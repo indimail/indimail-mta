@@ -954,4 +954,3 @@ batv.o
 batv
 qmail-greyd.o
 qmail-greyd
-.gitignore
