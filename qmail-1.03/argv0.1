@@ -1,0 +1,70 @@
+.TH argv0 1
+.SH NAME
+argv0 \- runs a program with a specified 0th argument.
+.SH SYNOPSIS
+.B argv0
+.I realname
+.I zero
+.I args
+.SH DESCRIPTION
+.I realname
+is one argument.
+.I zero
+is one argument.
+.I args
+is any number of arguments. 
+
+.B argv0
+runs the program stored as
+.I realname
+on disk, with
+.I zero
+as the 0th argument (rather than
+.IR realname )
+and
+.I args
+as the remaining arguments.
+.SH APPLICATIONS
+Some programs pay special attention to the 0th argument.
+.B argv0
+makes these programs usable from shell scripts. 
+
+For example, 
+.IP
+argv0 /bin/csh -csh
+.P
+runs /bin/csh with a 0th argument of -csh. /bin/csh will think it is a login
+shell and behave accordingly. 
+
+As another example, the command 
+.IP
+tcpserver 0 ftp argv0 tcpd ftpd -l -A
+.P
+has a similar effect to the line 
+.IP
+ftp stream tcp nowait root tcpd ftpd -l -A
+.P
+in /etc/inetd.conf. The tcpd program is run with 0th argument ftpd and
+remaining arguments -l -A. Note that tcpd can and should be replaced by the
+.B -x
+option of
+.BR tcpserver (1):
+.IP
+tcpserver -x ftp.tcp 0 ftp ftpd -l -A
+.SH SEE ALSO
+tcpserver(1),
+tcprules(1),
+tcprulescheck(1),
+fixcrio(1),
+recordio(1),
+rblsmtpd(1),
+tcpclient(1),
+who@(1),
+date@(1),
+finger@(1),
+http@(1),
+tcpcat(1),
+mconnect(1),
+tcp-environ(5)
+
+http://cr.yp.to/ucspi-tcp.html

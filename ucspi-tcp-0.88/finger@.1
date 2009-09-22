@@ -1,0 +1,53 @@
+.TH finger@ 1
+.SH NAME
+finger@ \- gets user information from a remote host.
+.SH SYNOPSIS
+.B finger@
+[
+.I host
+[
+.I user
+] ]
+.SH DESCRIPTION
+.B finger@
+connects to TCP port 79 (Finger) on
+.IR host ,
+sends
+.I user
+(with an extra CR) to
+.IR host ,
+and prints any data it receives. It removes CR and converts unprintable
+characters to a visible format. 
+
+Some computers respond to port 79 with information about
+.IR user .
+
+If
+.I user
+is not supplied,
+.B finger@
+sends a blank line to host. Some computers respond with information about all
+the users who are logged in.
+
+If
+.I host
+is not supplied,
+.B finger@
+connects to the local host.
+.SH SEE ALSO
+tcpserver(1),
+tcprules(1),
+tcprulescheck(1),
+argv0(1),
+fixcrio(1),
+recordio(1),
+rblsmtpd(1),
+tcpclient(1),
+who@(1),
+date@(1),
+http@(1),
+tcpcat(1),
+mconnect(1),
+tcp-environ(5)
+
+http://cr.yp.to/ucspi-tcp.html

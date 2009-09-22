@@ -1,0 +1,122 @@
+.TH rewriting 5
+.SH NAME
+rewriting \- syntactic changes to mail-address host names
+.SH DESCRIPTION
+.B new-inject
+and
+.B ofmipd
+support a generic rewriting system for Internet mail addresses.
+Each host name is transformed according to a series of instructions,
+as described here.
+The instructions are followed in order, each at most once.
+
+An instruction is either
+.BR =\fIpost\fB:\fInew ,
+.BR *\fIpost\fB:\fInew ,
+.BR ?\fIpost\fB:\fInew ,
+or
+.BR -\fIpost\fB:\fInew .
+.B =\fIpost\fB:\fInew
+means that the host name
+.I post
+is replaced by
+.IR new .
+.B *\fIpost\fB:\fInew
+means that any host name of the form
+.I prepost
+is replaced by
+.IR prenew .
+.B ?\fIpost\fB:\fInew
+means that any host name of the form
+.IR prepost ,
+where
+.I pre
+does not contain dots or brackets,
+is replaced by
+.IR prenew .
+.B -\fIpost\fB:\fInew
+means that any host name of the form
+.I prepost
+is replaced by
+.IR new .
+
+For example, the instruction
+.B *.:
+removes a trailing dot if there is one;
+.B =:vangogh
+converts an empty host name into
+.BR vangogh ;
+.B ?:.cs.b
+adds
+.B .cs.b
+to any host name without dots or brackets;
+.B *.b:.berkeley.edu
+changes
+.B vangogh.cs.b
+into
+.BR vangogh.cs.berkeley.edu ;
+.B -.local:cs.berkeley.edu
+converts
+.B me\fB.local
+into
+.BR cs.berkeley.edu .
+.SH "INSTRUCTION SOURCES"
+Rewriting instructions are normally listed in the
+.I rewrite
+control file,
+one instruction per line.
+
+If
+.I rewrite
+does not exist,
+.B new-inject
+and
+.B ofmipd
+use the control files
+.IR defaultdomain ,
+.IR defaulthost ,
+and
+.I plusdomain
+in the following instructions:
+
+.EX
+   *.:
+.br
+   =:\fIdefaulthost\fR
+.br
+   *+:.\fIplusdomain\fR
+.br
+   ?:.\fIdefaultdomain\fR
+.EE
+
+In other words:
+(1) If the host name ends with a dot,
+remove the dot.
+(2) If the host name is empty,
+add
+.IR defaulthost .
+(3) If the host name ends with a plus sign,
+change the plus sign to a dot and add
+.IR plusdomain .
+(4) If the host name does not contain dots or brackets,
+add a dot and add
+.IR defaultdomain .
+
+The
+.IR defaultdomain ,
+.IR defaulthost ,
+and
+.I plusdomain
+control files can be overridden by the environment variables
+.BR $QMAILDEFAULTDOMAIN ,
+.BR $QMAILDEFAULTHOST ,
+and
+.B $QMAILPLUSDOMAIN
+respectively.
+They all default to
+.IR me .
+.SH "SEE ALSO"
+new-inject(1),
+rewritehost(3),
+qmail-control(5),
+ofmipd(8)

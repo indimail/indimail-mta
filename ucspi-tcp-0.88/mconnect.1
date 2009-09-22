@@ -1,0 +1,46 @@
+.TH mconnect 1
+.SH NAME
+mconnect \- connects to a remote SMTP server.
+.SH SYNOPSIS
+.B mconnect
+[
+.I host
+[
+.I port
+]
+]
+.SH DESCRIPTION
+.B mconnect
+connects to
+.I port
+on
+.IR host .
+It sends its input to
+.IR host ,
+adding a CR to each line. Meanwhile it prints anything it receives from
+.IR host .
+
+If
+.I port
+is not supplied, mconnect uses port 25 (SMTP). 
+
+If
+.I host
+is not supplied, mconnect connects to the local host.
+.SH SEE ALSO
+tcpserver(1),
+tcprules(1),
+tcprulescheck(1),
+argv0(1),
+fixcrio(1),
+recordio(1),
+rblsmtpd(1),
+tcpclient(1),
+who@(1),
+date@(1),
+finger@(1),
+http@(1),
+tcpcat(1),
+tcp-environ(5)
+
+http://cr.yp.to/ucspi-tcp.html

@@ -1,0 +1,283 @@
+README qmail-smtpd SMTP Authentication
+======================================
+
+
+History:
+--------
+
+This patch is based on Krzysztof Dabrowski's qmail-smtpd-auth-0.31 patch 
+which itself uses "Mrs. Brisby's" initial code. 
+Version 0.41 of this patch fixes the "CAPS-LOCK" typo announcing
+'CRAM_MD5' instead of 'CRAM-MD5' (german keyboard) - tx to Mike Garrison.
+Version 0.42 fixes the '421 unable to read controls (#4.3.0)' problem
+(can't read control/morercpthosts.cdb) because FD 3 was already closed - tx Richard Lyons.
+Version 0.43 fixes the ba64decode() failure in case CRAM_MD5 is not enabled - tx Vladimir Zidar.
+
+
+Scope:
+------
+
+This patch supports partly RFC 2554 "SMTP Service Extension for Authentication".
+For more technical details see: http://www.fehcom.de/qmail/docu/smtpauth.html.
+
+
+
+Setup:
+------
+
+In order to use SMTP Authentication you have to use a 'Pluggable Authentication Module'
+PAM to be called by qmail-smtpd; typically
+
+	/var/qmail/bin/qmail-smtpd /bin/checkpassword false 2>&1
+
+Since qmail-smtpd does not run as root, checkpassword has to be made sticky.
+There is no need to include additionally the hostname in the call.
+In order to compute the CRAM-MD5 challenge, qmail-smtpd uses the 'tcplocalhost' information.
+
+
+Changes wrt. Krysztof Dabrowski's patch:
+----------------------------------------
+
+* Avoid the 'hostname' in the call of the PAM.
+* Conforms to Dan Bernstein's checkpassword interface even for CRAM-MD5.
+* Doesn't close FD 2; thus not inhibiting logging to STDERR.
+* Fixed bugs in base64.c.
+* Modified unconditional close of FD 3 in order to sustain reading of 'control/morecpthosts.cdb'.
+
+
+Erwin Hoffmann - Cologne 2004-04-03 (www.fehcom.de)
+-----------------------------------------------------------------------------
+
+*** Warning! Cuidado! Vorsicht! ***
+===================================
+*** Version 0.30 of the patch changes the arguments which must be
+*** passed to qmail-smtpd.  If you are upgrading from a previous
+*** version of the patch, take care to ensure your invocation of
+*** qmail-smtpd uses the correct arguments.  Otherwise, your server
+*** may run as an open relay!
+===================================
+*** Warning! Cuidado! Vorsicht! ***
+
+
+This patch adds ESMTP AUTH authentication protocol support to
+qmail-1.03.  It's originally based on Mrs. Brisby's smtp-auth patch
+with many enhancements from Krzysztof Dabrowski <brush@elysium.pl>.
+
+Beginning with version 0.30, the patch was completely rewritten to
+use only djb's string functions by Eric M. Johnston <emj@postal.net>.
+
+You can always get the newest version from:
+http://members.elysium.pl/brush/qmail-smtpd-auth/
+
+To use all of it's functionality you will also have to obtain and
+install Krzysztof's cmd5checkpw utility available at:
+http://members.elysium.pl/brush/cmd5checkpw/
+
+If you need more information about SMTP-AUTH itself and the
+client/server support and configuration, visit:
+http://members.elysium.pl/brush/smtp-auth/
+
+---
+
+Detailed patch information:
+
+This patch adds the ESMTP AUTH option to qmail-1.03, allowing the
+LOGIN, PLAIN, and CRAM-MD5 AUTH types. An appropriate checkpassword
+tool is necessary to support the authentication.  See
+http://cr.yp.to/checkpwd.html for more information on the interface.
+Note that the checkpassword tool should support all of the AUTH types
+advertised by qmail-smtpd.
+
+As reflected in the modified qmail-smtpd(8) man page, qmail-smtpd
+must be invoked with three arguments: hostname, checkprogram, and
+subprogram.  If these arguments are missing, qmail-smtpd will still
+advertise availability of AUTH, but will fail with a permanent error
+when AUTH is used.
+
+hostname is simply used to form the CRAM-MD5 challenge.  qmail-smtpd
+invokes checkprogram, feeding it the username and password, in the
+case of LOGIN or PLAIN, or the username, challenge, and response, in
+the case of CRAM-MD5.  If the user is permitted, checkprogram invokes
+subprogram, which just has to exit with a status of 0 for the user to
+be authenticated.  Otherwise, checkprogram exits with a non-zero
+status.  subprogram can usually be /usr/bin/true (or /bin/true,
+depending on your flavor of OS).
+
+If the user is successfully authenticated, the RELAYCLIENT
+environment variable is effectively set for the SMTP session, and
+the TCPREMOTEINFO environment variable is set to the authenticated
+username, overriding any value that tcpserver may have set.  The
+value of TCPREMOTEINFO is reflected in a Received header.
+
+
+How to use it:
+
+*** Warning: In version 0.30 the arguments have changed from
+*** previous versions of qmail-smtpd-auth.  Take care to make sure
+*** you update your startup scripts if updating!
+
+If you're running qmail-smtpd from inetd, you'll want to do the
+following:
+
+smtp stream tcp nowait qmaild /var/qmail/bin/tcp-env tcp-env \
+/var/qmail/bin/qmail-smtpd mail.acme.com /bin/cmd5checkpw /bin/false
+
+Replace mail.acme.com with your hostname.  The second argument to
+qmail-smtpd is your checkpassword utility (preferably cmd5checkpw
+or some alternative that can handle CRAM-MD5).  The third argument
+is the executable that the checkpassword utility execs when
+authentication is successful.  (Note that the location of "true"
+is OS dependent: you may need /usr/bin/true.)
+
+Invocations using tcpserver will require analagous changes.  Give
+your inetd a kill -HUP or restart tcpserver and away you go.
+
+
+Caveats:
+
+Please note that as authentication needs vary wildly across
+installations, no effort has been made to make this patch work ``out
+of the box.''  You'll have to procure or develop your own
+checkpassword program.  Also note that CRAM-MD5 will require you to
+keep plaintext passwords.  You'll probably want to disable this AUTH
+type if you're just using /etc/passwd (keeping in mind that PLAIN and
+LOGIN aren't quite as safe over the wire) -- just undefine AUTHCRAM
+in qmail-smtpd.
+
+Krzysztof Dabrowski's cmd5checkpw tool used as an example in this
+document supports the three AUTH types included in this patch.
+It's available at http://www.elysium.pl/members/brush/cmd5checkpw/.
+
+This patch has been generated against the stock qmail 1.03
+distribution.  The results of combining this patch with others are
+unknown.
+
+
+Features:
+
+This patch supports the following auth methods: LOGIN, PLAIN and
+CRAM-MD5.
+
+
+Compatibility:
+
+The following MUA's are confirmed to work with this patch:
+
+Eudora 4.2.2		-	CRAM-MD5
+Eudora 5.0.2 		- 	CRAM-MD5
+The Bat 1.39		-	LOGIN & CRAM-MD5
+Outlook Express 4	- 	LOGIN
+Outlook Express 5	-	LOGIN
+Outlook 2000 		- 	LOGIN
+Netscape 4.x		-	LOGIN & PLAIN
+Netscape 4.0x		-	LOGIN
+Pegasus Mail 3.1x	-	CRAM-MD5
+
+
+Various compatibility issues:
+
+Testing with Pegasus Mail 3.1 revealed that it requires the new style
+(RFC recommended) greeting message.  Both styles are now enabled to
+maintain the highest degree of compatibility with various clients.
+This fix was suggested by David Harris <David.Harris@pmail.gen.nz>,
+the developer of Pegasus Mail.
+
+
+Acknowledgments:
+
+This patch is based on work by Krzysztof Dabrowski at
+http://members.elysium.pl/brush/qmail-smtpd-auth/ and ``Mrs. Brisby''
+at http://www.nimh.org/hacks/qmail-smtpd.c which has been further
+developed by Eric M. Johnston <emj@postal.net>.
+
+---
+qmail-smtpd AUTH patch
+20010105
+Eric M. Johnston, emj@postal.net
+
+This patch adds the ESMTP AUTH option to qmail-1.03, allowing the
+LOGIN, PLAIN, and CRAM-MD5 AUTH types. An appropriate checkpassword
+tool is necessary to support the authentication.  See
+http://cr.yp.to/checkpwd.html for more information on the interface.
+Note that the checkpassword tool should support all of the AUTH types
+advertised by qmail-smtpd.
+
+As reflected in the modified qmail-smtpd(8) man page, qmail-smtpd must
+be invoked with three arguments: hostname, checkprogram, and
+subprogram.  If these arguments are missing, qmail-smtpd will still
+advertise availability of AUTH, but will fail with a permanent error
+when AUTH is used.
+
+hostname is simply used to form the CRAM-MD5 challenge.  qmail-smtpd
+invokes checkprogram, feeding it the username and password, in the
+case of LOGIN or PLAIN, or the username, challenge, and response, in
+the case of CRAM-MD5.  If the user checks out, checkprogram invokes
+subprogram, which just has to exit with a status of 0 for the user to
+be authenticated.  Otherwise, checkprogram exits with a non-zero
+status.  subprogram can usually be /usr/bin/true (or /bin/true,
+depending on your flavor of OS).
+
+If the user is successfully authenticated, the RELAYCLIENT
+environment variable is effectively set for the SMTP session, and
+the TCPREMOTEINFO environment variable is effectively set to the
+authenticated username, overriding any value that tcpserver may have
+set.  The value of TCPREMOTEINFO is reflected in a Received header.
+
+
+Caveats
+
+Please note that as authentication needs vary wildly across
+installations, no effort has been made to make this patch work ``out
+of the box.''  You'll have to procure or develop your own
+checkpassword program.  Also note that CRAM-MD5 will require you to
+keep plaintext passwords.  You'll probably want to disable this AUTH
+type if you're just using /etc/passwd (keeping in mind that PLAIN and
+LOGIN aren't quite as safe over the wire).
+
+You may be interested in Krzysztof Dabrowski's cmd5checkpw tool at
+http://www.elysium.pl/members/brush/cmd5checkpw/ which supports the
+three AUTH types included in this patch.
+
+This patch has been generated against the stock qmail 1.03
+distribution.  The results of combining this patch with others are
+unknown.
+
+
+Compatibility
+
+MUAs and AUTH types tested with this software are:
+
+Netscape Communicator 4.76 - LOGIN & PLAIN
+Microsoft Outlook 2000 - LOGIN
+Microsoft Outlook Express 5 - LOGIN
+Eudora 5.0.2 - CRAM-MD5
+
+Please report bugs, incompatibilities, successes, etc. to
+emj@postal.net.  The latest version of this software will be posted
+(Webmaster willing) at http://www.qmail.org/.
+
+
+Acknowledgments
+
+This patch is based on work by Krzysztof Dabrowski at
+http://members.elysium.pl/brush/qmail-smtpd-auth/ and ``Mrs. Brisby''
+at http://www.nimh.org/hacks/qmail-smtpd.c.
+
+
+Changes
+
+20010105: initial release
+
+---
+
+THIS SOFTWARE IS IN THE PUBLIC DOMAIN, IS PROVIDED BY THE AUTHOR
+``AS IS,'' AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+A PARTICULAR PURPOSE ARE DISCLAIMED.  IN NO EVENT SHALL THE AUTHOR BE
+LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR
+BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
+WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE
+OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
+EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.

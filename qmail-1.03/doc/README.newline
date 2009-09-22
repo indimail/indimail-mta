@@ -1,0 +1,36 @@
+Who am I?
+---------
+
+My name is John Saunders and I run a modest ISP in Sydney Australia. I've
+used qmail since 0.92 and have come to regard it as a very powerful and
+secure MTA. My ISP uses qmail on all the servers, and now I have no more
+worries about sendmail security holes. mailto:john@nlc.net.au
+
+What is this patch?
+-------------------
+
+This patch is for qmail 1.03 to allow qmail-smtpd to accept messages that
+are terminated with a single \n instead of the required \r\n sequence.
+See ftp://ftp.nlc.net.au/pub/mail/qmail/qmail-smtpd-pre1.03-newline.patch
+for the patch to older versions of qmail.
+
+Why would I want to use this patch?
+-----------------------------------
+
+I started logging error messages from qmail-smtpd and was horrified to find
+just how many broken MTAs there are out there. I was even more horrified
+to find out the number of messages qmail was bouncing because of this. I
+also had a number of customer problems about messages not being accepted.
+If you have customer complaints, or want to run a mail system with a
+reputation for getting the mail through, then you might want this patch.
+
+What do the RFCs (the internet rules) say?
+------------------------------------------
+
+The \r\n sequence is _required_ by the SMTP protocol. However a number of
+MTAs on the 'net today do not obey this rule. Typically some Windows
+MUAs (which is strange since \r\n is the natural Windows way of doing
+things) and some "custom" unix MTAs use a single \n to terminate lines.
+Also if sendmail is mis-configured it can cause this. In fact the qmail
+error message mentions something about a mis-configured sendmail under
+Solaris.

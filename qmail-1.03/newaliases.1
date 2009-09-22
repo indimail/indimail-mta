@@ -1,0 +1,366 @@
+.TH newaliases 1
+.SH NAME
+newaliases \- create a forwarding database from /etc/aliases
+.SH SYNOPSIS
+.B newaliases
+.SH DESCRIPTION
+.B newaliases
+reads a table of
+sendmail-style
+forwarding instructions from
+.B /etc/aliases
+and converts them into a forwarding database in
+.BR /etc/aliases.cdb .
+The forwarding database can be used by
+.BR fastforward .
+
+For safety,
+.B newaliases
+writes the forwarding database to
+.B /etc/aliases.tmp
+and then moves
+.B /etc/aliases.tmp
+to
+.BR /etc/aliases.cdb .
+If there is a problem creating
+.BR /etc/aliases.tmp ,
+.B newaliases
+complains and leaves
+.B /etc/aliases.cdb
+alone.
+Deliveries can continue using
+.B /etc/aliases.cdb
+in the meantime.
+
+.B newaliases
+always creates
+.B /etc/aliases.cdb
+world-readable.
+
+.B newaliases
+makes no attempt to protect against
+simultaneous updates of
+.BR /etc/aliases.cdb .
+.SH "INSTRUCTION FORMAT"
+.B newaliases
+imitates
+sendmail's
+handling of
+.BR /etc/aliases .
+For example,
+
+.EX
+   root: alice, bill
+.EE
+
+says that mail for
+.B root
+should be forwarded to
+.B alice
+and
+.BR bill .
+
+.B COMPATIBILITY WARNING:
+.B newaliases
+does not support file deliveries.
+You can use the file delivery mechanism described in
+.B dot-qmail(5)
+instead.
+.SH "SIMPLE ALIASES"
+The simplest type of forwarding instruction
+is a line of the form
+
+.EX
+   alias: recip
+.EE
+
+Any message sent to
+.I alias
+will be forwarded to the recipient address
+.IR recip .
+Addresses are compared to
+.I alias
+without regard to case.
+
+Forwarding instructions are cumulative.
+If
+.I recip
+is itself an alias,
+messages to
+.I alias
+will be forwarded the same way as
+messages to
+.IR recip .
+For example, with the following instructions,
+messages to
+.B postmaster@heaven.af.mil
+or
+.B root@heaven.af.mil
+will be delivered to Bob:
+
+.EX
+   postmaster@heaven.af.mil: bob@heaven.af.mil
+.EE
+.br
+.EX
+   root@heaven.af.mil: postmaster@heaven.af.mil
+.EE
+
+.B COMPATIBILITY WARNING:
+With
+sendmail,
+entries in
+.B /etc/aliases
+can override usernames.
+With
+.BR qmail ,
+if you install
+.B fastforward
+in
+.BR ~alias/.qmail-default ,
+it will not see addresses that are controlled by other users.
+See
+.BR qmail-getpw (8).
+To change this, see
+.BR qmail-users (5).
+
+.B COMPATIBILITY WARNING:
+Various versions of
+sendmail
+do various strange things with circular alias definitions.
+See
+.BR setforward (1)
+for details on
+.BR fastforward 's
+behavior.
+
+.B COMPATIBILITY WARNING:
+If there are several forwarding instructions for a single
+.IR alias ,
+sendmail
+will complain;
+.B fastforward
+will silently use the first instruction.
+.SH "WILDCARDS"
+.I alias
+can have the form
+.I user@host.dom
+for one user at one host,
+.I @host.dom
+for all users at one host, or
+.I user
+for one user at all hosts.
+
+.B COMPATIBILITY WARNING:
+sendmail
+supports only
+.IR user ;
+it does not support per-host aliases.
+It accepts
+.I user@host.dom
+if
+.I host.dom
+is a local host,
+but it then treats it the same way as
+.IR user ,
+applying to all local hosts and virtual domains.
+.SH "ADDRESS FORMATS"
+Addresses in
+.B /etc/aliases
+are parsed the same way as addresses in RFC 822 message headers.
+Parenthesized comments and bracketed addresses are permitted:
+
+.EX
+   root: bob (Bob, the postmaster)
+   joe: Joe Shmoe <shmoe@heaven.af.mil>
+.EE
+
+Addresses with special characters must be quoted:
+
+.EX
+   fred: "spaced out mailbox"@heaven.af.mil
+.EE
+
+Address groups are not permitted,
+since colons have a different use in
+.BR /etc/aliases .
+
+Any recipient address without a fully qualified domain name is
+fed through the
+.BR defaulthost ,
+.BR defaultdomain ,
+and
+.B plusdomain
+mechanisms described in
+.BR qmail-header (5).
+
+.B COMPATIBILITY WARNING:
+sendmail's
+handling of quotes and backslashes violates RFC 821 and RFC 822,
+and is not supported by
+.BR newaliases .
+The
+.B qmail-local
+delivery mechanism
+lets each user manage several addresses,
+so there is no need for a special syntax to get around forwarding.
+.SH "MULTIPLE RECIPIENTS"
+An instruction may list more than one recipient address:
+
+.EX
+   alias: recip1, recip2, recip3
+.EE
+
+Any message sent to
+.I alias
+will be forwarded to all of the addresses.
+
+A forwarding instruction may be split across several lines.
+Each line past the first must either (1) begin with space or tab
+or (2) be empty:
+
+.EX
+   hostmaster:
+.EE
+.br
+.EX
+      fred,
+.EE
+.br
+.EX
+      joe
+.EE
+
+.B COMPATIBILITY WARNING:
+sendmail
+requires the colon to be on the first line
+of a multi-line forwarding instruction.
+.B newaliases
+doesn't care whether the colon is present at all.
+
+.B COMPATIBILITY WARNING:
+sendmail
+does not permit blank lines in the middle of continuations.
+This has the undesirable effect that a blank line behaves differently
+from a line containing a single space.
+.SH "COMMENTS"
+Any line in
+.B /etc/aliases
+that begins with # is ignored:
+
+.EX
+   # this is a comment
+.EE
+
+A comment may be split across several lines.
+Each line past the first must either (1) begin with space or tab
+or (2) be empty.
+
+.B COMPATIBILITY WARNING:
+sendmail
+does not permit continuations of comment lines.
+.SH "PROGRAMS"
+If a recipient address does not contain a domain name,
+and begins with a vertical bar,
+.B newaliases
+takes the rest of the address as a program to run:
+
+.EX
+   weather: "|weather-server"
+.EE
+
+.B fastforward
+will run
+.B weather-server
+when a message arrives for
+.BR weather .
+
+.B COMPATIBILITY WARNING:
+Internet addresses can legitimately start with
+a slash or vertical bar.
+.B newaliases
+treats anything with an unquoted @ as an address.
+sendmail appears to have various problems
+coping with these addresses,
+and with commands that contain @ signs.
+
+.B COMPATIBILITY WARNING:
+.B newaliases
+does not allow a vertical bar before double quotes.
+.SH "INCLUDE FILES"
+A recipient address of the form
+.B :include:\fIfile
+means ``every address listed in
+.IR file .''
+(Actually
+.B fastforward
+reads
+.IR file\fB.bin ;
+see
+.BR newinclude (1)
+for further details.)
+
+Note that
+.I file
+is read by
+.BR fastforward ,
+not
+.BR newaliases ,
+so the system administrator does not have to run
+.B newaliases
+every time
+.I file
+changes.
+.I file
+must be world-readable
+and accessible to
+.BR fastforward .
+
+.B COMPATIBILITY WARNING:
+If an
+.B :include:
+file is unreadable or nonexistent,
+sendmail
+skips it;
+.B fastforward
+defers delivery of the message.
+
+.B COMPATIBILITY WARNING:
+sendmail
+does not permit spaces inside the literal text
+.BR :include: .
+.B newaliases
+does.
+
+.B COMPATIBILITY WARNING:
+Versions of
+sendmail
+before V8 did not strip quotes from
+.B :include:
+filenames.
+.SH "ALIAS OWNERS"
+If there is an alias for
+.BR owner-\fIlist ,
+any message forwarded through
+.I list
+will have its envelope sender set to
+.BR owner-\fIlist ,
+so that bounces go back to
+.BR owner-\fIlist .
+
+.B COMPATIBILITY WARNING:
+When an alias includes the same recipient both inside and outside
+a mailing list,
+.B fastforward
+sends the message twice,
+once with each envelope sender.
+sendmail
+sends the message only once;
+its choice of envelope sender for that recipient
+depends on the phase of the moon.
+.SH "SEE ALSO"
+fastforward(1),
+setforward(1),
+newinclude(1),
+printforward(1),
+dot-qmail(5)

@@ -1,0 +1,324 @@
+.TH spawn-filter 8
+.SH NAME
+spawn-filter \- Helper for running filters for qmail-local / qmail-remote
+.SH SYNOPSIS
+.B spawn-filter args
+.SH DESCRIPTION
+.B spawn-filter
+is a utility to help qmail run custom filters. It
+can run any filter which reads messages on fd 0 and writes the output on fd 1.
+Whatever is output on fd 1, will be the message that will be delivered to the destination.
+The filter can be turned on individually for local and remote mails by defining,
+.B QMAILLOCAL
+and 
+.B QMAILREMOTE
+environment variables, to the path of spawn-filter respectively in
+.B qmail-send's
+supervise or rc script. For spam filtering you can additionally, set the environment variable
+.BR SPAMFILTER .
+If spawn-filter is invoked as qmail-local, it executes the
+original
+.B qmail-local
+after running the custom filter. If spawn-filter is invoked as qmail-remote, it
+executes the original
+.B qmail-remote
+after running the custom filter.
+
+Filters can be run by defining the environment variable
+.B FILTERARGS
+or by using the control file
+.B filterargs
+(see below).
+.B spawn-filter
+uses /bin/sh to run the filter (with arguments) specified by the
+.B FILTERARGS
+environment variable (or the control defined in the control file
+.B filterargs
+).
+The environment variable
+.B FILTERARGS
+apply to both local and remote mails. For individual domain level control, it is best to set
+using the control file
+.BR filterargs.
+The environment variable
+.B FILTERARGS
+takes precedence over the control file.
+
+.B spawn-filter
+sets the environment variable
+.B DOMAIN
+to the recipient domain. This can be conveniently used in programs/scripts which get invoked by
+setting
+.B FILTERARGS
+environment variable or by rules in the control file
+.BR filterargs .
+
+.SH Control Files
+
+.TP 5
+.I filterargs
+The format of this file is of the form
+.B domain:args
+for both local and remote mails.
+.B domain:remote:args
+for remote mails and
+.B domain:local:args
+for local mails. This control file can be used to setup additional filters after running
+the SPAM filters (See Section on Spam Filtering).
+
+.EX
+indimail.org:remote:QMAILHOME/bin/dk-filter
+.EE
+
+.TP 0
+The sequence in which the filter program is run is given below
+
+.TP 5
+1. create two pipes and fork
+.TP 5
+2. dup write end of the first pipe to descriptor 1, dup write end of the second pipe to descriptor 2 in the child and exec the filter program
+.TP 5
+3. dup read end of the pipe to descriptor 0 in parent and exec qmail-local for local mails and qmail-remote for remote mails.
+.TP 5
+4. Wait for filter to exit and read read end of second pipe for any error messages.
+.TP 5
+5. Report success or failure
+.TP 0
+
+This gives the ability for the any filter program to read the mail message from descriptor 0 before
+passing it to qmail-local/qmail-remote through the pipe.
+
+The other control files that
+.B spawn-filter
+uses are
+
+.TP 5
+.I databytes
+Maximum size of mail that will be accepted before passing it to
+.B qmail-remote
+or
+.B qmail-local
+
+If the environment variable
+.B DATABYTES
+is set, it overrides
+.IR databytes .
+The value of databytes determines the maximum size of a message that
+.B spawn-filter
+will accept.
+
+.TP 5
+.I envrules
+Specific environment variables can be set for specific senders/recipients.
+The format of this file is of the form                                       
+pat:envar1=val,envar2=val,...]
+where pat is a regular expression which matches a sender. envar1, envar2
+are list of environment variables to be set. If
+.I var
+is omitted, the environment variable is unset.
+
+The name of the control file can be overriden by the environment
+variable RCPTRULES. Any environment variable used by
+.B spawn-filter
+or
+.B qmail-rspawn
+or
+.B qmail-remote
+or
+.B qmail-lspawn
+or
+.B qmail-local
+can be set by using envrules.
+
+ AUTHSELF
+ QMAILLOCAL
+ QMAILREMOTE
+ ROUTES
+ CONTROLDIR
+ AUTH_SMTP
+ SMTPROUTE
+ USE_FSYNC
+ SPAMFILTER
+ SPAMIGNORE
+ SPAMREDIRECT
+ SPAMIGNOREPATTERNS
+ SPAMEXITCODE
+ REJECTSPAM
+ LOGFILTER
+ FILTERARGS
+ QREGEX
+ TMPDIR
+ DATABYTES
+ MDA
+ MYSQL_INIT_COMMAND
+ MYSQL_READ_DEFAULT_FILE
+ MYSQL_READ_DEFAULT_GROUP
+ MYSQL_OPT_CONNECT_TIMEOUT
+ MYSQL_OPT_READ_TIMEOUT
+ MYSQL_OPT_WRITE_TIMEOUT
+
+
+.SH SPAM Filtering
+If SPAMFILTER is defined,
+.B spawn-filter
+additionally runs a command (with command line arguments) defined by SPAMFILTER environment variable. This
+gives
+.B spawn-filter
+the ability to filter mail messages based on the spam classification of the mail.
+
+The environment variable SPAMFILTER apply to both local and remote mails. For individual domain level control,
+it is best to set using the control file
+.BR spamfilter .
+
+.B spawn-filter
+will attempt to make the descriptor 0 seekable if the environment variable MAKE_SEEKABLE
+is defined. This may be necessary for certain filter programs like bogofilter to
+prevent allocating memory for the mail message.
+
+The spam filter program is expected to return 0, 1 or 2 in case the filter ran
+successfully without any temporary errors. For any other exit code, 
+.B spawn-filter
+will assume that the filter program had some errors and will accordingly
+defer mail delivery.
+
+In this case following interpretations on the exit status will be made
+
+ Exit Status     Interpretation
+ -----------     --------------
+ 0,1,2           Program ran successfully. Interpretation depends
+                 on filter implementation. Mail will be accepted
+                 unless REJECTSPAM is set. See description below.
+ anything else   Mail will be rejected with a temporary error
+
+A typical application of this would be to run spam filtering software like
+spamassasin, bogofilter, etc
+
+When the exit code of the filter program matches SPAMEXITCODE, the mail
+is considered to be spam.
+
+If REJECTSPAM is 0, mail is accepted. If REJECTSPAM is set to 1, the mail will be bounced back
+to the sender. If REJECTSPAM is greater than 1, the mail is blackholed. If
+SPAMREDIRECT is set, mails will be redirected to the recipient specified
+by the SPAMREDIRECT environment variable.  If both REJECTSPAM and SPAMREDIRECT is set, spam mails will
+be bounced back to the sender with a copy redirected to the recipient specified in the
+SPAMREDIRECT environment variable
+
+If individual domain level control is desired on REJECTSPAM and SPAMREDIRECT environment variable,
+the control files
+.B rejectspam
+and
+.B spamredirect
+can be setup without defining the REJECTSPAM and SPAMREDIRECT environment variable.
+
+The other control files that control spam filtering are
+.TP 5
+.I rejectspam
+The value of environment variable REJECTSPAM overrides this control file.
+The format of this file is
+.B domain:value
+without any extra spaces. The format also can be specified as
+.B domain:remote:value
+and
+.B domain:local:value
+
+where domain is a valid (recipient) domain for which mails are being processed and
+value should be 0 if SPAM mails should be delivered 1 for rejecting and greater
+than 1 for blackholing.
+
+.TP 5
+.I spamredirect
+The value of environment variable NOTIFYSPAM overrides this control file.
+The format of this file is
+.B domain:value
+without any extra spaces. The format also can be specified as
+.B domain:remote:recipient
+and
+.B domain:local:recipient
+
+where domain is a valid (recipient) domain for which mails are being processed and
+address should be valid recipient where the spam mails should be redirected.
+
+.TP 5
+.I spamfilter
+The format of this file is of the form
+.B domain:args
+for both local and remote mails.
+.B domain:remote:args
+for remote mails and
+.B domain:local:args
+for local mails
+
+where domain is a valid (recipient) domain for which mails are being processed and
+args is a list of aguments to be supplied to the filter program
+
+.EX
+indimail.org:bogofilter -c QMAILHOME/etc/bogofilter.cf -p -3 -d QMAILHOME/etc/indimail.org
+.EE
+
+NOTE: For the control files spamfilter, filterargs, rejectspam, spamredirect
+domain can also be a regular expression or wildcard pattern. If QREGEX envronment variable
+is defined, regex is used, else wildmat)
+
+.TP 5
+.I spamignore
+envelope sender addresses which should bypass spam filter.
+.B spawn-filter
+will bypass the filter defined by SPAMFILTER and directly exec
+qmail-local/qmail-remote, if the envelope sender address is listed in
+.IR spamignore .
+A line in
+.I spamignore
+may be of the form
+.BR @\fIhost ,
+meaning every address at
+.IR host .
+.I spamignore
+can be overriden by the environment variable
+.BR SPAMIGNORE .
+You can also create
+.I spamignore.cdb
+using
+.BR qmail-cdb ,
+in which case
+.B spawn-filter
+will use cdb function for fast lookup. You should create the cdb file in case you have large number of entries.
+
+.TP 5
+.I spamignorepatterns
+REGEX patterns of envelope sender addresses which should bypass spam filter.
+.I spamignorepatterns
+can be overriden by the environment variable
+.B SPAMIGNOREPATTERNS
+
+.SH "EXIT CODES"
+.B spawn-filter
+exits 111 for any error or if it is not able to exec
+QMAILHOME/bin/qmail-local (for local mails) or
+QMAILHOME/bin/qmail-remote (for remote mails).
+It exits 100 if the REJECTSPAM environment variable is set (or the 
+control file has rejectspam set for the domain) and the mail is found to
+be SPAM. It also exits 100 if the program/script defined by
+.B FILTERARGS
+(or defined in the control file
+.B filterargs
+) returns 100.
+
+.SH "SEE ALSO"
+qmail-lspawn(8),
+qmail-rspawn(8),
+qmail-local(8),
+qmail-remote(8),
+qmail-smtpd(8),
+qmail-multi(8),
+qmail-cdb(8),
+qmail-control(5),
+qmail-queue(8),
+bogofilter(1)
+
+.SH "AUTHORS"
+
+Manvendra Bhangui.
+.SH PROBLEMS
+Problems with
+.B spawn-filter
+should be forwarded to "Manvendra Bhangui" <mbhangui@gmail.com>

@@ -1,0 +1,66 @@
+GENERAL
+-------
+
+1. The included script install_qhpsi.sh does most of the job (installation + uninstallation).
+2. The script install_qhpsi.sh writes a log-file qhpsi.log of it's actions.
+3. The software version VRF (Version.Release.Fixlevel) is part of the archive name, 
+   eg. qhpsi-VRF.tgz.
+4. For the development history view HISTORY.qhpsi.
+5. The setup of the logic is described in README.qhpsi.
+
+
+INSTALLATION
+------------
+
+How to proceed:
+
+1. Copy all files to the Qmail 1.03 source directory.
+   (cd to qmail-1.03 and call tar -xzf DIR/qhpsi-VRF.tgz)
+2. Run ./install_qhpsi.sh from the source directory.
+3. Verify the patches by means of the generated log-file qhpsi.log.
+4. Re-Make Qmail (follow instructions in INSTALL and README.qhpsi).
+5. Read man qmail-queue for additional qmail-queue customization.
+
+VERIFICATION
+------------
+
+1. Verify the new man-pages:
+   - man qmail-queue
+2. Keep a copy of your old tcpserver's tcp.smtpd configuration file.
+
+
+INSTALLATION
+------------
+
+1. You have to understand how your AV scanner is working.
+2. Edit your tcpserver's tcp.smtpd (or whatever it is called) and add
+   the necessary environment variables:
+   QHPSI='/path/avscanner'
+   set SCANDIR if you require optional customization arguments
+   for the AV scanner, ie. to suppress unnecessary output in the logs.
+3. See sample README.clamav.
+
+
+UNINSTALLATION
+--------------
+
+You can always use a fresh copy of the qmail-sources to re-install the original version.
+
+1. Change to the Qmail + QHPSI source directory.
+2. Run ./install_qhpsi.sh -u VRF from here (uninstallation mode). 
+4. Verify the uninstallation by means of the qhpsi.log.
+5. Re-Make Qmail.
+
+
+UPGRADE
+-------
+
+1. Change to the Qmail + QHPSI source directory.
+2. Check the latest QHPSI Version Level by means of the qhpsi.log file.
+3. Remove the patched Qmail files and go back to the originals:
+   ./install_qhpsi.sh -u 105 (if the latest installed version was 1.0.5)
+4. Copy the new qhpsi files to the Qmail 1.03 source directory.
+5. Run ./install_qhpsi.sh in installation mode.
+6. Verify the patches by means of the generated log-file qhpsi.log.
+7. Re-Make Qmail (follow instructions in INSTALL and README.qhpsi).
+

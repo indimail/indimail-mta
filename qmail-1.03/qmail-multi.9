@@ -1,0 +1,171 @@
+.TH qmail-multi 8
+.SH NAME
+qmail-multi \- queue multiplexor and filter
+.SH SYNOPSIS
+.B qmail-multi
+.SH DESCRIPTION
+.B qmail-multi
+is a queue multiplexor and filter. The multiplexor can be turned on by defining
+QMAILQUEUE=QMAILHOME/bin/qmail-multi environment variable. The filter can be
+turned on by defining the SPAMFILTER environment variable.
+
+.B qmail-multi
+also calls
+.B qscanq
+to perform virus scanning or bad attachment scan
+if the value of the VIRUSCHECK environment variable lies
+between 2 and 7.
+
+The deposition and balancing of mail across multiple queues is controlled by
+the following environment variables.
+
+.TP 5
+.B QUEUE_START
+- This is a number which defines the first queue that should be used.
+
+e.g. QUEUE_START=1 implies the first queue to be QMAILHOME/queue1
+
+.TP 5
+.B QUEUE_COUNT
+- This defines the number of queues that should be used for load balancing.
+
+e.g. QUEUE_COUNT=5 implies 5 queues QMAILHOME/queue1, QMAILHOME/queue2, ..., QMAILHOME/queue5
+
+.TP 5
+.B MIN_FREE
+- This is the minimum free disk space that should be available in the filesystem containing the queues. When
+free space goes below this value, qmail-multi will return a temporary disk full error
+"qq write error or disk full (#4.3.0)". This prevents 
+.B qmail-send
+reaching a deadlock in the case when disk becomes full and there are bounce messages to be processed.
+.B qmail-send
+in this case keeps on retrying bounce message which does not succeeed as disk space is not there to
+prepare the bounce. This effectively stops processing of local and remote messages and thus disk space never
+gets freed up.
+.B qmail-multi
+prevents this from happening by accepting mails only when disk space greater than MIN_FREE is present. It uses
+.B statfs(2)
+(
+.B statvfs
+on solaris) to get the free space on the filesystem.
+
+If SPAMFILTER is defined,
+.B qmail-multi
+additionally runs a command defined by SPAMFILTER environment variable. This
+gives qmail-multi the ability to filter mail messages. The program defined
+by SPAMFILTER environment variable should read descriptor 0 and write to 
+descriptor 1
+
+The sequence in which the filter program is run is given below
+
+.TP 5
+1. create a pipe and fork
+.TP 5
+2. dup write end of the pipe to descriptor 1 in the child and exec the filter program
+.TP 5
+3. dup read end of the pipe to descriptor 0 in parent and exec qmail-queue
+.TP 0
+
+This gives the ability for the SPAMFILTER program to read the mail message from
+descriptor 0 before passing it to qmail-queue through the pipe.
+
+Additional arguments if required to be passed to the spam filter program can be done
+by defining the environment variable SPAMFILTERARGS.
+.B qmail-multi
+will attempt to make the descriptor 0 seekable if the environment variable MAKE_SEEKABLE
+is defined. This may be necessary for certain filter programs like bogofilter to
+prevent allocating memory for the mail message.
+
+In this case following interpretations on the exit status will be made
+
+ Exit Status     Interpretation
+ -----------     --------------
+ 0,1,2           Program ran successfully. Interpretation depends
+                 on filter implementation. Mail will be accepted
+                 unless REJECTSPAM is set. See description below.
+ anything else   Mail will be rejected with a temporary error
+
+A typical application of this would be to run spam filtering software like
+spamassasin, bogofilter, etc
+
+When the exit code of the filter program matches SPAMEXITCODE, the mail
+is considered to be spam.
+
+If REJECTSPAM is set to 1, the mail will be bounced back to the sender. If
+NOTIFYSPAM is set, mails will be redirected to the recipient specified
+by the NOTIFYSPAM environment variable. If NOTIFYSPAM is not set, the recipient
+can be specified by the
+.B globalspamredirect
+control file. If both REJECTSPAM and NOTIFYSPAM is set, spam mails will
+be bounced back to the sender with a copy redirected to the recipient
+specified in by the NOTIFYSPAM environment variable or the
+.B globalspamredirect
+control file as well. you may decide not to generate
+a bounce to the sender by setting the environment variable 
+.B REJECTSPAM
+to a value greater than 1 (i.e. black hole SPAM mails). In addition to running
+SPAM filters, 
+.B qmail-multi
+has the ability to run any filter by setting the FILTERARGS environment
+variable. Any command defined by FILTERARGS will be run using /bin/sh. The
+input to this filter will be fd 0 and the output will be piped to
+.B qmail-queue.
+e.g.
+
+.EX
+
+FILTERARGS="/usr/bin/altermime --input=- --disclaimer=/etc/motd"
+
+will append the output of altermime command to all mails.
+
+.SH
+Multiplexing LOGIC
+.B qmail-multi
+uses time slicing. It gets the current time since epoch and divides it by QUEUE_COUNT. This remainder is
+added to QUEUE_START to arrive at which queue to use. It then sets the QUEUEDIR environment variable and
+calls
+.B qmail-queue.
+
+.B
+qmail-multi
+is actually a wrapper for qmail-queue to manage multiple queues. N queues can be set up in
+/var/qmail as queue1, queue2, ... queueN. To use  qmail-multi set the environment variable
+QMAILQUEUE=/var/qmail/bin/qmail-multi. Additionally set the two environment variables QUEUE_START and
+QUEUE_COUNT as the number of the first queue (excluding queue prefix) and the total number of queues
+respectively.
+.B qmail-multi
+does load balancing across these N queues by doing exec of 
+.B qmail-queue
+with QUEUEDIR set as the path of one of these N queues.
+.B qmail-send
+should be used with the QUEUEDIR set appropriately to process these N queues.
+
+.SH "EXIT CODES"
+.B qmail-multi
+does not print diagnostics.
+It exits 120 if it is not able to exec
+.B qmail-queue
+It exits 55 if it is not able get the free space for the queue filesystem. It exits 53 if the free space
+is below MIN_FREE value.
+
+.SH "SEE ALSO"
+addresses(5),
+rfc-822(5),
+qmail-send(8),
+qmail-inject(8),
+qmail-smtpd(8),
+sendmail(8),
+qmail-control(5),
+qmail-header(5),
+qmail-queue(8),
+qscanq(8),
+bogofilter(1),
+spawn-filter(8)
+
+.SH "AUTHORS"
+
+Manvendra Bhangui.
+.SH PROBLEMS
+Problems with
+.B qmail-multi
+should be forwarded to "Manvendra Bhangui" <manvendra_bhangui@indicorp.com>

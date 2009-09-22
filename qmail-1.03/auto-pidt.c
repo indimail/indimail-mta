@@ -1,0 +1,40 @@
+/*
+ * $Log: auto-pidt.c,v $
+ * Revision 1.2  2004-10-22 15:34:16+05:30  Cprogrammer
+ * replaced readwrite.h with unistd.h
+ *
+ * Revision 1.1  2004-09-19 18:54:16+05:30  Cprogrammer
+ * Initial revision
+ *
+ */
+#include <unistd.h>
+#include <sys/types.h>
+#include "substdio.h"
+#include "exit.h"
+#include "scan.h"
+#include "fmt.h"
+
+char            buf1[256];
+substdio        ss1 = SUBSTDIO_FDBUF(write, 1, buf1, sizeof(buf1));
+
+void
+my_puts(s)	/*- was named puts, but Solaris pwd.h includes stdio.h. dorks.  */
+	char           *s;
+{
+	if (substdio_puts(&ss1, s) == -1)
+		_exit(111);
+}
+
+int
+main()
+{
+	char            strnum[FMT_ULONG];
+	strnum[fmt_ulong(strnum, (unsigned long) sizeof(pid_t))] = 0;
+
+	my_puts("#define PID_BYTES ");
+	my_puts(strnum);
+	my_puts("\n");
+	if (substdio_flush(&ss1) == -1)
+		_exit(111);
+	return (0);
+}

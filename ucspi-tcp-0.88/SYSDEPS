@@ -1,0 +1,12 @@
+VERSION
+systype
+fork.h
+hassgact.h
+hassgprm.h
+hasshsgr.h
+haswaitp.h
+iopause.h
+select.h
+socket.lib
+uint32.h
+uint64.h

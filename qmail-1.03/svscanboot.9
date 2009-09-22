@@ -1,0 +1,68 @@
+.TH svscanboot 8
+.SH NAME
+svscanboot \- starts
+.BR svscan (8)
+in the service directories, with output and error messages logged through
+.BR readproctitle (8).
+
+svscanboot is available in daemontools 0.75 and above.
+.SH SYNOPSIS
+.B svscanboot
+[
+.I directory1 directory2 ...
+]
+.SH DESCRIPTION
+.B svscanboot
+(without any command-line arguments) runs the pipeline
+
+svscan /service 2>&1 | readproctitle service errors: .....
+
+with 400 dots. The last 400 bytes of error messages from
+.BR svscan (8)
+will be visible to
+.BR ps (1)
+through
+.BR readproctitle (8).
+
+If
+.B svscanboot
+is given command-line arguments, it startups up svscan for each
+.I directory
+given on the command line (instead of just svscan /service).
+
+.B svscanboot
+sets $PATH to
+
+ QMAIL/bin:/usr/local/bin:/bin:/sbin:/usr/bin:/usr/sbin
+
+(all in one line, no space)
+
+and clears all other environment variables.
+
+The recommended way is to put the following entry in /etc/inittab to invoke svscanboot.
+
+SV:345:respawn:QMAIL/bin/svscanboot /service1 /service2 <>/dev/console 2<>/dev/console
+
+(assuming that you have configured services in both /service1 and /service2)
+.SH SEE ALSO
+supervise(8),
+svc(8),
+svok(8),
+svstat(8),
+svscan(8),
+svctool(8),
+readproctitle(8),
+fghack(8),  
+pgrphack(8),
+multilog(8),
+tai64n(8),
+tai64nlocal(8),
+setuidgid(8),
+envuidgid(8),
+envdir(8),
+softlimit(8),
+setlock(8),
+ps(1)
+
+ http://cr.yp.to/daemontools.html
+ http://cr.yp.to/slashcommand.html

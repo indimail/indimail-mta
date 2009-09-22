@@ -1,0 +1,34 @@
+.TH tcpcat 1
+.SH NAME
+tcpcat \- prints data from a remote host.
+.SH SYNOPSIS
+.B tcpcat
+.I host
+.I port
+.SH DESCRIPTION
+.B tcpcat
+connects to
+.I port
+on
+.IR host .
+It prints any data it receives. 
+
+.B tcpcat
+can be used to transfer binary data. It does no conversions.
+.SH SEE ALSO
+tcpserver(1),
+tcprules(1),
+tcprulescheck(1),
+argv0(1),
+fixcrio(1),
+recordio(1),
+rblsmtpd(1),
+tcpclient(1),
+who@(1),
+date@(1),
+finger@(1),
+http@(1),
+mconnect(1),
+tcp-environ(5)
+
+http://cr.yp.to/ucspi-tcp.html

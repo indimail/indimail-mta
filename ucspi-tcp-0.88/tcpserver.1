@@ -1,0 +1,297 @@
+.TH tcpserver 1
+.SH NAME
+tcpserver \- accepts incoming TCP connections.
+.SH SYNOPSIS
+.B tcpserver
+[
+.I opts
+]
+.I host
+.I port
+.I prog
+.SH DESCRIPTION
+.I opts
+is a series of getopt-style options.
+.I host
+is one argument.
+.I port
+is one argument.
+.I prog
+consists of one or more arguments. 
+
+.B tcpserver
+waits for connections from TCP clients. For each connection, it runs
+.IR prog ,
+with descriptor 0 reading from the network and descriptor 1 writing to the
+network. It also sets up several environment variables.
+
+The server's address is given by
+.I host
+and
+.IR port .
+.I port
+may be a name from /etc/services or a number; if it is 0,
+.B tcpserver
+will choose a free TCP port.
+.I host
+may be 0, allowing connections to any local IP address; or a dotted-decimal IP
+address, allowing connections only to that address; or a host name, allowing
+connections to the first IP address for that host. Host names are fed through
+qualification using dns_ip4_qualify (dns_ip6_qualify for ipv6).
+
+.B tcpserver
+exits when it receives SIGTERM.
+.SH OPTIONS
+.B General options:
+.TP
+.B \-q
+Quiet. Do not print error messages. 
+.TP
+.B \-Q
+(Default.) Print error messages. 
+.TP
+.B \-v
+Verbose. Print error messages and status messages. 
+.TP
+.B \-V
+Verbose. Print error messages, status messages and IP connection table. 
+.P
+.B Connection options:
+.TP
+.B \-c \fIn
+|
+.B \fIfile
+
+Do not handle more than
+.I n
+simultaneous connections. If there are
+.I n
+simultaneous copies of prog running, defer acceptance of a new connection
+until one copy finishes.
+.I n
+must be a positive integer. Default: 40. In the second form, 
+.I file
+can be a full path to a filename containing an integer specifying
+.IR n .
+This file will be reread when
+.B tcpserver
+receives SIGHUP.
+
+.TP
+.B \-C \fIn
+Do not handle more than
+.I n
+simultaneous connections from a particular host. If there are
+.I n
+simultaneous copies of prog running, defer acceptance of a new connection
+until one copy finishes.
+.I n
+must be a positive integer. Default: 20. This can be also handled by
+having the environment variable MAXPERIP compiled in the
+.I rules
+cdb database. The MAXPERIP environment variables gives
+.B tcpserver
+the ability to have different per host concurrency limit for each and every
+host that is defined in the rules database.
+.TP
+.B \-x \fIcdb
+Follow the rules compiled into
+.I cdb
+by
+.BR tcprules (1).
+These rules may specify setting environment variables or rejecting connections
+from bad sources. You can rerun
+.BR tcprules (1)
+to change the rules while
+.B tcpserver
+is running. 
+.TP
+.B \-X
+With
+.B -x \fIcdb,
+allow connections even if
+.I cdb
+does not exist. Normally
+.B tcpserver
+will drop the connection if
+.I cdb
+does not exist.
+
+.TP
+.B \-m \fIdb.conf
+Follow rules specified in the MySQL table tcprules. This table has 4 columns. The column
+.I iprules
+contains an IP address which can include wildcards. eg. 202.144.*.?, 202.144.10-20.1, etc. The column
+.I decision
+can have the value
+.I 'D'
+to deny connections for matching IP addresses. The column
+.I env
+contains a list of comma separated environment variables. e.g /var/indimail=/tmp,SERVER=galaxy.
+The db.conf file has the following layout
+
+database server ip:database user:database password:database name:table name
+
+with this option,
+.I tcpserver
+will connect to the
+.B MySQL(1)
+server specified by parameters in db.conf file. The connect timeout can be controlled by the environment variable
+.BR MYSQL_TIMEOUT .
+
+.TP
+.B \-B \fIbanner
+Write
+.I banner
+to the network immediately after each connection is made.
+.B tcpserver
+writes
+.I banner
+before looking up $TCPREMOTEHOST, before looking up $TCPREMOTEINFO, and before
+checking
+.IR cdb .
+This feature can be used to reduce latency in protocols where the client waits
+for a greeting from the server. 
+.TP
+.B \-g \fIgid
+Switch group ID to
+.I gid
+after preparing to receive connections.
+.I gid
+must be a positive integer. 
+.TP
+.B \-u \fIuid
+Switch user ID to
+.I uid
+after preparing to receive connections.
+.I uid
+must be a positive integer. 
+.TP
+.B \-U
+Same as
+.B \-g
+$GID
+.B \-u
+$UID. Typically $GID and $UID are set by
+.BR envuidgid (8).
+.TP
+.B \-1
+After preparing to receive connections, print the local port number to
+standard output. 
+.TP
+.B \-4
+Fall back to IPv4 sockets.  This is necessary for terminally broken
+systems like OpenBSD which will not let IPv6 sockets connect to
+V4-mapped IPv6 addresses.  Please note that this also applies to DNS
+lookups, so you will have to use an DNS resolver with an IPv6 address to
+accept IPv6 connections.  Use \fBDNSCACHEIP\fR to set the DNS resolver
+IP dynamically.
+.TP
+.B \-6
+Force IPv6 mode in UCSPI environment variables, even for
+IPv4 connections.  This will set \fB$PROTO\fR to \fBTCP6\fR and put
+IPv4-mapped IPv6 addresses in \fBTCPLOCALIP\fR and \fBTCPREMOTEIP\fR.
+.TP
+.B \-I\fIinterface
+Bind to the network interface
+.I interface
+("eth0" on Linux, for example).  This is only defined and needed for
+IPv6 link-local addresses.
+.TP
+.B \-b \fIn
+Allow a backlog of approximately
+\I n
+TCP SYNs. On some systems,
+\I n
+is silently limited to 5. On systems supporting SYN cookies, the backlog is
+irrelevant. 
+.TP
+.B \-o
+Leave IP options alone. If the client is sending packets along an IP source
+route, send packets back along the same route.
+.TP
+.B \-O
+(Default.) Kill IP options. A client can still use source routing to connect
+and to send data, but packets will be sent back along the default route.
+.TP
+.B \-d
+Delay sending data for a fraction of a second whenever the remote host is
+responding slowly. This is currently the default, but it may not be in the
+future; if you want it, set it explicitly. 
+.TP
+.B \-D
+Never delay sending data; enable TCP_NODELAY. 
+.P
+.B Data-gathering options: 
+.TP
+.B \-h
+(Default.) Look up the remote host name in DNS to set the environment variable
+$TCPREMOTEHOST. 
+.TP
+.B \-H
+Do not look up the remote host name in DNS; remove the environment variable
+$TCPREMOTEHOST. To avoid loops, you must use this option for servers on TCP
+port 53. 
+.TP
+.B \-p
+Paranoid. After looking up the remote host name in DNS, look up the IP
+addresses in DNS for that host name, and remove the environment variable
+$TCPREMOTEHOST if none of the addresses match the client's IP address.
+.TP
+.B \-P
+(Default.) Not paranoid. 
+.TP
+.B \-l \fIlocalname
+Do not look up the local host name in DNS; use
+.I localname
+for the environment variable $TCPLOCALHOST. A common choice for
+.I localname
+is 0. To avoid loops, you must use this option for servers on TCP port 53. 
+.TP
+.B \-r
+(Default.) Attempt to obtain $TCPREMOTEINFO from the remote host. 
+.TP
+.B  \-R
+Do not attempt to obtain $TCPREMOTEINFO from the remote host. To avoid loops,
+you must use this option for servers on TCP ports 53 and 113.
+.TP
+.B \-t \fIn
+Give up on the $TCPREMOTEINFO connection attempt after
+.I n
+seconds. Default: 26.
+.TP
+.B \-s
+Use ssl with servercert.pem certificate.
+.TP
+.B \-n \fIcertfile
+Instead of the default servercert.pem certificate use the specified
+.IR certfile .
+
+.SH ENVIRONMENT
+.TP
+.B SSL_CIPHER
+Specifies the ciphers that should be used in SSL/TLS mode. See
+.I openssl(1)
+for more information.
+.TP
+.B CONTROLDIR
+Sub-directory relative to /var/indimail, having servercert.pem. Default is /var/indimail/control.
+
+.SH SEE ALSO
+tcprules(1),
+tcprulescheck(1),
+argv0(1),
+fixcrio(1),
+recordio(1),
+rblsmtpd(1),
+tcpclient(1),
+who@(1),
+date@(1),
+finger@(1),
+http@(1),
+tcpcat(1),
+mconnect(1),
+openssl(1),
+tcp-environ(5)
+
+http://cr.yp.to/ucspi-tcp.html

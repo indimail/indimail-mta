@@ -1,0 +1,145 @@
+.TH rblsmtpd 1
+.SH NAME
+rblsmtpd \- blocks mail from RBL-listed sites. It works with any SMTP server that can run under
+.BR tcpserver (1)
+.SH SYNOPSIS
+.B rblsmtpd
+.I opts
+.I prog
+.SH DESCRIPTION
+.I opts
+is a series of getopt-style options.
+.I prog
+consists of one or more arguments.
+
+Normally
+.B rblsmtpd
+runs
+.IR prog .
+.I prog
+is expected to carry out an SMTP conversation to receive incoming mail messages. 
+
+However,
+.B rblsmtpd
+does not invoke
+.I prog
+if it is told to block mail from this client. Instead it carries out its own limited SMTP conversation, temporarily rejecting all attempts to send a message. Meanwhile it prints one line on descriptor 2 to log its activity.
+
+.B rblsmtpd
+drops the limited SMTP conversation after 60 seconds, even if the client has not quit by then.
+.SH OPTIONS
+.TP
+.B \-t \fIn
+Change the timeout to
+.I n
+seconds.
+.P
+.B Blocked clients
+.P
+If the $RBLSMTPD environment variable is set and is nonempty,
+.B rblsmtpd
+blocks mail. It uses $RBLSMTPD as an error message for the client. Normally
+.B rblsmtpd
+runs under
+.BR tcpserver (1);
+you can use
+.BR tcprules (1)
+to set $RBLSMTPD for selected clients. Any occurrence of %IP% in $RBLSMTPD gets replaced with the IP address of the remote client.
+
+If $RBLSMTPD is set and is empty,
+.B rblsmtpd
+does not block mail. 
+
+If $RBLSMTPD is not set,
+.B rblsmtpd
+looks up $TCPREMOTEIP in the RBL, and blocks mail if $TCPREMOTEIP is listed.
+.B tcpserver
+sets up $TCPREMOTEIP as the IP address of the remote host.
+.TP
+.B \-r \fIbase
+Use
+.I base
+as an RBL source. An IP address
+.I a.b.c.d
+is listed by that source if
+.I d.c.b.a.base
+has a TXT record.
+.B rblsmtpd
+uses the contents of the TXT record as an error message for the client.
+.TP
+.B \-a \fIbase
+Use
+.I base
+as an anti-RBL source. An IP address
+.I a.b.c.d
+is anti-listed by that source if
+.I d.c.b.a.base
+has an A record. In this case
+.B rblsmtpd
+does not block mail.
+.P
+You may supply any number of
+.B \-r
+and
+.B \-a
+options.
+.B rblsmtpd
+tries each source in turn until it finds one that lists or anti-lists $TCPREMOTEIP. It also tries an RBL source of rbl.maps.vix.com if you do not supply any
+.B -r
+options. See http://maps.vix.com/rbl/ for more information about rbl.maps.vix.com. 
+
+If you want to run your own RBL source or anti-RBL source for
+.BR rblsmtpd ,
+you can use
+.B rbldns
+from the DNScache (djbdns) package.
+.P
+.B Temporary errors
+.P
+Normally, if $RBLSMTPD is set, and does not start with a hyphen '-'
+.B rblsmtpd
+uses a 451 error code in its limited SMTP conversation. This tells legitimate clients to try again later. It gives innocent relay operators a chance to see the problem, prohibit relaying, get off the RBL, and get the mail delivered. 
+
+However, if $RBLSMTPD begins with a hyphen,
+.B rblsmtpd
+removes the hyphen and uses a 553 error code. This tells legitimate clients to bounce the message immediately. 
+
+There are several error-handling options for RBL lookups:
+.TP
+.B \-B
+(Default.) Use a 451 error code for IP addresses listed in the RBL.
+.TP
+.B \-b
+Use a 553 error code for IP addresses listed in the RBL.
+.TP
+.B \-C
+(Default.) Handle RBL lookups in a ``fail-open'' mode. If an RBL lookup fails temporarily, assume that the address is not listed; if an anti-RBL lookup fails temporarily, assume that the address is anti-listed. Unfortunately, a knowledgeable attacker can force an RBL lookup or an anti-RBL lookup to fail temporarily, so that his mail is not blocked.
+.TP
+.B \-c
+Handle RBL lookups in a ``fail-closed'' mode. If an RBL lookup fails temporarily, assume that the address is listed (but use a 451 error code even with -b). If an anti-RBL lookup fails temporarily, assume that the address is not anti-listed (but use a 451 error code even if a subsequent RBL lookup succeeds with -b). Unfortunately, this sometimes delays legitimate mail.
+.TP
+.B \-w \fIdelay
+Use
+.I delay
+for adding a delay after the SMTP client has initiated the SMTP session and before qmail-smtpd answers with "220 ESMTP"
+.TP
+.B \-W
+The delay is control via the environment variable GREETDELAY, which is typically set by means of tcpserver's rule-set file.
+
+.SH SEE ALSO
+tcpserver(1),
+tcprules(1),
+tcprulescheck(1),
+fixcrio(1),
+recordio(1),
+rblsmtpd(1),
+tcpclient(1),
+who@(1),
+date@(1),
+finger@(1),
+http@(1),
+tcpcat(1),
+mconnect(1),
+tcp-environ(5)
+
+http://cr.yp.to/ucspi-tcp.html

@@ -1,0 +1,45 @@
+Some hints about testing SPAMCONTROL
+------------------------------------
+
+1. To test SPAMCONTROL you can TELNET
+   to your MTA's SMTP Port address (25).
+2. Your TELNET client should be instructed
+   to use <LF> as delimitor and local echo.
+3. A test sequence:
+
+	qmailer.fehcom.de ESMTP
+	helo du
+	250 qmailer.fehcom.de
+	mail from: <spamtest@[200.194.96.32]>
+	250 ok
+	rcpt to: <me@[127.0.0.1]>
+	250 ok
+	data
+	354 go ahead
+	.
+	250 ok 955896938 qp 421
+	quit
+	221 qmailer.fehcom.de
+
+4. Syntax:
+The commands MAIL and RCPT have (at least) two arguments:
+
+- MAIL from: blabla
+       ----- ------
+       1.    2. Argument
+
+- RCPT to: blabla
+       --- ------
+       1.  2. Argument
+
+Between the command and the first argument and 
+between the first and the second argument there
+has to be exactly a "white space" (blank).
+The 2nd argument (the SENDER/RECIPIENT) should
+be enclosed in "<" and ">".
+
+5. Recommendation: 
+It is easy enough to make mistakes!
+Delete and Backspace is not allowed!
+Watch the behavior in the Log!
+  

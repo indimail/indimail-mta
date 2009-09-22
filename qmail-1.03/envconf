@@ -1,0 +1,29 @@
+#!/usr/bin/perl
+#
+# $Log: envconf,v $
+# Revision 1.1  2003-10-11 00:09:05+05:30  Cprogrammer
+# Initial revision
+#
+# 
+# Written by Jonas Pasche 
+#
+while (<STDIN>) {
+	if( $_ =~ /^([^#][^=]+)=(.*)/) {
+		$name=$1;
+		unlink "$name";
+		open (F, ">$name") or die "Cannot open $name: $!";
+		$value = $2;
+		if( $value =~ /^"(.*)"$/ ) {
+			$x=$1;
+		} else {
+			$x=$value;
+		}
+		while ($x =~ m/\$(\S+)/ && $vars{$1}) {
+			y = $1;
+			x =~ s/\$$y/$vars{$y}/;
+		}
+		$vars{$name}=$x;
+		print F $x or die "Cannot write to $1: $!";
+		close (F) or die "Cannot close $1: $!";
+	}
+}

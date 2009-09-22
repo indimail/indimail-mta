@@ -1,0 +1,74 @@
+GENERAL
+-------
+
+1. The included script spamcontrol.sh does most of the job (installation + uninstallation).
+2. The script spamcontrol.sh writes a log-file spamcontrol.log of it's actions.
+3. The software version VRF (Version.Release.Fixlevel) is part of the archive name, 
+   eg. spamcontrolVRF.tgz. The dots are ommitted.
+4. For the development history view HISTORY.spamcontrol.
+5. The setup of the logic is described in README.spamcontrol.
+
+
+INSTALLATION
+------------
+
+How to proceed:
+
+1. Copy all files to the QMAIL 1.03 source directory.
+   (cd to qmail-1.03 and call tar -xzf DIR/spamcontrol_VRF_tar.gz)
+2. SOLARIS only: Modifiy the "FLAG" parameter in spamcontrol.sh.
+3. Run ./spamcontrol.sh from here.
+4. Verify the patches by means of the generated log-file spamcontrol.log.
+5. Re-Make QMAIL (follow instructions in INSTALL and README.spamcontrol).
+6. Modify the tcpserver/qmail start-up and modify the call of qmail-smtpd:
+        /usr/local/bin/tcpserver <whatever your arguments are> smtp \
+            /var/qmail/bin/qmail-smtpd 2>&1 | /var/qmail/bin/splogger smtpd &
+
+VERIFICATION
+------------
+
+1. Verify the new man-pages:
+   - man qmail-control
+   - man qmail-smtpd
+   - man qmail-log
+2. For your own records keep a copy of your QMAIL configuration:
+   - /var/qmail/bin/qmail-showctl >> ~/qmail.config
+   - The new control files are included in this listing.
+   - qmail-showctl does neither perform a syntax nor a semantical check!
+
+
+UNINSTALLATION
+--------------
+
+You can always use a fresh copy of the qmail-sources to re-install the original version.
+
+1. Change to the QMAIL + SPAMCONTORL source directory.
+2. Run ./spamcontrol.sh -u from here (uninstallation mode). 
+3. Delete (if exisiting) the following files in /var/qmail/control:
+   - badmailpatterns
+   - badrcptto
+   - badrcptpatterns
+   - relayclients
+   - relaydomains
+   - relaymailfrom
+   - nodnschecks
+   - tarpitcount
+   - tarpitdelay
+   - relaymailfrom
+   This is optional. You can leave those files intact if you accept an error in qmail-showctl.
+4. Verify the uninstallation by means of the spamcontrol.log.
+5. Re-Make QMAIL.
+
+
+UPGRADE
+-------
+
+1. Change to the QMAIL + SPAMCONTROL source directory.
+2. Check the latest SPAMCONTROL Version Level by means of the spamcontrol.log file.
+3. Copy the new spamcontrol files to the QMAIL 1.03 source directory.
+4. Remove the patched QMAIL files and go back to the originals:
+   ./spamcontrol.sh -u 105 (if the latest installed version was 1.0.5)
+5. Run ./spamcontrol.sh in installation mode.
+6. Verify the patches by means of the generated log-file spamcontrol.log.
+7. Re-Make QMAIL (follow instructions in INSTALL and README.spamcontrol).
+

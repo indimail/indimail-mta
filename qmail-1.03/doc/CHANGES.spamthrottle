@@ -1,0 +1,73 @@
+Changed Files
+=============
+qmail-smtpd.c
+open_rw.c
+lock_unfcntl.c
+lock_exfcntl.c
+control.c
+hier.c
+qmail-showctl.c
+spamtime.c
+control_time.c
+spam.c
+tryltai.c
+trytai.c
+hastai.h
+lock.h
+control.h
+open.h
+spam.h
+spamtime.h
+TARGETS
+README.spamthrottle
+CHANGES.spamthrottle
+Makefile
+FILES
+qmail-control.9
+qmail-smtpd.8
+qmail-spamthrottle.9
+=============
+20020219 forgot to flush continuation lines in teergrube code
+         public release 1.02
+
+20020219 fix time(tai)-related bugs in reading/writing taia values
+           (thanks to Roland Chan)
+         add entry to qmail-spamthrottle(9) man page with a simple perl
+           expression to convert packed taia values to tai64n timestamps
+         public release 1.01
+
+20020218 add teergrube support (now 1.01 release) {dw}
+         remove all strerr_warn... calls as they cause problems
+           with qmail's sendmail and the -bs switch (as used by pine
+           for instance)
+         remove dead/redundant code {dw}
+
+20020213 public release 1.00 {dw,jl,mk}
+
+20011224 fix fpe error
+
+20011213 release 1.00 candidate complete
+
+20010923 new formulation, code restructure, man pages updated
+
+20010319 spam wrap open/lock calls
+
+20010313 wrap tai handlers so tai isn't required
+
+20010311 remove an extra CRLF in EHLO response
+         short circuit when sleep time would be zero
+
+20010309 RFC 2920 compliance (don't advertise PIPELINING with stflush on)
+         add fcntl() style lock module for compatibility
+	 make new control functions return values
+	 lock file is separate from time/wait files
+
+20010227 update man pages with spamthrottle info
+         add spamthrottleflush/spamthrottlemax support
+	 add warning in readme about libtai dependency
+
+20010221 remove testing code
+	 add spamthrottledir support (so IPs can be grouped)
+	   (the '.' means new subdir semantic still enforced though)
+
+20010220 alpha implementation

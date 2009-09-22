@@ -1,0 +1,148 @@
+19960311
+	version: ucspi-tcp 0.50, alpha.
+19960803
+	version: ucspi-tcp 0.60, alpha.
+19960903
+	version: ucspi-tcp 0.70, beta.
+19960914
+	version: ucspi-tcp 0.71, beta.
+19960922
+	version: ucspi-tcp 0.72, beta.
+19970410
+	version: ucspi-tcp 0.73, beta.
+19980118
+	version: ucspi-tcp 0.80, beta.
+19981107
+	code: switched to new install system.
+	code: eliminated tcpclient -U; moved usage() to default.
+	code: switched to strerr in tcpclient.
+	code: switched to str_equal in tcpclient.
+	portability problem: OpenBSD connect() prohibits 0.0.0.0.
+		impact: tcpclient 0 fails. fix: interpret 0 as
+		127.0.0.1. hopefully nobody needs 0 to mean primary
+		interface.
+	code: tcpclient now interprets empty host name as 0.
+	doc: added addcr.0, delcr.0.
+	doc: added who@.0, date@.0, finger@.0.
+	doc: added tcpcat.0, mconnect.0.
+	code: added printstatus() in tcpserver.
+	code: eliminated numchildren in printpid() in tcpserver.
+	code: unblocked SIGCHLD after setting SIGCHLD to SIG_DFL in
+		tcpserver, instead of before, to avoid confusion if
+		someone sends SIGCHLD manually.
+	code: moved printstatus() before fork in tcpserver.
+	code: added mconnect-io.
+	code: added argv0.
+	code: added fixcr.
+	doc: revamped BLURB.
+	code: added recordio.
+	doc: cleaned up tcpclient.0.
+	code: added http@.
+	code: stopped after 100 bytes in safeappend() in tcpserver.
+19981108
+	code: added tcpserver -B.
+	code: added a few regression tests.
+	version: ucspi-tcp 0.83, beta.
+19981109
+	doc: added http@ to BLURB.
+19981110
+	code: added exec to mconnect.
+	code: tcpclient now ignores port results from getpeername() in
+		favor of the port it tried connecting to.
+	code: added strport to tcpclient.
+	doc: reorganized tcpclient.0.
+	doc: reorganized tcpserver.0.
+	code: revamped tcpserver messages.
+	code: revamped tcpclient messages.
+	code: added a few more regression tests.
+	code: rewrote recordio for instant output and other features.
+	doc: added references in tcpserver.0 and tcpclient.0.
+	code: added tcpclient -i option.
+	code: added tcprulescheck.
+	code: added some tcprules regression tests.
+19981111
+	code: avoided ndelay in recordio.
+	version: ucspi-tcp 0.84, beta.
+19981212
+	doc: improved description of host 0 in tcpserver.0. tnx to
+		several people.
+19981218
+	doc: reordered sample rules in tcprules.0.
+		tnx Harald Hanche-Olsen.
+20000120
+	internal: revamped packaging.
+	internal: massive rewrite. tnx to everyone for bug reports and
+		other comments on various versions of tcpclient,
+		tcpserver, tcpcontrol, and rblsmtpd: Akihiro Iijima,
+		Akihiro Terasaki, Albert J. deVera, Alex Vostrikov,
+		Amos Shapira, Anand R. Buddhdev, Andrea Paolini,
+		Andrew Pam, Araki Yasuhiro, Arne Wichmann,
+		Ayamura Kikuchi, Bart B. B. Hanssens, Bert Gijsbers,
+		Bradford M. Shelton, Brendan Kehoe, Brian J. Reichert,
+		Brian M. Fisk, Brian O'Reilly, Bruno Wolff,
+		Chris Garrigues, Chris Johnson, Christian Wettergren,
+		Dale N. Woolridge, Dan M. Vogel, Daniel C. Mahoney,
+		Darren Hall, Darren W. Rees, Dave Sill, David J. Walton,
+		David P. Smith, David Pool, Dax Kelson, Dirk Jaeckel,
+		Dirk Vluegels, Donald E. Blais, Ed Weinberg,
+		Edward S. Marshall, Eric A. Perlman, Erik Wallin,
+		Faried Nawaz, Fred B. Ringel, Frederik P. Lindberg,
+		Gerry Boudreaux, Giles Lean, Grant Holliday,
+		Greg D. Patterson, Harald Barth, Harald Fritzsche,
+		Harald Hanche-Olsen, Hirofumi Ukawa, Hiroshi Yamashita,
+		Hitesh Patel, Ingmar Hupp, J. B. Keith Humphreys,
+		Jakub K. Boguslaw, Janos Farkas, Jason R. Mastaler,
+		Jeff Hayward, Jeremy Wohl, Jim Littlefield,
+		Johan Holmberg, John Bolhuis, John D. Mitchell,
+		Jos Backus, Jose Monteiro, Joshua J. Ellis,
+		Julie L. Baumler, Karl Lehenbauer, Karsten Thygesen,
+		Keith Burdis, Kenny Elliott, Kikuchi Kousuke,
+		Kris Kennaway, Lars Balker Rasmussen, Louis S. Theran,
+		Lyndon F. Bartels, Mads E. Eilertsen, Mark Delany,
+		Martin Mersberger, Matt P. Simerson, Matthew A. Zahorik,
+		Michael B. Scher, Michael Handler, Michael Hirohama,
+		Michael R. Gile, Michael Salmon, Mikael Suokas,
+		Nobuhiro Murata, Patrick M. Kane, Paul R. Rotering,
+		Peter Rye, Peter Wilkinson, Petr Novotny,
+		Petri Kaukasoina, Raul D. Miller, Richard A. Soderberg,
+		Robert W. Luce, Roberto A. Lumbreras, Russ Allbery,
+		Russell Nelson, Sean Reifschneider, Shawn A. Clifford,
+		Shin Ohira, Shinya O'Hira, Stan Norton,
+		Stathy G. Touloumis, Stefan M. Linnemann, Sudish Joseph,
+		Thomas E. Erskine, Thomas Kuerten, Tim Goodwin,
+		Timothy L. Mayo, Todd Underwood, Tomoaki Terazawa,
+		Tomoki Yoshioka, Toshinori Maeno, Uwe Ohse, Vern Hart,
+		Vince Vielhaber, Waskita Adijarto, William E. Baxter,
+		Wolfgang Rufeger, Wu Ching-hong, Yoshitatsu Takeshita.
+20000307
+	internal: switched to various new libraries.
+	ui: tcpserver prints status on startup, before first connection.
+20000309
+	ui: incorporated rblsmtpd.
+	ui: tcpserver -X allows nonexistent rules file.
+	ui: http@ uses HTTP/1.0, sends Host, removes header.
+	ui: added fixcrio.
+	ui: delcr leaves CR alone at the end of a partial final line.
+20000311
+	ui: switched to prot; so setgid() is preceded by setgroups().
+	ui: tcpserver supports -U.
+	ui: tcpserver supports hostname rules.
+	ui: tcprulescheck now uses environment variables.
+20000312
+	version: ucspi-tcp 0.86, beta.
+20000314
+	portability problem: the poll() emulation in RedHat 5.1 doesn't
+		clear revents when select() returns 0. tnx Petr Novotny.
+		impact: dns lookups busy-loop when they should time out.
+		fix: new iopause from DNScache.
+20000315
+	version: ucspi-tcp 0.87, beta.
+20000318
+	internal: split rules() out of tcpserver and tcprulescheck.
+	bug: didn't always clear rule length when $TCPREMOTEHOST was
+		set. impact: empty rule could be ignored. fix: obvious.
+		tnx Toshinori Maeno, Takashi Takizawa, Yuichi Katoh.
+	ui: check for lone = rule if $TCPREMOTEHOST is set.
+	ui: tcpclient supports fast+slow timeouts, 2+58 by default.
+	ui: tcpclient randomizes order of addresses.
+	version: ucspi-tcp 0.88, beta.

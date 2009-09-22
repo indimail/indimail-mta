@@ -1,0 +1,3 @@
+cc -Wall -O2 -DINET6 -fPIC
+
+This will be used to compile .c files.

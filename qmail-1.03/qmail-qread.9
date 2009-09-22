@@ -1,0 +1,43 @@
+.TH qmail-qread 8
+.SH NAME
+qmail-qread \- list outgoing messages and recipients
+.SH SYNOPSIS
+.B qmail-qread
+.I [-a]
+.I [-l]
+.I [-r]
+.I [-t]
+.TP 2
+-a List Mails in local, remote and todo
+.TP 2
+-l List Mails in local
+.TP 2
+-r List Mails in remote
+.TP 2
+-t List Mails in todo
+
+.SH DESCRIPTION
+.B qmail-qread
+scans the outgoing queue of messages.
+For each message it prints various human-readable information,
+including the date the message entered the queue,
+the number of bytes in the message,
+the message sender, the queue id no,
+and all the recipients still under consideration.
+
+.B qmail-qread
+must be run either as 
+.B root
+or with user id
+.B qmails
+and group id
+.BR qmail .
+If the environment variable QUEUEDIR is set,
+.B qmail-qread
+will use that as the queue. Else it will use QMAIL/queue1 as the queue.
+If the environment variables QUEUE_START and QUEUE_COUNT are set,
+.B qmail-qread
+will process multiple queues.
+.SH "SEE ALSO"
+qmail-qstat(8),
+qmail-send(8)
