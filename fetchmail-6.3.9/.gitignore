@@ -1,0 +1,15 @@
+fetchmail
+fetchmail.cron
+fetchmail.down
+fetchmail.up
+fetchmailconf
+fixwvdialconf
+genlsm.sh
+ip-down.local
+ip-up.local
+m4/Makefile
+po/Makefile
+po/Makefile.in
+po/POTFILES
+slemsPrivate
+writefifo

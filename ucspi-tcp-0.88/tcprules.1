@@ -1,0 +1,167 @@
+.TH tcprules 1
+.SH NAME
+tcprules \- compiles rules for
+.BR tcpserver (1).
+.SH SYNOPSIS
+.B tcprules
+.I cdb
+.I tmp
+.SH DESCRIPTION
+.BR tcpserver (1)
+optionally follows rules to decide whether a TCP connection is acceptable. For
+example, the rule 
+.IP
+18.23.0.32:deny
+.P
+prohibits connections from IP address 18.23.0.32. 
+
+.B tcprules
+reads rules from its standard input and writes them into
+.I cdb
+in a binary format suited for quick access by
+.BR tcpserver (1).
+
+.B tcprules
+can be used while
+.BR tcpserver (1)
+is running. It ensures that
+.I cdb
+is updated atomically. It does this by first writing the rules to
+.I tmp
+and then moving
+.I tmp
+on top of
+.IR cdb .
+If
+.I tmp
+already exists, it is destroyed. The directories containing
+.I cdb
+and
+.I tmp
+must be writable to
+.BR tcprules ;
+they must also be on the same filesystem. 
+
+If there is a problem with the input or with
+.IR tmp ,
+.B tcprules
+complains and leaves
+.I cdb
+alone. 
+
+The binary
+.I cdb
+format is portable across machines.
+.SH RULE FORMAT
+A rule is one line. A file containing rules may also contain comments: lines
+beginning with # are ignored. 
+
+Each rule contains an address, a colon, and a list of instructions, with no
+extra spaces. When
+.BR tcpserver (1)
+receives a connection from that address, it follows the instructions.
+.SH ADDRESSES
+.BR tcpserver (1)
+looks for rules with various addresses: 
+.IP 1.
+$TCPREMOTEINFO@$TCPREMOTEIP, if $TCPREMOTEINFO is set; 
+.IP 2.
+$TCPREMOTEINFO@=$TCPREMOTEHOST, if $TCPREMOTEINFO is set and $TCPREMOTEHOST is
+set;
+.IP 3.
+$TCPREMOTEIP; 
+.IP 4.
+=$TCPREMOTEHOST, if $TCPREMOTEHOST is set; 
+.IP 5.
+shorter and shorter prefixes of $TCPREMOTEIP ending with a dot; 
+.IP 6.
+shorter and shorter suffixes of $TCPREMOTEHOST starting with a dot, preceded
+by =, if $TCPREMOTEHOST is set; 
+.IP 7.
+=, if $TCPREMOTEHOST is set; and finally 
+.IP 8.
+the empty string. 
+.P
+.BR tcpserver (1)
+uses the first rule it finds. You should use the
+.B -p
+option to
+.BR tcpserver (1)
+if you rely on $TCPREMOTEHOST here. 
+
+For example, here are some rules: 
+
+     joe@127.0.0.1:first
+     18.23.0.32:second
+     :third
+     127.:fourth
+
+If $TCPREMOTEIP is 10.119.75.38,
+.BR tcpserver (1)
+will follow the third instructions. 
+
+If $TCPREMOTEIP is 18.23.0.32,
+.BR tcpserver (1)
+will follow the second instructions. 
+
+If $TCPREMOTEIP is 127.0.0.1 and $TCPREMOTEINFO is bill,
+.BR tcpserver (1)
+will follow the fourth instructions. 
+
+If $TCPREMOTEIP is 127.0.0.1 and $TCPREMOTEINFO is joe,
+.BR tcpserver (1)
+will follow the first instructions. 
+
+You can use
+.BR tcprulescheck (1)
+to see how tcpserver will interpret rules in
+.IR cdb .
+.SH ADDRESS RANGES
+.B tcprules
+treats 1.2.3.37-53:ins as an abbreviation for the rules 1.2.3.37:ins,
+1.2.3.38:ins, and so on up through 1.2.3.53:ins. Similarly, 10.2-3.:ins is an
+abbreviation for 10.2.:ins and 10.3.:ins.
+.SH INSTRUCTIONS
+The instructions in a rule must begin with either allow or deny. deny tells
+.BR tcpserver (1)
+to drop the connection without running anything. For example, the rule
+.IP
+:deny
+.P
+tells
+.BR tcpserver (1)
+to drop all connections that aren't handled by more specific rules. 
+
+The instructions may continue with some environment variables, in the form
+var="x".
+.BR tcpserver (1)
+adds an environment variable $var with value x. For example,
+.IP
+10.0.:allow,RELAYCLIENT="@fix.me"
+.P
+adds an environment variable $RELAYCLIENT with value @fix.me. The quotes may
+be replaced by any repeated character:
+.IP
+10.0.:allow,RELAYCLIENT=/@fix.me/
+.P
+Any number of variables may be listed:
+.IP
+ 127.0.0.1:allow,RELAYCLIENT="",TCPLOCALHOST="movie.edu"
+ ::1:allow,RELAYCLIENT="",TCPLOCALHOST="movie.edu"
+.SH SEE ALSO
+tcpserver(1),
+tcprulescheck(1),
+argv0(1),
+fixcrio(1),
+recordio(1),
+rblsmtpd(1),
+tcpclient(1),
+who@(1),
+date@(1),
+finger@(1),
+http@(1),
+tcpcat(1),
+mconnect(1),
+tcp-environ(5)
+
+http://cr.yp.to/ucspi-tcp.html

@@ -1,0 +1,48 @@
+.TH ifaddr 1
+.SH NAME
+ifaddr
+.SH SYNOPSIS
+.B ifaddr
+.I [ field ... : ] [ addr ... ]
+where
+.I field
+is an 822-format header field and
+.I addr
+is an email address. If no 
+.I field
+arguments appear, then 
+.B ifaddr
+uses
+.B To
+and 
+.B CC
+.SH DESCRIPTION
+.B ifaddr
+reads a message from standard input, exiting 0 if any 
+.I addr
+appears in a 
+.I field
+header, and exiting 100 if there is no match. Invoked with no addr arguments, 
+.B ifaddr
+looks for the address in the environment variable $RECIPIENT. Address comparisons are case
+insensitive.
+
+If it encounters a temporary error while reading input, 
+.B ifaddr
+exits 111.
+
+If an address begins with @, then 
+.B ifaddr
+compares it to the domain portion of addresses from each relevant field.
+
+For example, the .qmail line
+
+ | condtomaildir dir ifaddr to cc from : myfriend
+
+writes correspondence with myfriend to dir.
+
+The invocation
+
+ | condtomaildir dir ifaddr @example.com
+
+writes a message with a To or Cc address in the domain example.com to dir. 

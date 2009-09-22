@@ -1,0 +1,117 @@
+2004-08-29  Mr. Sam  <mrsam@courier-mta.com>
+
+	* imapsubj.c (rfc822_coresubj_keepblobs): New function to strip
+	non-core subject appendages, but keep [blobs].
+
+2004-05-29  Mr. Sam  <mrsam@courier-mta.com>
+
+	* rfc2047.c (rfc2047_encode_callback): Use base64 to MIME-encode
+	instead of quoted-printable, where it's more efficient to do so.
+
+2004-04-14  Mr. Sam  <mrsam@courier-mta.com>
+
+	* rfc2047.c (rfc2047_encode_callback): Fix bug introduced in 0411.
+
+2004-04-11  Mr. Sam  <mrsam@courier-mta.com>
+
+	* rfc2047.c (a_rfc2047_encode_str): Improve compliance with RFC 2047
+	for MIME-encoded recipient lists.
+	(rfc2047_encode_callback): New argument: qp_allow - function that
+	indicates acceptable characters in QP-encoded words.
+	(rfc2047_encode_str): Ditto.
+	(rfc2047_qp_allow_any, rfc2047_qp_allow_comment) 
+	(rfc2047_qp_allow_word): Possible arguments to qp_allow for various
+	situations.
+
+2004-04-09  Mr. Sam  <mrsam@courier-mta.com>
+
+	* encode.c: Moved rfc2045/rfc2045encode.c here, renamed all functions
+	to use the libmail_ prefix.
+
+2003-11-18  Tim Rice <tim@multitalents.net>
+
+	* configure.in: Fix MSG_WARN.
+
+2003-10-20  Mr. Sam  <mrsam@courier-mta.com>
+
+	* rfc2047u.c (rfc2047_print_unicode): Unicode-aware version of
+	rfc2047_print().
+
+2003-07-08  Mr. Sam  <mrsam@courier-mta.com>
+
+	* imaprefs.c (rfc822_threadmsgrefs): New rfc822_threadmsgrefs takes
+	an array of References: headers, instead of a single References:
+	string.
+
+2003-03-20  Mr. Sam  <mrsam@courier-mta.com>
+
+	* rfc2047.c (rfc2047_encode_callback): Fix MIME encoding of "_".
+
+2002-12-23  Mr. Sam  <mrsam@courier-mta.com>
+
+	* rfc2047.c (rfc2047_encode_callback): Fix loop on broken
+	locales where isspace(U+0x00A0) is true.
+
+2002-09-19  Mr. Sam  <mrsam@courier-mta.com>
+
+	* RFC 2231 support.
+
+2002-08-08  Mr. Sam  <mrsam@courier-mta.com>
+
+	* rfc2047.c (rfc2047_encode_callback): Fix MIME encoding of words
+	with = and ? characters.
+
+2002-05-20  Mr. Sam  <mrsam@courier-mta.com>
+
+	* rfc822_parsedt.c (rfc822_parsedt): Ignore obviously invalid years
+	(someone else can worry about Y10K).
+
+2002-04-07  Mr. Sam  <mrsam@courier-mta.com>
+
+	* rfc822_mkdate.c (rfc822_mkdate_buf): Explicit (int) cast gets
+	the file compiled under Cygwin.
+
+2002-03-09  Mr. Sam  <mrsam@courier-mta.com>
+
+	* rfc2047.c (rfc2047_encode_callback): Fix MIME-encoding of spaces.
+
+2002-03-04  Mr. Sam  <mrsam@courier-mta.com>
+
+	* rfc822.c (rfc822_prname_orlist): Dequote quoted-strings.
+
+2001-06-27  Mr. Sam  <mrsam@courier-mta.com>
+
+	* rfc2047.c (a_rfc2047_encode_str): Fix incorrect MIME encoding of
+	address name in old-style RFC-822 format.
+
+2001-04-17  Mr. Sam  <mrsam@courier-mta.com>
+
+	* rfc822.c (rfc822t_alloc): Explicitly cast arg to (void *).
+
+2000-12-22  Mr. Sam  <mrsam@courier-mta.com>
+
+	* reftest.c: Fix dependency on qsort sorting order of identical keys.
+
+2000-12-11  Mr. Sam  <mrsam@courier-mta.com>
+
+	* imapsubj.c (stripsubj): Recode subject stripping.
+
+2000-11-18  Mr. Sam  <mrsam@gwl.email-scan.com>
+
+	* imaprefs.c: Update to draft-05.txt-bis (sort top level siblings
+	by date.
+
+Mon Apr  5 00:58:37 EDT 1999
+
+* Yes, I've decided to start a Change Log. librfc822 now has a life of its
+own, so it might as well have it.
+
+* Courier needs tokens in a link list, not an array.  Rewrote most token
+handling code.
+
+* Fixed some issues with handling of () comments.
+
+* Changed *pr* functions to pass along a caller-provided void, also for
+  courier.  librfc822 should now be threadable (like, who cares...)
+
+* Added a testsuite

@@ -1,0 +1,19 @@
+#!/bin/sh
+#
+# $Log: ip-down.local.in,v $
+# Revision 1.2  2005-06-26 12:54:44+05:30  Cprogrammer
+# added restoration of resolv.conf
+#
+# Revision 1.1  2005-02-15 14:48:47+05:30  Cprogrammer
+# Initial revision
+#
+#
+ID=`/usr/bin/whoami`
+if [ " $ID" = " root" ] ; then
+	mv /etc/ppp/resolv.conf.org /etc/resolv.conf
+	kill -9 `/bin/cat /var/run/slemslite.pid`
+else
+	home_dir=`awk -F: '{print $6}' /etc/passwd|grep $ID|head -1`
+	kill -9 `/bin/cat $home_dir/.slemslite.pid`
+fi
+exit $?

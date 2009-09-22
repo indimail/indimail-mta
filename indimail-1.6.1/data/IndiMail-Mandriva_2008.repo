@@ -1,0 +1,15 @@
+[IndiMail]
+name=IndiMail (Mandriva_2008)
+type=rpm-md
+baseurl=http://download.opensuse.org/repositories/home:/mbhangui/Mandriva_2008/
+gpgcheck=1
+gpgkey=http://download.opensuse.org/repositories/home:/mbhangui/Mandriva_2008/repodata/repomd.xml.key
+enabled=1
+
+[IndiMail Raw]
+name=IndiMail Raw (Mandriva_2008)
+type=rpm-md
+baseurl=http://download.opensuse.org/repositories/home:/indimail/Mandriva_2008/
+gpgcheck=1
+gpgkey=http://download.opensuse.org/repositories/home:/indimail/Mandriva_2008/repodata/repomd.xml.key
+enabled=1

@@ -1,0 +1,11 @@
+alterMIME - Install
+
+Somewhat easy...
+
+	make
+	make install
+
+That will place the program "altermime" into
+your /usr/local/bin directory.
+
+--END.

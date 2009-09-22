@@ -1,0 +1,414 @@
+#!/bin/sh
+# $Log: create_services.in,v $
+# Revision 2.23  2009-08-24 14:43:30+05:30  Cprogrammer
+# option remoteauthsmtp renamed to remote-authsmtp
+#
+# Revision 2.22  2009-08-23 21:11:31+05:30  Cprogrammer
+# added greylisting daemon
+#
+# Revision 2.21  2009-08-11 14:46:45+05:30  Cprogrammer
+# added --ssl option for indisrvr, poppassd
+#
+# Revision 2.20  2009-08-06 09:33:41+05:30  Cprogrammer
+# added poppassd protocol
+#
+# Revision 2.19  2009-06-26 14:16:34+05:30  Cprogrammer
+# changed ssl ports to 4993 and 4995 for IMAPS, POP3S
+#
+# Revision 2.18  2009-06-24 19:50:41+05:30  Cprogrammer
+# added option to disable nssd service creation
+#
+# Revision 2.17  2009-06-18 16:14:09+05:30  Cprogrammer
+# fix syntax error for extra fi
+#
+# Revision 2.16  2009-05-27 14:05:50+05:30  Cprogrammer
+# added --ssl option for SMTPS on port 465
+#
+# Revision 2.15  2009-05-04 09:04:37+05:30  Cprogrammer
+# added dkim, rbl options
+#
+# Revision 2.14  2009-03-08 11:41:37+05:30  Cprogrammer
+# added signatures checking and virus filter configuration
+#
+# Revision 2.13  2009-02-26 20:24:02+05:30  Cprogrammer
+# create down file in fetchmail service directory
+#
+# Revision 2.12  2009-02-22 11:32:05+05:30  Cprogrammer
+# added --base_path during MySQL db creation
+#
+# Revision 2.11  2009-02-16 12:28:27+05:30  Cprogrammer
+# create ld cache before running svctool
+#
+# Revision 2.10  2009-02-15 20:45:23+05:30  Cprogrammer
+# added creation of ld cache
+#
+# Revision 2.9  2009-02-15 20:34:17+05:30  Cprogrammer
+# use /var/indimail/etc/indimail.cnf
+#
+# Revision 2.8  2009-02-03 13:01:37+05:30  Cprogrammer
+# added comments
+#
+# Revision 2.7  2009-01-30 17:07:28+05:30  Cprogrammer
+# display --destdir=path in usage
+#
+# Revision 2.6  2009-01-26 00:04:43+05:30  Cprogrammer
+# install upstart
+# added --postmaster option for cert
+# changed my.cnf to indimail.cnf
+#
+# Revision 2.5  2009-01-08 23:00:13+05:30  Cprogrammer
+# added creation of mysql database
+#
+# Revision 2.4  2008-11-10 13:37:14+05:30  Cprogrammer
+# added extra_opt for pwdlookup service
+#
+# Revision 2.3  2008-10-21 20:49:07+05:30  Cprogrammer
+# added creation of imap/pop3 ssl service
+#
+# Revision 2.2  2008-09-08 09:33:11+05:30  Cprogrammer
+# added option --pwdlookup to create Name Service Swith daemon for indimail
+#
+# Revision 2.1  2008-08-14 15:18:28+05:30  Cprogrammer
+# create_services
+#
+# Revision 2.3  2008-07-27 15:39:51+05:30  Cprogrammer
+# removed extra slash in dir_prefix
+#
+# Revision 2.2  2008-06-30 16:09:57+05:30  Cprogrammer
+# added line for end of USER configuration option
+#
+# Revision 2.1  2008-06-27 14:15:54+05:30  Cprogrammer
+# script to create all services
+#
+qcount=5
+servicedir=/service
+indimaildir=@indimaildir@
+
+#
+# End USER Configuration OPTIONS
+#
+
+# $Id: create_services.in,v 2.23 2009-08-24 14:43:30+05:30 Cprogrammer Exp mbhangui $
+
+usage()
+{
+	echo "create_svc [--servicedir=path] --qbase=path --mbase=path --mysqlPrefix=path [--destdir=path]
+
+	servicedir  - path of Supervise service directory
+	qbase       - path for createing IndiMail's queue collection
+	mbase       - path where user's home maildir will be created
+	mysqlPrefix - Prefix for MySQL installation
+	destdir     - Staging directory for creating service
+	echo
+	echo Press ENTER or Cntrl C to quit"
+	read key
+	exit 1
+}
+
+if test $# -eq 0; then
+    usage 1
+fi
+
+nocourierimap=0
+noproxy=0
+nofetchmail=0
+nobogofilter=0
+noclamav=0
+nonssd=0
+nodksignatures=0
+while test $# -gt 0; do
+    case "$1" in
+    -*=*) optarg=`echo "$1" | sed 's/[-_a-zA-Z0-9]*=//'` ;;
+    *) optarg= ;;
+    esac
+
+    case "$1" in
+    --servicedir=*)
+	servicedir=$optarg
+	;;
+
+    --qcount=*)
+	qcount=$optarg
+	;;
+
+    --qbase=*)
+	qbase=$optarg
+	;;
+
+    --mbase=*)
+	mail_path=$optarg
+	;;
+
+    --mysqlPrefix=*)
+	mysql_base=$optarg
+	;;
+
+    --no-courier-imap)
+	nocourierimap=1
+	;;
+
+    --no-proxy)
+	noproxy=1
+	;;
+
+    --no-bogofilter)
+	nobogofilter=1
+	;;
+
+    --no-nssd)
+	nonssd=1
+	;;
+
+    --no-fetchmail)
+	nofetchmail=1
+	;;
+
+    --no-clamav)
+	noclamav=1
+	;;
+
+    --destdir=*)
+	extra_opt="--destdir=$optarg"
+	dir_prefix=$optarg
+	;;
+
+    *)
+	echo "invalid option [$1]"
+	read key
+	usage 1
+	;;
+    esac
+
+    shift
+done
+if [ " $qbase" = " " -o " $mail_path" = " " -o " $mysql_base" = " " ] ; then
+    usage 1
+fi
+if [ -d /etc/ld.so.conf.d ] ; then
+	(
+		echo @mysql_libdir@
+		echo @libdir@
+	) > /etc/ld.so.conf.d/indimail-`arch`.conf
+	/sbin/ldconfig
+fi
+#
+# MySQL
+#
+$dir_prefix$indimaildir/sbin/svctool --config=mysql   --mysqlPrefix=$mysql_base --model=medium \
+    --no-of-cpu=2 $extra_opt
+$dir_prefix$indimaildir/sbin/svctool --config=mysqldb --mysqlPrefix=$mysql_base \
+    --databasedir=$indimaildir/mysqldb --base_path=$mail_path $extra_opt
+$dir_prefix$indimaildir/sbin/svctool --mysql=3306 --servicedir=$servicedir \
+    --mysqlPrefix=$mysql_base \
+	--databasedir=$indimaildir/mysqldb --config=$indimaildir/etc/indimail.cnf --default-domain=indimail.org \
+	--model=small --no-of-cpu=2 $extra_opt
+
+$dir_prefix$indimaildir/sbin/svctool --config=qmail --postmaster=postmaster@indimail.org \
+	--default-domain=indimail.org $extra_opt
+
+#
+# SMTP
+#
+if [ $nodksignatures -eq 0 ] ; then
+	if [ -x $dir_prefix/bin/dknewkey ] ; then
+		ver_opt="both"
+		sign_opt="both"
+		$dir_prefix/bin/dknewkey $dir_prefix/control/domainkeys/indimail
+	else
+		ver_opt="none"
+		sign_opt="none"
+	fi
+else
+	ver_opt="none"
+	sign_opt="none"
+fi
+if [ $nobogofilter -eq 0 ] ; then
+	if [ $noclamav -eq 0 ] ; then
+		for port in 465 25
+		do
+		if [ $port -eq 465 ] ; then
+			e_opt="--skipsend --ssl $extra_opt"
+		else
+			e_opt="$extra_opt"
+		fi
+		$dir_prefix$indimaildir/sbin/svctool --smtp=$port --servicedir=$servicedir --qbase=$qbase --qcount=$qcount --qstart=1 \
+			--cntrldir=control --localip=0 --maxdaemons=75 --maxperip=25 --persistdb \
+			--starttls --fsync --syncdir --memory=52428800 --chkrecipient --chkrelay --masquerade \
+			--min-free=52428800 --content-filter --virus-filter \
+			--qhpsi="$indimaildir/bin/clamdscan %s --quiet --disable-summary" \
+			--spamfilter="$indimaildir/bin/bogofilter -p -u -d $indimaildir/etc" \
+			--logfilter=/tmp/spamfifo --rejectspam=0 --spamexitcode=0 --localfilter --remotefilter \
+			--remote-authsmtp=plain --dmasquerade \
+			--dkverify=$ver_opt \
+			--dksign=$sign_opt --private_key=$indimaildir/control/domainkeys/indimail \
+			--rbl="-rzen.spamhaus.org -rdnsbl-1.uceprotect.net" \
+			$e_opt
+		done
+	else
+		for port in 465 25
+		do
+		if [ $port -eq 465 ] ; then
+			e_opt="--skipsend --ssl $extra_opt"
+		else
+			e_opt="$extra_opt"
+		fi
+		$dir_prefix$indimaildir/sbin/svctool --smtp=$port --servicedir=$servicedir --qbase=$qbase --qcount=$qcount --qstart=1 \
+			--cntrldir=control --localip=0 --maxdaemons=75 --maxperip=25 --persistdb \
+			--starttls --fsync --syncdir --memory=52428800 --chkrecipient --chkrelay --masquerade \
+			--min-free=52428800 --content-filter --virus-filter \
+			--spamfilter="$indimaildir/bin/bogofilter -p -u -d $indimaildir/etc" \
+			--logfilter=/tmp/spamfifo --rejectspam=0 --spamexitcode=0 --localfilter --remotefilter \
+			--remote-authsmtp=plain --dmasquerade \
+			--dkverify=$ver_opt \
+			--dksign=$sign_opt --private_key=$indimaildir/control/domainkeys/indimail \
+			--rbl="-rzen.spamhaus.org -rdnsbl-1.uceprotect.net" \
+			$e_opt
+		done
+	fi
+else
+	if [ $noclamav -eq 0 ] ; then
+		for port in 465 25
+		do
+		if [ $port -eq 465 ] ; then
+			e_opt="--skipsend --ssl $extra_opt"
+		else
+			e_opt="$extra_opt"
+		fi
+		$dir_prefix$indimaildir/sbin/svctool --smtp=$port --servicedir=$servicedir --qbase=$qbase --qcount=$qcount --qstart=1 \
+			--cntrldir=control --localip=0 --maxdaemons=75 --maxperip=25 --persistdb \
+			--starttls --fsync --syncdir --memory=52428800 --chkrecipient --chkrelay --masquerade \
+			--min-free=52428800 --content-filter --virus-filter \
+			--qhpsi="$indimaildir/bin/clamdscan %s --quiet --disable-summary" \
+			--localfilter --remotefilter \
+			--remote-authsmtp=plain --dmasquerade \
+			--dkverify=$ver_opt \
+			--dksign=$sign_opt --private_key=$indimaildir/control/domainkeys/indimail \
+			--rbl="-rzen.spamhaus.org -rdnsbl-1.uceprotect.net" \
+			$e_opt
+		done
+	else
+		for port in 465 25
+		do
+		if [ $port -eq 465 ] ; then
+			e_opt="--skipsend --ssl $extra_opt"
+		else
+			e_opt="$extra_opt"
+		fi
+		$dir_prefix$indimaildir/sbin/svctool --smtp=$port --servicedir=$servicedir --qbase=$qbase --qcount=$qcount --qstart=1 \
+			--cntrldir=control --localip=0 --maxdaemons=75 --maxperip=25 --persistdb \
+			--starttls --fsync --syncdir --memory=52428800 --chkrecipient --chkrelay --masquerade \
+			--min-free=52428800 --content-filter --virus-filter \
+			--localfilter --remotefilter \
+			--remote-authsmtp=plain --dmasquerade \
+			--dkverify=$ver_opt \
+			--dksign=$sign_opt --private_key=$indimaildir/control/domainkeys/indimail \
+			--rbl="-rzen.spamhaus.org -rdnsbl-1.uceprotect.net" \
+			$e_opt
+		done
+	fi
+fi
+$dir_prefix$indimaildir/sbin/svctool --smtp=366 --odmr --servicedir=$servicedir $extra_opt
+#
+# Greylist
+#
+$dir_prefix$indimaildir/sbin/svctool --greylist=1999 --servicedir=/service --min-resend-min=2 \
+    --resend-win-hr=24 --timeout-days=30 --context-file=greylist.context \
+	--save-interval=5 --whitelist=greylist.white $extra_opt
+
+#
+# fetchmail
+#
+if [ $nofetchmail -eq 0 ] ; then
+	if [ $nobogofilter -eq 0 ] ; then
+		if [ $noclamav -eq 0 ] ; then
+			$dir_prefix$indimaildir/sbin/svctool --fetchmail --servicedir=$servicedir --qbase=$qbase --qcount=$qcount \
+				--qstart=1 --cntrldir=control --default-domain=indimail.org \
+				--qhpsi="$indimaildir/bin/clamdscan %s --quiet --disable-summary" \
+				--spamfilter="$indimaildir/bin/bogofilter -p -u -d $indimaildir/etc" --spamexitcode=0 \
+				--memory=72428800 --fsync --syncdir $extra_opt
+		else
+			$dir_prefix$indimaildir/sbin/svctool --fetchmail --servicedir=$servicedir --qbase=$qbase --qcount=$qcount \
+				--qstart=1 --cntrldir=control --default-domain=indimail.org \
+				--spamfilter="$indimaildir/bin/bogofilter -p -u -d $indimaildir/etc" --spamexitcode=0 \
+				--memory=72428800 --fsync --syncdir $extra_opt
+		fi
+	else
+		if [ $noclamav -eq 0 ] ; then
+			$dir_prefix$indimaildir/sbin/svctool --fetchmail --servicedir=$servicedir --qbase=$qbase --qcount=$qcount \
+				--qstart=1 --cntrldir=control --default-domain=indimail.org \
+				--qhpsi="$indimaildir/bin/clamdscan %s --quiet --disable-summary" \
+				--memory=72428800 --fsync --syncdir $extra_opt
+		else
+			$dir_prefix$indimaildir/sbin/svctool --fetchmail --servicedir=$servicedir --qbase=$qbase --qcount=$qcount \
+				--qstart=1 --cntrldir=control --default-domain=indimail.org \
+				--memory=72428800 --fsync --syncdir $extra_opt
+		fi
+	fi
+	/bin/touch $dir_prefix$servicedir/fetchmail/down
+fi
+
+#
+# IMAP/POP3
+#
+if [ $nocourierimap -eq 0 ] ; then
+	$dir_prefix$indimaildir/sbin/svctool --imap=143 --servicedir=$servicedir --localip=0 --maxdaemons=40 --maxperip=25 \
+		--default-domain=indimail.org --memory=10485760 $extra_opt
+	$dir_prefix$indimaildir/sbin/svctool --imap=993 --servicedir=$servicedir --localip=0 --maxdaemons=40 --maxperip=25 \
+		--default-domain=indimail.org --memory=10485760 --ssl $extra_opt
+	$dir_prefix$indimaildir/sbin/svctool --pop3=110 --servicedir=$servicedir --localip=0 --maxdaemons=40 --maxperip=25 \
+		--default-domain=indimail.org --memory=10485760 $extra_opt
+	$dir_prefix$indimaildir/sbin/svctool --pop3=995 --servicedir=$servicedir --localip=0 --maxdaemons=40 --maxperip=25 \
+		--default-domain=indimail.org --memory=10485760 --ssl $extra_opt
+fi
+if [ $noproxy -eq 0 ] ; then
+	$dir_prefix$indimaildir/sbin/svctool --imap=4143 --servicedir=$servicedir --localip=0 --maxdaemons=40 \
+		--maxperip=25 --default-domain=indimail.org --memory=10485760 --proxy=143 $extra_opt
+	$dir_prefix$indimaildir/sbin/svctool --imap=4993 --servicedir=$servicedir --localip=0 --maxdaemons=40 \
+		--maxperip=25 --default-domain=indimail.org --memory=10485760 --proxy=143 --ssl $extra_opt
+	$dir_prefix$indimaildir/sbin/svctool --pop3=4110 --servicedir=$servicedir --localip=0 --maxdaemons=40 \
+		--maxperip=25 --default-domain=indimail.org --memory=10485760 --proxy=110 $extra_opt
+	$dir_prefix$indimaildir/sbin/svctool --pop3=4995 --servicedir=$servicedir --localip=0 --maxdaemons=40 \
+		--maxperip=25 --default-domain=indimail.org --memory=10485760 --proxy=110 --ssl $extra_opt
+fi
+
+#
+# IndiMail Daemons
+#
+$dir_prefix$indimaildir/sbin/svctool --indisrvr=4000 --servicedir=$servicedir --mysqlhost=localhost \
+	--mysqluser=indimail --mysqlpass=ssh-1.5- --localip=0 --maxdaemons=40 --maxperip=25 --avguserquota=2097152 \
+	--certfile=$indimaildir/control/servercert.pem --ssl \
+	--hardquota=52428800 --base_path=$mail_path $extra_opt
+$dir_prefix$indimaildir/sbin/svctool --inlookup=infifo --servicedir=$servicedir --cntrldir=control --threads=5 \
+	--password-cache $extra_opt
+
+if [ $nonssd -eq 0 ] ; then
+	$dir_prefix$indimaildir/sbin/svctool --pwdlookup=/tmp/nssd.sock --threads=5 --timeout=-1 \
+		--mysqlhost=localhost --mysqluser=indimail \
+		--mysqlpass=ssh-1.5- --mysqlsocket=/tmp/mysql.sock --servicedir=$servicedir $extra_opt
+fi
+#
+# poppassd protocol
+#
+$dir_prefix$indimaildir/sbin/svctool --poppass=106 --localip=0 --maxdaemons=40 --maxperip=25 \
+	--certfile=$indimaildir/control/servercert.pem --ssl \
+	--setpassword=$indimaildir/sbin/vsetpass --servicedir=$servicedir $extra_opt
+
+#
+# virus clamav/spam filter
+#
+if [ $noclamav -eq 0 ] ; then
+	$dir_prefix$indimaildir/sbin/svctool --config=clamd $extra_opt
+	$dir_prefix$indimaildir/sbin/svctool --qscanq --servicedir=$servicedir --clamdPrefix=$indimaildir \
+	--scanint=200 $extra_opt
+fi
+if [ $nobogofilter -eq 0 ] ; then
+	$dir_prefix$indimaildir/sbin/svctool --config=bogofilter $extra_opt
+fi
+#
+# Misc/Configuration
+#
+$dir_prefix$indimaildir/sbin/svctool --postmaster=postmaster@indimail.org --config=cert $extra_opt
+$dir_prefix$indimaildir/sbin/svctool --svscanlog --servicedir=$servicedir $extra_opt
+$dir_prefix$indimaildir/sbin/initsvc -status
+$dir_prefix$indimaildir/sbin/svctool --check-install --servicedir=$servicedir --qbase=$qbase \
+	--qcount=$qcount --qstart=1 $extra_opt

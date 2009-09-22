@@ -1,0 +1,31 @@
+RELEASE NOTES
+=============
+
+This is Release 1.6.1 of IndiMail. The release has both source.tar.gz and RPMs
+
+This release uses portable IPV6 functions like getaddrinfo(), getnameinfo()
+
+The RPM installs indimail, daemontools, ucspi-tcp, serialmail, mess822, clamav,
+fetchmail, bogofilter, altermime, ripmime, mpack, nssd, libdkim, courier-imap
+all in one package. You will have to separately install MySQL.
+
+This release includes the following files
+
+indimail-1.6.1.tar.gz
+INSTALL-1.6.1 (Installation Instructions)
+INSTALL-RPM-1.6.1 (Install Instructions for RPM)
+INSTALL-1.6.1.mysql (MySQL specific Installation Instructions)
+indimail-1.6.1-1.i386.rpm
+indimail-1.6.1-1.i386.deb
+
+IndiMail also has yum repositories for most of the Linux Distros at
+
+http://download.opensuse.org/repositories/home:/mbhangui/
+
+You will also find the RPMs for both 32bit and 64bit OS on the above
+repository
+
+1.5.7
+The qmail-poppass program is an add-on for indimail which allows external programs
+(such as squirrelmail) to change the password for a mail user. It has a fairly simple
+protocol and can be implemented under tcpserver or inetd.

@@ -1,0 +1,439 @@
+.TH qmail-remote 8
+.SH NAME
+qmail-remote \- send mail via SMTP or ESMTP
+.SH SYNOPSIS
+.B qmail-remote
+.I host
+.I sender
+.I qqeh
+.I size
+.I recip
+[
+.I recip ...
+]
+.SH DESCRIPTION
+.B qmail-remote
+reads a mail message from its input
+and sends the message
+to one or more recipients
+at a remote host.
+
+The remote host is
+.BR qmail-remote 's
+first argument,
+.IR host .
+.B qmail-remote
+sends the message to
+.IR host ,
+or to a mail exchanger for
+.I host
+listed in the Domain Name System,
+via the Simple Mail Transfer Protocol (SMTP / ESMTP).
+.I host
+can be either a fully-qualified domain name:
+
+.EX
+     silverton.berkeley.edu
+.EE
+
+or an IP address enclosed in brackets:
+
+.EX
+     [128.32.183.163]
+.EE
+
+The size parameter is only used if the remote host uses the ESMTP SIZE extension defined in
+.I RFC 1870\fP. It gives the size of the message in bytes. 
+.BR qmail-remote
+does not use this value to process the mail, the value is only passed to the remote mailserver.
+
+The envelope recipient addresses are listed as
+.I recip
+arguments to
+.BR qmail-remote .
+The envelope sender address is listed as
+.I sender\fP.
+Any QQEH information passed to qmail-queue is passed in
+.I qqeh\fP.
+
+If
+.B qmail-remote
+is not able to get the greeting from the remote SMTP server, it tries the next MX (as per 
+.B rfc-2821(5)
+) under the following conditions
+
+1. connection to remote host gets dropped without a greeting from the remote host
+
+2. greeting code >= 400 and < 600
+
+3. connection to the remote host times out.
+
+In these cases, the remote host's IP address is recorded in the timeout table QMAIL/queue/lock/tcpto, which causes
+subsequent deliveries to back off from the IP address and try the next MX (if it exists).
+.B qmail-tcpto(8)
+can be used to print the TCP timeout table.
+
+Note that
+.B qmail-remote
+does not take options
+and does not follow the
+.B getopt
+standard.
+.SH TRANSPARENCY
+End-of-file in SMTP is encoded as dot CR LF.
+A dot at the beginning of a line is encoded as dot dot.
+It is impossible in SMTP to send a message that does not end with a newline.
+.B qmail-remote
+converts the UNIX newline convention into the SMTP newline convention
+by inserting CR before each LF.
+
+It is a violation of the SMTP protocol
+to send a message that contains long lines or non-ASCII characters.
+However,
+.B qmail-remote
+will happily send such messages.
+It is the user's responsibility to avoid generating illegal messages.
+.SH "RESULTS"
+.B qmail-remote
+prints some number of 
+.I recipient reports\fP,
+followed by a
+.I message report\fR.
+Each report is terminated by a 0 byte.
+Each report begins with a single letter:
+.TP 5
+r
+Recipient report: acceptance.
+.TP 5
+h
+Recipient report: permanent rejection.
+.TP 5
+s
+Recipient report: temporary rejection.
+.TP 5
+K
+Message report: success.
+.I host
+has taken responsibility for delivering the message to each
+acceptable recipient.
+.TP 5
+Z
+Message report: temporary failure.
+.TP 5
+D
+Message report: permanent failure.
+.PP
+After this letter comes a human-readable description of
+what happened.
+
+The recipient reports will always be printed in the same order as
+.BR qmail-remote 's
+.I recip
+arguments.
+Note that in failure cases there may be fewer
+recipient reports
+than
+.I recip
+arguments.
+
+.B qmail-remote
+always exits zero.
+.SH "CONTROL FILES"
+.B
+qmail-remote
+by default looks at QMAIL/control for all control files. This path can be changed by defining the CONTROLDIR
+environment variable.
+
+.TP 5
+.I outgoingip.host
+Per host/domain IP address to be used on outgoing connections.
+.I host
+is the domain or host to which the mail is being delivered.
+Default: system-defined.
+The value
+.IR 0.0.0.0
+is equivalent to the system default.
+.I outgoingip.host
+takes precedence over
+.IR outgoingip .
+
+.TP 5
+.I outgoingip
+IP address to be used on outgoing connections.
+Default: system-defined.
+The value
+.IR 0.0.0.0
+is equivalent to the system default.
+
+.TP 5
+.I domainbindings
+Local IP bindings based on envelope sender domain.
+Each binding has the form
+.IR domain\fB:\fIlocal-ip ,
+without any extra spaces.
+If
+.I domain
+matches
+.IR host ,
+.B qmail-remote
+will bind the local side of the socket for the outgoing connection to
+.IR local-ip .
+.I local-ip
+may be empty;
+this tells
+.B qmail-remote
+to let the OS choose the local address for outgoing connections as usual.
+.I domainbindings
+may include wildcards:
+
+.EX
+   example.com:5.6.7.8
+   .example.com:5.6.7.9
+   heaven.af.mil:1.2.3.4
+.EE
+
+Here the connection for any message with an envelope sender address ending with
+.B .example.com
+(but not
+.B example.com
+itself)
+is bound to local address
+.BR 5.6.7.9 ,
+while envelope senders in
+.B example.com
+are bound to 
+.BR 5.6.7.8 ,
+and senders in
+.B heaven.af.mil
+are bound to 
+.BR 1.2.3.4 .
+All other outgoing connections (including messages with the null return-path)
+use the OS-chosen default local address. The
+.B qmail
+system does not protect you if you specify an invalid local address to
+bind to. \fIdomainbindings\fR takes precedence over \fIoutgoingip\fR.
+
+.TP 5
+.I bindroutes
+Artificial interface binding routes.
+Each route has the form
+.IR remote-address\fB:\fIlocal-address ,
+without any extra spaces.
+If the address of the host to which we are delivering matches the remote
+address, then bind the socket to the interface matching the local
+address, making it appear as if the connection had originated from the
+named local address instead of the default local address.
+.I bindroutes
+may contain suffix wildcards.
+.I bindroutes
+takes precedence over
+.IR domainbindings .
+
+.TP 5
+.I helohost
+Current host name,
+for use solely in saying hello to the remote SMTP server.
+Default:
+.IR me ,
+if that is supplied;
+otherwise
+.B qmail-remote
+refuses to run.  If the envelope sender address matches a domain in the
+.IR domainbindings
+control file, the envelope sender domain will be used instead of this value.
+
+.TP 5
+.I smtproutes
+Artificial SMTP routes.
+Each route has the form
+.IR domain\fB:\fIrelay ,
+without any extra spaces.
+If
+.I domain
+matches
+.IR host ,
+.B qmail-remote
+will connect to
+.IR relay ,
+as if
+.I host
+had
+.I relay
+as its only MX.
+(It will also avoid doing any CNAME lookups on
+.IR recip .)
+.I relay
+may include a colon and a port number to use instead of the
+normal SMTP port, 25:
+
+.EX
+   inside.af.mil:firewall.af.mil:26
+.EE
+
+.I relay
+may be empty;
+this tells
+.B qmail-remote
+to look up MX records as usual.
+.I port
+value of 465 (deprecated smtps port) causes TLS session to be started.
+.I smtproutes
+may include wildcards:
+
+.EX
+   .af.mil:
+   :heaven.af.mil
+.EE
+
+Here
+any address ending with
+.B .af.mil
+(but not
+.B af.mil
+itself)
+is routed by its MX records;
+any other address is artificially routed to
+.BR heaven.af.mil .
+
+The
+.B qmail
+system does not protect you if you create an artificial
+mail loop between machines.
+However,
+you are always safe using
+.I smtproutes
+if you do not accept mail from the network.
+
+The smtproutes control file is bypassed if the SMTPROUTE environment variable is set by
+.B qmail-rspawn.
+The SMTPROUTE environment variable has the same format as the entries in smtproutes control files. It is used
+in a clustered environment where a single domain can exist across multiple hosts. In such a case the SMTPROUTE
+variable points to the host where the user's mailbox lies.
+
+route may also have the form
+ \fIdomain\fB:\fIrelay\fB:\fIport\fB:\fIpenalty\fB:\fImax_tolerance<sp>username<sp>\fIpassword\fR
+
+without any extra spaces. If the environment variable
+.B AUTH_SMTP
+is set,
+.B qmail-remote
+will use 
+.B username
+and
+.B password
+to relay out mails through server 
+.B relay
+using authenticated SMTP (AUTH_LOGIN). <sp> is a single space character.
+If all connections to the 
+.I relay
+server fail for a 
+.I max_tolerance
+seconds further connections to the same server, are avoided for a period of at least
+.I penalty
+seconds.
+The default maximum period of failures that will be tolerated
+.I max_tolerance 
+is 120 seconds and the minimum penalty
+.I penalty 
+is 1 hour.
+By setting the 
+.I penalty 
+to 0, connections to the server will be attempted inspite of failures. The default values of 1
+hour for minimum penalty can be changed by setting the environment variable
+.IR MIN_PENALTY .
+The default value of 120 seconds for max_tolerance can be changed by setting the environment
+variable
+.IR MAX_TOLERANCE .
+
+.TP 5
+.I moresmtproutes.cdb
+This file gives smtproutes functionality on a per-user basis. You need to create moresmtproutes file
+in the following format
+
+<email_address><sp><ip_address>
+
+Then run the command cdbmake-12 moresmtproutes.cdb < moresmtproutes.tmp < moresmtproutes.cdb. A route obtained from
+moresmtproutes.cdb overrides control file \fBsmtproutes\fR or environment variable \fBSMTPROUTES\fR
+
+.TP 5
+.I timeoutconnect
+Number of seconds
+.B qmail-remote
+will wait for the remote SMTP server to accept a connection.
+Default: 60.
+The kernel normally imposes a 75-second upper limit.
+
+.TP 5
+.I timeoutremote
+Number of seconds
+.B qmail-remote
+will wait for each response from the remote SMTP server.
+Default: 1200.
+
+.TP 5
+.I signkey
+Key for Bounce Address Tag Validation (BATV) signing. The filename can be overriden by the environment variable
+.IR SIGNKEY .
+
+.TP 5
+.I clientcert.pem
+SSL certificate that is used to authenticate with the remote server
+during a TLS session.
+
+.TP 5
+.I tlsclientciphers
+A set of OpenSSL client cipher strings. Multiple ciphers
+contained in a string should be separated by a colon.
+
+.TP 5
+.I tlshosts/<FQDN>.pem
+.B qmail-remote
+requires TLS authentication from servers for which this file exists
+.RB ( <FQDN>
+is the fully-qualified domain name of the server). One of the
+.I dNSName
+or the
+.I CommonName
+attributes have to match. The file contains the trusted CA certificates.
+
+.TP 5
+.I nosignhosts
+Exclusions of remote hosts for Bounce Address Tag Validation (BATV)
+that do not work with signed addresses.
+
+Attention: If a host has more that one hostname, please list them
+all in
+.IR nosignhosts .
+
+.TP 5
+.I nosignmydoms
+Exclusions of domains you host for Bounce Address Tag Validation (BATV).
+
+.TP 5
+.I notlshosts/<FQDN>
+.B qmail-remote
+will not try TLS on servers for which this file exists
+.RB ( <FQDN>
+is the fully-qualified domain name of the server). 
+.IR (tlshosts/<FQDN>.pem 
+takes precedence over this file however).
+
+.TP 5
+.I tlshosts/exhaustivelist
+if this file exists
+no TLS will be tried on hosts other than those for which a file
+.B tlshosts/<FQDN>.pem
+exists.
+
+.B WARNING:
+this option may cause mail to be delayed, bounced, doublebounced, or lost.
+
+.SH "SEE ALSO"
+addresses(5),
+envelopes(5),
+qmail-control(5),
+qmail-send(8),
+qmail-rspawn(8),
+qmail-smtpd(8),
+qmail-tcpok(8),
+qmail-tcpto(8)

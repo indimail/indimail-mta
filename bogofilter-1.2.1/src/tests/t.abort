@@ -1,0 +1,7 @@
+#! /bin/sh
+
+NODB=1 . ${srcdir:=.}/t.frame
+
+if (${SHELL} "$srcdir/t._abort" junk arguments here) ; then
+    exit 1
+fi

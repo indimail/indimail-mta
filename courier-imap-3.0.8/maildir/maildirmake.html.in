@@ -1,0 +1,681 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN">
+<HTML
+><HEAD
+><link rel='stylesheet' type='text/css' href='manpage.css'>
+  <!-- $Id: maildirmake.sgml,v 1.5 2004/01/11 02:47:33 mrsam Exp $ -->
+  <!-- Copyright 1998 - 2003 Double Precision, Inc.  See COPYING for -->
+  <!-- distribution information. -->
+<meta name="MSSmartTagsPreventParsing" content="TRUE">
+<link rel="icon" href="icon.gif" type="image/gif" />
+<TITLE
+>maildirmake</TITLE
+><META
+NAME="GENERATOR"
+CONTENT="Modular DocBook HTML Stylesheet Version 1.7"></HEAD
+><BODY
+CLASS="REFENTRY"
+BGCOLOR="#FFFFFF"
+TEXT="#000000"
+LINK="#0000FF"
+VLINK="#840084"
+ALINK="#0000FF"
+><H1
+><A
+NAME="MAILDIRMAKE"
+></A
+>maildirmake</H1
+><DIV
+CLASS="REFNAMEDIV"
+><A
+NAME="AEN6"
+></A
+><H2
+>Name</H2
+>maildirmake&nbsp;--&nbsp;create maildirs and maildir folders</DIV
+><DIV
+CLASS="REFSYNOPSISDIV"
+><A
+NAME="AEN9"
+></A
+><H2
+>Synopsis</H2
+><P
+><B
+CLASS="COMMAND"
+>maildirmake</B
+> [options...] {<VAR
+CLASS="REPLACEABLE"
+>maildir</VAR
+>}</P
+></DIV
+><DIV
+CLASS="REFSECT1"
+><A
+NAME="AEN15"
+></A
+><H2
+>DESCRIPTION</H2
+><P
+>The <B
+CLASS="COMMAND"
+>maildirmake</B
+> command creates maildirs, and
+maildir folders.
+This documentation
+describes the <B
+CLASS="COMMAND"
+>maildirmake</B
+> command from the Courier
+mail server, which creates an extended form of maildirs that implements
+additional extensions beyond the basic maildir properties that were first
+implemented in the Qmail mail server.</P
+></DIV
+><DIV
+CLASS="REFSECT1"
+><A
+NAME="AEN20"
+></A
+><H2
+>OPTIONS</H2
+><P
+></P
+><DIV
+CLASS="VARIABLELIST"
+><DL
+><DT
+><TT
+CLASS="LITERAL"
+>-S</TT
+></DT
+><DD
+><P
+>create a "sharable" maildir.  A sharable maildir has
+slightly different permissions which allows creation of publicly-shared
+folders.</P
+></DD
+></DL
+></DIV
+><P
+></P
+><DIV
+CLASS="VARIABLELIST"
+><DL
+><DT
+><TT
+CLASS="LITERAL"
+>-q</TT
+> <VAR
+CLASS="REPLACEABLE"
+>quota</VAR
+></DT
+><DD
+><P
+>install a quota on the maildir.
+See "Maildir Quotas", below.</P
+></DD
+></DL
+></DIV
+><P
+></P
+><DIV
+CLASS="VARIABLELIST"
+><DL
+><DT
+><TT
+CLASS="LITERAL"
+>-f</TT
+> <VAR
+CLASS="REPLACEABLE"
+>folder</VAR
+></DT
+><DD
+><P
+>do not create a maildir, but create a folder in an
+existing maildir.</P
+></DD
+></DL
+></DIV
+><P
+></P
+><DIV
+CLASS="VARIABLELIST"
+><DL
+><DT
+><TT
+CLASS="LITERAL"
+>-s</TT
+> <VAR
+CLASS="REPLACEABLE"
+>mode</VAR
+></DT
+><DD
+><P
+>create a publicly accessible folder in an
+existing sharable maildir.  First, use the <VAR
+CLASS="OPTION"
+>-S</VAR
+> option to
+create a sharable maildir.
+Then, run <B
+CLASS="COMMAND"
+>maildirmake</B
+> again with the
+<VAR
+CLASS="OPTION"
+>-s</VAR
+> option to create
+publicly accessible folders.
+<VAR
+CLASS="REPLACEABLE"
+>mode</VAR
+> is a comma-separated list of
+the following keywords: <TT
+CLASS="LITERAL"
+>read</TT
+> - readonly folder, only you can
+write messages to this folder;
+<TT
+CLASS="LITERAL"
+>write</TT
+> - anyone can read and
+write messages to this folder;
+<TT
+CLASS="LITERAL"
+>group</TT
+> - only allow members of
+your own system group to access messages in this folder (instead of
+everyone).</P
+></DD
+></DL
+></DIV
+><P
+></P
+><DIV
+CLASS="VARIABLELIST"
+><DL
+><DT
+><TT
+CLASS="LITERAL"
+>--add</TT
+> <VAR
+CLASS="REPLACEABLE"
+>name</VAR
+>=<VAR
+CLASS="REPLACEABLE"
+>pathname</VAR
+>,
+<TT
+CLASS="LITERAL"
+>--del</TT
+> <VAR
+CLASS="REPLACEABLE"
+>name</VAR
+></DT
+><DD
+><P
+>create or delete the directories and links needed to
+access shared folders.  See below for more information.</P
+></DD
+></DL
+></DIV
+><DIV
+CLASS="REFSECT2"
+><A
+NAME="AEN66"
+></A
+><H3
+>FOLDERS</H3
+><P
+>This <B
+CLASS="COMMAND"
+>maildirmake</B
+> command supports enhanced maildirs that
+contain folders.</P
+><P
+>By itself, <B
+CLASS="COMMAND"
+>maildirmake</B
+> makes a new subdirectory
+<VAR
+CLASS="REPLACEABLE"
+>maildir</VAR
+>,
+and creates all the necessary structures.
+The <VAR
+CLASS="OPTION"
+>-f</VAR
+> option
+creates a new "folder" within an existing
+<VAR
+CLASS="REPLACEABLE"
+>maildir</VAR
+>. <VAR
+CLASS="REPLACEABLE"
+>maildir</VAR
+> must
+already exist, and the <B
+CLASS="COMMAND"
+>maildirmake</B
+> command will create a new
+folder in the maildir.</P
+><P
+>Folders are simply subdirectories inside the main maildir whose names start
+with a period, and which are themselves maildirs.
+For example, the command
+"<B
+CLASS="COMMAND"
+>maildirmake -f Drafts mail/Maildir</B
+>" creates
+<TT
+CLASS="FILENAME"
+>mail/Maildir/.Drafts</TT
+>,
+that has the usual <TT
+CLASS="FILENAME"
+>tmp</TT
+>,
+<TT
+CLASS="FILENAME"
+>new</TT
+> and <TT
+CLASS="FILENAME"
+>cur</TT
+>.
+You MUST use the <VAR
+CLASS="OPTION"
+>-f</VAR
+> option, instead of
+specifying <TT
+CLASS="FILENAME"
+>mail/Maildir/.Drafts</TT
+> directly,
+in order to correctly
+initialize certain enhanced maildir features.</P
+><P
+>Folders cannot be created directly within other folders.
+Running
+<B
+CLASS="COMMAND"
+>maildirmake -f Urgent mail/Maildir/.Drafts</B
+> will not work.
+Instead, the period character is designated as a hierarchy separator, run
+<B
+CLASS="COMMAND"
+>maildirmake -f Drafts.Urgent mail/Maildir</B
+> instead.
+This creates
+<TT
+CLASS="FILENAME"
+>mail/Maildir/.Drafts.Urgent</TT
+>, and all mail software
+that supports
+enhanced maildirs will interpret it as a subfolder Urgent of the Drafts
+folder.</P
+></DIV
+><DIV
+CLASS="REFSECT2"
+><A
+NAME="AEN89"
+></A
+><H3
+>SHARED FOLDERS</H3
+><P
+>This is another extension to the Maildir format that allows folders to be
+shared between multiple clients.</P
+><DIV
+CLASS="NOTE"
+><P
+></P
+><TABLE
+CLASS="NOTE"
+WIDTH="100%"
+BORDER="0"
+><TR
+><TD
+WIDTH="25"
+ALIGN="CENTER"
+VALIGN="TOP"
+>NOTE:</TD
+><TD
+ALIGN="LEFT"
+VALIGN="TOP"
+><P
+>The Courier-IMAP folder implements two types of shared folders:
+filesystem permission-based shared folders,
+as well as virtual shared folders based on IMAP access control lists.
+Use the <B
+CLASS="COMMAND"
+>maildirmake</B
+> command
+to implement shared folders based on
+filesystem permissions.
+The
+<A
+HREF="maildiracl.html"
+TARGET="_top"
+><SPAN
+CLASS="CITEREFENTRY"
+><SPAN
+CLASS="REFENTRYTITLE"
+>maildiracl</SPAN
+>(1)</SPAN
+></A
+>
+command manages access control lists, which
+are used by virtual shared folders.</P
+><P
+>See the Courier-IMAP server documentation for more information.</P
+></TD
+></TR
+></TABLE
+></DIV
+><P
+>First, you need to create a collection of
+sharable folders, as a separate maildir:
+<A
+NAME="AEN101"
+></A
+><BLOCKQUOTE
+CLASS="BLOCKQUOTE"
+><DIV
+CLASS="INFORMALEXAMPLE"
+><P
+></P
+><A
+NAME="AEN102"
+></A
+><P
+CLASS="LITERALLAYOUT"
+><B
+CLASS="COMMAND"
+>maildirmake -S /usr/local/share/maildirs/notices</B
+></P
+><P
+></P
+></DIV
+></BLOCKQUOTE
+></P
+><P
+>Then, create individuals folders that will be accessed in shared mode:
+<A
+NAME="AEN106"
+></A
+><BLOCKQUOTE
+CLASS="BLOCKQUOTE"
+><DIV
+CLASS="INFORMALEXAMPLE"
+><P
+></P
+><A
+NAME="AEN107"
+></A
+><P
+CLASS="LITERALLAYOUT"
+><B
+CLASS="COMMAND"
+>maildirmake -s write -f Weekly /usr/local/share/maildirs/notices</B
+></P
+><P
+></P
+></DIV
+></BLOCKQUOTE
+></P
+><P
+>In this example, the "Weekly" folder is created,
+with read/write access to everyone.
+Multiple folders can be created in the same maildir, with different access
+permissions. Everyone can create a sharable maildir.  The access privileges
+for individual folders are set by the <VAR
+CLASS="OPTION"
+>-s</VAR
+> option, and are
+implemented using traditional filesystem permissions.</P
+><P
+>Use the <VAR
+CLASS="OPTION"
+>--add</VAR
+> and
+<VAR
+CLASS="OPTION"
+>--del</VAR
+> options to add a sharable maildir to
+an existing maildir.  Client software that implements this extension will now
+know where to find sharable folders:
+<A
+NAME="AEN115"
+></A
+><BLOCKQUOTE
+CLASS="BLOCKQUOTE"
+><DIV
+CLASS="INFORMALEXAMPLE"
+><P
+></P
+><A
+NAME="AEN116"
+></A
+><P
+CLASS="LITERALLAYOUT"
+><B
+CLASS="COMMAND"
+>maildirmake --add notices=/usr/local/share/maildirs/notices $HOME/Maildir</B
+></P
+><P
+></P
+></DIV
+></BLOCKQUOTE
+></P
+><P
+><TT
+CLASS="FILENAME"
+>$HOME/Maildir</TT
+> is your main maildir.
+The argument to <VAR
+CLASS="OPTION"
+>-add</VAR
+>
+is <VAR
+CLASS="REPLACEABLE"
+>nick</VAR
+>=<VAR
+CLASS="REPLACEABLE"
+>path</VAR
+>.
+<VAR
+CLASS="REPLACEABLE"
+>nick</VAR
+> is a nickname for this collection of
+sharable folders, and <VAR
+CLASS="REPLACEABLE"
+>path</VAR
+> is the location of the
+sharable maildir.
+All folders in the sharable maildir that you have access to -- such
+as "Weekly", in this case, will now be accessible.
+Multiple sharable maildirs can be added, by giving each one a unique
+<VAR
+CLASS="REPLACEABLE"
+>nick</VAR
+>.</P
+><P
+>The <VAR
+CLASS="OPTION"
+>--del</VAR
+> option "disconnects" the sharable maildir from
+the main maildir.</P
+></DIV
+><DIV
+CLASS="REFSECT2"
+><A
+NAME="AEN129"
+></A
+><H3
+>GLOBAL SHARED FOLDERS</H3
+><P
+>Normally <VAR
+CLASS="OPTION"
+>-add</VAR
+> command must be run for every maildir
+which needs
+to access the sharable maildir. Alternatively the file
+<TT
+CLASS="FILENAME"
+>@sysconfdir@/maildirshared</TT
+> can be created,
+to specify a default set of sharable maildirs.
+Each line in this file takes the following format:
+<A
+NAME="AEN134"
+></A
+><BLOCKQUOTE
+CLASS="BLOCKQUOTE"
+><DIV
+CLASS="INFORMALEXAMPLE"
+><P
+></P
+><A
+NAME="AEN135"
+></A
+><P
+CLASS="LITERALLAYOUT"
+><VAR
+CLASS="REPLACEABLE"
+>nick</VAR
+><SPAN
+CLASS="TOKEN"
+>&#60;tab&#62;</SPAN
+><VAR
+CLASS="REPLACEABLE"
+>path</VAR
+></P
+><P
+></P
+></DIV
+></BLOCKQUOTE
+></P
+><P
+><VAR
+CLASS="REPLACEABLE"
+>nick</VAR
+> is a short nickname for
+the sharable maildir, <SPAN
+CLASS="TOKEN"
+>&#60;tab&#62;</SPAN
+>
+is a single tab character, <VAR
+CLASS="REPLACEABLE"
+>path</VAR
+>
+is the pathname to the sharable maildir.</P
+></DIV
+><DIV
+CLASS="REFSECT2"
+><A
+NAME="AEN144"
+></A
+><H3
+>ACCESSING SHARED FOLDERS</H3
+><P
+>You may have read or write access to a shared folder.
+If you have write
+access, you can add messages to the shared folder. You can also delete
+messages that you've added.</P
+><P
+>Anyone can create a sharable maildir, so if the sharable maildir
+is actually created by you, can can delete any message, not just your
+own.</P
+></DIV
+></DIV
+><DIV
+CLASS="REFSECT1"
+><A
+NAME="AEN148"
+></A
+><H2
+>SEE ALSO</H2
+><P
+><A
+HREF="maildir.html"
+TARGET="_top"
+><SPAN
+CLASS="CITEREFENTRY"
+><SPAN
+CLASS="REFENTRYTITLE"
+>maildir</SPAN
+>(5)</SPAN
+></A
+>,
+<A
+HREF="maildiracl.html"
+TARGET="_top"
+><SPAN
+CLASS="CITEREFENTRY"
+><SPAN
+CLASS="REFENTRYTITLE"
+>maildiracl</SPAN
+>(1)</SPAN
+></A
+>,
+<A
+HREF="maildirkw.html"
+TARGET="_top"
+><SPAN
+CLASS="CITEREFENTRY"
+><SPAN
+CLASS="REFENTRYTITLE"
+>maildirkw</SPAN
+>(1)</SPAN
+></A
+>,
+<A
+HREF="maildrop.html"
+TARGET="_top"
+><SPAN
+CLASS="CITEREFENTRY"
+><SPAN
+CLASS="REFENTRYTITLE"
+>maildrop</SPAN
+>(1)</SPAN
+></A
+>,
+<A
+HREF="maildirquota.html"
+TARGET="_top"
+><SPAN
+CLASS="CITEREFENTRY"
+><SPAN
+CLASS="REFENTRYTITLE"
+>maildirquota</SPAN
+>(7)</SPAN
+></A
+>,
+<A
+HREF="deliverquota.html"
+TARGET="_top"
+><SPAN
+CLASS="CITEREFENTRY"
+><SPAN
+CLASS="REFENTRYTITLE"
+>deliverquota</SPAN
+>(8)</SPAN
+></A
+>,
+<A
+HREF="maildropfilter.html"
+TARGET="_top"
+><SPAN
+CLASS="CITEREFENTRY"
+><SPAN
+CLASS="REFENTRYTITLE"
+>maildropfilter</SPAN
+>(7)</SPAN
+></A
+>,
+<A
+HREF="http://www.qmail.org/man/man5/maildir.html"
+TARGET="_top"
+>http://www.qmail.org/man/man5/maildir.html</A
+>.</P
+></DIV
+></BODY
+></HTML
+>

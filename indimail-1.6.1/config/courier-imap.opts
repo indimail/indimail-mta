@@ -1,0 +1,8 @@
+--disable-root-check
+--with-redhat
+--without-authldap --without-authmysql --without-authcram
+--without-authvchkpw --without-authpam --without-authdaemon
+--without-userdb --without-authcustom
+--without-authchangepwdir --without-authuserdb
+--without-authpwd --without-authpgsql --without-makedatprog
+--with-authshadow

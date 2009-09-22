@@ -1,0 +1,126 @@
+File INSTALL-RPM, Version @version@
+DATE: @DATE@
+
+This section covers installing IndiMail from rpm. This is the easy way out to install IndiMail.
+However, I would recommend you to go through the file INSTALL.indimail so that
+you undertand IndiMail better.
+
+There is also an Installation for Experts. For that read INSTALL.indimail
+
+You will also find this file as 
+http://downloads.sourceforge.net/indimail/INSTALL-RPM-@version@
+
+IndiMail also has yum repositories for most of the Linux Distros at
+
+http://download.opensuse.org/repositories/home:/mbhangui/
+
+What the RPM does
+-----------------
+
+It depends on whether you are Installing, upgrading or removing IndiMail using the rpm
+version
+
+A) Package Installation/Upgrade
+   1. Stops IndiMail services (in case the system already has IndiMail installed)
+   2. Add users (indimail, alias, qmaild, qmaill, qmailp, qmailq, qmailr, qmails, qscand)
+      and groups (indimail, nofiles, qmail, qscand)
+   3. Installs files/binaries in @indimaildir@
+   4. Installs services under supervice in /service
+       smtp, smtp - odmr, qmail-send, imap/pop3, indisrvr, inlookup, pwdlookup)
+       clamav antivirus service, freshclam - virus signature update service,
+       bogofilter spam filter service)
+   5. Installs MySQL database for use by IndiMail
+   6. Sets up svscan to be run by init (/etc/inittab) or by upstart (/etc/event.d)
+
+B) Package Removal
+   1. Stops IndiMail services (in case the system already has IndiMail installed)
+   2. Delete users (indimail, alias, qmaild, qmaill, qmailp, qmailq, qmailr, qmails, qscand)
+      and groups (indimail, nofiles, qmail, qscand)
+   3. Removes files/binaries in @indimaildir@
+   4. Removes services under supervice in /service
+       smtp, smtp - odmr, qmail-send, imap/pop3, indisrvr, inlookup, pwdlookup)
+       clamav antivirus service, freshclam - virus signature update service,
+       bogofilter spam filter service)
+   5. Sets up svsan to be run by init (/etc/inittab) or by upstart (/etc/event.d)
+   NOTE: MySQL database is not removed, config files in @indimaildir@/etc,
+         @indimaildir@/control, @indimaildir@/users, .qmail files in @indimaildir@/alias,
+         domain information in @indimaildir@/domains are not removed.
+
+What the RPM does not
+---------------------
+1. Install and configure MySQL (See How to install MySQL below)
+2. Configure IndiMail
+
+How to INSTALL
+--------------
+You need to have MySQL installed on your system (see below on how to install). You can also use an
+available rpm for MySQL from www.mysql.com
+
+1) Package Install Instruction
+   ---------------------------
+   % sudo rpm -ivh indimail-@version@-1.i386
+   % sudo dpkg -i indiamil-@version@-1.deb
+
+2) Package Upgrade Instruction
+   ---------------------------
+   % sudo rpm -Uvh indimail-@version@-1.i386
+   % someone please help with this command here
+
+3) Package Removal Instrucation
+   ----------------------------
+   % sudo rpm -e indimail-@version@-1.i386
+   % sudo dpkg -r indiamil-@version@-1.deb
+
+Start IndiMail Services
+-----------------------
+   Review the email in @indimaildir@/alias/.qmail-postmaster, before starting services
+
+   % sudo init q # (if your system uses traditional init)
+       or
+   % sudo /sbin/initctl emit qmailstart # (if your system uses upstart - ubuntu/fedora10)
+
+The RPM installation deliberately installs MySQL and fetchmail services in down state.
+This is for you to review your MySQL installation and configuration. For fetchmail service
+to run, you need to create @indimaildir@/etc/fetchmailrc file. You can use fetchmailconf
+for configuring fetchmail. To have these services started automatically during reboot,
+delete the files /service/mysql.3306/down and /service/fetchmail/down .
+
+Proceed to SECTION 7 in the file INSTALL.indimail for further instruction on 
+configuration of IndiMail
+
+Log files are creaed in /var/log/indimail/*
+
+
+How to install MySQL
+--------------------
+
+    Install MySQL with MD5 eaae8071cdc9c7144273e2e03ea20825
+    current working directory /home/local/src
+
+    % wget http://sunsite.mff.cuni.cz/MIRRORS/ftp.mysql.com/Downloads/MySQL-6.0/mysql-6.0.3-alpha.tar.gz
+    % gunzip -c mysql-6.0.3-alpha.tar.gz |tar xf -
+    % cd mysql-6.0.3-alpha
+    % ./configure --prefix=/usr/local/mysql --enable-local-infile
+    % make -s DESTDIR=staging_directory
+    % sudo make install-strip DESTDIR=staging_directory
+    cd ..
+
+Converting RPM to .deb
+----------------------
+The Ubuntu / Debian systems use the tool dpkg for package management. There is a tool to 
+convert .rpm packages to Debian .deb files using called 'alien'.
+
+Install Alien on your system
+% sudo apt-get update
+% sudo apt-get install alien
+
+Convert the rpm file from .rpm to .deb:
+% sudo alien -ck name-of-rpm-file.rpm
+
+To install .deb packages
+% dpkg -i name-of-created-deb-file.deb
+
+Alternatively you can simply install rpm files. This command converts rpm to deb
+then installs the deb file. After the installation, it will delete the temporary
+.deb created.
+% sudo alien -i name-of-rpm-file.rpm

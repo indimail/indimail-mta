@@ -1,0 +1,203 @@
+INTRODUCTION
+------------
+
+IndiMail is a mailing solution built using following packages
+
+qmail,
+serialmail,
+qmailanalog,
+dotforward,
+fastforward,
+mess822,
+daemontools,
+ucspi-tcp,
+Courier IMAP/POP3,
+Bogofilter - A Bayesian Spam Filter,
+Clam AntiVirus - GPL anti-virus toolkit for UNIX,
+Fetchmail,
+other useful utilities (mpack, unpack, altermime, ripmime, fortune, flash).
+
+IndiMail also provides Management of Virtual domains. Lot of the integration has been done by modifying some of the
+core components. You can read the feature list to get an idea of the changes and new features that have been added
+over the original packages.
+
+As a hobby way back in 2001, I started playing with qmail. Over the years, i learnt how to use qmail and put together
+a complete solution which worked quite well for me and can work for large ISP installations (> 8 million+ users in a
+single domain across multiple hosts and more than 4 million deliveries per day). Maybe some of the stuff could prove
+useful for someone who had the same situation as me (very little budget to buy costly NAS filers, availability of
+simple hardware, etc).
+
+The package combines qmail with other packages like courier-imap for IMAP/POP3, bogofilter for SPAM control,
+fetchmail for hosts with intermittent connectivity. IndiMail provides ability for a single domain to have users
+across multiple hosts (even across different geographical locations) and tools to manage virtual domains ?
+
+DISCLAIMER
+----------
+
+There is no warranty implied or otherwise with this package. I believe in OpenSource Philosophy and this is 
+an attempt to give back to the OpenSource community. I do not desire any monetory or material benefit out of this.
+
+LICENSING
+---------
+
+See file COPYING. The code uses libdomainkeys. Code related to domainkey is subjected to
+licensing terms detailed in softwarelicense1-1.html
+
+What will you find in this package
+----------------------------------
+
+Integrated solution of the following packages qmail, serialmail, qmailanalog, dotforward, fastforward, mess822,
+daemontools, ucspi-tcp, Indimail - Management of Virtual domains, Courier IMAP/POP3,
+Bogofilter - A Bayesian Spam Filter, Fetchmail, other useful utilities.
+
+If any modification or addition has been done to DJB's code, it has been done in the same style (not using the standard
+C library and using only DJB's functions like substdio, stralloc, etc). All man pages have been modified to reflect
+changes.
+
+This package also allows me to split my users in a single domain across multiple hosts without using NFS. I haven't
+looked at qmail-ldap but maybe this package does something like qmail-ldap but with MySQL as the backend for storing
+user information. The tools for administering virtual domains/users will have a lot in similarity to the vpopmail
+package from inter7.com. The table structures are the same. Plenty of code (for managing virtual domains/users) has
+been borrowed from there. Since the user get split across multiple hosts, IndiMail also provides two proxies for
+IMAP & POP3 protocol. The proxy servers run using daemontools and are by default set under supervise. You can use any
+IMAP/POP3 server behind the proxy. IndiMail also allows you to add any proprietary mail server serving some of the
+users of any domain which you want to configure under indimail. This makes it easy to migrate from an existing
+proprietary mail server like MS Exchange in 5 steps.
+
+The Steps are
+-------------
+
+1.You simply set up a new installation with IndiMail with the existing domain
+2.Add the IP address of the Exchange Server in host_table and the SMTP port of the Exchange Server in the table
+  smtp_port
+3.Add users on the exchange server to a table called hostcntrl (either manually or using the utility hostcntrl).
+4.Set up SMTP, IMAP Proxy, POP3 Proxy on the IndiMail server
+5.Change the MX to point to the IndiMail server
+
+BRIEF FEATURE LIST
+------------------
+
+Some of the features available in this package
+
+1.  svctool
+    A simple tool with command-line options which helps you to configure any configuration item in indimail
+    (creation of supervise scripts, qmail configuration, installation of all default MySQL tables, creation
+    of default aliases, users, etc)
+2.  configurable control files directory (using CONTROLDIR environment variable) (allows one to have multiple
+    running copies of qmail using a single binary installation)
+3.  configurable queue directory (using QUEUEDIR environment variable) (allows one to have multiple queues on a host
+    with a single qmail installation). 
+    qmail-multi (queue load balancer) uses qmail-queue to deposit mails across multiple queues. Each queue has its
+    own qmail-send process.
+    You can spread the individual queues across multiple filesystems on different controllers to maximize on IO
+    throughput.
+    The number of queues is configurable by three environment variables QUEUE_BASE, QUEUE_COUNT, and QUEUE_START.
+    A queue in indimail is defined as a collection of multiple queues. Each queue in the collection can have one or
+    more SMTP listener but a single delivery (qmail-send) processes. It is possible to have the entire queue collection
+    without a delivery process (e.g. SMTP on port 366 ODMR). The QUEUE_COUNT can be defined based on how powerful your
+    host is (IO bandwidth, etc). The configurable queue is possible with a single installation of qmail
+    and does not require you to have multiple qmail installations to achive this.
+4.  uses getpwnam to use uids/gids, home from /etc/passwd, /etc/group (allows me to transfer the binary to another
+    machine regardless of the ids in /etc/passwd)
+5.  Hooks into local and remote deliveries
+    QMAILLOCAL - Run executable defined by this instead of qmail-local (qmail-local)
+    QMAILREMOTE - Run executable defined by this instead of qmail-remote (qmail-remote)
+    Theoretically one can exploit QMAILLOCAL, QMAILREMOTE variables to route mails for a domain across multiple mail
+    stores.
+6.  Hook into qmail-remote's routing by using SMTPROUTE environment variable.
+    Ability to do User Based Routing via SMTPROUTE environment.
+    This gives the ability to split a domain across multiple hosts without using NFS to mount multiple filesystems
+    on any host. One can even use a shell script, set the environment variable and deliver mails to users across
+    multiple hosts.  I call this dynamic SMTPROUTE. Additionally qmail-rspawn has the ability to connect to MySQL
+    and set SMTPROUTES based on values in a MySQL table. The connection to MySQL is kept open. This gives qmail-rspawn
+    to do high speed user lookups in MySQL and to deliver the mail for a single domain split across multiple mail
+    stores.
+7.  Proxy for IMAP and POP3. Allows IMAP/POP3 protocol for users in a domain to be split across multiple hosts. Also
+    allows seamless integration of proprietary email servers with indimail. The proxy is generic and works with any
+    IMAP/POP3 server. The proxy comes useful when you want to move out of a headache causing mail server like x-change
+    and want to retain the same domain on the propreitary server. In conjunction with dynamic SMTPROUTES, you can
+    migrate all your users to indimail, without any downtime/disruption to email service. The proxy and dynamic
+    SMTPROUTES allow you to scale your email server horizontally with using NFS across geopraphical locations.
+8.  ETRN, ATRN, ODMR (RFC 2645) support
+9.  accesslist - restrictions between mail transactions between email ids (you can decide who can send mails to whom)
+10. bodycheck - checks on header/body on incoming emails (for spam, virus security and other needs)
+11. hostaccess - provides domain, IP address pair access list control. e.g. you can define from which set of addresses
+    mail from yahoo.com will be accepted.
+12. chkrcptdomains - rcpt check on selective domains
+13. envrules - recipient/sender based set or unset environment variables (qmail-smtpd, qmail-inject, qmail-local,
+    qmail-remote) any variables which controls the behaviour of qmail-smtpd, qmail-inject, qmail-local,
+    qmail-remote e.g. NODNSCHECKS, DATABYTES, RELAYCLIENT, BADMAILFROM, etc can be defined individually for a
+    particular recipient or sender rather than only in the run file
+14. NULLQUEUE, qmail-nullqueue (blackhole support - like qmail-queue but mails go into a blackhole). I typically uses
+    this in conjuction with envrules to trash the mail into blackhole without spending any disk IO.
+15. qmail-multi - run multiple filters (qmail-smtpd) (something like qmail-qfilter). Also distributes mails across
+    multiple queues to do a load balancing act. qmail-multi allowed me to process massive rate of incoming mails
+    at my earlier job with a ISP.
+16. envheaders - Any thing defined here e.g. Return-Path, qmail-queue sets Return-Path as an environment variable with
+    the value found in Return-Path header in the email. This environment variable gets passed across the queue and is
+    also available to qmail-local, qmail-remote
+17. logheaders - Any header defined in this control file, gets written to file descriptor 2 with the value found in the email.
+18. removeheaders - Any header defined here, qmail-queue will remove that header from the email
+19. quarantine or QUARANTINE env variable causes qmail-queue to replace the recipient list with the value defined in
+    the control file or the environment variable. Additionally an environment variable X-Quarantine-ID: is set which
+    holds the orignal recipient list.
+20. Added ability in qmail-queue to do line processing. Line processing allows qmail-queue to do some of the stuff
+    mentioned above
+21. plugins support for QHPSI interface (qmail-queue). qmail-queue will use dlopen to load any shared objected defined
+    by PLUGINDIR environment. Multiple plugins can be loaded. For details see man qmail-queue
+22. Message Submission Port (port 587) RFC 2476
+23. Integrated Authenticted SMTP with Indimail (PLAIN, LOGIN, CRAM-MD5, pop-bef-smtp)
+24. duplicate eliminator using 822header
+25. qmail-remote has configurable TCP timeout table (max_tolerance, min_backoff periods can be configured in
+    smtproutes)
+26. Ability to change concurrency of tcpserver without restarting tcpserver
+27. Ability to restrict connections per IP
+28. multilog replaced buffer funtions with substdio
+29. supervise can run script shutdown if present (when svc -d is issued)
+30. rfc3834 compliance for qmail-autoresponder (provide Auto-Submitted, In-Reply-To, References fields (RFC 3834))
+31. ability to add stupid disclaimer(s) to messages.
+32. InLookup serves as a high performance user lookup daemon for qmail-smtpd (rcpt checks, authenticated SMTP,
+    RELAY check).
+    Even the IMAP, POP3 authentication gets served by inlookup. inlookup preforks configurable number of daemons which
+    opens multiple connections to MySQL and keep the connection open.
+    This gives inlookup a decent database performance when handling millions of lookups in few hours. Programs like
+    qmail-smtpd use a fifo to communicate with inlookup
+33. CHKRECIPIENT extension which rejects users not found in local MySQL or recipients.cdb database
+34. indisrvr
+    Was written to ease mail server administration across multiple hosts. Allows ones to create, delete, modify users
+    and run any command as defined in variables.c. indisrvr listens on a AF_INET socket.
+35. Identation of djb's code (using indent) so that a mortal like me could understand it :)
+36. Works with Upstart - Upstart is an event-based replacement for the init daemon (http://www.upstart.ubuntu.com)
+37. Changed buffer libraries in daemontools to substdio.
+38. Can work with external virus scanners (QHPSI, or Len Budney's qscanq)
+39. Compiles on Mac OS X Version 10.5.4 (have not been able to test yet)
+40. qmail-queue custom error patch by Flavio Curti <fcu-software at no-way.org>
+41. Domainkey-Signature, DKIM-Signature with ADSP/SSP
+42. Greylisting Capability - http://www.gossamer-threads.com/lists/qmail/users/136740?page=last
+43. Updated man pages.
+
+Other features are as below which I have incorporated manually by hand as and when they came up at
+Qmail List <qmail@list.cr.yp.to>
+
+Mailing list
+------------
+
+There are four Mailing Lists for IndiMail
+
+   1. indimail-support  - You can subscribe for Support at https://lists.sourceforge.net/lists/listinfo/indimail-support
+                          You can mail indimail-support@lists.sourceforge.net for support
+                          Old discussions can be seen at
+                          https://sourceforge.net/mailarchive/forum.php?forum_name=indimail-support
+   2. indimail-devel    - You can subscribe at https://lists.sourceforge.net/lists/listinfo/indimail-devel
+                          You can mail indimail-devel@lists.sourceforge.net for development activities
+                          Old discussions can be seen at
+                          https://sourceforge.net/mailarchive/forum.php?forum_name=indimail-devel
+   3. indimail-announce - This is only meant for announcement of New Releases or patches. You
+                          can subscribe at http://groups.google.com/group/indimail
+   4. Archive at Google - http://groups.google.com/group/indimail
+                          This groups acts as a remote archive for indimail-support and indimail-devel.
+
+There is also a Project Tracker for IndiMail (Bugs, Feature Requests, Patches, Support Requests) at
+http://sourceforge.net/tracker/?group_id=230686
+
+-- Manvendra Bhangui

@@ -1,0 +1,504 @@
+# $Id: courier-imap.spec.in,v 1.69 2004/08/01 14:22:21 mrsam Exp $
+#
+# Copyright 1998 - 2004 Double Precision, Inc.  See COPYING for
+# distribution information.
+#
+#  Need to version-upgrade RH builds due to different directory locations.
+#
+%define courier_ver @VERSION@
+%define courier_release_no 1
+
+%define is_not_mandrake %(test ! -e /etc/mandrake-release && echo 1 || echo 0)
+# check if SuSE is installed. If not, set a dummy suse_version to null, else use the given value from SuSE.
+%if ! %([ -e /etc/SuSE-release ] && echo 1 || echo 0)
+%define suse_version 0
+%endif
+
+%if %suse_version
+%define courier_release .suse%{suse_version}
+%else
+%if %is_not_mandrake
+%define courier_release %(release="`rpm -q --queryformat='.%{VERSION}' redhat-release 2>/dev/null`" ; if test $? != 0 ; then release="`rpm -q --queryformat='.%{VERSION}' fedora-release 2>/dev/null`" ; if test $? != 0 ; then release="" ; fi ; fi ; echo "$release")
+%else
+%define courier_release mdk
+%endif
+%endif
+
+%define __libtoolize /bin/true
+
+%define configure CFLAGS="${CFLAGS:-%optflags}" ; export CFLAGS ; CXXFLAGS="${CXXFLAGS:-%optflags}" ; export CXXFLAGS ; FFLAGS="${FFLAGS:-%optflags}" ; export FFLAGS ;  ./configure --host=%{_host} --build=%{_build} --target=%{_target_platform} --program-prefix=%{?_program_prefix} --prefix=%{_prefix} --exec-prefix=%{_exec_prefix} --bindir=%{_bindir} --sbindir=%{_sbindir} --sysconfdir=%{_sysconfdir} --datadir=%{_datadir} --includedir=%{_includedir} --libdir=%{_libdir} --libexecdir=%{_libexecdir} --localstatedir=%{_localstatedir} --sharedstatedir=%{_sharedstatedir} --mandir=%{_mandir} --infodir=%{_infodir}
+
+%define _missing_doc_files_terminate_build 1
+%define _unpackaged_files_terminate_build 1
+
+Summary: Courier-IMAP %{courier_ver} IMAP server
+Name: @PACKAGE@
+Version: %{courier_ver}
+Release: %{courier_release_no}%{courier_release}
+Copyright: GPL
+Group: Applications/Mail
+Source: %{name}-%{courier_ver}.tar.bz2
+Packager: %{PACKAGER}
+BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-buildroot
+Requires: /sbin/chkconfig fileutils textutils sh-utils sed
+BuildPreReq: textutils openssl-devel fileutils perl gdbm-devel pam-devel postgresql-devel mysql-devel
+%if %suse_version
+BuildPreReq: rpm >= 3.0.5 /usr/bin/sed openldap2 openldap2-devel %([ %{suse_version} -gt 819 ] && echo fam-devel)
+%else
+BuildPreReq: rpm >= 4.0.2 sed fam-devel openldap-devel openldap-servers
+%endif
+
+#  RH 7.0 resets sysconfdir & mandir, put them back where they belong
+
+%define _sysconfdir %{_prefix}/etc
+%define	_mandir %{_prefix}/man
+
+%define	_prefix	/usr/lib/courier-imap
+
+%define _localstatedir /var/run
+
+%define initdir %(if test -d /etc/init.d/. ; then echo /etc/init.d ; else echo /etc/rc.d/init.d ; fi)
+
+%define	authdaemondir	%{_localstatedir}/authdaemon.courier-imap
+
+%define pamconfdir	/etc/pam.d
+#
+# SuSE specific settings
+%if %suse_version
+# some templates for SuSE distribs.
+%define templdir	${RPM_BUILD_DIR}/%{name}-%{courier_ver}/packaging/suse
+%define _sysconfdir	/etc/courier-imap
+%define	_mandir		/usr/share/man
+%define initlndir	/usr/sbin
+%endif
+
+
+%description
+Courier-IMAP is an IMAP server for Maildir mailboxes.  This package contains
+the standalone version of the IMAP server that's included in the Courier
+mail server package.  This package is a standalone version for use with
+other mail servers.  Do not install this package if you intend to install the
+full Courier mail server.  Install the Courier package instead.
+
+%package ldap
+Summary: Courier-IMAP LDAP authentication driver.
+Group: Applications/Mail
+Requires: courier-imap = %{courier_ver}
+
+%description ldap
+This package contains the necessary files to allow Courier-IMAP to
+authenticate from an LDAP directory.  Install this package if you need
+the ability to use an LDAP directory for authentication.
+
+%package mysql
+Summary: Courier-IMAP MySQL authentication driver.
+Group: Applications/Mail
+Requires: courier-imap = %{courier_ver}
+
+%description mysql
+This package contains the necessary files to allow Courier-IMAP to
+authenticate using a MySQL database table.  Install this package if you need
+the ability to use a MySQL database table for authentication.
+
+%package pgsql
+Summary: Courier-IMAP PostgreSQL authentication driver.
+Group: Applications/Mail
+Requires: courier-imap = %{courier_ver}
+
+%description pgsql
+This package contains the necessary files to allow Courier-IMAP to
+authenticate using a PostgreSQL database table.  Install this package if you
+need the ability to use a PostgreSQL database table for authentication.
+
+
+%prep
+LANG=C
+export LANG
+
+%setup -q
+
+%if %(test '%{xflags}' = '%%{xflags}' && echo 1 || echo 0)
+%define xflags --enable-unicode=iso-8859-1,utf-8
+%endif
+
+%configure \
+	--with-redhat --with-authdaemonvar=%{authdaemondir} \
+	%{?xflags: %{xflags}}
+
+%build
+LANG=C
+export LANG
+
+%{__make}
+%{__make} check
+
+%install
+LANG=C
+export LANG
+
+
+%{__rm} -rf $RPM_BUILD_ROOT
+%{__mkdir_p} $RPM_BUILD_ROOT%{pamconfdir}
+%{__mkdir_p} $RPM_BUILD_ROOT%{initdir}
+%{__make} install-strip DESTDIR=$RPM_BUILD_ROOT
+
+#
+# Red Hat or SuSE like init.d file.
+%if %suse_version
+# Create SuSE courier-imap start script and a link in /usr/sbin
+%{__mkdir_p} ${RPM_BUILD_ROOT}%{initlndir}
+install -Dm 744 %{templdir}/courier-imap.init ${RPM_BUILD_ROOT}/%{initdir}/courier-imap && \
+ln -sf %{initdir}/courier-imap ${RPM_BUILD_ROOT}%{initlndir}/rccourier-imap \
+#
+# Fix for SuSE like pam file look.
+install -Dm 644 %{templdir}/pop3.pam $RPM_BUILD_ROOT%{pamconfdir}/pop3
+install -Dm 644 %{templdir}/imap.pam $RPM_BUILD_ROOT%{pamconfdir}/imap
+%else
+# Copy standard sysvinit file
+install -Dm 744 courier-imap.sysvinit $RPM_BUILD_ROOT/%{initdir}/courier-imap
+%endif
+
+#
+# Fix imapd.dist
+#
+
+%{__sed} 's/^IMAPDSTART=.*/IMAPDSTART=YES/' \
+	<$RPM_BUILD_ROOT%{_sysconfdir}/imapd.dist \
+	>$RPM_BUILD_ROOT%{_sysconfdir}/imapd.dist.tmp
+
+%{__mv} $RPM_BUILD_ROOT%{_sysconfdir}/imapd.dist.tmp \
+	$RPM_BUILD_ROOT%{_sysconfdir}/imapd.dist
+
+%{__sed} 's/^IMAPDSSLSTART=.*/IMAPDSSLSTART=YES/' \
+	<$RPM_BUILD_ROOT%{_sysconfdir}/imapd-ssl.dist \
+	>$RPM_BUILD_ROOT%{_sysconfdir}/imapd-ssl.dist.tmp
+
+%{__mv} $RPM_BUILD_ROOT%{_sysconfdir}/imapd-ssl.dist.tmp \
+	$RPM_BUILD_ROOT%{_sysconfdir}/imapd-ssl.dist
+
+%{__chmod} 600 $RPM_BUILD_ROOT%{_sysconfdir}/imapd.dist
+%{__chmod} 600 $RPM_BUILD_ROOT%{_sysconfdir}/imapd-ssl.dist
+
+%{__sed} 's/^POP3DSTART=.*/POP3DSTART=YES/' \
+	<$RPM_BUILD_ROOT%{_sysconfdir}/pop3d.dist \
+	>$RPM_BUILD_ROOT%{_sysconfdir}/pop3d.dist.tmp
+
+%{__mv} $RPM_BUILD_ROOT%{_sysconfdir}/pop3d.dist.tmp \
+	$RPM_BUILD_ROOT%{_sysconfdir}/pop3d.dist
+
+%{__sed} 's/^POP3DSSLSTART=.*/POP3DSSLSTART=YES/' \
+	<$RPM_BUILD_ROOT%{_sysconfdir}/pop3d-ssl.dist \
+	>$RPM_BUILD_ROOT%{_sysconfdir}/pop3d-ssl.dist.tmp
+
+%{__mv} $RPM_BUILD_ROOT%{_sysconfdir}/pop3d-ssl.dist.tmp \
+	$RPM_BUILD_ROOT%{_sysconfdir}/pop3d-ssl.dist
+
+%{__chmod} 600 $RPM_BUILD_ROOT%{_sysconfdir}/pop3d.dist
+%{__chmod} 600 $RPM_BUILD_ROOT%{_sysconfdir}/pop3d-ssl.dist
+
+#
+# Red Hat /etc/profile.d scripts
+#
+
+%{__mkdir_p} $RPM_BUILD_ROOT/etc/profile.d
+%{__cat} >$RPM_BUILD_ROOT/etc/profile.d/courier-imap.sh <<EOF
+if echo "\$MANPATH" | tr ':' '\012' | fgrep -qx %{_mandir}
+then
+	:
+else
+	MANPATH="%{_mandir}:\$MANPATH"
+	export MANPATH
+	PATH="%{_bindir}:\$PATH"
+	if test -w /etc
+	then
+		PATH="%{_sbindir}:\$PATH"
+	fi
+	export PATH
+fi
+EOF
+
+%{__cat} >$RPM_BUILD_ROOT/etc/profile.d/courier-imap.csh <<EOF
+
+if ( \$?MANPATH ) then
+	true
+else
+	setenv MANPATH ""
+endif
+
+echo "\$MANPATH" | tr ':' '\012' | fgrep -qx %{_mandir}
+
+if ( \$? ) then
+	true
+else
+	setenv MANPATH "%{_mandir}:\$MANPATH"
+	setenv PATH "%{_bindir}:\$PATH"
+	test -w /etc
+	if ( \$? ) then
+		true
+	else
+		setenv PATH "%{_sbindir}:\$PATH"
+	endif
+endif
+EOF
+
+#
+# Compress everything in man
+#
+
+find $RPM_BUILD_ROOT%{_mandir} ! -type d -print | %{__perl} -e '
+
+	while (<>)
+	{
+		chop if /\n$/;
+		next if /\.gz$/;
+		$file=$_;
+		if ( -l $file)
+		{
+                        symlink readlink("$file")
+                                . ".gz", "$file.gz";
+			unlink($file);
+                }
+                else
+                {
+                        system("gzip <$file >$file.gz");
+			unlink($file);
+		}
+	}
+'
+
+%{__cp} imap/README README.imap
+%{__cp} maildir/README.maildirquota.txt README.maildirquota
+%{__cp} maildir/README.sharedfolders.txt README.sharedfolders
+
+####
+## Create config files for sysconftool-rpmupgrade (see below)
+
+%{__mkdir_p} $RPM_BUILD_ROOT%{_datadir}
+%{__cp} sysconftool $RPM_BUILD_ROOT%{_datadir}/sysconftool
+%{__chmod} 555 $RPM_BUILD_ROOT%{_datadir}/sysconftool
+%{__cat} >$RPM_BUILD_ROOT%{_datadir}/configlist <<EOF
+%{_sysconfdir}/imapd.dist
+%{_sysconfdir}/imapd-ssl.dist
+%{_sysconfdir}/pop3d.dist
+%{_sysconfdir}/pop3d-ssl.dist
+EOF
+
+%{__cp} /dev/null $RPM_BUILD_ROOT%{_datadir}/configlist.ldap
+%{__cp} /dev/null $RPM_BUILD_ROOT%{_datadir}/configlist.mysql
+%{__cp} /dev/null $RPM_BUILD_ROOT%{_datadir}/configlist.pgsql
+
+%{__chmod} 644 $RPM_BUILD_ROOT%{_datadir}/configlist*
+
+######
+##
+## Ok, upgrades are going to get ugly.  Because we install $filename.dist
+## instead of $filename, and the old package has $filename listed as a config,
+## RPM will back up $filename to $filename.rpmsave.  This will happen AFTER
+## we will run the post scripts, effectively blowing away our configurations.
+## PUT THEM BACK BY RUNNING THE FOLLOWING SCRIPT FROM A TRIGGER.
+
+%{__cat} >$RPM_BUILD_ROOT%{_datadir}/sysconftool-rpmupgrade <<EOF
+#!/bin/sh
+
+for f in \$* "."
+do
+	if test \$f = "."
+	then
+		continue
+	fi
+
+	base=\`echo \$f | sed 's/\\.dist\$//'\`
+	if test -f \$base.dist -a ! -f \$base
+	then
+		%{__cp} -pr \$base.dist \$base
+	fi
+done
+EOF
+
+%{__chmod} 555 $RPM_BUILD_ROOT%{_datadir}/sysconftool-rpmupgrade
+
+#
+#  Check if authdaemond was installed, make sure to include authdaemon
+#  directory
+#
+
+%{__cp} /dev/null authdaemon.files
+
+. authlib/authdaemonrc
+
+if test "$authdaemonvar" != ""
+then
+	echo "%{_sysconfdir}/authdaemonrc.dist" >>$RPM_BUILD_ROOT%{_datadir}/configlist
+	echo "%{_sysconfdir}/authdaemonrc.dist" >>authdaemon.files
+	echo '%dir %attr(700, root, root) ' $authdaemonvar >>authdaemon.files
+	touch $RPM_BUILD_ROOT/$authdaemonvar/lock || exit 1
+	touch $RPM_BUILD_ROOT/$authdaemonvar/pid || exit 1
+	authlib/authmksock $RPM_BUILD_ROOT$authdaemonvar/socket || exit 1
+	%{__chmod} 777 $RPM_BUILD_ROOT$authdaemonvar/socket || exit 1
+	echo '%ghost %attr(600, root, root) ' $authdaemonvar/lock >>authdaemon.files
+	echo '%ghost %attr(644, root, root) ' $authdaemonvar/pid >>authdaemon.files
+	echo '%ghost %attr(-, root, root) ' $authdaemonvar/socket >>authdaemon.files
+fi
+
+(cd $RPM_BUILD_ROOT ; find .%{_libexecdir} -type f ! -name authdaemond.ldap ! -name authdaemond.mysql ! -name authdaemond.pgsql -print ) | cut -c2- >>authdaemon.files
+
+%{__cp} /dev/null authdaemon.files.ldap
+%{__cp} /dev/null authdaemon.files.mysql
+%{__cp} /dev/null authdaemon.files.pgsql
+
+test ! -f $RPM_BUILD_ROOT%{_libexecdir}/authlib/authdaemond.mysql ||
+	echo %{_libexecdir}/authlib/authdaemond.mysql >>authdaemon.files.mysql
+
+test ! -f $RPM_BUILD_ROOT%{_libexecdir}/authlib/authdaemond.pgsql ||
+	echo %{_libexecdir}/authlib/authdaemond.pgsql >>authdaemon.files.pgsql
+
+test ! -f $RPM_BUILD_ROOT%{_libexecdir}/authlib/authdaemond.ldap || \
+	echo %{_libexecdir}/authlib/authdaemond.ldap >>authdaemon.files.ldap
+
+if test -f $RPM_BUILD_ROOT%{_libexecdir}/authlib/authdaemond.mysql
+then
+	echo %{_sysconfdir}/authmysqlrc.dist >>$RPM_BUILD_ROOT%{_datadir}/configlist.mysql
+	echo '%attr(-, root, root)' %{_sysconfdir}/authmysqlrc.dist >>authdaemon.files.mysql
+fi
+
+if test -f $RPM_BUILD_ROOT%{_libexecdir}/authlib/authdaemond.pgsql
+then
+	echo %{_sysconfdir}/authpgsqlrc.dist >>$RPM_BUILD_ROOT%{_datadir}/configlist.pgsql
+	echo '%attr(-, root, root)' %{_sysconfdir}/authpgsqlrc.dist >>authdaemon.files.pgsql
+fi
+
+if test -f $RPM_BUILD_ROOT%{_libexecdir}/authlib/authdaemond.ldap
+then
+	echo %{_sysconfdir}/authldaprc.dist >>$RPM_BUILD_ROOT%{_datadir}/configlist.ldap
+	echo '%attr(-, root, root)' %{_sysconfdir}/authldaprc.dist >>authdaemon.files.ldap
+
+	if test -d /etc/openldap/schema
+	then
+		mkdir -p $RPM_BUILD_ROOT/etc/openldap/schema
+		cp authlib/authldap.schema $RPM_BUILD_ROOT/etc/openldap/schema/courier.schema
+		echo '%config(noreplace) %attr(444, root, root) /etc/openldap/schema/courier.schema' >>authdaemon.files.ldap
+	fi
+fi
+
+%{__mkdir_p} $RPM_BUILD_ROOT%{_localstatedir}
+touch $RPM_BUILD_ROOT%{_localstatedir}/imapd.pid
+touch $RPM_BUILD_ROOT%{_localstatedir}/imapd-ssl.pid
+touch $RPM_BUILD_ROOT%{_localstatedir}/imapd.pid.lock
+touch $RPM_BUILD_ROOT%{_localstatedir}/imapd-ssl.pid.lock
+
+touch $RPM_BUILD_ROOT%{_localstatedir}/pop3d.pid
+touch $RPM_BUILD_ROOT%{_localstatedir}/pop3d-ssl.pid
+touch $RPM_BUILD_ROOT%{_localstatedir}/pop3d.pid.lock
+touch $RPM_BUILD_ROOT%{_localstatedir}/pop3d-ssl.pid.lock
+
+%post
+/sbin/chkconfig --del courier-imap
+/sbin/chkconfig --add courier-imap
+%{_datadir}/sysconftool `%{__cat} %{_datadir}/configlist` >/dev/null
+
+%post ldap
+%{_datadir}/sysconftool `%{__cat} %{_datadir}/configlist.ldap` >/dev/null
+
+%post mysql
+%{_datadir}/sysconftool `%{__cat} %{_datadir}/configlist.mysql` >/dev/null
+
+%post pgsql
+%{_datadir}/sysconftool `%{__cat} %{_datadir}/configlist.pgsql` >/dev/null
+
+%preun ldap
+%{_libexecdir}/imapd.rc stop
+%{_libexecdir}/imapd-ssl.rc stop
+%{_libexecdir}/pop3d.rc stop
+%{_libexecdir}/pop3d-ssl.rc stop
+
+%preun mysql
+%{_libexecdir}/imapd.rc stop
+%{_libexecdir}/imapd-ssl.rc stop
+%{_libexecdir}/pop3d.rc stop
+%{_libexecdir}/pop3d-ssl.rc stop
+
+%preun pgsql
+%{_libexecdir}/imapd.rc stop
+%{_libexecdir}/imapd-ssl.rc stop
+%{_libexecdir}/pop3d.rc stop
+%{_libexecdir}/pop3d-ssl.rc stop
+
+%preun
+
+if test "$1" = "0"
+then
+	rm -f %{_localstatedir}/couriersslcache
+	/sbin/chkconfig --del courier-imap
+fi
+
+%{_libexecdir}/imapd.rc stop
+%{_libexecdir}/imapd-ssl.rc stop
+%{_libexecdir}/pop3d.rc stop
+%{_libexecdir}/pop3d-ssl.rc stop
+
+%triggerpostun -- courier-imap
+
+test ! -f %{_datadir}/configlist || %{_datadir}/sysconftool-rpmupgrade `%{__cat} %{_datadir}/configlist` >/dev/null
+
+%triggerpostun ldap -- courier-imap-ldap
+
+test ! -f %{_datadir}/configlist.ldap || %{_datadir}/sysconftool-rpmupgrade `%{__cat} %{_datadir}/configlist.ldap` >/dev/null
+
+%triggerpostun mysql -- courier-imap-mysql
+
+test ! -f %{_datadir}/configlist.mysql || %{_datadir}/sysconftool-rpmupgrade `%{__cat} %{_datadir}/configlist.mysql` >/dev/null
+
+# pgsql was born after sysconftool
+
+%files -f authdaemon.files
+%defattr(-, bin, bin)
+%attr(644, root, root) %config(noreplace) %{pamconfdir}/imap
+%attr(644, root, root) %config(noreplace) %{pamconfdir}/pop3
+
+%attr(755, bin, bin) %config /etc/profile.d/courier-imap.csh
+%attr(755, bin, bin) %config /etc/profile.d/courier-imap.sh
+%attr(755, bin, bin) %{initdir}/courier-imap
+%if %{suse_version}
+%attr(740,root,root) %{initlndir}/rccourier-imap
+%endif
+%dir %{_prefix}
+
+%if "%{_prefix}" != "%{_exec_prefix}"
+%dir %{_exec_prefix}
+%endif
+
+%dir %{_libexecdir}
+%dir %{_libexecdir}/authlib
+%dir %{_sysconfdir}
+%dir %{_sysconfdir}/shared
+%dir %{_sysconfdir}/shared.tmp
+
+%config %{_sysconfdir}/imap*
+%config %{_sysconfdir}/pop3*
+%config %{_sysconfdir}/quotawarnmsg.example
+%{_bindir}
+%{_sbindir}
+%{_mandir}
+%{_datadir}
+
+%doc NEWS AUTHORS COPYING imap/BUGS README README.imap README.maildirquota
+%doc README.sharedfolders authlib/README.*
+
+%ghost %attr(600, root, root) %{_localstatedir}/imapd.pid
+%ghost %attr(600, root, root) %{_localstatedir}/imapd-ssl.pid
+%ghost %attr(600, root, root) %{_localstatedir}/imapd.pid.lock
+%ghost %attr(600, root, root) %{_localstatedir}/imapd-ssl.pid.lock
+
+%ghost %attr(600, root, root) %{_localstatedir}/pop3d.pid
+%ghost %attr(600, root, root) %{_localstatedir}/pop3d-ssl.pid
+%ghost %attr(600, root, root) %{_localstatedir}/pop3d.pid.lock
+%ghost %attr(600, root, root) %{_localstatedir}/pop3d-ssl.pid.lock
+
+%files ldap -f authdaemon.files.ldap
+
+%files mysql -f authdaemon.files.mysql
+
+%files pgsql -f authdaemon.files.pgsql
+
+%clean
+rm -rf $RPM_BUILD_ROOT

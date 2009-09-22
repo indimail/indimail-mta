@@ -1,0 +1,154 @@
+/* config.h.in.  Generated from configure.in by autoheader.  */
+
+/* Whether password changing should be enabled */
+#undef AUTHCHANGEPASS
+
+/* Whether we have the crypt() function */
+#undef HAVE_CRYPT
+
+/* Define to 1 if you have the <crypt.h> header file. */
+#undef HAVE_CRYPT_H
+
+/* Define to 1 if you have the `endpwent' function. */
+#undef HAVE_ENDPWENT
+
+/* Define to 1 if you have the `endspent' function. */
+#undef HAVE_ENDSPENT
+
+/* Whether expect(1) is installed */
+#undef HAVE_EXPECT
+
+/* Define to 1 if you have the <fcntl.h> header file. */
+#undef HAVE_FCNTL_H
+
+/* Define to 1 if you have the `getspent' function. */
+#undef HAVE_GETSPENT
+
+/* Whether we have the HMAC library available */
+#undef HAVE_HMACLIB
+
+/* Define to 1 if you have the <inttypes.h> header file. */
+#undef HAVE_INTTYPES_H
+
+/* Define to 1 if you have the <lber.h> header file. */
+#undef HAVE_LBER_H
+
+/* Define to 1 if you have the <ldap.h> header file. */
+#undef HAVE_LDAP_H
+
+/* Whether we have ldap_result2error() function */
+#undef HAVE_LDAP_RESULT2ERROR
+
+/* Whether we have ldap_start_tls_s */
+#undef HAVE_LDAP_TLS
+
+/* Define to 1 if you have the `shadow' library (-lshadow). */
+#undef HAVE_LIBSHADOW
+
+/* Whether libunicode.a is available */
+#undef HAVE_LIBUNICODE
+
+/* Whether we have the MD5 library available */
+#undef HAVE_MD5LIB
+
+/* Define to 1 if you have the <memory.h> header file. */
+#undef HAVE_MEMORY_H
+
+/* Define to 1 if you have the <netinet/in.h> header file. */
+#undef HAVE_NETINET_IN_H
+
+/* Whether -lvpopmail has the open_smtp_relay() function */
+#undef HAVE_OPEN_SMTP_RELAY
+
+/* Define to 1 if you have the <Pam/pam_appl.h> header file. */
+#undef HAVE_PAM_PAM_APPL_H
+
+/* Define to 1 if you have the `pam_setcred' function. */
+#undef HAVE_PAM_SETCRED
+
+/* Define to 1 if you have the <security/pam_appl.h> header file. */
+#undef HAVE_SECURITY_PAM_APPL_H
+
+/* Define to 1 if you have the `setlogin' function. */
+#undef HAVE_SETLOGIN
+
+/* Define to 1 if you have the `setsid' function. */
+#undef HAVE_SETSID
+
+/* Whether we have the SHA1 library available */
+#undef HAVE_SHA1LIB
+
+/* Define to 1 if you have the <shadow.h> header file. */
+#undef HAVE_SHADOW_H
+
+/* Define to 1 if you have the <stdint.h> header file. */
+#undef HAVE_STDINT_H
+
+/* Define to 1 if you have the <stdio.h> header file. */
+#undef HAVE_STDIO_H
+
+/* Define to 1 if you have the <stdlib.h> header file. */
+#undef HAVE_STDLIB_H
+
+/* Define to 1 if you have the <strings.h> header file. */
+#undef HAVE_STRINGS_H
+
+/* Define to 1 if you have the <string.h> header file. */
+#undef HAVE_STRING_H
+
+/* Define to 1 if you have the <sys/stat.h> header file. */
+#undef HAVE_SYS_STAT_H
+
+/* Define to 1 if you have the <sys/time.h> header file. */
+#undef HAVE_SYS_TIME_H
+
+/* Define to 1 if you have the <sys/types.h> header file. */
+#undef HAVE_SYS_TYPES_H
+
+/* Define to 1 if you have the <sys/wait.h> header file. */
+#undef HAVE_SYS_WAIT_H
+
+/* Define to 1 if you have the <unistd.h> header file. */
+#undef HAVE_UNISTD_H
+
+/* Whether -lvpopmail has the vset_lastauth() function */
+#undef HAVE_VSET_LASTAUTH
+
+/* Whether we must a prototype for crypt() */
+#undef NEED_CRYPT_PROTOTYPE
+
+/* Define to the address where bug reports for this package should be sent. */
+#undef PACKAGE_BUGREPORT
+
+/* Define to the full name of this package. */
+#undef PACKAGE_NAME
+
+/* Define to the full name and version of this package. */
+#undef PACKAGE_STRING
+
+/* Define to the one symbol short name of this package. */
+#undef PACKAGE_TARNAME
+
+/* Define to the version of this package. */
+#undef PACKAGE_VERSION
+
+/* This macro is used to build the list of SASL modules */
+#undef SASL_LIST
+
+/* Define to 1 if you have the ANSI C header files. */
+#undef STDC_HEADERS
+
+/* Location of the userdb database */
+#undef USERDB
+
+/* Define to empty if `const' does not conform to ANSI C. */
+#undef const
+
+/* Define to `int' if <sys/types.h> doesn't define. */
+#undef gid_t
+
+/* Define to `int' if <sys/types.h> does not define. */
+#undef pid_t
+
+/* Define to `int' if <sys/types.h> doesn't define. */
+#undef uid_t

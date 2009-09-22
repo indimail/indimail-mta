@@ -1,0 +1,73 @@
+#! @SHELL@
+# $Id: imapd.rc.in,v 1.26 2004/04/18 15:54:38 mrsam Exp $
+#
+# Copyright 1998 - 2002 Double Precision, Inc.
+# See COPYING for distribution information.
+
+
+prefix=@prefix@
+exec_prefix=@exec_prefix@
+bindir=@bindir@
+libexecdir=@libexecdir@
+
+if test ! -f @sysconfdir@/imapd
+then
+	echo "@sysconfdir@/imapd does not exist, forgot make install-configure?"
+	exit 1
+fi
+
+if test ! -f @sysconfdir@/imapd-ssl
+then
+	echo "@sysconfdir@/imapd-ssl does not exist, forgot make install-configure?"
+	exit 1
+fi
+
+TLS_CACHEFILE=""
+. @sysconfdir@/imapd-ssl
+. @sysconfdir@/imapd
+
+case $1 in
+start)
+	LIBAUTHMODULES=""
+	for f in `echo $AUTHMODULES`
+	do
+		LIBAUTHMODULES="$LIBAUTHMODULES @libexecdir@/authlib/$f"
+	done
+
+	if test -x ${libexecdir}/authlib/authdaemond
+	then
+		@SETENV@ - DEBUG_LOGIN="$DEBUG_LOGIN" ${libexecdir}/authlib/authdaemond start
+	fi
+
+	if test "$TLS_CACHEFILE" != ""
+	then
+		rm -f $TLS_CACHEFILE
+	fi
+
+	@ULIMIT@ $IMAP_ULIMITD
+	@SETENV@ - @SHELL@ -c " set -a ;
+			prefix=@prefix@ ;
+			exec_prefix=@exec_prefix@ ;
+			bindir=@bindir@ ;
+			libexecdir=@libexecdir@ ;
+				. @sysconfdir@/imapd ; \
+				. @sysconfdir@/imapd-ssl ; \
+		IMAP_STARTTLS=$IMAPDSTARTTLS ; export IMAP_STARTTLS ; \
+		TLS_PROTOCOL=$TLS_STARTTLS_PROTOCOL ; \
+		@libexecdir@/couriertcpd -address=$ADDRESS \
+			-stderrlogger=@sbindir@/courierlogger \
+			-stderrloggername=imapd \
+			-maxprocs=$MAXDAEMONS -maxperip=$MAXPERIP \
+			-pid=$PIDFILE $TCPDOPTS \
+			$PORT @sbindir@/imaplogin $LIBAUTHMODULES \
+				@bindir@/imapd ${MAILDIRPATH}"
+	;;
+stop)
+	@libexecdir@/couriertcpd -pid=$PIDFILE -stop
+	if test -x ${libexecdir}/authlib/authdaemond
+	then
+		${libexecdir}/authlib/authdaemond stop
+	fi
+	;;
+esac
+exit 0

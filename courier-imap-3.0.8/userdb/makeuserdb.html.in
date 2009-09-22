@@ -1,0 +1,814 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN">
+<HTML
+><HEAD
+><link rel='stylesheet' type='text/css' href='manpage.css'>
+  <!-- $Id: makeuserdb.sgml,v 1.2 2003/05/14 14:12:09 mrsam Exp $ -->
+  <!-- Copyright 1998 - 2001 Double Precision, Inc.  See COPYING for -->
+  <!-- distribution information. -->
+<meta name="MSSmartTagsPreventParsing" content="TRUE">
+<link rel="icon" href="icon.gif" type="image/gif" />
+<TITLE
+>makeuserdb</TITLE
+><META
+NAME="GENERATOR"
+CONTENT="Modular DocBook HTML Stylesheet Version 1.7"></HEAD
+><BODY
+CLASS="REFENTRY"
+BGCOLOR="#FFFFFF"
+TEXT="#000000"
+LINK="#0000FF"
+VLINK="#840084"
+ALINK="#0000FF"
+><H1
+><A
+NAME="MAKEUSERDB"
+></A
+>makeuserdb</H1
+><DIV
+CLASS="REFNAMEDIV"
+><A
+NAME="AEN10"
+></A
+><H2
+>Name</H2
+>make&nbsp;--&nbsp;create @userdb@</DIV
+><DIV
+CLASS="REFSYNOPSISDIV"
+><A
+NAME="AEN13"
+></A
+><H2
+>Synopsis</H2
+><P
+><B
+CLASS="COMMAND"
+>makeuserdb</B
+></P
+><P
+><B
+CLASS="COMMAND"
+>pw2userdb</B
+></P
+><P
+><B
+CLASS="COMMAND"
+>vchkpw2userdb</B
+> [--vpopmailhome=<VAR
+CLASS="REPLACEABLE"
+>dir</VAR
+>] [--todir=<VAR
+CLASS="REPLACEABLE"
+>dir</VAR
+>]</P
+></DIV
+><DIV
+CLASS="REFSECT1"
+><A
+NAME="AEN24"
+></A
+><H2
+>DESCRIPTION</H2
+><P
+><B
+CLASS="COMMAND"
+>makeuserdb</B
+> creates <TT
+CLASS="FILENAME"
+>@userdb@.dat</TT
+> from
+the contents of <TT
+CLASS="FILENAME"
+>@userdb@</TT
+>.
+<TT
+CLASS="FILENAME"
+>@userdb@</TT
+>'s contents are described later in this document.
+<TT
+CLASS="APPLICATION"
+>Maildrop</TT
+>,
+<TT
+CLASS="APPLICATION"
+>Courier</TT
+>, and other applications use
+<TT
+CLASS="FILENAME"
+>@userdb@.dat</TT
+> as a
+substitute/complement for your system password file.
+The usual purpose for
+<TT
+CLASS="FILENAME"
+>@userdb@.dat</TT
+> is to specify "virtual" accounts - accounts
+that do
+not have an associated system login.
+Usually (but not necessarily) all virtual accounts share the same
+system userid.
+<TT
+CLASS="FILENAME"
+>@userdb@.dat</TT
+> may also replace
+your system password file. Because the system password file is a text file,
+when there's a large number of accounts it will be significantly faster to
+search
+<TT
+CLASS="FILENAME"
+>@userdb.dat@</TT
+>, which is a binary database,
+instead of a flat text file that the system password file usually is.</P
+><P
+>The <B
+CLASS="COMMAND"
+>makeuserdb</B
+> command can be safely executed during
+normal system activity.</P
+><DIV
+CLASS="REFSECT2"
+><A
+NAME="AEN39"
+></A
+><H3
+>Format of <TT
+CLASS="FILENAME"
+>@userdb@</TT
+></H3
+><P
+><TT
+CLASS="FILENAME"
+>@userdb@</TT
+> is a plain text file that can be created using
+any text editor. Blank lines are ignored. Lines that start with the #
+character are comments, and are also ignored.
+Other lines define properties of a single
+"account", one line per account.
+<TT
+CLASS="FILENAME"
+>@userdb@</TT
+> may be a directory instead of a plain file.
+In that case all files in <TT
+CLASS="FILENAME"
+>@userdb@</TT
+> are essentially
+concatenated, and are treated as a single file.
+Each line takes the following format:</P
+><P
+><A
+NAME="AEN47"
+></A
+><BLOCKQUOTE
+CLASS="BLOCKQUOTE"
+><DIV
+CLASS="INFORMALEXAMPLE"
+><P
+></P
+><A
+NAME="AEN48"
+></A
+><P
+CLASS="LITERALLAYOUT"
+><VAR
+CLASS="REPLACEABLE"
+>name</VAR
+><SPAN
+CLASS="TOKEN"
+>&#60;TAB&#62;</SPAN
+><VAR
+CLASS="REPLACEABLE"
+>field</VAR
+>=<VAR
+CLASS="REPLACEABLE"
+>value</VAR
+>|<VAR
+CLASS="REPLACEABLE"
+>field</VAR
+>=<VAR
+CLASS="REPLACEABLE"
+>value</VAR
+>...</P
+><P
+></P
+></DIV
+></BLOCKQUOTE
+>
+
+<VAR
+CLASS="REPLACEABLE"
+>name</VAR
+> is the account name.
+<VAR
+CLASS="REPLACEABLE"
+>name</VAR
+> MUST contain only lowercase characters 
+If <TT
+CLASS="APPLICATION"
+>Courier</TT
+> is
+configured to treat lowercase and uppercase account names as
+identical, <VAR
+CLASS="REPLACEABLE"
+>name</VAR
+> is followed by exactly one tab
+character, then a list of field/value pairs separated by vertical slashes.
+<VAR
+CLASS="REPLACEABLE"
+>field</VAR
+> is the name of the field,
+<VAR
+CLASS="REPLACEABLE"
+>value</VAR
+> is the field value.
+Fields and values themself cannot contain slashes or control characters.
+Fields may be
+specified in any order. Here are all the currently defined fields.  Note that
+not every field is used by every application that reads
+<TT
+CLASS="FILENAME"
+>@userdb@.dat</TT
+>.</P
+><A
+NAME="AEN63"
+></A
+><BLOCKQUOTE
+CLASS="BLOCKQUOTE"
+><P
+><TT
+CLASS="PARAMETER"
+><I
+>uid</I
+></TT
+> - <VAR
+CLASS="REPLACEABLE"
+>value</VAR
+> is a (possibly)
+unique numerical user ID for this account.</P
+><P
+><TT
+CLASS="PARAMETER"
+><I
+>gid</I
+></TT
+> - <VAR
+CLASS="REPLACEABLE"
+>value</VAR
+> is a (possibly)
+unique numerical group ID for this account.</P
+><P
+><TT
+CLASS="PARAMETER"
+><I
+>home</I
+></TT
+> - <VAR
+CLASS="REPLACEABLE"
+>value</VAR
+> is the account's home
+directory.</P
+><P
+><TT
+CLASS="PARAMETER"
+><I
+>shell</I
+></TT
+> - <VAR
+CLASS="REPLACEABLE"
+>value</VAR
+> is the account's default
+login shell.</P
+><P
+><TT
+CLASS="PARAMETER"
+><I
+>systempw</I
+></TT
+> - <VAR
+CLASS="REPLACEABLE"
+>value</VAR
+> is the account's
+password. See
+<A
+HREF="userdbpw.html"
+TARGET="_top"
+><SPAN
+CLASS="CITEREFENTRY"
+><SPAN
+CLASS="REFENTRYTITLE"
+>userdbpw</SPAN
+>(8)</SPAN
+></A
+>
+for details on how to set up this field.</P
+><P
+><TT
+CLASS="PARAMETER"
+><I
+>pop3pw, esmtppw, imappw...</I
+></TT
+> - <VAR
+CLASS="REPLACEABLE"
+>value</VAR
+>
+specifies a separate password used only for authenticating access using a
+specific service, such as POP3, IMAP, or anything else. If not defined,
+<TT
+CLASS="PARAMETER"
+><I
+>systempw</I
+></TT
+> is always used. This allows access to an account to be
+restricted only to certain services, such as POP3, even if other services
+are also enabled on the server.</P
+><P
+><TT
+CLASS="PARAMETER"
+><I
+>mail</I
+></TT
+> - <VAR
+CLASS="REPLACEABLE"
+>value</VAR
+> specifies the location of
+the account's Maildir mailbox. This is an optional field that is normally
+used when <B
+CLASS="COMMAND"
+>userdb</B
+> is used to provide aliases for other
+mail accounts.  For example, one particular multi-domain E-mail
+service configuration
+that's used by both <TT
+CLASS="APPLICATION"
+>Qmail</TT
+> and
+<TT
+CLASS="APPLICATION"
+>Courier</TT
+> servers is to deliver mail for a
+mailbox in a virtual domain, such as "user@example.com", to a local mailbox
+called "example-user".  Instead of requiring the E-mail account
+holder to log in as
+"example-user" to download mail from this account, a <B
+CLASS="COMMAND"
+>userdb</B
+>
+entry for "user@example.com" is set up with <TT
+CLASS="PARAMETER"
+><I
+>mail</I
+></TT
+> set to the
+location of example-user's Maildir mailbox, thus hiding the internal
+mail configuration from the E-mail account holder's view.</P
+><P
+><TT
+CLASS="PARAMETER"
+><I
+>quota</I
+></TT
+> - <VAR
+CLASS="REPLACEABLE"
+>value</VAR
+> specifies the
+maildir quota for the account's Maildir.
+This has nothing to do with actual filesystem quotas.
+<TT
+CLASS="APPLICATION"
+>Courier</TT
+> has a
+software-based Maildir quota enforcement
+mechanism which requires additional setup and configuration.
+See
+<A
+HREF="maildirquota.html"
+TARGET="_top"
+><SPAN
+CLASS="CITEREFENTRY"
+><SPAN
+CLASS="REFENTRYTITLE"
+>maildirquota</SPAN
+>(7)</SPAN
+></A
+>
+for additional information.</P
+></BLOCKQUOTE
+></DIV
+><DIV
+CLASS="REFSECT2"
+><A
+NAME="AEN103"
+></A
+><H3
+><TT
+CLASS="FILENAME"
+>@userdb@shadow.dat</TT
+></H3
+><P
+>All fields whose name ends with 'pw' will NOT copied to
+<TT
+CLASS="FILENAME"
+>@userdb@.dat</TT
+>. These fields will be copied to
+<TT
+CLASS="FILENAME"
+>@userdb@shadow.dat</TT
+>.
+<B
+CLASS="COMMAND"
+>makeuserdb</B
+> creates <TT
+CLASS="FILENAME"
+>@userdb@shadow.dat</TT
+>
+without any group and world permissions.
+Note that <B
+CLASS="COMMAND"
+>makeuserdb</B
+> reports an error
+if <B
+CLASS="COMMAND"
+>@userdb@</B
+> has any group
+or world permissions.</P
+></DIV
+><DIV
+CLASS="REFSECT2"
+><A
+NAME="AEN113"
+></A
+><H3
+>CONVERTING <TT
+CLASS="FILENAME"
+>/etc/passwd</TT
+>
+and vpopmail to <TT
+CLASS="FILENAME"
+>@userdb@</TT
+> format</H3
+><P
+><B
+CLASS="COMMAND"
+>pw2userdb</B
+> reads the <TT
+CLASS="FILENAME"
+>/etc/passwd</TT
+> and
+<TT
+CLASS="FILENAME"
+>/etc/shadow</TT
+> files and converts all entries to the
+<TT
+CLASS="FILENAME"
+>@userdb@</TT
+> format,
+printing the result on standard output.
+The output of <B
+CLASS="COMMAND"
+>pw2userdb</B
+>
+can be saved as <B
+CLASS="COMMAND"
+>@userdb@</B
+> (or as some file in this
+subdirectory).
+Linear searches of <TT
+CLASS="FILENAME"
+>/etc/passwd</TT
+> can
+be very slow when you have
+tens of thousands of accounts.
+Programs like <B
+CLASS="COMMAND"
+>maildrop</B
+> always look in
+<TT
+CLASS="FILENAME"
+>@userdb@</TT
+> first.
+By saving the system password file in
+<TT
+CLASS="FILENAME"
+>@userdb@</TT
+> it is possible to significantly reduce the
+amount of
+time it takes to look up this information.</P
+><P
+>After saving the output of <B
+CLASS="COMMAND"
+>pw2userdb</B
+>, you must still run
+<B
+CLASS="COMMAND"
+>makeuserdb</B
+> to create
+<TT
+CLASS="FILENAME"
+>@userdb@.dat</TT
+>.</P
+><P
+><B
+CLASS="COMMAND"
+>vchkpw2userdb</B
+> converts a vpopmail-style
+directory hierarchy to the <TT
+CLASS="FILENAME"
+>@userdb@</TT
+> format.
+This is an external virtual domain management package that's often used
+with <TT
+CLASS="APPLICATION"
+>Qmail</TT
+> servers.</P
+><P
+>Generally, an account named 'vpopmail' is reserved for this purpose.
+In
+that account the file <TT
+CLASS="FILENAME"
+>users/vpasswd</TT
+> has the same
+layout as
+<TT
+CLASS="FILENAME"
+>/etc/passwd</TT
+>, and performs a similar function, except
+that all userid in <TT
+CLASS="FILENAME"
+>users/vpasswd</TT
+> have the same userid.
+Additionally, the
+<TT
+CLASS="FILENAME"
+>domains</TT
+> subdirectory stores virtual accounts for
+multiple domains.  For example,
+<TT
+CLASS="FILENAME"
+>domains/example.com/vpasswd</TT
+>
+has the passwd file for the domain <TT
+CLASS="PARAMETER"
+><I
+>example.com</I
+></TT
+>.
+Some systems also have a soft link, <TT
+CLASS="PARAMETER"
+><I
+>domains/default</I
+></TT
+>,
+that points to a domain that's considered a "default" domain.</P
+><P
+>The <B
+CLASS="COMMAND"
+>vchkpw2userdb</B
+> reads all this information, and tries to
+convert it into the <TT
+CLASS="FILENAME"
+>@userdb@</TT
+> format.  The
+<TT
+CLASS="PARAMETER"
+><I
+>--vpopmailhost</I
+></TT
+> option specifies the top level
+directory, if it is
+not the home directory of the vpopmail account.</P
+><P
+>The <B
+CLASS="COMMAND"
+>vchkpw2userdb</B
+> script prints the results on standard
+output. If specified, the <TT
+CLASS="PARAMETER"
+><I
+>--todir</I
+></TT
+> option
+tries to convert all
+<TT
+CLASS="FILENAME"
+>vpasswd</TT
+> files one at a time, saving each one
+individually in <VAR
+CLASS="REPLACEABLE"
+>dir</VAR
+>. For example:
+
+<A
+NAME="AEN153"
+></A
+><BLOCKQUOTE
+CLASS="BLOCKQUOTE"
+><DIV
+CLASS="INFORMALEXAMPLE"
+><P
+></P
+><A
+NAME="AEN154"
+></A
+><P
+CLASS="LITERALLAYOUT"
+>mkdir&nbsp;@userdb@<br>
+vchkpw2userdb&nbsp;--todir=@userdb@/vpopmail<br>
+makeuserdb</P
+><P
+></P
+></DIV
+></BLOCKQUOTE
+></P
+><P
+>It is still necessary to run <B
+CLASS="COMMAND"
+>makeuserdb</B
+>, of course, to
+create the binary database file <TT
+CLASS="FILENAME"
+>@userdb@.dat</TT
+></P
+><P
+>NOTE:  You are still required to create the <B
+CLASS="COMMAND"
+>@userdb@</B
+> entry
+which maps
+system userids back to accounts,
+"<VAR
+CLASS="REPLACEABLE"
+>uid</VAR
+>=<SPAN
+CLASS="TOKEN"
+>&#60;TAB&#62;</SPAN
+><VAR
+CLASS="REPLACEABLE"
+>name</VAR
+>",
+if that's applicable. <B
+CLASS="COMMAND"
+>vchkpw2userdb</B
+> will not do it for
+you.</P
+><P
+>NOTE:  <B
+CLASS="COMMAND"
+>makeuserdb</B
+> may complain about duplicate entries, if
+your "default" entries in <TT
+CLASS="FILENAME"
+>users/vpasswd</TT
+> or
+<TT
+CLASS="FILENAME"
+>domains/default/vpasswd</TT
+> are the same as anything in any
+other <TT
+CLASS="FILENAME"
+>@userdb@</TT
+> file.  It is also likely that you'll end
+up with duplicate, but distinct, entries for every account in the default
+domain.  For
+example, if your default domain is example.com, you'll end up with duplicate
+entries - you'll have entries for both <TT
+CLASS="PARAMETER"
+><I
+>user</I
+></TT
+> and
+<TT
+CLASS="PARAMETER"
+><I
+>user@example.com</I
+></TT
+>.</P
+><P
+>If you intend to maintain the master set of accounts using
+vchkpw/vpopmail,
+in order to avoid cleaning this up every time, you might want to consider
+doing the following: run <B
+CLASS="COMMAND"
+>vchkpw2userdb</B
+> once, using the
+<TT
+CLASS="PARAMETER"
+><I
+>--todir</I
+></TT
+> option.
+Then, go into the resulting directory, and
+replace one of the redundant files with a soft link to
+<TT
+CLASS="FILENAME"
+>/dev/null</TT
+>.
+This allows you to run
+<B
+CLASS="COMMAND"
+>vchkpw2userdb</B
+> without having to go in and
+cleaning up again, afterwards.</P
+></DIV
+></DIV
+><DIV
+CLASS="REFSECT1"
+><A
+NAME="AEN177"
+></A
+><H2
+>FILES</H2
+><P
+><P
+CLASS="LITERALLAYOUT"
+><TT
+CLASS="FILENAME"
+>@userdb@</TT
+><br>
+<TT
+CLASS="FILENAME"
+>@userdb@.dat</TT
+><br>
+<TT
+CLASS="FILENAME"
+>@userdb@shadow.dat</TT
+><br>
+<TT
+CLASS="FILENAME"
+>@tmpdir@/userdb.tmp</TT
+>&nbsp;-&nbsp;temporary&nbsp;file<br>
+<TT
+CLASS="FILENAME"
+>@tmpdir@/userdbshadow.tmp</TT
+>&nbsp;-&nbsp;temporary&nbsp;file</P
+></P
+></DIV
+><DIV
+CLASS="REFSECT1"
+><A
+NAME="AEN186"
+></A
+><H2
+>BUGS</H2
+><P
+><B
+CLASS="COMMAND"
+>makeuserdb</B
+> is a Perl script, and uses Perl's portable
+locking.
+Perl's documentation notes that certain combinations of locking options may
+not work with some networks.</P
+></DIV
+><DIV
+CLASS="REFSECT1"
+><A
+NAME="AEN190"
+></A
+><H2
+>SEE ALSO</H2
+><P
+><A
+HREF="userdb.html"
+TARGET="_top"
+><SPAN
+CLASS="CITEREFENTRY"
+><SPAN
+CLASS="REFENTRYTITLE"
+>userdb</SPAN
+>(8)</SPAN
+></A
+>,
+<A
+HREF="maildrop.html"
+TARGET="_top"
+><SPAN
+CLASS="CITEREFENTRY"
+><SPAN
+CLASS="REFENTRYTITLE"
+>maildrop</SPAN
+>(8)</SPAN
+></A
+>,
+<A
+HREF="courier.html"
+TARGET="_top"
+><SPAN
+CLASS="CITEREFENTRY"
+><SPAN
+CLASS="REFENTRYTITLE"
+>courier</SPAN
+>(8)</SPAN
+></A
+>,
+<A
+HREF="maildirquota.html"
+TARGET="_top"
+><SPAN
+CLASS="CITEREFENTRY"
+><SPAN
+CLASS="REFENTRYTITLE"
+>maildirquota</SPAN
+>(7)</SPAN
+></A
+>.</P
+></DIV
+></BODY
+></HTML
+>

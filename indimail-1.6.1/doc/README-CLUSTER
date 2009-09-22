@@ -1,0 +1,113 @@
+    You can either have a normal non-clustered domain or a clustered domain. To achieve high
+    performance needed for high volume servers, IndiMail uses MySQL to store some of the information
+    in MySQL tables. All indimail program depend on one or more control file to figure out how to
+    extract this information stored in MySQL tables.
+
+    IndiMail supports a cluster of servers for a domain.
+
+    There are three types of servers
+    1) hostcntrl  - This is the host which has a MySQL for storing the location of each user. Location
+       information is information like hostid, ip address
+    2) Mailstores - A mailstore is a host which has disk space to host user's mailboxes.
+       Each mailstore can have its own set of users. You can call each host a 'node'.
+    3) Relay Server - A relay server acts as an SMTP gateway between the user and the mailstore or
+       between the user and the internet
+    4) Webmail - This servers run a webmail software (like squirellmail, roundcube, etc).
+    5) IMAP/POP3 Gateway - These servers run IndiMail's IMAP/POP3 Proxies
+
+    The control files used to figure out the MySQL server depends on whether you are running
+    a clustered or a non-clustered domain. Read below to know more about this.
+
+    Non-Clustered Domain
+    --------------------
+    First you need to have all local information stored in MySQL (change localhost to the
+    appropriate host)
+
+    echo localhost > /var/indimail/control/host.mysql   (MySQL host to which all programs will
+                                                        connect)
+
+    Clustered Domain
+    ----------------
+
+    Adding the first Mailstore in a cluster
+    =======================================
+
+    There are four files required on all hosts serving mailboxes (mailstores) for 
+    clustered domain - host.mysql,host.cntrl,host.master & mcdinfo
+
+    echo hostcntrl_host > /var/indimail/control/host.mysql   (MySQL host to which all programs will
+                                                             connect)
+    When you have a clustered domain, IndiMail supports the use of Master-Slave architecture in
+    MySQL.
+
+    echo hostcntrl_master > /var/indimail/control/host.master (for a clustered domain, the master host)
+    echo hostcntrl_slave  > /var/indimail/control/host.cntrl  (for a clustered domain, the slave host)
+
+    where hostcntrl_master is the IP address of MySQL Master having the host control information.
+    where hostcntrl_slaver is the IP address of MySQL Slave  having the host control information.
+
+    In case you don't desire a master-slave architecture, hostcntrl_master and hostcntrl_slave
+    can be the same
+
+    You also need to have a file called mcdinfo having information for all hosts which will host
+    the domain indimail.org
+
+    e.g. run the following command to create a clustered domain with just two mail clusters on
+    hosts 192.168.2.115 and 192.168.2.116. The cluster information for all users will be
+    maintained on the MySQL host at 192.168.2.110. Updating the file on any host updates the file
+    on all hosts. You can use any text editor to edit this file.
+
+    You can use the command /var/indimail/bin/dbinfo -s to show this information.
+
+    (
+    echo "domain   indimail.org                     1"
+    echo "server   192.168.2.110" # MySQL Server for Cluster Information
+    echo "mdahost  192.168.2.115" # Mail Store
+    echo "port     3306"
+    echo "database indimail"
+    echo "user     indimail"
+    echo "pass     ssh-1.5-"
+    echo
+    echo "domain   indimail.org                     1"
+    echo "server   192.168.2.110" # MySQL Server for Cluster Information
+    echo "mdahost  192.168.2.116" # Mail Store
+    echo "port     3306"
+    echo "database indimail"
+    echo "user     indimail"
+    echo "pass     ssh-1.5-"
+    echo
+    ) > /var/indimail/control/mcdinfo
+
+    The cluster information is maintained in the MySQL table dbinfo
+    Every host has to be assigned a unique identifier called hostid
+    Each hostid is associated with the IP address of the mail store host    
+    You can use the command vhostid to add, insert, delete or update this
+    information. The hostid can be stored in the conrol file /var/indimail/control/hostid.
+    In case this control file is not there, IndiMail will use the gethostid(2) system
+    call to get the hostid. The dbinfo table can also be modified directly. The immediate
+    next call to 'dbinfo -s' will create the file mcdinfo. One can also use 'dbinfo -i'
+    to add entries to dbinfo table. In a cluster you need to update mcdinfo only on one
+    host. The entries to mcdinfo on all hosts part of the cluster automatically get updated.
+
+    When you add a user to a host in the cluster, the user gets added to a 
+    MySQL table hostcntrl. This table maintains the username, domain and the
+    hostid on which the user's mailbox lies.
+
+    The SMTP, IMAP/POP3 processes all look into the tables hostcntrl and host_table to
+    figure out the host which has the user's mailbox. You can specify the -m or -h
+    argument to vadduser to create users on specific hosts.
+
+    Adding a New Mailstore to a Cluster
+    ===================================
+    1) Create the files host.cntrl, host.master in /var/indimail/control
+    2) use vadddomain on the new node to add domain
+    3) Use dbinfo -i to add entry for the new node
+
+    Adding a New Relay Server/Proxy IMAP/Proxy POP3 Server to a cluster
+    ===================================================================
+    1) Create the files host.cntrl, host.master in /var/indimail/control
+    2) run dbinfo -s
+
+
+NOTE: This document is WIP and will undergo frequent changes till i get satisfied. Help
+in simplifying this will be highly apprecated.

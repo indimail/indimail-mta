@@ -1,0 +1,187 @@
+/*
+ * $Log: vsetuserquota.c,v $
+ * Revision 2.2  2008-08-02 09:10:46+05:30  Cprogrammer
+ * use new function error_stack
+ *
+ * Revision 2.1  2004-07-03 23:56:06+05:30  Cprogrammer
+ * check return status of parse_email
+ *
+ * Revision 1.10  2002-02-24 22:47:11+05:30  Cprogrammer
+ * added getversion
+ *
+ * Revision 1.9  2001-12-27 01:31:34+05:30  Cprogrammer
+ * version and verbose switch update
+ *
+ * Revision 1.8  2001-12-19 20:40:22+05:30  Cprogrammer
+ * err message if user does not exist
+ *
+ * Revision 1.7  2001-12-08 17:46:26+05:30  Cprogrammer
+ * usage message change
+ *
+ * Revision 1.6  2001-11-29 21:00:28+05:30  Cprogrammer
+ * conditional compilation of distributed arch
+ *
+ * Revision 1.5  2001-11-28 23:12:43+05:30  Cprogrammer
+ * code for distributed architecture added
+ *
+ * Revision 1.4  2001-11-24 12:22:31+05:30  Cprogrammer
+ * version information added
+ *
+ * Revision 1.3  2001-11-20 11:02:17+05:30  Cprogrammer
+ * *** empty log message ***
+ *
+ * Revision 1.2  2001-11-14 19:29:43+05:30  Cprogrammer
+ * distributed arch change
+ *
+ * Revision 1.1  2001-10-24 18:15:46+05:30  Cprogrammer
+ * Initial revision
+ *
+ * vsetuserquota
+ * part of the indimail package
+ * 
+ * Copyright (C) 1999 Inter7 Internet Technologies, Inc.
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA
+ */
+#include "indimail.h"
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <unistd.h>
+#include <string.h>
+#include <pwd.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+#include <signal.h>
+
+#ifndef	lint
+static char     sccsid[] = "$Id: vsetuserquota.c,v 2.2 2008-08-02 09:10:46+05:30 Cprogrammer Stab mbhangui $";
+#endif
+
+char            Email[MAX_BUFF];
+char            User[MAX_BUFF];
+char            Domain[MAX_BUFF];
+char            Quota[MAX_BUFF];
+char            TmpBuf1[MAX_BUFF];
+
+int             get_options(int argc, char **argv);
+void            usage();
+
+int
+main(argc, argv)
+	int             argc;
+	char           *argv[];
+{
+	int             i;
+#ifdef CLUSTERED_SITE
+	char            tmpbuf[MAX_BUFF];
+#endif
+	char           *real_domain;
+
+	if(get_options(argc, argv))
+		return(1);
+	for (i = 1; i < argc; ++i)
+	{
+		if (Email[0] == 0)
+			scopy(Email, argv[i], MAX_BUFF);
+		else
+			scopy(Quota, argv[i], MAX_BUFF);
+	}
+	lowerit(Email);
+	if (parse_email(Email, User, Domain, MAX_BUFF))
+	{
+		fprintf(stderr, "%s: Email too long\n", Email);
+		return(1);
+	}
+	if(!(real_domain = vget_real_domain(Domain)))
+	{
+		fprintf(stderr, "%s: No such domain\n", Domain);
+		return(1);
+	}
+#ifdef CLUSTERED_SITE
+	if((i = is_distributed_domain(real_domain)) == -1)
+	{
+		fprintf(stderr, "Unable to verify %s as a distributed domain\n", real_domain);
+		return(1);
+	} else
+	if(i == 1)
+	{
+		snprintf(tmpbuf, MAX_BUFF, "%s@%s", User, real_domain);
+		if(!findhost(tmpbuf, 1))
+		{
+			error_stack(stderr, "no such user %s@%s\n", User, real_domain);
+			return(1);
+		}
+	}
+#endif
+	if((i = vsetuserquota(User, real_domain, Quota)))
+		error_stack(stderr, 0);
+	vclose();
+	return(0);
+}
+
+void
+usage()
+{
+	printf("usage: vsetuserquota [options] email_address quota_in_bytes\n");
+	printf("options:\n");
+	printf("-V (print version number)\n");
+	printf("-v (verbose)\n");
+}
+
+int
+get_options(int argc, char **argv)
+{
+	int             c;
+	int             errflag;
+
+	memset(Email, 0, MAX_BUFF);
+	memset(Quota, 0, MAX_BUFF);
+	memset(Domain, 0, MAX_BUFF);
+	memset(TmpBuf1, 0, MAX_BUFF);
+	errflag = 0;
+	while (!errflag && (c = getopt(argc, argv, "Vv")) != -1)
+	{
+		switch (c)
+		{
+		case 'V':
+			getversion(sccsid);
+			break;
+		case 'v':
+			verbose = 1;
+			break;
+		default:
+			errflag = 1;
+			break;
+		}
+	}
+	if (optind < argc)
+		scopy(Email, argv[optind++], MAX_BUFF);
+	if (optind < argc)
+		scopy(Quota, argv[optind++], MAX_BUFF);
+	if (errflag || !*Email || !*Quota)
+	{
+		usage();
+		return(1);
+	}
+	return(0);
+}
+
+void
+getversion_vsetuserquota_c()
+{
+	printf("%s\n", sccsid);
+	printf("%s\n", sccsidh);
+}

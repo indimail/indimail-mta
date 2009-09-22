@@ -1,0 +1,860 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN">
+<HTML
+><HEAD
+><link rel='stylesheet' type='text/css' href='manpage.css'>
+  <!-- $Id: maildir.sgml,v 1.4 2004/07/12 22:56:00 mrsam Exp $ -->
+  <!-- Copyright 1998 - 2001 Double Precision, Inc.  See COPYING for -->
+  <!-- distribution information. -->
+<meta name="MSSmartTagsPreventParsing" content="TRUE">
+<link rel="icon" href="icon.gif" type="image/gif" />
+<TITLE
+>maildir</TITLE
+><META
+NAME="GENERATOR"
+CONTENT="Modular DocBook HTML Stylesheet Version 1.7"></HEAD
+><BODY
+CLASS="REFENTRY"
+BGCOLOR="#FFFFFF"
+TEXT="#000000"
+LINK="#0000FF"
+VLINK="#840084"
+ALINK="#0000FF"
+><H1
+><A
+NAME="MAILDIR"
+></A
+>maildir</H1
+><DIV
+CLASS="REFNAMEDIV"
+><A
+NAME="AEN10"
+></A
+><H2
+>Name</H2
+>maildir&nbsp;--&nbsp;E-mail directory</DIV
+><DIV
+CLASS="REFSYNOPSISDIV"
+><A
+NAME="AEN13"
+></A
+><H2
+>Synopsis</H2
+><P
+>$HOME/Maildir</P
+></DIV
+><DIV
+CLASS="REFSECT1"
+><A
+NAME="AEN15"
+></A
+><H2
+>DESCRIPTION</H2
+><P
+>A <SPAN
+CLASS="QUOTE"
+>"Maildir"</SPAN
+> is a structured directory that holds E-mail
+messages.
+Maildirs were first implemented by the
+<TT
+CLASS="APPLICATION"
+>Qmail</TT
+> mail server.
+Qmail's maildirs were a simple data structure, nothing more than a single
+collection of E-mail messages.
+<TT
+CLASS="APPLICATION"
+>Courier</TT
+> builds upon
+<TT
+CLASS="APPLICATION"
+>Qmail</TT
+>'s maildirs to provide
+extended functionality, such as folders and quotas.
+This document describes
+<TT
+CLASS="APPLICATION"
+>Courier</TT
+>'s extended maildirs,
+without explicitly identifying
+<TT
+CLASS="APPLICATION"
+>Courier</TT
+>-specific extensions.
+See
+<SPAN
+CLASS="CITEREFENTRY"
+><SPAN
+CLASS="REFENTRYTITLE"
+>maildir</SPAN
+>(5)</SPAN
+>
+in Qmail's documentation for the original definition of
+maildirs.</P
+><P
+>Traditionally, E-mail folders were saved as plain text files, called
+<SPAN
+CLASS="QUOTE"
+>"mboxes"</SPAN
+>.
+Mboxes have known limitations.
+Only one application can use an mbox at the same time.
+Locking is required in order to allow
+simultaneous concurrent access by different applications.
+Locking is often problematic, and not very reliable in network-based
+filesystem requirements.
+Some network-based filesystems don't offer any reliable locking mechanism
+at all.
+Furthermore, even bulletproof locking won't prevent occasional mbox
+corruption.
+A process
+can be killed or terminated in the middle of updating an mbox.
+This will likely result in corruption, and a loss of most messages in the
+mbox.</P
+><P
+>Maildirs allow multiple concurrent access by different applications.
+Maildirs do not require locking.
+Multiple applications can update a maildir at the same time, without
+stepping on each other's feet.</P
+><DIV
+CLASS="REFSECT2"
+><A
+NAME="AEN30"
+></A
+><H3
+>Maildir contents</H3
+><P
+>A <SPAN
+CLASS="QUOTE"
+>"maildir"</SPAN
+> is a directory that's created by
+<A
+HREF="maildirmake.html"
+TARGET="_top"
+><SPAN
+CLASS="CITEREFENTRY"
+><SPAN
+CLASS="REFENTRYTITLE"
+>maildirmake</SPAN
+>(1)</SPAN
+></A
+>.
+Naturally, maildirs should not have any group or world permissions,
+unless you want other people to read your mail.
+A maildir contains three subdirectories:
+<TT
+CLASS="FILENAME"
+>tmp</TT
+>, <TT
+CLASS="FILENAME"
+>new</TT
+>, and
+<TT
+CLASS="FILENAME"
+>cur</TT
+>.
+These three subdirectories comprise the primary folder, where new mail
+is delivered by the system.</P
+><P
+>Folders are
+additional subdirectories in the maildir
+whose names begin with a period: such as
+<TT
+CLASS="FILENAME"
+>.Drafts</TT
+> or <TT
+CLASS="FILENAME"
+>.Sent</TT
+>.
+Each folder itself contains the
+same three subdirectories, <TT
+CLASS="FILENAME"
+>tmp</TT
+>, <TT
+CLASS="FILENAME"
+>new</TT
+>,
+and <TT
+CLASS="FILENAME"
+>cur</TT
+>,
+and an additional zero-length file named
+<TT
+CLASS="FILENAME"
+>maildirfolder</TT
+>, whose purpose is to inform any mail
+delivery agent that it's really delivering to a folder, and that
+the mail delivery agent should look in the parent directory for
+any maildir-related information.</P
+><P
+>Folders are not physically nested.
+A folder subdirectory,
+such as <TT
+CLASS="FILENAME"
+>.Sent</TT
+>
+does not itself contain any subfolders.
+The main maildir contains a single, flat list of subfolders.
+These folders are logically nested,
+and periods serve to separate folder hierarchies.
+For example, <TT
+CLASS="FILENAME"
+>.Sent.2002</TT
+> is considered to be a subfolder
+called <SPAN
+CLASS="QUOTE"
+>"2002"</SPAN
+> which is a subfolder of <SPAN
+CLASS="QUOTE"
+>"Sent"</SPAN
+>.</P
+><DIV
+CLASS="REFSECT3"
+><A
+NAME="AEN53"
+></A
+><H4
+>Folder name encoding</H4
+><P
+>Folder names can contain any Unicode character, except for control characters.
+US-ASCII characters, U+0x0020 - U+0x007F, except for the period,
+forward-slash, and
+ampersand characters (U+0x002E, U+0x002F, and U+0x0026) represent themselves.
+The ampersand is represent by the two character sequence <SPAN
+CLASS="QUOTE"
+>"&#38;-"</SPAN
+>.
+The period, forward slash, and non US-ASCII Unicode characters
+are represented using the UTF-7 character set, and encoded with
+a modified form of base64-encoding.</P
+><P
+>The <SPAN
+CLASS="QUOTE"
+>"&#38;"</SPAN
+>
+character starts the modified base64-encoded sequence; the sequence
+is
+terminated by the <SPAN
+CLASS="QUOTE"
+>"-"</SPAN
+> character.
+The sequence of 16-bit Unicode characters is
+written in big-endian order, and
+encoded using the base64-encoding method described in section 5.2
+of <A
+HREF="http://www.rfc-editor.org/rfc/rfc1521.txt"
+TARGET="_top"
+>RFC 1521</A
+>,
+with the following modifications:</P
+><P
+></P
+><UL
+><LI
+><P
+>The <SPAN
+CLASS="QUOTE"
+>"="</SPAN
+> padding character is omitted.
+When decoding, an incomplete 16-bit character is discarded.</P
+></LI
+><LI
+><P
+>The comma character, <SPAN
+CLASS="QUOTE"
+>","</SPAN
+> is used in place of the
+<SPAN
+CLASS="QUOTE"
+>"/"</SPAN
+> character in the base64 alphabet.</P
+></LI
+></UL
+><P
+>For example, the word <SPAN
+CLASS="QUOTE"
+>"Resume"</SPAN
+> with both "e"s being the
+e-acute character, U+0x00e9,
+is encoded as
+<SPAN
+CLASS="QUOTE"
+>"R&#38;AOk-sum&#38;AOk-"</SPAN
+>
+(so a folder of that name would be a maildir subdirectory called
+<SPAN
+CLASS="QUOTE"
+>".R&#38;AOk-sum&#38;AOk-"</SPAN
+>).</P
+></DIV
+><DIV
+CLASS="REFSECT3"
+><A
+NAME="AEN73"
+></A
+><H4
+>Other maildir contents</H4
+><P
+>Software that uses maildirs may also create
+additional files besides the
+<TT
+CLASS="FILENAME"
+>tmp</TT
+>, <TT
+CLASS="FILENAME"
+>new</TT
+>, and
+<TT
+CLASS="FILENAME"
+>cur</TT
+> subdirectories -- in the main maildir or a
+subfolder -- for its own purposes.</P
+></DIV
+></DIV
+><DIV
+CLASS="REFSECT2"
+><A
+NAME="AEN79"
+></A
+><H3
+>Messages</H3
+><P
+>E-mail messages are stored in separate, individual files,
+one E-mail message per file.
+The <TT
+CLASS="FILENAME"
+>tmp</TT
+> subdirectory temporarily
+stores E-mail messages that are in the process of being delivered
+to this maildir.  <TT
+CLASS="FILENAME"
+>tmp</TT
+> may also
+store other kinds of temporary
+files, as long as they are created in the same way that message files are
+created in <TT
+CLASS="FILENAME"
+>tmp</TT
+>.
+The <TT
+CLASS="FILENAME"
+>new</TT
+> subdirectory stores messages
+that have been delivered to this maildir, but have not yet been seen by any
+mail application.
+The <TT
+CLASS="FILENAME"
+>cur</TT
+> subdirectory stores messages that have
+already been seen by mail applications.</P
+></DIV
+><DIV
+CLASS="REFSECT2"
+><A
+NAME="AEN87"
+></A
+><H3
+>Adding new mail to maildirs</H3
+><P
+>The following process delivers a new message to the maildir:</P
+><P
+>A new unique filename is created using one of two possible forms:
+<SPAN
+CLASS="QUOTE"
+>"time.MusecPpid.host"</SPAN
+>, or
+<SPAN
+CLASS="QUOTE"
+>"time.MusecPpid_unique.host"</SPAN
+>.
+<SPAN
+CLASS="QUOTE"
+>"time"</SPAN
+> and
+<SPAN
+CLASS="QUOTE"
+>"usec"</SPAN
+>
+is the current system
+time, obtained from
+<SPAN
+CLASS="CITEREFENTRY"
+><SPAN
+CLASS="REFENTRYTITLE"
+>gettimeofday</SPAN
+>(2)</SPAN
+>.
+<SPAN
+CLASS="QUOTE"
+>"pid"</SPAN
+> is the process number of the process that is
+delivering this message to the maildir.
+<SPAN
+CLASS="QUOTE"
+>"host"</SPAN
+> is the name of the machine
+where the mail is being delivered.  In the event that the same process
+creates multiple messages, a suffix unique to each message
+is appended to the process id;
+preferrably an underscore, followed by an increasing counter. This applies
+whether messages created by a process are all added
+to the same, or different,
+maildirs.
+This protocol allows multiple processes running on multiple machines
+on the same network to simultaneously create new messages without stomping on
+each other.</P
+><P
+>The filename created in the previous step is checked for
+existence by
+executing the
+<SPAN
+CLASS="CITEREFENTRY"
+><SPAN
+CLASS="REFENTRYTITLE"
+>stat</SPAN
+>(2)</SPAN
+>
+system call.
+If
+<SPAN
+CLASS="CITEREFENTRY"
+><SPAN
+CLASS="REFENTRYTITLE"
+>stat</SPAN
+>(2)</SPAN
+>
+results in ANYTHING OTHER
+than the system error <TT
+CLASS="LITERAL"
+>ENOENT</TT
+>,
+the process must sleep for two
+seconds, then go back and create another unique filename.
+This is an extra step
+to insure that each new message has a completely unique filename.</P
+><P
+>Other applications that wish to use <TT
+CLASS="FILENAME"
+>tmp</TT
+>
+for temporary storage
+should observe the same protocol (but see READING MAIL FROM MAILDIRS below,
+because old files in <TT
+CLASS="FILENAME"
+>tmp</TT
+> will be eventually
+deleted).</P
+><P
+>If the
+<SPAN
+CLASS="CITEREFENTRY"
+><SPAN
+CLASS="REFENTRYTITLE"
+>stat</SPAN
+>(2)</SPAN
+>
+system call returned <TT
+CLASS="LITERAL"
+>ENOENT</TT
+>, the process
+may proceed to create the file in the <TT
+CLASS="FILENAME"
+>tmp</TT
+>
+subdirectory, and save
+the entire message in the new file.  The message saved MUST NOT have the
+<SPAN
+CLASS="QUOTE"
+>"From_"</SPAN
+> header that is used to mboxes.
+The message also MUST NOT have any <SPAN
+CLASS="QUOTE"
+>"From_"</SPAN
+> lines
+in the contents of the message prefixed by the
+<SPAN
+CLASS="QUOTE"
+>"&#62;"</SPAN
+> character.</P
+><P
+>When saving the message,
+the number of
+bytes returned by the
+<SPAN
+CLASS="CITEREFENTRY"
+><SPAN
+CLASS="REFENTRYTITLE"
+>write</SPAN
+>(2)</SPAN
+>
+system call must be checked, in order
+to make sure that the complete message has been written out.</P
+><P
+>After the message is saved,
+the file descriptor is
+<SPAN
+CLASS="CITEREFENTRY"
+><SPAN
+CLASS="REFENTRYTITLE"
+>fstat</SPAN
+>(2)</SPAN
+>-ed.
+The file's device number, inode number, and the its byte size, are saved.
+The file is closed and is then
+immediately
+moved/renamed into the <TT
+CLASS="FILENAME"
+>new</TT
+> subdirectory.
+The name of the file in <TT
+CLASS="FILENAME"
+>new</TT
+>
+should be
+<SPAN
+CLASS="QUOTE"
+>"time.MusecPpidVdevIino.host,S=<VAR
+CLASS="REPLACEABLE"
+>cnt</VAR
+>"</SPAN
+>, or
+<SPAN
+CLASS="QUOTE"
+>"time.MusecPpidVdevIino_unique.host,S=<VAR
+CLASS="REPLACEABLE"
+>cnt</VAR
+>"</SPAN
+>.
+<SPAN
+CLASS="QUOTE"
+>"dev"</SPAN
+> is the message's device number,
+<SPAN
+CLASS="QUOTE"
+>"ino"</SPAN
+> is the message's inode number
+(from the previous
+<SPAN
+CLASS="CITEREFENTRY"
+><SPAN
+CLASS="REFENTRYTITLE"
+>fstat</SPAN
+>(2)</SPAN
+>
+call);
+and <SPAN
+CLASS="QUOTE"
+>"cnt"</SPAN
+> is the message's size, in bytes.</P
+><P
+>The <SPAN
+CLASS="QUOTE"
+>",S=<VAR
+CLASS="REPLACEABLE"
+>cnt</VAR
+>"</SPAN
+>
+part optimizes <A
+HREF="http://www.courier-mta.org"
+TARGET="_top"
+>Courier</A
+>'s
+maildir quota enhancement; it allows the size of all the mail stored in
+the maildir to be added up without issuing the
+<SPAN
+CLASS="CITEREFENTRY"
+><SPAN
+CLASS="REFENTRYTITLE"
+>stat</SPAN
+>(2)</SPAN
+>
+system call
+for each individual message (this can be quite a performance drain with
+certain network filesystems).</P
+></DIV
+><DIV
+CLASS="REFSECT2"
+><A
+NAME="AEN147"
+></A
+><H3
+>READING MAIL FROM MAILDIRS</H3
+><P
+>Applications that read mail from maildirs should do it in the following
+order:</P
+><P
+>When opening a maildir or a maildir folder, read the <TT
+CLASS="FILENAME"
+>tmp</TT
+>
+subdirectory and delete any files in there that are at least 36 hours
+old.</P
+><P
+>Look for new messages in the <TT
+CLASS="FILENAME"
+>new</TT
+> subdirectory.
+Rename <VAR
+CLASS="REPLACEABLE"
+>new/filename</VAR
+>,
+as <VAR
+CLASS="REPLACEABLE"
+>cur/filename:2,info</VAR
+>.
+Here, <VAR
+CLASS="REPLACEABLE"
+>info</VAR
+> represents the state of the message,
+and it
+consists of zero or more boolean flags chosen from the following:
+<SPAN
+CLASS="QUOTE"
+>"<TT
+CLASS="LITERAL"
+>D</TT
+>"</SPAN
+> - this is a 'draft' message,
+<SPAN
+CLASS="QUOTE"
+>"<TT
+CLASS="LITERAL"
+>R</TT
+>"</SPAN
+> - this message has been replied to,
+<SPAN
+CLASS="QUOTE"
+>"<TT
+CLASS="LITERAL"
+>S</TT
+>"</SPAN
+> - this message has been viewed (seen),
+<SPAN
+CLASS="QUOTE"
+>"<TT
+CLASS="LITERAL"
+>T</TT
+>"</SPAN
+> - this
+message has been marked to be deleted (trashed), but is not yet
+removed (messages are removed from maildirs simply by deleting their file),
+<SPAN
+CLASS="QUOTE"
+>"<TT
+CLASS="LITERAL"
+>F</TT
+>"</SPAN
+> - this message has been marked by the
+user, for some purpose.
+These flags must be stored in alphabetical order.
+New messages contain only the <TT
+CLASS="LITERAL"
+>:2,</TT
+>
+suffix, with no flags, indicating that the messages were not seen,
+replied, marked, or deleted.</P
+><P
+>Maildirs may have maximum size quotas defined, but these quotas are purely
+voluntary.  If you need to implement mandatory quotas, you should use any
+quota facilities provided by the underlying filesystem that is used to store
+the maildirs.  The maildir quota enhancement is designed to be used in certain
+situations where filesystem-based quotas cannot be used for some reason.  The
+implementation is designed to avoid the use of any locking.  As such, at
+certain times the calculated quota may be imprecise, and certain anomalous
+situations may result in the maildir actually going over the stated quota. One
+such situation would be when applications create messages without updating the
+quota estimate for the maildir.  Eventually it will be precisely recalculated,
+but wherever possible new messages should be created in compliance with the
+voluntary quota protocol.</P
+><P
+>The voluntary quota protocol involves some additional procedures that must
+be followed when creating or deleting messages within a given maildir or its
+subfolders.  The
+<A
+HREF="deliverquota.html"
+TARGET="_top"
+><SPAN
+CLASS="CITEREFENTRY"
+><SPAN
+CLASS="REFENTRYTITLE"
+>deliverquota</SPAN
+>(8)</SPAN
+></A
+>
+command is a
+tiny application that delivers a single message to a maildir using the
+voluntary quota protocol, and hopefully it can be used as a measure of last
+resort.  Alternatively, applications can use the
+<TT
+CLASS="FILENAME"
+>libmaildir.a</TT
+>
+library to handle all the low-level dirty details for them. The voluntary
+quota enhancement is described in the
+<A
+HREF="maildirquota.html"
+TARGET="_top"
+><SPAN
+CLASS="CITEREFENTRY"
+><SPAN
+CLASS="REFENTRYTITLE"
+>maildirquota</SPAN
+>(7)</SPAN
+></A
+>
+man page.</P
+></DIV
+><DIV
+CLASS="REFSECT2"
+><A
+NAME="AEN179"
+></A
+><H3
+>Maildir Quotas</H3
+><P
+>This is a voluntary mechanism for enforcing "loose" quotas on the maximum
+sizes of maildirs.  This mechanism is enforced in software, and not by the
+operating system.  Therefore it is only effective as long as the maildirs
+themselves are not directly accessible by their users, since this mechanism
+is trivially disabled.</P
+><P
+>If possible, operating system-enforced quotas are preferrable.
+Where operating system quota enforcement is not available, or not possible,
+this voluntary quota enforcement mechanism might be an acceptable
+compromise.  Since it's enforced in software, all software that modifies
+or accesses the maildirs is required to voluntary obey and enforce a
+quota.  The voluntary quota implementation is flexible enough to allow
+non quota-aware applications to also access the maildirs, without any
+drastic consequences.  There will be some non-drastic consequences, though.
+Of course, non quota-aware applications will not enforce any defined quotas.
+Furthermore, this voluntary maildir quota mechanism works by estimating the
+current size of the maildir, with periodic exact recalculation.
+Obviously non quota-aware maildir applications will not update the maildir
+size estimation, so the estimate will be thrown off for some period of time,
+until the next recalculation.</P
+><P
+>This voluntary quota mechanism is designed to be a reasonable compromise
+between effectiveness, and performance.  The entire purpose of using
+maildir-based mail storage is to avoid any kind of locking, and to permit
+parallel access to mail by multiple applications.  In order to compute the
+exact size of a maildir, the maildir must be locked somehow to prevent any
+modifications while its contents are added up.  Obviously something like
+that defeats the original purpose of using maildirs, therefore the voluntary
+quota mechanism does not use locking, and that's why the current recorded
+maildir size is always considered to be an estimate.  Regular size
+recalculations will compensate for any occasional race conditions that result
+in the estimate to be thrown off.</P
+><P
+>A quota for an existing maildir is installed by running maildirmake with the
+<TT
+CLASS="LITERAL"
+>-q</TT
+> option, and naming an existing maildir.
+
+The <TT
+CLASS="LITERAL"
+>-q</TT
+> option takes a parameter,
+<VAR
+CLASS="REPLACEABLE"
+>quota</VAR
+>, which
+is a comma-separated list of quota specifications. A quota specification
+consists of a number followed by either 'S', indicating the maximum message
+size in bytes, or 'C', maximum number of messages. For example:</P
+><P
+><A
+NAME="AEN189"
+></A
+><BLOCKQUOTE
+CLASS="BLOCKQUOTE"
+><DIV
+CLASS="INFORMALEXAMPLE"
+><P
+></P
+><A
+NAME="AEN190"
+></A
+><P
+CLASS="LITERALLAYOUT"
+><B
+CLASS="COMMAND"
+>maildirmake -q 5000000S,1000C ./Maildir</B
+></P
+><P
+></P
+></DIV
+></BLOCKQUOTE
+>
+This sets the quota to
+5,000,000 bytes or 1000 messages, whichever comes first.</P
+><P
+><A
+NAME="AEN194"
+></A
+><BLOCKQUOTE
+CLASS="BLOCKQUOTE"
+><DIV
+CLASS="INFORMALEXAMPLE"
+><P
+></P
+><A
+NAME="AEN195"
+></A
+><P
+CLASS="LITERALLAYOUT"
+><B
+CLASS="COMMAND"
+>maildirmake -q 1000000S ./Maildir</B
+></P
+><P
+></P
+></DIV
+></BLOCKQUOTE
+>
+This sets the quota
+to 1,000,000 bytes, without limiting the number of messages.</P
+><P
+>A quota of an existing maildir can be changed by rerunning the
+<B
+CLASS="COMMAND"
+>maildirmake</B
+> command with a new <TT
+CLASS="LITERAL"
+>-q</TT
+>
+option.
+To delete a quota entirely, delete the
+<TT
+CLASS="FILENAME"
+><VAR
+CLASS="REPLACEABLE"
+>Maildir</VAR
+>/maildirsize</TT
+>
+file.</P
+></DIV
+></DIV
+><DIV
+CLASS="REFSECT1"
+><A
+NAME="AEN203"
+></A
+><H2
+>SEE ALSO</H2
+><P
+><A
+HREF="maildirmake.html"
+TARGET="_top"
+><SPAN
+CLASS="CITEREFENTRY"
+><SPAN
+CLASS="REFENTRYTITLE"
+>maildirmake</SPAN
+>(1)</SPAN
+></A
+>.</P
+></DIV
+></BODY
+></HTML
+>

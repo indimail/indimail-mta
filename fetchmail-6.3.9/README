@@ -1,0 +1,50 @@
+			 fetchmail README
+
+Fetchmail is a free, full-featured, robust, well-documented remote
+mail retrieval and forwarding utility intended to be used over
+on-demand TCP/IP links (such as SLIP or PPP connections).  It
+retrieves mail from remote mail servers and forwards it to your local
+(client) machine's delivery system, so it can then be be read by
+normal mail user agents such as elm(1) or Mail(1).
+
+Fetchmail supports all standard mail-retrieval protocols in use on the
+Internet: POP2, POP3, RPOP, APOP, KPOP, IMAP2bis, IMAP4, IMAP4rev1
+ESMTP ETRN, and ODMR.  Fetchmail also fully supports authentication
+via GSSAPI, Kerberos 4 and 5, RFC1938 one-time passwords, Compuserve's
+POP3 with RPA, Microsoft's NTLM, Demon Internet's SDPS, or CRAM-MD5
+authentication a la RFC2195.  Fetchmail also supports end-to-end
+encryption with OpenSSL.
+
+The fetchmail code was developed under Linux, but has also been
+extensively tested under the BSD variants, AIX, HP-UX versions 9 and
+10, SunOS, Solaris, NEXTSTEP, OSF 3.2, IRIX, and Rhapsody.
+
+It should be readily portable to other Unix variants (it uses GNU
+autoconf).  It has been ported to LynxOS and BeOS and will build there
+without special action.  It has also been ported to QNX; to build
+under QNX, see the header comments in the Makefile.  It is reported to
+build and run under AmigaOS.
+
+See the distribution files FEATURES for a full list of features, NEWS
+for detailed information on recent changes, NOTES for design notes, and
+TODO for a list of things that still need doing.
+
+The INSTALL file describes how to configure and install fetchmail.
+
+The fetchmail code appears to be stable and free of bugs affecting
+normal operation (that is, retrieving from POP3 or IMAP in single-drop
+mode and forwarding via SMTP to sendmail).  It will probably undergo
+substantial change only if and when support for a new retrieval
+protocol or authentication mode is added.
+
+If you want to hack on this code, a list of known bugs and to-do items
+can be found in the file todo.html.
+
+You can get the code from the fetchmail home page:
+
+	http://fetchmail.berlios.de/
+
+Enjoy!
+
+							-- esr, ma
+

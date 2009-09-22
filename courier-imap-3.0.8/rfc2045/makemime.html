@@ -1,0 +1,1364 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN">
+<HTML
+><HEAD
+><link rel='stylesheet' type='text/css' href='manpage.css'>
+  <!-- $Id: makemime.sgml,v 1.1 2001/12/23 18:23:16 mrsam Exp $ -->
+  <!-- Copyright 2001 Double Precision, Inc.  See COPYING for -->
+  <!-- distribution information. -->
+<meta name="MSSmartTagsPreventParsing" content="TRUE">
+<link rel="icon" href="icon.gif" type="image/gif" />
+<TITLE
+>makemime</TITLE
+><META
+NAME="GENERATOR"
+CONTENT="Modular DocBook HTML Stylesheet Version 1.7"></HEAD
+><BODY
+CLASS="REFENTRY"
+BGCOLOR="#FFFFFF"
+TEXT="#000000"
+LINK="#0000FF"
+VLINK="#840084"
+ALINK="#0000FF"
+><H1
+><A
+NAME="MAKEMIME"
+></A
+>makemime</H1
+><DIV
+CLASS="REFNAMEDIV"
+><A
+NAME="AEN10"
+></A
+><H2
+>Name</H2
+>makemime&nbsp;--&nbsp;Create MIME-formatted messages</DIV
+><DIV
+CLASS="REFSYNOPSISDIV"
+><A
+NAME="AEN13"
+></A
+><H2
+>Synopsis</H2
+><P
+><B
+CLASS="COMMAND"
+>makemime</B
+> [<VAR
+CLASS="REPLACEABLE"
+>options</VAR
+>...]</P
+><P
+><B
+CLASS="COMMAND"
+>makemime</B
+> [@<VAR
+CLASS="REPLACEABLE"
+>filename</VAR
+>]</P
+></DIV
+><DIV
+CLASS="REFSECT1"
+><A
+NAME="AEN22"
+></A
+><H2
+>DESCRIPTION</H2
+><P
+><B
+CLASS="COMMAND"
+>makemime</B
+> creates MIME-formatted messages of arbitrary
+complexity.
+<B
+CLASS="COMMAND"
+>makemime</B
+> reads one or more individual files,
+MIME-encodes them, adds basic MIME headers, and adds any additional headers
+specified bye command line options. The result is saved to another file or
+standard output. Complex MIME-formatted messages are created by piping together
+multiple instances of <B
+CLASS="COMMAND"
+>makemime</B
+>.
+Advanced options direct <B
+CLASS="COMMAND"
+>makemime</B
+> to
+<TT
+CLASS="FUNCTION"
+>fork</TT
+>() itself, and handle the details of setting up all
+the pipelines.</P
+><P
+>In most cases, options for <B
+CLASS="COMMAND"
+>makemime</B
+> come directly from the
+command line. @<TT
+CLASS="FILENAME"
+>filename</TT
+> reads the options from a file.
+"<TT
+CLASS="LITERAL"
+>@&#38;<VAR
+CLASS="REPLACEABLE"
+>n</VAR
+></TT
+>" reads options from a pipe
+on file descriptor #<VAR
+CLASS="REPLACEABLE"
+>n</VAR
+>.
+"<TT
+CLASS="LITERAL"
+>@-</TT
+>" is a shortcut for
+"<TT
+CLASS="LITERAL"
+>@&#38;0</TT
+>", which reads options from standard input.</P
+><P
+>When options are read from a file or a pipe, each option must be on a
+line by itself. If an option requires an argument, the argument must follow
+on the next line.</P
+><P
+>For readability, leading whitespace is deleted when options
+are read from a file or a pipe. Empty lines are also ignored, as well as lines
+that begin with the '<SPAN
+CLASS="TOKEN"
+>#</SPAN
+>' character.</P
+><P
+>Options and their arguments may contain characters that are special
+characters to the shell, such as '<SPAN
+CLASS="TOKEN"
+>(</SPAN
+>' and '<SPAN
+CLASS="TOKEN"
+>)</SPAN
+>'.
+These characters must be backslashed when specified on the command line, to
+avoid their special meaning to the shell.
+These characters MUST NOT be backslashed when options are read
+from a file or a pipe. Similarly, the contents of most headers nearly always
+include spaces.  Therefore they must be quoted when specified on the command
+line.  Header contents MUST NOT be quoted when options come from a file or a
+pipe.</P
+><P
+><B
+CLASS="COMMAND"
+>makemime</B
+> reads the content to be formatted
+as a MIME message from some other file.
+The files can also be a pipe. It is possible to supply both the
+options and a file from the same pipe, by terminating the options list with
+a line containing the single character "-". The remainder of the pipe will be
+available to be used as an input file (which must be explicitly specified
+by one of the options). Of course, only one input file can come from a single
+pipe.</P
+><DIV
+CLASS="REFSECT2"
+><A
+NAME="AEN46"
+></A
+><H3
+>MIME overview</H3
+><P
+>A MIME-formatted message contains one or several MIME sections. MIME headers
+specify how multiple MIME sections are to be interpreted as a whole (whether
+they are attached together; whether they are alternative representations of
+the same content; or something even more esoteric). This manual page gives a
+very brief, terse, overview of basic MIME concepts. The description is biased
+towards describing the functionality of the <B
+CLASS="COMMAND"
+>makemime</B
+>
+utility.
+See
+<A
+HREF="http://www.rfc-editor.org/rfc/rfc2045.txt"
+TARGET="_top"
+>RFC 2045</A
+>,
+<A
+HREF="http://www.rfc-editor.org/rfc/rfc2046.txt"
+TARGET="_top"
+>RFC 2046</A
+>,
+<A
+HREF="http://www.rfc-editor.org/rfc/rfc2047.txt"
+TARGET="_top"
+>RFC 2047</A
+>,
+<A
+HREF="http://www.rfc-editor.org/rfc/rfc2048.txt"
+TARGET="_top"
+>RFC 2048</A
+>, and
+<A
+HREF="http://www.rfc-editor.org/rfc/rfc2048.txt"
+TARGET="_top"
+>RFC 2049</A
+>
+for a formal definition of MIME-formatted messages.</P
+><P
+>Each file in a MIME message is encoded as a single MIME section. A MIME
+section consists of at least one header line,
+"<TT
+CLASS="LITERAL"
+>Content-Type:</TT
+>".
+The "<TT
+CLASS="LITERAL"
+>Content-Type:</TT
+>" header gives the type of the data 
+ontained in the file. Other header lines may also be present.
+Their relative order does not matter. MIME
+headers are followed by a blank line, then the contents of the file, encoded
+appropriately.
+All MIME sections generated by <B
+CLASS="COMMAND"
+>makemime</B
+> will always
+contain another header,
+"<TT
+CLASS="LITERAL"
+>Content-Transfer-Encoding:</TT
+>". This header gives the
+encoding method used for the file; it is an optional header, but
+<B
+CLASS="COMMAND"
+>makemime</B
+> always creates it.</P
+><P
+>The MIME encoding method defaults to
+"<TT
+CLASS="LITERAL"
+>7bit</TT
+>" if this header is absent.
+<TT
+CLASS="LITERAL"
+>7bit</TT
+>
+encoding is only suitable for plain text messages in the US-ASCII character
+set.
+The "<TT
+CLASS="LITERAL"
+>8bit</TT
+>" encoding method is used by plain text messages
+in other character sets that use octets with the high bit set. An
+alternative to 8bit encoding is
+"<TT
+CLASS="LITERAL"
+>quoted-printable</TT
+>". The "<TT
+CLASS="LITERAL"
+>base64</TT
+>" encoding
+method is used for files containing binary data (anything other than plain
+text).</P
+><P
+>MIME sections that contain text messages have their
+"<TT
+CLASS="LITERAL"
+>Content-Type:</TT
+>" header
+set to "<TT
+CLASS="LITERAL"
+>text/plain</TT
+>";
+or "<TT
+CLASS="LITERAL"
+>text/html</TT
+>" for HTML messages.
+There are also several
+other, rare, content types that can be used. MIME sections that contain other
+kinds of data will use some other, appropriate
+"<TT
+CLASS="LITERAL"
+>Content-Type:</TT
+>" header, such as
+"<TT
+CLASS="LITERAL"
+>image/gif</TT
+>", or "<TT
+CLASS="LITERAL"
+>audio/x-wav</TT
+>".</P
+><P
+>MIME sections that contain textual content may also use the
+<TT
+CLASS="LITERAL"
+>base64</TT
+> encoding
+method, they are not required to use <TT
+CLASS="LITERAL"
+>7bit</TT
+>,
+<TT
+CLASS="LITERAL"
+>8bit</TT
+>, or <TT
+CLASS="LITERAL"
+>quoted-printable</TT
+>.
+"<TT
+CLASS="LITERAL"
+>text/pdf</TT
+>" sections, that contain PDF files,
+typically contain binary data
+and must use the <TT
+CLASS="LITERAL"
+>base64</TT
+> encoding.
+Consequently, MIME sections that typically
+contain binary data, such as
+<TT
+CLASS="LITERAL"
+>image/gif</TT
+> and <TT
+CLASS="LITERAL"
+>audio/x-wav</TT
+>,
+are free to use
+encodings other than <TT
+CLASS="LITERAL"
+>base64</TT
+>, as long as all the data can
+be represented by
+printable characters (but, in practice, that never happens).</P
+><P
+>MIME sections may also contain other, optional, headers such as
+"<TT
+CLASS="LITERAL"
+>Content-Disposition:</TT
+>",
+"<TT
+CLASS="LITERAL"
+>Content-ID:</TT
+>", and "<TT
+CLASS="LITERAL"
+>Content-Name:</TT
+>".
+Consult the
+appropriate RFCs for the specific usage of these headers. These headers can be
+added by <B
+CLASS="COMMAND"
+>makemime</B
+> by using the
+<VAR
+CLASS="OPTION"
+>-a</VAR
+> option, as described below. These
+headers play no part in creating the overall structure of a MIME-encoded
+message, and <B
+CLASS="COMMAND"
+>makemime</B
+> does not care much about these
+headers. It simply
+includes them, and their content, upon request.</P
+><P
+>Multiple files are formatted as a single message MIME message in two steps:
+first, by creating a MIME section for each file;
+and then creating a single MIME section that contains other MIME sections.
+A "<TT
+CLASS="LITERAL"
+>multipart/mixed</TT
+>" MIME section contains a
+collection of MIME sections that represent different objects, attached
+together.
+A "<TT
+CLASS="LITERAL"
+>multipart/alternative</TT
+>" MIME section contains a
+collection of MIME
+sections which are alternative representations of the same object, such as an
+HTML and a plain text version of the same message. Other "multipart" MIME
+sections also exist, and their usage is defined by their respective
+RFCs.</P
+></DIV
+><DIV
+CLASS="REFSECT2"
+><A
+NAME="AEN94"
+></A
+><H3
+>Creating a single MIME section</H3
+><P
+><B
+CLASS="COMMAND"
+>makemime</B
+> {-c "<VAR
+CLASS="REPLACEABLE"
+>type</VAR
+>"} [-e "<VAR
+CLASS="REPLACEABLE"
+>encoding</VAR
+>"] [-o <VAR
+CLASS="REPLACEABLE"
+>outputfile</VAR
+>] [-C "<VAR
+CLASS="REPLACEABLE"
+>charset</VAR
+>"] [-N "<VAR
+CLASS="REPLACEABLE"
+>name"</VAR
+>] [-a "<VAR
+CLASS="REPLACEABLE"
+>header: value"</VAR
+>...] {<VAR
+CLASS="REPLACEABLE"
+>filename</VAR
+>}</P
+><P
+>The <VAR
+CLASS="OPTION"
+>-c</VAR
+> option reads <TT
+CLASS="FILENAME"
+>filename</TT
+>,
+encodes it appropriately, adds the
+"<TT
+CLASS="LITERAL"
+>Content-Type: <VAR
+CLASS="REPLACEABLE"
+>type</VAR
+></TT
+>" and
+"<TT
+CLASS="LITERAL"
+>Content-Transfer-Encoding:</TT
+>" MIME headers, then writes the
+result to standard output. <TT
+CLASS="LITERAL"
+>type</TT
+> can be any valid MIME type,
+except for <TT
+CLASS="LITERAL"
+>multipart</TT
+>.
+Setting <TT
+CLASS="FILENAME"
+>filename</TT
+> to "<TT
+CLASS="LITERAL"
+>-</TT
+>"
+reads from standard input.
+Setting <TT
+CLASS="FILENAME"
+>filename</TT
+> to "&#38;<VAR
+CLASS="REPLACEABLE"
+>n</VAR
+>"
+reads from file descriptor #<VAR
+CLASS="REPLACEABLE"
+>n</VAR
+>.</P
+><P
+>The <VAR
+CLASS="OPTION"
+>-C</VAR
+> option sets the MIME <TT
+CLASS="LITERAL"
+>charset</TT
+>
+attribute for <TT
+CLASS="LITERAL"
+>text/plain</TT
+> content. The <VAR
+CLASS="OPTION"
+>-N</VAR
+>
+option sets the <TT
+CLASS="LITERAL"
+>name</TT
+> attribute for
+<TT
+CLASS="LITERAL"
+>Content-Type:</TT
+>.</P
+><P
+><VAR
+CLASS="REPLACEABLE"
+>encoding</VAR
+> argument should be specified. It's more
+efficient to do so. <VAR
+CLASS="REPLACEABLE"
+>encoding</VAR
+> must be one of the
+following:
+<TT
+CLASS="LITERAL"
+>7bit</TT
+>, <TT
+CLASS="LITERAL"
+>8bit</TT
+>,
+<TT
+CLASS="LITERAL"
+>quoted-printable</TT
+>, or <TT
+CLASS="LITERAL"
+>base64</TT
+>.</P
+><P
+>If <VAR
+CLASS="REPLACEABLE"
+>encoding</VAR
+> is not specified,
+<B
+CLASS="COMMAND"
+>makemime</B
+>
+reads the <TT
+CLASS="FILENAME"
+>filename</TT
+> twice - once to figure out the best
+encoding method, and the second time to encode <TT
+CLASS="FILENAME"
+>filename</TT
+>.
+If <TT
+CLASS="FILENAME"
+>filename</TT
+> is a pipe <B
+CLASS="COMMAND"
+>makemime</B
+>
+creates a temporary file, which is not very efficient if
+<TT
+CLASS="FILENAME"
+>filename</TT
+> is large.
+However letting <B
+CLASS="COMMAND"
+>makemime</B
+> pick the encoding method
+is more convenient if <TT
+CLASS="FILENAME"
+>filename</TT
+> is relatively small.</P
+><P
+>Another possibility is to omit <VAR
+CLASS="REPLACEABLE"
+>encoding</VAR
+> and set
+<VAR
+CLASS="REPLACEABLE"
+>type</VAR
+> to <TT
+CLASS="LITERAL"
+>auto</TT
+>.
+This combination sets "<TT
+CLASS="LITERAL"
+>Content-Type:</TT
+>" to either
+<TT
+CLASS="LITERAL"
+>text/plain</TT
+>, or
+<TT
+CLASS="LITERAL"
+>application/octet-stream</TT
+>, based on the selected
+<VAR
+CLASS="REPLACEABLE"
+>encoding</VAR
+>.</P
+><P
+>By default the encoded MIME section is written to standard output.
+The <VAR
+CLASS="OPTION"
+>-o</VAR
+> option writes the MIME section to
+<VAR
+CLASS="REPLACEABLE"
+>outputfile</VAR
+>. <VAR
+CLASS="REPLACEABLE"
+>outputfile</VAR
+> may be
+"&#38;<VAR
+CLASS="REPLACEABLE"
+>n</VAR
+>",
+which writes the MIME section to a pipe on file descriptor
+#<VAR
+CLASS="REPLACEABLE"
+>n</VAR
+>.</P
+><P
+><B
+CLASS="COMMAND"
+>makemime</B
+> does not generate any other headers.
+Particularly, the
+"<TT
+CLASS="LITERAL"
+>Mime-Version:</TT
+>" header is required for
+MIME-formatted E-mail messages. Additional headers are specified by the
+<VAR
+CLASS="OPTION"
+>-a</VAR
+> option, which may be used
+multiple times to insert multiple headers.
+<B
+CLASS="COMMAND"
+>makemime</B
+> doesn't do anything
+with them except to insert the headers into the generated MIME section.</P
+><P
+>Note that
+"<TT
+CLASS="LITERAL"
+>Mime-Version:</TT
+>" is only required for the top level
+MIME section.
+This header is not required for individual MIME sections that are later
+combined into a multipart MIME collection.</P
+><DIV
+CLASS="NOTE"
+><P
+></P
+><TABLE
+CLASS="NOTE"
+WIDTH="100%"
+BORDER="0"
+><TR
+><TD
+WIDTH="25"
+ALIGN="CENTER"
+VALIGN="TOP"
+>NOTE:</TD
+><TD
+ALIGN="LEFT"
+VALIGN="TOP"
+><P
+>The <VAR
+CLASS="OPTION"
+>-c</VAR
+> option must occur listed first, the remaining
+options must follow the <VAR
+CLASS="OPTION"
+>-c</VAR
+> option.</P
+></TD
+></TR
+></TABLE
+></DIV
+></DIV
+><DIV
+CLASS="REFSECT2"
+><A
+NAME="AEN174"
+></A
+><H3
+>Creating a multipart MIME collection</H3
+><P
+><B
+CLASS="COMMAND"
+>makemime</B
+> {-m "multipart/<VAR
+CLASS="REPLACEABLE"
+>type</VAR
+>"} [-e "<VAR
+CLASS="REPLACEABLE"
+>encoding</VAR
+>"] [-o <VAR
+CLASS="REPLACEABLE"
+>outputfile</VAR
+>] [-a "<VAR
+CLASS="REPLACEABLE"
+>header: value"</VAR
+>...] {<VAR
+CLASS="REPLACEABLE"
+>filename</VAR
+>}</P
+><P
+>The <VAR
+CLASS="OPTION"
+>-m</VAR
+> option is identical to the <VAR
+CLASS="OPTION"
+>-c</VAR
+> option,
+except for three differences.</P
+><P
+><VAR
+CLASS="REPLACEABLE"
+>type</VAR
+> must be either
+"<TT
+CLASS="LITERAL"
+>multipart/mixed</TT
+>",
+"<TT
+CLASS="LITERAL"
+>multipart/alternative</TT
+>", or
+some other MIME multipart content type. Additionally,
+"<VAR
+CLASS="REPLACEABLE"
+>encoding</VAR
+>" can only be
+"<TT
+CLASS="LITERAL"
+>7bit</TT
+>" or "<TT
+CLASS="LITERAL"
+>8bit</TT
+>", and will default to "<TT
+CLASS="LITERAL"
+>8bit</TT
+>" if not specified. Finally,
+<TT
+CLASS="FILENAME"
+>filename</TT
+> must be a MIME-formatted section, NOT a regular
+file. Usually
+<TT
+CLASS="FILENAME"
+>filename</TT
+> is created by a previous
+invocation of <B
+CLASS="COMMAND"
+>makemime</B
+> (it can also be a pipe, like
+the <VAR
+CLASS="OPTION"
+>-c</VAR
+> option), but it can be created via any other
+means.</P
+><P
+>The <VAR
+CLASS="OPTION"
+>-m</VAR
+> option creates an initial multipart MIME collection,
+that contains
+only one MIME section, taken from <TT
+CLASS="FILENAME"
+>filename</TT
+>.
+The collection is written to standard output, or the pipe or
+to <VAR
+CLASS="REPLACEABLE"
+>outputfile</VAR
+>.</P
+></DIV
+><DIV
+CLASS="REFSECT2"
+><A
+NAME="AEN207"
+></A
+><H3
+>Creating a multipart MIME section</H3
+><P
+><B
+CLASS="COMMAND"
+>makemime</B
+> {-j <VAR
+CLASS="REPLACEABLE"
+>file1</VAR
+>"} [-o <VAR
+CLASS="REPLACEABLE"
+>outputfile</VAR
+>] {<VAR
+CLASS="REPLACEABLE"
+>file2</VAR
+>}</P
+><P
+>This option adds a MIME section to an existing MIME collection.
+<VAR
+CLASS="REPLACEABLE"
+>file1</VAR
+> must be a MIME collection that was
+previously created by the <VAR
+CLASS="OPTION"
+>-m</VAR
+> option.
+<VAR
+CLASS="REPLACEABLE"
+>file2</VAR
+> must be a MIME section that was previously
+created by the <VAR
+CLASS="OPTION"
+>-c</VAR
+> option.
+The <VAR
+CLASS="OPTION"
+>-j</VAR
+> options adds the MIME section in
+<VAR
+CLASS="REPLACEABLE"
+>file2</VAR
+> to the MIME collection in
+<VAR
+CLASS="REPLACEABLE"
+>file1</VAR
+>.  The result is written to standard output
+or to <VAR
+CLASS="REPLACEABLE"
+>outputfile</VAR
+>.</P
+><P
+>&#13;<VAR
+CLASS="REPLACEABLE"
+>file1</VAR
+> and/or <VAR
+CLASS="REPLACEABLE"
+>file2</VAR
+> may
+be
+"<TT
+CLASS="LITERAL"
+>@&#38;<VAR
+CLASS="REPLACEABLE"
+>n</VAR
+></TT
+>" which reads from
+file descriptor #<VAR
+CLASS="REPLACEABLE"
+>n</VAR
+>.
+The <VAR
+CLASS="REPLACEABLE"
+>outputfile</VAR
+>
+may also specify a file descriptor.</P
+><P
+><VAR
+CLASS="REPLACEABLE"
+>file1</VAR
+> and
+<VAR
+CLASS="REPLACEABLE"
+>file2</VAR
+> should ideally be created by
+<B
+CLASS="COMMAND"
+>makemime</B
+> as well.
+It's also possible to use MIME-formatted files created by other software, but
+with some degree of care. <B
+CLASS="COMMAND"
+>makemime</B
+> is not intended to be a
+MIME parser, but a MIME generator. However some amount of MIME parsing is
+necessary to append a MIME section to an existing MIME collection.
+<B
+CLASS="COMMAND"
+>makemime</B
+>'s parsing is sufficient
+for appending a new section to a MIME collection, as long as the
+MIME headers in the MIME collections are straightforward. Very convoluted MIME
+headers may confuse <B
+CLASS="COMMAND"
+>makemime</B
+>, and it may not be able to
+handle them.</P
+></DIV
+><DIV
+CLASS="REFSECT2"
+><A
+NAME="AEN240"
+></A
+><H3
+>Recursive MIME collections</H3
+><P
+>MIME collection may contain other MIME collections as well as MIME
+sections. The <VAR
+CLASS="OPTION"
+>-m</VAR
+> and the <VAR
+CLASS="OPTION"
+>-j</VAR
+> options may use
+a multipart MIME collection in place of a MIME section automatically
+because a multipart MIME collection is just a special type of a MIME section.
+The following example
+encodes a text message that can be alternatively represented as HTML or plain
+text, with some additional attachments:</P
+><P
+>1. Create a MIME collection that has a
+<TT
+CLASS="LITERAL"
+>text/plain</TT
+> and a <TT
+CLASS="LITERAL"
+>text/html</TT
+> MIME
+section.</P
+><P
+>2. Create a MIME collection consisting of the MIME section generated in
+step one, plus additional MIME sections containing other attachments.</P
+><P
+>For example:</P
+><A
+NAME="AEN250"
+></A
+><BLOCKQUOTE
+CLASS="BLOCKQUOTE"
+><DIV
+CLASS="INFORMALEXAMPLE"
+><P
+></P
+><A
+NAME="AEN251"
+></A
+><TABLE
+BORDER="0"
+BGCOLOR="#E0E0E0"
+WIDTH="100%"
+><TR
+><TD
+><PRE
+CLASS="PROGRAMLISTING"
+># Take two files containing the text and the html version of a message, and
+# add MIME headers to them.
+
+makemime -c "text/plain; charset=iso-8859-1" -o tmp1.txt msg.txt
+makemime -c "text/html; charset=iso-8859-1" -o tmp1.html msg.html
+
+# Combine the result into a multipart/alternative collection
+
+makemime -m "multipart/alternative" -a "Content-Disposition: inline" \
+                                    -o tmp.ma1 tmp1.txt
+makemime -j tmp.ma1 -o tmp.ma2 tmp1.html
+
+# Add MIME headers to an image attachment.
+
+makemime -c "image/gif" -a "Content-Disposition: attachment" \
+                        -o tmp2.gif attachment.gif
+
+# Create the final multipart/mixed collection
+
+makemime -m "multipart/mixed" -a "Mime-Version: 1.0" \
+                              -o tmp.mm1 tmp.ma2
+makemime -j tmp.mm1 -o output.msg tmp2.gif</PRE
+></TD
+></TR
+></TABLE
+><P
+></P
+></DIV
+></BLOCKQUOTE
+><P
+><TT
+CLASS="FILENAME"
+>output.msg</TT
+> now contains the complete MIME collection.
+Just add the
+<TT
+CLASS="LITERAL"
+>Subject:</TT
+>, <TT
+CLASS="LITERAL"
+>From:</TT
+>, and
+<TT
+CLASS="LITERAL"
+>To:</TT
+> headers (can also be done by additional
+<VAR
+CLASS="OPTION"
+>-a</VAR
+> options, of
+course), and send it on its way.</P
+></DIV
+><DIV
+CLASS="REFSECT2"
+><A
+NAME="AEN259"
+></A
+><H3
+>Building complex MIME encodings</H3
+><P
+>There are several different ways to build complete MIME encodings from
+multiple MIME sections.  One way is to use temporary files to create MIME
+sections, then combine them together into a single MIME collection. A slightly
+more complicated approach involves setting up pipes between multiple makemime
+processes, in order to avoid using temporary files.</P
+><P
+>This can be done manually, by hand. It is also possible to have
+<B
+CLASS="COMMAND"
+>makemime</B
+> do this automatically. <B
+CLASS="COMMAND"
+>makemime</B
+>
+will set up these pipes and run multiple instances of itself to create a
+single MIME collection, with
+multiple attachments of complexity limited only by your system's limit on
+the maximum number of open files and pipes.</P
+><P
+>Any file that's read by the
+<VAR
+CLASS="OPTION"
+>-c</VAR
+>,
+<VAR
+CLASS="OPTION"
+>-m</VAR
+>,
+and
+<VAR
+CLASS="OPTION"
+>-j</VAR
+>
+options (
+<VAR
+CLASS="OPTION"
+>-o</VAR
+>
+specifies a file to
+create, and doesn't count) may be replaced by a single argument containing a
+left parenthesis, additional options, then a single argument containing a
+right parenthesis.
+A single invocation of <B
+CLASS="COMMAND"
+>makemime</B
+> can only use one
+<VAR
+CLASS="OPTION"
+>-c</VAR
+>, <VAR
+CLASS="OPTION"
+>-m</VAR
+>, or <VAR
+CLASS="OPTION"
+>-j</VAR
+> option.
+However, another <VAR
+CLASS="OPTION"
+>-c</VAR
+>, <VAR
+CLASS="OPTION"
+>-m</VAR
+>, or
+<VAR
+CLASS="OPTION"
+>-j</VAR
+> option may be specified
+inside the left and the right parenthesis, and its output is used in place of
+the file it replaced.  In the previous example the third and the fourth
+invocation of <B
+CLASS="COMMAND"
+>makemime</B
+> can be replaced with the following
+command:</P
+><A
+NAME="AEN278"
+></A
+><BLOCKQUOTE
+CLASS="BLOCKQUOTE"
+><DIV
+CLASS="INFORMALEXAMPLE"
+><P
+></P
+><A
+NAME="AEN279"
+></A
+><TABLE
+BORDER="0"
+BGCOLOR="#E0E0E0"
+WIDTH="100%"
+><TR
+><TD
+><PRE
+CLASS="PROGRAMLISTING"
+>makemime -j \(                                           \
+               -m "multipart/alternative"                \
+               -a "Content-Disposition: inline" tmp1.txt \
+             \) -o tmp.ma2                               \
+             tmp1.html</PRE
+></TD
+></TR
+></TABLE
+><P
+></P
+></DIV
+></BLOCKQUOTE
+><P
+>Note that the parenthesis must be backslashed, to avoid their special
+meaning to the shell. An equivalent argument file would have the following
+contents:</P
+><A
+NAME="AEN282"
+></A
+><BLOCKQUOTE
+CLASS="BLOCKQUOTE"
+><DIV
+CLASS="INFORMALEXAMPLE"
+><P
+></P
+><A
+NAME="AEN283"
+></A
+><TABLE
+BORDER="0"
+BGCOLOR="#E0E0E0"
+WIDTH="100%"
+><TR
+><TD
+><PRE
+CLASS="PROGRAMLISTING"
+>-j
+   (
+      -m
+          multipart/alternative
+      -a
+          Content-Disposition: inline
+      tmp1.txt
+   )
+   -o
+      tmp.ma2
+ tmp1.html</PRE
+></TD
+></TR
+></TABLE
+><P
+></P
+></DIV
+></BLOCKQUOTE
+><P
+>These constructs can be arbitrarily nested, and are limited by the amount
+of available memory and resources.  The entire sequence in the previous
+section is equivalent to the following command:</P
+><A
+NAME="AEN286"
+></A
+><BLOCKQUOTE
+CLASS="BLOCKQUOTE"
+><DIV
+CLASS="INFORMALEXAMPLE"
+><P
+></P
+><A
+NAME="AEN287"
+></A
+><TABLE
+BORDER="0"
+BGCOLOR="#E0E0E0"
+WIDTH="100%"
+><TR
+><TD
+><PRE
+CLASS="PROGRAMLISTING"
+>makemime -j                                                 \
+         \(                                                 \
+            -m "multipart/mixed"                            \
+            -a "Mime-Version: 1.0"                          \
+            \(                                              \
+                -j                                          \
+                \(                                          \
+                   -m "multipart/alternative"               \
+                   -a "Content-Disposition: inline"         \
+                   \(                                       \
+                      -c "text/plain; charset=iso-8859-1"   \
+                      msg.txt                               \
+                   \)                                       \
+                \)                                          \
+                \(                                          \
+                    -c "text/html; charset=iso-8859-1"      \
+                    msg.html                                \
+                \)                                          \
+            \)                                              \
+         \)                                                 \
+         -o output.msg                                      \
+         \(                                                 \
+            -c "image/gif"                                  \
+            -a "Content-Disposition: attachment"            \
+            attachment.gif                                  \
+         \)</PRE
+></TD
+></TR
+></TABLE
+><P
+></P
+></DIV
+></BLOCKQUOTE
+><P
+>An equivalent argument file would be:</P
+><A
+NAME="AEN290"
+></A
+><BLOCKQUOTE
+CLASS="BLOCKQUOTE"
+><DIV
+CLASS="INFORMALEXAMPLE"
+><P
+></P
+><A
+NAME="AEN291"
+></A
+><TABLE
+BORDER="0"
+BGCOLOR="#E0E0E0"
+WIDTH="100%"
+><TR
+><TD
+><PRE
+CLASS="PROGRAMLISTING"
+>-j
+(
+   -m
+       multipart/mixed
+   -a
+       Mime-Version: 1.0
+   (
+       -j
+       (
+           -m
+               multipart/alternative
+           -a
+               Content-Disposition: inline
+           (
+               -c
+                   text/plain; charset=iso-8859-1
+               msg.txt
+           )
+       )
+       (
+           -c
+               text/html; charset=iso-8859-1
+           msg.html
+       )
+   )
+)
+-o
+   output.msg
+(
+   -c
+       image/gif
+   -a
+       Content-Disposition: attachment
+   attachment.gif
+)</PRE
+></TD
+></TR
+></TABLE
+><P
+></P
+></DIV
+></BLOCKQUOTE
+></DIV
+></DIV
+><DIV
+CLASS="REFSECT1"
+><A
+NAME="AEN293"
+></A
+><H2
+>SEE ALSO</H2
+><P
+><A
+HREF="maildrop.html"
+TARGET="_top"
+><SPAN
+CLASS="CITEREFENTRY"
+><SPAN
+CLASS="REFENTRYTITLE"
+>maildrop</SPAN
+>(1)</SPAN
+></A
+>,
+<A
+HREF="maildropfilter.html"
+TARGET="_top"
+><SPAN
+CLASS="CITEREFENTRY"
+><SPAN
+CLASS="REFENTRYTITLE"
+>maildropfilter</SPAN
+>(5)</SPAN
+></A
+>,
+<A
+HREF="reformail.html"
+TARGET="_top"
+><SPAN
+CLASS="CITEREFENTRY"
+><SPAN
+CLASS="REFENTRYTITLE"
+>reformail</SPAN
+>(1)</SPAN
+></A
+>,
+<A
+HREF="reformime.html"
+TARGET="_top"
+><SPAN
+CLASS="CITEREFENTRY"
+><SPAN
+CLASS="REFENTRYTITLE"
+>reformime</SPAN
+>(1)</SPAN
+></A
+>,
+<SPAN
+CLASS="CITEREFENTRY"
+><SPAN
+CLASS="REFENTRYTITLE"
+>egrep</SPAN
+>(1)</SPAN
+>,
+<SPAN
+CLASS="CITEREFENTRY"
+><SPAN
+CLASS="REFENTRYTITLE"
+>grep</SPAN
+>(1)</SPAN
+>,
+<A
+HREF="courier.html"
+TARGET="_top"
+><SPAN
+CLASS="CITEREFENTRY"
+><SPAN
+CLASS="REFENTRYTITLE"
+>courier</SPAN
+>(8)</SPAN
+></A
+>,
+<SPAN
+CLASS="CITEREFENTRY"
+><SPAN
+CLASS="REFENTRYTITLE"
+>sendmail</SPAN
+>(8)</SPAN
+>,
+<A
+HREF="http://www.rfc-editor.org/rfc/rfc2045.txt"
+TARGET="_top"
+>RFC 2045</A
+>,
+<A
+HREF="http://www.rfc-editor.org/rfc/rfc2046.txt"
+TARGET="_top"
+>RFC 2046</A
+>,
+<A
+HREF="http://www.rfc-editor.org/rfc/rfc2047.txt"
+TARGET="_top"
+>RFC 2047</A
+>,
+<A
+HREF="http://www.rfc-editor.org/rfc/rfc2048.txt"
+TARGET="_top"
+>RFC 2048</A
+>,
+<A
+HREF="http://www.rfc-editor.org/rfc/rfc2048.txt"
+TARGET="_top"
+>RFC 2049</A
+>.</P
+></DIV
+></BODY
+></HTML
+>

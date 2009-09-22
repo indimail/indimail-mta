@@ -1,0 +1,35 @@
+The SPAMCONTROL patch modifies the following QMAIL 1.03 files:
+
+- Makefile
+- qmail-smtpd.c
+- qmail-smtpd.8
+- qmail-showctl.c
+- qmail-control.9
+- qmail-log.5     
+
+Patch files:
+
+- Makefile.patch
+- qmail-smtpd.c.patch
+- qmail-smtpd.8.patch
+- qmail-showctl.c.patch
+- qmail-control.9.patch
+- qmail-log.5.patch
+
+Added files:
+
+- wildmat.c
+
+Informational files:
+
+- badmailpatterns
+- badrcptpatterns
+- tarpitcount
+- spamcontrol.pdf (WINZIP < v7 is incapeable to extract this !)
+- spamcontrol.sh  (Installation shell script)
+- README.spamcontrol  
+- README.wildmat      
+- README.newline      
+- INSTALL.spamcontrol  
+- HISTORY.spamcontrol (development information)
+- FILES.spamcontrol (this file)

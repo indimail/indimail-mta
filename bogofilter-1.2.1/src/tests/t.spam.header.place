@@ -1,0 +1,71 @@
+#!/bin/sh +x
+
+# Note:  When run via "make check", test output files are automatically deleted.
+#	 When run from the command line, output files are left in directory
+#	 spam.header.place.YYYYMMDD.  This is useful when something is different.
+
+NODB=1 . ${srcdir=.}/t.frame
+
+map_rc()
+{
+    (
+	set +e
+	eval "$@"
+	a=$?
+	[ $a -eq 0 ] && exit 0
+	[ $a -eq 1 ] && exit 0
+	[ $a -eq 2 ] && exit 0
+	exit $a
+    )
+}
+
+CFG="$TMPDIR/test.cfg"
+MSG="$TMPDIR/test.msg"
+REF="$TMPDIR/test.ref"
+OUT="$TMPDIR/test.out"
+
+X_BOGOSITY="X-Bogosity: Unsure, tests=bogofilter, spamicity=0.520000"
+
+cat >> "$CFG" <<EOF
+header_format = %h: %c, tests=bogofilter, spamicity=%p
+EOF
+
+cat >> "$MSG" <<EOF
+from: whoever@example.com
+to: somebody@example.com
+DomainKey-Signature: before-this
+
+body test
+EOF
+
+cat >> "$REF.wo" <<EOF
+from: whoever@example.com
+to: somebody@example.com
+DomainKey-Signature: before-this
+$X_BOGOSITY
+
+body test
+EOF
+
+cat >> "$REF.wi" <<EOF
+from: whoever@example.com
+to: somebody@example.com
+$X_BOGOSITY
+DomainKey-Signature: before-this
+
+body test
+EOF
+
+map_rc $BOGOFILTER -n -c $CFG < /dev/null
+map_rc $BOGOFILTER -p -c $CFG -I "$MSG" -O "$OUT.wo"
+map_rc $BOGOFILTER -p -c $CFG --spam-header-place=DomainKey-Signature: -I "$MSG" -O "$OUT.wi"
+
+if  [ $verbose -eq 0 ]; then
+    cmp "$REF.wo" "$OUT.wo" \
+    ||  diff $DIFF_BRIEF "$REF.wo" "$OUT.wo"
+    cmp "$REF.wi" "$OUT.wi" \
+    ||  diff $DIFF_BRIEF "$REF.wi" "$OUT.wi"
+else
+    diff $DIFF_BRIEF "$REF.wo" "$OUT.wo"
+    diff $DIFF_BRIEF "$REF.wi" "$OUT.wi"
+fi

@@ -1,0 +1,15 @@
+[IndiMail]
+name=IndiMail (Fedora_10)
+type=rpm-md
+baseurl=http://download.opensuse.org/repositories/home:/mbhangui/Fedora_10/
+gpgcheck=1
+gpgkey=http://download.opensuse.org/repositories/home:/mbhangui/Fedora_10/repodata/repomd.xml.key
+enabled=1
+
+[IndiMail Raw]
+name=IndiMail Raw (Fedora_10)
+type=rpm-md
+baseurl=http://download.opensuse.org/repositories/home:/indimail/Fedora_10/
+gpgcheck=1
+gpgkey=http://download.opensuse.org/repositories/home:/indimail/Fedora_10/repodata/repomd.xml.key
+enabled=1

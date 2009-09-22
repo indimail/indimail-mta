@@ -1,0 +1,167 @@
+/*
+ * $Log: findmdahost.c,v $
+ * Revision 2.12  2008-07-20 18:09:38+05:30  Cprogrammer
+ * added error message
+ *
+ * Revision 2.11  2008-05-28 16:35:26+05:30  Cprogrammer
+ * removed USE_MYSQL
+ *
+ * Revision 2.10  2006-03-02 20:42:24+05:30  Cprogrammer
+ * While processing if one MySQL host is down, continue if the user entry is not on the
+ * >> 'down' MySQL h
+ *
+ * Revision 2.9  2005-12-29 22:44:23+05:30  Cprogrammer
+ * use getEnvConfigStr to set variables from environment variables
+ *
+ * Revision 2.8  2003-02-01 14:08:24+05:30  Cprogrammer
+ * bug fix - get_smtp_service_port() should not be called for non-distributed domains
+ *
+ * Revision 2.7  2002-12-29 18:58:24+05:30  Cprogrammer
+ * use control file smtproute if hostcntrl is absent
+ *
+ * Revision 2.6  2002-10-28 23:29:40+05:30  Cprogrammer
+ * removed duplicate assignment statements
+ *
+ * Revision 2.5  2002-10-28 17:56:49+05:30  Cprogrammer
+ * force reconnection to mysql if mysql_ping() fails
+ *
+ * Revision 2.4  2002-10-06 00:00:06+05:30  Cprogrammer
+ * added Error message if mysql_ping fails
+ *
+ * Revision 2.3  2002-08-31 15:57:32+05:30  Cprogrammer
+ * take domain as the DEFAULT_DOMAIN if email does not contain domain
+ *
+ * Revision 2.2  2002-08-25 22:32:31+05:30  Cprogrammer
+ * made control dir configurable
+ *
+ * Revision 2.1  2002-07-27 10:53:41+05:30  Cprogrammer
+ * moved OpenDatabases() into distributed part to increase efficiency
+ *
+ * Revision 1.2  2002-04-10 04:43:34+05:30  Cprogrammer
+ * do ping before vauth_init
+ *
+ * Revision 1.1  2002-04-10 02:59:05+05:30  Cprogrammer
+ * Initial revision
+ *
+ */
+#include "indimail.h"
+
+#ifndef	lint
+static char     sccsid[] = "$Id: findmdahost.c,v 2.12 2008-07-20 18:09:38+05:30 Cprogrammer Stab mbhangui $";
+#endif
+
+#ifdef CLUSTERED_SITE
+#include <unistd.h>
+#include <string.h>
+#include <errno.h>
+
+char           *
+findmdahost(char *email)
+{
+	int             is_dist, hostcntrl_present, count, port;
+	char            user[MAX_BUFF], domain[MAX_BUFF], TmpBuf[MAX_BUFF];
+	static char     mailhost[MAX_BUFF];
+	char           *qmaildir, *controldir, *ptr, *cptr, *real_domain, *ip;
+	DBINFO        **rhostsptr;
+	MYSQL         **mysqlptr;
+	struct passwd *pw;
+
+	for (cptr = user, ptr = email;*ptr && *ptr != '@';*cptr++ = *ptr++);
+	*cptr = 0;
+	if (*ptr)
+		ptr++;
+	else
+		getEnvConfigStr(&ptr, "DEFAULT_DOMAIN", DEFAULT_DOMAIN);
+	for (cptr = domain;*ptr;*cptr++ = *ptr++);
+	*cptr = 0;
+	if (!*domain)
+		return((char *) 0);
+	if (!(real_domain = vget_real_domain(domain)))
+		real_domain = domain;
+	getEnvConfigStr(&qmaildir, "QMAILDIR", QMAILDIR);
+	getEnvConfigStr(&controldir, "CONTROLDIR", "control");
+	snprintf(TmpBuf, MAX_BUFF, "%s/%s/host.cntrl", qmaildir, controldir);
+	hostcntrl_present = !access(TmpBuf, F_OK);
+	if (hostcntrl_present)
+	{
+		if ((is_dist = is_distributed_domain(real_domain)) == -1)
+			return((char *) 0);
+		if (is_dist == 1)
+		{
+			if (!(ip = findhost(email, 0)))
+				return((char *) 0);
+			else
+				return(ip);
+		}
+	} else
+	if ((is_dist = is_distributed_domain(domain)) == -1 || is_dist == 1)
+	{
+		fprintf(stderr, "%s: %s\n", TmpBuf, strerror(errno));
+		return((char *) 0);
+	}
+	/*- reach here if non-distributed */
+	if (OpenDatabases())
+		return((char *) 0);
+	for (count= 1, mysqlptr = MdaMysql, rhostsptr = RelayHosts;*rhostsptr;mysqlptr++, rhostsptr++, count++)
+	{
+		/*- for non distributed only one entry is there in mcd file */
+		if (!strncmp(real_domain, (*rhostsptr)->domain, DBINFO_BUFF))
+			break;
+	}
+	if (*rhostsptr)
+	{
+		if ((*rhostsptr)->fd == -1)
+		{
+			if (connect_db(rhostsptr, mysqlptr))
+			{
+				fprintf(stderr, "%d: %s Failed db %s@%s for user %s port %d\n", count, (*rhostsptr)->domain, 
+					(*rhostsptr)->database, (*rhostsptr)->server, (*rhostsptr)->user, (*rhostsptr)->port);
+				(*rhostsptr)->fd = -1;
+				return((char *) 0);
+			} else
+				(*rhostsptr)->fd = (*mysqlptr)->net.fd;
+		}
+		if (mysql_ping(*mysqlptr))
+		{
+			mysql_close(*mysqlptr);
+			if (connect_db(rhostsptr, mysqlptr))
+			{
+				fprintf(stderr, "%d: %s Failed db %s@%s for user %s port %d\n", count, (*rhostsptr)->domain, 
+					(*rhostsptr)->database, (*rhostsptr)->server, (*rhostsptr)->user, (*rhostsptr)->port);
+				(*rhostsptr)->fd = -1;
+				return((char *) 0);
+			} else
+				(*rhostsptr)->fd = (*mysqlptr)->net.fd;
+		}
+		vauth_init(1, *mysqlptr);
+		if (!(pw = vauth_getpw(user, real_domain)))
+		{
+			is_open = 0; /* prevent closing of connection by vclose */
+			return((char *) 0);
+		} else
+		{
+			is_open = 0; /* prevent closing of connection by vclose */
+			if (hostcntrl_present && is_dist == 1)
+				port = get_smtp_service_port(0, real_domain, (*rhostsptr)->mdahost);
+			else
+				port = GetSmtproute(real_domain);
+			if (port == -1)
+				return ((char *) 0);
+			else
+			if (!port)
+				port = 25;
+			snprintf(mailhost, MAX_BUFF, "%s:%s:%d", domain, (*rhostsptr)->mdahost, port);
+			return(mailhost);
+		}
+	} else
+		userNotFound = 1;
+	return((char *) 0);
+}
+#endif
+
+void
+getversion_findmdahost_c()
+{
+	printf("%s\n", sccsid);
+	printf("%s\n", sccsidh);
+}

@@ -1,0 +1,103 @@
+###########
+### WHO ###
+###########
+
+This patch was written by Scott Gifford <sgifford@suspectclass.com>.
+The design and much of the code for supporting "notipme" was
+contributed by Charles Cazabon <charlesc@discworld.dyndns.org>.
+
+
+############
+### WHAT ###
+############
+
+This patch may be necessary in some configurations that involve network
+address translation or port forwarding.  It prevents a problem caused
+by an MX or other mail routing directive instructing qmail to connect to
+itself without realizing it's connecting to itself.  When this happens,
+it accepts the message, finds out where to deliver it to (itself), and
+promptly reconnects to itself to deliver the message.  Eventually, when
+it has done this 20 or 30 times, it will give up and bounce the message,
+but not before sucking up all of your CPU while it's happening.
+
+It may also be useful in some configurations that have multiple qmail
+servers configured on different interfaces of the same system.  qmail
+will normally refuse to deliver mail by SMTP to the machine it's
+running on, but with multiple copies of qmail, you may want to prevent
+this behavior.
+
+Normally, qmail can detect what IP addresses refer to itself by getting
+a list of all network interfaces with IP addresses from the operating
+system.  It uses this list to determine whether connecting to an address
+will cause it to connect to itself, and avoid the situation (it calls
+the perm_ambigmx() function, which prints the message:
+
+   Sorry. Although I'm listed as a best-preference MX or A for that host,
+   it isn't in my control/locals file, so I don't treat it as local. (#5.4.6)
+
+But in situations where the OS is not aware of all IP addresses that
+connect back to itself, this detection fails, causing the CPU-sucking
+phenomenon described above.  This can happen if there is a network
+address translation device in front of the qmail server, such as a
+load-balancer or a router which allows you to share one IP address among
+several machines; if there is a port forwarder forwarding connections
+from some other machine to the SMTP server on the qmail server; or in
+configurations where a "dumb" mailserver is configured to use your qmail
+server as a "smarthost", delivering all mail to it without inspection.
+
+To solve this, other IP addresses which will ultimately connect back to
+your machine can be added to the file "control/moreipme", one per line.
+qmail will treat all addresses in this file exactly as if they were
+local, and if it finds an MX record or other mail routing information
+which would cause it to connect to any of these addresses, it will call
+perm_ambigmx(), and print the above error message.
+
+Additionally, IP addresses which the system detects but which should
+*not* be treated as local can be removed from qmail's ipme list by
+adding them to the file "control/notipme".
+
+"control/notipme" takes precedence over "control/moreipme".  In other
+words, addresses that appear in both "control/moreipme" and
+"control/notipme" will not be considered local.
+
+You can run the program "ipmeprint" from the source directory to see
+what interfaces qmail is detecting or finds in moreipme.
+
+
+###########
+### HOW ###
+###########
+
+To apply the patch, download and save it somewhere, then cd into your
+qmail source directory, and run:
+
+    patch -p1 </path/to/qmail-1.03-moreipme.patch
+
+
+###################
+### OTHER NOTES ###
+###################
+
+This patch also incorporates the "0.0.0.0" patch, which causes qmail 
+to recognize the IP address 0.0.0.0 as a local address.  See:
+
+    http://www.suspectclass.com/~sgifford/qmail/qmail-0.0.0.0.README
+
+for more information, and
+
+    http://www.suspectclass.com/~sgifford/qmail/qmail-0.0.0.0.patch
+
+for a copy of the patch.
+
+
+###############
+### HISTORY ###
+###############
+
+2002 Apr 26 - Patch version 0.4 released.  Includes support for "notipme" file.
+              Many other small fixes and cleanups.  Fixes ipmeprint to
+              chdir(/var/qmail) before running.
+
+2001 Oct  8 - Original release of patch.
+
+2001 Jan 22 - (roughly) Original release of 0.0.0.0 patch.

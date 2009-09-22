@@ -1,0 +1,314 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN">
+<HTML
+><HEAD
+><link rel='stylesheet' type='text/css' href='manpage.css'>
+  <!-- $Id: userdbpw.sgml,v 1.1 2001/11/24 20:49:56 mrsam Exp $ -->
+  <!-- Copyright 1998 - 2001 Double Precision, Inc.  See COPYING for -->
+  <!-- distribution information. -->
+<meta name="MSSmartTagsPreventParsing" content="TRUE">
+<link rel="icon" href="icon.gif" type="image/gif" />
+<TITLE
+>userdbpw</TITLE
+><META
+NAME="GENERATOR"
+CONTENT="Modular DocBook HTML Stylesheet Version 1.7"></HEAD
+><BODY
+CLASS="REFENTRY"
+BGCOLOR="#FFFFFF"
+TEXT="#000000"
+LINK="#0000FF"
+VLINK="#840084"
+ALINK="#0000FF"
+><H1
+><A
+NAME="USERDBPW"
+></A
+>userdbpw</H1
+><DIV
+CLASS="REFNAMEDIV"
+><A
+NAME="AEN10"
+></A
+><H2
+>Name</H2
+>userdbpw&nbsp;--&nbsp;create an encrypted password</DIV
+><DIV
+CLASS="REFSYNOPSISDIV"
+><A
+NAME="AEN13"
+></A
+><H2
+>Synopsis</H2
+><P
+><B
+CLASS="COMMAND"
+>userdbpw</B
+> [-md5 | -hmac-md5 | -hmac-sha1]  | <B
+CLASS="COMMAND"
+>userdb</B
+> {<VAR
+CLASS="REPLACEABLE"
+>name</VAR
+>}  set  {<VAR
+CLASS="REPLACEABLE"
+>field</VAR
+>}</P
+></DIV
+><DIV
+CLASS="REFSECT1"
+><A
+NAME="AEN27"
+></A
+><H2
+>DESCRIPTION</H2
+><P
+><B
+CLASS="COMMAND"
+>userdbpw</B
+> enables secure entry of encrypted
+passwords into <TT
+CLASS="FILENAME"
+>@userdb@</TT
+>.</P
+><P
+><B
+CLASS="COMMAND"
+>userdbpw</B
+> reads a single line of text on
+standard input, encrypts it, and prints the encrypted result to standard
+output.</P
+><P
+>If standard input is attached to a terminal device,
+<B
+CLASS="COMMAND"
+>userdbpw</B
+> explicitly issues a "Password: " prompt on
+standard error, and turns off echo while the password is entered.</P
+><P
+>The <VAR
+CLASS="OPTION"
+>-md5</VAR
+> option is available on systems that use
+MD5-hashed passwords (such as systems that use the current version of the
+PAM library for authenticating, with MD5 passwords enabled).
+This option creates an MD5 password hash, instead of using the
+traditional <TT
+CLASS="FUNCTION"
+>crypt()</TT
+> function.</P
+><P
+><VAR
+CLASS="OPTION"
+>-hmac-md5</VAR
+> and <VAR
+CLASS="OPTION"
+>-hmac-sha1</VAR
+> options
+are available only if the userdb library is installed by an application
+that uses a challenge/response authentication mechanism.
+<VAR
+CLASS="OPTION"
+>-hmac-md5</VAR
+> creates an intermediate HMAC context using the
+MD5 hash function. <VAR
+CLASS="OPTION"
+>-hmac-sha1</VAR
+> uses the SHA1 hash function
+instead. Whether either HMAC function is actually available depends on the
+actual application that installs the <VAR
+CLASS="OPTION"
+>userdb</VAR
+> library.</P
+><P
+>Note that even though the result of HMAC hashing looks like an encrypted
+password, it's really not.  HMAC-based challenge/response authentication
+mechanisms require the cleartext password to be available as cleartext.
+Computing an intermediate HMAC context does scramble the cleartext password,
+however if its compromised, it WILL be possible for an attacker to succesfully
+authenticate.  Therefore, applications that use challenge/response
+authentication will store intermediate HMAC contexts in the "pw" fields in the
+userdb database, which will be compiled into the
+<TT
+CLASS="FILENAME"
+>userdbshadow.dat</TT
+>
+database, which has group and world permissions turned off. The
+userdb library also requires that the cleartext userdb source for the
+<TT
+CLASS="FILENAME"
+>userdb.dat</TT
+> and
+<TT
+CLASS="FILENAME"
+>userdbshadow.dat</TT
+> databases is also stored with the
+group and world permissions turned off.</P
+><P
+><B
+CLASS="COMMAND"
+>userdbpw</B
+> is usually used together in a pipe with
+<B
+CLASS="COMMAND"
+>userdb</B
+>, which reads from standard input. For example:
+
+<A
+NAME="AEN52"
+></A
+><BLOCKQUOTE
+CLASS="BLOCKQUOTE"
+><DIV
+CLASS="INFORMALEXAMPLE"
+><P
+></P
+><A
+NAME="AEN53"
+></A
+><P
+CLASS="LITERALLAYOUT"
+><B
+CLASS="COMMAND"
+>userdbpw -md5 | userdb users/john set systempw</B
+></P
+><P
+></P
+></DIV
+></BLOCKQUOTE
+></P
+><P
+>or:
+
+<A
+NAME="AEN57"
+></A
+><BLOCKQUOTE
+CLASS="BLOCKQUOTE"
+><DIV
+CLASS="INFORMALEXAMPLE"
+><P
+></P
+><A
+NAME="AEN58"
+></A
+><P
+CLASS="LITERALLAYOUT"
+><B
+CLASS="COMMAND"
+>userdbpw -hmac-md5 | userdb users/john set hmac-md5pw</B
+></P
+><P
+></P
+></DIV
+></BLOCKQUOTE
+></P
+><P
+>These commands set the <VAR
+CLASS="OPTION"
+>systempw</VAR
+> field in the record for
+the user <VAR
+CLASS="OPTION"
+>john</VAR
+> in <TT
+CLASS="FILENAME"
+>@userdb@/users</TT
+> file, and the
+<VAR
+CLASS="OPTION"
+>hmac-md5pw</VAR
+> field. Don't forget to run
+<B
+CLASS="COMMAND"
+>makeuserdb</B
+> for the change to take effect.</P
+><P
+>The following command does the same thing:
+<A
+NAME="AEN68"
+></A
+><BLOCKQUOTE
+CLASS="BLOCKQUOTE"
+><DIV
+CLASS="INFORMALEXAMPLE"
+><P
+></P
+><A
+NAME="AEN69"
+></A
+><P
+CLASS="LITERALLAYOUT"
+><B
+CLASS="COMMAND"
+>userdb users/john set systempw=<VAR
+CLASS="OPTION"
+>SECRETPASSWORD</VAR
+></B
+></P
+><P
+></P
+></DIV
+></BLOCKQUOTE
+></P
+><P
+>However, this command passes the secret password as an argument to the
+<B
+CLASS="COMMAND"
+>userdb</B
+> command, which can be viewed by anyone who happens
+to run
+<SPAN
+CLASS="CITEREFENTRY"
+><SPAN
+CLASS="REFENTRYTITLE"
+>ps</SPAN
+>(1)</SPAN
+>
+at the same time. Using <B
+CLASS="COMMAND"
+>userdbpw</B
+> allows the secret password
+to be specified in a way that cannot be easily viewed by
+<SPAN
+CLASS="CITEREFENTRY"
+><SPAN
+CLASS="REFENTRYTITLE"
+>ps</SPAN
+>(1)</SPAN
+>.</P
+></DIV
+><DIV
+CLASS="REFSECT1"
+><A
+NAME="AEN82"
+></A
+><H2
+>SEE ALSO</H2
+><P
+><A
+HREF="userdb.html"
+TARGET="_top"
+><SPAN
+CLASS="CITEREFENTRY"
+><SPAN
+CLASS="REFENTRYTITLE"
+>userdb</SPAN
+>(8)</SPAN
+></A
+>,
+ 
+<A
+HREF="makeuserdb.html"
+TARGET="_top"
+><SPAN
+CLASS="CITEREFENTRY"
+><SPAN
+CLASS="REFENTRYTITLE"
+>makeuserdb</SPAN
+>(8)</SPAN
+></A
+></P
+></DIV
+></BODY
+></HTML
+>

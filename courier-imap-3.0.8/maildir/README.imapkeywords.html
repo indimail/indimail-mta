@@ -1,0 +1,153 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+  <title>Courier-IMAP: IMAP keywords implementation</title>
+  <meta name="generator" content="amaya 8.6, see http://www.w3.org/Amaya/" />
+  <style type="text/css">
+.filename { font-family: courier new,courier,fixed; font-weight: bold; }
+.imapflag { font-family: courier new,courier,fixed; }</style>
+</head>
+
+<body>
+<h1>Courier-IMAP: IMAP keywords implementation</h1>
+
+<p>This white paper describes how Courier-IMAP implements IMAP keywords. This
+document is provided for informational purposes only.</p>
+
+<h2>Background</h2>
+
+<p>Courier-IMAP is a maildir-based IMAP server. The reader is presumed to
+know how maildirs work.</p>
+
+<p>There are five pre-defined flags that may be set on each message in an
+IMAP folder: <span class="imapflag">\Seen</span>, <span
+class="imapflag">\Answered</span>, <span class="imapflag">\Draft</span>,
+<span class="imapflag">\Deleted</span>, and <span
+class="imapflag">\Flagged</span>. An IMAP server may also optionally offer
+the ability to set arbitrary client-defined flags for any message.</p>
+
+<h2>Implementation Requirements</h2>
+<ul>
+  <li>Maintain the high-performance, lock-free nature of maildir-based mail
+    stores.</li>
+  <li>The current version of Courier-IMAP offers an option to use light,
+    dot-lock based locking to minimize undesirable side-effects brought by
+    concurrent folder updates by multiple IMAP clients. Keyword usage should
+    not rely on locking being enabled.</li>
+  <li>Reading and saving keywords should be reasonably fast, even with large
+    folders.</li>
+  <li>Obtaining a list of all keywords set for a given message should be a
+    fast operation.</li>
+  <li>Obtaining a list of all messages with a given keyword set should also
+    be a fast operation.</li>
+  <li>Updating keywords should be a reasonably fast operation.</li>
+  <li>Should not have any noticable overhead unless keywords are actually
+    used.</li>
+</ul>
+
+<h2>Implementation Details</h2>
+
+<p>The rest of this document describes the technical keyword implementation.
+This is a short summary of the implement issues that should be understood
+when using IMAP keywords with Courier-IMAP.</p>
+<ul>
+  <li>On systems that impose a fixed upper limit on the maximum number of
+    files in a directory, the number of messages whose keywords may be
+    adjusted within a 15-20 minute window may not exceed 1/3rd of the upper
+    limit. For example, Linux ext2 filesystem directories can hold about
+    30,000 files, maximum. On Linux systems, no more than 10,000 messages (in
+    the same folder, of course) may have their keywords changed within any
+    15-20 minute window.</li>
+  <li>The atomicity is on a per-message basis. All keywords set for a
+    particular message are saved as an atomic unit. A client adjusts the
+    keywords that are set for a particular message by reading the existing
+    set of keywords, and then replacing them with a new set of keywords. This
+    means that when multiple clients update the keyword set of the same
+    message, the last update wins. Changes made by the losing client are
+    lost. Moral of the story: do not allow multiple clients to mess with the
+    same message, at the same time.</li>
+</ul>
+
+<h2>Data storage</h2>
+
+<p>A new subdirectory, <span class="filename">courierimapkeywords</span>, is
+created in the maildir. It stores keyword-related data.</p>
+
+<p>The file <span class="filename">courierimapkeywords/:list</span> contains
+a "stable, known list" of all keywords sets for all messages. It is,
+essentially, a list of the base filenames of each message in the <span
+class="filename">cur</span> directory that has keywords, without the ":2,"
+suffix, and any message flags. Messages without any set keywords are not
+listed in this file.</p>
+
+<p>Additional files may also exist in this subdirectory, named either <span
+class="filename">.N.file</span>, or <span class="filename">file</span>. <span
+class="filename">file</span> is the base filename of a message, while "N" is
+a numeric value.</p>
+
+<p>The list of keywords set for all messages is obtained by reading the
+contents of <span class="filename">courierimapkeywords</span> according to
+the process described below.</p>
+
+<h2>Updating keywords</h2>
+
+<p>A keywords set for a message may be updated as follows:</p>
+<ul>
+  <li>Create a file in tmp, containing the new keywords that are set for the
+    message. To remove all existing keywords, the file should be empty.</li>
+  <li>Rename the file as <span
+    class="filename">courierimapkeywords/file</span>, with <span
+    class="filename">file</span> matching the message's base filename.</li>
+</ul>
+
+<h2>Reading keywords</h2>
+
+<p>First, a list of all messages present in <span class="filename">new</span>
+and <span class="filename">cur</span> is obtained. Then:</p>
+<ul>
+  <li>Read <span class="filename">courierimapkeywords/:list</span>. Ignore
+    non-existent base filenames read from the <span
+    class="filename">:list</span> file.</li>
+  <li>Divide the current time, in seconds, by 300. Call the result T.</li>
+  <li>Read the contents of the <span
+    class="filename">courierimapkeywords</span> directory. Ignore <span
+    class="filename">:list</span>, the remaining files in the directory will
+    be named either "<span class="filename">file</span>", or ".N.file" where
+    N is a number. When encountering a file that cannot be found in the
+    current list of messages present in <span class="filename">new</span> and
+    <span class="filename">cur</span>, stat the file, and remove it if its
+    ctime is at least fifteen minutes old (prevents removal of keywords for a
+    message that's just been added to the folder, and the scan for messages
+    in new and cur just missed it).</li>
+  <li>When encountering "<span class="filename">.N.file</span>" after another
+    "<span class="filename">.N.file</span>" was encountered earlier, remove
+    the file with the lesser N, unless the larger of the two Ns is greater
+    than or equals to T. Keep track of the largest N seen that's less than T,
+    and the largest N that's seen that's greater than or equals to T. When
+    encountering a "<span class="filename">file</span>", add it a list of all
+    "<span class="filename">file</span>"s that were encountered, and process
+    this entry as if it were <span class="filename">.X.file</span>, where
+    X=T+1.</li>
+  <li>After reading the entire directory, apply the following changes to the
+    keywords read from the <span class="filename">:list</span> file: the
+    contents of every <span class="filename">file</span> seen; if <span
+    class="filename">file</span> was not seen but a <span
+    class="filename">.N.file</span> was seen, then the contents of the file
+    with the largest N. If an attempt to open an update file failed with
+    ENOENT, restart everything from step 1.</li>
+  <li>Write the new set of keywords to a temporary file in <span
+    class="filename">tmp</span>, then rename it as <span
+    class="filename">courierimapkeywords/:list</span>. Afterwords go through
+    the list of all "<span class="filename">file</span>"s that were
+    encountered two steps ago, and rename each "<span
+    class="filename">file</span>" to "<span class="filename">.X.file</span>".
+    This step should be omitted unless at least one nonexistent file was
+    skipped in the old <span class="filename">:list</span> file, or the
+    contents of at least one <span class="filename">.N.file</span> was
+    updated to <span class="filename">:list</span>.</li>
+  <li>If exactly one <span class="filename">.N.file</span> was seen, and
+    N&lt;T, remove the lone <span class="filename">.N.file</span>.</li>
+</ul>
+</body>
+</html>

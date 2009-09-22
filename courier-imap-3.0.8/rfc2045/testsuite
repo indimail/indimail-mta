@@ -1,0 +1,68 @@
+
+cat >testsuite.dat <<EOF
+From: nobody
+To: nobody
+Subject: this is
+   a test
+
+testing
+EOF
+./headercheck 0 "" <testsuite.dat
+echo "--"
+./headercheck 2 "" <testsuite.dat
+echo "--"
+./headercheck 1 "" <testsuite.dat
+
+cat >testsuite.dat <<EOF
+From: nobody
+To: nobody
+Mime-Version: 1.0
+Content-Type: message/rfc822
+
+From: nobody@example.com
+To: nobody@example.com
+Message-ID: <a@b>
+Subject: Example
+   subject
+
+EOF
+echo "---"
+./headercheck 0 "1.1" <testsuite.dat
+echo "--"
+./headercheck 2 "1.1" <testsuite.dat
+echo "--"
+./headercheck 1 "1.1" <testsuite.dat
+
+cat >testsuite.dat <<EOF
+Mime-Version: 1.0
+Content-Type: multipart/mixed; boundary=aaa
+
+
+--aaa
+Content-Type: text/plain; name*=n%41me
+Content-Disposition: attachment; filename*1=n%41me;
+				 filename*2*=".%65xe";
+				 filename*0*=iso8859-1'en_US'file
+
+Testing
+
+--aaa
+Content-Type: text/plain; name=name
+Content-Disposition: attachment; filename=name.exe; filename*1=n%41me;
+				 filename*2*=".%65xe";
+				 filename*0*=iso8859-1'en_US'file
+
+Testing
+
+--aaa---
+EOF
+./reformime -i <testsuite.dat | sed 's/^charset:.*/charset: iso-8859-1/'
+
+echo "foo" >confmdtest
+
+./makemime -c application/octet-stream -C utf-8 -N footest confmdtest
+
+./makemime -c application/octet-stream -C utf-8 -N footest:1 confmdtest
+./makemime -c application/octet-stream -C utf-8 -N f:::::::::::::::::::::::::1 confmdtest
+
+rm -f confmdtest

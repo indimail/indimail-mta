@@ -1,0 +1,45 @@
+.TH qmail-recipients 8
+.SH NAME
+qmail-recipients \- prepare recipients for qmail-smtpd
+.SH SYNOPSIS
+.B qmail-recipients
+.SH DESCRIPTION
+.B qmail-recipients
+does a chdir to QMAIL and
+reads the addresses provided in
+.BR users/recipients ,
+converts them into lowercase, and writes them into
+.B users/recipients.cdb
+in a binary format suited
+for quick access by
+.BR qmail-smtpd .
+
+If there is a problem with
+.BR users/recipients ,
+.B qmail-recipients
+complains and leaves
+.B users/recipients.cdb
+alone.
+
+.B qmail-recipients
+ensures that
+.B users/recipients.cdb
+is updated atomically,
+so
+.B qmail-smtpd
+never has to wait for
+.B qmail-recipients
+to finish.
+However,
+.B qmail-recipients
+makes no attempt to protect against two simultaneous updates of
+.BR users/recipients.cdb .
+
+The binary
+.B users/recipients.cdb
+is compatible with 
+.B setforward
+generated \'fastforward\' cdbs and it's
+format is portable across machines.
+.SH "SEE ALSO"
+qmail-smtpd(8)

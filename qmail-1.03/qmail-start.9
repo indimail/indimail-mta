@@ -1,0 +1,138 @@
+.TH qmail-start 8
+.SH NAME
+qmail-start \- turn on mail delivery
+qmail-daemon \- turn on mail delivery
+.SH SYNOPSIS
+.B qmail-start
+[
+.I defaultdelivery
+[
+.I logger arg ...
+]
+]
+
+.B qmail-daemon
+[
+.I defaultdelivery
+[
+.I logger arg ...
+]
+]
+.SH DESCRIPTION
+.B qmail-start
+invokes
+.BR qmail-send ,
+.BR qmail-lspawn ,
+.BR qmail-rspawn ,
+and
+.BR qmail-clean ,
+under the proper uids and gids for a single queue.
+These four daemons cooperate to deliver messages from the queue.
+
+.B qmail-daemons
+invokes
+.BR qmail-send ,
+.BR qmail-lspawn ,
+.BR qmail-rspawn ,
+and
+.BR qmail-clean ,
+under the proper uids and gids for multiple queues. It starts multiple copies (=$QUEUE_COUNT) of
+.B qmail-send
+by defining environment variable QUEUEDIR. A queue is defined by the environment variables
+QUEUE_START and QUEUE_COUNT.
+.B qmail-daemon
+also monitors 
+.B qmail-send
+and restart it if it goes down.
+
+.B qmail-start
+should be used if you desire to run only one queue. For running multiple parallel queues run
+.BR qmail-daemon .
+
+.B qmail-start
+or
+.B qmail-daemon
+arranges for
+.BR qmail-send 's
+activity record to be sent to
+.BR qmail-start 's
+output.
+See
+.B qmail-log(5)
+for the format of the activity record.
+Other than this,
+.B qmail-start
+does not print anything, even on failure.
+.B qmail-daemon
+announces its startup, exit and failures on stdout and stderr
+
+If
+.I defaultdelivery
+is supplied,
+.B qmail-start
+or
+.B qmail-daemon
+passes it to
+.BR qmail-lspawn .
+
+If
+.I logger
+is supplied,
+.B qmail-start
+or
+.B qmail-daemon
+invokes
+.I logger
+with the given arguments,
+and feeds
+.BR qmail-send 's
+activity record through
+.IR logger .
+
+Environment variables given to
+.B qmail-start
+or
+.B qmail-daemon
+will eventually be passed on to
+.BR qmail-local ,
+so make sure to clean up the environment if you run
+.B qmail-start
+manually:
+
+.EX
+   # env - PATH="QMAIL/bin:$PATH"
+.br
+   qmail-start ./Mailbox splogger qmail &
+.br
+   (all on one line)
+.EE
+
+Resource limits, controlling ttys, et al. are also passed from
+.B qmail-start
+or
+.B qmail-daemon
+to
+.BR qmail-local .
+
+Note that
+.B qmail-send
+normally juggles several simultaneous deliveries.
+To reduce
+.BR qmail-send 's
+impact on other programs,
+you can run
+.B qmail-start
+or
+.B qmail-daemon
+with a low priority.
+.SH "SEE ALSO"
+logger(1),
+splogger(1),
+nice(1),
+qmail-log(5),
+qmail-local(8),
+qmail-clean(8),
+qmail-lspawn(8),
+qmail-rspawn(8),
+qmail-send(8)
+qmail-multi(8)

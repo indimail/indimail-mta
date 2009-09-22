@@ -1,0 +1,1502 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN">
+<HTML
+><HEAD
+><link rel='stylesheet' type='text/css' href='manpage.css'>
+  <!-- $Id: couriertcpd.sgml,v 1.3 2003/04/30 00:28:27 mrsam Exp $ -->
+  <!-- Copyright 2000-2001 Double Precision, Inc.  See COPYING for -->
+  <!-- distribution information. -->
+<meta name="MSSmartTagsPreventParsing" content="TRUE">
+<link rel="icon" href="icon.gif" type="image/gif" />
+<TITLE
+>couriertcpd</TITLE
+><META
+NAME="GENERATOR"
+CONTENT="Modular DocBook HTML Stylesheet Version 1.7"></HEAD
+><BODY
+CLASS="REFENTRY"
+BGCOLOR="#FFFFFF"
+TEXT="#000000"
+LINK="#0000FF"
+VLINK="#840084"
+ALINK="#0000FF"
+><H1
+><A
+NAME="COURIERTCPD"
+></A
+>couriertcpd</H1
+><DIV
+CLASS="REFNAMEDIV"
+><A
+NAME="AEN10"
+></A
+><H2
+>Name</H2
+>couriertcpd&nbsp;--&nbsp;Courier TCP server daemon</DIV
+><DIV
+CLASS="REFSYNOPSISDIV"
+><A
+NAME="AEN13"
+></A
+><H2
+>Synopsis</H2
+><P
+><B
+CLASS="COMMAND"
+>couriertcpd</B
+> {-pid=<VAR
+CLASS="REPLACEABLE"
+>pidfile</VAR
+>} [<VAR
+CLASS="REPLACEABLE"
+>option</VAR
+>...] {<VAR
+CLASS="REPLACEABLE"
+>list</VAR
+>} {<VAR
+CLASS="REPLACEABLE"
+>program</VAR
+>} {<VAR
+CLASS="REPLACEABLE"
+>arg</VAR
+>...}</P
+><P
+><B
+CLASS="COMMAND"
+>couriertcpd</B
+> {-pid=<VAR
+CLASS="REPLACEABLE"
+>pidfile</VAR
+>} {-stop}</P
+><P
+><B
+CLASS="COMMAND"
+>couriertcpd</B
+> {-pid=<VAR
+CLASS="REPLACEABLE"
+>pidfile</VAR
+>} {-restart}</P
+></DIV
+><DIV
+CLASS="REFSECT1"
+><A
+NAME="AEN36"
+></A
+><H2
+>DESCRIPTION</H2
+><P
+><B
+CLASS="COMMAND"
+>couriertcpd</B
+> accepts incoming network connections, and runs
+<B
+CLASS="COMMAND"
+>program</B
+> after establishing each network connection. The
+<B
+CLASS="COMMAND"
+>program</B
+>'s standard input and output are set to the network
+connection.</P
+><P
+><VAR
+CLASS="REPLACEABLE"
+>list</VAR
+> is a comma-separated list of TCP port numbers
+where incoming
+connections are created. <B
+CLASS="COMMAND"
+>program</B
+> is the program to
+run. If <B
+CLASS="COMMAND"
+>program</B
+> requires any
+arguments, they are specified on the command line, after
+<B
+CLASS="COMMAND"
+>program</B
+> itself.</P
+><P
+>Before running <B
+CLASS="COMMAND"
+>program</B
+>, <B
+CLASS="COMMAND"
+>couriertcpd</B
+>
+initializes
+several environment variables that describe the network connection. The
+environment inherited by <B
+CLASS="COMMAND"
+>program</B
+> will be the environment
+inherited by <B
+CLASS="COMMAND"
+>couriertcpd</B
+>, plus any additional environment
+variables initialized by <B
+CLASS="COMMAND"
+>couriertcpd</B
+>. It is also possible to
+reject certain network connections. Several options are available to specify
+which network connections will be rejected.</P
+></DIV
+><DIV
+CLASS="REFSECT1"
+><A
+NAME="AEN53"
+></A
+><H2
+>OPTIONS</H2
+><P
+></P
+><DIV
+CLASS="VARIABLELIST"
+><DL
+><DT
+>-access=<VAR
+CLASS="REPLACEABLE"
+>filename</VAR
+></DT
+><DD
+><P
+>Specifies an optional access
+file. The access file lists the IP addresses from which connections
+should be accepted or rejected. The access file is also used to
+initialize environment variables based on the IP address of the
+connection. <VAR
+CLASS="REPLACEABLE"
+>filename</VAR
+> is a GDBM or DB database file
+that's usually
+created by a script from one or more text files. See "ACCESS FILE" below for
+more information.</P
+></DD
+><DT
+>-address=<VAR
+CLASS="REPLACEABLE"
+>n.n.n.n</VAR
+></DT
+><DD
+><P
+>Accept network connections only to IP address
+<VAR
+CLASS="REPLACEABLE"
+>n.n.n.n</VAR
+>. If not specified,
+<B
+CLASS="COMMAND"
+>couriertcpd</B
+>
+accepts connections to any IP address that the system accepts connections
+on. If the system has multiple network interfaces with separate IP
+addresses, this option makes <B
+CLASS="COMMAND"
+>couriertcpd</B
+> accept connections
+only to one specific IP address. Most systems have multiple network
+interfaces: the loopback interface, plus the local network interface, so
+that <TT
+CLASS="LITERAL"
+>-address=127.0.0.1</TT
+> accepts connections only from the
+local system. When multiple port numbers are specified, it is also
+possible to selectively bind different network addresses to each port
+number when <VAR
+CLASS="REPLACEABLE"
+>list</VAR
+> specifies more than one port
+number. See "<A
+HREF="#list"
+TARGET="_top"
+>Multiple port list</A
+>" below for more
+information.</P
+></DD
+><DT
+>-block=<VAR
+CLASS="REPLACEABLE"
+>zone</VAR
+>[,<VAR
+CLASS="REPLACEABLE"
+>var</VAR
+>[/<VAR
+CLASS="REPLACEABLE"
+>n.n.n.n</VAR
+>][,<VAR
+CLASS="REPLACEABLE"
+>msg</VAR
+>]]</DT
+><DD
+><P
+>Initialize the environment variable <VAR
+CLASS="REPLACEABLE"
+>var</VAR
+> if both of
+the following
+conditions are true: <VAR
+CLASS="REPLACEABLE"
+>var</VAR
+> is not already initialized;
+the connecting IP address can be found in a DNS-based list. See
+DNS ACCESS LISTS, below.
+Multiple <VAR
+CLASS="OPTION"
+>-block</VAR
+> options can be used.</P
+></DD
+><DT
+>-denymsg=<VAR
+CLASS="REPLACEABLE"
+>text</VAR
+></DT
+><DD
+><P
+>Specifies an optional message to be returned to the client if the
+<TT
+CLASS="PARAMETER"
+><I
+>-access</I
+></TT
+> option rejects them.
+The default is to drop the TCP
+connection without sending back any messages.</P
+></DD
+><DT
+>-group=<VAR
+CLASS="REPLACEABLE"
+>group</VAR
+></DT
+><DD
+><P
+>Set <B
+CLASS="COMMAND"
+>couriertcpd</B
+>'s its
+group ID. <VAR
+CLASS="REPLACEABLE"
+>group</VAR
+> may be specified numerically, or by
+its name. Only the superuser may use <VAR
+CLASS="OPTION"
+>-group</VAR
+>.</P
+></DD
+><DT
+>-listen=<VAR
+CLASS="REPLACEABLE"
+>n</VAR
+></DT
+><DD
+><P
+>Length of the queue which holds pending connections.
+<VAR
+CLASS="REPLACEABLE"
+>n</VAR
+> is a number. If not specified, the system default
+is used.</P
+></DD
+><DT
+>-maxperc=<VAR
+CLASS="REPLACEABLE"
+>n</VAR
+></DT
+><DD
+><P
+>Maximum number of connections accepted
+from the same C network block. Using this option is recommended, because
+connection slots are limited. Without this option, the same C network
+block can potentially use up all available connection slots.</P
+></DD
+><DT
+>-maxperip=<VAR
+CLASS="REPLACEABLE"
+>n</VAR
+></DT
+><DD
+><P
+>Maximum number of connections
+accepted from the same IP address.  Use both the <VAR
+CLASS="OPTION"
+>-maxperc</VAR
+>
+and <VAR
+CLASS="OPTION"
+>-maxperip</VAR
+> options to fine tune connection limits. For
+example, when <B
+CLASS="COMMAND"
+>couriertcpd</B
+> is listening on the SMTP port it
+makes sense to set an upper limit on the number of connections from the
+same C block. Domains that send a large amount of mail often have
+multiple servers sending outbound mail from the same C block, so it makes
+sense to set limits on individual C blocks. On the other hand, if
+<B
+CLASS="COMMAND"
+>couriertcpd</B
+> is listening on the POP3 port it makes more
+sense to set limits on individual IP addresses.  If a C block of
+addresses is assigned to a dialup modem pool, it is certainly possible to
+have many IP addresses within the same C block have connections to the
+POP3 server at the same time.</P
+></DD
+><DT
+>-maxprocs=<VAR
+CLASS="REPLACEABLE"
+>n</VAR
+></DT
+><DD
+><P
+>Maximum number of connection slots,
+or the maximum number of processes started. This effectively specifies
+the maximum number of connections accepted at the same time. After the
+maximum number of connections has been opened, <B
+CLASS="COMMAND"
+>couriertcpd</B
+>
+waits for an existing connection to close, before accepting any more
+connections.</P
+></DD
+><DT
+>-warn=<VAR
+CLASS="REPLACEABLE"
+>n</VAR
+></DT
+><DD
+><P
+>Log a <SPAN
+CLASS="ERRORCODE"
+>LOG_WARNING</SPAN
+> message to
+syslog when the number of active processes exceeds
+<VAR
+CLASS="REPLACEABLE"
+>n</VAR
+>.  The default is 90% of
+<VAR
+CLASS="REPLACEABLE"
+>maxprocs</VAR
+>. <B
+CLASS="COMMAND"
+>couriertcpd</B
+> logs a
+<SPAN
+CLASS="ERRORCODE"
+>LOG_ALERT</SPAN
+> syslog message when the number of active
+processes
+reaches the maximum.</P
+></DD
+><DT
+>-nodnslookup</DT
+><DD
+><P
+>Do not look up the hostname associated with connecting IP address and the
+local addres, do not initialize the
+<VAR
+CLASS="ENVAR"
+>TCPREMOTEHOST</VAR
+> or <VAR
+CLASS="ENVAR"
+>TCPLOCALHOST</VAR
+> environment
+variables (see below).</P
+></DD
+><DT
+>-noidentlookup</DT
+><DD
+><P
+>Do not perform an <I
+CLASS="EMPHASIS"
+>ident</I
+>
+lookup, and do not initialize the <VAR
+CLASS="ENVAR"
+>TCPREMOTEINFO</VAR
+> environment
+variable.</P
+></DD
+><DT
+>-pid=<VAR
+CLASS="REPLACEABLE"
+>filename</VAR
+></DT
+><DD
+><P
+><I
+CLASS="EMPHASIS"
+>REQUIRED OPTION</I
+>: name of a
+file where <B
+CLASS="COMMAND"
+>couriertcpd</B
+> saves its process ID, usually
+somewhere in <TT
+CLASS="FILENAME"
+>/var/run</TT
+>.</P
+></DD
+><DT
+>-restart</DT
+><DD
+><P
+>Send a SIGHUP to an existing <B
+CLASS="COMMAND"
+>couriertcpd</B
+> process.  Specify
+the same <VAR
+CLASS="OPTION"
+>-pid</VAR
+>
+argument as the one that was used to start <B
+CLASS="COMMAND"
+>couriertcpd</B
+>. The
+process ID is read from the <VAR
+CLASS="OPTION"
+>-pid</VAR
+> file, and the
+<B
+CLASS="COMMAND"
+>couriertcpd</B
+> receives a SIGHUP signal.</P
+></DD
+><DT
+>-stderr=socket</DT
+><DD
+><P
+>Set <B
+CLASS="COMMAND"
+>program</B
+>'s standard error to
+the network connection, just like its standard input and output.</P
+></DD
+><DT
+>-stderr=<VAR
+CLASS="REPLACEABLE"
+>logfile</VAR
+></DT
+><DD
+><P
+>Set <B
+CLASS="COMMAND"
+>program</B
+>'s standard
+error to the specified file, <TT
+CLASS="FILENAME"
+>logfile</TT
+>.
+The file is created, if necessary, and is opened in append mode.</P
+></DD
+><DT
+>-stderrlogger=<VAR
+CLASS="REPLACEABLE"
+>logprogram</VAR
+></DT
+><DD
+><P
+>Set <B
+CLASS="COMMAND"
+>program</B
+>'s
+standard error to a pipe, which is read by <B
+CLASS="COMMAND"
+>logprogram</B
+>.
+Only one instance of
+<VAR
+CLASS="REPLACEABLE"
+>logger</VAR
+> is started, which receives standard error
+from every
+instance of <B
+CLASS="COMMAND"
+>program</B
+>.
+The specified <VAR
+CLASS="REPLACEABLE"
+>logger</VAR
+> is executed with
+the output end of the stderr pipe connected as standard input.
+<VAR
+CLASS="REPLACEABLE"
+>logprogram</VAR
+> is
+executed with one argument - <B
+CLASS="COMMAND"
+>program</B
+>'s name.</P
+></DD
+><DT
+>-stderrloggername=name</DT
+><DD
+><P
+>Use <VAR
+CLASS="REPLACEABLE"
+>name</VAR
+> as the argument to
+<VAR
+CLASS="REPLACEABLE"
+>logprogram</VAR
+>, instead of the
+<B
+CLASS="COMMAND"
+>program</B
+>'s name.</P
+></DD
+><DT
+>-stop</DT
+><DD
+><P
+>Stop (kill) an existing <B
+CLASS="COMMAND"
+>couriertcpd</B
+>
+process.  Specify the same <VAR
+CLASS="OPTION"
+>-pid</VAR
+> argument as the one that was
+used to start <B
+CLASS="COMMAND"
+>couriertcpd</B
+>. The process ID is read from the
+<VAR
+CLASS="OPTION"
+>-pid</VAR
+> file, and the <B
+CLASS="COMMAND"
+>couriertcpd</B
+> process is
+killed. All child processes of <B
+CLASS="COMMAND"
+>couriertcpd</B
+> will receive a
+SIGTERM signal.</P
+></DD
+><DT
+>-user=<VAR
+CLASS="REPLACEABLE"
+>user</VAR
+></DT
+><DD
+><P
+>Set <B
+CLASS="COMMAND"
+>couriertcpd</B
+>'s user
+ID. Also, the group ID is set to the user's group ID. Using both
+<VAR
+CLASS="OPTION"
+>-group</VAR
+> and <VAR
+CLASS="OPTION"
+>-user</VAR
+> is not necessary. Only the
+superuser can specify <VAR
+CLASS="OPTION"
+>-user</VAR
+>.</P
+></DD
+></DL
+></DIV
+></DIV
+><DIV
+CLASS="REFSECT1"
+><A
+NAME="AEN213"
+></A
+><H2
+>MULTIPLE PORT LIST</H2
+><A
+NAME="LIST"
+></A
+><P
+>The <VAR
+CLASS="REPLACEABLE"
+>list</VAR
+> argument can be a comma-separated list of
+multiple port
+numbers. <B
+CLASS="COMMAND"
+>couriertcpd</B
+> will create network connections on any
+listed port. Each port number can be optionally specified as "address.port",
+for example:</P
+><DIV
+CLASS="INFORMALEXAMPLE"
+><P
+></P
+><A
+NAME="AEN219"
+></A
+><TABLE
+BORDER="0"
+BGCOLOR="#E0E0E0"
+WIDTH="100%"
+><TR
+><TD
+><PRE
+CLASS="PROGRAMLISTING"
+>couriertcpd -pid=/var/run/smtp.pid 127.0.0.1.25,999 <VAR
+CLASS="REPLACEABLE"
+>program</VAR
+></PRE
+></TD
+></TR
+></TABLE
+><P
+></P
+></DIV
+><P
+>This instance accepts network connections to either port 25 or port 999,
+however connections on port 25 are created only on the IP address 127.0.0.1,
+the loopback interface.</P
+><P
+>Whenever an IP address is not specified, network connections are
+accepted
+to any IP address (called "wildcarding"). On IPv6-capable systems,
+<B
+CLASS="COMMAND"
+>couriertcpd</B
+> will attempt to create two incoming network
+connection ports, if an IP address is not specified. After creating the first
+port as an IPv6 wildcard port, couriertcpd will then attept to create an IPv4
+wildcard port, with the same port number. Some BSD-derived systems must use
+separate IPv6 and IPv4 wildcard ports to create incoming network connections.
+Most other systems only need an IPv6 port to create both IPv6 and IPv4
+incoming network connections. <B
+CLASS="COMMAND"
+>couriertcpd</B
+> quietly ignores a
+failure to create an IPv4 wildcard port, as long as an IPv6 wildcard was
+succesfully created.</P
+><P
+>The <VAR
+CLASS="OPTION"
+>-address</VAR
+> option can be used to default a specific IP
+address for every listed port number.  For example:</P
+><DIV
+CLASS="INFORMALEXAMPLE"
+><P
+></P
+><A
+NAME="AEN228"
+></A
+><TABLE
+BORDER="0"
+BGCOLOR="#E0E0E0"
+WIDTH="100%"
+><TR
+><TD
+><PRE
+CLASS="PROGRAMLISTING"
+>couriertcpd -pid=/var/run/smtp.pid 127.0.0.1.25,127.0.0.1.999 <VAR
+CLASS="REPLACEABLE"
+>program</VAR
+></PRE
+></TD
+></TR
+></TABLE
+><P
+></P
+></DIV
+><P
+>and</P
+><DIV
+CLASS="INFORMALEXAMPLE"
+><P
+></P
+><A
+NAME="AEN232"
+></A
+><TABLE
+BORDER="0"
+BGCOLOR="#E0E0E0"
+WIDTH="100%"
+><TR
+><TD
+><PRE
+CLASS="PROGRAMLISTING"
+>couriertcpd -pid=/var/run/smtp.pid -address=127.0.0.1 25,999 <VAR
+CLASS="REPLACEABLE"
+>program</VAR
+></PRE
+></TD
+></TR
+></TABLE
+><P
+></P
+></DIV
+><P
+>will create network connections on ports 25 and 999 of the IP address
+127.0.0.1.</P
+></DIV
+><DIV
+CLASS="REFSECT1"
+><A
+NAME="AEN236"
+></A
+><H2
+>ACCESS FILE</H2
+><P
+>The access file lists IP addresses that <B
+CLASS="COMMAND"
+>couriertcpd</B
+> will
+accept or reject connections from. An access file is optional. Without an
+access file <B
+CLASS="COMMAND"
+>couriertcpd</B
+> accepts a connection from any IP
+address.</P
+><P
+>Both IPv4 and IPv6 addresses can be specified, if IPv6 support is
+available. A non-standard syntax is currently used to specify IPv6 addresses.
+This is subject to change in the near future. IPv6 support is currently
+considered to be experimental.</P
+><P
+>The access file is a binary database file that's usually created by a
+script, such as
+<A
+HREF="makesmtpaccess.html"
+TARGET="_top"
+><SPAN
+CLASS="CITEREFENTRY"
+><SPAN
+CLASS="REFENTRYTITLE"
+>makesmtpaccess</SPAN
+>(8)</SPAN
+></A
+>,
+from one or more plain text
+files. Blank lines in the text file are ignored. Lines that start with the #
+character are also ignored.</P
+><DIV
+CLASS="REFSECT2"
+><A
+NAME="AEN247"
+></A
+><H3
+>Rejecting and accepting connections by IP address</H3
+><P
+>The following line instructs <B
+CLASS="COMMAND"
+>couriertcpd</B
+> to reject all
+connections from an IP address range:</P
+><DIV
+CLASS="INFORMALEXAMPLE"
+><P
+></P
+><A
+NAME="AEN251"
+></A
+><TABLE
+BORDER="0"
+BGCOLOR="#E0E0E0"
+WIDTH="100%"
+><TR
+><TD
+><PRE
+CLASS="PROGRAMLISTING"
+>netblock&#60;tab&#62;deny</PRE
+></TD
+></TR
+></TABLE
+><P
+></P
+></DIV
+><P
+><VAR
+CLASS="REPLACEABLE"
+>netblock</VAR
+> is an IP address, such as
+<TT
+CLASS="LITERAL"
+>192.68.0.2</TT
+>. <SPAN
+CLASS="TOKEN"
+>&#60;tab&#62;</SPAN
+>
+is the ASCII tab character. There MUST be exactly one tab character after the
+IP address and the word "deny".</P
+><P
+>You can also block connections from an entire network C block:</P
+><DIV
+CLASS="INFORMALEXAMPLE"
+><P
+></P
+><A
+NAME="AEN258"
+></A
+><TABLE
+BORDER="0"
+BGCOLOR="#E0E0E0"
+WIDTH="100%"
+><TR
+><TD
+><PRE
+CLASS="PROGRAMLISTING"
+>192.68.0&#60;tab&#62;deny</PRE
+></TD
+></TR
+></TABLE
+><P
+></P
+></DIV
+><P
+>This blocks connections from IP addresses <TT
+CLASS="LITERAL"
+>192.68.0.0</TT
+>
+through <TT
+CLASS="LITERAL"
+>192.68.0.255</TT
+>.
+Blocking connections from an entire B or A network block works the same
+way.</P
+><P
+>Use the word "<TT
+CLASS="LITERAL"
+>allow</TT
+>" instead of "<TT
+CLASS="LITERAL"
+>deny</TT
+>"
+to explicitly allow connections
+from that IP address or netblock. For example:</P
+><DIV
+CLASS="INFORMALEXAMPLE"
+><P
+></P
+><A
+NAME="AEN266"
+></A
+><TABLE
+BORDER="0"
+BGCOLOR="#E0E0E0"
+WIDTH="100%"
+><TR
+><TD
+><PRE
+CLASS="PROGRAMLISTING"
+>192.68.0&#60;tab&#62;deny
+192.68.0.10&#60;tab&#62;allow</PRE
+></TD
+></TR
+></TABLE
+><P
+></P
+></DIV
+><P
+>This blocks all connections from <TT
+CLASS="LITERAL"
+>192.68.0.0</TT
+> to
+<TT
+CLASS="LITERAL"
+>192.68.0.255</TT
+> except for <TT
+CLASS="LITERAL"
+>192.68.0.10</TT
+>.
+These two lines can occur in any order. <B
+CLASS="COMMAND"
+>couriertcpd</B
+>
+always uses the line with the most specific IP address.</P
+><P
+>If the IP address of the connection is not found in the access file the
+connection is accepted by default. The following line causes unlisted
+connections to be rejected:</P
+><DIV
+CLASS="INFORMALEXAMPLE"
+><P
+></P
+><A
+NAME="AEN274"
+></A
+><TABLE
+BORDER="0"
+BGCOLOR="#E0E0E0"
+WIDTH="100%"
+><TR
+><TD
+><PRE
+CLASS="PROGRAMLISTING"
+>*&#60;tab&#62;deny</PRE
+></TD
+></TR
+></TABLE
+><P
+></P
+></DIV
+></DIV
+><DIV
+CLASS="REFSECT2"
+><A
+NAME="AEN276"
+></A
+><H3
+>IPv6 addresses</H3
+><DIV
+CLASS="NOTE"
+><P
+></P
+><TABLE
+CLASS="NOTE"
+WIDTH="100%"
+BORDER="0"
+><TR
+><TD
+WIDTH="25"
+ALIGN="CENTER"
+VALIGN="TOP"
+>NOTE:</TD
+><TD
+ALIGN="LEFT"
+VALIGN="TOP"
+><P
+>IPv6 support in the access file is experimental, and is subject to
+change in a future release.  The following syntax is subject to change at any
+time.</P
+></TD
+></TR
+></TABLE
+></DIV
+><P
+>The access file can also specify IPv6 addresses, if IPv6 support is
+available.  The existing IPv4 address format is used for IPv6-mapped IPv4
+addresses, and no changes are required.  For all other IPv6 addresses use the
+following format:</P
+><DIV
+CLASS="INFORMALEXAMPLE"
+><P
+></P
+><A
+NAME="AEN281"
+></A
+><TABLE
+BORDER="0"
+BGCOLOR="#E0E0E0"
+WIDTH="100%"
+><TR
+><TD
+><PRE
+CLASS="PROGRAMLISTING"
+>:hhhh:hhhh:hhhh:hhhh:hhhh:hhhh:hhhh:hhhh&#60;tab&#62;<VAR
+CLASS="REPLACEABLE"
+>action</VAR
+></PRE
+></TD
+></TR
+></TABLE
+><P
+></P
+></DIV
+><P
+>The IPv6 address must begin with :. The initial : character is not really
+a part of the IPv6 address, it is only used to designate this record as an
+IPv6 address, allowing an access file to contain a mixture of IPv4 and IPv6
+addresses. The IPv6 address follows the initial : character, and it must be
+spelled out <I
+CLASS="EMPHASIS"
+>using zero-padded lowercase hexadecimal
+digits</I
+>.
+For example:</P
+><DIV
+CLASS="INFORMALEXAMPLE"
+><P
+></P
+><A
+NAME="AEN286"
+></A
+><TABLE
+BORDER="0"
+BGCOLOR="#E0E0E0"
+WIDTH="100%"
+><TR
+><TD
+><PRE
+CLASS="PROGRAMLISTING"
+>:0000:0000:0000:0000:0000:f643:00a2:9354&#60;tab&#62;deny</PRE
+></TD
+></TR
+></TABLE
+><P
+></P
+></DIV
+><P
+>Netblocks must be specified using even-word boundaries only:</P
+><DIV
+CLASS="INFORMALEXAMPLE"
+><P
+></P
+><A
+NAME="AEN289"
+></A
+><TABLE
+BORDER="0"
+BGCOLOR="#E0E0E0"
+WIDTH="100%"
+><TR
+><TD
+><PRE
+CLASS="PROGRAMLISTING"
+>:0000:0000:0000:e240&#60;tab&#62;deny</PRE
+></TD
+></TR
+></TABLE
+><P
+></P
+></DIV
+><P
+>This puts the entire ::e240/32 IPv6 CIDR into the access file.</P
+></DIV
+><DIV
+CLASS="REFSECT2"
+><A
+NAME="AEN292"
+></A
+><H3
+>Setting environment variables</H3
+><P
+><TT
+CLASS="LITERAL"
+>allow</TT
+> can be optionally followed by a list of environment
+variable
+assignments, separated by commas. The environment variables are set before
+executing <B
+CLASS="COMMAND"
+>program</B
+> or checking
+access lists (see below). For example:</P
+><DIV
+CLASS="INFORMALEXAMPLE"
+><P
+></P
+><A
+NAME="AEN297"
+></A
+><TABLE
+BORDER="0"
+BGCOLOR="#E0E0E0"
+WIDTH="100%"
+><TR
+><TD
+><PRE
+CLASS="PROGRAMLISTING"
+>192.68.0&#60;tab&#62;allow,RELAYCLIENT
+192.68.0.10&#60;tab&#62;allow,RELAYCLIENT,SIZELIMIT=1000000</PRE
+></TD
+></TR
+></TABLE
+><P
+></P
+></DIV
+><P
+>This sets <VAR
+CLASS="ENVAR"
+>RELAYCLIENT</VAR
+> environment variable for connections
+from the <TT
+CLASS="LITERAL"
+>192.68.0</TT
+> block. In addition to that, the <VAR
+CLASS="ENVAR"
+>SIZELIMIT</VAR
+>
+environment variable is set to <TT
+CLASS="LITERAL"
+>1000000</TT
+> if the connection comes from the IP
+address <TT
+CLASS="LITERAL"
+>192.68.0.10</TT
+>.</P
+><P
+>Note that <VAR
+CLASS="ENVAR"
+>RELAYCLIENT</VAR
+> must be explicitly specified for the IP
+address <TT
+CLASS="LITERAL"
+>192.68.0.10</TT
+>. The first line is NOT used for
+connections from this IP
+address. <B
+CLASS="COMMAND"
+>couriertcpd</B
+> only reads one entry from the access
+file, the entry for the most specific IP address.</P
+></DIV
+><DIV
+CLASS="REFSECT2"
+><A
+NAME="AEN309"
+></A
+><H3
+>DNS ACCESS LISTS</H3
+><P
+>An alternative to listing banned IP addresses is to use an external
+DNS-based IP access list.</P
+><P
+>There is no provision to support IPv6-based lists, because none yet
+exist. IPv6-based access list support will be added in the future.</P
+><P
+><B
+CLASS="COMMAND"
+>couriertcpd</B
+> does not automatically reject connections from
+any IP address listed on a DNS-based list. If the connecting IP address is
+listed couriertcpd simply sets an environment variable. It's up to the
+<B
+CLASS="COMMAND"
+>program</B
+>, run by <B
+CLASS="COMMAND"
+>couriertcpd</B
+>,
+to read the environment
+variable and choose what to do if the environment variable is set.</P
+><P
+>Please note that if the environment variable is already set,
+<B
+CLASS="COMMAND"
+>couriertcpd</B
+> will NOT search the access list. This can be used
+to override the access list where <B
+CLASS="COMMAND"
+>program</B
+> only recognizes the
+access list if the environment variable is not empty. By setting the
+environment variable to an empty string in the access file (see above), you
+can override access lists for selected IP addresses.</P
+><P
+>The <VAR
+CLASS="OPTION"
+>-block</VAR
+> option queries a DNS list for each connecting IP
+address. The only required argument to <VAR
+CLASS="OPTION"
+>-block</VAR
+> is the DNS zone
+that is used to publish thelist. The name of the zone can optionally be
+followed by a comma and the name of the environment variable to set if the
+DNS list includes the IP address.  <B
+CLASS="COMMAND"
+>couriertcpd</B
+> sets the
+environment variable <VAR
+CLASS="ENVAR"
+>BLOCK</VAR
+> if you do not specify the name
+yourself.</P
+><P
+>The name of the environment variable can be optionally followed by a slash
+and an IP address. Normally <B
+CLASS="COMMAND"
+>couriertcpd</B
+> sets the environment
+variable if the access list includes any A record entry for the specified IP
+address. Some access lists may offer additional information by returning one of
+several possible A records. If the name of the environment variable is
+followed by a slash and an IP address, the environment variable will be
+initialized only if the access list includes an A record containing the
+indicated IP address.</P
+><P
+>The contents of the environment variable will be the contents of any TXT
+record for the listed IP address. <VAR
+CLASS="REPLACEABLE"
+>var</VAR
+>[/<VAR
+CLASS="REPLACEABLE"
+>n.n.n.n</VAR
+>] can be
+optionally followed by a comma and a text message, which will be used instead
+of the TXT record. The text message may include a single @ character
+somewhere in it, which will be replaced by the listed IP address.</P
+></DIV
+><DIV
+CLASS="REFSECT2"
+><A
+NAME="AEN330"
+></A
+><H3
+>MULTIPLE DNS LISTS</H3
+><P
+>Multiple <VAR
+CLASS="OPTION"
+>-block</VAR
+> options can be used. The connecting IP address
+will be looked up in multiple access lists. This is implemented as
+follows.</P
+><P
+><B
+CLASS="COMMAND"
+>couriertcpd</B
+> processes all <VAR
+CLASS="OPTION"
+>-block</VAR
+> options
+one at
+a time. If the indicated environment variable is already set,
+<B
+CLASS="COMMAND"
+>couriertcpd</B
+> skips the DNS list lookup (this is also true if
+only one <VAR
+CLASS="OPTION"
+>-block</VAR
+> option is specified). Therefore, if multiple
+<VAR
+CLASS="OPTION"
+>-block</VAR
+> options are used, and an IP address is found in the
+first
+access list, the remaininglists that use the same environment variable
+will not be checked. But other lists that use a different environment
+variable WILL be checked.</P
+><P
+>The same <VAR
+CLASS="REPLACEABLE"
+>zone</VAR
+> can be specified more than once,
+with different
+environment variables and different IP addresses. For example:</P
+><DIV
+CLASS="INFORMALEXAMPLE"
+><P
+></P
+><A
+NAME="AEN342"
+></A
+><TABLE
+BORDER="0"
+BGCOLOR="#E0E0E0"
+WIDTH="100%"
+><TR
+><TD
+><PRE
+CLASS="PROGRAMLISTING"
+>couriertcpd -block=block.example.org,BLOCK1/127.0.0.2 \
+            -block=block.example.org,BLOCK2/127.0.0.3</PRE
+></TD
+></TR
+></TABLE
+><P
+></P
+></DIV
+><P
+>If the specified access list contains an A record for the listed address,
+and the A record contains the IP address 127.0.0.2,
+<B
+CLASS="COMMAND"
+>couriertcpd</B
+>
+initializes the <VAR
+CLASS="ENVAR"
+>BLOCK1</VAR
+> environment variable. If the A record
+contains the IP address 127.0.0.3, <B
+CLASS="COMMAND"
+>couriertcpd</B
+> initializes
+<VAR
+CLASS="ENVAR"
+>BLOCK2</VAR
+>. If both records are present, both variables are
+initialized.</P
+><P
+><B
+CLASS="COMMAND"
+>couriertcpd</B
+> uses the following logic to determine what kind
+of DNS query to issue:</P
+><P
+>If neither the IP address, nor <VAR
+CLASS="REPLACEABLE"
+>msg</VAR
+> is specified,
+<B
+CLASS="COMMAND"
+>couriertcpd</B
+> will query for existence of TXT records, for the
+IP address.</P
+><P
+>If only <VAR
+CLASS="REPLACEABLE"
+>msg</VAR
+> is specified,
+<B
+CLASS="COMMAND"
+>couriertcpd</B
+> looks up the
+existence of A records, for the IP address.</P
+><P
+>If <VAR
+CLASS="REPLACEABLE"
+>/n.n.n.n</VAR
+> is used, and
+<VAR
+CLASS="REPLACEABLE"
+>msg</VAR
+> is not specified for at least
+one <VAR
+CLASS="OPTION"
+>-block</VAR
+> option for this same zone,
+<B
+CLASS="COMMAND"
+>couriertcpd</B
+>
+will query for existence of ANY records, which should return both TXT and all
+the A records for this IP address.</P
+><P
+>If <VAR
+CLASS="REPLACEABLE"
+>/n.n.n.n</VAR
+> is used, and
+<VAR
+CLASS="REPLACEABLE"
+>msg</VAR
+> is specified for every
+<VAR
+CLASS="OPTION"
+>-block</VAR
+> option for this same zone,
+<B
+CLASS="COMMAND"
+>couriertcpd</B
+> will
+query for existence of A records only.</P
+></DIV
+></DIV
+><DIV
+CLASS="REFSECT1"
+><A
+NAME="AEN367"
+></A
+><H2
+>ENVIRONMENT VARIABLES</H2
+><P
+><B
+CLASS="COMMAND"
+>couriertcpd</B
+> also initializes the following environment
+variables prior to running <B
+CLASS="COMMAND"
+>program</B
+>:</P
+><P
+></P
+><DIV
+CLASS="VARIABLELIST"
+><DL
+><DT
+>TCPLOCALHOST</DT
+><DD
+><P
+>The name of the host on the local end of
+the network connection, looked up in DNS. <VAR
+CLASS="ENVAR"
+>TCPLOCALHOST</VAR
+> will
+not be set if the IP address of the network connection's local end cannot
+be found in DNS, or if <VAR
+CLASS="OPTION"
+>-nodnslookup</VAR
+> option is specified.
+<VAR
+CLASS="ENVAR"
+>TCPLOCALHOST</VAR
+> will be set to the string
+<SPAN
+CLASS="ERRORCODE"
+>softdnserr</SPAN
+> if the DNS lookup fails with a temporary
+error
+(so you cannot tell if the IP address has a valid host name associated
+with it), or if the reverse and forward DNS lookups do not match.
+<VAR
+CLASS="ENVAR"
+>TCPLOCALHOST</VAR
+> will not be set if the reverse DNS lookup fails
+completely.</P
+></DD
+><DT
+>TCPLOCALIP</DT
+><DD
+><P
+>The IP address of the local end of the network connection.</P
+></DD
+><DT
+>TCPLOCALPORT</DT
+><DD
+><P
+>Rhe number of the port of the local end of the network connection.</P
+></DD
+><DT
+>TCPREMOTEHOST</DT
+><DD
+><P
+>The hostname of the connecting host. Like
+<VAR
+CLASS="ENVAR"
+>TCPLOCALHOST</VAR
+>, but for the connecting IP address.</P
+></DD
+><DT
+>TCPREMOTEIP</DT
+><DD
+><P
+>Connecting IP address.</P
+></DD
+><DT
+>TCPREMOTEINFO</DT
+><DD
+><P
+>Identification string received from the
+IDENT server on the remote IP address. Not set if the IDENT server
+returned an error, or if the <VAR
+CLASS="OPTION"
+>-noidentlookup</VAR
+> option was
+specified.</P
+></DD
+><DT
+>TCPREMOTEPORT</DT
+><DD
+><P
+>TCP port of the remote end of the network connection.</P
+></DD
+></DL
+></DIV
+></DIV
+><DIV
+CLASS="REFSECT1"
+><A
+NAME="AEN408"
+></A
+><H2
+>SEE ALSO</H2
+><P
+><A
+HREF="courier.html"
+TARGET="_top"
+><SPAN
+CLASS="CITEREFENTRY"
+><SPAN
+CLASS="REFENTRYTITLE"
+>courier</SPAN
+>(8)</SPAN
+></A
+>.</P
+></DIV
+></BODY
+></HTML
+>

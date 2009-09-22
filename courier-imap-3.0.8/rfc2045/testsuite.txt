@@ -1,0 +1,101 @@
+Header: from
+Value: nobody
+Header: to
+Value: nobody
+Header: subject
+Value: this is a test
+--
+Header: from
+Value: nobody
+Header: to
+Value: nobody
+Header: subject
+Value: this is
+   a test
+--
+Header: From
+Value: nobody
+Header: To
+Value: nobody
+Header: Subject
+Value: this is a test
+---
+Header: from
+Value: nobody@example.com
+Header: to
+Value: nobody@example.com
+Header: message-id
+Value: <a@b>
+Header: subject
+Value: Example subject
+--
+Header: from
+Value: nobody@example.com
+Header: to
+Value: nobody@example.com
+Header: message-id
+Value: <a@b>
+Header: subject
+Value: Example
+   subject
+--
+Header: From
+Value: nobody@example.com
+Header: To
+Value: nobody@example.com
+Header: Message-ID
+Value: <a@b>
+Header: Subject
+Value: Example subject
+section: 1
+content-type: multipart/mixed
+content-transfer-encoding: 8bit
+charset: iso-8859-1
+starting-pos: 0
+starting-pos-body: 63
+ending-pos: 433
+line-count: 21
+body-line-count: 18
+
+section: 1.1
+content-type: text/plain
+content-name: nAme
+content-transfer-encoding: 8bit
+charset: iso-8859-1
+content-disposition: attachment
+content-disposition-filename: filen%41me.exe
+starting-pos: 70
+starting-pos-body: 227
+ending-pos: 235
+line-count: 6
+body-line-count: 1
+
+section: 1.2
+content-type: text/plain
+content-name: name
+content-transfer-encoding: 8bit
+charset: iso-8859-1
+content-disposition: attachment
+content-disposition-filename: filen%41me.exe
+starting-pos: 242
+starting-pos-body: 415
+ending-pos: 423
+line-count: 6
+body-line-count: 1
+
+Content-Type: application/octet-stream; charset="utf-8";
+  name="footest"
+Content-Transfer-Encoding: 7bit
+
+foo
+Content-Type: application/octet-stream; charset="utf-8";
+  name*0*=utf-8''footest%3A1
+Content-Transfer-Encoding: 7bit
+
+foo
+Content-Type: application/octet-stream; charset="utf-8";
+  name*0*=utf-8''f%3A%3A%3A%3A%3A%3A%3A%3A%3A%3A%3A%3A%3A%3A%3A%3A%3A%3A%3A;
+  name*1*=%3A%3A%3A%3A%3A%3A1
+Content-Transfer-Encoding: 7bit
+
+foo

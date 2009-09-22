@@ -1,0 +1,44 @@
+Checklist for New Release
+--------------------------
+1. Run create_release
+
+2. Upload to sourceforge.net
+   a) indimail-{version}.tar.gz
+   b) INSTALL-{version}
+   c) INSTALL-MYSQL-{version}
+   d) INSTALL-RPM-{version}
+   e) README-{version}
+   e) indimail-{version}-rpmlintrc
+   f) indimail-{version}.spec
+   g) ChangeLog
+   h) .deb, .rpm
+
+3. Create Release on Sourceforge.net
+   a) Add all uploaded files using FRS
+   b) Edit Changelog/Release Notes
+   c) Edit Instructions for Default, Mac, Linux
+   d) Edit download page for Default, Mac, Linux
+
+4. Upload to OpenSUSE
+   a) indimail-{version}-rpmlintrc
+   b) indimail.spec (after chaning build_on_obs to true)
+   c) indimail-{version}.tar.gz
+
+5) News at sourceforge.net
+   indimail, indimail-announce on groups.google.com
+   Freshmeat announcement ---> twitter (indimail)
+   facebook announce ---> twitter (indimail) announce
+   twitter announce (cprogrammer)
+   indimail microblog announce
+   linkedin announce
+   https://www.ohloh.net/p/indimail
+   technorati
+   edit release info on en.wikepedia, sourceforge mediawiki
+   close all feature requests which got introduced with this
+   release
+
+6. Increment version
+   1) configure.in
+   2) rename indimail source directory
+   3) edit file RELEASE
+   4) edit ChangeLog and put entry for the new release

@@ -1,0 +1,120 @@
+.TH config 3
+.SH NAME
+config \- read optional configuration data
+.SH SYNTAX
+.B #include <sconfig.h>
+
+int \fBconfig\fP(&\fIc\fR);
+.br
+stralloc *\fBconfig_data\fP(&\fIc\fR);
+
+int \fBconfig_default\fP(&\fIc\fR,\fIs\fR);
+.br
+int \fBconfig_copy\fP(&\fIc\fR,&\fId\fR);
+.br
+int \fBconfig_env\fP(&\fIc\fR,\fIs\fR);
+.br
+int \fBconfig_readline\fP(&\fIc\fR,\fIs\fR);
+.br
+int \fBconfig_readfile\fP(&\fIc\fR,\fIs\fR);
+
+config_str \fIc\fR = CONFIG_STR;
+.br
+config_str \fId\fR = CONFIG_STR;
+
+char *\fIs\fR;
+.SH DESCRIPTION
+A
+.B config_str
+such as
+.I c
+holds an optional configuration string
+in dynamically allocated memory.
+
+The configuration string is stored inside a
+.BR stralloc .
+.B config_data
+returns a pointer to the
+.BR stralloc .
+
+.B config
+returns 1 if
+.I c
+has been configured,
+0 otherwise.
+
+Initially
+.I c
+is set to 
+.BR CONFIG_STR ,
+which is unconfigured.
+.SH "READING CONFIGURATION"
+The following functions attempt to configure
+.IR c .
+They return 0 without changing
+.I c
+if
+.I c
+is already configured;
+otherwise they configure
+.I c
+and return 0 if configuration data is supplied;
+otherwise they leave
+.I c
+unconfigured and return 0.
+They return -1,
+leaving
+.I c
+unconfigured,
+if a temporary error (out of memory, I/O error, etc.) occurs.
+
+.B config_default
+configures
+.I c
+as a copy of the \e0-terminated string
+.IR s ,
+if
+.I s
+is not the zero pointer.
+
+.B config_copy
+configures
+.I c
+as a copy of
+.I d
+if
+.I d
+is configured.
+
+.B config_env
+configures
+.I c
+as a copy of
+the first environment variable named
+.IR s ,
+if the environment has such a variable.
+
+.B config_readline
+configures
+.I c
+as the first line of the file named
+.IR s ,
+if that file exists.
+It removes any trailing spaces or tabs from the line.
+It also converts every \e0 inside the line to \en,
+so that the string can be used as a \e0-terminated string after
+.BR stralloc_0 .
+
+.B config_readfile
+configures
+.I c
+as the entire contents of the file named
+.IR s ,
+if that file exists.
+For each line, it removes any trailing spaces or tabs,
+converts every \e0 inside the line to \en,
+and puts a \e0 at the end of the line
+(even if the line was originally a partial final line).
+It skips blank lines and lines beginning with #.
+.SH "SEE ALSO"
+stralloc(3)

@@ -1,0 +1,949 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN">
+<HTML
+><HEAD
+><link rel='stylesheet' type='text/css' href='manpage.css'>
+  <!-- $Id: reformime.sgml,v 1.4 2004/03/14 02:58:08 mrsam Exp $ -->
+  <!-- Copyright 1998 - 2002 Double Precision, Inc.  See COPYING for -->
+  <!-- distribution information. -->
+<meta name="MSSmartTagsPreventParsing" content="TRUE">
+<link rel="icon" href="icon.gif" type="image/gif" />
+<TITLE
+>reformime</TITLE
+><META
+NAME="GENERATOR"
+CONTENT="Modular DocBook HTML Stylesheet Version 1.7"></HEAD
+><BODY
+CLASS="REFENTRY"
+BGCOLOR="#FFFFFF"
+TEXT="#000000"
+LINK="#0000FF"
+VLINK="#840084"
+ALINK="#0000FF"
+><H1
+><A
+NAME="REFORMIME"
+></A
+>reformime</H1
+><DIV
+CLASS="REFNAMEDIV"
+><A
+NAME="AEN10"
+></A
+><H2
+>Name</H2
+>reformime&nbsp;--&nbsp;MIME E-mail reformatting tool</DIV
+><DIV
+CLASS="REFSYNOPSISDIV"
+><A
+NAME="AEN13"
+></A
+><H2
+>Synopsis</H2
+><P
+><B
+CLASS="COMMAND"
+>reformime</B
+> [<VAR
+CLASS="REPLACEABLE"
+>options</VAR
+>...]</P
+></DIV
+><DIV
+CLASS="REFSECT1"
+><A
+NAME="AEN18"
+></A
+><H2
+>DESCRIPTION</H2
+><P
+><B
+CLASS="COMMAND"
+>reformime</B
+> is a utility for reformatting
+MIME messages.</P
+><P
+>Generally, <B
+CLASS="COMMAND"
+>reformime</B
+> expects to see an
+<A
+HREF="http://www.rfc-editor.org/rfc/rfc2045.txt"
+TARGET="_top"
+>RFC 2045</A
+>
+compliant message on standard input, except in few cases
+such as the <VAR
+CLASS="OPTION"
+>-m</VAR
+> option.</P
+><P
+>If no options are given, <B
+CLASS="COMMAND"
+>reformime</B
+> prints the MIME
+structure of the message. The output consists of so-called
+"MIME reference tags", one per line.
+For example:</P
+><A
+NAME="AEN28"
+></A
+><BLOCKQUOTE
+CLASS="BLOCKQUOTE"
+><DIV
+CLASS="INFORMALEXAMPLE"
+><P
+></P
+><A
+NAME="AEN29"
+></A
+><TABLE
+BORDER="0"
+BGCOLOR="#E0E0E0"
+WIDTH="100%"
+><TR
+><TD
+><PRE
+CLASS="PROGRAMLISTING"
+>1
+1.1
+1.2</PRE
+></TD
+></TR
+></TABLE
+><P
+></P
+></DIV
+></BLOCKQUOTE
+><P
+>This shows that the message contains two different MIME sections. The
+first line of the MIME structure output will always contain "1", which refers
+to the entire message.
+In this case it happens to be a <TT
+CLASS="LITERAL"
+>multipart/mixed</TT
+>
+message. "1.1" refers to the first section of the multipart message, which
+happens to be a
+<TT
+CLASS="LITERAL"
+>text/plain</TT
+> section. "1.2" refers to the second
+section of the message, which happens to be an
+<TT
+CLASS="LITERAL"
+>application/octet-stream</TT
+> section.</P
+><P
+>If the message is not a MIME message, or it does not contain any
+attachments, <B
+CLASS="COMMAND"
+>reformime</B
+> prints only "1", that refers
+to the entire message itself:
+<A
+NAME="AEN37"
+></A
+><BLOCKQUOTE
+CLASS="BLOCKQUOTE"
+><DIV
+CLASS="INFORMALEXAMPLE"
+><P
+></P
+><A
+NAME="AEN38"
+></A
+><TABLE
+BORDER="0"
+BGCOLOR="#E0E0E0"
+WIDTH="100%"
+><TR
+><TD
+><PRE
+CLASS="PROGRAMLISTING"
+>1</PRE
+></TD
+></TR
+></TABLE
+><P
+></P
+></DIV
+></BLOCKQUOTE
+></P
+><P
+>Here's the output from
+<B
+CLASS="COMMAND"
+>reformime</B
+> when the first part of the message was itself a
+<TT
+CLASS="LITERAL"
+>multipart/alternative</TT
+> section:</P
+><A
+NAME="AEN43"
+></A
+><BLOCKQUOTE
+CLASS="BLOCKQUOTE"
+><DIV
+CLASS="INFORMALEXAMPLE"
+><P
+></P
+><A
+NAME="AEN44"
+></A
+><TABLE
+BORDER="0"
+BGCOLOR="#E0E0E0"
+WIDTH="100%"
+><TR
+><TD
+><PRE
+CLASS="PROGRAMLISTING"
+>1
+1.1
+1.1.1
+1.1.2
+1.2</PRE
+></TD
+></TR
+></TABLE
+><P
+></P
+></DIV
+></BLOCKQUOTE
+><P
+>Arbitrarily complex MIME constructs are possible.</P
+></DIV
+><DIV
+CLASS="REFSECT1"
+><A
+NAME="AEN47"
+></A
+><H2
+>OPTIONS</H2
+><P
+></P
+><DIV
+CLASS="VARIABLELIST"
+><DL
+><DT
+>-d</DT
+><DD
+><P
+>Parse a delivery status notification MIME message
+(<A
+HREF="http://www.rfc-editor.org/rfc/rfc1894.txt"
+TARGET="_top"
+>RFC 1894</A
+>).
+<B
+CLASS="COMMAND"
+>reformime</B
+>
+expects to see on standard input a MIME message that consists of
+a delivery status notification, as defined by RFC 1894.
+<B
+CLASS="COMMAND"
+>reformime</B
+>
+reads
+the message and prints on standard output a list of addresses and their
+corresponding delivery status, as specified in the delivery status
+notification. Each line printed by
+<B
+CLASS="COMMAND"
+>reformime</B
+>
+consists of a delivery
+status, a space, and the address.
+<B
+CLASS="COMMAND"
+>reformime</B
+> then terminates with a 0 exit status.
+<B
+CLASS="COMMAND"
+>reformime</B
+> produces no output and terminates with an exit
+status of 1 if the standard input does not contain a delivery status
+notification.</P
+></DD
+><DT
+>-D</DT
+><DD
+><P
+>Like the <VAR
+CLASS="OPTION"
+>-d</VAR
+> except that
+<B
+CLASS="COMMAND"
+>reformime</B
+> lists the address
+found in the <TT
+CLASS="LITERAL"
+>Original-Recipient:</TT
+> header,
+if it exists.</P
+></DD
+><DT
+>-e</DT
+><DD
+><P
+>Rxtract the contents of the indicated MIME section, and display it
+on standard output.
+The <VAR
+CLASS="OPTION"
+>-s</VAR
+> option is required when
+<VAR
+CLASS="OPTION"
+>-e</VAR
+> is specified. If the
+indicated section uses either the <TT
+CLASS="LITERAL"
+>base64</TT
+> or
+<TT
+CLASS="LITERAL"
+>quoted-printable</TT
+> encoding method,
+<B
+CLASS="COMMAND"
+>reformime</B
+> automatically
+decodes it. In this case you're better off redirecting the standard output
+into a file.</P
+></DD
+><DT
+>-i</DT
+><DD
+><P
+>Display MIME information for each section. <B
+CLASS="COMMAND"
+>reformime</B
+>
+displays the contents of the
+<TT
+CLASS="LITERAL"
+>Content-Type:</TT
+> header, any encoding used,
+and the character set.
+<B
+CLASS="COMMAND"
+>reformime</B
+> also displays the byte offset in the message
+where each section starts and ends (and where the
+actual contents of the section start, after skipping all the headers).</P
+></DD
+><DT
+>-m</DT
+><DD
+><P
+>Create a <TT
+CLASS="LITERAL"
+>multipart/digest</TT
+> MIME message digest.</P
+></DD
+><DT
+>-r</DT
+><DD
+><P
+>Rewrite message, adding or standardizing
+<A
+HREF="http://www.rfc-editor.org/rfc/rfc2045.txt"
+TARGET="_top"
+>RFC 2045</A
+>
+MIME headers.</P
+></DD
+><DT
+>-r7</DT
+><DD
+><P
+>Like <VAR
+CLASS="OPTION"
+>-r</VAR
+> but also convert <TT
+CLASS="LITERAL"
+>8bit</TT
+>-encoded
+MIME sections to <TT
+CLASS="LITERAL"
+>quoted-printable</TT
+>.</P
+></DD
+><DT
+>-r8</DT
+><DD
+><P
+>Like <VAR
+CLASS="OPTION"
+>-r</VAR
+> but also convert
+<TT
+CLASS="LITERAL"
+>quoted-printable</TT
+>-encoded MIME sections to
+<TT
+CLASS="LITERAL"
+>8bit</TT
+>.</P
+></DD
+><DT
+>-s <VAR
+CLASS="REPLACEABLE"
+>section</VAR
+></DT
+><DD
+><P
+>Display MIME information for this section only.
+<VAR
+CLASS="REPLACEABLE"
+>section</VAR
+> is
+a MIME specification tag. The <VAR
+CLASS="OPTION"
+>-s</VAR
+> option is required if
+<VAR
+CLASS="OPTION"
+>-e</VAR
+> is also
+specified, and is optional with <VAR
+CLASS="OPTION"
+>-i</VAR
+>.</P
+></DD
+><DT
+>-x</DT
+><DD
+><P
+>Extract the contents of the indicated MIME section to a file.</P
+></DD
+><DT
+>-X</DT
+><DD
+><P
+>Pipe the contents of the indicated MIME section to a program.</P
+></DD
+></DL
+></DIV
+><DIV
+CLASS="REFSECT2"
+><A
+NAME="AEN124"
+></A
+><H3
+>Extracting RFC 2045 MIME section(s) to file(s)</H3
+><P
+>The <VAR
+CLASS="OPTION"
+>-x</VAR
+> and <VAR
+CLASS="OPTION"
+>-X</VAR
+> options extract a specific
+MIME section to a file or to a pipe to an external program.
+Use the <VAR
+CLASS="OPTION"
+>-s</VAR
+> option to identify the MIME section
+to extract.  If the <VAR
+CLASS="OPTION"
+>-s</VAR
+> option is not specified,
+every MIME section in the message is extracted, one at a time.
+<TT
+CLASS="LITERAL"
+>quoted-printable</TT
+> and <TT
+CLASS="LITERAL"
+>base64</TT
+> encoding are
+automatically decoded.</P
+><P
+></P
+><DIV
+CLASS="VARIABLELIST"
+><DL
+><DT
+>-x</DT
+><DD
+><P
+>Interactive extraction. <B
+CLASS="COMMAND"
+>reformime</B
+> prints the MIME
+content type of each section.  Answer with 'y' or 'Y' to extract the MIME
+section. Specify the filename at the next prompt. <B
+CLASS="COMMAND"
+>reformime</B
+>
+prompts with a default filename.
+<B
+CLASS="COMMAND"
+>reformime</B
+> tries to choose the default
+filename based on the MIME headers, if possible. If not, the default
+filename will be <TT
+CLASS="LITERAL"
+>attachment1.dat</TT
+> (if the -s option is not
+specified, the next filename will be <TT
+CLASS="LITERAL"
+>attachment2.dat</TT
+>,
+and so on).</P
+></DD
+><DT
+>-x<VAR
+CLASS="REPLACEABLE"
+>PREFIX</VAR
+></DT
+><DD
+><P
+>Automatic extraction. <B
+CLASS="COMMAND"
+>reformime</B
+> automatically
+extracts one or more MIME sections, and saves them to a file.
+The filename is formed by taking
+<VAR
+CLASS="REPLACEABLE"
+>PREFIX</VAR
+>, and appending the default filename to it.
+Note that there's no space between "-x" and "PREFIX". For example:</P
+><A
+NAME="AEN150"
+></A
+><BLOCKQUOTE
+CLASS="BLOCKQUOTE"
+><DIV
+CLASS="INFORMALEXAMPLE"
+><P
+></P
+><A
+NAME="AEN151"
+></A
+><TABLE
+BORDER="0"
+BGCOLOR="#E0E0E0"
+WIDTH="90%"
+><TR
+><TD
+><PRE
+CLASS="PROGRAMLISTING"
+>reformime -xfiles-</PRE
+></TD
+></TR
+></TABLE
+><P
+></P
+></DIV
+></BLOCKQUOTE
+><P
+>This command saves MIME sections as
+<TT
+CLASS="FILENAME"
+>files-attachment1.dat</TT
+>, then
+<TT
+CLASS="FILENAME"
+>files-attachment2.dat</TT
+>, etc.
+<B
+CLASS="COMMAND"
+>reformime</B
+> tries to append the filename specified in the
+MIME headers for each section, where possible.
+<B
+CLASS="COMMAND"
+>reformime</B
+> replaces all suspect characters with the
+underscore character.</P
+></DD
+><DT
+>-X prog arg1 arg2 ...</DT
+><DD
+><P
+>The <VAR
+CLASS="OPTION"
+>-X</VAR
+> option must be the last option to
+<B
+CLASS="COMMAND"
+>reformime</B
+>. <B
+CLASS="COMMAND"
+>reformime</B
+> runs an external
+program <B
+CLASS="COMMAND"
+>prog</B
+>, and pipes the contents of the MIME section to
+the program. <B
+CLASS="COMMAND"
+>reformime</B
+> sets the environment variable
+<VAR
+CLASS="ENVAR"
+>CONTENT_TYPE</VAR
+> to the MIME content type.  The environment
+variable <VAR
+CLASS="ENVAR"
+>FILENAME</VAR
+> gets set to the default filename of
+<B
+CLASS="COMMAND"
+>reformime</B
+>'s liking. If the <VAR
+CLASS="OPTION"
+>-s</VAR
+> option is
+not specified, the program runs once
+for every MIME section in the message.
+The external program, <B
+CLASS="COMMAND"
+>prog</B
+> must terminate with a zero
+exit status in order for <B
+CLASS="COMMAND"
+>reformime</B
+> to proceed to the
+next MIME section in the message.
+In any case, if <B
+CLASS="COMMAND"
+>prog</B
+> terminates with a non-zero exit
+status, <B
+CLASS="COMMAND"
+>reformime</B
+> terminates with the exit status of
+20 plus <B
+CLASS="COMMAND"
+>prog</B
+>'s exit status.</P
+></DD
+></DL
+></DIV
+><DIV
+CLASS="NOTE"
+><P
+></P
+><TABLE
+CLASS="NOTE"
+WIDTH="100%"
+BORDER="0"
+><TR
+><TD
+WIDTH="25"
+ALIGN="CENTER"
+VALIGN="TOP"
+>NOTE:</TD
+><TD
+ALIGN="LEFT"
+VALIGN="TOP"
+><P
+><B
+CLASS="COMMAND"
+>reformime</B
+> extracts every MIME section in the message
+unless the <VAR
+CLASS="OPTION"
+>-s</VAR
+> option is specified.
+This includes even the <TT
+CLASS="LITERAL"
+>text/plain</TT
+> MIME
+content that usually precedes a binary attachment.</P
+></TD
+></TR
+></TABLE
+></DIV
+></DIV
+><DIV
+CLASS="REFSECT2"
+><A
+NAME="AEN181"
+></A
+><H3
+>Adding RFC 2045 MIME headers</H3
+><P
+>The <VAR
+CLASS="OPTION"
+>-r</VAR
+> option performs the following actions:</P
+><P
+>If there is no <TT
+CLASS="LITERAL"
+>Mime-Version:</TT
+>,
+<TT
+CLASS="LITERAL"
+>Content-Type:</TT
+>, or
+<TT
+CLASS="LITERAL"
+>Content-Transfer-Encoding:</TT
+> header,
+<B
+CLASS="COMMAND"
+>reformime</B
+> adds one.</P
+><P
+>If the <TT
+CLASS="LITERAL"
+>Content-Transfer-Encoding:</TT
+> header contains
+<TT
+CLASS="LITERAL"
+>8bit</TT
+> or <TT
+CLASS="LITERAL"
+>raw</TT
+>, but only seven-bit data is
+found, <B
+CLASS="COMMAND"
+>reformime</B
+> changes
+the <TT
+CLASS="LITERAL"
+>Content-Transfer-Encoding</TT
+> header to
+<TT
+CLASS="LITERAL"
+>7bit</TT
+>.</P
+><P
+><VAR
+CLASS="OPTION"
+>-r7</VAR
+> does the same thing, but also converts
+<TT
+CLASS="LITERAL"
+>8bit</TT
+>-encoded content that contains eight-bit characters to
+<TT
+CLASS="LITERAL"
+>quoted-printable</TT
+> encoding.</P
+><P
+><VAR
+CLASS="OPTION"
+>-r8</VAR
+> does the same thing, but also converts
+<TT
+CLASS="LITERAL"
+>quoted-printable</TT
+>-encoded content to
+<TT
+CLASS="LITERAL"
+>8bit</TT
+>, except in some situations.</P
+></DIV
+><DIV
+CLASS="REFSECT2"
+><A
+NAME="AEN205"
+></A
+><H3
+>Creating <TT
+CLASS="LITERAL"
+>multipart/digest</TT
+> MIME digests</H3
+><P
+>The <VAR
+CLASS="OPTION"
+>-m</VAR
+> option creates a MIME digest.
+<B
+CLASS="COMMAND"
+>reformime</B
+> reads a list of filenames on standard input.
+Each line read from standard input contains the name of a file that is
+presumed to contain an RFC 2822-formatted message.
+<B
+CLASS="COMMAND"
+>reformime</B
+> splices all files into a
+<B
+CLASS="COMMAND"
+>multipart/digest</B
+> MIME section,
+and writes it to standard output.</P
+></DIV
+><DIV
+CLASS="REFSECT2"
+><A
+NAME="AEN213"
+></A
+><H3
+>Translating MIME headers</H3
+><P
+>The following options do not read a message from standard input.
+These options process MIME headers via the command line, and are designed
+to be conveniently used by mail-handling scripts.</P
+><P
+></P
+><DIV
+CLASS="VARIABLELIST"
+><DL
+><DT
+>-h "<VAR
+CLASS="REPLACEABLE"
+>header</VAR
+>"</DT
+><DD
+><P
+>Decode a MIME-encoded "<VAR
+CLASS="REPLACEABLE"
+>header</VAR
+>" and print the
+decoded 8-bit content on standard output.  Example:</P
+><DIV
+CLASS="INFORMALEXAMPLE"
+><P
+></P
+><A
+NAME="AEN223"
+></A
+><TABLE
+BORDER="0"
+BGCOLOR="#E0E0E0"
+WIDTH="90%"
+><TR
+><TD
+><PRE
+CLASS="PROGRAMLISTING"
+>$ reformime -h '=?iso-8859-1?Q?H=F3la!?='
+Hóla!</PRE
+></TD
+></TR
+></TABLE
+><P
+></P
+></DIV
+></DD
+><DT
+>-o "<VAR
+CLASS="REPLACEABLE"
+>text</VAR
+>"</DT
+><DD
+><P
+>MIME-encode "<VAR
+CLASS="REPLACEABLE"
+>text</VAR
+>", and print the results
+on standard output.
+Use the <VAR
+CLASS="OPTION"
+>-c</VAR
+> option to specify the character set.</P
+></DD
+><DT
+>-O "<VAR
+CLASS="REPLACEABLE"
+>text</VAR
+>"</DT
+><DD
+><P
+>Like the <VAR
+CLASS="OPTION"
+>-o option</VAR
+>, except that
+<VAR
+CLASS="REPLACEABLE"
+>text</VAR
+>
+is a structured header with RFC 2822 addresses.</P
+></DD
+></DL
+></DIV
+></DIV
+></DIV
+><DIV
+CLASS="REFSECT1"
+><A
+NAME="AEN239"
+></A
+><H2
+>SEE ALSO</H2
+><P
+><A
+HREF="reformail.html"
+TARGET="_top"
+><SPAN
+CLASS="CITEREFENTRY"
+><SPAN
+CLASS="REFENTRYTITLE"
+>reformail</SPAN
+>(1)</SPAN
+></A
+>,
+<SPAN
+CLASS="CITEREFENTRY"
+><SPAN
+CLASS="REFENTRYTITLE"
+>sendmail</SPAN
+>(8)</SPAN
+>,
+<A
+HREF="mailbot.html"
+TARGET="_top"
+><SPAN
+CLASS="CITEREFENTRY"
+><SPAN
+CLASS="REFENTRYTITLE"
+>mailbot</SPAN
+>(1)</SPAN
+></A
+>,
+<A
+HREF="maildrop.html"
+TARGET="_top"
+><SPAN
+CLASS="CITEREFENTRY"
+><SPAN
+CLASS="REFENTRYTITLE"
+>maildrop</SPAN
+>(1)</SPAN
+></A
+>,
+<A
+HREF="maildropfilter.html"
+TARGET="_top"
+><SPAN
+CLASS="CITEREFENTRY"
+><SPAN
+CLASS="REFENTRYTITLE"
+>maildropfilter</SPAN
+>(5)</SPAN
+></A
+>,
+<SPAN
+CLASS="CITEREFENTRY"
+><SPAN
+CLASS="REFENTRYTITLE"
+>egrep</SPAN
+>(1)</SPAN
+>,
+<SPAN
+CLASS="CITEREFENTRY"
+><SPAN
+CLASS="REFENTRYTITLE"
+>grep</SPAN
+>(1)</SPAN
+>,
+<SPAN
+CLASS="CITEREFENTRY"
+><SPAN
+CLASS="REFENTRYTITLE"
+>sendmail</SPAN
+>(8)</SPAN
+>.</P
+></DIV
+></BODY
+></HTML
+>

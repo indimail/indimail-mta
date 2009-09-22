@@ -1,0 +1,68 @@
+.TH http@ 1
+.SH NAME
+http@ \- gets a web page from a remote host.
+.SH SYNOPSIS
+.B http@
+[
+.I host
+[
+.I page
+[
+.I port
+]
+]
+]
+.SH DESCRIPTION
+.B http@
+connects to
+.I port
+on
+.IR host ,
+sends
+.IP
+GET
+.I /page
+HTTP/1.0
+
+Host: host
+.P
+to
+.IR host ,
+and prints the contents of the response, removing CR from the end of each
+line. 
+
+If
+.I port
+is not supplied,
+.B http@
+uses TCP port 80 (HTTP). 
+
+If
+.I page
+is not supplied,
+.B http@
+asks for / from
+.IR host .
+
+If
+.I host
+is not supplied,
+.B http@
+connects to the local host. 
+.SH SEE ALSO
+tcpserver(1),
+tcprules(1),
+tcprulescheck(1),
+argv0(1),
+fixcrio(1),
+recordio(1),
+rblsmtpd(1),
+tcpclient(1),
+who@(1),
+date@(1),
+finger@(1),
+tcpcat(1),
+mconnect(1),
+tcp-environ(5)
+
+http://cr.yp.to/ucspi-tcp.html

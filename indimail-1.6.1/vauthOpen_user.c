@@ -1,0 +1,116 @@
+/*
+ * $Log: vauthOpen_user.c,v $
+ * Revision 2.7  2008-11-07 11:13:59+05:30  Cprogrammer
+ * BUG - mdahost was getting clobbered
+ *
+ * Revision 2.6  2008-05-28 16:39:45+05:30  Cprogrammer
+ * removed USE_MYSQL
+ *
+ * Revision 2.5  2006-03-02 20:41:25+05:30  Cprogrammer
+ * While processing if one MySQL host is down, continue if the user entry is not on the
+ * >> 'down' MySQL h
+ *
+ * Revision 2.4  2005-12-29 22:51:52+05:30  Cprogrammer
+ * use getEnvConfigStr to set variables from environment variables
+ *
+ * Revision 2.3  2002-10-28 17:58:31+05:30  Cprogrammer
+ * force reconnection to mysql if mysql_ping() fails
+ *
+ * Revision 2.2  2002-10-06 00:01:49+05:30  Cprogrammer
+ * added error logging for mysql_ping()
+ *
+ * Revision 2.1  2002-08-31 15:57:37+05:30  Cprogrammer
+ * take domain as the DEFAULT_DOMAIN if email does not contain domain
+ *
+ * Revision 1.2  2002-04-10 04:43:53+05:30  Cprogrammer
+ * do ping before vauth_init
+ *
+ * Revision 1.1  2002-04-10 03:00:33+05:30  Cprogrammer
+ * Initial revision
+ *
+ */
+#include "indimail.h"
+
+#ifndef	lint
+static char     sccsid[] = "$Id: vauthOpen_user.c,v 2.7 2008-11-07 11:13:59+05:30 Cprogrammer Stab mbhangui $";
+#endif
+
+#ifdef CLUSTERED_SITE
+#include <unistd.h>
+#include <string.h>
+#include <errno.h>
+
+int
+vauthOpen_user(char *email)
+{
+	int             count;
+	char            user[MAX_BUFF], domain[MAX_BUFF], mdahost[MAX_BUFF];
+	char           *ptr, *cptr, *real_domain;
+	DBINFO        **rhostsptr;
+	MYSQL         **mysqlptr;
+
+	for (cptr = user, ptr = email;*ptr && *ptr != '@';*cptr++ = *ptr++);
+	*cptr = 0;
+	if (*ptr)
+		ptr++;
+	else
+		getEnvConfigStr(&ptr, "DEFAULT_DOMAIN", DEFAULT_DOMAIN);
+	for (cptr = domain;*ptr;*cptr++ = *ptr++);
+	*cptr = 0;
+	if (OpenDatabases())
+		return(-1);
+	if (!(ptr = findmdahost(email)))
+		return(-1);
+	for (;*ptr && *ptr != ':';ptr++);
+	if (!*ptr++)
+		return(-1);
+	for (cptr = mdahost;*ptr && *ptr != ':';*cptr++ = *ptr++);
+	*cptr = 0;
+	rhostsptr = RelayHosts;
+	mysqlptr = MdaMysql;
+	if (!(real_domain = vget_real_domain(domain)))
+		real_domain = domain;
+	for (count = 1, mysqlptr = MdaMysql, rhostsptr = RelayHosts;*rhostsptr;mysqlptr++, rhostsptr++, count++)
+	{
+		if (!strncmp(real_domain, (*rhostsptr)->domain, DBINFO_BUFF) && !strncmp(mdahost, (*rhostsptr)->mdahost, DBINFO_BUFF))
+			break;
+	}
+	if (*rhostsptr)
+	{
+		if ((*rhostsptr)->fd == -1)
+		{
+			if (connect_db(rhostsptr, mysqlptr))
+			{
+				fprintf(stderr, "%d: %s Failed db %s@%s for user %s port %d\n", count, (*rhostsptr)->domain, 
+					(*rhostsptr)->database, (*rhostsptr)->server, (*rhostsptr)->user, (*rhostsptr)->port);
+				(*rhostsptr)->fd = -1;
+				return(-1);
+			} else
+				(*rhostsptr)->fd = (*mysqlptr)->net.fd;
+		}
+		if (mysql_ping(*mysqlptr))
+		{
+			mysql_close(*mysqlptr);
+			if (connect_db(rhostsptr, mysqlptr))
+			{
+				fprintf(stderr, "%d: %s Failed db %s@%s for user %s port %d\n", count, (*rhostsptr)->domain, 
+					(*rhostsptr)->database, (*rhostsptr)->server, (*rhostsptr)->user, (*rhostsptr)->port);
+				(*rhostsptr)->fd = -1;
+				return(-1);
+			} else
+				(*rhostsptr)->fd = (*mysqlptr)->net.fd;
+		}
+		vauth_init(1, *mysqlptr);
+		return(0);
+	} else
+		userNotFound = 1;
+	return(-1);
+}
+#endif
+
+void
+getversion_vauthOpen_user_c()
+{
+	printf("%s\n", sccsid);
+	printf("%s\n", sccsidh);
+}

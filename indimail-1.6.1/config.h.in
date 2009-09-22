@@ -1,0 +1,351 @@
+/* config.h.in.  Generated from configure.in by autoheader.  */
+
+/* Directory where User's Home Directories get created */
+#undef BASE_PATH
+
+/* Enable Clustering */
+#undef CLUSTERED_SITE
+
+/* Default Domain */
+#undef DEFAULT_DOMAIN
+
+/* Enable DES Encryption */
+#undef DES_HASH
+
+/* Enable logging of Authentication time */
+#undef ENABLE_AUTH_LOGGING
+
+/* Enable domain level limits */
+#undef ENABLE_DOMAIN_LIMITS
+
+/* Define if IPv6 support is enabled. */
+#undef ENABLE_IPV6
+
+/* Disable Logging */
+#undef ENABLE_LOGGING
+
+/* Enable logging in MySQL */
+#undef ENABLE_MYSQL_LOGGING
+
+/* enable system passwds */
+#undef ENABLE_PASSWD
+
+/* Enable File Locking Code */
+#undef FILE_LOCKING
+
+/* Enable fsync when writing mail to disk */
+#undef FILE_SYNC
+
+/* Define to the type of elements in the array set by `getgroups'. Usually
+   this is either `int' or `gid_t'. */
+#undef GETGROUPS_T
+
+/* Enable Hard Quotas */
+#undef HARD_QUOTA
+
+/* /etc/shadow present */
+#undef HAS_SHADOW
+
+/* Define to 1 if you have the <a.out.h> header file. */
+#undef HAVE_A_OUT_H
+
+/* crypt Library */
+#undef HAVE_CRYPT
+
+/* Define to 1 if you have the <crypt.h> header file. */
+#undef HAVE_CRYPT_H
+
+/* curses Library */
+#undef HAVE_CURSES
+
+/* Define to 1 if you have the <dirent.h> header file. */
+#undef HAVE_DIRENT_H
+
+/* Define to 1 if you have the <dlfcn.h> header file. */
+#undef HAVE_DLFCN_H
+
+/* Define to 1 if you have the <elf.h> header file. */
+#undef HAVE_ELF_H
+
+/* Define to 1 if you have the `fchown' function. */
+#undef HAVE_FCHOWN
+
+/* Define to 1 if you have the <fcntl.h> header file. */
+#undef HAVE_FCNTL_H
+
+/* Define to 1 if you have the `fdatasync' function. */
+#undef HAVE_FDATASYNC
+
+/* Define to 1 if you have the `fnmatch' function. */
+#undef HAVE_FNMATCH
+
+/* Define to 1 if you have the <fnmatch.h> header file. */
+#undef HAVE_FNMATCH_H
+
+/* Define to 1 if you have the `getaddrinfo' function. */
+#undef HAVE_GETADDRINFO
+
+/* Define to 1 if you have the `gethostname' function. */
+#undef HAVE_GETHOSTNAME
+
+/* Define to 1 if you have the `getmntent' function. */
+#undef HAVE_GETMNTENT
+
+/* Define to 1 if you have the `getmntinfo' function. */
+#undef HAVE_GETMNTINFO
+
+/* Define to 1 if you have the <inttypes.h> header file. */
+#undef HAVE_INTTYPES_H
+
+/* "" */
+#undef HAVE_IN_ADDR_T
+
+/* Define to 1 if you have the `m' library (-lm). */
+#undef HAVE_LIBM
+
+/* Define to 1 if you have the `shadow' library (-lshadow). */
+#undef HAVE_LIBSHADOW
+
+/* Define to 1 if you have the `z' library (-lz). */
+#undef HAVE_LIBZ
+
+/* Define to 1 if you have the <limits.h> header file. */
+#undef HAVE_LIMITS_H
+
+/* "" */
+#undef HAVE_LOCAL_INFILE
+
+/* Define to 1 if you have the <magic.h> header file. */
+#undef HAVE_MAGIC_H
+
+/* Define to 1 if you have the <malloc.h> header file. */
+#undef HAVE_MALLOC_H
+
+/* Define if you want md5 crypt support compiled in */
+#undef HAVE_MD5_CRYPT
+
+/* Define to 1 if you have the <memory.h> header file. */
+#undef HAVE_MEMORY_H
+
+/* ncurses Library */
+#undef HAVE_NCURSES
+
+/* Define to 1 if you have the <openssl/evp.h> header file. */
+#undef HAVE_OPENSSL_EVP_H
+
+/* Define to 1 if you have the `setenv' function. */
+#undef HAVE_SETENV
+
+/* Define if you want sha256 crypt support compiled in */
+#undef HAVE_SHA256_CRYPT
+
+/* Define if you want sha512 crypt support compiled in */
+#undef HAVE_SHA512_CRYPT
+
+/* Define to 1 if you have the <shadow.h> header file. */
+#undef HAVE_SHADOW_H
+
+/* Define to 1 if you have the `sigaction' function. */
+#undef HAVE_SIGACTION
+
+/* Define to 1 if you have the `sigprocmask' function. */
+#undef HAVE_SIGPROCMASK
+
+/* Define if struct sockaddr_in6 has the sin6_scope_id member */
+#undef HAVE_SOCKADDR_IN6_SCOPE_ID
+
+/* OpenSSL Library */
+#undef HAVE_SSL
+
+/* Define to 1 if you have the <stdarg.h> header file. */
+#undef HAVE_STDARG_H
+
+/* Define to 1 if you have the <stdint.h> header file. */
+#undef HAVE_STDINT_H
+
+/* Define to 1 if you have the <stdlib.h> header file. */
+#undef HAVE_STDLIB_H
+
+/* Define to 1 if you have the <strings.h> header file. */
+#undef HAVE_STRINGS_H
+
+/* Define to 1 if you have the <string.h> header file. */
+#undef HAVE_STRING_H
+
+/* Define to 1 if the system has the type `struct sockaddr_in6'. */
+#undef HAVE_STRUCT_SOCKADDR_IN6
+
+/* Define to 1 if the system has the type `struct sockaddr_storage'. */
+#undef HAVE_STRUCT_SOCKADDR_STORAGE
+
+/* Define to 1 if you have the <sys/stat.h> header file. */
+#undef HAVE_SYS_STAT_H
+
+/* Define to 1 if you have the <sys/types.h> header file. */
+#undef HAVE_SYS_TYPES_H
+
+/* Define to 1 if you have the <sys/utsname.h> header file. */
+#undef HAVE_SYS_UTSNAME_H
+
+/* Define to 1 if you have the <sys/wait.h> header file. */
+#undef HAVE_SYS_WAIT_H
+
+/* termcap Library */
+#undef HAVE_TERMCAP
+
+/* ncurses Library */
+#undef HAVE_TERMCAP_IN_NCURSES
+
+/* Define to 1 if you have the <udb.h> header file. */
+#undef HAVE_UDB_H
+
+/* Define to 1 if you have the <unistd.h> header file. */
+#undef HAVE_UNISTD_H
+
+/* Define to 1 if you have the `unsetenv' function. */
+#undef HAVE_UNSETENV
+
+/* Define to 1 if you have the <xcoff.h> header file. */
+#undef HAVE_XCOFF_H
+
+/* IndiMail Group */
+#undef INDIGROUP
+
+/* IndiMail Home Directory */
+#undef INDIMAILDIR
+
+/* IndiMail User */
+#undef INDIUSER
+
+/* Enable IP Alias Domains */
+#undef IP_ALIAS_DOMAINS
+
+/* Directory where System Logs get created */
+#undef LOGDIR
+
+/* name to use for syslog */
+#undef LOG_NAME
+
+/* Define to the sub-directory in which libtool stores uninstalled libraries.
+   */
+#undef LT_OBJDIR
+
+/* Enable making seekable pipes */
+#undef MAKE_SEEKABLE
+
+/* Enable DES Encryption */
+#undef MD5_HASH
+
+/* full path to MySQL binaries */
+#undef MYSQLBINDIR
+
+/* "" */
+#undef OPEN_SMTP_CUR_FILE
+
+/* Name of package */
+#undef PACKAGE
+
+/* Define to the address where bug reports for this package should be sent. */
+#undef PACKAGE_BUGREPORT
+
+/* Define to the full name of this package. */
+#undef PACKAGE_NAME
+
+/* Define to the full name and version of this package. */
+#undef PACKAGE_STRING
+
+/* Define to the one symbol short name of this package. */
+#undef PACKAGE_TARNAME
+
+/* Define to the version of this package. */
+#undef PACKAGE_VERSION
+
+/* Enable SHA512 Encryption */
+#undef PASSWORD_HASH
+
+/* Enable POP/IMAP before SMTP */
+#undef POP_AUTH_OPEN_RELAY
+
+/* Directory where Postfix is installed */
+#undef POSTFIXDIR
+
+/* ps command */
+#undef PS_COMMAND
+
+/* qmail's home directory */
+#undef QMAILDIR
+
+/* Enable qmail extension addresses */
+#undef QMAIL_EXT
+
+/* Enable Query Caching for authentication */
+#undef QUERY_CACHE
+
+/* Enable Random Loadbalancing of inquery */
+#undef RANDOM_BALANCING
+
+/* Interval after which Relay Permission is Reset */
+#undef RELAY_CLEAR_MINUTES
+
+/* Enable DES Encryption */
+#undef SHA256_HASH
+
+/* Enable DES Encryption */
+#undef SHA512_HASH
+
+/* Enable Small Site */
+#undef SITE_SIZE
+
+/* Define to 1 if you have the ANSI C header files. */
+#undef STDC_HEADERS
+
+/* full path of tcprules program */
+#undef TCPRULES_PROG
+
+/* full path of the TCP Rules File */
+#undef TCP_FILE
+
+/* Define to 1 if your <sys/time.h> declares `struct tm'. */
+#undef TM_IN_SYS_TIME
+
+/* Use fcntl for file locking */
+#undef USE_FCNTLLOCK
+
+/* Use flock for file locking */
+#undef USE_FLOCK
+
+/* Use link for file locking */
+#undef USE_LINKLOCK
+
+/* Enable Maildir Quota */
+#undef USE_MAILDIRQUOTA
+
+/* Use MySQL for primary authentication */
+#undef USE_MYSQL
+
+/* Use semaphores for file locking */
+#undef USE_SEMAPHORES
+
+/* Enable Valias Mechanism */
+#undef VALIAS
+
+/* Version number of package */
+#undef VERSION
+
+/* Enable Vfilters */
+#undef VFILTER
+
+/* Define to empty if `const' does not conform to ANSI C. */
+#undef const
+
+/* Define to `int' if <sys/types.h> doesn't define. */
+#undef gid_t
+
+/* mysql_real_escape_string */
+#undef mysql_query
+
+/* Define to `unsigned int' if <sys/types.h> does not define. */
+#undef size_t
+
+/* Define to `int' if <sys/types.h> doesn't define. */
+#undef uid_t

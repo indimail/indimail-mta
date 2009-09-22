@@ -1,0 +1,7 @@
+5
+
+The first line of this file specifies the number of times to try creating a
+directory in which to perform the virus scan. This number should be kept
+fairly low, since in practice the first retry should always work--the name
+of the directory includes a tai64 timestamp and the current PID. You should
+have little reason to play with this number.

@@ -1,0 +1,9 @@
+#! /bin/sh
+
+. ${srcdir:=.}/t.frame
+
+# test description here
+#
+# test below
+# remember to use ${srcdir}
+false

@@ -1,0 +1,117 @@
+.\"     Title: bogoupgrade
+.\"    Author: 
+.\" Generator: DocBook XSL Stylesheets v1.70.1 <http://docbook.sf.net/>
+.\"      Date: 07/23/2007
+.\"    Manual: 
+.\"    Source: 
+.\"
+.TH "BOGOUPGRADE" "1" "07/23/2007" "" ""
+.\" disable hyphenation
+.nh
+.\" disable justification (adjust text to left margin only)
+.ad l
+.SH "NAME"
+bogoupgrade \- upgrades bogofilter database to current version
+.SH "SYNOPSIS"
+.HP 12
+\fBbogoupgrade\fR [\-h] \-d\ \fIdirectory\fR [\-i\ \fIinput\ file\fR] [\-o\ \fIoutput\ file\fR] [\-b\ \fIpath\ to\ bogoutil\fR]
+.SH "DESCRIPTION"
+.PP
+\fBbogoupgrade\fR
+is a command to upgrade
+bogofilter's databases from an old format to the current format. Since the format of the database changes once in a while, the utility is designed to make the upgrade easy.
+.SH "OPTIONS"
+.PP
+The
+\fB\-h\fR
+option prints the help message and exits.
+.PP
+The
+\fB\-d\fR
+specifies the directory with the wordlists for converting. This option is used when converting from multiple, separate wordlists (spamlist.db and goodlist.db \- containing spam and ham tokens, respectively) to a combined wordlist (wordlist.db) which contains both spam and ham tokens.
+.PP
+The
+\fB\-i\fR
+specifies the input file to be converted. It should be a text file containing message counts, and possibly data. If there is no data in the text file, there should be a Berkeley DB file in the same directory as the text file which contains the data.
+.PP
+The
+\fB\-o\fR
+specifies the output Berkeley DB file.
+.PP
+The
+\fB\-b\fR
+gives the path to the
+\fBbogoutil\fR
+command. It defaults to 'bogoutil', in the hopes that your shell will find it.
+.SH "UPGRADING"
+.PP
+Follow these instructions to upgrade
+bogofilter's databases to the latest version.
+.TP 3n
+1.
+Stop all instances of
+bogofilter. While the upgrade tools lock the database files, the upgrade may take a long time if you have a busy site. Don't forget to stop cron jobs or daemons that fetch and process mail and could fire off
+bogofilter.
+.TP 3n
+2.
+Backup your data. Let's assume that you said:
+.sp
+.RS 3n
+.nf
+$ \fBmv ~/.bogofilter ~/.bogofilter.safe\fR
+$ \fBmkdir ~/.bogofilter\fR
+.fi
+.RE
+.TP 3n
+3.
+If your
+bogofilter
+version is less than 0.7, say:
+.sp
+.RS 3n
+.nf
+$ \fBbogoupgrade \-i ~/.bogofilter.safe/goodlist \-o ~/.bogofilter/goodlist.db\fR
+$ \fBbogoupgrade \-i ~/.bogofilter.safe/badlist \-o ~/.bogofilter/spamlist.db\fR
+.fi
+.RE
+If your
+bogofilter
+version is 0.7 or greater, say:
+.sp
+.RS 3n
+.nf
+$ \fBbogoupgrade \-i ~/.bogofilter.safe/hamlist.count \-o ~/.bogofilter/goodlist.db\fR
+$ \fBbogoupgrade \-i ~/.bogofilter.safe/spamlist.count \-o ~/.bogofilter/spamlist.db\fR
+.fi
+.RE
+.TP 3n
+4.
+Current versions of
+bogofilter
+use a combined wordlist that holds both spam and non\-spam tokens. It is named wordlist.db. If you're updating from a version older than 0.14.0 that has separate wordlists (named goodlist.db and spamlist.db), use:
+.sp
+.RS 3n
+.nf
+$ \fBbogoupgrade \-d ~/.bogofilter.safe\fR
+.fi
+.RE
+.TP 3n
+5.
+Done. Restart any stopped daemons, cron tasks, etc.
+.SH "AUTHOR"
+.PP
+\fBbogoupgrade\fR
+was written by Gyepi Sam
+<gyepi@praxis\-sw.com>
+and David Relson
+<relson@osagesoftware.com>.
+.PP
+For updates, see
+[1]\&\fIthe bogofilter project page\fR.
+.SH "SEE ALSO "
+.PP
+bogofilter(1), bogolexer(1), bogotune(1), bogoutil(1)
+.SH "REFERENCES"
+.TP 3
+1.\ the bogofilter project page
+\%http://bogofilter.sourceforge.net/

@@ -1,0 +1,50 @@
+.TH qmail-cdb 8
+.SH NAME
+qmail-cdb \- prepare data in cdb format for
+.BR qmail-smtpd(8) ,
+and
+.BR spawn-filter(8) .
+.SH SYNOPSIS
+.B qmail-cdb
+.I filename
+.SH DESCRIPTION
+.B qmail-cdb
+does a chdir to QMAIL and
+reads the instructions in
+.I control/filename
+and writes them into
+.I control/filename.cdb
+in a binary format suited
+for quick access by
+.B qmail-smtpd
+or
+.BR spawn-filter .
+
+If there is a problem with
+.IR control/filename ,
+.B qmail-cdb
+complains and leaves
+.I control/filename.cdb
+alone.
+
+.B qmail-cdb
+ensures that
+.I control/filename.cdb
+is updated atomically,
+so
+.B qmail-smtpd
+or
+.B spawn-filter
+never has to wait for
+.B qmail-cdb
+to finish.
+However,
+.B qmail-cdb
+makes no attempt to protect against two simultaneous updates of
+.BR control/filename.cdb .
+
+The binary
+.B control/filename.cdb
+format is portable across machines.
+.SH "SEE ALSO"
+qmail-smtpd(8), spawn-filter(8), qmail-multi(8)

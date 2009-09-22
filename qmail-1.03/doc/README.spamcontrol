@@ -1,0 +1,477 @@
+1. PURPOSE
+----------
+
+The SPAMCONTROL patch is intended for environments where some local
+E-Mail systems are used (eg. Lotus Notes) and QMAIL 1.03 is facilitated
+as a RELAY to the Internet. This may be called an E-Mail Gateway.
+
+In this case, QMAIL-SMTPD receives all OUTGOING E-Mails from the local 
+environment and delivers them to MTAs on the Internet.
+Additionally, QMAIL-SMTPD should solely receive those INCOMING
+Internet E-Mails which are targeted for the local E-Mail systems. 
+In particular, QMAIL should not forward any E-Mail to third party
+MTAs.
+
+In a minimal configuration QMAIL acts as an SMTP RELAY and depends
+on the appropriate settings in the ./control files, in particular
+./control/rcpthosts which will turn QMAIL into a selective RELAY.
+
+The SPAMCONTROL patch improves the QMAIL-SMTPD's filtering capabilities
+as a selective relay. QMAIL can advised to ignore (not to invoke 
+QMAIL-QUEUE for) E-Mails from particular senders and/or for recipients. 
+Filtering is done analyzing the E-Mail SMTP ENVELOPE SENDER (MAIL from:)
+and/or RECIPIENT (RCPT to:) address.
+
+This version of the SPAMCONTROL patch requiers TCPSERVER to start 
+QMAIL-SMTPD in conjunction with SPLOGGER.
+
+The SPAMCONTROL patch enables logging for rejected E-Mails by means
+of QMAIL-SMTPD.
+
+With the SPAMCONTROL patch, QMAIL 1.03 complies to RFC 1870 and 2505.
+
+
+1.1 RELAYCLIENT and RCPTHOSTS
+-----------------------------
+
+Invoking the environment variable $RELAYCLIENT enhances the logic of
+QMAIL-SMTPD. Now, in addition the REMOTEIP of the SENDER is evaluated
+and tested against the value of the environment variable $RELAYCLIENT. 
+1) If the REMOTEIP of the SENDER failes the test, ./control/rcpthosts
+   and ./control/morercpthosts is checked and the E-Mail is ONLY
+   relayed if it's RECIPIENT address corresponds with the contents 
+   of one those files.
+2) If the REMOTEIP of the SENDER passes the test (which means 
+   usually the SENDER originates from your -trusted- Subnet/Domain)
+   no further tests are applied (except for BAD*).
+
+The RELAYCLIENT patch extends this feature by means of the files
+./control/relayclients and/or ./control/relaydomains.
+This allows you to include serveral IP-Addresses, IP-Subnets, and/or 
+Domains to be accepted for unrestricted relaying.
+
+This behavior corresponds to the suggestions (§2.1) for Anti-Spam MTAs
+(RFC 2505).
+
+CAUTION: If you apply the environment variable $RELAYCLIENT 
+./Control/relayclients and ./control/relaydomains become obsolete!
+
+See the attaced SPAMCONTROL.pdf file for more information.
+
+
+1.2 TCPSERVER and SPAMCONTROL
+-----------------------------
+
+If you use TCPSERVER with the $RELAYCLIENT environment variable set
+to some value, its fine also. In this case ./control/relayclients
+and ./control/relaydomains are ineffective and the original logic
+is still valid (see 1.1).
+
+
+1.3 RELAYCLIENT vs. SPAMCONTROL
+-------------------------------
+
+Both enhancements are independent. You can keep your existing
+QMAIL control file environment (including the files ./rcpthosts
+and ./morercpthosts) intact after applying this patch while taking
+advantage from the additional SPAM control files and the logging
+capabilities.
+
+
+1.4 RELAYMAILFROM
+-----------------
+
+Taken from Chris Johnson, additional E-Mail senders are allowed 
+to relay by means of analyzing their envelope sender address. 
+This is "not secure--it's trivial to forge a message's envelope
+sender" and somehow complementary to the relaydomain mechanism.
+
+New control file:
+
+- /var/qmail/control/relaymailfrom
+
+This gives the ability to enable ROAMING users.
+Users - identified by their E-Mail addresses included in here -
+are accepted to use this MTA as RELAY.
+Unlike the original implementation, RELAYMAILFROM can be used in 
+connection with RELAYCLIENT and RELAYDOMAIN.
+This mechanism works independent of the $RELAYCLIENT environment
+variable. 
+
+
+2. ABOUT SPAM E-MAIL
+--------------------
+
+Even if you use (e.g. QMAIL as) a restricted SMTP relay
+SPAMMERS may manipulate either the SENDER (MAIL from:) or the
+RECIPIENT (RCPT to:) address of E-Mails, making your MTA believe
+
+1) that this E-Mail is originated by itself,
+2) accepting it and send the SPAM E-Mail to a third party (target) MTA,
+   which in turn sees this E-Mail to originate from your MTA/Domain,
+3) turning your MTA effectively into a host for SPAM E-Mails.
+
+
+2.1 RBLSMTPD vs. SPAMCONTROL PATCH
+----------------------------------
+
+In general, there exist two methods to reject E-Mail from a
+potential SPAMMER:
+
+1) Employing the RPLSMTPD patch to enhance TCPSERVER calling
+   ORBS and/or others to check whether or not a SENDER/SMTP RELAY
+   is blacklisted. Thus, the SENDER is checked even before
+   QMAIL-SMTPD is invoked.
+2) The SPAMCONTROL patch, which enhances QMAIL-SMTPD to give you 
+   additional filter capabilities to reject incoming E-Mail by means
+   of the typical header extensions of the SENDER and/or RECIPIENT 
+   address of SPAM E-Mail.
+
+With the SPAMCONTROL patch you don't fight specific SENDERs 
+and/or SMTP MTAs but rather the METHODS potential SPAMMERs use. 
+However, you are able to filter individual sites/addresses as well. 
+This is in your own responsibility and you don't need to rely on 
+third-party information which might not be adequat for your site.
+
+And again, you are free to combine the RBLSMPTD and the SPAMCONTROL
+patch if you think you need it.
+
+
+2.2 CANNONICAL METHOD FILTER for SPAM E-MAIL
+--------------------------------------------
+
+Let's assume your MTA's FQDN is mta.domain.com and has
+IP address "12.34.56.78".
+The inverse DNS Name becomes "78.56.34.12.in-addr.arpa".
+
+Include the following canonical filters into the control files:
+
+./control/FILE   expression
+---------------------------------------------------------------
+badmailfrom      @12.34.56.78
+badrcptto        @12.34.56.78
+badmailpatterns  *12.34.56.78*
+badrcptpatterns  *12.34.56.78*
+badmailpatterns  *78.56.34.12.in-addr.arpa* 
+badrcptpatterns  *78.56.34.12.in-addr.arpa*
+
+
+SPAM E-Mails with the "PERCENTHACK" can be eliminated by adding "*%*"
+to the ./control/badmailpatterns and ./control/badrcptpatterns file. 
+Any E-Mails including a "%" sign in the SENDER and/or RECIPIENT
+address will be rejected.
+
+Starting with this version, the E-Mail addresses are evaluated
+case insensitive! (Thanks to Manon Goo)
+
+The filtering logic can be picked up from the SPAMCONTROL.pdf file.
+
+Please consider that evaluating the *PATTERNS takes a lot more CPU cycles
+then employing BADMAILFROM and BADRCPTTO. However, this has to be
+compared with the amount of processing to be spend by QMAIL-QUEUE, 
+QMAIL-RSPAWN and QMAIL-SEND, and of course your worries!
+
+Control characters:
+
+- Exclamation mark (!): The WILDMAT filter allows you to INCLUDE
+  particular clients/addresses simply putting an exclamation
+  mark (!) as first character in the line.
+- Asterisk (*): General pattern matching character.
+- Backslash (\): Literal expression of following character, eg. \[.
+
+For more details about the WILDMAT logic, have a look at README.wildmat.
+
+
+2.3 EXITING THE SMTP-SESSION IN CASE OF SPAM
+--------------------------------------------
+
+With this version of SPAMCONTROL, recognizing an invalid (i.e. SPAM) address,
+QMAIL-SMTPD exist after receiving the RCPT TO:, thus the potiential SPAMMER
+has to invoke a new TCP session. 
+Thanks to Manon Goo (root@host.manon.de) for this suggestion.
+
+
+This is different wrt the previous version where qmail-smtpd returns an SMTP
+error but silently was still accepting new E-Mail addresses within the current
+session.
+
+
+2.4 TARPITTING
+--------------
+
+I have included Chris Johnson's TARPITTING patch into SPAMCONTROL:
+"What is tarpitting? It's the practice of inserting a small sleep in
+a SMTP session for reach RCPT TO after some set number of RCPT TOs.
+The idea is to that spammers who would hand your SMTP server a single
+message wiht a long list of RCPT TOs. If a spammer were to attempt to
+use your server to relay a message, say, 10,000 recipients, and you
+inserted a five-second delay for each recipient after teh fiftieth,
+the spammer would be 'tarpitted', and would most likely assume that
+the connection had stalled and give up."
+
+Two additional control files can be employed:
+
+- tarpitcount: is the number of RCPT TOs to accept before starting
+               tarpitting and defaults 0 (no tarpitting).
+- tarpitdelay: is the number of seconds of delay to introduce after
+               each subsequent RCPT TO. Default is 5 seconds.
+
+Instead, the environment variable TARPITCOUNT and TARPITDELAY can
+be used.
+
+
+2.5 QMAIL's BEHAVIOR on [IP-Addresses]
+--------------------------------------
+
+Although it is not recommended to use IP-Addresses in SMTP E-Mail, 
+it is used in particular by SPAMMERs, and in addition by ORBS for
+testing the MTA's blocking mechanisms.
+
+We have to distinguish between the following cases for IP-Adresses
+in RCPT to:
+
+1) RCPT to: <any@IP-Address>    => forwarded to "any@[IP-Address]"
+2) RCPT to: <any@[IP-Address]>  => forwarded to "any@IP-Address"  
+3) RCPT to: <any@12.34.56.78>   => forwarded to "any@12.34.56.78"
+4) RCPT to: <any@[12.34.56.78]> => received for "any@mta.domain.com"
+5) RCPT to: <any@[127.0.0.1]>   => received for "any@mta.domain.com"
+
+This means, QMAIL performs already within QMAIL-SMTPD a substitution
+for it's own address and in particular the LOOPBACK address.
+This substition is done BEFORE the filters are applied!
+
+
+2.6 GENERIC ADDRESSES
+---------------------
+
+According to the discussion of SPAM E-Mail, avoid including generic
+addresses of your MTA in the QMAIL control files, i.e. localhost
+and/or the loopback address (127.0.0.1). This would make QMAIL
+accepting any incoming E-Mails with this generic address.
+In other words: For all QMAIL control files which are evaluated 
+with POSITIVE filtering logic be as specific/restrictive as possible.
+
+Unfortunately, some other E-Mail tools like FETCHMAIL depend on those.
+
+
+2.7 RETURN CODES for REJECTED SPAM E-MAILS
+------------------------------------------
+
+According to RFC 2505 §2.13 I implemented the following QMAIL SMTP Return Codes:
+
+1) "553 sorry, that domain isn't allowed to be relayed thru this MTA (#5.7.1)"
+2) "554 sorry, your envelope sender is in my badmailfrom list (#5.7.1)"
+3) "555 sorry, your envelope recipient is in my badrecipients list (#5.7.1)"
+
+A discussion about the implications can be found in RFC 2505.
+
+An explanation for the "Mail System Status Codes" (eg. the numbers #5.7.1)
+can be found in RFC 1893.
+
+
+2.8 LOGGING SPAM
+----------------
+
+QMAIL-SMTPD logs rejected E-Mail in the MAILLOG by means of SPLOGGER. 
+In this version, it is requierd to call QMAIL-SMTPD from TCPSERVER !
+Trying to use it with INETD or XINETD will show the log-output
+on the client console!
+
+
+A typical TCPSERVER start script:
+
+#!/bin/sh
+/usr/local/bin/tcpserver -v -R -H -u 7791 -g 2108 QMAIL_IP_ADDRESS smtp \
+    /var/qmail/bin/qmail-smtpd 2>&1 | /var/qmail/bin/splogger smtpd &
+
+
+In the MAILLOG the following information is displayed:
+
+- reason (verbose)
+- IP-Address of SENDER
+- SENDER address of E-Mail
+- RECIPIENT address of E-Mail
+
+This corresponds to §2.4 of RFC 2505.
+
+Since SPLOGGER is now facilitated, ACCUSTAMP time information is 
+included.
+
+See the new man-page of qmail-log(5).
+
+
+2.9 ON-THE-FLY MODS of CONTROL FILES
+------------------------------------
+
+If you apply this SPAMCONTROL patch, any change in the QMAIL-SMTPD
+control files  - including all the BAD* - are effective on the fly!
+Thus, as soon as you recognize any SPAM activity analyzing your MAILLOG
+you can block it immediately applying the appropriate filters.
+However, any SPAM E-Mail already in the queue will be processed further.
+
+
+3. DNS CHECKS for ENVELOPE SENDER
+---------------------------------
+
+The SPAMCONTROL Patch includes now the MFCHECK Patch with some enhancements.
+Thus, QMAIL-SMTPD performs not only a DNS MX look-up for the recipient but rather
+additionally for the sender of an incoming E-Mail (based on the addresses in 
+the E-Mail's envelope). Results:
+
+1) QMAIL-SMPTD verifies the existence of the sender's domain.
+2) QMAIL-SMTPD rejects E-Mails with bogus hostnames/domains in the envelope sender
+  (see 2.5).
+3) QMAIL-SMTPD writes a log-entry for rejected E-Mails (see 2.7).
+
+
+3.1 GLOBALLY DISABLEING the DNS CHECK
+-------------------------------------
+
+Invoking the environment variable $NODNSCHEK disables globally the DNS check
+for the envelope's sender. Thus, QMAIL-SMTPD acts in the conventional way.
+See attached sample for xinetd.conf.spamcontrol.
+
+
+3.2 EXCLUDING ADRESSES for DNS CHECK
+------------------------------------
+
+By means of the new control file ./control/nodnscheck individual sender
+addresses and/or domains can be excluded from the envelope sender DNS check.
+Recommendations:
+
+1) In order to reduce DNS traffic you can include local and/or trusted domains
+   (e.g. @hotmail.com).
+2) In case of a misconfigured MTA and/or DNS RR include those here in order to
+   allow the reception of E-Mails from those sites.
+
+
+3.3 RETURN CODES for rejected E-MAILS for missing MX-RECORDS
+------------------------------------------------------------
+
+qmail-smtpd will return the following SMTP message to the SMTP client:
+
+1) "552 sorry, your envelope sender domain must exist (#5.7.1)"
+
+
+
+4. SMTP SIZE COMMAND
+--------------------
+
+I included Will Harris' SIZE patch to make qmail-smtpd fully RFC 1870 complient.
+Based on the values in the control file
+
+- /var/qmail/control/databytes
+
+qmail-smtpd will respect now the required "MAIL FROM: < ...> SIZE=xxx" syntax.
+This depends of course on the ability of the SMTP client.
+Nevertheless, qmail-smtpd checks the size of the incoming message anyway.
+
+
+4.1 ESMTP SIZE RETURN CODES
+---------------------------
+
+For incoming E-Mails which exceed the message size values (in Bytes) defined in 
+
+- /var/qmail/control/databytes 
+or via the 
+- $DATABYTES
+environment variable, qmail-smtpd returns the RFC 1870 complient message:
+
+1) "552 sorry, that message size exceeds my databytes limit (#5.3.4)" 
+
+
+5. HOWTO
+--------
+
+In case your E-Mail environment complies to the assumption in (1.) 
+do the following:
+
+1.  Stop your QMAIL system (receive and send).
+2.  Remove SMTP/POP3 connection to be services by INETD/XINETD.
+    Employ TCPSERVER instead.                                      
+3.  Follow the INSTALL.spamcontrol instructions.
+4.  Edit the file ./control/relayclients and include the
+    IP-Addresses of your local subnets.
+    (IP-Adresses for SENDERS which are relayed thru QMAIL-SMTPD).
+5.  Instead, you can use ./control/relaydomains and
+    put your domain name in here. But I don't recommend this.
+6.  If necessary, you can enable relaying for individual E-Mail
+    MAIL From: address and include those in ./control/relaymailfrom.
+7.  Edit the files
+     ./control/badmailfrom,   
+     ./control/badmailpatterns,
+     ./control/badrcptto,
+     ./control/badrcptpatterns 
+     ./control/nodnscheck 
+     ./control/tarpitcount to your needs.
+    See above samples.
+8.  Restart QMAIL.
+9.  Check your configuration by means of qmail-showctl.
+    It is a good idea to pipe the output of that command 
+    with timestamp information to a file.
+10. If you are already blacklisted, inform those sites that
+    you don't act as an OPEN RELAY anymore.
+11. Watch the QMAIL behavior by means of the SYSLOG information.
+
+If it doesn't, skip item 4. and 5. and stay with your QMAIL control
+files.
+
+Good luck!
+
+
+5.1 TESTED ENVIRONMENTS
+-----------------------
+
+LINUX KERNEL 2.0
+LINUX KERNEL 2.2
+FREEBSD 3.4
+SOLARIS 2.7
+
+
+6. FURTHER INFORMATIONS
+-----------------------
+
+- QMAIL:     http://www.qmail.org/
+- XINETD:    http://synack.net/
+- SPAM:      http://maps.vix.com/rbl/
+             http://www.orbs.org/
+             http://www.obtuse.com/smtpd.html
+             http://spam.abuse.net/spam/
+- RFCs:  1869 (SMTP Service Extensions)
+         1890 (SMTP Size Declaration)
+         1893 (Mail System Status Codes)
+         2505 (Anti-Spam Recommendations for STMP MTAs)
+         2635 (DON'T SPEW - A Set of Guidelines for Mass Unsolicited
+               Mailings and Postings (spam*) )
+
+
+7. AUTHORS
+----------
+
+Rask Ingemann Lambertsen - who provided the original RELAY Patch
+Marc Pohl - ported it to QMAIL 1.03 (marc.pohl@wdr.de)
+Mark Delany - Auther of the WILDMAT Patch (markd@bushwire.net)
+Chris Johnson - Auther of the TARPIT and RELAYMAILFROM patch (cjohnson@palomine.net)
+Will Harris - Author of the SIZE extension patch (harris@ifi.unizh.ch)
+Markus Stumpf - provided the original LOGGING patch (maex-qmail@space.net)
+Manon Goo - suggested exiting the SMTP session in case of SPAM (manon@manon.de)
+
+Erwin Hoffmann - ported it to QMAIL 1.03 and put it all together
+
+8. THANKS
+---------
+
+Thanks to the discussion in the QMAIL Mailing List (qmail@list.cr.yp.to)
+in particular:
+- Russel Nelson
+- Vincent Schonau
+- Chris Johnson
+- Metthew Soffen
+- Luís Bezerra de A. Junior
+- Bernat Ginard
+- Duzun Gul
+
+
+Erwin Hoffmann (feh@fehcom.de)
+Cologne, 2000-11-26.
+

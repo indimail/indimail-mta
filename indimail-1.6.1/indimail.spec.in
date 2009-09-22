@@ -1,0 +1,2311 @@
+#
+# $Log: indimail.spec.in,v $
+# Revision 2.85  2009-09-20 12:13:43+05:30  Cprogrammer
+# libtool 2.x version
+#
+# Revision 2.84  2009-09-16 20:39:20+05:30  Cprogrammer
+# added autoreconf for libdkim, nssd, indimail
+#
+# Revision 2.83  2009-09-16 15:43:52+05:30  Cprogrammer
+# changes for mandriva (OBS)
+#
+# Revision 2.82  2009-09-14 14:46:39+05:30  Cprogrammer
+# autoreconf for bogofilter on OBS gives problems
+#
+# Revision 2.81  2009-09-13 12:46:20+05:30  Cprogrammer
+# unpack patch if compressed
+#
+# Revision 2.80  2009-09-07 16:17:56+05:30  Cprogrammer
+# upgraded to bogofilter 1.2.1
+#
+# Revision 2.79  2009-09-07 10:21:36+05:30  Cprogrammer
+# added --hash-size to greylisting service creation
+#
+# Revision 2.78  2009-09-02 08:18:22+05:30  Cprogrammer
+# added qmail-greyd, batv
+#
+# Revision 2.77  2009-08-24 14:43:44+05:30  Cprogrammer
+# opion remoteauthsmtp renamed to remote-authsmtp
+# added README.greylist
+#
+# Revision 2.76  2009-08-23 23:50:55+05:30  Cprogrammer
+# added greydaemon service
+#
+# Revision 2.75  2009-08-23 21:11:46+05:30  Cprogrammer
+# added greydaemon for greylisting
+#
+# Revision 2.74  2009-08-19 07:22:18+05:30  Cprogrammer
+# added nssd for removal of rpath
+#
+# Revision 2.73  2009-08-12 08:48:50+05:30  Cprogrammer
+# added qmail-poppass.106 in service cleanup
+#
+# Revision 2.72  2009-08-11 14:47:06+05:30  Cprogrammer
+# added --ssl option for indisrvr, poppassd services
+#
+# Revision 2.71  2009-08-06 22:53:57+05:30  Cprogrammer
+# added creation of poppass service
+#
+# Revision 2.70  2009-08-05 14:36:25+05:30  Cprogrammer
+# added vsetpass
+#
+# Revision 2.69  2009-07-12 21:49:19+05:30  Cprogrammer
+# renamed install.init, upgrade.init to rpm.init
+#
+# Revision 2.68  2009-07-11 08:52:20+05:30  Cprogrammer
+# mysql-devel required only on obs
+#
+# Revision 2.67  2009-07-06 08:18:18+05:30  Cprogrammer
+# changes for obs
+# changes for automake 1.11
+#
+# Revision 2.66  2009-06-26 14:17:30+05:30  Cprogrammer
+# commented out generation of perm_list using rpmattr
+#
+# Revision 2.65  2009-06-25 12:38:13+05:30  Cprogrammer
+# use basepath, logdir from configure
+#
+# Revision 2.64  2009-06-24 19:51:30+05:30  Cprogrammer
+# remove proxy services
+#
+# Revision 2.63  2009-06-23 22:27:29+05:30  Cprogrammer
+# upgraded ripmime, altermime package
+#
+# Revision 2.62  2009-06-23 14:08:01+05:30  Cprogrammer
+# added proxy service creation
+#
+# Revision 2.61  2009-06-18 16:14:26+05:30  Cprogrammer
+# upgrade to clamav-0.95.2
+#
+# Revision 2.60  2009-06-12 22:47:45+05:30  Cprogrammer
+# added mailzipper
+# new libdkim version
+#
+# Revision 2.59  2009-06-08 12:43:56+05:30  Cprogrammer
+# added comments for openSUSE buildservice
+#
+# Revision 2.58  2009-06-07 13:22:37+05:30  Cprogrammer
+# fixed upgrade
+#
+# Revision 2.57  2009-06-04 16:26:48+05:30  Cprogrammer
+# use .bz2 first if found
+#
+# Revision 2.56  2009-06-01 15:19:32+05:30  Cprogrammer
+# added yum repos
+#
+# Revision 2.55  2009-05-28 12:44:01+05:30  Cprogrammer
+# added tls-cert-check
+#
+# Revision 2.54  2009-05-27 14:10:33+05:30  Cprogrammer
+# corrected syntax error in %post
+#
+# Revision 2.53  2009-05-27 14:06:29+05:30  Cprogrammer
+# added --ssl option to create SMTPS service
+#
+# Revision 2.52  2009-05-26 12:21:00+05:30  Cprogrammer
+# added condition for Build Factory
+#
+# Revision 2.51  2009-05-04 12:20:14+05:30  Cprogrammer
+# fixed permissions
+#
+# Revision 2.50  2009-04-30 19:39:07+05:30  Cprogrammer
+# qmail-spamdb changed to qmail-cdb
+#
+# Revision 2.49  2009-04-26 09:10:47+05:30  Cprogrammer
+# removed epm
+#
+# Revision 2.48  2009-04-20 10:02:27+05:30  Cprogrammer
+# removed echo
+#
+# Revision 2.47  2009-04-17 20:17:47+05:30  Cprogrammer
+# libdkim version changed to 1.2
+#
+# Revision 2.46  2009-04-14 19:53:59+05:30  Cprogrammer
+# added custom script during %post
+#
+# Revision 2.45  2009-04-14 16:28:07+05:30  Cprogrammer
+# upgrade to clamav 0.95.1
+#
+# Revision 2.44  2009-04-10 20:24:40+05:30  Cprogrammer
+# added README files
+#
+# Revision 2.43  2009-04-09 20:39:35+05:30  Cprogrammer
+# added --rbl option
+#
+# Revision 2.42  2009-04-07 20:23:16+05:30  Cprogrammer
+# create dk, dkim verification/signing options
+#
+# Revision 2.41  2009-04-04 22:48:56+05:30  Cprogrammer
+# changed permission for qmail-dk, qmail-dkim
+# added dk-filter, qmail-qfilter
+#
+# Revision 2.40  2009-03-29 19:57:48+05:30  Cprogrammer
+# upgraded to bogofilter 1.2.0
+#
+# Revision 2.39  2009-03-28 23:14:33+05:30  Cprogrammer
+# removed assign, cdb
+#
+# Revision 2.38  2009-03-28 19:57:12+05:30  Cprogrammer
+# changed libdkim version
+#
+# Revision 2.37  2009-03-28 11:46:24+05:30  Cprogrammer
+# clamav 0.95
+#
+# Revision 2.36  2009-03-19 10:07:16+05:30  Cprogrammer
+# added libdkim
+#
+# Revision 2.35  2009-03-15 18:02:00+05:30  Cprogrammer
+# added man, include directory for removal on rpm uninstallation
+#
+# Revision 2.34  2009-03-15 13:30:12+05:30  Cprogrammer
+# removed testtrace
+# added suse_version 11.1
+#
+# Revision 2.33  2009-03-13 20:13:26+05:30  Cprogrammer
+# added testtrace, clamdtop
+#
+# Revision 2.32  2009-03-09 15:49:10+05:30  Cprogrammer
+# renamed FAQ to QMAILFAQ
+#
+# Revision 2.31  2009-03-09 09:12:08+05:30  Cprogrammer
+# added wordlist.db, main.cvd, daily.cvd as config files
+#
+# Revision 2.30  2009-03-08 11:42:02+05:30  Cprogrammer
+# added all control files
+# added virus filter configuration
+#
+# Revision 2.29  2009-03-04 19:49:15+05:30  Cprogrammer
+# removed glibc-devel from Requires
+#
+# Revision 2.28  2009-03-03 20:46:53+05:30  Cprogrammer
+# added glibc-devel
+#
+# Revision 2.27  2009-03-01 14:40:52+05:30  Cprogrammer
+# added group indimail
+#
+# Revision 2.26  2009-03-01 12:57:44+05:30  Cprogrammer
+# replaced commands with rpm macros
+#
+# Revision 2.25  2009-02-27 10:23:27+05:30  Cprogrammer
+# changed permissions for few directories as per Makefile.am
+#
+# Revision 2.24  2009-02-26 20:25:08+05:30  Cprogrammer
+# removed /etc/event.d/svscan
+#
+# Revision 2.23  2009-02-24 14:05:24+05:30  Cprogrammer
+# added svscan as noreplace
+#
+# Revision 2.22  2009-02-22 11:32:26+05:30  Cprogrammer
+# corrected argv1 not being set
+#
+# Revision 2.21  2009-02-21 15:04:43+05:30  Cprogrammer
+# added maildirmake from qmail
+# added README.cdb
+#
+# Revision 2.20  2009-02-21 10:59:40+05:30  Cprogrammer
+# added libcdb.la
+# added verbose option
+#
+# Revision 2.19  2009-02-19 09:30:58+05:30  Cprogrammer
+# added conditional buildrequires
+#
+# Revision 2.18  2009-02-18 22:01:02+05:30  Cprogrammer
+# added noreplace tag for few config files
+#
+# Revision 2.17  2009-02-18 12:13:05+05:30  Cprogrammer
+# added macros
+#
+# Revision 2.16  2009-02-16 12:28:42+05:30  Cprogrammer
+# create signatures file
+#
+# Revision 2.15  2009-02-15 20:34:36+05:30  Cprogrammer
+# added mysql lib to ld cache
+#
+# Revision 2.14  2009-02-14 12:00:35+05:30  Cprogrammer
+# added .deb package creation
+# create signature file for qmail-smtpd
+#
+# Revision 2.13  2009-02-13 11:16:27+05:30  Cprogrammer
+# use $(id -u) instead of `id -u`
+#
+# Revision 2.12  2009-02-11 23:35:45+05:30  Cprogrammer
+# IndiMail 1.3.4 release
+#
+# Revision 2.11  2009-02-11 11:52:16+05:30  Cprogrammer
+# replaced lib with %%{_lib}
+#
+# Revision 2.10  2009-02-10 11:14:22+05:30  Cprogrammer
+# removed hardcoded directory in user creation
+#
+# Revision 2.9  2009-02-10 09:26:47+05:30  Cprogrammer
+# removed hardcoding of /var/indimail
+#
+# Revision 2.8  2009-02-09 12:52:50+05:30  Cprogrammer
+# update for OBS (OpenSuse Build Service)
+#
+# Revision 2.7  2009-02-08 01:27:26+05:30  Cprogrammer
+# file for non-root user
+#
+# Revision 2.6  2009-02-06 16:19:12+05:30  Cprogrammer
+# use tar.gz, tar.bz2 instead of .zip
+#
+# Revision 2.5  2009-02-06 11:37:52+05:30  Cprogrammer
+# replaced ./configure with '%'configure
+#
+# Revision 2.4  2009-02-05 20:01:56+05:30  Cprogrammer
+# removed display of support options
+#
+# Revision 2.3  2009-02-05 14:14:14+05:30  Cprogrammer
+# remove /var directory
+#
+# Revision 2.2  2009-02-05 11:23:11+05:30  Cprogrammer
+# create logdir
+#
+# Revision 2.1  2009-02-04 20:32:35+05:30  Cprogrammer
+# rpm spec file for indimail
+#
+#
+# $Id: indimail.spec.in,v 2.85 2009-09-20 12:13:43+05:30 Cprogrammer Exp mbhangui $
+%undefine _missing_build_ids_terminate_build
+%define _unpackaged_files_terminate_build 1
+
+%define is_mandrake %(test -e /etc/mandrake-release && echo 1 || echo 0)
+%define is_suse %(test -e /etc/SuSE-release && echo 1 || echo 0)
+%define is_fedora %(test -e /etc/fedora-release && echo 1 || echo 0)
+
+%define dist redhat
+%define disttag rh
+
+%if %{is_mandrake} != 0
+%define dist mandrake
+%define disttag mdk
+%endif
+%if %{is_suse} != 0
+%define dist suse
+%define disttag suse
+%endif
+%if %{is_fedora} != 0
+%define dist fedora
+%define disttag rhfc
+%endif
+
+%if 0%{?opensuse_bs}
+# define to 1 if building on openSUSE build service
+%define build_on_obs       1
+%else
+%define build_on_obs       0
+%endif
+%define	_prefix            @indimaildir@
+%define default_domain     @defaultdomain@
+%define courier_version    3.0.8
+%define bogofilter_version 1.2.1
+%define ucspi_version      0.88
+%define qmail_version      1.03
+%define fetchmail_version  6.3.9
+%define clamav_version     0.95.2
+%define fortune_version    1.0
+%define nssd_version       1.0
+%define flash_version      0.9.4
+%define eps_version        1.2
+%define cdb_version        1.0
+%define libdkim_version    1.3
+%define mysql_version      6.0.9-alpha
+%define see_base           For a description of IndiMail visit http://www.indimail.org
+%define noproxy            0
+%define nocourierimap      0
+%define nolibdkim          0
+%define noclamav           0
+%define nofetchmail        0
+%define nobogofilter       0
+%define nodksignatures     0
+%define _verbose           0
+%define qcount             5
+%define qbase              %{_prefix}/queue
+%define mbase              @basepath@
+%define logdir             @logdir@
+%define servicedir         /service
+
+%if %build_on_obs != 0
+%define packager Manvendra Bhangui <mbhangui@gmail.com>
+%endif
+
+%if %build_on_obs != 0
+# change mysqlPrefix to /usr for openSUSE buildservice
+%define mysqlPrefix        /usr
+%else
+%define mysqlPrefix        @mysql_prefix@
+%endif
+
+Summary: A Fast, Efficient & Secure Mail Server with Multi-Domain/Multi-Host support
+Name: indimail
+Version: @version@
+%if %build_on_obs != 0
+Release: 1.<B_CNT>
+%else
+Release: 1
+%endif
+License: GPLv3
+%if %{undefined suse_version} && %{undefined sles_version}
+Group: System Environment/Base
+%else
+Group: Productivity/Networking/Email/Servers
+%endif
+Source0:  http://downloads.sourceforge.net/indimail/%{name}-%{version}.tar.gz
+Source1:  http://cr.yp.to/software/qmail-%{qmail_version}.tar.gz
+Source2:  http://cr.yp.to/ucspi-tcp/ucspi-tcp-%{ucspi_version}.tar.gz
+%if %nocourierimap == 0
+Source3:  http://downloads.sourceforge.net/indimail/courier-imap-%{courier_version}.tar.bz2
+%endif
+Source4:  http://downloads.sourceforge.net/indimail/flash-0.9.4.tar.gz
+Source5:  http://downloads.sourceforge.net/indimail/altermime-0.3.10.tar.gz
+Source6:  http://downloads.sourceforge.net/indimail/ripmime-1.4.0.9.tar.gz
+Source7:  http://downloads.sourceforge.net/indimail/mpack-1.6.tar.gz
+Source8:  http://downloads.sourceforge.net/indimail/fortune-%{fortune_version}.tar.gz
+Source9:  http://downloads.sourceforge.net/indimail/nssd-%{nssd_version}.tar.gz
+%if %nobogofilter == 0
+Source10: http://downloads.sourceforge.net/bogofilter/bogofilter-%{bogofilter_version}.tar.bz2
+%endif
+Source11: http://prdownload.berlios.de/fetchmail/fetchmail-%{fetchmail_version}.tar.bz2 
+%if %noclamav == 0
+Source12: http://downloads.sourceforge.net/clamav/clamav-%{clamav_version}.tar.gz
+%endif
+Source13: %{name}-%{version}-rpmlintrc
+Patch1:  qmail-%{qmail_version}.patch
+Patch2:  ucspi-tcp-%{ucspi_version}.patch
+
+%if %nocourierimap == 0
+%if %build_on_obs != 0
+Patch3:  courier-imap-%{courier_version}-1.0.patch
+%else
+Patch3:  courier-imap-%{courier_version}.patch
+%endif
+%endif
+
+# Comment out below for openSUSE buildservice
+%if %build_on_obs == 0
+%if %nobogofilter == 0
+Patch10: bogofilter-%{bogofilter_version}.patch
+%endif
+%if %nofetchmail == 0
+Patch11: fetchmail-%{fetchmail_version}.patch
+%endif
+%endif
+
+%if %noclamav == 0
+Patch12: clamav-%{clamav_version}.patch
+%endif
+NoSource: 1
+NoSource: 2
+%if %nocourierimap == 0
+NoSource: 3
+%endif
+NoSource: 4
+NoSource: 5
+NoSource: 6
+NoSource: 7
+NoSource: 8
+NoSource: 9
+%if %nobogofilter == 0
+NoSource: 10
+%endif
+%if %nofetchmail == 0
+NoSource: 11
+%endif
+%if %noclamav == 0
+NoSource: 12
+%endif
+
+URL: http://www.indimail.org
+#AutoReqProv: No
+BuildRequires: openssl-devel rpm gcc gcc-c++ make bison binutils coreutils grep
+BuildRequires: glibc glibc-devel openssl procps gdbm-devel readline-devel
+BuildRequires: sed ncurses-devel gettext-devel
+BuildRequires: python-devel flex findutils
+BuildRequires: readline sharutils gzip autoconf
+%if %build_on_obs == 1
+BuildRequires: mysql-devel
+%endif
+%if %{undefined centos_version} && %{undefined rhel_version} && %{undefined sles_version}
+BuildRequires: chrpath
+%endif
+%if 0%{?suse_version} > 1110 || 0%{?suse_version} == 1110 || 0%{?suse_version} == 1100 || 0%{?suse_version} == 1030 || 0%{?suse_version} == 1020
+BuildRequires: chrpath
+%endif
+%if 0%{?suse_version}
+BuildRequires: db-devel
+BuildRequires: -post-build-checks  
+#!BuildIgnore: post-build-checks  
+%else
+%if 0%{?mandriva_version} > 2009
+BuildRequires: db4.7-devel
+%else
+BuildRequires: db4-devel
+%endif
+%endif
+
+# rpm -qf /bin/ls
+# rpm -qp --queryformat '%{arch}\n' some-file.rpm
+# rpm --showrc for all macros
+# rpm -qlp some-file.rpm
+Requires: coreutils grep /bin/sh glibc openssl /usr/sbin/useradd /usr/sbin/groupadd
+Requires: /sbin/chkconfig /usr/sbin/userdel /usr/sbin/groupdel procps /usr/bin/awk
+Requires: mysql-server db4
+BuildRoot: %(mktemp -ud %{_tmppath}/%{name}-%{version}-%{release}-XXXXXXX)
+#
+# IndiMail is choosy and runs on reliable OS only
+#
+Excludeos: windows 
+
+%description
+IndiMail is a mailing solution built using following packages
+
+qmail,
+serialmail,
+qmailanalog,
+dotforward,
+fastforward,
+mess822,
+daemontools,
+ucspi-tcp,
+Courier IMAP/POP3,
+Bogofilter - A Bayesian Spam Filter,
+Clam AntiVirus - GPL anti-virus toolkit for UNIX,
+Fetchmail,
+other useful utilities (mpack, unpack, altermime, ripmime, fortune, flash).
+
+IndiMail also provides Management of Virtual domains. Lot of the
+integration has been done by modifying some of the core components.
+You can read the feature list to get an idea of the changes and new
+features that have been added over the original packages.
+
+The package combines qmail with other packages like courier-imap for
+IMAP/POP3, bogofilter for SPAM control, fetchmail for hosts with 
+intermittent connectivity. IndiMail provides ability for a single domain
+to have users across multiple hosts (even across different geographical
+locations) and tools to manage virtual domains ?
+
+%{see_base}
+
+%package devel
+Summary: IndiMail - Development header files and libraries
+Group: Applications/Databases
+Provides: %{name}-devel
+Requires: %{name}-shared
+
+%description devel
+This package contains the development header files and libraries
+necessary to develop IndiMail client applications.
+
+%{see_base}
+
+%package shared
+Summary: IndiMail - Shared libraries
+Group: Applications/Databases
+Provides: %{name}-shared
+
+%description shared
+This package contains the shared libraries (*.so*) which certain
+languages and applications need to dynamically load and use MySQL.
+
+%{see_base}
+
+%prep
+echo "---------------- INFORMATION ------------------------"
+echo target        %_target
+echo target_alias  %_target_alias
+echo target_cpu    %_target_cpu
+echo target_os     %_target_os
+echo target_vendor %_target_vendor
+echo Building %{name}-%{version}-%{release} Build %{_build} OS %{_os} Dist %dist disttag %disttag libs %{_lib} %{_libdir}
+echo "------------------------------------------------------"
+
+for i in %{name}-%{version} altermime-0.3.10 ripmime-1.4.0.9 flash-0.9.4 \
+mpack-1.6 fortune-%{fortune_version} \
+qmail-%{qmail_version} ucspi-tcp-%{ucspi_version} nssd-%{nssd_version} \
+bogofilter-%{bogofilter_version} fetchmail-%{fetchmail_version} \
+courier-imap-%{courier_version} clamav-%{clamav_version} \
+libdkim-%{libdkim_version}
+do
+	(
+	if [ -d $i ] ; then
+		%{__rm} -rf $i
+	fi
+	if [ " $i" = " fetchmail-%{fetchmail_version}" -a %nofetchmail -ne 0 ] ; then
+		continue
+	fi
+	if [ " $i" = " bogofilter-%{bogofilter_version}" -a %nobogofilter -ne 0 ] ; then
+		continue
+	fi
+	if [ " $i" = " courier-imap-%{courier_version}" -a %nocourierimap -ne 0 ] ; then
+		continue
+	fi
+	if [ " $i" = " libdkim-%{libdkim_version}" -a %nolibdkim -ne 0 ] ; then
+		continue
+	fi
+	if [ " $i" = " clamav-%{clamav_version}" -a %noclamav -ne 0 ] ; then
+		continue
+	fi
+	if [ -f ../SOURCES/$i.tar.bz2 ] ; then
+		%{__bzip2} -d -c ../SOURCES/$i.tar.bz2 |tar xf -
+	elif [ -f ../SOURCES/$i.tar.gz ] ; then
+		gunzip -c ../SOURCES/$i.tar.gz |tar xf -
+	else
+		echo "No Source Archive for $i"
+		exit 1
+	fi
+	if [ -d $i ] ; then
+		if [ -f %{name}-%{version}/patches/$i.patch ] ; then
+			# Copy for the SRPM
+			%{__cp} %{name}-%{version}/patches/$i.patch ../SOURCES
+		elif [ -f %{name}-%{version}/patches/$i.patch.gz ] ; then
+			gunzip -c %{name}-%{version}/patches/$i.patch.gz > ../SOURCES/$i.patch
+		fi
+	fi
+	)
+done
+
+# unComment out below for openSUSE buildservice
+%if %build_on_obs != 0
+	%{__cp} %{name}-%{version}/patches/courier-imap-%{courier_version}-1.0.patch ../SOURCES
+%endif
+
+%patch1  -p0
+%patch2  -p0
+%if %nocourierimap == 0
+%patch3  -p0
+%endif
+
+# Comment out below for openSUSE buildservice
+%if %build_on_obs == 0
+%if %nobogofilter == 0
+%patch10 -p0
+%endif
+%if %nofetchmail == 0
+%patch11 -p0
+%endif
+%endif
+
+%if %noclamav == 0
+%patch12 -p0
+%endif
+
+%build
+ID=$(id -u)
+if [ $ID -eq 0 ] ; then
+	nscd_up=`ps -ef |grep nscd |grep -v grep|wc -l`
+	if [ $nscd_up -ge 1 ] ; then
+		if [ -x %{_sysconfdir}/init.d/nscd ] ; then
+			%{_sysconfdir}/init.d/nscd stop
+		fi
+	fi
+	/usr/bin/getent group indimail || /usr/sbin/groupadd -r -g 555 indimail
+	if [ $? = 4 ] ; then # not unique
+		/usr/sbin/groupadd -r indimail
+	fi
+	/usr/bin/getent group nofiles  || /usr/sbin/groupadd nofiles  || true
+	/usr/bin/getent group qmail    || /usr/sbin/groupadd qmail    || true
+	/usr/bin/getent group qscand   || /usr/sbin/groupadd qscand   || true
+
+	for i in indimail alias qmaild qmaill qmailp qmailq qmailr qmails qscand
+	do
+		%{__rm} -f /var/spool/mail/$i
+	done
+
+	/usr/bin/getent passwd indimail || /usr/sbin/useradd -r -g indimail -u 555 -d %{_prefix} indimail || true
+	if [ $? = 4 ] ; then
+		/usr/sbin/useradd -r -g indimail -d %{_prefix} indimail
+	fi
+	/usr/bin/getent passwd alias    || /usr/sbin/useradd -M -g nofiles  -d %{_prefix}/alias  -s /sbin/nologin  alias || true
+	/usr/bin/getent passwd qmaild   || /usr/sbin/useradd -M -g nofiles  -d %{_prefix}        -s /sbin/nologin qmaild || true
+	/usr/bin/getent passwd qmaill   || /usr/sbin/useradd -M -g nofiles  -d %{_prefix}        -s /sbin/nologin qmaill || true
+	/usr/bin/getent passwd qmailp   || /usr/sbin/useradd -M -g nofiles  -d %{_prefix}        -s /sbin/nologin qmailp || true
+	/usr/bin/getent passwd qmailq   || /usr/sbin/useradd -M -g qmail    -d %{_prefix}        -s /sbin/nologin qmailq || true
+	/usr/bin/getent passwd qmailr   || /usr/sbin/useradd -M -g qmail    -d %{_prefix}        -s /sbin/nologin qmailr || true
+	/usr/bin/getent passwd qmails   || /usr/sbin/useradd -M -g qmail    -d %{_prefix}        -s /sbin/nologin qmails || true
+	/usr/bin/getent passwd qscand   || /usr/sbin/useradd -M -g qscand   -d %{_prefix}/qscanq -G qmail,qscand -s /sbin/nologin qscand || true
+fi
+
+if [ %{_verbose} -eq 0 ] ; then
+	DEVICE=/dev/null
+else
+	DEVICE=/dev/tty
+fi
+echo "Will send output to $DEVICE"
+#### Stupid Mandriva ######################
+%if 0%{?mandriva_version} > 2009
+%ifarch x86_64
+%define _libdir %{_prefix}/lib64
+%define _lib lib64
+%else
+%define _libdir %{_prefix}/lib
+%define _lib lib
+%endif
+%endif
+#### LIBDKIM ######################
+if [ -d libdkim-%{libdkim_version} ] ; then
+cd libdkim-%{libdkim_version}
+if [ %{build_on_obs} -eq 0 ] ; then
+	echo "reconfiguring..."
+	autoreconf -fi
+else
+	echo "reconfiguring..."
+%if %{undefined centos_version} && %{undefined rhel_version} && %{undefined sles_version}
+%if 0%{?fedora_version} > 10 || 0%{?suse_version} || 0%{?mandriva_version} > 2009
+	autoreconf -fi
+%endif
+%endif
+fi
+if [ " %dist" = " mandrake" ] ; then
+./configure --prefix=%{_prefix} --libdir=%{_libdir} --libexecdir=%{_prefix}/libexec \
+	--x-libraries=%{_libdir} > $DEVICE
+else
+%configure --prefix=%{_prefix} > $DEVICE
+fi
+cd ..
+fi
+
+#### IndiMail ######################
+cd %{name}-%{version}
+if [ %{build_on_obs} -eq 0 ] ; then
+	echo "reconfiguring..."
+	autoreconf -fi
+else
+echo "reconfiguring..."
+%if %{undefined centos_version} && %{undefined rhel_version} && %{undefined sles_version}
+%if 0%{?fedora_version} > 10 || 0%{?suse_version} || 0%{?mandriva_version} > 2009
+	autoreconf -fi
+%endif
+%endif
+fi
+if [ " %dist" = " mandrake" ] ; then
+./configure --prefix=%{_prefix} --libexecdir=%{_prefix}/libexec --sysconfdir=%{_prefix}/etc \
+	--enable-mysqlbindir=%{mysqlPrefix}/bin --enable-mysqlincdir=%{mysqlPrefix}/include/mysql \
+	--enable-mysqllibdir=%{mysqlPrefix}/%{_lib}/mysql \
+	--libdir=%{_libdir} --x-libraries=%{_libdir} \
+	--mandir=%{_prefix}/man --sysconfdir=%{_prefix}/etc --enable-qmaildir=%{_prefix} \
+	--enable-basepath=@basepath@ --enable-logdir=@logdir@ \
+	--enable-tcprules-prog=%{_prefix}/bin/tcprules --enable-tcpserver-file=%{_prefix}/etc/tcp.smtp \
+	`%{__cat} config/indimail.opts` > $DEVICE
+else
+%configure --prefix=%{_prefix} --libexecdir=%{_prefix}/libexec --sysconfdir=%{_prefix}/etc \
+	--enable-mysqlbindir=%{mysqlPrefix}/bin --enable-mysqlincdir=%{mysqlPrefix}/include/mysql \
+	--enable-mysqllibdir=%{mysqlPrefix}/%{_lib}/mysql \
+	--mandir=%{_prefix}/man --sysconfdir=%{_prefix}/etc --enable-qmaildir=%{_prefix} \
+	--enable-basepath=@basepath@ --enable-logdir=@logdir@ \
+	--enable-tcprules-prog=%{_prefix}/bin/tcprules --enable-tcpserver-file=%{_prefix}/etc/tcp.smtp \
+	`%{__cat} config/indimail.opts` > $DEVICE
+fi
+
+#### nssd ######################
+if [ -d ../nssd-%{nssd_version} ] ; then
+	cd ../nssd-%{nssd_version}
+if [ %{build_on_obs} -eq 0 ] ; then
+	echo "reconfiguring..."
+	autoreconf -fi
+else
+	echo "reconfiguring..."
+%if %{undefined centos_version} && %{undefined rhel_version} && %{undefined sles_version}
+%if 0%{?fedora_version} > 10 || 0%{?suse_version} || 0%{?mandriva_version} > 2009
+	autoreconf -fi
+%endif
+%endif
+fi
+if [ " %dist" = " mandrake" ] ; then
+	./configure --prefix=%{_prefix} --libexecdir=%{_prefix}/libexec --sysconfdir=%{_prefix}/etc \
+	--libdir=%{_libdir} --x-libraries=%{_libdir} \
+	--enable-mysqlincdir=%{mysqlPrefix}/include/mysql --enable-mysqllibdir=%{mysqlPrefix}/%{_lib}/mysql \
+	`%{__cat} ../%{name}-%{version}/config/nssd.opts` > $DEVICE
+else
+	%configure --prefix=%{_prefix} --libexecdir=%{_prefix}/libexec --sysconfdir=%{_prefix}/etc \
+	--enable-mysqlincdir=%{mysqlPrefix}/include/mysql --enable-mysqllibdir=%{mysqlPrefix}/%{_lib}/mysql \
+	`%{__cat} ../%{name}-%{version}/config/nssd.opts` > $DEVICE
+fi
+fi
+#sed -i 's|^hardcode_libdir_flag_spec=.*|hardcode_libdir_flag_spec=""|g' libtool
+#sed -i 's|^runpath_var=LD_RUN_PATH|runpath_var=DIE_RPATH_DIE|g' libtool
+
+#### courier-imap ######################
+if [ -d ../courier-imap-%{courier_version} ] ; then
+	cd ../courier-imap-%{courier_version}
+	%configure --prefix=%{_prefix} --libexecdir=%{_prefix}/libexec --bindir=%{_prefix}/bin \
+	--mandir=%{_prefix}/man --sysconfdir=%{_prefix}/etc \
+	`%{__cat} ../%{name}-%{version}/config/courier-imap.opts` > $DEVICE
+fi
+
+#### bogofilter ######################
+if [ -d ../bogofilter-%{bogofilter_version} ] ; then
+	cd ../bogofilter-%{bogofilter_version}
+	if [ %{build_on_obs} -eq 0 ] ; then
+	autoreconf -fi
+	%configure --prefix=%{_prefix} --libexecdir=%{_prefix}/libexec --sysconfdir=%{_prefix}/etc \
+	--mandir=%{_prefix}/man `%{__cat} ../%{name}-%{version}/config/bogofilter.opts` > $DEVICE
+	else
+	# change to ./configure for openSUSE buildservice
+	./configure --prefix=%{_prefix} --libexecdir=%{_prefix}/libexec --sysconfdir=%{_prefix}/etc \
+	--mandir=%{_prefix}/man `%{__cat} ../%{name}-%{version}/config/bogofilter.opts` > $DEVICE
+	fi
+fi
+
+#### clamav ######################
+if [ -d ../clamav-%{clamav_version} ] ; then
+	cd ../clamav-%{clamav_version}
+	if [ %{build_on_obs} -eq 0 ] ; then
+	%configure --prefix=%{_prefix} --libexecdir=%{_prefix}/libexec --sysconfdir=%{_prefix}/etc \
+	--with-dbdir=%{_prefix}/share/clamd --mandir=%{_prefix}/man \
+	`%{__cat} ../%{name}-%{version}/config/clamav.opts` > $DEVICE
+	else
+	# change to ./configure for openSUSE buildservice
+	./configure --prefix=%{_prefix} --libexecdir=%{_prefix}/libexec --sysconfdir=%{_prefix}/etc \
+	--with-dbdir=%{_prefix}/share/clamd --mandir=%{_prefix}/man \
+	`%{__cat} ../%{name}-%{version}/config/clamav.opts` > $DEVICE
+	fi
+fi
+
+#### fetchmail ######################
+if [ -d ../fetchmail-%{fetchmail_version} ] ; then
+	cd ../fetchmail-%{fetchmail_version}
+if [ %{build_on_obs} -eq 0 ] ; then
+	echo "reconfiguring..."
+	autoreconf -fi
+else
+echo "reconfiguring..."
+%if %{undefined centos_version} && %{undefined rhel_version} && %{undefined sles_version}
+%if 0%{?fedora_version} || 0%{?suse_version}
+	autoreconf -fi
+%else
+	%{__autoheader}
+	%{__autoconf}
+%endif
+%endif
+fi
+%configure --prefix=%{_prefix} --libexecdir=%{_prefix}/libexec --sysconfdir=%{_prefix}/etc \
+--enable-indimaildir=%{_prefix} --mandir=%{_prefix}/man \
+`%{__cat} ../%{name}-%{version}/config/fetchmail.opts` > $DEVICE
+fi
+cd ..
+
+#### ucspi-tcp ######################
+if [ -d ucspi-tcp-%{ucspi_version} ] ; then
+	%{__sed} 's{HOME{%{_prefix}{' ucspi-tcp-%{ucspi_version}/conf-home.in > ucspi-tcp-%{ucspi_version}/conf-home
+fi
+if [ $ID -eq 0 ] ; then
+	if [ $nscd_up -ge 1 ] ; then
+		if [ -x %{_sysconfdir}/init.d/nscd ] ; then
+			%{_sysconfdir}/init.d/nscd start
+		fi
+	fi
+fi
+
+%install
+[ "$RPM_BUILD_ROOT" != "/" ] && %{__rm} -fr $RPM_BUILD_ROOT
+ID=$(id -u)
+%{__mkdir_p} $RPM_BUILD_ROOT%{_prefix}
+for i in ucspi-tcp-%{ucspi_version} \
+nssd-%{nssd_version} bogofilter-%{bogofilter_version} \
+fetchmail-%{fetchmail_version} courier-imap-%{courier_version} \
+clamav-%{clamav_version} libdkim-%{libdkim_version} %{name}-%{version}
+do
+	if [ -d $i ] ; then
+		cd $i
+		if [ %{_verbose} -eq 0 ] ; then
+			%{__make} -s DESTDIR=%{buildroot}
+			%{__make} -s ARCH_LIB=%{_lib} DESTDIR=%{buildroot} install-strip
+		else
+			%{__make} DESTDIR=%{buildroot}
+			%{__make} ARCH_LIB=%{_lib} DESTDIR=%{buildroot} install-strip
+		fi
+		cd ..
+	fi
+done
+for i in eps cdb flash indimail
+do
+	%{__rm} -f %{buildroot}%{_libdir}/lib"$i".la
+done
+
+if [ %noclamav -eq 0 ] ; then
+	for i in clamav clamunrar clamunrar_iface
+	do
+		%{__rm} -f %{buildroot}%{_libdir}/lib"$i".la
+	done
+fi
+%{__rm} -f %{buildroot}/usr/%{_lib}/libnss_nssd.la
+
+%{__mkdir_p} %{buildroot}%{_prefix}/domains
+%{__mkdir_p} %{buildroot}%{_prefix}/etc
+%{__mkdir_p} %{buildroot}%{_prefix}/include
+%{__cp} %{name}-%{version}/inc_deps %{buildroot}%{_prefix}/etc
+%{__cp} %{name}-%{version}/lib_deps %{buildroot}%{_prefix}/etc
+%{__cp} %{name}-%{version}/indimail.h %{buildroot}%{_prefix}/include
+
+if [ %noclamav -eq 0 ] ; then
+	if [ -f %{buildroot}%{_prefix}/etc/clamd.conf ] ; then
+		%{__rm} -f %{buildroot}%{_prefix}/etc/clamd.conf
+	fi
+	if [ -f %{buildroot}%{_prefix}/etc/freshclam.conf ] ; then
+		%{__rm} -f %{buildroot}%{_prefix}/etc/freshclam.conf
+	fi
+	if [ -d %{buildroot}%{_prefix}/var ] ; then
+		/bin/rmdir %{buildroot}%{_prefix}/var
+	fi
+fi
+if [ -x /usr/bin/chrpath ] ; then
+/usr/bin/chrpath -d %{buildroot}%{_libdir}/*.so
+for i in clamconf clamscan dbinfo flash freshclam hostcntrl indiversion printdir \
+proxyimap proxypop3 resetquota sigtool vacation vaddaliasdomain vadddomain vadduser \
+vadduserl valias vatrn vbulletin vcalias vcfilter vdeldomain vdeluser vdominfo \
+vgroup vhostid vipmap vmoddomlimits vmoduser vmoveuser vpasswd vpriv \
+vproxy vrenamedomain vrenameuser vsetuserquota vsmtp vuserinfo tcpserver
+do
+	if [ -f %{buildroot}%{_prefix}/bin/$i ] ; then
+    	/usr/bin/chrpath -d %{buildroot}%{_prefix}/bin/$i
+	fi
+done
+
+/usr/bin/chrpath -d %{buildroot}%{_prefix}/libexec/authlib/authindi
+
+for i in adminclient chowkidar cindimail clamd clearopensmtp copyemail execmysql \
+hostsync indisrvr inlookup inquerytest install_tables ipchange mail_report \
+mgmtpass postdel systpass testmra updatefile updaterules vchkpass vdelivermail \
+vdeloldusers vfilter vfstab vmoddomain vreorg vsetpass nssd
+do
+	if [ -f %{buildroot}%{_prefix}/sbin/$i ] ; then
+    	/usr/bin/chrpath -d %{buildroot}%{_prefix}/sbin/$i
+	fi
+done
+fi
+# Compress the man pages
+find %{buildroot}%{_prefix}/man -type f -exec gzip {} \;
+if [ -f %{buildroot}%{_prefix}/man/man7/authlib.7.gz ] ; then
+	for i in authldap.7 authmysql.7 authdaemond.7 authshadow.7 authuserdb.7 authpwd.7 \
+	authvchkpw.7 authdaemon.7 authcram.7 authpam.7
+	do
+		%{__rm} -f %{buildroot}%{_prefix}/man/man7/$i
+		ln -sf %{_prefix}/man/man7/authlib.7.gz %{buildroot}%{_prefix}/man/man7/$i.gz
+	done
+fi
+if [ -f %{buildroot}%{_prefix}/man/man8/makeuserdb.8.gz ] ; then
+		for i in vchkpw2userdb.8 pw2userdb.8
+		do
+			%{__rm} -f %{buildroot}%{_prefix}/man/man8/$i
+			ln -sf %{_prefix}/man/man8/makeuserdb.8.gz %{buildroot}%{_prefix}/man/man8/$i.gz
+		done
+fi
+
+if [ -x /usr/bin/epm ] ; then
+	#/bin/chmod +x %{buildroot}%{_prefix}/bin/rpmattr
+	#find %{buildroot}%{_prefix} -exec %{buildroot}%{_prefix}/bin/rpmattr {} \; | \
+	#	sed -e 's,%{buildroot}%{_prefix},%{_prefix},g' > \
+	#	%{buildroot}%{_prefix}/etc/perm.list.tmp
+	#(
+	#grep "^%dir" %{buildroot}%{_prefix}/etc/perm.list.tmp
+	#grep -v "^%dir" %{buildroot}%{_prefix}/etc/perm.list.tmp
+	#) > %{buildroot}%{_prefix}/etc/perm_list
+	#%{__rm} -f %{buildroot}%{_prefix}/etc/perm.list.tmp
+	%{__sed} 's}BUILDROOT}%{buildroot}}' %{name}-%{version}/indimail-epm.list > indimail-epm.list
+	if [ -x /usr/bin/fakeroot -a -x /usr/bin/epm ] ;  then
+		/usr/bin/fakeroot epm -a intel -f deb indimail indimail-epm.list
+	else
+		/usr/bin/epm -a intel -f deb indimail indimail-epm.list
+	fi
+fi
+
+# Create these files so that %ghost does not complain
+for i in indimail.cnf nssd.conf tcp.imap tcp.imap.cdb tcp.pop3 \
+tcp.pop3.cdb tcp.smtp tcp.smtp.cdb services.log
+do
+	/bin/touch %{buildroot}%{_prefix}/etc/$i
+done
+(
+for i in `%{__cat} %{buildroot}%{_prefix}/etc/controlfiles`
+do
+	echo "%ghost %config(noreplace,missingok)               %{_prefix}/control/$i"
+	/bin/touch %{buildroot}%{_prefix}/control/$i
+done
+) > config_files.list
+if [ %nobogofilter -eq 0 ] ; then
+	/bin/touch %{buildroot}%{_prefix}/etc/bogofilter.cf
+fi
+if [ %nofetchmail -eq 0 ] ; then
+	/bin/touch %{buildroot}%{_prefix}/etc/fetchmailrc
+fi
+if [ %noclamav -eq 0 ] ; then
+	/bin/touch %{buildroot}%{_prefix}/share/clamd/clamav
+	/bin/touch %{buildroot}%{_prefix}/share/clamd/mirrors.dat
+fi
+
+%files -f config_files.list
+%defattr(-, root, root, 0555)
+#
+# Directories
+#
+%dir %attr(555,root,qmail)        %{_prefix}
+%dir %attr(555,root,qmail)        %{_prefix}/boot
+%dir %attr(555,root,qmail)        %{_prefix}/doc
+%dir %attr(2555,alias,qmail)      %{_prefix}/alias
+%dir %attr(555,root,root)         %{_prefix}/include
+%dir %attr(750,qscand,qscand)     %{_prefix}/qscanq
+%dir %attr(750,qscand,qscand)     %{_prefix}/qscanq/root
+%dir %attr(750,qscand,qscand)     %{_prefix}/qscanq/root/scanq
+%dir %attr(555,root,root)         %{_prefix}/libexec
+%dir %attr(555,root,root)         %{_prefix}/libexec/authlib
+%dir %attr(755,indimail,indimail) %{_prefix}/control
+%dir %attr(775,indimail,indimail) %{_prefix}/control/inquery
+%dir %attr(755,indimail,indimail) %{_prefix}/control/domainkeys
+%dir %attr(2755,indimail,qmail)   %{_prefix}/autoturn
+%dir %attr(555,root,root)         %{_prefix}/modules
+%dir %attr(555,root,qmail)        %{_prefix}/man
+%dir %attr(555,root,qmail)        %{_prefix}/man/man5
+%dir %attr(555,root,qmail)        %{_prefix}/man/cat7
+%dir %attr(555,root,qmail)        %{_prefix}/man/man7
+%dir %attr(555,root,qmail)        %{_prefix}/man/cat8
+%dir %attr(555,root,qmail)        %{_prefix}/man/man1
+%dir %attr(555,root,qmail)        %{_prefix}/man/man8
+%dir %attr(555,root,qmail)        %{_prefix}/man/cat5
+%dir %attr(555,root,qmail)        %{_prefix}/man/cat1
+%dir %attr(555,root,qmail)        %{_prefix}/man/man3
+%dir %attr(555,root,root)         %{_libdir}
+%if %nofetchmail == 0
+%dir %attr(755,root,root)         %{_prefix}/share/locale
+%dir %attr(755,root,root)         %{_prefix}/lib*/python*
+%dir %attr(755,root,root)         %{_prefix}/lib*/python*/site-packages
+%endif
+%dir %attr(775,root,indimail)     %{_prefix}/domains
+%dir %attr(555,root,root)         %{_prefix}/share
+%if %noclamav == 0
+%dir %attr(755,root,root)         %{_libdir}/pkgconfig
+%dir %attr(775,qscand,qscand)     %{_prefix}/share/clamd
+%endif
+%dir %attr(755,root,root)         %{_prefix}/share/fortunes
+%dir %attr(555,root,qmail)        %{_prefix}/users
+%dir %attr(555,root,qmail)        %{_prefix}/plugins
+%dir %attr(755,root,root)         %{_prefix}/etc
+%dir %attr(755,root,root)         %{_prefix}/etc/yum.repos.d
+%dir %attr(555,root,root)         %{_prefix}/sbin
+%dir %attr(555,root,qmail)        %{_prefix}/bin
+#
+# If the configuration file should not be replaced when the RPM is
+# upgraded, mark it as follows:
+# %config(noreplace) filename
+#
+# Configuration files must be marked as such in packages.
+# As a rule of thumb, use %config(noreplace) instead of plain %config unless your best,
+# educated guess is that doing so will break things. In other words, think hard before
+# overwriting local changes in configuration files on package upgrades.
+# An example case when /not/ to use noreplace is when a package's configuration file
+# changes so that the new package revision wouldn't work with the config file
+# from the previous package revision. Whenever plain %config is used,
+# add a brief comment to the specfile explaining why.
+
+%attr(444,root,root) %config(noreplace)           %{_prefix}/etc/system.flashlogin
+%attr(444,root,root) %config(noreplace)           %{_prefix}/etc/system.rc
+%attr(444,root,root) %config(noreplace)           %{_prefix}/etc/system.menu
+%attr(444,root,root) %config(noreplace)           %{_prefix}/etc/system.module
+%attr(444,root,root) %config(noreplace)           %{_prefix}/etc/osh.table
+# Allow new control files to get added with new packages
+# unlikely for this file to have local changes
+%attr(444,root,root) %config                      %{_prefix}/etc/controlfiles
+# For configuration files that may be found missing during uninstall have
+# $config(missingok)
+#
+# For files that should be included in the list of files so that they
+# are uninstalled when the package is removed but may not exist until
+# they are created during post-install should be marked as follows:
+# %ghost filename
+%if %nobogofilter == 0
+%ghost %config(noreplace,missingok)               %{_prefix}/etc/bogofilter.cf
+%endif
+%if %nofetchmail == 0
+%ghost %config(noreplace,missingok)               %{_prefix}/etc/fetchmailrc
+%endif
+
+%ghost %config(noreplace,missingok)               %{_prefix}/etc/indimail.cnf
+%ghost %config(noreplace,missingok)               %{_prefix}/etc/nssd.conf
+%ghost %config(noreplace,missingok)               %{_prefix}/etc/tcp.imap
+%ghost %config(noreplace,missingok)               %{_prefix}/etc/tcp.pop3
+%ghost %config(noreplace,missingok)               %{_prefix}/etc/tcp.smtp
+#
+# These files will get removed during uninstallation
+#
+%ghost %attr(0644,indimail,indimail)              %{_prefix}/etc/tcp.smtp.cdb
+%ghost %attr(0644,indimail,indimail)              %{_prefix}/etc/tcp.imap.cdb
+%ghost %attr(0644,indimail,indimail)              %{_prefix}/etc/tcp.pop3.cdb
+%ghost %attr(0644,root,root)                      %{_prefix}/etc/services.log
+
+%attr(444,root,root)                              %{_prefix}/etc/cronlist
+%attr(444,root,root)                              %{_prefix}/etc/qmailprog.list
+%attr(444,root,root)                              %{_prefix}/etc/headerlist
+%attr(444,root,root)                              %{_prefix}/etc/indimail.settings
+%attr(444,root,root)                              %{_prefix}/etc/perm_list
+%attr(444,root,root)                              %{_prefix}/etc/yum.repos.d/*.repo
+%if %nobogofilter == 0
+%attr(644,root,root)                              %{_prefix}/etc/bogofilter.cf.example
+%attr(0644,indimail,indimail) %config(noreplace)  %{_prefix}/etc/wordlist.db
+%endif
+
+%if %nocourierimap == 0
+%attr(444,root,root)                              %{_prefix}/etc/quotawarnmsg.example
+%attr(600,root,root)                              %{_prefix}/etc/pop3d-ssl.dist
+%attr(600,root,root)                              %{_prefix}/etc/imapd-ssl.dist
+%attr(600,root,root)                              %{_prefix}/etc/pop3d.cnf
+%attr(600,root,root)                              %{_prefix}/etc/imapd.cnf
+%attr(600,root,root)                              %{_prefix}/etc/pop3d.dist
+%attr(600,root,root)                              %{_prefix}/etc/imapd.dist
+%endif
+
+#
+# Binaries
+#
+%attr(6511,qscand,qmail)                %{_prefix}/bin/qhpsi
+%attr(6511,qmailq,qmail)                %{_prefix}/bin/qmail-queue
+%attr(4555,root,root)                   %{_prefix}/bin/vrenameuser
+%attr(4555,root,root)                   %{_prefix}/bin/vuserinfo
+%attr(4555,root,root)                   %{_prefix}/bin/vrenamedomain
+%attr(4555,root,root)                   %{_prefix}/bin/vaddaliasdomain
+%attr(4511,qscand,qscand)               %{_prefix}/bin/qscanq
+%attr(4555,root,root)                   %{_prefix}/bin/vadduser
+%attr(4555,root,root)                   %{_prefix}/bin/printdir
+%attr(4555,root,root)                   %{_prefix}/bin/vdeluser
+%attr(4555,root,root)                   %{_prefix}/bin/vbulletin
+%attr(4555,root,root)                   %{_prefix}/bin/vdominfo
+%attr(4555,root,root)                   %{_prefix}/bin/vadddomain
+%attr(4555,root,root)                   %{_prefix}/bin/vdeldomain
+%attr(2511,root,qscand)                 %{_prefix}/bin/run-cleanq
+%attr(4555,root,root)                   %{_prefix}/sbin/systpass
+
+%attr(555,root,qmail)                   %{_prefix}/bin/qmail-popbull
+%attr(555,root,qmail)                   %{_prefix}/bin/cleanq
+%attr(555,root,qmail)                   %{_prefix}/bin/logmonitor
+%attr(555,root,qmail)                   %{_prefix}/bin/zsuccesses
+%attr(555,root,qmail)                   %{_prefix}/bin/ofmipd
+%attr(555,root,qmail)                   %{_prefix}/bin/qmail-queue-print
+%attr(555,root,qmail)                   %{_prefix}/bin/qmail-lagcheck
+%attr(555,root,qmail)                   %{_prefix}/bin/mbox2maildir.pl
+%attr(555,root,qmail)                   %{_prefix}/bin/deferrals
+%attr(555,root,qmail)                   %{_prefix}/bin/maildirwatch
+%attr(555,root,qmail)                   %{_prefix}/bin/bouncesaying
+%attr(555,root,qmail)                   %{_prefix}/bin/hostcntrl
+%attr(511,root,qmail)                   %{_prefix}/bin/relaytest
+%attr(555,root,qmail)                   %{_prefix}/bin/checkaddr
+%attr(555,root,qmail)                   %{_prefix}/bin/rsmtprecipients
+%attr(555,root,qmail)                   %{_prefix}/bin/qmail-autoresponder
+%attr(555,root,qmail)                   %{_prefix}/bin/idedit
+%attr(555,root,qmail)                   %{_prefix}/bin/svstat
+%attr(555,root,qmail)                   %{_prefix}/bin/ddist
+%attr(555,root,qmail)                   %{_prefix}/bin/822headerfilter
+%attr(555,root,qmail)                   %{_prefix}/bin/smtp-matchup
+%attr(555,root,qmail)                   %{_prefix}/bin/vmoveuser
+%attr(500,root,qmail)                   %{_prefix}/bin/qmail-newu
+%attr(511,root,qmail)                   %{_prefix}/bin/qmail-pw2u
+%attr(555,root,qmail)                   %{_prefix}/bin/bogofilter-qfe
+%attr(555,root,qmail)                   %{_prefix}/bin/qfilelog
+%attr(555,root,qmail)                   %{_prefix}/bin/checkdomain
+%attr(555,root,qmail)                   %{_prefix}/bin/svok
+%attr(555,root,qmail)                   %{_prefix}/bin/maildirqmtp
+%attr(555,root,qmail)                   %{_prefix}/bin/qmailctl
+%attr(555,root,qmail)                   %{_prefix}/bin/mpack
+%attr(555,root,qmail)                   %{_prefix}/bin/munpack
+%attr(555,root,qmail)                   %{_prefix}/bin/qmail-qmHandle
+%attr(500,root,qmail)                   %{_prefix}/bin/qmail-lspawn
+%attr(555,root,qmail)                   %{_prefix}/bin/dnstxt
+%attr(555,root,qmail)                   %{_prefix}/bin/printmaillist
+%attr(555,root,qmail)                   %{_prefix}/bin/vpasswd
+%attr(555,root,qmail)                   %{_prefix}/bin/displaytop
+%attr(511,root,qmail)                   %{_prefix}/bin/qmail-todo
+%attr(555,root,qmail)                   %{_prefix}/bin/resetquota
+%attr(555,root,qmail)                   %{_prefix}/bin/tai64nunix
+%attr(555,root,qmail)                   %{_prefix}/bin/qmail-tcpto
+%attr(555,root,qmail)                   %{_prefix}/bin/newinclude
+%attr(555,root,qmail)                   %{_prefix}/bin/recordio
+%attr(555,root,qmail)                   %{_prefix}/bin/logselect
+%attr(555,root,qmail)                   %{_prefix}/bin/teepipe
+%attr(555,root,qmail)                   %{_prefix}/bin/vcfilter
+%attr(555,root,qmail)                   %{_prefix}/bin/ipmeprint
+%attr(555,root,qmail)                   %{_prefix}/bin/envdir
+%attr(555,root,qmail)                   %{_prefix}/bin/vcalias
+%attr(555,root,qmail)                   %{_prefix}/bin/dnsmxip
+%attr(555,root,qmail)                   %{_prefix}/bin/zrecipients
+%attr(555,root,qmail)                   %{_prefix}/bin/xsender
+%attr(555,root,qmail)                   %{_prefix}/bin/rxdelay
+%attr(555,root,qmail)                   %{_prefix}/bin/cdbmake
+%attr(511,root,qmail)                   %{_prefix}/bin/qmail-remote
+%attr(555,root,qmail)                   %{_prefix}/bin/fortune
+%attr(555,root,qmail)                   %{_prefix}/bin/pinq
+%attr(555,root,qmail)                   %{_prefix}/bin/mlmatchup
+%attr(555,root,qmail)                   %{_prefix}/bin/822print
+%attr(511,root,qmail)                   %{_prefix}/bin/qmail-send
+%attr(555,root,qmail)                   %{_prefix}/bin/sendmail
+%attr(555,root,qmail)                   %{_prefix}/bin/dbinfo
+%attr(555,root,qmail)                   %{_prefix}/bin/ifaddr
+%attr(555,root,qmail)                   %{_prefix}/bin/svscan
+%attr(555,root,qmail)                   %{_prefix}/bin/matchup
+%attr(555,root,qmail)                   %{_prefix}/bin/zspam
+%attr(555,root,qmail)                   %{_prefix}/bin/recipients
+%attr(555,root,qmail)                   %{_prefix}/bin/update_tmprsadh
+%attr(555,root,qmail)                   %{_prefix}/bin/softlimit
+%attr(555,root,qmail)                   %{_prefix}/bin/setforward
+%attr(555,root,qmail)                   %{_prefix}/bin/822date
+%attr(555,root,qmail)                   %{_prefix}/bin/cdbdump
+%attr(555,root,qmail)                   %{_prefix}/bin/iftocc
+%attr(555,root,qmail)                   %{_prefix}/bin/qmail-qmqpc
+%attr(555,root,qmail)                   %{_prefix}/bin/serialqmtp
+%attr(555,root,qmail)                   %{_prefix}/bin/altermime
+%attr(555,root,qmail)                   %{_prefix}/bin/rsmtprdomains
+%attr(555,root,qmail)                   %{_prefix}/bin/vhostid
+%attr(511,root,qmail)                   %{_prefix}/bin/qmail-getpw
+%attr(555,root,qmail)                   %{_prefix}/bin/vatrn
+%attr(555,root,qmail)                   %{_prefix}/bin/indiversion
+%attr(555,root,qmail)                   %{_prefix}/bin/rsmtpfailures
+%attr(555,root,qmail)                   %{_prefix}/bin/fghack
+%attr(555,root,qmail)                   %{_prefix}/bin/cdbmake-sv
+%attr(555,root,qmail)                   %{_prefix}/bin/svscanboot
+%attr(555,root,qmail)                   %{_prefix}/bin/successes
+%attr(555,root,qmail)                   %{_prefix}/bin/qmail-sigterm
+%attr(555,root,qmail)                   %{_prefix}/bin/spipe
+%attr(555,root,qmail)                   %{_prefix}/bin/vmoddomlimits
+%attr(555,root,qmail)                   %{_prefix}/bin/delcr
+%attr(555,root,qmail)                   %{_prefix}/bin/svc
+%attr(555,root,qmail)                   %{_prefix}/bin/crypt
+%attr(555,root,qmail)                   %{_prefix}/bin/setmaillist
+%attr(555,root,qmail)                   %{_prefix}/bin/zrxdelay
+%attr(555,root,qmail)                   %{_prefix}/bin/maildirdeliver
+%attr(555,root,qmail)                   %{_prefix}/bin/qmail-showctl
+%attr(555,root,qmail)                   %{_prefix}/bin/vpriv
+%attr(555,root,qmail)                   %{_prefix}/bin/envmigrate
+%attr(555,root,qmail)                   %{_prefix}/bin/rspamrdomain
+%attr(555,root,qmail)                   %{_prefix}/bin/qmail-sighup
+%attr(555,root,qmail)                   %{_prefix}/bin/multilog-matchup
+%attr(555,root,qmail)                   %{_prefix}/bin/822headerok
+%attr(511,root,qmail)                   %{_prefix}/bin/splogger
+%attr(555,root,qmail)                   %{_prefix}/bin/mbox2maildir
+%attr(555,root,qmail)                   %{_prefix}/bin/printforward
+%attr(555,root,qmail)                   %{_prefix}/bin/zddist
+%attr(555,root,qmail)                   %{_prefix}/bin/elq
+%attr(500,root,qmail)                   %{_prefix}/bin/qmail-newmrh
+%attr(555,root,qmail)                   %{_prefix}/bin/supervise
+%attr(555,root,qmail)                   %{_prefix}/bin/preline
+%attr(555,root,qmail)                   %{_prefix}/bin/cdbget
+%attr(555,root,qmail)                   %{_prefix}/bin/822addr
+%attr(555,root,qmail)                   %{_prefix}/bin/atrn
+%attr(555,root,qmail)                   %{_prefix}/bin/cdbstats
+%attr(555,root,qmail)                   %{_prefix}/bin/qmail-qstat
+%attr(555,root,qmail)                   %{_prefix}/bin/zsenders
+%attr(500,root,qmail)                   %{_prefix}/bin/instcheck
+%attr(555,root,qmail)                   %{_prefix}/bin/suids
+%attr(555,root,qmail)                   %{_prefix}/bin/config
+%attr(555,root,qmail)                   %{_prefix}/bin/maildirserial
+%attr(500,root,qmail)                   %{_prefix}/bin/qmail-start
+%attr(555,root,qmail)                   %{_prefix}/bin/822fields
+%attr(511,root,qmail)                   %{_prefix}/bin/qmail-popup
+%attr(555,root,qmail)                   %{_prefix}/bin/vipmap
+%attr(555,root,qmail)                   %{_prefix}/bin/ofmipname
+%attr(555,root,qmail)                   %{_prefix}/bin/822bodyfilter
+%attr(511,root,qmail)                   %{_prefix}/bin/qmail-local
+%attr(555,root,qmail)                   %{_prefix}/bin/serialsmtp
+%attr(555,root,qmail)                   %{_prefix}/bin/predate
+%attr(555,root,qmail)                   %{_prefix}/bin/vsmtp
+%attr(555,root,qmail)                   %{_prefix}/bin/condredirect
+%attr(555,root,qmail)                   %{_prefix}/bin/fastforward
+%attr(555,root,qmail)                   %{_prefix}/bin/rspamsdomain
+%attr(555,root,qmail)                   %{_prefix}/bin/newaliases
+%attr(555,root,qmail)                   %{_prefix}/bin/qmail-rm
+%attr(555,root,qmail)                   %{_prefix}/bin/zsmtp
+%attr(555,root,qmail)                   %{_prefix}/bin/qmail-pop3d
+%attr(555,root,qmail)                   %{_prefix}/bin/zoverall
+%attr(555,root,qmail)                   %{_prefix}/bin/randstr
+%attr(555,root,qmail)                   %{_prefix}/bin/xqp
+%attr(555,root,qmail)                   %{_prefix}/bin/dot-forward
+%attr(555,root,qmail)                   %{_prefix}/bin/datemail
+%attr(555,root,qmail)                   %{_prefix}/bin/b64encode
+%attr(555,root,qmail)                   %{_prefix}/bin/rhosts
+%attr(555,root,qmail)                   %{_prefix}/bin/replier
+%attr(500,root,qmail)                   %{_prefix}/bin/qmail-cdb
+%attr(555,root,qmail)                   %{_prefix}/bin/cdbtest
+%attr(555,root,qmail)                   %{_prefix}/bin/dnsfq
+%attr(555,root,qmail)                   %{_prefix}/bin/config-fast
+%attr(555,root,qmail)                   %{_prefix}/bin/tai64n
+%attr(555,root,qmail)                   %{_prefix}/bin/822header
+%attr(555,root,qmail)                   %{_prefix}/bin/vgroup
+%attr(555,root,qmail)                   %{_prefix}/bin/maildirmake
+%attr(555,root,qmail)                   %{_prefix}/bin/qmaildirmake
+%attr(555,root,qmail)                   %{_prefix}/bin/maildir2mbox
+%attr(555,root,qmail)                   %{_prefix}/bin/columnt
+%attr(555,root,qmail)                   %{_prefix}/bin/zrhosts
+%attr(555,root,qmail)                   %{_prefix}/bin/qmail-smtpd
+%attr(555,root,qmail)                   %{_prefix}/bin/batv
+%attr(555,root,qmail)                   %{_prefix}/bin/greydaemon
+%attr(555,root,qmail)                   %{_prefix}/bin/qmail-greyd
+%attr(555,root,qmail)                   %{_prefix}/bin/spawn-filter
+%attr(555,root,qmail)                   %{_prefix}/bin/tcp-env
+%attr(555,root,qmail)                   %{_prefix}/bin/qmail-lint
+%attr(555,root,qmail)                   %{_prefix}/bin/rrforward
+%attr(555,root,qmail)                   %{_prefix}/bin/qmail-dk
+%attr(555,root,qmail)                   %{_prefix}/bin/qmail-dkim
+%attr(555,root,qmail)                   %{_prefix}/bin/dk-filter
+%attr(555,root,qmail)                   %{_prefix}/bin/mailsubj
+%attr(555,root,qmail)                   %{_prefix}/bin/condtomaildir
+%attr(555,root,qmail)                   %{_prefix}/bin/crcdiff
+%attr(555,root,qmail)                   %{_prefix}/bin/multirotate
+%attr(555,root,qmail)                   %{_prefix}/bin/822field
+%attr(555,root,qmail)                   %{_prefix}/bin/testzero
+%attr(555,root,qmail)                   %{_prefix}/bin/qmail-cat
+%attr(555,root,qmail)                   %{_prefix}/bin/qmail-poppass
+%attr(555,root,qmail)                   %{_prefix}/bin/vsetuserquota
+%attr(555,root,qmail)                   %{_prefix}/bin/failures
+%attr(555,root,qmail)                   %{_prefix}/bin/vadduserl
+%attr(555,root,qmail)                   %{_prefix}/bin/rsmtp
+%attr(555,root,qmail)                   %{_prefix}/bin/qail
+%attr(555,root,qmail)                   %{_prefix}/bin/qmail-tcpok
+%attr(555,root,qmail)                   %{_prefix}/bin/qpq
+%attr(555,root,qmail)                   %{_prefix}/bin/replier-config
+%attr(555,root,qmail)                   %{_prefix}/bin/etrn
+%attr(555,root,qmail)                   %{_prefix}/bin/forward
+%attr(555,root,qmail)                   %{_prefix}/bin/new-inject
+%attr(555,root,qmail)                   %{_prefix}/bin/filterto
+%attr(555,root,qmail)                   %{_prefix}/bin/ripmime
+%attr(555,root,qmail)                   %{_prefix}/bin/stripmime.pl
+%attr(555,root,qmail)                   %{_prefix}/bin/fixcrio
+%attr(555,root,qmail)                   %{_prefix}/bin/qscanq-stdin
+%attr(555,root,qmail)                   %{_prefix}/bin/rsmtpsenders
+%attr(555,root,qmail)                   %{_prefix}/bin/vmoduser
+%attr(555,root,qmail)                   %{_prefix}/bin/queue-fix
+%attr(555,root,qmail)                   %{_prefix}/bin/822body
+%attr(555,root,qmail)                   %{_prefix}/bin/envconf
+%attr(555,root,qmail)                   %{_prefix}/bin/readproctitle
+%attr(555,root,qmail)                   %{_prefix}/bin/zdeferrals
+%attr(555,root,qmail)                   %{_prefix}/bin/vcaliasrev
+%attr(555,root,qmail)                   %{_prefix}/bin/dktest
+%attr(555,root,qmail)                   %{_prefix}/bin/qmail-scanner-queue.pl
+%attr(555,root,qmail)                   %{_prefix}/bin/rspamstat
+%attr(555,root,qmail)                   %{_prefix}/bin/iftoccfrom
+%attr(555,root,qmail)                   %{_prefix}/bin/hashtable
+%attr(555,root,qmail)                   %{_prefix}/bin/dnsptr
+%attr(555,root,qmail)                   %{_prefix}/bin/zsuids
+%attr(555,root,qmail)                   %{_prefix}/bin/setlock
+%attr(555,root,qmail)                   %{_prefix}/bin/qreceipt
+%attr(555,root,qmail)                   %{_prefix}/bin/qmail-qmqpd
+%attr(555,root,qmail)                   %{_prefix}/bin/multitail
+%attr(555,root,qmail)                   %{_prefix}/bin/except
+%attr(555,root,qmail)                   %{_prefix}/bin/dknewkey
+%attr(555,root,qmail)                   %{_prefix}/bin/maildirsmtp
+%attr(511,root,qmail)                   %{_prefix}/bin/qmail-clean
+%attr(555,root,qmail)                   %{_prefix}/bin/vacation
+%attr(511,root,qmail)                   %{_prefix}/bin/qmail-rspawn
+%attr(555,root,qmail)                   %{_prefix}/bin/pgrphack
+%attr(555,root,qmail)                   %{_prefix}/bin/xrecipient
+%attr(555,root,qmail)                   %{_prefix}/bin/argv0
+%attr(555,root,qmail)                   %{_prefix}/bin/qmail-qmtpd
+%attr(555,root,qmail)                   %{_prefix}/bin/addcr
+%attr(555,root,qmail)                   %{_prefix}/bin/proxyimap
+%attr(555,root,qmail)                   %{_prefix}/bin/proxypop3
+%attr(555,root,qmail)                   %{_prefix}/bin/dnsip
+%attr(555,root,qmail)                   %{_prefix}/bin/b64decode
+%attr(555,root,qmail)                   %{_prefix}/bin/crc
+%attr(555,root,qmail)                   %{_prefix}/bin/qsmhook
+%attr(555,root,qmail)                   %{_prefix}/bin/rspamhist
+%attr(555,root,qmail)                   %{_prefix}/bin/versioninfo
+%attr(555,root,qmail)                   %{_prefix}/bin/mailzipper
+%attr(500,root,qmail)                   %{_prefix}/bin/qmail-recipients
+%attr(555,root,qmail)                   %{_prefix}/bin/rsmtpsdomains
+%attr(555,root,qmail)                   %{_prefix}/bin/qmail-inject
+%attr(555,root,qmail)                   %{_prefix}/bin/serialcmd
+%attr(555,root,qmail)                   %{_prefix}/bin/qmail-qread
+%attr(555,root,qmail)                   %{_prefix}/bin/zfailures
+%attr(555,root,qmail)                   %{_prefix}/bin/qmail-nullqueue
+%attr(500,root,qmail)                   %{_prefix}/bin/qmail-daemon
+%attr(555,root,qmail)                   %{_prefix}/bin/zsendmail
+%attr(555,root,qmail)                   %{_prefix}/bin/multipipe
+%attr(555,root,qmail)                   %{_prefix}/sbin/adminclient
+%attr(555,root,qmail)                   %{_prefix}/sbin/chowkidar
+%attr(555,root,qmail)                   %{_prefix}/sbin/cindimail
+%attr(555,root,qmail)                   %{_prefix}/sbin/clearopensmtp
+%attr(555,root,qmail)                   %{_prefix}/sbin/config_settings
+%attr(555,root,qmail)                   %{_prefix}/sbin/controlsync
+%attr(555,root,qmail)                   %{_prefix}/sbin/copyemail
+%attr(555,root,qmail)                   %{_prefix}/sbin/cputime
+%attr(555,root,qmail)                   %{_prefix}/sbin/execmysql
+%attr(555,root,qmail)                   %{_prefix}/sbin/hostsync
+%attr(555,root,qmail)                   %{_prefix}/sbin/indisrvr
+%attr(555,root,qmail)                   %{_prefix}/sbin/initsvc
+%attr(555,root,qmail)                   %{_prefix}/sbin/inlookup
+%attr(555,root,qmail)                   %{_prefix}/sbin/inquerytest
+%attr(555,root,qmail)                   %{_prefix}/sbin/install_tables
+%attr(555,root,qmail)                   %{_prefix}/sbin/ipchange
+%attr(555,root,qmail)                   %{_prefix}/sbin/mail_report
+%attr(555,root,qmail)                   %{_prefix}/sbin/mgmtpass
+%attr(555,root,qmail)                   %{_prefix}/sbin/myslave
+%attr(555,root,qmail)                   %{_prefix}/sbin/nssd
+%attr(555,root,qmail)                   %{_prefix}/sbin/osh
+%attr(555,root,qmail)                   %{_prefix}/sbin/postdel
+%attr(555,root,qmail)                   %{_prefix}/sbin/rot
+%attr(555,root,qmail)                   %{_prefix}/sbin/strfile
+%attr(555,root,qmail)                   %{_prefix}/sbin/svctool
+%attr(555,root,qmail)                   %{_prefix}/sbin/tls-cert-check
+%attr(555,root,qmail)                   %{_prefix}/sbin/testmra
+%attr(555,root,qmail)                   %{_prefix}/sbin/unstr
+%attr(555,root,qmail)                   %{_prefix}/sbin/updatefile
+%attr(555,root,qmail)                   %{_prefix}/sbin/updaterules
+%attr(555,root,qmail)                   %{_prefix}/sbin/vchkpass
+%attr(555,root,qmail)                   %{_prefix}/sbin/vsetpass
+%attr(555,root,qmail)                   %{_prefix}/sbin/vdelivermail
+%attr(555,root,qmail)                   %{_prefix}/sbin/vdeloldusers
+%attr(555,root,qmail)                   %{_prefix}/sbin/vfilter
+%attr(555,root,qmail)                   %{_prefix}/sbin/vfstab
+%attr(555,root,qmail)                   %{_prefix}/sbin/vmoddomain
+%attr(555,root,qmail)                   %{_prefix}/sbin/vreorg
+%attr(555,root,qmail)                   %{_prefix}/bin/822received
+%attr(555,root,qmail)                   %{_prefix}/bin/cdbmake-12
+%attr(555,root,qmail)                   %{_prefix}/bin/dnscname
+%attr(555,root,qmail)                   %{_prefix}/bin/envuidgid
+%attr(555,root,qmail)                   %{_prefix}/bin/flash
+%attr(555,root,qmail)                   %{_prefix}/bin/maildircmd
+%attr(555,root,qmail)                   %{_prefix}/bin/multilog
+%attr(555,root,qmail)                   %{_prefix}/bin/plainencode
+%attr(555,root,qmail)                   %{_prefix}/bin/qmail-multi
+%attr(555,root,qmail)                   %{_prefix}/bin/qmail-qfilter
+%attr(555,root,qmail)                   %{_prefix}/bin/qmail-sigalrm
+%attr(555,root,qmail)                   %{_prefix}/bin/ripole
+%attr(555,root,qmail)                   %{_prefix}/bin/rpmattr
+%attr(555,root,qmail)                   %{_prefix}/bin/senders
+%attr(555,root,qmail)                   %{_prefix}/bin/setuidgid
+%attr(555,root,qmail)                   %{_prefix}/bin/spfquery
+%attr(555,root,qmail)                   %{_prefix}/bin/tai64nlocal
+%attr(555,root,qmail)                   %{_prefix}/bin/valias
+%attr(555,root,qmail)                   %{_prefix}/bin/vproxy
+%if %nocourierimap == 0
+# courier imap
+%attr(555,root,root)                    %{_prefix}/bin/maildirkw
+%attr(555,root,root)                    %{_prefix}/bin/deliverquota
+%attr(555,root,root)                    %{_prefix}/bin/couriertls
+%attr(555,root,root)                    %{_prefix}/bin/maildiracl
+%attr(555,root,root)                    %{_prefix}/bin/imapd
+%attr(555,root,root)                    %{_prefix}/bin/pop3d
+%attr(555,root,root)                    %{_prefix}/sbin/authenumerate
+%attr(555,root,root)                    %{_prefix}/sbin/courierlogger
+%attr(555,root,root)                    %{_prefix}/sbin/imaplogin
+%attr(555,root,root)                    %{_prefix}/sbin/pop3login
+%attr(555,root,root)                    %{_prefix}/sbin/sharedindexinstall
+%attr(555,root,root)                    %{_prefix}/sbin/sharedindexsplit
+%attr(555,root,root)                    %{_prefix}/sbin/userdbpw
+%attr(777,root,root)                    %{_prefix}/sbin/makeuserdb
+%attr(777,root,root)                    %{_prefix}/sbin/mkimapdcert
+%attr(777,root,root)                    %{_prefix}/sbin/mkpop3dcert
+%attr(777,root,root)                    %{_prefix}/sbin/pw2userdb
+%attr(777,root,root)                    %{_prefix}/sbin/userdb
+%attr(777,root,root)                    %{_prefix}/sbin/vchkpw2userdb
+%attr(4555,root,root)                   %{_prefix}/libexec/authlib/authshadow
+%endif
+# ucspi-tcp
+%attr(555,root,root)                    %{_prefix}/bin/mconnect-io
+%attr(555,root,root)                    %{_prefix}/bin/rblsmtpd
+%attr(555,root,root)                    %{_prefix}/bin/tcprulescheck
+%attr(555,root,root)                    %{_prefix}/bin/tcpcat
+%attr(555,root,root)                    %{_prefix}/bin/date@
+%attr(555,root,root)                    %{_prefix}/bin/who@
+%attr(555,root,root)                    %{_prefix}/bin/tcpclient
+%attr(555,root,root)                    %{_prefix}/bin/tcpserver
+%attr(555,root,root)                    %{_prefix}/bin/mconnect
+%attr(555,root,root)                    %{_prefix}/bin/finger@
+%attr(555,root,root)                    %{_prefix}/bin/http@
+%attr(555,root,root)                    %{_prefix}/bin/tcprules
+# bogofilter
+%if %nobogofilter == 0
+%attr(6511,root,indimail)               %{_prefix}/bin/bogofilter
+%attr(555,root,root)                    %{_prefix}/bin/bogolexer
+%attr(555,root,root)                    %{_prefix}/bin/bogotune
+%attr(555,root,root)                    %{_prefix}/bin/bogoutil
+%attr(555,root,root)                    %{_prefix}/bin/bogoupgrade
+%attr(555,root,root)                    %{_prefix}/sbin/bf_compact
+%attr(555,root,root)                    %{_prefix}/sbin/bf_copy
+%attr(555,root,root)                    %{_prefix}/sbin/bf_tar
+%endif
+%if %nolibdkim == 0
+%attr(555,root,root)                    %{_prefix}/bin/dkim
+%endif
+# clamav
+%if %noclamav == 0
+%attr(555,root,root)                    %{_prefix}/bin/sigtool
+%attr(555,root,root)                    %{_prefix}/bin/clamav-config
+%attr(555,root,root)                    %{_prefix}/bin/clamscan
+%attr(555,root,root)                    %{_prefix}/bin/clamdscan
+%attr(555,root,root)                    %{_prefix}/bin/clamdtop
+%attr(555,root,root)                    %{_prefix}/bin/freshclam
+%attr(555,root,root)                    %{_prefix}/sbin/clamd
+%attr(555,root,root)                    %{_prefix}/bin/clamconf
+%endif
+# fetchmail
+%if %nofetchmail == 0
+%attr(555,root,root)                    %{_prefix}/bin/fetchmailconf
+%attr(555,root,root)                    %{_prefix}/bin/fetchmail
+%attr(555,root,root)                    %{_prefix}/sbin/fetchmail.cron
+%attr(555,root,root)                    %{_prefix}/sbin/fetchmail.down
+%attr(555,root,root)                    %{_prefix}/sbin/fetchmail.up
+%attr(555,root,root)                    %{_prefix}/sbin/fixwvdialconf
+%attr(555,root,root)                    %{_prefix}/sbin/ip-down.local
+%attr(555,root,root)                    %{_prefix}/sbin/ip-up.local
+%attr(555,root,root)                    %{_prefix}/sbin/ppp-off
+%attr(555,root,root)                    %{_prefix}/sbin/slemsPrivate
+%attr(555,root,root)                    %{_prefix}/sbin/writefifo
+%endif
+
+%attr(555,root,qmail)                   %{_prefix}/boot/binm2
+%attr(555,root,qmail)                   %{_prefix}/boot/proc+df
+%attr(555,root,qmail)                   %{_prefix}/boot/binm1+df
+%attr(555,root,qmail)                   %{_prefix}/boot/binm3+df
+%attr(555,root,qmail)                   %{_prefix}/boot/home+df
+%attr(555,root,qmail)                   %{_prefix}/boot/binm3
+%attr(555,root,qmail)                   %{_prefix}/boot/binm1
+%attr(555,root,qmail)                   %{_prefix}/boot/proc
+%attr(555,root,qmail)                   %{_prefix}/boot/home
+%attr(555,root,qmail)                   %{_prefix}/boot/binm2+df
+%attr(444,root,qmail)                   %{_prefix}/boot/upstart
+
+%if %nocourierimap == 0
+%attr(555,root,root)                    %{_prefix}/libexec/pop3d-ssl.rc
+%attr(555,root,root)                    %{_prefix}/libexec/makedatprog
+%attr(555,root,root)                    %{_prefix}/libexec/imapd-ssl.rc
+%attr(555,root,root)                    %{_prefix}/libexec/couriertcpd
+%attr(555,root,root)                    %{_prefix}/libexec/imapd.rc
+%attr(555,root,root)                    %{_prefix}/libexec/pop3d.rc
+%attr(555,root,root)                    %{_prefix}/share/vchkpw2userdb
+%attr(555,root,root)                    %{_prefix}/share/mkimapdcert
+%attr(555,root,root)                    %{_prefix}/share/mkpop3dcert
+%attr(555,root,root)                    %{_prefix}/share/pw2userdb
+%attr(555,root,root)                    %{_prefix}/share/userdb
+%attr(555,root,root)                    %{_prefix}/share/makeuserdb
+%endif
+%attr(555,root,root)                    %{_prefix}/libexec/authlib/authindi
+
+%attr(555,root,qmail)                   %{_prefix}/plugins/generic.so
+
+%attr(555,root,root)                    %{_prefix}/modules/background
+%attr(555,root,root)                    %{_prefix}/modules/alarms
+%attr(555,root,root)                    %{_prefix}/modules/countdown
+
+%attr(644,root,root)                    %{_prefix}/share/fortunes/definitions
+%attr(644,root,root)                    %{_prefix}/share/fortunes/linux.dat
+%attr(644,root,root)                    %{_prefix}/share/fortunes/food
+%attr(644,root,root)                    %{_prefix}/share/fortunes/medicine
+%attr(644,root,root)                    %{_prefix}/share/fortunes/magic
+%attr(644,root,root)                    %{_prefix}/share/fortunes/ethnic
+%attr(644,root,root)                    %{_prefix}/share/fortunes/art.dat
+%attr(644,root,root)                    %{_prefix}/share/fortunes/computers.dat
+%attr(644,root,root)                    %{_prefix}/share/fortunes/songs-poems.dat
+%attr(644,root,root)                    %{_prefix}/share/fortunes/kids
+%attr(644,root,root)                    %{_prefix}/share/fortunes/goedel
+%attr(644,root,root)                    %{_prefix}/share/fortunes/paradoxum
+%attr(644,root,root)                    %{_prefix}/share/fortunes/computers
+%attr(644,root,root)                    %{_prefix}/share/fortunes/goedel.dat
+%attr(644,root,root)                    %{_prefix}/share/fortunes/news
+%attr(644,root,root)                    %{_prefix}/share/fortunes/pets
+%attr(644,root,root)                    %{_prefix}/share/fortunes/law.dat
+%attr(644,root,root)                    %{_prefix}/share/fortunes/zippy
+%attr(644,root,root)                    %{_prefix}/share/fortunes/miscellaneous
+%attr(644,root,root)                    %{_prefix}/share/fortunes/ascii-art.dat
+%attr(644,root,root)                    %{_prefix}/share/fortunes/perl
+%attr(644,root,root)                    %{_prefix}/share/fortunes/kids.dat
+%attr(644,root,root)                    %{_prefix}/share/fortunes/love.dat
+%attr(644,root,root)                    %{_prefix}/share/fortunes/work.dat
+%attr(644,root,root)                    %{_prefix}/share/fortunes/humorists
+%attr(644,root,root)                    %{_prefix}/share/fortunes/definitions.dat
+%attr(644,root,root)                    %{_prefix}/share/fortunes/drugs
+%attr(644,root,root)                    %{_prefix}/share/fortunes/education.dat
+%attr(644,root,root)                    %{_prefix}/share/fortunes/politics.dat
+%attr(644,root,root)                    %{_prefix}/share/fortunes/science.dat
+%attr(644,root,root)                    %{_prefix}/share/fortunes/love
+%attr(644,root,root)                    %{_prefix}/share/fortunes/men-women
+%attr(644,root,root)                    %{_prefix}/share/fortunes/ascii-art
+%attr(644,root,root)                    %{_prefix}/share/fortunes/humorists.dat
+%attr(644,root,root)                    %{_prefix}/share/fortunes/platitudes.dat
+%attr(644,root,root)                    %{_prefix}/share/fortunes/debian
+%attr(644,root,root)                    %{_prefix}/share/fortunes/sports.dat
+%attr(644,root,root)                    %{_prefix}/share/fortunes/riddles
+%attr(644,root,root)                    %{_prefix}/share/fortunes/law
+%attr(644,root,root)                    %{_prefix}/share/fortunes/knghtbrd.dat
+%attr(644,root,root)                    %{_prefix}/share/fortunes/sports
+%attr(644,root,root)                    %{_prefix}/share/fortunes/perl.dat
+%attr(644,root,root)                    %{_prefix}/share/fortunes/tao.dat
+%attr(644,root,root)                    %{_prefix}/share/fortunes/linuxcookie
+%attr(644,root,root)                    %{_prefix}/share/fortunes/linuxcookie.dat
+%attr(644,root,root)                    %{_prefix}/share/fortunes/riddles.dat
+%attr(644,root,root)                    %{_prefix}/share/fortunes/medicine.dat
+%attr(644,root,root)                    %{_prefix}/share/fortunes/fortunes
+%attr(644,root,root)                    %{_prefix}/share/fortunes/cookie
+%attr(644,root,root)                    %{_prefix}/share/fortunes/cookie.dat
+%attr(644,root,root)                    %{_prefix}/share/fortunes/art
+%attr(644,root,root)                    %{_prefix}/share/fortunes/politics
+%attr(644,root,root)                    %{_prefix}/share/fortunes/songs-poems
+%attr(644,root,root)                    %{_prefix}/share/fortunes/startrek.dat
+%attr(644,root,root)                    %{_prefix}/share/fortunes/men-women.dat
+%attr(644,root,root)                    %{_prefix}/share/fortunes/kernelnewbies
+%attr(644,root,root)                    %{_prefix}/share/fortunes/fortunes.dat
+%attr(644,root,root)                    %{_prefix}/share/fortunes/magic.dat
+%attr(644,root,root)                    %{_prefix}/share/fortunes/science
+%attr(644,root,root)                    %{_prefix}/share/fortunes/platitudes
+%attr(644,root,root)                    %{_prefix}/share/fortunes/kernelnewbies.dat
+%attr(644,root,root)                    %{_prefix}/share/fortunes/literature.dat
+%attr(644,root,root)                    %{_prefix}/share/fortunes/translate-me
+%attr(644,root,root)                    %{_prefix}/share/fortunes/startrek
+%attr(644,root,root)                    %{_prefix}/share/fortunes/drugs.dat
+%attr(644,root,root)                    %{_prefix}/share/fortunes/zippy.dat
+%attr(644,root,root)                    %{_prefix}/share/fortunes/linux
+%attr(644,root,root)                    %{_prefix}/share/fortunes/work
+%attr(644,root,root)                    %{_prefix}/share/fortunes/literature
+%attr(644,root,root)                    %{_prefix}/share/fortunes/knghtbrd
+%attr(644,root,root)                    %{_prefix}/share/fortunes/news.dat
+%attr(644,root,root)                    %{_prefix}/share/fortunes/paradoxum.dat
+%attr(644,root,root)                    %{_prefix}/share/fortunes/bofh-excuses.dat
+%attr(644,root,root)                    %{_prefix}/share/fortunes/translate-me.dat
+%attr(644,root,root)                    %{_prefix}/share/fortunes/miscellaneous.dat
+%attr(644,root,root)                    %{_prefix}/share/fortunes/rj.dat
+%attr(644,root,root)                    %{_prefix}/share/fortunes/debian.dat
+%attr(644,root,root)                    %{_prefix}/share/fortunes/tao
+%attr(644,root,root)                    %{_prefix}/share/fortunes/food.dat
+%attr(644,root,root)                    %{_prefix}/share/fortunes/ethnic.dat
+%attr(644,root,root)                    %{_prefix}/share/fortunes/people.dat
+%attr(644,root,root)                    %{_prefix}/share/fortunes/people
+%attr(644,root,root)                    %{_prefix}/share/fortunes/wisdom.dat
+%attr(644,root,root)                    %{_prefix}/share/fortunes/rj
+%attr(644,root,root)                    %{_prefix}/share/fortunes/wisdom
+%attr(644,root,root)                    %{_prefix}/share/fortunes/pets.dat
+%attr(644,root,root)                    %{_prefix}/share/fortunes/bofh-excuses
+%attr(644,root,root)                    %{_prefix}/share/fortunes/education
+
+%if %noclamav == 0
+%ghost                   %config(noreplace) %{_prefix}/share/clamd/clamav*
+%ghost                   %config(noreplace) %{_prefix}/share/clamd/mirrors.dat
+%attr(664,qscand,qscand) %config(noreplace) %{_prefix}/share/clamd/main.cvd
+%attr(664,qscand,qscand) %config(noreplace) %{_prefix}/share/clamd/daily.cvd
+%attr(644,root,root)                        %{_libdir}/pkgconfig/libclamav.pc
+%endif
+
+%if %nofetchmail == 0
+%attr(644,root,root)                    %{_prefix}/share/locale/*/LC_MESSAGES/*.mo
+%attr(644,root,root)                    %{_prefix}/lib*/python*/site-packages/fetchmailconf.pyo
+%attr(555,root,root)                    %{_prefix}/lib*/python*/site-packages/fetchmailconf.py
+%attr(644,root,root)                    %{_prefix}/lib*/python*/site-packages/fetchmailconf.pyc
+%endif
+
+%docdir %{_prefix}/doc
+%docdir %{_prefix}/man
+%attr(444,root,qmail)                   %{_prefix}/man/man?/*
+%attr(444,root,qmail)                   %{_prefix}/man/cat?/*
+
+%attr(444,root,qmail)                   %{_prefix}/doc/HOWTO.sharedmaildir
+%attr(444,root,qmail)                   %{_prefix}/doc/fhs-2.3.txt.gz
+%attr(444,root,qmail)                   %{_prefix}/doc/README.qmail
+%attr(444,root,qmail)                   %{_prefix}/doc/README.auth
+%attr(444,root,qmail)                   %{_prefix}/doc/README.clamav
+%attr(444,root,qmail)                   %{_prefix}/doc/README.logselect
+%attr(444,root,qmail)                   %{_prefix}/doc/README.moreipme
+%attr(444,root,qmail)                   %{_prefix}/doc/README.newline
+%attr(444,root,qmail)                   %{_prefix}/doc/README.qhpsi
+%attr(444,root,qmail)                   %{_prefix}/doc/README.qregex
+%attr(444,root,qmail)                   %{_prefix}/doc/README.queue-fix
+%attr(444,root,qmail)                   %{_prefix}/doc/README.greylist
+%attr(444,root,qmail)                   %{_prefix}/doc/README.recipients
+%attr(444,root,qmail)                   %{_prefix}/doc/README.remote-auth
+%attr(444,root,qmail)                   %{_prefix}/doc/README.spamcontrol
+%attr(444,root,qmail)                   %{_prefix}/doc/README.starttls
+%attr(444,root,qmail)                   %{_prefix}/doc/README.status
+%attr(444,root,qmail)                   %{_prefix}/doc/README.tls
+%attr(444,root,qmail)                   %{_prefix}/doc/README.wildmat
+%attr(444,root,qmail)                   %{_prefix}/doc/README.cdb
+%attr(444,root,qmail)                   %{_prefix}/doc/INSTALL.maildir
+%attr(444,root,qmail)                   %{_prefix}/doc/TEST.receive
+%attr(444,root,qmail)                   %{_prefix}/doc/README-CLUSTER
+%attr(444,root,qmail)                   %{_prefix}/doc/INSTALL.indimail
+%attr(444,root,qmail)                   %{_prefix}/doc/INSTALL-RPM
+%attr(444,root,qmail)                   %{_prefix}/doc/INSTALL-MYSQL
+%attr(444,root,qmail)                   %{_prefix}/doc/RELEASE-Notes
+%attr(444,root,qmail)                   %{_prefix}/doc/INSTALL.alias
+%attr(444,root,qmail)                   %{_prefix}/doc/ChangeLog
+%attr(444,root,qmail)                   %{_prefix}/doc/UPGRADE
+%attr(444,root,qmail)                   %{_prefix}/doc/percenthack.shtml
+%attr(444,root,qmail)                   %{_prefix}/doc/README.vlimits
+%attr(444,root,qmail)                   %{_prefix}/doc/PIC.local2alias
+%attr(444,root,qmail)                   %{_prefix}/doc/CREDITS
+%attr(444,root,qmail)                   %{_prefix}/doc/INSTALL.mbox
+%attr(444,root,qmail)                   %{_prefix}/doc/PIC.local2local
+%attr(444,root,qmail)                   %{_prefix}/doc/INSTALL.ids
+%attr(444,root,qmail)                   %{_prefix}/doc/INSTALL.qmail
+%if %nobogofilter == 0
+%attr(444,root,qmail)                   %{_prefix}/doc/HOWTO.bogofilter
+%endif
+%attr(444,root,qmail)                   %{_prefix}/doc/PIC.nullclient
+%attr(444,root,qmail)                   %{_prefix}/doc/PIC.rem2local
+%attr(444,root,qmail)                   %{_prefix}/doc/PIC.relaybad
+%attr(444,root,qmail)                   %{_prefix}/doc/SENDMAIL
+%attr(444,root,qmail)                   %{_prefix}/doc/37rules.pdf
+%attr(444,root,qmail)                   %{_prefix}/doc/indimail_arch.png
+%attr(444,root,qmail)                   %{_prefix}/doc/COPYING
+%attr(444,root,qmail)                   %{_prefix}/doc/FAQ.pdf
+%attr(444,root,qmail)                   %{_prefix}/doc/FROMISP
+%attr(444,root,qmail)                   %{_prefix}/doc/README.mpack
+%attr(444,root,qmail)                   %{_prefix}/doc/REMOVE.binmail
+%attr(444,root,qmail)                   %{_prefix}/doc/PIC.local2ext
+%attr(444,root,qmail)                   %{_prefix}/doc/README.indimail
+%attr(444,root,qmail)                   %{_prefix}/doc/REMOVE.sendmail
+%attr(444,root,qmail)                   %{_prefix}/doc/AUTOTURN
+%attr(444,root,qmail)                   %{_prefix}/doc/INSTALL.vsm
+%attr(444,root,qmail)                   %{_prefix}/doc/QMAILFAQ
+%attr(444,root,qmail)                   %{_prefix}/doc/INTERNALS
+%attr(444,root,qmail)                   %{_prefix}/doc/INSTALL.ctl
+%attr(444,root,qmail)                   %{_prefix}/doc/TEST.deliver
+%attr(444,root,qmail)                   %{_prefix}/doc/EXTTODO
+%attr(444,root,qmail)                   %{_prefix}/doc/PIC.local2virt
+%attr(444,root,qmail)                   %{_prefix}/doc/PIC.relaygood
+%attr(444,root,qmail)                   %{_prefix}/doc/PIC.local2rem
+%attr(444,root,qmail)                   %{_prefix}/doc/IndiMail.pdf
+%attr(444,root,qmail)                   %{_prefix}/doc/TOISP
+
+# Shared libraries (omit for architectures that don't support them)
+%if %noclamav == 0
+%{_libdir}/libclam*.so*
+%endif
+%{_libdir}/libeps.so
+%{_libdir}/libeps-%{eps_version}.so.0
+%{_libdir}/libeps-%{eps_version}.so.0.0.0
+%{_libdir}/libcdb.so
+%{_libdir}/libcdb-%{cdb_version}.so.0
+%{_libdir}/libcdb-%{cdb_version}.so.0.0.0
+%{_libdir}/libflash.so
+%{_libdir}/libflash-%{flash_version}.so.0
+%{_libdir}/libflash-%{flash_version}.so.0.0.0
+%{_libdir}/libindimail.so
+%{_libdir}/libindimail-%{version}.so.0
+%{_libdir}/libindimail-%{version}.so.0.0.0
+
+%attr(777,root,root)                    /usr/%{_lib}/libnss_nssd.so
+%attr(777,root,root)                    /usr/%{_lib}/libnss_nssd.so.2
+%attr(755,root,root)                    /usr/%{_lib}/libnss_nssd.so.2.0.0
+
+%files devel
+%defattr(-, root, root, 0755)
+%doc %attr(444, root, qmail)            %{_prefix}/man/man3/*
+%dir %attr(555, root, indimail)         %{_includedir}
+%dir %attr(555, root, indimail)         %{_libdir}
+
+%attr(644,root,qmail)                   %{_prefix}/etc/inc_deps
+%attr(644,root,qmail)                   %{_prefix}/etc/lib_deps
+
+%attr(644,root,qmail)                   %{_prefix}/include/eps_unroll.h
+%attr(644,root,qmail)                   %{_prefix}/include/eps_buffer.h
+%attr(644,root,qmail)                   %{_prefix}/include/eps_email.h
+%attr(644,root,qmail)                   %{_prefix}/include/rfc2822.h
+%attr(444,root,qmail)                   %{_prefix}/include/indimail.h
+%attr(644,root,qmail)                   %{_prefix}/include/eps_mime.h
+%attr(644,root,qmail)                   %{_prefix}/include/eps_boundary.h
+%attr(444,root,qmail)                   %{_prefix}/include/indimail_config.h
+%attr(644,root,qmail)                   %{_prefix}/include/eps_roll.h
+%attr(644,root,qmail)                   %{_prefix}/include/eps_line.h
+%attr(644,root,qmail)                   %{_prefix}/include/eps_int_buffer.h
+%attr(644,root,qmail)                   %{_prefix}/include/eps_base64.h
+%attr(644,root,qmail)                   %{_prefix}/include/eps_misc.h
+%attr(644,root,qmail)                   %{_prefix}/include/eps_address.h
+%attr(644,root,qmail)                   %{_prefix}/include/eps.h
+%attr(644,root,qmail)                   %{_prefix}/include/eps_interface.h
+%attr(644,root,qmail)                   %{_prefix}/include/eps_int_stream.h
+%attr(644,root,qmail)                   %{_prefix}/include/eps_header.h
+%attr(644,root,qmail)                   %{_prefix}/include/eps_content.h
+%attr(644,root,qmail)                   %{_prefix}/include/cdb.h
+%attr(644,root,qmail)                   %{_prefix}/include/cdbmake.h
+%attr(644,root,qmail)                   %{_prefix}/include/uint32.h
+
+%if %noclamav == 0
+%attr(644,root,qmail)                   %{_prefix}/include/clamav.h
+%{_libdir}/libclamav.a
+%{_libdir}/libclamunrar.a
+%{_libdir}/libclamunrar_iface.a
+%endif
+
+%if %nolibdkim == 0
+%attr(644,root,qmail)                   %{_prefix}/include/dkim.h
+%attr(644,root,qmail)                   %{_prefix}/include/macros.h
+%attr(644,root,qmail)                   %{_libdir}/libdkim.a
+%endif
+
+%{_libdir}/libeps.a
+%{_libdir}/libcdb.a
+%{_libdir}/libflash.a
+%{_libdir}/libindimail.a
+
+%files shared
+%defattr(-, root, root, 0755)
+# Shared libraries (omit for architectures that don't support them)
+%if %noclamav == 0
+%{_libdir}/libclam*.so*
+%endif
+%{_libdir}/libeps.so
+%{_libdir}/libeps-%{eps_version}.so.0
+%{_libdir}/libeps-%{eps_version}.so.0.0.0
+%{_libdir}/libcdb.so
+%{_libdir}/libcdb-%{cdb_version}.so.0
+%{_libdir}/libcdb-%{cdb_version}.so.0.0.0
+%{_libdir}/libflash.so
+%{_libdir}/libflash-%{flash_version}.so.0
+%{_libdir}/libflash-%{flash_version}.so.0.0.0
+%{_libdir}/libindimail.so
+%{_libdir}/libindimail-%{version}.so.0
+%{_libdir}/libindimail-%{version}.so.0.0.0
+
+%clean
+%{__rm} -rf %{buildroot}
+
+#            install   erase   upgrade  reinstall
+# % pretrans      0        -         0
+# % pre           1        -         2         2
+# % post          1        -         2         2
+# % preun         -        0         1         -
+# % postun        -        0         1         -
+# % posttrans     0        -         0
+# The scriptlets in %pre and %post are respectively run before and after a package is installed.
+# The scriptlets %preun and %postun are run before and after a package is uninstalled.
+# The scriptlets %pretrans and %posttrans are run at start and end of a transaction.
+# On upgrade, the scripts are run in the following order:
+#
+#   1. %pretrans of new package
+#   2. %pre of new package
+#   3. (package install)
+#   4. %post of new package
+#   5. %preun of old package
+#   6. (removal of old package)
+#   7. %postun of old package
+#   8. %posttrans of new package 
+
+### SCRIPTLET ###############################################################################
+%pretrans
+argv1=$1
+ID=$(id -u)
+if [ $ID -ne 0 ] ; then
+	echo "You are not root"
+	exit 1
+fi
+#echo "Running pretrans script for %{version}-%{release} : arg=$1"
+if [ -f %{_prefix}/sbin/initsvc ] ; then
+	%{_prefix}/sbin/initsvc -status
+fi
+if test -f %{_sysconfdir}/event.d/svscan
+then
+	/sbin/initctl emit qmailstop > /dev/null 2>&1
+	echo "Giving IndiMail exactly 5 seconds to exit nicely"
+	sleep 5
+elif test -x %{_prefix}/sbin/initsvc
+then
+	%{_prefix}/sbin/initsvc -off
+fi
+
+### SCRIPTLET ###############################################################################
+%pre 
+argv1=$1
+ID=$(id -u)
+if [ $ID -ne 0 ] ; then
+	echo "You are not root"
+	exit 1
+fi
+#echo "Running pre script for %{version}-%{release} : arg=$1"
+# we are doing upgrade
+if [ $argv1 -eq 2 ] ; then
+	exit 0
+fi
+echo "Checking for mandatory user/group mysql.."
+/usr/bin/getent group  mysql > /dev/null || echo "group mysql does not exist. Aborting..." && false
+/usr/bin/getent passwd mysql > /dev/null || echo "user  mysql does not exist. Aborting..." && false
+#
+# Create a users and groups. Do not report any problems if they already
+# exists.
+#
+nscd_up=`ps -ef |grep nscd |grep -v grep|wc -l`
+if [ $nscd_up -ge 1 ] ; then
+	if [ -x %{_sysconfdir}/init.d/nscd ] ; then
+		%{_sysconfdir}/init.d/nscd stop
+	fi
+fi
+echo "Adding IndiMail users/groups"
+/usr/bin/getent group indimail  > /dev/null || /usr/sbin/groupadd -r -g 555 indimail || true
+if [ $? = 4 ] ; then
+	/usr/sbin/groupadd indimail
+fi
+/usr/bin/getent group nofiles   > /dev/null || /usr/sbin/groupadd nofiles  || true
+/usr/bin/getent group qmail     > /dev/null || /usr/sbin/groupadd qmail    || true
+/usr/bin/getent group qscand    > /dev/null || /usr/sbin/groupadd qscand   || true
+
+for i in indimail alias qmaild qmaill qmailp qmailq qmailr qmails qscand
+do
+	%{__rm} -f /var/spool/mail/$i
+done
+
+/usr/bin/getent passwd indimail > /dev/null || /usr/sbin/useradd -r -g indimail -u 555 -d %{_prefix} indimail || true
+if [ $? = 4 ] ; then
+	/usr/sbin/useradd -r -g indimail -d %{_prefix} indimail
+fi
+/usr/bin/getent passwd alias    > /dev/null || /usr/sbin/useradd -M -g nofiles  -d %{_prefix}/alias  -s /sbin/nologin  alias || true
+/usr/bin/getent passwd qmaild   > /dev/null || /usr/sbin/useradd -M -g nofiles  -d %{_prefix}        -s /sbin/nologin qmaild || true
+/usr/bin/getent passwd qmaill   > /dev/null || /usr/sbin/useradd -M -g nofiles  -d %{_prefix}        -s /sbin/nologin qmaill || true
+/usr/bin/getent passwd qmailp   > /dev/null || /usr/sbin/useradd -M -g nofiles  -d %{_prefix}        -s /sbin/nologin qmailp || true
+/usr/bin/getent passwd qmailq   > /dev/null || /usr/sbin/useradd -M -g qmail    -d %{_prefix}        -s /sbin/nologin qmailq || true
+/usr/bin/getent passwd qmailr   > /dev/null || /usr/sbin/useradd -M -g qmail    -d %{_prefix}        -s /sbin/nologin qmailr || true
+/usr/bin/getent passwd qmails   > /dev/null || /usr/sbin/useradd -M -g qmail    -d %{_prefix}        -s /sbin/nologin qmails || true
+/usr/bin/getent passwd qscand   > /dev/null || /usr/sbin/useradd -M -g qscand   -d %{_prefix}/qscanq -G qmail,qscand -s /sbin/nologin qscand || true
+if [ $nscd_up -ge 1 ] ; then
+	if [ -x %{_sysconfdir}/init.d/nscd ] ; then
+		%{_sysconfdir}/init.d/nscd start
+	fi
+fi
+
+### SCRIPTLET ###############################################################################
+%post
+argv1=$1
+ID=$(id -u)
+if [ $ID -ne 0 ] ; then
+	echo "You are not root"
+	exit 1
+fi
+#echo "Running post script for %{version}-%{release} : arg=$1"
+if [ $argv1 -eq 2 ] ; then
+	if [ -f %{_prefix}/boot/rpm.init ] ; then
+		/sbin/ldconfig
+		echo "Running Custom Upgrade Script"
+		/bin/sh %{_prefix}/boot/rpm.init upgrade
+	fi
+	exit 0
+fi
+
+# MySQL
+echo "Creating %{logdir}"
+if [ ! -d %{logdir} ] ; then
+	%{__mkdir_p} %{logdir}
+fi
+%{__chown} -R qmaill:nofiles %{logdir}
+echo "Creating Database/Service for MySQL"
+# MySQL Config Creation
+%{_prefix}/sbin/svctool --config=mysql   --mysqlPrefix=%{mysqlPrefix} --model=medium --no-of-cpu=2
+# MySQL Database Creation
+%{_prefix}/sbin/svctool --config=mysqldb --mysqlPrefix=%{mysqlPrefix} \
+    --databasedir=%{_prefix}/mysqldb --base_path=%{mbase}
+# MySQL Supervise creation
+%{_prefix}/sbin/svctool --mysql=3306 --servicedir=%{servicedir} --mysqlPrefix=%{mysqlPrefix} \
+	--databasedir=%{_prefix}/mysqldb --config=%{_prefix}/etc/indimail.cnf --default-domain=%{default_domain} \
+	--model=small --no-of-cpu=2
+
+echo "Creating catch-all alias (%{_prefix}/alias/Maildir) for all system users"
+%{_prefix}/sbin/svctool --config=qmail --postmaster=%{_prefix}/alias/Maildir/ \
+	--default-domain=%{default_domain}
+
+if [ %nodksignatures -eq 0 ] ; then
+	if [ -x %{_prefix}/bin/dknewkey ] ; then
+		ver_opt="both"
+		sign_opt="both"
+		%{_prefix}/bin/dknewkey %{_prefix}/control/domainkeys/indimail
+	else
+		ver_opt="none"
+		sign_opt="none"
+	fi
+else
+	ver_opt="none"
+	sign_opt="none"
+fi
+# SMTP
+if [ %nobogofilter -eq 0 ] ; then
+	if [ %noclamav -eq 0 ] ; then
+		for port in 465 25
+		do
+		if [ $port -eq 465 ] ; then
+			extra_opt="--skipsend --ssl"
+		else
+			extra_opt=""
+		fi
+		%{_prefix}/sbin/svctool --smtp=$port --servicedir=%{servicedir} --qbase=%{qbase} --qcount=%{qcount} --qstart=1 \
+			--cntrldir=control --localip=0 --maxdaemons=75 --maxperip=25 --persistdb \
+			--starttls --fsync --syncdir --memory=52428800 --chkrecipient --chkrelay --masquerade \
+			--min-free=52428800 --content-filter --virus-filter \
+			--qhpsi="%{_prefix}/bin/clamdscan %s --quiet --disable-summary" \
+			--spamfilter="%{_prefix}/bin/bogofilter -p -u -d %{_prefix}/etc" \
+			--logfilter=/tmp/spamfifo --rejectspam=0 --spamexitcode=0 --localfilter --remotefilter \
+			--remote-authsmtp=plain --dmasquerade \
+			--dkverify=$ver_opt \
+			--dksign=$sign_opt --private_key=%{_prefix}/control/domainkeys/indimail \
+			--rbl="-rzen.spamhaus.org -rdnsbl-1.uceprotect.net" $extra_opt
+		done
+	else
+		for port in 465 25
+		do
+		if [ $port -eq 465 ] ; then
+			extra_opt="--skipsend --ssl"
+		else
+			extra_opt=""
+		fi
+		%{_prefix}/sbin/svctool --smtp=$port --servicedir=%{servicedir} --qbase=%{qbase} --qcount=%{qcount} --qstart=1 \
+			--cntrldir=control --localip=0 --maxdaemons=75 --maxperip=25 --persistdb \
+			--starttls --fsync --syncdir --memory=52428800 --chkrecipient --chkrelay --masquerade \
+			--min-free=52428800 --content-filter --virus-filter \
+			--spamfilter="%{_prefix}/bin/bogofilter -p -u -d %{_prefix}/etc" \
+			--logfilter=/tmp/spamfifo --rejectspam=0 --spamexitcode=0 --localfilter --remotefilter \
+			--remote-authsmtp=plain --dmasquerade \
+			--dkverify=both \
+			--dksign=both --private_key=%{_prefix}/control/domainkeys/indimail \
+			--rbl="-rzen.spamhaus.org -rdnsbl-1.uceprotect.net" $extra_opt
+		done
+	fi
+else
+	if [ %noclamav -eq 0 ] ; then
+		for port in 465 25
+		do
+		if [ $port -eq 465 ] ; then
+			extra_opt="--skipsend --ssl"
+		else
+			extra_opt=""
+		fi
+		%{_prefix}/sbin/svctool --smtp=$port --servicedir=%{servicedir} --qbase=%{qbase} --qcount=%{qcount} --qstart=1 \
+			--cntrldir=control --localip=0 --maxdaemons=75 --maxperip=25 --persistdb \
+			--starttls --fsync --syncdir --memory=52428800 --chkrecipient --chkrelay --masquerade \
+			--min-free=52428800 --content-filter --virus-filter --localfilter --remotefilter \
+			--qhpsi="%{_prefix}/bin/clamdscan %s --quiet --disable-summary" \
+			--remote-authsmtp=plain --dmasquerade \
+			--dkverify=both \
+			--dksign=both --private_key=%{_prefix}/control/domainkeys/indimail \
+			--rbl="-rzen.spamhaus.org -rdnsbl-1.uceprotect.net" $extra_opt
+		done
+	else
+		for port in 465 25
+		do
+		if [ $port -eq 465 ] ; then
+			extra_opt="--skipsend --ssl"
+		else
+			extra_opt=""
+		fi
+		%{_prefix}/sbin/svctool --smtp=$port --servicedir=%{servicedir} --qbase=%{qbase} --qcount=%{qcount} --qstart=1 \
+			--cntrldir=control --localip=0 --maxdaemons=75 --maxperip=25 --persistdb \
+			--starttls --fsync --syncdir --memory=52428800 --chkrecipient --chkrelay --masquerade \
+			--min-free=52428800 --content-filter --virus-filter --localfilter --remotefilter \
+			--remote-authsmtp=plain --dmasquerade \
+			--dkverify=both \
+			--dksign=both --private_key=%{_prefix}/control/domainkeys/indimail \
+			--rbl="-rzen.spamhaus.org -rdnsbl-1.uceprotect.net" $extra_opt
+		done
+	fi
+fi
+%{_prefix}/sbin/svctool --smtp=366 --odmr --servicedir=%{servicedir}
+# Greylist daemon
+%{_prefix}/sbin/svctool --greylist=1999 --servicedir=%{servicedir} --min-resend-min=2 \
+    --resend-win-hr=24 --timeout-days=30 --context-file=greylist.context \
+    --hash-size=65536 --save-interval=5 --whitelist=greylist.white
+
+if [ %nofetchmail -eq 0 ] ; then
+# fetchmail
+	if [ %nobogofilter -eq 0 ] ; then
+		if [ %noclamav -eq 0 ] ; then
+			%{_prefix}/sbin/svctool --fetchmail --servicedir=%{servicedir} --qbase=%{qbase} --qcount=%{qcount} \
+				--qstart=1 --cntrldir=control --default-domain=%{default_domain} \
+				--qhpsi="%{_prefix}/bin/clamdscan %s --quiet --disable-summary" \
+				--spamfilter="%{_prefix}/bin/bogofilter -p -u -d %{_prefix}/etc" --spamexitcode=0 \
+				--memory=72428800 --fsync --syncdir \
+				--dkverify=$ver_opt
+		else
+			%{_prefix}/sbin/svctool --fetchmail --servicedir=%{servicedir} --qbase=%{qbase} --qcount=%{qcount} \
+				--qstart=1 --cntrldir=control --default-domain=%{default_domain} \
+				--spamfilter="%{_prefix}/bin/bogofilter -p -u -d %{_prefix}/etc" --spamexitcode=0 \
+				--memory=72428800 --fsync --syncdir \
+				--dkverify=$ver_opt
+		fi
+	else
+		if [ %noclamav -eq 0 ] ; then
+			%{_prefix}/sbin/svctool --fetchmail --servicedir=%{servicedir} --qbase=%{qbase} --qcount=%{qcount} \
+				--qstart=1 --cntrldir=control --default-domain=%{default_domain} \
+				--qhpsi="%{_prefix}/bin/clamdscan %s --quiet --disable-summary" \
+				--memory=72428800 --fsync --syncdir \
+				--dkverify=$ver_opt
+		else
+			%{_prefix}/sbin/svctool --fetchmail --servicedir=%{servicedir} --qbase=%{qbase} --qcount=%{qcount} \
+				--qstart=1 --cntrldir=control --default-domain=%{default_domain} \
+				--memory=72428800 --fsync --syncdir \
+				--dkverify=$ver_opt
+		fi
+	fi
+	#
+	# user has to create fetchmailrc before which fetchmail cannot be started
+	#
+	/bin/touch %{servicedir}/fetchmail/down
+fi
+
+/bin/touch %{servicedir}/mysql.3306/down
+if [ %nocourierimap -eq 0 ] ; then
+# IMAP/POP3
+%{_prefix}/sbin/svctool --imap=143 --servicedir=%{servicedir} --localip=0 --maxdaemons=40 \
+	--maxperip=25 --default-domain=%{default_domain} --memory=10485760
+%{_prefix}/sbin/svctool --imap=993 --servicedir=%{servicedir} --localip=0 --maxdaemons=40 \
+	--maxperip=25 --default-domain=%{default_domain} --memory=10485760 --ssl
+%{_prefix}/sbin/svctool --pop3=110 --servicedir=%{servicedir} --localip=0 --maxdaemons=40 \
+	--maxperip=25 --default-domain=%{default_domain} --memory=10485760
+%{_prefix}/sbin/svctool --pop3=995 --servicedir=%{servicedir} --localip=0 --maxdaemons=40 \
+	--maxperip=25 --default-domain=%{default_domain} --memory=10485760 --ssl
+fi
+if [ %noproxy -eq 0 ] ; then
+%{_prefix}/sbin/svctool --imap=4143 --servicedir=%{servicedir} --localip=0 --maxdaemons=40 \
+	--maxperip=25 --default-domain=%{default_domain} --memory=10485760 --proxy=143
+%{_prefix}/sbin/svctool --imap=9143 --servicedir=%{servicedir} --localip=0 --maxdaemons=40 \
+	--maxperip=25 --default-domain=%{default_domain} --memory=10485760 --proxy=143 --ssl
+%{_prefix}/sbin/svctool --pop3=4110 --servicedir=%{servicedir} --localip=0 --maxdaemons=40 \
+	--maxperip=25 --default-domain=%{default_domain} --memory=10485760 --proxy=110
+%{_prefix}/sbin/svctool --pop3=9110 --servicedir=%{servicedir} --localip=0 --maxdaemons=40 \
+	--maxperip=25 --default-domain=%{default_domain} --memory=10485760 --proxy=110 --ssl
+fi
+
+# IndiMail Daemons
+%{_prefix}/sbin/svctool --indisrvr=4000 --servicedir=%{servicedir} --mysqlhost=localhost \
+	--mysqluser=indimail --mysqlpass=ssh-1.5- --localip=0 --maxdaemons=40 --maxperip=25 --avguserquota=2097152 \
+    --certfile=%{_prefix}/control/servercert.pem --ssl \
+	--hardquota=52428800 --base_path=%{mbase}
+%{_prefix}/sbin/svctool --inlookup=infifo --servicedir=%{servicedir} --cntrldir=control --threads=5 \
+	--password-cache
+%{_prefix}/sbin/svctool --pwdlookup=/tmp/nssd.sock --threads=5 --timeout=-1 \
+	--mysqlhost=localhost --mysqluser=indimail \
+	--mysqlpass=ssh-1.5- --mysqlsocket=/tmp/mysql.sock --servicedir=%{servicedir}
+%{_prefix}/sbin/svctool --poppass=106 --localip=0 --maxdaemons=40 --maxperip=25 \
+    --certfile=%{_prefix}/control/servercert.pem --ssl \
+	--setpassword=%{_prefix}/sbin/vsetpass --servicedir=%{servicedir}
+
+# virus/spam filtering
+if [ %noclamav -eq 0 ] ; then
+	%{_prefix}/sbin/svctool --config=clamd
+	%{_prefix}/sbin/svctool --qscanq --servicedir=%{servicedir} --clamdPrefix=%{_prefix} --scanint=200
+fi
+if [ %nobogofilter -eq 0 ] ; then
+	%{_prefix}/sbin/svctool --config=bogofilter
+fi
+
+%{__cat} <<EOF > %{_prefix}/control/signatures
+# Windows executables seen in active virii
+TVqQAAMAA
+TVpQAAIAA
+# Additional windows executable signatures not yet seen in virii
+TVpAALQAc
+TVpyAXkAX
+TVrmAU4AA
+TVrhARwAk
+TVoFAQUAA
+TVoAAAQAA
+TVoIARMAA
+TVouARsAA
+TVrQAT8AA
+# .ZIPfile signature seen in SoBig.E and mydoom:
+UEsDBBQAA
+UEsDBAoAAA
+# .GIF file found in a previous Microsoft virus making the rounds.
+R0lGODlhaAA7APcAAP///+rp6puSp6GZrDUjUUc6Zn53mFJMdbGvvVtXh2xre8bF1x8cU4yLprOy
+EOF
+%{__chown} qscand:qscand %{_prefix}/control/signatures
+
+# Recreate ld.so links and cache
+if [ -d %{_sysconfdir}/ld.so.conf.d ] ; then
+	(
+		echo %{_libdir}
+		echo %{mysqlPrefix}/%{_lib}/mysql 
+	) > %{_sysconfdir}/ld.so.conf.d/indimail-%{_arch}.conf
+fi
+/sbin/ldconfig
+
+# Misc/Configuration
+%{_prefix}/sbin/svctool --svscanlog --servicedir=%{servicedir}
+if [ -f %{_prefix}/boot/rpm.init ] ; then
+	echo "Running Custom Installation Script for post"
+	/bin/sh %{_prefix}/boot/rpm.init post
+fi
+
+### SCRIPTLET ###############################################################################
+%posttrans
+argv1=$1
+ID=$(id -u)
+if [ $ID -ne 0 ] ; then
+	echo "You are not root"
+	exit 1
+fi
+#echo "Running postrans script for %{version}-%{release} : arg=$1"
+%{_prefix}/sbin/initsvc -status
+if [ -f %{_prefix}/boot/rpm.init ] ; then
+	echo "Running Custom Installation Script for posttrans"
+	/bin/sh %{_prefix}/boot/rpm.init posttrans
+fi
+echo ""
+if test -f %{_sysconfdir}/event.d/svscan
+then
+	echo "1. Issue /sbin/initctl emit qmailstart to start services"
+else
+	echo "1. Issue /sbin/init q to start services"
+fi
+echo "2. You can optionally run the following command to verify installation"
+echo "   %{_prefix}/sbin/svctool --check-install --servicedir=%{servicedir} --qbase=%{qbase} --qcount=%{qcount} --qstart=1"
+if [ ! -f %{_prefix}/control/servercert.pem ] ; then
+echo
+echo "3. You also need to create CERTS for IMAP/POP3. run the following command to create cert"
+echo "   %{_prefix}/sbin/svctool --postmaster=postmaster@indimail.org --config=cert"
+fi
+
+### SCRIPTLET ###############################################################################
+%preun
+argv1=$1
+ID=$(id -u)
+if [ $ID -ne 0 ] ; then
+	echo "You are not root"
+	exit 1
+fi
+#echo "Running preun script for %{version}-%{release} : arg=$1"
+if test -f %{_sysconfdir}/event.d/svscan
+then
+	/sbin/initctl emit qmailstop > /dev/null 2>&1
+	echo "Giving IndiMail exactly 5 seconds to exit nicely"
+	sleep 5
+	if [ $argv1 -ne 1 ] ; then
+		%{__rm} -f %{_sysconfdir}/event.d/svscan
+	fi
+elif test -x %{_prefix}/sbin/initsvc
+then
+	%{_prefix}/sbin/initsvc -off
+fi
+if [ -f %{_prefix}/boot/rpm.init ] ; then
+	echo "Running Custom Un-Installation Script for preun"
+	/bin/sh %{_prefix}/boot/rpm.init preun
+fi
+
+### SCRIPTLET ###############################################################################
+%postun
+argv1=$1
+ID=$(id -u)
+if [ $ID -ne 0 ] ; then
+	echo "You are not root"
+	exit 1
+fi
+#echo "Running postun script for %{version}-%{release} : arg=$1"
+# we are doing upgrade
+if [ $argv1 -eq 1 ] ; then
+	echo "recreating ld.so cache"
+	/sbin/ldconfig
+	exit 0
+fi
+nscd_up=`ps -ef |grep nscd |grep -v grep|wc -l`
+if [ $nscd_up -ge 1 ] ; then
+	if [ -x %{_sysconfdir}/init.d/nscd ] ; then
+		%{_sysconfdir}/init.d/nscd stop
+	fi
+fi
+for i in alias qmaild qmaill qmailp qmailq qmailr qmails qscand indimail
+do
+	echo "Removing user $i"
+	/usr/bin/getent passwd $i > /dev/null && /usr/sbin/userdel $i >/dev/null || true
+done
+for i in nofiles qmail qscand indimail
+do
+	echo "Removing group $i"
+	/usr/bin/getent group $i > /dev/null && /usr/sbin/groupdel $i  >/dev/null || true
+done
+if [ $nscd_up -ge 1 ] ; then
+	if [ -x %{_sysconfdir}/init.d/nscd ] ; then
+		%{_sysconfdir}/init.d/nscd start
+	fi
+fi
+
+echo "removing binaries, libraries, queues"
+for i in bin sbin lib queue man include
+do
+	%{__rm} -rf %{_prefix}/$i || true
+done
+
+echo "removing configuration"
+for i in indimail.cnf nssd.conf tcp.imap tcp.pop3 tcp.smtp clamd.conf freshclam.conf
+do
+	%{__rm} -f %{_prefix}/etc/$i
+done
+
+/bin/rmdir --ignore-fail-on-non-empty %{_prefix}/users 2>/dev/null
+
+if [ -f %{_prefix}/etc/controlfiles ] ; then
+	for i in `%{__cat} %{_prefix}/etc/controlfiles`
+	do
+		%{__rm} -f %{_prefix}/control/$i
+	done
+else
+	for i in databytes defaultdelivery defaultdomain localiphost locals \
+		me nodnscheck plusdomain queue_base rcpthosts smtpgreeting signatures
+	do
+		%{__rm} -f %{_prefix}/control/$i
+	done
+fi
+/bin/rmdir --ignore-fail-on-non-empty %{_prefix}/control 2>/dev/null
+
+for i in .qmail-nonspam .qmail-register-nonspam .qmail-register-spam .qmail-spam .qmail-default
+do
+	%{__rm} -f %{_prefix}/domains/%{default_domain}/$i
+done
+/bin/rmdir --ignore-fail-on-non-empty %{_prefix}/domains/%{default_domain} 2>/dev/null
+for i in postmaster mailer-daemon root
+do
+	%{__rm} -f %{_prefix}/alias/.qmail-"$i"
+done
+/bin/rmdir --ignore-fail-on-non-empty %{_prefix}/alias 2>/dev/null
+
+if [ %nofetchmail -eq 0 ] ; then
+	%{__rm} -f %{_prefix}/etc/fetchmailrc
+fi
+if [ %nobogofilter -eq 0 ] ; then
+	%{__rm} -f %{_prefix}/etc/bogofilter.cf
+fi
+/bin/rmdir --ignore-fail-on-non-empty %{_prefix}/etc 2>/dev/null
+for i in `/bin/ls %{_prefix}/share 2>/dev/null`
+do
+	if [ " $i" = " clamd" ] ; then # leave the signatures
+		continue;
+	fi
+	%{__rm} -rf %{_prefix}/share/$i || true
+done
+/bin/rmdir --ignore-fail-on-non-empty %{_prefix}/share 2>/dev/null
+echo "removing startup services"
+for i in clamd fetchmail freshclam indisrvr.4000 inlookup.infifo mysql.3306 \
+pwdlookup qmail-imapd.143 qmail-imapd-ssl.993 qmail-pop3d.110 qmail-pop3d-ssl.995 \
+qmail-send.25 qmail-smtpd.25 qmail-smtpd.366 qmail-spamlog qscanq qmail-imapd.4143 \
+qmail-pop3d.4110 qmail-send.465 qmail-smtpd.465 qmail-poppass.106 greylist.1999 .svscan
+do
+	if [ -d %{servicedir}/$i ] ; then
+		%{__rm} -rf %{servicedir}/$i || true
+	fi
+done
+if [ %noproxy -eq 0 ] ; then
+for i in proxy-imapd.4143 proxy-imapd-ssl.9143 proxy-pop3d.4110 proxy-pop3d-ssl.9110
+do
+	if [ -d %{servicedir}/$i ] ; then
+		%{__rm} -rf %{servicedir}/$i || true
+	fi
+done
+fi
+echo "removing logs"
+%{__rm} -f %{_prefix}/mysqldb/logs/logisam.log
+%{__rm} -f %{_prefix}/mysqldb/logs/logquery
+%{__rm} -f %{_prefix}/mysqldb/logs/logslow
+count=`/bin/ls %{servicedir} 2>/dev/null| /usr/bin/wc -l`
+if [ $count -eq 0 ] ; then
+	%{__rm} -rf %{servicedir} || true
+fi
+if [ -h %{logdir} ] ; then
+	log_dir=`/bin/ls -ld %{logdir} | /usr/bin/awk '{print $10}'`
+else
+	log_dir=%{logdir}
+fi
+[ "$log_dir" != "/" ] && %{__rm} -fr $log_dir
+echo "recreating ld.so cache"
+/sbin/ldconfig
+if [ -f %{_prefix}/boot/rpm.init ] ; then
+	echo "Running Custom Un-Installation Script for postun"
+	/bin/sh %{_prefix}/boot/rpm.init postun
+fi
+
+### SCRIPTLET ###############################################################################
+%pre shared
+
+### SCRIPTLET ###############################################################################
+%post shared
+/sbin/ldconfig
+
+### SCRIPTLET ###############################################################################
+%postun shared
+/sbin/ldconfig
+
+# fix changelog for openSUSE buildservice
+%changelog

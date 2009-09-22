@@ -1,0 +1,393 @@
+<html>
+<head>
+<title>Debugging authentication problems</title>
+</head>
+<body bgcolor="#FFFFFF">
+
+<h1 align="center">Debugging authentication problems</h1>
+
+<p>
+A common problem after installing courier-imap or sqwebmail is that you
+try to login and just get "Invalid username or password" as the response.
+This document shows how to use courier's debugging features to pinpoint the
+problem.
+</p>
+
+<h2>1. Turn on debugging</h2>
+
+<p>
+For courier-imap, you need to set one of the following values in
+@sysconfdir@/pop3d and/or @sysconfdir@/imapd:
+</p>
+
+<pre>
+DEBUG_LOGIN=1    # turn on authentication debugging
+DEBUG_LOGIN=2    # turn on authentication debugging AND show passwords
+</pre>
+
+<p>and then restart the daemons. For sqwebmail, you can either put this in
+@sysconfdir@/authdaemonrc, or you can start sqwebmail like this:</p>
+
+<pre>
+# DEBUG_LOGIN=1 @libexecdir@/authlib/authdaemond start
+# DEBUG_LOGIN=1 @libexecdir@/sqwebmail/sqwebmaild start
+</pre>
+
+<p>
+At this point, all debugging output goes to syslog at level 'debug', which
+is normally not shown. You will probably need to change your
+<code>/etc/syslog.conf</code> file to be able to see these messages. If you
+have an existing entry which says "mail.info" (which means facility 'mail',
+level 'info' or higher) then you can just change this to "mail.debug".
+Alternatively you can add a new entry like this:
+</p>
+
+<pre>
+*.debug			/var/log/debug
+</pre>
+
+<p>Don't forget to create this file, and to send a HUP signal to syslogd to
+make it re-read its configuration:</p>
+
+<pre>
+# touch /var/log/debug
+# killall -1 syslogd
+</pre>
+
+<p>
+If you don't want to mess around with your syslog configuration, you can
+also get authdaemond to log to a file. Just change the last line of
+@libexecdir@/authlib/authdaemond as follows:
+</p>
+
+<pre>
+exec $DIR/$AUTHDAEMOND -stderr=/var/tmp/authdaemond.log $1
+# was: 
+# exec $DIR/$AUTHDAEMOND -stderrlogger=${sbindir}/courierlogger -stderrloggername=$AUTHDAEMOND $1
+</pre>
+
+<h2>2. Issue a manual login</h2>
+
+<p>
+For courier-imap, you will get much better information by not using a mail
+client and manually logging in using 'telnet'. The transcript of this telnet
+session may give useful information as to what is going on. If you are going
+to report a problem to the mailing list, you should certainly include this
+transcript as well as the corresponding debugging output.
+</p>
+
+<pre>
+-- to debug POP3 --
+# telnet x.x.x.x 110
+user USERNAME
+pass PASSWORD
+stat
+quit
+
+-- to debug IMAP --
+# telnet x.x.x.x 143
+a login USERNAME PASSWORD
+a examine inbox
+a logout
+
+-- to debug POP3 over SSL --
+# openssl s_client -connect x.x.x.x:995
+(then use same commands as POP3 example)
+
+-- to debug IMAP over SSL --
+# openssl s_client -connect x.x.x.x:993
+(then use same commands as IMAP example)
+</pre>
+
+<p>
+This isn't an option for sqwebmail of course - just login through the web
+interface and check the authentication debug log which is generated.
+</p>
+
+<h2>3. Interpret the debug output</h2>
+
+<p>
+First, a brief explanation of courier's authentication system. There are
+a number of standalone <b>client modules</b> which are executed, one after
+the other, resulting in one of three conditions:
+</p>
+<dt>ACCEPT</dt>
+<dd>The user was authenticated successfully</dd>
+<dt>REJECT</dt>
+<dd>The module did not know this username, or the user gave invalid
+credentials. The request is passed to the next module.</dd>
+<dt>TEMPFAIL</dt>
+<dd>The module suffered an internal failure, such as inability to contact
+an external database. The login is rejected, and no further modules are
+tried.</dd>
+
+<p>
+In a typical courier installation, there is only one client module:
+<b>authdaemon</b>. This formats the authentication request and sends it down
+a socket to a pool of <b>authdaemond</b> processes (note the extra "d" on
+the end) which perform the actual work. authdaemond, in turn, contains other
+authentication modules such as authpam, authmysql, and so on.
+</p>
+
+<p>
+You can see this reflected in the configuration files:
+</p>
+
+<pre>
+[ pop3d/imapd client: @sysconfdir@/pop3d and @sysconfdir@/imapd ]
+AUTHMODULES="authdaemon"
+
+[ sqwebmail client: @sysconfdir@/authmodulelist ]
+authdaemon
+
+[ authdaemond server: @sysconfdir@/authdaemonrc ]
+authmodulelist="authpam authuserdb"
+</pre>
+
+<p>
+What happens if authdaemond is not running? Then the client module will time
+out trying to connect to it, and you will get debug output like this:
+</p>
+
+<pre>
+Apr 14 13:45:46 billdog pop3d: authdaemon: starting client module
+Apr 14 13:46:01 billdog pop3d: authdaemon: s_connect() failed: Operation timed out
+Apr 14 13:46:01 billdog pop3d: [Hint: perhaps authdaemond is not running?]
+Apr 14 13:46:02 billdog pop3d: authdaemon: TEMPFAIL - no more modules will be tried
+</pre>
+
+<p>
+If authdaemond is running successfully, then it will in turn run each of the
+modules it is linked against. If any one returns REJECT then the next is
+tried; if any returns TEMPFAIL or ACCEPT then no further modules are tried.
+</p>
+
+<p>
+So a typical example might look like this:
+</p>
+
+<pre>
+Apr 14 14:07:15 billdog pop3d: authdaemon: starting client module
+Apr 14 14:07:15 billdog authdaemond.plain: received auth request, service=pop3, authtype=login
+Apr 14 14:07:15 billdog authdaemond.plain: authcustom: trying this module
+Apr 14 14:07:15 billdog authdaemond.plain: authcustom: nothing implemented in do_auth_custom()
+Apr 14 14:07:15 billdog authdaemond.plain: authcustom: REJECT - try next module
+Apr 14 14:07:15 billdog authdaemond.plain: authcram: trying this module
+Apr 14 14:07:15 billdog authdaemond.plain: cram: only supports authtype=cram-*
+Apr 14 14:07:15 billdog authdaemond.plain: authcram: REJECT - try next module
+Apr 14 14:07:15 billdog authdaemond.plain: authuserdb: trying this module
+Apr 14 14:07:15 billdog authdaemond.plain: userdb: opened /etc/userdb.dat
+Apr 14 14:07:15 billdog authdaemond.plain: userdb: looking up 'brian'
+Apr 14 14:07:15 billdog authdaemond.plain: userdb: entry not found
+Apr 14 14:07:15 billdog authdaemond.plain: authuserdb: REJECT - try next module
+Apr 14 14:07:15 billdog authdaemond.plain: authpam: trying this module
+Apr 14 14:07:15 billdog authdaemond.plain: authpam: sysusername=brian, sysuserid=&lt;null&gt;, sysgroupid=1001, homedir=/home/brian, address=brian, fullname=Brian Candler, maildir=&lt;null&gt;, quota=&lt;null&gt;, options=&lt;null&gt;
+Apr 14 14:07:15 billdog authdaemond.plain: pam_service=pop3, pam_username=brian
+Apr 14 14:07:15 billdog authdaemond.plain: dopam successful
+Apr 14 14:07:15 billdog authdaemond.plain: authpam: ACCEPT, username brian
+Apr 14 14:07:15 billdog pop3d: authdaemon: ACCEPT, username brian
+Apr 14 14:07:15 billdog pop3d: LOGIN, user=brian, ip=[::ffff:127.0.0.1]
+</pre>
+
+<p>What's happening here?</p>
+<ul>
+<li>The 'authdaemon' client module has been started</li>
+<li>The request was received by 'authdaemond.plain'</li>
+<li>It tries 'authcustom' - this module does nothing unless you have
+customised it yourself, so it REJECTs the request</li>
+<li>It tried 'authcram', but since this was a request with authtype=login
+(rather than authtype=cram-md5, say), this module cannot handle it so it
+REJECTs</li>
+<li>'authuserdb' has a go. In this case there is an /etc/userdb.dat file for
+it to look in, but the requested username 'brian' does not exist in there,
+so it REJECTs</li>
+<li>'authpam' has a go. It finds the username and home directory in
+/etc/passwd, and then calls the PAM subsystem to authenticate. The
+authentication is successful.</li>
+</ul>
+
+<p>So, in principle, debugging is straightforward. Watch the modules
+operate, search for the one which you <i>think</i> should be authenticating
+the user, and if it is not, check for REJECT (user not known or password
+mismatch) or TEMPFAIL (internal error) status. Additional messages should
+indicate why this status was returned.</p>
+
+<p>Why "authdaemond.plain"? Well, in fact you can have up to four separate
+authdaemond modules built:</p>
+
+<dt>authdaemond.plain</dt>
+<dd>Contains the non-database modules (e.g. authpam, authuserdb,
+authcram, authpwd)</dd>
+<dt>authdaemond.ldap</dt>
+<dd>Same as authdaemond.plain but also contains authldap</dd>
+<dt>authdaemond.mysql</dt>
+<dd>Same as authdaemond.plain but also contains authmysql</dd>
+<dt>authdaemond.pgsql</dt>
+<dd>Same as authdaemond.plain but also contains authpgsql</dd>
+
+<p>They are separated this way to make it easier to package and distribute
+the software, although it does mean that you can't have a single
+configuration which authenticates against two different database
+backends.</p>
+
+<p>The startup script <code>@libexecdir@/authlib/authdaemond</code> makes an
+arbitary decision as to which one to run. If it makes the wrong choice you
+can override it: for example,</p>
+
+<pre>
+[ @sysconfdir@/authdaemonrc ]
+version="authdaemond.ldap"
+</pre>
+
+<h2>4. Read the documentation</h2>
+
+<p>
+Most of the configuration files like authldaprc, authmysql are well
+documented with comments.
+</p>
+
+<p>
+For the nitty-gritty details of authentication modules, see
+<a href="http://www.courier-mta.org/authlib.html">man authlib</a>. There
+is probably a copy of this manpage installed on your system; if that command
+doesn't work, try one of these:
+</p>
+<pre>
+# man -M @prefix@/man authlib
+or
+# cd /path/to/sources
+# cd authlib
+# nroff -mandoc authlib.7.in | less
+</pre>
+
+<p>
+If you are using userdb authentication, you definitely need to read
+<a href="http://www.courier-mta.org/makeuserdb.html">man makeuserdb</a>,
+<a href="http://www.courier-mta.org/userdb.html">man userdb</a>, and
+<a href="http://www.courier-mta.org/userdbpw.html">man userdb</a>.
+</p>
+
+<h2>5. Use the mailing list</h2>
+
+<p>
+Please read through the common problems and solutions at the bottom of this
+document. The next thing to do, of course, is search the web to see if your
+particular problem has been seen before and solved.
+<a href="http://www.google.com">Google</a> is very good for this.
+</p>
+
+<p>
+If you still cannot work out what the problem is, then you can ask on the
+<a href="http://lists.sourceforge.net/mailman/listinfo/courier-imap">courier-imap</a>
+or <a href="mailto:sqwebmail-subscribe@inter7.com">sqwebmail</a> mailing
+lists. But before you post, please gather together all the following
+information:
+</p>
+
+<ul>
+<li>The operating system and version you are running</li>
+<li>The version of courier-imap/sqwebmail you have installed</li>
+<li>The <code>./configure</code> command line you gave to build it</li>
+<li>If you didn't build it yourself, where you got the package from (and if
+possible, find out from the packager what options they used to build it)</li>
+<li>The versions of any other relevant software which you are linking
+against, e.g. indimail, openldap, mysql, pgsql</li>
+<li>The transcript of the 'telnet' session you used to test [courier-imap]</li>
+<li>The corresponding debug output which was generated for that session</li>
+<li>The contents of the 'pop3d' and 'imapd' configuration files [courier-imap]</li>
+<li>The contents of the 'authmodulelist' configuration file [sqwebmail]</li>
+<li>The contents of the any other relevant configuration files, e.g.
+authldaprc, authmysqlrc</li>
+<li>A copy of the database entry you are trying to authenticate against:
+e.g. the line from your userdb file, an LDAP entry, a row from your mysql
+table, the line in /etc/password, etc.</li>
+</ul>
+
+<p>If you include all this, you are <i>much</i> more likely to get a helpful
+response.</p>
+
+<hr />
+<h2>Frequently seen authentication problems and solutions</h2>
+
+<p>See also the <a href="http://www.courier-mta.org/FAQ.html">Courier MTA
+FAQ</a></p>
+
+<h3>When I try to login with POP3 using telnet, the server disconnects
+immediately after the "PASS" command, without giving a -ERR response</h3>
+<p>
+The reason for this error will probably be found in your mail logs. Usually
+it indicates either that the home directory does not exist (chdir failed),
+or the Maildir has not been created. See 'man maildirmake'.
+</p>
+
+<h3>"authdaemon start" returns immediately with AUTHFAILURE</h3>
+<p>You missed the "d" from the end of "authdaemond". The right command is
+<pre>
+# @libexecdir@/authdaemon<b>d</b> start
+</pre>
+</p>
+
+<h3>I get logged "pop3d: @libexecdir@/authlib/authfoo: No such file or directory"</h3>
+<p>If you are running a standard configuration with authdaemond, then you
+must leave
+<pre>
+AUTHMODULES="authdaemon"
+</pre>
+in the pop3d/imapd configuration files. This is the client which talks to
+authdaemond, and it's the only standalone module you will get. All the other
+authentication modules are compiled into authdaemond.
+<br />
+To change the authentication modules used, you need to edit authdaemonrc and
+set the 'authmodulelist' parameter.
+</p>
+
+<h3>PAM authentication says "pam_start failed, result 4 [Hint: bad PAM configuration?]"</h3>
+<p>Probably your PAM configuration is bad. If you have /etc/pam.d/other,
+then try simply removing /etc/pam.d/pop3 and /etc/pam.d/imap and see if it
+works (this is sufficient for FreeBSD). Otherwise, try copying one of your
+existing /etc/pam.d/xxx files to /etc/pam.d/pop3, imap or webmail respectively.
+<br />
+The result value is a PAM_XXXX constant from
+<code>/usr/include/security/pam_constants.h</code> (this file may be in a
+different location on your system). Under FreeBSD, 4 is PAM_SYSTEM_ERR.
+</p>
+
+<h3>When I connect on the SSL ports (995 or 993), the server accepts the
+connection but then immediately disconnects</h3>
+<p>You probably didn't install any SSL certificates. Courier-imap comes
+with scripts you can run to do this for you:
+<pre>
+# @prefix@/sbin/mkimapdcert
+# @prefix@/sbin/mkpop3dcert
+</pre>
+</p>
+
+<h3>I expected courier-imap/sqwebmail to compile authmysql (or some
+other module), but it's not there</h3>
+<p>Firstly, remember that in the normal arrangement with authdaemond, there
+will be no standalone "authmysql" module. What you will get instead is a
+version of authdaemond installed which has the authmysql module built in; this
+program will be called "authdaemond.mysql" and you'll normally find it in
+@libexecdir@/authlib/.
+<br />
+If this doesn't exist, then perhaps ./configure was unable to find your
+mysql libraries (you can read through the file 'config.log' in the authlib
+subdirectory to see what it found). You may need to force it to look in the
+right place, as follows:
+<pre>
+# ./configure --with-authmsql --with-mysql-libs=/usr/local/mysql/lib  \
+              --with-mysql-includes=/usr/local/mysql/include
+</pre>
+
+<p>
+On some systems (e.g. FreeBSD), the mysqlclient library dpends on the math
+and compression libraries. For these systems, try:
+</p>
+
+<pre>
+# LDFLAGS="-lm -lz" ./configure --with-authmysql ... same as before
+</pre>
+</p>
+
+</body>
+</html>
