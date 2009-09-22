@@ -26,7 +26,8 @@ http://downloads.sourceforge.net/indimail/INSTALL-RPM-@version@
 
 Installation of IndiMail involves going through ten sections. Don't say that I didn't warn you.
 You may jump to Section 1 below if you are in a hurry and have some Unix experience under
-your belt. If you have ideas on how to simplify this documentation further, do write to me.
+your belt. If you have ideas on how to simplify this documentation further, do write to me. In
+case you get stuck, do write to me at "Manvendra Bhangui" <mbhangui@gmail.com>
 
 Checklist
 =========
@@ -885,22 +886,22 @@ OS X NOTES
 Post Install
 -------------
 
-In order to get Qmail to start automatically when OS X boots, you will need to create a new
-startup item containing the Qmail startup script and paramters list. Create a new startup
-directory for Qmail using the following command:
+In order to get qmail to start automatically when OS X boots, you will need to create a new
+startup item containing the qmail startup script and paramters list. Create a new startup
+directory for qmail using the following command:
 
 Mac OS X 10.5.x or later
 % sudo cp @qmaildir@/boot/indimail.plist /System/Library/LaunchDaemons
 
 NOTE: You can also add @qmaildir@/bin/svscanboot to /etc/rc.local
 
-prior to Mac OS X 10.5.x (NOTE: I have not compiled/tested IndiMail on Mac OS X earlier to 10.5.x)
+prior to Mac OS X 10.5.x (NOTE: I have not compiled/tested IndiMail on Mac OS X prior to 10.5.x)
 % cd ..
 % sudo mkdir /Library/StartupItems/Qmail
 % sudo cp @qmaildir@/bin/qmailctl /Library/StartupItems/Qmail/Qmail
 % sudo cp @qmaildir@/StartupParameters.plist /Library/StartupItems/Qmail
 
-When you reboot your machine Qmail will automatically start.
+When you reboot your machine qmail will automatically start.
 
 In order to have a Maildir created automatically when a new user is added to the system you will
 need to modify the new user template. The new user template can be found in the
@@ -963,7 +964,8 @@ with_option =
   | MAX_USER_CONNECTIONS count
 
 PS Output
-ps waux
+----------------
+% ps waux
 user       pid %cpu %mem    vsz   rss tty      stat start   time command
 smmsp     2506  0.0  0.0   9180  1512 ?        Ss   14:21   0:00 sendmail: Queue runner@01:00:00 for /var/spool/clientmqueue
 root     31328  0.0  0.0   2944  1024 ?        Ss   15:24   0:00 /bin/sh @indimaildir@/bin/svscanboot /service /service1

@@ -18,7 +18,7 @@ What the RPM does
 -----------------
 
 It depends on whether you are Installing, upgrading or removing IndiMail using the rpm
-version
+version. Following are the steps carried out during RPM installation.
 
 A) Package Installation/Upgrade
    1. Stops IndiMail services (in case the system already has IndiMail installed)
@@ -41,13 +41,13 @@ B) Package Removal
        smtp, smtp - odmr, qmail-send, imap/pop3, indisrvr, inlookup, pwdlookup)
        clamav antivirus service, freshclam - virus signature update service,
        bogofilter spam filter service)
-   5. Sets up svsan to be run by init (/etc/inittab) or by upstart (/etc/event.d)
+   5. Sets up svscan to be run by init (/etc/inittab) or by upstart (/etc/event.d)
    NOTE: MySQL database is not removed, config files in @indimaildir@/etc,
          @indimaildir@/control, @indimaildir@/users, .qmail files in @indimaildir@/alias,
          domain information in @indimaildir@/domains are not removed.
 
-What the RPM does not
----------------------
+What the RPM does not do
+------------------------
 1. Install and configure MySQL (See How to install MySQL below)
 2. Configure IndiMail
 
@@ -97,10 +97,11 @@ How to install MySQL
     Install MySQL with MD5 eaae8071cdc9c7144273e2e03ea20825
     current working directory /home/local/src
 
-    % wget http://sunsite.mff.cuni.cz/MIRRORS/ftp.mysql.com/Downloads/MySQL-6.0/mysql-6.0.3-alpha.tar.gz
+    % wget http://downloads.mysql.com/archives/mysql-6.0/mysql-6.0.3-alpha.tar.gz
     % gunzip -c mysql-6.0.3-alpha.tar.gz |tar xf -
     % cd mysql-6.0.3-alpha
     % ./configure --prefix=/usr/local/mysql --enable-local-infile
+      (--prefix=/usr in case you are using the RPM from openSUSE build service)
     % make -s DESTDIR=staging_directory
     % sudo make install-strip DESTDIR=staging_directory
     cd ..
