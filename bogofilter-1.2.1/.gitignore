@@ -1,5 +1,7 @@
 bogofilter.spec
 bogogrep
+Makefile
+Makefile.in
 doc/Makefile
 doc/bf_compact.1
 doc/bf_compact.html

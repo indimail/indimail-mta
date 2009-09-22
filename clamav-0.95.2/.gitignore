@@ -1,3 +1,5 @@
+Makefile
+Makefile.in
 clamav-config
 clamav-config.h
 clamav-milter/.deps/
