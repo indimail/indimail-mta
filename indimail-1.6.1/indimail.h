@@ -1,5 +1,8 @@
 /*
  * $Log: indimail.h,v $
+ * Revision 2.178  2009-09-23 15:00:01+05:30  Cprogrammer
+ * change for new runcmmd
+ *
  * Revision 2.177  2009-09-13 12:45:17+05:30  Cprogrammer
  * new argument to valias_insert() function
  *
@@ -845,7 +848,7 @@
 #define INDIMAILH_H
 
 #ifndef	lint
-static char     sccsidh[] = "$Id: indimail.h,v 2.177 2009-09-13 12:45:17+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsidh[] = "$Id: indimail.h,v 2.178 2009-09-23 15:00:01+05:30 Cprogrammer Stab mbhangui $";
 #endif
 
 #include "config.h"
@@ -1590,7 +1593,7 @@ long            Delunreadmails(char *, int, int);
 int             is_already_running(char *);
 char          **MakeArgs(char *);
 void            FreeMakeArgs(char **);
-int             runcmmd(char *);
+int             runcmmd(char *, int);
 int             pwcomp(struct passwd *, struct passwd *);
 int             proxylogin(char **, char *, char *, char *, char *, char *, int);
 int             AuthModuser(int, char **, unsigned, unsigned);

@@ -1,5 +1,8 @@
 /*
  * $Log: vchkpass.c,v $
+ * Revision 2.31  2009-09-23 15:00:24+05:30  Cprogrammer
+ * chane for new runcmmd
+ *
  * Revision 2.30  2009-04-17 21:00:09+05:30  Cprogrammer
  * log database error
  *
@@ -104,7 +107,7 @@
 #include <errno.h>
 
 #ifndef lint
-static char     sccsid[] = "$Id: vchkpass.c,v 2.30 2009-04-17 21:00:09+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: vchkpass.c,v 2.31 2009-09-23 15:00:24+05:30 Cprogrammer Stab mbhangui $";
 #endif
 #ifdef AUTH_SIZE
 #undef AUTH_SIZE
@@ -258,7 +261,7 @@ main(int argc, char **argv)
 	if ((ptr = (char *) getenv("POSTAUTH")) && !access(ptr, X_OK))
 	{
 		snprintf(buf, MAX_BUFF, "%s %s", ptr, login);
-		status = runcmmd(buf);
+		status = runcmmd(buf, 0);
 	}
 	_exit(norelay ? 3 : status);
 	/*- Not reached */

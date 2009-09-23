@@ -1,5 +1,8 @@
 /*
  * $Log: deliver_mail.c,v $
+ * Revision 2.48  2009-09-23 14:59:34+05:30  Cprogrammer
+ * change for new runcmmd()
+ *
  * Revision 2.47  2009-06-04 16:26:37+05:30  Cprogrammer
  * check return value of recalc_quota
  *
@@ -166,7 +169,7 @@
 #endif
 
 #ifndef	lint
-static char     sccsid[] = "$Id: deliver_mail.c,v 2.47 2009-06-04 16:26:37+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: deliver_mail.c,v 2.48 2009-09-23 14:59:34+05:30 Cprogrammer Stab mbhangui $";
 #endif
 
 /*- Function Prototypes */
@@ -562,7 +565,7 @@ deliver_mail(char *address, mdir_t MsgSize, char *quota, uid_t uid, gid_t gid,
 					/*snprintf(local_file, sizeof(local_file), "%s %d %d %d %s %s",*/
 					snprintf(local_file, sizeof(local_file), "%s %"PRIu64" %"PRIu64" %"PRIu64" %s %s",
 						address, MsgSize, msgsize, mailcount, ptr1 ? ptr1 : "", ptr2 ? ptr2 : "");
-					runcmmd(local_file);
+					runcmmd(local_file, 0);
 				}
 				return (-4);
 			} else
@@ -628,7 +631,7 @@ deliver_mail(char *address, mdir_t MsgSize, char *quota, uid_t uid, gid_t gid,
 					 */
 					snprintf(local_file, sizeof(local_file), "%s %s %"PRIu64" %"PRIu64" %"PRIu64" %s",
 						ptr, address, MsgSize, CurBytes, CurCount, maildirquota);
-					runcmmd(local_file);
+					runcmmd(local_file, 0);
 				}
 				/*
 				 * Defer Mail if holdoverquota file is present

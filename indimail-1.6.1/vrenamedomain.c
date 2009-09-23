@@ -1,5 +1,8 @@
 /*
  * $Log: vrenamedomain.c,v $
+ * Revision 2.12  2009-09-23 15:00:37+05:30  Cprogrammer
+ * change for new runcmmd()
+ *
  * Revision 2.11  2008-09-17 21:45:14+05:30  Cprogrammer
  * setuid to root for indimail
  *
@@ -43,7 +46,7 @@
 #include <sys/stat.h>
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vrenamedomain.c,v 2.11 2008-09-17 21:45:14+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: vrenamedomain.c,v 2.12 2009-09-23 15:00:37+05:30 Cprogrammer Stab mbhangui $";
 #endif
 
 int
@@ -137,7 +140,7 @@ main(int argc, char **argv)
 		getEnvConfigStr(&qmaildir, "QMAILDIR", QMAILDIR);
 		snprintf(TmpBuf, MAX_BUFF, "%s/bin/qmail-sighup", qmaildir);
 		if (!access(TmpBuf, X_OK))
-			runcmmd(TmpBuf);
+			runcmmd(TmpBuf, 0);
 		else
 			error_stack(stderr, "system: %s: %s\n", TmpBuf, strerror(errno));
 	}

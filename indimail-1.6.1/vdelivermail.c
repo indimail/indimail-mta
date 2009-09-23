@@ -1,5 +1,8 @@
 /*
  * $Log: vdelivermail.c,v $
+ * Revision 2.50  2009-09-23 15:00:29+05:30  Cprogrammer
+ * change for new runcmmd
+ *
  * Revision 2.49  2009-02-06 11:41:07+05:30  Cprogrammer
  * fixed potential buffer overflow
  *
@@ -230,7 +233,7 @@
 #include <sys/wait.h>
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vdelivermail.c,v 2.49 2009-02-06 11:41:07+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: vdelivermail.c,v 2.50 2009-09-23 15:00:29+05:30 Cprogrammer Stab mbhangui $";
 #endif
 
 /*- Globals */
@@ -581,7 +584,7 @@ processMail(struct passwd *pw, char *user, char *domain, mdir_t MsgSize)
 				else
 					snprintf(TheDir, sizeof(TheDir), "%s %s/Maildir %"PRIu64" %"PRIu64" %"PRIu64" %s",
 						ptr, pw->pw_dir, MsgSize, cur_size, cur_count, pw->pw_shell);
-				runcmmd(TheDir);
+				runcmmd(TheDir, 0);
 			}
 			fprintf(stderr, "Account %s@%s locked/overquota %"PRIu64"/%"PRIu64". indimail (#5.1.1)", user, domain, cur_size, mail_size_limit);
 			getEnvConfigStr(&ptr, "HOLDOVERQUOTA", "holdoverquota");

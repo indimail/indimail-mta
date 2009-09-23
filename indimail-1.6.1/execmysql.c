@@ -1,5 +1,8 @@
 /*
  * $Log: execmysql.c,v $
+ * Revision 2.7  2009-09-23 14:59:40+05:30  Cprogrammer
+ * change for new runcmmd()
+ *
  * Revision 2.6  2008-05-28 16:35:19+05:30  Cprogrammer
  * removed USE_MYSQL
  *
@@ -22,7 +25,7 @@
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: execmysql.c,v 2.6 2008-05-28 16:35:19+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: execmysql.c,v 2.7 2009-09-23 14:59:40+05:30 Cprogrammer Stab mbhangui $";
 #endif
 
 #include <string.h>
@@ -53,7 +56,7 @@ main(int argc, char **argv)
 			snprintf(cmdbuf, sizeof(cmdbuf), "%s/mysql -u %s -p%s -P %d -h %s %s",
 				MYSQLBINDIR, (*rhostsptr)->user, (*rhostsptr)->password,
 				(*rhostsptr)->port, (*rhostsptr)->mdahost, (*rhostsptr)->database);
-			runcmmd(cmdbuf);
+			runcmmd(cmdbuf, 0);
 			return(0);
 		}
 	}

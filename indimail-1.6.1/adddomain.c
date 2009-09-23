@@ -1,5 +1,8 @@
 /*
  * $Log: adddomain.c,v $
+ * Revision 2.14  2009-09-23 14:59:21+05:30  Cprogrammer
+ * change for new runcmmd()
+ *
  * Revision 2.13  2009-04-12 10:46:52+05:30  Cprogrammer
  * added domain to chkrcptdomains
  *
@@ -72,7 +75,7 @@
 #include <sys/stat.h>
 
 #ifndef	lint
-static char     sccsid[] = "$Id: adddomain.c,v 2.13 2009-04-12 10:46:52+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: adddomain.c,v 2.14 2009-09-23 14:59:21+05:30 Cprogrammer Stab mbhangui $";
 #endif
 
 int
@@ -246,7 +249,7 @@ vadddomain(char *domain, char *ipaddr, char *dir, uid_t uid, gid_t gid)
 		getEnvConfigStr(&qmaildir, "QMAILDIR", QMAILDIR);
 		snprintf(tmpbuf, MAX_BUFF, "%s/bin/qmail-sighup", qmaildir);
 		if (!access(tmpbuf, X_OK))
-			runcmmd(tmpbuf);
+			runcmmd(tmpbuf, 0);
 		else
 		{
 			error_stack(stderr, "system: %s: %s\n", tmpbuf, strerror(errno));

@@ -1,5 +1,8 @@
 /*
  * $Log: Login_Tasks.c,v $
+ * Revision 2.25  2009-09-23 15:00:06+05:30  Cprogrammer
+ * change for new runcmmd
+ *
  * Revision 2.24  2009-06-04 16:28:59+05:30  Cprogrammer
  * fixed syntax error
  *
@@ -121,7 +124,7 @@
 #include <fcntl.h>
 
 #ifndef	lint
-static char     sccsid[] = "$Id: Login_Tasks.c,v 2.24 2009-06-04 16:28:59+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: Login_Tasks.c,v 2.25 2009-09-23 15:00:06+05:30 Cprogrammer Stab mbhangui $";
 #endif
 
 int
@@ -238,7 +241,7 @@ Login_Tasks(pw, user, ServiceType)
 			pw->pw_shell, is_inactive);
 		putenv(pwbuf);
 		snprintf(tmpbuf, MAX_BUFF, "%s %s %s", postauth, fqemail, pw->pw_dir);
-		if ((status = runcmmd(tmpbuf)))
+		if ((status = runcmmd(tmpbuf, 0)))
 		{
 			fprintf(stderr, "%s %s %s [status=%d]\n", postauth, fqemail, pw->pw_dir, status);
 			return (status);
@@ -259,7 +262,7 @@ Login_Tasks(pw, user, ServiceType)
 			pw->pw_shell, is_inactive);
 		putenv(pwbuf);
 		snprintf(tmpbuf, MAX_BUFF, "%s %s %s", migrateuser, fqemail, pw->pw_dir);
-		if ((status = runcmmd(tmpbuf)))
+		if ((status = runcmmd(tmpbuf, 0)))
 		{
 			fprintf(stderr, "%s %s %s [status=%d]\n", postauth, fqemail, pw->pw_dir, status);
 			return (status);

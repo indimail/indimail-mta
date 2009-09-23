@@ -1,5 +1,8 @@
 /*
  * $Log: MailQuotaWarn.c,v $
+ * Revision 2.12  2009-09-23 15:00:11+05:30  Cprogrammer
+ * change for new runcmmd
+ *
  * Revision 2.11  2009-06-03 09:29:36+05:30  Cprogrammer
  * fix division by zero is quota alloted is non-numeric (e.g. NOQUOTA)
  *
@@ -60,7 +63,7 @@
 #include <fcntl.h>
 
 #ifndef	lint
-static char     sccsid[] = "$Id: MailQuotaWarn.c,v 2.11 2009-06-03 09:29:36+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: MailQuotaWarn.c,v 2.12 2009-09-23 15:00:11+05:30 Cprogrammer Stab mbhangui $";
 #endif
 
 int
@@ -134,7 +137,7 @@ MailQuotaWarn(char *username, char *domain, char *Maildir, char *QuotaAlloted)
 							ptr, username, domain, maildir, total_usage, -1, Quota,
 							-1, percent_warn);
 #endif
-						runcmmd(quota_cmd);
+						runcmmd(quota_cmd, 0);
 					}
 					return(1);
 				}

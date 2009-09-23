@@ -1,5 +1,8 @@
 /*
  * $Log: addaliasdomain.c,v $
+ * Revision 2.5  2009-09-23 14:59:02+05:30  Cprogrammer
+ * change for new runcmmd()
+ *
  * Revision 2.4  2008-08-02 09:04:45+05:30  Cprogrammer
  * new function error_stack
  *
@@ -37,7 +40,7 @@
 #include <sys/stat.h>
 
 #ifndef	lint
-static char     sccsid[] = "$Id: addaliasdomain.c,v 2.4 2008-08-02 09:04:45+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: addaliasdomain.c,v 2.5 2009-09-23 14:59:02+05:30 Cprogrammer Stab mbhangui $";
 #endif
 
 int
@@ -94,7 +97,7 @@ vaddaliasdomain(char *old_domain, char *new_domain)
 	getEnvConfigStr(&qmaildir, "QMAILDIR", QMAILDIR);
 	snprintf(TmpBuf1, MAX_BUFF, "%s/bin/qmail-sighup", qmaildir);
 	if (!access(TmpBuf1, X_OK))
-		runcmmd(TmpBuf1);
+		runcmmd(TmpBuf1, 0);
 	else
 		signal_process("qmail-send", SIGHUP);
 	if(snprintf(TmpBuf1, MAX_BUFF, "%s/domains/%s/.aliasdomains", Dir, old_domain) == -1)

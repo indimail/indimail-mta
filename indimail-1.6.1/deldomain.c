@@ -1,5 +1,8 @@
 /*
  * $Log: deldomain.c,v $
+ * Revision 2.13  2009-09-23 14:59:28+05:30  Cprogrammer
+ * change for new runcmmd()
+ *
  * Revision 2.12  2009-02-18 09:06:40+05:30  Cprogrammer
  * fixed fgets warning
  *
@@ -72,7 +75,7 @@
 #include <signal.h>
 
 #ifndef	lint
-static char     sccsid[] = "$Id: deldomain.c,v 2.12 2009-02-18 09:06:40+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: deldomain.c,v 2.13 2009-09-23 14:59:28+05:30 Cprogrammer Stab mbhangui $";
 #endif
 
 int
@@ -139,7 +142,7 @@ vdeldomain(char *domain)
 		getEnvConfigStr(&qmaildir, "QMAILDIR", QMAILDIR);
 		snprintf(TmpBuf, MAX_BUFF, "%s/bin/qmail-sighup", qmaildir);
 		if (!access(TmpBuf, X_OK))
-			runcmmd(TmpBuf);
+			runcmmd(TmpBuf, 0);
 		else
 			signal_process("qmail-send", SIGHUP);
 		return(0);
@@ -254,7 +257,7 @@ vdeldomain(char *domain)
 	getEnvConfigStr(&qmaildir, "QMAILDIR", QMAILDIR);
 	snprintf(TmpBuf, MAX_BUFF, "%s/bin/qmail-sighup", qmaildir);
 	if (!access(TmpBuf, X_OK))
-		runcmmd(TmpBuf);
+		runcmmd(TmpBuf, 0);
 	else
 		signal_process("qmail-send", SIGHUP);
 	/*

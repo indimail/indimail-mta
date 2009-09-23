@@ -1,5 +1,8 @@
 /*
  * $Log: systpass.c,v $
+ * Revision 2.9  2009-09-23 15:00:17+05:30  Cprogrammer
+ * change for new runcmmd
+ *
  * Revision 2.8  2008-12-19 11:53:28+05:30  Cprogrammer
  * exit with return status of POSTAUTH command
  *
@@ -38,7 +41,7 @@
 #endif
 
 #ifndef lint
-static char     sccsid[] = "$Id: systpass.c,v 2.8 2008-12-19 11:53:28+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: systpass.c,v 2.9 2009-09-23 15:00:17+05:30 Cprogrammer Stab mbhangui $";
 #endif
 
 int             authlen = 512;
@@ -141,7 +144,7 @@ main(int argc, char **argv)
 	if ((ptr = (char *) getenv("POSTAUTH")) && !access(ptr, X_OK))
 	{
 		snprintf(buf, MAX_BUFF, "%s %s", ptr, login);
-		status = runcmmd(buf);
+		status = runcmmd(buf, 0);
 	}
 	_exit(status);
 	/*- Not reached */
