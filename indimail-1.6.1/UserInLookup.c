@@ -1,5 +1,8 @@
 /*
  * $Log: UserInLookup.c,v $
+ * Revision 2.15  2009-09-23 21:22:50+05:30  Cprogrammer
+ * record error when mysql_ping reports MySQL server has gone away
+ *
  * Revision 2.14  2008-06-13 10:31:31+05:30  Cprogrammer
  * fixed compilation errors if VALIAS not defined
  *
@@ -50,7 +53,7 @@
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: UserInLookup.c,v 2.14 2008-06-13 10:31:31+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: UserInLookup.c,v 2.15 2009-09-23 21:22:50+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #include <string.h>
@@ -100,7 +103,7 @@ UserInLookup(char *email)
 			 * No need of checking further
 			 * valias uses addusecntrl() to add aliases
 			 * to hostcntrl. so if alias not found in hostcntrl,
-			 * it will not be present on the host alias table
+			 * it will not be present on the mailstore's alias table
 			 */
 			if (is_distributed_domain(real_domain))
 			{
@@ -129,6 +132,9 @@ UserInLookup(char *email)
 					}
 					if (mysql_ping(*mysqlptr))
 					{
+						fprintf(stderr, "mysql_ping: (%s) %s: Reconnecting... %s@%s user %s port %d\n",
+							mysql_error(*mysqlptr), (*rhostsptr)->domain, (*rhostsptr)->database,
+							(*rhostsptr)->server, (*rhostsptr)->user, (*rhostsptr)->port);
 						mysql_close(*mysqlptr);
 						if (connect_db(rhostsptr, mysqlptr))
 						{

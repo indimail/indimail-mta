@@ -1,5 +1,8 @@
 /*
  * $Log: findhost.c,v $
+ * Revision 2.23  2009-09-23 20:54:04+05:30  Cprogrammer
+ * register vclose_cntrl only once
+ *
  * Revision 2.22  2009-02-18 21:25:21+05:30  Cprogrammer
  * check return value of fscanf
  *
@@ -159,7 +162,7 @@
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: findhost.c,v 2.22 2009-02-18 21:25:21+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: findhost.c,v 2.23 2009-09-23 20:54:04+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #include <stdio.h>
@@ -314,7 +317,7 @@ again:
 int
 open_central_db(char *dbhost)
 {
-	static char     host_path[MAX_BUFF];
+	static char     host_path[MAX_BUFF], atexit_registered = 0;
 	char            SqlBuf[SQL_BUF_SIZE];
 	char           *ptr, *mysql_user, *mysql_passwd, *mysql_database, *cntrl_socket, *qmaildir, *controldir;
 	int             mysqlport;
@@ -366,7 +369,8 @@ open_central_db(char *dbhost)
 		fprintf(stderr, "mysql_options: Invalid options in MySQL options file\n");
 		return(-1);
 	}
-	atexit(vclose_cntrl);
+	if (!atexit_registered++)
+		atexit(vclose_cntrl);
 #ifdef HAVE_LOCAL_INFILE
 	if (mysql_options(&mysql[0], MYSQL_OPT_LOCAL_INFILE, 0))
 	{

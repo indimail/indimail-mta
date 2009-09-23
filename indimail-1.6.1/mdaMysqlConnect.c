@@ -1,5 +1,8 @@
 /*
  * $Log: mdaMysqlConnect.c,v $
+ * Revision 2.7  2009-09-23 21:22:15+05:30  Cprogrammer
+ * record error when mysql_ping reports MySQL server has gone away
+ *
  * Revision 2.6  2008-05-28 16:37:02+05:30  Cprogrammer
  * removed USE_MYSQL
  *
@@ -23,7 +26,7 @@
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: mdaMysqlConnect.c,v 2.6 2008-05-28 16:37:02+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: mdaMysqlConnect.c,v 2.7 2009-09-23 21:22:15+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #include <string.h>
@@ -53,6 +56,9 @@ mdaMysqlConnect(char *mdahost, char *domain)
 			}
 			if (mysql_ping(*mysqlptr))
 			{
+				fprintf(stderr, "mysql_ping: (%s) %s: Reconnecting... %s@%s user %s port %d\n",
+					mysql_error(*mysqlptr), (*rhostsptr)->domain, (*rhostsptr)->database,
+					(*rhostsptr)->server, (*rhostsptr)->user, (*rhostsptr)->port);
 				mysql_close(*mysqlptr);
 				if (connect_db(rhostsptr, mysqlptr))
 				{

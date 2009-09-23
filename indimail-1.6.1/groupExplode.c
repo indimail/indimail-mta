@@ -76,6 +76,9 @@ groupExplode(char *email)
 					}
 					if (mysql_ping(*mysqlptr))
 					{
+						fprintf(stderr, "mysql_ping: (%s) %s: Reconnecting... %s@%s user %s port %d\n",
+								mysql_error(*mysqlptr), (*rhostsptr)->domain, (*rhostsptr)->database,
+								(*rhostsptr)->server, (*rhostsptr)->user, (*rhostsptr)->port);
 						mysql_close(*mysqlptr);
 						if (connect_db(rhostsptr, mysqlptr))
 						{

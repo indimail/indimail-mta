@@ -1,5 +1,8 @@
 /*
  * $Log: vauthOpen_user.c,v $
+ * Revision 2.8  2009-09-23 21:22:54+05:30  Cprogrammer
+ * record error when mysql_ping reports MySQL server has gone away
+ *
  * Revision 2.7  2008-11-07 11:13:59+05:30  Cprogrammer
  * BUG - mdahost was getting clobbered
  *
@@ -32,7 +35,7 @@
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vauthOpen_user.c,v 2.7 2008-11-07 11:13:59+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: vauthOpen_user.c,v 2.8 2009-09-23 21:22:54+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef CLUSTERED_SITE
@@ -90,6 +93,9 @@ vauthOpen_user(char *email)
 		}
 		if (mysql_ping(*mysqlptr))
 		{
+			fprintf(stderr, "mysql_ping: (%s) %s: Reconnecting... %s@%s user %s port %d\n",
+				mysql_error(*mysqlptr), (*rhostsptr)->domain, (*rhostsptr)->database,
+				(*rhostsptr)->server, (*rhostsptr)->user, (*rhostsptr)->port);
 			mysql_close(*mysqlptr);
 			if (connect_db(rhostsptr, mysqlptr))
 			{
