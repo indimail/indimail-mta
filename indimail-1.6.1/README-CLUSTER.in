@@ -107,6 +107,11 @@
     ===================================================================
     1) Create the files host.cntrl, host.master in @indimaildir@/control
     2) run dbinfo -s
+    3) On host which will have SMTP/qmail-send, have the environment variable
+       ROUTES=dynamic for qmail-send. i.e
+
+       # echo dynamic > /service/qmail-send.25/variables/ROUTES
+       % svc -d /service/qmail-send.25; svc -u /service/qmail-send.25
 
 
 NOTE: This document is WIP and will undergo frequent changes till i get satisfied. Help
