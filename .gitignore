@@ -41,6 +41,7 @@ indimail-*/Makefile.in
 indimail-*/doc/INSTALL-RPM
 indimail-*/doc/ChangeLog
 indimail-*/doc/INSTALL.indimail
+indimail-*/doc/README-CLUSTER
 indimail-*/eps-*/Makefile.in
 indimail-*/indimail.settings
 
