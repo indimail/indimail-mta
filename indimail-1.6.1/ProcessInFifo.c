@@ -1,5 +1,8 @@
 /*
  * $Log: ProcessInFifo.c,v $
+ * Revision 2.28  2009-09-23 21:22:24+05:30  Cprogrammer
+ * reconnect to hostcntrl database if connection is closed by server
+ *
  * Revision 2.27  2008-11-21 15:08:52+05:30  Cprogrammer
  * fixed compilation for mac os
  *
@@ -96,7 +99,7 @@
  */
 
 #ifndef	lint
-static char     sccsid[] = "$Id: ProcessInFifo.c,v 2.27 2008-11-21 15:08:52+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: ProcessInFifo.c,v 2.28 2009-09-23 21:22:24+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #include <fcntl.h>
@@ -247,6 +250,26 @@ ProcessInFifo()
 		}
 		if(verbose || _debug)
 			prev_time = time(0);
+#ifdef CLUSTERED_SITE
+		if (!isopen_cntrl && open_central_db(0))
+		{
+			fprintf(stderr, "InLookup: Unable to open central db\n");
+			signal(SIGPIPE, pstat);
+			return (-1);
+		}
+		if (mysql_ping(&mysql[0]))
+		{
+			fprintf(stderr, "mysql_ping: %s: Reconnecting to central db...\n", mysql_error(&mysql[0]));
+			mysql_close(&mysql[0]);
+			isopen_cntrl = 0;
+			if (open_central_db(0))
+			{
+				fprintf(stderr, "InLookup: Unable to open central db\n");
+				signal(SIGPIPE, pstat);
+				return (-1);
+			}
+		}
+#endif
 		switch(*QueryBuf)
 		{
 			case USER_QUERY:
