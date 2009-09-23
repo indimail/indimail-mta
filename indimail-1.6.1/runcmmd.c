@@ -1,5 +1,8 @@
 /*
  * $Log: runcmmd.c,v $
+ * Revision 2.5  2009-09-23 14:57:02+05:30  Cprogrammer
+ * added option to use execvp()
+ *
  * Revision 2.4  2008-11-20 22:12:29+05:30  Cprogrammer
  * return status for the forked child only
  *
@@ -21,11 +24,11 @@
 #include <stdlib.h>
 
 #ifndef lint
-static char     sccsid[] = "$Id: runcmmd.c,v 2.4 2008-11-20 22:12:29+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: runcmmd.c,v 2.5 2009-09-23 14:57:02+05:30 Cprogrammer Stab mbhangui $";
 #endif
 
 int
-runcmmd(char *cmmd)
+runcmmd(char *cmmd, int useP)
 {
 	char          **argv;
 	int             status, i, retval;
@@ -39,7 +42,10 @@ runcmmd(char *cmmd)
 	case 0:
 		if (!(argv = MakeArgs(cmmd)))
 			exit(1);
-		execv(*argv, argv);
+		if (useP)
+			execvp(*argv, argv);
+		else
+			execv(*argv, argv);
 		perror(*argv);
 		exit(1);
 	default:
