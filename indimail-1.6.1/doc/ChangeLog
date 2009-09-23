@@ -24,6 +24,9 @@ Release 1.6.1 Start 13/09/2009
 12. Updated autoconf scripts for fortune-1.0.tar.gz libdkim-1.3.tar.gz
     flash-0.9.4.tar.gz nssd-1.0.tar.gz ripmime-1.4.0.9.tar.gz
     altermime-0.3.10.tar.gz
+21/09/2009
+13. Created git repository at
+    git://indimail.git.sourceforge.net/gitroot/indimail/indimail
 
 * Fri Sep 11 2009 mbhangui@gmail.com
 Release 1.6 Start 20/08/2009
