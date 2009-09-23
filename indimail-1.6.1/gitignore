@@ -12,6 +12,7 @@ create_services
 cronlist
 doc/INSTALL-RPM
 doc/INSTALL.indimail
+doc/ChangeLog
 indimail-*-rpmlintrc
 indimail-epm.list
 indimail.settings
