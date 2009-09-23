@@ -37,3 +37,9 @@ ripmime-*/ripmime
 ripmime-*/ripole
 ripmime-*/Makefile
 ripmime-*/Makefile.in
+indimail-*/Makefile.in
+indimail-*/doc/INSTALL-RPM
+indimail-*/doc/INSTALL.indimail
+indimail-*/eps-*/Makefile.in
+indimail-*/indimail.settings
+
