@@ -1,5 +1,8 @@
 /*
  * $Log: dbinfo.c,v $
+ * Revision 2.14  2009-09-23 14:58:36+05:30  Cprogrammer
+ * fixed segementation fault in dbinfo when mcdinfo is absent
+ *
  * Revision 2.13  2005-12-29 22:40:58+05:30  Cprogrammer
  * use getEnvConfigStr to set variables from environment variables
  *
@@ -89,7 +92,7 @@
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: dbinfo.c,v 2.13 2005-12-29 22:40:58+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: dbinfo.c,v 2.14 2009-09-23 14:58:36+05:30 Cprogrammer Stab mbhangui $";
 #endif
 
 #ifdef CLUSTERED_SITE
@@ -118,7 +121,7 @@ main(int argc, char **argv)
 
 	if (get_options(argc, argv, &opt, &dist, &m_server, &m_port, &m_database, &m_user, &m_pass, &mdahost, &domain, &filename))
 		return (1);
-	if(filename && *filename)
+	if (filename && *filename)
 	{
 		snprintf(mcdFile, sizeof(mcdFile), "MCDFILE=%s", filename);
 		putenv(mcdFile);
@@ -126,21 +129,21 @@ main(int argc, char **argv)
 	switch (opt)
 	{
 	case DBINFO_SELECT:
-		if(!(err = dbinfoSelect(filename, domain, mdahost, row_format)))
+		if (!(err = dbinfoSelect(filename, domain, mdahost, row_format)))
 			LoadDbInfo_TXT(&total);
 		break;
 	case DBINFO_INSERT:
-		if(!(err = dbinfoAdd(domain, dist, m_server, mdahost, m_port, m_database, m_user, m_pass)))
+		if (!(err = dbinfoAdd(domain, dist, m_server, mdahost, m_port, m_database, m_user, m_pass)))
 			LoadDbInfo_TXT(&total);
 		break;
 	case DBINFO_UPDATE:
-		if(!(err = dbinfoUpdate(domain, dist, m_server, mdahost, m_port, m_database, m_user, m_pass)))
+		if (!(err = dbinfoUpdate(domain, dist, m_server, mdahost, m_port, m_database, m_user, m_pass)))
 			LoadDbInfo_TXT(&total);
 		break;
 	case DBINFO_DELETE:
-		if(!(err = dbinfoDel(domain, mdahost)))
+		if (!(err = dbinfoDel(domain, mdahost)))
 		{
-			if(!access(filename, F_OK) && unlink(filename))
+			if (!access(filename, F_OK) && unlink(filename))
 			{
 				fprintf(stderr, "dbinfo: unlink: %s: %s\n", filename, strerror(errno));
 				return(1);
@@ -171,7 +174,7 @@ editdbinfo(char *filename)
 	verbose = 1;
 	getEnvConfigStr(&qmaildir, "QMAILDIR", QMAILDIR);
 	getEnvConfigStr(&controldir, "CONTROLDIR", "control");
-	if(!filename || !*filename)
+	if (!filename || !*filename)
 		getEnvConfigStr(&mcdfile, "MCDFILE", MCDFILE);
 	else
 		mcdfile = filename;
@@ -181,30 +184,31 @@ editdbinfo(char *filename)
 		snprintf(mcdFile, MAX_BUFF, "%s/%s/%s", qmaildir, controldir, mcdfile);
 	snprintf(envbuf, MAX_BUFF, "MCDFILE=%s", mcdFile);
 	rhostsptr = LoadDbInfo_TXT(&total);
-	for(count = 0,tmpPtr = rhostsptr;*tmpPtr;tmpPtr++)
+	for (count = 0,tmpPtr = rhostsptr;tmpPtr && *tmpPtr;tmpPtr++)
 	{
-		if((*tmpPtr)->isLocal)
+		if ((*tmpPtr)->isLocal)
 			continue;
 		count++;
 	}
 	printf("Loaded %d entries in file %s\nPress ENTER to continue", count, mcdFile);
 	getchar();
-	if(access(mcdFile, F_OK))
+	if (rhostsptr && access(mcdFile, F_OK))
 	{
-		if(writedbinfo(rhostsptr, time(0)))
+		if (writedbinfo(rhostsptr, time(0)))
 		{
 			fprintf(stderr, "writedbinfo failed\n");
 			return(1);
 		}
 	}
 	getEnvConfigStr(&ptr, "EDITOR", "vi");
+	printf("Editor is %s\n", ptr);
 	snprintf(TmpBuf, MAX_BUFF, "%s %s", ptr, mcdFile);
-	runcmmd(TmpBuf);
-	if(indimailuid == -1 || indimailgid == -1)
+	runcmmd(TmpBuf, 1);
+	if (indimailuid == -1 || indimailgid == -1)
 		GetIndiId(&indimailuid, &indimailgid);
 	uid = indimailuid;
 	gid = indimailgid;
-	if(chown(mcdFile, uid, gid))
+	if (chown(mcdFile, uid, gid))
 		fprintf(stderr, "chown: %s: %s\n", mcdFile, strerror(errno));
 	return((LoadDbInfo_TXT(&total) ? 0 : 1));
 }
@@ -290,7 +294,7 @@ get_options(int argc, char **argv, int *option, int *distributed, char **mysql_s
 		}
 	case DBINFO_UPDATE:
 	case DBINFO_DELETE:
-		if(!*domain || !*mdahost)
+		if (!*domain || !*mdahost)
 		{
 			usage();
 			return (1);
