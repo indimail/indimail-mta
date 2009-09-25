@@ -1,5 +1,8 @@
 /*
  * $Log: userinfo.c,v $
+ * Revision 2.28  2009-09-26 00:02:02+05:30  Cprogrammer
+ * display status as missing if home directory is absent
+ *
  * Revision 2.27  2008-11-13 21:01:53+05:30  Cprogrammer
  * added display of password hash
  *
@@ -171,9 +174,10 @@
 #include <stdlib.h>
 #include <pwd.h>
 #include <ctype.h>
+#include <errno.h>
 
 #ifndef	lint
-static char     sccsid[] = "$Id: userinfo.c,v 2.27 2008-11-13 21:01:53+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: userinfo.c,v 2.28 2009-09-26 00:02:02+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 extern char *strptime(const char *, const char *, struct tm *);
@@ -295,7 +299,8 @@ vuserinfo(Email, User, Domain, DisplayName, DisplayPasswd, DisplayUid, DisplayGi
 			if (DisplayGid || DisplayAll)
 				printf("gid           : %d\n", (int) gid);
 			if (DisplayDir || DisplayAll)
-				printf("dir           : %s\n", tmpbuf);
+				printf("dir           : %s%s\n", tmpbuf,
+					access(tmpbuf, F_OK) && errno == ENOENT ? " (missing)" : "");
 			return(0);
 		} else
 		if (valiasinfo(User, real_domain))
@@ -368,7 +373,8 @@ vuserinfo(Email, User, Domain, DisplayName, DisplayPasswd, DisplayUid, DisplayGi
 	if (DisplayComment || DisplayAll)
 		printf("gecos         : %s\n", mypw->pw_gecos);
 	if (DisplayDir || DisplayAll)
-		printf("dir           : %s\n", mypw->pw_dir);
+		printf("dir           : %s%s\n", mypw->pw_dir,
+			access(mypw->pw_dir, F_OK) && errno == ENOENT ? " (missing)" : "");
 	if (DisplayQuota || DisplayAll)
 	{
 #ifdef USE_MAILDIRQUOTA	
@@ -376,7 +382,8 @@ vuserinfo(Email, User, Domain, DisplayName, DisplayPasswd, DisplayUid, DisplayGi
 #endif
 
 		snprintf(maildir, MAX_BUFF, "%s/Maildir", mypw->pw_dir);
-		printf("quota         : %s [%-4.2f Mb]\n", mypw->pw_shell, (float) atol(mypw->pw_shell)/(1024 * 1024));
+		printf("quota         : %s [%-4.2f Mb]\n", mypw->pw_shell,
+			(float) atol(mypw->pw_shell)/(1024 * 1024));
 #ifdef USE_MAILDIRQUOTA	
 		size_limit = parse_quota(mypw->pw_shell, &count_limit);
 		cur_size = recalc_quota(maildir, &mcount, size_limit, count_limit, 2);
@@ -388,7 +395,8 @@ vuserinfo(Email, User, Domain, DisplayName, DisplayPasswd, DisplayUid, DisplayGi
 	if (DisplayAll)
 	{
 #ifdef CLUSTERED_SITE
-		printf("Mail Store Ip : %s (%s - %s)\n", mailstore, (is_dist ? "Clustered" : "NonClustered"), 
+		printf("Mail Store Ip : %s (%s - %s)\n", mailstore,
+			(is_dist ? "Clustered" : "NonClustered"), 
 			islocalif(mailstore) ? "local" : "remote");
 		if(is_dist)
 			ptr = vauth_gethostid(mailstore);
