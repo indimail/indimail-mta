@@ -126,7 +126,7 @@ update_quota(char *Maildir, mdir_t new_size)
 #endif
 	fl.l_type = F_UNLCK;
 	if (fcntl(Fd, F_SETLK, &fl) == -1)
-		fprintf(stderr, "recalc_quota: fcntl: %s\n", strerror(errno));
+		fprintf(stderr, "update_quota: fcntl: %s\n", strerror(errno));
 	fclose(fp);
 	(void) signal(SIGINT, pstat[0]);
 	(void) signal(SIGQUIT, pstat[1]);

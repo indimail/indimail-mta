@@ -189,9 +189,9 @@ Login_Tasks(pw, user, ServiceType)
 		vauth_active(pw, domain, FROM_INACTIVE_TO_ACTIVE);
 #ifdef USE_MAILDIRQUOTA	
 		size_limit = parse_quota(pw->pw_shell, &count_limit);
-		recalc_quota(Maildir, 0, size_limit, count_limit, 2);
+		(void) recalc_quota(Maildir, 0, size_limit, count_limit, 2);
 #else
-		recalc_quota(Maildir, 2);
+		(void) recalc_quota(Maildir, 2);
 #endif
 	} else
 	if (getenv("NOLASTAUTHLOGGING") || getenv("NOLASTAUTH"))

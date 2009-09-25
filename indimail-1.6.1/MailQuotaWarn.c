@@ -1,5 +1,8 @@
 /*
  * $Log: MailQuotaWarn.c,v $
+ * Revision 2.13  2009-09-25 23:49:58+05:30  Cprogrammer
+ * check return value of recalc_quota()
+ *
  * Revision 2.12  2009-09-23 15:00:11+05:30  Cprogrammer
  * change for new runcmmd
  *
@@ -63,7 +66,7 @@
 #include <fcntl.h>
 
 #ifndef	lint
-static char     sccsid[] = "$Id: MailQuotaWarn.c,v 2.12 2009-09-23 15:00:11+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: MailQuotaWarn.c,v 2.13 2009-09-25 23:49:58+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 int
@@ -100,6 +103,8 @@ MailQuotaWarn(char *username, char *domain, char *Maildir, char *QuotaAlloted)
 		return (0);
 	total_usage = recalc_quota(maildir, 0);
 #endif
+	if (total_usage == -1)
+		return (-1);
 	warn_usage = warn_mail = 0;
 	for (i = 10;i;i--)
 	{

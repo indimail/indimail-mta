@@ -336,9 +336,9 @@ read_quota(char *Maildir)
 	if (*tmpbuf == '\n') /*- fix for courier imap mucking things up */
 	{
 #ifdef USE_MAILDIRQUOTA	
-			recalc_quota(maildir, 0, 0, 0, 2);
+		(void) recalc_quota(maildir, 0, 0, 0, 2);
 #else
-			recalc_quota(maildir, 2);
+		(void) recalc_quota(maildir, 2);
 #endif
 		return("NOQUOTA");
 	} else

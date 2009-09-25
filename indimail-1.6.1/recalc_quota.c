@@ -1,5 +1,8 @@
 /*
  * $Log: recalc_quota.c,v $
+ * Revision 2.7  2009-09-25 23:50:16+05:30  Cprogrammer
+ * return quota as zero of maildirsize is absent
+ *
  * Revision 2.6  2009-06-03 09:31:01+05:30  Cprogrammer
  * use fcntl for file locking
  *
@@ -51,7 +54,7 @@
 #include <unistd.h>
 
 #ifndef	lint
-static char     sccsid[] = "$Id: recalc_quota.c,v 2.6 2009-06-03 09:31:01+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: recalc_quota.c,v 2.7 2009-09-25 23:50:16+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef USE_MAILDIRQUOTA
@@ -129,6 +132,14 @@ mdir_t recalc_quota(char *Maildir, int force_flag)
 		return (-1);
 	if ((Fd = open(tmpbuf, O_CREAT | O_TRUNC | O_WRONLY, S_IWUSR | S_IRUSR)) == -1)
 	{
+		if (errno == 2)
+		{
+			mail_size = 0;
+			(void) signal(SIGINT, pstat[0]);
+			(void) signal(SIGQUIT, pstat[1]);
+			(void) signal(SIGTSTP, pstat[2]);
+			return (0);
+		}
 		fprintf(stderr, "recalc_quota: %s: %s\n", tmpbuf, strerror(errno));
 		(void) signal(SIGINT, pstat[0]);
 		(void) signal(SIGQUIT, pstat[1]);
@@ -151,6 +162,7 @@ mdir_t recalc_quota(char *Maildir, int force_flag)
 		return (-1);
 	}
 	fl.l_pid = getpid();
+	/*- lock the file */
 	for (;;)
 	{
 		if (fcntl(Fd, F_SETLKW, &fl) == -1)
@@ -166,9 +178,6 @@ mdir_t recalc_quota(char *Maildir, int force_flag)
 		}
 		break;
 	}
-	(void) signal(SIGINT, pstat[0]);
-	(void) signal(SIGQUIT, pstat[1]);
-	(void) signal(SIGTSTP, pstat[2]);
 #ifdef USE_MAILDIRQUOTA
 	if (count_limit)
 		fprintf(fp, "%"PRIu64"S,%"PRIu64"C\n", size_limit, count_limit);
@@ -185,6 +194,9 @@ mdir_t recalc_quota(char *Maildir, int force_flag)
 	if (fcntl(Fd, F_SETLK, &fl) == -1)
 		fprintf(stderr, "recalc_quota: fcntl: %s\n", strerror(errno));
 	fclose(fp);
+	(void) signal(SIGINT, pstat[0]);
+	(void) signal(SIGQUIT, pstat[1]);
+	(void) signal(SIGTSTP, pstat[2]);
 	CurCount = mail_count;
 	scopy(prevmaildir, maildir, MAX_BUFF);
 	return (mail_size);
