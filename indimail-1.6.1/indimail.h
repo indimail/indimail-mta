@@ -1,5 +1,8 @@
 /*
  * $Log: indimail.h,v $
+ * Revision 2.179  2009-09-25 23:49:31+05:30  Cprogrammer
+ * changed mdir_t to signed
+ *
  * Revision 2.178  2009-09-23 15:00:01+05:30  Cprogrammer
  * change for new runcmmd
  *
@@ -848,7 +851,7 @@
 #define INDIMAILH_H
 
 #ifndef	lint
-static char     sccsidh[] = "$Id: indimail.h,v 2.178 2009-09-23 15:00:01+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsidh[] = "$Id: indimail.h,v 2.179 2009-09-25 23:49:31+05:30 Cprogrammer Stab mbhangui $";
 #endif
 
 #include "config.h"
@@ -872,7 +875,7 @@ static char     sccsidh[] = "$Id: indimail.h,v 2.178 2009-09-23 15:00:01+05:30 C
 #endif
 #ifdef HAVE_INTTYPES_H
 #include <inttypes.h>
-typedef uint64_t mdir_t;
+typedef int64_t mdir_t;
 #else
 typedef long long mdir_t;
 #define PRId64 "lld"
