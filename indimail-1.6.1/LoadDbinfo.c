@@ -1,5 +1,8 @@
 /*
  * $Log: LoadDbinfo.c,v $
+ * Revision 2.34  2009-09-27 12:10:19+05:30  Cprogrammer
+ * set 644 perm for mcdfile
+ *
  * Revision 2.33  2009-07-23 13:36:44+05:30  Cprogrammer
  * BUG - double fclose
  *
@@ -113,7 +116,7 @@
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: LoadDbinfo.c,v 2.33 2009-07-23 13:36:44+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: LoadDbinfo.c,v 2.34 2009-09-27 12:10:19+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #include <sys/types.h>
@@ -410,8 +413,11 @@ writedbinfo(DBINFO **rhostsptr, time_t mtime)
 		GetIndiId(&indimailuid, &indimailgid);
 	uid = indimailuid;
 	gid = indimailgid;
-	if (chown(mcdFile, uid, gid))
-		fprintf(stderr, "chown: %s: %s\n", mcdFile, strerror(errno));
+	if (fchown(fileno(fp), uid, gid))
+		fprintf(stderr, "fchown: %s: %s\n", mcdFile, strerror(errno));
+	else
+	if (fchmod(fileno(fp), INDIMAIL_QMAIL_MODE))
+		fprintf(stderr, "fchmod: %s: %s\n", mcdFile, strerror(errno));
 	for (ptr = rhostsptr;(*ptr);ptr++)
 	{
 		if ((*ptr)->isLocal)
