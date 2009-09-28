@@ -127,7 +127,9 @@ noinst_SCRIPTS = create_services indimail.spec indimail-@VERSION@-rpmlintrc indi
 MOSTLYCLEANFILES=versioninfo vcaliasrev myslave logmonitor controlsync bogofilter-qfe \
 svctool indimail_settings.c cronlist crypt create_services INSTALL INSTALL-RPM INSTALL-MYSQL \
 indimail.spec cscope.* *.dSYM inc_deps lib_deps socket.lib indimail-@VERSION@-rpmlintrc \
-indimail-epm.list README-CLUSTER tls-cert-check mailzipper perm_list RELEASE-Notes .gitignore
+indimail-epm.list README-CLUSTER tls-cert-check mailzipper perm_list RELEASE-Notes
+
+DISTCLEANFILES=.gitignore
 
 vuserinfo_SOURCES = vuserinfo.c
 vuserinfo_LDADD = @auth_libs@
