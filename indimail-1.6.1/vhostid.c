@@ -43,7 +43,7 @@ main(argc, argv)
 	switch (HostAction)
 	{
 	case HOST_SELECT:
-		printf("%-30s %s\n", "Hostid", "Ip Address");
+		printf("%-30s %s\n", "Hostid", "IP Address");
 		if(*HostId && (tmphost_line = vauth_getipaddr(HostId)))
 			printf("%-30s %s\n", HostId, tmphost_line);
 		else
