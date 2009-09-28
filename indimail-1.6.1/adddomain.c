@@ -1,5 +1,8 @@
 /*
  * $Log: adddomain.c,v $
+ * Revision 2.15  2009-09-28 13:53:29+05:30  Cprogrammer
+ * added option chk_rcpt to selectively add domains to chkrcptdomains
+ *
  * Revision 2.14  2009-09-23 14:59:21+05:30  Cprogrammer
  * change for new runcmmd()
  *
@@ -75,11 +78,11 @@
 #include <sys/stat.h>
 
 #ifndef	lint
-static char     sccsid[] = "$Id: adddomain.c,v 2.14 2009-09-23 14:59:21+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: adddomain.c,v 2.15 2009-09-28 13:53:29+05:30 Cprogrammer Stab mbhangui $";
 #endif
 
 int
-vadddomain(char *domain, char *ipaddr, char *dir, uid_t uid, gid_t gid)
+vadddomain(char *domain, char *ipaddr, char *dir, uid_t uid, gid_t gid, int chk_rcpt)
 {
 	FILE           *fs;
 	char           *ptr;
@@ -233,14 +236,17 @@ vadddomain(char *domain, char *ipaddr, char *dir, uid_t uid, gid_t gid)
 			vdelfiles(tmpbuf, 0, 0);
 			return(-1);
 		}
-		snprintf(tmpbuf, MAX_BUFF, "%s/control/chkrcptdomains", dir);
-		if (update_file(tmpbuf, domain, INDIMAIL_QMAIL_MODE))
+		if (chk_rcpt)
 		{
-			snprintf(tmpbuf, MAX_BUFF, "%s/domains/%s", dir, domain);
-			del_domain_assign(domain, tmpbuf, uid, gid);
-			del_control(domain);
-			vdelfiles(tmpbuf, 0, 0);
-			return(-1);
+			snprintf(tmpbuf, MAX_BUFF, "%s/control/chkrcptdomains", dir);
+			if (update_file(tmpbuf, domain, INDIMAIL_QMAIL_MODE))
+			{
+				snprintf(tmpbuf, MAX_BUFF, "%s/domains/%s", dir, domain);
+				del_domain_assign(domain, tmpbuf, uid, gid);
+				del_control(domain);
+				vdelfiles(tmpbuf, 0, 0);
+				return(-1);
+			}
 		}
 		CreateDomainDirs(domain, uid, gid);
 	}

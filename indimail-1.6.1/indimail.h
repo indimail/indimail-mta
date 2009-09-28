@@ -1,5 +1,8 @@
 /*
  * $Log: indimail.h,v $
+ * Revision 2.180  2009-09-28 13:45:47+05:30  Cprogrammer
+ * added chk_rcpt argument to vadddomain
+ *
  * Revision 2.179  2009-09-25 23:49:31+05:30  Cprogrammer
  * changed mdir_t to signed
  *
@@ -851,7 +854,7 @@
 #define INDIMAILH_H
 
 #ifndef	lint
-static char     sccsidh[] = "$Id: indimail.h,v 2.179 2009-09-25 23:49:31+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsidh[] = "$Id: indimail.h,v 2.180 2009-09-28 13:45:47+05:30 Cprogrammer Stab mbhangui $";
 #endif
 
 #include "config.h"
@@ -1457,7 +1460,7 @@ struct vlimits {
 int             timeoutread(int, int, char *, int);
 int             timeoutwrite(int, int, char *, int);
 int             pipe_exec(char **, char *, int);
-int             vadddomain(char *, char *, char *, uid_t, gid_t);
+int             vadddomain(char *, char *, char *, uid_t, gid_t, int);
 int             vaddaliasdomain(char *, char *);
 int             is_alias_domain(char *);
 int             vdeldomain(char *);

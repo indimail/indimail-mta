@@ -1,5 +1,8 @@
 /*
  * $Log: vadddomain.c,v $
+ * Revision 2.25  2009-09-28 13:47:34+05:30  Cprogrammer
+ * added -C option to allow selection of recipient check for a domain
+ *
  * Revision 2.24  2009-03-06 19:53:55+05:30  Cprogrammer
  * allow adddomain to proceed if postmaster id exists
  *
@@ -137,7 +140,7 @@
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vadddomain.c,v 2.24 2009-03-06 19:53:55+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: vadddomain.c,v 2.25 2009-09-28 13:47:34+05:30 Cprogrammer Stab mbhangui $";
 #endif
 
 
@@ -152,14 +155,14 @@ uid_t           Uid, a_uid;
 gid_t           Gid, a_gid;
 
 void            usage();
-int             get_options(int argc, char **argv);
+int             get_options(int argc, char **argv, int *);
 
 int
 main(argc, argv)
 	int             argc;
 	char           *argv[];
 {
-	int             err;
+	int             err, chk_rcpt;
 	uid_t           uid;
 	gid_t           gid;
 	extern int      create_flag;
@@ -171,7 +174,7 @@ main(argc, argv)
 	int             is_dist, user_present, total;
 #endif
 
-	if (get_options(argc, argv))
+	if (get_options(argc, argv, &chk_rcpt))
 		return(1);
 	if (!isvalid_domain(Domain))
 	{
@@ -209,13 +212,21 @@ main(argc, argv)
 		} else
 			scopy(Dir, INDIMAILDIR, MAX_BUFF);
 	}
-	if ((err = vadddomain(Domain, ipaddr, Dir, Uid, Gid)) != VA_SUCCESS)
+	/*
+	 * add domain to virtualdomains and optionally to chkrcptdomains
+	 * add domain to /var/indimail/users/assign, /var/indimail/users/cdb
+	 * create .qmail-default file
+	 */
+	if ((err = vadddomain(Domain, ipaddr, Dir, Uid, Gid, chk_rcpt)) != VA_SUCCESS)
 	{
 		error_stack(stderr, 0);
 		vclose();
 		return(err);
 	}
 #ifdef CLUSTERED_SITE
+	/*
+	 * add domain to dbinfo
+	 */
 	if (distributed >= 0)
 	{
 		if (!(localIP = get_local_ip()))
@@ -277,6 +288,9 @@ main(argc, argv)
 		}
 	}
 	create_flag = 1;
+	/*
+	 * Add the postmaster user
+	 */
 #ifdef CLUSTERED_SITE
 	snprintf(email, MAX_BUFF, "postmaster@%s", Domain);
 	if ((is_dist = is_distributed_domain(Domain)) == -1)
@@ -310,6 +324,7 @@ main(argc, argv)
 			return(err);
 		}
 	}
+	/* set quota for postmaster */
 	if (Quota[0] != 0)
 		vsetuserquota("postmaster", Domain, Quota);
 	vclose();
@@ -317,7 +332,7 @@ main(argc, argv)
 }
 
 int
-get_options(int argc, char **argv)
+get_options(int argc, char **argv, int *chk_rcpt)
 {
 	int             c;
 	int             errflag;
@@ -331,14 +346,14 @@ get_options(int argc, char **argv)
 	Gid = indimailgid;
 	Apop = USE_POP;
 	Bounce = 1;
-	errflag = 0;
+	*chk_rcpt = errflag = 0;
 #ifdef CLUSTERED_SITE
 	*sqlserver = *database = *dbuser = *dbpass = 0;
 	dbport = -1;
 	distributed = -1;
-	scopy(optbuf, "atT:q:be:u:Vvci:g:d:D:S:U:P:p:O", MAX_BUFF);
+	scopy(optbuf, "atT:q:be:u:VvCci:g:d:D:S:U:P:p:O", MAX_BUFF);
 #else
-	scopy(optbuf, "atT:q:be:u:Vvi:g:d:O", MAX_BUFF);
+	scopy(optbuf, "atT:q:be:u:VvCi:g:d:O", MAX_BUFF);
 #endif
 #ifdef VFILTER
 	scat(optbuf, "f", MAX_BUFF);
@@ -355,6 +370,9 @@ get_options(int argc, char **argv)
 			break;
 		case 'd':
 			scopy(Dir, optarg, MAX_BUFF);
+			break;
+		case 'C':
+			*chk_rcpt = 1;
 			break;
 #ifdef CLUSTERED_SITE
 		case 'c':
@@ -461,6 +479,7 @@ usage()
 	printf("options: -V print version number\n");
 	printf("         -v verbose\n");
 	printf("         -q quota_in_bytes (sets the quota for postmaster account)\n");
+	printf("         -C (Do recipient check for this domain)\n");
 	printf("         -b (bounces all mail that doesn't match a user, default)\n");
 	printf("         -e [email_address|maildir] (forwards all non matching user to this address [*])\n");
 	printf("         -u user (sets the uid/gid based on a user in /etc/passwd)\n");
