@@ -1,5 +1,8 @@
 #
 # $Log: indimail.spec.in,v $
+# Revision 2.86  2009-09-30 00:19:57+05:30  Cprogrammer
+# made vmovuser, vmoduser, vsetuserquota setuid
+#
 # Revision 2.85  2009-09-20 12:13:43+05:30  Cprogrammer
 # libtool 2.x version
 #
@@ -265,7 +268,7 @@
 # rpm spec file for indimail
 #
 #
-# $Id: indimail.spec.in,v 2.85 2009-09-20 12:13:43+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 2.86 2009-09-30 00:19:57+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %define _unpackaged_files_terminate_build 1
 
@@ -1058,8 +1061,11 @@ fi
 %attr(6511,qscand,qmail)                %{_prefix}/bin/qhpsi
 %attr(6511,qmailq,qmail)                %{_prefix}/bin/qmail-queue
 %attr(4555,root,root)                   %{_prefix}/bin/vrenameuser
+%attr(4555,root,root)                   %{_prefix}/bin/vmoveuser
 %attr(4555,root,root)                   %{_prefix}/bin/vuserinfo
 %attr(4555,root,root)                   %{_prefix}/bin/vrenamedomain
+%attr(4555,root,root)                   %{_prefix}/bin/vmoduser
+%attr(4555,root,root)                   %{_prefix}/bin/vsetuserquota
 %attr(4555,root,root)                   %{_prefix}/bin/vaddaliasdomain
 %attr(4511,qscand,qscand)               %{_prefix}/bin/qscanq
 %attr(4555,root,root)                   %{_prefix}/bin/vadduser
@@ -1093,7 +1099,6 @@ fi
 %attr(555,root,qmail)                   %{_prefix}/bin/ddist
 %attr(555,root,qmail)                   %{_prefix}/bin/822headerfilter
 %attr(555,root,qmail)                   %{_prefix}/bin/smtp-matchup
-%attr(555,root,qmail)                   %{_prefix}/bin/vmoveuser
 %attr(500,root,qmail)                   %{_prefix}/bin/qmail-newu
 %attr(511,root,qmail)                   %{_prefix}/bin/qmail-pw2u
 %attr(555,root,qmail)                   %{_prefix}/bin/bogofilter-qfe
@@ -1249,7 +1254,6 @@ fi
 %attr(555,root,qmail)                   %{_prefix}/bin/testzero
 %attr(555,root,qmail)                   %{_prefix}/bin/qmail-cat
 %attr(555,root,qmail)                   %{_prefix}/bin/qmail-poppass
-%attr(555,root,qmail)                   %{_prefix}/bin/vsetuserquota
 %attr(555,root,qmail)                   %{_prefix}/bin/failures
 %attr(555,root,qmail)                   %{_prefix}/bin/vadduserl
 %attr(555,root,qmail)                   %{_prefix}/bin/rsmtp
@@ -1266,7 +1270,6 @@ fi
 %attr(555,root,qmail)                   %{_prefix}/bin/fixcrio
 %attr(555,root,qmail)                   %{_prefix}/bin/qscanq-stdin
 %attr(555,root,qmail)                   %{_prefix}/bin/rsmtpsenders
-%attr(555,root,qmail)                   %{_prefix}/bin/vmoduser
 %attr(555,root,qmail)                   %{_prefix}/bin/queue-fix
 %attr(555,root,qmail)                   %{_prefix}/bin/822body
 %attr(555,root,qmail)                   %{_prefix}/bin/envconf
