@@ -1,0 +1,163 @@
+.LL 8i
+.TH vdelivermail 8
+.SH NAME
+vdelivermail \- deliver mails to users in a virtual domain
+
+.SH SYNOPSYS
+\fBvdelivermail\fR [\fB""\fR] [\fIdefault account\fR]
+
+.SH DESCRIPTION
+.PP
+\fBvdelivermail\fR is called by \fBqmail-local\fR because of instruction in .qmail-default
+file to deliver email to a virtual user. \fBvdelivermail\fR is the MDA for IndiMail. Along with a
+wrapper postdel, \fBvdelivermail\fR can be used as the MDA for postfix also. \fBqmail-local\fR
+sets the environment variables EXT and HOST which is used by \fBvdelivermail\fR to set the
+user and the domain component of the email address. For postfix, these two environment
+variables are set by postdel. If the username is quoted, the quotes are removed. The
+user@domain is then searched in the authentication database. If there are any system problems
+due to which \fBvdelivermail\fR is unable to locate the user, it exits with the code 111
+and the mail gets deferred. If the domain is a clustered domain, \fBvdelivermail\fR attempts
+to find the host for the user and calls qmail-remote to deliver the mail in case the host
+is different from the current host. Else if QMAIL_EXT is set during compile time,
+\fBvdelivermail\fR attempts to locate the username based on Qmail Extensions. If the user
+is not found or user is found but is inactive action as per delivery instruction
+(third argument to \fBvdelivermail\fR) is taken. If the user is active, \fBvdelivermail\fR
+checks for any forward delivery (including aliases) and delivers appropriately. While
+delivering, \fBvdelivermail\fR creates the inbox (Maildir format) if the directories do
+not exist.
+.PP
+\fBvdelivermail\fR defers the mail if stick bit is set on the Maildir to which the mail is
+being delivered.
+.PP
+\fBvdelivermail\fR adds the following headers on delivery of the mail to a Maildir
+.nr step 1 1
+.IP \n[step] 3
+Delivered-To: specifying the address to which the mail has been delivered
+.IP \n+[step]
+Return-Path: specifying the sender's email address.
+.IP \n+[step]
+X-Filter: specifying if the mail has been filtered through vfilter.
+.IP \n+[step]
+Received: specifying the date and time, the mail was received and delivered.
+.PP
+\fBvdelivermail\fR looks up the qmail control files blackholedsenders and blackholedpatterns.
+If the sender's email address matches an entry in these control files, \fBvdelivermail\fR
+discards the mail without bouncing the mail to the sender. A line in these files may be of
+the form @host, meaning every address at host. These files are also used by \fBqmail-smtpd\fR
+causing SMTP sessions to get blackholed.
+
+blackholedpatterns gives qmail-smtpd the ability to blackhole E-Mails by comparing the sender
+address with a REGEX pattern in blackholedpatterns.
+Example:
+
+*@earthlink.net
+!fred@earthlink.net
+[0-9][0-9][0-9][0-9][0-9]@[0-9][0-9][0-9].com
+answerme@save*
+*%*
+
+blackholedpatterns  file  with  this contents stops all mail from earthlink except from
+fred@earthlink.net. It also stops all  mail  with  addresses  like:  12345@123.com  and
+answerme@savetrees.com.  Further, any E-Mail with a sender address containing a percent sign (%) is rejected.
+
+.SH Quota Checking
+.PP
+If the size of the mail is within the quota, or if the size of the mail is
+less than QUOTA_MAILSIZE (defined in indimail.h) but would bring the user overquota,
+the mail is delivered and the user's current quota usage updated. Else the mail is
+bounced back with Over Quota message. Also if INDIMAIL/bin/overquota.sh exists, the
+command is executed with the following arguments
+
+ maildir_path Message_size Current_disk_usage Current_mailcount quota
+
+.PP
+The command overquota.sh can be changed by setting the environment variable OVERQUOTA_CMD.
+The default behaviour of bouncing mails on overquota can be changed by setting HOLDOVERQUOTA
+environment variable or by having a file holdoverquota in the user's homedir. In this case,
+the mail will be deferred till the queuelifetime gets reached. If HOLDOVERQUOTA is not defined
+and neither the file holdoverquota is present \fBvdelivermail\fR (if the user is already
+above quota) sets the BOUNCE FLAG for the user. Subsequent deliveries are bounced without any
+quota checking. Setting of the BOUNCE_FLAG reduces the load on the server when multiple mails
+are being sent to an overquota user. The BOUNCE FLAG is removed only after the user logs in
+and clears the mails to reduce the quota usage. Site administrators can customize
+Over Quota Bounce messages, by setting environment variables
+QUOTAWARN1, QUOTAWARN2 ... upto QUOTAWARN10. These variables should be set to a percentage
+quota usage at which warning should be sent. In addition to the EXT and HOST environment
+variable, RPLINE variable is also used by \fBvdelivermail\fR to set the value for Return-Path
+in the mail headers. 
+.PP
+The quota limit for a user can be set by the administrator either in size, number of mails or
+combination of both. e.g. 40000,2000S means quota of 40000 Bytes and 2000 mails. Administrator
+can use either vsetuserquota or vmoduser programs.
+.PP
+Additionally per day limit on deliveries per user can be set by specifying the environment
+variable MAILCOUNT_LIMIT. This can be set in the qmail-send run file. If the number of
+deliveries for a user exceeds this number, the mail is bounced back to the sender with over
+quota message.
+
+.SH dot-qmail processing
+
+.PP
+Every virtualdomain get's it's own directory under INDIMAIL/domains. qmail's user/assign file
+gets an entry for each domain that points qmail-local deliveries into this directory.
+Therefore, all normal .qmail file processing works in each virtual domain. .qmail files
+just need the user name extension to work, i.e. .qmail-joe for user joe. ezmlm uses .qmail
+files for processing, so it will work under IndiMail.
+.PP
+If no user matches a .qmail file then the .qmail-default file is processed. This file
+contains the \fBvdelivermail\fR program. This program reads the authentication database
+(MySQL or vpasswd.cdb) and delivers the mail into the users directory. The last parameter
+of \fBvdelivermail\fR can be a maildir owned by indimail/indimail so that all default mail
+reception ends up there. Or it can have an email address, and all default mail is forwarded
+to this address. Last but not least, the last parameter to \fBvdelivermail\fR can be the
+text bounce-no-mailbox. This will bounce all non matching emails back to the sender.
+.PP
+In addition to .qmail files, IndiMail has its dot-qmail processing called valias. valias can
+be either the file .qmail in the user's home directory or an entry made in MySQL(1) using the
+valias(1) program.
+
+.SH Mail Alerts
+\fBvdelivermail\fR sends alerts in the form of UDP packets to a host and port which can be
+specified in the following two ways
+
+.nr step 1 1
+.IP \n[step] 3
+By defining environment variables MAILHOST_ALERT and MAILHOST_PORT.
+.IP \n+[step]
+By creating a file mailalert.cfg in the qmail/control directory. The first line of this file should have the line host x.x.x.x where x.x.x.x is an IP address. The second line of this file should have the line port port_num where port_num is an integer.
+
+.SH OPTIONS
+.TP
+[\fB""\fR]
+Blank double quote for backward compatibility
+.TP
+[\fIdefault account for delivery\fR]
+If the email does match any .qmail-user file and also does not match any virtual domain user,
+this is the default delivery instructions. This may be one of the four values given below.
+ 
+.nr step 1 1
+.IP \n[step] 3
+Full path to a indimail user directory 
+.IP \n+[step]
+email address to forward email to
+.IP \n+[step]
+the string bounce-no-mailbox to bounce the email back to the sender.
+.IP \n+[step]
+Address in SMTPROUTE format to which \fBvdelivermail\fR should use SMTP to deliver the mail. e.g. indi.com:202.144.76.55:25 where indi.com is the local domain, 202.144.76.55 is the IP address of an SMTP server for indi.com and 25 is the SMTP port.
+
+.SH RETURN VALUE
+.TP
+.IP \[bu] 2
+0
+if all steps were successful. 
+.TP
+.IP \[bu] 2
+100
+for permanent errors. i.e. if user is over quota or bounce-no-mailbox is set and no matching user is found.
+.TP
+.IP \[bu] 2
+111
+for all temporary error occurs during mail delivery and without the error, the mail would have got delivered
+
+.SH "SEE ALSO"
+vmoduser(1), vsetuserquota(1)

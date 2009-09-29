@@ -1,0 +1,47 @@
+.LL 8i
+.TH valias 1
+.SH NAME
+valias \- add/modify/delete alias for virtual users
+
+.SH SYNOPSYS
+\fBvalias\fR [\fIoptions\fR] [\fIemail_address\fR | \fIdomain_name\fR]
+
+.SH DESCRIPTION
+.PP
+\fBvalias\fR adds valias entries for virtual users in the table valias. valias entries are
+equivalent to .qmail files. valias is useful in cases where large number of forwarding/aliases
+are to be maintained and having numerous physical files on the file system could prove to be
+cumbersome/inefficient or impossible (i.e. > 32768 on some filesystems).
+
+.SH OPTIONS
+.PP
+.TP
+\fB\-V\fR
+Display Version Numbers
+.TP
+\fB\-v\fR
+Set Verbose mode
+.TP
+\fB\-s\fR
+Show aliases (domain_name needs to be given)
+.TP
+\fB\-d\fR \fIalias_line\fR
+Delete alias line corresponding to alias_line
+.TP
+\fB\-i\fR \fIalias_line\fR
+Insert new alias line
+.TP
+\fB\-u\fR \fIold_alias_line\fR \fB\-i\fR \fInew_alias_line\fR
+Change an existing alias_line
+.TP
+\fB\-m\fR
+Ignore requirement of email_address to be local (option for clustered domain only)
+.TP
+\fIemail_address\fR
+Should point to an existing deliverable address on the host where valias is executed.
+
+.SH RETURN VALUE
+0 in   case of success, 1 in case of any failure.
+
+.SH "SEE ALSO"
+vcalias(1), vgroup(1), vdelivermail(1), vrenamedomain(1), vreorg(1)

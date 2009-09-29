@@ -1,0 +1,148 @@
+.LL 8i
+.TH vadddomain 1
+.SH NAME
+vadddomain \- Create a virtual domain
+
+.SH SYNOPSYS
+.B vadddomain
+[
+.I options
+]
+.I virtual_domain
+[
+\fIpostmaster_password\fR
+]
+
+.SH DESCRIPTION
+
+.PP
+.B vadddomain
+add a new virtual domain. It creates the necessary \fBqmail\fR control files and
+a \fB.qmail-default\fR containing delivery instructions.
+It also adds the RFC821 required postmaster account. Carries out the following steps
+to create the domain.
+
+.nr step 1 1
+.IP \n[step] 3
+Create the domains directory (/var/indimail/domains/\fIvirtual_domain\fR)
+.IP \n+[step]
+Create the \fB.qmail-default\fR file in the domains directory.
+.IP \n+[step]
+Add the domain to qmail assign file.
+.IP \n+[step]
+Add the domain to chkrcptdomains ('-C' option).
+.IP \n+[step]
+Add the domain to rcpthosts, virtualdomains (and etrnhosts for domains with ETRN/AUTOTURN support).
+.IP \n+[step]
+Create table indimail and indibak if used for the first time.
+.IP \n+[step]
+Sends SIGHUP to qmail-send.
+.IP \n+[step]
+Add entry to table dbinfo and mcdfile for a clustered domain ('-D' option).
+.IP \n+[step]
+Create the postmaster account for a non-clustered domain. For a clustered domain, the postmaster account is created on the first host on which the domain is created.
+
+.SH OPTIONS
+.PP
+\fIvirtual_domain\fR is mandatory. Rest are optional. If \fIpostmaster_password\fB is not given, \fBvadddomain\fR
+will prompt for the password.
+.TP
+\fB\-V\fR
+print version
+.TP
+\fB\-v\fR
+make \fBvaddomain\fR be verbose
+.TP
+\fB\-q\fR \fIquota_in_bytes\fR
+sets the quota for postmaster account
+.TP
+\fB\-b\fR
+bounces all mail that doesn't match a user, default
+.TP
+\fB\-e\fR
+email_address (forwards all non matching user to this address)
+.TP
+\fB\-u\fR \fIuser\fR
+sets the uid/gid based on a user in /etc/passwd. Default is user \fBindimail\fR
+.TP
+\fB\-d\fR \fIdir\fR
+sets the dir to use for this domain
+.TP
+\fB\-i\fR \fIuid\fR
+sets the uid to use for this domain
+.TP
+\fB\-g\fR \fIgid\fR
+sets the gid to use for this domain
+.TP
+\fB\-C\fR
+Sets RECIPIENT Check for this domain. \fBqmail-smtpd(8)\fR verifies all users in the RCPT TO command.
+.TP
+\fB\-a\fR
+sets the account to use APOP, default is POP
+.TP
+\fB\-O\fR
+optimize adding, for bulk adds set this for all except the last one
+.TP
+\fB\-f\fR
+sets the domain to use vfilter mechanism for mail filtering
+.TP
+\fB\-t\fR
+Enable ETRN support for the domain
+.TP
+\fB\-T\fR \fIip_address\fR
+Enable AUTOTURN Support from the IP ip_address
+.TP
+\fB\-D\fR \fIdatabase\fR
+Adds domain information to dbinfo table. This implies use of the \fB-S\fR, \fB-U\fR, \fB-P\fR, \fB-L\fR
+options additionally
+.TP
+\fB\-S\fR \fISqlServer\fR
+IP address or hostname of MySQL(1) server
+.TP
+\fB\-U\fR \fIUser\fR
+User for accessing MySQL Database
+.TP
+\fB\-P\fR \fIPassword\fR
+Password for the user to access the MySQL database
+.TP
+\fB\-p\fB \fIMySQL Port\fR
+Port to connect to for accessing the database
+.TP
+\fB\-c\fR
+Adds a clustered domain.  This implies use of the \fB-S\fR, \fB-U\fR, \fB-P\fR, \fB-L\fR options
+.TP
+\fIvirtual_domain\fR
+Name of the new virtual domain. \fInew_domain\fR can contain alphanumeric characters besides '-' and '.' . However the first and the last character cannot be '-'.
+.TP
+[\fIpostmaster password\fR]
+The password for the RFC required postmaster account. If the password is not supplied on the command line then vadddomain will prompt for the password twice.
+
+.SH RETURN VALUE
+0 if all steps were successful, non-zero otherwise. If any of the steps fail, a diagnostic message is printed.
+
+.SH NOTE
+.nr step 1 1
+.IP \n[step] 3
+The virtual domain becomes active after running this program. No additional files need to be modified. A new directory is added under INDIMAIL/domains to house all the .qmail files, configuration files for the new virtual domain. 
+.IP \n+[step]
+vadddomain has the setuid bit set and runs as root.
+.IP \n+[step]
+Domain names can contain alphanumeric characters besides '-' and '.' . However the first and the last character cannot be '-'.
+.IP \n+[step]
+The postmaster account is created as an active account.
+.IP \n+[step]
+For a clustered domain, the postmaster id is added only for the first domain part of the cluster.
+.IP \n+[step]
+The virtual domain becomes active after running this program. No additional files need to be modified. A new directory is added under INDIMAIL/domains to house all the .qmail files, configuration files for the new virtual domain. 
+.IP \n+[step]
+vadddomain has the setuid bit set and runs as root.
+.IP \n+[step]
+Domain names can contain alphanumeric characters besides '-' and '.' . However the first and the last character cannot be '-'.
+.IP \n+[step]
+The postmaster account is created as an active account.
+.IP \n+[step]
+For a clustered domain, the postmaster id is added only for the first domain added as part of the cluster.
+
+.SH "SEE ALSO"
+vaddaliasdomain(1), vmoddomain(1), vadduser(1), vdeldomain(1), vdeluser(1), vdominfo(1),
+dbinfo(1), qmail-smtpd(8), vdelivermail(8), vatrn(1)

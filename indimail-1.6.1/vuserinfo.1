@@ -1,0 +1,55 @@
+.LL 8i
+.TH vuserinfo 1
+.SH NAME
+vuserinfo \- display attributes for a virtual user
+
+.SH SYNOPSYS
+\fBvuserinfo\fR [\fIoptions\fR] \fIemail_addr\fR
+
+.SH DESCRIPTION
+\fBvuserinfo\fR displays following information for a user specified by email \fIemail_addr\fR.
+vuserinfo also displays mail folders with usage, forwarding or alias information and filters
+set for users (if the user have these enabled). \fBvuserinfo\fR has setuid bit as root to enable
+reading of user quota usage stored in \fBmaildirsize\fR.
+
+.SH OPTIONS
+.PP
+.TP
+\fB\-a\fR
+Display all fields, this is the default
+.TP
+\fB\-n\fR
+Display the Name only
+.TP
+\fB\-p\fR
+Display crypted password
+.TP
+\fB\-u\fR
+Display uid field
+.TP
+\fB\-g\fR
+Display gid field
+.TP
+\fB\-c\fR
+Display comment field
+.TP
+\fB\-d\fR
+Display directory
+.TP
+\fB\-q\fR
+Display quota field
+.TP
+\fB\-l\fR
+Display usage times
+.TP
+\fB\-m\fR
+Display Mail Summary
+.TP
+\fB\-V\fR
+Print version numbers
+
+.SH RETURN VALUE
+0 in case of success, 1 in case of any failure retrieving user information.
+
+.SH "SEE ALSO"
+vdominfo(1)

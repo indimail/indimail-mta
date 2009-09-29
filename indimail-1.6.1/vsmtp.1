@@ -1,0 +1,62 @@
+.LL 8i
+.TH vsmtp 1
+.SH NAME
+vsmtp \- Setup artificial routes for qmail-remote
+
+.SH SYNOPSYS
+.B vsmtp
+[
+.I options
+]
+[
+.I host@domain_name
+\fB\-m\fR \fImta\fR
+|
+\fB\-s\fR \fIdomain_name\fR
+]
+
+.SH DESCRIPTION
+.PP
+\fBvsmtp\fR sets up artificial routes for \fBqmail-remote(8)\fR to be able to deliver mails to the
+mailstore on host \fIhost\fR and domain \fIdomain_name\fR. This route is used by \fBqmail-remote(8)\fR
+for clustered domains. For all other domains the control/smtproutes is consulted. This information
+is stored in MySQL on a host which by nomenclature is called the \fBcontrol host\fR. In case,
+the \fBcontrol host\fR is unavailable due to any reason, qmail-remote fall backs to
+control/smtproutes and expects the MDA on the mailstore to re-route the mail to the correct
+destination.
+
+.SH OPTIONS
+.PP
+.TP
+\fB\-V\fR
+Print Version Numbers
+.TP
+\fB\-v\fR
+Sets Verbose option.
+.TP
+\fB\-s\fR
+Show smtp ports for a virtual domain or SMTP Route between a MTA host and a mailstore having the domain domain_name
+.TP
+\fB\-d\fR
+Delete SMTP Route between a MTA host and a mailstore.
+.TP
+\fB\-i\fR \fIport\fR
+Add SMTP Route between a MTA host and a mailstore
+.TP
+\fB\-u\fR \fIport\fR
+Change SMTP Route between a MTA host and a mailstore
+.TP
+\fB\-m\fR \fImta_ipaddress\fR
+The ip address of the MTA which needs a SMTP route to the mailstore.
+.TP
+\fIhost@domain\fR
+The name of the mailstore followed by '@' sign and the domain_name.
+.TP
+\fIdomain_name\fR
+The name of the virtual domain.
+
+.SH RETURN VALUES
+0 for success, 1 for any failure.
+
+.SH "SEE ALSO"
+qmail-remote(8), hostcntrl(1), vhostid(1), dbinfo(1)

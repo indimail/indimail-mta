@@ -1,0 +1,38 @@
+adminclient
+SYNOPSYS
+adminclient -h adminHost -p port -u adminUser -P adminPassword [-n certfile]
+  -c Command
+DESCRIPTION
+indisrvr is the administration client for administering IndiMail's clustered domains. It has a simple mechanism by which administrators can connect to the administration server - indisrvr and issue commands to execute any of the IndiMail programs given above.  On successful validation of password, adminclient executes the specified IndiMail administration program on the remote host running indisrvr. For security reasons, the list of these administration programs are hard-coded in the adminclient and indisrvr executable. adminclient uses environment variable ADMIN_TIMEOUT to timeout connections to indisrvr.
+
+e.g. The following command runs the command vadduser with arguments 
+test@indi.com password.
+
+adminclient -h phoenix2 -p  4000 -u admin -p adminpass -c "vadduser test@indi.com password"
+OPTIONS
+-v
+Sets Verbose option.
+
+-h adminHost
+The IP address on which command  needs to run. 
+
+-p adminPort
+A TCP/IP port or service in /etc/services on which indisrvr is running on adminHost.
+
+-u adminUser
+The administration user (maintained in mgmtaccess) for which indisrvr will
+validate the password.
+
+-P adminPass
+The password for the user specified by the -u option.
+
+-n certificate
+A client certificate which should be provided in case TLS encryption is needed
+
+-c Command 
+The command that needs to executed on the remote host adminHost. Command should be enclosed in quotes for commands requiring multiple arguments on the command line.
+
+The -h, -p, -u, -P, -v are optional. If not given, the environment variables ADMIN_HOST, ADMIN_PORT, ADMIN_USER, ADMIN_PASS will be used for these variables.
+RETURN VALUE
+Returns the return status of the remote command executed. All output printed by the remote command on stdout/stderr are printed on stdout of adminclient.
+

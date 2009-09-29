@@ -1,0 +1,40 @@
+.LL 8i
+.TH vhostid 1
+.SH NAME
+vhostid \- Add, Modify, Delete, Display IndiMail hostid mapping
+
+.SH SYNOPSYS
+\fBvhostid\fR [\fIoptions\fR] [\fIHostId\fR]
+
+.SH DESCRIPTION
+\fBvhostid\fR displays the hostid to IP address mapping used by IndiMail for clustered domains.
+Each host in a clustered setup is assigned a unique hostid with the help of \fBvhostid\fR.
+Subsequently, \fBvhostid\fR can be used to display, insert, update or delete these mappings.
+Any host added/deleted/modified is accomplished by using this program.
+
+.SH OPTIONS
+.TP
+\fB\-V\fR
+Print Version Numbers
+.TP
+\fB\-v\fR
+Sets Verbose Option
+.TP
+\fB\-s\fR
+Display hostid Mappings for all hosts (if hostid is not given on command line. Else displays the hostid to IP Address mapping only for the host with id HostId.
+.TP
+\fB\-d\fR \fIHostId\fR
+Delete IP address Mapping for HostId
+.TP
+\fB\-i\fR \fIIpaddr\fR
+Maps IP address Ipaddr to hostid HostId
+.TP
+\fB\-u\fR \fIIpaddr\fR
+(Map HostId to New_Ipaddr)
+Changes IP address for hostid Hostid to IP address Ipaddr
+
+.SH RETURN VALUE
+0 if successful, 1 for any failure.
+
+.SH "SEE ALSO"
+vsmtp(1), hostcntrl(1), dbinfo(1)
