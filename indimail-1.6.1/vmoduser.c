@@ -1,5 +1,8 @@
 /*
  * $Log: vmoduser.c,v $
+ * Revision 2.20  2009-09-30 00:23:12+05:30  Cprogrammer
+ * use setuid so that quota and vacation operation succeed
+ *
  * Revision 2.19  2009-01-27 18:16:28+05:30  Cprogrammer
  * added toggle operation for gid field int bits
  *
@@ -117,13 +120,14 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <string.h>
+#include <errno.h>
 #include <pwd.h>
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <signal.h>
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vmoduser.c,v 2.19 2009-01-27 18:16:28+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: vmoduser.c,v 2.20 2009-09-30 00:23:12+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 char            Email[MAX_BUFF];
@@ -152,8 +156,8 @@ main(argc, argv)
 	char           *argv[];
 {
 	int             err;
-#ifdef ENABLE_AUTH_LOGGING
 	uid_t           uid;
+#ifdef ENABLE_AUTH_LOGGING
 	gid_t           gid;
 #endif
 	struct passwd   PwTmp;
@@ -167,6 +171,27 @@ main(argc, argv)
 
 	if(get_options(argc, argv))
 		return(1);
+	if (indimailuid == -1 || indimailgid == -1)
+		GetIndiId(&indimailuid, &indimailgid);
+	uid = getuid();
+	if (uid != 0 && uid != indimailuid)
+	{
+		error_stack(stderr, "you must be root or indimail to run this program\n");
+		return(1);
+	}
+	if (QuotaFlag == 1 || set_vacation)
+	{
+		if (uid && setuid(0))
+		{
+			error_stack(stderr, "setuid-root: %s\n", strerror(errno));
+			return(1);
+		}
+	} else
+	if (setuid(uid))
+	{
+		error_stack(stderr, "setuid-%d: %s\n", uid, strerror(errno));
+		return(1);
+	}
 	if(set_vacation)
 		return(add_vacation(Email, vacation_file));
 	if (parse_email(Email, User, Domain, MAX_BUFF))

@@ -1,5 +1,8 @@
 /*
  * $Log: vrenameuser.c,v $
+ * Revision 2.8  2009-09-30 00:24:23+05:30  Cprogrammer
+ * added missing call to GetIndiId()
+ *
  * Revision 2.7  2008-09-17 21:39:15+05:30  Cprogrammer
  * allow root and indimail to run vrenameuser
  *
@@ -35,7 +38,7 @@
 #include <signal.h>
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vrenameuser.c,v 2.7 2008-09-17 21:39:15+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: vrenameuser.c,v 2.8 2009-09-30 00:24:23+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 char            oldEmail[MAX_BUFF];
@@ -74,6 +77,8 @@ main(argc, argv)
 		error_stack(stderr, "%s: No such domain\n", newDomain);
 		return(1);
 	}
+	if (indimailuid == -1 || indimailgid == -1)
+		GetIndiId(&indimailuid, &indimailgid);
 	myuid = getuid();
 	if (myuid != 0 && myuid != indimailuid)
 	{

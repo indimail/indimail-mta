@@ -1,5 +1,8 @@
 /*
  * $Log: vmoveuser.c,v $
+ * Revision 2.7  2009-09-30 00:24:05+05:30  Cprogrammer
+ * do setuid so that move succeeds
+ *
  * Revision 2.6  2008-08-02 09:10:32+05:30  Cprogrammer
  * use new function error_stack
  *
@@ -72,7 +75,7 @@
 #include <sys/stat.h>
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vmoveuser.c,v 2.6 2008-08-02 09:10:32+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: vmoveuser.c,v 2.7 2009-09-30 00:24:05+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 int
@@ -106,6 +109,14 @@ main(int argc, char **argv)
 			tmpstr = argv[0];
 		fprintf(stderr, "USAGE: %s user new_dir\n", tmpstr);
 		return (1);
+	}
+	if (indimailuid == -1 || indimailgid == -1)
+		GetIndiId(&indimailuid, &indimailgid);
+	uid = getuid();
+	if (uid != 0 && uid != indimailuid)
+	{
+		error_stack(stderr, "you must be root or indimail to run this program\n");
+		return(1);
 	}
 	User = argv[1];
 	NewDir = argv[2];
@@ -189,17 +200,18 @@ main(int argc, char **argv)
 		free(ptr2);
 	}
 #endif
-	/*
-	 * move directory 
-	 */
+	/*- move directory */
+	if (setuid(0))
+	{
+		perror("setuid-root");
+		return(1);
+	}
 	if (!access(OldDir, F_OK) && MoveFile(OldDir, NewDir))
 	{
 		fprintf(stderr, "MoveFile: %s->%s: %s\n", OldDir, pw->pw_dir, strerror(errno));
 		return (1);
 	}
-	/*
-	 * update database 
-	 */
+	/*- update database */
 	if ((i = vauth_setpw(pw, Domain)))
 	{
 		error_stack(stderr, "vauth_setpw failed\n");
