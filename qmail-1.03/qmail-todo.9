@@ -73,6 +73,24 @@ it will reread
 and
 .IR virtualdomains .
 
+.SH INTERNALS
+Communication between qmail-send and qmail-todo
+
+qmail-todo -> qmail-send
+   D[LRB]<mesgid>\\0
+    Start delivery for new message with id <messid>.
+    the character L, R or B defines the type
+    of delivery, local, remote or both respectively.
+   L<string>\\0
+    Dump string to the logger without adding additional \\n or similar.
+
+qmail-send -> qmail-todo
+   H   Got a SIGHUP reread ~/control/locals and ~/control/virtualdomains
+   X   Quit ASAP.
+
+qmail-todo sends "\\0" terminated messages whereas qmail-send just send one
+character to qmail-todo.
+
 .SH "SEE ALSO"
 qmail-queue(8),
 qmail-send(8),

@@ -36,4 +36,9 @@ eps*/Makefile
 eps*/Makefile.in
 eps*/libtool
 eps*/.libs
+dbinfo.1
+indimail.5
+inlookup.8
+vadddomain.1
+vdelivermail.8
 .gitignore

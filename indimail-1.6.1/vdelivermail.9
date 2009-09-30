@@ -144,6 +144,16 @@ email address to forward email to
 the string bounce-no-mailbox to bounce the email back to the sender.
 .IP \n+[step]
 Address in SMTPROUTE format to which \fBvdelivermail\fR should use SMTP to deliver the mail. e.g. indi.com:202.144.76.55:25 where indi.com is the local domain, 202.144.76.55 is the IP address of an SMTP server for indi.com and 25 is the SMTP port.
+.PP
+Once vdelivermail is started up, it checks existence of the virtual domain user. If the user
+exists, the email is delivered into the user's Maildir. If IndiMail was
+configured for hard quotas (default is yes with 5 Meg quota), then the size of the users
+current email files in their Maildir/new and Maildir/cur directories and other folders
+(excluding Trash) are counted and added to \fImaildirsize\fR. If the user is over quota the
+email is bounced back to the user with a bounce message that can be customized (See the 
+section '\fBQuota Checking\fR' above. If the message is 1Kbytes or smaller the email will always
+be delivered. This is so system administration programs can always get a message through
+to the user. 
 
 .SH RETURN VALUE
 .TP

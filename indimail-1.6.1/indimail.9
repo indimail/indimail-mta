@@ -1,0 +1,308 @@
+.LL 8i
+.TH indimail 5
+.SH NAME
+IndiMail -\ A Multi-host distributed Mail Server
+
+.SH DESCRIPTION
+IndiMail is an email server built using following packages
+.IP \[bu] 2
+qmail
+.IP \[bu]
+serialmail
+.IP \[bu]
+qmailanalog
+.IP \[bu]
+dotforward
+.IP \[bu]
+fastforward
+.IP \[bu]
+mess822
+.IP \[bu]
+daemontools
+.IP \[bu]
+ucspi-tcp
+.IP \[bu]
+Courier IMAP/POP3
+.IP \[bu]
+Bogofilter - A Bayesian Spam Filter
+.IP \[bu]
+Fetchmail
+.PP
+other useful collection which are needed on a typical email server
+
+.IP \[bu] 2
+pack
+.IP \[bu]
+unpack
+.IP \[bu]
+altermime
+.IP \[bu]
+ripmime
+.IP \[bu]
+flash
+.PP
+IndiMail also provides Management of Virtual domains. IndiMail works on 32 / 64 bit Unix
+platforms.
+.PP
+IndiMail provides qmail-remote / qmail-local, proxyimap & proxypop3 which are user-location
+aware. This gives IndiMail the ability to distribute the users across multiple hosts using
+standard non-proprietary protocols and RFCs. The other use of user-location aware property
+is to have a single domain consisting of a heterogeneous email server environment (with some
+users on MS Exchange and some on Lotus Notes some on IndiMail). You can have multiple hosts
+hosting a domain placed geographically anywhere and tied up by IndiMail. The architecture does
+not force a filesystem architecture like NFS to be used to distribute the users.
+.PP
+The distributed architecture in IndiMail is achieved by having a central storage of user location
+information in a MySQL database. This database is referred to as the \fBcentral database\fR. It
+consists of the following tables
+
+.nr step 1 1
+.IP \n[step] 2
+hostcntrl
+.IP \n+[step]
+host_table
+.IP \n+[step]
+dbinfo
+.IP \n+[step]
+smtp_port
+.IP \n+[step]
+mgmtaccess
+.IP \n+[step]
+vpriv
+.PP
+The table \fIhostcntrl\fR contains the user, domain and hostid. hostid is a unique identification
+which needs to be assigned to every server on which email accounts need to be created. These
+servers are also called \fImailstores\fR. The program \fBhostcntrl(1)\fR can be used to add,
+modify, delete entries to the table \fIhostcntrl\fR. Each \fIhostid\fR needs to be mapped to
+an IP address. This is maintained in the table \fIhost_table\fR. A program called
+\fBvhostid(1)\fR can be used to add, modify or delete entries in \fIhost_table\fR.
+.PP
+To be able to access the \fBcentral database\fR, IndiMail programs need the following control
+files in the directory INDIMAIL/control
+
+.nr step 1 1
+.IP \n[step] 2
+host.master
+.IP \n+[step]
+host.cntrl
+.PP
+These control file contains the ip address or hostname of the MySQL database corresponding to
+the \fBcentral database\fR. If you plan to have a master-slave MySQL architecture, you can have
+entry in \fIhost.master\fR pointing to the MySQL master database and have entry in \fIhost.cntrl\fR
+pointing to the MySQL slave database. All indimail programs ensure that all writes go to the
+master database and reads happen only from the slave database. The control files \fIhost.master\fR,
+\fIhost.cntrl\fR can be overriden by the environment variables \fBMASTER_HOST\fR and \fBCNTRL_HOST\fR.
+.PP
+In a distributed setup, you can have multiple servers with each server having its own set of
+local users. The information for these users are stored in a MySQL database known as the
+\fBlocal database\fR. You can have multiple \fBlocal databases\fR with each database serving one
+email server. You can also club user information for multiple email servers in a single MySQL
+\fBlocal database\fR. This flexibility helps IndiMail achieve scalability.
+So apart from the user's location which is maintained in the \fBcentral database\fR, other user
+attributes like home directory, gecos, quota, access rights are maintained in another MySQL
+database called the \fBlocal database\fR.
+.PP
+Access to the \fBlocal database\fR to indimail programs is made easy by having the parameters
+needed to connect to the MySQL \fBlocal datbase\fR in a table called \fIdbinfo\fR on the
+\fBcentral database\fR. The same information can be maintained in a control file 
+\fBINDIMAIL/control/mcdinfo\fR. The file \fImcdinfo\fR allows one to maintain and sync information about
+each and every \fImailstore\fR on the \fIdbinfo\fR table. The updation depends on the timestamp
+of the \fImcdinfo\fR file and \fIdbinfo\fR table. The moment \fImcdinfo\fR is updated,
+the same information gets updated in the \fIdbinfo\fR table. The moment \fIdbinfo\fR gets updated,
+the file \fImcdinfo\fR on all other \fImailstore\fR (older than the \fIdbinfo\fR table) gets updated.
+The entries in \fIdbinfo\fR table / \fImcdinfo\fR file can be seen by running the \fBdbinfo(1)\fR
+program. Whenever a new \fImailstore\fR is added/removed, the entry for the \fImailstore\fR and the corresponding
+MySQL \fBlocal database\fR needs to be added/removed in the \fIdbinfo\fR table or \fImcdinfo\fR file.
+.PP
+In case you do not require a multi-host setup, IndiMail does not require \fBcentral database\fR. Programs
+just need to connect to the \fBlocal database\fR which can be configured by having the control
+file INDIMAIL/control/host.mysql. The control file contains the ip address or hostname of the
+MySQL \fBlocal database\fR.
+
+.SH Virtual Domains
+.PP
+IndiMail has an idea of email domains that are "local" and "virtual". Local domains are ones
+which primarily match against /etc/passwd. Virtual domains match against domains listed in
+the control file INDIMAIL/control/virtualdomains. IndiMail makes use of the INDIMAIL/users/assign
+file and \fIvirtualdomains\fR file. The \fIusers/assign\fR file gets compiled into a \fIusers/cdb\fR
+file. It is a hashed database to speed searches for patterns. If a pattern is matched then
+IndiMail delivers the email to the directory defined in the file using the uid and gid which is
+also defined. IndiMail makes use of this method to deliver all virtual domain email as the
+single uid/gid indimail/indimail. It also uses it to take delivery instructions from
+INDIMAIL/domains/<virtualdomain>/.qmail-default file. Once qmail-local gets the information from the \fIusers/assign\fR file it performs standard .qmail
+file processing in the directory. Normal .qmail-<user> files can be used for forwarding, aliases
+or invoking programs such as ezmlm. If no matches are found qmail-local looks for a .qmail-default
+file. This is the last stage in qmail-local's delivery mechanism. qmail-local uses this file to
+invoke the vdelivermail program. This program takes two parameters, the first is not used (it is
+there for backward compatibility). The second parameter is the default delivery if a virtual
+domain user can not be found. Basically, it can be one of the following
+
+.nr step 1 1
+.IP \n[step] 3
+Full path to a indimail user directory 
+.IP \n+[step]
+email address to forward email to
+.IP \n+[step]
+the string bounce-no-mailbox to bounce the email back to the sender.
+.IP \n+[step]
+Address in SMTPROUTE format to which \fBvdelivermail\fR should use SMTP to deliver the mail.
+e.g. indimail.org:192.168.1.55:25 where indimail.org is the local domain, 192.168.1.55 is the IP
+address of an SMTP server for indimail.org and 25 is the SMTP port.
+
+.SH Directory structure
+.PP
+IndiMail gets it's own home directory. Under this directory there are the following:
+.RS
+.TS
+l l.
+Directory     | Description
+_
+bin           | All user binaries
+sbin          | Binaries required by administrators
+lib           | Shared/Development Libraries
+include       | Include files for development
+users         | assign, cdb file
+domains       | Virtual domain directories, each having .qmail-default file
+.TE
+
+.SH Virtual domain Directory Structure Layout
+IndiMail uses an adaptive directory structure based on a table \fIdir-control\fR which is
+automatically managed by the core programs \fBvadduser(1)\fR and \fBvdeluser\fR. The basic
+idea is to break up the user Maildir directories across multiple directories and sub
+directories so that there are never more than 100 user directories in a single directory.
+
+In a single file system, the default directory setup allows for 62 directories in 3 levels
+and 100 user directories per directory. The total number of user directories is equal to
+(62 * 100) + (62 * 62 * 100) + (62 * 62 * 62 * 100) = over 24 million directories per filesystem.
+This should be more than sufficient for any site and probably goes beyond the technology
+of directory structures. 
+
+If you are going to be storing large numbers of user directories, make sure you set your
+file system to have a higher than normal percentage of inodes. 
+
+IndiMail will automatically create these directories and sub directories as needed and
+populate each directory with up to 100 user accounts. As soon as a directory reaches
+100 users it will create the next directory or sub directory and store the new users
+directory there. 
+
+You can use the \fBvreorg(8)\fR program to recreate the \fIdir-control\fR table.
+
+.SH PROGRAMS
+.nr step 1 1
+.IP \n[step] 4
+vadddomain(1)
+.IP \n+[step]
+vmoddomain(1)
+.IP \n+[step]
+vaddaliasdomain(1)
+.IP \n+[step]
+vrenamedomain(1)
+.IP \n+[step]
+vatrn(1)
+.IP \n+[step]
+vdeldomain(1)
+.IP \n+[step]
+vdominfo(1)
+.IP \n+[step]
+printdir(1)
+.IP \n+[step]
+vmoddomlimits(1)
+.IP \n+[step]
+vadduser(1)
+.IP \n+[step]
+vuserinfo(1)
+.IP \n+[step]
+vpasswd(1)
+.IP \n+[step]
+vdeluser(1)
+.IP \n+[step]
+vmoduser(1)
+.IP \n+[step]
+vsetuserquota(1)
+.IP \n+[step]
+vmoveuser(1)
+.IP \n+[step]
+vrenameuser(1)
+.IP \n+[step]
+resetquota(1)
+.IP \n+[step]
+valias(1)
+.IP \n+[step]
+vcaliasrev.sh(1)
+.IP \n+[step]
+vgroup(1)
+.IP \n+[step]
+vcalias(1)
+.IP \n+[step]
+vacation(1)
+.IP \n+[step]
+vsmtp(1)
+.IP \n+[step]
+vipmap(1)
+.IP \n+[step]
+vcfilter(1)
+.IP \n+[step]
+hostcntrl(1)
+.IP \n+[step]
+vhostid(1)
+.IP \n+[step]
+dbinfo(1)
+.IP \n+[step]
+ipchange(1)
+.IP \n+[step]
+vbulletin(1)
+.IP \n+[step]
+vfstab(1)
+.IP \n+[step]
+execmysql
+.IP \n+[step]
+chowkidar(8)
+.IP \n+[step]
+logmonitor(1)
+.IP \n+[step]
+controlsync
+.IP \n+[step]
+updatefile
+.IP \n+[step]
+vfilter(8)
+.IP \n+[step]
+vdelivermail(8)
+.IP \n+[step]
+postdel(8)
+.IP \n+[step]
+proxyimap(8)
+.IP \n+[step]
+proxypop3(8)
+.IP \n+[step]
+vproxy(8)
+.IP \n+[step]
+vchkpass(1)
+.IP \n+[step]
+InLookup(8)
+.IP \n+[step]
+inquerytest(1)
+.IP \n+[step]
+indiversion(1)
+.IP \n+[step]
+versioninfo(1)
+.IP \n+[step]
+hostsync(8)
+.IP \n+[step]
+clearopensmtp(8)
+.IP \n+[step]
+updaterules(8)
+.IP \n+[step]
+vreorg(8)
+.IP \n+[step]
+vdeloldusers(8)
+.IP \n+[step]
+indisrvr(8)
+.IP \n+[step]
+adminclient(1)
+.IP \n+[step]
+mgmtpass(1)
+.IP \n+[step]
+vpriv(1)
+
+.SH "SEE ALSO"
+dbinfo(1), vhostid(1), vsmtp(1), vreorg(8), vadduser(1), vdeluser(1)
