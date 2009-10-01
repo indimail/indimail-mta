@@ -1,0 +1,37 @@
+RELEASE NOTES
+=============
+
+This is Release @version@ of IndiMail. The release has both source.tar.gz and RPMs
+
+The Highlights of this release are
+
+The RPM installs indimail, daemontools, ucspi-tcp, serialmail, mess822, clamav,
+fetchmail, bogofilter, altermime, ripmime, mpack, nssd, libdkim, courier-imap
+all in one package. You will have to separately install MySQL.
+
+This release includes the following files
+
+indimail-@version@.tar.gz
+INSTALL-@version@ (Installation Instructions)
+INSTALL-RPM-@version@ (Install Instructions for RPM)
+INSTALL-@version@.mysql (MySQL specific Installation Instructions)
+indimail-@version@-1.i386.rpm
+indimail-@version@-1.i386.deb
+
+
+IndiMail has two yum repositories for most of the Linux Distros at
+
+Stable Release
+--------------
+http://download.opensuse.org/repositories/home:/mbhangui/
+
+
+Bleeding Edge Release
+---------------------
+IndiMail has yum repositories for the latest features being added. You will find
+the bleeding edge rpms at
+
+http://download.opensuse.org/repositories/home:/indimail/
+
+You will also find the RPMs for both 32bit and 64bit OS on the above
+repositories
