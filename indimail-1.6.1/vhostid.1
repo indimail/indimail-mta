@@ -21,20 +21,21 @@ Print Version Numbers
 Sets Verbose Option
 .TP
 \fB\-s\fR
-Display hostid Mappings for all hosts (if hostid is not given on command line. Else displays the hostid to IP Address mapping only for the host with id HostId.
+Display hostid Mappings for all hosts (if hostid is not given on command line. Else displays
+the hostid to IP Address mapping only for the host with id \fIHostId\fR.
 .TP
 \fB\-d\fR \fIHostId\fR
-Delete IP address Mapping for HostId
+Delete IP address Mapping for \fIHostId\fR
 .TP
 \fB\-i\fR \fIIpaddr\fR
-Maps IP address Ipaddr to hostid HostId
+Maps IP address \fIIpaddr\fR to hostid \fIHostId\fR
 .TP
-\fB\-u\fR \fIIpaddr\fR
-(Map HostId to New_Ipaddr)
-Changes IP address for hostid Hostid to IP address Ipaddr
+\fB\-u\fR \fINew_Ipaddr\fR
+(Map \fIHostId\fR to \fINew_Ipaddr\fR)
+Changes IP address for hostid \fIHostid\fR to IP address \fINew_Ipaddr\fR
 
 .SH RETURN VALUE
 0 if successful, 1 for any failure.
 
 .SH "SEE ALSO"
-vsmtp(1), hostcntrl(1), dbinfo(1)
+vsmtp(1), hostcntrl(1), dbinfo(1), IndiMail(5)

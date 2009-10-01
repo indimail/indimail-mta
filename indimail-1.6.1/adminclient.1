@@ -1,7 +1,7 @@
 .LL 8i
 .TH adminclient 1
 .SH NAME
-adminclient \- Administration client for IndiMail
+adminclient \- Client for running IndiMail programs remotely
 
 .SH SYNOPSYS
 \fBadminclient\fR \fB\-h\fR \fIadminHost\fR \fB\-p\fR \fIport\fR \fB\-u\fR \fIadminUser\fR \fB\-P\fR \fIadminPassword\fR [\fB\-n\fR \fIcertfile\fR] \fB\-c\fR \fICommand\fR
@@ -12,10 +12,10 @@ adminclient \- Administration client for IndiMail
 It has a simple mechanism by which administrators can connect to the administration server,
 \fBindisrvr\fR and issue commands to execute any of the IndiMail programs \fICommand\fR.
 On successful validation of password, \fBadminclient\fR executes the specified IndiMail
-administration program on the remote host running \fBindisrvr\fR. For security reasons, the
-list of these administration programs are hard-coded in the \fBadminclient\fR and \fBindisrvr\fR
-executable. \fBadminclient\Fr uses environment variable \fBADMIN_TIMEOUT\fR to timeout
-connections to \fBindisrvr\fR.
+administration program on the remote host by connecting to \fBindisrvr(8)\fR. For security
+reasons, the list of these administration programs are hard-coded in the \fBadminclient\fR
+and \fBindisrvr\fR executable. \fBadminclient\Fr uses environment variable \fBADMIN_TIMEOUT\fR
+to timeout connections to \fBindisrvr\fR.
 
 .EX
  e.g. The following command runs the command vadduser with arguments 
@@ -30,13 +30,13 @@ connections to \fBindisrvr\fR.
 Sets Verbose option.
 .TP
 \fB\-h\fR \fIadminHost\fR
-The IP address on which command  needs to run. 
+The IP address / hostname of host on which command \fICommand\fR needs to run. 
 .TP
 \fB\-p\fR \fIadminPort\fR
 A TCP/IP port or service in /etc/services on which indisrvr is running on adminHost.
 .TP
 \fB\-u\fR \fIadminUser\fR
-The administration user (maintained in mgmtaccess) for which indisrvr will
+The administration user (maintained using \fBmgmtpass(1)\fR) for which indisrvr will
 validate the password.
 .TP
 \fB\-P\fR \fIadminPass\fR
@@ -53,5 +53,9 @@ The -h, -p, -u, -P, -v are optional. If not given, the environment variables ADM
 ADMIN_PORT, ADMIN_USER, ADMIN_PASS will be used for these variables.
 
 .SH RETURN VALUE
-Returns the return status of the remote command executed. All output printed by the remote command on stdout/stderr are printed on stdout of adminclient.
+Returns the return status of the remote command executed. All output printed by the remote
+command on stdout/stderr are printed on stdout of adminclient.
+
+.SH "SEE ALSO"
+indisrvr(8), mgmtpass(1), IndiMail(5)
 

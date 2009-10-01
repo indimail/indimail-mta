@@ -28,8 +28,8 @@ File containing the email message to be posted.
 File containing a list of email addresses to exclude from posting. 
 .TP
 [\fB\-n\fR]
-Don't actually mail it. using \fB\-v\fR and \fB\-n\fR can be used to list out all virtual domain email
-accounts. 
+Don't actually mail it. using \fB\-v\fR and \fB\-n\fR can be used to list out all virtual
+domain email accounts. 
 .TP
 [\fB\-c\fR]
 Default, copy message to users directory.
@@ -40,7 +40,8 @@ physical device as the virtual users directories. This will save disk space.
 .TP
 [\fB\-s\fR]
 Make a soft link from the email file to the virtual users directory. This will save on disk
-space but will not remove the file when all users read it. If the original file is deleted, users will not be able to read the message.
+space but will not remove the file when all users read it. If the original file is deleted,
+users will not be able to read the message.
 .TP
 \fB\-S\fR \fIsubscriber_list\fR
 Take the list of subscriber list from a file and populates the bulkmail table. The IMAP4/POP3
@@ -58,4 +59,5 @@ with ,all appended.
 List of domains to send the message to. If this is not supplied then the message is sent to all virtual domains. 
 
 .SH RETURN VALUE
-0 if all steps were successful, non-zero otherwise. If any of the steps fail, a diagnostic message is printed.
+0 if all steps were successful, non-zero otherwise. If any of the steps fail, a diagnostic
+message is printed.

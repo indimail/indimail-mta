@@ -37,7 +37,10 @@ runs qmail-newu to recreate the assign cdb file.
 .IP \n+[step]
 relinks all alias domains aliased to old_domain_name to new_domain_name.
 .IP \n+[step]
-creates a file .domain_rename in the new_domain_name's domain directory. If this file is present and a user logs in through IMAP4 or POP3, the file .domain is recreated during the login process also. This ensures that when a user logs in, the .domain file contains the correct domain name.
+creates a file .domain_rename in the new_domain_name's domain directory. If this file is
+present and a user logs in through IMAP4 or POP3, the file .domain is recreated during the
+login process also. This ensures that when a user logs in, the .domain file contains the
+correct domain name.
 .IP \n+[step]
 recreates .domain file in user's Maildir to with new_domain_name as the entry. 
 .IP \n+[step]
