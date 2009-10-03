@@ -1,4 +1,4 @@
-    Do not read this without reading INSTALL-1.6.1
+    Do not read this without reading INSTALL-1.6.2
 
     ##### STEP 1  ## MySQL Startup ##################
     Create Supervise Directory for starting MySQL. If you already have a running MySQL server and
