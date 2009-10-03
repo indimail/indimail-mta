@@ -85,7 +85,7 @@ main(int argc, char **argv)
 	if (stat(argv[1], &st) == -1)
 		my_error("qmail-cat: stat", argv[1], 1);
 	if ((st.st_mode & S_IFMT) == S_IFIFO)
-		mode = O_RDONLY;
+		mode = O_RDWR;
 	if ((fd = open(argv[1], mode)) == -1)
 		my_error("qmail-cat: open", argv[1], 1);
 	if (dup2(fd, 0))
