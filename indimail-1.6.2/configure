@@ -997,7 +997,7 @@ eps-1.2
 ../ripmime-1.4.0.9
 ../altermime-0.3.10
 ../mpack-1.6
-../fortune-1.0'
+../fortune-1.1'
 
 # Initialize some variables set by options.
 ac_init_help=
@@ -13320,7 +13320,7 @@ fi
 
 subdir_list=""
 for i in cdb-1.0 eps-1.2 ../flash-0.9.4 ../ripmime-1.4.0.9 ../altermime-0.3.10 \
-		../mpack-1.6 ../fortune-1.0 . ../qmail-1.03
+		../mpack-1.6 ../fortune-1.1 . ../qmail-1.03
 do
 	if test -d $i
 	then
@@ -13359,8 +13359,8 @@ subdirs="$subdirs cdb-1.0"
 				subdirs="$subdirs ../mpack-1.6"
 
 				;;
-				../fortune-1.0)
-				subdirs="$subdirs ../fortune-1.0"
+				../fortune-1.1)
+				subdirs="$subdirs ../fortune-1.1"
 
 				;;
 			esac

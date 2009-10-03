@@ -96,7 +96,7 @@ fi
 dnl configure only packages for whom the subdirectories which are present
 subdir_list=""
 for i in cdb-1.0 eps-1.2 ../flash-0.9.4 ../ripmime-1.4.0.9 ../altermime-0.3.10 \
-		../mpack-1.6 ../fortune-1.0 . ../qmail-1.03
+		../mpack-1.6 ../fortune-1.1 . ../qmail-1.03
 do
 	if test -d $i
 	then
@@ -127,8 +127,8 @@ do
 				../mpack-1.6)
 				AC_CONFIG_SUBDIRS([../mpack-1.6])
 				;;
-				../fortune-1.0)
-				AC_CONFIG_SUBDIRS([../fortune-1.0])
+				../fortune-1.1)
+				AC_CONFIG_SUBDIRS([../fortune-1.1])
 				;;
 			esac
 		fi
