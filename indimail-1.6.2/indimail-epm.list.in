@@ -31,7 +31,7 @@ $ucspi_version=0.88
 $qmail_version=1.03
 $fetchmail_version=6.3.9
 $clamav_version=0.95.1
-$fortune_version=1.0
+$fortune_version=1.1
 $nssd_version=1.0
 $mysql_version=6.0.9-alpha
 $see_base="For a description of IndiMail visit http://www.indimail.org"
@@ -587,6 +587,59 @@ f 644 root root ${prefix}/man/man1/fetchmailconf.1.gz BUILDROOT${prefix}/man/man
 f 644 root root ${prefix}/man/man1/fetchmail.1.gz BUILDROOT${prefix}/man/man1/fetchmail.1.gz
 %endif
 
+f 644 root indimail ${prefix}/man/man1/adminclient.1.gz	BUILDROOT${prefix}/man/man1/adminclient.1.gz
+f 644 root indimail ${prefix}/man/man1/hostcntrl.1.gz	BUILDROOT${prefix}/man/man1/hostcntrl.1.gz
+f 644 root indimail ${prefix}/man/man1/inquerytest.1.gz	BUILDROOT${prefix}/man/man1/inquerytest.1.gz
+f 644 root indimail ${prefix}/man/man1/ipchange.1.gz	BUILDROOT${prefix}/man/man1/ipchange.1.gz
+f 644 root indimail ${prefix}/man/man1/logmonitor.1.gz	BUILDROOT${prefix}/man/man1/logmonitor.1.gz
+f 644 root indimail ${prefix}/man/man1/mgmtpass.1.gz	BUILDROOT${prefix}/man/man1/mgmtpass.1.gz
+f 644 root indimail ${prefix}/man/man1/printdir.1.gz	BUILDROOT${prefix}/man/man1/printdir.1.gz
+f 644 root indimail ${prefix}/man/man1/resetquota.1.gz	BUILDROOT${prefix}/man/man1/resetquota.1.gz
+f 644 root indimail ${prefix}/man/man1/vaddaliasdomain.1.gz	BUILDROOT${prefix}/man/man1/vaddaliasdomain.1.gz
+f 644 root indimail ${prefix}/man/man1/vadduser.1.gz	BUILDROOT${prefix}/man/man1/vadduser.1.gz
+f 644 root indimail ${prefix}/man/man1/valias.1.gz	BUILDROOT${prefix}/man/man1/valias.1.gz
+f 644 root indimail ${prefix}/man/man1/vatrn.1.gz	BUILDROOT${prefix}/man/man1/vatrn.1.gz
+f 644 root indimail ${prefix}/man/man1/vbulletin.1.gz	BUILDROOT${prefix}/man/man1/vbulletin.1.gz
+f 644 root indimail ${prefix}/man/man1/vcalias.1.gz	BUILDROOT${prefix}/man/man1/vcalias.1.gz
+f 644 root indimail ${prefix}/man/man1/vcaliasrev.sh.1.gz	BUILDROOT${prefix}/man/man1/vcaliasrev.sh.1.gz
+f 644 root indimail ${prefix}/man/man1/vcfilter.1.gz	BUILDROOT${prefix}/man/man1/vcfilter.1.gz
+f 644 root indimail ${prefix}/man/man1/vchkpass.1.gz	BUILDROOT${prefix}/man/man1/vchkpass.1.gz
+f 644 root indimail ${prefix}/man/man1/vdeldomain.1.gz	BUILDROOT${prefix}/man/man1/vdeldomain.1.gz
+f 644 root indimail ${prefix}/man/man1/vdeluser.1.gz	BUILDROOT${prefix}/man/man1/vdeluser.1.gz
+f 644 root indimail ${prefix}/man/man1/vdominfo.1.gz	BUILDROOT${prefix}/man/man1/vdominfo.1.gz
+f 644 root indimail ${prefix}/man/man1/vfstab.1.gz	BUILDROOT${prefix}/man/man1/vfstab.1.gz
+f 644 root indimail ${prefix}/man/man1/vgroup.1.gz	BUILDROOT${prefix}/man/man1/vgroup.1.gz
+f 644 root indimail ${prefix}/man/man1/vhostid.1.gz	BUILDROOT${prefix}/man/man1/vhostid.1.gz
+f 644 root indimail ${prefix}/man/man1/vipmap.1.gz	BUILDROOT${prefix}/man/man1/vipmap.1.gz
+f 644 root indimail ${prefix}/man/man1/vmoddomain.1.gz	BUILDROOT${prefix}/man/man1/vmoddomain.1.gz
+f 644 root indimail ${prefix}/man/man1/vmoddomlimits.1.gz	BUILDROOT${prefix}/man/man1/vmoddomlimits.1.gz
+f 644 root indimail ${prefix}/man/man1/vmoduser.1.gz	BUILDROOT${prefix}/man/man1/vmoduser.1.gz
+f 644 root indimail ${prefix}/man/man1/vmoveuser.1.gz	BUILDROOT${prefix}/man/man1/vmoveuser.1.gz
+f 644 root indimail ${prefix}/man/man1/vpasswd.1.gz	BUILDROOT${prefix}/man/man1/vpasswd.1.gz
+f 644 root indimail ${prefix}/man/man1/vpriv.1.gz	BUILDROOT${prefix}/man/man1/vpriv.1.gz
+f 644 root indimail ${prefix}/man/man1/vrenamedomain.1.gz	BUILDROOT${prefix}/man/man1/vrenamedomain.1.gz
+f 644 root indimail ${prefix}/man/man1/vrenameuser.1.gz	BUILDROOT${prefix}/man/man1/vrenameuser.1.gz
+f 644 root indimail ${prefix}/man/man1/vsetuserquota.1.gz	BUILDROOT${prefix}/man/man1/vsetuserquota.1.gz
+f 644 root indimail ${prefix}/man/man1/vsmtp.1.gz	BUILDROOT${prefix}/man/man1/vsmtp.1.gz
+f 644 root indimail ${prefix}/man/man1/vuserinfo.1.gz	BUILDROOT${prefix}/man/man1/vuserinfo.1.gz
+f 644 root indimail ${prefix}/man/man5/indimail.5.gz	BUILDROOT${prefix}/man/man5/indimail.5.gz
+f 644 root indimail ${prefix}/man/man5/IndiMail.5.gz	BUILDROOT${prefix}/man/man5/IndiMail.5.gz
+f 644 root indimail ${prefix}/man/man8/chowkidar.8.gz	BUILDROOT${prefix}/man/man8/chowkidar.8.gz
+f 644 root indimail ${prefix}/man/man8/clearopensmtp.8.gz	BUILDROOT${prefix}/man/man8/clearopensmtp.8.gz
+f 644 root indimail ${prefix}/man/man8/hostsync.8.gz	BUILDROOT${prefix}/man/man8/hostsync.8.gz
+f 644 root indimail ${prefix}/man/man8/indisrvr.8.gz	BUILDROOT${prefix}/man/man8/indisrvr.8.gz
+f 644 root indimail ${prefix}/man/man8/indiversion.8.gz	BUILDROOT${prefix}/man/man8/indiversion.8.gz
+f 644 root indimail ${prefix}/man/man8/InLookup.8.gz	BUILDROOT${prefix}/man/man8/InLookup.8.gz
+f 644 root indimail ${prefix}/man/man8/osh.8.gz	BUILDROOT${prefix}/man/man8/osh.8.gz
+f 644 root indimail ${prefix}/man/man8/postdel.8.gz	BUILDROOT${prefix}/man/man8/postdel.8.gz
+f 644 root indimail ${prefix}/man/man8/proxyimap.8.gz	BUILDROOT${prefix}/man/man8/proxyimap.8.gz
+f 644 root indimail ${prefix}/man/man8/proxypop3.8.gz	BUILDROOT${prefix}/man/man8/proxypop3.8.gz
+f 644 root indimail ${prefix}/man/man8/updaterules.8.gz	BUILDROOT${prefix}/man/man8/updaterules.8.gz
+f 644 root indimail ${prefix}/man/man8/vacation.8.gz	BUILDROOT${prefix}/man/man8/vacation.8.gz
+f 644 root indimail ${prefix}/man/man8/vdeloldusers.8.gz	BUILDROOT${prefix}/man/man8/vdeloldusers.8.gz
+f 644 root indimail ${prefix}/man/man8/vfilter.8.gz	BUILDROOT${prefix}/man/man8/vfilter.8.gz
+f 644 root indimail ${prefix}/man/man8/vproxy.8.gz	BUILDROOT${prefix}/man/man8/vproxy.8.gz
+f 644 root indimail ${prefix}/man/man8/vreorg.8.gz	BUILDROOT${prefix}/man/man8/vreorg.8.gz
 
 ##### Documents #################
 f 644 root root ${prefix}/doc/fhs-2.3.txt.gz BUILDROOT${prefix}/doc/fhs-2.3.txt.gz
@@ -1246,7 +1299,6 @@ f 644 root root ${prefix}/share/fortunes/songs-poems BUILDROOT${prefix}/share/fo
 f 644 root root ${prefix}/share/fortunes/zippy.dat BUILDROOT${prefix}/share/fortunes/zippy.dat
 f 644 root root ${prefix}/share/fortunes/education.dat BUILDROOT${prefix}/share/fortunes/education.dat
 f 644 root root ${prefix}/share/fortunes/medicine BUILDROOT${prefix}/share/fortunes/medicine
-f 644 root root ${prefix}/share/fortunes/fortunes BUILDROOT${prefix}/share/fortunes/fortunes
 f 644 root root ${prefix}/share/fortunes/paradoxum.dat BUILDROOT${prefix}/share/fortunes/paradoxum.dat
 f 644 root root ${prefix}/share/fortunes/medicine.dat BUILDROOT${prefix}/share/fortunes/medicine.dat
 f 644 root root ${prefix}/share/fortunes/pets BUILDROOT${prefix}/share/fortunes/pets
@@ -1274,6 +1326,7 @@ f 644 root root ${prefix}/share/fortunes/songs-poems.dat BUILDROOT${prefix}/shar
 f 644 root root ${prefix}/share/fortunes/rj BUILDROOT${prefix}/share/fortunes/rj
 f 644 root root ${prefix}/share/fortunes/drugs BUILDROOT${prefix}/share/fortunes/drugs
 f 644 root root ${prefix}/share/fortunes/law.dat BUILDROOT${prefix}/share/fortunes/law.dat
+f 644 root root ${prefix}/share/fortunes/fortunes BUILDROOT${prefix}/share/fortunes/fortunes
 f 644 root root ${prefix}/share/fortunes/fortunes.dat BUILDROOT${prefix}/share/fortunes/fortunes.dat
 f 644 root root ${prefix}/share/fortunes/miscellaneous.dat BUILDROOT${prefix}/share/fortunes/miscellaneous.dat
 f 644 root root ${prefix}/share/fortunes/linux.dat BUILDROOT${prefix}/share/fortunes/linux.dat
@@ -1292,6 +1345,22 @@ f 644 root root ${prefix}/share/fortunes/cookie BUILDROOT${prefix}/share/fortune
 f 644 root root ${prefix}/share/fortunes/law BUILDROOT${prefix}/share/fortunes/law
 f 644 root root ${prefix}/share/fortunes/humorists.dat BUILDROOT${prefix}/share/fortunes/humorists.dat
 f 644 root root ${prefix}/share/fortunes/debian BUILDROOT${prefix}/share/fortunes/debian
+f 644 root root ${prefix}/share/fortunes/chanakya BUILDROOT${prefix}/share/fortunes/chanakya
+f 644 root root ${prefix}/share/fortunes/chanakya.dat BUILDROOT${prefix}/share/fortunes/chanakya.dat
+f 644 root root ${prefix}/share/fortunes/vedas-1 BUILDROOT${prefix}/share/fortunes/vedas-1
+f 644 root root ${prefix}/share/fortunes/vedas-1.dat BUILDROOT${prefix}/share/fortunes/vedas-1.dat
+f 644 root root ${prefix}/share/fortunes/vedas-2 BUILDROOT${prefix}/share/fortunes/vedas-2
+f 644 root root ${prefix}/share/fortunes/vedas-2.dat BUILDROOT${prefix}/share/fortunes/vedas-2.dat
+f 644 root root ${prefix}/share/fortunes/thirukkural BUILDROOT${prefix}/share/fortunes/thirukkural
+f 644 root root ${prefix}/share/fortunes/thirukkural.dat BUILDROOT${prefix}/share/fortunes/thirukkural.dat
+f 644 root root ${prefix}/share/fortunes/paul-graham BUILDROOT${prefix}/share/fortunes/paul-graham
+f 644 root root ${prefix}/share/fortunes/paul-graham.dat BUILDROOT${prefix}/share/fortunes/paul-graham.dat
+f 644 root root ${prefix}/share/fortunes/osp BUILDROOT${prefix}/share/fortunes/osp
+f 644 root root ${prefix}/share/fortunes/osp.dat BUILDROOT${prefix}/share/fortunes/osp.dat
+f 644 root root ${prefix}/share/fortunes/joel-on-software BUILDROOT${prefix}/share/fortunes/joel-on-software
+f 644 root root ${prefix}/share/fortunes/joel-on-software.dat BUILDROOT${prefix}/share/fortunes/joel-on-software.dat
+f 644 root root ${prefix}/share/fortunes/age BUILDROOT${prefix}/share/fortunes/age
+f 644 root root ${prefix}/share/fortunes/age.dat BUILDROOT${prefix}/share/fortunes/age.dat
 
 %ifdef !noclamavdef
 f 644 root root ${prefix}/share/clamd/daily.cvd BUILDROOT${prefix}/share/clamd/daily.cvd
