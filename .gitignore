@@ -12,6 +12,7 @@ pam-multi*
 */config.h
 *.lib
 indimail-*/.gitignore
+fortune-*/.gitignore
 */.deps
 */.libs
 #
@@ -42,5 +43,7 @@ indimail-*/doc/INSTALL-RPM
 indimail-*/doc/INSTALL.indimail
 indimail-*/doc/README-CLUSTER
 indimail-*/doc/RELEASE-Steps
+indimail-*/doc/INSTALL-MYSQL
+indimail-*/doc/RELEASE-Notes
 indimail-*/eps-*/Makefile.in
 indimail-*/indimail.settings
