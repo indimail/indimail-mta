@@ -1,5 +1,9 @@
 /*
  * $Log: qmail-cat.c,v $
+ * Revision 1.7  2009-10-03 15:02:59+05:30  Cprogrammer
+ * process all arguments on command line
+ * bug fix in my_error - 2nd arg never printed
+ *
  * Revision 1.6  2009-03-31 09:07:55+05:30  Cprogrammer
  * open files other than fifo in O_RDONLY
  *
@@ -36,16 +40,14 @@ static char     sserrbuf[512];
 static substdio sserr = SUBSTDIO_FDBUF(write, 2, sserrbuf, sizeof(sserrbuf));
 
 void
-logerr(s)
-	char           *s;
+logerr(char *s)
 {
 	if (substdio_puts(&sserr, s) == -1)
 		_exit(1);
 }
 
 void
-logerrf(s)
-	char           *s;
+logerrf(char *s)
 {
 	if (substdio_puts(&sserr, s) == -1)
 		_exit(1);
@@ -60,7 +62,7 @@ my_error(char *s1, char *s2, int exit_val)
 	logerr(": ");
 	if (s2)
 	{
-		logerr(s1);
+		logerr(s2);
 		logerr(": ");
 	}
 	logerr(error_str(errno));
@@ -73,35 +75,35 @@ main(int argc, char **argv)
 {
 	stralloc        line = { 0 };
 	struct stat     st;
-	int             match, fd, mode = O_RDONLY;
+	int             i, match, fd, mode = O_RDONLY;
 
-	if (argc != 2)
-	{
+	if (argc == 1) {
 		logerr("USAGE: ");
 		logerr(argv[0]);
 		logerrf(" filename\n");
 		_exit(1);
 	}
-	if (stat(argv[1], &st) == -1)
-		my_error("qmail-cat: stat", argv[1], 1);
-	if ((st.st_mode & S_IFMT) == S_IFIFO)
-		mode = O_RDWR;
-	if ((fd = open(argv[1], mode)) == -1)
-		my_error("qmail-cat: open", argv[1], 1);
-	if (dup2(fd, 0))
-		my_error("qmail-cat: dup2", 0, 1);
-	if (fd)
-		close(fd);
-	for (;;)
-	{
-		if (getln(&ssin, &line, &match, '\n') == -1)
-			my_error("qmail-cat: read", 0, 2);
-		if (!match && line.len == 0)
-			break;
-		if (substdio_bput(&ssout, line.s, line.len) == -1)
-			my_error("qmail-cat: write", 0, 3);
-		if (substdio_flush(&ssout) == -1)
-			my_error("qmail-cat: write", 0, 3);
+	for (i = 1;i < argc;i++) {
+		if (stat(argv[i], &st) == -1)
+			my_error("qmail-cat: stat", argv[i], 1);
+		if ((st.st_mode & S_IFMT) == S_IFIFO)
+			mode = O_RDWR;
+		if ((fd = open(argv[i], mode)) == -1)
+			my_error("qmail-cat: open", argv[i], 1);
+		if (dup2(fd, 0))
+			my_error("qmail-cat: dup2", 0, 1);
+		if (fd && close(fd))
+			my_error("qmail-cat: close", 0, 1);
+		for (;;) {
+			if (getln(&ssin, &line, &match, '\n') == -1)
+				my_error("qmail-cat: read", 0, 2);
+			if (!match && line.len == 0)
+				break;
+			if (substdio_bput(&ssout, line.s, line.len) == -1)
+				my_error("qmail-cat: write", 0, 3);
+			if (substdio_flush(&ssout) == -1)
+				my_error("qmail-cat: write", 0, 3);
+		}
 	}
 	if (substdio_flush(&ssout) == -1)
 		my_error("qmail-cat: write", 0, 3);
@@ -113,7 +115,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_cat_c()
 {
-	static char    *x = "$Id: qmail-cat.c,v 1.6 2009-03-31 09:07:55+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: qmail-cat.c,v 1.7 2009-10-03 15:02:59+05:30 Cprogrammer Stab mbhangui $";
 
 	x++;
 }
