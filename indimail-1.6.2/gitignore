@@ -42,4 +42,5 @@ inlookup.8
 vadddomain.1
 vdelivermail.8
 indimail.5
+svctool.1
 .gitignore
