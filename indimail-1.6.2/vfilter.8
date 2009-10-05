@@ -19,13 +19,15 @@ For optimization, \fBvfilter\fR skips filters if the file .vfilter is not found 
 Maildir patch. This file is created by \fBvcfilter\fR when the first filter is added and
 removed when the last filter is deleted. If in case, While processing, any fatal error occurs,
 \fBvfilter\fR passes the mail to \fBvdelivermail\fR directly (or any other mail delivery agent
-defined by the MDA environment variable) without any further processing. In case of temporary
+defined by the \fBMDA\fR environment variable) without any further processing. In case of temporary
 errors, the mail remains in the queue and retried later and hence again passes through the
 filter. \fBvfilter\fR can perform various actions on a filter match. These actions are
 
 .nr step 1 1
 .IP \n[step] 3
-Delivering to any one specific mailbox (Maildir format – if this is different from Inbox, the environment variable MAILDIRFOLDER is set, causing vdelivermail to deliver mail to a different folder).
+Delivering to any one specific mailbox (Maildir format – if this is different from Inbox,
+the environment variable \fBMAILDIRFOLDER\fR is set, causing vdelivermail to deliver mail
+to a different folder).
 .IP \n+[step]
 Bouncing the mail back to sender
 .IP \n+[step]
@@ -35,7 +37,7 @@ Running the email through another program
 .PP
 On a successful match, the mail is removed from the queue. If mail passes through the filter
 without any match, mail remains in the queue and is handed over to vdelivermail (or the mda
-defined by the MDA environment variable) for further processing.
+defined by the \fBMDA\fR environment variable) for further processing.
 .PP
 These actions make vfilter a powerful mechanism to organize your emails, spam control,
 automation based on email, taking specific action on receipt of specific emails, etc. In fact

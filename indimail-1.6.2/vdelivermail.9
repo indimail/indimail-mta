@@ -11,7 +11,7 @@ vdelivermail \- deliver mails to users in a virtual domain
 \fBvdelivermail\fR is called by \fBqmail-local\fR because of instruction in .qmail-default
 file to deliver email to a virtual user. \fBvdelivermail\fR is the MDA for IndiMail. Along with a
 wrapper postdel, \fBvdelivermail\fR can be used as the MDA for postfix also. \fBqmail-local\fR
-sets the environment variables EXT and HOST which is used by \fBvdelivermail\fR to set the
+sets the environment variables \fBEXT\fR and \fBHOST\fR which is used by \fBvdelivermail\fR to set the
 user and the domain component of the email address. For postfix, these two environment
 variables are set by postdel. If the username is quoted, the quotes are removed. The
 user@domain is then searched in the authentication database. If there are any system problems
@@ -71,27 +71,28 @@ command is executed with the following arguments
  maildir_path Message_size Current_disk_usage Current_mailcount quota
 
 .PP
-The command overquota.sh can be changed by setting the environment variable OVERQUOTA_CMD.
-The default behaviour of bouncing mails on overquota can be changed by setting HOLDOVERQUOTA
-environment variable or by having a file holdoverquota in the user's homedir. In this case,
-the mail will be deferred till the queuelifetime gets reached. If HOLDOVERQUOTA is not defined
-and neither the file holdoverquota is present \fBvdelivermail\fR (if the user is already
-above quota) sets the BOUNCE FLAG for the user. Subsequent deliveries are bounced without any
-quota checking. Setting of the BOUNCE_FLAG reduces the load on the server when multiple mails
-are being sent to an overquota user. The BOUNCE FLAG is removed only after the user logs in
+The command overquota.sh can be changed by setting the environment variable \fBOVERQUOTA_CMD\fR.
+The default behaviour of bouncing mails on overquota can be changed by setting environment
+variable \fBHOLDOVERQUOTA\fR or by having a file \fIholdoverquota\fR in the user's homedir.
+In this case, the mail will be deferred till the \fIqueuelifetime\fR gets reached. If
+\fBHOLDOVERQUOTA\fR is not defined and neither the file \fIholdoverquota\fR is present
+\fBvdelivermail\fR (if the user is already above quota) sets the \fBBOUNCE FLAG\fR for the user.
+Subsequent deliveries are bounced without any quota checking. Setting of the \fBBOUNCE_FLAG\fR
+reduces the load on the server when multiple mails are being sent to an overquota user.
+The \fBBOUNCE FLAG\fR is removed only after the user logs in
 and clears the mails to reduce the quota usage. Site administrators can customize
 Over Quota Bounce messages, by setting environment variables
-QUOTAWARN1, QUOTAWARN2 ... upto QUOTAWARN10. These variables should be set to a percentage
-quota usage at which warning should be sent. In addition to the EXT and HOST environment
-variable, RPLINE variable is also used by \fBvdelivermail\fR to set the value for Return-Path
-in the mail headers. 
+\fBQUOTAWARN1\fR, \fBQUOTAWARN2\fR ... upto \fBQUOTAWARN10\fR. These variables should be set to
+a percentage quota usage for which warning should be sent. In addition to the \fBEXT\fR and
+\fBHOST\fR environment variable, \fBRPLINE\fR variable is also used by \fBvdelivermail\fR to
+set the value for \fBReturn-Path\fR in the mail headers. 
 .PP
 The quota limit for a user can be set by the administrator either in size, number of mails or
 combination of both. e.g. 40000,2000S means quota of 40000 Bytes and 2000 mails. Administrator
-can use either vsetuserquota or vmoduser programs.
+can use either \fBvsetuserquota\fR or \fBvmoduser\fR programs.
 .PP
 Additionally per day limit on deliveries per user can be set by specifying the environment
-variable MAILCOUNT_LIMIT. This can be set in the qmail-send run file. If the number of
+variable \fBMAILCOUNT_LIMIT\fR. This can be set in the qmail-send run file. If the number of
 deliveries for a user exceeds this number, the mail is bounced back to the sender with over
 quota message.
 
@@ -104,17 +105,17 @@ Therefore, all normal .qmail file processing works in each virtual domain. .qmai
 just need the user name extension to work, i.e. .qmail-joe for user joe. ezmlm uses .qmail
 files for processing, so it will work under IndiMail.
 .PP
-If no user matches a .qmail file then the .qmail-default file is processed. This file
-contains the \fBvdelivermail\fR program. This program reads the authentication database
-(MySQL or vpasswd.cdb) and delivers the mail into the users directory. The last parameter
-of \fBvdelivermail\fR can be a maildir owned by indimail/indimail so that all default mail
-reception ends up there. Or it can have an email address, and all default mail is forwarded
+If no user matches a .qmail file then the .\fIqmail-default\fR file is processed. This file
+contains invokation of \fBvdelivermail\fR program with arguments. This program reads the
+authentication database and delivers the mail into the users directory.
+The last parameter of \fBvdelivermail\fR can be a maildir owned by indimail/indimail so that
+all default mail reception ends up there. Or it can have an email address, and all default mail is forwarded
 to this address. Last but not least, the last parameter to \fBvdelivermail\fR can be the
-text bounce-no-mailbox. This will bounce all non matching emails back to the sender.
+text \fBbounce\-no\-mailbox\fR. This will bounce all non matching emails back to the sender.
 .PP
 In addition to .qmail files, IndiMail has its dot-qmail processing called valias. valias can
 be either the file .qmail in the user's home directory or an entry made in MySQL(1) using the
-valias(1) program.
+\fBvalias(1)\fR program.
 
 .SH Mail Alerts
 \fBvdelivermail\fR sends alerts in the form of UDP packets to a host and port which can be
@@ -143,7 +144,14 @@ email address to forward email to
 .IP \n+[step]
 the string bounce-no-mailbox to bounce the email back to the sender.
 .IP \n+[step]
-Address in SMTPROUTE format to which \fBvdelivermail\fR should use SMTP to deliver the mail. e.g. indi.com:202.144.76.55:25 where indi.com is the local domain, 202.144.76.55 is the IP address of an SMTP server for indi.com and 25 is the SMTP port.
+Address in \fBSMTPROUTE\fR format to which \fBvdelivermail\fR should use SMTP to deliver the mail.
+
+.EX
+indimail.org:192.168.1.1:25
+.EE
+
+where indimail.org is the local domain, 192.168.1.1 is the IP address of an SMTP server for
+indimail.org and 25 is the SMTP port.
 .PP
 Once vdelivermail is started up, it checks existence of the virtual domain user. If the user
 exists, the email is delivered into the user's Maildir. If IndiMail was

@@ -32,7 +32,7 @@ man_MANS=vadduser.1 adminclient.1 chowkidar.8 clearopensmtp.8 dbinfo.1 hostcntrl
 	vdeluser.1 vdominfo.1 vfilter.8 vfstab.1 vgroup.1 vhostid.1 vipmap.1 vmoddomain.1 \
 	vmoddomlimits.1 vmoduser.1 vmoveuser.1 vpasswd.1 vpriv.1 vproxy.8 vrenamedomain.1 \
 	vrenameuser.1 vreorg.8 vsetuserquota.1 vsmtp.1 vuserinfo.1 indimail.5 IndiMail.5 \
-	updaterules.8 osh.8 svctool.1
+	updaterules.8 osh.8 svctool.1 systpass.1
 
 setuid_list = ../sbin/systpass vdeldomain vadddomain vadduser vdeluser \
 			  vaddaliasdomain vrenamedomain vrenameuser vbulletin vdominfo \

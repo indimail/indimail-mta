@@ -608,6 +608,7 @@ f 644 root indimail ${prefix}/man/man1/vcalias.1.gz	BUILDROOT${prefix}/man/man1/
 f 644 root indimail ${prefix}/man/man1/vcaliasrev.sh.1.gz	BUILDROOT${prefix}/man/man1/vcaliasrev.sh.1.gz
 f 644 root indimail ${prefix}/man/man1/vcfilter.1.gz	BUILDROOT${prefix}/man/man1/vcfilter.1.gz
 f 644 root indimail ${prefix}/man/man1/vchkpass.1.gz	BUILDROOT${prefix}/man/man1/vchkpass.1.gz
+f 644 root indimail ${prefix}/man/man1/systpass.1.gz	BUILDROOT${prefix}/man/man1/systpass.1.gz
 f 644 root indimail ${prefix}/man/man1/vdeldomain.1.gz	BUILDROOT${prefix}/man/man1/vdeldomain.1.gz
 f 644 root indimail ${prefix}/man/man1/vdeluser.1.gz	BUILDROOT${prefix}/man/man1/vdeluser.1.gz
 f 644 root indimail ${prefix}/man/man1/vdominfo.1.gz	BUILDROOT${prefix}/man/man1/vdominfo.1.gz
