@@ -1,5 +1,8 @@
 #
 # $Log: indimail.spec.in,v $
+# Revision 2.88  2009-10-06 13:55:54+05:30  Cprogrammer
+# added pam-multi
+#
 # Revision 2.87  2009-10-04 13:10:27+05:30  Cprogrammer
 # added new fortune data files
 # new fortune release
@@ -272,7 +275,7 @@
 # rpm spec file for indimail
 #
 #
-# $Id: indimail.spec.in,v 2.87 2009-10-04 13:10:27+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 2.88 2009-10-06 13:55:54+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %define _unpackaged_files_terminate_build 1
 

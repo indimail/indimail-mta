@@ -1,5 +1,8 @@
 #
 # $Log: indimail-epm.list.in,v $
+# Revision 2.21  2009-10-06 13:55:48+05:30  Cprogrammer
+# added pam-multi
+#
 # Revision 2.20  2009-10-04 13:10:00+05:30  Cprogrammer
 # added indimail man pages
 #
