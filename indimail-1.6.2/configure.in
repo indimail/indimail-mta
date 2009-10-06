@@ -80,7 +80,7 @@ dnl Does not work on RHEL 5, CentOS 5 64 bit systems
 RPATH_LIB="$acl_libdirstem"
 
 defaultprefix="/var/indimail"
-LIBVER=0:0:0
+LIBVER=0
 AC_SUBST([LIBTOOL_DEPS])
 AC_SUBST(LIBVER)
 AC_SUBST(STRIP_OPT)
@@ -358,6 +358,7 @@ moduledir="$enableval"
 	fi
 ])
 AC_DEFINE_UNQUOTED(PAM_MOD_DIR,"$moduledir",full path to PAM Module Directory)
+AC_SUBST(moduledir)
 
 log_name="indimail"
 AC_ARG_ENABLE(log-name, [  --enable-log-name=indimail    set syslog name.], log_name="$enableval", )

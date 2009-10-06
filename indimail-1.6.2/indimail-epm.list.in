@@ -54,6 +54,7 @@ $noclamav=0
 $nofetchmail=0
 $nobogofilter=0
 $nodksignature=0
+$nopam_multi=0
 $default_domain=@defaultdomain@
 ####################################
 
@@ -651,6 +652,10 @@ f 644 root indimail ${prefix}/man/man8/inlookup.8.gz	BUILDROOT${prefix}/man/man8
 f 644 root indimail ${prefix}/man/man1/svctool.1.gz	BUILDROOT${prefix}/man/man1/svctool.1.gz
 f 644 root indimail ${prefix}/man/man1/vadddomain.1.gz	BUILDROOT${prefix}/man/man1/vadddomain.1.gz
 f 644 root indimail ${prefix}/man/man8/vdelivermail.8.gz	BUILDROOT${prefix}/man/man8/vdelivermail.8.gz
+%ifdef !nopam_multi
+f 644 root indimail ${prefix}/man/man8/pam-multi.8.gz	BUILDROOT${prefix}/man/man8/pam-multi.8.gz
+f 644 root indimail ${prefix}/man/man8/pam-multi.8.gz	BUILDROOT${prefix}/man/man8/pam-checkpwd.8.gz
+%endif
 
 ##### Documents #################
 f 644 root root ${prefix}/doc/fhs-2.3.txt.gz BUILDROOT${prefix}/doc/fhs-2.3.txt.gz
@@ -1135,6 +1140,10 @@ f 755 root root ${prefix}/bin/dkim BUILDROOT${prefix}/bin/dkim
 f 755 root root ${prefix}/sbin/nssd BUILDROOT${prefix}/sbin/nssd
 %endif
 
+%ifdef !nopam_multi
+f 755 root root ${prefix}/sbin/pam-checkpwd BUILDROOT${prefix}/sbin/pam-checkpwd
+%endif
+
 #### Startup files
 f 555 root qmail ${prefix}/boot/proc BUILDROOT${prefix}/boot/proc
 f 444 root qmail ${prefix}/boot/upstart BUILDROOT${prefix}/boot/upstart
@@ -1236,6 +1245,10 @@ f 644 root root ${prefix}/lib/pkgconfig/libclamav.pc BUILDROOT${prefix}/lib/pkgc
 f 755 root root /usr/lib/libnss_nssd.so.2.0.0 BUILDROOT/usr/lib/libnss_nssd.so.2.0.0
 l 777 root root /usr/lib/libnss_nssd.so.2 libnss_nssd.so.2.0.0
 l 777 root root /usr/lib/libnss_nssd.so libnss_nssd.so.2.0.0
+%endif
+%ifdef !nopam_multi
+f 755 root root ${prefix}/lib/authenticate.so BUILDROOT${prefix}/lib/authenticate.so
+f 755 root root @moduledir@/pam-multi.so BUILDROOT/@moduledir@/pam-multi.so
 %endif
 
 ###### Development Headers

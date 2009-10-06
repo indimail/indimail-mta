@@ -458,7 +458,7 @@ BuildRequires: db4.7-devel
 BuildRequires: db4-devel
 %endif
 %endif
-%if nopam_multi == 0
+%if %nopam_multi == 0
 BuildPrereq: pam-devel
 Requires: pam
 %endif
@@ -540,7 +540,7 @@ echo Building %{name}-%{version}-%{release} Build %{_build} OS %{_os} Dist %dist
 echo "------------------------------------------------------"
 
 for i in %{name}-%{version} altermime-0.3.10 ripmime-1.4.0.9 flash-0.9.4 \
-mpack-1.6 fortune-%{fortune_version} \
+mpack-1.6 fortune-%{fortune_version} pam-multi-%{pam_multi_version} \
 qmail-%{qmail_version} ucspi-tcp-%{ucspi_version} nssd-%{nssd_version} \
 bogofilter-%{bogofilter_version} fetchmail-%{fetchmail_version} \
 courier-imap-%{courier_version} clamav-%{clamav_version} \
@@ -549,6 +549,9 @@ do
 	(
 	if [ -d $i ] ; then
 		%{__rm} -rf $i
+	fi
+	if [ " $i" = " pam-multi-%{pam-multi_version}" -a %nopam_multi -ne 0 ] ; then
+		continue
 	fi
 	if [ " $i" = " fetchmail-%{fetchmail_version}" -a %nofetchmail -ne 0 ] ; then
 		continue
@@ -1478,7 +1481,7 @@ fi
 %attr(555,root,root)                    %{_prefix}/sbin/writefifo
 %endif
 # pam-multi
-%if nopam_multi == 0
+%if %nopam_multi == 0
 %attr(555,root,root)                    %{_prefix}/sbin/pam-checkpwd
 %endif
 
@@ -1712,7 +1715,7 @@ fi
 # Shared libraries (omit for architectures that don't support them)
 
 # pam-multi
-%if nopam_multi == 0
+%if %nopam_multi == 0
 %attr(755,root,root)                    %{security_dir}/pam-multi.so
 %attr(755,root,root)                    %{_libdir}/authenticate.so
 %endif

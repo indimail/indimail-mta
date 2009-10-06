@@ -13,7 +13,7 @@ libpam_multi_LTLIBRARIES=pam-multi.la
 noinst_FILES=pam-multi.la pam-multi.a
 
 pam_multi_la_SOURCES=pam-multi.c md5_crypt.c sha256_crypt.c sha512_crypt.c
-pam_multi_la_LDFLAGS=-module -avoid-version
+pam_multi_la_LDFLAGS=-module -avoid-version -version-info @LIBVER@:0:0
 pam_multi_la_CPPFLAGS=$(DEFS) @auth_inc@
 
 libpamsbin_PROGRAMS = pam-checkpwd
@@ -21,8 +21,8 @@ libpamsbin_PROGRAMS = pam-checkpwd
 all-local: authenticate.so pam-multi.spec
 
 authenticate.so: authenticate.o
-	$(COMPILE) $(MODFLAGS) -o $@ authenticate.o -Xlinker -R -Xlinker @indimaildir@/lib \
-		-L@indimaildir@/lib -lindimail -leps
+	$(COMPILE) $(MODFLAGS) -o $@ authenticate.o -soname=authenticate.so -Xlinker -R \
+		-Xlinker @indimaildir@/lib -L@indimaildir@/lib -lindimail -leps
 authenticate.o: authenticate.c
 	$(COMPILE) $(DEFS) @auth_inc@ -c $^
 

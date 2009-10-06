@@ -82,6 +82,8 @@ case "$host" in
 esac
 
 defaultprefix="/var/indimail"
+LIBVER=0
+AC_SUBST(LIBVER)
 AC_SUBST(STRIP_OPT)
 AC_SUBST(defaultprefix)
 

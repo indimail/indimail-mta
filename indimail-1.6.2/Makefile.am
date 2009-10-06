@@ -20,7 +20,7 @@ libindimail_la_SOURCES = $(COMMONSOURCES)
 libindimail_la_LIBADD =  $(top_builddir)/eps-1.2/libeps.la $(top_builddir)/cdb-1.0/libcdb.la \
 						 -L@mysql_libdir@ -lmysqlclient @LIB_CRYPT@ -lm
 libindimail_la_DEPENDENCIES = $(top_builddir)/eps-1.2/libeps.la $(top_builddir)/cdb-1.0/libcdb.la
-libindimail_la_LDFLAGS = -version-info @LIBVER@ -release @VERSION@
+libindimail_la_LDFLAGS = -version-info @LIBVER@:0:0 -release @VERSION@
 
 SYSCONFDIR = @sysconfdir@
 sysconf_DATA = indimail.settings controlfiles headerlist osh.table cronlist perm_list
@@ -686,6 +686,7 @@ edit = sed \
 	-e 's,@indimaildir\@,$(indimaildir),g' \
 	-e 's,@qmaildir\@,$(qmaildir),g' \
 	-e 's,@mysqlbindir\@,$(mysqlbindir),g' \
+	-e 's,@moduledir\@,$(moduledir),g' \
 	-e 's,@auth_inc\@,$(auth_inc),g' \
 	-e 's,@auth_libs\@,$(auth_libs),g' \
 	-e 's,@libdir\@,$(libdir),g' \
