@@ -136,3 +136,5 @@ The site http://qmail.org and the qmail mailing list for wealth of information
 93. Andrew Richard, John Levine for Greylisting -
     http://www.gossamer-threads.com/lists/qmail/users/136740?page=last
 94. Bounce Address Tag Validation - John Levine, Joerg Backschues
+95. Alexey Mahotkin <alexm@hsys.msk.ru> for pam support functions and new
+    pam-checkpwd program
