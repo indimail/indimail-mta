@@ -178,6 +178,7 @@ If a command is prefixed with the '#' sign, it means that it was run using root.
                                . bogofilter-1.2.1   (11.6 Mb)
                                . nssd-1.0           (2.0  Mb)
                                . fetchmail-6.3.8    (10.1 Mb)
+                               . pam-multi-1.0      (3.0  Mb)
 
 ########### SECTION 2  ##### USER/GROUP Creation ########################
 2. add groups and users and home directory
@@ -238,6 +239,7 @@ the installation.
     % wget http://downloads.sourceforge.net/indimail/mpack-1.6.tar.gz
     % wget http://downloads.sourceforge.net/indimail/fortune-1.1.tar.gz
     % wget http://downloads.sourceforge.net/indimail/nssd-1.0.tar.gz
+    % wget http://downloads.sourceforge.net/indimail/pam-multi-1.0.tar.gz
 
     You may omit STEP 1 if you already have a working installation of MySQL and would want to use
     the existing MySQL installation with IndiMail. You may also omit STEP 2 in cause you do not
@@ -272,8 +274,8 @@ the installation.
     Install IndiMail. This step involves extracting both indimail-@version@.tar.gz and
     qmail-1.03.tar.gz. It is important that the extracted qmail source directory (qmail-1.03)
     is present for ./configure to detect qmail. You can also extract optional
-    packages (flash, altermime, ripmime, mpack, fortune). The configure script will detect
-    these packages if present in /home/local/src
+    packages (flash, altermime, ripmime, mpack, fortune, nssd, pam-multi, fetchmail). The
+	configure script will detect these packages if present in /home/local/src
 
     This step also involves applying a patch to qmail-1.03. This patch adds many features
     missing in stock qmail installations.
@@ -334,6 +336,7 @@ the installation.
         --enable-sha256-crypt=n \
         --enable-sha512-crypt=n \
         --enable-ipv6=y \
+		--enable-moduledir=/lib/security \
         --enable-offensive=n
 
     NOTES: To get a complete list of configure options type: ./configure --help

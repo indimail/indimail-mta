@@ -96,7 +96,7 @@ fi
 dnl configure only packages for whom the subdirectories which are present
 subdir_list=""
 for i in cdb-1.0 eps-1.2 ../flash-0.9.4 ../ripmime-1.4.0.9 ../altermime-0.3.10 \
-		../mpack-1.6 ../fortune-1.1 . ../qmail-1.03
+		../mpack-1.6 ../fortune-1.1 ../pam-multi-1.0 . ../qmail-1.03
 do
 	if test -d $i
 	then
@@ -129,6 +129,9 @@ do
 				;;
 				../fortune-1.1)
 				AC_CONFIG_SUBDIRS([../fortune-1.1])
+				;;
+				../pam-multi-1.0)
+				AC_CONFIG_SUBDIRS([../pam-multi-1.0])
 				;;
 			esac
 		fi
@@ -336,6 +339,25 @@ AC_ARG_ENABLE(default-domain, [  --enable-default-domain=name  Default domain na
 	[])
 AC_SUBST(defaultdomain)
 AC_DEFINE_UNQUOTED(DEFAULT_DOMAIN,"$defaultdomain",Default Domain)
+
+moduledir=""
+for f in /lib/security
+do
+	if test -d $f
+	then
+		moduledir=$f
+		break
+	fi
+done
+AC_ARG_ENABLE([moduledir], [  --enable-moduledir=DIR specify PAM module installation path],
+moduledir="$enableval"
+[
+	if test "$moduledir" = ""
+	then
+		AC_MSG_ERROR([Unable to find your pam module dir, specify --enable-moduledir.])
+	fi
+])
+AC_DEFINE_UNQUOTED(PAM_MOD_DIR,"$moduledir",full path to PAM Module Directory)
 
 log_name="indimail"
 AC_ARG_ENABLE(log-name, [  --enable-log-name=indimail    set syslog name.], log_name="$enableval", )
@@ -1072,7 +1094,6 @@ echo "CPPFLAGS             = $CPPFLAGS"
 echo "CXXFLAGS             = $CXXFLAGS"
 echo "CFLAGS               = $CFLAGS"
 echo "LDFLAGS              = $LDFLAGS"
-echo "Additonal Components = $subdir_list"
 echo "            Current settings"
 echo "-------------------------------------------------------------"
 echo "   qmail directory = $qmaildir --enable-qmaildir=$qmaildir"
@@ -1350,4 +1371,6 @@ echo "      SHA512 Crypt = ON  --enable-sha512-crypt=y"
 echo "      SHA512 Crypt = OFF --enable-sha512-crypt=n default"
 ;;
 esac
+echo "-------------------------------------------------------------"
+echo "Additonal Components = $subdir_list"
 ) | tee indimail.settings

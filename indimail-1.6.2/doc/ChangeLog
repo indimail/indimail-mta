@@ -1,7 +1,9 @@
 * Fri Oct  2 2009 mbhangui@gmail.com
 Release 1.6.2 Start 01/10/2009
-1.   
-
+03/10/2009
+1.  O_RDWR mode for fifo in qmail-cat
+04/10/2009
+2.  Added svctool man page
 
 * Fri Oct  2 2009 mbhangui@gmail.com
 Release 1.6.1 Start 13/09/2009

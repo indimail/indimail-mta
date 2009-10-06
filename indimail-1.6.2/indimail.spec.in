@@ -303,9 +303,11 @@
 %define build_on_obs       0
 %endif
 %define	_prefix            @indimaildir@
+%define security_dir       @moduledir@
 %define default_domain     @defaultdomain@
 %define courier_version    3.0.8
 %define bogofilter_version 1.2.1
+%define pam_multi_version  1.0
 %define ucspi_version      0.88
 %define qmail_version      1.03
 %define fetchmail_version  6.3.9
@@ -324,6 +326,7 @@
 %define noclamav           0
 %define nofetchmail        0
 %define nobogofilter       0
+%define nopam_multi        0
 %define nodksignatures     0
 %define _verbose           0
 %define qcount             5
@@ -376,7 +379,10 @@ Source11: http://prdownload.berlios.de/fetchmail/fetchmail-%{fetchmail_version}.
 %if %noclamav == 0
 Source12: http://downloads.sourceforge.net/clamav/clamav-%{clamav_version}.tar.gz
 %endif
-Source13: %{name}-%{version}-rpmlintrc
+%if %nopam_multi == 0
+Source13: http://downloads.sourceforge.net/indimail/pam-multi-%{pam_multi_version}.tar.gz
+%endif
+Source14: %{name}-%{version}-rpmlintrc
 Patch1:  qmail-%{qmail_version}.patch
 Patch2:  ucspi-tcp-%{ucspi_version}.patch
 
@@ -421,6 +427,9 @@ NoSource: 11
 %if %noclamav == 0
 NoSource: 12
 %endif
+%if %nopam_multi == 0
+NoSource: 13
+%endif
 
 URL: http://www.indimail.org
 #AutoReqProv: No
@@ -448,6 +457,10 @@ BuildRequires: db4.7-devel
 %else
 BuildRequires: db4-devel
 %endif
+%endif
+%if nopam_multi == 0
+BuildPrereq: pam-devel
+Requires: pam
 %endif
 
 # rpm -qf /bin/ls
@@ -692,6 +705,7 @@ if [ " %dist" = " mandrake" ] ; then
 	--mandir=%{_prefix}/man --sysconfdir=%{_prefix}/etc --enable-qmaildir=%{_prefix} \
 	--enable-basepath=@basepath@ --enable-logdir=@logdir@ \
 	--enable-tcprules-prog=%{_prefix}/bin/tcprules --enable-tcpserver-file=%{_prefix}/etc/tcp.smtp \
+	--enable-moduledir=%{security_dir} \
 	`%{__cat} config/indimail.opts` > $DEVICE
 else
 %configure --prefix=%{_prefix} --libexecdir=%{_prefix}/libexec --sysconfdir=%{_prefix}/etc \
@@ -700,6 +714,7 @@ else
 	--mandir=%{_prefix}/man --sysconfdir=%{_prefix}/etc --enable-qmaildir=%{_prefix} \
 	--enable-basepath=@basepath@ --enable-logdir=@logdir@ \
 	--enable-tcprules-prog=%{_prefix}/bin/tcprules --enable-tcpserver-file=%{_prefix}/etc/tcp.smtp \
+	--enable-moduledir=%{security_dir} \
 	`%{__cat} config/indimail.opts` > $DEVICE
 fi
 
@@ -896,6 +911,15 @@ if [ -f %{buildroot}%{_prefix}/man/man8/makeuserdb.8.gz ] ; then
 			%{__rm} -f %{buildroot}%{_prefix}/man/man8/$i
 			ln -sf %{_prefix}/man/man8/makeuserdb.8.gz %{buildroot}%{_prefix}/man/man8/$i.gz
 		done
+fi
+if [ %nopam_multi -eq 0 ] ; then
+/bin/rm -f "$RPM_BUILD_ROOT"%{security_dir}/pam-multi.la
+/bin/rm -f "$RPM_BUILD_ROOT"%{security_dir}/pam-multi.a
+if [ -x /usr/bin/chrpath ] ; then
+	/usr/bin/chrpath -d %{buildroot}%{_libdir}/authenticate.so
+	/usr/bin/chrpath -d %{buildroot}%{security_dir}/pam-multi.so
+	/usr/bin/chrpath -d %{buildroot}%{_prefix}/sbin/pam-checkpwd
+fi
 fi
 
 if [ -x /usr/bin/epm ] ; then
@@ -1453,6 +1477,10 @@ fi
 %attr(555,root,root)                    %{_prefix}/sbin/slemsPrivate
 %attr(555,root,root)                    %{_prefix}/sbin/writefifo
 %endif
+# pam-multi
+%if nopam_multi == 0
+%attr(555,root,root)                    %{_prefix}/sbin/pam-checkpwd
+%endif
 
 %attr(555,root,qmail)                   %{_prefix}/boot/binm2
 %attr(555,root,qmail)                   %{_prefix}/boot/proc+df
@@ -1682,6 +1710,13 @@ fi
 %attr(444,root,qmail)                   %{_prefix}/doc/TOISP
 
 # Shared libraries (omit for architectures that don't support them)
+
+# pam-multi
+%if nopam_multi == 0
+%attr(755,root,root)                    %{security_dir}/pam-multi.so
+%attr(755,root,root)                    %{_libdir}/authenticate.so
+%endif
+
 %if %noclamav == 0
 %{_libdir}/libclam*.so*
 %endif
