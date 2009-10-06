@@ -11,7 +11,22 @@ Basic Installation
 ==================
 
 The most common option would be
- ./configure --with-pam-module-dir=/lib/security --enable-default-domain=indimail.org -prefix=/var/indimail
+ ./configure --with-moduledir=/lib/security --enable-default-domain=indimail.org \
+ -prefix=/var/indimail
+
+To INSTALL carry out the following steps
+
+% mkdir -p /home/local/src
+% cd /home/local/src
+% wget http://downloads.sourceforge.net/indimail/pam-multi-1.0.tar.gz
+% gunzip -c pam-multi-1.0.tar.gz | tar xf -
+% cd pam-multi-1.0
+% ./configure --with-pam-module-dir=/lib/security \
+% --enable-default-domain=indimail.org -prefix=/var/indimail \
+    --enable-moduledir=/lib/security
+% make
+% sudo make install
+(replace indimail.org with your domain)
 
 Briefly, the shell commands `./configure; make; make install' should
 configure, build, and install this package.  The following
