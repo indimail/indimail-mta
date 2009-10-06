@@ -1,0 +1,173 @@
+.\" This manpage is Copyright (c) Alexey Mahotkin 2002-2004
+.TH CHECKPASSWORD-PAM 8 "05 Oct 2009" GNU/Linux "Authentication"
+.SH "NAME"
+pam-checkpwd \- PAM-based checkpassword compatible authentication
+.SH SYNOPSIS
+.PP
+pam-checkpwd [-s PAM-SERVICE] [-e|--noenv] -- \fIprog args...\fP
+.PP
+pam-checkpwd --help
+.PP
+pam-checkpwd --version
+.PP
+.I Additional debugging options (see below):
+.RS
+	[--debug] [--stdout]
+.RE
+.PP
+.I Additional rarely used options (see below):
+.RS
+	[-H|--no-chdir-home]
+.RE
+
+
+.SH "DESCRIPTION"
+.B pam-checkpwd
+uses PAM to authenticate the remote user with
+.I checkpassword
+protocol.
+
+.PP
+.IR checkpassword -style
+programs are usually run by network server programs that wish to
+authenticate remote user.
+
+.PP
+.B pam-checkpwd
+uses PAM service name specified by
+.B PAM_SERVICE
+environment variable, or by the -\fIs\fR " or " --\fIservice\fR command-line option.
+
+.PP
+After successful authentication, if --\fInoenv\fR option is not specified,
+\fBpam-checkpwd\fR sets up supplementary groups of authenticated user,
+its gid, its uid, and its working directory (those values are taken from the system
+user database).
+
+.PP
+Normally,
+.B pam-checkpwd
+switches to user home directory.   If
+--\fIno\fR-\fIchdir\fR-\fIhome\fR or -\fIH\fR option is specified, this step is skipped.
+This option is useful when you have automounted home directories, but mail is delivered to a
+central location.
+
+.PP
+Finally,
+.B pam-checkpwd
+executes
+.I prog
+with
+.I args
+as its arguments.
+
+.PP
+\fB--\fR is used as usual to separate the \fBpam-checkpwd\fR own options from
+\fIprog\fR options.
+
+.PP
+\fBpam-checkpwd\fR logs authentication failures (or all actions, if
+\fI\-\-debug\fR option is used) to \fBsyslog\fR (or to stdout, if
+\fI\-\-stdout\fR option is used).
+
+.SH "ENVIRONMENT VARIABLES"
+.TP
+.B PAM_SERVICE
+.B pam-checkpwd
+uses contents of
+.B PAM_SERVICE
+environment variable to specify the PAM service name.  This could be
+overriden by
+.I -s
+option, see above.
+
+.PP
+Before invoking
+.IR prog ,
+.B pam-checkpwd
+sets environment variables
+.BR USER ", " HOME ", and " SHELL
+to appropriate values.  If
+.I --noenv
+option is specified, this step is skipped and the variables are left
+alone.  This is needed when you have virtual users which are not
+listed in your
+.IR /etc/passwd ,
+and you need to only do authentication.  Setting up process
+environment is handled by some other application like
+.BR setuidgid .
+
+
+.SH "DEBUGGING"
+.PP
+You can turn on debugging using the
+.I --debug
+option.
+.B pam-checkpwd
+starts to log all of its actions and the results of those actions to
+syslog (or to stdout, based on the state of
+.I --stdout
+option, see above).
+
+There is a way to manually trace how the
+.B pam-checkpwd
+authenticates: use the shell redirection and the
+.I --stdout
+option.  In this case
+.B pam-checkpwd
+reads
+.I checkpassword
+protocol data from stdin, and logs actions to stdout.  You can trace
+the authentication for the given user and password with the following
+command-line (usually as root):
+
+.PP
+# printf "%s\0%s\0%s\0" username password timestamp \\
+.br
+  | pam-checkpwd -s SERVICE \\
+    --debug --stdout -- /usr/bin/id 3<&0
+
+.PP
+It will trace the PAM authentication process for the user
+.I username
+with password
+.IR password ,
+and run the
+.B id
+program, which will report the user and groups
+.B pam-checkpwd
+switched to.
+
+.PP
+The idea of this method is courtesy of Mark Delany
+<markd-at-mira.net>.
+
+.SH "BUGS"
+.PP
+If you've found a bug in
+.BR checkpasswd-pam ,
+please report it to
+checkpasswd-pam-devel@lists\&.sourceforge\&.net
+
+.SH "SEE ALSO"
+.PP
+http://checkpasswd-pam.sourceforge.net/
+.PP
+http://cr.yp.to/checkpwd.html
+.PP
+"PAM Administrator's Guide" for your operating system.
+
+.SH "LEGACY"
+.PP
+There are alternate older pam-checkpwd packages available.  They
+are derived from original DJB's checkpassword code, and usually are less
+administrator-friendly than this version.  You can tell those packages
+apart by looking at their version number: it is less than 0.95.
+
+.SH "AUTHOR"
+.PP
+This version of pam-checkpwd was written by Manvendra Bhangui <mbhangui@gmail\&.com> by 
+hacking pam-checkpwd by Alexey Mahotkin <alexm@hsys\&.msk\&.ru>
+.PP
+.I checkpassword
+interface was designed by Daniel J. Bernstein.

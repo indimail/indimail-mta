@@ -1,0 +1,90 @@
+I am pleased to announce pam-multi - A PAM extender module.
+
+pam-multi helps you to extend authentication of an existing pam-module 
+(e.g. courier-imap, dovecout, cyrus, etc) to transparently authenticate
+against IndiMail's own MySQL database. The primary goal of pam-multi was
+to allow authentication of IMAP/POP3 servers like courier-imap, dovecot 
+against IndiMail MySQL database. In short, pam-multi provides a pam service,
+which is configurable to look at any datasource. IndiMail uses pam-multi
+to make possible usage of any IMAP/POP3 server with IndiMail's database,
+without modifying a single line of code in the IMAP/POP3 server.
+
+To INSTALL carry out the following steps
+
+% mkdir -p /home/local/src
+% cd /home/local/src
+% wget http://downloads.sourceforge.net/indimail/pam-multi-1.0.tar.gz
+% gunzip -c pam-multi-1.0.tar.gz | tar xf -
+% cd pam-multi-1.0
+% ./configure --with-pam-module-dir=/lib/security \
+% --enable-default-domain=indimail.org -prefix=/var/indimail \
+    --enable-moduledir=/lib/security
+% make
+% sudo make install
+(replace indimail.org with your domain)
+
+pam-multi supports four methods for password hashing schemes.
+crypt (DES), MD5, SHA256, SHA512.
+
+To use pam-multi for your application (which currently uses PAM), you
+need to modify the PAM configuration file for that application. The
+following options are supported in configuration file in /etc/pam.d.
+See man pam-multi(8) for more details.
+
+All that is needed is for you is to configure the appropriate command which
+returns an encrypted password for the user. pam-multi will encrypt
+the plain text password given by the user and compare it with the result
+fetched by one of the three configured method. If the encrypted password
+matches, access will be granted. The comparision will utilize one of the
+four hashing schemes.
+
+ $1$ .. MD5
+ $5$ .. SHA256
+ $6$ .. SHA512
+ anything else than above, the hashing scheme will be DES
+
+Three methods are supported for fetching the encrypted password from your database
+
+-m sql_statement
+ MySQL mode. You will need to specify -u, -p, -d, -H and -P options. It is
+ expected that the sql_statement will return a row containing the encrypted password
+ for the user.
+
+-c command
+ Command mode. pam-multi will do sh -c "command". It is expected that the output of the
+ command will be an encrypted password.
+
+-s shared_library
+ Library Mode. pam-multi will dynamically load the shared library. It is expected for
+ the library to provide the function
+
+ char *vauthenticate(char *email, char *service)
+
+ The function vauthenticate() will be passed a username and a token service denoting the
+ name of service. The service argument will be used only for identification purpose. It is
+ expected for the function to return a string containing the encrypted password. An example
+ shared library authenticate.so has been provided in the package. Authenticate.so has
+ a vauthenticate() function to authenticate against IndiMail's database.
+
+The following tokens if present in command string or the sql string (-m or -c options),
+will be replaced as follows
+
+  %u - Username
+  %d - Domain
+
+A checkpassword compatible program pam-checkpwd has been provided in the
+package. pam-checkpwd can use pam-multi as well as any existing pam service
+on your system. See man pam-checkpwd(8) for more details.
+
+Examples for illustration only
+  If you want an existing application on your system which uses PAM to use pam-multi, you will
+  neeed to modify the configuration file which your application uses to have any one of the
+  three options below.
+
+1  auth optional pam-multi.so args -m [select pw_passwd from indimail where pw_name=’%u’ and
+   pw_domain=’%d’] -u indimail -p ssh-1.5- -d indimail -H localhost -P 3306
+2  auth optional pam-multi.so args -c [grep "^%u:" /etc/passwd | awk -F: ’{print $2}’]
+3  auth optional pam-multi.so args -s /lib/security/authenticate.so
+
+pam-multi is experimental at this stage. It is covered under GNU GPL V3 license and
+I imply no warranty. However, I would be glad if this can be further improved.
