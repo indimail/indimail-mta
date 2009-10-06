@@ -12,6 +12,7 @@
  * Copyright (c) Alexey Mahotkin <alexm@hsys.msk.ru> 2002-2004
  * 
  * PAM support for checkpassword-pam
+ * Modified by Manvendra Bhangui <mbhangui@gmail.com>
  * 
  */
 
@@ -82,7 +83,7 @@ conversation(int num_msg, const struct pam_message **msgs, struct pam_response *
 }
 
 int
-authenticate_using_pam(const char *service_name, const char *username, const char *password, int opt_debugging)
+auth_pam(const char *service_name, const char *username, const char *password, int opt_debugging)
 {
 	struct pam_conv pam_conversation = { conversation, NULL };
 	pam_handle_t   *pamh;

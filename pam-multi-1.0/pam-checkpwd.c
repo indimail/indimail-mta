@@ -1,5 +1,8 @@
 /*
- * $Log: $
+ * $Log: pam-checkpwd.c,v $
+ * Revision 1.1  2009-10-06 13:50:14+05:30  Cprogrammer
+ * Initial revision
+ *
  */
 #include <stdio.h>
 #include <string.h>
@@ -18,7 +21,7 @@
 #endif
 
 #ifndef lint
-static char     sccsid[] = "$Id: $";
+static char     sccsid[] = "$Id: pam-checkpwd.c,v 1.1 2009-10-06 13:50:14+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 int             authlen = 512;
@@ -214,7 +217,7 @@ main(int argc, char **argv)
 			argv[0], login, challenge, response);
 	/*- authenticate using PAM */
 	status = 0;
-	if ((status = authenticate_using_pam(service_name, login, challenge, debug)))
+	if ((status = auth_pam(service_name, login, challenge, debug)))
 	{
 		pipe_exec(argv, tmpbuf, offset);
 		printf("454-%s (#4.3.0)\r\n", strerror(errno));
