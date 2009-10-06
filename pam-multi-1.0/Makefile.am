@@ -21,7 +21,7 @@ libpamsbin_PROGRAMS = pam-checkpwd
 all-local: authenticate.so pam-multi.spec
 
 authenticate.so: authenticate.o
-	$(COMPILE) $(MODFLAGS) -o $@ authenticate.o -soname=authenticate.so -Xlinker -R \
+	$(COMPILE) $(MODFLAGS) -o $@ authenticate.o -Xlinker -soname=authenticate.so -Xlinker -R \
 		-Xlinker @indimaildir@/lib -L@indimaildir@/lib -lindimail -leps
 authenticate.o: authenticate.c
 	$(COMPILE) $(DEFS) @auth_inc@ -c $^
