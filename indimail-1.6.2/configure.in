@@ -341,7 +341,7 @@ AC_SUBST(defaultdomain)
 AC_DEFINE_UNQUOTED(DEFAULT_DOMAIN,"$defaultdomain",Default Domain)
 
 moduledir=""
-for f in /lib/security
+for f in "$acl_libdirstem"/security
 do
 	if test -d $f
 	then
