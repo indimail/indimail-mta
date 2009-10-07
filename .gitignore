@@ -11,16 +11,18 @@ pam-multi*
 */libtool
 */config.h
 *.lib
-indimail-*/.gitignore
-fortune-*/.gitignore
 */.deps
 */.libs
 #
 # remaining programs
 #
+fortune-*/.gitignore
+fortune-*/configure
 altermime-*/altermime
 altermime-*/Makefile
 altermime-*/Makefile.in
+altermime-*/configure
+flash-*/configure
 flash-*/Makefile
 flash-*/Makefile.in
 flash-*/alarms
@@ -30,10 +32,12 @@ flash-*/crypt
 flash-*/flash
 flash-*/system.menu
 flash-*/system.rc
+mpack-*/configure
 mpack-*/mpack
 mpack-*/munpack
 mpack-*/Makefile
 mpack-*/Makefile.in
+ripmime-*/configure
 ripmime-*/ripmime
 ripmime-*/ripole
 ripmime-*/Makefile
@@ -47,4 +51,6 @@ indimail-*/doc/INSTALL-MYSQL
 indimail-*/doc/RELEASE-Notes
 indimail-*/eps-*/Makefile.in
 indimail-*/indimail.settings
+indimail-*/configure
+indimail-*/.gitignore
 indium-1.0
