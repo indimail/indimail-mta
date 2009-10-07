@@ -1,5 +1,8 @@
 /*
  * $Log: pam-support.c,v $
+ * Revision 1.2  2009-10-07 11:58:08+05:30  Cprogrammer
+ * removed stray debug statements
+ *
  * Revision 1.1  2009-10-07 10:19:03+05:30  Cprogrammer
  * Initial revision
  *
@@ -40,6 +43,7 @@
 
 #ifdef HAVE_PAM
 static const char *pam_username, *pam_password;
+static int      _debug = 0;
 
 static int
 conversation(int num_msg, const struct pam_message **msg, struct pam_response **resp,
@@ -49,7 +53,6 @@ conversation(int num_msg, const struct pam_message **msg, struct pam_response **
 	char           *style = 0;
 	struct pam_response *repl = NULL;
 
-	fprintf(stderr, "num_msg=%d\n", num_msg);
 	if (!(repl = malloc(sizeof(struct pam_response) * num_msg)))
 		return PAM_CONV_ERR;
 	for (i = 0; i < num_msg; i++) {
@@ -88,8 +91,9 @@ conversation(int num_msg, const struct pam_message **msg, struct pam_response **
 			free(repl);
 			return PAM_CONV_ERR;
 		}
-		fprintf(stderr, "conversation(): msg[%d], style %s, msg = \"%s\"\n", i,
-			style, msgs->msg);
+		if (_debug)
+			fprintf(stderr, "conversation(): msg[%d], style %s, msg = \"%s\"\n",
+				i, style, msgs->msg);
 	}
 	*resp = repl;
 	return PAM_SUCCESS;
@@ -108,7 +112,10 @@ auth_pam(const char *service_name, const char *username, const char *password, i
 	pam_password = password;
 	/*- initialize the PAM library */
 	if (debug)
+	{
 		fprintf(stderr, "Initializing PAM library using service name '%s'\n", service_name);
+		_debug = debug;
+	}
 	if ((retval = pam_start(service_name, username, &conv, &pamh)) != PAM_SUCCESS) {
 		fprintf(stderr, "Initialization failed: %s\n", pam_strerror(pamh, retval));
 		return 111;

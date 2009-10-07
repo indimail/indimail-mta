@@ -1,5 +1,8 @@
 /*
  * $Log: pam-multi.c,v $
+ * Revision 1.4  2009-10-07 11:51:38+05:30  Cprogrammer
+ * added option 'D' to use non-escaped mysql string
+ *
  * Revision 1.3  2009-10-07 09:59:18+05:30  Cprogrammer
  * initialize optind
  *
@@ -150,7 +153,7 @@ int             converse(pam_handle_t * pamh, int, const char *, const char **);
 int             pw_comp(const char *, char *, int, int);
 
 #ifndef	lint
-static char     sccsid[] = "$Id: pam-multi.c,v 1.3 2009-10-07 09:59:18+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: pam-multi.c,v 1.4 2009-10-07 11:51:38+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 /*
@@ -163,7 +166,9 @@ _pam_log(int err, const char *format, ...)
 
 	va_start(args, format);
 	openlog(PAM_MODULE_NAME, LOG_PID, LOG_AUTHPRIV);
-	vsyslog(LOG_ALERT, format, args);
+	vsyslog(err, format, args);
+	vfprintf(stderr, format, args);
+	fprintf(stderr, "\n");
 	va_end(args);
 	closelog();
 }
@@ -428,8 +433,8 @@ run_mysql(char *mysql_user, char *mysql_pass, char *mysql_host, char *mysql_data
 		  const char *user, char **qresult, int debug)
 {
 	char            thischar, lastchar;
-	char           *sql, *p;
-	char           *escapeUser, *orig_user;	/* User provided stuff MUST be escaped */
+	char           *sql, *p, *q;
+	char           *escapeUser;	/* User provided stuff MUST be escaped */
 	unsigned int    user_length, domain_length, len, i, j, row_count;
 	MYSQL           mysql;
 	MYSQL_RES      *result;
@@ -439,11 +444,6 @@ run_mysql(char *mysql_user, char *mysql_pass, char *mysql_host, char *mysql_data
 		_pam_log(LOG_INFO, "run_mysql user[%s],pass[%s],host[%s], database[%s], port[%d], query[%s], User[%s]", mysql_user, mysql_pass,
 			 mysql_host, mysql_database, mysql_port, query_str, user);
 	*qresult = (char *) 0;
-	escapeUser = malloc(sizeof (char) * (strlen(user) * 2) + 1);
-	if (!escapeUser) {
-		_pam_log(LOG_ERR, "malloc: %s\n", strerror(errno));
-		return PAM_BUF_ERR;
-	}
 	if (!mysql_init(&mysql)) {
 		_pam_log(LOG_ERR, "mysql_init: %s", mysql_error(&mysql));
 		return (PAM_SERVICE_ERR);
@@ -452,14 +452,17 @@ run_mysql(char *mysql_user, char *mysql_pass, char *mysql_host, char *mysql_data
 		_pam_log(LOG_ERR, "mysql_real_connect: %s", mysql_error(&mysql));
 		return (PAM_SERVICE_ERR);
 	}
-	mysql_real_escape_string(&mysql, escapeUser, user, strlen(user));
-	len = strlen(escapeUser) + 1;
-	if (!(orig_user = (char *) malloc(len))) {
+	if (!(escapeUser = malloc(sizeof (char) * (strlen(user) * 2) + 1))) {
 		_pam_log(LOG_ERR, "malloc: %s\n", strerror(errno));
-		mysql_close(&mysql);
 		return PAM_BUF_ERR;
 	}
-	strncpy(orig_user, escapeUser, len);
+	mysql_real_escape_string(&mysql, escapeUser, user, strlen(user));
+	for (q = (char *) user; *q && *q != '@'; q++);
+	if (*q) {
+		*q = 0;
+		q++;
+	} else
+		getEnvConfigStr(&q, "DEFAULT_DOMAIN", DEFAULT_DOMAIN);
 	for (p = escapeUser; *p && *p != '@'; p++);
 	if (*p) {
 		*p = 0;
@@ -468,26 +471,25 @@ run_mysql(char *mysql_user, char *mysql_pass, char *mysql_host, char *mysql_data
 		getEnvConfigStr(&p, "DEFAULT_DOMAIN", DEFAULT_DOMAIN);
 	domain_length = strlen(p);
 	user_length = strlen(escapeUser);
-	lastchar = 0;
-	j = 0;
 	if (!(sql = (char *) malloc(sizeof (char) * (MAX_QUERY_LENGTH + 1)))) {
 		_pam_log(LOG_ERR, "malloc: %s\n", strerror(errno));
 		mysql_close(&mysql);
 		return PAM_BUF_ERR;
 	}
 	len = strlen(query_str);
-	for (i = 0; i < len; i++) {
+	for (i = j = lastchar = 0; i < len; i++) {
 		thischar = query_str[i];
 		if (lastchar == '%') {
-			switch (thischar) {
+			switch (thischar)
+			{
 			case 'U':
 				if ((j + user_length) >= MAX_QUERY_LENGTH) {
 					_pam_log(LOG_ERR, "pam_db: query too long");
 					mysql_close(&mysql);
 					return PAM_BUF_ERR;
 				}
-				strcpy(sql + j, orig_user);
-				j += strlen(orig_user);
+				strcpy(sql + j, user);
+				j += strlen(user);
 				lastchar = 0;
 				break;
 			case 'u':
@@ -498,6 +500,16 @@ run_mysql(char *mysql_user, char *mysql_pass, char *mysql_host, char *mysql_data
 				}
 				strcpy(sql + j, escapeUser);
 				j += user_length;
+				lastchar = 0;
+				break;
+			case 'D':
+				if ((j + domain_length) >= MAX_QUERY_LENGTH) {
+					_pam_log(LOG_ERR, "pam_db: query too long");
+					mysql_close(&mysql);
+					return PAM_BUF_ERR;
+				}
+				strcpy(sql + j, q);
+				j += strlen(q);
 				lastchar = 0;
 				break;
 			case 'd':
