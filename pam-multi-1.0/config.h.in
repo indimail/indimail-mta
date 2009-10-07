@@ -51,26 +51,17 @@
 /* Define to 1 if you have the <pam_appl.h> header file. */
 #undef HAVE_PAM_APPL_H
 
-/* Define to 1 if you have the <pam_misc.h> header file. */
-#undef HAVE_PAM_MISC_H
-
 /* Define to 1 if you have the <pam_modules.h> header file. */
 #undef HAVE_PAM_MODULES_H
 
 /* Define to 1 if you have the <pam/pam_appl.h> header file. */
 #undef HAVE_PAM_PAM_APPL_H
 
-/* Define to 1 if you have the <pam/pam_misc.h> header file. */
-#undef HAVE_PAM_PAM_MISC_H
-
 /* Define to 1 if you have the <pam/pam_modules.h> header file. */
 #undef HAVE_PAM_PAM_MODULES_H
 
 /* Define to 1 if you have the <security/pam_appl.h> header file. */
 #undef HAVE_SECURITY_PAM_APPL_H
-
-/* Define to 1 if you have the <security/pam_misc.h> header file. */
-#undef HAVE_SECURITY_PAM_MISC_H
 
 /* Define to 1 if you have the <security/pam_modules.h> header file. */
 #undef HAVE_SECURITY_PAM_MODULES_H

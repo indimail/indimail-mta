@@ -81,7 +81,7 @@ case "$host" in
 	;;
 esac
 
-AC_CHECK_HEADERS([pam/pam_appl.h security/pam_appl.h pam_appl.h pam/pam_misc.h security/pam_misc.h pam_misc.h pam/pam_modules.h security/pam_modules.h pam_modules.h])
+AC_CHECK_HEADERS([pam/pam_appl.h security/pam_appl.h pam_appl.h pam/pam_modules.h security/pam_modules.h pam_modules.h])
 
 defaultprefix="/var/indimail"
 LIBVER=0
