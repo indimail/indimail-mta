@@ -1,4 +1,8 @@
 /*
+ * $Log: pam-support.c,v $
+ * Revision 1.1  2009-10-07 10:19:03+05:30  Cprogrammer
+ * Initial revision
+ *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
  * published by the Free Software Foundation; either version 2, or (at
@@ -16,88 +20,96 @@
  * 
  */
 
+
 #ifdef HAVE_CONFIG_H
 #include "config.h"
-#endif
-#ifdef DARWIN
-#include <pam/pam_appl.h>
-#else
-#include <security/pam_appl.h>
 #endif
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
-
-static const char *global_password;
-static int         debug;
+#include <unistd.h>
+#ifdef HAVE_SECURITY_PAM_APPL_H
+#include <security/pam_appl.h>
+#endif
+#ifdef HAVE_PAM_PAM_APPL_H
+#include <pam/pam_appl.h>
+#endif
+#ifdef HAVE_PAM_APPL_H
+#include <pam_appl.h>
+#endif
 
 #ifdef HAVE_PAM
+static const char *pam_username, *pam_password;
+
 static int
-conversation(int num_msg, const struct pam_message **msgs, struct pam_response **resp,
+conversation(int num_msg, const struct pam_message **msg, struct pam_response **resp,
 	void *appdata_ptr)
 {
-	int             i;
-	struct pam_response *responses;
-	(void) appdata_ptr;
+	int             i = 0;
+	char           *style = 0;
+	struct pam_response *repl = NULL;
 
-	/*- safety check */
-	if (num_msg <= 0) {
-		fprintf(stderr, "Internal PAM error: num_msgs <= 0\n");
+	fprintf(stderr, "num_msg=%d\n", num_msg);
+	if (!(repl = malloc(sizeof(struct pam_response) * num_msg)))
 		return PAM_CONV_ERR;
-	}
-	/*- allocate array of responses */
-	if (!(responses = calloc(num_msg, sizeof (struct pam_response)))) {
-		fprintf(stderr, "Out of memory\n");
-		return PAM_CONV_ERR;
-	}
 	for (i = 0; i < num_msg; i++) {
-		const struct pam_message *msg = msgs[i];
-		struct pam_response *response = &(responses[i]);
-		char           *style = NULL;
-		switch (msg->msg_style) {
-		case PAM_PROMPT_ECHO_OFF:
-			style = "PAM_PROMPT_ECHO_OFF";
-			response->resp = strdup(global_password);
-			if (!response->resp)
-				return PAM_CONV_ERR;
-			break;
+		const struct pam_message *msgs = msg[i];
+		switch (msg[i]->msg_style)
+		{
 		case PAM_PROMPT_ECHO_ON:
 			style = "PAM_PROMPT_ECHO_ON";
+			repl[i].resp_retcode = PAM_SUCCESS;
+			repl[i].resp = strdup(pam_username);
+			if (!repl[i].resp)
+			{
+				perror("strdup");
+				return PAM_CONV_ERR;
+			}
 			break;
-		case PAM_ERROR_MSG:
-			style = "PAM_ERROR_MSG";
+		case PAM_PROMPT_ECHO_OFF:
+			style = "PAM_PROMPT_ECHO_OFF";
+			repl[i].resp_retcode = PAM_SUCCESS;
+			repl[i].resp = strdup(pam_password);
+			if (!repl[i].resp)
+			{
+				perror("strdup");
+				return PAM_CONV_ERR;
+			}
 			break;
 		case PAM_TEXT_INFO:
-			style = "PAM_TEXT_INFO";
+		case PAM_ERROR_MSG:
+			style = msg[i]->msg_style == PAM_TEXT_INFO ?  "PAM_TEXT_INFO" : "PAM_ERROR_MSG";
+			write(2, msg[i]->msg, strlen(msg[i]->msg));
+			write(2, "\n", 1);
+			repl[i].resp_retcode = PAM_SUCCESS;
+			repl[i].resp = NULL;
 			break;
 		default:
-			fprintf(stderr, "Internal error: invalid msg_style: %d\n", msg->msg_style);
-			break;
+			free(repl);
+			return PAM_CONV_ERR;
 		}
-		if (debug)
-			fprintf(stderr, "conversation(): msg[%d], style %s, msg = \"%s\"\n", i, style, msg->msg);
-		response->resp_retcode = 0;
-	} /*- for (i = 0; i < num_msg; i++) { */
-	*resp = responses;
+		fprintf(stderr, "conversation(): msg[%d], style %s, msg = \"%s\"\n", i,
+			style, msgs->msg);
+	}
+	*resp = repl;
 	return PAM_SUCCESS;
 }
 
 int
-auth_pam(const char *service_name, const char *username, const char *password, int opt_debugging)
+auth_pam(const char *service_name, const char *username, const char *password, int debug)
 {
-	struct pam_conv pam_conversation = { conversation, NULL };
+	/*- struct pam_conv pam_conversation = { conversation, NULL }; -*/
+	struct pam_conv conv = {conversation, NULL };
 	pam_handle_t   *pamh;
 	int             retval;
 	char           *remoteip;
 
-	if (opt_debugging)
-		debug = 1;
-	/*- to be used later from conversation() */
-	global_password = password;
+	pam_username = username;
+	pam_password = password;
 	/*- initialize the PAM library */
 	if (debug)
 		fprintf(stderr, "Initializing PAM library using service name '%s'\n", service_name);
-	if ((retval = pam_start(service_name, username, &pam_conversation, &pamh)) != PAM_SUCCESS) {
+	if ((retval = pam_start(service_name, username, &conv, &pamh)) != PAM_SUCCESS) {
 		fprintf(stderr, "Initialization failed: %s\n", pam_strerror(pamh, retval));
 		return 111;
 	}
@@ -108,19 +120,21 @@ auth_pam(const char *service_name, const char *username, const char *password, i
 	if (remoteip) /*- we don't care if this succeeds or not */
 		pam_set_item(pamh, PAM_RHOST, remoteip);
 	/*- Authenticate the user */
-	if ((retval = pam_authenticate(pamh, 0)) != PAM_SUCCESS) {
+	if ((retval = pam_authenticate(pamh, PAM_DISALLOW_NULL_AUTHTOK)) != PAM_SUCCESS) {
 		/*
 		 * usually PAM itself logs auth failures, but we need to see
 		 * how it looks from our side 
 		 */
-		if (opt_debugging)
+		if (debug)
 			fprintf(stderr, "Authentication failed: %s\n", pam_strerror(pamh, retval));
+		pam_end(pamh, retval);
 		return 1;
 	}
 	if (debug)
 		fprintf(stderr, "Authentication passed\n");
 	if ((retval = pam_acct_mgmt(pamh, 0)) != PAM_SUCCESS) {
 		fprintf(stderr, "PAM account management failed: %s\n", pam_strerror(pamh, retval));
+		pam_end(pamh, retval);
 		return 1;
 	}
 	if (debug)

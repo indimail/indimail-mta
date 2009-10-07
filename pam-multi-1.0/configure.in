@@ -44,42 +44,44 @@ case "$host" in
 	INSTALL="./install-sh -c"
 	idcommand="/usr/xpg4/bin/id -u"
 	CPPFLAGS="$CPPFLAGS -DSUNOS4"
-	CFLAGS="$CFLAGS -s -O4 -Wall -fPIC"
-	MODFLAGS="-s -O4 -fPIC -shared -Wall"
+	CFLAGS="$CFLAGS -O4 -Wall -fPIC"
+	MODFLAGS="-O4 -fPIC -shared -Wall"
 	STRIP_OPT=-s
 	;;
 *-*-solaris*)
 	INSTALL="./install-sh -c"
 	idcommand="/usr/xpg4/bin/id -u"
 	CPPFLAGS="$CPPFLAGS -DSOLARIS"
-	CFLAGS="$CFLAGS -s -O4 -Wall -fPIC"
-	MODFLAGS="-s -O4 -fPIC -shared -Wall"
+	CFLAGS="$CFLAGS -g -O4 -Wall -fPIC"
+	MODFLAGS="-g -O4 -fPIC -shared -Wall"
 	STRIP_OPT=-s
 	;;
 *-*-linux*)
 	INSTALL="/usr/bin/install -c"
 	idcommand="/usr/bin/id -u"
 	CPPFLAGS="$CPPFLAGS -DLINUX"
-	CFLAGS="$CFLAGS -s -O4 -Wall -fPIC"
-	MODFLAGS="-module -s -O4 -fPIC -shared -Wall"
+	CFLAGS="$CFLAGS -g -O4 -Wall -fPIC"
+	MODFLAGS="-g -module -O4 -fPIC -shared -Wall"
 	STRIP_OPT=-s
 	;;
 *-*-darwin*)
 	INSTALL="/usr/bin/install -c"
 	idcommand="/usr/bin/id -u"
 	CPPFLAGS="$CPPFLAGS -DDARWIN"
-	CFLAGS="$CFLAGS -O4 -Wall -pie"
-	MODFLAGS="-O4 -bundle -pie -Wall -undefined dynamic_lookup"
+	CFLAGS="$CFLAGS -g -O4 -Wall -pie"
+	MODFLAGS="-g -O4 -bundle -pie -Wall -undefined dynamic_lookup"
 	STRIP_OPT=-S
 	;;
 *)
 	INSTALL="/usr/bin/install -c"
 	idcommand="/usr/bin/id -u"
-	CFLAGS="$CFLAGS -s -O4 -Wall -fPIC"
-	MODFLAGS="-s -O4 -fPIC -shared -Wall"
+	CFLAGS="$CFLAGS -g -O4 -Wall -fPIC"
+	MODFLAGS="-g -O4 -fPIC -shared -Wall"
 	STRIP_OPT=-s
 	;;
 esac
+
+AC_CHECK_HEADERS([pam/pam_appl.h security/pam_appl.h pam_appl.h pam/pam_misc.h security/pam_misc.h pam_misc.h pam/pam_modules.h security/pam_modules.h pam_modules.h])
 
 defaultprefix="/var/indimail"
 LIBVER=0
@@ -218,6 +220,7 @@ AC_CHECK_LIB(z,compress)
 HOST=$host
 AC_SUBST(MODFLAGS)
 AC_SUBST(auth_inc)
+AC_SUBST(auth_libs)
 AC_SUBST(moduledir)
 AC_SUBST(indimaildir)
 AC_SUBST(HOST)

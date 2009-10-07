@@ -14,6 +14,7 @@ noinst_FILES=pam-multi.la pam-multi.a
 
 pam_multi_la_SOURCES=pam-multi.c md5_crypt.c sha256_crypt.c sha512_crypt.c
 pam_multi_la_LDFLAGS=-module -avoid-version -version-info @LIBVER@:0:0
+pam_multi_la_LIBADD=@LIB_CRYPT@ @LIB_SSL@ @auth_libs@ @LIB_PAM@
 pam_multi_la_CPPFLAGS=$(DEFS) @auth_inc@
 
 libpamsbin_PROGRAMS = pam-checkpwd
@@ -26,14 +27,15 @@ authenticate.so: authenticate.o
 authenticate.o: authenticate.c
 	$(COMPILE) $(DEFS) @auth_inc@ -c $^
 
-pam-checkpwd: pam-checkpwd.o pam-support.o
-	$(LINK) $@.o pam-support.o -Xlinker -R -Xlinker @indimaildir@/lib -L@indimaildir@/lib \
-		-lindimail -leps $(LIB_CRYPT) $(LIB_SSL) @LIB_PAM@ @LIB_DL@
-pam-checkpwd.o: pam-checkpwd.c pam-support.h
+pam-checkpwd: pam-checkpwd.o pam-support.o 
+	$(LINK) $@.o pam-support.o @LIB_PAM@
+pam-checkpwd.o: pam-checkpwd.c pam-support.h config.h
 	$(COMPILE) $(DEFS) @auth_inc@ -c $^
+pam-support.o: config.h pam-support.c
 
-MOSTLYCLEANFILES=pam-multi.la  authenticate.so pam-checkpwd
+MOSTLYCLEANFILES=pam-multi.la authenticate.so pam-checkpwd pam-support.h.gch
 EXTRA_DIST=COPYING NEWS README CREDITS ChangeLog INSTALL pam-multi.spec.in install-sh missing mkinstalldirs pam-multi.spec
+DISTCLEANFILES=pam-multi.settings
 
 install-data-local: authenticate.so
 	$(mkinstalldirs)  $(DESTDIR)$(moduledir)
