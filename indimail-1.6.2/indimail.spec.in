@@ -1,5 +1,8 @@
 #
 # $Log: indimail.spec.in,v $
+# Revision 2.90  2009-10-07 23:41:45+05:30  Cprogrammer
+# fix path when %{_lib} was used
+#
 # Revision 2.89  2009-10-07 13:26:10+05:30  Cprogrammer
 # figure out pam module directory automatically
 #
@@ -278,7 +281,7 @@
 # rpm spec file for indimail
 #
 #
-# $Id: indimail.spec.in,v 2.89 2009-10-07 13:26:10+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 2.90 2009-10-07 23:41:45+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %define _unpackaged_files_terminate_build 1
 
@@ -464,7 +467,7 @@ BuildRequires: db4-devel
 %endif
 %endif
 %if %nopam_multi == 0
-BuildPrereq: pam-devel
+BuildRequires: pam-devel
 Requires: pam
 %endif
 
@@ -713,7 +716,7 @@ if [ " %dist" = " mandrake" ] ; then
 	--mandir=%{_prefix}/man --sysconfdir=%{_prefix}/etc --enable-qmaildir=%{_prefix} \
 	--enable-basepath=@basepath@ --enable-logdir=@logdir@ \
 	--enable-tcprules-prog=%{_prefix}/bin/tcprules --enable-tcpserver-file=%{_prefix}/etc/tcp.smtp \
-	--enable-moduledir=%{_lib}/security \
+	--enable-moduledir=/%{_lib}/security \
 	`%{__cat} config/indimail.opts` > $DEVICE
 else
 %configure --prefix=%{_prefix} --libexecdir=%{_prefix}/libexec --sysconfdir=%{_prefix}/etc \
@@ -722,7 +725,7 @@ else
 	--mandir=%{_prefix}/man --sysconfdir=%{_prefix}/etc --enable-qmaildir=%{_prefix} \
 	--enable-basepath=@basepath@ --enable-logdir=@logdir@ \
 	--enable-tcprules-prog=%{_prefix}/bin/tcprules --enable-tcpserver-file=%{_prefix}/etc/tcp.smtp \
-	--enable-moduledir=%{_lib}/security \
+	--enable-moduledir=/%{_lib}/security \
 	`%{__cat} config/indimail.opts` > $DEVICE
 fi
 
@@ -921,11 +924,11 @@ if [ -f %{buildroot}%{_prefix}/man/man8/makeuserdb.8.gz ] ; then
 		done
 fi
 if [ %nopam_multi -eq 0 ] ; then
-/bin/rm -f "$RPM_BUILD_ROOT"%{_lib}/security/pam-multi.la
-/bin/rm -f "$RPM_BUILD_ROOT"%{_lib}/security/pam-multi.a
+/bin/rm -f %{buildroot}/%{_lib}/security/pam-multi.la
+/bin/rm -f %{buildroot}/%{_lib}/security/pam-multi.a
 if [ -x /usr/bin/chrpath ] ; then
 	/usr/bin/chrpath -d %{buildroot}%{_libdir}/authenticate.so
-	/usr/bin/chrpath -d %{buildroot}%{_lib}/security/pam-multi.so
+	/usr/bin/chrpath -d %{buildroot}/%{_lib}/security/pam-multi.so
 	/usr/bin/chrpath -d %{buildroot}%{_prefix}/sbin/pam-checkpwd
 fi
 fi
@@ -1721,7 +1724,7 @@ fi
 
 # pam-multi
 %if %nopam_multi == 0
-%attr(755,root,root)                    %{_lib}/security/pam-multi.so
+%attr(755,root,root)                    /%{_lib}/security/pam-multi.so
 %attr(755,root,root)                    %{_libdir}/authenticate.so
 %endif
 
