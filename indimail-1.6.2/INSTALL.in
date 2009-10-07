@@ -336,7 +336,6 @@ the installation.
         --enable-sha256-crypt=n \
         --enable-sha512-crypt=n \
         --enable-ipv6=y \
-		--enable-moduledir=/lib/security \
         --enable-offensive=n
 
     NOTES: To get a complete list of configure options type: ./configure --help
