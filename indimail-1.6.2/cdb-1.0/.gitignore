@@ -14,3 +14,7 @@ config.log
 config.status
 libtool
 stamp-h1
+.libs
+compile
+load
+uint32.h
