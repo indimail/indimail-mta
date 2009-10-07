@@ -1,5 +1,8 @@
 /*
  * $Log: pam-checkpwd.c,v $
+ * Revision 1.4  2009-10-07 22:56:59+05:30  Cprogrammer
+ * removed --stdout option
+ *
  * Revision 1.3  2009-10-07 10:18:26+05:30  Cprogrammer
  * added initialize() routine
  *
@@ -34,13 +37,11 @@
 #define isEscape(ch) ((ch) == '"' || (ch) == '\'')
 
 #ifndef lint
-static char     sccsid[] = "$Id: pam-checkpwd.c,v 1.3 2009-10-07 10:18:26+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: pam-checkpwd.c,v 1.4 2009-10-07 22:56:59+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 int             authlen = 512;
 static const char     *short_options = "dehs:HV";
-
-enum { OPT_STDOUT = 1 };
 
 static struct option long_options[] = {
 	{"debug", no_argument, NULL, 'd'},
@@ -48,7 +49,6 @@ static struct option long_options[] = {
 	{"noenv", no_argument, NULL, 'e'},
 	{"no-chdir-home", no_argument, NULL, 'H'},
 	{"service", required_argument, NULL, 's'},
-	{"stdout", no_argument, NULL, OPT_STDOUT},
 	{"version", no_argument, NULL, 'V'},
 	{NULL, 0, NULL, 0}
 };
@@ -303,7 +303,7 @@ main(int argc, char **argv)
 {
 	char           *ptr, *tmpbuf, *login, *response, *challenge;
 	char            buf[MAX_BUFF];
-	int             opt_use_stdout = 0, opt_dont_set_env = 0, opt_dont_chdir_home = 0,
+	int             opt_dont_set_env = 0, opt_dont_chdir_home = 0,
 					debug = 0, c, count, offset, status, option_index = 0, s_optind;
 	char           *service_name = 0;
 
@@ -315,9 +315,6 @@ main(int argc, char **argv)
 		if ((c = getopt_long(argc, argv, short_options, long_options, &option_index)) == -1)
 			break;
 		switch (c) {
-		case OPT_STDOUT:
-			opt_use_stdout = 1;
-			break;
 		case 'd':
 			debug = 1;
 			break;
