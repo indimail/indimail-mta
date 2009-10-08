@@ -110,8 +110,8 @@ libindimail.la: $(libindimail_la_OBJECTS) $(libindimail_la_DEPENDENCIES)
 
 authenticate.la: $(authenticate_la_OBJECTS) $(authenticate_la_DEPENDENCIES)
 	$(LIBTOOL) --mode=link $(COMPILE) $(MODFLAGS) -o $@ authenticate.lo \
-	-no-undefined -module -avoid-version $(top_builddir)/libindimail.la \
-	-rpath @libdir@
+	-rdynamic -nostartfiles -no-undefined -module -avoid-version \
+	$(top_builddir)/libindimail.la -L.libs -rpath @libdir@
 
 authenticate.lo: authenticate.c
 	$(LIBTOOL) --mode=compile gcc $(DEFS) @auth_inc@ -c $^
