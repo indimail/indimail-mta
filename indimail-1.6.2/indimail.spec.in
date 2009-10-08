@@ -1,5 +1,11 @@
 #
 # $Log: indimail.spec.in,v $
+# Revision 2.93  2009-10-08 16:50:34+05:30  Cprogrammer
+# compiled indimail after libdkim
+#
+# Revision 2.92  2009-10-08 11:51:10+05:30  Cprogrammer
+# delete authenticate.la
+#
 # Revision 2.91  2009-10-08 11:18:32+05:30  Cprogrammer
 # moved authenticate.so from pam-multi to indimail
 #
@@ -284,7 +290,7 @@
 # rpm spec file for indimail
 #
 #
-# $Id: indimail.spec.in,v 2.91 2009-10-08 11:18:32+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 2.93 2009-10-08 16:50:34+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %define _unpackaged_files_terminate_build 1
 
@@ -836,10 +842,10 @@ fi
 [ "$RPM_BUILD_ROOT" != "/" ] && %{__rm} -fr $RPM_BUILD_ROOT
 ID=$(id -u)
 %{__mkdir_p} $RPM_BUILD_ROOT%{_prefix}
-for i in ucspi-tcp-%{ucspi_version} \
+for i in libdkim-%{libdkim_version} %{name}-%{version} ucspi-tcp-%{ucspi_version} \
 nssd-%{nssd_version} bogofilter-%{bogofilter_version} \
 fetchmail-%{fetchmail_version} courier-imap-%{courier_version} \
-clamav-%{clamav_version} libdkim-%{libdkim_version} %{name}-%{version}
+clamav-%{clamav_version}
 do
 	if [ -d $i ] ; then
 		cd $i
@@ -857,6 +863,7 @@ for i in eps cdb flash indimail
 do
 	%{__rm} -f %{buildroot}%{_libdir}/lib"$i".la
 done
+%{__rm} -f %{buildroot}%{_libdir}/authenticate.la
 
 if [ %noclamav -eq 0 ] ; then
 	for i in clamav clamunrar clamunrar_iface
