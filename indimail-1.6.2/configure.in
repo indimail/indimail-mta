@@ -45,6 +45,7 @@ case "$host" in
 	idcommand="/usr/xpg4/bin/id -u"
 	CPPFLAGS="$CPPFLAGS -DSUNOS4"
 	CFLAGS="$CFLAGS -O4 -Wall -fPIC"
+	MODFLAGS="-O4 -fPIC -shared -Wall"
 	STRIP_OPT=-s
 	;;
 *-*-solaris*)
@@ -52,6 +53,7 @@ case "$host" in
 	idcommand="/usr/xpg4/bin/id -u"
 	CPPFLAGS="$CPPFLAGS -DSOLARIS"
 	CFLAGS="$CFLAGS -O4 -Wall -fPIC"
+	MODFLAGS="-O4 -fPIC -shared -Wall"
 	STRIP_OPT=-s
 	;;
 *-*-linux*)
@@ -60,6 +62,7 @@ case "$host" in
 	idcommand="/usr/bin/id -u"
 	CPPFLAGS="$CPPFLAGS -DLINUX"
 	CFLAGS="$CFLAGS -O4 -Wall -fPIC"
+	MODFLAGS="-O4 -fPIC -shared -Wall"
 	STRIP_OPT=-s
 	;;
 *-*-darwin*)
@@ -67,12 +70,14 @@ case "$host" in
 	idcommand="/usr/bin/id -u"
 	CPPFLAGS="$CPPFLAGS -DDARWIN"
 	CFLAGS="$CFLAGS -O4 -Wall -pie"
+	MODFLAGS="-g -O4 -bundle -pie -Wall -undefined dynamic_lookup"
 	STRIP_OPT=-s
 	;;
 *)
 	INSTALL="/usr/bin/install -c"
 	idcommand="/usr/bin/id -u"
 	CFLAGS="$CFLAGS -O4 -Wall -fPIC"
+	MODFLAGS="-O4 -fPIC -shared -Wall"
 	STRIP_OPT=-s
 	;;
 esac
@@ -858,6 +863,7 @@ AC_SUBST(mysqlbindir)
 AC_SUBST(auth_inc)
 AC_SUBST(auth_libs)
 AC_SUBST(idcommand)
+AC_SUBST(MODFLAGS)
 AC_SUBST(HOST)
 
 AC_CHECK_LIB(m,floor)
@@ -1095,6 +1101,7 @@ echo "CPPFLAGS             = $CPPFLAGS"
 echo "CXXFLAGS             = $CXXFLAGS"
 echo "CFLAGS               = $CFLAGS"
 echo "LDFLAGS              = $LDFLAGS"
+echo "MODFLAGS             = $MODFLAGS"
 echo "            Current settings"
 echo "-------------------------------------------------------------"
 echo "   qmail directory = $qmaildir --enable-qmaildir=$qmaildir"

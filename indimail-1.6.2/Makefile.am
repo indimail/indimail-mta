@@ -14,6 +14,7 @@ libindimaildir=@libdir@
 indimailbindir=@prefix@/bin
 indimailsbindir=@prefix@/sbin
 indimailauthlibdir=@prefix@/libexec/authlib
+authenticatedir=@libdir@
 
 libindimail_LTLIBRARIES = libindimail.la
 libindimail_la_SOURCES = $(COMMONSOURCES)
@@ -21,6 +22,12 @@ libindimail_la_LIBADD =  $(top_builddir)/eps-1.2/libeps.la $(top_builddir)/cdb-1
 						 -L@mysql_libdir@ -lmysqlclient @LIB_CRYPT@ -lm
 libindimail_la_DEPENDENCIES = $(top_builddir)/eps-1.2/libeps.la $(top_builddir)/cdb-1.0/libcdb.la
 libindimail_la_LDFLAGS = -version-info @LIBVER@:0:0 -release @VERSION@
+
+authenticate_LTLIBRARIES = authenticate.la
+authenticate_la_SOURCES = authenticate.c
+authenticate_la_LIBADD = $(top_builddir)/libindimail.la
+authenticate_la_LDFLAGS = -no-undefined -module -avoid-version
+authenticate_la_DEPENDENCIES = $(top_builddir)/libindimail.la
 
 SYSCONFDIR = @sysconfdir@
 sysconf_DATA = indimail.settings controlfiles headerlist osh.table cronlist perm_list
@@ -101,7 +108,15 @@ libindimail.la: $(libindimail_la_OBJECTS) $(libindimail_la_DEPENDENCIES)
 	-O -o libindimail.la $(libindimail_la_OBJECTS) $(libindimail_la_LIBADD) \
 	-rpath @libdir@
 
-all-local: libindimail.la inc_deps lib_deps .gitignore
+authenticate.la: $(authenticate_la_OBJECTS) $(authenticate_la_DEPENDENCIES)
+	$(LIBTOOL) --mode=link $(COMPILE) $(MODFLAGS) -o $@ authenticate.lo \
+	-no-undefined -module -avoid-version $(top_builddir)/libindimail.la \
+	-rpath @libdir@
+
+authenticate.lo: authenticate.c
+	$(LIBTOOL) --mode=compile gcc $(DEFS) @auth_inc@ -c $^
+
+all-local: libindimail.la authenticate.la inc_deps lib_deps .gitignore
 
 inc_deps: configure Makefile
 	if test -d ../qmail-1.03 ; then \
@@ -138,7 +153,7 @@ MOSTLYCLEANFILES=versioninfo vcaliasrev myslave logmonitor controlsync bogofilte
 svctool indimail_settings.c cronlist crypt create_services INSTALL INSTALL-RPM INSTALL-MYSQL \
 indimail.spec cscope.* *.dSYM inc_deps lib_deps socket.lib indimail-@VERSION@-rpmlintrc \
 indimail-epm.list README-CLUSTER tls-cert-check mailzipper perm_list RELEASE-Notes \
-dbinfo.1 inlookup.8 vadddomain.1 vdelivermail.8 indimail.5 svctool.1
+dbinfo.1 inlookup.8 vadddomain.1 vdelivermail.8 indimail.5 svctool.1 indisub.c
 
 DISTCLEANFILES=.gitignore
 
@@ -787,7 +802,8 @@ hashtable.o: hashtable.c
 initsvc$(EXEEXT): $(initsvc_OBJECTS) $(initsvc_DEPENDENCIES)
 	$(LINK) $(initsvc_LDFLAGS) $(initsvc_OBJECTS) fappend.o getEnvConfig.o $(initsvc_LDADD)
 
-install-data-local: initsvc libindimail.la indimail-epm.list indimail-@VERSION@-rpmlintrc indimail.spec
+install-data-local: initsvc libindimail.la indimail-epm.list indimail-@VERSION@-rpmlintrc \
+indimail.spec authenticate.la
 	if [ " $(DESTDIR)" = " " ] ; then \
 		if test `@idcommand@` != "0" ; then \
 			echo "you are not root"; \

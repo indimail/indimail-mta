@@ -1,5 +1,8 @@
 #
 # $Log: indimail.spec.in,v $
+# Revision 2.91  2009-10-08 11:18:32+05:30  Cprogrammer
+# moved authenticate.so from pam-multi to indimail
+#
 # Revision 2.90  2009-10-07 23:41:45+05:30  Cprogrammer
 # fix path when %{_lib} was used
 #
@@ -281,7 +284,7 @@
 # rpm spec file for indimail
 #
 #
-# $Id: indimail.spec.in,v 2.90 2009-10-07 23:41:45+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 2.91 2009-10-08 11:18:32+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %define _unpackaged_files_terminate_build 1
 
@@ -927,7 +930,6 @@ if [ %nopam_multi -eq 0 ] ; then
 /bin/rm -f %{buildroot}/%{_lib}/security/pam-multi.la
 /bin/rm -f %{buildroot}/%{_lib}/security/pam-multi.a
 if [ -x /usr/bin/chrpath ] ; then
-	/usr/bin/chrpath -d %{buildroot}%{_libdir}/authenticate.so
 	/usr/bin/chrpath -d %{buildroot}/%{_lib}/security/pam-multi.so
 	/usr/bin/chrpath -d %{buildroot}%{_prefix}/sbin/pam-checkpwd
 fi
@@ -1725,7 +1727,6 @@ fi
 # pam-multi
 %if %nopam_multi == 0
 %attr(755,root,root)                    /%{_lib}/security/pam-multi.so
-%attr(755,root,root)                    %{_libdir}/authenticate.so
 %endif
 
 %if %noclamav == 0
@@ -1744,6 +1745,7 @@ fi
 %{_libdir}/libindimail-%{version}.so.0
 %{_libdir}/libindimail-%{version}.so.0.0.0
 
+%attr(755,root,root)                    %{_libdir}/authenticate.so
 %attr(777,root,root)                    /usr/%{_lib}/libnss_nssd.so
 %attr(777,root,root)                    /usr/%{_lib}/libnss_nssd.so.2
 %attr(755,root,root)                    /usr/%{_lib}/libnss_nssd.so.2.0.0
