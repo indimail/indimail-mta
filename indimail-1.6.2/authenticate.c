@@ -1,5 +1,8 @@
 /*
  * $Log: authenticate.c,v $
+ * Revision 2.2  2009-10-08 14:39:41+05:30  Cprogrammer
+ * check pw_gid bit field only when service is not null
+ *
  * Revision 2.1  2009-10-08 11:17:36+05:30  Cprogrammer
  * moved authenticate from pam-multi to indimail
  *
@@ -51,7 +54,7 @@
 static int      defaultTask(char *, char *, struct passwd *, char *);
 
 #ifndef lint
-static char     sccsid[] = "$Id: authenticate.c,v 2.1 2009-10-08 11:17:36+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: authenticate.c,v 2.2 2009-10-08 14:39:41+05:30 Cprogrammer Exp mbhangui $";
 #endif
 /*
 #define vauthenticate ltdl_module_LTX_vauthenticate
@@ -143,31 +146,34 @@ vauthenticate(char *email, char *service)
 	 * And then see if the user is permitted to make this type
 	 * of connection
 	 */
-	if (strcmp("webmail", service) == 0)
+	if (service)
 	{
-		if (pw->pw_gid & NO_WEBMAIL)
+		if (strcmp("webmail", service) == 0)
 		{
-			fprintf(stderr, "vauthenticate: webmail disabled for this account");
-			close_connection();
-			return ((char *) 0);
-		}
-	} else
-	if (strcmp("pop3", service) == 0)
-	{
-		if (pw->pw_gid & NO_POP)
+			if (pw->pw_gid & NO_WEBMAIL)
+			{
+				fprintf(stderr, "vauthenticate: webmail disabled for this account");
+				close_connection();
+				return ((char *) 0);
+			}
+		} else
+		if (strcmp("pop3", service) == 0)
 		{
-			fprintf(stderr, "vauthenticate: pop3 disabled for this account");
-			close_connection();
-			return ((char *) 0);
-		}
-	} else
-	if (strcmp("imap", service) == 0)
-	{
-		if (pw->pw_gid & NO_IMAP)
+			if (pw->pw_gid & NO_POP)
+			{
+				fprintf(stderr, "vauthenticate: pop3 disabled for this account");
+				close_connection();
+				return ((char *) 0);
+			}
+		} else
+		if (strcmp("imap", service) == 0)
 		{
-			fprintf(stderr, "vauthenticate: imap disabled for this account");
-			close_connection();
-			return ((char *) 0);
+			if (pw->pw_gid & NO_IMAP)
+			{
+				fprintf(stderr, "vauthenticate: imap disabled for this account");
+				close_connection();
+				return ((char *) 0);
+			}
 		}
 	}
 	crypt_pass = pw->pw_passwd;
