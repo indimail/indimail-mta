@@ -2,3 +2,4 @@ pam-multi.spec
 Makefile.in
 pam-multi.settings
 missing
+configure
