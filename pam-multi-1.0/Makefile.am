@@ -19,13 +19,7 @@ pam_multi_la_CPPFLAGS=$(DEFS) @auth_inc@
 
 libpamsbin_PROGRAMS = pam-checkpwd
 
-all-local: authenticate.so pam-multi.spec
-
-authenticate.so: authenticate.o
-	$(COMPILE) $(MODFLAGS) -o $@ authenticate.o -Xlinker -R \
-		-Xlinker @indimaildir@/lib -L@indimaildir@/lib -lindimail -leps
-authenticate.o: authenticate.c
-	$(COMPILE) $(DEFS) @auth_inc@ -c $^
+all-local: pam-multi.spec
 
 pam-checkpwd: pam-checkpwd.o pam-support.o 
 	$(LINK) $@.o pam-support.o @LIB_PAM@
@@ -33,15 +27,14 @@ pam-checkpwd.o: pam-checkpwd.c pam-support.h config.h
 	$(COMPILE) $(DEFS) @auth_inc@ -c $^
 pam-support.o: config.h pam-support.c
 
-MOSTLYCLEANFILES=pam-multi.la authenticate.so pam-checkpwd pam-support.h.gch
+MOSTLYCLEANFILES=pam-multi.la pam-checkpwd pam-support.h.gch config.h.gch
 EXTRA_DIST=COPYING NEWS README CREDITS ChangeLog INSTALL pam-multi.spec.in install-sh missing mkinstalldirs pam-multi.spec
 DISTCLEANFILES=pam-multi.settings
 
-install-data-local: authenticate.so
+install-data-local:  pam-multi.8 pam-checkpwd.8
 	$(mkinstalldirs)  $(DESTDIR)$(moduledir)
 	$(mkinstalldirs)  $(DESTDIR)$(libdir)
 	$(mkinstalldirs)  $(DESTDIR)@prefix@/man/man8
-	$(INSTALL_PROGRAM) -c authenticate.so $(DESTDIR)$(libdir)/authenticate.so
 	$(INSTALL_DATA) -c pam-multi.8 $(DESTDIR)@prefix@/man/man8
 	$(INSTALL_DATA) -c pam-checkpwd.8 $(DESTDIR)@prefix@/man/man8
 
