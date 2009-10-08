@@ -7,17 +7,17 @@ install_sh_PROGRAM = $(install_sh) -c
 INSTALL_SCRIPT = ${INSTALL}
 install_sh_SCRIPT = $(install_sh) -c
 
-libpamsbindir=@prefix@/sbin
-libpam_multidir=$(moduledir)
-libpam_multi_LTLIBRARIES=pam-multi.la
+pamsbindir=@prefix@/sbin
+pam_multidir=$(moduledir)
 noinst_FILES=pam-multi.la pam-multi.a
 
+pam_multi_LTLIBRARIES=pam-multi.la
 pam_multi_la_SOURCES=pam-multi.c md5_crypt.c sha256_crypt.c sha512_crypt.c
 pam_multi_la_LDFLAGS=-module -avoid-version -version-info @LIBVER@:0:0
 pam_multi_la_LIBADD=@LIB_CRYPT@ @LIB_SSL@ @auth_libs@ @LIB_PAM@
 pam_multi_la_CPPFLAGS=$(DEFS) @auth_inc@
 
-libpamsbin_PROGRAMS = pam-checkpwd
+pamsbin_PROGRAMS = pam-checkpwd
 
 all-local: pam-multi.spec
 
