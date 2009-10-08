@@ -107,7 +107,7 @@ AC_ARG_ENABLE(default-domain, [  --enable-default-domain=name  Default domain na
 AC_DEFINE_UNQUOTED(DEFAULT_DOMAIN,"$defaultdomain",Default Domain)
 
 moduledir=""
-for f in /lib/security
+for f in /lib64/security /lib/security
 do
 	if test -d $f
 	then
