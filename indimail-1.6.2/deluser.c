@@ -1,5 +1,8 @@
 /*
  * $Log: deluser.c,v $
+ * Revision 2.24  2009-10-09 20:19:55+05:30  Cprogrammer
+ * use defined CONSTANTS for vget_lastauth
+ *
  * Revision 2.23  2008-09-14 19:42:42+05:30  Cprogrammer
  * removed setgid, setuid calls
  *
@@ -125,7 +128,7 @@
 #endif
 
 #ifndef	lint
-static char     sccsid[] = "$Id: deluser.c,v 2.23 2008-09-14 19:42:42+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: deluser.c,v 2.24 2009-10-09 20:19:55+05:30 Cprogrammer Stab mbhangui $";
 #endif
 
 /*-
@@ -260,7 +263,7 @@ vdeluser(char *user, char *domain, int remove_db)
 					return(-1);
 				}
 #ifdef ENABLE_AUTH_LOGGING
-				if (vget_lastauth(passent, real_domain, 4, 0))
+				if (vget_lastauth(passent, real_domain, ACTIV_TIME, 0))
 					fstabChangeCounter(passent->pw_dir, local_ip, -1, 0 - quota);
 				snprintf(SqlBuf, SQL_BUF_SIZE, 
 					"delete low_priority from lastauth where user=\"%s\" and domain=\"%s\"",
