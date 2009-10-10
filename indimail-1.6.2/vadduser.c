@@ -1,5 +1,8 @@
 /*
  * $Log: vadduser.c,v $
+ * Revision 2.25  2009-10-10 11:41:10+05:30  Cprogrammer
+ * run vadduser only as root or indimail
+ *
  * Revision 2.24  2009-08-15 20:48:59+05:30  Cprogrammer
  * display usage information for -B basepath option
  *
@@ -125,7 +128,7 @@
 #include <signal.h>
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vadduser.c,v 2.24 2009-08-15 20:48:59+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: vadduser.c,v 2.25 2009-10-10 11:41:10+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 char            Email[MAX_BUFF];
@@ -157,6 +160,7 @@ main(argc, argv)
 	char           *real_domain, *ptr;
 	char            tmpbuf[MAX_BUFF], envbuf[MAX_BUFF], buffer[MAX_BUFF];
 	FILE           *fp;
+	uid_t           uid;
 #ifdef ENABLE_DOMAIN_LIMITS
 	struct vlimits  limits;
 #endif
@@ -189,6 +193,19 @@ main(argc, argv)
 	{
 		error_stack(stderr, "Please input password\n");
 		usage();
+		return(1);
+	}
+	if (indimailuid == -1 || indimailgid == -1)
+		GetIndiId(&indimailuid, &indimailgid);
+	uid = getuid();
+	if (uid != 0 && uid != indimailuid)
+	{
+		error_stack(stderr, "you must be root or indimail to run this program\n");
+		return(1);
+	}
+	if (setgid(indimailgid) || setuid(uid))
+	{
+		error_stack(stderr, "setuid/setgid (%d/%d): %s", uid, indimailgid, strerror(errno));
 		return(1);
 	}
 	/* Do this so that users do not get added in a alias domain */
