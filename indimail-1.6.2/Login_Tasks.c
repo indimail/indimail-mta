@@ -1,5 +1,8 @@
 /*
  * $Log: Login_Tasks.c,v $
+ * Revision 2.26  2009-10-09 20:20:32+05:30  Cprogrammer
+ * use defined CONSTANTS for vget_lastauth
+ *
  * Revision 2.25  2009-09-23 15:00:06+05:30  Cprogrammer
  * change for new runcmmd
  *
@@ -124,7 +127,7 @@
 #include <fcntl.h>
 
 #ifndef	lint
-static char     sccsid[] = "$Id: Login_Tasks.c,v 2.25 2009-09-23 15:00:06+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: Login_Tasks.c,v 2.26 2009-10-09 20:20:32+05:30 Cprogrammer Stab mbhangui $";
 #endif
 
 int
@@ -166,7 +169,7 @@ Login_Tasks(pw, user, ServiceType)
 	{
 		vmake_maildir(pw->pw_dir, indimailuid, indimailgid, domain);
 #ifdef ENABLE_AUTH_LOGGING
-		if ((inact_time = vget_lastauth(pw, domain, 5, 0)))
+		if ((inact_time = vget_lastauth(pw, domain, INACT_TIME, 0)))
 		{
 			struct tm *tm;
 			int    year;
@@ -207,14 +210,14 @@ Login_Tasks(pw, user, ServiceType)
 	min_login_interval = atoi(ptr);
 	if (min_login_interval)
 	{
-		if ((tmval2 = time(0)) - (tmval1 = vget_lastauth(pw, domain, 1, 0)) < min_login_interval)
+		if ((tmval2 = time(0)) - (tmval1 = vget_lastauth(pw, domain, AUTH_TIME, 0)) < min_login_interval)
 		{
 			fprintf(stderr, "ERR: Login interval %ld < %ld, user=%s, domain=%s\n", 
 				tmval2 - tmval1, min_login_interval, pw->pw_name, domain);
 			return(2);
 		}
 	}
-	tmval1 = vget_lastauth(pw, domain, 3, 0);
+	tmval1 = vget_lastauth(pw, domain, PASS_TIME, 0);
 	snprintf(last_pass_change, sizeof(last_pass_change), "LAST_PASSWORD_CHANGE=%ld", tmval1);
 	putenv(last_pass_change);
 #ifdef USE_MAILDIRQUOTA

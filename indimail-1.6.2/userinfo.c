@@ -1,5 +1,8 @@
 /*
  * $Log: userinfo.c,v $
+ * Revision 2.29  2009-10-09 20:20:40+05:30  Cprogrammer
+ * use defined CONSTANTS for vget_lastauth
+ *
  * Revision 2.28  2009-09-26 00:02:02+05:30  Cprogrammer
  * display status as missing if home directory is absent
  *
@@ -177,7 +180,7 @@
 #include <errno.h>
 
 #ifndef	lint
-static char     sccsid[] = "$Id: userinfo.c,v 2.28 2009-09-26 00:02:02+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: userinfo.c,v 2.29 2009-10-09 20:20:40+05:30 Cprogrammer Stab mbhangui $";
 #endif
 
 extern char *strptime(const char *, const char *, struct tm *);
@@ -429,13 +432,13 @@ vuserinfo(Email, User, Domain, DisplayName, DisplayPasswd, DisplayUid, DisplayGi
 	}
 	if (Domain && *Domain && (DisplayLastAuth || DisplayAll))
 	{
-		auth_time = vget_lastauth(mypw, Domain, 1, ipaddr[0]);
-		add_time  = vget_lastauth(mypw, Domain, 2, ipaddr[1]);
-		pwdchg_time = vget_lastauth(mypw, Domain, 3, ipaddr[2]);
-		act_time = vget_lastauth(mypw, Domain, 4, ipaddr[3]);
-		inact_time = vget_lastauth(mypw, Domain, 5, ipaddr[4]);
-		pop3_time = vget_lastauth(mypw, Domain, 6, ipaddr[5]);
-		imap_time = vget_lastauth(mypw, Domain, 7, ipaddr[6]);
+		auth_time = vget_lastauth(mypw, Domain, AUTH_TIME, ipaddr[0]);
+		add_time  = vget_lastauth(mypw, Domain, CREAT_TIME, ipaddr[1]);
+		pwdchg_time = vget_lastauth(mypw, Domain, PASS_TIME, ipaddr[2]);
+		act_time = vget_lastauth(mypw, Domain, ACTIV_TIME, ipaddr[3]);
+		inact_time = vget_lastauth(mypw, Domain, INACT_TIME, ipaddr[4]);
+		pop3_time = vget_lastauth(mypw, Domain, POP3_TIME, ipaddr[5]);
+		imap_time = vget_lastauth(mypw, Domain, IMAP_TIME, ipaddr[6]);
 		delivery_count = 0;
 		delivery_time = 0;
 		delivery_size = 0;

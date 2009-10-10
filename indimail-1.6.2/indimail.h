@@ -1,5 +1,8 @@
 /*
  * $Log: indimail.h,v $
+ * Revision 2.181  2009-10-09 11:59:54+05:30  Cprogrammer
+ * added definitions for record states in lastauth
+ *
  * Revision 2.180  2009-09-28 13:45:47+05:30  Cprogrammer
  * added chk_rcpt argument to vadddomain
  *
@@ -854,7 +857,7 @@
 #define INDIMAILH_H
 
 #ifndef	lint
-static char     sccsidh[] = "$Id: indimail.h,v 2.180 2009-09-28 13:45:47+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsidh[] = "$Id: indimail.h,v 2.181 2009-10-09 11:59:54+05:30 Cprogrammer Stab mbhangui $";
 #endif
 
 #include "config.h"
@@ -1129,6 +1132,17 @@ primary key(ipaddr)"
 #endif
 
 #ifdef ENABLE_AUTH_LOGGING
+
+/* last auth definitions */
+#define AUTH_TIME  1
+#define CREAT_TIME 2
+#define PASS_TIME  3
+#define ACTIV_TIME 4
+#define INACT_TIME 5
+#define POP3_TIME  6
+#define IMAP_TIME  7
+#define WEBM_TIME  8
+
 #define LASTAUTH_TABLE_LAYOUT "\
 user char(40) not null, \
 domain char(67) not null,\

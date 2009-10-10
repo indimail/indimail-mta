@@ -1,5 +1,8 @@
 /*
  * $Log: vget_lastauth.c,v $
+ * Revision 2.8  2009-10-09 20:20:50+05:30  Cprogrammer
+ * use defined CONSTANTS for vget_lastauth
+ *
  * Revision 2.7  2008-09-08 09:57:54+05:30  Cprogrammer
  * removed mysql_escape
  * changes for using mysql_real_escape_string on sql queries
@@ -56,7 +59,7 @@
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vget_lastauth.c,v 2.7 2008-09-08 09:57:54+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: vget_lastauth.c,v 2.8 2009-10-09 20:20:50+05:30 Cprogrammer Stab mbhangui $";
 #endif
 
 #ifdef ENABLE_AUTH_LOGGING
@@ -77,44 +80,44 @@ vget_lastauth(struct passwd *pw, char *domain, int type, char *ipaddr)
 		*ipaddr = 0;
 	if ((err = vauth_open((char *) 0)) != 0)
 		return (-1);
-	switch(type)
+	switch (type)
 	{
-		case 1:
+		case AUTH_TIME: /*- Last Authentication */
 			snprintf(SqlBuf, SQL_BUF_SIZE, 
 			"select high_priority UNIX_TIMESTAMP(timestamp), remote_ip from lastauth where user=\"%s\" and domain=\"%s\" \
 			and (service = \"pop3\" or service=\"imap\" or service=\"webm\")", pw->pw_name, domain);
 		break;
-		case 2:
+		case CREAT_TIME: /*- User Creation Date */
 			snprintf(SqlBuf, SQL_BUF_SIZE, 
 			"select high_priority UNIX_TIMESTAMP(timestamp), remote_ip from lastauth where user=\"%s\" and domain=\"%s\" \
 			and service=\"add\"", pw->pw_name, domain);
 		break;
-		case 3:
+		case PASS_TIME: /*- Last password change */
 			snprintf(SqlBuf, SQL_BUF_SIZE, 
 			"select high_priority UNIX_TIMESTAMP(timestamp), remote_ip from lastauth where user=\"%s\" and domain=\"%s\" \
 			and service=\"pass\"", pw->pw_name, domain);
 		break;
-		case 4:
+		case ACTIV_TIME: /*- Activation date */
 			snprintf(SqlBuf, SQL_BUF_SIZE, 
 			"select high_priority UNIX_TIMESTAMP(timestamp), remote_ip from lastauth where user=\"%s\" and domain=\"%s\" \
 			and service=\"ACTI\"", pw->pw_name, domain);
 		break;
-		case 5:
+		case INACT_TIME: /*- Inactivation date */
 			snprintf(SqlBuf, SQL_BUF_SIZE, 
 			"select high_priority UNIX_TIMESTAMP(timestamp), remote_ip from lastauth where user=\"%s\" and domain=\"%s\" \
 			and service=\"INAC\"", pw->pw_name, domain);
 		break;
-		case 6:
+		case POP3_TIME: /*- Last POP3 access */
 			snprintf(SqlBuf, SQL_BUF_SIZE, 
 			"select high_priority UNIX_TIMESTAMP(timestamp), remote_ip from lastauth where user=\"%s\" and domain=\"%s\" \
 			and service = \"pop3\"", pw->pw_name, domain);
 		break;
-		case 7:
+		case IMAP_TIME: /*- Last IMAP access */
 			snprintf(SqlBuf, SQL_BUF_SIZE, 
 			"select high_priority UNIX_TIMESTAMP(timestamp), remote_ip from lastauth where user=\"%s\" and domain=\"%s\" \
 			and service = \"imap\"", pw->pw_name, domain);
 		break;
-		case 8:
+		case WEBM_TIME: /*- Last WEB access */
 			snprintf(SqlBuf, SQL_BUF_SIZE, 
 			"select high_priority UNIX_TIMESTAMP(timestamp), remote_ip from lastauth where user=\"%s\" and domain=\"%s\" \
 			and service = \"webm\"", pw->pw_name, domain);
