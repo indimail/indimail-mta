@@ -31,15 +31,15 @@ authenticate_la_DEPENDENCIES = $(top_builddir)/libindimail.la
 
 SYSCONFDIR = @sysconfdir@
 sysconf_DATA = indimail.settings controlfiles headerlist osh.table cronlist perm_list
-man_MANS=vadduser.1 adminclient.1 chowkidar.8 clearopensmtp.8 dbinfo.1 hostcntrl.1 hostsync.8 \
-	indisrvr.8 indiversion.8 InLookup.8 inlookup.8 inquerytest.1 ipchange.1 \
-	logmonitor.1 mgmtpass.1 postdel.8 printdir.1 proxyimap.8 proxypop3.8 resetquota.1 \
-	vacation.8 vaddaliasdomain.1 vadddomain.1 valias.1 vatrn.1 vbulletin.1 vcalias.1 \
-	vcaliasrev.sh.1 vcfilter.1 vchkpass.8 vdeldomain.1 vdelivermail.8 vdeloldusers.8 \
-	vdeluser.1 vdominfo.1 vfilter.8 vfstab.1 vgroup.1 vhostid.1 vipmap.1 vmoddomain.1 \
-	vmoddomlimits.1 vmoduser.1 vmoveuser.1 vpasswd.1 vpriv.1 vproxy.8 vrenamedomain.1 \
-	vrenameuser.1 vreorg.8 vsetuserquota.1 vsmtp.1 vuserinfo.1 indimail.5 IndiMail.5 \
-	updaterules.8 osh.8 svctool.1 systpass.8
+man_MANS=vadduser.1 adminclient.8 chowkidar.8 clearopensmtp.8 dbinfo.8 hostcntrl.8 hostsync.8 \
+	indisrvr.8 indiversion.8 InLookup.8 inlookup.8 inquerytest.8 ipchange.8 \
+	logmonitor.8 mgmtpass.8 postdel.8 printdir.1 proxyimap.8 proxypop3.8 resetquota.8 \
+	vacation.8 vaddaliasdomain.1 vadddomain.1 valias.1 vatrn.1 vbulletin.1 vcalias.8 \
+	vcaliasrev.sh.8 vcfilter.1 vchkpass.8 vdeldomain.1 vdelivermail.8 vdeloldusers.8 \
+	vdeluser.1 vdominfo.1 vfilter.8 vfstab.8 vgroup.1 vhostid.8 vipmap.1 vmoddomain.1 \
+	vmoddomlimits.1 vmoduser.1 vmoveuser.1 vpasswd.1 vpriv.8 vproxy.8 vrenamedomain.1 \
+	vrenameuser.1 vreorg.8 vsetuserquota.1 vsmtp.8 vuserinfo.1 indimail.7 IndiMail.7 \
+	updaterules.8 osh.8 svctool.8 systpass.8
 
 setuid_list = ../sbin/systpass vdeldomain vadddomain vadduser vdeluser \
 			  vaddaliasdomain vrenamedomain vrenameuser vbulletin vdominfo \
@@ -153,7 +153,7 @@ MOSTLYCLEANFILES=versioninfo vcaliasrev myslave logmonitor controlsync bogofilte
 svctool indimail_settings.c cronlist crypt create_services INSTALL INSTALL-RPM INSTALL-MYSQL \
 indimail.spec cscope.* *.dSYM inc_deps lib_deps socket.lib indimail-@VERSION@-rpmlintrc \
 indimail-epm.list README-CLUSTER tls-cert-check mailzipper perm_list RELEASE-Notes \
-dbinfo.1 inlookup.8 vadddomain.1 vdelivermail.8 indimail.5 svctool.1 indisub.c
+dbinfo.8 inlookup.8 vadddomain.1 vdelivermail.8 indimail.7 svctool.8 indisub.c
 
 DISTCLEANFILES=.gitignore
 
@@ -758,9 +758,9 @@ indimail-@VERSION@-rpmlintrc: indimail-rpmlintrc.in
 	$(edit) indimail-rpmlintrc.in > $@
 indimail-epm.list: indimail-epm.list.in
 	$(edit) $@.in > $@
-svctool.1: svctool.9
+svctool.8: svctool.9
 	cat $^ | sed s}INDIMAIL}$(indimaildir)}g > $@
-dbinfo.1: dbinfo.9
+dbinfo.8: dbinfo.9
 	cat $^ | sed s}INDIMAIL}$(indimaildir)}g > $@
 inlookup.8: inlookup.9
 	cat $^ | sed s}INDIMAIL}$(indimaildir)}g > $@
@@ -768,7 +768,7 @@ vadddomain.1:vadddomain.9
 	cat $^ | sed s}INDIMAIL}$(indimaildir)}g > $@
 vdelivermail.8:vdelivermail.9
 	cat $^ | sed s}INDIMAIL}$(indimaildir)}g > $@
-indimail.5:indimail.9
+indimail.7:indimail.9
 	cat $^ | sed s}INDIMAIL}$(indimaildir)}g > $@
 
 crc.o: crc.c

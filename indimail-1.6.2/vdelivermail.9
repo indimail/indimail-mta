@@ -33,10 +33,13 @@ being delivered.
 .nr step 1 1
 .IP \n[step] 3
 Delivered-To: specifying the address to which the mail has been delivered
+.sp -1
 .IP \n+[step]
 Return-Path: specifying the sender's email address.
+.sp -1
 .IP \n+[step]
 X-Filter: specifying if the mail has been filtered through vfilter.
+.sp -1
 .IP \n+[step]
 Received: specifying the date and time, the mail was received and delivered.
 .PP
@@ -124,6 +127,7 @@ specified in the following two ways
 .nr step 1 1
 .IP \n[step] 3
 By defining environment variables MAILHOST_ALERT and MAILHOST_PORT.
+.sp -1
 .IP \n+[step]
 By creating a file mailalert.cfg in the qmail/control directory. The first line of this file should have the line host x.x.x.x where x.x.x.x is an IP address. The second line of this file should have the line port port_num where port_num is an integer.
 
@@ -139,12 +143,16 @@ this is the default delivery instructions. This may be one of the four values gi
 .nr step 1 1
 .IP \n[step] 3
 Full path to a indimail user directory 
+.sp -1
 .IP \n+[step]
 email address to forward email to
+.sp -1
 .IP \n+[step]
 the string bounce-no-mailbox to bounce the email back to the sender.
+.sp -1
 .IP \n+[step]
-Address in \fBSMTPROUTE\fR format to which \fBvdelivermail\fR should use SMTP to deliver the mail.
+Address in \fBSMTPROUTE\fR format to which \fBvdelivermail\fR should use SMTP to deliver
+the mail. e.g.
 
 .EX
 indimail.org:192.168.1.1:25

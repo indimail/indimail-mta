@@ -1,5 +1,5 @@
 .LL 8i
-.TH indimail 5
+.TH indimail 9
 .SH NAME
 IndiMail -\ A Multi-host distributed Mail Server
 
@@ -7,24 +7,34 @@ IndiMail -\ A Multi-host distributed Mail Server
 IndiMail is an email server built using following packages
 .IP \[bu] 2
 qmail
+.sp -1
 .IP \[bu]
 serialmail
+.sp -1
 .IP \[bu]
 qmailanalog
+.sp -1
 .IP \[bu]
 dotforward
+.sp -1
 .IP \[bu]
 fastforward
+.sp -1
 .IP \[bu]
 mess822
+.sp -1
 .IP \[bu]
 daemontools
+.sp -1
 .IP \[bu]
 ucspi-tcp
+.sp -1
 .IP \[bu]
 Courier IMAP/POP3
+.sp -1
 .IP \[bu]
 Bogofilter - A Bayesian Spam Filter
+.sp -1
 .IP \[bu]
 Fetchmail
 .PP
@@ -32,12 +42,16 @@ other useful collection which are needed on a typical email server
 
 .IP \[bu] 2
 pack
+.sp -1
 .IP \[bu]
 unpack
+.sp -1
 .IP \[bu]
 altermime
+.sp -1
 .IP \[bu]
 ripmime
+.sp -1
 .IP \[bu]
 flash
 .PP
@@ -52,6 +66,61 @@ users on MS Exchange and some on Lotus Notes some on IndiMail). You can have mul
 hosting a domain placed geographically anywhere and tied up by IndiMail. The architecture does
 not force a filesystem architecture like NFS to be used to distribute the users.
 .PP
+IndiMail has two databases
+
+.nr step 1 1
+.IP \n[step] 2
+local database - Contains all user information, attributes
+.sp -1
+.IP \n+[step]
+central database - Used only when configured as a distributed architecture
+
+.PP
+For a non-distributed architecture, you need to have a control file \fBhost\.mysql\fR. This
+control file contains the IP address or hostname of the MySQL database corresponding to
+the \fBlocal database\fR. It consists of the following tables
+
+.nr step 1 1
+.IP \n[step] 3
+indimail
+.sp -1
+.IP \n+[step]
+indibak
+.sp -1
+.IP \n+[step]
+lastauth
+.sp -1
+.IP \n+[step]
+valias
+.sp -1
+.IP \n+[step]
+vlimits
+.sp -1
+.IP \n+[step]
+ip_alias_map
+.sp -1
+.IP \n+[step]
+userquota
+.sp -1
+.IP \n+[step]
+atrn_map
+.sp -1
+.IP \n+[step]
+vlog
+.sp -1
+.IP \n+[step]
+fstab
+.sp -1
+.IP \n+[step]
+vfilter
+.sp -1
+.IP \n+[step]
+mailing_list
+.sp -1
+.IP \n+[step]
+bulkmail
+
+.PP
 The distributed architecture in IndiMail is achieved by having a central storage of user location
 information in a MySQL database. This database is referred to as the \fBcentral database\fR. It
 consists of the following tables
@@ -59,23 +128,28 @@ consists of the following tables
 .nr step 1 1
 .IP \n[step] 2
 hostcntrl
+.sp -1
 .IP \n+[step]
 host_table
+.sp -1
 .IP \n+[step]
 dbinfo
+.sp -1
 .IP \n+[step]
 smtp_port
+.sp -1
 .IP \n+[step]
 mgmtaccess
+.sp -1
 .IP \n+[step]
 vpriv
 .PP
 The table \fIhostcntrl\fR contains the user, domain and hostid. hostid is a unique identification
 which needs to be assigned to every server on which email accounts need to be created. These
-servers are also called \fImailstores\fR. The program \fBhostcntrl(1)\fR can be used to add,
+servers are also called \fImailstores\fR. The program \fBhostcntrl(8)\fR can be used to add,
 modify, delete entries to the table \fIhostcntrl\fR. Each \fIhostid\fR needs to be mapped to
 an IP address. This is maintained in the table \fIhost_table\fR. A program called
-\fBvhostid(1)\fR can be used to add, modify or delete entries in \fIhost_table\fR.
+\fBvhostid(8)\fR can be used to add, modify or delete entries in \fIhost_table\fR.
 .PP
 To be able to access the \fBcentral database\fR, IndiMail programs need the following control
 files in the directory INDIMAIL/control
@@ -83,10 +157,11 @@ files in the directory INDIMAIL/control
 .nr step 1 1
 .IP \n[step] 2
 host.master
+.sp -1
 .IP \n+[step]
 host.cntrl
 .PP
-These control file contains the ip address or hostname of the MySQL database corresponding to
+These control file contains the IP address or hostname of the MySQL database corresponding to
 the \fBcentral database\fR. If you plan to have a master-slave MySQL architecture, you can have
 entry in \fIhost.master\fR pointing to the MySQL master database and have entry in \fIhost.cntrl\fR
 pointing to the MySQL slave database. All indimail programs ensure that all writes go to the
@@ -110,13 +185,13 @@ each and every \fImailstore\fR on the \fIdbinfo\fR table. The updation depends o
 of the \fImcdinfo\fR file and \fIdbinfo\fR table. The moment \fImcdinfo\fR is updated,
 the same information gets updated in the \fIdbinfo\fR table. The moment \fIdbinfo\fR gets updated,
 the file \fImcdinfo\fR on all other \fImailstore\fR (older than the \fIdbinfo\fR table) gets updated.
-The entries in \fIdbinfo\fR table / \fImcdinfo\fR file can be seen by running the \fBdbinfo(1)\fR
+The entries in \fIdbinfo\fR table / \fImcdinfo\fR file can be seen by running the \fBdbinfo(8)\fR
 program. Whenever a new \fImailstore\fR is added/removed, the entry for the \fImailstore\fR and the corresponding
 MySQL \fBlocal database\fR needs to be added/removed in the \fIdbinfo\fR table or \fImcdinfo\fR file.
 .PP
 In case you do not require a multi-host setup, IndiMail does not require \fBcentral database\fR. Programs
 just need to connect to the \fBlocal database\fR which can be configured by having the control
-file INDIMAIL/control/host.mysql. The control file contains the ip address or hostname of the
+file INDIMAIL/control/host.mysql. The control file contains the IP address or hostname of the
 MySQL \fBlocal database\fR.
 
 .SH Virtual Domains
@@ -140,14 +215,23 @@ domain user can not be found. Basically, it can be one of the following
 .nr step 1 1
 .IP \n[step] 3
 Full path to a indimail user directory 
+.sp -1
 .IP \n+[step]
 email address to forward email to
+.sp -1
 .IP \n+[step]
 the string bounce-no-mailbox to bounce the email back to the sender.
+.sp -1
 .IP \n+[step]
 Address in SMTPROUTE format to which \fBvdelivermail\fR should use SMTP to deliver the mail.
-e.g. indimail.org:192.168.1.55:25 where indimail.org is the local domain, 192.168.1.55 is the IP
-address of an SMTP server for indimail.org and 25 is the SMTP port.
+e.g.
+
+.EX
+indimail.org:192.168.1.55:25
+.EE
+
+where indimail.org is the local domain, 192.168.1.55 is the IP address of an SMTP server
+for indimail.org and 25 is the SMTP port.
 
 .SH Directory structure
 .PP
@@ -191,118 +275,174 @@ You can use the \fBvreorg(8)\fR program to recreate the \fIdir-control\fR table.
 .nr step 1 1
 .IP \n[step] 4
 vadddomain(1)
+.sp -1
 .IP \n+[step]
 vmoddomain(1)
+.sp -1
 .IP \n+[step]
 vaddaliasdomain(1)
+.sp -1
 .IP \n+[step]
 vrenamedomain(1)
+.sp -1
 .IP \n+[step]
 vatrn(1)
+.sp -1
 .IP \n+[step]
 vdeldomain(1)
+.sp -1
 .IP \n+[step]
 vdominfo(1)
+.sp -1
 .IP \n+[step]
 printdir(1)
+.sp -1
 .IP \n+[step]
 vmoddomlimits(1)
+.sp -1
 .IP \n+[step]
 vadduser(1)
+.sp -1
 .IP \n+[step]
 vuserinfo(1)
+.sp -1
 .IP \n+[step]
 vpasswd(1)
+.sp -1
 .IP \n+[step]
 vdeluser(1)
+.sp -1
 .IP \n+[step]
 vmoduser(1)
+.sp -1
 .IP \n+[step]
 vsetuserquota(1)
+.sp -1
 .IP \n+[step]
 vmoveuser(1)
+.sp -1
 .IP \n+[step]
 vrenameuser(1)
+.sp -1
 .IP \n+[step]
-resetquota(1)
+resetquota(8)
+.sp -1
 .IP \n+[step]
 valias(1)
+.sp -1
 .IP \n+[step]
-vcaliasrev.sh(1)
+vcaliasrev.sh(8)
+.sp -1
 .IP \n+[step]
 vgroup(1)
+.sp -1
 .IP \n+[step]
-vcalias(1)
+vcalias(8)
+.sp -1
 .IP \n+[step]
-vacation(1)
+vacation(8)
+.sp -1
 .IP \n+[step]
-vsmtp(1)
+vsmtp(8)
+.sp -1
 .IP \n+[step]
 vipmap(1)
+.sp -1
 .IP \n+[step]
 vcfilter(1)
+.sp -1
 .IP \n+[step]
-hostcntrl(1)
+hostcntrl(8)
+.sp -1
 .IP \n+[step]
-vhostid(1)
+vhostid(8)
+.sp -1
 .IP \n+[step]
-dbinfo(1)
+dbinfo(8)
+.sp -1
 .IP \n+[step]
-ipchange(1)
+ipchange(8)
+.sp -1
 .IP \n+[step]
 vbulletin(1)
+.sp -1
 .IP \n+[step]
-vfstab(1)
+vfstab(8)
+.sp -1
 .IP \n+[step]
 execmysql
+.sp -1
 .IP \n+[step]
 chowkidar(8)
+.sp -1
 .IP \n+[step]
-logmonitor(1)
+logmonitor(8)
+.sp -1
 .IP \n+[step]
 controlsync
+.sp -1
 .IP \n+[step]
 updatefile
+.sp -1
 .IP \n+[step]
 vfilter(8)
+.sp -1
 .IP \n+[step]
 vdelivermail(8)
+.sp -1
 .IP \n+[step]
 postdel(8)
+.sp -1
 .IP \n+[step]
 proxyimap(8)
+.sp -1
 .IP \n+[step]
 proxypop3(8)
+.sp -1
 .IP \n+[step]
 vproxy(8)
+.sp -1
 .IP \n+[step]
-vchkpass(1)
+vchkpass(8)
+.sp -1
 .IP \n+[step]
 InLookup(8)
+.sp -1
 .IP \n+[step]
-inquerytest(1)
+inquerytest(8)
+.sp -1
 .IP \n+[step]
 indiversion(1)
+.sp -1
 .IP \n+[step]
 versioninfo(1)
+.sp -1
 .IP \n+[step]
 hostsync(8)
+.sp -1
 .IP \n+[step]
 clearopensmtp(8)
+.sp -1
 .IP \n+[step]
 updaterules(8)
+.sp -1
 .IP \n+[step]
 vreorg(8)
+.sp -1
 .IP \n+[step]
 vdeloldusers(8)
+.sp -1
 .IP \n+[step]
 indisrvr(8)
+.sp -1
 .IP \n+[step]
-adminclient(1)
+adminclient(8)
+.sp -1
 .IP \n+[step]
-mgmtpass(1)
+mgmtpass(8)
+.sp -1
 .IP \n+[step]
-vpriv(1)
+vpriv(8)
 
 .SH "SEE ALSO"
-dbinfo(1), vhostid(1), vsmtp(1), vreorg(8), vadduser(1), vdeluser(1), svctool(1)
+dbinfo(8), vhostid(8), vsmtp(8), vreorg(8), vadduser(1), vdeluser(1), svctool(8)
