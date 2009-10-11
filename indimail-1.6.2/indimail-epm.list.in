@@ -1,5 +1,8 @@
 #
 # $Log: indimail-epm.list.in,v $
+# Revision 2.22  2009-10-11 09:36:50+05:30  Cprogrammer
+# renamed authenticate.so to iauth.so
+#
 # Revision 2.21  2009-10-06 13:55:48+05:30  Cprogrammer
 # added pam-multi
 #
@@ -1250,7 +1253,7 @@ l 777 root root /usr/lib/libnss_nssd.so.2 libnss_nssd.so.2.0.0
 l 777 root root /usr/lib/libnss_nssd.so libnss_nssd.so.2.0.0
 %endif
 %ifdef !nopam_multi
-f 755 root root ${prefix}/lib/authenticate.so BUILDROOT${prefix}/lib/authenticate.so
+f 755 root root ${prefix}/lib/iauth.so BUILDROOT${prefix}/lib/iauth.so
 f 755 root root @moduledir@/pam-multi.so BUILDROOT/@moduledir@/pam-multi.so
 %endif
 

@@ -1,5 +1,8 @@
 #
 # $Log: indimail.spec.in,v $
+# Revision 2.94  2009-10-11 09:36:58+05:30  Cprogrammer
+# renamed authenticate.so to iauth.so
+#
 # Revision 2.93  2009-10-08 16:50:34+05:30  Cprogrammer
 # compiled indimail after libdkim
 #
@@ -290,7 +293,7 @@
 # rpm spec file for indimail
 #
 #
-# $Id: indimail.spec.in,v 2.93 2009-10-08 16:50:34+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 2.94 2009-10-11 09:36:58+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %define _unpackaged_files_terminate_build 1
 
@@ -863,7 +866,7 @@ for i in eps cdb flash indimail
 do
 	%{__rm} -f %{buildroot}%{_libdir}/lib"$i".la
 done
-%{__rm} -f %{buildroot}%{_libdir}/authenticate.la
+%{__rm} -f %{buildroot}%{_libdir}/iauth.la
 
 if [ %noclamav -eq 0 ] ; then
 	for i in clamav clamunrar clamunrar_iface
@@ -1752,7 +1755,7 @@ fi
 %{_libdir}/libindimail-%{version}.so.0
 %{_libdir}/libindimail-%{version}.so.0.0.0
 
-%attr(755,root,root)                    %{_libdir}/authenticate.so
+%attr(755,root,root)                    %{_libdir}/iauth.so
 %attr(777,root,root)                    /usr/%{_lib}/libnss_nssd.so
 %attr(777,root,root)                    /usr/%{_lib}/libnss_nssd.so.2
 %attr(755,root,root)                    /usr/%{_lib}/libnss_nssd.so.2.0.0
