@@ -2,10 +2,18 @@
 Release 1.6.2 Start 01/10/2009
 03/10/2009
 1.  O_RDWR mode for fifo in qmail-cat
+2.  Added new fortune cookies (chanakya, vedas, joel-on-software)
 04/10/2009
-2.  Added svctool man page
+3.  Added svctool man page
 06/10/2009
-3.  Added pam-multi, pam-checkpwd
+4.  Added pam-multi, pam-checkpwd, authenticate.so
+09/10/2009
+5.  Added various record states in lastauth as #defines
+10/10/2009
+6.  Run vadduser only as root or indimail
+11/10/2009
+7.  Renamed vauthenticate() to iauth()
+8.  Completed acct_mgmt functions in iauth.c, pam-multi.c
 
 * Fri Oct  2 2009 mbhangui@gmail.com
 Release 1.6.1 Start 13/09/2009
@@ -28,7 +36,7 @@ Release 1.6.1 Start 13/09/2009
 20/09/2009
 10. Added new repository for latest bleeding edge IndiMail RPM
     http://download.opensuse.org/repositories/home:/indimail
-11. Major chagnes to indimail.spec to support Mandriva 2009.1 on
+11. Major changes to indimail.spec to support Mandriva 2009.1 on
     openSUSE build service (OBS)
 12. Updated autoconf scripts for fortune-1.0.tar.gz libdkim-1.3.tar.gz
     flash-0.9.4.tar.gz nssd-1.0.tar.gz ripmime-1.4.0.9.tar.gz
