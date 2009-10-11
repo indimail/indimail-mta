@@ -1,5 +1,8 @@
 /*
  * $Log: pam-multi.c,v $
+ * Revision 1.6  2009-10-11 09:38:51+05:30  Cprogrammer
+ * completed acct_mgmt
+ *
  * Revision 1.5  2009-10-08 16:53:31+05:30  Cprogrammer
  * added code for account management
  *
@@ -139,11 +142,12 @@ PAM_EXTERN int  pam_sm_acct_mgmt(pam_handle_t * pamh, int flags, int argc, const
 PAM_EXTERN int  pam_sm_setcred(pam_handle_t * pamh, int flags, int argc, const char **argv);
 PAM_EXTERN int  pam_sm_open_session(pam_handle_t * pamh, int flags, int argc, const char **argv);
 PAM_EXTERN int  pam_sm_close_session(pam_handle_t * pamh, int flags, int argc, const char **argv);
-static int      run_command(char *, int, const char *, char **);
+static int      run_command(char *, int, const char *, char **, int *);
 #ifdef HAVE_DLFCN_H
-static int      loadLIB(char *, const char *, const char *, char **);
+static int      loadLIB(char *, const char *, const char *, char **, int, int *, int);
 #endif
-static int      run_mysql(char *, char *, char *, char *, int, char *, const char *, char **, int);
+static int      run_mysql(char *, char *, char *, char *, int, char *, const char *,
+					char **, int *, int);
 void            makesalt(char *);
 char           *md5_crypt(const char *, const char *);
 char           *sha256_crypt(const char *, const char *);
@@ -156,7 +160,7 @@ int             converse(pam_handle_t * pamh, int, const char *, const char **);
 int             pw_comp(const char *, char *, int, int);
 
 #ifndef	lint
-static char     sccsid[] = "$Id: pam-multi.c,v 1.5 2009-10-08 16:53:31+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: pam-multi.c,v 1.6 2009-10-11 09:38:51+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 /*
@@ -170,11 +174,14 @@ _pam_log(int err, const char *format, ...)
 	va_start(args, format);
 	openlog(PAM_MODULE_NAME, LOG_PID, LOG_AUTHPRIV);
 	vsyslog(err, format, args);
+	fprintf(stderr, "%s: ", PAM_MODULE_NAME);
 	vfprintf(stderr, format, args);
 	fprintf(stderr, "\n");
 	va_end(args);
 	closelog();
 }
+
+static char    *_global_user;
 
 PAM_EXTERN int
 pam_sm_authenticate(pam_handle_t *pamh, int flags, int argc, const char **argv)
@@ -199,6 +206,7 @@ pam_sm_authenticate(pam_handle_t *pamh, int flags, int argc, const char **argv)
 #ifdef HAVE_DLFCN_H
 	shared_lib = service = 0;
 #endif
+	_global_user = (char *) 0;
 	mode = -1;
 	/*-
 	 * Substitutions:
@@ -303,18 +311,16 @@ pam_sm_authenticate(pam_handle_t *pamh, int flags, int argc, const char **argv)
 	switch (mode) 
 	{
 	case COMMAND_MODE:
-		status = run_command(command_str, 1, user, &result);
+		status = run_command(command_str, 1, user, &result, 0);
 		break;
 #ifdef HAVE_DLFCN_H
 	case LIB_MODE:
-		if (debug)
-			_pam_log(LOG_INFO, "loadLIB %s %s", user, service ? service : "no service");
-		status = loadLIB(shared_lib, user, service, &result);
+		status = loadLIB(shared_lib, user, service, &result, 0, 0, debug);
 		break;
 #endif
 	case MYSQL_MODE:
 		status = run_mysql(mysql_user, mysql_pass, mysql_host,
-			mysql_database, mysql_port, mysql_query_str, user, &result, debug);
+			mysql_database, mysql_port, mysql_query_str, user, &result, 0, debug);
 		break;
 	default:
 		status = 1;
@@ -336,6 +342,7 @@ pam_sm_authenticate(pam_handle_t *pamh, int flags, int argc, const char **argv)
 	else
 		crypt_method = DES_HASH;
 	if (!pw_comp(password, result, crypt_method, debug)) {
+		_global_user = (char *) user;
 		if (result)
 			free(result);
 		free((void *) password);
@@ -347,13 +354,30 @@ pam_sm_authenticate(pam_handle_t *pamh, int flags, int argc, const char **argv)
 	return (PAM_AUTH_ERR);
 }
 
+char           *
+cryptMethod(int method)
+{
+	switch (method)
+	{
+	case DES_HASH:
+		return ("DES");
+	case MD5_HASH:
+		return ("MD5");
+	case SHA256_HASH:
+		return ("SHA256");
+	case SHA512_HASH:
+		return ("SHA521");
+	}
+	return ("unknown");
+}
+
 int
 pw_comp(const char *plain_text, char *crypted, int method, int debug)
 {
 	char           *crypt_pass;
 
 	if (debug)
-		_pam_log(LOG_INFO, "plain[%s], crypted[%s], method %d", plain_text, crypted, method);
+		_pam_log(LOG_INFO, "plain[%s], crypted[%s], method %s", plain_text, crypted, cryptMethod(method));
 	switch (method)
 	{
 	case DES_HASH:
@@ -430,7 +454,7 @@ getEnvConfigStr(char **source, char *envname, char *defaultValue)
 
 static int
 run_mysql(char *mysql_user, char *mysql_pass, char *mysql_host, char *mysql_database, int mysql_port, char *query_str,
-		  const char *user, char **qresult, int debug)
+		  const char *user, char **qresult, int *nitems, int debug)
 {
 	char            thischar, lastchar;
 	char           *sql, *p, *q;
@@ -581,36 +605,45 @@ run_mysql(char *mysql_user, char *mysql_pass, char *mysql_host, char *mysql_data
 
 #ifdef HAVE_DLFCN_H
 static int
-loadLIB(char *shared_lib, const char *user, const char *service, char **qresult)
+loadLIB(char *shared_lib, const char *user, const char *service, char **qresult,
+	int auth_or_acct_mgmt, int *nitems, int debug)
 {
 	void           *handle;
-	int             len;
+	int             size;
 	char           *error, *ptr;
-	void           *(*func) (const char *, const char *);
+	void           *(*func) (const char *, const char *, int, int *, int *, int);
 
 	*qresult = 0;
+	if (debug)
+		_pam_log(LOG_INFO, "loadLIB %s %s", user, service ? service : "no service");
 	if (!(handle = dlopen(shared_lib, RTLD_LAZY))) {
 		_pam_log(LOG_ERR, "dlopen: %s", dlerror());
 		return (PAM_SERVICE_ERR);
 	}
 	dlerror(); /*- man page told me to do this */
-	func = dlsym(handle, "vauthenticate");
+	func = dlsym(handle, "iauth");
 	if ((error = dlerror())) {
 		_pam_log(LOG_ERR, "dlsym: %s", error);
 		dlclose(handle);
 		return (PAM_SERVICE_ERR);
 	}
-	if (!(ptr = (char *) (*func) (user, service))) {
+	if (!(ptr = (char *) (*func) (user, service, auth_or_acct_mgmt, &size, nitems, debug))) {
 		dlclose(handle);
 		return (PAM_AUTH_ERR);
 	}
-	len = strlen(ptr) + 1;
-	if (!(*qresult = (char *) malloc(len))) {
+	if (debug)
+		_pam_log(LOG_INFO, "loadLIB nitems=%d, size=%d", nitems ? *nitems : 0, size);
+	if (!size)
+	{
+		dlclose(handle);
+		return (PAM_AUTH_ERR);
+	}
+	if (!(*qresult = (char *) malloc(size))) {
 		_pam_log(LOG_ERR, "malloc: %s\n", strerror(errno));
 		dlclose(handle);
 		return (PAM_BUF_ERR);
 	} else
-		strncpy(*qresult, ptr, len);
+		memcpy(*qresult, ptr, size);
 	if (dlclose(handle)) {
 		_pam_log(LOG_ERR, "dlsym: %s", error);
 		return (PAM_SERVICE_ERR);
@@ -633,7 +666,7 @@ wait_pid(wstat, pid)
 }
 
 static int
-run_command(char *command_args, int mode, const char *user, char **qresult)
+run_command(char *command_args, int mode, const char *user, char **qresult, int *nitems)
 {
 	char            buffer[1024];
 	char           *ptr = (char *) 0;
@@ -714,27 +747,55 @@ pam_sm_setcred(pam_handle_t * pamh, int flags, int argc, const char *argv[])
 	return (PAM_SUCCESS);
 }
 
+/*
+ * PAM_ACCT_EXPIRED
+ * User account has expired.
+ *
+ * PAM_AUTH_ERR
+ * Authentication failure.
+ *
+ * PAM_NEW_AUTHTOK_REQD
+ * The user´s authentication token has expired. Before calling this function
+ * again the application will arrange for a new one to be given. This will
+ * likely result in a call to pam_sm_chauthtok().
+ *
+ * PAM_PERM_DENIED
+ * Permission denied.
+ *
+ * PAM_SUCCESS
+ * The authentication token was successfully updated.
+ *
+ * PAM_USER_UNKNOWN
+ * User unknown to password service.
+ */
 PAM_EXTERN int
 pam_sm_acct_mgmt(pam_handle_t *pamh, int flags, int argc, const char *argv[])
 {
 	char            opt_str[56];
 	const char     *user, *rhost;
 	int             c, status, mode, pam_err, errflag, debug = 0,
-					mysql_port = 3306;
+					nitems = 0, mysql_port = 3306;
 	char           *mysql_query_str, *mysql_user, *mysql_pass, *mysql_host, *mysql_database,
-				   *command_str, *result;
+				   *command_str, *result, *token;
+	long           *expiry_ptr;
 	time_t          curtime;
 #ifdef HAVE_DLFCN_H
 	char           *shared_lib, *service;
 #endif
-#ifndef DARWIN
+#if 0
 	struct spwd    *pwd;
 #endif
 
+	if (!_global_user)
+		return (PAM_AUTH_ERR);
+	/*- Calculate current time */
+	curtime = time(0) / 86400;
 	if ((pam_err = pam_get_user(pamh, &user, NULL)) != PAM_SUCCESS)
 		return (pam_err);
-	if (!user)
+	if (!user || !*user)
 		return (PAM_USER_UNKNOWN);
+	if (strcmp(user, _global_user))
+		return (PAM_AUTH_ERR);
 #ifdef HAVE_DLFCN_H
 	snprintf(opt_str, sizeof (opt_str), "dm:u:p:D:H:P:c:s:i:");
 #else
@@ -797,12 +858,7 @@ pam_sm_acct_mgmt(pam_handle_t *pamh, int flags, int argc, const char *argv[])
 		}
 	}
 	if (debug)
-	{
-		for (c = 0;c < argc;c++)
-			_pam_log(LOG_INFO, "argv[%d]=[%s]", c, argv[c]);
 		_pam_log(LOG_INFO, "sm_acct_mgmt %s", user);
-	}
-	curtime = time(NULL) / (60 * 60 * 24);
 	switch ((pam_err = pam_get_item(pamh, PAM_RHOST, (const void **) &rhost)))
 	{
 	case PAM_SUCCESS:
@@ -813,18 +869,16 @@ pam_sm_acct_mgmt(pam_handle_t *pamh, int flags, int argc, const char *argv[])
 	switch (mode) 
 	{
 	case COMMAND_MODE:
-		status = run_command(command_str, 1, user, &result);
+		status = run_command(command_str, 1, user, &result, &nitems);
 		break;
 #ifdef HAVE_DLFCN_H
 	case LIB_MODE:
-		if (debug)
-			_pam_log(LOG_INFO, "loadLIB %s %s", user, service ? service : "no service");
-		status = loadLIB(shared_lib, user, service, &result);
+		status = loadLIB(shared_lib, user, service, &result, 1, &nitems, debug);
 		break;
 #endif
 	case MYSQL_MODE:
 		status = run_mysql(mysql_user, mysql_pass, mysql_host,
-			mysql_database, mysql_port, mysql_query_str, user, &result, debug);
+			mysql_database, mysql_port, mysql_query_str, user, &result, &nitems, debug);
 		break;
 	default:
 		_pam_log(LOG_INFO, "invalid/insufficient arguments");
@@ -836,9 +890,39 @@ pam_sm_acct_mgmt(pam_handle_t *pamh, int flags, int argc, const char *argv[])
 			_pam_log(LOG_INFO, "status=%d", status);
 		return (PAM_SERVICE_ERR);
 	}
+	if (!nitems)
+		return (PAM_SUCCESS);
+	expiry_ptr = (long *) result;
+	for (c = 0;c < nitems;c++)
+	{
+		switch (c)
+		{
+		case 0:
+			token = "Account";
+			break;
+		case 1:
+			token = "Password";
+			break;
+		default:
+			token = "Account";
+			break;
+		}
+		if (debug)
+			_pam_log(LOG_INFO, "expiry[%d]=%ld", c, *expiry_ptr);
+		if (*expiry_ptr > 0)
+		{
+			if (curtime > *expiry_ptr / 86400)
+			{
+				_pam_log(LOG_WARNING, "%s has expired!", token);
+				return (PAM_ACCT_EXPIRED);
+			} else
+			if (*expiry_ptr / 86400 - curtime < DEFAULT_WARN)
+				_pam_log(LOG_WARNING, "Warning: your %s expires on %s", token, ctime(expiry_ptr));
+		}
+		expiry_ptr++;
+	}
 	return (PAM_SUCCESS);
-	/*- Calculate current time */
-#ifndef DARWIN
+#if 0
 	if (user == NULL || (pwd = getspnam(user)) == NULL)
 		return (PAM_SERVICE_ERR);
 	if (!*pwd->sp_pwdp && (flags & PAM_DISALLOW_NULL_AUTHTOK) != 0)
@@ -848,7 +932,8 @@ pam_sm_acct_mgmt(pam_handle_t *pamh, int flags, int argc, const char *argv[])
 		if ((curtime > pwd->sp_expire) && (pwd->sp_expire != -1)) {
 			_pam_log(LOG_WARNING, "Account has expired!");
 			return (PAM_ACCT_EXPIRED);
-		} else if ((pwd->sp_expire - curtime < DEFAULT_WARN))
+		} else
+		if ((pwd->sp_expire - curtime < DEFAULT_WARN))
 			_pam_log(LOG_WARNING, "Warning: your account expires on %s", ctime(&pwd->sp_expire));
 		if (pwd->sp_lstchg == 0)
 			return (PAM_NEW_AUTHTOK_REQD);
@@ -892,6 +977,7 @@ pam_sm_open_session(pam_handle_t * pamh, int flags, int argc, const char *argv[]
 		return (PAM_SESSION_ERR);
 	}
 	_pam_log(LOG_ERR, "Opened session for user [%s] by %s(uid=%lu)", user, getlogin(), (unsigned long) getuid());
+	_pam_log(LOG_INFO, "open_session called but not implemented.");
 	return (PAM_SUCCESS);
 }
 
@@ -911,6 +997,7 @@ pam_sm_close_session(pam_handle_t * pamh, int flags, int argc, const char *argv[
 		_pam_log(LOG_ERR, "Close session - Error recovering service");
 		return (PAM_SESSION_ERR);
 	}
+	_pam_log(LOG_INFO, "close_session called but not implemented.");
 	return PAM_SUCCESS;
 }
 
