@@ -1,5 +1,8 @@
 /*
  * $Log: pam-checkpwd.c,v $
+ * Revision 1.5  2009-10-11 09:38:31+05:30  Cprogrammer
+ * added comments
+ *
  * Revision 1.4  2009-10-07 22:56:59+05:30  Cprogrammer
  * removed --stdout option
  *
@@ -12,6 +15,8 @@
  * Revision 1.1  2009-10-06 13:50:14+05:30  Cprogrammer
  * Initial revision
  *
+ * This version of pam-checkpwd was written by hacking checkpassword-pam
+ * written by Alexey Mahotkin <alexm@hsys\&.msk\&.ru>
  */
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -37,7 +42,7 @@
 #define isEscape(ch) ((ch) == '"' || (ch) == '\'')
 
 #ifndef lint
-static char     sccsid[] = "$Id: pam-checkpwd.c,v 1.4 2009-10-07 22:56:59+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: pam-checkpwd.c,v 1.5 2009-10-11 09:38:31+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 int             authlen = 512;
