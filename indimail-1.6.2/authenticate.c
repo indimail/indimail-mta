@@ -1,5 +1,8 @@
 /*
  * $Log: authenticate.c,v $
+ * Revision 2.3  2009-10-11 09:11:14+05:30  Cprogrammer
+ * completed acct_mgmt code
+ *
  * Revision 2.2  2009-10-08 14:39:41+05:30  Cprogrammer
  * check pw_gid bit field only when service is not null
  *
@@ -50,11 +53,14 @@
 #include <unistd.h>
 #include <errno.h>
 #include <pwd.h>
+#ifdef ENABLE_AUTH_LOGGING
+#include <mysqld_error.h>
+#endif
 
 static int      defaultTask(char *, char *, struct passwd *, char *);
 
 #ifndef lint
-static char     sccsid[] = "$Id: authenticate.c,v 2.2 2009-10-08 14:39:41+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: authenticate.c,v 2.3 2009-10-11 09:11:14+05:30 Cprogrammer Exp mbhangui $";
 #endif
 /*
 #define vauthenticate ltdl_module_LTX_vauthenticate
@@ -81,8 +87,10 @@ close_connection()
 #endif
 }
 
-char *
-vauthenticate(char *email, char *service)
+struct passwd  *_global_pw;
+
+static char *
+v_authenticate(char *email, char *service, int *size, int debug)
 {
 	char           *ptr, *cptr, *real_domain, *crypt_pass;
 	char            User[AUTH_SIZE], Domain[AUTH_SIZE];
@@ -90,6 +98,8 @@ vauthenticate(char *email, char *service)
 	gid_t           gid;
 	struct passwd  *pw;
 
+	_global_pw = (struct passwd *) 0;
+	*size = 0;
 	for (ptr = email, cptr = User;*ptr && *ptr != '@';*cptr++ = *ptr++);
 	*cptr = 0;
 	if (*ptr)
@@ -98,14 +108,9 @@ vauthenticate(char *email, char *service)
 		getEnvConfigStr(&ptr, "DEFAULT_DOMAIN", DEFAULT_DOMAIN);
 	for (cptr = Domain;*ptr;*cptr++ = *ptr++);
 	*cptr = 0;
-	if (!vget_assign(Domain, 0, 0, &uid, &gid)) 
-	{
-		fprintf(stderr, "vauthenticate: domain %s does not exist\n", Domain);
-		return ((char *) 0);
-	}
-	if (!(real_domain = vget_real_domain(Domain)))
-		real_domain = Domain;
 	/*- crypt("pass", "kk"); -*/
+	if (debug)
+		fprintf(stderr, "authenticate.so: opening MySQL connection\n");
 #ifdef PASSWD_CACHE
 	if (!getenv("PASSWD_CACHE"))
 	{
@@ -126,10 +131,33 @@ vauthenticate(char *email, char *service)
 #endif
 #ifdef PASSWD_CACHE
 	if (getenv("PASSWD_CACHE"))
+	{
+		if (debug)
+			fprintf(stderr, "authenticate.so: doing inquery\n");
 		pw = inquery(PWD_QUERY, email, 0);
-	else
+	} else
+	{
+		if (debug)
+			fprintf(stderr, "authenticate.so: doing vauth_getpw\n");
+		if (!vget_assign(Domain, 0, 0, &uid, &gid)) 
+		{
+			fprintf(stderr, "vauthenticate: domain %s does not exist\n", Domain);
+			return ((char *) 0);
+		}
+		if (!(real_domain = vget_real_domain(Domain)))
+			real_domain = Domain;
 		pw = vauth_getpw(User, real_domain);
+	}
 #else
+	if (debug)
+		fprintf(stderr, "authenticate.so: doing vauth_getpw\n");
+	if (!vget_assign(Domain, 0, 0, &uid, &gid)) 
+	{
+		fprintf(stderr, "v_authenticate: domain %s does not exist\n", Domain);
+		return ((char *) 0);
+	}
+	if (!(real_domain = vget_real_domain(Domain)))
+		real_domain = Domain;
 	pw = vauth_getpw(User, real_domain);
 #endif
 	if (!pw)
@@ -137,58 +165,159 @@ vauthenticate(char *email, char *service)
 		if(userNotFound)
 			return ((char *) 0);
 		else
-			fprintf(stderr, "vauthenticate: inquery: %s\n", strerror(errno));
+			fprintf(stderr, "v_authenticate: inquery: %s\n", strerror(errno));
 		close_connection();
 		return ((char *) 0);
+	}
+	crypt_pass = pw->pw_passwd;
+	if (getenv("DEBUG_LOGIN"))
+	{
+		fprintf(stderr, "v_authenticate: service[%s] email [%s] pw_passwd [%s]\n", 
+			service, email, crypt_pass);
+	}
+	close_connection();
+	_global_pw = pw;
+	*size = strlen(crypt_pass) + 1;
+	if (debug)
+		fprintf(stderr, "authenticate.so: returning data of size %d\n", *size);
+	return(crypt_pass);
+}
+
+#ifdef ENABLE_AUTH_LOGGING
+#define NO_OF_ITEMS 2
+char           *
+v_accountmgmt(char *email, char *service, int *size, int *nitems, int debug)
+{
+	char           *ptr, *cptr, *real_domain, *crypt_pass;
+	char            User[AUTH_SIZE], Domain[AUTH_SIZE];
+	char            SqlBuf[SQL_BUF_SIZE];
+	int             i;
+	static long     exp_times[NO_OF_ITEMS];
+	time_t          tmval;
+	uid_t           uid;
+	gid_t           gid;
+	MYSQL_RES      *res;
+	MYSQL_ROW       row;
+
+	*nitems = NO_OF_ITEMS;
+	*size = 0;
+	for (ptr = email, cptr = User;*ptr && *ptr != '@';*cptr++ = *ptr++);
+	*cptr = 0;
+	if (*ptr)
+		ptr++;
+	else
+		getEnvConfigStr(&ptr, "DEFAULT_DOMAIN", DEFAULT_DOMAIN);
+	for (cptr = Domain;*ptr;*cptr++ = *ptr++);
+	*cptr = 0;
+	if (debug)
+		fprintf(stderr, "authenticate.so: opening MySQL connection\n");
+	if (vauth_open((char *) 0))
+		return ((char *) 0);
+	if (!vget_assign(Domain, 0, 0, &uid, &gid)) 
+	{
+		fprintf(stderr, "v_accountmgmt: domain %s does not exist\n", Domain);
+		return ((char *) 0);
+	}
+	if (!(real_domain = vget_real_domain(Domain)))
+		real_domain = Domain;
+	for (i = 0;i < NO_OF_ITEMS;i++)
+	{
+		switch (i)
+		{
+		case 0:
+			snprintf(SqlBuf, SQL_BUF_SIZE, 
+				"select high_priority UNIX_TIMESTAMP(timestamp) from lastauth where user=\"%s\" and domain=\"%s\" \
+				and (service = \"pop3\" or service=\"imap\" or service=\"webm\")", User, Domain);
+			break;
+		case 1:
+			snprintf(SqlBuf, SQL_BUF_SIZE, 
+				"select high_priority UNIX_TIMESTAMP(timestamp) from lastauth where user=\"%s\" and domain=\"%s\" \
+				and service=\"pass\"", User, Domain);
+			break;
+		}
+		if (mysql_query(&mysql[1], SqlBuf))
+		{
+			if(mysql_errno(&mysql[1]) == ER_NO_SUCH_TABLE)
+			{
+				create_table(ON_LOCAL, "lastauth", LASTAUTH_TABLE_LAYOUT);
+				exp_times[i] = 0;
+				if (debug)
+					fprintf(stderr, "authenticate.so: expiry[%d] = %ld\n", i, exp_times[i]);
+				continue;
+			}
+			mysql_perror("v_accountmgmt: mysql_query: %s", SqlBuf);
+			return ((char *) 0);
+		}
+		res = mysql_store_result(&mysql[1]);
+		exp_times[i] = 0;
+		while ((row = mysql_fetch_row(res)))
+		{
+			tmval = atol(row[0]);
+			if (tmval > exp_times[i])
+				exp_times[i] = tmval;
+		}
+		if (debug)
+			fprintf(stderr, "authenticate.so: expiry[%d] = %ld\n", i, exp_times[i]);
+		mysql_free_result(res);
 	}
 	/*
 	 * Look at what type of connection we are trying to auth.
 	 * And then see if the user is permitted to make this type
 	 * of connection
 	 */
-	if (service)
+	if (service && _global_pw)
 	{
 		if (strcmp("webmail", service) == 0)
 		{
-			if (pw->pw_gid & NO_WEBMAIL)
+			if (_global_pw->pw_gid & NO_WEBMAIL)
 			{
-				fprintf(stderr, "vauthenticate: webmail disabled for this account");
+				fprintf(stderr, "v_accountmgmt: webmail disabled for this account");
 				close_connection();
 				return ((char *) 0);
 			}
 		} else
 		if (strcmp("pop3", service) == 0)
 		{
-			if (pw->pw_gid & NO_POP)
+			if (_global_pw->pw_gid & NO_POP)
 			{
-				fprintf(stderr, "vauthenticate: pop3 disabled for this account");
+				fprintf(stderr, "v_accountmgmt: pop3 disabled for this account");
 				close_connection();
 				return ((char *) 0);
 			}
 		} else
 		if (strcmp("imap", service) == 0)
 		{
-			if (pw->pw_gid & NO_IMAP)
+			if (_global_pw->pw_gid & NO_IMAP)
 			{
-				fprintf(stderr, "vauthenticate: imap disabled for this account");
+				fprintf(stderr, "v_accountmgmt: imap disabled for this account");
 				close_connection();
 				return ((char *) 0);
 			}
 		}
+		if (defaultTask(email, Domain, _global_pw, service))
+		{
+			close_connection();
+			return ((char *) 0);
+		}
 	}
-	crypt_pass = pw->pw_passwd;
-	if (getenv("DEBUG_LOGIN"))
-	{
-		fprintf(stderr, "vauthenticate: service[%s] email [%s] pw_passwd [%s]\n", 
-			service, email, crypt_pass);
-	}
-	if (defaultTask(email, Domain, pw, service))
-	{
-		close_connection();
-		return ((char *) 0);
-	}
-	close_connection();
-	return(crypt_pass);
+	*size = sizeof(long) * NO_OF_ITEMS;
+	return ((char *) &exp_times[0]);
+}
+#else
+char           *
+v_accountmgmt(char *email, char *service, int *size, int *nitems, int debug)
+{
+	*nitems = 0;
+	return ((char *) 0);
+}
+#endif
+
+char *
+vauthenticate(char *email, char *service, int auth_or_accmgmt, int *size, int *nitems, int debug)
+{
+	if (!auth_or_accmgmt && nitems)
+		*nitems = 1;
+	return (auth_or_accmgmt ?  v_accountmgmt(email, service, size, nitems, debug) : v_authenticate(email, service, size, debug));
 }
 
 static int
@@ -201,6 +330,7 @@ defaultTask(char *userid, char *TheDomain, struct passwd *pw, char *service)
 #ifdef USE_MAILDIRQUOTA
 	mdir_t          size_limit, count_limit;
 #endif
+
 	for (cptr = TheUser, ptr = userid;*ptr && *ptr != '@';*cptr++ = *ptr++);
 	*cptr = 0;
 	scopy(TmpBuf, service, MAX_BUFF);
