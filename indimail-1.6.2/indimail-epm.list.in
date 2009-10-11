@@ -1,5 +1,8 @@
 #
 # $Log: indimail-epm.list.in,v $
+# Revision 2.23  2009-10-11 12:01:34+05:30  Cprogrammer
+# correct man page paths
+#
 # Revision 2.22  2009-10-11 09:36:50+05:30  Cprogrammer
 # renamed authenticate.so to iauth.so
 #
@@ -598,44 +601,44 @@ f 644 root root ${prefix}/man/man1/fetchmail.1.gz BUILDROOT${prefix}/man/man1/fe
 %endif
 
 # IndiMail Man Pages
-f 644 root indimail ${prefix}/man/man1/adminclient.1.gz	BUILDROOT${prefix}/man/man1/adminclient.1.gz
-f 644 root indimail ${prefix}/man/man1/hostcntrl.1.gz	BUILDROOT${prefix}/man/man1/hostcntrl.1.gz
-f 644 root indimail ${prefix}/man/man1/inquerytest.1.gz	BUILDROOT${prefix}/man/man1/inquerytest.1.gz
-f 644 root indimail ${prefix}/man/man1/ipchange.1.gz	BUILDROOT${prefix}/man/man1/ipchange.1.gz
-f 644 root indimail ${prefix}/man/man1/logmonitor.1.gz	BUILDROOT${prefix}/man/man1/logmonitor.1.gz
-f 644 root indimail ${prefix}/man/man1/mgmtpass.1.gz	BUILDROOT${prefix}/man/man1/mgmtpass.1.gz
+f 644 root indimail ${prefix}/man/man8/adminclient.8.gz	BUILDROOT${prefix}/man/man8/adminclient.8.gz
+f 644 root indimail ${prefix}/man/man8/hostcntrl.8.gz	BUILDROOT${prefix}/man/man8/hostcntrl.8.gz
+f 644 root indimail ${prefix}/man/man8/inquerytest.8.gz	BUILDROOT${prefix}/man/man8/inquerytest.8.gz
+f 644 root indimail ${prefix}/man/man8/ipchange.8.gz	BUILDROOT${prefix}/man/man8/ipchange.8.gz
+f 644 root indimail ${prefix}/man/man8/logmonitor.8.gz	BUILDROOT${prefix}/man/man8/logmonitor.8.gz
+f 644 root indimail ${prefix}/man/man8/mgmtpass.8.gz	BUILDROOT${prefix}/man/man8/mgmtpass.8.gz
 f 644 root indimail ${prefix}/man/man1/printdir.1.gz	BUILDROOT${prefix}/man/man1/printdir.1.gz
-f 644 root indimail ${prefix}/man/man1/resetquota.1.gz	BUILDROOT${prefix}/man/man1/resetquota.1.gz
+f 644 root indimail ${prefix}/man/man8/resetquota.8.gz	BUILDROOT${prefix}/man/man8/resetquota.8.gz
 f 644 root indimail ${prefix}/man/man1/vaddaliasdomain.1.gz	BUILDROOT${prefix}/man/man1/vaddaliasdomain.1.gz
 f 644 root indimail ${prefix}/man/man1/vadduser.1.gz	BUILDROOT${prefix}/man/man1/vadduser.1.gz
 f 644 root indimail ${prefix}/man/man1/valias.1.gz	BUILDROOT${prefix}/man/man1/valias.1.gz
 f 644 root indimail ${prefix}/man/man1/vatrn.1.gz	BUILDROOT${prefix}/man/man1/vatrn.1.gz
 f 644 root indimail ${prefix}/man/man1/vbulletin.1.gz	BUILDROOT${prefix}/man/man1/vbulletin.1.gz
-f 644 root indimail ${prefix}/man/man1/vcalias.1.gz	BUILDROOT${prefix}/man/man1/vcalias.1.gz
-f 644 root indimail ${prefix}/man/man1/vcaliasrev.sh.1.gz	BUILDROOT${prefix}/man/man1/vcaliasrev.sh.1.gz
+f 644 root indimail ${prefix}/man/man8/vcalias.8.gz	BUILDROOT${prefix}/man/man8/vcalias.8.gz
+f 644 root indimail ${prefix}/man/man8/vcaliasrev.sh.8.gz	BUILDROOT${prefix}/man/man8/vcaliasrev.sh.8.gz
 f 644 root indimail ${prefix}/man/man1/vcfilter.1.gz	BUILDROOT${prefix}/man/man1/vcfilter.1.gz
 f 644 root indimail ${prefix}/man/man8/vchkpass.8.gz	BUILDROOT${prefix}/man/man8/vchkpass.8.gz
 f 644 root indimail ${prefix}/man/man8/systpass.8.gz	BUILDROOT${prefix}/man/man8/systpass.8.gz
 f 644 root indimail ${prefix}/man/man1/vdeldomain.1.gz	BUILDROOT${prefix}/man/man1/vdeldomain.1.gz
 f 644 root indimail ${prefix}/man/man1/vdeluser.1.gz	BUILDROOT${prefix}/man/man1/vdeluser.1.gz
 f 644 root indimail ${prefix}/man/man1/vdominfo.1.gz	BUILDROOT${prefix}/man/man1/vdominfo.1.gz
-f 644 root indimail ${prefix}/man/man1/vfstab.1.gz	BUILDROOT${prefix}/man/man1/vfstab.1.gz
+f 644 root indimail ${prefix}/man/man8/vfstab.8.gz	BUILDROOT${prefix}/man/man8/vfstab.8.gz
 f 644 root indimail ${prefix}/man/man1/vgroup.1.gz	BUILDROOT${prefix}/man/man1/vgroup.1.gz
-f 644 root indimail ${prefix}/man/man1/vhostid.1.gz	BUILDROOT${prefix}/man/man1/vhostid.1.gz
+f 644 root indimail ${prefix}/man/man8/vhostid.8.gz	BUILDROOT${prefix}/man/man8/vhostid.8.gz
 f 644 root indimail ${prefix}/man/man1/vipmap.1.gz	BUILDROOT${prefix}/man/man1/vipmap.1.gz
 f 644 root indimail ${prefix}/man/man1/vmoddomain.1.gz	BUILDROOT${prefix}/man/man1/vmoddomain.1.gz
 f 644 root indimail ${prefix}/man/man1/vmoddomlimits.1.gz	BUILDROOT${prefix}/man/man1/vmoddomlimits.1.gz
 f 644 root indimail ${prefix}/man/man1/vmoduser.1.gz	BUILDROOT${prefix}/man/man1/vmoduser.1.gz
 f 644 root indimail ${prefix}/man/man1/vmoveuser.1.gz	BUILDROOT${prefix}/man/man1/vmoveuser.1.gz
 f 644 root indimail ${prefix}/man/man1/vpasswd.1.gz	BUILDROOT${prefix}/man/man1/vpasswd.1.gz
-f 644 root indimail ${prefix}/man/man1/vpriv.1.gz	BUILDROOT${prefix}/man/man1/vpriv.1.gz
+f 644 root indimail ${prefix}/man/man1/vpriv.8.gz	BUILDROOT${prefix}/man/man8/vpriv.8.gz
 f 644 root indimail ${prefix}/man/man1/vrenamedomain.1.gz	BUILDROOT${prefix}/man/man1/vrenamedomain.1.gz
 f 644 root indimail ${prefix}/man/man1/vrenameuser.1.gz	BUILDROOT${prefix}/man/man1/vrenameuser.1.gz
 f 644 root indimail ${prefix}/man/man1/vsetuserquota.1.gz	BUILDROOT${prefix}/man/man1/vsetuserquota.1.gz
-f 644 root indimail ${prefix}/man/man1/vsmtp.1.gz	BUILDROOT${prefix}/man/man1/vsmtp.1.gz
+f 644 root indimail ${prefix}/man/man8/vsmtp.8.gz	BUILDROOT${prefix}/man/man8/vsmtp.8.gz
 f 644 root indimail ${prefix}/man/man1/vuserinfo.1.gz	BUILDROOT${prefix}/man/man1/vuserinfo.1.gz
-f 644 root indimail ${prefix}/man/man5/indimail.5.gz	BUILDROOT${prefix}/man/man5/indimail.5.gz
-f 644 root indimail ${prefix}/man/man5/IndiMail.5.gz	BUILDROOT${prefix}/man/man5/IndiMail.5.gz
+f 644 root indimail ${prefix}/man/man7/indimail.7.gz	BUILDROOT${prefix}/man/man7/indimail.7.gz
+f 644 root indimail ${prefix}/man/man7/IndiMail.7.gz	BUILDROOT${prefix}/man/man7/IndiMail.7.gz
 f 644 root indimail ${prefix}/man/man8/chowkidar.8.gz	BUILDROOT${prefix}/man/man8/chowkidar.8.gz
 f 644 root indimail ${prefix}/man/man8/clearopensmtp.8.gz	BUILDROOT${prefix}/man/man8/clearopensmtp.8.gz
 f 644 root indimail ${prefix}/man/man8/hostsync.8.gz	BUILDROOT${prefix}/man/man8/hostsync.8.gz
@@ -652,10 +655,9 @@ f 644 root indimail ${prefix}/man/man8/vdeloldusers.8.gz	BUILDROOT${prefix}/man/
 f 644 root indimail ${prefix}/man/man8/vfilter.8.gz	BUILDROOT${prefix}/man/man8/vfilter.8.gz
 f 644 root indimail ${prefix}/man/man8/vproxy.8.gz	BUILDROOT${prefix}/man/man8/vproxy.8.gz
 f 644 root indimail ${prefix}/man/man8/vreorg.8.gz	BUILDROOT${prefix}/man/man8/vreorg.8.gz
-f 644 root indimail ${prefix}/man/man1/dbinfo.1.gz	BUILDROOT${prefix}/man/man1/dbinfo.1.gz
-f 644 root indimail ${prefix}/man/man5/indimail.5.gz	BUILDROOT${prefix}/man/man5/indimail.5.gz
+f 644 root indimail ${prefix}/man/man8/dbinfo.8.gz	BUILDROOT${prefix}/man/man8/dbinfo.8.gz
 f 644 root indimail ${prefix}/man/man8/inlookup.8.gz	BUILDROOT${prefix}/man/man8/inlookup.8.gz
-f 644 root indimail ${prefix}/man/man1/svctool.1.gz	BUILDROOT${prefix}/man/man1/svctool.1.gz
+f 644 root indimail ${prefix}/man/man8/svctool.8.gz	BUILDROOT${prefix}/man/man8/svctool.8.gz
 f 644 root indimail ${prefix}/man/man1/vadddomain.1.gz	BUILDROOT${prefix}/man/man1/vadddomain.1.gz
 f 644 root indimail ${prefix}/man/man8/vdelivermail.8.gz	BUILDROOT${prefix}/man/man8/vdelivermail.8.gz
 %ifdef !nopam_multi
