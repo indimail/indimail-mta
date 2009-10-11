@@ -1,5 +1,8 @@
 /*
  * $Log: pam-multi.c,v $
+ * Revision 1.7  2009-10-11 11:34:57+05:30  Cprogrammer
+ * prevent doS
+ *
  * Revision 1.6  2009-10-11 09:38:51+05:30  Cprogrammer
  * completed acct_mgmt
  *
@@ -160,7 +163,7 @@ int             converse(pam_handle_t * pamh, int, const char *, const char **);
 int             pw_comp(const char *, char *, int, int);
 
 #ifndef	lint
-static char     sccsid[] = "$Id: pam-multi.c,v 1.6 2009-10-11 09:38:51+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: pam-multi.c,v 1.7 2009-10-11 11:34:57+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 /*
@@ -348,6 +351,7 @@ pam_sm_authenticate(pam_handle_t *pamh, int flags, int argc, const char **argv)
 		free((void *) password);
 		return (PAM_SUCCESS);
 	}
+	sleep(5);
 	if (result)
 		free(result);
 	free((void *) password);
