@@ -1,5 +1,9 @@
 /*
  * $Log: pam-multi.c,v $
+ * Revision 1.8  2009-10-12 08:33:41+05:30  Cprogrammer
+ * rearranged functions
+ * completed run_command() function
+ *
  * Revision 1.7  2009-10-11 11:34:57+05:30  Cprogrammer
  * prevent doS
  *
@@ -145,13 +149,6 @@ PAM_EXTERN int  pam_sm_acct_mgmt(pam_handle_t * pamh, int flags, int argc, const
 PAM_EXTERN int  pam_sm_setcred(pam_handle_t * pamh, int flags, int argc, const char **argv);
 PAM_EXTERN int  pam_sm_open_session(pam_handle_t * pamh, int flags, int argc, const char **argv);
 PAM_EXTERN int  pam_sm_close_session(pam_handle_t * pamh, int flags, int argc, const char **argv);
-static int      run_command(char *, int, const char *, char **, int *);
-#ifdef HAVE_DLFCN_H
-static int      loadLIB(char *, const char *, const char *, char **, int, int *, int);
-#endif
-static int      run_mysql(char *, char *, char *, char *, int, char *, const char *,
-					char **, int *, int);
-void            makesalt(char *);
 char           *md5_crypt(const char *, const char *);
 char           *sha256_crypt(const char *, const char *);
 char           *sha512_crypt(const char *, const char *);
@@ -159,11 +156,9 @@ static int      update_shadow(pam_handle_t *, const char *, const char *);
 #ifdef WHY_IS_THIS_NEEDED
 static int      update_passwd(pam_handle_t *, const char *, const char *);
 #endif
-int             converse(pam_handle_t * pamh, int, const char *, const char **);
-int             pw_comp(const char *, char *, int, int);
 
 #ifndef	lint
-static char     sccsid[] = "$Id: pam-multi.c,v 1.7 2009-10-11 11:34:57+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: pam-multi.c,v 1.8 2009-10-12 08:33:41+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 /*
@@ -182,6 +177,442 @@ _pam_log(int err, const char *format, ...)
 	fprintf(stderr, "\n");
 	va_end(args);
 	closelog();
+}
+
+int
+wait_pid(wstat, pid)
+	int            *wstat;
+	int             pid;
+{
+	int             r;
+
+	do {
+		r = waitpid(pid, wstat, 0);
+	} while ((r == -1) && (errno == EINTR));
+	return r;
+}
+
+static int
+run_command(char *command_args, int mode, const char *user, char **qresult,
+	int *nitems, int debug)
+{
+	char            buffer[1024];
+	char           *ptr = (char *) 0;
+	pid_t           filt_pid;
+	int             pipefd[2];
+	int             wstat, filt_exitcode, len, n;
+
+	*qresult = 0;
+	if (nitems)
+		*nitems = 0;
+	if (debug)
+		_pam_log(LOG_INFO, "run_command user %s command [%s]", user, command_args);
+	if (pipe(pipefd) == -1) {
+		_pam_log(LOG_ERR, "pipe: %s", strerror(errno));
+		return (-1);
+	}
+	switch ((filt_pid = fork())) {
+	case -1:
+		_pam_log(LOG_ERR, "fork: %s", strerror(errno));
+		return (-1);
+	case 0:
+		   /*- Command */
+		if (mode == 1) {
+			if (dup2(pipefd[1], 1) == -1 || close(pipefd[0]) == -1) {
+				_pam_log(LOG_ERR, "dup2: %s", strerror(errno));
+				_exit(60);
+			}
+			if (pipefd[1] != 1)
+				close(pipefd[1]);
+		}
+		execl("/bin/sh", "pam-multi", "-c", command_args, (char *) 0);
+		_pam_log(LOG_ERR, "execl: %s: %s", command_args, strerror(errno));
+		_exit(75);
+	default:
+		if (mode == 1) {
+			if (close(pipefd[1]) == -1) {
+				close(pipefd[0]);
+				wait_pid(&wstat, filt_pid);
+				return (-1);
+			}
+			for (len = 0;;) {
+				if ((n = read(pipefd[0], buffer, sizeof (buffer))) == -1) {
+					if (errno == EINTR)
+						continue;
+				} else
+				if (!n)
+					break;
+				if (!ptr) {
+					if (!(ptr = malloc(len + n + 1))) {
+						_pam_log(LOG_ERR, "malloc: %s", strerror(errno));
+						return (-1);
+					}
+				} else {
+					if (!(ptr = realloc(ptr, len + n + 1))) {
+						_pam_log(LOG_ERR, "malloc: %s", strerror(errno));
+						return (-1);
+					}
+				}
+				memcpy(ptr + len, buffer, n);
+				len += n;
+			}
+			if (ptr)
+				ptr[len] = 0;
+			*qresult = ptr;
+		}
+		if (wait_pid(&wstat, filt_pid) != filt_pid)
+			return (-1);
+		if (wait_crashed(wstat))
+			return (-1);
+		break;
+	}
+	if (nitems)
+		*nitems = 1;
+	return (filt_exitcode = wait_exitcode(wstat));
+}
+
+#ifndef INDIMAIL
+void
+getEnvConfigStr(char **source, char *envname, char *defaultValue)
+{
+	if (!(*source = getenv(envname)))
+		*source = defaultValue;
+	return;
+}
+#endif
+
+static int
+run_mysql(char *mysql_user, char *mysql_pass, char *mysql_host, char *mysql_database, int mysql_port, char *query_str,
+		  const char *user, char **qresult, int *nitems, int debug)
+{
+	char            thischar, lastchar;
+	char           *sql, *p, *q;
+	char           *escapeUser;	/* User provided stuff MUST be escaped */
+	unsigned int    user_length, domain_length, len, i, j, row_count;
+	MYSQL           mysql;
+	MYSQL_RES      *result;
+	MYSQL_ROW       row;
+
+	if (debug)
+		_pam_log(LOG_INFO, "run_mysql user[%s],pass[%s],host[%s], database[%s], port[%d], query[%s], User[%s]", mysql_user, mysql_pass,
+			 mysql_host, mysql_database, mysql_port, query_str, user);
+	*qresult = (char *) 0;
+	if (nitems)
+		*nitems = 0;
+	if (!mysql_init(&mysql)) {
+		_pam_log(LOG_ERR, "mysql_init: %s", mysql_error(&mysql));
+		return (PAM_SERVICE_ERR);
+	}
+	if (!(mysql_real_connect(&mysql, mysql_host, mysql_user, mysql_pass, mysql_database, mysql_port, NULL, 0))) {
+		_pam_log(LOG_ERR, "mysql_real_connect: %s", mysql_error(&mysql));
+		return (PAM_SERVICE_ERR);
+	}
+	if (!(escapeUser = malloc(sizeof (char) * (strlen(user) * 2) + 1))) {
+		_pam_log(LOG_ERR, "malloc: %s", strerror(errno));
+		return PAM_BUF_ERR;
+	}
+	mysql_real_escape_string(&mysql, escapeUser, user, strlen(user));
+	for (q = (char *) user; *q && *q != '@'; q++);
+	if (*q) {
+		*q = 0;
+		q++;
+	} else
+		getEnvConfigStr(&q, "DEFAULT_DOMAIN", DEFAULT_DOMAIN);
+	for (p = escapeUser; *p && *p != '@'; p++);
+	if (*p) {
+		*p = 0;
+		p++;
+	} else
+		getEnvConfigStr(&p, "DEFAULT_DOMAIN", DEFAULT_DOMAIN);
+	domain_length = strlen(p);
+	user_length = strlen(escapeUser);
+	if (!(sql = (char *) malloc(sizeof (char) * (MAX_QUERY_LENGTH + 1)))) {
+		_pam_log(LOG_ERR, "malloc: %s", strerror(errno));
+		mysql_close(&mysql);
+		return PAM_BUF_ERR;
+	}
+	len = strlen(query_str);
+	for (i = j = lastchar = 0; i < len; i++) {
+		thischar = query_str[i];
+		if (lastchar == '%') {
+			switch (thischar)
+			{
+			case 'U':
+				if ((j + user_length) >= MAX_QUERY_LENGTH) {
+					_pam_log(LOG_ERR, "pam_db: query too long");
+					mysql_close(&mysql);
+					return PAM_BUF_ERR;
+				}
+				strcpy(sql + j, user);
+				j += strlen(user);
+				lastchar = 0;
+				break;
+			case 'u':
+				if ((j + user_length) >= MAX_QUERY_LENGTH) {
+					_pam_log(LOG_ERR, "pam_db: query too long");
+					mysql_close(&mysql);
+					return PAM_BUF_ERR;
+				}
+				strcpy(sql + j, escapeUser);
+				j += user_length;
+				lastchar = 0;
+				break;
+			case 'D':
+				if ((j + domain_length) >= MAX_QUERY_LENGTH) {
+					_pam_log(LOG_ERR, "pam_db: query too long");
+					mysql_close(&mysql);
+					return PAM_BUF_ERR;
+				}
+				strcpy(sql + j, q);
+				j += strlen(q);
+				lastchar = 0;
+				break;
+			case 'd':
+				if ((j + domain_length) >= MAX_QUERY_LENGTH) {
+					_pam_log(LOG_ERR, "pam_db: query too long");
+					mysql_close(&mysql);
+					return PAM_BUF_ERR;
+				}
+				strcpy(sql + j, p);
+				j += domain_length;
+				lastchar = 0;
+				break;
+			case '%':
+			default:
+				lastchar = (lastchar == '%' ? 0 : thischar);
+				sql[j++] = thischar;
+				if (j > MAX_QUERY_LENGTH) {
+					_pam_log(LOG_ERR, "pam_db: query too long");
+					mysql_close(&mysql);
+					return PAM_BUF_ERR;
+				}
+				break;
+			}
+		} else {
+			if (thischar != '%')
+				sql[j++] = thischar;
+			if (j > MAX_QUERY_LENGTH) {
+				_pam_log(LOG_ERR, "pam_db: query too long");
+				mysql_close(&mysql);
+				return PAM_BUF_ERR;
+			}
+			lastchar = thischar;
+		}
+	}
+	sql[j] = 0;
+	if (debug)
+		_pam_log(LOG_INFO, "run_mysql user[%s],pass[%s],host[%s], database[%s], port[%d], query[%s], User[%s]", mysql_user, mysql_pass,
+			 mysql_host, mysql_database, mysql_port, sql, user);
+	if (mysql_query(&mysql, sql)) {
+		_pam_log(LOG_ERR, "mysql_query: %s: %s", sql, mysql_error(&mysql));
+		mysql_close(&mysql);
+		return (PAM_SERVICE_ERR);
+	}
+	if (!(result = mysql_store_result(&mysql))) {
+		_pam_log(LOG_ERR, "mysql_store_result: %s", mysql_error(&mysql));
+		mysql_close(&mysql);
+		return (PAM_SERVICE_ERR);
+	}
+	if (!(row_count = mysql_num_rows(result))) {
+		mysql_free_result(result);
+		mysql_close(&mysql);
+		return (PAM_AUTH_ERR);
+	}
+	mysql_close(&mysql);
+	if ((row = mysql_fetch_row(result))) {
+		if (!(*qresult = (char *) malloc((len = strlen(row[0]) + 1)))) {
+			_pam_log(LOG_ERR, "malloc: %s", strerror(errno));
+			mysql_free_result(result);
+			return (PAM_BUF_ERR);
+		} else {
+			if (nitems)
+				*nitems = 1;
+			strncpy(*qresult, row[0], len);
+			mysql_free_result(result);
+			return (PAM_SUCCESS);
+		}
+	} else
+		mysql_free_result(result);
+	return (PAM_AUTH_ERR);
+}
+
+#ifdef HAVE_DLFCN_H
+static int
+loadLIB(char *shared_lib, const char *user, const char *service, char **qresult,
+	int auth_or_acct_mgmt, int *nitems, int debug)
+{
+	void           *handle;
+	int             size;
+	char           *error, *ptr;
+	void           *(*func) (const char *, const char *, int, int *, int *, int);
+
+	*qresult = 0;
+	if (debug)
+		_pam_log(LOG_INFO, "loadLIB %s %s", user, service ? service : "no service");
+	if (!(handle = dlopen(shared_lib, RTLD_LAZY))) {
+		_pam_log(LOG_ERR, "dlopen: %s", dlerror());
+		return (PAM_SERVICE_ERR);
+	}
+	dlerror(); /*- man page told me to do this */
+	func = dlsym(handle, "iauth");
+	if ((error = dlerror())) {
+		_pam_log(LOG_ERR, "dlsym: %s", error);
+		dlclose(handle);
+		return (PAM_SERVICE_ERR);
+	}
+	if (!(ptr = (char *) (*func) (user, service, auth_or_acct_mgmt, &size, nitems, debug))) {
+		dlclose(handle);
+		return (PAM_AUTH_ERR);
+	}
+	if (debug)
+		_pam_log(LOG_INFO, "loadLIB nitems=%d, size=%d", nitems ? *nitems : 0, size);
+	if (!size)
+	{
+		dlclose(handle);
+		return (PAM_AUTH_ERR);
+	}
+	if (!(*qresult = (char *) malloc(size))) {
+		_pam_log(LOG_ERR, "malloc: %s", strerror(errno));
+		dlclose(handle);
+		return (PAM_BUF_ERR);
+	} else
+		memcpy(*qresult, ptr, size);
+	if (dlclose(handle)) {
+		_pam_log(LOG_ERR, "dlsym: %s", error);
+		return (PAM_SERVICE_ERR);
+	}
+	return (PAM_SUCCESS);
+}
+#endif
+
+char           *
+cryptMethod(int method)
+{
+	switch (method)
+	{
+	case DES_HASH:
+		return ("DES");
+	case MD5_HASH:
+		return ("MD5");
+	case SHA256_HASH:
+		return ("SHA256");
+	case SHA512_HASH:
+		return ("SHA521");
+	}
+	return ("unknown");
+}
+
+int
+pw_comp(const char *plain_text, char *crypted, int method, int debug)
+{
+	char           *crypt_pass;
+
+	if (debug)
+		_pam_log(LOG_INFO, "plain[%s], crypted[%s], method %s", plain_text, crypted, cryptMethod(method));
+	switch (method)
+	{
+	case DES_HASH:
+		if (!(crypt_pass = crypt((char *) plain_text, (char *) crypted)))
+			return (-1);
+		break;
+	case MD5_HASH:
+		if (!(crypt_pass = md5_crypt((char *) plain_text, (char *) crypted)))
+			return (-1);
+		break;
+	case SHA256_HASH:
+		if (!(crypt_pass = sha256_crypt((char *) plain_text, (char *) crypted)))
+			return (-1);
+		break;
+	case SHA512_HASH:
+		if (!(crypt_pass = sha512_crypt((char *) plain_text, (char *) crypted)))
+			return (-1);
+		break;
+	default:
+		return (1);
+	}
+	return (strncmp((const char *) crypt_pass, (const char *) crypted, strlen(crypt_pass) + 1));
+}
+
+int
+converse(pam_handle_t *pamh, int flags, const char *prompt, const char **password)
+{
+	struct pam_conv *conv;
+	struct pam_message msg;
+	struct pam_message *msgp;
+	struct pam_response *resp;
+	int             retry, pam_err;
+
+	if ((pam_err = pam_get_item(pamh, PAM_CONV, (const void **) &conv)) != PAM_SUCCESS) {
+		_pam_log(LOG_AUTHPRIV | LOG_ERR, PAM_MYSQL_LOG_PREFIX "could not obtain coversation interface (reason: %s)",
+			   pam_strerror(pamh, pam_err));
+		return (pam_err == PAM_PERM_DENIED ? PAM_AUTH_ERR : pam_err);
+	}
+	msg.msg_style = PAM_PROMPT_ECHO_OFF;
+	msg.msg = prompt;
+	msgp = &msg;
+	*password = NULL;
+	for (retry = 0; retry < MAX_RETRIES; ++retry) {
+		resp = NULL;
+		pam_err = (*conv->conv) (1, (const struct pam_message **) &msgp, (struct pam_response **) &resp, conv->appdata_ptr);
+		if (resp) {
+			if ((flags & PAM_DISALLOW_NULL_AUTHTOK) && resp[0].resp == NULL) {
+				free(resp);
+				return (PAM_AUTH_ERR);
+			}
+			if (pam_err == PAM_SUCCESS) {
+				*password = resp->resp;
+				return (PAM_SUCCESS);
+			} else
+				free(resp->resp);
+			free(resp);
+		} else
+			return (PAM_CONV_ERR); /*- have to check on this */
+		if (pam_err == PAM_SUCCESS)
+			break;
+	}
+	return (PAM_AUTH_ERR);
+}
+
+/*
+ * Mostly stolen from passwd(1)'s local_passwd.c - markm 
+ */
+int
+Arc4random(int start_num, int end_num)
+{
+	int             j;
+	float           fnum;
+
+	fnum = (float) end_num;
+	j = start_num + (int) (fnum * rand() / (RAND_MAX + 1.0));
+	return (j);
+}
+
+/*
+ * Salt suitable for traditional DES and MD5 
+ */
+void
+makesalt(char salt[SALTSIZE])
+{
+	int             i, len;
+	static int      seeded;
+	static char     itoa64[] = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz./";
+		/* 0 ... 63 => ascii - 64 */
+
+	/*
+	 * These are not really random numbers, they are just
+	 * numbers that change to thwart construction of a
+	 * dictionary. This is exposed to the public.
+	 */
+	if (!seeded)
+	{
+		seeded = 1;
+		srand(time(0)^(getpid()<<15));
+	}
+	len = strlen(itoa64);
+	for (i = 0; i < SALTSIZE; i++)
+		/* generate random no from 0 to len */
+		salt[i] = itoa64[Arc4random(0, len - 1)];
+	salt[SALTSIZE] = '\0';
 }
 
 static char    *_global_user;
@@ -314,7 +745,7 @@ pam_sm_authenticate(pam_handle_t *pamh, int flags, int argc, const char **argv)
 	switch (mode) 
 	{
 	case COMMAND_MODE:
-		status = run_command(command_str, 1, user, &result, 0);
+		status = run_command(command_str, 1, user, &result, 0, debug);
 		break;
 #ifdef HAVE_DLFCN_H
 	case LIB_MODE:
@@ -358,388 +789,6 @@ pam_sm_authenticate(pam_handle_t *pamh, int flags, int argc, const char **argv)
 	return (PAM_AUTH_ERR);
 }
 
-char           *
-cryptMethod(int method)
-{
-	switch (method)
-	{
-	case DES_HASH:
-		return ("DES");
-	case MD5_HASH:
-		return ("MD5");
-	case SHA256_HASH:
-		return ("SHA256");
-	case SHA512_HASH:
-		return ("SHA521");
-	}
-	return ("unknown");
-}
-
-int
-pw_comp(const char *plain_text, char *crypted, int method, int debug)
-{
-	char           *crypt_pass;
-
-	if (debug)
-		_pam_log(LOG_INFO, "plain[%s], crypted[%s], method %s", plain_text, crypted, cryptMethod(method));
-	switch (method)
-	{
-	case DES_HASH:
-		if (!(crypt_pass = crypt((char *) plain_text, (char *) crypted)))
-			return (-1);
-		break;
-	case MD5_HASH:
-		if (!(crypt_pass = md5_crypt((char *) plain_text, (char *) crypted)))
-			return (-1);
-		break;
-	case SHA256_HASH:
-		if (!(crypt_pass = sha256_crypt((char *) plain_text, (char *) crypted)))
-			return (-1);
-		break;
-	case SHA512_HASH:
-		if (!(crypt_pass = sha512_crypt((char *) plain_text, (char *) crypted)))
-			return (-1);
-		break;
-	default:
-		return (1);
-	}
-	return (strncmp((const char *) crypt_pass, (const char *) crypted, strlen(crypt_pass) + 1));
-}
-
-int
-converse(pam_handle_t *pamh, int flags, const char *prompt, const char **password)
-{
-	struct pam_conv *conv;
-	struct pam_message msg;
-	struct pam_message *msgp;
-	struct pam_response *resp;
-	int             retry, pam_err;
-
-	if ((pam_err = pam_get_item(pamh, PAM_CONV, (const void **) &conv)) != PAM_SUCCESS) {
-		_pam_log(LOG_AUTHPRIV | LOG_ERR, PAM_MYSQL_LOG_PREFIX "could not obtain coversation interface (reason: %s)",
-			   pam_strerror(pamh, pam_err));
-		return (pam_err == PAM_PERM_DENIED ? PAM_AUTH_ERR : pam_err);
-	}
-	msg.msg_style = PAM_PROMPT_ECHO_OFF;
-	msg.msg = prompt;
-	msgp = &msg;
-	*password = NULL;
-	for (retry = 0; retry < MAX_RETRIES; ++retry) {
-		resp = NULL;
-		pam_err = (*conv->conv) (1, (const struct pam_message **) &msgp, (struct pam_response **) &resp, conv->appdata_ptr);
-		if (resp) {
-			if ((flags & PAM_DISALLOW_NULL_AUTHTOK) && resp[0].resp == NULL) {
-				free(resp);
-				return (PAM_AUTH_ERR);
-			}
-			if (pam_err == PAM_SUCCESS) {
-				*password = resp->resp;
-				return (PAM_SUCCESS);
-			} else
-				free(resp->resp);
-			free(resp);
-		} else
-			return (PAM_CONV_ERR); /*- have to check on this */
-		if (pam_err == PAM_SUCCESS)
-			break;
-	}
-	return (PAM_AUTH_ERR);
-}
-
-#ifndef INDIMAIL
-void
-getEnvConfigStr(char **source, char *envname, char *defaultValue)
-{
-	if (!(*source = getenv(envname)))
-		*source = defaultValue;
-	return;
-}
-#endif
-
-static int
-run_mysql(char *mysql_user, char *mysql_pass, char *mysql_host, char *mysql_database, int mysql_port, char *query_str,
-		  const char *user, char **qresult, int *nitems, int debug)
-{
-	char            thischar, lastchar;
-	char           *sql, *p, *q;
-	char           *escapeUser;	/* User provided stuff MUST be escaped */
-	unsigned int    user_length, domain_length, len, i, j, row_count;
-	MYSQL           mysql;
-	MYSQL_RES      *result;
-	MYSQL_ROW       row;
-
-	if (debug)
-		_pam_log(LOG_INFO, "run_mysql user[%s],pass[%s],host[%s], database[%s], port[%d], query[%s], User[%s]", mysql_user, mysql_pass,
-			 mysql_host, mysql_database, mysql_port, query_str, user);
-	*qresult = (char *) 0;
-	if (!mysql_init(&mysql)) {
-		_pam_log(LOG_ERR, "mysql_init: %s", mysql_error(&mysql));
-		return (PAM_SERVICE_ERR);
-	}
-	if (!(mysql_real_connect(&mysql, mysql_host, mysql_user, mysql_pass, mysql_database, mysql_port, NULL, 0))) {
-		_pam_log(LOG_ERR, "mysql_real_connect: %s", mysql_error(&mysql));
-		return (PAM_SERVICE_ERR);
-	}
-	if (!(escapeUser = malloc(sizeof (char) * (strlen(user) * 2) + 1))) {
-		_pam_log(LOG_ERR, "malloc: %s", strerror(errno));
-		return PAM_BUF_ERR;
-	}
-	mysql_real_escape_string(&mysql, escapeUser, user, strlen(user));
-	for (q = (char *) user; *q && *q != '@'; q++);
-	if (*q) {
-		*q = 0;
-		q++;
-	} else
-		getEnvConfigStr(&q, "DEFAULT_DOMAIN", DEFAULT_DOMAIN);
-	for (p = escapeUser; *p && *p != '@'; p++);
-	if (*p) {
-		*p = 0;
-		p++;
-	} else
-		getEnvConfigStr(&p, "DEFAULT_DOMAIN", DEFAULT_DOMAIN);
-	domain_length = strlen(p);
-	user_length = strlen(escapeUser);
-	if (!(sql = (char *) malloc(sizeof (char) * (MAX_QUERY_LENGTH + 1)))) {
-		_pam_log(LOG_ERR, "malloc: %s", strerror(errno));
-		mysql_close(&mysql);
-		return PAM_BUF_ERR;
-	}
-	len = strlen(query_str);
-	for (i = j = lastchar = 0; i < len; i++) {
-		thischar = query_str[i];
-		if (lastchar == '%') {
-			switch (thischar)
-			{
-			case 'U':
-				if ((j + user_length) >= MAX_QUERY_LENGTH) {
-					_pam_log(LOG_ERR, "pam_db: query too long");
-					mysql_close(&mysql);
-					return PAM_BUF_ERR;
-				}
-				strcpy(sql + j, user);
-				j += strlen(user);
-				lastchar = 0;
-				break;
-			case 'u':
-				if ((j + user_length) >= MAX_QUERY_LENGTH) {
-					_pam_log(LOG_ERR, "pam_db: query too long");
-					mysql_close(&mysql);
-					return PAM_BUF_ERR;
-				}
-				strcpy(sql + j, escapeUser);
-				j += user_length;
-				lastchar = 0;
-				break;
-			case 'D':
-				if ((j + domain_length) >= MAX_QUERY_LENGTH) {
-					_pam_log(LOG_ERR, "pam_db: query too long");
-					mysql_close(&mysql);
-					return PAM_BUF_ERR;
-				}
-				strcpy(sql + j, q);
-				j += strlen(q);
-				lastchar = 0;
-				break;
-			case 'd':
-				if ((j + domain_length) >= MAX_QUERY_LENGTH) {
-					_pam_log(LOG_ERR, "pam_db: query too long");
-					mysql_close(&mysql);
-					return PAM_BUF_ERR;
-				}
-				strcpy(sql + j, p);
-				j += domain_length;
-				lastchar = 0;
-				break;
-			case '%':
-			default:
-				lastchar = (lastchar == '%' ? 0 : thischar);
-				sql[j++] = thischar;
-				if (j > MAX_QUERY_LENGTH) {
-					_pam_log(LOG_ERR, "pam_db: query too long");
-					mysql_close(&mysql);
-					return PAM_BUF_ERR;
-				}
-				break;
-			}
-		} else {
-			if (thischar != '%')
-				sql[j++] = thischar;
-			if (j > MAX_QUERY_LENGTH) {
-				_pam_log(LOG_ERR, "pam_db: query too long");
-				mysql_close(&mysql);
-				return PAM_BUF_ERR;
-			}
-			lastchar = thischar;
-		}
-	}
-	sql[j] = 0;
-	if (debug)
-		_pam_log(LOG_INFO, "run_mysql user[%s],pass[%s],host[%s], database[%s], port[%d], query[%s], User[%s]", mysql_user, mysql_pass,
-			 mysql_host, mysql_database, mysql_port, sql, user);
-	if (mysql_query(&mysql, sql)) {
-		_pam_log(LOG_ERR, "mysql_query: %s: %s", sql, mysql_error(&mysql));
-		mysql_close(&mysql);
-		return (PAM_SERVICE_ERR);
-	}
-	if (!(result = mysql_store_result(&mysql))) {
-		_pam_log(LOG_ERR, "mysql_store_result: %s", mysql_error(&mysql));
-		mysql_close(&mysql);
-		return (PAM_SERVICE_ERR);
-	}
-	if (!(row_count = mysql_num_rows(result))) {
-		mysql_free_result(result);
-		mysql_close(&mysql);
-		return (PAM_AUTH_ERR);
-	}
-	mysql_close(&mysql);
-	if ((row = mysql_fetch_row(result))) {
-		if (!(*qresult = (char *) malloc((len = strlen(row[0]) + 1)))) {
-			_pam_log(LOG_ERR, "malloc: %s", strerror(errno));
-			mysql_free_result(result);
-			return (PAM_BUF_ERR);
-		} else {
-			strncpy(*qresult, row[0], len);
-			mysql_free_result(result);
-			return (PAM_SUCCESS);
-		}
-	} else
-		mysql_free_result(result);
-	return (PAM_AUTH_ERR);
-}
-
-#ifdef HAVE_DLFCN_H
-static int
-loadLIB(char *shared_lib, const char *user, const char *service, char **qresult,
-	int auth_or_acct_mgmt, int *nitems, int debug)
-{
-	void           *handle;
-	int             size;
-	char           *error, *ptr;
-	void           *(*func) (const char *, const char *, int, int *, int *, int);
-
-	*qresult = 0;
-	if (debug)
-		_pam_log(LOG_INFO, "loadLIB %s %s", user, service ? service : "no service");
-	if (!(handle = dlopen(shared_lib, RTLD_LAZY))) {
-		_pam_log(LOG_ERR, "dlopen: %s", dlerror());
-		return (PAM_SERVICE_ERR);
-	}
-	dlerror(); /*- man page told me to do this */
-	func = dlsym(handle, "iauth");
-	if ((error = dlerror())) {
-		_pam_log(LOG_ERR, "dlsym: %s", error);
-		dlclose(handle);
-		return (PAM_SERVICE_ERR);
-	}
-	if (!(ptr = (char *) (*func) (user, service, auth_or_acct_mgmt, &size, nitems, debug))) {
-		dlclose(handle);
-		return (PAM_AUTH_ERR);
-	}
-	if (debug)
-		_pam_log(LOG_INFO, "loadLIB nitems=%d, size=%d", nitems ? *nitems : 0, size);
-	if (!size)
-	{
-		dlclose(handle);
-		return (PAM_AUTH_ERR);
-	}
-	if (!(*qresult = (char *) malloc(size))) {
-		_pam_log(LOG_ERR, "malloc: %s\n", strerror(errno));
-		dlclose(handle);
-		return (PAM_BUF_ERR);
-	} else
-		memcpy(*qresult, ptr, size);
-	if (dlclose(handle)) {
-		_pam_log(LOG_ERR, "dlsym: %s", error);
-		return (PAM_SERVICE_ERR);
-	}
-	return (PAM_SUCCESS);
-}
-#endif
-
-int
-wait_pid(wstat, pid)
-	int            *wstat;
-	int             pid;
-{
-	int             r;
-
-	do {
-		r = waitpid(pid, wstat, 0);
-	} while ((r == -1) && (errno == EINTR));
-	return r;
-}
-
-static int
-run_command(char *command_args, int mode, const char *user, char **qresult, int *nitems)
-{
-	char            buffer[1024];
-	char           *ptr = (char *) 0;
-	pid_t           filt_pid;
-	int             pipefd[2];
-	int             wstat, filt_exitcode, len, n;
-
-	*qresult = 0;
-	if (pipe(pipefd) == -1) {
-		_pam_log(LOG_ERR, "pipe: %s", strerror(errno));
-		return (-1);
-	}
-	switch ((filt_pid = fork())) {
-	case -1:
-		_pam_log(LOG_ERR, "fork: %s", strerror(errno));
-		return (-1);
-	case 0:
-		   /*- Command */
-		if (mode == 1) {
-			if (dup2(pipefd[1], 1) == -1 || close(pipefd[0]) == -1) {
-				_pam_log(LOG_ERR, "dup2: %s", strerror(errno));
-				_exit(60);
-			}
-			if (pipefd[1] != 1)
-				close(pipefd[1]);
-		}
-		execl("/bin/sh", "pam-multi", "-c", command_args, (char *) 0);
-		_pam_log(LOG_ERR, "execl: %s: %s", command_args, strerror(errno));
-		_exit(75);
-	default:
-		if (mode == 1) {
-			if (close(pipefd[1]) == -1) {
-				close(pipefd[0]);
-				wait_pid(&wstat, filt_pid);
-				return (-1);
-			}
-			for (len = 0;;) {
-				if ((n = read(pipefd[0], buffer, sizeof (buffer))) == -1) {
-					if (errno == EINTR)
-						continue;
-				} else if (!n)
-					break;
-				if (!ptr) {
-					if (!(ptr = malloc(len + n + 1))) {
-						_pam_log(LOG_ERR, "malloc: %s", strerror(errno));
-						return (-1);
-					}
-				} else {
-					if (!(ptr = realloc(ptr, len + n + 1))) {
-						_pam_log(LOG_ERR, "malloc: %s", strerror(errno));
-						return (-1);
-					}
-				}
-				memcpy(ptr + len, buffer, n);
-				len += n;
-			}
-			if (ptr)
-				ptr[len - 1] = 0;
-			*qresult = ptr;
-		}
-		if (wait_pid(&wstat, filt_pid) != filt_pid)
-			return (-1);
-		if (wait_crashed(wstat))
-			return (-1);
-		break;
-	}
-	return (filt_exitcode = wait_exitcode(wstat));
-}
-
 PAM_EXTERN int
 pam_sm_setcred(pam_handle_t * pamh, int flags, int argc, const char *argv[])
 {
@@ -780,14 +829,12 @@ pam_sm_acct_mgmt(pam_handle_t *pamh, int flags, int argc, const char *argv[])
 	int             c, status, mode, pam_err, errflag, debug = 0,
 					nitems = 0, mysql_port = 3306;
 	char           *mysql_query_str, *mysql_user, *mysql_pass, *mysql_host, *mysql_database,
-				   *command_str, *result, *token;
+				   *command_str, *result, *ptr;
+	long            exp_times[2];
 	long           *expiry_ptr;
 	time_t          curtime;
 #ifdef HAVE_DLFCN_H
 	char           *shared_lib, *service;
-#endif
-#if 0
-	struct spwd    *pwd;
 #endif
 
 	if (!_global_user)
@@ -873,7 +920,20 @@ pam_sm_acct_mgmt(pam_handle_t *pamh, int flags, int argc, const char *argv[])
 	switch (mode) 
 	{
 	case COMMAND_MODE:
-		status = run_command(command_str, 1, user, &result, &nitems);
+		if (!(status = run_command(command_str, 1, user, &result, &nitems, debug)))
+		{
+			for (ptr = result;*ptr;ptr++)
+			{
+				if (*ptr == ',' && *(ptr + 1))
+				{
+					exp_times[1] = atol(ptr + 1);
+					*ptr = 0;
+					break;
+				}
+			}
+		}
+		exp_times[0] = atol(result);
+		result = (char *) &exp_times[0];
 		break;
 #ifdef HAVE_DLFCN_H
 	case LIB_MODE:
@@ -894,21 +954,19 @@ pam_sm_acct_mgmt(pam_handle_t *pamh, int flags, int argc, const char *argv[])
 			_pam_log(LOG_INFO, "status=%d", status);
 		return (PAM_SERVICE_ERR);
 	}
-	if (!nitems)
-		return (PAM_SUCCESS);
 	expiry_ptr = (long *) result;
 	for (c = 0;c < nitems;c++)
 	{
 		switch (c)
 		{
 		case 0:
-			token = "Account";
+			ptr = "Account";
 			break;
 		case 1:
-			token = "Password";
+			ptr = "Password";
 			break;
 		default:
-			token = "Account";
+			ptr = "Account";
 			break;
 		}
 		if (debug)
@@ -917,50 +975,15 @@ pam_sm_acct_mgmt(pam_handle_t *pamh, int flags, int argc, const char *argv[])
 		{
 			if (curtime > *expiry_ptr / 86400)
 			{
-				_pam_log(LOG_WARNING, "%s has expired!", token);
+				_pam_log(LOG_WARNING, "%s has expired!", ptr);
 				return (PAM_ACCT_EXPIRED);
 			} else
 			if (*expiry_ptr / 86400 - curtime < DEFAULT_WARN)
-				_pam_log(LOG_WARNING, "Warning: your %s expires on %s", token, ctime(expiry_ptr));
+				_pam_log(LOG_WARNING, "Warning: your %s expires on %s", ptr, ctime(expiry_ptr));
 		}
 		expiry_ptr++;
 	}
 	return (PAM_SUCCESS);
-#if 0
-	if (user == NULL || (pwd = getspnam(user)) == NULL)
-		return (PAM_SERVICE_ERR);
-	if (!*pwd->sp_pwdp && (flags & PAM_DISALLOW_NULL_AUTHTOK) != 0)
-		return (PAM_NEW_AUTHTOK_REQD);
-	/*- Check for account expiration */
-	if (pwd->sp_expire > 0) {
-		if ((curtime > pwd->sp_expire) && (pwd->sp_expire != -1)) {
-			_pam_log(LOG_WARNING, "Account has expired!");
-			return (PAM_ACCT_EXPIRED);
-		} else
-		if ((pwd->sp_expire - curtime < DEFAULT_WARN))
-			_pam_log(LOG_WARNING, "Warning: your account expires on %s", ctime(&pwd->sp_expire));
-		if (pwd->sp_lstchg == 0)
-			return (PAM_NEW_AUTHTOK_REQD);
-		/*-
-		 * check all other possibilities (mostly stolen from pam_tcb) 
-		 */
-		if ((curtime > (pwd->sp_lstchg + pwd->sp_max + pwd->sp_inact)) && (pwd->sp_max != -1) && (pwd->sp_inact != -1)
-			&& (pwd->sp_lstchg != 0)) {
-			_pam_log(LOG_WARNING, "Account has expired!");
-			return (PAM_ACCT_EXPIRED);
-		}
-		if (((pwd->sp_lstchg + pwd->sp_max) < curtime) && (pwd->sp_max != -1)) {
-			_pam_log(LOG_WARNING, "Account has expired!");
-			return (PAM_ACCT_EXPIRED);
-		}
-		if ((curtime - pwd->sp_lstchg > pwd->sp_max) && (curtime - pwd->sp_lstchg > pwd->sp_inact)
-			&& (curtime - pwd->sp_lstchg > pwd->sp_max + pwd->sp_inact) && (pwd->sp_max != -1) && (pwd->sp_inact != -1)) {
-			_pam_log(LOG_WARNING, "Account has expired!");
-			return (PAM_ACCT_EXPIRED);
-		}
-	}
-#endif
-	return (PAM_ACCT_EXPIRED);
 }
 
 PAM_EXTERN int
@@ -1154,48 +1177,6 @@ pam_sm_chauthtok(pam_handle_t * pamh, int flags, int argc, const char *argv[])
 	return (PAM_SERVICE_ERR);
 }
 
-/*
- * Mostly stolen from passwd(1)'s local_passwd.c - markm 
- */
-int
-Arc4random(int start_num, int end_num)
-{
-	int             j;
-	float           fnum;
-
-	fnum = (float) end_num;
-	j = start_num + (int) (fnum * rand() / (RAND_MAX + 1.0));
-	return (j);
-}
-
-/*
- * Salt suitable for traditional DES and MD5 
- */
-void
-makesalt(char salt[SALTSIZE])
-{
-	int             i, len;
-	static int      seeded;
-	static char     itoa64[] = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz./";
-		/* 0 ... 63 => ascii - 64 */
-
-	/*
-	 * These are not really random numbers, they are just
-	 * numbers that change to thwart construction of a
-	 * dictionary. This is exposed to the public.
-	 */
-	if (!seeded)
-	{
-		seeded = 1;
-		srand(time(0)^(getpid()<<15));
-	}
-	len = strlen(itoa64);
-	for (i = 0; i < SALTSIZE; i++)
-		/* generate random no from 0 to len */
-		salt[i] = itoa64[Arc4random(0, len - 1)];
-	salt[SALTSIZE] = '\0';
-}
-
 #define NEW_SHADOW "/etc/.shadow"
 /*
  * Update shadow with new user password
@@ -1356,6 +1337,7 @@ update_passwd(pam_handle_t * pamh, const char *user, const char *newhashedpwd)
 	return (PAM_SUCCESS);
 }
 #endif
+
 void
 getversion_pam_multi()
 {
