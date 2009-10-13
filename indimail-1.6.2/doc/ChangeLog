@@ -14,6 +14,9 @@ Release 1.6.2 Start 01/10/2009
 11/10/2009
 7.  Renamed vauthenticate() to iauth()
 8.  Completed acct_mgmt functions in iauth.c, pam-multi.c
+9.  Do sleep on authentication failure in pam-multi
+13/10/2009
+10. Added Quick-INSTALL
 
 * Fri Oct  2 2009 mbhangui@gmail.com
 Release 1.6.1 Start 13/09/2009

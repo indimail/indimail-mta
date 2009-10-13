@@ -1,11 +1,14 @@
+File README-CLUSTER, Version @version@
+DATE: @DATE@
+
     You can either have a normal non-clustered domain or a clustered domain. To achieve high
     performance needed for high volume servers, IndiMail uses MySQL to store some of the information
     in MySQL tables. All indimail program depend on one or more control file to figure out how to
     extract this information stored in MySQL tables. These control files are host.cntrl, host.master,
-	host.mysql
+	host.mysql. Take a look at http://groups.google.com/group/indimail/web/quick-install
 
     IndiMail supports a cluster of servers for a domain.
-	(Refer to the diagram https://sourceforge.net/dbimage.php?id=207728)
+	(Refer to the diagram at https://sourceforge.net/project/screenshots.php?group_id=230686)
 
     There are five types of servers
     1) hostcntrl  - This is the host which has a MySQL for storing the location of each user. Location

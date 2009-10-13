@@ -1,0 +1,34 @@
+   IndiMail supports two types of virtual domains
+
+   1. Non-Clustered domain
+   2. Clustered domain
+
+    Creating a non-clustered Domain
+    -------------------------------
+
+    % sudo rpm -ivh indimail-@version@-1.1.i386.rpm
+    % cd /var/indimail/control
+    % su
+    # echo "localhost" > host.mysql
+    # exit
+    % sudo /var/indimail/bin/vadddomain example.com pass
+    % sudo /var/indimail/bin/vadduser testuser1@example.com pass
+    % vuserinfo postmaster@example.com
+    % vuserinfo testuser1@example.com
+
+    Creating a Clustered Domain
+    ---------------------------
+
+    % sudo rpm -ivh indimail-@version@-1.1.i386.rpm
+    % cd /var/indimail/control
+    % su
+    # echo "localhost" > host.cntrl (replace localhost with IP of your MySQL host)
+    # ln -s host.cntrl host.master
+    # echo 192.168.1.100 > hostip (replace 192.168.1.100 with your mailserver IP)
+    # exit
+    % sudo /var/indimail/bin/vadddomain -D indimail -S localhost \
+        -U indimail -P ssh-1.5- -p 3306 -c example.com pass
+    % sudo /var/indimail/bin/vadduser testuser1@example.com pass
+    % vuserinfo postmaster@example.com
+    % vuserinfo testuser1@example.com
+    % dbinfo -s

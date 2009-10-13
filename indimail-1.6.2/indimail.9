@@ -73,10 +73,10 @@ IndiMail has two databases
 local database - Contains all user information, attributes
 .sp -1
 .IP \n+[step]
-central database - Used only when configured as a distributed architecture
+central database - Used only when configured as a clustered architecture
 
 .PP
-For a non-distributed architecture, you need to have a control file \fBhost\.mysql\fR. This
+For a non-clustered architecture, you need to have a control file \fBhost\.mysql\fR. This
 control file contains the IP address or hostname of the MySQL database corresponding to
 the \fBlocal database\fR. It consists of the following tables
 
@@ -121,7 +121,7 @@ mailing_list
 bulkmail
 
 .PP
-The distributed architecture in IndiMail is achieved by having a central storage of user location
+The clustered architecture in IndiMail is achieved by having a central storage of user location
 information in a MySQL database. This database is referred to as the \fBcentral database\fR. It
 consists of the following tables
 
@@ -168,7 +168,7 @@ pointing to the MySQL slave database. All indimail programs ensure that all writ
 master database and reads happen only from the slave database. The control files \fIhost.master\fR,
 \fIhost.cntrl\fR can be overriden by the environment variables \fBMASTER_HOST\fR and \fBCNTRL_HOST\fR.
 .PP
-In a distributed setup, you can have multiple servers with each server having its own set of
+In a clustered setup, you can have multiple servers with each server having its own set of
 local users. The information for these users are stored in a MySQL database known as the
 \fBlocal database\fR. You can have multiple \fBlocal databases\fR with each database serving one
 email server. You can also club user information for multiple email servers in a single MySQL

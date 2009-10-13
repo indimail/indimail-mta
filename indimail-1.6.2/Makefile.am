@@ -48,7 +48,8 @@ setuid_list = ../sbin/systpass vdeldomain vadddomain vadduser vdeluser \
 
 doc_list= 37rules.pdf ChangeLog COPYING CREDITS FAQ.pdf fhs-2.3.txt.gz HOWTO.bogofilter \
 	HOWTO.sharedmaildir INSTALL.indimail IndiMail.pdf percenthack.shtml README.indimail \
-	INSTALL-MYSQL RELEASE-Notes INSTALL-RPM README-CLUSTER README.vlimits indimail_arch.png
+	INSTALL-MYSQL RELEASE-Notes INSTALL-RPM README-CLUSTER README.vlimits indimail_arch.png \
+	Quick-INSTALL
 
 COMMONSOURCES = addaliasdomain.c add_control.c add_domain_assign.c adddomain.c addressToken.c \
 add_user_assign.c adduser.c addusercntrl.c add_vacation.c \
@@ -147,13 +148,13 @@ indimailbin_SCRIPTS = versioninfo vcaliasrev logmonitor bogofilter-qfe mailzippe
 indimailsbin_SCRIPTS = myslave controlsync svctool cputime tls-cert-check
 
 noinst_SCRIPTS = create_services indimail.spec indimail-@VERSION@-rpmlintrc indimail-epm.list \
-	INSTALL INSTALL-RPM INSTALL-MYSQL README-CLUSTER RELEASE-Notes
+	INSTALL INSTALL-RPM INSTALL-MYSQL README-CLUSTER RELEASE-Notes Quick-INSTALL
 
 MOSTLYCLEANFILES=versioninfo vcaliasrev myslave logmonitor controlsync bogofilter-qfe \
 svctool indimail_settings.c cronlist crypt create_services INSTALL INSTALL-RPM INSTALL-MYSQL \
 indimail.spec cscope.* *.dSYM inc_deps lib_deps socket.lib indimail-@VERSION@-rpmlintrc \
 indimail-epm.list README-CLUSTER tls-cert-check mailzipper perm_list RELEASE-Notes \
-dbinfo.8 inlookup.8 vadddomain.1 vdelivermail.8 indimail.7 svctool.8 indisub.c
+dbinfo.8 inlookup.8 vadddomain.1 vdelivermail.8 indimail.7 svctool.8 indisub.c Quick-INSTALL
 
 DISTCLEANFILES=.gitignore
 
@@ -742,6 +743,8 @@ perm_list: perm_list.in
 	$(edit) $@.in > $@
 INSTALL: INSTALL.in configure.in
 	$(edit) $@.in > doc/$@.indimail; ln -sf doc/$@.indimail $@
+Quick-INSTALL: Quick-INSTALL.in configure.in
+	$(edit) $@.in > doc/$@; ln -sf doc/$@ $@
 INSTALL-RPM: INSTALL-RPM.in configure.in
 	$(edit) $@.in > doc/$@; ln -sf doc/$@ $@
 INSTALL-MYSQL: INSTALL-MYSQL.in configure.in

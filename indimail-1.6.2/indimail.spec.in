@@ -1861,7 +1861,6 @@ if [ $ID -ne 0 ] ; then
 	echo "You are not root"
 	exit 1
 fi
-#echo "Running pretrans script for %{version}-%{release} : arg=$1"
 if [ -f %{_prefix}/sbin/initsvc ] ; then
 	%{_prefix}/sbin/initsvc -status
 fi
@@ -1883,7 +1882,6 @@ if [ $ID -ne 0 ] ; then
 	echo "You are not root"
 	exit 1
 fi
-#echo "Running pre script for %{version}-%{release} : arg=$1"
 # we are doing upgrade
 if [ $argv1 -eq 2 ] ; then
 	exit 0
@@ -1941,7 +1939,6 @@ if [ $ID -ne 0 ] ; then
 	echo "You are not root"
 	exit 1
 fi
-#echo "Running post script for %{version}-%{release} : arg=$1"
 if [ $argv1 -eq 2 ] ; then
 	if [ -f %{_prefix}/boot/rpm.init ] ; then
 		/sbin/ldconfig
@@ -2229,7 +2226,6 @@ if [ $ID -ne 0 ] ; then
 	echo "You are not root"
 	exit 1
 fi
-#echo "Running preun script for %{version}-%{release} : arg=$1"
 if test -f %{_sysconfdir}/event.d/svscan
 then
 	/sbin/initctl emit qmailstop > /dev/null 2>&1
@@ -2255,7 +2251,6 @@ if [ $ID -ne 0 ] ; then
 	echo "You are not root"
 	exit 1
 fi
-#echo "Running postun script for %{version}-%{release} : arg=$1"
 # we are doing upgrade
 if [ $argv1 -eq 1 ] ; then
 	echo "recreating ld.so cache"
