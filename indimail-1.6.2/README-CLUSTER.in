@@ -5,37 +5,39 @@ DATE: @DATE@
     performance needed for high volume servers, IndiMail uses MySQL to store some of the information
     in MySQL tables. All indimail program depend on one or more control file to figure out how to
     extract this information stored in MySQL tables. These control files are host.cntrl, host.master,
-	host.mysql. Take a look at http://groups.google.com/group/indimail/web/quick-install
+    host.mysql. Take a look at http://groups.google.com/group/indimail/web/quick-install
 
-    IndiMail supports a cluster of servers for a domain.
-	(Refer to the diagram at https://sourceforge.net/project/screenshots.php?group_id=230686)
+    IndiMail supports a cluster of servers for a domain. A cluster is a set of servers
+    having the same domain.
+    (Refer to the diagram at https://sourceforge.net/project/screenshots.php?group_id=230686)
 
     There are five types of servers
-    1) hostcntrl  - This is the host which has a MySQL for storing the location of each user. Location
+    1) clusterinfo  - This is the host which has a MySQL for storing the location of each user. Location
        information is information like hostid, ip address.
-	   If this host is only going to server as a pure MySQL database server, you do not
-	   need to install IndiMail on this server.
+       If this host is only going to server as a pure MySQL database server, you do not
+       need to install IndiMail on this server.
     2) Mailstores - A mailstore is a host which has disk space to host user's mailboxes.
        Each mailstore can have its own set of users. You can call each host a 'node'.
-	   You need to install IndiMail on each mailstore.
+       You need to install IndiMail on each mailstore. IndiMail allows you to extend
+       a domain across multiple mailstores.
     3) Relay Server - A relay server acts as an SMTP gateway between the user and the mailstore or
        between the user and the internet.
-	   You need to install IndiMail on each relay server.
+       You need to install IndiMail on each relay server.
     4) IMAP/POP3 Gateway - These servers run IndiMail's IMAP/POP3 Proxies
-	   You need to install IndiMail on each IMAP/POP3 proxy server.
+       You need to install IndiMail on each IMAP/POP3 proxy server.
     5) Webmail - This servers run a webmail software (like squirellmail, roundcube, etc).
-	   In case you webmail software connects to localhost on the IMAP/POP3 port, you will
-	   need to install IndiMail for having the IMAP/POP3 proxy.
+       In case you webmail software connects to localhost on the IMAP/POP3 port, you will
+       need to install IndiMail for having the IMAP/POP3 proxy.
 
     The control files used to figure out the MySQL server storing IndiMail configuration/information
-	depends on whether you are running a clustered or a non-clustered domain. Read below to
-	know more about this.
+    depends on whether you are running a clustered or a non-clustered domain. Read below to
+    know more about this.
 
     Non-Clustered Domain
     --------------------
-	In this case IndiMail just requires how to connect to a single MySQL database. You can
-	create a control file host.mysql which has the IP address or hostname for the MySQL
-	database. If this file is missing, IndiMail program will use 'localhost' my default.
+    In this case IndiMail just requires how to connect to a single MySQL database. You can
+    create a control file host.mysql which has the IP address or hostname for the MySQL
+    database. If this file is missing, IndiMail program will use 'localhost' my default.
 
     echo localhost > @indimaildir@/control/host.mysql   (MySQL host to which all programs will
                                                         connect)
@@ -43,17 +45,18 @@ DATE: @DATE@
     Clustered Domain
     ----------------
 
-	For a Clustered Domain, you need multiple MySQL database. You require a MySQL database
-	called the central database. The central database is used to store information about all
-	other MySQL database for each mailstore. Each mailstore should have the control files
-	host.cntrl and host.master, having the IP address or hostname of the MySQL central
-	database.
+    Each mailstore requires a MySQL database to store user information. When a domain is
+    extended across multiple mailstores, you require an additional MySQL database called
+    the clusterinfo. The clusterinfo is used to store information about all the MySQL
+    databases for each of the mailstores. When you extend a domain, each mailstore needs
+    to have the control files host.cntrl and host.master. These control files has  the IP
+    address or hostname of the clusterinfo MySQL database.
 
     Adding the first Mailstore in a cluster
     =======================================
 
     There are three files required on all hosts serving mailboxes (mailstores) for 
-    clustered domain - ,host.cntrl,host.master & mcdinfo
+    clustered domain - host.cntrl,host.master & mcdinfo
 
     echo hostcntrl_host > @indimaildir@/control/host.mysql   (MySQL host to which all programs will
                                                              connect)

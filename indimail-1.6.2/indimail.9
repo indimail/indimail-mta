@@ -64,7 +64,10 @@ standard non-proprietary protocols and RFCs. The other use of user-location awar
 is to have a single domain consisting of a heterogeneous email server environment (with some
 users on MS Exchange and some on Lotus Notes some on IndiMail). You can have multiple hosts
 hosting a domain placed geographically anywhere and tied up by IndiMail. The architecture does
-not force a filesystem architecture like NFS to be used to distribute the users.
+not force a filesystem architecture like NFS to be used to distribute the users. In other words,
+\fBIndiMail\fR allows you to extend a domain across multiple servers to provide the ability
+to scale to any number of users. Such a domain which is extended across multiple servers is called
+a clustered domain.
 .PP
 IndiMail has two databases
 
@@ -73,7 +76,8 @@ IndiMail has two databases
 local database - Contains all user information, attributes
 .sp -1
 .IP \n+[step]
-central database - Used only when configured as a clustered architecture
+central database - Used only when configured as a clustered domain. This database is
+refered to as '\fBclusterinfo\fR'.
 
 .PP
 For a non-clustered architecture, you need to have a control file \fBhost\.mysql\fR. This
@@ -121,9 +125,10 @@ mailing_list
 bulkmail
 
 .PP
-The clustered architecture in IndiMail is achieved by having a central storage of user location
-information in a MySQL database. This database is referred to as the \fBcentral database\fR. It
-consists of the following tables
+A clustered domain in IndiMail is achieved by having a central storage called \fIclusterinfo\fR.
+\fIclusterinfo\fR stores information about all users and the user's storage server (mailstore),
+each mailstore it's individual MySQL database information. This database is also
+referred to as the \fBcentral database\fR. It consists of the following tables
 
 .nr step 1 1
 .IP \n[step] 2
@@ -144,12 +149,12 @@ mgmtaccess
 .IP \n+[step]
 vpriv
 .PP
-The table \fIhostcntrl\fR contains the user, domain and hostid. hostid is a unique identification
-which needs to be assigned to every server on which email accounts need to be created. These
-servers are also called \fImailstores\fR. The program \fBhostcntrl(8)\fR can be used to add,
-modify, delete entries to the table \fIhostcntrl\fR. Each \fIhostid\fR needs to be mapped to
-an IP address. This is maintained in the table \fIhost_table\fR. A program called
-\fBvhostid(8)\fR can be used to add, modify or delete entries in \fIhost_table\fR.
+The table \fIhostcntrl\fR contains the user, domain and hostid. \fIhostid\fR is a unique
+identification which needs to be assigned to every server on which email accounts need to
+be created. These servers are also called \fImailstores\fR. The program \fBhostcntrl(8)\fR
+can be used to add, modify, delete entries to the table \fIhostcntrl\fR. Each \fIhostid\fR
+needs to be mapped to an IP address. This is maintained in the table \fIhost_table\fR. A
+program called \fBvhostid(8)\fR can be used to add, modify or delete entries in \fIhost_table\fR.
 .PP
 To be able to access the \fBcentral database\fR, IndiMail programs need the following control
 files in the directory INDIMAIL/control

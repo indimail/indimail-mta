@@ -1,7 +1,7 @@
    IndiMail supports two types of virtual domains
 
-   1. Non-Clustered domain
-   2. Clustered domain
+   1. Non-Clustered domain - A domain existing on a single server
+   2. Clustered domain - A domain extended across multiple servers
 
     Creating a non-clustered Domain
     -------------------------------

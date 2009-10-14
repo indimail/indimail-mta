@@ -16,17 +16,20 @@ dbinfo \- Dbinfo Structure Administration
 \fBdbinfo \fB\-e\fR
 
 .SH DESCRIPTION
-\fBdbinfo\fR is a utility for administering the dbinfo structure maintained in MySQL(1).
+\fBdbinfo\fR is a utility for administering the dbinfo structure maintained in MySQL(1). This
+structure holds information about all MySQL databases corresponding to all mailstores comprising
+an clustered domain. A clustered domain is a domain extended across multiple servers called mailstores.
 The above five different forms of usage allows you to add, modify, delete and display the
-dbinfo structure. With the '-e' option, it uses the EDITOR environment variable to edit the
+dbinfo structure. With the '-e' option, it uses the \fBEDITOR\fR environment variable to edit the
 Mail Cluster Definition file. For reliability, this structure is maintained in MySQL as well
 as a file defined by the MCDFILE environment variable (defaults to INDIMAIL/control/sql). On
 updation of the dbinfo structure, the entries in the file is synchronized with the entries in
-MySQL table dbinfo. In addition to the MySQL table dbinfo, dbinfo also uses the  qmail assign
-file to find domains not listed in the dbinfo table. These domains are assumed to be
-non-clustered domains. The dbinfo structure for this domains is created automatically using
-the environment variables MYSQL_HOST, MYSQL_USER, MYSQL_PASSWD, MYSQL_DATABASE, MYSQL_VPORT
-(If MYSQL_HOST is not defined, the control file mysql_host is used).
+MySQL table \fIdbinfo\fR. In addition to the MySQL table \fIdbinfo\fR, \fBdbinfo\fR also uses
+the  qmail assign (INDIMAIL/users/assign) file to find domains not listed in the \fIdbinfo\fR
+table. Domains not listed in \Idbinfo\fR table are assumed to be non-clustered domains. The
+dbinfo structure for this domains is created automatically using the environment variables
+\fBMYSQL_HOST\fR, \fBMYSQL_USER\fR, \fBMYSQL_PASSWD\fR, \fBMYSQL_DATABASE\fR, \fBMYSQL_VPORT\fR
+(If \fBMYSQL_HOST\fR is not defined, the control file \fImysql\.host\fR is used).
 .PP
 The dbinfo structure holds the following parameters
 
@@ -38,12 +41,12 @@ The dbinfo structure holds the following parameters
  - Domain Name which will be served by the MySQL database
  - Mail Store IP address.
  - Optional Cluster flag indicating that the mail setup is part
-   of a mail cluster.
+   of a mail cluster. A clustered domain is a domain extended across multiple servers.
  - Filename pointing to the path of the Mail Cluster Definition File.
 
-The option '-s' in dbinfo displays the status of all MySQL servers used by IndiMail listed
+The option '-s' in \fBdbinfo\fR displays the status of all MySQL servers used by IndiMail listed
 in the MCD file. If MCD filename is not given on the command line, the environment variable
-MCDFILE is used. If environment variable is not set, the static definition of MCDFILE in
+\fBMCDFILE\fR is used. If environment variable is not set, the static definition of MCDFILE in
 indimail.h is used. The information displayed is as follows.
 
 .SH OPTIONS

@@ -17,7 +17,7 @@ variables are set by postdel. If the username is quoted, the quotes are removed.
 user@domain is then searched in the authentication database. If there are any system problems
 due to which \fBvdelivermail\fR is unable to locate the user, it exits with the code 111
 and the mail gets deferred. If the domain is a clustered domain, \fBvdelivermail\fR attempts
-to find the host for the user and calls qmail-remote to deliver the mail in case the host
+to find the mailstore for the user and calls qmail-remote to deliver the mail in case the mailstore
 is different from the current host. Else if QMAIL_EXT is set during compile time,
 \fBvdelivermail\fR attempts to locate the username based on Qmail Extensions. If the user
 is not found or user is found but is inactive action as per delivery instruction

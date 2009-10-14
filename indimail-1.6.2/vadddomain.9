@@ -40,7 +40,8 @@ Sends SIGHUP to qmail-send.
 .IP \n+[step]
 Add entry to table dbinfo and mcdfile for a clustered domain ('-D' option).
 .IP \n+[step]
-Create the postmaster account for a non-clustered domain. For a clustered domain, the postmaster account is created on the first host on which the domain is created.
+Create the postmaster account for a non-clustered domain. For a clustered domain, the postmaster
+account is created on the first host on which the domain is created.
 
 .SH OPTIONS
 .PP
@@ -131,17 +132,8 @@ Domain names can contain alphanumeric characters besides '-' and '.' . However t
 .IP \n+[step]
 The postmaster account is created as an active account.
 .IP \n+[step]
-For a clustered domain, the postmaster id is added only for the first domain part of the cluster.
-.IP \n+[step]
-The virtual domain becomes active after running this program. No additional files need to be modified. A new directory is added under INDIMAIL/domains to house all the .qmail files, configuration files for the new virtual domain. 
-.IP \n+[step]
-vadddomain has the setuid bit set and runs as root.
-.IP \n+[step]
-Domain names can contain alphanumeric characters besides '-' and '.' . However the first and the last character cannot be '-'.
-.IP \n+[step]
-The postmaster account is created as an active account.
-.IP \n+[step]
-For a clustered domain, the postmaster id is added only for the first domain added as part of the cluster.
+For a clustered domain, the postmaster id is added only for the first domain created as part of a
+cluster.
 
 .SH "SEE ALSO"
 vaddaliasdomain(1), vmoddomain(1), vadduser(1), vdeldomain(1), vdeluser(1), vdominfo(1),

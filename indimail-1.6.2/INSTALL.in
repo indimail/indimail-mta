@@ -33,35 +33,40 @@ Checklist
 =========
 
 You need to have answers to the following ready before starting the installation (I need to
-bring more clarity to this section so that it becomes easy for a novice to install a mail server)
+bring more clarity to this section so that it becomes easy for a novice to install a mail
+server)
 
-   1.  Whether you want a full fledged mail server or just a relay server installation
-   2.  Default Domain name for your Mail Server (mailserver)
+   1.  Whether you want a full fledged mailstore or just a relay server installation
+   2.  Default Domain name for your Mail Server (mailstore)
        1. postmaster email account
        2. abuse account
-   3.  What Filesystem to use (XFS, EXT4 for Maildirs, ext2 for queue)? (mailserver)
-   4.  Filesystem where you will have your queue (mailserver, relayserver)
-   5.  Filesystem where you will have your user's home directory (mailserver)
-   6.  Filesystem where you will have the MySQL data files and logs (mailserver, clusterinfo)
+   3.  What Filesystem to use (XFS, EXT4 for Maildirs, ext2 for queue)? (mailstore)
+   4.  Filesystem where you will have your queue (mailstore, relayserver)
+   5.  Filesystem where you will have your user's home directory (mailstore)
+   6.  Filesystem where you will have the MySQL data files and logs (mailstore, clusterinfo)
    7   Filesystem where you will have the supervise log files
    8.  A MySQL database to hold the user cluster information (clusterinfo)
    9.  A MySQL database to hold local user information for each host which is part of the user
-       cluster (mailserver)
-   10. Userids, passwords for the MySQL Database (mailserver, clusterinfo)
-   11. Estimation of Load (mailserver, relayserver, clusterinfo)
+       cluster (mailstore)
+   10. Userids, passwords for the MySQL Database (mailstore, clusterinfo)
+   11. Estimation of Load (mailstore, relayserver, clusterinfo)
    12. IP addresses (Mailserver, relayservers, clusterinfo)
    13. MX records to be setup (relayserver)
-   14. Access to root (mailserver, relayserver, clusterinfo)
-   15. Broad level features required (SPAM/Virus Filter, IMAP, POP3, WebMail) (mailserver)
+   14. Access to root (mailstore, relayserver, clusterinfo)
+   15. Broad level features required (SPAM/Virus Filter, IMAP, POP3, WebMail) (mailstore)
    16. Whom should the daily mail statistics reports be sent to.
 
 TERMS
 =====
 
-  * mailserver -  A host which keeps the user's maildir
-  * relayserver - A host which accepts mail from the internet (port 25) and/or the users (port 587)
-  * clusterinfo - A host which hosts the MySQL database having the user cluster information (only if
-    you want to install single domain multi-host mailservers)
+  * mailstore   - A host which keeps the user's maildir. I may also refer sometimes a mailstore
+                  as a mailserver.
+  * relayserver - A host which accepts mail from the internet (port 25) and/or the users
+                  (port 587)
+  * clusterinfo - A host which hosts the MySQL database having the user cluster information
+                  (only if you want to install single domain multi-host mailstores). A clusterinfo
+                  helps to extend a domain across multiple mailstores. I may refer the cluserinfo
+                  sometimes as the 'central database' or hostcntrl.
 
 Before starting the installation, there are a few things you need to think about.
 
@@ -159,22 +164,22 @@ If a command is prefixed with the '#' sign, it means that it was run using root.
 
     Determine which disk partition you install IndiMail software
 
-	Prepare Source Directory Structure in the disk partition selected
-	you have to extract minimum of 10 sources as per the directory
-	structure below. You may skip extraction of nssd-1.0, fetchmail-6.3.8,
-	depending on whether you require them.
+    Prepare Source Directory Structure in the disk partition selected
+    you have to extract minimum of 10 sources as per the directory
+    structure below. You may skip extraction of nssd-1.0, fetchmail-6.3.8,
+    depending on whether you require them.
 
     +-/home/local/src/indimail/.+
                                .
                                . indimail-@version@ (50   Mb)
                                . qmail-1.03         (21   Mb)
-							   . libdkim-1.3        (4.0  Mb)
+                               . libdkim-1.3        (4.0  Mb)
                                . courier-imap-3.0.8 (32   Mb)
                                . flash-0.9.4        (4.3  Mb)
                                . altermime-0.3.10   (1.5  Mb)
                                . ripmime-1.4.0.9    (2.1  Mb)
-							   . mpack-1.6          (1.5  Mb)
-							   . fortune-1.1        (8.4  Mb)
+                               . mpack-1.6          (1.5  Mb)
+                               . fortune-1.1        (8.4  Mb)
                                . bogofilter-1.2.1   (11.6 Mb)
                                . nssd-1.0           (2.0  Mb)
                                . fetchmail-6.3.8    (10.1 Mb)
@@ -275,7 +280,7 @@ the installation.
     qmail-1.03.tar.gz. It is important that the extracted qmail source directory (qmail-1.03)
     is present for ./configure to detect qmail. You can also extract optional
     packages (flash, altermime, ripmime, mpack, fortune, nssd, pam-multi, fetchmail). The
-	configure script will detect these packages if present in /home/local/src
+    configure script will detect these packages if present in /home/local/src
 
     This step also involves applying a patch to qmail-1.03. This patch adds many features
     missing in stock qmail installations.
@@ -453,7 +458,8 @@ the installation.
     % sudo chown indimail:indimail @indimaildir@/etc/wordlist.db
     % cd ..
 
-    NOTE: A copy of wordlist.db is present in indimail-@version@/data. i.e.
+    NOTE: A copy of wordlist.db is present in indimail-@version@/data.
+    So you can skip all the above and just execute the two commands below i.e.
     % sudo cp indimail-@version@/data/worldlist.db @indimaildir@/etc
     % sudo chown indimail:indimail @indimaildir@/etc/wordlist.db
 
@@ -813,7 +819,7 @@ You can go on to add a virtual domain and users if you wish
     # echo localhost > @indimaildir@/control/mysql.host   (MySQL host to which all programs
       will connect)
 
-    If you need to setup a cluster of mail servers having the same domain, you need to
+    If you need to setup a cluster of mailstores having the same domain, you need to
     read README-CLUSTER
 
     ##### STEP 2  #############################################
