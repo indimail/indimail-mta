@@ -22,6 +22,9 @@ Release 1.6.2 Start 01/10/2009
 12. Added --general-log option and removed --log-isam option from svctool.
 13. Added environment variable INCLUDE_TRASH to include trash mails in quota
     calculations
+15/10/2009
+14. Use errno == ERANGE instead of LLONG_MAX, LLONG_MIN if LLONG_MAX,
+	LLONG_MIN not defined (when checking return status of strtoll)
 
 * Fri Oct  2 2009 mbhangui@gmail.com
 Release 1.6.1 Start 13/09/2009

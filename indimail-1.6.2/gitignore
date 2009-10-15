@@ -11,8 +11,12 @@ bogofilter-qfe
 controlsync
 create_services
 cronlist
+doc/INSTALL-MYSQL
 doc/INSTALL-RPM
 doc/INSTALL.indimail
+doc/README.indimail
+doc/README-CLUSTER
+doc/RELEASE-Notes
 indimail-*-rpmlintrc
 indimail-epm.list
 indimail.settings
