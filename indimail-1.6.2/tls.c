@@ -297,7 +297,7 @@ safewrite(fd, buf, len, timeout)
 void
 getversion_tls_c()
 {
-	static char    *x = "$Id: tls.c,v 2.2 2009-09-16 09:04:28+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: tls.c,v 2.2 2009-09-16 09:04:28+05:30 Cprogrammer Stab mbhangui $";
 
 	x++;
 }

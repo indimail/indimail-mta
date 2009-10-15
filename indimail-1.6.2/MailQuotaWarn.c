@@ -1,5 +1,8 @@
 /*
  * $Log: MailQuotaWarn.c,v $
+ * Revision 2.14  2009-10-14 20:43:39+05:30  Cprogrammer
+ * check return status of parse_quota()
+ *
  * Revision 2.13  2009-09-25 23:49:58+05:30  Cprogrammer
  * check return value of recalc_quota()
  *
@@ -61,12 +64,13 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <string.h>
+#include <errno.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
 
 #ifndef	lint
-static char     sccsid[] = "$Id: MailQuotaWarn.c,v 2.13 2009-09-25 23:49:58+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: MailQuotaWarn.c,v 2.14 2009-10-14 20:43:39+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 int
@@ -95,7 +99,12 @@ MailQuotaWarn(char *username, char *domain, char *Maildir, char *QuotaAlloted)
 	if((ptr = strstr(maildir, "/Maildir/")) && *(ptr + 9))
 		*(ptr + 9) = 0;
 #ifdef USE_MAILDIRQUOTA
-	if (!(Quota = parse_quota(QuotaAlloted, &QuotaCount)))
+	if ((Quota = parse_quota(QuotaAlloted, &QuotaCount)) == -1)
+	{
+		fprintf(stderr, "parse_quota: %s: %s\n", QuotaAlloted, strerror(errno));
+		return (-1);
+	} else
+	if (!Quota)
 		return (0);
 	total_usage = recalc_quota(maildir, &mailcount, Quota, QuotaCount, 0);
 #else

@@ -1,5 +1,8 @@
 /*
  * $Log: user_over_quota.c,v $
+ * Revision 2.12  2009-10-14 20:45:54+05:30  Cprogrammer
+ * check return status of parse_quota()
+ *
  * Revision 2.11  2009-06-04 16:27:37+05:30  Cprogrammer
  * check return status of recalc_quota
  *
@@ -55,7 +58,7 @@
 #endif
 
 #ifndef	lint
-static char     sccsid[] = "$Id: user_over_quota.c,v 2.11 2009-06-04 16:27:37+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: user_over_quota.c,v 2.12 2009-10-14 20:45:54+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 /* 
@@ -101,7 +104,8 @@ user_over_quota(char *Maildir, char *quota, int cur_msgsize)
 		tmpQuota = quota;
 	if (!strncmp(tmpQuota, "0S", 2))
 		return(0);
-	mail_size_limit = parse_quota(tmpQuota, &mail_count_limit);
+	if ((mail_size_limit = parse_quota(tmpQuota, &mail_count_limit)) == -1)
+		return(-1);
 #else
 	if (!quota || !*quota)
 		return(0);

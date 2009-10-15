@@ -17,6 +17,11 @@ Release 1.6.2 Start 01/10/2009
 9.  Do sleep on authentication failure in pam-multi
 13/10/2009
 10. Added Quick-INSTALL
+14/10/2009
+11. Replaced atol() with strtoll() for quota calculations
+12. Added --general-log option and removed --log-isam option from svctool.
+13. Added environment variable INCLUDE_TRASH to include trash mails in quota
+    calculations
 
 * Fri Oct  2 2009 mbhangui@gmail.com
 Release 1.6.1 Start 13/09/2009

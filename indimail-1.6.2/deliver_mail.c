@@ -1,5 +1,8 @@
 /*
  * $Log: deliver_mail.c,v $
+ * Revision 2.49  2009-10-14 20:42:24+05:30  Cprogrammer
+ * check return status of parse_quota()
+ *
  * Revision 2.48  2009-09-23 14:59:34+05:30  Cprogrammer
  * change for new runcmmd()
  *
@@ -169,7 +172,7 @@
 #endif
 
 #ifndef	lint
-static char     sccsid[] = "$Id: deliver_mail.c,v 2.48 2009-09-23 14:59:34+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: deliver_mail.c,v 2.49 2009-10-14 20:42:24+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 /*- Function Prototypes */
@@ -647,7 +650,12 @@ deliver_mail(char *address, mdir_t MsgSize, char *quota, uid_t uid, gid_t gid,
 				if (email && *email)
 				{
 #ifdef USE_MAILDIRQUOTA
-					if ((*MailQuotaSize = parse_quota(maildirquota, MailQuotaCount)))
+					if ((*MailQuotaSize = parse_quota(maildirquota, MailQuotaCount)) == -1)
+					{
+						fprintf(stderr, "parse_quota: %s: %s\n", maildirquota, strerror(errno));
+						return (-2);
+					} else
+					if (*MailQuotaSize)
 					{
 						if (CurBytes > *MailQuotaSize || (*MailQuotaCount && (CurCount > *MailQuotaCount)))
 							vset_lastdeliver(user, domain, CurBytes);

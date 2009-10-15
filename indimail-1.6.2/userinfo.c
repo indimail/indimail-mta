@@ -1,5 +1,8 @@
 /*
  * $Log: userinfo.c,v $
+ * Revision 2.30  2009-10-14 20:45:45+05:30  Cprogrammer
+ * use strtoll() instead of atol()
+ *
  * Revision 2.29  2009-10-09 20:20:40+05:30  Cprogrammer
  * use defined CONSTANTS for vget_lastauth
  *
@@ -174,13 +177,14 @@
 #include <time.h>
 #include <string.h>
 #include <unistd.h>
+#define XOPEN_SOURCE = 600
 #include <stdlib.h>
 #include <pwd.h>
 #include <ctype.h>
 #include <errno.h>
 
 #ifndef	lint
-static char     sccsid[] = "$Id: userinfo.c,v 2.29 2009-10-09 20:20:40+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: userinfo.c,v 2.30 2009-10-14 20:45:45+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 extern char *strptime(const char *, const char *, struct tm *);
@@ -386,10 +390,12 @@ vuserinfo(Email, User, Domain, DisplayName, DisplayPasswd, DisplayUid, DisplayGi
 
 		snprintf(maildir, MAX_BUFF, "%s/Maildir", mypw->pw_dir);
 		printf("quota         : %s [%-4.2f Mb]\n", mypw->pw_shell,
-			(float) atol(mypw->pw_shell)/(1024 * 1024));
+			(float) strtoll(mypw->pw_shell, 0, 0)/(1024 * 1024));
 #ifdef USE_MAILDIRQUOTA	
-		size_limit = parse_quota(mypw->pw_shell, &count_limit);
-		cur_size = recalc_quota(maildir, &mcount, size_limit, count_limit, 2);
+		if ((size_limit = parse_quota(mypw->pw_shell, &count_limit)) == -1)
+			cur_size = mcount = -1;
+		else
+			cur_size = recalc_quota(maildir, &mcount, size_limit, count_limit, 2);
 		printf("curr quota    : %"PRIu64"S,%"PRIu64"C\n", cur_size, mcount);
 #else
 		printf("curr quota    : %"PRIu64"\n", recalc_quota(maildir, 2));
@@ -398,14 +404,14 @@ vuserinfo(Email, User, Domain, DisplayName, DisplayPasswd, DisplayUid, DisplayGi
 	if (DisplayAll)
 	{
 #ifdef CLUSTERED_SITE
-		printf("Mail Store Ip : %s (%s - %s)\n", mailstore,
+		printf("Mail Store IP : %s (%s - %s)\n", mailstore,
 			(is_dist ? "Clustered" : "NonClustered"), 
 			islocalif(mailstore) ? "local" : "remote");
 		if(is_dist)
 			ptr = vauth_gethostid(mailstore);
 		else
 			ptr = "non-clustered domain";
-		printf("Mail Store Id : %s\n", ptr ? ptr : "no id present");
+		printf("Mail Store ID : %s\n", ptr ? ptr : "no id present");
 #else
 		printf("Mail store    : %s\n", mailstore);
 #endif

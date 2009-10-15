@@ -1,5 +1,11 @@
 #
 # $Log: indimail.spec.in,v $
+# Revision 2.96  2009-10-15 08:22:44+05:30  Cprogrammer
+# added Quick-INSTALL
+#
+# Revision 2.95  2009-10-14 19:43:20+05:30  Cprogrammer
+# added instruction for non-upstart systems to issue initsvc command
+#
 # Revision 2.94  2009-10-11 09:36:58+05:30  Cprogrammer
 # renamed authenticate.so to iauth.so
 #
@@ -293,7 +299,7 @@
 # rpm spec file for indimail
 #
 #
-# $Id: indimail.spec.in,v 2.94 2009-10-11 09:36:58+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 2.96 2009-10-15 08:22:44+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %define _unpackaged_files_terminate_build 1
 
@@ -1687,6 +1693,7 @@ fi
 %attr(444,root,qmail)                   %{_prefix}/doc/INSTALL.maildir
 %attr(444,root,qmail)                   %{_prefix}/doc/TEST.receive
 %attr(444,root,qmail)                   %{_prefix}/doc/README-CLUSTER
+%attr(444,root,qmail)                   %{_prefix}/doc/Quick-INSTALL
 %attr(444,root,qmail)                   %{_prefix}/doc/INSTALL.indimail
 %attr(444,root,qmail)                   %{_prefix}/doc/INSTALL-RPM
 %attr(444,root,qmail)                   %{_prefix}/doc/INSTALL-MYSQL
@@ -2208,7 +2215,8 @@ if test -f %{_sysconfdir}/event.d/svscan
 then
 	echo "1. Issue /sbin/initctl emit qmailstart to start services"
 else
-	echo "1. Issue /sbin/init q to start services"
+	echo "1. Issue /var/indimail/sbin/initsvc -on"
+	echo "2. Issue /sbin/init q to start services"
 fi
 echo "2. You can optionally run the following command to verify installation"
 echo "   %{_prefix}/sbin/svctool --check-install --servicedir=%{servicedir} --qbase=%{qbase} --qcount=%{qcount} --qstart=1"

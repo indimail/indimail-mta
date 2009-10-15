@@ -1,5 +1,8 @@
 /*
  * $Log: setuserquota.c,v $
+ * Revision 2.7  2009-10-14 20:45:36+05:30  Cprogrammer
+ * check return status of parse_quota()
+ *
  * Revision 2.6  2009-09-25 23:50:32+05:30  Cprogrammer
  * return status of recalc_quota()
  *
@@ -37,9 +40,11 @@
 #include "indimail.h"
 #include <stdio.h>
 #include <ctype.h>
+#include <string.h>
+#include <errno.h>
 
 #ifndef	lint
-static char     sccsid[] = "$Id: setuserquota.c,v 2.6 2009-09-25 23:50:32+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: setuserquota.c,v 2.7 2009-10-14 20:45:36+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 /*
@@ -81,7 +86,11 @@ vsetuserquota(char *username, char *domain, char *quota)
 	}
 	snprintf(tmpbuf, MAX_BUFF, "%s/Maildir", pw->pw_dir);
 #ifdef USE_MAILDIRQUOTA
-	size_limit = parse_quota(quota, &count_limit);
+	if ((size_limit = parse_quota(quota, &count_limit)) == -1)
+	{
+		fprintf(stderr, "parse_quota: %s: %s\n", quota, strerror(errno));
+		return (1);
+	}
 	return (recalc_quota(tmpbuf, &mailcount, size_limit, count_limit, 2));
 #else
 	return (recalc_quota(tmpbuf, 2))

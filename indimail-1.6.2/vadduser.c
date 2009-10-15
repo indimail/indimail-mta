@@ -1,5 +1,8 @@
 /*
  * $Log: vadduser.c,v $
+ * Revision 2.26  2009-10-14 20:46:06+05:30  Cprogrammer
+ * use strtoll() instead of atol()
+ *
  * Revision 2.25  2009-10-10 11:41:10+05:30  Cprogrammer
  * run vadduser only as root or indimail
  *
@@ -118,6 +121,7 @@
 
 #include "indimail.h"
 #include <stdio.h>
+#define XOPEN_SOURCE = 600
 #include <stdlib.h>
 #include <unistd.h>
 #include <string.h>
@@ -128,7 +132,7 @@
 #include <signal.h>
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vadduser.c,v 2.25 2009-10-10 11:41:10+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: vadduser.c,v 2.26 2009-10-14 20:46:06+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 char            Email[MAX_BUFF];
@@ -221,7 +225,7 @@ main(argc, argv)
 		if (!strncmp(Quota, "NOQUOTA", 8))
 			quota = -1;
 		else
-			quota = atol(Quota);
+			quota = strtoll(Quota, 0, 0);
 	} else
 #ifdef ENABLE_DOMAIN_LIMITS
 	if (getenv("DOMAIN_LIMITS") && !vget_limits(real_domain, &limits))

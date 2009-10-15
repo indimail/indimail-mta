@@ -1,5 +1,8 @@
 /*
  * $Log: count_dir.c,v $
+ * Revision 2.3  2009-10-15 08:22:27+05:30  Cprogrammer
+ * added option INCLUDE_TRASH to include trash in quota calculations
+ *
  * Revision 2.2  2008-06-24 21:45:40+05:30  Cprogrammer
  * porting for 64 bit
  *
@@ -40,7 +43,7 @@
 #include <sys/stat.h>
 
 #ifndef	lint
-static char     sccsid[] = "$Id: count_dir.c,v 2.2 2008-06-24 21:45:40+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: count_dir.c,v 2.3 2009-10-15 08:22:27+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 mdir_t count_dir(char *dir_name, mdir_t *mailcount)
@@ -49,31 +52,36 @@ mdir_t count_dir(char *dir_name, mdir_t *mailcount)
 	struct dirent  *dp;
 	struct stat     statbuf;
 	mdir_t          file_size, len, flen, count;
-	int             is_trash;
+	int             is_trash, include_trash;
 	char           *tmpstr, *ptr;
 
 	if (!dir_name || !*dir_name)
 		return (0);
 	if (!(entry = opendir(dir_name)))
 		return (0);
-	if(strstr(dir_name, "/Maildir/.Trash"))
-		is_trash = 1;
-	else
+	if ((include_trash = (char *) getenv("INCLUDE_TRASH")))
 		is_trash = 0;
-	if(mailcount)
-		*mailcount = 0;
-	for(file_size = 0, tmpstr = 0;;)
+	else
 	{
-		if(!(dp = readdir(entry)))
+		if (strstr(dir_name, "/Maildir/.Trash"))
+			is_trash = 1;
+		else
+			is_trash = 0;
+	}
+	if (mailcount)
+		*mailcount = 0;
+	for (file_size = 0, tmpstr = 0;;)
+	{
+		if (!(dp = readdir(entry)))
 			break;
-		if(!strcmp(dp->d_name, ".") || !strcmp(dp->d_name, ".."))
+		if (!strcmp(dp->d_name, ".") || !strcmp(dp->d_name, ".."))
 			continue;
 		else
-		if(skip_system_files(dp->d_name))
+		if (skip_system_files(dp->d_name))
 			continue;
 		flen = slen(dp->d_name);
 		len = flen + slen(dir_name) + 2;
-		if(!(tmpstr = (char *) realloc(tmpstr, (len * sizeof(char)))))
+		if (!(tmpstr = (char *) realloc(tmpstr, (len * sizeof(char)))))
 		{
 			fprintf(stderr, "realloc: %d bytes: %s\n", (int) len, strerror(errno));
 			closedir(entry);
@@ -84,22 +92,21 @@ mdir_t count_dir(char *dir_name, mdir_t *mailcount)
 		{
 			ptr += 3;
 			file_size += atoi(ptr);
-			if(mailcount)
+			if (mailcount)
 				(*mailcount)++;
 		} else
 		if (!stat(tmpstr, &statbuf))
 		{
-			if(S_ISDIR(statbuf.st_mode))
+			if (S_ISDIR(statbuf.st_mode))
 			{
 				file_size += count_dir(tmpstr, &count);
-				if(mailcount)
+				if (mailcount)
 					*mailcount += count;
-			}
-			else
+			} else
 			{
-				if(*(dp->d_name + flen - 1) == 'T' || is_trash)
+				if (!include_trash && (*(dp->d_name + flen - 1) == 'T' || is_trash))
 					continue;
-				if(mailcount)
+				if (mailcount)
 					(*mailcount)++;
 				file_size += statbuf.st_size;
 			}

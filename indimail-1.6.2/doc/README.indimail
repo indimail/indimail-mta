@@ -174,7 +174,11 @@ Some of the features available in this package
 40. qmail-queue custom error patch by Flavio Curti <fcu-software at no-way.org>
 41. Domainkey-Signature, DKIM-Signature with ADSP/SSP
 42. Greylisting Capability - http://www.gossamer-threads.com/lists/qmail/users/136740?page=last
-43. Updated man pages.
+43. nssd - Name Service Switch daemon which extends systems password database to
+    lookup IndiMail's database for authentication
+44. pam-multi - Generic PAM which allows external program using PAM to authenticate against
+    IndiMail's database.
+45. Updated man pages.
 
 Other features are as below which I have incorporated manually by hand as and when they came up at
 Qmail List <qmail@list.cr.yp.to>

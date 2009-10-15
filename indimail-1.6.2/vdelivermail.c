@@ -1,5 +1,8 @@
 /*
  * $Log: vdelivermail.c,v $
+ * Revision 2.51  2009-10-14 20:46:47+05:30  Cprogrammer
+ * check return status of parse_quota()
+ *
  * Revision 2.50  2009-09-23 15:00:29+05:30  Cprogrammer
  * change for new runcmmd
  *
@@ -233,7 +236,7 @@
 #include <sys/wait.h>
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vdelivermail.c,v 2.50 2009-09-23 15:00:29+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: vdelivermail.c,v 2.51 2009-10-14 20:46:47+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 /*- Globals */
@@ -561,7 +564,11 @@ processMail(struct passwd *pw, char *user, char *domain, mdir_t MsgSize)
 	{
 		snprintf(tmpbuf, AUTH_SIZE, "%s/Maildir", pw->pw_dir);
 #ifdef USE_MAILDIRQUOTA
-		mail_size_limit = parse_quota(pw->pw_shell, &mail_count_limit);
+		if ((mail_size_limit = parse_quota(pw->pw_shell, &mail_count_limit)) == -1)
+		{
+			fprintf(stderr, "parse_quota: %s: %s\n", pw->pw_shell, strerror(errno));
+			return (-1);
+		}
 		cur_size = recalc_quota(tmpbuf, &cur_count, mail_size_limit, mail_count_limit, 0);
 #else
 		mail_size_limit = atol(pw->pw_shell);

@@ -1,5 +1,8 @@
 /*
  * $Log: vfstabNew.c,v $
+ * Revision 2.7  2009-10-14 20:47:24+05:30  Cprogrammer
+ * use strtoll() instead of atol()
+ *
  * Revision 2.6  2008-07-13 19:50:02+05:30  Cprogrammer
  * port for Darwin (Mac OS X)
  *
@@ -22,10 +25,11 @@
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vfstabNew.c,v 2.6 2008-07-13 19:50:02+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: vfstabNew.c,v 2.7 2009-10-14 20:47:24+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #include <mysqld_error.h>
+#define XOPEN_SOURCE = 600
 #include <stdlib.h>
 
 #if defined(sun)
@@ -70,7 +74,7 @@ vfstabNew(char *filesystem, long max_user, long max_size)
 		if(max_user == -1)
 		{
 			getEnvConfigStr(&avg_user_quota, "AVG_USER_QUOTA", AVG_USER_QUOTA);
-			quota_user = quota_size / atol(avg_user_quota);
+			quota_user = quota_size / strtoll(avg_user_quota, 0, 0);
 		}
 		else
 			quota_user = max_user;

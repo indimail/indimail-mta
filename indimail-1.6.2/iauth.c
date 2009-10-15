@@ -1,5 +1,8 @@
 /*
  * $Log: iauth.c,v $
+ * Revision 2.5  2009-10-14 20:43:07+05:30  Cprogrammer
+ * check return status of parse_quota()
+ *
  * Revision 2.4  2009-10-11 09:36:16+05:30  Cprogrammer
  * renamed authenticate to iauth
  * completed acct_mgmt function
@@ -64,7 +67,7 @@
 static int      defaultTask(char *, char *, struct passwd *, char *);
 
 #ifndef lint
-static char     sccsid[] = "$Id: iauth.c,v 2.4 2009-10-11 09:36:16+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: iauth.c,v 2.5 2009-10-14 20:43:07+05:30 Cprogrammer Exp mbhangui $";
 #endif
 /*
 #define iauth ltdl_module_LTX_iauth
@@ -358,7 +361,11 @@ defaultTask(char *userid, char *TheDomain, struct passwd *pw, char *service)
 	snprintf(authenv2, MAX_BUFF, "AUTHADDR=%s@%s", TheUser, TheDomain);
 	snprintf(authenv3, MAX_BUFF, "AUTHFULLNAME=%s", pw->pw_gecos);
 #ifdef USE_MAILDIRQUOTA	
-	size_limit = parse_quota(pw->pw_shell, &count_limit);
+	if ((size_limit = parse_quota(pw->pw_shell, &count_limit)) == -1)
+	{
+		fprintf(stderr, "parse_quota: %s: %s\n", pw->pw_shell, strerror(errno));
+		return (1);
+	}
 	snprintf(authenv4, MAX_BUFF, "MAILDIRQUOTA=%"PRIu64"S,%"PRIu64"C", size_limit, count_limit);
 #else
 	snprintf(authenv4, MAX_BUFF, "MAILDIRQUOTA=%sS", pw->pw_shell);

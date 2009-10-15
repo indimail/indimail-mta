@@ -1,5 +1,8 @@
 /*
  * $Log: proxylogin.c,v $
+ * Revision 2.39  2009-10-14 20:45:17+05:30  Cprogrammer
+ * check return status of parse_quota()
+ *
  * Revision 2.38  2009-09-19 19:04:19+05:30  Cprogrammer
  * fix for mandriva 2009.1
  *
@@ -135,7 +138,7 @@
 #include <unistd.h>
 
 #ifndef	lint
-static char     sccsid[] = "$Id: proxylogin.c,v 2.38 2009-09-19 19:04:19+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: proxylogin.c,v 2.39 2009-10-14 20:45:17+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef CLUSTERED_SITE
@@ -340,7 +343,11 @@ ExecImapd(char **argv, char *userid, char *TheDomain, struct passwd *pw, char *s
 	snprintf(authenv2, MAX_BUFF, "AUTHADDR=%s@%s", TheUser, TheDomain);
 	snprintf(authenv3, MAX_BUFF, "AUTHFULLNAME=%s", pw->pw_gecos);
 #ifdef USE_MAILDIRQUOTA	
-	size_limit = parse_quota(pw->pw_shell, &count_limit);
+	if ((size_limit = parse_quota(pw->pw_shell, &count_limit)) == -1)
+	{
+		fprintf(stderr, "parse_quota: %s: %s\n", pw->pw_shell, strerror(errno));
+		return (1);
+	}
 	snprintf(authenv4, MAX_BUFF, "MAILDIRQUOTA=%"PRIu64"S,%"PRIu64"C", size_limit, count_limit);
 #else
 	snprintf(authenv4, MAX_BUFF, "MAILDIRQUOTA=%sS", pw->pw_shell);

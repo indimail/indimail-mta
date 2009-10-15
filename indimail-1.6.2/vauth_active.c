@@ -1,5 +1,8 @@
 /*
  * $Log: vauth_active.c,v $
+ * Revision 2.9  2009-10-14 20:46:19+05:30  Cprogrammer
+ * check return status of parse_quota()
+ *
  * Revision 2.8  2008-09-08 09:55:25+05:30  Cprogrammer
  * removed mysql_escape
  * changes for using mysql_real_escape_string
@@ -47,7 +50,7 @@
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vauth_active.c,v 2.8 2008-09-08 09:55:25+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: vauth_active.c,v 2.9 2009-10-14 20:46:19+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 
@@ -128,7 +131,11 @@ vauth_active(struct passwd *pw, char *domain, int type)
 		is_inactive = 0;
 	snprintf(Dir, MAX_BUFF, "%s/Maildir", pw->pw_dir);
 #ifdef USE_MAILDIRQUOTA
-	quota = parse_quota(pw->pw_shell, 0);
+	if ((quota = parse_quota(pw->pw_shell, 0)) == -1)
+	{
+		fprintf(stderr, "parse_quota: %s: %s\n", pw->pw_shell, strerror(errno));
+		return (-1);
+	}
 	vset_lastauth(pw->pw_name, domain, ((type == FROM_ACTIVE_TO_INACTIVE) ? "INAC" : "ACTI"), GetIpaddr(), 
 			pw->pw_gecos, (type == FROM_ACTIVE_TO_INACTIVE) ? 0 : check_quota(Dir, 0));
 #else

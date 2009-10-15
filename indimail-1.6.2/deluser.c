@@ -1,5 +1,8 @@
 /*
  * $Log: deluser.c,v $
+ * Revision 2.25  2009-10-14 20:42:48+05:30  Cprogrammer
+ * check return status of parse_quota()
+ *
  * Revision 2.24  2009-10-09 20:19:55+05:30  Cprogrammer
  * use defined CONSTANTS for vget_lastauth
  *
@@ -128,7 +131,7 @@
 #endif
 
 #ifndef	lint
-static char     sccsid[] = "$Id: deluser.c,v 2.24 2009-10-09 20:19:55+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: deluser.c,v 2.25 2009-10-14 20:42:48+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 /*-
@@ -257,6 +260,11 @@ vdeluser(char *user, char *domain, int remove_db)
 #else
 				quota = atol(passent->pw_shell);
 #endif
+				if (quota == -1)
+				{
+					fprintf(stderr, "vdeluser: parse_quota: %s: %s\n", passent->pw_shell, strerror(errno));
+					return (-1);
+				}
 				if (!(local_ip = get_local_ip()))
 				{
 					fprintf(stderr, "vdeluser: get_local_ip: %s\n", strerror(errno));

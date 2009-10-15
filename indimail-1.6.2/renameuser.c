@@ -1,5 +1,8 @@
 /*
  * $Log: renameuser.c,v $
+ * Revision 2.13  2009-10-14 20:45:26+05:30  Cprogrammer
+ * use strtoll() instead of atol()
+ *
  * Revision 2.12  2008-08-02 09:08:36+05:30  Cprogrammer
  * use new function error_stack
  *
@@ -41,11 +44,12 @@
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: renameuser.c,v 2.12 2008-08-02 09:08:36+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: renameuser.c,v 2.13 2009-10-14 20:45:26+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #include <ctype.h>
 #include <unistd.h>
+#define XOPEN_SOURCE = 600
 #include <stdlib.h>
 #include <string.h>
 #include <errno.h>
@@ -155,7 +159,7 @@ vrenameuser(char *oldUser, char *oldDomain, char *newUser, char *newDomain)
 		return (-1);
 	}
 	encrypt_flag = 1;
-	if ((err = vadduser(newUser, newDomain, 0, pw->pw_passwd, pw->pw_gecos, atol(pw->pw_shell), 1, !inactive_flag)) == -1)
+	if ((err = vadduser(newUser, newDomain, 0, pw->pw_passwd, pw->pw_gecos, strtoll(pw->pw_shell, 0, 0), 1, !inactive_flag)) == -1)
 	{
 		error_stack(stderr, 0);
 		return(-1);

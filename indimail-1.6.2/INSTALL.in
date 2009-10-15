@@ -103,6 +103,7 @@ IndiMail will install and run on most UNIX and UNIX-like systems, but there are 
     free about 15 megabytes by doing make clean
   * A complete, functioning C development system including a compiler, system header files, and
     libraries. The installation steps will guide you through the installation process.
+  * MySQL 5.1.x or greater. I prefer MySQL 6 onwards
   * Around 80 megabytes for the binaries, documentation, and configuration files.
   * A safe filesystem for the queue. qmail's reliability guarantee requires that the queue reside
     on a filesystem with traditional BSD FFS semantics. Most modern local filesystems meet these
@@ -820,17 +821,33 @@ You can go on to add a virtual domain and users if you wish
       will connect)
 
     If you need to setup a cluster of mailstores having the same domain, you need to
-    read README-CLUSTER
+    do the following (change localhost to the appropriate host)
+
+    # echo "localhost" > host.cntrl (replace localhost with IP of your MySQL host)
+    # ln -s host.cntrl host.master
+    # echo 192.168.1.100 > hostip (replace 192.168.1.100 with your mailserver/mailstore IP)
+    # exit
 
     ##### STEP 2  #############################################
     Add a virtual domain
 
     For this example, we will add a domain "indimail.org"
 
+    For a non-clustered domain you would execute the following command
+
     % su indimail
     % @indimaildir@/bin/vadddomain indimail.org
         or
     % @indimaildir@/bin/vadddomain indimail.org password-for-postmaster
+
+    For a clustered domain you would execute the following command
+
+    % su indimail
+    % @indimaildir@/bin/vadddomain -D indimail -S localhost \
+        -U indimail -P ssh-1.5- -p 3306 -c indimail.org password-for-postmaster
+        or
+    % @indimaildir@/bin/vadddomain -D indimail -S localhost \
+        -U indimail -P ssh-1.5- -p 3306 -c indimail.org password-for-postmaster
 
     vadddomain will modify the following qmail files 
     (default locations used)
@@ -885,10 +902,11 @@ You can go on to add a virtual domain and users if you wish
     % @indimaildir@/bin/vpasswd user@indimail.org <password-for-user@indimail.org>
 
 ########### SECTION 9 ### RTFM #########################################
-9.  Information details hiding 
+9.  Man pages
     A lot of the underlying qmail details are not covered in this
     file. This is on purpose. If you want to find out the internal
     workings of indimail and qmail look into all files in @indimaildir@/doc
+    and /var/indimail/man?
 
 ########### SECTION 10 #### SUPPORT INFORMATION #########################
 10. Good luck

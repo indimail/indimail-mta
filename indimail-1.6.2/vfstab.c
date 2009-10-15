@@ -1,5 +1,8 @@
 /*
  * $Log: vfstab.c,v $
+ * Revision 2.6  2009-10-14 20:47:14+05:30  Cprogrammer
+ * use strtoll() instead of atol()
+ *
  * Revision 2.5  2008-05-28 17:41:10+05:30  Cprogrammer
  * removed USE_MYSQL
  *
@@ -21,9 +24,10 @@
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vfstab.c,v 2.5 2008-05-28 17:41:10+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: vfstab.c,v 2.6 2009-10-14 20:47:14+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
+#define XOPEN_SOURCE = 600
 #include <stdlib.h>
 #include <unistd.h>
 #include <string.h>
@@ -162,10 +166,10 @@ get_options(int argc, char **argv)
 			scopy(MdaHost, optarg, MAX_BUFF);
 			break;
 		case 'q':
-			size_quota = atol(optarg);
+			size_quota = strtoll(optarg, 0, 0);
 			break;
 		case 'n':
-			user_quota = atol(optarg);
+			user_quota = strtoll(optarg, 0, 0);
 			break;
 		case 'o':
 			if(FstabAction == FSTAB_SELECT)

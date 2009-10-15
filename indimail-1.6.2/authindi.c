@@ -1,5 +1,8 @@
 /*
  * $Log: authindi.c,v $
+ * Revision 2.12  2009-10-14 20:41:24+05:30  Cprogrammer
+ * check parse_quota for return status
+ *
  * Revision 2.11  2009-02-18 21:24:00+05:30  Cprogrammer
  * removed compiler warnings
  *
@@ -42,7 +45,7 @@
 #include <errno.h>
 
 #ifndef lint
-static char     sccsid[] = "$Id: authindi.c,v 2.11 2009-02-18 21:24:00+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: authindi.c,v 2.12 2009-10-14 20:41:24+05:30 Cprogrammer Exp mbhangui $";
 #endif
 #ifdef AUTH_SIZE
 #undef AUTH_SIZE
@@ -341,7 +344,11 @@ exec_local(char **argv, char *userid, char *TheDomain, struct passwd *pw, char *
 	snprintf(authenv2, MAX_BUFF, "AUTHADDR=%s@%s", TheUser, TheDomain);
 	snprintf(authenv3, MAX_BUFF, "AUTHFULLNAME=%s", pw->pw_gecos);
 #ifdef USE_MAILDIRQUOTA	
-	size_limit = parse_quota(pw->pw_shell, &count_limit);
+	if ((size_limit = parse_quota(pw->pw_shell, &count_limit)) == -1)
+	{
+		fprintf(stderr, "parse_quota: %s: %s\n", pw->pw_shell, strerror(errno));
+		return (1);
+	}
 	snprintf(authenv4, MAX_BUFF, "MAILDIRQUOTA=%"PRIu64"S,%"PRIu64"C", size_limit, count_limit);
 #else
 	snprintf(authenv4, MAX_BUFF, "MAILDIRQUOTA=%sS", pw->pw_shell);

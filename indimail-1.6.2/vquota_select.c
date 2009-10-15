@@ -1,5 +1,8 @@
 /*
  * $Log: vquota_select.c,v $
+ * Revision 2.3  2009-10-14 20:48:06+05:30  Cprogrammer
+ * use strtoll() instead of atol()
+ *
  * Revision 2.2  2008-06-24 22:02:32+05:30  Cprogrammer
  * porting for 64 bit
  *
@@ -28,11 +31,12 @@
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vquota_select.c,v 2.2 2008-06-24 22:02:32+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: vquota_select.c,v 2.3 2009-10-14 20:48:06+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef ENABLE_AUTH_LOGGING
 #include <string.h>
+#define XOPEN_SOURCE = 600
 #include <stdlib.h>
 
 int
@@ -66,7 +70,7 @@ vquota_select(char *user, char *domain, mdir_t *quota, time_t *timestamp, int le
 	{
 		scopy(user, row[0], len);
 		scopy(domain, row[1], len);
-		*quota = atol(row[2]);
+		*quota = strtoll(row[2], 0, 0);
 		*timestamp = atol(row[3]);
 		return (1);
 	}

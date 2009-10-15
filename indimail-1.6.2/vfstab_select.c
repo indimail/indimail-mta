@@ -1,5 +1,8 @@
 /*
  * $Log: vfstab_select.c,v $
+ * Revision 2.6  2009-10-14 20:47:33+05:30  Cprogrammer
+ * use strtoll() instead of atol()
+ *
  * Revision 2.5  2008-05-28 17:41:21+05:30  Cprogrammer
  * removed USE_MYSQL
  *
@@ -20,9 +23,10 @@
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vfstab_select.c,v 2.5 2008-05-28 17:41:21+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: vfstab_select.c,v 2.6 2009-10-14 20:47:33+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
+#define XOPEN_SOURCE = 600
 #include <stdlib.h>
 #include <mysqld_error.h>
 
@@ -98,9 +102,9 @@ vfstab_select(char *host, int *status, long *max_users, long *cur_users, long *m
 		if(cur_users)
 			*cur_users = atol(row[4]);
 		if(max_size)
-			*max_size = atol(row[5]);
+			*max_size = strtoll(row[5], 0, 0);
 		if(cur_size)
-			*cur_size = atol(row[6]);
+			*cur_size = strtoll(row[6], 0, 0);
 		return (FileSystem);
 	}
 	mysql_free_result(res);

@@ -1,5 +1,8 @@
 /*
  * $Log: Login_Tasks.c,v $
+ * Revision 2.27  2009-10-14 20:43:17+05:30  Cprogrammer
+ * check return status of parse_quota()
+ *
  * Revision 2.26  2009-10-09 20:20:32+05:30  Cprogrammer
  * use defined CONSTANTS for vget_lastauth
  *
@@ -123,11 +126,12 @@
 #include <pwd.h>
 #include <sys/stat.h>
 #include <string.h>
+#include <errno.h>
 #include <unistd.h>
 #include <fcntl.h>
 
 #ifndef	lint
-static char     sccsid[] = "$Id: Login_Tasks.c,v 2.26 2009-10-09 20:20:32+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: Login_Tasks.c,v 2.27 2009-10-14 20:43:17+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 int
@@ -191,7 +195,11 @@ Login_Tasks(pw, user, ServiceType)
 	{
 		vauth_active(pw, domain, FROM_INACTIVE_TO_ACTIVE);
 #ifdef USE_MAILDIRQUOTA	
-		size_limit = parse_quota(pw->pw_shell, &count_limit);
+		if ((size_limit = parse_quota(pw->pw_shell, &count_limit)) == -1)
+		{
+			fprintf(stderr, "parse_quota: %s: %s\n", pw->pw_shell, strerror(errno));
+			return (1);
+		}
 		(void) recalc_quota(Maildir, 0, size_limit, count_limit, 2);
 #else
 		(void) recalc_quota(Maildir, 2);

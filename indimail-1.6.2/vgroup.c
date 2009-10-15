@@ -1,5 +1,8 @@
 /*
  * $Log: vgroup.c,v $
+ * Revision 2.15  2009-10-14 20:47:41+05:30  Cprogrammer
+ * use strtoll() instead of atol()
+ *
  * Revision 2.14  2009-09-13 12:49:07+05:30  Cprogrammer
  * added 'm' option to getopt for previous ignore option
  *
@@ -47,11 +50,12 @@
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vgroup.c,v 2.14 2009-09-13 12:49:07+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: vgroup.c,v 2.15 2009-10-14 20:47:41+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef VALIAS
 #include <unistd.h>
+#define XOPEN_SOURCE = 600
 #include <stdlib.h>
 #include <string.h>
 #include <errno.h>
@@ -104,7 +108,7 @@ main(int argc, char **argv)
 	{
 		case ADDNEW_GROUP:
 			if (Quota && *Quota)
-				quota = atol(Quota);
+				quota = strtoll(Quota, 0, 0);
 			else
 				quota = 0;
 #ifdef CLUSTERED_SITE

@@ -16,7 +16,7 @@
 static char    *sysc(char *);
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vlog.c,v 2.2 2009-09-19 19:04:30+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: vlog.c,v 2.2 2009-09-19 19:04:30+05:30 Cprogrammer Stab mbhangui $";
 #endif
 /*
  * log messages and figure out what type they are and where they should go depending on configure options 

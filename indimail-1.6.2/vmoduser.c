@@ -1,5 +1,9 @@
 /*
  * $Log: vmoduser.c,v $
+ * Revision 2.21  2009-10-14 20:47:54+05:30  Cprogrammer
+ * check return status of parse_quota()
+ * use strtoll() instead of atol()
+ *
  * Revision 2.20  2009-09-30 00:23:12+05:30  Cprogrammer
  * use setuid so that quota and vacation operation succeed
  *
@@ -117,6 +121,7 @@
  */
 #include "indimail.h"
 #include <stdio.h>
+#define XOPEN_SOURCE = 600
 #include <stdlib.h>
 #include <unistd.h>
 #include <string.h>
@@ -127,7 +132,7 @@
 #include <signal.h>
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vmoduser.c,v 2.20 2009-09-30 00:23:12+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: vmoduser.c,v 2.21 2009-10-14 20:47:54+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 char            Email[MAX_BUFF];
@@ -245,7 +250,7 @@ main(argc, argv)
 	if (QuotaFlag == 1)
 	{
 		if((*Quota == '+') || (*Quota == '-'))
-			snprintf(tmpQuota, sizeof(tmpQuota), "%ld", atol(pw->pw_shell) + atoi(Quota));
+			snprintf(tmpQuota, sizeof(tmpQuota), "%lld", strtoll(pw->pw_shell, 0, 0) + atol(Quota));
 		else
 			scopy(tmpQuota, Quota, MAX_BUFF);
 		if (!(ptr = strchr(tmpQuota, ',')))
@@ -280,7 +285,11 @@ main(argc, argv)
 	{
 		snprintf(tmpbuf, MAX_BUFF, "%s/Maildir", pw->pw_dir);
 #ifdef USE_MAILDIRQUOTA
-		size_limit = parse_quota(pw->pw_shell, &count_limit);
+		if ((size_limit = parse_quota(pw->pw_shell, &count_limit)) == -1)
+		{
+			fprintf(stderr, "parse_quota: %s: %s\n", pw->pw_shell, strerror(errno));
+			return (1);
+		}
 		quota = recalc_quota(tmpbuf, &mailcount, size_limit, count_limit, 2);
 #else
 		quota = recalc_quota(tmpbuf, 2);

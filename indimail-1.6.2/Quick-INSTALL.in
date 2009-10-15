@@ -7,10 +7,17 @@
     -------------------------------
 
     % sudo rpm -ivh indimail-@version@-1.1.i386.rpm
+	% sudo /var/indimail/bin/initsvc -on
     % cd /var/indimail/control
     % su
     # echo "localhost" > host.mysql
     # exit
+
+	Ensure MySQL is running
+
+	% sudo /var/indimail/bin/svstat /service/mysql.3306
+    /service/mysql.3306: up (pid 11936) 3927 seconds
+
     % sudo /var/indimail/bin/vadddomain example.com pass
     % sudo /var/indimail/bin/vadduser testuser1@example.com pass
     % vuserinfo postmaster@example.com
@@ -20,12 +27,19 @@
     ---------------------------
 
     % sudo rpm -ivh indimail-@version@-1.1.i386.rpm
+	% sudo /var/indimail/bin/initsvc -on
     % cd /var/indimail/control
     % su
     # echo "localhost" > host.cntrl (replace localhost with IP of your MySQL host)
     # ln -s host.cntrl host.master
     # echo 192.168.1.100 > hostip (replace 192.168.1.100 with your mailserver IP)
     # exit
+
+	Ensure MySQL is running
+
+	% sudo /var/indimail/bin/svstat /service/mysql.3306
+    /service/mysql.3306: up (pid 11936) 3927 seconds
+
     % sudo /var/indimail/bin/vadddomain -D indimail -S localhost \
         -U indimail -P ssh-1.5- -p 3306 -c example.com pass
     % sudo /var/indimail/bin/vadduser testuser1@example.com pass

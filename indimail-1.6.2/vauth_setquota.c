@@ -1,5 +1,8 @@
 /*
  * $Log: vauth_setquota.c,v $
+ * Revision 2.12  2009-10-14 20:46:26+05:30  Cprogrammer
+ * use strtoll() instead of atol()
+ *
  * Revision 2.11  2008-11-10 11:56:23+05:30  Cprogrammer
  * conditional compilation of QUERY_CACHE code
  *
@@ -76,9 +79,10 @@
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vauth_setquota.c,v 2.11 2008-11-10 11:56:23+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: vauth_setquota.c,v 2.12 2009-10-14 20:46:26+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
+#define XOPEN_SOURCE = 600
 #include <stdlib.h>
 #include <string.h>
 #include <mysqld_error.h>
@@ -103,7 +107,7 @@ vauth_setquota(char *user, char *domain, char *quota)
 		return(0);
 	}
 	if((*quota == '+') || (*quota == '-'))
-		snprintf(tmpQuota, sizeof(tmpQuota), "%ld", atol(pw->pw_shell) + atoi(quota));
+		snprintf(tmpQuota, sizeof(tmpQuota), "%lld", strtoll(pw->pw_shell, 0, 0) + atoi(quota));
 	else
 		scopy(tmpQuota, quota, MAX_BUFF);
 	if (site_size == LARGE_SITE)
