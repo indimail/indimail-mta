@@ -54,26 +54,26 @@ get_local_ip()
 	struct hostent *host_data;
 #endif
 
-	if(*hostbuf)
+	if (*hostbuf)
 		return(hostbuf);
 	getEnvConfigStr(&qmaildir, "QMAILDIR", QMAILDIR);
 	getEnvConfigStr(&controldir, "CONTROLDIR", "control");
 	snprintf(TmpBuf, MAX_BUFF, "%s/%s/hostip", qmaildir, controldir);
-	if((fp = fopen(TmpBuf, "r")))
+	if ((fp = fopen(TmpBuf, "r")))
 	{
-		if(!fgets(hostbuf, MAX_BUFF - 1, fp))
+		if (!fgets(hostbuf, MAX_BUFF - 1, fp))
 		{
 			fclose(fp);
 			*hostbuf = 0;
 		} else
 		{
-			if((ptr = strchr(hostbuf, '\n')))
+			if ((ptr = strchr(hostbuf, '\n')))
 				*ptr = 0;
 			fclose(fp);
 			return(hostbuf);
 		}
 	}
-	if(gethostname(TmpBuf, sizeof(TmpBuf)))
+	if (gethostname(TmpBuf, sizeof(TmpBuf)))
 		return((char *) 0);
 #ifdef ENABLE_IPV6
 	memset(&hints, 0, sizeof(hints));
@@ -102,7 +102,7 @@ get_local_ip()
 		return((char *) 0);
 	}
 #else
-	if(!(host_data = gethostbyname(TmpBuf)))
+	if (!(host_data = gethostbyname(TmpBuf)))
 		return((char *) 0);
 	strncpy(hostbuf, inet_ntoa(*((struct in_addr *) host_data->h_addr_list[0])), MAX_BUFF);
 #endif
