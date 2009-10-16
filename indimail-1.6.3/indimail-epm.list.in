@@ -688,6 +688,7 @@ f 444 root qmail ${prefix}/doc/README.tls BUILDROOT${prefix}/doc/README.tls
 f 444 root qmail ${prefix}/doc/PIC.local2alias BUILDROOT${prefix}/doc/PIC.local2alias
 f 444 root qmail ${prefix}/doc/README.starttls BUILDROOT${prefix}/doc/README.starttls
 f 644 root root ${prefix}/doc/INSTALL-RPM BUILDROOT${prefix}/doc/INSTALL-RPM
+f 644 root root ${prefix}/doc/Quick-INSTALL BUILDROOT${prefix}/doc/Quick-INSTALL
 f 444 root qmail ${prefix}/doc/README.qmail BUILDROOT${prefix}/doc/README.qmail
 f 644 root root ${prefix}/doc/indimail_arch.png BUILDROOT${prefix}/doc/indimail_arch.png
 f 444 root qmail ${prefix}/doc/SENDMAIL BUILDROOT${prefix}/doc/SENDMAIL
