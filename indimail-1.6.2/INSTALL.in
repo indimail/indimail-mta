@@ -903,10 +903,12 @@ You can go on to add a virtual domain and users if you wish
 
 ########### SECTION 9 ### RTFM #########################################
 9.  Man pages
-    A lot of the underlying qmail details are not covered in this
+    A lot of the underlying indimail details are not covered in this
     file. This is on purpose. If you want to find out the internal
     workings of indimail and qmail look into all files in @indimaildir@/doc
     and /var/indimail/man?
+	As a first step, do
+	% man -M INDIMAIL/man indimail
 
 ########### SECTION 10 #### SUPPORT INFORMATION #########################
 10. Good luck
