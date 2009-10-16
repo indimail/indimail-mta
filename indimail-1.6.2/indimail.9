@@ -80,9 +80,11 @@ central database - Used only when configured as a clustered domain. This databas
 refered to as '\fBclusterinfo\fR'.
 
 .PP
-For a non-clustered architecture, you need to have a control file \fBhost\.mysql\fR. This
-control file contains the IP address or hostname of the MySQL database corresponding to
-the \fBlocal database\fR. It consists of the following tables
+For a non-clustered architecture, you need a local MySQL database. To connect to this MySQL
+database, you need to have a control file \fBhost\.mysql\fR. This control file contains the
+IP address or hostname of the MySQL database corresponding to the \fBlocal database\fR. If
+the control file \fBhost\.mysql\fR is missing, programs will use \fIlocalhost\fR to connect
+to MySQL. The local database consists of the following tables
 
 .nr step 1 1
 .IP \n[step] 3
@@ -125,9 +127,9 @@ mailing_list
 bulkmail
 
 .PP
-A clustered domain in IndiMail is achieved by having a central storage called \fIclusterinfo\fR.
+A clustered domain in IndiMail is achieved by having a central MySQL database called \fIclusterinfo\fR.
 \fIclusterinfo\fR stores information about all users and the user's storage server (mailstore),
-each mailstore it's individual MySQL database information. This database is also
+each mailstore's individual local MySQL database information. This database is also
 referred to as the \fBcentral database\fR. It consists of the following tables
 
 .nr step 1 1
@@ -149,12 +151,13 @@ mgmtaccess
 .IP \n+[step]
 vpriv
 .PP
-The table \fIhostcntrl\fR contains the user, domain and hostid. \fIhostid\fR is a unique
-identification which needs to be assigned to every server on which email accounts need to
+The table \fIhostcntrl\fR has the fields user, domain and hostid. \fIhostid\fR is a unique
+identifier which needs to be assigned to every server on which email accounts need to
 be created. These servers are also called \fImailstores\fR. The program \fBhostcntrl(8)\fR
-can be used to add, modify, delete entries to the table \fIhostcntrl\fR. Each \fIhostid\fR
-needs to be mapped to an IP address. This is maintained in the table \fIhost_table\fR. A
-program called \fBvhostid(8)\fR can be used to add, modify or delete entries in \fIhost_table\fR.
+can be used to add, modify, delete entries to the table \fIhostcntrl\fR. The program \fBvadduser(1)\fR
+also adds user entries to this table. Each \fIhostid\fR needs to be mapped to an IP address.
+This is maintained in the table \fIhost_table\fR. A program called \fBvhostid(8)\fR can be used
+to add, modify or delete entries in \fIhost_table\fR.
 .PP
 To be able to access the \fBcentral database\fR, IndiMail programs need the following control
 files in the directory INDIMAIL/control
@@ -240,7 +243,7 @@ for indimail.org and 25 is the SMTP port.
 
 .SH Directory structure
 .PP
-IndiMail gets it's own home directory. Under this directory there are the following:
+IndiMail gets it's own home directory. A typical IndiMail installation willl have the following directories
 .RS
 .TS
 l l.
@@ -251,7 +254,21 @@ sbin          | Binaries required by administrators
 lib           | Shared/Development Libraries
 include       | Include files for development
 users         | assign, cdb file
+alias         | System aliases postmaster, mailer-daemon, root
 domains       | Virtual domain directories, each having .qmail-default file
+control       | Most of IndiMail's configuration file lie here
+plugins       | Plugins for qmail-queue
+modules       | Loadable modules for flash (ncurses based menu system)
+man           | Man pages
+doc           | Documentation
+mysqldb       | Local MySQL database
+boot          | Startup files
+autoturn      | Domains supporting ETRN, AUTOTURN support
+qscanq        | Directory for virus scanning if qscanq is used
+share         | clamd virus signature database
+libexec       | Authentication modules for courier-imap
+etc           | bogofilter.cf, spam wordlist, tcp.[smtp,imap,pop3].cdb, etc
+
 .TE
 
 .SH Virtual domain Directory Structure Layout
@@ -277,6 +294,7 @@ directory there.
 You can use the \fBvreorg(8)\fR program to recreate the \fIdir-control\fR table.
 
 .SH PROGRAMS
+IndiMail has programs installed in INDIMAIL/bin, INDIMAIL/sbin.
 .nr step 1 1
 .IP \n[step] 4
 vadddomain(1)
@@ -450,4 +468,4 @@ mgmtpass(8)
 vpriv(8)
 
 .SH "SEE ALSO"
-dbinfo(8), vhostid(8), vsmtp(8), vreorg(8), vadduser(1), vdeluser(1), svctool(8)
+dbinfo(8), vhostid(8), vsmtp(8), vreorg(8), hostcntrl(1), vadduser(1), vdeluser(1), svctool(8)
