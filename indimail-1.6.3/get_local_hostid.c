@@ -36,19 +36,19 @@ get_local_hostid()
 	getEnvConfigStr(&qmaildir, "QMAILDIR", QMAILDIR);
 	getEnvConfigStr(&controldir, "CONTROLDIR", "control");
 	snprintf(TmpFname, MAX_BUFF, "%s/%s/hostid", qmaildir, controldir);
-	if((fp = fopen(TmpFname, "r")))
+	if ((fp = fopen(TmpFname, "r")))
 	{
-		if(!fgets(hostid, MAX_BUFF - 1, fp))
+		if (!fgets(hostid, MAX_BUFF - 1, fp))
 		{
 			fclose(fp);
 			return((char *) 0);
 		}
-		if((ptr = strchr(hostid, '\n')))
+		if ((ptr = strchr(hostid, '\n')))
 			*ptr = 0;
 		fclose(fp);
 		return(hostid);
 	}
-	if((hostidno = gethostid()) == -1)
+	if ((hostidno = gethostid()) == -1)
 		return((char *) 0);
 	snprintf(hostid, MAX_BUFF, "%08lx", hostidno);
 	return(hostid);
