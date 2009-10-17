@@ -1,5 +1,8 @@
 /*
  * $Log: valias_insert.c,v $
+ * Revision 2.16  2009-10-17 20:18:40+05:30  Cprogrammer
+ * added missing argument real_domain
+ *
  * Revision 2.15  2009-09-15 12:09:20+05:30  Cprogrammer
  * report the address being added instead of the alias
  *
@@ -85,7 +88,7 @@
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: valias_insert.c,v 2.15 2009-09-15 12:09:20+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: valias_insert.c,v 2.16 2009-10-17 20:18:40+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef VALIAS
@@ -137,7 +140,7 @@ valias_insert(char *alias, char *domain, char *alias_line, int ignore)
 			mailstore++;
 			if (!ignore && !islocalif (mailstore))
 			{
-				fprintf(stderr, "%s not local (mailstore %s)\n", alias_line, real_domain, mailstore);
+				fprintf(stderr, "%s@%s not local (mailstore %s)\n", alias_line, real_domain, mailstore);
 				return(1);
 			}
 		}
