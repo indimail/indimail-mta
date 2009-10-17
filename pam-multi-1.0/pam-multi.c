@@ -1,5 +1,8 @@
 /*
  * $Log: pam-multi.c,v $
+ * Revision 1.10  2009-10-17 20:14:09+05:30  Cprogrammer
+ * duplicate definition of pam_err removed
+ *
  * Revision 1.9  2009-10-17 16:53:45+05:30  Cprogrammer
  * fix for DARWIN
  *
@@ -163,7 +166,7 @@ static int      update_passwd(pam_handle_t *, const char *, const char *);
 #endif
 
 #ifndef	lint
-static char     sccsid[] = "$Id: pam-multi.c,v 1.9 2009-10-17 16:53:45+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: pam-multi.c,v 1.10 2009-10-17 20:14:09+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 /*
@@ -1041,7 +1044,7 @@ pam_sm_chauthtok(pam_handle_t * pamh, int flags, int argc, const char *argv[])
 	struct passwd  *old_pwd;
 	const char     *old_pass, *new_pass;
 	char           *hashedpwd, salt[SALTSIZE + 1];
-	int             pam_err, retries;
+	int             retries;
 #endif
 	const char     *user;
 	int             pam_err;
