@@ -1,5 +1,8 @@
 #
 # $Log: indimail-epm.list.in,v $
+# Revision 2.24  2009-10-17 09:58:37+05:30  Cprogrammer
+# added Quick-INSTALL
+#
 # Revision 2.23  2009-10-11 12:01:34+05:30  Cprogrammer
 # correct man page paths
 #
