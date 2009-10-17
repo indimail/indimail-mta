@@ -1,5 +1,8 @@
 /*
  * $Log: pam-multi.c,v $
+ * Revision 1.9  2009-10-17 16:53:45+05:30  Cprogrammer
+ * fix for DARWIN
+ *
  * Revision 1.8  2009-10-12 08:33:41+05:30  Cprogrammer
  * rearranged functions
  * completed run_command() function
@@ -152,13 +155,15 @@ PAM_EXTERN int  pam_sm_close_session(pam_handle_t * pamh, int flags, int argc, c
 char           *md5_crypt(const char *, const char *);
 char           *sha256_crypt(const char *, const char *);
 char           *sha512_crypt(const char *, const char *);
+#ifndef DARWIN
 static int      update_shadow(pam_handle_t *, const char *, const char *);
+#endif
 #ifdef WHY_IS_THIS_NEEDED
 static int      update_passwd(pam_handle_t *, const char *, const char *);
 #endif
 
 #ifndef	lint
-static char     sccsid[] = "$Id: pam-multi.c,v 1.8 2009-10-12 08:33:41+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: pam-multi.c,v 1.9 2009-10-17 16:53:45+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 /*
@@ -1032,12 +1037,14 @@ PAM_EXTERN int
 pam_sm_chauthtok(pam_handle_t * pamh, int flags, int argc, const char *argv[])
 {
 #ifndef DARWIN
-	struct passwd  *old_pwd;
 	struct spwd    *pwd;
-#endif
-	const char     *user, *old_pass, *new_pass;
+	struct passwd  *old_pwd;
+	const char     *old_pass, *new_pass;
 	char           *hashedpwd, salt[SALTSIZE + 1];
 	int             pam_err, retries;
+#endif
+	const char     *user;
+	int             pam_err;
 
 #ifdef DEBUG
 	_pam_log(LOG_INFO, "chauthtok %d.",__LINE__);
@@ -1056,7 +1063,6 @@ pam_sm_chauthtok(pam_handle_t * pamh, int flags, int argc, const char *argv[])
 				is not in the selected database", user);
 		return PAM_USER_UNKNOWN;
 	}
-#endif
 #ifdef DEBUG
 	_pam_log(LOG_INFO, "chauthtok %d.",__LINE__);
 #endif
@@ -1105,7 +1111,8 @@ pam_sm_chauthtok(pam_handle_t * pamh, int flags, int argc, const char *argv[])
 #ifdef DEBUG
 		_pam_log(LOG_INFO, "Got old token for user [%s].", user);
 #endif
-	} else if (flags & PAM_UPDATE_AUTHTOK) {
+	} else
+	if (flags & PAM_UPDATE_AUTHTOK) {
 #ifdef DEBUG
 		_pam_log(LOG_INFO, "Doing actual update.");
 #endif
@@ -1171,17 +1178,18 @@ pam_sm_chauthtok(pam_handle_t * pamh, int flags, int argc, const char *argv[])
 		_pam_log(LOG_ERR, "Unrecognized flags.");
 		return (pam_err);
 	}
+#endif
 	/*
 	 * This code is yet to be completed
 	 */
 	return (PAM_SERVICE_ERR);
 }
 
+#ifndef DARWIN
 #define NEW_SHADOW "/etc/.shadow"
 /*
  * Update shadow with new user password
  */
-
 static int
 update_shadow(pam_handle_t * pamh, const char *user, const char *newhashedpwd)
 {
@@ -1259,6 +1267,7 @@ update_shadow(pam_handle_t * pamh, const char *user, const char *newhashedpwd)
 	}
 	return (PAM_SUCCESS);
 }
+#endif
 
 #ifdef WHY_IS_THIS_NEEDED
 /*- Update /etc/passwd with new user information */

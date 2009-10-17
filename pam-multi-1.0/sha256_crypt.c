@@ -1,5 +1,8 @@
 /*
  * $Log: sha256_crypt.c,v $
+ * Revision 1.2  2009-10-17 16:53:52+05:30  Cprogrammer
+ * fix for DARWIN
+ *
  * Revision 1.1  2008-09-01 14:58:08+05:30  Cprogrammer
  * Initial revision
  *
@@ -7,7 +10,9 @@
  * Released into the Public Domain by Ulrich Drepper <drepper@redhat.com>.
  */
 #ifndef HAVE_SHA256_CRYPT
+#ifndef DARWIN
 #include <endian.h>
+#endif
 #define	__USE_GNU
 #define _GNU_SOURCE
 #include <string.h>

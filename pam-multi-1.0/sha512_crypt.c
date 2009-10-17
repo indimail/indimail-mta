@@ -1,5 +1,8 @@
 /*
  * $Log: sha512_crypt.c,v $
+ * Revision 1.3  2009-10-17 16:54:15+05:30  Cprogrammer
+ * fix for darwin
+ *
  * Revision 1.2  2009-08-04 14:14:50+05:30  Cprogrammer
  * removed debug statement
  *
@@ -12,7 +15,9 @@
  */
 
 #ifndef HAVE_SHA512_CRYPT
+#ifndef DARWIN
 #include <endian.h>
+#endif
 #define	__USE_GNU
 #define _GNU_SOURCE
 #include <string.h>

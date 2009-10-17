@@ -107,7 +107,7 @@ AC_ARG_ENABLE(default-domain, [  --enable-default-domain=name  Default domain na
 AC_DEFINE_UNQUOTED(DEFAULT_DOMAIN,"$defaultdomain",Default Domain)
 
 moduledir=""
-for f in /lib64/security /lib/security
+for f in /lib64/security /lib/security /usr/lib/pam
 do
 	if test -d $f
 	then
@@ -115,16 +115,15 @@ do
 		break
 	fi
 done
-AC_ARG_ENABLE([moduledir], [  --enable-moduledir=DIR specify PAM module installation path],
-moduledir="$enableval"
-[
-	if test "$moduledir" = ""
-	then
-		AC_MSG_ERROR([Unable to find your pam module dir, specify --enable-moduledir.])
-	fi
-])
+AC_ARG_ENABLE(moduledir, [  --enable-moduledir=dir specify PAM module installation path],
+  moduledir="$enableval",
+  [
+	  if test "$moduledir" = ""
+	  then
+		  AC_MSG_ERROR([Unable to find your pam module dir, specify --enable-moduledir.])
+	  fi
+  ])
 AC_DEFINE_UNQUOTED(PAM_MOD_DIR,"$moduledir",full path to PAM Module Directory)
-
 AC_DEFINE_UNQUOTED(USE_MYSQL,$USE_MYSQL,Use MySQL for primary authentication)
 
 mysql_incdir=""
