@@ -1583,7 +1583,7 @@ Optional Features:
   --enable-dependency-tracking   do not reject slow dependency extractors
   --disable-libtool-lock  avoid locking (might break parallel builds)
   --enable-default-domain=name  Default domain name, default is null.
-  --enable-moduledir=DIR specify PAM module installation path
+  --enable-moduledir=dir specify PAM module installation path
   --enable-mysqlincdir=""       directory where auth include files are.
   --enable-mysqllibdir=path-to-auth-libs directory where auth libs are.
   --enable-mysqlbindir=""       directory where mysql binary are.
@@ -19067,13 +19067,14 @@ done
 # Check whether --enable-moduledir was given.
 if test "${enable_moduledir+set}" = set; then
   enableval=$enable_moduledir; moduledir="$enableval"
+else
 
-	if test "$moduledir" = ""
-	then
-		{ { $as_echo "$as_me:$LINENO: error: Unable to find your pam module dir, specify --enable-moduledir." >&5
+	  if test "$moduledir" = ""
+	  then
+		  { { $as_echo "$as_me:$LINENO: error: Unable to find your pam module dir, specify --enable-moduledir." >&5
 $as_echo "$as_me: error: Unable to find your pam module dir, specify --enable-moduledir." >&2;}
    { (exit 1); exit 1; }; }
-	fi
+	  fi
 
 fi
 
@@ -19081,7 +19082,6 @@ fi
 cat >>confdefs.h <<_ACEOF
 #define PAM_MOD_DIR "$moduledir"
 _ACEOF
-
 
 
 cat >>confdefs.h <<_ACEOF
