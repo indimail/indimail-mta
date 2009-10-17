@@ -1,5 +1,8 @@
 /*
  * $Log: count_dir.c,v $
+ * Revision 2.4  2009-10-17 20:16:53+05:30  Cprogrammer
+ * include_trash wrongly defined as int
+ *
  * Revision 2.3  2009-10-15 08:22:27+05:30  Cprogrammer
  * added option INCLUDE_TRASH to include trash in quota calculations
  *
@@ -43,7 +46,7 @@
 #include <sys/stat.h>
 
 #ifndef	lint
-static char     sccsid[] = "$Id: count_dir.c,v 2.3 2009-10-15 08:22:27+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: count_dir.c,v 2.4 2009-10-17 20:16:53+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 mdir_t count_dir(char *dir_name, mdir_t *mailcount)
@@ -52,8 +55,8 @@ mdir_t count_dir(char *dir_name, mdir_t *mailcount)
 	struct dirent  *dp;
 	struct stat     statbuf;
 	mdir_t          file_size, len, flen, count;
-	int             is_trash, include_trash;
-	char           *tmpstr, *ptr;
+	int             is_trash;
+	char           *tmpstr, *ptr, *include_trash;
 
 	if (!dir_name || !*dir_name)
 		return (0);
