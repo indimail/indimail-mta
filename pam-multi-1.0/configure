@@ -19056,7 +19056,7 @@ _ACEOF
 
 
 moduledir=""
-for f in /lib64/security /lib/security
+for f in /lib64/security /lib/security /usr/lib/pam
 do
 	if test -d $f
 	then
