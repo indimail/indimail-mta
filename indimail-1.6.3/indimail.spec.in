@@ -1,5 +1,8 @@
 #
 # $Log: indimail.spec.in,v $
+# Revision 2.97  2009-10-17 08:51:58+05:30  Cprogrammer
+# pass argument to rpm.init for preun to distinguish between package removal and upgrade
+#
 # Revision 2.96  2009-10-15 08:22:44+05:30  Cprogrammer
 # added Quick-INSTALL
 #
@@ -299,7 +302,7 @@
 # rpm spec file for indimail
 #
 #
-# $Id: indimail.spec.in,v 2.96 2009-10-15 08:22:44+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 2.97 2009-10-17 08:51:58+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %define _unpackaged_files_terminate_build 1
 
@@ -1949,7 +1952,7 @@ fi
 if [ $argv1 -eq 2 ] ; then
 	if [ -f %{_prefix}/boot/rpm.init ] ; then
 		/sbin/ldconfig
-		echo "Running Custom Upgrade Script"
+		echo "Running Custom Upgrade Script for post"
 		/bin/sh %{_prefix}/boot/rpm.init upgrade
 	fi
 	exit 0
@@ -2248,7 +2251,7 @@ then
 fi
 if [ -f %{_prefix}/boot/rpm.init ] ; then
 	echo "Running Custom Un-Installation Script for preun"
-	/bin/sh %{_prefix}/boot/rpm.init preun
+	/bin/sh %{_prefix}/boot/rpm.init preun "$argv1"
 fi
 
 ### SCRIPTLET ###############################################################################
