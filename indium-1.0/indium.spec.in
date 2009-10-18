@@ -1,0 +1,499 @@
+#
+# $Log: $
+#
+# $Id: $
+%undefine _missing_build_ids_terminate_build
+%define _unpackaged_files_terminate_build 1
+
+%define is_mandrake %(test -e /etc/mandrake-release && echo 1 || echo 0)
+%define is_suse %(test -e /etc/SuSE-release && echo 1 || echo 0)
+%define is_fedora %(test -e /etc/fedora-release && echo 1 || echo 0)
+
+%define dist redhat
+%define disttag rh
+
+%if %is_mandrake
+%define dist mandrake
+%define disttag mdk
+%endif
+%if %is_suse
+%define dist suse
+%define disttag suse
+%endif
+%if %is_fedora
+%define dist fedora
+%define disttag rhfc
+%endif
+
+%define _prefix            @indimaildir@
+%define see_base           For a description of IndiMail visit http://www.indimail.org
+%define _verbose           0
+%define tai_version        1.0
+%define fbsql_version      1.0
+%define bwidget_version    1.8.0
+%define tcl_version        8.5
+%define mysqlPrefix        /usr/local/mysql
+
+Summary: TCL/TK based Administration GUI for IndiMail
+Name: indium
+Version: @version@
+Release: 1
+License: GPLv3
+Group: System Environment/Base
+Source0:  http://downloads.sourceforge.net/indimail/%{name}-%{version}.tar.gz
+Source2: %{name}-%{version}-rpmlintrc
+
+URL: http://www.indimail.org
+AutoReqProv: No
+BuildRequires: tcl-devel rpm gcc gcc-c++ make binutils coreutils grep
+BuildRequires: tk-devel glibc glibc-devel procps tcl tk cpio
+BuildRequires: sed gettext-devel
+BuildRequires: findutils
+BuildRequires: sharutils gzip autoconf indimail
+%if %{undefined centos_version} && %{undefined rhel_version} && %{undefined sles_version}
+BuildRequires: chrpath
+%endif
+%if 0%{?suse_version}
+BuildRequires: -post-build-checks  
+#!BuildIgnore: post-build-checks  
+%endif
+
+Requires: coreutils grep /bin/sh glibc /usr/sbin/useradd /usr/sbin/groupadd indimail
+Requires: procps /usr/bin/awk indimail > 1.4
+BuildRoot: %(mktemp -ud %{_tmppath}/%{name}-%{version}-%{release}-XXXXXX)
+Excludeos: windows 
+
+%description
+Indium provides a GUI for administering IndiMail and configurint
+associated components below
+
+qmail,
+daemontools,
+ucspi-tcp,
+Courier IMAP/POP3,
+Bogofilter - A Bayesian Spam Filter,
+Clam AntiVirus - GPL anti-virus toolkit for UNIX,
+Fetchmail,
+
+Indiium also provides Management of Virtual domains.
+
+%{see_base}
+
+%prep
+echo Building %{name}-%{version}-%{release} Build %{_build} OS %{_os} %dist %disttag
+
+for i in %{name}-%{version}
+do
+(
+if [ -d $i ] ; then
+	/bin/rm -rf $i
+fi
+if [ -f ../SOURCES/$i.tar.gz ] ; then
+	gunzip -c ../SOURCES/$i.tar.gz |tar xf -
+elif [ -f ../SOURCES/$i.tar.bz2 ] ; then
+	bzip2 -d -c ../SOURCES/$i.tar.bz2 |tar xf -
+else
+	echo "No Source Archive for $i"
+	exit 1
+fi
+if [ -d $i ] ; then
+	if [ -f %{name}-%{version}/patches/$i.patch ] ; then
+	    # Copy for the SRPM
+		/bin/cp %{name}-%{version}/patches/$i.patch ../SOURCES
+	fi
+fi
+)
+done
+
+%build
+ID=$(id -u)
+if [ $ID -eq 0 ] ; then
+nscd_up=`ps -ef |grep nscd |grep -v grep|wc -l`
+if [ $nscd_up -ge 1 ] ; then
+	if [ -x %{_sysconfdir}/init.d/nscd ] ; then
+		%{_sysconfdir}/init.d/nscd stop
+	fi
+fi
+/usr/bin/getent group indimail || /usr/sbin/groupadd -r -g 555 indimail
+if [ $? = 4 ] ; then
+	/usr/sbin/groupadd -r indimail
+fi
+/usr/bin/getent passwd indimail || /usr/sbin/useradd -r -g indimail -u 555 -d %{_prefix} indimail || true
+if [ $? = 4 ] ; then
+	/usr/sbin/useradd -r -g indimail -d %{_prefix} indimail
+fi
+fi
+
+if [ %{_verbose} -eq 0 ] ; then
+DEVICE=/dev/null
+else
+DEVICE=/dev/tty
+fi
+echo "Will send output to $DEVICE"
+cd %{name}-%{version}
+%configure --prefix=%{_prefix} \
+	--libexecdir=%{_prefix}/libexec --sysconfdir=%{_prefix}/etc \
+	--enable-mysqlincdir=%{mysqlPrefix}/include/mysql \
+	--enable-mysqllibdir=%{mysqlPrefix}/%{_lib}/mysql \
+	--mandir=%{_prefix}/man --sysconfdir=%{_prefix}/etc
+
+%install
+[ "$RPM_BUILD_ROOT" != "/" ] && /bin/rm -fr $RPM_BUILD_ROOT
+ID=$(id -u)
+for i in %{name}-%{version}
+do
+if [ -d $i ] ; then
+	cd $i
+	if [ %{_verbose} -eq 0 ] ; then
+		make -s DESTDIR=%{buildroot}
+		make -s ARCH_LIB=%{_lib} DESTDIR=%{buildroot} install-strip
+	else
+		make DESTDIR=%{buildroot}
+		make ARCH_LIB=%{_lib} DESTDIR=%{buildroot} install-strip
+	fi
+	cd ..
+fi
+done
+for i in fbsql tai64
+do
+/bin/rm -f %{buildroot}%{_libdir}/lib"$i".la
+/bin/rm -f %{buildroot}%{_libdir}/lib"$i".a
+done
+
+. /usr/lib/tclConfig.sh
+cd %{name}-%{version}
+if [ $TCL_VERSION -ne %{tcl_version} ] ; then
+	echo "tcl version mismatch $TCL_VERSION != %{tcl_version}"
+	exit 1
+fi
+TCL_PATH=`echo $TCL_PACKAGE_PATH|awk '{print $1}'`
+find ./BWidget-%{bwidget_version} -depth -print | cpio -pdmv %{buildroot}$TCL_PATH
+
+# copy files here
+if [ -x /usr/bin/chrpath ] ; then
+/usr/bin/chrpath -d %{buildroot}%{_libdir}/*.so
+/usr/bin/chrpath -d %{buildroot}%{_prefix}/sbin/pwhelper
+fi
+
+%files
+%defattr(-, root, root, 0555)
+%dir %attr(555,root,root)               %{_prefix}
+#
+# Image files
+#
+%attr(444,root,indimail)                %{_prefix}/share/indium-%{version}/images/adddomain.gif
+%attr(444,root,indimail)                %{_prefix}/share/indium-%{version}/images/addgroup.gif
+%attr(444,root,indimail)                %{_prefix}/share/indium-%{version}/images/addr.gif
+%attr(444,root,indimail)                %{_prefix}/share/indium-%{version}/images/adduser.gif
+%attr(444,root,indimail)                %{_prefix}/share/indium-%{version}/images/arrow_left.gif
+%attr(444,root,indimail)                %{_prefix}/share/indium-%{version}/images/arrow_right.gif
+%attr(444,root,indimail)                %{_prefix}/share/indium-%{version}/images/atrn.gif
+%attr(444,root,indimail)                %{_prefix}/share/indium-%{version}/images/bulletin.gif
+%attr(444,root,indimail)                %{_prefix}/share/indium-%{version}/images/buttonexit.gif
+%attr(444,root,indimail)                %{_prefix}/share/indium-%{version}/images/buttonlogin.gif
+%attr(444,root,indimail)                %{_prefix}/share/indium-%{version}/images/c95mycom.gif
+%attr(444,root,indimail)                %{_prefix}/share/indium-%{version}/images/chilli.gif
+%attr(444,root,indimail)                %{_prefix}/share/indium-%{version}/images/configs.gif
+%attr(444,root,indimail)                %{_prefix}/share/indium-%{version}/images/connects.gif
+%attr(444,root,indimail)                %{_prefix}/share/indium-%{version}/images/connects-4.gif
+%attr(444,root,indimail)                %{_prefix}/share/indium-%{version}/images/cron.gif
+%attr(444,root,indimail)                %{_prefix}/share/indium-%{version}/images/dbcontrol.gif
+%attr(444,root,indimail)                %{_prefix}/share/indium-%{version}/images/deldomain.gif
+%attr(444,root,indimail)                %{_prefix}/share/indium-%{version}/images/delolduser.gif
+%attr(444,root,indimail)                %{_prefix}/share/indium-%{version}/images/deluser.gif
+%attr(444,root,indimail)                %{_prefix}/share/indium-%{version}/images/edit.gif
+%attr(444,root,indimail)                %{_prefix}/share/indium-%{version}/images/envelope.gif
+%attr(444,root,indimail)                %{_prefix}/share/indium-%{version}/images/exit.gif
+%attr(444,root,indimail)                %{_prefix}/share/indium-%{version}/images/filemanager.gif
+%attr(444,root,indimail)                %{_prefix}/share/indium-%{version}/images/flagdown.gif
+%attr(444,root,indimail)                %{_prefix}/share/indium-%{version}/images/flagup.gif
+%attr(444,root,indimail)                %{_prefix}/share/indium-%{version}/images/folder.gif
+%attr(444,root,indimail)                %{_prefix}/share/indium-%{version}/images/folder.xbm
+%attr(444,root,indimail)                %{_prefix}/share/indium-%{version}/images/forum.gif
+%attr(444,root,indimail)                %{_prefix}/share/indium-%{version}/images/go.gif
+%attr(444,root,indimail)                %{_prefix}/share/indium-%{version}/images/gq.gif
+%attr(444,root,indimail)                %{_prefix}/share/indium-%{version}/images/green.gif
+%attr(444,root,indimail)                %{_prefix}/share/indium-%{version}/images/greenoff.gif
+%attr(444,root,indimail)                %{_prefix}/share/indium-%{version}/images/greenon.gif
+%attr(444,root,indimail)                %{_prefix}/share/indium-%{version}/images/help.gif
+%attr(444,root,indimail)                %{_prefix}/share/indium-%{version}/images/indimaillogo_small.gif
+%attr(444,root,indimail)                %{_prefix}/share/indium-%{version}/images/indimaillogo_small.jpg
+%attr(444,root,indimail)                %{_prefix}/share/indium-%{version}/images/keys.gif
+%attr(444,root,indimail)                %{_prefix}/share/indium-%{version}/images/license.gif
+%attr(444,root,indimail)                %{_prefix}/share/indium-%{version}/images/linux.xbm
+%attr(444,root,indimail)                %{_prefix}/share/indium-%{version}/images/linux_mask.xbm
+%attr(444,root,indimail)                %{_prefix}/share/indium-%{version}/images/loginleft.gif
+%attr(444,root,indimail)                %{_prefix}/share/indium-%{version}/images/logintop.gif
+%attr(444,root,indimail)                %{_prefix}/share/indium-%{version}/images/logintop.gif.org
+%attr(444,root,indimail)                %{_prefix}/share/indium-%{version}/images/madadmin.gif
+%attr(444,root,indimail)                %{_prefix}/share/indium-%{version}/images/mail.gif
+%attr(444,root,indimail)                %{_prefix}/share/indium-%{version}/images/mailbox.gif
+%attr(444,root,indimail)                %{_prefix}/share/indium-%{version}/images/mbar1.gif
+%attr(444,root,indimail)                %{_prefix}/share/indium-%{version}/images/mbar2.gif
+%attr(444,root,indimail)                %{_prefix}/share/indium-%{version}/images/merlin.gif
+%attr(444,root,indimail)                %{_prefix}/share/indium-%{version}/images/moduser.gif
+%attr(444,root,indimail)                %{_prefix}/share/indium-%{version}/images/neat.gif
+%attr(444,root,indimail)                %{_prefix}/share/indium-%{version}/images/passwd.gif
+%attr(444,root,indimail)                %{_prefix}/share/indium-%{version}/images/postel.gif
+%attr(444,root,indimail)                %{_prefix}/share/indium-%{version}/images/powered-by.gif
+%attr(444,root,indimail)                %{_prefix}/share/indium-%{version}/images/preferences.gif
+%attr(444,root,indimail)                %{_prefix}/share/indium-%{version}/images/profiles.gif
+%attr(444,root,indimail)                %{_prefix}/share/indium-%{version}/images/pwrdLogo150.gif
+%attr(444,root,indimail)                %{_prefix}/share/indium-%{version}/images/pwrdLogo175.gif
+%attr(444,root,indimail)                %{_prefix}/share/indium-%{version}/images/queuefix.gif
+%attr(444,root,indimail)                %{_prefix}/share/indium-%{version}/images/queuestatus.gif
+%attr(444,root,indimail)                %{_prefix}/share/indium-%{version}/images/quit.gif
+%attr(444,root,indimail)                %{_prefix}/share/indium-%{version}/images/red.gif
+%attr(444,root,indimail)                %{_prefix}/share/indium-%{version}/images/reload.gif
+%attr(444,root,indimail)                %{_prefix}/share/indium-%{version}/images/scp.gif
+%attr(444,root,indimail)                %{_prefix}/share/indium-%{version}/images/secpanel.gif
+%attr(444,root,indimail)                %{_prefix}/share/indium-%{version}/images/serviceTool.gif
+%attr(444,root,indimail)                %{_prefix}/share/indium-%{version}/images/shit.gif
+%attr(444,root,indimail)                %{_prefix}/share/indium-%{version}/images/showctl.gif
+%attr(444,root,indimail)                %{_prefix}/share/indium-%{version}/images/slemslite.gif
+%attr(444,root,indimail)                %{_prefix}/share/indium-%{version}/images/slemslitelogo.gif
+%attr(444,root,indimail)                %{_prefix}/share/indium-%{version}/images/smtp.gif
+%attr(444,root,indimail)                %{_prefix}/share/indium-%{version}/images/sscreen.gif
+%attr(444,root,indimail)                %{_prefix}/share/indium-%{version}/images/stop.gif
+%attr(444,root,indimail)                %{_prefix}/share/indium-%{version}/images/textedit.gif
+%attr(444,root,indimail)                %{_prefix}/share/indium-%{version}/images/tkrat.xbm
+%attr(444,root,indimail)                %{_prefix}/share/indium-%{version}/images/tkrat_small.xbm
+%attr(444,root,indimail)                %{_prefix}/share/indium-%{version}/images/tkrat_smallmask.xbm
+%attr(444,root,indimail)                %{_prefix}/share/indium-%{version}/images/tkratmask.xbm
+%attr(444,root,indimail)                %{_prefix}/share/indium-%{version}/images/top.gif
+%attr(444,root,indimail)                %{_prefix}/share/indium-%{version}/images/tree.gif
+%attr(444,root,indimail)                %{_prefix}/share/indium-%{version}/images/uparrow.gif
+%attr(444,root,indimail)                %{_prefix}/share/indium-%{version}/images/vacation.gif
+%attr(444,root,indimail)                %{_prefix}/share/indium-%{version}/images/version.gif
+%attr(444,root,indimail)                %{_prefix}/share/indium-%{version}/images/warning.gif
+#
+# BWidget
+#
+
+%dir %attr(755,root,root) /usr/%{_lib}/tcl%{tcl_version}/BWidget-%{bwidget_version}
+%dir %attr(755,root,root) /usr/%{_lib}/tcl%{tcl_version}/BWidget-%{bwidget_version}/BWman
+%dir %attr(755,root,root) /usr/%{_lib}/tcl%{tcl_version}/BWidget-%{bwidget_version}/images
+%dir %attr(755,root,root) /usr/%{_lib}/tcl%{tcl_version}/BWidget-%{bwidget_version}/lang
+
+%attr(644,root,root) /usr/%{_lib}/tcl%{tcl_version}/BWidget-%{bwidget_version}/README.txt
+%attr(644,root,root) /usr/%{_lib}/tcl%{tcl_version}/BWidget-%{bwidget_version}/BWman/ScrollView.html
+%attr(644,root,root) /usr/%{_lib}/tcl%{tcl_version}/BWidget-%{bwidget_version}/BWman/PanelFrame.html
+%attr(644,root,root) /usr/%{_lib}/tcl%{tcl_version}/BWidget-%{bwidget_version}/BWman/SelectColor.html
+%attr(644,root,root) /usr/%{_lib}/tcl%{tcl_version}/BWidget-%{bwidget_version}/BWman/MainFrame.html
+%attr(644,root,root) /usr/%{_lib}/tcl%{tcl_version}/BWidget-%{bwidget_version}/BWman/DropSite.html
+%attr(644,root,root) /usr/%{_lib}/tcl%{tcl_version}/BWidget-%{bwidget_version}/BWman/Separator.html
+%attr(644,root,root) /usr/%{_lib}/tcl%{tcl_version}/BWidget-%{bwidget_version}/BWman/NoteBook.html
+%attr(644,root,root) /usr/%{_lib}/tcl%{tcl_version}/BWidget-%{bwidget_version}/BWman/ScrollableFrame.html
+%attr(644,root,root) /usr/%{_lib}/tcl%{tcl_version}/BWidget-%{bwidget_version}/BWman/DragSite.html
+%attr(644,root,root) /usr/%{_lib}/tcl%{tcl_version}/BWidget-%{bwidget_version}/BWman/ListBox.html
+%attr(644,root,root) /usr/%{_lib}/tcl%{tcl_version}/BWidget-%{bwidget_version}/BWman/PagesManager.html
+%attr(644,root,root) /usr/%{_lib}/tcl%{tcl_version}/BWidget-%{bwidget_version}/BWman/Dialog.html
+%attr(644,root,root) /usr/%{_lib}/tcl%{tcl_version}/BWidget-%{bwidget_version}/BWman/Widget.html
+%attr(644,root,root) /usr/%{_lib}/tcl%{tcl_version}/BWidget-%{bwidget_version}/BWman/Button.html
+%attr(644,root,root) /usr/%{_lib}/tcl%{tcl_version}/BWidget-%{bwidget_version}/BWman/PanedWindow.html
+%attr(644,root,root) /usr/%{_lib}/tcl%{tcl_version}/BWidget-%{bwidget_version}/BWman/navtree.html
+%attr(644,root,root) /usr/%{_lib}/tcl%{tcl_version}/BWidget-%{bwidget_version}/BWman/LabelFrame.html
+%attr(644,root,root) /usr/%{_lib}/tcl%{tcl_version}/BWidget-%{bwidget_version}/BWman/DynamicHelp.html
+%attr(644,root,root) /usr/%{_lib}/tcl%{tcl_version}/BWidget-%{bwidget_version}/BWman/index.html
+%attr(644,root,root) /usr/%{_lib}/tcl%{tcl_version}/BWidget-%{bwidget_version}/BWman/PasswdDlg.html
+%attr(644,root,root) /usr/%{_lib}/tcl%{tcl_version}/BWidget-%{bwidget_version}/BWman/options.htm
+%attr(644,root,root) /usr/%{_lib}/tcl%{tcl_version}/BWidget-%{bwidget_version}/BWman/MessageDlg.html
+%attr(644,root,root) /usr/%{_lib}/tcl%{tcl_version}/BWidget-%{bwidget_version}/BWman/ProgressBar.html
+%attr(644,root,root) /usr/%{_lib}/tcl%{tcl_version}/BWidget-%{bwidget_version}/BWman/TitleFrame.html
+%attr(644,root,root) /usr/%{_lib}/tcl%{tcl_version}/BWidget-%{bwidget_version}/BWman/Tree.html
+%attr(644,root,root) /usr/%{_lib}/tcl%{tcl_version}/BWidget-%{bwidget_version}/BWman/StatusBar.html
+%attr(644,root,root) /usr/%{_lib}/tcl%{tcl_version}/BWidget-%{bwidget_version}/BWman/SelectFont.html
+%attr(644,root,root) /usr/%{_lib}/tcl%{tcl_version}/BWidget-%{bwidget_version}/BWman/BWidget.html
+%attr(644,root,root) /usr/%{_lib}/tcl%{tcl_version}/BWidget-%{bwidget_version}/BWman/ButtonBox.html
+%attr(644,root,root) /usr/%{_lib}/tcl%{tcl_version}/BWidget-%{bwidget_version}/BWman/LabelEntry.html
+%attr(644,root,root) /usr/%{_lib}/tcl%{tcl_version}/BWidget-%{bwidget_version}/BWman/Entry.html
+%attr(644,root,root) /usr/%{_lib}/tcl%{tcl_version}/BWidget-%{bwidget_version}/BWman/ScrolledWindow.html
+%attr(644,root,root) /usr/%{_lib}/tcl%{tcl_version}/BWidget-%{bwidget_version}/BWman/contents.html
+%attr(644,root,root) /usr/%{_lib}/tcl%{tcl_version}/BWidget-%{bwidget_version}/BWman/ProgressDlg.html
+%attr(644,root,root) /usr/%{_lib}/tcl%{tcl_version}/BWidget-%{bwidget_version}/BWman/SpinBox.html
+%attr(644,root,root) /usr/%{_lib}/tcl%{tcl_version}/BWidget-%{bwidget_version}/BWman/ArrowButton.html
+%attr(644,root,root) /usr/%{_lib}/tcl%{tcl_version}/BWidget-%{bwidget_version}/BWman/ComboBox.html
+%attr(644,root,root) /usr/%{_lib}/tcl%{tcl_version}/BWidget-%{bwidget_version}/BWman/Label.html
+%attr(644,root,root) /usr/%{_lib}/tcl%{tcl_version}/BWidget-%{bwidget_version}/scrollw.tcl
+%attr(644,root,root) /usr/%{_lib}/tcl%{tcl_version}/BWidget-%{bwidget_version}/notebook.tcl
+%attr(644,root,root) /usr/%{_lib}/tcl%{tcl_version}/BWidget-%{bwidget_version}/separator.tcl
+%attr(644,root,root) /usr/%{_lib}/tcl%{tcl_version}/BWidget-%{bwidget_version}/color.tcl
+%attr(644,root,root) /usr/%{_lib}/tcl%{tcl_version}/BWidget-%{bwidget_version}/bitmap.tcl
+%attr(644,root,root) /usr/%{_lib}/tcl%{tcl_version}/BWidget-%{bwidget_version}/labelentry.tcl
+%attr(644,root,root) /usr/%{_lib}/tcl%{tcl_version}/BWidget-%{bwidget_version}/combobox.tcl
+%attr(644,root,root) /usr/%{_lib}/tcl%{tcl_version}/BWidget-%{bwidget_version}/buttonbox.tcl
+%attr(644,root,root) /usr/%{_lib}/tcl%{tcl_version}/BWidget-%{bwidget_version}/progressdlg.tcl
+%attr(644,root,root) /usr/%{_lib}/tcl%{tcl_version}/BWidget-%{bwidget_version}/button.tcl
+%attr(644,root,root) /usr/%{_lib}/tcl%{tcl_version}/BWidget-%{bwidget_version}/labelframe.tcl
+%attr(644,root,root) /usr/%{_lib}/tcl%{tcl_version}/BWidget-%{bwidget_version}/entry.tcl
+%attr(644,root,root) /usr/%{_lib}/tcl%{tcl_version}/BWidget-%{bwidget_version}/scrollframe.tcl
+%attr(644,root,root) /usr/%{_lib}/tcl%{tcl_version}/BWidget-%{bwidget_version}/pkgIndex.tcl
+%attr(644,root,root) /usr/%{_lib}/tcl%{tcl_version}/BWidget-%{bwidget_version}/mainframe.tcl
+%attr(644,root,root) /usr/%{_lib}/tcl%{tcl_version}/BWidget-%{bwidget_version}/wizard.tcl
+%attr(644,root,root) /usr/%{_lib}/tcl%{tcl_version}/BWidget-%{bwidget_version}/font.tcl
+%attr(644,root,root) /usr/%{_lib}/tcl%{tcl_version}/BWidget-%{bwidget_version}/arrow.tcl
+%attr(644,root,root) /usr/%{_lib}/tcl%{tcl_version}/BWidget-%{bwidget_version}/ChangeLog
+%attr(644,root,root) /usr/%{_lib}/tcl%{tcl_version}/BWidget-%{bwidget_version}/titleframe.tcl
+%attr(644,root,root) /usr/%{_lib}/tcl%{tcl_version}/BWidget-%{bwidget_version}/progressbar.tcl
+%attr(644,root,root) /usr/%{_lib}/tcl%{tcl_version}/BWidget-%{bwidget_version}/dialog.tcl
+%attr(644,root,root) /usr/%{_lib}/tcl%{tcl_version}/BWidget-%{bwidget_version}/CHANGES.txt
+%attr(644,root,root) /usr/%{_lib}/tcl%{tcl_version}/BWidget-%{bwidget_version}/images/italic.gif
+%attr(644,root,root) /usr/%{_lib}/tcl%{tcl_version}/BWidget-%{bwidget_version}/images/save.gif
+%attr(644,root,root) /usr/%{_lib}/tcl%{tcl_version}/BWidget-%{bwidget_version}/images/minus.xbm
+%attr(644,root,root) /usr/%{_lib}/tcl%{tcl_version}/BWidget-%{bwidget_version}/images/warning.gif
+%attr(644,root,root) /usr/%{_lib}/tcl%{tcl_version}/BWidget-%{bwidget_version}/images/file.gif
+%attr(644,root,root) /usr/%{_lib}/tcl%{tcl_version}/BWidget-%{bwidget_version}/images/paste.gif
+%attr(644,root,root) /usr/%{_lib}/tcl%{tcl_version}/BWidget-%{bwidget_version}/images/bold.gif
+%attr(644,root,root) /usr/%{_lib}/tcl%{tcl_version}/BWidget-%{bwidget_version}/images/undo.gif
+%attr(644,root,root) /usr/%{_lib}/tcl%{tcl_version}/BWidget-%{bwidget_version}/images/underline.gif
+%attr(644,root,root) /usr/%{_lib}/tcl%{tcl_version}/BWidget-%{bwidget_version}/images/opcopy.xbm
+%attr(644,root,root) /usr/%{_lib}/tcl%{tcl_version}/BWidget-%{bwidget_version}/images/print.gif
+%attr(644,root,root) /usr/%{_lib}/tcl%{tcl_version}/BWidget-%{bwidget_version}/images/palette.gif
+%attr(644,root,root) /usr/%{_lib}/tcl%{tcl_version}/BWidget-%{bwidget_version}/images/overstrike.gif
+%attr(644,root,root) /usr/%{_lib}/tcl%{tcl_version}/BWidget-%{bwidget_version}/images/copy.gif
+%attr(644,root,root) /usr/%{_lib}/tcl%{tcl_version}/BWidget-%{bwidget_version}/images/info.gif
+%attr(644,root,root) /usr/%{_lib}/tcl%{tcl_version}/BWidget-%{bwidget_version}/images/question.gif
+%attr(644,root,root) /usr/%{_lib}/tcl%{tcl_version}/BWidget-%{bwidget_version}/images/openfold.gif
+%attr(644,root,root) /usr/%{_lib}/tcl%{tcl_version}/BWidget-%{bwidget_version}/images/plus.xbm
+%attr(644,root,root) /usr/%{_lib}/tcl%{tcl_version}/BWidget-%{bwidget_version}/images/passwd.gif
+%attr(644,root,root) /usr/%{_lib}/tcl%{tcl_version}/BWidget-%{bwidget_version}/images/cut.gif
+%attr(644,root,root) /usr/%{_lib}/tcl%{tcl_version}/BWidget-%{bwidget_version}/images/open.gif
+%attr(644,root,root) /usr/%{_lib}/tcl%{tcl_version}/BWidget-%{bwidget_version}/images/hourglass.gif
+%attr(644,root,root) /usr/%{_lib}/tcl%{tcl_version}/BWidget-%{bwidget_version}/images/oplink.xbm
+%attr(644,root,root) /usr/%{_lib}/tcl%{tcl_version}/BWidget-%{bwidget_version}/images/redo.gif
+%attr(644,root,root) /usr/%{_lib}/tcl%{tcl_version}/BWidget-%{bwidget_version}/images/new.gif
+%attr(644,root,root) /usr/%{_lib}/tcl%{tcl_version}/BWidget-%{bwidget_version}/images/dragfile.gif
+%attr(644,root,root) /usr/%{_lib}/tcl%{tcl_version}/BWidget-%{bwidget_version}/images/dragicon.gif
+%attr(644,root,root) /usr/%{_lib}/tcl%{tcl_version}/BWidget-%{bwidget_version}/images/opmove.xbm
+%attr(644,root,root) /usr/%{_lib}/tcl%{tcl_version}/BWidget-%{bwidget_version}/images/folder.gif
+%attr(644,root,root) /usr/%{_lib}/tcl%{tcl_version}/BWidget-%{bwidget_version}/images/target.xbm
+%attr(644,root,root) /usr/%{_lib}/tcl%{tcl_version}/BWidget-%{bwidget_version}/images/error.gif
+%attr(644,root,root) /usr/%{_lib}/tcl%{tcl_version}/BWidget-%{bwidget_version}/scrollview.tcl
+%attr(644,root,root) /usr/%{_lib}/tcl%{tcl_version}/BWidget-%{bwidget_version}/init.tcl
+%attr(644,root,root) /usr/%{_lib}/tcl%{tcl_version}/BWidget-%{bwidget_version}/lang/en.rc
+%attr(644,root,root) /usr/%{_lib}/tcl%{tcl_version}/BWidget-%{bwidget_version}/lang/fr.rc
+%attr(644,root,root) /usr/%{_lib}/tcl%{tcl_version}/BWidget-%{bwidget_version}/lang/de.rc
+%attr(644,root,root) /usr/%{_lib}/tcl%{tcl_version}/BWidget-%{bwidget_version}/lang/es.rc
+%attr(644,root,root) /usr/%{_lib}/tcl%{tcl_version}/BWidget-%{bwidget_version}/lang/da.rc
+%attr(644,root,root) /usr/%{_lib}/tcl%{tcl_version}/BWidget-%{bwidget_version}/spinbox.tcl
+%attr(644,root,root) /usr/%{_lib}/tcl%{tcl_version}/BWidget-%{bwidget_version}/listbox.tcl
+%attr(644,root,root) /usr/%{_lib}/tcl%{tcl_version}/BWidget-%{bwidget_version}/tree.tcl
+%attr(644,root,root) /usr/%{_lib}/tcl%{tcl_version}/BWidget-%{bwidget_version}/LICENSE.txt
+%attr(644,root,root) /usr/%{_lib}/tcl%{tcl_version}/BWidget-%{bwidget_version}/utils.tcl
+%attr(644,root,root) /usr/%{_lib}/tcl%{tcl_version}/BWidget-%{bwidget_version}/dropsite.tcl
+%attr(644,root,root) /usr/%{_lib}/tcl%{tcl_version}/BWidget-%{bwidget_version}/dragsite.tcl
+%attr(644,root,root) /usr/%{_lib}/tcl%{tcl_version}/BWidget-%{bwidget_version}/panedw.tcl
+%attr(644,root,root) /usr/%{_lib}/tcl%{tcl_version}/BWidget-%{bwidget_version}/panelframe.tcl
+%attr(644,root,root) /usr/%{_lib}/tcl%{tcl_version}/BWidget-%{bwidget_version}/xpm2image.tcl
+%attr(644,root,root) /usr/%{_lib}/tcl%{tcl_version}/BWidget-%{bwidget_version}/messagedlg.tcl
+%attr(644,root,root) /usr/%{_lib}/tcl%{tcl_version}/BWidget-%{bwidget_version}/widget.tcl
+%attr(644,root,root) /usr/%{_lib}/tcl%{tcl_version}/BWidget-%{bwidget_version}/dynhelp.tcl
+%attr(644,root,root) /usr/%{_lib}/tcl%{tcl_version}/BWidget-%{bwidget_version}/label.tcl
+%attr(644,root,root) /usr/%{_lib}/tcl%{tcl_version}/BWidget-%{bwidget_version}/statusbar.tcl
+%attr(644,root,root) /usr/%{_lib}/tcl%{tcl_version}/BWidget-%{bwidget_version}/passwddlg.tcl
+%attr(644,root,root) /usr/%{_lib}/tcl%{tcl_version}/BWidget-%{bwidget_version}/pagesmgr.tcl
+#
+# These files will get removed during installation
+#
+%attr(755,root,indimail)                %{_prefix}/sbin/pwhelper
+%attr(555,root,indimail)                %{_prefix}/bin/FMbrowse
+%attr(555,root,indimail)                %{_prefix}/bin/indium
+%attr(555,root,indimail)                %{_prefix}/bin/litesrc
+%attr(555,root,indimail)                %{_prefix}/bin/secpanel
+%attr(555,root,indimail)                %{_prefix}/bin/supernotepad
+%attr(555,root,indimail)                %{_prefix}/bin/tkdiff
+%attr(444,root,indimail)                %{_prefix}/share/indium-%{version}/scripts/balloon.tcl
+%attr(444,root,indimail)                %{_prefix}/share/indium-%{version}/scripts/base64.tcl
+%attr(444,root,indimail)                %{_prefix}/share/indium-%{version}/scripts/combobox.tcl
+%attr(444,root,indimail)                %{_prefix}/share/indium-%{version}/scripts/common.tcl
+%attr(444,root,indimail)                %{_prefix}/share/indium-%{version}/scripts/convert_history.tcl
+%attr(444,root,indimail)                %{_prefix}/share/indium-%{version}/scripts/fileman.tcl
+%attr(444,root,indimail)                %{_prefix}/share/indium-%{version}/scripts/global.tcl
+%attr(444,root,indimail)                %{_prefix}/share/indium-%{version}/scripts/gui.tcl
+%attr(444,root,indimail)                %{_prefix}/share/indium-%{version}/scripts/help.tcl
+%attr(444,root,indimail)                %{_prefix}/share/indium-%{version}/scripts/hugecombo.tcl
+%attr(444,root,indimail)                %{_prefix}/share/indium-%{version}/scripts/hugelist.tcl
+%attr(444,root,indimail)                %{_prefix}/share/indium-%{version}/scripts/keydistribute.tcl
+%attr(444,root,indimail)                %{_prefix}/share/indium-%{version}/scripts/listserver.tcl
+%attr(444,root,indimail)                %{_prefix}/share/indium-%{version}/scripts/madHelp.tcl
+%attr(444,root,indimail)                %{_prefix}/share/indium-%{version}/scripts/mclistbox.tcl
+%attr(444,root,indimail)                %{_prefix}/share/indium-%{version}/scripts/notebook.tcl
+%attr(444,root,indimail)                %{_prefix}/share/indium-%{version}/scripts/progressbar.tcl
+%attr(444,root,indimail)                %{_prefix}/share/indium-%{version}/scripts/ranges.tcl
+%attr(444,root,indimail)                %{_prefix}/share/indium-%{version}/scripts/secpanel.dist
+%attr(444,root,indimail)                %{_prefix}/share/indium-%{version}/scripts/secpanel.wait
+
+# Shared libraries (omit for architectures that don't support them)
+%{_libdir}/libtai64.so
+%{_libdir}/libtai64-%{tai_version}.so.0
+%{_libdir}/libtai64-%{tai_version}.so.0.0.0
+%{_libdir}/libfbsql.so
+%{_libdir}/libfbsql-%{fbsql_version}.so.0
+%{_libdir}/libfbsql-%{fbsql_version}.so.0.0.0
+
+#
+# If the configuration file should not be replaced when the RPM is
+# upgraded, mark it as follows:
+# %config(noreplace) filename
+#
+# For files that should be included in the list of files so that they
+# are uninstalled when the package is removed but may not exist until
+# they are created during post-install should be marked as follows:
+# %config(missingok) filename
+#
+%doc %attr(444, root, qmail)                          %{_prefix}/share/indium-%{version}/lib/userhelp.txt
+%attr(444,root,indimail) %config(noreplace,missingok) %{_prefix}/share/indium-%{version}/etc/default.config
+%attr(444,root,indimail) %config(noreplace,missingok) %{_prefix}/share/indium-%{version}/etc/default.profile
+%attr(444,root,indimail) %config(noreplace,missingok) %{_prefix}/share/indium-%{version}/etc/filemanrc
+
+%clean
+/bin/rm -rf %{buildroot}
+
+#          install   erase   upgrade  reinstall
+# % pre         1        -         2         2
+# % post        1        -         2         2
+# % preun       -        0         1         -
+# % postun      -        0         1         -
+%pre 
+#echo This is pre for %{version}-%{release} : arg=$1
+argv1=$1
+ID=$(id -u)
+if [ $ID -ne 0 ] ; then
+echo "You are not root"
+exit 1
+fi
+
+%post
+argv1=$1
+ID=$(id -u)
+if [ $ID -ne 0 ] ; then
+echo "You are not root"
+exit 1
+fi
+# Recreate ld.so links and cache
+if [ -d %{_sysconfdir}/ld.so.conf.d ] ; then
+	(
+		echo %{_libdir}
+		echo %{mysqlPrefix}/%{_lib}/mysql 
+	) > %{_sysconfdir}/ld.so.conf.d/indimail-%{_arch}.conf
+fi
+/sbin/ldconfig
+
+%preun
+#echo This is preun for %{version}-%{release} : arg=$1
+ID=$(id -u)
+if [ $ID -ne 0 ] ; then
+echo "You are not root"
+exit 1
+fi
+
+%postun
+#echo This is postun for %{version}-%{release} : arg=$1
+ID=$(id -u)
+if [ $ID -ne 0 ] ; then
+echo "You are not root"
+exit 1
+fi
+/sbin/ldconfig
+
+%changelog
