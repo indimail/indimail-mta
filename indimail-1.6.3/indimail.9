@@ -293,6 +293,750 @@ directory there.
 
 You can use the \fBvreorg(8)\fR program to recreate the \fIdir-control\fR table.
 
+.SH Environment Variables
+Some IndiMail programs set or use environment variables. The following
+table lists these variables and describes their use.
+.RS
+.TS
+l l.
+Environ  Variable |Program      |Set/Used|Purpose
+------------------|-------------|--------|----------------------------------------
+CONTROLDIR        |qmail-smtpd  |used    |The directory containing control files.
+                  |qmail-remote |        |If not defined qmail_home/control
+                  |spawn-filter |        |is used
+                  |qmail-local  |        |
+                  |ipmeprint    |        |
+                  |qmail-newmrh |        |
+                  |qmail-qstat  |        |
+                  |qmail-send   |        |
+                  |qmail-showctl|        |
+                  |qmail-spamdb |        |
+                  |qmail-todo   |        |
+                  |qmail-command|        |
+------------------|-------------|--------|----------------------------------------
+QUEUEDIR          |qmail-queue  |used    |queue path from where to pick up mails
+                  |qmail-clean  |        |for local and remote deliveries
+                  |qmail-daemon |        |
+                  |qmail-rm     |        |
+                  |qmail-send   |        |
+                  |qmail-tcpok  |        |
+                  |qmail-tcpto  |        |
+                  |qmail-todo   |        |
+                  |spawn-filter |        |
+                  |qmail-lspawn |        |
+                  |qmail-rspawn |        |
+------------------|-------------|--------|----------------------------------------
+ENVRULES          |qmail-smtpd  |used    |Any environment variable(s) can be set
+                  |spawn-filter |        |based on senders/recipients matching a
+                  |qmail-inject |        |given value.
+                  |             |        |smtp 
+                  |             |        |REQUIREAUTH, QREGEX, ENFORCE_FQDN_HELO,
+                  |             |        |DATABYTES, BADHELOCHECK, BADHELO,
+                  |             |        |NODNSCHECK, VIRUSCHECK, SIGNATURES,
+                  |             |        |BODYCHECK, BADMAILFROM,
+                  |             |        |BADMAILFROMPATTERNS, BOUNCEMAIL,
+                  |             |        |CUGMAIL, MASQUERADE, DEFAULT_DOMAIN,
+                  |             |        |BADRCPTTO, BADRCPTPATTERNS, TARPITCOUNT,
+                  |             |        |TARPITDELAY, MAXRECIPIENTS, AUTH_ALL,
+                  |             |        |CHECKRELAY, CONTROLDIR, ANTISPOOFING,
+                  |             |        |CHECKRECIPIENT SPAMFILTER, LOGFILTER,
+                  |             |        |SPAMFILTERARGS, SPAMEXITCODE,
+                  |             |        |REJECTSPAM, SPAMREDIRECT, SPAMIGNORE,
+                  |             |        |SPAMIGNOREPATTERNS, FILTERARGS,
+                  |             |        |QMAILQUEUE, QMAILREMOTE, QMAILLOCAL,
+                  |             |        |RELAYCLIENT, QQEH, BADEXT,
+                  |             |        |BADEXTPATTERNS, ACCESSLIST, QHPSI,
+                  |             |        |REJECTSPAM, REJECTVIRUS
+                  |             |        |spawn-filter
+                  |             |        |SPAMFILTER, LOGFILTER, SPAMFILTERARGS,
+                  |             |        |FILTERARGS, SPAMEXITCODE, REJECTSPAM,
+                  |             |        |SPAMREDIRECT, SPAMIGNORE,
+                  |             |        |SPAMIGNOREPATTERNS, QREGEX, DATABYTES,
+                  |             |        |SMTPROUTE
+------------------|-------------|--------|----------------------------------------
+QREGEX            |qmail-smtpd  |used    |If set, regex is used to evaluate
+                  |spawn-filter |        |patterns in
+                  |             |        |  1.badhelo
+                  |             |        |  2.blackholedsender
+                  |             |        |  3.badmailfrom
+                  |             |        |  4.badrcptto
+                  |             |        |  5.spamignore
+                  |             |        |  6.relaymailfrom
+                  |             |        |  7.authdomains
+                  |             |        |  8.chkrcptdomains
+                  |             |        |  9.accesslist
+------------------|-------------|--------|----------------------------------------
+EXTRAQUEUE        |qmail-queue  |used    |Extra recipient to be added to the
+                  |             |        |recipient list before queueing the mail.
+QHPSI             |qmail-queue  |used    |If set enables the Qmail High
+                  |             |        |Performance Scanner Interface. This
+                  |             |        |should be set to the path of the virus
+                  |             |        |scanner. If SCANCMD is defined
+QHPSIRC           |qmail-queue  |used    |To specify the return code of the virus
+                  |             |        |scanner in case of an infection;
+                  |             |        |default is 1.
+QHPSIMINSIZE      |qmail-queue  |used    |The minimal size of the message to
+                  |             |        |invoke the virus scanner; default is 0.
+                  |             |        |A typical choice would be
+                  |             |        |QHPSIMISIZE=10000 (~10k).
+QHPSIMAXSIZE      |qmail-queue  |used    |The maximal size of the message to
+                  |             |        |invoke the virus scanner; default is
+                  |             |        |unrestricted. A typical choice would be
+                  |             |        |QHPPIMAXSIZE=1000000.
+QUARANTINE        |qmail-queue  |used    |If set, all mails get redirected to the
+                  |             |        |id defined by the environment variable
+QHPSIFORWARD      |qmail-queue  |used    |If set, virus infected mails get
+                  |             |        |redirectored to the id defined by the
+                  |             |        |environment variable
+REJECTVIRUS       |qmail-queue  |used    |Sets action to be carried out on
+                  |             |        |detection of virus
+                  |             |        | 0 – Accept infected mails
+                  |             |        | 1 – Bounce the mail.
+                  |             |        | 2 – Blackhole the mail.
+NULLQUEUE         |qmail-queue  |used    |If set, mail transaction is sent to
+                  |             |        |/dev/null without returning an error
+                  |             |        |(blackholing)
+ENVHEADERS        |qmail-queue  |used    |
+LOGHEADERS        |qmail-queue  |used    |
+REMOVEHEADERS     |qmail-queue  |used    |Name of control file containing a list
+                  |             |        |of email headers that should be removed
+                  |             |        |before putting into the queue. If not 
+                  |             |        |supplied, qmail-queue uses the control
+                  |             |        |file removeheaders.
+PLUGINDIR         |qmail-queue  |used    |Directory in /var/indimail containing
+                  |             |        |dynamically loadable virus scanner
+                  |             |        |plugins
+VIRUS_PLUGIN      |qmail-queue  |used    |The function to be called when a
+                  |             |        |dynamic virus scanner plugin is loaded
+QQEH              |qmail-queue  |used    |qmail-queue passes this variable into
+                  |qmail-local  |        |the queue. qmail-local and qmail-remote
+                  |forward      |        |will prepend it to the headers of email
+                  |condredirect |        |when it is delivered
+                  |             |        |
+------------------|-------------|--------|----------------------------------------
+QUEUE_COUNT       |qmail-multi  |used    |No of queues setup
+QUEUE_START       |qmail-multi  |used    |Number denoting the first queue
+QUEUEDIR          |qmail-multi  |set     |queue path where mails are queued
+MIN_FREE          |qmail-multi  |used    |Minimum free disk space allowed on the
+                  |             |        |QUEUE filesystem after which mails get
+                  |             |        |rejected with a temporary error. By
+                  |             |        |setting this the IndiMail system becomes
+                  |             |        |crashproof as well as bounceproof
+SPAMFILTER        |qmail-multi  |used    |Filter program to filter mail before
+                  |spawn-filter |        |passing it to qmail-queue
+SPAMFILTERARGS    |qmail-multi  |used    |Arguments to be passed to the spam
+                  |spawn-filter |        |filter program.
+SPAMEXITCODE      |qmail-multi  |used    |Exit code of the spamfilter which
+                  |spawn-filter |        |denotes a spam mail.
+REJECTSPAM        |qmail-multi  |used    |If set, and if the filter program
+                  |spawn-filter |        |returns an exit code matching the value
+                  |             |        |of SPAMEXITCODE, the mail is permanently
+                  |             |        |rejected
+SPAMIGNORE        |qmail-smtpd  |used    |ignore users listed in this control file
+                  |spawn-filter |        |
+                  |chowkidar    |        |
+SPAMIGNOREPATTERNS|qmail-smtpd  |used    |same as above, except that the user list
+                  |spawn-filter |        |can have wildcards.
+                  |chowkidar    |        |
+SPAMREDIRECT      |qmail-multi  |used    |Redirect SPAM tagged mails to the user
+                  |spawn-filter |        |specified by this environment variable
+FILTERARGS        |qmail-multi  |used    |Arguments with with Filter program will
+                  |spawn-filter |        |be called
+LOGFILTER         |qmail-smtpd  |used    |If set, the filter program has available
+                  |spawn-filter |        |the file descriptor 255 where it can log
+                  |             |        |additonal status messages to be logged
+                  |             |        |in the qmail-smtpd's log file. This
+                  |             |        |should be set to a filename which will
+                  |             |        |be used by the spamlogger service.
+MAKE_SEEKABLE     |qmail-multi  |used    |If set, the pipe used by various
+                  |spawn-filter |        |programs to communicate is made
+                  |vdelivermail |        |seekable. This improves the performance
+                  |qmail-       |        |of filters.
+                  |autoresponder|        |
+------------------|-------------|--------|----------------------------------------
+QMAILLOCAL        |spawn-filter |used    |The mda to call for local deliveries
+                  |             |        |(default qmail-local if not defined)
+QMAILREMOTE       |spawn-filter |used    |The smtp cilent to call for local
+                  |             |        |deliveries (default qmail-remote if
+                  |             |        |not defined)
+------------------|-------------|--------|----------------------------------------
+DEFAULT           |qmail-command|set     |Portion of address matching "-default"
+                  |             |        |in a .qmail file name.
+DTLINE            |             |        |Delivered-To header field
+EXT               |             |        |The address extension
+EXT2              |             |        |Portion of EXT following first dash
+EXT3              |             |        |Portion of EXT following second dash
+EXT4              |             |        |Portion of EXT following third dash
+HOST              |             |        |The domain part of the recipient address
+HOST2             |             |        |Portion of HOST preceding last dot.
+HOST3             |             |        |Portion of HOST preceding second-to-last
+                  |             |        |dot
+HOST4             |             |        |Portion of HOST preceding third-to-last
+                  |             |        |dot
+HOME              |             |        |The user's home directory
+LOCAL             |             |        |The local part of the recipient address
+NEWSENDER         |             |        |Forwarding sender address
+                  |             |        |(see "man dot-qmail")
+RECIPIENT         |             |        |Envelope recipient address
+RPLINE            |             |        |Return-Path header field
+SENDER            |             |        |Envelope sender address
+UFLINE            |             |        |UUCP-style "From" line
+USER              |             |        |The current user
+------------------|-------------|--------|----------------------------------------
+LOGNAME           |qmail-inject |used    |User name in From header field
+MAILHOST          |             |        |Host name in From header field
+MAILNAME          |             |        |Personal name in From header field
+MAILUSER          |             |        |User name in From header field
+NAME              |             |        |Personal name in From header field
+QMAILDEFAULTDOMAIN|             |        |Overrides control/defaultdomain
+QMAILDEFAULTHOST  |             |        |Overrides control/defaulthost
+QMAILHOST         |             |        |Host name in From header field
+QMAILIDHOST       |             |        |Overrides control/idhost
+QMAILINJECT       |             |        |Specify various  options (see next
+                  |             |        |table)
+QMAILMFTFILE      |             |        |File containing list of mailing list
+                  |             |        |addresses for Mail-Followup-To
+                  |             |        |generation
+QMAILNAME         |             |        |Personal name in From header field
+QMAILPLUSDOMAIN   |             |        |Overrides control/plusdomain
+QMAILSHOST        |             |        |Host name in envelope sender address
+QMAILSUSER        |             |        |User name in envelope sender address
+QMAILUSER         |             |        |User name in From header field
+USER              |             |        |User name in From header field
+------------------|-------------|--------|----------------------------------------
+DKQUEUE           |qmail-dk     |used    |Specifies the path to the qmail-queue
+                  |             |        |executable. If this is not set, qmail-dk
+                  |             |        |will invoke qmail-multi
+DKSIGN            |qmail-dk     |used    |If set to the path of a private key,
+                  |             |        |qmail-dk signs the message using the
+                  |             |        |private key. This variable should be set
+                  |             |        |when a host is authorized to relay.
+DKVERIFY          |qmail-dk     |used    |If set, messages are verified and 
+                  |             |        |qmail-dk will insert the
+                  |             |        |DomainKey-Status header. The behaviour
+                  |             |        |depends on the set of letters to which
+                  |             |        |DKVERIFY is set. A conservative set of
+                  |             |        |letters is DEGIJKfh
+DKSIGNOPTIONS     |qmail-dk     |used    |Options to use for dk signing.
+                  |dk-filter    |        |
+------------------|-------------|--------|----------------------------------------
+DKIMQUEUE         |qmail-dkim   |used    |Specifies the path to the qmail-queue
+                  |             |        |executable. If this is not set,
+                  |             |        |qmail-dkim will invoke qmail-multi
+DKIMSIGN          |qmail-dkim   |used    |If set to the path of a private key,
+                  |             |        |qmail-dkim signs the message using the
+                  |             |        |private key. This variable should be set
+                  |             |        |when a host is authorized to relay.
+DKIMVERIFY        |qmail-dkim   |used    |If set, messages are verified and
+                  |             |        |qmail-dkim will insert the DKIM-Status
+                  |             |        |header.
+DKIMSIGNOPTIONS   |qmail-dkim   |used    |Options to use for dkim signing
+                  |dk-filter    |        |
+SIGN_PRACTICE     |qmail-dkim   |used    |For using SSP or ADSP as the signing
+                  |             |        |practice
+------------------|-------------|-------------------------------------------------
+DATABYTES         |qmail-smtpd  |used    |override control/databytes
+DATABYTES         |qmail-inject |used    |override control/databytes
+DATABYTES         |sendmail     |used    |override control/databytes
+DATABYTES         |spawn-filter |used    |override control/databytes
+------------------|-------------|--------|----------------------------------------
+BOUNCEPROCESSOR   |qmail-send   |used    |External bounceprocess to call for
+                  |             |        |handling bounces.
+BOUNCEQUEUE       |qmail-send   |        |Queue to be used for injecting bounces
+TODO_INTERVAL     |qmail-send   |        |To set the minumum time interval between
+                  |qmail-todo   |        |two todo runs. By increasing this you
+                  |             |        |can reduce the disk IO. But there is a
+                  |             |        |latency on mail delivery times 
+------------------|-------------|--------|----------------------------------------
+TMPDIR            |qmail-multi  |used    |Sets directory to use for temporary
+                  |qmail-qfilter|        |files. Default is /tmp
+                  |qmail-smtpd  |        |
+                  |spawn-filter |        |
+PROTO             |sendmail     |used    |Used internally by sendmail -bs flag.
+------------------|-------------|--------|----------------------------------------
+RELAYCLIENT       |qmail-smtpd  |used    |Ignore control/rcpthosts and append
+                  |             |        |value to recipient address. This is used
+                  |             |        |for selective relaying to domains not
+                  |             |        |listed in rcpthosts.
+AUTH_ALL          |             |        |If set, sending mail to all domains will
+                  |             |        |require authentication (regardless of
+                  |             |        |whether the domain is listed in
+                  |             |        |rcpthosts).
+REQUIREAUTH       |             |        |If set, 'mail from' is not accepted
+                  |             |        |without prior authenticated SMTP.
+AUTH_DOMAINS      |             |        |List of comma separated domains whose
+                  |             |        |senders will allways require
+                  |             |        |authentication to send out mails
+                  |             |        |(regardless of whether the domain is
+                  |             |        |listed in rcpthosts). Multiple domains
+                  |             |        |can also be set with ':' or newline as
+                  |             |        |the delimiter. e.g.
+                  AUTH_DOMAINS=`cat ~indimail/control/authdomains`
+                  |             |        |where authdomains is a file containing
+                  |             |        |list of domains one per line.
+CHECKRELAY        |             |        |Relay table in MySQL is checked for
+                  |             |        |'return path' before sending mails to
+                  |             |        |outside domains. Allows users to relay
+                  |             |        |mails to foreign domains.
+CHECKRECIPIENT    |             |        |Used for checking the status of the
+                  |             |        |user. The presence of the user can be
+                  |             |        |checked in MySQL (indimail) or
+                  |             |        |indimail~/users/recipients.cdb. If the
+                  |             |        |control file chkrcptdomains is present,
+                  |             |        |then only domains listed in
+                  |             |        |chkrcptdomainare checked. If
+                  |             |        |chkrcptdomain is absent, |all domains
+                  |             |        |are checked. The value of CHECKRECIPIENT
+                  |             |        |can be one of the 3 values
+                  |             |        |  1.Check MySQL
+                  |             |        |  2.Check both MySQL and recipients.cdb
+                  |             |        |  3.Check recipients.cdb
+MASQUERADE        |             |        |Allows the authenticated userid in AUTH
+                  |             |        |SMTP to be different from the 
+CUGMAIL           |             |        |Return-Path. Turns of relaying to
+ANTISPOOFING      |             |        |foreign domains. Turns of spoofing of
+                  |             |        |Return-Path for local users.
+MAXRECIPIENTS     |             |        |Maximum number of recipients allowed in
+                  |             |        |a single SMTP session.
+TARPITCOUNT       |             |        |Maximum number of recipients allowed in
+                  |             |        |a single SMTP session after which an
+                  |             |        |artificial delay is introduced.
+TARPITDELAY       |             |        |No of seconds of delay to be imposed on
+                  |             |        |the SMTP session when number of
+                  |             |        |recipients in a single SMTP session
+                  |             |        |exceeds the value of TARPITCOUNT
+BADHELOCHECK      |             |        |Enables checking of badhelo control
+                  |             |        |file and validity of the HELO/EHLO
+                  |             |        |string as a valid domain.
+BADHELO           |             |        |Use this as the filename for bad helo
+                  |             |        |REGEX strings.
+ENFORCE_FQDN_HELO |             |        |Forces argument to helo/ehlo command to
+                  |             |        |be a fully qualified domain name.
+BOUNCEMAIL        |             |        |When this is set, SMTP server issues
+                  |             |        |this as a message to the client with a
+                  |             |        |permanent error.
+WARNMAIL          |             |        |Enables warn_mail function.
+WARNMAIL          |             |        |X-Spam-Warning: lines inserted in 
+.. WARNMAIL9      |             |        |message if these are set.
+SHUTDOWN          |             |        |Issues temporary errors for all commands
+BADMAILFROM       |             |        |Override the default name for the
+                  |             |        |'badmailfrom' control file
+BADMAILPATTERNS   |             |        |Override the default name for the
+                  |             |        |'badmailpatterns' control file
+BADRCPTTO         |             |        |Override the default name for the
+                  |             |        |'badrcptto' control file
+BADRCPTPATTERNS   |             |        |Override the default name for the
+                  |             |        |'badrcptpatterns' control file
+BODYCHECK         |             |        |Enables content filtering during a SMTP
+                  |             |        |session. The value of BODYCHECK
+                  |             |        |environment variable specifies the name
+                  |             |        |of the control file containing regex
+                  |             |        |patterns to be matched in an email.
+VIRUSCHECK        |             |        |Enables in-built virus scanning engine
+                  |             |        |in qmail-smtpd. Virus patterns can be
+                  |             |        |maintained in the control file
+                  |             |        |'signatures'. If set to a value > 1,
+                  |             |        |it can be used to call an external
+                  |             |        |scan engine for checking viruses and
+                  |             |        |bad attachments
+                  |             |        |  1.Internal scanner
+                  |             |        |  2.Internal+External+attachment scan.
+                  |             |        |  3.Internal+attachment scan 
+                  |             |        |  4.External+attachment scan
+                  |             |        |  5.External scanner
+                  |             |        |  6.Attachment scan
+SIGNATURES        |             |        |Override the name of the default virus
+                  |             |        |pattern control file 'signatures'
+HOSTACCESS        |             |        |Defines from which IP address or set of
+                  |             |        |IP addresses can mail from a particular
+                  |             |        |domain originate.
+PARANOID          |             |        |If set, then only pairs having a match
+                  |             |        |in the 'hostaccess' control file are
+                  |             |        |granted access
+DOMAIN_MASQUERADE |             |        |If set, all IP address having a match in
+                  |             |        |the 'hostaccess' control file are
+                  |             |        |granted access
+------------------|-------------|--------|----------------------------------------
+STARTTLS          |qmail-smtpd  |used    |Enables the ESMTP STARTTLS extension
+SMTPS             |             |        |Turns on the deprecated SMTPS protocol
+                  |             |        |on port 465
+SERVERCERT        |             |        |File having SSL certificate to be
+                  |             |        |presented to clients in TLS encrypted
+                  |             |        |sessions. This overrides the control
+                  |             |        |file servercert.pem
+CLIENTCA          |             |        |A file having list of Certifying
+                  |             |        |Authority (CA) certificates that are
+                  |             |        |used to verify the client-presented
+                  |             |        |certficates during a TLS-encrypted
+                  |             |        |session. This overrides the control
+                  |             |        |file clientca.pem
+CLIENTCRL         |             |        |File having a list of Revocation Lists
+                  |             |        |(CRLs). This overrides the control file
+                  |             |        |clientcrl.pem
+TLSCIPHERS        |             |        |A  set  of OpenSSL cipher strings.
+                  |             |        |Multiple ciphers contained in a string
+                  |             |        |should be separated by a colon.
+------------------|-------------|--------|----------------------------------------
+NODNSCHECK        |qmail-smtpd  |used    |If set, the domain part of an email
+                  |             |        |address is not verified.
+SPFBEHAVIOUR      |             |        |SPF check gets enabled
+                  |             |        |  0.SPF Disabled
+                  |             |        |  1.Annotate with Received-SPF fields
+                  |             |        |  2.Producte temporary failures on DNS
+                  |             |        |    lookup problems
+                  |             |        |  3.Reject if SPF record says fail
+                  |             |        |  4.Strict mode. Reject for 'fail'
+                  |             |        |    and 'softfail'
+                  |             |        |  5.Reject for 'fail', 'softfail'
+                  |             |        |    and 'neutral'
+                  |             |        |  6.Reject if no SPF record is
+                  |             |        |    available or for syntax error
+OPENRELAY         |             |        |If set, qmail-smtpd rejects incoming
+                  |             |        |connection with (553 code) the message
+                  |             |        |“No mail accepted from an open relay”
+GREYIP            |             |        |If set, will send a UDP packet to
+                  |             |        |greydaemon for greylisting
+GREETDELAY        |             |        |Time in seconds by which qmail-smtpd
+                  |             |        |delays the “220 ESMTP” welcome prompt.
+                  |             |        |This overrides the greetdelay control
+                  |             |        |file.
+------------------|-------------|--------|----------------------------------------
+SCANCMD           |qscanq       |used    |The virus scanner to run for scanning
+                  |             |        |emails. A '%s' in SCANCMD will get
+                  |             |        |replaced with the filename in the mess
+                  |             |        |directory (file containing the entire
+                  |             |        |content of the email)
+BADEXT            |qscanq-stdin |used    |Name of control file specifying list of
+                  |             |        |prohibited filename extensions in mail.
+BADEXTPATTERNS    |qscanq-stdin |used    |Name of control file specifying regex
+                  |             |        |patterns of list of prohibited filename
+                  |             |        |extensions in mail
+SCANDIR           |qscanq       |used    |Name of directory where qscanq will
+                  |             |        |create temporary work directory for
+                  |             |        |extracting mime from emails.
+SCANINTERVAL      |svscan       |used    |Time interval in which svscan should do
+                  |             |        |a directory scan to look for new
+                  |             |        |services. If set to 0, scanning is
+                  |             |        |disabled. However the scan can be
+                  |             |        |manually triggered by sending svscan a
+                  |             |        |HUP signal. If not set, the default
+                  |             |        |scan interval is 5 seconds.
+------------------|-------------|--------|----------------------------------------
+USE_FSYNC         |qmail-queue  |used    |Causes fsync() to be used for all
+                  |qmail-local  |        |open files. This makes IndiMail crash
+                  |qmail-send   |        |proof with a minor performance penalty
+                  |qmail-todo   |        |
+USE_SYNCDIR       |qmail-queue  |used    |Emulates BSD style synchronous
+                  |qmail-local  |        |directories.
+                  |qmail-send   |        |
+                  |qmail-todo   |        |
+ROUTES            |qmail-rspawn |set     |If defined as static, control/smtproutes
+                  |             |        |is used, else hostcntrl is used and
+                  |             |        |SMTPROUTE environment variables is set
+SMTPROUTE         |qmail-rspawn |used    |overrides control/smtproutes
+SMTPROUTE         |qmail-remote |        |
+AUTH_SMTP         |qmail-remote |used    |Uses Authenticated SMTP on the remote
+                  |             |        |SMTP server to push out mails. The
+                  |             |        |username and password must be specified
+                  |             |        |in smtproutes separated by spaces. e.g.
+                  |             |        |test.com:25 postmaster@test.com pass
+DOMAINBINDINGS    |qmail-remote |        |Name to be used for the domainbindings
+                  |             |        |control file.
+AUTHSELF          |qmail-lspawn |used    |Causes PWSTRUCT environment variable to
+                  |             |        |be set. This eliminates the need for
+                  |             |        |vdelivermail to make connection to the
+                  |             |        |database (MySQL). On a high volume
+                  |             |        |server, this can significantly improve
+                  |             |        |the database performance.
+PWSTRUCT          |qmail-lspawn |set     |Has /etc/passwd format. Set by
+                  |             |        |qmail-lspawn after doing vauth_getpw()
+------------------|-------------|--------|----------------------------------------
+PWSTRUCT          |vdelivermail |used    |Uses the environment variable to fetch
+                  |vfilter      |        |the passwd structure rather than from
+                  |             |        |the database.
+MDA               |vfilter      |used    |Executable to be called for delivering
+                  |             |        |the mail. By default, vfilter calls
+                  |             |        |vdelivermail. Command line arguments
+                  |             |        |can also be specified in the environment
+                  |             |        |variable
+MAILCOUNT_LIMIT   |vdelivermail |used    |Max deliveries permitted for a user in
+                  |             |        |a day.
+MAILSIZE_LIMIT    |             |        |Max total size of mail delivery/day for
+                  |             |        |a user.
+OVERQUOTA_MAILSIZE|             |        |Maximum allowed size of mail when user
+                  |             |        |is over quota
+HOLDOVERQUOTA     |             |        |If set, vdelivermail will defer mails
+                  |             |        |when user runs out of quota. The command
+                  |             |        |defined by OVERQUOTA_CMD will be run.
+                  |             |        |However, BOUNCE_FLAG and lastdeliver
+                  |             |        |table will not be updated
+MAILDIRFOLDER     |             |        |Alternate Folder to deliver incoming
+                  |             |        |mail.
+MTA               |             |        |Default MTA to use for injecting mails
+                  |             |        |(currently qmail-inject or postfix)
+------------------|-------------|--------|----------------------------------------
+OVERQUOTA_CMD     |vdelivermail |used    |Command to be run when user becomes
+                  |authindi     |        |overquota. Triggered during mail
+                  |             |        |delivery or during IMAP/POP3
+                  |             |        |authentication.
+------------------|-------------|--------|----------------------------------------
+INCLUDE_TRASH     |vdelivermail |used    |If set, vdelivermail will include trash
+                  |             |        |in quota calculations.
+------------------|-------------|--------|----------------------------------------
+REAL_DOMAINS      |qmail-rspawn |used    |List of real domains separated by the
+                  |qmail-lspawn |        |':' character. e.g.
+                  |InLookup     |        |indimail.org:yahoo.com
+                  |vfilter      |        |
+                  |vdelivermail |        |
+ALIAS_DOMAINS     |             |        |List of aliasdomain-realdomain pair
+                  |             |        |separated by the ':' character. e.g.
+                                indimail.in,indimail.org:yahoo.co.in,yahoo.com
+------------------|-------------|--------|----------------------------------------
+POSTAUTH          |authindi     |used    |Command to be run post successful
+                  |systpass     |        |authentication. If return value is 2 or
+                  |vchkpass     |        |3, the homedir gets set to the
+                  |proxyimap    |        |environment variable TMP_MAILDIR if
+                  |proxypop3    |        |defined else the user's home directoriy.
+                  |             |        |If the return value is 3, authindi will
+                  |             |        |additionally display a message defined
+                  |             |        |by the environment variable MSG_ONERROR
+                  |             |        |(if defined) and will exit if the
+                  |             |        |environment variable EXIT_ONERROR is
+                  |             |        |defined.
+TMP_MAILDIR       |authindi     |used    |Home directory set for imap/pop3 if the
+                  |proxyimap    |        |command defined by POSTAUTH exits with 2
+                  |proxypop3    |        |or 3
+MSG_ONERROR       |             |        |Message displayed to IMAP/POP3 clients
+                  |             |        |when script defined by POSTAUTH exits
+                  |             |        |with 2 or 3
+EXIT_ONERROR      |             |        |If the command defined by POSTAUTH
+                  |             |        |environment variable exits with 2 or 3
+                  |             |        |and this environment variable is
+                  |             |        |defined, IMAP/POP3 client will exit
+                  |             |        |preventing the user from accessing
+                  |             |        |mailbox
+------------------|-------------|--------|----------------------------------------
+DESTPORT          |proxyimap    |used    |Used to determine whether the
+                  |proxypop3    |        |destination port is imap or pop3. The
+                  |authindi     |        |format is either imap:port_num or
+                  |             |        |pop3:port_num, where port_num is a port
+                  |             |        |on which either IMAP or POP3 server is
+                  |             |        |listening.
+NOLASTAUTH        |             |        |If set, lastauth insert is disabled
+                  |             |        |during authentication.
+MIGRATEUSER       |             |        |Program to be run once (first time) when
+                  |             |        |the user logs in successfully
+                  |             |        |(successful authentication).
+MIGRATEFLAG       |             |        |Zero bytes file created in User's
+                  |             |        |Maildir to figure out if the migration
+                  |             |        |program defined by environment variable
+                  |             |        |MIGRATEUSER has been run.
+ACTIVATEMAIL      |             |        |Specifies the default name of the
+                  |             |        |activation mail in the bulk mail
+                  |             |        |directory.
+WELCOMEMAIL       |             |        |Specifies the default name of the
+                  |             |        |welcome mail in the bulk mail directory.
+BULK_MAILDIR      |             |        |Constitutes part of the bulk mail
+                  |             |        |directory. e.g. for indi.com the bulk
+                  |             |        |mail directory will be
+                  |             |        |indimail~/control/indi.com/$BULK_MAILDIR
+BULK_HOST         |             |        |Environment variables to be set when the
+                  |             |        |'bulkmail' table lies on a remote MySQL
+                  |             |        |host.
+BULK_VPORT        |             |        |Port for the 'bulkmail' MySQL
+BULK_SOCKET       |             |        |Socket for the 'bulkmail' MySQL
+BULK_USER         |             |        |User for the 'bulkmail' MySQL
+BULK_PASSWD       |             |        |Password for the 'bulkmail' MySQL
+BULK_DATABASE     |             |        |Database for the 'bulkmail' MySQL
+MIN_LOGIN_INTERVAL|             |        |Minimum time permitted between two
+                  |             |        |successful authentication.
+                  |             |        |Authentication requests made before this
+                  |             |        |teme elapsed are rejected. To remove
+                  |             |        |this restriction, set this to 0.
+NORELAY           |             |        |If set, insert to table 'relay'
+                  |             |        |after successful authentication
+                  |             |        |is disabled. This in effect disables
+                  |             |        |relaying (Roaming Users).
+TCP_FILE          |             |        |File containing list of default tcprules
+                  |             |        |to be applied. Default is
+                  |             |        |/var/indimail/etc/tcp.smtp.
+OPEN_SMTP_CUR_FILE|             |        |File containing list of tcprules for IP
+                  |             |        |addresses of users who have
+                  |             |        |authenticated in the past
+                  |             |        |RELAY_CLEAR_MINUTES. Default
+                  |             |        |is /var/indimail/etc/open-smtp
+------------------|-------------|--------|----------------------------------------
+RELAY_TABLE       |authindi     |used    |MySQL table name containing user
+                  |InLookup     |        |authentication timestamps for
+                  |clearopensmtp|        |implementing POP/IMAP before SMTP.
+------------------|-------------|--------|----------------------------------------
+PASSWD_CACHE      |authindi     |used    |Enables Password caching. Improves
+                  |InLookup     |        |performance for a very busy site. For
+                  |vchkpass     |        |dormant sites, this should be turned off
+                  |             |        |as passwd changes take time to get
+                  |             |        |reflected.
+QUERY_CACHE       |authindi     |used    |Enables Query caching. Improves
+                  |InLookup     |        |performance for a very busy site. For
+                  |vchkpass     |        |dormant sites, this should be turned off
+                  |             |        |as passwd changes take time to get
+                  |             |        |reflected.
+------------------|-------------|--------|----------------------------------------
+RELAY_CLEAR_MIN   |clearopensmtp|used    |No of minutes after which the
+-UTES             |InLookup     |        |authentication request maintained in the
+                  |vuserinfo    |        |relay table is expired. This is used for
+                  |authindi     |        |sites using pop/imap before smtp
+                  |vchkpass     |        |authentication
+                  |proxyimap    |        |
+                  |proxypop3    |        |
+------------------|-------------|--------|----------------------------------------
+DATA_TIMEOUT      |proxyimap    |used    |Used for timing out if no data flows
+                  |proxypop3    |        |between the user's MUA and the proxy, or
+                  |             |        |between the proxy and the actual
+                  |             |        |IMAP/POP3 daemon.
+SLEEPTIME         |             |        |Minimum duration between connection
+                  |             |        |attempts, if connection is refused.
+LEGACY_SERVER     |             |        |If the destination imap/pop3 server are
+                  |             |        |not indimail then this needs to be set.
+                  |             |        |The destination imap/pop3 server will
+                  |             |        |always see proxy server's IP address
+                  |             |        |regardless from where the user logs in.
+------------------|-------------|--------|----------------------------------------
+DOMAIN_LIMITS     |authindi     |used    |The vlimit structure is checked and the
+                  |vadduser     |        |pw_gid field is OR'ed with the value
+                  |vdeldomain   |        |fetched from the vlimit table. This
+                  |             |        |allows domain wide limits to be set for
+                  |             |        |users.
+IMAPCLIENT        |proxyimap    |used    |If set, access to IMAP is granted
+POP3CLIENT        |proxypop3    |used    |If set, access to POP3 is granted
+------------------|-------------|--------|----------------------------------------
+ADMIN_HOST        |adminclient  |used    |variables used to connect to indisrvr
+                  |             |        |for adding users. Also used by
+                  |             |        |adminclient for executing administration
+                  |             |        |commands.
+ADMIN_PORT        |proxypop3    |        |Port for connecting to indisrvr
+ADMIN_USER        |proxyimap    |        |User for connecting to indisrvr
+ADMIN_PASS        |             |        |Password for connecting to indisrvr
+ADMIN_TIMEOUT     |             |        |Used to set timeout for executing any
+                  |             |        |administration command by indisrvr
+------------------|-------------|--------|----------------------------------------
+HARD_QUOTA        |vadduser     |        |Default value of quota for user addition
+                  |             |        |through vadduser (without -q option).
+                  |             |        |
+ALLOWCHARS        |vadduser     |used    |List of allowed characters in the
+                  |             |        |username.
+AVG_USER_QUOTA    |vfstab       |used    |value in bytes the average mailbox size
+                  |             |        |for a user.
+------------------|-------------|--------|----------------------------------------
+CNTRL_HOST        |InLookup     |used    |Environment variables to be set when a
+                  |qmail-rspawn |        |domain is extended across multiple
+                  |qmail-lspawn |        |servers. These variables point to the
+                  |vuserinfo    |        |central database which has the
+                  |             |        |'hostcntrl' table. If both MASTER_HOST
+                  |             |        |and CNTRL_HOST are defined all updates
+                  |             |        |go to MASTER_HOST adn all queries go
+                  |             |        |to CNTRL_HOST
+CNTRL_USER        |             |        |User for connecting to MySQL database
+CNTRL_PASSWD      |             |        |password for connecting to MySQL
+                  |             |        |database
+CNTRL_VPORT       |             |        |port for connecting to MySQL database
+CNTRL_SOCKET      |             |        |socket for connecting to MySQL database
+CNTRL_TABLE       |             |        |Table for storing user location
+                  |             |        |default is 'hostcntrl'
+CNTRL_DATABASE    |             |        |database on which table 'hostcntrl' is
+                  |             |        |present. default is 'indimail'
+MASTER_HOST       |             |        |Host to which all writes should go to
+------------------|-------------|--------|----------------------------------------
+INFIFO            |InLookup     |used    |Name of FIFO used for communicating with
+                  |qmail-smtpd  |        |InLookup. InLookup pools connections to
+                  |authindi     |        |MySQL and provides the interface between
+                  |proxyimap    |        |IndiMail and MySQL
+                  |proxypop3    |        |
+                  |inquerytest  |        |
+------------------|-------------|--------|----------------------------------------
+DEBUG             |InLookup     |used    |Enables verbose debugging
+                  |vckpass      |        |
+EDITOR            |dbinfo       |used    |Editor to use for editing the MCD file
+HOME              |mate         |used    |These programs uses the HOME environment
+                  |osh          |        |variable to switch its CWD.
+                  |supernotepad |        |
+                  |secpanel     |        |
+                  |lite         |        |
+TABLE_NAME        |osh          |used    |Access control file for granting program
+                  |             |        |specific access to users.
+TERM              |osh          |used    |Initialize various escape sequence for
+                  |             |        |terminal handling
+                  |logtop       |        |
+MAIL              |maildir2mbox |used    |mbox file name
+MAILDIR           |maildirwatch |used    |These programs use the MAILDIR
+                  |             |        |environment to select the Maildir
+MAILTMP           |maildir2mbox |used    |Temporary file that maildir2mbox can
+                  |             |        |overwrite
+MCDFILE           |InLookup     |used    |Mail Control Definition file. Specifies
+                  |dbinfo       |        |the list of all MySQL servers
+                  |vuserinfo    |        |participating in a clustered setup.
+MYSQL_TABLE       |             |used    |Name of the default indimail
+                  |             |        |authentication table containing active
+                  |             |        |users. If not set, this defaults to
+                  |             |        |'indimail'
+MYSQL_INACTIVE_TAB|             |        |Name of the default indimail
+-LE               |             |        |authentication table containing inactive
+                  |             |        |users. If not set, this defaults to
+                  |             |        |'indibak'
+MAXADDR           |chowkidar    |used    |Number of addresses to load in chowkidar
+------------------|-------------|--------|----------------------------------------
+TCPLOCALHOST      |tcpclient    |set     |The domain name of the local host. If
+                  |tcpserver    |        |there is no currently available domain
+                  |             |        |name for the local IP address,
+                  |             |        |TCPLOCALHOST is not set
+TCPLOCALIP        |             |        |The IP address of the local host in
+                  |             |        |dotted-decimal form
+TCPLOCALPORT      |             |        |The local TCP port numer, in decimal
+TCPREMOTEPORT     |             |        |The remote TCP port number.
+------------------|-------------|--------|----------------------------------------
+TCPREMOTEHOST     |tcpclient    |set     |The domain name of the remote host, with
+                  |tcpserver    |        |uppercase letters  converted to
+                  |tcprulescheck|        |lowercase. If there is no currently
+                  |             |        |available domain name for the remote IP
+                  |             |        |address, TCPREMOTEHOST is not set.
+TCPREMOTEINFO     |             |        |A connection-specific string, perhaps a
+                  |             |        |username, supplied by the remote host
+                  |             |        |via 931/1413/IDENT/TAP. If the remote
+                  |             |        |host did not supply connection
+                  |             |        |information, TCPREMOTEINFO is not set.
+------------------|-------------|--------|----------------------------------------
+TCPREMOTEIP       |tcpclient    |set     |The IP address of the remote host.
+                  |tcpserver    |        |
+                  |tcprulescheck|        |
+                  |rblsmtpd     |        |
+------------------|-------------|--------|----------------------------------------
+.TE
+
+Some of these environment variables have default values. The table below lists some of these.
+.RS
+.TS
+l l.
+Environ  Variable  | default value
+-------------------|----------------
+BULK_MAILDIR       | bulk_mail
+DEFAULT_DOMAIN     | set by ./configure
+BASE_PATH          | /home/mail
+MYSQL_HOST         | localhost
+MYSQL_VPORT        | 3306
+MYSQL_SOCKET       | /tmp/mysql.sock
+MYSQL_DATABASE     | indimail
+MYSQL_TABLE        | indimail
+MYSQL_INACTIVETABLE| indibak
+MYSQL_PASSWD       |
+MYSQL_USER         | indimail
+QMAILDIR           | /var/indimail
+TCP_FILE           | /var/indimail/etc/tcp.smtp
+OPEN_SMTP_CUR_FILE | /var/indimail/etc/open-smtp
+RELAY_TABLE        | relay
+MCDFILE            | "mcdinfo" or /var/indimail/control/mcdinfo
+INFIFO             | infifo or /var/indimail/control/inquery/infifo
+.TE
+
+
 .SH PROGRAMS
 IndiMail has programs installed in INDIMAIL/bin, INDIMAIL/sbin.
 .nr step 1 1
