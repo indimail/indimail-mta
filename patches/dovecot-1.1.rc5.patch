@@ -1,0 +1,1418 @@
+diff -Naur dovecot-1.1.rc5/config.h.in ../dovecot-1.1.rc5/config.h.in
+--- dovecot-1.1.rc5/config.h.in	2008-05-05 03:32:24.000000000 +0530
++++ ../dovecot-1.1.rc5/config.h.in	2008-05-22 14:36:57.000000000 +0530
+@@ -462,8 +462,8 @@
+ /* Build with SQL support */
+ #undef PASSDB_SQL
+ 
+-/* Build with vpopmail support */
+-#undef PASSDB_VPOPMAIL
++/* Build with indimail support */
++#undef PASSDB_INDIMAIL
+ 
+ /* Define if pread/pwrite needs _XOPEN_SOURCE 500 */
+ #undef PREAD_WRAPPERS
+@@ -531,8 +531,8 @@
+ /* Build with static userdb support */
+ #undef USERDB_STATIC
+ 
+-/* Build with vpopmail support */
+-#undef USERDB_VPOPMAIL
++/* Build with indimail support */
++#undef USERDB_INDIMAIL
+ 
+ /* Define if you want to use Boehm GC */
+ #undef USE_GC
+diff -Naur dovecot-1.1.rc5/configure.in ../dovecot-1.1.rc5/configure.in
+--- dovecot-1.1.rc5/configure.in	2008-05-05 03:31:52.000000000 +0530
++++ ../dovecot-1.1.rc5/configure.in	2008-05-22 14:35:39.000000000 +0530
+@@ -167,21 +167,21 @@
+ 	fi,
+ 	want_ldap=no)
+ 
+-AC_ARG_WITH(vpopmail,
+-[  --with-vpopmail         Build with vpopmail support (auto)],
++AC_ARG_WITH(indimail,
++[  --with-indimail         Build with indimail support (auto)],
+ 	if test x$withval = xno; then
+-		want_vpopmail=no
++		want_indimail=no
+ 	else
+ 		if test x$withval = xyes || test x$withval = xauto; then
+-			vpopmail_home="`echo ~vpopmail`"
+-			want_vpopmail=$withval
++			indimail_home="`echo ~indimail`"
++			want_indimail=$withval
+ 		else
+-			vpopmail_home="$withval"
+-			want_vpopmail=yes
++			indimail_home="$withval"
++			want_indimail=yes
+ 		fi
+ 	fi, [
+-		want_vpopmail=auto
+-		vpopmail_home="`echo ~vpopmail`"
++		want_indimail=auto
++		indimail_home="`echo ~indimail`"
+ 	])
+ 
+ AC_ARG_WITH(static-userdb,
+@@ -1915,22 +1915,22 @@
+ 	userdb="$userdb sql"
+ fi
+ 
+-if test $want_vpopmail != no; then
+-	vpop_libdeps="$vpopmail_home/etc/lib_deps"
++if test $want_indimail != no; then
++	indi_libdeps="$indimail_home/etc/lib_deps"
+ 
+-	AC_MSG_CHECKING([for vpopmail configuration at $vpop_libdeps])
+-	if test -f $vpop_libdeps; then
+-		AUTH_CFLAGS="$AUTH_CFLAGS `cat $vpopmail_home/etc/inc_deps` $CFLAGS"
+-		AUTH_LIBS="$AUTH_LIBS `cat $vpop_libdeps`"
+-		AC_DEFINE(USERDB_VPOPMAIL,, Build with vpopmail support)
+-		AC_DEFINE(PASSDB_VPOPMAIL,, Build with vpopmail support)
+-		userdb="$userdb vpopmail"
+-		passdb="$passdb vpopmail"
++	AC_MSG_CHECKING([for indimail configuration at $indi_libdeps])
++	if test -f $indi_libdeps; then
++		AUTH_CFLAGS="$AUTH_CFLAGS `cat $indimail_home/etc/inc_deps` $CFLAGS"
++		AUTH_LIBS="$AUTH_LIBS `cat $indi_libdeps`"
++		AC_DEFINE(USERDB_INDIMAIL,, Build with indimail support)
++		AC_DEFINE(PASSDB_INDIMAIL,, Build with indimail support)
++		userdb="$userdb indimail"
++		passdb="$passdb indimail"
+ 		AC_MSG_RESULT(found)
+ 	else
+ 		AC_MSG_RESULT(not found)
+-		if test $want_vpopmail = yes; then
+-		  AC_ERROR([Can't build with vpopmail support: $vpop_libdeps not found])
++		if test $want_indimail = yes; then
++		  AC_ERROR([Can't build with indimail support: $indi_libdeps not found])
+ 		fi
+ 	fi
+ fi
+diff -Naur dovecot-1.1.rc5/doc/wiki/AuthDatabase.IndiMail.txt ../dovecot-1.1.rc5/doc/wiki/AuthDatabase.IndiMail.txt
+--- dovecot-1.1.rc5/doc/wiki/AuthDatabase.IndiMail.txt	1970-01-01 05:30:00.000000000 +0530
++++ ../dovecot-1.1.rc5/doc/wiki/AuthDatabase.IndiMail.txt	2008-05-22 14:39:56.000000000 +0530
+@@ -0,0 +1,37 @@
++IndiMail
++========
++
++This is an external software intended to make handling virtual domains easier.
++Supports Qmail and Postfix. See http://inter7.com/indimail.html
++
++If the indimail database contains plaintext passwords, it can be used for
++non-plaintext authentication as well.
++
++You can use auth_cache with IndiMail if you give 'cache_key' parameter. See
++<PAM> [PasswordDatabase.PAM.txt] for more information about it.
++
++indimail + mysql
++================
++
++Alternatively, you can use the SQL backend with the following configuration:
++
++ * ---%<----------------------------------------------------------------------
++   driver = mysql
++   #
++   connect = host=/var/run/mysqld/mysqld.sock user=indimail
++   password=YOURPASSWORDHERE dbname=indimail
++   #
++   default_pass_scheme = PLAIN
++   #
++   password_query = SELECT CONCAT(pw_name, '@', pw_domain) AS user,
++   pw_clear_passwd AS password FROM indimail WHERE pw_name = '%n' AND pw_domain
++   = '%d'
++   #
++   user_query = SELECT pw_dir as home, 64020 AS uid, 64020 AS gid FROM indimail
++   WHERE pw_name = '%n' AND pw_domain = '%d'
++   ---%<----------------------------------------------------------------------
++ * .
++
++Most indimail installations use 89 as the uid/gid, not 64020. 
++
++(This file was created from the wiki on 2008-05-04 04:42)
+diff -Naur dovecot-1.1.rc5/doc/wiki/AuthDatabase.txt ../dovecot-1.1.rc5/doc/wiki/AuthDatabase.txt
+--- dovecot-1.1.rc5/doc/wiki/AuthDatabase.txt	2008-05-04 07:12:03.000000000 +0530
++++ ../dovecot-1.1.rc5/doc/wiki/AuthDatabase.txt	2008-05-22 14:38:54.000000000 +0530
+@@ -10,7 +10,7 @@
+    specified location
+  * <LDAP> [AuthDatabase.LDAP.txt]: Lightweight Directory Access Protocol
+  * <SQL> [AuthDatabase.SQL.txt]: SQL database (PostgreSQL, MySQL, SQLite)
+- * <VPopMail> [AuthDatabase.VPopMail.txt]: External software used to handle
++ * <IndiMail> [AuthDatabase.IndiMail.txt]: External software used to handle
+    virtual domains
+ 
+ (This file was created from the wiki on 2008-05-04 04:42)
+diff -Naur dovecot-1.1.rc5/doc/wiki/AuthDatabase.VPopMail.txt ../dovecot-1.1.rc5/doc/wiki/AuthDatabase.VPopMail.txt
+--- dovecot-1.1.rc5/doc/wiki/AuthDatabase.VPopMail.txt	2008-05-04 07:12:03.000000000 +0530
++++ ../dovecot-1.1.rc5/doc/wiki/AuthDatabase.VPopMail.txt	1970-01-01 05:30:00.000000000 +0530
+@@ -1,37 +0,0 @@
+-VPopMail
+-========
+-
+-This is an external software intended to make handling virtual domains easier.
+-Supports Qmail and Postfix. See http://inter7.com/vpopmail.html
+-
+-If the vpopmail database contains plaintext passwords, it can be used for
+-non-plaintext authentication as well.
+-
+-You can use auth_cache with VPopMail if you give 'cache_key' parameter. See
+-<PAM> [PasswordDatabase.PAM.txt] for more information about it.
+-
+-vpopmail + mysql
+-================
+-
+-Alternatively, you can use the SQL backend with the following configuration:
+-
+- * ---%<----------------------------------------------------------------------
+-   driver = mysql
+-   #
+-   connect = host=/var/run/mysqld/mysqld.sock user=vpopmail
+-   password=YOURPASSWORDHERE dbname=vpopmail
+-   #
+-   default_pass_scheme = PLAIN
+-   #
+-   password_query = SELECT CONCAT(pw_name, '@', pw_domain) AS user,
+-   pw_clear_passwd AS password FROM vpopmail WHERE pw_name = '%n' AND pw_domain
+-   = '%d'
+-   #
+-   user_query = SELECT pw_dir as home, 64020 AS uid, 64020 AS gid FROM vpopmail
+-   WHERE pw_name = '%n' AND pw_domain = '%d'
+-   ---%<----------------------------------------------------------------------
+- * .
+-
+-Most vpopmail installations use 89 as the uid/gid, not 64020. 
+-
+-(This file was created from the wiki on 2008-05-04 04:42)
+diff -Naur dovecot-1.1.rc5/doc/wiki/Authentication.Caching.txt ../dovecot-1.1.rc5/doc/wiki/Authentication.Caching.txt
+--- dovecot-1.1.rc5/doc/wiki/Authentication.Caching.txt	2008-05-04 07:12:03.000000000 +0530
++++ ../dovecot-1.1.rc5/doc/wiki/Authentication.Caching.txt	2008-05-22 14:41:16.000000000 +0530
+@@ -52,7 +52,7 @@
+ have to tell Dovecot manually. The following databases require specifying the
+ cache key:
+ 
+- * vpopmail
++ * indimail
+  * pam
+  * bsdauth
+ 
+diff -Naur dovecot-1.1.rc5/doc/wiki/Authentication.PasswordSchemes.txt ../dovecot-1.1.rc5/doc/wiki/Authentication.PasswordSchemes.txt
+--- dovecot-1.1.rc5/doc/wiki/Authentication.PasswordSchemes.txt	2008-05-04 07:12:03.000000000 +0530
++++ ../dovecot-1.1.rc5/doc/wiki/Authentication.PasswordSchemes.txt	2008-05-22 14:40:24.000000000 +0530
+@@ -25,7 +25,7 @@
+    'dovecot-ldap.conf'
+  * <PasswdFile> [AuthDatabase.PasswdFile.txt], <Passwd>
+    [AuthDatabase.Passwd.txt], <Shadow> [PasswordDatabase.Shadow.txt],
+-   <VPopMail> [AuthDatabase.VPopMail.txt]: CRYPT is used by default and can't
++   <IndiMail> [AuthDatabase.IndiMail.txt]: CRYPT is used by default and can't
+    be changed currently.
+  * <PAM> [PasswordDatabase.PAM.txt], <BSDAuth> [PasswordDatabase.BSDAuth.txt],
+    <CheckPassword> [PasswordDatabase.CheckPassword.txt]: Dovecot never even
+diff -Naur dovecot-1.1.rc5/doc/wiki/CompilingSource.txt ../dovecot-1.1.rc5/doc/wiki/CompilingSource.txt
+--- dovecot-1.1.rc5/doc/wiki/CompilingSource.txt	2008-05-04 07:12:04.000000000 +0530
++++ ../dovecot-1.1.rc5/doc/wiki/CompilingSource.txt	2008-05-22 14:41:50.000000000 +0530
+@@ -326,8 +326,8 @@
+   Build with GSSAPI authentication support (requires krb5-devel, libkrb5-dev or
+   similar package)
+ 
+---with-vpopmail:
+-  Build with vpopmail support (requires vpopmail sources or a devel package)
++--with-indimail:
++  Build with indimail support (requires indimail sources or a devel package)
+ 
+ Dynamic Authentication Modules
+ ==============================
+@@ -335,16 +335,16 @@
+ Dovecot can also dynamically load authentication modules from the
+ '$prefix/lib/dovecot/auth/' directory. Binary packages builders should use them
+ for authentication modules which require external libraries (e. g. LDAP and
+-vpopmail). There is no standard way to build them as modules currently, but
++indimail). There is no standard way to build them as modules currently, but
+ something like this should work:
+ 
+ ---%<-------------------------------------------------------------------------
+ gcc -shared -fPIC -DHAVE_CONFIG_H -DUSERDB_LDAP -DPASSDB_LDAP \
+ -I../.. -I../lib -I../lib-settings \
+ db-ldap.c userdb-ldap.c passdb-ldap.c -o ldap.so -lldap
+-gcc -shared -fPIC -DHAVE_CONFIG_H -DUSERDB_VPOPMAIL -DPASSDB_VPOPMAIL \
+--I../.. -I../lib userdb-vpopmail.c passdb-vpopmail.c -o vpopmail.so \
+--lvpopmail
++gcc -shared -fPIC -DHAVE_CONFIG_H -DUSERDB_indiMAIL -DPASSDB_indiMAIL \
++-I../.. -I../lib userdb-indimail.c passdb-indimail.c -o indimail.so \
++-lindimail
+ ---%<-------------------------------------------------------------------------
+ 
+ Dynamic IMAP and POP3 Modules
+diff -Naur dovecot-1.1.rc5/doc/wiki/Makefile.am ../dovecot-1.1.rc5/doc/wiki/Makefile.am
+--- dovecot-1.1.rc5/doc/wiki/Makefile.am	2008-05-05 03:32:16.000000000 +0530
++++ ../dovecot-1.1.rc5/doc/wiki/Makefile.am	2008-05-22 14:41:42.000000000 +0530
+@@ -10,7 +10,7 @@
+ 	AuthDatabase.Passwd.txt \
+ 	AuthDatabase.SQL.txt \
+ 	AuthDatabase.txt \
+-	AuthDatabase.VPopMail.txt \
++	AuthDatabase.IndiMail.txt \
+ 	Authentication.Caching.txt \
+ 	Authentication.Kerberos.txt \
+ 	Authentication.MasterUsers.txt \
+diff -Naur dovecot-1.1.rc5/doc/wiki/Makefile.in ../dovecot-1.1.rc5/doc/wiki/Makefile.in
+--- dovecot-1.1.rc5/doc/wiki/Makefile.in	2008-05-05 03:32:25.000000000 +0530
++++ ../dovecot-1.1.rc5/doc/wiki/Makefile.in	2008-05-22 14:40:40.000000000 +0530
+@@ -205,7 +205,7 @@
+ 	AuthDatabase.Passwd.txt \
+ 	AuthDatabase.SQL.txt \
+ 	AuthDatabase.txt \
+-	AuthDatabase.VPopMail.txt \
++	AuthDatabase.IndiMail.txt \
+ 	Authentication.Caching.txt \
+ 	Authentication.Kerberos.txt \
+ 	Authentication.MasterUsers.txt \
+diff -Naur dovecot-1.1.rc5/doc/wiki/Migration.BincIMAP.txt ../dovecot-1.1.rc5/doc/wiki/Migration.BincIMAP.txt
+--- dovecot-1.1.rc5/doc/wiki/Migration.BincIMAP.txt	2008-05-04 07:12:10.000000000 +0530
++++ ../dovecot-1.1.rc5/doc/wiki/Migration.BincIMAP.txt	2008-05-22 14:41:36.000000000 +0530
+@@ -206,7 +206,7 @@
+ /path/to/binc2dove.pl {} \;
+ 
+ Example 2:
+-# find /usr/local/vpopmail/domains -mindepth 2 -maxdepth 2 -type d -exec
++# find /usr/local/indimail/domains -mindepth 2 -maxdepth 2 -type d -exec
+ /path/to/binc2dove.pl {} \;
+ ---%<-------------------------------------------------------------------------
+ 
+diff -Naur dovecot-1.1.rc5/doc/wiki/PasswordDatabase.txt ../dovecot-1.1.rc5/doc/wiki/PasswordDatabase.txt
+--- dovecot-1.1.rc5/doc/wiki/PasswordDatabase.txt	2008-05-04 07:12:11.000000000 +0530
++++ ../dovecot-1.1.rc5/doc/wiki/PasswordDatabase.txt	2008-05-22 14:39:16.000000000 +0530
+@@ -50,7 +50,7 @@
+    similiar).
+  * <Shadow> [PasswordDatabase.Shadow.txt]: Shadow passwords for system users
+    (NSS,'/etc/shadow' or similiar).
+- * <VPopMail> [AuthDatabase.VPopMail.txt]: External software used to handle
++ * <IndiMail> [AuthDatabase.IndiMail.txt]: External software used to handle
+    virtual domains.
+ 
+ Databases that support looking up everything:
+diff -Naur dovecot-1.1.rc5/doc/wiki/UserDatabase.txt ../dovecot-1.1.rc5/doc/wiki/UserDatabase.txt
+--- dovecot-1.1.rc5/doc/wiki/UserDatabase.txt	2008-05-04 07:12:16.000000000 +0530
++++ ../dovecot-1.1.rc5/doc/wiki/UserDatabase.txt	2008-05-22 14:43:09.000000000 +0530
+@@ -31,7 +31,7 @@
+  * <SQL> [AuthDatabase.SQL.txt]: SQL database (PostgreSQL, MySQL, SQLite)
+  * <Static> [UserDatabase.Static.txt]: Userdb information generated from a
+    given template
+- * <VPopMail> [AuthDatabase.VPopMail.txt]: External software used to handle
++ * <IndiMail> [AuthDatabase.IndiMail.txt]: External software used to handle
+    virtual domains
+  * <Prefetch> [UserDatabase.Prefetch.txt]: This assumes that the passdb already
+    returned also all the required user database information
+diff -Naur dovecot-1.1.rc5/doc/wiki/VirtualUsers.txt ../dovecot-1.1.rc5/doc/wiki/VirtualUsers.txt
+--- dovecot-1.1.rc5/doc/wiki/VirtualUsers.txt	2008-05-04 07:12:16.000000000 +0530
++++ ../dovecot-1.1.rc5/doc/wiki/VirtualUsers.txt	2008-05-22 14:41:03.000000000 +0530
+@@ -167,8 +167,8 @@
+ Existing virtual user management software
+ -----------------------------------------
+ 
+- * VPopMail [http://www.inter7.com/vpopmail/]: Dovecot <supports VPopMail
+-   directly> [AuthDatabase.VPopMail.txt].
++ * IndiMail [http://www.inter7.com/indimail/]: Dovecot <supports IndiMail
++   directly> [AuthDatabase.IndiMail.txt].
+  * Linuxconf [http://www.solucorp.qc.ca/linuxconf/]: See
+    <Migration.Linuxconf.txt>
+  * Also see the Examples / Scenarios in <FrontPage.txt> 
+diff -Naur dovecot-1.1.rc5/dovecot-example.conf ../dovecot-1.1.rc5/dovecot-example.conf
+--- dovecot-1.1.rc5/dovecot-example.conf	2008-05-05 03:31:52.000000000 +0530
++++ ../dovecot-1.1.rc5/dovecot-example.conf	2008-05-22 14:42:23.000000000 +0530
+@@ -699,7 +699,7 @@
+ #auth_process_size = 256
+ 
+ # Authentication cache size in kilobytes. 0 means it's disabled.
+-# Note that bsdauth, PAM and vpopmail require cache_key to be set for caching
++# Note that bsdauth, PAM and indimail require cache_key to be set for caching
+ # to be used.
+ #auth_cache_size = 0
+ # Time to live in seconds for cached data. After this many seconds the cached
+@@ -908,8 +908,8 @@
+     #args = 
+   #}
+ 
+-  # vpopmail authentication <doc/wiki/AuthDatabase.VPopMail.txt>
+-  #passdb vpopmail {
++  # indimail authentication <doc/wiki/AuthDatabase.IndiMail.txt>
++  #passdb indimail {
+     # [cache_key=<key>] - See cache_key in PAM for explanation.
+     # [quota_template=<template>] - %q expands to Maildir++ quota
+     #   (eg. quota_template=quota_rule=*:backend=%q)
+@@ -971,8 +971,8 @@
+     #args = 
+   #}
+ 
+-  # vpopmail <doc/wiki/AuthDatabase.VPopMail.txt>
+-  #userdb vpopmail {
++  # indimail <doc/wiki/AuthDatabase.IndiMail.txt>
++  #userdb indimail {
+   #}
+ 
+   # "prefetch" user database means that the passdb already provided the
+diff -Naur dovecot-1.1.rc5/src/auth/Makefile.am ../dovecot-1.1.rc5/src/auth/Makefile.am
+--- dovecot-1.1.rc5/src/auth/Makefile.am	2008-05-05 03:31:52.000000000 +0530
++++ ../dovecot-1.1.rc5/src/auth/Makefile.am	2008-05-22 12:04:56.000000000 +0530
+@@ -95,7 +95,7 @@
+ 	passdb-pam.c \
+ 	passdb-shadow.c \
+ 	passdb-sia.c \
+-	passdb-vpopmail.c \
++	passdb-indimail.c \
+ 	passdb-sql.c \
+ 	userdb.c \
+ 	userdb-blocking.c \
+@@ -104,7 +104,7 @@
+ 	userdb-passwd-file.c \
+ 	userdb-prefetch.c \
+ 	userdb-static.c \
+-	userdb-vpopmail.c \
++	userdb-indimail.c \
+ 	userdb-sql.c \
+ 	$(builtin_gssapi_sources) \
+ 	$(builtin_ldap_sources)
+@@ -137,7 +137,7 @@
+ 	userdb.h \
+ 	userdb-blocking.h \
+ 	userdb-static.h \
+-	userdb-vpopmail.h
++	userdb-indimail.h
+ 
+ if GSSAPI_PLUGIN
+ libmech_gssapi_la_LDFLAGS = -module -avoid-version
+diff -Naur dovecot-1.1.rc5/src/auth/Makefile.in ../dovecot-1.1.rc5/src/auth/Makefile.in
+--- dovecot-1.1.rc5/src/auth/Makefile.in	2008-05-05 03:32:25.000000000 +0530
++++ ../dovecot-1.1.rc5/src/auth/Makefile.in	2008-05-22 12:05:08.000000000 +0530
+@@ -107,10 +107,10 @@
+ 	mech-winbind.c otp-skey-common.c plain-common.c passdb.c \
+ 	passdb-blocking.c passdb-bsdauth.c passdb-cache.c \
+ 	passdb-checkpassword.c passdb-passwd.c passdb-passwd-file.c \
+-	passdb-pam.c passdb-shadow.c passdb-sia.c passdb-vpopmail.c \
++	passdb-pam.c passdb-shadow.c passdb-sia.c passdb-indimail.c \
+ 	passdb-sql.c userdb.c userdb-blocking.c userdb-nss.c \
+ 	userdb-passwd.c userdb-passwd-file.c userdb-prefetch.c \
+-	userdb-static.c userdb-vpopmail.c userdb-sql.c mech-gssapi.c \
++	userdb-static.c userdb-indimail.c userdb-sql.c mech-gssapi.c \
+ 	db-ldap.c passdb-ldap.c userdb-ldap.c
+ @GSSAPI_PLUGIN_FALSE@am__objects_2 = mech-gssapi.$(OBJEXT)
+ am__objects_3 = db-ldap.$(OBJEXT) passdb-ldap.$(OBJEXT) \
+@@ -134,11 +134,11 @@
+ 	passdb-checkpassword.$(OBJEXT) passdb-passwd.$(OBJEXT) \
+ 	passdb-passwd-file.$(OBJEXT) passdb-pam.$(OBJEXT) \
+ 	passdb-shadow.$(OBJEXT) passdb-sia.$(OBJEXT) \
+-	passdb-vpopmail.$(OBJEXT) passdb-sql.$(OBJEXT) \
++	passdb-indimail.$(OBJEXT) passdb-sql.$(OBJEXT) \
+ 	userdb.$(OBJEXT) userdb-blocking.$(OBJEXT) \
+ 	userdb-nss.$(OBJEXT) userdb-passwd.$(OBJEXT) \
+ 	userdb-passwd-file.$(OBJEXT) userdb-prefetch.$(OBJEXT) \
+-	userdb-static.$(OBJEXT) userdb-vpopmail.$(OBJEXT) \
++	userdb-static.$(OBJEXT) userdb-indimail.$(OBJEXT) \
+ 	userdb-sql.$(OBJEXT) $(am__objects_2) $(am__objects_4)
+ dovecot_auth_OBJECTS = $(am_dovecot_auth_OBJECTS)
+ dovecot_auth_DEPENDENCIES = libpassword.a \
+@@ -175,7 +175,7 @@
+ 	auth-worker-server.h db-ldap.h db-sql.h db-passwd-file.h \
+ 	common.h mech.h mycrypt.h otp-skey-common.h plain-common.h \
+ 	passdb.h passdb-blocking.h passdb-cache.h password-scheme.h \
+-	userdb.h userdb-blocking.h userdb-static.h userdb-vpopmail.h
++	userdb.h userdb-blocking.h userdb-static.h userdb-indimail.h
+ am__pkginc_lib_HEADERS_DIST = auth.h auth-cache.h \
+ 	auth-client-connection.h auth-client-interface.h \
+ 	auth-master-interface.h auth-master-connection.h \
+@@ -184,7 +184,7 @@
+ 	db-ldap.h db-sql.h db-passwd-file.h common.h mech.h mycrypt.h \
+ 	otp-skey-common.h plain-common.h passdb.h passdb-blocking.h \
+ 	passdb-cache.h password-scheme.h userdb.h userdb-blocking.h \
+-	userdb-static.h userdb-vpopmail.h
++	userdb-static.h userdb-indimail.h
+ pkginc_libHEADERS_INSTALL = $(INSTALL_HEADER)
+ HEADERS = $(noinst_HEADERS) $(pkginc_lib_HEADERS)
+ ETAGS = etags
+@@ -410,7 +410,7 @@
+ 	passdb-pam.c \
+ 	passdb-shadow.c \
+ 	passdb-sia.c \
+-	passdb-vpopmail.c \
++	passdb-indimail.c \
+ 	passdb-sql.c \
+ 	userdb.c \
+ 	userdb-blocking.c \
+@@ -419,7 +419,7 @@
+ 	userdb-passwd-file.c \
+ 	userdb-prefetch.c \
+ 	userdb-static.c \
+-	userdb-vpopmail.c \
++	userdb-indimail.c \
+ 	userdb-sql.c \
+ 	$(builtin_gssapi_sources) \
+ 	$(builtin_ldap_sources)
+@@ -452,7 +452,7 @@
+ 	userdb.h \
+ 	userdb-blocking.h \
+ 	userdb-static.h \
+-	userdb-vpopmail.h
++	userdb-indimail.h
+ 
+ @GSSAPI_PLUGIN_TRUE@libmech_gssapi_la_LDFLAGS = -module -avoid-version
+ @GSSAPI_PLUGIN_TRUE@libmech_gssapi_la_LIBADD = $(KRB5_LIBS)
+@@ -628,7 +628,7 @@
+ @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/passdb-shadow.Po@am__quote@
+ @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/passdb-sia.Po@am__quote@
+ @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/passdb-sql.Po@am__quote@
+-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/passdb-vpopmail.Po@am__quote@
++@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/passdb-indimail.Po@am__quote@
+ @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/passdb.Po@am__quote@
+ @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/password-scheme-md5crypt.Po@am__quote@
+ @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/password-scheme-otp.Po@am__quote@
+@@ -643,7 +643,7 @@
+ @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/userdb-prefetch.Po@am__quote@
+ @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/userdb-sql.Po@am__quote@
+ @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/userdb-static.Po@am__quote@
+-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/userdb-vpopmail.Po@am__quote@
++@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/userdb-indimail.Po@am__quote@
+ @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/userdb.Po@am__quote@
+ 
+ .c.o:
+diff -Naur dovecot-1.1.rc5/src/auth/passdb.c ../dovecot-1.1.rc5/src/auth/passdb.c
+--- dovecot-1.1.rc5/src/auth/passdb.c	2008-05-05 03:31:52.000000000 +0530
++++ ../dovecot-1.1.rc5/src/auth/passdb.c	2008-05-22 12:02:23.000000000 +0530
+@@ -176,7 +176,7 @@
+ extern struct passdb_module_interface passdb_passwd_file;
+ extern struct passdb_module_interface passdb_pam;
+ extern struct passdb_module_interface passdb_checkpassword;
+-extern struct passdb_module_interface passdb_vpopmail;
++extern struct passdb_module_interface passdb_indimail;
+ extern struct passdb_module_interface passdb_ldap;
+ extern struct passdb_module_interface passdb_sql;
+ extern struct passdb_module_interface passdb_sia;
+@@ -202,8 +202,8 @@
+ #ifdef PASSDB_SHADOW
+ 	passdb_register_module(&passdb_shadow);
+ #endif
+-#ifdef PASSDB_VPOPMAIL
+-	passdb_register_module(&passdb_vpopmail);
++#ifdef PASSDB_INDIMAIL
++	passdb_register_module(&passdb_indimail);
+ #endif
+ #if defined(PASSDB_LDAP) && defined(BUILTIN_LDAP)
+ 	passdb_register_module(&passdb_ldap);
+diff -Naur dovecot-1.1.rc5/src/auth/passdb-checkpassword.c ../dovecot-1.1.rc5/src/auth/passdb-checkpassword.c
+--- dovecot-1.1.rc5/src/auth/passdb-checkpassword.c	2008-05-05 03:31:52.000000000 +0530
++++ ../dovecot-1.1.rc5/src/auth/passdb-checkpassword.c	2008-05-22 12:03:11.000000000 +0530
+@@ -100,8 +100,8 @@
+ 		return;
+ 
+ 	switch (request->exit_status) {
+-	/* vpopmail exit codes: */
+-	case 3:		/* password fail / vpopmail user not found */
++	/* indimail exit codes: */
++	case 3:		/* password fail / indimail user not found */
+ 	case 12: 	/* null user name given */
+ 	case 13:	/* null password given */
+ 	case 15:	/* user has no password */
+@@ -112,7 +112,7 @@
+ 
+ 	/* standard checkpassword exit codes: */
+ 	case 1:
+-		/* (1 is additionally defined in vpopmail for
++		/* (1 is additionally defined in indimail for
+ 		   "pop/smtp/webmal/ imap/access denied") */
+ 		auth_request_log_info(request->request, "checkpassword",
+ 				      "Login failed (status=%d)",
+diff -Naur dovecot-1.1.rc5/src/auth/passdb-indimail.c ../dovecot-1.1.rc5/src/auth/passdb-indimail.c
+--- dovecot-1.1.rc5/src/auth/passdb-indimail.c	1970-01-01 05:30:00.000000000 +0530
++++ ../dovecot-1.1.rc5/src/auth/passdb-indimail.c	2008-05-22 12:24:55.000000000 +0530
+@@ -0,0 +1,146 @@
++/*
++ * Copyright (c) 2002-2008 Dovecot authors, see the included COPYING file 
++ */
++
++/*
++ * Thanks to Courier-IMAP for showing how the indimail API should be used 
++ */
++
++#include "common.h"
++
++#ifdef PASSDB_INDIMAIL
++
++#include "safe-memset.h"
++#include "passdb.h"
++#include "password-scheme.h"
++#include "userdb-indimail.h"
++#include <stdlib.h>
++
++#define INDIMAIL_DEFAULT_PASS_SCHEME "CRYPT"
++
++static char    *
++indimail_password_lookup(struct auth_request *auth_request, bool cleartext, enum passdb_result *result_r)
++{
++	char            indi_user[INDIMAIL_LIMIT], indi_domain[INDIMAIL_LIMIT];
++	struct passwd  *vpw;
++	char           *password;
++
++	vpw = indimail_lookup_vqp(auth_request, indi_user, indi_domain);
++	if (vpw == NULL)
++	{
++		*result_r = PASSDB_RESULT_USER_UNKNOWN;
++		return NULL;
++	}
++
++	if (((vpw->pw_gid & NO_IMAP) != 0 && strcmp(auth_request->service, "IMAP") == 0) ||
++		((vpw->pw_gid & NO_POP) != 0 && strcmp(auth_request->service, "POP3") == 0))
++	{
++		auth_request_log_info(auth_request, "indimail", "%s disabled", auth_request->service);
++		password = NULL;
++		*result_r = PASSDB_RESULT_USER_DISABLED;
++	} else
++	{
++		password = t_strdup_noconst(vpw->pw_passwd);
++		*result_r = password != NULL ? PASSDB_RESULT_OK : PASSDB_RESULT_SCHEME_NOT_AVAILABLE;
++	}
++	safe_memset(vpw->pw_passwd, 0, strlen(vpw->pw_passwd));
++	return password;
++}
++
++static void
++indimail_lookup_credentials(struct auth_request *request, lookup_credentials_callback_t *callback)
++{
++	enum passdb_result result;
++	char           *password;
++
++	password = indimail_password_lookup(request, TRUE, &result);
++	if (password == NULL)
++	{
++		callback(result, "", 0, request);
++		return;
++	}
++
++	passdb_handle_credentials(PASSDB_RESULT_OK, password, "CLEARTEXT", callback, request);
++	safe_memset(password, 0, strlen(password));
++}
++
++static void
++indimail_verify_plain(struct auth_request *request, const char *password, verify_plain_callback_t *callback)
++{
++	enum passdb_result result;
++	const char     *scheme, *tmp_pass;
++	char           *crypted_pass;
++	int             ret;
++
++	crypted_pass = indimail_password_lookup(request, FALSE, &result);
++	if (crypted_pass == NULL)
++	{
++		callback(result, request);
++		return;
++	}
++	tmp_pass = crypted_pass;
++	scheme = password_get_scheme(&tmp_pass);
++	if (scheme == NULL)
++		scheme = request->passdb->passdb->default_pass_scheme;
++	ret = auth_request_password_verify(request, password, tmp_pass, scheme, "indimail");
++	safe_memset(crypted_pass, 0, strlen(crypted_pass));
++	if (ret <= 0)
++	{
++		callback(PASSDB_RESULT_PASSWORD_MISMATCH, request);
++		return;
++	}
++#ifdef HAVE_INDIMAIL_OPEN_SMTP_RELAY
++	if (strcmp(request->service, "POP3") == 0 || strcmp(request->service, "IMAP") == 0)
++	{
++		const char     *host = net_ip2addr(&request->remote_ip);
++		if (host != NULL)
++		{
++			/*
++			 * use putenv() directly rather than env_put() which
++			 * would leak memory every time we got here. use a
++			 * static buffer for putenv() as SUSv2 requirements
++			 * would otherwise corrupt our environment later. 
++			 */
++			static char     ip_env[256];
++
++			i_snprintf(ip_env, sizeof(ip_env), "TCPREMOTEIP=%s", host);
++			putenv(ip_env);
++			open_smtp_relay();
++		}
++	}
++#endif
++	callback(PASSDB_RESULT_OK, request);
++}
++
++static struct passdb_module *
++indimail_preinit(struct auth_passdb *auth_passdb, const char *args)
++{
++	struct passdb_module *module;
++
++	module = p_new(auth_passdb->auth->pool, struct passdb_module, 1);
++	module->default_pass_scheme = INDIMAIL_DEFAULT_PASS_SCHEME;
++
++	if (strncmp(args, "cache_key=", 10) == 0)
++	{
++		module->cache_key = auth_cache_parse_key(auth_passdb->auth->pool, args + 10);
++	}
++	return module;
++}
++
++static void
++indimail_deinit(struct passdb_module *module ATTR_UNUSED)
++{
++	vclose();
++}
++
++struct passdb_module_interface passdb_indimail = {
++	"indimail",
++	indimail_preinit,
++	NULL,
++	indimail_deinit,
++	indimail_verify_plain,
++	indimail_lookup_credentials,
++	NULL
++};
++
++#endif
+diff -Naur dovecot-1.1.rc5/src/auth/passdb-shadow.c ../dovecot-1.1.rc5/src/auth/passdb-shadow.c
+--- dovecot-1.1.rc5/src/auth/passdb-shadow.c	2008-05-05 03:31:52.000000000 +0530
++++ ../dovecot-1.1.rc5/src/auth/passdb-shadow.c	2008-05-22 12:26:40.000000000 +0530
+@@ -20,7 +20,6 @@
+ 	int ret;
+ 
+ 	auth_request_log_debug(request, "shadow", "lookup");
+-
+ 	spw = getspnam(request->user);
+ 	if (spw == NULL) {
+ 		auth_request_log_info(request, "shadow", "unknown user");
+@@ -73,11 +72,9 @@
+ 
+ struct passdb_module_interface passdb_shadow = {
+ 	"shadow",
+-
+ 	NULL,
+ 	shadow_init,
+ 	shadow_deinit,
+-
+ 	shadow_verify_plain,
+ 	NULL,
+ 	NULL
+diff -Naur dovecot-1.1.rc5/src/auth/passdb-sql.c ../dovecot-1.1.rc5/src/auth/passdb-sql.c
+--- dovecot-1.1.rc5/src/auth/passdb-sql.c	2008-05-05 03:31:52.000000000 +0530
++++ ../dovecot-1.1.rc5/src/auth/passdb-sql.c	2008-05-22 12:20:38.000000000 +0530
+@@ -179,7 +179,7 @@
+ 	sql_request->auth_request = request;
+ 	sql_request->callback.lookup_credentials = callback;
+ 
+-        sql_lookup_pass(sql_request);
++    sql_lookup_pass(sql_request);
+ }
+ 
+ static void sql_set_credentials_callback(const char *error,
+diff -Naur dovecot-1.1.rc5/src/auth/passdb-vpopmail.c ../dovecot-1.1.rc5/src/auth/passdb-vpopmail.c
+--- dovecot-1.1.rc5/src/auth/passdb-vpopmail.c	2008-05-05 03:31:52.000000000 +0530
++++ ../dovecot-1.1.rc5/src/auth/passdb-vpopmail.c	1970-01-01 05:30:00.000000000 +0530
+@@ -1,158 +0,0 @@
+-/* Copyright (c) 2002-2008 Dovecot authors, see the included COPYING file */
+-
+-/* Thanks to Courier-IMAP for showing how the vpopmail API should be used */
+-
+-#include "common.h"
+-
+-#ifdef PASSDB_VPOPMAIL
+-
+-#include "safe-memset.h"
+-#include "passdb.h"
+-#include "password-scheme.h"
+-
+-#include "userdb-vpopmail.h"
+-
+-#include <stdlib.h>
+-
+-#define VPOPMAIL_DEFAULT_PASS_SCHEME "CRYPT"
+-
+-static char *
+-vpopmail_password_lookup(struct auth_request *auth_request, bool cleartext,
+-			 enum passdb_result *result_r)
+-{
+-	char vpop_user[VPOPMAIL_LIMIT], vpop_domain[VPOPMAIL_LIMIT];
+-	struct vqpasswd *vpw;
+-	char *password;
+-
+-	vpw = vpopmail_lookup_vqp(auth_request, vpop_user, vpop_domain);
+-	if (vpw == NULL) {
+-		*result_r = PASSDB_RESULT_USER_UNKNOWN;
+-		return NULL;
+-	}
+-
+-	if (((vpw->pw_gid & NO_IMAP) != 0 &&
+-	     strcmp(auth_request->service, "IMAP") == 0) ||
+-	    ((vpw->pw_gid & NO_POP) != 0 &&
+-	     strcmp(auth_request->service, "POP3") == 0)) {
+-		auth_request_log_info(auth_request, "vpopmail",
+-				      "%s disabled", auth_request->service);
+-		password = NULL;
+-		*result_r = PASSDB_RESULT_USER_DISABLED;
+-	} else {
+-		password = t_strdup_noconst(cleartext ? vpw->pw_clear_passwd :
+-					   vpw->pw_passwd);
+-		*result_r = password != NULL ? PASSDB_RESULT_OK :
+-			PASSDB_RESULT_SCHEME_NOT_AVAILABLE;
+-	}
+-
+-	safe_memset(vpw->pw_passwd, 0, strlen(vpw->pw_passwd));
+-	if (vpw->pw_clear_passwd != NULL) {
+-		safe_memset(vpw->pw_clear_passwd, 0,
+-			    strlen(vpw->pw_clear_passwd));
+-	}
+-
+-	return password;
+-}
+-
+-static void vpopmail_lookup_credentials(struct auth_request *request,
+-					lookup_credentials_callback_t *callback)
+-{
+-	enum passdb_result result;
+-	char *password;
+-
+-	password = vpopmail_password_lookup(request, TRUE, &result);
+-	if (password == NULL) {
+-		callback(result, "", 0, request);
+-		return;
+-	}
+-	
+-	passdb_handle_credentials(PASSDB_RESULT_OK, password, "CLEARTEXT",
+-				  callback, request);
+-	safe_memset(password, 0, strlen(password));
+-}
+-
+-static void
+-vpopmail_verify_plain(struct auth_request *request, const char *password,
+-		      verify_plain_callback_t *callback)
+-{
+-	enum passdb_result result;
+-	const char *scheme, *tmp_pass;
+-	char *crypted_pass;
+-	int ret;
+-
+-	crypted_pass = vpopmail_password_lookup(request, FALSE, &result);
+-	if (crypted_pass == NULL) {
+-		callback(result, request);
+-		return;
+-	}
+-
+-	tmp_pass = crypted_pass;
+-	scheme = password_get_scheme(&tmp_pass);
+-	if (scheme == NULL)
+-		scheme = request->passdb->passdb->default_pass_scheme;
+-
+-	ret = auth_request_password_verify(request, password,
+-					   tmp_pass, scheme, "vpopmail");
+-	safe_memset(crypted_pass, 0, strlen(crypted_pass));
+-
+-	if (ret <= 0) {
+-		callback(PASSDB_RESULT_PASSWORD_MISMATCH, request);
+-		return;
+-	}
+-
+-#ifdef HAVE_VPOPMAIL_OPEN_SMTP_RELAY
+-	if (strcmp(request->service, "POP3") == 0 ||
+-	    strcmp(request->service, "IMAP") == 0) {
+-		const char *host = net_ip2addr(&request->remote_ip);
+-		if (host != NULL) {
+-			/* use putenv() directly rather than env_put() which
+-			   would leak memory every time we got here. use a
+-			   static buffer for putenv() as SUSv2 requirements
+-			   would otherwise corrupt our environment later. */
+-			static char ip_env[256];
+-
+-			i_snprintf(ip_env, sizeof(ip_env),
+-				   "TCPREMOTEIP=%s", host);
+-			putenv(ip_env);
+-			open_smtp_relay();
+-		}
+-	}
+-#endif
+-
+-	callback(PASSDB_RESULT_OK, request);
+-}
+-
+-static struct passdb_module *
+-vpopmail_preinit(struct auth_passdb *auth_passdb, const char *args)
+-{
+-	struct passdb_module *module;
+-
+-	module = p_new(auth_passdb->auth->pool, struct passdb_module, 1);
+-	module->default_pass_scheme = VPOPMAIL_DEFAULT_PASS_SCHEME;
+-
+-	if (strncmp(args, "cache_key=", 10) == 0) {
+-		module->cache_key =
+-			auth_cache_parse_key(auth_passdb->auth->pool,
+-					     args + 10);
+-	}
+-	return module;
+-}
+-
+-static void vpopmail_deinit(struct passdb_module *module ATTR_UNUSED)
+-{
+-	vclose();
+-}
+-
+-struct passdb_module_interface passdb_vpopmail = {
+-	"vpopmail",
+-
+-	vpopmail_preinit,
+-	NULL,
+-	vpopmail_deinit,
+-
+-	vpopmail_verify_plain,
+-	vpopmail_lookup_credentials,
+-	NULL
+-};
+-
+-#endif
+diff -Naur dovecot-1.1.rc5/src/auth/userdb.c ../dovecot-1.1.rc5/src/auth/userdb.c
+--- dovecot-1.1.rc5/src/auth/userdb.c	2008-05-05 03:31:52.000000000 +0530
++++ ../dovecot-1.1.rc5/src/auth/userdb.c	2008-05-22 12:02:43.000000000 +0530
+@@ -154,7 +154,7 @@
+ extern struct userdb_module_interface userdb_static;
+ extern struct userdb_module_interface userdb_passwd;
+ extern struct userdb_module_interface userdb_passwd_file;
+-extern struct userdb_module_interface userdb_vpopmail;
++extern struct userdb_module_interface userdb_indimail;
+ extern struct userdb_module_interface userdb_ldap;
+ extern struct userdb_module_interface userdb_sql;
+ extern struct userdb_module_interface userdb_nss;
+@@ -174,8 +174,8 @@
+ #ifdef USERDB_STATIC
+ 	userdb_register_module(&userdb_static);
+ #endif
+-#ifdef USERDB_VPOPMAIL
+-	userdb_register_module(&userdb_vpopmail);
++#ifdef USERDB_INDIMAIL
++	userdb_register_module(&userdb_indimail);
+ #endif
+ #if defined(USERDB_LDAP) && defined(BUILTIN_LDAP)
+ 	userdb_register_module(&userdb_ldap);
+diff -Naur dovecot-1.1.rc5/src/auth/userdb-indimail.c ../dovecot-1.1.rc5/src/auth/userdb-indimail.c
+--- dovecot-1.1.rc5/src/auth/userdb-indimail.c	1970-01-01 05:30:00.000000000 +0530
++++ ../dovecot-1.1.rc5/src/auth/userdb-indimail.c	2008-05-22 15:53:32.000000000 +0530
+@@ -0,0 +1,243 @@
++/* Copyright (c) 2002-2008 Dovecot authors, see the included COPYING file */
++
++/* Thanks to Courier-IMAP for showing how the indimail API should be used */
++
++#include "common.h"
++
++#if defined(PASSDB_INDIMAIL) || defined(USERDB_INDIMAIL)
++#include "str.h"
++#include "var-expand.h"
++#include "userdb.h"
++#include "userdb-indimail.h"
++
++struct indimail_userdb_module {
++	struct userdb_module module;
++
++	const char *quota_template_key;
++	const char *quota_template_value;
++};
++
++struct passwd *indimail_lookup_vqp(struct auth_request *request,
++				     char indi_user[INDIMAIL_LIMIT],
++				     char indi_domain[INDIMAIL_LIMIT])
++{
++	struct passwd *vpw;
++
++	/* indi_user must be zero-filled or parse_email() leaves an
++	   extra character after the user name. we'll fill indi_domain
++	   as well just to be sure... */
++	memset(indi_user, '\0', INDIMAIL_LIMIT);
++	memset(indi_domain, '\0', INDIMAIL_LIMIT);
++
++	if (parse_email(request->user, indi_user, indi_domain,
++			INDIMAIL_LIMIT-1) < 0) {
++		auth_request_log_info(request, "indimail",
++				      "parse_email() failed");
++		return NULL;
++	}
++
++	auth_request_log_debug(request, "indimail",
++			       "lookup user=%s domain=%s",
++			       indi_user, indi_domain);
++
++	vpw = vauth_getpw(indi_user, indi_domain);
++	if (vpw == NULL) {
++		auth_request_log_info(request, "indimail", "unknown user");
++		return NULL;
++	}
++
++	return vpw;
++}
++
++#ifdef USERDB_INDIMAIL
++char           *format_maildirquota(const char *);
++
++static const char *
++userdb_indimail_get_quota(const char *template, const char *indi_str)
++{
++	const struct var_expand_table *tab;
++	string_t *quota;
++
++	if (template == NULL || *indi_str == '\0' ||
++	    strcmp(indi_str, "NOQUOTA") == 0)
++		return "";
++
++	tab = var_expand_table_build('q', format_maildirquota(indi_str), '\0');
++	quota = t_str_new(128);
++	var_expand(quota, template, tab);
++	return str_c(quota);
++}
++
++char           *
++format_maildirquota(const char *q)
++{
++	int             i;
++	double          quota_size;
++	long            quota_count;
++	char           *p;
++	static char     tempquota[128];
++
++	if (strcmp(q, "NOQUOTA") == 0)
++	{
++		strcpy(tempquota, "NOQUOTA");
++		return tempquota;
++	}
++
++	/*
++	 * translate the quota to a number, or leave it 
++	 */
++	quota_size = -1.0;
++	quota_count = -1;
++	snprintf(tempquota, sizeof(tempquota), "%s", q);
++	p = strtok(tempquota, ",");
++	while (p != NULL)
++	{
++		i = strlen(p) - 1;
++		if (p[i] == 'C')
++		{						/*- specify a limit on the number of messages (COUNT) */
++			quota_count = atol(p);
++		} else
++		{						/*- specify a limit on the size */
++			/*
++			 * strip optional trailing S 
++			 */
++			if ((p[i] == 'S') || (p[i] == 's'))
++				p[i--] = '\0';
++			/*
++			 * strip optional trailing B (for KB, MB) 
++			 */
++			if ((p[i] == 'B') || (p[i] == 'b'))
++				p[i--] = '\0';
++
++			quota_size = atof(p);
++			if ((p[i] == 'M') || (p[i] == 'm'))
++				quota_size *= 1024 * 1024;
++			if ((p[i] == 'K') || (p[i] == 'k'))
++				quota_size *= 1024;
++		}
++		p = strtok(NULL, ",");
++	}
++	if (quota_count == -1)
++		if (quota_size == -1.0)
++			strcpy(tempquota, "");	/*- invalid quota */
++		else
++			sprintf(tempquota, "%.0fS", quota_size);
++	else
++	if (quota_size == -1.0)
++		sprintf(tempquota, "%luC", quota_count);
++	else
++		sprintf(tempquota, "%.0fS,%luC", quota_size, quota_count);
++
++	return tempquota;
++}
++
++static void indimail_lookup(struct auth_request *auth_request,
++			    userdb_callback_t *callback)
++{
++	struct userdb_module *_module = auth_request->userdb->userdb;
++	struct indimail_userdb_module *module =
++		(struct indimail_userdb_module *)_module;
++	char indi_user[INDIMAIL_LIMIT], indi_domain[INDIMAIL_LIMIT], tmpbuf[INDIMAIL_LIMIT];
++	struct passwd *vpw;
++	char *ptr;
++	const char *quota;
++	uid_t uid;
++	gid_t gid;
++
++	vpw = indimail_lookup_vqp(auth_request, indi_user, indi_domain);
++	if (vpw == NULL) {
++		callback(USERDB_RESULT_USER_UNKNOWN, auth_request);
++		return;
++	}
++
++	/* we have to get uid/gid separately, because the gid field in
++	   struct passwd isn't really gid at all but just some flags... */
++	if (vget_assign(indi_domain, NULL, 0, &uid, &gid) == NULL) {
++		auth_request_log_info(auth_request, "indimail",
++				      "vget_assign(%s) failed", indi_domain);
++		callback(USERDB_RESULT_INTERNAL_FAILURE, auth_request);
++		return;
++	}
++
++	if (auth_request->successful) {
++		snprintf(tmpbuf, MAX_BUFF, "%s/Maildir", vpw->pw_dir);
++		/* update the last login only when we're really  */
++		if (!(ptr = getenv("TCPREMOTEIP")))
++			ptr = "unknown";
++		vset_lastauth(indi_user, indi_domain,
++			      t_strdup_noconst(auth_request->service), ptr, vpw->pw_gecos, check_quota(tmpbuf, 0));
++	}
++
++	if (vpw->pw_dir == NULL || vpw->pw_dir[0] == '\0') {
++		/* user's homedir doesn't exist yet, create it */
++		auth_request_log_info(auth_request, "indimail",
++				      "pw_dir isn't set, creating");
++
++		if (make_user_dir(indi_user, indi_domain, uid, gid) == NULL) {
++			auth_request_log_error(auth_request, "indimail",
++					       "make_user_dir(%s, %s) failed",
++					       indi_user, indi_domain);
++			callback(USERDB_RESULT_INTERNAL_FAILURE, auth_request);
++			return;
++		}
++
++		/* get the user again so pw_dir is visible */
++		vpw = vauth_getpw(indi_user, indi_domain);
++		if (vpw == NULL) {
++			callback(USERDB_RESULT_INTERNAL_FAILURE, auth_request);
++			return;
++		}
++	}
++
++	auth_request_init_userdb_reply(auth_request);
++	auth_request_set_userdb_field(auth_request, "uid", dec2str(uid));
++	auth_request_set_userdb_field(auth_request, "gid", dec2str(gid));
++	auth_request_set_userdb_field(auth_request, "home", vpw->pw_dir);
++
++	quota = userdb_indimail_get_quota(module->quota_template_value,
++					  vpw->pw_shell);
++	if (*quota != '\0') {
++		auth_request_set_userdb_field(auth_request,
++					      module->quota_template_key,
++					      quota);
++	}
++	callback(USERDB_RESULT_OK, auth_request);
++}
++
++static struct userdb_module *
++indimail_preinit(struct auth_userdb *auth_userdb, const char *args)
++{
++	struct indimail_userdb_module *module;
++	const char *const *tmp, *p;
++	pool_t pool = auth_userdb->auth->pool;
++
++	module = p_new(pool, struct indimail_userdb_module, 1);
++
++	for (tmp = t_strsplit(args, " "); *tmp != NULL; tmp++) {
++		if (strncmp(*tmp, "cache_key=", 10) == 0)
++			module->module.cache_key = p_strdup(pool, *tmp + 10);
++		else if (strncmp(*tmp, "quota_template=", 15) == 0) {
++			p = strchr(*tmp + 15, '=');
++			if (p == NULL) {
++				i_fatal("indimail userdb: "
++					"quota_template missing '='");
++			}
++			module->quota_template_key =
++				p_strdup_until(pool, *tmp + 15, p);
++			module->quota_template_value = p_strdup(pool, p + 1);
++		} else
++			i_fatal("indimail userdb: Unknown args: %s", *tmp);
++	}
++	return &module->module;
++}
++
++struct userdb_module_interface userdb_indimail = {
++	"indimail",
++	indimail_preinit,
++	NULL,
++	NULL,
++	indimail_lookup
++};
++
++#endif
++#endif
+diff -Naur dovecot-1.1.rc5/src/auth/userdb-indimail.h ../dovecot-1.1.rc5/src/auth/userdb-indimail.h
+--- dovecot-1.1.rc5/src/auth/userdb-indimail.h	1970-01-01 05:30:00.000000000 +0530
++++ ../dovecot-1.1.rc5/src/auth/userdb-indimail.h	2008-05-22 12:05:55.000000000 +0530
+@@ -0,0 +1,16 @@
++#ifndef USERDB_INDIMAIL_H
++#define USERDB_INDIMAIL_H
++
++#include <stdio.h>
++#include <indimail.h>
++
++/* Limit user and domain to 80 chars each (+1 for \0). I wouldn't recommend
++   raising this limit at least much, indimail is full of potential buffer
++   overflows. */
++#define INDIMAIL_LIMIT 81
++
++struct passwd *indimail_lookup_vqp(struct auth_request *request,
++				     char indi_user[INDIMAIL_LIMIT],
++				     char indi_domain[INDIMAIL_LIMIT]);
++
++#endif
+diff -Naur dovecot-1.1.rc5/src/auth/userdb-passwd-file.c ../dovecot-1.1.rc5/src/auth/userdb-passwd-file.c
+--- dovecot-1.1.rc5/src/auth/userdb-passwd-file.c	2008-05-05 03:31:52.000000000 +0530
++++ ../dovecot-1.1.rc5/src/auth/userdb-passwd-file.c	2008-05-22 12:28:15.000000000 +0530
+@@ -130,11 +130,9 @@
+ 
+ struct userdb_module_interface userdb_passwd_file = {
+ 	"passwd-file",
+-
+ 	passwd_file_preinit,
+ 	passwd_file_init,
+ 	passwd_file_deinit,
+-
+ 	passwd_file_lookup
+ };
+ 
+diff -Naur dovecot-1.1.rc5/src/auth/userdb-vpopmail.c ../dovecot-1.1.rc5/src/auth/userdb-vpopmail.c
+--- dovecot-1.1.rc5/src/auth/userdb-vpopmail.c	2008-05-05 03:31:52.000000000 +0530
++++ ../dovecot-1.1.rc5/src/auth/userdb-vpopmail.c	1970-01-01 05:30:00.000000000 +0530
+@@ -1,177 +0,0 @@
+-/* Copyright (c) 2002-2008 Dovecot authors, see the included COPYING file */
+-
+-/* Thanks to Courier-IMAP for showing how the vpopmail API should be used */
+-
+-#include "common.h"
+-
+-#if defined(PASSDB_VPOPMAIL) || defined(USERDB_VPOPMAIL)
+-#include "str.h"
+-#include "var-expand.h"
+-#include "userdb.h"
+-#include "userdb-vpopmail.h"
+-
+-struct vpopmail_userdb_module {
+-	struct userdb_module module;
+-
+-	const char *quota_template_key;
+-	const char *quota_template_value;
+-};
+-
+-struct vqpasswd *vpopmail_lookup_vqp(struct auth_request *request,
+-				     char vpop_user[VPOPMAIL_LIMIT],
+-				     char vpop_domain[VPOPMAIL_LIMIT])
+-{
+-	struct vqpasswd *vpw;
+-
+-	/* vpop_user must be zero-filled or parse_email() leaves an
+-	   extra character after the user name. we'll fill vpop_domain
+-	   as well just to be sure... */
+-	memset(vpop_user, '\0', VPOPMAIL_LIMIT);
+-	memset(vpop_domain, '\0', VPOPMAIL_LIMIT);
+-
+-	if (parse_email(request->user, vpop_user, vpop_domain,
+-			VPOPMAIL_LIMIT-1) < 0) {
+-		auth_request_log_info(request, "vpopmail",
+-				      "parse_email() failed");
+-		return NULL;
+-	}
+-
+-	auth_request_log_debug(request, "vpopmail",
+-			       "lookup user=%s domain=%s",
+-			       vpop_user, vpop_domain);
+-
+-	vpw = vauth_getpw(vpop_user, vpop_domain);
+-	if (vpw == NULL) {
+-		auth_request_log_info(request, "vpopmail", "unknown user");
+-		return NULL;
+-	}
+-
+-	return vpw;
+-}
+-
+-#ifdef USERDB_VPOPMAIL
+-
+-static const char *
+-userdb_vpopmail_get_quota(const char *template, const char *vpop_str)
+-{
+-	const struct var_expand_table *tab;
+-	string_t *quota;
+-
+-	if (template == NULL || *vpop_str == '\0' ||
+-	    strcmp(vpop_str, "NOQUOTA") == 0)
+-		return "";
+-
+-	tab = var_expand_table_build('q', format_maildirquota(vpop_str), '\0');
+-	quota = t_str_new(128);
+-	var_expand(quota, template, tab);
+-	return str_c(quota);
+-}
+-
+-static void vpopmail_lookup(struct auth_request *auth_request,
+-			    userdb_callback_t *callback)
+-{
+-	struct userdb_module *_module = auth_request->userdb->userdb;
+-	struct vpopmail_userdb_module *module =
+-		(struct vpopmail_userdb_module *)_module;
+-	char vpop_user[VPOPMAIL_LIMIT], vpop_domain[VPOPMAIL_LIMIT];
+-	struct vqpasswd *vpw;
+-	const char *quota;
+-	uid_t uid;
+-	gid_t gid;
+-
+-	vpw = vpopmail_lookup_vqp(auth_request, vpop_user, vpop_domain);
+-	if (vpw == NULL) {
+-		callback(USERDB_RESULT_USER_UNKNOWN, auth_request);
+-		return;
+-	}
+-
+-	/* we have to get uid/gid separately, because the gid field in
+-	   struct vqpasswd isn't really gid at all but just some flags... */
+-	if (vget_assign(vpop_domain, NULL, 0, &uid, &gid) == NULL) {
+-		auth_request_log_info(auth_request, "vpopmail",
+-				      "vget_assign(%s) failed", vpop_domain);
+-		callback(USERDB_RESULT_INTERNAL_FAILURE, auth_request);
+-		return;
+-	}
+-
+-	if (auth_request->successful) {
+-		/* update the last login only when we're really  */
+-		vset_lastauth(vpop_user, vpop_domain,
+-			      t_strdup_noconst(auth_request->service));
+-	}
+-
+-	if (vpw->pw_dir == NULL || vpw->pw_dir[0] == '\0') {
+-		/* user's homedir doesn't exist yet, create it */
+-		auth_request_log_info(auth_request, "vpopmail",
+-				      "pw_dir isn't set, creating");
+-
+-		if (make_user_dir(vpop_user, vpop_domain, uid, gid) == NULL) {
+-			auth_request_log_error(auth_request, "vpopmail",
+-					       "make_user_dir(%s, %s) failed",
+-					       vpop_user, vpop_domain);
+-			callback(USERDB_RESULT_INTERNAL_FAILURE, auth_request);
+-			return;
+-		}
+-
+-		/* get the user again so pw_dir is visible */
+-		vpw = vauth_getpw(vpop_user, vpop_domain);
+-		if (vpw == NULL) {
+-			callback(USERDB_RESULT_INTERNAL_FAILURE, auth_request);
+-			return;
+-		}
+-	}
+-
+-	auth_request_init_userdb_reply(auth_request);
+-	auth_request_set_userdb_field(auth_request, "uid", dec2str(uid));
+-	auth_request_set_userdb_field(auth_request, "gid", dec2str(gid));
+-	auth_request_set_userdb_field(auth_request, "home", vpw->pw_dir);
+-
+-	quota = userdb_vpopmail_get_quota(module->quota_template_value,
+-					  vpw->pw_shell);
+-	if (*quota != '\0') {
+-		auth_request_set_userdb_field(auth_request,
+-					      module->quota_template_key,
+-					      quota);
+-	}
+-	callback(USERDB_RESULT_OK, auth_request);
+-}
+-
+-static struct userdb_module *
+-vpopmail_preinit(struct auth_userdb *auth_userdb, const char *args)
+-{
+-	struct vpopmail_userdb_module *module;
+-	const char *const *tmp, *p;
+-	pool_t pool = auth_userdb->auth->pool;
+-
+-	module = p_new(pool, struct vpopmail_userdb_module, 1);
+-
+-	for (tmp = t_strsplit(args, " "); *tmp != NULL; tmp++) {
+-		if (strncmp(*tmp, "cache_key=", 10) == 0)
+-			module->module.cache_key = p_strdup(pool, *tmp + 10);
+-		else if (strncmp(*tmp, "quota_template=", 15) == 0) {
+-			p = strchr(*tmp + 15, '=');
+-			if (p == NULL) {
+-				i_fatal("vpopmail userdb: "
+-					"quota_template missing '='");
+-			}
+-			module->quota_template_key =
+-				p_strdup_until(pool, *tmp + 15, p);
+-			module->quota_template_value = p_strdup(pool, p + 1);
+-		} else
+-			i_fatal("vpopmail userdb: Unknown args: %s", *tmp);
+-	}
+-	return &module->module;
+-}
+-
+-struct userdb_module_interface userdb_vpopmail = {
+-	"vpopmail",
+-
+-	vpopmail_preinit,
+-	NULL,
+-	NULL,
+-
+-	vpopmail_lookup
+-};
+-
+-#endif
+-#endif
+diff -Naur dovecot-1.1.rc5/src/auth/userdb-vpopmail.h ../dovecot-1.1.rc5/src/auth/userdb-vpopmail.h
+--- dovecot-1.1.rc5/src/auth/userdb-vpopmail.h	2008-05-05 03:31:52.000000000 +0530
++++ ../dovecot-1.1.rc5/src/auth/userdb-vpopmail.h	1970-01-01 05:30:00.000000000 +0530
+@@ -1,17 +0,0 @@
+-#ifndef USERDB_VPOPMAIL_H
+-#define USERDB_VPOPMAIL_H
+-
+-#include <stdio.h>
+-#include <vpopmail.h>
+-#include <vauth.h>
+-
+-/* Limit user and domain to 80 chars each (+1 for \0). I wouldn't recommend
+-   raising this limit at least much, vpopmail is full of potential buffer
+-   overflows. */
+-#define VPOPMAIL_LIMIT 81
+-
+-struct vqpasswd *vpopmail_lookup_vqp(struct auth_request *request,
+-				     char vpop_user[VPOPMAIL_LIMIT],
+-				     char vpop_domain[VPOPMAIL_LIMIT]);
+-
+-#endif
+diff -Naur dovecot-1.1.rc5/src/lib-sql/sql-drivers-register.c ../dovecot-1.1.rc5/src/lib-sql/sql-drivers-register.c
+--- dovecot-1.1.rc5/src/lib-sql/sql-drivers-register.c	2008-05-05 03:33:41.000000000 +0530
++++ ../dovecot-1.1.rc5/src/lib-sql/sql-drivers-register.c	1970-01-01 05:30:00.000000000 +0530
+@@ -1,11 +0,0 @@
+-/* this file automatically generated by Makefile */
+-#include "lib.h"
+-#include "sql-api.h"
+-extern struct sql_db driver_pgsql_db;
+-extern struct sql_db driver_mysql_db;
+-extern struct sql_db driver_sqlite_db;
+-void sql_drivers_register_all(void) {
+-sql_driver_register(&driver_pgsql_db);
+-sql_driver_register(&driver_mysql_db);
+-sql_driver_register(&driver_sqlite_db);
+-}
+diff -Naur dovecot-1.1.rc5/src/master/main.c ../dovecot-1.1.rc5/src/master/main.c
+--- dovecot-1.1.rc5/src/master/main.c	2008-05-05 03:31:54.000000000 +0530
++++ ../dovecot-1.1.rc5/src/master/main.c	2008-05-22 12:05:49.000000000 +0530
+@@ -399,8 +399,8 @@
+ #ifdef PASSDB_SQL 
+ 		" sql"
+ #endif
+-#ifdef PASSDB_VPOPMAIL
+-		" vpopmail"
++#ifdef PASSDB_INDIMAIL
++		" indimail"
+ #endif
+ 	"\nUserdb:"
+ #ifdef USERDB_CHECKPASSWORD
+@@ -424,8 +424,8 @@
+ #ifdef USERDB_STATIC 
+ 		" static"
+ #endif
+-#ifdef USERDB_VPOPMAIL
+-		" vpopmail"
++#ifdef USERDB_INDIMAIL
++		" indimail"
+ #endif
+ 	"\n");
+ }
