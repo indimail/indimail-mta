@@ -1,5 +1,13 @@
 * Fri Oct 16 2009 mbhangui@gmail.com
 Release 1.6.3 Start 16/10/2009
+17/10/2009
+1.  Pass argument to rpm.init to distinguish between package removal and
+    upgrade
+2.  Fix compilation of pam-multi on Mac OS X
+3.  include_trash
+4.  added missing argument real_domain in valias_insert.c
+19/10/2009
+5.  Allow only root/indimail user to execute vpriv
 
 * Fri Oct 16 2009 mbhangui@gmail.com
 Release 1.6.2 Start 01/10/2009
