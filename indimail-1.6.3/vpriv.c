@@ -1,5 +1,8 @@
 /*
  * $Log: vpriv.c,v $
+ * Revision 2.5  2009-10-19 11:24:54+05:30  Cprogrammer
+ * allow only root/indimail user to execute program
+ *
  * Revision 2.4  2008-06-13 10:58:23+05:30  Cprogrammer
  * print error when run if CLUSTERED_SITE not defined
  *
@@ -16,11 +19,12 @@
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vpriv.c,v 2.4 2008-06-13 10:58:23+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: vpriv.c,v 2.5 2009-10-19 11:24:54+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef CLUSTERED_SITE
 #include <unistd.h>
+#include <sys/types.h>
 
 #define V_PRIV_SELECT 0
 #define V_PRIV_INSERT 1
@@ -39,7 +43,16 @@ main(argc, argv)
 {
 	int             action, err, i;
 	char           *ptr, *user, *program, *cmdargs, *oldcmdargs;
+	uid_t           uid;
 
+	if (indimailuid == -1 || indimailgid == -1)
+		GetIndiId(&indimailuid, &indimailgid);
+	uid = getuid();
+	if (uid != 0 && uid != indimailuid)
+	{
+		error_stack(stderr, "you must be root or indimail to run this program\n");
+		return(1);
+	}
 	if(get_options(argc, argv, &user, &program, &cmdargs, &oldcmdargs, &action))
 		return(1);
 	if(action != V_PRIV_SELECT)
