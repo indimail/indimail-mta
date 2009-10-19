@@ -1,5 +1,8 @@
 /*
  * $Log: hier.c,v $
+ * Revision 1.127  2009-10-19 10:13:04+05:30  Cprogrammer
+ * added qmail-daemon.8
+ *
  * Revision 1.126  2009-09-08 12:33:23+05:30  Cprogrammer
  * compilation of control/domainkeys to be default
  *
@@ -886,6 +889,7 @@ hier(inst_dir)
 	c(auto_qmail_home, "man/cat8", "qmail-send.0", auto_uido, auto_gidq, 0444);
 	c(auto_qmail_home, "man/man8", "qmail-todo.8", auto_uido, auto_gidq, 0444);
 	c(auto_qmail_home, "man/cat8", "qmail-todo.0", auto_uido, auto_gidq, 0444);
+	c(auto_qmail_home, "man/man8", "qmail-daemon.8", auto_uido, auto_gidq, 0444);
 	c(auto_qmail_home, "man/man8", "qmail-start.8", auto_uido, auto_gidq, 0444);
 	c(auto_qmail_home, "man/cat8", "qmail-start.0", auto_uido, auto_gidq, 0444);
 	c(auto_qmail_home, "man/man8", "splogger.8", auto_uido, auto_gidq, 0444);
@@ -982,7 +986,7 @@ hier(inst_dir)
 void
 getversion_install_big_c()
 {
-	static char    *x = "$Id: hier.c,v 1.126 2009-09-08 12:33:23+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: hier.c,v 1.127 2009-10-19 10:13:04+05:30 Cprogrammer Exp mbhangui $";
 
 #ifdef INDIMAIL
 	x = sccsidh;
