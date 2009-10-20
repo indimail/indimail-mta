@@ -1,0 +1,221 @@
+#
+# You will require this patch if you are on Mac OS 10.5.x
+# This patch must be applied after applying courier-imap-3.0.8.patch
+#
+diff -Naur courier-imap-3.0.8.orig/authlib/Makefile.am courier-imap-3.0.8/authlib/Makefile.am
+--- courier-imap-3.0.8.orig/authlib/Makefile.am	2009-06-12 11:19:23.000000000 +0530
++++ courier-imap-3.0.8/authlib/Makefile.am	2009-06-12 11:04:12.000000000 +0530
+@@ -423,9 +423,9 @@
+ 
+ authtest_SOURCES=authtest.c
+ authtest_DEPENDENCIES=libauth.a libauth1.dep libauthmod.a\
+-	../rfc2045/librfc2045.a ../random128/librandom128.a
++	../numlib/changeuiggid.o ../rfc2045/librfc2045.a ../random128/librandom128.a
+ authtest_LDADD=libauth.a libauthmod.a\
+-	../rfc2045/librfc2045.a ../random128/librandom128.a `cat libauth1.dep`
++	../numlib/changeuiggid.o ../rfc2045/librfc2045.a ../random128/librandom128.a `cat libauth1.dep`
+ 
+ authenumerate_SOURCES=authenumerate.c
+ authenumerate_DEPENDENCIES=libauth.a libauthmod.a ../numlib/libnumlib.a libauth.dep\
+diff -Naur courier-imap-3.0.8.orig/authlib/Makefile.in courier-imap-3.0.8/authlib/Makefile.in
+--- courier-imap-3.0.8.orig/authlib/Makefile.in	2009-06-12 11:19:23.000000000 +0530
++++ courier-imap-3.0.8/authlib/Makefile.in	2009-06-12 11:04:16.000000000 +0530
+@@ -712,10 +712,10 @@
+ 
+ authtest_SOURCES = authtest.c
+ authtest_DEPENDENCIES = libauth.a libauth1.dep libauthmod.a\
+-	../rfc2045/librfc2045.a ../random128/librandom128.a
++	../numlib/changeuidgid.o ../rfc2045/librfc2045.a ../random128/librandom128.a
+ 
+ authtest_LDADD = libauth.a libauthmod.a\
+-	../rfc2045/librfc2045.a ../random128/librandom128.a `cat libauth1.dep`
++	../numlib/changeuidgid.o ../rfc2045/librfc2045.a ../random128/librandom128.a `cat libauth1.dep`
+ 
+ authenumerate_SOURCES = authenumerate.c
+ authenumerate_DEPENDENCIES = libauth.a libauthmod.a ../numlib/libnumlib.a libauth.dep\
+diff -Naur courier-imap-3.0.8.orig/rfc1035/Makefile.am courier-imap-3.0.8/rfc1035/Makefile.am
+--- courier-imap-3.0.8.orig/rfc1035/Makefile.am	2004-09-03 06:49:12.000000000 +0530
++++ courier-imap-3.0.8/rfc1035/Makefile.am	2009-06-12 11:01:59.000000000 +0530
+@@ -8,7 +8,7 @@
+ noinst_LIBRARIES=librfc1035.a
+ 
+ librfc1035_a_SOURCES= \
+-		rfc1035.c rfc1035.h rfc1035_res.c rfc1035_res.h rfc1035an.c \
++		rfc1035.c rfc1035.h rfc1035_res.h rfc1035an.c \
+ 		rfc1035dump.c rfc1035dumprrdata.c rfc1035fmttime.c \
+ 		rfc1035gettxt.c rfc1035ifconf.c \
+ 		rfc1035ipv6to4.c rfc1035mkaddress.c \
+@@ -22,19 +22,19 @@
+ noinst_PROGRAMS=testlookup testspf
+ 
+ testlookup_SOURCES=testlookup.c
+-testlookup_DEPENDENCIES=librfc1035.a ../md5/libmd5.a \
++testlookup_DEPENDENCIES=librfc1035.a rfc1035_res.o ../md5/libmd5.a \
+ 	../random128/librandom128.a ../soxwrap/libsoxwrap.a \
+ 	../soxwrap/soxlibs.dep
+-testlookup_LDADD=librfc1035.a ../soxwrap/libsoxwrap.a ../md5/libmd5.a \
++testlookup_LDADD=librfc1035.a rfc1035_res.o ../soxwrap/libsoxwrap.a ../md5/libmd5.a \
+ 	../random128/librandom128.a `cat ../soxwrap/soxlibs.dep`
+ 
+ EXTRA_DIST=testsuite.txt
+ 
+ testspf_SOURCES=testspf.c
+-testspf_DEPENDENCIES=librfc1035.a ../md5/libmd5.a \
++testspf_DEPENDENCIES=librfc1035.a rfc1035_res.o ../md5/libmd5.a \
+ 	../random128/librandom128.a ../soxwrap/libsoxwrap.a \
+ 	../soxwrap/soxlibs.dep
+-testspf_LDADD=librfc1035.a ../md5/libmd5.a \
++testspf_LDADD=librfc1035.a rfc1035_res.o ../md5/libmd5.a \
+ 	../random128/librandom128.a ../soxwrap/libsoxwrap.a \
+ 	`cat ../soxwrap/soxlibs.dep`
+ 
+diff -Naur courier-imap-3.0.8.orig/rfc1035/Makefile.in courier-imap-3.0.8/rfc1035/Makefile.in
+--- courier-imap-3.0.8.orig/rfc1035/Makefile.in	2004-09-03 06:50:03.000000000 +0530
++++ courier-imap-3.0.8/rfc1035/Makefile.in	2009-06-12 11:02:15.000000000 +0530
+@@ -205,7 +205,7 @@
+ target_alias = @target_alias@
+ noinst_LIBRARIES = librfc1035.a
+ librfc1035_a_SOURCES = \
+-		rfc1035.c rfc1035.h rfc1035_res.c rfc1035_res.h rfc1035an.c \
++		rfc1035.c rfc1035.h rfc1035_res.h rfc1035an.c \
+ 		rfc1035dump.c rfc1035dumprrdata.c rfc1035fmttime.c \
+ 		rfc1035gettxt.c rfc1035ifconf.c \
+ 		rfc1035ipv6to4.c rfc1035mkaddress.c \
+@@ -217,20 +217,20 @@
+ 		spf.c spf.h
+ 
+ testlookup_SOURCES = testlookup.c
+-testlookup_DEPENDENCIES = librfc1035.a ../md5/libmd5.a \
++testlookup_DEPENDENCIES = librfc1035.a rfc1035_res.o ../md5/libmd5.a \
+ 	../random128/librandom128.a ../soxwrap/libsoxwrap.a \
+ 	../soxwrap/soxlibs.dep
+ 
+-testlookup_LDADD = librfc1035.a ../soxwrap/libsoxwrap.a ../md5/libmd5.a \
++testlookup_LDADD = librfc1035.a rfc1035_res.o ../soxwrap/libsoxwrap.a ../md5/libmd5.a \
+ 	../random128/librandom128.a `cat ../soxwrap/soxlibs.dep`
+ 
+ EXTRA_DIST = testsuite.txt
+ testspf_SOURCES = testspf.c
+-testspf_DEPENDENCIES = librfc1035.a ../md5/libmd5.a \
++testspf_DEPENDENCIES = librfc1035.a rfc1035_res.o ../md5/libmd5.a \
+ 	../random128/librandom128.a ../soxwrap/libsoxwrap.a \
+ 	../soxwrap/soxlibs.dep
+ 
+-testspf_LDADD = librfc1035.a ../md5/libmd5.a \
++testspf_LDADD = librfc1035.a rfc1035_res.o ../md5/libmd5.a \
+ 	../random128/librandom128.a ../soxwrap/libsoxwrap.a \
+ 	`cat ../soxwrap/soxlibs.dep`
+ 
+diff -Naur courier-imap-3.0.8.orig/sha1/Makefile.am courier-imap-3.0.8/sha1/Makefile.am
+--- courier-imap-3.0.8.orig/sha1/Makefile.am	2009-06-12 11:19:23.000000000 +0530
++++ courier-imap-3.0.8/sha1/Makefile.am	2009-06-12 10:58:18.000000000 +0530
+@@ -20,7 +20,7 @@
+ testsuite_SOURCES=testsuite.c
+ testsuite_DEPENDENCIES=libsha1.a
+ testsuite_LDADD=$(testsuite_DEPENDENCIES)
+-testsuite_LDFLAGS=-static
++#testsuite_LDFLAGS=-static
+ 
+ EXTRA_DIST=testsuite.txt hmac.c
+ 
+diff -Naur courier-imap-3.0.8.orig/sha1/Makefile.in courier-imap-3.0.8/sha1/Makefile.in
+--- courier-imap-3.0.8.orig/sha1/Makefile.in	2009-06-12 11:19:23.000000000 +0530
++++ courier-imap-3.0.8/sha1/Makefile.in	2009-06-12 10:58:24.000000000 +0530
+@@ -185,7 +185,7 @@
+ testsuite_SOURCES = testsuite.c
+ testsuite_DEPENDENCIES = libsha1.a
+ testsuite_LDADD = $(testsuite_DEPENDENCIES)
+-testsuite_LDFLAGS = -static
++#testsuite_LDFLAGS = -static
+ EXTRA_DIST = testsuite.txt hmac.c
+ all: config.h
+ 	$(MAKE) $(AM_MAKEFLAGS) all-am
+diff -Naur courier-imap-3.0.8.orig/tcpd/Makefile.am courier-imap-3.0.8/tcpd/Makefile.am
+--- courier-imap-3.0.8.orig/tcpd/Makefile.am	2004-06-12 18:03:19.000000000 +0530
++++ courier-imap-3.0.8/tcpd/Makefile.am	2009-06-12 11:05:59.000000000 +0530
+@@ -23,6 +23,7 @@
+ 	tcpd.c tcpdaccess.c tcpremoteinfo.c tcpremoteinfo.h
+ 
+ couriertcpd_DEPENDENCIES= libspipe.a \
++	../rfc1035/rfc1035_res.o \
+ 	../rfc1035/librfc1035.a \
+ 	@dblibrary@ \
+ 	../liblock/liblock.a\
+@@ -33,6 +34,7 @@
+ 	../soxwrap/soxlibs.dep
+ 
+ couriertcpd_LDADD= libspipe.a \
++	../rfc1035/rfc1035_res.o \
+ 	../rfc1035/librfc1035.a \
+         @dblibrary@ \
+ 	../liblock/liblock.a\
+@@ -53,10 +55,12 @@
+ couriertls_SOURCES=starttls.c argparse.c argparse.h
+ 
+ couriertls_DEPENDENCIES=libcouriertls.a libspipe.a ../rfc1035/librfc1035.a \
++	../rfc1035/rfc1035_res.o \
+ 	../md5/libmd5.a ../random128/librandom128.a \
+ 	../numlib/libnumlib.a ../liblock/liblock.a \
+ 	../soxwrap/libsoxwrap.a ../soxwrap/soxlibs.dep
+ couriertls_LDADD=libcouriertls.a libspipe.a ../rfc1035/librfc1035.a \
++	../rfc1035/rfc1035_res.o \
+ 	../md5/libmd5.a ../random128/librandom128.a \
+ 	../numlib/libnumlib.a ../liblock/liblock.a \
+ 	../soxwrap/libsoxwrap.a `cat ../soxwrap/soxlibs.dep` `cat libcouriertls.dep`
+diff -Naur courier-imap-3.0.8.orig/tcpd/Makefile.in courier-imap-3.0.8/tcpd/Makefile.in
+--- courier-imap-3.0.8.orig/tcpd/Makefile.in	2004-07-27 07:10:50.000000000 +0530
++++ courier-imap-3.0.8/tcpd/Makefile.in	2009-06-12 11:06:33.000000000 +0530
+@@ -222,6 +222,7 @@
+ 	tcpd.c tcpdaccess.c tcpremoteinfo.c tcpremoteinfo.h
+ 
+ couriertcpd_DEPENDENCIES = libspipe.a \
++	../rfc1035/rfc1035_res.o \
+ 	../rfc1035/librfc1035.a \
+ 	@dblibrary@ \
+ 	../liblock/liblock.a\
+@@ -232,6 +233,7 @@
+ 	../soxwrap/soxlibs.dep
+ 
+ couriertcpd_LDADD = libspipe.a \
++	../rfc1035/rfc1035_res.o \
+ 	../rfc1035/librfc1035.a \
+         @dblibrary@ \
+ 	../liblock/liblock.a\
+@@ -248,11 +250,13 @@
+ libspipe_a_SOURCES = spipe.c spipe.h
+ couriertls_SOURCES = starttls.c argparse.c argparse.h
+ couriertls_DEPENDENCIES = libcouriertls.a libspipe.a ../rfc1035/librfc1035.a \
++	../rfc1035/rfc1035_res.o \
+ 	../md5/libmd5.a ../random128/librandom128.a \
+ 	../numlib/libnumlib.a ../liblock/liblock.a \
+ 	../soxwrap/libsoxwrap.a ../soxwrap/soxlibs.dep
+ 
+ couriertls_LDADD = libcouriertls.a libspipe.a ../rfc1035/librfc1035.a \
++	../rfc1035/rfc1035_res.o \
+ 	../md5/libmd5.a ../random128/librandom128.a \
+ 	../numlib/libnumlib.a ../liblock/liblock.a \
+ 	../soxwrap/libsoxwrap.a `cat ../soxwrap/soxlibs.dep` `cat libcouriertls.dep`
+diff -Naur courier-imap-3.0.8.orig/unicode/Makefile.am courier-imap-3.0.8/unicode/Makefile.am
+--- courier-imap-3.0.8.orig/unicode/Makefile.am	2009-06-12 12:12:32.000000000 +0530
++++ courier-imap-3.0.8/unicode/Makefile.am	2009-06-12 12:11:19.000000000 +0530
+@@ -15,7 +15,7 @@
+ unicode_info_SOURCES=unicodeinfo.c
+ unicode_info_DEPENDENCIES=libunicode.a
+ unicode_info_LDADD=libunicode.a
+-unicode_info_LDFLAGS=-static
++#unicode_info_LDFLAGS=-static
+ 
+ update-www:
+ 	@$(MAKE) update-www-unicode
+diff -Naur courier-imap-3.0.8.orig/unicode/Makefile.in courier-imap-3.0.8/unicode/Makefile.in
+--- courier-imap-3.0.8.orig/unicode/Makefile.in	2009-06-12 12:12:32.000000000 +0530
++++ courier-imap-3.0.8/unicode/Makefile.in	2009-06-12 12:11:51.000000000 +0530
+@@ -210,7 +210,7 @@
+ unicode_info_SOURCES = unicodeinfo.c
+ unicode_info_DEPENDENCIES = libunicode.a
+ unicode_info_LDADD = libunicode.a
+-unicode_info_LDFLAGS = -static
++#unicode_info_LDFLAGS = -static
+ ISO8859CFILES = iso88591.c iso88592.c iso88593.c iso88594.c iso88595.c\
+ 	iso88596.c iso88597.c iso88598.c iso88599.c iso885910.c iso885913.c\
+ 	iso885914.c iso885915.c
