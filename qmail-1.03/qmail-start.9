@@ -75,6 +75,27 @@ or
 passes it to
 .BR qmail-lspawn .
 
+\fBIndiMail(7)\fR installs qmail-daemon to be started under \fBsupervise(8)\fR. The default
+mailbox type is picked up from the control file \fBINDIMAIL/control/defaultdelivery\fR.
+The table below outlines the choices for \fBdefaultdelivery\fR control file
+.TS
+l l.
+Mailbox | Name  | Location       | defaultdelivery | Comments
+Format  |       |                |                 |
+_
+
+mbox    |Mailbox | $HOME         | ./Mailbox       | most common, works with 
+        |        |               |                 | most MUA's
+_
+maildir |Maildir | $HOME         | ./Maildir/      | more reliable, less
+        |        |               |                 | MUA support
+_
+mbox    |username|/var/spool/mail| See INSTALL.vsm | traditional mailbox
+_
+
+.TE
+
+
 If
 .I logger
 is supplied,
@@ -136,4 +157,7 @@ qmail-lspawn(8),
 qmail-rspawn(8),
 qmail-send(8),
 qmail-multi(8),
+initsvc(1),
+svscan(8),
+supervise(8),
 IndiMail(7)
