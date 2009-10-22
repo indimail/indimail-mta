@@ -296,7 +296,7 @@ the installation.
 
     % wget http://cr.yp.to/software/qmail-1.03.tar.gz
     % gunzip -c qmail-1.03.tar.gz | tar xf -
-    % patch -p0 < indimail-@version@/patches/qmail-1.03.patch
+    % gunzip -c indimail-@version@/patches/qmail-1.03.patch.gz | patch -p0
 
     change first line in conf-qmail to @indimaildir@
 
@@ -371,7 +371,7 @@ the installation.
     Download the ucspi-tcp package. The latest published ucspi-tcp package is ucspi-tcp-0.88.tar.gz.
     % wget http://cr.yp.to/ucspi-tcp/ucspi-tcp-0.88.tar.gz
     % gunzip -c ucspi-tcp-0.88.tar.gz | tar xf -
-    % patch -p0 < indimail-@version@/patches/ucspi-tcp-0.88.patch
+    % gunzip -c indimail-@version@/patches/ucspi-tcp-0.88.patch.gz | patch -p0
 
     ensure that mysql_config is in the path. This is needed by ucspi-tcp to detect
     MySQL libraries.
@@ -390,9 +390,9 @@ the installation.
     courier-imap-3.0.8.tar.bz2. The patch brings up the version upto courier-imap version to 4.5.0
 
     % bzip2 -d -c courier-imap-3.0.8.tar.bz2 | tar xf -
-    % patch -p0 < indimail-@version@/patches/courier-imap-3.0.8.patch
+    % gunzip -c indimail-@version@/patches/courier-imap-3.0.8.patch.gz | patch -p0
     # If you are on Mac OS X 10.5.x you will need to apply a supplement patch
-    # patch -p0 < indimail-@version@/patches/courier-imap-3.0.8-1.2.mac-supplement.patch
+    # gunzip -c indimail-@version@/patches/courier-imap-3.0.8-1.2.mac-supplement.patch.gz | patch -p0
     % cd courier-imap-3.0.8
     % ./configure --prefix=@indimaildir@ --disable-root-check --bindir=@indimaildir@/bin \
         --with-redhat \
@@ -417,7 +417,7 @@ the installation.
 
     % wget http://downloads.sourceforge.net/bogofilter/bogofilter-1.2.1.tar.bz2
     % bzip2 -d -c bogofilter-1.2.1.tar.bz2 | tar xf -
-    % patch -p0 < indimail-@version@/patches/bogofilter-1.2.1.patch
+    % gunzip -c indimail-@version@/patches/bogofilter-1.2.1.patch.gz | patch -p0
     % cd bogofilter-1.2.1
     % autoreconf -fi
     % ./configure --prefix=@indimaildir@ --sysconfdir=@indimaildir@/etc --enable-indimail \
@@ -471,7 +471,7 @@ the installation.
 
     % wget http://downloads.sourceforge.net/clamav/clamav-0.95.2.tar.gz
     % gunzip -c clamav-0.95.2.tar.gz | tar xf -
-    % patch -p0 < indimail-@version@/patches/clamav-0.95.2.patch
+    % gunzip -c indimail-@version@/patches/clamav-0.95.2.patch.gz | patch -p0
     % cd clamav-0.95.2
     % ./configure --prefix=@indimaildir@ --sysconfdir=@indimaildir@/etc \
         --with-dbdir=@indimaildir@/share/clamd \
@@ -489,7 +489,7 @@ the installation.
 
     % wget http://prdownload.berlios.de/fetchmail/fetchmail-6.3.8.tar.bz2 
     % bzip2 -d -c fetchmail-6.3.8.tar.bz2 | tar xf -
-    % patch -p0 < indimail-@version@/patches/fetchmail-6.3.8.patch
+    % gunzip -c indimail-@version@/patches/fetchmail-6.3.8.patch.gz | patch -p0
     % cd fetchmail-6.3.8
     % autoreconf -fi
     % ./configure --prefix=@indimaildir@ --enable-indimail --enable-indimaildir=@indimaildir@ \
