@@ -1,5 +1,8 @@
 #
 # $Log: indimail-epm.list.in,v $
+# Revision 2.25  2009-10-22 19:57:14+05:30  Cprogrammer
+# added nssd man pages
+#
 # Revision 2.24  2009-10-17 09:58:37+05:30  Cprogrammer
 # added Quick-INSTALL
 #
@@ -665,7 +668,11 @@ f 644 root indimail ${prefix}/man/man1/vadddomain.1.gz	BUILDROOT${prefix}/man/ma
 f 644 root indimail ${prefix}/man/man8/vdelivermail.8.gz	BUILDROOT${prefix}/man/man8/vdelivermail.8.gz
 %ifdef !nopam_multi
 f 644 root indimail ${prefix}/man/man8/pam-multi.8.gz	BUILDROOT${prefix}/man/man8/pam-multi.8.gz
-f 644 root indimail ${prefix}/man/man8/pam-multi.8.gz	BUILDROOT${prefix}/man/man8/pam-checkpwd.8.gz
+f 644 root indimail ${prefix}/man/man8/pam-checkpwd.8.gz	BUILDROOT${prefix}/man/man8/pam-checkpwd.8.gz
+%endif
+%ifdef !nonssd
+f 644 root indimail ${prefix}/man/man5/nssd.conf.5.gz	BUILDROOT${prefix}/man/man5/nssd.conf.5.gz
+f 644 root indimail ${prefix}/man/man8/nssd..gz	BUILDROOT${prefix}/man/man8/nssd.8.gz
 %endif
 
 ##### Documents #################
