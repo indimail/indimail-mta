@@ -1,0 +1,35 @@
+.TH nssd 8
+.SH NAME
+INDIMAIL/sbin/nssd \- NSS daemon for IndiMail database
+.SH SYNOPSIS
+\fBnssd\fR [-\fBf\fR \fIconfig\fR] [ -\fBd\fR \fIlevel\fR] | [-\fIV\fR]
+
+.SH DESCRIPTION
+\fBnssd\fR implements \fInssd\fR database prividing lookup for IndiMail users in NSS. There are
+various functions to lookup users and groups in a local environment. Traditionally, this was
+done by using files (e.g., /etc/passwd), but other nameservices (like the Network Information
+Service (NIS) and the Domain Name Service (DNS)) became popular, and were hacked into the C
+library, usually with a fixed search order. The Name Service Switch (NSS) provides a cleaner
+solution to extend the lookup to other databases.
+
+The actual implementation of nssd is implemented by having a daemon \fBnssd\fR and library
+\fB/usr/lib/libnss_nssd.so\fR. The daemon \fBnssd\fR listens on UNIX socket /tmp/nssd.sock.
+
+.SH OPTIONS
+.PP
+.TP
+\fB\-V\fR
+Display Version Numbers
+.TP
+\fB\-f\fR \fIconfig\fR
+nssd config file
+.TP
+\fB\-d\fR \fIlevel\fR
+Set debug level
+
+.SH SEE ALSO
+IndiMail(7),
+nssd.conf(5),
+nscd(8),
+nscd(5),
+nsswitch.conf(5),

@@ -1,0 +1,92 @@
+.TH nssd.conf 5
+.SH NAME
+INDIMAIL/etc/nscd.conf - Name Service Switch database configuration for IndiMail
+.SH DESCRIPTION
+nscd.conf specifies the query to be executed against a MySQL database for the functions
+getpwnam(3), getpwuid(3), getpwent(3), getspnam(3), getspent(3), getgrnam(3), getgrgid(3),
+getgrent(3).
+.PP
+To connect to MySQL you require the following paramters
+.TP
+host
+MySQL host to connect
+.TP
+database
+MySQL database to connect
+.TP
+username
+The username to connect to MySQL database
+.TP
+password
+The password to use to connect to MySQL database
+.TP
+socket or port
+Socket or port to use for connecting to MySQL database
+.TP
+pidfile 
+Filename to store nssd(8) pid.
+.TP
+threads
+No of nssd threads to run
+.TP
+timeout
+Timeout to use for querying IndiMail's database. -1 for no timeout.
+.TP
+facility
+syslog facility to use for log messages.
+.TP
+priority
+syslog priority to use for log messages.
+.PP
+The example below shows a configuration file INDIMAIL/etc/nssd.conf
+.PP
+.EX
+ getpwnam   SELECT pw_name,'x',555,555,pw_gecos,pw_dir,pw_shell \\
+            FROM indimail \\
+            WHERE pw_name='%1$s' and pw_domain='%2$s' \\
+            LIMIT 1
+            LIMIT 1
+ getpwuid   SELECT username,'x',uid,gid,gecos,homedir,shell \\
+            FROM users \\
+            WHERE uid='%1$s' \\
+            LIMIT 1
+ getpwent   SELECT pw_name,'x',555,555,pw_gecos,pw_dir,pw_shell \\
+            FROM indimail
+ getspnam   SELECT pw_name,pw_passwd,'1','0','99999','0','0','-1','0' \\
+            FROM indimail \\
+            WHERE pw_name='%1$s'and pw_domain='%2$s' \\
+            LIMIT 1
+ getspent   SELECT pw_name,pw_passwd,'1','0','99999','0','0','-1','0' \\
+            FROM indimail
+ getgrnam   SELECT name,password,gid \\
+            FROM groups \\
+            WHERE name='%1$s' \\
+            LIMIT 1
+ getgrgid   SELECT name,password,gid \\
+            FROM groups \\
+            WHERE gid='%1$s' \\
+            LIMIT 1
+ getgrent   SELECT name,password,gid \\
+            FROM groups
+ memsbygid  SELECT username \\
+            FROM grouplist \\
+            WHERE gid='%1$s'
+ gidsbymem  SELECT gid \\
+            FROM grouplist \\
+            WHERE username='%1$s'
+
+ host        localhost
+ database    indimail
+ username    indimail
+ password    xxxxxxxx
+ socket      /tmp/mysql.sock
+ #port       3306
+ pidfile     /tmp/nssd.pid
+ threads     5
+ timeout     -1
+ facility    daemon
+ priority    info
+.EE
+
+.SH SEE ALSO
+nssd(8)
