@@ -794,9 +794,9 @@ auth_inc
 mysql_libdir
 mysql_incdir
 defaultdomain
+defaultprefix
 OS
 LIBVER
-defaultprefix
 LIBTOOL_DEPS
 PTHREAD_CFLAGS
 PTHREAD_LIBS
@@ -12579,7 +12579,7 @@ case "$host" in
 	INSTALL="/usr/bin/install -c"
 	CPPFLAGS="$CPPFLAGS -DLINUX"
 	CFLAGS="$CFLAGS -s -O4 -Wall -fPIC"
-	STRIP_OPT=-s
+	#STRIP_OPT=-s
     LIBVER=2
 	OS=linux
 	;;
