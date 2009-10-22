@@ -215,7 +215,6 @@ builddir = @builddir@
 datadir = @datadir@
 datarootdir = @datarootdir@
 defaultdomain = @defaultdomain@
-defaultprefix = @defaultprefix@
 docdir = @docdir@
 dvidir = @dvidir@
 exec_prefix = @exec_prefix@
