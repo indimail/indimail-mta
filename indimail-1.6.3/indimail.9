@@ -243,8 +243,8 @@ for indimail.org and 25 is the SMTP port.
 
 .SH Directory structure
 .PP
-IndiMail gets it's own home directory. A typical IndiMail installation willl have the following directories
-.RS
+IndiMail gets it's own home directory. A typical IndiMail installation willl have the following
+directories in the directory INDIMAIL.
 .TS
 l l.
 Directory     | Description
@@ -271,7 +271,42 @@ etc           | bogofilter.cf, spam wordlist, tcp.[smtp,imap,pop3].cdb, etc
 
 .TE
 
-.SH Virtual domain Directory Structure Layout
+.PP
+Apart from the above, IndiMail has all logs in the directory /var/log/indimail.
+These contain both informational and error logs.
+
+.TS
+l l.
+Directory       | Description
+_
+clamd           | clamd virus scanner log
+freshclam       | clamd signature update log
+qscanq          | qscanq virus scanner log
+smtpd.25        | Log for qmail-smtpd running on port 25
+smtpd.366       | Log for qmail-smtpd ODMR port
+smtpd.465       | Log for qmail-smtpd on SMTPS port
+deliver.25      | qmail-send deliver log
+qmail-send.25
+fetchmail       | fetchmail log
+greylist.1999   | greylist daemon log
+imapd.143       | Log for imapd running on port 143
+imapd-ssl.993   | Log for imapd running on port 993 (SSL)
+proxyIMAP.4143  | Log for IMAP proxy running on port 4143
+proxyIMAP.9143  | Log for IMAP proxy running on port 9143 (SSL)
+pop3d.110       | Log for pop3d running on port 110
+pop3d-ssl.995   | Log for pop3d running on port 995 (SSL)
+proxyPOP3.4110  | Log for POP3 proxy running on port 4110
+proxyPOP3.9110  | Log for POP3 proxy running on port 9110 (SSL)
+indisrvr.4000   | Log for IndiMail administration daemon
+inlookup.infifo | Log for inlookup server
+pwdlookup       | Log for NSS daemon
+poppass.106     | Log for poppassd protocol daemon
+mysql.3306      | Log for MySQL service
+spamlog         | Spam attemtps gets logged here
+svscan          | Log for svscan service
+.TE
+
+.SH Virtual Domain Directory Structure Layout
 IndiMail uses an adaptive directory structure based on a table \fIdir-control\fR which is
 automatically managed by the core programs \fBvadduser(1)\fR and \fBvdeluser\fR. The basic
 idea is to break up the user Maildir directories across multiple directories and sub
@@ -296,7 +331,6 @@ You can use the \fBvreorg(8)\fR program to recreate the \fIdir-control\fR table.
 .SH Environment Variables
 Some IndiMail programs set or use environment variables. The following
 table lists these variables and describes their use.
-.RS
 .TS
 l l.
 Environ  Variable |Program      |Set/Used|Purpose
@@ -1012,7 +1046,6 @@ TCPREMOTEIP       |tcpclient    |set     |The IP address of the remote host.
 .TE
 
 Some of these environment variables have default values. The table below lists some of these.
-.RS
 .TS
 l l.
 Environ  Variable  | default value
@@ -1036,6 +1069,45 @@ MCDFILE            | "mcdinfo" or /var/indimail/control/mcdinfo
 INFIFO             | infifo or /var/indimail/control/inquery/infifo
 .TE
 
+.SH STARTUP
+IndiMail uses svscan(8) to start, monitor and restart (if neccessary) all services needed
+for proper functioning of email server. svscan is installed as an entry in /etc/inittab on
+systems which use \fBinit(8)\fR. Some of the newer systems come with \fBupstart(8)\fR, in whih case,
+svscan is installed in /etc/event.d. All services are installed in /service which each
+directory representing a service. These services are started and monitored by \fBsupervise(8)\fR.
+The table below gives all the service directories in /service.
+
+.TS
+l l.
+Directory            | Service Description
+--------------------------------------------------------------------
+clamd                | clam(8) antivirus
+freshclam            | freshclam(1) clam signature update service
+qscanq               | qscanq(8) virus scanner
+qmail-smtpd.25       | qmail-smtpd(8) SMTP service on port 25
+qmail-smtpd.366      | qmail-smtpd(8) SMTP ODMR service on port 366
+qmail-smtpd.465      | qmail-smtpd(8) SMTPS service on port 465 (SSL)
+qmail-send.25        | qmail-send(8) delivery service
+fetchmail            | fetchmail(1) service
+greylist.1999        | qmail-greyd(8) greylisting daemon
+qmail-imapd.143      | imapd(8) IMAP service on port 143
+qmail-imapd-ssl.993  | imapd(8) IMAPS service on port 993
+proxy-imapd.4143     | imapd(8) IMAP proxy on port 4143
+proxy-imapd-ssl.9143 | imapd(8) SSL enabled IMAP proxy on port 9143
+qmail-pop3d.110      | pop3d(8) POP3 service on port 110
+qmail-pop3d-ssl.995  | pop3d(8) POP3S service on port 995
+proxy-pop3d.4110     | pop3d(8) POP3 proxy on port 4110
+proxy-pop3d-ssl.9110 | pop3d(8) SSL enabled POP3 proxy on port 9110
+indisrvr.4000        | indisrvr(8) IndiMail administration daemon
+inlookup.infifo      | InLookup(8) Service
+pwdlookup            | nssd(8) Name Service Switch Daemon
+mysql.3306           | mysqld(8) MySQL daemon
+qmail-poppass.106    | qmail-poppass(8) Poppassd protocol service
+qmail-spamlog        | Spam logger service
+.TE
+
+You can use svc to start / stop individual services. To disable / enable all services, you
+can use the initsvc(1) command
 
 .SH PROGRAMS
 IndiMail has programs installed in INDIMAIL/bin, INDIMAIL/sbin.
@@ -1212,4 +1284,14 @@ mgmtpass(8)
 vpriv(8)
 
 .SH "SEE ALSO"
-dbinfo(8), vhostid(8), vsmtp(8), vreorg(8), hostcntrl(1), vadduser(1), vdeluser(1), svctool(8)
+dbinfo(8),
+vhostid(8),
+vsmtp(8),
+vreorg(8),
+hostcntrl(1),
+vadduser(1),
+vdeluser(1),
+initsvc(1),
+svscan(8),
+supervise(8),
+svctool(8)
