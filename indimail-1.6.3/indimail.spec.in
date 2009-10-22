@@ -1,5 +1,12 @@
 #
 # $Log: indimail.spec.in,v $
+# Revision 2.99  2009-10-22 19:59:28+05:30  Cprogrammer
+# added --mandir, --libdir option for nssd
+#
+# Revision 2.98  2009-10-21 14:54:38+05:30  Cprogrammer
+# proper url for all sources and patches
+# compressed patches
+#
 # Revision 2.97  2009-10-17 08:51:58+05:30  Cprogrammer
 # pass argument to rpm.init for preun to distinguish between package removal and upgrade
 #
@@ -302,7 +309,7 @@
 # rpm spec file for indimail
 #
 #
-# $Id: indimail.spec.in,v 2.97 2009-10-17 08:51:58+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 2.99 2009-10-22 19:59:28+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %define _unpackaged_files_terminate_build 1
 
@@ -389,18 +396,18 @@ Group: System Environment/Base
 %else
 Group: Productivity/Networking/Email/Servers
 %endif
-Source0:  http://downloads.sourceforge.net/indimail/%{name}-%{version}.tar.gz
+Source0:  http://downloads.sourceforge.net/%{name}/%{name}-%{version}.tar.gz
 Source1:  http://cr.yp.to/software/qmail-%{qmail_version}.tar.gz
 Source2:  http://cr.yp.to/ucspi-tcp/ucspi-tcp-%{ucspi_version}.tar.gz
 %if %nocourierimap == 0
-Source3:  http://downloads.sourceforge.net/indimail/courier-imap-%{courier_version}.tar.bz2
+Source3:  http://downloads.sourceforge.net/%{name}/courier-imap-%{courier_version}.tar.bz2
 %endif
-Source4:  http://downloads.sourceforge.net/indimail/flash-0.9.4.tar.gz
-Source5:  http://downloads.sourceforge.net/indimail/altermime-0.3.10.tar.gz
-Source6:  http://downloads.sourceforge.net/indimail/ripmime-1.4.0.9.tar.gz
-Source7:  http://downloads.sourceforge.net/indimail/mpack-1.6.tar.gz
-Source8:  http://downloads.sourceforge.net/indimail/fortune-%{fortune_version}.tar.gz
-Source9:  http://downloads.sourceforge.net/indimail/nssd-%{nssd_version}.tar.gz
+Source4:  http://downloads.sourceforge.net/%{name}/flash-0.9.4.tar.gz
+Source5:  http://downloads.sourceforge.net/%{name}/altermime-0.3.10.tar.gz
+Source6:  http://downloads.sourceforge.net/%{name}/ripmime-1.4.0.9.tar.gz
+Source7:  http://downloads.sourceforge.net/%{name}/mpack-1.6.tar.gz
+Source8:  http://downloads.sourceforge.net/%{name}/fortune-%{fortune_version}.tar.gz
+Source9:  http://downloads.sourceforge.net/%{name}/nssd-%{nssd_version}.tar.gz
 %if %nobogofilter == 0
 Source10: http://downloads.sourceforge.net/bogofilter/bogofilter-%{bogofilter_version}.tar.bz2
 %endif
@@ -409,32 +416,33 @@ Source11: http://prdownload.berlios.de/fetchmail/fetchmail-%{fetchmail_version}.
 Source12: http://downloads.sourceforge.net/clamav/clamav-%{clamav_version}.tar.gz
 %endif
 %if %nopam_multi == 0
-Source13: http://downloads.sourceforge.net/indimail/pam-multi-%{pam_multi_version}.tar.gz
+Source13: http://downloads.sourceforge.net/%{name}/pam-multi-%{pam_multi_version}.tar.gz
 %endif
-Source14: %{name}-%{version}-rpmlintrc
-Patch1:  qmail-%{qmail_version}.patch
-Patch2:  ucspi-tcp-%{ucspi_version}.patch
+Source14: http://downloads.sourceforge.net/%{name}/%{name}-%{version}-rpmlintrc
+
+Patch1:  http://downloads.sourceforge.net/%{name}/Patches/qmail-%{qmail_version}.patch.gz
+Patch2:  http://downloads.sourceforge.net/%{name}/Patches/ucspi-tcp-%{ucspi_version}.patch.gz
 
 %if %nocourierimap == 0
-%if %build_on_obs != 0
-Patch3:  courier-imap-%{courier_version}-1.0.patch
+%if %build_on_obs == 0
+Patch3:  http://downloads.sourceforge.net/%{name}/Patches/courier-imap-%{courier_version}.patch.gz
 %else
-Patch3:  courier-imap-%{courier_version}.patch
+Patch3:  http://downloads.sourceforge.net/%{name}/Patches/courier-imap-%{courier_version}-1.0.patch.gz
 %endif
 %endif
 
 # Comment out below for openSUSE buildservice
 %if %build_on_obs == 0
 %if %nobogofilter == 0
-Patch10: bogofilter-%{bogofilter_version}.patch
+Patch10: http://downloads.sourceforge.net/%{name}/Patches/bogofilter-%{bogofilter_version}.patch.gz
 %endif
 %if %nofetchmail == 0
-Patch11: fetchmail-%{fetchmail_version}.patch
+Patch11: http://downloads.sourceforge.net/%{name}/Patches/fetchmail-%{fetchmail_version}.patch.gz
 %endif
 %endif
 
 %if %noclamav == 0
-Patch12: clamav-%{clamav_version}.patch
+Patch12: http://downloads.sourceforge.net/%{name}/Patches/clamav-%{clamav_version}.patch.gz
 %endif
 NoSource: 1
 NoSource: 2
@@ -610,15 +618,14 @@ do
 			# Copy for the SRPM
 			%{__cp} %{name}-%{version}/patches/$i.patch ../SOURCES
 		elif [ -f %{name}-%{version}/patches/$i.patch.gz ] ; then
-			gunzip -c %{name}-%{version}/patches/$i.patch.gz > ../SOURCES/$i.patch
+			%{__cp} %{name}-%{version}/patches/$i.patch.gz ../SOURCES
 		fi
 	fi
 	)
 done
-
 # unComment out below for openSUSE buildservice
 %if %build_on_obs != 0
-	%{__cp} %{name}-%{version}/patches/courier-imap-%{courier_version}-1.0.patch ../SOURCES
+	%{__cp} %{name}-%{version}/patches/courier-imap-%{courier_version}-1.0.patch.gz ../SOURCES
 %endif
 
 %patch1  -p0
@@ -766,11 +773,12 @@ else
 fi
 if [ " %dist" = " mandrake" ] ; then
 	./configure --prefix=%{_prefix} --libexecdir=%{_prefix}/libexec --sysconfdir=%{_prefix}/etc \
-	--libdir=%{_libdir} --x-libraries=%{_libdir} \
+	--mandir=%{_prefix}/man --libdir=/usr/%{_lib} --x-libraries=/usr/%{_lib} \
 	--enable-mysqlincdir=%{mysqlPrefix}/include/mysql --enable-mysqllibdir=%{mysqlPrefix}/%{_lib}/mysql \
 	`%{__cat} ../%{name}-%{version}/config/nssd.opts` > $DEVICE
 else
 	%configure --prefix=%{_prefix} --libexecdir=%{_prefix}/libexec --sysconfdir=%{_prefix}/etc \
+	--mandir=%{_prefix}/man --libdir=/usr/%{_lib} \
 	--enable-mysqlincdir=%{mysqlPrefix}/include/mysql --enable-mysqllibdir=%{mysqlPrefix}/%{_lib}/mysql \
 	`%{__cat} ../%{name}-%{version}/config/nssd.opts` > $DEVICE
 fi
@@ -863,10 +871,10 @@ do
 		cd $i
 		if [ %{_verbose} -eq 0 ] ; then
 			%{__make} -s DESTDIR=%{buildroot}
-			%{__make} -s ARCH_LIB=%{_lib} DESTDIR=%{buildroot} install-strip
+			%{__make} -s DESTDIR=%{buildroot} install-strip
 		else
 			%{__make} DESTDIR=%{buildroot}
-			%{__make} ARCH_LIB=%{_lib} DESTDIR=%{buildroot} install-strip
+			%{__make} DESTDIR=%{buildroot} install-strip
 		fi
 		cd ..
 	fi
