@@ -39,8 +39,9 @@ nssdsbin_PROGRAMS = nssd$(EXEEXT)
 subdir = .
 DIST_COMMON = README $(am__configure_deps) $(noinst_HEADERS) \
 	$(srcdir)/Makefile.am $(srcdir)/Makefile.in \
-	$(srcdir)/config.h.in $(top_srcdir)/configure config.guess \
-	config.sub install-sh ltmain.sh missing
+	$(srcdir)/config.h.in $(top_srcdir)/configure AUTHORS \
+	ChangeLog NEWS config.guess config.sub install-sh ltmain.sh \
+	missing
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/m4/libtool.m4 \
 	$(top_srcdir)/m4/ltoptions.m4 $(top_srcdir)/m4/ltsugar.m4 \
@@ -76,7 +77,8 @@ am__base_list = \
   sed '$$!N;$$!N;$$!N;$$!N;$$!N;$$!N;$$!N;s/\n/ /g' | \
   sed '$$!N;$$!N;$$!N;$$!N;s/\n/ /g'
 am__installdirs = "$(DESTDIR)$(libnss_nssddir)" \
-	"$(DESTDIR)$(nssdsbindir)"
+	"$(DESTDIR)$(nssdsbindir)" "$(DESTDIR)$(man5dir)" \
+	"$(DESTDIR)$(man8dir)"
 LTLIBRARIES = $(libnss_nssd_LTLIBRARIES)
 am__objects_1 = pwd.lo spwd.lo grp.lo sock.lo misc.lo util.lo
 am_libnss_nssd_la_OBJECTS = $(am__objects_1)
@@ -105,6 +107,10 @@ LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
 	$(LDFLAGS) -o $@
 SOURCES = $(libnss_nssd_la_SOURCES) $(nssd_SOURCES)
 DIST_SOURCES = $(libnss_nssd_la_SOURCES) $(nssd_SOURCES)
+man5dir = $(mandir)/man5
+man8dir = $(mandir)/man8
+NROFF = nroff
+MANS = $(man_MANS)
 HEADERS = $(noinst_HEADERS)
 ETAGS = etags
 CTAGS = ctags
@@ -266,7 +272,9 @@ nssd_LDFLAGS = @auth_libs@ @PTHREAD_CFLAGS@ @PTHREAD_LIBS@
 #nssd_LDFLAGS = @MYSQL_LIBS@ @PTHREAD_CFLAGS@ @PTHREAD_LIBS@
 nssd_LDADD = 
 nssd_DEPENDENCIES = config.h
+man_MANS = nssd.8 nssd.conf.5
 noinst_HEADERS = nssd.h
+MOSTLYCLEANFILES = nssd.8 nssd.conf.5
 all: config.h
 	$(MAKE) $(AM_MAKEFLAGS) all-am
 
@@ -323,6 +331,19 @@ $(srcdir)/config.h.in:  $(am__configure_deps)
 
 distclean-hdr:
 	-rm -f config.h stamp-h1
+install-libnss_nssdLTLIBRARIES: $(libnss_nssd_LTLIBRARIES)
+	@$(NORMAL_INSTALL)
+	test -z "$(libnss_nssddir)" || $(MKDIR_P) "$(DESTDIR)$(libnss_nssddir)"
+	@list='$(libnss_nssd_LTLIBRARIES)'; test -n "$(libnss_nssddir)" || list=; \
+	list2=; for p in $$list; do \
+	  if test -f $$p; then \
+	    list2="$$list2 $$p"; \
+	  else :; fi; \
+	done; \
+	test -z "$$list2" || { \
+	  echo " $(LIBTOOL) $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=install $(INSTALL) $(INSTALL_STRIP_FLAG) $$list2 '$(DESTDIR)$(libnss_nssddir)'"; \
+	  $(LIBTOOL) $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=install $(INSTALL) $(INSTALL_STRIP_FLAG) $$list2 "$(DESTDIR)$(libnss_nssddir)"; \
+	}
 
 uninstall-libnss_nssdLTLIBRARIES:
 	@$(NORMAL_UNINSTALL)
@@ -437,6 +458,82 @@ clean-libtool:
 
 distclean-libtool:
 	-rm -f libtool config.lt
+install-man5: $(man_MANS)
+	@$(NORMAL_INSTALL)
+	test -z "$(man5dir)" || $(MKDIR_P) "$(DESTDIR)$(man5dir)"
+	@list=''; test -n "$(man5dir)" || exit 0; \
+	{ for i in $$list; do echo "$$i"; done; \
+	l2='$(man_MANS)'; for i in $$l2; do echo "$$i"; done | \
+	  sed -n '/\.5[a-z]*$$/p'; \
+	} | while read p; do \
+	  if test -f $$p; then d=; else d="$(srcdir)/"; fi; \
+	  echo "$$d$$p"; echo "$$p"; \
+	done | \
+	sed -e 'n;s,.*/,,;p;h;s,.*\.,,;s,^[^5][0-9a-z]*$$,5,;x' \
+	      -e 's,\.[0-9a-z]*$$,,;$(transform);G;s,\n,.,' | \
+	sed 'N;N;s,\n, ,g' | { \
+	list=; while read file base inst; do \
+	  if test "$$base" = "$$inst"; then list="$$list $$file"; else \
+	    echo " $(INSTALL_DATA) '$$file' '$(DESTDIR)$(man5dir)/$$inst'"; \
+	    $(INSTALL_DATA) "$$file" "$(DESTDIR)$(man5dir)/$$inst" || exit $$?; \
+	  fi; \
+	done; \
+	for i in $$list; do echo "$$i"; done | $(am__base_list) | \
+	while read files; do \
+	  test -z "$$files" || { \
+	    echo " $(INSTALL_DATA) $$files '$(DESTDIR)$(man5dir)'"; \
+	    $(INSTALL_DATA) $$files "$(DESTDIR)$(man5dir)" || exit $$?; }; \
+	done; }
+
+uninstall-man5:
+	@$(NORMAL_UNINSTALL)
+	@list=''; test -n "$(man5dir)" || exit 0; \
+	files=`{ for i in $$list; do echo "$$i"; done; \
+	l2='$(man_MANS)'; for i in $$l2; do echo "$$i"; done | \
+	  sed -n '/\.5[a-z]*$$/p'; \
+	} | sed -e 's,.*/,,;h;s,.*\.,,;s,^[^5][0-9a-z]*$$,5,;x' \
+	      -e 's,\.[0-9a-z]*$$,,;$(transform);G;s,\n,.,'`; \
+	test -z "$$files" || { \
+	  echo " ( cd '$(DESTDIR)$(man5dir)' && rm -f" $$files ")"; \
+	  cd "$(DESTDIR)$(man5dir)" && rm -f $$files; }
+install-man8: $(man_MANS)
+	@$(NORMAL_INSTALL)
+	test -z "$(man8dir)" || $(MKDIR_P) "$(DESTDIR)$(man8dir)"
+	@list=''; test -n "$(man8dir)" || exit 0; \
+	{ for i in $$list; do echo "$$i"; done; \
+	l2='$(man_MANS)'; for i in $$l2; do echo "$$i"; done | \
+	  sed -n '/\.8[a-z]*$$/p'; \
+	} | while read p; do \
+	  if test -f $$p; then d=; else d="$(srcdir)/"; fi; \
+	  echo "$$d$$p"; echo "$$p"; \
+	done | \
+	sed -e 'n;s,.*/,,;p;h;s,.*\.,,;s,^[^8][0-9a-z]*$$,8,;x' \
+	      -e 's,\.[0-9a-z]*$$,,;$(transform);G;s,\n,.,' | \
+	sed 'N;N;s,\n, ,g' | { \
+	list=; while read file base inst; do \
+	  if test "$$base" = "$$inst"; then list="$$list $$file"; else \
+	    echo " $(INSTALL_DATA) '$$file' '$(DESTDIR)$(man8dir)/$$inst'"; \
+	    $(INSTALL_DATA) "$$file" "$(DESTDIR)$(man8dir)/$$inst" || exit $$?; \
+	  fi; \
+	done; \
+	for i in $$list; do echo "$$i"; done | $(am__base_list) | \
+	while read files; do \
+	  test -z "$$files" || { \
+	    echo " $(INSTALL_DATA) $$files '$(DESTDIR)$(man8dir)'"; \
+	    $(INSTALL_DATA) $$files "$(DESTDIR)$(man8dir)" || exit $$?; }; \
+	done; }
+
+uninstall-man8:
+	@$(NORMAL_UNINSTALL)
+	@list=''; test -n "$(man8dir)" || exit 0; \
+	files=`{ for i in $$list; do echo "$$i"; done; \
+	l2='$(man_MANS)'; for i in $$l2; do echo "$$i"; done | \
+	  sed -n '/\.8[a-z]*$$/p'; \
+	} | sed -e 's,.*/,,;h;s,.*\.,,;s,^[^8][0-9a-z]*$$,8,;x' \
+	      -e 's,\.[0-9a-z]*$$,,;$(transform);G;s,\n,.,'`; \
+	test -z "$$files" || { \
+	  echo " ( cd '$(DESTDIR)$(man8dir)' && rm -f" $$files ")"; \
+	  cd "$(DESTDIR)$(man8dir)" && rm -f $$files; }
 
 ID: $(HEADERS) $(SOURCES) $(LISP) $(TAGS_FILES)
 	list='$(SOURCES) $(HEADERS) $(LISP) $(TAGS_FILES)'; \
@@ -491,6 +588,19 @@ distclean-tags:
 	-rm -f TAGS ID GTAGS GRTAGS GSYMS GPATH tags
 
 distdir: $(DISTFILES)
+	@list='$(MANS)'; if test -n "$$list"; then \
+	  list=`for p in $$list; do \
+	    if test -f $$p; then d=; else d="$(srcdir)/"; fi; \
+	    if test -f "$$d$$p"; then echo "$$d$$p"; else :; fi; done`; \
+	  if test -n "$$list" && \
+	    grep 'ab help2man is required to generate this page' $$list >/dev/null; then \
+	    echo "error: found man pages containing the \`missing help2man' replacement text:" >&2; \
+	    grep -l 'ab help2man is required to generate this page' $$list | sed 's/^/         /' >&2; \
+	    echo "       to fix them, install help2man, remove and regenerate the man pages;" >&2; \
+	    echo "       typically \`make maintainer-clean' will remove them" >&2; \
+	    exit 1; \
+	  else :; fi; \
+	else :; fi
 	$(am__remove_distdir)
 	test -d "$(distdir)" || mkdir "$(distdir)"
 	@srcdirstrip=`echo "$(srcdir)" | sed 's/[].[^$$\\*]/\\\\&/g'`; \
@@ -638,9 +748,10 @@ distcleancheck: distclean
 	       exit 1; } >&2
 check-am: all-am
 check: check-am
-all-am: Makefile $(LTLIBRARIES) $(PROGRAMS) $(HEADERS) config.h
+all-am: Makefile $(LTLIBRARIES) $(PROGRAMS) $(MANS) $(HEADERS) \
+		config.h
 installdirs:
-	for dir in "$(DESTDIR)$(libnss_nssddir)" "$(DESTDIR)$(nssdsbindir)"; do \
+	for dir in "$(DESTDIR)$(libnss_nssddir)" "$(DESTDIR)$(nssdsbindir)" "$(DESTDIR)$(man5dir)" "$(DESTDIR)$(man8dir)"; do \
 	  test -z "$$dir" || $(MKDIR_P) "$$dir"; \
 	done
 install: install-am
@@ -658,6 +769,7 @@ install-strip:
 	  `test -z '$(STRIP)' || \
 	    echo "INSTALL_PROGRAM_ENV=STRIPPROG='$(STRIP)'"` install
 mostlyclean-generic:
+	-test -z "$(MOSTLYCLEANFILES)" || rm -f $(MOSTLYCLEANFILES)
 
 clean-generic:
 
@@ -691,7 +803,7 @@ info: info-am
 
 info-am:
 
-install-data-am: install-libnss_nssdLTLIBRARIES \
+install-data-am: install-libnss_nssdLTLIBRARIES install-man \
 	install-nssdsbinPROGRAMS
 
 install-dvi: install-dvi-am
@@ -708,7 +820,7 @@ install-info: install-info-am
 
 install-info-am:
 
-install-man:
+install-man: install-man5 install-man8
 
 install-pdf: install-pdf-am
 
@@ -739,8 +851,10 @@ ps: ps-am
 
 ps-am:
 
-uninstall-am: uninstall-libnss_nssdLTLIBRARIES \
+uninstall-am: uninstall-libnss_nssdLTLIBRARIES uninstall-man \
 	uninstall-nssdsbinPROGRAMS
+
+uninstall-man: uninstall-man5 uninstall-man8
 
 .MAKE: all install-am install-strip
 
@@ -754,13 +868,14 @@ uninstall-am: uninstall-libnss_nssdLTLIBRARIES \
 	info-am install install-am install-data install-data-am \
 	install-dvi install-dvi-am install-exec install-exec-am \
 	install-html install-html-am install-info install-info-am \
-	install-libnss_nssdLTLIBRARIES install-man \
-	install-nssdsbinPROGRAMS install-pdf install-pdf-am install-ps \
-	install-ps-am install-strip installcheck installcheck-am \
-	installdirs maintainer-clean maintainer-clean-generic \
-	mostlyclean mostlyclean-compile mostlyclean-generic \
-	mostlyclean-libtool pdf pdf-am ps ps-am tags uninstall \
-	uninstall-am uninstall-libnss_nssdLTLIBRARIES \
+	install-libnss_nssdLTLIBRARIES install-man install-man5 \
+	install-man8 install-nssdsbinPROGRAMS install-pdf \
+	install-pdf-am install-ps install-ps-am install-strip \
+	installcheck installcheck-am installdirs maintainer-clean \
+	maintainer-clean-generic mostlyclean mostlyclean-compile \
+	mostlyclean-generic mostlyclean-libtool pdf pdf-am ps ps-am \
+	tags uninstall uninstall-am uninstall-libnss_nssdLTLIBRARIES \
+	uninstall-man uninstall-man5 uninstall-man8 \
 	uninstall-nssdsbinPROGRAMS
 
 @SET_MAKE@
@@ -777,26 +892,23 @@ nssd-config.$(OBJEXT): nssd.h common.h config.h
 nssd-nssd_misc.$(OBJEXT): nssd.h common.h config.h
 nssd-util.$(OBJEXT): common.h config.h
 
-#install -data-hook:
-install-libnss_nssdLTLIBRARIES: $(libnss_nssd_LTLIBRARIES)
-	@$(NORMAL_INSTALL)
-	if [ " $(ARCH_LIB)" != " " ] ; then \
-		for dir in "$(DESTDIR)/usr/$(ARCH_LIB)"; do \
-	  	test -z "$$dir" || $(MKDIR_P) "$$dir"; \
-		done; \
-		$(LIBTOOL) --mode=install $(INSTALL) -c -s libnss_nssd.la $(DESTDIR)/usr/$(ARCH_LIB)/libnss_nssd.la; \
-	else \
-		test -z "$(libnss_nssddir)" || $(MKDIR_P) "$(DESTDIR)$(libnss_nssddir)"; \
-		list='$(libnss_nssd_LTLIBRARIES)'; for p in $$list; do \
-	  	if test -f $$p; then \
-	    	f=$(am__strip_dir) \
-	    	echo " $(LIBTOOL) $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=install $(libnss_nssdLTLIBRARIES_INSTALL) $(INSTALL_STRIP_FLAG) '$$p' '$(DESTDIR)$(libnss_nssddir)/$$f'"; \
-	    	$(LIBTOOL) $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=install $(libnss_nssdLTLIBRARIES_INSTALL) $(INSTALL_STRIP_FLAG) "$$p" "$(DESTDIR)$(libnss_nssddir)/$$f"; \
-	  	else :; fi; \
-		done; \
-	fi
+nssd.8: nssd.9
+	cat $^ | sed s}INDIMAIL}$(prefix)}g > $@
+nssd.conf.5: nssd.conf.9
+	cat $^ | sed s}INDIMAIL}$(prefix)}g > $@
 libtool: $(LIBTOOL_DEPS)
 	$(SHELL) ./config.status --recheck
+
+#install -data-hook:
+#install-libnss_nssdLTLIBRARIES: $(libnss_nssd_LTLIBRARIES)
+#	@$(NORMAL_INSTALL)
+#	@if [ " $(ARCH_LIB)" = " " ] ; then \
+#		if [ -d /usr/lib64 ] ; then \
+#			$(LIBTOOL) --mode=install $(INSTALL) -c -s libnss_nssd.la $(DESTDIR)/usr/lib64/libnss_nssd.la; \
+#		else \
+#			$(LIBTOOL) --mode=install $(INSTALL) -c -s libnss_nssd.la $(DESTDIR)/usr/lib/libnss_nssd.la; \
+#		fi; \
+#	fi
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.
