@@ -28,8 +28,11 @@ nssd_LDFLAGS = @auth_libs@ @PTHREAD_CFLAGS@ @PTHREAD_LIBS@
 #nssd_LDFLAGS = @MYSQL_LIBS@ @PTHREAD_CFLAGS@ @PTHREAD_LIBS@
 nssd_LDADD = 
 nssd_DEPENDENCIES = config.h
+man_MANS=nssd.8 nssd.conf.5
 
 noinst_HEADERS = nssd.h
+
+MOSTLYCLEANFILES=nssd.8 nssd.conf.5
 
 pwd.$(OBJEXT): nsvs.h common.h config.h
 grp.$(OBJEXT): nsvs.h common.h config.h
@@ -43,25 +46,22 @@ nssd-config.$(OBJEXT): nssd.h common.h config.h
 nssd-nssd_misc.$(OBJEXT): nssd.h common.h config.h
 nssd-util.$(OBJEXT): common.h config.h
 
-#install -data-hook:
-install-libnss_nssdLTLIBRARIES: $(libnss_nssd_LTLIBRARIES)
-	@$(NORMAL_INSTALL)
-	if [ " $(ARCH_LIB)" != " " ] ; then \
-		for dir in "$(DESTDIR)/usr/$(ARCH_LIB)"; do \
-	  	test -z "$$dir" || $(MKDIR_P) "$$dir"; \
-		done; \
-		$(LIBTOOL) --mode=install $(INSTALL) -c -s libnss_nssd.la $(DESTDIR)/usr/$(ARCH_LIB)/libnss_nssd.la; \
-	else \
-		test -z "$(libnss_nssddir)" || $(MKDIR_P) "$(DESTDIR)$(libnss_nssddir)"; \
-		list='$(libnss_nssd_LTLIBRARIES)'; for p in $$list; do \
-	  	if test -f $$p; then \
-	    	f=$(am__strip_dir) \
-	    	echo " $(LIBTOOL) $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=install $(libnss_nssdLTLIBRARIES_INSTALL) $(INSTALL_STRIP_FLAG) '$$p' '$(DESTDIR)$(libnss_nssddir)/$$f'"; \
-	    	$(LIBTOOL) $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=install $(libnss_nssdLTLIBRARIES_INSTALL) $(INSTALL_STRIP_FLAG) "$$p" "$(DESTDIR)$(libnss_nssddir)/$$f"; \
-	  	else :; fi; \
-		done; \
-	fi
+nssd.8: nssd.9
+	cat $^ | sed s}INDIMAIL}$(prefix)}g > $@
+nssd.conf.5: nssd.conf.9
+	cat $^ | sed s}INDIMAIL}$(prefix)}g > $@
 
 LIBTOOL_DEPS = @LIBTOOL_DEPS@
 libtool: $(LIBTOOL_DEPS)
 	$(SHELL) ./config.status --recheck
+
+#install -data-hook:
+#install-libnss_nssdLTLIBRARIES: $(libnss_nssd_LTLIBRARIES)
+#	@$(NORMAL_INSTALL)
+#	@if [ " $(ARCH_LIB)" = " " ] ; then \
+#		if [ -d /usr/lib64 ] ; then \
+#			$(LIBTOOL) --mode=install $(INSTALL) -c -s libnss_nssd.la $(DESTDIR)/usr/lib64/libnss_nssd.la; \
+#		else \
+#			$(LIBTOOL) --mode=install $(INSTALL) -c -s libnss_nssd.la $(DESTDIR)/usr/lib/libnss_nssd.la; \
+#		fi; \
+#	fi

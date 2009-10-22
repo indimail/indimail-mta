@@ -48,7 +48,7 @@ case "$host" in
 	INSTALL="/usr/bin/install -c"
 	CPPFLAGS="$CPPFLAGS -DLINUX"
 	CFLAGS="$CFLAGS -s -O4 -Wall -fPIC"
-	STRIP_OPT=-s
+	#STRIP_OPT=-s
     LIBVER=2
 	OS=linux
 	;;
@@ -201,7 +201,6 @@ config_path="$enableval",
 AC_DEFINE_UNQUOTED(_PATH_NSVSD_CONF,"$config_path",full path of the NSVS configuration File)
 
 AC_SUBST([LIBTOOL_DEPS])
-AC_SUBST(defaultprefix)
 AC_SUBST(LIBVER)
 AC_SUBST(OS)
 AC_SUBST(defaultdomain)
