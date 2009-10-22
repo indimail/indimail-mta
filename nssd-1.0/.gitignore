@@ -3,3 +3,6 @@ Makefile.in
 stamp-h1
 config.log
 nssd
+configure
+nssd.8
+nssd.conf.5
