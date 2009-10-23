@@ -510,6 +510,7 @@ the installation.
     % ./configure --prefix=@indimaildir@ --sysconfdir=@indimaildir@/etc \
         --enable-mysqlincdir=@mysql_incdir@ \
         --enable-mysqllibdir=@mysql_libdir@ \
+		--libdir=/usr/lib \ # replace with /usr/lib64 on a 64bit system
         --enable-default-domain=indimail.org
     % make -s [DESTDIR=staging_directory]
     % sudo make -s install-strip [DESTDIR=staging_directory]
