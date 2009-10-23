@@ -50,3 +50,5 @@ indimail.5
 svctool.8
 .gitignore
 Quick-INSTALL
+patches/courier-imap-3.0.8.patch.gz
+patches/fetchmail-6.3.9.patch.gz
