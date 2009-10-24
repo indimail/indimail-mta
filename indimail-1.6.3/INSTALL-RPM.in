@@ -2,10 +2,10 @@ File INSTALL-RPM, Version @version@
 DATE: @DATE@
 
 This section covers installing IndiMail from rpm. This is the easy way out to install IndiMail.
-However, I would recommend you to go through the file INSTALL.indimail so that
-you undertand IndiMail better.
 
-There is also an Installation for Experts. For that read INSTALL.indimail
+There is also an Installation for Experts. For that read INSTALL-@version@. I would
+recommend you to go through the file INSTALL-@version@ so that you undertand IndiMail
+better.
 
 You will also find this file as 
 http://downloads.sourceforge.net/indimail/INSTALL-RPM-@version@
@@ -29,7 +29,8 @@ A) Package Installation/Upgrade
        smtp, smtp - odmr, qmail-send, imap/pop3, indisrvr, inlookup, pwdlookup)
        clamav antivirus service, freshclam - virus signature update service,
        bogofilter spam filter service)
-   5. Installs MySQL database for use by IndiMail
+   5. Installs (for installation only) MySQL database for use by IndiMail
+      (database in @indimaildir@/mysqldb/data and logs in @indimaildir@/mysqldb/logs)
    6. Sets up svscan to be run by init (/etc/inittab) or by upstart (/etc/event.d)
 
 B) Package Removal
@@ -85,7 +86,7 @@ to run, you need to create @indimaildir@/etc/fetchmailrc file. You can use fetch
 for configuring fetchmail. To have these services started automatically during reboot,
 delete the files /service/mysql.3306/down and /service/fetchmail/down .
 
-Proceed to SECTION 7 in the file INSTALL.indimail for further instruction on 
+Proceed to SECTION 7 in the file INSTALL-@version@ for further instruction on 
 configuration of IndiMail
 
 Log files are creaed in /var/log/indimail/*

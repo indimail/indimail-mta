@@ -1,4 +1,12 @@
-    Do not read this without reading INSTALL-@version@
+    Do not read this without reading INSTALL-@version@. This is a important file. Most users
+    in my experience have got stuck with MySQL installation and configuration. Following
+    are the most common issues that users have experienced installing IndiMail
+
+    1. MySQL version : As far as possible use mysql 5.1.x or greater
+    2. If you have /etc/my.conf, replace socket=/var/lib/mysql/mysql.sock with
+       socket=/tmp/mysql.sock 
+    3. The user root in mysql does not have a password. This will prevent anyone on
+       the system to connect to MySQL using a password.
 
     ##### STEP 1  ## MySQL Startup ##################
     Create Supervise Directory for starting MySQL. If you already have a running MySQL server and
@@ -16,7 +24,7 @@
     services on startup. You must remove any invocation of mysqld_safe from these scripts.
 
     Create service in supervise to start mysqld
-    # @indimaildir@/sbin/svctool --mysql=3306 --servicedir=/service --mysqlPrefix=/usr/local/mysql \
+    # @indimaildir@/sbin/svctool --mysql=3306 --servicedir=/service --mysqlPrefix=@mysql_prefix@ \
         --databasedir=@indimaildir@/mysqldb --config=@indimaildir@/etc/indimail.cnf \
         --default-domain=indimail.org \
         --model=small --no-of-cpu=2 
@@ -32,11 +40,11 @@
        output of `mysql_real_escape_string()'.
        so have `sql-mode=NO_BACKSLASH_ESCAPES' in the server option
        file (@indimaildir@/etc/indimail.cnf)
-       # @indimaildir@/sbin/svctool --config=mysql --mysqlPrefix=/usr/local/mysql \
+       # @indimaildir@/sbin/svctool --config=mysql --mysqlPrefix=@mysql_prefix@ \
            --model=medium --no-of-cpu=2 --mysqlport=3306 --mysqlsocket=/tmp/mysql.sock
 
        Create a new MySQL database
-       # @indimaildir@/sbin/svctool --config=mysqldb --mysqlPrefix=/usr/local/mysql \
+       # @indimaildir@/sbin/svctool --config=mysqldb --mysqlPrefix=@mysql_prefix@ \
            --databasedir=@indimaildir@/mysqldb --default-domain=indimail.org --base_path=/home/mail
 
     b) For creation of a database in an existing running copy of MySQL on your server
@@ -45,8 +53,8 @@
 
        Method 1 - Using svctool
        ------------------------
-       # @indimaildir@/sbin/svctool --config=mysqldb --mysqlPrefix=/usr/local/mysql \
-           --databasedir=@indimaildir@/mysqldb --default-domain=indimail.org --base-path=/home/mail \
+       # @indimaildir@/sbin/svctool --config=mysqldb --mysqlPrefix=@mysql_prefix@ \
+           --databasedir=@indimaildir@/mysqldb --default-domain=indimail.org --base_path=/home/mail \
            --stdout | mysql -u user -ppassword
        (here user and password are the userid and password of a privileged user in your
         existing MySQL Database)
@@ -57,7 +65,8 @@
        mysql> CREATE USER indimail identified by 'ssh-1.5-';
        mysql> CREATE USER admin    identified by 'benhur20';
        mysql> CREATE USER repl     identified by 'slaveserver';
-       mysql> GRANT SELECT,CREATE,ALTER,INDEX,INSERT,UPDATE,DELETE,CREATE TEMPORARY TABLES,LOCK TABLES ON indimail.* to 'indimail';
+       mysql> GRANT SELECT,CREATE,ALTER,INDEX,INSERT,UPDATE,DELETE,CREATE TEMPORARY TABLES, \
+              LOCK TABLES ON indimail.* to 'indimail';
        mysql> GRANT RELOAD,SHUTDOWN,PROCESS,SUPER on *.* to admin;
        mysql> GRANT REPLICATION_SLAVE on *.* to repl;
 

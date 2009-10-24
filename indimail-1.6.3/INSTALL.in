@@ -103,7 +103,9 @@ IndiMail will install and run on most UNIX and UNIX-like systems, but there are 
     free about 15 megabytes by doing make clean
   * A complete, functioning C development system including a compiler, system header files, and
     libraries. The installation steps will guide you through the installation process.
-  * MySQL 5.1.x or greater. I prefer MySQL 6 onwards
+  * MySQL 5.1.x or greater. I prefer MySQL 6 onwards. You can make IndiMail work with 5.0 or less
+    but you will have to do some manual tweaking with MySQL database and configuration to make
+    MySQL work with IndiMail (read INSTALL-MYSQL for more information).
   * Around 80 megabytes for the binaries, documentation, and configuration files.
   * A safe filesystem for the queue. qmail's reliability guarantee requires that the queue reside
     on a filesystem with traditional BSD FFS semantics. Most modern local filesystems meet these
@@ -510,7 +512,7 @@ the installation.
     % ./configure --prefix=@indimaildir@ --sysconfdir=@indimaildir@/etc \
         --enable-mysqlincdir=@mysql_incdir@ \
         --enable-mysqllibdir=@mysql_libdir@ \
-		--libdir=/usr/lib \ # replace with /usr/lib64 on a 64bit system
+        --libdir=/usr/lib \ # replace with /usr/lib64 on a 64bit system
         --enable-default-domain=indimail.org
     % make -s [DESTDIR=staging_directory]
     % sudo make -s install-strip [DESTDIR=staging_directory]
@@ -526,18 +528,20 @@ the installation.
     service installed under supervise which will start MySQL along with all other IndiMail services.
 
     The commands below will create configuration and service for running mysql. The command also
-    creates a default MySQL database for IndiMail in @indimaildir@/mysqldb/data.
+    creates a default MySQL database for IndiMail in @indimaildir@/mysqldb/data and MySQl
+    logs to go in @indimaildir@/mysqldb/logs.
 
     ##### STEP 1  ## MySQL Configuration and Database Creation ##################
-    Create MySQL configuration (@indimaildir@/etc/indimail.cnf)
+    a) Create MySQL configuration (@indimaildir@/etc/indimail.cnf)
     % sudo @indimaildir@/sbin/svctool --config=mysql --mysqlPrefix=@mysql_prefix@ \
      --model=medium --no-of-cpu=2 --mysqlport=3306 --mysqlsocket=/tmp/mysql.sock
     You can have a section [indimail] in @indimaildir@/etc/indimail.cnf for parameters specific
     to indimail
 
-    Create a new MySQL database
+    b) Create a new MySQL database
     % sudo @indimaildir@/sbin/svctool --config=mysqldb --mysqlPrefix=@mysql_prefix@ \
-        --databasedir=@indimaildir@/mysqldb --default-domain=indimail.org --base_path=@basepath@
+        --databasedir=@indimaildir@/mysqldb --default-domain=indimail.org \
+        --base_path=@basepath@
 
     ##### STEP 2  ## MySQL Startup ############################
     If you plan to use an existing MySQL server, read INSTALL-MYSQL in indimail-@version@/doc
@@ -908,8 +912,8 @@ You can go on to add a virtual domain and users if you wish
     file. This is on purpose. If you want to find out the internal
     workings of indimail and qmail look into all files in @indimaildir@/doc
     and /var/indimail/man?
-	As a first step, do
-	% man -M INDIMAIL/man indimail
+    As a first step, do
+    % man -M INDIMAIL/man indimail
 
 ########### SECTION 10 #### SUPPORT INFORMATION #########################
 10. Good luck
