@@ -254,12 +254,12 @@ the installation.
     need DKIM Signatures for signing for verification
 
     ##### STEP 1  ##### Install MySQL #########################
-    Install MySQL with MD5 eaae8071cdc9c7144273e2e03ea20825
+    Install MySQL 5.4.3-beta with MD5 9ea08558d51b1d56d3784028d57c2b08
+    (You can install MySQL 5.1.x and greater)
     current working directory /home/local/src
-
-    % wget http://downloads.mysql.com/archives/mysql-6.0/mysql-6.0.3-alpha.tar.gz
-    % gunzip -c mysql-6.0.3-alpha.tar.gz |tar xf -
-    % cd mysql-6.0.3-alpha
+    % You can download mysql-5.4.3-beta.tar.gz from dev.mysql.com
+    % gunzip -c mysql-5.4.3-beta.tar.gz |tar xf -
+    % cd mysql-5.4.3-beta
     % ./configure --prefix=@mysql_prefix@ --enable-local-infile
     % make -s DESTDIR=staging_directory
     % sudo make install-strip DESTDIR=staging_directory

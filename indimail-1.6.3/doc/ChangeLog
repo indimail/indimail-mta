@@ -1,10 +1,10 @@
-* Wed Oct 21 2009 mbhangui@gmail.com
+* Tue Oct 27 2009 mbhangui@gmail.com
 Release 1.6.3 Start 17/10/2009
 17/10/2009
 1.  Pass argument to rpm.init to distinguish between package removal and
     upgrade
-2.  Fix compilation of pam-multi on Mac OS X [2883154]
-3.  include_trash wrongly defined as int in count_dir.c [2883153]
+2.  include_trash wrongly defined as int in count_dir.c [2883153]
+3.  Fix compilation of pam-multi on Mac OS X [2883154]
 4.  added missing argument real_domain in valias_insert.c
 19/10/2009
 5.  Allow only root/indimail user to execute vpriv
@@ -12,6 +12,10 @@ Release 1.6.3 Start 17/10/2009
 6.  Added man page for initsvc, nssd, nssd.conf
 7.  Fixed compilation/installation problem for nssd when ARCH_LIB was not
     defined
+24/10/2009
+8.  Added cases for mysql 3.0 in svctool [2885254]
+27/10/2009
+9.  Added cases for MySQL 5.2, 5.3, 5.4.3 in svctool
 
 * Fri Oct 16 2009 mbhangui@gmail.com
 Release 1.6.2 Start 01/10/2009
