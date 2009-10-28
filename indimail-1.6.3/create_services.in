@@ -1,5 +1,8 @@
 #!/bin/sh
 # $Log: create_services.in,v $
+# Revision 2.25  2009-10-28 13:24:35+05:30  Cprogrammer
+# use greydaemon instead of qmail-greyd
+#
 # Revision 2.24  2009-10-17 16:55:58+05:30  Cprogrammer
 # added --hash-size for greylist service
 #
@@ -91,7 +94,7 @@ indimaildir=@indimaildir@
 # End USER Configuration OPTIONS
 #
 
-# $Id: create_services.in,v 2.24 2009-10-17 16:55:58+05:30 Cprogrammer Exp mbhangui $
+# $Id: create_services.in,v 2.25 2009-10-28 13:24:35+05:30 Cprogrammer Exp mbhangui $
 
 usage()
 {
@@ -316,7 +319,7 @@ $dir_prefix$indimaildir/sbin/svctool --smtp=366 --odmr --servicedir=$servicedir 
 #
 $dir_prefix$indimaildir/sbin/svctool --greylist=1999 --servicedir=/service --min-resend-min=2 \
     --resend-win-hr=24 --timeout-days=30 --context-file=greylist.context \
-	--hash-size=65536 --save-interval=5 --whitelist=greylist.white $extra_opt
+	--hash-size=65536 --save-interval=5 --whitelist=greylist.white --use-greydaemon $extra_opt
 
 #
 # fetchmail

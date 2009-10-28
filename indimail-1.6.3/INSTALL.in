@@ -616,7 +616,7 @@ the installation.
 
     % sudo @indimaildir@/sbin/svctool --greylist=1999 --servicedir=/service --min-resend-min=2 \
         --resend-win-hr=24 --timeout-days=30 --context-file=greylist.context \
-        --save-interval=5 --whitelist=greylist.white
+        --hash-size=65536 --save-interval=5 --whitelist=greylist.white --use-greydaemon
 
     ##### STEP 5  ## IMAP/POP3 Service ##################
     The commands below will create listeners for IMAP and POP3 service.

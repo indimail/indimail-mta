@@ -1,5 +1,8 @@
 #
 # $Log: indimail.spec.in,v $
+# Revision 2.100  2009-10-28 13:24:47+05:30  Cprogrammer
+# use greydaemon instead of qmail-greyd
+#
 # Revision 2.99  2009-10-22 19:59:28+05:30  Cprogrammer
 # added --mandir, --libdir option for nssd
 #
@@ -309,7 +312,7 @@
 # rpm spec file for indimail
 #
 #
-# $Id: indimail.spec.in,v 2.99 2009-10-22 19:59:28+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 2.100 2009-10-28 13:24:47+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %define _unpackaged_files_terminate_build 1
 
@@ -2084,7 +2087,7 @@ fi
 # Greylist daemon
 %{_prefix}/sbin/svctool --greylist=1999 --servicedir=%{servicedir} --min-resend-min=2 \
     --resend-win-hr=24 --timeout-days=30 --context-file=greylist.context \
-    --hash-size=65536 --save-interval=5 --whitelist=greylist.white
+    --hash-size=65536 --save-interval=5 --whitelist=greylist.white --use-greydaemon
 
 if [ %nofetchmail -eq 0 ] ; then
 # fetchmail
