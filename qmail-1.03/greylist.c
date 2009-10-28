@@ -47,12 +47,16 @@ scan_ip_port(s, defaultip, defaultport, ipp, portp)
 	int             n;
 	unsigned long   port;	/* long because of scan_ulong */
 
-	if (!(n = (s ? ip_scan(s, ipp) : ip_scan(defaultip, ipp))))
-		return -1;
-	if (*(s + n) == ':')
-		scan_ulong(s + n + 1, &port);
-	else
+	if (!s)
+	{
+		ip_scan(defaultip, ipp);
 		port = defaultport;
+	} else {
+		if (!(n = ip_scan(s, ipp)))
+			ip_scan(defaultip, ipp);
+		if (!(*(s + n) == ':' && scan_ulong(s + n + 1, &port)))
+			port = defaultport;
+	}
 	*portp = (unsigned int) port;
 	return (0);
 }
@@ -146,8 +150,10 @@ greylist(gip, connectingip, from, tolist, tolen, timeoutfn, errfn)
 		return (-2);
 	if (!stralloc_catb(&chkpacket, tolist, tolen))
 		return (-2);
+#if 0 /*- causes problem with greydaemon */
 	if (!stralloc_append(&chkpacket, "\n")) /* newline to end a record */
 		return (-2);
+#endif
 	if ((r = query_skt(sockfd, &chkpacket, rbuf, sizeof rbuf, GREYTIMEOUT, timeoutfn, errfn)) == -1)
 		return -1;	/*- Permit connection (soft fail) - probably timeout */
 	if (rbuf[0] == 0)
