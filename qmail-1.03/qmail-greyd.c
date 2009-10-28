@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-greyd.c,v $
+ * Revision 1.8  2009-10-28 13:34:51+05:30  Cprogrammer
+ * fix segmentation fault due to free()
+ *
  * Revision 1.7  2009-09-07 13:58:02+05:30  Cprogrammer
  * fix compilation if USE_HAS was not defined
  *
@@ -72,6 +75,7 @@
 #define RECORD_OK     4
 #define RECORD_GREY   5
 #define RECORD_BOUNCE 6
+#define RECORD_IPV6   7
 #define BUILD_IP(IP) ((IP[0]<<24) | (IP[1]<<16) | (IP[2]<<8) | IP[3])
 #define VALID_IP(IP) ((IP[0]<256) && (IP[1]<256) && (IP[2]<256) && (IP[3]<256))
 
@@ -184,7 +188,13 @@ cidr2IPrange(char *ipaddr, int mask, struct netspec *spec)
 	ip_addr         ip;
 
 	if (!ip_scan(ipaddr, &ip))
+	{
+		logerr("failed to scan ip");
+		logerr("[");
+		logerr(ipaddr);
+		logerrf("\n");
 		return (-1);
+	}
 	spec->min = BUILD_IP(ip.d) & (~((1 << (32 - mask)) -1) & 0xFFFFFFFF);
 	spec->max = spec->min | (((1 << (32 - mask)) - 1) & 0xFFFFFFFF);
 	return (0);
@@ -304,7 +314,13 @@ ip_match(char *fn, stralloc *ipaddr, stralloc *content, struct constmap *ptrmap,
 			}
 			ptr[x] = '/';
 			if (!ip_scan(ipaddr->s, &ip)) /*- record contains invalid IP */
+			{
+				logerr("failed to scan ip");
+				logerr("[");
+				logerr(ipaddr->s);
+				logerrf("\n");
 				return (0);
+			}
 			tmp_ip = BUILD_IP(ip.d);
 			if (tmp_ip == netspec.min || tmp_ip == netspec.max
 					|| (tmp_ip > netspec.min && tmp_ip < netspec.max))
@@ -351,12 +367,21 @@ copy_grey(struct greylst *ptr, char *ipaddr, char *rpath, char *rcpt, int rcptle
 	int             len;
 
 	if (!ip_scan(ipaddr, &ptr->ip))
+	{
+		logerr("failed to scan ip");
+		logerr("[");
+		logerr(ipaddr);
+		logerrf("\n");
 		return (-1);
+	}
 	len = str_len(rpath);
 	if (!(ptr->rpath = (char *) malloc(len + 1)))
 		die_nomem();
 	if (str_copy(ptr->rpath, rpath) != len)
+	{
+		free(ptr->rpath);
 		return (-1);
+	}
 	if (!(ptr->rcpt = (char *) malloc(rcptlen)))
 		die_nomem();
 	ptr->rcptlen = rcptlen;
@@ -446,7 +471,6 @@ create_hash(struct greylst *curr)
 		strnum[fmt_ulong(strnum, (unsigned long) (2 * hash_size * h_allocated))] = 0;
 		logerr(strnum);
 		logerrf("\n");
-		flush();
 		if (!hcreate(h_allocated * (2 * hash_size)))
 			strerr_die2sys(111, FATAL, "unable to create hash table: ");
 	}
@@ -621,7 +645,13 @@ search_record(char *remoteip, char *rpath, char *rcpt, int rcptlen, int min_rese
 	} else
 		ptr = head;
 	if (!ip_scan(remoteip, &r_ip))
+	{
+		logerr("failed to scan ip");
+		logerr("[");
+		logerr(remoteip);
+		logerrf("\n");
 		return (0);
+	}
 #ifdef USE_HASH
 	if (!hash_size)
 		return (seq_search(r_ip, ptr, rpath, rcpt, rcptlen, min_resend, resend_win, cur_time, store));
@@ -700,8 +730,6 @@ add_record(char *ip, char *rpath, char *rcpt, int rcptlen, struct greylst **grey
 	ptr->attempts = 1;
 	ptr->status = RECORD_NEW;
 	if (copy_grey(ptr, ip, rpath, rcpt, rcptlen)) {
-		free(ptr->rpath);
-		free(ptr->rcpt);
 		free(ptr);
 		return ((struct greylst *) 0);
 	}
@@ -715,7 +743,18 @@ send_response(int s, struct sockaddr_in *from, int fromlen, char *ip, char *rpat
 {
 	char           *resp;
 	int             i, n = 0;
+	unsigned char   ibuf[sizeof(struct in6_addr)];
 
+	*grey = (struct greylst *) 0;
+	if ((i = inet_pton(AF_INET6, ip, ibuf)) == 1) {
+		resp = "\1\4";
+		n = -3; /*- inet6 address */
+	} else
+	if (i == -1)
+	{
+		resp = "\0\4";
+		n = -1; /*- system error */
+	} else /*- Not in ip6 presentation format */
 	switch (search_record(ip, rpath, rcpt, rcptlen, min_resend, resend_win, fr_int, grey))
 	{
 	case RECORD_NEW:
@@ -723,7 +762,7 @@ send_response(int s, struct sockaddr_in *from, int fromlen, char *ip, char *rpat
 		{
 			logerrf("unable to add record\n");
 			resp = "\0\4";
-			n = -2;
+			n = -4;
 		} else
 			resp = "\0\1";
 		break;
@@ -747,7 +786,7 @@ send_response(int s, struct sockaddr_in *from, int fromlen, char *ip, char *rpat
 		break;
 	default:
 		resp = "0\5";
-		n = -3;
+		n = -2;
 		break;
 	}
 	if (!n)
@@ -896,8 +935,7 @@ load_context()
 		ptr->status = status;
 		if (copy_grey(ptr, ip, rpath, rcpt, rcptlen)) {
 			flush();
-			free(ptr->rpath);
-			free(ptr->rcpt);
+			free(ptr);
 			return;
 		}
 		if (!match) {
@@ -969,6 +1007,8 @@ print_status(char status)
 		return ("RECORD GREY");
 	case RECORD_BOUNCE:
 		return ("RECORD BOUNCE");
+	case RECORD_IPV6:
+		return ("RECORD IPV6");
 	}
 	return ("RECORD UNKNOWN");
 }
@@ -1200,7 +1240,8 @@ main(int argc, char **argv)
 		 * packet structure -
 		 * I192.168.2.0\0Fmbhangui@gmail.com\0Tpostmaster@indimail.org\0root@indimail.org\0\0
 		 */
-		switch (rdata[0]) {
+		switch (rdata[0])
+		{
 		case 'I': /*- process exactly like greydaemon */
 			out(" [");
 			for (ptr = rdata, rcpt_head = (char *) 0, rcptlen = 0;ptr < rdata + n - 1;) {
@@ -1234,9 +1275,16 @@ main(int argc, char **argv)
 			out(", rcptlen=");
 			strnum[fmt_ulong(strnum, (unsigned long) rcptlen)] = 0;
 			out(strnum);
-			if ((n = send_response(s, &from, fromlen, client_ip, rpath, rcpt_head, rcptlen,
-					min_resend, resend_window, free_interval, &grey)) == -2) {
+			n = send_response(s, &from, fromlen, client_ip, rpath, rcpt_head, rcptlen,
+					min_resend, resend_window, free_interval, &grey);
+			if (n == -2) {
 				logerrf("qmail-greyd: invalid send_response - report bug to author\n");
+			} else
+			if (n == -3) {
+				logerrf("qmail-greyd: invalid IP address format\n");
+			} else
+			if (n == -4) {
+				logerrf("qmail-greyd: copy failed\n");
 			} else
 			if (n < 0)
 				strerr_warn2(WARN, "sendto failed: ", &strerr_sys);
@@ -1248,7 +1296,7 @@ main(int argc, char **argv)
 				out(print_status(grey->status));
 			} else {
 				out(", Reponse: ");
-				out(print_status(RECORD_WHITE));
+				n == -3 ? out(print_status(RECORD_IPV6)) : out(print_status(RECORD_WHITE));
 			}
 			out("\n");
 			break;
@@ -1285,7 +1333,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_greyd_c()
 {
-	static char    *x = "$Id: qmail-greyd.c,v 1.7 2009-09-07 13:58:02+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: qmail-greyd.c,v 1.8 2009-10-28 13:34:51+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
