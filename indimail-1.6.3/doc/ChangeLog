@@ -1,4 +1,4 @@
-* Tue Oct 27 2009 mbhangui@gmail.com
+* Thu Oct 29 2009 mbhangui@gmail.com
 Release 1.6.3 Start 17/10/2009
 17/10/2009
 1.  Pass argument to rpm.init to distinguish between package removal and
@@ -15,7 +15,17 @@ Release 1.6.3 Start 17/10/2009
 24/10/2009
 8.  Added cases for mysql 3.0 in svctool [2885254]
 27/10/2009
-9.  Added cases for MySQL 5.2, 5.3, 5.4.3 in svctool
+9.  Added cases for MySQL 5.2, 5.3, 5.4.3 in svctool [2887071]
+28/10/2009
+10. BUG - Fixed scan_ip_port in greylist.c [2887721]
+11. remove newline as end of record in greylist.c [2887721]
+12. Removed errorneous free() statements in qmail-greyd.c [2887721]
+13. Temporary fix in qmail-greyd to handle IPv6 addresses [2887721]
+14. Use --use-greydaemon in indimail.spec, create_services to handle
+    IPV6 addresses in greylisting [2887721]
+29/10/2009
+15. svctool - Restart qmail-poppass after cert creation; check certfile before
+    starting indisrvr
 
 * Fri Oct 16 2009 mbhangui@gmail.com
 Release 1.6.2 Start 01/10/2009

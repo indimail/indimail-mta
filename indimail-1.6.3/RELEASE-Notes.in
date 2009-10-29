@@ -4,12 +4,16 @@ DATE: @DATE@
 
 This is Release @version@ of IndiMail. The release has both source.tar.gz and RPMs
 
-The Highlights of this release are
+With this release, IndiMail has got tested with MySQL 5.4.3-beta and no issues were
+found.
 
-PAM module - pam-multi. pam-multi enables external programs which use PAM to authenticate
-against IndiMail's database.
-atol() has been replaced with strtoll() for all quota calculations for better error handling.
-A document Quick-INSTALL has been added to assist first time installation for newbies.
+Main focus of this release was extensive testing and bug fixes
+
+Following bugs at the tracker
+http://sourceforge.net/tracker/?group_id=230686
+have been fixed
+
+2883153, 2883154 2887071 2887721
 
 This release includes the following files
 
@@ -41,30 +45,24 @@ repositories
 ChangeLog
 =========
 
-* Fri Oct 16 2009 mbhangui@gmail.com
-Release 1.6.2 Start 01/10/2009
-03/10/2009
-1.  O_RDWR mode for fifo in qmail-cat
-2.  Added new fortune cookies (chanakya, vedas, joel-on-software)
-04/10/2009
-3.  Added svctool man page
-06/10/2009
-4.  Added pam-multi, pam-checkpwd, authenticate.so
-09/10/2009
-5.  Added various record states in lastauth as #defines
-10/10/2009
-6.  Run vadduser only as root or indimail
-11/10/2009
-7.  Renamed vauthenticate() to iauth()
-8.  Completed acct_mgmt functions in iauth.c, pam-multi.c
-9.  Do sleep on authentication failure in pam-multi
-13/10/2009
-10. Added Quick-INSTALL
-14/10/2009
-11. Replaced atol() with strtoll() for quota calculations
-12. Added --general-log option and removed --log-isam option from svctool.
-13. Added environment variable INCLUDE_TRASH to include trash mails in quota
-    calculations
-15/10/2009
-14. Use errno == ERANGE instead of LLONG_MAX, LLONG_MIN if LLONG_MAX,
-	LLONG_MIN not defined (when checking return status of strtoll)
+* Thu Oct 29 2009 mbhangui@gmail.com
+Release 1.6.3 Start 17/10/2009
+1.  Pass argument to rpm.init to distinguish between package removal and
+    upgrade
+2.  include_trash wrongly defined as int in count_dir.c [2883153]
+3.  Fix compilation of pam-multi on Mac OS X [2883154]
+4.  added missing argument real_domain in valias_insert.c
+5.  Allow only root/indimail user to execute vpriv
+6.  Added man page for initsvc, nssd, nssd.conf
+7.  Fixed compilation/installation problem for nssd when ARCH_LIB was not
+    defined
+8.  Added cases for mysql 3.0 in svctool [2885254]
+9.  Added cases for MySQL 5.2, 5.3, 5.4.3 in svctool [2887071]
+10. BUG - Fixed scan_ip_port in greylist.c [2887721]
+11. remove newline as end of record in greylist.c [2887721]
+12. Removed errorneous free() statements in qmail-greyd.c [2887721]
+13. Temporary fix in qmail-greyd to handle IPv6 addresses [2887721]
+14. Use --use-greydaemon in indimail.spec, create_services to handle
+    IPV6 addresses in greylisting [2887721]
+15. svctool - Restart qmail-poppass after cert creation; check certfile before
+    starting indisrvr
