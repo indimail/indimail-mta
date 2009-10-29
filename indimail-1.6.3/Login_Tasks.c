@@ -131,7 +131,7 @@
 #include <fcntl.h>
 
 #ifndef	lint
-static char     sccsid[] = "$Id: Login_Tasks.c,v 2.27 2009-10-14 20:43:17+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: Login_Tasks.c,v 2.27 2009-10-14 20:43:17+05:30 Cprogrammer Stab mbhangui $";
 #endif
 
 int

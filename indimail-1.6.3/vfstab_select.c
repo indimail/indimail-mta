@@ -23,7 +23,7 @@
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vfstab_select.c,v 2.6 2009-10-14 20:47:33+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: vfstab_select.c,v 2.6 2009-10-14 20:47:33+05:30 Cprogrammer Stab mbhangui $";
 #endif
 
 #define XOPEN_SOURCE = 600

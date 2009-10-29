@@ -46,7 +46,7 @@
 #include <sys/stat.h>
 
 #ifndef	lint
-static char     sccsid[] = "$Id: count_dir.c,v 2.4 2009-10-17 20:16:53+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: count_dir.c,v 2.4 2009-10-17 20:16:53+05:30 Cprogrammer Stab mbhangui $";
 #endif
 
 mdir_t count_dir(char *dir_name, mdir_t *mailcount)

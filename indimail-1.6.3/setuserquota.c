@@ -44,7 +44,7 @@
 #include <errno.h>
 
 #ifndef	lint
-static char     sccsid[] = "$Id: setuserquota.c,v 2.7 2009-10-14 20:45:36+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: setuserquota.c,v 2.7 2009-10-14 20:45:36+05:30 Cprogrammer Stab mbhangui $";
 #endif
 
 /*
