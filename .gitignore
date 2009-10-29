@@ -1,3 +1,4 @@
+.gitignore
 RELEASE
 dist
 experiments
@@ -53,3 +54,7 @@ indimail-*/eps-*/Makefile.in
 indimail-*/indimail.settings
 indimail-*/configure
 indimail-*/.gitignore
+indimail-*/patches/courier-imap-3.0.8.patch.gz
+indimail-*/patches/fetchmail-6.3.9.patch.gz
+indimail-*/doc/Quick-INSTALL
+indimail-*/doc/README.indimail
