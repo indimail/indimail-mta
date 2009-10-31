@@ -4,10 +4,16 @@ qmail-multi \- queue multiplexor and filter
 .SH SYNOPSIS
 .B qmail-multi
 .SH DESCRIPTION
-.B qmail-multi
-is a queue multiplexor and filter. The multiplexor can be turned on by defining
-QMAILQUEUE=QMAILHOME/bin/qmail-multi environment variable. The filter can be
-turned on by defining the SPAMFILTER environment variable.
+\fBqmail-multi(8)\fR is a queue multiplexor and filter for \fBIndiMail(7)\fR. The
+multiplexor can be turned on by defining the \fBQMAILQUEUE\fR environment variable
+
+.EX
+QMAILQUEUE=QMAILHOME/bin/qmail-multi
+.EE
+
+The filter can be turned on by defining the \fBFILTERARGS\fR environment variable.
+\fBqmail-multi\fR can also do spam filtering by setting the \fBSPAMFILTER\fR
+environment variable.
 
 .B qmail-multi
 also calls
@@ -44,11 +50,9 @@ prepare the bounce. This effectively stops processing of local and remote messag
 gets freed up.
 .B qmail-multi
 prevents this from happening by accepting mails only when disk space greater than MIN_FREE is present. It uses
-.B statfs(2)
-(
-.B statvfs
-on solaris) to get the free space on the filesystem.
+\fBstatfs(2)\fR (\fBstatvfs\fR on solaris) to get the free space on the filesystem.
 
+.PP
 If SPAMFILTER is defined,
 .B qmail-multi
 additionally runs a command defined by SPAMFILTER environment variable. This
@@ -113,8 +117,8 @@ input to this filter will be fd 0 and the output will be piped to
 e.g.
 
 .EX
-
 FILTERARGS="/usr/bin/altermime --input=- --disclaimer=/etc/motd"
+.EE
 
 will append the output of altermime command to all mails.
 
@@ -168,4 +172,4 @@ Manvendra Bhangui.
 .SH PROBLEMS
 Problems with
 .B qmail-multi
-should be forwarded to "Manvendra Bhangui" <manvendra_bhangui@indicorp.com>
+should be forwarded to "Manvendra Bhangui" <mbhangui@gmail.com>
