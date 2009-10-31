@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-multi.c,v $
+ * Revision 1.43  2009-10-31 14:32:58+05:30  Cprogrammer
+ * skip spam filtering for authenticated users
+ *
  * Revision 1.42  2009-09-08 12:34:07+05:30  Cprogrammer
  * removed dependency of INDIMAIL on qmail-multi
  *
@@ -201,7 +204,7 @@ main(int argc, char **argv)
 			_exit(75);
 		}
 	}
-	if (!(spamf = env_get("SPAMFILTER")))
+	if (!(spamf = env_get("SPAMFILTER")) || env_get("RELAYCLIENT"))
 		return (run_mailfilter(argc, argv)); /*- Does not return */
 	if (pipe(pipefd) == -1)
 		_exit(60);
@@ -641,6 +644,6 @@ discard_envelope()
 void
 getversion_qmail_multi_c()
 {
-	static char    *x = "$Id: qmail-multi.c,v 1.42 2009-09-08 12:34:07+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: qmail-multi.c,v 1.43 2009-10-31 14:32:58+05:30 Cprogrammer Stab mbhangui $";
 	x++;
 }
