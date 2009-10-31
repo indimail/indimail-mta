@@ -3064,8 +3064,8 @@ mail_acl(char *sender, char *recipient)
 	if (!str_diffn(recipient, "abuse@", 6) || !str_diff(recipient, "abuse"))
 		return(0);
 	/*
-	 * rcpt:ajit_abraham@indicorp.com:indi_maa@indicorp.com
-	 * from:recruiter@yahoo.com:hr@indicorp.com 
+	 * rcpt:ajit_abraham@indimail.org:indi_maa@indimail.org
+	 * from:recruiter@yahoo.com:hr@indimail.org 
 	 */
 	for (from_reject = rcpt_reject = count = len = 0, ptr = acclist.s;len < acclist.len;)
 	{
