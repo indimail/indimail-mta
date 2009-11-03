@@ -1,5 +1,8 @@
 #
 # $Log: indimail-epm.list.in,v $
+# Revision 2.26  2009-11-03 10:34:07+05:30  Cprogrammer
+# use greydaemon instead of qmail-greyd
+#
 # Revision 2.25  2009-10-22 19:57:14+05:30  Cprogrammer
 # added nssd man pages
 #
@@ -1702,7 +1705,7 @@ ${prefix}/sbin/svctool --smtp=366 --odmr --servicedir=${servicedir}
 # Greylist daemon
 ${prefix}/sbin/svctool --greylist=1999 --servicedir=${servicedir} --min-resend-min=2 \
     --resend-win-hr=24 --timeout-days=30 --context-file=greylist.context \
-    --hash-size=65536 --save-interval=5 --whitelist=greylist.white
+    --hash-size=65536 --save-interval=5 --whitelist=greylist.white --use-greydaemon
 
 if [ $$nofetchmail -eq 0 ] ; then
 # fetchmail
