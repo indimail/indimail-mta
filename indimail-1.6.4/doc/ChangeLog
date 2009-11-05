@@ -1,3 +1,15 @@
+* Fri Oct 30 2009 mbhangui@gmail.com
+Release 1.6.4 Start 30/10/2009
+31/10/2009
+1.  Use RELAYCLIENT variable in qmail-multi to skip spam filter
+03/11/2009
+2.  Unset SPAMFILTER in qmail-send variables
+3.  Corrected indimail-epm.list to use greydaemon instead of qmail-greyd.
+    debian package will now use greydaemon just like the rpm package
+05/11/2009
+4.  Fix mysql database creation statements in svctool
+5.  Print all errors to stderr in svctool
+
 * Thu Oct 29 2009 mbhangui@gmail.com
 Release 1.6.3 Start 17/10/2009
 17/10/2009
