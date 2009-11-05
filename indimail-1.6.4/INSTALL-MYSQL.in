@@ -67,8 +67,10 @@
        -----------------------------
        % mysql -u user -ppassword
        mysql> CREATE USER indimail identified by 'ssh-1.5-';
+       mysql> CREATE USER mysql    identified by '4-57343';
        mysql> CREATE USER admin    identified by 'benhur20';
        mysql> CREATE USER repl     identified by 'slaveserver';
+       mysql> GRANT ALL on *.* to 'mysql';
        mysql> GRANT SELECT,CREATE,ALTER,INDEX,INSERT,UPDATE,DELETE,CREATE TEMPORARY TABLES, \
               LOCK TABLES ON indimail.* to 'indimail';
        mysql> GRANT RELOAD,SHUTDOWN,PROCESS,SUPER on *.* to admin;

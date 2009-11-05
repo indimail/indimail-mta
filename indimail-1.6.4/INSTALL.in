@@ -141,7 +141,7 @@ IndiMail will install and run on most UNIX and UNIX-like systems, but there are 
 Installation Steps
 ==================
 
-For more information, read Basic Installation instrucations at the bottom. In all the steps below
+For more information, read Basic Installation instructions at the bottom. In all the steps below
 (make command)
 you may omit DESTDIR=staging_directory in the make command in case
 a) you are doing this on a fresh system or
