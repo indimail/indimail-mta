@@ -1,28 +1,22 @@
 .TH spawn-filter 8
 .SH NAME
-spawn-filter \- Helper for running filters for qmail-local / qmail-remote
+spawn-filter \- Interceptor for qmail-local / qmail-remote
 .SH SYNOPSIS
 .B spawn-filter args
 .SH DESCRIPTION
 .B spawn-filter
-is a utility to help qmail run custom filters. It
-can run any filter which reads messages on fd 0 and writes the output on fd 1.
-Whatever is output on fd 1, will be the message that will be delivered to the destination.
-The filter can be turned on individually for local and remote mails by defining,
-.B QMAILLOCAL
-and 
-.B QMAILREMOTE
-environment variables, to the path of spawn-filter respectively in
-.B qmail-send's
+is a \fBqmail-local\fR / \fBqmail-remote\fR interceptor to help qmail run custom filters on email
+being sent to \fBqmail-local\fR / \fBqmail-remote\fR. It can run any filter which reads
+messages on fd 0 and writes the output on fd 1.  Whatever is output on fd 1, will be the
+message that will be delivered to the destination.  The filter can be turned on individually
+for local and remote mails by defining, \fBQMAILLOCAL\fR and \fBQMAILREMOTE\fR
+environment variables, to the path of \fBspawn-filter\fR respectively in \fBqmail-send\fR's
 supervise or rc script. For spam filtering you can additionally, set the environment variable
-.BR SPAMFILTER .
-If spawn-filter is invoked as qmail-local, it executes the
-original
-.B qmail-local
-after running the custom filter. If spawn-filter is invoked as qmail-remote, it
-executes the original
-.B qmail-remote
-after running the custom filter.
+\fBSPAMFILTER\fR.  If \fBspawn-filter\fR is invoked as \fBqmail-local\fR, it executes the original
+\fBqmail-local\fR or \ffBqmail-remote\fR after running the custom filter.  \fBspawn-filter\fR unsets
+\fBQMAILLOCAL\fR when it runs as \fBqmail-local\fR. Similarly, it unsets \fBQMAILREMOTE\fR when
+it runs as \fBqmail-remote\fR. This is useful in scripts to figure out whether \fBspawn-filter\fR
+is running as \fBqmail-local\fR or \fBqmail-remote\fR.
 
 Filters can be run by defining the environment variable
 .B FILTERARGS
@@ -38,8 +32,7 @@ environment variable (or the control defined in the control file
 The environment variable
 .B FILTERARGS
 apply to both local and remote mails. For individual domain level control, it is best to set
-using the control file
-.BR filterargs.
+using the control file \fBfilterargs\fR (see below the section on control files).
 The environment variable
 .B FILTERARGS
 takes precedence over the control file.
@@ -58,12 +51,9 @@ environment variable or by rules in the control file
 .TP 5
 .I filterargs
 The format of this file is of the form
-.B domain:args
-for both local and remote mails.
-.B domain:remote:args
-for remote mails and
-.B domain:local:args
-for local mails. This control file can be used to setup additional filters after running
+\fBdomain:args\fR for both local and remote mails. \fBdomain:remote:args\fR
+for remote mails and \fBdomain:local:args\fR for local mails. This control
+file can be used to setup additional filters after running
 the SPAM filters (See Section on Spam Filtering).
 
 .EX
@@ -316,8 +306,4 @@ bogofilter(1)
 
 .SH "AUTHORS"
 
-Manvendra Bhangui.
-.SH PROBLEMS
-Problems with
-.B spawn-filter
-should be forwarded to "Manvendra Bhangui" <mbhangui@gmail.com>
+"Manvendra Bhangui" <mbhangui@gmail.com>.
