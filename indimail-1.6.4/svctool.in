@@ -1,6 +1,10 @@
 #!/bin/sh
 # WARNING: This file was auto-generated. Do not edit!
 # $Log: svctool.in,v $
+# Revision 2.137  2009-11-05 10:26:54+05:30  Cprogrammer
+# fix for MySQL database creation
+# print all errors to stderr
+#
 # Revision 2.136  2009-11-03 09:11:47+05:30  Cprogrammer
 # removed setting of SPAMFILTER in qmail-send variables
 #
@@ -590,7 +594,7 @@
 # Initial revision
 #
 #
-# $Id: svctool.in,v 2.136 2009-11-03 09:11:47+05:30 Cprogrammer Stab mbhangui $
+# $Id: svctool.in,v 2.137 2009-11-05 10:26:54+05:30 Cprogrammer Stab mbhangui $
 #
 
 #
@@ -623,7 +627,7 @@ if [ -f /usr/bin/less ] ; then
 else
 	MORE=/usr/bin/more
 fi
-echo "Press ENTER for options, Cntrl C to quit"
+echo "Press ENTER for options, Cntrl C to quit" 1>&2
 read key
 $MORE <<EOF
 Usage: svctool [OPTION]
@@ -1041,7 +1045,7 @@ exit $1
 change_config()
 {
 if [ $# -ne 2 ] ; then
-	echo "USAGE: change_config old_config_file new_config_file"
+	echo "USAGE: change_config old_config_file new_config_file" 1>&2
 	return 1
 fi
 conf_file=$1
@@ -1052,7 +1056,7 @@ if [ -f $conf_file ] ; then
 		/bin/mv $conf_file $conf_file.`date +'%d%m%y-%H%M%S'`
 		/bin/mv $temp_file $conf_file
 	else
-		echo "$conf_file not changed"
+		echo "$conf_file not changed" 1>&2
 		/bin/rm -f $temp_file
 	fi
 else
@@ -1064,7 +1068,7 @@ fi
 check_installation()
 {
 if [ $# -lt 5 ] ; then
-	echo "USAGE: create_queue qbase queue_count first_queue_no supervise_dir verb"
+	echo "USAGE: create_queue qbase queue_count first_queue_no supervise_dir verb" 1>&2
 	return 1
 fi
 QUEUE_DIR=$1
@@ -1080,7 +1084,7 @@ else
 fi
 echo "Checking IndiMail Home"
 if [ ! -d "$DESTDIR"$QmailHOME ]; then
-  echo "! Couldn't find qmail's home directory, "$DESTDIR"$QmailHOME!"
+  echo "! Couldn't find qmail's home directory, "$DESTDIR"$QmailHOME!" 1>&2
 else
   if [ "$VERB" = y ]; then
     echo ""$DESTDIR"$QmailHOME exists"
@@ -1088,7 +1092,7 @@ else
   echo "Checking Critical IndiMail directories"
   for i in alias bin boot control doc man autoturn users; do
     if [ ! -d "$DESTDIR"$QmailHOME/$i ]; then
-      echo "! Couldn't find "$DESTDIR"$QmailHOME/$i!"
+      echo "! Couldn't find "$DESTDIR"$QmailHOME/$i!" 1>&2
       OK=0
     elif [ "$VERB" = y ]; then
       echo ""$DESTDIR"$QmailHOME/$i exists"
@@ -1101,7 +1105,7 @@ else
     do
       "$DESTDIR"$QmailHOME/bin/queue-fix -N "$DESTDIR"$QUEUE_DIR/queue"$QUEUE_NO" > /dev/null 2>&1
       if [ $? -ne 0 ] ; then
-        echo "status $? ! queue"$QUEUE_NO" should be fixed. Run queue-fix "$DESTDIR"$QUEUE_DIR/queue"$QUEUE_NO" !"
+        echo "status $? ! queue"$QUEUE_NO" should be fixed. Run queue-fix "$DESTDIR"$QUEUE_DIR/queue"$QUEUE_NO" !" 1>&2
         OK=0
       elif [ "$VERB" = y ]; then
         echo "queue "$DESTDIR"$QUEUE_DIR/queue"$QUEUE_NO" looks OK"
@@ -1114,7 +1118,7 @@ else
     done
     "$DESTDIR"$QmailHOME/bin/queue-fix -N "$DESTDIR"$QUEUE_DIR/nqueue > /dev/null 2>&1
     if [ $? -ne 0 ] ; then
-      echo "status $? ! nqueue should be fixed. Run queue-fix "$DESTDIR"$QUEUE_DIR/nqueue !"
+      echo "status $? ! nqueue should be fixed. Run queue-fix "$DESTDIR"$QUEUE_DIR/nqueue !" 1>&2
       OK=0
     elif [ "$VERB" = y ]; then
       echo "queue "$DESTDIR"$QUEUE_DIR/nqueue looks OK"
@@ -1127,7 +1131,7 @@ for i in alias qmaild qmaill qmailp qmailq qmailr qmails mysql indimail qscand; 
 		*-*-darwin*)
   			dscl . -list /Users/$i > /dev/null 2>&1
   			if [ $? -ne 0 ]; then
-    			echo "! Couldn't find $i user in passwd database"
+    			echo "! Couldn't find $i user in passwd database" 1>&2
     			OK=0
   			elif [ "$VERB" = y ]; then
     			echo "$i user exists"
@@ -1136,7 +1140,7 @@ for i in alias qmaild qmaill qmailp qmailq qmailr qmails mysql indimail qscand; 
 		*)
   			grep "^$i:" /etc/passwd >/dev/null
   			if [ $? -ne 0 ]; then
-    			echo "! Couldn't find $i user in /etc/passwd"
+    			echo "! Couldn't find $i user in /etc/passwd" 1>&2
     			OK=0
   			elif [ "$VERB" = y ]; then
     			echo "$i user exists"
@@ -1151,7 +1155,7 @@ for i in qmail nofiles indimail qscand; do
 		*-*-darwin*)
 			dscl . -list /Groups/$i > /dev/null 2>&1
   			if [ $? -ne 0 ]; then
-    			echo "! Couldn't find $i group in group database"
+    			echo "! Couldn't find $i group in group database" 1>&2
     			OK=0
   			elif [ "$VERB" = y ]; then
     			echo "$i group exists"
@@ -1160,7 +1164,7 @@ for i in qmail nofiles indimail qscand; do
 		*)
   			grep "^$i:" /etc/group >/dev/null
   			if [ $? -ne 0 ]; then
-    			echo "! Couldn't find $i group in /etc/group"
+    			echo "! Couldn't find $i group in /etc/group" 1>&2
     			OK=0
   			elif [ "$VERB" = y ]; then
     			echo "$i group exists"
@@ -1171,7 +1175,7 @@ done
 
 echo "Checking IndiMail Installation Permission and Default MySQL Tables"
   if [ ! -x "$DESTDIR"$QmailHOME/bin/instcheck ]; then
-    echo "! Couldn't find "$DESTDIR"$QmailHOME/bin/instcheck"
+    echo "! Couldn't find "$DESTDIR"$QmailHOME/bin/instcheck" 1>&2
     OK=0
   else
     if [ "$VERB" = y ]; then
@@ -1184,7 +1188,7 @@ echo "Checking IndiMail Installation Permission and Default MySQL Tables"
 	fi
   fi
   if [ ! -x "$DESTDIR"$indimaildir/sbin/install_tables ]; then
-    echo "! Couldn't find "$DESTDIR"$QmailHOME/sbin/install_tables"
+    echo "! Couldn't find "$DESTDIR"$QmailHOME/sbin/install_tables" 1>&2
     OK=0
   else
     if [ "$VERB" = y ]; then
@@ -1192,14 +1196,14 @@ echo "Checking IndiMail Installation Permission and Default MySQL Tables"
 	fi
 	"$DESTDIR"$indimaildir/sbin/install_tables > /dev/null
 	if [ $? -ne 0 ]; then
-	  echo "install_tables returned non-zero exit status. Check Installation"
+	  echo "install_tables returned non-zero exit status. Check Installation" 1>&2
 	  OK=0
 	fi
   fi
 
 echo "Checking Service Directory"
 if [ ! -d $servicedir ]; then
-  echo "! $servicedir directory is missing"
+  echo "! $servicedir directory is missing" 1>&2
   OK=0
 elif [ "$VERB" = y ]; then
   echo "$servicedir directory exists"
@@ -1208,7 +1212,7 @@ fi
 if [ -d /etc/event.d -a -f /sbin/initctl ] ; then
 	/sbin/initctl list svscan
   	if [ $? -ne 0 ]; then
-		echo "! svscan service not configured in upstart"
+		echo "! svscan service not configured in upstart" 1>&2
       	OK=0
 	else
    		echo "svscan service is configured to run via upstart"
@@ -1217,10 +1221,10 @@ if [ -d /etc/event.d -a -f /sbin/initctl ] ; then
 elif [ -d /System/Library/LaunchDaemons ] ; then
 	/bin/launchctl list indimail
   	if [ $? -ne 0 ]; then
-		echo "! svscan service not configured in launchd"
+		echo "! svscan service not configured in launchd" 1>&2
       	OK=0
 	else
-   		echo "svscan service is configured to run via launchd"
+   		echo "svscan service is configured to run via launchd" 1>&2
 	fi
  	PS="ps -ef"
 else
@@ -1228,12 +1232,12 @@ else
 	if [ -f /etc/inittab ]; then
   		grep "^SV:" /etc/inittab >/dev/null
   		if [ $? -ne 0 ]; then
-    		echo "! Couldn't find SV entry in inittab"
+    		echo "! Couldn't find SV entry in inittab" 1>&2
     		OK=0
   		else
     		grep "^SV:" /etc/inittab |grep respawn >/dev/null
     		if [ $? -ne 0 ]; then
-      			echo "! SV entry in inittab is not set to respawn"
+      			echo "! SV entry in inittab is not set to respawn" 1>&2
       			OK=0
     		elif [ "$VERB" = y ]; then
       			echo "svscan /service is configured to run via /etc/inittab"
@@ -1243,10 +1247,10 @@ else
 	else
 		grep "qmailctl start" /etc/rc.local >/dev/null
 		if [ $? -ne 0 ]; then
-			echo "! Couldn't find 'qmailctl start' in /etc/rc.local"
+			echo "! Couldn't find 'qmailctl start' in /etc/rc.local" 1>&2
   			grep "svscan /service" /etc/rc.local >/dev/null
   			if [ $? -ne 0 ]; then
-    			echo "! Couldn't find 'svscan /service' in /etc/rc.local"
+    			echo "! Couldn't find 'svscan /service' in /etc/rc.local" 1>&2
     			OK=0
   			elif [ "$VERB" = y ]; then
     			echo "svscan /service is configured to run via /etc/rc.local"
@@ -1259,7 +1263,7 @@ else
 	echo "Checking svscan"
 	SVRUN=`$PS | grep "svscan $servicedir" | grep -v grep`
 	if [ -z "$SVRUN" ]; then
-  		echo "'! svscan $servicedir' doesn't seem to be running"
+  		echo "'! svscan $servicedir' doesn't seem to be running" 1>&2
   		OK=0
 	elif [ "$VERB" = y ]; then
   		echo "svscan $servicedir is running"
@@ -1268,28 +1272,28 @@ fi
 
 echo "Checking defaultdelivery"
 if [ ! -f "$DESTDIR"$QmailHOME/control/defaultdelivery ]; then
-  echo "! Couldn't find "$DESTDIR"$QmailHOME/control/defaultdelivery"
+  echo "! Couldn't find "$DESTDIR"$QmailHOME/control/defaultdelivery" 1>&2
   OK=0
 elif [ ! -s "$DESTDIR"$QmailHOME/control/defaultdelivery ]; then
-  echo "! "$DESTDIR"$QmailHOME/control/defaultdelivery is empty"
+  echo "! "$DESTDIR"$QmailHOME/control/defaultdelivery is empty" 1>&2
   OK=0
 elif [ "$VERB" = y ]; then
   echo ""$DESTDIR"$QmailHOME/control/defaultdelivery looks OK"
 fi
 
 if [ ! -f "$DESTDIR"$QmailHOME/bin/qmailctl ]; then
-  echo "! "$DESTDIR"$QmailHOME/bin/qmailctl is missing"
+  echo "! "$DESTDIR"$QmailHOME/bin/qmailctl is missing" 1>&2
   OK=0
 elif [ ! -s "$DESTDIR"$QmailHOME/bin/qmailctl ]; then
-  echo "! "$DESTDIR"$QmailHOME/bin/qmailctl is empty"
+  echo "! "$DESTDIR"$QmailHOME/bin/qmailctl is empty" 1>&2
   OK=0
 elif [ `head -1 "$DESTDIR"$QmailHOME/bin/qmailctl|cat -vet` != '#!/bin/sh$' ]; then
-    echo "! "$DESTDIR"$QmailHOME/bin/qmailctl has bad magic cookie"
-    echo "...try: dos2unix "$DESTDIR"$QmailHOME/bin/qmailctl"
+    echo "! "$DESTDIR"$QmailHOME/bin/qmailctl has bad magic cookie" 1>&2
+    echo "...try: dos2unix "$DESTDIR"$QmailHOME/bin/qmailctl" 1>&2
     OK=0
 elif [ ! -x "$DESTDIR"$QmailHOME/bin/qmailctl ]; then
-  echo "! "$DESTDIR"$QmailHOME/bin/qmailctl is not executable"
-  echo "...try: chmod 755 "$DESTDIR"$QmailHOME/bin/qmailctl"
+  echo "! "$DESTDIR"$QmailHOME/bin/qmailctl is not executable" 1>&2
+  echo "...try: chmod 755 "$DESTDIR"$QmailHOME/bin/qmailctl" 1>&2
   OK=0
 elif [ "$VERB" = y ]; then
   echo ""$DESTDIR"$QmailHOME/bin/qmailctl looks OK"
@@ -1300,7 +1304,7 @@ echo "Checking mandatory services"
 for i in clamd qscanq qmail-spamlog inlookup.infifo freshclam indisrvr.4000 qmail-imapd.143 \
 qmail-pop3d.110 qmail-send.25 qmail-smtpd.25 qmail-poppass.106 greylist.1999; do
   if [ ! -d $servicedir/$i ]; then
-    echo "! $servicedir/$i directory is missing"
+    echo "! $servicedir/$i directory is missing" 1>&2
     OK=0
   fi
 done
@@ -1313,31 +1317,31 @@ for i in $SVCDIRS; do
   fi
   interp=`head -1 $servicedir/$i/run|cat -vet`
   if [ ! -f $servicedir/$i/run ]; then
-    echo "! $servicedir/$i/run file is missing"
+    echo "! $servicedir/$i/run file is missing" 1>&2
     OK=0
   elif [ ! " $interp" = " #!/bin/sh$" ]; then
-    echo "! $servicedir/$i/run has bad magic cookie [$interp]"
-    echo "...try: dos2unix $servicedir/$i/run"
+    echo "! $servicedir/$i/run has bad magic cookie [$interp]" 1>&2
+    echo "...try: dos2unix $servicedir/$i/run" 1>&2
     OK=0
   elif [ ! -x $servicedir/$i/run ]; then
-    echo "! $servicedir/$i/run file is not executable"
+    echo "! $servicedir/$i/run file is not executable" 1>&2
     OK=0
   elif [ "$VERB" = y ]; then
     echo "$servicedir/$i/run looks OK"
   fi
   if [ ! -d $servicedir/$i/log ] ; then
-	  echo "No log for $servicedir/$i"
+	  echo "No log for $servicedir/$i" 1>&2
 	  continue
   fi
   if [ ! -f $servicedir/$i/log/run ]; then
-    echo "! $servicedir/$i/log/run file is missing"
+    echo "! $servicedir/$i/log/run file is missing" 1>&2
     OK=0
   elif [ ! " $interp" = " #!/bin/sh$" ]; then
-    echo "! $servicedir/$i/log/run has bad magic cookie [$interp]"
-    echo "...try: dos2unix $servicedir/$i/log/run"
+    echo "! $servicedir/$i/log/run has bad magic cookie [$interp]" 1>&2
+    echo "...try: dos2unix $servicedir/$i/log/run" 1>&2
     OK=0
   elif [ ! -x $servicedir/$i/log/run ]; then
-    echo "! $servicedir/$i/log/run file is not executable"
+    echo "! $servicedir/$i/log/run file is not executable" 1>&2
     OK=0
   elif [ "$VERB" = y ]; then
     echo "$servicedir/$i/log/run looks OK"
@@ -1353,16 +1357,16 @@ fi
 LOGDIRS="`ls -d $logdir/* 2>/dev/null`"
 for i in $LOGDIRS; do
   if [ ! -d $i ]; then
-    echo "! $i is missing"
-    echo "...try: mkdir -p $i"
+    echo "! $i is missing" 1>&2
+    echo "...try: mkdir -p $i" 1>&2
     OK=0
   elif [ "`ls -ld $i|awk '{print $3}'`" != "qmaill" ]; then
-    echo "! $i has wrong owner, should be qmaill"
-    echo "...try: chown qmaill $i"
+    echo "! $i has wrong owner, should be qmaill" 1>&2
+    echo "...try: chown qmaill $i" 1>&2
     OK=0
   elif [ "`ls -ld $i|awk '{print $1}'|cut -d. -f1`" != "drwxr-xr-x" ]; then
-    echo "! $i has wrong mode, should be 755"
-    echo "...try: chmod 755 $i"
+    echo "! $i has wrong mode, should be 755" 1>&2
+    echo "...try: chmod 755 $i" 1>&2
     OK=0
   elif [ "$VERB" = y ]; then
     echo "$i looks OK"
@@ -1371,16 +1375,16 @@ done
 
 echo "Checking Firewall Rules"
 if [ ! -f "$DESTDIR"$indimaildir/etc/tcp.smtp ]; then
-  echo "! "$DESTDIR"$indimaildir/etc/tcp.smtp is missing"
-  echo "...try: echo '127.:allow,RELAYCLIENT=\"\"' >> "$DESTDIR"$indimaildir/etc/tcp.smtp"
+  echo "! "$DESTDIR"$indimaildir/etc/tcp.smtp is missing" 1>&2
+  echo "...try: echo '127.:allow,RELAYCLIENT=\"\"' >> "$DESTDIR"$indimaildir/etc/tcp.smtp" 1>&2
   OK=0
 elif [ "$VERB" = y ]; then
   echo ""$DESTDIR"$indimaildir/etc/tcp.smtp exists"
 fi
 
 if [ ! -f "$DESTDIR"$indimaildir/etc/tcp.smtp.cdb ]; then
-  echo "! "$DESTDIR"$indimaildir/etc/tcp.smtp.cdb is missing"
-  echo "...try: "$DESTDIR"$QmailHOME/bin/qmailctl cdb"
+  echo "! "$DESTDIR"$indimaildir/etc/tcp.smtp.cdb is missing" 1>&2
+  echo "...try: "$DESTDIR"$QmailHOME/bin/qmailctl cdb" 1>&2
   OK=0
 elif [ "$VERB" = y ]; then
   echo ""$DESTDIR"$indimaildir/etc/tcp.smtp.cdb exists"
@@ -1396,13 +1400,13 @@ case $host in
 	;;
 esac
 if [ -z "$AHOME" ]; then
-  echo "! Couldn't find user alias's home directory"
+  echo "! Couldn't find user alias's home directory" 1>&2
   OK=0
 else
   for i in root postmaster mailer-daemon; do
     if [ ! -f "$DESTDIR"$AHOME/.qmail-$i ]; then
-      echo "! Alias for $i is missing"
-      echo "...try: echo me > "$DESTDIR"$AHOME/.qmail-$i"
+      echo "! Alias for $i is missing" 1>&2
+      echo "...try: echo me > "$DESTDIR"$AHOME/.qmail-$i" 1>&2
       OK=0
     elif [ "$VERB" = y ]; then
       echo "$i alias exists"
@@ -1413,28 +1417,28 @@ fi
 echo "Checking Sendmail Status"
 if netstat -a | grep smtp | grep -i listen >/dev/null; then
   if $PS | grep sendmail | grep -v grep >/dev/null; then
-    echo "! Sendmail is still running"
-    echo "...try: $RCDIR/init.d/sendmail stop"
+    echo "! Sendmail is still running" 1>&2
+    echo "...try: $RCDIR/init.d/sendmail stop" 1>&2
     OK=0
   elif "$DESTDIR"$QmailHOME/bin/svok $servicedir/qmail-smtpd.25; then
     if [ "$VERB" = y ]; then
       echo "$servicedir/qmail-smtpd.25 is running"
     fi
   else
-    echo "! Something is listening on port 25 (not tcpserver/qmail-smtpd)"
-    echo "...try: disabling current MTA"
+    echo "! Something is listening on port 25 (not tcpserver/qmail-smtpd)" 1>&2
+    echo "...try: disabling current MTA" 1>&2
     OK=0
   fi
 fi
 
 for i in /usr/lib/sendmail /usr/sbin/sendmail; do
   if [ -f $i -a ! -L $i ]; then
-    echo "! $i is a file, should be a link"
-    echo "...try: uninstalling current MTA or: mv $i $i.old; ln -s $QmailHOME/bin/sendmail $i"
+    echo "! $i is a file, should be a link" 1>&2
+    echo "...try: uninstalling current MTA or: mv $i $i.old; ln -s $QmailHOME/bin/sendmail $i" 1>&2
     OK=0
   elif [ ! -f $i ];then
-    echo "! $i is missing"
-    echo "...try: ln -s $QmailHOME/bin/sendmail $i"
+    echo "! $i is missing" 1>&2
+    echo "...try: ln -s $QmailHOME/bin/sendmail $i" 1>&2
     OK=0
   elif [ "$VERB" = y ]; then
     echo "$i exists"
@@ -1445,7 +1449,7 @@ if [ $OK -eq 1 ]; then
   echo "Congratulations, your IndiMail installation in "$DESTDIR"$indimaildir looks good!"
   return 0
 else
-  echo "! Potential problems were found with your IndiMail installation in "$DESTDIR"$indimaildir"
+  echo "! Potential problems were found with your IndiMail installation in "$DESTDIR"$indimaildir" 1>&2
   return 1
 fi
 }
@@ -1567,7 +1571,7 @@ done
 create_smtp()
 {
 if [ $# -ne 8 ] ; then
-	echo "USAGE: create_smtp qbase queue_count first_queue_no supervise_dir smtp_port check_user=0|1 check_relay=0|1 use_ssl=0|1"
+	echo "USAGE: create_smtp qbase queue_count first_queue_no supervise_dir smtp_port check_user=0|1 check_relay=0|1 use_ssl=0|1" 1>&2
 	return 1
 fi
 QUEUE_DIR=$1
@@ -1799,7 +1803,7 @@ case "$dkverify_option" in
 esac
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.136 2009-11-03 09:11:47+05:30 Cprogrammer Stab mbhangui $"
+echo "# \$Id: svctool.in,v 2.137 2009-11-05 10:26:54+05:30 Cprogrammer Stab mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -1847,7 +1851,7 @@ if [ " $odmr" = " " ] ; then
 	# qmail-inject wrapper
 	(
 	echo "#!/bin/sh"
-	echo "# \$Id: svctool.in,v 2.136 2009-11-03 09:11:47+05:30 Cprogrammer Stab mbhangui $"
+	echo "# \$Id: svctool.in,v 2.137 2009-11-05 10:26:54+05:30 Cprogrammer Stab mbhangui $"
 	echo "# generated on $host on `date`"
 	echo "# $prog_args"
 	echo ""
@@ -1860,7 +1864,7 @@ if [ " $odmr" = " " ] ; then
 		/bin/mkdir -p "$DESTDIR"$SERVICEDIR/qmail-spamlog/log
 		(
 		echo "#!/bin/sh"
-		echo "# \$Id: svctool.in,v 2.136 2009-11-03 09:11:47+05:30 Cprogrammer Stab mbhangui $"
+		echo "# \$Id: svctool.in,v 2.137 2009-11-05 10:26:54+05:30 Cprogrammer Stab mbhangui $"
 		echo ""
 		echo "LOGFILTER=\`cat $SERVICEDIR/qmail-smtpd.$tag/variables/LOGFILTER\`"
 		echo "if [ ! -p \$LOGFILTER ] ; then"
@@ -1880,7 +1884,7 @@ if [ " $odmr" = " " ] ; then
 		#qmail-spamlog log script
 		(
 		echo "#!/bin/sh"
-		echo "# \$Id: svctool.in,v 2.136 2009-11-03 09:11:47+05:30 Cprogrammer Stab mbhangui $"
+		echo "# \$Id: svctool.in,v 2.137 2009-11-05 10:26:54+05:30 Cprogrammer Stab mbhangui $"
 		echo "# generated on $host on `date`"
 		echo "# $prog_args"
 		echo ""
@@ -1898,7 +1902,7 @@ if [ ! -d $LOGDIR ] ; then
 fi
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.136 2009-11-03 09:11:47+05:30 Cprogrammer Stab mbhangui $"
+echo "# \$Id: svctool.in,v 2.137 2009-11-05 10:26:54+05:30 Cprogrammer Stab mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -1911,7 +1915,7 @@ echo "$QmailHOME/bin/multilog t $LOGDIR/smtpd.$tag"
 create_greylist()
 {
 if [ $# -ne 10 ] ; then
-	echo "USAGE: create_greylist supervise_dir port min_resend_min resend_win_hr timeout_days context_file save_interval hash_size whitelist use-greydaemon"
+	echo "USAGE: create_greylist supervise_dir port min_resend_min resend_win_hr timeout_days context_file save_interval hash_size whitelist use-greydaemon" 1>&2
 	return 1
 fi
 SERVICEDIR=$1
@@ -1966,7 +1970,7 @@ fi
 
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.136 2009-11-03 09:11:47+05:30 Cprogrammer Stab mbhangui $"
+echo "# \$Id: svctool.in,v 2.137 2009-11-05 10:26:54+05:30 Cprogrammer Stab mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -1989,7 +1993,7 @@ if [ ! -d $LOGDIR ] ; then
 fi
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.136 2009-11-03 09:11:47+05:30 Cprogrammer Stab mbhangui $"
+echo "# \$Id: svctool.in,v 2.137 2009-11-05 10:26:54+05:30 Cprogrammer Stab mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -2002,7 +2006,7 @@ echo "$QmailHOME/bin/multilog t $LOGDIR/greylist.$tag"
 create_imap()
 {
 if [ $# -ne 5 ] ; then
-	echo "USAGE: create_imap supervise_dir imap_port nolastauth=0|1 legacyserver=0|1 use_ssl=0|1"
+	echo "USAGE: create_imap supervise_dir imap_port nolastauth=0|1 legacyserver=0|1 use_ssl=0|1" 1>&2
 	return 1
 fi
 SERVICEDIR=$1
@@ -2063,7 +2067,7 @@ else
 fi
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.136 2009-11-03 09:11:47+05:30 Cprogrammer Stab mbhangui $"
+echo "# \$Id: svctool.in,v 2.137 2009-11-05 10:26:54+05:30 Cprogrammer Stab mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -2118,7 +2122,7 @@ fi
 # qmail-imapd log script
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.136 2009-11-03 09:11:47+05:30 Cprogrammer Stab mbhangui $"
+echo "# \$Id: svctool.in,v 2.137 2009-11-05 10:26:54+05:30 Cprogrammer Stab mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -2261,7 +2265,7 @@ echo "TLS_CACHESIZE=524288"
 create_ssl_cnf()
 {
 if [ $# -ne 2 ] ; then
-	echo "USAGE: create_ssl_cnf postmaster IMAP|POP3"
+	echo "USAGE: create_ssl_cnf postmaster IMAP|POP3" 1>&2
 	return 1
 fi
 postmaster=$1
@@ -2331,7 +2335,7 @@ echo "cert = $indimaildir/share/pop3d.pem"
 create_pop3()
 {
 if [ $# -ne 5 ] ; then
-	echo "USAGE: create_pop3 supervise_dir pop3_port nolastauth=0|1 legacyserver=0|1 use_ssl=0|1"
+	echo "USAGE: create_pop3 supervise_dir pop3_port nolastauth=0|1 legacyserver=0|1 use_ssl=0|1" 1>&2
 	return 1
 fi
 SERVICEDIR=$1
@@ -2394,7 +2398,7 @@ else
 fi
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.136 2009-11-03 09:11:47+05:30 Cprogrammer Stab mbhangui $"
+echo "# \$Id: svctool.in,v 2.137 2009-11-05 10:26:54+05:30 Cprogrammer Stab mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -2448,7 +2452,7 @@ fi
 # qmail-pop3d log script
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.136 2009-11-03 09:11:47+05:30 Cprogrammer Stab mbhangui $"
+echo "# \$Id: svctool.in,v 2.137 2009-11-05 10:26:54+05:30 Cprogrammer Stab mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -2573,7 +2577,7 @@ echo "TLS_CACHESIZE=524288"
 create_indisrvr()
 {
 if [ $# -ne 9 ] ; then
-	echo "create_indisrvr bind_port mysql_host mysql_user mysql_pass avg_user_quota hard_quota base_path servicedir use_ssl=0|1"
+	echo "create_indisrvr bind_port mysql_host mysql_user mysql_pass avg_user_quota hard_quota base_path servicedir use_ssl=0|1" 1>&2
 	return 1
 fi
 BIND_PORT=$1
@@ -2586,7 +2590,7 @@ BASE_PATH=$7
 SERVICEDIR=$8
 use_ssl=$9
 if [ " $use_ssl" = " 1" -a " $certfile" = " " ] ; then
-	echo "Certificate not specfied"
+	echo "Certificate not specfied" 1>&2
 	return 1
 fi
 
@@ -2633,7 +2637,7 @@ else
 fi
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.136 2009-11-03 09:11:47+05:30 Cprogrammer Stab mbhangui $"
+echo "# \$Id: svctool.in,v 2.137 2009-11-05 10:26:54+05:30 Cprogrammer Stab mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -2661,7 +2665,7 @@ fi
 # indisrvr log script
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.136 2009-11-03 09:11:47+05:30 Cprogrammer Stab mbhangui $"
+echo "# \$Id: svctool.in,v 2.137 2009-11-05 10:26:54+05:30 Cprogrammer Stab mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -2685,7 +2689,7 @@ conf_dir="$DESTDIR"$SERVICEDIR/qscanq/variables
 # qscanq script
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.136 2009-11-03 09:11:47+05:30 Cprogrammer Stab mbhangui $"
+echo "# \$Id: svctool.in,v 2.137 2009-11-05 10:26:54+05:30 Cprogrammer Stab mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -2707,7 +2711,7 @@ fi
 # qscanq log script
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.136 2009-11-03 09:11:47+05:30 Cprogrammer Stab mbhangui $"
+echo "# \$Id: svctool.in,v 2.137 2009-11-05 10:26:54+05:30 Cprogrammer Stab mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -2724,7 +2728,7 @@ conf_dir="$DESTDIR"$SERVICEDIR/clamd/variables
 # clamd script
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.136 2009-11-03 09:11:47+05:30 Cprogrammer Stab mbhangui $"
+echo "# \$Id: svctool.in,v 2.137 2009-11-05 10:26:54+05:30 Cprogrammer Stab mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -2761,7 +2765,7 @@ fi
 # clamd log script
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.136 2009-11-03 09:11:47+05:30 Cprogrammer Stab mbhangui $"
+echo "# \$Id: svctool.in,v 2.137 2009-11-05 10:26:54+05:30 Cprogrammer Stab mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -2776,7 +2780,7 @@ conf_dir="$DESTDIR"$SERVICEDIR/freshclam/variables
 # freshclam script
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.136 2009-11-03 09:11:47+05:30 Cprogrammer Stab mbhangui $"
+echo "# \$Id: svctool.in,v 2.137 2009-11-05 10:26:54+05:30 Cprogrammer Stab mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -2804,7 +2808,7 @@ fi
 # freshclam log script
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.136 2009-11-03 09:11:47+05:30 Cprogrammer Stab mbhangui $"
+echo "# \$Id: svctool.in,v 2.137 2009-11-05 10:26:54+05:30 Cprogrammer Stab mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -2817,7 +2821,7 @@ echo "$QmailHOME/bin/multilog t $LOGDIR/freshclam"
 create_pwdlookup()
 {
 if [ $# -ne 9 ] ; then
-	echo "USAGE: create_pwdlookup socket_path thread_count listen_timeout supervise_dir mysql_host mysql_user mysql_pass mysql_port mysql_socket"
+	echo "USAGE: create_pwdlookup socket_path thread_count listen_timeout supervise_dir mysql_host mysql_user mysql_pass mysql_port mysql_socket" 1>&2
 	return 1
 fi
 SOCKET_PATH=$1
@@ -2830,7 +2834,7 @@ conf_dir="$DESTDIR"$SERVICEDIR/pwdlookup/variables
 mkdir -p $conf_dir
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.136 2009-11-03 09:11:47+05:30 Cprogrammer Stab mbhangui $"
+echo "# \$Id: svctool.in,v 2.137 2009-11-05 10:26:54+05:30 Cprogrammer Stab mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -2846,7 +2850,7 @@ fi
 # pwdlookup log script
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.136 2009-11-03 09:11:47+05:30 Cprogrammer Stab mbhangui $"
+echo "# \$Id: svctool.in,v 2.137 2009-11-05 10:26:54+05:30 Cprogrammer Stab mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -2897,7 +2901,7 @@ echo "priority    err"
 create_inlookup()
 {
 if [ $# -ne 3 ] ; then
-	echo "USAGE: create_inlookup infifo thread_count supervise_dir"
+	echo "USAGE: create_inlookup infifo thread_count supervise_dir" 1>&2
 	return 1
 fi
 INFIFO_PATH=$1
@@ -2933,7 +2937,7 @@ fi
 echo "inlookup" > $conf_dir/MYSQL_READ_DEFAULT_GROUP
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.136 2009-11-03 09:11:47+05:30 Cprogrammer Stab mbhangui $"
+echo "# \$Id: svctool.in,v 2.137 2009-11-05 10:26:54+05:30 Cprogrammer Stab mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -2949,7 +2953,7 @@ fi
 # inlookup log script
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.136 2009-11-03 09:11:47+05:30 Cprogrammer Stab mbhangui $"
+echo "# \$Id: svctool.in,v 2.137 2009-11-05 10:26:54+05:30 Cprogrammer Stab mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -2962,7 +2966,7 @@ echo "$QmailHOME/bin/multilog t $LOGDIR/inlookup.$base_fifo_name"
 create_mysql_db()
 {
 if [ $# -ne 2 ] ; then
-	echo "USAGE: create_mysql_db databasedir config_file"
+	echo "USAGE: create_mysql_db databasedir config_file" 1>&2
 	return 1
 fi
 databasedir=$1
@@ -2976,29 +2980,41 @@ else
 fi
 
 if [ ! -f "$DESTDIR"$conf_file -a $use_stdout -ne 1 ] ; then
-	echo ""$DESTDIR"$conf_file: No such File or directory"
+	echo ""$DESTDIR"$conf_file: No such File or directory" 1>&2
 	return 1
 fi
 
-if [ $use_stdout -eq 1 ] ; then
-	create_mysql_user 
-elif [ ! -d "$DESTDIR"$databasedir/data ] ; then
+if [ ! -d "$DESTDIR"$databasedir/data ] ; then
 	if ( mkdir -p "$DESTDIR"$databasedir/data && mkdir -p "$DESTDIR"$databasedir/logs ) ; then
 		(
-		echo "# \$Id: svctool.in,v 2.136 2009-11-03 09:11:47+05:30 Cprogrammer Stab mbhangui $"
+		echo "# \$Id: svctool.in,v 2.137 2009-11-05 10:26:54+05:30 Cprogrammer Stab mbhangui $"
 		echo "# generated on $host on `date`"
 		echo ""
+		if [ $use_stdout -eq 1 ] ; then
+		echo "# svctool --config=mysqldb --mysqlPrefix=$mysqlPrefix --databasedir=$databasedir --stdout --nolog"
+		else
 		echo "# svctool --config=mysqldb --mysqlPrefix=$mysqlPrefix --databasedir=$databasedir --nolog"
+		fi
 		) > "$DESTDIR"$databasedir/README
-		chown -R mysql:mysql "$DESTDIR"$databasedir
-		$mysqlPrefix/bin/mysql_install_db --user=mysql --datadir="$DESTDIR"$databasedir/data
-		chown -R mysql:mysql "$DESTDIR"$databasedir
-		echo "Creating MySQL Database in "$DESTDIR"$databasedir/data with defaults file $conf_file"
-		create_mysql_user | eval "$mysqlPrefix/$mysqld \
-		--defaults-file="$DESTDIR"$conf_file --bootstrap --user=mysql \
-		--datadir="$DESTDIR"$databasedir/data --skip-grant-tables"
+		echo "Creating MySQL database in "$DESTDIR"$databasedir/data" 1>&2
+		/bin/chown -R mysql:mysql "$DESTDIR"$databasedir
+		$mysqlPrefix/bin/mysql_install_db --user=mysql --datadir="$DESTDIR"$databasedir/data 1>&2
+		/bin/chown -R mysql:mysql "$DESTDIR"$databasedir
+		if [ $use_stdout -eq 1 ] ; then
+			echo "Generating MySQL statements for Database in "$DESTDIR"$databasedir/data" 1>&2
+			create_mysql_user 
+		else
+			echo "Creating MySQL Database in "$DESTDIR"$databasedir/data with defaults file $conf_file"
+			create_mysql_user | eval "$mysqlPrefix/$mysqld \
+			--defaults-file="$DESTDIR"$conf_file --bootstrap --user=mysql \
+			--datadir="$DESTDIR"$databasedir/data --skip-grant-tables"
+		fi
 	else
 		return 1
+	fi
+else
+	if [ $use_stdout -eq 1 ] ; then
+		create_mysql_user 
 	fi
 fi
 }
@@ -3006,7 +3022,7 @@ fi
 create_mysql()
 {
 if [ $# -ne 5 ] ; then
-	echo "USAGE: create_mysql port mysqlPrefix databasedir config_file servicedir"
+	echo "USAGE: create_mysql port mysqlPrefix databasedir config_file servicedir" 1>&2
 	return 1
 fi
 port=$1
@@ -3023,7 +3039,7 @@ else
 fi
 
 if [ ! -f "$DESTDIR"$conf_file ] ; then
-	echo ""$DESTDIR"$conf_file: No such File or directory"
+	echo ""$DESTDIR"$conf_file: No such File or directory" 1>&2
 	return 1
 fi
 
@@ -3031,7 +3047,7 @@ mkdir -p "$DESTDIR"$SERVICEDIR/mysql.$port/log
 (
 mysql_version=`$mysqlPrefix/bin/mysql_config --version`
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.136 2009-11-03 09:11:47+05:30 Cprogrammer Stab mbhangui $"
+echo "# \$Id: svctool.in,v 2.137 2009-11-05 10:26:54+05:30 Cprogrammer Stab mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -3079,7 +3095,7 @@ echo "--pid-file=\$PIDFILE 2>&1"
 
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.136 2009-11-03 09:11:47+05:30 Cprogrammer Stab mbhangui $"
+echo "# \$Id: svctool.in,v 2.137 2009-11-05 10:26:54+05:30 Cprogrammer Stab mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -3096,7 +3112,7 @@ fi
 # mysql log script
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.136 2009-11-03 09:11:47+05:30 Cprogrammer Stab mbhangui $"
+echo "# \$Id: svctool.in,v 2.137 2009-11-05 10:26:54+05:30 Cprogrammer Stab mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -3110,18 +3126,20 @@ create_mysql_user()
 {
 mysql_version=`$mysqlPrefix/bin/mysql_config --version`
 echo "use mysql;"
-if [ $use_stdout -ne 1 ] ; then
-	echo "drop database test;"
-fi
-echo "create database indimail;"
-if [ $use_grant -eq 1 ] ; then
+if [ $use_stdout -eq 1 ] ; then
+    echo "CREATE USER 'mysql'    identified by '$PRIV_PASS';"
     echo "CREATE USER 'indimail' identified by '$MYSQL_PASS';"
     echo "CREATE USER 'admin'    identified by '$ADMIN_PASS';"
     echo "CREATE USER 'repl'     identified by 'slaveserver';"
+	echo "GRANT ALL on *.* to mysql;"
     echo "GRANT SELECT,CREATE,ALTER,INDEX,INSERT,UPDATE,DELETE,CREATE TEMPORARY TABLES,LOCK TABLES ON indimail.* to indimail;"
     echo "GRANT RELOAD,SHUTDOWN,PROCESS,SUPER on *.* to admin;"
     echo "GRANT REPLICATION SLAVE on *.* to repl;"
 else
+	echo "drop database test;"
+	echo "delete from user where user='';"
+	echo "delete from user where user='root';"
+	echo "delete from db where db like 'test%'"
 	# Super User
 	c_d=""
 	c_d="$c_d INSERT INTO user (Host, User, Password, Select_priv, Insert_priv,"
@@ -3266,13 +3284,9 @@ else
 	esac
 	echo $c_d
 fi
-if [ $use_stdout -ne 1 ] ; then
-	echo "delete from user where user='';"
-	echo "delete from user where user='root';"
-	echo "delete from db where db like 'test%'"
-fi
-echo "use indimail;"
 
+echo "create database indimail;"
+echo "use indimail;"
 # Bootstrap Indimail tables
 c_d=""
 c_d="$c_d CREATE TABLE mgmtaccess ("
@@ -3453,7 +3467,7 @@ echo "wait_timeout=28800"
 create_svscan()
 {
 if [ $# -ne 1 ] ; then
-	echo "USAGE: create_svscan supervise_dir"
+	echo "USAGE: create_svscan supervise_dir" 1>&2
 	return 1
 fi
 SERVICEDIR=$1
@@ -3466,7 +3480,7 @@ fi
 # svscan log script
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.136 2009-11-03 09:11:47+05:30 Cprogrammer Stab mbhangui $"
+echo "# \$Id: svctool.in,v 2.137 2009-11-05 10:26:54+05:30 Cprogrammer Stab mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -3479,7 +3493,7 @@ echo "$QmailHOME/bin/multilog t $LOGDIR/svscan"
 create_fetchmail()
 {
 if [ $# -ne 4 ] ; then
-	echo "USAGE: create_fetchmail qbase queue_count first_queue_no supervise_dir"
+	echo "USAGE: create_fetchmail qbase queue_count first_queue_no supervise_dir" 1>&2
 	return 1
 fi
 QUEUE_DIR=$1
@@ -3577,7 +3591,7 @@ case "$dkverify_option" in
 esac
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.136 2009-11-03 09:11:47+05:30 Cprogrammer Stab mbhangui $"
+echo "# \$Id: svctool.in,v 2.137 2009-11-05 10:26:54+05:30 Cprogrammer Stab mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -3599,7 +3613,7 @@ fi
 # fetchmail log script
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.136 2009-11-03 09:11:47+05:30 Cprogrammer Stab mbhangui $"
+echo "# \$Id: svctool.in,v 2.137 2009-11-05 10:26:54+05:30 Cprogrammer Stab mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -3612,14 +3626,14 @@ echo "$QmailHOME/bin/multilog t $LOGDIR/fetchmail"
 create_poppass()
 {
 if [ $# -ne 4 ] ; then
-	echo "USAGE: create_poppass supervise_dir poppass_port password_command use_ssl=0|1"
+	echo "USAGE: create_poppass supervise_dir poppass_port password_command use_ssl=0|1" 1>&2
 	return 1
 fi
 SERVICEDIR=$1
 pwd_cmd=$3
 use_ssl=$4
 if [ " $use_ssl" = " 1" -a " $certfile" = " " ] ; then
-	echo "Certificate not specfied"
+	echo "Certificate not specfied" 1>&2
 	return 1
 fi
 
@@ -3671,7 +3685,7 @@ else
 fi
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.136 2009-11-03 09:11:47+05:30 Cprogrammer Stab mbhangui $"
+echo "# \$Id: svctool.in,v 2.137 2009-11-05 10:26:54+05:30 Cprogrammer Stab mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -3712,7 +3726,7 @@ fi
 # qmail-poppass log script
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.136 2009-11-03 09:11:47+05:30 Cprogrammer Stab mbhangui $"
+echo "# \$Id: svctool.in,v 2.137 2009-11-05 10:26:54+05:30 Cprogrammer Stab mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -3726,7 +3740,7 @@ mv /tmp/popass-run.$$ "$DESTDIR"$SERVICEDIR/qmail-poppass.$tag/log/run
 create_queue()
 {
 if [ $# -ne 6 ] ; then
-	echo "USAGE: create_queue qbase queue_count first_queue_no supervise_dir smtp_port routes=0|1"
+	echo "USAGE: create_queue qbase queue_count first_queue_no supervise_dir smtp_port routes=0|1" 1>&2
 	return 1
 fi
 QUEUE_DIR=$1
@@ -3907,7 +3921,7 @@ case "$dksign_option" in
 esac
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.136 2009-11-03 09:11:47+05:30 Cprogrammer Stab mbhangui $"
+echo "# \$Id: svctool.in,v 2.137 2009-11-05 10:26:54+05:30 Cprogrammer Stab mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -3924,7 +3938,7 @@ fi
 mkdir -p "$DESTDIR"$SERVICEDIR/qmail-send."$tag"/log
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.136 2009-11-03 09:11:47+05:30 Cprogrammer Stab mbhangui $"
+echo "# \$Id: svctool.in,v 2.137 2009-11-05 10:26:54+05:30 Cprogrammer Stab mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -3937,19 +3951,19 @@ echo "$QmailHOME/bin/multilog t $LOGDIR/deliver."$tag""
 rmsvc()
 {
 if [ $# -lt 1 ] ; then
-	echo "rmsvc service_with_full_path"
+	echo "rmsvc service_with_full_path" 1>&2
 	return 1
 fi
 for i in $*
 do
 	if [ ! -d $i ] ; then
-		echo "$i: No such file or directory"
+		echo "$i: No such file or directory" 1>&2
 		continue
 	fi
 	dir=`dirname $i`
 	pgname=`basename $i`
 	if [ ! -p $i/supervise/control ] ; then
-		echo "$i/supervise not a supervise directory"
+		echo "$i/supervise not a supervise directory" 1>&2
 		continue
 	fi
 	/bin/mv $i $dir/".""$pgname"
@@ -3966,13 +3980,13 @@ done
 ensvc()
 {
 if [ $# -lt 1 ] ; then
-	echo "ensvc service_with_full_path"
+	echo "ensvc service_with_full_path" 1>&2
 	return 1
 fi
 for i in $*
 do
 	if [ ! -d $i ] ; then
-		echo "$i: No such file or directory"
+		echo "$i: No such file or directory" 1>&2
 		continue
 	fi
 	dir=`dirname $i`
@@ -3983,7 +3997,7 @@ do
 		/bin/mv $i $dir/$pgname
 		echo "Enabled Service $pgname" 
 	else
-		echo "Service $i is not disabled (should have a '.' as the first char in $pgname)"
+		echo "Service $i is not disabled (should have a '.' as the first char in $pgname)" 1>&2
 	fi
 done
 sleep 5
@@ -4041,7 +4055,7 @@ macOSuseradd()
 		for i in `dscl . -list /Users UniqueID | awk '{print $2}'`
 		do
 			if [ $i -eq $userid ] ; then
-				echo "userid $userid not uniqueue"
+				echo "userid $userid not unique" 1>&2
 				return 1
 			fi
 		done
@@ -4050,7 +4064,7 @@ macOSuseradd()
 		group=$2
 		dscl . -read /Groups/$group PrimaryGroupID >/dev/null 2>&1
 		if [ $? -ne 0 ] ; then
-			echo "error with Group $group"
+			echo "error with Group $group" 1>&2
 			return 1
 		fi
 		groupid=`dscl . -read /Groups/$group PrimaryGroupID | grep -v "No such key"| awk '{print $2}'`
@@ -4532,7 +4546,7 @@ echo "#ReceiveTimeout 60"
 create_bogofilter_conf()
 {
 if [ ! -f "$DESTDIR"$indimaildir/etc/bogofilter.cf.example ] ; then
-	echo ""$DESTDIR"$indimaildir/etc/bogofilter.cf.example: No such file or directory"
+	echo ""$DESTDIR"$indimaildir/etc/bogofilter.cf.example: No such file or directory" 1>&2
 	return 1
 fi
 cat "$DESTDIR"$indimaildir/etc/bogofilter.cf.example | sed \
@@ -4587,7 +4601,7 @@ report ()
 				zrxdelay| zsendmail|zsuids|zsmtp|zspam|all)
 			;;
 			*)
-				echo "Invalid option $i"
+				echo "Invalid option $i" 1>&2
 				usage 1
 			;;
 		esac
@@ -4736,14 +4750,14 @@ report ()
 dump_config()
 {
 if [ $# -ne 2 ] ; then
-	echo "USAGE: dump_config servicedir controldir"
+	echo "USAGE: dump_config servicedir controldir" 1>&2
 	return 1
 fi
 servicedir=$1
 CONTROLDIR=$2
 export CONTROLDIR
 if [ ! -d $servicedir ] ; then
-	echo "servicedir: No such file or directory"
+	echo "servicedir: No such file or directory" 1>&2
 	return 1
 fi
 echo "Service Configuration ================================================"
@@ -4836,7 +4850,6 @@ fi
 
 prog_args="$0 $*"
 use_stdout=0
-use_grant=0
 silent=0
 use_ssl=0
 while test $# -gt 0; do
@@ -4877,7 +4890,7 @@ while test $# -gt 0; do
 	cntrldir=$optarg
 	echo $cntrldir | grep '/' >/dev/null 2>&1
 	if [ $? -eq 0 ] ; then
-		echo cntrldir cannot be an absolute path
+		echo cntrldir cannot be an absolute path 1>&2
 		exit 1
 	fi
 	CONTROLDIR=$cntrldir
@@ -4944,7 +4957,7 @@ while test $# -gt 0; do
 	spamfilter=$optarg
 	echo $spamfilter | grep '/' >/dev/null 2>&1
 	if [ $? -ne 0 ] ; then
-		echo spamfilter must be an absolute path
+		echo spamfilter must be an absolute path 1>&2
 		exit 1
 	fi
 	;;
@@ -5004,7 +5017,7 @@ while test $# -gt 0; do
 	--context-file=*)
 	echo $optarg | grep '/' >/dev/null 2>&1
 	if [ $? -eq 0 ] ; then
-		echo context file cannot have absolute path
+		echo context file cannot have absolute path 1>&2
 		exit 1
 	fi
 	context_file=$optarg
@@ -5018,7 +5031,7 @@ while test $# -gt 0; do
 	--whitelist=*)
 	echo $optarg | grep '/' >/dev/null 2>&1
 	if [ $? -eq 0 ] ; then
-		echo whitelist file cannot have absolute path
+		echo whitelist file cannot have absolute path 1>&2
 		exit 1
 	fi
 	whitelist=$optarg
@@ -5034,10 +5047,6 @@ while test $# -gt 0; do
 	;;
 	--dmasquerade)
 	dmasquerade=1
-	;;
-	--use-grant)
-	use_grant=1
-	use_stdout=1
 	;;
 	--stdout)
 	use_stdout=1
@@ -5125,7 +5134,7 @@ while test $# -gt 0; do
 		model=$optarg
 		;;
 		*)
-		echo "Invalid model $optarg"
+		echo "Invalid model $optarg" 1>&2
 		exit 1
 		;;
 		esac
@@ -5140,9 +5149,9 @@ while test $# -gt 0; do
 	if [ -f /usr/bin/zip ] ; then
 		attach_report=1
 	else
-		echo "/usr/bin/zip is missing on your system"
-		echo "will not use attachments to send out reports"
-		echo "Press ENTER to continue"
+		echo "/usr/bin/zip is missing on your system" 1>&2
+		echo "will not use attachments to send out reports" 1>&2
+		echo "Press ENTER to continue" 1>&2
 		read key
 	fi
 	;;
@@ -5282,7 +5291,7 @@ while test $# -gt 0; do
 	;;
 
     --version)
-	echo "\$Id: svctool.in,v 2.136 2009-11-03 09:11:47+05:30 Cprogrammer Stab mbhangui $"
+	echo "\$Id: svctool.in,v 2.137 2009-11-05 10:26:54+05:30 Cprogrammer Stab mbhangui $"
 	prog_args=""
 	exit 0
 	;;
@@ -5318,7 +5327,7 @@ while test $# -gt 0; do
 	private_key=$optarg
 	;;
     *)
-	echo "invalid option [$1]"
+	echo "invalid option [$1]" 1>&2
 	prog_args=""
 	read key
 	usage 1
@@ -5330,30 +5339,30 @@ done
 case $option in
 	1)
 	if [ " $servicedir" = " " ] ; then
-		echo "Supervise Directory not specified"
+		echo "Supervise Directory not specified" 1>&2
 		usage 1
 	elif [ " $smtp_port" = " " ] ; then
-		echo "SMTP PORT not specified"
+		echo "SMTP PORT not specified" 1>&2
 		usage 1
 	elif [ $smtp_port -lt 1 ] ; then
-		echo "SMTP PORT should be a positive number"
+		echo "SMTP PORT should be a positive number" 1>&2
 		usage 1
 	fi
 	if [ " $odmr" = " " ] ; then
 		if [ " $qbase" = " " ] ; then
-			echo "Queue Directory not specified"
+			echo "Queue Directory not specified" 1>&2
 			usage 1
 		elif [ " $qcount" = " " ] ; then
-			echo "Queue Count not specified"
+			echo "Queue Count not specified" 1>&2
 			usage 1
 		elif [ " $qstart" = " " ] ; then
-			echo "Start Queue Number not specified"
+			echo "Start Queue Number not specified" 1>&2
 			usage 1
 		elif [ $qcount -lt 1 ] ; then
-			echo "No of Queues should be a positive number"
+			echo "No of Queues should be a positive number" 1>&2
 			usage 1
 		elif [ $qstart -lt 1 ] ; then
-			echo "Start Queue Number should be a positive number"
+			echo "Start Queue Number should be a positive number" 1>&2
 			usage 1
 		fi
 		if [ " $skipsend" = " " ] ; then
@@ -5366,21 +5375,21 @@ case $option in
 			none|"")
 			;;
 			*)
-			echo "invalid --dkverify=$dkverify_option"
+			echo "invalid --dkverify=$dkverify_option" 1>&2
 			usage 1
 			;;
 		esac
 		case "$dksign_option" in
 			dkim|dk|both)
 			if [ " $private_key" = " " ] ; then
-				echo "--private_key not specfied"
+				echo "--private_key not specfied" 1>&2
 				usage 1
 			fi
 			;;
 			none|"")
 			;;
 			*)
-			echo "invalid --dksign=$dksign_option"
+			echo "invalid --dksign=$dksign_option" 1>&2
 			usage 1
 			;;
 		esac
@@ -5395,24 +5404,24 @@ case $option in
 
 	2)
 	if [ " $imap_port" = " " ] ; then
-		echo "IMAP PORT not specified"
+		echo "IMAP PORT not specified" 1>&2
 		usage 1
 	elif [ " $servicedir" = " " ] ; then
-		echo "Supervise Directory not specified"
+		echo "Supervise Directory not specified" 1>&2
 		usage 1
 	elif [ $imap_port -lt 1 ] ; then
-		echo "IMAP PORT should be a positive number"
+		echo "IMAP PORT should be a positive number" 1>&2
 		usage 1
 	elif [ " $default_domain" = " " ] ; then
-		echo "Default Domain not specified"
+		echo "Default Domain not specified" 1>&2
 		usage 1
 	fi
 	if [ ! " $proxy" = " " ] ; then
 		if [ " $hard_quota" = " " ] ; then
-			echo "User Hard Quota not specified"
+			echo "User Hard Quota not specified" 1>&2
 			usage 1
 		elif [ $hard_quota -lt 500000 ] ; then
-			echo "Hard Quota should be greater than 500k"
+			echo "Hard Quota should be greater than 500k" 1>&2
 			usage 1
 		fi
 	fi
@@ -5422,24 +5431,24 @@ case $option in
 
 	3)
 	if [ " $pop3_port" = " " ] ; then
-		echo "POP3 PORT not specified"
+		echo "POP3 PORT not specified" 1>&2
 		usage 1
 	elif [ " $servicedir" = " " ] ; then
-		echo "Supervise Directory not specified"
+		echo "Supervise Directory not specified" 1>&2
 		usage 1
 	elif [ $pop3_port -lt 1 ] ; then
-		echo "POP3 PORT should be a positive number"
+		echo "POP3 PORT should be a positive number" 1>&2
 		usage 1
 	elif [ " $default_domain" = " " ] ; then
-		echo "Default Domain not specified"
+		echo "Default Domain not specified" 1>&2
 		usage 1
 	fi
 	if [ ! " $proxy" = " " ] ; then
 		if [ " $hard_quota" = " " ] ; then
-			echo "User Hard Quota not specified"
+			echo "User Hard Quota not specified" 1>&2
 			usage 1
 		elif [ $hard_quota -lt 500000 ] ; then
-			echo "Hard Quota should be greater than 500k"
+			echo "Hard Quota should be greater than 500k" 1>&2
 			usage 1
 		fi
 	fi
@@ -5457,13 +5466,13 @@ case $option in
 
 	6)
 	if [ " $servicedir" = " " ] ; then
-		echo "Supervise Directory not specified"
+		echo "Supervise Directory not specified" 1>&2
 		usage 1
 	elif [ " $infifo" = " " ] ; then
-		echo "INFIFO not specified"
+		echo "INFIFO not specified" 1>&2
 		usage 1
 	elif [ " $thread_count" = " " ] ; then
-		echo "Thread Count not specified"
+		echo "Thread Count not specified" 1>&2
 		usage 1
 	fi
 	echo "Creating InLookup Daemon on Fifo $infifo, Service $servicedir, Threads $thread_count"
@@ -5472,37 +5481,37 @@ case $option in
 
 	7)
 	if [ " $servicedir" = " " ] ; then
-		echo "Supervise Directory not specified"
+		echo "Supervise Directory not specified" 1>&2
 		usage 1
 	elif [ " $bind_port" = " " ] ; then
-		echo "Port not specified"
+		echo "Port not specified" 1>&2
 		usage 1
 	elif [ " $mysql_host" = " " ] ; then
-		echo "MySQL Host not specified"
+		echo "MySQL Host not specified" 1>&2
 		usage 1
 	elif [ " $mysql_user" = " " ] ; then
-		echo "MySQL User not specified"
+		echo "MySQL User not specified" 1>&2
 		usage 1
 	elif [ " $mysql_pass" = " " ] ; then
-		echo "MySQL Passwd not specified"
+		echo "MySQL Passwd not specified" 1>&2
 		usage 1
 	elif [ " $avg_user_quota" = " " ] ; then
-		echo "Average User Quota not specified"
+		echo "Average User Quota not specified" 1>&2
 		usage 1
 	elif [ " $hard_quota" = " " ] ; then
-		echo "User Hard Quota not specified"
+		echo "User Hard Quota not specified" 1>&2
 		usage 1
 	elif [ " $base_path" = " " ] ; then
-		echo "Base Path not specified"
+		echo "Base Path not specified" 1>&2
 		usage 1
 	elif [ $bind_port -lt 1 ] ; then
-		echo "BIND PORT should be a positive number"
+		echo "BIND PORT should be a positive number" 1>&2
 		usage 1
 	elif [ $avg_user_quota -lt 500000 ] ; then
-		echo "Average User Quota should be greater than 500k"
+		echo "Average User Quota should be greater than 500k" 1>&2
 		usage 1
 	elif [ $hard_quota -lt 500000 ] ; then
-		echo "Hard Quota should be greater than 500k"
+		echo "Hard Quota should be greater than 500k" 1>&2
 		usage 1
 	fi
 	echo "Creating IndiMail Admin Service Port $bind_port, Service $servicedir, Base Path $base_path"
@@ -5512,28 +5521,28 @@ case $option in
 
 	8)
 	if [ " $servicedir" = " " ] ; then
-		echo "Supervise Directory not specified"
+		echo "Supervise Directory not specified" 1>&2
 		usage 1
 	elif [ " $default_domain" = " " ] ; then
-		echo "default domain not specified"
+		echo "default domain not specified" 1>&2
 		exit 1
 	elif [ " $model" = " " ] ; then
-		echo "Model not selected"
+		echo "Model not selected" 1>&2
 		exit 1
 	elif [ " $databasedir" = " " ] ; then
-		echo "Database directory not specified"
+		echo "Database directory not specified" 1>&2
 		usage 1
 	elif [ " $mysqlPrefix" = " " ] ; then
-		echo "MySQL Installation Prefix directory not specified"
+		echo "MySQL Installation Prefix directory not specified" 1>&2
 		usage 1
 	elif [ " $conf_file" = " " ] ; then
-		echo "Config file not specified"
+		echo "Config file not specified" 1>&2
 		usage 1
 	elif [ " $mysql_port" = " " ] ; then
-		echo "Port not specified"
+		echo "Port not specified" 1>&2
 		usage 1
 	elif [ $mysql_port -lt 1 ] ; then
-		echo "BIND PORT should be a positive number"
+		echo "BIND PORT should be a positive number" 1>&2
 		usage 1
 	fi
 	echo "Creating MySQL Service Port $mysql_port, Service $servicedir, conf file $conf_file"
@@ -5542,25 +5551,25 @@ case $option in
 
 	9)
 	if [ " $qbase" = " " ] ; then
-		echo "Queue Directory not specified"
+		echo "Queue Directory not specified" 1>&2
 		usage 1
 	elif [ " $qcount" = " " ] ; then
-		echo "Queue Count not specified"
+		echo "Queue Count not specified" 1>&2
 		usage 1
 	elif [ " $qstart" = " " ] ; then
-		echo "Start Queue Number not specified"
+		echo "Start Queue Number not specified" 1>&2
 		usage 1
 	elif [ " $servicedir" = " " ] ; then
-		echo "Supervise Directory not specified"
+		echo "Supervise Directory not specified" 1>&2
 		usage 1
 	elif [ " $default_domain" = " " ] ; then
-		echo "Default Domain not specified"
+		echo "Default Domain not specified" 1>&2
 		usage 1
 	elif [ $qcount -lt 1 ] ; then
-		echo "No of Queues should be a positive number"
+		echo "No of Queues should be a positive number" 1>&2
 		usage 1
 	elif [ $qstart -lt 1 ] ; then
-		echo "Start Queue Number should be a positive number"
+		echo "Start Queue Number should be a positive number" 1>&2
 		usage 1
 	fi
 	echo "Creating FetchMail Daemon Service $servicedir, Queue Base $qbase, Queue Count $qcount, Qstart $qstart"
@@ -5571,10 +5580,10 @@ case $option in
 	case $config_name in
 		mysql)
 		if [ " $mysqlPrefix" = " " ] ; then
-			echo "MySQL Installation Prefix directory not specified"
+			echo "MySQL Installation Prefix directory not specified" 1>&2
 			usage 1
 		elif [ " $model" = " " ] ; then
-			echo "Model not selected"
+			echo "Model not selected" 1>&2
 			exit 1
 		fi
 		if [ " $mysql_port" = " " ]; then
@@ -5589,25 +5598,25 @@ case $option in
 		;;
 		mysqldb)
 		if [ " $mysqlPrefix" = " " ] ; then
-			echo "MySQL Installation Prefix directory not specified"
+			echo "MySQL Installation Prefix directory not specified" 1>&2
 			usage 1
 		elif [ " $databasedir" = " " ] ; then
-			echo "Database directory not specified"
+			echo "Database directory not specified" 1>&2
 			usage 1
 			exit 1
 		elif [ " $base_path" = " " ] ; then
-			echo "Base Path not specified"
+			echo "Base Path not specified" 1>&2
 			usage 1
 			exit 1
 		elif [ " $default_domain" = " " ] ; then
-			echo "default domain not specified"
+			echo "default domain not specified" 1>&2
 			exit 1
 		fi
 		create_mysql_db "$databasedir" "$indimaildir/etc/indimail.cnf"
 		;;
 		imap)
 		if [ " $default_domain" = " " ] ; then
-			echo "default domain not specified"
+			echo "default domain not specified" 1>&2
 			exit 1
 		fi
 		if [ " $use_ssl" = " 1" ] ; then
@@ -5629,7 +5638,7 @@ case $option in
 		;;
 		pop3)
 		if [ " $default_domain" = " " ] ; then
-			echo "default domain not specified"
+			echo "default domain not specified" 1>&2
 			exit 1
 		fi
 
@@ -5652,11 +5661,11 @@ case $option in
 		;;
 		qmail)
 		if [ " $postmaster" = " " ] ; then
-			echo "postmaster not specified"
+			echo "postmaster not specified" 1>&2
 			exit 1
 		fi
 		if [ " $default_domain" = " " ] ; then
-			echo "default domain not specified"
+			echo "default domain not specified" 1>&2
 			exit 1
 		fi
 		create_qmail_config
@@ -5712,7 +5721,7 @@ case $option in
 		;;
 		cert)
 		if [ " $postmaster" = " " ] ; then
-			echo "postmaster not specified"
+			echo "postmaster not specified" 1>&2
 			exit 1
 		fi
 		if [ ! -f "$DESTDIR"$QmailHOME/control/servercert.pem ] ; then
@@ -5747,15 +5756,15 @@ case $option in
 				$QmailHOME/bin/svc -d /service/qmail-poppass.*
 				$QmailHOME/bin/svc -u /service/indisrvr.*
 				$QmailHOME/bin/svc -u /service/qmail-poppass.*
-				echo "WARNING!!! Restart all services using the generated certificates"
+				echo "WARNING!!! Restart all services using the generated certificates" 1>&2
 			fi
 		else
-			echo ""$DESTDIR"$QmailHOME/control/servercert.pem exists. Remove to create new"
+			echo ""$DESTDIR"$QmailHOME/control/servercert.pem exists. Remove to create new" 1>&2
 			exit 1
 		fi
 		;;
 		*)
-		echo "Invalid configuration option $optarg"
+		echo "Invalid configuration option $optarg" 1>&2
 		usage 1
 		prog_args=""
 		;;
@@ -5764,16 +5773,16 @@ case $option in
 
 	11)
 	if [ " $qbase" = " " ] ; then
-		echo "Queue Directory not specified"
+		echo "Queue Directory not specified" 1>&2
 		usage 1
 	elif [ " $qcount" = " " ] ; then
-		echo "Queue Count not specified"
+		echo "Queue Count not specified" 1>&2
 		usage 1
 	elif [ " $qstart" = " " ] ; then
-		echo "Start Queue Number not specified"
+		echo "Start Queue Number not specified" 1>&2
 		usage 1
 	elif [ " $servicedir" = " " ] ; then
-		echo "Supervise Directory not specified"
+		echo "Supervise Directory not specified" 1>&2
 		usage 1
 	fi
 	check_installation "$qbase" "$qcount" "$qstart" "$servicedir" "$verbose"
@@ -5781,7 +5790,7 @@ case $option in
 
 	12)
 	if [ " $servicedir" = " " ] ; then
-		echo "Supervise Directory not specified"
+		echo "Supervise Directory not specified" 1>&2
 		usage 1
 	fi
 	grep "svscanboot" /etc/inittab >/dev/null
@@ -5801,17 +5810,17 @@ case $option in
 
 	13)
 	if [ " $servicedir" = " " ] ; then
-		echo "Supervise Directory not specified"
+		echo "Supervise Directory not specified" 1>&2
 		usage 1
 	elif [ " $mysqlPrefix" = " " ] ; then
-		echo "MySQL Installation Prefix directory not specified"
+		echo "MySQL Installation Prefix directory not specified" 1>&2
 		usage 1
 	elif [ " $backupdir" = " " ] ; then
-		echo "Backup directory not specified"
+		echo "Backup directory not specified" 1>&2
 		usage 1
 	fi
 	if [ ! -d $backupdir ] ; then
-		echo "$backupdir: No such file or directory"
+		echo "$backupdir: No such file or directory" 1>&2
 		exit 1
 	fi
 	EXT=`date +'%d%m%y-%H%M%S'`
@@ -5836,10 +5845,10 @@ case $option in
 
 	16)
 	if [ " $servicedir" = " " ] ; then
-		echo "Supervise Directory not specified"
+		echo "Supervise Directory not specified" 1>&2
 		usage 1
 	elif [ " $clamdPrefix" = " " ] ; then
-		echo "clamd Installation Prefix directory not specified"
+		echo "clamd Installation Prefix directory not specified" 1>&2
 		usage 1
 	fi
 	echo "Creating Virus Scanner Service ClamdPrefix $clamdPrefix, Service $servicedir"
@@ -5848,19 +5857,19 @@ case $option in
 
 	17)
 	if [ " $poppass_port" = " " ] ; then
-		echo "poppass PORT not specified"
+		echo "poppass PORT not specified" 1>&2
 		usage 1
 	elif [ " $servicedir" = " " ] ; then
-		echo "Supervise Directory not specified"
+		echo "Supervise Directory not specified" 1>&2
 		usage 1
 	elif [ " $password_cmd" = " " ] ; then
-		echo "Setpassword Command not specified"
+		echo "Setpassword Command not specified" 1>&2
 		usage 1
 	elif [ $poppass_port -lt 1 ] ; then
-		echo "POP3 PORT should be a positive number"
+		echo "POP3 PORT should be a positive number" 1>&2
 		usage 1
 	elif [ $use_ssl -eq 1 -a " $certfile" = " " ] ; then
-		echo "--ssl option given and Certficate not specified"
+		echo "--ssl option given and Certficate not specified" 1>&2
 		usage 1
 	fi
 	echo "Creating poppass Listener Port $poppass_port, Service $servicedir use_ssl=$use_ssl"
@@ -5869,7 +5878,7 @@ case $option in
 
 	18)
 	if [ " $servicedir" = " " ] ; then
-		echo "Supervise Directory not specified"
+		echo "Supervise Directory not specified" 1>&2
 		usage 1
 	fi
 	echo "Creating svscan log Service Service $servicedir"
@@ -5878,28 +5887,28 @@ case $option in
 
 	19)
 	if [ " $servicedir" = " " ] ; then
-		echo "Supervise Directory not specified"
+		echo "Supervise Directory not specified" 1>&2
 		usage 1
 	elif [ " $socket_path" = " " ] ; then
-		echo "socket path not specified"
+		echo "socket path not specified" 1>&2
 		usage 1
 	elif [ " $thread_count" = " " ] ; then
-		echo "Thread Count not specified"
+		echo "Thread Count not specified" 1>&2
 		usage 1
 	elif [ " $timeout" = " " ] ; then
-		echo "Listen Timeout not specified"
+		echo "Listen Timeout not specified" 1>&2
 		usage 1
 	elif [ " $mysql_host" = " " ] ; then
-		echo "MySQL Host not specified"
+		echo "MySQL Host not specified" 1>&2
 		usage 1
 	elif [ " $mysql_user" = " " ] ; then
-		echo "MySQL User not specified"
+		echo "MySQL User not specified" 1>&2
 		usage 1
 	elif [ " $mysql_pass" = " " ] ; then
-		echo "MySQL Passwd not specified"
+		echo "MySQL Passwd not specified" 1>&2
 		usage 1
 	elif [ " $mysql_port" = " " -a " $mysql_socket" = " " ] ; then
-		echo "MySQL Port/Socket not specified"
+		echo "MySQL Port/Socket not specified" 1>&2
 		usage 1
 	fi
 	echo "Creating pwdLookup Daemon on socket $socket_path, Service $servicedir, Threads $thread_count"
@@ -5909,7 +5918,7 @@ case $option in
 
 	20)
 	if [ " $servicedir" = " " ] ; then
-		echo "Supervise Directory not specified"
+		echo "Supervise Directory not specified" 1>&2
 		usage 1
 	fi
 	dump_config "$servicedir" "$cntrldir"
@@ -5917,7 +5926,7 @@ case $option in
 
 	21)
 	if [ " $servicedir" = " " ] ; then
-		echo "Supervise Directory not specified"
+		echo "Supervise Directory not specified" 1>&2
 		usage 1
 	fi
 	create_greylist "$servicedir" "$grey_port" "$min_resend_min" " $resend_win_hr" "$timeout_days" "$context_file" "$save_interval" "$hash_size" "$whitelist" "$use_greydaemon"
@@ -5925,10 +5934,10 @@ case $option in
 
 	*)
 	if [ " $option" = " " ] ; then
-		echo "No Options Provided"
+		echo "No Options Provided" 1>&2
 		read key
 	else
-		echo "Invalid Option [$option]"
+		echo "Invalid Option [$option]" 1>&2
 	fi
 	prog_args=""
 	;;
