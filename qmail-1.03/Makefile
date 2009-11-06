@@ -581,11 +581,9 @@ dot-qmail.5
 	nroff -man dot-qmail.5 > dot-qmail.0
 
 dot-qmail.5: \
-dot-qmail.9 conf-break conf-spawn
+dot-qmail.9 conf-break
 	cat dot-qmail.9 \
-	| sed s}QMAIL}"`head -1 conf-qmail`"}g \
 	| sed s}BREAK}"`head -1 conf-break`"}g \
-	| sed s}SPAWN}"`head -1 conf-spawn`"}g \
 	> dot-qmail.5
 
 elq: \
@@ -1490,11 +1488,9 @@ qmail-control.5
 	nroff -man qmail-control.5 > qmail-control.0
 
 qmail-control.5: \
-qmail-control.9 conf-break conf-spawn
+qmail-control.9 conf-qmail
 	cat qmail-control.9 \
 	| sed s}QMAIL}"`head -1 conf-qmail`"}g \
-	| sed s}BREAK}"`head -1 conf-break`"}g \
-	| sed s}SPAWN}"`head -1 conf-spawn`"}g \
 	> qmail-control.5
 
 qmail-getpw: \
@@ -1508,11 +1504,9 @@ qmail-getpw.8
 	nroff -man qmail-getpw.8 > qmail-getpw.0
 
 qmail-getpw.8: \
-qmail-getpw.9 conf-break conf-spawn
+qmail-getpw.9 conf-break
 	cat qmail-getpw.9 \
-	| sed s}QMAIL}"`head -1 conf-qmail`"}g \
 	| sed s}BREAK}"`head -1 conf-break`"}g \
-	| sed s}SPAWN}"`head -1 conf-spawn`"}g \
 	> qmail-getpw.8
 
 qmail-getpw.o: \
@@ -1575,10 +1569,8 @@ qmail-limits.7
 	nroff -man qmail-limits.7 > qmail-limits.0
 
 qmail-limits.7: \
-qmail-limits.9 conf-break conf-spawn
+qmail-limits.9 conf-spawn
 	cat qmail-limits.9 \
-	| sed s}QMAIL}"`head -1 conf-qmail`"}g \
-	| sed s}BREAK}"`head -1 conf-break`"}g \
 	| sed s}SPAWN}"`head -1 conf-spawn`"}g \
 	> qmail-limits.7
 
@@ -1646,11 +1638,9 @@ qmail-newmrh.8
 	nroff -man qmail-newmrh.8 > qmail-newmrh.0
 
 qmail-newmrh.8: \
-qmail-newmrh.9 conf-break conf-spawn
+qmail-newmrh.9 conf-qmail
 	cat qmail-newmrh.9 \
 	| sed s}QMAIL}"`head -1 conf-qmail`"}g \
-	| sed s}BREAK}"`head -1 conf-break`"}g \
-	| sed s}SPAWN}"`head -1 conf-spawn`"}g \
 	> qmail-newmrh.8
 
 qmail-newmrh.o: \
