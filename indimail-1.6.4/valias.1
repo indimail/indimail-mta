@@ -26,13 +26,19 @@ Set Verbose mode
 Show aliases (domain_name needs to be given)
 .TP
 \fB\-d\fR \fIalias_line\fR
-Delete alias line corresponding to alias_line
+Delete alias line corresponding to \fIalias_line\fR
 .TP
 \fB\-i\fR \fIalias_line\fR
-Insert new alias line
+Insert new alias line. An alias line has one of the 3 forms. See \fBdot-qmail(5)\fR for more details.
+
+.EX
+ 1. &\fIemail\fR       - Forward mails to \fIemail\fR
+ 2. Maildir      - copy mails to a Maildir with path \fIMaildir\fR
+ 3. | Command    - pipe the mail through command \fICommand\fR
+.EE
 .TP
 \fB\-u\fR \fIold_alias_line\fR \fB\-i\fR \fInew_alias_line\fR
-Change an existing alias_line
+Change an existing alias line
 .TP
 \fB\-m\fR
 Ignore requirement of email_address to be local (option for clustered domain only)
@@ -44,4 +50,4 @@ Should point to an existing deliverable address on the host where valias is exec
 0 in   case of success, 1 in case of any failure.
 
 .SH "SEE ALSO"
-vcalias(8), vgroup(1), vdelivermail(8), vrenamedomain(1), vreorg(8)
+dot-qmail(5), vcalias(8), vgroup(1), vdelivermail(8), vrenamedomain(1), vreorg(8)

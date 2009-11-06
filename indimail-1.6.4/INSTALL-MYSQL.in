@@ -13,8 +13,9 @@
        the system to connect to MySQL using a password.
 
     ##### STEP 1  ## MySQL Startup ##################
-    Create Supervise Directory for starting MySQL. If you already have a running MySQL server and
-    want to continue to have MySQL started through the system boot scripts, proceed to
+    Create Supervise Directory for starting MySQL. If you already have a running MySQL
+    server and want to continue to have MySQL started through the system boot scripts,
+    proceed to
     ##### STEP 2 ##### below
 
     However if you want to run MySQL under supervise. You will have to disable startup of MySQL

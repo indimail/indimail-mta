@@ -70,7 +70,14 @@ being run (option valid for clustered domain only)
 Options for an Existing Group
 .TP
 \fB\-i\fR \fIaliasLine\fR
-Insert aliasLine in the group. See valias for more details
+Insert alias line \fIaliasLine\fR in the group. An alias line has one of the 3 forms.
+See \fBdot-qmail(5)\fR for more details.
+
+.EX
+ 1. &\fIemail\fR       - Forward mails to \fIemail\fR
+ 2. Maildir      - copy mails to a Maildir with path \fIMaildir\fR
+ 3. | Command    - pipe the mail through command \fICommand\fR
+.EE
 .TP
 \fB\-d\fR \fIaliasLine\fR
 delete aliasLine from the group. See valias for more details
@@ -83,4 +90,4 @@ Modify oldaliasLine to newaliasLine alias in the group. See valias for more deta
 diagnostic message is printed.
 
 .SH "SEE ALSO"
-valias(1), vcalias(8), vadduser(1), vdelivermail(8), vrenamedomain(1), vreorg(8)
+dot-qmail(5), valias(1), vcalias(8), vadduser(1), vdelivermail(8), vrenamedomain(1), vreorg(8)
