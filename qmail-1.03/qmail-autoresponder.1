@@ -89,10 +89,14 @@ replaces occurrences of the following special characters in the \fImessagefile\f
  - Can use links in the rate-limiting data directory to limit inode
    usage to a single inode.
  - Inserts Auto-Submitted, In-Reply-To and References headers as per
-   RFC 3834. The value of Auto-Submitted headers is set to 'auto-replied'.
+   RFC 3834. The value of Auto-Submitted headers is set to
+   'auto-replied'.
    In-Reply-To and References headers are set to the Message ID in the
    original mail (if present).
  - Can insert header fields from the original mail into the
    autoresponse if special characters are inserted in the
    \fImessagefile\fR.
  - RFC 3834 compliant
+
+.SH SEE ALSO
+vacation(8), vmoduser(1), vdelivermail(8), dot-qmail(5)
