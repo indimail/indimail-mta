@@ -1,5 +1,8 @@
 /*
  * $Log: error_stack.c,v $
+ * Revision 2.4  2009-11-08 00:53:11+05:30  Cprogrammer
+ * added missing declaration for non stdarg.h system
+ *
  * Revision 2.3  2009-02-18 21:25:01+05:30  Cprogrammer
  * check return value of vasprintf for error
  *
@@ -20,7 +23,7 @@
 #include "error_stack.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: error_stack.c,v 2.3 2009-02-18 21:25:01+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: error_stack.c,v 2.4 2009-11-08 00:53:11+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 void
@@ -50,6 +53,7 @@ va_dcl
 {
 #ifndef HAVE_STDARG_H
 	char           *fmt;
+	FILE           *ferr;
 #endif
 	va_list         ap;
 	int             len, i;
