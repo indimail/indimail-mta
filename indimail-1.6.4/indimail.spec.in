@@ -1,5 +1,8 @@
 #
 # $Log: indimail.spec.in,v $
+# Revision 2.102  2009-11-08 00:50:32+05:30  Cprogrammer
+# added sq_vacation program
+#
 # Revision 2.101  2009-11-06 10:23:39+05:30  Cprogrammer
 # use higher softlimit for memory on 64 bit systems
 #
@@ -315,7 +318,7 @@
 # rpm spec file for indimail
 #
 #
-# $Id: indimail.spec.in,v 2.101 2009-11-06 10:23:39+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 2.102 2009-11-08 00:50:32+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %define _unpackaged_files_terminate_build 1
 
@@ -1448,6 +1451,7 @@ fi
 %attr(555,root,qmail)                   %{_prefix}/bin/tai64nlocal
 %attr(555,root,qmail)                   %{_prefix}/bin/valias
 %attr(555,root,qmail)                   %{_prefix}/bin/vproxy
+%attr(4555,root,qmail)                  %{_prefix}/libexec/sq_vacation
 %if %nocourierimap == 0
 # courier imap
 %attr(555,root,root)                    %{_prefix}/bin/maildirkw

@@ -4,6 +4,8 @@ SUBDIRS=@subdir_list@
 COFLAGS=-z+05:30
 ACLOCAL_AMFLAGS=-I m4
 
+DEFS=@DEFS@ -I. -Ieps-1.2 @auth_inc@ 
+
 INSTALL_PROGRAM = ${INSTALL}          -c
 install_sh_PROGRAM = $(install_sh)    -c
 INSTALL_SCRIPT = ${INSTALL}           -c
@@ -13,6 +15,7 @@ INSTALL_STRIP_PROGRAM = $(install_sh) -c $(STRIP_OPT)
 libindimaildir=@libdir@
 indimailbindir=@prefix@/bin
 indimailsbindir=@prefix@/sbin
+indimaillibexecdir=@prefix@/libexec
 indimailauthlibdir=@prefix@/libexec/authlib
 iauthdir=@libdir@
 
@@ -44,7 +47,7 @@ man_MANS=vadduser.1 adminclient.8 chowkidar.8 clearopensmtp.8 dbinfo.8 hostcntrl
 setuid_list = ../sbin/systpass vdeldomain vadddomain vadduser vdeluser \
 			  vaddaliasdomain vrenamedomain vrenameuser vbulletin vdominfo \
 			  printdir vuserinfo ../sbin/vreorg vsetuserquota vmoduser \
-			  vmoveuser
+			  vmoveuser ../libexec/sq_vacation
 
 doc_list= 37rules.pdf ChangeLog COPYING CREDITS FAQ.pdf fhs-2.3.txt.gz HOWTO.bogofilter \
 	HOWTO.sharedmaildir INSTALL.indimail IndiMail.pdf percenthack.shtml README.indimail \
@@ -140,6 +143,8 @@ indimailsbin_PROGRAMS = adminclient chowkidar cindimail clearopensmtp config_set
 	copyemail execmysql hostsync indisrvr initsvc inlookup inquerytest install_tables \
 	ipchange mail_report mgmtpass osh postdel systpass testmra updatefile updaterules \
 	vchkpass vsetpass vdelivermail vdeloldusers vfilter vfstab vmoddomain vreorg
+
+indimaillibexec_PROGRAMS = sq_vacation
 
 indimailauthlib_PROGRAMS = authindi
 
@@ -297,6 +302,9 @@ adminclient_SOURCES = adminclient.c
 adminclient_LDADD = @auth_libs@ tls.o auth_admin.o adminCmmd.o
 adminclient_DEPENDENCIES = tls.lo auth_admin.lo adminCmmd.lo
 
+sq_vacation_SOURCES = sq_vacation.c
+sq_vacation_LDADD = @auth_libs@
+
 vpriv_SOURCES = vpriv.c 
 vpriv_LDADD = @auth_libs@
 
@@ -373,8 +381,6 @@ install_tables_LDADD = @auth_libs@
 indiversion_SOURCE = indiversion.c
 indiversion_LDADD = @auth_libs@
 indiversion_DEPENDENCIES = indimail_settings.o
-
-DEFS=-I. -Ieps-1.2 @auth_inc@ 
 
 addaliasdomain.lo: indimail.h config.h
 add_control.lo: indimail.h config.h
