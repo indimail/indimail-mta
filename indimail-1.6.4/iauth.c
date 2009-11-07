@@ -1,5 +1,8 @@
 /*
  * $Log: iauth.c,v $
+ * Revision 2.6  2009-11-08 00:49:11+05:30  Cprogrammer
+ * PASSWD_CACHE renamed to QUERY_CACHE
+ *
  * Revision 2.5  2009-10-14 20:43:07+05:30  Cprogrammer
  * check return status of parse_quota()
  *
@@ -67,7 +70,7 @@
 static int      defaultTask(char *, char *, struct passwd *, char *);
 
 #ifndef lint
-static char     sccsid[] = "$Id: iauth.c,v 2.5 2009-10-14 20:43:07+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: iauth.c,v 2.6 2009-11-08 00:49:11+05:30 Cprogrammer Exp mbhangui $";
 #endif
 /*
 #define iauth ltdl_module_LTX_iauth
@@ -86,10 +89,10 @@ getEnvConfigStr(char **source, char *envname, char *defaultValue)
 void
 close_connection()
 {
-#ifdef PASSWD_CACHE
-	if (!getenv("PASSWD_CACHE"))
+#ifdef QUERY_CACHE
+	if (!getenv("QUERY_CACHE"))
 		vclose();
-#else /*- Not PASSWD_CACHE */
+#else /*- Not QUERY_CACHE */
 	vclose();
 #endif
 }
@@ -118,8 +121,8 @@ i_auth(char *email, char *service, int *size, int debug)
 	/*- crypt("pass", "kk"); -*/
 	if (debug)
 		fprintf(stderr, "authenticate.so: opening MySQL connection\n");
-#ifdef PASSWD_CACHE
-	if (!getenv("PASSWD_CACHE"))
+#ifdef QUERY_CACHE
+	if (!getenv("QUERY_CACHE"))
 	{
 #ifdef CLUSTERED_SITE
 		if (vauthOpen_user(email))
@@ -136,8 +139,8 @@ i_auth(char *email, char *service, int *size, int debug)
 #endif
 		return ((char *) 0);
 #endif
-#ifdef PASSWD_CACHE
-	if (getenv("PASSWD_CACHE"))
+#ifdef QUERY_CACHE
+	if (getenv("QUERY_CACHE"))
 	{
 		if (debug)
 			fprintf(stderr, "authenticate.so: doing inquery\n");
