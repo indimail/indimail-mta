@@ -1,5 +1,8 @@
 /*
  * $Log: sq_vacation.c,v $
+ * Revision 2.3  2009-11-09 08:35:00+05:30  Cprogrammer
+ * added definitions for default MySQL connections
+ *
  * Revision 2.2  2009-11-08 02:34:38+05:30  Cprogrammer
  * removed stray debug statement
  *
@@ -48,7 +51,21 @@
 #define ALIAS_QUERY  5
 #define LPWD_QUERY   6
 #define DOMAIN_QUERY 7
-#endif
+
+#define MYSQL_HOST              "localhost"
+#define MYSQL_USER              "indimail"
+#define MYSQL_PASSWD            "ssh-1.5-"
+#define MYSQL_VPORT             "3306"
+#define MYSQL_SOCKET            "/tmp/mysql.sock"
+#define CNTRL_HOST              "localhost"
+#define MASTER_HOST             "localhost"
+#define CNTRL_USER              "indimail"
+#define CNTRL_PASSWD            "ssh-1.5-"
+#define CNTRL_VPORT             "3306"
+#define CNTRL_SOCKET            "/tmp/mysql.sock"
+#define CNTRL_DATABASE          "indimail"
+#define CNTRL_DEFAULT_TABLE     "hostcntrl"
+#endif /* INDIMAILH_H */
 
 /*- Exit status */
 #define ERR_OK          0       /*- no error */
@@ -73,7 +90,7 @@
 #define ERR_UNEXPECTED  126     /*- other unexpected error */
 
 #ifndef lint
-static char     sccsid[] = "$Id: sq_vacation.c,v 2.2 2009-11-08 02:34:38+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: sq_vacation.c,v 2.3 2009-11-09 08:35:00+05:30 Cprogrammer Exp mbhangui $";
 #endif
 #ifndef INDIMAILH_H
 int             vauthOpen_user(char *);
