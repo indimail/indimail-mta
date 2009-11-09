@@ -1,5 +1,8 @@
 #!/bin/sh
 # $Log: create_services.in,v $
+# Revision 2.26  2009-11-09 21:22:28+05:30  Cprogrammer
+# added service creation for port 587
+#
 # Revision 2.25  2009-10-28 13:24:35+05:30  Cprogrammer
 # use greydaemon instead of qmail-greyd
 #
@@ -94,7 +97,7 @@ indimaildir=@indimaildir@
 # End USER Configuration OPTIONS
 #
 
-# $Id: create_services.in,v 2.25 2009-10-28 13:24:35+05:30 Cprogrammer Exp mbhangui $
+# $Id: create_services.in,v 2.26 2009-11-09 21:22:28+05:30 Cprogrammer Exp mbhangui $
 
 usage()
 {
@@ -230,10 +233,12 @@ else
 fi
 if [ $nobogofilter -eq 0 ] ; then
 	if [ $noclamav -eq 0 ] ; then
-		for port in 465 25
+		for port in 465 25 587
 		do
 		if [ $port -eq 465 ] ; then
 			e_opt="--skipsend --ssl $extra_opt"
+		elif [ $port -eq 587 ] ; then
+			e_opt="--skipsend --authsmtp --antispoof $extra_opt"
 		else
 			e_opt="$extra_opt"
 		fi
@@ -251,10 +256,12 @@ if [ $nobogofilter -eq 0 ] ; then
 			$e_opt
 		done
 	else
-		for port in 465 25
+		for port in 465 25 587
 		do
 		if [ $port -eq 465 ] ; then
 			e_opt="--skipsend --ssl $extra_opt"
+		elif [ $port -eq 587 ] ; then
+			e_opt="--skipsend --authsmtp --antispoof $extra_opt"
 		else
 			e_opt="$extra_opt"
 		fi
@@ -273,10 +280,12 @@ if [ $nobogofilter -eq 0 ] ; then
 	fi
 else
 	if [ $noclamav -eq 0 ] ; then
-		for port in 465 25
+		for port in 465 25 587
 		do
 		if [ $port -eq 465 ] ; then
 			e_opt="--skipsend --ssl $extra_opt"
+		elif [ $port -eq 587 ] ; then
+			e_opt="--skipsend --authsmtp --antispoof $extra_opt"
 		else
 			e_opt="$extra_opt"
 		fi
@@ -293,10 +302,12 @@ else
 			$e_opt
 		done
 	else
-		for port in 465 25
+		for port in 465 25 587
 		do
 		if [ $port -eq 465 ] ; then
 			e_opt="--skipsend --ssl $extra_opt"
+		elif [ $port -eq 587 ] ; then
+			e_opt="--skipsend --authsmtp --antispoof $extra_opt"
 		else
 			e_opt="$extra_opt"
 		fi
