@@ -1,5 +1,8 @@
 /*
  * $Log: sq_vacation.c,v $
+ * Revision 2.4  2009-11-09 10:43:23+05:30  Cprogrammer
+ * removed BUFF_SIZE definition
+ *
  * Revision 2.3  2009-11-09 08:35:00+05:30  Cprogrammer
  * added definitions for default MySQL connections
  *
@@ -39,7 +42,6 @@
 #define INDIMAILDIR "/var/indimail"
 #define INDIMAIL_QMAIL_MODE     0644
 #define DEFAULT_DOMAIN "indimail.org"
-#define BUFF_SIZE               300
 #define AUTH_SIZE               300
 
 #define USER_QUERY   1
@@ -90,7 +92,7 @@
 #define ERR_UNEXPECTED  126     /*- other unexpected error */
 
 #ifndef lint
-static char     sccsid[] = "$Id: sq_vacation.c,v 2.3 2009-11-09 08:35:00+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: sq_vacation.c,v 2.4 2009-11-09 10:43:23+05:30 Cprogrammer Exp mbhangui $";
 #endif
 #ifndef INDIMAILH_H
 int             vauthOpen_user(char *);
