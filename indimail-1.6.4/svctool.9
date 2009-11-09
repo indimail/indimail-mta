@@ -13,7 +13,8 @@ svctool \- IndiMail Service Configuration Tool
 
 \fBsvctool\fR is a shell frontend for configuring IndiMail services, configuring
 \fBIndiMail(7)\fR, taking backups of configuration and data. All services are configured to
-run under \fBsupervise(8)\fR. \fBsupervise\fR itself gets started by \fBsvscan(8)\fR.
+run under \fBsupervise(8)\fR. \fBsupervise(8)\fR itself gets started by \fBsvscan(8)\fR. You
+can install \fBsvscan(8)\fR to be started by the system using the command \fBinitsvc(1)\fR.
 
 .EX
 Known values for options are:
@@ -438,4 +439,4 @@ Known values for options are:
 \fBsvctool\fR returns non-zero status on error.
 
 .SH "SEE ALSO"
-IndiMail(7), svscan(8), svstat(8), svc(8), supervise(8)
+IndiMail(7), initsvc(1), svscan(8), svstat(8), svc(8), supervise(8)

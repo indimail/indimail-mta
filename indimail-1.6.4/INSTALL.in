@@ -593,10 +593,10 @@ the installation.
     If you want to have a message submission port (587) for users to submit outgoing mails
     you can create the Message Submission Port. Note the additional --skip-send option which
     creates a service without delivery process. Mails will be processed by delivery process
-    created above.
+    created above. The message submission port will enforce authenticated SMTP.
 
     % sudo @indimaildir@/sbin/svctool --smtp=587 --servicedir=/service --qbase=/home/queue \
-        --qcount=5 --qstart=1 \
+        --qcount=5 --qstart=1 --authsmtp --antispoof \
         --cntrldir=control --localip=0 --maxdaemons=150 --maxperip=25 --persistdb \
         --starttls --fsync --syncdir --memory=52428800 --chkrecipient --chkrelay --masquerade \
         --min-free=52428800 --content-filter --virus-filter \
