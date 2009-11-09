@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-multi.c,v $
+ * Revision 1.44  2009-11-09 20:32:39+05:30  Cprogrammer
+ * Use control file queue_base to process multiple indimail queues
+ *
  * Revision 1.43  2009-10-31 14:32:58+05:30  Cprogrammer
  * skip spam filtering for authenticated users
  *
@@ -446,7 +449,7 @@ qmail_multi(int argc, char **argv)
 	char           *(qqargs[]) = { "bin/qmail-queue", 0 };
 	char           *ptr, *queue_count_ptr, *queue_start_ptr, *qbase;
 	int             qcount, qstart;
-	static stralloc Queuedir = {0};
+	static stralloc Queuedir = {0}, QueueBase = {0};
 
 	if (!(ptr = env_get("QUEUEDIR")))
 	{
@@ -459,7 +462,20 @@ qmail_multi(int argc, char **argv)
 		else
 			scan_int(queue_start_ptr, &qstart);
 		if (!(qbase = env_get("QUEUE_BASE")))
-			qbase = auto_qmail;
+		{
+			switch (control_readfile(&QueueBase, "queue_base", 0))
+			{
+			case -1:
+				_exit(55);
+				break;
+			case 0:
+				qbase = auto_qmail;
+				break;
+			case 1:
+				qbase = QueueBase.s;
+				break;
+			}
+		}
 		queueNo = (now() % qcount) + qstart;
 		if (!stralloc_copys(&Queuedir, "QUEUEDIR="))
 			_exit(51);
@@ -644,6 +660,6 @@ discard_envelope()
 void
 getversion_qmail_multi_c()
 {
-	static char    *x = "$Id: qmail-multi.c,v 1.43 2009-10-31 14:32:58+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: qmail-multi.c,v 1.44 2009-11-09 20:32:39+05:30 Cprogrammer Exp mbhangui $";
 	x++;
 }
