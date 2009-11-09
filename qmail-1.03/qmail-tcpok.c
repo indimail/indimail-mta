@@ -1,7 +1,7 @@
 /*
  * $Log: qmail-tcpok.c,v $
- * Revision 1.21  2009-11-09 16:53:42+05:30  Cprogrammer
- * use control file queue_base to process multiple indimail queues
+ * Revision 1.21  2009-11-09 19:55:18+05:30  Cprogrammer
+ * Use control file queue_base to process multiple indimail queues
  *
  * Revision 1.20  2009-09-08 13:33:12+05:30  Cprogrammer
  * define default value for QUEUE_COUNT
@@ -127,11 +127,21 @@ main()
 #ifndef INDIMAIL
 	if (chdir(auto_qmail))
 		die_home();
-	if (control_readfile(&QueueBase, "queue_base", 0) != 1)
-		die_control();
-	qbase = QueueBase.s;
-	if (!qbase && !(qbase = env_get("QUEUE_BASE")))
-		qbase = auto_qmail;
+	if (!(qbase = env_get("QUEUE_BASE")))
+	{
+		switch (control_readfile(&QueueBase, "queue_base", 0))
+		{
+		case -1:
+			die_control();
+			break;
+		case 0:
+			qbase = auto_qmail;
+			break;
+		case 1:
+			qbase = QueueBase.s;
+			break;
+		}
+	}
 	if (chdir(qbase) == -1)
 		strerr_die4sys(111, FATAL, "unable to chdir to ", qbase, ": ");
 	if (!queuedir && !(queuedir = env_get("QUEUEDIR")))
@@ -180,11 +190,21 @@ main(int argc, char **argv)
 
 	if (chdir(auto_qmail))
 		die_home();
-	if (control_readfile(&QueueBase, "queue_base", 0) != 1)
-		die_control();
-	qbase = QueueBase.s;
-	if (!qbase && !(qbase = env_get("QUEUE_BASE")))
-		qbase = auto_qmail;
+	if (!(qbase = env_get("QUEUE_BASE")))
+	{
+		switch (control_readfile(&QueueBase, "queue_base", 0))
+		{
+		case -1:
+			die_control();
+			break;
+		case 0:
+			qbase = auto_qmail;
+			break;
+		case 1:
+			qbase = QueueBase.s;
+			break;
+		}
+	}
 	if (!(queue_count_ptr = env_get("QUEUE_COUNT")))
 		qcount = QUEUE_COUNT;
 	else
@@ -234,7 +254,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_tcpok_c()
 {
-	static char    *x = "$Id: qmail-tcpok.c,v 1.21 2009-11-09 16:53:42+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-tcpok.c,v 1.21 2009-11-09 19:55:18+05:30 Cprogrammer Exp mbhangui $";
 
 #ifdef INDIMAIL
 	x = sccsidh;

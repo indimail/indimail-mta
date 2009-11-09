@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-daemon.c,v $
+ * Revision 1.17  2009-11-09 20:33:24+05:30  Cprogrammer
+ * Use control file queue_base to process multiple indimail queues
+ *
  * Revision 1.16  2009-02-01 00:06:55+05:30  Cprogrammer
  * display system error when unable to switch directory
  *
@@ -56,6 +59,7 @@
 #include <string.h>
 #include "substdio.h"
 #include "error.h"
+#include "control.h"
 #include "fmt.h"
 #include "env.h"
 #include "scan.h"
@@ -248,7 +252,7 @@ start_send(char **argv, int qstart, int qcount)
 	char           *qbase;
 	char            strnum[FMT_ULONG];
 	int             i, j, child, nqueue;
-	static stralloc queuedir = { 0 };
+	static stralloc queuedir = {0}, QueueBase = {0};
 
 	if (argv[1])
 		qlargs[1] = argv[1];
@@ -263,7 +267,21 @@ start_send(char **argv, int qstart, int qcount)
 			pid_table[i].pid = -1;
 	}
 	if (!(qbase = env_get("QUEUE_BASE")))
-		qbase = auto_qmail;
+	{
+		switch (control_readfile(&QueueBase, "queue_base", 0))
+		{
+		case -1:
+			logerrf("alert: unable to read control file qbase\n");
+			_exit(111);
+			break;
+		case 0:
+			qbase = auto_qmail;
+			break;
+		case 1:
+			qbase = QueueBase.s;
+			break;
+		}
+	}
 	my_log("qmail-daemon: qStart/qCount ");
 	strnum[fmt_ulong(strnum, qstart)] = 0;
 	my_log(strnum);
@@ -486,7 +504,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_daemon_c()
 {
-	static char    *x = "$Id: qmail-daemon.c,v 1.16 2009-02-01 00:06:55+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: qmail-daemon.c,v 1.17 2009-11-09 20:33:24+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

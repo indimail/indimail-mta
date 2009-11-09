@@ -1,5 +1,8 @@
 /*
  * $Log: spawn-filter.c,v $
+ * Revision 1.49  2009-11-09 20:32:52+05:30  Cprogrammer
+ * Use control file queue_base to process multiple indimail queues
+ *
  * Revision 1.48  2009-09-08 13:22:28+05:30  Cprogrammer
  * removed dependency of INDIMAIL on spam filtering
  *
@@ -203,6 +206,7 @@ static stralloc spp = { 0 };
 struct constmap mapspf;
 struct constmap mapspp;
 static int      remotE;
+stralloc        QueueBase = { 0 };
 
 static void
 report(int errCode, char *s1, char *s2, char *s3, char *s4, char *s5, char *s6)
@@ -587,7 +591,20 @@ redirect_mail(char *recipient)
 		 * caught by spamfilter :)
 		 */
 		if (!(qbase = env_get("QUEUE_BASE")))
-			qbase = auto_qmail;
+		{
+			switch (control_readfile(&QueueBase, "queue_base", 0))
+			{
+			case -1:
+				report(111, "spawn-filter: Unable to read qbase: ", error_str(errno), ". (#4.3.0)", 0, 0, 0);
+				break;
+			case 0:
+				qbase = auto_qmail;
+				break;
+			case 1:
+				qbase = QueueBase.s;
+				break;
+			}
+		}
 		if (!env_unset("SPAMFILTER") || !env_unset("QMAILQUEUE") || !env_unset("QUEUEDIR") || !env_unset("FILTERARGS"))
 			report(111, "spawn-filter: out of mem: ", error_str(errno), ". (#4.3.0)", 0, 0, 0);
 		if (!stralloc_copys(&Queuedir, "QUEUEDIR="))
@@ -887,7 +904,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_spawn_filter_c()
 {
-	static char    *x = "$Id: spawn-filter.c,v 1.48 2009-09-08 13:22:28+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: spawn-filter.c,v 1.49 2009-11-09 20:32:52+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
