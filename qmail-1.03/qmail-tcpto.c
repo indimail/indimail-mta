@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-tcpto.c,v $
+ * Revision 1.19  2009-11-09 16:53:46+05:30  Cprogrammer
+ * use control file queue_base to process multiple indimail queues
+ *
  * Revision 1.18  2009-09-08 13:33:28+05:30  Cprogrammer
  * define default value for QUEUE_COUNT
  *
@@ -83,6 +86,7 @@ die(n)
 	int             n;
 {
 	substdio_flush(subfderr);
+	substdio_flush(subfdout);
 #ifdef INDIMAIL
 	if (n)
 		_exit(n);
@@ -136,26 +140,49 @@ die_read()
 	die(111);
 }
 
+void
+die_home()
+{
+	substdio_puts(subfderr, "Unable to switch to home directory.\n");
+	die(111);
+}
+
+void
+die_control()
+{
+	substdio_puts(subfderr, "fatal: unable to read controls\n");
+	die(111);
+}
+
 char            tcpto_buf[TCPTO_BUFSIZ];
 char            tmp[FMT_ULONG + IPFMT];
+char           *qbase;
+stralloc        QueueBase = { 0 };
 
-int
 #ifdef INDIMAIL
+int
 main_function()
 #else
+int
 main()
 #endif
 {
 	int             fdlock, fd, r, i, af;
-	char           *record, *qbase;
+	char           *record;
 	union v46addr   ip;
 	datetime_sec    when, start;
 
-	if (!(qbase = env_get("QUEUE_BASE")))
+#ifndef INDIMAIL
+	if (chdir(auto_qmail))
+		die_home();
+	if (control_readfile(&QueueBase, "queue_base", 0) != 1)
+		die_control();
+	qbase = QueueBase.s;
+	if (!qbase && !(qbase = env_get("QUEUE_BASE")))
 		qbase = auto_qmail;
 	if (chdir(qbase) == -1)
 		die_chdir(qbase);
-#ifndef INDIMAIL
+	if (!queuedir && !(queuedir = env_get("QUEUEDIR")))
 		queuedir = "queue";
 #endif
 	if (chdir(queuedir) == -1)
@@ -234,24 +261,36 @@ die_nomem()
 	die(111);
 }
 
+void
+outok(s)
+	char           *s;
+{
+	substdio_puts(subfdout, s);
+}
+
 int
 main(int argc, char **argv)
 {
-	char           *queue_count_ptr, *queue_start_ptr, *qbase;
+	char           *queue_count_ptr, *queue_start_ptr;
 	char            strnum[FMT_ULONG];
 	int             idx, count, qcount, qstart;
 	static stralloc Queuedir = { 0 };
 
-	if(!(queue_count_ptr = env_get("QUEUE_COUNT")))
+	if (chdir(auto_qmail))
+		die_home();
+	if (control_readfile(&QueueBase, "queue_base", 0) != 1)
+		die_control();
+	qbase = QueueBase.s;
+	if (!qbase && !(qbase = env_get("QUEUE_BASE")))
+		qbase = auto_qmail;
+	if (!(queue_count_ptr = env_get("QUEUE_COUNT")))
 		qcount = QUEUE_COUNT;
 	else
 		scan_int(queue_count_ptr, &qcount);
-	if(!(queue_start_ptr = env_get("QUEUE_START")))
+	if (!(queue_start_ptr = env_get("QUEUE_START")))
 		qstart = 1;
 	else
 		scan_int(queue_start_ptr, &qstart);
-	if (!(qbase = env_get("QUEUE_BASE")))
-		qbase = auto_qmail;
 	for (idx = qstart, count=1; count <= qcount; count++, idx++)
 	{
 		if (!stralloc_copys(&Queuedir, qbase))
@@ -265,6 +304,9 @@ main(int argc, char **argv)
 		if (access(Queuedir.s, F_OK))
 			break;
 		queuedir = Queuedir.s;
+		outok("processing queue ");
+		outok(queuedir);
+		outok("\n");
 		main_function();
 	}
 	if (!stralloc_copys(&Queuedir, qbase))
@@ -276,8 +318,13 @@ main(int argc, char **argv)
 	if (!access(Queuedir.s, F_OK))
 	{
 		queuedir = Queuedir.s;
+		outok("processing queue ");
+		outok(queuedir);
+		outok("\n");
 		main_function();
 	}
+	die(0);
+	/*- Not reached */
 	return(0);
 }
 #endif
@@ -285,7 +332,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_tcpto_c()
 {
-	static char    *x = "$Id: qmail-tcpto.c,v 1.18 2009-09-08 13:33:28+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: qmail-tcpto.c,v 1.19 2009-11-09 16:53:46+05:30 Cprogrammer Exp mbhangui $";
 
 #ifdef INDIMAIL
 	x = sccsidh;
