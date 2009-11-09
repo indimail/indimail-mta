@@ -2222,16 +2222,21 @@ hasindimail.h conf-mime conf-sync conf-batv
 	./compile $(inc_deps) `grep -h -v "^#" conf-mime conf-sync conf-batv` qmail-send.c
 
 qmail-daemon: \
-load qmail-daemon.o scan_ulong.o envread.o env.o fmt_str.o fmt_strn.o fmt_ulong.o auto_qmail.o \
-alloc.o alloc_re.o error.o open_write.o str.a lock_exnb.o sig_catch.o \
+load qmail-daemon.o scan_ulong.o envread.o env.o \
+control.o fmt_str.o fmt_strn.o fmt_ulong.o auto_qmail.o \
+byte_chr.o byte_cr.o open_read.o alloc.o alloc_re.o error.o open_write.o \
+getln.o getln2.o variables.o str.a lock_exnb.o sig_catch.o \
 error_str.o sig_block.o wait_pid.o substdio.a stralloc.a
-	./load qmail-daemon scan_ulong.o envread.o env.o fmt_str.o fmt_strn.o fmt_ulong.o auto_qmail.o \
-	alloc.o alloc_re.o error.o str.a open_write.o lock_exnb.o sig_catch.o \
+	./load qmail-daemon scan_ulong.o envread.o env.o \
+	control.o fmt_str.o fmt_strn.o fmt_ulong.o auto_qmail.o \
+	open_read.o alloc.o alloc_re.o error.o str.a open_write.o \
+	byte_chr.o byte_cr.o getln.o getln2.o variables.o \
+	lock_exnb.o sig_catch.o \
 	error_str.o sig_block.o wait_pid.o substdio.a stralloc.a
 
 qmail-daemon.o: \
 compile qmail-daemon.c substdio.h error.h fmt.h env.h sig.h open.h lock.h alloc.h \
-wait.h auto_qmail.h scan.h stralloc.h str.h conf-queue
+control.h wait.h auto_qmail.h scan.h stralloc.h str.h conf-queue
 	if test -f conf-queue ; then \
 	./compile -DQUEUE_COUNT=`cat conf-queue` qmail-daemon.c; \
 	else \
