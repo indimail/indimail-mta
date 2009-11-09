@@ -1,5 +1,8 @@
 #
 # $Log: indimail.spec.in,v $
+# Revision 2.103  2009-11-09 21:23:27+05:30  Cprogrammer
+# added service creation for port 587
+#
 # Revision 2.102  2009-11-08 00:50:32+05:30  Cprogrammer
 # added sq_vacation program
 #
@@ -318,7 +321,7 @@
 # rpm spec file for indimail
 #
 #
-# $Id: indimail.spec.in,v 2.102 2009-11-08 00:50:32+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 2.103 2009-11-09 21:23:27+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %define _unpackaged_files_terminate_build 1
 
@@ -2024,10 +2027,12 @@ fi
 %endif
 if [ %nobogofilter -eq 0 ] ; then
 	if [ %noclamav -eq 0 ] ; then
-		for port in 465 25
+		for port in 465 25 587
 		do
 		if [ $port -eq 465 ] ; then
 			extra_opt="--skipsend --ssl"
+		elif [ $port -eq 587 ] ; then
+			extra_opt="--skipsend --authsmtp --antispoof"
 		else
 			extra_opt=""
 		fi
@@ -2044,10 +2049,12 @@ if [ %nobogofilter -eq 0 ] ; then
 			--rbl="-rzen.spamhaus.org -rdnsbl-1.uceprotect.net" $extra_opt
 		done
 	else
-		for port in 465 25
+		for port in 465 25 587
 		do
 		if [ $port -eq 465 ] ; then
 			extra_opt="--skipsend --ssl"
+		elif [ $port -eq 587 ] ; then
+			extra_opt="--skipsend --authsmtp --antispoof"
 		else
 			extra_opt=""
 		fi
@@ -2065,10 +2072,12 @@ if [ %nobogofilter -eq 0 ] ; then
 	fi
 else
 	if [ %noclamav -eq 0 ] ; then
-		for port in 465 25
+		for port in 465 25 587
 		do
 		if [ $port -eq 465 ] ; then
 			extra_opt="--skipsend --ssl"
+		elif [ $port -eq 587 ] ; then
+			extra_opt="--skipsend --authsmtp --antispoof"
 		else
 			extra_opt=""
 		fi
@@ -2083,10 +2092,12 @@ else
 			--rbl="-rzen.spamhaus.org -rdnsbl-1.uceprotect.net" $extra_opt
 		done
 	else
-		for port in 465 25
+		for port in 465 25 587
 		do
 		if [ $port -eq 465 ] ; then
 			extra_opt="--skipsend --ssl"
+		elif [ $port -eq 587 ] ; then
+			extra_opt="--skipsend --authsmtp --antispoof"
 		else
 			extra_opt=""
 		fi
@@ -2378,7 +2389,8 @@ echo "removing startup services"
 for i in clamd fetchmail freshclam indisrvr.4000 inlookup.infifo mysql.3306 \
 pwdlookup qmail-imapd.143 qmail-imapd-ssl.993 qmail-pop3d.110 qmail-pop3d-ssl.995 \
 qmail-send.25 qmail-smtpd.25 qmail-smtpd.366 qmail-spamlog qscanq qmail-imapd.4143 \
-qmail-pop3d.4110 qmail-send.465 qmail-smtpd.465 qmail-poppass.106 greylist.1999 .svscan
+qmail-pop3d.4110 qmail-smtpd.465 qmail-smtpd.587 qmail-poppass.106 \
+greylist.1999 .svscan
 do
 	if [ -d %{servicedir}/$i ] ; then
 		%{__rm} -rf %{servicedir}/$i || true
