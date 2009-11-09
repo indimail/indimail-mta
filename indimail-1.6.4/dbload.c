@@ -1,5 +1,8 @@
 /*
  * $Log: dbload.c,v $
+ * Revision 2.14  2009-11-09 08:34:13+05:30  Cprogrammer
+ * use set_mysql_options() to set mysql options before connecting to MDA MySQL db
+ *
  * Revision 2.13  2009-03-13 20:13:03+05:30  Cprogrammer
  * added field last_error to dbinfo
  *
@@ -53,7 +56,7 @@
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: dbload.c,v 2.13 2009-03-13 20:13:03+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: dbload.c,v 2.14 2009-11-09 08:34:13+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #include <unistd.h>
@@ -221,6 +224,11 @@ connect_db(DBINFO **ptr, MYSQL **mysqlptr)
 	{
 		fprintf(stderr, "MYSQL Init Error: %s@%s\n", (*ptr)->database, (*ptr)->server);
 		return (1);
+	}
+	if (set_mysql_options(*mysqlptr, "indimail.cnf", "indimail"))
+	{
+		fprintf(stderr, "mysql_options: Invalid options in MySQL options file\n");
+		return(-1);
 	}
 	if (islocalif((*ptr)->server) || !strncmp((*ptr)->server, "localhost", 10))
 		server = "localhost";
