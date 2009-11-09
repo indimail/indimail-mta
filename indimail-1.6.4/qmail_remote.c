@@ -1,5 +1,8 @@
 /*
  * $Log: qmail_remote.c,v $
+ * Revision 2.9  2009-11-09 10:42:50+05:30  Cprogrammer
+ * changed BUFF_SIZE to MAX_BUFF
+ *
  * Revision 2.8  2008-07-13 19:46:41+05:30  Cprogrammer
  * use ERESTART only if available
  * 64 bit compilation
@@ -47,7 +50,7 @@
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: qmail_remote.c,v 2.8 2008-07-13 19:46:41+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: qmail_remote.c,v 2.9 2009-11-09 10:42:50+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #include <stdlib.h>
@@ -71,7 +74,7 @@ qmail_remote(char *user, char *domain)
 	pid_t           pid;
 	char           *ptr, *qmaildir, *binqqargs[7];
 	char            recipient[AUTH_SIZE], mail_size[28];
-	char            bin0[BUFF_SIZE];
+	char            bin0[MAX_BUFF];
 
 	if (pipe(pim1) == -1)
 		return (-2);
@@ -92,7 +95,7 @@ qmail_remote(char *user, char *domain)
 		if (dup2(1, 2) == -1)
 			exit(111);
 		getEnvConfigStr(&qmaildir, "QMAILDIR", QMAILDIR);
-		snprintf(bin0, BUFF_SIZE, "%s/bin/qmail-remote", qmaildir);
+		snprintf(bin0, MAX_BUFF, "%s/bin/qmail-remote", qmaildir);
 		binqqargs[0] = "qmail-remote";
 		binqqargs[1] = domain;
 		getEnvConfigStr(&ptr, "SENDER", "");

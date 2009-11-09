@@ -1,5 +1,8 @@
 /*
  * $Log: deliver_mail.c,v $
+ * Revision 2.50  2009-11-09 10:42:37+05:30  Cprogrammer
+ * changed BUFF_SIZE to MAX_BUFF
+ *
  * Revision 2.49  2009-10-14 20:42:24+05:30  Cprogrammer
  * check return status of parse_quota()
  *
@@ -172,7 +175,7 @@
 #endif
 
 #ifndef	lint
-static char     sccsid[] = "$Id: deliver_mail.c,v 2.49 2009-10-14 20:42:24+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: deliver_mail.c,v 2.50 2009-11-09 10:42:37+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 /*- Function Prototypes */
@@ -250,7 +253,7 @@ qmail_inject_open(char *address, int *write_fd)
 	char           *mta;
 #endif
 	char            Address[AUTH_SIZE];
-	char            bin0[BUFF_SIZE];
+	char            bin0[MAX_BUFF];
 	char           *binqqargs[6];
 
 	/*- skip over an & sign if there */
@@ -274,16 +277,16 @@ qmail_inject_open(char *address, int *write_fd)
 		getEnvConfigStr(&sender, "SENDER", "postmaster");
 #ifdef POSTFIXDIR
 		if (!(mta = getenv("MTA")))
-			snprintf(bin0, BUFF_SIZE, "%s/bin/qmail-inject", qmaildir);
+			snprintf(bin0, MAX_BUFF, "%s/bin/qmail-inject", qmaildir);
 		else
 		{
 			if (!strncmp(mta, "Postfix", 8))
-				snprintf(bin0, BUFF_SIZE, "%s/bin/sendmail", POSTFIXDIR);
+				snprintf(bin0, MAX_BUFF, "%s/bin/sendmail", POSTFIXDIR);
 			else
-				snprintf(bin0, BUFF_SIZE, "%s/bin/qmail-inject", qmaildir);
+				snprintf(bin0, MAX_BUFF, "%s/bin/qmail-inject", qmaildir);
 		}
 #else
-	snprintf(bin0, BUFF_SIZE, "%s/bin/qmail-inject", qmaildir);
+	snprintf(bin0, MAX_BUFF, "%s/bin/qmail-inject", qmaildir);
 #endif
 		binqqargs[0] = bin0;
 		binqqargs[1] = "-f";
@@ -1136,7 +1139,7 @@ is_duplicate(char *maildir)
 {
 	int             md_len, error, code, wait_status, n, pim[2];
 	long unsigned   pid;
-	char            bin0[BUFF_SIZE], buffer[BUFF_SIZE], dupfile[MAX_BUFF];
+	char            bin0[MAX_BUFF], buffer[MAX_BUFF], dupfile[MAX_BUFF];
 	char          **argv;
 	char           *ptr, *qmaildir;
 	char           *binqqargs[8];
@@ -1162,7 +1165,7 @@ is_duplicate(char *maildir)
 		if (dup2(pim[1], 1) == -1)
 			_exit(111);
 		getEnvConfigStr(&qmaildir, "QMAILDIR", QMAILDIR);
-		snprintf(bin0, BUFF_SIZE, "%s/bin/822header", qmaildir);
+		snprintf(bin0, MAX_BUFF, "%s/bin/822header", qmaildir);
 		binqqargs[0] = bin0;
 		if ((ptr = getenv("ELIMINATE_DUPS_ARGS")) && !(argv = MakeArgs(ptr)))
 		{
