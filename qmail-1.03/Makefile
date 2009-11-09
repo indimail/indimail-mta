@@ -1869,10 +1869,13 @@ auto_qmail.h control.h received.h scan.h recipients.h
 qmail-qread: \
 load qmail-qread.o fmtqfn.o readsubdir.o date822fmt.o datetime.a \
 open.a getln.a stralloc.a alloc.a substdio.a error.a str.a fs.a \
-auto_qmail.o auto_split.o envread.o str_diffn.o variables.o
+auto_qmail.o auto_split.o envread.o str_diffn.o variables.o control.o \
+stralloc_copy.o stralloc_cat.o
 	./load qmail-qread fmtqfn.o readsubdir.o date822fmt.o \
+	control.o stralloc_copy.o stralloc_cat.o str_diffn.o \
+	auto_qmail.o auto_split.o envread.o variables.o \
 	datetime.a open.a getln.a stralloc.a alloc.a substdio.a \
-	error.a str.a fs.a auto_qmail.o auto_split.o envread.o str_diffn.o variables.o
+	error.a str.a fs.a 
 
 qmail-qread.0: \
 qmail-qread.8
@@ -1887,7 +1890,7 @@ qmail-qread.9
 qmail-qread.o: \
 compile qmail-qread.c stralloc.h gen_alloc.h substdio.h subfd.h \
 fmt.h str.h getln.h fmtqfn.h readsubdir.h direntry.h \
-auto_qmail.h open.h datetime.h date822fmt.h error.h \
+control.h auto_qmail.h open.h datetime.h date822fmt.h error.h \
 scan.h exit.h env.h variables.h hasindimail.h conf-queue
 	if test -f conf-queue ; then \
 	./compile $(inc_deps) -DQUEUE_COUNT=`cat conf-queue` qmail-qread.c; \
@@ -2390,10 +2393,10 @@ compile qmail-start.c fd.h prot.h exit.h auto_uids.h qmail-todo.h
 
 qmail-tcpok: \
 load qmail-tcpok.o scan_ulong.o auto_qmail.o envread.o str_diffn.o variables.o \
-fmt_ulong.o \
+fmt_ulong.o control.o getln.o getln2.o \
 alloc.a open.a lock.a strerr.a substdio.a error.a str.a stralloc.a
 	./load qmail-tcpok scan_ulong.o auto_qmail.o envread.o \
-	str_diffn.o variables.o fmt_ulong.o \
+	str_diffn.o variables.o fmt_ulong.o control.o getln.o getln2.o \
 	open.a lock.a strerr.a substdio.a error.a str.a stralloc.a alloc.a
 
 qmail-tcpok.0: \
@@ -2403,7 +2406,7 @@ qmail-tcpok.8
 qmail-tcpok.o: \
 compile qmail-tcpok.c strerr.h substdio.h lock.h open.h \
 auto_qmail.h exit.h env.h variables.h hasindimail.h scan.h stralloc.h fmt.h \
-subfd.h conf-queue
+control.h subfd.h conf-queue
 	if test -f conf-queue ; then \
 	./compile $(inc_deps) -DQUEUE_COUNT=`cat conf-queue` qmail-tcpok.c; \
 	else \
@@ -2412,10 +2415,14 @@ subfd.h conf-queue
 
 qmail-tcpto: \
 load qmail-tcpto.o ip.o now.o auto_qmail.o \
-envread.o str_diffn.o variables.o scan_xlong.o socket_v4mappedprefix.o socket_v6any.o \
+envread.o str_diffn.o variables.o scan_xlong.o \
+control.o getln.o getln2.o \
+socket_v4mappedprefix.o socket_v6any.o \
 open.a lock.a substdio.a error.a str.a fs.a stralloc.a alloc.a
 	./load qmail-tcpto ip.o now.o auto_qmail.o envread.o \
-	str_diffn.o variables.o scan_xlong.o socket_v4mappedprefix.o socket_v6any.o \
+	str_diffn.o variables.o scan_xlong.o \
+	control.o getln.o getln2.o \
+	socket_v4mappedprefix.o socket_v6any.o \
 	open.a lock.a substdio.a error.a str.a fs.a stralloc.a alloc.a
 
 qmail-tcpto.0: \
@@ -2426,7 +2433,7 @@ qmail-tcpto.o: \
 compile qmail-tcpto.c substdio.h subfd.h auto_qmail.h \
 fmt.h ip.h lock.h error.h exit.h datetime.h now.h datetime.h env.h \
 variables.h hasindimail.h open.h byte.h scan.h stralloc.h subfd.h \
-tcpto.h ipalloc.h conf-tls conf-ip conf-queue
+control.h tcpto.h ipalloc.h conf-tls conf-ip conf-queue
 	if test -f conf-queue ; then \
 	./compile $(inc_deps) -DQUEUE_COUNT=`cat conf-queue` qmail-tcpto.c; \
 	else \
