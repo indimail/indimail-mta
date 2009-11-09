@@ -1,5 +1,8 @@
 /*
  * $Log: set_mysql_options.c,v $
+ * Revision 2.6  2009-11-09 10:43:01+05:30  Cprogrammer
+ * added comment for MYSQL_OPT_PROTOCOL enum values
+ *
  * Revision 2.5  2009-11-09 08:34:36+05:30  Cprogrammer
  * added option to set MYSQL_OPT_PROTOCOL
  *
@@ -20,7 +23,7 @@
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: set_mysql_options.c,v 2.5 2009-11-09 08:34:36+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: set_mysql_options.c,v 2.6 2009-11-09 10:43:01+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 int
@@ -61,6 +64,11 @@ set_mysql_options(MYSQL *mysql, char *file, char *group)
 	if (getenv("MYSQL_OPT_RECONNECT") &&
 			mysql_options(mysql, MYSQL_OPT_RECONNECT, opt_reconnect))
 		return (1);
+	/*-
+	 * enum mysql_protocol_type 
+	 * MYSQL_PROTOCOL_DEFAULT, MYSQL_PROTOCOL_TCP, MYSQL_PROTOCOL_SOCKET,
+	 * MYSQL_PROTOCOL_PIPE, MYSQL_PROTOCOL_MEMORY
+	 */
 	if (mysql_options(mysql, MYSQL_OPT_PROTOCOL, (char *) &protocol))
 		return (1);
 	return (0);
