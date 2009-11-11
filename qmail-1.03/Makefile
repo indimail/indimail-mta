@@ -1331,7 +1331,7 @@ qmail-rm.0 maildirdeliver.0 822header.0 \
 matchup.0 mlmatchup.0 columnt.0 xqp.0 xsender.0 xrecipient.0 \
 serialcmd.0 maildircmd.0 rewind.0 \
 maildirserial.0 serialsmtp.0 serialqmtp.0 maildirsmtp.0 \
-maildirqmtp.0 qmail-qfilter.0 \
+maildirqmtp.0 qmail-qfilter.0 queue-fix.0 \
 caldate.0 caldate_mjd.0 caltime.0 caltime_tai.0 \
 config.0 leapsecs.0 mess822_date.0 tai.0 tai_now.0 tai_pack.0 \
 iftocc.0 ofmipd.0 ofmipname.0 822field.0 new-inject.0 rewriting.0 \
@@ -1913,6 +1913,10 @@ compile qmail-qstat.c auto_qmail.h scan.h conf-queue
 qmail-qstat.0: \
 qmail-qstat.8
 	nroff -man qmail-qstat.8 > qmail-qstat.0
+
+queue-fix.0: \
+queue-fix.8
+	nroff -man queue-fix.8 > queue-fix.0
 
 qmail-multi: \
 load qmail-multi.o envread.o env.o now.o fmt_ulong.o MakeArgs.o \
