@@ -1,5 +1,8 @@
 #
 # $Log: indimail.spec.in,v $
+# Revision 2.106  2009-11-11 19:34:32+05:30  Cprogrammer
+# remove spamfiltering for port 587
+#
 # Revision 2.105  2009-11-11 09:26:17+05:30  Cprogrammer
 # removed -u option (auto udpate mode) in bogofilter invocation
 #
@@ -327,7 +330,7 @@
 # rpm spec file for indimail
 #
 #
-# $Id: indimail.spec.in,v 2.105 2009-11-11 09:26:17+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 2.106 2009-11-11 19:34:32+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %define _unpackaged_files_terminate_build 1
 
@@ -2035,22 +2038,31 @@ fi
 for port in 465 25 587
 do
 	if [ $port -eq 465 ] ; then
+		spamfilter=1
 		extra_opt="--skipsend --ssl"
 	elif [ $port -eq 587 ] ; then
+		# local authenticated users
+		# why bother with spamfilter
+		# if you do, then you have a serious
+		# problem with your organization, not 
+		# with IndiMail
+		spamfilter=0
 		extra_opt="--skipsend --authsmtp --antispoof"
 	else
-		extra_opt="--rbl=-rzen.spamhaus.org --rbl=-rdnsbl-1.uceprotect.net"
+		spamfilter=1
+		extra_opt="--remote-authsmtp=plain --localfilter --remotefilter"
+		extra_opt="$extra_opt --rbl=-rzen.spamhaus.org --rbl=-rdnsbl-1.uceprotect.net"
 	fi
-	if [ %nobogofilter -eq 0 ] ; then
+	if [ $spamfilter -eq 1 ] ; then
 		if [ %noclamav -eq 0 ] ; then
 			%{_prefix}/sbin/svctool --smtp=$port --servicedir=%{servicedir} --qbase=%{qbase} --qcount=%{qcount} --qstart=1 \
 				--cntrldir=control --localip=0 --maxdaemons=75 --maxperip=25 --persistdb \
 				--starttls --fsync --syncdir --memory=%{smtp_soft_mem} --chkrecipient --chkrelay --masquerade \
 				--min-free=52428800 --content-filter --virus-filter \
-				--qhpsi="%{_prefix}/bin/clamdscan %s --quiet --disable-summary" \
 				--spamfilter="%{_prefix}/bin/bogofilter -p -d %{_prefix}/etc" \
-				--logfilter=/tmp/spamfifo --rejectspam=0 --spamexitcode=0 --localfilter --remotefilter \
-				--remote-authsmtp=plain --dmasquerade \
+				--logfilter=/tmp/spamfifo --rejectspam=0 --spamexitcode=0 \
+				--qhpsi="%{_prefix}/bin/clamdscan %s --quiet --disable-summary" \
+				--dmasquerade \
 				--dkverify=$ver_opt \
 				--dksign=$sign_opt --private_key=%{_prefix}/control/domainkeys/indimail \
 				$extra_opt
@@ -2060,8 +2072,8 @@ do
 				--starttls --fsync --syncdir --memory=%{smtp_soft_mem} --chkrecipient --chkrelay --masquerade \
 				--min-free=52428800 --content-filter --virus-filter \
 				--spamfilter="%{_prefix}/bin/bogofilter -p -d %{_prefix}/etc" \
-				--logfilter=/tmp/spamfifo --rejectspam=0 --spamexitcode=0 --localfilter --remotefilter \
-				--remote-authsmtp=plain --dmasquerade \
+				--logfilter=/tmp/spamfifo --rejectspam=0 --spamexitcode=0 \
+				--dmasquerade \
 				--dkverify=both \
 				--dksign=both --private_key=%{_prefix}/control/domainkeys/indimail \
 				$extra_opt
@@ -2071,9 +2083,9 @@ do
 			%{_prefix}/sbin/svctool --smtp=$port --servicedir=%{servicedir} --qbase=%{qbase} --qcount=%{qcount} --qstart=1 \
 				--cntrldir=control --localip=0 --maxdaemons=75 --maxperip=25 --persistdb \
 				--starttls --fsync --syncdir --memory=%{smtp_soft_mem} --chkrecipient --chkrelay --masquerade \
-				--min-free=52428800 --content-filter --virus-filter --localfilter --remotefilter \
+				--min-free=52428800 --content-filter --virus-filter \
 				--qhpsi="%{_prefix}/bin/clamdscan %s --quiet --disable-summary" \
-				--remote-authsmtp=plain --dmasquerade \
+				--dmasquerade \
 				--dkverify=both \
 				--dksign=both --private_key=%{_prefix}/control/domainkeys/indimail \
 				$extra_opt
@@ -2081,8 +2093,8 @@ do
 			%{_prefix}/sbin/svctool --smtp=$port --servicedir=%{servicedir} --qbase=%{qbase} --qcount=%{qcount} --qstart=1 \
 				--cntrldir=control --localip=0 --maxdaemons=75 --maxperip=25 --persistdb \
 				--starttls --fsync --syncdir --memory=%{smtp_soft_mem} --chkrecipient --chkrelay --masquerade \
-				--min-free=52428800 --content-filter --virus-filter --localfilter --remotefilter \
-				--remote-authsmtp=plain --dmasquerade \
+				--min-free=52428800 --content-filter --virus-filter \
+				--dmasquerade \
 				--dkverify=both \
 				--dksign=both --private_key=%{_prefix}/control/domainkeys/indimail \
 				$extra_opt

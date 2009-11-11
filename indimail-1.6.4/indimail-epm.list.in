@@ -1,5 +1,8 @@
 #
 # $Log: indimail-epm.list.in,v $
+# Revision 2.32  2009-11-11 19:34:59+05:30  Cprogrammer
+# remove spam filtering for port 587
+#
 # Revision 2.31  2009-11-11 09:26:13+05:30  Cprogrammer
 # removed -u option (auto udpate mode) in bogofilter invocation
 #
@@ -1658,7 +1661,8 @@ do
 	elif [ $$port -eq 465 ] ; then
 		extra_opt="--skipsend --authsmtp --antispoof"
 	else
-		extra_opt="--rbl=-rzen.spamhaus.org --rbl=-rdnsbl-1.uceprotect.net"
+		extra_opt="--remote-authsmtp=plain --localfilter --remotefilter"
+		extra_opt="$extra_opt --rbl=-rzen.spamhaus.org --rbl=-rdnsbl-1.uceprotect.net"
 	fi
 	if [ $$nobogofilter -eq 0 ] ; then
 		if [ $$noclamav -eq 0 ] ; then
@@ -1668,8 +1672,8 @@ do
 				--min-free=52428800 --content-filter --virus-filter \
 				--qhpsi="${prefix}/bin/clamdscan %s --quiet --disable-summary" \
 				--spamfilter="${prefix}/bin/bogofilter -p -d ${prefix}/etc" \
-				--logfilter=/tmp/spamfifo --rejectspam=0 --spamexitcode=0 --localfilter --remotefilter \
-				--remoteauthsmtp=plain --dmasquerade \
+				--logfilter=/tmp/spamfifo --rejectspam=0 --spamexitcode=0 \
+				--dmasquerade \
 				--dkverify=$$ver_opt \
 				--dksign=$$sign_opt --private_key=${prefix}/control/domainkeys/indimail \
 				$extra_opt
@@ -1679,8 +1683,8 @@ do
 				--starttls --fsync --syncdir --memory=$$smtp_soft_mem --chkrecipient --chkrelay --masquerade \
 				--min-free=52428800 --content-filter --virus-filter \
 				--spamfilter="${prefix}/bin/bogofilter -p -d ${prefix}/etc" \
-				--logfilter=/tmp/spamfifo --rejectspam=0 --spamexitcode=0 --localfilter --remotefilter \
-				--remoteauthsmtp=plain --dmasquerade \
+				--logfilter=/tmp/spamfifo --rejectspam=0 --spamexitcode=0 \
+				--dmasquerade \
 				--dkverify=both \
 				--dksign=both --private_key=${prefix}/control/domainkeys/indimail \
 				$extra_opt
@@ -1690,9 +1694,9 @@ do
 			${prefix}/sbin/svctool --smtp=$$port --servicedir=${servicedir} --qbase=${qbase} --qcount=${qcount} --qstart=1 \
 				--cntrldir=control --localip=0 --maxdaemons=75 --maxperip=25 --persistdb \
 				--starttls --fsync --syncdir --memory=$$smtp_soft_mem --chkrecipient --chkrelay --masquerade \
-				--min-free=52428800 --content-filter --virus-filter --localfilter --remotefilter \
+				--min-free=52428800 --content-filter --virus-filter \
 				--qhpsi="${prefix}/bin/clamdscan %s --quiet --disable-summary" \
-				--remoteauthsmtp=plain --dmasquerade \
+				--dmasquerade \
 				--dkverify=both \
 				--dksign=both --private_key=${prefix}/control/domainkeys/indimail \
 				$extra_opt
@@ -1700,8 +1704,8 @@ do
 			${prefix}/sbin/svctool --smtp=$$port --servicedir=${servicedir} --qbase=${qbase} --qcount=${qcount} --qstart=1 \
 				--cntrldir=control --localip=0 --maxdaemons=75 --maxperip=25 --persistdb \
 				--starttls --fsync --syncdir --memory=$$smtp_soft_mem --chkrecipient --chkrelay --masquerade \
-				--min-free=52428800 --content-filter --virus-filter --localfilter --remotefilter \
-				--remoteauthsmtp=plain --dmasquerade \
+				--min-free=52428800 --content-filter --virus-filter \
+				--dmasquerade \
 				--dkverify=both \
 				--dksign=both --private_key=${prefix}/control/domainkeys/indimail \
 				$extra_opt
