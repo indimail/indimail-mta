@@ -1,6 +1,9 @@
 # chkconfig: 345 50 80
 # description: Starts qmail system and associated services
 # $Log: qmailctl.sh,v $
+# Revision 1.13  2009-11-11 08:33:53+05:30  Cprogrammer
+# build cdb files matching wildcards tcp*.smtp, tcp*.imap, tcp*.pop3
+#
 # Revision 1.12  2009-08-15 20:36:57+05:30  Cprogrammer
 # added poppass
 #
@@ -177,11 +180,26 @@ case "$1" in
     INDIMAILDIR=`grep -w "^indimail" /etc/passwd | cut -d: -f6|head -1`
 	for i in smtp imap pop3 poppass
 	do
-		if [ -f $INDIMAILDIR/etc/tcp.$i ] ; then
-    		QMAIL/bin/tcprules $INDIMAILDIR/etc/tcp.$i.cdb $INDIMAILDIR/etc/tcp.$i.tmp < $INDIMAILDIR/etc/tcp.$i
-    		chmod 644 $INDIMAILDIR/etc/tcp.$i.cdb
-    		echo "Reloaded $INDIMAILDIR/etc/tcp.$i.cdb"
-		fi
+		for i in `/bin/ls $INDIMAILDIR/etc/tcp*.$i 2>/dev/null`
+		do
+			if [ -f $INDIMAILDIR/etc/tcp.$i ] ; then
+    			QMAIL/bin/tcprules $INDIMAILDIR/etc/tcp.$i.cdb \
+					$INDIMAILDIR/etc/tcp.$i.tmp < $INDIMAILDIR/etc/tcp.$i
+    			chmod 644 $INDIMAILDIR/etc/tcp.$i.cdb
+				if [ $? -eq 0 ] ; then
+    				echo "Rebuilt $INDIMAILDIR/etc/tcp.$i.cdb"
+				else
+    				echo "Rebuild $INDIMAILDIR/etc/tcp.$i.cdb: failed!!"
+				fi
+			else
+				/bin/rm -f $INDIMAILDIR/etc/tcp.$i.cdb
+				if [ $? -eq 0 ] ; then
+    				echo "Deleted $INDIMAILDIR/etc/tcp.$i.cdb"
+				else
+    				echo "Delete  $INDIMAILDIR/etc/tcp.$i.cdb: failed!!"
+				fi
+			fi
+		done`
 	done
     ;;
   help)
