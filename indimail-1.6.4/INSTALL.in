@@ -591,7 +591,7 @@ the installation.
     % sudo @indimaildir@/bin/dknewkey @indimaildir@/control/domainkeys/indimail
 
     If you want to have a message submission port (587) for users to submit outgoing mails
-    you can create the Message Submission Port. Note the additional --skip-send option which
+    you can create the Message Submission Port. Note the additional --skipsend option which
     creates a service without delivery process. Mails will be processed by delivery process
     created above. The message submission port will enforce authenticated SMTP.
 
@@ -601,7 +601,7 @@ the installation.
         --starttls --fsync --syncdir --memory=104857600 --chkrecipient --chkrelay --masquerade \
         --min-free=52428800 --content-filter --virus-filter \
         --qhpsi="@indimaildir@/bin/clamdscan %s --quiet --disable-summary" \
-        --dmasquerade --skip-send \
+        --dmasquerade --skipsend \
         --dkverify=both --dksign=both --private_key=@indimaildir@/control/domainkeys/indimail
 
     NOTE: You can create a deliver process for port 587 too either by having a different --qbase
