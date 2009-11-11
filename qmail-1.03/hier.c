@@ -1,5 +1,8 @@
 /*
  * $Log: hier.c,v $
+ * Revision 1.128  2009-11-11 09:31:14+05:30  Cprogrammer
+ * added queue-fix man page
+ *
  * Revision 1.127  2009-10-19 10:13:04+05:30  Cprogrammer
  * added qmail-daemon.8
  *
@@ -931,6 +934,8 @@ hier(inst_dir)
 	c(auto_qmail_home, "man/cat8", "qmail-qread.0", auto_uido, auto_gidq, 0444);
 	c(auto_qmail_home, "man/man8", "qmail-qstat.8", auto_uido, auto_gidq, 0444);
 	c(auto_qmail_home, "man/cat8", "qmail-qstat.0", auto_uido, auto_gidq, 0444);
+	c(auto_qmail_home, "man/man8", "queue-fix.8", auto_uido, auto_gidq, 0444);
+	c(auto_qmail_home, "man/man8", "queue-fix.0", auto_uido, auto_gidq, 0444);
 	c(auto_qmail_home, "man/man8", "qmail-tcpok.8", auto_uido, auto_gidq, 0444);
 	c(auto_qmail_home, "man/cat8", "qmail-tcpok.0", auto_uido, auto_gidq, 0444);
 	c(auto_qmail_home, "man/man8", "qmail-tcpto.8", auto_uido, auto_gidq, 0444);
@@ -986,7 +991,7 @@ hier(inst_dir)
 void
 getversion_install_big_c()
 {
-	static char    *x = "$Id: hier.c,v 1.127 2009-10-19 10:13:04+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: hier.c,v 1.128 2009-11-11 09:31:14+05:30 Cprogrammer Stab mbhangui $";
 
 #ifdef INDIMAIL
 	x = sccsidh;
