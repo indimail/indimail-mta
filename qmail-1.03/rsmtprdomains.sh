@@ -1,4 +1,7 @@
 # $Log: rsmtprdomains.sh,v $
+# Revision 1.5  2009-11-11 08:34:17+05:30  Cprogrammer
+# assign X-Bogosity to spamheader_name by default
+#
 # Revision 1.4  2004-02-03 13:51:33+05:30  Cprogrammer
 # pick up spam header from bogofilter.cf
 #
@@ -21,6 +24,9 @@
 
 INDIMAILDIR=`grep -w "^indimail" /etc/passwd | cut -d: -f6|head -1`
 spamheader_name=`grep ^spam_header_name $INDIMAILDIR/etc/bogofilter.cf | cut -d= -f2`
+if [ " $spamheader_name" = " " ] ; then
+	spamheader_name = "X-Bogosity"
+fi
 awk -v spamheader_name=$spamheader_name '
   /tcpserver:|qmail-smtpd:/ {
   	if ($2 == "tcpserver:" && $3 == "pid")
