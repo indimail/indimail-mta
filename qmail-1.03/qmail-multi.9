@@ -100,7 +100,8 @@ NOTIFYSPAM is set, mails will be redirected to the recipient specified
 by the NOTIFYSPAM environment variable. If NOTIFYSPAM is not set, the recipient
 can be specified by the
 .B globalspamredirect
-control file. If both REJECTSPAM and NOTIFYSPAM is set, spam mails will
+control file. The email id in \fBglobalspamdirect\fR can be overriden by the environment
+variable \fBGLOBALSPAMREDIRECT\fR. If both REJECTSPAM and NOTIFYSPAM is set, spam mails will
 be bounced back to the sender with a copy redirected to the recipient
 specified in by the NOTIFYSPAM environment variable or the
 .B globalspamredirect
@@ -140,9 +141,9 @@ respectively.
 .B qmail-multi
 does load balancing across these N queues by doing exec of 
 .B qmail-queue
-with QUEUEDIR set as the path of one of these N queues.
-.B qmail-send
-should be used with the QUEUEDIR set appropriately to process these N queues.
+with QUEUEDIR set as the path of one of these N queues. Each of these \fBN\fR queues should be
+created using \fBqueue-fix(1)\fR program. \fBqmail-send\fR should be used with the
+\fBQUEUEDIR\fR set appropriately to process these N queues.
 
 .SH "EXIT CODES"
 .B qmail-multi
@@ -164,6 +165,7 @@ qmail-header(5),
 qmail-queue(8),
 qscanq(8),
 bogofilter(1),
+queue-fix(8),
 spawn-filter(8)
 
 .SH "AUTHORS"
