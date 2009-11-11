@@ -943,6 +943,7 @@ do
 done
 
 /usr/bin/chrpath -d %{buildroot}%{_prefix}/libexec/authlib/authindi
+/usr/bin/chrpath -d %{buildroot}%{_prefix}/libexec/sq_vacation
 
 for i in adminclient chowkidar cindimail clamd clearopensmtp copyemail execmysql \
 hostsync indisrvr inlookup inquerytest install_tables ipchange mail_report \
