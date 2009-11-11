@@ -578,7 +578,7 @@ the installation.
     % sudo @indimaildir@/sbin/svctool --smtp=25 --servicedir=/service --qbase=/home/queue \
         --qcount=5 --qstart=1 \
         --cntrldir=control --localip=0 --maxdaemons=150 --maxperip=25 --persistdb \
-        --starttls --fsync --syncdir --memory=52428800 --chkrecipient --chkrelay --masquerade \
+        --starttls --fsync --syncdir --memory=104857600 --chkrecipient --chkrelay --masquerade \
         --min-free=52428800 --content-filter --virus-filter \
         --qhpsi="@indimaildir@/bin/clamdscan %s --quiet --disable-summary" \
         --spamfilter="@indimaildir@/bin/bogofilter -p -d @indimaildir@/etc" \
@@ -598,12 +598,10 @@ the installation.
     % sudo @indimaildir@/sbin/svctool --smtp=587 --servicedir=/service --qbase=/home/queue \
         --qcount=5 --qstart=1 --authsmtp --antispoof \
         --cntrldir=control --localip=0 --maxdaemons=150 --maxperip=25 --persistdb \
-        --starttls --fsync --syncdir --memory=52428800 --chkrecipient --chkrelay --masquerade \
+        --starttls --fsync --syncdir --memory=104857600 --chkrecipient --chkrelay --masquerade \
         --min-free=52428800 --content-filter --virus-filter \
         --qhpsi="@indimaildir@/bin/clamdscan %s --quiet --disable-summary" \
-        --spamfilter="@indimaildir@/bin/bogofilter -p -d @indimaildir@/etc" \
-        --logfilter=/tmp/spamfifo --rejectspam=0 --spamexitcode=0 --localfilter --remotefilter \
-        --remote-authsmtp=plain --dmasquerade --skip-send \
+        --dmasquerade --skip-send \
         --dkverify=both --dksign=both --private_key=@indimaildir@/control/domainkeys/indimail
 
     NOTE: You can create a deliver process for port 587 too either by having a different --qbase
