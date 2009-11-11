@@ -1,4 +1,4 @@
-* Fri Oct 30 2009 mbhangui@gmail.com
+* Wed Nov 11 2009 mbhangui@gmail.com
 Release 1.6.4 Start 30/10/2009
 31/10/2009
 1.  Use RELAYCLIENT variable in qmail-multi to skip spam filter
@@ -9,6 +9,38 @@ Release 1.6.4 Start 30/10/2009
 05/11/2009
 4.  Fix mysql database creation statements in svctool
 5.  Print all errors to stderr in svctool
+06/11/2009
+6.  added --no-botstrap option in svctool for internal use
+7.  fixed svctool program arguments not getting recorded in poppass run file.
+8.  Increase softmem for supervise services on 64bit OS in indimail.spec
+9.  Fixed missing newline in .qmail file created in add_vacation.c
+07/11/2009
+10. Renamed PASSWD_CACHE to QUERY_CACHE in iauth.c
+11. Added sq_vacation program (backend for squirrelmail autoresponder plugin)
+12. Added squirrelmail autoresponder plugin.
+13. Added missing declaration in error_stack.c for non-stdarg.h system
+14. Made code more compact in filewrt.c, mysql_perror.c
+08/11/2009
+15. Added option in set_mysql_options.c to set MYSQL_OPT_PROTOCOL. One can now
+    choose TCP or UNIX socket connection to MySQL by specifying MYSQL_OPT_PROTOCOL
+    environment variable.
+09/11/2009
+16. Use set_mysql_options to set MySQL options before connecting to MDA MySQL.
+17. Added definitions for default MySQL connections in sq_vacation.c
+18. Use control file queue_base to process multiple indimail queues in
+    qmail-multi.c, qmail-qread.c, qmail-tcpok.c, qmail-tcpto.c,
+    spawn-filter.c, qmail-daemon.c
+19. Added service creation for SMTP submission port 587, enforcing
+    authenticated SMTP (extra options --authsmtp --antispoof) and no rbl
+10/11/2009
+20. Assign default header name for spamheader_name for qmailanalog scripts
+21. Fixed assigning spamheader_name rsmtp scripts
+22. --rbl option can be specified multiple times in svctool for configuring
+    multiple rbl lists
+11/11/2009
+23. Build cdb with wildcard matching tcp*.smtp, tcp*.imap, tcp*.pop3
+    (qmailctl)
+24. Removed option -u passed to bogofilter (for automated installations).
 
 * Thu Oct 29 2009 mbhangui@gmail.com
 Release 1.6.3 Start 17/10/2009
