@@ -1,5 +1,11 @@
 #
 # $Log: indimail.spec.in,v $
+# Revision 2.105  2009-11-11 09:26:17+05:30  Cprogrammer
+# removed -u option (auto udpate mode) in bogofilter invocation
+#
+# Revision 2.104  2009-11-11 08:32:03+05:30  Cprogrammer
+# moved smtp creation inside a single for loop
+#
 # Revision 2.103  2009-11-09 21:23:27+05:30  Cprogrammer
 # added service creation for port 587
 #
@@ -321,7 +327,7 @@
 # rpm spec file for indimail
 #
 #
-# $Id: indimail.spec.in,v 2.103 2009-11-09 21:23:27+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 2.105 2009-11-11 09:26:17+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %define _unpackaged_files_terminate_build 1
 
@@ -2025,93 +2031,63 @@ fi
 %define imap_pop3_mem 10485760
 %define poppass_mem   10485760
 %endif
-if [ %nobogofilter -eq 0 ] ; then
-	if [ %noclamav -eq 0 ] ; then
-		for port in 465 25 587
-		do
-		if [ $port -eq 465 ] ; then
-			extra_opt="--skipsend --ssl"
-		elif [ $port -eq 587 ] ; then
-			extra_opt="--skipsend --authsmtp --antispoof"
-		else
-			extra_opt=""
-		fi
-		%{_prefix}/sbin/svctool --smtp=$port --servicedir=%{servicedir} --qbase=%{qbase} --qcount=%{qcount} --qstart=1 \
-			--cntrldir=control --localip=0 --maxdaemons=75 --maxperip=25 --persistdb \
-			--starttls --fsync --syncdir --memory=%{smtp_soft_mem} --chkrecipient --chkrelay --masquerade \
-			--min-free=52428800 --content-filter --virus-filter \
-			--qhpsi="%{_prefix}/bin/clamdscan %s --quiet --disable-summary" \
-			--spamfilter="%{_prefix}/bin/bogofilter -p -u -d %{_prefix}/etc" \
-			--logfilter=/tmp/spamfifo --rejectspam=0 --spamexitcode=0 --localfilter --remotefilter \
-			--remote-authsmtp=plain --dmasquerade \
-			--dkverify=$ver_opt \
-			--dksign=$sign_opt --private_key=%{_prefix}/control/domainkeys/indimail \
-			--rbl="-rzen.spamhaus.org -rdnsbl-1.uceprotect.net" $extra_opt
-		done
+for port in 465 25 587
+do
+	if [ $port -eq 465 ] ; then
+		extra_opt="--skipsend --ssl"
+	elif [ $port -eq 587 ] ; then
+		extra_opt="--skipsend --authsmtp --antispoof"
 	else
-		for port in 465 25 587
-		do
-		if [ $port -eq 465 ] ; then
-			extra_opt="--skipsend --ssl"
-		elif [ $port -eq 587 ] ; then
-			extra_opt="--skipsend --authsmtp --antispoof"
-		else
-			extra_opt=""
-		fi
-		%{_prefix}/sbin/svctool --smtp=$port --servicedir=%{servicedir} --qbase=%{qbase} --qcount=%{qcount} --qstart=1 \
-			--cntrldir=control --localip=0 --maxdaemons=75 --maxperip=25 --persistdb \
-			--starttls --fsync --syncdir --memory=%{smtp_soft_mem} --chkrecipient --chkrelay --masquerade \
-			--min-free=52428800 --content-filter --virus-filter \
-			--spamfilter="%{_prefix}/bin/bogofilter -p -u -d %{_prefix}/etc" \
-			--logfilter=/tmp/spamfifo --rejectspam=0 --spamexitcode=0 --localfilter --remotefilter \
-			--remote-authsmtp=plain --dmasquerade \
-			--dkverify=both \
-			--dksign=both --private_key=%{_prefix}/control/domainkeys/indimail \
-			--rbl="-rzen.spamhaus.org -rdnsbl-1.uceprotect.net" $extra_opt
-		done
+		extra_opt="--rbl=-rzen.spamhaus.org --rbl=-rdnsbl-1.uceprotect.net"
 	fi
-else
-	if [ %noclamav -eq 0 ] ; then
-		for port in 465 25 587
-		do
-		if [ $port -eq 465 ] ; then
-			extra_opt="--skipsend --ssl"
-		elif [ $port -eq 587 ] ; then
-			extra_opt="--skipsend --authsmtp --antispoof"
+	if [ %nobogofilter -eq 0 ] ; then
+		if [ %noclamav -eq 0 ] ; then
+			%{_prefix}/sbin/svctool --smtp=$port --servicedir=%{servicedir} --qbase=%{qbase} --qcount=%{qcount} --qstart=1 \
+				--cntrldir=control --localip=0 --maxdaemons=75 --maxperip=25 --persistdb \
+				--starttls --fsync --syncdir --memory=%{smtp_soft_mem} --chkrecipient --chkrelay --masquerade \
+				--min-free=52428800 --content-filter --virus-filter \
+				--qhpsi="%{_prefix}/bin/clamdscan %s --quiet --disable-summary" \
+				--spamfilter="%{_prefix}/bin/bogofilter -p -d %{_prefix}/etc" \
+				--logfilter=/tmp/spamfifo --rejectspam=0 --spamexitcode=0 --localfilter --remotefilter \
+				--remote-authsmtp=plain --dmasquerade \
+				--dkverify=$ver_opt \
+				--dksign=$sign_opt --private_key=%{_prefix}/control/domainkeys/indimail \
+				$extra_opt
 		else
-			extra_opt=""
+			%{_prefix}/sbin/svctool --smtp=$port --servicedir=%{servicedir} --qbase=%{qbase} --qcount=%{qcount} --qstart=1 \
+				--cntrldir=control --localip=0 --maxdaemons=75 --maxperip=25 --persistdb \
+				--starttls --fsync --syncdir --memory=%{smtp_soft_mem} --chkrecipient --chkrelay --masquerade \
+				--min-free=52428800 --content-filter --virus-filter \
+				--spamfilter="%{_prefix}/bin/bogofilter -p -d %{_prefix}/etc" \
+				--logfilter=/tmp/spamfifo --rejectspam=0 --spamexitcode=0 --localfilter --remotefilter \
+				--remote-authsmtp=plain --dmasquerade \
+				--dkverify=both \
+				--dksign=both --private_key=%{_prefix}/control/domainkeys/indimail \
+				$extra_opt
 		fi
-		%{_prefix}/sbin/svctool --smtp=$port --servicedir=%{servicedir} --qbase=%{qbase} --qcount=%{qcount} --qstart=1 \
-			--cntrldir=control --localip=0 --maxdaemons=75 --maxperip=25 --persistdb \
-			--starttls --fsync --syncdir --memory=%{smtp_soft_mem} --chkrecipient --chkrelay --masquerade \
-			--min-free=52428800 --content-filter --virus-filter --localfilter --remotefilter \
-			--qhpsi="%{_prefix}/bin/clamdscan %s --quiet --disable-summary" \
-			--remote-authsmtp=plain --dmasquerade \
-			--dkverify=both \
-			--dksign=both --private_key=%{_prefix}/control/domainkeys/indimail \
-			--rbl="-rzen.spamhaus.org -rdnsbl-1.uceprotect.net" $extra_opt
-		done
 	else
-		for port in 465 25 587
-		do
-		if [ $port -eq 465 ] ; then
-			extra_opt="--skipsend --ssl"
-		elif [ $port -eq 587 ] ; then
-			extra_opt="--skipsend --authsmtp --antispoof"
+		if [ %noclamav -eq 0 ] ; then
+			%{_prefix}/sbin/svctool --smtp=$port --servicedir=%{servicedir} --qbase=%{qbase} --qcount=%{qcount} --qstart=1 \
+				--cntrldir=control --localip=0 --maxdaemons=75 --maxperip=25 --persistdb \
+				--starttls --fsync --syncdir --memory=%{smtp_soft_mem} --chkrecipient --chkrelay --masquerade \
+				--min-free=52428800 --content-filter --virus-filter --localfilter --remotefilter \
+				--qhpsi="%{_prefix}/bin/clamdscan %s --quiet --disable-summary" \
+				--remote-authsmtp=plain --dmasquerade \
+				--dkverify=both \
+				--dksign=both --private_key=%{_prefix}/control/domainkeys/indimail \
+				$extra_opt
 		else
-			extra_opt=""
+			%{_prefix}/sbin/svctool --smtp=$port --servicedir=%{servicedir} --qbase=%{qbase} --qcount=%{qcount} --qstart=1 \
+				--cntrldir=control --localip=0 --maxdaemons=75 --maxperip=25 --persistdb \
+				--starttls --fsync --syncdir --memory=%{smtp_soft_mem} --chkrecipient --chkrelay --masquerade \
+				--min-free=52428800 --content-filter --virus-filter --localfilter --remotefilter \
+				--remote-authsmtp=plain --dmasquerade \
+				--dkverify=both \
+				--dksign=both --private_key=%{_prefix}/control/domainkeys/indimail \
+				$extra_opt
 		fi
-		%{_prefix}/sbin/svctool --smtp=$port --servicedir=%{servicedir} --qbase=%{qbase} --qcount=%{qcount} --qstart=1 \
-			--cntrldir=control --localip=0 --maxdaemons=75 --maxperip=25 --persistdb \
-			--starttls --fsync --syncdir --memory=%{smtp_soft_mem} --chkrecipient --chkrelay --masquerade \
-			--min-free=52428800 --content-filter --virus-filter --localfilter --remotefilter \
-			--remote-authsmtp=plain --dmasquerade \
-			--dkverify=both \
-			--dksign=both --private_key=%{_prefix}/control/domainkeys/indimail \
-			--rbl="-rzen.spamhaus.org -rdnsbl-1.uceprotect.net" $extra_opt
-		done
 	fi
-fi
+done
 %{_prefix}/sbin/svctool --smtp=366 --odmr --servicedir=%{servicedir}
 # Greylist daemon
 %{_prefix}/sbin/svctool --greylist=1999 --servicedir=%{servicedir} --min-resend-min=2 \
@@ -2125,13 +2101,13 @@ if [ %nofetchmail -eq 0 ] ; then
 			%{_prefix}/sbin/svctool --fetchmail --servicedir=%{servicedir} --qbase=%{qbase} --qcount=%{qcount} \
 				--qstart=1 --cntrldir=control --default-domain=%{default_domain} \
 				--qhpsi="%{_prefix}/bin/clamdscan %s --quiet --disable-summary" \
-				--spamfilter="%{_prefix}/bin/bogofilter -p -u -d %{_prefix}/etc" --spamexitcode=0 \
+				--spamfilter="%{_prefix}/bin/bogofilter -p -d %{_prefix}/etc" --spamexitcode=0 \
 				--memory=%{fetchmail_mem} --fsync --syncdir \
 				--dkverify=$ver_opt
 		else
 			%{_prefix}/sbin/svctool --fetchmail --servicedir=%{servicedir} --qbase=%{qbase} --qcount=%{qcount} \
 				--qstart=1 --cntrldir=control --default-domain=%{default_domain} \
-				--spamfilter="%{_prefix}/bin/bogofilter -p -u -d %{_prefix}/etc" --spamexitcode=0 \
+				--spamfilter="%{_prefix}/bin/bogofilter -p -d %{_prefix}/etc" --spamexitcode=0 \
 				--memory=%{fetchmail_mem} --fsync --syncdir \
 				--dkverify=$ver_opt
 		fi
