@@ -559,7 +559,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_qread_c()
 {
-	static char    *x = "$Id: qmail-qread.c,v 1.18 2009-11-09 19:55:08+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-qread.c,v 1.18 2009-11-09 19:55:08+05:30 Cprogrammer Stab mbhangui $";
 
 #ifdef INDIMAIL
 	x = sccsidh;

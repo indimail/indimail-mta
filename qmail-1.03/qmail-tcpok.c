@@ -254,7 +254,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_tcpok_c()
 {
-	static char    *x = "$Id: qmail-tcpok.c,v 1.21 2009-11-09 19:55:18+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-tcpok.c,v 1.21 2009-11-09 19:55:18+05:30 Cprogrammer Stab mbhangui $";
 
 #ifdef INDIMAIL
 	x = sccsidh;

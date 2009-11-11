@@ -504,7 +504,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_daemon_c()
 {
-	static char    *x = "$Id: qmail-daemon.c,v 1.17 2009-11-09 20:33:24+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-daemon.c,v 1.17 2009-11-09 20:33:24+05:30 Cprogrammer Stab mbhangui $";
 
 	x++;
 }
