@@ -1,4 +1,7 @@
 # $Log: rspamrdomain.sh,v $
+# Revision 1.4  2009-11-11 08:35:27+05:30  Cprogrammer
+# assign X-Bogosity to spamheader_name by default
+#
 # Revision 1.3  2004-05-19 23:12:08+05:30  Cprogrammer
 # fixed qmail-smtpd line getting skipped
 #
@@ -16,6 +19,9 @@
 
 INDIMAILDIR=`grep -w "^indimail" /etc/passwd | cut -d: -f6|head -1`
 spamheader_name=`grep ^spam_header_name $INDIMAILDIR/etc/bogofilter.cf | cut -d= -f2`
+if [ " $spamheader_name" = " " ] ; then
+	spamheader_name = "X-Bogosity"
+fi
 awk -v spamheader_name=$spamheader_name '
   /qmail-local:|qmail-remote:|qmail-smtpd:/ {
 	pid = $4

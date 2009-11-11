@@ -1,4 +1,7 @@
 # $Log: rspamstat.sh,v $
+# Revision 1.4  2009-11-11 08:35:16+05:30  Cprogrammer
+# assign X-Bogosity to spamheader_name by default
+#
 # Revision 1.3  2008-05-26 22:31:51+05:30  Cprogrammer
 # removed debug statement left by mistake
 #
@@ -15,6 +18,9 @@
 
 INDIMAILDIR=`grep -w "^indimail" /etc/passwd | cut -d: -f6|head -1`
 spamheader_name=`grep ^spam_header_name $INDIMAILDIR/etc/bogofilter.cf | cut -d= -f2`
+if [ " $spamheader_name" = " " ] ; then
+	spamheader_name = "X-Bogosity"
+fi
 awk -v spamheader_name=$spamheader_name '
 	/qmail-remote:|qmail-local:|qmail-smtpd:/ {
 		if (num = index($9, "@"))
