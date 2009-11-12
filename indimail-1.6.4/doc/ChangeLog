@@ -1,46 +1,57 @@
-* Wed Nov 11 2009 mbhangui@gmail.com
+* Fri Nov 13 2009 mbhangui@gmail.com
 Release 1.6.4 Start 30/10/2009
 31/10/2009
-1.  Use RELAYCLIENT variable in qmail-multi to skip spam filter
+1.  Use RELAYCLIENT variable in qmail-multi to skip spam filter [2895710]
 03/11/2009
-2.  Unset SPAMFILTER in qmail-send variables
+2.  Unset SPAMFILTER in qmail-send variables [2895711]
 3.  Corrected indimail-epm.list to use greydaemon instead of qmail-greyd.
     debian package will now use greydaemon just like the rpm package
+    [2895727]
 05/11/2009
-4.  Fix mysql database creation statements in svctool
-5.  Print all errors to stderr in svctool
+4.  Fix mysql database creation statements in svctool [2895728]
+5.  Print all errors to stderr in svctool [2895712]
 06/11/2009
-6.  added --no-botstrap option in svctool for internal use
+6.  added --no-bootstrap option in svctool for internal use [2895714]
 7.  fixed svctool program arguments not getting recorded in poppass run file.
+    [2895732]
 8.  Increase softmem for supervise services on 64bit OS in indimail.spec
+    [2895836]
 9.  Fixed missing newline in .qmail file created in add_vacation.c
 07/11/2009
-10. Renamed PASSWD_CACHE to QUERY_CACHE in iauth.c
+10. Renamed PASSWD_CACHE to QUERY_CACHE in iauth.c [2895833]
 11. Added sq_vacation program (backend for squirrelmail autoresponder plugin)
-12. Added squirrelmail autoresponder plugin.
+    [2895715]
+12. Added squirrelmail autoresponder plugin. [2895715]
 13. Added missing declaration in error_stack.c for non-stdarg.h system
 14. Made code more compact in filewrt.c, mysql_perror.c
 08/11/2009
 15. Added option in set_mysql_options.c to set MYSQL_OPT_PROTOCOL. One can now
     choose TCP or UNIX socket connection to MySQL by specifying MYSQL_OPT_PROTOCOL
-    environment variable.
+    environment variable. [2895720]
 09/11/2009
 16. Use set_mysql_options to set MySQL options before connecting to MDA MySQL.
+    [2895720]
 17. Added definitions for default MySQL connections in sq_vacation.c
+    [2895715]
 18. Use control file queue_base to process multiple indimail queues in
     qmail-multi.c, qmail-qread.c, qmail-tcpok.c, qmail-tcpto.c,
-    spawn-filter.c, qmail-daemon.c
+    spawn-filter.c, qmail-daemon.c [2895722]
 19. Added service creation for SMTP submission port 587, enforcing
-    authenticated SMTP (extra options --authsmtp --antispoof) and no rbl
+    authenticated SMTP (extra options --authsmtp --antispoof), no rbl
+    [2895723]
 10/11/2009
 20. Assign default header name for spamheader_name for qmailanalog scripts
-21. Fixed assigning spamheader_name rsmtp scripts
-22. --rbl option can be specified multiple times in svctool for configuring
-    multiple rbl lists
+    [2895841]
+21. --rbl option can be specified multiple times in svctool for configuring
+    multiple rbl lists [2895724]
 11/11/2009
-23. Build cdb with wildcard matching tcp*.smtp, tcp*.imap, tcp*.pop3
-    (qmailctl)
-24. Removed option -u passed to bogofilter (for automated installations).
+22. Build cdb with wildcard matching tcp*.smtp, tcp*.imap, tcp*.pop3
+    (qmailctl) [2895725]
+23. Removed option -u passed to bogofilter (for rpm installations).
+    [2895737]
+24. Added man page for queue-fix.
+25. Turned off spam filtering for SMTP service on port 587 (create_services,
+    indimail.spec, indimail-epm.list
 
 * Thu Oct 29 2009 mbhangui@gmail.com
 Release 1.6.3 Start 17/10/2009
@@ -97,7 +108,7 @@ Release 1.6.2 Start 01/10/2009
     calculations
 15/10/2009
 14. Use errno == ERANGE instead of LLONG_MAX, LLONG_MIN if LLONG_MAX,
-	LLONG_MIN not defined (when checking return status of strtoll)
+    LLONG_MIN not defined (when checking return status of strtoll)
 
 * Fri Oct  2 2009 mbhangui@gmail.com
 Release 1.6.1 Start 13/09/2009

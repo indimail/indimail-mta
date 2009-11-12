@@ -575,8 +575,8 @@ the installation.
 
     The commands below will create service for the MTA (both smtp and delivery process). The
     number of queues can be adjusted by you. The commands below create 5 queues.
-    % sudo @indimaildir@/sbin/svctool --smtp=25 --servicedir=/service --qbase=/home/queue \
-        --qcount=5 --qstart=1 \
+    % sudo @indimaildir@/sbin/svctool --smtp=25 --servicedir=/service \
+        --qbase=@indimaildir@/queue --qcount=5 --qstart=1 \
         --cntrldir=control --localip=0 --maxdaemons=150 --maxperip=25 --persistdb \
         --starttls --fsync --syncdir --memory=104857600 --chkrecipient --chkrelay --masquerade \
         --min-free=52428800 --content-filter --virus-filter \
@@ -595,8 +595,8 @@ the installation.
     creates a service without delivery process. Mails will be processed by delivery process
     created above. The message submission port will enforce authenticated SMTP.
 
-    % sudo @indimaildir@/sbin/svctool --smtp=587 --servicedir=/service --qbase=/home/queue \
-        --qcount=5 --qstart=1 --authsmtp --antispoof \
+    % sudo @indimaildir@/sbin/svctool --smtp=587 --servicedir=/service \
+        --qbase=@indimaildir@/queue --qcount=5 --qstart=1 --authsmtp --antispoof \
         --cntrldir=control --localip=0 --maxdaemons=150 --maxperip=25 --persistdb \
         --starttls --fsync --syncdir --memory=104857600 --chkrecipient --chkrelay --masquerade \
         --min-free=52428800 --content-filter --virus-filter \
@@ -732,8 +732,8 @@ the installation.
     the down file when you have configured fetchmailrc file. You can use fetchmailconf
     to generate fetchmailrc file.
 
-    % sudo @indimaildir@/sbin/svctool --fetchmail --servicedir=/service --qbase=/home/queue \
-        --qcount=5 --qstart=1 \
+    % sudo @indimaildir@/sbin/svctool --fetchmail --servicedir=/service \
+        --qbase=@indimaildir@/queue --qcount=5 --qstart=1 \
         --cntrldir=control --default-domain=indimail.org \
         --qhpsi="@indimaildir@/bin/clamdscan %s --quiet --disable-summary" \
         --spamfilter="@indimaildir@/bin/bogofilter -p -d @indimaildir@/etc" --spamexitcode=0 \
@@ -789,17 +789,17 @@ the installation.
 ########### SECTION 6  ### Verfiy INSTALLATION ##########################
 6. Check your installation
 
-   % sudo @indimaildir@/sbin/svctool --check-install --servicedir=/service --qbase=/home/queue \
-       --qcount=2 --qstart=1
+   % sudo @indimaildir@/sbin/svctool --check-install --servicedir=/service \
+       --qbase=@indimaildir@/queue --qcount=2 --qstart=1
 
    NOTE: All the above svctool commands in all previous steps are in the script
    create_services. You can run this script from IndiMail's source directory to
    create all services with reasonable defaults.
 
-   sudo sh ./create_services --qbase=/home/queue --mbase=@basepath@ \
+   sudo sh ./create_services --qbase=@indimaildir@/queue --mbase=@basepath@ \
      --mysqlPrefix=@mysql_prefix@
    On Mac OS X you may run
-   sudo sh ./create_services --qbase=/home/queue --mbase=@basepath@ \
+   sudo sh ./create_services --qbase=@indimaildir@/queue --mbase=@basepath@ \
      --mysqlPrefix=@mysql_prefix@ --no-nssd
 
 ########### SECTION 7  ### Crontab Entries ##############################

@@ -4,16 +4,18 @@ DATE: @DATE@
 
 This is Release @version@ of IndiMail. The release has both source.tar.gz and RPMs
 
-With this release, IndiMail has got tested with MySQL 5.4.3-beta and no issues were
-found.
+This release comes with a autoresponder plugin for Squirrel Mail.
 
-Main focus of this release was extensive testing and bug fixes
-
-Following bugs at the tracker
+Following features at the tracker have been incorporated
 http://sourceforge.net/tracker/?group_id=230686
-have been fixed
 
-2883153, 2883154 2887071 2887721
+2895710, 2895711, 2895712, 2895714, 2895715, 2895720, 2895722, 2895723,
+2895724, 2895725
+
+Following bugs at the tracker have been fixed
+http://sourceforge.net/tracker/?group_id=230686
+
+2895727, 2895728, 2895732, 2895737
 
 This release includes the following files
 
