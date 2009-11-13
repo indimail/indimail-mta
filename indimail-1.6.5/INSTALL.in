@@ -467,14 +467,14 @@ the installation.
     % sudo chown indimail:indimail @indimaildir@/etc/wordlist.db
 
     ##### STEP 7  ##### Virus Scanner #########################
-    Install clamav MD5 930362397d30e01ba81b5f24c1046d48
+    Install clamav MD5 eaf9fccc3cc3567605a9732313652967
     current working directory /home/local/src
-    Download clamav package. The latest tested clamav package tested is clamav-0.95.2.tar.gz.
+    Download clamav package. The latest tested clamav package tested is clamav-0.95.3.tar.gz.
 
-    % wget http://downloads.sourceforge.net/clamav/clamav-0.95.2.tar.gz
-    % gunzip -c clamav-0.95.2.tar.gz | tar xf -
-    % gunzip -c indimail-@version@/patches/clamav-0.95.2.patch.gz | patch -p0
-    % cd clamav-0.95.2
+    % wget http://downloads.sourceforge.net/clamav/clamav-0.95.3.tar.gz
+    % gunzip -c clamav-0.95.3.tar.gz | tar xf -
+    % gunzip -c indimail-@version@/patches/clamav-0.95.3.patch.gz | patch -p0
+    % cd clamav-0.95.3
     % ./configure --prefix=@indimaildir@ --sysconfdir=@indimaildir@/etc \
         --with-dbdir=@indimaildir@/share/clamd \
         --libexecdir=@indimaildir@/libexec \
