@@ -270,7 +270,7 @@ do
 				--cntrldir=control --localip=0 --maxdaemons=75 --maxperip=25 --persistdb \
 				--starttls --fsync --syncdir --memory=$smtp_soft_mem --chkrecipient --chkrelay --masquerade \
 				--min-free=52428800 --content-filter --virus-filter \
-				--qhpsi="$indimaildir/bin/clamdscan %s --quiet --disable-summary" \
+				--qhpsi="$indimaildir/bin/clamdscan %s --quiet --no-summary" \
 				--spamfilter="$indimaildir/bin/bogofilter -p -d $indimaildir/etc" \
 				--logfilter=/tmp/spamfifo --rejectspam=0 --spamexitcode=0 \
 				--dmasquerade \
@@ -295,7 +295,7 @@ do
 				--cntrldir=control --localip=0 --maxdaemons=75 --maxperip=25 --persistdb \
 				--starttls --fsync --syncdir --memory=$smtp_soft_mem --chkrecipient --chkrelay --masquerade \
 				--min-free=52428800 --content-filter --virus-filter \
-				--qhpsi="$indimaildir/bin/clamdscan %s --quiet --disable-summary" \
+				--qhpsi="$indimaildir/bin/clamdscan %s --quiet --no-summary" \
 				--dmasquerade \
 				--dkverify=$ver_opt \
 				--dksign=$sign_opt --private_key=$indimaildir/control/domainkeys/indimail \
@@ -328,7 +328,7 @@ if [ $nofetchmail -eq 0 ] ; then
 		if [ $noclamav -eq 0 ] ; then
 			$dir_prefix$indimaildir/sbin/svctool --fetchmail --servicedir=$servicedir --qbase=$qbase --qcount=$qcount \
 				--qstart=1 --cntrldir=control --default-domain=indimail.org \
-				--qhpsi="$indimaildir/bin/clamdscan %s --quiet --disable-summary" \
+				--qhpsi="$indimaildir/bin/clamdscan %s --quiet --no-summary" \
 				--spamfilter="$indimaildir/bin/bogofilter -p -d $indimaildir/etc" --spamexitcode=0 \
 				--memory=$fetchmail_mem --fsync --syncdir $extra_opt
 		else
@@ -341,7 +341,7 @@ if [ $nofetchmail -eq 0 ] ; then
 		if [ $noclamav -eq 0 ] ; then
 			$dir_prefix$indimaildir/sbin/svctool --fetchmail --servicedir=$servicedir --qbase=$qbase --qcount=$qcount \
 				--qstart=1 --cntrldir=control --default-domain=indimail.org \
-				--qhpsi="$indimaildir/bin/clamdscan %s --quiet --disable-summary" \
+				--qhpsi="$indimaildir/bin/clamdscan %s --quiet --no-summary" \
 				--memory=$fetchmail_mem --fsync --syncdir $extra_opt
 		else
 			$dir_prefix$indimaildir/sbin/svctool --fetchmail --servicedir=$servicedir --qbase=$qbase --qcount=$qcount \
