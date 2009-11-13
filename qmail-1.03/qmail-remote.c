@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-remote.c,v $
+ * Revision 1.50  2009-11-12 19:29:33+05:30  Cprogrammer
+ * record the helo name if rejected (Stupid MS Exchange rejects helo domain)
+ *
  * Revision 1.49  2009-09-16 15:45:56+05:30  Cprogrammer
  * do not try next MX for permanent errors
  *
@@ -1298,6 +1301,9 @@ smtp_auth(type, use_size)
 	mailfrom(use_size);
 	return;
 }
+
+stralloc         helo_str = { 0 };
+
 void
 smtp()
 {
@@ -1358,10 +1364,18 @@ smtp()
 			code = smtpcode();
 		}
 	}
-	if (code >= 500)
-		quit("DConnected to "," but my name was rejected", 1);
 	if (code != 250)
-		quit("ZConnected to "," but my name was rejected", 0);
+	{
+		if (!stralloc_copys(&helo_str, " but my name -->"))
+			temp_nomem();
+		if (!stralloc_cat(&helo_str, &helohost))
+			temp_nomem();
+		if (!stralloc_cats(&helo_str, "<-- was rejected :("))
+			temp_nomem();
+		if (!stralloc_0(&helo_str))
+			temp_nomem();
+		quit(code >= 500 ? "DConnected to " : "ZConnected to " , helo_str.s, code >= 500 ? 1 : 0);
+	}
 	/*
 	 * go through all lines of the multi line answer until one begins
 	 * with "XXX[ -]SIZE" or we reach the last line
@@ -2002,7 +2016,7 @@ main(argc, argv)
 void
 getversion_qmail_remote_c()
 {
-	static char    *x = "$Id: qmail-remote.c,v 1.49 2009-09-16 15:45:56+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: qmail-remote.c,v 1.50 2009-11-12 19:29:33+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
