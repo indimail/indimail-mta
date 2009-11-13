@@ -1,5 +1,11 @@
 #
 # $Log: indimail.spec.in,v $
+# Revision 2.108  2009-11-13 10:50:03+05:30  Cprogrammer
+# upgraded clamav to version 0.95.3
+#
+# Revision 2.107  2009-11-12 23:29:11+05:30  Cprogrammer
+# added descriptions for virus signatures
+#
 # Revision 2.106  2009-11-11 19:34:32+05:30  Cprogrammer
 # remove spamfiltering for port 587
 #
@@ -330,7 +336,7 @@
 # rpm spec file for indimail
 #
 #
-# $Id: indimail.spec.in,v 2.106 2009-11-11 19:34:32+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 2.108 2009-11-13 10:50:03+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %define _unpackaged_files_terminate_build 1
 
@@ -368,7 +374,7 @@
 %define ucspi_version      0.88
 %define qmail_version      1.03
 %define fetchmail_version  6.3.9
-%define clamav_version     0.95.2
+%define clamav_version     0.95.3
 %define fortune_version    1.1
 %define nssd_version       1.0
 %define flash_version      0.9.4
@@ -693,7 +699,7 @@ if [ $ID -eq 0 ] ; then
 
 	/usr/bin/getent passwd indimail || /usr/sbin/useradd -r -g indimail -u 555 -d %{_prefix} indimail || true
 	if [ $? = 4 ] ; then
-		/usr/sbin/useradd -r -g indimail -d %{_prefix} indimail
+		/usr/sbin/useradd -r -g indimail -d %{_prefix} indimail -s /sbin/nologin
 	fi
 	/usr/bin/getent passwd alias    || /usr/sbin/useradd -M -g nofiles  -d %{_prefix}/alias  -s /sbin/nologin  alias || true
 	/usr/bin/getent passwd qmaild   || /usr/sbin/useradd -M -g nofiles  -d %{_prefix}        -s /sbin/nologin qmaild || true
@@ -2193,7 +2199,7 @@ fi
 
 %{__cat} <<EOF > %{_prefix}/control/signatures
 # Windows executables seen in active virii
-TVqQAAMAA
+TVqQAAMAA:
 TVpQAAIAA
 # Additional windows executable signatures not yet seen in virii
 TVpAALQAc
@@ -2206,10 +2212,10 @@ TVoIARMAA
 TVouARsAA
 TVrQAT8AA
 # .ZIPfile signature seen in SoBig.E and mydoom:
-UEsDBBQAA
-UEsDBAoAAA
+UEsDBBQAA:SoBig.e Virus
+UEsDBAoAAA:mydoom Virus
 # .GIF file found in a previous Microsoft virus making the rounds.
-R0lGODlhaAA7APcAAP///+rp6puSp6GZrDUjUUc6Zn53mFJMdbGvvVtXh2xre8bF1x8cU4yLprOy
+R0lGODlhaAA7APcAAP///+rp6puSp6GZrDUjUUc6Zn53mFJMdbGvvVtXh2xre8bF1x8cU4yLprOy:Virus in .gif files
 EOF
 %{__chown} qscand:qscand %{_prefix}/control/signatures
 

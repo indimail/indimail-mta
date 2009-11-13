@@ -1,5 +1,8 @@
 #
 # $Log: indimail-epm.list.in,v $
+# Revision 2.33  2009-11-13 10:49:56+05:30  Cprogrammer
+# clamav-0.95.3
+#
 # Revision 2.32  2009-11-11 19:34:59+05:30  Cprogrammer
 # remove spam filtering for port 587
 #
@@ -1264,21 +1267,21 @@ l 777 root root ${prefix}/lib/libcdb.so libcdb-1.0.so.0.0.0
 %ifdef !noclamavdef
 #f 755 root root ${prefix}/lib/libclamunrar_iface.la BUILDROOT${prefix}/lib/libclamunrar_iface.la
 #f 644 root root ${prefix}/lib/libclamunrar_iface.a BUILDROOT${prefix}/lib/libclamunrar_iface.a
-f 755 root root ${prefix}/lib/libclamunrar_iface.so.6.0.4 BUILDROOT${prefix}/lib/libclamunrar_iface.so.6.0.4
-l 777 root root ${prefix}/lib/libclamunrar_iface.so.6 libclamunrar_iface.so.6.0.4
-l 777 root root ${prefix}/lib/libclamunrar_iface.so libclamunrar_iface.so.6.0.4
+f 755 root root ${prefix}/lib/libclamunrar_iface.so.6.0.5 BUILDROOT${prefix}/lib/libclamunrar_iface.so.6.0.5
+l 777 root root ${prefix}/lib/libclamunrar_iface.so.6 libclamunrar_iface.so.6.0.5
+l 777 root root ${prefix}/lib/libclamunrar_iface.so libclamunrar_iface.so.6.0.5
 
 #f 755 root root ${prefix}/lib/libclamav.la BUILDROOT${prefix}/lib/libclamav.la
 #f 644 root root ${prefix}/lib/libclamav.a BUILDROOT${prefix}/lib/libclamav.a
-f 755 root root ${prefix}/lib/libclamav.so.6.0.4 BUILDROOT${prefix}/lib/libclamav.so.6.0.4
-l 777 root root ${prefix}/lib/libclamav.so.6 libclamav.so.6.0.4
-l 777 root root ${prefix}/lib/libclamav.so libclamav.so.6.0.4
+f 755 root root ${prefix}/lib/libclamav.so.6.0.5 BUILDROOT${prefix}/lib/libclamav.so.6.0.5
+l 777 root root ${prefix}/lib/libclamav.so.6 libclamav.so.6.0.5
+l 777 root root ${prefix}/lib/libclamav.so libclamav.so.6.0.5
 
 #f 755 root root ${prefix}/lib/libclamunrar.la BUILDROOT${prefix}/lib/libclamunrar.la
 #f 644 root root ${prefix}/lib/libclamunrar.a BUILDROOT${prefix}/lib/libclamunrar.a
-f 755 root root ${prefix}/lib/libclamunrar.so.6.0.4 BUILDROOT${prefix}/lib/libclamunrar.so.6.0.4
-l 777 root root ${prefix}/lib/libclamunrar.so.6 libclamunrar.so.6.0.4
-l 777 root root ${prefix}/lib/libclamunrar.so libclamunrar.so.6.0.4
+f 755 root root ${prefix}/lib/libclamunrar.so.6.0.5 BUILDROOT${prefix}/lib/libclamunrar.so.6.0.5
+l 777 root root ${prefix}/lib/libclamunrar.so.6 libclamunrar.so.6.0.5
+l 777 root root ${prefix}/lib/libclamunrar.so libclamunrar.so.6.0.5
 f 644 root root ${prefix}/lib/pkgconfig/libclamav.pc BUILDROOT${prefix}/lib/pkgconfig/libclamav.pc
 %endif
 
