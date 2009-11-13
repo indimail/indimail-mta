@@ -1,6 +1,9 @@
 # chkconfig: 345 50 80
 # description: Starts qmail system and associated services
 # $Log: qmailctl.sh,v $
+# Revision 1.14  2009-11-12 15:07:15+05:30  Cprogrammer
+# check return status of tcprules
+#
 # Revision 1.13  2009-11-11 13:33:53+05:30  Cprogrammer
 # build cdb files matching wildcards tcp*.smtp, tcp*.imap, tcp*.pop3
 #
@@ -194,8 +197,7 @@ case "$1" in
 		done
 		for j in `/bin/ls $INDIMAILDIR/etc/tcp*.$i 2>/dev/null`
 		do
-    		QMAIL/bin/tcprules $j.cdb $j.tmp < $j
-    		chmod 644 $j.cdb
+    		QMAIL/bin/tcprules $j.cdb $j.tmp < $j && /bin/chmod 644 $j.cdb
 			if [ $? -eq 0 ] ; then
     			echo "Rebuilt $j.cdb"
 			else
