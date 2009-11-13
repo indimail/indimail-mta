@@ -1,5 +1,8 @@
 /*
  * $Log: qmail.c,v $
+ * Revision 1.24  2009-11-13 23:05:29+05:30  Cprogrammer
+ * report QHPSI error when exit code is 77
+ *
  * Revision 1.23  2009-04-22 15:23:55+05:30  Cprogrammer
  * added scan.h
  *
@@ -284,6 +287,8 @@ qmail_close(qq)
 		return "Zunable to exec (#4.3.0)";
 	case 76: /*-*/
 		return "Ztemporary problem with SPAM filter (#4.3.0)";
+	case 77: /*- thanks to problem repoted by peter cheng */
+		return "Zqq unable to run QHPSI scanner (#4.3.0)";
 	case 91:
 		/*- fall through */
 	case 81:
@@ -311,7 +316,7 @@ qmail_close(qq)
 void
 getversion_qmail_c()
 {
-	static char    *x = "$Id: qmail.c,v 1.23 2009-04-22 15:23:55+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: qmail.c,v 1.24 2009-11-13 23:05:29+05:30 Cprogrammer Stab mbhangui $";
 
 	x++;
 }

@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-queue.c,v $
+ * Revision 1.44  2009-11-13 23:04:38+05:30  Cprogrammer
+ * report QHPSI error using return value 77
+ *
  * Revision 1.43  2009-09-08 13:32:57+05:30  Cprogrammer
  * compile QHPSI without INDIMAIL
  *
@@ -604,7 +607,7 @@ qhpsiprog(program)
 	} else
 	{
 		cleanup();
-		die(childrc);
+		die(77); /*- QHPSI error in qmail.c */
 	}
 	return;
 }
@@ -1019,7 +1022,7 @@ main()
 void
 getversion_qmail_queue_c()
 {
-	static char    *x = "$Id: qmail-queue.c,v 1.43 2009-09-08 13:32:57+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: qmail-queue.c,v 1.44 2009-11-13 23:04:38+05:30 Cprogrammer Stab mbhangui $";
 
 #ifdef INDIMAIL
 	x = sccsidh;
