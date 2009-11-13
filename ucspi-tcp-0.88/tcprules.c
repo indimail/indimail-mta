@@ -1,5 +1,8 @@
 /*
  * $Log: tcprules.c,v $
+ * Revision 1.5  2009-11-12 15:04:58+05:30  Cprogrammer
+ * fixed tcprules going into endless loop with lines not having allow and deny
+ *
  * Revision 1.4  2009-05-29 15:03:12+05:30  Cprogrammer
  * added code to unset env variables
  *
@@ -154,7 +157,6 @@ main(int argc, char **argv)
 			continue;
 		if (x[0] == '\n')
 			continue;
-
 		while (len)
 		{
 			ch = x[len - 1];
@@ -169,18 +171,20 @@ main(int argc, char **argv)
 			int             tmp;
 
 			tmp = byte_chr(x + colon, len - colon, ':');
+			if (colon == 0 && tmp == len)
+				strerr_die2x(111, FATAL, "Unable to find colon on non-empty line.");
 			colon += tmp;
 			if (colon == len)
-				continue;
+				break;
 			if (byte_equal(x + colon + 1, 4, "deny") || byte_equal(x + colon + 1, 5, "allow"))
 				break;
 			++colon;
 		}
 #else
 		colon = byte_chr(x, len, ':');
+#endif
 		if (colon == len)
 			continue;
-#endif
 		if (!stralloc_copyb(&address, x, colon))
 			nomem();
 		if (!stralloc_copys(&data, ""))
