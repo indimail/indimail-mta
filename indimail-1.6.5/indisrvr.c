@@ -1,5 +1,8 @@
 /*
  * $Log: indisrvr.c,v $
+ * Revision 2.39  2009-11-13 21:32:53+05:30  Cprogrammer
+ * reload cert on SIGHUP
+ *
  * Revision 2.38  2009-09-17 10:23:52+05:30  Cprogrammer
  * exit if certfile is missing
  *
@@ -142,7 +145,7 @@
 #include "indimail.h"
 
 #ifndef lint
-static char     sccsid[] = "$Id: indisrvr.c,v 2.38 2009-09-17 10:23:52+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: indisrvr.c,v 2.39 2009-11-13 21:32:53+05:30 Cprogrammer Stab mbhangui $";
 #endif
 
 #ifdef CLUSTERED_SITE
@@ -197,6 +200,7 @@ int             call_prg();
 static void     SigChild(void);
 static void     SigTerm();
 static void     SigUsr();
+static void     SigHup();
 static int      get_options(int argc, char **argv, char **, char **, int *);
 #ifdef HAVE_SSL
 void            translate(SSL *, int, int, int, unsigned int);
@@ -207,6 +211,7 @@ static char     pidFile[MAX_BUFF];
 #ifdef HAVE_SSL
 static int      usessl = 0;
 static char    *certfile;
+SSL_CTX        *ctx = (SSL_CTX *) 0;
 #endif
 
 char            tbuf[2048];
@@ -327,6 +332,46 @@ translate(SSL *ssl, int out, int clearout, int clearerr, unsigned int iotimeout)
 		}
 	}
 }
+
+SSL_CTX *
+load_certificate(char *certfile)
+{
+	SSL_CTX        *myctx = (SSL_CTX *) 0;
+
+    /* setup SSL context (load key and cert into ctx) */
+	if (!(myctx = SSL_CTX_new(SSLv23_server_method())))
+	{
+		fprintf(stderr, "SSL_CTX_new: unable to create SSL context: %s\n",
+			ERR_error_string(ERR_get_error(), 0));
+		return ((SSL_CTX *) 0);
+	}
+	/* set prefered ciphers */
+	if (getenv("SSL_CIPHER") && !SSL_CTX_set_cipher_list(myctx, getenv("SSL_CIPHER")))
+	{
+		fprintf(stderr, "SSL_CTX_set_cipher_list: unable to set cipher list: %s\n",
+			ERR_error_string(ERR_get_error(), 0));
+		SSL_CTX_free(myctx);
+		return ((SSL_CTX *) 0);
+	}
+	if (SSL_CTX_use_certificate_chain_file(myctx, certfile))
+	{
+		if (SSL_CTX_use_RSAPrivateKey_file(myctx, certfile, SSL_FILETYPE_PEM) != 1)
+		{
+			fprintf(stderr, "SSL_CTX_use_RSAPrivateKey: unable to load RSA private key: %s\n",
+				ERR_error_string(ERR_get_error(), 0));
+			SSL_CTX_free(myctx);
+			return ((SSL_CTX *) 0);
+		}
+		if (SSL_CTX_use_certificate_file(myctx, certfile, SSL_FILETYPE_PEM) != 1)
+		{
+			fprintf(stderr, "SSL_CTX_use_certificate_file: unable to load certificate: %s\n",
+			ERR_error_string(ERR_get_error(), 0));
+			SSL_CTX_free(myctx);
+			return ((SSL_CTX *) 0);
+		}
+	}
+	return (myctx);
+}
 #endif
 
 int
@@ -346,7 +391,6 @@ main(argc, argv)
 #ifdef HAVE_SSL
 	BIO            *sbio;
 	SSL            *ssl;
-	SSL_CTX        *ctx = (SSL_CTX *) 0;
 	int             pi1[2], pi2[2], pi3[2];
 #endif
 
@@ -365,39 +409,10 @@ main(argc, argv)
 			fprintf(stderr, "missing certficate: %s: %s\n", certfile, strerror(errno));
 			return (1);
 		}
-    	/* setup SSL context (load key and cert into ctx) */
+		signal(SIGHUP, SigHup);
 		SSL_library_init();
-		if (!(ctx = SSL_CTX_new(SSLv23_server_method())))
-		{
-			fprintf(stderr, "SSL_CTX_new: unable to create SSL context: %s\n",
-				ERR_error_string(ERR_get_error(), 0));
+		if (!(ctx = load_certificate(certfile)))
 			return (1);
-		}
-		/* set prefered ciphers */
-		if (getenv("SSL_CIPHER") && !SSL_CTX_set_cipher_list(ctx, getenv("SSL_CIPHER")))
-		{
-			fprintf(stderr, "SSL_CTX_set_cipher_list: unable to set cipher list: %s\n",
-				ERR_error_string(ERR_get_error(), 0));
-			SSL_CTX_free(ctx);
-			return (1);
-		}
-		if (SSL_CTX_use_certificate_chain_file(ctx, certfile))
-		{
-			if (SSL_CTX_use_RSAPrivateKey_file(ctx, certfile, SSL_FILETYPE_PEM) != 1)
-			{
-				fprintf(stderr, "SSL_CTX_use_RSAPrivateKey: unable to load RSA private key: %s\n",
-					ERR_error_string(ERR_get_error(), 0));
-				SSL_CTX_free(ctx);
-				return (1);
-			}
-			if (SSL_CTX_use_certificate_file(ctx, certfile, SSL_FILETYPE_PEM) != 1)
-			{
-				fprintf(stderr, "SSL_CTX_use_certificate_file: unable to load certificate: %s\n",
-					ERR_error_string(ERR_get_error(), 0));
-				SSL_CTX_free(ctx);
-				return (1);
-			}
-		}
 	}
 #endif
 	linger.l_onoff = 1;
@@ -831,6 +846,16 @@ SigUsr(void)
 	filewrt(3, "%d Resetting Verbose flag to %d\n", (int) getpid(), verbose ? 0 : 1);
 	verbose = (verbose ? 0 : 1);
 	signal(SIGUSR2, (void(*)()) SigUsr);
+	errno = EINTR;
+	return;
+}
+
+static void
+SigHup(void)
+{
+	filewrt(3, "%d: IndiServer received SIGHUP\n", getpid);
+	ctx = load_certificate(certfile);
+	signal(SIGHUP, (void(*)()) SigHup);
 	errno = EINTR;
 	return;
 }
