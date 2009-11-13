@@ -4,6 +4,7 @@ dist
 experiments
 packages
 rpmbuild
+clamav-*
 private
 pam-multi*
 */config.log
