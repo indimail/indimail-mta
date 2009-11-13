@@ -1,5 +1,9 @@
 /*
  * $Log: smtpd.c,v $
+ * Revision 1.133  2009-11-12 19:28:50+05:30  Cprogrammer
+ * do antispoofing in smtp_mail()
+ * bypass antispoofing if relayclient is set
+ *
  * Revision 1.132  2009-09-08 12:34:21+05:30  Cprogrammer
  * removed dependency of INDIMAIL on spam filtering
  *
@@ -534,7 +538,7 @@ int             wildmat_internal(char *, char *);
 int             ssl_rfd = -1, ssl_wfd = -1;	/*- SSL_get_Xfd() are broken */
 char           *servercert, *clientca, *clientcrl;
 #endif
-char           *revision = "$Revision: 1.132 $";
+char           *revision = "$Revision: 1.133 $";
 char           *protocol = "SMTP";
 stralloc        proto = { 0 };
 static stralloc Revision = { 0 };
@@ -3458,6 +3462,29 @@ smtp_mail(arg)
 			return;
 		}
 	}	  /*- if (env_get("CUGMAIL")) */
+	/*-
+	 * ANTISPOOFING 
+	 * Delivery to local domains
+	 * If the mailfrom is local and rcptto is local, do not allow
+	 * receipt without authentication (unless MASQUERADE is set).
+	 * (do not allow spoofing for local users)
+	 */
+	if (!relayclient && !authd && env_get("ANTISPOOFING") && addrallowed(mailfrom.s))
+	{
+		if (pop_bef_smtp(mailfrom.s)) /*- will set the variable authenticated */
+			return; /*- temp error */
+		if (authenticated != 1) /*- in case pop-bef-smtp also is negative */
+		{
+			logerr("qmail-smtpd: ");
+			logerrpid();
+			logerr(remoteip);
+			logerr(" unauthenticated local SENDER address: MAIL from <");
+			logerr(mailfrom.s);
+			logerrf(">\n");
+			out("530 authentication required for local users (#5.7.1)\r\n");
+			return;
+		}
+	}
 	if (!env_get("MASQUERADE") && authd)
 	{
 		int             at1, at2;
@@ -3774,34 +3801,6 @@ smtp_rcpt(arg)
 #endif /*- #ifdef INDIMAIL */
 	}	  /*- if (!allowed_rcpthosts) */
 #ifdef INDIMAIL
-	/*-
-	 * Delivery to local domains
-	 * If the mailfrom is local and rcptto is local, do not allow
-	 * receipt without authentication (unless MASQUERADE is set).
-	 * (do not allow spoofing for local users)
-	 */
-	if (env_get("ANTISPOOFING") && !authd && addrallowed(mailfrom.s))
-	{
-		if (!relayclient)
-		{
-			if (pop_bef_smtp(mailfrom.s))
-				return;
-			relayclient = (char *) 0;
-		} else
-		if (pop_bef_smtp(mailfrom.s))
-			return;
-		if (authenticated != 1)
-		{
-			logerr("qmail-smtpd: ");
-			logerrpid();
-			logerr(remoteip);
-			logerr(" unauthenticated local SENDER address: MAIL from <");
-			logerr(mailfrom.s);
-			logerrf(">\n");
-			out("530 authentication required for local users (#5.7.1)\r\n");
-			return;
-		}
-	}
 	/*
 	 * If rcptto is local, check status of recipients
 	 * (do not allow mail to be sent to invalid users)
@@ -5652,7 +5651,7 @@ addrrelay()
 void
 getversion_smtpd_c()
 {
-	static char    *x = "$Id: smtpd.c,v 1.132 2009-09-08 12:34:21+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: smtpd.c,v 1.133 2009-11-12 19:28:50+05:30 Cprogrammer Exp mbhangui $";
 
 #ifdef INDIMAIL
 	x = sccsidh;
