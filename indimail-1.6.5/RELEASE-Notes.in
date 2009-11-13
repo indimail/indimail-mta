@@ -4,18 +4,13 @@ DATE: @DATE@
 
 This is Release @version@ of IndiMail. The release has both source.tar.gz and RPMs
 
-This release comes with a autoresponder plugin for Squirrel Mail.
 
 Following features at the tracker have been incorporated
 http://sourceforge.net/tracker/?group_id=230686
 
-2895710, 2895711, 2895712, 2895714, 2895715, 2895720, 2895722, 2895723,
-2895724, 2895725
-
 Following bugs at the tracker have been fixed
 http://sourceforge.net/tracker/?group_id=230686
 
-2895727, 2895728, 2895732, 2895737
 
 This release includes the following files
 
@@ -46,25 +41,14 @@ repositories
 
 ChangeLog
 =========
-
-* Thu Oct 29 2009 mbhangui@gmail.com
-Release 1.6.3 Start 17/10/2009
-1.  Pass argument to rpm.init to distinguish between package removal and
-    upgrade
-2.  include_trash wrongly defined as int in count_dir.c [2883153]
-3.  Fix compilation of pam-multi on Mac OS X [2883154]
-4.  added missing argument real_domain in valias_insert.c
-5.  Allow only root/indimail user to execute vpriv
-6.  Added man page for initsvc, nssd, nssd.conf
-7.  Fixed compilation/installation problem for nssd when ARCH_LIB was not
-    defined
-8.  Added cases for mysql 3.0 in svctool [2885254]
-9.  Added cases for MySQL 5.2, 5.3, 5.4.3 in svctool [2887071]
-10. BUG - Fixed scan_ip_port in greylist.c [2887721]
-11. remove newline as end of record in greylist.c [2887721]
-12. Removed errorneous free() statements in qmail-greyd.c [2887721]
-13. Temporary fix in qmail-greyd to handle IPv6 addresses [2887721]
-14. Use --use-greydaemon in indimail.spec, create_services to handle
-    IPV6 addresses in greylisting [2887721]
-15. svctool - Restart qmail-poppass after cert creation; check certfile before
-    starting indisrvr
+* Fri Nov 13 2009 mbhangui@gmail.com
+Release 1.6.5 Start 13/11/2009
+13/11/2008
+1.  BUG - fixed tcprules going into endless loop with lines neither having
+    allow or deny lines and non-blank lines not have ':'
+2.  ANTISPOOF code implemented in MAIL FROM rather than RCPT TO
+    Turn off antispoof if relayclient is set
+3.  Record helo name when helo name is rejected by stupid mail servers like MS
+    Exchange
+4.  Check for return status of tcprules in qmailctl
+5.  Upgraded clamav to verision 0.95.3
