@@ -1,4 +1,20 @@
 * Fri Nov 13 2009 mbhangui@gmail.com
+Release 1.6.5 Start 13/11/2009
+13/11/2008
+1.  BUG - fixed tcprules going into endless loop with lines neither having
+    allow or deny lines and non-blank lines not have ':' [2897073]
+2.  ANTISPOOF code implemented in MAIL FROM rather than RCPT TO
+    Turn off antispoof if relayclient is set [2897560]
+3.  Record helo name when helo name is rejected by stupid mail servers like MS
+    Exchange
+4.  BUG - Check for return status of tcprules in qmailctl [2897564]
+5.  Reload certificate on SIGHUP in indisrvr - reported peter cheng [2897560]
+6.  If QHPSI program fails (qmail-queue.c, qmail.c), report error using return
+    value 77 [2897382]
+7.  Upgraded clamav to version 0.95.3 [2897567]
+8.  changed --disable-summary to --no-summary argument to clamdscan [2897567]
+
+* Fri Nov 13 2009 mbhangui@gmail.com
 Release 1.6.4 Start 30/10/2009
 31/10/2009
 1.  Use RELAYCLIENT variable in qmail-multi to skip spam filter [2895710]
