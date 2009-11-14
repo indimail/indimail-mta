@@ -1,5 +1,8 @@
 #
 # $Log: indimail-epm.list.in,v $
+# Revision 2.34  2009-11-14 09:21:37+05:30  Cprogrammer
+# --disable-summary changed to --no-summary
+#
 # Revision 2.33  2009-11-13 10:49:56+05:30  Cprogrammer
 # clamav-0.95.3
 #

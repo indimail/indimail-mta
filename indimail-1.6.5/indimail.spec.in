@@ -1,5 +1,8 @@
 #
 # $Log: indimail.spec.in,v $
+# Revision 2.109  2009-11-14 09:21:52+05:30  Cprogrammer
+# --disable-summary changed to --no-summary
+#
 # Revision 2.108  2009-11-13 10:50:03+05:30  Cprogrammer
 # upgraded clamav to version 0.95.3
 #
@@ -336,7 +339,7 @@
 # rpm spec file for indimail
 #
 #
-# $Id: indimail.spec.in,v 2.108 2009-11-13 10:50:03+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 2.109 2009-11-14 09:21:52+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %define _unpackaged_files_terminate_build 1
 
