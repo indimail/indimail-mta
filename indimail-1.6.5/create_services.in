@@ -1,5 +1,8 @@
 #!/bin/sh
 # $Log: create_services.in,v $
+# Revision 2.31  2009-11-15 14:37:18+05:30  Cprogrammer
+# added --query-cache, --password-cache for smtp
+#
 # Revision 2.30  2009-11-14 09:21:14+05:30  Cprogrammer
 # --disable-summary changed to --no-summmary
 #
@@ -110,7 +113,7 @@ indimaildir=@indimaildir@
 # End USER Configuration OPTIONS
 #
 
-# $Id: create_services.in,v 2.30 2009-11-14 09:21:14+05:30 Cprogrammer Exp mbhangui $
+# $Id: create_services.in,v 2.31 2009-11-15 14:37:18+05:30 Cprogrammer Exp mbhangui $
 
 usage()
 {
@@ -269,7 +272,9 @@ do
 	fi
 	if [ $nobogofilter -eq 0 ] ; then
 		if [ $noclamav -eq 0 ] ; then
-			$dir_prefix$indimaildir/sbin/svctool --smtp=$port --servicedir=$servicedir --qbase=$qbase --qcount=$qcount --qstart=1 \
+			$dir_prefix$indimaildir/sbin/svctool --smtp=$port --servicedir=$servicedir \
+				--qbase=$qbase --qcount=$qcount --qstart=1 \
+				--query-cache --passwd-cache \
 				--cntrldir=control --localip=0 --maxdaemons=75 --maxperip=25 --persistdb \
 				--starttls --fsync --syncdir --memory=$smtp_soft_mem --chkrecipient --chkrelay --masquerade \
 				--min-free=52428800 --content-filter --virus-filter \
@@ -281,7 +286,9 @@ do
 				--dksign=$sign_opt --private_key=$indimaildir/control/domainkeys/indimail \
 				$e_opt $extra_opt
 		else
-			$dir_prefix$indimaildir/sbin/svctool --smtp=$port --servicedir=$servicedir --qbase=$qbase --qcount=$qcount --qstart=1 \
+			$dir_prefix$indimaildir/sbin/svctool --smtp=$port --servicedir=$servicedir \
+				--qbase=$qbase --qcount=$qcount --qstart=1 \
+				--query-cache --passwd-cache \
 				--cntrldir=control --localip=0 --maxdaemons=75 --maxperip=25 --persistdb \
 				--starttls --fsync --syncdir --memory=$smtp_soft_mem --chkrecipient --chkrelay --masquerade \
 				--min-free=52428800 --content-filter --virus-filter \
@@ -294,7 +301,9 @@ do
 		fi
 	else
 		if [ $noclamav -eq 0 ] ; then
-			$dir_prefix$indimaildir/sbin/svctool --smtp=$port --servicedir=$servicedir --qbase=$qbase --qcount=$qcount --qstart=1 \
+			$dir_prefix$indimaildir/sbin/svctool --smtp=$port --servicedir=$servicedir
+				--qbase=$qbase --qcount=$qcount --qstart=1 \
+				--query-cache --passwd-cache \
 				--cntrldir=control --localip=0 --maxdaemons=75 --maxperip=25 --persistdb \
 				--starttls --fsync --syncdir --memory=$smtp_soft_mem --chkrecipient --chkrelay --masquerade \
 				--min-free=52428800 --content-filter --virus-filter \
@@ -304,7 +313,9 @@ do
 				--dksign=$sign_opt --private_key=$indimaildir/control/domainkeys/indimail \
 				$e_opt $extra_opt
 		else
-			$dir_prefix$indimaildir/sbin/svctool --smtp=$port --servicedir=$servicedir --qbase=$qbase --qcount=$qcount --qstart=1 \
+			$dir_prefix$indimaildir/sbin/svctool --smtp=$port --servicedir=$servicedir \
+				--qbase=$qbase --qcount=$qcount --qstart=1 \
+				--query-cache --passwd-cache \
 				--cntrldir=control --localip=0 --maxdaemons=75 --maxperip=25 --persistdb \
 				--starttls --fsync --syncdir --memory=$smtp_soft_mem --chkrecipient --chkrelay --masquerade \
 				--min-free=52428800 --content-filter --virus-filter \
@@ -387,7 +398,7 @@ $dir_prefix$indimaildir/sbin/svctool --indisrvr=4000 --servicedir=$servicedir --
 	--certfile=$indimaildir/control/servercert.pem --ssl \
 	--hardquota=52428800 --base_path=$mail_path $extra_opt
 $dir_prefix$indimaildir/sbin/svctool --inlookup=infifo --servicedir=$servicedir --cntrldir=control --threads=5 \
-	--password-cache $extra_opt
+	--query-cache --password-cache $extra_opt
 
 if [ $nonssd -eq 0 ] ; then
 	$dir_prefix$indimaildir/sbin/svctool --pwdlookup=/tmp/nssd.sock --threads=5 --timeout=-1 \

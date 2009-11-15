@@ -576,6 +576,7 @@ the installation.
     The commands below will create service for the MTA (both smtp and delivery process). The
     number of queues can be adjusted by you. The commands below create 5 queues.
     % sudo @indimaildir@/sbin/svctool --smtp=25 --servicedir=/service \
+        --query-cache --password-cache \
         --qbase=@indimaildir@/queue --qcount=5 --qstart=1 \
         --cntrldir=control --localip=0 --maxdaemons=150 --maxperip=25 --persistdb \
         --starttls --fsync --syncdir --memory=104857600 --chkrecipient --chkrelay --masquerade \
@@ -597,6 +598,7 @@ the installation.
 
     % sudo @indimaildir@/sbin/svctool --smtp=587 --servicedir=/service \
         --qbase=@indimaildir@/queue --qcount=5 --qstart=1 --authsmtp --antispoof \
+        --query-cache --password-cache \
         --cntrldir=control --localip=0 --maxdaemons=150 --maxperip=25 --persistdb \
         --starttls --fsync --syncdir --memory=104857600 --chkrecipient --chkrelay --masquerade \
         --min-free=52428800 --content-filter --virus-filter \
@@ -733,6 +735,7 @@ the installation.
     to generate fetchmailrc file.
 
     % sudo @indimaildir@/sbin/svctool --fetchmail --servicedir=/service \
+        --query-cache --password-cache \
         --qbase=@indimaildir@/queue --qcount=5 --qstart=1 \
         --cntrldir=control --default-domain=indimail.org \
         --qhpsi="@indimaildir@/bin/clamdscan %s --quiet --disable-summary" \

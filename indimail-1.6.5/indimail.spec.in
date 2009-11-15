@@ -1,5 +1,12 @@
 #
 # $Log: indimail.spec.in,v $
+# Revision 2.111  2009-11-15 14:37:43+05:30  Cprogrammer
+# added --query-cache, --password-cache for smtp
+#
+# Revision 2.110  2009-11-15 11:14:01+05:30  Cprogrammer
+# removed man3 from indimail package (aleady part of devel package)
+# added mysql-libs in Requires
+#
 # Revision 2.109  2009-11-14 09:21:52+05:30  Cprogrammer
 # --disable-summary changed to --no-summary
 #
@@ -339,7 +346,7 @@
 # rpm spec file for indimail
 #
 #
-# $Id: indimail.spec.in,v 2.109 2009-11-14 09:21:52+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 2.111 2009-11-15 14:37:43+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %define _unpackaged_files_terminate_build 1
 
@@ -536,7 +543,7 @@ Requires: pam
 # rpm -qlp some-file.rpm
 Requires: coreutils grep /bin/sh glibc openssl /usr/sbin/useradd /usr/sbin/groupadd
 Requires: /sbin/chkconfig /usr/sbin/userdel /usr/sbin/groupdel procps /usr/bin/awk
-Requires: mysql-server db4
+Requires: mysql-server mysql-libs db4
 BuildRoot: %(mktemp -ud %{_tmppath}/%{name}-%{version}-%{release}-XXXXXXX)
 #
 # IndiMail is choosy and runs on reliable OS only
@@ -577,7 +584,6 @@ locations) and tools to manage virtual domains ?
 Summary: IndiMail - Development header files and libraries
 Group: Applications/Databases
 Provides: %{name}-devel
-Requires: %{name}-shared
 
 %description devel
 This package contains the development header files and libraries
@@ -1056,15 +1062,14 @@ fi
 %dir %attr(2755,indimail,qmail)   %{_prefix}/autoturn
 %dir %attr(555,root,root)         %{_prefix}/modules
 %dir %attr(555,root,qmail)        %{_prefix}/man
-%dir %attr(555,root,qmail)        %{_prefix}/man/man5
-%dir %attr(555,root,qmail)        %{_prefix}/man/cat7
-%dir %attr(555,root,qmail)        %{_prefix}/man/man7
-%dir %attr(555,root,qmail)        %{_prefix}/man/cat8
 %dir %attr(555,root,qmail)        %{_prefix}/man/man1
-%dir %attr(555,root,qmail)        %{_prefix}/man/man8
-%dir %attr(555,root,qmail)        %{_prefix}/man/cat5
 %dir %attr(555,root,qmail)        %{_prefix}/man/cat1
-%dir %attr(555,root,qmail)        %{_prefix}/man/man3
+%dir %attr(555,root,qmail)        %{_prefix}/man/man5
+%dir %attr(555,root,qmail)        %{_prefix}/man/cat5
+%dir %attr(555,root,qmail)        %{_prefix}/man/man7
+%dir %attr(555,root,qmail)        %{_prefix}/man/cat7
+%dir %attr(555,root,qmail)        %{_prefix}/man/man8
+%dir %attr(555,root,qmail)        %{_prefix}/man/cat8
 %dir %attr(555,root,root)         %{_libdir}
 %if %nofetchmail == 0
 %dir %attr(755,root,root)         %{_prefix}/share/locale
@@ -1710,8 +1715,8 @@ fi
 
 %docdir %{_prefix}/doc
 %docdir %{_prefix}/man
-%attr(444,root,qmail)                   %{_prefix}/man/man?/*
-%attr(444,root,qmail)                   %{_prefix}/man/cat?/*
+%attr(444,root,qmail)                   %{_prefix}/man/man[1,4,5,7,8]/*
+%attr(444,root,qmail)                   %{_prefix}/man/cat[1,4,5,7,8]/*
 
 %attr(444,root,qmail)                   %{_prefix}/doc/HOWTO.sharedmaildir
 %attr(444,root,qmail)                   %{_prefix}/doc/fhs-2.3.txt.gz
@@ -1812,9 +1817,10 @@ fi
 
 %files devel
 %defattr(-, root, root, 0755)
-%doc %attr(444, root, qmail)            %{_prefix}/man/man3/*
 %dir %attr(555, root, indimail)         %{_includedir}
 %dir %attr(555, root, indimail)         %{_libdir}
+%dir %attr(555,root,qmail)              %{_prefix}/man/man3
+%doc %attr(444, root, qmail)            %{_prefix}/man/man3/*
 
 %attr(644,root,qmail)                   %{_prefix}/etc/inc_deps
 %attr(644,root,qmail)                   %{_prefix}/etc/lib_deps
@@ -2064,7 +2070,9 @@ do
 	fi
 	if [ $spamfilter -eq 1 ] ; then
 		if [ %noclamav -eq 0 ] ; then
-			%{_prefix}/sbin/svctool --smtp=$port --servicedir=%{servicedir} --qbase=%{qbase} --qcount=%{qcount} --qstart=1 \
+			%{_prefix}/sbin/svctool --smtp=$port --servicedir=%{servicedir} \
+				--qbase=%{qbase} --qcount=%{qcount} --qstart=1 \
+				--query-cache --password-cache \
 				--cntrldir=control --localip=0 --maxdaemons=75 --maxperip=25 --persistdb \
 				--starttls --fsync --syncdir --memory=%{smtp_soft_mem} --chkrecipient --chkrelay --masquerade \
 				--min-free=52428800 --content-filter --virus-filter \
@@ -2076,7 +2084,9 @@ do
 				--dksign=$sign_opt --private_key=%{_prefix}/control/domainkeys/indimail \
 				$extra_opt
 		else
-			%{_prefix}/sbin/svctool --smtp=$port --servicedir=%{servicedir} --qbase=%{qbase} --qcount=%{qcount} --qstart=1 \
+			%{_prefix}/sbin/svctool --smtp=$port --servicedir=%{servicedir} \
+				--qbase=%{qbase} --qcount=%{qcount} --qstart=1 \
+				--query-cache --password-cache \
 				--cntrldir=control --localip=0 --maxdaemons=75 --maxperip=25 --persistdb \
 				--starttls --fsync --syncdir --memory=%{smtp_soft_mem} --chkrecipient --chkrelay --masquerade \
 				--min-free=52428800 --content-filter --virus-filter \
@@ -2089,7 +2099,9 @@ do
 		fi
 	else
 		if [ %noclamav -eq 0 ] ; then
-			%{_prefix}/sbin/svctool --smtp=$port --servicedir=%{servicedir} --qbase=%{qbase} --qcount=%{qcount} --qstart=1 \
+			%{_prefix}/sbin/svctool --smtp=$port --servicedir=%{servicedir} \
+				--qbase=%{qbase} --qcount=%{qcount} --qstart=1 \
+				--query-cache --password-cache \
 				--cntrldir=control --localip=0 --maxdaemons=75 --maxperip=25 --persistdb \
 				--starttls --fsync --syncdir --memory=%{smtp_soft_mem} --chkrecipient --chkrelay --masquerade \
 				--min-free=52428800 --content-filter --virus-filter \
@@ -2099,7 +2111,9 @@ do
 				--dksign=both --private_key=%{_prefix}/control/domainkeys/indimail \
 				$extra_opt
 		else
-			%{_prefix}/sbin/svctool --smtp=$port --servicedir=%{servicedir} --qbase=%{qbase} --qcount=%{qcount} --qstart=1 \
+			%{_prefix}/sbin/svctool --smtp=$port --servicedir=%{servicedir} \
+				--qbase=%{qbase} --qcount=%{qcount} --qstart=1 \
+				--query-cache --password-cache \
 				--cntrldir=control --localip=0 --maxdaemons=75 --maxperip=25 --persistdb \
 				--starttls --fsync --syncdir --memory=%{smtp_soft_mem} --chkrecipient --chkrelay --masquerade \
 				--min-free=52428800 --content-filter --virus-filter \
@@ -2182,7 +2196,7 @@ fi
     --certfile=%{_prefix}/control/servercert.pem --ssl \
 	--hardquota=52428800 --base_path=%{mbase}
 %{_prefix}/sbin/svctool --inlookup=infifo --servicedir=%{servicedir} --cntrldir=control --threads=5 \
-	--password-cache
+	--query-cache --password-cache
 %{_prefix}/sbin/svctool --pwdlookup=/tmp/nssd.sock --threads=5 --timeout=-1 \
 	--mysqlhost=localhost --mysqluser=indimail \
 	--mysqlpass=ssh-1.5- --mysqlsocket=/tmp/mysql.sock --servicedir=%{servicedir}
