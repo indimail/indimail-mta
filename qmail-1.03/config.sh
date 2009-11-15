@@ -3,7 +3,11 @@
 if read host
 then
 	echo Your hostname is "$host".
-	./dnsfq "$host" | tr '[A-Z]' '[a-z]' |
+	if [ -x QMAIL/bin/dnsfq ] ; then
+		QMAIL/bin/dnsfq "$host" | tr '[A-Z]' '[a-z]' |
+	else
+		./dnsfq "$host" | tr '[A-Z]' '[a-z]' |
+	fi
 	(
 	if read fqdn
 	then
@@ -34,14 +38,26 @@ then
 		: > QMAIL/control/locals
 		chmod 644 QMAIL/control/locals
 		(
-			./dnsip "$fqdn"
-			./ipmeprint | awk '{print $3}'
+			if [ -x QMAIL/bin/dnsip ] ; then
+				QMAIL/bin/dnsip "$fqdn"
+			else
+				./dnsip "$fqdn"
+			fi
+			if [ -x QMAIL/bbin/ipmeprint ] ; then
+				QMAIL/bin/ipmeprint | awk '{print $3}'
+			else
+				./ipmeprint | awk '{print $3}'
+			fi
 		) | sort -u |
 		(
 			while read localip
 			do
 				echo "$localip: " | tr -d '\012'
-				./dnsptr "$localip" 2>/dev/null |
+				if [ -x QMAIL/bin/dnsptr ] ; then
+					QMAIL/bin/dnsptr "$localip" 2>/dev/null |
+				else
+					./dnsptr "$localip" 2>/dev/null |
+				fi
 				(
 					if read local
 					then
