@@ -219,6 +219,8 @@ If a command is prefixed with the '#' sign, it means that it was run using root.
     # dscl . create /Users/indimail PrimaryGroupID 555
     # dscl . create /Users/indimail UserShell /bin/bash
     # dscl . create /Users/indimail RealName indimail
+    # defaults write /Library/Preferences/com.apple.loginwindow HiddenUsersList \
+        -array-add indimail alias qmaild qmaill qmailp qmailq qmailr qmails qscand
     # exit
 
     RedHat and other linux systems place useradd and groupadd in
@@ -351,7 +353,14 @@ the installation.
     indimail:indimail, change conf-users or conf-groups in qmail-1.03 subdirectory
 
     % make -s [DESTDIR=staging_directory]
-    % sudo make -s [install-strip DESTDIR=staging_directory]
+
+    Run the following command to create all default users
+
+    % sudo sh ./svctool --config=users --nolog
+    Once you have created all users required by IndiMail you can
+    continue the make below
+
+    % sudo make -s install-strip [DESTDIR=staging_directory]
     % cd ..
 
     You can omit DESTDIR=staging_directory if you do not have a running indimail system or
