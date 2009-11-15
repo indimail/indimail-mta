@@ -1,10 +1,10 @@
 /*
  * $Log: vchkpass.c,v $
- * Revision 2.32  2009-11-15 10:30:33+05:30  Cprogrammer
- * vauthOpen_user was not called for extended domains
+ * Revision 2.32  2009-11-15 12:26:53+05:30  Cprogrammer
+ * reorganized code for better readability
  *
  * Revision 2.31  2009-09-23 15:00:24+05:30  Cprogrammer
- * chane for new runcmmd
+ * change for new runcmmd
  *
  * Revision 2.30  2009-04-17 21:00:09+05:30  Cprogrammer
  * log database error
@@ -110,7 +110,7 @@
 #include <errno.h>
 
 #ifndef lint
-static char     sccsid[] = "$Id: vchkpass.c,v 2.32 2009-11-15 10:30:33+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: vchkpass.c,v 2.32 2009-11-15 12:26:53+05:30 Cprogrammer Exp mbhangui $";
 #endif
 #ifdef AUTH_SIZE
 #undef AUTH_SIZE
@@ -170,14 +170,18 @@ main(int argc, char **argv)
 	if (count == offset || (count + 1) == offset)
 		_exit(2);
 	response = tmpbuf + count + 1; /*- response */
+	for (cptr = user, ptr = login;*ptr && *ptr != '@';*cptr++ = *ptr++);
+	*cptr = 0;
+	if (*ptr)
+		ptr++;
+	else
+		getEnvConfigStr(&ptr, "DEFAULT_DOMAIN", DEFAULT_DOMAIN);
+	for (cptr = domain;*ptr;*cptr++ = *ptr++);
+	*cptr = 0;
 #ifdef QUERY_CACHE
 	if (!getenv("QUERY_CACHE"))
 	{
-#ifdef CLUSTERED_SITE
-		if (vauthOpen_user(login))
-#else
 		if (vauth_open((char *) 0))
-#endif
 		{
 			if (userNotFound)
 				pipe_exec(argv, tmpbuf, offset);
@@ -187,7 +191,10 @@ main(int argc, char **argv)
 			fflush(stdout);
 			_exit (111);
 		}
-	}
+		pw = vauth_getpw(user, domain);
+		vclose();
+	} else
+		pw = inquery(PWD_QUERY, login, 0);
 #else
 #ifdef CLUSTERED_SITE
 	if (vauthOpen_user(login))
@@ -203,27 +210,7 @@ main(int argc, char **argv)
 		fflush(stdout);
 		_exit (111);
 	}
-#endif
-	for (cptr = user, ptr = login;*ptr && *ptr != '@';*cptr++ = *ptr++);
-	*cptr = 0;
-	if (*ptr)
-		ptr++;
-	else
-		getEnvConfigStr(&ptr, "DEFAULT_DOMAIN", DEFAULT_DOMAIN);
-	for (cptr = domain;*ptr;*cptr++ = *ptr++);
-	*cptr = 0;
-#ifdef QUERY_CACHE
-	if (getenv("QUERY_CACHE"))
-		pw = inquery(PWD_QUERY, login, 0);
-	else
-		pw = vauth_getpw(user, domain);
-#else
 	pw = vauth_getpw(user, domain);
-#endif
-#ifdef QUERY_CACHE
-	if (!getenv("QUERY_CACHE"))
-		vclose();
-#else /*- Not QUERY_CACHE */
 	vclose();
 #endif
 	if (!pw)
