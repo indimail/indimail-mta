@@ -1,5 +1,8 @@
 /*
  * $Log: vchkpass.c,v $
+ * Revision 2.32  2009-11-15 10:30:33+05:30  Cprogrammer
+ * vauthOpen_user was not called for extended domains
+ *
  * Revision 2.31  2009-09-23 15:00:24+05:30  Cprogrammer
  * chane for new runcmmd
  *
@@ -107,7 +110,7 @@
 #include <errno.h>
 
 #ifndef lint
-static char     sccsid[] = "$Id: vchkpass.c,v 2.31 2009-09-23 15:00:24+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: vchkpass.c,v 2.32 2009-11-15 10:30:33+05:30 Cprogrammer Exp mbhangui $";
 #endif
 #ifdef AUTH_SIZE
 #undef AUTH_SIZE
@@ -170,7 +173,11 @@ main(int argc, char **argv)
 #ifdef QUERY_CACHE
 	if (!getenv("QUERY_CACHE"))
 	{
+#ifdef CLUSTERED_SITE
+		if (vauthOpen_user(login))
+#else
 		if (vauth_open((char *) 0))
+#endif
 		{
 			if (userNotFound)
 				pipe_exec(argv, tmpbuf, offset);
