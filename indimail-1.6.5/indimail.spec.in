@@ -1,5 +1,8 @@
 #
 # $Log: indimail.spec.in,v $
+# Revision 2.112  2009-11-15 17:02:33+05:30  Cprogrammer
+# added --query-cache, --password-cache for odmr service creation
+#
 # Revision 2.111  2009-11-15 14:37:43+05:30  Cprogrammer
 # added --query-cache, --password-cache for smtp
 #
@@ -346,7 +349,7 @@
 # rpm spec file for indimail
 #
 #
-# $Id: indimail.spec.in,v 2.111 2009-11-15 14:37:43+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 2.112 2009-11-15 17:02:33+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %define _unpackaged_files_terminate_build 1
 
@@ -2124,7 +2127,8 @@ do
 		fi
 	fi
 done
-%{_prefix}/sbin/svctool --smtp=366 --odmr --servicedir=%{servicedir}
+%{_prefix}/sbin/svctool --smtp=366 --odmr --servicedir=%{servicedir} \
+	--query-cache --password-cache
 # Greylist daemon
 %{_prefix}/sbin/svctool --greylist=1999 --servicedir=%{servicedir} --min-resend-min=2 \
     --resend-win-hr=24 --timeout-days=30 --context-file=greylist.context \

@@ -1,5 +1,8 @@
 #!/bin/sh
 # $Log: create_services.in,v $
+# Revision 2.32  2009-11-15 17:02:11+05:30  Cprogrammer
+# added --query-cache for odmr
+#
 # Revision 2.31  2009-11-15 14:37:18+05:30  Cprogrammer
 # added --query-cache, --password-cache for smtp
 #
@@ -113,7 +116,7 @@ indimaildir=@indimaildir@
 # End USER Configuration OPTIONS
 #
 
-# $Id: create_services.in,v 2.31 2009-11-15 14:37:18+05:30 Cprogrammer Exp mbhangui $
+# $Id: create_services.in,v 2.32 2009-11-15 17:02:11+05:30 Cprogrammer Exp mbhangui $
 
 usage()
 {
@@ -326,7 +329,8 @@ do
 		fi
 	fi
 done
-$dir_prefix$indimaildir/sbin/svctool --smtp=366 --odmr --servicedir=$servicedir $extra_opt
+$dir_prefix$indimaildir/sbin/svctool --smtp=366 --odmr --servicedir=$servicedir \
+	--query-cache --password-cache $extra_opt
 #
 # Greylist
 #
