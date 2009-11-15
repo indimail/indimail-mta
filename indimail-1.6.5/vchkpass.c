@@ -1,5 +1,8 @@
 /*
  * $Log: vchkpass.c,v $
+ * Revision 2.33  2009-11-15 14:40:32+05:30  Cprogrammer
+ * use vauthOpen_user() if QUERY_CACHE is not set for an extended domain
+ *
  * Revision 2.32  2009-11-15 12:26:53+05:30  Cprogrammer
  * reorganized code for better readability
  *
@@ -110,7 +113,7 @@
 #include <errno.h>
 
 #ifndef lint
-static char     sccsid[] = "$Id: vchkpass.c,v 2.32 2009-11-15 12:26:53+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: vchkpass.c,v 2.33 2009-11-15 14:40:32+05:30 Cprogrammer Stab mbhangui $";
 #endif
 #ifdef AUTH_SIZE
 #undef AUTH_SIZE
@@ -181,7 +184,11 @@ main(int argc, char **argv)
 #ifdef QUERY_CACHE
 	if (!getenv("QUERY_CACHE"))
 	{
+#ifdef CLUSTERED_SITE
+		if (vauthOpen_user(login))
+#else
 		if (vauth_open((char *) 0))
+#endif
 		{
 			if (userNotFound)
 				pipe_exec(argv, tmpbuf, offset);
