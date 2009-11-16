@@ -1,4 +1,4 @@
-[IndiMail]
+[IndiMail Raw]
 name=IndiMail (SLE_11)
 type=rpm-md
 baseurl=http://download.opensuse.org/repositories/home:/mbhangui/SLE_11/
@@ -6,7 +6,7 @@ gpgcheck=1
 gpgkey=http://download.opensuse.org/repositories/home:/mbhangui/SLE_11/repodata/repomd.xml.key
 enabled=1
 
-[IndiMail Raw]
+[IndiMail]
 name=IndiMail Raw (SLE_11)
 type=rpm-md
 baseurl=http://download.opensuse.org/repositories/home:/indimail/SLE_11/
