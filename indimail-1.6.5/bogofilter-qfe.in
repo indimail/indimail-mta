@@ -86,21 +86,21 @@ fi
 opt="X"
 case "$EXT" in
 	register-spam)		# register as spam
-	PAT="/^X-Spam-Rating/d; /^X-Filter/d; /^X-Bogocity/d; /^Delivered-To/d; /$domain/d;"
+	PAT="/^X-Spam-Rating/d; /^X-Filter/d; /^X-Bogosity/d; /^Delivered-To/d; /$domain/d;"
 	opt="-s"
 ;;
 	register-nonspam)	# register as non-spam
-	PAT="/^X-Spam-Rating/d; /^X-Filter/d; /^X-Bogocity/d; /^Delivered-To/d;"
+	PAT="/^X-Spam-Rating/d; /^X-Filter/d; /^X-Bogosity/d; /^Delivered-To/d;"
 	opt="-n"
 ;;
 	spam)		# unregister as ham
 				# register as spam
-	PAT="/^X-Spam-Rating/d; /^X-Filter/d; /^X-Bogocity/d; /^Delivered-To/d; /$domain/d;"
+	PAT="/^X-Spam-Rating/d; /^X-Filter/d; /^X-Bogosity/d; /^Delivered-To/d; /$domain/d;"
 	opt="-Ns"
 ;;
 	nonspam)	# unregister as spam
 				# register as ham
-	PAT="/^X-Spam-Rating/d; /^X-Filter/d; /^X-Bogocity/d; /^Delivered-To/d;"
+	PAT="/^X-Spam-Rating/d; /^X-Filter/d; /^X-Bogosity/d; /^Delivered-To/d;"
 	opt="-Sn"
 ;;
 esac
