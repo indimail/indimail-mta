@@ -285,7 +285,7 @@ FILE *f;
 > socket.lib
 AC_CHECK_LIB(socket, socket,echo -lsocket > socket.lib,,)
 AC_CHECK_LIB(nsl, gethostbyname,echo -lnsl >> socket.lib,,)
-AC_CHECK_LIB(ssl, EVP_MD_CTX_init, [AC_SUBST([LIB_SSL], ["-lssl"]) AC_DEFINE([HAVE_SSL], [1],[OpenSSL Library])],,-lssl)
+AC_CHECK_LIB(ssl, SSL_CTX_new, [AC_SUBST([LIB_SSL], ["-lssl -lcrypto"]) AC_DEFINE([HAVE_SSL], [1],[OpenSSL Library])],,-lssl -lcrypto)
 AC_CHECK_LIB(crypt, crypt, [AC_SUBST([LIB_CRYPT], ["-lcrypt"]) AC_DEFINE([HAVE_CRYPT], [1],[crypt Library])],,)
 AC_CHECK_LIB(ncurses, tgetstr, [AC_SUBST([LIB_TERMCAP], ["-lncurses"]) AC_DEFINE([HAVE_TERMCAP_IN_NCURSES], [1],[ncurses Library],nocurses=t,)],,)
 if  test " $nocurses" = " t"
