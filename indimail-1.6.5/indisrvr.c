@@ -1,5 +1,8 @@
 /*
  * $Log: indisrvr.c,v $
+ * Revision 2.40  2009-11-16 21:45:03+05:30  Cprogrammer
+ * fix compilation when HAVE_SSL is not defined
+ *
  * Revision 2.39  2009-11-13 21:32:53+05:30  Cprogrammer
  * reload cert on SIGHUP
  *
@@ -145,7 +148,7 @@
 #include "indimail.h"
 
 #ifndef lint
-static char     sccsid[] = "$Id: indisrvr.c,v 2.39 2009-11-13 21:32:53+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: indisrvr.c,v 2.40 2009-11-16 21:45:03+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef CLUSTERED_SITE
@@ -200,9 +203,9 @@ int             call_prg();
 static void     SigChild(void);
 static void     SigTerm();
 static void     SigUsr();
-static void     SigHup();
 static int      get_options(int argc, char **argv, char **, char **, int *);
 #ifdef HAVE_SSL
+static void     SigHup();
 void            translate(SSL *, int, int, int, unsigned int);
 #endif
 
@@ -850,6 +853,7 @@ SigUsr(void)
 	return;
 }
 
+#ifdef HAVE_SSL
 static void
 SigHup(void)
 {
@@ -859,6 +863,7 @@ SigHup(void)
 	errno = EINTR;
 	return;
 }
+#endif
 #else
 int
 main()
