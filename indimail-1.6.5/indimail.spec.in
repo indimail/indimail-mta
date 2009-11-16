@@ -1,5 +1,8 @@
 #
 # $Log: indimail.spec.in,v $
+# Revision 2.114  2009-11-16 14:18:31+05:30  Cprogrammer
+# fixed permission for /var/indimail/include, /var/indimail/lib for indimail and indimail-devel package
+#
 # Revision 2.113  2009-11-15 22:45:42+05:30  Cprogrammer
 # upgrade to fetchmail 6.3.13
 #
@@ -352,7 +355,7 @@
 # rpm spec file for indimail
 #
 #
-# $Id: indimail.spec.in,v 2.113 2009-11-15 22:45:42+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 2.114 2009-11-16 14:18:31+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %define _unpackaged_files_terminate_build 1
 
@@ -1056,7 +1059,6 @@ fi
 %dir %attr(555,root,qmail)        %{_prefix}/boot
 %dir %attr(555,root,qmail)        %{_prefix}/doc
 %dir %attr(2555,alias,qmail)      %{_prefix}/alias
-%dir %attr(555,root,root)         %{_prefix}/include
 %dir %attr(750,qscand,qscand)     %{_prefix}/qscanq
 %dir %attr(750,qscand,qscand)     %{_prefix}/qscanq/root
 %dir %attr(750,qscand,qscand)     %{_prefix}/qscanq/root/scanq
@@ -1076,6 +1078,7 @@ fi
 %dir %attr(555,root,qmail)        %{_prefix}/man/cat7
 %dir %attr(555,root,qmail)        %{_prefix}/man/man8
 %dir %attr(555,root,qmail)        %{_prefix}/man/cat8
+%dir %attr(555,root,root)         %{_includedir}
 %dir %attr(555,root,root)         %{_libdir}
 %if %nofetchmail == 0
 %dir %attr(755,root,root)         %{_prefix}/share/locale
@@ -1823,10 +1826,10 @@ fi
 
 %files devel
 %defattr(-, root, root, 0755)
-%dir %attr(555, root, indimail)         %{_includedir}
-%dir %attr(555, root, indimail)         %{_libdir}
-%dir %attr(555,root,qmail)              %{_prefix}/man/man3
-%doc %attr(444, root, qmail)            %{_prefix}/man/man3/*
+%dir %attr(555,root,root)              %{_includedir}
+%dir %attr(555,root,root)              %{_libdir}
+%dir %attr(555,root,qmail)             %{_prefix}/man/man3
+%doc %attr(444,root,qmail)             %{_prefix}/man/man3/*
 
 %attr(644,root,qmail)                   %{_prefix}/etc/inc_deps
 %attr(644,root,qmail)                   %{_prefix}/etc/lib_deps
