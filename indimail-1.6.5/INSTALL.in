@@ -169,7 +169,7 @@ If a command is prefixed with the '#' sign, it means that it was run using root.
 
     Prepare Source Directory Structure in the disk partition selected
     you have to extract minimum of 10 sources as per the directory
-    structure below. You may skip extraction of nssd-1.0, fetchmail-6.3.8,
+    structure below. You may skip extraction of nssd-1.0, fetchmail-6.3.13,
     depending on whether you require them.
 
     +-/home/local/src/indimail/.+
@@ -185,7 +185,7 @@ If a command is prefixed with the '#' sign, it means that it was run using root.
                                . fortune-1.1        (8.4  Mb)
                                . bogofilter-1.2.1   (11.6 Mb)
                                . nssd-1.0           (2.0  Mb)
-                               . fetchmail-6.3.8    (10.1 Mb)
+                               . fetchmail-6.3.13   (10.1 Mb)
                                . pam-multi-1.0      (3.0  Mb)
 
 ########### SECTION 2  ##### USER/GROUP Creation ########################
@@ -493,15 +493,15 @@ the installation.
     % cd ..
  
     ##### STEP 8  ## Optional STEP ##### Fetchmail ############
-    Install fetchmail MD5 66b97500b0a1e3c0916b3b5314f597f5  
+    Install fetchmail MD5 db792fb311bc358e95ed0437389269ac  
     current working directory /home/local/src
     Download the fetchmail package. The latest published fetchmail package tested is
-    fetchmail-6.3.8.tar.bz2.
+    fetchmail-6.3.13.tar.bz2.
 
-    % wget http://prdownload.berlios.de/fetchmail/fetchmail-6.3.8.tar.bz2 
-    % bzip2 -d -c fetchmail-6.3.8.tar.bz2 | tar xf -
-    % gunzip -c indimail-@version@/patches/fetchmail-6.3.8.patch.gz | patch -p0
-    % cd fetchmail-6.3.8
+    % wget http://prdownload.berlios.de/fetchmail/fetchmail-6.3.13.tar.bz2 
+    % bzip2 -d -c fetchmail-6.3.13.tar.bz2 | tar xf -
+    % gunzip -c indimail-@version@/patches/fetchmail-6.3.13.patch.gz | patch -p0
+    % cd fetchmail-6.3.13
     % autoreconf -fi
     % ./configure --prefix=@indimaildir@ --enable-indimail --enable-indimaildir=@indimaildir@ \
         --with-ssl \

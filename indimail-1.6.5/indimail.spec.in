@@ -1,5 +1,8 @@
 #
 # $Log: indimail.spec.in,v $
+# Revision 2.113  2009-11-15 22:45:42+05:30  Cprogrammer
+# upgrade to fetchmail 6.3.13
+#
 # Revision 2.112  2009-11-15 17:02:33+05:30  Cprogrammer
 # added --query-cache, --password-cache for odmr service creation
 #
@@ -349,7 +352,7 @@
 # rpm spec file for indimail
 #
 #
-# $Id: indimail.spec.in,v 2.112 2009-11-15 17:02:33+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 2.113 2009-11-15 22:45:42+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %define _unpackaged_files_terminate_build 1
 
@@ -386,7 +389,7 @@
 %define pam_multi_version  1.0
 %define ucspi_version      0.88
 %define qmail_version      1.03
-%define fetchmail_version  6.3.9
+%define fetchmail_version  6.3.13
 %define clamav_version     0.95.3
 %define fortune_version    1.1
 %define nssd_version       1.0

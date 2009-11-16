@@ -1,5 +1,8 @@
 #
 # $Log: indimail-epm.list.in,v $
+# Revision 2.36  2009-11-15 22:45:28+05:30  Cprogrammer
+# upgrade to fetchmail 6.3.13
+#
 # Revision 2.35  2009-11-15 17:02:20+05:30  Cprogrammer
 # added --query-cache --password-cache for smtp service creation
 #
@@ -77,7 +80,7 @@ $courier_version=3.0.8
 $bogofilter_version=1.2.1
 $ucspi_version=0.88
 $qmail_version=1.03
-$fetchmail_version=6.3.9
+$fetchmail_version=6.3.13
 $clamav_version=0.95.1
 $fortune_version=1.1
 $nssd_version=1.0
