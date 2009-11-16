@@ -1,5 +1,8 @@
 #!/bin/sh
 # $Log: create_services.in,v $
+# Revision 2.33  2009-11-16 21:43:29+05:30  Cprogrammer
+# figure out which services to create depending on installed software (bogofilter, fetchmail, clamd, nssd)
+#
 # Revision 2.32  2009-11-15 17:02:11+05:30  Cprogrammer
 # added --query-cache for odmr
 #
@@ -116,11 +119,11 @@ indimaildir=@indimaildir@
 # End USER Configuration OPTIONS
 #
 
-# $Id: create_services.in,v 2.32 2009-11-15 17:02:11+05:30 Cprogrammer Exp mbhangui $
+# $Id: create_services.in,v 2.33 2009-11-16 21:43:29+05:30 Cprogrammer Exp mbhangui $
 
 usage()
 {
-	echo "create_svc [--servicedir=path] --qbase=path --mbase=path --mysqlPrefix=path [--destdir=path]
+	echo "create_service [--servicedir=path] --qbase=path --mbase=path --mysqlPrefix=path [--destdir=path]
 
 	servicedir  - path of Supervise service directory
 	qbase       - path for createing IndiMail's queue collection
@@ -137,8 +140,8 @@ if test $# -eq 0; then
     usage 1
 fi
 
-nocourierimap=0
 noproxy=0
+nocourierimap=0
 nofetchmail=0
 nobogofilter=0
 noclamav=0
@@ -219,6 +222,21 @@ if [ -d /etc/ld.so.conf.d ] ; then
 	) > /etc/ld.so.conf.d/indimail-`arch`.conf
 	/sbin/ldconfig
 fi
+if [ ! -x $dir_prefix$indimaildir/sbin/clamd ] ; then
+	noclamav=1
+fi
+if [ ! -x $dir_prefix$indimaildir/bin/fetchmail ] ; then
+	nofetchmail=1
+fi
+if [ ! -x $dir_prefix$indimaildir/bin/bogofilter ] ; then
+	nobogofilter=1
+fi
+if [ ! -x $dir_prefix$indimaildir/sbin/nssd ] ; then
+	nonssd=1
+fi
+if [ ! -x $dir_prefix$indimaildir/bin/imapd ] ; then
+	nocourierimap=1
+fi
 #
 # MySQL
 #
@@ -277,7 +295,7 @@ do
 		if [ $noclamav -eq 0 ] ; then
 			$dir_prefix$indimaildir/sbin/svctool --smtp=$port --servicedir=$servicedir \
 				--qbase=$qbase --qcount=$qcount --qstart=1 \
-				--query-cache --passwd-cache \
+				--query-cache --password-cache \
 				--cntrldir=control --localip=0 --maxdaemons=75 --maxperip=25 --persistdb \
 				--starttls --fsync --syncdir --memory=$smtp_soft_mem --chkrecipient --chkrelay --masquerade \
 				--min-free=52428800 --content-filter --virus-filter \
@@ -291,7 +309,7 @@ do
 		else
 			$dir_prefix$indimaildir/sbin/svctool --smtp=$port --servicedir=$servicedir \
 				--qbase=$qbase --qcount=$qcount --qstart=1 \
-				--query-cache --passwd-cache \
+				--query-cache --password-cache \
 				--cntrldir=control --localip=0 --maxdaemons=75 --maxperip=25 --persistdb \
 				--starttls --fsync --syncdir --memory=$smtp_soft_mem --chkrecipient --chkrelay --masquerade \
 				--min-free=52428800 --content-filter --virus-filter \
@@ -304,9 +322,9 @@ do
 		fi
 	else
 		if [ $noclamav -eq 0 ] ; then
-			$dir_prefix$indimaildir/sbin/svctool --smtp=$port --servicedir=$servicedir
+			$dir_prefix$indimaildir/sbin/svctool --smtp=$port --servicedir=$servicedir \
 				--qbase=$qbase --qcount=$qcount --qstart=1 \
-				--query-cache --passwd-cache \
+				--query-cache --password-cache \
 				--cntrldir=control --localip=0 --maxdaemons=75 --maxperip=25 --persistdb \
 				--starttls --fsync --syncdir --memory=$smtp_soft_mem --chkrecipient --chkrelay --masquerade \
 				--min-free=52428800 --content-filter --virus-filter \
@@ -318,7 +336,7 @@ do
 		else
 			$dir_prefix$indimaildir/sbin/svctool --smtp=$port --servicedir=$servicedir \
 				--qbase=$qbase --qcount=$qcount --qstart=1 \
-				--query-cache --passwd-cache \
+				--query-cache --password-cache \
 				--cntrldir=control --localip=0 --maxdaemons=75 --maxperip=25 --persistdb \
 				--starttls --fsync --syncdir --memory=$smtp_soft_mem --chkrecipient --chkrelay --masquerade \
 				--min-free=52428800 --content-filter --virus-filter \
@@ -367,7 +385,7 @@ if [ $nofetchmail -eq 0 ] ; then
 				--memory=$fetchmail_mem --fsync --syncdir $extra_opt
 		fi
 	fi
-	/bin/touch $dir_prefix$servicedir/fetchmail/down
+	touch $dir_prefix$servicedir/fetchmail/down
 fi
 
 #
@@ -386,11 +404,11 @@ fi
 if [ $noproxy -eq 0 ] ; then
 	$dir_prefix$indimaildir/sbin/svctool --imap=4143 --servicedir=$servicedir --localip=0 --maxdaemons=40 \
 		--maxperip=25 --default-domain=indimail.org --memory=$imap_pop3_mem --proxy=143 $extra_opt
-	$dir_prefix$indimaildir/sbin/svctool --imap=4993 --servicedir=$servicedir --localip=0 --maxdaemons=40 \
-		--maxperip=25 --default-domain=indimail.org --memory=$imap_pop3_mem --proxy=143 --ssl $extra_opt
+	$dir_prefix$indimaildir/sbin/svctool --imap=9143 --servicedir=$servicedir --localip=0 --maxdaemons=40 \
+		--maxperip=25 --default-domain=indimail.org --memory=$imap_pop3_mem --proxy=143 --ssl
 	$dir_prefix$indimaildir/sbin/svctool --pop3=4110 --servicedir=$servicedir --localip=0 --maxdaemons=40 \
 		--maxperip=25 --default-domain=indimail.org --memory=$imap_pop3_mem --proxy=110 $extra_opt
-	$dir_prefix$indimaildir/sbin/svctool --pop3=4995 --servicedir=$servicedir --localip=0 --maxdaemons=40 \
+	$dir_prefix$indimaildir/sbin/svctool --pop3=9110 --servicedir=$servicedir --localip=0 --maxdaemons=40 \
 		--maxperip=25 --default-domain=indimail.org --memory=$imap_pop3_mem --proxy=110 --ssl $extra_opt
 fi
 
@@ -420,10 +438,10 @@ $dir_prefix$indimaildir/sbin/svctool --poppass=106 --localip=0 --maxdaemons=40 -
 #
 # virus clamav/spam filter
 #
+$dir_prefix$indimaildir/sbin/svctool --qscanq --servicedir=$servicedir --clamdPrefix=$indimaildir \
+	--scanint=200 $extra_opt
 if [ $noclamav -eq 0 ] ; then
 	$dir_prefix$indimaildir/sbin/svctool --config=clamd $extra_opt
-	$dir_prefix$indimaildir/sbin/svctool --qscanq --servicedir=$servicedir --clamdPrefix=$indimaildir \
-	--scanint=200 $extra_opt
 fi
 if [ $nobogofilter -eq 0 ] ; then
 	$dir_prefix$indimaildir/sbin/svctool --config=bogofilter $extra_opt
