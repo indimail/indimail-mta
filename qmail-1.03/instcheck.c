@@ -1,5 +1,8 @@
 /*
  * $Log: instcheck.c,v $
+ * Revision 1.12  2009-11-17 09:38:11+05:30  Cprogrammer
+ * treat errors with man directories as warnings
+ *
  * Revision 1.11  2009-04-30 21:12:20+05:30  Cprogrammer
  * check for compressed man page if uncompressed is missing
  *
@@ -39,7 +42,6 @@ int             uidinit(void);
 
 #define FATAL "instcheck: fatal: "
 #define WARNING "instcheck: warning: "
-
 void
 perm(prefix1, prefix2, prefix3, file, type, uid, gid, mode)
 	char           *prefix1;
@@ -71,11 +73,16 @@ perm(prefix1, prefix2, prefix3, file, type, uid, gid, mode)
 						strerr_warn6(WARNING, prefix1, prefix2, prefix3, file, " does not exist", 0);
 					else
 						strerr_warn4(WARNING, "unable to stat .../", tfile, ": ", &strerr_sys);
+					if (tfile != file)
+						alloc_free(tfile);
 					return;
 				}
 			} else
 			{
-				strerr_warn6(WARNING, prefix1, prefix2, prefix3, file, " does not exist", 0);
+				if (!str_diffn(file, "man/", 4))
+					strerr_warn6(WARNING, prefix1, prefix2, prefix3, file, " does not exist", 0);
+				else
+					strerr_die6sys(111, FATAL, prefix1, prefix2, prefix3, file, ": ");
 				return;
 			}
 		} else
@@ -159,7 +166,11 @@ c(home, subdir, file, uid, gid, mode)
 	if (chdir(home) == -1)
 		strerr_die4sys(111, FATAL, "unable to switch to ", home, ": ");
 	if (chdir(subdir) == -1)
+	{
+		if (errno == error_noent && !str_diffn(subdir, "man/", 4))
+			return;
 		strerr_die6sys(111, FATAL, "unable to switch to ", home, "/", subdir, ": ");
+	}
 	perm(".../", subdir, "/", file, S_IFREG, uid, gid, mode);
 }
 
@@ -211,7 +222,7 @@ main(int argc, char **argv)
 void
 getversion_instcheck_c()
 {
-	static char    *x = "$Id: instcheck.c,v 1.11 2009-04-30 21:12:20+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: instcheck.c,v 1.12 2009-11-17 09:38:11+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
