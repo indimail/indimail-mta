@@ -222,7 +222,7 @@ main(int argc, char **argv)
 void
 getversion_instcheck_c()
 {
-	static char    *x = "$Id: instcheck.c,v 1.12 2009-11-17 09:38:11+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: instcheck.c,v 1.12 2009-11-17 09:38:11+05:30 Cprogrammer Stab mbhangui $";
 
 	x++;
 }
