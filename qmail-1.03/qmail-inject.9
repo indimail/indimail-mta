@@ -328,7 +328,7 @@ overrides the value in this control file.
 .I spamignore
 envelope sender addresses which should bypass spam filter.
 .B qmail-inject
-will unset QMAILFILTER environment variable for a message
+will unset SPAMFILTER environment variable for a message
 if the envelope sender address is listed in
 .IR spamignore .
 A line in
@@ -337,7 +337,7 @@ may be of the form
 .BR @\fIhost ,
 meaning every address at
 .IR host .
-If QMAILFILTER is not defined, 
+If SPAMFILTER is not defined, 
 .B qmail-multi
 does not apply spam filter on the message See qmail-multi(8) for more details.
 
