@@ -1,5 +1,8 @@
 /*
  * $Log: authindi.c,v $
+ * Revision 2.13  2009-11-18 14:21:31+05:30  Cprogrammer
+ * more readable code
+ *
  * Revision 2.12  2009-10-14 20:41:24+05:30  Cprogrammer
  * check parse_quota for return status
  *
@@ -45,7 +48,7 @@
 #include <errno.h>
 
 #ifndef lint
-static char     sccsid[] = "$Id: authindi.c,v 2.12 2009-10-14 20:41:24+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: authindi.c,v 2.13 2009-11-18 14:21:31+05:30 Cprogrammer Exp mbhangui $";
 #endif
 #ifdef AUTH_SIZE
 #undef AUTH_SIZE
@@ -192,10 +195,14 @@ main(int argc, char **argv)
 	{
 		char           *mailstore, *ptr;
 
+#ifdef QUERY_CACHE
 		if (getenv("QUERY_CACHE"))
 			mailstore = inquery(HOST_QUERY, Email, 0);
 		else
 			mailstore = findhost(Email, 2);
+#else
+		mailstore = findhost(Email, 2);
+#endif
 		if (!mailstore)
 		{
 			if (!userNotFound)
@@ -213,9 +220,11 @@ main(int argc, char **argv)
 			return(1);
 		}
 	}
-#endif
+#endif /*- CLUSTERED_SITE */
 #ifdef QUERY_CACHE
-	if (!getenv("QUERY_CACHE"))
+	if (getenv("QUERY_CACHE"))
+		pw = inquery(PWD_QUERY, Email, 0);
+	else
 	{
 		if (vauth_open((char *) 0))
 		{
@@ -224,8 +233,9 @@ main(int argc, char **argv)
 			pipe_exec(argv, buf, offset);
 			return (1);
 		}
+		pw = vauth_getpw(user, real_domain);
 	}
-#else /*- QUERY_CACHE */
+#else
 	if (vauth_open((char *) 0))
 	{
 		if(!userNotFound)
@@ -233,13 +243,6 @@ main(int argc, char **argv)
 		pipe_exec(argv, buf, offset);
 		return (1);
 	}
-#endif /*- QUERY_CACHE */
-#ifdef QUERY_CACHE
-	if (getenv("QUERY_CACHE"))
-		pw = inquery(PWD_QUERY, Email, 0);
-	else
-		pw = vauth_getpw(user, real_domain);
-#else
 	pw = vauth_getpw(user, real_domain);
 #endif
 	if (!pw)
