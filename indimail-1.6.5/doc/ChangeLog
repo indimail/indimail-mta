@@ -12,7 +12,22 @@ Release 1.6.5 Start 13/11/2009
 6.  If QHPSI program fails (qmail-queue.c, qmail.c), report error using return
     value 77 [2897382]
 7.  Upgraded clamav to version 0.95.3 [2897567]
-8.  changed --disable-summary to --no-summary argument to clamdscan [2897567]
+8.  Changed --disable-summary to --no-summary argument to clamdscan [2897567]
+15/11/2009
+9.  BUG - Authenticated SMTP does not work if QUERY_CACHE is turned off [2897954]
+10. Added --query-cache, --password-cache option to svctool when creating
+    SMTP service. Added --query-cache, --password-cache in svctool invocation
+    arguments in indimail.spec, create_services, indimail-epm.list
+11. Upgraded to fetchmail-6.3.13
+16/11/2009
+12. Do not create services for clamd, bogofilter, fetchmail svctool, create_svc,
+    nssd if original executables found missing
+13. BUG - fixed compilation in indisrvr when HAVE_SSL is not defined (SigHup handler)
+14. BUG - Added -lcrypto to linking. 
+17/11/2009
+15. BUG - Fixed fcntl (locking) error on DARWIN (flock structure initialization) [2898949]
+18/11/2009
+16. Added new command vserverinfo
 
 * Fri Nov 13 2009 mbhangui@gmail.com
 Release 1.6.4 Start 30/10/2009
