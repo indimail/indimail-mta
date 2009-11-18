@@ -1,5 +1,8 @@
 /*
  * $Log: initsvc.c,v $
+ * Revision 2.10  2009-11-17 20:14:50+05:30  Cprogrammer
+ * run initsvc only for root
+ *
  * Revision 2.9  2009-06-18 16:14:48+05:30  Cprogrammer
  * use launchtl on Mac OS
  *
@@ -37,7 +40,7 @@
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: initsvc.c,v 2.9 2009-06-18 16:14:48+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: initsvc.c,v 2.10 2009-11-17 20:14:50+05:30 Cprogrammer Stab mbhangui $";
 #endif
 
 int
@@ -53,6 +56,11 @@ main(int argc, char **argv)
 	if (argc != 2)
 	{
 		fprintf(stderr, "usage: initsvc -on|-off|-status|-print\n");
+		return (1);
+	} else
+	if (getuid())
+	{
+		fprintf(stderr, "initsvc: this program must be run as root\n");
 		return (1);
 	}
 	if (!strncmp(argv[1], "-on", 4))
