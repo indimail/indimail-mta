@@ -67,6 +67,6 @@ added check for regular files
 pop3dserver.c
 added printed, printchar() functions
 
-27/05/2008
+27/05/2009
 use getuid, setuid in imapd.c pop3dserver.c to prevent root privileges
 update to courier-imap 4.5.0
