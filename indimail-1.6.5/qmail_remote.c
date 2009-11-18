@@ -50,7 +50,7 @@
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: qmail_remote.c,v 2.9 2009-11-09 10:42:50+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: qmail_remote.c,v 2.9 2009-11-09 10:42:50+05:30 Cprogrammer Stab mbhangui $";
 #endif
 
 #include <stdlib.h>

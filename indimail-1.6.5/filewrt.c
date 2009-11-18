@@ -14,7 +14,7 @@
 #include <unistd.h>
 
 #ifndef	lint
-static char     sccsid[] = "$Id: filewrt.c,v 2.3 2009-11-08 00:56:18+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: filewrt.c,v 2.3 2009-11-08 00:56:18+05:30 Cprogrammer Stab mbhangui $";
 #endif
 
 #ifdef HAVE_STDARG_H

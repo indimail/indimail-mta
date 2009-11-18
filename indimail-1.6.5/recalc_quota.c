@@ -1,5 +1,8 @@
 /*
  * $Log: recalc_quota.c,v $
+ * Revision 2.8  2009-11-17 20:15:41+05:30  Cprogrammer
+ * struct flock members have different order on Mac OS X
+ *
  * Revision 2.7  2009-09-25 23:50:16+05:30  Cprogrammer
  * return quota as zero of maildirsize is absent
  *
@@ -54,7 +57,7 @@
 #include <unistd.h>
 
 #ifndef	lint
-static char     sccsid[] = "$Id: recalc_quota.c,v 2.7 2009-09-25 23:50:16+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: recalc_quota.c,v 2.8 2009-11-17 20:15:41+05:30 Cprogrammer Stab mbhangui $";
 #endif
 
 #ifdef USE_MAILDIRQUOTA
@@ -64,7 +67,11 @@ mdir_t recalc_quota(char *Maildir, int force_flag)
 #endif
 {
 	static mdir_t   mail_size, mail_count;
+#ifdef DARWIN
+	struct flock    fl = {0, 0, 0, F_WRLCK, SEEK_SET};
+#else
 	struct flock    fl = {F_WRLCK, SEEK_SET, 0, 0, 0};
+#endif
 	int             Fd;
 #ifdef USE_MAILDIRQUOTA
 	FILE           *fp;

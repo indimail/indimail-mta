@@ -1,5 +1,8 @@
 /*
  * $Log: update_quota.c,v $
+ * Revision 2.6  2009-11-17 20:15:49+05:30  Cprogrammer
+ * struct flock members have different order on Mac OS X
+ *
  * Revision 2.5  2009-06-03 09:31:17+05:30  Cprogrammer
  * replaced lockf with fcntl for file locking
  *
@@ -46,7 +49,7 @@
 #include <unistd.h>
 
 #ifndef	lint
-static char     sccsid[] = "$Id: update_quota.c,v 2.5 2009-06-03 09:31:17+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: update_quota.c,v 2.6 2009-11-17 20:15:49+05:30 Cprogrammer Stab mbhangui $";
 #endif
 
 int
@@ -56,7 +59,11 @@ update_quota(char *Maildir, mdir_t new_size)
 	char           *ptr;
 	uid_t           uid;
 	gid_t           gid;
+#ifdef DARWIN
+	struct flock    fl = {0, 0, 0, F_WRLCK, SEEK_SET};
+#else
 	struct flock    fl = {F_WRLCK, SEEK_SET, 0, 0, 0};
+#endif
 	void            (*pstat[3]) ();
 	int             Fd;
 	FILE           *fp;

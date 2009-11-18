@@ -23,7 +23,7 @@
 #include "error_stack.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: error_stack.c,v 2.4 2009-11-08 00:53:11+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: error_stack.c,v 2.4 2009-11-08 00:53:11+05:30 Cprogrammer Stab mbhangui $";
 #endif
 
 void
