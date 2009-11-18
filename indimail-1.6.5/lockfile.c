@@ -1,5 +1,8 @@
 /*
  * $Log: lockfile.c,v $
+ * Revision 2.5  2009-11-17 20:15:01+05:30  Cprogrammer
+ * struct flock members have different order on Mac OS X
+ *
  * Revision 2.4  2009-06-03 09:29:20+05:30  Cprogrammer
  * added lock code to use fcntl
  *
@@ -57,7 +60,7 @@
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: lockfile.c,v 2.4 2009-06-03 09:29:20+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: lockfile.c,v 2.5 2009-11-17 20:15:01+05:30 Cprogrammer Stab mbhangui $";
 #endif
 
 #ifdef FILE_LOCKING
@@ -185,7 +188,11 @@ lockcreate(char *filename, char proj)
 	int             fd, tmperrno;
 	pid_t           pid, mypid;
 	time_t          file_age, start_time, secs;
+#ifdef DARWIN
+	struct flock    fl = {0, 0, 0, F_WRLCK, SEEK_SET};
+#else
 	struct flock    fl = {F_WRLCK, SEEK_SET, 0, 0, 0};
+#endif
 
 	start_time = time(0);
 	snprintf(TmpFil, sizeof(TmpFil), "%s.pre.%d", filename, proj);
@@ -332,7 +339,11 @@ lockcreate(char *filename, char proj)
 {
 	int             fd;
 	char            TmpFil[MAX_BUFF];
+#ifdef DARWIN
+	struct flock    fl = {0, 0, 0, F_WRLCK, SEEK_SET};
+#else
 	struct flock    fl = {F_WRLCK, SEEK_SET, 0, 0, 0};
+#endif
 
 	snprintf(TmpFil, sizeof(TmpFil), "%s.pre.%d", filename, proj);
 	if ((fd = open(TmpFil, O_CREAT|O_WRONLY, 0644)) == -1)
@@ -364,7 +375,11 @@ get_write_lock(int fd)
 int
 ReleaseLock(int fd)
 {
+#ifdef DARWIN
+	struct flock    fl = {0, 0, 0, F_UNLCK, SEEK_SET};
+#else
 	struct flock    fl = {F_UNLCK, SEEK_SET, 0, 0, 0};
+#endif
 
 	if (fd == -1)
 		return(-1);
