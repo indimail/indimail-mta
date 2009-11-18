@@ -1,5 +1,8 @@
 #
 # $Log: indimail.spec.in,v $
+# Revision 2.115  2009-11-18 13:47:22+05:30  Cprogrammer
+# added vserverinfo
+#
 # Revision 2.114  2009-11-16 14:18:31+05:30  Cprogrammer
 # fixed permission for /var/indimail/include, /var/indimail/lib for indimail and indimail-devel package
 #
@@ -355,7 +358,7 @@
 # rpm spec file for indimail
 #
 #
-# $Id: indimail.spec.in,v 2.114 2009-11-16 14:18:31+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 2.115 2009-11-18 13:47:22+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %define _unpackaged_files_terminate_build 1
 
@@ -975,7 +978,7 @@ done
 for i in adminclient chowkidar cindimail clamd clearopensmtp copyemail execmysql \
 hostsync indisrvr inlookup inquerytest install_tables ipchange mail_report \
 mgmtpass postdel systpass testmra updatefile updaterules vchkpass vdelivermail \
-vdeloldusers vfilter vfstab vmoddomain vreorg vsetpass nssd
+vdeloldusers vfilter vfstab vmoddomain vreorg vsetpass nssd vserverinfo
 do
 	if [ -f %{buildroot}%{_prefix}/sbin/$i ] ; then
     	/usr/bin/chrpath -d %{buildroot}%{_prefix}/sbin/$i
@@ -1192,6 +1195,7 @@ fi
 %attr(4555,root,root)                   %{_prefix}/sbin/systpass
 
 %attr(555,root,qmail)                   %{_prefix}/bin/qmail-popbull
+%attr(555,root,qmail)                   %{_prefix}/sbin/vserverinfo
 %attr(555,root,qmail)                   %{_prefix}/bin/cleanq
 %attr(555,root,qmail)                   %{_prefix}/bin/logmonitor
 %attr(555,root,qmail)                   %{_prefix}/bin/zsuccesses
