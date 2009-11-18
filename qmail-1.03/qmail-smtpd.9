@@ -658,7 +658,7 @@ than the client gets tarpitted and the connection is closed.
 .I spamignore
 envelope sender addresses which should bypass spam filter.
 .B qmail-smtpd
-will unset QMAILFILTER environment variable for a message
+will unset SPAMFILTER environment variable for a message
 if the envelope sender address is listed in
 .IR spamignore .
 A line in
@@ -667,7 +667,7 @@ may be of the form
 .BR @\fIhost ,
 meaning every address at
 .IR host .
-If QMAILFILTER is not defined, 
+If SPAMFILTER is not defined, 
 .B qmail-multi
 does not apply spam filter on the message See
 .B qmail-multi(8)

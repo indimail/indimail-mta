@@ -142,8 +142,8 @@ Installation Steps
 ==================
 
 For more information, read Basic Installation instructions at the bottom. In all the steps below
-(make command)
-you may omit DESTDIR=staging_directory in the make command in case
+(in the make command) you may omit DESTDIR=staging_directory in the make command in case
+
 a) you are doing this on a fresh system or
 b) in case you are installing this on a live IndiMail System and do not wish
    to do make install or make install-strip
@@ -157,7 +157,7 @@ Which user should I use to run the commands listed below ?
 If a command is prefixed with the '%' sign, it means that it was run using a non-privilege id. e.g.
 % df -k
 If a command is prefixed with the '#' sign, it means that it was run using root. e.g.
-% df -k
+# df -k
 
 ########### SECTION 1  ##### DISK SPACE Check ###########################
 1. check for diskspace

@@ -8,6 +8,36 @@ vuserinfo \- display attributes for a virtual user
 
 .SH DESCRIPTION
 \fBvuserinfo\fR displays following information for a user specified by email \fIemail_addr\fR.
+
+.TS
+l l.
+Field             | Description
+_
+name              | Username
+passwd            | Password
+uid               | Used internally by host sync
+gid               | User status bits
+gecos             | General Comments
+dir               | Home directory
+quota             | Disk quota allocated
+cur usage         | Current disk usage
+mailStore IP      | IP address of mailstore
+mailStore ID      | Hostid of mailstore
+sql database      | MySQL database name for user storage
+table Name        | Table name for user storage
+relay Allowed     | If relaying is allowed
+days inactive     | No of days the user has been inactive
+Added On          | Registration date
+last auth         | Last successful authentication
+last IMAP         | Last successful authentication using IMAP
+last POP3         | Last successful authentication using POP3
+password Change   | Last successful password change date
+inactivation Date | Last date when user was inactivated
+activation Date   | Last date when user was activated
+forwardings       | All forwardings for user
+
+.TE
+
 vuserinfo also displays mail folders with usage, forwarding or alias information and filters
 set for users (if the user have these enabled). \fBvuserinfo\fR has setuid bit as root to enable
 reading of user quota usage stored in \fBmaildirsize\fR.
@@ -53,4 +83,5 @@ Print version numbers
 
 .SH "SEE ALSO"
 vdominfo(1),
+vserverinfo(1),
 printdir(1)

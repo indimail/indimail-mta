@@ -65,9 +65,14 @@ is to have a single domain consisting of a heterogeneous email server environmen
 users on MS Exchange and some on Lotus Notes some on IndiMail). You can have multiple hosts
 hosting a domain placed geographically anywhere and tied up by IndiMail. The architecture does
 not force a filesystem architecture like NFS to be used to distribute the users. In other words,
-\fBIndiMail\fR allows you to extend a domain across multiple servers to provide the ability
+\fBIndiMail\fR allows you to extend a domain across multiple servers and hence provide the ability
 to scale to any number of users. Such a domain which is extended across multiple servers is called
-a clustered domain.
+a clustered domain. A clustered domain consists of multiple mailstore and one or many MySQL servers.
+A mailstore is a host which has the user's mail storage in Maildir. The MySQL servers hold user
+information like path of the Maildir, user privileges, user aliases and forwardings,
+user's mailstore. The MySQL servers can be present on the mailstores itself or as individual servers
+or as a single server holding information for all users on all mailstores. The configuration
+is flexible and is left to the user so that one can optimize on cost or performance.
 .PP
 IndiMail has two databases
 
@@ -965,7 +970,7 @@ CNTRL_HOST        |InLookup     |used    |Environment variables to be set when a
                   |qmail-rspawn |        |domain is extended across multiple
                   |qmail-lspawn |        |servers. These variables point to the
                   |vuserinfo    |        |central database which has the
-                  |             |        |'hostcntrl' table. If both MASTER_HOST
+                  |vserverinfo  |        |'hostcntrl' table. If both MASTER_HOST
                   |             |        |and CNTRL_HOST are defined all updates
                   |             |        |go to MASTER_HOST adn all queries go
                   |             |        |to CNTRL_HOST
@@ -1008,6 +1013,7 @@ MAILTMP           |maildir2mbox |used    |Temporary file that maildir2mbox can
 MCDFILE           |InLookup     |used    |Mail Control Definition file. Specifies
                   |dbinfo       |        |the list of all MySQL servers
                   |vuserinfo    |        |participating in a clustered setup.
+                  |vserverinfo  |        |
 MYSQL_TABLE       |             |used    |Name of the default indimail
                   |             |        |authentication table containing active
                   |             |        |users. If not set, this defaults to
@@ -1144,6 +1150,9 @@ vadduser(1)
 .sp -1
 .IP \n+[step]
 vuserinfo(1)
+.sp -1
+.IP \n+[step]
+vserverinfo(1)
 .sp -1
 .IP \n+[step]
 vpasswd(1)
