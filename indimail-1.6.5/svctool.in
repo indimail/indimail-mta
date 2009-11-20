@@ -5209,7 +5209,7 @@ report ()
 				echo "Date: $date"
 				echo "Subject: $subject"
 				echo 
-				echo ATTENTION: Mail Administrators - aaj kaa taaja kabar
+				echo ATTENTION: Mail Administrators - aaj kaa taaja khabar
 				echo
 				echo Mail Statistics for `/bin/cat $QmailHOME/control/me`
 				echo on $date
@@ -5227,7 +5227,7 @@ report ()
 				) | "$DESTDIR"$QmailHOME/bin/sendmail.sh -t
 			else
 				(
-				echo ATTENTION: Mail Administrators - aaj kaa taaja kabar
+				echo ATTENTION: Mail Administrators - aaj kaa taaja khabar
 				echo
 				echo Mail Statistics for `/usr/bin/head -1 $QmailHOME/control/me` 
 				echo on $date
