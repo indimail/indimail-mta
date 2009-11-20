@@ -25,7 +25,7 @@
 INDIMAILDIR=`grep -w "^indimail" /etc/passwd | cut -d: -f6|head -1`
 spamheader_name=`grep ^spam_header_name $INDIMAILDIR/etc/bogofilter.cf | cut -d= -f2`
 if [ " $spamheader_name" = " " ] ; then
-	spamheader_name = "X-Bogosity"
+	spamheader_name="X-Bogosity"
 fi
 awk -v spamheader_name=$spamheader_name '
   /tcpserver:|qmail-smtpd:/ {
