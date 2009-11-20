@@ -1,4 +1,4 @@
-* Fri Nov 13 2009 mbhangui@gmail.com
+* Fri Nov 20 2009 mbhangui@gmail.com
 Release 1.6.5 Start 13/11/2009
 13/11/2008
 1.  BUG - fixed tcprules going into endless loop with lines neither having
