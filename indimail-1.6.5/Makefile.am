@@ -33,7 +33,8 @@ iauth_la_LDFLAGS = -no-undefined -module -avoid-version
 iauth_la_DEPENDENCIES = $(top_builddir)/libindimail.la
 
 SYSCONFDIR = @sysconfdir@
-sysconf_DATA = indimail.settings controlfiles headerlist osh.table cronlist perm_list
+sysconf_DATA = indimail.settings controlfiles headerlist osh.table cronlist perm_list \
+			   indimail.mrtg.cfg
 man_MANS=vadduser.1 adminclient.8 chowkidar.8 clearopensmtp.8 dbinfo.8 hostcntrl.8 hostsync.8 \
 	initsvc.1 indisrvr.8 indiversion.8 InLookup.8 inlookup.8 inquerytest.8 ipchange.8 \
 	logmonitor.8 mgmtpass.8 postdel.8 printdir.1 proxyimap.8 proxypop3.8 resetquota.8 \
@@ -145,7 +146,7 @@ indimailsbin_PROGRAMS = adminclient chowkidar cindimail clearopensmtp config_set
 	vserverinfo vchkpass vsetpass vdelivermail vdeloldusers vfilter vfstab \
 	vmoddomain vreorg
 
-indimaillibexec_PROGRAMS = sq_vacation
+indimaillibexec_PROGRAMS = sq_vacation qmailmrtg7
 
 indimailauthlib_PROGRAMS = authindi
 
@@ -160,7 +161,8 @@ MOSTLYCLEANFILES=versioninfo vcaliasrev myslave logmonitor controlsync bogofilte
 svctool indimail_settings.c cronlist crypt create_services INSTALL INSTALL-RPM INSTALL-MYSQL \
 indimail.spec cscope.* *.dSYM inc_deps lib_deps socket.lib indimail-@VERSION@-rpmlintrc \
 indimail-epm.list README-CLUSTER tls-cert-check mailzipper perm_list RELEASE-Notes \
-dbinfo.8 inlookup.8 vadddomain.1 vdelivermail.8 indimail.7 svctool.8 indisub.c Quick-INSTALL
+dbinfo.8 inlookup.8 vadddomain.1 vdelivermail.8 indimail.7 svctool.8 indisub.c Quick-INSTALL \
+indimail.mrtg.cfg
 
 DISTCLEANFILES=.gitignore
 
@@ -305,6 +307,9 @@ adminclient_DEPENDENCIES = tls.lo auth_admin.lo adminCmmd.lo
 
 sq_vacation_SOURCES = sq_vacation.c
 sq_vacation_LDADD = @auth_libs@
+
+qmailmrtg7_SOURCES = qmailmrtg7.c
+qmailmrtg7_LDADD = @auth_libs@
 
 vpriv_SOURCES = vpriv.c 
 vpriv_LDADD = @auth_libs@
@@ -742,6 +747,8 @@ myslave: myslave.in
 	$(edit) $@.in > $@
 logmonitor: logmonitor.in
 	$(edit) $@.in > $@
+indimail.mrtg.cfg: indimail.mrtg.in
+	$(edit) indimail.mrtg.in > $@
 svctool: svctool.in /etc/passwd
 	$(edit) $@.in > $@
 tls-cert-check: tls-cert-check.in /etc/passwd
