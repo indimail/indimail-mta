@@ -12,7 +12,10 @@ http://downloads.sourceforge.net/indimail/INSTALL-RPM-@version@
 
 IndiMail also has yum repositories for most of the Linux Distros at
 
-http://download.opensuse.org/repositories/home:/mbhangui/
+http://download.opensuse.org/repositories/home:/indimail/
+
+The latest RPM (for yet to be released version) can be found at
+http://download.opensuse.org/repositories/home:/indimail/
 
 What the RPM does
 -----------------
@@ -86,7 +89,7 @@ to run, you need to create @indimaildir@/etc/fetchmailrc file. You can use fetch
 for configuring fetchmail. To have these services started automatically during reboot,
 delete the files /service/mysql.3306/down and /service/fetchmail/down .
 
-Proceed to SECTION 7 in the file INSTALL-@version@ for further instruction on 
+Proceed to SECTION 8 in the file INSTALL-@version@ for further instruction on 
 configuration of IndiMail
 
 Log files are creaed in /var/log/indimail/*
@@ -95,12 +98,12 @@ Log files are creaed in /var/log/indimail/*
 How to install MySQL
 --------------------
 
-    Install MySQL with MD5 eaae8071cdc9c7144273e2e03ea20825
+    Install MySQL 5.4.3-beta with MD5 9ea08558d51b1d56d3784028d57c2b08
     current working directory /home/local/src
 
-    % wget http://downloads.mysql.com/archives/mysql-6.0/mysql-6.0.3-alpha.tar.gz
-    % gunzip -c mysql-6.0.3-alpha.tar.gz |tar xf -
-    % cd mysql-6.0.3-alpha
+    You can download mysql-5.4.3-beta.tar.gz from dev.mysql.com
+    % gunzip -c mysql-5.4.3-beta.tar.gz |tar xf -
+    % cd mysql-5.4.3-beta
     % ./configure --prefix=/usr/local/mysql --enable-local-infile
       (--prefix=/usr in case you are using the RPM from openSUSE build service)
     % make -s DESTDIR=staging_directory
