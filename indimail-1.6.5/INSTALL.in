@@ -821,6 +821,13 @@ the installation.
 
     % sudo crontab -u root @indimaildir@/etc/cronlist
 
+    The following procedure configures MRTG for IndiMail
+    % sudo mkdir /var/www/html/mailmrtg
+    % sudo cp @indimaildir@/etc/indimail.mrtg.cfg /var/www/html/mailmrtg
+    % sudo indexmaker --title="IndiMail Statistics" --section=title \
+        --output=/var/www/html/mailmrtg/index.html \
+        @indimaildir@/etc/indimail.mrtg.cfg
+
 
 You can go on to add a virtual domain and users if you wish
 
