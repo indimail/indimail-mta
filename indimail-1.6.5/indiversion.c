@@ -1,5 +1,11 @@
 /*
  * $Log: indiversion.c,v $
+ * Revision 2.122  2009-11-23 11:41:09+05:30  Cprogrammer
+ * added mode for libexec programs
+ *
+ * Revision 2.121  2009-11-23 11:33:36+05:30  Cprogrammer
+ * added vserverinfo, programs in libexec directory
+ *
  * Revision 2.120  2009-08-11 17:00:11+05:30  Cprogrammer
  * removed auth_admin() and adminCmmd()
  *
@@ -478,7 +484,7 @@
 #endif
 
 #ifndef	lint
-static char     sccsid[] = "$Id: indiversion.c,v 2.120 2009-08-11 17:00:11+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: indiversion.c,v 2.122 2009-11-23 11:41:09+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 void            getversion_indimail_settings_c();
@@ -854,7 +860,16 @@ char           *sbin_program_list[] =
 	"copyemail",
 	"mail_report",
 	"mgmtpass",
+	"vserverinfo",
 	"tls-cert-check",
+	0
+};
+
+char           *libexec_program_list[] = 
+{
+	"authlib/authindi",
+	"qmailmrtg7",
+	"sq_vacation",
 	0
 };
 
@@ -872,6 +887,8 @@ main()
 		Ident(*ptr, 1);
 	for(ptr = sbin_program_list;*ptr;ptr++)
 		Ident(*ptr, 2);
+	for(ptr = libexec_program_list;*ptr;ptr++)
+		Ident(*ptr, 3);
 	snprintf(listfile, sizeof(listfile), "%s/etc/qmailprog.list", INDIMAILDIR);
 	if ((fp = fopen(listfile, "r")))
 	{
@@ -1193,8 +1210,12 @@ Ident(char *pgname, int mode)
 
 	if (mode == 1)
 		snprintf(buffer, MAX_BUFF, "strings %s/bin/%s", INDIMAILDIR, pgname);
+	else
 	if (mode == 2)
 		snprintf(buffer, MAX_BUFF, "strings %s/sbin/%s", INDIMAILDIR, pgname);
+	else
+	if (mode == 3)
+		snprintf(buffer, MAX_BUFF, "strings %s/libexec/%s", INDIMAILDIR, pgname);
 	else
 		snprintf(buffer, MAX_BUFF, "strings %s/bin/%s", QMAILDIR, pgname);
 	if(!(fp = popen(buffer, "r")))
