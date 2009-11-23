@@ -1,3 +1,17 @@
+#
+# $Log: indimail.mrtg.in,v $
+# Revision 2.2  2009-11-23 11:28:22+05:30  Cprogrammer
+# added local/remote queue
+#
+# Revision 2.1  2009-11-23 10:28:20+05:30  Cprogrammer
+# mrtg config file for indimail
+#
+#
+# Generate index.html using below command
+#
+# indexmaker --title="IndiMail Statistics" --section=title \
+#       --output=/var/www/html/mailmrtg/index.html \
+#        @indimaildir@/etc/indimail.mrtg.cfg
 HtmlDir: /var/www/html/mailmrtg/
 ImageDir: /var/www/html/mailmrtg/
 WorkDir: /var/www/html/mailmrtg/
@@ -22,24 +36,6 @@ YSize[msg]: 150
 
 #-------------------------------------------------------------------
 
-Title[bits]: Bits Transfered
-MaxBytes[bits]: 1540000
-AbsMax[bits]: 100000000
-Options[bits]: growright,unknaszero,nopercent,gauge
-Target[bits]: `@indimaildir@/libexec/qmailmrtg7 b @logdir@/deliver.25`
-PageTop[bits]: <B>Bits Transfered</B><br>
-ShortLegend[bits]: bits
-YLegend[bits]: bits/sec
-Legend1[bits]: bits&nbsp;
-Legend2[bits]: bits&nbsp;
-LegendI[bits]: bits&nbsp;
-LegendO[bits]: bits&nbsp;
-WithPeak[bits]: ymwd
-XSize[bits]: 350
-YSize[bits]: 150
-
-#-------------------------------------------------------------------
-
 Title[messstatus]: Message Status
 MaxBytes[messstatus]: 10000
 AbsMax[messstatus]: 100000
@@ -57,21 +53,57 @@ YSize[messstatus]: 150
 
 #-------------------------------------------------------------------
 
-Title[queue-size]: Queue Size
-MaxBytes[queue-size]: 10000
-AbsMax[queue-size]: 100000
-Options[queue-size]: growright,unknaszero,nopercent,gauge
-Target[queue-size]: `@indimaildir@/libexec/qmailmrtg7 q @indimaildir@/queue`
-PageTop[queue-size]: <B>Queue Size</B><br>
-ShortLegend[queue-size]: Msg
-YLegend[queue-size]: msg total
-Legend1[queue-size]: msg&nbsp;
-Legend2[queue-size]: msg&nbsp;
-LegendI[queue-size]: msg&nbsp;
-LegendO[queue-size]: unprocessed msg:&nbsp;
-WithPeak[queue-size]: ymwd
-XSize[queue-size]: 350
-YSize[queue-size]: 150
+Title[queue1-size]: Queue Size (Messages/Todo)
+MaxBytes[queue1-size]: 10000
+AbsMax[queue1-size]: 100000
+Options[queue1-size]: growright,unknaszero,nopercent,gauge
+Target[queue1-size]: `@indimaildir@/libexec/qmailmrtg7 q @indimaildir@/queue`
+PageTop[queue1-size]: <B>Queue Size</B><br>
+ShortLegend[queue1-size]: Msg
+YLegend[queue1-size]: msg total
+Legend1[queue1-size]: msg&nbsp;
+Legend2[queue1-size]: msg&nbsp;
+LegendI[queue1-size]: msg&nbsp;
+LegendO[queue1-size]: unprocessed msg:&nbsp;
+WithPeak[queue1-size]: ymwd
+XSize[queue1-size]: 350
+YSize[queue1-size]: 150
+
+#-------------------------------------------------------------------
+
+Title[queue2-size]: Queue Size (Local/Remote)
+MaxBytes[queue2-size]: 10000
+AbsMax[queue2-size]: 100000
+Options[queue2-size]: growright,unknaszero,nopercent,gauge
+Target[queue2-size]: `@indimaildir@/libexec/qmailmrtg7 Q @indimaildir@/queue`
+PageTop[queue2-size]: <B>Queue Size</B><br>
+ShortLegend[queue2-size]: Msg
+YLegend[queue2-size]: msg total
+Legend1[queue2-size]: Local Queue&nbsp;
+Legend2[queue2-size]: Remote Queue&nbsp;
+LegendI[queue2-size]: local&nbsp;
+LegendO[queue2-size]: remote&nbsp;
+WithPeak[queue2-size]: ymwd
+XSize[queue2-size]: 350
+YSize[queue2-size]: 150
+
+#-------------------------------------------------------------------
+
+Title[bits]: Bits Transfered
+MaxBytes[bits]: 1540000
+AbsMax[bits]: 100000000
+Options[bits]: growright,unknaszero,nopercent,gauge
+Target[bits]: `@indimaildir@/libexec/qmailmrtg7 b @logdir@/deliver.25`
+PageTop[bits]: <B>Bits Transfered</B><br>
+ShortLegend[bits]: bits
+YLegend[bits]: bits/sec
+Legend1[bits]: bits&nbsp;
+Legend2[bits]: bits&nbsp;
+LegendI[bits]: bits&nbsp;
+LegendO[bits]: bits&nbsp;
+WithPeak[bits]: ymwd
+XSize[bits]: 350
+YSize[bits]: 150
 
 #-------------------------------------------------------------------
 
