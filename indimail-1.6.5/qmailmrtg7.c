@@ -1,4 +1,18 @@
 /*
+ * $Log: qmailmrtg7.c,v $
+ * Revision 2.4  2009-11-23 11:54:22+05:30  Cprogrammer
+ * added getversion_qmailmrtg7_c() function
+ *
+ * Revision 2.3  2009-11-23 11:43:03+05:30  Cprogrammer
+ * added ident keyword
+ *
+ * Revision 2.2  2009-11-23 11:28:37+05:30  Cprogrammer
+ * 'Q' option for displaying local/remote queue size
+ *
+ * Revision 2.1  2009-11-23 10:32:25+05:30  Cprogrammer
+ * provide mrtg support for indimail
+ *
+ *
  * Copyright (C) 1999-2004 Inter7 Internet Technologies, Inc.
  *
  * This program is free software; you can redistribute it and/or modify
@@ -14,14 +28,16 @@
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA
+ *
+ *
+ * kbo@inter7.com
+ * Wrote everything except what is listed below. 
+ * 
+ * Richard A. Secor <rsecor@seqlogic.com>
+ * Added support for rblsmtpd deny
+ *
+ * Modified for IndiMail by Manvendra Bhangui <mbhangui@gmail.com>
  */
-/*-
-kbo@inter7.com
-   Wrote everything except what is listed below. 
-
-Richard A. Secor <rsecor@seqlogic.com>
-   Added support for rblsmtpd deny
-*/
 #include <stdio.h>
 #include <unistd.h>
 #include <stdlib.h>
@@ -30,6 +46,10 @@ Richard A. Secor <rsecor@seqlogic.com>
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <dirent.h>
+
+#ifndef lint
+static char     sccsid[] = "$Id: qmailmrtg7.c,v 2.4 2009-11-23 11:54:22+05:30 Cprogrammer Exp mbhangui $";
+#endif
 
 #define MAX_BUFF 1000
 int             BigTodo=1;
@@ -91,10 +111,11 @@ main(int argc, char **argv)
 	case 'S':
 	case 'b':
 	case 'q':
+	case 'Q':
 	case 'l':
 	case 'v':
 	case 'u':
-	case 'Q':
+	case 'd':
 		break;
 	default:
 		usage();
@@ -123,22 +144,26 @@ main(int argc, char **argv)
 	tquery = 0;
 	tcached = 0;
 
-	if (TheType == 'q') {
+	if (TheType == 'q' || TheType == 'Q') {
 		for (i = 1, mess_count = todo_count = 0;;i++)
 		{
-			snprintf(TmpBuf, sizeof (TmpBuf), "%s/queue%d/mess", TheDir, i);
+			snprintf(TmpBuf, sizeof (TmpBuf), "%s/queue%d/%s", TheDir, i,
+				TheType == 'Q' ? "local" : "mess");
 			if (access(TmpBuf, F_OK))
 				break;
 			max_files = 0;
 			mess_count += get_size(TmpBuf);
-			snprintf(TmpBuf, sizeof (TmpBuf), "%s/queue%d/todo", TheDir, i);
+			snprintf(TmpBuf, sizeof (TmpBuf), "%s/queue%d/%s", TheDir, i,
+				TheType == 'Q' ? "remote" : "todo");
 			max_files = 0;
 			todo_count += get_size(TmpBuf);
 		}
-		snprintf(TmpBuf, sizeof (TmpBuf), "%s/nqueue/mess", TheDir);
+		snprintf(TmpBuf, sizeof (TmpBuf), "%s/nqueue/%s", TheDir,
+			TheType == 'Q' ? "local" : "mess");
 		max_files = 0;
 		mess_count += get_size(TmpBuf);
-		snprintf(TmpBuf, sizeof (TmpBuf), "%s/nqueue/todo", TheDir);
+		snprintf(TmpBuf, sizeof (TmpBuf), "%s/nqueue/%s", TheDir,
+			TheType == 'Q' ? "local" : "todo");
 		max_files = 0;
 		todo_count += get_size(TmpBuf);
 		printf("%d\n%d\n", mess_count, todo_count);
@@ -201,7 +226,7 @@ main(int argc, char **argv)
 		printf("%.0f\n", (bytes * 8.0) / 300.0);
 		printf("%.0f\n", (bytes * 8.0) / 300.0);
 		break;
-	case 'Q': /*- dnscache */
+	case 'd': /*- dnscache */
 		printf("%i\n%i\n\n\n", tcached * 12, tquery * 12);
 		break;
 	}
@@ -325,7 +350,7 @@ process_file(char *file_name)
 		case 'l':
 			++ttotal;
 			break;
-		case 'Q':
+		case 'd':
 			if (strstr(TmpBuf, "cached"))
 				tcached++;
 			if (strstr(TmpBuf, "query"))
@@ -365,14 +390,16 @@ get_tai(char *tmpstr)
 	return (secs);
 }
 
+void            getversion_qmailmrtg7_c();
 
 void
 usage()
 {
 	fprintf(stderr, "usage: type dir\n");
-	fprintf(stderr, "where type is one of t, a, m, c, s, b, q, l, v, S, C, Q\n");
+	fprintf(stderr, "where type is one of t, a, m, c, s, b, q, l, v, S, C, d\n");
 	fprintf(stderr, "and dir is a directory containing multilog files\n");
 	fprintf(stderr, "for q option dir is the qmail queue dir\n");
+	getversion_qmailmrtg7_c();
 }
 
 int
@@ -406,4 +433,10 @@ get_size(diri)
 		count += count_files(tmpbuf);
 	}
 	return (count);
+}
+
+void
+getversion_qmailmrtg7_c()
+{
+	printf("%s\n", sccsid);
 }
