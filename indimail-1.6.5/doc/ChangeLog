@@ -28,6 +28,8 @@ Release 1.6.5 Start 13/11/2009
 15. BUG - Fixed fcntl (locking) error on DARWIN (flock structure initialization) [2898949]
 18/11/2009
 16. Added new command vserverinfo
+23/11/2009
+17. Added mrtg support using qmailmrtg7
 
 * Fri Nov 13 2009 mbhangui@gmail.com
 Release 1.6.4 Start 30/10/2009
