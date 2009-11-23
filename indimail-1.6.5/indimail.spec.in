@@ -1,5 +1,8 @@
 #
 # $Log: indimail.spec.in,v $
+# Revision 2.116  2009-11-23 09:29:39+05:30  Cprogrammer
+# added qmailmrtg
+#
 # Revision 2.115  2009-11-18 13:47:22+05:30  Cprogrammer
 # added vserverinfo
 #
@@ -358,7 +361,7 @@
 # rpm spec file for indimail
 #
 #
-# $Id: indimail.spec.in,v 2.115 2009-11-18 13:47:22+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 2.116 2009-11-23 09:29:39+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %define _unpackaged_files_terminate_build 1
 
@@ -974,6 +977,7 @@ done
 
 /usr/bin/chrpath -d %{buildroot}%{_prefix}/libexec/authlib/authindi
 /usr/bin/chrpath -d %{buildroot}%{_prefix}/libexec/sq_vacation
+/usr/bin/chrpath -d %{buildroot}%{_prefix}/libexec/qmailmrtg7
 
 for i in adminclient chowkidar cindimail clamd clearopensmtp copyemail execmysql \
 hostsync indisrvr inlookup inquerytest install_tables ipchange mail_report \
@@ -1151,6 +1155,7 @@ fi
 %ghost %attr(0644,root,root)                      %{_prefix}/etc/services.log
 
 %attr(444,root,root)                              %{_prefix}/etc/cronlist
+%attr(444,root,root)                              %{_prefix}/etc/indimail.mrtg.cfg
 %attr(444,root,root)                              %{_prefix}/etc/qmailprog.list
 %attr(444,root,root)                              %{_prefix}/etc/headerlist
 %attr(444,root,root)                              %{_prefix}/etc/indimail.settings
@@ -1491,6 +1496,7 @@ fi
 %attr(555,root,qmail)                   %{_prefix}/bin/tai64nlocal
 %attr(555,root,qmail)                   %{_prefix}/bin/valias
 %attr(555,root,qmail)                   %{_prefix}/bin/vproxy
+%attr(555,root,qmail)                   %{_prefix}/libexec/qmailmrtg7
 %attr(4555,root,qmail)                  %{_prefix}/libexec/sq_vacation
 %if %nocourierimap == 0
 # courier imap
