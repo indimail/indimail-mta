@@ -1,5 +1,8 @@
 #
 # $Log: indimail.mrtg.in,v $
+# Revision 2.3  2009-11-24 15:39:10+05:30  Cprogrammer
+# made title more descriptive for Messages
+#
 # Revision 2.2  2009-11-23 11:28:22+05:30  Cprogrammer
 # added local/remote queue
 #
@@ -17,7 +20,7 @@ ImageDir: /var/www/html/mailmrtg/
 WorkDir: /var/www/html/mailmrtg/
 #############################################################
 
-Title[msg]: Messages
+Title[msg]: Messages (Success, Attempts)
 MaxBytes[msg]: 10000
 AbsMax[msg]: 20000
 Options[msg]: growright,unknaszero,nopercent,gauge
@@ -36,7 +39,7 @@ YSize[msg]: 150
 
 #-------------------------------------------------------------------
 
-Title[messstatus]: Message Status
+Title[messstatus]: Message Status (Success, Failure)
 MaxBytes[messstatus]: 10000
 AbsMax[messstatus]: 100000
 Options[messstatus]: growright,unknaszero,nopercent,gauge
