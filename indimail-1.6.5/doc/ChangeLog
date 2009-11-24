@@ -1,4 +1,4 @@
-* Fri Nov 20 2009 mbhangui@gmail.com
+* Wed Nov 25 2009 mbhangui@gmail.com
 Release 1.6.5 Start 13/11/2009
 13/11/2008
 1.  BUG - fixed tcprules going into endless loop with lines neither having
@@ -29,7 +29,10 @@ Release 1.6.5 Start 13/11/2009
 18/11/2009
 16. Added new command vserverinfo
 23/11/2009
-17. Added mrtg support using qmailmrtg7
+17. Added mrtg support using a modified qmailmrtg7
+24/11/2009
+18. use Maildir path in .qmail-register-spam, .qmail-spam,
+    .qmail-register-nonspam, .qmail-nonspam
 
 * Fri Nov 13 2009 mbhangui@gmail.com
 Release 1.6.4 Start 30/10/2009
