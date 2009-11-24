@@ -33,6 +33,7 @@ Release 1.6.5 Start 13/11/2009
 24/11/2009
 18. use Maildir path in .qmail-register-spam, .qmail-spam,
     .qmail-register-nonspam, .qmail-nonspam
+19. Added HAM/SPAM graph for MRTG, qmailmrtg7 modified to handle bogofilter
 
 * Fri Nov 13 2009 mbhangui@gmail.com
 Release 1.6.4 Start 30/10/2009
