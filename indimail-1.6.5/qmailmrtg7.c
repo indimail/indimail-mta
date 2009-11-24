@@ -1,5 +1,8 @@
 /*
  * $Log: qmailmrtg7.c,v $
+ * Revision 2.5  2009-11-24 21:04:49+05:30  Cprogrammer
+ * option 'S' no handles bogofilter
+ *
  * Revision 2.4  2009-11-23 11:54:22+05:30  Cprogrammer
  * added getversion_qmailmrtg7_c() function
  *
@@ -48,7 +51,7 @@
 #include <dirent.h>
 
 #ifndef lint
-static char     sccsid[] = "$Id: qmailmrtg7.c,v 2.4 2009-11-23 11:54:22+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: qmailmrtg7.c,v 2.5 2009-11-24 21:04:49+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #define MAX_BUFF 1000
@@ -191,7 +194,7 @@ main(int argc, char **argv)
 	}
 	closedir(mydir);
 	switch (TheType) {
-	case 'S': /*- spamassassin */
+	case 'S': /*- bogofilter */
 		printf("%i\n%i\n\n\n", tclean * 12, tspam * 12);
 		break;
 	case 'C': /*- clamav */
@@ -252,9 +255,9 @@ process_file(char *file_name)
 			continue;
 		switch (TheType) {
 		case 'S':
-			if ((tmpstr1 = strstr(TmpBuf, "identified spam")) != NULL) {
+			if ((tmpstr1 = strstr(TmpBuf, "X-Bogosity: Yes")) != NULL) {
 				++tspam;
-			} else if ((tmpstr1 = strstr(TmpBuf, "clean message")) != NULL) {
+			} else if ((tmpstr1 = strstr(TmpBuf, "X-Bogosity: No")) != NULL) {
 				++tclean;
 			}
 			break;

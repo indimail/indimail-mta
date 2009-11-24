@@ -1,5 +1,8 @@
 #
 # $Log: indimail.mrtg.in,v $
+# Revision 2.4  2009-11-24 21:05:11+05:30  Cprogrammer
+# added HAM/SPAM graph for MRTG
+#
 # Revision 2.3  2009-11-24 15:39:10+05:30  Cprogrammer
 # made title more descriptive for Messages
 #
@@ -125,6 +128,24 @@ LegendO[concurrency]: remote&nbsp;
 WithPeak[concurrency]: ymwd
 XSize[concurrency]: 350
 YSize[concurrency]: 150
+
+#-------------------------------------------------------------------
+
+Title[spam]: Ham/Spam
+MaxBytes[spam]: 10000
+AbsMax[spam]: 100000
+Options[spam]: growright,unknaszero,nopercent,gauge
+Target[spam]: `@indimaildir@/libexec/qmailmrtg7 S @logdir@/spamlog`
+PageTop[spam]: <B>Bogofilter</B><br>
+ShortLegend[spam]: Msg
+YLegend[spam]: spam/hour
+Legend1[spam]: Ham&nbsp;
+Legend2[spam]: Spam&nbsp;
+LegendI[spam]: Ham&nbsp;
+LegendO[spam]: Spam:&nbsp;
+WithPeak[spam]: ymwd
+XSize[spam]: 350
+YSize[spam]: 150
 
 #-------------------------------------------------------------------
 
