@@ -1,5 +1,8 @@
 #
 # $Log: indimail-epm.list.in,v $
+# Revision 2.37  2009-11-24 22:23:01+05:30  Cprogrammer
+# added vserverinfo, qmailmrtg7, indimail.mrtg.cfg
+#
 # Revision 2.36  2009-11-15 22:45:28+05:30  Cprogrammer
 # upgrade to fetchmail 6.3.13
 #
@@ -676,6 +679,7 @@ f 644 root indimail ${prefix}/man/man1/vrenameuser.1.gz	BUILDROOT${prefix}/man/m
 f 644 root indimail ${prefix}/man/man1/vsetuserquota.1.gz	BUILDROOT${prefix}/man/man1/vsetuserquota.1.gz
 f 644 root indimail ${prefix}/man/man8/vsmtp.8.gz	BUILDROOT${prefix}/man/man8/vsmtp.8.gz
 f 644 root indimail ${prefix}/man/man1/vuserinfo.1.gz	BUILDROOT${prefix}/man/man1/vuserinfo.1.gz
+f 644 root indimail ${prefix}/man/man1/vserverinfo.1.gz	BUILDROOT${prefix}/man/man1/vserverinfo.1.gz
 f 644 root indimail ${prefix}/man/man7/indimail.7.gz	BUILDROOT${prefix}/man/man7/indimail.7.gz
 f 644 root indimail ${prefix}/man/man7/IndiMail.7.gz	BUILDROOT${prefix}/man/man7/IndiMail.7.gz
 f 644 root indimail ${prefix}/man/man8/chowkidar.8.gz	BUILDROOT${prefix}/man/man8/chowkidar.8.gz
@@ -888,6 +892,7 @@ f 555 root qmail ${prefix}/bin/datemail BUILDROOT${prefix}/bin/datemail
 f 555 root qmail ${prefix}/bin/qmail-scanner-queue.pl BUILDROOT${prefix}/bin/qmail-scanner-queue.pl
 f 555 root qmail ${prefix}/bin/zsenders BUILDROOT${prefix}/bin/zsenders
 f 4555 root root ${prefix}/bin/vuserinfo BUILDROOT${prefix}/bin/vuserinfo
+f 4555 root root ${prefix}/bin/vserverinfo BUILDROOT${prefix}/bin/vserverinfo
 f 511 root qmail ${prefix}/bin/qmail-remote BUILDROOT${prefix}/bin/qmail-remote
 f 555 root qmail ${prefix}/bin/zfailures BUILDROOT${prefix}/bin/zfailures
 f 755 root root ${prefix}/bin/munpack BUILDROOT${prefix}/bin/munpack
@@ -1101,6 +1106,7 @@ f 555 root qmail ${prefix}/bin/argv0 BUILDROOT${prefix}/bin/argv0
 f 555 root qmail ${prefix}/bin/envdir BUILDROOT${prefix}/bin/envdir
 f 555 root qmail ${prefix}/bin/recipients BUILDROOT${prefix}/bin/recipients
 f 755 root root ${prefix}/libexec/sq_vacation BUILDROOT${prefix}/libexec/sq_vacation
+f 755 root root ${prefix}/libexec/qmailmrtg7 BUILDROOT${prefix}/libexec/qmailmrtg7
 f 755 root root ${prefix}/libexec/authlib/authindi BUILDROOT${prefix}/libexec/authlib/authindi
 f 755 root root ${prefix}/libexec/sq_vacation BUILDROOT${prefix}/libexec/sq_vacation
 
@@ -1228,6 +1234,7 @@ f 644 root root ${prefix}/etc/yum.repos.d/IndiMail-openSUSE_10.3.repo BUILDROOT$
 f 644 root root ${prefix}/etc/yum.repos.d/IndiMail-openSUSE_11.0.repo BUILDROOT${prefix}/etc/yum.repos.d/IndiMail-openSUSE_11.0.repo
 f 644 root root ${prefix}/etc/yum.repos.d/IndiMail-openSUSE_11.1.repo BUILDROOT${prefix}/etc/yum.repos.d/IndiMail-openSUSE_11.1.repo
 f 644 root root ${prefix}/etc/cronlist BUILDROOT${prefix}/etc/cronlist
+f 644 root root ${prefix}/etc/indimail.mrtg.cfg BUILDROOT${prefix}/etc/indimail.mrtg.cfg
 f 644 root root ${prefix}/etc/headerlist BUILDROOT${prefix}/etc/headerlist
 f 644 root root ${prefix}/etc/indimail.settings BUILDROOT${prefix}/etc/indimail.settings
 f 644 root root ${prefix}/etc/qmailprog.list BUILDROOT${prefix}/etc/qmailprog.list
