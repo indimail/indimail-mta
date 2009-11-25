@@ -1,5 +1,8 @@
 #
 # $Log: indimail-epm.list.in,v $
+# Revision 2.38  2009-11-25 15:52:53+05:30  Cprogrammer
+# fixed vserverinfo path
+#
 # Revision 2.37  2009-11-24 22:23:01+05:30  Cprogrammer
 # added vserverinfo, qmailmrtg7, indimail.mrtg.cfg
 #
