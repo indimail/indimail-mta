@@ -1,5 +1,8 @@
 #
 # $Log: indimail.mrtg.in,v $
+# Revision 2.7  2009-11-25 16:12:39+05:30  Cprogrammer
+# another typo fixed (path for Port 25)
+#
 # Revision 2.6  2009-11-25 15:53:01+05:30  Cprogrammer
 # fixed smtpd log path for port 587
 #
@@ -212,7 +215,7 @@ Title[smtpad]: SMTP Totals (Port 25)
 MaxBytes[smtpad]: 1000
 AbsMax[smtpad]: 100000
 Options[smtpad]: growright,unknaszero,nopercent,gauge
-Target[smtpad]: `@indimaildir@/libexec/qmailmrtg7 a @logdir@/smtpd.587`
+Target[smtpad]: `@indimaildir@/libexec/qmailmrtg7 a @logdir@/smtpd.25`
 PageTop[smtpad]: <B>SMTP Totals</B><BR>
 ShortLegend[smtpad]: SMTP
 YLegend[smtpad]: SMTP/hour
