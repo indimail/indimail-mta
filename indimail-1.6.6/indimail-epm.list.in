@@ -892,7 +892,7 @@ f 555 root qmail ${prefix}/bin/datemail BUILDROOT${prefix}/bin/datemail
 f 555 root qmail ${prefix}/bin/qmail-scanner-queue.pl BUILDROOT${prefix}/bin/qmail-scanner-queue.pl
 f 555 root qmail ${prefix}/bin/zsenders BUILDROOT${prefix}/bin/zsenders
 f 4555 root root ${prefix}/bin/vuserinfo BUILDROOT${prefix}/bin/vuserinfo
-f 4555 root root ${prefix}/bin/vserverinfo BUILDROOT${prefix}/bin/vserverinfo
+f 4555 root root ${prefix}/sbin/vserverinfo BUILDROOT${prefix}/sbin/vserverinfo
 f 511 root qmail ${prefix}/bin/qmail-remote BUILDROOT${prefix}/bin/qmail-remote
 f 555 root qmail ${prefix}/bin/zfailures BUILDROOT${prefix}/bin/zfailures
 f 755 root root ${prefix}/bin/munpack BUILDROOT${prefix}/bin/munpack
