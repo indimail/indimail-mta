@@ -1,5 +1,8 @@
 #
 # $Log: indimail.mrtg.in,v $
+# Revision 2.5  2009-11-25 12:53:36+05:30  Cprogrammer
+# added port 587
+#
 # Revision 2.4  2009-11-24 21:05:11+05:30  Cprogrammer
 # added HAM/SPAM graph for MRTG
 #
@@ -28,8 +31,7 @@ MaxBytes[msg]: 10000
 AbsMax[msg]: 20000
 Options[msg]: growright,unknaszero,nopercent,gauge
 Target[msg]: `@indimaildir@/libexec/qmailmrtg7 m @logdir@/deliver.25`
-#PageTop[msg]: <B>Messages</B><br>
-PageTop[msg]: <H1>Stats for Messages</H1>
+PageTop[msg]: <B>Stats for Messages</B><br>
 ShortLegend[msg]: msg
 YLegend[msg]: msg/hour
 Legend1[msg]: Total Msg&nbsp;
@@ -135,7 +137,7 @@ Title[spam]: Ham/Spam
 MaxBytes[spam]: 10000
 AbsMax[spam]: 100000
 Options[spam]: growright,unknaszero,nopercent,gauge
-Target[spam]: `@indimaildir@/libexec/qmailmrtg7 S @logdir@/spamlog`
+Target[spam]: `@indimaildir@/libexec/qmailmrtg7 S @logdir@/smtpd.25`
 PageTop[spam]: <B>Bogofilter</B><br>
 ShortLegend[spam]: Msg
 YLegend[spam]: spam/hour
@@ -167,11 +169,47 @@ YSize[clamd]: 150
 
 #-------------------------------------------------------------------
 
-Title[smtpad]: SMTP Totals
+Title[smtpad587]: SMTP Totals (Port 587)
+MaxBytes[smtpad587]: 1000
+AbsMax[smtpad587]: 100000
+Options[smtpad587]: growright,unknaszero,nopercent,gauge
+Target[smtpad587]: `@indimaildir@/libexec/qmailmrtg7 a @logdir@/smtpd.25`
+PageTop[smtpad587]: <B>SMTP Totals</B><BR>
+ShortLegend[smtpad587]: SMTP
+YLegend[smtpad587]: SMTP/hour
+Legend1[smtpad587]: Allowed Connections&nbsp;
+Legend2[smtpad587]: Denied Connections&nbsp;
+LegendI[smtpad587]: Allow&nbsp;
+LegendO[smtpad587]: Deny&nbsp;
+WithPeak[smtpad587]: ymwd
+XSize[smtpad587]: 350
+YSize[smtpad587]: 150
+
+#-------------------------------------------------------------------
+
+Title[smtp587]: SMTP Concurrency (Port 587)
+MaxBytes[smtp587]: 100
+AbsMax[smtp587]: 500
+Options[smtp587]: growright,unknaszero,nopercent,gauge
+Target[smtp587]: `@indimaildir@/libexec/qmailmrtg7 c @logdir@/smtpd.587`
+PageTop[smtp587]: <B>SMTP Concurrency</B><BR>
+ShortLegend[smtp587]: SMTP
+YLegend[smtp587]: max SMTP
+Legend1[smtp587]: Peak Connections&nbsp;
+Legend2[smtp587]: Max Concurrency&nbsp;
+LegendI[smtp587]: SMTP Concurrency&nbsp;
+LegendO[smtp587]: Max Configured SMTP&nbsp;
+WithPeak[smtp587]: ymwd
+XSize[smtp587]: 350
+YSize[smtp587]: 150
+
+#-------------------------------------------------------------------
+
+Title[smtpad]: SMTP Totals (Port 25)
 MaxBytes[smtpad]: 1000
 AbsMax[smtpad]: 100000
 Options[smtpad]: growright,unknaszero,nopercent,gauge
-Target[smtpad]: `@indimaildir@/libexec/qmailmrtg7 a @logdir@/smtpd.25`
+Target[smtpad]: `@indimaildir@/libexec/qmailmrtg7 a @logdir@/smtpd.587`
 PageTop[smtpad]: <B>SMTP Totals</B><BR>
 ShortLegend[smtpad]: SMTP
 YLegend[smtpad]: SMTP/hour
@@ -185,7 +223,7 @@ YSize[smtpad]: 150
 
 #-------------------------------------------------------------------
 
-Title[smtp]: SMTP Concurrency
+Title[smtp]: SMTP Concurrency (Port 25)
 MaxBytes[smtp]: 100
 AbsMax[smtp]: 500
 Options[smtp]: growright,unknaszero,nopercent,gauge
