@@ -1,5 +1,8 @@
 /*
  * $Log: vgroup.c,v $
+ * Revision 2.16  2009-11-25 12:54:41+05:30  Cprogrammer
+ * do not allow empty email addresses
+ *
  * Revision 2.15  2009-10-14 20:47:41+05:30  Cprogrammer
  * use strtoll() instead of atol()
  *
@@ -50,7 +53,7 @@
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vgroup.c,v 2.15 2009-10-14 20:47:41+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: vgroup.c,v 2.16 2009-11-25 12:54:41+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef VALIAS
@@ -195,6 +198,15 @@ get_options(int argc, char **argv, int *option, char **group, char **gecos, char
 			verbose = 1;
 			break;
 		case 'a':
+			switch (*option)
+			{
+			case ADDNEW_GROUP:
+			case INSERT_MEMBER:
+			case DELETE_MEMBER:
+			case UPDATE_MEMBER:
+				usage();
+				return(1);
+			}
 			*option = ADDNEW_GROUP;
 			break;
 		case 'm':
@@ -209,6 +221,12 @@ get_options(int argc, char **argv, int *option, char **group, char **gecos, char
 		case 'i':
 			if (*option == ADDNEW_GROUP)
 			{
+				usage();
+				return(1);
+			}
+			if (!*optarg)
+			{
+				fprintf(stderr, "You cannot have an empty email address\n");
 				usage();
 				return(1);
 			}
@@ -230,12 +248,24 @@ get_options(int argc, char **argv, int *option, char **group, char **gecos, char
 				usage();
 				return(1);
 			}
+			if (!*optarg)
+			{
+				fprintf(stderr, "You cannot have an empty email address\n");
+				usage();
+				return(1);
+			}
 			*option = UPDATE_MEMBER;
 			*member = optarg;
 			break;
 		case 'o':
 			if (*option == ADDNEW_GROUP)
 			{
+				usage();
+				return(1);
+			}
+			if (!*optarg)
+			{
+				fprintf(stderr, "You cannot have an empty email address\n");
 				usage();
 				return(1);
 			}
@@ -277,7 +307,7 @@ void
 usage()
 {
 	fprintf(stderr, "usage1: vgroup -a [-h] [-c] [-q] [-v] [-V] groupAddress [password]\n");
-	fprintf(stderr, "usage2: vgroup    [-i] [-d] [-u] [-v] [-V] groupAddress\n\n");
+	fprintf(stderr, "usage2: vgroup    [-i] [-d] [-u new_mail -o old_email] [-v] [-V] groupAddress\n\n");
 	fprintf(stderr, "options: -V (print version number)\n");
 	fprintf(stderr, "         -v (verbose)\n");
 	fprintf(stderr, "         -a (Add new group)\n");

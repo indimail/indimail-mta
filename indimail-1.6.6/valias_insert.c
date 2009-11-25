@@ -1,5 +1,8 @@
 /*
  * $Log: valias_insert.c,v $
+ * Revision 2.17  2009-11-25 12:54:04+05:30  Cprogrammer
+ * do not allow empty alias_line
+ *
  * Revision 2.16  2009-10-17 20:18:40+05:30  Cprogrammer
  * added missing argument real_domain
  *
@@ -88,7 +91,7 @@
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: valias_insert.c,v 2.16 2009-10-17 20:18:40+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: valias_insert.c,v 2.17 2009-11-25 12:54:04+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef VALIAS
@@ -109,6 +112,8 @@ valias_insert(char *alias, char *domain, char *alias_line, int ignore)
 #endif
 
 	if (!domain || !*domain)
+		return(1);
+	if (!alias_line || !*alias_line)
 		return(1);
 	if (!(real_domain = vget_real_domain(domain)))
 		real_domain = domain;

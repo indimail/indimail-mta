@@ -1,5 +1,8 @@
 /*
  * $Log: valias.c,v $
+ * Revision 2.6  2009-11-25 12:53:55+05:30  Cprogrammer
+ * do not allow empty alias line
+ *
  * Revision 2.5  2009-09-13 12:48:20+05:30  Cprogrammer
  * added 'm' option to getopt for previous ignore option
  *
@@ -66,7 +69,7 @@
 
 #include "indimail.h"
 #ifndef	lint
-static char     sccsid[] = "$Id: valias.c,v 2.5 2009-09-13 12:48:20+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: valias.c,v 2.6 2009-11-25 12:53:55+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef VALIAS
@@ -189,6 +192,12 @@ get_options(int argc, char **argv)
 			break;
 		case 'u':
 			AliasAction = VALIAS_UPDATE;
+			if (!*optarg)
+			{
+				fprintf(stderr, "You cannot have an empty alias line\n");
+				usage();
+				return(1);
+			}
 			scopy(OAliasLine, optarg, MAX_BUFF);
 			break;
 		case 'd':
@@ -198,6 +207,12 @@ get_options(int argc, char **argv)
 		case 'i':
 			if(AliasAction != VALIAS_UPDATE)
 				AliasAction = VALIAS_INSERT;
+			if (!*optarg)
+			{
+				fprintf(stderr, "You cannot have an empty alias line\n");
+				usage();
+				return(1);
+			}
 			scopy(AliasLine, optarg, MAX_BUFF);
 			break;
 		default:
