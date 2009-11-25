@@ -54,6 +54,7 @@ indimail-*/doc/RELEASE-Notes
 indimail-*/eps-*/Makefile.in
 indimail-*/indimail.settings
 indimail-*/configure
+indimail-*/indimail.mrtg.cfg
 indimail-*/.gitignore
 indimail-*/patches/courier-imap-3.0.8.patch.gz
 indimail-*/patches/fetchmail-6.3.9.patch.gz
