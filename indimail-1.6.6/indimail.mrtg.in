@@ -1,5 +1,8 @@
 #
 # $Log: indimail.mrtg.in,v $
+# Revision 2.6  2009-11-25 15:53:01+05:30  Cprogrammer
+# fixed smtpd log path for port 587
+#
 # Revision 2.5  2009-11-25 12:53:36+05:30  Cprogrammer
 # added port 587
 #
@@ -173,7 +176,7 @@ Title[smtpad587]: SMTP Totals (Port 587)
 MaxBytes[smtpad587]: 1000
 AbsMax[smtpad587]: 100000
 Options[smtpad587]: growright,unknaszero,nopercent,gauge
-Target[smtpad587]: `@indimaildir@/libexec/qmailmrtg7 a @logdir@/smtpd.25`
+Target[smtpad587]: `@indimaildir@/libexec/qmailmrtg7 a @logdir@/smtpd.587`
 PageTop[smtpad587]: <B>SMTP Totals</B><BR>
 ShortLegend[smtpad587]: SMTP
 YLegend[smtpad587]: SMTP/hour
