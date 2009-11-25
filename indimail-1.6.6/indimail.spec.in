@@ -1,5 +1,8 @@
 #
 # $Log: indimail.spec.in,v $
+# Revision 2.117  2009-11-25 12:55:29+05:30  Cprogrammer
+# skip posttrans if file /tmp/indimail.noposttrans is present
+#
 # Revision 2.116  2009-11-23 09:29:39+05:30  Cprogrammer
 # added qmailmrtg
 #
@@ -361,7 +364,7 @@
 # rpm spec file for indimail
 #
 #
-# $Id: indimail.spec.in,v 2.116 2009-11-23 09:29:39+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 2.117 2009-11-25 12:55:29+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %define _unpackaged_files_terminate_build 1
 
@@ -2285,6 +2288,11 @@ fi
 if [ -f %{_prefix}/boot/rpm.init ] ; then
 	echo "Running Custom Installation Script for posttrans"
 	/bin/sh %{_prefix}/boot/rpm.init posttrans
+	if [ -f /tmp/indimail.noposttrans ] ; then
+		/bin/rm -f /tmp/indimail.noposttrans
+		echo "Skipping posttrans for upgrade"
+		exit 0
+	fi
 fi
 echo ""
 if test -f %{_sysconfdir}/event.d/svscan
