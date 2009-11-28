@@ -189,7 +189,7 @@ condredirect.o
 condtomaildir
 condtomaildir.0
 condtomaildir.o
-config
+qmailconfig
 config.0
 config-fast
 config.o

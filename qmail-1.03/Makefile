@@ -415,14 +415,14 @@ compile condredirect.c sig.h exit.h env.h error.h \
 wait.h seek.h qmail.h substdio.h strerr.h fmt.h
 	./compile condredirect.c
 
-config: \
-warn-auto.sh config.sh conf-qmail conf-break conf-split
-	cat warn-auto.sh config.sh \
+qmailconfig: \
+warn-auto.sh qmailconfig.sh conf-qmail conf-break conf-split
+	cat warn-auto.sh qmailconfig.sh \
 	| sed s}QMAIL}"`head -1 conf-qmail`"}g \
 	| sed s}BREAK}"`head -1 conf-break`"}g \
 	| sed s}SPLIT}"`head -1 conf-split`"}g \
-	> config
-	chmod 755 config
+	> qmailconfig
+	chmod 755 qmailconfig
 
 config-fast: \
 warn-auto.sh config-fast.sh conf-qmail conf-break conf-split
@@ -1157,7 +1157,7 @@ qmail-clean qmail-send qmail-start qmail-daemon splogger qmail-multi qmail-queue
 qmail-dk qmail-dkim predate datemail mailsubj qmail-upq qmail-showctl qmail-newu spawn-filter \
 qmail-pw2u qmail-qread qmail-qstat qmail-tcpto qmail-tcpok qmail-cat qmail-poppass \
 qmail-pop3d qmail-popbull qmail-popup qmail-qmqpc qmail-qmqpd qmail-qmtpd \
-qmail-smtpd sendmail tcp-env qmail-newmrh qmail-recipients qmail-cdb config \
+qmail-smtpd sendmail tcp-env qmail-newmrh qmail-recipients qmail-cdb qmailconfig \
 config-fast dnscname dnsptr dnsip dnsmxip dnsfq dnstxt hostname ipmeprint qreceipt \
 qsmhook forward rrforward preline condredirect bouncesaying except qmail-todo \
 queue-fix idedit setup instcheck rpmattr maildir2mbox qmaildirmake maildirwatch b64encode \
@@ -2662,7 +2662,7 @@ qmail-popup.8 qmail-pw2u.9 qmail-qmqpc.8 qmail-qmqpd.8 qmail-qmtpd.8 \
 qmail-qread.8 qmail-qstat.8 qmail-queue.9 qmail-remote.9 \
 qmail-rspawn.8 qmail-send.9 qmail-todo.9 qmail-showctl.8 qmail-smtpd.9 \
 qmail-start.9 qmail-tcpok.8 qmail-tcpto.8 qmail-users.9 qmail.7 qmail-multi.9 \
-qreceipt.1 splogger.8 tcp-env.1 config.sh config-fast.sh \
+qreceipt.1 splogger.8 tcp-env.1 qmailconfig.sh config-fast.sh \
 qmail-clean.c qmail-getpw.c qmail-inject.c qmail-local.c \
 qmail-lspawn.c qmail-newmrh.c qmail-newu.c qmail-pop3d.c \
 qmail-popup.c qmail-pw2u.c qmail-qmqpc.c qmail-qmqpd.c qmail-qmtpd.c \

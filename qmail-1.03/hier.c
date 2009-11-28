@@ -428,7 +428,8 @@ hier(inst_dir)
 #endif
 	c(auto_qmail_home, "bin", "envconf", auto_uido, auto_gidq, 0555);
 	c(auto_qmail_home, "bin", "qmail-nullqueue", auto_uido, auto_gidq, 0555);
-	c(auto_qmail_home, "bin", "config", auto_uido, auto_gidq, 0555);
+	c(auto_qmail_home, "bin", "hostname", auto_uido, auto_gidq, 0555);
+	c(auto_qmail_home, "bin", "qmailconfig", auto_uido, auto_gidq, 0555);
 	c(auto_qmail_home, "bin", "config-fast", auto_uido, auto_gidq, 0555);
 	c(auto_qmail_home, "bin", "pinq", auto_uido, auto_gidq, 0555);
 	c(auto_qmail_home, "bin", "rpmattr", auto_uido, auto_gidq, 0555);
