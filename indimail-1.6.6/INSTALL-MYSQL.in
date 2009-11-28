@@ -50,7 +50,8 @@
 
        Create a new MySQL database
        # @indimaildir@/sbin/svctool --config=mysqldb --mysqlPrefix=@mysql_prefix@ \
-           --databasedir=@indimaildir@/mysqldb --default-domain=indimail.org --base_path=/home/mail
+           --databasedir=@indimaildir@/mysqldb --default-domain=indimail.org \
+           --base_path=/home/mail
 
     b) For creation of a database in an existing running copy of MySQL on your server
        The below are needed only if you are going to use the existing MySQL database).
