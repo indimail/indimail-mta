@@ -12,12 +12,10 @@ INSTALL_SCRIPT = ${INSTALL}           -c
 install_sh_SCRIPT = $(install_sh)     -c
 INSTALL_STRIP_PROGRAM = $(install_sh) -c $(STRIP_OPT)
 
-libindimaildir=@libdir@
 indimailbindir=@prefix@/bin
 indimailsbindir=@prefix@/sbin
 indimaillibexecdir=@prefix@/libexec
 indimailauthlibdir=@prefix@/libexec/authlib
-iauthdir=@libdir@
 
 libindimail_LTLIBRARIES = libindimail.la
 libindimail_la_SOURCES = $(COMMONSOURCES)
@@ -25,12 +23,14 @@ libindimail_la_LIBADD =  $(top_builddir)/eps-1.2/libeps.la $(top_builddir)/cdb-1
 						 -L@mysql_libdir@ -lmysqlclient @LIB_CRYPT@ -lm
 libindimail_la_DEPENDENCIES = $(top_builddir)/eps-1.2/libeps.la $(top_builddir)/cdb-1.0/libcdb.la
 libindimail_la_LDFLAGS = -version-info @LIBVER@:0:0 -release @VERSION@
+libindimaildir=@libdir@
 
 iauth_LTLIBRARIES = iauth.la
 iauth_la_SOURCES = iauth.c
 iauth_la_LIBADD = $(top_builddir)/libindimail.la
-iauth_la_LDFLAGS = -no-undefined -module -avoid-version
 iauth_la_DEPENDENCIES = $(top_builddir)/libindimail.la
+iauth_la_LDFLAGS = -module -avoid-version -shared -no-undefined -rdynamic -nostartfiles 
+iauthdir=@libdir@
 
 SYSCONFDIR = @sysconfdir@
 sysconf_DATA = indimail.settings controlfiles headerlist osh.table cronlist perm_list \
@@ -50,7 +50,7 @@ setuid_list = ../sbin/systpass vdeldomain vadddomain vadduser vdeluser \
 			  printdir vuserinfo ../sbin/vreorg vsetuserquota vmoduser \
 			  vmoveuser ../libexec/sq_vacation
 
-doc_list= 37rules.pdf ChangeLog COPYING CREDITS FAQ.pdf fhs-2.3.txt.gz HOWTO.bogofilter \
+doc_list= 37rules.pdf ChangeLog COPYING CREDITS FAQ.pdf HOWTO.bogofilter \
 	HOWTO.sharedmaildir INSTALL.indimail IndiMail.pdf percenthack.shtml README.indimail \
 	INSTALL-MYSQL RELEASE-Notes INSTALL-RPM README-CLUSTER README.vlimits indimail_arch.png \
 	Quick-INSTALL
@@ -114,9 +114,8 @@ libindimail.la: $(libindimail_la_OBJECTS) $(libindimail_la_DEPENDENCIES)
 	-rpath @libdir@
 
 iauth.la: $(iauth_la_OBJECTS) $(iauth_la_DEPENDENCIES)
-	$(LIBTOOL) --mode=link $(COMPILE) $(MODFLAGS) -o $@ iauth.lo \
-	-rdynamic -nostartfiles -no-undefined -module -avoid-version \
-	$(top_builddir)/libindimail.la -L.libs -rpath @libdir@
+	$(LIBTOOL) --mode=link $(COMPILE) $(MODFLAGS) -o $@ iauth.lo $(iauth_la_LDFLAGS) \
+	$(iauth_la_LIBADD) -L.libs -rpath @libdir@
 
 iauth.lo: iauth.c
 	$(LIBTOOL) --mode=compile gcc $(DEFS) @auth_inc@ -c $^
@@ -840,10 +839,12 @@ install-data-hook:
 	$(INSTALL_DATA) config.h $(DESTDIR)@prefix@/include/indimail_config.h || exit 1
 	$(INSTALL_DATA) data/wordlist.db $(DESTDIR)@prefix@/etc/wordlist.db  || exit 1
 	$(INSTALL_DATA) perm_list $(DESTDIR)@prefix@/etc/perm_list  || exit 1
-	/bin/mkdir -p $(DESTDIR)@prefix@/etc/yum.repos.d || exit 1
+	$(INSTALL_DATA) $(DESTDIR)@libdir@/iauth.*  $(DESTDIR)@prefix@/modules || exit 1
+	/bin/rm -f $(DESTDIR)@libdir@/iauth.* || exit 1
+	$(mkinstalldirs) $(DESTDIR)@prefix@/etc/yum.repos.d || exit 1
+	$(mkinstalldirs) $(DESTDIR)@prefix@/doc || exit 1
 	$(INSTALL_DATA) data/*.repo $(DESTDIR)@prefix@/etc/yum.repos.d || exit 1
 	for f in $(doc_list); do \
-		/bin/mkdir -p $(DESTDIR)@prefix@/doc; \
 		$(INSTALL_DATA) doc/$$f $(DESTDIR)@prefix@/doc/$$f || exit 1 ;\
 	done
 	if test `@idcommand@` = "0" ; then \
