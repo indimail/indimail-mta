@@ -1,5 +1,19 @@
 #
 # $Log: indimail.spec.in,v $
+# Revision 2.121  2009-11-28 20:44:04+05:30  Cprogrammer
+# moved iauth.so to modules directory
+#
+# Revision 2.120  2009-11-27 19:41:11+05:30  Cprogrammer
+# display rpm -V for verification
+#
+# Revision 2.119  2009-11-27 16:38:38+05:30  Cprogrammer
+# fixed checking of mysql user
+# added qmailconfig, hostname command
+# moved installation verification to %%post from %%posttrans
+#
+# Revision 2.118  2009-11-25 20:30:55+05:30  Cprogrammer
+# removed checking of noposttrans
+#
 # Revision 2.117  2009-11-25 12:55:29+05:30  Cprogrammer
 # skip posttrans if file /tmp/indimail.noposttrans is present
 #
@@ -364,7 +378,7 @@
 # rpm spec file for indimail
 #
 #
-# $Id: indimail.spec.in,v 2.117 2009-11-25 12:55:29+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 2.121 2009-11-28 20:44:04+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %define _unpackaged_files_terminate_build 1
 
@@ -391,8 +405,10 @@
 %if 0%{?opensuse_bs}
 # define to 1 if building on openSUSE build service
 %define build_on_obs       1
+%define fast_mode          0
 %else
 %define build_on_obs       0
+%define fast_mode          0
 %endif
 %define	_prefix            @indimaildir@
 %define default_domain     @defaultdomain@
@@ -443,7 +459,7 @@ Version: @version@
 %if %build_on_obs != 0
 Release: 1.<B_CNT>
 %else
-Release: 1
+Release: 1.B_CNT
 %endif
 License: GPLv3
 %if %{undefined suse_version} && %{undefined sles_version}
@@ -561,7 +577,7 @@ Requires: pam
 # rpm -qlp some-file.rpm
 Requires: coreutils grep /bin/sh glibc openssl /usr/sbin/useradd /usr/sbin/groupadd
 Requires: /sbin/chkconfig /usr/sbin/userdel /usr/sbin/groupdel procps /usr/bin/awk
-Requires: mysql-server mysql-libs db4
+Requires: mysql-server
 BuildRoot: %(mktemp -ud %{_tmppath}/%{name}-%{version}-%{release}-XXXXXXX)
 #
 # IndiMail is choosy and runs on reliable OS only
@@ -757,6 +773,8 @@ echo "Will send output to $DEVICE"
 #### LIBDKIM ######################
 if [ -d libdkim-%{libdkim_version} ] ; then
 cd libdkim-%{libdkim_version}
+
+if [ %{fast_mode} -eq 0 ] ; then
 if [ %{build_on_obs} -eq 0 ] ; then
 	echo "reconfiguring..."
 	autoreconf -fi
@@ -767,6 +785,7 @@ else
 	autoreconf -fi
 %endif
 %endif
+fi
 fi
 if [ " %dist" = " mandrake" ] ; then
 ./configure --prefix=%{_prefix} --libdir=%{_libdir} --libexecdir=%{_prefix}/libexec \
@@ -779,6 +798,8 @@ fi
 
 #### IndiMail ######################
 cd %{name}-%{version}
+
+if [ %{fast_mode} -eq 0 ] ; then
 if [ %{build_on_obs} -eq 0 ] ; then
 	echo "reconfiguring..."
 	autoreconf -fi
@@ -789,6 +810,8 @@ echo "reconfiguring..."
 	autoreconf -fi
 %endif
 %endif
+fi
+
 fi
 if [ " %dist" = " mandrake" ] ; then
 ./configure --prefix=%{_prefix} --libexecdir=%{_prefix}/libexec --sysconfdir=%{_prefix}/etc \
@@ -814,6 +837,8 @@ fi
 #### nssd ######################
 if [ -d ../nssd-%{nssd_version} ] ; then
 	cd ../nssd-%{nssd_version}
+
+if [ %{fast_mode} -eq 0 ] ; then
 if [ %{build_on_obs} -eq 0 ] ; then
 	echo "reconfiguring..."
 	autoreconf -fi
@@ -825,6 +850,8 @@ else
 %endif
 %endif
 fi
+fi
+
 if [ " %dist" = " mandrake" ] ; then
 	./configure --prefix=%{_prefix} --libexecdir=%{_prefix}/libexec --sysconfdir=%{_prefix}/etc \
 	--mandir=%{_prefix}/man --libdir=/usr/%{_lib} --x-libraries=/usr/%{_lib} \
@@ -880,20 +907,27 @@ fi
 #### fetchmail ######################
 if [ -d ../fetchmail-%{fetchmail_version} ] ; then
 	cd ../fetchmail-%{fetchmail_version}
+
 if [ %{build_on_obs} -eq 0 ] ; then
 	echo "reconfiguring..."
-	autoreconf -fi
+	if [ %{fast_mode} -eq 0 ] ; then
+		autoreconf -fi
+	fi
 else
-echo "reconfiguring..."
 %if %{undefined centos_version} && %{undefined rhel_version} && %{undefined sles_version}
 %if 0%{?fedora_version} || 0%{?suse_version}
-	autoreconf -fi
+	echo "reconfiguring..."
+	if [ %{fast_mode} -eq 0 ] ; then
+		autoreconf -fi
+	fi
 %else
+	echo "reconfiguring..."
 	%{__autoheader}
 	%{__autoconf}
 %endif
 %endif
 fi
+
 %configure --prefix=%{_prefix} --libexecdir=%{_prefix}/libexec --sysconfdir=%{_prefix}/etc \
 --enable-indimaildir=%{_prefix} --mandir=%{_prefix}/man \
 `%{__cat} ../%{name}-%{version}/config/fetchmail.opts` > $DEVICE
@@ -937,7 +971,7 @@ for i in eps cdb flash indimail
 do
 	%{__rm} -f %{buildroot}%{_libdir}/lib"$i".la
 done
-%{__rm} -f %{buildroot}%{_libdir}/iauth.la
+%{__rm} -f %{buildroot}%{_prefix}/modules/iauth.la
 
 if [ %noclamav -eq 0 ] ; then
 	for i in clamav clamunrar clamunrar_iface
@@ -1017,6 +1051,7 @@ if [ -x /usr/bin/chrpath ] ; then
 	/usr/bin/chrpath -d %{buildroot}%{_prefix}/sbin/pam-checkpwd
 fi
 fi
+
 
 if [ -x /usr/bin/epm ] ; then
 	#/bin/chmod +x %{buildroot}%{_prefix}/bin/rpmattr
@@ -1129,7 +1164,7 @@ fi
 %attr(444,root,root) %config(noreplace)           %{_prefix}/etc/osh.table
 # Allow new control files to get added with new packages
 # unlikely for this file to have local changes
-%attr(444,root,root) %config                      %{_prefix}/etc/controlfiles
+%attr(444,root,root)                              %{_prefix}/etc/controlfiles
 # For configuration files that may be found missing during uninstall have
 # $config(missingok)
 #
@@ -1321,7 +1356,9 @@ fi
 %attr(555,root,qmail)                   %{_prefix}/bin/zsenders
 %attr(500,root,qmail)                   %{_prefix}/bin/instcheck
 %attr(555,root,qmail)                   %{_prefix}/bin/suids
-%attr(555,root,qmail)                   %{_prefix}/bin/config
+%attr(555,root,qmail)                   %{_prefix}/bin/hostname
+%attr(555,root,qmail)                   %{_prefix}/bin/config-fast
+%attr(555,root,qmail)                   %{_prefix}/bin/qmailconfig
 %attr(555,root,qmail)                   %{_prefix}/bin/maildirserial
 %attr(500,root,qmail)                   %{_prefix}/bin/qmail-start
 %attr(555,root,qmail)                   %{_prefix}/bin/822fields
@@ -1351,7 +1388,6 @@ fi
 %attr(500,root,qmail)                   %{_prefix}/bin/qmail-cdb
 %attr(555,root,qmail)                   %{_prefix}/bin/cdbtest
 %attr(555,root,qmail)                   %{_prefix}/bin/dnsfq
-%attr(555,root,qmail)                   %{_prefix}/bin/config-fast
 %attr(555,root,qmail)                   %{_prefix}/bin/tai64n
 %attr(555,root,qmail)                   %{_prefix}/bin/822header
 %attr(555,root,qmail)                   %{_prefix}/bin/vgroup
@@ -1614,6 +1650,7 @@ fi
 %attr(555,root,root)                    %{_prefix}/modules/background
 %attr(555,root,root)                    %{_prefix}/modules/alarms
 %attr(555,root,root)                    %{_prefix}/modules/countdown
+%attr(755,root,root)                    %{_prefix}/modules/iauth.so
 
 %attr(644,root,root)                    %{_prefix}/share/fortunes/definitions
 %attr(644,root,root)                    %{_prefix}/share/fortunes/linux.dat
@@ -1741,7 +1778,6 @@ fi
 %attr(444,root,qmail)                   %{_prefix}/man/cat[1,4,5,7,8]/*
 
 %attr(444,root,qmail)                   %{_prefix}/doc/HOWTO.sharedmaildir
-%attr(444,root,qmail)                   %{_prefix}/doc/fhs-2.3.txt.gz
 %attr(444,root,qmail)                   %{_prefix}/doc/README.qmail
 %attr(444,root,qmail)                   %{_prefix}/doc/README.auth
 %attr(444,root,qmail)                   %{_prefix}/doc/README.clamav
@@ -1832,7 +1868,6 @@ fi
 %{_libdir}/libindimail-%{version}.so.0
 %{_libdir}/libindimail-%{version}.so.0.0.0
 
-%attr(755,root,root)                    %{_libdir}/iauth.so
 %attr(777,root,root)                    /usr/%{_lib}/libnss_nssd.so
 %attr(777,root,root)                    /usr/%{_lib}/libnss_nssd.so.2
 %attr(755,root,root)                    /usr/%{_lib}/libnss_nssd.so.2.0.0
@@ -1932,6 +1967,16 @@ fi
 #   8. %posttrans of new package 
 
 ### SCRIPTLET ###############################################################################
+%verifyscript
+ID=$(id -u)
+if [ $ID -ne 0 ] ; then
+	echo "You are not root"
+	exit 1
+fi
+%{_prefix}/sbin/svctool --check-install --servicedir=%{servicedir} \
+	--qbase=%{qbase} --qcount=%{qcount} --qstart=1
+
+### SCRIPTLET ###############################################################################
 %pretrans
 argv1=$1
 ID=$(id -u)
@@ -1965,8 +2010,14 @@ if [ $argv1 -eq 2 ] ; then
 	exit 0
 fi
 echo "Checking for mandatory user/group mysql.."
-/usr/bin/getent group  mysql > /dev/null || echo "group mysql does not exist. Aborting..." && false
-/usr/bin/getent passwd mysql > /dev/null || echo "user  mysql does not exist. Aborting..." && false
+/usr/bin/getent group  mysql > /dev/null || (echo "group mysql does not exist. Aborting..." && false)
+if [ $? -ne 0 ] ; then
+	exit 1
+fi
+/usr/bin/getent passwd mysql > /dev/null || (echo "user  mysql does not exist. Aborting..." && false)
+if [ $? -ne 0 ] ; then
+	exit 1
+fi
 #
 # Create a users and groups. Do not report any problems if they already
 # exists.
@@ -2032,16 +2083,21 @@ if [ ! -d %{logdir} ] ; then
 	%{__mkdir_p} %{logdir}
 fi
 %{__chown} -R qmaill:nofiles %{logdir}
-echo "Creating Database/Service for MySQL"
-# MySQL Config Creation
-%{_prefix}/sbin/svctool --config=mysql   --mysqlPrefix=%{mysqlPrefix} --model=medium --no-of-cpu=2
-# MySQL Database Creation
-%{_prefix}/sbin/svctool --config=mysqldb --mysqlPrefix=%{mysqlPrefix} \
-    --databasedir=%{_prefix}/mysqldb --base_path=%{mbase}
-# MySQL Supervise creation
-%{_prefix}/sbin/svctool --mysql=3306 --servicedir=%{servicedir} --mysqlPrefix=%{mysqlPrefix} \
-	--databasedir=%{_prefix}/mysqldb --config=%{_prefix}/etc/indimail.cnf --default-domain=%{default_domain} \
-	--model=small --no-of-cpu=2
+
+if [ -f %{mysqlPrefix}/bin/mysql_config ] ; then
+	echo "Creating Database/Service for MySQL"
+	# MySQL Config Creation
+	%{_prefix}/sbin/svctool --config=mysql   --mysqlPrefix=%{mysqlPrefix} --model=medium --no-of-cpu=2
+	# MySQL Database Creation
+	%{_prefix}/sbin/svctool --config=mysqldb --mysqlPrefix=%{mysqlPrefix} \
+    	--databasedir=%{_prefix}/mysqldb --base_path=%{mbase}
+	# MySQL Supervise creation
+	%{_prefix}/sbin/svctool --mysql=3306 --servicedir=%{servicedir} --mysqlPrefix=%{mysqlPrefix} \
+		--databasedir=%{_prefix}/mysqldb --config=%{_prefix}/etc/indimail.cnf --default-domain=%{default_domain} \
+		--model=small --no-of-cpu=2
+else
+	echo "WARNING!!! Did not find mysql_config in %{mysqlPrefix}. Skipping MySQL configuration"
+fi
 
 echo "Creating catch-all alias (%{_prefix}/alias/Maildir) for all system users"
 %{_prefix}/sbin/svctool --config=qmail --postmaster=%{_prefix}/alias/Maildir/ \
@@ -2275,39 +2331,26 @@ if [ -f %{_prefix}/boot/rpm.init ] ; then
 	/bin/sh %{_prefix}/boot/rpm.init post
 fi
 
-### SCRIPTLET ###############################################################################
-%posttrans
-argv1=$1
-ID=$(id -u)
-if [ $ID -ne 0 ] ; then
-	echo "You are not root"
-	exit 1
-fi
-#echo "Running postrans script for %{version}-%{release} : arg=$1"
 %{_prefix}/sbin/initsvc -status
-if [ -f %{_prefix}/boot/rpm.init ] ; then
-	echo "Running Custom Installation Script for posttrans"
-	/bin/sh %{_prefix}/boot/rpm.init posttrans
-	if [ -f /tmp/indimail.noposttrans ] ; then
-		/bin/rm -f /tmp/indimail.noposttrans
-		echo "Skipping posttrans for upgrade"
-		exit 0
-	fi
-fi
-echo ""
-if test -f %{_sysconfdir}/event.d/svscan
-then
+if [ -f %{_sysconfdir}/event.d/svscan ] ; then
 	echo "1. Issue /sbin/initctl emit qmailstart to start services"
+	echo "2. Change your default domain in %{_prefix}/control/defaultdomain"
+	echo "3. You can optionally run the following command to verify installation"
+	echo "   sudo rpm -V indimail"
+	if [ ! -f %{_prefix}/control/servercert.pem ] ; then
+	echo "4. You also need to create CERTS for IMAP/POP3. run the following command to create cert"
+	echo "   %{_prefix}/sbin/svctool --postmaster=postmaster@indimail.org --config=cert"
+	fi
 else
 	echo "1. Issue /var/indimail/sbin/initsvc -on"
 	echo "2. Issue /sbin/init q to start services"
-fi
-echo "2. You can optionally run the following command to verify installation"
-echo "   %{_prefix}/sbin/svctool --check-install --servicedir=%{servicedir} --qbase=%{qbase} --qcount=%{qcount} --qstart=1"
-if [ ! -f %{_prefix}/control/servercert.pem ] ; then
-echo
-echo "3. You also need to create CERTS for IMAP/POP3. run the following command to create cert"
-echo "   %{_prefix}/sbin/svctool --postmaster=postmaster@indimail.org --config=cert"
+	echo "3. Change your default domain in %{_prefix}/control/defaultdomain"
+	echo "4. You can optionally run the following command to verify installation"
+	echo "   sudo rpm -V indimail"
+	if [ ! -f %{_prefix}/control/servercert.pem ] ; then
+	echo "5. You also need to create CERTS for IMAP/POP3. run the following command to create cert"
+	echo "   %{_prefix}/sbin/svctool --postmaster=postmaster@indimail.org --config=cert"
+	fi
 fi
 
 ### SCRIPTLET ###############################################################################
@@ -2318,12 +2361,17 @@ if [ $ID -ne 0 ] ; then
 	echo "You are not root"
 	exit 1
 fi
+
+# we are doing upgrade
+#if [ $argv1 -eq 1 ] ; then
+#fi
+
 if test -f %{_sysconfdir}/event.d/svscan
 then
 	/sbin/initctl emit qmailstop > /dev/null 2>&1
 	echo "Giving IndiMail exactly 5 seconds to exit nicely"
 	sleep 5
-	if [ $argv1 -ne 1 ] ; then
+	if [ $argv1 -ne 1 ] ; then # not an upgrade
 		%{__rm} -f %{_sysconfdir}/event.d/svscan
 	fi
 elif test -x %{_prefix}/sbin/initsvc
@@ -2464,6 +2512,21 @@ if [ -f %{_prefix}/boot/rpm.init ] ; then
 	echo "Running Custom Un-Installation Script for postun"
 	/bin/sh %{_prefix}/boot/rpm.init postun
 fi
+
+### SCRIPTLET ###############################################################################
+%posttrans
+argv1=$1
+ID=$(id -u)
+if [ $ID -ne 0 ] ; then
+	echo "You are not root"
+	exit 1
+fi
+#echo "Running postrans script for %{version}-%{release} : arg=$1"
+if [ -f %{_prefix}/boot/rpm.init ] ; then
+	echo "Running Custom Installation Script for posttrans"
+	/bin/sh %{_prefix}/boot/rpm.init posttrans
+fi
+echo ""
 
 ### SCRIPTLET ###############################################################################
 %pre shared
