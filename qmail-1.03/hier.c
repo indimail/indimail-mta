@@ -1,5 +1,9 @@
 /*
  * $Log: hier.c,v $
+ * Revision 1.129  2009-11-28 20:46:04+05:30  Cprogrammer
+ * renamed config to qmailconfig
+ * added hostname command
+ *
  * Revision 1.128  2009-11-11 09:31:14+05:30  Cprogrammer
  * added queue-fix man page
  *
@@ -992,7 +996,7 @@ hier(inst_dir)
 void
 getversion_install_big_c()
 {
-	static char    *x = "$Id: hier.c,v 1.128 2009-11-11 09:31:14+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: hier.c,v 1.129 2009-11-28 20:46:04+05:30 Cprogrammer Exp mbhangui $";
 
 #ifdef INDIMAIL
 	x = sccsidh;
