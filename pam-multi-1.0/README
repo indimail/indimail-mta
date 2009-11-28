@@ -43,13 +43,13 @@ Three methods are supported for fetching the encrypted password from your databa
  Library Mode. pam-multi will dynamically load the shared library. It is expected for
  the library to provide the function
 
- char *vauthenticate(char *email, char *service)
+ char *iauth(char *email, char *service)
 
- The function vauthenticate() will be passed a username and a token service denoting the
+ The function iauth() will be passed a username and a token service denoting the
  name of service. The service argument will be used only for identification purpose. It is
  expected for the function to return a string containing the encrypted password. An example
- shared library authenticate.so has been provided in the package. Authenticate.so has
- a vauthenticate() function to authenticate against IndiMail's database.
+ shared library iauth.so has been provided in the package. Authenticate.so has
+ a iauth() function to authenticate against IndiMail's database.
 
 The following tokens if present in command string or the sql string (-m or -c options),
 will be replaced as follows
@@ -69,7 +69,7 @@ Examples for illustration only
 1  auth optional pam-multi.so args -m [select pw_passwd from indimail where pw_name=’%u’ and
    pw_domain=’%d’] -u indimail -p ssh-1.5- -d indimail -H localhost -P 3306
 2  auth optional pam-multi.so args -c [grep "^%u:" /etc/passwd | awk -F: ’{print $2}’]
-3  auth optional pam-multi.so args -s /lib/security/authenticate.so
+3  auth optional pam-multi.so args -s /var/indimail/modules/iauth.so
 
 pam-multi is experimental at this stage. It is covered under GNU GPL V3 license and
 I imply no warranty. However, I would be glad if this can be further improved.
