@@ -34,6 +34,7 @@ flash-*/crypt
 flash-*/flash
 flash-*/system.menu
 flash-*/system.rc
+mpack-*/README
 mpack-*/configure
 mpack-*/mpack
 mpack-*/munpack
