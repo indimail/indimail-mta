@@ -1,5 +1,8 @@
 /*
  * $Log: qmailmrtg7.c,v $
+ * Revision 2.6  2009-11-26 11:34:08+05:30  Cprogrammer
+ * removed system command
+ *
  * Revision 2.5  2009-11-24 21:04:49+05:30  Cprogrammer
  * option 'S' no handles bogofilter
  *
@@ -51,7 +54,7 @@
 #include <dirent.h>
 
 #ifndef lint
-static char     sccsid[] = "$Id: qmailmrtg7.c,v 2.5 2009-11-24 21:04:49+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: qmailmrtg7.c,v 2.6 2009-11-26 11:34:08+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #define MAX_BUFF 1000
@@ -170,9 +173,6 @@ main(int argc, char **argv)
 		max_files = 0;
 		todo_count += get_size(TmpBuf);
 		printf("%d\n%d\n", mess_count, todo_count);
-		fflush(stdout);
-		if (cmmd)
-			system(cmmd);
 		return (0);
 	}
 	if (!(mydir = opendir(TheDir))) {
