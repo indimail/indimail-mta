@@ -1,5 +1,8 @@
 /*
  * $Log: indimail.h,v $
+ * Revision 2.182  2009-12-01 10:34:22+05:30  Cprogrammer
+ * changed order of passwd_expiry column
+ *
  * Revision 2.181  2009-10-09 11:59:54+05:30  Cprogrammer
  * added definitions for record states in lastauth
  *
@@ -857,7 +860,7 @@
 #define INDIMAILH_H
 
 #ifndef	lint
-static char     sccsidh[] = "$Id: indimail.h,v 2.181 2009-10-09 11:59:54+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsidh[] = "$Id: indimail.h,v 2.182 2009-12-01 10:34:22+05:30 Cprogrammer Stab mbhangui $";
 #endif
 
 #include "config.h"
@@ -1289,8 +1292,8 @@ primary key(emailid, mailing_list), index emailid (emailid, filter_no)"
 #ifdef ENABLE_DOMAIN_LIMITS
 #define LIMITS_TABLE_LAYOUT " \
 	domain                   CHAR(67) NOT NULL, \
-	passwd_expiry            INT(10) NOT NULL DEFAULT -1, \
 	domain_expiry            INT(10) NOT NULL DEFAULT -1, \
+	passwd_expiry            INT(10) NOT NULL DEFAULT -1, \
 	maxpopaccounts           INT(10) NOT NULL DEFAULT -1, \
 	maxaliases               INT(10) NOT NULL DEFAULT -1, \
 	maxforwards              INT(10) NOT NULL DEFAULT -1, \
