@@ -1,5 +1,8 @@
 /*
  * $Log: vmoddomlimits.c,v $
+ * Revision 2.7  2009-12-01 11:59:09+05:30  Cprogrammer
+ * show limits by default
+ *
  * Revision 2.6  2008-10-24 22:07:10+05:30  Cprogrammer
  * added Domain Password Expiry
  *
@@ -40,7 +43,7 @@
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vmoddomlimits.c,v 2.6 2008-10-24 22:07:10+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: vmoddomlimits.c,v 2.7 2009-12-01 11:59:09+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef ENABLE_DOMAIN_LIMITS
@@ -93,7 +96,7 @@ long            domain_expiry = -1;
 long            passwd_expiry = -1;
 
 int             QuotaFlag = 0;
-int             ShowLimits = 0;
+int             ShowLimits = 1;
 int             DeleteLimits = 0;
 
 int
@@ -126,82 +129,6 @@ main(int argc, char *argv[])
 			fprintf(stderr, "Failed to delete limits\n");
 			return (-1);
 		}
-	}
-	if (ShowLimits)
-	{
-		printf("Domain Expiry Date   : %s", limits.domain_expiry == -1 ? "Never Expires\n" : ctime(&limits.domain_expiry));
-		printf("Password Expiry Date : %s", limits.passwd_expiry == -1 ? "Never Expires\n" : ctime(&limits.passwd_expiry));
-		printf("Max Domain Quota     : %d\n", limits.diskquota);
-		printf("Max Domain Messages  : %d\n", limits.maxmsgcount);
-		printf("Default User Quota   : %d\n", limits.defaultquota);
-		printf("Default User Messages: %d\n", limits.defaultmaxmsgcount);
-		printf("Max Pop Accounts     : %d\n", limits.maxpopaccounts);
-		printf("Max Aliases          : %d\n", limits.maxaliases);
-		printf("Max Forwards         : %d\n", limits.maxforwards);
-		printf("Max Autoresponders   : %d\n", limits.maxautoresponders);
-		printf("Max Mailinglists     : %d\n", limits.maxmailinglists);
-		printf("GID Flags:\n");
-		if (limits.disable_imap != 0)
-			printf("  NO_IMAP\n");
-		if (limits.disable_smtp != 0)
-			printf("  NO_SMTP\n");
-		if (limits.disable_pop != 0)
-			printf("  NO_POP\n");
-		if (limits.disable_webmail != 0)
-			printf("  NO_WEBMAIL\n");
-		if (limits.disable_passwordchanging != 0)
-			printf("  NO_PASSWD_CHNG\n");
-		if (limits.disable_relay != 0)
-			printf("  NO_RELAY\n");
-		if (limits.disable_dialup != 0)
-			printf("  NO_DIALUP\n");
-		printf("Flags for non postmaster accounts:\n");
-		printf("  pop account:            ");
-		printf((limits.perm_account & VLIMIT_DISABLE_CREATE ? "DENY_CREATE  " : "ALLOW_CREATE "));
-		printf((limits.perm_account & VLIMIT_DISABLE_MODIFY ? "DENY_MODIFY  " : "ALLOW_MODIFY "));
-		printf((limits.perm_account & VLIMIT_DISABLE_DELETE ? "DENY_DELETE  " : "ALLOW_DELETE "));
-		printf("\n");
-		printf("  alias:                  ");
-		printf((limits.perm_alias & VLIMIT_DISABLE_CREATE ? "DENY_CREATE  " : "ALLOW_CREATE "));
-		printf((limits.perm_alias & VLIMIT_DISABLE_MODIFY ? "DENY_MODIFY  " : "ALLOW_MODIFY "));
-		printf((limits.perm_alias & VLIMIT_DISABLE_DELETE ? "DENY_DELETE  " : "ALLOW_DELETE "));
-		printf("\n");
-		printf("  forward:                ");
-		printf((limits.perm_forward & VLIMIT_DISABLE_CREATE ? "DENY_CREATE  " : "ALLOW_CREATE "));
-		printf((limits.perm_forward & VLIMIT_DISABLE_MODIFY ? "DENY_MODIFY  " : "ALLOW_MODIFY "));
-		printf((limits.perm_forward & VLIMIT_DISABLE_DELETE ? "DENY_DELETE  " : "ALLOW_DELETE "));
-		printf("\n");
-		printf("  autoresponder:          ");
-		printf((limits.perm_autoresponder & VLIMIT_DISABLE_CREATE ? "DENY_CREATE  " : "ALLOW_CREATE "));
-		printf((limits.perm_autoresponder & VLIMIT_DISABLE_MODIFY ? "DENY_MODIFY  " : "ALLOW_MODIFY "));
-		printf((limits.perm_autoresponder & VLIMIT_DISABLE_DELETE ? "DENY_DELETE  " : "ALLOW_DELETE "));
-		printf("\n");
-		printf("  mailinglist:            ");
-		printf((limits.perm_maillist & VLIMIT_DISABLE_CREATE ? "DENY_CREATE  " : "ALLOW_CREATE "));
-		printf((limits.perm_maillist & VLIMIT_DISABLE_MODIFY ? "DENY_MODIFY  " : "ALLOW_MODIFY "));
-		printf((limits.perm_maillist & VLIMIT_DISABLE_DELETE ? "DENY_DELETE  " : "ALLOW_DELETE "));
-		printf("\n");
-		printf("  mailinglist users:      ");
-		printf((limits.perm_maillist_users & VLIMIT_DISABLE_CREATE ? "DENY_CREATE  " : "ALLOW_CREATE "));
-		printf((limits.perm_maillist_users & VLIMIT_DISABLE_MODIFY ? "DENY_MODIFY  " : "ALLOW_MODIFY "));
-		printf((limits.perm_maillist_users & VLIMIT_DISABLE_DELETE ? "DENY_DELETE  " : "ALLOW_DELETE "));
-		printf("\n");
-		printf("  mailinglist moderators: ");
-		printf((limits.perm_maillist_moderators & VLIMIT_DISABLE_CREATE ? "DENY_CREATE  " : "ALLOW_CREATE "));
-		printf((limits.perm_maillist_moderators & VLIMIT_DISABLE_MODIFY ? "DENY_MODIFY  " : "ALLOW_MODIFY "));
-		printf((limits.perm_maillist_moderators & VLIMIT_DISABLE_DELETE ? "DENY_DELETE  " : "ALLOW_DELETE "));
-		printf("\n");
-		printf("  quota:                  ");
-		printf((limits.perm_quota & VLIMIT_DISABLE_CREATE ? "DENY_CREATE  " : "ALLOW_CREATE "));
-		printf((limits.perm_quota & VLIMIT_DISABLE_MODIFY ? "DENY_MODIFY  " : "ALLOW_MODIFY "));
-		printf((limits.perm_quota & VLIMIT_DISABLE_DELETE ? "DENY_DELETE  " : "ALLOW_DELETE "));
-		printf("\n");
-		printf("  default quota:          ");
-		printf((limits.perm_defaultquota & VLIMIT_DISABLE_CREATE ? "DENY_CREATE  " : "ALLOW_CREATE "));
-		printf((limits.perm_defaultquota & VLIMIT_DISABLE_MODIFY ? "DENY_MODIFY  " : "ALLOW_MODIFY "));
-		printf((limits.perm_defaultquota & VLIMIT_DISABLE_DELETE ? "DENY_DELETE  " : "ALLOW_DELETE "));
-		printf("\n");
-		return (0);
 	}
 	limits.domain_expiry = domain_expiry;
 	limits.passwd_expiry = passwd_expiry;
@@ -471,10 +398,86 @@ main(int argc, char *argv[])
 			}
 		}
 	}
-	if (vset_limits(Domain, &limits) != 0)
+	if (!ShowLimits && vset_limits(Domain, &limits) != 0)
 	{
 		fprintf(stderr, "vset_limits: Failed to vset_limits\n");
 		return (-1);
+	}
+	if (ShowLimits)
+	{
+		printf("Domain Expiry Date   : %s", limits.domain_expiry == -1 ? "Never Expires\n" : ctime(&limits.domain_expiry));
+		printf("Password Expiry Date : %s", limits.passwd_expiry == -1 ? "Never Expires\n" : ctime(&limits.passwd_expiry));
+		printf("Max Domain Quota     : %d\n", limits.diskquota);
+		printf("Max Domain Messages  : %d\n", limits.maxmsgcount);
+		printf("Default User Quota   : %d\n", limits.defaultquota);
+		printf("Default User Messages: %d\n", limits.defaultmaxmsgcount);
+		printf("Max Pop Accounts     : %d\n", limits.maxpopaccounts);
+		printf("Max Aliases          : %d\n", limits.maxaliases);
+		printf("Max Forwards         : %d\n", limits.maxforwards);
+		printf("Max Autoresponders   : %d\n", limits.maxautoresponders);
+		printf("Max Mailinglists     : %d\n", limits.maxmailinglists);
+		printf("GID Flags:\n");
+		if (limits.disable_imap != 0)
+			printf("  NO_IMAP\n");
+		if (limits.disable_smtp != 0)
+			printf("  NO_SMTP\n");
+		if (limits.disable_pop != 0)
+			printf("  NO_POP\n");
+		if (limits.disable_webmail != 0)
+			printf("  NO_WEBMAIL\n");
+		if (limits.disable_passwordchanging != 0)
+			printf("  NO_PASSWD_CHNG\n");
+		if (limits.disable_relay != 0)
+			printf("  NO_RELAY\n");
+		if (limits.disable_dialup != 0)
+			printf("  NO_DIALUP\n");
+		printf("Flags for non postmaster accounts:\n");
+		printf("  pop account:            ");
+		printf((limits.perm_account & VLIMIT_DISABLE_CREATE ? "DENY_CREATE  " : "ALLOW_CREATE "));
+		printf((limits.perm_account & VLIMIT_DISABLE_MODIFY ? "DENY_MODIFY  " : "ALLOW_MODIFY "));
+		printf((limits.perm_account & VLIMIT_DISABLE_DELETE ? "DENY_DELETE  " : "ALLOW_DELETE "));
+		printf("\n");
+		printf("  alias:                  ");
+		printf((limits.perm_alias & VLIMIT_DISABLE_CREATE ? "DENY_CREATE  " : "ALLOW_CREATE "));
+		printf((limits.perm_alias & VLIMIT_DISABLE_MODIFY ? "DENY_MODIFY  " : "ALLOW_MODIFY "));
+		printf((limits.perm_alias & VLIMIT_DISABLE_DELETE ? "DENY_DELETE  " : "ALLOW_DELETE "));
+		printf("\n");
+		printf("  forward:                ");
+		printf((limits.perm_forward & VLIMIT_DISABLE_CREATE ? "DENY_CREATE  " : "ALLOW_CREATE "));
+		printf((limits.perm_forward & VLIMIT_DISABLE_MODIFY ? "DENY_MODIFY  " : "ALLOW_MODIFY "));
+		printf((limits.perm_forward & VLIMIT_DISABLE_DELETE ? "DENY_DELETE  " : "ALLOW_DELETE "));
+		printf("\n");
+		printf("  autoresponder:          ");
+		printf((limits.perm_autoresponder & VLIMIT_DISABLE_CREATE ? "DENY_CREATE  " : "ALLOW_CREATE "));
+		printf((limits.perm_autoresponder & VLIMIT_DISABLE_MODIFY ? "DENY_MODIFY  " : "ALLOW_MODIFY "));
+		printf((limits.perm_autoresponder & VLIMIT_DISABLE_DELETE ? "DENY_DELETE  " : "ALLOW_DELETE "));
+		printf("\n");
+		printf("  mailinglist:            ");
+		printf((limits.perm_maillist & VLIMIT_DISABLE_CREATE ? "DENY_CREATE  " : "ALLOW_CREATE "));
+		printf((limits.perm_maillist & VLIMIT_DISABLE_MODIFY ? "DENY_MODIFY  " : "ALLOW_MODIFY "));
+		printf((limits.perm_maillist & VLIMIT_DISABLE_DELETE ? "DENY_DELETE  " : "ALLOW_DELETE "));
+		printf("\n");
+		printf("  mailinglist users:      ");
+		printf((limits.perm_maillist_users & VLIMIT_DISABLE_CREATE ? "DENY_CREATE  " : "ALLOW_CREATE "));
+		printf((limits.perm_maillist_users & VLIMIT_DISABLE_MODIFY ? "DENY_MODIFY  " : "ALLOW_MODIFY "));
+		printf((limits.perm_maillist_users & VLIMIT_DISABLE_DELETE ? "DENY_DELETE  " : "ALLOW_DELETE "));
+		printf("\n");
+		printf("  mailinglist moderators: ");
+		printf((limits.perm_maillist_moderators & VLIMIT_DISABLE_CREATE ? "DENY_CREATE  " : "ALLOW_CREATE "));
+		printf((limits.perm_maillist_moderators & VLIMIT_DISABLE_MODIFY ? "DENY_MODIFY  " : "ALLOW_MODIFY "));
+		printf((limits.perm_maillist_moderators & VLIMIT_DISABLE_DELETE ? "DENY_DELETE  " : "ALLOW_DELETE "));
+		printf("\n");
+		printf("  quota:                  ");
+		printf((limits.perm_quota & VLIMIT_DISABLE_CREATE ? "DENY_CREATE  " : "ALLOW_CREATE "));
+		printf((limits.perm_quota & VLIMIT_DISABLE_MODIFY ? "DENY_MODIFY  " : "ALLOW_MODIFY "));
+		printf((limits.perm_quota & VLIMIT_DISABLE_DELETE ? "DENY_DELETE  " : "ALLOW_DELETE "));
+		printf("\n");
+		printf("  default quota:          ");
+		printf((limits.perm_defaultquota & VLIMIT_DISABLE_CREATE ? "DENY_CREATE  " : "ALLOW_CREATE "));
+		printf((limits.perm_defaultquota & VLIMIT_DISABLE_MODIFY ? "DENY_MODIFY  " : "ALLOW_MODIFY "));
+		printf((limits.perm_defaultquota & VLIMIT_DISABLE_DELETE ? "DENY_DELETE  " : "ALLOW_DELETE "));
+		printf("\n");
+		return (0);
 	}
 	return (0);
 }
@@ -570,7 +573,6 @@ get_options(int argc, char **argv)
 	domain_expiry = -1;
 	passwd_expiry = -1;
 	/*- NoMakeIndex = 0; */
-	ShowLimits = 0;
 	DeleteLimits = 0;
 	errflag = 0;
 	flag[0] = flag[1] = flag[2] = flag[3] = 0;
@@ -585,6 +587,7 @@ get_options(int argc, char **argv)
 			ShowLimits = 1;
 			break;
 		case 'e':
+			ShowLimits = 0;
 			flag[0] = 1;
 			if(strncmp(optarg, "-1", 3))
 			{
@@ -604,10 +607,12 @@ get_options(int argc, char **argv)
 				domain_expiry = -1; /* Disable check on expiry date*/
 			break;
 		case 'n':
+			ShowLimits = 0;
 			flag[1] = 1;
 			domain_expiry = time(0) + (atol(optarg) * 86400);
 			break;
 		case 't':
+			ShowLimits = 0;
 			flag[2] = 1;
 			if(strncmp(optarg, "-1", 3))
 			{
@@ -627,83 +632,106 @@ get_options(int argc, char **argv)
 				passwd_expiry = -1; /* Disable check on expiry date*/
 			break;
 		case 'N':
+			ShowLimits = 0;
 			flag[3] = 1;
 			passwd_expiry = time(0) + (atol(optarg) * 86400);
 			break;
 		case 'D':
+			ShowLimits = 0;
 			DeleteLimits = 1;
 			break;
 		case 'Q':
+			ShowLimits = 0;
 			snprintf(DomainQuota, sizeof(DomainQuota), "%s", optarg);
 			break;
 		case 'q':
+			ShowLimits = 0;
 			snprintf(DefaultUserQuota, sizeof(DefaultUserQuota), "%s", optarg);
 			break;
 		case 'M':
+			ShowLimits = 0;
 			snprintf(DomainMaxMsgCount, sizeof(DomainMaxMsgCount), "%s", optarg);
 			break;
 		case 'm':
+			ShowLimits = 0;
 			snprintf(DefaultUserMaxMsgCount, sizeof(DefaultUserMaxMsgCount), "%s", optarg);
 			break;
 		case 'P':
+			ShowLimits = 0;
 			snprintf(MaxPopAccounts, sizeof(MaxPopAccounts), "%s", optarg);
 			break;
 		case 'A':
+			ShowLimits = 0;
 			snprintf(MaxAliases, sizeof(MaxAliases), "%s", optarg);
 			break;
 		case 'F':
+			ShowLimits = 0;
 			snprintf(MaxForwards, sizeof(MaxForwards), "%s", optarg);
 			break;
 		case 'R':
+			ShowLimits = 0;
 			snprintf(MaxAutoresponders, sizeof(MaxAutoresponders), "%s", optarg);
 			break;
 		case 'L':
+			ShowLimits = 0;
 			snprintf(MaxMailinglists, sizeof(MaxMailinglists), "%s", optarg);
 			break;
 		case 'g':
+			ShowLimits = 0;
 			snprintf(GidFlagString, sizeof(GidFlagString), "%s", optarg);
 			GidFlag = 1;
 			break;
 		case 'p':
+			ShowLimits = 0;
 			snprintf(PermAccountFlagString, sizeof(PermAccountFlagString), "%s", optarg);
 			PermAccountFlag = 1;
 			break;
 		case 'a':
+			ShowLimits = 0;
 			snprintf(PermAliasFlagString, sizeof(PermAliasFlagString), "%s", optarg);
 			PermAliasFlag = 1;
 			break;
 		case 'f':
+			ShowLimits = 0;
 			snprintf(PermForwardFlagString, sizeof(PermForwardFlagString), "%s", optarg);
 			PermForwardFlag = 1;
 			break;
 		case 'r':
+			ShowLimits = 0;
 			snprintf(PermAutoresponderFlagString, sizeof(PermAutoresponderFlagString), "%s", optarg);
 			PermAutoresponderFlag = 1;
 			break;
 		case 'l':
+			ShowLimits = 0;
 			snprintf(PermMaillistFlagString, sizeof(PermMaillistFlagString), "%s", optarg);
 			PermMaillistFlag = 1;
 			break;
 		case 'u':
+			ShowLimits = 0;
 			snprintf(PermMaillistUsersFlagString, sizeof(PermMaillistUsersFlagString), "%s", optarg);
 			PermMaillistUsersFlag = 1;
 			break;
 		case 'o':
+			ShowLimits = 0;
 			snprintf(PermMaillistModeratorsFlagString, sizeof(PermMaillistModeratorsFlagString), "%s", optarg);
 			PermMaillistModeratorsFlag = 1;
 			break;
 		case 'x':
+			ShowLimits = 0;
 			snprintf(PermQuotaFlagString, sizeof(PermQuotaFlagString), "%s", optarg);
 			PermQuotaFlag = 1;
 			break;
 		case 'z':
+			ShowLimits = 0;
 			snprintf(PermDefaultQuotaFlagString, sizeof(PermDefaultQuotaFlagString), "%s", optarg);
 			PermDefaultQuotaFlag = 1;
 			break;
 		case 'h':
+			ShowLimits = 0;
 			usage();
 			return (1);
 		default:
+			ShowLimits = 0;
 			errflag = 1;
 			break;
 		}

@@ -1,5 +1,8 @@
 /*
  * $Log: limits.c,v $
+ * Revision 2.11  2009-12-01 11:59:23+05:30  Cprogrammer
+ * fixed syntax error in mysql_query
+ *
  * Revision 2.10  2008-10-20 19:06:04+05:30  Cprogrammer
  * added passwd_expiry
  *
@@ -37,7 +40,7 @@
  */
 
 #ifndef	lint
-static char     sccsid[] = "$Id: limits.c,v 2.10 2008-10-20 19:06:04+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: limits.c,v 2.11 2009-12-01 11:59:23+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #include "indimail.h"
@@ -53,7 +56,7 @@ int
 vget_limits(char *domain, struct vlimits *limits)
 {
 	char            SqlBuf[SQL_BUF_SIZE];
-	int             err;
+	int             err, perm;
 	MYSQL_ROW       row;
 	MYSQL_RES      *res;
 
@@ -91,7 +94,6 @@ vget_limits(char *domain, struct vlimits *limits)
 	}
 	if ((row = mysql_fetch_row(res)))
 	{
-		int             perm = atol(row[22]);
 
 		limits->domain_expiry = atoi(row[0]);
 		limits->passwd_expiry = atoi(row[1]);
@@ -115,6 +117,7 @@ vget_limits(char *domain, struct vlimits *limits)
 		limits->perm_alias = atoi(row[19]);
 		limits->perm_forward = atoi(row[20]);
 		limits->perm_autoresponder = atoi(row[21]);
+		perm = atol(row[22]);
 		limits->perm_maillist = perm & VLIMIT_DISABLE_ALL;
 		perm >>= VLIMIT_DISABLE_BITS;
 		limits->perm_maillist_users = perm & VLIMIT_DISABLE_ALL;
@@ -144,11 +147,9 @@ vdel_limits(char *domain)
 			if (create_table(ON_LOCAL, "vlimits", LIMITS_TABLE_LAYOUT))
 				return (-1);
 			return (0);
-		} else
-		{
-			mysql_perror("vdel_limits: %s", SqlBuf);
-			return (-1);
 		}
+		mysql_perror("vdel_limits: %s", SqlBuf);
+		return (-1);
 	}
 	if ((err = mysql_affected_rows(&mysql[1])) == -1)
 	{
@@ -174,21 +175,23 @@ vset_limits(char *domain, struct vlimits *limits)
 	if ((err = vauth_open((char *) 0)) != 0)
 		return (err);
 	snprintf(SqlBuf, SQL_BUF_SIZE,
-		"REPLACE INTO vlimits (domain, domain_expiry, maxpopaccounts, maxaliases, maxforwards,"
-		"maxautoresponders, maxmailinglists, diskquota, maxmsgcount, defaultquota,"
-		"defaultmaxmsgcount, disable_pop, disable_imap, disable_dialup,disable_passwordchanging,"
-		"disable_webmail, disable_relay, disable_smtp, perm_account, perm_alias, perm_forward,"
-		"perm_autoresponder, perm_maillist, perm_quota, perm_defaultquota) \n"
+		"REPLACE INTO vlimits (domain, domain_expiry, passwd_expiry, maxpopaccounts, maxaliases, "
+		"maxforwards, maxautoresponders, maxmailinglists, diskquota, maxmsgcount, defaultquota, "
+		"defaultmaxmsgcount, disable_pop, disable_imap, disable_dialup, "
+		"disable_passwordchanging, disable_webmail, disable_relay, disable_smtp, perm_account, "
+		"perm_alias, perm_forward, perm_autoresponder, perm_maillist, perm_quota, "
+		"perm_defaultquota) \n"
 		"VALUES \n"
-		"('%s', %ld, %ld, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d)",
-		domain, limits->domain_expiry, limits->passwd_expiry, limits->maxpopaccounts, limits->maxaliases,
-		limits->maxforwards, limits->maxautoresponders, limits->maxmailinglists,
+		"(\"%s\", %ld, %ld, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d)",
+		domain, limits->domain_expiry, limits->passwd_expiry, limits->maxpopaccounts,
+		limits->maxaliases, limits->maxforwards, limits->maxautoresponders, limits->maxmailinglists,
 		limits->diskquota, limits->maxmsgcount, limits->defaultquota, limits->defaultmaxmsgcount,
 		limits->disable_pop, limits->disable_imap, limits->disable_dialup,
 		limits->disable_passwordchanging, limits->disable_webmail, limits->disable_relay,
 		limits->disable_smtp, limits->perm_account, limits->perm_alias, limits->perm_forward,
 		limits->perm_autoresponder,
-		(limits->perm_maillist | (limits->perm_maillist_users << VLIMIT_DISABLE_BITS) | (limits->perm_maillist_moderators << (VLIMIT_DISABLE_BITS * 2))),
+		(limits->perm_maillist | (limits->perm_maillist_users << VLIMIT_DISABLE_BITS) |
+		(limits->perm_maillist_moderators << (VLIMIT_DISABLE_BITS * 2))),
 		limits->perm_quota, limits->perm_defaultquota);
 	if (mysql_query(&mysql[1], SqlBuf))
 	{
@@ -202,6 +205,8 @@ vset_limits(char *domain, struct vlimits *limits)
 				return (-1);
 			}
 		}
+		mysql_perror("vset_limits: %s", SqlBuf);
+		return (-1);
 	}
 	if ((err = mysql_affected_rows(&mysql[1])) == -1)
 	{
@@ -244,6 +249,7 @@ vdefault_limits(struct vlimits *limits)
 {
 	/*- initialize structure */
 	memset(limits, 0, sizeof(*limits));
+
 	limits->domain_expiry = -1;
 	limits->passwd_expiry = -1;
 	limits->maxpopaccounts = -1;
@@ -251,6 +257,27 @@ vdefault_limits(struct vlimits *limits)
 	limits->maxforwards = -1;
 	limits->maxautoresponders = -1;
 	limits->maxmailinglists = -1;
+	limits->diskquota = -1;
+	limits->maxmsgcount = -1;
+	limits->defaultquota = -1;
+	limits->defaultmaxmsgcount = -1;
+
+	limits->disable_pop = 0;
+	limits->disable_imap = 0;
+	limits->disable_dialup = 0;
+	limits->disable_passwordchanging = 0;
+	limits->disable_webmail = 0;
+	limits->disable_relay = 0;
+	limits->disable_smtp = 0;
+	limits->perm_account = 0;
+	limits->perm_alias = 0;
+	limits->perm_forward = 0;
+	limits->perm_autoresponder = 0;
+	limits->perm_maillist = 0;
+	limits->perm_maillist_users = 0;
+	limits->perm_maillist_moderators = 0;
+	limits->perm_quota = 0;
+	limits->perm_defaultquota = 0;
 }
 #endif /*- #ifdef ENABLE_DOMAIN_LIMITS */
 
