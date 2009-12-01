@@ -1,5 +1,8 @@
 /*
  * $Log: vmoduser.c,v $
+ * Revision 2.22  2009-12-01 16:29:00+05:30  Cprogrammer
+ * added checking of domain limit for user quota
+ *
  * Revision 2.21  2009-10-14 20:47:54+05:30  Cprogrammer
  * check return status of parse_quota()
  * use strtoll() instead of atol()
@@ -132,7 +135,7 @@
 #include <signal.h>
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vmoduser.c,v 2.21 2009-10-14 20:47:54+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: vmoduser.c,v 2.22 2009-12-01 16:29:00+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 char            Email[MAX_BUFF];
@@ -173,8 +176,11 @@ main(argc, argv)
 #ifdef USE_MAILDIRQUOTA
 	mdir_t          size_limit, count_limit, mailcount;
 #endif
+#ifdef ENABLE_DOMAIN_LIMITS
+	struct vlimits  limits;
+#endif
 
-	if(get_options(argc, argv))
+	if (get_options(argc, argv))
 		return(1);
 	if (indimailuid == -1 || indimailgid == -1)
 		GetIndiId(&indimailuid, &indimailgid);
@@ -197,29 +203,29 @@ main(argc, argv)
 		error_stack(stderr, "setuid-%d: %s\n", uid, strerror(errno));
 		return(1);
 	}
-	if(set_vacation)
+	if (set_vacation)
 		return(add_vacation(Email, vacation_file));
 	if (parse_email(Email, User, Domain, MAX_BUFF))
 	{
-		fprintf(stderr, "%s: Email too long\n", Email);
+		error_stack(stderr, "%s: Email too long\n", Email);
 		return(1);
 	}
 	real_domain = (char *) 0;
 	if (!(real_domain = vget_real_domain(Domain)))
 	{
-		fprintf(stderr, "%s: No such domain\n", Domain);
+		error_stack(stderr, "%s: No such domain\n", Domain);
 		return (1);
 	}
 #ifdef CLUSTERED_SITE
-	if((err = is_distributed_domain(real_domain)) == -1)
+	if ((err = is_distributed_domain(real_domain)) == -1)
 	{
-		fprintf(stderr, "Unable to verify %s as a distributed domain\n", real_domain);
+		error_stack(stderr, "Unable to verify %s as a distributed domain\n", real_domain);
 		return(1);
 	} else
-	if(err == 1)
+	if (err == 1)
 	{
 		snprintf(tmpbuf, MAX_BUFF, "%s@%s", User, real_domain);
-		if(!findhost(tmpbuf, 1))
+		if (!findhost(tmpbuf, 1))
 		{
 			error_stack(stderr, "no such user %s@%s\n", User, real_domain);
 			return(1);
@@ -228,9 +234,24 @@ main(argc, argv)
 #endif
 	if (!(pw = vauth_getpw(User, real_domain)))
 	{
-		fprintf(stderr, "no such user %s@%s\n", User, real_domain);
+		error_stack(stderr, "no such user %s@%s\n", User, real_domain);
 		return(1);
 	}
+#ifdef ENABLE_DOMAIN_LIMITS
+	if (!(pw->pw_gid & V_OVERRIDE) && getenv("DOMAIN_LIMITS"))
+	{
+		if (vget_limits(real_domain, &limits))
+		{
+			error_stack(stderr, "Unable to get domain limits for %s\n", real_domain);
+			return(1);
+		}
+		if (QuotaFlag && (limits.perm_defaultquota & VLIMIT_DISABLE_MODIFY))
+		{
+			error_stack(stderr, "quota modification not allowed for %s\n", Email);
+			return(1);
+		}
+	}
+#endif
 	PwTmp = *pw; /*- structure copy */
 	pw = &PwTmp;
 	if (*Gecos)
@@ -249,27 +270,27 @@ main(argc, argv)
 	}
 	if (QuotaFlag == 1)
 	{
-		if((*Quota == '+') || (*Quota == '-'))
+		if ((*Quota == '+') || (*Quota == '-'))
 			snprintf(tmpQuota, sizeof(tmpQuota), "%lld", strtoll(pw->pw_shell, 0, 0) + atol(Quota));
 		else
 			scopy(tmpQuota, Quota, MAX_BUFF);
 		if (!(ptr = strchr(tmpQuota, ',')))
 		{
-			if((ptr = strchr(pw->pw_shell, ',')))
+			if ((ptr = strchr(pw->pw_shell, ',')))
 				scat(tmpQuota, ptr, sizeof(tmpQuota));
 		}
 		pw->pw_shell = tmpQuota;
 	}
 	err = 0;
 #ifdef ENABLE_AUTH_LOGGING
-	if(active_inactive == 1)
+	if (active_inactive == 1)
 	{
-		if(is_inactive)
+		if (is_inactive)
 		{
 			err = vauth_active(pw, real_domain, FROM_INACTIVE_TO_ACTIVE);
-			if(!vget_assign(real_domain, 0, 0, &uid, &gid))
+			if (!vget_assign(real_domain, 0, 0, &uid, &gid))
 			{
-				if(indimailuid == -1 || indimailgid == -1)
+				if (indimailuid == -1 || indimailgid == -1)
 					GetIndiId(&indimailuid, &indimailgid);
 				uid = indimailuid;
 				gid = indimailgid;
@@ -279,7 +300,7 @@ main(argc, argv)
 			err = vdeluser(User, real_domain, 2);
 	}
 #endif
-	if((*Gecos || *Passwd || ClearFlags || GidFlag || QuotaFlag) && (err = vauth_setpw(pw, real_domain)))
+	if ((*Gecos || *Passwd || ClearFlags || GidFlag || QuotaFlag) && (err = vauth_setpw(pw, real_domain)))
 		error_stack(stderr, "vauth_setpw failed\n");
 	if (!err && QuotaFlag == 1)
 	{
@@ -287,7 +308,7 @@ main(argc, argv)
 #ifdef USE_MAILDIRQUOTA
 		if ((size_limit = parse_quota(pw->pw_shell, &count_limit)) == -1)
 		{
-			fprintf(stderr, "parse_quota: %s: %s\n", pw->pw_shell, strerror(errno));
+			error_stack(stderr, "parse_quota: %s: %s\n", pw->pw_shell, strerror(errno));
 			return (1);
 		}
 		quota = recalc_quota(tmpbuf, &mailcount, size_limit, count_limit, 2);
@@ -297,7 +318,7 @@ main(argc, argv)
 	}
 	if (*Passwd)
 	{
-		if(!quota)
+		if (!quota)
 		{
 			snprintf(tmpbuf, MAX_BUFF, "%s/Maildir", pw->pw_dir);
 #ifdef USE_MAILDIRQUOTA

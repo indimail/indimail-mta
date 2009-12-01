@@ -1,5 +1,8 @@
 /*
  * $Log: vsetuserquota.c,v $
+ * Revision 2.4  2009-12-01 16:29:21+05:30  Cprogrammer
+ * added checking of domain limit for user quota
+ *
  * Revision 2.3  2009-09-30 00:24:38+05:30  Cprogrammer
  * do setuid to make quota operations succeed
  *
@@ -71,7 +74,7 @@
 #include <signal.h>
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vsetuserquota.c,v 2.3 2009-09-30 00:24:38+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: vsetuserquota.c,v 2.4 2009-12-01 16:29:21+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 char            Email[MAX_BUFF];
@@ -90,12 +93,13 @@ main(argc, argv)
 {
 	int             i;
 	uid_t           uid;
-#ifdef CLUSTERED_SITE
-	char            tmpbuf[MAX_BUFF];
-#endif
 	char           *real_domain;
+	struct passwd  *pw;
+#ifdef ENABLE_DOMAIN_LIMITS
+	struct vlimits  limits;
+#endif
 
-	if(get_options(argc, argv))
+	if (get_options(argc, argv))
 		return(1);
 	if (indimailuid == -1 || indimailgid == -1)
 		GetIndiId(&indimailuid, &indimailgid);
@@ -120,31 +124,52 @@ main(argc, argv)
 	lowerit(Email);
 	if (parse_email(Email, User, Domain, MAX_BUFF))
 	{
-		fprintf(stderr, "%s: Email too long\n", Email);
+		error_stack(stderr, "%s: Email too long\n", Email);
 		return(1);
 	}
-	if(!(real_domain = vget_real_domain(Domain)))
+	if (!(real_domain = vget_real_domain(Domain)))
 	{
-		fprintf(stderr, "%s: No such domain\n", Domain);
+		error_stack(stderr, "%s: No such domain\n", Domain);
 		return(1);
 	}
 #ifdef CLUSTERED_SITE
-	if((i = is_distributed_domain(real_domain)) == -1)
+	if (vauthOpen_user(Email))
+#else
+	if (vauth_open((char *) 0))
+#endif
 	{
-		fprintf(stderr, "Unable to verify %s as a distributed domain\n", real_domain);
-		return(1);
-	} else
-	if(i == 1)
-	{
-		snprintf(tmpbuf, MAX_BUFF, "%s@%s", User, real_domain);
-		if(!findhost(tmpbuf, 1))
+		if (userNotFound)
 		{
-			error_stack(stderr, "no such user %s@%s\n", User, real_domain);
+			error_stack(stderr, "%s: No such user\n", Email);
+			return (1);
+		}
+		error_stack(stderr, "Temporary database Errror\n");
+		return(1);
+	}
+	if (!(pw = vauth_getpw(User, Domain)))
+	{
+		error_stack(stderr, "%s: No such user\n", Email);
+		vclose();
+		return (1);
+	}
+#ifdef ENABLE_DOMAIN_LIMITS
+	if (!(pw->pw_gid & V_OVERRIDE) && getenv("DOMAIN_LIMITS"))
+	{
+		if (vget_limits(real_domain, &limits))
+		{
+			error_stack(stderr, "Unable to get domain limits for %s\n", real_domain);
+			vclose();
+			return(1);
+		}
+		if (limits.perm_defaultquota & VLIMIT_DISABLE_MODIFY)
+		{
+			error_stack(stderr, "quota modification not allowed for %s\n", Email);
+			vclose();
 			return(1);
 		}
 	}
 #endif
-	if((i = vsetuserquota(User, real_domain, Quota)))
+	if ((i = vsetuserquota(User, real_domain, Quota)))
 		error_stack(stderr, 0);
 	vclose();
 	return(0);

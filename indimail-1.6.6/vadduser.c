@@ -1,5 +1,8 @@
 /*
  * $Log: vadduser.c,v $
+ * Revision 2.27  2009-12-01 16:28:14+05:30  Cprogrammer
+ * added checking of domain limits for user quota
+ *
  * Revision 2.26  2009-10-14 20:46:06+05:30  Cprogrammer
  * use strtoll() instead of atol()
  *
@@ -132,7 +135,7 @@
 #include <signal.h>
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vadduser.c,v 2.26 2009-10-14 20:46:06+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: vadduser.c,v 2.27 2009-12-01 16:28:14+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 char            Email[MAX_BUFF];
@@ -179,6 +182,25 @@ main(argc, argv)
 		error_stack(stderr, "%s: Email too long\n", Email);
 		return(1);
 	}
+	/* Do this so that users do not get added in a alias domain */
+	real_domain = (char *) 0;
+	if (*Domain && !(real_domain = vget_real_domain(Domain)))
+	{
+		error_stack(stderr, "%s: No such domain\n", Domain);
+		return(1);
+	}
+#ifdef ENABLE_DOMAIN_LIMITS
+	if (getenv("DOMAIN_LIMITS") && vget_limits(real_domain, &limits))
+	{
+		error_stack(stderr, "Unable to get domain limits for %s\n", real_domain);
+		return(1);
+	}
+	if (*Quota && (limits.perm_defaultquota & VLIMIT_DISABLE_CREATE))
+	{
+		error_stack(stderr, "-q option not allowed for %s\n", real_domain);
+		return(1);
+	}
+#endif
 	/*
 	 * if the comment field is blank use the user name 
 	 */
@@ -212,13 +234,6 @@ main(argc, argv)
 		error_stack(stderr, "setuid/setgid (%d/%d): %s", uid, indimailgid, strerror(errno));
 		return(1);
 	}
-	/* Do this so that users do not get added in a alias domain */
-	real_domain = (char *) 0;
-	if (*Domain && !(real_domain = vget_real_domain(Domain)))
-	{
-		error_stack(stderr, "%s: No such domain\n", Domain);
-		return(1);
-	}
 	/* set the users quota if set on the command line */
 	if (*Quota)
 	{
@@ -228,7 +243,7 @@ main(argc, argv)
 			quota = strtoll(Quota, 0, 0);
 	} else
 #ifdef ENABLE_DOMAIN_LIMITS
-	if (getenv("DOMAIN_LIMITS") && !vget_limits(real_domain, &limits))
+	if (getenv("DOMAIN_LIMITS") && limits.defaultquota != -1)
 		quota = limits.defaultquota;
 	else
 		quota = 0;
@@ -405,7 +420,6 @@ get_options(int argc, char **argv, char *envbuf, int *pass_len)
 		scopy(Email, argv[optind++], MAX_BUFF);
 	if (optind < argc)
 		scopy(Passwd, argv[optind++], MAX_BUFF);
-
 	if (errflag || !*Email)
 	{
 		usage();

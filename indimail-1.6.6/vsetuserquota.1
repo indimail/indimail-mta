@@ -33,10 +33,14 @@ example \fBvsetuserquota\fR user@domain 5m will set the quota to 5 mega bytes. O
 user@domain 2k will set the quota to 2k. \fBvsetuserquota\fR user@domain NOQUOTA will turn off
 all quota checking for that user. 
 
+.PP
+If the domain has domain limits set using vmoddomlimits(1), then domain limits apply. Setting
+of quota will not be allowed if permission for modifying quota is disabled in domain limits.
+
 .SH RETURN VALUE
 0 if all steps were successful, non-zero otherwise. If any of the steps fail, a diagnostic
 message is printed.
 
 .SH "SEE ALSO"
 
-vadduser(1), vmoduser(1), resetquota(8)
+vadduser(1), vmoduser(1), resetquota(8), vmoddomlimits(1)

@@ -1,5 +1,8 @@
 /*
  * $Log: vmoddomlimits.c,v $
+ * Revision 2.8  2009-12-01 16:28:42+05:30  Cprogrammer
+ * removed delete permission for user quota
+ *
  * Revision 2.7  2009-12-01 11:59:09+05:30  Cprogrammer
  * show limits by default
  *
@@ -43,7 +46,7 @@
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vmoddomlimits.c,v 2.7 2009-12-01 11:59:09+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: vmoddomlimits.c,v 2.8 2009-12-01 16:28:42+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef ENABLE_DOMAIN_LIMITS
@@ -392,9 +395,6 @@ main(int argc, char *argv[])
 			case 'm':
 				limits.perm_defaultquota |= VLIMIT_DISABLE_MODIFY;
 				break;
-			case 'd':
-				limits.perm_defaultquota |= VLIMIT_DISABLE_DELETE;
-				break;
 			}
 		}
 	}
@@ -432,32 +432,32 @@ main(int argc, char *argv[])
 		if (limits.disable_dialup != 0)
 			printf("  NO_DIALUP\n");
 		printf("Flags for non postmaster accounts:\n");
-		printf("  pop account:            ");
+		printf("  pop account           : ");
 		printf((limits.perm_account & VLIMIT_DISABLE_CREATE ? "DENY_CREATE  " : "ALLOW_CREATE "));
 		printf((limits.perm_account & VLIMIT_DISABLE_MODIFY ? "DENY_MODIFY  " : "ALLOW_MODIFY "));
 		printf((limits.perm_account & VLIMIT_DISABLE_DELETE ? "DENY_DELETE  " : "ALLOW_DELETE "));
 		printf("\n");
-		printf("  alias:                  ");
+		printf("  alias                 : ");
 		printf((limits.perm_alias & VLIMIT_DISABLE_CREATE ? "DENY_CREATE  " : "ALLOW_CREATE "));
 		printf((limits.perm_alias & VLIMIT_DISABLE_MODIFY ? "DENY_MODIFY  " : "ALLOW_MODIFY "));
 		printf((limits.perm_alias & VLIMIT_DISABLE_DELETE ? "DENY_DELETE  " : "ALLOW_DELETE "));
 		printf("\n");
-		printf("  forward:                ");
+		printf("  forward               : ");
 		printf((limits.perm_forward & VLIMIT_DISABLE_CREATE ? "DENY_CREATE  " : "ALLOW_CREATE "));
 		printf((limits.perm_forward & VLIMIT_DISABLE_MODIFY ? "DENY_MODIFY  " : "ALLOW_MODIFY "));
 		printf((limits.perm_forward & VLIMIT_DISABLE_DELETE ? "DENY_DELETE  " : "ALLOW_DELETE "));
 		printf("\n");
-		printf("  autoresponder:          ");
+		printf("  autoresponder         : ");
 		printf((limits.perm_autoresponder & VLIMIT_DISABLE_CREATE ? "DENY_CREATE  " : "ALLOW_CREATE "));
 		printf((limits.perm_autoresponder & VLIMIT_DISABLE_MODIFY ? "DENY_MODIFY  " : "ALLOW_MODIFY "));
 		printf((limits.perm_autoresponder & VLIMIT_DISABLE_DELETE ? "DENY_DELETE  " : "ALLOW_DELETE "));
 		printf("\n");
-		printf("  mailinglist:            ");
+		printf("  mailinglist           : ");
 		printf((limits.perm_maillist & VLIMIT_DISABLE_CREATE ? "DENY_CREATE  " : "ALLOW_CREATE "));
 		printf((limits.perm_maillist & VLIMIT_DISABLE_MODIFY ? "DENY_MODIFY  " : "ALLOW_MODIFY "));
 		printf((limits.perm_maillist & VLIMIT_DISABLE_DELETE ? "DENY_DELETE  " : "ALLOW_DELETE "));
 		printf("\n");
-		printf("  mailinglist users:      ");
+		printf("  mailinglist users     : ");
 		printf((limits.perm_maillist_users & VLIMIT_DISABLE_CREATE ? "DENY_CREATE  " : "ALLOW_CREATE "));
 		printf((limits.perm_maillist_users & VLIMIT_DISABLE_MODIFY ? "DENY_MODIFY  " : "ALLOW_MODIFY "));
 		printf((limits.perm_maillist_users & VLIMIT_DISABLE_DELETE ? "DENY_DELETE  " : "ALLOW_DELETE "));
@@ -467,15 +467,14 @@ main(int argc, char *argv[])
 		printf((limits.perm_maillist_moderators & VLIMIT_DISABLE_MODIFY ? "DENY_MODIFY  " : "ALLOW_MODIFY "));
 		printf((limits.perm_maillist_moderators & VLIMIT_DISABLE_DELETE ? "DENY_DELETE  " : "ALLOW_DELETE "));
 		printf("\n");
-		printf("  quota:                  ");
+		printf("  domain quota          : ");
 		printf((limits.perm_quota & VLIMIT_DISABLE_CREATE ? "DENY_CREATE  " : "ALLOW_CREATE "));
 		printf((limits.perm_quota & VLIMIT_DISABLE_MODIFY ? "DENY_MODIFY  " : "ALLOW_MODIFY "));
 		printf((limits.perm_quota & VLIMIT_DISABLE_DELETE ? "DENY_DELETE  " : "ALLOW_DELETE "));
 		printf("\n");
-		printf("  default quota:          ");
+		printf("  default quota         : ");
 		printf((limits.perm_defaultquota & VLIMIT_DISABLE_CREATE ? "DENY_CREATE  " : "ALLOW_CREATE "));
 		printf((limits.perm_defaultquota & VLIMIT_DISABLE_MODIFY ? "DENY_MODIFY  " : "ALLOW_MODIFY "));
-		printf((limits.perm_defaultquota & VLIMIT_DISABLE_DELETE ? "DENY_DELETE  " : "ALLOW_DELETE "));
 		printf("\n");
 		return (0);
 	}
@@ -519,7 +518,7 @@ usage()
 	fprintf(stderr, "         -l \"flags\"  (set mailinglist flags)\n");
 	fprintf(stderr, "         -u \"flags\"  (set mailinglist users flags)\n");
 	fprintf(stderr, "         -o \"flags\"  (set mailinglist moderators flags)\n");
-	fprintf(stderr, "         -x \"flags\"  (set quota flags)\n");
+	fprintf(stderr, "         -x \"flags\"  (set domain  quota flags)\n");
 	fprintf(stderr, "         -z \"flags\"  (set default quota flags)\n");
 	fprintf(stderr, "         perm flags:\n");
 	fprintf(stderr, "            a ( set deny all flag )\n");

@@ -28,6 +28,9 @@ i.e. Moves the user between indimail and indibak
 .TP
 \fB\-q\fR \fIquota\fR
 Changes the quota for the user. Changes the field pw_shell in indimail or indibak.
+
+If the domain has domain limits set using vmoddomlimits(1), then domain limits apply. Also,
+this option will not be allowed if permission for modifying quota is disabled in domain limits.
 .TP
 \fB\-c\fR \fIcomment\fR
 Changes the gecos (comment) field for the user. Changes the field pw_gecos in indimail or
