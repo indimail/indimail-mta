@@ -90,7 +90,7 @@ condredirect
 condredirect.0
 condtomaildir
 condtomaildir.0
-config
+qmailconfig
 config.0
 config-fast
 conf-qmail
