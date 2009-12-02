@@ -1,7 +1,7 @@
 .LL 8i
 .TH vmoddomain 1
 .SH NAME
-vmoddomain - Modify delivery instruction for a virtual domain
+vmoddomain - Modify delivery instruction for a virtual domain or set domain limits
 
 .SH SYNOPSYS
 .B vmoddomain
@@ -14,7 +14,8 @@ vmoddomain - Modify delivery instruction for a virtual domain
 .PP
 \fBvmoddomain\fR modifies delivery instructions for a virtual domain by modifying
 \fB.qmail-default\fR. \fBvmoddomain\fR has the setuid bit set and runs with the
-\fIvirtual_domain's\fR uid.
+\fIvirtual_domain's\fR uid. \fBvmoddomain\fR can also be used to set domain limits when
+using the -\fBl\fR option.
 
 .SH OPTIONS
 .PP
@@ -26,11 +27,15 @@ print version
 \fB\-v\fR
 verbose
 .TP
+\fB\-l\fR \fI0\fR | \fI1\fR
+Set domain limit. 0 to turn off, 1 to turn on.
+.TP
 \fB\-f\fR
 Sets the domain with VFILTER capability
 .TP
 \fB\-h\fR \fIhandler\fR
 Sets the handler for delivery instruction. The handler can be one of the following values
+.RS
 .nr step 1 1
 .IP \n[step] 3
 The keyword 'delete'
@@ -42,6 +47,7 @@ Maildir – A full path to a Maildir (e.g. /home/manny/Maildir/)
 Email Address – Email address for forwarding emails
 .IP \n+[step]
 IP Address – An IP address in SMTPROUTE specification (e.g. indimail.org:192.168.2.1:25)
+.RE
 
 .SH RETURN VALUE
 0 if all steps were successful, non-zero otherwise. If any of the steps fail, a diagnostic

@@ -1,5 +1,8 @@
 /*
  * $Log: vmoduser.c,v $
+ * Revision 2.23  2009-12-02 11:05:04+05:30  Cprogrammer
+ * use .domain_limits in domain directory to turn on domain limits
+ *
  * Revision 2.22  2009-12-01 16:29:00+05:30  Cprogrammer
  * added checking of domain limit for user quota
  *
@@ -135,7 +138,7 @@
 #include <signal.h>
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vmoduser.c,v 2.22 2009-12-01 16:29:00+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: vmoduser.c,v 2.23 2009-12-02 11:05:04+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 char            Email[MAX_BUFF];
@@ -177,7 +180,9 @@ main(argc, argv)
 	mdir_t          size_limit, count_limit, mailcount;
 #endif
 #ifdef ENABLE_DOMAIN_LIMITS
+	char            TheDir[MAX_BUFF];
 	struct vlimits  limits;
+	int             domain_limits;
 #endif
 
 	if (get_options(argc, argv))
@@ -216,6 +221,15 @@ main(argc, argv)
 		error_stack(stderr, "%s: No such domain\n", Domain);
 		return (1);
 	}
+#ifdef ENABLE_DOMAIN_LIMITS
+	if (!vget_assign(real_domain, TheDir, MAX_BUFF, 0, 0))
+	{
+		error_stack(stderr, "%s: domain does not exist\n", real_domain);
+		return (1);
+	}
+	snprintf(tmpbuf, MAX_BUFF, "%s/.domain_limits", TheDir);
+	domain_limits = ((access(tmpbuf, F_OK) && !getenv("DOMAIN_LIMITS")) ? 0 : 1);
+#endif
 #ifdef CLUSTERED_SITE
 	if ((err = is_distributed_domain(real_domain)) == -1)
 	{
@@ -238,7 +252,7 @@ main(argc, argv)
 		return(1);
 	}
 #ifdef ENABLE_DOMAIN_LIMITS
-	if (!(pw->pw_gid & V_OVERRIDE) && getenv("DOMAIN_LIMITS"))
+	if (!(pw->pw_gid & V_OVERRIDE) && domain_limits)
 	{
 		if (vget_limits(real_domain, &limits))
 		{

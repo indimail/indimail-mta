@@ -89,7 +89,7 @@ set mailing list users flags
 set mailing list moderators flags
 .TP
 \fB\-x\fR \fIperm_flags\fR
-set quota flags
+set domain quota flags
 .TP
 \fB\-z\fR \fIperm_flags\fR
 set default quota flags
@@ -104,6 +104,9 @@ perm_flags:
 .SH RETURN VALUE
  0 if all steps were successful. 
  1 if any error occurred
+
+.SH NOTES
+domain limits is work in progress and not fully implemented.
 
 .SH "SEE ALSO"
 vmoduser(1)

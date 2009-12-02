@@ -1,5 +1,8 @@
 /*
  * $Log: vadduser.c,v $
+ * Revision 2.28  2009-12-02 11:04:34+05:30  Cprogrammer
+ * use .domain_limits in domain directory to turn on domain limits
+ *
  * Revision 2.27  2009-12-01 16:28:14+05:30  Cprogrammer
  * added checking of domain limits for user quota
  *
@@ -135,7 +138,7 @@
 #include <signal.h>
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vadduser.c,v 2.27 2009-12-01 16:28:14+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: vadduser.c,v 2.28 2009-12-02 11:04:34+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 char            Email[MAX_BUFF];
@@ -169,6 +172,7 @@ main(argc, argv)
 	FILE           *fp;
 	uid_t           uid;
 #ifdef ENABLE_DOMAIN_LIMITS
+	int             domain_limits;
 	struct vlimits  limits;
 #endif
 
@@ -190,7 +194,14 @@ main(argc, argv)
 		return(1);
 	}
 #ifdef ENABLE_DOMAIN_LIMITS
-	if (getenv("DOMAIN_LIMITS") && vget_limits(real_domain, &limits))
+	if (!vget_assign(real_domain, buffer, AUTH_SIZE, 0, 0))
+	{
+		error_stack(stderr, "%s: domain does not exist\n", real_domain);
+		return (1);
+	}
+	snprintf(tmpbuf, MAX_BUFF, "%s/.domain_limits", buffer);
+	domain_limits = ((access(tmpbuf, F_OK) && !getenv("DOMAIN_LIMITS")) ? 0 : 1);
+	if (domain_limits && vget_limits(real_domain, &limits))
 	{
 		error_stack(stderr, "Unable to get domain limits for %s\n", real_domain);
 		return(1);
@@ -243,7 +254,7 @@ main(argc, argv)
 			quota = strtoll(Quota, 0, 0);
 	} else
 #ifdef ENABLE_DOMAIN_LIMITS
-	if (getenv("DOMAIN_LIMITS") && limits.defaultquota != -1)
+	if (domain_limits && limits.defaultquota != -1)
 		quota = limits.defaultquota;
 	else
 		quota = 0;
