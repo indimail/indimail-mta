@@ -5,7 +5,7 @@
 # renamed config.sh to qmailconfig.sh
 #
 #
-# $Id: qmailconfig.sh,v 1.5 2009-11-26 18:13:43+05:30 Cprogrammer Exp mbhangui $
+# $Id: qmailconfig.sh,v 1.5 2009-11-26 18:13:43+05:30 Cprogrammer Stab mbhangui $
 #
 ./hostname | tr '[A-Z]' '[a-z]' |
 (
