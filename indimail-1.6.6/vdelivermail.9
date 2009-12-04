@@ -8,20 +8,21 @@ vdelivermail \- deliver mails to users in a virtual domain
 
 .SH DESCRIPTION
 .PP
-\fBvdelivermail\fR is called by \fBqmail-local\fR because of instruction in .qmail-default
-file to deliver email to a virtual user. \fBvdelivermail\fR is the MDA for IndiMail. Along with a
-wrapper postdel, \fBvdelivermail\fR can be used as the MDA for postfix also. \fBqmail-local\fR
-sets the environment variables \fBEXT\fR and \fBHOST\fR which is used by \fBvdelivermail\fR to set the
+\fBvdelivermail\fR deliver mails to users created in a virtual domain created by \fBvadddomain(1)\fR
+\fBvdelivermail\fR is called by \fBqmail-local\fR through an instruction in .qmail-default file.
+\fBvdelivermail\fR is the MDA for IndiMail. Along with a wrapper postdel, \fBvdelivermail\fR
+can be used as the MDA for postfix also. \fBqmail-local\fR sets the environment variables
+\fBEXT\fR and \fBHOST\fR which is used by \fBvdelivermail\fR to set the
 user and the domain component of the email address. For postfix, these two environment
 variables are set by postdel. If the username is quoted, the quotes are removed. The
 user@domain is then searched in the authentication database. If there are any system problems
-due to which \fBvdelivermail\fR is unable to locate the user, it exits with the code 111
-and the mail gets deferred. If the domain is a clustered domain, \fBvdelivermail\fR attempts
-to find the mailstore for the user and calls qmail-remote to deliver the mail in case the mailstore
-is different from the current host. Else if QMAIL_EXT is set during compile time,
+due to which \fBvdelivermail\fR is unable to locate the user, it exits 111 and the mail gets
+deferred. If the domain is a clustered domain, \fBvdelivermail\fR attempts
+to find the mailstore for the user and invokes \fBqmail-remote(8)\fR to deliver the mail
+in case the mailstore is remoet. Else if QMAIL_EXT is set during compile time,
 \fBvdelivermail\fR attempts to locate the username based on Qmail Extensions. If the user
-is not found or user is found but is inactive action as per delivery instruction
-(third argument to \fBvdelivermail\fR) is taken. If the user is active, \fBvdelivermail\fR
+is not found or user is found but is inactive, action taken is as per delivery instruction
+(third argument to \fBvdelivermail\fR). If the user is active, \fBvdelivermail\fR
 checks for any forward delivery (including aliases) and delivers appropriately. While
 delivering, \fBvdelivermail\fR creates the inbox (Maildir format) if the directories do
 not exist.
@@ -161,14 +162,12 @@ indimail.org:192.168.1.1:25
 where indimail.org is the local domain, 192.168.1.1 is the IP address of an SMTP server for
 indimail.org and 25 is the SMTP port.
 .PP
-Once vdelivermail is started up, it checks existence of the virtual domain user. If the user
-exists, the email is delivered into the user's Maildir. If IndiMail was
-configured for hard quotas (default is yes with 5 Meg quota), then the size of the users
-current email files in their Maildir/new and Maildir/cur directories and other folders
+If IndiMail is configured for hard quotas (default is yes with 5 Meg quota), then the size
+of the user's current usage Maildir/new and Maildir/cur directories and other folders
 (excluding Trash) are counted and added to \fImaildirsize\fR. If the user is over quota the
 email is bounced back to the user with a bounce message that can be customized (See the 
 section '\fBQuota Checking\fR' above. If the message is 1Kbytes or smaller the email will always
-be delivered. This is so system administration programs can always get a message through
+be delivered. This allows system administration programs to always get a message through
 to the user. 
 
 .SH RETURN VALUE
