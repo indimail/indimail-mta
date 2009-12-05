@@ -65,8 +65,9 @@ in
 .IR spamignorepatterns ,
 .IR from.envrules ,
 .IR rcpt.envrules ,
-.IR signaturedomains
-.IR nosignaturedomains
+.IR signaturedomains ,
+.IR nosignaturedomains ,
+.IR badhost ,
 and
 .IR virtualdomains .
 Trailing spaces and tabs are allowed in any control file.
@@ -116,6 +117,7 @@ control	default	used by
 .I accesslist	\fR(none)	\fRqmail-smtpd
 .I authdomains	\fR(none)	\fRqmail-smtpd
 .I badhelo	\fR(none)	\fRqmail-smtpd
+.I badhost	\fR(none)	\fRqmail-smtpd
 .I badmailfrom	\fR(none)	\fRqmail-smtpd
 .I badmailpatterns	\fR(none)	\fRqmail-smtpd
 .I goodrcptto	\fR(none)	\fRqmail-smtpd
@@ -201,6 +203,7 @@ control	default	used by
 .I tlsclientciphers	\fR(none)	\fRqmail-remote
 .I tlshosts/FQDN.pem	\fR(none)	\fRqmail-remote
 .I tlsserverciphers	\fR(none)	\fRqmail-smtpd
+.I originipfield	\fR(none)	\fRqmail-queue
 .I filterargs	\fR(none)	\fRspawn-filter
 .I globalspamredirect	\FR(none)	\fRqmail-multi
 .I spamfilter	\fR(none)	\fRspawn-filter
