@@ -976,7 +976,7 @@ usage(void)
 #else
 "[ -1UXpPhHrRoOdDqQv ]\n"
 #endif
-"[ -c Maxlimit | -a concurrency_file]\n"
+"[ -c Maxlimit | -c concurrency_file]\n"
 "[ -C PerHostlimit ]\n"
 "[ -x rules.cdb ]\n"
 "[ -B banner ]\n"
