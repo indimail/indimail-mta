@@ -1,5 +1,9 @@
 /*
  * $Log: smtpd.c,v $
+ * Revision 1.134  2009-12-05 11:26:43+05:30  Cprogrammer
+ * added badhost check
+ * display value of TCPPARANOID, REQPTR in error messages
+ *
  * Revision 1.133  2009-11-12 19:28:50+05:30  Cprogrammer
  * do antispoofing in smtp_mail()
  * bypass antispoofing if relayclient is set
@@ -538,7 +542,7 @@ int             wildmat_internal(char *, char *);
 int             ssl_rfd = -1, ssl_wfd = -1;	/*- SSL_get_Xfd() are broken */
 char           *servercert, *clientca, *clientcrl;
 #endif
-char           *revision = "$Revision: 1.133 $";
+char           *revision = "$Revision: 1.134 $";
 char           *protocol = "SMTP";
 stralloc        proto = { 0 };
 static stralloc Revision = { 0 };
@@ -658,6 +662,11 @@ struct constmap maprmf;
 int             nodnschecksok = 0;
 static stralloc nodnschecks = { 0 };
 struct constmap mapnodnschecks;
+/*- badhost Check */
+char           *dobadhostcheck = (char *) 0;
+int             brhok = 0;
+stralloc        brh = {0};
+struct constmap mapbrh;
 /*- Helo Check */
 char           *dohelocheck = (char *) 0;
 int             badhelook = 0;
@@ -2174,6 +2183,40 @@ smtp_quit(char *arg)
 	_exit(0);
 }
 
+/*
+ * $TCPREMOTEHOST check against regular expressions depending on $RELAYCLIENT:
+ * domain-based blacklist/right-hand-side blackhole list (RHSBL)
+ *
+ * Author: Jörg Backschues
+ * switch (address_match(0, &addr, brhok ? &brh : 0, brhok ? &mapbrh : 0, 0, &errStr))
+ */
+int
+badhostcheck()
+{
+	int             i = 0, j = 0, x = 0, negate = 0;
+	stralloc        curregex = { 0 };
+
+	while (j < brh.len) {
+		i = j;
+		while ((brh.s[i] != '\0') && (i < brh.len))
+			i++;
+		if (brh.s[j] == '!') {
+			negate = 1;
+			j++;
+		}
+		stralloc_copyb(&curregex, brh.s + j, (i - j));
+		stralloc_0(&curregex);
+		x = matchregex(remotehost, curregex.s, 0);
+		if ((negate) && (x == 0))
+			return 1;
+		if (!(negate) && (x > 0))
+			return 1;
+		j = i + 1;
+		negate = 0;
+	}
+	return 0;
+}
+
 void
 dohelo(arg)
 	char           *arg;
@@ -2338,6 +2381,20 @@ setup()
 	{
 		if (control_readint(&greetdelay, "greetdelay") == -1)
 			die_control();
+	}
+	/*
+	 * Enable badhost if
+	 * BADHOSTCHECK is defined (default control file badhost)
+	 * or
+	 * BADHOST (control file defined by BADHOST env variable)
+	 * is defined
+	 */
+	if ((dobadhostcheck = (env_get("BADHOSTCHECK") ? "" : env_get("BADHOST"))))
+	{
+		if ((brhok = control_readfile(&brh, (x = env_get("BADHOST")) && *x ? x : "badhost", 0)) == -1)
+			die_control();
+		if (brhok && !constmap_init(&mapbrh, brh.s, brh.len, 0))
+			die_nomem();
 	}
 	/*
 	 * Enable badhelo if
@@ -3241,7 +3298,8 @@ smtp_mail(arg)
 		if (ret > 0)
 		{
 			/*
-			 * Following environment variables cannot be reset by envrules
+			 * No point in setting Following environment variables as they have been
+			 * read in the function setup() which gets called only once
 			 * SMTPS, NODNSCHECK, RELAYCLIENT, TCPREMOTEINFO, TCPREMOTEHOST, TCPLOCALIP
 			 * TCPLOCALHOST, TCPREMOTEIP, GREETDELAY, BADHELO, BADHELOCHECK
 			 */
@@ -5576,6 +5634,13 @@ qmail_smtpd(argc, argv, envp)
 		setup_state = 1;
 	} else
 	{
+		if (dobadhostcheck && badhostcheck())
+		{
+			smtp_greet("553 ");
+			out("553 sorry, your host ");
+			out(remoteip);
+			out(" has been denied (#5.7.1)");
+		} else
 		if (env_get("OPENRELAY"))
 		{
 			smtp_greet("553 ");
@@ -5584,20 +5649,35 @@ qmail_smtpd(argc, argv, envp)
 			out("); check your server configs (#5.7.1)");
 			setup_state = 2;
 		} else
-		if (env_get("TCPPARANOID"))
+		if ((ptr = env_get("TCPPARANOID")))
 		{
 			smtp_greet("553 ");
 			out(" Your IP address (");
 			out(remoteip);
-			out(") PTR (reverse DNS) record points to wrong hostname (#5.7.1)");
+			if (*ptr)
+			{
+				out(") PTR (reverse DNS) record points to wrong hostname ");
+				out(ptr);
+				out(" (#5.7.1)");
+			} else
+				out(") PTR (reverse DNS) record points to wrong hostname (#5.7.1)");
 			setup_state = 3;
 		} else
-		if (env_get("REQPTR") && str_equal(remotehost, "unknown"))
+		if ((ptr = env_get("REQPTR")) && str_equal(remotehost, "unknown"))
 		{
 			smtp_greet("553 ");
-			out(" Sorry, no PTR (reverse DNS) record for (");
-			out(remoteip);
-			out(") (#5.7.1)");
+			if (*ptr)
+			{
+				out(ptr);
+				out(": from ");
+				out(remoteip);
+				out(": (#5.7.1)");
+			} else
+			{
+				out(" Sorry, no PTR (reverse DNS) record for (");
+				out(remoteip);
+				out(") (#5.7.1)");
+			}
 			setup_state = 4;
 		} else
 			smtp_greet("220 ");
@@ -5651,7 +5731,7 @@ addrrelay()
 void
 getversion_smtpd_c()
 {
-	static char    *x = "$Id: smtpd.c,v 1.133 2009-11-12 19:28:50+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: smtpd.c,v 1.134 2009-12-05 11:26:43+05:30 Cprogrammer Exp mbhangui $";
 
 #ifdef INDIMAIL
 	x = sccsidh;
