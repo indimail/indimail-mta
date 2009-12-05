@@ -23,6 +23,19 @@ to deposit them into the outgoing queue.
 must be supplied several environment variables;
 see
 .BR tcp-environ(5) .
+One important environment variable is \fBTCPREMOTEIP\fR which is the IP address of the connecting
+remote host.
+
+If the environment variable \fBTCPPARANOID\fR is set (\fBtcpserver(1)\fR with -p option),
+\fBqmail-smtpd\fR returns a permanent error code 553 to the client. TCPPARANOID is set
+by \fBtcpserver(1)\fR if the IP for reverse DNS address for \fBTCPREMOTEIP\fR does not
+match \fBTCPREMOTEIP\fR.
+
+If the environment variable \fBREQPTR\fR is set and the environment variable \fBTCPREMOTEHOST\fR
+is absent, \fBqmail-smtpd\fR returns permanent error code 553 to the client. \fBTCPREMOTEHOST\fR
+environment variable is removed by \fBtcpserver(1)\fR if remote host (TCPREMOTEIP) does not have a
+reverse DNS record.
+
 If the environment variable
 .B SMTPS
 is non-empty,
@@ -109,6 +122,9 @@ are passed as the minimum arguments.
 
 .B qmail-smtpd
 employs DNS look-up for the "MAIL from:" sender address.
+
+\fBqmail-smtpd\fR rejects connections from unresolvable IP address (hosts without reverse DNS), if
+the environment variable \fBREQPTR\fR is set.
 
 .B qmail-smtpd
 employs the following additional checks -
@@ -324,7 +340,7 @@ will reject every connection attempt
 if the client MTA's HELO/EHLO greeting compares with 
 a REGEX pattern provided in
 .IR badhelo .
-To enable badhelocheck, define the environment variable BADHELOCHECK or set the environment variable
+To enable badhelo check, define the environment variable BADHELOCHECK or set the environment variable
 BADHELO to a control file containing unacceptable HELO/EHLO greetings strings. When badhelocheck is enabled,
 .B qmail-smtpd
 will reject email send using HELO hostname equal to your IP address, your hostname or any hostname without dots.
@@ -337,6 +353,19 @@ may be of the form
 .BR @\fIhost ,
 meaning every address at
 .IR host .
+
+.TP 5
+.I badhost
+Unacceptable remote host in environment variable
+.B TCPREMOTEHOST.
+.B qmail-smtpd
+will reject every host if the host is listed in
+.IR badhost .
+A line in
+.I badhost
+may be a case insensitive regular expression.
+To enable badhost check, define the environment variable BADHOSTCHECK or set the environment variable
+BADHOST to a control file containing unacceptable remote hosts.
 
 .TP 5
 .I accesslist
@@ -1504,6 +1533,7 @@ mysqld(1),
 tcp-env(1),
 tcp-environ(5),
 tcpserver(1),
+tcprules(1),
 qmail-control(5),
 MCDFILE(5),
 indimail.patch(5),

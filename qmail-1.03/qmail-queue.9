@@ -40,6 +40,17 @@ also does the same thing. The value of the environment variable overrides the
 value in the control file.
 
 If the control file
+.I originipfield
+is set or if the environment variable 
+.B ORIGINIPFIELD
+is set, a "X-Originating-IP" header will be added to every relayed mail.
+
+If the environment variable 
+.B ORIGINIPFIELD
+is set,  it overrides the control file 
+.IR originipfield .
+
+If the control file
 .B quarantine
 exists, recipient list is replaced with its content. The environment variable
 .B QUARANTINE
