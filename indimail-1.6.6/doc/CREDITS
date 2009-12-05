@@ -138,3 +138,6 @@ The site http://qmail.org and the qmail mailing list for wealth of information
 94. Bounce Address Tag Validation - John Levine, Joerg Backschues
 95. Alexey Mahotkin <alexm@hsys.msk.ru> for pam support functions and new
     pam-checkpwd program
+95. Jeremy Kister - X=Originating-IP header qmail-1.03.originip-field.patch
+    [http://jeremy.kister.net/code/qmail-1.03.originip-field.patch]
+96. Joerg Backschues - badremotehost check function (Ability to block hosts listed in badhost)
