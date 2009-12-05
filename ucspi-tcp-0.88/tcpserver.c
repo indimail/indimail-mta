@@ -438,9 +438,9 @@ doit(int t)
 				if (!stralloc_0(&remotehostsa))
 					drop_nomem();
 				remotehost = remotehostsa.s;
-			} else
+			} else /*- host has reverse DNS but IP does not match remoteip */
 				env("TCPPARANOID", remotehostsa.s);
-		}
+		}  /*- host does not have reverse DNS */
 	}
 	env("TCPREMOTEIP", remoteipstr);
 	env("TCPREMOTEPORT", remoteportstr);
