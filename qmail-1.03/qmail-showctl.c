@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-showctl.c,v $
+ * Revision 1.48  2009-12-05 11:25:39+05:30  Cprogrammer
+ * added control files badhelo, badhost, originipfield
+ *
  * Revision 1.47  2009-09-01 23:19:56+05:30  Cprogrammer
  * changes for batv
  *
@@ -349,6 +352,7 @@ main(int argc, char **argv)
 	do_lst("blackholedrcpt",  "Any SMTP connection is allowed.", "", " is immediately dropped for RCPT TO.");
 	do_lst("blackholedrcptpatterns","Any SMTP connection is allowed.", "", " is immediately dropped for RCPT TO. (Not if line starts with !).");
 	do_lst("badhelo", "Any HELO/EHLO greeting is allowed.", "", " not accepted in HELO/EHLO.");
+	do_lst("badhost","Any external remote hosts are allow.",""," pattern will be rejected for external host.");
 	do_lst("badmailfrom",     "Any MAIL FROM is allowed.", "", " not accepted in MAIL FROM.");
 	do_lst("badmailpatterns", "Any MAIL FROM is allowed.", "", " not accepted in MAIL FROM (Not if line starts with !).");
 	do_lst("badrcptto",       "Any RCPT TO is allowed.", "", " not accepted in RCPT TO.");
@@ -394,6 +398,7 @@ main(int argc, char **argv)
 	do_int("bouncelifetime","604800","Bounce message lifetime in the queue is "," seconds (or max of queuelifetime)");
 	do_int("holdremote", "0", "Hold Remote is ", "");
 	do_int("holdlocal", "0", "Hold Local is ", "");
+	do_int("originipfield","0","X-Originating-IP header is set to ","");
 
 	if (do_lst
 		("rcpthosts", "SMTP clients may send messages to any recipient.", "SMTP clients may send messages to recipients at ", "."))
@@ -495,6 +500,10 @@ main(int argc, char **argv)
 			continue;
 		if (str_equal(d->d_name, "badrcptto"))
 			continue;
+		if (str_equal(d->d_name,"badhelo"))
+			continue;
+		if (str_equal(d->d_name,"badhost"))
+			continue;
 		if (str_equal(d->d_name, "badmailpatterns"))
 			continue;
 		if (str_equal(d->d_name, "badrcptpatterns"))
@@ -561,6 +570,8 @@ main(int argc, char **argv)
 			continue;
 		if (str_equal(d->d_name, "qmqpservers"))
 			continue;
+		if (str_equal(d->d_name,"originipfield"))
+			continue;    
 		if (str_equal(d->d_name, "queuelifetime"))
 			continue;
 		if (str_equal(d->d_name, "bouncelifetime"))
@@ -689,7 +700,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_showctl_c()
 {
-	static char    *x = "$Id: qmail-showctl.c,v 1.47 2009-09-01 23:19:56+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: qmail-showctl.c,v 1.48 2009-12-05 11:25:39+05:30 Cprogrammer Stab mbhangui $";
 
 #ifdef INDIMAIL
 	x = sccsidh;
