@@ -60,7 +60,7 @@ Verbose. Print error messages, status messages and IP connection table.
 .TP
 .B \-c \fIn
 |
-.B \fIfile
+.B \-c \fIfile
 
 Do not handle more than
 .I n
@@ -235,8 +235,9 @@ port 53.
 .TP
 .B \-p
 Paranoid. After looking up the remote host name in DNS, look up the IP
-addresses in DNS for that host name, and remove the environment variable
-$TCPREMOTEHOST if none of the addresses match the client's IP address.
+addresses in DNS for that host name, remove the environment variable
+$TCPREMOTEHOST and set the environment variable TCPPARANOID, if none of the addresses
+match the client's IP address.
 .TP
 .B \-P
 (Default.) Not paranoid. 
