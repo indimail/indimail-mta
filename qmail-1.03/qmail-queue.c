@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-queue.c,v $
+ * Revision 1.45  2009-12-05 11:23:47+05:30  Cprogrammer
+ * added X-Originating-IP header
+ *
  * Revision 1.44  2009-11-13 23:04:38+05:30  Cprogrammer
  * report QHPSI error using return value 77
  *
@@ -220,10 +223,67 @@ sigbug()
 	die(81);
 }
 
-unsigned int    receivedlen;
-char           *received;
+#ifndef INET_ADDRSTRLEN
+#define INET_ADDRSTRLEN 16
+#endif
 
+char           *tcpremoteip;
+void
+tcpgetremoteip()
+{
+#ifdef IPV6
+	static char     addrBuf[INET6_ADDRSTRLEN];
+	struct sockaddr_storage sa;
+#else
+	struct sockaddr sa;
+	struct sockaddr_in *sin = (struct sockaddr_in *) (&sa);
+#endif
+	int             i, status, dummy = sizeof(sa);
+
+	memset(&sa, 0, sizeof(struct sockaddr));
+	for (tcpremoteip = (char *) 0, errno = i = 0; i < 3; i++)
+	{
+		errno = 0;
+		if (!(status = getpeername(i, (struct sockaddr *) &sa, (socklen_t *) &dummy)))
+		{
+#ifdef IPV6
+			if (((struct sockaddr *) &sa)->sa_family == AF_INET)
+			{
+				tcpremoteip = (char *) inet_ntop(AF_INET,
+					(void *) &((struct sockaddr_in *) &sa)->sin_addr, addrBuf,
+					INET_ADDRSTRLEN);
+			} else
+			if (((struct sockaddr *)&sa)->sa_family == AF_INET6)
+			{
+				tcpremoteip = (char *) inet_ntop(AF_INET6,
+					(void *) &((struct sockaddr_in6 *) &sa)->sin6_addr, addrBuf,
+					INET6_ADDRSTRLEN);
+			} else
+			if (((struct sockaddr *) &sa)->sa_family == AF_UNSPEC)
+				tcpremoteip = "::1";
+#else
+			if (((struct sockaddr *) sin)->sa_family == AF_INET)
+				tcpremoteip = (char *) inet_ntoa(sin->sin_addr);
+			else
+			if (((struct sockaddr *) sin)->sa_family == AF_UNSPEC)
+				tcpremoteip = "127.0.0.1";
+#endif
+			else
+				tcpremoteip = "?.?.?.?";
+			break;
+		}
+		if (errno == error_ebadf)
+			break;
+	}
+	return;
+}
+
+unsigned int    receivedlen;
+unsigned int    originlen;
+char           *received;
 /* "Received: (qmail-queue invoked by alias); 26 Sep 1995 04:46:54 -0000\n" */
+char           *origin; /* "X-Originating-IP: 10.0.0.1\n" */
+
 static unsigned int
 receivedfmt(s)
 	char           *s;
@@ -269,54 +329,10 @@ receivedfmt(s)
 			s += i;
 	} else
 	{
-#ifndef INET_ADDRSTRLEN
-#define INET_ADDRSTRLEN 16
-#endif
-		char           *tcpremoteip;
-#ifdef IPV6
-		static char     addrBuf[INET6_ADDRSTRLEN];
-		struct sockaddr_storage sa;
-#else
-		struct sockaddr sa;
-		struct sockaddr_in *sin = (struct sockaddr_in *) (&sa);
-#endif
-		int             i, status, dummy = sizeof(sa);
-
-		memset(&sa, 0, sizeof(struct sockaddr));
-		for (tcpremoteip = (char *) 0, errno = i = 0; i < 3; i++)
-		{
-			errno = 0;
-			if (!(status = getpeername(i, (struct sockaddr *) &sa, (socklen_t *) &dummy)))
-			{
-#ifdef IPV6
-				if (((struct sockaddr *) &sa)->sa_family == AF_INET)
-				{
-					tcpremoteip = (char *) inet_ntop(AF_INET,
-						(void *) &((struct sockaddr_in *) &sa)->sin_addr, addrBuf,
-						INET_ADDRSTRLEN);
-				} else
-				if (((struct sockaddr *)&sa)->sa_family == AF_INET6)
-				{
-					tcpremoteip = (char *) inet_ntop(AF_INET6,
-						(void *) &((struct sockaddr_in6 *) &sa)->sin6_addr, addrBuf,
-						INET6_ADDRSTRLEN);
-				} else
-				if (((struct sockaddr *) &sa)->sa_family == AF_UNSPEC)
-					tcpremoteip = "::1";
-#else
-				if (((struct sockaddr *) sin)->sa_family == AF_INET)
-					tcpremoteip = (char *) inet_ntoa(sin->sin_addr);
-				else
-				if (((struct sockaddr *) sin)->sa_family == AF_UNSPEC)
-					tcpremoteip = "127.0.0.1";
-#endif
-				else
-					tcpremoteip = "?.?.?.?";
-				break;
-			}
-			if (errno == error_ebadf)
-				break;
-		}
+		if (!tcpremoteip)
+			tcpremoteip = env_get("TCPREMOTEIP");
+		if (!tcpremoteip)
+			tcpgetremoteip();
 		if (tcpremoteip)
 		{
 			char            Hostname[128];
@@ -367,6 +383,38 @@ received_setup()
 	if (!(received = alloc(receivedlen + 1)))
 		die(51);
 	receivedfmt(received);
+}
+
+unsigned int
+originfmt(s)
+	char           *s;
+{
+	unsigned int    i;
+	unsigned int    len;
+
+	len = 0;
+	i = fmt_str(s, "X-Originating-IP: ");
+	len += i;
+	if (s)
+		s += i;
+	i = fmt_str(s, tcpremoteip);
+	len += i;
+	if (s)
+		s += i;
+	i = fmt_str(s, "\n");
+	len += i;
+	if (s)
+		s += i;
+	return len;
+}
+
+void
+origin_setup()
+{
+	originlen = originfmt((char *) 0);
+	if (!(origin = alloc(originlen + 1)))
+		die(51);
+	originfmt(origin);
 }
 
 unsigned int
@@ -621,7 +669,7 @@ main()
 #ifdef USE_FSYNC
 	int             fd;
 #endif
-	unsigned int    len, x;
+	unsigned int    len, x, originipfield = 0;
 	char            tmp[FMT_ULONG];
 	char            ch;
 	char           *ptr, *qqeh, *tmp_ptr;
@@ -633,6 +681,13 @@ main()
 		die(67);
 	if (chdir(auto_qmail) == -1)
 		die(61);
+	if (control_readint((int *) &originipfield, "originipfield") == -1)
+		die(55);
+	if ((ptr = env_get("ORIGINIPFIELD")))
+	{
+		scan_ulong(ptr, (unsigned long *) &x);
+		originipfield = x;
+	}
 	if (!(ptr = env_get("EXTRAQUEUE")))
 	{
 		if (control_readline(&extraqueue, "extraqueue") == -1)
@@ -710,6 +765,14 @@ main()
 	}
 	if (substdio_bput(&ssout, received, receivedlen) == -1)
 		die_write();
+	if (originipfield && (tcpremoteip = env_get("TCPREMOTEIP"))
+		&& (env_get("RELAYCLIENT") || env_get("TCPREMOTEINFO")))
+	{
+		origin_setup();
+		if (substdio_bput(&ssout, origin, originlen) == -1)
+			die_write();
+	}
+
 	if (!excl.len && !incl.len && !logh.len)
 	{
 		switch (substdio_copy(&ssout, &ssin))
@@ -1022,7 +1085,7 @@ main()
 void
 getversion_qmail_queue_c()
 {
-	static char    *x = "$Id: qmail-queue.c,v 1.44 2009-11-13 23:04:38+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: qmail-queue.c,v 1.45 2009-12-05 11:23:47+05:30 Cprogrammer Stab mbhangui $";
 
 #ifdef INDIMAIL
 	x = sccsidh;
