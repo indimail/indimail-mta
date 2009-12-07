@@ -76,11 +76,13 @@ and
 .B qmail-send
 by default looks at QMAILHOME/control for all control files. This path can be changed by
 defining the CONTROLDIR environment variable.
+
 .TP 5
 .I bouncefrom
 Bounce username.
 Default:
 .BR MAILER-DAEMON .
+
 .TP 5
 .I bouncehost
 Bounce host.
@@ -98,25 +100,19 @@ notice back to the message's envelope sender.
 The notice is
 .B From: \fIbouncefrom\fB@\fIbouncehost\fR,
 although its envelope sender is empty.
+
 .TP 5
 .I bouncemaxbyte
 Limit the size of bounces. Default: 50000 bytes.
+
 .TP 5
-.I concurrencylocal
-Maximum number of simultaneous local delivery attempts.
-Default: 10.
-If 0, local deliveries will be put on hold.
-.I concurrencylocal
-is limited at compile time to
-SPAWN.
+.I bouncesubject
+Configures the bounce message subject
+
 .TP 5
-.I concurrencyremote
-Maximum number of simultaneous remote delivery attempts.
-Default: 20.
-If 0, remote deliveries will be put on hold.
-.I concurrencyremote
-is limited at compile time to
-SPAWN.
+.I bouncemessage
+Text for bounce message. Remember that this may break QSBMF
+
 .TP 5
 .I doublebouncehost
 Double-bounce host.
@@ -126,6 +122,7 @@ if that is supplied;
 otherwise the literal name
 .BR doublebouncehost ,
 which is probably not what you want.
+
 .TP 5
 .I doublebounceto
 User to receive double-bounces.
@@ -144,6 +141,33 @@ As a special case, if the first line of
 .IR doublebounceto
 is blank (contains a single linefeed), qmail-send will not queue
 the double-bounce at all.
+
+.TP 5
+.I doublebouncesubject
+Configures the double bounce message subject
+
+.TP 5
+.I doublebouncemessage
+Text for double bounce message. Remember that this may break QSBMF
+
+.TP 5
+.I concurrencylocal
+Maximum number of simultaneous local delivery attempts.
+Default: 10.
+If 0, local deliveries will be put on hold.
+.I concurrencylocal
+is limited at compile time to
+SPAWN.
+
+.TP 5
+.I concurrencyremote
+Maximum number of simultaneous remote delivery attempts.
+Default: 20.
+If 0, remote deliveries will be put on hold.
+.I concurrencyremote
+is limited at compile time to
+SPAWN.
+
 .TP 5
 .I envnoathost
 Presumed domain name for addresses without @ signs.
