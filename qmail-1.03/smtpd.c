@@ -1,5 +1,8 @@
 /*
  * $Log: smtpd.c,v $
+ * Revision 1.135  2009-12-05 19:47:54+05:30  Cprogrammer
+ * ansic conversion
+ *
  * Revision 1.134  2009-12-05 11:26:43+05:30  Cprogrammer
  * added badhost check
  * display value of TCPPARANOID, REQPTR in error messages
@@ -542,7 +545,7 @@ int             wildmat_internal(char *, char *);
 int             ssl_rfd = -1, ssl_wfd = -1;	/*- SSL_get_Xfd() are broken */
 char           *servercert, *clientca, *clientcrl;
 #endif
-char           *revision = "$Revision: 1.134 $";
+char           *revision = "$Revision: 1.135 $";
 char           *protocol = "SMTP";
 stralloc        proto = { 0 };
 static stralloc Revision = { 0 };
@@ -728,16 +731,14 @@ int             smtp_port;
 extern char   **environ;
 
 void
-logerr(s)
-	char           *s;
+logerr(char *s)
 {
 	if (substdio_puts(&sserr, s) == -1)
 		_exit(1);
 }
 
 void
-logerrf(s)
-	char           *s;
+logerrf(char *s)
 {
 	if (substdio_puts(&sserr, s) == -1)
 		_exit(1);
@@ -755,10 +756,7 @@ logerrpid()
 }
 
 ssize_t
-safewrite(fd, buf, len)
-	int             fd;
-	char           *buf;
-	int             len;
+safewrite(int fd, char *buf, int len)
 {
 	int             r;
 
@@ -782,14 +780,13 @@ flush()
 }
 
 void
-out(s)
-	char           *s;
+out(char *s)
 {
 	substdio_puts(&ssout, s);
 }
 
 void
-die_nohelofqdn(arg)
+die_nohelofqdn(char *arg)
 {
 	logerr("qmail-smtpd: ");
 	logerrpid();
@@ -913,9 +910,7 @@ err_hops()
 }
 
 void
-err_hmf(arg1, arg2, arg3)
-	char           *arg1, *arg2;
-	int             arg3;
+err_hmf(char *arg1, char *arg2, int arg3)
 {
 	logerr("qmail-smtpd: ");
 	logerrpid();
@@ -933,8 +928,7 @@ err_hmf(arg1, arg2, arg3)
 }
 
 void
-err_badhelo(arg1, arg2, arg3, arg4, arg5)
-	char           *arg1, *arg2, *arg3;
+err_badhelo(char *arg1, char *arg2, char *arg3)
 {
 	logerr("qmail-smtpd: ");
 	logerrpid();
@@ -952,9 +946,7 @@ err_badhelo(arg1, arg2, arg3, arg4, arg5)
 }
 
 void
-err_nogateway(arg1, arg2, arg3, flag)
-	char           *arg1, *arg2, *arg3;
-	int             flag;
+err_nogateway(char *arg1, char *arg2, char *arg3, int flag)
 {
 	logerr("qmail-smtpd: ");
 	logerrpid();
@@ -997,8 +989,7 @@ err_badbounce()
 }
 
 void
-err_bmf(arg1, arg2)
-	char           *arg1, *arg2;
+err_bmf(char *arg1, char *arg2)
 {
 	logerr("qmail-smtpd: ");
 	logerrpid();
@@ -1036,8 +1027,7 @@ err_spf()
 #endif
 
 void
-err_hostaccess(arg1, arg2)
-	char           *arg1, *arg2;
+err_hostaccess(char *arg1, char *arg2)
 {
 	logerr("qmail-smtpd: ");
 	logerrpid();
@@ -1049,9 +1039,7 @@ err_hostaccess(arg1, arg2)
 }
 
 void
-log_virus(arg1, arg2, arg3, arg4, len, blackhole)
-	char           *arg1, *arg2, *arg3, *arg4;
-	int             len, blackhole;
+log_virus(char *arg1, char *arg2, char *arg3, char *arg4, int len, int blackhole)
 {
 	int             idx;
 	char           *ptr;
@@ -1089,8 +1077,7 @@ log_virus(arg1, arg2, arg3, arg4, len, blackhole)
 }
 
 void
-err_acl(arg1, arg2, arg3)
-	char           *arg1, *arg2, *arg3;
+err_acl(char *arg1, char *arg2, char *arg3)
 {
 	logerr("qmail-smtpd: ");
 	logerrpid();
@@ -1105,8 +1092,7 @@ err_acl(arg1, arg2, arg3)
 }
 
 void
-err_rcp(arg1, arg2, arg3)
-	char           *arg1, *arg2, *arg3;
+err_rcp(char *arg1, char *arg2, char *arg3)
 {
 	logerr("qmail-smtpd: ");
 	logerrpid();
@@ -1121,8 +1107,7 @@ err_rcp(arg1, arg2, arg3)
 }
 
 void
-smtp_relayreject(arg)
-	char           *arg;
+smtp_relayreject(char *arg)
 {
 	logerr("qmail-smtpd: ");
 	logerrpid();
@@ -1136,8 +1121,7 @@ smtp_relayreject(arg)
 }
 
 void
-smtp_paranoid(arg)
-	char           *arg;
+smtp_paranoid(char *arg)
 {
 	logerr("qmail-smtpd: ");
 	logerrpid();
@@ -1151,8 +1135,7 @@ smtp_paranoid(arg)
 }
 
 void
-smtp_ptr(arg)
-	char           *arg;
+smtp_ptr(char *arg)
 {
 	logerr("qmail-smtpd: ");
 	logerrpid();
@@ -1166,9 +1149,7 @@ smtp_ptr(arg)
 }
 
 void
-log_rules(arg1, arg2, arg3, arg4)
-	char           *arg1, *arg2, *arg3;
-	int             arg4;
+log_rules(char *arg1, char *arg2, char *arg3, int arg4)
 {
 	logerr("qmail-smtpd: ");
 	logerrpid();
@@ -1238,8 +1219,7 @@ err_wantrcpt()
 }
 
 void
-err_bhf(arg1, arg2)
-	char           *arg1, *arg2;
+err_bhf(char *arg1, char *arg2)
 {
 	logerr("qmail-smtpd: ");
 	logerrpid();
@@ -1252,8 +1232,7 @@ err_bhf(arg1, arg2)
 }
 
 void
-err_bhrcp(arg1, arg2, arg3)
-	char           *arg1, *arg2, *arg3;
+err_bhrcp(char *arg1, char *arg2, char *arg3)
 {
 	logerr("qmail-smtpd: ");
 	logerrpid();
@@ -1286,8 +1265,7 @@ err_maps(char *m, char *ip, char *from)
 }
 
 void
-err_mrc(arg1, arg2, arg3)
-	char           *arg1, *arg2, *arg3;
+err_mrc(char *arg1, char *arg2, char *arg3)
 {
 	logerr("qmail-smtpd: ");
 	logerrpid();
@@ -1403,8 +1381,7 @@ err_authrequired()
 }
 
 void
-err_transaction(arg)
-	char           *arg;
+err_transaction(char *arg)
 {
 	out("503 no ");
 	out(arg);
@@ -1433,8 +1410,7 @@ err_input()
 }
 
 void
-err_mailbox(arg1, arg2, arg3)
-	char           *arg1, *arg2, *arg3;
+err_mailbox(char *arg1, char *arg2, char *arg3)
 {
 	logerr("qmail-smtpd: ");
 	logerrpid();
@@ -1457,9 +1433,7 @@ err_mailbox(arg1, arg2, arg3)
 }
 
 void
-err_rcpt_errcount(arg1, count)
-	char           *arg1;
-	int             count;
+err_rcpt_errcount(char *arg1, int count)
 {
 	logerr("qmail-smtpd: ");
 	logerrpid();
@@ -1857,10 +1831,7 @@ log_spam(char *arg1, char *arg2, unsigned long size, stralloc *line)
 }
 
 void
-log_trans(arg1, arg2, arg3, len, arg4)
-	char           *arg1, *arg2, *arg3;
-	int             len;
-	char           *arg4;
+log_trans(char *arg1, char *arg2, char *arg3, int len, char *arg4)
 {
 	char           *ptr;
 	int             idx;
@@ -1930,12 +1901,7 @@ log_trans(arg1, arg2, arg3, len, arg4)
 }
 
 void
-err_queue(arg1, arg2, arg3, len, arg4, qqx, permanent)
-	char           *arg1, *arg2, *arg3;
-	int             len;
-	char           *arg4;
-	char           *qqx;
-	int             permanent;
+err_queue(char *arg1, char *arg2, char *arg3, int len, char *arg4, char *qqx, int permanent)
 {
 	char           *ptr;
 	int             idx;
@@ -2096,8 +2062,7 @@ esmtp_print()
 }
 
 void
-smtp_greet(code)
-	char           *code;
+smtp_greet(char *code)
 {
 	int             i, j, esmtp;
 
@@ -2218,8 +2183,7 @@ badhostcheck()
 }
 
 void
-dohelo(arg)
-	char           *arg;
+dohelo(char *arg)
 {
 	int             i;
 
@@ -2607,8 +2571,7 @@ setup()
 }
 
 int
-addrparse(arg)
-	char           *arg;
+addrparse(char *arg)
 {
 	int             i;
 	char            ch;
@@ -2705,8 +2668,7 @@ addrparse(arg)
 }
 
 void
-smtp_helo(arg)
-	char           *arg;
+smtp_helo(char *arg)
 {
 	seenmail = 0;
 	switch (setup_state)
@@ -2741,8 +2703,7 @@ smtp_helo(arg)
 }
 
 void
-smtp_ehlo(arg)
-	char           *arg;
+smtp_ehlo(char *arg)
 {
 	char            size_buf[FMT_ULONG]; /*- needed for SIZE CMD */
 
@@ -2841,8 +2802,7 @@ smtp_ehlo(arg)
 }
 
 void
-smtp_rset(arg)
-	char           *arg;
+smtp_rset(char *arg)
 {
 	seenmail = 0;
 	if (arg && *arg)
@@ -3009,8 +2969,7 @@ int             flagsize = 0;
 stralloc        mfparms = { 0 };
 
 int
-mailfrom_size(arg)
-	char           *arg;
+mailfrom_size(char *arg)
 {
 	long            r;
 	unsigned long   sizebytes = 0;
@@ -3023,9 +2982,7 @@ mailfrom_size(arg)
 }
 
 void
-mailfrom_auth(arg, len)
-	char           *arg;
-	int             len;
+mailfrom_auth(char *arg, int len)
 {
 	if (authd)
 		return;
@@ -3075,8 +3032,7 @@ mailfrom_auth(arg, len)
 }
 
 void
-mailfrom_parms(arg)
-	char           *arg;
+mailfrom_parms(char *arg)
 {
 	int             i;
 	int             len;
@@ -3223,8 +3179,7 @@ mail_acl(char *sender, char *recipient)
 }
 
 void
-smtp_mail(arg)
-	char           *arg;
+smtp_mail(char *arg)
 {
 #ifdef INDIMAIL
 	struct passwd  *pw;
@@ -3741,8 +3696,7 @@ smtp_mail(arg)
 }
 
 void
-smtp_rcpt(arg)
-	char           *arg;
+smtp_rcpt(char *arg)
 {
 	int             allowed_rcpthosts = 0, isgoodrcpt = 0;
 #ifdef INDIMAIL
@@ -3984,10 +3938,7 @@ smtp_rcpt(arg)
 }
 
 ssize_t
-saferead(fd, buf, len)
-	int             fd;
-	char           *buf;
-	int             len;
+saferead(int fd, char *buf, int len)
 {
 	int             r;
 
@@ -4046,8 +3997,7 @@ stralloc        boundary = { 0 };
  */
 
 void
-put(ch)
-	char           *ch;
+put(char *ch)
 {
 	char           *cp, *cpstart, *cpafter;
 	unsigned int    len;
@@ -4234,8 +4184,7 @@ put(ch)
 }
 
 void
-blast(hops)
-	int            *hops;
+blast(int *hops)
 {
 	char            ch;
 	int             state;
@@ -4398,8 +4347,7 @@ spfreceived()
 #endif
 
 void
-acceptmessage(qp)
-	unsigned long   qp;
+acceptmessage(unsigned long qp)
 {
 	datetime_sec    when;
 
@@ -4445,8 +4393,7 @@ create_logfilter()
 }
 
 void
-smtp_data(arg)
-	char           *arg;
+smtp_data(char *arg)
 {
 	int             hops;
 	unsigned long   qp;
@@ -4651,8 +4598,7 @@ authenticate(void)
 }
 
 int
-auth_login(arg)
-	char           *arg;
+auth_login(char *arg)
 {
 	int             r;
 
@@ -4688,8 +4634,7 @@ auth_login(arg)
 }
 
 int
-auth_plain(arg)
-	char           *arg;
+auth_plain(char *arg)
 {
 	int             r, id = 0;
 
@@ -4779,8 +4724,7 @@ auth_cram()
 }
 
 void
-smtp_auth(arg)
-	char           *arg;
+smtp_auth(char *arg)
 {
 	int             i;
 	char           *cmd = arg;
@@ -4858,8 +4802,7 @@ smtp_auth(arg)
 }
 
 void
-smtp_etrn(arg)
-	char           *arg;
+smtp_etrn(char *arg)
 {
 	int             status, i;
 	char            tmpbuf[1024], err_buff[1024], status_buf[FMT_ULONG]; /*- needed for SIZE CMD */
@@ -4969,8 +4912,7 @@ smtp_etrn(arg)
 
 #ifdef INDIMAIL
 void
-smtp_atrn(arg)
-	char           *arg;
+smtp_atrn(char *arg)
 {
 	char           *ptr, *cptr, *domain_ptr, *user_tmp, *domain_tmp;
 	int             i, end_flag, status, Reject = 0, Accept = 0;
@@ -5238,7 +5180,7 @@ tls_nogateway()
 	if (ssl_verify_err)
 	{
 		out(": ");
-		out(ssl_verify_err);
+		out((char *) ssl_verify_err);
 	}
 	out(" ");
 }
@@ -5247,11 +5189,11 @@ void
 tls_out(const char *s1, const char *s2)
 {
 	out("454 TLS ");
-	out(s1);
+	out((char *) s1);
 	if (s2)
 	{
 		out(": ");
-		out(s2);
+		out((char *) s2);
 	}
 	out(" (#4.3.0)\r\n");
 	flush();
@@ -5591,9 +5533,7 @@ struct commands submcommands[] = {
 };
 
 void
-qmail_smtpd(argc, argv, envp)
-	int             argc;
-	char          **argv, **envp;
+qmail_smtpd(int argc, char **argv, char **envp)
 {
 	char           *ptr;
 	struct commands *cmdptr;
@@ -5706,7 +5646,7 @@ qmail_smtpd(argc, argv, envp)
 }
 
 int
-addrrelay()
+addrrelay() /*- Rejection of relay probes. */
 {
 	int             j;
 
@@ -5731,7 +5671,7 @@ addrrelay()
 void
 getversion_smtpd_c()
 {
-	static char    *x = "$Id: smtpd.c,v 1.134 2009-12-05 11:26:43+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: smtpd.c,v 1.135 2009-12-05 19:47:54+05:30 Cprogrammer Stab mbhangui $";
 
 #ifdef INDIMAIL
 	x = sccsidh;

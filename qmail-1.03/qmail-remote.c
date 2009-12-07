@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-remote.c,v $
+ * Revision 1.51  2009-12-05 20:16:03+05:30  Cprogrammer
+ * ansic conversion
+ *
  * Revision 1.50  2009-11-12 19:29:33+05:30  Cprogrammer
  * record the helo name if rejected (Stupid MS Exchange rejects helo domain)
  *
@@ -259,8 +262,7 @@ struct constmap mapnosigndoms;
 #endif
 
 void
-out(s)
-	char           *s;
+out(char *s)
 {
 	if (substdio_puts(subfdoutsmall, s) == -1)
 		_exit(0);
@@ -282,8 +284,7 @@ zerodie()
 }
 
 void
-outsafe(sa)
-	stralloc       *sa;
+outsafe(stralloc *sa)
 {
 	int             i;
 	char            ch;
@@ -454,7 +455,7 @@ dropped()
 #ifdef TLS
 	if (ssl_err_str)
 	{
-		out(ssl_err_str);
+		out((char *) ssl_err_str);
 		out(" ");
 	}
 #endif
@@ -496,10 +497,7 @@ int             smtpfd;
 int             timeout = 1200;
 
 ssize_t
-saferead(fd, buf, len)
-	int             fd;
-	char           *buf;
-	int             len;
+saferead(int fd, char *buf, int len)
 {
 	int             r;
 
@@ -519,10 +517,7 @@ saferead(fd, buf, len)
 }
 
 ssize_t
-safewrite(fd, buf, len)
-	int             fd;
-	char           *buf;
-	int             len;
+safewrite(int fd, char *buf, int len)
 {
 	int             r;
 
@@ -550,8 +545,7 @@ substdio        smtpfrom = SUBSTDIO_FDBUF(saferead, -1, smtpfrombuf, sizeof smtp
 stralloc        smtptext = { 0 };
 
 void
-get(ch)
-	char           *ch;
+get(char *ch)
 {
 	substdio_get(&smtpfrom, ch, 1);
 	if (*ch != '\r')
@@ -572,25 +566,25 @@ smtpcode()
 
 	if (!stralloc_copys(&smtptext, ""))
 		temp_nomem();
-	get(&ch);
+	get((char *) &ch);
 	code = ch - '0';
-	get(&ch);
+	get((char *) &ch);
 	code = code * 10 + (ch - '0');
-	get(&ch);
+	get((char *) &ch);
 	code = code * 10 + (ch - '0');
 	for (;;)
 	{
-		get(&ch);
+		get((char *) &ch);
 		if (ch != '-')
 			break;
 		while (ch != '\n')
-			get(&ch);
-		get(&ch);
-		get(&ch);
-		get(&ch);
+			get((char *) &ch);
+		get((char *) &ch);
+		get((char *) &ch);
+		get((char *) &ch);
 	}
 	while (ch != '\n')
-		get(&ch);
+		get((char *) &ch);
 	return code;
 }
 
@@ -692,10 +686,7 @@ outsmtptext()
 }
 
 void
-quit(prepend, append, die)
-	char           *prepend;
-	char           *append;
-	int             die;
+quit(char *prepend, char *append, int die)
 {
 #ifdef TLS
 	/*
@@ -801,11 +792,11 @@ char           *partner_fqdn = 0;
 void
 tls_quit(const char *s1, const char *s2)
 {
-	out(s1);
+	out((char *) s1);
 	if (s2)
 	{
 		out(": ");
-		out(s2);
+		out((char *) s2);
 	}
 	TLS_QUIT;
 }
@@ -1108,10 +1099,7 @@ stralloc        auth = { 0 };
 stralloc        plain = { 0 };
 
 int
-xtext(ptr, s, len)
-	stralloc       *ptr;
-	char           *s;
-	int             len;
+xtext(stralloc *ptr, char *s, int len)
 {
 	int             i;
 
@@ -1141,8 +1129,7 @@ xtext(ptr, s, len)
 }
 
 void
-mailfrom(use_size)
-	int             use_size;
+mailfrom(int use_size)
 {
 	substdio_puts(&smtpto, "MAIL FROM:<");
 	substdio_put(&smtpto, sender.s, sender.len);
@@ -1156,8 +1143,7 @@ mailfrom(use_size)
 }
 
 void
-auth_plain(use_size)
-	int             use_size;
+auth_plain(int use_size)
 {
 	substdio_puts(&smtpto, "AUTH PLAIN\r\n");
 	substdio_flush(&smtpto);
@@ -1199,8 +1185,7 @@ auth_plain(use_size)
 }
 
 void
-auth_login(use_size)
-	int             use_size;
+auth_login(int use_size)
 {
 	substdio_puts(&smtpto, "AUTH LOGIN\r\n");
 	substdio_flush(&smtpto);
@@ -1244,9 +1229,7 @@ auth_login(use_size)
 }
 
 void
-smtp_auth(type, use_size)
-	char           *type;
-	int             use_size;
+smtp_auth(char *type, int use_size)
 {
 	int             i = 0, j, login_supp = 0, plain_supp = 0;
 
@@ -1448,12 +1431,8 @@ smtp()
 stralloc        canonhost = { 0 };
 stralloc        canonbox = { 0 };
 
-void
-addrmangle(saout, s, flagalias, flagcname)
-	stralloc       *saout;		/*- host has to be canonical, box has to be quoted */
-	char           *s;
-	int            *flagalias;
-	int             flagcname;
+void /*- host has to be canonical, box has to be quoted */
+addrmangle(stralloc *saout, char *s, int *flagalias, int flagcname)
 {
 	int             j;
 
@@ -1752,8 +1731,7 @@ lookup_host(char *host, int len)
 }
 
 int
-ipme_is46(mxip)
-	struct ip_mx   *mxip;
+ipme_is46(struct ip_mx *mxip)
 {
 	switch (mxip->af)
 	{
@@ -1768,12 +1746,7 @@ ipme_is46(mxip)
 }
 
 int
-timeoutconn46(fd, ix, ip, port, timeout)
-	int             fd;
-	struct ip_mx   *ix;
-	union v46addr  *ip;
-	int             port;
-	int             timeout;
+timeoutconn46(int fd, struct ip_mx *ix, union v46addr *ip, int port, int timeout)
 {
 #ifdef IPV6
 	if (ix->af == AF_INET)
@@ -1793,9 +1766,7 @@ timeoutconn46(fd, ix, ip, port, timeout)
  * argv + 5 - Recipient list
  */
 int
-main(argc, argv)
-	int             argc;
-	char          **argv;
+main(int argc, char **argv)
 {
 	static ipalloc  ip = { 0 };
 	int             i, j, errors, flagallaliases, flagalias, smtp_error;
@@ -2016,7 +1987,7 @@ main(argc, argv)
 void
 getversion_qmail_remote_c()
 {
-	static char    *x = "$Id: qmail-remote.c,v 1.50 2009-11-12 19:29:33+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: qmail-remote.c,v 1.51 2009-12-05 20:16:03+05:30 Cprogrammer Stab mbhangui $";
 
 	x++;
 }
