@@ -1,5 +1,11 @@
 /*
  * $Log: qmail-queue.c,v $
+ * Revision 1.47  2009-12-05 20:07:08+05:30  Cprogrammer
+ * added prototype for MakeArgs
+ *
+ * Revision 1.46  2009-12-05 20:01:24+05:30  Cprogrammer
+ * ansic conversion
+ *
  * Revision 1.45  2009-12-05 11:23:47+05:30  Cprogrammer
  * added X-Originating-IP header
  *
@@ -151,6 +157,7 @@
 #define ADDR  1003
 
 int             uidinit();
+char          **MakeArgs(char *);
 
 char            inbuf[2048], outbuf[256], logbuf[2048];
 char           *pidfn, *messfn, *todofn, *intdfn;
@@ -285,8 +292,7 @@ char           *received;
 char           *origin; /* "X-Originating-IP: 10.0.0.1\n" */
 
 static unsigned int
-receivedfmt(s)
-	char           *s;
+receivedfmt(char *s)
 {
 	unsigned int    i;
 	unsigned int    len;
@@ -386,8 +392,7 @@ received_setup()
 }
 
 unsigned int
-originfmt(s)
-	char           *s;
+originfmt(char *s)
 {
 	unsigned int    i;
 	unsigned int    len;
@@ -418,9 +423,7 @@ origin_setup()
 }
 
 unsigned int
-pidfmt(s, seq)
-	char           *s;
-	unsigned long   seq;
+pidfmt(char *s, unsigned long seq)
 {
 	unsigned int    i;
 	unsigned int    len;
@@ -458,9 +461,7 @@ pidfmt(s, seq)
 }
 
 char           *
-fnnum(dirslash, flagsplit)
-	char           *dirslash;
-	int             flagsplit;
+fnnum(char *dirslash, int flagsplit)
 {
 	char           *s;
 
@@ -501,8 +502,7 @@ char           *qhpsi;
  * X-Quarantine-ID:
  */
 void
-qhpsiprog(program)
-	char           *program;
+qhpsiprog(char *program)
 {
 	int             wstat, child, rejectvirus = 0;
 	char          **argv;
@@ -1085,7 +1085,7 @@ main()
 void
 getversion_qmail_queue_c()
 {
-	static char    *x = "$Id: qmail-queue.c,v 1.45 2009-12-05 11:23:47+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: qmail-queue.c,v 1.47 2009-12-05 20:07:08+05:30 Cprogrammer Stab mbhangui $";
 
 #ifdef INDIMAIL
 	x = sccsidh;

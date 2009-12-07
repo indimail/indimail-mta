@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-local.c,v $
+ * Revision 1.20  2009-12-05 20:07:40+05:30  Cprogrammer
+ * ansic conversion
+ *
  * Revision 1.19  2008-11-15 17:08:17+05:30  Cprogrammer
  * added localdomains control file
  *
@@ -214,8 +217,7 @@ fmt_xlong(s, u)
  */
 
 void
-maildir_child(dir)
-	char           *dir;
+maildir_child(char *dir)
 {
 	char            strnum[FMT_ULONG], host[64];
 	char           *s;
@@ -425,8 +427,7 @@ fail:
  */
 
 void
-maildir(fn)
-	char           *fn;
+maildir(char *fn)
 {
 	int             child;
 	int             wstat;
@@ -463,8 +464,7 @@ maildir(fn)
 }
 
 void
-mailfile(fn)
-	char           *fn;
+mailfile(char *fn)
 {
 	int             fd;
 	substdio        ss;
@@ -546,8 +546,7 @@ writeerrs:
 }
 
 void
-mailprogram(prog)
-	char           *prog;
+mailprogram(char *prog)
 {
 	int             child;
 	char           *(args[4]);
@@ -599,8 +598,7 @@ mailprogram(prog)
 unsigned long   mailforward_qp = 0;
 
 void
-mailforward(recips)
-	char          **recips;
+mailforward(char **recips)
 {
 	struct qmail    qqt;
 	char           *qqx;
@@ -710,8 +708,7 @@ checkhome(char *homedir)
 }
 
 int
-qmeox(dashowner)
-	char           *dashowner;
+qmeox(char *dashowner)
 {
 	struct stat     st;
 
@@ -735,9 +732,7 @@ qmeox(dashowner)
 }
 
 int
-qmeexists(fd, cutable)
-	int            *fd;
-	int            *cutable;
+qmeexists(int *fd, int *cutable)
 {
 	struct stat     st;
 
@@ -779,9 +774,7 @@ qmeexists(fd, cutable)
 /* "-/" "a-b-c": "-/a-b-c" "-/a-b-default" "-/a-default" "-/default" */
 
 void
-qmesearch(fd, cutable)
-	int            *fd;
-	int            *cutable;
+qmesearch(int *fd, int *cutable)
 {
 	int             i;
 
@@ -856,10 +849,7 @@ count_print()
 }
 
 void
-sayit(type, cmd, len)
-	char           *type;
-	char           *cmd;
-	int             len;
+sayit(char *type, char *cmd, int len)
 {
 	substdio_puts(subfdoutsmall, type);
 	substdio_put(subfdoutsmall, cmd, len);
@@ -867,9 +857,7 @@ sayit(type, cmd, len)
 }
 
 int
-main(argc, argv)
-	int             argc;
-	char          **argv;
+main(int argc, char **argv)
 {
 	char           *x;
 	char          **recips;
@@ -1220,7 +1208,7 @@ main(argc, argv)
 void
 getversion_qmail_local_c()
 {
-	static char    *x = "$Id: qmail-local.c,v 1.19 2008-11-15 17:08:17+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: qmail-local.c,v 1.20 2009-12-05 20:07:40+05:30 Cprogrammer Stab mbhangui $";
 
 	x++;
 }
