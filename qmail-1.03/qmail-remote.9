@@ -376,6 +376,19 @@ Key for Bounce Address Tag Validation (BATV) signing. The filename can be overri
 .IR SIGNKEY .
 
 .TP 5
+.I nosignhosts
+Exclusions of remote hosts for Bounce Address Tag Validation (BATV)
+that do not work with signed addresses.
+
+Attention: If a host has more that one hostname, please list them
+all in
+.IR nosignhosts .
+
+.TP 5
+.I nosignmydoms
+Exclusions of domains you host for Bounce Address Tag Validation (BATV).
+
+.TP 5
 .I clientcert.pem
 SSL certificate that is used to authenticate with the remote server
 during a TLS session.
@@ -395,19 +408,6 @@ is the fully-qualified domain name of the server). One of the
 or the
 .I CommonName
 attributes have to match. The file contains the trusted CA certificates.
-
-.TP 5
-.I nosignhosts
-Exclusions of remote hosts for Bounce Address Tag Validation (BATV)
-that do not work with signed addresses.
-
-Attention: If a host has more that one hostname, please list them
-all in
-.IR nosignhosts .
-
-.TP 5
-.I nosignmydoms
-Exclusions of domains you host for Bounce Address Tag Validation (BATV).
 
 .TP 5
 .I notlshosts/<FQDN>
