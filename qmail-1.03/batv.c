@@ -1,5 +1,8 @@
 /*
  * $Log: batv.c,v $
+ * Revision 1.2  2009-12-07 08:21:02+05:30  Cprogrammer
+ * corrected usage
+ *
  * Revision 1.1  2009-09-01 22:23:19+05:30  Cprogrammer
  * Initial revision
  *
@@ -176,10 +179,10 @@ signbatv(char *sender)
 }
 
 char           *usage =
-				"usage: batv [svk] sender recipient\n"
-				"        [ -k signing key ]\n"
-				"        [ -s (batv signing)]\n"
-				"        [ -v (batv  verify)]";
+				"usage: batv -k key [-s sender | -v recipient]\n"
+				"        -k key       (signing key)\n"
+				"        -s sender    (batv signing)\n"
+				"        -v recipient (batv  verify)";
 
 int
 main(int argc, char **argv)
@@ -251,7 +254,7 @@ main(argc, argv)
 void
 getversion_batv_c()
 {
-	static char    *x = "$Id: batv.c,v 1.1 2009-09-01 22:23:19+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: batv.c,v 1.2 2009-12-07 08:21:02+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
