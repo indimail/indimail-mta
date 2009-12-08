@@ -1,5 +1,8 @@
 #
 # $Log: indimail.spec.in,v $
+# Revision 2.122  2009-12-08 11:06:37+05:30  Cprogrammer
+# changes for centos for OBS
+#
 # Revision 2.121  2009-11-28 20:44:04+05:30  Cprogrammer
 # moved iauth.so to modules directory
 #
@@ -378,7 +381,7 @@
 # rpm spec file for indimail
 #
 #
-# $Id: indimail.spec.in,v 2.121 2009-11-28 20:44:04+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 2.122 2009-12-08 11:06:37+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %define _unpackaged_files_terminate_build 1
 
@@ -907,30 +910,32 @@ fi
 #### fetchmail ######################
 if [ -d ../fetchmail-%{fetchmail_version} ] ; then
 	cd ../fetchmail-%{fetchmail_version}
-
-if [ %{build_on_obs} -eq 0 ] ; then
-	echo "reconfiguring..."
-	if [ %{fast_mode} -eq 0 ] ; then
-		autoreconf -fi
-	fi
-else
+	if [ %{build_on_obs} -eq 0 ] ; then
+		echo "reconfiguring..."
+		if [ %{fast_mode} -eq 0 ] ; then
+			autoreconf -fi
+		fi
+	%configure --prefix=%{_prefix} --libexecdir=%{_prefix}/libexec --sysconfdir=%{_prefix}/etc \
+		--enable-indimaildir=%{_prefix} --mandir=%{_prefix}/man \
+		`%{__cat} ../%{name}-%{version}/config/fetchmail.opts` > $DEVICE
+	else
+		echo "reconfiguring..."
 %if %{undefined centos_version} && %{undefined rhel_version} && %{undefined sles_version}
 %if 0%{?fedora_version} || 0%{?suse_version}
-	echo "reconfiguring..."
-	if [ %{fast_mode} -eq 0 ] ; then
-		autoreconf -fi
-	fi
+		if [ %{fast_mode} -eq 0 ] ; then
+			autoreconf -fi
+		fi
 %else
-	echo "reconfiguring..."
-	%{__autoheader}
-	%{__autoconf}
+		if [ %{fast_mode} -eq 0 ] ; then
+			%{__autoheader}
+			%{__autoconf}
+		fi
 %endif
 %endif
-fi
-
-%configure --prefix=%{_prefix} --libexecdir=%{_prefix}/libexec --sysconfdir=%{_prefix}/etc \
---enable-indimaildir=%{_prefix} --mandir=%{_prefix}/man \
-`%{__cat} ../%{name}-%{version}/config/fetchmail.opts` > $DEVICE
+	./configure --prefix=%{_prefix} --libexecdir=%{_prefix}/libexec --sysconfdir=%{_prefix}/etc \
+		--enable-indimaildir=%{_prefix} --mandir=%{_prefix}/man \
+		`%{__cat} ../%{name}-%{version}/config/fetchmail.opts` > $DEVICE
+	fi
 fi
 cd ..
 
