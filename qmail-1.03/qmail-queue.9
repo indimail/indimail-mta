@@ -362,7 +362,7 @@ Samples with clamd/clamdscan:
 Here is a typical sample how to customize QHPSI together
 with Clam AV (clamd/clamdscan) for a tcpserver tcp.smtpd file:
 
- :allow,QHPSI='INDIDIR/bin/clamdscan %s --quiet --disable-summary'
+ :allow,QHPSI='INDIDIR/bin/clamdscan %s --quiet --no-summary'
 
 Comments:
 
@@ -370,7 +370,7 @@ Comments:
    the standard path (INDIDIR/bin).
  - In the configuration file clamav.conf, the option
   'ScanMail' has to be enabled; clamd has to run as 'root'.
- - The argument QHPSI='INDIDIR/bin/clamdscan %s --quiet --disable-summary'
+ - The argument QHPSI='INDIDIR/bin/clamdscan %s --quiet --no-summary'
    tells Clam AV to provide a single line output of the scan results.
  - The argument QHPSIRC is not necessary, because
    'clamdscan' return with 'RC=1' (the default) in 
