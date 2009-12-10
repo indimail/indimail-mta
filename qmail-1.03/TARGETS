@@ -99,6 +99,7 @@ auto-str.o
 auto-uid
 auto-uid.o
 auto_uids.c
+auto_uids.c.tmp
 auto_uids.h
 auto_uids.o
 auto_usera.c
