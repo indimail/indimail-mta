@@ -254,7 +254,7 @@ main(argc, argv)
 void
 getversion_batv_c()
 {
-	static char    *x = "$Id: batv.c,v 1.2 2009-12-07 08:21:02+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: batv.c,v 1.2 2009-12-07 08:21:02+05:30 Cprogrammer Stab mbhangui $";
 
 	x++;
 }
