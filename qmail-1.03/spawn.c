@@ -1,5 +1,11 @@
 /*
  * $Log: spawn.c,v $
+ * Revision 1.17  2009-12-10 10:46:46+05:30  Cprogrammer
+ * display MySQL error
+ *
+ * Revision 1.16  2009-12-09 23:58:04+05:30  Cprogrammer
+ * additional closeflag argument to uidinit()
+ *
  * Revision 1.15  2008-08-03 18:26:24+05:30  Cprogrammer
  * use proper proto
  *
@@ -239,11 +245,14 @@ docmd()
 	coe(pi[0]);
 	f = spawn(fdmess, pi[1], st.st_size, sender.s, qqeh.s, recip.s, j);
 	close(fdmess);
-	if (f == -1)
+	if (f < 0)
 	{
 		close(pi[0]);
 		close(pi[1]);
-		err("Zqmail-spawn unable to fork or out of mem. (#4.3.0)\n");
+		if (f == -2)
+			err("Zqmail-spawn temporary MySQL error. (#4.3.0)\n");
+		else
+			err("Zqmail-spawn unable to fork or out of mem. (#4.3.0)\n");
 		return;
 	}
 	d[delnum].fdin = pi[0];
@@ -327,7 +336,7 @@ getcmd()
 
 char            inbuf[128];
 
-int             uidinit();
+int             uidinit(int);
 
 int
 main(argc, argv)
@@ -340,7 +349,7 @@ main(argc, argv)
 	fd_set          rfds;
 	int             nfds;
 
-	if(uidinit() == -1)
+	if(uidinit(1) == -1)
 		_exit(111);
 	if (chdir(auto_qmail) == -1)
 		_exit(111);
@@ -451,7 +460,7 @@ main(argc, argv)
 void
 getversion_spawn_c()
 {
-	static char    *x = "$Id: spawn.c,v 1.15 2008-08-03 18:26:24+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: spawn.c,v 1.17 2009-12-10 10:46:46+05:30 Cprogrammer Stab mbhangui $";
 
 #ifdef INDIMAIL
 	x = sccsidh;

@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-lspawn.c,v $
+ * Revision 1.17  2009-12-10 10:56:06+05:30  Cprogrammer
+ * return -2 for MySQL error
+ *
  * Revision 1.16  2009-03-15 13:26:25+05:30  Cprogrammer
  * BUG - user was incorrectly extracted on domains having '-' in the name
  *
@@ -187,7 +190,7 @@ nughde_get(local)
 		uint32          dlen;
 		unsigned int    i;
 
-		if((r = cdb_seek(fd, "", 0, &dlen)) != 1)
+		if ((r = cdb_seek(fd, "", 0, &dlen)) != 1)
 			_exit(QLX_CDB);
 		if (!stralloc_ready(&wildchars, (unsigned int) dlen))
 			_exit(QLX_NOMEM);
@@ -201,7 +204,7 @@ nughde_get(local)
 			/*- i > 0 */
 			if (!flagwild || (i == 1) || (byte_chr(wildchars.s, wildchars.len, lower.s[i - 1]) < wildchars.len))
 			{
-				if((r = cdb_seek(fd, lower.s, i, &dlen)) == -1)
+				if ((r = cdb_seek(fd, lower.s, i, &dlen)) == -1)
 					_exit(QLX_CDB);
 				if (r == 1)
 				{
@@ -279,14 +282,14 @@ spawn(fdmess, fdout, msgsize, sender, qqeh, recip, at)
 /*
  * saldo-biuro.com.pl-test1@saldo-biuro.com.pl
  */
-	if(env_get("AUTHSELF") && isvirtualdomain(recip + at + 1) && !vauth_open((char *) 0))
+	if (env_get("AUTHSELF") && isvirtualdomain(recip + at + 1) && !vauth_open((char *) 0))
 	{
 		for (f = at - 1;f && recip[f] != '-';f--);
 		if (!env_unset("PWSTRUCT"))
 			return (-1);
 		for(cptr = user, ptr = recip + f + 1;*ptr && *ptr != '@';*cptr++ = *ptr++);
 		*cptr = 0;
-		if((pw = (struct passwd *) vauth_getpw(user, recip + at + 1)))
+		if ((pw = (struct passwd *) vauth_getpw(user, recip + at + 1)))
 		{
 			snprintf(pwstruct, sizeof(pwstruct), "PWSTRUCT=%s@%s:%s:%d:%d:%s:%s:%s:%d", 
 				pw->pw_name,
@@ -301,13 +304,16 @@ spawn(fdmess, fdout, msgsize, sender, qqeh, recip, at)
 				return (-1);
 		}  else
 		{
-			if(userNotFound)
+			if (userNotFound)
 			{
 				snprintf(pwstruct, sizeof(pwstruct), "PWSTRUCT=No such user %s@%s", user, recip + at + 1);
 				if (!env_put(pwstruct))
 					return (-1);
 			} else
+			{
 				vclose();
+				return (-2);
+			}
 		}
 	}
 #endif
@@ -387,7 +393,7 @@ spawn(fdmess, fdout, msgsize, sender, qqeh, recip, at)
 			_exit(QLX_USAGE);
 		if (!getuid())
 			_exit(QLX_ROOT);
-		if(!(ptr = env_get("QMAILLOCAL")))
+		if (!(ptr = env_get("QMAILLOCAL")))
 			execv(*args, args);
 		else
 			execv(ptr, args);
@@ -401,7 +407,7 @@ spawn(fdmess, fdout, msgsize, sender, qqeh, recip, at)
 void
 getversion_qmail_lspawn_c()
 {
-	static char    *x = "$Id: qmail-lspawn.c,v 1.16 2009-03-15 13:26:25+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: qmail-lspawn.c,v 1.17 2009-12-10 10:56:06+05:30 Cprogrammer Stab mbhangui $";
 
 #ifdef INDIMAIL
 	x = sccsidh;
