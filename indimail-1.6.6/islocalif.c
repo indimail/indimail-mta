@@ -1,5 +1,8 @@
 /*
  * $Log: islocalif.c,v $
+ * Revision 2.2  2009-12-10 12:05:12+05:30  Cprogrammer
+ * use ip from hostip if present
+ *
  * Revision 2.1  2009-07-09 15:55:20+05:30  Cprogrammer
  * ipv6 ready code
  *
@@ -33,13 +36,14 @@
 #ifdef sun
 #include <sys/sockio.h>
 #endif
+#include "indimail.h"
 
 #ifndef INET_ADDRSTRLEN
 #define INET_ADDRSTRLEN 16
 #endif
 
 #ifndef	lint
-static char     sccsid[] = "$Id: islocalif.c,v 2.1 2009-07-09 15:55:20+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: islocalif.c,v 2.2 2009-12-10 12:05:12+05:30 Cprogrammer Stab mbhangui $";
 #endif
 
 /*
@@ -63,6 +67,9 @@ islocalif(char *hostptr)
 	int             s, len, idx, family;
 	char           *buf, *ptr;
 	struct sockaddr_in *sin = 0;
+	char            TmpBuf[MAX_BUFF];
+	char           *qmaildir, *controldir;
+	FILE           *fp;
 #ifdef ENABLE_IPV6
 	struct sockaddr_in6 *sin6 = 0;
 #endif
@@ -80,6 +87,22 @@ islocalif(char *hostptr)
 	unsigned long   inaddr;
 #endif
 
+	getEnvConfigStr(&qmaildir, "QMAILDIR", QMAILDIR);
+	getEnvConfigStr(&controldir, "CONTROLDIR", "control");
+	snprintf(TmpBuf, MAX_BUFF, "%s/%s/hostip", qmaildir, controldir);
+	if ((fp = fopen(TmpBuf, "r")))
+	{
+		if (!fgets(TmpBuf, MAX_BUFF - 1, fp))
+			fclose(fp);
+		else
+		{
+			fclose(fp);
+			if ((ptr = strchr(TmpBuf, '\n')))
+				*ptr = 0;
+			if (!strncmp(hostptr, TmpBuf, MAX_BUFF))
+				return (1);
+		}
+	}
 #ifdef HAVE_STRUCT_SOCKADDR_STORAGE
 	/* getaddrinfo() case.  It can handle multiple addresses. */
 	memset(&hints, 0, sizeof(hints));
