@@ -1,5 +1,8 @@
 /*
  * $Log: instcheck.c,v $
+ * Revision 1.13  2009-12-09 23:58:36+05:30  Cprogrammer
+ * additional closeflag argument to uidinit()
+ *
  * Revision 1.12  2009-11-17 09:38:11+05:30  Cprogrammer
  * treat errors with man directories as warnings
  *
@@ -38,7 +41,7 @@
 #include "exit.h"
 
 void            hier(char *);
-int             uidinit(void);
+int             uidinit(int);
 
 #define FATAL "instcheck: fatal: "
 #define WARNING "instcheck: warning: "
@@ -209,7 +212,7 @@ main(int argc, char **argv)
 {
 	int             i;
 
-	if(uidinit() == -1)
+	if(uidinit(1) == -1)
 		strerr_die2sys(111, FATAL, "unable to get uids/gids: ");
 	if (argc == 1)
 		hier(0);
@@ -222,7 +225,7 @@ main(int argc, char **argv)
 void
 getversion_instcheck_c()
 {
-	static char    *x = "$Id: instcheck.c,v 1.12 2009-11-17 09:38:11+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: instcheck.c,v 1.13 2009-12-09 23:58:36+05:30 Cprogrammer Stab mbhangui $";
 
 	x++;
 }

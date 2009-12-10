@@ -1,5 +1,8 @@
 /*
  * $Log: setup.c,v $
+ * Revision 1.15  2009-12-09 23:57:53+05:30  Cprogrammer
+ * additional closeflag argument to uidinit()
+ *
  * Revision 1.14  2009-04-06 16:39:14+05:30  Cprogrammer
  * removed function cd() and use function c() for docs also
  *
@@ -47,7 +50,7 @@
 #include "exit.h"
 
 void            hier(char *);
-int             uidinit();
+int             uidinit(int);
 char           *get_user(uid_t);
 char           *get_group(gid_t);
 void            dd(char *, int, int, int, char *, char *);
@@ -336,7 +339,7 @@ main(int argc, char **argv)
 		auto_uida = pw->pw_uid;
 		auto_gidn = pw->pw_gid;
 	} else
-	if(uidinit() == -1)
+	if(uidinit(1) == -1)
 		strerr_die2sys(111, FATAL, "unable to get uids/gids: ");
 	umask(077);
 	if (argc == 1)
@@ -350,7 +353,7 @@ main(int argc, char **argv)
 void
 getversion_setup_c()
 {
-	static char    *x = "$Id: setup.c,v 1.14 2009-04-06 16:39:14+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: setup.c,v 1.15 2009-12-09 23:57:53+05:30 Cprogrammer Stab mbhangui $";
 
 	x++;
 }

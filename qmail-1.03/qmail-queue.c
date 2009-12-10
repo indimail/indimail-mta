@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-queue.c,v $
+ * Revision 1.48  2009-12-09 23:57:23+05:30  Cprogrammer
+ * additional closeflag argument to uidinit()
+ *
  * Revision 1.47  2009-12-05 20:07:08+05:30  Cprogrammer
  * added prototype for MakeArgs
  *
@@ -156,7 +159,7 @@
 #define DEATH 86400	/*- 24 hours; _must_ be below q-s's OSSIFIED (36 hours) */
 #define ADDR  1003
 
-int             uidinit();
+int             uidinit(int);
 char          **MakeArgs(char *);
 
 char            inbuf[2048], outbuf[256], logbuf[2048];
@@ -677,7 +680,7 @@ main()
 
 	sig_blocknone();
 	umask(033);
-	if (uidinit() == -1)
+	if (uidinit(0) == -1)
 		die(67);
 	if (chdir(auto_qmail) == -1)
 		die(61);
@@ -1085,7 +1088,7 @@ main()
 void
 getversion_qmail_queue_c()
 {
-	static char    *x = "$Id: qmail-queue.c,v 1.47 2009-12-05 20:07:08+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: qmail-queue.c,v 1.48 2009-12-09 23:57:23+05:30 Cprogrammer Stab mbhangui $";
 
 #ifdef INDIMAIL
 	x = sccsidh;
