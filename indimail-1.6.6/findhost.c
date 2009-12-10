@@ -1,5 +1,8 @@
 /*
  * $Log: findhost.c,v $
+ * Revision 2.24  2009-12-09 23:21:23+05:30  Cprogrammer
+ * reconnect to MySQL if server gone away
+ *
  * Revision 2.23  2009-09-23 20:54:04+05:30  Cprogrammer
  * register vclose_cntrl only once
  *
@@ -162,7 +165,7 @@
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: findhost.c,v 2.23 2009-09-23 20:54:04+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: findhost.c,v 2.24 2009-12-09 23:21:23+05:30 Cprogrammer Stab mbhangui $";
 #endif
 
 #include <stdio.h>
@@ -256,6 +259,15 @@ again:
 			fprintf(stderr, "findhost: create_table %s: %s: %s", cntrl_table, SqlBuf, mysql_error(&mysql[0]));
 		if (err == ER_NO_SUCH_TABLE || err == ER_SYNTAX_ERROR)
 			userNotFound = 1;
+		/*- reconnect to MySQL if server gone away */
+		if (mysql_ping(&mysql[0]))
+		{
+			if (attempt == 1)
+			{
+				vclose_cntrl();
+				goto again;
+			}
+		}
 		return ((char *) 0);
 	}
 	if (!(res = mysql_store_result(&mysql[0])))
