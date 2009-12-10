@@ -1,5 +1,8 @@
 /*
  * $Log: dktest.c,v $
+ * Revision 1.13  2009-12-10 15:04:09+05:30  Cprogrammer
+ * exit with DK_STAT
+ *
  * Revision 1.12  2009-04-20 22:20:55+05:30  Cprogrammer
  * fixed compilation warning
  *
@@ -55,7 +58,7 @@ errorout(DK *dk, DK_STAT st)
 	if (optf && dk)
 		fprintf(stderr, "%s(%d):", dk_errfile(dk), dk_errline(dk));
 	fprintf(stderr, "dktest: %s\n", DK_STAT_to_string(st));
-	exit(1);
+	exit(st);
 }
 
 int
@@ -411,7 +414,7 @@ main(int argc, char *argv[])
 void
 getversion_dktest_c()
 {
-	static char    *x = "$Id: dktest.c,v 1.12 2009-04-20 22:20:55+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: dktest.c,v 1.13 2009-12-10 15:04:09+05:30 Cprogrammer Stab mbhangui $";
 
 	x++;
 }

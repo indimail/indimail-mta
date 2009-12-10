@@ -1,5 +1,11 @@
 #
 # $Log: dk-filter.sh,v $
+# Revision 1.11  2009-12-10 19:25:13+05:30  Cprogrammer
+# added RCS id
+#
+# Revision 1.10  2009-12-10 16:41:14+05:30  Cprogrammer
+# continue of message gives DK_SYNTAX_ERR
+#
 # Revision 1.9  2009-05-04 10:30:32+05:30  Cprogrammer
 # fixed argument expected error
 #
@@ -30,6 +36,7 @@
 # Revision 1.1  2009-04-02 14:52:27+05:30  Cprogrammer
 # Initial revision
 #
+# $Id: dk-filter.sh,v 1.11 2009-12-10 19:25:13+05:30 Cprogrammer Stab mbhangui $
 #
 if [ -z "$QMAILREMOTE" -a -z "$QMAILLOCAL" ]; then
 	echo "dk-filter should be run by spawn-filter" 1>&2
@@ -126,9 +133,16 @@ if [ $dksign -eq 1 ] ; then
 	exec 0</tmp/dk.$$
 	#QMAILHOME/bin/dktest -h -s $dkkeyfn
 	eval $dkopts
-	if [ $? -ne 0 ] ; then
+	exit_val=$?
+	if [ $exit_val -ne 0 ] ; then
+		if [ $exit_val -eq 6 ] ; then
+			exec 0</tmp/dk.$$
+			/bin/rm -f /tmp/dk.$$
+			cat
+			exit $?
+		fi
 		/bin/rm -f /tmp/dk.$$
-		exit 1
+		exit $exit_val
 	fi
 fi
 if [ $dkimsign -eq 1 ] ; then
