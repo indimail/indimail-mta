@@ -1,5 +1,11 @@
 /*
  * $Log: qmail-rspawn.c,v $
+ * Revision 1.24  2009-12-10 10:46:57+05:30  Cprogrammer
+ * return -2 for MySQL error
+ *
+ * Revision 1.23  2009-12-09 23:55:57+05:30  Cprogrammer
+ * handle MySQL error correctly
+ *
  * Revision 1.22  2007-12-20 13:57:15+05:30  Cprogrammer
  * added case 'r' for code clarity
  * removed compilation warning
@@ -213,39 +219,42 @@ spawn(fdmess, fdout, msgsize, s, qqeh, r, at)
 #ifdef INDIMAIL
 	*smtproute = 0;
 	if (!env_unset("SMTPROUTE"))
-		return(-1);
+		return (-1);
 	/*
 	 * On SIGHUP have to figure out a way to set rcptflag to 0.
 	 * A new Distributed domain added will not work as distributed as
 	 * long as rcptflag is not reinitialized. Static smtproutes will
 	 * be used instead.
 	 */
-	if(!(ptr = env_get("ROUTES")) || (ptr &&  str_diffn(ptr, "static", 6)))
+	if (!(ptr = env_get("ROUTES")) || (ptr &&  str_diffn(ptr, "static", 6)))
 	{
-		if(rcptflag)
+		if (rcptflag)
 		{
-			if(!getcwd(CurDir, MAX_BUFF - 1))
-				return(-1);
-			if(chdir(auto_qmail))
-				return(-1);
+			if (!getcwd(CurDir, MAX_BUFF - 1))
+				return (-1);
+			if (chdir(auto_qmail))
+				return (-1);
 			rcptflag = rcpthosts_init();
-			if(chdir(CurDir))
-				return(-1);
+			if (chdir(CurDir))
+				return (-1);
 		}
 		if (!rcptflag && (f = rcpthosts(r, str_len(r), 0)) == 1)
 		{
-			if ((real_domain = vget_real_domain(r + at + 1)) && (is_distributed_domain(real_domain) == 1))
+			if ((real_domain = vget_real_domain(r + at + 1))
+				&& (is_distributed_domain(real_domain) == 1))
 			{
 				if ((ip = findhost(r, 0)) != (char *) 0)
 				{
 					i = fmt_str(smtproute, "SMTPROUTE=");
 					i += fmt_strn(smtproute + i, ip, MAX_BUFF - 11);
-					if(i > MAX_BUFF - 1)
-						return(-1);
+					if (i > MAX_BUFF - 1)
+						return (-1);
 					smtproute[i] = 0;
 					if (!env_put(smtproute))
-						return(-1);
-				}
+						return (-1);
+				} else
+				if (!userNotFound) /*- temp MySQL error */
+					return (-2);
 			}
 		}
 	}
@@ -259,7 +268,7 @@ spawn(fdmess, fdout, msgsize, s, qqeh, r, at)
 		if (fd_copy(2, 1) == -1)
 			_exit(111);
 #ifdef INDIMAIL
-		if(!(ptr = env_get("QMAILREMOTE")))
+		if (!(ptr = env_get("QMAILREMOTE")))
 			execvp(*args, args);
 		else
 			execvp(ptr, args);
@@ -276,7 +285,7 @@ spawn(fdmess, fdout, msgsize, s, qqeh, r, at)
 void
 getversion_qmail_rspawn_c()
 {
-	static char    *x = "$Id: qmail-rspawn.c,v 1.22 2007-12-20 13:57:15+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: qmail-rspawn.c,v 1.24 2009-12-10 10:46:57+05:30 Cprogrammer Stab mbhangui $";
 
 #ifdef INDIMAIL
 	x = sccsidh;
