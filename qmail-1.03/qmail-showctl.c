@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-showctl.c,v $
+ * Revision 1.49  2009-12-09 23:57:31+05:30  Cprogrammer
+ * additional closeflag argument to uidinit()
+ *
  * Revision 1.48  2009-12-05 11:25:39+05:30  Cprogrammer
  * added control files badhelo, badhost, originipfield
  *
@@ -91,7 +94,7 @@
 #include "spf.h"
 #endif
 
-int             uidinit();
+int             uidinit(int);
 
 stralloc        me = { 0 };
 int             meok;
@@ -268,7 +271,7 @@ main(int argc, char **argv)
 	substdio_puts(subfdout, ".\n");
 
 	substdio_puts(subfdout, "user ids: ");
-	if(uidinit())
+	if(uidinit(1))
 	{
 		substdio_puts(subfdout, "Oops! Unable to get uids/gids.\n");
 		substdio_flush(subfdout);
@@ -700,7 +703,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_showctl_c()
 {
-	static char    *x = "$Id: qmail-showctl.c,v 1.48 2009-12-05 11:25:39+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: qmail-showctl.c,v 1.49 2009-12-09 23:57:31+05:30 Cprogrammer Stab mbhangui $";
 
 #ifdef INDIMAIL
 	x = sccsidh;

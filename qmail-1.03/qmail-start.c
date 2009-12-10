@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-start.c,v $
+ * Revision 1.16  2009-12-09 23:57:36+05:30  Cprogrammer
+ * additional closeflag argument to uidinit()
+ *
  * Revision 1.15  2009-04-30 16:15:06+05:30  Cprogrammer
  * removed hasindimail.h
  *
@@ -104,7 +107,7 @@ closepipes()
 #endif
 }
 
-int             uidinit();
+int             uidinit(int);
 
 int             verbose;
 
@@ -115,7 +118,7 @@ main(argc, argv)
 {
 	if (chdir("/") == -1)
 		die();
-	if (uidinit() == -1)
+	if (uidinit(1) == -1)
 		die();
 	umask(077);
 	if (prot_gid(auto_gidq) == -1)
@@ -293,7 +296,7 @@ main(argc, argv)
 void
 getversion_qmail_start_c()
 {
-	static char    *x = "$Id: qmail-start.c,v 1.15 2009-04-30 16:15:06+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: qmail-start.c,v 1.16 2009-12-09 23:57:36+05:30 Cprogrammer Stab mbhangui $";
 
 	x++;
 }

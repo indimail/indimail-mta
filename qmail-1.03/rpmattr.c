@@ -1,5 +1,8 @@
 /*
  * $Log: rpmattr.c,v $
+ * Revision 1.4  2009-12-09 23:57:46+05:30  Cprogrammer
+ * additional closeflag argument to uidinit()
+ *
  * Revision 1.3  2009-06-25 12:40:28+05:30  Cprogrammer
  * display 4 digits perms
  *
@@ -24,7 +27,7 @@
 
 #define WARNING "rpmattr: warning: "
 
-int             uidinit();
+int             uidinit(int);
 char           *get_user(uid_t);
 char           *get_group(gid_t);
 
@@ -78,7 +81,7 @@ main(int argc, char **argv)
 	struct passwd  *pw;
 	struct group   *gr;
 
-	if (uidinit() == -1)
+	if (uidinit(1) == -1)
 		return (1);
 	for (i = 1;i < argc;i++)
 	{
@@ -130,6 +133,6 @@ main(int argc, char **argv)
 void
 getversion_rpmattr_c()
 {
-	static char    *x = "$Id: rpmattr.c,v 1.3 2009-06-25 12:40:28+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: rpmattr.c,v 1.4 2009-12-09 23:57:46+05:30 Cprogrammer Stab mbhangui $";
 	x++;
 }

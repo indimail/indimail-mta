@@ -1,5 +1,8 @@
 /*
  * $Log: get_uid.c,v $
+ * Revision 1.13  2009-12-09 23:56:24+05:30  Cprogrammer
+ * close passwd, group database if passed additional flag - closeflag
+ *
  * Revision 1.12  2009-02-05 15:34:30+05:30  Cprogrammer
  * removed rootgroup
  *
@@ -157,7 +160,7 @@ get_gid(char *group)
 }
 
 int
-uidinit()
+uidinit(int closeflag)
 {
 	static int      first;
 
@@ -207,6 +210,11 @@ uidinit()
 	else
 	{
 		first++;
+		if (closeflag)
+		{
+			endpwent();
+			endgrent();
+		}
 		return (0);
 	}
 }
@@ -214,7 +222,7 @@ uidinit()
 char *
 get_user(uid_t uid)
 {
-	if (uidinit() == -1)
+	if (uidinit(0) == -1)
 		return ((char *) 0);
 	else
 	if (uid == auto_uida)
@@ -253,7 +261,7 @@ get_user(uid_t uid)
 char *
 get_group(gid_t gid)
 {
-	if (uidinit() == -1)
+	if (uidinit(0) == -1)
 		return ((char *) 0);
 	if (gid == auto_gidq)
 		return("qmail");
@@ -273,7 +281,7 @@ get_group(gid_t gid)
 void
 getversion_get_uid_c()
 {
-	static char    *x = "$Id: get_uid.c,v 1.12 2009-02-05 15:34:30+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: get_uid.c,v 1.13 2009-12-09 23:56:24+05:30 Cprogrammer Stab mbhangui $";
 
 	x++;
 }

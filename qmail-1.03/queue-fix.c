@@ -1,5 +1,8 @@
 /*
  * $Log: queue-fix.c,v $
+ * Revision 1.15  2009-12-09 23:57:41+05:30  Cprogrammer
+ * additional closeflag argument to uidinit()
+ *
  * Revision 1.14  2005-07-04 18:05:19+05:30  Cprogrammer
  * size of tcpto changed to TCPTO_BUFSIZ
  *
@@ -54,7 +57,7 @@
 #include "auto_split.h"
 #include "auto_uids.h"
 
-int             uidinit();
+int             uidinit(int);
 
 stralloc        queue_dir = { 0 };	/*- the root queue dir with trailing slash */
 stralloc        check_dir = { 0 };	/*- the current directory being checked */
@@ -1039,7 +1042,7 @@ main(int argc, char **argv)
 		if (!stralloc_append(&queue_dir, "/"))
 			die_nomem();
 	}
-	if(uidinit() == -1)
+	if(uidinit(1) == -1)
 	{
 		fprintf(stderr, "Unable to get uids/gids: %s\n", strerror(errno));
 		return(1);
@@ -1065,7 +1068,7 @@ main(int argc, char **argv)
 void
 getversion_queue_fix_c()
 {
-	static char    *x = "$Id: queue-fix.c,v 1.14 2005-07-04 18:05:19+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: queue-fix.c,v 1.15 2009-12-09 23:57:41+05:30 Cprogrammer Stab mbhangui $";
 
 	x++;
 }

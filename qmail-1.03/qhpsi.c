@@ -1,5 +1,8 @@
 /*
  * $Log: qhpsi.c,v $
+ * Revision 1.4  2009-12-09 23:57:04+05:30  Cprogrammer
+ * additional closeflag argument to uidinit()
+ *
  * Revision 1.3  2005-04-27 17:16:03+05:30  Cprogrammer
  * prevent path to be given in plugindir
  *
@@ -21,7 +24,7 @@
 
 #define FATAL "qhpsi: fatal: "
 
-int             uidinit();
+int             uidinit(int);
 
 void
 nomem(int flaglog)
@@ -40,7 +43,7 @@ main(int argc, char **argv)
 	char           *messfn, *error, *queue_plugin, *plugindir;
 	stralloc        plugin = { 0 };
 
-	if (uidinit() == -1)
+	if (uidinit(0) == -1)
 		_exit(67);
 	if (env_get("DEBUG"))
 		flaglog = 1;
@@ -126,6 +129,6 @@ main(int argc, char **argv)
 void
 getversion_qmail_qhpsi_c()
 {
-	static char    *x = "$Id: qhpsi.c,v 1.3 2005-04-27 17:16:03+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: qhpsi.c,v 1.4 2009-12-09 23:57:04+05:30 Cprogrammer Stab mbhangui $";
 	x++;
 }
