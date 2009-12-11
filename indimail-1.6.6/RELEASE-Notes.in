@@ -4,18 +4,14 @@ DATE: @DATE@
 
 This is Release @version@ of IndiMail. The release has both source.tar.gz and RPMs
 
-This release comes with provision to render MRTG graphs for queue status, concurrency
-for various services running under tcpserver. This release also introduces a new
-command vserverinfo which helps in showing all servers involved in serving a specific
-email when IndiMail is configured as a large extended domain.
 
 Following features at the tracker have been incorporated
 http://sourceforge.net/tracker/?group_id=230686
-2897567, 2897561, 2897560, 2897382
 
 Following bugs at the tracker have been fixed
 http://sourceforge.net/tracker/?group_id=230686
-2898949, 2897954, 2897564, 2897073
+
+2911755
 
 This release includes the following files
 
@@ -50,6 +46,7 @@ Currently, the list of supported distributions for IndiMail is (for
 both 32 and 64 bit) are
 
     * SUSE
+          o openSUSE 11.2
           o openSUSE 11.1
           o openSUSE 11.0
           o SUSE Linux Enterprise 11
@@ -57,6 +54,7 @@ both 32 and 64 bit) are
           o openSUSE Factory
 
     * Red Hat
+          o Fedora 12
           o Fedora 11
           o Fedora 10
           o Red Hat Enterprise Linux 5
@@ -69,32 +67,31 @@ both 32 and 64 bit) are
 
 ChangeLog
 =========
-* Wed Nov 25 2009 mbhangui@gmail.com
-Release 1.6.5 Start 13/11/2009
-1.  BUG - fixed tcprules going into endless loop with lines neither having
-    allow or deny lines and non-blank lines not have ':' [2897073]
-2.  ANTISPOOF code implemented in MAIL FROM rather than RCPT TO
-    Turn off antispoof if relayclient is set [2897560]
-3.  Record helo name when helo name is rejected by stupid mail servers like MS
-    Exchange
-4.  BUG - Check for return status of tcprules in qmailctl [2897564]
-5.  Reload certificate on SIGHUP in indisrvr - reported peter cheng [2897560]
-6.  If QHPSI program fails (qmail-queue.c, qmail.c), report error using return
-    value 77 [2897382]
-7.  Upgraded clamav to version 0.95.3 [2897567]
-8.  Changed --disable-summary to --no-summary argument to clamdscan [2897567]
-9.  BUG - Authenticated SMTP does not work if QUERY_CACHE is turned off [2897954]
-10. Added --query-cache, --password-cache option to svctool when creating
-    SMTP service. Added --query-cache, --password-cache in svctool invocation
-    arguments in indimail.spec, create_services, indimail-epm.list
-11. Upgraded to fetchmail-6.3.13
-12. Do not create services for clamd, bogofilter, fetchmail svctool, create_svc,
-    nssd if original executables found missing
-13. BUG - fixed compilation in indisrvr when HAVE_SSL is not defined (SigHup handler)
-14. BUG - Added -lcrypto to linking. 
-15. BUG - Fixed fcntl (locking) error on DARWIN (flock structure initialization) [2898949]
-16. Added new command vserverinfo
-17. Added mrtg support using a modified qmailmrtg7
-18. use Maildir path in .qmail-register-spam, .qmail-spam,
-    .qmail-register-nonspam, .qmail-nonspam
-19. Added HAM/SPAM graph for MRTG, qmailmrtg7 modified to handle bogofilter
+* Fri Dec 11 2009 mbhangui@gmail.com
+Release 1.6.6 Start 25/11/2009
+1.  Added repo for openSUSE 11.2, Fedora 12
+2.  Prevent empty alias_line, email addresses getting added in valias
+3.  Removed left over system command from qmailmrtg7
+4.  Fixed config in qmail. renamed config shell script to qmailconfig
+5.  Added reports for smtp port 587 in svctool --reports
+6.  Modification to rpm spec file - moved verification to %%post,
+    added %%verifyscript, added qmailconfig, hostname
+7.  Changed iauth.so path to /var/indimail/modules
+8.  Fixed error in vset_limit() - limits.c
+9.  Enforce domain limits user quota in vadduser, vmoduser, vsetuserquota
+10. Added -l option to vmodddomain to turn on or off domain limits
+11. use .domain_limits in domain directory to turn on domain limits in
+    vadduser, vmoduser, vsetuserquota
+12. Use AUTHMODULES environment variable for defining smtp auth modules
+13. Added badhost functionality in qmail-smtpd
+14. Added X-Originating-IP header in qmail-queue
+15. Fixed typo in tcpserver '-a' option change to '-c'
+16. reconnect to MySQL (findhost.c) if server gone away
+17. Handle MySQL error gracefully in qmail-rspawn
+18. Close passwd, group database in uidinit()
+19. Modified spawn.c to display MySQL error in qmail-rspawn
+20. Use hostip also to figure out local interfaces
+21. Fix for DK_SYNTAX_ERR in dkfilter-sh. Also dktest now exits with the DK
+    status instead of 1
+22. create environment variable MYSQL_OPT_RECONNECT for indiserver, qmail-send,
+    inlookup service (svctool)
