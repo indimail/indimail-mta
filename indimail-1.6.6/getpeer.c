@@ -1,5 +1,8 @@
 /*
  * $Log: getpeer.c,v $
+ * Revision 2.5  2009-12-11 13:11:15+05:30  Cprogrammer
+ * removed compiler warning
+ *
  * Revision 2.4  2009-08-11 13:41:34+05:30  Cprogrammer
  * use sockaddr_storage instead of sockaddr to prevent truncation of ipv6 addresses
  *
@@ -42,7 +45,7 @@
 #include <stdio.h>
 
 #ifndef	lint
-static char     sccsid[] = "$Id: getpeer.c,v 2.4 2009-08-11 13:41:34+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: getpeer.c,v 2.5 2009-12-11 13:11:15+05:30 Cprogrammer Stab mbhangui $";
 #endif
 
 #ifndef INET_ADDRSTRLEN
@@ -115,7 +118,7 @@ GetIpaddr()
 	} else
 	if (((struct sockaddr *)&sa)->sa_family == AF_INET6)
 	{
-		return (inet_ntop(AF_INET6, (void *) &((struct sockaddr_in6 *) &sa)->sin6_addr,
+		return ((char *) inet_ntop(AF_INET6, (void *) &((struct sockaddr_in6 *) &sa)->sin6_addr,
 			addrBuf, INET6_ADDRSTRLEN));
 	} else
 	if (((struct sockaddr *) &sa)->sa_family == AF_UNSPEC)

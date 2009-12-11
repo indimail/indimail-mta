@@ -1,5 +1,8 @@
 /*
  * $Log: islocalif.c,v $
+ * Revision 2.3  2009-12-11 13:11:21+05:30  Cprogrammer
+ * removed compiler warning
+ *
  * Revision 2.2  2009-12-10 12:05:12+05:30  Cprogrammer
  * use ip from hostip if present
  *
@@ -43,7 +46,7 @@
 #endif
 
 #ifndef	lint
-static char     sccsid[] = "$Id: islocalif.c,v 2.2 2009-12-10 12:05:12+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: islocalif.c,v 2.3 2009-12-11 13:11:21+05:30 Cprogrammer Stab mbhangui $";
 #endif
 
 /*
@@ -236,5 +239,6 @@ void
 getversion_islocalif_c()
 {
 	printf("%s\n", sccsid);
+	printf("%s\n", sccsidh);
 	return;
 }
