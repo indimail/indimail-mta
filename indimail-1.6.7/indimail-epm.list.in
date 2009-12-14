@@ -1308,9 +1308,9 @@ f 755 root root ${prefix}/lib/libflash-0.9.4.so.0.0.0 BUILDROOT${prefix}/lib/lib
 l 777 root root ${prefix}/lib/libflash-0.9.4.so.0 BUILDROOT${prefix}libflash-0.9.4.so.0.0.0
 l 777 root root ${prefix}/lib/libflash.so BUILDROOT${prefix}libflash-0.9.4.so.0.0.0
 
-f 755 root root ${prefix}/lib/libindimail-1.6.6.so.0.0.0 BUILDROOT${prefix}/lib/libindimail-1.6.6.so.0.0.0
-l 777 root root ${prefix}/lib/libindimail-1.6.6.so.0 BUILDROOT${prefix}libindimail-1.6.6.so.0.0.0
-l 777 root root ${prefix}/lib/libindimail.so BUILDROOT${prefix}libindimail-1.6.6.so.0.0.0
+f 755 root root ${prefix}/lib/libindimail-@version@.so.0.0.0 BUILDROOT${prefix}/lib/libindimail-@version@.so.0.0.0
+l 777 root root ${prefix}/lib/libindimail-@version@.so.0 BUILDROOT${prefix}libindimail-@version@.so.0.0.0
+l 777 root root ${prefix}/lib/libindimail.so BUILDROOT${prefix}libindimail-@version@.so.0.0.0
 
 f 555 root root ${prefix}/modules/alarms BUILDROOT${prefix}/modules/alarms
 f 555 root root ${prefix}/modules/background BUILDROOT${prefix}/modules/background
