@@ -1000,6 +1000,19 @@ Remember to create a Maildir for each existing user account. You will have to us
 command on each Maildir individually (if you want to hide them in the Finder). After you create
 a Maildir for an existing user, remember to make the user the owner of the of the directory
 (using chown).
+---------------------------------------------
+If you see the new users in the login-window, you might want to use one of the following commands
+(depending on which one works for you) to hide them:
+
+% sudo defaults write /Library/Preferences/com.apple.loginwindow HiddenUsersList \
+   -array-add _alias _qmaild _qmaill _qmailp _qmailq _qmailr _qmails
+
+If the above doesn't work, try this one:
+
+% sudo defaults write /Library/Preferences/com.apple.loginwindow Hide500User -bool YES
+
+(source:http://qmail.jms1.net/djbdns/osx.shtml)
+---------------------------------------------
 
 MySQL NOTES
 -----------
