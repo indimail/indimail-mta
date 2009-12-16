@@ -1,5 +1,8 @@
 #!/bin/sh
 # $Log: create_services.in,v $
+# Revision 2.34  2009-12-16 20:07:31+05:30  Cprogrammer
+# create log directory
+#
 # Revision 2.33  2009-11-16 21:43:29+05:30  Cprogrammer
 # figure out which services to create depending on installed software (bogofilter, fetchmail, clamd, nssd)
 #
@@ -119,7 +122,7 @@ indimaildir=@indimaildir@
 # End USER Configuration OPTIONS
 #
 
-# $Id: create_services.in,v 2.33 2009-11-16 21:43:29+05:30 Cprogrammer Exp mbhangui $
+# $Id: create_services.in,v 2.34 2009-12-16 20:07:31+05:30 Cprogrammer Stab mbhangui $
 
 usage()
 {
@@ -237,6 +240,20 @@ fi
 if [ ! -x $dir_prefix$indimaildir/bin/imapd ] ; then
 	nocourierimap=1
 fi
+echo "Creating @logdir@"
+if [ ! -d @logdir@ ] ; then
+	mkdir -p @logdir@
+fi
+if [ -x /bin/chown ] ; then
+	chown=/bin/chown
+elif [ -x /usr/sbin/chown ] ; then
+	chown=/usr/sbin/chown
+elif [ -x /usr/bin/chown ] ; then
+	chown=/usr/bin/chown
+else
+	chown=/bin/chown
+fi
+$chown -R qmaill:nofiles @logdir@
 #
 # MySQL
 #
