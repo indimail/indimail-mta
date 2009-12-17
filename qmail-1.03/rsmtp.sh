@@ -50,11 +50,7 @@ awk -v spamheader_name=$spamheader_name '
 	{
 		pid = $4
 		embryo[pid] = 2
-		if (num = index($6, ":"))
-		{
-			ip[pid] = substr($6, 0, num - 1)
-		} else
-			ip[pid] = $6
+		ip[pid] = $6
 		from[pid] = $11
 		rcpt[pid] = $13
 		host = ip[pid]
