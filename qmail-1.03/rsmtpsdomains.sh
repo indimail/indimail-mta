@@ -41,11 +41,6 @@ awk -v spamheader_name=$spamheader_name '
   	if ($2 == "qmail-smtpd:")
 	{
 		pid = $4
-		if (num = index($6, ":"))
-		{
-			ip[pid] = substr($6, 0, num - 1)
-		} else
-			ip[pid] = $6
 		from[pid] = $11
 		rcpt[pid] = $13
 		if ($7 == "HELO" || $7 == "ETRN" || $7 == "ATRN") {
