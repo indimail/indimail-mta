@@ -1,5 +1,10 @@
 /*
  * $Log: qmail-remote.c,v $
+ * Revision 1.52  2009-12-17 09:15:55+05:30  Cprogrammer
+ * log real envelope recipients of messages after host name canonicalization
+ * patch by James Raftery
+ * log from and recipient on success and failure
+ *
  * Revision 1.51  2009-12-05 20:16:03+05:30  Cprogrammer
  * ansic conversion
  *
@@ -1390,7 +1395,11 @@ smtp()
 		code = smtpcode();
 		if (code >= 500)
 		{
-			out("h");
+			out("hFrom: <");
+			outsafe(&sender);
+			out("> RCPT: <");
+			outsafe(&reciplist.sa[i]);
+			out("> ");
 			outhost();
 			out(" does not like recipient.\n");
 			outsmtptext();
@@ -1398,14 +1407,22 @@ smtp()
 		} else
 		if (code >= 400)
 		{
-			out("s");
+			out("sFrom: <");
+			outsafe(&sender);
+			out("> RCPT: <");
+			outsafe(&reciplist.sa[i]);
+			out("> ");
 			outhost();
 			out(" does not like recipient.\n");
 			outsmtptext();
 			zero();
 		} else
 		{
-			out("r");
+			out("rFrom: <");
+			outsafe(&sender);
+			out("> RCPT: <");
+			outsafe(&reciplist.sa[i]);
+			out("> ");
 			zero();
 			flagbother = 1;
 		}
@@ -1987,7 +2004,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_remote_c()
 {
-	static char    *x = "$Id: qmail-remote.c,v 1.51 2009-12-05 20:16:03+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: qmail-remote.c,v 1.52 2009-12-17 09:15:55+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
