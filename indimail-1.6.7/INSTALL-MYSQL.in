@@ -2,13 +2,26 @@
     in my experience have got stuck with MySQL installation and configuration. Following
     are the most common issues that users have experienced installing IndiMail
 
-    1. MySQL version : As far as possible use mysql 5.1.x or greater. Due to this
-       you might face the following problems
+    1. MySQL version : As far as possible use mysql 5.1.x or greater. If you use an
+       unsupported version of MySQL, you might face the following problems
        a) MySQL fails to startup under supervise
        b) svctool fails to create a default MySQL database for IndiMail during RPM
           installation or when you run the command svctool --config=mysqldb ...
+
+          The following versions have been confirmed to work. Let me know your version
+          of MySQL and if you faced any of the above issue
+
+          o mysql-6.0.3-alpha
+          o mysql-6.0.9-alpha
+		  o mysql-5.0.26
+		  o mysql-5.0.77
+          o mysql-5.1.40
+          o mysql-5.4.3-beta
+          o mysql-5.5.0-m2
+
     2. If you have /etc/my.conf, replace socket=/var/lib/mysql/mysql.sock with
        socket=/tmp/mysql.sock 
+
     3. If the user root in mysql does not have a password. This will prevent anyone on
        the system to connect to MySQL using a password.
 
