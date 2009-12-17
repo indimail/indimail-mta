@@ -1,4 +1,7 @@
 # $Log: rsmtprecipients.sh,v $
+# Revision 1.6  2009-12-17 16:03:06+05:30  Cprogrammer
+# fix for null host obtained from smtp logs
+#
 # Revision 1.5  2009-11-11 08:34:53+05:30  Cprogrammer
 # assign X-Bogosity to spamheader_name by default
 #
