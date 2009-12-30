@@ -11,7 +11,6 @@ http://sourceforge.net/tracker/?group_id=230686
 Following bugs at the tracker have been fixed
 http://sourceforge.net/tracker/?group_id=230686
 
-2911755
 
 This release includes the following files
 
@@ -67,31 +66,19 @@ both 32 and 64 bit) are
 
 ChangeLog
 =========
-* Fri Dec 11 2009 mbhangui@gmail.com
-Release 1.6.6 Start 25/11/2009
-1.  Added repo for openSUSE 11.2, Fedora 12
-2.  Prevent empty alias_line, email addresses getting added in valias
-3.  Removed left over system command from qmailmrtg7
-4.  Fixed config in qmail. renamed config shell script to qmailconfig
-5.  Added reports for smtp port 587 in svctool --reports
-6.  Modification to rpm spec file - moved verification to %%post,
-    added %%verifyscript, added qmailconfig, hostname
-7.  Changed iauth.so path to /var/indimail/modules
-8.  Fixed error in vset_limit() - limits.c
-9.  Enforce domain limits user quota in vadduser, vmoduser, vsetuserquota
-10. Added -l option to vmodddomain to turn on or off domain limits
-11. use .domain_limits in domain directory to turn on domain limits in
-    vadduser, vmoduser, vsetuserquota
-12. Use AUTHMODULES environment variable for defining smtp auth modules
-13. Added badhost functionality in qmail-smtpd
-14. Added X-Originating-IP header in qmail-queue
-15. Fixed typo in tcpserver '-a' option change to '-c'
-16. reconnect to MySQL (findhost.c) if server gone away
-17. Handle MySQL error gracefully in qmail-rspawn
-18. Close passwd, group database in uidinit()
-19. Modified spawn.c to display MySQL error in qmail-rspawn
-20. Use hostip also to figure out local interfaces
-21. Fix for DK_SYNTAX_ERR in dkfilter-sh. Also dktest now exits with the DK
-    status instead of 1
-22. create environment variable MYSQL_OPT_RECONNECT for indiserver, qmail-send,
-    inlookup service (svctool)
+* Fri Dec 25 2009 mbhangui@gmail.com
+Release 1.6.7 Start 11/12/2009
+1.  create log directory in create_services
+2.  replaced all occurences of chown with $chown in svctool
+3.  log from and rcpt for qmail-remote
+4.  Modified rsmtp, rsmtprdomains, rsmtpsdomains, rsmptsenders to correctly
+    decipher host from smtp log
+5.  Added case for mysql-5.5 in svctool
+6.  Use GNU syntax for tail in bogofilter-qfe.in
+7.  fixed issue with delivery of mails to register-spam, spam,
+    register-nonspam, nonspam ids
+8.  Added vfilter rule for X-Bogosity spam filtering in postfilt in svctool
+9.  Made vcfilter setuid
+10. Modified vcfilter.c, vbulletin.c, vadduser.c, printdir.c, vdeluser.c,
+    vreorg.c, vdominfo.c, vdeldomain.c for running programs with uid,gid of
+    domain
