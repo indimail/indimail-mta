@@ -19,6 +19,8 @@ allows maximum of 255 filters to be created.
 The first form of usage is primarily for creating filters (though some amount of mailing list
 updation is also possible). The second form of usage is for mailing list updation only.
 
+\fBvcfilter\fR has the setuid bit set to root and must be run as root or domain user
+
 .SH OPTIONS  (for filters)
 .TP
 \fB\-v\fR
@@ -42,26 +44,28 @@ Textual name for the filter
 \fB\-h\fR
 header value. A number denoting the following
 
- -1 – If comparison (-c option) is 5 or 6
-  0 – Return-Path
-  1 – From
-  2 – Subject
-  3 – To
-  4 – Cc
-  5 – Bcc
-  6 – Reply-To
-  7 – Sender        
-  8 – List-Id
-  9 – Mailing-List
- 10 – X-Sender
- 11 – X-Mailing-List
- 12 – X-ML-Name
- 13 – X-List   
- 14 – X-Loop
- 15 – X-BeenThere
- 16 – X-Sequence
- 17 – X-Mailer
- 18 – Precedence
+ -1 - If comparision (-c option) is 5 or 6
+  0 - Return-Path                       1 - From
+  2 - Subject                           3 - To
+  4 - Cc                                5 - Bcc
+  6 - Reply-To                          7 - Date
+  8 - Sender                            9 - User-Agent
+  10 - Message-Id                       11 - MIME-Version
+  12 - Content-Type                     13 - Content-Transfer-Encoding
+  14 - Precedence                       15 - Organization
+  16 - Errors-To                        17 - List-Id
+  18 - Importance                       19 - Mailing-List
+  20 - X-Sender                         21 - X-Mailing-List
+  22 - X-ML-Name                        23 - X-List
+  24 - X-Loop                           25 - X-BeenThere
+  26 - X-Sequence                       27 - X-Mailer
+  28 - X-QHPSI                          29 - X-Priority
+  30 - X-Mailer                         31 - X-Spam-Status
+  32 - X-Spam-Rating                    33 - X-Bogosity
+  34 - Received                         35 - X-Quarantine
+  36 - Domainkey-Signature              37 - DKIM-Signature
+  38 - DKIM-Status                      39 - Domainkey-Status
+
 .TP 
 \fB\-c\fR
 Comparison with the headers to make. This could be one of the following number.
