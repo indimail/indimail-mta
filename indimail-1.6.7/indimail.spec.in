@@ -1,5 +1,8 @@
 #
 # $Log: indimail.spec.in,v $
+# Revision 2.123  2009-12-30 11:13:44+05:30  Cprogrammer
+# made vcfilter setuid
+#
 # Revision 2.122  2009-12-08 11:06:37+05:30  Cprogrammer
 # changes for centos for OBS
 #
@@ -381,7 +384,7 @@
 # rpm spec file for indimail
 #
 #
-# $Id: indimail.spec.in,v 2.122 2009-12-08 11:06:37+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 2.123 2009-12-30 11:13:44+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %define _unpackaged_files_terminate_build 1
 
@@ -1229,6 +1232,7 @@ fi
 %attr(4555,root,root)                   %{_prefix}/bin/vuserinfo
 %attr(4555,root,root)                   %{_prefix}/bin/vrenamedomain
 %attr(4555,root,root)                   %{_prefix}/bin/vmoduser
+%attr(4555,root,root)                   %{_prefix}/bin/vcfilter
 %attr(4555,root,root)                   %{_prefix}/bin/vsetuserquota
 %attr(4555,root,root)                   %{_prefix}/bin/vaddaliasdomain
 %attr(4511,qscand,qscand)               %{_prefix}/bin/qscanq
@@ -1288,7 +1292,6 @@ fi
 %attr(555,root,qmail)                   %{_prefix}/bin/recordio
 %attr(555,root,qmail)                   %{_prefix}/bin/logselect
 %attr(555,root,qmail)                   %{_prefix}/bin/teepipe
-%attr(555,root,qmail)                   %{_prefix}/bin/vcfilter
 %attr(555,root,qmail)                   %{_prefix}/bin/ipmeprint
 %attr(555,root,qmail)                   %{_prefix}/bin/envdir
 %attr(555,root,qmail)                   %{_prefix}/bin/vcalias
