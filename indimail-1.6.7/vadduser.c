@@ -1,5 +1,8 @@
 /*
  * $Log: vadduser.c,v $
+ * Revision 2.29  2009-12-30 13:10:17+05:30  Cprogrammer
+ * run vadduser with uid, gid of domain
+ *
  * Revision 2.28  2009-12-02 11:04:34+05:30  Cprogrammer
  * use .domain_limits in domain directory to turn on domain limits
  *
@@ -138,7 +141,7 @@
 #include <signal.h>
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vadduser.c,v 2.28 2009-12-02 11:04:34+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: vadduser.c,v 2.29 2009-12-30 13:10:17+05:30 Cprogrammer Stab mbhangui $";
 #endif
 
 char            Email[MAX_BUFF];
@@ -170,7 +173,8 @@ main(argc, argv)
 	char           *real_domain, *ptr;
 	char            tmpbuf[MAX_BUFF], envbuf[MAX_BUFF], buffer[MAX_BUFF];
 	FILE           *fp;
-	uid_t           uid;
+	uid_t           uid, uidtmp;
+	gid_t           gid;
 #ifdef ENABLE_DOMAIN_LIMITS
 	int             domain_limits;
 	struct vlimits  limits;
@@ -194,7 +198,7 @@ main(argc, argv)
 		return(1);
 	}
 #ifdef ENABLE_DOMAIN_LIMITS
-	if (!vget_assign(real_domain, buffer, AUTH_SIZE, 0, 0))
+	if (!vget_assign(real_domain, buffer, AUTH_SIZE, &uid, &gid))
 	{
 		error_stack(stderr, "%s: domain does not exist\n", real_domain);
 		return (1);
@@ -232,17 +236,15 @@ main(argc, argv)
 		usage();
 		return(1);
 	}
-	if (indimailuid == -1 || indimailgid == -1)
-		GetIndiId(&indimailuid, &indimailgid);
-	uid = getuid();
-	if (uid != 0 && uid != indimailuid)
+	uidtmp = getuid();
+	if (uidtmp != 0 && uidtmp != uid)
 	{
-		error_stack(stderr, "you must be root or indimail to run this program\n");
+		error_stack(stderr, "you must be root or domain user (uid=%d) to run this program\n", uid);
 		return(1);
 	}
-	if (setgid(indimailgid) || setuid(uid))
+	if (setgid(gid) || setuid(uid))
 	{
-		error_stack(stderr, "setuid/setgid (%d/%d): %s", uid, indimailgid, strerror(errno));
+		error_stack(stderr, "setuid/setgid (%d/%d): %s", uid, gid, strerror(errno));
 		return(1);
 	}
 	/* set the users quota if set on the command line */

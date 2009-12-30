@@ -1,5 +1,8 @@
 /*
  * $Log: vcfilter.c,v $
+ * Revision 2.24  2009-12-30 13:12:11+05:30  Cprogrammer
+ * run vcfilter with uid,gid of domain
+ *
  * Revision 2.23  2009-02-18 09:08:30+05:30  Cprogrammer
  * check chown error
  *
@@ -78,7 +81,7 @@
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vcfilter.c,v 2.23 2009-02-18 09:08:30+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: vcfilter.c,v 2.24 2009-12-30 13:12:11+05:30 Cprogrammer Stab mbhangui $";
 #endif
 
 #ifdef VFILTER
@@ -121,24 +124,46 @@ int
 main(int argc, char **argv)
 {
 	int             i, j, status = -1, raw = 0;
+	uid_t           uid, uidtmp;
+	gid_t           gid;
 	struct passwd  *pw;
 	char           *real_domain;
-	char            user[AUTH_SIZE], domain[AUTH_SIZE], vfilter_file[MAX_BUFF];
+	char            user[AUTH_SIZE], domain[AUTH_SIZE], vfilter_file[MAX_BUFF],
+					buffer[AUTH_SIZE];
 
-	if(get_options(argc, argv, &raw))
+	if (get_options(argc, argv, &raw))
 		return(1);
-	if(FilterAction == FILTER_INSERT || FilterAction == FILTER_DELETE)
+	if (parse_email(emailid, user, domain, AUTH_SIZE))
 	{
-		if (parse_email(emailid, user, domain, AUTH_SIZE))
+		fprintf(stderr, "%s: Email too long\n", emailid);
+		return (1);
+	}
+	if (!(real_domain = vget_real_domain(domain)))
+		real_domain = domain;
+	if (!vget_assign(real_domain, buffer, AUTH_SIZE, &uid, &gid))
+	{
+		error_stack(stderr, "%s: domain does not exist\n", real_domain);
+		return (1);
+	}
+	if (FilterAction != FILTER_SELECT)
+	{
+		uidtmp = getuid();
+		if (uidtmp != 0 && uidtmp != uid)
 		{
-			fprintf(stderr, "%s: Email too long\n", emailid);
-			return (1);
+			error_stack(stderr, "you must be root or domain user (uid=%d) to run this program\n", uid);
+			return(1);
 		}
-		if (!(real_domain = vget_real_domain(domain)))
-			real_domain = domain;
-		if(!(pw = vauth_getpw(user, real_domain)))
+		if (setgid(gid) || setuid(uid))
 		{
-			if(userNotFound)
+			error_stack(stderr, "setuid/setgid (%d/%d): %s", uid, gid, strerror(errno));
+			return(1);
+		}
+	}
+	if (FilterAction == FILTER_INSERT || FilterAction == FILTER_DELETE)
+	{
+		if (!(pw = vauth_getpw(user, real_domain)))
+		{
+			if (userNotFound)
 				fprintf(stderr, "%s@%s: No such user\n", user, real_domain);
 			else
 				fprintf(stderr, "Temporary database Errror\n");
@@ -150,9 +175,9 @@ main(int argc, char **argv)
 	{
 	case MLIST_SELECT:
 		mailing_list = getmailingList(emailid, -1);
-		for(i = 0;mailing_list && mailing_list[i];i++)
+		for (i = 0;mailing_list && mailing_list[i];i++)
 		{
-			if(!i)
+			if (!i)
 				printf("    Mailing Lists\n");
 			printf("             -> %s\n", mailing_list[i]);
 		}
@@ -162,22 +187,27 @@ main(int argc, char **argv)
 		break;
 	case FILTER_INSERT:
 		status = vfilter_insert(emailid, filter_name, header_name, comparision, keyword, folder, bounce_action, faddr, mailing_list);
-		if(access(vfilter_file, F_OK) && !status)
+		if (access(vfilter_file, F_OK) && !status)
 		{
-			close(open(vfilter_file, O_CREAT | O_TRUNC , 0644));
-			GetIndiId(&indimailuid, &indimailgid);
-			if (!getuid() || !geteuid())
-				if (chown(vfilter_file, indimailuid, indimailgid))
+			if ((i = open(vfilter_file, O_CREAT | O_TRUNC, 0644)) == -1)
+			{
+				fprintf(stderr, "open: %s: %s\n", vfilter_file, strerror(errno));
+				status = -1;
+			} else
+			{
+				close(i);
+				if (chown(vfilter_file, uid, gid))
 				{
 					fprintf(stderr, "chown: %s: %s\n", vfilter_file, strerror(errno));
 					status = -1;
 				}
+			}
 		}
 		break;
 	case FILTER_DELETE:
-		if(!(status = vfilter_delete(emailid, filter_no)))
+		if (!(status = vfilter_delete(emailid, filter_no)))
 		{
-			if(vfilter_select(emailid, &i, filter_name, &header_name, &comparision, keyword, folder, &bounce_action, faddr, &mailing_list) == -2)
+			if (vfilter_select(emailid, &i, filter_name, &header_name, &comparision, keyword, folder, &bounce_action, faddr, &mailing_list) == -2)
 				unlink(vfilter_file);
 		}
 		break;
@@ -185,18 +215,18 @@ main(int argc, char **argv)
 		status = vfilter_update(emailid, filter_no, header_name, comparision, keyword, folder, bounce_action, faddr, mailing_list);
 		break;
 	case MLIST_INSERT:
-		if((filter_no = mlist_filterno(emailid)) == -1)
+		if ((filter_no = mlist_filterno(emailid)) == -1)
 		{
 			fprintf(stderr, "failed to get Filter No [for comparision 5/6] for %s\n", emailid);
 			status = -1;
 		} else
-		if(filter_no == -2)
+		if (filter_no == -2)
 		{
 			status = 1;
 			fprintf(stderr, "No filter present for this option\n");
 		} else
 		{
-			if(mailing_list && *mailing_list && **mailing_list)
+			if (mailing_list && *mailing_list && **mailing_list)
 				status = mlist_insert(emailid, filter_no, mailing_list);
 		}
 		break;
@@ -204,19 +234,19 @@ main(int argc, char **argv)
 		status = mlist_update(emailid, mailing_list[0], mailing_list[1]);
 		break;
 	case MLIST_DELETE:
-		for(status = i = 0;mailing_list && mailing_list[i] && *(mailing_list[i]);i++)
+		for (status = i = 0;mailing_list && mailing_list[i] && *(mailing_list[i]);i++)
 		{
-			if((j = mlist_delete(emailid, mailing_list[i])))
+			if ((j = mlist_delete(emailid, mailing_list[i])))
 				status = j;
 		}
 		break;
 	case MLIST_OPTION:
-		if((filter_no = mlist_filterno(emailid)) == -1)
+		if ((filter_no = mlist_filterno(emailid)) == -1)
 		{
 			fprintf(stderr, "failed to get Filter No [comparision 5/6] for %s\n", emailid);
 			status = -1;
 		} else
-		if(filter_no == -2)
+		if (filter_no == -2)
 		{
 			fprintf(stderr, "No filter present for this option\n");
 			status = -1;
@@ -227,9 +257,9 @@ main(int argc, char **argv)
 #ifdef DEBUG
 	printf("action %d, header %d keyword [%s] comparision %d folder [%s] bounce_action %d Forward %s email [%s]\n",
 			FilterAction, header_name, keyword, comparision, folder, bounce_action, bounce_action == 2 ? faddr : "N/A", emailid);
-	for(i = 0;mailing_list && mailing_list[i];i++)
+	for (i = 0;mailing_list && mailing_list[i];i++)
 	{
-		if(!i)
+		if (!i)
 			printf("Mailing Lists\n");
 		printf("%s\n", mailing_list[i]);
 	}
@@ -251,8 +281,8 @@ get_options(int argc, char **argv, int *raw)
 	
 	if (!(header_list = headerList()))
 		header_list = vfilter_header;
-	for(max_header = 0;header_list[max_header];max_header++);
-	for(max_comparision = 0;vfilter_comparision[max_comparision];max_comparision++);
+	for (max_header = 0;header_list[max_header];max_header++);
+	for (max_comparision = 0;vfilter_comparision[max_comparision];max_comparision++);
 	max_header--;
 	max_comparision--;
 	while ((c = getopt(argc, argv, "vsirm:d:u:h:c:b:k:f:o:t:DU")) != -1)
@@ -269,30 +299,30 @@ get_options(int argc, char **argv, int *raw)
 			*raw = 1;
 			break;
 		case 'i':
-			if(FilterAction != MLIST_SELECT)
+			if (FilterAction != MLIST_SELECT)
 				FilterAction = FILTER_INSERT;
 			else
 				FilterAction = MLIST_INSERT;
 			break;
 		case 'd':
 			FilterAction = FILTER_DELETE;
-			if(isnum(optarg))
+			if (isnum(optarg))
 				filter_no = atoi(optarg);
 			else
 				filter_no = -1;
 			break;
 		case 'u':
 			FilterAction = FILTER_UPDATE;
-			if(isnum(optarg))
+			if (isnum(optarg))
 				filter_no = atoi(optarg);
 			else
 				filter_no = -1;
 			break;
 		case 'h':
-			if(isnum(optarg))
+			if (isnum(optarg))
 			{
 				header_name = atoi(optarg);
-				if(header_name < 0 || header_name > max_header)
+				if (header_name < 0 || header_name > max_header)
 				{
 					fprintf(stderr, "Header value %d out of range\n", header_name);
 					usage();
@@ -302,10 +332,10 @@ get_options(int argc, char **argv, int *raw)
 				header_name = -1;
 			break;
 		case 'c':
-			if(isnum(optarg))
+			if (isnum(optarg))
 			{
 				comparision = atoi(optarg);
-				if(comparision < 0 || comparision > max_comparision)
+				if (comparision < 0 || comparision > max_comparision)
 				{
 					fprintf(stderr, "Comparision value %d out of range\n", comparision);
 					usage();
@@ -315,18 +345,18 @@ get_options(int argc, char **argv, int *raw)
 				comparision = -1;
 			break;
 		case 'b':
-			if(isdigit((int) *optarg))
+			if (isdigit((int) *optarg))
 			{
 				bounce_action = *optarg - '0';
-				if(bounce_action != 0 && bounce_action != 1 && bounce_action != 2 && bounce_action != 3)
+				if (bounce_action != 0 && bounce_action != 1 && bounce_action != 2 && bounce_action != 3)
 				{
 					fprintf(stderr, "Invalid Bounce action %d\n", bounce_action);
 					usage();
 					return(1);
 				} else
-				if(bounce_action == 2 || bounce_action == 3)
+				if (bounce_action == 2 || bounce_action == 3)
 				{
-					if((optarg[1] && optarg[1] != '&' && optarg[1] != '|') || !optarg[1] || !optarg[2])
+					if ((optarg[1] && optarg[1] != '&' && optarg[1] != '|') || !optarg[1] || !optarg[2])
 					{
 						fprintf(stderr, "forwarding address incorrect or not specified\n");
 						usage();
@@ -344,9 +374,9 @@ get_options(int argc, char **argv, int *raw)
 			scopy(keyword, optarg, MAX_BUFF);
 			if (comparision == 7)
 			{
-				for(ptr1 = keyword, ptr2 = keyword; *ptr1; ptr1++)
+				for (ptr1 = keyword, ptr2 = keyword; *ptr1; ptr1++)
 				{
-					if(!isspace((int) *ptr1))
+					if (!isspace((int) *ptr1))
 						*ptr2++ = *ptr1;
 				}
 				*ptr2 = 0;
@@ -355,17 +385,17 @@ get_options(int argc, char **argv, int *raw)
 			break;
 		case 'f':
 			scopy(folder, optarg, MAX_BUFF);
-			if(*folder == '.')
+			if (*folder == '.')
 			{
 				fprintf(stderr, "%s: Folder Name cannot start with '%c'\n", folder, *folder);
 				*folder = 0;
 				return(1);
 			} else
-			if(strncasecmp(folder, "/NoDeliver", 10))
+			if (strncasecmp(folder, "/NoDeliver", 10))
 			{
-				for(ptr = folder;*ptr;ptr++)
+				for (ptr = folder;*ptr;ptr++)
 				{
-					if(*ptr == '/')
+					if (*ptr == '/')
 					{
 						fprintf(stderr, "%s: Invalid Char %c\n", folder, *ptr);
 						*folder = 0;
@@ -373,7 +403,7 @@ get_options(int argc, char **argv, int *raw)
 					}
 				}
 			}
-			if(strncasecmp(folder, "/NoDeliver", 11))
+			if (strncasecmp(folder, "/NoDeliver", 11))
 				snprintf(folder, MAX_BUFF, ".%s", optarg);
 			else
 				scopy(folder, "/NoDeliver", 11);
@@ -390,10 +420,10 @@ get_options(int argc, char **argv, int *raw)
 			break;
 		case 'o':
 			FilterAction = MLIST_OPTION;
-			if(isnum(optarg))
+			if (isnum(optarg))
 			{
 				mlist_option = atoi(optarg);
-				if(mlist_option != 0 && mlist_option != 1 && mlist_option != 2)
+				if (mlist_option != 0 && mlist_option != 1 && mlist_option != 2)
 				{
 					fprintf(stderr, "Comparision value %d out of range\n", mlist_option);
 					usage();
@@ -407,7 +437,7 @@ get_options(int argc, char **argv, int *raw)
 			return(1);
 		}
 	} /*- while ((c = getopt(argc, argv, "Vvsim:d:u:h:c:b:k:f:o:DU")) != -1) */
-	if(FilterAction == -1)
+	if (FilterAction == -1)
 	{
 		fprintf(stderr, "Must specify one of -s -i, -u, -d, -m option\n");
 		usage();
@@ -415,7 +445,7 @@ get_options(int argc, char **argv, int *raw)
 	}
 	if (optind < argc)
 	{
-		if(FilterAction < MLIST_SELECT)
+		if (FilterAction < MLIST_SELECT)
 			scopy(emailid, argv[optind++], AUTH_SIZE);
 	}
 	if (!*emailid)
@@ -425,9 +455,9 @@ get_options(int argc, char **argv, int *raw)
 		return(1);
 	} else
 	{
-		for(i = 0;rfc_ids[i];i++)
+		for (i = 0;rfc_ids[i];i++)
 		{
-			if(!strncmp(emailid, rfc_ids[i], slen(rfc_ids[i]) + 1))
+			if (!strncmp(emailid, rfc_ids[i], slen(rfc_ids[i]) + 1))
 			{
 				fprintf(stderr, "vcfilter: email %s not allowed for filtering\n", emailid);
 				usage();
@@ -436,12 +466,12 @@ get_options(int argc, char **argv, int *raw)
 		}
 	}
 #ifdef CLUSTERED_SITE
-	if(vauthOpen_user(emailid) == -1)
+	if (vauthOpen_user(emailid) == -1)
 #else
 	if (vauth_open((char *) 0))
 #endif
 	{
-		if(userNotFound)
+		if (userNotFound)
 		{
 			fprintf(stderr, "%s: No such user\n", emailid);
 			return(1);
@@ -452,7 +482,7 @@ get_options(int argc, char **argv, int *raw)
 		}
 	}
 	mailing_list = argv + optind;
-	if(comparision == 5 || comparision == 6)
+	if (comparision == 5 || comparision == 6)
 	{
 		header_name = -1;
 		*keyword = 0;
@@ -462,40 +492,40 @@ get_options(int argc, char **argv, int *raw)
 	case FILTER_DELETE:
 	case FILTER_UPDATE:
 	case FILTER_INSERT:
-		if(FilterAction == FILTER_INSERT && !*filter_name)
+		if (FilterAction == FILTER_INSERT && !*filter_name)
 		{
 			fprintf(stderr, "filter name not specified\n");
 			usage();
 			return(1);
 		}
-		if((FilterAction == FILTER_UPDATE || FilterAction == FILTER_DELETE) && filter_no == -1)
+		if ((FilterAction == FILTER_UPDATE || FilterAction == FILTER_DELETE) && filter_no == -1)
 		{
 			fprintf(stderr, "filter no not specified or invalid\n");
 			usage();
 			return(1);
 		}
-		if(FilterAction == FILTER_DELETE)
+		if (FilterAction == FILTER_DELETE)
 			break;
-		if(comparision == -1 || bounce_action == -1 || !*folder)
+		if (comparision == -1 || bounce_action == -1 || !*folder)
 		{
-			if(comparision == -1)
+			if (comparision == -1)
 				fprintf(stderr, "-c option not specified\n");
-			if(bounce_action == -1)
+			if (bounce_action == -1)
 				fprintf(stderr, "-b option not specified\n");
-			if(!*folder)
+			if (!*folder)
 				fprintf(stderr, "-f option not specified\n");
 			usage();
 			return(1);
 		}
-		if(comparision != 5 && comparision != 6)
+		if (comparision != 5 && comparision != 6)
 		{
-			if(header_name == -1 || !*keyword || (mailing_list && *mailing_list))
+			if (header_name == -1 || !*keyword || (mailing_list && *mailing_list))
 			{
-				if(header_name == -1)
+				if (header_name == -1)
 					fprintf(stderr, "-h option not specified\n");
-				if(!*keyword)
+				if (!*keyword)
 					fprintf(stderr, "-k option not specified\n");
-				if(mailing_list && *mailing_list)
+				if (mailing_list && *mailing_list)
 					fprintf(stderr, "mailing list not relevant for Comparision '%s'\n", vfilter_comparision[comparision]);
 				usage();
 				return(1);
@@ -504,7 +534,7 @@ get_options(int argc, char **argv, int *raw)
 		break;
 	case MLIST_INSERT:
 	case MLIST_DELETE:
-		if(!mailing_list || !*mailing_list || !**mailing_list)
+		if (!mailing_list || !*mailing_list || !**mailing_list)
 		{
 			fprintf(stderr, "must specify mailing list(s)\n");
 			usage();
@@ -512,7 +542,7 @@ get_options(int argc, char **argv, int *raw)
 		}
 		break;
 	case MLIST_UPDATE:
-		if(!mailing_list[0] || !mailing_list[1])
+		if (!mailing_list[0] || !mailing_list[1])
 		{
 			fprintf(stderr, "must specify old mailing list and new mailing list\n");
 			usage();
@@ -520,7 +550,7 @@ get_options(int argc, char **argv, int *raw)
 		}
 		break;
 	case MLIST_OPTION:
-		if(mlist_option == -1)
+		if (mlist_option == -1)
 		{
 			fprintf(stderr, "must specify valid a mailing list option\n");
 			usage();
@@ -546,9 +576,9 @@ usage()
 	fprintf(stderr, "         -t Filter Name (textual description of filter)\n");
 	fprintf(stderr, "         -h header value\n");
 	fprintf(stderr, "            %3d - %-25s\n", -1, "If comparision (-c option) is 5 or 6");
-	for(i = 0;header_list[i];)
+	for (i = 0;header_list[i];)
 	{
-		if(header_list[i + 1])
+		if (header_list[i + 1])
 		{
 			fprintf(stderr, "            %3d - %-25s          %3d - %-25s\n", i, header_list[i], i + 1, header_list[i + 1]);
 			i += 2;
@@ -560,9 +590,9 @@ usage()
 		}
 	}
 	fprintf(stderr, "         -c comparision\n");
-	for(i = 0;vfilter_comparision[i];)
+	for (i = 0;vfilter_comparision[i];)
 	{
-		if(vfilter_comparision[i + 1])
+		if (vfilter_comparision[i + 1])
 		{
 			fprintf(stderr, "            %3d - %-25s          %3d - %-25s\n", i, vfilter_comparision[i],
 				i + 1, vfilter_comparision[i + 1]);

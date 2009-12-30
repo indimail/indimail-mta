@@ -1,5 +1,8 @@
 /*
  * $Log: vdeluser.c,v $
+ * Revision 2.5  2009-12-30 13:14:07+05:30  Cprogrammer
+ * run vdeluser with uid, gid of domain
+ *
  * Revision 2.4  2008-09-17 21:36:59+05:30  Cprogrammer
  * allow only root or indimail to run vdeluser
  *
@@ -68,7 +71,7 @@
 #include <signal.h>
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vdeluser.c,v 2.4 2008-09-17 21:36:59+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: vdeluser.c,v 2.5 2009-12-30 13:14:07+05:30 Cprogrammer Stab mbhangui $";
 #endif
 
 char            Email[MAX_BUFF];
@@ -84,7 +87,7 @@ main(argc, argv)
 	char           *argv[];
 {
 	int             err;
-	uid_t           uid;
+	uid_t           uid, uidtmp;
 	gid_t           gid;
 
 	if (get_options(argc, argv))
@@ -99,12 +102,10 @@ main(argc, argv)
 		error_stack(stderr, "%s: No such domain\n", Domain);
 		return (-1);
 	}
-	if (indimailuid == -1 || indimailgid == -1)
-		GetIndiId(&indimailuid, &indimailgid);
-	uid = getuid();
-	if (uid != 0 && uid != indimailuid)
+	uidtmp = getuid();
+	if (uidtmp != 0 && uidtmp != uid)
 	{
-		error_stack(stderr, "you must be root or indimail to run this program\n");
+		error_stack(stderr, "you must be root or domain user (uid=%d) to run this program\n", uid);
 		return(1);
 	}
 	if (setgid(gid) || setuid(uid))

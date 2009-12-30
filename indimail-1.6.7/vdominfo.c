@@ -1,5 +1,8 @@
 /*
  * $Log: vdominfo.c,v $
+ * Revision 2.9  2009-12-30 13:15:03+05:30  Cprogrammer
+ * run vdominfo with uid, gid of domain specfified or with indimail uid
+ *
  * Revision 2.8  2009-02-18 09:08:41+05:30  Cprogrammer
  * display domain only if isvirtualdomain() does not return error
  *
@@ -100,7 +103,7 @@
 #include <memory.h>
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vdominfo.c,v 2.8 2009-02-18 09:08:41+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: vdominfo.c,v 2.9 2009-12-30 13:15:03+05:30 Cprogrammer Stab mbhangui $";
 #endif
 
 char            Domain[MAX_BUFF];
@@ -138,9 +141,7 @@ main(argc, argv)
 
 	if(get_options(argc, argv))
 		return(1);
-	if(indimailuid == -1 || indimailgid == -1)
-		GetIndiId(&indimailuid, &indimailgid);
-	myuid = geteuid();
+	myuid = getuid();
 	if (*Domain)
 	{
 		if (vget_assign(Domain, Dir, MAX_BUFF, &Uid, &Gid) == NULL)
@@ -148,13 +149,15 @@ main(argc, argv)
 			printf("domain %s does not exist\n", Domain);
 			return(1);
 		}
-		if ((myuid != indimailuid && myuid != Uid) || myuid == 0)
+		if (myuid != Uid && myuid != 0)
 		{
-			if (setgid(Gid) || setuid(Uid))
-			{
-				fprintf(stderr, "setuid/setgid (%d/%d): %s", Uid, Gid, strerror(errno));
-				return (1);
-			}
+			error_stack(stderr, "you must be root or domain user (uid=%d) to run this program\n", Uid);
+			return(1);
+		}
+		if (setgid(Gid) || setuid(Uid))
+		{
+			fprintf(stderr, "setuid/setgid (%d/%d): %s", Uid, Gid, strerror(errno));
+			return (1);
 		}
 		if(isvirtualdomain(Domain) == 1)
 			display_domain(Domain, Dir, Uid, Gid);
@@ -162,13 +165,12 @@ main(argc, argv)
 			printf("domain %s does not exist\n", Domain);
 	} else
 	{
-		if ((myuid != indimailuid) || myuid == 0)
+		if(indimailuid == -1 || indimailgid == -1)
+			GetIndiId(&indimailuid, &indimailgid);
+		if (setgid(indimailgid) || setuid(0))
 		{
-			if (setgid(indimailgid) || setuid(indimailuid))
-			{
-				fprintf(stderr, "setuid/setgid (%d/%d): %s", Uid, Gid, strerror(errno));
-				return (1);
-			}
+			fprintf(stderr, "setuid/setgid (%d/%d): %s", Uid, Gid, strerror(errno));
+			return (1);
 		}
 		display_all_domains();
 	}

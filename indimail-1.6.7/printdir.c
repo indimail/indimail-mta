@@ -1,5 +1,8 @@
 /*
  * $Log: printdir.c,v $
+ * Revision 2.3  2009-12-30 13:09:12+05:30  Cprogrammer
+ * run with uid of domain
+ *
  * Revision 2.2  2008-09-17 19:29:02+05:30  Cprogrammer
  * setuid to indimail or domain uid to read .filesystems
  *
@@ -23,7 +26,7 @@
 #include <string.h>
 
 #ifndef	lint
-static char     sccsid[] = "$Id: printdir.c,v 2.2 2008-09-17 19:29:02+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: printdir.c,v 2.3 2009-12-30 13:09:12+05:30 Cprogrammer Stab mbhangui $";
 #endif
 
 int
@@ -45,13 +48,12 @@ main(int argc, char **argv)
 	}
 	if(indimailuid == -1 || indimailgid == -1)
 		GetIndiId(&indimailuid, &indimailgid);
-	myuid = geteuid();
 	if(!(ptr = vget_assign(argv[1], NULL, 0, &uid, &gid)))
 	{
 		fprintf(stderr, "%s: No such domain\n", argv[1]);
 		return(-1);
 	}
-	if ((myuid != indimailuid && myuid != uid) || myuid == 0)
+	if ((myuid = getuid()) != uid)
 	{
 		if (setgid(gid) || setuid(uid))
 		{

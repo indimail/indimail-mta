@@ -1,5 +1,8 @@
 /*
  * $Log: vreorg.c,v $
+ * Revision 2.12  2009-12-30 13:16:15+05:30  Cprogrammer
+ * run vreorg with uid of domain if uid does not match domain uid
+ *
  * Revision 2.11  2009-02-18 21:36:08+05:30  Cprogrammer
  * check return value of fscanf
  *
@@ -87,7 +90,7 @@
 #include <sys/stat.h>
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vreorg.c,v 2.11 2009-02-18 21:36:08+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: vreorg.c,v 2.12 2009-12-30 13:16:15+05:30 Cprogrammer Stab mbhangui $";
 #endif
 
 int             get_options(int argc, char **argv, char *, char *, int *, int *);
@@ -115,10 +118,7 @@ main(int argc, char **argv)
 		fprintf(stderr, "%s: No such domain\n", Domain);
 		return(1);
 	}
-	if(indimailuid == -1 || indimailgid == -1)
-		GetIndiId(&indimailuid, &indimailgid);
-	myuid = geteuid();
-	if ((myuid != indimailuid && myuid != uid) || myuid == 0)
+	if ((myuid = getuid()) != uid)
 	{
 		if (setgid(gid) || setuid(uid))
 		{

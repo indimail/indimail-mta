@@ -1,5 +1,8 @@
 /*
  * $Log: vbulletin.c,v $
+ * Revision 2.14  2009-12-30 13:11:18+05:30  Cprogrammer
+ * run vbulletin with uid,gid of domain
+ *
  * Revision 2.13  2009-02-18 21:35:04+05:30  Cprogrammer
  * check return value of fscanf, fwrite
  *
@@ -65,7 +68,7 @@
 #include <signal.h>
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vbulletin.c,v 2.13 2009-02-18 21:35:04+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: vbulletin.c,v 2.14 2009-12-30 13:11:18+05:30 Cprogrammer Stab mbhangui $";
 #endif
 
 #define COPY_IT          0
@@ -284,16 +287,16 @@ process_domain(EmailFile, ExcludeFile, domain)
 		fprintf(stderr, "No such Domain %s\n", domain);
 		return (-1);
 	}
-	if(indimailuid == -1 || indimailgid == -1)
-		GetIndiId(&indimailuid, &indimailgid);
-	myuid = geteuid();
-	if ((myuid != indimailuid && myuid != uid) || myuid == 0)
+	myuid = getuid();
+	if (myuid != 0 && myuid != uid)
 	{
-		if (setgid(gid) || setuid(uid))
-		{
-			fprintf(stderr, "setuid/setgid (%d/%d): %s", uid, gid, strerror(errno));
-			return (1);
-		}
+		error_stack(stderr, "you must be root or domain user (uid=%d) to run this program\n", uid);
+		return(1);
+	}
+	if (setgid(gid) || setuid(uid))
+	{
+		fprintf(stderr, "setuid/setgid (%d/%d): %s", uid, gid, strerror(errno));
+		return (1);
 	}
 	snprintf(filename, MAX_BUFF, "%lu.%d.%s", tm, pid, hostname);
 	first = 1;
