@@ -48,7 +48,7 @@ man_MANS=vadduser.1 adminclient.8 chowkidar.8 clearopensmtp.8 dbinfo.8 hostcntrl
 setuid_list = ../sbin/systpass vdeldomain vadddomain vadduser vdeluser \
 			  vaddaliasdomain vrenamedomain vrenameuser vbulletin vdominfo \
 			  printdir vuserinfo ../sbin/vreorg vsetuserquota vmoduser \
-			  vmoveuser ../libexec/sq_vacation
+			  vmoveuser vcfilter ../libexec/sq_vacation
 
 doc_list= 37rules.pdf ChangeLog COPYING CREDITS FAQ.pdf HOWTO.bogofilter \
 	HOWTO.sharedmaildir INSTALL.indimail IndiMail.pdf percenthack.shtml README.indimail \
