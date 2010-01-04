@@ -4,13 +4,7 @@ DATE: @DATE@
 
 This is Release @version@ of IndiMail. The release has both source.tar.gz and RPMs
 
-
-Following features at the tracker have been incorporated
-http://sourceforge.net/tracker/?group_id=230686
-
-Following bugs at the tracker have been fixed
-http://sourceforge.net/tracker/?group_id=230686
-
+This release adds RPM for Mandriva 2010
 
 This release includes the following files
 
@@ -60,13 +54,14 @@ both 32 and 64 bit) are
           o CentOS 5
 
     * Mandriva Linux
+          o Mandriva 2010
           o Mandriva 2009.1
           o Mandriva 2009
 
 
 ChangeLog
 =========
-* Fri Dec 25 2009 mbhangui@gmail.com
+* Mon Jan 04 2010 mbhangui@gmail.com
 Release 1.6.7 Start 11/12/2009
 1.  create log directory in create_services
 2.  replaced all occurences of chown with $chown in svctool

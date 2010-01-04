@@ -1,6 +1,25 @@
-* Fri Dec 11 2009 mbhangui@gmail.com
+* Mon Jan 04 2010 mbhangui@gmail.com
 Release 1.6.7 Start 11/12/2009
-
+16/12/2009
+1.  create log directory in create_services
+2.  replaced all occurences of chown with $chown in svctool
+17/12/2009
+3.  log from and rcpt for qmail-remote
+4.  Modified rsmtp, rsmtprdomains, rsmtpsdomains, rsmptsenders to correctly
+    decipher host from smtp log
+18/12/2009
+5.  Added case for mysql-5.5 in svctool
+19/12/2009
+6.  Use GNU syntax for tail in bogofilter-qfe.in
+21/12/2009
+7.  fixed issue with delivery of mails to register-spam, spam,
+    register-nonspam, nonspam ids
+30/12/2009
+8.  Added vfilter rule for X-Bogosity spam filtering in postfilt in svctool
+9.  Made vcfilter setuid
+10. Modified vcfilter.c, vbulletin.c, vadduser.c, printdir.c, vdeluser.c,
+    vreorg.c, vdominfo.c, vdeldomain.c for running programs with uid,gid of
+    domain
 
 * Fri Dec 11 2009 mbhangui@gmail.com
 Release 1.6.6 Start 25/11/2009
