@@ -8,10 +8,14 @@ This release adds RPM for Mandriva 2010
 
 This release includes the following files
 
-indimail-@version@.tar.gz
-INSTALL-@version@ (Installation Instructions)
-INSTALL-RPM-@version@ (Install Instructions for RPM)
-INSTALL-@version@.mysql (MySQL specific Installation Instructions)
+README                        (Introduction to IndiMail)
+INSTALL-@version@             (Installation Instructions)
+INSTALL-RPM-@version@         (Install Instructions for RPM)
+INSTALL-@version@.mysql       (MySQL specific Installation Instructions)
+README-CLUSTER                (Steps on installing a clustered setup)
+Quick-INSTALL-@version@       (A minimal documentation on Installation)
+RELEASE-Notes-@version@       (This file)
+indimail-@version@.tar.gz     (IndiMail source)
 indimail-@version@-1.i386.rpm
 indimail-@version@-1.i386.deb
 
