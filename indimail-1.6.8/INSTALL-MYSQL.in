@@ -92,4 +92,4 @@
        mysql> GRANT REPLICATION_SLAVE on *.* to repl;
 
        also have 'sql-mode=NO_BACKSLASH_ESCAPES' in the server option
-       file (@indimaildir@/etc/indimail.cnf or wherever your indimail.cnf lies)
+       file (my.cnf or wherever your my.cnf lies)
