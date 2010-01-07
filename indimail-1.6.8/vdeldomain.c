@@ -108,9 +108,9 @@ main(argc, argv)
 	int             total, is_dist;
 #endif
 
-	if(get_options(argc, argv))
+	if (get_options(argc, argv))
 		return(0);
-	if(indimailuid == -1 || indimailgid == -1)
+	if (indimailuid == -1 || indimailgid == -1)
 		GetIndiId(&indimailuid, &indimailgid);
 	uid = getuid();
 	if (uid != 0 && uid != indimailuid)
@@ -126,28 +126,28 @@ main(argc, argv)
 	if ((err = vdeldomain(Domain)) != VA_SUCCESS)
 		error_stack(stderr, 0);
 #ifdef CLUSTERED_SITE
-	if(!err)
+	if (!err)
 	{
-		if(is_alias_domain(Domain) == 1)
+		if (is_alias_domain(Domain) == 1)
 		{
 			vclose();
 			return(err);
 		}
-		if((is_dist = is_distributed_domain(Domain)) == -1)
+		if ((is_dist = is_distributed_domain(Domain)) == -1)
 		{
 			fprintf(stderr, "Unable to verify %s as a distributed domain\n", Domain);
 			vclose();
 			return(1);
 		} else
-		if(is_dist || mcd_remove)
+		if (is_dist || mcd_remove)
 		{
-			if(!(ipaddr = get_local_ip()))
+			if (!(ipaddr = get_local_ip()))
 			{
 				fprintf(stderr, "vdeldomain: failed to get local ipaddr\n");
 				vclose();
 				return(1);
 			}
-			if(dbinfoDel(Domain, ipaddr))
+			if (dbinfoDel(Domain, ipaddr))
 			{
 				fprintf(stderr, "vdeldomain: failed to get remove dbinfo entry for %s@%s\n", Domain, ipaddr);
 				vclose();
@@ -156,11 +156,11 @@ main(argc, argv)
 			getEnvConfigStr(&qmaildir, "QMAILDIR", QMAILDIR);
 			getEnvConfigStr(&controldir, "CONTROLDIR", "control");
 			getEnvConfigStr(&mcdfile, "MCDFILE", MCDFILE);
-			if(*mcdfile == '/')
+			if (*mcdfile == '/')
 				scopy(mcdFile, mcdfile, MAX_BUFF);
 			else
 				snprintf(mcdFile, MAX_BUFF, "%s/%s/%s", qmaildir, controldir, mcdfile);
-			if(!access(mcdfile, F_OK) && unlink(mcdFile))
+			if (!access(mcdfile, F_OK) && unlink(mcdFile))
 			{
 				fprintf(stderr, "vdeldomain: unlink: %s: %s\n", mcdFile, strerror(errno));
 				vclose();
