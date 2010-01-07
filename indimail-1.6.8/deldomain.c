@@ -96,20 +96,20 @@ vdeldomain(char *domain)
 		"T2Zsym",
 	};
 
-	if(!domain || !*domain)
+	if (!domain || !*domain)
 	{
 		error_stack(stderr, "Invalid Domain Name\n");
 		return (-1);
 	}
 	lowerit(domain);
-	if(use_etrn == 2)
+	if (use_etrn == 2)
 	{
-		if(!(ptr = autoturn_dir(domain)))
+		if (!(ptr = autoturn_dir(domain)))
 		{
 			error_stack(stderr, "Domain %s does not exist\n", domain);
 			return (-1);
 		} else
-		if(!(tmpstr = vget_assign("autoturn", 0, 0, &uid, &gid)))
+		if (!(tmpstr = vget_assign("autoturn", 0, 0, &uid, &gid)))
 		{
 			error_stack(stderr, "Domain %s does not exist: No entry for autoturn in assign\n",
 				domain);
@@ -122,17 +122,17 @@ vdeldomain(char *domain)
 			return (-1);
 		}
 		snprintf(TmpBuf, sizeof(TmpBuf), "%s/.qmail-%s-default", tmpstr, ptr);
-		if((ptr = strrchr(TmpBuf, '/')))
+		if ((ptr = strrchr(TmpBuf, '/')))
 		{
 			ptr++;
-			if(*ptr == '.' && *(ptr + 1) == 'q')
+			if (*ptr == '.' && *(ptr + 1) == 'q')
 				ptr++;
 			for(;*ptr;ptr++)
 			{
-				if(*ptr == '.')
+				if (*ptr == '.')
 					*ptr = ':';
 			}
-			if(!access(TmpBuf, F_OK) && unlink(TmpBuf))
+			if (!access(TmpBuf, F_OK) && unlink(TmpBuf))
 			{
 				perror(TmpBuf);
 				return(-1);
@@ -147,52 +147,52 @@ vdeldomain(char *domain)
 			signal_process("qmail-send", SIGHUP);
 		return(0);
 	}
-	if(!vget_assign(domain, Dir, MAX_BUFF, &uid, &gid))
+	if (!vget_assign(domain, Dir, MAX_BUFF, &uid, &gid))
 	{
 		error_stack(stderr, "Domain %s does not exist\n", domain);
 		return (-1);
 	}
 	snprintf(TmpBuf, MAX_BUFF, "%s/.aliasdomains", Dir);
-	if((is_alias = is_alias_domain(domain)) == 1)
+	if ((is_alias = is_alias_domain(domain)) == 1)
 	{
-		if(verbose)
+		if (verbose)
 			printf("Removing alias domain %s\n", domain);
 #ifdef CLUSTERED_SITE
-		if(open_master())
+		if (open_master())
 		{
 			error_stack(stderr, "Failed to open Master Db\n");
 			return (-1);
 		}
-		if(vauth_get_realdomain(domain) && vauth_delaliasdomain(domain))
+		if (vauth_get_realdomain(domain) && vauth_delaliasdomain(domain))
 		{
 			error_stack(stderr, "Failed to remove alias Domain %s from aliasdomain Table\n",
 				domain);
 			return (-1);
 		}
 #endif
-		if(remove_line(domain, TmpBuf, 0, 0600) == -1)
+		if (remove_line(domain, TmpBuf, 0, 0600) == -1)
 		{
 			error_stack(stderr, "Failed to remove alias Domain %s from %s\n",
 				domain, TmpBuf);
 			return (-1);
 		}
 	} else
-	if((fp = fopen(TmpBuf, "r")) != (FILE *) NULL)
+	if ((fp = fopen(TmpBuf, "r")) != (FILE *) NULL)
 	{
-		if(verbose)
+		if (verbose)
 			printf("Removing domains aliased to %s\n", domain);
 		for(;;)
 		{
 			if (!fgets(TmpBuf, MAX_BUFF - 2, fp))
 			{
-				if(feof(fp))
+				if (feof(fp))
 					break;
 				perror("vdel_dir_control: fgets");
 				return (-1);
 			}
-			if((tmpstr = strrchr(TmpBuf, '\n')) != NULL)
+			if ((tmpstr = strrchr(TmpBuf, '\n')) != NULL)
 				*tmpstr = 0;
-			if(vdeldomain(TmpBuf))
+			if (vdeldomain(TmpBuf))
 			{
 				fclose(fp);
 				return (-1);
@@ -202,7 +202,7 @@ vdeldomain(char *domain)
 	}
 	if (is_alias != 1)
 	{
-		if(vdel_dir_control(domain))
+		if (vdel_dir_control(domain))
 		{
 			error_stack(stderr, "vdel_dir_control: Failed to remove dir_control for %s\n", 
 				domain);
@@ -215,18 +215,18 @@ vdeldomain(char *domain)
 	/*
 	 * delete the assign file line 
 	 */
-	if(del_domain_assign(domain, Dir, uid, gid))
+	if (del_domain_assign(domain, Dir, uid, gid))
 		return (-1);
 	/* delete the Mail File systems */
-	if(is_alias != 1)
+	if (is_alias != 1)
 	{
 		getEnvConfigStr(&base_path, "BASE_PATH", BASE_PATH);
 		for (i = 0; i < 5;i++)
 		{
 			snprintf(TmpBuf, MAX_BUFF, "%s/%s/%s", base_path, FileSystems[i], domain);
-			if(verbose)
+			if (verbose)
 				printf("Removing %s\n", TmpBuf);
-			if(vdelfiles(TmpBuf, "", domain))
+			if (vdelfiles(TmpBuf, "", domain))
 			{
 				error_stack(stderr, "Failed to remove Dir %s: %s\n", TmpBuf, strerror(errno));
 				return (-1);
@@ -244,12 +244,12 @@ vdeldomain(char *domain)
 	 * call the auth module to delete the domain from the authentication
 	 * database
 	 */
-	if(is_alias != 1 && vauth_deldomain(domain))
+	if (is_alias != 1 && vauth_deldomain(domain))
 		return (-1);
 	/*
 	 * delete the email domain from the qmail control files 
 	 */
-	if(del_control(domain))
+	if (del_control(domain))
 		return (-1);
 	/*
 	 * send a HUP signal to qmail-send process to reread control files 
