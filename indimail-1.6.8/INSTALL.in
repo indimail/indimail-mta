@@ -758,8 +758,7 @@ the installation.
     IndiMail admin commands
 
     % sudo @indimaildir@/sbin/svctool --indisrvr=4000 --servicedir=/service \
-        --mysqlhost=localhost --mysqluser=indimail \
-        --mysqlpass=ssh-1.5- --localip=0 --maxdaemons=150 --maxperip=25 --avguserquota=2097152 \
+        --localip=0 --maxdaemons=150 --maxperip=25 --avguserquota=2097152 \
         --certfile=@indimaildir@/control/servercert.pem --ssl \
         --hardquota=52428800 --base_path=@basepath@
 
