@@ -1,5 +1,8 @@
 /*
  * $Log: vauth_open.c,v $
+ * Revision 2.19  2010-01-06 09:40:14+05:30  Cprogrammer
+ * host.mysql can now have host:user:passwd:socket/port format
+ *
  * Revision 2.18  2009-02-18 21:34:27+05:30  Cprogrammer
  * check return value of fscanf
  *
@@ -87,7 +90,7 @@
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vauth_open.c,v 2.18 2009-02-18 21:34:27+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: vauth_open.c,v 2.19 2010-01-06 09:40:14+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #include <stdio.h>
@@ -100,9 +103,9 @@ int
 vauth_open(char *dbhost)
 {
 	char            SqlBuf[SQL_BUF_SIZE], host_path[MAX_BUFF];
-	char           *ptr, *mysql_user, *mysql_passwd, *mysql_database, *qmaildir, *controldir,
-		           *mysql_socket;
-	int             mysqlport;
+	char           *ptr, *mysql_user = 0, *mysql_passwd = 0, *mysql_database = 0,
+		           *mysql_socket = 0, *qmaildir, *controldir;
+	int             mysqlport = -1, count;
 	FILE           *fp;
 
 	if (is_open == 1)
@@ -134,13 +137,14 @@ vauth_open(char *dbhost)
 			return (1);
 		} else
 		{
-			if (fscanf(fp, "%s", mysql_host) != 1)
+			if (!fgets(mysql_host, MAX_BUFF - 2, fp))
 			{
-				fprintf(stderr, "fscanf: %s\n", strerror(errno));
+				fprintf(stderr, "fgets: %s\n", strerror(errno));
 				fclose(fp);
 				return (1);
 			}
-			mysql_host[MAX_BUFF - 1] = 0;
+			if ((ptr = strrchr(mysql_host, '\n')))
+				*ptr = 0;
 			fclose(fp);
 		}
 	} else
@@ -153,11 +157,37 @@ vauth_open(char *dbhost)
 		return(-1);
 	}
 	atexit(vclose);
-	getEnvConfigStr(&mysql_user, "MYSQL_USER", MYSQL_USER);
-	getEnvConfigStr(&mysql_passwd, "MYSQL_PASSWD", MYSQL_PASSWD);
+	for (count = 0,ptr = mysql_host;*ptr;ptr++)
+	{
+		if (*ptr == ':')
+		{
+			*ptr = 0;
+			switch (count++)
+			{
+			case 0: /*- mysql user */
+				if (*(ptr + 1))
+					mysql_user = ptr + 1;
+			case 1: /*- mysql passwd */
+				if (*(ptr + 1))
+					mysql_passwd = ptr + 1;
+			case 2: /*- mysql socket/port */
+				if (*(ptr + 1) == '/' || *(ptr + 1) == '.')
+					mysql_socket = ptr + 1;
+				else
+				if (*(ptr + 1))
+					indi_port = ptr + 1;
+			}
+		}
+	}
+	if (!mysql_user)
+		getEnvConfigStr(&mysql_user, "MYSQL_USER", MYSQL_USER);
+	if (!mysql_passwd)
+		getEnvConfigStr(&mysql_passwd, "MYSQL_PASSWD", MYSQL_PASSWD);
+	if (!mysql_socket)
+		getEnvConfigStr(&mysql_socket, "MYSQL_SOCKET", MYSQL_SOCKET);
+	if (!indi_port)
+		getEnvConfigStr(&indi_port, "MYSQL_VPORT", MYSQL_VPORT);
 	getEnvConfigStr(&mysql_database, "MYSQL_DATABASE", MYSQL_DATABASE);
-	getEnvConfigStr(&mysql_socket, "MYSQL_SOCKET", MYSQL_SOCKET);
-	getEnvConfigStr(&indi_port, "MYSQL_VPORT", MYSQL_VPORT);
 	getEnvConfigStr(&default_table, "MYSQL_TABLE", MYSQL_DEFAULT_TABLE);
 	getEnvConfigStr(&inactive_table, "MYSQL_INACTIVE_TABLE", MYSQL_INACTIVE_TABLE);
 	mysqlport = atoi(indi_port);

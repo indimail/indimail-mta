@@ -1,5 +1,8 @@
 /*
  * $Log: findhost.c,v $
+ * Revision 2.25  2010-01-06 09:39:36+05:30  Cprogrammer
+ * host.cntrl, host.master can now have host:user:passwd:socket/port format
+ *
  * Revision 2.24  2009-12-09 23:21:23+05:30  Cprogrammer
  * reconnect to MySQL if server gone away
  *
@@ -165,7 +168,7 @@
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: findhost.c,v 2.24 2009-12-09 23:21:23+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: findhost.c,v 2.25 2010-01-06 09:39:36+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #include <stdio.h>
@@ -331,8 +334,9 @@ open_central_db(char *dbhost)
 {
 	static char     host_path[MAX_BUFF], atexit_registered = 0;
 	char            SqlBuf[SQL_BUF_SIZE];
-	char           *ptr, *mysql_user, *mysql_passwd, *mysql_database, *cntrl_socket, *qmaildir, *controldir;
-	int             mysqlport;
+	char           *ptr, *mysql_user = 0, *mysql_passwd = 0, *mysql_database = 0,
+				   *cntrl_socket = 0, *qmaildir, *controldir;
+	int             mysqlport = -1, count;
 	FILE           *fp;
 
 	if (isopen_cntrl == 1)
@@ -363,13 +367,14 @@ open_central_db(char *dbhost)
 			return(-1);
 		} else
 		{
-			if (fscanf(fp, "%s", cntrl_host) != 1)
+			if (!fgets(cntrl_host, MAX_BUFF - 2, fp))
 			{
-				fprintf(stderr, "fscanf: %s\n", strerror(errno));
+				fprintf(stderr, "fgets: %s\n", strerror(errno));
 				fclose(fp);
 				return(-1);
 			}
-			cntrl_host[MAX_BUFF - 1] = 0;
+			if ((ptr = strrchr(cntrl_host, '\n')))
+				*ptr = 0;
 			fclose(fp);
 		}
 	} else
@@ -390,11 +395,37 @@ open_central_db(char *dbhost)
 		return(-1);
 	}
 #endif
-	getEnvConfigStr(&mysql_user, "CNTRL_USER", CNTRL_USER);
-	getEnvConfigStr(&mysql_passwd, "CNTRL_PASSWD", CNTRL_PASSWD);
+	for (count = 0,ptr = cntrl_host;*ptr;ptr++)
+	{
+		if (*ptr == ':')
+		{
+			*ptr = 0;
+			switch (count++)
+			{
+			case 0: /*- mysql user */
+				if (*(ptr + 1))
+					mysql_user = ptr + 1;
+			case 1: /*- mysql passwd */
+				if (*(ptr + 1))
+					mysql_passwd = ptr + 1;
+			case 2: /*- mysql socket/port */
+				if (*(ptr + 1) == '/' || *(ptr + 1) == '.')
+					cntrl_socket = ptr + 1;
+				else
+				if (*(ptr + 1))
+					cntrl_port = ptr + 1;
+			}
+		}
+	}
+	if (!mysql_user)
+		getEnvConfigStr(&mysql_user, "CNTRL_USER", CNTRL_USER);
+	if (!mysql_passwd)
+		getEnvConfigStr(&mysql_passwd, "CNTRL_PASSWD", CNTRL_PASSWD);
+	if (!cntrl_socket)
+		getEnvConfigStr(&cntrl_socket, "CNTRL_SOCKET", CNTRL_SOCKET);
+	if (!cntrl_port)
+		getEnvConfigStr(&cntrl_port, "CNTRL_VPORT", CNTRL_VPORT);
 	getEnvConfigStr(&mysql_database, "CNTRL_DATABASE", CNTRL_DATABASE);
-	getEnvConfigStr(&cntrl_port, "CNTRL_VPORT", CNTRL_VPORT);
-	getEnvConfigStr(&cntrl_socket, "CNTRL_SOCKET", CNTRL_SOCKET);
 	getEnvConfigStr(&cntrl_table, "CNTRL_TABLE", CNTRL_DEFAULT_TABLE);
 	mysqlport = atoi(cntrl_port);
 	if (!is_open || strncmp(cntrl_host, mysql_host, MAX_BUFF) || strncmp(cntrl_port, indi_port, MAX_BUFF))
