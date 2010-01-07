@@ -1,5 +1,8 @@
 /*
  * $Log: install_tables.c,v $
+ * Revision 2.4  2010-01-06 22:28:33+05:30  Cprogrammer
+ * fix for non-clustered setup
+ *
  * Revision 2.3  2009-01-11 19:54:08+05:30  Cprogrammer
  * disabled mysql_escape()
  *
@@ -11,9 +14,12 @@
  *
  */
 #include "indimail.h"
+#ifdef CLUSTERED_SITE
+#include <unistd.h>
+#endif
 
 #ifndef	lint
-static char     sccsid[] = "$Id: install_tables.c,v 2.3 2009-01-11 19:54:08+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: install_tables.c,v 2.4 2010-01-06 22:28:33+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 int
@@ -21,6 +27,10 @@ main(int argc, char **argv)
 {
 #ifdef POP_AUTH_OPEN_RELAY
 	char           *relay_table;
+#endif
+#ifdef CLUSTERED_SITE
+	static char     host_path[MAX_BUFF];
+	char           *qmaildir, *controldir;
 #endif
 	int             i;
 
@@ -50,7 +60,13 @@ main(int argc, char **argv)
 		printf("created table %s on local\n", relay_table);
 #endif
 #ifdef CLUSTERED_SITE
+	getEnvConfigStr(&qmaildir, "QMAILDIR", QMAILDIR);
+	getEnvConfigStr(&controldir, "CONTROLDIR", "control");
+	if (snprintf(host_path, MAX_BUFF, "%s/%s/host.master", qmaildir, controldir) == -1)
+		host_path[MAX_BUFF - 1] = 0;
 	getEnvConfigStr(&cntrl_table, "CNTRL_TABLE", CNTRL_DEFAULT_TABLE);
+	if (access(host_path, F_OK))
+		return (0);
 	if (create_table(ON_MASTER, cntrl_table, CNTRL_TABLE_LAYOUT))
 		return (1);
 	else
