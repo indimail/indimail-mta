@@ -481,6 +481,7 @@ hier(inst_dir)
 	c(auto_qmail_home, "bin", "ipmeprint", auto_uido, auto_gidq, 0555);
 	c(auto_qmail_home, "bin", "idedit", auto_uido, auto_gidq, 0555);
 	c(auto_qmail_home, "bin", "qmailctl", auto_uido, auto_gidq, 0555);
+	c(auto_qmail_home, "bin", "uacl", auto_uido, auto_gidq, 0555);
 	c(auto_qmail_home, "bin", "b64encode", auto_uido, auto_gidq, 0555);
 	c(auto_qmail_home, "bin", "b64decode", auto_uido, auto_gidq, 0555);
 	c(auto_qmail_home, "bin", "plainencode", auto_uido, auto_gidq, 0555);

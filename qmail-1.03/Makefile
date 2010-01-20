@@ -1176,7 +1176,8 @@ setmaillist newinclude sortedtest logselect mbox2maildir \
 envdir envuidgid fghack multilog pgrphack readproctitle setlock \
 setuidgid softlimit supervise svc svok svscan svstat tai64n tai64nlocal tai64nunix \
 recordio argv0 addcr delcr fixcrio generic.so cdbmake cdbget \
-cdbdump cdbstats cdbtest cdbmake-12 cdbmake-sv testzero dk-filter
+cdbdump cdbstats cdbtest cdbmake-12 cdbmake-sv testzero dk-filter \
+uacl
 
 analyzer: \
 mlmatchup matchup columnt zoverall zsendmail xqp xsender xrecipient ddist \
@@ -4959,5 +4960,25 @@ batv.o: \
 compile batv.c sgetopt.h str.h constmap.h strerr.h \
 stralloc.h subfd.h now.h env.h scan.h conf-batv
 	./compile `grep -h -v "^#" conf-batv` batv.c
+
+uacl: \
+load uacl.o case_lowerb.o byte_rchr.o byte_copy.o open_read.o \
+matchregex.o scan_ulong.o alloc.o alloc_re.o wildmat.o control.o \
+constmap.o env.o getln.o case_diffb.o cdb_seek.o getln2.o strerr_die.o \
+strerr_sys.o str_cpy.o cdb_hash.o cdb_unpack.o byte_chr.o byte_cr.o \
+variables.o str_diff.o str_diffn.o qregex.o envread.o str_len.o \
+fmt_ulong.o auto_qmail.o error.o error_str.o stralloc.a substdio.a
+	./load uacl case_lowerb.o byte_rchr.o byte_copy.o open_read.o \
+	matchregex.o scan_ulong.o alloc.o alloc_re.o wildmat.o control.o \
+	constmap.o env.o getln.o case_diffb.o cdb_seek.o getln2.o strerr_die.o \
+	strerr_sys.o str_cpy.o cdb_hash.o cdb_unpack.o byte_chr.o byte_cr.o \
+	variables.o str_diff.o str_diffn.o qregex.o envread.o str_len.o \
+	fmt_ulong.o auto_qmail.o error.o error_str.o stralloc.a substdio.a
+
+uacl.o: \
+compile uacl.c qregex.h auto_qmail.h subfd.h \
+env.h strerr.h fmt.h str.h matchregex.h scan.h control.h
+	./compile uacl.c
+
 
 #################################################################
