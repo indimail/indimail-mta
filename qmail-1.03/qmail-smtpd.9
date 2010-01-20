@@ -383,18 +383,18 @@ variable QREGEX can be set to match \fIsender\fR, \fIrecipient\fR using
 regular expressions.
 
 .EX
- rcpt:ajit_a@indimail.org:indi_maa@indimail.org
- rcpt:george_z@indimail.org:indi_maa@indimail.org
+ rcpt:ceo@indimail.org:country_distribution_list@indimail.org
+ rcpt:md@indimail.org:country_distribution_list@indimail.org
  from:recruiter@yahoo.com:hr@indimail.org 
 
- - only ajit_a@indimail.org and george_z@indimail.org
-   are permitted to send mails to indi_maa@indimail.org
+ - only ceo@indimail.org and md@indimail.org
+   are permitted to send mails to country_distribution_list@indimail.org
  - recruiter@yahoo.com is permitted to send mails to
    hr@indimail.org only
 
 These restrictions do not apply when the from is "" or the recipient is postmaster or abuse.
 This is to prevent
-violating RFCs.
+violating RFCs. A utility \fBuacl(1)\fR is provided to test the accesslist.
 .EE
 
 .TP 5
@@ -1534,6 +1534,7 @@ tcp-env(1),
 tcp-environ(5),
 tcpserver(1),
 tcprules(1),
+uacl(1),
 qmail-control(5),
 MCDFILE(5),
 indimail.patch(5),
