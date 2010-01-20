@@ -38,7 +38,7 @@ out(char *str)
 	if (!str || !*str)
 		return;
 	if (substdio_puts(subfdout, str) == -1)
-		strerr_die2sys(111, FATAL, "batv: write: ");
+		strerr_die2sys(111, FATAL, "write: ");
 	return;
 }
 
@@ -46,7 +46,7 @@ void
 flush()
 {
 	if (substdio_flush(subfdout) == -1)
-		strerr_die2sys(111, FATAL, "batv: write: ");
+		strerr_die2sys(111, FATAL, "write: ");
 	return;
 }
 
