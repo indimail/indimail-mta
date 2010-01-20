@@ -1296,6 +1296,7 @@ fi
 %attr(555,root,qmail)                   %{_prefix}/bin/logselect
 %attr(555,root,qmail)                   %{_prefix}/bin/teepipe
 %attr(555,root,qmail)                   %{_prefix}/bin/ipmeprint
+%attr(555,root,qmail)                   %{_prefix}/bin/uacl
 %attr(555,root,qmail)                   %{_prefix}/bin/envdir
 %attr(555,root,qmail)                   %{_prefix}/bin/vcalias
 %attr(555,root,qmail)                   %{_prefix}/bin/dnsmxip
