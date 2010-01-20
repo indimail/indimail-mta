@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-inject.c,v $
+ * Revision 1.21  2010-01-20 09:25:09+05:30  Cprogrammer
+ * corrected error message
+ *
  * Revision 1.20  2009-09-08 12:33:51+05:30  Cprogrammer
  * removed dependency of INDIMAIL on qmail-inject
  *
@@ -213,7 +216,7 @@ die_qqt()
 void
 die_chdir()
 {
-	substdio_putsflush(subfderr, "qmail-inject: fatal: internal bug\n");
+	substdio_putsflush(subfderr, "qmail-inject: fatal: unable to chdir to home\n");
 	temp();
 }
 
@@ -1222,7 +1225,7 @@ main(argc, argv)
 void
 getversion_qmail_inject_c()
 {
-	static char    *x = "$Id: qmail-inject.c,v 1.20 2009-09-08 12:33:51+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: qmail-inject.c,v 1.21 2010-01-20 09:25:09+05:30 Cprogrammer Stab mbhangui $";
 
 	x++;
 }
