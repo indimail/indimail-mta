@@ -879,9 +879,16 @@ fi
 #### courier-imap ######################
 if [ -d ../courier-imap-%{courier_version} ] ; then
 	cd ../courier-imap-%{courier_version}
+if [ " %dist" = " mandrake" ] ; then
+	%configure --prefix=%{_prefix} --exec-prefix=%{_prefix}/ --bindir=%{_prefix}/bin \
+	--sbindir=%{_prefix}/sbin --datadir=%{_prefix}/share --includedir=%{_prefix}/include \
+	--libexecdir=%{_prefix}/libexec --mandir=%{_prefix}/man --sysconfdir=%{_prefix}/etc \
+	`%{__cat} ../%{name}-%{version}/config/courier-imap.opts` > $DEVICE
+else
 	%configure --prefix=%{_prefix} --libexecdir=%{_prefix}/libexec --bindir=%{_prefix}/bin \
 	--mandir=%{_prefix}/man --sysconfdir=%{_prefix}/etc \
 	`%{__cat} ../%{name}-%{version}/config/courier-imap.opts` > $DEVICE
+fi
 fi
 
 #### bogofilter ######################
@@ -1134,7 +1141,7 @@ fi
 %dir %attr(555,root,qmail)        %{_prefix}/man/cat7
 %dir %attr(555,root,qmail)        %{_prefix}/man/man8
 %dir %attr(555,root,qmail)        %{_prefix}/man/cat8
-%dir %attr(555,root,root)         %{_includedir}
+%dir %attr(555,root,root)         %{_prefix}/include
 %dir %attr(555,root,root)         %{_libdir}
 %if %nofetchmail == 0
 %dir %attr(755,root,root)         %{_prefix}/share/locale
@@ -1886,7 +1893,7 @@ fi
 
 %files devel
 %defattr(-, root, root, 0755)
-%dir %attr(555,root,root)              %{_includedir}
+%dir %attr(555,root,root)              %{_prefix}/include
 %dir %attr(555,root,root)              %{_libdir}
 %dir %attr(555,root,qmail)             %{_prefix}/man/man3
 %doc %attr(444,root,qmail)             %{_prefix}/man/man3/*
