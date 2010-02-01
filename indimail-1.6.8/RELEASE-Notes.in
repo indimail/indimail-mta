@@ -62,22 +62,18 @@ both 32 and 64 bit) are
           o Mandriva 2009.1
           o Mandriva 2009
 
-
 ChangeLog
 =========
-* Mon Jan 04 2010 mbhangui@gmail.com
-Release 1.6.7 Start 11/12/2009
-1.  create log directory in create_services
-2.  replaced all occurences of chown with $chown in svctool
-3.  log from and rcpt for qmail-remote
-4.  Modified rsmtp, rsmtprdomains, rsmtpsdomains, rsmptsenders to correctly
-    decipher host from smtp log
-5.  Added case for mysql-5.5 in svctool
-6.  Use GNU syntax for tail in bogofilter-qfe.in
-7.  fixed issue with delivery of mails to register-spam, spam,
-    register-nonspam, nonspam ids
-8.  Added vfilter rule for X-Bogosity spam filtering in postfilt in svctool
-9.  Made vcfilter setuid
-10. Modified vcfilter.c, vbulletin.c, vadduser.c, printdir.c, vdeluser.c,
-    vreorg.c, vdominfo.c, vdeldomain.c for running programs with uid,gid of
-    domain
+* Thu Jan 21 2010 mbhangui@gmail.com
+Release 1.6.8 Start 04/01/2010
+1.  host.cntrl, host.mysql, host.master can now accept
+    host:username:password:port/socket
+2.  MYSQL_PASS changed to MYSQL_PASSWD in svctool
+3.  Fixed install_tables attempting to create clustered tables setup
+    on non-clustered setup.
+4.  Remove --mysqlhost parameter for indisrvr service creation in
+    indimail.spec
+5.  use mysql user, password from command line in pwdlookup service
+6.  Fixed logic in mail_acl() function. accesslist feature in qmail-smtpd
+7.  New program uacl to test accesslist
+8.  Fixed xtext function in qmail-remote

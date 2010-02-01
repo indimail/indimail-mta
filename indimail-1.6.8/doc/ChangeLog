@@ -1,6 +1,21 @@
-* Mon Jan 04 2010 mbhangui@gmail.com
+* Mon Feb 01 2010 mbhangui@gmail.com
 Release 1.6.8 Start 04/01/2010
-
+06/01/2010
+1.  host.cntrl, host.mysql, host.master can now accept
+    host:username:password:port/socket
+2.  MYSQL_PASS changed to MYSQL_PASSWD in svctool
+3.  Fixed install_tables attempting to create clustered tables setup
+    on non-clustered setup.
+01/01/2010
+4.  Remove --mysqlhost parameter for indisrvr service creation in
+    indimail.spec
+5.  use mysql user, password from command line in pwdlookup service
+19/01/2010
+6.  Fixed logic in mail_acl() function. accesslist feature in qmail-smtpd
+20/01/2010
+7.  New program uacl to test accesslist
+01/02/2010
+8.  Fixed xtext function in qmail-remote
 
 * Mon Jan 04 2010 mbhangui@gmail.com
 Release 1.6.7 Start 11/12/2009
