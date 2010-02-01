@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-remote.c,v $
+ * Revision 1.53  2010-02-01 10:11:30+05:30  Cprogrammer
+ * fix for xtext function
+ *
  * Revision 1.52  2009-12-17 09:15:55+05:30  Cprogrammer
  * log real envelope recipients of messages after host name canonicalization
  * patch by James Raftery
@@ -1114,21 +1117,21 @@ xtext(stralloc *ptr, char *s, int len)
 	{
 		if (s[i] == '+')
 		{
+			if (!stralloc_cats(ptr, "+2B"))
+				temp_nomem();
+		} else
+		if (s[i] == '=')
+		{
 			if (!stralloc_cats(ptr, "+3D"))
 				temp_nomem();
-			if (s[i] == '=')
-			{
-				if (!stralloc_cats(ptr, "+2B"))
-					temp_nomem();
-				if ((int) s[i] < 33 || (int) s[i] > 126)
-				{
-					if (!stralloc_cats(ptr, "+3F"))
-						temp_nomem();	/*- ok. not correct */
-					if (!stralloc_catb(ptr, s + i, 1))
-						temp_nomem();
-				}
-			}
-		}
+		} else
+		if ((int) s[i] < 33 || (int) s[i] > 126)
+		{
+			if (!stralloc_cats(ptr, "+3F"))
+				temp_nomem();	/*- ok. not correct */
+		} else
+		if (!stralloc_catb(ptr, s + i, 1))
+			temp_nomem();
 	}
 	return (ptr->len ? ptr->len : 1);
 }
@@ -2004,7 +2007,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_remote_c()
 {
-	static char    *x = "$Id: qmail-remote.c,v 1.52 2009-12-17 09:15:55+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-remote.c,v 1.53 2010-02-01 10:11:30+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
