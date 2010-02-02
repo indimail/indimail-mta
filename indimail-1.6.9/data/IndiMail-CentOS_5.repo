@@ -1,5 +1,5 @@
 [IndiMail Raw]
-name=IndiMail (CentOS_5)
+name=IndiMail Raw (CentOS_5)
 type=rpm-md
 baseurl=http://download.opensuse.org/repositories/home:/mbhangui/CentOS_5/
 gpgcheck=1
@@ -7,7 +7,7 @@ gpgkey=http://download.opensuse.org/repositories/home:/mbhangui/CentOS_5/repodat
 enabled=1
 
 [IndiMail]
-name=IndiMail Raw (CentOS_5)
+name=IndiMail (CentOS_5)
 type=rpm-md
 baseurl=http://download.opensuse.org/repositories/home:/indimail/CentOS_5/
 gpgcheck=1

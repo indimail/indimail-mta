@@ -1,5 +1,5 @@
 [IndiMail Raw]
-name=IndiMail (Mandriva_2009)
+name=IndiMail Raw (Mandriva_2009)
 type=rpm-md
 baseurl=http://download.opensuse.org/repositories/home:/mbhangui/Mandriva_2009/
 gpgcheck=1
@@ -7,7 +7,7 @@ gpgkey=http://download.opensuse.org/repositories/home:/mbhangui/Mandriva_2009/re
 enabled=1
 
 [IndiMail]
-name=IndiMail Raw (Mandriva_2009)
+name=IndiMail (Mandriva_2009)
 type=rpm-md
 baseurl=http://download.opensuse.org/repositories/home:/indimail/Mandriva_2009/
 gpgcheck=1

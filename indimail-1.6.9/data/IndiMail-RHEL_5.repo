@@ -1,5 +1,5 @@
 [IndiMail Raw]
-name=IndiMail (RHEL_5)
+name=IndiMail Raw (RHEL_5)
 type=rpm-md
 baseurl=http://download.opensuse.org/repositories/home:/mbhangui/RHEL_5/
 gpgcheck=1
@@ -7,7 +7,7 @@ gpgkey=http://download.opensuse.org/repositories/home:/mbhangui/RHEL_5/repodata/
 enabled=1
 
 [IndiMail]
-name=IndiMail Raw (RHEL_5)
+name=IndiMail (RHEL_5)
 type=rpm-md
 baseurl=http://download.opensuse.org/repositories/home:/indimail/RHEL_5/
 gpgcheck=1

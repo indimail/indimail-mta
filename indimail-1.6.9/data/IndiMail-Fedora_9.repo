@@ -1,5 +1,5 @@
 [IndiMail Raw]
-name=IndiMail (Fedora_9)
+name=IndiMail Raw (Fedora_9)
 type=rpm-md
 baseurl=http://download.opensuse.org/repositories/home:/mbhangui/Fedora_9/
 gpgcheck=1
@@ -7,7 +7,7 @@ gpgkey=http://download.opensuse.org/repositories/home:/mbhangui/Fedora_9/repodat
 enabled=1
 
 [IndiMail]
-name=IndiMail Raw (Fedora_9)
+name=IndiMail (Fedora_9)
 type=rpm-md
 baseurl=http://download.opensuse.org/repositories/home:/indimail/Fedora_9/
 gpgcheck=1
