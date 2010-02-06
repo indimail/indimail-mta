@@ -5733,7 +5733,7 @@ addrrelay() /*- Rejection of relay probes. */
 void
 getversion_smtpd_c()
 {
-	static char    *x = "$Id: smtpd.c,v 1.136 2010-01-20 11:26:46+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: smtpd.c,v 1.136 2010-01-20 11:26:46+05:30 Cprogrammer Stab mbhangui $";
 
 #ifdef INDIMAIL
 	x = sccsidh;
