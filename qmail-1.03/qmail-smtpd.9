@@ -145,11 +145,11 @@ allows
 to relay out mails if the user does a POP3/IMAP4 access before sending out mails.
 
 NOTE: Only domains not listed in rcpthosts are checked. Domains in rcpthosts
-are relayed by default. This feature can be turned off by having the domain in
+are relayed by default. This feature can be turned off by having the domain listed in
 the control file
 .I authdomains
-- in which case, sender's domain present in the control file will be checked for
-relay status. If the environment variable
+- in which case, sender's domain will be checked for relay status if present in the
+control file. If the environment variable
 .B AUTH_ALL
 is set, even local domains (listed in rcpthosts) will be checked for relay status.
 If the environment variable 
