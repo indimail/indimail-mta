@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-tcpto.c,v $
+ * Revision 1.20  2010-02-10 08:59:23+05:30  Cprogrammer
+ * use -DMULTI_QUEUE for using multiple queues
+ *
  * Revision 1.19  2009-11-09 19:55:25+05:30  Cprogrammer
  * Use control file queue_base to process multiple indimail queues
  *
@@ -71,11 +74,10 @@
 #include "exit.h"
 #include "datetime.h"
 #include "env.h"
-#include "variables.h"
 #include "now.h"
 #include "stralloc.h"
 #include "tcpto.h"
-#include "hasindimail.h"
+#include "variables.h"
 #include <unistd.h>
 
 #ifndef QUEUE_COUNT
@@ -88,7 +90,7 @@ die(n)
 {
 	substdio_flush(subfderr);
 	substdio_flush(subfdout);
-#ifdef INDIMAIL
+#ifdef MULTI_QUEUE
 	if (n)
 		_exit(n);
 	else
@@ -160,7 +162,7 @@ char            tmp[FMT_ULONG + IPFMT];
 char           *qbase;
 stralloc        QueueBase = { 0 };
 
-#ifdef INDIMAIL
+#ifdef MULTI_QUEUE
 int
 main_function()
 #else
@@ -173,7 +175,7 @@ main()
 	union v46addr   ip;
 	datetime_sec    when, start;
 
-#ifndef INDIMAIL
+#ifndef MULTI_QUEUE
 	if (chdir(auto_qmail))
 		die_home();
 	if (!(qbase = env_get("QUEUE_BASE")))
@@ -264,7 +266,7 @@ main()
 	return(0);
 }
 
-#ifdef INDIMAIL
+#ifdef MULTI_QUEUE
 void
 die_nomem()
 {
@@ -353,10 +355,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_tcpto_c()
 {
-	static char    *x = "$Id: qmail-tcpto.c,v 1.19 2009-11-09 19:55:25+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: qmail-tcpto.c,v 1.20 2010-02-10 08:59:23+05:30 Cprogrammer Exp mbhangui $";
 
-#ifdef INDIMAIL
-	x = sccsidh;
-#endif
 	x++;
 }

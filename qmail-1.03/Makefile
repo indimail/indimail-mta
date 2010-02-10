@@ -1476,7 +1476,8 @@ qmail-clean.8
 qmail-clean.o: \
 compile qmail-clean.c sig.h now.h datetime.h str.h \
 direntry.h getln.h stralloc.h gen_alloc.h subfd.h \
-substdio.h byte.h scan.h fmt.h error.h exit.h fmtqfn.h auto_qmail.h env.h variables.h hasindimail.h
+substdio.h byte.h scan.h fmt.h error.h exit.h fmtqfn.h auto_qmail.h \
+env.h variables.h
 
 	./compile $(inc_deps) qmail-clean.c
 
@@ -1892,9 +1893,9 @@ qmail-qread.o: \
 compile qmail-qread.c stralloc.h gen_alloc.h substdio.h subfd.h \
 fmt.h str.h getln.h fmtqfn.h readsubdir.h direntry.h \
 control.h auto_qmail.h open.h datetime.h date822fmt.h error.h \
-scan.h exit.h env.h variables.h hasindimail.h conf-queue
+scan.h exit.h env.h variables.h hasindimail.h conf-queue conf-multiqueue
 	if test -f conf-queue ; then \
-	./compile $(inc_deps) -DQUEUE_COUNT=`cat conf-queue` qmail-qread.c; \
+	./compile $(inc_deps) -DMULTI_QUEUE -DQUEUE_COUNT=`cat conf-queue` qmail-qread.c; \
 	else \
 	./compile $(inc_deps) -DQUEUE_COUNT=10 qmail-qread.c; \
 	fi;
@@ -2415,10 +2416,10 @@ qmail-tcpok.8
 
 qmail-tcpok.o: \
 compile qmail-tcpok.c strerr.h substdio.h lock.h open.h \
-auto_qmail.h exit.h env.h variables.h hasindimail.h scan.h stralloc.h fmt.h \
+auto_qmail.h exit.h env.h variables.h scan.h stralloc.h fmt.h \
 control.h subfd.h conf-queue
 	if test -f conf-queue ; then \
-	./compile $(inc_deps) -DQUEUE_COUNT=`cat conf-queue` qmail-tcpok.c; \
+	./compile $(inc_deps) -DMULTI_QUEUE -DQUEUE_COUNT=`cat conf-queue` qmail-tcpok.c; \
 	else \
 	./compile $(inc_deps) -DQUEUE_COUNT=10 qmail-tcpok.c; \
 	fi;
@@ -2442,10 +2443,10 @@ qmail-tcpto.8
 qmail-tcpto.o: \
 compile qmail-tcpto.c substdio.h subfd.h auto_qmail.h \
 fmt.h ip.h lock.h error.h exit.h datetime.h now.h datetime.h env.h \
-variables.h hasindimail.h open.h byte.h scan.h stralloc.h subfd.h \
+variables.h open.h byte.h scan.h stralloc.h subfd.h \
 control.h tcpto.h ipalloc.h conf-tls conf-ip conf-queue
 	if test -f conf-queue ; then \
-	./compile $(inc_deps) -DQUEUE_COUNT=`cat conf-queue` qmail-tcpto.c; \
+	./compile $(inc_deps) -DMULTI_QUEUE -DQUEUE_COUNT=`cat conf-queue` qmail-tcpto.c; \
 	else \
 	./compile $(inc_deps) -DQUEUE_COUNT=10 qmail-tcpto.c; \
 	fi;

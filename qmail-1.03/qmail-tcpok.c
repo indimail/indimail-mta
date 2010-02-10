@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-tcpok.c,v $
+ * Revision 1.22  2010-02-10 08:59:10+05:30  Cprogrammer
+ * use -DMULTI_QUEUE for using multiple queues
+ *
  * Revision 1.21  2009-11-09 19:55:18+05:30  Cprogrammer
  * Use control file queue_base to process multiple indimail queues
  *
@@ -43,7 +46,7 @@
  * added notification queue
  *
  * Revision 1.7  2003-10-28 20:02:18+05:30  Cprogrammer
- * conditional compilation for INDIMAIL
+ * conditional compilation for indimail
  *
  * Revision 1.6  2003-10-23 01:26:41+05:30  Cprogrammer
  * fixed compilation warnings
@@ -71,7 +74,6 @@
 #include "fmt.h"
 #include "exit.h"
 #include "tcpto.h"
-#include "hasindimail.h"
 
 #ifndef QUEUE_COUNT
 #define QUEUE_COUNT 10
@@ -90,7 +92,7 @@ die(n)
 {
 	substdio_flush(subfderr);
 	substdio_flush(subfdout);
-#ifdef INDIMAIL
+#ifdef MULTI_QUEUE
 	if (n)
 		_exit(n);
 	else
@@ -114,7 +116,7 @@ die_control()
 	die(111);
 }
 
-#ifdef INDIMAIL
+#ifdef MULTI_QUEUE
 int
 main_function()
 #else
@@ -124,7 +126,7 @@ main()
 {
 	int             fd, i;
 
-#ifndef INDIMAIL
+#ifndef MULTI_QUEUE
 	if (chdir(auto_qmail))
 		die_home();
 	if (!(qbase = env_get("QUEUE_BASE")))
@@ -165,7 +167,7 @@ main()
 	return(0);
 }
 
-#ifdef INDIMAIL
+#ifdef MULTI_QUEUE
 void
 outok(s)
 	char           *s;
@@ -254,11 +256,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_tcpok_c()
 {
-	static char    *x = "$Id: qmail-tcpok.c,v 1.21 2009-11-09 19:55:18+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: qmail-tcpok.c,v 1.22 2010-02-10 08:59:10+05:30 Cprogrammer Exp mbhangui $";
 
-#ifdef INDIMAIL
-	x = sccsidh;
-#else
 	x++;
-#endif
 }

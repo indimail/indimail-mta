@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-qread.c,v $
+ * Revision 1.19  2010-02-10 08:58:43+05:30  Cprogrammer
+ * use -DMULTI_QUEUE to use multiple queues
+ *
  * Revision 1.18  2009-11-09 19:55:08+05:30  Cprogrammer
  * Use control file queue_base to process multiple indimail queues
  *
@@ -241,7 +244,7 @@ putstats()
 
 int             doLocal = 1, doRemote = 1, doTodo = 0;
 
-#ifdef INDIMAIL
+#ifdef MULTI_QUEUE
 static int
 get_arguments(int argc, char **argv)
 {
@@ -298,7 +301,7 @@ stralloc        line = { 0 };
 char           *qbase;
 stralloc        QueueBase = { 0 };
 
-#ifdef INDIMAIL
+#ifdef MULTI_QUEUE
 
 int
 main_function()
@@ -311,7 +314,7 @@ main(int argc, char **argv)
 	struct stat     st;
 	substdio        ss;
 
-#ifndef INDIMAIL
+#ifndef MULTI_QUEUE
 	if (chdir(auto_qmail))
 		die_home();
 	if (!(qbase = env_get("QUEUE_BASE")))
@@ -480,7 +483,7 @@ main(int argc, char **argv)
 	return(0);
 }
 
-#ifdef INDIMAIL
+#ifdef MULTI_QUEUE
 int
 main(int argc, char **argv)
 {
@@ -559,11 +562,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_qread_c()
 {
-	static char    *x = "$Id: qmail-qread.c,v 1.18 2009-11-09 19:55:08+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: qmail-qread.c,v 1.19 2010-02-10 08:58:43+05:30 Cprogrammer Exp mbhangui $";
 
-#ifdef INDIMAIL
-	x = sccsidh;
-#else
 	x++;
-#endif
 }
