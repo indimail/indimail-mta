@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-rspawn.c,v $
+ * Revision 1.25  2010-02-10 08:58:59+05:30  Cprogrammer
+ * removed dependency on indimail
+ *
  * Revision 1.24  2009-12-10 10:46:57+05:30  Cprogrammer
  * return -2 for MySQL error
  *
@@ -199,11 +202,11 @@ spawn(fdmess, fdout, msgsize, s, qqeh, r, at)
 	int             at;
 {
 	int             f;
-	char           *(args[7]);
+	char           *ptr, *(args[7]);
 	char            size_buf[FMT_ULONG];
 #ifdef INDIMAIL
 	int             i;
-	char           *ip, *real_domain, *ptr;
+	char           *ip, *real_domain;
 	static char     smtproute[MAX_BUFF], CurDir[MAX_BUFF]; 
 	static int      rcptflag = 1;
 #endif
@@ -267,14 +270,10 @@ spawn(fdmess, fdout, msgsize, s, qqeh, r, at)
 			_exit(111);
 		if (fd_copy(2, 1) == -1)
 			_exit(111);
-#ifdef INDIMAIL
 		if (!(ptr = env_get("QMAILREMOTE")))
 			execvp(*args, args);
 		else
 			execvp(ptr, args);
-#else
-		execvp(*args, args);
-#endif
 		if (error_temp(errno))
 			_exit(111);
 		_exit(100);
@@ -285,7 +284,7 @@ spawn(fdmess, fdout, msgsize, s, qqeh, r, at)
 void
 getversion_qmail_rspawn_c()
 {
-	static char    *x = "$Id: qmail-rspawn.c,v 1.24 2009-12-10 10:46:57+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: qmail-rspawn.c,v 1.25 2010-02-10 08:58:59+05:30 Cprogrammer Exp mbhangui $";
 
 #ifdef INDIMAIL
 	x = sccsidh;

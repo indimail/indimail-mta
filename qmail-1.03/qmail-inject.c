@@ -4,7 +4,7 @@
  * corrected error message
  *
  * Revision 1.20  2009-09-08 12:33:51+05:30  Cprogrammer
- * removed dependency of INDIMAIL on qmail-inject
+ * removed dependency of indimail on qmail-inject
  *
  * Revision 1.19  2009-08-13 19:08:00+05:30  Cprogrammer
  * code beautified

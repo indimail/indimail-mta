@@ -1,6 +1,7 @@
 * Mon Feb 01 2010 mbhangui@gmail.com
 Release 1.6.9 Start 01/02/2010
-
+10/02/2010
+1.  Removed INDIMAIL depencies in qmail-tcpok, qmail-tcpto, qmail-qread
 
 * Mon Feb 01 2010 mbhangui@gmail.com
 Release 1.6.8 Start 04/01/2010

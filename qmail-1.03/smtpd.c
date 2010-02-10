@@ -1,5 +1,8 @@
 /*
  * $Log: smtpd.c,v $
+ * Revision 1.137  2010-02-10 08:59:41+05:30  Cprogrammer
+ * trivial change for #ifdef INDIMAIL
+ *
  * Revision 1.136  2010-01-20 11:26:46+05:30  Cprogrammer
  * new improved logic for accesslist
  *
@@ -548,7 +551,7 @@ int             wildmat_internal(char *, char *);
 int             ssl_rfd = -1, ssl_wfd = -1;	/*- SSL_get_Xfd() are broken */
 char           *servercert, *clientca, *clientcrl;
 #endif
-char           *revision = "$Revision: 1.136 $";
+char           *revision = "$Revision: 1.137 $";
 char           *protocol = "SMTP";
 stralloc        proto = { 0 };
 static stralloc Revision = { 0 };
@@ -696,8 +699,11 @@ struct constmap mapspf;
 int             sppok = 0;
 static stralloc spp = { 0 };
 char           *spfFn = 0;
-#ifdef INDIMAIL
-/*- chkrcptdomains */
+#ifdef INDIMAIL 
+/*-
+ * check recipients using inquery
+ * chkrcptdomains
+ */
 int             chkrcptok = 0;
 static stralloc chkrcpt = { 0 };
 struct constmap mapchkrcpt;
@@ -5685,11 +5691,14 @@ qmail_smtpd(int argc, char **argv, char **envp)
 			smtp_greet("220 ");
 	}
 	out("\r\n");
-#ifdef INDIMAIL
 	switch (smtp_port)
 	{
 	case ODMR_PORT: /*- RFC 2645 */
+#ifdef INDIMAIL
 		cmdptr = odmrcommands;
+#else
+		cmdptr = smtpcommands;
+#endif
 		break;
 	case SUBM_PORT: /*- RFC 2476 */
 		cmdptr = submcommands;
@@ -5699,9 +5708,6 @@ qmail_smtpd(int argc, char **argv, char **envp)
 		cmdptr = smtpcommands;
 		break;
 	}
-#else
-	cmdptr = smtpcommands;
-#endif
 	if (commands(&ssin, cmdptr) == 0)
 		die_read();
 	die_nomem();
@@ -5733,7 +5739,7 @@ addrrelay() /*- Rejection of relay probes. */
 void
 getversion_smtpd_c()
 {
-	static char    *x = "$Id: smtpd.c,v 1.136 2010-01-20 11:26:46+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: smtpd.c,v 1.137 2010-02-10 08:59:41+05:30 Cprogrammer Exp mbhangui $";
 
 #ifdef INDIMAIL
 	x = sccsidh;

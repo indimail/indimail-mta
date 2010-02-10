@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-showctl.c,v $
+ * Revision 1.50  2010-02-10 08:59:05+05:30  Cprogrammer
+ * removed dependency on indimail
+ *
  * Revision 1.49  2009-12-09 23:57:31+05:30  Cprogrammer
  * additional closeflag argument to uidinit()
  *
@@ -240,9 +243,9 @@ main(int argc, char **argv)
 {
 	DIR            *dir;
 	direntry       *d;
-	char           *ptr, *local_ip;
+	char           *ptr, *local_ip, *qbase;
 #ifdef INDIMAIL
-	char           *local_id, *qbase;
+	char           *local_id;
 #endif
 	int             verbose = 0;
 	struct stat     stmrh;
@@ -465,9 +468,7 @@ main(int argc, char **argv)
 	do_str("spfrules",0,"","The local SPF rules are: ");
 #endif
 	do_lst("signaturedomains", "No DKIM signature domains.", "DKIM signature domain(s): ", "");
-#ifdef INDIMAIL
 	do_str("queue_base", 0, (qbase = env_get("QUEUE_BASE")) ? qbase : auto_qmail, "Base queue directory: ");
-#endif
 #ifdef BATV
 	do_str("signkey","0","No BATV sign key","BATV sign key: ");
 	do_int("signkeystale","7","BATV sign key stale is set to ","");
@@ -703,7 +704,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_showctl_c()
 {
-	static char    *x = "$Id: qmail-showctl.c,v 1.49 2009-12-09 23:57:31+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: qmail-showctl.c,v 1.50 2010-02-10 08:59:05+05:30 Cprogrammer Exp mbhangui $";
 
 #ifdef INDIMAIL
 	x = sccsidh;

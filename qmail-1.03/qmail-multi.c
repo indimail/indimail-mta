@@ -7,7 +7,7 @@
  * skip spam filtering for authenticated users
  *
  * Revision 1.42  2009-09-08 12:34:07+05:30  Cprogrammer
- * removed dependency of INDIMAIL on qmail-multi
+ * removed dependency of indimail on qmail-multi
  *
  * Revision 1.41  2008-07-25 16:52:04+05:30  Cprogrammer
  * port for darwin
@@ -65,7 +65,7 @@
  * set argv[0] from spamfilterprog
  *
  * Revision 1.24  2003-12-22 18:36:01+05:30  Cprogrammer
- * moved mkTempFile() outside #ifdef INDIMAIL
+ * moved mkTempFile() outside #ifdef indimail
  *
  * Revision 1.23  2003-12-20 01:47:34+05:30  Cprogrammer
  * added filter capability
@@ -85,7 +85,7 @@
  * added documentation
  *
  * Revision 1.18  2003-10-28 20:01:16+05:30  Cprogrammer
- * conditional compilation of variables defined for INDIMAIL
+ * conditional compilation of variables defined for indimail
  *
  * Revision 1.17  2003-10-27 00:51:19+05:30  Cprogrammer
  * NOTIFYSPAM functionality

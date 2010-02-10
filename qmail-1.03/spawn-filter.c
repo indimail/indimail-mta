@@ -4,7 +4,7 @@
  * Use control file queue_base to process multiple indimail queues
  *
  * Revision 1.48  2009-09-08 13:22:28+05:30  Cprogrammer
- * removed dependency of INDIMAIL on spam filtering
+ * removed dependency of indimail on spam filtering
  *
  * Revision 1.47  2009-05-01 10:43:40+05:30  Cprogrammer
  * added errstr argument to envrules(), address_match()

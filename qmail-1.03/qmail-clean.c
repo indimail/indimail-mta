@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-clean.c,v $
+ * Revision 1.9  2010-02-10 08:58:19+05:30  Cprogrammer
+ * removed dependency on indimail
+ *
  * Revision 1.8  2007-12-20 12:46:57+05:30  Cprogrammer
  * removed compiler warnings
  *
@@ -33,7 +36,6 @@
 #include "env.h"
 #include "variables.h"
 #include "auto_qmail.h"
-#include "hasindimail.h"
 
 #define OSSIFIED 129600	/*- see qmail-send.c */
 
@@ -93,11 +95,7 @@ main()
 	if (chdir(auto_qmail) == -1)
 		_exit(111);
 	if(!(queuedir = env_get("QUEUEDIR")))
-#ifdef INDIMAIL
-		queuedir = "queue1";
-#else
 		queuedir = "queue";
-#endif
 	if (chdir(queuedir) == -1)
 		_exit(111);
 
@@ -174,11 +172,7 @@ if (unlink(fnbuf) == -1) if (errno != error_noent) { respond("!"); continue; }
 void
 getversion_qmail_clean_c()
 {
-	static char    *x = "$Id: qmail-clean.c,v 1.8 2007-12-20 12:46:57+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: qmail-clean.c,v 1.9 2010-02-10 08:58:19+05:30 Cprogrammer Exp mbhangui $";
 
-#ifdef INDIMAIL
-	x = sccsidh;
-#else
 	x++;
-#endif
 }
