@@ -1893,7 +1893,7 @@ qmail-qread.o: \
 compile qmail-qread.c stralloc.h gen_alloc.h substdio.h subfd.h \
 fmt.h str.h getln.h fmtqfn.h readsubdir.h direntry.h \
 control.h auto_qmail.h open.h datetime.h date822fmt.h error.h \
-scan.h exit.h env.h variables.h hasindimail.h conf-queue conf-multiqueue
+scan.h exit.h env.h variables.h hasindimail.h conf-queue
 	if test -f conf-queue ; then \
 	./compile $(inc_deps) -DMULTI_QUEUE -DQUEUE_COUNT=`cat conf-queue` qmail-qread.c; \
 	else \
