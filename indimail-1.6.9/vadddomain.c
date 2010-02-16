@@ -1,5 +1,8 @@
 /*
  * $Log: vadddomain.c,v $
+ * Revision 2.26  2010-02-16 09:29:37+05:30  Cprogrammer
+ * added abuse, mailer-daemon as alias to postmaster
+ *
  * Revision 2.25  2009-09-28 13:47:34+05:30  Cprogrammer
  * added -C option to allow selection of recipient check for a domain
  *
@@ -140,7 +143,7 @@
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vadddomain.c,v 2.25 2009-09-28 13:47:34+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: vadddomain.c,v 2.26 2010-02-16 09:29:37+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 
@@ -162,12 +165,18 @@ main(argc, argv)
 	int             argc;
 	char           *argv[];
 {
-	int             err, chk_rcpt;
+	int             err, chk_rcpt, i;
 	uid_t           uid;
 	gid_t           gid;
 	extern int      create_flag;
 	char           *qmaildir, *ptr;
 	FILE           *fs;
+	char            AliasLine[MAX_BUFF];
+	char           *auto_ids[] = {
+		"abuse",
+		"mailer-daemon",
+		0
+	};
 #ifdef CLUSTERED_SITE
 	char           *hostid, *localIP;
 	char            email[MAX_BUFF];
@@ -327,6 +336,12 @@ main(argc, argv)
 	/* set quota for postmaster */
 	if (Quota[0] != 0)
 		vsetuserquota("postmaster", Domain, Quota);
+	for(i = 0;auto_ids[i];i++)
+	{
+		printf("Adding alias %s@%s --> postmaster@%s\n", auto_ids[i], Domain, Domain);
+		snprintf(AliasLine, sizeof(AliasLine), "&postmaster@%s", Domain);
+		valias_insert(auto_ids[i], Domain, AliasLine, 0);
+	}
 	vclose();
 	return(0);
 }
