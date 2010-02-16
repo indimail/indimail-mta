@@ -1,5 +1,8 @@
 /*
  * $Log: variables.c,v $
+ * Revision 2.48  2010-02-16 09:28:47+05:30  Cprogrammer
+ * added mailer-daemon to rfc ids
+ *
  * Revision 2.47  2009-09-17 09:52:59+05:30  Cprogrammer
  * removed duplicate command entry for ipchange in adminCommands
  *
@@ -188,7 +191,7 @@
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: variables.c,v 2.47 2009-09-17 09:52:59+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: variables.c,v 2.48 2010-02-16 09:28:47+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 vdir_type       vdir;
@@ -215,6 +218,7 @@ int             use_vfilter;
 char           *rfc_ids[] = {
 	"postmaster",
 	"abuse",
+	"mailer-daemon",
 	"editor",
 	"prefilt",
 	"postfilt",
