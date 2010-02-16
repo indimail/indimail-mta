@@ -2,6 +2,11 @@
 Release 1.6.9 Start 01/02/2010
 10/02/2010
 1.  Removed INDIMAIL depencies in qmail-tcpok, qmail-tcpto, qmail-qread
+16/02/2010
+2.  Added abuse, mailer-daemon as alias to postmaster when creating a new
+    domain.
+3.  Added POST Hook for program vadddomain, vdeldomain, vadduser, vdeluser
+4.  BUG - Free memory allocated by vasprintf in error_stack.c
 
 * Mon Feb 01 2010 mbhangui@gmail.com
 Release 1.6.8 Start 04/01/2010

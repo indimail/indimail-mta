@@ -79,9 +79,9 @@ make_user_dir.c makesalt.c md5c.c mdaMysqlConnect.c mgmtpassfuncs.c mkpasswd3.c 
 mlist_delete.c mlist_filterno.c mlist_filterupdate.c mlist_insert.c mlist_update.c \
 monkey.c MoveFile.c mysql_perror.c mysql_query.c next_big_dir.c no_of_days.c \
 open_big_dir.c open_master.c open_smtp_relay.c parseAddress.c parse_email.c \
-parse_quota.c passwd.c passwd_policy.c pathToFilesystem.c pipe_exec.c print_control.c \
-ProcessInFifo.c proxylogin.c purge_files.c pw_comp.c pwcomp.c PwdInLookup.c \
-qmail_remote.c r_chown.c recalc_quota.c RelayInLookup.c relay_select.c \
+parse_quota.c passwd.c passwd_policy.c pathToFilesystem.c pipe_exec.c post_hook.c \
+print_control.c ProcessInFifo.c proxylogin.c purge_files.c pw_comp.c pwcomp.c \
+PwdInLookup.c qmail_remote.c r_chown.c recalc_quota.c RelayInLookup.c relay_select.c \
 RemoteBulkMail.c remove_line.c remove_quotes.c renameuser.c replacestr.c r_mkdir.c \
 runcmmd.c ScanDir.c scat.c scopy.c SendWelcomeMail.c set_mysql_options.c setsockbuf.c \
 setuserquota.c sha256_crypt.c sha512_crypt.c signal_process.c site_size.c \
@@ -160,8 +160,8 @@ MOSTLYCLEANFILES=versioninfo vcaliasrev myslave logmonitor controlsync bogofilte
 svctool indimail_settings.c cronlist crypt create_services INSTALL INSTALL-RPM INSTALL-MYSQL \
 indimail.spec cscope.* *.dSYM inc_deps lib_deps socket.lib indimail-@VERSION@-rpmlintrc \
 indimail-epm.list README-CLUSTER tls-cert-check mailzipper perm_list RELEASE-Notes \
-dbinfo.8 inlookup.8 vadddomain.1 vdelivermail.8 indimail.7 svctool.8 indisub.c Quick-INSTALL \
-indimail.mrtg.cfg
+dbinfo.8 inlookup.8 vadddomain.1 vdeldomain.1 vadduser.1 vdeluser.1 vdelivermail.8 \
+indimail.7 svctool.8 indisub.c Quick-INSTALL indimail.mrtg.cfg
 
 DISTCLEANFILES=.gitignore
 
@@ -709,7 +709,8 @@ osh.lo: config.h osh.h
 exp.lo: config.h osh.h
 handlers.lo: config.h osh.h
 install_tables.lo: indimail.h config.h
-error_stack.lo: error_stack.c error_stack.h
+error_stack.lo: error_stack.c error_stack.h config.h
+post_hook.lo: post_hook.c config.h
 randltr.lo: indimail.h config.h
 in_crypt.lo: indimail.h config.h
 
@@ -785,6 +786,12 @@ dbinfo.8: dbinfo.9
 inlookup.8: inlookup.9
 	cat $^ | sed s}INDIMAIL}$(indimaildir)}g > $@
 vadddomain.1:vadddomain.9
+	cat $^ | sed s}INDIMAIL}$(indimaildir)}g > $@
+vdeldomain.1:vdeldomain.9
+	cat $^ | sed s}INDIMAIL}$(indimaildir)}g > $@
+vadduser.1:vadduser.9
+	cat $^ | sed s}INDIMAIL}$(indimaildir)}g > $@
+vdeluser.1:vdeluser.9
 	cat $^ | sed s}INDIMAIL}$(indimaildir)}g > $@
 vdelivermail.8:vdelivermail.9
 	cat $^ | sed s}INDIMAIL}$(indimaildir)}g > $@

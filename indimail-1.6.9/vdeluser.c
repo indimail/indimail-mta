@@ -1,5 +1,8 @@
 /*
  * $Log: vdeluser.c,v $
+ * Revision 2.6  2010-02-16 13:09:02+05:30  Cprogrammer
+ * added post_hook function
+ *
  * Revision 2.5  2009-12-30 13:14:07+05:30  Cprogrammer
  * run vdeluser with uid, gid of domain
  *
@@ -71,7 +74,7 @@
 #include <signal.h>
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vdeluser.c,v 2.5 2009-12-30 13:14:07+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: vdeluser.c,v 2.6 2010-02-16 13:09:02+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 char            Email[MAX_BUFF];
@@ -87,6 +90,7 @@ main(argc, argv)
 	char           *argv[];
 {
 	int             err;
+	char           *ptr, *base_argv0;
 	uid_t           uid, uidtmp;
 	gid_t           gid;
 
@@ -120,7 +124,13 @@ main(argc, argv)
 		return(err);
 	}
 	vclose();
-	return(0);
+	if (!(ptr = getenv("POST_HOOK")))
+	{
+		if (!(base_argv0 = strrchr(argv[0], '/')))
+			base_argv0 = argv[0];
+		return(post_hook("%s/libexec/%s %s@%s", INDIMAILDIR, base_argv0, User, Domain));
+	} else
+		return(post_hook("%s %s@%s", ptr, User, Domain));
 }
 
 

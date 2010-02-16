@@ -40,12 +40,19 @@ Sends SIGHUP to qmail-send.
 .IP \n+[step]
 Add entry to table dbinfo and mcdfile for a clustered domain ('-D' option).
 .IP \n+[step]
-Create the postmaster account for a non-clustered domain. For a clustered domain, the postmaster
-account is created on the first host on which the domain is created.
+Create the postmaster account for a non-clustered domain. For a clustered domain, the \fIpostmaster\fR
+account is created on the first host on which the domain is created. Post adding the
+\fIpostmaster\fR user, \fBvadddomain\fR adds \fIabuse\fR and \fImailer-daemon\fR, as aliases to the \fIpostmaster\fR account.
+
+.SH POST HOOK
+If the environment variable POST_HOOK is set, \fBvadddomain\fR executes the program defined by
+the POST_HOOK environment variable, passing \fIvirtual_domain\fR as a parameter. If POST_HOOK
+is not defined, the program/script INDIMAIL/libexec/vadddomain will be executed with \fIvirtual_domain\fR
+as a parameter.
 
 .SH OPTIONS
 .PP
-\fIvirtual_domain\fR is mandatory. Rest are optional. If \fIpostmaster_password\fB is not given, \fBvadddomain\fR
+\fIvirtual_domain\fR is mandatory. Rest are optional. If \fIpostmaster_password\fR is not given, \fBvadddomain\fR
 will prompt for the password.
 .TP
 \fB\-V\fR
@@ -136,5 +143,5 @@ For a clustered domain, the postmaster id is added only for the first domain cre
 cluster.
 
 .SH "SEE ALSO"
-vaddaliasdomain(1), vmoddomain(1), vadduser(1), vdeldomain(1), vdeluser(1), vdominfo(1),
+vaddaliasdomain(1), vmoddomain(1), vadduser(1), vdeldomain(1), valias(1), vdeluser(1), vdominfo(1),
 dbinfo(8), qmail-smtpd(8), vdelivermail(8), vatrn(1)

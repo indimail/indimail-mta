@@ -1,5 +1,8 @@
 /*
  * $Log: indimail.h,v $
+ * Revision 2.183  2010-02-16 13:07:14+05:30  Cprogrammer
+ * added post_hook() function
+ *
  * Revision 2.182  2009-12-01 10:34:22+05:30  Cprogrammer
  * changed order of passwd_expiry column
  *
@@ -860,7 +863,7 @@
 #define INDIMAILH_H
 
 #ifndef	lint
-static char     sccsidh[] = "$Id: indimail.h,v 2.182 2009-12-01 10:34:22+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsidh[] = "$Id: indimail.h,v 2.183 2010-02-16 13:07:14+05:30 Cprogrammer Stab mbhangui $";
 #endif
 
 #include "config.h"
@@ -1530,11 +1533,6 @@ int             r_chown(char *, uid_t, gid_t);
 char           *vget_assign(char *, char *, int, uid_t *, gid_t *);
 char           *autoturn_dir(char *);
 int             fappend(char *, char *, char *, mode_t, uid_t, gid_t);
-#ifdef HAVE_STDARG_H
-int             filewrt     __P((int, char *, ...));
-#else
-int             filewrt     ();
-#endif
 int             purge_files(char *, int);
 char           *genpass(int);
 int             user_over_quota(char *, char *, int);
@@ -1656,9 +1654,13 @@ int             loadbalance(int);
 void            getEnvConfigStr(char **, char *, char *);
 void            getEnvConfigInt(long *, char *, long);
 #ifdef HAVE_STDARG_H
+int             filewrt     __P((int, char *, ...));
+int             post_hook   __P((const char *, ...));
 char           *error_stack __P((FILE *, const char *, ...));
 #else
-char           *error_stack();
+int             filewrt     ();
+int             post_hook   ();
+char           *error_stack ();
 #endif
 
 #ifdef USE_MAILDIRQUOTA

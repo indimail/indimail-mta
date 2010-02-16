@@ -1,5 +1,8 @@
 /*
  * $Log: vdeldomain.c,v $
+ * Revision 2.11  2010-02-16 13:08:55+05:30  Cprogrammer
+ * added post_hook function
+ *
  * Revision 2.10  2008-09-17 21:35:24+05:30  Cprogrammer
  * setuid(0) only for indimail
  *
@@ -78,6 +81,7 @@
 #include <stdio.h>
 #include <unistd.h>
 #include <string.h>
+#include <stdlib.h>
 #include <pwd.h>
 #include <sys/stat.h>
 #include <fcntl.h>
@@ -86,7 +90,7 @@
 #include <pwd.h>
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vdeldomain.c,v 2.10 2008-09-17 21:35:24+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: vdeldomain.c,v 2.11 2010-02-16 13:08:55+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 char            Domain[MAX_BUFF];
@@ -102,6 +106,7 @@ main(argc, argv)
 {
 	int             err;
 	uid_t           uid;
+	char           *ptr, *base_argv0;
 #ifdef CLUSTERED_SITE
 	char            mcdFile[MAX_BUFF];
 	char           *ipaddr, *mcdfile, *qmaildir, *controldir;
@@ -171,7 +176,13 @@ main(argc, argv)
 	}
 #endif
 	vclose();
-	return(err);
+	if (!(ptr = getenv("POST_HOOK")))
+	{
+		if (!(base_argv0 = strrchr(argv[0], '/')))
+			base_argv0 = argv[0];
+		return(post_hook("%s/libexec/%s %s", INDIMAILDIR, base_argv0, Domain));
+	} else
+		return(post_hook("%s %s", ptr, Domain));
 }
 
 int

@@ -1,5 +1,8 @@
 /*
  * $Log: vadduser.c,v $
+ * Revision 2.30  2010-02-16 13:08:47+05:30  Cprogrammer
+ * added post_hook function
+ *
  * Revision 2.29  2009-12-30 13:10:17+05:30  Cprogrammer
  * run vadduser with uid, gid of domain
  *
@@ -141,7 +144,7 @@
 #include <signal.h>
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vadduser.c,v 2.29 2009-12-30 13:10:17+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: vadduser.c,v 2.30 2010-02-16 13:08:47+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 char            Email[MAX_BUFF];
@@ -170,7 +173,7 @@ main(argc, argv)
 	char           *argv[];
 {
 	int             i, quota, pass_len = 8;
-	char           *real_domain, *ptr;
+	char           *real_domain, *ptr, *base_argv0;
 	char            tmpbuf[MAX_BUFF], envbuf[MAX_BUFF], buffer[MAX_BUFF];
 	FILE           *fp;
 	uid_t           uid, uidtmp;
@@ -321,7 +324,13 @@ main(argc, argv)
 	vclose();
 	if (Random)
 		printf("Password is %s\n", Passwd);
-	return(0);
+	if (!(ptr = getenv("POST_HOOK")))
+	{
+		if (!(base_argv0 = strrchr(argv[0], '/')))
+			base_argv0 = argv[0];
+		return(post_hook("%s/libexec/%s %s@%s", INDIMAILDIR, base_argv0, User, real_domain));
+	} else
+		return(post_hook("%s %s@%s", ptr, User, real_domain));
 }
 
 void

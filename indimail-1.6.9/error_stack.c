@@ -1,5 +1,8 @@
 /*
  * $Log: error_stack.c,v $
+ * Revision 2.5  2010-02-16 13:31:54+05:30  Cprogrammer
+ * free memory allocated by vasprintf
+ *
  * Revision 2.4  2009-11-08 00:53:11+05:30  Cprogrammer
  * added missing declaration for non stdarg.h system
  *
@@ -23,7 +26,7 @@
 #include "error_stack.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: error_stack.c,v 2.4 2009-11-08 00:53:11+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: error_stack.c,v 2.5 2010-02-16 13:31:54+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 void
@@ -80,6 +83,7 @@ va_dcl
 		len = strlen(errorstr) + 1;
 		if (!(error_store = realloc(error_store, mylen + len + 1))) {	/*- The man page is wierd on Mac OS */
 			fprintf(ferr, "%s", errorstr);
+			free(errorstr);
 			fprintf(ferr, "error_stack: realloc: %s\n", strerror(errno));
 			fflush(ferr);
 			return ((char *) 0);
@@ -94,9 +98,11 @@ va_dcl
 		{
 			fprintf(ferr, "atexit: %s\n", strerror(errno));
 			fflush(ferr);
+			free(errorstr);
 			return((char *) 0);
 		}
 		strncpy(error_store + mylen, errorstr, len);
+		free(errorstr);
 		error_store[mylen + len - 1] = 0;
 		mylen += len;
 		return (error_store);

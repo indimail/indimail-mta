@@ -1,5 +1,8 @@
 /*
  * $Log: vadddomain.c,v $
+ * Revision 2.27  2010-02-16 13:08:35+05:30  Cprogrammer
+ * added post_hook function
+ *
  * Revision 2.26  2010-02-16 09:29:37+05:30  Cprogrammer
  * added abuse, mailer-daemon as alias to postmaster
  *
@@ -143,7 +146,7 @@
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vadddomain.c,v 2.26 2010-02-16 09:29:37+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: vadddomain.c,v 2.27 2010-02-16 13:08:35+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 
@@ -169,7 +172,7 @@ main(argc, argv)
 	uid_t           uid;
 	gid_t           gid;
 	extern int      create_flag;
-	char           *qmaildir, *ptr;
+	char           *qmaildir, *ptr, *base_argv0;
 	FILE           *fs;
 	char            AliasLine[MAX_BUFF];
 	char           *auto_ids[] = {
@@ -343,7 +346,13 @@ main(argc, argv)
 		valias_insert(auto_ids[i], Domain, AliasLine, 0);
 	}
 	vclose();
-	return(0);
+	if (!(ptr = getenv("POST_HOOK")))
+	{
+		if (!(base_argv0 = strrchr(argv[0], '/')))
+			base_argv0 = argv[0];
+		return(post_hook("%s/libexec/%s %s", INDIMAILDIR, base_argv0, Domain));
+	} else
+		return(post_hook("%s %s", ptr, Domain));
 }
 
 int
