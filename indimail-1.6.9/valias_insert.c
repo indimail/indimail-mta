@@ -1,5 +1,8 @@
 /*
  * $Log: valias_insert.c,v $
+ * Revision 2.18  2010-02-16 09:28:38+05:30  Cprogrammer
+ * return error when insert fails
+ *
  * Revision 2.17  2009-11-25 12:54:04+05:30  Cprogrammer
  * do not allow empty alias_line
  *
@@ -91,7 +94,7 @@
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: valias_insert.c,v 2.17 2009-11-25 12:54:04+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: valias_insert.c,v 2.18 2010-02-16 09:28:38+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef VALIAS
@@ -186,7 +189,7 @@ valias_insert(char *alias, char *domain, char *alias_line, int ignore)
 		printf("Added alias %s@%s\n", alias, real_domain);
 	else
 		printf("No alias %s@%s\n", alias, real_domain);
-	return (0);
+	return (err ? 0 : 1);
 }
 #endif
 
