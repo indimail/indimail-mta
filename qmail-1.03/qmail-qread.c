@@ -564,5 +564,9 @@ getversion_qmail_qread_c()
 {
 	static char    *x = "$Id: qmail-qread.c,v 1.19 2010-02-10 08:58:43+05:30 Cprogrammer Exp mbhangui $";
 
+#ifdef INDIMAIL
+	x = sccsidh;
+#else
 	x++;
+#endif
 }
