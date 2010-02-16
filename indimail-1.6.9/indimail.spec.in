@@ -1,5 +1,8 @@
 #
 # $Log: indimail.spec.in,v $
+# Revision 2.125  2010-02-16 09:28:09+05:30  Cprogrammer
+# added uacl
+#
 # Revision 2.124  2010-01-07 15:39:00+05:30  Cprogrammer
 # removed --mysqlhost parameter to indisrvr to enable indisrvr to use control file
 #
@@ -387,7 +390,7 @@
 # rpm spec file for indimail
 #
 #
-# $Id: indimail.spec.in,v 2.124 2010-01-07 15:39:00+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 2.125 2010-02-16 09:28:09+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %define _unpackaged_files_terminate_build 1
 
