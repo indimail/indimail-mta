@@ -52,3 +52,9 @@ svctool.8
 Quick-INSTALL
 patches/courier-imap-3.0.8.patch.gz
 patches/fetchmail-6.3.9.patch.gz
+vadduser.1
+vdeldomain.1
+vdeluser.1
+vrenamedomain.1
+vrenameuser.1
+
