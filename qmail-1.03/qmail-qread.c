@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-qread.c,v $
+ * Revision 1.20  2010-02-17 10:38:55+05:30  Cprogrammer
+ * removed compiler warning
+ *
  * Revision 1.19  2010-02-10 08:58:43+05:30  Cprogrammer
  * use -DMULTI_QUEUE to use multiple queues
  *
@@ -562,7 +565,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_qread_c()
 {
-	static char    *x = "$Id: qmail-qread.c,v 1.19 2010-02-10 08:58:43+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-qread.c,v 1.20 2010-02-17 10:38:55+05:30 Cprogrammer Exp mbhangui $";
 
 #ifdef INDIMAIL
 	x = sccsidh;
