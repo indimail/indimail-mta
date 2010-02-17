@@ -161,7 +161,7 @@ svctool indimail_settings.c cronlist crypt create_services INSTALL INSTALL-RPM I
 indimail.spec cscope.* *.dSYM inc_deps lib_deps socket.lib indimail-@VERSION@-rpmlintrc \
 indimail-epm.list README-CLUSTER tls-cert-check mailzipper perm_list RELEASE-Notes \
 dbinfo.8 inlookup.8 vadddomain.1 vdeldomain.1 vadduser.1 vdeluser.1 vdelivermail.8 \
-indimail.7 svctool.8 indisub.c Quick-INSTALL indimail.mrtg.cfg
+vrenamedomain.1 vrenameuser.1 indimail.7 svctool.8 indisub.c Quick-INSTALL indimail.mrtg.cfg
 
 DISTCLEANFILES=.gitignore
 
@@ -792,6 +792,10 @@ vdeldomain.1:vdeldomain.9
 vadduser.1:vadduser.9
 	cat $^ | sed s}INDIMAIL}$(indimaildir)}g > $@
 vdeluser.1:vdeluser.9
+	cat $^ | sed s}INDIMAIL}$(indimaildir)}g > $@
+vrenamedomain.1:vrenamedomain.9
+	cat $^ | sed s}INDIMAIL}$(indimaildir)}g > $@
+vrenameuser.1:vrenameuser.9
 	cat $^ | sed s}INDIMAIL}$(indimaildir)}g > $@
 vdelivermail.8:vdelivermail.9
 	cat $^ | sed s}INDIMAIL}$(indimaildir)}g > $@

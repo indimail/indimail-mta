@@ -15,6 +15,12 @@ component, and doesn't change attributes like pw_gecos, pw_dir, etc. But can be 
 conjunction with vmoveuser, vmoduser it can be used to change the homedir, gecos also.
 \fBvrenameuser\fR has setuid bit to root and can be run by the root or indimail user.
 
+.SH POST HOOK
+If the environment variable POST_HOOK is set, \fBvrenameuser\fR executes the program defined by
+the POST_HOOK environment variable, passing \fIold_email_address\fR and \fInew_email_address\fR as
+parameters. If POST_HOOK is not defined, the program/script INDIMAIL/libexec/vrenameuser
+will be executed with \fIold_email_address\fR and \fInew_email_address\fR as parameters.
+
 .SH OPTIONS
 .PP
 .TP

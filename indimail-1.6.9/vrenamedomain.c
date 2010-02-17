@@ -1,5 +1,8 @@
 /*
  * $Log: vrenamedomain.c,v $
+ * Revision 2.13  2010-02-17 10:58:50+05:30  Cprogrammer
+ * added post hook
+ *
  * Revision 2.12  2009-09-23 15:00:37+05:30  Cprogrammer
  * change for new runcmmd()
  *
@@ -40,13 +43,14 @@
  */
 #include "indimail.h"
 #include <unistd.h>
+#include <stdlib.h>
 #include <fcntl.h>
 #include <errno.h>
 #include <string.h>
 #include <sys/stat.h>
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vrenamedomain.c,v 2.12 2009-09-23 15:00:37+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: vrenamedomain.c,v 2.13 2010-02-17 10:58:50+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 int
@@ -56,14 +60,14 @@ main(int argc, char **argv)
 	gid_t           gid;
 	FILE           *fp;
 	char            OldDir[MAX_BUFF], NewDir[MAX_BUFF], TmpBuf[MAX_BUFF], DomDir[MAX_BUFF];
-	char           *real_domain, *ptr, *qmaildir, *tmpstr;
+	char           *real_domain, *ptr, *qmaildir, *tmpstr, *base_argv0;
 	struct passwd  *pw;
 	struct stat     statbuf;
 
 	if(argc != 3)
 	{
 		error_stack(stderr, "USAGE: %s old_domain_name new_domain_name\n", argv[0]);
-		return(1);
+		return (1);
 	}
 	if (indimailuid == -1 || indimailgid == -1)
 		GetIndiId(&indimailuid, &indimailgid);
@@ -71,12 +75,12 @@ main(int argc, char **argv)
 	if (uid != 0 && uid != indimailuid)
 	{
 		error_stack(stderr, "you must be root or indimail to run this program\n");
-		return(1);
+		return (1);
 	}
 	if (uid && setuid(0))
 	{
 		error_stack(stderr, "setuid-root: %s\n", strerror(errno));
-		return(1);
+		return (1);
 	}
 	if((real_domain = vget_real_domain(argv[2])) != (char *) 0)
 	{
@@ -101,7 +105,7 @@ main(int argc, char **argv)
 		else
 		if(vdeldomain(argv[1]))
 			error_stack(stderr, "vdeldomain: %s\n", argv[1]);
-		return(0);
+		return (0);
 	} else
 	if(!vget_assign(argv[1], OldDir, MAX_BUFF, &uid, &gid))
 	{
@@ -124,13 +128,13 @@ main(int argc, char **argv)
 		*tmpstr = 0;
 	printf("Renaming real domain %s to %s\n", argv[1], argv[2]);
 	if(vauth_renamedomain(argv[1], argv[2], ptr))
-		return(1);
+		return (1);
 	else
 	if(add_domain_assign(argv[2], DomDir, uid, gid))
-		return(1);
+		return (1);
 	else
 	if(add_control(argv[2], 0))
-		return(1);
+		return (1);
 	else
 	if(del_domain_assign(argv[1], OldDir, uid, gid))
 		return (1);
@@ -212,7 +216,13 @@ main(int argc, char **argv)
 	}
 	snprintf(TmpBuf, MAX_BUFF, "%s/.domain_rename", ptr);
 	unlink(TmpBuf);
-	return(0);
+	if (!(ptr = getenv("POST_HOOK")))
+	{
+		if (!(base_argv0 = strrchr(argv[0], '/')))
+			base_argv0 = argv[0];
+		return(post_hook("%s/libexec/%s %s", INDIMAILDIR, base_argv0, argv[1], argv[2]));
+	} else
+		return(post_hook("%s %s", ptr, argv[1], argv[2]));
 }
 
 void

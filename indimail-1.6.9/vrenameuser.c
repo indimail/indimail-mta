@@ -1,5 +1,8 @@
 /*
  * $Log: vrenameuser.c,v $
+ * Revision 2.9  2010-02-17 10:58:55+05:30  Cprogrammer
+ * added post hook
+ *
  * Revision 2.8  2009-09-30 00:24:23+05:30  Cprogrammer
  * added missing call to GetIndiId()
  *
@@ -38,7 +41,7 @@
 #include <signal.h>
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vrenameuser.c,v 2.8 2009-09-30 00:24:23+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: vrenameuser.c,v 2.9 2010-02-17 10:58:55+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 char            oldEmail[MAX_BUFF];
@@ -59,23 +62,29 @@ main(argc, argv)
 	int             err;
 	uid_t           uid1, uid2, myuid;
 	gid_t           gid1, gid2;
+	char           *ptr, *base_argv0;
 
 	if(get_options(argc, argv))
-		return(1);
-	if (parse_email(oldEmail, oldUser, oldDomain, MAX_BUFF) || parse_email(newEmail, newUser, newDomain, MAX_BUFF))
+		return (1);
+	if (parse_email(oldEmail, oldUser, oldDomain, MAX_BUFF))
 	{
 		error_stack(stderr, "%s: Email too long\n", oldEmail);
-		return(1);
-	}
+		return (1);
+	} else
+	if (parse_email(newEmail, newUser, newDomain, MAX_BUFF))
+	{
+		error_stack(stderr, "%s: Email too long\n", newEmail);
+		return (1);
+	} 
 	if(!vget_assign(oldDomain, 0, 0, &uid1, &gid1))
 	{
 		error_stack(stderr, "%s: No such domain\n", oldDomain);
-		return(1);
+		return (1);
 	}
 	if(!vget_assign(newDomain, 0, 0, &uid2, &gid2))
 	{
 		error_stack(stderr, "%s: No such domain\n", newDomain);
-		return(1);
+		return (1);
 	}
 	if (indimailuid == -1 || indimailgid == -1)
 		GetIndiId(&indimailuid, &indimailgid);
@@ -83,14 +92,14 @@ main(argc, argv)
 	if (myuid != 0 && myuid != indimailuid)
 	{
 		error_stack(stderr, "you must be root or indimail to run this program\n");
-		return(1);
+		return (1);
 	}
 	if (uid1 != uid2)
 	{
 		if (setuid(0))
 		{
 			perror("setuid-root");
-			return(1);
+			return (1);
 		}
 	} else
 	{
@@ -100,12 +109,18 @@ main(argc, argv)
 		if (setgid(gid1) || setuid(uid1))
 		{
 			error_stack(stderr, "setuid/setgid (%d/%d): %s", uid1, gid1, strerror(errno));
-			return(1);
+			return (1);
 		}
 	}
 	err = vrenameuser(oldUser, oldDomain, newUser, newDomain);
 	vclose();
-	return(err);
+	if (!(ptr = getenv("POST_HOOK")))
+	{
+		if (!(base_argv0 = strrchr(argv[0], '/')))
+			base_argv0 = argv[0];
+		return (post_hook("%s/libexec/%s %s", INDIMAILDIR, base_argv0, oldEmail, newEmail));
+	} else
+		return (post_hook("%s %s", ptr, oldEmail, newEmail));
 }
 
 
@@ -154,9 +169,9 @@ get_options(int argc, char **argv)
 	if (errflag || !*oldEmail || !*newEmail)
 	{
 		usage();
-		return(1);
+		return (1);
 	}
-	return(0);
+	return (0);
 }
 
 void
