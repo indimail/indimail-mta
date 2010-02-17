@@ -1,5 +1,8 @@
 /*
  * $Log: vpasswd.c,v $
+ * Revision 2.13  2010-02-17 14:14:29+05:30  Cprogrammer
+ * added post hook
+ *
  * Revision 2.12  2008-08-02 09:10:37+05:30  Cprogrammer
  * use new function error_stack
  *
@@ -95,7 +98,7 @@
 #include <signal.h>
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vpasswd.c,v 2.12 2008-08-02 09:10:37+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: vpasswd.c,v 2.13 2010-02-17 14:14:29+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 
@@ -117,7 +120,7 @@ main(argc, argv)
 	char           *argv[];
 {
 	int             i;
-	char           *real_domain;
+	char           *real_domain, *ptr, *base_argv0;
 
 	if(get_options(argc, argv))
 		return(1);
@@ -147,7 +150,13 @@ main(argc, argv)
 		return(1);
 	}
 	vclose();
-	return(0);
+	if (!(ptr = getenv("POST_HOOK")))
+	{
+		if (!(base_argv0 = strrchr(argv[0], '/')))
+			base_argv0 = argv[0];
+		return (post_hook("%s/libexec/%s %s@%s", INDIMAILDIR, base_argv0, User, real_domain));
+	} else
+		return (post_hook("%s %s@%s", ptr, User, real_domain));
 }
 
 void

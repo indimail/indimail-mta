@@ -118,9 +118,9 @@ main(argc, argv)
 	{
 		if (!(base_argv0 = strrchr(argv[0], '/')))
 			base_argv0 = argv[0];
-		return (post_hook("%s/libexec/%s %s", INDIMAILDIR, base_argv0, oldEmail, newEmail));
+		return (post_hook("%s/libexec/%s %s %s", INDIMAILDIR, base_argv0, oldEmail, newEmail));
 	} else
-		return (post_hook("%s %s", ptr, oldEmail, newEmail));
+		return (post_hook("%s %s %s", ptr, oldEmail, newEmail));
 }
 
 

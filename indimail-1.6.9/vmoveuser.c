@@ -1,5 +1,8 @@
 /*
  * $Log: vmoveuser.c,v $
+ * Revision 2.8  2010-02-17 14:14:24+05:30  Cprogrammer
+ * added post hook
+ *
  * Revision 2.7  2009-09-30 00:24:05+05:30  Cprogrammer
  * do setuid so that move succeeds
  *
@@ -75,7 +78,7 @@
 #include <sys/stat.h>
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vmoveuser.c,v 2.7 2009-09-30 00:24:05+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: vmoveuser.c,v 2.8 2010-02-17 14:14:24+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 int
@@ -83,7 +86,7 @@ main(int argc, char **argv)
 {
 	struct passwd  *pw;
 	struct passwd   PwTmp;
-	char           *tmpstr, *Domain, *NewDir, *User, *real_domain;
+	char           *tmpstr, *Domain, *NewDir, *User, *real_domain, *base_argv0;
 	char            OldDir[MAX_BUFF], Dir[MAX_BUFF];
 #if defined(CLUSTERED_SITE) || defined(VALIAS)
 	char           *ptr1;
@@ -220,7 +223,14 @@ main(int argc, char **argv)
 		return (1);
 	}
 	printf("%s@%s old %s new %s done\n", User, Domain, OldDir, NewDir);
-	return (0);
+	if (!(tmpstr = getenv("POST_HOOK")))
+	{
+		if (!(base_argv0 = strrchr(argv[0], '/')))
+			base_argv0 = argv[0];
+		return (post_hook("%s/libexec/%s %s@%s %s %s",
+					INDIMAILDIR, base_argv0, User, real_domain, OldDir, NewDir));
+	} else
+		return (post_hook("%s %s@%s %s %s", tmpstr, User, real_domain, OldDir, NewDir));
 }
 
 void

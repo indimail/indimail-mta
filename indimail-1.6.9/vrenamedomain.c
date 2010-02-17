@@ -220,9 +220,9 @@ main(int argc, char **argv)
 	{
 		if (!(base_argv0 = strrchr(argv[0], '/')))
 			base_argv0 = argv[0];
-		return(post_hook("%s/libexec/%s %s", INDIMAILDIR, base_argv0, argv[1], argv[2]));
+		return(post_hook("%s/libexec/%s %s %s", INDIMAILDIR, base_argv0, argv[1], argv[2]));
 	} else
-		return(post_hook("%s %s", ptr, argv[1], argv[2]));
+		return(post_hook("%s %s %s", ptr, argv[1], argv[2]));
 }
 
 void
