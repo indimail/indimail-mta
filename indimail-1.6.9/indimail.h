@@ -1,5 +1,8 @@
 /*
  * $Log: indimail.h,v $
+ * Revision 2.184  2010-02-18 08:35:15+05:30  Cprogrammer
+ * changed default socket to /var/lib/mysql/mysql.sock
+ *
  * Revision 2.183  2010-02-16 13:07:14+05:30  Cprogrammer
  * added post_hook() function
  *
@@ -863,7 +866,7 @@
 #define INDIMAILH_H
 
 #ifndef	lint
-static char     sccsidh[] = "$Id: indimail.h,v 2.183 2010-02-16 13:07:14+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsidh[] = "$Id: indimail.h,v 2.184 2010-02-18 08:35:15+05:30 Cprogrammer Stab mbhangui $";
 #endif
 
 #include "config.h"
@@ -904,7 +907,7 @@ typedef long long mdir_t;
 #define MYSQL_USER              "indimail"
 #define MYSQL_PASSWD            "ssh-1.5-"
 #define MYSQL_VPORT             "3306"
-#define MYSQL_SOCKET            "/tmp/mysql.sock"
+#define MYSQL_SOCKET            "/var/lib/mysql/mysql.sock"
 #define MYSQL_DATABASE          "indimail"
 #define MYSQL_DEFAULT_TABLE     "indimail"
 #define MYSQL_INACTIVE_TABLE    "indibak"
