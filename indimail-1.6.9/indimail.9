@@ -180,6 +180,7 @@ entry in \fIhost.master\fR pointing to the MySQL master database and have entry 
 pointing to the MySQL slave database. All indimail programs ensure that all writes go to the
 master database and reads happen only from the slave database. The control files \fIhost.master\fR,
 \fIhost.cntrl\fR can be overriden by the environment variables \fBMASTER_HOST\fR and \fBCNTRL_HOST\fR.
+One can also give host:user:password:mysql_socket/port as the format for \fIhost.master\fR or \fIhost.cntrl\fR.
 .PP
 In a clustered setup, you can have multiple servers with each server having its own set of
 local users. The information for these users are stored in a MySQL database known as the
@@ -205,7 +206,8 @@ MySQL \fBlocal database\fR needs to be added/removed in the \fIdbinfo\fR table o
 In case you do not require a multi-host setup, IndiMail does not require \fBcentral database\fR. Programs
 just need to connect to the \fBlocal database\fR which can be configured by having the control
 file INDIMAIL/control/host.mysql. The control file contains the IP address or hostname of the
-MySQL \fBlocal database\fR.
+MySQL \fBlocal database\fR. One can also give host:user:password:mysql_socket/port as the format
+for \fIhost.mysql\fR.
 
 .SH Virtual Domains
 .PP
@@ -914,11 +916,13 @@ PASSWD_CACHE      |authindi     |used    |Enables Password caching. Improves
                   |vchkpass     |        |dormant sites, this should be turned off
                   |             |        |as passwd changes take time to get
                   |             |        |reflected.
-QUERY_CACHE       |authindi     |used    |Enables Query caching. Improves
-                  |InLookup     |        |performance for a very busy site. For
-                  |vchkpass     |        |dormant sites, this should be turned off
-                  |             |        |as passwd changes take time to get
-                  |             |        |reflected.
+                  |             |        |
+                  |             |        |
+QUERY_CACHE       |authindi     |used    |Enables Query caching by using inquery.
+                  |InLookup     |        |Improves performance for a very busy site.
+                  |vchkpass     |        |
+                  |             |        |
+                  |             |        |
 ------------------|-------------|--------|----------------------------------------
 RELAY_CLEAR_MIN   |clearopensmtp|used    |No of minutes after which the
 -UTES             |InLookup     |        |authentication request maintained in the
@@ -1049,6 +1053,15 @@ TCPREMOTEIP       |tcpclient    |set     |The IP address of the remote host.
                   |tcprulescheck|        |
                   |rblsmtpd     |        |
 ------------------|-------------|--------|----------------------------------------
+POST_HANDLE       |vadddomain   |used    |Used to set the path to program that
+                  |vdeldomain   |        |will be executed on successful completion
+                  |vrenamedomain|        |of the program. If not set, program with
+                  |vadduser     |        |the same name as that of the calling
+                  |vdeluser     |        |program will be executed in the directory
+                  |vrenameuser  |        |INDIMAIL/libexec. If the program exists,
+                  |vmoveuser    |        |then return status of the handle will be
+                  |vpasswd      |        |returned
+------------------|-------------|--------|----------------------------------------
 .TE
 
 Some of these environment variables have default values. The table below lists some of these.
@@ -1114,6 +1127,23 @@ qmail-spamlog        | Spam logger service
 
 You can use svc to start / stop individual services. To disable / enable all services, you
 can use the initsvc(1) command
+
+.SH POST Execution Handle
+Some indimail programs have a post execution handle. A post execution handle is a program with
+the same name as that of the calling program but in the directory INDIMAIL/libexec.
+On successful completion, such programs with this handle will execute the handle program and return
+the status of the called handle program. If the handle program is not accessible, the return status
+is zero. Normally, the handle program always gets executed from INDIMAIL/libexec directory, but
+you can override the program called by setting the environment variable \fBPOST_HANDLE\fR.
+
+Post execution handle is useful when you want to achieve a task that is beyond the scope of IndiMail's
+programs. These handle help you to extend the functionality of indimail programs when adding domains,
+adding users, modifying a domain or modifying a user. These handles are passed arguments depending
+on the arguments passed to the original program. See the section on \fBPOST HANDLE\fR in the
+man page for the programs mentioned below having post execution handle.
+
+Programs that support this post execution handle are vadddomain(1), vdeldomain(1), vrenamedomain(1),
+vadduser(1), vdeluser(1), vrenameuser(1), vmoveuser(1), vpasswd(1).
 
 .SH PROGRAMS
 IndiMail has programs installed in INDIMAIL/bin, INDIMAIL/sbin.

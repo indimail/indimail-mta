@@ -89,7 +89,7 @@
        mysql> GRANT SELECT,CREATE,ALTER,INDEX,INSERT,UPDATE,DELETE,CREATE TEMPORARY TABLES, \
               LOCK TABLES ON indimail.* to 'indimail';
        mysql> GRANT RELOAD,SHUTDOWN,PROCESS,SUPER on *.* to admin;
-       mysql> GRANT REPLICATION_SLAVE on *.* to repl;
+       mysql> GRANT REPLICATION SLAVE on *.* to repl;
 
        also have 'sql-mode=NO_BACKSLASH_ESCAPES' in the server option
        file (my.cnf or wherever your my.cnf lies)

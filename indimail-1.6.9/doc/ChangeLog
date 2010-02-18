@@ -1,12 +1,16 @@
-* Mon Feb 01 2010 mbhangui@gmail.com
+* Thu Feb 18 2010 mbhangui@gmail.com
 Release 1.6.9 Start 01/02/2010
 10/02/2010
 1.  Removed INDIMAIL depencies in qmail-tcpok, qmail-tcpto, qmail-qread
 16/02/2010
 2.  Added abuse, mailer-daemon as alias to postmaster when creating a new
     domain.
-3.  Added POST Hook for program vadddomain, vdeldomain, vadduser, vdeluser
+3.  Added POST Handle for program vadddomain, vdeldomain, vadduser, vdeluser
+    vrenamedomain, vrenameuser, vpasswd, vmoveuser
 4.  BUG - Free memory allocated by vasprintf in error_stack.c
+18/02/2010
+5.  BUG - Fixed creation of indisrvr service when installing RPM
+6.  Changed default mysql socket to /var/lib/mysql/mysql.sock in indimail.h
 
 * Mon Feb 01 2010 mbhangui@gmail.com
 Release 1.6.8 Start 04/01/2010
