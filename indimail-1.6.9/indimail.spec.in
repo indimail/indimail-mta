@@ -1,5 +1,9 @@
 #
 # $Log: indimail.spec.in,v $
+# Revision 2.126  2010-02-18 11:02:39+05:30  Cprogrammer
+# fixed problem with indisrvr service creation
+# added --query-cache for imap/pop3 service
+#
 # Revision 2.125  2010-02-16 09:28:09+05:30  Cprogrammer
 # added uacl
 #
@@ -390,7 +394,7 @@
 # rpm spec file for indimail
 #
 #
-# $Id: indimail.spec.in,v 2.125 2010-02-16 09:28:09+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 2.126 2010-02-18 11:02:39+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %define _unpackaged_files_terminate_build 1
 
@@ -2272,32 +2276,38 @@ fi
 if [ %nocourierimap -eq 0 ] ; then
 # IMAP/POP3
 %{_prefix}/sbin/svctool --imap=143 --servicedir=%{servicedir} --localip=0 --maxdaemons=40 \
-	--maxperip=25 --default-domain=%{default_domain} --memory=%{imap_pop3_mem}
+	--query-cache --maxperip=25 --default-domain=%{default_domain} --memory=%{imap_pop3_mem}
 %{_prefix}/sbin/svctool --imap=993 --servicedir=%{servicedir} --localip=0 --maxdaemons=40 \
-	--maxperip=25 --default-domain=%{default_domain} --memory=%{imap_pop3_mem} --ssl
+	--query-cache --maxperip=25 --default-domain=%{default_domain} --memory=%{imap_pop3_mem} \
+	--ssl
 %{_prefix}/sbin/svctool --pop3=110 --servicedir=%{servicedir} --localip=0 --maxdaemons=40 \
-	--maxperip=25 --default-domain=%{default_domain} --memory=%{imap_pop3_mem}
+	--query-cache --maxperip=25 --default-domain=%{default_domain} --memory=%{imap_pop3_mem}
 %{_prefix}/sbin/svctool --pop3=995 --servicedir=%{servicedir} --localip=0 --maxdaemons=40 \
-	--maxperip=25 --default-domain=%{default_domain} --memory=%{imap_pop3_mem} --ssl
+	--query-cache --maxperip=25 --default-domain=%{default_domain} --memory=%{imap_pop3_mem} \
+	--ssl
 fi
 if [ %noproxy -eq 0 ] ; then
 %{_prefix}/sbin/svctool --imap=4143 --servicedir=%{servicedir} --localip=0 --maxdaemons=40 \
-	--maxperip=25 --default-domain=%{default_domain} --memory=%{imap_pop3_mem} --proxy=143
+	--query-cache --maxperip=25 --default-domain=%{default_domain} --memory=%{imap_pop3_mem} \
+	--proxy=143
 %{_prefix}/sbin/svctool --imap=9143 --servicedir=%{servicedir} --localip=0 --maxdaemons=40 \
-	--maxperip=25 --default-domain=%{default_domain} --memory=%{imap_pop3_mem} --proxy=143 --ssl
+	--query-cache --maxperip=25 --default-domain=%{default_domain} --memory=%{imap_pop3_mem} \
+	--proxy=143 --ssl
 %{_prefix}/sbin/svctool --pop3=4110 --servicedir=%{servicedir} --localip=0 --maxdaemons=40 \
-	--maxperip=25 --default-domain=%{default_domain} --memory=%{imap_pop3_mem} --proxy=110
+	--query-cache --maxperip=25 --default-domain=%{default_domain} --memory=%{imap_pop3_mem} \
+	--proxy=110
 %{_prefix}/sbin/svctool --pop3=9110 --servicedir=%{servicedir} --localip=0 --maxdaemons=40 \
-	--maxperip=25 --default-domain=%{default_domain} --memory=%{imap_pop3_mem} --proxy=110 --ssl
+	--query-cache --maxperip=25 --default-domain=%{default_domain} --memory=%{imap_pop3_mem} \
+	--proxy=110 --ssl
 fi
 
 # IndiMail Daemons
-%{_prefix}/sbin/svctool --indisrvr=4000 --servicedir=%{servicedir} 
+%{_prefix}/sbin/svctool --indisrvr=4000 --servicedir=%{servicedir} \
 	--localip=0 --maxdaemons=40 --maxperip=25 --avguserquota=2097152 \
     --certfile=%{_prefix}/control/servercert.pem --ssl \
 	--hardquota=52428800 --base_path=%{mbase}
-%{_prefix}/sbin/svctool --inlookup=infifo --servicedir=%{servicedir} --cntrldir=control --threads=5 \
-	--query-cache --password-cache
+%{_prefix}/sbin/svctool --inlookup=infifo --servicedir=%{servicedir} --cntrldir=control \
+	--threads=5 --query-cache --password-cache
 %{_prefix}/sbin/svctool --pwdlookup=/tmp/nssd.sock --threads=5 --timeout=-1 \
 	--mysqlhost=localhost --mysqluser=indimail \
 	--mysqlpass=ssh-1.5- --mysqlsocket=/tmp/mysql.sock --servicedir=%{servicedir}
