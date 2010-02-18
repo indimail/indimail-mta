@@ -632,13 +632,13 @@ the installation.
     The commands below will create listeners for IMAP and POP3 service.
 
     % sudo @indimaildir@/sbin/svctool --imap=143 --servicedir=/service --localip=0 \
-        --maxdaemons=150 --maxperip=25 \
+        --query-cache --maxdaemons=150 --maxperip=25 \
         --default-domain=indimail.org --memory=10485760
     % sudo @indimaildir@/sbin/svctool --imap=993 --servicedir=/service --localip=0 \
-        --maxdaemons=150 --maxperip=25 \
+        --query-cache --maxdaemons=150 --maxperip=25 \
         --default-domain=indimail.org --memory=10485760 --postmaster=postmaster@indimail.org --ssl
     % sudo @indimaildir@/sbin/svctool --pop3=110 --servicedir=/service --localip=0 \
-        --maxdaemons=150 --maxperip=25 \
+        --query-cache --maxdaemons=150 --maxperip=25 \
         --default-domain=indimail.org --memory=10485760
     % sudo @indimaildir@/sbin/svctool --pop3=995 --servicedir=/service --localip=0 \
         --maxdaemons=150 --maxperip=25 \
@@ -649,17 +649,17 @@ the installation.
     multiple hosts.
 
     % sudo @indimaildir@/sbin/svctool --imap=4143 --servicedir=/service --localip=0 \
-        --maxdaemons=150 --maxperip=25 \
+        --query-cache --maxdaemons=150 --maxperip=25 \
         --default-domain=indimail.org --memory=10485760 --proxy=143
     % sudo @indimaildir@/sbin/svctool --imap=4990 --servicedir=/service --localip=0 \
-        --maxdaemons=150 --maxperip=25 \
+        --query-cache --maxdaemons=150 --maxperip=25 \
         --default-domain=indimail.org --memory=10485760 --proxy=143 \
         --postmaster=postmaster@indimail.org --ssl
     % sudo @indimaildir@/sbin/svctool --pop3=4110 --servicedir=/service --localip=0 \
-        --maxdaemons=150 --maxperip=25 \
+        --query-cache --maxdaemons=150 --maxperip=25 \
         --default-domain=indimail.org --memory=10485760 --proxy=110
     % sudo @indimaildir@/sbin/svctool --pop3=4995 --servicedir=/service --localip=0 \
-        --maxdaemons=150 --maxperip=25 \
+        --query-cache --maxdaemons=150 --maxperip=25 \
         --default-domain=indimail.org --memory=10485760 --proxy=110 \
         --postmaster=postmaster@indimail.org --ssl
 
@@ -696,9 +696,8 @@ the installation.
     functions like getpwnam(), getspnam(), etc to look at indimail MySQL tables.
 
     % sudo @indimaildir@/sbin/svctool --pwdlookup=/tmp/nssd.sock --threads=5 --timeout=-1 \
-        --mysqlhost=localhost \
-        --mysqluser=indimail --mysqlpass=ssh-1.5- --mysqlsocket=/tmp/mysql.sock \
-        --servicedir=/service
+        --mysqlhost=localhost --mysqluser=indimail --mysqlpass=ssh-1.5- \
+        --mysqlsocket=/tmp/mysql.sock --servicedir=/service
 
     ##### STEP 9  ## svscan log Service ##################
     The command below creates a multilog process for logging output of svscan
