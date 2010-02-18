@@ -4,7 +4,7 @@
  * changed default socket to /var/lib/mysql/mysql.sock
  *
  * Revision 2.183  2010-02-16 13:07:14+05:30  Cprogrammer
- * added post_hook() function
+ * added post_handle() function
  *
  * Revision 2.182  2009-12-01 10:34:22+05:30  Cprogrammer
  * changed order of passwd_expiry column
@@ -1658,11 +1658,11 @@ void            getEnvConfigStr(char **, char *, char *);
 void            getEnvConfigInt(long *, char *, long);
 #ifdef HAVE_STDARG_H
 int             filewrt     __P((int, char *, ...));
-int             post_hook   __P((const char *, ...));
+int             post_handle __P((const char *, ...));
 char           *error_stack __P((FILE *, const char *, ...));
 #else
 int             filewrt     ();
-int             post_hook   ();
+int             post_handle ();
 char           *error_stack ();
 #endif
 
