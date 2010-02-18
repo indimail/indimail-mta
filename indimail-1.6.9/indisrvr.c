@@ -709,7 +709,7 @@ call_prg()
 int
 Login_User(char *username, char *pass)
 {
-	char           *ptr, *mysql_pass;
+	char           *ptr, *admin_pass;
 
 	setbuf(stdin, 0);
 	printf("Login: ");
@@ -740,9 +740,9 @@ Login_User(char *username, char *pass)
 		fprintf(stderr, "You are disabled\n");
 		return(1);
 	}
-	if(!(mysql_pass = mgmtgetpass(username)))
+	if(!(admin_pass = mgmtgetpass(username)))
 		return(1);
-	if (*mysql_pass && !pw_comp(0, (unsigned char *) mysql_pass, (unsigned char *) pass, 0))
+	if (*admin_pass && !pw_comp(0, (unsigned char *) admin_pass, (unsigned char *) pass, 0))
 	{
 		printf("OK\n");
 		fflush(stdout);
