@@ -79,7 +79,7 @@ make_user_dir.c makesalt.c md5c.c mdaMysqlConnect.c mgmtpassfuncs.c mkpasswd3.c 
 mlist_delete.c mlist_filterno.c mlist_filterupdate.c mlist_insert.c mlist_update.c \
 monkey.c MoveFile.c mysql_perror.c mysql_query.c next_big_dir.c no_of_days.c \
 open_big_dir.c open_master.c open_smtp_relay.c parseAddress.c parse_email.c \
-parse_quota.c passwd.c passwd_policy.c pathToFilesystem.c pipe_exec.c post_hook.c \
+parse_quota.c passwd.c passwd_policy.c pathToFilesystem.c pipe_exec.c post_handle.c \
 print_control.c ProcessInFifo.c proxylogin.c purge_files.c pw_comp.c pwcomp.c \
 PwdInLookup.c qmail_remote.c r_chown.c recalc_quota.c RelayInLookup.c relay_select.c \
 RemoteBulkMail.c remove_line.c remove_quotes.c renameuser.c replacestr.c r_mkdir.c \
@@ -711,7 +711,7 @@ exp.lo: config.h osh.h
 handlers.lo: config.h osh.h
 install_tables.lo: indimail.h config.h
 error_stack.lo: error_stack.c error_stack.h config.h
-post_hook.lo: post_hook.c config.h
+post_handle.lo: post_handle.c config.h
 randltr.lo: indimail.h config.h
 in_crypt.lo: indimail.h config.h
 
