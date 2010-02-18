@@ -1,5 +1,8 @@
 #
 # $Log: indimail-epm.list.in,v $
+# Revision 2.42  2010-02-18 11:02:28+05:30  Cprogrammer
+# removed --mysqlhost parameter to indisrvr to enable indisrvr to use control file
+#
 # Revision 2.41  2009-12-16 20:08:54+05:30  Cprogrammer
 # removed hard coed version
 #
@@ -1822,8 +1825,8 @@ ${prefix}/sbin/svctool --pop3=9110 --servicedir=${servicedir} --localip=0 --maxd
 fi
 
 # IndiMail Daemons
-${prefix}/sbin/svctool --indisrvr=4000 --servicedir=${servicedir} --mysqlhost=localhost \
-	--mysqluser=indimail --mysqlpass=ssh-1.5- --localip=0 --maxdaemons=40 --maxperip=25 --avguserquota=2097152 \
+${prefix}/sbin/svctool --indisrvr=4000 --servicedir=${servicedir} \
+	--localip=0 --maxdaemons=40 --maxperip=25 --avguserquota=2097152 \
     --certfile=${prefix}/control/servercert.pem --ssl \
 	--hardquota=52428800 --base_path=${mbase}
 ${prefix}/sbin/svctool --inlookup=infifo --servicedir=${servicedir} --cntrldir=control --threads=5 \
