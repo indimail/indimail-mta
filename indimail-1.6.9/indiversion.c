@@ -1,7 +1,7 @@
 /*
  * $Log: indiversion.c,v $
  * Revision 2.123  2010-02-16 13:07:25+05:30  Cprogrammer
- * added post_hook() function
+ * added post_handle() function
  *
  * Revision 2.122  2009-11-23 11:41:09+05:30  Cprogrammer
  * added mode for libexec programs
@@ -766,7 +766,7 @@ void            getversion_error_stack_c();
 void            getversion_in_crypt_c();
 void            getversion_mysql_query_c();
 void            getversion_unsetenv_c();
-void            getversion_post_hook_c();
+void            getversion_post_handle_c();
 void            getversion();
 
 #ifdef MAIN
@@ -1186,7 +1186,7 @@ getversion(char *id)
 	getversion_getenvConfig_c();
 	getversion_set_mysql_options_c();
 	getversion_error_stack_c();
-	getversion_post_hook_c();
+	getversion_post_handle_c();
 	getversion_in_crypt_c();
 	getversion_mysql_query_c();
 	getversion_unsetenv_c();
