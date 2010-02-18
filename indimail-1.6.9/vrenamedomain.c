@@ -1,7 +1,7 @@
 /*
  * $Log: vrenamedomain.c,v $
  * Revision 2.13  2010-02-17 10:58:50+05:30  Cprogrammer
- * added post hook
+ * added post handle
  *
  * Revision 2.12  2009-09-23 15:00:37+05:30  Cprogrammer
  * change for new runcmmd()
@@ -216,13 +216,13 @@ main(int argc, char **argv)
 	}
 	snprintf(TmpBuf, MAX_BUFF, "%s/.domain_rename", ptr);
 	unlink(TmpBuf);
-	if (!(ptr = getenv("POST_HOOK")))
+	if (!(ptr = getenv("POST_HANDLE")))
 	{
 		if (!(base_argv0 = strrchr(argv[0], '/')))
 			base_argv0 = argv[0];
-		return(post_hook("%s/libexec/%s %s %s", INDIMAILDIR, base_argv0, argv[1], argv[2]));
+		return(post_handle("%s/libexec/%s %s %s", INDIMAILDIR, base_argv0, argv[1], argv[2]));
 	} else
-		return(post_hook("%s %s %s", ptr, argv[1], argv[2]));
+		return(post_handle("%s %s %s", ptr, argv[1], argv[2]));
 }
 
 void

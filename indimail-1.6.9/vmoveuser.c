@@ -1,7 +1,7 @@
 /*
  * $Log: vmoveuser.c,v $
  * Revision 2.8  2010-02-17 14:14:24+05:30  Cprogrammer
- * added post hook
+ * added post handle
  *
  * Revision 2.7  2009-09-30 00:24:05+05:30  Cprogrammer
  * do setuid so that move succeeds
@@ -223,14 +223,14 @@ main(int argc, char **argv)
 		return (1);
 	}
 	printf("%s@%s old %s new %s done\n", User, Domain, OldDir, NewDir);
-	if (!(tmpstr = getenv("POST_HOOK")))
+	if (!(tmpstr = getenv("POST_HANDLE")))
 	{
 		if (!(base_argv0 = strrchr(argv[0], '/')))
 			base_argv0 = argv[0];
-		return (post_hook("%s/libexec/%s %s@%s %s %s",
+		return (post_handle("%s/libexec/%s %s@%s %s %s",
 					INDIMAILDIR, base_argv0, User, real_domain, OldDir, NewDir));
 	} else
-		return (post_hook("%s %s@%s %s %s", tmpstr, User, real_domain, OldDir, NewDir));
+		return (post_handle("%s %s@%s %s %s", tmpstr, User, real_domain, OldDir, NewDir));
 }
 
 void

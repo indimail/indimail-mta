@@ -1,7 +1,7 @@
 /*
  * $Log: vdeluser.c,v $
  * Revision 2.6  2010-02-16 13:09:02+05:30  Cprogrammer
- * added post_hook function
+ * added post_handle function
  *
  * Revision 2.5  2009-12-30 13:14:07+05:30  Cprogrammer
  * run vdeluser with uid, gid of domain
@@ -124,13 +124,13 @@ main(argc, argv)
 		return(err);
 	}
 	vclose();
-	if (!(ptr = getenv("POST_HOOK")))
+	if (!(ptr = getenv("POST_HANDLE")))
 	{
 		if (!(base_argv0 = strrchr(argv[0], '/')))
 			base_argv0 = argv[0];
-		return(post_hook("%s/libexec/%s %s@%s", INDIMAILDIR, base_argv0, User, Domain));
+		return(post_handle("%s/libexec/%s %s@%s", INDIMAILDIR, base_argv0, User, Domain));
 	} else
-		return(post_hook("%s %s@%s", ptr, User, Domain));
+		return(post_handle("%s %s@%s", ptr, User, Domain));
 }
 
 

@@ -1,7 +1,7 @@
 /*
  * $Log: vadddomain.c,v $
  * Revision 2.27  2010-02-16 13:08:35+05:30  Cprogrammer
- * added post_hook function
+ * added post_handle function
  *
  * Revision 2.26  2010-02-16 09:29:37+05:30  Cprogrammer
  * added abuse, mailer-daemon as alias to postmaster
@@ -346,13 +346,13 @@ main(argc, argv)
 		valias_insert(auto_ids[i], Domain, AliasLine, 0);
 	}
 	vclose();
-	if (!(ptr = getenv("POST_HOOK")))
+	if (!(ptr = getenv("POST_HANDLE")))
 	{
 		if (!(base_argv0 = strrchr(argv[0], '/')))
 			base_argv0 = argv[0];
-		return(post_hook("%s/libexec/%s %s", INDIMAILDIR, base_argv0, Domain));
+		return(post_handle("%s/libexec/%s %s", INDIMAILDIR, base_argv0, Domain));
 	} else
-		return(post_hook("%s %s", ptr, Domain));
+		return(post_handle("%s %s", ptr, Domain));
 }
 
 int

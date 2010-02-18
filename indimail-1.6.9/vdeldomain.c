@@ -1,7 +1,7 @@
 /*
  * $Log: vdeldomain.c,v $
  * Revision 2.11  2010-02-16 13:08:55+05:30  Cprogrammer
- * added post_hook function
+ * added post_handle function
  *
  * Revision 2.10  2008-09-17 21:35:24+05:30  Cprogrammer
  * setuid(0) only for indimail
@@ -176,13 +176,13 @@ main(argc, argv)
 	}
 #endif
 	vclose();
-	if (!(ptr = getenv("POST_HOOK")))
+	if (!(ptr = getenv("POST_HANDLE")))
 	{
 		if (!(base_argv0 = strrchr(argv[0], '/')))
 			base_argv0 = argv[0];
-		return(post_hook("%s/libexec/%s %s", INDIMAILDIR, base_argv0, Domain));
+		return(post_handle("%s/libexec/%s %s", INDIMAILDIR, base_argv0, Domain));
 	} else
-		return(post_hook("%s %s", ptr, Domain));
+		return(post_handle("%s %s", ptr, Domain));
 }
 
 int

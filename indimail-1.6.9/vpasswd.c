@@ -1,7 +1,7 @@
 /*
  * $Log: vpasswd.c,v $
  * Revision 2.13  2010-02-17 14:14:29+05:30  Cprogrammer
- * added post hook
+ * added post handle
  *
  * Revision 2.12  2008-08-02 09:10:37+05:30  Cprogrammer
  * use new function error_stack
@@ -150,13 +150,13 @@ main(argc, argv)
 		return(1);
 	}
 	vclose();
-	if (!(ptr = getenv("POST_HOOK")))
+	if (!(ptr = getenv("POST_HANDLE")))
 	{
 		if (!(base_argv0 = strrchr(argv[0], '/')))
 			base_argv0 = argv[0];
-		return (post_hook("%s/libexec/%s %s@%s", INDIMAILDIR, base_argv0, User, real_domain));
+		return (post_handle("%s/libexec/%s %s@%s", INDIMAILDIR, base_argv0, User, real_domain));
 	} else
-		return (post_hook("%s %s@%s", ptr, User, real_domain));
+		return (post_handle("%s %s@%s", ptr, User, real_domain));
 }
 
 void

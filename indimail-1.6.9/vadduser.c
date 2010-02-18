@@ -1,7 +1,7 @@
 /*
  * $Log: vadduser.c,v $
  * Revision 2.30  2010-02-16 13:08:47+05:30  Cprogrammer
- * added post_hook function
+ * added post_handle function
  *
  * Revision 2.29  2009-12-30 13:10:17+05:30  Cprogrammer
  * run vadduser with uid, gid of domain
@@ -324,13 +324,13 @@ main(argc, argv)
 	vclose();
 	if (Random)
 		printf("Password is %s\n", Passwd);
-	if (!(ptr = getenv("POST_HOOK")))
+	if (!(ptr = getenv("POST_HANDLE")))
 	{
 		if (!(base_argv0 = strrchr(argv[0], '/')))
 			base_argv0 = argv[0];
-		return(post_hook("%s/libexec/%s %s@%s", INDIMAILDIR, base_argv0, User, real_domain));
+		return(post_handle("%s/libexec/%s %s@%s", INDIMAILDIR, base_argv0, User, real_domain));
 	} else
-		return(post_hook("%s %s@%s", ptr, User, real_domain));
+		return(post_handle("%s %s@%s", ptr, User, real_domain));
 }
 
 void

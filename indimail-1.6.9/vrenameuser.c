@@ -1,7 +1,7 @@
 /*
  * $Log: vrenameuser.c,v $
  * Revision 2.9  2010-02-17 10:58:55+05:30  Cprogrammer
- * added post hook
+ * added post handle
  *
  * Revision 2.8  2009-09-30 00:24:23+05:30  Cprogrammer
  * added missing call to GetIndiId()
@@ -114,13 +114,13 @@ main(argc, argv)
 	}
 	err = vrenameuser(oldUser, oldDomain, newUser, newDomain);
 	vclose();
-	if (!(ptr = getenv("POST_HOOK")))
+	if (!(ptr = getenv("POST_HANDLE")))
 	{
 		if (!(base_argv0 = strrchr(argv[0], '/')))
 			base_argv0 = argv[0];
-		return (post_hook("%s/libexec/%s %s %s", INDIMAILDIR, base_argv0, oldEmail, newEmail));
+		return (post_handle("%s/libexec/%s %s %s", INDIMAILDIR, base_argv0, oldEmail, newEmail));
 	} else
-		return (post_hook("%s %s %s", ptr, oldEmail, newEmail));
+		return (post_handle("%s %s %s", ptr, oldEmail, newEmail));
 }
 
 
