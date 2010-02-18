@@ -1,5 +1,9 @@
 #!/bin/sh
 # $Log: create_services.in,v $
+# Revision 2.35  2010-02-18 14:03:26+05:30  Cprogrammer
+# added --query-cache for imap/pop3 service
+# removed mysql parameters to indisrvr service creation to enable indisrvr use the control file
+#
 # Revision 2.34  2009-12-16 20:07:31+05:30  Cprogrammer
 # create log directory
 #
@@ -122,7 +126,7 @@ indimaildir=@indimaildir@
 # End USER Configuration OPTIONS
 #
 
-# $Id: create_services.in,v 2.34 2009-12-16 20:07:31+05:30 Cprogrammer Stab mbhangui $
+# $Id: create_services.in,v 2.35 2010-02-18 14:03:26+05:30 Cprogrammer Exp mbhangui $
 
 usage()
 {
@@ -409,31 +413,39 @@ fi
 # IMAP/POP3
 #
 if [ $nocourierimap -eq 0 ] ; then
-	$dir_prefix$indimaildir/sbin/svctool --imap=143 --servicedir=$servicedir --localip=0 --maxdaemons=40 --maxperip=25 \
-		--default-domain=indimail.org --memory=$imap_pop3_mem $extra_opt
-	$dir_prefix$indimaildir/sbin/svctool --imap=993 --servicedir=$servicedir --localip=0 --maxdaemons=40 --maxperip=25 \
-		--default-domain=indimail.org --memory=$imap_pop3_mem --ssl $extra_opt
-	$dir_prefix$indimaildir/sbin/svctool --pop3=110 --servicedir=$servicedir --localip=0 --maxdaemons=40 --maxperip=25 \
-		--default-domain=indimail.org --memory=$imap_pop3_mem $extra_opt
-	$dir_prefix$indimaildir/sbin/svctool --pop3=995 --servicedir=$servicedir --localip=0 --maxdaemons=40 --maxperip=25 \
-		--default-domain=indimail.org --memory=$imap_pop3_mem --ssl $extra_opt
+	$dir_prefix$indimaildir/sbin/svctool --imap=143 --servicedir=$servicedir \
+		--localip=0 --maxdaemons=40 --maxperip=25 \
+		--query-cache --default-domain=indimail.org --memory=$imap_pop3_mem $extra_opt
+	$dir_prefix$indimaildir/sbin/svctool --imap=993 --servicedir=$servicedir --localip=0 \
+		--maxdaemons=40 --maxperip=25 \
+		--query-cache --default-domain=indimail.org --memory=$imap_pop3_mem --ssl $extra_opt
+	$dir_prefix$indimaildir/sbin/svctool --pop3=110 --servicedir=$servicedir --localip=0 \
+		--maxdaemons=40 --maxperip=25 \
+		--query-cache --default-domain=indimail.org --memory=$imap_pop3_mem $extra_opt
+	$dir_prefix$indimaildir/sbin/svctool --pop3=995 --servicedir=$servicedir --localip=0 \
+		--maxdaemons=40 --maxperip=25 \
+		--query-cache --default-domain=indimail.org --memory=$imap_pop3_mem --ssl $extra_opt
 fi
 if [ $noproxy -eq 0 ] ; then
-	$dir_prefix$indimaildir/sbin/svctool --imap=4143 --servicedir=$servicedir --localip=0 --maxdaemons=40 \
-		--maxperip=25 --default-domain=indimail.org --memory=$imap_pop3_mem --proxy=143 $extra_opt
-	$dir_prefix$indimaildir/sbin/svctool --imap=9143 --servicedir=$servicedir --localip=0 --maxdaemons=40 \
-		--maxperip=25 --default-domain=indimail.org --memory=$imap_pop3_mem --proxy=143 --ssl
-	$dir_prefix$indimaildir/sbin/svctool --pop3=4110 --servicedir=$servicedir --localip=0 --maxdaemons=40 \
-		--maxperip=25 --default-domain=indimail.org --memory=$imap_pop3_mem --proxy=110 $extra_opt
-	$dir_prefix$indimaildir/sbin/svctool --pop3=9110 --servicedir=$servicedir --localip=0 --maxdaemons=40 \
-		--maxperip=25 --default-domain=indimail.org --memory=$imap_pop3_mem --proxy=110 --ssl $extra_opt
+	$dir_prefix$indimaildir/sbin/svctool --imap=4143 --servicedir=$servicedir --localip=0 \
+		--maxdaemons=40 --query-cache --maxperip=25 --default-domain=indimail.org \
+		--memory=$imap_pop3_mem --proxy=143 $extra_opt
+	$dir_prefix$indimaildir/sbin/svctool --imap=9143 --servicedir=$servicedir --localip=0 \
+		--maxdaemons=40 --query-cache --maxperip=25 --default-domain=indimail.org \
+		--memory=$imap_pop3_mem --proxy=143 --ssl
+	$dir_prefix$indimaildir/sbin/svctool --pop3=4110 --servicedir=$servicedir --localip=0 \
+		--maxdaemons=40 --query-cache --maxperip=25 --default-domain=indimail.org \
+		--memory=$imap_pop3_mem --proxy=110 $extra_opt
+	$dir_prefix$indimaildir/sbin/svctool --pop3=9110 --servicedir=$servicedir --localip=0 \
+		--maxdaemons=40 --query-cache --maxperip=25 --default-domain=indimail.org \
+		--memory=$imap_pop3_mem --proxy=110 --ssl $extra_opt
 fi
 
 #
 # IndiMail Daemons
 #
-$dir_prefix$indimaildir/sbin/svctool --indisrvr=4000 --servicedir=$servicedir --mysqlhost=localhost \
-	--mysqluser=indimail --mysqlpass=ssh-1.5- --localip=0 --maxdaemons=40 --maxperip=25 --avguserquota=2097152 \
+$dir_prefix$indimaildir/sbin/svctool --indisrvr=4000 --servicedir=$servicedir \
+	--localip=0 --maxdaemons=40 --maxperip=25 --avguserquota=2097152 \
 	--certfile=$indimaildir/control/servercert.pem --ssl \
 	--hardquota=52428800 --base_path=$mail_path $extra_opt
 $dir_prefix$indimaildir/sbin/svctool --inlookup=infifo --servicedir=$servicedir --cntrldir=control --threads=5 \
