@@ -36,17 +36,17 @@ create_table(int which, char *table, char *_template)
 	char           *SqlBuf, *template;
 	int             len;
 
-	if(!table || !*table)
+	if (!table || !*table)
 		return(-1);
 	if (!(template = (!_template || !*_template) ? layout(table) : _template))
 	{
 		fprintf(stderr, "Invalid template for table %s\n", table);
 		return(-1);
 	}
-	if(which != ON_MASTER && which != ON_LOCAL)
+	if (which != ON_MASTER && which != ON_LOCAL)
 		return(-1);
 #ifdef CLUSTERED_SITE
-	if((which == ON_MASTER ? open_master() : vauth_open((char *) 0)))
+	if ((which == ON_MASTER ? open_master() : vauth_open((char *) 0)))
 	{
 		fprintf(stderr, "create_table: Failed to open %s\n", which == ON_MASTER ? "central" : "local");
 		return(-1);
@@ -54,14 +54,14 @@ create_table(int which, char *table, char *_template)
 #else
 	if (which == ON_MASTER)
 		return(0);
-	if(vauth_open((char *) 0))
+	if (vauth_open((char *) 0))
 	{
 		fprintf(stderr, "create_table: Failed to open %s\n", which == ON_MASTER ? "central" : "local");
 		return(-1);
 	}
 #endif
 	len = slen(table) + slen(template) + 33;
-	if(!(SqlBuf = (char *) malloc(len)))
+	if (!(SqlBuf = (char *) malloc(len)))
 	{
 		fprintf(stderr, "create_table: malloc: %d bytes: %s\n", len, strerror(errno));
 		return(-1);
