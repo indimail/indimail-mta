@@ -1,4 +1,4 @@
-* Thu Feb 18 2010 mbhangui@gmail.com
+* Fri Feb 19 2010 mbhangui@gmail.com
 Release 1.6.9 Start 01/02/2010
 10/02/2010
 1.  Removed INDIMAIL depencies in qmail-tcpok, qmail-tcpto, qmail-qread
@@ -11,6 +11,9 @@ Release 1.6.9 Start 01/02/2010
 18/02/2010
 5.  BUG - Fixed creation of indisrvr service when installing RPM
 6.  Changed default mysql socket to /var/lib/mysql/mysql.sock in indimail.h
+19/02/2010
+7.  BUG - localdbinfo() did not use host:user:passwd:socket/port format from
+    host.mysql
 
 * Mon Feb 01 2010 mbhangui@gmail.com
 Release 1.6.8 Start 04/01/2010

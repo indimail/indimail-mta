@@ -1,0 +1,80 @@
+RELEASE NOTES
+=============
+DATE: @DATE@
+
+This is Release @version@ of IndiMail. The release has both source.tar.gz and RPMs
+
+This release adds Post Execution hooks to vadddomain, vdeldomain, vrenamedomain,
+vadduser, vdeluser, vrenamedomain, vrenameuser, vmoveuser, vpasswd. Post execution
+hooks helps in extending the functionality of IndiMail
+
+This release includes the following files
+
+README                        (Introduction to IndiMail)
+INSTALL-@version@                 (Installation Instructions)
+INSTALL-RPM-@version@             (Install Instructions for RPM)
+INSTALL-MYSQL-@version@           (MySQL specific Installation Instructions)
+README-CLUSTER                (Steps on installing a clustered setup)
+Quick-INSTALL-@version@           (A minimal documentation on Installation)
+RELEASE-Notes-@version@           (This file)
+indimail-@version@.tar.gz         (IndiMail source)
+indimail-@version@-1.i386.rpm
+indimail-@version@-1.i386.deb
+
+
+IndiMail has two yum repositories for most of the Linux Distros at
+
+Stable Releases
+--------------
+
+http://download.opensuse.org/repositories/home:/indimail/
+
+
+Bleeding Edge Releases
+---------------------
+IndiMail has yum repositories for the latest features being added. You will find
+the bleeding edge rpms at
+
+http://download.opensuse.org/repositories/home:/mbhangui/
+
+
+You will also find the RPMs for both 32bit and 64bit OS on the above
+repositories
+
+Currently, the list of supported distributions for IndiMail is (for
+both 32 and 64 bit) are
+
+    * SUSE
+          o openSUSE 11.2
+          o openSUSE 11.1
+          o openSUSE 11.0
+          o SUSE Linux Enterprise 11
+          o SUSE Linux Enterprise 10
+          o openSUSE Factory
+
+    * Red Hat
+          o Fedora 12
+          o Fedora 11
+          o Fedora 10
+          o Red Hat Enterprise Linux 5
+          o CentOS 5
+
+    * Mandriva Linux
+          o Mandriva 2010
+          o Mandriva 2009.1
+          o Mandriva 2009
+
+ChangeLog
+=========
+* Fri Feb 19 2010 mbhangui@gmail.com
+Release 1.6.9 Start 01/02/2010
+1.  Removed INDIMAIL depencies in qmail-tcpok, qmail-tcpto, qmail-qread
+2.  Added abuse, mailer-daemon as alias to postmaster when creating a new
+    domain.
+3.  Added POST Hook for program vadddomain, vdeldomain, vadduser, vdeluser
+    vrenamedomain, vrenameuser, vpasswd, vmoveuser
+4.  BUG - Free memory allocated by vasprintf in error_stack.c
+5.  BUG - Fixed creation of indisrvr service when installing RPM
+6.  Changed default mysql socket to /var/lib/mysql/mysql.sock in indimail.h
+7.  BUG - localdbinfo() did not use host:user:passwd:socket/port format from
+    host.mysql
