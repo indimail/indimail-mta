@@ -1,5 +1,8 @@
 /*
  * $Log: LoadDbinfo.c,v $
+ * Revision 2.35  2010-02-18 22:43:45+05:30  Cprogrammer
+ * accept mysql host in host:user:password:socket/port parameter
+ *
  * Revision 2.34  2009-09-27 12:10:19+05:30  Cprogrammer
  * set 644 perm for mcdfile
  *
@@ -116,7 +119,7 @@
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: LoadDbinfo.c,v 2.34 2009-09-27 12:10:19+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: LoadDbinfo.c,v 2.35 2010-02-18 22:43:45+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #include <sys/types.h>
@@ -637,11 +640,11 @@ static DBINFO **
 localDbinfo(int *total, DBINFO ***rhosts)
 {
 	FILE           *fp, *mfp;
-	char           *mysqlhost, *mysqlport, *mysql_user, *mysql_passwd; 
-	char           *mysql_database, *qmaildir, *controldir, *tmpstr, *domain;
-	char           *localhost;
+	char           *mysqlhost, *mysql_user = 0, *mysql_passwd = 0; 
+	char           *mysql_database = 0, *qmaildir, *controldir, *ptr, *domain;
+	char           *localhost, *mysql_socket = 0, *mysql_port = 0;
 	char            host_path[MAX_BUFF], mysqlhost_buf[MAX_BUFF], TmpBuf[MAX_BUFF];
-	int             count, found;
+	int             count, field_count, found;
 	DBINFO        **relayhosts, **rhostsptr, **tmpPtr;
 
 	relayhosts = *rhosts;
@@ -661,15 +664,15 @@ localDbinfo(int *total, DBINFO ***rhosts)
 				break;
 			fprintf(stderr, "localDbinfo: fgets: %s\n", strerror(errno));
 		}
-		if (!(tmpstr = strchr(TmpBuf, ':')))
+		if (!(ptr = strchr(TmpBuf, ':')))
 			continue;
 		if (relayhosts)
 		{
-			tmpstr++;
-			domain = tmpstr;
-			for (;*tmpstr && *tmpstr != ':';tmpstr++);
-			if (*tmpstr)
-				*tmpstr = 0;
+			ptr++;
+			domain = ptr;
+			for (;*ptr && *ptr != ':';ptr++);
+			if (*ptr)
+				*ptr = 0;
 			if (!isvirtualdomain(domain))
 				continue;
 			if (is_alias_domain(domain))
@@ -692,28 +695,62 @@ localDbinfo(int *total, DBINFO ***rhosts)
 		fclose(fp);
 		return(*rhosts);
 	}
-	if (!(mysqlhost = (char *) getenv("MYSQL_HOST")))
+	*mysqlhost_buf = 0;
+	if ((mysqlhost = (char *) getenv("MYSQL_HOST")) != (char *) 0)
+		scopy(mysqlhost_buf, mysqlhost, MAX_BUFF);
+	getEnvConfigStr(&controldir, "CONTROLDIR", "control");
+	if (snprintf(host_path, MAX_BUFF, "%s/%s/host.mysql", qmaildir, controldir) == -1)
+		host_path[MAX_BUFF - 1] = 0;
+	if (!*mysqlhost_buf && !access(host_path, F_OK))
 	{
-		getEnvConfigStr(&controldir, "CONTROLDIR", "control");
-		if (snprintf(host_path, MAX_BUFF, "%s/%s/host.mysql", qmaildir, controldir) == -1)
-			host_path[MAX_BUFF - 1] = 0;
 		if (!(mfp = fopen(host_path, "r")))
-			mysqlhost = MYSQL_HOST;
+			scopy(mysqlhost_buf, MYSQL_HOST, MAX_BUFF);
 		else
 		{
-			if (fscanf(mfp, "%s", mysqlhost_buf) == 1)
+			if (!fgets(mysqlhost_buf, MAX_BUFF - 2, mfp))
+				scopy(mysqlhost_buf, MYSQL_HOST, MAX_BUFF);
+			else
 			{
-				mysqlhost_buf[MAX_BUFF - 1] = 0;
-				mysqlhost = mysqlhost_buf;
-			} else
-				mysqlhost = MYSQL_HOST;
+				if ((ptr = strrchr(mysqlhost_buf, '\n')))
+					*ptr = 0;
+			}
 			fclose(mfp);
 		}
+	} else
+	if (!*mysqlhost_buf)
+		scopy(mysqlhost_buf, MYSQL_HOST, MAX_BUFF);
+	mysqlhost = mysqlhost_buf;
+	for (field_count = 0,ptr = mysqlhost_buf;*ptr;ptr++)
+	{
+		if (*ptr == ':')
+		{
+			*ptr = 0;
+			switch (field_count++)
+			{
+			case 0: /*- mysql user */
+				if (*(ptr + 1))
+					mysql_user = ptr + 1;
+			case 1: /*- mysql passwd */
+				if (*(ptr + 1))
+					mysql_passwd = ptr + 1;
+			case 2: /*- mysql socket/port */
+				if (*(ptr + 1) == '/' || *(ptr + 1) == '.')
+					mysql_socket = ptr + 1;
+				else
+				if (*(ptr + 1))
+					mysql_port = ptr + 1;
+			}
+		}
 	}
-	getEnvConfigStr(&mysql_user, "MYSQL_USER", MYSQL_USER);
-	getEnvConfigStr(&mysql_passwd, "MYSQL_PASSWD", MYSQL_PASSWD);
+	if (!mysql_user)
+		getEnvConfigStr(&mysql_user, "MYSQL_USER", MYSQL_USER);
+	if (!mysql_passwd)
+		getEnvConfigStr(&mysql_passwd, "MYSQL_PASSWD", MYSQL_PASSWD);
+	if (!mysql_socket)
+		getEnvConfigStr(&mysql_socket, "MYSQL_SOCKET", MYSQL_SOCKET);
+	if (!mysql_port)
+		getEnvConfigStr(&mysql_port, "MYSQL_VPORT", MYSQL_VPORT);
 	getEnvConfigStr(&mysql_database, "MYSQL_DATABASE", MYSQL_DATABASE);
-	getEnvConfigStr(&mysqlport, "MYSQL_VPORT", MYSQL_VPORT);
 	if (total)
 	{
 		relayhosts = (DBINFO **) realloc(relayhosts, sizeof(DBINFO *) * (*total + count + 1));
@@ -741,13 +778,13 @@ localDbinfo(int *total, DBINFO ***rhosts)
 				break;
 			fprintf(stderr, "localDbinfo: fgets: %s\n", strerror(errno));
 		}
-		if (!(tmpstr = strchr(TmpBuf, ':')))
+		if (!(ptr = strchr(TmpBuf, ':')))
 			continue;
-		tmpstr++;
-		domain = tmpstr;
-		for (;*tmpstr && *tmpstr != ':';tmpstr++);
-		if (*tmpstr)
-			*tmpstr = 0;
+		ptr++;
+		domain = ptr;
+		for (;*ptr && *ptr != ':';ptr++);
+		if (*ptr)
+			*ptr = 0;
 		if (!isvirtualdomain(domain))
 			continue;
 		if (is_alias_domain(domain))
@@ -776,7 +813,7 @@ localDbinfo(int *total, DBINFO ***rhosts)
 		scopy((*rhostsptr)->mdahost, localhost, DBINFO_BUFF);
 		scopy((*rhostsptr)->server, mysqlhost, DBINFO_BUFF);
 		scopy((*rhostsptr)->domain, domain, DBINFO_BUFF);
-		(*rhostsptr)->port = atoi(mysqlport);
+		(*rhostsptr)->port = atoi(mysql_port);
 		scopy((*rhostsptr)->database, mysql_database, DBINFO_BUFF);
 		scopy((*rhostsptr)->user, mysql_user, DBINFO_BUFF);
 		scopy((*rhostsptr)->password, mysql_passwd, DBINFO_BUFF);
