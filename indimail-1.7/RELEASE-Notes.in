@@ -4,9 +4,6 @@ DATE: @DATE@
 
 This is Release @version@ of IndiMail. The release has both source.tar.gz and RPMs
 
-This release adds Post Execution hooks to vadddomain, vdeldomain, vrenamedomain,
-vadduser, vdeluser, vrenamedomain, vrenameuser, vmoveuser, vpasswd. Post execution
-hooks helps in extending the functionality of IndiMail
 
 This release includes the following files
 
@@ -66,15 +63,3 @@ both 32 and 64 bit) are
 
 ChangeLog
 =========
-* Fri Feb 19 2010 mbhangui@gmail.com
-Release 1.6.9 Start 01/02/2010
-1.  Removed INDIMAIL depencies in qmail-tcpok, qmail-tcpto, qmail-qread
-2.  Added abuse, mailer-daemon as alias to postmaster when creating a new
-    domain.
-3.  Added POST Hook for program vadddomain, vdeldomain, vadduser, vdeluser
-    vrenamedomain, vrenameuser, vpasswd, vmoveuser
-4.  BUG - Free memory allocated by vasprintf in error_stack.c
-5.  BUG - Fixed creation of indisrvr service when installing RPM
-6.  Changed default mysql socket to /var/lib/mysql/mysql.sock in indimail.h
-7.  BUG - localdbinfo() did not use host:user:passwd:socket/port format from
-    host.mysql
