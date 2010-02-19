@@ -1,5 +1,8 @@
 /*
  * $Log: indimail.h,v $
+ * Revision 2.185  2010-02-19 10:35:32+05:30  Cprogrammer
+ * changed default control host socket to /var/lib/mysql/mysql.sock
+ *
  * Revision 2.184  2010-02-18 08:35:15+05:30  Cprogrammer
  * changed default socket to /var/lib/mysql/mysql.sock
  *
@@ -866,7 +869,7 @@
 #define INDIMAILH_H
 
 #ifndef	lint
-static char     sccsidh[] = "$Id: indimail.h,v 2.184 2010-02-18 08:35:15+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsidh[] = "$Id: indimail.h,v 2.185 2010-02-19 10:35:32+05:30 Cprogrammer Stab mbhangui $";
 #endif
 
 #include "config.h"
@@ -974,7 +977,7 @@ extern DBINFO **RelayHosts;
 #define CNTRL_USER              "indimail"
 #define CNTRL_PASSWD            "ssh-1.5-"
 #define CNTRL_VPORT             "3306"
-#define CNTRL_SOCKET            "/tmp/mysql.sock"
+#define CNTRL_SOCKET            "/var/lib/mysql/mysql.sock"
 #define CNTRL_DATABASE          "indimail"
 #define CNTRL_DEFAULT_TABLE     "hostcntrl"
 #endif /*- #ifdef CLUSTERED_SITE */
