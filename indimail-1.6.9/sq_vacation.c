@@ -1,5 +1,8 @@
 /*
  * $Log: sq_vacation.c,v $
+ * Revision 2.5  2010-02-18 22:44:34+05:30  Cprogrammer
+ * removed unused definitions
+ *
  * Revision 2.4  2009-11-09 10:43:23+05:30  Cprogrammer
  * removed BUFF_SIZE definition
  *
@@ -54,19 +57,6 @@
 #define LPWD_QUERY   6
 #define DOMAIN_QUERY 7
 
-#define MYSQL_HOST              "localhost"
-#define MYSQL_USER              "indimail"
-#define MYSQL_PASSWD            "ssh-1.5-"
-#define MYSQL_VPORT             "3306"
-#define MYSQL_SOCKET            "/tmp/mysql.sock"
-#define CNTRL_HOST              "localhost"
-#define MASTER_HOST             "localhost"
-#define CNTRL_USER              "indimail"
-#define CNTRL_PASSWD            "ssh-1.5-"
-#define CNTRL_VPORT             "3306"
-#define CNTRL_SOCKET            "/tmp/mysql.sock"
-#define CNTRL_DATABASE          "indimail"
-#define CNTRL_DEFAULT_TABLE     "hostcntrl"
 #endif /* INDIMAILH_H */
 
 /*- Exit status */
@@ -92,7 +82,7 @@
 #define ERR_UNEXPECTED  126     /*- other unexpected error */
 
 #ifndef lint
-static char     sccsid[] = "$Id: sq_vacation.c,v 2.4 2009-11-09 10:43:23+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: sq_vacation.c,v 2.5 2010-02-18 22:44:34+05:30 Cprogrammer Exp mbhangui $";
 #endif
 #ifndef INDIMAILH_H
 int             vauthOpen_user(char *);
