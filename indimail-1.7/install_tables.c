@@ -1,5 +1,8 @@
 /*
  * $Log: install_tables.c,v $
+ * Revision 2.5  2010-02-19 11:31:53+05:30  Cprogrammer
+ * skip creating tables for distributed setup on a non-clustered setup
+ *
  * Revision 2.4  2010-01-06 22:28:33+05:30  Cprogrammer
  * fix for non-clustered setup
  *
@@ -19,7 +22,7 @@
 #endif
 
 #ifndef	lint
-static char     sccsid[] = "$Id: install_tables.c,v 2.4 2010-01-06 22:28:33+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: install_tables.c,v 2.5 2010-02-19 11:31:53+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 int
@@ -37,19 +40,30 @@ main(int argc, char **argv)
 	getEnvConfigStr(&default_table, "MYSQL_TABLE", MYSQL_DEFAULT_TABLE);
 	getEnvConfigStr(&inactive_table, "MYSQL_INACTIVE_TABLE", MYSQL_INACTIVE_TABLE);
 	disable_mysql_escape(1);
+	if (snprintf(host_path, MAX_BUFF, "%s/%s/host.master", qmaildir, controldir) == -1)
+		host_path[MAX_BUFF - 1] = 0;
 	for (i = 0; i < 2; i++)
 	{
 		if (create_table(ON_LOCAL, i == 0 ? default_table : inactive_table,
 				 site_size == LARGE_SITE ? LARGE_TABLE_LAYOUT : SMALL_TABLE_LAYOUT))
+		{
+			fprintf(stderr, "failed to create table %s\n", i == 0 ? default_table : inactive_table);
 			return (1);
-		else
+		} else
 			printf("created table %s on local\n", i == 0 ? default_table : inactive_table);
 	}
 	for (i = 0; IndiMailTable[i].table_name; i++)
 	{
+		if (IndiMailTable[i].which == ON_MASTER && access(host_path, F_OK))
+		{
+			printf("skipped table %s on %s\n", IndiMailTable[i].table_name, IndiMailTable[i].which == ON_LOCAL ? "local" : "master");
+			continue;
+		}
 		if (create_table(IndiMailTable[i].which, IndiMailTable[i].table_name, IndiMailTable[i].template))
+		{
+			fprintf(stderr, "failed to create table %s\n", IndiMailTable[i].table_name);
 			return (1);
-		else
+		} else
 			printf("created table %s on %s\n", IndiMailTable[i].table_name, IndiMailTable[i].which == ON_LOCAL ? "local" : "master");
 	}
 #if defined(POP_AUTH_OPEN_RELAY)
@@ -62,8 +76,6 @@ main(int argc, char **argv)
 #ifdef CLUSTERED_SITE
 	getEnvConfigStr(&qmaildir, "QMAILDIR", QMAILDIR);
 	getEnvConfigStr(&controldir, "CONTROLDIR", "control");
-	if (snprintf(host_path, MAX_BUFF, "%s/%s/host.master", qmaildir, controldir) == -1)
-		host_path[MAX_BUFF - 1] = 0;
 	getEnvConfigStr(&cntrl_table, "CNTRL_TABLE", CNTRL_DEFAULT_TABLE);
 	if (access(host_path, F_OK))
 		return (0);
