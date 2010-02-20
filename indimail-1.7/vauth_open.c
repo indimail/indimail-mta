@@ -1,5 +1,11 @@
 /*
  * $Log: vauth_open.c,v $
+ * Revision 2.21  2010-02-19 16:17:01+05:30  Cprogrammer
+ * indi_port was wrongly initialized to zero
+ *
+ * Revision 2.20  2010-02-19 13:12:56+05:30  Cprogrammer
+ * set_mysql_options() needs to be called before each invocation of mysql_real_connect
+ *
  * Revision 2.19  2010-01-06 09:40:14+05:30  Cprogrammer
  * host.mysql can now have host:user:passwd:socket/port format
  *
@@ -90,7 +96,7 @@
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vauth_open.c,v 2.19 2010-01-06 09:40:14+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: vauth_open.c,v 2.21 2010-02-19 16:17:01+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #include <stdio.h>
@@ -151,11 +157,6 @@ vauth_open(char *dbhost)
 	if (!*mysql_host)
 		scopy(mysql_host, MYSQL_HOST, MAX_BUFF);
 	mysql_init(&mysql[1]);
-	if (set_mysql_options(&mysql[1], "indimail.cnf", "indimail"))
-	{
-		fprintf(stderr, "mysql_options: Invalid options in MySQL options file\n");
-		return(-1);
-	}
 	atexit(vclose);
 	for (count = 0,ptr = mysql_host;*ptr;ptr++)
 	{
@@ -183,10 +184,15 @@ vauth_open(char *dbhost)
 		getEnvConfigStr(&mysql_user, "MYSQL_USER", MYSQL_USER);
 	if (!mysql_passwd)
 		getEnvConfigStr(&mysql_passwd, "MYSQL_PASSWD", MYSQL_PASSWD);
+#if 0
 	if (!mysql_socket)
 		getEnvConfigStr(&mysql_socket, "MYSQL_SOCKET", MYSQL_SOCKET);
 	if (!indi_port)
 		getEnvConfigStr(&indi_port, "MYSQL_VPORT", MYSQL_VPORT);
+#else
+	if (!indi_port)
+		indi_port = "0";
+#endif
 	getEnvConfigStr(&mysql_database, "MYSQL_DATABASE", MYSQL_DATABASE);
 	getEnvConfigStr(&default_table, "MYSQL_TABLE", MYSQL_DEFAULT_TABLE);
 	getEnvConfigStr(&inactive_table, "MYSQL_INACTIVE_TABLE", MYSQL_INACTIVE_TABLE);
@@ -195,8 +201,18 @@ vauth_open(char *dbhost)
 	if (!isopen_cntrl || strncmp(cntrl_host, mysql_host, MAX_BUFF) || strncmp(cntrl_port, indi_port, MAX_BUFF))
 	{
 #endif
+		if (set_mysql_options(&mysql[1], "indimail.cnf", "indimail"))
+		{
+			fprintf(stderr, "mysql_options: Invalid options in MySQL options file\n");
+			return(-1);
+		}
 		if (!(mysql_real_connect(&mysql[1], mysql_host, mysql_user, mysql_passwd, mysql_database, mysqlport, mysql_socket, 0)))
 		{
+			if (set_mysql_options(&mysql[1], "indimail.cnf", "indimail"))
+			{
+				fprintf(stderr, "mysql_options: Invalid options in MySQL options file\n");
+				return(-1);
+			}
 			if (!(mysql_real_connect(&mysql[1], mysql_host, mysql_user, mysql_passwd, NULL, mysqlport, mysql_socket, 0)))
 			{
 				mysql_perror("mysql_real_connect: %s", mysql_host);
