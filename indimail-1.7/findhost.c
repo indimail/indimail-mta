@@ -1,5 +1,14 @@
 /*
  * $Log: findhost.c,v $
+ * Revision 2.28  2010-02-19 19:31:48+05:30  Cprogrammer
+ * user,passwd,socket/port was getting lost
+ *
+ * Revision 2.27  2010-02-19 16:16:08+05:30  Cprogrammer
+ * cntrl_port was getting wrongly initialized to zero
+ *
+ * Revision 2.26  2010-02-19 13:11:10+05:30  Cprogrammer
+ * set_mysql_options() needs to be called before each invocation of mysql_real_connect()
+ *
  * Revision 2.25  2010-01-06 09:39:36+05:30  Cprogrammer
  * host.cntrl, host.master can now have host:user:passwd:socket/port format
  *
@@ -168,7 +177,7 @@
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: findhost.c,v 2.25 2010-01-06 09:39:36+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: findhost.c,v 2.28 2010-02-19 19:31:48+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #include <stdio.h>
@@ -348,11 +357,8 @@ open_central_db(char *dbhost)
 	 *    defined in indimail.h
 	 */
 	if (dbhost && *dbhost)
-	{
 		scopy(cntrl_host, dbhost, MAX_BUFF);
-		if ((ptr = strchr(cntrl_host, ':')) != (char *) 0)
-			*ptr = 0;
-	} else
+	else
 	if ((ptr = (char *) getenv("CNTRL_HOST")) != (char *) 0)
 		scopy(cntrl_host, ptr, MAX_BUFF);
 	getEnvConfigStr(&qmaildir, "QMAILDIR", QMAILDIR);
@@ -381,11 +387,6 @@ open_central_db(char *dbhost)
 	if (!*cntrl_host)
 		scopy(cntrl_host, CNTRL_HOST, MAX_BUFF);
 	mysql_init(&mysql[0]);
-	if (set_mysql_options(&mysql[0], "indimail.cnf", "indimail"))
-	{
-		fprintf(stderr, "mysql_options: Invalid options in MySQL options file\n");
-		return(-1);
-	}
 	if (!atexit_registered++)
 		atexit(vclose_cntrl);
 #ifdef HAVE_LOCAL_INFILE
@@ -421,17 +422,32 @@ open_central_db(char *dbhost)
 		getEnvConfigStr(&mysql_user, "CNTRL_USER", CNTRL_USER);
 	if (!mysql_passwd)
 		getEnvConfigStr(&mysql_passwd, "CNTRL_PASSWD", CNTRL_PASSWD);
+#if 0
 	if (!cntrl_socket)
 		getEnvConfigStr(&cntrl_socket, "CNTRL_SOCKET", CNTRL_SOCKET);
 	if (!cntrl_port)
 		getEnvConfigStr(&cntrl_port, "CNTRL_VPORT", CNTRL_VPORT);
+#else
+	if (!cntrl_port)
+		cntrl_port = "0";
+#endif
 	getEnvConfigStr(&mysql_database, "CNTRL_DATABASE", CNTRL_DATABASE);
 	getEnvConfigStr(&cntrl_table, "CNTRL_TABLE", CNTRL_DEFAULT_TABLE);
 	mysqlport = atoi(cntrl_port);
 	if (!is_open || strncmp(cntrl_host, mysql_host, MAX_BUFF) || strncmp(cntrl_port, indi_port, MAX_BUFF))
 	{
+		if (set_mysql_options(&mysql[0], "indimail.cnf", "indimail"))
+		{
+			fprintf(stderr, "mysql_options: Invalid options in MySQL options file\n");
+			return(-1);
+		}
 		if (!(mysql_real_connect(&mysql[0], cntrl_host, mysql_user, mysql_passwd, mysql_database, mysqlport, cntrl_socket, 0)))
 		{
+			if (set_mysql_options(&mysql[0], "indimail.cnf", "indimail"))
+			{
+				fprintf(stderr, "mysql_options: Invalid options in MySQL options file\n");
+				return(-1);
+			}
 			if (!(mysql_real_connect(&mysql[0], cntrl_host, mysql_user, mysql_passwd, NULL, mysqlport, cntrl_socket, 0)))
 			{
 				fprintf(stderr, "open_central_db: mysql_real_connect: %s: %s\n", cntrl_host, mysql_error(&mysql[0]));
