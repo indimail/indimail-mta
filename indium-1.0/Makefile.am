@@ -3,6 +3,8 @@
 #noinst_LIBRARIES = libfbsql.a libtai64.a
 
 COFLAGS=-z+05:30
+ACLOCAL_AMFLAGS=-I m4
+
 DEFS=-I. @auth_inc@ 
 
 libfbsql_LTLIBRARIES = libfbsql.la
