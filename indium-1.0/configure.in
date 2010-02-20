@@ -221,7 +221,7 @@ mysql_incdir="$enableval",
 ])
 
 mysql_libdir=""
-for f in /usr/lib/mysql /usr/local/mysql/lib/mysql /usr/lib/mysql
+for f in /usr/lib64/mysql /usr/lib/mysql /usr/local/mysql/lib/mysql /usr/lib/mysql
 do
 	if test -d $f
 	then
@@ -237,9 +237,16 @@ mysql_libdir="$enableval",
 		AC_MSG_ERROR([Unable to find your sql libraries dir, specify --enable-mysqllibdir.])
 	fi
 ])
+mysqlPrefix="`dirname $mysql_libdir`"
+mysqlPrefix="`dirname $mysqlPrefix`"
 else
 	mysql_incdir=$mysql_prefix/include/mysql
-	mysql_libdir=$mysql_prefix/lib/mysql
+	if test -d $mysql_prefix/lib64/mysql
+	then
+		mysql_libdir=$mysql_prefix/lib64/mysql
+	else
+		mysql_libdir=$mysql_prefix/lib/mysql
+	fi
 fi
 
 AC_CHECK_LIB(mysqlclient -L${mysql_libdir}, mysql_real_connect,libs="$libs -lmysqlclient",
