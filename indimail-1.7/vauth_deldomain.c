@@ -1,5 +1,8 @@
 /*
  * $Log: vauth_deldomain.c,v $
+ * Revision 2.7  2010-02-19 19:34:37+05:30  Cprogrammer
+ * delete from smtp_port only if domain is distributed
+ *
  * Revision 2.6  2008-05-28 16:38:54+05:30  Cprogrammer
  * removed USE_MYSQL
  *
@@ -55,7 +58,7 @@
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vauth_deldomain.c,v 2.6 2008-05-28 16:38:54+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: vauth_deldomain.c,v 2.7 2010-02-19 19:34:37+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #include <mysqld_error.h>
@@ -70,20 +73,20 @@ vauth_deldomain(char *domain)
 
 	if (vauth_open((char *) 0))
 		return (1);
-	if((is_dist = is_distributed_domain(domain)) == -1)
+	if ((is_dist = is_distributed_domain(domain)) == -1)
 	{
 		fprintf(stderr, "Unable to verify %s as a distributed domain\n",domain);
 		return(1);
 	}
 	for (err = 0, pw = vauth_getall(domain, 1, 0); pw; pw = vauth_getall(domain, 0, 0))
 	{
-		if(verbose)
+		if (verbose)
 			printf("Removing user %s\n", pw->pw_name);
 		vdelfiles(pw->pw_dir, pw->pw_name, domain);
 #ifdef CLUSTERED_SITE
-		if(is_dist)
+		if (is_dist)
 		{
-			if(vauth_updateflag(pw->pw_name, domain, DEL_FLAG) || delusercntrl(pw->pw_name, domain, 0))
+			if (vauth_updateflag(pw->pw_name, domain, DEL_FLAG) || delusercntrl(pw->pw_name, domain, 0))
 				continue;
 		}
 #endif
@@ -110,7 +113,7 @@ vauth_deldomain(char *domain)
 		}
 	}
 #ifdef ENABLE_AUTH_LOGGING
-	if(snprintf(SqlBuf, SQL_BUF_SIZE, "delete low_priority from lastauth where domain = \"%s\"", domain) == -1)
+	if (snprintf(SqlBuf, SQL_BUF_SIZE, "delete low_priority from lastauth where domain = \"%s\"", domain) == -1)
 		SqlBuf[SQL_BUF_SIZE - 1] = 0;
 	if (mysql_query(&mysql[1], SqlBuf) && mysql_errno(&mysql[1]) != ER_NO_SUCH_TABLE)
 	{
@@ -122,7 +125,8 @@ vauth_deldomain(char *domain)
 	err = (valias_delete_domain(domain) ? 1 : err);
 #endif
 #ifdef CLUSTERED_SITE
-	err = (vsmtp_delete_domain(domain) ? 1 : err);
+	if (is_dist)
+		err = (vsmtp_delete_domain(domain) ? 1 : err);
 #endif
 	return (err);
 }
