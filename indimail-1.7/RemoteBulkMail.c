@@ -1,5 +1,8 @@
 /*
  * $Log: RemoteBulkMail.c,v $
+ * Revision 2.8  2010-02-19 16:18:43+05:30  Cprogrammer
+ * allow host:user:password:socket/port format for mysql host
+ *
  * Revision 2.7  2008-09-08 09:51:25+05:30  Cprogrammer
  * removed mysql_escape
  * use BULK_SOCKET for unix domain socket name
@@ -38,7 +41,7 @@
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: RemoteBulkMail.c,v 2.7 2008-09-08 09:51:25+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: RemoteBulkMail.c,v 2.8 2010-02-19 16:18:43+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #include <stdlib.h>
@@ -107,21 +110,58 @@ RemoteBulkMail(email, domain, homedir)
 static MYSQL   *
 bulk_host_connect()
 {
-	char           *bulk_host, *bulk_user, *bulk_passwd, *bulk_database, *bulk_socket, *port;
-	int             bulk_port;
+	char           *bulk_host, *bulk_user = 0, *bulk_passwd = 0, *bulk_database,
+				   *bulk_socket = 0, *port, *ptr;
+	int             bulk_port, count;
 	static MYSQL    bulkMySql;
 
 	if ((bulk_host = (char *) getenv("BULK_HOST")) == (char *) 0)
 		return (&mysql[1]);
 	else
 	{
-		getEnvConfigStr(&bulk_user, "BULK_USER", MYSQL_USER);
-		getEnvConfigStr(&bulk_passwd, "BULK_PASSWD", MYSQL_PASSWD);
+		for (count = 0,ptr = bulk_host;*ptr;ptr++)
+		{
+			if (*ptr == ':')
+			{
+				*ptr = 0;
+				switch (count++)
+				{
+				case 0: /*- mysql user */
+					if (*(ptr + 1))
+						bulk_user = ptr + 1;
+				case 1: /*- mysql passwd */
+					if (*(ptr + 1))
+						bulk_passwd = ptr + 1;
+				case 2: /*- mysql socket/port */
+					if (*(ptr + 1) == '/' || *(ptr + 1) == '.')
+						bulk_socket = ptr + 1;
+					else
+					if (*(ptr + 1))
+						port = ptr + 1;
+				}
+			}
+		}
+		if (!bulk_user)
+			getEnvConfigStr(&bulk_user, "BULK_USER", MYSQL_USER);
+		if (!bulk_passwd)
+			getEnvConfigStr(&bulk_passwd, "BULK_PASSWD", MYSQL_PASSWD);
 		getEnvConfigStr(&bulk_database, "BULK_DATABASE", MYSQL_DATABASE);
-		getEnvConfigStr(&bulk_socket, "BULK_SOCKET", MYSQL_SOCKET);
-		getEnvConfigStr(&port, "BULK_VPORT", MYSQL_VPORT);
-		bulk_port = atoi(port);
+#if 0
+		if (!bulk_socket)
+			getEnvConfigStr(&bulk_socket, "BULK_SOCKET", MYSQL_SOCKET);
+		if (!port)
+			getEnvConfigStr(&port, "BULK_VPORT", MYSQL_VPORT);
+#else
+		if (!port)
+			port = "0";
+#endif
 		mysql_init(&bulkMySql);
+		if (set_mysql_options(&mysql[1], "indimail.cnf", "indimail"))
+		{
+			fprintf(stderr, "mysql_options: Invalid options in MySQL options file\n");
+			return ((MYSQL *) 0);
+		}
+		bulk_port = atoi(port);
 		if ((mysql_real_connect(&bulkMySql, bulk_host, bulk_user, bulk_passwd, bulk_database, bulk_port, bulk_socket, 0)))
 			return (&bulkMySql);
 		else
