@@ -1,5 +1,11 @@
 /*
  * $Log: LoadDbinfo.c,v $
+ * Revision 2.37  2010-02-19 16:16:44+05:30  Cprogrammer
+ * mysql_port was wrongly getting initialized to zero
+ *
+ * Revision 2.36  2010-02-19 13:13:35+05:30  Cprogrammer
+ * use defaults for mysql_port and mysql_socket
+ *
  * Revision 2.35  2010-02-18 22:43:45+05:30  Cprogrammer
  * accept mysql host in host:user:password:socket/port parameter
  *
@@ -119,7 +125,7 @@
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: LoadDbinfo.c,v 2.35 2010-02-18 22:43:45+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: LoadDbinfo.c,v 2.37 2010-02-19 16:16:44+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #include <sys/types.h>
@@ -746,10 +752,15 @@ localDbinfo(int *total, DBINFO ***rhosts)
 		getEnvConfigStr(&mysql_user, "MYSQL_USER", MYSQL_USER);
 	if (!mysql_passwd)
 		getEnvConfigStr(&mysql_passwd, "MYSQL_PASSWD", MYSQL_PASSWD);
+#if 0
 	if (!mysql_socket)
 		getEnvConfigStr(&mysql_socket, "MYSQL_SOCKET", MYSQL_SOCKET);
 	if (!mysql_port)
 		getEnvConfigStr(&mysql_port, "MYSQL_VPORT", MYSQL_VPORT);
+#else
+	if (!mysql_port)
+		mysql_port = "0";
+#endif
 	getEnvConfigStr(&mysql_database, "MYSQL_DATABASE", MYSQL_DATABASE);
 	if (total)
 	{
