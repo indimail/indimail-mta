@@ -1,7 +1,13 @@
 #
-# $Log: $
+# $Log: indium.spec.in,v $
+# Revision 1.2  2010-02-20 11:17:17+05:30  Cprogrammer
+# fix for autoreconf
 #
-# $Id: $
+# Revision 1.1  2010-02-20 10:53:59+05:30  Cprogrammer
+# Initial revision
+#
+#
+# $Id: indium.spec.in,v 1.2 2010-02-20 11:17:17+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %define _unpackaged_files_terminate_build 1
 
@@ -25,6 +31,13 @@
 %define disttag rhfc
 %endif
 
+%if 0%{?opensuse_bs}
+# define to 1 if building on openSUSE build service
+%define build_on_obs       1
+%else
+%define build_on_obs       0
+%endif
+
 %define _prefix            @indimaildir@
 %define see_base           For a description of IndiMail visit http://www.indimail.org
 %define _verbose           0
@@ -32,12 +45,23 @@
 %define fbsql_version      1.0
 %define bwidget_version    1.8.0
 %define tcl_version        8.5
-%define mysqlPrefix        /usr/local/mysql
+
+%if %build_on_obs != 0
+# change mysqlPrefix to /usr for openSUSE buildservice
+%define mysqlPrefix        /usr
+%else
+%define mysqlPrefix        @mysql_prefix@
+%endif
+%define nobwidget          1
 
 Summary: TCL/TK based Administration GUI for IndiMail
 Name: indium
 Version: @version@
-Release: 1
+%if %build_on_obs != 0
+Release: 1.<B_CNT>
+%else
+Release: 1.B_CNT
+%endif
 License: GPLv3
 Group: System Environment/Base
 Source0:  http://downloads.sourceforge.net/indimail/%{name}-%{version}.tar.gz
@@ -48,8 +72,11 @@ AutoReqProv: No
 BuildRequires: tcl-devel rpm gcc gcc-c++ make binutils coreutils grep
 BuildRequires: tk-devel glibc glibc-devel procps tcl tk cpio
 BuildRequires: sed gettext-devel
-BuildRequires: findutils
-BuildRequires: sharutils gzip autoconf indimail
+BuildRequires: findutils openssl-devel openssl
+BuildRequires: sharutils gzip autoconf indimail-devel
+%if %build_on_obs == 1
+BuildRequires: mysql-devel
+%endif
 %if %{undefined centos_version} && %{undefined rhel_version} && %{undefined sles_version}
 BuildRequires: chrpath
 %endif
@@ -58,13 +85,13 @@ BuildRequires: -post-build-checks
 #!BuildIgnore: post-build-checks  
 %endif
 
-Requires: coreutils grep /bin/sh glibc /usr/sbin/useradd /usr/sbin/groupadd indimail
+Requires: coreutils grep /bin/sh glibc /usr/sbin/useradd /usr/sbin/groupadd
 Requires: procps /usr/bin/awk indimail > 1.4
 BuildRoot: %(mktemp -ud %{_tmppath}/%{name}-%{version}-%{release}-XXXXXX)
 Excludeos: windows 
 
 %description
-Indium provides a GUI for administering IndiMail and configurint
+Indium provides a GUI for administering IndiMail and configuring
 associated components below
 
 qmail,
@@ -75,12 +102,19 @@ Bogofilter - A Bayesian Spam Filter,
 Clam AntiVirus - GPL anti-virus toolkit for UNIX,
 Fetchmail,
 
-Indiium also provides Management of Virtual domains.
+Indium also provides Management of Virtual domains.
 
 %{see_base}
 
 %prep
-echo Building %{name}-%{version}-%{release} Build %{_build} OS %{_os} %dist %disttag
+echo "---------------- INFORMATION ------------------------"
+echo target        %_target
+echo target_alias  %_target_alias
+echo target_cpu    %_target_cpu
+echo target_os     %_target_os
+echo target_vendor %_target_vendor
+echo Building %{name}-%{version}-%{release} Build %{_build} OS %{_os} Dist %dist disttag %disttag libs %{_lib} %{_libdir}
+echo "------------------------------------------------------"
 
 for i in %{name}-%{version}
 do
@@ -108,34 +142,69 @@ done
 %build
 ID=$(id -u)
 if [ $ID -eq 0 ] ; then
-nscd_up=`ps -ef |grep nscd |grep -v grep|wc -l`
-if [ $nscd_up -ge 1 ] ; then
-	if [ -x %{_sysconfdir}/init.d/nscd ] ; then
-		%{_sysconfdir}/init.d/nscd stop
+	nscd_up=`ps -ef |grep nscd |grep -v grep|wc -l`
+	if [ $nscd_up -ge 1 ] ; then
+		if [ -x %{_sysconfdir}/init.d/nscd ] ; then
+			%{_sysconfdir}/init.d/nscd stop
+		fi
 	fi
-fi
-/usr/bin/getent group indimail || /usr/sbin/groupadd -r -g 555 indimail
-if [ $? = 4 ] ; then
-	/usr/sbin/groupadd -r indimail
-fi
-/usr/bin/getent passwd indimail || /usr/sbin/useradd -r -g indimail -u 555 -d %{_prefix} indimail || true
-if [ $? = 4 ] ; then
-	/usr/sbin/useradd -r -g indimail -d %{_prefix} indimail
-fi
+	/usr/bin/getent group indimail || /usr/sbin/groupadd -r -g 555 indimail
+	if [ $? = 4 ] ; then
+		/usr/sbin/groupadd -r indimail
+	fi
+	/usr/bin/getent passwd indimail || /usr/sbin/useradd -r -g indimail -u 555 -d %{_prefix} indimail || true
+	if [ $? = 4 ] ; then
+		/usr/sbin/useradd -r -g indimail -d %{_prefix} indimail
+	fi
 fi
 
 if [ %{_verbose} -eq 0 ] ; then
-DEVICE=/dev/null
+	DEVICE=/dev/null
 else
-DEVICE=/dev/tty
+	DEVICE=/dev/tty
 fi
 echo "Will send output to $DEVICE"
+#### Stupid Mandriva ######################
+%if 0%{?mandriva_version} > 2009
+%ifarch x86_64
+%define _libdir %{_prefix}/lib64
+%define _lib lib64
+%else
+%define _libdir %{_prefix}/lib
+%define _lib lib
+%endif
+%endif
+
 cd %{name}-%{version}
+if [ %{fast_mode} -eq 0 ] ; then
+if [ %{build_on_obs} -eq 0 ] ; then
+	echo "reconfiguring..."
+	autoreconf -fi
+else
+echo "reconfiguring..."
+%if %{undefined centos_version} && %{undefined rhel_version} && %{undefined sles_version}
+%if 0%{?fedora_version} > 10 || 0%{?suse_version} || 0%{?mandriva_version} > 2009
+	autoreconf -fi
+%endif
+%endif
+fi
+
+if [ " %dist" = " mandrake" ] ; then
 %configure --prefix=%{_prefix} \
+	--libdir=%{_libdir} --x-libraries=%{_libdir} \
 	--libexecdir=%{_prefix}/libexec --sysconfdir=%{_prefix}/etc \
+	--enable-mysqlPrefix=%{mysqlPrefix} \
 	--enable-mysqlincdir=%{mysqlPrefix}/include/mysql \
 	--enable-mysqllibdir=%{mysqlPrefix}/%{_lib}/mysql \
 	--mandir=%{_prefix}/man --sysconfdir=%{_prefix}/etc
+else
+%configure --prefix=%{_prefix} \
+	--libexecdir=%{_prefix}/libexec --sysconfdir=%{_prefix}/etc \
+	--enable-mysqlPrefix=%{mysqlPrefix} \
+	--enable-mysqlincdir=%{mysqlPrefix}/include/mysql \
+	--enable-mysqllibdir=%{mysqlPrefix}/%{_lib}/mysql \
+	--mandir=%{_prefix}/man --sysconfdir=%{_prefix}/etc
+fi
 
 %install
 [ "$RPM_BUILD_ROOT" != "/" ] && /bin/rm -fr $RPM_BUILD_ROOT
@@ -145,21 +214,22 @@ do
 if [ -d $i ] ; then
 	cd $i
 	if [ %{_verbose} -eq 0 ] ; then
-		make -s DESTDIR=%{buildroot}
-		make -s ARCH_LIB=%{_lib} DESTDIR=%{buildroot} install-strip
+		%{__make} -s DESTDIR=%{buildroot}
+		%{__make} -s DESTDIR=%{buildroot} install-strip
 	else
-		make DESTDIR=%{buildroot}
-		make ARCH_LIB=%{_lib} DESTDIR=%{buildroot} install-strip
+		%{__make} DESTDIR=%{buildroot}
+		%{__make} DESTDIR=%{buildroot} install-strip
 	fi
 	cd ..
 fi
 done
 for i in fbsql tai64
 do
-/bin/rm -f %{buildroot}%{_libdir}/lib"$i".la
-/bin/rm -f %{buildroot}%{_libdir}/lib"$i".a
+	/bin/rm -f %{buildroot}%{_libdir}/lib"$i".la
+	/bin/rm -f %{buildroot}%{_libdir}/lib"$i".a
 done
 
+%if %nobwidget == 0
 . /usr/lib/tclConfig.sh
 cd %{name}-%{version}
 if [ $TCL_VERSION -ne %{tcl_version} ] ; then
@@ -168,16 +238,17 @@ if [ $TCL_VERSION -ne %{tcl_version} ] ; then
 fi
 TCL_PATH=`echo $TCL_PACKAGE_PATH|awk '{print $1}'`
 find ./BWidget-%{bwidget_version} -depth -print | cpio -pdmv %{buildroot}$TCL_PATH
+%endif
 
 # copy files here
 if [ -x /usr/bin/chrpath ] ; then
-/usr/bin/chrpath -d %{buildroot}%{_libdir}/*.so
-/usr/bin/chrpath -d %{buildroot}%{_prefix}/sbin/pwhelper
+	/usr/bin/chrpath -d %{buildroot}%{_libdir}/*.so
+	/usr/bin/chrpath -d %{buildroot}%{_prefix}/sbin/pwhelper
 fi
 
 %files
-%defattr(-, root, root, 0555)
-%dir %attr(555,root,root)               %{_prefix}
+%defattr(-,root,root,0555)
+%dir %attr(555,root,qmail)              %{_prefix}
 #
 # Image files
 #
@@ -266,6 +337,7 @@ fi
 %attr(444,root,indimail)                %{_prefix}/share/indium-%{version}/images/vacation.gif
 %attr(444,root,indimail)                %{_prefix}/share/indium-%{version}/images/version.gif
 %attr(444,root,indimail)                %{_prefix}/share/indium-%{version}/images/warning.gif
+%if %nobwidget == 0
 #
 # BWidget
 #
@@ -392,6 +464,7 @@ fi
 %attr(644,root,root) /usr/%{_lib}/tcl%{tcl_version}/BWidget-%{bwidget_version}/statusbar.tcl
 %attr(644,root,root) /usr/%{_lib}/tcl%{tcl_version}/BWidget-%{bwidget_version}/passwddlg.tcl
 %attr(644,root,root) /usr/%{_lib}/tcl%{tcl_version}/BWidget-%{bwidget_version}/pagesmgr.tcl
+%endif
 #
 # These files will get removed during installation
 #
@@ -447,7 +520,7 @@ fi
 %attr(444,root,indimail) %config(noreplace,missingok) %{_prefix}/share/indium-%{version}/etc/filemanrc
 
 %clean
-/bin/rm -rf %{buildroot}
+%{__rm} -rf %{buildroot}
 
 #          install   erase   upgrade  reinstall
 # % pre         1        -         2         2
@@ -459,41 +532,32 @@ fi
 argv1=$1
 ID=$(id -u)
 if [ $ID -ne 0 ] ; then
-echo "You are not root"
-exit 1
+	echo "You are not root"
+	exit 1
 fi
 
 %post
 argv1=$1
 ID=$(id -u)
 if [ $ID -ne 0 ] ; then
-echo "You are not root"
-exit 1
+	echo "You are not root"
+	exit 1
 fi
-# Recreate ld.so links and cache
-if [ -d %{_sysconfdir}/ld.so.conf.d ] ; then
-	(
-		echo %{_libdir}
-		echo %{mysqlPrefix}/%{_lib}/mysql 
-	) > %{_sysconfdir}/ld.so.conf.d/indimail-%{_arch}.conf
-fi
-/sbin/ldconfig
 
 %preun
 #echo This is preun for %{version}-%{release} : arg=$1
 ID=$(id -u)
 if [ $ID -ne 0 ] ; then
-echo "You are not root"
-exit 1
+	echo "You are not root"
+	exit 1
 fi
 
 %postun
 #echo This is postun for %{version}-%{release} : arg=$1
 ID=$(id -u)
 if [ $ID -ne 0 ] ; then
-echo "You are not root"
-exit 1
+	echo "You are not root"
+	exit 1
 fi
-/sbin/ldconfig
 
 %changelog

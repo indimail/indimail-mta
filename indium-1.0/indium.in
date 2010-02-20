@@ -1,5 +1,11 @@
 #
 # $Log: indium.in,v $
+# Revision 2.108  2010-02-20 11:16:54+05:30  Cprogrammer
+# added -n option to adminclient
+#
+# Revision 2.107  2010-02-19 23:07:48+05:30  Cprogrammer
+# use clientcert.pem for encrypted adminclient session
+#
 # Revision 2.106  2009-10-03 23:54:50+05:30  Cprogrammer
 # changed etcdir to scriptdir
 #
@@ -3010,7 +3016,7 @@ proc run_moduser {server} {
 	} else {
 		set vmodcmd "\"vmoduser -q $quota -c \\\"$gecos\\\" $opt $username@$domain\""
 	}
-	set cmd "exec @indimaildir@/sbin/adminclient -h $server -p $adminport -u $adminuser -P $adminpass -c $vmodcmd"
+	set cmd "exec @indimaildir@/sbin/adminclient -h $server -p $adminport -u $adminuser -P $adminpass -n @indimaildir@/control/clientcert.pem -c $vmodcmd"
 	runCommand $cmd
 	if {$returnstatus == 0} {
 		vuserinfo $server

@@ -1,5 +1,4 @@
 @SET_MAKE@
-.SILENT:
 
 #noinst_LIBRARIES = libfbsql.a libtai64.a
 
@@ -28,6 +27,8 @@ tcl_script_list = global.tcl balloon.tcl base64.tcl combobox.tcl fileman.tcl hel
 tcl_etc_list = default.config default.profile filemanrc
 tcl_lib_list = userhelp.txt
 
+all-local: .gitignore
+
 guisbin_PROGRAMS = pwhelper
 
 guibin_SCRIPTS = indium litesrc supernotepad secpanel FMbrowse tkdiff
@@ -42,6 +43,7 @@ pwhelper_LDADD = @auth_libs@
 
 edit = sed \
 	-e 's,@indimaildir\@,$(indimaildir),g' \
+	-e 's,@mysql_prefix\@,$(mysql_prefix),g' \
 	-e 's,@auth_inc\@,$(auth_inc),g' \
 	-e 's,@libdir\@,$(libdir),g' \
 	-e 's,@scriptdir\@,$(datarootdir)/$(distdir)/scripts,g' \
@@ -92,5 +94,9 @@ install-data-hook:
 		/bin/mkdir -p $(DESTDIR)$(datarootdir)/$(distdir)/lib; \
 		$(INSTALL_DATA) $$f $(DESTDIR)$(datarootdir)/$(distdir)/lib/$$f || exit 1 ;\
 	done
+.gitignore: $(PROGRAMS) $(guibin_SCRIPTS) $(MOSTLYCLEANFILES) $(noinst_SCRIPTS) gitignore
+	(for f in $^; do \
+		echo $$f ; \
+	done ;cat gitignore) |grep -v gitignore >> .gitignore; sort -u .gitignore -o .gitignore
 
 AUTOMAKE_OPTIONS = foreign no-dependencies
