@@ -1,5 +1,8 @@
 #
 # $Log: common.tcl.in,v $
+# Revision 2.19  2010-02-20 13:52:28+05:30  Cprogrammer
+# set firefox as default browser and gnome-terminal as default terminal
+#
 # Revision 2.18  2009-10-03 23:55:14+05:30  Cprogrammer
 # removed mailstat
 #
@@ -943,6 +946,10 @@ proc preferences {mode} {
 			set browser "/usr/bin/X11/netscape"
 			set configs(browser) $browser
 		} 
+		if {[file exist /usr/bin/firefox]} {
+			set browser "/usr/bin/firefox"
+			set configs(browser) $browser
+		} 
 	} else {
 		set browser $configs(browser)
 	}
@@ -1532,7 +1539,7 @@ proc default_config {} {
 	global configs
 
 	set configs(editor) "/bin/vi"
-	set configs(xterm) "/usr/bin/X11/xterm"
+	set configs(xterm) "/usr/bin/gnome-terminal"
 	set configs(mysql_host) "localhost"
 	set configs(mysql_port) 3306
 	set configs(mysql_database) "indimail"
@@ -1542,7 +1549,7 @@ proc default_config {} {
 	set configs(adminuser) "admin"
 	set configs(adminpass) ""
 	set configs(mysql_pass) "ssh-1.5-"
-	set configs(browser) "/usr/bin/netscape"
+	set configs(browser) "/usr/bin/firefox"
 	set configs(mailclient) "/usr/local/bin/sylpheed"
 	set configs(controldir) "@indimaildir@/control"
 	if {[file exists "/service"]} {
