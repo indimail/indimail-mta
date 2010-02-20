@@ -1,10 +1,13 @@
 /*
- * $log:$
+ * $Log: open_master.c,v $
+ * Revision 2.6  2010-02-20 11:31:17+05:30  Cprogrammer
+ * added RCS log
+ *
  */
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: open_master.c,v 2.5 2009-02-18 21:32:46+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: open_master.c,v 2.6 2010-02-20 11:31:17+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef CLUSTERED_SITE
@@ -18,7 +21,7 @@ open_master()
 	char            host_path[MAX_BUFF], master_host[MAX_BUFF];
 	FILE           *fp;
 
-	if((ptr = (char *) getenv("MASTER_HOST")) != (char *) 0)
+	if ((ptr = (char *) getenv("MASTER_HOST")) != (char *) 0)
 		return (open_central_db(ptr));
 	getEnvConfigStr(&qmaildir, "QMAILDIR", QMAILDIR);
 	getEnvConfigStr(&controldir, "CONTROLDIR", "control");
