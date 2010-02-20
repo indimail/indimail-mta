@@ -1,5 +1,11 @@
 #
 # $Log: indium.spec.in,v $
+# Revision 1.4  2010-02-20 13:52:50+05:30  Cprogrammer
+# added ldconfig
+#
+# Revision 1.3  2010-02-20 11:44:02+05:30  Cprogrammer
+# added fast_mode
+#
 # Revision 1.2  2010-02-20 11:17:17+05:30  Cprogrammer
 # fix for autoreconf
 #
@@ -7,7 +13,7 @@
 # Initial revision
 #
 #
-# $Id: indium.spec.in,v 1.2 2010-02-20 11:17:17+05:30 Cprogrammer Exp mbhangui $
+# $Id: indium.spec.in,v 1.4 2010-02-20 13:52:50+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %define _unpackaged_files_terminate_build 1
 
@@ -34,8 +40,10 @@
 %if 0%{?opensuse_bs}
 # define to 1 if building on openSUSE build service
 %define build_on_obs       1
+%define fast_mode          0
 %else
 %define build_on_obs       0
+%define fast_mode          0
 %endif
 
 %define _prefix            @indimaildir@
@@ -86,7 +94,7 @@ BuildRequires: -post-build-checks
 %endif
 
 Requires: coreutils grep /bin/sh glibc /usr/sbin/useradd /usr/sbin/groupadd
-Requires: procps /usr/bin/awk indimail > 1.4
+Requires: procps /usr/bin/awk indimail > 1.6
 BuildRoot: %(mktemp -ud %{_tmppath}/%{name}-%{version}-%{release}-XXXXXX)
 Excludeos: windows 
 
@@ -188,19 +196,18 @@ echo "reconfiguring..."
 %endif
 %endif
 fi
+fi
 
 if [ " %dist" = " mandrake" ] ; then
 %configure --prefix=%{_prefix} \
 	--libdir=%{_libdir} --x-libraries=%{_libdir} \
 	--libexecdir=%{_prefix}/libexec --sysconfdir=%{_prefix}/etc \
-	--enable-mysqlPrefix=%{mysqlPrefix} \
 	--enable-mysqlincdir=%{mysqlPrefix}/include/mysql \
 	--enable-mysqllibdir=%{mysqlPrefix}/%{_lib}/mysql \
 	--mandir=%{_prefix}/man --sysconfdir=%{_prefix}/etc
 else
 %configure --prefix=%{_prefix} \
 	--libexecdir=%{_prefix}/libexec --sysconfdir=%{_prefix}/etc \
-	--enable-mysqlPrefix=%{mysqlPrefix} \
 	--enable-mysqlincdir=%{mysqlPrefix}/include/mysql \
 	--enable-mysqllibdir=%{mysqlPrefix}/%{_lib}/mysql \
 	--mandir=%{_prefix}/man --sysconfdir=%{_prefix}/etc
@@ -543,6 +550,7 @@ if [ $ID -ne 0 ] ; then
 	echo "You are not root"
 	exit 1
 fi
+/sbin/ldconfig
 
 %preun
 #echo This is preun for %{version}-%{release} : arg=$1
@@ -559,5 +567,13 @@ if [ $ID -ne 0 ] ; then
 	echo "You are not root"
 	exit 1
 fi
+if [ $argv1 -eq 1 ] ; then
+	echo "recreating ld.so cache"
+	/sbin/ldconfig
+	exit 0
+fi
+echo "recreating ld.so cache"
+/sbin/ldconfig
 
+# fix changelog for openSUSE buildservice
 %changelog
