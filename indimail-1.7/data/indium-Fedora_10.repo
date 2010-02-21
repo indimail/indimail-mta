@@ -1,0 +1,15 @@
+[indium Raw]
+name=indium (Fedora_10)
+type=rpm-md
+baseurl=http://download.opensuse.org/repositories/home:/mbhangui:/indium/Fedora_10/
+gpgcheck=1
+gpgkey=http://download.opensuse.org/repositories/home:/mbhangui:/indium/Fedora_10/repodata/repomd.xml.key
+enabled=1
+
+[indium Stable]
+name=indium (Fedora_10)
+type=rpm-md
+baseurl=http://download.opensuse.org/repositories/home:/indimail:/indium/Fedora_10/
+gpgcheck=1
+gpgkey=http://download.opensuse.org/repositories/home:/indimail:/indium/Fedora_10/repodata/repomd.xml.key
+enabled=1
