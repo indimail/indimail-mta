@@ -1,5 +1,8 @@
 /*
  * $Log: rblsmtpd.c,v $
+ * Revision 1.9  2010-02-22 15:21:54+05:30  Cprogrammer
+ * log sender, recipients
+ *
  * Revision 1.8  2009-08-12 10:09:55+05:30  Cprogrammer
  * IPV6 Modifications
  *
@@ -51,7 +54,7 @@
 #define FATAL "rblsmtpd: fatal: "
 
 #ifndef	lint
-static char     sccsid[] = "$Id: rblsmtpd.c,v 1.8 2009-08-12 10:09:55+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: rblsmtpd.c,v 1.9 2010-02-22 15:21:54+05:30 Cprogrammer Stab mbhangui $";
 #endif
 
 void
@@ -67,7 +70,31 @@ usage(void)
 }
 
 char           *ip_env;
+char            pid_str[FMT_ULONG] = "?PID?";
+static stralloc addr = { 0 };
 static stralloc ip_reverse;
+
+/*
+ * Idea from Andrew Richards http://free.acrconsulting.co.uk
+ */
+void
+rbl_out(int should_flush, char *arg)
+{
+	buffer_puts(buffer_2, "rblsmtpd: ");
+	buffer_puts(buffer_2, " pid ");
+	if (*pid_str == '?')
+		pid_str[fmt_ulong(pid_str, getpid())] = 0;
+	buffer_puts(buffer_2, pid_str);
+	buffer_puts(buffer_2, " from ");
+	buffer_puts(buffer_2, ip_env);
+	if (arg && *arg)
+	{
+		buffer_puts(buffer_2, ": ");
+		buffer_puts(buffer_2, arg);
+	}
+	if (should_flush)
+		buffer_flush(buffer_2);
+}
 
 #ifdef IPV6
 char           *tcp_proto;
@@ -290,10 +317,7 @@ delay(unsigned long delay)
 	}
 	if (!stralloc_copys(&info, "greetdelay: "))
 		nomem();
-	buffer_puts(buffer_2, "rblsmtpd: ");
-	buffer_puts(buffer_2, ip_env);
-	buffer_puts(buffer_2, " pid ");
-	buffer_put(buffer_2, strnum, fmt_ulong(strnum,getpid()));
+	rbl_out(0, 0);
 	buffer_puts(buffer_2, ": ");
 	buffer_put(buffer_2, info.s, info.len);
 	buffer_put(buffer_2, strnum, fmt_ulong(strnum,delay));
@@ -318,6 +342,119 @@ accept()
 }
 
 void
+verify()
+{
+	buffer_putsflush(&out, "252 rblsmtpd.local\r\n");
+}
+
+int
+addrparse(char *arg)
+{
+	int             i;
+	char            ch;
+	char            terminator;
+	int             flagesc;
+	int             flagquoted;
+
+	terminator = '>';
+	i = str_chr(arg, '<');
+	if (arg[i])
+		arg += i + 1;
+	else
+	{	/*- partner should go read rfc 821 */
+		terminator = ' ';
+		arg += str_chr(arg, ':');
+		if (*arg == ':')
+			++arg;
+		if (!*arg)
+			return (0);
+		while (*arg == ' ')
+			++arg;
+	}
+	/*- strip source route */
+	if (*arg == '@')
+	{
+		while (*arg)
+		{
+			if (*arg++ == ':')
+				break;
+		}
+	}
+	if (!stralloc_copys(&addr, ""))
+		nomem();
+	flagesc = 0;
+	flagquoted = 0;
+	for (i = 0; (ch = arg[i]); ++i)
+	{	/*- copy arg to addr, stripping quotes */
+		if (flagesc)
+		{
+			if (!stralloc_append(&addr, &ch))
+				nomem();
+			flagesc = 0;
+		} else
+		{
+			if (!flagquoted && ch == terminator)
+				break;
+			switch (ch)
+			{
+			case '\\':
+				flagesc = 1;
+				break;
+#ifdef STRIPSINGLEQUOTES
+			case '\'':
+				flagquoted = !flagquoted;
+				break;
+#endif
+			case '"':
+				flagquoted = !flagquoted;
+				break;
+			default:
+				if (!stralloc_append(&addr, &ch))
+					nomem();
+			}
+		}
+	}
+	/*- could check for termination failure here, but why bother? */
+	if (!stralloc_append(&addr, ""))
+		nomem();
+	if (addr.len > 900)
+		return 0;
+	return 1;
+}
+
+void
+smtp_mail(char *arg)
+{
+	rbl_out(1, 0);
+	if (!addrparse(arg))
+		buffer_puts(buffer_2, ": MAIL with too long address\n");
+	else
+	{
+		buffer_puts(buffer_2, ": Sender <");
+		buffer_puts(buffer_2, addr.s);
+		buffer_puts(buffer_2, ">\n");
+	}
+	buffer_flush(buffer_2);
+	accept();
+}
+
+void
+smtp_rcpt(char *arg)
+{
+	rbl_out(1, 0);
+	if (!addrparse(arg))
+		buffer_puts(buffer_2, ": RCPT with too long address\n");
+	else
+	{
+		buffer_puts(buffer_2, ": Recipient <");
+		buffer_puts(buffer_2, addr.s);
+		buffer_puts(buffer_2, ">\n");
+	}
+	buffer_flush(buffer_2);
+	reject();
+}
+
+void
 greet()
 {
 	buffer_putsflush(&out, "220 rblsmtpd.local\r\n");
@@ -337,13 +474,15 @@ drop()
 }
 
 struct commands smtpcommands[] = {
-	{"quit", quit, 0}
-	, {"helo", accept, 0}
-	, {"ehlo", accept, 0}
-	, {"mail", accept, 0}
-	, {"rset", accept, 0}
-	, {"noop", accept, 0}
-	, {0, reject, 0}
+	{"quit", quit, 0},
+	{"helo", accept, 0},
+	{"ehlo", accept, 0},
+	{"mail", smtp_mail, 0},
+	{"rcpt", smtp_rcpt, 0},
+	{"rset", accept, 0},
+	{"vrfy", verify, 0},
+	{"noop", accept, 0},
+	{0, reject, 0}
 };
 
 void
@@ -358,7 +497,6 @@ rblsmtpd(void)
 	} else
 	if (!stralloc_copys(&message, "553 "))
 		nomem();
-
 	if (text.len > 200)
 		text.len = 200;
 	if (!stralloc_cat(&message, &text))
@@ -366,19 +504,13 @@ rblsmtpd(void)
 	for (i = 0; i < message.len; ++i)
 		if ((message.s[i] < 32) || (message.s[i] > 126))
 			message.s[i] = '?';
-
-	buffer_puts(buffer_2, "rblsmtpd: ");
-	buffer_puts(buffer_2, ip_env);
-	buffer_puts(buffer_2, " pid ");
-	buffer_put(buffer_2, strnum, fmt_ulong(strnum, getpid()));
+	rbl_out(0, 0);
 	buffer_puts(buffer_2, ": ");
 	buffer_put(buffer_2, message.s, message.len);
 	buffer_puts(buffer_2, "\n");
 	buffer_flush(buffer_2);
-
 	if (!stralloc_cats(&message, "\r\n"))
 		nomem();
-
 	if (!timeout)
 		reject();
 	else
@@ -388,6 +520,7 @@ rblsmtpd(void)
 		greet();
 		commands(&in, smtpcommands);
 	}
+	rbl_out(1, ": Session terminated: quitting\n");
 	_exit(0);
 }
 
@@ -435,10 +568,12 @@ main(int argc, char **argv, char **envp)
 			} else
 				altreply += i;
 		}
+#if 0
 		buffer_puts(buffer_2, "RBLSMTPD=");
 		buffer_put(buffer_2, text.s, text.len);
 		buffer_puts(buffer_2, "\n");
 		buffer_flush(buffer_2);
+#endif
 	}
 	while ((opt = getopt(argc, argv, "bBcCt:r:a:")) != opteof)
 	{
