@@ -13,6 +13,11 @@
     # echo "localhost" > host.mysql
     # exit
 
+    NOTE: you can also use host:user:password:socket or host:user:password:port format
+    for host.mysql (for IndiMail 1.6.9 and above)
+
+	# echo "localhost:indimail:ssh-1.5-:/tmp/mysql.sock" > host.mysql
+
 	Ensure MySQL is running
 
 	% sudo /var/indimail/bin/svstat /service/mysql.3306
@@ -34,6 +39,11 @@
     # ln -s host.cntrl host.master
     # echo 192.168.1.100 > hostip (replace 192.168.1.100 with your mailserver IP)
     # exit
+
+    NOTE: you can also use host:user:password:socket or host:user:password:port format
+    for host.cntrl, host.master (for IndiMail 1.6.9 and above)
+
+	# echo "localhost:indimail:ssh-1.5-:/tmp/mysql.sock" > host.cntrl
 
 	Ensure MySQL is running
 

@@ -75,6 +75,9 @@ DATE: @DATE@
     where hostcntrl_master is the IP address of MySQL Master having the host control information.
     where hostcntrl_slaver is the IP address of MySQL Slave  having the host control information.
 
+    NOTE: you can also use host:user:password:socket or host:user:password:port format
+    for host.mysql, host.cntrl, host.master (for IndiMail 1.6.9 and above)
+
     In case you don't desire a master-slave architecture, hostcntrl_master and hostcntrl_slave
     can be the same
 

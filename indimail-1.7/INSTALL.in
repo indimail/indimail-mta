@@ -838,7 +838,7 @@ You can go on to add a virtual domain and users if you wish
     First you need to have all local information stored in MySQL (change localhost to the
     appropriate host)
 
-    # echo localhost > @indimaildir@/control/mysql.host   (MySQL host to which all programs
+    # echo localhost > @indimaildir@/control/host.mysql   (MySQL host to which all programs
       will connect)
 
     If you need to setup a cluster of mailstores having the same domain, you need to
@@ -848,6 +848,9 @@ You can go on to add a virtual domain and users if you wish
     # ln -s host.cntrl host.master
     # echo 192.168.1.100 > hostip (replace 192.168.1.100 with your mailserver/mailstore IP)
     # exit
+
+    NOTE: you can also use host:user:password:socket or host:user:password:port format
+    for host.mysql, host.cntrl, host.master (for IndiMail 1.6.9 and above)
 
     ##### STEP 2  #############################################
     Add a virtual domain
