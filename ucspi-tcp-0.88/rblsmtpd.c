@@ -1,5 +1,8 @@
 /*
  * $Log: rblsmtpd.c,v $
+ * Revision 1.10  2010-02-22 20:48:16+05:30  Cprogrammer
+ * fixed SIGSEGV when RBLSMTPD was set and empty
+ *
  * Revision 1.9  2010-02-22 15:21:54+05:30  Cprogrammer
  * log sender, recipients
  *
@@ -54,7 +57,7 @@
 #define FATAL "rblsmtpd: fatal: "
 
 #ifndef	lint
-static char     sccsid[] = "$Id: rblsmtpd.c,v 1.9 2010-02-22 15:21:54+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: rblsmtpd.c,v 1.10 2010-02-22 20:48:16+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 void
@@ -186,7 +189,6 @@ int             flagmustnotbounce = 0;
 
 int             decision = 0;	/*- 0 undecided, 1 accept, 2 reject, 3 bounce */
 static stralloc text;			/*- defined if decision is 2 or 3 */
-
 static stralloc tmp;
 
 void
@@ -542,14 +544,16 @@ main(int argc, char **argv, char **envp)
 		{
 			altreply = x + 1;
 			decision = 3;
+			if (!stralloc_copys(&text, ""))
+				nomem();
 		} else
 		{
 			altreply = x;
 			decision = 2;
+			if (!stralloc_copys(&text, ""))
+				nomem();
 		}
-		if (!stralloc_copys(&text, ""))
-			nomem();
-		while (*altreply)
+		while (altreply && *altreply)
 		{
 			i = str_chr(altreply, '%');
 			if (!stralloc_catb(&text, altreply, i))
