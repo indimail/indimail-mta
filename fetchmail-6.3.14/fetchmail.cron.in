@@ -1,0 +1,43 @@
+#!/bin/sh
+#
+# $Log: slemslite.cron.in,v $
+# Revision 1.2  2005-06-26 12:56:17+05:30  Cprogrammer
+# added comments
+#
+# Revision 1.1  2003-12-13 16:10:29+05:30  Cprogrammer
+# Initial revision
+#
+#
+trap "" 1
+WHOAMI=`/usr/bin/whoami`
+if [ -f /tmp/slemscron.pid ] ; then
+	pid=`cat /tmp/slemscron"$WHOAMI".pid`
+	kill -0 $pid > /dev/null 2>&1
+	if [ $? = 0 ] ; then
+		exit 0
+	fi
+fi
+if [ -d /service1 ] ; then
+	SERVICEDIR=/service1
+elif [ -d /service2 ] ; then
+	SERVICEDIR=/service2
+else
+	SERVICEDIR=/service
+fi
+echo $$ > /tmp/slemscron"$WHOAMI".pid
+if [ -p /tmp/.wakeup ] ; then
+	@prefix@/bin/writefifo /tmp/.wakeup
+fi
+
+if [ " $1" = " dialup" ] ; then
+	touch /tmp/.dialup
+else
+	rm -f /tmp/.dialup
+fi
+@prefix@/bin/slemsPrivate @prefix@/bin/svstat $SERVICEDIR/slemslite
+if [ $? = 0 ] ; then
+	exec @prefix@/bin/slemslite # Send wakeup signal to slemslite
+else # Do not start slemslite if down in /service directory
+	/bin/rm -f /tmp/slemscron"$WHOAMI".pid
+	exit 0
+fi
