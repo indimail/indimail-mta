@@ -1,5 +1,8 @@
 #
 # $Log: indium.spec.in,v $
+# Revision 1.5  2010-02-24 09:13:43+05:30  Cprogrammer
+# added bwidget to Requires
+#
 # Revision 1.4  2010-02-20 13:52:50+05:30  Cprogrammer
 # added ldconfig
 #
@@ -13,7 +16,7 @@
 # Initial revision
 #
 #
-# $Id: indium.spec.in,v 1.4 2010-02-20 13:52:50+05:30 Cprogrammer Exp mbhangui $
+# $Id: indium.spec.in,v 1.5 2010-02-24 09:13:43+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %define _unpackaged_files_terminate_build 1
 
@@ -94,7 +97,7 @@ BuildRequires: -post-build-checks
 %endif
 
 Requires: coreutils grep /bin/sh glibc /usr/sbin/useradd /usr/sbin/groupadd
-Requires: procps /usr/bin/awk indimail > 1.6
+Requires: bwidget tcl tk procps /usr/bin/awk indimail > 1.6
 BuildRoot: %(mktemp -ud %{_tmppath}/%{name}-%{version}-%{release}-XXXXXX)
 Excludeos: windows 
 
