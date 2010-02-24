@@ -57,7 +57,7 @@
 #define FATAL "rblsmtpd: fatal: "
 
 #ifndef	lint
-static char     sccsid[] = "$Id: rblsmtpd.c,v 1.10 2010-02-22 20:48:16+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: rblsmtpd.c,v 1.10 2010-02-22 20:48:16+05:30 Cprogrammer Stab mbhangui $";
 #endif
 
 void
