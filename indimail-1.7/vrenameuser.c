@@ -41,7 +41,7 @@
 #include <signal.h>
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vrenameuser.c,v 2.9 2010-02-17 10:58:55+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: vrenameuser.c,v 2.9 2010-02-17 10:58:55+05:30 Cprogrammer Stab mbhangui $";
 #endif
 
 char            oldEmail[MAX_BUFF];

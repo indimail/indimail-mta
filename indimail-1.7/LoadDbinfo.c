@@ -1,5 +1,8 @@
 /*
  * $Log: LoadDbinfo.c,v $
+ * Revision 2.38  2010-02-24 14:54:45+05:30  Cprogrammer
+ * allow MYSQL_SOCKET, MYSQL_VPORT variables to override indimail.cnf variables
+ *
  * Revision 2.37  2010-02-19 16:16:44+05:30  Cprogrammer
  * mysql_port was wrongly getting initialized to zero
  *
@@ -125,7 +128,7 @@
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: LoadDbinfo.c,v 2.37 2010-02-19 16:16:44+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: LoadDbinfo.c,v 2.38 2010-02-24 14:54:45+05:30 Cprogrammer Stab mbhangui $";
 #endif
 
 #include <sys/types.h>
@@ -752,15 +755,10 @@ localDbinfo(int *total, DBINFO ***rhosts)
 		getEnvConfigStr(&mysql_user, "MYSQL_USER", MYSQL_USER);
 	if (!mysql_passwd)
 		getEnvConfigStr(&mysql_passwd, "MYSQL_PASSWD", MYSQL_PASSWD);
-#if 0
 	if (!mysql_socket)
-		getEnvConfigStr(&mysql_socket, "MYSQL_SOCKET", MYSQL_SOCKET);
-	if (!mysql_port)
-		getEnvConfigStr(&mysql_port, "MYSQL_VPORT", MYSQL_VPORT);
-#else
-	if (!mysql_port)
+		mysql_socket = (char *) getenv("MYSQL_SOCKET");
+	if (!mysql_port && !(mysql_port = (char *) getenv("MYSQL_VPORT")))
 		mysql_port = "0";
-#endif
 	getEnvConfigStr(&mysql_database, "MYSQL_DATABASE", MYSQL_DATABASE);
 	if (total)
 	{

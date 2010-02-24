@@ -44,7 +44,7 @@
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: RemoteBulkMail.c,v 2.9 2010-02-24 09:11:16+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: RemoteBulkMail.c,v 2.9 2010-02-24 09:11:16+05:30 Cprogrammer Stab mbhangui $";
 #endif
 
 #include <stdlib.h>
