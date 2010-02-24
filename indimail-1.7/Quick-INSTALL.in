@@ -11,6 +11,7 @@
     % cd /var/indimail/control
     % su
     # echo "localhost" > host.mysql
+	# /var/indimail/sbin/initsvc -on
     # exit
 
     NOTE: you can also use host:user:password:socket or host:user:password:port format
@@ -38,6 +39,7 @@
     # echo "localhost" > host.cntrl (replace localhost with IP of your MySQL host)
     # ln -s host.cntrl host.master
     # echo 192.168.1.100 > hostip (replace 192.168.1.100 with your mailserver IP)
+	# /var/indimail/sbin/initsvc -on
     # exit
 
     NOTE: you can also use host:user:password:socket or host:user:password:port format
