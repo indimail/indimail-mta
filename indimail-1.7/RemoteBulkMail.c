@@ -1,5 +1,8 @@
 /*
  * $Log: RemoteBulkMail.c,v $
+ * Revision 2.9  2010-02-24 09:11:16+05:30  Cprogrammer
+ * use BULK_SOCKET, BULK_VPORT env variable to override indimail.cnf variables
+ *
  * Revision 2.8  2010-02-19 16:18:43+05:30  Cprogrammer
  * allow host:user:password:socket/port format for mysql host
  *
@@ -41,7 +44,7 @@
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: RemoteBulkMail.c,v 2.8 2010-02-19 16:18:43+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: RemoteBulkMail.c,v 2.9 2010-02-24 09:11:16+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #include <stdlib.h>
@@ -146,15 +149,10 @@ bulk_host_connect()
 		if (!bulk_passwd)
 			getEnvConfigStr(&bulk_passwd, "BULK_PASSWD", MYSQL_PASSWD);
 		getEnvConfigStr(&bulk_database, "BULK_DATABASE", MYSQL_DATABASE);
-#if 0
 		if (!bulk_socket)
-			getEnvConfigStr(&bulk_socket, "BULK_SOCKET", MYSQL_SOCKET);
-		if (!port)
-			getEnvConfigStr(&port, "BULK_VPORT", MYSQL_VPORT);
-#else
-		if (!port)
+			bulk_socket = (char *) getenv("BULK_SOCKET");
+		if (!port && !(port = (char *) getenv("BULK_VPORT")))
 			port = "0";
-#endif
 		mysql_init(&bulkMySql);
 		if (set_mysql_options(&mysql[1], "indimail.cnf", "indimail"))
 		{

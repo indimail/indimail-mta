@@ -1,5 +1,8 @@
 /*
  * $Log: vauth_open.c,v $
+ * Revision 2.22  2010-02-24 09:12:04+05:30  Cprogrammer
+ * allow MYSQL_SOCKET, MYSQL_VPORT variables to override indimail.cnf variables
+ *
  * Revision 2.21  2010-02-19 16:17:01+05:30  Cprogrammer
  * indi_port was wrongly initialized to zero
  *
@@ -96,7 +99,7 @@
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vauth_open.c,v 2.21 2010-02-19 16:17:01+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: vauth_open.c,v 2.22 2010-02-24 09:12:04+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #include <stdio.h>
@@ -184,15 +187,10 @@ vauth_open(char *dbhost)
 		getEnvConfigStr(&mysql_user, "MYSQL_USER", MYSQL_USER);
 	if (!mysql_passwd)
 		getEnvConfigStr(&mysql_passwd, "MYSQL_PASSWD", MYSQL_PASSWD);
-#if 0
 	if (!mysql_socket)
-		getEnvConfigStr(&mysql_socket, "MYSQL_SOCKET", MYSQL_SOCKET);
-	if (!indi_port)
-		getEnvConfigStr(&indi_port, "MYSQL_VPORT", MYSQL_VPORT);
-#else
-	if (!indi_port)
+		mysql_socket = (char *) getenv("MYSQL_SOCKET");
+	if (!indi_port && !(indi_port = (char *) getenv("MYSQL_VPORT")))
 		indi_port = "0";
-#endif
 	getEnvConfigStr(&mysql_database, "MYSQL_DATABASE", MYSQL_DATABASE);
 	getEnvConfigStr(&default_table, "MYSQL_TABLE", MYSQL_DEFAULT_TABLE);
 	getEnvConfigStr(&inactive_table, "MYSQL_INACTIVE_TABLE", MYSQL_INACTIVE_TABLE);

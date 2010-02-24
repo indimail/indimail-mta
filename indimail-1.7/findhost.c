@@ -1,5 +1,8 @@
 /*
  * $Log: findhost.c,v $
+ * Revision 2.29  2010-02-24 09:10:55+05:30  Cprogrammer
+ * use CNTRL_SOCKET, CNTRL_VPORT to override indimail.cnf variables
+ *
  * Revision 2.28  2010-02-19 19:31:48+05:30  Cprogrammer
  * user,passwd,socket/port was getting lost
  *
@@ -177,7 +180,7 @@
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: findhost.c,v 2.28 2010-02-19 19:31:48+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: findhost.c,v 2.29 2010-02-24 09:10:55+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #include <stdio.h>
@@ -422,15 +425,10 @@ open_central_db(char *dbhost)
 		getEnvConfigStr(&mysql_user, "CNTRL_USER", CNTRL_USER);
 	if (!mysql_passwd)
 		getEnvConfigStr(&mysql_passwd, "CNTRL_PASSWD", CNTRL_PASSWD);
-#if 0
 	if (!cntrl_socket)
-		getEnvConfigStr(&cntrl_socket, "CNTRL_SOCKET", CNTRL_SOCKET);
-	if (!cntrl_port)
-		getEnvConfigStr(&cntrl_port, "CNTRL_VPORT", CNTRL_VPORT);
-#else
-	if (!cntrl_port)
+		cntrl_socket = (char *) getenv("CNTRL_SOCKET");
+	if (!cntrl_port && !(cntrl_port = (char *) getenv("CNTRL_VPORT")))
 		cntrl_port = "0";
-#endif
 	getEnvConfigStr(&mysql_database, "CNTRL_DATABASE", CNTRL_DATABASE);
 	getEnvConfigStr(&cntrl_table, "CNTRL_TABLE", CNTRL_DEFAULT_TABLE);
 	mysqlport = atoi(cntrl_port);
