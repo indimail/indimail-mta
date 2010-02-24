@@ -172,7 +172,7 @@ if (unlink(fnbuf) == -1) if (errno != error_noent) { respond("!"); continue; }
 void
 getversion_qmail_clean_c()
 {
-	static char    *x = "$Id: qmail-clean.c,v 1.9 2010-02-10 08:58:19+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-clean.c,v 1.9 2010-02-10 08:58:19+05:30 Cprogrammer Stab mbhangui $";
 
 	x++;
 }
