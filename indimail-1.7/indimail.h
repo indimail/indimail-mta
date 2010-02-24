@@ -1,5 +1,8 @@
 /*
  * $Log: indimail.h,v $
+ * Revision 2.186  2010-02-24 15:03:28+05:30  Cprogrammer
+ * removed SOCKET and PORT definitions for MySQL
+ *
  * Revision 2.185  2010-02-19 10:35:32+05:30  Cprogrammer
  * changed default control host socket to /var/lib/mysql/mysql.sock
  *
@@ -869,7 +872,7 @@
 #define INDIMAILH_H
 
 #ifndef	lint
-static char     sccsidh[] = "$Id: indimail.h,v 2.185 2010-02-19 10:35:32+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsidh[] = "$Id: indimail.h,v 2.186 2010-02-24 15:03:28+05:30 Cprogrammer Stab mbhangui $";
 #endif
 
 #include "config.h"
@@ -908,9 +911,7 @@ typedef long long mdir_t;
 /* Edit to match your set up */
 #define MYSQL_HOST              "localhost"
 #define MYSQL_USER              "indimail"
-#define MYSQL_PASSWD            "ssh-1.5-"
-#define MYSQL_VPORT             "3306"
-#define MYSQL_SOCKET            "/var/lib/mysql/mysql.sock"
+#define MYSQL_PASSWD            "ssh-1.5-" /*- control file overrides this */
 #define MYSQL_DATABASE          "indimail"
 #define MYSQL_DEFAULT_TABLE     "indimail"
 #define MYSQL_INACTIVE_TABLE    "indibak"
@@ -975,9 +976,7 @@ extern DBINFO **RelayHosts;
 #define CNTRL_HOST              "localhost"
 #define MASTER_HOST             "localhost"
 #define CNTRL_USER              "indimail"
-#define CNTRL_PASSWD            "ssh-1.5-"
-#define CNTRL_VPORT             "3306"
-#define CNTRL_SOCKET            "/var/lib/mysql/mysql.sock"
+#define CNTRL_PASSWD            "ssh-1.5-" /*- control file overrides this */
 #define CNTRL_DATABASE          "indimail"
 #define CNTRL_DEFAULT_TABLE     "hostcntrl"
 #endif /*- #ifdef CLUSTERED_SITE */
