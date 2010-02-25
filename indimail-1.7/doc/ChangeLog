@@ -1,6 +1,24 @@
 * Fri Feb 19 2010 mbhangui@gmail.com
 Release 1.7 Start 19/02/2010
-
+19/02/2010
+1.  BUG - install_tables to skip creating table for distributed setup
+    on a non-clustered setup
+2.  FEATURE - Allow defaults from mysql conf file to be used for mysql_socket,
+    mysql_port
+3.  BUG - set_mysql_options() to be called before each mysql_real_connect()
+4.  BUG - Fixed user, passwd, socket/port getting lost in open_central_db() in
+    findhost.c
+5.  BUG - Delete from smtp_port vsmtp_delete_domain() in vauth_deldmain.c only
+    if domain is distributed
+22/02/2010
+6.  FEATURE - Added logging of senders and recipients in rblsmtpd
+7.  BUG - Fixed SIGSEGV in rblsmtpd when RBLSMTPD was set and empty [2956656]
+8.  FEATURE - Upgrade to fetchmail-6.3.14
+23/02/2010
+9.  Allow MYSQL_SOCKET, MYSQL_VPORT to override indimail.cnf settings
+24/02/2010
+10. Added man page for uacl
+11. Updated indimail documentation (man page indimail(7))
 
 * Fri Feb 19 2010 mbhangui@gmail.com
 Release 1.6.9 Start 01/02/2010

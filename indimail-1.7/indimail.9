@@ -89,7 +89,9 @@ For a non-clustered architecture, you need a local MySQL database. To connect to
 database, you need to have a control file \fBhost\.mysql\fR. This control file contains the
 IP address or hostname of the MySQL database corresponding to the \fBlocal database\fR. If
 the control file \fBhost\.mysql\fR is missing, programs will use \fIlocalhost\fR to connect
-to MySQL. The local database consists of the following tables
+to MySQL. One can also use \fIhost:user:password:socket/port\fR format for \fBhost.mysql\fR.
+
+The local database consists of the following tables
 
 .nr step 1 1
 .IP \n[step] 3
@@ -132,10 +134,11 @@ mailing_list
 bulkmail
 
 .PP
-A clustered domain in IndiMail is achieved by having a central MySQL database called \fIclusterinfo\fR.
-\fIclusterinfo\fR stores information about all users and the user's storage server (mailstore),
-each mailstore's individual local MySQL database information. This database is also
-referred to as the \fBcentral database\fR. It consists of the following tables
+A clustered domain in IndiMail is achieved by having a central MySQL database called
+\fIclusterinfo\fR. \fIclusterinfo\fR stores information about the user's storage server
+(mailstore) and each mailstore's individual local MySQL database's connection parameters
+(host, user, password, socket or port). This database is also referred to as the
+\fBcentral database\fR. It consists of the following tables
 
 .nr step 1 1
 .IP \n[step] 2
@@ -157,12 +160,12 @@ mgmtaccess
 vpriv
 .PP
 The table \fIhostcntrl\fR has the fields user, domain and hostid. \fIhostid\fR is a unique
-identifier which needs to be assigned to every server on which email accounts need to
-be created. These servers are also called \fImailstores\fR. The program \fBhostcntrl(8)\fR
-can be used to add, modify, delete entries to the table \fIhostcntrl\fR. The program \fBvadduser(1)\fR
-also adds user entries to this table. Each \fIhostid\fR needs to be mapped to an IP address.
-This is maintained in the table \fIhost_table\fR. A program called \fBvhostid(8)\fR can be used
-to add, modify or delete entries in \fIhost_table\fR.
+identifier which needs to be assigned to every server on which email accounts need to be
+created. These servers are also called \fImailstores\fR. The program \fBhostcntrl(8)\fR
+can be used to add, modify, delete entries to the table \fIhostcntrl\fR. The program
+\fBvadduser(1)\fR also adds user entries to this table. Each \fIhostid\fR needs to be mapped
+to an IP address. This is maintained in the table \fIhost_table\fR. A program called
+\fBvhostid(8)\fR can be used to add, modify or delete entries in \fIhost_table\fR.
 .PP
 To be able to access the \fBcentral database\fR, IndiMail programs need the following control
 files in the directory INDIMAIL/control
@@ -175,7 +178,8 @@ host.master
 host.cntrl
 .PP
 These control file contains the IP address or hostname of the MySQL database corresponding to
-the \fBcentral database\fR. If you plan to have a master-slave MySQL architecture, you can have
+the \fBcentral database\fR. You can also use \fIhost:user:password:socket/port\fB format for
+these control fiels. If you plan to have a master-slave MySQL architecture, you can have
 entry in \fIhost.master\fR pointing to the MySQL master database and have entry in \fIhost.cntrl\fR
 pointing to the MySQL slave database. All indimail programs ensure that all writes go to the
 master database and reads happen only from the slave database. The control files \fIhost.master\fR,
@@ -191,23 +195,22 @@ So apart from the user's location which is maintained in the \fBcentral database
 attributes like home directory, gecos, quota, access rights are maintained in another MySQL
 database called the \fBlocal database\fR.
 .PP
-Access to the \fBlocal database\fR to indimail programs is made easy by having the parameters
-needed to connect to the MySQL \fBlocal datbase\fR in a table called \fIdbinfo\fR on the
-\fBcentral database\fR. The same information can be maintained in a control file 
-\fBINDIMAIL/control/mcdinfo\fR. The file \fImcdinfo\fR allows one to maintain and sync information about
-each and every \fImailstore\fR on the \fIdbinfo\fR table. The updation depends on the timestamp
-of the \fImcdinfo\fR file and \fIdbinfo\fR table. The moment \fImcdinfo\fR is updated,
-the same information gets updated in the \fIdbinfo\fR table. The moment \fIdbinfo\fR gets updated,
-the file \fImcdinfo\fR on all other \fImailstore\fR (older than the \fIdbinfo\fR table) gets updated.
-The entries in \fIdbinfo\fR table / \fImcdinfo\fR file can be seen by running the \fBdbinfo(8)\fR
-program. Whenever a new \fImailstore\fR is added/removed, the entry for the \fImailstore\fR and the corresponding
-MySQL \fBlocal database\fR needs to be added/removed in the \fIdbinfo\fR table or \fImcdinfo\fR file.
+Access to the individual \fBlocal database\fR by indimail programs is made easy by having the
+parameters needed to connect to each of the MySQL \fBlocal datbase\fR in a table called
+\fIdbinfo\fR on the \fBcentral database\fR. The same information can be maintained in a control
+file \fBINDIMAIL/control/mcdinfo\fR. The file \fImcdinfo\fR allows one to maintain and sync
+information about each and every \fImailstore\fR on the \fIdbinfo\fR table. The updation
+depends on the timestamp of the \fImcdinfo\fR file and \fIdbinfo\fR table. The moment
+\fImcdinfo\fR is updated, the same information gets updated in the \fIdbinfo\fR table. The
+moment \fIdbinfo\fR gets updated, the file \fImcdinfo\fR on all other \fImailstore\fR (older
+than the \fIdbinfo\fR table) gets updated. The entries in \fIdbinfo\fR table / \fImcdinfo\fR
+file can be seen by running the \fBdbinfo(8)\fR program. Whenever a new \fImailstore\fR is
+added/removed, the entry for the \fImailstore\fR and the corresponding MySQL \fBlocal database\fR
+needs to be added/removed in the \fIdbinfo\fR table or \fImcdinfo\fR file.
 .PP
-In case you do not require a multi-host setup, IndiMail does not require \fBcentral database\fR. Programs
-just need to connect to the \fBlocal database\fR which can be configured by having the control
-file INDIMAIL/control/host.mysql. The control file contains the IP address or hostname of the
-MySQL \fBlocal database\fR. One can also give host:user:password:mysql_socket/port as the format
-for \fIhost.mysql\fR.
+In case you do not require a multi-host setup, IndiMail does not require \fBcentral database\fR.
+Programs just need to connect to the \fBlocal database\fR which can be configured by having the
+control file INDIMAIL/control/host.mysql.
 
 .SH Virtual Domains
 .PP
@@ -290,10 +293,10 @@ clamd           | clamd virus scanner log
 freshclam       | clamd signature update log
 qscanq          | qscanq virus scanner log
 smtpd.25        | Log for qmail-smtpd running on port 25
-smtpd.366       | Log for qmail-smtpd ODMR port
+smtpd.587       | Log for qmail-smtpd Message Submission Port \fBrfc-2476(5)\fR
+smtpd.366       | Log for qmail-smtpd ODMR port \fBrfc-2645(5)\fR.
 smtpd.465       | Log for qmail-smtpd on SMTPS port
 deliver.25      | qmail-send deliver log
-qmail-send.25
 fetchmail       | fetchmail log
 greylist.1999   | greylist daemon log
 imapd.143       | Log for imapd running on port 143
@@ -1092,7 +1095,8 @@ INFIFO             | infifo or /var/indimail/control/inquery/infifo
 IndiMail uses svscan(8) to start, monitor and restart (if neccessary) all services needed
 for proper functioning of email server. svscan is installed as an entry in /etc/inittab on
 systems which use \fBinit(8)\fR. Some of the newer systems come with \fBupstart(8)\fR, in whih case,
-svscan is installed in /etc/event.d. All services are installed in /service which each
+svscan is installed in /etc/event.d. The program \fBinitsvc(1)\fR can be used to enable svscan
+to get automatically started on system boot. All services are installed in /service which each
 directory representing a service. These services are started and monitored by \fBsupervise(8)\fR.
 The table below gives all the service directories in /service.
 
@@ -1125,8 +1129,8 @@ qmail-poppass.106    | qmail-poppass(8) Poppassd protocol service
 qmail-spamlog        | Spam logger service
 .TE
 
-You can use svc to start / stop individual services. To disable / enable all services, you
-can use the initsvc(1) command
+You can use \fBsvc(8)\fR to start / stop individual services. To disable / enable all services,
+you can use the \fBinitsvc(8)\fR command.
 
 .SH POST Execution Handle
 Some indimail programs have a post execution handle. A post execution handle is a program with
