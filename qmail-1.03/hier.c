@@ -1,5 +1,8 @@
 /*
  * $Log: hier.c,v $
+ * Revision 1.131  2010-02-25 10:41:32+05:30  Cprogrammer
+ * added man page for uacl
+ *
  * Revision 1.130  2010-01-21 08:57:23+05:30  Cprogrammer
  * added program uacl
  *
@@ -669,6 +672,7 @@ hier(inst_dir)
 	c(auto_qmail_home, "man/man1", "delcr.1", auto_uido, auto_gidq, 0444);
 	c(auto_qmail_home, "man/man1", "fixcrio.1", auto_uido, auto_gidq, 0444);
 	c(auto_qmail_home, "man/man1", "recordio.1", auto_uido, auto_gidq, 0444);
+	c(auto_qmail_home, "man/man1", "uacl.1", auto_uido, auto_gidq, 0444);
 	c(auto_qmail_home, "man/man1", "fastforward.1", auto_uido, auto_gidq, 0444);
 	c(auto_qmail_home, "man/cat1", "fastforward.0", auto_uido, auto_gidq, 0444);
 	c(auto_qmail_home, "man/man1", "printforward.1", auto_uido, auto_gidq, 0444);
@@ -1000,7 +1004,7 @@ hier(inst_dir)
 void
 getversion_install_big_c()
 {
-	static char    *x = "$Id: hier.c,v 1.130 2010-01-21 08:57:23+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: hier.c,v 1.131 2010-02-25 10:41:32+05:30 Cprogrammer Stab mbhangui $";
 
 #ifdef INDIMAIL
 	x = sccsidh;
