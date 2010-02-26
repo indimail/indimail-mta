@@ -48,9 +48,9 @@ FifoCreate(char *fifoname)
 	int             status;
 
 	errno = 0;
-	if(!(status = mkfifo(fifoname, INDIMAIL_QMAIL_MODE)))
+	if (!(status = mkfifo(fifoname, INDIMAIL_QMAIL_MODE)))
 	{
-		if(!getuid() || !geteuid())
+		if (!getuid() || !geteuid())
 		{
 			if (indimailuid == -1 || indimailgid == -1)
 				GetIndiId(&indimailuid, &indimailgid);
@@ -66,7 +66,7 @@ FifoCreate(char *fifoname)
 			return(-1);
 		if (S_ISFIFO(statbuf.st_mode))
 		{
-			if(!getuid() || !geteuid())
+			if (!getuid() || !geteuid())
 			{
 				if (indimailuid == -1 || indimailgid == -1)
 					GetIndiId(&indimailuid, &indimailgid);
@@ -88,23 +88,23 @@ FifoCreate(char *fifoname)
 				GetIndiId(&indimailuid, &indimailgid);
 			if (r_mkdir(fifoname, 0755, indimailuid, indimailgid))
 			{
-				if(ptr)
+				if (ptr)
 					*ptr = '/';
 				return (-1);
 			}
-			if(ptr)
+			if (ptr)
 				*ptr = '/';
 			if (mkfifo(fifoname, INDIMAIL_QMAIL_MODE))
 				return (-1);
 			else
 			{
-				if(!getuid() || !geteuid())
+				if (!getuid() || !geteuid())
 					if (chown(fifoname, indimailuid, indimailgid))
 						return (-1);
 				return(0);
 			}
 		}
-		if(ptr)
+		if (ptr)
 			*ptr = '/';
 		return (-1);
 	}

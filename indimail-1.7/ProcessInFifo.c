@@ -174,7 +174,7 @@ ProcessInFifo()
 		snprintf(InFifo, MAX_BUFF, "%s/%s/inquery/%s", qmaildir, controldir, infifo);
 	getTimeoutValues(&readTimeout, &writeTimeout, qmaildir, controldir);
 	/*- Open the Fifos */
-	if(FifoCreate(InFifo) == -1)
+	if (FifoCreate(InFifo) == -1)
 	{
 		fprintf(stderr, "InLookup: FifoCreate: %s: %s\n", InFifo, strerror(errno));
 		return (-1);
@@ -184,12 +184,12 @@ ProcessInFifo()
 		fprintf(stderr, "InLookup: open: %s: %s\n", InFifo, strerror(errno));
 		return (-1);
 	} else 
-	if((pipe_size = fpathconf(rfd, _PC_PIPE_BUF)) == -1)
+	if ((pipe_size = fpathconf(rfd, _PC_PIPE_BUF)) == -1)
 	{
 		fprintf(stderr, "InLookup: fpathconf: %s: %s\n", InFifo, strerror(errno));
 		return (-1);
 	} else
-	if(!(QueryBuf = (char *) malloc(pipe_size * sizeof(char))))
+	if (!(QueryBuf = (char *) malloc(pipe_size * sizeof(char))))
 	{
 		fprintf(stderr, "InLookup: malloc(%d bytes): %s: %s\n", pipe_size, InFifo, strerror(errno));
 		return (-1);
@@ -203,25 +203,25 @@ ProcessInFifo()
 #ifdef CLUSTERED_SITE
 	host_query_count = 0;
 #endif
-	if(!(local_ip = get_local_ip()))
+	if (!(local_ip = get_local_ip()))
 	{
 		fprintf(stderr, "InLookup: Could not get local ip: %s\n", strerror(errno));
 		signal(SIGPIPE, pstat);
 		return(-1);
 	}
-	for(bytes = 0;getppid() != 1;)
+	for (bytes = 0;getppid() != 1;)
 	{
-		if((idx = read(rfd, (char *) &bytes, sizeof(int))) == -1)
+		if ((idx = read(rfd, (char *) &bytes, sizeof(int))) == -1)
 		{
 #ifdef ERESTART
-			if(errno != EINTR && errno != ERESTART)
+			if (errno != EINTR && errno != ERESTART)
 #else
-			if(errno != EINTR)
+			if (errno != EINTR)
 #endif
 				fprintf(stderr, "InLookup: read: %s\n", strerror(errno));
 			continue;
 		} else
-		if(!idx)
+		if (!idx)
 		{
 			close(rfd);
 			if ((rfd = open(InFifo, O_RDWR, 0)) == -1)
@@ -232,18 +232,18 @@ ProcessInFifo()
 			} else
 				continue;
 		} else
-		if(bytes > pipe_size)
+		if (bytes > pipe_size)
 		{
 			errno = EMSGSIZE;
 			fprintf(stderr, "InLookup: bytes %d, pipe_size %d, %s\n", bytes, pipe_size, strerror(errno));
 			continue;
 		} else
-		if((idx = timeoutread(readTimeout, rfd, QueryBuf, bytes)) == -1)
+		if ((idx = timeoutread(readTimeout, rfd, QueryBuf, bytes)) == -1)
 		{
 			fprintf(stderr, "InLookup: read-int: %s\n", strerror(errno));
 			continue;
 		} else
-		if(!idx)
+		if (!idx)
 		{
 			close(rfd);
 			if ((rfd = open(InFifo, O_RDWR, 0)) == -1)
@@ -254,7 +254,7 @@ ProcessInFifo()
 			} else
 				continue;
 		}
-		if(verbose || _debug)
+		if (verbose || _debug)
 			prev_time = time(0);
 #ifdef CLUSTERED_SITE
 		snprintf(host_path, MAX_BUFF, "%s/%s/host.cntrl", qmaildir, controldir);
@@ -329,15 +329,15 @@ ProcessInFifo()
 				continue;
 		}
 		email = QueryBuf + 2;
-		for(ptr = email;*ptr;ptr++);
+		for (ptr = email;*ptr;ptr++);
 		ptr++;
 		myFifo = ptr;
-		for(;*ptr;ptr++);
+		for (;*ptr;ptr++);
 		ptr++;
 		remoteip = ptr;
-		if(verbose || _debug)
+		if (verbose || _debug)
 		{
-			if((cptr = strrchr(InFifo, '/')))
+			if ((cptr = strrchr(InFifo, '/')))
 				cptr++;
 			else
 				cptr = InFifo;
@@ -348,7 +348,7 @@ ProcessInFifo()
 		if ((wfd = open(myFifo, O_RDWR, 0)) == -1)
 		{
 			fprintf(stderr, "InLookup: open-probably-timeout: %s: QueryType %s: %s\n", myFifo, query_type(*QueryBuf), strerror(errno));
-			if(errno != ENOENT)
+			if (errno != ENOENT)
 				unlink(myFifo);
 			continue;
 		} else
@@ -357,38 +357,38 @@ ProcessInFifo()
 		{
 			case USER_QUERY:
 				status = UserInLookup(email);
-				if(timeoutwrite(writeTimeout, wfd, (char *) &status, sizeof(int)) == -1)
+				if (timeoutwrite(writeTimeout, wfd, (char *) &status, sizeof(int)) == -1)
 					fprintf(stderr, "InLookup: write-UserInLookup: %s\n", strerror(errno));
 				close(wfd);
 				break;
 			case RELAY_QUERY:
 				status = RelayInLookup(email, remoteip);
-				if(timeoutwrite(writeTimeout, wfd, (char *) &status, sizeof(int)) == -1)
+				if (timeoutwrite(writeTimeout, wfd, (char *) &status, sizeof(int)) == -1)
 					fprintf(stderr, "InLookup: write-RelayInLookup: %s\n", strerror(errno));
 				close(wfd);
 				break;
 #ifdef CLUSTERED_SITE
 			case HOST_QUERY:
 				ptr = findmdahost(email);
-				if(ptr)
+				if (ptr)
 					bytes = slen(ptr) + 1;
 				else
 					bytes = (userNotFound ? 0 : -1);
-				if(bytes > pipe_size)
+				if (bytes > pipe_size)
 					bytes = -1;
-				if(timeoutwrite(writeTimeout, wfd, (char *) &bytes, sizeof(int)) == -1)
+				if (timeoutwrite(writeTimeout, wfd, (char *) &bytes, sizeof(int)) == -1)
 					fprintf(stderr, "InLookup: write-findmdahost: %s\n", strerror(errno));
 				else
-				if(bytes > 0 && timeoutwrite(writeTimeout, wfd, ptr, bytes) == -1)
+				if (bytes > 0 && timeoutwrite(writeTimeout, wfd, ptr, bytes) == -1)
 					fprintf(stderr, "InLookup: write-findmdahost: %s\n", strerror(errno));
 				close(wfd);
 				break;
 #endif
 			case ALIAS_QUERY:
 				ptr = AliasInLookup(email);
-				if(ptr && *ptr)
+				if (ptr && *ptr)
 				{
-					if((bytes = slen(ptr) + 1) > pipe_size)
+					if ((bytes = slen(ptr) + 1) > pipe_size)
 						bytes = -1;
 				}
 				else
@@ -396,10 +396,10 @@ ProcessInFifo()
 					bytes = 1; /*- write Null Byte */
 					ptr = "\0";
 				}
-				if(timeoutwrite(writeTimeout, wfd, (char *) &bytes, sizeof(int)) == -1)
+				if (timeoutwrite(writeTimeout, wfd, (char *) &bytes, sizeof(int)) == -1)
 					fprintf(stderr, "InLookup: write-AliasInLookup: %s\n", strerror(errno));
 				else
-				if(bytes > 0 && timeoutwrite(writeTimeout, wfd, ptr, bytes) == -1)
+				if (bytes > 0 && timeoutwrite(writeTimeout, wfd, ptr, bytes) == -1)
 					fprintf(stderr, "InLookup: write-AliasInLookup: %s\n", strerror(errno));
 				close(wfd);
 #ifdef LOW_MEM
@@ -408,7 +408,7 @@ ProcessInFifo()
 				break;
 			case PWD_QUERY:
 				/*- Connect to mysql after fetching ip host details for the user from hostcntrl.*/
-				if((pw = PwdInLookup(email)))
+				if ((pw = PwdInLookup(email)))
 				{
 					snprintf(pwbuf, sizeof(pwbuf), "PWSTRUCT=%s:%s:%d:%d:%s:%s:%s:%d", 
 						email,
@@ -418,19 +418,19 @@ ProcessInFifo()
 						pw->pw_gecos,
 						pw->pw_dir,
 						pw->pw_shell, is_inactive);
-					if((bytes = (slen(pwbuf) + 1)) > pipe_size)
+					if ((bytes = (slen(pwbuf) + 1)) > pipe_size)
 						bytes = -1;
 				} else
-				if(userNotFound)
+				if (userNotFound)
 				{
 					snprintf(pwbuf, sizeof(pwbuf), "PWSTRUCT=No such user %s", email);
 					bytes = slen(pwbuf) + 1;
 				} else
 					bytes = 0;
-				if(timeoutwrite(writeTimeout, wfd, (char *) &bytes, sizeof(int)) == -1)
+				if (timeoutwrite(writeTimeout, wfd, (char *) &bytes, sizeof(int)) == -1)
 					fprintf(stderr, "InLookup: write-PwdInLookup: %s\n", strerror(errno));
 				else
-				if(bytes > 0 && timeoutwrite(writeTimeout, wfd, pwbuf, bytes) == -1)
+				if (bytes > 0 && timeoutwrite(writeTimeout, wfd, pwbuf, bytes) == -1)
 					fprintf(stderr, "InLookup: write-PwdInLookup: %s\n", strerror(errno));
 				close(wfd);
 				break;
@@ -439,9 +439,9 @@ ProcessInFifo()
 				 * This is done by figuring out the mysql parameters from
 				 * dbinfo structure for the local ip
 				 */
-				for(ptr = email, cptr = username;*ptr && *ptr != '@';*cptr++ = *ptr++);
+				for (ptr = email, cptr = username;*ptr && *ptr != '@';*cptr++ = *ptr++);
 				*cptr = 0;
-				if(*(ptr++) == '@' && *ptr)
+				if (*(ptr++) == '@' && *ptr)
 					scopy(domain, ptr, MAX_BUFF);
 				else
 				{
@@ -450,14 +450,14 @@ ProcessInFifo()
 				}
 				if (!(real_domain = vget_real_domain(domain)))
 					real_domain = domain;
-				if(!(mysqlptr = mdaMysqlConnect(local_ip, real_domain)))
+				if (!(mysqlptr = mdaMysqlConnect(local_ip, real_domain)))
 				{
 					fprintf(stderr, "InLookup: mdaMysqlConnect: %s %s: failure\n", local_ip, real_domain);
 					bytes = -1;
 				} else
 				{
 					vauth_init(1, *mysqlptr);
-					if((pw = vauth_getpw(username, domain)))
+					if ((pw = vauth_getpw(username, domain)))
 					{
 						snprintf(pwbuf, sizeof(pwbuf), "PWSTRUCT=%s:%s:%d:%d:%s:%s:%s:%d", 
 							email,
@@ -467,10 +467,10 @@ ProcessInFifo()
 							pw->pw_gecos,
 							pw->pw_dir,
 							pw->pw_shell, is_inactive);
-						if((bytes = (slen(pwbuf) + 1)) > pipe_size)
+						if ((bytes = (slen(pwbuf) + 1)) > pipe_size)
 							bytes = -1;
 					} else
-					if(userNotFound)
+					if (userNotFound)
 					{
 						snprintf(pwbuf, sizeof(pwbuf), "PWSTRUCT=No such user %s", email);
 						bytes = slen(pwbuf) + 1;
@@ -478,10 +478,10 @@ ProcessInFifo()
 						bytes = 0;
 					is_open = 0;
 				}
-				if(timeoutwrite(writeTimeout, wfd, (char *) &bytes, sizeof(int)) == -1)
+				if (timeoutwrite(writeTimeout, wfd, (char *) &bytes, sizeof(int)) == -1)
 					fprintf(stderr, "InLookup: write-mdaMysqlConnect: %s\n", strerror(errno));
 				else
-				if(bytes > 0 && timeoutwrite(writeTimeout, wfd, pwbuf, bytes) == -1)
+				if (bytes > 0 && timeoutwrite(writeTimeout, wfd, pwbuf, bytes) == -1)
 					fprintf(stderr, "InLookup: write-mdaMysqlConnect: %s\n", strerror(errno));
 				close(wfd);
 				break;
@@ -489,22 +489,22 @@ ProcessInFifo()
 				if (!(real_domain = vget_real_domain(email)))
 					real_domain = email;
 				bytes = slen(real_domain) + 1;
-				if(bytes > pipe_size)
+				if (bytes > pipe_size)
 					bytes = -1;
-				if(timeoutwrite(writeTimeout, wfd, (char *) &bytes, sizeof(int)) == -1)
+				if (timeoutwrite(writeTimeout, wfd, (char *) &bytes, sizeof(int)) == -1)
 					fprintf(stderr, "InLookup: write-findmdahost: %s\n", strerror(errno));
 				else
-				if(bytes > 0 && timeoutwrite(writeTimeout, wfd, real_domain, bytes) == -1)
+				if (bytes > 0 && timeoutwrite(writeTimeout, wfd, real_domain, bytes) == -1)
 					fprintf(stderr, "InLookup: write-get_real_domain: %s\n", strerror(errno));
 				close(wfd);
 				break;
 		} /*- switch(*QueryBuf) */
-		if(verbose || _debug)
+		if (verbose || _debug)
 		{
 			printf("%ld %s -> %s\n", time(0) - prev_time, query_type(*QueryBuf), myFifo);
 			fflush(stdout);
 		}
-	} /*- for(QueryBuf = (char *) 0;;) */
+	} /*- for (QueryBuf = (char *) 0;;) */
 	signal(SIGPIPE, pstat);
 	return(1);
 }
@@ -775,22 +775,22 @@ getTimeoutValues(int *readTimeout, int *writeTimeout, char *qmaildir, char *cont
 	FILE           *fp;
 
 	snprintf(TmpBuf, MAX_BUFF, "%s/%s/timeoutread", qmaildir, controldir);
-	if((fp = fopen(TmpBuf, "r")))
+	if ((fp = fopen(TmpBuf, "r")))
 	{
-		if(fgets(TmpBuf, MAX_BUFF - 2, fp))
+		if (fgets(TmpBuf, MAX_BUFF - 2, fp))
 		{
-			if(sscanf(TmpBuf, "%d", readTimeout) != 1)
+			if (sscanf(TmpBuf, "%d", readTimeout) != 1)
 				*readTimeout = 4;
 		}
 		fclose(fp);
 	} else
 		*readTimeout = 4;
 	snprintf(TmpBuf, MAX_BUFF, "%s/%s/timeoutwrite", qmaildir, controldir);
-	if((fp = fopen(TmpBuf, "r")))
+	if ((fp = fopen(TmpBuf, "r")))
 	{
-		if(fgets(TmpBuf, MAX_BUFF - 2, fp))
+		if (fgets(TmpBuf, MAX_BUFF - 2, fp))
 		{
-			if(sscanf(TmpBuf, "%d", writeTimeout) != 1)
+			if (sscanf(TmpBuf, "%d", writeTimeout) != 1)
 				*writeTimeout = 4;
 		}
 		fclose(fp);
