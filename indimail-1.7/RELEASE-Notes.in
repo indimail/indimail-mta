@@ -7,11 +7,11 @@ This is Release @version@ of IndiMail. The release has both source.tar.gz and RP
 
 This release includes the following files
 
-README                        (Introduction to IndiMail)
+README                      (Introduction to IndiMail)
 INSTALL-@version@                 (Installation Instructions)
 INSTALL-RPM-@version@             (Install Instructions for RPM)
 INSTALL-MYSQL-@version@           (MySQL specific Installation Instructions)
-README-CLUSTER                (Steps on installing a clustered setup)
+README-CLUSTER              (Steps on installing a clustered setup)
 Quick-INSTALL-@version@           (A minimal documentation on Installation)
 RELEASE-Notes-@version@           (This file)
 indimail-@version@.tar.gz         (IndiMail source)
@@ -63,3 +63,22 @@ both 32 and 64 bit) are
 
 ChangeLog
 =========
+1.  BUG - install_tables to skip creating table for distributed setup
+    on a non-clustered setup
+2.  FEATURE - Allow defaults from mysql conf file to be used for mysql_socket,
+    mysql_port
+3.  BUG - set_mysql_options() to be called before each mysql_real_connect()
+4.  BUG - Fixed user, passwd, socket/port getting lost in open_central_db() in
+    findhost.c
+5.  BUG - Delete from smtp_port vsmtp_delete_domain() in vauth_deldmain.c only
+    if domain is distributed
+6.  FEATURE - Added logging of senders and recipients in rblsmtpd
+7.  BUG - Fixed SIGSEGV in rblsmtpd when RBLSMTPD was set and empty [2956656]
+8.  FEATURE - Upgrade to fetchmail-6.3.14
+9.  Allow MYSQL_SOCKET, MYSQL_VPORT to override indimail.cnf settings
+10. Added man page for uacl
+11. Updated indimail documentation (man page indimail(7))
+12. Use host.mysql in ProcessInFifo() if host.cntrl is absent
+13. Use host.mysql in findhost if host.cntrl is absent
+14. use host:user:password:socket/port format in vauth_open()
+15. Return host in host:user:password:socket/port format in SqlServer()
