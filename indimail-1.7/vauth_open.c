@@ -1,5 +1,8 @@
 /*
  * $Log: vauth_open.c,v $
+ * Revision 2.23  2010-02-26 10:55:50+05:30  Cprogrammer
+ * allow mysql host in host:user:password:socket/port format
+ *
  * Revision 2.22  2010-02-24 09:12:04+05:30  Cprogrammer
  * allow MYSQL_SOCKET, MYSQL_VPORT variables to override indimail.cnf variables
  *
@@ -99,7 +102,7 @@
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vauth_open.c,v 2.22 2010-02-24 09:12:04+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: vauth_open.c,v 2.23 2010-02-26 10:55:50+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #include <stdio.h>
@@ -127,11 +130,8 @@ vauth_open(char *dbhost)
 	 *    defined in indimail.h
 	 */
 	if (dbhost && *dbhost)
-	{
 		scopy(mysql_host, dbhost, MAX_BUFF);
-		if ((ptr = strchr(mysql_host, ':')) != (char *) 0)
-			*ptr = 0;
-	} else
+	else
 	if ((ptr = (char *) getenv("MYSQL_HOST")) != (char *) 0)
 		scopy(mysql_host, ptr, MAX_BUFF);
 	getEnvConfigStr(&qmaildir, "QMAILDIR", QMAILDIR);

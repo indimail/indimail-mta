@@ -1,5 +1,8 @@
 /*
  * $Log: SqlServer.c,v $
+ * Revision 2.5  2010-02-26 10:52:27+05:30  Cprogrammer
+ * return host in host:user:password:port/socket format
+ *
  * Revision 2.4  2008-05-28 16:37:57+05:30  Cprogrammer
  * removed USE_MYSQL
  *
@@ -19,15 +22,19 @@
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: SqlServer.c,v 2.4 2008-05-28 16:37:57+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: SqlServer.c,v 2.5 2010-02-26 10:52:27+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #include <string.h>
+#include <stdlib.h>
+
 char *
 SqlServer(char *mdahost, char *domain)
 {
 	DBINFO        **rhostsptr;
-	int             total;
+	int             total, len;
+	char            port_buf[18];
+	static char    *hostbuf;
 
 	if(!RelayHosts && !(RelayHosts = LoadDbInfo_TXT(&total)))
 	{
@@ -37,7 +44,28 @@ SqlServer(char *mdahost, char *domain)
 	for (rhostsptr = RelayHosts;*rhostsptr;rhostsptr++)
 	{
 		if(!strncmp((*rhostsptr)->domain, domain, DBINFO_BUFF) && !strncmp((*rhostsptr)->mdahost, mdahost, DBINFO_BUFF))
-			return((*rhostsptr)->server);
+		{
+			len = strlen((*rhostsptr)->server) + strlen((*rhostsptr)->user) +
+					strlen((*rhostsptr)->password) + 3;
+			if (strncmp((*rhostsptr)->server, "localhost", 10) && (*rhostsptr)->port != 3306)
+			{
+				snprintf(port_buf, sizeof(port_buf), "%d", (*rhostsptr)->port);
+				len += (strlen(port_buf) + 1);
+			} else
+				*port_buf = 0;
+			if (!(hostbuf = (char *) realloc(hostbuf, len)))
+			{
+				perror("SqlServer: realloc");
+				return((char *) 0);
+			}
+			if (*port_buf)
+				snprintf(hostbuf, len, "%s:%s:%s:%s", (*rhostsptr)->server, (*rhostsptr)->user,
+						(*rhostsptr)->password, port_buf);
+			else
+				snprintf(hostbuf, len, "%s:%s:%s", (*rhostsptr)->server, (*rhostsptr)->user,
+						(*rhostsptr)->password);
+			return (hostbuf);
+		}
 	}
 	return((char *) 0);
 }
