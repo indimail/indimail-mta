@@ -1,5 +1,8 @@
 /*
  * $Log: ProcessInFifo.c,v $
+ * Revision 2.29  2010-02-26 10:52:11+05:30  Cprogrammer
+ * host host.mysql if host.cntrl is not present
+ *
  * Revision 2.28  2009-09-23 21:22:24+05:30  Cprogrammer
  * reconnect to hostcntrl database if connection is closed by server
  *
@@ -99,7 +102,7 @@
  */
 
 #ifndef	lint
-static char     sccsid[] = "$Id: ProcessInFifo.c,v 2.28 2009-09-23 21:22:24+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: ProcessInFifo.c,v 2.29 2010-02-26 10:52:11+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #include <fcntl.h>
@@ -138,8 +141,11 @@ ProcessInFifo()
 	int             rfd, wfd, bytes, status, idx, pipe_size, readTimeout, writeTimeout;
 	MYSQL         **mysqlptr;
 	struct passwd  *pw;
-	char            InFifo[MAX_BUFF], username[MAX_BUFF], pwbuf[MAX_BUFF], domain[MAX_BUFF];
-	char           *ptr, *cptr, *qmaildir, *controldir, *QueryBuf, *email, *myFifo, *remoteip, *infifo, *local_ip;
+	FILE           *fp;
+	char            InFifo[MAX_BUFF], username[MAX_BUFF], pwbuf[MAX_BUFF], domain[MAX_BUFF],
+					host_path[MAX_BUFF], tmpbuf[MAX_BUFF];
+	char           *ptr, *cptr, *qmaildir, *controldir, *QueryBuf, *email, *myFifo,
+				   *remoteip, *infifo, *local_ip, *cntrl_host;
 	char           *real_domain;
 	void            (*pstat) ();
 	time_t          prev_time = 0l;
@@ -251,7 +257,31 @@ ProcessInFifo()
 		if(verbose || _debug)
 			prev_time = time(0);
 #ifdef CLUSTERED_SITE
-		if (!isopen_cntrl && open_central_db(0))
+		snprintf(host_path, MAX_BUFF, "%s/%s/host.cntrl", qmaildir, controldir);
+		if (access(host_path, F_OK))
+			snprintf(host_path, MAX_BUFF, "%s/%s/host.mysql", qmaildir, controldir);
+		if (access(host_path, F_OK))
+			cntrl_host = 0;
+		else
+		{
+			if (!(fp = fopen(host_path, "r")))
+				cntrl_host = 0;
+			else
+			{
+				if (!fgets(tmpbuf, MAX_BUFF - 2, fp))
+				{
+					fprintf(stderr, "fgets: %s\n", strerror(errno));
+					fclose(fp);
+					cntrl_host = 0;
+					return(-1);
+				}
+				fclose(fp);
+				if ((ptr = strrchr(tmpbuf, '\n')))
+					*ptr = 0;
+				cntrl_host = tmpbuf;
+			}
+		}
+		if (!isopen_cntrl && open_central_db(cntrl_host))
 		{
 			fprintf(stderr, "InLookup: Unable to open central db\n");
 			signal(SIGPIPE, pstat);
@@ -262,7 +292,7 @@ ProcessInFifo()
 			fprintf(stderr, "mysql_ping: %s: Reconnecting to central db...\n", mysql_error(&mysql[0]));
 			mysql_close(&mysql[0]);
 			isopen_cntrl = 0;
-			if (open_central_db(0))
+			if (open_central_db(cntrl_host))
 			{
 				fprintf(stderr, "InLookup: Unable to open central db\n");
 				signal(SIGPIPE, pstat);

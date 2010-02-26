@@ -1,5 +1,8 @@
 /*
  * $Log: findhost.c,v $
+ * Revision 2.30  2010-02-26 10:55:34+05:30  Cprogrammer
+ * use host.mysql if host.cntrl is not present
+ *
  * Revision 2.29  2010-02-24 09:10:55+05:30  Cprogrammer
  * use CNTRL_SOCKET, CNTRL_VPORT to override indimail.cnf variables
  *
@@ -180,7 +183,7 @@
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: findhost.c,v 2.29 2010-02-24 09:10:55+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: findhost.c,v 2.30 2010-02-26 10:55:34+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #include <stdio.h>
@@ -367,6 +370,8 @@ open_central_db(char *dbhost)
 	getEnvConfigStr(&qmaildir, "QMAILDIR", QMAILDIR);
 	getEnvConfigStr(&controldir, "CONTROLDIR", "control");
 	if (snprintf(host_path, MAX_BUFF, "%s/%s/host.cntrl", qmaildir, controldir) == -1)
+		host_path[MAX_BUFF - 1] = 0;
+	if (access(host_path, F_OK) && snprintf(host_path, MAX_BUFF, "%s/%s/host.mysql", qmaildir, controldir) == -1)
 		host_path[MAX_BUFF - 1] = 0;
 	if (!*cntrl_host && !access(host_path, F_OK))
 	{
