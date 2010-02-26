@@ -785,7 +785,7 @@ svctool.8: svctool.9
 dbinfo.8: dbinfo.9
 	cat $^ | sed s}INDIMAIL}$(indimaildir)}g > $@
 inlookup.8: inlookup.9
-	cat $^ | sed s}INDIMAIL}$(indimaildir)}g > $@
+	cat $^ | sed s}INDIMAIL}$(indimaildir)}g | sed s}LOGDIR}$(logdir)}g > $@
 vadddomain.1:vadddomain.9
 	cat $^ | sed s}INDIMAIL}$(indimaildir)}g > $@
 vdeldomain.1:vdeldomain.9
