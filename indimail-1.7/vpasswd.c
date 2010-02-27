@@ -122,7 +122,7 @@ main(argc, argv)
 	int             i;
 	char           *real_domain, *ptr, *base_argv0;
 
-	if(get_options(argc, argv))
+	if (get_options(argc, argv))
 		return(1);
 	if (parse_email(Email, User, Domain, MAX_BUFF))
 	{
@@ -142,10 +142,10 @@ main(argc, argv)
 	}
 	if ((i = vpasswd(User, real_domain, Passwd, apop)) != 1)
 	{
-		if(!i)
+		if (!i)
 			error_stack(stderr, "%s@%s: No such user\n", User, real_domain);
 		vclose();
-		if(i == -1)
+		if (i == -1)
 			return(-1);
 		return(1);
 	}
@@ -208,16 +208,16 @@ get_options(int argc, char **argv)
 	}
 	if (optind < argc)
 		scopy(Email, argv[optind++], MAX_BUFF);
-	if(*Email)
+	if (*Email)
 	{
 		if (optind < argc)
 			scopy(Passwd, argv[optind++], MAX_BUFF);
 		else
 		{
-			if(Random)
+			if (Random)
 				ptr = genpass(8);
 			else
-			if(!(ptr = vgetpasswd(Email)))
+			if (!(ptr = vgetpasswd(Email)))
 			{
 				usage();
 				return(1);

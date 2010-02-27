@@ -79,7 +79,7 @@ vopen_smtp_relay(char *user, char *domain)
 	time_t          mytime;
 
 	mytime = time(0);
-	if(!(ipaddr = (char *) getenv("TCPREMOTEIP")))
+	if (!(ipaddr = (char *) getenv("TCPREMOTEIP")))
 		return(0);
 	/*
 	 * courier-imap mangles TCPREMOTEIP 
@@ -91,21 +91,21 @@ vopen_smtp_relay(char *user, char *domain)
 			++ipaddr;
 		++ipaddr;
 	}
-	if(skip_relay(ipaddr))
+	if (skip_relay(ipaddr))
 		return(0);
 	if (vauth_open((char *)0))
 		return(0);
 	getEnvConfigStr(&relay_table, "RELAY_TABLE", RELAY_DEFAULT_TABLE);
-	if(!(real_domain = vget_real_domain(domain)))
+	if (!(real_domain = vget_real_domain(domain)))
 		real_domain = domain;
 	snprintf(SqlBuf, SQL_BUF_SIZE,
 		"replace delayed into %s ( email, ipaddr, timestamp ) values ( \"%s@%s\", \"%s\", %ld )", 
 		relay_table, user, real_domain, ipaddr, mytime);
 	if (mysql_query(&mysql[1], SqlBuf))
 	{
-		if(mysql_errno(&mysql[1]) == ER_NO_SUCH_TABLE)
+		if (mysql_errno(&mysql[1]) == ER_NO_SUCH_TABLE)
 		{
-			if(create_table(ON_LOCAL, relay_table, RELAY_TABLE_LAYOUT))
+			if (create_table(ON_LOCAL, relay_table, RELAY_TABLE_LAYOUT))
 				return(0);
 			if (!mysql_query(&mysql[1], SqlBuf))
 				return(1);

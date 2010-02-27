@@ -223,25 +223,25 @@ vuserinfo(Email, User, Domain, DisplayName, DisplayPasswd, DisplayUid, DisplayGi
 		getEnvConfigStr(&qmaildir, "QMAILDIR", QMAILDIR);
 		getEnvConfigStr(&controldir, "CONTROLDIR", "control");
 		snprintf(tmpbuf, MAX_BUFF, "%s/%s/rcpthosts", qmaildir, controldir);
-		if(!(fp = fopen(tmpbuf, "r")))
+		if (!(fp = fopen(tmpbuf, "r")))
 		{
 			fprintf(stderr, "%s: No such domain\n", Domain);
 			return (1);
 		}
 		for(;;)
 		{
-			if(!fgets(tmpbuf, sizeof(tmpbuf) - 2, fp))
+			if (!fgets(tmpbuf, sizeof(tmpbuf) - 2, fp))
 			{
 				fclose(fp);
 				fprintf(stderr, "%s: No such domain\n", Domain);
 				return (1);
 			}
-			if((ptr = strchr(tmpbuf, '\n')) || (ptr = strchr(tmpbuf, '#')))
+			if ((ptr = strchr(tmpbuf, '\n')) || (ptr = strchr(tmpbuf, '#')))
 				*ptr = 0;
 			for (ptr = tmpbuf; *ptr && isspace((int) *ptr); ptr++);
 			if (!*ptr)
 				continue;
-			if(!strncmp(tmpbuf, Domain, MAX_BUFF))
+			if (!strncmp(tmpbuf, Domain, MAX_BUFF))
 			{
 				real_domain = Domain;
 				break;
@@ -250,25 +250,25 @@ vuserinfo(Email, User, Domain, DisplayName, DisplayPasswd, DisplayUid, DisplayGi
 		fclose(fp);
 	}
 #ifdef CLUSTERED_SITE
-	if((is_dist = is_distributed_domain(real_domain)) == -1)
+	if ((is_dist = is_distributed_domain(real_domain)) == -1)
 	{
 		fprintf(stderr, "Unable to verify %s as a distributed domain\n", Domain);
 		return (1);
 	}
-	if(real_domain && *real_domain)
+	if (real_domain && *real_domain)
 	{
-		if(is_dist == 1)
+		if (is_dist == 1)
 		{
 			snprintf(tmpbuf, MAX_BUFF, "%s@%s", User, real_domain);
-			if((mailstore = findhost(tmpbuf, 1)) != (char *) 0)
+			if ((mailstore = findhost(tmpbuf, 1)) != (char *) 0)
 			{
-				if((ptr = strrchr(mailstore, ':')) != (char *) 0)
+				if ((ptr = strrchr(mailstore, ':')) != (char *) 0)
 					*ptr = 0;
 				for(;*mailstore && *mailstore != ':';mailstore++);
 				mailstore++;
 			} else
 			{
-				if(userNotFound)
+				if (userNotFound)
 					fprintf(stderr, "%s@%s: No such user\n", User, Domain);
 				else
 					fprintf(stderr, "Internal System Error\n");
@@ -276,18 +276,18 @@ vuserinfo(Email, User, Domain, DisplayName, DisplayPasswd, DisplayUid, DisplayGi
 			}
 		} else
 		{
-			if(vauth_open((char *) 0))
+			if (vauth_open((char *) 0))
 			{
 				fprintf(stderr, "vauth_open failed\n");
 				return(1);
 			}
 			mailstore = MdaServer(mysql_host, real_domain);
-			if(!mailstore && (!strncmp(mysql_host, "localhost", 10) || !strncmp(mysql_host, "127.0.0.1", 10)))
+			if (!mailstore && (!strncmp(mysql_host, "localhost", 10) || !strncmp(mysql_host, "127.0.0.1", 10)))
 			{
-				if((ptr = get_local_ip()))
+				if ((ptr = get_local_ip()))
 					mailstore = MdaServer(ptr, real_domain);
 			}
-			if(!mailstore)
+			if (!mailstore)
 				mailstore = "unknown";
 		}
 	} else
@@ -297,7 +297,7 @@ vuserinfo(Email, User, Domain, DisplayName, DisplayPasswd, DisplayUid, DisplayGi
 #endif
 	if (!(mypw = vauth_getpw(User, real_domain)))
 	{
-		if(!real_domain && !isvirtualdomain(User) && vget_assign(User, tmpbuf, MAX_BUFF, &uid, &gid))
+		if (!real_domain && !isvirtualdomain(User) && vget_assign(User, tmpbuf, MAX_BUFF, &uid, &gid))
 		{
 			if (DisplayName || DisplayAll)
 				printf("name          : %s@localhost\n", User);
@@ -406,8 +406,8 @@ vuserinfo(Email, User, Domain, DisplayName, DisplayPasswd, DisplayUid, DisplayGi
 #ifdef CLUSTERED_SITE
 		printf("Mail Store IP : %s (%s - %s)\n", mailstore,
 			(is_dist ? "Clustered" : "NonClustered"), 
-			islocalif(mailstore) ? "local" : "remote");
-		if(is_dist)
+			islocalif (mailstore) ? "local" : "remote");
+		if (is_dist)
 			ptr = vauth_gethostid(mailstore);
 		else
 			ptr = "non-clustered domain";
@@ -416,9 +416,9 @@ vuserinfo(Email, User, Domain, DisplayName, DisplayPasswd, DisplayUid, DisplayGi
 		printf("Mail store    : %s\n", mailstore);
 #endif
 #ifdef CLUSTERED_SITE
-		if(!(ptr = SqlServer(mailstore, real_domain)))
+		if (!(ptr = SqlServer(mailstore, real_domain)))
 		{
-			if(!is_dist)
+			if (!is_dist)
 				ptr = mysql_host;
 			else
 				ptr = "unknown";
@@ -429,9 +429,9 @@ vuserinfo(Email, User, Domain, DisplayName, DisplayPasswd, DisplayUid, DisplayGi
 #endif
 	}
 #ifdef ENABLE_AUTH_LOGGING
-	if(Domain && *Domain && DisplayAll)
+	if (Domain && *Domain && DisplayAll)
 	{
-		if(is_inactive)
+		if (is_inactive)
 			printf("Table Name    : %s\n", inactive_table);
 		else
 			printf("Table Name    : %s\n", default_table);
@@ -449,7 +449,7 @@ vuserinfo(Email, User, Domain, DisplayName, DisplayPasswd, DisplayUid, DisplayGi
 		delivery_time = 0;
 		delivery_size = 0;
 		snprintf(tmpbuf, MAX_BUFF, "%s/Maildir/deliveryCount", mypw->pw_dir);
-		if((fp = fopen(tmpbuf, "r")))
+		if ((fp = fopen(tmpbuf, "r")))
 		{
 			for(;;)
 			{
@@ -461,7 +461,7 @@ vuserinfo(Email, User, Domain, DisplayName, DisplayPasswd, DisplayUid, DisplayGi
 			strptime(timeBuf, "%d-%m-%Y:%H:%M:%S", &tm);
 			delivery_time = mktime(&tm);
 		}
-		if(auth_time > 0 || add_time > 0)
+		if (auth_time > 0 || add_time > 0)
 		{
 			ptr = (relay_select(Email, ipaddr[5]) || relay_select(Email, ipaddr[6]) ? "YES" : "NO");
 			printf("Relay Allowed : %s\n", ptr);
@@ -469,7 +469,7 @@ vuserinfo(Email, User, Domain, DisplayName, DisplayPasswd, DisplayUid, DisplayGi
 		} else
 		{
 			printf("Relay Allowed : No\n");
-			if(add_time)
+			if (add_time)
 				printf("Days inact    : %s\n", no_of_days((time(0) - (auth_time ? auth_time : add_time))));
 			else
 				printf("Days inact    : Unknown\n");
@@ -477,7 +477,7 @@ vuserinfo(Email, User, Domain, DisplayName, DisplayPasswd, DisplayUid, DisplayGi
 		if (!add_time)
 			printf("Added   On    : Unknown\n");
 		else
-		if(add_time > 0)
+		if (add_time > 0)
 			printf("Added   On    : (%15s) %s", ipaddr[1], asctime(localtime(&add_time)));
 		else
 			printf("Added   On    : ????\n");
@@ -488,59 +488,59 @@ vuserinfo(Email, User, Domain, DisplayName, DisplayPasswd, DisplayUid, DisplayGi
 			printf("last  POP3    : Not yet logged in\n");
 		}
 		else
-		if(pop3_time > 0 || imap_time > 0)
+		if (pop3_time > 0 || imap_time > 0)
 		{
 			printf("last  auth    : (%15s) %s", ipaddr[0], asctime(localtime(&auth_time)));
-			if(pop3_time > 0)
+			if (pop3_time > 0)
 				printf("last  POP3    : (%15s) %s", ipaddr[5], asctime(localtime(&pop3_time)));
 			else
 				printf("last  POP3    : Not yet logged in\n");
-			if(imap_time > 0)
+			if (imap_time > 0)
 				printf("last  IMAP    : (%15s) %s", ipaddr[6], asctime(localtime(&imap_time)));
 			else
 				printf("last  IMAP    : Not yet logged in\n");
 		} else
-		if(auth_time < 0)
+		if (auth_time < 0)
 			printf("last  auth    : ????\n");
-		if(!pwdchg_time)
+		if (!pwdchg_time)
 			printf("PassChange    : Not yet Changed\n");
 		else
-		if(pwdchg_time > 0)
+		if (pwdchg_time > 0)
 			printf("PassChange    : (%15s) %s", ipaddr[2], asctime(localtime(&pwdchg_time)));
 		else
 			printf("PassChange    : ????\n");
-		if(!inact_time)
+		if (!inact_time)
 			printf("Inact Date    : Not yet Inactivated\n");
 		else
-		if(inact_time > 0)
+		if (inact_time > 0)
 			printf("Inact Date    : (%15s) %s", ipaddr[4], asctime(localtime(&inact_time)));
 		else
 			printf("Inact Date    : ????\n");
-		if(inact_time > 0)
+		if (inact_time > 0)
 		{
-			if(!act_time)
+			if (!act_time)
 				printf("Activ Date    : Not yet Activated\n");
 			else
-			if(act_time > 0)
+			if (act_time > 0)
 				printf("Activ Date    : (%15s) %s", ipaddr[3], asctime(localtime(&act_time)));
 			else
 				printf("Activ Date    : ????\n");
 		} else
 		{
-			if(is_inactive)
+			if (is_inactive)
 				printf("Activ Date    : Not yet Activated\n");
 			else
 			{
 				if (!add_time)
 					printf("Activ Date    : Unknown\n");
 				else
-				if(add_time > 0)
+				if (add_time > 0)
 					printf("Activ Date    : (%15s) %s", ipaddr[1], asctime(localtime(&add_time)));
 				else
 					printf("Activ Date    : ????\n");
 			}
 		}
-		if(delivery_time > 0)
+		if (delivery_time > 0)
 		{
 			printf("Delivery Time :                   %s", asctime(localtime(&delivery_time)));
 			printf("              : (%"PRIu64" Mails, %"PRIu64" Bytes [%"PRIu64" Kb])\n", delivery_count, delivery_size, delivery_size/1024);
@@ -559,7 +559,7 @@ vuserinfo(Email, User, Domain, DisplayName, DisplayPasswd, DisplayUid, DisplayGi
 		valiasinfo(mypw->pw_name, Domain);
 #ifdef VFILTER
 		snprintf(maildir, MAX_BUFF, "%s/Maildir/vfilter", mypw->pw_dir);
-		if(!access(maildir, F_OK))
+		if (!access(maildir, F_OK))
 		{
 			printf("Filters       :\n");
 			vfilter_display(Email, 0, &filter_no, filter_name, &header_name, &comparision, keyword, folder, &bounce_action, forward, &mailing_list);
@@ -572,7 +572,7 @@ vuserinfo(Email, User, Domain, DisplayName, DisplayPasswd, DisplayUid, DisplayGi
 
 		ttotal = tcount = mcount = total = unread = unseen = 0;
 		snprintf(maildir, MAX_BUFF, "%s/Maildir", mypw->pw_dir);
-		if(!access(maildir, F_OK))
+		if (!access(maildir, F_OK))
 		{
 			printf("-----------------------------------------------------------------------------------\n");
 			printf("Folder                          Size     Mails   TrashSize TrashMails Unread Unseen\n");

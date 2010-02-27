@@ -63,13 +63,13 @@ open_smtp_relay(char *user, char *domain)
 	getEnvConfigStr(&qmaildir, "QMAILDIR", QMAILDIR);
 	getEnvConfigStr(&controldir, "CONTROLDIR", "control");
 	getEnvConfigStr(&mcdfile, "MCDFILE", MCDFILE);
-	if(!(mcdfile = (char *) getenv("MCDFILE")))
+	if (!(mcdfile = (char *) getenv("MCDFILE")))
 		mcdfile = MCDFILE;
-	if(*mcdfile == '/')
+	if (*mcdfile == '/')
 		scopy(TmpBuf1, mcdfile, MAX_BUFF);
 	else
 		snprintf(TmpBuf1, MAX_BUFF, "%s/%s/%s", qmaildir, controldir, mcdfile);
-	if(vopen_smtp_relay(user, domain) && access(TmpBuf1, F_OK))
+	if (vopen_smtp_relay(user, domain) && access(TmpBuf1, F_OK))
 		update_rules(1);
 #endif /*- #ifdef POP_AUTH_OPEN_RELAY */
 	return (0);

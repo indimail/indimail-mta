@@ -63,17 +63,17 @@ vpasswd(char *username, char *domain, char *password,
 	lowerit(domain);
 	snprintf(email, MAX_BUFF, "%s@%s", username, domain);
 #ifdef CLUSTERED_SITE
-	if(vauthOpen_user(email))
+	if (vauthOpen_user(email))
 #else
-	if(vauth_open((char *) 0))
+	if (vauth_open((char *) 0))
 #endif
 	{
-		if(userNotFound)
+		if (userNotFound)
 			return(0);
 		else
 			return(-1);
 	}
-	if(!(pw = vauth_getpw(username, domain)))
+	if (!(pw = vauth_getpw(username, domain)))
 	{
 #ifdef CLUSTERED_SITE
 		is_open = 0;
@@ -99,10 +99,10 @@ vpasswd(char *username, char *domain, char *password,
 	else
 	{
 		mkpasswd3(password, Crypted, MAX_BUFF);
-		if((i = vauth_vpasswd(username, domain, Crypted, apop)) == 1)
+		if ((i = vauth_vpasswd(username, domain, Crypted, apop)) == 1)
 		{
 			snprintf(Dir, MAX_BUFF, "%s/Maildir", pw->pw_dir);
-			if(access(Dir, F_OK))
+			if (access(Dir, F_OK))
 				quota = 0l;
 			else
 			{
