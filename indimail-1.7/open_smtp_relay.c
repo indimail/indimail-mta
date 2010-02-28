@@ -1,5 +1,8 @@
 /*
  * $Log: open_smtp_relay.c,v $
+ * Revision 2.5  2010-02-28 11:37:28+05:30  Cprogrammer
+ * update tcp.smtp.cdb only if OPEN_SMTP is defined
+ *
  * Revision 2.4  2008-05-28 21:55:50+05:30  Cprogrammer
  * removed ldap,cdb code
  *
@@ -44,33 +47,21 @@
  *
  */
 #include "indimail.h"
-#include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
-#include <unistd.h>
 
 #ifndef	lint
-static char     sccsid[] = "$Id: open_smtp_relay.c,v 2.4 2008-05-28 21:55:50+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: open_smtp_relay.c,v 2.5 2010-02-28 11:37:28+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 int
 open_smtp_relay(char *user, char *domain)
 {
 #ifdef POP_AUTH_OPEN_RELAY
-	char           TmpBuf1[MAX_BUFF];
-	char           *mcdfile, *qmaildir, *controldir;
+	char           *open_smtp;
 
-	getEnvConfigStr(&qmaildir, "QMAILDIR", QMAILDIR);
-	getEnvConfigStr(&controldir, "CONTROLDIR", "control");
-	getEnvConfigStr(&mcdfile, "MCDFILE", MCDFILE);
-	if (!(mcdfile = (char *) getenv("MCDFILE")))
-		mcdfile = MCDFILE;
-	if (*mcdfile == '/')
-		scopy(TmpBuf1, mcdfile, MAX_BUFF);
-	else
-		snprintf(TmpBuf1, MAX_BUFF, "%s/%s/%s", qmaildir, controldir, mcdfile);
-	if (vopen_smtp_relay(user, domain) && access(TmpBuf1, F_OK))
-		update_rules(1);
+	open_smtp = (char *) getenv("OPEN_SMTP");
+	if (vopen_smtp_relay(user, domain) && open_smtp) /*- write to relay table */
+		update_rules(1); /*- update tcp.smtp.cdb */
 #endif /*- #ifdef POP_AUTH_OPEN_RELAY */
 	return (0);
 }
