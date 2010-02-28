@@ -88,7 +88,7 @@ main(int argc, char **argv)
 		usage();
 		return(1);
 	}
-	if(is_already_running("clearopensmtp"))
+	if (is_already_running("clearopensmtp"))
 	{
 		fprintf(stderr, "clearopensmtp is already running\n");
 		return(1);
@@ -108,13 +108,13 @@ main(int argc, char **argv)
 		getEnvConfigStr(&tmpstr, "QMAILDIR", QMAILDIR);
 		getEnvConfigStr(&controldir, "CONTROLDIR", "control");
 		getEnvConfigStr(&mcdfile, "MCDFILE", MCDFILE);
-		if(*mcdfile == '/')
+		if (*mcdfile == '/')
 			scopy(TmpBuf, mcdfile, MAX_BUFF);
 		else
 			snprintf(TmpBuf, MAX_BUFF, "%s/%s/%s", tmpstr, controldir, mcdfile);
-		if(access(TmpBuf, F_OK))
+		if (access(TmpBuf, F_OK))
 		{
-			if(job_type == 2 && vauth_open((char *) 0))
+			if (job_type == 2 && vauth_open((char *) 0))
 				return(1);
 			errflag = update_rules(1);
 			vclose();
