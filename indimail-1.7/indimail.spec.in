@@ -1,5 +1,9 @@
 #
 # $Log: indimail.spec.in,v $
+# Revision 2.129  2010-02-28 13:26:04+05:30  Cprogrammer
+# do not remove man pages, include files in uninstall of main package
+# remove man, include in devel package
+#
 # Revision 2.128  2010-02-28 11:42:40+05:30  Cprogrammer
 # changed permission of ~indimail/etc to 775 root:indimail
 #
@@ -400,7 +404,7 @@
 # rpm spec file for indimail
 #
 #
-# $Id: indimail.spec.in,v 2.128 2010-02-28 11:42:40+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 2.129 2010-02-28 13:26:04+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %define _unpackaged_files_terminate_build 1
 
@@ -2458,7 +2462,7 @@ if [ $nscd_up -ge 1 ] ; then
 fi
 
 echo "removing binaries, libraries, queues"
-for i in bin sbin lib queue man include
+for i in bin sbin lib queue
 do
 	%{__rm} -rf %{_prefix}/$i || true
 done
@@ -2575,7 +2579,36 @@ echo ""
 
 ### SCRIPTLET ###############################################################################
 %postun shared
+# Shared libraries (omit for architectures that don't support them)
+echo "removing shared libraries"
+%if %noclamav == 0
+%{__rm} -f %{_libdir}/libclam*.so*
+%endif
+%{__rm} -f %{_libdir}/libeps.so
+%{__rm} -f %{_libdir}/libeps-%{eps_version}.so.0
+%{__rm} -f %{_libdir}/libeps-%{eps_version}.so.0.0.0
+%{__rm} -f %{_libdir}/libcdb.so
+%{__rm} -f %{_libdir}/libcdb-%{cdb_version}.so.0
+%{__rm} -f %{_libdir}/libcdb-%{cdb_version}.so.0.0.0
+%{__rm} -f %{_libdir}/libflash.so
+%{__rm} -f %{_libdir}/libflash-%{flash_version}.so.0
+%{__rm} -f %{_libdir}/libflash-%{flash_version}.so.0.0.0
+%{__rm} -f %{_libdir}/libindimail.so
+%{__rm} -f %{_libdir}/libindimail-%{version}.so.0
+%{__rm} -f %{_libdir}/libindimail-%{version}.so.0.0.0
 /sbin/ldconfig
+
+%postun devel
+echo "removing man pages, include files"
+for i in man include
+do
+	%{__rm} -rf %{_prefix}/$i || true
+done
+echo "removing static libraries"
+%{__rm} -f %{_libdir}/libeps.a
+%{__rm} -f %{_libdir}/libcdb.a
+%{__rm} -f %{_libdir}/libflash.a
+%{__rm} -f %{_libdir}/libindimail.a
 
 # fix changelog for openSUSE buildservice
 %changelog
