@@ -1,5 +1,8 @@
 #
 # $Log: indimail.spec.in,v $
+# Revision 2.128  2010-02-28 11:42:40+05:30  Cprogrammer
+# changed permission of ~indimail/etc to 775 root:indimail
+#
 # Revision 2.127  2010-02-22 16:35:05+05:30  Cprogrammer
 # upgrade to fetchmail 6.3.14
 #
@@ -397,7 +400,7 @@
 # rpm spec file for indimail
 #
 #
-# $Id: indimail.spec.in,v 2.127 2010-02-22 16:35:05+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 2.128 2010-02-28 11:42:40+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %define _unpackaged_files_terminate_build 1
 
@@ -1167,7 +1170,7 @@ fi
 %dir %attr(755,root,root)         %{_prefix}/share/fortunes
 %dir %attr(555,root,qmail)        %{_prefix}/users
 %dir %attr(555,root,qmail)        %{_prefix}/plugins
-%dir %attr(755,root,root)         %{_prefix}/etc
+%dir %attr(775,root,indimail)     %{_prefix}/etc
 %dir %attr(755,root,root)         %{_prefix}/etc/yum.repos.d
 %dir %attr(555,root,root)         %{_prefix}/sbin
 %dir %attr(555,root,qmail)        %{_prefix}/bin
