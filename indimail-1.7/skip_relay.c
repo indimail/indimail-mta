@@ -46,28 +46,28 @@ skip_relay(ipaddr)
 	char           *ptr, *tcp_file;
 
 	getEnvConfigStr(&tcp_file, "TCP_FILE", TCP_FILE);
-	if(!(fp = fopen(tcp_file, "r")))
+	if (!(fp = fopen(tcp_file, "r")))
 		return(0);
-	for(;;)
+	for (;;)
 	{
 		if (fscanf(fp, "%s", buffer) != 1)
 		{
 			if (ferror(fp))
 				break;
 		}
-		if(feof(fp))
+		if (feof(fp))
 			break;
-		if((ptr = strchr(buffer, '#')))
+		if ((ptr = strchr(buffer, '#')))
 			*ptr = 0;
-		for(ptr = buffer;*ptr && isspace((int) *ptr);ptr++);
+		for (ptr = buffer;*ptr && isspace((int) *ptr);ptr++);
 		if (!*ptr)
 			continue;
-		if(!strstr(buffer, "allow") || !strstr(buffer, "RELAYCLIENT"))
+		if (!strstr(buffer, "allow") || !strstr(buffer, "RELAYCLIENT"))
 			continue;
-		if((ptr = strchr(buffer, ':')) != NULL)
+		if ((ptr = strchr(buffer, ':')) != NULL)
 		{
 			*ptr = 0;
-			if(!strncmp(buffer, ipaddr, slen(buffer)))
+			if (!strncmp(buffer, ipaddr, slen(buffer)))
 			{
 				fclose(fp);
 				return(1);
