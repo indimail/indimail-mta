@@ -424,8 +424,8 @@ case $POPRELAY in
 	])
 	AC_DEFINE_UNQUOTED(TCP_FILE,"$tcpserver_file",full path of the TCP Rules File)
 
-	open_smtp_cur="$indimaildir/etc/open-smtp"
-	AC_DEFINE_UNQUOTED(OPEN_SMTP_CUR_FILE,"$open_smtp_cur","")
+	open_smtp="$indimaildir/etc/open-smtp"
+	AC_DEFINE_UNQUOTED(OPEN_SMTP,"$open_smtp","")
 	;;
 *)
 	;;
@@ -1143,7 +1143,7 @@ case $POPRELAY in
 	echo "  relay clear mins = $relay_clear_minutes --enable-relay-clear-minutes=$relay_clear_minutes"
 	echo "    tcprules  prog = $tcprules_prog --enable-tcprules-prog=$tcprules_prog"
 	echo "    tcpserver file = $tcpserver_file --enable-tcpserver-file=$tcpserver_file"
-	echo "    open_smtp file = $open_smtp_cur"
+	echo "    open_smtp file = $open_smtp"
 	;;
 *)
 	echo "     roaming users = OFF --enable-roaming-users=n"
