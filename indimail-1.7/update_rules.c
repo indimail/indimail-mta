@@ -1,5 +1,8 @@
 /*
  * $Log: update_rules.c,v $
+ * Revision 2.8  2010-02-28 11:39:42+05:30  Cprogrammer
+ * renamed OPEN_SMTP_CUR_FILE to OPEN_SMTP
+ *
  * Revision 2.7  2009-02-18 21:37:35+05:30  Cprogrammer
  * check chown, write for errors
  *
@@ -58,7 +61,7 @@
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: update_rules.c,v 2.7 2009-02-18 21:37:35+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: update_rules.c,v 2.8 2010-02-28 11:39:42+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef POP_AUTH_OPEN_RELAY
@@ -81,43 +84,43 @@ update_rules(lock)
 #endif
 	unsigned long   pid;
 	int             wstat;
-	char           *tcp_file, *open_smtp_cur_file;
+	char           *tcp_file, *open_smtp;
 	char            TmpBuf1[MAX_BUFF];
 
 	umask(INDIMAIL_TCPRULES_UMASK);
-	getEnvConfigStr(&open_smtp_cur_file, "OPEN_SMTP_CUR_FILE", OPEN_SMTP_CUR_FILE);
+	getEnvConfigStr(&open_smtp, "OPEN_SMTP", OPEN_SMTP);
 #ifdef FILE_LOCKING
-	if(lock && ((fd = getDbLock(open_smtp_cur_file, 1)) == -1))
+	if (lock && ((fd = getDbLock(open_smtp, 1)) == -1))
 		return(-1);
 #endif
 	if ((pid = tcprules_open()) < 0)
 	{
 #ifdef FILE_LOCKING
-		if(lock)
-			delDbLock(fd, open_smtp_cur_file, 1);
+		if (lock)
+			delDbLock(fd, open_smtp, 1);
 #endif
 		return(1);
 	}
-	if(vupdate_rules(fdm))
+	if (vupdate_rules(fdm)) /*- write rules from RELAY table */
 	{
 		close(fdm);
 #ifdef FILE_LOCKING
-		if(lock)
-			delDbLock(fd, open_smtp_cur_file, 1);
+		if (lock)
+			delDbLock(fd, open_smtp, 1);
 #endif
 		while (wait(&wstat) != pid);
 		return(1);
 	}
 	getEnvConfigStr(&tcp_file, "TCP_FILE", TCP_FILE);
-	if((fs = fopen(tcp_file, "r")) != NULL)
+	if ((fs = fopen(tcp_file, "r")) != NULL)
 	{
 		while (fgets(TmpBuf1, 100, fs) != NULL)
 		{
-			if (write(fdm, TmpBuf1, slen(TmpBuf1)) == -1)
+			if (write(fdm, TmpBuf1, slen(TmpBuf1)) == -1) /*- write rules in the file tcp.smtp */
 			{
 #ifdef FILE_LOCKING
-				if(lock)
-					delDbLock(fd, open_smtp_cur_file, 1);
+				if (lock)
+					delDbLock(fd, open_smtp, 1);
 #endif
 				break;
 			}
@@ -126,8 +129,8 @@ update_rules(lock)
 	}
 	close(fdm);
 #ifdef FILE_LOCKING
-	if(lock)
-		delDbLock(fd, open_smtp_cur_file, 1);
+	if (lock)
+		delDbLock(fd, open_smtp, 1);
 #endif
 	/*
 	 * wait until tcprules finishes so we don't have zombies 
@@ -137,7 +140,7 @@ update_rules(lock)
 	 * Set the ownership of the file 
 	 */
 	snprintf(TmpBuf1, MAX_BUFF, "%s.cdb", tcp_file);
-	if(indimailuid == -1 || indimailgid == -1)
+	if (indimailuid == -1 || indimailgid == -1)
 		GetIndiId(&indimailuid, &indimailgid);
 	if (!getuid() || !geteuid())
 		if (chown(TmpBuf1, indimailuid, indimailgid) == -1)
