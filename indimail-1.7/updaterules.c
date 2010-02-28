@@ -31,9 +31,9 @@ static char     sccsid[] = "$Id: updaterules.c,v 2.2 2008-06-13 10:17:13+05:30 C
 int
 main()
 {
-	if(vauth_open((char *) 0))
+	if (vauth_open((char *) 0))
 		return(1);
-	if(update_rules(1))
+	if (update_rules(1))
 	{
 		vclose();
 		return(1);
