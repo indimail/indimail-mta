@@ -1,5 +1,8 @@
 /*
  * $Log: authindi.c,v $
+ * Revision 2.14  2010-02-28 13:26:48+05:30  Cprogrammer
+ * use value of DEBUG_LOGIN
+ *
  * Revision 2.13  2009-11-18 14:21:31+05:30  Cprogrammer
  * more readable code
  *
@@ -48,7 +51,7 @@
 #include <errno.h>
 
 #ifndef lint
-static char     sccsid[] = "$Id: authindi.c,v 2.13 2009-11-18 14:21:31+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: authindi.c,v 2.14 2010-02-28 13:26:48+05:30 Cprogrammer Stab mbhangui $";
 #endif
 #ifdef AUTH_SIZE
 #undef AUTH_SIZE
@@ -73,7 +76,7 @@ int
 main(int argc, char **argv)
 {
 	char           *buf, *tmpbuf, *login, *challenge, *crypt_pass, *real_domain,
-				   *prog_name, *service, *service_type;
+				   *prog_name, *service, *service_type, *ptr;
 	char            user[AUTH_SIZE], domain[AUTH_SIZE], Email[MAX_BUFF];
 	int             count, offset;
 	uid_t           uid;
@@ -295,7 +298,7 @@ main(int argc, char **argv)
 		}
 	}
 	crypt_pass = pw->pw_passwd;
-	if (getenv("DEBUG_LOGIN"))
+	if ((ptr = getenv("DEBUG_LOGIN")) && *ptr > '0')
 	{
 		fprintf(stderr, "%s: service[%s] type [%s] login [%s] challenge [%s] pw_passwd [%s]\n", 
 			prog_name, service, service_type, login, challenge, crypt_pass);
