@@ -240,7 +240,7 @@
 #undef MYSQLBINDIR
 
 /* "" */
-#undef OPEN_SMTP_CUR_FILE
+#undef OPEN_SMTP
 
 /* Name of package */
 #undef PACKAGE
