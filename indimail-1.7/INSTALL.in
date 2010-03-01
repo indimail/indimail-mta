@@ -633,16 +633,18 @@ the installation.
 
     % sudo @indimaildir@/sbin/svctool --imap=143 --servicedir=/service --localip=0 \
         --query-cache --maxdaemons=150 --maxperip=25 \
-        --default-domain=indimail.org --memory=10485760
+        --default-domain=indimail.org --memory=10485760 --starttls
     % sudo @indimaildir@/sbin/svctool --imap=993 --servicedir=/service --localip=0 \
         --query-cache --maxdaemons=150 --maxperip=25 \
-        --default-domain=indimail.org --memory=10485760 --postmaster=postmaster@indimail.org --ssl
+        --default-domain=indimail.org --memory=10485760 \
+		--postmaster=postmaster@indimail.org --ssl
     % sudo @indimaildir@/sbin/svctool --pop3=110 --servicedir=/service --localip=0 \
         --query-cache --maxdaemons=150 --maxperip=25 \
-        --default-domain=indimail.org --memory=10485760
+        --default-domain=indimail.org --memory=10485760 --starttls
     % sudo @indimaildir@/sbin/svctool --pop3=995 --servicedir=/service --localip=0 \
         --maxdaemons=150 --maxperip=25 \
-        --default-domain=indimail.org --memory=10485760 --postmaster=postmaster@indimail.org --ssl
+        --default-domain=indimail.org --memory=10485760 \
+		--postmaster=postmaster@indimail.org --ssl
 
     The below four command will create proxies (ssl and non-ssl) for IMAP and POP3. These
     will be required if you decide to split your users belonging to a single domain across

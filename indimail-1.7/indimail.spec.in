@@ -1,5 +1,8 @@
 #
 # $Log: indimail.spec.in,v $
+# Revision 2.130  2010-03-01 15:39:04+05:30  Cprogrammer
+# advertise STARTTLS in imap and pop3
+#
 # Revision 2.129  2010-02-28 13:26:04+05:30  Cprogrammer
 # do not remove man pages, include files in uninstall of main package
 # remove man, include in devel package
@@ -404,7 +407,7 @@
 # rpm spec file for indimail
 #
 #
-# $Id: indimail.spec.in,v 2.129 2010-02-28 13:26:04+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 2.130 2010-03-01 15:39:04+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %define _unpackaged_files_terminate_build 1
 
@@ -2286,12 +2289,14 @@ fi
 if [ %nocourierimap -eq 0 ] ; then
 # IMAP/POP3
 %{_prefix}/sbin/svctool --imap=143 --servicedir=%{servicedir} --localip=0 --maxdaemons=40 \
-	--query-cache --maxperip=25 --default-domain=%{default_domain} --memory=%{imap_pop3_mem}
+	--query-cache --maxperip=25 --default-domain=%{default_domain} --memory=%{imap_pop3_mem} \
+	--starttls
 %{_prefix}/sbin/svctool --imap=993 --servicedir=%{servicedir} --localip=0 --maxdaemons=40 \
 	--query-cache --maxperip=25 --default-domain=%{default_domain} --memory=%{imap_pop3_mem} \
 	--ssl
 %{_prefix}/sbin/svctool --pop3=110 --servicedir=%{servicedir} --localip=0 --maxdaemons=40 \
-	--query-cache --maxperip=25 --default-domain=%{default_domain} --memory=%{imap_pop3_mem}
+	--query-cache --maxperip=25 --default-domain=%{default_domain} --memory=%{imap_pop3_mem} \
+	--starttls
 %{_prefix}/sbin/svctool --pop3=995 --servicedir=%{servicedir} --localip=0 --maxdaemons=40 \
 	--query-cache --maxperip=25 --default-domain=%{default_domain} --memory=%{imap_pop3_mem} \
 	--ssl

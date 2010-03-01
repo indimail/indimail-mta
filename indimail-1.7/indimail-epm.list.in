@@ -1,5 +1,8 @@
 #
 # $Log: indimail-epm.list.in,v $
+# Revision 2.43  2010-03-01 15:49:20+05:30  Cprogrammer
+# advertise STARTTLS capability in IMAP and POP3
+#
 # Revision 2.42  2010-02-18 11:02:28+05:30  Cprogrammer
 # removed --mysqlhost parameter to indisrvr to enable indisrvr to use control file
 #
@@ -1805,11 +1808,11 @@ fi
 if [ $$nocourierimap -eq 0 ] ; then
 # IMAP/POP3
 ${prefix}/sbin/svctool --imap=143 --servicedir=${servicedir} --localip=0 --maxdaemons=40 --maxperip=25 \
-	--default-domain=${default_domain} --memory=$$imap_pop3_mem
+	--starttls --default-domain=${default_domain} --memory=$$imap_pop3_mem
 ${prefix}/sbin/svctool --imap=993 --servicedir=${servicedir} --localip=0 --maxdaemons=40 --maxperip=25 \
 	--default-domain=${default_domain} --memory=$$imap_pop3_mem --ssl
 ${prefix}/sbin/svctool --pop3=110 --servicedir=${servicedir} --localip=0 --maxdaemons=40 --maxperip=25 \
-		--default-domain=${default_domain} --memory=$$imap_pop3_mem
+		--starttls --default-domain=${default_domain} --memory=$$imap_pop3_mem
 ${prefix}/sbin/svctool --pop3=995 --servicedir=${servicedir} --localip=0 --maxdaemons=40 --maxperip=25 \
 		--default-domain=${default_domain} --memory=$$imap_pop3_mem --ssl
 fi
