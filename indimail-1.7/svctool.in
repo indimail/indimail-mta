@@ -1,6 +1,10 @@
 #!/bin/sh
 # WARNING: This file was auto-generated. Do not edit!
 # $Log: svctool.in,v $
+# Revision 2.160  2010-03-01 11:58:58+05:30  Cprogrammer
+# added case for mysql-5.1.44
+# changed skip-locking to skip-external-locking in my.cnf
+#
 # Revision 2.159  2010-02-27 20:31:09+05:30  Cprogrammer
 # fixed typo couriersslcache
 #
@@ -664,7 +668,7 @@
 # Initial revision
 #
 #
-# $Id: svctool.in,v 2.159 2010-02-27 20:31:09+05:30 Cprogrammer Stab mbhangui $
+# $Id: svctool.in,v 2.160 2010-03-01 11:58:58+05:30 Cprogrammer Stab mbhangui $
 #
 
 #
@@ -1916,7 +1920,7 @@ case "$dkverify_option" in
 esac
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.159 2010-02-27 20:31:09+05:30 Cprogrammer Stab mbhangui $"
+echo "# \$Id: svctool.in,v 2.160 2010-03-01 11:58:58+05:30 Cprogrammer Stab mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -1965,7 +1969,7 @@ if [ " $odmr" = " " ] ; then
 	# qmail-inject wrapper
 	(
 	echo "#!/bin/sh"
-	echo "# \$Id: svctool.in,v 2.159 2010-02-27 20:31:09+05:30 Cprogrammer Stab mbhangui $"
+	echo "# \$Id: svctool.in,v 2.160 2010-03-01 11:58:58+05:30 Cprogrammer Stab mbhangui $"
 	echo "# generated on $host on `date`"
 	echo "# $prog_args"
 	echo ""
@@ -1978,7 +1982,7 @@ if [ " $odmr" = " " ] ; then
 		/bin/mkdir -p "$DESTDIR"$SERVICEDIR/qmail-spamlog/log
 		(
 		echo "#!/bin/sh"
-		echo "# \$Id: svctool.in,v 2.159 2010-02-27 20:31:09+05:30 Cprogrammer Stab mbhangui $"
+		echo "# \$Id: svctool.in,v 2.160 2010-03-01 11:58:58+05:30 Cprogrammer Stab mbhangui $"
 		echo "# $prog_args"
 		echo ""
 		echo "LOGFILTER=\`cat $SERVICEDIR/qmail-smtpd.$tag/variables/LOGFILTER\`"
@@ -1999,7 +2003,7 @@ if [ " $odmr" = " " ] ; then
 		#qmail-spamlog log script
 		(
 		echo "#!/bin/sh"
-		echo "# \$Id: svctool.in,v 2.159 2010-02-27 20:31:09+05:30 Cprogrammer Stab mbhangui $"
+		echo "# \$Id: svctool.in,v 2.160 2010-03-01 11:58:58+05:30 Cprogrammer Stab mbhangui $"
 		echo "# generated on $host on `date`"
 		echo "# $prog_args"
 		echo ""
@@ -2017,7 +2021,7 @@ if [ ! -d $LOGDIR ] ; then
 fi
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.159 2010-02-27 20:31:09+05:30 Cprogrammer Stab mbhangui $"
+echo "# \$Id: svctool.in,v 2.160 2010-03-01 11:58:58+05:30 Cprogrammer Stab mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -2085,7 +2089,7 @@ fi
 
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.159 2010-02-27 20:31:09+05:30 Cprogrammer Stab mbhangui $"
+echo "# \$Id: svctool.in,v 2.160 2010-03-01 11:58:58+05:30 Cprogrammer Stab mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -2108,7 +2112,7 @@ if [ ! -d $LOGDIR ] ; then
 fi
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.159 2010-02-27 20:31:09+05:30 Cprogrammer Stab mbhangui $"
+echo "# \$Id: svctool.in,v 2.160 2010-03-01 11:58:58+05:30 Cprogrammer Stab mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -2187,7 +2191,7 @@ else
 fi
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.159 2010-02-27 20:31:09+05:30 Cprogrammer Stab mbhangui $"
+echo "# \$Id: svctool.in,v 2.160 2010-03-01 11:58:58+05:30 Cprogrammer Stab mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -2242,7 +2246,7 @@ fi
 # qmail-imapd log script
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.159 2010-02-27 20:31:09+05:30 Cprogrammer Stab mbhangui $"
+echo "# \$Id: svctool.in,v 2.160 2010-03-01 11:58:58+05:30 Cprogrammer Stab mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -2521,7 +2525,7 @@ else
 fi
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.159 2010-02-27 20:31:09+05:30 Cprogrammer Stab mbhangui $"
+echo "# \$Id: svctool.in,v 2.160 2010-03-01 11:58:58+05:30 Cprogrammer Stab mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -2575,7 +2579,7 @@ fi
 # qmail-pop3d log script
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.159 2010-02-27 20:31:09+05:30 Cprogrammer Stab mbhangui $"
+echo "# \$Id: svctool.in,v 2.160 2010-03-01 11:58:58+05:30 Cprogrammer Stab mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -2773,7 +2777,7 @@ fi
 echo 1 > $conf_dir/MYSQL_OPT_RECONNECT
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.159 2010-02-27 20:31:09+05:30 Cprogrammer Stab mbhangui $"
+echo "# \$Id: svctool.in,v 2.160 2010-03-01 11:58:58+05:30 Cprogrammer Stab mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -2801,7 +2805,7 @@ fi
 # indisrvr log script
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.159 2010-02-27 20:31:09+05:30 Cprogrammer Stab mbhangui $"
+echo "# \$Id: svctool.in,v 2.160 2010-03-01 11:58:58+05:30 Cprogrammer Stab mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -2825,7 +2829,7 @@ conf_dir="$DESTDIR"$SERVICEDIR/qscanq/variables
 # qscanq script
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.159 2010-02-27 20:31:09+05:30 Cprogrammer Stab mbhangui $"
+echo "# \$Id: svctool.in,v 2.160 2010-03-01 11:58:58+05:30 Cprogrammer Stab mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -2847,7 +2851,7 @@ fi
 # qscanq log script
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.159 2010-02-27 20:31:09+05:30 Cprogrammer Stab mbhangui $"
+echo "# \$Id: svctool.in,v 2.160 2010-03-01 11:58:58+05:30 Cprogrammer Stab mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -2864,7 +2868,7 @@ conf_dir="$DESTDIR"$SERVICEDIR/clamd/variables
 # clamd script
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.159 2010-02-27 20:31:09+05:30 Cprogrammer Stab mbhangui $"
+echo "# \$Id: svctool.in,v 2.160 2010-03-01 11:58:58+05:30 Cprogrammer Stab mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -2901,7 +2905,7 @@ fi
 # clamd log script
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.159 2010-02-27 20:31:09+05:30 Cprogrammer Stab mbhangui $"
+echo "# \$Id: svctool.in,v 2.160 2010-03-01 11:58:58+05:30 Cprogrammer Stab mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -2916,7 +2920,7 @@ conf_dir="$DESTDIR"$SERVICEDIR/freshclam/variables
 # freshclam script
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.159 2010-02-27 20:31:09+05:30 Cprogrammer Stab mbhangui $"
+echo "# \$Id: svctool.in,v 2.160 2010-03-01 11:58:58+05:30 Cprogrammer Stab mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -2944,7 +2948,7 @@ fi
 # freshclam log script
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.159 2010-02-27 20:31:09+05:30 Cprogrammer Stab mbhangui $"
+echo "# \$Id: svctool.in,v 2.160 2010-03-01 11:58:58+05:30 Cprogrammer Stab mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -2970,7 +2974,7 @@ conf_dir="$DESTDIR"$SERVICEDIR/pwdlookup/variables
 mkdir -p $conf_dir
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.159 2010-02-27 20:31:09+05:30 Cprogrammer Stab mbhangui $"
+echo "# \$Id: svctool.in,v 2.160 2010-03-01 11:58:58+05:30 Cprogrammer Stab mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -2986,7 +2990,7 @@ fi
 # pwdlookup log script
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.159 2010-02-27 20:31:09+05:30 Cprogrammer Stab mbhangui $"
+echo "# \$Id: svctool.in,v 2.160 2010-03-01 11:58:58+05:30 Cprogrammer Stab mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -3086,7 +3090,7 @@ echo "inlookup" > $conf_dir/MYSQL_READ_DEFAULT_GROUP
 echo 1 > $conf_dir/MYSQL_OPT_RECONNECT
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.159 2010-02-27 20:31:09+05:30 Cprogrammer Stab mbhangui $"
+echo "# \$Id: svctool.in,v 2.160 2010-03-01 11:58:58+05:30 Cprogrammer Stab mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -3102,7 +3106,7 @@ fi
 # inlookup log script
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.159 2010-02-27 20:31:09+05:30 Cprogrammer Stab mbhangui $"
+echo "# \$Id: svctool.in,v 2.160 2010-03-01 11:58:58+05:30 Cprogrammer Stab mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -3136,7 +3140,7 @@ fi
 if [ ! -d "$DESTDIR"$databasedir/data ] ; then
 	if ( mkdir -p "$DESTDIR"$databasedir/data && mkdir -p "$DESTDIR"$databasedir/logs ) ; then
 		(
-		echo "# \$Id: svctool.in,v 2.159 2010-02-27 20:31:09+05:30 Cprogrammer Stab mbhangui $"
+		echo "# \$Id: svctool.in,v 2.160 2010-03-01 11:58:58+05:30 Cprogrammer Stab mbhangui $"
 		echo "# generated on $host on `date`"
 		echo ""
 		if [ $use_stdout -eq 1 ] ; then
@@ -3200,7 +3204,7 @@ mkdir -p "$DESTDIR"$SERVICEDIR/mysql.$port/log
 (
 mysql_version=`$mysqlPrefix/bin/mysql_config --version`
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.159 2010-02-27 20:31:09+05:30 Cprogrammer Stab mbhangui $"
+echo "# \$Id: svctool.in,v 2.160 2010-03-01 11:58:58+05:30 Cprogrammer Stab mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -3222,7 +3226,7 @@ case $mysql_version in
 	echo "--log=\$DATABASE/logs/logquery \\"
 	echo "--log-slow-queries=\$DATABASE/logs/logslow \\"
 	;;
-	5.1.12|5.2*|5.3*|5.4*|5.5*|5.5*|6.0.9*)
+	5.1.12|5.1.44|5.2*|5.3*|5.4*|5.5*|6.0.9*)
 	echo "--general-log=1 \\"
 	echo "--general-log-file=\$DATABASE/logs/logquery \\"
 	echo "--slow-query-log \\"
@@ -3248,7 +3252,7 @@ echo "--pid-file=\$PIDFILE 2>&1"
 
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.159 2010-02-27 20:31:09+05:30 Cprogrammer Stab mbhangui $"
+echo "# \$Id: svctool.in,v 2.160 2010-03-01 11:58:58+05:30 Cprogrammer Stab mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -3265,7 +3269,7 @@ fi
 # mysql log script
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.159 2010-02-27 20:31:09+05:30 Cprogrammer Stab mbhangui $"
+echo "# \$Id: svctool.in,v 2.160 2010-03-01 11:58:58+05:30 Cprogrammer Stab mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -3510,13 +3514,15 @@ mysql_version=`$mysqlPrefix/bin/mysql_config --version`
 if [ " $model" = " small" ] ; then
 	case $mysql_version in
 	6.0.9-alpha)
-	cat $mysqlPrefix/share/mysql/my-small.cnf | sed -e 's{#log-bin=mysql-bin{log-bin=@indimaildir@/mysqldb/logs/mysql-bin{g' \
+	cat $mysqlPrefix/share/mysql/my-small.cnf | sed \
+		-e 's{#log-bin=mysql-bin{log-bin=@indimaildir@/mysqldb/logs/mysql-bin{g' \
 		-e 's{skip-federated{#skip-federated{g' \
 		-e "s{port		= 3306{port		= $mysql_port{g" \
 		-e "s{socket		= .*\${socket        = $mysql_socket{g"
 	;;
 	*)
-	cat $mysqlPrefix/share/mysql/my-small.cnf | sed -e 's{#log-bin=mysql-bin{log-bin=@indimaildir@/mysqldb/logs/mysql-bin{g' \
+	cat $mysqlPrefix/share/mysql/my-small.cnf | sed \
+		-e 's{#log-bin=mysql-bin{log-bin=@indimaildir@/mysqldb/logs/mysql-bin{g' \
 		-e "s{port		= 3306{port		= $mysql_port{g" \
 		-e "s{socket		= .*\${socket        = $mysql_socket{g"
 	;;
@@ -3524,13 +3530,16 @@ if [ " $model" = " small" ] ; then
 elif [ " $model" = " medium" ] ; then
 	case $mysql_version in
 	6.0.9-alpha)
-	cat $mysqlPrefix/share/mysql/my-medium.cnf | sed -e 's{log-bin=mysql-bin{log-bin=@indimaildir@/mysqldb/logs/mysql-bin{g' \
+	cat $mysqlPrefix/share/mysql/my-medium.cnf | sed \
+		-e 's{log-bin=mysql-bin{log-bin=@indimaildir@/mysqldb/logs/mysql-bin{g' \
 		-e 's{skip-federated{#skip-federated{g' \
 		-e "s{port		= 3306{port		= $mysql_port{g" \
 		-e "s{socket		= .*\${socket        = $mysql_socket{g"
 	;;
 	*)
-	cat $mysqlPrefix/share/mysql/my-medium.cnf | sed -e 's{log-bin=mysql-bin{log-bin=@indimaildir@/mysqldb/logs/mysql-bin{g' \
+	cat $mysqlPrefix/share/mysql/my-medium.cnf | sed \
+		-e 's{log-bin=mysql-bin{log-bin=@indimaildir@/mysqldb/logs/mysql-bin{g' \
+		-e "s{skip-locking{skip-external-locking{g" \
 		-e "s{port		= 3306{port		= $mysql_port{g" \
 		-e "s{socket		= .*\${socket        = $mysql_socket{g"
 	;;
@@ -3539,29 +3548,35 @@ elif [ " $model" = " large" ] ; then
 	if [ " $no_of_cpu" = " " ] ; then
 		case $mysql_version in
 		6.0.9-alpha)
-		cat $mysqlPrefix/share/mysql/my-medium.cnf | sed -e 's{log-bin=mysql-bin{log-bin=@indimaildir@/mysqldb/logs/mysql-bin{g' \
+		cat $mysqlPrefix/share/mysql/my-medium.cnf | sed \
+			-e 's{log-bin=mysql-bin{log-bin=@indimaildir@/mysqldb/logs/mysql-bin{g' \
 			-e 's{skip-federated{#skip-federated{g' \
 			-e "s{port		= 3306{port		= $mysql_port{g" \
 			-e "s{socket		= .*\${socket        = $mysql_socket{g"
 		;;
 		*)
-		cat $mysqlPrefix/share/mysql/my-medium.cnf | sed -e 's{log-bin=mysql-bin{log-bin=@indimaildir@/mysqldb/logs/mysql-bin{g' \
-		-e "s{port		= 3306{port		= $mysql_port{g" \
-		-e "s{socket		= .*\${socket        = $mysql_socket{g"
+		cat $mysqlPrefix/share/mysql/my-medium.cnf | sed \
+			-e 's{log-bin=mysql-bin{log-bin=@indimaildir@/mysqldb/logs/mysql-bin{g' \
+			-e "s{skip-locking{skip-external-locking{g" \
+			-e "s{port		= 3306{port		= $mysql_port{g" \
+			-e "s{socket		= .*\${socket        = $mysql_socket{g"
 		;;
 		esac
 	else
 		thr_con=`expr $no_of_cpu * 2`
 		case $mysql_version in
 		6.0.9-alpha)
-		cat $mysqlPrefix/share/mysql/my-large.cnf | sed -e 's{log-bin=mysql-bin{log-bin=@indimaildir@/mysqldb/logs/mysql-bin{g' \
+		cat $mysqlPrefix/share/mysql/my-large.cnf | sed \
+			-e 's{log-bin=mysql-bin{log-bin=@indimaildir@/mysqldb/logs/mysql-bin{g' \
 			-e 's/thread_concurrency = 8/thread_concurrency=$thr_con/g' \
 			-e 's{skip-federated{#skip-federated{g' \
 			-e "s{port		= 3306{port		= $mysql_port{g" \
 			-e "s{socket		= .*\${socket        = $mysql_socket{g"
 		;;
 		*)
-		cat $mysqlPrefix/share/mysql/my-large.cnf | sed -e 's{log-bin=mysql-bin{log-bin=@indimaildir@/mysqldb/logs/mysql-bin{g' \
+		cat $mysqlPrefix/share/mysql/my-large.cnf | sed \
+			-e 's{log-bin=mysql-bin{log-bin=@indimaildir@/mysqldb/logs/mysql-bin{g' \
+			-e "s{skip-locking{skip-external-locking{g" \
 			-e 's/thread_concurrency = 8/thread_concurrency=$thr_con/g' \
 			-e "s{port		= 3306{port		= $mysql_port{g" \
 			-e "s{socket		= .*\${socket        = $mysql_socket{g"
@@ -3572,13 +3587,16 @@ elif [ " $model" = " huge" ] ; then
 	if [ " $no_of_cpu" = " " ] ; then
 		case $mysql_version in
 		6.0.9-alpha)
-		cat $mysqlPrefix/share/mysql/my-huge.cnf | sed -e 's{log-bin=mysql-bin{log-bin=@indimaildir@/mysqldb/logs/mysql-bin{g' \
+		cat $mysqlPrefix/share/mysql/my-huge.cnf | sed \
+			-e 's{log-bin=mysql-bin{log-bin=@indimaildir@/mysqldb/logs/mysql-bin{g' \
 			-e 's{skip-federated{#skip-federated{g' \
 			-e "s{port		= 3306{port		= $mysql_port{g" \
 			-e "s{socket		= .*\${socket        = $mysql_socket{g"
 		;;
 		*)
-		cat $mysqlPrefix/share/mysql/my-huge.cnf | sed -e 's{log-bin=mysql-bin{log-bin=@indimaildir@/mysqldb/logs/mysql-bin{g' \
+		cat $mysqlPrefix/share/mysql/my-huge.cnf | sed \
+			-e 's{log-bin=mysql-bin{log-bin=@indimaildir@/mysqldb/logs/mysql-bin{g' \
+			-e "s{skip-locking{skip-external-locking{g" \
 			-e "s{port		= 3306{port		= $mysql_port{g" \
 			-e "s{socket		= .*\${socket        = $mysql_socket{g"
 		;;
@@ -3587,14 +3605,17 @@ elif [ " $model" = " huge" ] ; then
 		thr_con=`expr $no_of_cpu * 2`
 		case $mysql_version in
 		6.0.9-alpha)
-		cat $mysqlPrefix/share/mysql/my-huge.cnf | sed -e 's{log-bin=mysql-bin{log-bin=@indimaildir@/mysqldb/logs/mysql-bin{g' \
+		cat $mysqlPrefix/share/mysql/my-huge.cnf | sed \
+			-e 's{log-bin=mysql-bin{log-bin=@indimaildir@/mysqldb/logs/mysql-bin{g' \
 			-e 's/thread_concurrency = 8/thread_concurrency=$thr_con/g' \
 			-e 's{skip-federated{#skip-federated{g' \
 			-e "s{port		= 3306{port		= $mysql_port{g" \
 			-e "s{socket		= .*\${socket        = $mysql_socket{g"
 		;;
 		*)
-		cat $mysqlPrefix/share/mysql/my-huge.cnf | sed -e 's{log-bin=mysql-bin{log-bin=@indimaildir@/mysqldb/logs/mysql-bin{g' \
+		cat $mysqlPrefix/share/mysql/my-huge.cnf | sed \
+			-e 's{log-bin=mysql-bin{log-bin=@indimaildir@/mysqldb/logs/mysql-bin{g' \
+			-e "s{skip-locking{skip-external-locking{g" \
 			-e 's/thread_concurrency = 8/thread_concurrency=$thr_con/g' \
 			-e "s{port		= 3306{port		= $mysql_port{g" \
 			-e "s{socket		= .*\${socket        = $mysql_socket{g"
@@ -3643,7 +3664,7 @@ fi
 # svscan log script
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.159 2010-02-27 20:31:09+05:30 Cprogrammer Stab mbhangui $"
+echo "# \$Id: svctool.in,v 2.160 2010-03-01 11:58:58+05:30 Cprogrammer Stab mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -3754,7 +3775,7 @@ case "$dkverify_option" in
 esac
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.159 2010-02-27 20:31:09+05:30 Cprogrammer Stab mbhangui $"
+echo "# \$Id: svctool.in,v 2.160 2010-03-01 11:58:58+05:30 Cprogrammer Stab mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -3776,7 +3797,7 @@ fi
 # fetchmail log script
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.159 2010-02-27 20:31:09+05:30 Cprogrammer Stab mbhangui $"
+echo "# \$Id: svctool.in,v 2.160 2010-03-01 11:58:58+05:30 Cprogrammer Stab mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -3848,7 +3869,7 @@ else
 fi
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.159 2010-02-27 20:31:09+05:30 Cprogrammer Stab mbhangui $"
+echo "# \$Id: svctool.in,v 2.160 2010-03-01 11:58:58+05:30 Cprogrammer Stab mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -3889,7 +3910,7 @@ fi
 # qmail-poppass log script
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.159 2010-02-27 20:31:09+05:30 Cprogrammer Stab mbhangui $"
+echo "# \$Id: svctool.in,v 2.160 2010-03-01 11:58:58+05:30 Cprogrammer Stab mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -4085,7 +4106,7 @@ case "$dksign_option" in
 esac
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.159 2010-02-27 20:31:09+05:30 Cprogrammer Stab mbhangui $"
+echo "# \$Id: svctool.in,v 2.160 2010-03-01 11:58:58+05:30 Cprogrammer Stab mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -4102,7 +4123,7 @@ fi
 mkdir -p "$DESTDIR"$SERVICEDIR/qmail-send."$tag"/log
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.159 2010-02-27 20:31:09+05:30 Cprogrammer Stab mbhangui $"
+echo "# \$Id: svctool.in,v 2.160 2010-03-01 11:58:58+05:30 Cprogrammer Stab mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -5950,7 +5971,7 @@ while test $# -gt 0; do
 	;;
 
     --version)
-	echo "\$Id: svctool.in,v 2.159 2010-02-27 20:31:09+05:30 Cprogrammer Stab mbhangui $"
+	echo "\$Id: svctool.in,v 2.160 2010-03-01 11:58:58+05:30 Cprogrammer Stab mbhangui $"
 	prog_args=""
 	exit 0
 	;;
