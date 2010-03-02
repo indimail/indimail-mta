@@ -1,5 +1,8 @@
 /*
  * $Log: deluser.c,v $
+ * Revision 2.26  2010-03-02 08:17:32+05:30  Cprogrammer
+ * changed Username xxx@yyy does not exist to xxx@yyy: No such user
+ *
  * Revision 2.25  2009-10-14 20:42:48+05:30  Cprogrammer
  * check return status of parse_quota()
  *
@@ -131,7 +134,7 @@
 #endif
 
 #ifndef	lint
-static char     sccsid[] = "$Id: deluser.c,v 2.25 2009-10-14 20:42:48+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: deluser.c,v 2.26 2010-03-02 08:17:32+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 /*-
@@ -224,7 +227,7 @@ vdeluser(char *user, char *domain, int remove_db)
 			} else
 			{
 				if (userNotFound)
-					error_stack(stderr, "Username %s@%s does not exist\n", user, real_domain);
+					error_stack(stderr, "%s@%s: No such user\n", user, real_domain);
 				else
 					error_stack(stderr, "Error connecting to db\n");
 				return (-1);
@@ -240,7 +243,7 @@ vdeluser(char *user, char *domain, int remove_db)
 		if (!(passent = vauth_getpw(user, real_domain)))
 		{
 			if (userNotFound)
-				error_stack(stderr, "Username %s@%s does not exist\n", user, real_domain);
+				error_stack(stderr, "%s@%s: No such user\n", user, real_domain);
 			else
 				error_stack(stderr, "Error connecting to db\n");
 			return (-1);
@@ -382,7 +385,7 @@ vdeluser(char *user, char *domain, int remove_db)
 	{
 		if (!vget_assign(user, Dir, MAX_BUFF, &uid, &gid))
 		{
-			error_stack(stderr, "Username %s does not exist\n", user);
+			error_stack(stderr, "%s: No such user\n", user);
 			return (-1);
 		}
 		if (remove_db && del_user_assign(user))

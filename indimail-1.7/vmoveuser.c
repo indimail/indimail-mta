@@ -1,5 +1,8 @@
 /*
  * $Log: vmoveuser.c,v $
+ * Revision 2.9  2010-03-02 08:18:27+05:30  Cprogrammer
+ * changed Username xxx@yyy does not exist to xxx@yyy: No such user
+ *
  * Revision 2.8  2010-02-17 14:14:24+05:30  Cprogrammer
  * added post handle
  *
@@ -78,7 +81,7 @@
 #include <sys/stat.h>
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vmoveuser.c,v 2.8 2010-02-17 14:14:24+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: vmoveuser.c,v 2.9 2010-03-02 08:18:27+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 int
@@ -165,7 +168,7 @@ main(int argc, char **argv)
 		} else
 		{
 			if(userNotFound)
-				fprintf(stderr, "Username %s@%s does not exist\n", User, real_domain);
+				fprintf(stderr, "%s@%s: No such user\n", User, real_domain);
 			else
 				fprintf(stderr, "Error connecting to db\n");
 			return (1);

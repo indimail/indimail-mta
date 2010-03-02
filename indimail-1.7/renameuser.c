@@ -1,5 +1,8 @@
 /*
  * $Log: renameuser.c,v $
+ * Revision 2.14  2010-03-02 08:18:13+05:30  Cprogrammer
+ * changed Username xxx@yyy does not exist to xxx@yyy: No such user
+ *
  * Revision 2.13  2009-10-14 20:45:26+05:30  Cprogrammer
  * use strtoll() instead of atol()
  *
@@ -44,7 +47,7 @@
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: renameuser.c,v 2.13 2009-10-14 20:45:26+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: renameuser.c,v 2.14 2010-03-02 08:18:13+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #include <ctype.h>
@@ -121,7 +124,7 @@ vrenameuser(char *oldUser, char *oldDomain, char *newUser, char *newDomain)
 		} else
 		{
 			if(userNotFound)
-				fprintf(stderr, "Old Username %s@%s does not exist\n", oldUser, real_domain);
+				fprintf(stderr, "%s@%s: No such user\n", oldUser, real_domain);
 			else
 				fprintf(stderr, "Error connecting to db\n");
 			return (-1);
@@ -141,7 +144,7 @@ vrenameuser(char *oldUser, char *oldDomain, char *newUser, char *newDomain)
 	if(!(pw = vauth_getpw(oldUser, real_domain)))
 	{
 		if(userNotFound)
-			fprintf(stderr, "Old Username %s@%s does not exist\n", oldUser, real_domain);
+			fprintf(stderr, "%s@%s: No such user\n", oldUser, real_domain);
 		else
 			fprintf(stderr, "Error connecting to db\n");
 		return (-1);
@@ -167,7 +170,7 @@ vrenameuser(char *oldUser, char *oldDomain, char *newUser, char *newDomain)
 	if(!(pw = vauth_getpw(newUser, newDomain)))
 	{
 		if(userNotFound)
-			fprintf(stderr, "Username %s@%s does not exist\n", newUser, newDomain);
+			fprintf(stderr, "%s@%s: No such user\n", newUser, newDomain);
 		else
 			fprintf(stderr, "Error connecting to db\n");
 		return (-1);

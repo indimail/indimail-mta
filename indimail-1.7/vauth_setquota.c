@@ -1,5 +1,8 @@
 /*
  * $Log: vauth_setquota.c,v $
+ * Revision 2.13  2010-03-02 08:18:20+05:30  Cprogrammer
+ * changed Username xxx@yyy does not exist to xxx@yyy: No such user
+ *
  * Revision 2.12  2009-10-14 20:46:26+05:30  Cprogrammer
  * use strtoll() instead of atol()
  *
@@ -79,7 +82,7 @@
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vauth_setquota.c,v 2.12 2009-10-14 20:46:26+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: vauth_setquota.c,v 2.13 2010-03-02 08:18:20+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #define XOPEN_SOURCE = 600
@@ -103,7 +106,7 @@ vauth_setquota(char *user, char *domain, char *quota)
 			return(1);
 	}  else
 	{
-		error_stack(stderr, "Username %s@%s does not exist\n", user, domain);
+		error_stack(stderr, "%s@%s: No such user\n", user, domain);
 		return(0);
 	}
 	if((*quota == '+') || (*quota == '-'))
