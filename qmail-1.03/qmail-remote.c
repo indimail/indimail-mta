@@ -1048,7 +1048,7 @@ tls_init()
 
 		/*
 		 * RFC 2595 section 2.4: find a matching name
-		 * * first find a match among alternative names 
+		 * first find a match among alternative names 
 		 */
 		if ((gens = X509_get_ext_d2i(peercert, NID_subject_alt_name, 0, 0)))
 		{
