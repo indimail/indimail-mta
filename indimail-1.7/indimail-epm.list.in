@@ -1,5 +1,8 @@
 #
 # $Log: indimail-epm.list.in,v $
+# Revision 2.44  2010-03-03 16:08:33+05:30  Cprogrammer
+# removed b64encode, b64decode and merged functionality in base64
+#
 # Revision 2.43  2010-03-01 15:49:20+05:30  Cprogrammer
 # advertise STARTTLS capability in IMAP and POP3
 #
@@ -829,8 +832,7 @@ f 555 root qmail ${prefix}/bin/addcr BUILDROOT${prefix}/bin/addcr
 f 555 root qmail ${prefix}/bin/altermime BUILDROOT${prefix}/bin/altermime
 f 555 root qmail ${prefix}/bin/argv0 BUILDROOT${prefix}/bin/argv0
 f 555 root qmail ${prefix}/bin/atrn BUILDROOT${prefix}/bin/atrn
-f 555 root qmail ${prefix}/bin/b64decode BUILDROOT${prefix}/bin/b64decode
-f 555 root qmail ${prefix}/bin/b64encode BUILDROOT${prefix}/bin/b64encode
+f 555 root qmail ${prefix}/bin/base64 BUILDROOT${prefix}/bin/base64
 f 555 root qmail ${prefix}/bin/batv BUILDROOT${prefix}/bin/batv
 f 555 root qmail ${prefix}/bin/bouncesaying BUILDROOT${prefix}/bin/bouncesaying
 f 555 root qmail ${prefix}/bin/cdbdump BUILDROOT${prefix}/bin/cdbdump
