@@ -1,5 +1,10 @@
 #
 # $Log: indimail.spec.in,v $
+# Revision 2.131  2010-03-03 16:06:44+05:30  Cprogrammer
+# merged base64 encode/decode in base64 utility
+# removed rcpthosts from the list of control files removed during uninstallation
+# create host.mysql control file
+#
 # Revision 2.130  2010-03-01 15:39:04+05:30  Cprogrammer
 # advertise STARTTLS in imap and pop3
 #
@@ -407,7 +412,7 @@
 # rpm spec file for indimail
 #
 #
-# $Id: indimail.spec.in,v 2.130 2010-03-01 15:39:04+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 2.131 2010-03-03 16:06:44+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %define _unpackaged_files_terminate_build 1
 
@@ -1421,7 +1426,7 @@ fi
 %attr(555,root,qmail)                   %{_prefix}/bin/xqp
 %attr(555,root,qmail)                   %{_prefix}/bin/dot-forward
 %attr(555,root,qmail)                   %{_prefix}/bin/datemail
-%attr(555,root,qmail)                   %{_prefix}/bin/b64encode
+%attr(555,root,qmail)                   %{_prefix}/bin/base64
 %attr(555,root,qmail)                   %{_prefix}/bin/rhosts
 %attr(555,root,qmail)                   %{_prefix}/bin/replier
 %attr(500,root,qmail)                   %{_prefix}/bin/qmail-cdb
@@ -1501,7 +1506,6 @@ fi
 %attr(555,root,qmail)                   %{_prefix}/bin/proxyimap
 %attr(555,root,qmail)                   %{_prefix}/bin/proxypop3
 %attr(555,root,qmail)                   %{_prefix}/bin/dnsip
-%attr(555,root,qmail)                   %{_prefix}/bin/b64decode
 %attr(555,root,qmail)                   %{_prefix}/bin/crc
 %attr(555,root,qmail)                   %{_prefix}/bin/qsmhook
 %attr(555,root,qmail)                   %{_prefix}/bin/rspamhist
@@ -2139,8 +2143,10 @@ else
 fi
 
 echo "Creating catch-all alias (%{_prefix}/alias/Maildir) for all system users"
+echo "Creating default control files"
 %{_prefix}/sbin/svctool --config=qmail --postmaster=%{_prefix}/alias/Maildir/ \
-	--default-domain=%{default_domain}
+	--default-domain=%{default_domain} --mysqlhost=localhost --mysqluser=indimail \
+	--mysqlpass=ssh-1.5- --mysqlsocket=/tmp/mysql.sock
 
 if [ %nodksignatures -eq 0 ] ; then
 	if [ -x %{_prefix}/bin/dknewkey ] ; then
@@ -2487,7 +2493,7 @@ if [ -f %{_prefix}/etc/controlfiles ] ; then
 	done
 else
 	for i in databytes defaultdelivery defaultdomain localiphost locals \
-		me nodnscheck plusdomain queue_base rcpthosts smtpgreeting signatures
+		me nodnscheck plusdomain queue_base smtpgreeting signatures
 	do
 		%{__rm} -f %{_prefix}/control/$i
 	done
