@@ -104,11 +104,9 @@ auto_uids.h
 auto_uids.o
 auto_usera.c
 auto_usera.o
-b64decode
-b64decode.o
-b64encode
-b64encode.o
+base64
 base64.o
+base64sub.o
 binm1
 binm1+df
 binm2
