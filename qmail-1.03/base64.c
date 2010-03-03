@@ -99,7 +99,7 @@ main(int argc, char **argv)
 void
 getversion_base64_c()
 {
-	static char    *x = "$Id: base64.c,v 1.7 2010-03-03 11:00:41+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: base64.c,v 1.7 2010-03-03 11:00:41+05:30 Cprogrammer Stab mbhangui $";
 
 	x++;
 }
