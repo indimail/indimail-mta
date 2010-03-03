@@ -1,167 +1,102 @@
 /*
  * $Log: base64.c,v $
- * Revision 1.5  2004-10-22 20:18:37+05:30  Cprogrammer
+ * Revision 1.6  2010-03-03 09:34:09+05:30  Cprogrammer
+ * renamed b64encode to base64, combining encoding and decoding
+ *
+ * Revision 1.5  2004-10-22 20:18:29+05:30  Cprogrammer
  * added RCS id
  *
- * Revision 1.4  2004-09-19 14:36:11+05:30  Cprogrammer
- * corrected number of bytes in stralloc variable 'out'
- *
- * Revision 1.3  2004-07-30 17:36:47+05:30  Cprogrammer
- * fixed bugs in b64decode()
- *
- * Revision 1.2  2004-07-17 21:16:27+05:30  Cprogrammer
+ * Revision 1.4  2004-07-17 21:16:25+05:30  Cprogrammer
  * added RCS log
  *
  */
-#include "base64.h"
+#include <unistd.h>
 #include "stralloc.h"
-#include "substdio.h"
-#include "str.h"
+#include "base64.h"
+#include "getln.h"
+#include "sgetopt.h"
+#include "error.h"
 
-static char    *b64alpha = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
-#define B64PAD '='
+static char     ssinbuf[1024];
+static substdio ssin = SUBSTDIO_FDBUF(read, 0, ssinbuf, sizeof ssinbuf);
+static char     ssoutbuf[512];
+static substdio ssout = SUBSTDIO_FDBUF(write, 1, ssoutbuf, sizeof ssoutbuf);
+static char     sserrbuf[512];
+static substdio sserr = SUBSTDIO_FDBUF(write, 2, sserrbuf, sizeof(sserrbuf));
 
-/*
- * returns 0 ok, 1 illegal, -1 problem 
- */
-
-int
-b64decode(in, l, out)
-	const unsigned char *in;
-	int             l;
-	stralloc       *out;		/*- not null terminated */
+void
+logerr(char *s)
 {
-	int             p = 0;
-	int             n;
-	unsigned int    x;
-	int             i, j;
-	char           *s;
-	unsigned char   b[3];
+	if (substdio_puts(&sserr, s) == -1)
+		_exit(1);
+}
 
-	if (l == 0)
+void
+logerrf(char *s)
+{
+	if (substdio_puts(&sserr, s) == -1)
+		_exit(1);
+	if (substdio_flush(&sserr) == -1)
+		_exit(1);
+}
+
+void
+my_error(char *s1, char *s2, int exit_val)
+{
+	logerr(s1);
+	logerr(": ");
+	if (s2)
 	{
-		if (!stralloc_copys(out, ""))
-			return -1;
-		return 0;
+		logerr(s2);
+		logerr(": ");
 	}
-	while (in[l - 1] == B64PAD)
-	{
-		p++;
-		l--;
-	}
-	n = (l + p) / 4;
-	out->len = (n * 3) - p;
-	if (!stralloc_ready(out, out->len))
-		return -1;
-	s = out->s;
-	for (i = 0; i < n - 1; i++)
-	{
-		x = 0;
-		for (j = 0; j < 4; j++)
-		{
-			if (in[j] >= 'A' && in[j] <= 'Z')
-				x = (x << 6) + (unsigned int) (in[j] - 'A' + 0);
-			else
-			if (in[j] >= 'a' && in[j] <= 'z')
-				x = (x << 6) + (unsigned int) (in[j] - 'a' + 26);
-			else
-			if (in[j] >= '0' && in[j] <= '9')
-				x = (x << 6) + (unsigned int) (in[j] - '0' + 52);
-			else
-			if (in[j] == '+')
-				x = (x << 6) + 62;
-			else
-			if (in[j] == '/')
-				x = (x << 6) + 63;
-			else
-			if (in[j] == '=')
-				x = (x << 6);
-		}
-		s[2] = (unsigned char) (x & 255);
-		x >>= 8;
-		s[1] = (unsigned char) (x & 255);
-		x >>= 8;
-		s[0] = (unsigned char) (x & 255);
-		x >>= 8;
-		s += 3;
-		in += 4;
-	}
-	x = 0;
-	for (j = 0; j < 4; j++)
-	{
-		if (in[j] >= 'A' && in[j] <= 'Z')
-			x = (x << 6) + (unsigned int) (in[j] - 'A' + 0);
-		else
-		if (in[j] >= 'a' && in[j] <= 'z')
-			x = (x << 6) + (unsigned int) (in[j] - 'a' + 26);
-		else
-		if (in[j] >= '0' && in[j] <= '9')
-			x = (x << 6) + (unsigned int) (in[j] - '0' + 52);
-		else
-		if (in[j] == '+')
-			x = (x << 6) + 62;
-		else
-		if (in[j] == '/')
-			x = (x << 6) + 63;
-		else
-		if (in[j] == '=')
-			x = (x << 6);
-	}
-	b[2] = (unsigned char) (x & 255);
-	x >>= 8;
-	b[1] = (unsigned char) (x & 255);
-	x >>= 8;
-	b[0] = (unsigned char) (x & 255);
-	x >>= 8;
-	for (i = 0; i < 3 - p; i++)
-		s[i] = b[i];
-	out->len = (n * 3) - p;
-	return 0;
+	logerr(error_str(errno));
+	logerrf("\n");
+	_exit(exit_val);
 }
 
 int
-b64encode(in, out)
-	stralloc       *in;
-	stralloc       *out;		/*- not null terminated */
+main(int argc, char **argv)
 {
-	unsigned char   a, b, c;
-	int             i;
-	char           *s;
+	int             match, opt, encode = 1, ignore_newline = 0;
+	stralloc        user = { 0 };
+	stralloc        userout = { 0 };
 
-	if (in->len == 0)
-	{
-		if (!stralloc_copys(out, ""))
-			return -1;
-		return 0;
+	while ((opt = getopt(argc, argv, "di")) != opteof) {
+		switch (opt) {
+		case 'd':
+			encode = 0;
+			break;
+		case 'i':
+			ignore_newline = 1;
+			break;
+		}
 	}
-	if (!stralloc_ready(out, in->len / 3 * 4 + 4))
-		return -1;
-	s = out->s;
-	for (i = 0; i < in->len; i += 3)
-	{
-		a = in->s[i];
-		b = i + 1 < in->len ? in->s[i + 1] : 0;
-		c = i + 2 < in->len ? in->s[i + 2] : 0;
-		*s++ = b64alpha[a >> 2];
-		*s++ = b64alpha[((a & 3) << 4) | (b >> 4)];
-		if (i + 1 >= in->len)
-			*s++ = B64PAD;
+	for (opt = -1;;) {
+		if (getln(&ssin, &user, &match, '\n') == -1)
+			my_error("base64: read", 0, 2);
+		if (!match && user.len == 0)
+			break;
+		if (ignore_newline)
+			user.len--; /*- remove new line */
+		if (encode)
+			opt = b64encode(&user, &userout);
 		else
-			*s++ = b64alpha[((b & 15) << 2) | (c >> 6)];
-
-		if (i + 2 >= in->len)
-			*s++ = B64PAD;
-		else
-			*s++ = b64alpha[c & 63];
+			opt = b64decode((const unsigned char *) user.s, user.len, &userout);
+		if (substdio_bput(&ssout, userout.s, userout.len) == -1)
+			my_error("base64: write", 0, 3);
+		if (substdio_bput(&ssout, "\n", 1))
+			my_error("base64: write", 0, 3);
+		if (substdio_flush(&ssout) == -1)
+			my_error("base64: write", 0, 3);
 	}
-	out->len = s - out->s;
-	return 0;
+	_exit (opt);
 }
 
 void
 getversion_base64_c()
 {
-	static char    *x = "$Id: base64.c,v 1.5 2004-10-22 20:18:37+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: base64.c,v 1.6 2010-03-03 09:34:09+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
