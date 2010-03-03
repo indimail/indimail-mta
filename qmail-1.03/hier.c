@@ -1,5 +1,8 @@
 /*
  * $Log: hier.c,v $
+ * Revision 1.134  2010-03-03 11:13:00+05:30  Cprogrammer
+ * added base64 man page
+ *
  * Revision 1.133  2010-03-03 11:01:46+05:30  Cprogrammer
  * merged base64 encoding/decoding in one utility - base64
  *
@@ -679,6 +682,7 @@ hier(inst_dir)
 	c(auto_qmail_home, "man/man1", "fixcrio.1", auto_uido, auto_gidq, 0444);
 	c(auto_qmail_home, "man/man1", "recordio.1", auto_uido, auto_gidq, 0444);
 	c(auto_qmail_home, "man/man1", "uacl.1", auto_uido, auto_gidq, 0444);
+	c(auto_qmail_home, "man/man1", "base64.1", auto_uido, auto_gidq, 0444);
 	c(auto_qmail_home, "man/man1", "fastforward.1", auto_uido, auto_gidq, 0444);
 	c(auto_qmail_home, "man/cat1", "fastforward.0", auto_uido, auto_gidq, 0444);
 	c(auto_qmail_home, "man/man1", "printforward.1", auto_uido, auto_gidq, 0444);
@@ -1010,7 +1014,7 @@ hier(inst_dir)
 void
 getversion_install_big_c()
 {
-	static char    *x = "$Id: hier.c,v 1.133 2010-03-03 11:01:46+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: hier.c,v 1.134 2010-03-03 11:13:00+05:30 Cprogrammer Stab mbhangui $";
 
 #ifdef INDIMAIL
 	x = sccsidh;
