@@ -1,5 +1,8 @@
 /*
  * $Log: hier.c,v $
+ * Revision 1.133  2010-03-03 11:01:46+05:30  Cprogrammer
+ * merged base64 encoding/decoding in one utility - base64
+ *
  * Revision 1.132  2010-02-28 11:44:26+05:30  Cprogrammer
  * added directory etc
  *
@@ -1007,7 +1010,7 @@ hier(inst_dir)
 void
 getversion_install_big_c()
 {
-	static char    *x = "$Id: hier.c,v 1.132 2010-02-28 11:44:26+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: hier.c,v 1.133 2010-03-03 11:01:46+05:30 Cprogrammer Exp mbhangui $";
 
 #ifdef INDIMAIL
 	x = sccsidh;
