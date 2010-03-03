@@ -200,9 +200,9 @@ auto_usera.o: \
 compile auto_usera.c
 	./compile auto_usera.c
 
-base64.o: \
-compile base64.c base64.h stralloc.h substdio.h str.h
-	./compile base64.c
+base64sub.o: \
+compile base64sub.c base64.h stralloc.h substdio.h str.h
+	./compile base64sub.c
 
 binm1: \
 binm1.sh conf-qmail
@@ -1160,8 +1160,8 @@ qmail-pop3d qmail-popbull qmail-popup qmail-qmqpc qmail-qmqpd qmail-qmtpd \
 qmail-smtpd sendmail tcp-env qmail-newmrh qmail-recipients qmail-cdb qmailconfig \
 config-fast dnscname dnsptr dnsip dnsmxip dnsfq dnstxt hostname ipmeprint qreceipt \
 qsmhook forward rrforward preline condredirect bouncesaying except qmail-todo \
-queue-fix idedit setup instcheck rpmattr maildir2mbox qmaildirmake maildirwatch b64encode \
-plainencode b64decode maildirdeliver qmail-autoresponder qmail-rm qail elq pinq etrn \
+queue-fix idedit setup instcheck rpmattr maildir2mbox qmaildirmake maildirwatch base64 \
+plainencode maildirdeliver qmail-autoresponder qmail-rm qail elq pinq etrn \
 atrn qmailctl indimail.plist svscanboot upstart qmail-sighup qmail-sigalrm qmail-sigterm \
 home home+df proc proc+df binm1 binm1+df binm2 binm2+df \
 binm3 binm3+df spfquery multirotate qpq 822header qmail-nullqueue \
@@ -2128,14 +2128,14 @@ dk-filter.8: dk-filter.9
 	> dk-filter.8
 
 qmail-remote: \
-load qmail-remote.o control.o constmap.o timeoutread.o timeoutwrite.o base64.o \
+load qmail-remote.o control.o constmap.o timeoutread.o timeoutwrite.o base64sub.o \
 timeoutconn.o tcpto.o now.o dns.o ip.o ipalloc.o strsalloc.o ipme.o quote.o variables.o \
 socket_ip4loopback.o socket_v6loopback.o socket_v6any.o \
 ndelay.a case.a sig.a open.a lock.a seek.a getln.a stralloc.a alloc.a \
 socket_v4mappedprefix.o scan_xlong.o socket_tcp.o socket_tcp6.o \
 substdio.a error.a str.a fs.a cdb.a auto_qmail.o envread.o dns.lib socket.lib error_str.o \
 tls.lib
-	./load qmail-remote control.o constmap.o timeoutread.o base64.o \
+	./load qmail-remote control.o constmap.o timeoutread.o base64sub.o \
 	timeoutwrite.o timeoutconn.o tcpto.o now.o dns.o ip.o scan_xlong.o \
 	socket_ip4loopback.o socket_v6loopback.o socket_v6any.o ipalloc.o \
 	socket_v4mappedprefix.o strsalloc.o ipme.o quote.o \
@@ -2280,7 +2280,7 @@ timeoutwrite.o ip.o ipme.o ipalloc.o strsalloc.o control.o etrn.o atrn.o constma
 received.o date822fmt.o wildmat.o now.o qmail.o variables.o cdb.a fd.a \
 wait.a datetime.a getln.a envrules.o bodycheck.o sqlmatch.o matchregex.o \
 scan_xlong.o socket_v4mappedprefix.o socket_v6any.o \
-open.a sig.a case.a spf.o dns.o auto_qmail.o auto_uids.o base64.o qregex_smtpd.o \
+open.a sig.a case.a spf.o dns.o auto_qmail.o auto_uids.o base64sub.o qregex_smtpd.o \
 tablematch.o ndelay.o ndelay_off.o greylist.o auto_break.o \
 env.a stralloc.a alloc.a substdio.a error.a str.a fs.a lock.a \
 socket.lib tai.lib dns.lib indimail.lib tls.lib
@@ -2289,7 +2289,7 @@ socket.lib tai.lib dns.lib indimail.lib tls.lib
 	received.o date822fmt.o wildmat.o now.o qmail.o variables.o \
 	envrules.o bodycheck.o spf.o dns.o auto_qmail.o sqlmatch.o matchregex.o \
 	scan_xlong.o socket_v4mappedprefix.o socket_v6any.o \
-	auto_uids.o base64.o qregex_smtpd.o tablematch.o ndelay.o ndelay_off.o \
+	auto_uids.o base64sub.o qregex_smtpd.o tablematch.o ndelay.o ndelay_off.o \
 	cdb.a fd.a wait.a datetime.a greylist.o auto_break.o \
 	getln.a open.a sig.a case.a env.a stralloc.a alloc.a substdio.a error.a \
 	str.a fs.a lock.a `cat socket.lib tai.lib dns.lib indimail.lib tls.lib`
@@ -3156,28 +3156,22 @@ scan.h auto_split.h auto_uids.h tcpto.h
 	./compile queue-fix.c
 
 plainencode: \
-load plainencode.o base64.o stralloc.a alloc.a error.o str.a
-	./load plainencode base64.o stralloc.a alloc.a error.o str.a
+load plainencode.o base64sub.o stralloc.a alloc.a error.o str.a
+	./load plainencode base64sub.o stralloc.a alloc.a error.o str.a
 
 plainencode.o: \
 compile plainencode.c stralloc.h base64.h
 	./compile plainencode.c
 
-b64encode: \
-load b64encode.o base64.o stralloc.a alloc.a error.o str.a
-	./load b64encode base64.o stralloc.a alloc.a error.o str.a
+base64: \
+load base64.o base64sub.o sgetopt.o subgetopt.o error_str.o getln.o getln2.o \
+substdio.a stralloc.a alloc.a error.o str.a
+	./load base64 base64sub.o sgetopt.o subgetopt.o error_str.o getln.o getln2.o \
+	substdio.a stralloc.a alloc.a error.o str.a
 
-b64encode.o: \
-compile b64encode.c stralloc.h base64.h
-	./compile b64encode.c
-
-b64decode: \
-load b64decode.o base64.o stralloc.a alloc.a error.o str.a
-	./load b64decode base64.o stralloc.a alloc.a error.o str.a
-
-b64decode.o: \
-compile b64decode.c stralloc.h base64.h
-	./compile b64decode.c
+base64.o: \
+compile base64.c stralloc.h base64.h sgetopt.h getln.h error.h
+	./compile base64.c
 
 maildirdeliver: \
 load maildirdeliver.o now.o envread.o substdio.a strerr.a error.a fs.a \
@@ -3836,11 +3830,11 @@ exit.h
 	./compile iftocc.c
 
 ofmipd: load ofmipd.o rewritehost.o rwhconfig.o sconfig.o qmail.o auto_qmail.o \
-timeoutread.o timeoutwrite.o commands.o base64.o now.o env.a cdb.a mess822.a \
+timeoutread.o timeoutwrite.o commands.o base64sub.o now.o env.a cdb.a mess822.a \
 libtai.a getln.a strerr.a substdio.a stralloc.a alloc.a error.a \
 case.a str.a fs.a open.a wait.a sig.a fd.a
 	./load ofmipd rewritehost.o rwhconfig.o sconfig.o qmail.o \
-	auto_qmail.o timeoutread.o timeoutwrite.o commands.o base64.o now.o env.a \
+	auto_qmail.o timeoutread.o timeoutwrite.o commands.o base64sub.o now.o env.a \
 	cdb.a mess822.a libtai.a getln.a strerr.a substdio.a \
 	stralloc.a alloc.a error.a case.a str.a fs.a open.a wait.a \
 	sig.a fd.a 
