@@ -52,8 +52,6 @@ auto-uid
 auto_uids.c
 auto_uids.h
 auto_usera.c
-b64decode
-b64encode
 batv
 binm1
 binm1+df
