@@ -1,5 +1,8 @@
 /*
  * $Log: base64.c,v $
+ * Revision 1.7  2010-03-03 11:00:41+05:30  Cprogrammer
+ * remove newline
+ *
  * Revision 1.6  2010-03-03 09:34:09+05:30  Cprogrammer
  * renamed b64encode to base64, combining encoding and decoding
  *
@@ -77,7 +80,7 @@ main(int argc, char **argv)
 			my_error("base64: read", 0, 2);
 		if (!match && user.len == 0)
 			break;
-		if (ignore_newline)
+		if (match && ignore_newline)
 			user.len--; /*- remove new line */
 		if (encode)
 			opt = b64encode(&user, &userout);
@@ -96,7 +99,7 @@ main(int argc, char **argv)
 void
 getversion_base64_c()
 {
-	static char    *x = "$Id: base64.c,v 1.6 2010-03-03 09:34:09+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: base64.c,v 1.7 2010-03-03 11:00:41+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
