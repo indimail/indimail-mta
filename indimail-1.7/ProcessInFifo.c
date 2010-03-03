@@ -1,7 +1,7 @@
 /*
  * $Log: ProcessInFifo.c,v $
  * Revision 2.29  2010-02-26 10:52:11+05:30  Cprogrammer
- * host host.mysql if host.cntrl is not present
+ * use host.mysql if host.cntrl is not present
  *
  * Revision 2.28  2009-09-23 21:22:24+05:30  Cprogrammer
  * reconnect to hostcntrl database if connection is closed by server
