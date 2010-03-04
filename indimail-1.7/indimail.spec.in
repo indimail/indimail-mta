@@ -1,5 +1,8 @@
 #
 # $Log: indimail.spec.in,v $
+# Revision 2.132  2010-03-04 10:38:35+05:30  Cprogrammer
+# remove non-devel man pages in main package uninstallation
+#
 # Revision 2.131  2010-03-03 16:06:44+05:30  Cprogrammer
 # merged base64 encode/decode in base64 utility
 # removed rcpthosts from the list of control files removed during uninstallation
@@ -412,7 +415,7 @@
 # rpm spec file for indimail
 #
 #
-# $Id: indimail.spec.in,v 2.131 2010-03-03 16:06:44+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 2.132 2010-03-04 10:38:35+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %define _unpackaged_files_terminate_build 1
 
@@ -2472,11 +2475,14 @@ if [ $nscd_up -ge 1 ] ; then
 	fi
 fi
 
-echo "removing binaries, libraries, queues"
-for i in bin sbin lib queue
+echo "removing binaries, libraries, queues, man pages"
+for i in %{_prefix}/bin %{_prefix}/sbin %{_prefix}/lib %{_prefix}/queue \
+	%{_prefix}/man/man1 %{_prefix}/man/cat1 %{_prefix}/man/man5 %{_prefix}/man/cat5 \
+	%{_prefix}/man/man7 %{_prefix}/man/cat7 %{_prefix}/man/man8 %{_prefix}/man/cat8
 do
-	%{__rm} -rf %{_prefix}/$i || true
+	%{__rm} -rf $i || true
 done
+/bin/rmdir --ignore-fail-on-non-empty %{_prefix}/man 2>/dev/null
 
 echo "removing configuration"
 for i in indimail.cnf nssd.conf tcp.imap tcp.pop3 tcp.smtp clamd.conf freshclam.conf
@@ -2611,10 +2617,11 @@ echo "removing shared libraries"
 
 %postun devel
 echo "removing man pages, include files"
-for i in man include
+for i in %{_prefix}/include %{_prefix}/man/man3
 do
-	%{__rm} -rf %{_prefix}/$i || true
+	%{__rm} -rf $i || true
 done
+/bin/rmdir --ignore-fail-on-non-empty %{_prefix}/man 2>/dev/null
 echo "removing static libraries"
 %{__rm} -f %{_libdir}/libeps.a
 %{__rm} -f %{_libdir}/libcdb.a
