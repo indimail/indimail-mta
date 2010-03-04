@@ -81,6 +81,7 @@ Start IndiMail Services
 -----------------------
    Review the email in @indimaildir@/alias/.qmail-postmaster, before starting services
 
+   % sudo /var/indimail/sbin/initsvc -on
    % sudo init q # (if your system uses traditional init)
        or
    % sudo /sbin/initctl emit qmailstart # (if your system uses upstart - ubuntu/fedora10)
@@ -100,14 +101,14 @@ Log files are creaed in /var/log/indimail/*
 How to install MySQL
 --------------------
 
-    Install MySQL 5.4.3-beta with MD5 9ea08558d51b1d56d3784028d57c2b08
+    You can download mysql-5.5.2-m2.tar.gz from dev.mysql.com
+    Install MySQL 5.5.2-m2 with MD5 cd3254f29561953ffb7c023cb1b825d2
+    (You can install MySQL 5.1.x and greater)
     current working directory /home/local/src
-
-    You can download mysql-5.4.3-beta.tar.gz from dev.mysql.com
-    % gunzip -c mysql-5.4.3-beta.tar.gz |tar xf -
-    % cd mysql-5.4.3-beta
-    % ./configure --prefix=/usr/local/mysql --enable-local-infile
-      (--prefix=/usr in case you are using the RPM from openSUSE build service)
+    % You can download mysql-5.5.2-m2.tar.gz from dev.mysql.com
+    % gunzip -c mysql-5.5.2-m2.tar.gz |tar xf -
+    % cd mysql-5.5.2-m2
+    % ./configure --prefix=@mysql_prefix@ --enable-local-infile
     % make -s DESTDIR=staging_directory
     % sudo make install-strip DESTDIR=staging_directory
     cd ..
