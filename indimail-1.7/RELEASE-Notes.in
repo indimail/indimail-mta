@@ -3,7 +3,8 @@ RELEASE NOTES
 DATE: @DATE@
 
 This is Release @version@ of IndiMail. The release has both source.tar.gz and RPMs
-
+This release adds multiple ways in which parameters for connecting to MySQL can be
+given.
 
 This release includes the following files
 
@@ -82,3 +83,13 @@ ChangeLog
 13. Use host.mysql in findhost if host.cntrl is absent
 14. use host:user:password:socket/port format in vauth_open()
 15. Return host in host:user:password:socket/port format in SqlServer()
+16. Use tcprules for opening relay only if OPEN_SMTP is defined in
+    open_smtp_relay
+17. Check value of DEBUG_LOGIN in authindi
+18. Do not remove man, include in man rpm package
+19. Advertise STARTTLS capability in IMAP, POP3 ports
+20. Changed Username xxx@yyy does not exist to xxx@yyy: No such user in
+    deluser.c, renameuser.c vauth_setquota.c vmoveuser.c
+21. Removed unsupported AUTH methods for pop3 and imap services
+22. Merged base64 encoding/decoding in one utility - base64
+23. Create a default host.mysql file in /var/indimail/control
