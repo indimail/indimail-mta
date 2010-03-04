@@ -1,4 +1,8 @@
 * Thu Mar 04 2010 mbhangui@gmail.com
+Release 1.7.1 Start 04/03/2010
+
+
+* Thu Mar 04 2010 mbhangui@gmail.com
 Release 1.7 Start 19/02/2010
 19/02/2010
 1.  BUG - install_tables to skip creating table for distributed setup
