@@ -1,5 +1,8 @@
 #
 # $Log: indimail.spec.in,v $
+# Revision 2.133  2010-03-05 11:02:37+05:30  Cprogrammer
+# error message to go to fd 2
+#
 # Revision 2.132  2010-03-04 10:38:35+05:30  Cprogrammer
 # remove non-devel man pages in main package uninstallation
 #
@@ -415,7 +418,7 @@
 # rpm spec file for indimail
 #
 #
-# $Id: indimail.spec.in,v 2.132 2010-03-04 10:38:35+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 2.133 2010-03-05 11:02:37+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %define _unpackaged_files_terminate_build 1
 
@@ -2016,7 +2019,7 @@ fi
 %verifyscript
 ID=$(id -u)
 if [ $ID -ne 0 ] ; then
-	echo "You are not root"
+	echo "You are not root" 1>&2
 	exit 1
 fi
 %{_prefix}/sbin/svctool --check-install --servicedir=%{servicedir} \
@@ -2027,7 +2030,7 @@ fi
 argv1=$1
 ID=$(id -u)
 if [ $ID -ne 0 ] ; then
-	echo "You are not root"
+	echo "You are not root" 1>&2
 	exit 1
 fi
 if [ -f %{_prefix}/sbin/initsvc ] ; then
@@ -2048,7 +2051,7 @@ fi
 argv1=$1
 ID=$(id -u)
 if [ $ID -ne 0 ] ; then
-	echo "You are not root"
+	echo "You are not root" 1>&2
 	exit 1
 fi
 # we are doing upgrade
@@ -2111,7 +2114,7 @@ fi
 argv1=$1
 ID=$(id -u)
 if [ $ID -ne 0 ] ; then
-	echo "You are not root"
+	echo "You are not root" 1>&2
 	exit 1
 fi
 if [ $argv1 -eq 2 ] ; then
@@ -2141,8 +2144,9 @@ if [ -f %{mysqlPrefix}/bin/mysql_config ] ; then
 	%{_prefix}/sbin/svctool --mysql=3306 --servicedir=%{servicedir} --mysqlPrefix=%{mysqlPrefix} \
 		--databasedir=%{_prefix}/mysqldb --config=%{_prefix}/etc/indimail.cnf --default-domain=%{default_domain} \
 		--model=small --no-of-cpu=2
+	/bin/touch %{servicedir}/mysql.3306/down
 else
-	echo "WARNING!!! Did not find mysql_config in %{mysqlPrefix}. Skipping MySQL configuration"
+	echo "WARNING!!! Did not find mysql_config in %{mysqlPrefix}. Skipping MySQL configuration" 1>&2
 fi
 
 echo "Creating catch-all alias (%{_prefix}/alias/Maildir) for all system users"
@@ -2294,7 +2298,6 @@ if [ %nofetchmail -eq 0 ] ; then
 	/bin/touch %{servicedir}/fetchmail/down
 fi
 
-/bin/touch %{servicedir}/mysql.3306/down
 if [ %nocourierimap -eq 0 ] ; then
 # IMAP/POP3
 %{_prefix}/sbin/svctool --imap=143 --servicedir=%{servicedir} --localip=0 --maxdaemons=40 \
@@ -2344,6 +2347,7 @@ fi
 if [ %noclamav -eq 0 ] ; then
 	%{_prefix}/sbin/svctool --config=clamd
 	%{_prefix}/sbin/svctool --qscanq --servicedir=%{servicedir} --clamdPrefix=%{_prefix} --scanint=200
+	/bin/touch %{servicedir}/freshclam/down
 fi
 if [ %nobogofilter -eq 0 ] ; then
 	%{_prefix}/sbin/svctool --config=bogofilter
@@ -2388,6 +2392,9 @@ if [ -f %{_prefix}/boot/rpm.init ] ; then
 fi
 
 %{_prefix}/sbin/initsvc -status
+if [ %noclamav -eq 0 ] ; then
+	%{__rm} -f %{servicedir}/freshclam/down
+fi
 if [ -f %{_sysconfdir}/event.d/svscan ] ; then
 	echo "1. Issue /sbin/initctl emit qmailstart to start services"
 	echo "2. Change your default domain in %{_prefix}/control/defaultdomain"
@@ -2414,7 +2421,7 @@ fi
 argv1=$1
 ID=$(id -u)
 if [ $ID -ne 0 ] ; then
-	echo "You are not root"
+	echo "You are not root" 1>&2
 	exit 1
 fi
 
@@ -2444,7 +2451,7 @@ fi
 argv1=$1
 ID=$(id -u)
 if [ $ID -ne 0 ] ; then
-	echo "You are not root"
+	echo "You are not root" 1>&2
 	exit 1
 fi
 # we are doing upgrade
@@ -2577,7 +2584,7 @@ fi
 argv1=$1
 ID=$(id -u)
 if [ $ID -ne 0 ] ; then
-	echo "You are not root"
+	echo "You are not root" 1>&2
 	exit 1
 fi
 #echo "Running postrans script for %{version}-%{release} : arg=$1"
