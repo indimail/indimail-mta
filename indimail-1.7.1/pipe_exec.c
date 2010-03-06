@@ -29,23 +29,23 @@ pipe_exec(char **argv, char *tmpbuf, int len)
 		fprintf(stderr, "pipe_exec: signal: %s\n", strerror(errno));
 		return (-1);
 	}
-	if(pipe(pipe_fd) == -1)
+	if (pipe(pipe_fd) == -1)
 	{
 		fprintf(stderr, "pipe_exec: pipe: %s\n", strerror(errno));
 		signal(SIGPIPE, pstat);
 		return(-1);
 	}
-	if(dup2(pipe_fd[0], 3) == -1 || dup2(pipe_fd[1], 4) == -1)
+	if (dup2(pipe_fd[0], 3) == -1 || dup2(pipe_fd[1], 4) == -1)
 	{
 		fprintf(stderr, "pipe_exec: dup2: %s\n", strerror(errno));
 		signal(SIGPIPE, pstat);
 		return(-1);
 	}
-	if(pipe_fd[0] != 3 && pipe_fd[0] != 4)
+	if (pipe_fd[0] != 3 && pipe_fd[0] != 4)
 		close(pipe_fd[0]);
-	if(pipe_fd[1] != 3 && pipe_fd[1] != 4)
+	if (pipe_fd[1] != 3 && pipe_fd[1] != 4)
 		close(pipe_fd[1]);
-	if(write(4, tmpbuf, len) != len)
+	if (write(4, tmpbuf, len) != len)
 	{
 		fprintf(stderr, "pipe_exec: %s: %s\n", argv[1], strerror(errno));
 		signal(SIGPIPE, pstat);
