@@ -1,5 +1,8 @@
 /*
  * $Log: indisrvr.c,v $
+ * Revision 2.41  2010-03-06 14:55:02+05:30  Cprogrammer
+ * return error code in ssl translate function correctly
+ *
  * Revision 2.40  2009-11-16 21:45:03+05:30  Cprogrammer
  * fix compilation when HAVE_SSL is not defined
  *
@@ -148,7 +151,7 @@
 #include "indimail.h"
 
 #ifndef lint
-static char     sccsid[] = "$Id: indisrvr.c,v 2.40 2009-11-16 21:45:03+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: indisrvr.c,v 2.41 2010-03-06 14:55:02+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef CLUSTERED_SITE
@@ -206,7 +209,7 @@ static void     SigUsr();
 static int      get_options(int argc, char **argv, char **, char **, int *);
 #ifdef HAVE_SSL
 static void     SigHup();
-void            translate(SSL *, int, int, int, unsigned int);
+int             translate(SSL *, int, int, int, unsigned int);
 #endif
 
 static char     pidFile[MAX_BUFF];
@@ -240,7 +243,7 @@ ssl_write(SSL *ssl, char *buf, int len)
 	return 0;
 }
 
-void
+int
 translate(SSL *ssl, int out, int clearout, int clearerr, unsigned int iotimeout)
 {
 	fd_set          rfds;	/*- File descriptor mask for select -*/
@@ -255,12 +258,16 @@ translate(SSL *ssl, int out, int clearout, int clearerr, unsigned int iotimeout)
 	if ((sslin = SSL_get_rfd(ssl)) == -1)
 	{
 		filewrt(3, "translate: unable to set up SSL connection\n");
-		return;
+		while ((n = ERR_get_error()))
+			filewrt(3, "translate: %s\n", ERR_error_string(n, 0));
+		return (-1);
 	}
 	if (SSL_accept(ssl) <= 0)
 	{
 		filewrt(3, "translate: unable to accept SSL connection\n");
-		return;
+		while ((n = ERR_get_error()))
+			filewrt(3, "translate: %s\n", ERR_error_string(n, 0));
+		return (-1);
 	}
 	while (!flagexitasap)
 	{
@@ -277,12 +284,12 @@ translate(SSL *ssl, int out, int clearout, int clearerr, unsigned int iotimeout)
 #endif
 				continue;
 			filewrt(3, "translate: %s\n", strerror(errno));
-			return;
+			return (-1);
 		} else
 		if (!retval)
 		{
 			filewrt(3, "translate: timeout reached without input [%ld sec]\n", timeout.tv_sec);
-			return;
+			return (-1);
 		}
 		if (FD_ISSET(sslin, &rfds))
 		{
@@ -297,8 +304,8 @@ translate(SSL *ssl, int out, int clearout, int clearerr, unsigned int iotimeout)
 			else
 			if ((r = sockwrite(out, tbuf, n)) < 0)
 			{
-				filewrt(3, "translate: unable to write to client: \n", strerror(errno));
-				return;
+				filewrt(3, "translate: unable to write to client: %s\n", strerror(errno));
+				return (-1);
 			}
 		}
 		if (FD_ISSET(clearout, &rfds))
@@ -306,15 +313,15 @@ translate(SSL *ssl, int out, int clearout, int clearerr, unsigned int iotimeout)
 			/*- data on clearout */
 			if ((n = read(clearout, tbuf, sizeof(tbuf))) < 0)
 			{
-				filewrt(3, "translate: unable to read form client: \n", strerror(errno));
-				return;
+				filewrt(3, "translate: unable to read form client: %s\n", strerror(errno));
+				return (-1);
 			} else
 			if (n == 0)
 				flagexitasap = 1;
 			if ((r = ssl_write(ssl, tbuf, n)) < 0)
 			{
-				filewrt(3, "translate: unable to write to network: \n", strerror(errno));
-				return;
+				filewrt(3, "translate: unable to write to network: %s\n", strerror(errno));
+				return (-1);
 			}
 		}
 		if (FD_ISSET(clearerr, &rfds))
@@ -322,18 +329,19 @@ translate(SSL *ssl, int out, int clearout, int clearerr, unsigned int iotimeout)
 			/*- data on clearerr */
 			if ((n = read(clearerr, tbuf, sizeof(tbuf))) < 0)
 			{
-				filewrt(3, "translate: unable to read form client: \n", strerror(errno));
-				return;
+				filewrt(3, "translate: unable to read form client: %s\n", strerror(errno));
+				return (-1);
 			} else
 			if (n == 0)
 				flagexitasap = 1;
 			if ((r = ssl_write(ssl, tbuf, n)) < 0)
 			{
-				filewrt(3, "translate: unable to write to network: \n", strerror(errno));
-				return;
+				filewrt(3, "translate: unable to write to network: %s\n", strerror(errno));
+				return (-1);
 			}
 		}
-	}
+	} /*- while (!flagexitasap) */
+	return (0);
 }
 
 SSL_CTX *
@@ -382,7 +390,7 @@ main(argc, argv)
 	int             argc;
 	char          **argv;
 {
-	int             socket_desc, pid, backlog;
+	int             n, socket_desc, pid, backlog;
 	char            pgname[MAXBUF];
 	char           *port, *ipaddr;
 	struct sockaddr_in cliaddress;
@@ -394,10 +402,10 @@ main(argc, argv)
 #ifdef HAVE_SSL
 	BIO            *sbio;
 	SSL            *ssl;
-	int             pi1[2], pi2[2], pi3[2];
+	int             r, status, retval, pi1[2], pi2[2], pi3[2];
 #endif
 
-	if(get_options(argc, argv, &ipaddr, &port, &backlog))
+	if (get_options(argc, argv, &ipaddr, &port, &backlog))
 		return(1);
 	dup2(2, 3);
 	snprintf(pidFile, MAX_BUFF, "/tmp/indiserver.%s%s.PID", ipaddr, port);
@@ -437,7 +445,7 @@ main(argc, argv)
 	close(1);
 	for (;;)
 	{
-		if((new = accept(socket_desc, (struct sockaddr *) &cliaddress, (socklen_t *) &addrlen)) == -1)
+		if ((new = accept(socket_desc, (struct sockaddr *) &cliaddress, (socklen_t *) &addrlen)) == -1)
 		{
 			switch (errno)
 			{
@@ -517,7 +525,6 @@ main(argc, argv)
 					filewrt(3, "unable to create pipe: %s\n", strerror(errno));
 					exit(1);
 				}
-				(void) signal(SIGCHLD, (void (*)()) SigChild);
 				switch (fork())
 				{
 				case 0:
@@ -538,60 +545,87 @@ main(argc, argv)
 					/*
 					 * signals are allready set in the parent 
 					 */
-					call_prg();
+					n = call_prg();
 					close(0);
 					close(1);
 					close(2);
 					close(3);
-					_exit(1);
+					_exit(n);
 				case -1:
 					filewrt(3, "%d: unable to fork: %s\n", getpid(), strerror(errno));
 					exit(1);
 				default:
-					close(pi1[0]);
-					close(pi2[1]);
-					close(pi3[1]);
-					if (!(ssl = SSL_new(ctx)))
-					{
-						long e;
-						while ((e = ERR_get_error()))
-							filewrt(3, "%d: %s\n", getpid(), ERR_error_string(e, 0));
-						filewrt(3, "%d: unable to set up SSL session\n", getpid());
-						SSL_CTX_free(ctx);
-						_exit(0);
-					}
-					SSL_CTX_free(ctx);
-					if (!(sbio = BIO_new_socket(0, BIO_NOCLOSE)))
-					{
-						filewrt(3, "%d: unable to set up BIO socket\n", getpid());
-						_exit(0);
-					}
-					SSL_set_bio(ssl, sbio, sbio); /*- cannot fail */
-					translate(ssl, pi1[1], pi2[0], pi3[0], 3600);
-					SSL_shutdown(ssl);
-					SSL_free(ssl);
-					close(0);
-					close(1);
-					close(2);
-					close(3);
-					_exit(0);
+					break;
 				} /*- switch (fork()) */
-			} else
-			{
-				call_prg();
+				close(pi1[0]);
+				close(pi2[1]);
+				close(pi3[1]);
+				if (!(ssl = SSL_new(ctx)))
+				{
+					long e;
+					while ((e = ERR_get_error()))
+						filewrt(3, "%d: %s\n", getpid(), ERR_error_string(e, 0));
+					filewrt(3, "%d: unable to set up SSL session\n", getpid());
+					SSL_CTX_free(ctx);
+					_exit(1);
+				}
+				SSL_CTX_free(ctx);
+				if (!(sbio = BIO_new_socket(0, BIO_NOCLOSE)))
+				{
+					filewrt(3, "%d: unable to set up BIO socket\n", getpid());
+					_exit(1);
+				}
+				SSL_set_bio(ssl, sbio, sbio); /*- cannot fail */
+				n = translate(ssl, pi1[1], pi2[0], pi3[0], 3600);
+				SSL_shutdown(ssl);
+				SSL_free(ssl);
+				for (retval = -1;(r = waitpid(pid, &status, WNOHANG | WUNTRACED));)
+				{
+#ifdef ERESTART
+					if (r == -1 && (errno == EINTR || errno == ERESTART))
+#else
+					if (r == -1 && errno == EINTR)
+#endif
+						continue;
+					if (WIFSTOPPED(status) || WIFSIGNALED(status))
+					{
+						if (verbose)
+							filewrt(3, "%d: killed by signal %d\n", pid, WIFSTOPPED(status) ? WSTOPSIG(status) : WTERMSIG(status));
+						retval = -1;
+					} else
+					if (WIFEXITED(status))
+					{
+						retval = WEXITSTATUS(status);
+						if (verbose)
+							filewrt(3, "%d: normal exit return status %d\n", pid, retval);
+					}
+					break;
+				} /*- for (; pid = waitpid(-1, &status, WNOHANG | WUNTRACED);) -*/
 				close(0);
 				close(1);
 				close(2);
 				close(3);
-				_exit(1);
+				if (n)
+					_exit(n);
+				if (retval)
+					_exit(retval);
+				_exit (0);
+			} else
+			{
+				n = call_prg();
+				close(0);
+				close(1);
+				close(2);
+				close(3);
+				_exit(n);
 			}
 #else
-			call_prg();
+			n = call_prg();
 			close(0);
 			close(1);
 			close(2);
 			close(3);
-			_exit(1);
+			_exit(n);
 #endif
 		default:
 			close(new);
@@ -618,7 +652,7 @@ call_prg()
 	} else
 	if (i)
 		return (1);
-	if(!fgets(buffer, sizeof(buffer) - 2, stdin))
+	if (!fgets(buffer, sizeof(buffer) - 2, stdin))
 	{
 		fprintf(stderr, "call_prg: read-cmdbuf: EOF\n");
 		return (-1);
@@ -642,19 +676,19 @@ call_prg()
 		return(-1);
 	case 0:
 		(void) signal(SIGCHLD, SIG_DFL);
-		if(!(Argv = MakeArgs(ptr)))
+		if (!(Argv = MakeArgs(ptr)))
 		{
 			fprintf(stderr, "MakeArgs failed: %s\n", strerror(errno));
 			filewrt(3, "%d: MakeArgs failed: %s\n", getpid(), strerror(errno));
 			return(-1);
 		}
-		if(checkPerm(username, adminCommands[i].name, Argv))
+		if (checkPerm(username, adminCommands[i].name, Argv))
 		{
 			fprintf(stderr, "%s: %s: %s: permission denied\n", username, adminCommands[i].name, ptr);
 			filewrt(3, "%s: %s: %s: permission denied\n", username, adminCommands[i].name, ptr);
 			exit(1);
 		}
-		if(verbose)
+		if (verbose)
 			filewrt(3, "%d: command %s Args %s\n", getpid(), adminCommands[i].name, ptr);
 		execv(adminCommands[i].name, Argv);
 		filewrt(3, "%d: %s: %s\n", getpid(), adminCommands[i].name, strerror(errno));
@@ -674,17 +708,17 @@ call_prg()
 		else
 		if (i == -1)
 			break;
-		if(WIFSTOPPED(status) || WIFSIGNALED(status))
+		if (WIFSTOPPED(status) || WIFSIGNALED(status))
 		{
-			if(verbose)
-				filewrt(3, "%d: killed by signal %d\n", getpid(), WIFSTOPPED(status) ? WSTOPSIG(status) : WTERMSIG(status));
+			if (verbose)
+				filewrt(3, "%d: killed by signal %d\n", pid, WIFSTOPPED(status) ? WSTOPSIG(status) : WTERMSIG(status));
 			retval = -1;
 		} else
 		if (WIFEXITED(status))
 		{
 			retval = WEXITSTATUS(status);
-			if(verbose)
-				filewrt(3, "%d: normal exit return status %d\n", getpid(), retval);
+			if (verbose)
+				filewrt(3, "%d: normal exit return status %d\n", pid, retval);
 		}
 		break;
 	}
@@ -693,7 +727,7 @@ call_prg()
 		if (!feof(stdin))
 			perror("fgets: stdin");
 	}
-	if(verbose)
+	if (verbose)
 		filewrt(3, "%d: return status %d\n", pid, retval);
 	printf("RETURNSTATUS%d\n", retval);
 	fflush(stdout);
@@ -702,7 +736,7 @@ call_prg()
 
 /*
  * return to parent (call_prg) for:
- *   1 - for success
+ *  0 - for success
  *  & exit for the foll.
  *  1.) Mysql Prb , 2.) Password incorrect & 3.) If the user is not present
  */
@@ -714,24 +748,24 @@ Login_User(char *username, char *pass)
 	setbuf(stdin, 0);
 	printf("Login: ");
 	fflush(stdout);
-	if(!fgets(username, MAX_BUFF - 2, stdin))
+	if (!fgets(username, MAX_BUFF - 2, stdin))
 	{
 		fprintf(stderr, "EOF username\n");
 		return(1);
 	}
-	for(ptr = username;*ptr;ptr++)
-		if(isspace((int) *ptr))
+	for (ptr = username;*ptr;ptr++)
+		if (isspace((int) *ptr))
 			*ptr = 0;
 	printf("Password: ");
 	fflush(stdout);
-	if(!fgets(pass, MAX_BUFF - 2, stdin))
+	if (!fgets(pass, MAX_BUFF - 2, stdin))
 	{
 		fprintf(stderr, "EOF password\n");
 		return(1);
 	}
-	for(ptr = pass;*ptr;ptr++)
+	for (ptr = pass;*ptr;ptr++)
 	{
-		if(isspace((int) *ptr))
+		if (isspace((int) *ptr))
 			*ptr = 0;
 	}
 	if (isDisabled(username))
@@ -740,7 +774,7 @@ Login_User(char *username, char *pass)
 		fprintf(stderr, "You are disabled\n");
 		return(1);
 	}
-	if(!(admin_pass = mgmtgetpass(username)))
+	if (!(admin_pass = mgmtgetpass(username)))
 		return(1);
 	if (*admin_pass && !pw_comp(0, (unsigned char *) admin_pass, (unsigned char *) pass, 0))
 	{
@@ -803,7 +837,7 @@ get_options(int argc, char **argv, char **ipaddr, char **port, int *backlog)
 			break;
 		}
 	}
-	if(!*ipaddr || !*port || !*backlog == -1)
+	if (!*ipaddr || !*port || !*backlog == -1)
 	{
 #ifdef HAVE_SSL
 		fprintf(stderr, "USAGE: indisrvr -i ipaddr -p port -n certfile -b backlog\n");
