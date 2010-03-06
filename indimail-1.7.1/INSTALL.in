@@ -651,14 +651,14 @@ the installation.
     multiple hosts.
 
     % sudo @indimaildir@/sbin/svctool --imap=4143 --servicedir=/service --localip=0 \
-        --query-cache --maxdaemons=150 --maxperip=25 \
+        --query-cache --maxdaemons=150 --maxperip=25 --starttls \
         --default-domain=indimail.org --memory=10485760 --proxy=143
     % sudo @indimaildir@/sbin/svctool --imap=4990 --servicedir=/service --localip=0 \
         --query-cache --maxdaemons=150 --maxperip=25 \
         --default-domain=indimail.org --memory=10485760 --proxy=143 \
         --postmaster=postmaster@indimail.org --ssl
     % sudo @indimaildir@/sbin/svctool --pop3=4110 --servicedir=/service --localip=0 \
-        --query-cache --maxdaemons=150 --maxperip=25 \
+        --query-cache --maxdaemons=150 --maxperip=25 --starttls \
         --default-domain=indimail.org --memory=10485760 --proxy=110
     % sudo @indimaildir@/sbin/svctool --pop3=4995 --servicedir=/service --localip=0 \
         --query-cache --maxdaemons=150 --maxperip=25 \
