@@ -135,7 +135,7 @@ lib_deps: configure Makefile
 	echo @auth_libs@ > lib_deps
 
 indimailbin_PROGRAMS = crc crcdiff dbinfo displaytop hashtable hostcntrl indiversion \
-	printdir proxyimap proxypop3 resetquota vacation vaddaliasdomain vadddomain \
+	printdir proxyimap proxypop3 resetquota sslerator vacation vaddaliasdomain vadddomain \
 	vadduser vadduserl valias vatrn vbulletin vcalias vcfilter vdeldomain vdeluser \
 	vdominfo vgroup vhostid vipmap vmoddomlimits vmoduser vmoveuser vpasswd vpriv \
 	vproxy vrenamedomain vrenameuser vsetuserquota vsmtp vuserinfo crypt
@@ -267,6 +267,9 @@ vhostid_LDADD = @auth_libs@
 
 indisrvr_SOURCES = indisrvr.c 
 indisrvr_LDADD = @auth_libs@ $(shell cat socket.lib 2>/dev/null)
+
+sslerator_SOURCES = sslerator.c 
+sslerator_LDADD = @auth_libs@ $(shell cat socket.lib 2>/dev/null)
 
 proxyimap_SOURCES = proxyimap.c 
 proxyimap_LDADD = @auth_libs@
@@ -506,6 +509,7 @@ SendWelcomeMail.lo: indimail.h config.h
 setsockbuf.lo: indimail.h config.h
 setuserquota.lo: indimail.h config.h
 indisrvr.lo: indimail.h config.h
+sslerator.lo: indimail.h config.h
 hostsync.lo: indimail.h config.h
 signal_process.lo: indimail.h config.h
 sha256_crypt.c: config.h
