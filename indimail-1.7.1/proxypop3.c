@@ -1,5 +1,11 @@
 /*
  * $Log: proxypop3.c,v $
+ * Revision 2.7  2010-03-06 15:47:33+05:30  Cprogrammer
+ * use COURIERTLS env variable to execute TLS enabler program
+ *
+ * Revision 2.6  2010-03-06 14:56:00+05:30  Cprogrammer
+ * added STARTTLS capability
+ *
  * Revision 2.5  2003-02-08 21:21:31+05:30  Cprogrammer
  * corrected ambiguous return value
  *
@@ -19,8 +25,9 @@
  * Initial revision
  *
  */
-#include <string.h>
 #include <stdio.h>
+#include <string.h>
+#include <errno.h>
 #include <stdlib.h>
 #include <signal.h>
 #include <ctype.h>
@@ -28,7 +35,7 @@
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: proxypop3.c,v 2.5 2003-02-08 21:21:31+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: proxypop3.c,v 2.7 2010-03-06 15:47:33+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef CLUSTERED_SITE
@@ -41,29 +48,30 @@ main(int argc, char **argv)
 	char           *p, *remoteip, *local_port, *destport, *user = 0;
 	char            badlogins[MAX_BUFF], buf[BUFSIZ];
 	int             c, len;
+	char           *binqqargs[7];
 
-	if((p = strrchr(argv[0], '/')))
+	if ((p = strrchr(argv[0], '/')))
 		p++;
 	else
 		p = argv[0];
-	if(argc != 3)
+	if (argc != 3)
 	{
 		fprintf(stderr, "USAGE: %s pop3d Maildir\n", p);
 		return(1);
 	}
-	if(!(remoteip = getenv("TCPREMOTEIP")))
+	if (!(remoteip = getenv("TCPREMOTEIP")))
 	{
 		fprintf(stderr, "ERR: TCPREMOTEIP not set\n");
 		fflush(stderr);
 		_exit(1);
 	} else
-	if(!(local_port = getenv("TCPLOCALPORT")))
+	if (!(local_port = getenv("TCPLOCALPORT")))
 	{
 		fprintf(stderr, "ERR: TCPLOCALPORT not set\n");
 		fflush(stderr);
 		exit(1);
 	}
-	if(!(destport = getenv("DESTPORT")))
+	if (!(destport = getenv("DESTPORT")))
 	{
 		fprintf(stderr, "ERR: DESTPORT not set\n");
 		fflush(stderr);
@@ -72,11 +80,14 @@ main(int argc, char **argv)
 	signal(SIGALRM, bye);
 	if (AuthModuser(argc, argv, 60, 5))
 	{
-		fprintf(stderr, "INFO: Connection, remoteip=[%s]\n", remoteip);
-		printf("+OK POP3 Server Ready.\r\n");
+		if (!getenv("SSLERATOR"))
+		{
+			fprintf(stderr, "INFO: Connection, remoteip=[%s]\n", remoteip);
+			printf("+OK POP3 Server Ready.\r\n");
+		}
 	} else
 	{
-		if(!(p = (char *) getenv("BADLOGINS")))
+		if (!(p = (char *) getenv("BADLOGINS")))
 		{
 			snprintf(badlogins, MAX_BUFF, "BADLOGINS=1");
 			p = "1";
@@ -84,7 +95,7 @@ main(int argc, char **argv)
 		else
 			snprintf(badlogins, MAX_BUFF, "BADLOGINS=%d", atoi(p) + 1);
 		putenv(badlogins);
-		if(atoi(p) > 3)
+		if (atoi(p) > 3)
 			_exit(1);
 		fprintf(stderr, "ERR: LOGIN FAILED, remoteip=[%s]\n", remoteip);
 		printf("-ERR Login failed.\r\n");
@@ -94,7 +105,7 @@ main(int argc, char **argv)
 	for (;;)
 	{
 		alarm(60);
-		if(!fgets(buf, sizeof(buf), stdin))
+		if (!fgets(buf, sizeof(buf), stdin))
 			return(1);
 		alarm(0);
 		c = 1;
@@ -132,6 +143,55 @@ main(int argc, char **argv)
 			{
 				pop3d_capability();
 				fflush(stdout);
+				continue;
+			} else
+			if (!strcmp(p, "STLS"))
+			{
+				char           *ptr;
+
+				putenv("AUTHARGC=0");
+				for (c = 0; c < argc; c++)
+				{
+					char namebuf[56];
+					sprintf(namebuf, "AUTHARGV%d=", c);
+					unsetenv(namebuf);
+				}
+				unsetenv("BADLOGINS");
+				unsetenv("POP3_STARTTLS");
+				alarm(0);
+				p = getenv("COURIERTLS");
+				if (!(ptr = strrchr(p, '/')))
+					ptr = p;
+				else
+					ptr++;
+				if (!p || !strcmp(ptr, "sslerator"))
+				{
+					binqqargs[0] = INDIMAILDIR"/bin/sslerator";
+					binqqargs[1] = argv[0];
+					binqqargs[2] = argv[1]; 
+					binqqargs[3] = argv[2];
+					binqqargs[4] = 0;
+					putenv("BANNER=+OK Begin SSL/TLS negotiation now.\r\n");
+				} else
+				{
+					if (!(binqqargs[0] = strdup(p)))
+					{
+						perror("malloc");
+						_exit(1);
+					}
+					unsetenv("COURIERTLS");
+					binqqargs[1] = "-remotefd=0";
+					binqqargs[2] = "-server";
+					binqqargs[3] = argv[0];
+					binqqargs[4] = argv[1]; 
+					binqqargs[5] = argv[2];
+					binqqargs[6] = 0;
+					putenv("SSLERATOR=1");
+					printf("+OK Begin SSL/TLS negotiation now.\r\n");
+					fflush(stdout);
+				}
+				execv(*binqqargs, binqqargs);
+				fprintf(stderr, "execv: %s: %s\n", *binqqargs, strerror(errno));
 				continue;
 			} else
 			if (!strcmp(p, "USER"))

@@ -1,5 +1,8 @@
 /*
  * $Log: indiversion.c,v $
+ * Revision 2.124  2010-03-06 14:55:20+05:30  Cprogrammer
+ * added program sslerator
+ *
  * Revision 2.123  2010-02-16 13:07:25+05:30  Cprogrammer
  * added post_handle() function
  *
@@ -487,7 +490,7 @@
 #endif
 
 #ifndef	lint
-static char     sccsid[] = "$Id: indiversion.c,v 2.123 2010-02-16 13:07:25+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: indiversion.c,v 2.124 2010-03-06 14:55:20+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 void            getversion_indimail_settings_c();
@@ -822,6 +825,7 @@ char           *bin_program_list[] =
 	"mconnect",
 	"mconnect-io",
 	"rblsmtpd",
+	"sslerator",
 	"imapd",
 	"pop3d",
 	"logmonitor",

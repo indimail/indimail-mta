@@ -1,5 +1,8 @@
 #
 # $Log: indimail.spec.in,v $
+# Revision 2.134  2010-03-06 15:46:33+05:30  Cprogrammer
+# added --starttls for proxy imap and proxy pop3
+#
 # Revision 2.133  2010-03-05 11:02:37+05:30  Cprogrammer
 # error message to go to fd 2
 #
@@ -418,7 +421,7 @@
 # rpm spec file for indimail
 #
 #
-# $Id: indimail.spec.in,v 2.133 2010-03-05 11:02:37+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 2.134 2010-03-06 15:46:33+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %define _unpackaged_files_terminate_build 1
 
@@ -672,7 +675,7 @@ Provides: %{name}-shared
 
 %description shared
 This package contains the shared libraries (*.so*) which certain
-languages and applications need to dynamically load and use MySQL.
+languages and applications need to dynamically load and use IndiMail.
 
 %{see_base}
 
@@ -2316,13 +2319,13 @@ fi
 if [ %noproxy -eq 0 ] ; then
 %{_prefix}/sbin/svctool --imap=4143 --servicedir=%{servicedir} --localip=0 --maxdaemons=40 \
 	--query-cache --maxperip=25 --default-domain=%{default_domain} --memory=%{imap_pop3_mem} \
-	--proxy=143
+	--proxy=143 --starttls
 %{_prefix}/sbin/svctool --imap=9143 --servicedir=%{servicedir} --localip=0 --maxdaemons=40 \
 	--query-cache --maxperip=25 --default-domain=%{default_domain} --memory=%{imap_pop3_mem} \
 	--proxy=143 --ssl
 %{_prefix}/sbin/svctool --pop3=4110 --servicedir=%{servicedir} --localip=0 --maxdaemons=40 \
 	--query-cache --maxperip=25 --default-domain=%{default_domain} --memory=%{imap_pop3_mem} \
-	--proxy=110
+	--proxy=110 --starttls
 %{_prefix}/sbin/svctool --pop3=9110 --servicedir=%{servicedir} --localip=0 --maxdaemons=40 \
 	--query-cache --maxperip=25 --default-domain=%{default_domain} --memory=%{imap_pop3_mem} \
 	--proxy=110 --ssl

@@ -1,5 +1,8 @@
 /*
  * $Log: proxylogin.c,v $
+ * Revision 2.40  2010-03-06 14:55:46+05:30  Cprogrammer
+ * identify STLS or STARTTLS
+ *
  * Revision 2.39  2009-10-14 20:45:17+05:30  Cprogrammer
  * check return status of parse_quota()
  *
@@ -138,13 +141,14 @@
 #include <unistd.h>
 
 #ifndef	lint
-static char     sccsid[] = "$Id: proxylogin.c,v 2.39 2009-10-14 20:45:17+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: proxylogin.c,v 2.40 2010-03-06 14:55:46+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef CLUSTERED_SITE
 static int      LocalLogin(char **, char *, char *, char *, char *, char *);
 static int      ExecImapd(char **, char *, char *, struct passwd *, char *, char *);
-static int      have_starttls();
+static int      have_imap_starttls();
+static int      have_pop3_starttls();
 static int      tlsrequired();
 
 static char     imaptagenv[MAX_BUFF];
@@ -509,7 +513,7 @@ AuthModuser(int argc, char **argv, unsigned timeout, unsigned errsleep)
 #endif
 
 static int
-have_starttls()
+have_imap_starttls()
 {
 	const char     *p;
 
@@ -551,13 +555,30 @@ imapd_capability()
 	else
 		printf("IMAP4rev1");
 
-	if (have_starttls())
+	if (have_imap_starttls())
 	{
 		printf(" STARTTLS");
 		if (tlsrequired())
 			printf(" LOGINDISABLED");
 	}
 	printf("\r\n");
+}
+
+static int
+have_pop3_starttls()
+{
+	const char     *p;
+
+	if (!(p = getenv("POP3_STARTTLS")))
+		return (0);
+	if (*p != 'y' && *p != 'Y')
+		return (0);
+	p = getenv("COURIERTLS");
+	if (!p || !*p)
+		return (0);
+	if (access(p, X_OK))
+		return (0);
+	return (1);
 }
 
 void pop3d_capability()
@@ -571,6 +592,8 @@ void pop3d_capability()
 		p=getenv("POP3AUTH");
 	if (p && *p)
 		printf("SASL %s\r\n", p);
+	if (have_pop3_starttls())
+		printf("STLS\r\n");
 	printf("TOP\r\nUSER\r\nLOGIN-DELAY 10\r\nPIPELINING\r\nUIDL\r\n.\r\n");
 }
 

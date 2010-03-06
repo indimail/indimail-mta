@@ -1065,6 +1065,18 @@ POST_HANDLE       |vadddomain   |used    |Used to set the path to program that
                   |vmoveuser    |        |then return status of the handle will be
                   |vpasswd      |        |returned
 ------------------|-------------|--------|----------------------------------------
+COURIERTLS        |imapd/pop3d  |used    | Path to ssl enabler (sslerator / couriertls)
+IMAP_STARTLS      |imapd        |        | If set to yes, STARTTLS is advertised
+IMAP_TLS_REQUIRED |imapd        |        | If set to 1, STARTTLS is enforced
+POP3_STARTLS      |pop3d        |        | If set to yes, STARTTLS is advertised
+POP3_TLS_REQUIRED |pop3d        |        | If set to 1, STARTTLS is enforced
+TLS_CERTFILE      |imapd/pop3d  |        | Path to certficate
+TLS_PROTOCOL      |imapd/pop3d  |        | TLS1 or SSL3 depending on wheter you
+                  |             |        | use straight SSL or STARTTLS
+TLS_VERIFYPEER    |imapd/pop3d  |        | Set to NONE if you don't want to require
+                  |             |        | a client certificate
+BANNER            |sslerator    |        | Banner to display when STARTTLS is issued
+------------------|-------------|--------|----------------------------------------
 .TE
 
 Some of these environment variables have default values. The table below lists some of these.
@@ -1325,6 +1337,9 @@ mgmtpass(8)
 .sp -1
 .IP \n+[step]
 vpriv(8)
+.sp -1
+.IP \n+[step]
+sslerator
 
 .SH "SEE ALSO"
 dbinfo(8),
