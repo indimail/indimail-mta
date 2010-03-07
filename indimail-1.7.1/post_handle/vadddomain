@@ -1,0 +1,5 @@
+#!/bin/sh
+/var/indimail/bin/vdominfo $1
+ls -dl /var/indimail/domains/$1
+ls -al /var/indimail/domains/$1
+exit 0
