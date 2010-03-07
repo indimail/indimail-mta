@@ -82,9 +82,9 @@ create the next directory or sub directory and store the new users directory the
 Over a period of time, due to large no of deletions of users, the Directory Structure Layout
 for all users can be regenerated using the program \fBvreorg(8)\fR.
 
-.SH POST HOOK
-If the environment variable POST_HOOK is set, \fBvadduser\fR executes the program defined by
-the POST_HOOK environment variable, passing \fIemail_address\fR as a parameter. If POST_HOOK
+.SH POST HANDLE
+If the environment variable POST_HANDLE is set, \fBvadduser\fR executes the program defined by
+the POST_HANDLE environment variable, passing \fIemail_address\fR as a parameter. If POST_HANDLE
 is not defined, the program/script INDIMAIL/libexec/vadduser will be executed with \fIemail_address\fR
 as a parameter.
 

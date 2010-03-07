@@ -11,10 +11,10 @@ vmoveuser \- move homedir of a virtual user to a new path
 files to the new path. \fBvmoveuser\fR has setuid bit to root and can be run by the
 root or indimail user.
 
-.SH POST HOOK
-If the environment variable POST_HOOK is set, \fBvmoveuser\fR executes the program defined by
-the POST_HOOK environment variable, passing \fIemail_addr\fR, \fIold_homedir\fR and \fInew_homedir\fR
-as parameters. If POST_HOOK is not defined, the program/script INDIMAIL/libexec/vmoveuser will
+.SH POST HANDLE
+If the environment variable POST_HANDLE is set, \fBvmoveuser\fR executes the program defined by
+the POST_HANDLE environment variable, passing \fIemail_addr\fR, \fIold_homedir\fR and \fInew_homedir\fR
+as parameters. If POST_HANDLE is not defined, the program/script INDIMAIL/libexec/vmoveuser will
 be executed with \fIemail_addr\fR, \fIold_homedir\fR and \fInew_homedir\fR as parameters.
 
 .SH OPTIONS

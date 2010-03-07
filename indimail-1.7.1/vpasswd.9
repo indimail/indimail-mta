@@ -35,9 +35,9 @@ _
 3             | SHA-512
 .TE
 
-.SH POST HOOK
-If the environment variable POST_HOOK is set, \fBvpasswd\fR executes the program defined by
-the POST_HOOK environment variable, passing \fIemail_address\fR as a parameter. If POST_HOOK
+.SH POST HANDLE
+If the environment variable POST_HANDLE is set, \fBvpasswd\fR executes the program defined by
+the POST_HANDLE environment variable, passing \fIemail_address\fR as a parameter. If POST_HANDLE
 is not defined, the program/script INDIMAIL/libexec/vpasswd will be executed with \fIemail_address\fR
 as a parameter.
 
