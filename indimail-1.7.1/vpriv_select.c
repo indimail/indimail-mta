@@ -1,5 +1,8 @@
 /*
  * $Log: vpriv_select.c,v $
+ * Revision 2.6  2010-03-07 11:27:56+05:30  Cprogrammer
+ * use open_central_db instead of open_master
+ *
  * Revision 2.5  2008-09-08 09:58:35+05:30  Cprogrammer
  * removed mysql_escape
  *
@@ -19,7 +22,7 @@
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vpriv_select.c,v 2.5 2008-09-08 09:58:35+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: vpriv_select.c,v 2.6 2010-03-07 11:27:56+05:30 Cprogrammer Exp mbhangui $";
 #endif
 #ifdef CLUSTERED_SITE
 #include <string.h>
@@ -34,16 +37,13 @@ vpriv_select(char **user, char **program)
 	MYSQL_ROW       row;
 	static MYSQL_RES *select_res;
 
-	if(!select_res)
+	if (!select_res)
 	{
-		if (open_master())
-		{
-			fprintf(stderr, "Failed to open Master Db\n");
+		if (open_central_db(0))
 			return ((char *) 0);
-		}
-		if(program && *program)
+		if (program && *program)
 		{
-			if(user && *user && **user)
+			if (user && *user && **user)
 				snprintf(SqlBuf, SQL_BUF_SIZE,
 					"select high_priority user,program,cmdswitches from vpriv where user=\"%s\" and program=\"%s\"",
 					*user, *program);
@@ -52,7 +52,7 @@ vpriv_select(char **user, char **program)
 					"select high_priority user,program,cmdswitches from vpriv where program=\"%s\"", *program);
 		} else
 		{
-			if(user && *user && **user)
+			if (user && *user && **user)
 				snprintf(SqlBuf, SQL_BUF_SIZE,
 					"select high_priority user,program,cmdswitches from vpriv where user=\"%s\"", *user);
 			else
@@ -60,7 +60,7 @@ vpriv_select(char **user, char **program)
 		}
 		if (mysql_query(&mysql[0], SqlBuf))
 		{
-			if(mysql_errno(&mysql[0]) == ER_NO_SUCH_TABLE)
+			if (mysql_errno(&mysql[0]) == ER_NO_SUCH_TABLE)
 			{
 				create_table(ON_MASTER, "vpriv", PRIV_CMD_LAYOUT);
 				return ((char *) 0);
@@ -68,7 +68,7 @@ vpriv_select(char **user, char **program)
 			fprintf(stderr, "vpriv_select: %s: %s\n", SqlBuf, mysql_error(&mysql[0]));
 			return ((char *) 0);
 		}
-		if(!(select_res = mysql_store_result(&mysql[0])))
+		if (!(select_res = mysql_store_result(&mysql[0])))
 			return ((char *) 0);
 	}
 	if ((row = mysql_fetch_row(select_res)))
