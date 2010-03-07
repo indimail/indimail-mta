@@ -160,7 +160,7 @@ vdeldomain(char *domain)
 #ifdef CLUSTERED_SITE
 		if (open_master())
 		{
-			error_stack(stderr, "Failed to open Master Db\n");
+			error_stack(stderr, "vdeldomain: Failed to open Master Db\n");
 			return (-1);
 		}
 		if (vauth_get_realdomain(domain) && vauth_delaliasdomain(domain))

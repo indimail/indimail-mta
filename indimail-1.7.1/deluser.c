@@ -214,7 +214,7 @@ vdeluser(char *user, char *domain, int remove_db)
 		{
 			if (open_master())
 			{
-				error_stack(stderr, "Failed to Open Master Db\n");
+				error_stack(stderr, "vdeluser: Failed to Open Master Db\n");
 				return (-1);
 			}
 			snprintf(TmpBuf, MAX_BUFF, "%s@%s", user, real_domain);

@@ -99,10 +99,10 @@ LoadBMF(int *total, char *bmf)
 	{
 		if (sync_file)
 		{
-			fprintf(stderr, "Failed to open Master Db\n");
-			return((char **) 0);
+			fprintf(stderr, "LoadBMF: Failed to open Master Db\n");
+			return ((char **) 0);
 		} else
-			return(LoadBMF_internal(total, bmf));
+			return (LoadBMF_internal(total, bmf));
 	}
 	if (!strncmp(bmf, "badmailfrom", 12) || !strncmp(bmf, "badrcptto", 10) || !strncmp(bmf, "spamdb", 7))
 		badmail_flag = 1;
@@ -116,9 +116,9 @@ LoadBMF(int *total, char *bmf)
 	{
 		fprintf(stderr, "LoadBMF: mysql_query: %s: %s\n", SqlBuf, mysql_error(&mysql[0]));
 		if (sync_file)
-			return((char **) 0);
+			return ((char **) 0);
 		else
-			return(LoadBMF_internal(total, bmf));
+			return (LoadBMF_internal(total, bmf));
 	}
 	if (err == ER_NO_SUCH_TABLE)
 	{
@@ -126,9 +126,9 @@ LoadBMF(int *total, char *bmf)
 			badmail_flag == 1 ? BADMAILFROM_TABLE_LAYOUT : SPAM_TABLE_LAYOUT))
 		{
 			if (sync_file)
-				return((char **) 0);
+				return ((char **) 0);
 			else
-				return(LoadBMF_internal(total, bmf));
+				return (LoadBMF_internal(total, bmf));
 		}
 		sync_mcd = 1;
 	} else
@@ -137,16 +137,16 @@ LoadBMF(int *total, char *bmf)
 		{
 			(void) fprintf(stderr, "LoadBMF: mysql_store_result: %s\n", mysql_error(&mysql[0]));
 			if (sync_file)
-				return((char **) 0);
+				return ((char **) 0);
 			else
-				return(LoadBMF_internal(total, bmf));
+				return (LoadBMF_internal(total, bmf));
 		}
 		if (!(num_rows = mysql_num_rows(res)))
 		{
 			if (sync_file)
 			{
 				mysql_free_result(res);
-				return((char **) 0);
+				return ((char **) 0);
 			}
 			sync_mcd = 1;
 			mysql_free_result(res);
@@ -171,7 +171,7 @@ LoadBMF(int *total, char *bmf)
 			if (mcd_time == file_time)
 			{
 				mysql_free_result(res);
-				return(LoadBMF_internal(total, bmf));
+				return (LoadBMF_internal(total, bmf));
 			} else
 			if (mcd_time > file_time)
 			{
@@ -185,17 +185,17 @@ LoadBMF(int *total, char *bmf)
 					if (mysql_query(&mysql[0], SqlBuf))
 					{
 						fprintf(stderr, "LoadBMF: mysql_query: %s: %s\n", SqlBuf, mysql_error(&mysql[0]));
-						return((char **) 0);
+						return ((char **) 0);
 					}
 					if (!(res = mysql_store_result(&mysql[0])))
 					{
 						(void) fprintf(stderr, "LoadBMF: mysql_store_result: %s\n", mysql_error(&mysql[0]));
-						return((char **) 0);
+						return ((char **) 0);
 					}
 					if (!(num_rows = mysql_num_rows(res))) /*- should never happen */
 					{
 						mysql_free_result(res);
-						return((char **) 0);
+						return ((char **) 0);
 					}
 				}
 			} else
@@ -211,7 +211,7 @@ LoadBMF(int *total, char *bmf)
 		if (res)
 			mysql_free_result(res);
 		if ((err = UpdateSpamTable(bmf)) == -1)
-			return((char **) 0);
+			return ((char **) 0);
 		else
 		{
 			if (verbose)
@@ -219,12 +219,12 @@ LoadBMF(int *total, char *bmf)
 			if (!err && (file_time = BMFTimestamp(badmail_flag, bmf)) == -1)
 			{
 				fprintf(stderr, "LoadBMF: Invalid TIMESTAMP: Internal BUG\n");
-				return((char **) 0);
+				return ((char **) 0);
 			}
 			ubuf.actime = ubuf.modtime = (err ? time(0) : file_time);
 			if (utime(badmailfrom, &ubuf))
 				fprintf(stderr, "LoadBMF: utime: %s: %s\n", badmailfrom, strerror(errno));
-			return(LoadBMF_internal(total, bmf));
+			return (LoadBMF_internal(total, bmf));
 		}
 	} else
 	if (sync_file && res)
@@ -235,7 +235,7 @@ LoadBMF(int *total, char *bmf)
 		{
 			fprintf(stderr, "LoadBMF: %s: %s\n", badmailfrom, strerror(errno));
 			mysql_free_result(res);
-			return((char **) 0);
+			return ((char **) 0);
 		}
 		mysql_data_seek(res, 0);
 		for (;(row = mysql_fetch_row(res));)
@@ -254,7 +254,7 @@ LoadBMF(int *total, char *bmf)
 	} else
 	if (verbose)
 		printf("Nothing to update\n");
-	return(LoadBMF_internal(total, bmf));
+	return (LoadBMF_internal(total, bmf));
 }
 
 /*
@@ -275,7 +275,7 @@ UpdateSpamTable(char *bmf)
 	if (access(badmailfrom, F_OK))
 	{
 		fprintf(stderr, "UpdateSpamTable: %s: %s\n", badmailfrom, strerror(errno));
-		return(-1);
+		return (-1);
 	}
 	if (verbose)
 		printf("Updating Table %s\n", bmf);
@@ -285,8 +285,8 @@ UpdateSpamTable(char *bmf)
 		badmail_flag = 0;
 	if (open_master())
 	{
-		fprintf(stderr, "Failed to open Master Db\n");
-		return(-1);
+		fprintf(stderr, "UpdateSpamTable: Failed to open Master Db\n");
+		return (-1);
 	}
 	if (badmail_flag)
 		snprintf(SqlBuf, SQL_BUF_SIZE,
@@ -310,14 +310,14 @@ UpdateSpamTable(char *bmf)
 				fprintf(stderr, "UpdateSpamTable: mysql_query: %s: %s", SqlBuf, mysql_error(&mysql[0]));
 				if (!badmail_flag)
 					disable_mysql_escape(es_opt);
-				return(-1);
+				return (-1);
 			}
 		} else
 		{
 			if (!badmail_flag)
 				disable_mysql_escape(es_opt);
 			fprintf(stderr, "UpdateSpamTable: mysql_query: %s: %s\n", SqlBuf, mysql_error(&mysql[0]));
-			return(-1);
+			return (-1);
 		}
 	}
 	if (!badmail_flag)
@@ -325,7 +325,7 @@ UpdateSpamTable(char *bmf)
 	if ((err = mysql_affected_rows(&mysql[0])) == -1)
 	{
 		fprintf(stderr, "UpdateSpamTable: mysql_affected_rows: %s", mysql_error(&mysql[0]));
-		return(-1);
+		return (-1);
 	}
 	/*
 	 * If err is 0, possibility is file has been  updated without any content
@@ -335,7 +335,7 @@ UpdateSpamTable(char *bmf)
 		fprintf(stderr, "UpdateSpamTable: utime: %s: %s\n", badmailfrom, strerror(errno));
 	if (verbose)
 		printf("%d rows affected\n", err);
-	return(err);
+	return (err);
 }
 
 static char **
@@ -356,16 +356,16 @@ LoadBMF_internal(int *total, char *bmf)
 	if (total)
 		*total = 0;
 	if (stat(badmailfrom, &statbuf))
-		return((char **) 0);
+		return ((char **) 0);
 	if (bmfptr && (statbuf.st_mtime == file_time))
 	{
 		if (total)
 			*total = _count;
-		return(bmfptr);
+		return (bmfptr);
 	}
 	file_time = statbuf.st_mtime;
 	if (!(fp = fopen(badmailfrom, "r")))
-		return((char **) 0);
+		return ((char **) 0);
 	for (count = 0;;count++)
 	{
 		if (!fgets(tmpbuf, sizeof(tmpbuf) - 2, fp))
@@ -377,13 +377,13 @@ LoadBMF_internal(int *total, char *bmf)
 	if (!count)
 	{
 		fclose(fp);
-		return((char **) 0);
+		return ((char **) 0);
 	}
 	if (!(bmfptr = (char **) malloc(sizeof(char *) * (count + 1))))
 	{
 		fprintf(stderr, "LoadBMF_internal: malloc: %s\n", strerror(errno));
 		fclose(fp);
-		return((char **) 0);
+		return ((char **) 0);
 	}
 	rewind(fp);
 	for (count = 1;;count++)
@@ -409,7 +409,7 @@ LoadBMF_internal(int *total, char *bmf)
 			fprintf(stderr, "LoadBMF_internal: malloc: %s\n", strerror(errno));
 			fclose(fp);
 			free(bmfptr);
-			return((char **) 0);
+			return ((char **) 0);
 		}
 		scopy(bmfptr[count - 1], ptr, len + 1);
 	}
@@ -418,7 +418,7 @@ LoadBMF_internal(int *total, char *bmf)
 		*total = (count - 1);
 	_count = count - 1;
 	bmfptr[count - 1] = 0;
-	return(bmfptr);
+	return (bmfptr);
 }
 
 static time_t
@@ -438,17 +438,17 @@ BMFTimestamp(int badmail_flag, char *bmf)
 				badmail_flag == 1 ? BADMAILFROM_TABLE_LAYOUT : SPAM_TABLE_LAYOUT);
 		else
 			fprintf(stderr, "BMFTimestamp: mysql_query: %s: %s\n", SqlBuf, mysql_error(&mysql[0]));
-		return(-1);
+		return (-1);
 	}
 	if (!(res = mysql_store_result(&mysql[0])))
 	{
 		(void) fprintf(stderr, "BMFTimestamp: mysql_store_result: %s\n", mysql_error(&mysql[0]));
-		return(-1);
+		return (-1);
 	}
 	if (!(num_rows = mysql_num_rows(res)))
 	{
 		mysql_free_result(res);
-		return(-1);
+		return (-1);
 	}
 	for (mcd_time = 0l;(row = mysql_fetch_row(res));)
 	{
@@ -458,8 +458,8 @@ BMFTimestamp(int badmail_flag, char *bmf)
 	}
 	mysql_free_result(res);
 	if (!mcd_time)
-		return(-1);
-	return(mcd_time);
+		return (-1);
+	return (mcd_time);
 }
 #endif /*- CLUSTERED_SITE */
 

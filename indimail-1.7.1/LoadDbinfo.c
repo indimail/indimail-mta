@@ -151,7 +151,7 @@ static int      _total;
 int
 loadDbinfoTotal()
 {
-	return(_total);
+	return (_total);
 }
 
 #ifdef CLUSTERED_SITE
@@ -175,7 +175,7 @@ LoadDbInfo_TXT(int *total)
 	if (total)
 		_total = *total = 0;
 	if (access(TmpBuf, F_OK))
-		return(LoadDbInfo_TXT_internal(total));
+		return (LoadDbInfo_TXT_internal(total));
 	getEnvConfigStr(&mcdfile, "MCDFILE", MCDFILE);
 	if (*mcdfile == '/' || *mcdfile == '.')
 		snprintf(mcdFile, MAX_BUFF, "%s", mcdfile);
@@ -197,28 +197,28 @@ LoadDbInfo_TXT(int *total)
 	{
 		if (sync_file)
 		{
-			fprintf(stderr, "Failed to open Master Db\n");
-			return((DBINFO **) 0);
+			fprintf(stderr, "LoadDbInfo_TXT: Failed to open Master Db\n");
+			return ((DBINFO **) 0);
 		} else
-			return(LoadDbInfo_TXT_internal(total));
+			return (LoadDbInfo_TXT_internal(total));
 	}
 	snprintf(SqlBuf, SQL_BUF_SIZE, "select UNIX_TIMESTAMP(timestamp) from dbinfo where filename=\"%s\"", mcdFile);
 	if (mysql_query(&mysql[0], SqlBuf) && ((err = mysql_errno(&mysql[0])) != ER_NO_SUCH_TABLE))
 	{
 		fprintf(stderr, "LoadDbInfo_TXT: mysql_query: %s: %s\n", SqlBuf, mysql_error(&mysql[0]));
 		if (sync_file)
-			return((DBINFO **) 0);
+			return ((DBINFO **) 0);
 		else
-			return(LoadDbInfo_TXT_internal(total));
+			return (LoadDbInfo_TXT_internal(total));
 	}
 	if (err == ER_NO_SUCH_TABLE)
 	{
 		if (create_table(ON_MASTER, "dbinfo", DBINFO_TABLE_LAYOUT))
 		{
 			if (sync_file)
-				return((DBINFO **) 0);
+				return ((DBINFO **) 0);
 			else
-				return(LoadDbInfo_TXT_internal(total));
+				return (LoadDbInfo_TXT_internal(total));
 		}
 		sync_mcd = 1;
 	} else 
@@ -227,9 +227,9 @@ LoadDbInfo_TXT(int *total)
 		{
 			(void) fprintf(stderr, "LoadDbInfo_TXT: mysql_store_result: %s\n", mysql_error(&mysql[0]));
 			if (sync_file)
-				return((DBINFO **) 0);
+				return ((DBINFO **) 0);
 			else
-				return(LoadDbInfo_TXT_internal(total));
+				return (LoadDbInfo_TXT_internal(total));
 		}
 		if (!(num_rows = mysql_num_rows(res)))
 		{
@@ -237,7 +237,7 @@ LoadDbInfo_TXT(int *total)
 			{
 				mysql_free_result(res);
 				errno = ENOENT;
-				return((DBINFO **) 0);
+				return ((DBINFO **) 0);
 			}
 			sync_mcd = 1;
 			row = mysql_fetch_row(res);
@@ -258,7 +258,7 @@ LoadDbInfo_TXT(int *total)
 					printf("Nothing to update\n");
 			}
 			if (mcd_time == file_time)
-				return(LoadDbInfo_TXT_internal(total));
+				return (LoadDbInfo_TXT_internal(total));
 			else
 			if (mcd_time > file_time)
 			{
@@ -279,10 +279,10 @@ LoadDbInfo_TXT(int *total)
 		if (!(relayhosts = LoadDbInfo_TXT_internal(total)))
 		{
 			perror("LoadDbInfo_TXT_internal");
-			return((DBINFO **) 0);
+			return ((DBINFO **) 0);
 		}
 		if (delete_dbinfo_rows(mcdFile))
-			return(relayhosts);
+			return (relayhosts);
 		for (err = 0, ptr = relayhosts;(*ptr);ptr++)
 		{
 			if ((*ptr)->isLocal)
@@ -299,7 +299,7 @@ LoadDbInfo_TXT(int *total)
 				continue;
 			}
 		}
-		return(relayhosts);
+		return (relayhosts);
 	} else
 	if (sync_file)
 	{
@@ -312,37 +312,37 @@ LoadDbInfo_TXT(int *total)
 		{
 			fprintf(stderr, "LoadDbInfo_TXT: mysql_query: %s: %s\n", SqlBuf, mysql_error(&mysql[0]));
 			if (access(mcdFile, F_OK))
-				return((DBINFO **) 0);
+				return ((DBINFO **) 0);
 			else
-				return(LoadDbInfo_TXT_internal(total));
+				return (LoadDbInfo_TXT_internal(total));
 		}
 		if (!(res = mysql_store_result(&mysql[0])))
 		{
 			(void) fprintf(stderr, "LoadDbInfo_TXT: mysql_store_result: %s\n", mysql_error(&mysql[0]));
 			if (access(mcdFile, F_OK))
-				return((DBINFO **) 0);
+				return ((DBINFO **) 0);
 			else
-				return(LoadDbInfo_TXT_internal(total));
+				return (LoadDbInfo_TXT_internal(total));
 		}
 		if (!(num_rows = mysql_num_rows(res)))
 		{
 			mysql_free_result(res);
 			fprintf(stderr, "LoadDbInfo_TXT: No rows selected\n");
 			if (access(mcdFile, F_OK))
-				return((DBINFO **) 0);
+				return ((DBINFO **) 0);
 			else
-				return(LoadDbInfo_TXT_internal(total));
+				return (LoadDbInfo_TXT_internal(total));
 		}
-		if(total)
+		if (total)
 			_total = (*total += num_rows);
 		if (!(relayhosts = (DBINFO **) calloc(1, sizeof(DBINFO *) * (num_rows + 1))))
 		{
 			perror("malloc");
 			mysql_free_result(res);
 			if (access(mcdFile, F_OK))
-				return((DBINFO **) 0);
+				return ((DBINFO **) 0);
 			else
-				return(LoadDbInfo_TXT_internal(total));
+				return (LoadDbInfo_TXT_internal(total));
 		}
 		for (ptr = relayhosts, idx = 0;(row = mysql_fetch_row(res));idx++, ptr++)
 		{
@@ -352,9 +352,9 @@ LoadDbInfo_TXT(int *total)
 				free(relayhosts);
 				mysql_free_result(res);
 				if (access(mcdFile, F_OK))
-					return((DBINFO **) 0);
+					return ((DBINFO **) 0);
 				else
-					return(LoadDbInfo_TXT_internal(total));
+					return (LoadDbInfo_TXT_internal(total));
 			}
 			scopy((*ptr)->domain, row[0], DBINFO_BUFF);
 			(*ptr)->distributed = atoi(row[1]);
@@ -370,11 +370,11 @@ LoadDbInfo_TXT(int *total)
 			fprintf(stderr, "LoadDbInfo_TXT: writedbinfo failed\n");
 		(*ptr) = (DBINFO *) 0;
 		mysql_free_result(res);
-		return(relayhosts);
+		return (relayhosts);
 	} else
 	if (verbose)
 		printf("Nothing to update\n");
-	return(LoadDbInfo_TXT_internal(total));
+	return (LoadDbInfo_TXT_internal(total));
 }
 
 static int
@@ -384,16 +384,16 @@ delete_dbinfo_rows(char *filename)
 
 	if (open_master())
 	{
-		fprintf(stderr, "Failed to open Master Db\n");
-		return(-1);
+		fprintf(stderr, "delete_dbinfo_rows: Failed to open Master Db\n");
+		return (-1);
 	}
 	snprintf(SqlBuf, SQL_BUF_SIZE, "delete low_priority from dbinfo where filename=\"%s\"", filename);
 	if (mysql_query(&mysql[0], SqlBuf))
 	{
 		fprintf(stderr, "delete_dbinfo: mysql_query: %s: %s\n", SqlBuf, mysql_error(&mysql[0]));
-		return(-1);
+		return (-1);
 	}
-	return(0);
+	return (0);
 }
 
 int
@@ -415,11 +415,11 @@ writedbinfo(DBINFO **rhostsptr, time_t mtime)
 	else
 		snprintf(mcdFile, MAX_BUFF, "%s/%s/%s", qmaildir, controldir, mcdfile);
 	if (!rhostsptr)
-		return(1);
+		return (1);
 	if (!(fp = fopen(mcdFile, "w")))
 	{
 		fprintf(stderr, "writedbinfo: %s: %s\n", mcdFile, strerror(errno));
-		return(1);
+		return (1);
 	}
 	if (indimailuid == -1 || indimailgid == -1)
 		GetIndiId(&indimailuid, &indimailgid);
@@ -447,13 +447,13 @@ writedbinfo(DBINFO **rhostsptr, time_t mtime)
 	ubuf.modtime = mtime;
 	if (utime(mcdFile, &ubuf))
 		fprintf(stderr, "utime: %s: %s\n", mcdFile, strerror(errno));
-	return(0);
+	return (0);
 }
 #else
 DBINFO **
 LoadDbInfo_TXT(int *total)
 {
-	return(LoadDbInfo_TXT_internal(total));
+	return (LoadDbInfo_TXT_internal(total));
 }
 #endif
 
@@ -477,7 +477,7 @@ LoadDbInfo_TXT_internal(int *total)
 	count = 0;
 	relayhosts = (DBINFO **) 0;
 	if (!(fp = fopen(mcdFile, "r")))
-		return(localDbinfo(total, &relayhosts));
+		return (localDbinfo(total, &relayhosts));
 	else
 	{
 		for (;;)
@@ -501,7 +501,7 @@ LoadDbInfo_TXT_internal(int *total)
 	if (!count)
 	{
 		fclose(fp);
-		return(localDbinfo(total, &relayhosts));
+		return (localDbinfo(total, &relayhosts));
 	} else
 	if (total)
 		_total = (*total += count);
@@ -702,7 +702,7 @@ localDbinfo(int *total, DBINFO ***rhosts)
 	if (!count)
 	{
 		fclose(fp);
-		return(*rhosts);
+		return (*rhosts);
 	}
 	*mysqlhost_buf = 0;
 	if ((mysqlhost = (char *) getenv("MYSQL_HOST")) != (char *) 0)
@@ -776,7 +776,7 @@ localDbinfo(int *total, DBINFO ***rhosts)
 	{
 		perror("malloc");
 		fclose(fp);
-		return((DBINFO **) 0);
+		return ((DBINFO **) 0);
 	}
 	rewind(fp);
 	for (;;)
@@ -832,7 +832,7 @@ localDbinfo(int *total, DBINFO ***rhosts)
 	}
 	fclose(fp);
 	(*rhostsptr) = (DBINFO *) 0; /*- Null structure to end relayhosts */
-	return(relayhosts);
+	return (relayhosts);
 }
 
 void
