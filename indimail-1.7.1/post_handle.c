@@ -17,7 +17,7 @@
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: post_handle.c,v 2.2 2010-02-16 13:30:15+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: post_handle.c,v 2.2 2010-02-16 13:30:15+05:30 Cprogrammer Stab mbhangui $";
 #endif
 
 #ifdef HAVE_STDARG_H

@@ -490,7 +490,7 @@
 #endif
 
 #ifndef	lint
-static char     sccsid[] = "$Id: indiversion.c,v 2.124 2010-03-06 14:55:20+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: indiversion.c,v 2.124 2010-03-06 14:55:20+05:30 Cprogrammer Stab mbhangui $";
 #endif
 
 void            getversion_indimail_settings_c();

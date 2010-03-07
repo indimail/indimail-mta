@@ -22,7 +22,7 @@
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: SqlServer.c,v 2.5 2010-02-26 10:52:27+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: SqlServer.c,v 2.5 2010-02-26 10:52:27+05:30 Cprogrammer Stab mbhangui $";
 #endif
 
 #include <string.h>

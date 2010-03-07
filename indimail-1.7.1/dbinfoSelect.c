@@ -22,7 +22,7 @@
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: dbinfoSelect.c,v 2.6 2010-03-07 09:28:11+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: dbinfoSelect.c,v 2.6 2010-03-07 09:28:11+05:30 Cprogrammer Stab mbhangui $";
 #endif
 
 #ifdef CLUSTERED_SITE
@@ -67,7 +67,7 @@ dbinfoSelect(char *filename, char *domain, char *mdahost, int row_format)
 		printf("protocol       %d\n", mysql_get_proto_info(*mysqlptr));
 		printf("server version %s\n", mysql_get_server_info(*mysqlptr));
 		if ((is_dist = is_distributed_domain((*rhostsptr)->domain)) == -1)
-			printf("domain         %-15s - can't figure out dist flag\n");
+			printf("domain         %-15s - can't figure out dist flag\n", (*rhostsptr)->domain);
 		else
 			printf("domain         %-15s - %s\n", (*rhostsptr)->domain, 
 				is_distributed_domain((*rhostsptr)->domain) == 1 ? "Distributed" : "Non Distributed");
