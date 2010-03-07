@@ -95,9 +95,9 @@ addusercntrl(char *user, char *domain, char *hostid, char *pass, int force)
 	 */
 	if (!force)
 	{
-		if((err = is_distributed_domain(domain)) == -1)
+		if ((err = is_distributed_domain(domain)) == -1)
 			return(1);
-		if(!err)
+		if (!err)
 			return(0);
 	}
 	if (open_master())
@@ -111,15 +111,15 @@ addusercntrl(char *user, char *domain, char *hostid, char *pass, int force)
 		 cntrl_table, user, domain, pass, hostid, time(0));
 	if (mysql_query(&mysql[0], SqlBuf))
 	{
-		if((err = mysql_errno(&mysql[0])) == ER_NO_SUCH_TABLE)
+		if ((err = mysql_errno(&mysql[0])) == ER_NO_SUCH_TABLE)
 		{
-			if(create_table(ON_MASTER, cntrl_table, CNTRL_TABLE_LAYOUT))
+			if (create_table(ON_MASTER, cntrl_table, CNTRL_TABLE_LAYOUT))
 				return(1);
 			if (!mysql_query(&mysql[0], SqlBuf))
 				return(0);
 		}
 		fprintf(stderr, "addusercntrl: %s: %s", SqlBuf, mysql_error(&mysql[0]));
-		if(err == ER_DUP_ENTRY)
+		if (err == ER_DUP_ENTRY)
 			return(2);
 		return(1);
 	}
