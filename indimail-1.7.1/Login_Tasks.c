@@ -179,7 +179,7 @@ Login_Tasks(pw, user, ServiceType)
 			int    year;
 			tm = localtime(&inact_time);
 			year = tm->tm_year + 1900;
-			snprintf(Subject, MAX_BUFF, "Your Indi Mail Account was de-activated on %02d-%02d-%02d", tm->tm_mday, tm->tm_mon + 1, year);
+			snprintf(Subject, MAX_BUFF, "Your IndiMail Account was de-activated on %02d-%02d-%02d", tm->tm_mday, tm->tm_mon + 1, year);
 			if ((ptr = strrchr(Subject, '\n')))
 				*ptr = 0;
 		} else
