@@ -34,36 +34,36 @@ fstabChangeCounter(char *filesystem, char *mdahost, long user_count, long size_c
 	char            SqlBuf[SQL_BUF_SIZE];
 
 #ifdef CLUSTERED_SITE
-	if(open_master())
+	if (open_master())
 	{
-		fprintf(stderr, "Failed to open Master Db\n");
+		fprintf(stderr, "fstabChangeCounter: Failed to open Master Db\n");
 		return (-1);
 	}
 #else
-	if(vauth_open(0))
+	if (vauth_open(0))
 	{
-		fprintf(stderr, "Failed to open Local Db\n");
+		fprintf(stderr, "Failed to open local Db\n");
 		return (-1);
 	}
 #endif
-	if(!(ptr = pathToFilesystem(filesystem)))
+	if (!(ptr = pathToFilesystem(filesystem)))
 	{
 		fprintf(stderr, "vauth_active: pathToFilesystem: %s: %s\n", filesystem, strerror(errno));
-		return(-1);
+		return (-1);
 	}
-	if(user_count && size_count)
+	if (user_count && size_count)
 	{
 		snprintf(SqlBuf, SQL_BUF_SIZE, 
 			"update fstab set cur_users=cur_users+%ld, cur_size=cur_size+%ld where filesystem = \"%s\" \
 			and host = \"%s\"", user_count, size_count, ptr, mdahost);
 	} else
-	if(user_count)
+	if (user_count)
 	{
 		snprintf(SqlBuf, SQL_BUF_SIZE, 
 			"update fstab set cur_users=cur_users+%ld where filesystem = \"%s\" and host = \"%s\"", 
 			user_count, ptr, mdahost);
 	} else
-	if(size_count)
+	if (size_count)
 	{
 		snprintf(SqlBuf, SQL_BUF_SIZE, 
 			"update fstab set cur_size=cur_size+%ld where filesystem = \"%s\" and host = \"%s\"", 
@@ -76,9 +76,9 @@ fstabChangeCounter(char *filesystem, char *mdahost, long user_count, long size_c
 #endif
 	{
 #ifdef CLUSTERED_SITE
-		if(mysql_errno(&mysql[0]) == ER_NO_SUCH_TABLE)
+		if (mysql_errno(&mysql[0]) == ER_NO_SUCH_TABLE)
 #else
-		if(mysql_errno(&mysql[1]) == ER_NO_SUCH_TABLE)
+		if (mysql_errno(&mysql[1]) == ER_NO_SUCH_TABLE)
 #endif
 		{
 #ifdef CLUSTERED_SITE
@@ -87,7 +87,7 @@ fstabChangeCounter(char *filesystem, char *mdahost, long user_count, long size_c
 			create_table(ON_LOCAL, "fstab", FSTAB_TABLE_LAYOUT);
 #endif
 			fprintf(stderr, "fstabChangeCounter: No rows selected\n");
-			return(-1);
+			return (-1);
 		} else
 		{
 #ifdef CLUSTERED_SITE
@@ -99,16 +99,16 @@ fstabChangeCounter(char *filesystem, char *mdahost, long user_count, long size_c
 		}
 	}
 #ifdef CLUSTERED_SITE
-	if((err = mysql_affected_rows(&mysql[0])) == -1)
+	if ((err = mysql_affected_rows(&mysql[0])) == -1)
 	{
 		fprintf(stderr, "fstabChangeCounter: mysql_affected_rows: %s\n", mysql_error(&mysql[0]));
-		return(-1);
+		return (-1);
 	}
 #else
-	if((err = mysql_affected_rows(&mysql[1])) == -1)
+	if ((err = mysql_affected_rows(&mysql[1])) == -1)
 	{
 		fprintf(stderr, "fstabChangeCounter: mysql_affected_rows: %s\n", mysql_error(&mysql[1]));
-		return(-1);
+		return (-1);
 	}
 #endif
 	return (0);
