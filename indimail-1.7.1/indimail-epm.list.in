@@ -1,5 +1,8 @@
 #
 # $Log: indimail-epm.list.in,v $
+# Revision 2.45  2010-03-06 18:20:19+05:30  Cprogrammer
+# added --starttls option for proxy pop3/imap
+#
 # Revision 2.44  2010-03-03 16:08:33+05:30  Cprogrammer
 # removed b64encode, b64decode and merged functionality in base64
 #
@@ -497,6 +500,7 @@ f 444 root qmail ${prefix}/man/man1/vmoveuser.1.gz BUILDROOT${prefix}/man/man1/v
 f 444 root qmail ${prefix}/man/man1/vpasswd.1.gz BUILDROOT${prefix}/man/man1/vpasswd.1.gz
 f 444 root qmail ${prefix}/man/man1/vrenamedomain.1.gz BUILDROOT${prefix}/man/man1/vrenamedomain.1.gz
 f 444 root qmail ${prefix}/man/man1/vrenameuser.1.gz BUILDROOT${prefix}/man/man1/vrenameuser.1.gz
+f 444 root qmail ${prefix}/man/man1/sslerator.1.gz BUILDROOT${prefix}/man/man1/sslerator.1.gz
 f 444 root qmail ${prefix}/man/man1/vserverinfo.1.gz BUILDROOT${prefix}/man/man1/vserverinfo.1.gz
 f 444 root qmail ${prefix}/man/man1/vsetuserquota.1.gz BUILDROOT${prefix}/man/man1/vsetuserquota.1.gz
 f 444 root qmail ${prefix}/man/man1/vuserinfo.1.gz BUILDROOT${prefix}/man/man1/vuserinfo.1.gz
@@ -857,6 +861,7 @@ f 555 root qmail ${prefix}/bin/crypt BUILDROOT${prefix}/bin/crypt
 f 555 root qmail ${prefix}/bin/datemail BUILDROOT${prefix}/bin/datemail
 f 555 root root ${prefix}/bin/date@ BUILDROOT${prefix}/bin/date@
 f 555 root qmail ${prefix}/bin/dbinfo BUILDROOT${prefix}/bin/dbinfo
+f 555 root qmail ${prefix}/bin/sslerator BUILDROOT${prefix}/bin/sslerator
 f 555 root qmail ${prefix}/bin/ddist BUILDROOT${prefix}/bin/ddist
 f 555 root qmail ${prefix}/bin/deferrals BUILDROOT${prefix}/bin/deferrals
 f 555 root qmail ${prefix}/bin/delcr BUILDROOT${prefix}/bin/delcr
@@ -1820,11 +1825,13 @@ ${prefix}/sbin/svctool --pop3=995 --servicedir=${servicedir} --localip=0 --maxda
 fi
 if [ $$noproxy -eq 0 ] ; then
 ${prefix}/sbin/svctool --imap=4143 --servicedir=${servicedir} --localip=0 --maxdaemons=40 \
-	--maxperip=25 --default-domain=${default_domain} --memory=$$imap_pop3_mem --proxy=143
+	--maxperip=25 --default-domain=${default_domain} --memory=$$imap_pop3_mem --proxy=143 \
+	--starttls
 ${prefix}/sbin/svctool --imap=9143 --servicedir=${servicedir} --localip=0 --maxdaemons=40 \
 	--maxperip=25 --default-domain=${default_domain} --memory=$$imap_pop3_mem --proxy=143 --ssl
 ${prefix}/sbin/svctool --pop3=4110 --servicedir=${servicedir} --localip=0 --maxdaemons=40 \
-	--maxperip=25 --default-domain=${default_domain} --memory=$$imap_pop3_mem --proxy=110
+	--maxperip=25 --default-domain=${default_domain} --memory=$$imap_pop3_mem --proxy=110 \
+	--starttls
 ${prefix}/sbin/svctool --pop3=9110 --servicedir=${servicedir} --localip=0 --maxdaemons=40 \
 	--maxperip=25 --default-domain=${default_domain} --memory=$$imap_pop3_mem --proxy=110 --ssl
 fi

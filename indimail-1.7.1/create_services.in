@@ -1,5 +1,8 @@
 #!/bin/sh
 # $Log: create_services.in,v $
+# Revision 2.37  2010-03-06 18:28:47+05:30  Cprogrammer
+# added option for starttls on proxy pop3/imap
+#
 # Revision 2.36  2010-03-01 15:48:52+05:30  Cprogrammer
 # advertise STARTTLS capability in IMAP and POP3
 #
@@ -129,7 +132,7 @@ indimaildir=@indimaildir@
 # End USER Configuration OPTIONS
 #
 
-# $Id: create_services.in,v 2.36 2010-03-01 15:48:52+05:30 Cprogrammer Stab mbhangui $
+# $Id: create_services.in,v 2.37 2010-03-06 18:28:47+05:30 Cprogrammer Exp mbhangui $
 
 usage()
 {
@@ -432,13 +435,15 @@ fi
 if [ $noproxy -eq 0 ] ; then
 	$dir_prefix$indimaildir/sbin/svctool --imap=4143 --servicedir=$servicedir --localip=0 \
 		--maxdaemons=40 --query-cache --maxperip=25 --default-domain=indimail.org \
-		--memory=$imap_pop3_mem --proxy=143 $extra_opt
+		--memory=$imap_pop3_mem --proxy=143 --starttls --tlsprog=$indimaildir/bin/sslerator \
+		$extra_opt
 	$dir_prefix$indimaildir/sbin/svctool --imap=9143 --servicedir=$servicedir --localip=0 \
 		--maxdaemons=40 --query-cache --maxperip=25 --default-domain=indimail.org \
 		--memory=$imap_pop3_mem --proxy=143 --ssl
 	$dir_prefix$indimaildir/sbin/svctool --pop3=4110 --servicedir=$servicedir --localip=0 \
 		--maxdaemons=40 --query-cache --maxperip=25 --default-domain=indimail.org \
-		--memory=$imap_pop3_mem --proxy=110 $extra_opt
+		--memory=$imap_pop3_mem --proxy=110 --starttls --tlsprog=$indimaildir/bin/sslerator \
+		$extra_opt
 	$dir_prefix$indimaildir/sbin/svctool --pop3=9110 --servicedir=$servicedir --localip=0 \
 		--maxdaemons=40 --query-cache --maxperip=25 --default-domain=indimail.org \
 		--memory=$imap_pop3_mem --proxy=110 --ssl $extra_opt

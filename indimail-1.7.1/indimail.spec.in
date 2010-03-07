@@ -1,5 +1,9 @@
 #
 # $Log: indimail.spec.in,v $
+# Revision 2.135  2010-03-06 18:29:14+05:30  Cprogrammer
+# added sslerator
+# added option to specify external tls enabler
+#
 # Revision 2.134  2010-03-06 15:46:33+05:30  Cprogrammer
 # added --starttls for proxy imap and proxy pop3
 #
@@ -421,7 +425,7 @@
 # rpm spec file for indimail
 #
 #
-# $Id: indimail.spec.in,v 2.134 2010-03-06 15:46:33+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 2.135 2010-03-06 18:29:14+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %define _unpackaged_files_terminate_build 1
 
@@ -1056,7 +1060,7 @@ if [ -x /usr/bin/chrpath ] ; then
 for i in clamconf clamscan dbinfo flash freshclam hostcntrl indiversion printdir \
 proxyimap proxypop3 resetquota sigtool vacation vaddaliasdomain vadddomain vadduser \
 vadduserl valias vatrn vbulletin vcalias vcfilter vdeldomain vdeluser vdominfo \
-vgroup vhostid vipmap vmoddomlimits vmoduser vmoveuser vpasswd vpriv \
+vgroup vhostid vipmap vmoddomlimits vmoduser vmoveuser vpasswd vpriv sslerator \
 vproxy vrenamedomain vrenameuser vsetuserquota vsmtp vuserinfo tcpserver
 do
 	if [ -f %{buildroot}%{_prefix}/bin/$i ] ; then
@@ -1353,6 +1357,7 @@ fi
 %attr(511,root,qmail)                   %{_prefix}/bin/qmail-send
 %attr(555,root,qmail)                   %{_prefix}/bin/sendmail
 %attr(555,root,qmail)                   %{_prefix}/bin/dbinfo
+%attr(555,root,qmail)                   %{_prefix}/bin/sslerator
 %attr(555,root,qmail)                   %{_prefix}/bin/ifaddr
 %attr(555,root,qmail)                   %{_prefix}/bin/svscan
 %attr(555,root,qmail)                   %{_prefix}/bin/matchup
@@ -2319,13 +2324,13 @@ fi
 if [ %noproxy -eq 0 ] ; then
 %{_prefix}/sbin/svctool --imap=4143 --servicedir=%{servicedir} --localip=0 --maxdaemons=40 \
 	--query-cache --maxperip=25 --default-domain=%{default_domain} --memory=%{imap_pop3_mem} \
-	--proxy=143 --starttls
+	--proxy=143 --starttls --tlsprog=${_prefix}/bin/sslerator
 %{_prefix}/sbin/svctool --imap=9143 --servicedir=%{servicedir} --localip=0 --maxdaemons=40 \
 	--query-cache --maxperip=25 --default-domain=%{default_domain} --memory=%{imap_pop3_mem} \
 	--proxy=143 --ssl
 %{_prefix}/sbin/svctool --pop3=4110 --servicedir=%{servicedir} --localip=0 --maxdaemons=40 \
 	--query-cache --maxperip=25 --default-domain=%{default_domain} --memory=%{imap_pop3_mem} \
-	--proxy=110 --starttls
+	--proxy=110 --starttls --tlsprog=${_prefix}/bin/sslerator
 %{_prefix}/sbin/svctool --pop3=9110 --servicedir=%{servicedir} --localip=0 --maxdaemons=40 \
 	--query-cache --maxperip=25 --default-domain=%{default_domain} --memory=%{imap_pop3_mem} \
 	--proxy=110 --ssl
