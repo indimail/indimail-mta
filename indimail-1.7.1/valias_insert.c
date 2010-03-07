@@ -1,5 +1,8 @@
 /*
  * $Log: valias_insert.c,v $
+ * Revision 2.19  2010-03-07 09:28:26+05:30  Cprogrammer
+ * check return value of is_distributed_domain for error
+ *
  * Revision 2.18  2010-02-16 09:28:38+05:30  Cprogrammer
  * return error when insert fails
  *
@@ -94,7 +97,7 @@
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: valias_insert.c,v 2.18 2010-02-16 09:28:38+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: valias_insert.c,v 2.19 2010-03-07 09:28:26+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef VALIAS
@@ -115,13 +118,18 @@ valias_insert(char *alias, char *domain, char *alias_line, int ignore)
 #endif
 
 	if (!domain || !*domain)
-		return(1);
+		return (1);
 	if (!alias_line || !*alias_line)
-		return(1);
+		return (1);
 	if (!(real_domain = vget_real_domain(domain)))
 		real_domain = domain;
 #ifdef CLUSTERED_SITE
-	if (is_distributed_domain(real_domain))
+	if ((err = is_distributed_domain(real_domain)) == -1)
+	{
+		fprintf(stderr, "%s: is_distributed_domain failed\n", real_domain);
+		return (1);
+	} else
+	if (err)
 	{
 		snprintf(emailid, MAX_BUFF, "%s@%s", alias, real_domain);
 		if (!(mailstore = findhost(emailid, 1)))
@@ -137,7 +145,7 @@ valias_insert(char *alias, char *domain, char *alias_line, int ignore)
 			if (addusercntrl(alias, real_domain, ptr, "alias", 0))
 			{
 				fprintf(stderr, "valias_insert: Could not insert into central database\n");
-				return(1);
+				return (1);
 			}
 		}
 		if ((ptr = strchr(alias_line, '@')) && (mailstore = findhost(alias_line, 1)) != (char *) 0)
@@ -149,7 +157,7 @@ valias_insert(char *alias, char *domain, char *alias_line, int ignore)
 			if (!ignore && !islocalif (mailstore))
 			{
 				fprintf(stderr, "%s@%s not local (mailstore %s)\n", alias_line, real_domain, mailstore);
-				return(1);
+				return (1);
 			}
 		}
 	}
@@ -166,7 +174,7 @@ valias_insert(char *alias, char *domain, char *alias_line, int ignore)
 		if (mysql_errno(&mysql[1]) == ER_NO_SUCH_TABLE)
 		{
 			if (create_table(ON_LOCAL, "valias", VALIAS_TABLE_LAYOUT))
-				return(-1);
+				return (-1);
 			if (mysql_query(&mysql[1], SqlBuf))
 			{
 				mysql_perror("valias_insert: %s", SqlBuf);
@@ -181,7 +189,7 @@ valias_insert(char *alias, char *domain, char *alias_line, int ignore)
 	if ((err = mysql_affected_rows(&mysql[1])) == -1)
 	{
 		mysql_perror("mysql_affected_rows");
-		return(-1);
+		return (-1);
 	}
 	if (!verbose)
 		return (0);

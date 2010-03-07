@@ -1,5 +1,8 @@
 /*
  * $Log: addaliasdomain.c,v $
+ * Revision 2.6  2010-03-07 09:27:58+05:30  Cprogrammer
+ * check return value of is_distributed_domain for error
+ *
  * Revision 2.5  2009-09-23 14:59:02+05:30  Cprogrammer
  * change for new runcmmd()
  *
@@ -40,7 +43,7 @@
 #include <sys/stat.h>
 
 #ifndef	lint
-static char     sccsid[] = "$Id: addaliasdomain.c,v 2.5 2009-09-23 14:59:02+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: addaliasdomain.c,v 2.6 2010-03-07 09:27:58+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 int
@@ -48,40 +51,46 @@ vaddaliasdomain(char *old_domain, char *new_domain)
 {
 	char            Dir[MAX_BUFF], TmpBuf1[MAX_BUFF], TmpBuf2[MAX_BUFF];
 	char           *tmpstr, *qmaildir;
+	int             i;
 	uid_t           uid;
 	gid_t           gid;
 
-	if(!new_domain || !*new_domain || *new_domain == '-' || !old_domain || !*old_domain)
+	if (!new_domain || !*new_domain || *new_domain == '-' || !old_domain || !*old_domain)
 	{
 		error_stack(stderr, "Invalid Domain Name\n");
 		return (-1);
 	}
 	lowerit(new_domain);
-	if(vget_assign(new_domain, 0, MAX_BUFF, 0, 0))
+	if (vget_assign(new_domain, 0, MAX_BUFF, 0, 0))
 	{
 		error_stack(stderr, "Domain %s exists\n", new_domain);
 		return (-1);
 	}
 	lowerit(old_domain);
-	if(!vget_assign(old_domain, Dir, MAX_BUFF, &uid, &gid))
+	if (!vget_assign(old_domain, Dir, MAX_BUFF, &uid, &gid))
 	{
 		error_stack(stderr, "Domain %s does not exist\n", old_domain);
 		return (-1);
 	}
 #ifdef CLUSTERED_SITE
-	if(is_distributed_domain(old_domain))
+	if ((i = is_distributed_domain(old_domain)) == -1)
 	{
-		if(open_master())
+		error_stack(stderr, "%s: is_distributed_domain failed\n", old_domain);
+		return (-1);
+	} else
+	if (i)
+	{
+		if (open_master())
 		{
 			error_stack(stderr, "Failed to open Master Db\n");
 			return(-1);
 		}
-		if(vauth_insertaliasdomain(old_domain, new_domain))
+		if (vauth_insertaliasdomain(old_domain, new_domain))
 			return(-1);
 	}
 #endif
 	scopy(TmpBuf1, Dir, MAX_BUFF);
-	if((tmpstr = strstr(Dir, "/domains")) != (char *) 0)
+	if ((tmpstr = strstr(Dir, "/domains")) != (char *) 0)
 		*tmpstr = 0;
 	snprintf(TmpBuf2, MAX_BUFF, "%s/domains/%s", Dir, new_domain);
 	if (symlink(TmpBuf1, TmpBuf2) != 0)
@@ -90,9 +99,9 @@ vaddaliasdomain(char *old_domain, char *new_domain)
 			TmpBuf2, TmpBuf1, strerror(errno));
 		return(-1);
 	}
-	if(add_domain_assign(new_domain, Dir, uid, gid))
+	if (add_domain_assign(new_domain, Dir, uid, gid))
 		return(-1);
-	if(add_control(new_domain, 0))
+	if (add_control(new_domain, 0))
 		return(-1);
 	getEnvConfigStr(&qmaildir, "QMAILDIR", QMAILDIR);
 	snprintf(TmpBuf1, MAX_BUFF, "%s/bin/qmail-sighup", qmaildir);
@@ -100,15 +109,15 @@ vaddaliasdomain(char *old_domain, char *new_domain)
 		runcmmd(TmpBuf1, 0);
 	else
 		signal_process("qmail-send", SIGHUP);
-	if(snprintf(TmpBuf1, MAX_BUFF, "%s/domains/%s/.aliasdomains", Dir, old_domain) == -1)
+	if (snprintf(TmpBuf1, MAX_BUFF, "%s/domains/%s/.aliasdomains", Dir, old_domain) == -1)
 	{
 		error_stack(stderr, "string %s/domains/%s/.aliasdomains too long\n",
 			Dir, old_domain);
 		return(-1);
 	}  else
-	if(update_file(TmpBuf1, new_domain, 0600))
+	if (update_file(TmpBuf1, new_domain, 0600))
 		return(-1);
-	if(chown(TmpBuf1, uid, gid))
+	if (chown(TmpBuf1, uid, gid))
 	{
 		error_stack(stderr, "chown/chmod %s (%d/%d/0600)\n",
 			TmpBuf1, uid, gid);

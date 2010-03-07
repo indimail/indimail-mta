@@ -1,5 +1,8 @@
 /*
  * $Log: UserInLookup.c,v $
+ * Revision 2.16  2010-03-07 09:27:27+05:30  Cprogrammer
+ * check return value of is_distributed_domain for error
+ *
  * Revision 2.15  2009-09-23 21:22:50+05:30  Cprogrammer
  * record error when mysql_ping reports MySQL server has gone away
  *
@@ -53,7 +56,7 @@
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: UserInLookup.c,v 2.15 2009-09-23 21:22:50+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: UserInLookup.c,v 2.16 2010-03-07 09:27:27+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #include <string.h>
@@ -105,19 +108,24 @@ UserInLookup(char *email)
 			 * to hostcntrl. so if alias not found in hostcntrl,
 			 * it will not be present on the mailstore's alias table
 			 */
-			if (is_distributed_domain(real_domain))
+			if ((count = is_distributed_domain(real_domain)) == -1)
+			{
+				fprintf(stderr, "%s: is_distributed_domain failed\n", real_domain);
+				return (-1);
+			} else
+			if (count)
 			{
 				is_open = 0;
-				return(1);
+				return (1);
 			}
 #endif
-			if(OpenDatabases())
-				return(-1);
+			if (OpenDatabases())
+				return (-1);
 			for (count = 1, mysqlptr = MdaMysql, rhostsptr = RelayHosts;*rhostsptr;mysqlptr++, rhostsptr++)
 			{
 				if (!strncmp((*rhostsptr)->domain, real_domain, DBINFO_BUFF))
 				{
-					if((*rhostsptr)->fd == -1)
+					if ((*rhostsptr)->fd == -1)
 					{
 						if (connect_db(rhostsptr, mysqlptr))
 						{
@@ -126,7 +134,7 @@ UserInLookup(char *email)
 							(*rhostsptr)->fd = -1;
 							is_open = 0;
 							userNotFound = 0;
-							return(-1);
+							return (-1);
 						} else
 							(*rhostsptr)->fd = (*mysqlptr)->net.fd;
 					}
@@ -143,7 +151,7 @@ UserInLookup(char *email)
 							fprintf(stderr, "%d: %s Failed db %s@%s for user %s port %d\n", count, (*rhostsptr)->domain, 
 								(*rhostsptr)->database, (*rhostsptr)->server, (*rhostsptr)->user, (*rhostsptr)->port);
 							(*rhostsptr)->fd = -1;
-							return(-1);
+							return (-1);
 						} else
 							(*rhostsptr)->fd = (*mysqlptr)->net.fd;
 					}
@@ -153,12 +161,12 @@ UserInLookup(char *email)
 					{
 						is_open = 0;
 						userNotFound = 0;
-						return(-1);
+						return (-1);
 					} else
 					if (valias_count > 0)
 					{
 						is_open = 0;
-						return(4);
+						return (4);
 					}
 #endif
 				}
@@ -166,16 +174,16 @@ UserInLookup(char *email)
 			is_open = 0;
 #else /*- #ifdef CLUSTERED_SITE */
 #ifdef VALIAS
-			if((valias_count = valiasCount(user, real_domain)) == -1)
-				return(-1);
+			if ((valias_count = valiasCount(user, real_domain)) == -1)
+				return (-1);
 			else
-			if(valias_count > 0)
-				return(4);
+			if (valias_count > 0)
+				return (4);
 #endif
 #endif /*- #ifdef CLUSTERED_SITE */
-			return(1);
+			return (1);
 		} else
-			return(-1);
+			return (-1);
 	}
 	if (!vauth_getpw(user, real_domain))
 	{
@@ -188,37 +196,37 @@ UserInLookup(char *email)
 				is_open = 0;
 #endif
 				userNotFound = 0;
-				return(-1);
+				return (-1);
 			} else
 			if (valias_count > 0)
 			{
 #ifdef CLUSTERED_SITE
 				is_open = 0;
 #endif
-				return(4);
+				return (4);
 			}
 #ifdef CLUSTERED_SITE
 			is_open = 0;
 #endif
 #endif
-			return(1);
+			return (1);
 		} else
 		{
 #ifdef CLUSTERED_SITE
 			is_open = 0;
 #endif
-			return(-1);
+			return (-1);
 		}
 	}
 #ifdef CLUSTERED_SITE
 	is_open = 0;
 #endif
 	if (is_inactive)
-		return(2);
+		return (2);
 	else
 	if (is_overquota)
-		return(3);
-	return(0);
+		return (3);
+	return (0);
 }
 
 void

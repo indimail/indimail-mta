@@ -1,5 +1,8 @@
 /*
  * $Log: valias_delete.c,v $
+ * Revision 2.13  2010-03-07 09:28:23+05:30  Cprogrammer
+ * check return value of is_distributed_domain for error
+ *
  * Revision 2.12  2008-09-08 09:54:44+05:30  Cprogrammer
  * removed mysql_escape
  *
@@ -76,7 +79,7 @@
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: valias_delete.c,v 2.12 2008-09-08 09:54:44+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: valias_delete.c,v 2.13 2010-03-07 09:28:23+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef VALIAS
@@ -91,12 +94,17 @@ valias_delete(char *alias, char *domain, char *alias_line)
 	char            SqlBuf[SQL_BUF_SIZE];
 	char           *real_domain;
 
-	if(!domain || !*domain)
-		return(1);
-	if(!(real_domain = vget_real_domain(domain)))
+	if (!domain || !*domain)
+		return (1);
+	if (!(real_domain = vget_real_domain(domain)))
 		real_domain = domain;
 #ifdef CLUSTERED_SITE
-	if(is_distributed_domain(real_domain))
+	if ((err = is_distributed_domain(real_domain)) == -1)
+	{
+		fprintf(stderr, "%s: is_distributed_domain failed\n", real_domain);
+		return (1);
+	} else
+	if (err)
 	{
 		if (open_master())
 		{
@@ -108,19 +116,19 @@ valias_delete(char *alias, char *domain, char *alias_line)
 			cntrl_table, alias, real_domain);
 		if (mysql_query(&mysql[0], SqlBuf))
 		{
-			if(mysql_errno(&mysql[0]) == ER_NO_SUCH_TABLE)
+			if (mysql_errno(&mysql[0]) == ER_NO_SUCH_TABLE)
 				create_table(ON_MASTER, "hostcntrl", CNTRL_TABLE_LAYOUT);
 			else
 			{
 				fprintf(stderr, "valias_delete: mysql error: %s\n", mysql_error(&mysql[0]));
-				return(1);
+				return (1);
 			}
 		}
 	}
 #endif
 	if ((err = vauth_open((char *) 0)) != 0)
 		return (err);
-	if(alias_line && *alias_line)
+	if (alias_line && *alias_line)
 		snprintf(SqlBuf, SQL_BUF_SIZE, 
 			"delete low_priority from valias where alias = \"%s\" and domain = \"%s\" and valias_line=\"%s\"", 
 			alias, real_domain, alias_line);
@@ -130,32 +138,32 @@ valias_delete(char *alias, char *domain, char *alias_line)
 			alias, real_domain);
 	if (mysql_query(&mysql[1], SqlBuf))
 	{
-		if(mysql_errno(&mysql[1]) == ER_NO_SUCH_TABLE)
+		if (mysql_errno(&mysql[1]) == ER_NO_SUCH_TABLE)
 		{
-			if(create_table(ON_LOCAL, "valias", VALIAS_TABLE_LAYOUT))
-				return(-1);
-			if(verbose)
+			if (create_table(ON_LOCAL, "valias", VALIAS_TABLE_LAYOUT))
+				return (-1);
+			if (verbose)
 				printf("No alias line %s for alias %s@%s\n", alias_line ? alias_line : " ", alias, real_domain);
-			return(0);
+			return (0);
 		} else
 		{
 			mysql_perror("valias_delete: %s", SqlBuf);
 			return (-1);
 		}
 	}
-	if((err = mysql_affected_rows(&mysql[1])) == -1)
+	if ((err = mysql_affected_rows(&mysql[1])) == -1)
 	{
 		mysql_perror("mysql_affected_rows");
-		return(-1);
+		return (-1);
 	}
-	if(!verbose)
+	if (!verbose)
 		return (0);
-	if(err && verbose)
+	if (err && verbose)
 		printf("Deleted alias line %s for alias %s@%s (%d entries)\n", alias_line, alias, real_domain, err);
 	else
-	if(verbose)
+	if (verbose)
 		printf("No alias line %s for alias %s@%s\n", alias_line ? alias_line : " ", alias, real_domain);
-	return(0);
+	return (0);
 }
 #endif /*- #ifdef VALIAS */
 

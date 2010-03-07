@@ -1,5 +1,8 @@
 /*
  * $Log: dbinfoSelect.c,v $
+ * Revision 2.6  2010-03-07 09:28:11+05:30  Cprogrammer
+ * check return value of is_distributed_domain for error
+ *
  * Revision 2.5  2003-10-28 00:23:00+05:30  Cprogrammer
  * display auto generated local dbinfo entries
  *
@@ -19,7 +22,7 @@
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: dbinfoSelect.c,v 2.5 2003-10-28 00:23:00+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: dbinfoSelect.c,v 2.6 2010-03-07 09:28:11+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef CLUSTERED_SITE
@@ -32,24 +35,24 @@ dbinfoSelect(char *filename, char *domain, char *mdahost, int row_format)
 	char            mcdFile[MAX_BUFF];
 	DBINFO        **rhostsptr;
 	MYSQL         **mysqlptr;
-	int             count;
+	int             count, is_dist;
 	int             first_flag = 0;
 	char           *ptr;
 
-	if(filename && *filename)
+	if (filename && *filename)
 	{
 		snprintf(mcdFile, MAX_BUFF, "MCDFILE=%s", filename);
 		putenv(mcdFile);
 	}
-	if(OpenDatabases())
+	if (OpenDatabases())
 		return(1);
 	for (count = 1, mysqlptr = MdaMysql, rhostsptr = RelayHosts;(*rhostsptr);mysqlptr++, rhostsptr++, count++)
 	{
-		if(mdahost && *mdahost && strncmp(mdahost, (*rhostsptr)->mdahost, DBINFO_BUFF))
+		if (mdahost && *mdahost && strncmp(mdahost, (*rhostsptr)->mdahost, DBINFO_BUFF))
 			continue;
-		if(domain && *domain && strncmp(domain, (*rhostsptr)->domain, DBINFO_BUFF))
+		if (domain && *domain && strncmp(domain, (*rhostsptr)->domain, DBINFO_BUFF))
 			continue;
-		if(row_format)
+		if (row_format)
 		{
 			first_flag++;
 			printf("%s %s %d %s %s %d %s %s %s\n", 
@@ -58,17 +61,20 @@ dbinfoSelect(char *filename, char *domain, char *mdahost, int row_format)
 				(*rhostsptr)->user, (*rhostsptr)->password);
 			continue;
 		}
-		if(!first_flag++)
+		if (!first_flag++)
 			printf("MySQL Client Version: %s\n", mysql_get_client_info());
 		printf("connection to  %s\n", mysql_get_host_info(*mysqlptr));
 		printf("protocol       %d\n", mysql_get_proto_info(*mysqlptr));
 		printf("server version %s\n", mysql_get_server_info(*mysqlptr));
-		printf("domain         %-15s - %s\n", (*rhostsptr)->domain, 
-			is_distributed_domain((*rhostsptr)->domain) == 1 ? "Distributed" : "Non Distributed");
+		if ((is_dist = is_distributed_domain((*rhostsptr)->domain)) == -1)
+			printf("domain         %-15s - can't figure out dist flag\n");
+		else
+			printf("domain         %-15s - %s\n", (*rhostsptr)->domain, 
+				is_distributed_domain((*rhostsptr)->domain) == 1 ? "Distributed" : "Non Distributed");
 		printf("sqlserver[%03d] %s\n", count, (*rhostsptr)->server);
-		if(*((*rhostsptr)->mdahost))
+		if (*((*rhostsptr)->mdahost))
 			printf("mda host       %s\n", (*rhostsptr)->mdahost);
-		if((*mysqlptr)->unix_socket)
+		if ((*mysqlptr)->unix_socket)
 			printf("Unix   Socket  %s\n", (*mysqlptr)->unix_socket);
 		else
 			printf("TCP/IP Port    %d\n", (*rhostsptr)->port);
@@ -77,10 +83,10 @@ dbinfoSelect(char *filename, char *domain, char *mdahost, int row_format)
 		printf("password       %s\n", (*rhostsptr)->password);
 		printf("fd             %d\n", (*rhostsptr)->fd);
 		printf("DBINFO Method  %s\n", (*rhostsptr)->isLocal ? "Auto" : "DBINFO");
-		if((*rhostsptr)->fd == -1)
+		if ((*rhostsptr)->fd == -1)
 			printf("MySQL Stat     mysql_real_connect: %s\n", mysql_error((*mysqlptr)));
 		else
-		if((ptr = (char *) mysql_stat((*mysqlptr))))
+		if ((ptr = (char *) mysql_stat((*mysqlptr))))
 			printf("MySQL Stat     %s\n", ptr);
 		else
 			printf("MySQL Stat     %s\n", mysql_error((*mysqlptr)));

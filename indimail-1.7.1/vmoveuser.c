@@ -122,7 +122,7 @@ main(int argc, char **argv)
 	if (uid != 0 && uid != indimailuid)
 	{
 		error_stack(stderr, "you must be root or indimail to run this program\n");
-		return(1);
+		return (1);
 	}
 	User = argv[1];
 	NewDir = argv[2];
@@ -133,50 +133,50 @@ main(int argc, char **argv)
 	} else
 	{
 		fprintf(stderr, "%s: Not a fully qualified email\n", User);
-		return(1);
+		return (1);
 	}
-	if(!(real_domain = vget_real_domain(Domain)))
+	if (!(real_domain = vget_real_domain(Domain)))
 	{
 		fprintf(stderr, "Domain %s does not exist\n", Domain);
 		return (1);
 	} else
-	if(!vget_assign(real_domain, Dir, MAX_BUFF, &uid, &gid))
+	if (!vget_assign(real_domain, Dir, MAX_BUFF, &uid, &gid))
 	{
 		fprintf(stderr, "Domain %s does not exist\n", real_domain);
 		return (1);
 	}
 #ifdef CLUSTERED_SITE
-	if((err = is_distributed_domain(real_domain)) == -1)
+	if ((err = is_distributed_domain(real_domain)) == -1)
 	{
 		fprintf(stderr, "Unable to verify %s as a distributed domain\n", real_domain);
 		return (1);
 	} else
-	if(err == 1)
+	if (err == 1)
 	{
-		if(open_master())
+		if (open_master())
 		{
 			fprintf(stderr, "Failed to Open Master Db\n");
 			return (1);
 		}
 		snprintf(TmpBuf, MAX_BUFF, "%s@%s", User, real_domain);
-		if((mailstore = findhost(TmpBuf, 0)) != (char *) 0)
+		if ((mailstore = findhost(TmpBuf, 0)) != (char *) 0)
 		{
-			if((ptr1 = strrchr(mailstore, ':')) != (char *) 0)
+			if ((ptr1 = strrchr(mailstore, ':')) != (char *) 0)
 				*ptr1 = 0;
 			for(;*mailstore && *mailstore != ':';mailstore++);
 			mailstore++;
 		} else
 		{
-			if(userNotFound)
+			if (userNotFound)
 				fprintf(stderr, "%s@%s: No such user\n", User, real_domain);
 			else
 				fprintf(stderr, "Error connecting to db\n");
 			return (1);
 		}
-		if(!islocalif(mailstore))
+		if (!islocalif(mailstore))
 		{
 			fprintf(stderr, "%s@%s not local (mailstore %s)\n", User, real_domain, mailstore);
-			return(1);
+			return (1);
 		}
 	}
 #endif
@@ -196,11 +196,11 @@ main(int argc, char **argv)
 	for(;;)
 	{
 		*tmp_domain = 0;
-		if(!(ptr1 = valias_select_all(0, tmp_domain, 0)))
+		if (!(ptr1 = valias_select_all(0, tmp_domain, 0)))
 			break;
-		if(!(ptr2 = replacestr(ptr1, OldDir, NewDir)))
+		if (!(ptr2 = replacestr(ptr1, OldDir, NewDir)))
 			continue;
-		if(ptr1 == ptr2)
+		if (ptr1 == ptr2)
 			continue;
 		valias_update(User, tmp_domain, ptr1, ptr2);
 		free(ptr2);
@@ -210,7 +210,7 @@ main(int argc, char **argv)
 	if (setuid(0))
 	{
 		perror("setuid-root");
-		return(1);
+		return (1);
 	}
 	if (!access(OldDir, F_OK) && MoveFile(OldDir, NewDir))
 	{

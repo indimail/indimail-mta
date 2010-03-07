@@ -1,5 +1,8 @@
 /*
  * $Log: vserverinfo.c,v $
+ * Revision 2.2  2010-03-07 09:28:42+05:30  Cprogrammer
+ * check return value of is_distributed_domain for error
+ *
  * Revision 2.1  2009-11-18 11:49:30+05:30  Cprogrammer
  * program to display server info of a node in IndiMail cluster
  *
@@ -7,7 +10,7 @@
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vserverinfo.c,v 2.1 2009-11-18 11:49:30+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: vserverinfo.c,v 2.2 2010-03-07 09:28:42+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #include <string.h>
@@ -39,7 +42,12 @@ main(int argc, char **argv)
 		if (!(real_domain = vget_real_domain(Domain)))
 			real_domain = Domain;
 		domain = real_domain;
-		if (is_distributed_domain(real_domain))
+		if ((found = is_distributed_domain(real_domain)) == -1)
+		{
+			fprintf(stderr, "%s: is_distributed_domain failed\n", real_domain);
+			return (1);
+		} else
+		if (found)
 		{
 			if (!(mailstore = findhost(email, 2)))
 			{
@@ -58,14 +66,14 @@ main(int argc, char **argv)
 			fprintf(stderr, "%s: not a distributed domain\n", real_domain);
 	} else
 		real_domain = domain;
-	if(!RelayHosts && !(RelayHosts = LoadDbInfo_TXT(&total)))
+	if (!RelayHosts && !(RelayHosts = LoadDbInfo_TXT(&total)))
 	{
 		perror("LoadDbInfo_TXT");
-		return(1);
+		return (1);
 	}
 	for (found = 0, rhostsptr = RelayHosts;*rhostsptr;rhostsptr++)
 	{
-		if(!strncmp((*rhostsptr)->domain, domain, DBINFO_BUFF))
+		if (!strncmp((*rhostsptr)->domain, domain, DBINFO_BUFF))
 		{
 			if ((mdahost && !strncmp((*rhostsptr)->mdahost, mdahost, DBINFO_BUFF))
 					|| (server && !strncmp((*rhostsptr)->server, server, DBINFO_BUFF))
@@ -91,7 +99,7 @@ main(int argc, char **argv)
 	}
 	if (!found)
 		fprintf(stderr, "userinfo: could not locate server info for %s\n", real_domain);
-	return(found ? 0 : 1);
+	return (found ? 0 : 1);
 }
 
 static int
@@ -150,7 +158,7 @@ get_options(int argc, char **argv, char **mdahost, char **server, char **domain,
 			break;
 		default:
 			fprintf(stderr, "USAGE: vserserverinfo [-upPsmd] [-D domain -H host | -S server] | [email]\n");
-			return(1);
+			return (1);
 		}
 	}
 	if (!display_user && !display_passwd && !display_server && !display_mdahost

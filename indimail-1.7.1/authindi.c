@@ -1,5 +1,8 @@
 /*
  * $Log: authindi.c,v $
+ * Revision 2.15  2010-03-07 09:28:06+05:30  Cprogrammer
+ * check return value of is_distributed_domain for error
+ *
  * Revision 2.14  2010-02-28 13:26:48+05:30  Cprogrammer
  * use value of DEBUG_LOGIN
  *
@@ -51,7 +54,7 @@
 #include <errno.h>
 
 #ifndef lint
-static char     sccsid[] = "$Id: authindi.c,v 2.14 2010-02-28 13:26:48+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: authindi.c,v 2.15 2010-03-07 09:28:06+05:30 Cprogrammer Exp mbhangui $";
 #endif
 #ifdef AUTH_SIZE
 #undef AUTH_SIZE
@@ -194,7 +197,12 @@ main(int argc, char **argv)
 		real_domain = domain;
 	snprintf(Email, MAX_BUFF, "%s@%s", user, real_domain);
 #ifdef CLUSTERED_SITE
-	if (is_distributed_domain(real_domain))
+	if ((count = is_distributed_domain(real_domain)) == -1)
+	{
+		fprintf(stderr, "%s: is_distributed_domain failed\n", real_domain);
+		return (1);
+	} else
+	if (count)
 	{
 		char           *mailstore, *ptr;
 
