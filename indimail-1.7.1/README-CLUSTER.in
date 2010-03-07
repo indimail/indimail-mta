@@ -20,10 +20,10 @@ DATE: @DATE@
        install IndiMail on this server.
     2) Mailstores - A mailstore is a host which has disk space to host user's mailboxes.
        Each mailstore can have its own set of users. You can call each host a 'node'.
-       You need to install IndiMail on each mailstore. IndiMail allows you to extend
-       a domain across multiple mailstores. Each mailstore needs its own MySQL database
-       to store information for its own set of users. You may install a MySQL database on
-       each of the mailstore. You need to have IndiMail installed on each mailstore.
+       IndiMail allows you to extend a domain across multiple mailstores. Each mailstore
+       needs its own MySQL database to store information for its own set of users. You may
+       install a MySQL database on each of the mailstore.
+       You need to install IndiMail on each mailstore.
     3) Relay Server - A relay server acts as an SMTP gateway between the user and the
        mailstore or between the user and the internet.
        You need to install IndiMail on each relay server.
@@ -43,8 +43,12 @@ DATE: @DATE@
     create a control file host.mysql which has the IP address or hostname for the MySQL
     database. If this file is missing, IndiMail program will use 'localhost' my default.
 
-    echo localhost > @indimaildir@/control/host.mysql   (MySQL host to which all programs will
-                                                        connect)
+    # echo localhost > @indimaildir@/control/host.mysql (MySQL host to which all programs will
+                                                         connect)
+    NOTE: you can also use host:user:password:socket or host:user:password:port format
+    for host.mysql (for IndiMail 1.6.9 and above)
+
+    # echo "localhost:indimail:ssh-1.5-:/tmp/mysql.sock" > host.mysql
 
     Clustered Domain
     ----------------

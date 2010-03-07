@@ -7,21 +7,27 @@
     -------------------------------
 
     % sudo rpm -ivh indimail-@version@-1.1.i386.rpm
-	% sudo /var/indimail/sbin/initsvc -on
     % cd /var/indimail/control
     % su
     # echo "localhost" > host.mysql
-	# /var/indimail/sbin/initsvc -on
+    # /var/indimail/sbin/initsvc -on
     # exit
 
     NOTE: you can also use host:user:password:socket or host:user:password:port format
     for host.mysql (for IndiMail 1.6.9 and above)
 
-	# echo "localhost:indimail:ssh-1.5-:/tmp/mysql.sock" > host.mysql
+    # echo "localhost:indimail:ssh-1.5-:/tmp/mysql.sock" > host.mysql
 
-	Ensure MySQL is running
+    Ensure MySQL is running
 
-	% sudo /var/indimail/bin/svstat /service/mysql.3306
+    The RPM installation creates MySQL service in down state. The service will
+    not come up unless you use the command svc -u. Also to ensure that the
+    service comes up automatically after system reboot, remove the file 'down'
+
+    % sudo rm /service/mysql.3306/down
+    % sudo svc -u /service/mysql.3306
+
+    % sudo /var/indimail/bin/svstat /service/mysql.3306
     /service/mysql.3306: up (pid 11936) 3927 seconds
 
     % sudo /var/indimail/bin/vadddomain example.com pass
@@ -33,23 +39,29 @@
     ---------------------------
 
     % sudo rpm -ivh indimail-@version@-1.1.i386.rpm
-	% sudo /var/indimail/sbin/initsvc -on
     % cd /var/indimail/control
     % su
     # echo "localhost" > host.cntrl (replace localhost with IP of your MySQL host)
     # ln -s host.cntrl host.master
     # echo 192.168.1.100 > hostip (replace 192.168.1.100 with your mailserver IP)
-	# /var/indimail/sbin/initsvc -on
+    # /var/indimail/sbin/initsvc -on
     # exit
 
     NOTE: you can also use host:user:password:socket or host:user:password:port format
     for host.cntrl, host.master (for IndiMail 1.6.9 and above)
 
-	# echo "localhost:indimail:ssh-1.5-:/tmp/mysql.sock" > host.cntrl
+    # echo "localhost:indimail:ssh-1.5-:/tmp/mysql.sock" > host.cntrl
 
-	Ensure MySQL is running
+    Ensure MySQL is running
 
-	% sudo /var/indimail/bin/svstat /service/mysql.3306
+    The RPM installation creates MySQL service in down state. The service will
+    not come up unless you use the command svc -u. Also to ensure that the
+    service comes up automatically after system reboot, remove the file 'down'
+
+    % sudo rm /service/mysql.3306/down
+    % sudo svc -u /service/mysql.3306
+
+    % sudo /var/indimail/bin/svstat /service/mysql.3306
     /service/mysql.3306: up (pid 11936) 3927 seconds
 
     % sudo /var/indimail/bin/vadddomain -D indimail -S localhost \

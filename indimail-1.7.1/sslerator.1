@@ -24,6 +24,11 @@ connection with SSL/TLS.
 Use \fIcertfile\fR as the certificate
 The certificate to use and is required for SSL/TLS servers.
 \fIcertfile\fR must not be world-readable.
+.TP
+\fB-e\fR
+Write ssl library errors to the network. If not provided, \fBsslerator\fR will write
+all ssl library errors to fd 2. This mode is disabled if environment variable TCPREMOTEIP
+is defined (running under tcpserver(1))
 
 .SH "ENVIRONMENT VARIABLES"
 .PP
@@ -41,6 +46,11 @@ for SSL/TLS clients.
 A set of OpenSSL cipher strings. Multiple ciphers contained in a
 string should be separated by a colon.
 
+.TP
+\fBBANNER=\fIstring\fB\fR
+Banner to issue before starting SSL/TLS negotiation.
+
 .SH "SEE ALSO"
 .PP
-\fBproxyimap\fR(8)
+\fBproxyimap\fR(8),
+\fBproxypop3\fR(8)
