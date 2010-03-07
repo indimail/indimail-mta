@@ -1195,9 +1195,9 @@ getversion(char *id)
 	getversion_mysql_query_c();
 	getversion_unsetenv_c();
 	if(id)
-		printf("%s\nIndi Mail Version %s\n", id, VERSION);
+		printf("%s\nIndiMail Version %s\n", id, VERSION);
 	else
-		printf("Indi Mail Version %s\n", VERSION);
+		printf("IndiMail Version %s\n", VERSION);
 	return;
 }
 
