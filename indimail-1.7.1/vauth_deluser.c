@@ -86,17 +86,17 @@ vauth_deluser(char *user, char *domain)
 	if ((err = vauth_open((char *) 0)) != 0)
 		return (1);
 #ifdef CLUSTERED_SITE
-	if((err = is_distributed_domain(domain)) == -1)
+	if ((err = is_distributed_domain(domain)) == -1)
 	{
 		fprintf(stderr, "Unable to verify %s as a distributed domain\n", domain);
-		return(1);
+		return (1);
 	} else
-	if(err == 1)
+	if (err == 1)
 	{
-		if(vauth_updateflag(user, domain, DEL_FLAG))
-			return(1);
-		if(delusercntrl(user, domain, 0))
-			return(1);
+		if (vauth_updateflag(user, domain, DEL_FLAG))
+			return (1);
+		if (delusercntrl(user, domain, 0))
+			return (1);
 	}
 #endif
 	if (site_size == LARGE_SITE)
@@ -115,7 +115,7 @@ vauth_deluser(char *user, char *domain)
 		return (1);
 	} 
 	err = mysql_affected_rows(&mysql[1]);
-	if(!err && site_size == SMALL_SITE)
+	if (!err && site_size == SMALL_SITE)
 	{
 		snprintf(SqlBuf, SQL_BUF_SIZE, "delete low_priority from %s where pw_name = \"%s\" and pw_domain = \"%s\"", 
 				inactive_table, user, domain);
@@ -126,11 +126,11 @@ vauth_deluser(char *user, char *domain)
 		} 
 		err = mysql_affected_rows(&mysql[1]);
 	}
-	if(!err || err == -1)
+	if (!err || err == -1)
 		err = 1;
 	else
 		err = 0;
-	return(err);
+	return (err);
 }
 
 void
