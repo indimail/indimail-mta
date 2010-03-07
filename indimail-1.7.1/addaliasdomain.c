@@ -82,7 +82,7 @@ vaddaliasdomain(char *old_domain, char *new_domain)
 	{
 		if (open_master())
 		{
-			error_stack(stderr, "Failed to open Master Db\n");
+			error_stack(stderr, "vaddaliasdomain: Failed to open Master Db\n");
 			return(-1);
 		}
 		if (vauth_insertaliasdomain(old_domain, new_domain))
