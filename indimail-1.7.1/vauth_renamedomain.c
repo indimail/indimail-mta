@@ -133,14 +133,14 @@ rename_data(int which, char *tablename, char *column_name, char *NewDomain, char
 #ifdef CLUSTERED_SITE
 	if ((which == ON_MASTER ? open_master() : vauth_open((char *) 0)))
 	{
-		fprintf(stderr, "rename_data: Failed to open %s\n", which == ON_MASTER ? "central" : "local");
+		fprintf(stderr, "rename_data: Failed to open %s db\n", which == ON_MASTER ? "master" : "local");
 		return (-1);
 	}
 #else
 	which = ON_LOCAL;
 	if (vauth_open((char *) 0))
 	{
-		fprintf(stderr, "rename_data: Failed to open %s\n", which == ON_MASTER ? "central" : "local");
+		fprintf(stderr, "rename_data: Failed to open local db\n");
 		return (-1);
 	}
 #endif
