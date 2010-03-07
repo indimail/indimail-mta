@@ -30,14 +30,14 @@ vpriv_delete(char *user, char *program)
 	int             err;
 	char            SqlBuf[SQL_BUF_SIZE];
 
-	if(!user || !*user)
-		return(1);
+	if (!user || !*user)
+		return (1);
 	if (open_master())
 	{
-		fprintf(stderr, "Failed to open Master Db\n");
-		return(-1);
+		fprintf(stderr, "vpriv_delete: Failed to open Master Db\n");
+		return (-1);
 	}
-	if(program && *program)
+	if (program && *program)
 	{
 		snprintf(SqlBuf, SQL_BUF_SIZE, 
 			"delete low_priority from vpriv where user = \"%s\" and program = \"%s\"", 
@@ -47,32 +47,32 @@ vpriv_delete(char *user, char *program)
 			"delete low_priority from vpriv where user = \"%s\"", user);
 	if (mysql_query(&mysql[0], SqlBuf))
 	{
-		if(mysql_errno(&mysql[0]) == ER_NO_SUCH_TABLE)
+		if (mysql_errno(&mysql[0]) == ER_NO_SUCH_TABLE)
 		{
-			if(create_table(ON_MASTER, "vpriv", PRIV_CMD_LAYOUT))
-				return(-1);
-			if(verbose)
+			if (create_table(ON_MASTER, "vpriv", PRIV_CMD_LAYOUT))
+				return (-1);
+			if (verbose)
 				printf("No program line %s for user %s\n", program, user);
-			return(0);
+			return (0);
 		} else
 		{
 			fprintf(stderr, "vpriv_delete: %s: %s\n", SqlBuf, mysql_error(&mysql[0]));
 			return (-1);
 		}
 	}
-	if((err = mysql_affected_rows(&mysql[0])) == -1)
+	if ((err = mysql_affected_rows(&mysql[0])) == -1)
 	{
 		fprintf(stderr, "mysql_affected_rows: %s\n", mysql_error(&mysql[0]));
-		return(-1);
+		return (-1);
 	}
-	if(!verbose)
+	if (!verbose)
 		return (0);
-	if(err && verbose)
+	if (err && verbose)
 		printf("Deleted program %s for user %s (%d entries)\n", program, user, err);
 	else
-	if(verbose)
+	if (verbose)
 		printf("No Program %s for user %s\n",  program, user);
-	return(0);
+	return (0);
 }
 #endif
 

@@ -25,18 +25,18 @@ lockTable(int which, char *table_name, int flag)
 #ifdef CLUSTERED_SITE
 	if ((which == ON_MASTER ? open_master() : vauth_open((char *) 0)))
 	{
-		fprintf(stderr, "lockTable: Failed to open %s\n", which == ON_MASTER ? "central" : "local");
+		fprintf(stderr, "lockTable: Failed to open %s db\n", which == ON_MASTER ? "master" : "local");
 		return (-1);
 	}
 #else
 	which = ON_LOCAL;
 	if (vauth_open((char *) 0))
 	{
-		fprintf(stderr, "lockTable: Failed to open %s\n", which == ON_MASTER ? "central" : "local");
+		fprintf(stderr, "lockTable: Failed to open local db\n");
 		return (-1);
 	}
 #endif
-	if(flag)
+	if (flag)
 		snprintf(SqlBuf, SQL_BUF_SIZE, "lock tables %s write", table_name);
 	else
 		snprintf(SqlBuf, SQL_BUF_SIZE, "unlock tables");
@@ -45,7 +45,7 @@ lockTable(int which, char *table_name, int flag)
 		fprintf(stderr, "lockTable: mysql_query: %s: %s\n", SqlBuf, mysql_error(which == ON_MASTER ? &mysql[0] : &mysql[1]));
 		return (1);
 	}
-	return(0);
+	return (0);
 }
 
 void

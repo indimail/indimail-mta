@@ -80,70 +80,70 @@ vrenameuser(char *oldUser, char *oldDomain, char *newUser, char *newDomain)
 		fprintf(stderr, "Illegal Username/domain\n");
 		return (-1);
 	}
-	if(slen(newUser) > MAX_PW_NAME || slen(newDomain) > MAX_PW_DOMAIN)
+	if (slen(newUser) > MAX_PW_NAME || slen(newDomain) > MAX_PW_DOMAIN)
 	{
 		fprintf(stderr, "Name Too Long (name > %d or domain > %d)\n", MAX_PW_NAME, MAX_PW_DOMAIN);
 		return (-1);
 	}
-	if(!(real_domain = vget_real_domain(oldDomain)))
+	if (!(real_domain = vget_real_domain(oldDomain)))
 	{
 		fprintf(stderr, "Domain %s does not exist\n", oldDomain);
 		return (-1);
 	} else
-	if(!vget_assign(real_domain, 0, 0, 0, 0))
+	if (!vget_assign(real_domain, 0, 0, 0, 0))
 	{
 		fprintf(stderr, "Domain %s does not exist\n", real_domain);
 		return (-1);
 	}
 #ifdef CLUSTERED_SITE
-	if((err = is_distributed_domain(real_domain)) == -1)
+	if ((err = is_distributed_domain(real_domain)) == -1)
 	{
 		fprintf(stderr, "Unable to verify %s as a distributed domain\n", real_domain);
 		return (-1);
 	} else
-	if(err == 1)
+	if (err == 1)
 	{
-		if(open_master())
+		if (open_master())
 		{
-			fprintf(stderr, "Failed to Open Master Db\n");
+			fprintf(stderr, "vrenameuser: Failed to Open Master Db\n");
 			return (-1);
 		}
 		snprintf(TmpBuf, MAX_BUFF, "%s@%s", newUser, real_domain);
-		if(is_user_present(newUser, real_domain))
+		if (is_user_present(newUser, real_domain))
 		{
 			fprintf(stderr, "New Username %s@%s exists\n", newUser, real_domain);
-			return(-1);
+			return (-1);
 		}
 		snprintf(TmpBuf, MAX_BUFF, "%s@%s", oldUser, real_domain);
-		if((mailstore = findhost(TmpBuf, 0)) != (char *) 0)
+		if ((mailstore = findhost(TmpBuf, 0)) != (char *) 0)
 		{
-			if((ptr = strrchr(mailstore, ':')) != (char *) 0)
+			if ((ptr = strrchr(mailstore, ':')) != (char *) 0)
 				*ptr = 0;
 			for(;*mailstore && *mailstore != ':';mailstore++);
 			mailstore++;
 		} else
 		{
-			if(userNotFound)
+			if (userNotFound)
 				fprintf(stderr, "%s@%s: No such user\n", oldUser, real_domain);
 			else
 				fprintf(stderr, "Error connecting to db\n");
 			return (-1);
 		}
-		if(!islocalif(mailstore))
+		if (!islocalif(mailstore))
 		{
 			fprintf(stderr, "%s@%s not local (mailstore %s)\n", oldUser, real_domain, mailstore);
-			return(-1);
+			return (-1);
 		}
 	}
 #endif
-	if((pw = vauth_getpw(newUser, real_domain)))
+	if ((pw = vauth_getpw(newUser, real_domain)))
 	{
 		fprintf(stderr, "New Username %s@%s exists\n", newUser, real_domain);
-		return(-1);
+		return (-1);
 	} else
-	if(!(pw = vauth_getpw(oldUser, real_domain)))
+	if (!(pw = vauth_getpw(oldUser, real_domain)))
 	{
-		if(userNotFound)
+		if (userNotFound)
 			fprintf(stderr, "%s@%s: No such user\n", oldUser, real_domain);
 		else
 			fprintf(stderr, "Error connecting to db\n");
@@ -151,12 +151,12 @@ vrenameuser(char *oldUser, char *oldDomain, char *newUser, char *newDomain)
 	} else
 		scopy(oldDir, pw->pw_dir, MAX_PW_DIR);
 	inactive_flag = is_inactive;
-	if(!(real_domain = vget_real_domain(newDomain)))
+	if (!(real_domain = vget_real_domain(newDomain)))
 	{
 		fprintf(stderr, "Domain %s does not exist\n", newDomain);
 		return (-1);
 	} else
-	if(!vget_assign(real_domain, 0, 0, 0, 0))
+	if (!vget_assign(real_domain, 0, 0, 0, 0))
 	{
 		fprintf(stderr, "Domain %s does not exist\n", real_domain);
 		return (-1);
@@ -165,11 +165,11 @@ vrenameuser(char *oldUser, char *oldDomain, char *newUser, char *newDomain)
 	if ((err = vadduser(newUser, newDomain, 0, pw->pw_passwd, pw->pw_gecos, strtoll(pw->pw_shell, 0, 0), 1, !inactive_flag)) == -1)
 	{
 		error_stack(stderr, 0);
-		return(-1);
+		return (-1);
 	} else
-	if(!(pw = vauth_getpw(newUser, newDomain)))
+	if (!(pw = vauth_getpw(newUser, newDomain)))
 	{
-		if(userNotFound)
+		if (userNotFound)
 			fprintf(stderr, "%s@%s: No such user\n", newUser, newDomain);
 		else
 			fprintf(stderr, "Error connecting to db\n");
@@ -179,7 +179,7 @@ vrenameuser(char *oldUser, char *oldDomain, char *newUser, char *newDomain)
 	if (create_flag && MoveFile(oldDir, pw->pw_dir))
 	{
 		fprintf(stderr, "renameuser: MoveFile: %s\n", strerror(errno));
-		return(-1);
+		return (-1);
 	}
 #ifdef ENABLE_AUTH_LOGGING
 	snprintf(SqlBuf, SQL_BUF_SIZE, 
@@ -190,7 +190,7 @@ vrenameuser(char *oldUser, char *oldDomain, char *newUser, char *newDomain)
 		if (mysql_errno(&mysql[1]) == ER_NO_SUCH_TABLE)
 		{
 			if (create_table(ON_LOCAL, "lastauth", LASTAUTH_TABLE_LAYOUT))
-				return(-1);
+				return (-1);
 		} else
 		{
 			fprintf(stderr, "vrenameuser: lastauth update: %s: %s\n", SqlBuf, mysql_error(&mysql[1]));
@@ -198,7 +198,7 @@ vrenameuser(char *oldUser, char *oldDomain, char *newUser, char *newDomain)
 		}
 	}
 	if (inactive_flag)
-		return(vdeluser(oldUser, real_domain, 1));
+		return (vdeluser(oldUser, real_domain, 1));
 #endif
 #ifdef VALIAS
 	snprintf(SqlBuf, SQL_BUF_SIZE, 
@@ -208,8 +208,8 @@ vrenameuser(char *oldUser, char *oldDomain, char *newUser, char *newDomain)
 	{
 		if (mysql_errno(&mysql[1]) == ER_NO_SUCH_TABLE)
 		{
-			if(create_table(ON_LOCAL, "valias", VALIAS_TABLE_LAYOUT))
-				return(-1);
+			if (create_table(ON_LOCAL, "valias", VALIAS_TABLE_LAYOUT))
+				return (-1);
 		} else
 		{
 			fprintf(stderr, "vrenameuser: alias update: %s: %s\n", SqlBuf, mysql_error(&mysql[1]));
@@ -224,11 +224,11 @@ vrenameuser(char *oldUser, char *oldDomain, char *newUser, char *newDomain)
 	for(;;)
 	{
 		*tmp_domain = 0;
-		if(!(ptr1 = valias_select_all(User, tmp_domain, MAX_BUFF)))
+		if (!(ptr1 = valias_select_all(User, tmp_domain, MAX_BUFF)))
 			break;
-		if(!(ptr2 = replacestr(ptr1, oldEmail, newEmail)))
+		if (!(ptr2 = replacestr(ptr1, oldEmail, newEmail)))
 			continue;
-		if(ptr1 == ptr2)
+		if (ptr1 == ptr2)
 			continue;
 		valias_update(User, tmp_domain, ptr1, ptr2);
 		free(ptr2);
@@ -240,10 +240,10 @@ vrenameuser(char *oldUser, char *oldDomain, char *newUser, char *newDomain)
 		newUser, newDomain, oldUser, real_domain);
 	if (mysql_query(&mysql[1], SqlBuf))
 	{
-		if(mysql_errno(&mysql[1]) == ER_NO_SUCH_TABLE)
+		if (mysql_errno(&mysql[1]) == ER_NO_SUCH_TABLE)
 		{
 			if (create_table(ON_LOCAL, "vfilter", FILTER_TABLE_LAYOUT))
-				return(-1);
+				return (-1);
 		} else
 		{
 			fprintf(stderr, "vrenameuser: vfilter update: %s: %s\n", SqlBuf, mysql_error(&mysql[1]));
@@ -255,10 +255,10 @@ vrenameuser(char *oldUser, char *oldDomain, char *newUser, char *newDomain)
 		newUser, newDomain, oldUser, real_domain);
 	if (mysql_query(&mysql[1], SqlBuf))
 	{
-		if(mysql_errno(&mysql[1]) == ER_NO_SUCH_TABLE)
+		if (mysql_errno(&mysql[1]) == ER_NO_SUCH_TABLE)
 		{
 			if (create_table(ON_LOCAL, "mailing_list", MAILING_LIST_TABLE_LAYOUT))
-				return(-1);
+				return (-1);
 		} else
 		{
 			fprintf(stderr, "vrenameuser: mailing_list update: %s: %s\n", SqlBuf, mysql_error(&mysql[1]));
@@ -272,10 +272,10 @@ vrenameuser(char *oldUser, char *oldDomain, char *newUser, char *newDomain)
 		newUser, newDomain, oldUser, real_domain);
 	if (mysql_query(&mysql[1], SqlBuf))
 	{
-		if(mysql_errno(&mysql[1]) == ER_NO_SUCH_TABLE)
+		if (mysql_errno(&mysql[1]) == ER_NO_SUCH_TABLE)
 		{
 			if (create_table(ON_LOCAL, "userquota", USERQUOTA_TABLE_LAYOUT))
-				return(-1);
+				return (-1);
 		} else
 		{
 			fprintf(stderr, "vrenameuser: lastauth update: %s: %s\n", SqlBuf, mysql_error(&mysql[1]));
@@ -283,9 +283,9 @@ vrenameuser(char *oldUser, char *oldDomain, char *newUser, char *newDomain)
 		}
 	}
 #endif
-	if(vdeluser(oldUser, real_domain, 1))
-		return(-1);
-	return(0);
+	if (vdeluser(oldUser, real_domain, 1))
+		return (-1);
+	return (0);
 }
 
 void

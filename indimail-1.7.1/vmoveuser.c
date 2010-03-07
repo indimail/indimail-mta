@@ -155,7 +155,7 @@ main(int argc, char **argv)
 	{
 		if (open_master())
 		{
-			fprintf(stderr, "Failed to Open Master Db\n");
+			fprintf(stderr, "vmoveuser: Failed to Open Master Db\n");
 			return (1);
 		}
 		snprintf(TmpBuf, MAX_BUFF, "%s@%s", User, real_domain);

@@ -46,12 +46,12 @@ vsmtp_delete(char *host, char *src_host, char *domain, int port)
 	int             err;
 	char            SqlBuf[SQL_BUF_SIZE];
 
-	if(open_master())
+	if (open_master())
 	{
-		fprintf(stderr, "Failed to open Master Db\n");
+		fprintf(stderr, "vsmtp_delete: Failed to open Master Db\n");
 		return (-1);
 	}
-	if(port)
+	if (port)
 		snprintf(SqlBuf, SQL_BUF_SIZE, 
 			"delete low_priority from smtp_port where host = \"%s\" and \
 			src_host = \"%s\" and domain = \"%s\" and port =%d",
@@ -62,7 +62,7 @@ vsmtp_delete(char *host, char *src_host, char *domain, int port)
 			host, src_host, domain);
 	if (mysql_query(&mysql[0], SqlBuf))
 	{
-		if(mysql_errno(&mysql[0]) == ER_NO_SUCH_TABLE)
+		if (mysql_errno(&mysql[0]) == ER_NO_SUCH_TABLE)
 		{
 			create_table(ON_MASTER, "smtp_port", SMTP_TABLE_LAYOUT);
 			fprintf(stderr, "vsmtp_delete: No rows selected\n");
@@ -71,10 +71,10 @@ vsmtp_delete(char *host, char *src_host, char *domain, int port)
 		fprintf(stderr, "vsmtp_delete: %s: %s\n", SqlBuf, mysql_error(&mysql[0]));
 		return (-1);
 	}
-	if((err = mysql_affected_rows(&mysql[0])) == -1)
+	if ((err = mysql_affected_rows(&mysql[0])) == -1)
 	{
 		fprintf(stderr, "vsmtp_delete: mysql_affected_rows: %s\n", mysql_error(&mysql[0]));
-		return(-1);
+		return (-1);
 	}
 	return (err > 0 ? 0 : 1);
 }

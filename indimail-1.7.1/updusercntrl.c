@@ -46,11 +46,11 @@ updusercntrl(char *user, char *domain, char *hostid, int force)
 	 */
 	if (force == 0)
 	{
-		if((err = is_distributed_domain(domain)) == -1)
-			return(1);
+		if ((err = is_distributed_domain(domain)) == -1)
+			return (1);
 		else
-		if(!err)
-			return(0);
+		if (!err)
+			return (0);
 	}
 	if (open_master())
 	{
@@ -62,15 +62,15 @@ updusercntrl(char *user, char *domain, char *hostid, int force)
 		cntrl_table, hostid, user, domain);
 	if (mysql_query(&mysql[0], SqlBuf))
 	{
-		if(mysql_errno(&mysql[0]) == ER_NO_SUCH_TABLE)
+		if (mysql_errno(&mysql[0]) == ER_NO_SUCH_TABLE)
 		{
 			create_table(ON_MASTER, cntrl_table, CNTRL_TABLE_LAYOUT);
-			return(0);
+			return (0);
 		}
 		fprintf(stderr, "updusercntrl: %s: %s\n", SqlBuf, mysql_error(&mysql[0]));
-		return(1);
+		return (1);
 	}
-	return(0);
+	return (0);
 }
 #endif
 void

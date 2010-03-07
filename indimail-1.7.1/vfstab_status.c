@@ -38,24 +38,24 @@ vfstab_status(char *filesystem, char *mdahost, int status)
 	MYSQL_ROW       row;
 
 #ifdef CLUSTERED_SITE
-	if(open_master())
+	if (open_master())
 	{
-		fprintf(stderr, "Failed to open Master Db\n");
+		fprintf(stderr, "vfstab_status: Failed to open Master Db\n");
 		return (-1);
 	}
 #else
-	if(vauth_open(0))
+	if (vauth_open(0))
 	{
-		fprintf(stderr, "Failed to open Local Db\n");
+		fprintf(stderr, "Failed to open local Db\n");
 		return (-1);
 	}
 #endif
-	if(!(ptr = pathToFilesystem(filesystem)))
+	if (!(ptr = pathToFilesystem(filesystem)))
 	{
 		fprintf(stderr, "vfstab_status: %s: Not a filesystem\n", filesystem);
-		return(-1);
+		return (-1);
 	}
-	if(status == -1)
+	if (status == -1)
 	{
 		snprintf(SqlBuf, SQL_BUF_SIZE, 
 			"select high_priority status from fstab where filesystem = \"%s\" and host = \"%s\"", 
@@ -67,9 +67,9 @@ vfstab_status(char *filesystem, char *mdahost, int status)
 #endif
 		{
 #ifdef CLUSTERED_SITE
-			if(mysql_errno(&mysql[0]) == ER_NO_SUCH_TABLE)
+			if (mysql_errno(&mysql[0]) == ER_NO_SUCH_TABLE)
 #else
-			if(mysql_errno(&mysql[1]) == ER_NO_SUCH_TABLE)
+			if (mysql_errno(&mysql[1]) == ER_NO_SUCH_TABLE)
 #endif
 			{
 #ifdef CLUSTERED_SITE
@@ -78,7 +78,7 @@ vfstab_status(char *filesystem, char *mdahost, int status)
 				create_table(ON_LOCAL, "fstab", FSTAB_TABLE_LAYOUT);
 #endif
 				fprintf(stderr, "vfstab_status: No rows selected\n");
-				return(-1);
+				return (-1);
 			} else
 			{
 #ifdef CLUSTERED_SITE
@@ -89,9 +89,9 @@ vfstab_status(char *filesystem, char *mdahost, int status)
 			}
 		}
 #ifdef CLUSTERED_SITE
-		if(!(res = mysql_store_result(&mysql[0])))
+		if (!(res = mysql_store_result(&mysql[0])))
 #else
-		if(!(res = mysql_store_result(&mysql[1])))
+		if (!(res = mysql_store_result(&mysql[1])))
 #endif
 		{
 #ifdef CLUSTERED_SITE
@@ -101,15 +101,15 @@ vfstab_status(char *filesystem, char *mdahost, int status)
 #endif
 			return (-1);
 		}
-		if(!(row = mysql_fetch_row(res)))
+		if (!(row = mysql_fetch_row(res)))
 		{
 			fprintf(stderr, "vfstab_status: No rows selected\n");
 			mysql_free_result(res);
-			return(-1);
+			return (-1);
 		}
 		status = (atoi(row[0]) == FS_ONLINE ? FS_OFFLINE : FS_ONLINE);
 		mysql_free_result(res);
-	} /*- if(status == -1) */
+	} /*- if (status == -1) */
 	snprintf(SqlBuf, SQL_BUF_SIZE, 
 		"update low_priority fstab set status=%d where filesystem = \"%s\" and host = \"%s\"", 
 		status, ptr, mdahost);
@@ -120,9 +120,9 @@ vfstab_status(char *filesystem, char *mdahost, int status)
 #endif
 	{
 #ifdef CLUSTERED_SITE
-		if(mysql_errno(&mysql[0]) == ER_NO_SUCH_TABLE)
+		if (mysql_errno(&mysql[0]) == ER_NO_SUCH_TABLE)
 #else
-		if(mysql_errno(&mysql[1]) == ER_NO_SUCH_TABLE)
+		if (mysql_errno(&mysql[1]) == ER_NO_SUCH_TABLE)
 #endif
 		{
 #ifdef CLUSTERED_SITE
@@ -131,7 +131,7 @@ vfstab_status(char *filesystem, char *mdahost, int status)
 			create_table(ON_LOCAL, "fstab", FSTAB_TABLE_LAYOUT);
 #endif
 			fprintf(stderr, "vfstab_status: No rows selected\n");
-			return(1);
+			return (1);
 		} else
 		{
 #ifdef CLUSTERED_SITE
@@ -143,22 +143,22 @@ vfstab_status(char *filesystem, char *mdahost, int status)
 		}
 	}
 #ifdef CLUSTERED_SITE
-	if((err = mysql_affected_rows(&mysql[0])) == -1)
+	if ((err = mysql_affected_rows(&mysql[0])) == -1)
 	{
 		fprintf(stderr, "vfstab_status: mysql_affected_rows: %s\n", mysql_error(&mysql[0]));
-		return(-1);
+		return (-1);
 	}
 #else
-	if((err = mysql_affected_rows(&mysql[1])) == -1)
+	if ((err = mysql_affected_rows(&mysql[1])) == -1)
 	{
 		fprintf(stderr, "vfstab_status: mysql_affected_rows: %s\n", mysql_error(&mysql[1]));
-		return(-1);
+		return (-1);
 	}
 #endif
-	if(!err)
+	if (!err)
 	{
 		fprintf(stderr, "vfstab_status: No rows selected\n");
-		return(1);
+		return (1);
 	}
 	return (status);
 }

@@ -44,12 +44,12 @@ main(int argc, char **argv)
 	int             first, ret;
 	struct passwd  *pw;
 
-	if(get_options(argc, argv))
-		return(1);
-	if(is_already_running("hostsync"))
+	if (get_options(argc, argv))
+		return (1);
+	if (is_already_running("hostsync"))
 	{
 		fprintf(stderr, "hostsync is already running\n");
-		return(1);
+		return (1);
 	}
 	if ((ret = is_distributed_domain(Domain)) == -1)
 	{
@@ -63,9 +63,9 @@ main(int argc, char **argv)
 		unlink("/tmp/hostsync.PID");
 		return (1);
 	}
-	if(open_master())
+	if (open_master())
 	{
-		fprintf(stderr, "Failed to open Master Db\n");
+		fprintf(stderr, "hostsync: Failed to open Master Db\n");
 		unlink("/tmp/hostsync.PID");
 		return (1);
 	}
@@ -76,25 +76,25 @@ main(int argc, char **argv)
 		switch (ret = pw->pw_uid)
 		{
 		case ADD_FLAG:
-			if(verbose)
+			if (verbose)
 				printf("Adding      ");
 			cntrl_clearaddflag(pw->pw_name, Domain, pw->pw_passwd);
 			break;
 		case DEL_FLAG:
-			if(verbose)
+			if (verbose)
 				printf("Deleting    ");
 			cntrl_cleardelflag(pw->pw_name, Domain);
 			break;
 		default:
-			if(verbose)
+			if (verbose)
 				printf("Ignoring??? ");
 			fprintf(stderr, "Invalid case %d\n", ret);
 		}
-		if(verbose)
+		if (verbose)
 			printf("user %s@%s\n", pw->pw_name, Domain);
 		first++;
 	}
-	if(verbose)
+	if (verbose)
 		printf("Synced %d entries\n", first - 1);
 	vclose();
 	unlink("/tmp/hostsync.PID");
@@ -127,9 +127,9 @@ get_options(int argc, char **argv)
 	if (!*Domain || errflag == 1)
 	{
 		usage(argv[0]);
-		return(1);
+		return (1);
 	}
-	return(0);
+	return (0);
 }
 
 void
@@ -137,7 +137,7 @@ usage(char *progname)
 {
 	char           *ptr;
 
-	if((ptr = strrchr(progname, '/')) != (char *) 0)
+	if ((ptr = strrchr(progname, '/')) != (char *) 0)
 		ptr++;
 	else
 		ptr = progname;

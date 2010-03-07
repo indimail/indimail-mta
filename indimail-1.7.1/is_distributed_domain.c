@@ -70,11 +70,11 @@ is_distributed_domain(char *Domain)
 	DBINFO        **rhostsptr;
 
 	if (!Domain || !*Domain)
-		return(0);
+		return (0);
 #ifdef QUERY_CACHE
 	if (_cacheSwitch && (char *) getenv("QUERY_CACHE") && dist_flag != -1 && *savedomain 
 		&& !strncmp(Domain, savedomain, MAX_BUFF))
-		return(dist_flag);
+		return (dist_flag);
 	else
 		scopy(savedomain, Domain, MAX_BUFF);
 	if (!_cacheSwitch)
@@ -85,15 +85,15 @@ is_distributed_domain(char *Domain)
 	if (!RelayHosts && !(RelayHosts = LoadDbInfo_TXT(&total)))
 	{
 		if (errno == 2)
-			return(dist_flag = 0);
+			return (dist_flag = 0);
 		fprintf(stderr, "is_distributed_domain: LoadDbInfo_TXT: %s\n", strerror(errno));
 		dist_flag = -1;
-		return(-1);
+		return (-1);
 	} 
 	for (dist_flag = 0, rhostsptr = RelayHosts;*rhostsptr;rhostsptr++)
 	{
 		if (!strncmp((*rhostsptr)->domain, Domain, DBINFO_BUFF))
-			return((dist_flag = (*rhostsptr)->distributed));
+			return ((dist_flag = (*rhostsptr)->distributed));
 	}
 	return (dist_flag = 0);
 }

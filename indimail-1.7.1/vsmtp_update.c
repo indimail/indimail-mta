@@ -45,9 +45,9 @@ vsmtp_update(char *host, char *src_host, char *domain, int oldport, int newport)
 {
 	char            SqlBuf[SQL_BUF_SIZE];
 
-	if(open_master())
+	if (open_master())
 	{
-		fprintf(stderr, "Failed to open Master Db\n");
+		fprintf(stderr, "vsmtp_update: Failed to open Master Db\n");
 		return (-1);
 	}
 	snprintf(SqlBuf, SQL_BUF_SIZE, 
@@ -55,11 +55,11 @@ vsmtp_update(char *host, char *src_host, char *domain, int oldport, int newport)
 		newport, host, src_host, domain, oldport);
 	if (mysql_query(&mysql[0], SqlBuf))
 	{
-		if(mysql_errno(&mysql[0]) == ER_NO_SUCH_TABLE)
+		if (mysql_errno(&mysql[0]) == ER_NO_SUCH_TABLE)
 		{
 			create_table(ON_MASTER, "smtp_port", SMTP_TABLE_LAYOUT);
 			fprintf(stderr, "vsmtp_update: No rows selected\n");
-			return(0);
+			return (0);
 		}
 		fprintf(stderr, "vsmtp_update: %s: %s\n", SqlBuf, mysql_error(&mysql[0]));
 		return (-1);

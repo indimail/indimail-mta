@@ -28,15 +28,15 @@ vfstab_delete(char *filesystem, char *mdahost)
 	char            SqlBuf[SQL_BUF_SIZE];
 
 #ifdef CLUSTERED_SITE
-	if(open_master())
+	if (open_master())
 	{
-		fprintf(stderr, "Failed to open Master Db\n");
+		fprintf(stderr, "vfstab_delete: Failed to open Master Db\n");
 		return (-1);
 	}
 #else
-	if(vauth_open(0))
+	if (vauth_open(0))
 	{
-		fprintf(stderr, "Failed to open Local Db\n");
+		fprintf(stderr, "Failed to open local Db\n");
 		return (-1);
 	}
 #endif
@@ -50,9 +50,9 @@ vfstab_delete(char *filesystem, char *mdahost)
 #endif
 	{
 #ifdef CLUSTERED_SITE
-		if(mysql_errno(&mysql[0]) == ER_NO_SUCH_TABLE)
+		if (mysql_errno(&mysql[0]) == ER_NO_SUCH_TABLE)
 #else
-		if(mysql_errno(&mysql[1]) == ER_NO_SUCH_TABLE)
+		if (mysql_errno(&mysql[1]) == ER_NO_SUCH_TABLE)
 #endif
 		{
 #ifdef CLUSTERED_SITE
@@ -61,7 +61,7 @@ vfstab_delete(char *filesystem, char *mdahost)
 			create_table(ON_LOCAL, "fstab", FSTAB_TABLE_LAYOUT);
 #endif
 			fprintf(stderr, "vfstab_delete: No rows selected\n");
-			return(1);
+			return (1);
 		} else
 		{
 #ifdef CLUSTERED_SITE
@@ -73,22 +73,22 @@ vfstab_delete(char *filesystem, char *mdahost)
 		}
 	}
 #ifdef CLUSTERED_SITE
-	if((err = mysql_affected_rows(&mysql[0])) == -1)
+	if ((err = mysql_affected_rows(&mysql[0])) == -1)
 	{
 		fprintf(stderr, "vfstab_delete: mysql_affected_rows: %s\n", mysql_error(&mysql[0]));
-		return(-1);
+		return (-1);
 	}
 #else
-	if((err = mysql_affected_rows(&mysql[1])) == -1)
+	if ((err = mysql_affected_rows(&mysql[1])) == -1)
 	{
 		fprintf(stderr, "vfstab_delete: mysql_affected_rows: %s\n", mysql_error(&mysql[1]));
-		return(-1);
+		return (-1);
 	}
 #endif
-	if(!err)
+	if (!err)
 	{
 		fprintf(stderr, "vfstab_delete: No rows selected\n");
-		return(1);
+		return (1);
 	}
 	return (0);
 }

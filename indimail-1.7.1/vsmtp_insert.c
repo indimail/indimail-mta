@@ -41,7 +41,7 @@ vsmtp_insert(char *host, char *src_host, char *domain, int smtp_port)
 
 	if (open_master())
 	{
-		fprintf(stderr, "Failed to open Master Db\n");
+		fprintf(stderr, "vsmtp_insert: Failed to open Master Db\n");
 		return (-1);
 	}
 	snprintf(SqlBuf, SQL_BUF_SIZE, 
@@ -49,12 +49,12 @@ vsmtp_insert(char *host, char *src_host, char *domain, int smtp_port)
 		host, src_host, domain, smtp_port);
 	if (mysql_query(&mysql[0], SqlBuf))
 	{
-		if(mysql_errno(&mysql[0]) == ER_NO_SUCH_TABLE)
+		if (mysql_errno(&mysql[0]) == ER_NO_SUCH_TABLE)
 		{
-			if(create_table(ON_MASTER, "smtp_port", SMTP_TABLE_LAYOUT))
-				return(-1);
+			if (create_table(ON_MASTER, "smtp_port", SMTP_TABLE_LAYOUT))
+				return (-1);
 			if (!mysql_query(&mysql[0], SqlBuf))
-				return(0);
+				return (0);
 		}
 		fprintf(stderr, "vsmtp_insert: %s: %s\n", SqlBuf, mysql_error(&mysql[0]));
 		return (-1);

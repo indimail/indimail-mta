@@ -35,27 +35,27 @@ vauth_insertaliasdomain(char *old_domain, char *new_domain)
 	char            SqlBuf[SQL_BUF_SIZE];
 #endif
 
-	if(open_master())
+	if (open_master())
 	{
-		error_stack(stderr, "Failed to open Master Db\n");
-		return(-1);
+		error_stack(stderr, "vauth_insertaliasdomain: Failed to open Master Db\n");
+		return (-1);
 	}
 	snprintf(SqlBuf, SQL_BUF_SIZE, 
 		"insert low_priority into aliasdomain ( alias, domain ) values ( \"%s\", \"%s\")", 
 		new_domain, old_domain);
 	if (mysql_query(&mysql[0], SqlBuf) && (err = mysql_errno(&mysql[0])) != ER_DUP_ENTRY)
 	{
-		if(err == ER_NO_SUCH_TABLE)
+		if (err == ER_NO_SUCH_TABLE)
 		{
-			if(create_table(ON_MASTER, "aliasdomain", ALIASDOMAIN_TABLE_LAYOUT))
-				return(-1);
+			if (create_table(ON_MASTER, "aliasdomain", ALIASDOMAIN_TABLE_LAYOUT))
+				return (-1);
 			if (!mysql_query(&mysql[0], SqlBuf))
-				return(0);
+				return (0);
 		} 
 		fprintf(stderr, "vauth_insertaliasdomain: %s: %s\n", SqlBuf, mysql_error(&mysql[0]));
 		return (-1);
 	}
-	return(0);
+	return (0);
 }
 #endif
 

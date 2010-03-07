@@ -39,20 +39,20 @@ main(int argc, char **argv)
 	snprintf(SqlBuf, sizeof(SqlBuf), 
 		"update low_priority %s set %s=\"%s\" where %s=\"%s\"",
 		table_name, column_name, new_ip, column_name, old_ip);
-	if((which == ON_MASTER ? open_master() : vauth_open((char *) 0)))
+	if ((which == ON_MASTER ? open_master() : vauth_open((char *) 0)))
 	{
-		fprintf(stderr, "ipchange: Failed to open %s\n", which == ON_MASTER ? "central" : "local");
-		return(-1);
+		fprintf(stderr, "ipchange: Failed to open %s db\n", which == ON_MASTER ? "master" : "local");
+		return (-1);
 	}
 	if (mysql_query(which == ON_MASTER ? &mysql[0] : &mysql[1], SqlBuf))
 	{
 		fprintf(stderr, "ipchange: %s: %s\nQuery: %s\n", table_name, mysql_error(which == ON_MASTER ? &mysql[0] : &mysql[1]), SqlBuf);
 		return (-1);
 	}
-	if((err = mysql_affected_rows(which == ON_MASTER ? &mysql[0] : &mysql[1])) == -1)
+	if ((err = mysql_affected_rows(which == ON_MASTER ? &mysql[0] : &mysql[1])) == -1)
 	{
 		fprintf(stderr, "ipchange: %s\n", mysql_error(which == ON_MASTER ? &mysql[0] : &mysql[1]));
-		return(-1);
+		return (-1);
 	}
 	if (verbose)
 		printf("%d rows affected\n", err);
@@ -100,7 +100,7 @@ get_options(int argc, char **argv, char **old_ip, char **new_ip,
 			break;
 		default:
 			usage();
-			return(1);
+			return (1);
 		}
 	}
 	if (optind < argc)
@@ -108,16 +108,16 @@ get_options(int argc, char **argv, char **old_ip, char **new_ip,
 	if (!*old_ip || !*new_ip || !*table_name || !*column_name)
 	{
 		usage();
-		return(1);
+		return (1);
 	}
-	return(0);
+	return (0);
 }
 #else
 int
 main()
 {
 	fprintf(stderr, "IndiMail not configured with --enable-user-cluster=y\n");
-	return(0);
+	return (0);
 }
 #endif
 

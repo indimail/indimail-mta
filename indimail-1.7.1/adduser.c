@@ -225,7 +225,7 @@ vadduser(char *username, char *domain, char *mdahost, char *password,
 		{
 			if (open_master())
 			{
-				error_stack(stderr, "Failed to open Master Db\n");
+				error_stack(stderr, "vadduser: Failed to open Master Db\n");
 				return (-1);
 			}
 			apop = ADD_FLAG;

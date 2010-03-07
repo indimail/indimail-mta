@@ -184,7 +184,7 @@ mgmtlist()
 		if (mysql_errno(&mysql[0]) == ER_NO_SUCH_TABLE)
 		{
 			create_table(ON_MASTER, "mgmtaccess", MGMT_TABLE_LAYOUT);
-			return(0);
+			return (0);
 		}
 		else
 			fprintf(stderr, "mgmtlist: %s: %s\n", SqlBuf, mysql_error(&mysql[0]));
@@ -198,7 +198,7 @@ mgmtlist()
 	if (!mysql_num_rows(res))
 	{
 		mysql_free_result(res);
-		return(0);
+		return (0);
 	} 
 	for(;;)
 	{
@@ -207,7 +207,7 @@ mgmtlist()
 		printf("%s\n", row[0]);
 	}
 	mysql_free_result(res);
-	return(0);
+	return (0);
 }
 
 int
@@ -267,7 +267,7 @@ mgmtpassinfo(char *username, int print_flag)
 	MYSQL_RES      *res;
 	MYSQL_ROW       row;
 
-	if(!username || !*username)
+	if (!username || !*username)
 		return (1);
 	if (open_central_db(0))
 	{
@@ -279,7 +279,7 @@ mgmtpassinfo(char *username, int print_flag)
 		where user=\"%s\"", username);
 	if (mysql_query(&mysql[0], SqlBuf))
 	{
-		if(mysql_errno(&mysql[0]) == ER_NO_SUCH_TABLE)
+		if (mysql_errno(&mysql[0]) == ER_NO_SUCH_TABLE)
 		{
 			create_table(ON_MASTER, "mgmtaccess", MGMT_TABLE_LAYOUT);
 			return (1);
@@ -295,18 +295,18 @@ mgmtpassinfo(char *username, int print_flag)
 	} else
 	if (!(mysql_num_rows(res)))
 	{
-		if(print_flag)
+		if (print_flag)
 			fprintf(stderr, "%s: No such user\n", username);
 		userNotFound = 1;
 		mysql_free_result(res);
 		return (1);
 	}
-	if(!print_flag)
+	if (!print_flag)
 	{
 		mysql_free_result(res);
-		return(0);
+		return (0);
 	}
-	if((row = mysql_fetch_row(res)))
+	if ((row = mysql_fetch_row(res)))
 	{
 		printf("User        : %s\n", username);
 		printf("Pass        : %s\n", row[0]);
@@ -319,10 +319,10 @@ mgmtpassinfo(char *username, int print_flag)
 		printf("Attempts    : %d\n", atoi(row[5]));
 		printf("Status      : %d (%s)\n", atoi(row[6]), isDisabled(username) ? "Disabled" : "Enabled");
 		mysql_free_result(res);
-		return(0);
+		return (0);
 	}
 	mysql_free_result(res);
-	return(1);
+	return (1);
 }
 
 int
@@ -446,13 +446,13 @@ mgmtgetpass(char *username)
 	MYSQL_RES      *res;
 	MYSQL_ROW       row;
 
-	if(!username || !*username)
+	if (!username || !*username)
 	{
 		fprintf(stderr, "Password incorrect\n");
 		return ((char *) 0);
 	}
-	if(*_user && username && *username && !strncmp(username, _user, MAX_BUFF))
-		return(mysql_pass);
+	if (*_user && username && *username && !strncmp(username, _user, MAX_BUFF))
+		return (mysql_pass);
 	if (open_central_db(0))
 	{
 		fprintf(stderr, "Unable to open central db\n");
@@ -462,9 +462,9 @@ mgmtgetpass(char *username)
 		username);
 	if (mysql_query(&mysql[0], SqlBuf))
 	{
-		if(mysql_errno(&mysql[0]) == ER_NO_SUCH_TABLE)
+		if (mysql_errno(&mysql[0]) == ER_NO_SUCH_TABLE)
 		{
-			if(!create_table(ON_MASTER, "mgmtaccess", MGMT_TABLE_LAYOUT))
+			if (!create_table(ON_MASTER, "mgmtaccess", MGMT_TABLE_LAYOUT))
 				fprintf(stderr, "Password incorrect\n");
 			return ((char *) 0);
 		} else
@@ -496,7 +496,7 @@ mgmtgetpass(char *username)
 		return ((char *) 0);
 	}
 	scopy(_user, username, MAX_BUFF);
-	return(mysql_pass);
+	return (mysql_pass);
 }
 
 int
@@ -509,8 +509,8 @@ mgmtsetpass(char *username, char *pass, uid_t uid, gid_t gid, time_t lastaccess,
 
 	if (open_master())
 	{
-		fprintf(stderr, "Failed to open Master Db\n");
-		return(-1);
+		fprintf(stderr, "mgmtsetpass: Failed to open Master Db\n");
+		return (-1);
 	}
 	if (encrypt_flag)
 	{
@@ -524,24 +524,24 @@ mgmtsetpass(char *username, char *pass, uid_t uid, gid_t gid, time_t lastaccess,
 		crypted, uid, gid, cur_time, cur_time, tmptr->tm_mday, username);
 	if (mysql_query(&mysql[0], SqlBuf))
 	{
-		if(mysql_errno(&mysql[0]) == ER_NO_SUCH_TABLE)
+		if (mysql_errno(&mysql[0]) == ER_NO_SUCH_TABLE)
 		{
-			if(create_table(ON_MASTER, "mgmtaccess", MGMT_TABLE_LAYOUT))
-				return(-1);
+			if (create_table(ON_MASTER, "mgmtaccess", MGMT_TABLE_LAYOUT))
+				return (-1);
 			if (mysql_query(&mysql[0], SqlBuf))
 			{
 				fprintf(stderr, "mysql_query: %s: %s\n", SqlBuf, mysql_error(&mysql[0]));
-				return(-1);
+				return (-1);
 			}
 		}  else
 		{
 			fprintf(stderr, "mysql_query: %s: %s\n", SqlBuf, mysql_error(&mysql[0]));
-			return(-1);
+			return (-1);
 		}
 	}
-	if(!(err = mysql_affected_rows(&mysql[0])) || err == -1)
-		return(1);
-	return(0);
+	if (!(err = mysql_affected_rows(&mysql[0])) || err == -1)
+		return (1);
+	return (0);
 }
 
 int
@@ -551,30 +551,30 @@ mgmtadduser(char *username, char *pass, uid_t uid, gid_t gid, time_t lastaccess,
 
 	if (open_master())
 	{
-		fprintf(stderr, "Failed to open Master Db\n");
-		return(-1);
+		fprintf(stderr, "mgmtadduser: Failed to open Master Db\n");
+		return (-1);
 	}
 	snprintf(SqlBuf, SQL_BUF_SIZE,
 		"insert low_priority into mgmtaccess (user, pass) values (\"%s\", \"%s\")",
 		username, pass);
 	if (mysql_query(&mysql[0], SqlBuf))
 	{
-		if(mysql_errno(&mysql[0]) == ER_NO_SUCH_TABLE)
+		if (mysql_errno(&mysql[0]) == ER_NO_SUCH_TABLE)
 		{
-			if(create_table(ON_MASTER, "mgmtaccess", MGMT_TABLE_LAYOUT))
-				return(-1);
+			if (create_table(ON_MASTER, "mgmtaccess", MGMT_TABLE_LAYOUT))
+				return (-1);
 			if (mysql_query(&mysql[0], SqlBuf))
 			{
 				fprintf(stderr, "mysql_query: %s: %s\n", SqlBuf, mysql_error(&mysql[0]));
-				return(-1);
+				return (-1);
 			}
 		}  else
 		{
 			fprintf(stderr, "mysql_query: %s: %s\n", SqlBuf, mysql_error(&mysql[0]));
-			return(-1);
+			return (-1);
 		}
 	}
-	return(mgmtsetpass(username, pass, uid, gid, lastaccess, lastupdate));
+	return (mgmtsetpass(username, pass, uid, gid, lastaccess, lastupdate));
 }
 #endif
 

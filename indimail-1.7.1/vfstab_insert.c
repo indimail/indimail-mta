@@ -30,13 +30,13 @@ vfstab_insert(char *filesystem, char *host, int status, long max_users, long max
 #ifdef CLUSTERED_SITE
 	if (open_master())
 	{
-		fprintf(stderr, "Failed to open Master Db\n");
+		fprintf(stderr, "vfstab_insert: Failed to open Master Db\n");
 		return (-1);
 	}
 #else
 	if (vauth_open(0))
 	{
-		fprintf(stderr, "Failed to open Local Db\n");
+		fprintf(stderr, "Failed to open local Db\n");
 		return (-1);
 	}
 #endif

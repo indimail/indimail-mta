@@ -41,7 +41,7 @@ dbinfoDel(char *domain, char *mdahost)
 		snprintf(mcdFile, MAX_BUFF, "%s/%s/%s", qmaildir, controldir, mcdfile);
 	if (open_master())
 	{
-		fprintf(stderr, "Failed to open Master Db\n");
+		fprintf(stderr, "dbinfoDel: Failed to open Master Db\n");
 		return(-1);
 	}
 	snprintf(SqlBuf, SQL_BUF_SIZE,
