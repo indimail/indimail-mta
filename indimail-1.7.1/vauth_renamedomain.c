@@ -46,7 +46,7 @@ vauth_renamedomain(char *OldDomain, char *NewDomain, char *domdir)
 	FILE           *fp;
 	int             err = 0;
 #ifdef CLUSTERED_SITE
-	int             is_dist;
+	int             is_dist = 0;
 #endif
 
 	if (vauth_open((char *) 0))
