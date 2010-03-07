@@ -1,5 +1,8 @@
 /*
  * $Log: vacation.c,v $
+ * Revision 2.10  2010-03-07 14:44:28+05:30  Cprogrammer
+ * changed welcome message
+ *
  * Revision 2.9  2009-02-18 09:08:09+05:30  Cprogrammer
  * fixed fgets warning
  *
@@ -55,7 +58,7 @@
 #include <sys/stat.h>
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vacation.c,v 2.9 2009-02-18 09:08:09+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: vacation.c,v 2.10 2010-03-07 14:44:28+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 char           *getuserinfo(char *);
@@ -197,8 +200,8 @@ main(int argc, char **argv)
 		fprintf(inject_fp, "Note: Further Auto Response will be deferred to %s\n", ToId);
 		fprintf(inject_fp, "      till 24 Hrs Elapses and a new message is received\n");
 		fprintf(inject_fp, "      from %s\n", ToId);
-		fprintf(inject_fp, "Welcome to Indi Mail - Fastest Mail on Earth\n");
-		fprintf(inject_fp, "Get Free email at http://mail.indi.com.\n");
+		fprintf(inject_fp, "Welcome to IndiMail - Fastest Mail on Earth\n");
+		fprintf(inject_fp, "Download for Free, OpenSource IndiMail at http://www.indimail.org\n");
 		fprintf(inject_fp, "-----------------------------------------------------------------------------\n");
 		if(fp)
 			fclose(fp);
