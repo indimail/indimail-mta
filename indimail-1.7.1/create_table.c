@@ -1,5 +1,8 @@
 /*
  * $Log: create_table.c,v $
+ * Revision 2.7  2010-03-07 11:07:25+05:30  Cprogrammer
+ * display database as "master" in error message
+ *
  * Revision 2.6  2008-05-28 16:34:26+05:30  Cprogrammer
  * removed USE_MYSQL
  *
@@ -23,7 +26,7 @@
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: create_table.c,v 2.6 2008-05-28 16:34:26+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: create_table.c,v 2.7 2010-03-07 11:07:25+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #include <string.h>
@@ -48,7 +51,8 @@ create_table(int which, char *table, char *_template)
 #ifdef CLUSTERED_SITE
 	if ((which == ON_MASTER ? open_master() : vauth_open((char *) 0)))
 	{
-		fprintf(stderr, "create_table: Failed to open %s\n", which == ON_MASTER ? "central" : "local");
+		fprintf(stderr, "create_table: Failed to open %s db\n",
+			which == ON_MASTER ? "master" : "local");
 		return(-1);
 	}
 #else
