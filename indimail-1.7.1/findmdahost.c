@@ -1,5 +1,8 @@
 /*
  * $Log: findmdahost.c,v $
+ * Revision 2.14  2010-03-07 11:10:35+05:30  Cprogrammer
+ * no need of checking host.cntrl. Check mcdinfo instead
+ *
  * Revision 2.13  2009-09-23 21:21:32+05:30  Cprogrammer
  * record error when mysql_ping reports MySQL server has gone away
  *
@@ -50,21 +53,19 @@
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: findmdahost.c,v 2.13 2009-09-23 21:21:32+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: findmdahost.c,v 2.14 2010-03-07 11:10:35+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef CLUSTERED_SITE
-#include <unistd.h>
 #include <string.h>
-#include <errno.h>
 
 char           *
 findmdahost(char *email)
 {
-	int             is_dist, hostcntrl_present, count, port;
-	char            user[MAX_BUFF], domain[MAX_BUFF], TmpBuf[MAX_BUFF];
+	int             is_dist, count, port;
+	char            user[MAX_BUFF], domain[MAX_BUFF];
 	static char     mailhost[MAX_BUFF];
-	char           *qmaildir, *controldir, *ptr, *cptr, *real_domain, *ip;
+	char           *ptr, *cptr, *real_domain, *ip;
 	DBINFO        **rhostsptr;
 	MYSQL         **mysqlptr;
 	struct passwd *pw;
@@ -78,33 +79,24 @@ findmdahost(char *email)
 	for (cptr = domain;*ptr;*cptr++ = *ptr++);
 	*cptr = 0;
 	if (!*domain)
-		return((char *) 0);
+		return ((char *) 0);
 	if (!(real_domain = vget_real_domain(domain)))
 		real_domain = domain;
-	getEnvConfigStr(&qmaildir, "QMAILDIR", QMAILDIR);
-	getEnvConfigStr(&controldir, "CONTROLDIR", "control");
-	snprintf(TmpBuf, MAX_BUFF, "%s/%s/host.cntrl", qmaildir, controldir);
-	hostcntrl_present = !access(TmpBuf, F_OK);
-	if (hostcntrl_present)
+	if ((is_dist = is_distributed_domain(real_domain)) == -1)
 	{
-		if ((is_dist = is_distributed_domain(real_domain)) == -1)
-			return((char *) 0);
-		if (is_dist == 1)
-		{
-			if (!(ip = findhost(email, 0)))
-				return((char *) 0);
-			else
-				return(ip);
-		}
-	} else
-	if ((is_dist = is_distributed_domain(domain)) == -1 || is_dist == 1)
-	{
-		fprintf(stderr, "%s: %s\n", TmpBuf, strerror(errno));
-		return((char *) 0);
+		fprintf(stderr, "%s: is_distributed_domain failed\n", real_domain);
+		return ((char *) 0);
 	}
+	if (is_dist)
+	{
+		if (!(ip = findhost(email, 0)))
+			return ((char *) 0);
+		else
+			return (ip);
+	} 
 	/*- reach here if non-distributed */
 	if (OpenDatabases())
-		return((char *) 0);
+		return ((char *) 0);
 	for (count= 1, mysqlptr = MdaMysql, rhostsptr = RelayHosts;*rhostsptr;mysqlptr++, rhostsptr++, count++)
 	{
 		/*- for non distributed only one entry is there in mcd file */
@@ -120,7 +112,7 @@ findmdahost(char *email)
 				fprintf(stderr, "%d: %s Failed db %s@%s for user %s port %d\n", count, (*rhostsptr)->domain, 
 					(*rhostsptr)->database, (*rhostsptr)->server, (*rhostsptr)->user, (*rhostsptr)->port);
 				(*rhostsptr)->fd = -1;
-				return((char *) 0);
+				return ((char *) 0);
 			} else
 				(*rhostsptr)->fd = (*mysqlptr)->net.fd;
 		}
@@ -135,7 +127,7 @@ findmdahost(char *email)
 				fprintf(stderr, "%d: %s Failed db %s@%s for user %s port %d\n", count, (*rhostsptr)->domain, 
 					(*rhostsptr)->database, (*rhostsptr)->server, (*rhostsptr)->user, (*rhostsptr)->port);
 				(*rhostsptr)->fd = -1;
-				return((char *) 0);
+				return ((char *) 0);
 			} else
 				(*rhostsptr)->fd = (*mysqlptr)->net.fd;
 		}
@@ -143,11 +135,11 @@ findmdahost(char *email)
 		if (!(pw = vauth_getpw(user, real_domain)))
 		{
 			is_open = 0; /* prevent closing of connection by vclose */
-			return((char *) 0);
+			return ((char *) 0);
 		} else
 		{
 			is_open = 0; /* prevent closing of connection by vclose */
-			if (hostcntrl_present && is_dist == 1)
+			if (is_dist == 1)
 				port = get_smtp_service_port(0, real_domain, (*rhostsptr)->mdahost);
 			else
 				port = GetSmtproute(real_domain);
@@ -157,11 +149,11 @@ findmdahost(char *email)
 			if (!port)
 				port = 25;
 			snprintf(mailhost, MAX_BUFF, "%s:%s:%d", domain, (*rhostsptr)->mdahost, port);
-			return(mailhost);
+			return (mailhost);
 		}
 	} else
 		userNotFound = 1;
-	return((char *) 0);
+	return ((char *) 0);
 }
 #endif
 
