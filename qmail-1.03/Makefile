@@ -1161,7 +1161,7 @@ qmail-smtpd sendmail tcp-env qmail-newmrh qmail-recipients qmail-cdb qmailconfig
 config-fast dnscname dnsptr dnsip dnsmxip dnsfq dnstxt hostname ipmeprint qreceipt \
 qsmhook forward rrforward preline condredirect bouncesaying except qmail-todo \
 queue-fix idedit setup instcheck rpmattr maildir2mbox qmaildirmake maildirwatch base64 \
-plainencode maildirdeliver qmail-autoresponder qmail-rm qail elq pinq etrn \
+plainencode maildirdeliver autoresponder qmail-rm qail elq pinq etrn \
 atrn qmailctl indimail.plist svscanboot upstart qmail-sighup qmail-sigalrm qmail-sigterm \
 home home+df proc proc+df binm1 binm1+df binm2 binm2+df \
 binm3 binm3+df spfquery multirotate qpq 822header qmail-nullqueue \
@@ -1327,7 +1327,7 @@ rrforward.0 preline.0 condredirect.0 bouncesaying.0 except.0 \
 maildir2mbox.0 maildirwatch.0 qmail.0 qmail-limits.0 qmail-log.0 \
 qmail-control.0 qmail-header.0 qmail-users.0 dot-qmail.0 \
 qmail-command.0 tcp-environ.0 maildir.0 mbox.0 addresses.0 \
-envelopes.0 forgeries.0 qmail-autoresponder.0 \
+envelopes.0 forgeries.0 autoresponder.0 \
 qmail-rm.0 maildirdeliver.0 822header.0 \
 matchup.0 mlmatchup.0 columnt.0 xqp.0 xsender.0 xrecipient.0 \
 serialcmd.0 maildircmd.0 rewind.0 \
@@ -3205,14 +3205,14 @@ qmail-rm.8: qmail-rm.9
 	| sed s}QMAILHOME}"`head -1 conf-qmail`"}g \
 	> qmail-rm.8
 
-qmail-autoresponder: load qmail-autoresponder.o alloc.o error.o error_str.o \
+autoresponder: load autoresponder.o alloc.o error.o error_str.o \
 alloc_re.o case_diffs.o case_diffb.o case_lowers.o env.o envread.o auto_qmail.o subgetopt.o \
 open_read.o scan_ulong.o variables.o control.o quote.o tai_now.o fmt_ulong.o \
 ip.o ipme.o ipalloc.o scan_xlong.o socket_v4mappedprefix.o socket_v6any.o \
 datetime.o date822fmt.o datetime_un.o fmt_uint.o fmt_uint0.o now.o \
 fmt_str.o myctime.o sgetopt.o getln.a mess822.a strerr.a substdio.a stralloc.a \
 str.a
-	./load qmail-autoresponder alloc.o error.o error_str.o alloc_re.o \
+	./load autoresponder alloc.o error.o error_str.o alloc_re.o \
 	case_diffs.o case_diffb.o case_lowers.o env.o envread.o auto_qmail.o now.o \
 	open_read.o scan_ulong.o variables.o control.o subgetopt.o \
 	quote.o tai_now.o fmt_ulong.o fmt_str.o myctime.o sgetopt.o \
@@ -3221,15 +3221,15 @@ str.a
 	getln.a mess822.a strerr.a substdio.a stralloc.a \
 	str.a
 
-qmail-autoresponder.o: \
-compile qmail-autoresponder.c substdio.h subfd.h mess822.h date822fmt.h \
+autoresponder.o: \
+compile autoresponder.c substdio.h subfd.h mess822.h date822fmt.h \
 getln.h stralloc.h env.h case.h auto_qmail.h str.h strerr.h control.h \
 error.h alloc.h ip.h byte.h ipme.h fmt.h quote.h tai.h sgetopt.h conf-mime
-	./compile -DMAKE_SEEKABLE -DQUOTE `grep -h -v "^#" conf-mime` qmail-autoresponder.c
+	./compile -DMAKE_SEEKABLE -DQUOTE `grep -h -v "^#" conf-mime` autoresponder.c
 
-qmail-autoresponder.0: \
-qmail-autoresponder.1
-	nroff -man qmail-autoresponder.1 > qmail-autoresponder.0
+autoresponder.0: \
+autoresponder.1
+	nroff -man autoresponder.1 > autoresponder.0
 
 822field: \
 load 822field.o mess822.a getln.a strerr.a substdio.a stralloc.a \

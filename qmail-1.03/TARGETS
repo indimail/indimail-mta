@@ -502,9 +502,9 @@ qforward.o
 qhpsi
 qhpsi.o
 qmail.0
-qmail-autoresponder
-qmail-autoresponder.0
-qmail-autoresponder.o
+autoresponder
+autoresponder.0
+autoresponder.o
 qmail-cat
 qmail-cat.o
 qmail-clean

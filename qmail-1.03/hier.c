@@ -1,5 +1,11 @@
 /*
  * $Log: hier.c,v $
+ * Revision 1.136  2010-03-08 22:04:30+05:30  Cprogrammer
+ * renamed qmail-autoresponder as autoresponder to shorten path
+ *
+ * Revision 1.135  2010-03-08 15:38:50+05:30  Cprogrammer
+ * added qmailctl man page
+ *
  * Revision 1.134  2010-03-03 11:13:00+05:30  Cprogrammer
  * added base64 man page
  *
@@ -438,7 +444,7 @@ hier(inst_dir)
 	c(auto_qmail_home, "bin", "maildirwatch", auto_uido, auto_gidq, 0555);
 	c(auto_qmail_home, "bin", "maildirdeliver", auto_uido, auto_gidq, 0555);
 	c(auto_qmail_home, "bin", "qmail-rm", auto_uido, auto_gidq, 0555);
-	c(auto_qmail_home, "bin", "qmail-autoresponder", auto_uido, auto_gidq, 0555);
+	c(auto_qmail_home, "bin", "autoresponder", auto_uido, auto_gidq, 0555);
 	c(auto_qmail_home, "bin", "qail", auto_uido, auto_gidq, 0555);
 	c(auto_qmail_home, "bin", "elq", auto_uido, auto_gidq, 0555);
 	c(auto_qmail_home, "bin", "etrn", auto_uido, auto_gidq, 0555);
@@ -745,8 +751,8 @@ hier(inst_dir)
 	c(auto_qmail_home, "man/cat1", "822received.0", auto_uido, auto_gidq, 0444);
 	c(auto_qmail_home, "man/man1", "822print.1", auto_uido, auto_gidq, 0444);
 	c(auto_qmail_home, "man/cat1", "822print.0", auto_uido, auto_gidq, 0444);
-	c(auto_qmail_home, "man/man1", "qmail-autoresponder.1", auto_uido, auto_gidq, 0444);
-	c(auto_qmail_home, "man/cat1", "qmail-autoresponder.0", auto_uido, auto_gidq, 0444);
+	c(auto_qmail_home, "man/man1", "autoresponder.1", auto_uido, auto_gidq, 0444);
+	c(auto_qmail_home, "man/cat1", "autoresponder.0", auto_uido, auto_gidq, 0444);
 	c(auto_qmail_home, "man/man1", "serialcmd.1", auto_uido, auto_gidq, 0444);
 	c(auto_qmail_home, "man/man1", "serialcmd.0", auto_uido, auto_gidq, 0444);
 	c(auto_qmail_home, "man/man1", "serialqmtp.1", auto_uido, auto_gidq, 0444);
@@ -893,6 +899,7 @@ hier(inst_dir)
 	c(auto_qmail_home, "man/man5", "rfc-4871.5", auto_uido, auto_gidq, 0444);
 	c(auto_qmail_home, "man/man5", "rfc-4870.5", auto_uido, auto_gidq, 0444);
 
+	c(auto_qmail_home, "man/man8", "qmailctl.8", auto_uido, auto_gidq, 0444);
 	c(auto_qmail_home, "man/man8", "qmail-rm.8", auto_uido, auto_gidq, 0444);
 	c(auto_qmail_home, "man/cat8", "qmail-rm.0", auto_uido, auto_gidq, 0444);
 	c(auto_qmail_home, "man/man8", "ofmipd.8", auto_uido, auto_gidq, 0444);
@@ -1014,7 +1021,7 @@ hier(inst_dir)
 void
 getversion_install_big_c()
 {
-	static char    *x = "$Id: hier.c,v 1.134 2010-03-03 11:13:00+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: hier.c,v 1.136 2010-03-08 22:04:30+05:30 Cprogrammer Exp mbhangui $";
 
 #ifdef INDIMAIL
 	x = sccsidh;
