@@ -1,5 +1,5 @@
+.TH "IndiMail" "7" "07 Mar 2010" "Manvendra Bhangui" ""
 .LL 8i
-.TH indimail 7
 .SH NAME
 IndiMail -\ A Multi-host distributed Mail Server
 
@@ -1119,9 +1119,9 @@ Directory            | Service Description
 clamd                | clam(8) antivirus
 freshclam            | freshclam(1) clam signature update service
 qscanq               | qscanq(8) virus scanner
-qmail-smtpd.25       | qmail-smtpd(8) SMTP service on port 25
-qmail-smtpd.366      | qmail-smtpd(8) SMTP ODMR service on port 366
-qmail-smtpd.465      | qmail-smtpd(8) SMTPS service on port 465 (SSL)
+qmail-smtpd.25       | qmail-smtpd(8) ESMTP service on port 25
+qmail-smtpd.366      | qmail-smtpd(8) ESMTP ODMR service on port 366
+qmail-smtpd.465      | qmail-smtpd(8) ESMTPS service on port 465 (SSL)
 qmail-send.25        | qmail-send(8) delivery service
 fetchmail            | fetchmail(1) service
 greylist.1999        | qmail-greyd(8) greylisting daemon
@@ -1140,6 +1140,8 @@ mysql.3306           | mysqld(8) MySQL daemon
 qmail-poppass.106    | qmail-poppass(8) Poppassd protocol service
 qmail-spamlog        | Spam logger service
 .TE
+
+The services on port 25, 587, 110, 4110, 143, 4143 support STARTTLS
 
 You can use \fBsvc(8)\fR to start / stop individual services. To disable / enable all services,
 you can use the \fBinitsvc(8)\fR command.
@@ -1165,181 +1167,187 @@ vadduser(1), vdeluser(1), vrenameuser(1), vmoveuser(1), vpasswd(1).
 IndiMail has programs installed in INDIMAIL/bin, INDIMAIL/sbin.
 .nr step 1 1
 .IP \n[step] 4
-vadddomain(1)
+vadddomain(1)      - Add a virtual domain
 .sp -1
 .IP \n+[step]
-vmoddomain(1)
+vmoddomain(1)      - Modify domain delivery instruction
 .sp -1
 .IP \n+[step]
-vaddaliasdomain(1)
+vaddaliasdomain(1) - Add an alias domain
 .sp -1
 .IP \n+[step]
-vrenamedomain(1)
+vrenamedomain(1)   - Rename a domain
 .sp -1
 .IP \n+[step]
-vatrn(1)
+vatrn(1)           - Set a domain for ODMR (RFC-2645)
 .sp -1
 .IP \n+[step]
-vdeldomain(1)
+vdeldomain(1)      - Delete a domain
 .sp -1
 .IP \n+[step]
-vdominfo(1)
+vdominfo(1)        - Print domain information
 .sp -1
 .IP \n+[step]
-printdir(1)
+printdir(1)        - Print domain directory structure layout
 .sp -1
 .IP \n+[step]
-vmoddomlimits(1)
+vmoddomlimits(1)   - Modify domain limits
 .sp -1
 .IP \n+[step]
-vadduser(1)
+vadduser(1)        - Add a user
 .sp -1
 .IP \n+[step]
-vuserinfo(1)
+vuserinfo(1)       - Display user information
 .sp -1
 .IP \n+[step]
-vserverinfo(1)
+vserverinfo(1)     - Display server information for a user
 .sp -1
 .IP \n+[step]
-vpasswd(1)
+vpasswd(1)         - Change user password
 .sp -1
 .IP \n+[step]
-vdeluser(1)
+qmail-poppass(1)   - Change user password using poppassd protocol
 .sp -1
 .IP \n+[step]
-vmoduser(1)
+vdeluser(1)        - Delete a user
 .sp -1
 .IP \n+[step]
-vsetuserquota(1)
+vmoduser(1)        - Modify user attributes
 .sp -1
 .IP \n+[step]
-vmoveuser(1)
+vsetuserquota(1)   - Set user disk quota
 .sp -1
 .IP \n+[step]
-vrenameuser(1)
+vmoveuser(1)       - Move user's homedir
 .sp -1
 .IP \n+[step]
-resetquota(8)
+vrenameuser(1)     - Rename a user
 .sp -1
 .IP \n+[step]
-valias(1)
+resetquota(8)      - Resets user's disk usage
 .sp -1
 .IP \n+[step]
-vcaliasrev.sh(8)
+valias(1)          - Add, modify, delete aliases
 .sp -1
 .IP \n+[step]
-vgroup(1)
+vcalias(8)         - Convert .qmail to IndiMail's alias database
 .sp -1
 .IP \n+[step]
-vcalias(8)
+vcaliasrev.sh(8)   - Convert IndiMail's alias database to .qmail
 .sp -1
 .IP \n+[step]
-vacation(8)
+vgroup(1)          - Add, modify, delete groups
 .sp -1
 .IP \n+[step]
-vsmtp(8)
+vacation(8)        - Set vacation response.
 .sp -1
 .IP \n+[step]
-vipmap(1)
+autoresponder      - Rate/Time limited autoresponder for IndiMail
 .sp -1
 .IP \n+[step]
-vcfilter(1)
+vsmtp(8)           - Add, modify, delete SMTP routes
 .sp -1
 .IP \n+[step]
-hostcntrl(8)
+vipmap(1)          - Map an ip address to a virtual domain
 .sp -1
 .IP \n+[step]
-vhostid(8)
+vcfilter(1)        - Add, modify, delete vfilter
 .sp -1
 .IP \n+[step]
-dbinfo(8)
+hostcntrl(8)       - Add, modify, delete hostcntrl entries
 .sp -1
 .IP \n+[step]
-ipchange(8)
+vhostid(8)         - Add, modify, delete hostid
 .sp -1
 .IP \n+[step]
-vbulletin(1)
+dbinfo(8)          - Display database information for all IndiMail servers
 .sp -1
 .IP \n+[step]
-vfstab(8)
+ipchange(8)        - Change IP address of an IndiMail server
 .sp -1
 .IP \n+[step]
-execmysql
+vbulletin(1)       - Set instant bulletin for IndiMail users
 .sp -1
 .IP \n+[step]
-chowkidar(8)
+vfstab(8)          - Add, modify, delete fstab entries
 .sp -1
 .IP \n+[step]
-logmonitor(8)
+execmysql          - Execute MySQL client on an IndiMail MySQL server
 .sp -1
 .IP \n+[step]
-controlsync
+chowkidar(8)       - IndiMail's Spam Guard
 .sp -1
 .IP \n+[step]
-updatefile
+logmonitor(8)      - Utility for real time monitoring of logs
 .sp -1
 .IP \n+[step]
-vfilter(8)
+controlsync        - Utility to maintain IndiMail's control file in sync
 .sp -1
 .IP \n+[step]
-vdelivermail(8)
+updatefile         - Update an IndiMail control file
 .sp -1
 .IP \n+[step]
-postdel(8)
+vfilter(8)         - Filter mail before delivery using vfilter mechanism
 .sp -1
 .IP \n+[step]
-proxyimap(8)
+vdelivermail(8)    - Deliver mails to Maildir
 .sp -1
 .IP \n+[step]
-proxypop3(8)
+postdel(8)         - Deliver mails to Maildir if using postfix as MTA
 .sp -1
 .IP \n+[step]
-vproxy(8)
+proxyimap(8)       - IMAP proxy to connect to a server in a cluster setup
 .sp -1
 .IP \n+[step]
-vchkpass(8)
+proxypop3(8)       - POP3 Proxy to connect to a server in a cluster setup
 .sp -1
 .IP \n+[step]
-InLookup(8)
+vproxy(8)          - Generic Proxy utility
 .sp -1
 .IP \n+[step]
-inquerytest(8)
+vchkpass(8)        - IndiMail's checkpassword utility
 .sp -1
 .IP \n+[step]
-indiversion(1)
+systpass(8)        - checkpassword utility to authenticate against shadow
 .sp -1
 .IP \n+[step]
-versioninfo(1)
+InLookup(8)        - IndiMail's name lookup daemon
 .sp -1
 .IP \n+[step]
-hostsync(8)
+inquerytest(8)     - Utility to test inlookup queries
 .sp -1
 .IP \n+[step]
-clearopensmtp(8)
+indiversion(1)     - Display version information for all IndiMail programs
 .sp -1
 .IP \n+[step]
-updaterules(8)
+versioninfo(1)     - Display version information for all IndiMail programs
 .sp -1
 .IP \n+[step]
-vreorg(8)
+hostsync(8)        - Sync uncommited entries in a IndiMail cluster
 .sp -1
 .IP \n+[step]
-vdeloldusers(8)
+clearopensmtp(8)   - remove stale IP’s authorized for pop before SMTP
 .sp -1
 .IP \n+[step]
-indisrvr(8)
+updaterules(8)     - Rebuild tcp.smtp.cdb with IP address open for relay.
 .sp -1
 .IP \n+[step]
-adminclient(8)
+vreorg(8)          - Do reorg of IndiMail's database for speed optimization
 .sp -1
 .IP \n+[step]
-mgmtpass(8)
+vdeloldusers(8)    - Delete inactive users, trash and other housekeeping
 .sp -1
 .IP \n+[step]
-vpriv(8)
+indisrvr(8)        - Secure server to run commands on an IndiMail cluster
 .sp -1
 .IP \n+[step]
-sslerator
+adminclient(8)     - Client for connecting to indisrvr
+.sp -1
+.IP \n+[step]
+mgmtpass(8)        - Utility for managing admin users
+.sp -1
+.IP \n+[step]
+vpriv(8)           - Set program access rights for indimail admin users.
 
 .SH "SEE ALSO"
 dbinfo(8),
@@ -1350,6 +1358,10 @@ hostcntrl(1),
 vadduser(1),
 vdeluser(1),
 initsvc(1),
+sslerator(1),
 svscan(8),
 supervise(8),
-svctool(8)
+qmailctl(8),
+svctool(8),
+autoresponder(1),
+rfc-2645(5)

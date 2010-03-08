@@ -1,5 +1,8 @@
 #
 # $Log: indimail-epm.list.in,v $
+# Revision 2.46  2010-03-08 22:03:07+05:30  Cprogrammer
+# renamed qmail-autoresponder as autoresponder to shorten path
+#
 # Revision 2.45  2010-03-06 18:20:19+05:30  Cprogrammer
 # added --starttls option for proxy pop3/imap
 #
@@ -321,7 +324,7 @@ f 444 root qmail ${prefix}/man/cat1/new-inject.0.gz BUILDROOT${prefix}/man/cat1/
 f 444 root qmail ${prefix}/man/cat1/preline.0.gz BUILDROOT${prefix}/man/cat1/preline.0.gz
 f 444 root qmail ${prefix}/man/cat1/printforward.0.gz BUILDROOT${prefix}/man/cat1/printforward.0.gz
 f 444 root qmail ${prefix}/man/cat1/printmaillist.0.gz BUILDROOT${prefix}/man/cat1/printmaillist.0.gz
-f 444 root qmail ${prefix}/man/cat1/qmail-autoresponder.0.gz BUILDROOT${prefix}/man/cat1/qmail-autoresponder.0.gz
+f 444 root qmail ${prefix}/man/cat1/autoresponder.0.gz BUILDROOT${prefix}/man/cat1/autoresponder.0.gz
 f 444 root qmail ${prefix}/man/cat1/qmaildirmake.0.gz BUILDROOT${prefix}/man/cat1/qmaildirmake.0.gz
 f 444 root qmail ${prefix}/man/cat1/qmail-qfilter.0.gz BUILDROOT${prefix}/man/cat1/qmail-qfilter.0.gz
 f 444 root qmail ${prefix}/man/cat1/qreceipt.0.gz BUILDROOT${prefix}/man/cat1/qreceipt.0.gz
@@ -452,7 +455,7 @@ f 444 root qmail ${prefix}/man/man1/printforward.1.gz BUILDROOT${prefix}/man/man
 f 444 root qmail ${prefix}/man/man1/printmaillist.1.gz BUILDROOT${prefix}/man/man1/printmaillist.1.gz
 f 444 root qmail ${prefix}/man/man1/qfilelog.1.gz BUILDROOT${prefix}/man/man1/qfilelog.1.gz
 f 444 root qmail ${prefix}/man/man1/qlogselect.1.gz BUILDROOT${prefix}/man/man1/qlogselect.1.gz
-f 444 root qmail ${prefix}/man/man1/qmail-autoresponder.1.gz BUILDROOT${prefix}/man/man1/qmail-autoresponder.1.gz
+f 444 root qmail ${prefix}/man/man1/autoresponder.1.gz BUILDROOT${prefix}/man/man1/autoresponder.1.gz
 f 444 root qmail ${prefix}/man/man1/qmaildirmake.1.gz BUILDROOT${prefix}/man/man1/qmaildirmake.1.gz
 f 444 root qmail ${prefix}/man/man1/qmail-qfilter.1.gz BUILDROOT${prefix}/man/man1/qmail-qfilter.1.gz
 f 444 root qmail ${prefix}/man/man1/qreceipt.1.gz BUILDROOT${prefix}/man/man1/qreceipt.1.gz
@@ -945,7 +948,7 @@ f 555 root qmail ${prefix}/bin/proxypop3 BUILDROOT${prefix}/bin/proxypop3
 f 555 root qmail ${prefix}/bin/qail BUILDROOT${prefix}/bin/qail
 f 555 root qmail ${prefix}/bin/qfilelog BUILDROOT${prefix}/bin/qfilelog
 f 6511 qscand qmail ${prefix}/bin/qhpsi BUILDROOT${prefix}/bin/qhpsi
-f 555 root qmail ${prefix}/bin/qmail-autoresponder BUILDROOT${prefix}/bin/qmail-autoresponder
+f 555 root qmail ${prefix}/bin/autoresponder BUILDROOT${prefix}/bin/autoresponder
 f 555 root qmail ${prefix}/bin/qmail-cat BUILDROOT${prefix}/bin/qmail-cat
 f 500 root qmail ${prefix}/bin/qmail-cdb BUILDROOT${prefix}/bin/qmail-cdb
 f 511 root qmail ${prefix}/bin/qmail-clean BUILDROOT${prefix}/bin/qmail-clean

@@ -1,5 +1,8 @@
 #
 # $Log: indimail.spec.in,v $
+# Revision 2.136  2010-03-08 22:03:49+05:30  Cprogrammer
+# renamed qmail-autoresponder as autoresponder to shorten path
+#
 # Revision 2.135  2010-03-06 18:29:14+05:30  Cprogrammer
 # added sslerator
 # added option to specify external tls enabler
@@ -425,7 +428,7 @@
 # rpm spec file for indimail
 #
 #
-# $Id: indimail.spec.in,v 2.135 2010-03-06 18:29:14+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 2.136 2010-03-08 22:03:49+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %define _unpackaged_files_terminate_build 1
 
@@ -1310,7 +1313,7 @@ fi
 %attr(511,root,qmail)                   %{_prefix}/bin/relaytest
 %attr(555,root,qmail)                   %{_prefix}/bin/checkaddr
 %attr(555,root,qmail)                   %{_prefix}/bin/rsmtprecipients
-%attr(555,root,qmail)                   %{_prefix}/bin/qmail-autoresponder
+%attr(555,root,qmail)                   %{_prefix}/bin/autoresponder
 %attr(555,root,qmail)                   %{_prefix}/bin/idedit
 %attr(555,root,qmail)                   %{_prefix}/bin/svstat
 %attr(555,root,qmail)                   %{_prefix}/bin/ddist

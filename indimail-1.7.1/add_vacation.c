@@ -1,5 +1,8 @@
 /*
  * $Log: add_vacation.c,v $
+ * Revision 2.9  2010-03-08 22:04:03+05:30  Cprogrammer
+ * renamed qmail-autoresponder as autoresponder to shorten path
+ *
  * Revision 2.8  2009-11-06 18:48:29+05:30  Cprogrammer
  * added missing newline in .qmail file for vacation
  *
@@ -33,7 +36,7 @@
 #include <sys/stat.h>
 
 #ifndef	lint
-static char     sccsid[] = "$Id: add_vacation.c,v 2.8 2009-11-06 18:48:29+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: add_vacation.c,v 2.9 2010-03-08 22:04:03+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 int
@@ -96,7 +99,7 @@ add_vacation(char *email, char *fname)
 		return(1);
 	}
 	/*- fprintf(fp1, "| %s/bin/vacation\n", INDIMAILDIR); -*/
-	fprintf(fp1, "| %s/bin/qmail-autoresponder -q %s/.vacation.msg %s/.vacation.dir\n%s/Maildir/\n",
+	fprintf(fp1, "| %s/bin/autoresponder -q %s/.vacation.msg %s/.vacation.dir\n%s/Maildir/\n",
 		QMAILDIR, pw->pw_dir, pw->pw_dir, pw->pw_dir);
 	fclose(fp1);
 	if (chown(TmpBuf, uid, gid) || chmod(TmpBuf, INDIMAIL_QMAIL_MODE))
