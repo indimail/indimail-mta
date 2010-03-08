@@ -1,6 +1,12 @@
 # chkconfig: 345 50 80
 # description: Starts qmail system and associated services
 # $Log: qmailctl.sh,v $
+# Revision 1.16  2010-03-08 15:12:41+05:30  Cprogrammer
+# removed duplicate options doqueue, alrm, hup
+#
+# Revision 1.15  2010-03-08 15:05:40+05:30  Cprogrammer
+# removed redundant functions
+#
 # Revision 1.14  2009-11-12 15:07:15+05:30  Cprogrammer
 # check return status of tcprules
 #
@@ -47,46 +53,6 @@
 #
 SERVICE=/service
 #
-RETVAL=0
-Start() {
-        echo -n "Starting qmail services: "
-        cd $SERVICE
-        daemon svscanboot
-        RETVAL=$?
-        echo
-        [ $RETVAL -eq 0 ] && touch /var/lock/subsys/qmail
-        return $RETVAL
-}
-Stop() {
-        echo -n "Stopping qmail services: "
-        killproc svscanboot
-        RETVAL=$?
-        echo
-        [ $RETVAL -eq 0 ] && rm -f /var/lock/subsys/qmail
-        return $RETVAL
-}
-
-StartService() {
-        /bin/echo -n "Starting qmail services: "
-        cd $SERVICE
-        svscanboot
-        RETVAL=$?
-        echo
-        [ $RETVAL -eq 0 ] && touch /var/lock/subsys/qmail
-        return $RETVAL
-}
-StopService() {
-        echo -n "Stopping qmail services: "
-        killall svscanboot
-        RETVAL=$?
-        echo
-        [ $RETVAL -eq 0 ] && rm -f /var/lock/subsys/qmail
-        return $RETVAL
-}
-RestartService() {
-	StopService
-	StartService
-}
 #
 #
 SYSTEM=`uname -s | tr "[:lower:]" "[:upper:]"`
@@ -115,7 +81,7 @@ case "$SYSTEM" in
 	;;
 esac
 
-PATH=$PATH:QMAIL/bin:/usr/local/bin:/usr/bin:/bin
+PATH=$PATH:QMAIL/bin:QMAIL/sbin:/usr/local/bin:/usr/bin:/bin
 export PATH
 
 [ -x QMAIL/bin/svscanboot ] || exit 0
@@ -128,16 +94,18 @@ case "$SYSTEM" in
 esac
 
 case "$1" in
-  start)
-    Start
-    ;;
   stop)
-    StopService
-    QMAIL/bin/svc -dx $SERVICE/* $SERVICE/*/log
+    QMAIL/bin/svc -d /service/qmail-smtpd.*
+    QMAIL/bin/svc -d /service/qmail-send.*
+    ;;
+  start)
+    QMAIL/bin/svc -u /service/qmail-smtpd.*
+    QMAIL/bin/svc -u /service/qmail-send.*
     ;;
   restart)
-    Stop
-    Start
+    QMAIL/bin/svc -d /service/qmail-smtpd.*
+    QMAIL/bin/svc -t /service/qmail-send.*
+    QMAIL/bin/svc -u /service/qmail-smtpd.*
     ;;
   kill)
     kill `ps -ef|egrep "tcpserver|supervise|qmail-send" | grep -v grep | awk '{print $2}'`
@@ -145,7 +113,7 @@ case "$1" in
   stat)
     QMAIL/bin/svstat $SERVICE/* $SERVICE/*/log
     ;;
-  doqueue|alrm|flush)
+  flush)
     echo "Flushing timeout table and sending ALRM signal to qmail-send."
     QMAIL/bin/qmail-tcpok
     QMAIL/bin/svc -a $SERVICE/qmail-send*
@@ -154,7 +122,7 @@ case "$1" in
     QMAIL/bin/qmail-qstat
     QMAIL/bin/qmail-qread
     ;;
-  reload|hup)
+  reload)
     echo "Sending HUP signal to qmail-send."
     QMAIL/bin/svc -h $SERVICE/qmail-send*
     ;;
@@ -169,15 +137,6 @@ case "$1" in
     QMAIL/bin/svc -c $SERVICE/qmail-send*
     echo "Continuing qmail-smtpd"
     QMAIL/bin/svc -c $SERVICE/qmail-smtpd*
-    ;;
-  restart)
-    echo "Restarting qmail:"
-    echo "* Stopping qmail-smtpd."
-    QMAIL/bin/svc -d $SERVICE/qmail-smtpd*
-    echo "* Sending qmail-send SIGTERM and restarting."
-    QMAIL/bin/svc -t $SERVICE/qmail-send*
-    echo "* Restarting qmail-smtpd."
-    QMAIL/bin/svc -u $SERVICE/qmail-smtpd*
     ;;
   cdb)
     INDIMAILDIR=`grep -w "^indimail" /etc/passwd | cut -d: -f6|head -1`
@@ -208,23 +167,21 @@ case "$1" in
     ;;
   help)
     cat <<HELP
-   stop -- stops mail service (smtp connections refused, nothing goes out)
   start -- starts mail service (smtp connection accepted, mail can go out)
+   stop -- stops mail service (smtp connections refused, nothing goes out)
+restart -- stops and restarts smtp, sends qmail-send a TERM & restarts it
+   kill -- Send kill signal to tcpserver, supvervise, qmail-send processes.
+  flush -- Schedules queued messages for immediate delivery
+ reload -- sends qmail-send HUP, rereading locals and virtualdomains
+   stat -- displays status of mail service
+  queue -- shows status of queue
   pause -- temporarily stops mail service (connections accepted, nothing leaves)
    cont -- continues paused mail service
-   stat -- displays status of mail service
     cdb -- rebuild the tcpserver cdb file for smtp, imap, pop3 and poppass
-restart -- stops and restarts smtp, sends qmail-send a TERM & restarts it
-doqueue -- Schedules queued messages for immediate delivery
-  flush -- same as doqueue
- reload -- sends qmail-send HUP, rereading locals and virtualdomains
-  queue -- shows status of queue
-   alrm -- same as doqueue
-    hup -- same as reload
 HELP
     ;;
   *)
-    echo "Usage: $0 {start|stop|restart|flush|doqueue|reload|stat|pause|cont|cdb|queue|help}"
+    echo "Usage: `basename $0` {start|stop|restart|flush|reload|stat|queue|pause|cont|cdb|help}"
     exit 1
     ;;
 esac
