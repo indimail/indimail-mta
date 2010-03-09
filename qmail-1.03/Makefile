@@ -454,6 +454,11 @@ warn-auto.sh datemail.sh conf-qmail conf-break conf-split
 	| sed s}SPLIT}"`head -1 conf-split`"}g \
 	> datemail
 
+datemail.1: datemail.9
+	cat datemail.9 \
+	| sed s}QMAILHOME}"`head -1 conf-qmail`"}g \
+	> datemail.1
+
 datetime.a: \
 makelib datetime.o datetime_un.o
 	./makelib datetime.a datetime.o datetime_un.o
@@ -1157,11 +1162,11 @@ qmail-clean qmail-send qmail-start qmail-daemon splogger qmail-multi qmail-queue
 qmail-dk qmail-dkim predate datemail mailsubj qmail-upq qmail-showctl qmail-newu spawn-filter \
 qmail-pw2u qmail-qread qmail-qstat qmail-tcpto qmail-tcpok qmail-cat qmail-poppass \
 qmail-pop3d qmail-popbull qmail-popup qmail-qmqpc qmail-qmqpd qmail-qmtpd \
-qmail-smtpd sendmail tcp-env qmail-newmrh qmail-recipients qmail-cdb qmailconfig \
+qmail-smtpd sendmail tcp-env qmail-newmrh recipient-cdb qmail-cdb qmailconfig \
 config-fast dnscname dnsptr dnsip dnsmxip dnsfq dnstxt hostname ipmeprint qreceipt \
 qsmhook forward rrforward preline condredirect bouncesaying except qmail-todo \
 queue-fix idedit setup instcheck rpmattr maildir2mbox qmaildirmake maildirwatch base64 \
-plainencode maildirdeliver autoresponder qmail-rm qail elq pinq etrn \
+maildirdeliver autoresponder qmail-rm qail elq pinq etrn \
 atrn qmailctl indimail.plist svscanboot upstart qmail-sighup qmail-sigalrm qmail-sigterm \
 home home+df proc proc+df binm1 binm1+df binm2 binm2+df \
 binm3 binm3+df spfquery multirotate qpq 822header qmail-nullqueue \
@@ -1322,15 +1327,15 @@ qmail-pw2u.0 qmail-qread.0 qmail-qstat.0 qmail-tcpto.0 qmail-tcpok.0 \
 qmail-pop3d.0 qmail-popbull.0 qmail-popup.0 qmail-qmqpc.0 \
 qmail-qmqpd.0 qmail-qmtpd.0 qmail-smtpd.0 greydaemon.0 qmail-poppass.0 dktest.8 svscanboot.0 \
 qmail-multi.0 spawn-filter.0 tcp-env.0 qmail-greyd.0 \
-qmail-newmrh.0 qmail-recipients.0 qmail-cdb.0 qreceipt.0 forward.0 \
+qmail-newmrh.0 recipient-cdb.0 qmail-cdb.0 qreceipt.0 forward.0 \
 rrforward.0 preline.0 condredirect.0 bouncesaying.0 except.0 \
 maildir2mbox.0 maildirwatch.0 qmail.0 qmail-limits.0 qmail-log.0 \
 qmail-control.0 qmail-header.0 qmail-users.0 dot-qmail.0 \
 qmail-command.0 tcp-environ.0 maildir.0 mbox.0 addresses.0 \
-envelopes.0 forgeries.0 autoresponder.0 \
-qmail-rm.0 maildirdeliver.0 822header.0 \
+envelopes.0 forgeries.0 autoresponder.0 predate.1 datemail.1 mlmatchup.8 \
+qmail-rm.0 maildirdeliver.0 822header.0 cdbdump.1 cdbmake.1 cdbget.1 \
 matchup.0 mlmatchup.0 columnt.0 xqp.0 xsender.0 xrecipient.0 \
-serialcmd.0 maildircmd.0 rewind.0 \
+serialcmd.0 maildircmd.0 rewind.0 logselect.8 \
 maildirserial.0 serialsmtp.0 serialqmtp.0 maildirsmtp.0 \
 maildirqmtp.0 qmail-qfilter.0 queue-fix.0 \
 caldate.0 caldate_mjd.0 caltime.0 caltime_tai.0 \
@@ -1677,30 +1682,30 @@ getln.h exit.h open.h auto_qmail.h cdbmss.h cdbmake.h \
 uint32.h env.h variables.h case.h
 	./compile qmail-cdb.c
 
-qmail-recipients: \
-load qmail-recipients.o cdbmss.o getln.a open.a cdbmake.a seek.a case.a \
+recipient-cdb: \
+load recipient-cdb.o cdbmss.o getln.a open.a cdbmake.a seek.a case.a \
 stralloc.a alloc.a strerr.a substdio.a error.a str.a auto_qmail.o
-	./load qmail-recipients cdbmss.o getln.a open.a cdbmake.a \
+	./load recipient-cdb cdbmss.o getln.a open.a cdbmake.a \
 	seek.a case.a stralloc.a alloc.a strerr.a substdio.a \
 	error.a str.a auto_qmail.o 
 
-qmail-recipients.0: \
-qmail-recipients.8
-	nroff -man qmail-recipients.8 > qmail-recipients.0
+recipient-cdb.0: \
+recipient-cdb.8
+	nroff -man recipient-cdb.8 > recipient-cdb.0
 
-qmail-recipients.8: \
-qmail-recipients.9 conf-break conf-spawn
-	cat qmail-recipients.9 \
+recipient-cdb.8: \
+recipient-cdb.9 conf-break conf-spawn
+	cat recipient-cdb.9 \
 	| sed s}QMAIL}"`head -1 conf-qmail`"}g \
 	| sed s}BREAK}"`head -1 conf-break`"}g \
 	| sed s}SPAWN}"`head -1 conf-spawn`"}g \
-	> qmail-recipients.8
+	> recipient-cdb.8
 
-qmail-recipients.o: \
-compile qmail-recipients.c strerr.h stralloc.h gen_alloc.h substdio.h \
+recipient-cdb.o: \
+compile recipient-cdb.c strerr.h stralloc.h gen_alloc.h substdio.h \
 getln.h exit.h open.h auto_qmail.h cdbmss.h cdbmake.h \
 uint32.h substdio.h case.h
-	./compile qmail-recipients.c
+	./compile recipient-cdb.c
 
 qmail-newu: \
 load qmail-newu.o cdbmss.o getln.a open.a seek.a cdbmake.a case.a \
@@ -1882,12 +1887,6 @@ stralloc_copy.o stralloc_cat.o
 qmail-qread.0: \
 qmail-qread.8
 	nroff -man qmail-qread.8 > qmail-qread.0
-
-qmail-qread.8: \
-qmail-qread.9
-	cat qmail-qread.9 \
-	| sed s}QMAIL}"`head -1 conf-qmail`"}g \
-	> qmail-qread.8
 
 qmail-qread.o: \
 compile qmail-qread.c stralloc.h gen_alloc.h substdio.h subfd.h \
@@ -2658,7 +2657,7 @@ envelopes.5 forgeries.7 forward.1 rrforward.1 maildir2mbox.1 qmaildirmake.1 \
 maildirwatch.1 mailsubj.1 mbox.5 preline.1 qmail-clean.8 \
 qmail-command.8 qmail-control.9 qmail-getpw.9 qmail-header.5 \
 qmail-inject.8 qmail-limits.9 qmail-local.8 qmail-log.5 \
-qmail-lspawn.8 qmail-newmrh.9 qmail-newu.9 qmail-pop3d.8 qmail-recipients.9 \
+qmail-lspawn.8 qmail-newmrh.9 qmail-newu.9 qmail-pop3d.8 recipient-cdb.9 \
 qmail-popbull.8 \
 qmail-popup.8 qmail-pw2u.9 qmail-qmqpc.8 qmail-qmqpd.8 qmail-qmtpd.8 \
 qmail-qread.8 qmail-qstat.8 qmail-queue.9 qmail-remote.9 \
@@ -2676,7 +2675,7 @@ sendmail.c qreceipt.c qsmhook.c forward.c preline.c predate.c \
 except.c bouncesaying.c condredirect.c qmaildirmake.c maildir2mbox.c \
 maildirwatch.c splogger.c qail.sh elq.sh pinq.sh etrn.sh atrn.sh qmail-upq.sh \
 datemail.sh mailsubj.sh qlx.h rcpthosts.h rcpthosts.c commands.h \
-recipients.h recipients.c qmail-recipients.c \
+recipients.h recipients.c recipient-cdb.c \
 commands.c dnsdoe.h dnsdoe.c fmtqfn.h fmtqfn.c gfrom.h gfrom.c \
 myctime.h myctime.c newfield.h newfield.c qsutil.h qsutil.c \
 readsubdir.h readsubdir.c received.h received.c tcpto.h tcpto.c \
@@ -3155,14 +3154,6 @@ compile queue-fix.c direntry.h stralloc.h fmt.h error.h subfd.h getln.h str.h op
 scan.h auto_split.h auto_uids.h tcpto.h
 	./compile queue-fix.c
 
-plainencode: \
-load plainencode.o base64sub.o stralloc.a alloc.a error.o str.a
-	./load plainencode base64sub.o stralloc.a alloc.a error.o str.a
-
-plainencode.o: \
-compile plainencode.c stralloc.h base64.h
-	./compile plainencode.c
-
 base64: \
 load base64.o base64sub.o sgetopt.o subgetopt.o error_str.o getln.o getln2.o \
 substdio.a stralloc.a alloc.a error.o str.a
@@ -3499,9 +3490,13 @@ str.a fs.a case.a
 	./load mlmatchup strerr.a getln.a substdio.a stralloc.a \
 	alloc.a error.a str.a fs.a case.a
 
-mlmatchup.0: \
-mlmatchup.1
-	nroff -man mlmatchup.1 > mlmatchup.0
+mlmatchup.0: mlmatchup.8
+	nroff -man mlmatchup.8 > mlmatchup.0
+
+mlmatchup.8: mlmatchup.9
+	cat mlmatchup.9 \
+	| sed s}QMAILHOME}"`head -1 conf-qmail`"}g \
+	> mlmatchup.8
 
 mlmatchup.o: \
 compile mlmatchup.c stralloc.h gen_alloc.h gen_alloc.h gen_allocdefs.h \
@@ -4729,6 +4724,11 @@ str_len.o str_diff.o strerr.a substdio.a stralloc.a
 	./load logselect sorted.o error.o error_str.o alloc.o open_read.o \
 	tai_pack.o taia_pack.o alloc_re.o byte_diff.o byte_cr.o byte_copy.o \
 	str_len.o str_diff.o strerr.a substdio.a stralloc.a
+
+logselect.8: logselect.9
+	cat logselect.9 \
+	| sed s}QMAILHOME}"`head -1 conf-qmail`"}g \
+	> logselect.8
 
 sorted.o: compile sorted.c str.h gen_allocdefs.h sorted.h alloc.h stralloc.h
 	./compile sorted.c

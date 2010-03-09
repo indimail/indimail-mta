@@ -151,7 +151,6 @@
 %attr(0555,root,qmail) @indimaildir@/bin/dnstxt
 %attr(0555,root,qmail) @indimaildir@/bin/dot-forward
 %attr(0555,root,qmail) @indimaildir@/bin/elq
-%attr(0555,root,qmail) @indimaildir@/bin/envconf
 %attr(0555,root,qmail) @indimaildir@/bin/envdir
 %attr(0555,root,qmail) @indimaildir@/bin/envmigrate
 %attr(0555,root,qmail) @indimaildir@/bin/envuidgid

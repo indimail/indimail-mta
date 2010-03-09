@@ -1,5 +1,10 @@
 #
 # $Log: indimail-epm.list.in,v $
+# Revision 2.47  2010-03-09 14:38:55+05:30  Cprogrammer
+# removed envconf
+# renamed qmail-recipients to recipient-cdb
+# removed plainencode
+#
 # Revision 2.46  2010-03-08 22:03:07+05:30  Cprogrammer
 # renamed qmail-autoresponder as autoresponder to shorten path
 #
@@ -317,7 +322,6 @@ f 444 root qmail ${prefix}/man/cat1/maildirsmtp.0.gz BUILDROOT${prefix}/man/cat1
 f 444 root qmail ${prefix}/man/cat1/maildirwatch.0.gz BUILDROOT${prefix}/man/cat1/maildirwatch.0.gz
 f 444 root qmail ${prefix}/man/cat1/mailsubj.0.gz BUILDROOT${prefix}/man/cat1/mailsubj.0.gz
 f 444 root qmail ${prefix}/man/cat1/matchup.0.gz BUILDROOT${prefix}/man/cat1/matchup.0.gz
-f 444 root qmail ${prefix}/man/cat1/mlmatchup.0.gz BUILDROOT${prefix}/man/cat1/mlmatchup.0.gz
 f 444 root qmail ${prefix}/man/cat1/newaliases.0.gz BUILDROOT${prefix}/man/cat1/newaliases.0.gz
 f 444 root qmail ${prefix}/man/cat1/newinclude.0.gz BUILDROOT${prefix}/man/cat1/newinclude.0.gz
 f 444 root qmail ${prefix}/man/cat1/new-inject.0.gz BUILDROOT${prefix}/man/cat1/new-inject.0.gz
@@ -353,6 +357,7 @@ f 444 root qmail ${prefix}/man/cat5/tcp-environ.0.gz BUILDROOT${prefix}/man/cat5
 f 444 root qmail ${prefix}/man/cat7/forgeries.0.gz BUILDROOT${prefix}/man/cat7/forgeries.0.gz
 f 444 root qmail ${prefix}/man/cat7/qmail.0.gz BUILDROOT${prefix}/man/cat7/qmail.0.gz
 f 444 root qmail ${prefix}/man/cat7/qmail-limits.0.gz BUILDROOT${prefix}/man/cat7/qmail-limits.0.gz
+f 444 root qmail ${prefix}/man/cat8/mlmatchup.0.gz BUILDROOT${prefix}/man/cat8/mlmatchup.0.gz
 f 444 root qmail ${prefix}/man/cat8/cleanq.0.gz BUILDROOT${prefix}/man/cat8/cleanq.0.gz
 f 444 root qmail ${prefix}/man/cat8/greydaemon.0.gz BUILDROOT${prefix}/man/cat8/greydaemon.0.gz
 f 444 root qmail ${prefix}/man/cat8/ofmipd.0.gz BUILDROOT${prefix}/man/cat8/ofmipd.0.gz
@@ -379,7 +384,7 @@ f 444 root qmail ${prefix}/man/cat8/qmail-qmtpd.0.gz BUILDROOT${prefix}/man/cat8
 f 444 root qmail ${prefix}/man/cat8/qmail-qread.0.gz BUILDROOT${prefix}/man/cat8/qmail-qread.0.gz
 f 444 root qmail ${prefix}/man/cat8/qmail-qstat.0.gz BUILDROOT${prefix}/man/cat8/qmail-qstat.0.gz
 f 444 root qmail ${prefix}/man/cat8/qmail-queue.0.gz BUILDROOT${prefix}/man/cat8/qmail-queue.0.gz
-f 444 root qmail ${prefix}/man/cat8/qmail-recipients.0.gz BUILDROOT${prefix}/man/cat8/qmail-recipients.0.gz
+f 444 root qmail ${prefix}/man/cat8/recipient-cdb.0.gz BUILDROOT${prefix}/man/cat8/recipient-cdb.0.gz
 f 444 root qmail ${prefix}/man/cat8/qmail-remote.0.gz BUILDROOT${prefix}/man/cat8/qmail-remote.0.gz
 f 444 root qmail ${prefix}/man/cat8/qmail-rm.0.gz BUILDROOT${prefix}/man/cat8/qmail-rm.0.gz
 f 444 root qmail ${prefix}/man/cat8/qmail-rspawn.0.gz BUILDROOT${prefix}/man/cat8/qmail-rspawn.0.gz
@@ -441,7 +446,7 @@ f 444 root qmail ${prefix}/man/man1/maildirwatch.1.gz BUILDROOT${prefix}/man/man
 f 444 root qmail ${prefix}/man/man1/mailsubj.1.gz BUILDROOT${prefix}/man/man1/mailsubj.1.gz
 f 444 root qmail ${prefix}/man/man1/matchup.1.gz BUILDROOT${prefix}/man/man1/matchup.1.gz
 f 444 root qmail ${prefix}/man/man1/mconnect.1.gz BUILDROOT${prefix}/man/man1/mconnect.1.gz
-f 444 root qmail ${prefix}/man/man1/mlmatchup.1.gz BUILDROOT${prefix}/man/man1/mlmatchup.1.gz
+f 444 root qmail ${prefix}/man/man8/mlmatchup.8.gz BUILDROOT${prefix}/man/man8/mlmatchup.8.gz
 f 444 root qmail ${prefix}/man/man1/mpack.1.gz BUILDROOT${prefix}/man/man1/mpack.1.gz
 f 444 root qmail ${prefix}/man/man1/multipipe.1.gz BUILDROOT${prefix}/man/man1/multipipe.1.gz
 f 444 root qmail ${prefix}/man/man1/multitail.1.gz BUILDROOT${prefix}/man/man1/multitail.1.gz
@@ -643,7 +648,7 @@ f 444 root qmail ${prefix}/man/man8/qmail-qmtpd.8.gz BUILDROOT${prefix}/man/man8
 f 444 root qmail ${prefix}/man/man8/qmail-qread.8.gz BUILDROOT${prefix}/man/man8/qmail-qread.8.gz
 f 444 root qmail ${prefix}/man/man8/qmail-qstat.8.gz BUILDROOT${prefix}/man/man8/qmail-qstat.8.gz
 f 444 root qmail ${prefix}/man/man8/qmail-queue.8.gz BUILDROOT${prefix}/man/man8/qmail-queue.8.gz
-f 444 root qmail ${prefix}/man/man8/qmail-recipients.8.gz BUILDROOT${prefix}/man/man8/qmail-recipients.8.gz
+f 444 root qmail ${prefix}/man/man8/recipient-cdb.8.gz BUILDROOT${prefix}/man/man8/recipient-cdb.8.gz
 f 444 root qmail ${prefix}/man/man8/qmail-remote.8.gz BUILDROOT${prefix}/man/man8/qmail-remote.8.gz
 f 444 root qmail ${prefix}/man/man8/qmail-rm.8.gz BUILDROOT${prefix}/man/man8/qmail-rm.8.gz
 f 444 root qmail ${prefix}/man/man8/qmail-rspawn.8.gz BUILDROOT${prefix}/man/man8/qmail-rspawn.8.gz
@@ -880,7 +885,6 @@ f 555 root qmail ${prefix}/bin/dnsptr BUILDROOT${prefix}/bin/dnsptr
 f 555 root qmail ${prefix}/bin/dnstxt BUILDROOT${prefix}/bin/dnstxt
 f 555 root qmail ${prefix}/bin/dot-forward BUILDROOT${prefix}/bin/dot-forward
 f 555 root qmail ${prefix}/bin/elq BUILDROOT${prefix}/bin/elq
-f 555 root qmail ${prefix}/bin/envconf BUILDROOT${prefix}/bin/envconf
 f 555 root qmail ${prefix}/bin/envdir BUILDROOT${prefix}/bin/envdir
 f 555 root qmail ${prefix}/bin/envmigrate BUILDROOT${prefix}/bin/envmigrate
 f 555 root qmail ${prefix}/bin/envuidgid BUILDROOT${prefix}/bin/envuidgid
@@ -937,7 +941,6 @@ f 555 root qmail ${prefix}/bin/ofmipd BUILDROOT${prefix}/bin/ofmipd
 f 555 root qmail ${prefix}/bin/ofmipname BUILDROOT${prefix}/bin/ofmipname
 f 555 root qmail ${prefix}/bin/pgrphack BUILDROOT${prefix}/bin/pgrphack
 f 555 root qmail ${prefix}/bin/pinq BUILDROOT${prefix}/bin/pinq
-f 555 root qmail ${prefix}/bin/plainencode BUILDROOT${prefix}/bin/plainencode
 f 555 root qmail ${prefix}/bin/predate BUILDROOT${prefix}/bin/predate
 f 555 root qmail ${prefix}/bin/preline BUILDROOT${prefix}/bin/preline
 f 4555 root root ${prefix}/bin/printdir BUILDROOT${prefix}/bin/printdir
@@ -982,7 +985,7 @@ f 555 root qmail ${prefix}/bin/qmail-qread BUILDROOT${prefix}/bin/qmail-qread
 f 555 root qmail ${prefix}/bin/qmail-qstat BUILDROOT${prefix}/bin/qmail-qstat
 f 555 root qmail ${prefix}/bin/qmail-queue-print BUILDROOT${prefix}/bin/qmail-queue-print
 f 6511 qmailq qmail ${prefix}/bin/qmail-queue BUILDROOT${prefix}/bin/qmail-queue
-f 500 root qmail ${prefix}/bin/qmail-recipients BUILDROOT${prefix}/bin/qmail-recipients
+f 500 root qmail ${prefix}/bin/recipient-cdb BUILDROOT${prefix}/bin/recipient-cdb
 f 511 root qmail ${prefix}/bin/qmail-remote BUILDROOT${prefix}/bin/qmail-remote
 f 555 root qmail ${prefix}/bin/qmail-rm BUILDROOT${prefix}/bin/qmail-rm
 f 511 root qmail ${prefix}/bin/qmail-rspawn BUILDROOT${prefix}/bin/qmail-rspawn

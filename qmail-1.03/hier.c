@@ -1,5 +1,10 @@
 /*
  * $Log: hier.c,v $
+ * Revision 1.137  2010-03-09 14:40:47+05:30  Cprogrammer
+ * added cdb man pages
+ * added man pages for predate, datemail, logselect
+ * removed envconf
+ *
  * Revision 1.136  2010-03-08 22:04:30+05:30  Cprogrammer
  * renamed qmail-autoresponder as autoresponder to shorten path
  *
@@ -397,7 +402,7 @@ hier(inst_dir)
 	c(auto_qmail_home, "bin", "splogger", auto_uido, auto_gidq, 0511);
 	c(auto_qmail_home, "bin", "qmail-newu", auto_uido, auto_gidq, 0500);
 	c(auto_qmail_home, "bin", "qmail-newmrh", auto_uido, auto_gidq, 0500);
-	c(auto_qmail_home, "bin", "qmail-recipients", auto_uido, auto_gidq, 0500);
+	c(auto_qmail_home, "bin", "recipient-cdb", auto_uido, auto_gidq, 0500);
 	c(auto_qmail_home, "bin", "qmail-cdb", auto_uido, auto_gidq, 0500);
 	c(auto_qmail_home, "bin", "qmail-pw2u", auto_uido, auto_gidq, 0511);
 	c(auto_qmail_home, "bin", "qmail-inject", auto_uido, auto_gidq, 0555);
@@ -452,7 +457,6 @@ hier(inst_dir)
 #if defined(HASDKIM) || defined(DOMAIN_KEYS)
 	c(auto_qmail_home, "bin", "dk-filter", auto_uido, auto_gidq, 0555);
 #endif
-	c(auto_qmail_home, "bin", "envconf", auto_uido, auto_gidq, 0555);
 	c(auto_qmail_home, "bin", "qmail-nullqueue", auto_uido, auto_gidq, 0555);
 	c(auto_qmail_home, "bin", "hostname", auto_uido, auto_gidq, 0555);
 	c(auto_qmail_home, "bin", "qmailconfig", auto_uido, auto_gidq, 0555);
@@ -505,7 +509,6 @@ hier(inst_dir)
 	c(auto_qmail_home, "bin", "qmailctl", auto_uido, auto_gidq, 0555);
 	c(auto_qmail_home, "bin", "uacl", auto_uido, auto_gidq, 0555);
 	c(auto_qmail_home, "bin", "base64", auto_uido, auto_gidq, 0555);
-	c(auto_qmail_home, "bin", "plainencode", auto_uido, auto_gidq, 0555);
 	c(auto_qmail_home, "bin", "mbox2maildir.pl", auto_uido, auto_gidq, 0555);
 	c(auto_qmail_home, "bin", "qmail-scanner-queue.pl", auto_uido, auto_gidq, 0555);
 	c(auto_qmail_home, "bin", "stripmime.pl", auto_uido, auto_gidq, 0555);
@@ -682,6 +685,8 @@ hier(inst_dir)
 	c(auto_qmail_home, "doc", "README.tls", auto_uido, auto_gidq, 0444);
 	c(auto_qmail_home, "doc", "README.wildmat", auto_uido, auto_gidq, 0444);
 
+	c(auto_qmail_home, "man/man1", "predate.1", auto_uido, auto_gidq, 0444);
+	c(auto_qmail_home, "man/man1", "datemail.1", auto_uido, auto_gidq, 0444);
 	c(auto_qmail_home, "man/man1", "argv0.1", auto_uido, auto_gidq, 0444);
 	c(auto_qmail_home, "man/man1", "addcr.1", auto_uido, auto_gidq, 0444);
 	c(auto_qmail_home, "man/man1", "delcr.1", auto_uido, auto_gidq, 0444);
@@ -769,8 +774,6 @@ hier(inst_dir)
 	c(auto_qmail_home, "man/cat1", "maildirserial.0", auto_uido, auto_gidq, 0444);
 	c(auto_qmail_home, "man/man1", "matchup.1", auto_uido, auto_gidq, 0444);
 	c(auto_qmail_home, "man/cat1", "matchup.0", auto_uido, auto_gidq, 0444);
-	c(auto_qmail_home, "man/man1", "mlmatchup.1", auto_uido, auto_gidq, 0444);
-	c(auto_qmail_home, "man/cat1", "mlmatchup.0", auto_uido, auto_gidq, 0444);
 	c(auto_qmail_home, "man/man1", "xqp.1", auto_uido, auto_gidq, 0444);
 	c(auto_qmail_home, "man/cat1", "xqp.0", auto_uido, auto_gidq, 0444);
 	c(auto_qmail_home, "man/man1", "xsender.1", auto_uido, auto_gidq, 0444);
@@ -815,6 +818,11 @@ hier(inst_dir)
 	c(auto_qmail_home, "man/man1", "tai2tai64n.1", auto_uido, auto_gidq, 0444);
 	c(auto_qmail_home, "man/man1", "tai64n2tai.1", auto_uido, auto_gidq, 0444);
 	c(auto_qmail_home, "man/man1", "qlogselect.1", auto_uido, auto_gidq, 0444);
+	c(auto_qmail_home, "man/man1", "cdbget.1", auto_uido, auto_gidq, 0444);
+	c(auto_qmail_home, "man/man1", "cdbtest.1", auto_uido, auto_gidq, 0444);
+	c(auto_qmail_home, "man/man1", "cdbstats.1", auto_uido, auto_gidq, 0444);
+	c(auto_qmail_home, "man/man1", "cdbmake.1", auto_uido, auto_gidq, 0444);
+	c(auto_qmail_home, "man/man1", "cdbdump.1", auto_uido, auto_gidq, 0444);
 
 	c(auto_qmail_home, "man/man3", "alloc.3", auto_uido, auto_gidq, 0444);
 	c(auto_qmail_home, "man/man3", "case.3", auto_uido, auto_gidq, 0444);
@@ -899,6 +907,9 @@ hier(inst_dir)
 	c(auto_qmail_home, "man/man5", "rfc-4871.5", auto_uido, auto_gidq, 0444);
 	c(auto_qmail_home, "man/man5", "rfc-4870.5", auto_uido, auto_gidq, 0444);
 
+	c(auto_qmail_home, "man/man8", "logselect.8", auto_uido, auto_gidq, 0444);
+	c(auto_qmail_home, "man/man8", "mlmatchup.8", auto_uido, auto_gidq, 0444);
+	c(auto_qmail_home, "man/cat8", "mlmatchup.0", auto_uido, auto_gidq, 0444);
 	c(auto_qmail_home, "man/man8", "qmailctl.8", auto_uido, auto_gidq, 0444);
 	c(auto_qmail_home, "man/man8", "qmail-rm.8", auto_uido, auto_gidq, 0444);
 	c(auto_qmail_home, "man/cat8", "qmail-rm.0", auto_uido, auto_gidq, 0444);
@@ -952,8 +963,8 @@ hier(inst_dir)
 	c(auto_qmail_home, "man/cat8", "qmail-showctl.0", auto_uido, auto_gidq, 0444);
 	c(auto_qmail_home, "man/man8", "qmail-newmrh.8", auto_uido, auto_gidq, 0444);
 	c(auto_qmail_home, "man/cat8", "qmail-newmrh.0", auto_uido, auto_gidq, 0444);
-	c(auto_qmail_home, "man/man8", "qmail-recipients.8", auto_uido, auto_gidq, 0444);
-	c(auto_qmail_home, "man/cat8", "qmail-recipients.0", auto_uido, auto_gidq, 0444);
+	c(auto_qmail_home, "man/man8", "recipient-cdb.8", auto_uido, auto_gidq, 0444);
+	c(auto_qmail_home, "man/cat8", "recipient-cdb.0", auto_uido, auto_gidq, 0444);
 	c(auto_qmail_home, "man/man8", "qmail-cdb.8", auto_uido, auto_gidq, 0444);
 	c(auto_qmail_home, "man/cat8", "qmail-cdb.0", auto_uido, auto_gidq, 0444);
 	c(auto_qmail_home, "man/man8", "qmail-newu.8", auto_uido, auto_gidq, 0444);
@@ -1021,7 +1032,7 @@ hier(inst_dir)
 void
 getversion_install_big_c()
 {
-	static char    *x = "$Id: hier.c,v 1.136 2010-03-08 22:04:30+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: hier.c,v 1.137 2010-03-09 14:40:47+05:30 Cprogrammer Exp mbhangui $";
 
 #ifdef INDIMAIL
 	x = sccsidh;

@@ -495,8 +495,7 @@ LOGFILTER         |qmail-smtpd  |used    |If set, the filter program has availab
 MAKE_SEEKABLE     |qmail-multi  |used    |If set, the pipe used by various
                   |spawn-filter |        |programs to communicate is made
                   |vdelivermail |        |seekable. This improves the performance
-                  |qmail-       |        |of filters.
-                  |autoresponder|        |
+                  |autoresponder|        |of filters.
 ------------------|-------------|--------|----------------------------------------
 QMAILLOCAL        |spawn-filter |used    |The mda to call for local deliveries
                   |             |        |(default qmail-local if not defined)
@@ -1344,10 +1343,614 @@ indisrvr(8)        - Secure server to run commands on an IndiMail cluster
 adminclient(8)     - Client for connecting to indisrvr
 .sp -1
 .IP \n+[step]
+sslerator          - TLS/SSL protocol wrapper
+.sp -1
+.IP \n+[step]
 mgmtpass(8)        - Utility for managing admin users
 .sp -1
 .IP \n+[step]
 vpriv(8)           - Set program access rights for indimail admin users.
+.sp -1
+.IP \n+[step]
+osh(8)             - Operator Shell
+.sp -1
+.IP \n+[step]
+flash(1)           - A menu shell with hotkeys and process group management
+.sp -1
+.IP \n+[step]
+altermime          - MIME encoded email pack alteration too
+.sp -1
+.IP \n+[step]
+ripmime            - email attachment / decomposition tool
+.sp -1
+.IP \n+[step]
+mpack              - pack a file in MIME format
+.sp -1
+.IP \n+[step]
+munpack            - unpack messages in MIME or split-uuencode format
+.sp -1
+.IP \n+[step]
+nssd               - Name Service Switch daemon for IndiMail
+.sp -1
+.IP \n+[step]
+pam-checkpwd       - PAM-based checkpassword program
+
+.SH UCSPI-TCP
+
+.nr step 1 1
+.IP \n[step] 4
+tcpserver     - accepts incoming TCP connections
+.sp -1
+.IP \n+[step]
+tcpcat        - prints data from a remote host
+.sp -1
+.IP \n+[step]
+tcpclient     - creates an outgoing TCP connection
+.sp -1
+.IP \n+[step]
+tcp-env       - set up TCP-related environment variables
+.sp -1
+.IP \n+[step]
+tcprules      - compiles rules for \fBtcpserver\fR(1)
+.sp -1
+.IP \n+[step]
+tcprulescheck - checks tcprules
+.sp -1
+.IP \n+[step]
+addcr         - inserts a CR (\015) before each LF (\012)
+.sp -1
+.IP \n+[step]
+delcr         - removes a CR (\015) at the end of each line of input
+.sp -1
+.IP \n+[step]
+fixcrio       - inserts missing CRs at the ends of lines
+.sp -1
+.IP \n+[step]
+argv0         - runs a program with a specified 0th argument
+.sp -1
+.IP \n+[step]
+date@         - prints the date on a remote host
+.sp -1
+.IP \n+[step]
+finger@       - gets user information from a remote host
+.sp -1
+.IP \n+[step]
+http@         - gets a web page from a remote host
+.sp -1
+.IP \n+[step]
+who@          - prints the list of active users on a remote host
+.sp -1
+.IP \n+[step]
+mconnect      - connect to a remote SMTP server
+.sp -1
+.IP \n+[step]
+rblsmtpd      - block mail from rbl listed site
+.sp -1
+.IP \n+[step]
+recordio      - record the input/output of a program
+.sp -1
+.IP \n+[step]
+maildirserial - send a maildir through a client
+.sp -1
+.IP \n+[step]
+maildirqmtp   - send a maildir through a QMTP
+.sp -1
+.IP \n+[step]
+maildircmd    - pipe a maildir through a command
+.sp -1
+.IP \n+[step]
+maildirsmtp   - send a maildir through a SMTP
+.sp -1
+.IP \n+[step]
+serialcmd     - Pipe messages through a command
+.sp -1
+.IP \n+[step]
+serialqmtp    - Blast messages to QMTP
+.sp -1
+.IP \n+[step]
+serialsmtp    - Blast messages to SMTP
+
+.SH Daemontools
+
+.nr step 1 1
+.IP \n[step] 4
+envdir        - run program with env according to files in a directory
+.sp -1
+.IP \n+[step]
+envuidgid     - run program with env variables with an account’s uid, gid
+.sp -1
+.IP \n+[step]
+setuidgid     - run program under a specified account’s uid and gid
+.sp -1
+.IP \n+[step]
+supervise     - starts and monitors a service
+.sp -1
+.IP \n+[step]
+svc           - controls services monitored by \fBsupervise\fR(8)
+.sp -1
+.IP \n+[step]
+svok          - checks whether \fBsupervise\fR(8) is running
+.sp -1
+.IP \n+[step]
+svscan        - starts and monitors a collection of services
+.sp -1
+.IP \n+[step]
+svscanboot    - starts svscan(8) in the service directory
+.sp -1
+.IP \n+[step]
+svstat        - prints the status of services monitored by \fBsupervise\fR(8)
+.sp -1
+.IP \n+[step]
+logselect     - Select portions of log
+.sp -1
+.IP \n+[step]
+mlmatchup     - collect info on messages and deliveries through multilog
+.sp -1
+.IP \n+[step]
+matchup       - collect info on messages and deliveries
+.sp -1
+.IP \n+[step]
+multilog      - qmail/indimail logging utility
+.sp -1
+.IP \n+[step]
+multitail     - watch output sent to a file
+.sp -1
+.IP \n+[step]
+tai64n        - puts a precise timestamp on each line
+.sp -1
+.IP \n+[step]
+tai64nlocal   - convert TAI64N timestamps to a human-readable format
+.sp -1
+.IP \n+[step]
+tai64nunix    - convert TAI64N timestamps to fractional secs since epoch
+.sp -1
+.IP \n+[step]
+teepipe       - copy stdin to a program and stdout
+.sp -1
+.IP \n+[step]
+qfilelog      - log messages to a single file
+.sp -1
+.IP \n+[step]
+splogger      - make entries in syslog
+.sp -1
+.IP \n+[step]
+fghack        - is an anti-backgrounding tool
+.sp -1
+.IP \n+[step]
+pgrphack      - runs a program in a separate process group
+.sp -1
+.IP \n+[step]
+softlimit     - runs another program with new resource limits
+.sp -1
+.IP \n+[step]
+multipipe     - supervise an pipeline of commands in a directory
+.sp -1
+.IP \n+[step]
+spipe         - supervise an pipeline of commands
+.sp -1
+.IP \n+[step]
+setlock       - runs another program with a file locked
+.sp -1
+.IP \n+[step]
+readproctitle - maintains a rotated log in memory for inspection by ps(1)
+.sp -1
+.IP \n+[step]
+qmail-log     - the qmail activity record
+.sp -1
+.IP \n+[step]
+xqp           - locate a message given its qp
+.sp -1
+.IP \n+[step]
+xrecipient    - locate all deliveries to one recipient
+.sp -1
+.IP \n+[step]
+xsender       - locate all messages from one sender
+.sp -1
+.IP \n+[step]
+columnt       - align columns in a table
+
+.SH 822mess
+
+.nr step 1 1
+.IP \n[step] 4
+822print        - print a mail message
+.sp -1
+.IP \n+[step]
+822headerok     - Check if email message header is 822-compliant
+.sp -1
+.IP \n+[step]
+822header       - print the header of a mail message
+.sp -1
+.IP \n+[step]
+822addr         - extract 822 headers with values from email
+.sp -1
+.IP \n+[step]
+822body         - print the body of a mail message
+.sp -1
+.IP \n+[step]
+822headerfilter - filter message header through a program
+.sp -1
+.IP \n+[step]
+822bodyfilter   - filter message body through a program
+.sp -1
+.IP \n+[step]
+822date         - print the date in a mail message
+.sp -1
+.IP \n+[step]
+822field        - print the value of a header field in a mail message
+.sp -1
+.IP \n+[step]
+822fields       - extract 822 field values from email headers
+.sp -1
+.IP \n+[step]
+822received     - print the Received fields in a mail message
+
+.SH dot-qmail
+.nr step 1 1
+.IP \n[step] 4
+autoresponder  - Rate and time limited autoresponder for qmail/indimail
+.sp -1
+.IP \n+[step]
+qreceipt       - respond to delivery notice requests
+.sp -1
+.IP \n+[step]
+replier        - Reply to messages through external program
+.sp -1
+.IP \n+[step]
+bouncesaying   - perhaps bounce each incoming message
+.sp -1
+.IP \n+[step]
+condredirect   - perhaps redirect mail to another address
+.sp -1
+.IP \n+[step]
+condtomaildir  - Feed message to program and perhaps store message
+.sp -1
+.IP \n+[step]
+forward        - forward new mail to one or more addresses
+.sp -1
+.IP \n+[step]
+dot-forward    - read a .forward file under qmail
+.sp -1
+.IP \n+[step]
+filterto       - perhaps redirect mail to another address
+.sp -1
+.IP \n+[step]
+except         - reverse the exit code of a program
+.sp -1
+.IP \n+[step]
+preline        - prepend lines to message
+.sp -1
+.IP \n+[step]
+rrforward      - round-robin message delivery
+.sp -1
+.IP \n+[step]
+maildirdeliver - deliver a mail message to a maildir
+.sp -1
+.IP \n+[step]
+fastforward    - forward mail according to a cdb database
+.sp -1
+.IP \n+[step]
+ifaddr         - match address
+.sp -1
+.IP \n+[step]
+checkaddr      - match address on addresses supplied on standard input
+.sp -1
+.IP \n+[step]
+iftocc         - match to or cc
+.sp -1
+.IP \n+[step]
+iftoccfrom     - match to, cc or from
+.sp -1
+.IP \n+[step]
+checkdomain    - match domain on addresses supplied on standard input
+.sp -1
+.IP \n+[step]
+newaliases     - rebuild the data base for the mail aliases file
+.sp -1
+.IP \n+[step]
+setmaillist    - create a binary mailing list
+.sp -1
+.IP \n+[step]
+printmaillist  - print the contents of a binary mailing list
+.sp -1
+.IP \n+[step]
+setforward     - create a forwarding database
+.sp -1
+.IP \n+[step]
+printforward   - print the instructions in a forwarding database
+.sp -1
+.IP \n+[step]
+newinclude     - create a binary mailing list from an :include: file
+
+.SH CDB
+
+.nr step 1 1
+.IP \n[step] 4
+cdbmake   - write cdb by reading series of encoded records on input
+.sp -1
+.IP \n+[step]
+cdbdump   - read cdb in stdin and print database in \fBcdbmake\fR(1) format
+.sp -1
+.IP \n+[step]
+cdbget    - search for records in cdb
+.sp -1
+.IP \n+[step]
+cdbstats  - read cdb on stdin and print statistics
+.sp -1
+.IP \n+[step]
+cdbtest   - read cdb on stdin and test it
+
+.SH qmail
+
+.nr step 1 1
+.IP \n[step] 4
+ofmipd          - accept outgoing mail through OFMIP
+.sp -1
+.IP \n+[step]
+ofmipname       - build a name-address database for ofmipd
+.sp -1
+.IP \n+[step]
+qmail-daemon    - turn on qmail delivery with multiple queue
+.sp -1
+.IP \n+[step]
+qmail-start     - turn on qmail delivery
+.sp -1
+.IP \n+[step]
+qmail-smtpd     - receive mail via SMTP
+.sp -1
+.IP \n+[step]
+qmail-cdb       - prepare data in cdb format for \fBqmail-smtpd\fR(8), and \fBspawn-filter\fR(8)
+.sp -1
+.IP \n+[step]
+recipient-cdb   - prepare recipients for qmail-smtpd
+.sp -1
+.IP \n+[step]
+qmail-qmqpc     - queue a mail message via QMQP
+.sp -1
+.IP \n+[step]
+qmail-qmqpd     - receive mail via QMQP
+.sp -1
+.IP \n+[step]
+qmail-qmtpd     - receive mail via QMTP
+.sp -1
+.IP \n+[step]
+qmail-lspawn    - schedule local deliveries
+.sp -1
+.IP \n+[step]
+qmail-local     - deliver or forward a mail message
+.sp -1
+.IP \n+[step]
+qmail-rspawn    - schedule remote deliveries
+.sp -1
+.IP \n+[step]
+qmail-remote    - send mail via SMTP / ESMTP
+.sp -1
+.IP \n+[step]
+qmail-poppass   - change passwords from across the network
+.sp -1
+.IP \n+[step]
+qmail-clean     - clean up the queue directory
+.sp -1
+.IP \n+[step]
+qmail-send      - deliver mail messages from the queue
+.sp -1
+.IP \n+[step]
+qmail-todo      - process todo messages from the queue
+.sp -1
+.IP \n+[step]
+spawn-filter    - Interceptor for qmail-local / qmail-remote
+.sp -1
+.IP \n+[step]
+mailsubj        - send a mail message with a subject line
+.sp -1
+.IP \n+[step]
+predate         - Prepend RFC 822 compliant Date header to data on stdin
+.sp -1
+.IP \n+[step]
+datemail        - Insert local time in RFC 822 Date header before injecting mail
+.sp -1
+.IP \n+[step]
+qmail-inject    - inject mail in the queue
+.sp -1
+.IP \n+[step]
+new-inject      - preprocess a mail message before injecting
+.sp -1
+.IP \n+[step]
+sendmail        - an electronic mail transport agent
+.sp -1
+.IP \n+[step]
+qmail-tcpok     - clear TCP timeout tabl
+.sp -1
+.IP \n+[step]
+qmail-tcpto     - print TCP timeout table
+.sp -1
+.IP \n+[step]
+qmail-qread     - list outgoing messages and recipients
+.sp -1
+.IP \n+[step]
+qmail-qstat     - summarize mail queue statistics
+.sp -1
+.IP \n+[step]
+qmail-rm        - Remove mails from Queue
+.sp -1
+.IP \n+[step]
+qpq             - Print qmail queue contents
+.sp -1
+.IP \n+[step]
+queue-fix       - Create/Repair qmail queue structure
+.sp -1
+.IP \n+[step]
+qmail-queue     - queue a mail message for delivery
+.sp -1
+.IP \n+[step]
+qmail-multi     - queue multiplexor and filter
+.sp -1
+.IP \n+[step]
+qmail-qfilter   - front end for qmail-multi that does filtering
+.sp -1
+.IP \n+[step]
+qmail-nullqueue - send mail to /dev/null
+.sp -1
+.IP \n+[step]
+qmail-dk        - Domainkey sign/verify and queue message for delivery
+.sp -1
+.IP \n+[step]
+dktest          - exercise the domainkeys library
+.sp -1
+.IP \n+[step]
+dk-filter       - DK/DKIM sign/verify and queue message for deilvery
+.sp -1
+.IP \n+[step]
+qmail-dkim      - DKIM sign/verify and queue message for delivery
+.sp -1
+.IP \n+[step]
+dkim            - Exercise the DKIM library
+.sp -1
+.IP \n+[step]
+dknewkey        - Generate a new DK/DKIM key
+.sp -1
+.IP \n+[step]
+qmail-getpw     - give addresses to users
+.sp -1
+.IP \n+[step]
+qmail-newmrh    - prepare morercpthosts for qmail-smtpd
+.sp -1
+.IP \n+[step]
+qmail-newu      - prepare address assignments for qmail-lspawn
+.sp -1
+.IP \n+[step]
+qmail-pw2u      - build address assignments from a passwd file
+.sp -1
+.IP \n+[step]
+qmailctl        - Control qmail mail delvery
+.sp -1
+.IP \n+[step]
+qmail-showctl   - analyze the qmail configuration files
+.sp -1
+.IP \n+[step]
+uacl            - test qmail-smtpd access list
+.sp -1
+.IP \n+[step]
+maildirmake     - create a Maildir for incoming mail
+.sp -1
+.IP \n+[step]
+qmaildirmake    - create a Maildir for incoming mail
+.sp -1
+.IP \n+[step]
+maildirwatch    - look for new mail in a Maildir
+.sp -1
+.IP \n+[step]
+maildir2mbox    - move mail from a Maildir to an mbox
+.sp -1
+.IP \n+[step]
+mbox2maildir    - conver mbox to Maildir
+.sp -1
+.IP \n+[step]
+greydaemon      - greylisting daemon (written in perl)
+.sp -1
+.IP \n+[step]
+qmail-greyd     - greylisting daemon for IndiMail, qmail and netqmail
+.sp -1
+.IP \n+[step]
+base64          - base64 encoding/decoding utility
+
+.SH Miscellaneous
+
+This programs have been borrowed from exetern Open Source Projects and add significant
+value to the working of the IndiMail server.
+
+.nr step 1 1
+.IP \n[step] 4
+imapd         - Courier-IMAP server
+.sp -1
+.IP \n+[step]
+pop3d         - Courier-POP3 server
+.sp -1
+.IP \n+[step]
+couriertls    - Courier TLS/SSL protocol wrapper
+.sp -1
+.IP \n+[step]
+maildirkw     - set maildir message keywords
+.sp -1
+.IP \n+[step]
+maildiracl    - manage access control lists of courier-imap maildir
+.sp -1
+.IP \n+[step]
+deliverquota  - deliver to a maildir with a quota
+.sp -1
+.IP \n+[step]
+mkimapdcert   - create a test SSL certificate for IMAP over SSL
+.sp -1
+.IP \n+[step]
+mkpop3dcert   - create a test SSL certificate for POP3 over SSL
+.sp -1
+.IP \n+[step]
+bogofilter    - fast Bayesian spam filter
+.sp -1
+.IP \n+[step]
+bogolexer     - Utility program for separating email messages into tokens
+.sp -1
+.IP \n+[step]
+bogotune      - find optimum parameter settings for bogofilter
+.sp -1
+.IP \n+[step]
+bogoupgrade   - upgrades bogofilter database to current version
+.sp -1
+.IP \n+[step]
+bogoutil      - Dumps, loads, and maintains bogofilter database files
+.sp -1
+.IP \n+[step]
+bf_compact    - shell script to compact a bogofilter directory
+.sp -1
+.IP \n+[step]
+bf_copy       - shell script to copy a bogofilter working directory
+.sp -1
+.IP \n+[step]
+bf_tar        - shell script to write a tar file of a bogofilter directory to stdout
+.sp -1
+.IP \n+[step]
+fetchmail     - fetch mail from a POP, IMAP, ETRN, or ODMR-capable server
+.sp -1
+.IP \n+[step]
+fetchmailconf - configure fetchmailrc
+.sp -1
+.IP \n+[step]
+freshclam     - update clamd virus database
+.sp -1
+.IP \n+[step]
+clamd         - an anti-virus daemon
+.sp -1
+.IP \n+[step]
+qscanq        - qmail virus scanner
+.sp -1
+.IP \n+[step]
+run-cleanq    - request cleanq to be run
+.sp -1
+.IP \n+[step]
+cleanq        - clean up qscanq work directory
+.sp -1
+.IP \n+[step]
+sigtool       - signature and database management tool
+
+.SH FUN STUFF
+
+.nr step 1 1
+.IP \n[step] 4
+fortune - print a random, hopefully interesting, adage
+.sp -1
+.IP \n+[step]
+unstr   - dump strings in pointer order
+.sp -1
+.IP \n+[step]
+strfile - create a random access file for storing strings
+.sp -1
+.IP \n+[step]
+randstr - fetch a random text string from a specified file
+
+.PP
+Apart from the above, IndiMail provides many more programs which can work with qmail without
+needing IndiMail to be installed. The list of such programs not listed here are being compiled
+and will be available in the near future.
 
 .SH "SEE ALSO"
 dbinfo(8),

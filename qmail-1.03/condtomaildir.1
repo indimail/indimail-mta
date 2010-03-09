@@ -1,10 +1,10 @@
-.TH contomaildir 1
+.TH condtmaildir 1
 .SH NAME
-contomaildir
+condtmaildir - Feed message to program and perhaps store message
 .SH SYNOPSIS
 in
 .BR .qmail :
-.B |contomaildir
+.B |condtmaildir
 .I dir
 .I program
 [
@@ -16,14 +16,14 @@ is a Maildir-format directory and
 .I program
 is one or more arguments specifying a program to run for each message.
 .SH DESCRIPTION
-.B contomaildir
+.B condtmaildir
 feeds each new mail message to
 .I program
 with the given arguments.
 If
 .I program
 exits 0,
-.B contomaildir
+.B condtmaildir
 writes the email message to
 .IR dir ,
 and then exits 99, so further commands in
@@ -33,7 +33,7 @@ are ignored.
 If
 .I program
 exits 111,
-.B contomaildir
+.B condtmaildir
 exits 111,
 so delivery will be retried later.
 
@@ -41,7 +41,7 @@ If
 .I program
 exits anything else
 (or does not exist),
-.B contomaildir
+.B condtmaildir
 exits 0,
 so the rest of
 .B .qmail
@@ -69,7 +69,7 @@ reads the message in the background.
 If you create a
 .B .qmail
 file to enable
-.BR contomaildir ,
+.BR condtmaildir ,
 make sure to also add a line specifying delivery to your normal mailbox.
 .SH "SEE ALSO"
 bouncesaying(1),

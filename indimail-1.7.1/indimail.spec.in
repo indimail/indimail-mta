@@ -1,5 +1,10 @@
 #
 # $Log: indimail.spec.in,v $
+# Revision 2.137  2010-03-09 14:39:34+05:30  Cprogrammer
+# removed envconf
+# renamed qmail-recipients to recipient-cdb
+# removed plainencode
+#
 # Revision 2.136  2010-03-08 22:03:49+05:30  Cprogrammer
 # renamed qmail-autoresponder as autoresponder to shorten path
 #
@@ -428,7 +433,7 @@
 # rpm spec file for indimail
 #
 #
-# $Id: indimail.spec.in,v 2.136 2010-03-08 22:03:49+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 2.137 2010-03-09 14:39:34+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %define _unpackaged_files_terminate_build 1
 
@@ -485,6 +490,7 @@
 %define nobogofilter       0
 %define nopam_multi        0
 %define nodksignatures     0
+%define noepm              1
 %define _verbose           0
 %define qcount             5
 %define qbase              %{_prefix}/queue
@@ -1023,6 +1029,11 @@ do
 			%{__make} DESTDIR=%{buildroot}
 			%{__make} DESTDIR=%{buildroot} install-strip
 		fi
+		# courier-imap installations misses out on this
+		if [ %nocourierimap -eq 0 -a " $i" = " courier-imap-%{courier_version}" ] ; then
+			%{__mkdir_p} %{buildroot}%{_prefix}/man/man1
+			gzip -c tcpd/couriertls.1 > %{buildroot}%{_prefix}/man/man1/couriertls.1.gz
+		fi
 		cd ..
 	fi
 done
@@ -1112,7 +1123,7 @@ fi
 fi
 
 
-if [ -x /usr/bin/epm ] ; then
+if [ -x /usr/bin/epm -a %noepm -eq 0 ] ; then
 	#/bin/chmod +x %{buildroot}%{_prefix}/bin/rpmattr
 	#find %{buildroot}%{_prefix} -exec %{buildroot}%{_prefix}/bin/rpmattr {} \; | \
 	#	sed -e 's,%{buildroot}%{_prefix},%{_prefix},g' > \
@@ -1494,7 +1505,6 @@ fi
 %attr(555,root,qmail)                   %{_prefix}/bin/rsmtpsenders
 %attr(555,root,qmail)                   %{_prefix}/bin/queue-fix
 %attr(555,root,qmail)                   %{_prefix}/bin/822body
-%attr(555,root,qmail)                   %{_prefix}/bin/envconf
 %attr(555,root,qmail)                   %{_prefix}/bin/readproctitle
 %attr(555,root,qmail)                   %{_prefix}/bin/zdeferrals
 %attr(555,root,qmail)                   %{_prefix}/bin/vcaliasrev
@@ -1528,7 +1538,7 @@ fi
 %attr(555,root,qmail)                   %{_prefix}/bin/rspamhist
 %attr(555,root,qmail)                   %{_prefix}/bin/versioninfo
 %attr(555,root,qmail)                   %{_prefix}/bin/mailzipper
-%attr(500,root,qmail)                   %{_prefix}/bin/qmail-recipients
+%attr(500,root,qmail)                   %{_prefix}/bin/recipient-cdb
 %attr(555,root,qmail)                   %{_prefix}/bin/rsmtpsdomains
 %attr(555,root,qmail)                   %{_prefix}/bin/qmail-inject
 %attr(555,root,qmail)                   %{_prefix}/bin/serialcmd
@@ -1583,7 +1593,6 @@ fi
 %attr(555,root,qmail)                   %{_prefix}/bin/flash
 %attr(555,root,qmail)                   %{_prefix}/bin/maildircmd
 %attr(555,root,qmail)                   %{_prefix}/bin/multilog
-%attr(555,root,qmail)                   %{_prefix}/bin/plainencode
 %attr(555,root,qmail)                   %{_prefix}/bin/qmail-multi
 %attr(555,root,qmail)                   %{_prefix}/bin/qmail-qfilter
 %attr(555,root,qmail)                   %{_prefix}/bin/qmail-sigalrm

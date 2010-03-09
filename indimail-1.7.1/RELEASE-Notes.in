@@ -3,19 +3,17 @@ RELEASE NOTES
 DATE: @DATE@
 
 This is Release @version@ of IndiMail. The release has both source.tar.gz and RPMs
-This release adds multiple ways in which parameters for connecting to MySQL can be
-given.
 
 This release includes the following files
 
 README                      (Introduction to IndiMail)
-INSTALL-@version@                 (Installation Instructions)
-INSTALL-RPM-@version@             (Install Instructions for RPM)
-INSTALL-MYSQL-@version@           (MySQL specific Installation Instructions)
+INSTALL-@version@               (Installation Instructions)
+INSTALL-RPM-@version@           (Install Instructions for RPM)
+INSTALL-MYSQL-@version@         (MySQL specific Installation Instructions)
 README-CLUSTER              (Steps on installing a clustered setup)
-Quick-INSTALL-@version@           (A minimal documentation on Installation)
-RELEASE-Notes-@version@           (This file)
-indimail-@version@.tar.gz         (IndiMail source)
+Quick-INSTALL-@version@         (A minimal documentation on Installation)
+RELEASE-Notes-@version@         (This file)
+indimail-@version@.tar.gz       (IndiMail source)
 indimail-@version@-1.i386.rpm
 indimail-@version@-1.i386.deb
 
@@ -64,32 +62,12 @@ both 32 and 64 bit) are
 
 ChangeLog
 =========
-1.  BUG - install_tables to skip creating table for distributed setup
-    on a non-clustered setup
-2.  FEATURE - Allow defaults from mysql conf file to be used for mysql_socket,
-    mysql_port
-3.  BUG - set_mysql_options() to be called before each mysql_real_connect()
-4.  BUG - Fixed user, passwd, socket/port getting lost in open_central_db() in
-    findhost.c
-5.  BUG - Delete from smtp_port vsmtp_delete_domain() in vauth_deldmain.c only
-    if domain is distributed
-6.  FEATURE - Added logging of senders and recipients in rblsmtpd
-7.  BUG - Fixed SIGSEGV in rblsmtpd when RBLSMTPD was set and empty [2956656]
-8.  FEATURE - Upgrade to fetchmail-6.3.14
-9.  Allow MYSQL_SOCKET, MYSQL_VPORT to override indimail.cnf settings
-10. Added man page for uacl
-11. Updated indimail documentation (man page indimail(7))
-12. Use host.mysql in ProcessInFifo() if host.cntrl is absent
-13. Use host.mysql in findhost if host.cntrl is absent
-14. use host:user:password:socket/port format in vauth_open()
-15. Return host in host:user:password:socket/port format in SqlServer()
-16. Use tcprules for opening relay only if OPEN_SMTP is defined in
-    open_smtp_relay
-17. Check value of DEBUG_LOGIN in authindi
-18. Do not remove man, include in man rpm package
-19. Advertise STARTTLS capability in IMAP, POP3 ports
-20. Changed Username xxx@yyy does not exist to xxx@yyy: No such user in
-    deluser.c, renameuser.c vauth_setquota.c vmoveuser.c
-21. Removed unsupported AUTH methods for pop3 and imap services
-22. Merged base64 encoding/decoding in one utility - base64
-23. Create a default host.mysql file in /var/indimail/control
+* Sun Mar 07 2010 mbhangui@gmail.com
+Release 1.7.1 Start 04/03/2010
+1.  Added STLS capability to proxpop3, STARTTLS capability to proxyimap
+2.  New Program sslerator to ssl enable applications.
+3.  Check return value of is_distributed_domain() in all programs
+4.  return failure in open_master if host.master is not present
+5.  disable checking of host.cntrl in findmdahost.c
+6.  Renamed POST HOOK to POST HANDLE in man pages
+7.  host.master path was not set correctly in install_tables.c

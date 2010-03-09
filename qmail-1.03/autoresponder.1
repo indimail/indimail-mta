@@ -1,9 +1,8 @@
-.TH qmail-autoresponder 1
+.TH autoresponder 1
 .SH NAME
-qmail-autoresponder \- Rate and time limited autoresponder for
-                      qmail/indimail
+autoresponder \- Rate and time limited autoresponder for qmail/indimail
 .SH SYNOPSIS
-\fBqmail-autoresponder\fR [\fIOPTIONS\fR]
+\fBautoresponder\fR [\fIOPTIONS\fR]
 .I messagefile
 .I directory
 
@@ -28,16 +27,16 @@ qmail-autoresponder \- Rate and time limited autoresponder for
            recipient)
 
 .SH DESCRIPTION
-.B qmail-autoresponder
+.B autoresponder
 is a RFC 3834 compliant responder to automatically respond to emails.
-.B qmail-autoresponder
+.B autoresponder
 creates temporary files in \fIdirectory\fR to track sender's rates. If more than NUM messages are
 received from the same sender within TIME seconds of each other, no response is sent. This
-program must be run by qmail. Put "|qmail-autoresponder \fImessagefile\fR \fIdirectory\fR" into
+program must be run by qmail. Put "|autoresponder \fImessagefile\fR \fIdirectory\fR" into
 your ".qmail" file before other delivery instructions. \fImessagefile\fR is a pre-formatted
 response, including headers, and \fIdirectory\fR is the directory into which rate-limiting
 information will be stored. By default
-.B qmail-autoresponder
+.B autoresponder
 will reply with the address of the recipient. This behaviour can be altered by setting the
 environment variable SERVICE_RESPONDER. The value of SERVICE_RESPONDER can be set to a friendly
 name which will appear in the 'from address'. For a service responder, the address will be
@@ -45,7 +44,7 @@ determined by the \fIbouncefrom\fR and \fIbouncehost\fR control files. The Retur
 both the cases will be null to prevent brain damaged MTA like M$Exchange to send bounces/reply to
 autoresponder.
 
-.B qmail-autoresponder
+.B autoresponder
 replaces occurrences of the following special characters in the \fImessagefile\fR.
 
 .IP \[bu] 2
