@@ -1,0 +1,54 @@
+.TH "qmailctl" "8" "07 Mar 2010" "Manvendra Bhangui" ""
+
+.SH NAME
+qmailctl \- Control qmail mail delvery
+
+.SH SYNOPSIS
+.B qmailctl [start|stop|restart|flush|reload|stat|queue|pause|cont|cdb|help]
+
+.SH DESCRIPTION
+\fBqmailctl\fR(8) is a utility to help with very basic administration of IndiMail. \fBqmailctl\fR(8) can
+be used if IndiMail services are monitored by \fBsupervise\fR(8). You can setup services under
+\fBsupervise\fR(8) using \fBsvctool\fR(8).
+
+.SH OPTIONS
+.TP 8
+\fBstart\fR
+start \fBqmail-smtpd\fR(8) and \fBqmail-send\fR(8)
+.TP
+\fBstop\fR
+stop \fBqmail-smtpd\fR(8) and \fBqmail-send\fR(8)
+.TP
+\fBrestart\fR
+stop \fBqmail-stmpd\fR(8), send SIGTERM to \fBqmail-send\fR(8) and restart \fBqmail-smtpd\fR(8)
+.TP
+\fBflush\fR
+Reset qmail tcp timeout table using \fBqmail-tcpok\fR(8) and send SIGALRM to \fBqmail-send\fR(8)
+.TP
+\fBreload\fR
+send SIGHUP to \fBqmail-send\fR(8)
+.TP
+\fBstat\fR
+run \fBsvstat\fR(8) on all directories in the service directory
+.TP
+\fBqueue\fR
+run \fBqmail-qstat\fR(8)
+.TP
+\fBpause\fR
+pause \fBqmail-send\fR(8), \fBqmail-smtpd\fR(8). This implies using \fBsvc\fR(8) with -p option.
+.TP
+\fBcont\fR
+continue \fBqmail-send\fR(8), \fBqmail-smtpd\fR(8). This implies using \fBsvc\fR(8) with -c option.
+.TP
+\fBcdb\fR
+rebuild tcp.smtpd.cdb, tcp.imap.cdb, tcp.pop3.cdb and tcp.poppass.cdb using \fBtcprules\fR(1)
+
+.SH "SEE ALSO"
+qmail-stmpd(8),
+qmail-send(8),
+qmail-qstat(8),
+qmail-tcpok(8),
+tcprules(1),
+svc(8),
+svctool(8),
+initsvc(1)
