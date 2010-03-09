@@ -372,6 +372,7 @@ lock_unfcntl.o
 lock_un.o
 logselect
 logselect.o
+logselect.8
 maildir.0
 maildir2mbox
 maildir2mbox.0
@@ -428,6 +429,7 @@ mess822_when.o
 mkfn.o
 mlmatchup
 mlmatchup.0
+mlmatchup.8
 mlmatchup.o
 multilog
 multilog-matchup
@@ -579,7 +581,6 @@ qmail-qmtpd.0
 qmail-qmtpd.o
 qmail-qread
 qmail-qread.0
-qmail-qread.8
 qmail-qread.o
 qmail-qstat
 qmail-qstat.0
@@ -588,10 +589,10 @@ qmail-queue
 qmail-queue.0
 qmail-queue.8
 qmail-queue.o
-qmail-recipients
-qmail-recipients.0
-qmail-recipients.8
-qmail-recipients.o
+recipient-cdb
+recipient-cdb.0
+recipient-cdb.8
+recipient-cdb.o
 qmail-remote
 qmail-remote.0
 qmail-remote.8

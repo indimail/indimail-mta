@@ -26,9 +26,9 @@ or with user id
 .B qmailr
 and group id
 .BR qmail .
-If the environment variables QUEUE_START and QUEUE_COUNT are set,
-.B qmail-tcpto
-will process multiple queues.
+\fBqmail-tcpto\fR uses the environment variable QUEUE_BASE or the conrol file \fBqbase\fR if
+present to use the queue base. If the environment variables QUEUE_START and QUEUE_COUNT are set,
+\fBqmail-tcpto\fR will process multiple queues present in the queue base.
 .SH "SEE ALSO"
 qmail-qread(8),
 qmail-remote(8),
