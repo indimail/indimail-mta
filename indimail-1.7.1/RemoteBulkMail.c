@@ -114,7 +114,7 @@ static MYSQL   *
 bulk_host_connect()
 {
 	char           *bulk_host, *bulk_user = 0, *bulk_passwd = 0, *bulk_database,
-				   *bulk_socket = 0, *port, *ptr;
+				   *bulk_socket = 0, *port = 0, *ptr;
 	int             bulk_port, count;
 	static MYSQL    bulkMySql;
 
