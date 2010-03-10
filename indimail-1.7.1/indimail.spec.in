@@ -1,5 +1,8 @@
 #
 # $Log: indimail.spec.in,v $
+# Revision 2.138  2010-03-10 16:28:57+05:30  Cprogrammer
+# do not gzip couritertls.1
+#
 # Revision 2.137  2010-03-09 14:39:34+05:30  Cprogrammer
 # removed envconf
 # renamed qmail-recipients to recipient-cdb
@@ -433,7 +436,7 @@
 # rpm spec file for indimail
 #
 #
-# $Id: indimail.spec.in,v 2.137 2010-03-09 14:39:34+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 2.138 2010-03-10 16:28:57+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %define _unpackaged_files_terminate_build 1
 
