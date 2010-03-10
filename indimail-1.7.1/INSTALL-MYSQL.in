@@ -95,3 +95,6 @@
 
        also have 'sql-mode=NO_BACKSLASH_ESCAPES' in the server option
        file (my.cnf or wherever your my.cnf lies)
+
+NOTE: You can email me at mbhangui@gmail.com, if you find this confusing or need any
+help/clarification.

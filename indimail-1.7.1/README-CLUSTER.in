@@ -16,7 +16,7 @@ DATE: @DATE@
     There are five types of servers
     1) clusterinfo  - This is the host which has a MySQL database for storing the location
        of each user. Location information is hostid and ip address.
-       If this host is only going to serve as a pure MySQL database server, you need not
+       If this host is going to serve as a pure MySQL database server only, you need not
        install IndiMail on this server.
     2) Mailstores - A mailstore is a host which has disk space to host user's mailboxes.
        Each mailstore can have its own set of users. You can call each host a 'node'.
@@ -25,7 +25,8 @@ DATE: @DATE@
        install a MySQL database on each of the mailstore.
        You need to install IndiMail on each mailstore.
     3) Relay Server - A relay server acts as an SMTP gateway between the user and the
-       mailstore or between the user and the internet.
+       mailstore or between the user and the internet. A relay server can also carry
+       out tasks like virus/spam filtering, maintain your security policy, access lists.
        You need to install IndiMail on each relay server.
     4) IMAP/POP3 Gateway - These servers run IndiMail's IMAP/POP3 Proxies
        You need to install IndiMail on each IMAP/POP3 proxy server.
@@ -70,6 +71,9 @@ DATE: @DATE@
 
     echo hostcntrl_host > @indimaildir@/control/host.mysql   (MySQL host to which all programs will
                                                              connect)
+      or
+    echo "hostcntrl_host:user:password:mysql socket/port" > @indimaildir@/control/host.mysql
+
     When you have a clustered domain, IndiMail supports the use of Master-Slave architecture in
     MySQL.
 
@@ -113,7 +117,7 @@ DATE: @DATE@
     echo
     ) > @indimaildir@/control/mcdinfo
     
-    The above can be achieved by executing the following commands
+    The above can also be achieved by executing the following commands
     % @indimaildir@/bin/dbinfo -i -S 192.168.2.110 -D indimail -U indimail -P ssh-1.5- \
         -p 3306 -d indimail.org -m 192.168.2.115
     % @indimaildir@/bin/dbinfo -i -S 192.168.2.110 -D indimail -U indimail -P ssh-1.5- \
@@ -169,4 +173,5 @@ DATE: @DATE@
 
 
 NOTE: This document is WIP and will undergo frequent changes till i get satisfied. Help
-in simplifying this will be highly apprecated.
+in simplifying this will be highly apprecated. You can email me at mbhangui@gmail.com, if
+you find this confusing or need any help/clarification.
