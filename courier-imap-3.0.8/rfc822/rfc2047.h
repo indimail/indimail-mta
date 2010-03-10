@@ -1,8 +1,9 @@
 #ifndef	rfc2047_h
 #define	rfc2047_h
 
+#include	<stdlib.h>
 /*
-** Copyright 1998 - 2002 Double Precision, Inc.  See COPYING for
+** Copyright 1998 - 2009 Double Precision, Inc.  See COPYING for
 ** distribution information.
 */
 
@@ -11,57 +12,37 @@ extern "C" {
 #endif
 
 
-static const char rfc2047_h_rcsid[]="$Id: rfc2047.h,v 1.8 2004/05/23 14:28:24 mrsam Exp $";
-
-extern int rfc2047_decode(const char *text,
-			  int (*func)(const char *, int,
-				      const char *,
-				      const char *,
-				      void *),
-			  void *arg);
-
-extern char *rfc2047_decode_simple(const char *text);
-
-extern char *rfc2047_decode_enhanced(const char *text, const char *mychset);
-
-/*
-** If libunicode.a is available, like rfc2047_decode_enhanced, but attempt to
-** convert to my preferred charset.
-*/
+static const char rfc2047_h_rcsid[]="$Id: rfc2047.h,v 1.12 2009/11/14 21:15:43 mrsam Exp $";
 
 struct unicode_info;
 
-extern char *rfc2047_decode_unicode(const char *text,
-	const struct unicode_info *mychset,
-	int options);
+/*
+** Raw RFC 2047 parser.
+**
+** rfc2047_decoder() repeatedly invokes the callback function, passing it
+** the decoded RFC 2047 string that's given as an argument.
+*/
 
-#define	RFC2047_DECODE_DISCARD	1
-	/* options: Discard unknown charsets from decoded string. */
-#define RFC2047_DECODE_ABORT	2
-	/* options: Abort if we encounter an unknown charset, errno=EINVAL */
-#define RFC2047_DECODE_NOTAG	4
-	/* options: Do not tag unknown charset strings */
-#define	RFC2047_DECODE_REPLACE	8
-	/* options: Replace unknown characters */
+int rfc2047_decoder(const char *text,
+		    void (*callback)(const char *chset,
+				     const char *lang,
+				     const char *content,
+				     size_t cnt,
+				     void *dummy),
+		    void *ptr);
 
 /*
-** rfc2047_print is like rfc822_print, except that it converts RFC 2047
-** MIME encoding to 8 bit text.
+** rfc2047_print_unicodeaddr is like rfc822_print, except that it converts
+** RFC 2047 MIME encoding to 8 bit text.
 */
 
 struct rfc822a;
 
-void rfc2047_print(const struct rfc822a *a,
-	const char *charset,
-	void (*print_func)(char, void *),
-	void (*print_separator)(const char *, void *), void *);
-
-void rfc2047_print_unicode(const struct rfc822a *a,
-			   const char *charset,
-			   void (*print_func)(char, void *),
-			   void (*print_separator)(const char *, void *),
-			   void *ptr);
-
+int rfc2047_print_unicodeaddr(const struct rfc822a *a,
+			      const char *charset,
+			      void (*print_func)(char, void *),
+			      void (*print_separator)(const char *, void *),
+			      void *ptr);
 
 
 /*
@@ -97,12 +78,24 @@ int rfc2047_qp_allow_comment(char); /* Any character except () */
 int rfc2047_qp_allow_word(char); /* See RFC2047, bottom of page 7 */
 
 
+
 /*
-** rfc2047_encode_header allocates a buffer, and MIME-encodes an RFC822 header
+** rfc2047_encode_header allocates a buffer, and MIME-encodes a header.
+**
+** The name of the header, passed as the first parameter, should be
+** "From", "To", "Subject", etc... It is not included in the encoded contents.
+*/
+char *rfc2047_encode_header_tobuf(const char *name, /* Header name */
+				  const char *header, /* Header's contents */
+				  const char *charset);
+
+/*
+** rfc2047_encode_header_addr allocates a buffer, and MIME-encodes an
+** RFC822 address header.
 **
 */
-char *rfc2047_encode_header(const struct rfc822a *a,
-			    const char *charset);
+char *rfc2047_encode_header_addr(const struct rfc822a *a,
+				 const char *charset);
 
 #ifdef  __cplusplus
 }

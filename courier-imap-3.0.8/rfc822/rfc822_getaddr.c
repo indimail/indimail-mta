@@ -4,7 +4,7 @@
 */
 
 /*
-** $Id: rfc822_getaddr.c,v 1.8 2008/06/14 14:12:50 mrsam Exp $
+** $Id: rfc822_getaddr.c,v 1.10 2009/11/22 19:39:52 mrsam Exp $
 */
 #include	"rfc822.h"
 #include	<stdlib.h>
@@ -27,20 +27,24 @@ static void saveaddr(char c, void *p)
 
 char *rfc822_getaddr(const struct rfc822a *rfc, int n)
 {
+	return rfc822_display_addr_tobuf(rfc, n, NULL);
+}
+
+char *rfc822_gettok(const struct rfc822token *t)
+{
 size_t	addrbuflen=0;
 char	*addrbuf, *ptr;
 
-	rfc822_praddr(rfc, n, &cntlen, &addrbuflen);
+	rfc822tok_print(t, &cntlen, &addrbuflen);
+
 	if (!(addrbuf=malloc(addrbuflen+1)))
 		return (0);
 
 	ptr=addrbuf;
-	rfc822_praddr(rfc, n, &saveaddr, &ptr);
+	rfc822tok_print(t, &saveaddr, &ptr);
 	addrbuf[addrbuflen]=0;
 	return (addrbuf);
 }
-
-/* Get rid of surrounding quotes */
 
 static void dropquotes(char *addrbuf)
 {
@@ -62,23 +66,6 @@ static void dropquotes(char *addrbuf)
 	*q=0;
 }
 
-char *rfc822_getname(const struct rfc822a *rfc, int n)
-{
-size_t	addrbuflen=0;
-char	*addrbuf, *ptr;
-
-	rfc822_prname(rfc, n, &cntlen, &addrbuflen);
-	if (!(addrbuf=malloc(addrbuflen+1)))
-		return (0);
-
-	ptr=addrbuf;
-	rfc822_prname(rfc, n, &saveaddr, &ptr);
-	addrbuf[addrbuflen]=0;
-
-	dropquotes(addrbuf);
-	return (addrbuf);
-}
-
 char *rfc822_getname_orlist(const struct rfc822a *rfc, int n)
 {
 size_t	addrbuflen=0;
@@ -93,21 +80,5 @@ char	*addrbuf, *ptr;
 	addrbuf[addrbuflen]=0;
 
 	dropquotes(addrbuf);
-	return (addrbuf);
-}
-
-char *rfc822_gettok(const struct rfc822token *t)
-{
-size_t	addrbuflen=0;
-char	*addrbuf, *ptr;
-
-	rfc822tok_print(t, &cntlen, &addrbuflen);
-
-	if (!(addrbuf=malloc(addrbuflen+1)))
-		return (0);
-
-	ptr=addrbuf;
-	rfc822tok_print(t, &saveaddr, &ptr);
-	addrbuf[addrbuflen]=0;
 	return (addrbuf);
 }

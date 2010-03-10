@@ -1,10 +1,10 @@
 /*
-** Copyright 1998 - 2007 Double Precision, Inc.
+** Copyright 1998 - 2009 Double Precision, Inc.
 ** See COPYING for distribution information.
 */
 
 /*
-** $Id: rfc822.c,v 1.21 2007/02/26 04:13:41 mrsam Exp $
+** $Id: rfc822.c,v 1.26 2009/11/22 19:39:52 mrsam Exp $
 */
 #include	<stdio.h>
 #include	<ctype.h>
@@ -132,7 +132,7 @@ int	inbracket=0;
 					if (p[j] == '?' || p[j] == '=')
 						continue;
 
-					if (strchr(SPECIALS, p[j]) ||
+					if (strchr(RFC822_SPECIALS, p[j]) ||
 					    isspace(p[j]))
 						break;
 				}
@@ -317,9 +317,9 @@ int	flag, j, k;
 			If it consists exclusively of atoms, leave them alone.
 			Else, make them all a quoted string. */
 
-			for (j=0; j<i && (tokens[j].token == 0 ||
-					  tokens[j].token == '('); j++)
-				;
+                        for (j=0; j<i && (tokens[j].token == 0 ||
+                                          tokens[j].token == '('); j++)
+                                ;
 
 			if (j == i)
 			{
@@ -511,244 +511,6 @@ int	isatom;
 	}
 }
 
-void rfc822_print(const struct rfc822a *rfcp, void (*print_func)(char, void *),
-	void (*print_separator)(const char *s, void *), void *ptr)
-{
-	rfc822_print_common(rfcp, 0, 0, print_func, print_separator, ptr);
-}
-
-void rfc822_print_common(const struct rfc822a *rfcp,
-	char *(*decode_func)(const char *, const char *), const char *chset,
-	void (*print_func)(char, void *),
-	void (*print_separator)(const char *, void *), void *ptr)
-{
-const struct rfc822addr *addrs=rfcp->addrs;
-int naddrs=rfcp->naddrs;
-
-	while (naddrs)
-	{
-		if (addrs->tokens == 0)
-		{
-			rfc822tok_print(addrs->name, print_func, ptr);
-			++addrs;
-			--naddrs;
-			if (addrs[-1].name && naddrs)
-			{
-			struct	rfc822token *t;
-
-				for (t=addrs[-1].name; t && t->next; t=t->next)
-					;
-
-				if (t && (t->token == ':' || t->token == ';'))
-					(*print_separator)(" ", ptr);
-			}
-			continue;
-		}
-		else if (addrs->name && addrs->name->token == '(')
-		{	/* old style */
-		char *p;
-
-			rfc822tok_print(addrs->tokens, print_func, ptr);
-			(*print_func)(' ', ptr);
-
-			if (decode_func && (p=rfc822_gettok(addrs->name))!=0)
-			{
-			char *q= (*decode_func)(p, chset);
-			char *r;
-
-				for (r=q; r && *r; r++)
-					(*print_func)( (int)(unsigned char)*r,
-						ptr);
-				if (q)	free(q);
-				free(p);
-			}
-			else rfc822tok_print(addrs->name, print_func, ptr);
-		}
-		else
-		{
-		int	print_braces=0;
-		char *p;
-
-			if (addrs->name)
-			{
-				if (decode_func &&
-					(p=rfc822_gettok(addrs->name)) != 0)
-				{
-				char *q= (*decode_func)(p, chset);
-				char *r;
-
-					for (r=q; r && *r; r++)
-						(*print_func)(
-							(int)(unsigned char)*r,
-							ptr);
-					if (q)	free(q);
-					free(p);
-				}
-				else rfc822tok_print(addrs->name,
-					print_func, ptr);
-				(*print_func)(' ', ptr);
-				print_braces=1;
-			}
-			else
-			{
-			struct rfc822token *p;
-
-				for (p=addrs->tokens; p && p->next; p=p->next)
-					if (rfc822_is_atom(p->token) &&
-						rfc822_is_atom(p->next->token))
-					print_braces=1;
-			}
-			if (print_braces)
-				(*print_func)('<', ptr);
-#if 0
-			rfc822tok_print(addrs->tokens, print_func, ptr);
-#else
-			if (decode_func &&
-			    (p=rfc822_gettok(addrs->tokens))!=0)
-			{
-			char *q=(*decode_func)(p, chset);
-			char *r;
-				for (r=q; r && *r; r++)
-					(*print_func)((int)(unsigned char)*r,
-						      ptr);
-				if (q)  free(q);
-				free(p);
-			}
-			else rfc822tok_print(addrs->tokens, print_func, ptr);
-#endif
-			if (print_braces)
-			{
-				(*print_func)('>', ptr);
-			}
-		}
-		++addrs;
-		--naddrs;
-		if (naddrs)
-			if (addrs->tokens || (addrs->name &&
-				rfc822_is_atom(addrs->name->token)))
-				(*print_separator)(", ", ptr);
-	}
-}
-
-void rfc822t_free(struct rfc822t *p)
-{
-	if (p->tokens)	free(p->tokens);
-	free(p);
-}
-
-void rfc822a_free(struct rfc822a *p)
-{
-	if (p->addrs)	free(p->addrs);
-	free(p);
-}
-
-void rfc822_deladdr(struct rfc822a *rfcp, int index)
-{
-int	i;
-
-	if (index < 0 || index >= rfcp->naddrs)	return;
-
-	for (i=index+1; i<rfcp->naddrs; i++)
-		rfcp->addrs[i-1]=rfcp->addrs[i];
-	if (--rfcp->naddrs == 0)
-	{
-		free(rfcp->addrs);
-		rfcp->addrs=0;
-	}
-}
-
-static void compat_err_func(const char *p, int i, void *voidp)
-{
-	void (*err_func)(const char *, int)=
-		(void (*)(const char *, int))voidp;
-
-	if (err_func)
-		(*err_func)(p, i);
-}
-
-struct rfc822t *rfc822t_alloc(const char *addr,
-			      void (*err_func)(const char *, int))
-{
-	return (rfc822t_alloc_new(addr, &compat_err_func, (void *)err_func));
-}
-
-
-struct rfc822t *rfc822t_alloc_new(const char *addr,
-	void (*err_func)(const char *, int, void *), void *voidp)
-{
-struct rfc822t *p=(struct rfc822t *)malloc(sizeof(struct rfc822t));
-
-	if (!p)	return (NULL);
-	memset(p, 0, sizeof(*p));
-
-	tokenize(addr, NULL, &p->ntokens, err_func, voidp);
-	p->tokens=p->ntokens ? (struct rfc822token *)
-			calloc(p->ntokens, sizeof(struct rfc822token)):0;
-	if (p->ntokens && !p->tokens)
-	{
-		rfc822t_free(p);
-		return (NULL);
-	}
-	tokenize(addr, p->tokens, &p->ntokens, NULL, NULL);
-	return (p);
-}
-
-struct rfc822a *rfc822a_alloc(struct rfc822t *t)
-{
-struct rfc822a *p=(struct rfc822a *)malloc(sizeof(struct rfc822a));
-
-	if (!p)	return (NULL);
-	memset(p, 0, sizeof(*p));
-
-	parseaddr(t->tokens, t->ntokens, NULL, &p->naddrs);
-	p->addrs=p->naddrs ? (struct rfc822addr *)
-			calloc(p->naddrs, sizeof(struct rfc822addr)):0;
-	if (p->naddrs && !p->addrs)
-	{
-		rfc822a_free(p);
-		return (NULL);
-	}
-	parseaddr(t->tokens, t->ntokens, p->addrs, &p->naddrs);
-	return (p);
-}
-
-void rfc822_praddr(const struct rfc822a *rfcp, int index,
-	void (*print_func)(char, void *), void *ptr)
-{
-const struct rfc822addr *addrs;
-
-	if (index < 0 || index >= rfcp->naddrs)	return;
-
-	addrs=rfcp->addrs+index;
-	if (addrs->tokens)
-	{
-		rfc822tok_print(addrs->tokens, print_func, ptr);
-		(*print_func)('\n', ptr);
-	}
-}
-
-void rfc822_addrlist(const struct rfc822a *rfcp,
-		void (*print_func)(char, void *), void *ptr)
-{
-int	i;
-
-	for (i=0; i<rfcp->naddrs; i++)
-		rfc822_praddr(rfcp, i, print_func, ptr);
-}
-
-void rfc822_prname(const struct rfc822a *rfcp, int index,
-	void (*print_func)(char, void *), void *ptr)
-{
-const struct rfc822addr *addrs;
-
-	if (index < 0 || index >= rfcp->naddrs)	return;
-
-	addrs=rfcp->addrs+index;
-
-	if (!addrs->tokens)	return;
-	rfc822_prname_orlist(rfcp, index, print_func, ptr);
-}
-
 void rfc822_prname_orlist(const struct rfc822a *rfcp, int index,
 	void (*print_func)(char, void *), void *ptr)
 {
@@ -797,11 +559,333 @@ const struct rfc822addr *addrs;
 	(*print_func)('\n', ptr);
 }
 
-void rfc822_namelist(const struct rfc822a *rfcp,
-	void (*print_func)(char, void *), void *ptr)
+static void rfc822_prname_int(const struct rfc822addr *addrs,
+			      void (*print_func)(char, void *),
+			      void *ptr)
+
+{
+	struct rfc822token *i;
+	int n;
+	int	prev_isatom=0;
+	int	isatom=0;
+
+	for (i=addrs->name; i; i=i->next, prev_isatom=isatom)
+	{
+		isatom=rfc822_is_atom(i->token);
+		if (isatom && prev_isatom)
+			(*print_func)(' ', ptr);
+
+		if (i->token == '"')
+		{
+			for (n=0; n<i->len; n++)
+			{
+				if (i->ptr[n] == '\\' &&
+				    n + 1 < i->len)
+					++n;
+				(*print_func)(i->ptr[n], ptr);
+			}
+			continue;
+		}
+
+		if (i->token != '(')
+		{
+			print_token(i, print_func, ptr);
+			continue;
+		}
+
+		for (n=2; n<i->len; n++)
+			(*print_func)(i->ptr[n-1], ptr);
+	}
+}
+
+static void rfc822_print_common_nameaddr_cntlen(char c, void *p)
+{
+	++ *(size_t *)p;
+}
+
+static void rfc822_print_common_nameaddr_saveaddr(char c, void *p)
+{
+	char **cp=(char **)p;
+
+	*(*cp)++=c;
+}
+
+static int rfc822_print_common_nameaddr(const struct rfc822addr *addrs,
+					char *(*decode_func)(const char *,
+							     const char *, int),
+					const char *chset,
+					void (*print_func)(char, void *),
+					void *ptr)
+{
+	size_t n=1;
+	char *addrbuf, *namebuf;
+	char *p, *q;
+	int print_braces=0;
+
+	if (addrs->tokens)
+		rfc822tok_print(addrs->tokens,
+				rfc822_print_common_nameaddr_cntlen, &n);
+
+
+	p=addrbuf=malloc(n);
+
+	if (!addrbuf)
+		return -1;
+
+	if (addrs->tokens)
+		rfc822tok_print(addrs->tokens,
+				rfc822_print_common_nameaddr_saveaddr, &p);
+
+	*p=0;
+
+	n=1;
+
+	rfc822_prname_int(addrs,
+			  rfc822_print_common_nameaddr_cntlen, &n);
+
+	p=namebuf=malloc(n);
+
+	if (!p)
+	{
+		free(addrbuf);
+		return -1;
+	}
+
+	rfc822_prname_int(addrs,
+			  rfc822_print_common_nameaddr_saveaddr, &p);
+
+	*p=0;
+
+	p=(*decode_func)(namebuf, chset, 0);
+
+	free(namebuf);
+	if (!p)
+	{
+		free(addrbuf);
+		return -1;
+	}
+
+	for (namebuf=p; *p; p++)
+	{
+		print_braces=1;
+		(*print_func)(*p, ptr);
+	}
+	free(namebuf);
+
+	p=(*decode_func)(addrbuf, chset, 1);
+	free(addrbuf);
+
+	if (print_braces)
+		(*print_func)(' ', ptr);
+
+
+	for (q=p; *q; ++q)
+		if (*q != '.' && *q != '@' && strchr(RFC822_SPECIALS, *q))
+		{
+			print_braces=1;
+			break;
+		}
+
+	if (print_braces)
+		(*print_func)('<', ptr);
+
+	if (!p)
+		return -1;
+
+	for (addrbuf=p; *p; p++)
+		(*print_func)(*p, ptr);
+
+	if (print_braces)
+		(*print_func)('>', ptr);
+
+	free(addrbuf);
+	return (0);
+}
+
+int rfc822_print(const struct rfc822a *rfcp, void (*print_func)(char, void *),
+	void (*print_separator)(const char *s, void *), void *ptr)
+{
+	return rfc822_print_common(rfcp, 0, 0, print_func, print_separator, ptr);
+}
+
+int rfc822_print_common(const struct rfc822a *rfcp,
+			char *(*decode_func)(const char *, const char *, int),
+			const char *chset,
+			void (*print_func)(char, void *),
+			void (*print_separator)(const char *, void *),
+			void *ptr)
+{
+const struct rfc822addr *addrs=rfcp->addrs;
+int naddrs=rfcp->naddrs;
+
+	while (naddrs)
+	{
+		if (addrs->tokens == 0)
+		{
+			rfc822tok_print(addrs->name, print_func, ptr);
+			++addrs;
+			--naddrs;
+			if (addrs[-1].name && naddrs)
+			{
+			struct	rfc822token *t;
+
+				for (t=addrs[-1].name; t && t->next; t=t->next)
+					;
+
+				if (t && (t->token == ':' || t->token == ';'))
+					(*print_separator)(" ", ptr);
+			}
+			continue;
+		}
+		else if (addrs->name && addrs->name->token == '(')
+		{	/* old style */
+
+			if (!decode_func)
+			{
+				rfc822tok_print(addrs->tokens, print_func, ptr);
+				(*print_func)(' ', ptr);
+				rfc822tok_print(addrs->name, print_func, ptr);
+			}
+			else
+			{
+				if (rfc822_print_common_nameaddr(addrs,
+								 decode_func,
+								 chset,
+								 print_func,
+								 ptr) < 0)
+					return -1;
+			}
+		}
+		else
+		{
+			if (!decode_func)
+			{
+				int	print_braces=0;
+
+				if (addrs->name)
+				{
+					rfc822tok_print(addrs->name,
+							print_func, ptr);
+					(*print_func)(' ', ptr);
+					print_braces=1;
+				}
+#if 1
+				else
+				{
+					struct rfc822token *p;
+
+					for (p=addrs->tokens; p && p->next; p=p->next)
+						if (rfc822_is_atom(p->token) &&
+						    rfc822_is_atom(p->next->token))
+							print_braces=1;
+				}
+#endif
+
+				if (print_braces)
+					(*print_func)('<', ptr);
+
+				rfc822tok_print(addrs->tokens, print_func, ptr);
+
+				if (print_braces)
+					(*print_func)('>', ptr);
+			}
+			else
+			{
+				if (rfc822_print_common_nameaddr(addrs,
+								 decode_func,
+								 chset,
+								 print_func,
+								 ptr) < 0)
+					return -1;
+			}
+		}
+		++addrs;
+		--naddrs;
+		if (naddrs)
+			if (addrs->tokens || (addrs->name &&
+				rfc822_is_atom(addrs->name->token)))
+				(*print_separator)(", ", ptr);
+	}
+	return 0;
+}
+
+void rfc822t_free(struct rfc822t *p)
+{
+	if (p->tokens)	free(p->tokens);
+	free(p);
+}
+
+void rfc822a_free(struct rfc822a *p)
+{
+	if (p->addrs)	free(p->addrs);
+	free(p);
+}
+
+void rfc822_deladdr(struct rfc822a *rfcp, int index)
 {
 int	i;
 
-	for (i=0; i<rfcp->naddrs; i++)
-		rfc822_prname(rfcp, i, print_func, ptr);
+	if (index < 0 || index >= rfcp->naddrs)	return;
+
+	for (i=index+1; i<rfcp->naddrs; i++)
+		rfcp->addrs[i-1]=rfcp->addrs[i];
+	if (--rfcp->naddrs == 0)
+	{
+		free(rfcp->addrs);
+		rfcp->addrs=0;
+	}
+}
+
+static void compat_err_func(const char *p, int i, void *voidp)
+{
+	void (*err_func)(const char *, int)=
+		(void (*)(const char *, int))voidp;
+
+	if (err_func)
+		(*err_func)(p, i);
+}
+
+struct rfc822t *rfc822t_alloc(const char *addr,
+			      void (*err_func)(const char *, int))
+{
+	return (rfc822t_alloc_new(addr, &compat_err_func, (void *)err_func));
+}
+
+struct rfc822t *rfc822t_alloc_new(const char *addr,
+	void (*err_func)(const char *, int, void *), void *voidp)
+{
+struct rfc822t *p=(struct rfc822t *)malloc(sizeof(struct rfc822t));
+
+	if (!p)	return (NULL);
+	memset(p, 0, sizeof(*p));
+
+	tokenize(addr, NULL, &p->ntokens, err_func, voidp);
+	p->tokens=p->ntokens ? (struct rfc822token *)
+			calloc(p->ntokens, sizeof(struct rfc822token)):0;
+	if (p->ntokens && !p->tokens)
+	{
+		rfc822t_free(p);
+		return (NULL);
+	}
+	tokenize(addr, p->tokens, &p->ntokens, NULL, NULL);
+	return (p);
+}
+
+struct rfc822a *rfc822a_alloc(struct rfc822t *t)
+{
+struct rfc822a *p=(struct rfc822a *)malloc(sizeof(struct rfc822a));
+
+	if (!p)	return (NULL);
+	memset(p, 0, sizeof(*p));
+
+	parseaddr(t->tokens, t->ntokens, NULL, &p->naddrs);
+	p->addrs=p->naddrs ? (struct rfc822addr *)
+			calloc(p->naddrs, sizeof(struct rfc822addr)):0;
+	if (p->naddrs && !p->addrs)
+	{
+		rfc822a_free(p);
+		return (NULL);
+	}
+	parseaddr(t->tokens, t->ntokens, p->addrs, &p->naddrs);
+	return (p);
 }

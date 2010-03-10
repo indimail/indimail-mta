@@ -858,7 +858,7 @@ acctout(const char *disc)
 static RETSIGTYPE
 bye(int signum)
 {
-	acctout("ERR: TIMEOUT");
+	acctout("INFO: TIMEOUT");
 	exit(0);
 #if	RETSIGTYPE != void
 	return (0);
@@ -889,7 +889,7 @@ loop()
 		mkupper(p);
 		if (strcmp(p, "QUIT") == 0)
 		{
-			printed(printf("+OK Phir Khab Miloge2.\r\n"));
+			printed(printf("+OK Phir Kab Miloge?\r\n"));
 			fflush(stdout);
 			cleanup();
 			acctout("INFO: LOGOUT");
@@ -984,7 +984,7 @@ loop()
 		printed(printf("-ERR Invalid command.\r\n"));
 		fflush(stdout);
 	}
-	acctout("ERR: DISCONNECTED");
+	acctout("INFO: DISCONNECTED");
 }
 
 /* Like every good Maildir reader, we purge the tmp subdirectory */

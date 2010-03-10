@@ -1,5 +1,5 @@
 /*
-** Copyright 1998 - 2008 Double Precision, Inc.
+** Copyright 1998 - 2009 Double Precision, Inc.
 ** See COPYING for distribution information.
 */
 
@@ -28,7 +28,7 @@
 #include	"imaptoken.h"
 #include	"imapscanclient.h"
 
-static const char rcsid[]="$Id: search.c,v 1.33 2008/09/20 12:48:29 mrsam Exp $";
+static const char rcsid[]="$Id: search.c,v 1.34 2009/11/08 18:14:47 mrsam Exp $";
 
 extern time_t rfc822_parsedt(const char *);
 extern struct imapscaninfo current_maildir_info;
@@ -720,9 +720,10 @@ static void fill_search_header(struct searchinfo *si,
 		if (search_chset->search_chset)
 			search_chset=search_chset->search_chset;
 
-		conv_buf=rfc2047_decode_unicode(r, search_chset,
-						RFC2047_DECODE_DISCARD);
 
+		conv_buf=rfc822_display_hdrvalue_tobuf(p, r,
+						       search_chset->chset,
+						       NULL, NULL);
 			/* Characters not in our charset are discarded */
 
 		if (!conv_buf && errno != EINVAL)
@@ -898,7 +899,8 @@ static void fill_search_header(struct searchinfo *si,
 			if (sip->type == search_references3 &&
 			    strcmp(p, "SUBJECT") == 0 && sip->as == 0)
 			{
-				sip->as=strdup(q);
+				sip->as=unicode_xconvert(q, search_chset,
+							 &unicode_UTF8);
 				if (!sip->as)
 					write_error_exit(0);
 			}
@@ -915,17 +917,8 @@ static void fill_search_header(struct searchinfo *si,
 				strcmp(p, "SUBJECT") == 0 && sip->as == 0)
 			{
 				int dummy;
-				char *r;
 
-			/* Dummy node used to suck in the Subject:
-			** header for the THREAD or SORT command.
-			*/
-				r=rfc2047_decode_unicode(q, &unicode_UTF8, 0);
-				if (!r)
-					write_error_exit(0);
-
-				sip->as=rfc822_coresubj(r, &dummy);
-				free(r);
+				sip->as=rfc822_coresubj(q, &dummy);
 				if (!sip->as)
 					write_error_exit(0);
 			}

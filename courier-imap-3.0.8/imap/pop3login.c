@@ -201,7 +201,7 @@ main(int argc, char **argv)
 			auth_debug_login(1, "command=%s", p);
 			if (strcmp(p, "QUIT") == 0)
 			{
-				printed(printf("+OK Phir Khab Miloge.\r\n"));
+				printed(printf("+OK Phir Kab Miloge?\r\n"));
 				fflush(stdout);
 				fprintf(stderr, "INFO: LOGOUT, ip=[%s], port=%s, rcvd=%lu, sent=%lu\n", ip, port, bytes_received_count,
 						bytes_sent_count);

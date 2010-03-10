@@ -40,7 +40,7 @@
 int gethostname(const char *, size_t);
 #endif
 
-static const char rcsid[]="$Id: makemime.c,v 1.15 2006/05/28 15:29:52 mrsam Exp $";
+static const char rcsid[]="$Id: makemime.c,v 1.16 2009/06/27 16:32:38 mrsam Exp $";
 
 struct arg_list {
 	struct arg_list *next;
@@ -197,19 +197,25 @@ static void usage()
 "          -           - read or write from stdin or stdout\n"
 "          &n          - read or write from file descriptor n\n"
 "          \\( opts \\)  - read from child process, that generates [ opts ]\n"
-"\n"
+		"\n");
+
+	fprintf(stderr,
 "Options:\n"
 "\n"
 "  -c type         - create a new MIME section from \"file\" with this\n"
 "                    Content-Type: (default is application/octet-stream).\n"
 "  -C charset      - MIME charset of a new text/plain section.\n"
-"  -N name         - MIME content name of the new mime section.\n"
+		"  -N name         - MIME content name of the new mime section.\n");
+
+	fprintf(stderr,
 "  -m [ type ]     - create a multipart mime section from \"file\" of this\n"
 "                    Content-Type: (default is multipart/mixed).\n"
 "  -e encoding     - use the given encoding (7bit, 8bit, quoted-printable,\n"
 "                    or base64), instead of guessing.  Omit \"-e\" and use\n"
 "                    -c auto to set Content-Type: to text/plain or\n"
-"                    application/octet-stream based on picked encoding.\n"
+		"                    application/octet-stream based on picked encoding.\n");
+
+	fprintf(stderr,
 "  -j file1 file2  - join mime section file2 to multipart section file1.\n"
 "  -o file         - write ther result to file, instead of stdout (not\n"
 "                    allowed in child processes).\n"

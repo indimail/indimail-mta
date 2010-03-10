@@ -1,10 +1,10 @@
 /*
-** Copyright 1998 - 2004 Double Precision, Inc.  See COPYING for
+** Copyright 1998 - 2009 Double Precision, Inc.  See COPYING for
 ** distribution information.
 */
 
 /*
-** $Id: rfc2045.h,v 1.33 2004/06/27 02:28:22 mrsam Exp $
+** $Id: rfc2045.h,v 1.35 2009/11/22 17:33:03 mrsam Exp $
 */
 #ifndef	rfc2045_h
 #define	rfc2045_h
@@ -318,16 +318,46 @@ struct rfc2045_mkreplyinfo {
 	** "forward" - forward original message.
 	** "forwardatt" - forward original message as an RFC822 attachment
 	** "reply" - a standard reply to the original message's sender
+	** "replydsn" - a DSN reply to the original message's sender
 	** "replyall" - a "reply to all" response.
 	** "replylist" - "reply to mailing list" response.  This is a reply
 	** that's addressed to the mailing list the original message was sent
 	** to.
 	*/
 
+	int replytoenvelope;
+	/*
+	** If non-zero, the "reply" or "replydsn" message gets addressed to the
+	** "Return-Path" or "Errors-To" address, if available.
+	*/
+
 	const char *replysalut;
 	/*
 	** This should be set to the salutation to be used for the reply.
-	** %s is replaced by the sender's name.  Example:  "%s writes:"
+	** The following %-formats may appear in this string:
+	**
+	** %% - an explicit % character
+	**
+	** %n - a newline character
+	**
+	** %C - the X-Newsgroup: header from the original message
+	**
+	** %N - the Newsgroups: header from the original message
+	**
+	** %i - the Message-ID: header from the original message
+	**
+	** %f - the original message's sender's address
+	**
+	** %F - the original message's sender's name
+	**
+	** %S - the Subject: header from the original message
+	**
+	** %d - the original message's date, in the local timezone
+	**
+	** %{...}d - use strftime() to format the original message's date.
+	**           A plain %d is equivalent to %{%a, %d %b %Y %H:%M:%S %z}d.
+	**
+	** Example:  "%F writes:"
 	*/
 
 	const char *forwarddescr;
@@ -335,6 +365,52 @@ struct rfc2045_mkreplyinfo {
 	** For forwardatt, this is the Content-Description: header,
 	** (typically "Forwarded message").
 	*/
+
+	/*
+	** If not NULL, overrides the Subject: header
+	*/
+
+	const char *subject;
+
+	/*
+	** When reply mode is 'replydsn', dsnfrom must be set to a valid
+	** email address that's specified as the address that's generating
+	** the DSN.
+	*/
+	const char *dsnfrom;
+
+	/*
+	** Set the reply/fwd MIME headers. If this is a NULL pointer,
+	** write_func() receives a Content-Type: text/plain; charset="charset"
+	** (specified below), and "Content-Transfer-Encoding: 8bit".
+	**
+	** If this is not a NULL pointer, the effect of
+	** this function should be invocation of write_func() to perform the
+	** analogous purpose.
+	**
+	** The output of content_set_charset() should be consistent with the
+	** contents of the charset field.
+	*/
+
+	void (*content_set_charset)(void *);
+
+	/*
+	** Set the reply/fwd content.
+	**
+	** This function gets called at the point where the additional contents
+	** of the reply/fwd should go.
+	**
+	** If this is not a NULL pointer, the effect of this function should
+	** be invocation of write_func() with the additional contents of the
+	** reply/fwd. The added content should be consistent with the
+	** charset field.
+	**
+	** Note -- this content is likely to end up in a multipart MIME
+	** message, as such it should not contain any lines that look like
+	** MIME boundaries.
+	*/
+
+	void (*content_specify)(void *);
 
 	const char *mailinglists;
 	/*
@@ -361,12 +437,7 @@ struct rfc2045_mkreplyinfo {
 				  void *);
 } ;
 
-int rfc2045_makereply(struct rfc2045_mkreplyinfo *);
 int rfc2045_makereply_unicode(struct rfc2045_mkreplyinfo *);
-	/*
-	** Like makereply(), except do unicode translation from message text
-	** to charset.
-	*/
 
 /********** Decode RFC 2231 attributes ***********/
 

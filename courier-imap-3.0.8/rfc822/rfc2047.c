@@ -1,5 +1,5 @@
 /*
-** Copyright 1998 - 2004 Double Precision, Inc.  See COPYING for
+** Copyright 1998 - 2009 Double Precision, Inc.  See COPYING for
 ** distribution information.
 */
 
@@ -8,11 +8,18 @@
 #include	<ctype.h>
 #include	<string.h>
 #include	<stdlib.h>
+#include	<errno.h>
 
 #include	"rfc822.h"
+#include	"rfc822hdr.h"
 #include	"rfc2047.h"
+#include	"../unicode/unicode.h"
+#if LIBIDN
+#include <idna.h>
+#include <stringprep.h>
+#endif
 
-static const char rcsid[]="$Id: rfc2047.c,v 1.20 2006/01/22 03:33:24 mrsam Exp $";
+static const char rcsid[]="$Id: rfc2047.c,v 1.23 2009/11/18 03:38:50 mrsam Exp $";
 
 #define	RFC2047_ENCODE_FOLDLENGTH	76
 
@@ -20,467 +27,164 @@ static const char xdigit[]="0123456789ABCDEF";
 static const char base64tab[]=
 "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
 
-
-static char *rfc2047_search_quote(const char **ptr)
-{
-const char *p= *ptr;
-char	*s;
-
-	while (**ptr && **ptr != '?')
-		++ *ptr;
-	if ((s=malloc( *ptr - p + 1)) == 0)
-		return (0);
-	memcpy(s, p, *ptr-p);
-	s[*ptr - p]=0;
-	return (s);
-}
-
-static int nyb(int c)
-{
-const char	*p;
-
-	c=toupper( (int)(unsigned char)c );
-	p=strchr(xdigit, c);
-	return (p ? p-xdigit:0);
-}
-
-static unsigned char decode64tab[256];
-static int decode64tab_init=0;
-
-static size_t decodebase64(char *ptr, size_t cnt)
-{
-size_t  i, j;
-char    a,b,c;
-size_t  k;
-
-	if (!decode64tab_init)
-	{
-		for (i=0; i<256; i++)   decode64tab[i]=0;
-		for (i=0; i<64; i++)
-			decode64tab[(int)(base64tab[i])]=i;
-		decode64tab[ (int)'=' ] = 99;
-	}
-
-	i=cnt / 4;
-	i=i*4;
-	k=0;
-	for (j=0; j<i; j += 4)
-	{
-	int     w=decode64tab[(int)(unsigned char)ptr[j]];
-	int     x=decode64tab[(int)(unsigned char)ptr[j+1]];
-	int     y=decode64tab[(int)(unsigned char)ptr[j+2]];
-	int     z=decode64tab[(int)(unsigned char)ptr[j+3]];
-
-		a= (w << 2) | (x >> 4);
-		b= (x << 4) | (y >> 2);
-		c= (y << 6) | z;
-		ptr[k++]=a;
-		if ( ptr[j+2] != '=')
-			ptr[k++]=b;
-		if ( ptr[j+3] != '=')
-			ptr[k++]=c;
-	}
-	return (k);
-}
-
-/*
-**	This is the main rfc2047 decoding function.  It receives rfc2047-encoded
-**	text, and a callback function.  The callback function is repeatedly
-**	called, each time receiving a piece of decoded text.  The decoded
-**	info includes a text fragment - string, string length arg - followed
-**	by the character set, followed by a context pointer that is received
-**	from the caller.  If the callback function returns non-zero, rfc2047
-**	decoding terminates, returning the result code.  Otherwise,
-**	rfc2047_decode returns 0 after a successfull decoding (-1 if malloc
-**	failed).
-*/
-
-int rfc2047_decode(const char *text, int (*func)(const char *, int,
-						 const char *,
-						 const char *, void *),
-		void *arg)
-{
-int	rc;
-int	had_last_word=0;
-const char *p;
-char	*chset, *lang;
-char	*encoding;
-char	*enctext;
-char	*enctext_s=NULL, *chset_s=NULL, *lang_s=NULL;
-
-#define	FREE_SAVED	{ \
-				if (enctext_s)	free(enctext_s); \
-				enctext_s=NULL; \
-				if (chset_s)	free(chset_s); \
-				chset_s=NULL; \
-			}
-
-	while (text && *text)
-	{
-		if (text[0] != '=' || text[1] != '?')
-		{
-			p=text;
-			while (*text)
-			{
-				if (text[0] == '=' && text[1] == '?')
-					break;
-				if (!isspace((int)(unsigned char)*text))
-					had_last_word=0;
-				++text;
-			}
-			if (text > p && !had_last_word)
-			{
-				if (enctext_s)
-				/* Flush buffer. */
-				{
-					rc=(*func)(enctext_s,
-						   strlen(enctext_s), chset_s,
-						   lang_s, arg);
-					FREE_SAVED;
-					if (rc)	return rc;
-				} 
-				rc=(*func)(p, text-p, 0, 0, arg);
-				if (rc) return (rc);
-			}
-			continue;
-		}
-
-		text += 2;
-		if ((chset=rfc2047_search_quote( &text )) == 0)
-		{
-			FREE_SAVED;
-			return (-1);
-		}
-		if (*text)	++text;
-		if ((encoding=rfc2047_search_quote( &text )) == 0)
-		{
-			free(chset);
-			FREE_SAVED;
-			return (-1);
-		}
-		if (*text)	++text;
-		if ((enctext=rfc2047_search_quote( &text )) == 0)
-		{
-			free(encoding);
-			free(chset);
-			FREE_SAVED;
-			return (-1);
-		}
-		if (*text == '?' && text[1] == '=')
-			text += 2;
-		if (strcmp(encoding, "Q") == 0 || strcmp(encoding, "q") == 0)
-		{
-			char *q, *r;
-
-			for (q=r=enctext; *q; )
-			{
-				int c;
-
-				if (*q == '=' && q[1] && q[2])
-				{
-					*r++ = (char)(
-						nyb(q[1])*16+nyb(q[2]));
-					q += 3;
-					continue;
-				}
-
-				c=*q++;
-				if (c == '_')
-					c=' ';
-				*r++ = c ;
-			}
-			*r=0;
-		}
-		else if (strcmp(encoding, "B") == 0 || strcmp(encoding, "b")==0)
-		{
-			enctext[decodebase64(enctext, strlen(enctext))]=0;
-		}
-
-		lang=strrchr(chset, '*'); /* RFC 2231 language */
-
-		if (lang)
-			*lang++=0;
-
-		if (enctext_s)
-		{
-		/*
-		 * If charset or language is changed, flush buffer.
-		 * Otherwise, add decoded string to buffer.
-		 */
-			if ((lang_s && lang && strcasecmp(lang_s, lang) != 0) ||
-			    (!lang_s && lang) || (lang_s && !lang) ||
-			    strcasecmp(chset_s, chset) != 0)
-			{
-				rc=(*func)(enctext_s, strlen(enctext_s),
-					   chset_s, lang_s, arg);
-				FREE_SAVED;
-				if (rc)
-				{
-					free(chset);
-					free(enctext);
-					free(encoding);
-					return rc;
-				}
-				enctext_s = enctext;
-				chset_s = chset;
-				lang_s = lang;
-			}
-			else
-			{
-			char *p;
-				if (!(p=malloc(strlen(enctext_s) +
-					       strlen(enctext) + 1)))
-				{
-					FREE_SAVED;
-					free(chset);
-					free(enctext);
-					free(encoding);
-					return (-1);
-				}
-				strcat(strcpy(p, enctext_s), enctext);
-				free(chset);
-				free(enctext);
-				free(enctext_s);
-				enctext_s = p;
-			}
-
-		}
-		else
-		{
-			enctext_s = enctext;
-			chset_s = chset;
-			lang_s = lang;
-		}
-		free(encoding);
-
-		had_last_word=1;	/* Ignore blanks between enc words */
-	}
-
-	/* Flush buffer. */
-	if (enctext_s)
-	{
-		rc=(*func)(enctext_s, strlen(enctext_s), chset_s, lang_s, arg);
-		FREE_SAVED;
-		if (rc)	return (rc);
-	}
-	return (0);
-#undef FREE_SAVED
-}
-
-/*
-** rfc2047_decode_simple just strips out the rfc2047 decoding, throwing away
-** the character set.  This is done by calling rfc2047_decode twice, once
-** to count the number of characters in the decoded text, the second time to
-** actually do it.
-*/
-
-struct simple_info {
-	char *string;
-	int index;
-	const char *mychset;
-	} ;
-
-static int count_simple(const char *txt, int len, const char *chset,
-			const char *lang, void *arg)
-{
-struct simple_info *iarg= (struct simple_info *)arg;
-
-	iarg->index += len;
-
-	return (0);
-}
-
-static int save_simple(const char *txt, int len, const char *chset,
-		       const char *lang,
-		       void *arg)
-{
-struct simple_info *iarg= (struct simple_info *)arg;
-
-	memcpy(iarg->string+iarg->index, txt, len);
-	iarg->index += len;
-	return (0);
-}
-
-char *rfc2047_decode_simple(const char *text)
-{
-struct	simple_info info;
-
-	info.index=1;
-	if (rfc2047_decode(text, &count_simple, &info))
-		return (0);
-
-	if ((info.string=malloc(info.index)) == 0)	return (0);
-	info.index=0;
-	if (rfc2047_decode(text, &save_simple, &info))
-	{
-		free(info.string);
-		return (0);
-	}
-	info.string[info.index]=0;
-	return (info.string);
-}
-
-/*
-** rfc2047_decode_enhanced is like simply, but prefixes the character set
-** name before the text, in brackets.
-*/
-
-static int do_enhanced(const char *txt, int len, const char *chset,
-		       const char *lang,
-		       void *arg,
-		       int (*func)(const char *, int, const char *,
-				   const char *, void *)
-		       )
-{
-int	rc=0;
-struct	simple_info *info=(struct simple_info *)arg;
-
-	if (chset && info->mychset && strcasecmp(chset, info->mychset) == 0)
-		chset=0;
-
-	if (chset)
-	{
-		rc= (*func)(" [", 2, 0, 0, arg);
-		if (rc == 0)
-			rc= (*func)(chset, strlen(chset), 0, 0, arg);
-		if (rc == 0 && lang)
-			rc= (*func)("*", 1, 0, 0, arg);
-		if (rc == 0 && lang)
-			rc= (*func)(lang, strlen(lang), 0, 0, arg);
-		if (rc == 0)
-			rc= (*func)("] ", 2, 0, 0, arg);
-	}
-
-	if (rc == 0)
-		rc= (*func)(txt, len, 0, 0, arg);
-	return (rc);
-}
-
-static int count_enhanced(const char *txt, int len, const char *chset,
-			  const char *lang,
-			  void *arg)
-{
-	return (do_enhanced(txt, len, chset, lang, arg, &count_simple));
-}
-
-static int save_enhanced(const char *txt, int len, const char *chset,
-			 const char *lang,
-			 void *arg)
-{
-	return (do_enhanced(txt, len, chset, lang, arg, &save_simple));
-}
-
-char *rfc2047_decode_enhanced(const char *text, const char *mychset)
-{
-struct	simple_info info;
-
-	info.mychset=mychset;
-	info.index=1;
-	if (rfc2047_decode(text, &count_enhanced, &info))
-		return (0);
-
-	if ((info.string=malloc(info.index)) == 0)	return (0);
-	info.index=0;
-	if (rfc2047_decode(text, &save_enhanced, &info))
-	{
-		free(info.string);
-		return (0);
-	}
-	info.string[info.index]=0;
-	return (info.string);
-}
-
-void rfc2047_print(const struct rfc822a *a,
-	const char *charset,
-	void (*print_func)(char, void *),
-	void (*print_separator)(const char *, void *), void *ptr)
-{
-	rfc822_print_common(a, &rfc2047_decode_enhanced, charset,
-		print_func, print_separator, ptr);
-}
-
-static char *a_rfc2047_encode_str(const char *str, const char *charset);
+static char *a_rfc2047_encode_str(const char *str, const char *charset,
+				  int isaddress);
 
 static void rfc2047_encode_header_do(const struct rfc822a *a,
-	const char *charset,
-	void (*print_func)(char, void *),
-	void (*print_separator)(const char *, void *), void *ptr)
+				     const char *charset,
+				     void (*print_func)(char, void *),
+				     void (*print_separator)(const char *,
+							     void *), void *ptr)
 {
 	rfc822_print_common(a, &a_rfc2047_encode_str, charset,
-		print_func, print_separator, ptr);
+			    print_func, print_separator, ptr);
 }
 
-/*
-** When MIMEifying names from an RFC822 list of addresses, strip quotes
-** before MIMEifying them, and add them afterwards.
-*/
+static char *rfc822_encode_domain_int(const char *pfix,
+				      size_t pfix_len,
+				      const char *domain)
+{
+	char *q;
 
-static char *a_rfc2047_encode_str(const char *str, const char *charset)
+#if LIBIDN
+	int err;
+	char *p;
+
+	err=idna_to_ascii_8z(domain, &p, 0);
+
+	if (err != IDNA_SUCCESS)
+	{
+		errno=EINVAL;
+		return NULL;
+	}
+#else
+	char *p;
+
+	p=strdup(domain);
+
+	if (!p)
+		return NULL;
+#endif
+
+	q=malloc(strlen(p)+pfix_len+1);
+
+	if (!q)
+	{
+		free(p);
+		return NULL;
+	}
+
+	if (pfix_len)
+		memcpy(q, pfix, pfix_len);
+
+	strcpy(q + pfix_len, p);
+	free(p);
+	return q;
+}
+
+char *rfc822_encode_domain(const char *address,
+			    const char *charset)
+{
+	const struct unicode_info *ui=unicode_find(charset);
+	const char *cp;
+	char *p, *q;
+
+	if (!ui)
+	{
+		errno=EINVAL;
+		return NULL;
+	}
+
+	p=unicode_convert(address, ui, &unicode_UTF8);
+
+	if (!p)
+		return NULL;
+
+	cp=strchr(p, '@');
+
+	if (!cp)
+	{
+		q=rfc822_encode_domain_int("", 0, p);
+		free(p);
+		return q;
+	}
+
+	++cp;
+	q=rfc822_encode_domain_int(p, cp-p, cp);
+	free(p);
+	return q;
+}
+
+static char *a_rfc2047_encode_str(const char *str, const char *charset,
+				  int isaddress)
 {
 	size_t	l;
-	char	*p, *r, *s;
-	int (*qp_func)(char);
-	char save_char;
+	char	*p;
+
+	if (isaddress)
+		return rfc822_encode_domain(str, charset);
 
 	for (l=0; str[l]; l++)
 		if (str[l] & 0x80)
 			break;
+
 	if (str[l] == 0)
-		return (strdup(str));
-
-	l=strlen(str);
-
-	if (*str == '"' && str[l-1] == '"')
-		qp_func=rfc2047_qp_allow_word;
-	else if (*str == '(' && str[l-1] == ')')
-		qp_func=rfc2047_qp_allow_comment;
-	else
-		return (rfc2047_encode_str(str, charset,
-					   rfc2047_qp_allow_comment));
-
-	save_char=*str;
-
-	p=malloc(l);
-	if (!p)	return (0);
-	memcpy(p, str+1, l-2);
-	p[l-2]=0;
-	for (r=s=p; *r; r++)
 	{
-		if (*r == '\\' && r[1])
-			++r;
-		else
-			*s++=*r;
-	}
-	*s=0;
+		size_t n;
 
-	s=rfc2047_encode_str(p, charset, qp_func);
-	free(p);
+		for (l=0; str[l]; l++)
+			if (strchr(RFC822_SPECIALS, str[l]))
+				break;
 
-	if (save_char == '(')
-	{
-		p=malloc(strlen(s)+3);
-		if (p)
+		if (str[l] == 0)
+			return (strdup(str));
+
+		for (n=3, l=0; str[l]; l++)
 		{
-			p[0]='(';
-			strcpy(p+1, s);
-			strcat(p, ")");
+			switch (str[l]) {
+			case '"':
+			case '\\':
+				++n;
+			break;
+			}
+
+			++n;
 		}
-		free(s);
-		s=p;
+
+		p=malloc(n);
+
+		if (!p)
+			return NULL;
+
+		p[0]='"';
+
+		for (n=1, l=0; str[l]; l++)
+		{
+			switch (str[l]) {
+			case '"':
+			case '\\':
+				p[n++]='\\';
+			break;
+			}
+
+			p[n++]=str[l];
+		}
+		p[n++]='"';
+		p[n]=0;
+
+		return (p);
 	}
-	return s;
+
+	return rfc2047_encode_str(str, charset, rfc2047_qp_allow_word);
 }
-
-
-
 
 static void count(char c, void *p);
 static void counts2(const char *c, void *p);
 static void save(char c, void *p);
 static void saves2(const char *c, void *p);
 
-char *rfc2047_encode_header(const struct rfc822a *a,
-        const char *charset)
+char *rfc2047_encode_header_addr(const struct rfc822a *a,
+			    const char *charset)
 {
 size_t	l;
 char	*s, *p;
@@ -494,6 +198,33 @@ char	*s, *p;
 	return (s);
 }
 
+
+char *rfc2047_encode_header_tobuf(const char *name, /* Header name */
+				  const char *header, /* Header's contents */
+				  const char *charset)
+{
+	if (rfc822hdr_is_addr(name))
+	{
+		char *s=0;
+
+		struct rfc822t *t;
+		struct rfc822a *a;
+
+		if ((t=rfc822t_alloc_new(header, NULL, NULL)) != 0)
+		{
+			if ((a=rfc822a_alloc(t)) != 0)
+			{
+				s=rfc2047_encode_header_addr(a, charset);
+				rfc822a_free(a);
+			}
+			rfc822t_free(t);
+		}
+		return s;
+	}
+
+	return rfc2047_encode_str(header, charset, rfc2047_qp_allow_word);
+}
+
 static void count(char c, void *p)
 {
 	++*(size_t *)p;
@@ -501,8 +232,11 @@ static void count(char c, void *p)
 
 static void counts2(const char *c, void *p)
 {
-	if (strcmp(c, ", ") == 0)
-		c=",\n  ";
+	if (*c == ',')
+		count(*c++, p);
+
+	count('\n', p);
+	count(' ', p);
 
 	while (*c)	count(*c++, p);
 }
@@ -515,8 +249,11 @@ static void save(char c, void *p)
 
 static void saves2(const char *c, void *p)
 {
-	if (strcmp(c, ", ") == 0)
-		c=",\n  ";
+	if (*c == ',')
+		save(*c++, p);
+
+	save('\n', p);
+	save(' ', p);
 
 	while (*c)	save(*c++, p);
 }
@@ -588,10 +325,6 @@ static int encodebase64(const char *ptr, size_t len, const char *charset,
 #define DOENCODE(i) (((i) & 0x80) || (i)=='"' || (i)=='=' || \
 			((unsigned char)(i) < 0x20 && !ISSPACE(i)) || \
 			!(*qp_allow)(i))
-
-#if	HAVE_LIBUNICODE
-
-#include	"../unicode/unicode.h"
 
 int rfc2047_encode_callback_base64(const char *str, const char *charset,
 				   int (*qp_allow)(char),
@@ -734,7 +467,6 @@ unicode_char *ustr, *uptr;
 	free(ustr);
 	return 0;
 }
-#endif
 
 #define DOENCODEWORD(c) \
 	(((c) & 0x80) || (c) == '"' || (unsigned char)(c) <= 0x20 || \
@@ -747,19 +479,14 @@ int rfc2047_encode_callback(const char *str, const char *charset,
 {
 int	rc;
 int     maxlen;
-#if	HAVE_LIBUNICODE
 const struct unicode_info *ci = unicode_find(charset);
-#endif
 
 	if (!str || !*str)
 		return 0;
 
-#if	HAVE_LIBUNICODE
-
 	if (ci && ci->flags & UNICODE_SISO)
 		return rfc2047_encode_callback_base64(str, charset, qp_allow,
 						      func, arg);
-#endif
   
 	/* otherwise, output quoted-printable-encoded. */
 

@@ -9,6 +9,9 @@
 /* Define to 1 if you have the <crypt.h> header file. */
 #undef HAVE_CRYPT_H
 
+/* Define to 1 if you have the <dlfcn.h> header file. */
+#undef HAVE_DLFCN_H
+
 /* Define to 1 if you have the `endpwent' function. */
 #undef HAVE_ENDPWENT
 
@@ -113,6 +116,10 @@
 
 /* Whether -lvpopmail has the vset_lastauth() function */
 #undef HAVE_VSET_LASTAUTH
+
+/* Define to the sub-directory in which libtool stores uninstalled libraries.
+   */
+#undef LT_OBJDIR
 
 /* Whether we must a prototype for crypt() */
 #undef NEED_CRYPT_PROTOTYPE

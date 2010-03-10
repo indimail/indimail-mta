@@ -1,17 +1,15 @@
 /*
-** Copyright 2003-2004 Double Precision, Inc.  See COPYING for
+** Copyright 2003-2009 Double Precision, Inc.  See COPYING for
 ** distribution information.
 */
 
 /*
-** $Id: encodeautodetect.c,v 1.1 2004/10/21 00:10:51 mrsam Exp $
+** $Id: encodeautodetect.c,v 1.2 2009/11/08 18:14:47 mrsam Exp $
 */
 #include	"encode.h"
 #include	<string.h>
 #include	<stdlib.h>
-#if	HAVE_LIBUNICODE
 #include	"../unicode/unicode.h"
-#endif
 
 static const char *libmail_encode_autodetect(const char *charset, 
 					     int (*func)(void *), void *arg)
@@ -20,9 +18,7 @@ static const char *libmail_encode_autodetect(const char *charset,
 	int	l=0;
 	int	longline=0;
 	int c;
-#if	HAVE_LIBUNICODE
 	const struct unicode_info *ci = unicode_find(charset);
-#endif
 
 	while ((c = (*func)(arg)) != EOF)
 	{
@@ -31,7 +27,6 @@ static const char *libmail_encode_autodetect(const char *charset,
 		if (ch >= 0x80)
 		{
 
-#if	HAVE_LIBUNICODE
 			if (!charset || !*charset)
 				encoding="8bit";
 			else if (ci && ci->flags & UNICODE_BODY_QUOPRI)
@@ -40,25 +35,17 @@ static const char *libmail_encode_autodetect(const char *charset,
 				encoding="base64";
 			else
 				encoding="8bit";
-#else
-			encoding="8bit";
-#endif
 		}
 
 		if (ch < 0x20 &&
 		    ch != '\t' && ch != '\r' && ch != '\n')
 		{
-#if	HAVE_LIBUNICODE
 			if (!charset || !*charset)
 				;
 			else if (ci && ci->flags & UNICODE_BODY_QUOPRI)
 				encoding="quoted-printable";
 			else if (!ci || ci->flags & UNICODE_BODY_BASE64)
 				encoding="base64";
-#else
-			if (charset && *charset)
-				encoding="quoted-printable";
-#endif
                 }
 
 		if (ch == 0)
@@ -68,30 +55,18 @@ static const char *libmail_encode_autodetect(const char *charset,
 		else if (++l > 990)
 		{
 			longline=1;
-#if	HAVE_LIBUNICODE
 			if (ci && ci->flags & UNICODE_BODY_QUOPRI)
 				encoding="quoted-printable";
-#else
-			if (charset && *charset)
-				encoding="quoted-printable";
-#endif
 		}
 
 	}
 
 	if (longline)
 	{
-#if	HAVE_LIBUNICODE
 		if (ci && ci->flags & UNICODE_BODY_QUOPRI)
 			encoding="quoted-printable";
 		else
 			encoding="base64";
-#else
-		if (charset && *charset)
-			encoding="quoted-printable";
-		else
-			encoding="base64";
-#endif
 	}
 	return encoding;
 }

@@ -6,7 +6,9 @@ dnl Copyright 1998 - 2001 Double Precision, Inc.  See COPYING for
 dnl distribution information.
 
 AC_INIT(mod.h)
+LT_INIT
 LPATH="$PATH:/usr/local/bin"
+AC_CONFIG_MACRO_DIR([m4])
 
 AM_INIT_AUTOMAKE(authlib, 0.10, 0)
 AM_CONFIG_HEADER(config.h)
@@ -17,8 +19,7 @@ AC_PROG_CC
 AC_PROG_CPP
 AC_PROG_INSTALL
 AC_PROG_LN_S
-AC_PROG_RANLIB
-AC_PROG_SYSCONFTOOL
+AC_PROG_LIBTOOL
 AC_PATH_PROGS(PERL, perl5 perl, perl, $LPATH)
 
 if test "$PERL" = "perl"

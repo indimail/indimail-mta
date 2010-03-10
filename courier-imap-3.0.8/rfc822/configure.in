@@ -1,21 +1,23 @@
 dnl Process this file with autoconf to produce a configure script.
-dnl $Id: configure.in,v 1.14 2003/11/20 02:46:12 mrsam Exp $
+dnl $Id: configure.in,v 1.21 2009/11/08 18:14:47 mrsam Exp $
 dnl
-dnl Copyright 1998 - 1999 Double Precision, Inc.  See COPYING for
+dnl Copyright 1998 - 2009 Double Precision, Inc.  See COPYING for
 dnl distribution information.
 
-AC_INIT(rfc822.c)
+AC_INIT(rfc822lib, 0.13, [courier-users@lists.sourceforge.net])
+AC_USE_SYSTEM_EXTENSIONS
+LT_INIT
 
-AM_INIT_AUTOMAKE(rfc822lib, 0.12, 0)
+>confdefs.h  # Kill PACKAGE_ macros
+
+AC_CONFIG_SRCDIR(rfc822.c)
+AM_INIT_AUTOMAKE([foreign no-define])
 AM_CONFIG_HEADER(config.h)
+AC_CONFIG_MACRO_DIR([m4])
 
 dnl Checks for programs.
 AC_PROG_CC
-AC_PROG_RANLIB
-
-AC_ISC_POSIX
-AC_AIX
-AC_MINIX
+AC_PROG_LIBTOOL
 
 if test "$GCC" = yes ; then
         CXXFLAGS="$CXXFLAGS -Wall"
@@ -34,6 +36,25 @@ AC_TYPE_SIZE_T
 AC_STRUCT_TM
 
 dnl Checks for library functions.
+
+AC_ARG_WITH(libidn, AC_HELP_STRING([--with-libidn=[DIR]],
+		    [Support IDN (needs GNU Libidn)]),
+		    libidn=$withval, libidn=yes)
+
+if test "$libidn" != "no"
+then
+	PKG_CHECK_MODULES(LIBIDN, libidn >= 0.0.0, [libidn=yes], [libidn=no])
+        if test "$libidn" != "yes"
+	then
+		libidn=no
+         	AC_MSG_WARN([Libidn not found])
+	else
+		libidn=yes
+		AC_DEFINE(LIBIDN, 1, [Define to 1 if you want Libidn.])
+       	fi
+fi
+AC_MSG_CHECKING([if Libidn should be used])
+AC_MSG_RESULT($libidn)
 
 AC_CHECK_FUNCS(strcasecmp strncasecmp setlocale)
 
@@ -96,12 +117,6 @@ daylight)
 	AC_MSG_WARN([Cannot figure out how to calculate the alternate timezone, will use GMT])
 	;;
 esac
-
-if test -d ../unicode
-then
-	AC_DEFINE_UNQUOTED(HAVE_LIBUNICODE,1,
-		[ Whether we have libunicode.a ])
-fi
 
 AM_CONDITIONAL(HAVE_SGML, test -d ${srcdir}/../docbook)
 

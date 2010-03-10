@@ -10,7 +10,7 @@ static const char outbox_h_rcsid[]="$Id: outbox.h,v 1.3 2003/05/27 15:55:10 mrsa
 
 int check_outbox(const char *message, const char *mailbox);
 int is_outbox(const char *mailbox);
-int sendmsg(const char *message, char **argv, void (*err_func)(char *));
+int imapd_sendmsg(const char *message, char **argv, void (*err_func)(char *));
 const char *defaultSendFrom();
 
 #endif

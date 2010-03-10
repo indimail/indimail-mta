@@ -1,5 +1,5 @@
 /*
-** Copyright 1998 - 2003 Double Precision, Inc.
+** Copyright 1998 - 2008 Double Precision, Inc.
 ** See COPYING for distribution information.
 */
 
@@ -14,9 +14,11 @@
 #endif
 #include	"imapwrite.h"
 
-static const char rcsid[]="$Id: capability.c,v 1.10 2004/05/25 02:16:05 mrsam Exp $";
+static const char rcsid[]="$Id: capability.c,v 1.13 2008/06/29 20:18:36 mrsam Exp $";
 
 static int capa_keywords=0;
+
+extern const char *externalauth();
 
 void initcapability()
 {
@@ -57,7 +59,6 @@ int fastkeywords()
 	return capa_keywords == 1;
 }
 
-
 int magictrash()
 {
 	const char *p;
@@ -68,6 +69,17 @@ int magictrash()
 		return 1;
 	return 0;
 }
+
+const char *imap_externalauth()
+{
+	const char *p;
+
+	if ((p=getenv("IMAP_TLS")) && atoi(p))
+		return externalauth();
+
+	return NULL;
+}
+
 
 void imapcapability()
 {
@@ -96,12 +108,19 @@ void imapcapability()
 
 	if ((p=getenv("IMAP_ACL")) && atoi(p))
 		writes(" ACL ACL2=UNION");
+
 	if (have_starttls())
 	{
 		writes(" STARTTLS");
 		if (tlsrequired())
 			writes(" LOGINDISABLED");
 	}
+	else
+	{
+		if (imap_externalauth())
+			writes(" AUTH=EXTERNAL");
+	}
+			
 
 	p=getenv("OUTBOX");
 

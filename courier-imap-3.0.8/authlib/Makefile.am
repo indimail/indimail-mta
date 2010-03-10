@@ -3,6 +3,7 @@
 # Copyright 1998 - 2004 Double Precision, Inc.  See COPYING for
 # distribution information.
 
+ACLOCAL_AMFLAGS=-I m4
 AUTOMAKE = srcdir=${srcdir} @SHELL@ ${srcdir}/../automake.fix @AUTOMAKE@
 
 EXTRA_PROGRAMS=authcram authpam authpwd authshadow authuserdb authvchkpw \
@@ -415,24 +416,24 @@ authdaemon_passwd_LDADD=libauth.a ../numlib/libnumlib.a  ../soxwrap/libsoxwrap.a
 
 authinfo_SOURCES=authinfo.c authinfodaemondlist.c
 authinfo_DEPENDENCIES=libauth.a libauth.dep libauthmod.a\
-	../rfc2045/librfc2045.a @UNICODE_LIB@ ../rfc822/libencode.a ../rfc822/librfc822.a\
+	../rfc2045/librfc2045.la @UNICODE_LIB@ ../rfc822/libencode.la ../rfc822/librfc822.la\
 	../random128/librandom128.a
-authinfo_LDADD=libauth.a libauthmod.a ../rfc2045/librfc2045.a \
-	../rfc822/libencode.a ../rfc822/librfc822.a @UNICODE_LIB@\
+authinfo_LDADD=libauth.a libauthmod.a ../rfc2045/librfc2045.la \
+	../rfc822/libencode.la ../rfc822/librfc822.la @UNICODE_LIB@\
 	../random128/librandom128.a `cat libauth.dep libauth1.dep`
 
 authtest_SOURCES=authtest.c
 authtest_DEPENDENCIES=libauth.a libauth1.dep libauthmod.a\
-	../rfc2045/librfc2045.a ../random128/librandom128.a
+	../rfc2045/librfc2045.la ../random128/librandom128.a
 authtest_LDADD=libauth.a libauthmod.a\
-	../rfc2045/librfc2045.a ../random128/librandom128.a `cat libauth1.dep`
+	../rfc2045/librfc2045.la ../random128/librandom128.a `cat libauth1.dep`
 
 authenumerate_SOURCES=authenumerate.c
 authenumerate_DEPENDENCIES=libauth.a libauthmod.a ../numlib/libnumlib.a libauth.dep\
-	../rfc822/librfc822.a ../rfc2045/librfc2045.a \
+	../rfc822/librfc822.la ../rfc2045/librfc2045.la \
 	../random128/librandom128.a @UNICODE_LIB@
 authenumerate_LDADD=libauth.a libauthmod.a\
-	../rfc2045/librfc2045.a ../rfc822/librfc822.a ../numlib/libnumlib.a \
+	../rfc2045/librfc2045.la ../rfc822/librfc822.la ../numlib/libnumlib.a \
 	../random128/librandom128.a `cat libauth.dep` @UNICODE_LIB@
 
 #
@@ -442,7 +443,7 @@ authenumerate_LDADD=libauth.a libauthmod.a\
 #
 
 AUTHDAEMOND_DEP_COMMON=authdaemond.o libauth.a libauthmod.a\
- ../rfc2045/librfc2045.a ../random128/librandom128.a\
+ ../rfc2045/librfc2045.la ../random128/librandom128.a\
  ../liblock/liblock.a ../numlib/libnumlib.a
 
 make-authdaemond: $(AUTHDAEMOND_DEP_COMMON) libauth.dep libauth1.dep
@@ -459,7 +460,7 @@ AUTHDAEMOND_DEPS=
 $(AUTHDAEMOND_TARGET): $(AUTHDAEMOND_DEP_COMMON) $(AUTHDAEMONDLIST_O) \
 			$(AUTHDAEMOND_DEPS)
 	$(LINK) authdaemond.o $(AUTHDAEMONDLIST_O) \
-		libauth.a libauthmod.a ../rfc2045/librfc2045.a \
+		libauth.a libauthmod.a ../rfc2045/librfc2045.la \
 		../random128/librandom128.a \
 		../liblock/liblock.a ../numlib/libnumlib.a \
 		`cat $(AUTHDAEMOND_DEPS) /dev/null | @SHELL@ $(srcdir)/libauth.sh @SHELL@ $(srcdir)` @NETLIBS@

@@ -3496,7 +3496,7 @@ void smap()
 						}
 						argvec[i]=0;
 
-						i=sendmsg(tmpname, argvec,
+						i=imapd_sendmsg(tmpname, argvec,
 							  &senderr);
 						free(argvec);
 						if (i)

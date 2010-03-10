@@ -3,6 +3,7 @@
 # Copyright 1998 - 2004 Double Precision, Inc.  See COPYING for
 # distribution information.
 
+ACLOCAL_AMFLAGS=-I m4
 AUTOMAKE = srcdir=${srcdir} @SHELL@ ${srcdir}/../automake.fix @AUTOMAKE@
 
 noinst_LIBRARIES=libmaildir.a
@@ -53,15 +54,15 @@ noinst_PROGRAMS=deliverquota maildirmake testmaildirfilter maildirkwtest \
 	maildirkw maildiracl maildiraclttest
 
 deliverquota_SOURCES=deliverquota.c
-deliverquota_DEPENDENCIES=libmaildir.a ../rfc822/librfc822.a \
+deliverquota_DEPENDENCIES=libmaildir.a ../rfc822/librfc822.la \
 				../numlib/libnumlib.a
-deliverquota_LDADD=libmaildir.a ../rfc822/librfc822.a ../numlib/libnumlib.a
+deliverquota_LDADD=libmaildir.a ../rfc822/librfc822.la ../numlib/libnumlib.a
 
 maildirmake_SOURCES=maildirmake.c
 maildirmake_DEPENDENCIES=libmaildir.a ../numlib/libnumlib.a \
-			../rfc822/librfc822.a
+			../rfc822/librfc822.la
 maildirmake_LDADD=libmaildir.a ../numlib/libnumlib.a \
-			../rfc822/librfc822.a
+			../rfc822/librfc822.la
 
 testmaildirfilter_SOURCES=maildirfiltertypelist.h testmaildirfilter.c
 testmaildirfilter_DEPENDENCIES=libmaildir.a ../numlib/libnumlib.a

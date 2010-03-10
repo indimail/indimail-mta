@@ -29,11 +29,16 @@
 #include	"maildir/maildirquota.h"
 #include	"maildir/maildiraclt.h"
 
-static const char rcsid[]="$Id: fetch.c,v 1.28 2004/03/26 02:02:02 mrsam Exp $";
+static const char rcsid[]="$Id: fetch.c,v 1.29 2009/06/03 00:33:05 mrsam Exp $";
 #if SMAP
 extern int smapflag;
 #endif
-static const char unavailable[]= "From: System Administrator <root@localhost>\nSubject: message unavailable\n\nThis message is no longer available on the server.\n";
+
+static const char unavailable[]=
+	"\
+From: System Administrator <root@localhost>\n\
+Subject: message unavailable\n\n\
+This message is no longer available on the server.\n";
 
 unsigned long header_count=0, body_count=0;	/* Total transferred */
 
@@ -1544,15 +1549,31 @@ FILE *open_cached_fp(unsigned long msgnum)
 	if (fd < 0 || (cached_fp=fdopen(fd, "r")) == 0)
 	{
 		if (fd >= 0)	close(fd);
+
 		if ((cached_fp=tmpfile()) != 0)
 		{
 			fprintf(cached_fp, unavailable);
 			if (fseek(cached_fp, 0L, SEEK_SET) < 0 ||
-				ferror(cached_fp))
+			    ferror(cached_fp))
 			{
 				fclose(cached_fp);
 				cached_fp=0;
 			}
+		}
+
+		if (cached_fp == 0)
+		{
+			fprintf(stderr, "ERR: %s: %s\n",
+				getenv("AUTHENTICATED"),
+#if	HAVE_STRERROR
+				strerror(errno)
+#else
+				"error"
+#endif
+
+				);
+			fflush(stderr);
+			_exit(1);
 		}
 	}
 

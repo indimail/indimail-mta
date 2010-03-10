@@ -20,6 +20,8 @@
 
 static const char rcsid[]="$Id: pop3dcapa.c,v 1.4 2002/10/25 12:19:50 mrsam Exp $";
 
+extern const char *externalauth();
+
 int have_starttls()
 {
 	const char *p;
@@ -42,9 +44,21 @@ int tls_required()
         return (0);
 }
 
+const char *pop3_externalauth()
+{
+	const char *external=NULL;
+	const char *p;
+
+	if ((p=getenv("POP3_TLS")) != 0 && atoi(p))
+		external=externalauth();
+
+	return external;
+}
+
 void pop3dcapa()
 {
-const char *p;
+	const char *p;
+	const char *external=pop3_externalauth();
 
 	printf("+OK Here's what I can do:\r\n");
 
@@ -54,8 +68,17 @@ const char *p;
 	else
 		p=getenv("POP3AUTH");
 
-	if (p && *p)
-		printf("SASL %s\r\n", p);
+	if ((p && *p) || external)
+	{
+		if (!p)
+			p="";
+
+		if (!external)
+			external="";
+
+		printf("SASL %s%s%s\r\n", p, *p && *external ? " ":"",
+		       *external ? "EXTERNAL":"");
+	}
 	if (have_starttls())
 		printf("STLS\r\n");
 

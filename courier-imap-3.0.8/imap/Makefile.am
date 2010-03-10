@@ -3,6 +3,7 @@
 # Copyright 1998 - 2004 Double Precision, Inc.  See COPYING for
 # distribution information.
 
+ACLOCAL_AMFLAGS=-I m4
 AUTOMAKE = srcdir=${srcdir} @SHELL@ ${srcdir}/../automake.fix @AUTOMAKE@
 
 DISTCLEANFILES=imapd.pam pop3d.pam
@@ -33,7 +34,7 @@ noinst_DATA=imapd.8 imapd.html imapd.cnf pop3d.cnf \
 	courierpop3d.html courierpop3d.8
 
 libimapd_a_SOURCES=mainloop.c imaptoken.c imaptoken.h imapwrite.c imapwrite.h \
-	capability.c smap.c smapsnapshot.c
+	capability.c externalauth.c smap.c smapsnapshot.c
 
 if HAVE_AUTH
 authc=authenticate_auth.c
@@ -43,12 +44,12 @@ endif
 
 imaplogin_SOURCES=imaplogin.c $(authc)
 imaplogin_DEPENDENCIES=libimapd.a ../authlib/libauthmod.a ../authlib/libauth.a \
-	../random128/librandom128.a ../rfc2045/librfc2045.a \
-	../rfc822/librfc822.a ../md5/libmd5.a ../tcpd/libspipe.a \
+	../random128/librandom128.a ../rfc2045/librfc2045.la \
+	../rfc822/librfc822.la ../md5/libmd5.a ../tcpd/libspipe.a \
 	../unicode/libunicode.a ../numlib/libnumlib.a
 imaplogin_LDADD=libimapd.a ../authlib/libauthmod.a ../authlib/libauth.a \
-	../random128/librandom128.a ../rfc2045/librfc2045.a \
-	../rfc822/libencode.a ../rfc822/librfc822.a ../md5/libmd5.a ../tcpd/libspipe.a \
+	../random128/librandom128.a ../rfc2045/librfc2045.la \
+	../rfc822/libencode.la ../rfc822/librfc822.la ../md5/libmd5.a ../tcpd/libspipe.a \
 	../unicode/libunicode.a ../numlib/libnumlib.a @NETLIBS@
 
 imapd_SOURCES=fetch.c fetchinfo.c fetchinfo.h imapd.c imapd.h \
@@ -61,32 +62,32 @@ imapd_SOURCES=fetch.c fetchinfo.c fetchinfo.h imapd.c imapd.h \
 	search.c searchinfo.c searchinfo.h \
 	storeinfo.c storeinfo.h
 
-imapd_DEPENDENCIES=libimapd.a ../rfc2045/librfc2045.a ../maildir/libmaildir.a \
+imapd_DEPENDENCIES=libimapd.a ../rfc2045/librfc2045.la ../maildir/libmaildir.a \
 	../unicode/libunicode.a ../authlib/libauthmod.a ../authlib/libauth.a \
-	../rfc822/librfc822.a ../liblock/liblock.a ../numlib/libnumlib.a \
+	../rfc822/librfc822.la ../liblock/liblock.a ../numlib/libnumlib.a \
 	../maildir/maildir.libdeps @dblibrary@
 
-imapd_LDADD=libimapd.a ../rfc2045/librfc2045.a ../maildir/libmaildir.a \
+imapd_LDADD=libimapd.a ../rfc2045/librfc2045.la ../maildir/libmaildir.a \
 	../authlib/libauthmod.a ../authlib/libauth.a \
-	../rfc822/librfc822.a ../liblock/liblock.a ../numlib/libnumlib.a \
+	../rfc822/librfc822.la ../liblock/liblock.a ../numlib/libnumlib.a \
 	../unicode/libunicode.a `cat ../maildir/maildir.libdeps` \
 	@dblibrary@ @LIBDB@ @LIBGDBM@ @DEBUGLIB@
 
-pop3login_SOURCES=pop3login.c pop3dcapa.c
+pop3login_SOURCES=pop3login.c pop3dcapa.c externalauth.c
 pop3login_DEPENDENCIES=../authlib/libauthmod.a ../authlib/libauth.a \
 			../random128/librandom128.a ../md5/libmd5.a \
-			../rfc2045/librfc2045.a ../rfc822/librfc822.a \
+			../rfc2045/librfc2045.la ../rfc822/librfc822.la \
 			../unicode/libunicode.a ../tcpd/libspipe.a
 pop3login_LDADD=../authlib/libauthmod.a ../authlib/libauth.a \
 			../random128/librandom128.a ../md5/libmd5.a \
-			../rfc2045/librfc2045.a ../rfc822/libencode.a ../rfc822/librfc822.a \
+			../rfc2045/librfc2045.la ../rfc822/libencode.la ../rfc822/librfc822.la \
 			../unicode/libunicode.a ../tcpd/libspipe.a
 
-pop3d_SOURCES=pop3dserver.c pop3dcapa.c
+pop3d_SOURCES=pop3dserver.c pop3dcapa.c externalauth.c
 pop3d_DEPENDENCIES=../authlib/libauthmod.a ../authlib/libauth.a \
-	../maildir/libmaildir.a ../rfc822/librfc822.a ../numlib/libnumlib.a
+	../maildir/libmaildir.a ../rfc822/librfc822.la ../numlib/libnumlib.a
 pop3d_LDADD=../authlib/libauthmod.a ../authlib/libauth.a \
-	../maildir/libmaildir.a ../rfc822/librfc822.a ../numlib/libnumlib.a
+	../maildir/libmaildir.a ../rfc822/librfc822.la ../numlib/libnumlib.a
 
 HTML2TXT=`which lynx 2>/dev/null && echo "lynx -dump -nolist" && exit; echo "links -dump"`
 

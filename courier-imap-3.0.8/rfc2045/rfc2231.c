@@ -1,10 +1,10 @@
 /*
-** Copyright 2002 Double Precision, Inc.  See COPYING for
+** Copyright 2002-2009 Double Precision, Inc.  See COPYING for
 ** distribution information.
 */
 
 /*
-** $Id: rfc2231.c,v 1.4 2003/03/07 00:47:31 mrsam Exp $
+** $Id: rfc2231.c,v 1.5 2009/11/08 18:14:47 mrsam Exp $
 */
 
 #if    HAVE_CONFIG_H
@@ -16,10 +16,7 @@
 #include	<ctype.h>
 #include	"rfc2045.h"
 #include	"rfc822/rfc822.h"
-
-#if HAVE_UNICODE
 #include	"unicode/unicode.h"
-#endif
 
 /*
 ** Deallocate a link list of rfc2231param structures.
@@ -311,8 +308,6 @@ int rfc2231_decodeDisposition(struct rfc2045 *rfc, const char *name,
 static int conv_unicode(char **text, const char *fromChset,
 			const struct unicode_info *toChset)
 {
-#if HAVE_UNICODE
-
 	const struct unicode_info *u=unicode_find(fromChset);
 
 	if (toChset == NULL)
@@ -333,7 +328,6 @@ static int conv_unicode(char **text, const char *fromChset,
 		free(*text);
 		*text=p;
 	}
-#endif
 	return (0);
 }
 

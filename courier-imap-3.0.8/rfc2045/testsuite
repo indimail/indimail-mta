@@ -56,7 +56,7 @@ Testing
 
 --aaa---
 EOF
-./reformime -i <testsuite.dat | sed 's/^charset:.*/charset: iso-8859-1/'
+LANG=en_US.utf-8 ./reformime -i <testsuite.dat | sed 's/^charset:.*/charset: iso-8859-1/'
 
 echo "foo" >confmdtest
 
@@ -65,4 +65,25 @@ echo "foo" >confmdtest
 ./makemime -c application/octet-stream -C utf-8 -N footest:1 confmdtest
 ./makemime -c application/octet-stream -C utf-8 -N f:::::::::::::::::::::::::1 confmdtest
 
+LANG=en_US.utf-8 ./reformime -h '=?iso-8859-1?Q?H=F3la!?= test =?iso-8859-1?Q?H=F3la!_?=  =?iso-8859-1?Q?H=F3la!?=  test'
 rm -f confmdtest
+
+cat >testsuite.dat <<EOF
+Subject: test
+Mime-Version: 1.0
+Content-Type: text/plain; charset=utf-8
+Content-Description: =?iso-8859-1?Q?H=F3la!?= test =?iso-8859-1?Q?H=F3la!_?=
+		     =?iso-8859-1?Q?H=F3la!?=  test
+
+testing
+EOF
+LANG=en_US.utf-8 ./reformime -i <./testsuite.dat
+LANG=en_US.utf-8 ./reformime -H '=?iso-8859-1?Q?H=F3la!?= test <test1@example.com>'
+LANG=en_US.utf-8 ./reformime -H '=?iso-8859-1?Q?H=F3la=22?= test <test1@example.com>'
+LANG=en_US.utf-8 ./reformime -O 'Hóla <user@Hóla.example.com>, user@example.com (Hóla), John Smith <user@example.com>, user2@example.com, "John Smith (Accounting)" <user3@example.com>, "Hóla Smith (Accounting)" <user4@example.com>, john smith <user@hóla.example.com>'
+
+LANG=en_US.utf-8 ./reformime -H '=?UTF-8?B?SMOzbGE=?= <user@xn--hla-gna.example.com>, =?UTF-8?B?SMOzbGE=?= <user@example.com>, John Smith <user@example.com>, user2@example.com, "John Smith (Accounting)" <user3@example.com>, =?UTF-8?B?SMOzbGE=?= Smith =?UTF-8?B?KEFjY291bnRpbmcp?= <user4@example.com>, john smith <user@xn--hla-gna.example.com>'
+
+LANG=en_US.utf-8 ./reformime -H 'list: address1 <address1@example.com>, address2 <address2@example.com>;'
+
+LANG=en_US.utf-8 ./reformime -O 'list: address1 <address1@example.com>, address2 <address2@example.com>;'

@@ -1,5 +1,5 @@
 /*
-** Copyright 1998 - 2006 Double Precision, Inc.  See COPYING for
+** Copyright 1998 - 2009 Double Precision, Inc.  See COPYING for
 ** distribution information.
 */
 
@@ -12,6 +12,8 @@
 #include	<stdio.h>
 #include	<errno.h>
 #include	<string.h>
+#include	<langinfo.h>
+
 #if	HAVE_STRINGS_H
 #include	<strings.h>
 #endif
@@ -29,6 +31,8 @@
 #include	"rfc822/rfc822.h"
 #include	"rfc822/rfc2047.h"
 #include	"rfc2045charset.h"
+#include	"unicode/unicode.h"
+
 #if HAVE_UNISTD_H
 #include	<unistd.h>
 #endif
@@ -44,7 +48,9 @@ int gethostname(const char *, size_t);
 
 extern int rfc2045_in_reformime;
 
-static const char rcsid[]="$Id: reformime.c,v 1.48 2006/05/28 15:29:52 mrsam Exp $";
+static const struct unicode_info *uniinfo;
+
+static const char rcsid[]="$Id: reformime.c,v 1.50 2009/11/14 21:15:43 mrsam Exp $";
 
 void rfc2045_error(const char *errmsg)
 {
@@ -222,11 +228,15 @@ char *disposition_name, *disposition_filename;
 		printf("content-id: <%s>\n", p);
 	if (*(p=rfc2045_content_description(s)))
 	{
-	char *s=rfc2047_decode_simple(p);
+		char *s=rfc822_display_hdrvalue_tobuf("content-description",
+						      p,
+						      uniinfo->chset,
+						      NULL,
+						      NULL);
 
 		if (!s)
 		{
-			perror("rfc2047_decode_simple");
+			perror("rfc2047_decode_unicode");
 			exit(1);
 		}
 		printf("content-description: %s\n", s);
@@ -362,7 +372,7 @@ const char *disposition_filename_s;
 
 	if (!filename_buf)
 	{
-		perror("rfc2047_decode_simple");
+		perror("strdup");
 		exit(1);
 	}
 
@@ -911,17 +921,24 @@ FILE	*fp;
 	printf("\n--%s--\n", boundarybuf);
 }
 
-int main(int argc, char **argv)
+static void display_decoded_header(const char *ptr, size_t cnt, void *dummy)
+{
+	if (cnt == 0)
+		putchar('\n');
+	else
+		fwrite(ptr, cnt, 1, stdout);
+}
+
+static int main2(const char *mimecharset, int argc, char **argv)
 {
 int	argn;
 char	optc;
 char	*optarg;
 char	*mimesection=0;
 int	doinfo=0, dodecode=0, dorewrite=0, dodsn=0, domimedigest=0;
-int	dodecodehdr=0, doencodemime=0, doencodemimehdr=0;
+int	dodecodehdr=0, dodecodeaddrhdr=0, doencodemime=0, doencodemimehdr=0;
 
 char	*decode_header="";
- char	*mimecharset="iso-8859-1";
 struct	rfc2045 *p;
 int	rwmode=0;
 int	dovalidate=0;
@@ -929,9 +946,6 @@ void	(*do_extract)(struct rfc2045 *, const char *, int, char **)=0;
 const char *extract_filename=0;
 int rc=0;
 
-#if HAVE_SETLOCALE
-	setlocale(LC_ALL, "C");
-#endif
 
 	rfc2045_in_reformime=1;
 
@@ -1003,6 +1017,15 @@ int rc=0;
 			}
 			dodecodehdr=1;
 			break;
+		case 'H':
+			if (!optarg && argn < argc)
+				optarg=argv[argn++];
+			if (optarg)
+			{
+				decode_header=optarg;
+			}
+			dodecodeaddrhdr=1;
+			break;
 		case 'o':
 			if (!optarg && argn < argc)
 				optarg=argv[argn++];
@@ -1027,6 +1050,14 @@ int rc=0;
 		}
 	}
 
+	uniinfo=unicode_find(mimecharset);
+
+	if (!uniinfo)
+	{
+		fprintf(stderr, "Unknown character set: %s\n", mimecharset);
+		exit(1);
+	}
+
 	if (domimedigest)
 	{
 		mimedigest(argc-argn, argv+argn);
@@ -1034,15 +1065,37 @@ int rc=0;
 	}
 	else if (dodecodehdr)
 	{
-		char *s=rfc2047_decode_simple(decode_header);
-
-		if (s)
+		if (rfc822_display_hdrvalue("Subject",
+					    decode_header,
+					    mimecharset,
+					    display_decoded_header,
+					    NULL,
+					    NULL) < 0)
 		{
-			printf("%s\n", s);
-			free(s);
+			perror("rfc822_display_hdrvalue");
+			return (1);
 		}
+
+		printf("\n");
 		return (0);
 	}
+	else if (dodecodeaddrhdr)
+	{
+		if (rfc822_display_hdrvalue("To",
+					    decode_header,
+					    mimecharset,
+					    display_decoded_header,
+					    NULL,
+					    NULL) < 0)
+		{
+			perror("rfc822_display_hdrvalue");
+			return (1);
+		}
+
+		printf("\n");
+		return (0);
+	}
+
 	if (doencodemime)
 	{
 		char *s=rfc2047_encode_str(decode_header, mimecharset,
@@ -1061,7 +1114,7 @@ int rc=0;
 		struct rfc822a *a=t ? rfc822a_alloc(t):NULL;
 		char *s;
 
-		if (a && (s=rfc2047_encode_header(a, mimecharset)) != NULL)
+		if (a && (s=rfc2047_encode_header_addr(a, mimecharset)) != NULL)
 		{
 			printf("%s\n", s);
 			free(s);
@@ -1110,4 +1163,24 @@ int rc=0;
 	rfc2045_free(p);
 	exit(rc);
 	return (rc);
+}
+
+int main(int argc, char **argv)
+{
+	char	*mimecharset;
+	int	rc;
+
+	setlocale(LC_ALL, "");
+	mimecharset=strdup(nl_langinfo(CODESET));
+	setlocale(LC_ALL, "C");
+
+	if (!mimecharset)
+	{
+		perror("malloc");
+		exit(1);
+	}
+
+	rc=main2(mimecharset, argc, argv);
+	free(mimecharset);
+	return rc;
 }

@@ -9,7 +9,7 @@
 #include	<string.h>
 #include	"rfc822hdr.h"
 
-static const char rcsid[]="$Id: rfc822hdr.c,v 1.1 2001/08/12 15:42:02 mrsam Exp $";
+static const char rcsid[]="$Id: rfc822hdr.c,v 1.2 2009/11/08 18:14:47 mrsam Exp $";
 
 /*
 ** Read the next mail header.
@@ -126,4 +126,16 @@ void rfc822hdr_collapse(struct rfc822hdr *h)
 		*q++ = *p++;
 	}
 	*q=0;
+}
+
+int rfc822hdr_is_addr(const char *hdr)
+{
+	return strcasecmp(hdr, "from") == 0 ||
+		strcasecmp(hdr, "to") == 0 ||
+		strcasecmp(hdr, "cc") == 0 ||
+		strcasecmp(hdr, "bcc") == 0 ||
+		strcasecmp(hdr, "resent-from") == 0 ||
+		strcasecmp(hdr, "resent-to") == 0 ||
+		strcasecmp(hdr, "resent-cc") == 0 ||
+		strcasecmp(hdr, "resent-bcc") == 0;
 }

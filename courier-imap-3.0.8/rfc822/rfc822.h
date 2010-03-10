@@ -1,11 +1,11 @@
 /*
-** $Id: rfc822.h,v 1.24 2006/04/11 02:24:59 mrsam Exp $
+** $Id: rfc822.h,v 1.31 2009/11/22 19:39:52 mrsam Exp $
 */
 #ifndef	rfc822_h
 #define	rfc822_h
 
 /*
-** Copyright 1998 - 2006 Double Precision, Inc.
+** Copyright 1998 - 2009 Double Precision, Inc.
 ** See COPYING for distribution information.
 */
 
@@ -18,6 +18,8 @@
 #ifdef  __cplusplus
 extern "C" {
 #endif
+
+#define RFC822_SPECIALS "()<>[]:;@\\,.\""
 
 /*
 ** The text string we want to parse is first tokenized into an array of
@@ -86,7 +88,6 @@ struct rfc822t {
 
 struct rfc822t *rfc822t_alloc(const char *p,
 	void (*err_func)(const char *, int));	/* Parse addresses */
-
 struct rfc822t *rfc822t_alloc_new(const char *p,
 	void (*err_func)(const char *, int, void *), void *);
 	/* Parse addresses */
@@ -117,37 +118,17 @@ void rfc822_deladdr(struct rfc822a *, int);
    commas, the print_separator function is called.
 */
 
-void rfc822_print(const struct rfc822a *a,
+int rfc822_print(const struct rfc822a *a,
 	void (*print_func)(char, void *),
 	void (*print_separator)(const char *, void *), void *);
 
 /* rfc822_print_common is an internal function */
 
-void rfc822_print_common(const struct rfc822a *a,
-	char *(*decode_func)(const char *, const char *),
-	const char *chset,
-	void (*print_func)(char, void *),
-	void (*print_separator)(const char *, void *), void *);
-
-/* Another unparser, except that only the raw addresses are extracted,
-   and each address is followed by a newline character */
-
-void rfc822_addrlist(const struct rfc822a *, void (*print_func)(char, void *),
-		void *);
-
-/* Now, just the comments.  If comments not given, the address. */
-void rfc822_namelist(const struct rfc822a *, void (*print_func)(char, void *),
-		void *);
-
-/* Unparse an individual name/addr from a list of addresses.  If the given
-   index points to some syntactical fluff, this is a noop */
-
-void rfc822_prname(const struct rfc822a *, int, void (*)(char, void *), void *);
-void rfc822_praddr(const struct rfc822a *, int, void (*)(char, void *), void *);
-
-/* Like rfc822_prname, except that we'll also print the legacy format
-** of a list designation.
-*/
+int rfc822_print_common(const struct rfc822a *a,
+			 char *(*decode_func)(const char *, const char *, int),
+			 const char *chset,
+			 void (*print_func)(char, void *),
+			 void (*print_separator)(const char *, void *), void *);
 
 void rfc822_prname_orlist(const struct rfc822a *, int,
 			  void (*)(char, void *), void *);
@@ -155,9 +136,8 @@ void rfc822_prname_orlist(const struct rfc822a *, int,
 /* Extra functions */
 
 char *rfc822_gettok(const struct rfc822token *);
-char *rfc822_getaddr(const struct rfc822a *, int);
-char *rfc822_getname(const struct rfc822a *, int);
 char *rfc822_getname_orlist(const struct rfc822a *, int);
+char *rfc822_getaddr(const struct rfc822a *, int);
 char *rfc822_getaddrs(const struct rfc822a *);
 char *rfc822_getaddrs_wrap(const struct rfc822a *, int);
 
@@ -171,6 +151,150 @@ time_t rfc822_parsedt(const char *);
 char *rfc822_coresubj(const char *, int *);
 char *rfc822_coresubj_nouc(const char *, int *);
 char *rfc822_coresubj_keepblobs(const char *s);
+
+/*
+** Display a header. Takes a raw header value, and formats it for display
+** in the given character set.
+**
+** hdrname -- header name. Determines whether the header contains addresses,
+**            or unstructured data.
+**
+** hdrvalue -- the actual value to format.
+**
+** display_func -- output function.
+**
+** err_func -- if this function returns a negative value, to indicate an error,
+** this may be called just prior to the error return to indicate where the
+** formatting error is, in the original header.
+**
+** ptr -- passthrough last argument to display_func or err_func.
+**
+** repeatedly invokes display_func to pass the formatted contents.
+**
+** Returns 0 upon success, -1 upon a failure.
+*/
+
+int rfc822_display_hdrvalue(const char *hdrname,
+			    const char *hdrvalue,
+			    const char *charset,
+			    void (*display_func)(const char *, size_t,
+						 void *),
+			    void (*err_func)(const char *, int, void *),
+			    void *ptr);
+
+/*
+** Like rfc822_display_hdrvalue, except that the converted header is saved in
+** a malloc-ed buffer. The pointer to the malloc-ed buffer is returned, the
+** caller is responsible for free-ing it. An error condition is indicated
+** by a NULL return value.
+*/
+
+char *rfc822_display_hdrvalue_tobuf(const char *hdrname,
+				    const char *hdrvalue,
+				    const char *charset,
+				    void (*err_func)(const char *, int,
+						     void *),
+				    void *ptr);
+
+/*
+** Display a recipient's name in a specific character set.
+**
+** The index-th recipient in the address structure is formatted for the given
+** character set. If the index-th entry in the address structure is not
+** a recipient address (it represents an obsolete list name indicator),
+** this function reproduces it literally.
+**
+** If the index-th entry in the address structure is a recipient address without
+** a name, the address itself is formatted for the given character set.
+**
+** If 'charset' is NULL, the name is formatted as is, without converting
+** it to any character set.
+**
+** A callback function gets repeatedly invoked to produce the name.
+**
+** Returns a negative value upon a formatting error.
+*/
+
+int rfc822_display_name(const struct rfc822a *rfcp, int index,
+			const char *chset,
+			void (*print_func)(const char *, size_t, void *),
+			void *ptr);
+
+/*
+** Display a recipient's name in a specific character set.
+**
+** Uses rfc822_display_name to place the generated name into a malloc-ed
+** buffer. The caller must free it when it is no longer needed.
+**
+** Returns NULL upon an error.
+*/
+
+char *rfc822_display_name_tobuf(const struct rfc822a *rfcp, int index,
+				const char *chset);
+
+/*
+** Display names of all addresses. Each name is followed by a newline
+** character.
+**
+*/
+int rfc822_display_namelist(const struct rfc822a *rfcp,
+			    const char *chset,
+			    void (*print_func)(const char *, size_t, void *),
+			    void *ptr);
+
+/*
+** Display a recipient's address in a specific character set.
+**
+** The index-th recipient in the address structure is formatted for the given
+** character set. If the index-th entry in the address structure is not
+** a recipient address (it represents an obsolete list name indicator),
+** this function produces an empty string.
+**
+** If 'charset' is NULL, the address is formatted as is, without converting
+** it to any character set.
+**
+** A callback function gets repeatedly invoked to produce the address.
+**
+** Returns a negative value upon a formatting error.
+*/
+
+int rfc822_display_addr(const struct rfc822a *rfcp, int index,
+			const char *chset,
+			void (*print_func)(const char *, size_t, void *),
+			void *ptr);
+
+/*
+** Like rfc822_display_addr, but the resulting displayable string is
+** saved in a buffer. Returns a malloc-ed buffer, the caller is responsible
+** for free()ing it. A NULL return indicates an error.
+*/
+
+char *rfc822_display_addr_tobuf(const struct rfc822a *rfcp, int index,
+				const char *chset);
+
+/*
+** Like rfc822_display_addr, but the user@domain gets supplied in a string.
+*/
+int rfc822_display_addr_str(const char *tok,
+			    const char *chset,
+			    void (*print_func)(const char *, size_t, void *),
+			    void *ptr);
+
+/*
+** Like rfc822_display_addr_str, but the resulting displayable string is
+** saved in a buffer. Returns a malloc-ed buffer, the caller is responsible
+** for free()ing it. A NULL return indicates an error.
+*/
+char *rfc822_display_addr_str_tobuf(const char *tok,
+				    const char *chset);
+
+/*
+** address is a hostname, which is IDN-encoded. 'address' may contain an
+** optional 'user@', which is preserved. Returns a malloc-ed buffer, the
+** caller is responsible for freeing it.
+*/
+char *rfc822_encode_domain(const char *address,
+			   const char *charset);
 
 #ifdef  __cplusplus
 }

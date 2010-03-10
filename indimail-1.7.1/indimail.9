@@ -1106,10 +1106,13 @@ INFIFO             | infifo or /var/indimail/control/inquery/infifo
 IndiMail uses svscan(8) to start, monitor and restart (if neccessary) all services needed
 for proper functioning of email server. svscan is installed as an entry in /etc/inittab on
 systems which use \fBinit(8)\fR. Some of the newer systems come with \fBupstart(8)\fR, in whih case,
-svscan is installed in /etc/event.d. The program \fBinitsvc(1)\fR can be used to enable svscan
-to get automatically started on system boot. All services are installed in /service which each
-directory representing a service. These services are started and monitored by \fBsupervise(8)\fR.
-The table below gives all the service directories in /service.
+svscan is installed in /etc/event.d. On MacOS the file indimail.plist in the directory
+/System/Library/LaunchDaemons is used by launchctl to start IndiMail.
+.PP
+The program \fBinitsvc(1)\fR can be used to enable svscan to get automatically started on
+system boot. All services are installed in /service which each directory representing a
+service. These services are started and monitored by \fBsupervise(8)\fR. The table below
+gives all the service directories in /service.
 
 .TS
 l l.
@@ -1163,7 +1166,8 @@ Programs that support this post execution handle are vadddomain(1), vdeldomain(1
 vadduser(1), vdeluser(1), vrenameuser(1), vmoveuser(1), vpasswd(1).
 
 .SH PROGRAMS
-IndiMail has programs installed in INDIMAIL/bin, INDIMAIL/sbin.
+IndiMail has > 250 programs installed in INDIMAIL/bin, INDIMAIL/sbin.
+
 .nr step 1 1
 .IP \n[step] 4
 vadddomain(1)      - Add a virtual domain
@@ -1662,24 +1666,6 @@ printforward   - print the instructions in a forwarding database
 .IP \n+[step]
 newinclude     - create a binary mailing list from an :include: file
 
-.SH CDB
-
-.nr step 1 1
-.IP \n[step] 4
-cdbmake   - write cdb by reading series of encoded records on input
-.sp -1
-.IP \n+[step]
-cdbdump   - read cdb in stdin and print database in \fBcdbmake\fR(1) format
-.sp -1
-.IP \n+[step]
-cdbget    - search for records in cdb
-.sp -1
-.IP \n+[step]
-cdbstats  - read cdb on stdin and print statistics
-.sp -1
-.IP \n+[step]
-cdbtest   - read cdb on stdin and test it
-
 .SH qmail
 
 .nr step 1 1
@@ -1854,9 +1840,27 @@ qmail-greyd     - greylisting daemon for IndiMail, qmail and netqmail
 .IP \n+[step]
 base64          - base64 encoding/decoding utility
 
+.SH CDB
+
+.nr step 1 1
+.IP \n[step] 4
+cdbmake   - write cdb by reading series of encoded records on input
+.sp -1
+.IP \n+[step]
+cdbdump   - read cdb in stdin and print database in \fBcdbmake\fR(1) format
+.sp -1
+.IP \n+[step]
+cdbget    - search for records in cdb
+.sp -1
+.IP \n+[step]
+cdbstats  - read cdb on stdin and print statistics
+.sp -1
+.IP \n+[step]
+cdbtest   - read cdb on stdin and test it
+
 .SH Miscellaneous
 
-This programs have been borrowed from exetern Open Source Projects and add significant
+These programs have been borrowed from exetern Open Source Projects and add significant
 value to the working of the IndiMail server.
 
 .nr step 1 1

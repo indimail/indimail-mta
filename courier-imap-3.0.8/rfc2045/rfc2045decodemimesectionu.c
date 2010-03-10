@@ -1,5 +1,5 @@
 /*
-** Copyright 2000 Double Precision, Inc.  See COPYING for
+** Copyright 2000-2009 Double Precision, Inc.  See COPYING for
 ** distribution information.
 */
 
@@ -7,9 +7,6 @@
 #include	"rfc2045.h"
 #include	<stdio.h>
 #include	<unistd.h>
-
-#if HAVE_UNICODE
-
 #include	"unicode/unicode.h"
 
 /*
@@ -172,16 +169,3 @@ static int txtflush(struct convert_info *ci, size_t n)
 	free(ptr);
 	return (rc);
 }
-
-#else
-
-int rfc2045_decodetextmimesection(int fd,
-				  struct rfc2045 *rfc,
-				  const char *mychset,
-				  int (*handler)(const char *,
-						 size_t, void *),
-				  void *voidarg)
-{
-	return (rfc2045_decodemimesection(fd, rfc, handler, voidarg));
-}
-#endif

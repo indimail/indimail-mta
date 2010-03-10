@@ -1,5 +1,5 @@
 /*
-** Copyright 1998 - 2004 Double Precision, Inc.
+** Copyright 1998 - 2009 Double Precision, Inc.
 ** See COPYING for distribution information.
 */
 
@@ -15,7 +15,7 @@
 #include	<stdlib.h>
 #include	<string.h>
 
-static const char rcsid[]="$Id: msgenvelope.c,v 1.15 2008/06/14 14:12:50 mrsam Exp $";
+static const char rcsid[]="$Id: msgenvelope.c,v 1.17 2009/11/22 14:42:56 mrsam Exp $";
 
 #define	MAX_HEADER_SIZE	8192
 
@@ -132,7 +132,7 @@ char	*q, *r;
 		return;
 	}
 
-	t=rfc822t_alloc(s, 0);
+	t=rfc822t_alloc_new(s, 0, 0);
 	if (!t)
 	{
 		perror("malloc");
@@ -159,7 +159,8 @@ char	*q, *r;
 	{
 		(*writefunc)("(", 1);
 
-		q=rfc822_getname_orlist(a, i);
+		q=rfc822_display_name_tobuf(a, i, NULL);
+
 		if (!q)
 		{
 			perror("malloc");
@@ -184,7 +185,8 @@ char	*q, *r;
 		}
 
 		if (a->addrs[i].name == 0)
-			*q=0; /* getname_orlist defaults to addr, ignore. */
+			*q=0;
+		/* rfc822_display_name_tobuf() defaults to addr, ignore. */
 
 		doenvs(writefunc, q);
 		(*writefunc)(" NIL \"", 6);	/* TODO @domain list */

@@ -1,3 +1,108 @@
+2009-11-22  Sam Varshavchik  <mrsam@courier-mta.com>
+
+	* rfc822.c: Removed rfc822_praddr().
+
+	* rfc822_getaddr.c (rfc822_getaddr): Implement rfc822_getaddr() by
+	calling rfc822_display_addr_tobuf(), instead of rfc822_praddr().
+
+	* testsuite.c (doaddr): Remove rfc822_addrlist() and rfc822_namelist().
+
+2009-11-21  Sam Varshavchik  <mrsam@courier-mta.com>
+
+	* rfc822_getaddr.c: Remove rfc822_prname() and rfc822_prname_orlist(),
+	replaced by rfc822_display_name() with a NULL character set.
+
+	* rfc2047u.c (rfc822_display_name): Semantical change -- without
+	an explicit name, display the address as the name. If the requested
+	character set is NULL, do not decode RFC2047-encoded content, return
+	it as is.
+
+2009-11-17  Sam Varshavchik  <mrsam@courier-mta.com>
+
+	* rfc2047u.c (rfc2047_print_unicodeaddr): Fix several formatting
+	issues with deprecated RFC 822 distribution lists: spurious comma
+	adter the last address, pass the space after the ':' as a separator
+	character.
+
+	* rfc2047.c (counts2/save): Fix line-wrapping of encoded addresses.
+
+	* rfc2047u.c (rfc822_display_addr_tobuf): New function.
+
+2009-11-14  Sam Varshavchik  <mrsam@courier-mta.com>
+
+	* rfc822.c (rfc822_print_common): Rewrite.
+
+	* rfc2047u.c (rfc822_display_name_int): Fixed various rules for
+	encoding names to be more MIME compliant.
+	(rfc822_display_addr_str): Renamed from rfc822_display_addr(), for a
+	consistent API.
+	(rfc822_display_addr): New function, decode the wire format of a single
+	address. Names are MIME decoded, addresses are IDN-decoded.
+	(rfc2047_print_unicodeaddr): Do not output a dummy name for an
+	address without one.
+	(rfc822_display_addr_str_tobuf): New function, version of
+	rfc822_display_addr_str() that collects the output into a buffer.
+
+	* rfc2047.c (rfc822_encode_domain): New function -- IDN-encode a domain,
+	with an optional "user@".
+	(rfc2047_encode_header_addr): Renamed rfc2047_encode_header(), for a
+	consistent API.
+	(rfc2047_encode_header_tobuf): New function, encode a header from
+	displayed format to wire format. Names are encoded using RFC 2047,
+	addresses using IDN.
+
+2009-11-08  Sam Varshavchik  <mrsam@courier-mta.com>
+
+	* rfc2047.h: Expose raw RFC 2047 decoding function,
+	rfc2047_decoder().
+
+	* rfc822hdr.c (rfc822hdr_is_addr): New function.
+
+	* rfc822.c (tokenize): Tweak the logic for collecting RFC 2047 atoms.
+
+	* rfc2047u.c (rfc822_display_name): New function,
+	replaces rfc2047_print().
+	(rfc822_display_name_tobuf): New function,
+	replaces rfc2047_print().
+	(rfc822_display_namelist): New function,
+	replaces rfc822_namelist().
+	(rfc822_display_addr): New function, replaces rfc2047_print().
+	(rfc2047_print_unicodeaddr): Renamed from rfc2047_print_unicode().
+	(rfc822_display_hdrvalue): New function, replaces rfc2047_decode(),
+	rfc2047_decode_simple(), rfc2047_decode_enhanced().
+	(rfc822_display_hdrvalue_tobuf): New function, ditto.
+
+	* rfc2047.c: Removed rfc2047_decode(), rfc2047_decode_simple(),
+	rfc2047_decode_enhanced(), rfc2047_print().
+
+	* Makefile.am: Link against GNU IDN library.
+
+2008-11-30  Sam Varshavchik  <mrsam@courier-mta.com>
+
+	* imaprefs.c (dorefcreate): Clean up usage of rfc822_threadsearchmsg().
+	A malloc() failure wasn't checked correctly.
+
+2008-06-13  Mr. Sam  <mrsam@courier-mta.com>
+
+	* rfc822_getaddr.c: Backslashed special characters in address names
+	weren't being dequoted correctly by rfc822_getname() and
+	rfc822_getname_orlist().
+
+2007-02-25  Mr. Sam  <mrsam@courier-mta.com>
+
+	* rfc822.c (parseaddr): rfc822a_alloc() would corrupt and misparse
+	RFC2047-encoded atoms.
+
+2006-01-21  Mr. Sam  <mrsam@courier-mta.com>
+
+	* rfc2047.c (encodebase64): Fix compiler warning.
+
+	* rfc822.c (parseaddr): Ditto.
+
+2005-11-15  Mr. Sam  <mrsam@courier-mta.com>
+
+	* encode.c (quoted_printable): encode spaces that precede a newline.
+
 2004-08-29  Mr. Sam  <mrsam@courier-mta.com>
 
 	* imapsubj.c (rfc822_coresubj_keepblobs): New function to strip

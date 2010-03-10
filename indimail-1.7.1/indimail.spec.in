@@ -1032,7 +1032,7 @@ do
 		# courier-imap installations misses out on this
 		if [ %nocourierimap -eq 0 -a " $i" = " courier-imap-%{courier_version}" ] ; then
 			%{__mkdir_p} %{buildroot}%{_prefix}/man/man1
-			gzip -c tcpd/couriertls.1 > %{buildroot}%{_prefix}/man/man1/couriertls.1.gz
+			cp tcpd/couriertls.1 %{buildroot}%{_prefix}/man/man1/couriertls.1
 		fi
 		cd ..
 	fi

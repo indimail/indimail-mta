@@ -1,9 +1,9 @@
 /*
-** Copyright 2000-2004 Double Precision, Inc.
+** Copyright 2000-2009 Double Precision, Inc.
 ** See COPYING for distribution information.
 */
 
-static const char rcsid[]="$Id: thread.c,v 1.14 2006/01/13 01:29:36 mrsam Exp $";
+static const char rcsid[]="$Id: thread.c,v 1.15 2009/11/08 18:14:47 mrsam Exp $";
 
 #include	"config.h"
 #include	"imapd.h"
@@ -240,7 +240,6 @@ static void thread_ref_callback(struct searchinfo *si,
 	    sihead->a->a->a->type == search_references4)
 	{
 		const char *ref, *inreplyto, *subject, *date, *msgid;
-		char *subj_utf8;
 
 		ref=sihead->as;
 		inreplyto=sihead->bs;
@@ -256,15 +255,11 @@ static void thread_ref_callback(struct searchinfo *si,
 			date ? date:"",
 			msgid ? msgid:"");
 #endif
-		subj_utf8=rfc2047_decode_unicode(subject,
-						 &unicode_UTF8,
-						 0);
-		if (!subj_utf8 ||
-		    !rfc822_threadmsg( (struct imap_refmsgtable *)voidarg,
+
+		if (!rfc822_threadmsg( (struct imap_refmsgtable *)voidarg,
 				       msgid, ref && *ref ? ref:inreplyto,
-				       subj_utf8, date, 0, i))
+				       subject, date, 0, i))
 			write_error_exit(0);
-		free(subj_utf8);
 	}
 }
 

@@ -7,7 +7,7 @@
 #include	<stdio.h>
 #include	<stdlib.h>
 
-static const char rcsid[]="$Id: testsuite.c,v 1.7 2007/02/26 04:13:41 mrsam Exp $";
+static const char rcsid[]="$Id: testsuite.c,v 1.8 2009/11/22 18:46:53 mrsam Exp $";
 
 static void print_func(char c, void *p)
 {
@@ -57,8 +57,6 @@ struct rfc822a *a=rfc822a_alloc(t);
 	printf("----\n");
 	rfc822_print(a, print_func, print_separator, NULL);
 	printf("\n");
-	rfc822_addrlist(a, print_func, NULL);
-	rfc822_namelist(a, print_func, NULL);
 	return (a);
 }
 

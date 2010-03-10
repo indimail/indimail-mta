@@ -92,10 +92,10 @@ int check_outbox(const char *message, const char *mailbox)
 		argv[5]=NULL;
 	}
 
-	return (sendmsg(message, argv, errlogger));
+	return (imapd_sendmsg(message, argv, errlogger));
 }
 
-int sendmsg(const char *message, char **argv, void (*err_func)(char *))
+int imapd_sendmsg(const char *message, char **argv, void (*err_func)(char *))
 {
 	char buffer[512];
 	int i;

@@ -5,6 +5,7 @@
 
 @SET_MAKE@
 
+ACLOCAL_AMFLAGS=-I m4
 TEMPLFILES=packaging/suse/courier-imap.init.in \
 	packaging/suse/imap.pam \
 	packaging/suse/pop3.pam

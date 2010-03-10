@@ -99,3 +99,37 @@ Content-Type: application/octet-stream; charset="utf-8";
 Content-Transfer-Encoding: 7bit
 
 foo
+Hóla! test Hóla! Hóla!  test
+section: 1
+content-type: text/plain
+content-transfer-encoding: 8bit
+charset: utf-8
+content-description: Hóla! test Hóla! Hóla!  test
+starting-pos: 0
+starting-pos-body: 188
+ending-pos: 196
+line-count: 7
+body-line-count: 1
+
+Hóla! test <test1@example.com>
+"Hóla\" test" <test1@example.com>
+=?UTF-8?B?SMOzbGE=?= <user@xn--hla-gna.example.com>,
+  =?UTF-8?B?SMOzbGE=?= <user@example.com>,
+  John Smith <user@example.com>,
+  user2@example.com,
+  "John Smith (Accounting)" <user3@example.com>,
+  =?UTF-8?B?SMOzbGE=?= Smith =?UTF-8?B?KEFjY291bnRpbmcp?= <user4@example.com>,
+  john smith <user@xn--hla-gna.example.com>
+Hóla <user@hóla.example.com>, 
+Hóla <user@example.com>, 
+John Smith <user@example.com>, 
+user2@example.com, 
+"John Smith (Accounting)" <user3@example.com>, 
+"Hóla Smith (Accounting)" <user4@example.com>, 
+john smith <user@hóla.example.com>
+list: 
+address1 <address1@example.com>, 
+address2 <address2@example.com>;
+list:
+  address1 <address1@example.com>,
+  address2 <address2@example.com>;

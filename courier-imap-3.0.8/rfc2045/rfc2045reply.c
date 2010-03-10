@@ -1,5 +1,5 @@
 /*
-** Copyright 2000-2004 Double Precision, Inc.  See COPYING for
+** Copyright 2000-2009 Double Precision, Inc.  See COPYING for
 ** distribution information.
 */
 
@@ -16,13 +16,212 @@
 #include	<string.h>
 #include	<ctype.h>
 
-static const char rcsid[]="$Id: rfc2045reply.c,v 1.15 2006/05/25 10:53:11 mrsam Exp $";
+static const char rcsid[]="$Id: rfc2045reply.c,v 1.18 2009/11/22 17:33:03 mrsam Exp $";
 
 extern void rfc2045_enomem();
 
 static int mkreply(struct rfc2045_mkreplyinfo *);
 static int mkforward(struct rfc2045_mkreplyinfo *);
 static struct rfc2045 *do_mixed_fwd(struct rfc2045 *, off_t *);
+
+static void mksalutation_datefmt(const char *fmt_start,
+				 const char *fmt_end,
+				 const char *date,
+				 void (*callback_func)(const char *,
+						       size_t, void *),
+				 void *callback_arg)
+{
+	time_t t;
+
+	if (!fmt_start)
+	{
+		fmt_start="%a, %d %b %Y %H:%M:%S %z";
+		fmt_end=fmt_start + strlen(fmt_start);
+	}
+
+	if ((t=rfc822_parsedt(date)))
+	{
+		struct tm tmbuf;
+
+		if (localtime_r(&t, &tmbuf))
+		{
+			char *fmtstr=malloc(fmt_end-fmt_start + 1);
+
+			if (fmtstr)
+			{
+				char fmtbuf[1024];
+
+				memcpy(fmtstr, fmt_start, fmt_end - fmt_start);
+				fmtstr[fmt_end-fmt_start]=0;
+
+				fmtbuf[strftime(fmtbuf,
+						sizeof(fmtbuf)-1,
+						fmtstr, &tmbuf)]=0;
+
+				free(fmtstr);
+				(*callback_func)(fmtbuf, strlen(fmtbuf),
+						 callback_arg);
+				return;
+			}
+		}
+	}
+	(*callback_func)(date, strlen(date), callback_arg);
+}
+
+static void mksalutation_cb(const char *salutation_template,
+			    const char *newsgroup,
+			    const char *message_id,
+			    const char *newsgroups,
+			    const char *sender_addr,
+			    const char *sender_name,
+			    const char *date,
+			    const char *subject,
+
+			    void (*callback_func)(const char *, size_t, void *),
+			    void *callback_arg)
+{
+	const char *p;
+
+	for (p=salutation_template; *p; p++)
+	{
+		const char *fmt_start=0, *fmt_end=0;
+
+		if (*p != '%' || p[1] == '\0')
+		{
+			(*callback_func)( p, 1, callback_arg );
+			continue;
+		}
+
+		++p;
+
+		if (*p == '{')
+		{
+			fmt_start= ++p;
+
+			while (*p)
+			{
+				if (*p == '}')
+				{
+					fmt_end=p;
+					++p;
+					break;
+				}
+			}
+
+			if (!fmt_end)
+				continue;
+		}
+
+#define CBSTR(s) s, strlen(s), callback_arg
+
+		switch (*p)	{
+		case 'n':
+			(*callback_func)("\n", 1, callback_arg );
+			continue;
+		case 'C':
+			(*callback_func)(CBSTR(newsgroup));
+			break;
+		case 'i':
+			(*callback_func)(CBSTR(message_id));
+			break;
+		case 'N':
+			(*callback_func)(CBSTR(newsgroups));
+			break;
+		case 'f':
+			(*callback_func)(CBSTR(sender_addr));
+			break;
+		case 'F':
+			(*callback_func)(CBSTR(sender_name));
+			break;
+		case 'd':
+			mksalutation_datefmt(fmt_start,
+					     fmt_end,
+					     date,
+					     callback_func, callback_arg);
+			break;
+		case 's':
+			(*callback_func)(CBSTR(subject));
+			break;
+		default:
+			(*callback_func)(p, 1, callback_arg);
+			break;
+		}
+#undef CBSTR
+
+	}
+}
+
+static void mksal_count(const char *str,
+			size_t cnt,
+			void *arg)
+{
+	*(size_t *)arg += cnt;
+}
+
+static void mksal_save(const char *str,
+		       size_t cnt,
+		       void *arg)
+{
+	if (cnt)
+		memcpy(*(char **)arg, str, cnt);
+
+	*(char **)arg += cnt;
+}
+
+static char *mksalutation(const char *salutation_template,
+			  const char *newsgroup,
+			  const char *message_id,
+			  const char *newsgroups,
+			  const char *sender_addr,
+			  const char *sender_name,
+			  const char *date,
+			  const char *subject,
+			  const char *charset)
+{
+	size_t cnt;
+	char *p, *q;
+
+	char *subj_decoded=rfc822_display_hdrvalue_tobuf("subject", subject,
+							 charset, NULL, NULL);
+
+	if (!subj_decoded)
+		return NULL;
+
+	cnt=1;
+
+	mksalutation_cb(salutation_template,
+			newsgroup,
+			message_id,
+			newsgroups,
+			sender_addr,
+			sender_name,
+			date,
+			subj_decoded,
+			mksal_count, &cnt);
+
+	p=q=malloc(cnt);
+
+	if (!p)
+	{
+		free(subj_decoded);
+		return NULL;
+	}
+
+	mksalutation_cb(salutation_template,
+			newsgroup,
+			message_id,
+			newsgroups,
+			sender_addr,
+			sender_name,
+			date,
+			subj_decoded,
+			mksal_save, &q);
+	*q=0;
+
+	free(subj_decoded);
+	return p;
+}
+
 
 int rfc2045_makereply_do(struct rfc2045_mkreplyinfo *ri)
 {
@@ -157,12 +356,10 @@ static int mkforward(struct rfc2045_mkreplyinfo *ri)
 	int is_flowed_fwd=0;
 
 	struct rfc2045headerinfo *hi;
-#if	HAVE_UNICODE
 	const struct unicode_info *uiptr=NULL;
 
 	if (ri->charset && *(ri->charset))
 		uiptr = unicode_find(ri->charset);
-#endif
 
 	rfc2045_mimepos(ri->rfc2045partp, &start_pos, &end_pos, &start_body,
 		&dummy, &dummy);
@@ -187,20 +384,25 @@ static int mkforward(struct rfc2045_mkreplyinfo *ri)
 		if (strcmp(header, "subject") == 0)
 		{
 			if (subject)	free(subject);
-			subject=malloc(strlen(value)+10);
-			if (!subject)
-				return (-1);
 
-			strcpy(subject, value);
-			if (strlen(subject) > 255)
-				subject[255]='\0';
+			subject=strdup(value);
+			if (!subject)
+			{
+				rfc2045header_end(hi);
+				return (-1);
+			}
 		}
 	}
 
 	rfc2045header_end(hi);
 
 	writes(ri, "Subject: ");
-	if (subject)
+
+	if (ri->subject)
+	{
+		writes(ri, ri->subject);
+	}
+	else if (subject)
 	{
 		char	*s=rfc822_coresubj_keepblobs(subject);
 
@@ -209,8 +411,9 @@ static int mkforward(struct rfc2045_mkreplyinfo *ri)
 
 		writes(ri, s);
 		free(s);
+		writes(ri, " (fwd)");
 	}
-	writes(ri, " (fwd)\nMime-Version: 1.0\n");
+	writes(ri, "\nMime-Version: 1.0\n");
 
 	if ((mixed_fwd=strcmp(ri->replymode, "forwardatt") == 0 ? 0:
 	     do_mixed_fwd(ri->rfc2045partp, &start_pos)) != 0)
@@ -249,9 +452,7 @@ static int mkforward(struct rfc2045_mkreplyinfo *ri)
 			writes(ri,
 			       "Content-Type: multipart/mixed; boundary=\"");
 			writes(ri, boundary);
-			writes(ri, "\"\nContent-Transfer-Encoding: ");
-			writes(ri, content_transfer_encoding);
-			writes(ri, "\n\n");
+			writes(ri, "\"\nContent-Transfer-Encoding: 8bit\n\n");
 			writes(ri, RFC2045MIMEMSG);
 			writes(ri, "--");
 			writes(ri, boundary);
@@ -260,10 +461,25 @@ static int mkforward(struct rfc2045_mkreplyinfo *ri)
 		else if (rfc2045_isflowed(ri->rfc2045partp))
 			is_flowed_fwd=1;
 
-	writes(ri, "Content-Type: text/plain; charset=\"");
-	writes(ri, ri->charset);
-	writes(ri, "\"\n\n");
-	(*ri->writesig_func)(ri->voidarg);
+
+	if (ri->content_set_charset)
+	{
+		(*ri->content_set_charset)(ri->voidarg);
+	}
+	else
+	{
+		writes(ri, "Content-Type: text/plain; charset=\"");
+		writes(ri, ri->charset);
+		writes(ri, "\"\n");
+	}
+
+	writes(ri, "Content-Transfer-Encoding: 8bit\n\n");
+	if (ri->content_specify)
+		(*ri->content_specify)(ri->voidarg);
+
+	writes(ri, "\n");
+	if (ri->writesig_func)
+		(*ri->writesig_func)(ri->voidarg);
 	writes(ri, "\n");
 
 	if (!boundary)	/* Not forwarding as attachment */
@@ -300,14 +516,13 @@ static int mkforward(struct rfc2045_mkreplyinfo *ri)
 			    strcasecmp(header, "resent-message-id") == 0)
 			{
 				if (subject) free(subject);
-#if	HAVE_UNICODE
-				if (uiptr)
-					subject=rfc2047_decode_unicode(value,
-						uiptr, RFC2047_DECODE_REPLACE);
-				else
-#endif
-				subject=rfc2047_decode_enhanced(value,
-								ri->charset);
+
+				subject=rfc822_display_hdrvalue_tobuf(header,
+								      value,
+								      ri->charset,
+								      NULL,
+								      NULL);
+
 				if (subject)
 				{
 					(*ri->write_func)(header,
@@ -364,14 +579,12 @@ static int mkforward(struct rfc2045_mkreplyinfo *ri)
 			    strcasecmp(header, "resent-message-id") == 0)
 			{
 				if (subject) free(subject);
-#if	HAVE_UNICODE
-				if (uiptr)
-					subject=rfc2047_decode_unicode(value,
-						uiptr, RFC2047_DECODE_REPLACE);
-				else
-#endif
-				subject=rfc2047_decode_enhanced(value,
-								ri->charset);
+
+				subject=rfc822_display_hdrvalue_tobuf(header,
+								      value,
+								      ri->charset,
+								      NULL,
+								      NULL);
 				if (subject)
 				{
 					(*ri->write_func)(header,
@@ -585,18 +798,22 @@ static int mkreply(struct rfc2045_mkreplyinfo *ri)
 	char	*subject;
 	char	*oldmsgid;
 	char	*oldreferences;
+	char	*oldenvelope;
 	char	*header, *value;
+	char	*date;
+	char	*newsgroup;
+	char	*newsgroups;
 
 	char	*whowrote;
 	off_t	start_pos, end_pos, start_body, dummy;
 	int errflag=0;
+	char	*boundary;
+
 	struct rfc2045headerinfo *hi;
-#if	HAVE_UNICODE
 	const struct unicode_info *uiptr=NULL;
 
 	if (ri->charset && *(ri->charset))
 		uiptr = unicode_find(ri->charset);
-#endif
 
 	oldtocc=0;
 	oldtolist=0;
@@ -605,7 +822,11 @@ static int mkreply(struct rfc2045_mkreplyinfo *ri)
 	subject=0;
 	oldmsgid=0;
 	oldreferences=0;
+	oldenvelope=0;
 	whowrote=0;
+	newsgroup=0;
+	newsgroups=0;
+	date=0;
 
 	rfc2045_mimepos(ri->rfc2045partp, &start_pos, &end_pos, &start_body,
 		&dummy, &dummy);
@@ -624,6 +845,10 @@ static int mkreply(struct rfc2045_mkreplyinfo *ri)
 		if (oldtolist) free(oldtolist); \
 		if (oldfrom) free(oldfrom); \
 		if (oldreplyto)	free(oldreplyto); \
+		if (oldenvelope) free(oldenvelope); \
+		if (newsgroup) free(newsgroup); \
+		if (newsgroups) free(newsgroups); \
+		if (date) free(date); \
 		rfc2045header_end(hi); \
 		return (-1); \
 	}
@@ -642,6 +867,7 @@ static int mkreply(struct rfc2045_mkreplyinfo *ri)
 		if (strcmp(header, "subject") == 0)
 		{
 			if (subject)	free(subject);
+
 			subject=strdup(value);
 			if (!subject)
 				BLOWUP;
@@ -672,6 +898,36 @@ static int mkreply(struct rfc2045_mkreplyinfo *ri)
 			if (oldreferences)	free(oldreferences);
 			oldreferences=strdup(value);
 			if (!oldreferences)
+				BLOWUP;
+		}
+		else if ((strcmp(header, "return-path") == 0 ||
+			  strcmp(header, "errors-to") == 0) &&
+			 ri->replytoenvelope)
+		{
+			if (oldenvelope)	free(oldenvelope);
+			oldenvelope=strdup(value);
+			if (!oldenvelope)
+				BLOWUP;
+		}
+		else if (strcmp(header, "newsgroups") == 0)
+		{
+			if (newsgroups)	free(newsgroups);
+			newsgroups=strdup(value);
+			if (!newsgroups)
+				BLOWUP;
+		}
+		else if (strcmp(header, "x-newsgroup") == 0)
+		{
+			if (newsgroup)	free(newsgroup);
+			newsgroup=strdup(value);
+			if (!newsgroup)
+				BLOWUP;
+		}
+		else if (strcmp(header, "date") == 0)
+		{
+			if (date)	free(date);
+			date=strdup(value);
+			if (!date)
 				BLOWUP;
 		}
 		else if ((strcmp(ri->replymode, "replyall") == 0
@@ -727,11 +983,13 @@ static int mkreply(struct rfc2045_mkreplyinfo *ri)
 
 	/* Write:  "%s writes:" */
 
-	if (oldfrom)
 	{
-		struct	rfc822t *rfcp=rfc822t_alloc_new(oldfrom, NULL, NULL);
+		struct	rfc822t *rfcp=rfc822t_alloc_new(oldfrom ? oldfrom:"",
+							NULL, NULL);
 		struct	rfc822a *rfcpa;
-		char	*p, *q;
+		char	*sender_name=NULL;
+		char	*sender_addr=NULL;
+		int	n;
 
 		if (!rfcp)
 			BLOWUP;
@@ -743,45 +1001,61 @@ static int mkreply(struct rfc2045_mkreplyinfo *ri)
 			BLOWUP;
 		}
 
-		p= rfcpa->naddrs > 0 ?
-			rfc822_getname(rfcpa, 0):0;
+		for (n=0; n<rfcpa->naddrs; ++n)
+		{
+			if (rfcpa->addrs[n].tokens == NULL)
+				continue;
+
+			sender_name=rfc822_display_name_tobuf(rfcpa, n,
+							      ri->charset);
+			sender_addr=rfc822_display_addr_tobuf(rfcpa, n,
+							      ri->charset);
+			break;
+		}
+
 		rfc822a_free(rfcpa);
 		rfc822t_free(rfcp);
-		if (!p)	p=strdup(oldfrom);
-		if (!p)
-			BLOWUP;
 
-#if	HAVE_UNICODE
-		if (uiptr)
-			q=rfc2047_decode_unicode(p, uiptr,
-				RFC2047_DECODE_REPLACE);
-		else
-#endif
-		q=rfc2047_decode_enhanced(p, ri->charset);
-		if (!q)
-		{
-			free(p);
-			BLOWUP;
-		}
+		whowrote=mksalutation(ri->replysalut,
+				      newsgroup ? newsgroup:"",
+				      oldmsgid ? oldmsgid:"",
+				      newsgroups ? newsgroups:"",
 
-		free(p);
-		p=q;
-		whowrote=malloc(strlen(p)+strlen(ri->replysalut)+1);
+				      sender_addr ? sender_addr:"(no address given)",
+				      sender_name ? sender_name:"(no name given)",
+				      date,
+				      subject,
+				      ri->charset);
+
+		if (sender_name)
+			free(sender_name);
+		if (sender_addr)
+			free(sender_addr);
+
 		if (!whowrote)
 		{
-			free(p);
 			BLOWUP;
 		}
-
-		sprintf(whowrote, ri->replysalut, p);
-		free(p);
 	}
 
+	if (newsgroups)
+		free(newsgroups);
+	if (newsgroup)
+		free(newsgroup);
+	if (date)
+		free(date);
 	if (oldreplyto)
 	{
 		if (oldfrom)	free(oldfrom);
 		oldfrom=oldreplyto;
 		oldreplyto=0;
+	}
+
+	if (oldenvelope)
+	{
+		if (oldfrom)	free(oldfrom);
+		oldfrom=oldenvelope;
+		oldenvelope=0;
 	}
 
 	/*
@@ -930,21 +1204,60 @@ static int mkreply(struct rfc2045_mkreplyinfo *ri)
 		writes(ri, "\n");
 		free(oldmsgid);
 	}
-	writes(ri,"Subject: Re: ");
-	if (subject)
+	writes(ri,"Subject: ");
+
+	if (ri->subject)
+	{
+		writes(ri, ri->subject);
+	}
+	else if (subject)
 	{
 		char	*s=rfc822_coresubj_keepblobs(subject);
 
+		writes(ri, "Re: ");
 		writes(ri, s ? s:"");
 		if (s)	free(s);
 		free(subject);
 	}
 
 	writes(ri, "\nMime-Version: 1.0\n");
-	writes(ri, "Content-Type: text/plain; charset=\"");
-	writes(ri, ri->charset);
-	writes(ri, "\"\n");
-	writes(ri, "\n");
+
+
+	boundary=NULL;
+
+	if (strcmp(ri->replymode, "replydsn") == 0 && ri->dsnfrom)
+	{
+		boundary=rfc2045_mk_boundary(ri->rfc2045partp, ri->fd);
+		if (!boundary)
+			return (-1);
+
+		writes(ri, "Content-Type: multipart/report;"
+		       " report-type=delivery-status;\n"
+		       "    boundary=\"");
+
+		writes(ri, boundary);
+
+		writes(ri,"\"\n"
+			"\n"
+			RFC2045MIMEMSG
+			"\n"
+		       "--");
+		writes(ri, boundary);
+		writes(ri, "\n");
+	}
+
+	if (ri->content_set_charset)
+	{
+		(*ri->content_set_charset)(ri->voidarg);
+	}
+	else
+	{
+		writes(ri, "Content-Type: text/plain; charset=\"");
+		writes(ri, ri->charset);
+		writes(ri, "\"\n");
+	}
+	writes(ri, "Content-Transfer-Encoding: 8bit\n\n");
+
 	if (whowrote)
 	{
 		writes(ri, whowrote);
@@ -956,7 +1269,68 @@ static int mkreply(struct rfc2045_mkreplyinfo *ri)
 
 	replybody(ri, ri->rfc2045partp);
 	writes(ri, "\n");	/* First blank line in the reply */
-	(*ri->writesig_func)(ri->voidarg);
+
+	if (ri->content_specify)
+		(*ri->content_specify)(ri->voidarg);
+
+	writes(ri, "\n");
+	if (ri->writesig_func)
+		(*ri->writesig_func)(ri->voidarg);
+	writes(ri, "\n");
+
+	if (boundary)
+	{
+		char	*header, *value;
+		struct rfc2045headerinfo *hi;
+
+		time_t now;
+
+		time(&now);
+
+		writes(ri, "\n--");
+		writes(ri, boundary);
+		writes(ri, "\nContent-Type: message/delivery-status\n"
+		       "Content-Transfer-Encoding: 7bit\n\n"
+		       "Arrival-Date: ");
+
+		writes(ri, rfc822_mkdate(now));
+		writes(ri,"\n"
+		       "\n"
+		       "Final-Recipient: rfc822; ");
+
+		writes(ri, ri->dsnfrom);
+
+		writes(ri, "\n"
+		       "Action: delivered\n"
+		       "Status: 2.0.0\n"
+		       "\n--");
+		writes(ri, boundary);
+		writes(ri, "\nContent-Type: text/rfc822-headers; charset=\"iso-8859-1\"\n"
+		       "Content-Disposition: attachment\n"
+		       "Content-Transfer-Encoding: 8bit\n\n"
+		       );
+
+		hi=rfc2045header_start(ri->fd, ri->rfc2045partp);
+
+		while (hi)
+		{
+			if (rfc2045header_get(hi, &header, &value, 0) ||
+			    !header)
+			{
+				rfc2045header_end(hi);
+				break;
+			}
+
+			writes(ri, header);
+			writes(ri, ": ");
+			writes(ri, value);
+			writes(ri, "\n");
+		}
+		writes(ri, "\n--");
+		writes(ri, boundary);
+		writes(ri, "--\n");
+		free(boundary);
+	}
 	return (errflag);
 }
 

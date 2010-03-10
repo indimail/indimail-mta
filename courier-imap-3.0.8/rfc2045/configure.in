@@ -1,19 +1,22 @@
-dnl $Id: configure.in,v 1.20 2004/05/25 02:30:57 mrsam Exp $
+dnl $Id: configure.in,v 1.27 2009/11/08 18:14:47 mrsam Exp $
 dnl
-dnl Copyright 1998 - 2001 Double Precision, Inc.  See COPYING for
+dnl Copyright 1998 - 2009 Double Precision, Inc.  See COPYING for
 dnl distribution information.
-AC_INIT(rfc2045.c)
+AC_INIT(rfc2045lib, 0.20, [courier-maildrop@lists.sourceforge.net])
+AC_USE_SYSTEM_EXTENSIONS
+LT_INIT
 
-AM_INIT_AUTOMAKE(rfc2045lib, 0.20, 0)
+>confdefs.h  # Kill PACKAGE_ macros
+
+AC_CONFIG_MACRO_DIR([m4])
+AC_CONFIG_SRCDIR(rfc2045.c)
+AM_INIT_AUTOMAKE([foreign no-define])
 AM_CONFIG_HEADER(rfc2045_config.h)
 
 dnl Checks for programs.
 AC_PROG_CC
-AC_PROG_RANLIB
-
-AC_ISC_POSIX
-AC_AIX
-AC_MINIX
+AC_LIBTOOL_DLOPEN
+AM_PROG_LIBTOOL
 
 if test "$GCC" = yes ; then
         CXXFLAGS="$CXXFLAGS -Wall"
@@ -80,22 +83,6 @@ CFLAGS="$CFLAGS -I${srcdir}/.."
 AC_SUBST(rfc822includedir)
 
 AC_SUBST(RFC2045CHARSET)
-
-AC_ARG_ENABLE(unicode, [],
-	unicode="$enableval",
-	unicode="no")
-
-if test -d ${srcdir}/../unicode
-then
-	if test "$unicode" != "no"
-	then
-		AC_DEFINE_UNQUOTED(HAVE_UNICODE,1,
-			[ Whether libunicode.a is available ])
-	fi
-	UNICODE_LIB=../unicode/libunicode.a
-fi
-
-AC_SUBST(UNICODE_LIB)
 
 AM_CONDITIONAL(HAVE_SGML, test -d ${srcdir}/../docbook)
 
