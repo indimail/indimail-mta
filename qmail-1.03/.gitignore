@@ -196,6 +196,8 @@ mbox2maildir
 mess822_date.0
 mlmatchup
 mlmatchup.0
+mlmatchup.8
+logselect.8
 multilog
 multilog-matchup
 multipipe
@@ -228,8 +230,8 @@ qail
 qfilelog
 qhpsi
 qmail.0
-qmail-autoresponder
-qmail-autoresponder.0
+autoresponder
+autoresponder.0
 qmail-cat
 qmail-cdb
 qmail-cdb.0
@@ -303,9 +305,9 @@ qmail-qstat.0
 qmail-queue
 qmail-queue.0
 qmail-queue.8
-qmail-recipients
-qmail-recipients.0
-qmail-recipients.8
+recipient-cdb
+recipient-cdb.0
+recipient-cdb.8
 qmail-remote
 qmail-remote.0
 qmail-remote.8
