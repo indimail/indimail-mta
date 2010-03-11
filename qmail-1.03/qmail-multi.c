@@ -422,7 +422,7 @@ run_mailfilter(int argc, char **argv)
 		}
 		break;
 	}
-	/*- Process message if exit code is 0, bounce if 100 */
+	/*- Process message if exit code is 0, bounce if 100, else issue temp error */
 	if (wait_pid(&wstat, filt_pid) != filt_pid)
 		_exit(122);
 	if (wait_crashed(wstat))
