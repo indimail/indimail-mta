@@ -290,7 +290,9 @@ be SPAM. It also exits 100 if the program/script defined by
 .B FILTERARGS
 (or defined in the control file
 .B filterargs
-) returns 100.
+) returns 100 (i.e. mail gets bounced). If the program/script defined by \fBFILTERARGS\fR
+exits non-zero status, temporary error is issued and the mail stays in the queue. For
+all other cases where no errors occur, it exits 0.
 
 .SH "SEE ALSO"
 qmail-lspawn(8),
