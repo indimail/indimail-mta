@@ -30,6 +30,7 @@ tcpclient
 tcprules
 tcprulescheck
 tcpserver
+tcpserver.1
 uint32.h
 uint64.h
 who@
