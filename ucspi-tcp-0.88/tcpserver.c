@@ -1,5 +1,14 @@
 /*
  * $Log: tcpserver.c,v $
+ * Revision 1.45  2010-03-12 08:59:54+05:30  Cprogrammer
+ * print connected IPs table on sigusr1
+ *
+ * Revision 1.44  2010-03-11 13:37:59+05:30  Cprogrammer
+ * log maxperip
+ *
+ * Revision 1.43  2010-03-11 12:47:47+05:30  Cprogrammer
+ * initialized maxperio with PerHostLimit
+ *
  * Revision 1.42  2009-08-12 09:37:16+05:30  Cprogrammer
  * corrected display of usage
  *
@@ -147,7 +156,7 @@
 #include "auto_home.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: tcpserver.c,v 1.42 2009-08-12 09:37:16+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: tcpserver.c,v 1.45 2010-03-12 08:59:54+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef IPV6
@@ -162,7 +171,11 @@ int             flagremoteinfo = 1;
 int             flagremotehost = 1;
 int             flagparanoid = 0;
 int             verbose;
-unsigned long   timeout = 26, maxperip = 20;
+unsigned long   timeout = 26, maxperip = 20, PerHostLimit = 20;
+unsigned long   limit = 40;
+unsigned long   alloc_count = 0;
+unsigned long   numchildren = 0;
+unsigned long   backlog = 20;
 #ifdef TLS
 int             flagssl = 0;
 struct stralloc certfile = {0};
@@ -201,11 +214,6 @@ char            bspace[16];
 buffer          b;
 static stralloc limitFile;
 
-unsigned long   limit = 40;
-unsigned long   alloc_count = 0;
-unsigned long   PerHostLimit = 20;
-unsigned long   numchildren = 0;
-unsigned long   backlog = 20;
 unsigned long   uid = 0;
 unsigned long   gid = 0;
 
@@ -517,6 +525,10 @@ doit(int t)
 			safecats(tcpremoteinfo.s);
 		cats(":");
 		safecats(remoteportstr);
+		cats(":");
+		cats("maxperip=");
+		strnum[fmt_ulong(strnum, maxperip)] = 0;
+		safecats(strnum);
 		cats("\n");
 		buffer_putflush(buffer_2, tmp.s, tmp.len);
 	}
@@ -1163,6 +1175,12 @@ sigterm()
 }
 
 void
+siguser1()
+{
+	print_ip();
+}
+
+void
 sighangup()
 {
 	int             i, tmpLimit;
@@ -1248,7 +1266,10 @@ main(int argc, char **argv)
 	struct stralloc options = {0};
   
 	if ((x = env_get("MAXPERIP"))) /*- '-C' option overrides this */
+	{
 		scan_ulong(x, &PerHostLimit);
+		maxperip = PerHostLimit;
+	}
 	if (!stralloc_copys(&options, "dDvqQhHrR1UXx:m:t:u:g:l:b:B:c:C:pPoO"))
 		strerr_die2x(111, FATAL, "out of memory");
 #ifdef IPV6
@@ -1440,6 +1461,7 @@ main(int argc, char **argv)
 	sig_catch(sig_child, sigchld);
 	sig_catch(sig_term, sigterm);
 	sig_catch(sig_hangup, sighangup);
+	sig_catch(sig_usr1, siguser1);
 	sig_ignore(sig_pipe);
 	if (str_equal(hostname, "0"))
 		byte_zero(localip, sizeof(localip));
@@ -1544,7 +1566,7 @@ main(int argc, char **argv)
 #else
 		remoteipstr[ip4_fmt(remoteipstr, remoteip)] = 0;
 #endif
-		if (PerHostLimit < limit && (ipcount = check_ip()) >= PerHostLimit)
+		if (PerHostLimit && (ipcount = check_ip()) >= PerHostLimit)
 		{
 			strnum2[fmt_ulong(strnum2, ipcount)] = 0;
 			strerr_warn4("tcpserver: end ", remoteipstr, " perIPlimit ", strnum2, 0);
@@ -1577,7 +1599,7 @@ main(int argc, char **argv)
 					strnum2[fmt_ulong(strnum2, ipcount)] = 0;
 					close(t);
 					errno = error_acces;
-					strerr_die6sys(111, DROP, "no ip slots for ", remoteipstr, ", perIPlimit ", strnum2, ", : ");
+					strerr_die6sys(111, DROP, "no ip slots for ", remoteipstr, ", perIPlimit ", strnum2, ": ");
 				}
 			}
 #ifdef TLS
@@ -1626,8 +1648,6 @@ main(int argc, char **argv)
 			printstatus();
 		default:
 			add_ip(pid);
-			if (verbosity >= 2)
-				print_ip();
 		}
 		close(t);
 	}
