@@ -280,19 +280,14 @@ can be overriden by the environment variable
 .B SPAMIGNOREPATTERNS
 
 .SH "EXIT CODES"
-.B spawn-filter
-exits 111 for any error or if it is not able to exec
-QMAILHOME/bin/qmail-local (for local mails) or
-QMAILHOME/bin/qmail-remote (for remote mails).
-It exits 100 if the REJECTSPAM environment variable is set (or the 
-control file has rejectspam set for the domain) and the mail is found to
-be SPAM. It also exits 100 if the program/script defined by
-.B FILTERARGS
-(or defined in the control file
-.B filterargs
-) returns 100 (i.e. mail gets bounced). If the program/script defined by \fBFILTERARGS\fR
-exits non-zero status, temporary error is issued and the mail stays in the queue. For
-all other cases where no errors occur, it exits 0.
+\fBspawn-filter\fR exits 111 for any error (non-zero exit status by called program) or if it
+is not able to exec QMAILHOME/bin/qmail-local (for local mails) or QMAILHOME/bin/qmail-remote
+(for remote mails). It exits 100 (i.e mail will be bounced) if the REJECTSPAM environment
+variable is set (or the control file has rejectspam set for the domain) and the mail is found
+to be SPAM. It also exits 100 if the program/script defined by \fBFILTERARGS\fR (or defined
+in the control file \fBfilterargs\fR) returns 100. If the program/script defined
+by \fBFILTERARGS\fR exits non-zero status, temporary error is issued and the mail stays in the
+queue. For all other cases where no errors occur, it exits 0.
 
 .SH "SEE ALSO"
 qmail-lspawn(8),
