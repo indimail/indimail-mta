@@ -39,8 +39,9 @@ address, allowing connections only to that address; or a host name, allowing
 connections to the first IP address for that host. Host names are fed through
 qualification using dns_ip4_qualify (dns_ip6_qualify for ipv6).
 
-.B tcpserver
-exits when it receives SIGTERM.
+\fBtcpserver\fR dumps on standard error, list of active connections, when it
+receives SIGUSR1. \fBtcpserver\fR exits when it receives SIGTERM.
+
 .SH OPTIONS
 .B General options:
 .TP

@@ -1,5 +1,8 @@
 /*
  * $Log: sig.h,v $
+ * Revision 1.2  2010-03-12 08:59:11+05:30  Cprogrammer
+ * added SIGUSR1
+ *
  * Revision 1.1  2003-12-31 19:57:33+05:30  Cprogrammer
  * Initial revision
  *
@@ -13,6 +16,7 @@ extern int sig_cont;
 extern int sig_hangup;
 extern int sig_pipe;
 extern int sig_term;
+extern int sig_usr1;
 
 extern void (*sig_defaulthandler)();
 extern void (*sig_ignorehandler)();
