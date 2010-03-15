@@ -1,5 +1,8 @@
 #
 # $Log: indimail-epm.list.in,v $
+# Revision 2.48  2010-03-12 15:57:33+05:30  Cprogrammer
+# added clamav-0.96rc1
+#
 # Revision 2.47  2010-03-09 14:38:55+05:30  Cprogrammer
 # removed envconf
 # renamed qmail-recipients to recipient-cdb
@@ -1341,18 +1344,18 @@ f 555 root qmail ${prefix}/plugins/generic.so BUILDROOT${prefix}/plugins/generic
 
 %ifdef !noclamavdef
 f 644 root root ${prefix}/lib/libclamav.a BUILDROOT${prefix}/lib/libclamav.a
-f 755 root root ${prefix}/lib/libclamav.so.6.0.5 BUILDROOT${prefix}/lib/libclamav.so.6.0.5
-l 777 root root ${prefix}/lib/libclamav.so.6 BUILDROOT${prefix}/lib/libclamav.so.6.0.5
-l 777 root root ${prefix}/lib/libclamav.so BUILDROOT${prefix}/lib/libclamav.so.6.0.5
+f 755 root root ${prefix}/lib/libclamav.so.6.1.0 BUILDROOT${prefix}/lib/libclamav.so.6.1.0
+l 777 root root ${prefix}/lib/libclamav.so.6 BUILDROOT${prefix}/lib/libclamav.so.6.1.0
+l 777 root root ${prefix}/lib/libclamav.so BUILDROOT${prefix}/lib/libclamav.so.6.1.0
 f 644 root root ${prefix}/lib/pkgconfig/libclamav.pc BUILDROOT${prefix}/lib/pkgconfig/libclamav.pc
 f 644 root root ${prefix}/lib/libclamunrar.a BUILDROOT${prefix}/lib/libclamunrar.a
 f 644 root root ${prefix}/lib/libclamunrar_iface.a BUILDROOT${prefix}/lib/libclamunrar_iface.a
-f 755 root root ${prefix}/lib/libclamunrar_iface.so.6.0.5 BUILDROOT${prefix}/lib/libclamunrar_iface.so.6.0.5
-l 777 root root ${prefix}/lib/libclamunrar_iface.so.6 BUILDROOT${prefix}/lib/libclamunrar_iface.so.6.0.5
-l 777 root root ${prefix}/lib/libclamunrar_iface.so BUILDROOT${prefix}/lib/libclamunrar_iface.so.6.0.5
-f 755 root root ${prefix}/lib/libclamunrar.so.6.0.5 BUILDROOT${prefix}/lib/libclamunrar.so.6.0.5
-l 777 root root ${prefix}/lib/libclamunrar.so.6 BUILDROOT${prefix}/lib/libclamunrar.so.6.0.5
-l 777 root root ${prefix}/lib/libclamunrar.so BUILDROOT${prefix}/lib/libclamunrar.so.6.0.5
+f 755 root root ${prefix}/lib/libclamunrar_iface.so.6.1.0 BUILDROOT${prefix}/lib/libclamunrar_iface.so.6.1.0
+l 777 root root ${prefix}/lib/libclamunrar_iface.so.6 BUILDROOT${prefix}/lib/libclamunrar_iface.so.6.1.0
+l 777 root root ${prefix}/lib/libclamunrar_iface.so BUILDROOT${prefix}/lib/libclamunrar_iface.so.6.1.0
+f 755 root root ${prefix}/lib/libclamunrar.so.6.1.0 BUILDROOT${prefix}/lib/libclamunrar.so.6.1.0
+l 777 root root ${prefix}/lib/libclamunrar.so.6 BUILDROOT${prefix}/lib/libclamunrar.so.6.1.0
+l 777 root root ${prefix}/lib/libclamunrar.so BUILDROOT${prefix}/lib/libclamunrar.so.6.1.0
 %endif
 
 %ifdef !nonssddef
