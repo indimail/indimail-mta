@@ -1,5 +1,11 @@
 #
 # $Log: indimail.spec.in,v $
+# Revision 2.140  2010-03-15 08:45:00+05:30  Cprogrammer
+# added clambc in list of exe from wich rpath is to be removed
+#
+# Revision 2.139  2010-03-12 15:57:17+05:30  Cprogrammer
+# added clamav-0.96rc1
+#
 # Revision 2.138  2010-03-10 16:28:57+05:30  Cprogrammer
 # do not gzip couritertls.1
 #
@@ -436,7 +442,7 @@
 # rpm spec file for indimail
 #
 #
-# $Id: indimail.spec.in,v 2.138 2010-03-10 16:28:57+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 2.140 2010-03-15 08:45:00+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %define _unpackaged_files_terminate_build 1
 
@@ -476,7 +482,7 @@
 %define ucspi_version      0.88
 %define qmail_version      1.03
 %define fetchmail_version  6.3.14
-%define clamav_version     0.95.3
+%define clamav_version     0.96rc1
 %define fortune_version    1.1
 %define nssd_version       1.0
 %define flash_version      0.9.4
@@ -1074,7 +1080,7 @@ if [ %noclamav -eq 0 ] ; then
 fi
 if [ -x /usr/bin/chrpath ] ; then
 /usr/bin/chrpath -d %{buildroot}%{_libdir}/*.so
-for i in clamconf clamscan dbinfo flash freshclam hostcntrl indiversion printdir \
+for i in clambc clamconf clamscan dbinfo flash freshclam hostcntrl indiversion printdir \
 proxyimap proxypop3 resetquota sigtool vacation vaddaliasdomain vadddomain vadduser \
 vadduserl valias vatrn vbulletin vcalias vcfilter vdeldomain vdeluser vdominfo \
 vgroup vhostid vipmap vmoddomlimits vmoduser vmoveuser vpasswd vpriv sslerator \
@@ -1665,6 +1671,7 @@ fi
 %attr(555,root,root)                    %{_prefix}/bin/clamav-config
 %attr(555,root,root)                    %{_prefix}/bin/clamscan
 %attr(555,root,root)                    %{_prefix}/bin/clamdscan
+%attr(555,root,root)                    %{_prefix}/bin/clambc
 %attr(555,root,root)                    %{_prefix}/bin/clamdtop
 %attr(555,root,root)                    %{_prefix}/bin/freshclam
 %attr(555,root,root)                    %{_prefix}/sbin/clamd
@@ -1979,9 +1986,9 @@ fi
 
 %if %noclamav == 0
 %attr(644,root,qmail)                   %{_prefix}/include/clamav.h
-%{_libdir}/libclamav.a
-%{_libdir}/libclamunrar.a
-%{_libdir}/libclamunrar_iface.a
+#%{_libdir}/libclamav.a
+#%{_libdir}/libclamunrar.a
+#%{_libdir}/libclamunrar_iface.a
 %endif
 
 %if %nolibdkim == 0
