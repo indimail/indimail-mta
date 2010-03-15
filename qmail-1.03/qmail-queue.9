@@ -159,7 +159,7 @@ for the virus scanner itself.
 The QHPSI extension for qmail-queue allows to call an arbitary virus scanner directly,
 scanning the incoming data-stream on STDIN or it allows plugins to be loaded from
 the QMAILHOME/plugins directory. This directory can be changed by defining
-\fBPLUGINDIR\fR environment variable. QHPSI can be adviced to pass
+\fBPLUGINDIR\fR environment variable. QHPSI can be advised to pass
 multiple arguments to the virus scanner for customization. To run external scanner
 or load scanner plugins, \fBqmail-queue\fR calls \fBqhpsi\fR, a program setuid to \fIqscand\fR.
 By default, \fBqhpsi\fR looks for the symbol \fIvirusscan\fR to invoke the scanner.
@@ -371,7 +371,8 @@ Comments:
  - In the configuration file clamav.conf, the option
   'ScanMail' has to be enabled; clamd has to run as 'root'.
  - The argument QHPSI='INDIDIR/bin/clamdscan %s --quiet --no-summary'
-   tells Clam AV to provide a single line output of the scan results.
+   tells Clam AV to just provide the return status and print nothing
+   on the stdout.
  - The argument QHPSIRC is not necessary, because
    'clamdscan' return with 'RC=1' (the default) in 
    case a virus infection is recognized.
@@ -387,6 +388,10 @@ Comments:
    therefore, QHPSIRC has to provide this value.
  - The virus scanning is omitted, if the size of the message
    exceeds 9.000.000 byte, ~ 8.5MB.
+
+You can also set these variables outside tcp.smtp. e.g.
+  # echo INDIDIR/bin/clamdscan %s --quiet --no-summary \\
+     > /service/qmail.smtpd.25/variables/QHPSI
 
 .SH "SEE ALSO"
 addresses(5),
