@@ -1,4 +1,7 @@
 * Mon Mar 15 2010 mbhangui@gmail.com
+Release 1.7.2 Start 15/03/2010
+
+* Mon Mar 15 2010 mbhangui@gmail.com
 Release 1.7.1 Start 04/03/2010
 06/03/2010
 1.  Added STLS capability to proxpop3, STARTTLS capability to proxyimap
