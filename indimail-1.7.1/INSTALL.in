@@ -184,7 +184,7 @@ If a command is prefixed with the '#' sign, it means that it was run using root.
                                . mpack-1.6          (1.5  Mb)
                                . fortune-1.1        (8.4  Mb)
                                . bogofilter-1.2.1   (11.6 Mb)
-                               . clamav-0.95.3      (34.6 Mb)
+                               . clamav-0.96rc1     (36   Mb)
                                . nssd-1.0           (2.0  Mb)
                                . fetchmail-6.3.14   (10.5 Mb)
                                . pam-multi-1.0      (3.0  Mb)
@@ -477,14 +477,14 @@ the installation.
     % sudo chown indimail:indimail @indimaildir@/etc/wordlist.db
 
     ##### STEP 7  ##### Virus Scanner #########################
-    Install clamav MD5 eaf9fccc3cc3567605a9732313652967
+    Install clamav MD5 6cb3a716f06f00c73def71aa72ff5f41
     current working directory /home/local/src
-    Download clamav package. The latest tested clamav package tested is clamav-0.95.3.tar.gz.
+    Download clamav package. The latest tested clamav package tested is clamav-0.96rc1.tar.gz.
 
-    % wget http://downloads.sourceforge.net/clamav/clamav-0.95.3.tar.gz
-    % gunzip -c clamav-0.95.3.tar.gz | tar xf -
-    % gunzip -c indimail-@version@/patches/clamav-0.95.3.patch.gz | patch -p0
-    % cd clamav-0.95.3
+    % wget http://downloads.sourceforge.net/clamav/clamav-0.96rc1.tar.gz
+    % gunzip -c clamav-0.96rc1.tar.gz | tar xf -
+    % gunzip -c indimail-@version@/patches/clamav-0.96rc1.patch.gz | patch -p0
+    % cd clamav-0.96rc1
     % ./configure --prefix=@indimaildir@ --sysconfdir=@indimaildir@/etc \
         --with-dbdir=@indimaildir@/share/clamd \
         --libexecdir=@indimaildir@/libexec \
@@ -637,14 +637,14 @@ the installation.
     % sudo @indimaildir@/sbin/svctool --imap=993 --servicedir=/service --localip=0 \
         --query-cache --maxdaemons=150 --maxperip=25 \
         --default-domain=indimail.org --memory=10485760 \
-		--postmaster=postmaster@indimail.org --ssl
+        --postmaster=postmaster@indimail.org --ssl
     % sudo @indimaildir@/sbin/svctool --pop3=110 --servicedir=/service --localip=0 \
         --query-cache --maxdaemons=150 --maxperip=25 \
         --default-domain=indimail.org --memory=10485760 --starttls
     % sudo @indimaildir@/sbin/svctool --pop3=995 --servicedir=/service --localip=0 \
         --maxdaemons=150 --maxperip=25 \
         --default-domain=indimail.org --memory=10485760 \
-		--postmaster=postmaster@indimail.org --ssl
+        --postmaster=postmaster@indimail.org --ssl
 
     The below four command will create proxies (ssl and non-ssl) for IMAP and POP3. These
     will be required if you decide to split your users belonging to a single domain across
@@ -652,7 +652,7 @@ the installation.
 
     % sudo @indimaildir@/sbin/svctool --imap=4143 --servicedir=/service --localip=0 \
         --query-cache --maxdaemons=150 --maxperip=25 --starttls \
-		--tlsprog=@indimaildir@/bin/sslerator \
+        --tlsprog=@indimaildir@/bin/sslerator \
         --default-domain=indimail.org --memory=10485760 --proxy=143
     % sudo @indimaildir@/sbin/svctool --imap=4990 --servicedir=/service --localip=0 \
         --query-cache --maxdaemons=150 --maxperip=25 \
@@ -660,7 +660,7 @@ the installation.
         --postmaster=postmaster@indimail.org --ssl
     % sudo @indimaildir@/sbin/svctool --pop3=4110 --servicedir=/service --localip=0 \
         --query-cache --maxdaemons=150 --maxperip=25 --starttls \
-		--tlsprog=@indimaildir@/bin/sslerator \
+        --tlsprog=@indimaildir@/bin/sslerator \
         --default-domain=indimail.org --memory=10485760 --proxy=110
     % sudo @indimaildir@/sbin/svctool --pop3=4995 --servicedir=/service --localip=0 \
         --query-cache --maxdaemons=150 --maxperip=25 \
