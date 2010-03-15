@@ -4,6 +4,13 @@ DATE: @DATE@
 
 This is Release @version@ of IndiMail. The release has both source.tar.gz and RPMs
 
+This release introduces sslerator which is a TLS/SSL wrapper to encrypt a network
+connection using SSL/TLS, without having the application to deal with openssl
+libraries.
+
+This man page for IndiMail is now exhaustive, covering almost all applications which
+make up the IndiMail package.
+
 This release includes the following files
 
 README                      (Introduction to IndiMail)
@@ -62,12 +69,23 @@ both 32 and 64 bit) are
 
 ChangeLog
 =========
-* Sun Mar 07 2010 mbhangui@gmail.com
+* Mon Mar 15 2010 mbhangui@gmail.com
 Release 1.7.1 Start 04/03/2010
-1.  Added STLS capability to proxpop3, STARTTLS capability to proxyimap
+1.  Added STLS capability to proxpop3, STARTTLS capability to proxyimap [2964759]
 2.  New Program sslerator to ssl enable applications.
 3.  Check return value of is_distributed_domain() in all programs
 4.  return failure in open_master if host.master is not present
 5.  disable checking of host.cntrl in findmdahost.c
 6.  Renamed POST HOOK to POST HANDLE in man pages
 7.  host.master path was not set correctly in install_tables.c
+8.  renamed qmail-autoresponder to autoresponder to shorten path
+9.  renamed qmail-recipients to recipient-cdb
+10. added man page cdbmake, cdbdump, cdbget, cdbstats, cdbtest, predate,
+    datemail, logselect
+11. Expanded indimail man page to include documentation on qmail,
+    courier-imap, bogofilter, fetchmail, altermime, ripmime, mpack, flash
+    packages
+12. Backported courier-imap-3.0.8 to courier-imap-4.7.0
+13. BUG - initialized maxperip with PerHostLimit in tcpserver.c [2968485]
+14. Added SIGUSR1 handler to print connected IPs table in tcpserver
+15. Added clamav-0.96rc1
