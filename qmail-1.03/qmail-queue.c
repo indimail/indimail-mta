@@ -499,7 +499,7 @@ pidopen()
 char           *qhpsi;
 
 /*-
- * Following added additional to QHPSI
+ * Following added in addition to QHPSI
  * X-QHPSI:
  * VIRUSFORWARD:
  * X-Quarantine-ID:
