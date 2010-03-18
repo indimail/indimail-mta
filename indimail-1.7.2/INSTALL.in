@@ -24,6 +24,13 @@ There is also Installation for Dummies. For that read INSTALL-RPM. You will also
 find the INSTALL-RPM file as
 http://downloads.sourceforge.net/indimail/INSTALL-RPM-@version@
 
+There is also a crash course on IndiMail installation if you want to skip the above
+two documents. Read the file Quick-INSTALL-@version@. You will also find the file as
+http://downloads.sourceforge.net/indimail/Quick-INSTALL-@version@
+
+Using Quick-INSTALL it is possible to setup a fully functional mail server in
+flat 30 minutes;
+
 Installation of IndiMail involves going through ten sections. Don't say that I didn't warn you.
 You may jump to Section 1 below if you are in a hurry and have some Unix experience under
 your belt. If you have ideas on how to simplify this documentation further, do write to me. In
@@ -88,7 +95,7 @@ Before starting the installation, there are a few things you need to think about
   * If you don't have a spare, and your system is already handling mail using sendmail, smail, or
     some other MTA, you can install and test most pieces of IndiMail without interfering with the
     existing service.
-  * When migrating a system from some other MTA to qmail--even if you've got some IndiMail
+  * When migrating a system from some other MTA to IndiMail--even if you've got some IndiMail
     experience under your belt--it's a good idea to formulate a plan.
 
 
@@ -240,6 +247,7 @@ the installation.
     % wget http://downloads.sourceforge.net/indimail/INSTALL-@version@ # This file
     % wget http://downloads.sourceforge.net/indimail/INSTALL-RPM-@version@
     % wget http://downloads.sourceforge.net/indimail/INSTALL-MYSQL-@version@
+    % wget http://downloads.sourceforge.net/indimail/Quick-INSTALL-@version@
     % wget http://downloads.sourceforge.net/indimail/package.checksums # MD5 sum of all the packages
     % wget http://downloads.sourceforge.net/indimail/indimail-@version@.tar.gz
     % wget http://downloads.sourceforge.net/indimail/libdkim-1.3.tar.gz
