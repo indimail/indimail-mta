@@ -1,5 +1,9 @@
 /*
  * $Log: alloc.c,v $
+ * Revision 1.2  2010-03-18 15:06:37+05:30  Cprogrammer
+ * add unsigned integer overflow check to alloc.c
+ * Matthew Dempsky - http://marc.info/?l=qmail&m=125213850310173&w=2
+ *
  * Revision 1.1  2003-12-31 19:46:55+05:30  Cprogrammer
  * Initial revision
  *
@@ -26,13 +30,19 @@ static unsigned int avail = SPACE;	/*- multiple of ALIGNMENT; 0<=avail<=SPACE */
 	unsigned int    n;
 {
 	char           *x;
-	n = ALIGNMENT + n - (n & (ALIGNMENT - 1));	/*- XXX: could overflow */
+	unsigned int    m = n;
+
+	if ((n = ALIGNMENT + n - (n & (ALIGNMENT - 1))) < m)	/*- handle overflow */
+	{
+		errno = error_nomem;
+		return 0;
+	}
 	if (n <= avail)
 	{
 		avail -= n;
 		return space + avail;
 	}
-	if(!(x = malloc(n)))
+	if (!(x = malloc(n)))
 		errno = error_nomem;
 	return x;
 }
