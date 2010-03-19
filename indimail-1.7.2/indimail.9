@@ -55,24 +55,42 @@ ripmime
 .IP \[bu]
 flash
 .PP
-IndiMail also provides Management of Virtual domains. IndiMail works on 32 / 64 bit Unix
-platforms.
+Apart from providing ESMTP, IMAP, POP3 service, IndiMail provides Management of Virtual
+domains. IndiMail works on both 32 / 64 bit Unix platforms.
 .PP
 IndiMail provides qmail-remote / qmail-local, proxyimap & proxypop3 which are user-location
-aware. This gives IndiMail the ability to distribute the users across multiple hosts using
-standard non-proprietary protocols and RFCs. The other use of user-location aware property
-is to have a single domain consisting of a heterogeneous email server environment (with some
-users on MS Exchange and some on Lotus Notes some on IndiMail). You can have multiple hosts
-hosting a domain placed geographically anywhere and tied up by IndiMail. The architecture does
-not force a filesystem architecture like NFS to be used to distribute the users. In other words,
-\fBIndiMail\fR allows you to extend a domain across multiple servers and hence provide the ability
-to scale to any number of users. Such a domain which is extended across multiple servers is called
-a clustered domain. A clustered domain consists of multiple mailstore and one or many MySQL servers.
-A mailstore is a host which has the user's mail storage in Maildir. The MySQL servers hold user
-information like path of the Maildir, user privileges, user aliases and forwardings,
-user's mailstore. The MySQL servers can be present on the mailstores itself or as individual servers
-or as a single server holding information for all users on all mailstores. The configuration
-is flexible and is left to the user so that one can optimize on cost or performance.
+aware (on which server the user's mailbox lies). This gives IndiMail the ability to distribute
+the users across multiple hosts using standard non-proprietary protocols and RFCs. The other
+use of user-location aware property is to have a single domain consisting of a heterogeneous
+email server environment (with some users on MS Exchange and some on Lotus Notes some on
+IndiMail). You can have multiple hosts hosting a domain placed geographically anywhere and tied
+up by IndiMail. The architecture does not force a filesystem architecture like NFS to be used
+to distribute the users. In other words, \fBIndiMail\fR allows you to extend a domain across
+multiple servers and hence provide the ability to scale to any number of users. Such a domain
+which is extended across multiple servers is called a clustered domain. A clustered domain
+consists of multiple mailstore and one or many MySQL servers. A mailstore is a host which has
+the user's mail storage in Maildir. The MySQL servers hold user information like path of the
+Maildir, user privileges, user aliases and forwardings, user's mailstore. The MySQL servers
+can be present on the mailstores itself or as individual servers or as a single server holding
+information for all users on all mailstores. The configuration is flexible and is left to the
+user so that one can optimize on cost or performance.
+
+When an IMAP or POP3 client logs in through proxyimap/proxypop3, the following takes place:
+.IP \[bu] 2
+The proxy analyzes the login sequence
+.sp -1
+.IP \[bu]
+Extracts the user name of the user trying to login
+.sp -1
+.IP \[bu]
+Does a lookup query on the local server to find out which server the mailbox of the user
+attempting to login lives on This lookup service (named \fBinlookup(8)\fR) runs on mailbox
+servers and accepts requests on a well defined FIFO.
+.PP
+IndiMail uses a highly modified qmail and provides all features needed in a
+modern MTA. However, all features have been added by re-using the functions/libraries provide
+by stock qmail (stralloc, substdio, alloc, str, env, etc). Detailed feature list of IndiMail
+is provided on the website http://www.indimail.org
 .PP
 IndiMail has two databases
 
@@ -178,13 +196,14 @@ host.master
 host.cntrl
 .PP
 These control file contains the IP address or hostname of the MySQL database corresponding to
-the \fBcentral database\fR. You can also use \fIhost:user:password:socket/port\fB format for
-these control fiels. If you plan to have a master-slave MySQL architecture, you can have
+the \fBcentral database\fR. You can also use \fIhost:user:password:socket/port\fR format for
+these control files. If you plan to have a master-slave MySQL architecture, you can have
 entry in \fIhost.master\fR pointing to the MySQL master database and have entry in \fIhost.cntrl\fR
-pointing to the MySQL slave database. All indimail programs ensure that all writes go to the
-master database and reads happen only from the slave database. The control files \fIhost.master\fR,
-\fIhost.cntrl\fR can be overriden by the environment variables \fBMASTER_HOST\fR and \fBCNTRL_HOST\fR.
-One can also give host:user:password:mysql_socket/port as the format for \fIhost.master\fR or \fIhost.cntrl\fR.
+pointing to the MySQL slave database. With these control files, all indimail programs ensure
+that all writes go to the master database and reads happen only from the slave database. The
+control files \fIhost.master\fR, \fIhost.cntrl\fR can be overriden by the environment
+variables \fBMASTER_HOST\fR and \fBCNTRL_HOST\fR. One can also give
+host:user:password:mysql_socket/port as the format for \fIhost.master\fR and \fIhost.cntrl\fR.
 .PP
 In a clustered setup, you can have multiple servers with each server having its own set of
 local users. The information for these users are stored in a MySQL database known as the
@@ -206,7 +225,8 @@ moment \fIdbinfo\fR gets updated, the file \fImcdinfo\fR on all other \fImailsto
 than the \fIdbinfo\fR table) gets updated. The entries in \fIdbinfo\fR table / \fImcdinfo\fR
 file can be seen by running the \fBdbinfo(8)\fR program. Whenever a new \fImailstore\fR is
 added/removed, the entry for the \fImailstore\fR and the corresponding MySQL \fBlocal database\fR
-needs to be added/removed in the \fIdbinfo\fR table or \fImcdinfo\fR file.
+needs to be added/removed in the \fIdbinfo\fR table or \fImcdinfo\fR file. In short, the entries
+in the \fIdbinfo\fR table and the \fImcdinfo\fR control file on all servers are kept in sync.
 .PP
 In case you do not require a multi-host setup, IndiMail does not require \fBcentral database\fR.
 Programs just need to connect to the \fBlocal database\fR which can be configured by having the
@@ -309,7 +329,7 @@ proxyPOP3.4110  | Log for POP3 proxy running on port 4110
 proxyPOP3.9110  | Log for POP3 proxy running on port 9110 (SSL)
 indisrvr.4000   | Log for IndiMail administration daemon
 inlookup.infifo | Log for inlookup server
-pwdlookup       | Log for NSS daemon
+pwdlookup       | Log for NSS daemon for password lookups
 poppass.106     | Log for poppassd protocol daemon
 mysql.3306      | Log for MySQL service
 spamlog         | Spam attemtps gets logged here
@@ -1122,6 +1142,7 @@ clamd                | clam(8) antivirus
 freshclam            | freshclam(1) clam signature update service
 qscanq               | qscanq(8) virus scanner
 qmail-smtpd.25       | qmail-smtpd(8) ESMTP service on port 25
+qmail-smtpd.587      | qmail-smtpd(8) ESMTP Mssage Submission Port \fBrfc-2476(5)\fR
 qmail-smtpd.366      | qmail-smtpd(8) ESMTP ODMR service on port 366
 qmail-smtpd.465      | qmail-smtpd(8) ESMTPS service on port 465 (SSL)
 qmail-send.25        | qmail-send(8) delivery service
@@ -1956,8 +1977,99 @@ Apart from the above, IndiMail provides many more programs which can work with q
 needing IndiMail to be installed. The list of such programs not listed here are being compiled
 and will be available in the near future.
 
+.SH Mailing lists
+There are four Mailing Lists for IndiMail
+
+.TP 5
+1. indimail-support - mailing list for support
+indimail-support@lists.sourceforge.net
+
+Subscribe for Support at https://lists.sourceforge.net/lists/listinfo/indimail-support.
+Old discussions can be seen at
+https://sourceforge.net/mailarchive/forum.php?forum_name=indimail-support
+.TP 5
+2. indimail-devel - mailing list to discuss IndiMail development
+indimail-devel@lists.sourceforge.net
+
+Subscribe at https://lists.sourceforge.net/lists/listinfo/indimail-devel
+Old discussions can be seen at
+https://sourceforge.net/mailarchive/forum.php?forum_name=indimail-devel
+.TP 5
+3. indimail-announce - List to announce New Releases or patches
+Subscribe at http://groups.google.com/group/indimail
+.TP 5
+4. Archive at Google - http://groups.google.com/group/indimail
+This groups acts as a remote archive for indimail-support and indimail-devel.
+
+.PP
+There is also a Project Tracker for IndiMail (Bugs, Feature Requests, Patches, Support Requests) at
+http://sourceforge.net/tracker/?group_id=230686
+
+You can also get titbits about IndiMail at
+.TP 5
+twitter     - http://twitter.com/indimail
+.TP 5
+facebook    - http://www.facebook.com/pages/indimail/88063516703?_fb_noscript=1
+.TP 5
+sourceforge - https://sourceforge.net/apps/laconica/indimail/
+
+.SH Download/Repository
+IndiMail provides the package in both source and binary forms. Installation from the source
+requires you to download other packages from the respective websites apart from the indimail
+core package. The indimail package contains a patch directory which allows you to add features
+to qmail, ucspi-tcp, courier-imap, etc. Details for building IndiMail from source can be read
+in the INSTALL document provided with the source package. Many users may find this complicated
+and hence binary packages are also provided which can be downloaded from the RPM repo mentioned
+below.
+
+.TP 5
+Source Download - http://sourceforge.net/projects/indimail/
+.TP 5
+Git Repository  - http://indimail.git.sourceforge.net/
+.TP 5
+Stable RPM Repo - http://download.opensuse.org/repositories/home:/indimail/
+.TP 5
+Raw RPM Repo    - http://download.opensuse.org/repositories/home:/mbhangui/
+.PP
+IndiMail uses openSUSE Build service to build the RPM whenever there is a new release.
+Currently, the list of supported distributions for IndiMail RPM (for both 32 and 64 bit) are
+
+    * SUSE
+          o openSUSE 11.2
+          o openSUSE 11.1
+          o openSUSE 11.0
+          o SUSE Linux Enterprise 11
+          o SUSE Linux Enterprise 10
+          o openSUSE Factory
+
+    * Red Hat
+          o Fedora 12
+          o Fedora 11
+          o Fedora 10
+          o Red Hat Enterprise Linux 5
+          o CentOS 5
+
+    * Mandriva Linux
+          o Mandriva 2010
+          o Mandriva 2009.1
+          o Mandriva 2009
+
+You can also use \fByum(8)\fR to install IndiMail by downloading the repo file and
+importing the RPM key. e.g. for Fedora 12 one could do the following
+
+.EX
+# wget -O /etc/yum.repos.d/indimail.repo \\
+ http://download.opensuse.org/repositories/home:/indimail/Fedora_12/home:indimail.repo
+
+# rpm --import \\
+ http://download.opensuse.org/repositories/home:/indimail/Fedora_12/repodata/repomd.xml.key
+
+# yum install indimail
+.EE
+
 .SH "SEE ALSO"
 dbinfo(8),
+inlookup(8),
 vhostid(8),
 vsmtp(8),
 vreorg(8),
@@ -1971,4 +2083,6 @@ supervise(8),
 qmailctl(8),
 svctool(8),
 autoresponder(1),
+rpm(8),
+yum(8),
 rfc-2645(5)
