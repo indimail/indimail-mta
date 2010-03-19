@@ -1,5 +1,9 @@
 /*
  * $Log: alloc.c,v $
+ * Revision 1.6  2010-03-18 15:04:53+05:30  Cprogrammer
+ * add unsigned integer overflow check to alloc.c
+ * Matthew Dempsky - http://marc.info/?l=qmail&m=125213850310173&w=2
+ *
  * Revision 1.5  2008-08-03 18:23:51+05:30  Cprogrammer
  * use stdlib.h
  *
@@ -30,21 +34,24 @@ static aligned  realspace[SPACE / ALIGNMENT];
 #define space ((char *) realspace)
 static unsigned int avail = SPACE;	/*- multiple of ALIGNMENT; 0<=avail<=SPACE */
 
-/* @null@ */
-/* @out@ */
-char       *
+/*@null@*//*@out@*/char *alloc(n)
 alloc(n)
 	unsigned int    n;
 {
 	char           *x;
-	n = ALIGNMENT + n - (n & (ALIGNMENT - 1));	/*- XXX: could overflow */
+	unsigned int    m = n;
+
+	if ((n = ALIGNMENT + n - (n & (ALIGNMENT - 1))) < m)	/*- handle overflow */
+	{
+		errno = error_nomem;
+		return 0;
+	}
 	if (n <= avail)
 	{
 		avail -= n;
 		return space + avail;
 	}
-	x = malloc(n);
-	if (!x)
+	if (!(x = malloc(n)))
 		errno = error_nomem;
 	return x;
 }
@@ -53,16 +60,15 @@ void
 alloc_free(x)
 	char           *x;
 {
-	if (x >= space)
-		if (x < space + SPACE)
-			return;				/*- XXX: assuming that pointers are flat */
+	if (x >= space && (x < space + SPACE))
+		return;				/*- XXX: assuming that pointers are flat */
 	free(x);
 }
 
 void
 getversion_alloc_c()
 {
-	static char    *x = "$Id: alloc.c,v 1.5 2008-08-03 18:23:51+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: alloc.c,v 1.6 2010-03-18 15:04:53+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
