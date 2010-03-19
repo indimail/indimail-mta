@@ -4,7 +4,7 @@
  * run initsvc only for root
  *
  * Revision 2.9  2009-06-18 16:14:48+05:30  Cprogrammer
- * use launchtl on Mac OS
+ * use launchctl on Mac OS
  *
  * Revision 2.8  2009-02-03 20:17:40+05:30  Cprogrammer
  * fix erroneously error being returned during first time install of svscan service on systems
