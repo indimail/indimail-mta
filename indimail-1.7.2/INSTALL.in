@@ -13,28 +13,29 @@ unlimited permission to copy, distribute and modify it.
 This section covers installing IndiMail. If you're an experienced system administrator, you
 can install IndiMail following the directions below. If you are in a hurry, you can directly
 jump to the Section 'Installation Steps' below. However, I would recommend you to go through
-the Checklist below to understand what is involved in setting up a fully fledged mail server.
-What is described here has relevance in Chapter 2 of "Indimail Documentation" in
-@indimaildir@/doc/indimail.pdf
+the Checklist below to understand what is involved in setting up a full featured mail server.
 
 You will also find this file as 
 http://downloads.sourceforge.net/indimail/INSTALL-@version@
 
-There is also Installation for Dummies. For that read INSTALL-RPM. You will also
+There is also a 'Installation for Dummies'. For that read INSTALL-RPM. You will also
 find the INSTALL-RPM file as
 http://downloads.sourceforge.net/indimail/INSTALL-RPM-@version@
 
-There is also a crash course on IndiMail installation if you want to skip the above
-two documents. Read the file Quick-INSTALL-@version@. You will also find the file as
+This document is complicated as it involves installing from multiple sources. However, there
+is a crash course on IndiMail installation if you want to skip the above
+two documents and directly install from the RPM. Read the file Quick-INSTALL-@version@.
+You will also find the file as
 http://downloads.sourceforge.net/indimail/Quick-INSTALL-@version@
 
 Using Quick-INSTALL it is possible to setup a fully functional mail server in
-flat 30 minutes;
+flat 30 minutes and in less than 10 commands;
 
-Installation of IndiMail involves going through ten sections. Don't say that I didn't warn you.
-You may jump to Section 1 below if you are in a hurry and have some Unix experience under
-your belt. If you have ideas on how to simplify this documentation further, do write to me. In
-case you get stuck, do write to me at "Manvendra Bhangui" <mbhangui@gmail.com>
+Installation of IndiMail using source involves going through ten sections. Don't say that
+I didn't warn you. You may jump to Section 1 below if you are in a hurry and have some Unix
+experience under your belt. If you have ideas on how to simplify this documentation further,
+do write to me. In case you get stuck, do write to me
+at "Manvendra Bhangui" <mbhangui@gmail.com>
 
 Checklist
 =========
