@@ -1,5 +1,8 @@
 #!/bin/sh
 # $Log: create_services.in,v $
+# Revision 2.38  2010-03-22 09:34:22+05:30  Cprogrammer
+# added delivery count limit for vdelivermail to record email delivery times
+#
 # Revision 2.37  2010-03-06 18:28:47+05:30  Cprogrammer
 # added option for starttls on proxy pop3/imap
 #
@@ -132,7 +135,7 @@ indimaildir=@indimaildir@
 # End USER Configuration OPTIONS
 #
 
-# $Id: create_services.in,v 2.37 2010-03-06 18:28:47+05:30 Cprogrammer Exp mbhangui $
+# $Id: create_services.in,v 2.38 2010-03-22 09:34:22+05:30 Cprogrammer Exp mbhangui $
 
 usage()
 {
@@ -316,6 +319,7 @@ do
 		e_opt="--skipsend --authsmtp --antispoof"
 	else
 		e_opt="--remote-authsmtp=plain --localfilter --remotefilter"
+		e_opt="$e_opt --deliverylimit-count=-1"
 		e_opt="$e_opt --rbl=-rzen.spamhaus.org --rbl=-rdnsbl-1.uceprotect.net"
 	fi
 	if [ $nobogofilter -eq 0 ] ; then
