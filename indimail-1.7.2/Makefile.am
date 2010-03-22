@@ -149,7 +149,7 @@ indimaillibexec_PROGRAMS = sq_vacation qmailmrtg7
 
 indimailauthlib_PROGRAMS = authindi
 
-indimailbin_SCRIPTS = versioninfo vcaliasrev logmonitor bogofilter-qfe mailzipper
+indimailbin_SCRIPTS = versioninfo vcaliasrev logmonitor bogofilter-qfe mailzipper overquota.sh
 
 indimailsbin_SCRIPTS = myslave controlsync svctool cputime tls-cert-check
 
@@ -162,7 +162,7 @@ indimail.spec cscope.* *.dSYM inc_deps lib_deps socket.lib indimail-@VERSION@-rp
 indimail-epm.list README-CLUSTER tls-cert-check mailzipper perm_list RELEASE-Notes \
 dbinfo.8 inlookup.8 vadddomain.1 vdeldomain.1 vadduser.1 vdeluser.1 vdelivermail.8 \
 vrenamedomain.1 vrenameuser.1 vpasswd.1 vmoveuser.1 indimail.7 svctool.8 indisub.c \
-Quick-INSTALL indimail.mrtg.cfg
+Quick-INSTALL indimail.mrtg.cfg overquota.sh
 
 DISTCLEANFILES=.gitignore
 
@@ -757,6 +757,8 @@ indimail.mrtg.cfg: indimail.mrtg.in
 svctool: svctool.in /etc/passwd
 	$(edit) $@.in > $@
 tls-cert-check: tls-cert-check.in /etc/passwd
+	$(edit) $@.in > $@
+overquota.sh: overquota.sh.in
 	$(edit) $@.in > $@
 bogofilter-qfe: bogofilter-qfe.in
 	$(edit) $@.in > $@
