@@ -1,5 +1,8 @@
 /*
  * $Log: MailQuotaWarn.c,v $
+ * Revision 2.15  2010-03-22 14:35:34+05:30  Cprogrammer
+ * fixed typo in comments
+ *
  * Revision 2.14  2009-10-14 20:43:39+05:30  Cprogrammer
  * check return status of parse_quota()
  *
@@ -70,7 +73,7 @@
 #include <fcntl.h>
 
 #ifndef	lint
-static char     sccsid[] = "$Id: MailQuotaWarn.c,v 2.14 2009-10-14 20:43:39+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: MailQuotaWarn.c,v 2.15 2010-03-22 14:35:34+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 int
@@ -138,7 +141,8 @@ MailQuotaWarn(char *username, char *domain, char *Maildir, char *QuotaAlloted)
 					if (!access(ptr, X_OK))
 					{
 						/*
-						 * Call overquota command with 8 arguments
+						 * Call overquota command with 7 arguments
+						 * email maildir total_usage mailcount Quota QuotaCount percent_warn
 						 */
 #ifdef USE_MAILDIRQUOTA
 						snprintf(quota_cmd, sizeof(quota_cmd),
