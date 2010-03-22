@@ -1,6 +1,6 @@
 /*
  * $Log: alloc.c,v $
- * Revision 1.6  2010-03-18 15:04:53+05:30  Cprogrammer
+ * Revision 1.6  2010-03-22 09:20:31+05:30  Cprogrammer
  * add unsigned integer overflow check to alloc.c
  * Matthew Dempsky - http://marc.info/?l=qmail&m=125213850310173&w=2
  *
@@ -35,7 +35,6 @@ static aligned  realspace[SPACE / ALIGNMENT];
 static unsigned int avail = SPACE;	/*- multiple of ALIGNMENT; 0<=avail<=SPACE */
 
 /*@null@*//*@out@*/char *alloc(n)
-alloc(n)
 	unsigned int    n;
 {
 	char           *x;
@@ -68,7 +67,7 @@ alloc_free(x)
 void
 getversion_alloc_c()
 {
-	static char    *x = "$Id: alloc.c,v 1.6 2010-03-18 15:04:53+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: alloc.c,v 1.6 2010-03-22 09:20:31+05:30 Cprogrammer Stab mbhangui $";
 
 	x++;
 }
