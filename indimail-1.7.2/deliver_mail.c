@@ -1,5 +1,8 @@
 /*
  * $Log: deliver_mail.c,v $
+ * Revision 2.51  2010-03-22 14:33:42+05:30  Cprogrammer
+ * fixed calling overquota_command when user is over quota
+ *
  * Revision 2.50  2009-11-09 10:42:37+05:30  Cprogrammer
  * changed BUFF_SIZE to MAX_BUFF
  *
@@ -175,7 +178,7 @@
 #endif
 
 #ifndef	lint
-static char     sccsid[] = "$Id: deliver_mail.c,v 2.50 2009-11-09 10:42:37+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: deliver_mail.c,v 2.51 2010-03-22 14:33:42+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 /*- Function Prototypes */
@@ -357,7 +360,7 @@ read_quota(char *Maildir)
 #endif
 
 int
-recordMailcount(char *maildir, mdir_t curmsgsize, mdir_t *msgsize, mdir_t *mailcount)
+recordMailcount(char *maildir, mdir_t curmsgsize, mdir_t *dailyMsgSize, mdir_t *dailyMsgCount)
 {
 	FILE           *fp;
 	char            tmpbuf[MAX_BUFF], datebuf[20], tmpdate[MAX_BUFF], fileName[MAX_BUFF];
@@ -423,10 +426,10 @@ recordMailcount(char *maildir, mdir_t curmsgsize, mdir_t *msgsize, mdir_t *mailc
 		}
 	} else
 		size = count = 0;
-	if (mailcount)
-		*mailcount = count;
-	if (msgsize)
-		*msgsize = size;
+	if (dailyMsgCount)
+		*dailyMsgCount = count;
+	if (dailyMsgSize)
+		*dailyMsgSize = size;
 	mail_limit = ((ptr = getenv("MAILCOUNT_LIMIT")) && *ptr) ? atoi(ptr) : MAILCOUNT_LIMIT;
 	size_limit = ((ptr = getenv("MAILSIZE_LIMIT")) && *ptr) ? atoi(ptr) : MAILSIZE_LIMIT;
 	count++;
@@ -481,7 +484,7 @@ deliver_mail(char *address, mdir_t MsgSize, char *quota, uid_t uid, gid_t gid,
 	char           *maildirquota, *domain, *email, *rpline, *dtline, *xfilter, *ptr, *alert_host,
 	               *alert_port, *cmmd, *ptr1, *ptr2, *qqeh;
 	mdir_t         *MailQuotaCount, *MailQuotaSize;
-	mdir_t          _MailQuotaCount, _MailQuotaSize, quota_mailsize, mailcount, msgsize;
+	mdir_t          _MailQuotaCount, _MailQuotaSize, quota_mailsize, dailyMsgCount, dailyMsgSize;
 	static int      counter;
 	struct stat     statbuf;
 	struct passwd  *pw;
@@ -556,21 +559,22 @@ deliver_mail(char *address, mdir_t MsgSize, char *quota, uid_t uid, gid_t gid,
 				xfilter ? xfilter : "X-Filter: None",
 				getpid(), getuid(), get_localtime());
 		MsgSize += slen(DeliveredTo);
-		ptr1 = getenv("MAILCOUNT_LIMIT");
-		ptr2 = getenv("MAILSIZE_LIMIT");
+		ptr1 = getenv("MAILSIZE_LIMIT");
+		ptr2 = getenv("MAILCOUNT_LIMIT");
 		if ((ptr1 && *ptr1) || (ptr2 && *ptr2))
 		{
-			if ((ret = recordMailcount(address, MsgSize, &msgsize, &mailcount)) == -1)
+			if ((ret = recordMailcount(address, MsgSize, &dailyMsgSize, &dailyMsgCount)) == -1)
 			{
 				getEnvConfigStr(&ptr, "OVERQUOTA_CMD", INDIMAILDIR"/bin/overquota.sh");
 				if (!access(ptr, X_OK))
 				{
 					/*
-					 * Call overquota command with 6 arguments
+					 * Call overquota command with 5 arguments
+					 * address currMessSize dailyMsgSize dailyMsgCount "dailySizeLimit"S,"dailyCountLimit"C
 					 */
-					/*snprintf(local_file, sizeof(local_file), "%s %d %d %d %s %s",*/
-					snprintf(local_file, sizeof(local_file), "%s %"PRIu64" %"PRIu64" %"PRIu64" %s %s",
-						address, MsgSize, msgsize, mailcount, ptr1 ? ptr1 : "", ptr2 ? ptr2 : "");
+					snprintf(local_file, sizeof(local_file),
+						"%s %s %"PRIu64" %"PRIu64" %"PRIu64" %s,%s",
+						ptr, address, MsgSize, dailyMsgSize, dailyMsgCount, ptr1 ? ptr1 : "0S", ptr2 ? ptr2 : "0C");
 					runcmmd(local_file, 0);
 				}
 				return (-4);
@@ -633,9 +637,11 @@ deliver_mail(char *address, mdir_t MsgSize, char *quota, uid_t uid, gid_t gid,
 				if (!access(ptr, X_OK))
 				{
 					/*
-					 * Call overquota command with 6 arguments
+					 * Call overquota command with 6 arguments (including last dummy)
+					 * email message_size curr_usage curr_count maildirquota "dummy"
 					 */
-					snprintf(local_file, sizeof(local_file), "%s %s %"PRIu64" %"PRIu64" %"PRIu64" %s",
+					snprintf(local_file, sizeof(local_file),
+						"%s %s %"PRIu64" %"PRIu64" %"PRIu64" %s dummy",
 						ptr, address, MsgSize, CurBytes, CurCount, maildirquota);
 					runcmmd(local_file, 0);
 				}
