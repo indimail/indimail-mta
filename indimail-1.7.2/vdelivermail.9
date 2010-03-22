@@ -8,8 +8,9 @@ vdelivermail \- deliver mails to users in a virtual domain
 
 .SH DESCRIPTION
 .PP
-\fBvdelivermail\fR deliver mails to users created in a virtual domain created by \fBvadddomain(1)\fR
-\fBvdelivermail\fR is called by \fBqmail-local\fR through an instruction in .qmail-default file.
+\fBvdelivermail\fR deliver mails to users created (by \fBvadddomain(1)\fR) in a virtual domain.
+\fBvdelivermail\fR is called by \fBqmail-local\fR through an instruction in the file .\fIqmail\fR-\fIdefault\fR
+present in INDIMAIL/domains directory.
 \fBvdelivermail\fR is the MDA for IndiMail. Along with a wrapper postdel, \fBvdelivermail\fR
 can be used as the MDA for postfix also. \fBqmail-local\fR sets the environment variables
 \fBEXT\fR and \fBHOST\fR which is used by \fBvdelivermail\fR to set the
@@ -18,14 +19,14 @@ variables are set by postdel. If the username is quoted, the quotes are removed.
 user@domain is then searched in the authentication database. If there are any system problems
 due to which \fBvdelivermail\fR is unable to locate the user, it exits 111 and the mail gets
 deferred. If the domain is a clustered domain, \fBvdelivermail\fR attempts
-to find the mailstore for the user and invokes \fBqmail-remote(8)\fR to deliver the mail
-in case the mailstore is remoet. Else if QMAIL_EXT is set during compile time,
-\fBvdelivermail\fR attempts to locate the username based on Qmail Extensions. If the user
-is not found or user is found but is inactive, action taken is as per delivery instruction
-(third argument to \fBvdelivermail\fR). If the user is active, \fBvdelivermail\fR
-checks for any forward delivery (including aliases) and delivers appropriately. While
-delivering, \fBvdelivermail\fR creates the inbox (Maildir format) if the directories do
-not exist.
+to find the mailstore for the user. If the mailstore is local, it delivers the mail locally.
+If the mailstore is a remote server, it invokes \fBqmail-remote(8)\fR to deliver the mail.
+If QMAIL_EXT is set during compile time, \fBvdelivermail\fR attempts to locate the username
+based on qmail Extensions. If the user is not found or user is found but is inactive, action
+taken is as per delivery instruction (third argument to \fBvdelivermail\fR). If the user is
+active, \fBvdelivermail\fR checks for any forward delivery (including aliases) and delivers
+appropriately. While delivering, \fBvdelivermail\fR creates the inbox (Maildir format) if the
+directories do not exist.
 .PP
 \fBvdelivermail\fR defers the mail if stick bit is set on the Maildir to which the mail is
 being delivered.

@@ -15,8 +15,6 @@ README-CLUSTER              (Steps on installing a clustered setup)
 Quick-INSTALL-@version@         (A minimal documentation on Installation)
 RELEASE-Notes-@version@         (This file)
 indimail-@version@.tar.gz       (IndiMail source)
-indimail-@version@-1.i386.rpm
-indimail-@version@-1.i386.deb
 
 
 IndiMail has two yum repositories for most of the Linux Distros at
