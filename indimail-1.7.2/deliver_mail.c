@@ -1,5 +1,8 @@
 /*
  * $Log: deliver_mail.c,v $
+ * Revision 2.52  2010-03-24 10:14:33+05:30  Cprogrammer
+ * moved overquota.sh to libexec directory
+ *
  * Revision 2.51  2010-03-22 14:33:42+05:30  Cprogrammer
  * fixed calling overquota_command when user is over quota
  *
@@ -178,7 +181,7 @@
 #endif
 
 #ifndef	lint
-static char     sccsid[] = "$Id: deliver_mail.c,v 2.51 2010-03-22 14:33:42+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: deliver_mail.c,v 2.52 2010-03-24 10:14:33+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 /*- Function Prototypes */
@@ -565,7 +568,7 @@ deliver_mail(char *address, mdir_t MsgSize, char *quota, uid_t uid, gid_t gid,
 		{
 			if ((ret = recordMailcount(address, MsgSize, &dailyMsgSize, &dailyMsgCount)) == -1)
 			{
-				getEnvConfigStr(&ptr, "OVERQUOTA_CMD", INDIMAILDIR"/bin/overquota.sh");
+				getEnvConfigStr(&ptr, "OVERQUOTA_CMD", INDIMAILDIR"/libexec/overquota.sh");
 				if (!access(ptr, X_OK))
 				{
 					/*
@@ -633,7 +636,7 @@ deliver_mail(char *address, mdir_t MsgSize, char *quota, uid_t uid, gid_t gid,
 				return (-2);
 			if (ret == 1)
 			{
-				getEnvConfigStr(&ptr, "OVERQUOTA_CMD", INDIMAILDIR"/bin/overquota.sh");
+				getEnvConfigStr(&ptr, "OVERQUOTA_CMD", INDIMAILDIR"/libexec/overquota.sh");
 				if (!access(ptr, X_OK))
 				{
 					/*

@@ -1,5 +1,8 @@
 /*
  * $Log: vdelivermail.c,v $
+ * Revision 2.52  2010-03-24 10:15:18+05:30  Cprogrammer
+ * moved overquota.sh to libexec
+ *
  * Revision 2.51  2009-10-14 20:46:47+05:30  Cprogrammer
  * check return status of parse_quota()
  *
@@ -236,7 +239,7 @@
 #include <sys/wait.h>
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vdelivermail.c,v 2.51 2009-10-14 20:46:47+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: vdelivermail.c,v 2.52 2010-03-24 10:15:18+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 /*- Globals */
@@ -579,7 +582,7 @@ processMail(struct passwd *pw, char *user, char *domain, mdir_t MsgSize)
 			vset_lastdeliver(user, domain, 0);
 		else
 		{
-			getEnvConfigStr(&ptr, "OVERQUOTA_CMD", INDIMAILDIR"/bin/overquota.sh");
+			getEnvConfigStr(&ptr, "OVERQUOTA_CMD", INDIMAILDIR"/libexec/overquota.sh");
 			if (!access(ptr, X_OK))
 			{
 				/*

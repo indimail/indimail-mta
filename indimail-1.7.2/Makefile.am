@@ -149,7 +149,9 @@ indimaillibexec_PROGRAMS = sq_vacation qmailmrtg7
 
 indimailauthlib_PROGRAMS = authindi
 
-indimailbin_SCRIPTS = versioninfo vcaliasrev logmonitor bogofilter-qfe mailzipper overquota.sh
+indimaillibexec_SCRIPTS = overquota.sh
+
+indimailbin_SCRIPTS = versioninfo vcaliasrev logmonitor bogofilter-qfe mailzipper
 
 indimailsbin_SCRIPTS = myslave controlsync svctool cputime tls-cert-check
 

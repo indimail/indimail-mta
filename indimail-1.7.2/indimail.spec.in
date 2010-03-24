@@ -1,7 +1,14 @@
 #
 # $Log: indimail.spec.in,v $
+# Revision 2.142  2010-03-24 10:14:42+05:30  Cprogrammer
+# moved overquota.sh to libexec directory
+#
+# Revision 2.141  2010-03-22 14:34:21+05:30  Cprogrammer
+# added tcp.poppass to %ghost
+# rename existing servicedir
+#
 # Revision 2.140  2010-03-15 08:45:00+05:30  Cprogrammer
-# added clambc in list of exe from wich rpath is to be removed
+# added clambc in list of exe from which rpath is to be removed
 #
 # Revision 2.139  2010-03-12 15:57:17+05:30  Cprogrammer
 # added clamav-0.96rc1
@@ -442,7 +449,7 @@
 # rpm spec file for indimail
 #
 #
-# $Id: indimail.spec.in,v 2.140 2010-03-15 08:45:00+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 2.142 2010-03-24 10:14:42+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %define _unpackaged_files_terminate_build 1
 
@@ -1152,7 +1159,7 @@ fi
 
 # Create these files so that %ghost does not complain
 for i in indimail.cnf nssd.conf tcp.imap tcp.imap.cdb tcp.pop3 \
-tcp.pop3.cdb tcp.smtp tcp.smtp.cdb services.log
+tcp.pop3.cdb tcp.smtp tcp.smtp.cdb tcp.poppass tcp.poppass.cdb services.log
 do
 	/bin/touch %{buildroot}%{_prefix}/etc/$i
 done
@@ -1263,12 +1270,14 @@ fi
 %ghost %config(noreplace,missingok)               %{_prefix}/etc/tcp.imap
 %ghost %config(noreplace,missingok)               %{_prefix}/etc/tcp.pop3
 %ghost %config(noreplace,missingok)               %{_prefix}/etc/tcp.smtp
+%ghost %config(noreplace,missingok)               %{_prefix}/etc/tcp.poppass
 #
 # These files will get removed during uninstallation
 #
 %ghost %attr(0644,indimail,indimail)              %{_prefix}/etc/tcp.smtp.cdb
 %ghost %attr(0644,indimail,indimail)              %{_prefix}/etc/tcp.imap.cdb
 %ghost %attr(0644,indimail,indimail)              %{_prefix}/etc/tcp.pop3.cdb
+%ghost %attr(0644,indimail,indimail)              %{_prefix}/etc/tcp.poppass.cdb
 %ghost %attr(0644,root,root)                      %{_prefix}/etc/services.log
 
 %attr(444,root,root)                              %{_prefix}/etc/cronlist
@@ -1613,6 +1622,7 @@ fi
 %attr(555,root,qmail)                   %{_prefix}/bin/tai64nlocal
 %attr(555,root,qmail)                   %{_prefix}/bin/valias
 %attr(555,root,qmail)                   %{_prefix}/bin/vproxy
+%attr(555,root,qmail)                   %{_prefix}/libexec/overquota.sh
 %attr(555,root,qmail)                   %{_prefix}/libexec/qmailmrtg7
 %attr(4555,root,qmail)                  %{_prefix}/libexec/sq_vacation
 %if %nocourierimap == 0
@@ -2163,6 +2173,9 @@ if [ ! -d %{logdir} ] ; then
 fi
 %{__chown} -R qmaill:nofiles %{logdir}
 
+if [ -d /service ] ; then
+	%{__mv} -f %{servicedir} %{servicedir}.org
+fi
 if [ -f %{mysqlPrefix}/bin/mysql_config ] ; then
 	echo "Creating Database/Service for MySQL"
 	# MySQL Config Creation
@@ -2226,6 +2239,7 @@ do
 	else
 		spamfilter=1
 		extra_opt="--remote-authsmtp=plain --localfilter --remotefilter"
+		extra_opt="$extra_opt --deliverylimit-count=-1"
 		extra_opt="$extra_opt --rbl=-rzen.spamhaus.org --rbl=-rdnsbl-1.uceprotect.net"
 	fi
 	if [ $spamfilter -eq 1 ] ; then
@@ -2522,7 +2536,7 @@ done
 /bin/rmdir --ignore-fail-on-non-empty %{_prefix}/man 2>/dev/null
 
 echo "removing configuration"
-for i in indimail.cnf nssd.conf tcp.imap tcp.pop3 tcp.smtp clamd.conf freshclam.conf
+for i in indimail.cnf nssd.conf tcp.imap tcp.pop3 tcp.smtp tcp.poppass clamd.conf freshclam.conf
 do
 	%{__rm} -f %{_prefix}/etc/$i
 done
