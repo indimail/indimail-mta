@@ -2159,8 +2159,8 @@ auto_qmail.h control.h dns.h alloc.h quote.h ip.h ipalloc.h \
 ipme.h cdb.h open.h base64.h gen_allocdefs.h str.h now.h \
 datetime.h exit.h constmap.h tcpto.h timeoutconn.h timeoutread.h \
 timeoutwrite.h env.h uint32.h haveip6.h socket.h variables.h \
-byte.h fmt.h conf-tls conf-ip conf-batv hasindimail.h
-	./compile `grep -h -v "^#" conf-tls conf-ip conf-batv` qmail-remote.c
+byte.h fmt.h conf-tls conf-ip conf-batv conf-mxps hasindimail.h
+	./compile `grep -h -v "^#" conf-tls conf-ip conf-mxps conf-batv` qmail-remote.c
 
 qmail-rspawn: \
 load qmail-rspawn.o spawn.o tcpto_clean.o now.o coe.o get_uid.o sig.a open.a \

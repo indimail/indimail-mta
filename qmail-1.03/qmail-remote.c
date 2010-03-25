@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-remote.c,v $
+ * Revision 1.54  2010-03-25 10:16:24+05:30  Cprogrammer
+ * added QMTP support
+ *
  * Revision 1.53  2010-02-01 10:11:30+05:30  Cprogrammer
  * fix for xtext function
  *
@@ -99,7 +102,7 @@
  * comment for arguments corrected
  *
  * Revision 1.22  2003-11-25 20:46:01+05:30  Cprogrammer
- * do not compare with maproutes if smtproutes is absent
+ * do not compare with mapsmtproutes if smtproutes is absent
  *
  * Revision 1.21  2003-10-23 01:25:33+05:30  Cprogrammer
  * replaced strcmp with str_diffn
@@ -219,6 +222,9 @@
 #define MAX_TOLERANCE 120
 
 #define PORT_SMTP     25 /*- silly rabbit, /etc/services is for users */
+#ifdef MXPS
+#define PORT_QMTP     209 
+#endif
 
 #ifdef TLS
 int             tls_init();
@@ -234,9 +240,15 @@ stralloc        helohost = { 0 };
 stralloc        senderbind = { 0 };
 stralloc        localips = { 0 };
 stralloc        outgoingip = { 0 };
-stralloc        routes = { 0 };
 int             cntrl_stat;
-struct constmap maproutes;
+stralloc        smtproutes = { 0 };
+struct constmap mapsmtproutes;
+#ifdef MXPS
+stralloc        qmtproutes = { 0 };
+struct constmap mapqmtproutes;
+stralloc        bounce = {0};
+int             type = 0;
+#endif
 struct constmap maplocalips;
 stralloc        host = { 0 };
 stralloc        sender = { 0 };
@@ -492,6 +504,29 @@ temp_noconn(stralloc *h, char *ip, int port)
 	zerodie();
 }
 
+#ifdef MXPS
+void
+temp_qmtp_noconn(stralloc *h, char *ip, int port)
+{
+	char            strnum[FMT_ULONG];
+
+	out("ZSorry, I wasn't able to establish an QMTP connection for ");
+	if (substdio_put(subfdoutsmall, h->s, h->len) == -1)
+		_exit(0);
+	if (ip)
+	{
+		out(" to ");
+		out(ip);
+		out(" port ");
+		strnum[fmt_ulong(strnum, port)] = 0;
+		out(strnum);
+		alloc_free(ip);
+	}
+	out(". (#4.4.1)\n");
+	zerodie();
+}
+#endif
+
 void
 err_authprot()
 {
@@ -544,9 +579,14 @@ safewrite(int fd, char *buf, int len)
 	return r;
 }
 
+#ifdef MXPS
+char            inbuf[1500];
+char            smtptobuf[1500];
+#else
 char            inbuf[1024];
-substdio        ssin = SUBSTDIO_FDBUF(read, 0, inbuf, sizeof inbuf);
 char            smtptobuf[1024];
+#endif
+substdio        ssin = SUBSTDIO_FDBUF(read, 0, inbuf, sizeof inbuf);
 substdio        smtpto = SUBSTDIO_FDBUF(safewrite, -1, smtptobuf, sizeof smtptobuf);
 char            smtpfrombuf[128];
 substdio        smtpfrom = SUBSTDIO_FDBUF(saferead, -1, smtpfrombuf, sizeof smtpfrombuf);
@@ -611,7 +651,7 @@ ehlo()
 	ehlokw.len = 0;
 
 #ifdef MXPS
-	if (type == 's')
+	if (type == 's') /* QMTP */
 		return 0;
 #endif
 	substdio_puts(&smtpto, "EHLO ");
@@ -1293,6 +1333,137 @@ smtp_auth(char *type, int use_size)
 	return;
 }
 
+#ifdef MXPS
+void temp_proto()
+{
+	out("Zrecipient did not talk proper QMTP (#4.3.0)\n");
+	zerodie();
+}
+
+int
+qmtp_priority(int pref)
+{
+	if (pref < 12800)
+		return 0;
+	if (pref > 13055)
+		return 0;
+	if (pref % 16 == 1)
+		return 1;
+	return 0;
+}
+
+int             qmtpsend = 0;
+
+void
+qmtp(stralloc *h, char *ip, int port)
+{
+	struct stat     st;
+	unsigned long   len;
+	char           *x;
+	int             i;
+	int             n;
+	unsigned char   ch;
+	char            num[FMT_ULONG];
+	int             flagallok;
+
+	if (fstat(0, &st) == -1)
+		quit("Z", "unable to fstat fd 0", 1);
+	len = st.st_size;
+	/*
+	 * the following code was substantially taken from serialmail'ss serialqmtp.c 
+	 */
+	substdio_put(&smtpto, num, fmt_ulong(num, len + 1));
+	substdio_put(&smtpto, ":\n", 2);
+	while (len > 0) {
+		n = substdio_feed(&ssin);
+		if (n <= 0)
+			_exit(32);			/* wise guy again */
+		x = substdio_PEEK(&ssin);
+		substdio_put(&smtpto, x, n);
+		substdio_SEEK(&ssin, n);
+		len -= n;
+	}
+	substdio_put(&smtpto, ",", 1);
+	len = sender.len;
+	substdio_put(&smtpto, num, fmt_ulong(num, len));
+	substdio_put(&smtpto, ":", 1);
+	substdio_put(&smtpto, sender.s, sender.len);
+	substdio_put(&smtpto, ",", 1);
+	len = 0;
+	for (i = 0; i < reciplist.len; ++i)
+		len += fmt_ulong(num, reciplist.sa[i].len) + 1 + reciplist.sa[i].len + 1;
+	substdio_put(&smtpto, num, fmt_ulong(num, len));
+	substdio_put(&smtpto, ":", 1);
+	for (i = 0; i < reciplist.len; ++i) {
+		substdio_put(&smtpto, num, fmt_ulong(num, reciplist.sa[i].len));
+		substdio_put(&smtpto, ":", 1);
+		substdio_put(&smtpto, reciplist.sa[i].s, reciplist.sa[i].len);
+		substdio_put(&smtpto, ",", 1);
+	}
+	substdio_put(&smtpto, ",", 1);
+	substdio_flush(&smtpto);
+	flagallok = 1;
+	for (i = 0; i < reciplist.len; ++i) {
+		len = 0;
+		for (;;) {
+			get((char *) &ch);
+			if (ch == ':')
+				break;
+			if (len > 200000000)
+				temp_proto();
+			if (ch - '0' > 9)
+				temp_proto();
+			len = 10 * len + (ch - '0');
+		}
+		if (!len)
+			temp_proto();
+		get((char *) &ch);
+		--len;
+		if ((ch != 'Z') && (ch != 'D') && (ch != 'K'))
+			temp_proto();
+		if (!stralloc_copyb(&smtptext, (char *) &ch, 1))
+			temp_proto();
+		if (!stralloc_cats(&smtptext, "Remote host said: "))
+			temp_nomem();
+		while (len > 0) {
+			get((char *) &ch);
+			--len;
+		}
+		for (len = 0; len < smtptext.len; ++len) {
+			ch = smtptext.s[len];
+			if ((ch < 32) || (ch > 126))
+				smtptext.s[len] = '?';
+		}
+		get((char *) &ch);
+		if (ch != ',')
+			temp_proto();
+		smtptext.s[smtptext.len - 1] = '\n';
+		if (smtptext.s[0] == 'K')
+			out("r");
+		else if (smtptext.s[0] == 'D') {
+			out("h");
+			flagallok = 0;
+		} else {				/* if (smtptext.s[0] == 'Z') */
+			out("s");
+			flagallok = 0;
+		}
+		if (substdio_put(subfdoutsmall, smtptext.s + 1, smtptext.len - 1) == -1)
+			temp_qmtp_noconn(h, ip, port);
+		zero();
+	}
+	if (!flagallok) {
+		out("DGiving up on ");
+		outhost();
+		out("\n");
+	} else {
+		out("K");
+		outhost();
+		out(" accepted message.\n");
+	}
+	zerodie();
+}
+#endif
+
 stralloc         helo_str = { 0 };
 
 void
@@ -1310,17 +1481,17 @@ smtp()
 	else
 	if (type != 's' && port == 465)
 		smtps = 1;
-#else
+#else /*- MXPS */
 	if (port == 465)
 		smtps = 1;
-#endif
+#endif /*- #ifdef MXPS */
 	if (!smtps)
 		code = smtpcode();
 	else
 		code = 220;
-#else
+#else /*- TLS */
 	code = smtpcode();
-#endif
+#endif /*- #ifdef TLS */
 	inside_greeting = 0;
 	if (code >= 500 && code < 600)
 		quit("DConnected to ", " but greeting failed", 1);
@@ -1508,12 +1679,12 @@ getcontrols()
 		temp_control();
 	if ((ip = env_get("SMTPROUTE"))) /* mysql */
 	{
-		if (!stralloc_copyb(&routes, ip, str_len(ip) + 1))
+		if (!stralloc_copyb(&smtproutes, ip, str_len(ip) + 1))
 			temp_nomem();
 		cntrl_stat = 1;
 	} else
 	{
-		cntrl_stat = control_readfile(&routes, "smtproutes", 0);
+		cntrl_stat = control_readfile(&smtproutes, "smtproutes", 0);
 		if (!controldir)
 		{
 			if (!(controldir = env_get("CONTROLDIR")))
@@ -1542,14 +1713,29 @@ getcontrols()
 	case -1: /*- error reading smtproutes */
 		temp_control();
 	case 0: /*- smtproutes absent */
-		if (!constmap_init(&maproutes, "", 0, 1))
+		if (!constmap_init(&mapsmtproutes, "", 0, 1))
 			temp_nomem();
 		break;
 	case 1: /*- smtproutes present */
-		if (!constmap_init(&maproutes, routes.s, routes.len, 1))
+		if (!constmap_init(&mapsmtproutes, smtproutes.s, smtproutes.len, 1))
 			temp_nomem();
 		break;
 	}
+#ifdef MXPS
+	switch (control_readfile(&qmtproutes, "qmtproutes", 0))
+	{
+	case -1:
+		temp_control();
+	case 0:
+		if (!constmap_init(&mapqmtproutes, "", 0, 1))
+			temp_nomem();
+		break;
+	case 1:
+		if (!constmap_init(&mapqmtproutes, qmtproutes.s, qmtproutes.len, 1))
+			temp_nomem();
+		break;
+	}
+#endif
 #ifdef BATV
 	if ((batvok = control_readline(&signkey, (x = env_get("SIGNKEY")) ? x : "signkey")) == -1)
 		temp_control();
@@ -1799,25 +1985,51 @@ main(int argc, char **argv)
 		perm_usage();
 	if (chdir(auto_qmail) == -1)
 		temp_chdir();
-	msgsize = argv[4];
-	recips = argv + 5;
 	if (!stralloc_copys(&host, argv[1])) /*- host required by getcontrols below */
 		temp_nomem();
+	addrmangle(&sender, argv[2], &flagalias, 0);
+	if (!stralloc_copys(&qqeh, argv[3]))
+		temp_nomem();
+	msgsize = argv[4];
+	recips = argv + 5;
 	getcontrols();
 	use_auth_smtp = env_get("AUTH_SMTP");
-	relayhost = 0;
+	/*- Per user SMTPROUTE functionality */
+	relayhost = lookup_host(*recips, str_len(*recips));
 	min_penalty = (x = env_get("MIN_PENALTY")) ? scan_int(x, &min_penalty) : MIN_PENALTY;
 	max_tolerance = (x = env_get("MAX_TOLERANCE")) ? scan_ulong(x, &max_tolerance) : MAX_TOLERANCE;
+#ifdef MXPS
+	if (sender.len == 0) {     /* bounce routes */
+		if (!stralloc_copys(&bounce, "!@"))
+			temp_nomem();
+		if ((relayhost = constmap(&mapqmtproutes, bounce.s, bounce.len))) {
+			type = 's';
+			qmtpsend = 1;
+			port = PORT_QMTP;
+		} else
+		if (!(relayhost = constmap(&mapsmtproutes, bounce.s, bounce.len)))
+			relayhost = lookup_host("!@", 2);
+	}
+	if (relayhost && !*relayhost)
+		relayhost = 0;
+#endif
 	if (cntrl_stat) /*- set in getcontrols() above */
 	{
-		/*- Per user SMTPROUTE functionality */
-		relayhost = lookup_host(argv[5], str_len(argv[5]));
 		/*- Look at smtproutes */
 		for (i = 0; !relayhost && i <= host.len; ++i)
 		{
 			if ((i == 0) || (i == host.len) || (host.s[i] == '.'))
 			{
-				if ((relayhost = constmap(&maproutes, host.s + i, host.len - i)))
+#ifdef MXPS
+				if ((relayhost = constmap(&mapqmtproutes, host.s + i, host.len - i))) {
+					type = 's';
+					qmtpsend = 1;
+					port = PORT_QMTP;
+					break;
+				} 
+#endif
+				/* default smtproutes */
+				if ((relayhost = constmap(&mapsmtproutes, host.s + i, host.len - i)))
 					break;
 				if ((relayhost = lookup_host(host.s + i, host.len - i)))
 					break;
@@ -1826,6 +2038,25 @@ main(int argc, char **argv)
 		if (relayhost && !*relayhost)
 			relayhost = 0;
 	}
+#ifdef MXPS
+	else
+	{
+		for (i = 0; !relayhost && i <= host.len; ++i)
+		{
+			if ((i == 0) || (i == host.len) || (host.s[i] == '.'))
+			{
+				if ((relayhost = constmap(&mapqmtproutes, host.s + i, host.len - i))) {
+					type = 's';
+					qmtpsend = 1;
+					port = PORT_QMTP;
+					break;
+				} 
+			}
+		}
+		if (relayhost && !*relayhost)
+			relayhost = 0;
+	}
+#endif
 	if (relayhost)
 	{
 		if (use_auth_smtp)
@@ -1877,9 +2108,6 @@ main(int argc, char **argv)
 			temp_nomem();
 	} else
 		use_auth_smtp = 0;
-	addrmangle(&sender, argv[2], &flagalias, 0);
-	if (!stralloc_copys(&qqeh, argv[3]))
-		temp_nomem();
 #if BATV
 	if (batvok && sender.len && signkey.len) {
 		int             j;
@@ -1887,9 +2115,9 @@ main(int argc, char **argv)
 		if (!stralloc_0(&sender))
 			temp_nomem(); /* null terminate */
 		sender.len--;
-		i = str_rchr(argv[5], '@');	/* should check all recips, not just the first */
+		i = str_rchr(*recips, '@');	/* should check all recips, not just the first */
 		j = str_rchr(sender.s, '@');
-		if (!constmap(&mapnosign, argv[5] + i + 1, str_len(argv[5] + i + 1)) 
+		if (!constmap(&mapnosign, *recips + i + 1, str_len(*recips + i + 1)) 
 				&& !constmap(&mapnosigndoms, sender.s + j + 1, sender.len - (j + 1)))
 			sign_batv(); /*- modifies sender */
 	}
@@ -1948,7 +2176,13 @@ main(int argc, char **argv)
 	x = 0;
 	for (i = j = 0; i < ip.len; ++i)
 	{
+#ifdef MXPS
+		if (qmtp_priority(ip.ix[i].pref))
+			qmtpsend = 1;
+		if (qmtpsend || ip.ix[i].pref < prefme)
+#else
 		if (ip.ix[i].pref < prefme)
+#endif
 		{
 			if (flagtcpto && tcpto(&ip.ix[i], min_penalty))
 				continue;
@@ -1976,7 +2210,15 @@ main(int argc, char **argv)
 #ifdef TLS
 				partner_fqdn = ip.ix[i].fqdn;
 #endif
-				smtp(); /*- only returns when the next MX is to be tried */
+#ifdef MXPS
+				if (qmtpsend) 
+				{
+					if (j)
+						x[j - 1] = 0;
+					qmtp(&host, x, port);
+				} else
+#endif
+					smtp(); /*- only returns when the next MX is to be tried */
 				smtp_error = 1;
 			} else
 				smtp_error = 0;
@@ -2007,7 +2249,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_remote_c()
 {
-	static char    *x = "$Id: qmail-remote.c,v 1.53 2010-02-01 10:11:30+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: qmail-remote.c,v 1.54 2010-03-25 10:16:24+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

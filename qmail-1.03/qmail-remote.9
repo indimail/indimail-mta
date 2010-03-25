@@ -1,6 +1,6 @@
 .TH qmail-remote 8
 .SH NAME
-qmail-remote \- send mail via SMTP or ESMTP
+qmail-remote \- send mail via SMTP / ESMTP or QMTP
 .SH SYNOPSIS
 .B qmail-remote
 .I host
@@ -28,7 +28,8 @@ sends the message to
 or to a mail exchanger for
 .I host
 listed in the Domain Name System,
-via the Simple Mail Transfer Protocol (SMTP / ESMTP).
+via the Simple Mail Transfer Protocol (SMTP/ESMTP) - default -
+or the Quick Mail Transfer Protocol (QMTP).
 .I host
 can be either a fully-qualified domain name:
 
@@ -41,7 +42,7 @@ or an IP address enclosed in brackets:
 .EX
      [128.32.183.163]
 .EE
-
+ 
 The size parameter is only used if the remote host uses the ESMTP SIZE extension defined in
 .I RFC 1870\fP. It gives the size of the message in bytes. 
 .BR qmail-remote
@@ -243,6 +244,23 @@ refuses to run.  If the envelope sender address matches a domain in the
 control file, the envelope sender domain will be used instead of this value.
 
 .TP 5
+.I qmtproutes
+Additional QMTP routes which have precedence over
+.IR smtproutes .
+QMTP routes should obey the form
+.IR domain\fB:\fIrelay\fB:\fIport ,
+without any extra spaces.
+.I qmtproutes
+follows the same syntax as
+.IR smtproutes .
+By default, 
+.B qmail-remote
+connects to QMTP service port 209. However
+you can chose a dedicated high-port for QMTP communication
+as defined in
+.IR qmtproutes .
+
+.TP 5
 .I smtproutes
 Artificial SMTP routes.
 Each route has the form
@@ -303,6 +321,16 @@ However,
 you are always safe using
 .I smtproutes
 if you do not accept mail from the network.
+Additionally,
+.I smtproutes 
+allows to forward bounces (with a 'Nullsender' MAIL FROM: <>)
+literally expressed as '!@'
+to a particular bounce host:
+
+.EX
+   !@:bouncehost.af.mil:27
+.EE
+
 
 The smtproutes control file is bypassed if the SMTPROUTE environment variable is set by
 .B qmail-rspawn.
@@ -353,7 +381,10 @@ in the following format
 <email_address><sp><ip_address>
 
 Then run the command cdbmake-12 moresmtproutes.cdb < moresmtproutes.tmp < moresmtproutes.cdb. A route obtained from
-moresmtproutes.cdb overrides control file \fBsmtproutes\fR or environment variable \fBSMTPROUTES\fR
+moresmtproutes.cdb overrides control file \fBsmtproutes\fR or environment variable
+\fBSMTPROUTES\fR. One can also redirect all bounces to a host by specifying
+
+!@<sp><ip_address>
 
 .TP 5
 .I timeoutconnect
