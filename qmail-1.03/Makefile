@@ -1325,7 +1325,8 @@ qmail-queue.0 qmail-dk.0 qmail-dkim.8 dk-filter.8 qmail-inject.0 mailsubj.0 \
 qmail-showctl.0 qmail-newu.0 \
 qmail-pw2u.0 qmail-qread.0 qmail-qstat.0 qmail-tcpto.0 qmail-tcpok.0 \
 qmail-pop3d.0 qmail-popbull.0 qmail-popup.0 qmail-qmqpc.0 \
-qmail-qmqpd.0 qmail-qmtpd.0 qmail-smtpd.0 greydaemon.0 qmail-poppass.0 dktest.8 svscanboot.0 \
+qmail-qmqpd.0 qmail-qmtpd.0 qmail-smtpd.0 greydaemon.0 qmail-poppass.0 \
+dktest.8 dkim.8 svscanboot.0 \
 qmail-multi.0 spawn-filter.0 tcp-env.0 qmail-greyd.0 \
 qmail-newmrh.0 recipient-cdb.0 qmail-cdb.0 qreceipt.0 forward.0 \
 rrforward.0 preline.0 condredirect.0 bouncesaying.0 except.0 \
@@ -2068,6 +2069,10 @@ dktest.8: dktest.9
 	| sed s}QMAILHOME}"`head -1 conf-qmail`"}g \
 	> dktest.8
 
+dkim.8: dkim.9
+	cat dkim.9 \
+	| sed s}QMAILHOME}"`head -1 conf-qmail`"}g \
+	> dkim.8
 dkim.lib: trydkim.c compile load conf-dkim dns.lib
 	( ( ./compile -I$(DESTDIR)$(INDIDIR)/include -I../libdkim-$(DKIM_VERSION) `grep -h -v "^#" conf-dkim` trydkim.c && \
 	g++ -o trydkim trydkim.o  -L../libdkim-$(DKIM_VERSION) -L$(DESTDIR)$(INDIDIR)/lib `cat dns.lib` -ldkim -lcrypto ) >/dev/null 2>&1 \
