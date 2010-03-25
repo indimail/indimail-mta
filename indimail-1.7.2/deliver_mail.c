@@ -1,5 +1,9 @@
 /*
  * $Log: deliver_mail.c,v $
+ * Revision 2.53  2010-03-25 08:31:34+05:30  Cprogrammer
+ * added missing newline after Delivered-To header
+ * QQEH to be unset only if QHPSI is set.
+ *
  * Revision 2.52  2010-03-24 10:14:33+05:30  Cprogrammer
  * moved overquota.sh to libexec directory
  *
@@ -181,7 +185,7 @@
 #endif
 
 #ifndef	lint
-static char     sccsid[] = "$Id: deliver_mail.c,v 2.52 2010-03-24 10:14:33+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: deliver_mail.c,v 2.53 2010-03-25 08:31:34+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 /*- Function Prototypes */
@@ -276,6 +280,9 @@ qmail_inject_open(char *address, int *write_fd)
 		close(pim[1]);
 		return (-1);
 	case 0:
+		/*- Our responsibility on QQEH ends here */
+		if (getenv("QHPSI"))
+			unsetenv("QQEH");
 		close(pim[1]);
 		if (dup2(pim[0], 0) == -1)
 			_exit(111);
@@ -538,13 +545,13 @@ deliver_mail(char *address, mdir_t MsgSize, char *quota, uid_t uid, gid_t gid,
 			if (qqeh && *qqeh)
 			{
 				snprintf(DeliveredTo, AUTH_SIZE, 
-					"%s%s%s%s\nReceived: (indimail %d invoked by uid %d); %s\n",
+					"%s%s\n%s%s\nReceived: (indimail %d invoked by uid %d); %s\n",
 					rpline, dtline, qqeh,
 					xfilter ? xfilter : "X-Filter: None",
 					getpid(), getuid(), get_localtime());
 			} else
 				snprintf(DeliveredTo, AUTH_SIZE, 
-					"%s%s%s\nReceived: (indimail %d invoked by uid %d); %s\n",
+					"%s%s\n%s\nReceived: (indimail %d invoked by uid %d); %s\n",
 					rpline, dtline,
 					xfilter ? xfilter : "X-Filter: None",
 					getpid(), getuid(), get_localtime());
@@ -766,8 +773,6 @@ deliver_mail(char *address, mdir_t MsgSize, char *quota, uid_t uid, gid_t gid,
 	if (*address == '|')
 	{
 		is_file = 0;
-		/*- Our responsibility on QQEH ends here */
-		unsetenv("QQEH");
 		/*- This is an command */
 		is_injected = 1;
 		/*- open up a pipe to a command */
@@ -779,8 +784,6 @@ deliver_mail(char *address, mdir_t MsgSize, char *quota, uid_t uid, gid_t gid,
 		for (cmmd = address + 1;*cmmd && isspace((int) *cmmd);cmmd++);
 	} else /*- must be an email address */
 	{
-		/*- Our responsibility on QQEH ends here */
-		unsetenv("QQEH");
 		is_file = 0;
 		is_injected = 1;
 		cmmd = "qmail-inject";
@@ -1035,7 +1038,8 @@ open_command(char *command, int *write_fd)
 		close(pim[1]);
 		return (-1);
 	case 0:
-		unsetenv("QQEH");
+		if (getenv("QHPSI"))
+			unsetenv("QQEH");
 		close(pim[1]);
 		if (dup2(pim[0], 0) == -1)
 			_exit(-1);
