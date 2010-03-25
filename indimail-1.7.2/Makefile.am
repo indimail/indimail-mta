@@ -884,7 +884,8 @@ install-data-hook:
 		chown indimail:indimail $(DESTDIR)@prefix@/etc/wordlist.db || exit 1; \
 	fi
 
-.gitignore: $(PROGRAMS) $(indimailbin_SCRIPTS) $(indimailsbin_SCRIPTS) gitignore
+.gitignore: $(PROGRAMS) $(indimailbin_SCRIPTS) $(indimailsbin_SCRIPTS) \
+$(indimaillibexec_SCRIPTS) gitignore
 	(for f in $^; do \
 		echo $$f ; \
 	done ;cat gitignore) |grep -v gitignore >> .gitignore; sort -u .gitignore -o .gitignore
