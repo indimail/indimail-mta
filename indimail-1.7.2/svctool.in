@@ -1,6 +1,9 @@
 #!/bin/sh
 # WARNING: This file was auto-generated. Do not edit!
 # $Log: svctool.in,v $
+# Revision 2.168  2010-03-25 10:27:06+05:30  Cprogrammer
+# added option to create qmtpd service
+#
 # Revision 2.167  2010-03-22 10:50:57+05:30  Cprogrammer
 # do not clobber default control files if they exist
 #
@@ -689,7 +692,7 @@
 # Initial revision
 #
 #
-# $Id: svctool.in,v 2.167 2010-03-22 10:50:57+05:30 Cprogrammer Exp mbhangui $
+# $Id: svctool.in,v 2.168 2010-03-25 10:27:06+05:30 Cprogrammer Exp mbhangui $
 #
 
 #
@@ -861,6 +864,49 @@ Known values for OPTION are:
   save_interval  - Time interval in which context file gets saved
   whitelist      - List of whitelisted IP
   use-greydaemon - Use John Levine's greydaemon
+
+--qmtp=Port --qbase=queue_path --qcount=N --qstart=I
+	--servicedir=service_path --cntrldir=cntrl_path
+	--localip=a --maxdaemons=m --maxperip=i
+	[--fsync --syncdir]
+	[--memory=b --min-free=M]
+	[--qhpsi=q]
+	[--spamfilter=spamfilter_args]
+	[--logfilter=filter_fifo]
+	[--rejectspam=r --spamexitcode=e]
+	[--dkverify=dk|dkim|both|none]
+	[--dksign=dk|dkim|both|none --private_key=private_key]
+
+ Installs a new queue with a QMTP Listener
+  m              - Concurrency of connections to allow
+  i              - Concurrency of connections to be allowed from a
+                   single ip address
+  a              - IP Address to listen
+  N              - No of Queues
+  I              - Numeral Prefix of first queue (i.e 1 for $QmailHOME/queue1)
+  M              - Minimum Disk Space to maintain in queue after which
+                   Temporary error will be returned
+  b              - Max Memory that QMTP can allocate
+  Port           - Bind on this port for QMTP
+  service_path   - Path where supervise scripts will be installed
+  queue_path     - Path where the queues are installed. If this is different from
+                   $QmailHOME appropriate links will be created in
+                   $QmailHOME
+  cntrl_path     - Path where Qmail control files are stored
+  fsync          - Sync files and directories when writing files
+  syncdir        - Use BSD style sync semantics for flushing directories
+  q              - Full path to an external virus scanner (like clamdscan)
+  spamfilter     - Spamfilter program along with arguments
+
+  filter_fifo    - Capture additional status message from spamfilter in 
+                   smtpd logfile via filter_fifo
+  r              - Mails get rejected as spam if exit status of spamfilter
+                   equals the value of spamexitcode. r can have following values
+                   0 - Do not reject SPAM mails
+                   1 - Bounce SPAM Mails.
+                   2 - Blackhole SPAM Mails
+  e              - Exit value of spamfilter that should be treated as spam
+  private_key    - Path to Private key created by dknewkey
 
 --imap=Port --servicedir=service_path
 	--localip=a --maxdaemons=m --maxperip=i
@@ -2018,7 +2064,7 @@ case "$dkverify_option" in
 esac
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.167 2010-03-22 10:50:57+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.168 2010-03-25 10:27:06+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -2029,7 +2075,7 @@ echo "HOSTNAME=\`uname -n\`"
 echo
 echo "if [ -z \"\$QMAILDUID\" -o -z \"\$NOFILESGID\" -o -z \"\$ME\" ]; then"
 echo "    echo QMAILDUID, NOFILESGID, or ME is unset in"
-echo "    echo $QmailHOME/supervise/qmail-smtpd/run"
+echo "    echo $QmailHOME/supervise/qmail-smtpd.$tag/run"
 echo "    sleep 5"
 echo "    exit 1"
 echo "fi"
@@ -2067,7 +2113,7 @@ if [ " $odmr" = " " ] ; then
 	# qmail-inject wrapper
 	(
 	echo "#!/bin/sh"
-	echo "# \$Id: svctool.in,v 2.167 2010-03-22 10:50:57+05:30 Cprogrammer Exp mbhangui $"
+	echo "# \$Id: svctool.in,v 2.168 2010-03-25 10:27:06+05:30 Cprogrammer Exp mbhangui $"
 	echo "# generated on $host on `date`"
 	echo "# $prog_args"
 	echo ""
@@ -2080,7 +2126,7 @@ if [ " $odmr" = " " ] ; then
 		/bin/mkdir -p "$DESTDIR"$SERVICEDIR/qmail-spamlog/log
 		(
 		echo "#!/bin/sh"
-		echo "# \$Id: svctool.in,v 2.167 2010-03-22 10:50:57+05:30 Cprogrammer Exp mbhangui $"
+		echo "# \$Id: svctool.in,v 2.168 2010-03-25 10:27:06+05:30 Cprogrammer Exp mbhangui $"
 		echo "# $prog_args"
 		echo ""
 		echo "LOGFILTER=\`cat $SERVICEDIR/qmail-smtpd.$tag/variables/LOGFILTER\`"
@@ -2101,7 +2147,7 @@ if [ " $odmr" = " " ] ; then
 		#qmail-spamlog log script
 		(
 		echo "#!/bin/sh"
-		echo "# \$Id: svctool.in,v 2.167 2010-03-22 10:50:57+05:30 Cprogrammer Exp mbhangui $"
+		echo "# \$Id: svctool.in,v 2.168 2010-03-25 10:27:06+05:30 Cprogrammer Exp mbhangui $"
 		echo "# generated on $host on `date`"
 		echo "# $prog_args"
 		echo ""
@@ -2119,7 +2165,7 @@ if [ ! -d $LOGDIR ] ; then
 fi
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.167 2010-03-22 10:50:57+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.168 2010-03-25 10:27:06+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -2127,6 +2173,215 @@ echo "exec $QmailHOME/bin/setuidgid qmaill \\"
 echo "$QmailHOME/bin/multilog t $LOGDIR/smtpd.$tag"
 ) > "$DESTDIR"$SERVICEDIR/qmail-smtpd.$tag/log/run
 /bin/chmod +x "$DESTDIR"$SERVICEDIR/qmail-smtpd.$tag/log/run
+}
+
+create_qmtp()
+{
+if [ $# -ne 5 ] ; then
+	echo "USAGE: create_qmtp qbase queue_count first_queue_no supervise_dir qmtp_port" 1>&2
+	return 1
+fi
+QUEUE_DIR=$1
+NO_OF_QUEUES=$2
+FIRST_QUEUE=$3
+SERVICEDIR=$4
+QMTP_PORT=$5
+
+# qmail-qmtpd script
+if [ ! -d /usr/xpg4 ] ; then
+	/bin/mkdir /usr/xpg4
+	/bin/ln -s /usr/bin /usr/xpg4/bin
+fi
+if [ " $servicetag" = " " ] ; then
+	tag=$QMTP_PORT
+else
+	tag=$servicetag
+fi
+/bin/mkdir -p "$DESTDIR"$SERVICEDIR/qmail-qmtpd.$tag/log
+conf_dir="$DESTDIR"$SERVICEDIR/qmail-qmtpd.$tag/variables
+/bin/mkdir -p $conf_dir
+if [ " $ipaddress" = " " ] ; then
+	echo 0 > $conf_dir/LOCALIP
+else
+	echo $ipaddress > $conf_dir/LOCALIP
+fi
+echo $QMTP_PORT > $conf_dir/PORT
+if [ ! " $maxdaemons" = " " ] ; then
+	echo "$maxdaemons" > $conf_dir/MAXDAEMONS
+else
+	echo $CONCURRENCYINCOMING > $conf_dir/MAXDAEMONS
+fi
+if [ ! " $maxperip" = " " ] ; then
+	echo "$maxperip" > $conf_dir/MAXPERIP
+else
+	echo 10 > $conf_dir/MAXPERIP
+fi
+if [ ! " $CONTROLDIR" = " " ] ; then
+	echo "$CONTROLDIR" > $conf_dir/CONTROLDIR
+else
+	 > $conf_dir/CONTROLDIR
+fi
+if [ ! " $memory" = " " ] ; then
+	echo $memory > $conf_dir/SOFT_MEM
+else
+	echo 52428800 > $conf_dir/SOFT_MEM
+fi
+echo $QUEUE_DIR > $conf_dir/QUEUE_BASE
+echo $NO_OF_QUEUES > $conf_dir/QUEUE_COUNT
+echo $FIRST_QUEUE > $conf_dir/QUEUE_START
+case "$dkverify_option" in
+	dkim)
+	/bin/rm -f $conf_dir/DKSIGN $conf_dir/DKIMSIGN $conf_dir/DKVERIFY $conf_dir/DKIMVERIFY $conf_dir/DKQUEUE $conf_dir/DKIMQUEUE
+	echo > $conf_dir/DKIMVERIFY
+	echo "$QmailHOME/bin/qmail-dkim" > $conf_dir/QMAILQUEUE
+	;;
+	dk)
+	echo > $conf_dir/DKVERIFY
+	/bin/rm -f $conf_dir/DKSIGN $conf_dir/DKIMSIGN $conf_dir/DKVERIFY $conf_dir/DKIMVERIFY $conf_dir/DKQUEUE $conf_dir/DKIMQUEUE
+	echo "$QmailHOME/bin/qmail-dk" > $conf_dir/QMAILQUEUE
+	;;
+	both)
+	/bin/rm -f $conf_dir/DKSIGN $conf_dir/DKIMSIGN $conf_dir/DKVERIFY $conf_dir/DKIMVERIFY $conf_dir/DKQUEUE $conf_dir/DKIMQUEUE
+	echo > $conf_dir/DKIMVERIFY
+	echo > $conf_dir/DKVERIFY
+	echo "$QmailHOME/bin/qmail-dk" > $conf_dir/QMAILQUEUE
+	echo "$QmailHOME/bin/qmail-dkim" > $conf_dir/DKQUEUE
+	;;
+	none|*)
+	/bin/rm -f $conf_dir/DKSIGN $conf_dir/DKIMSIGN $conf_dir/DKVERIFY $conf_dir/DKIMVERIFY $conf_dir/DKQUEUE $conf_dir/DKIMQUEUE
+	echo "$QmailHOME/bin/qmail-multi" > $conf_dir/QMAILQUEUE
+	;;
+esac
+if [ " $usefsync" = " " ] ; then
+	> $conf_dir/USE_FSYNC
+else
+	echo > $conf_dir/USE_FSYNC
+fi
+if [ " $usesyncdir" = " " ] ; then
+	> $conf_dir/USE_SYNCDIR
+else
+	echo > $conf_dir/USE_SYNCDIR
+fi
+if [ " $min_free" = " " ] ; then
+	echo 52428800 > $conf_dir/MIN_FREE
+else
+	echo $min_free > $conf_dir/MIN_FREE
+fi
+if [ " $min_free" = " " ] ; then
+	echo 52428800 > $conf_dir/MIN_FREE
+else
+	echo $min_free > $conf_dir/MIN_FREE
+fi
+if [ " $qhpsi" = " " ] ; then
+	> $conf_dir/QHPSI
+else
+	echo $qhpsi > $conf_dir/QHPSI
+fi
+if [ ! " $spamfilter" = " " ] ; then
+	echo "$spamfilter" > $conf_dir/SPAMFILTER
+	if [ ! " $logfilter" = " " ] ; then
+		echo  $logfilter > $conf_dir/LOGFILTER
+	else
+		> $conf_dir/LOGFILTER
+	fi
+	echo "1" > $conf_dir/MAKE_SEEKABLE
+	if [ ! " $spamexitcode" = " " ] ; then
+		echo "$spamexitcode" > $conf_dir/SPAMEXITCODE
+		if [ ! " $rejectspam" = " " ] ; then
+			echo "$rejectspam" > $conf_dir/REJECTSPAM
+		else
+			> $conf_dir/REJECTSPAM
+		fi
+	else
+		> $conf_dir/SPAMEXITCODE
+	fi
+else
+	> $conf_dir/SPAMFILTER
+fi
+if [ ! " $QmailHOME" = " $indimaildir" ] ; then
+	echo "$QmailHOME/bin:/bin:/usr/bin:$indimaildir/bin" > $conf_dir/PATH
+else
+	echo "$QmailHOME/bin:/bin:/usr/bin" > $conf_dir/PATH
+fi
+(
+echo "#!/bin/sh"
+echo "# \$Id: svctool.in,v 2.168 2010-03-25 10:27:06+05:30 Cprogrammer Exp mbhangui $"
+echo "# generated on $host on `date`"
+echo "# $prog_args"
+echo ""
+echo "QMAILDUID=\`/usr/xpg4/bin/id -u indimail\`"
+echo "NOFILESGID=\`/usr/xpg4/bin/id -g indimail\`"
+echo "ME=\`head -1 $QmailHOME/control/me\`"
+echo "HOSTNAME=\`uname -n\`"
+echo
+echo "if [ -z \"\$QMAILDUID\" -o -z \"\$NOFILESGID\" -o -z \"\$ME\" ]; then"
+echo "    echo QMAILDUID, NOFILESGID, or ME is unset in"
+echo "    echo $QmailHOME/supervise/qmail-qmtpd.$tag/run"
+echo "    sleep 5"
+echo "    exit 1"
+echo "fi"
+echo
+echo "exec $QmailHOME/bin/envdir $SERVICEDIR/qmail-qmtpd.$tag/variables sh -c \""
+echo "exec $QmailHOME/bin/softlimit -m \\\$SOFT_MEM -o 1024 \\"
+echo "$QmailHOME/bin/tcpserver -v -H -R -l \\\$LOCALIP \\"
+echo "-x $indimaildir/etc/tcp.smtp.cdb \\"
+echo "-c $SERVICEDIR/qmail-qmtpd.$tag/variables/MAXDAEMONS -o -b \\\$MAXDAEMONS \\"
+echo "-u \$QMAILDUID -g \$NOFILESGID \\\$LOCALIP \\\$PORT \\"
+echo "$QmailHOME/bin/qmail-qmtpd 2>&1\""
+) > "$DESTDIR"$SERVICEDIR/qmail-qmtpd.$tag/run
+/bin/chmod +x "$DESTDIR"$SERVICEDIR/qmail-qmtpd.$tag/run
+
+if [ ! " $logfilter" = " " -a ! -d "$DESTDIR"$SERVICEDIR/qmail-spamlog/run ] ; then
+	# qmail-spam logger
+	/bin/mkdir -p "$DESTDIR"$SERVICEDIR/qmail-spamlog/log
+	(
+	echo "#!/bin/sh"
+	echo "# \$Id: svctool.in,v 2.168 2010-03-25 10:27:06+05:30 Cprogrammer Exp mbhangui $"
+	echo "# $prog_args"
+	echo ""
+	echo "LOGFILTER=\`cat $SERVICEDIR/qmail-qmtpd.$tag/variables/LOGFILTER\`"
+	echo "if [ ! -p \$LOGFILTER ] ; then"
+	echo "	/bin/rm -f \$LOGFILTER"
+	echo "	/usr/bin/mkfifo \$LOGFILTER"
+	echo "fi"
+	echo "/bin/chmod 666 \$LOGFILTER"
+	echo "exec $QmailHOME/bin/setuidgid indimail \\"
+	echo "$QmailHOME/bin/qmail-cat \$LOGFILTER"
+	) > "$DESTDIR"$SERVICEDIR/qmail-spamlog/run
+	/bin/chmod +x "$DESTDIR"$SERVICEDIR/qmail-spamlog/run
+
+	if [ ! -d $LOGDIR ] ; then
+		/bin/mkdir -p $LOGDIR
+		$chown qmaill:nofiles $LOGDIR
+	fi
+	#qmail-spamlog log script
+	(
+	echo "#!/bin/sh"
+	echo "# \$Id: svctool.in,v 2.168 2010-03-25 10:27:06+05:30 Cprogrammer Exp mbhangui $"
+	echo "# generated on $host on `date`"
+	echo "# $prog_args"
+	echo ""
+	echo "exec $QmailHOME/bin/setuidgid qmaill \\"
+	echo "$QmailHOME/bin/multilog t $LOGDIR/spamlog"
+	) > "$DESTDIR"$SERVICEDIR/qmail-spamlog/log/run
+	/bin/chmod +x "$DESTDIR"$SERVICEDIR/qmail-spamlog/log/run
+fi
+
+# qmail-qmtpd log script
+if [ ! -d $LOGDIR ] ; then
+	/bin/mkdir -p $LOGDIR
+	$chown qmaill:nofiles $LOGDIR
+fi
+(
+echo "#!/bin/sh"
+echo "# \$Id: svctool.in,v 2.168 2010-03-25 10:27:06+05:30 Cprogrammer Exp mbhangui $"
+echo "# generated on $host on `date`"
+echo "# $prog_args"
+echo ""
+echo "exec $QmailHOME/bin/setuidgid qmaill \\"
+echo "$QmailHOME/bin/multilog t $LOGDIR/qmtpd.$tag"
+) > "$DESTDIR"$SERVICEDIR/qmail-qmtpd.$tag/log/run
+/bin/chmod +x "$DESTDIR"$SERVICEDIR/qmail-qmtpd.$tag/log/run
 }
 
 create_greylist()
@@ -2187,7 +2442,7 @@ fi
 
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.167 2010-03-22 10:50:57+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.168 2010-03-25 10:27:06+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -2210,7 +2465,7 @@ if [ ! -d $LOGDIR ] ; then
 fi
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.167 2010-03-22 10:50:57+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.168 2010-03-25 10:27:06+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -2289,7 +2544,7 @@ else
 fi
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.167 2010-03-22 10:50:57+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.168 2010-03-25 10:27:06+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -2344,7 +2599,7 @@ fi
 # qmail-imapd log script
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.167 2010-03-22 10:50:57+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.168 2010-03-25 10:27:06+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -2638,7 +2893,7 @@ else
 fi
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.167 2010-03-22 10:50:57+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.168 2010-03-25 10:27:06+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -2692,7 +2947,7 @@ fi
 # qmail-pop3d log script
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.167 2010-03-22 10:50:57+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.168 2010-03-25 10:27:06+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -2900,7 +3155,7 @@ fi
 echo 1 > $conf_dir/MYSQL_OPT_RECONNECT
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.167 2010-03-22 10:50:57+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.168 2010-03-25 10:27:06+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -2928,7 +3183,7 @@ fi
 # indisrvr log script
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.167 2010-03-22 10:50:57+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.168 2010-03-25 10:27:06+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -2952,7 +3207,7 @@ conf_dir="$DESTDIR"$SERVICEDIR/qscanq/variables
 # qscanq script
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.167 2010-03-22 10:50:57+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.168 2010-03-25 10:27:06+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -2974,7 +3229,7 @@ fi
 # qscanq log script
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.167 2010-03-22 10:50:57+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.168 2010-03-25 10:27:06+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -2991,7 +3246,7 @@ conf_dir="$DESTDIR"$SERVICEDIR/clamd/variables
 # clamd script
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.167 2010-03-22 10:50:57+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.168 2010-03-25 10:27:06+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -3028,7 +3283,7 @@ fi
 # clamd log script
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.167 2010-03-22 10:50:57+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.168 2010-03-25 10:27:06+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -3043,7 +3298,7 @@ conf_dir="$DESTDIR"$SERVICEDIR/freshclam/variables
 # freshclam script
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.167 2010-03-22 10:50:57+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.168 2010-03-25 10:27:06+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -3071,7 +3326,7 @@ fi
 # freshclam log script
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.167 2010-03-22 10:50:57+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.168 2010-03-25 10:27:06+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -3097,7 +3352,7 @@ conf_dir="$DESTDIR"$SERVICEDIR/pwdlookup/variables
 mkdir -p $conf_dir
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.167 2010-03-22 10:50:57+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.168 2010-03-25 10:27:06+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -3113,7 +3368,7 @@ fi
 # pwdlookup log script
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.167 2010-03-22 10:50:57+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.168 2010-03-25 10:27:06+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -3213,7 +3468,7 @@ echo "inlookup" > $conf_dir/MYSQL_READ_DEFAULT_GROUP
 echo 1 > $conf_dir/MYSQL_OPT_RECONNECT
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.167 2010-03-22 10:50:57+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.168 2010-03-25 10:27:06+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -3229,7 +3484,7 @@ fi
 # inlookup log script
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.167 2010-03-22 10:50:57+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.168 2010-03-25 10:27:06+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -3263,7 +3518,7 @@ fi
 if [ ! -d "$DESTDIR"$databasedir/data ] ; then
 	if ( mkdir -p "$DESTDIR"$databasedir/data && mkdir -p "$DESTDIR"$databasedir/logs ) ; then
 		(
-		echo "# \$Id: svctool.in,v 2.167 2010-03-22 10:50:57+05:30 Cprogrammer Exp mbhangui $"
+		echo "# \$Id: svctool.in,v 2.168 2010-03-25 10:27:06+05:30 Cprogrammer Exp mbhangui $"
 		echo "# generated on $host on `date`"
 		echo ""
 		if [ $use_stdout -eq 1 ] ; then
@@ -3327,7 +3582,7 @@ mkdir -p "$DESTDIR"$SERVICEDIR/mysql.$port/log
 (
 mysql_version=`$mysqlPrefix/bin/mysql_config --version`
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.167 2010-03-22 10:50:57+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.168 2010-03-25 10:27:06+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -3375,7 +3630,7 @@ echo "--pid-file=\$PIDFILE 2>&1"
 
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.167 2010-03-22 10:50:57+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.168 2010-03-25 10:27:06+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -3392,7 +3647,7 @@ fi
 # mysql log script
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.167 2010-03-22 10:50:57+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.168 2010-03-25 10:27:06+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -3787,7 +4042,7 @@ fi
 # svscan log script
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.167 2010-03-22 10:50:57+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.168 2010-03-25 10:27:06+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -3898,7 +4153,7 @@ case "$dkverify_option" in
 esac
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.167 2010-03-22 10:50:57+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.168 2010-03-25 10:27:06+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -3920,7 +4175,7 @@ fi
 # fetchmail log script
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.167 2010-03-22 10:50:57+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.168 2010-03-25 10:27:06+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -3992,7 +4247,7 @@ else
 fi
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.167 2010-03-22 10:50:57+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.168 2010-03-25 10:27:06+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -4033,7 +4288,7 @@ fi
 # qmail-poppass log script
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.167 2010-03-22 10:50:57+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.168 2010-03-25 10:27:06+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -4229,7 +4484,7 @@ case "$dksign_option" in
 esac
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.167 2010-03-22 10:50:57+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.168 2010-03-25 10:27:06+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -4246,7 +4501,7 @@ fi
 mkdir -p "$DESTDIR"$SERVICEDIR/qmail-send."$tag"/log
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.167 2010-03-22 10:50:57+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.168 2010-03-25 10:27:06+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -6048,6 +6303,11 @@ while test $# -gt 0; do
 	smtp_port=$optarg
 	;;
 
+    --qmtp=*)
+	option=22
+	qmtp_port=$optarg
+	;;
+
     --imap=*)
 	option=2
 	imap_port=$optarg
@@ -6155,7 +6415,7 @@ while test $# -gt 0; do
 	;;
 
     --version)
-	echo "\$Id: svctool.in,v 2.167 2010-03-22 10:50:57+05:30 Cprogrammer Exp mbhangui $"
+	echo "\$Id: svctool.in,v 2.168 2010-03-25 10:27:06+05:30 Cprogrammer Exp mbhangui $"
 	prog_args=""
 	exit 0
 	;;
@@ -6794,6 +7054,37 @@ case $option in
 		usage 1
 	fi
 	create_greylist "$servicedir" "$grey_port" "$min_resend_min" " $resend_win_hr" "$timeout_days" "$context_file" "$save_interval" "$hash_size" "$whitelist" "$use_greydaemon"
+	;;
+
+	22)
+	if [ " $servicedir" = " " ] ; then
+		echo "Supervise Directory not specified" 1>&2
+		usage 1
+	elif [ " $qmtp_port" = " " ] ; then
+		echo "QMTP PORT not specified" 1>&2
+		usage 1
+	elif [ $qmtp_port -lt 1 ] ; then
+		echo "QMTP PORT should be a positive number" 1>&2
+		usage 1
+	fi
+	if [ " $qbase" = " " ] ; then
+		echo "Queue Directory not specified" 1>&2
+		usage 1
+	elif [ " $qcount" = " " ] ; then
+		echo "Queue Count not specified" 1>&2
+		usage 1
+	elif [ " $qstart" = " " ] ; then
+		echo "Start Queue Number not specified" 1>&2
+		usage 1
+	elif [ $qcount -lt 1 ] ; then
+		echo "No of Queues should be a positive number" 1>&2
+		usage 1
+	elif [ $qstart -lt 1 ] ; then
+		echo "Start Queue Number should be a positive number" 1>&2
+		usage 1
+	fi
+	echo "Creating QMTP Listener Port $qmtp_port, Service $servicedir, Queue Base $qbase, Queue Count $qcount, Queue Start $qstart"
+	create_qmtp "$qbase" "$qcount" "$qstart" "$servicedir" "$qmtp_port"
 	;;
 
 	*)

@@ -629,6 +629,14 @@ the installation.
     or have a qstart > 5. The point to remember is you can have multiple delivery process as long
     as you do not share a queue between delivery processes.
 
+    You can implement QMTP service if you want a faster way of accepting mails from your
+    relay servers. Remember you will also need to create the file
+    @indimaildir@/control/qmtproutes
+
+    % sudo @indimaildir@/sbin/svctool --qmtp=209 --servicedir=/service \
+        --qbase=@indimaildir@/queue --qcount=5 --qstart=1 --cntrldir=control --localip=0 \
+        --maxdaemons=75 --maxperip=25 --fsync --syncdir --memory=104857600 --min-free=52428800
+
     You can implement Greylisting as described at
     http://www.gossamer-threads.com/lists/qmail/users/136740?page=last
     by executing the command

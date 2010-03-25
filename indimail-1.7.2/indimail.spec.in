@@ -1,5 +1,8 @@
 #
 # $Log: indimail.spec.in,v $
+# Revision 2.143  2010-03-25 10:26:52+05:30  Cprogrammer
+# added qmtpd service creation
+#
 # Revision 2.142  2010-03-24 10:14:42+05:30  Cprogrammer
 # moved overquota.sh to libexec directory
 #
@@ -449,7 +452,7 @@
 # rpm spec file for indimail
 #
 #
-# $Id: indimail.spec.in,v 2.142 2010-03-24 10:14:42+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 2.143 2010-03-25 10:26:52+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %define _unpackaged_files_terminate_build 1
 
@@ -2215,11 +2218,13 @@ fi
 %ifarch x86_64
 %define fetchmail_mem 144857600
 %define smtp_soft_mem 104857600
+%define qmtp_soft_mem 104857600
 %define imap_pop3_mem 209715200
 %define poppass_mem   52428800
 %else
 %define fetchmail_mem 72428800
 %define smtp_soft_mem 52428800
+%define qmtp_soft_mem 52428800
 %define imap_pop3_mem 10485760
 %define poppass_mem   10485760
 %endif
@@ -2304,6 +2309,10 @@ done
 %{_prefix}/sbin/svctool --greylist=1999 --servicedir=%{servicedir} --min-resend-min=2 \
     --resend-win-hr=24 --timeout-days=30 --context-file=greylist.context \
     --hash-size=65536 --save-interval=5 --whitelist=greylist.white --use-greydaemon
+# qmail-qmtpd service
+%{_prefix}/sbin/svctool --qmtp=209 --servicedir=%{servicedir} --qbase=%{qbase} \
+	--qcount=%{qcount} --qstart=1 --cntrldir=control --localip=0 --maxdaemons=75 --maxperip=25 \
+	--fsync --syncdir --memory=%{qmtp_soft_mem} --min-free=52428800
 
 if [ %nofetchmail -eq 0 ] ; then
 # fetchmail
