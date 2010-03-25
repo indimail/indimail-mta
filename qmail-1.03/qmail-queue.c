@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-queue.c,v $
+ * Revision 1.49  2010-03-25 10:16:11+05:30  Cprogrammer
+ * added documentation
+ *
  * Revision 1.48  2009-12-09 23:57:23+05:30  Cprogrammer
  * additional closeflag argument to uidinit()
  *
@@ -705,6 +708,10 @@ main()
 	} else
 	if (!stralloc_copys(&quarantine, ptr))
 		die(51);
+	/*
+	 * These control files will cause qmail-queue to 
+	 * read one line at a time
+	 */
 	if (control_readfile(&excl, (ptr = env_get("REMOVEHEADERS")) && *ptr ? ptr : "removeheaders", 0) == -1)
 		die(55);
 	if (control_readfile(&incl, (ptr = env_get("ENVHEADERS")) && *ptr ? ptr : "envheaders", 0) == -1)
@@ -1088,7 +1095,7 @@ main()
 void
 getversion_qmail_queue_c()
 {
-	static char    *x = "$Id: qmail-queue.c,v 1.48 2009-12-09 23:57:23+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: qmail-queue.c,v 1.49 2010-03-25 10:16:11+05:30 Cprogrammer Stab mbhangui $";
 
 #ifdef INDIMAIL
 	x = sccsidh;
