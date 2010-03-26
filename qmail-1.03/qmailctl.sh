@@ -1,6 +1,9 @@
 # chkconfig: 345 50 80
 # description: Starts qmail system and associated services
 # $Log: qmailctl.sh,v $
+# Revision 1.17  2010-03-26 15:59:24+05:30  Cprogrammer
+# create tcp.qmtp.cdb
+#
 # Revision 1.16  2010-03-08 15:12:41+05:30  Cprogrammer
 # removed duplicate options doqueue, alrm, hup
 #
@@ -140,7 +143,7 @@ case "$1" in
     ;;
   cdb)
     INDIMAILDIR=`grep -w "^indimail" /etc/passwd | cut -d: -f6|head -1`
-	for i in smtp imap pop3 poppass
+	for i in smtp qmtp imap pop3 poppass
 	do
 		for j in `/bin/ls $INDIMAILDIR/etc/tcp*.$i.cdb 2>/dev/null`
 		do
