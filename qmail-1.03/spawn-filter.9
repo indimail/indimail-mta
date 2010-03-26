@@ -108,43 +108,59 @@ is omitted, the environment variable is unset.
 
 The name of the control file can be overriden by the environment
 variable RCPTRULES. Any environment variable used by
-.B spawn-filter
-or
-.B qmail-rspawn
-or
+.BR spawn-filter ,
 .B qmail-remote
-or
-.B qmail-lspawn
 or
 .B qmail-local
 can be set by using rcpt.envrules.
 
- AUTHSELF
- QMAILLOCAL
- QMAILREMOTE
- ROUTES
- CONTROLDIR
- AUTH_SMTP
- SMTPROUTE
- USE_FSYNC
- SPAMFILTER
- SPAMIGNORE
- SPAMREDIRECT
- SPAMIGNOREPATTERNS
- SPAMEXITCODE
- REJECTSPAM
- LOGFILTER
- FILTERARGS
- QREGEX
- TMPDIR
- DATABYTES
- MDA
- MYSQL_INIT_COMMAND
- MYSQL_READ_DEFAULT_FILE
- MYSQL_READ_DEFAULT_GROUP
- MYSQL_OPT_CONNECT_TIMEOUT
- MYSQL_OPT_READ_TIMEOUT
- MYSQL_OPT_WRITE_TIMEOUT
+The following list of environment variables can be modified using envrules
+
+.IR QREGEX ,
+.IR SPAMFILTER ,
+.IR LOGFILTER ,
+.IR SPAMFILTERARGS ,
+.IR FILTERARGS ,
+.IR SPAMEXITCODE ,
+.IR HAMEXITCODE ,
+.IR UNSUREEXITCODE ,
+.IR REJECTSPAM ,
+.IR SPAMREDIRECT ,
+.IR SPAMIGNORE ,
+.IR SPAMIGNOREPATTERNS ,
+.IR DATABYTES ,
+.IR MDA ,
+.IR MYSQL_INIT_COMMAND ,
+.IR MYSQL_READ_DEFAULT_FILE ,
+.IR MYSQL_READ_DEFAULT_GROUP ,
+.IR MYSQL_OPT_CONNECT_TIMEOUT ,
+.IR MYSQL_OPT_READ_TIMEOUT ,
+.IR MYSQL_OPT_WRITE_TIMEOUT ,
+.IR QUEUEDIR ,
+.IR QUEUE_BASE ,
+.IR QUEUE_START ,
+.IR QUEUE_COUNT ,
+and
+.IR TMPDIR
+
+The following list of environment variables which can be modified using envrules are
+specfic to \fBqmail-remote\fR.
+
+.IR CONTROLDIR ,
+.IR SMTPROUTE ,
+.IR SIGNKEY ,
+.IR DOMAINBINDINGS ,
+.IR AUTH_SMTP ,
+.IR MIN_PENALTY ,
+and
+.IR MAX_TOLERANCE
+
+The following list of environment variables which can be modified using envrules are
+specfic to \fBqmail-local\fR.
+.IR USE_SYNCDIR ,
+.IR USE_FSYNC ,
+and
+.IR LOCALDOMAINS
 
 
 .SH SPAM Filtering

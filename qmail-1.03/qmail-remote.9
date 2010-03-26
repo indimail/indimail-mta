@@ -136,12 +136,13 @@ than
 arguments.
 
 .B qmail-remote
-always exits zero.
+always exits zero. \fBqmail-remote\fR uses many environment variables. These environment variables can be recipient
+specific by using envrules. See \fBspawn-filter(8)\fR for more details.
+
 .SH "CONTROL FILES"
-.B
-qmail-remote
-by default looks at QMAIL/control for all control files. This path can be changed by defining the CONTROLDIR
-environment variable.
+.B qmail-remote
+by default looks at QMAIL/control for all control files. This path can be changed by defining the
+CONTROLDIR environment variable.
 
 .TP 5
 .I outgoingip.host
@@ -462,6 +463,7 @@ addresses(5),
 envelopes(5),
 qmail-control(5),
 qmail-send(8),
+spawn-filter(8),
 qmail-rspawn(8),
 qmail-smtpd(8),
 qmail-tcpok(8),

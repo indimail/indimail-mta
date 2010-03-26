@@ -89,6 +89,8 @@ print a description of the delivery instructions.
 .TP
 .B \-N
 (Default.) Read and deliver the message.
+\fBqmail-local\fR uses few environment variables. These environment variables can be recipient
+specific by using envrules. See \fBspawn-filter(8)\fR for more details.
 
 .SH "CONTROL FILES"
 .B
@@ -121,4 +123,5 @@ envelopes(5),
 qmail-command(8),
 qmail-queue(8),
 qmail-send(8),
+spawn-filter(8),
 qmail-lspawn(8)
