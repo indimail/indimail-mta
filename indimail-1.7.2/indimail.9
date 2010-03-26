@@ -316,6 +316,7 @@ smtpd.25        | Log for qmail-smtpd running on port 25
 smtpd.587       | Log for qmail-smtpd Message Submission Port \fBrfc-2476(5)\fR
 smtpd.366       | Log for qmail-smtpd ODMR port \fBrfc-2645(5)\fR.
 smtpd.465       | Log for qmail-smtpd on SMTPS port
+qmtpd.209       | Log for qmail-qmtpd on QMTP port
 deliver.25      | qmail-send deliver log
 fetchmail       | fetchmail log
 greylist.1999   | greylist daemon log
@@ -364,6 +365,30 @@ table lists these variables and describes their use.
 .TS
 l l.
 Environ  Variable |Program      |Set/Used|Purpose
+------------------|-------------|--------|----------------------------------------
+QMAILQUEUE        |qmail-smtpd  |used    |Program to be called instead
+                  |qmail-qmtpd  |        |qmail-queue
+                  |qmail-inject |        |
+                  |new-inject   |        |
+                  |condredirect |        |
+                  |dot-forward  |        |
+                  |fastforward  |        |
+                  |filterto     |        |
+                  |forward      |        |
+                  |maildirserial|        |
+                  |ofmipd       |        |
+                  |qmail-local  |        |
+                  |qmail-qmqpd  |        |
+                  |qmail-qmtpd  |        |
+                  |qmail-send   |        |
+                  |qreceipt     |        |
+                  |replier      |        |
+                  |rrforward    |        |
+------------------|-------------|--------|----------------------------------------
+QUEUEPROG         |qmail-multi  |used    |Program to be called to queue message
+                  |             |        |default is qmail-queue. You can defin
+			      |             |        |this to be qmail-qmqpc to send messages
+			      |             |        |to a QMQP server
 ------------------|-------------|--------|----------------------------------------
 CONTROLDIR        |qmail-smtpd  |used    |The directory containing control files.
                   |qmail-remote |        |If not defined qmail_home/control
@@ -1145,6 +1170,7 @@ qmail-smtpd.25       | qmail-smtpd(8) ESMTP service on port 25
 qmail-smtpd.587      | qmail-smtpd(8) ESMTP Mssage Submission Port \fBrfc-2476(5)\fR
 qmail-smtpd.366      | qmail-smtpd(8) ESMTP ODMR service on port 366
 qmail-smtpd.465      | qmail-smtpd(8) ESMTPS service on port 465 (SSL)
+qmail-qmtpd.209      | qmail-qmtpd(8) QMTP service on port 209
 qmail-send.25        | qmail-send(8) delivery service
 fetchmail            | fetchmail(1) service
 greylist.1999        | qmail-greyd(8) greylisting daemon
