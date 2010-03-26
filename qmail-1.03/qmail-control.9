@@ -75,9 +75,12 @@ Trailing spaces and tabs are allowed in any control file.
 The following control files can also be specified in cdb format or
 can be in MySQL
 
+.IR authdomains ,
+.IR badhelo ,
+.IR badext ,
 .IR badmailfrom ,
 .IR badrcptto ,
-.IR blackholedrcpt ,
+.IR blackholedsender ,
 .IR blackholedrcpt ,
 .IR chkrcptdomains ,
 .IR goodrcptto ,
@@ -103,6 +106,24 @@ specifies that entries for badmailfrom should be checked in the MySQL table my_b
 localhost. The username and password for connecting to MySQL is indimail and ssh-1.5- and the
 database name to use is qmail.
 .EE
+
+The following control files can have regular expressions for match if QREGEX environment
+variable is defined
+
+.IR badhelo ,
+.IR badhost
+.IR blackholedsender ,
+.IR blackholedrcpt ,
+.IR badmailfrom ,
+.IR spamignore ,
+.IR relaymailfrom ,
+.IR authdomains ,
+.IR badrcptto ,
+.IR chkrcptdomains ,
+.IR badext ,
+.IR goodrcptto ,
+and
+.IR accesslist ,
 
 The following table lists all control files
 other than
