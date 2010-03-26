@@ -1454,11 +1454,11 @@ qmtp(stralloc *h, char *ip, int port)
 	if (!flagallok) {
 		out("DGiving up on ");
 		outhost();
-		out("\n");
+		out(" - Protocol QMTP\n");
 	} else {
 		out("K");
 		outhost();
-		out(" accepted message.\n");
+		out(" accepted message - Protocol QMTP\n");
 	}
 	zerodie();
 }
