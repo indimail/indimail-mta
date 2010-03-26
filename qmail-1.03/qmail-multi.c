@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-multi.c,v $
+ * Revision 1.45  2010-03-26 15:02:37+05:30  Cprogrammer
+ * Use QUEUEPROG to call an alternate queue program like qmail-qmqpc
+ *
  * Revision 1.44  2009-11-09 20:32:39+05:30  Cprogrammer
  * Use control file queue_base to process multiple indimail queues
  *
@@ -446,7 +449,7 @@ qmail_multi(int argc, char **argv)
 {
 	datetime_sec    queueNo;
 	char            strnum[FMT_ULONG];
-	char           *(qqargs[]) = { "bin/qmail-queue", 0 };
+	char           *qqargs[2] = { 0, 0 };
 	char           *ptr, *queue_count_ptr, *queue_start_ptr, *qbase;
 	int             qcount, qstart;
 	static stralloc Queuedir = {0}, QueueBase = {0};
@@ -497,6 +500,8 @@ qmail_multi(int argc, char **argv)
 	case 1: /*- Disk full */
 		_exit(53);
 	}
+	if (!(qqargs[0] = env_get("QUEUEPROG")))
+		qqargs[0] = "bin/qmail-queue";
 	execv(*qqargs, argv);
 	_exit(120);
 	/*- Not reached */
@@ -660,6 +665,6 @@ discard_envelope()
 void
 getversion_qmail_multi_c()
 {
-	static char    *x = "$Id: qmail-multi.c,v 1.44 2009-11-09 20:32:39+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: qmail-multi.c,v 1.45 2010-03-26 15:02:37+05:30 Cprogrammer Exp mbhangui $";
 	x++;
 }
