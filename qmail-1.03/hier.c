@@ -1,5 +1,8 @@
 /*
  * $Log: hier.c,v $
+ * Revision 1.138  2010-03-26 08:37:19+05:30  Cprogrammer
+ * added dkim man page
+ *
  * Revision 1.137  2010-03-09 14:40:47+05:30  Cprogrammer
  * added cdb man pages
  * added man pages for predate, datemail, logselect
@@ -950,6 +953,7 @@ hier(inst_dir)
 	c(auto_qmail_home, "man/cat8", "qmail-dk.0", auto_uido, auto_gidq, 0444);
 	c(auto_qmail_home, "man/man8", "dknewkey.8", auto_uido, auto_gidq, 0444);
 	c(auto_qmail_home, "man/man8", "dktest.8", auto_uido, auto_gidq, 0444);
+	c(auto_qmail_home, "man/man8", "dkim.8", auto_uido, auto_gidq, 0444);
 #endif
 	c(auto_qmail_home, "man/man8", "qmail-multi.8", auto_uido, auto_gidq, 0444);
 	c(auto_qmail_home, "man/cat8", "qmail-multi.0", auto_uido, auto_gidq, 0444);
@@ -1032,7 +1036,7 @@ hier(inst_dir)
 void
 getversion_install_big_c()
 {
-	static char    *x = "$Id: hier.c,v 1.137 2010-03-09 14:40:47+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: hier.c,v 1.138 2010-03-26 08:37:19+05:30 Cprogrammer Stab mbhangui $";
 
 #ifdef INDIMAIL
 	x = sccsidh;
