@@ -3,6 +3,9 @@ RELEASE NOTES
 DATE: @DATE@
 
 This is Release @version@ of IndiMail. The release has both source.tar.gz and RPMs
+This release introduces QMTP support in qmail-remote. The RPM installation now
+creates a QMTP service. To enable QMTP service to your servers, you will have
+to create qmtproutes file.
 
 
 This release includes the following files
@@ -61,5 +64,20 @@ both 32 and 64 bit) are
 
 ChangeLog
 =========
-* Mon Mar 15 2010 mbhangui@gmail.com
+* Fri Mar 26 2010 mbhangui@gmail.com
 Release 1.7.2 Start 15/03/2010
+1.  Added unsigned integer overflow check to alloc.c in ucspi-tcp, qmail
+    Matthew Dempsky - http://marc.info/?l=qmail&m=125213850310173&w=2
+2.  Added --deliverycount-limit option for vdelivermail to record email
+    delivery counts
+3.  Tested with MariaDB 5.1.42
+4.  fixed calling of overquota command when user becomes overquota [2974478]
+5.  Moved overquota.sh to libexec
+6.  Added QMTP support in qmail-remote [2976840]
+7.  Added option to create qmail-qmtpd service in svctool, create_services
+8.  Added dkim man page
+9.  Added QUEUEPROG environment variable in qmail-multi to execute alternate
+    queue program instead of qmail-queue
+10. Updated envrules environment variables in qmail-smtpd, qmail-inject,
+    spawn-filter man pages
+11. use tcp.qmtp.cdb for qmtpd service

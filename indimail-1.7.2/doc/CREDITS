@@ -47,7 +47,7 @@ The site http://qmail.org and the qmail mailing list for wealth of information
 9.  Chuck Foster - binding outgoing connections to local interface
 10. Andre Oppermann ext-todo
 11. Andreas Aardal Hanssen - ext-todo and big-todo
-12. Bruce Guenter - QMAILQUEUE, qmail-qstat
+12. Bruce Guenter - QMAILQUEUE, qmail-qstat, Bigtodo Patch
 13. Bruce Guenter - rate limiting autoresponder based on Eric Huss's design
 14. Bruce Guenter  syncdir
 15. Bruce Guenter - qmail-qfilter, QUEUE_EXTRA patch
@@ -98,7 +98,8 @@ The site http://qmail.org and the qmail mailing list for wealth of information
 60. Nagy Balazs - patch to ensure that the domain name on the envelope sender is a valid DNS name.
 61. re-read concurrencylocal concurrency remote on SIGHUP.
 62. Erik Sjölund - qmail-local tab patch
-63. Frank Denis - Patched qmail-send to limit the size of bounces
+63. Frank Denis aka Jedi/Sector One <j@4u.net> - Patched qmail-send to
+    - limit the size of bounces (bouncemaxbytes)
     - MAXRECIPIENT
     - maxhop control file
 64. Paul Gregg - ENFORCE_FQDN_HELO patch 29/08/2003
@@ -141,4 +142,5 @@ The site http://qmail.org and the qmail mailing list for wealth of information
 95. Jeremy Kister - X-Originating-IP header qmail-1.03.originip-field.patch
     [http://jeremy.kister.net/code/qmail-1.03.originip-field.patch]
 96. Joerg Backschues - badremotehost check function (Ability to block hosts listed in badhost)
-97. James Raftery - real envelope recipient after hsot name canonicalization
+97. James Raftery - real envelope recipient after host name canonicalization
+98. Russ Nelson's QMTP patch for qmail-remote
