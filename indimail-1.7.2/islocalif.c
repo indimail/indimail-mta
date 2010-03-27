@@ -113,7 +113,7 @@ islocalif(char *hostptr)
 	hints.ai_family = PF_UNSPEC;
 	if ((error = getaddrinfo(hostptr, NULL, &hints, &res0)))
 	{
-		fprintf(stderr, "getaddrinfo: %s\n", gai_strerror(error));
+		fprintf(stderr, "islocalif: getaddrinfo: %s\n", gai_strerror(error));
 		return (-1);
 	}
 #else

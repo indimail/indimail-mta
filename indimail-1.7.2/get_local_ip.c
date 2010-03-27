@@ -81,7 +81,7 @@ get_local_ip()
 	hints.ai_family = PF_UNSPEC;
 	if ((error = getaddrinfo(TmpBuf, 0, &hints, &res0)))
 	{
-		fprintf(stderr, "getaddrinfo: %s\n", gai_strerror(error));
+		fprintf(stderr, "get_local_ip: getaddrinfo: %s\n", gai_strerror(error));
 		return((char *) 0);
 	}
 	else {

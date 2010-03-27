@@ -1,5 +1,8 @@
 /*
  * $Log: tcpopen.c,v $
+ * Revision 2.5  2010-03-26 19:17:41+05:30  Cprogrammer
+ * return correct error instead of EINVAL
+ *
  * Revision 2.4  2009-07-09 15:55:33+05:30  Cprogrammer
  * ipv6 ready code
  *
@@ -30,7 +33,7 @@
  */
 
 #ifndef	lint
-static char     sccsid[] = "$Id: tcpopen.c,v 2.4 2009-07-09 15:55:33+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: tcpopen.c,v 2.5 2010-03-26 19:17:41+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #include "config.h"
@@ -134,9 +137,9 @@ tcpopen(host, service, port) /*- Thanks to Richard's Steven */
 		return (-1);
 	} else
 		snprintf(serv, FMT_ULONG, "%d", port);
-	if (getaddrinfo(hostptr, serv, &hints, &res0))
+	if ((retval = getaddrinfo(hostptr, serv, &hints, &res0)))
 	{
-		return (EINVAL);
+		fprintf(stderr, "tcpbind: getaddrinfo: %s\n", gai_strerror(retval));
 		return (-1);
 	}
 	for (res = res0; res; res = res->ai_next)

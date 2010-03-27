@@ -108,7 +108,7 @@ tcpbind(hostname, servicename, backlog)
 	hints.ai_flags = AI_PASSIVE;
 	if ((idx = getaddrinfo(NULL, servicename, &hints, &res0)))
 	{
-		fprintf(stderr, "getaddrinfo: %s\n", gai_strerror(idx));
+		fprintf(stderr, "tcpbind: getaddrinfo: %s\n", gai_strerror(idx));
 		return (-1);
 	}
 	listenfd = -1;
