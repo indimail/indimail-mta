@@ -1,5 +1,8 @@
 #
 # $Log: indimail.spec.in,v $
+# Revision 2.146  2010-03-27 16:40:12+05:30  Cprogrammer
+# added vadddomain, vadduser post handle scripts
+#
 # Revision 2.145  2010-03-26 16:23:57+05:30  Cprogrammer
 # added tcp.qmtp
 #
@@ -458,7 +461,7 @@
 # rpm spec file for indimail
 #
 #
-# $Id: indimail.spec.in,v 2.145 2010-03-26 16:23:57+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 2.146 2010-03-27 16:40:12+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %define _unpackaged_files_terminate_build 1
 
@@ -1634,6 +1637,8 @@ fi
 %attr(555,root,qmail)                   %{_prefix}/bin/tai64nlocal
 %attr(555,root,qmail)                   %{_prefix}/bin/valias
 %attr(555,root,qmail)                   %{_prefix}/bin/vproxy
+%attr(555,root,qmail)                   %{_prefix}/libexec/vadddomain
+%attr(555,root,qmail)                   %{_prefix}/libexec/vadduser
 %attr(555,root,qmail)                   %{_prefix}/libexec/overquota.sh
 %attr(555,root,qmail)                   %{_prefix}/libexec/qmailmrtg7
 %attr(4555,root,qmail)                  %{_prefix}/libexec/sq_vacation
