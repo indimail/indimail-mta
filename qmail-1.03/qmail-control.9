@@ -73,7 +73,7 @@ and
 Trailing spaces and tabs are allowed in any control file.
 
 The following control files can also be specified in cdb format or
-can be in MySQL
+be in MySQL
 
 .IR authdomains ,
 .IR badhelo ,
@@ -89,10 +89,10 @@ and
 .IR spamignore .
 
 To use the cdb format, the control files should be converted to cdb using
-.BR qmail-cdb .
-To have the control files in MySQL, you should have the control file with a .sql extension and
-a colon separated list of paramaters for connecting to MySQL specified in the file. The parameters
-are as given below.
+.BR qmail-cdb
+and have a .cdb extension. To have the control files in MySQL, you should have the control file
+with a .sql extension and a colon separated list of paramaters for connecting to MySQL
+specified in the file. The parameters are as given below.
 
 .BR database_server_ip:database_user:database_password:database_name:table_name .
 
@@ -123,7 +123,9 @@ variable is defined
 .IR badext ,
 .IR goodrcptto ,
 and
-.IR accesslist ,
+.IR accesslist .
+Once you define QREGEX, the corresponding pattern file gets disabled (e.g. badhelopatterns,
+badhostpatterns, badmailfrompatterns, etc).
 
 The following table lists all control files
 other than
