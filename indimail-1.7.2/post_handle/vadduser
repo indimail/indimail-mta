@@ -1,2 +1,2 @@
 #!/bin/sh
-exec @indimaildir@/bin/vuserinfo $1
+exec /var/indimail/bin/vuserinfo $1
