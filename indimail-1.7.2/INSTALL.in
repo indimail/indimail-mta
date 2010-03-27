@@ -629,7 +629,7 @@ the installation.
     or have a qstart > 5. The point to remember is you can have multiple delivery process as long
     as you do not share a queue between delivery processes.
 
-    You can implement QMTP service if you want a faster way of accepting mails from your
+    You can implement QMTP service if you want a faster distribution of mails from your
     relay servers. Remember you will also need to create the file
     @indimaildir@/control/qmtproutes
 
@@ -1204,6 +1204,8 @@ indimail 31499  0.0  0.0   6572   860 ?        S    15:24   0:00 @indimaildir@/s
 indimail 31500  0.0  0.0   6572   860 ?        S    15:24   0:00 @indimaildir@/sbin/inlookup -i 5
 qmails   31501  0.0  0.0   1900   392 ?        S    15:24   0:00 qmail-todo
 qmailq   31502  0.0  0.0   1872   368 ?        S    15:24   0:00 qmail-clean
+indimail  1078  0.0  0.0   6640  1108 ?        S    08:51   0:00 @indimaildir@/bin/tcpserver -v -H -R -l 0 -x /var/indimail/etc/tcp.qmtp.cdb -c /service/qmail-qmtpd.209/variables/MAXDAEMONS -o -b 75 -u 555 -g 555 0 209 /var/indimail/bin/qmail-qmtpd
+qmaill    1089  0.0  0.0   1756   336 ?        S    08:51   0:00 @indimaildir@/bin/multilog t /var/log/indimail/qmtpd.209
 ------------------------------------------------------------------------------------
 
 Basic Installation
