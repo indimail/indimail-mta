@@ -1,0 +1,2 @@
+#!/bin/sh
+exec @indimaildir@/bin/vuserinfo $1

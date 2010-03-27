@@ -1,0 +1,5 @@
+#!/bin/sh
+@indimaildir@/bin/vdominfo $1
+/bin/ls -dl @indimaildir@/domains/$1
+/bin/ls -al @indimaildir@/domains/$1
+exit 0
