@@ -1,5 +1,8 @@
 /*
  * $Log: get_local_ip.c,v $
+ * Revision 2.6  2010-03-28 16:53:26+05:30  Cprogrammer
+ * set other hints flag (ai_socktype, ai_flags, ai_protocol)
+ *
  * Revision 2.5  2009-07-10 20:49:35+05:30  Cprogrammer
  * BUG - hints not initialized
  *
@@ -16,7 +19,7 @@
  * enabled caching of result
  *
  * Revision 1.3  2002-03-30 14:50:09+05:30  Cprogrammer
- * return ip address from QMAILDIR/control/hostip if present
+ * return ip address from QMAILDIR/control/localiphost if present
  *
  * Revision 1.2  2002-03-29 17:24:59+05:30  Cprogrammer
  * removed hardcoding of hostname variable
@@ -35,7 +38,7 @@
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: get_local_ip.c,v 2.5 2009-07-10 20:49:35+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: get_local_ip.c,v 2.6 2010-03-28 16:53:26+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 char           *
@@ -58,15 +61,12 @@ get_local_ip()
 		return(hostbuf);
 	getEnvConfigStr(&qmaildir, "QMAILDIR", QMAILDIR);
 	getEnvConfigStr(&controldir, "CONTROLDIR", "control");
-	snprintf(TmpBuf, MAX_BUFF, "%s/%s/hostip", qmaildir, controldir);
-	if ((fp = fopen(TmpBuf, "r")))
-	{
-		if (!fgets(hostbuf, MAX_BUFF - 1, fp))
-		{
+	snprintf(TmpBuf, MAX_BUFF, "%s/%s/localiphost", qmaildir, controldir);
+	if ((fp = fopen(TmpBuf, "r"))) {
+		if (!fgets(hostbuf, MAX_BUFF - 1, fp)) {
 			fclose(fp);
 			*hostbuf = 0;
-		} else
-		{
+		} else {
 			if ((ptr = strchr(hostbuf, '\n')))
 				*ptr = 0;
 			fclose(fp);
@@ -78,13 +78,14 @@ get_local_ip()
 #ifdef ENABLE_IPV6
 	memset(&hints, 0, sizeof(hints));
 	/* set-up hints structure */
-	hints.ai_family = PF_UNSPEC;
-	if ((error = getaddrinfo(TmpBuf, 0, &hints, &res0)))
-	{
+	hints.ai_family = PF_UNSPEC; /*- Allow IPv4 or IPv6 */
+	hints.ai_socktype = SOCK_DGRAM; /*- Datagram socket */
+	hints.ai_flags = 0;
+	hints.ai_protocol = 0; /*- Any protocol */
+	if ((error = getaddrinfo(TmpBuf, 0, &hints, &res0))) {
 		fprintf(stderr, "get_local_ip: getaddrinfo: %s\n", gai_strerror(error));
 		return((char *) 0);
-	}
-	else {
+	} else {
 		for (res = res0; res; res = res->ai_next) {
 			sa = res->ai_addr;
 			salen = res->ai_addrlen;
@@ -92,8 +93,7 @@ get_local_ip()
 			/* getnameinfo() case. NI_NUMERICHOST avoids DNS lookup. */
 			if ((error = getnameinfo(sa, salen, hostbuf, sizeof(hostbuf), 0, 0, NI_NUMERICHOST)))
 				perror("getnameinfo");
-			if (res->ai_flags | AI_NUMERICHOST)
-			{
+			if (res->ai_flags | AI_NUMERICHOST) {
 				freeaddrinfo(res0);
 				return (hostbuf);
 			}
