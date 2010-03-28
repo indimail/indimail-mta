@@ -1,5 +1,8 @@
 /*
  * $Log: ProcessInFifo.c,v $
+ * Revision 2.30  2010-03-28 18:54:25+05:30  Cprogrammer
+ * use 127.0.0.1 if get_local_ip() fails
+ *
  * Revision 2.29  2010-02-26 10:52:11+05:30  Cprogrammer
  * use host.mysql if host.cntrl is not present
  *
@@ -102,7 +105,7 @@
  */
 
 #ifndef	lint
-static char     sccsid[] = "$Id: ProcessInFifo.c,v 2.29 2010-02-26 10:52:11+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: ProcessInFifo.c,v 2.30 2010-03-28 18:54:25+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #include <fcntl.h>
@@ -193,11 +196,6 @@ ProcessInFifo()
 	{
 		fprintf(stderr, "InLookup: malloc(%d bytes): %s: %s\n", pipe_size, InFifo, strerror(errno));
 		return (-1);
-	} else
-	if ((pstat = signal(SIGPIPE, SIG_IGN)) == SIG_ERR)
-	{
-		fprintf(stderr, "InLookup: signal: %s: %s\n", InFifo, strerror(errno));
-		return (-1);
 	}
 	user_query_count = relay_query_count = pwd_query_count = lpwd_query_count = alias_query_count = dom_query_count = 0;
 #ifdef CLUSTERED_SITE
@@ -205,9 +203,13 @@ ProcessInFifo()
 #endif
 	if (!(local_ip = get_local_ip()))
 	{
-		fprintf(stderr, "InLookup: Could not get local ip: %s\n", strerror(errno));
-		signal(SIGPIPE, pstat);
-		return(-1);
+		local_ip = "127.0.0.1";
+		fprintf(stderr, "ProcessInFifo: get_local_ip failed. using localhost\n");
+	}
+	if ((pstat = signal(SIGPIPE, SIG_IGN)) == SIG_ERR)
+	{
+		fprintf(stderr, "InLookup: signal: %s: %s\n", InFifo, strerror(errno));
+		return (-1);
 	}
 	for (bytes = 0;getppid() != 1;)
 	{
