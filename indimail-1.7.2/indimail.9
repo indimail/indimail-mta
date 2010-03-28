@@ -205,6 +205,11 @@ control files \fIhost.master\fR, \fIhost.cntrl\fR can be overriden by the enviro
 variables \fBMASTER_HOST\fR and \fBCNTRL_HOST\fR. One can also give
 host:user:password:mysql_socket/port as the format for \fIhost.master\fR and \fIhost.cntrl\fR.
 .PP
+IndiMail uses \fBgethostid(3)\fR and \fBgetaddrinfo(3)\fR to figure out its identity. \fBgetaddrinfo(3)\fR
+requires your hosts address to be either resolved by dns or be present in \fBhosts(5)\fR /etc/hosts.
+You can bypass \fBgethostid(3)\fR and \fBgetaddrifno(3)\fR by have your hostid in
+\fIINDIMAIL/control/hostid\fR and your IP address in \fBINDIMAIL/control/localiphost\fR.
+.PP
 In a clustered setup, you can have multiple servers with each server having its own set of
 local users. The information for these users are stored in a MySQL database known as the
 \fBlocal database\fR. You can have multiple \fBlocal databases\fR with each database serving one
