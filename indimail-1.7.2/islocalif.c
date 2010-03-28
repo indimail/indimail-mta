@@ -4,7 +4,7 @@
  * removed compiler warning
  *
  * Revision 2.2  2009-12-10 12:05:12+05:30  Cprogrammer
- * use ip from hostip if present
+ * use ip from localiphost if present
  *
  * Revision 2.1  2009-07-09 15:55:20+05:30  Cprogrammer
  * ipv6 ready code
@@ -92,7 +92,7 @@ islocalif(char *hostptr)
 
 	getEnvConfigStr(&qmaildir, "QMAILDIR", QMAILDIR);
 	getEnvConfigStr(&controldir, "CONTROLDIR", "control");
-	snprintf(TmpBuf, MAX_BUFF, "%s/%s/hostip", qmaildir, controldir);
+	snprintf(TmpBuf, MAX_BUFF, "%s/%s/localiphost", qmaildir, controldir);
 	if ((fp = fopen(TmpBuf, "r")))
 	{
 		if (!fgets(TmpBuf, MAX_BUFF - 1, fp))
