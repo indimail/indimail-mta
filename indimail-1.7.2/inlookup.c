@@ -1,5 +1,8 @@
 /*
  * $Log: inlookup.c,v $
+ * Revision 2.16  2010-03-28 13:46:04+05:30  Cprogrammer
+ * prevent rapid spawning of inlookup children when ProcessInFifo() exits
+ *
  * Revision 2.15  2008-11-21 15:08:28+05:30  Cprogrammer
  * fixed compilation on mac os
  *
@@ -48,7 +51,7 @@
  */
 
 #ifndef	lint
-static char     sccsid[] = "$Id: inlookup.c,v 2.15 2008-11-21 15:08:28+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: inlookup.c,v 2.16 2010-03-28 13:46:04+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #include "indimail.h"
@@ -90,7 +93,7 @@ main(int argc, char **argv)
 	char           *infifo, *ptr, *instance = "1";
 
 	getEnvConfigStr(&infifo, "INFIFO", INFIFO);
-	if((ptr = strrchr(argv[0], '/')))
+	if ((ptr = strrchr(argv[0], '/')))
 		ptr++;
 	else
 		ptr = argv[0];
@@ -114,16 +117,16 @@ main(int argc, char **argv)
 			return(1);
 		}
 	}
-	if((inst_count = atoi(instance)) > 1)
+	if ((inst_count = atoi(instance)) > 1)
 	{
-		if(!pid_table)
+		if (!pid_table)
 		{
-			if(!(pid_table = (struct pidtab *) malloc(sizeof(struct pidtab) * inst_count)))
+			if (!(pid_table = (struct pidtab *) malloc(sizeof(struct pidtab) * inst_count)))
 			{
 				fprintf(stderr, "inlookup: out of memory: %s\n", strerror(errno));
 				return(1);
 			}
-			for(idx = 0;idx < inst_count;idx++)
+			for (idx = 0; idx < inst_count; idx++)
 				pid_table[idx].pid = -1;
 		}
 #ifdef DARWIN
@@ -139,33 +142,33 @@ main(int argc, char **argv)
 		sig_catch(SIGHUP, sig_hand);
 		sig_catch(SIGINT, sig_hand);
 #endif
-		for(idx = 0;idx < inst_count;idx++)
+		for (idx = 0; idx < inst_count; idx++)
 		{
-			if(fork_child(infifo, idx) == -1)
+			if (fork_child(infifo, idx) == -1) /*- parent returns */
 				return(-1);
 		}
-		for(;;)
+		for (;;)
 		{
 			pid = wait(&wStat);
 #ifdef ERESTART
-			if(pid == -1 && (errno == EINTR || errno == ERESTART))
+			if (pid == -1 && (errno == EINTR || errno == ERESTART))
 #else
-			if(pid == -1 && errno == EINTR)
+			if (pid == -1 && errno == EINTR)
 #endif
 				continue;
 			else
-			if(pid == -1)
+			if (pid == -1)
 				break;
-			if(WIFSTOPPED(wStat) || WIFSIGNALED(wStat))
+			if (WIFSTOPPED(wStat) || WIFSIGNALED(wStat))
 			{
-				for(idx = 0;idx < inst_count;idx++)
+				for (idx = 0; idx < inst_count; idx++)
 				{
-					if(pid_table[idx].pid == pid)
+					if (pid_table[idx].pid == pid)
 					{
 						fprintf(stderr, "inlookup[%d]: child [%d] died with signal %d\n", 
 							idx + 1, pid, 
 							WIFSIGNALED(wStat) ? WTERMSIG(wStat) : (WIFSTOPPED(wStat) ? WSTOPSIG(wStat) : -1));
-						if(fork_child(infifo, idx) == -1)
+						if (fork_child(infifo, idx) == -1)
 						{
 							fprintf(stderr, "Help!! Unable to start process %d\n", idx + 1);
 							pid_table[idx].pid = -1;
@@ -173,19 +176,19 @@ main(int argc, char **argv)
 						break;
 					}
 				}
-				if(idx == inst_count)
+				if (idx == inst_count)
 					fprintf(stderr, "inlookup: %d crashed. Unable to find slot\n", pid);
 			}
 			else
-			if(WIFEXITED(wStat))
+			if (WIFEXITED(wStat))
 			{
 				tmp_stat = WEXITSTATUS(wStat);
-				for(idx = 0;idx < inst_count;idx++)
+				for (idx = 0; idx < inst_count; idx++)
 				{
-					if(pid_table[idx].pid == pid)
+					if (pid_table[idx].pid == pid)
 					{
 						fprintf(stderr, "inlookup[%d]: child [%d] died with status %d\n", idx + 1, pid, tmp_stat);
-						if(fork_child(infifo, idx) == -1)
+						if (fork_child(infifo, idx) == -1)
 						{
 							fprintf(stderr, "Help!! Unable to start process %d\n", idx + 1);
 							pid_table[idx].pid = -1;
@@ -193,15 +196,15 @@ main(int argc, char **argv)
 						break;
 					}
 				}
-				if(idx == inst_count)
+				if (idx == inst_count)
 					fprintf(stderr, "inlookup: %d crashed. Unable to find slot\n", pid);
 			}
 		}
-		for(idx = 0;idx < inst_count;idx++)
+		for (idx = 0; idx < inst_count; idx++)
 		{
-			if(pid_table[idx].pid == -1)
+			if (pid_table[idx].pid == -1)
 			{
-				if(fork_child(infifo, idx) == -1)
+				if (fork_child(infifo, idx) == -1)
 				{
 					fprintf(stderr, "inlookup[%d]: Help!! Unable to start process\n", idx + 1);
 					pid_table[idx].pid = -1;
@@ -223,7 +226,7 @@ main(int argc, char **argv)
 static int
 fork_child(char *infifo, int instNum)
 {
-	int             pid;
+	int             pid, i;
 
 	switch(pid = fork())
 	{
@@ -242,7 +245,9 @@ fork_child(char *infifo, int instNum)
 			putenv(pid_table[instNum].infifo);
 			printf("InLookup[%d] PPID %d Ready with INFIFO=%s.%d\n", instNum + 1, (int) getppid(), infifo, instNum + 1);
 			fflush(stdout);
-			exit(ProcessInFifo());
+			i = ProcessInFifo();
+			sleep(5);
+			exit(i);
 		default:
 			pid_table[instNum].pid = pid;
 			snprintf(pid_table[instNum].infifo, MAX_BUFF, "INFIFO=%s.%d", infifo, instNum + 1);
@@ -257,9 +262,9 @@ sig_usr1()
 {
 	int             idx;
 
-	for(idx = 0;idx < inst_count;idx++)
+	for (idx = 0; idx < inst_count; idx++)
 	{
-		if(pid_table[idx].pid == -1)
+		if (pid_table[idx].pid == -1)
 			continue;
 		kill(pid_table[idx].pid, SIGUSR1);
 	}
@@ -273,9 +278,9 @@ sig_usr2()
 {
 	int             idx;
 
-	for(idx = 0;idx < inst_count;idx++)
+	for (idx = 0; idx < inst_count; idx++)
 	{
-		if(pid_table[idx].pid == -1)
+		if (pid_table[idx].pid == -1)
 			continue;
 		kill(pid_table[idx].pid, SIGUSR2);
 	}
@@ -289,9 +294,9 @@ sig_hup()
 {
 	int             idx;
 
-	for(idx = 0;idx < inst_count;idx++)
+	for (idx = 0; idx < inst_count; idx++)
 	{
-		if(pid_table[idx].pid == -1)
+		if (pid_table[idx].pid == -1)
 			continue;
 		kill(pid_table[idx].pid, SIGHUP);
 	}
@@ -305,9 +310,9 @@ sig_int()
 {
 	int             idx;
 
-	for(idx = 0;idx < inst_count;idx++)
+	for (idx = 0; idx < inst_count; idx++)
 	{
-		if(pid_table[idx].pid == -1)
+		if (pid_table[idx].pid == -1)
 			continue;
 		kill(pid_table[idx].pid, SIGINT);
 	}
@@ -322,9 +327,9 @@ sig_term()
 	int             idx;
 
 	sig_block(SIGTERM);
-	for(idx = 0;idx < inst_count;idx++)
+	for (idx = 0; idx < inst_count; idx++)
 	{
-		if(pid_table[idx].pid == -1)
+		if (pid_table[idx].pid == -1)
 			continue;
 		kill(pid_table[idx].pid, SIGTERM);
 	}
@@ -341,9 +346,9 @@ sig_hand(sig, code, scp, addr)
 
 	if (sig == SIGTERM)
 		sig_block(sig);
-	for(idx = 0;idx < inst_count;idx++)
+	for (idx = 0; idx < inst_count; idx++)
 	{
-		if(pid_table[idx].pid == -1)
+		if (pid_table[idx].pid == -1)
 			continue;
 		kill(pid_table[idx].pid, sig);
 	}
