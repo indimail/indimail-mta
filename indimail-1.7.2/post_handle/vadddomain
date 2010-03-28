@@ -3,4 +3,3 @@
 /bin/ls -dl /var/indimail/domains/$1
 /bin/ls -al /var/indimail/domains/$1
 exit 0
-
