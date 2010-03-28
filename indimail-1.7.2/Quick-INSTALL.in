@@ -1,7 +1,8 @@
    IndiMail supports two types of virtual domains
 
    1. Non-Clustered domain - A domain existing on a single server
-   2. Clustered domain - A domain extended across multiple servers
+   2. Clustered domain - A domain extended across multiple servers, with each
+      server having its own set of users.
 
     Creating a non-clustered Domain
     -------------------------------
@@ -31,8 +32,8 @@
     /service/mysql.3306: up (pid 11936) 3927 seconds
 
     % sudo /var/indimail/bin/vadddomain example.com pass
-    % sudo /var/indimail/bin/vadduser testuser1@example.com pass
     % vuserinfo postmaster@example.com
+    % sudo /var/indimail/bin/vadduser testuser1@example.com pass
     % vuserinfo testuser1@example.com
 
     Creating a Clustered Domain
@@ -66,8 +67,8 @@
 
     % sudo /var/indimail/bin/vadddomain -D indimail -S localhost \
         -U indimail -P ssh-1.5- -p 3306 -c example.com pass
-    % sudo /var/indimail/bin/vadduser testuser1@example.com pass
     % vuserinfo postmaster@example.com
+    % sudo /var/indimail/bin/vadduser testuser1@example.com pass
     % vuserinfo testuser1@example.com
     % dbinfo -s
 
