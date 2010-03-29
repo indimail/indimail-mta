@@ -185,7 +185,7 @@
 #endif
 
 #ifndef	lint
-static char     sccsid[] = "$Id: deliver_mail.c,v 2.53 2010-03-25 08:31:34+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: deliver_mail.c,v 2.53 2010-03-25 08:31:34+05:30 Cprogrammer Stab mbhangui $";
 #endif
 
 /*- Function Prototypes */

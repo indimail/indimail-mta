@@ -7,7 +7,7 @@
 #include "indimail.h"
 
 #ifndef lint
-static char     sccsid[] = "$Id: sslerator.c,v 2.1 2010-03-06 16:10:18+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: sslerator.c,v 2.1 2010-03-06 16:10:18+05:30 Cprogrammer Stab mbhangui $";
 #endif
 
 #ifdef HAVE_SSL

@@ -33,7 +33,7 @@
  */
 
 #ifndef	lint
-static char     sccsid[] = "$Id: tcpopen.c,v 2.5 2010-03-26 19:17:41+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: tcpopen.c,v 2.5 2010-03-26 19:17:41+05:30 Cprogrammer Stab mbhangui $";
 #endif
 
 #include "config.h"

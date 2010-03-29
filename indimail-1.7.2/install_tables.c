@@ -26,7 +26,7 @@
 #endif
 
 #ifndef	lint
-static char     sccsid[] = "$Id: install_tables.c,v 2.6 2010-03-07 12:31:49+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: install_tables.c,v 2.6 2010-03-07 12:31:49+05:30 Cprogrammer Stab mbhangui $";
 #endif
 
 int

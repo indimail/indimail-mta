@@ -141,7 +141,7 @@
 #include <unistd.h>
 
 #ifndef	lint
-static char     sccsid[] = "$Id: proxylogin.c,v 2.40 2010-03-06 14:55:46+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: proxylogin.c,v 2.40 2010-03-06 14:55:46+05:30 Cprogrammer Stab mbhangui $";
 #endif
 
 #ifdef CLUSTERED_SITE

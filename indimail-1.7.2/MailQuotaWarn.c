@@ -76,7 +76,7 @@
 #include <fcntl.h>
 
 #ifndef	lint
-static char     sccsid[] = "$Id: MailQuotaWarn.c,v 2.16 2010-03-24 10:14:50+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: MailQuotaWarn.c,v 2.16 2010-03-24 10:14:50+05:30 Cprogrammer Stab mbhangui $";
 #endif
 
 int
