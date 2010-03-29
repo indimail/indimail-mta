@@ -123,7 +123,7 @@ main()
 void
 getversion_qmail_recipients_c()
 {
-	static char    *x = "$Id: recipient-cdb.c,v 1.7 2010-03-09 14:41:27+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: recipient-cdb.c,v 1.7 2010-03-09 14:41:27+05:30 Cprogrammer Stab mbhangui $";
 
 	x++;
 }
