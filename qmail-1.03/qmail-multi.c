@@ -665,6 +665,6 @@ discard_envelope()
 void
 getversion_qmail_multi_c()
 {
-	static char    *x = "$Id: qmail-multi.c,v 1.45 2010-03-26 15:02:37+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-multi.c,v 1.45 2010-03-26 15:02:37+05:30 Cprogrammer Stab mbhangui $";
 	x++;
 }
