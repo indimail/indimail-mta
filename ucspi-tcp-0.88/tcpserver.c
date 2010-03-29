@@ -156,7 +156,7 @@
 #include "auto_home.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: tcpserver.c,v 1.45 2010-03-12 08:59:54+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: tcpserver.c,v 1.45 2010-03-12 08:59:54+05:30 Cprogrammer Stab mbhangui $";
 #endif
 
 #ifdef IPV6
