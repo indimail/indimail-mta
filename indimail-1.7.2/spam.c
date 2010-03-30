@@ -1,5 +1,11 @@
 /*
  * $Log: spam.c,v $
+ * Revision 2.16  2010-03-30 12:03:36+05:30  Cprogrammer
+ * parse MAIL from instead of Mail from:
+ *
+ * Revision 2.15  2010-03-30 09:08:20+05:30  Cprogrammer
+ * call qmail-cdb to create cdb file instead of qmail-spamdb
+ *
  * Revision 2.14  2005-12-29 22:50:24+05:30  Cprogrammer
  * use getEnvConfigStr to set variables from environment variables
  *
@@ -59,7 +65,7 @@
 #define SPAMDB  3
 
 #ifndef	lint
-static char     sccsid[] = "$Id: spam.c,v 2.14 2005-12-29 22:50:24+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: spam.c,v 2.16 2010-03-30 12:03:36+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 static char    *parseLine1(char *);
@@ -74,7 +80,7 @@ static int      bounce, maxaddr;
 /*
  * This function parses one line from log file, checks if any " from " 
  * is matched. If so, returns the mail address 
- * @400000003d97d57c07c6d64c info msg 181049: bytes 1872 from <inditac_escalation@indicorp.com> qp 1176 uid 0
+ * @400000003d97d57c07c6d64c info msg 181049: bytes 1872 from <inditac_escalation@indimail.org> qp 1176 uid 0
  * @400000003da2eb6637759be4 info msg 181997: bytes 50526 from <#@[]> qp 8753 uid 506
  * @400000003da2eb6637759be4 info msg 181997: bytes 50526 from <> qp 8753 uid 506
  */
@@ -132,12 +138,11 @@ parseLine2(char *str)
 	return (email);
 }
 /*-
- * @400000003fe5384c2ea9d6c4 qmail-smtpd: pid 15008 from 127.0.0.1: 
- * HELO <127.0.0.1> 
- * MAIL from: <mbhangui@testindi.com> 
- * RCPT <postmaster@testindi.com> 
- * AUTH <local-rcpt> Size: 70 
- * X-Bogocity: Unsure, spam probability=0.440984, cutoff=5.11e-01
+ * @400000004bac90a33711966c qmail-smtpd: pid 14544 from ::ffff:127.0.0.1
+ * HELO <indimail.org> MAIL from <sitelist-bounces@lists.sourceforge.net>
+ * RCPT <mailstore@indimail.org>
+ * AUTH <local-rcpt> Size: 7330
+ * X-Bogosity: No, spamicity=0.500000, cutoff=9.90e-01, ham_cutoff=0.00e+00, queueID=x18cs65599wff, msgID=<E1Nv0Sc-0006w3-BF@sfs-web-2.v29.ch3.sourceforge.com>, ipaddr=216.34.181.68
  */
 static char    *
 parseLine3(char *str)
@@ -148,13 +153,13 @@ parseLine3(char *str)
 
 	if (!(ptr = strstr(str, " qmail-smtpd: pid ")))
 		return ((char *) 0);
-	if (!(ptr = strstr(str, "> MAIL from: <")))
+	if (!(ptr = strstr(str, "> MAIL from <")))
 		return ((char *) 0);
-	ptr += 14;
+	ptr += 13;
 	for (cptr = ptr;*cptr && *cptr != '>';cptr++);
 	*cptr = 0;
 	tmp = cptr + 1;
-	if (!(cptr = strstr(tmp, " X-Spam-Rating")) && !(cptr = strstr(tmp, "X-Bogocity")))
+	if (!(cptr = strstr(tmp, "X-Bogosity")))
 		return ((char *) 0);
 	for (;*cptr && *cptr != ':';cptr++);
 	if (!*cptr)
@@ -172,7 +177,7 @@ parseLine3(char *str)
 	len = strlen(ptr) + 1;
 	if (!(email = (char *) malloc(sizeof(char) * len)))
 	{
-		fprintf(stderr, "parseLine1: malloc: %s\n", strerror(errno));
+		fprintf(stderr, "parseLine3: malloc: %s\n", strerror(errno));
 		return ((char *) 0);
 	}
 	strncpy(email, ptr, len);
@@ -257,7 +262,7 @@ spamReport(int spamNumber, char *outfile)
 		flag = 1;
 	else
 		flag = 0;
-	for (i = 0; i < maxaddr; i++)
+	for (i = 0; spammer_hash && i < maxaddr; i++)
 	{
 		for (p = spammer_hash[i]; p != NULL; p = p->next)
 		{
@@ -277,7 +282,7 @@ spamReport(int spamNumber, char *outfile)
 	fprintf(stderr, "%d Spammers detected\n", spamcnt);
 	if (flag && spamcnt)
 	{
-		spamprog[0] = QMAILDIR"/bin/qmail-spamdb";
+		spamprog[0] = QMAILDIR"/bin/qmail-cdb";
 		if ((ptr = strrchr(outfile, '/')))
 			ptr++;
 		else
