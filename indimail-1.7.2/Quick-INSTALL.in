@@ -10,14 +10,15 @@
     % sudo rpm -ivh indimail-@version@-1.1.i386.rpm
     % cd /var/indimail/control
     % su
-    # echo "localhost" > host.mysql
+    # echo "localhost:indimail:ssh-1.5-:/tmp/mysql.sock" > host.mysql
     # /var/indimail/sbin/initsvc -on
     # exit
 
-    NOTE: you can also use host:user:password:socket or host:user:password:port format
-    for host.mysql (for IndiMail 1.6.9 and above)
-
-    # echo "localhost:indimail:ssh-1.5-:/tmp/mysql.sock" > host.mysql
+    NOTE: replace localhost, indimail, ssh-1.5-, /tmp/mysql.sock as relevant to your MySQL
+    installation. You can use 3306 instead of /tmp/mysql.sock in case your MySQL
+    database is on another host.
+    you must use host:user:password:socket or host:user:password:port format
+    for host.cntrl (for IndiMail 1.6.9 and above)
 
     Ensure MySQL is running
 
@@ -42,16 +43,17 @@
     % sudo rpm -ivh indimail-@version@-1.1.i386.rpm
     % cd /var/indimail/control
     % su
-    # echo "localhost" > host.cntrl (replace localhost with IP of your MySQL host)
+    # echo "localhost:indimail:ssh-1.5-:/tmp/mysql.sock" > host.cntrl
     # ln -s host.cntrl host.master
     # echo 192.168.1.100 > hostip (replace 192.168.1.100 with your mailserver IP)
     # /var/indimail/sbin/initsvc -on
     # exit
 
-    NOTE: you can also use host:user:password:socket or host:user:password:port format
-    for host.cntrl, host.master (for IndiMail 1.6.9 and above)
-
-    # echo "localhost:indimail:ssh-1.5-:/tmp/mysql.sock" > host.cntrl
+    NOTE: replace localhost, indimail, ssh-1.5-, /tmp/mysql.sock as relevant to your MySQL
+    installation. You can use 3306 instead of /tmp/mysql.sock in case your MySQL
+    database is on another host.
+    you must use host:user:password:socket or host:user:password:port format
+    for host.cntrl (for IndiMail 1.6.9 and above)
 
     Ensure MySQL is running
 

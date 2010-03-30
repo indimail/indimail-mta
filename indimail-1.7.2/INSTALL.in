@@ -111,9 +111,9 @@ IndiMail will install and run on most UNIX and UNIX-like systems, but there are 
     free about 15 megabytes by doing make clean
   * A complete, functioning C development system including a compiler, system header files, and
     libraries. The installation steps will guide you through the installation process.
-  * MySQL 5.1.x or greater. I prefer MySQL 6 onwards. You can make IndiMail work with 5.0 or less
-    but you will have to do some manual tweaking with MySQL database and configuration to make
-    MySQL work with IndiMail (read INSTALL-MYSQL for more information).
+  * MySQL 5.1.x or greater. You can make IndiMail work with 5.0 or less but you will have to
+    do some manual tweaking with MySQL database and configuration to make MySQL work with
+    IndiMail (read INSTALL-MYSQL for more information).
   * Around 80 megabytes for the binaries, documentation, and configuration files.
   * A safe filesystem for the queue. qmail's reliability guarantee requires that the queue reside
     on a filesystem with traditional BSD FFS semantics. Most modern local filesystems meet these
@@ -178,7 +178,10 @@ If a command is prefixed with the '#' sign, it means that it was run using root.
     Prepare Source Directory Structure in the disk partition selected
     you have to extract minimum of 10 sources as per the directory
     structure below. You may skip extraction of nssd-1.0, fetchmail-6.3.14,
-    depending on whether you require them.
+    depending on whether you require them. Most probably you have downloaded
+    indimail-@version@.tar.gz only. You require to additionally download the
+    following sources mentioned below. The link from which you can download
+    the sources are mentioned in SECTION 3 below.
 
     +-/home/local/src/indimail/.+
                                .
@@ -290,6 +293,9 @@ the installation.
     % sudo make -s install-strip [DESTDIR=staging_directory]
     % cd ..
 
+    NOTE: UPGRADE Information. You can always upgrade to the latest version of libdkim
+    by doing ./configure <same_parameters_as_earlier_install> ; make ; make install-strip
+
     ##### STEP 3  ##### MOST IMPORTANT STEP ###################
     Install IndiMail. This step involves extracting both indimail-@version@.tar.gz and
     qmail-1.03.tar.gz. It is important that the extracted qmail source directory (qmail-1.03)
@@ -386,6 +392,13 @@ the installation.
 
     BUT DO NOT START THE SERVICES NOW (unless you are upgrading IndiMail)
 
+    NOTE: UPGRADE Information. You can always upgrade to the latest version of qmail by
+    applying the latest patch qmail-1.03.patch.gz available in the indimail source patch
+    subdirectory to the orignal qmail package.
+    Then do ./configure <same_parameters_as_earlier_install> ; make ; make install-strip
+    You can always upgrade to the latest version of IndiMail by doing extracting IndiMail and
+    ./configure <same_parameters_as_earlier_install> ; make ; make install-strip
+
     ##### STEP 4  ##### UCSPI TCP #############################
     Install ucspi-tcp MD5 39b619147db54687c4a583a7a94c9163
     current working directory /home/local/src
@@ -403,6 +416,11 @@ the installation.
     % make -s [DESTDIR=staging_directory]
     % sudo make -s install [DESTDIR=staging_directory]
     % cd ..
+
+    NOTE: UPGRADE Information. You can always upgrade to the latest version of ucpsi
+    by applying the latest patch available in the indimail source patch subdirectory
+    to the orignal ucspi-tcp package.
+    Then do ./configure <same_parameters_as_earlier_install> ; make ; make install-strip
 
     ##### STEP 5  ##### Courier IMAP/POP3 #####################
     Install courier-imap (courier-imap-3.0.8.tar.bz2) MD5 1b431e6dac39ed728d839ceb35474040
@@ -430,6 +448,11 @@ the installation.
     % sudo make -s install-strip [DESTDIR=staging_directory]
     % cd ..
     
+    NOTE: UPGRADE Information. You can always upgrade to the latest version of courier-imap
+    by applying the latest patch available in the indimail source patch subdirectory
+    to the orignal courier-imap package.
+    Then do ./configure <same_parameters_as_earlier_install> ; make ; make install-strip
+
     ##### STEP 6  ##### SPAM Filter ###########################
     Install Bogofilter (http://www.bogofilter.org) MD5 2eb802f4e271b99c3d8f68b14f8df9ef
     current working directory /home/local/src
@@ -485,6 +508,11 @@ the installation.
     % sudo cp indimail-@version@/data/worldlist.db @indimaildir@/etc
     % sudo chown indimail:indimail @indimaildir@/etc/wordlist.db
 
+    NOTE: UPGRADE Information. You can always upgrade to the latest version of bogofilter
+    by applying the latest patch available in the indimail source patch subdirectory
+    to the orignal latest available bogofilter package.
+    Then do ./configure <same_parameters_as_earlier_install> ; make ; make install-strip
+
     ##### STEP 7  ##### Virus Scanner #########################
     Install clamav MD5 6cb3a716f06f00c73def71aa72ff5f41
     current working directory /home/local/src
@@ -501,6 +529,11 @@ the installation.
     % make -s [DESTDIR=staging_directory]
     % sudo make -s install-strip [DESTDIR=staging_directory]
     % cd ..
+
+    NOTE: UPGRADE Information. You can always upgrade to the latest version of clamav
+    by applying the latest patch available in the indimail source patch subdirectory
+    to the orignal latest available clamav package.
+    Then do ./configure <same_parameters_as_earlier_install> ; make ; make install-strip
  
     ##### STEP 8  ## Optional STEP ##### Fetchmail ############
     Install fetchmail MD5 86d3cfbce151881d8bf76a1efd5bda6a  
@@ -521,6 +554,11 @@ the installation.
     % sudo make -s install-strip [DESTDIR=staging_directory]
     % cd ..
 
+    NOTE: UPGRADE Information. You can always upgrade to the latest version of fetchmail
+    by applying the latest patch available in the indimail source patch subdirectory
+    to the orignal latest available fetchmail package.
+    Then do ./configure <same_parameters_as_earlier_install> ; make ; make install-strip
+
     ##### STEP 9  ## Optional STEP ############################
     Install nssd MD5 5bf5083b074adbb89d07c6f60aec9701
     current working directory /home/local/src
@@ -536,6 +574,10 @@ the installation.
     % make -s [DESTDIR=staging_directory]
     % sudo make -s install-strip [DESTDIR=staging_directory]
     % cd ..
+
+    NOTE: UPGRADE Information. You can always upgrade to the latest version of fetchmail
+    by downloading the lastest nssd package
+    Then do ./configure <same_parameters_as_earlier_install> ; make ; make install-strip
 
 ########### SECTION 4  ### Configuration and SETUP ######################
 4. run svctool
@@ -645,6 +687,10 @@ the installation.
         --resend-win-hr=24 --timeout-days=30 --context-file=greylist.context \
         --hash-size=65536 --save-interval=5 --whitelist=greylist.white --use-greydaemon
 
+    If you decide to use greylisting, have the following in tcp.smtp
+
+    :allow,GREYIP=":" in the file @indimaildir@/etc/tcp.smtp
+
     ##### STEP 5  ## IMAP/POP3 Service ##################
     The commands below will create listeners for IMAP and POP3 service.
 
@@ -737,16 +783,23 @@ the installation.
 
     % su
     # echo "192.9.200.:allow,RELAYCLIENT=\"\"" >> @indimaildir@/etc/tcp.smtp
+    # echo ":allow,GREYIP=\":\""               >> @indimaildir@/etc/tcp.smtp
+    # echo "192.9.200.:allow"                  >> @indimaildir@/etc/tcp.qmtp
     # echo "192.9.200.:allow,IMAPCLIENT=\"\""  >> @indimaildir@/etc/tcp.imap
     # echo "192.9.200.:allow,POP3CLIENT=\"\""  >> @indimaildir@/etc/tcp.pop3
+    # echo "192.9.200.:allow"                  >> @indimaildir@/etc/tcp.poppass
     # exit
 
     % sudo @indimaildir@/bin/tcprules @indimaildir@/etc/tcp.smtp.cdb \
-        @indimaildir@/etc/tcp.smtp.tmp < "@indimaildir@/etc/tcp.smtp
+        @indimaildir@/etc/tcp.smtp.tmp < @indimaildir@/etc/tcp.smtp
+    % sudo @indimaildir@/bin/tcprules @indimaildir@/etc/tcp.qmtp.cdb \
+        @indimaildir@/etc/tcp.qmtp.tmp < @indimaildir@/etc/tcp.qmtp
     % sudo @indimaildir@/bin/tcprules @indimaildir@/etc/tcp.imap.cdb \
-        @indimaildir@/etc/tcp.imap.tmp < "@indimaildir@/etc/tcp.imap
+        @indimaildir@/etc/tcp.imap.tmp < @indimaildir@/etc/tcp.imap
     % sudo @indimaildir@/bin/tcprules @indimaildir@/etc/tcp.pop3.cdb \
-        @indimaildir@/etc/tcp.pop3.tmp < "@indimaildir@/etc/tcp.pop3
+        @indimaildir@/etc/tcp.pop3.tmp < @indimaildir@/etc/tcp.pop3
+    % sudo @indimaildir@/bin/tcprules @indimaildir@/etc/tcp.poppass.cdb \
+        @indimaildir@/etc/tcp.pop3.tmp < @indimaildir@/etc/tcp.poppass
 
     you can add other ip's later, when ever you want.
 
@@ -838,7 +891,11 @@ the installation.
 7. Setup crontab for indimail
     Add lines to roots crontab (you may want to edit the file cronlist)
 
-    % sudo crontab -u root @indimaildir@/etc/cronlist
+    % su -
+    # crontab -u root /var/indimail/etc/cronlist
+    # exit
+    CAUTION: Do not use sudo from a non-privileged user else it will
+    overwrite your root user's crontab file
 
     The following procedure configures MRTG for IndiMail
     % sudo mkdir /var/www/html/mailmrtg
@@ -865,13 +922,17 @@ You can go on to add a virtual domain and users if you wish
     If you need to setup a cluster of mailstores having the same domain, you need to
     do the following (change localhost to the appropriate host)
 
+    # echo "localhost:indimail:ssh-1.5-:/tmp/mysql.sock" > host.cntrl
     # echo "localhost" > host.cntrl (replace localhost with IP of your MySQL host)
     # ln -s host.cntrl host.master
-    # echo 192.168.1.100 > hostip (replace 192.168.1.100 with your mailserver/mailstore IP)
+    # echo 192.168.1.100 > localiphost (replace 192.168.1.100 with your mailserver/mailstore IP)
     # exit
 
-    NOTE: you can also use host:user:password:socket or host:user:password:port format
-    for host.mysql, host.cntrl, host.master (for IndiMail 1.6.9 and above)
+    NOTE: replace localhost, indimail, ssh-1.5-, /tmp/mysql.sock as relevant to your MySQL
+    installation. You can use 3306 instead of /tmp/mysql.sock in case your MySQL
+    database is on another host.
+    you must use host:user:password:socket or host:user:password:port format
+    for host.cntrl (for IndiMail 1.6.9 and above)
 
     ##### STEP 2  #############################################
     Add a virtual domain
