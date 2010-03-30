@@ -230,7 +230,7 @@ static int
 thistcp(struct dns_transmit *d)
 {
 	struct taia     now;
-	char          *ip;
+	char           *ip;
 
 	socketfree(d);
 	packetfree(d);
