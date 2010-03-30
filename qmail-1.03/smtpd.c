@@ -1,5 +1,8 @@
 /*
  * $Log: smtpd.c,v $
+ * Revision 1.138  2010-03-30 09:09:12+05:30  Cprogrammer
+ * greylisting error was being sent to client instead of log files
+ *
  * Revision 1.137  2010-02-10 08:59:41+05:30  Cprogrammer
  * trivial change for #ifdef INDIMAIL
  *
@@ -551,7 +554,7 @@ int             wildmat_internal(char *, char *);
 int             ssl_rfd = -1, ssl_wfd = -1;	/*- SSL_get_Xfd() are broken */
 char           *servercert, *clientca, *clientcrl;
 #endif
-char           *revision = "$Revision: 1.137 $";
+char           *revision = "$Revision: 1.138 $";
 char           *protocol = "SMTP";
 stralloc        proto = { 0 };
 static stralloc Revision = { 0 };
@@ -1506,16 +1509,16 @@ err_grey()
 			ptr = arg + idx + 2;
 		}
 	}
-	out("greylist ");
-	out(remoteip);
-	out(" <");
-	out(mailfrom.s);
-	out("> to <");
-	out(arg + 1);
-	out(">");
+	logerr("greylist ");
+	logerr(remoteip);
+	logerr(" <");
+	logerr(mailfrom.s);
+	logerr("> to <");
+	logerr(arg + 1);
+	logerr(">");
 	if (rcptcount > 1)
-		out("..."); /* > 1 address sent for greylist check */
-	out("\n");
+		logerr("..."); /* > 1 address sent for greylist check */
+	logerr("\n");
 	out("450 try again later (#4.3.0)\r\n");
 	return;
 }
@@ -5739,7 +5742,7 @@ addrrelay() /*- Rejection of relay probes. */
 void
 getversion_smtpd_c()
 {
-	static char    *x = "$Id: smtpd.c,v 1.137 2010-02-10 08:59:41+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: smtpd.c,v 1.138 2010-03-30 09:09:12+05:30 Cprogrammer Exp mbhangui $";
 
 #ifdef INDIMAIL
 	x = sccsidh;
