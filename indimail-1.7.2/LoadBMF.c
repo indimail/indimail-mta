@@ -1,5 +1,8 @@
 /*
  * $Log: LoadBMF.c,v $
+ * Revision 2.15  2010-03-30 12:55:40+05:30  Cprogrammer
+ * fixed Invalid TIMESTAMP: Internal Bug problem
+ *
  * Revision 2.14  2008-11-06 15:37:08+05:30  Cprogrammer
  * initialized es_opt
  *
@@ -46,7 +49,7 @@
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: LoadBMF.c,v 2.14 2008-11-06 15:37:08+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: LoadBMF.c,v 2.15 2010-03-30 12:55:40+05:30 Cprogrammer Stab mbhangui $";
 #endif
 
 #ifdef CLUSTERED_SITE
@@ -222,7 +225,7 @@ LoadBMF(int *total, char *bmf)
 				return ((char **) 0);
 			}
 			ubuf.actime = ubuf.modtime = (err ? time(0) : file_time);
-			if (utime(badmailfrom, &ubuf))
+			if (ubuf.actime && utime(badmailfrom, &ubuf))
 				fprintf(stderr, "LoadBMF: utime: %s: %s\n", badmailfrom, strerror(errno));
 			return (LoadBMF_internal(total, bmf));
 		}
@@ -448,7 +451,7 @@ BMFTimestamp(int badmail_flag, char *bmf)
 	if (!(num_rows = mysql_num_rows(res)))
 	{
 		mysql_free_result(res);
-		return (-1);
+		return (0);
 	}
 	for (mcd_time = 0l;(row = mysql_fetch_row(res));)
 	{
