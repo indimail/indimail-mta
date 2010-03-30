@@ -1,5 +1,8 @@
 /*
  * $Log: smtpd.c,v $
+ * Revision 1.139  2010-03-30 16:25:32+05:30  Cprogrammer
+ * use ipv4 address for greylisting
+ *
  * Revision 1.138  2010-03-30 09:09:12+05:30  Cprogrammer
  * greylisting error was being sent to client instead of log files
  *
@@ -554,7 +557,7 @@ int             wildmat_internal(char *, char *);
 int             ssl_rfd = -1, ssl_wfd = -1;	/*- SSL_get_Xfd() are broken */
 char           *servercert, *clientca, *clientcrl;
 #endif
-char           *revision = "$Revision: 1.138 $";
+char           *revision = "$Revision: 1.139 $";
 char           *protocol = "SMTP";
 stralloc        proto = { 0 };
 static stralloc Revision = { 0 };
@@ -592,8 +595,9 @@ char            isbounce;
 static char     strnum[FMT_ULONG];
 static char     accept_buf[FMT_ULONG];
 
-char           *remoteip, *remotehost, *remoteinfo, *local, *relayclient, *nodnscheck, *msgsize, *fakehelo;
-char           *hostname, *bouncemail, *requireauth, *localip, *greyip;
+char           *remoteip4, *remoteip, *remotehost, *remoteinfo, *local, *relayclient,
+			   *nodnscheck, *msgsize, *fakehelo, *hostname, *bouncemail, *requireauth,
+			   *localip, *greyip;
 char          **childargs;
 
 static char     ssinbuf[1024];
@@ -2459,7 +2463,8 @@ setup()
 			die_control();
 	}
 #ifdef IPV6
-	if (!(remoteip = env_get("TCP6REMOTEIP")) && !(remoteip = env_get("TCPREMOTEIP")))
+	remoteip4 = env_get("TCPREMOTEIP");
+	if (!(remoteip = env_get("TCP6REMOTEIP")) && !(remoteip = remoteip4))
 		remoteip = "unknown";
 	if (!(localip = env_get("TCP6LOCALIP")))
 		localip = env_get("TCPLOCALIP");
@@ -4490,7 +4495,7 @@ smtp_data(char *arg)
 	}
 	if (greyip && !relayclient)
 	{
-		switch(greylist(greyip, remoteip, mailfrom.s, rcptto.s, rcptto.len, err_greytimeout, err_grey_tmpfail))
+		switch(greylist(greyip, remoteip4, mailfrom.s, rcptto.s, rcptto.len, err_greytimeout, err_grey_tmpfail))
 		{
 		case 1: /*- success */
 			break;
@@ -5742,7 +5747,7 @@ addrrelay() /*- Rejection of relay probes. */
 void
 getversion_smtpd_c()
 {
-	static char    *x = "$Id: smtpd.c,v 1.138 2010-03-30 09:09:12+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: smtpd.c,v 1.139 2010-03-30 16:25:32+05:30 Cprogrammer Exp mbhangui $";
 
 #ifdef INDIMAIL
 	x = sccsidh;
