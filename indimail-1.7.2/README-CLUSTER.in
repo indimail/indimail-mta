@@ -60,7 +60,7 @@ DATE: @DATE@
     databases for each of the mailstores. When you extend a domain, each mailstore needs
     to have the control files host.cntrl and host.master. These control files has  the IP
     address or hostname of the clusterinfo MySQL database. The clusterinfo database also
-    stores each user's mailstore. This is required to ensure that each mail reaches the
+    stores each user's mailstore IP. This is required to ensure that each mail reaches the
     correct user on the correct mailstore.
 
     Adding the first Mailstore in a cluster

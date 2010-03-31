@@ -1,5 +1,8 @@
 /*
  * $Log: smtpd.c,v $
+ * Revision 1.140  2010-03-30 16:43:44+05:30  Cprogrammer
+ * fix for IPV6 hosts
+ *
  * Revision 1.139  2010-03-30 16:25:32+05:30  Cprogrammer
  * use ipv4 address for greylisting
  *
@@ -557,7 +560,7 @@ int             wildmat_internal(char *, char *);
 int             ssl_rfd = -1, ssl_wfd = -1;	/*- SSL_get_Xfd() are broken */
 char           *servercert, *clientca, *clientcrl;
 #endif
-char           *revision = "$Revision: 1.139 $";
+char           *revision = "$Revision: 1.140 $";
 char           *protocol = "SMTP";
 stralloc        proto = { 0 };
 static stralloc Revision = { 0 };
@@ -595,9 +598,12 @@ char            isbounce;
 static char     strnum[FMT_ULONG];
 static char     accept_buf[FMT_ULONG];
 
-char           *remoteip4, *remoteip, *remotehost, *remoteinfo, *local, *relayclient,
+char           *remoteip, *remotehost, *remoteinfo, *local, *relayclient,
 			   *nodnscheck, *msgsize, *fakehelo, *hostname, *bouncemail, *requireauth,
 			   *localip, *greyip;
+#ifdef IPV6
+char           *remoteip4;
+#endif
 char          **childargs;
 
 static char     ssinbuf[1024];
@@ -2463,7 +2469,8 @@ setup()
 			die_control();
 	}
 #ifdef IPV6
-	remoteip4 = env_get("TCPREMOTEIP");
+	if (!(remoteip4 = env_get("TCPREMOTEIP")))
+		remoteip4 = "unknown";
 	if (!(remoteip = env_get("TCP6REMOTEIP")) && !(remoteip = remoteip4))
 		remoteip = "unknown";
 	if (!(localip = env_get("TCP6LOCALIP")))
@@ -4495,7 +4502,11 @@ smtp_data(char *arg)
 	}
 	if (greyip && !relayclient)
 	{
+#ifdef IPV6
 		switch(greylist(greyip, remoteip4, mailfrom.s, rcptto.s, rcptto.len, err_greytimeout, err_grey_tmpfail))
+#else
+		switch(greylist(greyip, remoteip, mailfrom.s, rcptto.s, rcptto.len, err_greytimeout, err_grey_tmpfail))
+#endif
 		{
 		case 1: /*- success */
 			break;
@@ -5747,7 +5758,7 @@ addrrelay() /*- Rejection of relay probes. */
 void
 getversion_smtpd_c()
 {
-	static char    *x = "$Id: smtpd.c,v 1.139 2010-03-30 16:25:32+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: smtpd.c,v 1.140 2010-03-30 16:43:44+05:30 Cprogrammer Exp mbhangui $";
 
 #ifdef INDIMAIL
 	x = sccsidh;

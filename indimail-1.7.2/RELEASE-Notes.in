@@ -7,6 +7,8 @@ This release introduces QMTP support in qmail-remote. The RPM installation now
 creates a QMTP service. To enable QMTP service to your servers, you will have
 to create qmtproutes file.
 
+This release fixes quite many bugs identified by Tobias Schmidt (greylisting,
+documentation, chowkidar)
 
 This release includes the following files
 
@@ -64,7 +66,7 @@ both 32 and 64 bit) are
 
 ChangeLog
 =========
-* Fri Mar 26 2010 mbhangui@gmail.com
+* Wed Mar 31 2010 mbhangui@gmail.com
 Release 1.7.2 Start 15/03/2010
 1.  Added unsigned integer overflow check to alloc.c in ucspi-tcp, qmail
     Matthew Dempsky - http://marc.info/?l=qmail&m=125213850310173&w=2
@@ -81,3 +83,12 @@ Release 1.7.2 Start 15/03/2010
 10. Updated envrules environment variables in qmail-smtpd, qmail-inject,
     spawn-filter man pages
 11. use tcp.qmtp.cdb for qmtpd service
+12. use localiphost instead of hostip for local IP address
+13. use 127.0.0.1 if get_local_ip() fails in inlookup [2977996]
+14. BUG - Fixed typo in cronlist.in
+15. BUG - Fixed SIGSEGV in spamReport() function in spam.c [2979103]
+16. BUG - fixed "Invalid TIMESTAMP: Internal Bug problem" in LoadBMF.c
+    [2979103]
+17. BUG - call qmail-cdb instead of qmail-spamdb in spam.c [2979103]
+18. BUG - Fix output being sent to client instead of log [2979100]
+19. BUG - pass ipv4 address to greylist() in smtpd.c [2979391]
