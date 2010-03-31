@@ -20,6 +20,7 @@
           o mysql-5.4.3-beta
           o mysql-5.5.0-m2
           o mysql-5.5.2-m2
+          o MariaDB 5.1.42
 
     2. If you have /etc/my.conf, replace socket=/var/lib/mysql/mysql.sock with
        socket=/tmp/mysql.sock 
