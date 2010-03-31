@@ -1,4 +1,8 @@
 * Wed Mar 31 2010 mbhangui@gmail.com
+Release 1.7.3 Start 31/03/2010
+
+
+* Wed Mar 31 2010 mbhangui@gmail.com
 Release 1.7.2 Start 15/03/2010
 18/03/2010
 1.  Added unsigned integer overflow check to alloc.c in ucspi-tcp, qmail
