@@ -512,6 +512,7 @@ hier(inst_dir)
 	c(auto_qmail_home, "bin", "qmailctl", auto_uido, auto_gidq, 0555);
 	c(auto_qmail_home, "bin", "uacl", auto_uido, auto_gidq, 0555);
 	c(auto_qmail_home, "bin", "base64", auto_uido, auto_gidq, 0555);
+	c(auto_qmail_home, "bin", "swaks", auto_uido, auto_gidq, 0555);
 	c(auto_qmail_home, "bin", "mbox2maildir.pl", auto_uido, auto_gidq, 0555);
 	c(auto_qmail_home, "bin", "qmail-scanner-queue.pl", auto_uido, auto_gidq, 0555);
 	c(auto_qmail_home, "bin", "stripmime.pl", auto_uido, auto_gidq, 0555);
@@ -697,6 +698,7 @@ hier(inst_dir)
 	c(auto_qmail_home, "man/man1", "recordio.1", auto_uido, auto_gidq, 0444);
 	c(auto_qmail_home, "man/man1", "uacl.1", auto_uido, auto_gidq, 0444);
 	c(auto_qmail_home, "man/man1", "base64.1", auto_uido, auto_gidq, 0444);
+	c(auto_qmail_home, "man/man1", "swaks.1", auto_uido, auto_gidq, 0444);
 	c(auto_qmail_home, "man/man1", "fastforward.1", auto_uido, auto_gidq, 0444);
 	c(auto_qmail_home, "man/cat1", "fastforward.0", auto_uido, auto_gidq, 0444);
 	c(auto_qmail_home, "man/man1", "printforward.1", auto_uido, auto_gidq, 0444);
