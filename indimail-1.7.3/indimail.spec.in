@@ -1,5 +1,8 @@
 #
 # $Log: indimail.spec.in,v $
+# Revision 2.147  2010-04-01 19:15:32+05:30  Cprogrammer
+# added swaks
+#
 # Revision 2.146  2010-03-27 16:40:12+05:30  Cprogrammer
 # added vadddomain, vadduser post handle scripts
 #
@@ -461,7 +464,7 @@
 # rpm spec file for indimail
 #
 #
-# $Id: indimail.spec.in,v 2.146 2010-03-27 16:40:12+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 2.147 2010-04-01 19:15:32+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %define _unpackaged_files_terminate_build 1
 
@@ -1488,6 +1491,7 @@ fi
 %attr(555,root,qmail)                   %{_prefix}/bin/dot-forward
 %attr(555,root,qmail)                   %{_prefix}/bin/datemail
 %attr(555,root,qmail)                   %{_prefix}/bin/base64
+%attr(555,root,qmail)                   %{_prefix}/bin/swaks
 %attr(555,root,qmail)                   %{_prefix}/bin/rhosts
 %attr(555,root,qmail)                   %{_prefix}/bin/replier
 %attr(500,root,qmail)                   %{_prefix}/bin/qmail-cdb
