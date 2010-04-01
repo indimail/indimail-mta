@@ -1,5 +1,8 @@
 /*
  * $Log: deliver_mail.c,v $
+ * Revision 2.54  2010-04-01 12:45:59+05:30  Cprogrammer
+ * fix extra newlines after Delivered-To header
+ *
  * Revision 2.53  2010-03-25 08:31:34+05:30  Cprogrammer
  * added missing newline after Delivered-To header
  * QQEH to be unset only if QHPSI is set.
@@ -185,7 +188,7 @@
 #endif
 
 #ifndef	lint
-static char     sccsid[] = "$Id: deliver_mail.c,v 2.53 2010-03-25 08:31:34+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: deliver_mail.c,v 2.54 2010-04-01 12:45:59+05:30 Cprogrammer Stab mbhangui $";
 #endif
 
 /*- Function Prototypes */
@@ -526,6 +529,9 @@ deliver_mail(char *address, mdir_t MsgSize, char *quota, uid_t uid, gid_t gid,
 		is_file = 1;
 		getEnvConfigStr(&rpline, "RPLINE", "Return-PATH: <>\n");
 		dtline = getenv("DTLINE");
+		for (ptr1 = dtline;*ptr1 && *ptr1 != '\n';ptr1++);
+		if (*ptr1 == '\n')
+			*ptr1 = 0;
 		xfilter = getenv("XFILTER");
 		qqeh = getenv("QQEH");
 		if (stat(address, &statbuf))
