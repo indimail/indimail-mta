@@ -157,7 +157,9 @@ indimailsbin_SCRIPTS = myslave controlsync svctool cputime tls-cert-check
 
 noinst_SCRIPTS = create_services indimail.spec indimail-@VERSION@-rpmlintrc indimail-epm.list \
 	INSTALL INSTALL-RPM INSTALL-MYSQL README-CLUSTER RELEASE-Notes Quick-INSTALL \
-	vadddomain_handle vadduser_handle
+	vadddomain_handle vadduser_handle 
+
+post_handle_list = vadddomain vadduser
 
 MOSTLYCLEANFILES=versioninfo vcaliasrev myslave logmonitor controlsync bogofilter-qfe \
 svctool indimail_settings.c cronlist crypt create_services INSTALL INSTALL-RPM INSTALL-MYSQL \
@@ -874,6 +876,12 @@ install-data-hook:
 	$(INSTALL_DATA) data/*.repo $(DESTDIR)@prefix@/etc/yum.repos.d || exit 1
 	$(mkinstalldirs) $(DESTDIR)@prefix@/libexec || exit 1
 	$(INSTALL_DATA) post_handle/* $(DESTDIR)@prefix@/libexec || exit 1
+	for f in $(post_handle_list); do \
+		if [ -f $(DESTDIR)@prefix@/libexec/$$f ] ; then \
+			chmod 555 $(DESTDIR)@prefix@/libexec/$$f; \
+			echo "chmod 555 $(DESTDIR)@prefix@/libexec/$$f"; \
+		fi;\
+	done
 	$(mkinstalldirs) $(DESTDIR)@prefix@/doc || exit 1
 	for f in $(doc_list); do \
 		$(INSTALL_DATA) doc/$$f $(DESTDIR)@prefix@/doc/$$f || exit 1 ;\
@@ -892,7 +900,7 @@ install-data-hook:
 	fi
 
 .gitignore: $(PROGRAMS) $(indimailbin_SCRIPTS) $(indimailsbin_SCRIPTS) \
-$(indimaillibexec_SCRIPTS) gitignore
+$(indimaillibexec_SCRIPTS) $(noinst_SCRIPTS) gitignore
 	(for f in $^; do \
 		echo $$f ; \
 	done ;cat gitignore) |grep -v gitignore >> .gitignore; sort -u .gitignore -o .gitignore
