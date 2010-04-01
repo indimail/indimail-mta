@@ -145,7 +145,7 @@
  * have Return-Path in the header when forwarding to an email id
  *
  * Revision 2.9  2003-08-24 16:29:36+05:30  Cprogrammer
- * changes for DTLINE compatibility with slemslite
+ * changes for DTLINE compatibility with fetchmail
  *
  * Revision 2.8  2003-02-01 15:35:03+05:30  Cprogrammer
  * removed update_flag argument to user_over_quota()
