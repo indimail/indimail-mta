@@ -1,5 +1,8 @@
 /*
  * $Log: hier.c,v $
+ * Revision 1.139  2010-04-02 17:46:41+05:30  Cprogrammer
+ * added swaks
+ *
  * Revision 1.138  2010-03-26 08:37:19+05:30  Cprogrammer
  * added dkim man page
  *
@@ -1038,7 +1041,7 @@ hier(inst_dir)
 void
 getversion_install_big_c()
 {
-	static char    *x = "$Id: hier.c,v 1.138 2010-03-26 08:37:19+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: hier.c,v 1.139 2010-04-02 17:46:41+05:30 Cprogrammer Stab mbhangui $";
 
 #ifdef INDIMAIL
 	x = sccsidh;
