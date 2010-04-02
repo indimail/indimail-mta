@@ -1,5 +1,8 @@
 /*
  * $Log: deliver_mail.c,v $
+ * Revision 2.55  2010-04-02 10:17:40+05:30  Cprogrammer
+ * another approach to fix newline after Delivered-To header
+ *
  * Revision 2.54  2010-04-01 12:45:59+05:30  Cprogrammer
  * fix extra newlines after Delivered-To header
  *
@@ -188,7 +191,7 @@
 #endif
 
 #ifndef	lint
-static char     sccsid[] = "$Id: deliver_mail.c,v 2.54 2010-04-01 12:45:59+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: deliver_mail.c,v 2.55 2010-04-02 10:17:40+05:30 Cprogrammer Stab mbhangui $";
 #endif
 
 /*- Function Prototypes */
@@ -529,9 +532,11 @@ deliver_mail(char *address, mdir_t MsgSize, char *quota, uid_t uid, gid_t gid,
 		is_file = 1;
 		getEnvConfigStr(&rpline, "RPLINE", "Return-PATH: <>\n");
 		dtline = getenv("DTLINE");
+#if 0
 		for (ptr1 = dtline;*ptr1 && *ptr1 != '\n';ptr1++);
 		if (*ptr1 == '\n')
 			*ptr1 = 0;
+#endif
 		xfilter = getenv("XFILTER");
 		qqeh = getenv("QQEH");
 		if (stat(address, &statbuf))
@@ -551,13 +556,13 @@ deliver_mail(char *address, mdir_t MsgSize, char *quota, uid_t uid, gid_t gid,
 			if (qqeh && *qqeh)
 			{
 				snprintf(DeliveredTo, AUTH_SIZE, 
-					"%s%s\n%s%s\nReceived: (indimail %d invoked by uid %d); %s\n",
+					"%s%s%s%s\nReceived: (indimail %d invoked by uid %d); %s\n",
 					rpline, dtline, qqeh,
 					xfilter ? xfilter : "X-Filter: None",
 					getpid(), getuid(), get_localtime());
 			} else
 				snprintf(DeliveredTo, AUTH_SIZE, 
-					"%s%s\n%s\nReceived: (indimail %d invoked by uid %d); %s\n",
+					"%s%s%s\nReceived: (indimail %d invoked by uid %d); %s\n",
 					rpline, dtline,
 					xfilter ? xfilter : "X-Filter: None",
 					getpid(), getuid(), get_localtime());
@@ -802,10 +807,10 @@ deliver_mail(char *address, mdir_t MsgSize, char *quota, uid_t uid, gid_t gid,
 	}
 	if (is_injected)
 	{
+		char           *tstr = 0;
 		getEnvConfigStr(&rpline, "RPLINE", "Return-Path: <>\n");
 		if ((dtline = getenv("DTLINE")))
 		{
-			char           *tstr;
 
 			for (;*dtline && *dtline != ':';dtline++);
 			if (*dtline)
@@ -840,6 +845,8 @@ deliver_mail(char *address, mdir_t MsgSize, char *quota, uid_t uid, gid_t gid,
 				rpline, dtline,
 				xfilter ? xfilter : "X-Filter: None",
 				getpid(), getuid(), get_localtime());
+		if (tstr) /*- replace the newline in DTLINE environment variable */
+			*tstr = '\n';
 		if (write(write_fd, DeliveredTo, slen(DeliveredTo)) != slen(DeliveredTo))
 		{
 			/*- Check if the user is over quota */
