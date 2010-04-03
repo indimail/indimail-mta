@@ -18,7 +18,8 @@
     installation. You can use 3306 instead of /tmp/mysql.sock in case your MySQL
     database is on another host.
     you must use host:user:password:socket or host:user:password:port format
-    for host.cntrl (for IndiMail 1.6.9 and above)
+    for host.cntrl (for IndiMail 1.6.9 and above). Also set your PATH to 
+    have /var/indimail/bin in the path.
 
     Ensure MySQL is running
 
@@ -53,7 +54,8 @@
     installation. You can use 3306 instead of /tmp/mysql.sock in case your MySQL
     database is on another host.
     you must use host:user:password:socket or host:user:password:port format
-    for host.cntrl (for IndiMail 1.6.9 and above)
+    for host.cntrl (for IndiMail 1.6.9 and above). Also set your PATH to 
+    have /var/indimail/bin in the path.
 
     Ensure MySQL is running
 
