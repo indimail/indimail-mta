@@ -45,11 +45,14 @@ normally on port 465). Otherwise,
 .B qmail-smtpd
 offers the STARTTLS extension to ESMTP.
 
-If the environment variable FILTERLOG is defined,
-.B qmail-multi
-will open a temporary file with descriptor 255. It will expect status message (max 255 bytes) be written
-by programs called via the QMAILQUEUE environment variable. The status message will
-be logged to stderr along with the transaction log.
+If the environment variable LOGFILTER is defined, \fBqmail-smtpd\fR will open a fifo 
+defined by \fBLOGFILTER\fR environment variable in O_WRONLY mode. It will write
+the SMTP transaction log to the fifo. \fBqmail-smtpd\fR will also make available file descriptor
+255 for writing by external programs called when \fBQMAILQUEUE\fR or \fBFILTERARGS\fR environment 
+variables are defined. Additionally, \fBqmail-smtpd\fR will read 255 bytes on file
+descriptor 255. The read bytes will be logged to stderr along with the transaction log.
+This mechanism allows \fBqmail-smtpd\fR to communicate with external programs called when
+one uses the \fBQMAILQUEUE\fR or \fBFILTERARGS\fR environment variable.
 
 .B qmail-smtpd
 is responsible for counting hops.
