@@ -1,20 +1,10 @@
 /*
  * $Log: deliver_mail.c,v $
- * Revision 2.55  2010-04-02 10:17:40+05:30  Cprogrammer
- * another approach to fix newline after Delivered-To header
- *
- * Revision 2.54  2010-04-01 12:45:59+05:30  Cprogrammer
- * fix extra newlines after Delivered-To header
- *
- * Revision 2.53  2010-03-25 08:31:34+05:30  Cprogrammer
- * added missing newline after Delivered-To header
- * QQEH to be unset only if QHPSI is set.
- *
- * Revision 2.52  2010-03-24 10:14:33+05:30  Cprogrammer
- * moved overquota.sh to libexec directory
- *
- * Revision 2.51  2010-03-22 14:33:42+05:30  Cprogrammer
+ * Revision 2.51  2010-04-03 20:32:05+05:30  Cprogrammer
  * fixed calling overquota_command when user is over quota
+ * moved overquota.sh to libexec directory
+ * QQEH to be unset only if QHPSI is set
+ * fixed newline being removed from Delivered-To header
  *
  * Revision 2.50  2009-11-09 10:42:37+05:30  Cprogrammer
  * changed BUFF_SIZE to MAX_BUFF
@@ -191,7 +181,7 @@
 #endif
 
 #ifndef	lint
-static char     sccsid[] = "$Id: deliver_mail.c,v 2.55 2010-04-02 10:17:40+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: deliver_mail.c,v 2.51 2010-04-03 20:32:05+05:30 Cprogrammer Stab mbhangui $";
 #endif
 
 /*- Function Prototypes */
@@ -532,11 +522,6 @@ deliver_mail(char *address, mdir_t MsgSize, char *quota, uid_t uid, gid_t gid,
 		is_file = 1;
 		getEnvConfigStr(&rpline, "RPLINE", "Return-PATH: <>\n");
 		dtline = getenv("DTLINE");
-#if 0
-		for (ptr1 = dtline;*ptr1 && *ptr1 != '\n';ptr1++);
-		if (*ptr1 == '\n')
-			*ptr1 = 0;
-#endif
 		xfilter = getenv("XFILTER");
 		qqeh = getenv("QQEH");
 		if (stat(address, &statbuf))
