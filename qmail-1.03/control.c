@@ -78,7 +78,7 @@ control_init()
 {
 	int             r;
 
-	if((r = control_readline(&me, "me")) == 1)
+	if ((r = control_readline(&me, "me")) == 1)
 		meok = 1;
 	return r; /*- negative for error */
 }
@@ -92,7 +92,7 @@ control_rldef(sa, fn, flagme, def)
 {
 	int             r;
 
-	if((r = control_readline(sa, fn)))
+	if ((r = control_readline(sa, fn)))
 		return r;
 	if (flagme && meok)
 		return stralloc_copy(sa, &me) ? 1 : -1;
@@ -112,9 +112,9 @@ control_readline(sa, fn)
 
 	if (*fn != '/' && *fn != '.')
 	{
-		if(!controldir)
+		if (!controldir)
 		{
-			if(!(controldir = env_get("CONTROLDIR")))
+			if (!(controldir = env_get("CONTROLDIR")))
 				controldir = "control";
 		}
 		if (!stralloc_copys(&controlfile, controldir))
@@ -128,7 +128,7 @@ control_readline(sa, fn)
 		return(-1);
 	if (!stralloc_0(&controlfile))
 		return(-1);
-	if((fd = open_read(controlfile.s)) == -1)
+	if ((fd = open_read(controlfile.s)) == -1)
 	{
 		if (errno == error_noent)
 			return 0;
@@ -210,9 +210,9 @@ control_readnativefile(sa, fn, mode)
 		return -1;
 	if (*fn != '/' && *fn != '.')
 	{
-		if(!controldir)
+		if (!controldir)
 		{
-			if(!(controldir = env_get("CONTROLDIR")))
+			if (!(controldir = env_get("CONTROLDIR")))
 				controldir = "control";
 		}
 		if (!stralloc_copys(&controlfile, controldir))
@@ -280,9 +280,9 @@ control_readfile(sa, fn, flagme)
 		return -1;
 	if (*fn != '/' && *fn != '.')
 	{
-		if(!controldir)
+		if (!controldir)
 		{
-			if(!(controldir = env_get("CONTROLDIR")))
+			if (!(controldir = env_get("CONTROLDIR")))
 				controldir = "control";
 		}
 		if (!stralloc_copys(&controlfile, controldir))
@@ -296,7 +296,7 @@ control_readfile(sa, fn, flagme)
 		return(-1);
 	if (!stralloc_0(&controlfile))
 		return(-1);
-	if((fd = open_read(controlfile.s)) == -1)
+	if ((fd = open_read(controlfile.s)) == -1)
 	{
 		if (errno == error_noent)
 		{
