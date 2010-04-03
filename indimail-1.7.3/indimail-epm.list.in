@@ -1,5 +1,8 @@
 #
 # $Log: indimail-epm.list.in,v $
+# Revision 2.50  2010-04-03 16:46:54+05:30  Cprogrammer
+# added QMQP service
+#
 # Revision 2.49  2010-03-25 10:26:41+05:30  Cprogrammer
 # added qmtpd service creation
 #
@@ -1697,12 +1700,14 @@ if [ " $$a_arch" = " x86_64" ] ; then
 	fetchmail_mem=144857600
 	smtp_soft_mem=104857600
 	qmtp_soft_mem=104857600
+	qmqp_soft_mem=104857600
 	imap_pop3_mem=209715200
 	poppass_mem=52428800
 else
 	fetchmail_mem=72428800
 	smtp_soft_mem=52428800
 	qmtp_soft_mem=52428800
+	qmqp_soft_mem=52428800
 	imap_pop3_mem=10485760
 	poppass_mem=10485760
 fi
@@ -1791,6 +1796,10 @@ ${prefix}/sbin/svctool --greylist=1999 --servicedir=${servicedir} --min-resend-m
 ${prefix}/sbin/svctool --qmtp=209 --servicedir=${servicedir} --qbase=${qbase} \
 	--qcount=${qcount} --qstart=1 --cntrldir=control --localip=0 --maxdaemons=75 --maxperip=25 \
 	--fsync --syncdir --memory=$$qmtp_soft_mem --min-free=52428800
+# qmail-qmtqd service
+${prefix}/sbin/svctool --qmqp=628 --servicedir=${servicedir} --qbase=${qbase} \
+	--qcount=${qcount} --qstart=1 --cntrldir=control --localip=0 --maxdaemons=75 --maxperip=25 \
+	--fsync --syncdir --memory=$$qmqp_soft_mem --min-free=52428800
 
 if [ $$nofetchmail -eq 0 ] ; then
 # fetchmail

@@ -528,6 +528,7 @@ the installation.
         --mandir=@indimaildir@/man --with-user=qscand --with-group=qscand --disable-clamav
     % make -s [DESTDIR=staging_directory]
     % sudo make -s install-strip [DESTDIR=staging_directory]
+    % sudo chown -R qscand:qscand /var/indimail/share/clamd
     % cd ..
 
     NOTE: UPGRADE Information. You can always upgrade to the latest version of clamav
@@ -676,6 +677,12 @@ the installation.
     @indimaildir@/control/qmtproutes
 
     % sudo @indimaildir@/sbin/svctool --qmtp=209 --servicedir=/service \
+        --qbase=@indimaildir@/queue --qcount=5 --qstart=1 --cntrldir=control --localip=0 \
+        --maxdaemons=75 --maxperip=25 --fsync --syncdir --memory=104857600 --min-free=52428800
+
+    If you want a centralized mail queue, you can implement QMQP service. Like QMTP, QMQP
+    is much faster than SMTP.
+    % sudo @indimaildir@/sbin/svctool --qmqp=628 --servicedir=/service \
         --qbase=@indimaildir@/queue --qcount=5 --qstart=1 --cntrldir=control --localip=0 \
         --maxdaemons=75 --maxperip=25 --fsync --syncdir --memory=104857600 --min-free=52428800
 

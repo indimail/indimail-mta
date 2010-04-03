@@ -1,5 +1,8 @@
 #
 # $Log: indimail.spec.in,v $
+# Revision 2.148  2010-04-03 16:47:03+05:30  Cprogrammer
+# added QMQP service
+#
 # Revision 2.147  2010-04-01 19:15:32+05:30  Cprogrammer
 # added swaks
 #
@@ -464,7 +467,7 @@
 # rpm spec file for indimail
 #
 #
-# $Id: indimail.spec.in,v 2.147 2010-04-01 19:15:32+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 2.148 2010-04-03 16:47:03+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %define _unpackaged_files_terminate_build 1
 
@@ -1174,8 +1177,8 @@ fi
 
 # Create these files so that %ghost does not complain
 for i in indimail.cnf nssd.conf tcp.imap tcp.imap.cdb tcp.pop3 \
-tcp.pop3.cdb tcp.smtp tcp.smtp.cdb tcp.qmtp tcp.qmtp.cdb tcp.poppass \
-tcp.poppass.cdb services.log
+tcp.pop3.cdb tcp.smtp tcp.smtp.cdb tcp.qmtp tcp.qmtp.cdb tcp.qmqp tcp.qmqp.cdb \
+tcp.poppass tcp.poppass.cdb services.log
 do
 	/bin/touch %{buildroot}%{_prefix}/etc/$i
 done
@@ -1287,12 +1290,14 @@ fi
 %ghost %config(noreplace,missingok)               %{_prefix}/etc/tcp.pop3
 %ghost %config(noreplace,missingok)               %{_prefix}/etc/tcp.smtp
 %ghost %config(noreplace,missingok)               %{_prefix}/etc/tcp.qmtp
+%ghost %config(noreplace,missingok)               %{_prefix}/etc/tcp.qmqp
 %ghost %config(noreplace,missingok)               %{_prefix}/etc/tcp.poppass
 #
 # These files will get removed during uninstallation
 #
 %ghost %attr(0644,indimail,indimail)              %{_prefix}/etc/tcp.smtp.cdb
 %ghost %attr(0644,indimail,indimail)              %{_prefix}/etc/tcp.qmtp.cdb
+%ghost %attr(0644,indimail,indimail)              %{_prefix}/etc/tcp.qmqp.cdb
 %ghost %attr(0644,indimail,indimail)              %{_prefix}/etc/tcp.imap.cdb
 %ghost %attr(0644,indimail,indimail)              %{_prefix}/etc/tcp.pop3.cdb
 %ghost %attr(0644,indimail,indimail)              %{_prefix}/etc/tcp.poppass.cdb
@@ -2237,12 +2242,14 @@ fi
 %define fetchmail_mem 144857600
 %define smtp_soft_mem 104857600
 %define qmtp_soft_mem 104857600
+%define qmqp_soft_mem 104857600
 %define imap_pop3_mem 209715200
 %define poppass_mem   52428800
 %else
 %define fetchmail_mem 72428800
 %define smtp_soft_mem 52428800
 %define qmtp_soft_mem 52428800
+%define qmqp_soft_mem 52428800
 %define imap_pop3_mem 10485760
 %define poppass_mem   10485760
 %endif
@@ -2331,6 +2338,11 @@ done
 %{_prefix}/sbin/svctool --qmtp=209 --servicedir=%{servicedir} --qbase=%{qbase} \
 	--qcount=%{qcount} --qstart=1 --cntrldir=control --localip=0 --maxdaemons=75 --maxperip=25 \
 	--fsync --syncdir --memory=%{qmtp_soft_mem} --min-free=52428800
+# qmail-qmqpd service
+%{_prefix}/sbin/svctool --qmqp=628 --servicedir=%{servicedir} --qbase=%{qbase} \
+	--qcount=%{qcount} --qstart=1 --cntrldir=control --localip=0 --maxdaemons=75 --maxperip=25 \
+	--fsync --syncdir --memory=%{qmqp_soft_mem} --min-free=52428800
+/bin/touch %{servicedir}/qmqpd.628/down
 
 if [ %nofetchmail -eq 0 ] ; then
 # fetchmail
@@ -2563,7 +2575,7 @@ done
 /bin/rmdir --ignore-fail-on-non-empty %{_prefix}/man 2>/dev/null
 
 echo "removing configuration"
-for i in indimail.cnf nssd.conf tcp.imap tcp.pop3 tcp.smtp tcp.qmtp tcp.poppass \
+for i in indimail.cnf nssd.conf tcp.imap tcp.pop3 tcp.smtp tcp.qmtp tcp.qmqp tcp.poppass \
 clamd.conf freshclam.conf
 do
 	%{__rm} -f %{_prefix}/etc/$i
@@ -2615,8 +2627,8 @@ echo "removing startup services"
 for i in clamd fetchmail freshclam indisrvr.4000 inlookup.infifo mysql.3306 \
 pwdlookup qmail-imapd.143 qmail-imapd-ssl.993 qmail-pop3d.110 qmail-pop3d-ssl.995 \
 qmail-send.25 qmail-smtpd.25 qmail-smtpd.366 qmail-spamlog qscanq qmail-imapd.4143 \
-qmail-pop3d.4110 qmail-smtpd.465 qmail-smtpd.587 qmail-qmtpd.209 qmail-poppass.106 \
-greylist.1999 .svscan
+qmail-pop3d.4110 qmail-smtpd.465 qmail-smtpd.587 qmail-qmtpd.209 qmail-qmqpd.628 \
+qmail-poppass.106 greylist.1999 .svscan
 do
 	if [ -d %{servicedir}/$i ] ; then
 		%{__rm} -rf %{servicedir}/$i || true

@@ -322,6 +322,7 @@ smtpd.587       | Log for qmail-smtpd Message Submission Port \fBrfc-2476(5)\fR
 smtpd.366       | Log for qmail-smtpd ODMR port \fBrfc-2645(5)\fR.
 smtpd.465       | Log for qmail-smtpd on SMTPS port
 qmtpd.209       | Log for qmail-qmtpd on QMTP port
+qmqpd.628       | Log for qmail-qmqpd on QMQP port
 deliver.25      | qmail-send deliver log
 fetchmail       | fetchmail log
 greylist.1999   | greylist daemon log
@@ -372,8 +373,7 @@ l l.
 Environ  Variable |Program      |Set/Used|Purpose
 ------------------|-------------|--------|----------------------------------------
 QMAILQUEUE        |qmail-smtpd  |used    |Program to be called instead
-                  |qmail-qmtpd  |        |qmail-queue
-                  |qmail-inject |        |
+                  |qmail-inject |        |qmail-queue
                   |new-inject   |        |
                   |condredirect |        |
                   |dot-forward  |        |
@@ -383,8 +383,8 @@ QMAILQUEUE        |qmail-smtpd  |used    |Program to be called instead
                   |maildirserial|        |
                   |ofmipd       |        |
                   |qmail-local  |        |
-                  |qmail-qmqpd  |        |
                   |qmail-qmtpd  |        |
+                  |qmail-qmqpd  |        |
                   |qmail-send   |        |
                   |qreceipt     |        |
                   |replier      |        |
@@ -536,12 +536,13 @@ SPAMREDIRECT      |qmail-multi  |used    |Redirect SPAM tagged mails to the user
                   |spawn-filter |        |specified by this environment variable
 FILTERARGS        |qmail-multi  |used    |Arguments with with Filter program will
                   |spawn-filter |        |be called
-LOGFILTER         |qmail-smtpd  |used    |If set, the filter program has available
-                  |spawn-filter |        |the file descriptor 255 where it can log
+LOGFILTER         |qmail-smtpd  |used    |If set, any programs called using QMAILQUEUE
+                  |spawn-filter |        |or FILTERARGS env variable can use
+                  |             |        |the file descriptor 255 where it can log
                   |             |        |additonal status messages to be logged
                   |             |        |in the qmail-smtpd's log file. This
                   |             |        |should be set to a filename which will
-                  |             |        |be used by the spamlogger service.
+                  |             |        |be used by the qmail-spamlog service.
 MAKE_SEEKABLE     |qmail-multi  |used    |If set, the pipe used by various
                   |spawn-filter |        |programs to communicate is made
                   |vdelivermail |        |seekable. This improves the performance
@@ -1176,6 +1177,7 @@ qmail-smtpd.587      | qmail-smtpd(8) ESMTP Mssage Submission Port \fBrfc-2476(5
 qmail-smtpd.366      | qmail-smtpd(8) ESMTP ODMR service on port 366
 qmail-smtpd.465      | qmail-smtpd(8) ESMTPS service on port 465 (SSL)
 qmail-qmtpd.209      | qmail-qmtpd(8) QMTP service on port 209
+qmail-qmqpd.628      | qmail-qmqpd(8) QMTP service on port 628
 qmail-send.25        | qmail-send(8) delivery service
 fetchmail            | fetchmail(1) service
 greylist.1999        | qmail-greyd(8) greylisting daemon
