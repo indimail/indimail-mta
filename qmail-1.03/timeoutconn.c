@@ -1,5 +1,8 @@
 /*
  * $Log: timeoutconn.c,v $
+ * Revision 1.11  2010-04-03 12:54:31+05:30  Cprogrammer
+ * fix for bind on ipv6 address
+ *
  * Revision 1.10  2005-08-23 17:40:38+05:30  Cprogrammer
  * gcc 4 compliance
  *
@@ -185,10 +188,12 @@ timeoutconn6(s, ipr, ipl, port, timeout)
 {
 	int             i;
 	char            ch, bound = 0;
-	struct sockaddr sa;
 	sockaddr_in    *sin4;
 #if LIBC_HAS_IP6
+	sockaddr_in6    sa;
 	sockaddr_in6   *sin6;
+#else
+	struct sockaddr sa;
 #endif
 	fd_set          wfds;
 	struct timeval  tv;
@@ -203,7 +208,7 @@ timeoutconn6(s, ipr, ipl, port, timeout)
 	 */
 	if (!bound)
 	{
-		byte_zero((char *) &sa, sizeof(struct sockaddr));
+		byte_zero((char *) &sa, sizeof(sa));
 #ifdef LIBC_HAS_IP6
 		if (noipv6)
 		{
@@ -224,7 +229,7 @@ timeoutconn6(s, ipr, ipl, port, timeout)
 			}
 		} else
 		{
-			sin6 = (sockaddr_in6 *) &sa;
+			sin6 = &sa;
 			sin6->sin6_family = AF_INET6;
 			byte_copy((char *) &sin6->sin6_addr, 16, (char *) &ipl->ip6);
 		}
@@ -245,11 +250,11 @@ timeoutconn6(s, ipr, ipl, port, timeout)
 			return -1;
 		}
 #endif
-		if (-1 == bind(s, &sa, sizeof(struct sockaddr)))
+		if (-1 == bind(s, (struct sockaddr *) &sa, sizeof(sa)))
 			return -1;
 	}
 #if LIBC_HAS_IP6
-	byte_zero((char *) &sa, sizeof(struct sockaddr));
+	byte_zero((char *) &sa, sizeof(sa));
 	if (noipv6)
 	{
 		if (ip6_isv4mapped(ipr->d))
@@ -299,7 +304,7 @@ timeoutconn6(s, ipr, ipl, port, timeout)
 #endif
 	if (ndelay_on(s) == -1)
 		return -1;
-	if (connect(s, &sa, sizeof(struct sockaddr)) == 0)
+	if (connect(s, (struct sockaddr *) &sa, sizeof(sa)) == 0)
 	{
 		ndelay_off(s);
 		return 0;
@@ -315,8 +320,8 @@ timeoutconn6(s, ipr, ipl, port, timeout)
 	if (FD_ISSET(s, &wfds))
 	{
 		int             dummy;
-		dummy = sizeof(struct sockaddr);
-		if (getpeername(s, &sa, (socklen_t *) &dummy) == -1)
+		dummy = sizeof(sa);
+		if (getpeername(s, (struct sockaddr *) &sa, (socklen_t *) &dummy) == -1)
 		{
 			read(s, &ch, 1);
 			return -1;
@@ -396,7 +401,7 @@ timeoutconn4(s, ipr, ipl, port, timeout)
 void
 getversion_timeoutconn_c()
 {
-	static char    *x = "$Id: timeoutconn.c,v 1.10 2005-08-23 17:40:38+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: timeoutconn.c,v 1.11 2010-04-03 12:54:31+05:30 Cprogrammer Stab mbhangui $";
 
 	x++;
 }
