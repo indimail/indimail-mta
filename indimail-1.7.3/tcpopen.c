@@ -139,7 +139,7 @@ tcpopen(host, service, port) /*- Thanks to Richard's Steven */
 		snprintf(serv, FMT_ULONG, "%d", port);
 	if ((retval = getaddrinfo(hostptr, serv, &hints, &res0)))
 	{
-		fprintf(stderr, "tcpbind: getaddrinfo: %s\n", gai_strerror(retval));
+		fprintf(stderr, "tcpopen: getaddrinfo: %s\n", gai_strerror(retval));
 		return (-1);
 	}
 	for (res = res0; res; res = res->ai_next)
