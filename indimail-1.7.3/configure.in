@@ -61,7 +61,7 @@ case "$host" in
 	INSTALL="/usr/bin/install -c"
 	idcommand="/usr/bin/id -u"
 	CPPFLAGS="$CPPFLAGS -DLINUX"
-	CFLAGS="$CFLAGS -O4 -Wall -fPIC"
+	CFLAGS="$CFLAGS -O4 -Wall -fPIC -fno-strict-aliasing"
 	MODFLAGS="-O4 -fPIC -shared -Wall"
 	STRIP_OPT=-s
 	;;
