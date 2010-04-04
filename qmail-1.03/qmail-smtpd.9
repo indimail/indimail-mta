@@ -31,10 +31,14 @@ If the environment variable \fBTCPPARANOID\fR is set (\fBtcpserver(1)\fR with -p
 by \fBtcpserver(1)\fR if the IP for reverse DNS address for \fBTCPREMOTEIP\fR does not
 match \fBTCPREMOTEIP\fR.
 
-If the environment variable \fBREQPTR\fR is set and the environment variable \fBTCPREMOTEHOST\fR
-is absent, \fBqmail-smtpd\fR returns permanent error code 553 to the client. \fBTCPREMOTEHOST\fR
-environment variable is removed by \fBtcpserver(1)\fR if remote host (TCPREMOTEIP) does not have a
-reverse DNS record.
+.B qmail-smtpd
+employs DNS look-up for the "MAIL from:" sender address. This can be bypassed using
+the \fInodnscheck\fR control file.
+
+If the environment variable \fBREQPTR\fR is set and \fBTCPREMOTEHOST\fR is absent, \fBqmail-smtpd\fR
+rejects connections from unresolvable IP address (hosts without reverse DNS). \fBqmail-smtpd\fR
+returns permanent error code 553 to the client. \fBTCPREMOTEHOST\fR environment variable is
+removed by \fBtcpserver(1)\fR if remote host (TCPREMOTEIP) does not have a reverse DNS record.
 
 If the environment variable
 .B SMTPS
@@ -45,14 +49,26 @@ normally on port 465). Otherwise,
 .B qmail-smtpd
 offers the STARTTLS extension to ESMTP.
 
-If the environment variable LOGFILTER is defined, \fBqmail-smtpd\fR will open a fifo 
+If the environment variable \fBLOGFILTER\fR is defined, \fBqmail-smtpd\fR will open a fifo 
 defined by \fBLOGFILTER\fR environment variable in O_WRONLY mode. It will write
-the SMTP transaction log to the fifo. \fBqmail-smtpd\fR will also make available file descriptor
-255 for writing by external programs called when \fBQMAILQUEUE\fR or \fBFILTERARGS\fR environment 
+the SMTP transaction log to the fifo. This makes it possible for \fBqmail-smtpd\fR to push
+the SMTP transaction log to exernal programs. \fBqmail-smtpd\fR will also make available file
+descriptor 255 to be available for writing by external programs when \fBQMAILQUEUE\fR or \fBFILTERARGS\fR environment 
 variables are defined. Additionally, \fBqmail-smtpd\fR will read 255 bytes on file
-descriptor 255. The read bytes will be logged to stderr along with the transaction log.
-This mechanism allows \fBqmail-smtpd\fR to communicate with external programs called when
-one uses the \fBQMAILQUEUE\fR or \fBFILTERARGS\fR environment variable.
+descriptor 255. The bytes read will be logged to stderr along with the transaction log.
+This makes it possible for programs called during the data phase of SMTP to send back 255 bytes
+of messages back to \fBqmail-smtpd\fR. In fact, this is used to obtain the \fBX-Bogosity\fR
+header from \fBbogofilter(1)\fR when during spam filtering. An example of a SMTP transaction
+log is as below
+.PP
+.EX
+qmail-smtpd: pid 14544 from ::ffff:127.0.0.1 HELO <indimail.org> \\
+ MAIL from <newsletter_xxx@example.com> \\
+ RCPT <mailstore@indimail.org> AUTH <local-rcpt> Size: 245988 \\
+ X-Bogosity: No, spamicity=0.578967, cutoff=9.90e-01, ham_cutoff=0.00e+00, \\
+ queueID=x18cs40485wff, msgID=<Newsletter_xxx@example.com>, \\
+ ipaddr=217.73.48.143
+.EE
 
 .B qmail-smtpd
 is responsible for counting hops.
@@ -91,7 +107,7 @@ variable MASQUERADE is set,
 .LP
 .nr step 1 1
 .IP \n[step] 2
-relaying to outside domains will be allowed on successful authentication using any sender address.
+after successful authentication, relaying to outside domains will be allowed with any sender address.
 .IP \n+[step]
 mails to local domain will be allowed without authentication
 .LP
@@ -123,38 +139,26 @@ and
 .IR checkprogram
 are passed as the minimum arguments.
 
-.B qmail-smtpd
-employs DNS look-up for the "MAIL from:" sender address.
-
-\fBqmail-smtpd\fR rejects connections from unresolvable IP address (hosts without reverse DNS), if
-the environment variable \fBREQPTR\fR is set.
-
-.B qmail-smtpd
-employs the following additional checks -
+\fBqmail-smtpd\fR prevents unauthorized relaying and also reject mails addressed to invalid
+mailboxes. To do this, \fBqmail-smtpd\fR employs the following additional checks -
 .nr step 1 1
 .IP \n[step] 2
 .B Check Relay Status
-by looking up in 
-.B MySQL
-email addresses logged in the relay table within past 30 Minutes, 
-corresponding to the remote ip address of the client. This effectively
-prevents the user to give any "Mail from:" sender address other than
-the authenticated username and hence serves as a very powerful spam
-prevention mechanism. This option is turned on by defining the environment variable
-.B CHECKRELAY.
-Addresses are logged into the relay table when the user does a POP3 or IMAP4 access. This mechanism 'pop before smtp'
-allows
-.B qmail-smtpd
-to relay out mails if the user does a POP3/IMAP4 access before sending out mails.
+by looking up in \fBMySQL\fR, email addresses logged in the relay table within past 30 Minutes,
+corresponding to the remote ip address of the client. This effectively prevents the user to
+give any "Mail from:" sender address other than the authenticated username and hence serves as
+a very powerful spam prevention mechanism. This option is turned on by defining the environment
+variable \fBCHECKRELAY\fR. Addresses are logged into the relay table when the user does a
+IMAP or POP3 access. This mechanism 'pop before smtp' allows \fBqmail-smtpd\fR to relay out
+mails if the user does a IMAP/POP3 access before sending out mails.
 
 NOTE: Only domains not listed in rcpthosts are checked. Domains in rcpthosts
 are relayed by default. This feature can be turned off by having the domain listed in
-the control file
-.I authdomains
-- in which case, sender's domain will be checked for relay status if present in the
-control file. If the environment variable
+the control file \fIauthdomains\fR.  In such a case mails for local domains will be relayed
+only if the sender has authenticated using SMTP AUTH, IMAP or POP3. If the environment variable
 .B AUTH_ALL
-is set, even local domains (listed in rcpthosts) will be checked for relay status.
+is set, even local domains (listed in rcpthosts) will require senders to authenticate using
+SMTP AUTH, IMAP or POP3.
 If the environment variable 
 .B REQUIREAUTH
 is set, qmail-smtpd will not accept any 
@@ -164,17 +168,14 @@ the
 .B AUTH
 command. If the environment variable
 .B ANTISPOOFING
-set set, qmail-smtpd will force local users to authenticate before accepting
-mails.
+set set, qmail-smtpd will force local users to authenticate (using AUTH, IMAP or POP3) before
+accepting mails.
 
 .IP \n+[step]
 .B Check User Status
-by looking up in
-.B MySQL
-following status of the recipient is determined before accepting the mails
-(This option is turned on by defining the environment variable)
-.B CHECKRECIPIENT.
-To one of the following values
+by looking up in \fBMySQL\fR, status of recipients is determined before accepting the mails.
+This option is turned on by defining the environment variable \fBCHECKRECIPIENT\fR to one of
+the following values
  1. Reject if User not in MySQL
  2. Reject if User not in both MySQL and recipient.cdb (See below)
  3. Reject if User not in recipients.cdb (See below)
@@ -209,25 +210,25 @@ will reject mails if number of errors while doing User Status Check equals/excee
 .BR MAX_RCPT_ERRCOUNT .
 
 .SH Database Connections
-.B qmail-smtpd
-connects to all the databases it requires by sharing the file descriptors to the databases, opened by
-.B tcpserver(1).
-This is done in order to maximise efficiency by avoiding frequent make and break down of TCP/IP connections
-to the database.
+If the environment variable \fBQUERY_CACHE\fR is defined, \fBqmail-smtpd\fR can use
+\fBinlookup(8)\fR, instead of directly connecting to MySQL, for all MySQL queries. This allows
+very a high queries per seconds to be achieved by avoiding frequent tearing down of TCP/IP
+connections. If \fBQUERY_CACHE\fR is not defined, \fBqmail-smtpd\fR will directly connect to
+MySQL and close the connection when the SMTP session ends.
 
 The information of all the databases that
 .B qmail-smtpd
 needs to connect to is maintained in the file
-.BR MCDFILE(5) .
+.BR mcdinfo .
 You can use
 .B dbinfo(1)
 program to edit
-.BR MCDFILE(5) .
+.BR mcdinfo .
 For each database that
 .B qmail-smtpd
 needs to connect to, the following lines need to be maintained
 
- domain   testindi.com 1
+ domain   indimail.org 1
  server   localhost
  mdahost  192.9.0.1
  port     3306
@@ -324,14 +325,14 @@ even though such messages violate the SMTP protocol.
 .SH "CONTROL FILES"
 .B qmail-smtpd
 by default looks at QMAILHOME/control for all control files. This path can be changed by defining the CONTROLDIR
-environment variable. Some of this control files can also be in cdb format if they have the
+environment variable. Some of these control files can also be in cdb format if they have the
 .I .cdb
 extension.
 Some of these control files can be in MySQL if they have the
 .I .sql
-extension. If you desire for the control file to be in MySQL, the file (with 
+extension. If you desire that the control file to be in MySQL, the file (with 
 .I .sql
-extension) should have the following layout
+extension) should have an entry in the following format
 
 .BR database_server_ip:database_user:database_password:database_name:table_name .
 
@@ -1546,8 +1547,9 @@ Following is the list of errors printed by
 .BR qmail-smtpd .
 See rfc-1893(5) for an explanation of the error codes in parentheses.
 
- "450 atrn service unavailable (#5.7.1)"
  "421 too many invalid addresses, goodbye (#4.7.1)"
+ "450 atrn service unavailable (#5.7.1)"
+ "450 try again later (#4.3.0)"
  "451 communication with mail server failed (#4.4.2)"
  "451 connection to mail server rejected (#4.4.1)"
  "451 connection to mail server timed out (#4.4.1)"
@@ -1588,6 +1590,8 @@ See rfc-1893(5) for an explanation of the error codes in parentheses.
  "451 unable to exec qq (#4.3.0)"
  "451 unable to fork filter (#4.3.0)"
  "451 Unable to queue messages (#4.3.0)"
+ "451 greylist temporary failure - Timeout (#4.3.0)"
+ "451 greylist temporary failure (#4.3.0)"
  "501 auth exchange cancelled (#5.0.0)"
  "501 invalid parameter syntax (#5.3.2)"
  "501 malformed auth input (#5.5.4)"
@@ -1631,35 +1635,9 @@ See rfc-1893(5) for an explanation of the error codes in parentheses.
  "557 sorry, too many recipients (#5.7.1)"
 
 .SH "SEE ALSO"
-mysqld(1),
-tcp-env(1),
-tcp-environ(5),
-tcpserver(1),
-tcprules(1),
-uacl(1),
-qmail-control(5),
-MCDFILE(5),
-indimail.patch(5),
-qmail-inject(8),
-qmail-newmrh(8),
-qmail-queue(8),
-qmail-multi(8),
-qscanq(8),
-qmail-remote(8),
-qmail-send(8),
-qmail-spamdb(8),
-recipient-cdb(8),
-pam-multi(8),
-pam-checkpwd(8),
-vchkpass(8),
-systpass(8),
-greydaemon(8),
-rfc-2821(5),
-rfc-1893(5),
-rfc-1894(5),
-rfc-1985(5),
-rfc-2645(5),
-rfc-1321(5),
-rfc-822(5),
-rfc-2104(5),
-rfc-2476(5)
+mysqld(1), tcp-env(1), tcp-environ(5), tcpserver(1), tcprules(1), uacl(1),
+qmail-control(5), MCDFILE(5), indimail.patch(5), qmail-inject(8), qmail-newmrh(8),
+qmail-queue(8), qmail-multi(8), qscanq(8), qmail-remote(8), qmail-send(8), qmail-spamdb(8),
+recipient-cdb(8), pam-multi(8), pam-checkpwd(8), vchkpass(8), systpass(8), bogofilter(1),
+greydaemon(8), rfc-2821(5), rfc-1893(5), rfc-1894(5), rfc-1985(5), rfc-2645(5), rfc-1321(5),
+rfc-822(5), rfc-2104(5), rfc-2476(5)
