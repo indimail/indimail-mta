@@ -16,10 +16,8 @@ and sends the message
 to one or more recipients
 at a remote host.
 
-The remote host is
-.BR qmail-remote 's
-first argument,
-.IR host .
+The remote host \fIhost\fR is \fBqmail-remote\fR's
+first argument.
 .B qmail-remote
 sends the message to
 .IR host ,
@@ -27,7 +25,7 @@ or to a mail exchanger for
 .I host
 listed in the Domain Name System,
 via the Simple Mail Transfer Protocol (SMTP/ESMTP) - default -
-or the Quick Mail Transfer Protocol (QMTP).
+or the Quick Mail Transfer Protocol (QMTP). QMTP is implemented by \fBqmail-qmtpd\fR.
 .I host
 can be either a fully-qualified domain name:
 
@@ -466,5 +464,6 @@ qmail-send(8),
 spawn-filter(8),
 qmail-rspawn(8),
 qmail-smtpd(8),
+qmail-qmtpd(8),
 qmail-tcpok(8),
 qmail-tcpto(8)
