@@ -1,5 +1,8 @@
 /*
  * $Log: socket_recv6.c,v $
+ * Revision 1.3  2010-04-06 08:59:54+05:30  Cprogrammer
+ * minor change
+ *
  * Revision 1.2  2005-06-10 12:18:15+05:30  Cprogrammer
  * conditional ipv6 compilation
  *
@@ -19,7 +22,7 @@
 extern int          noipv6;
 
 int
-socket_recv6(int s, char *buf, unsigned int len, char ip[16], uint16 * port, uint32 * scope_id)
+socket_recv6(int s, char *buf, unsigned int len, char ip[16], uint16 *port, uint32 *scope_id)
 {
 #ifdef LIBC_HAS_IP6
 	struct sockaddr_in6 sa;
@@ -30,10 +33,8 @@ socket_recv6(int s, char *buf, unsigned int len, char ip[16], uint16 * port, uin
 	int             r;
 
 	byte_zero(&sa, dummy);
-	r = recvfrom(s, buf, len, 0, (struct sockaddr *) &sa, &dummy);
-	if (r == -1)
+	if (-1 == (r = recvfrom(s, buf, len, 0, (struct sockaddr *) &sa, &dummy)))
 		return -1;
-
 #ifdef LIBC_HAS_IP6
 	if (noipv6)
 	{
