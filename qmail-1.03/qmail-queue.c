@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-queue.c,v $
+ * Revision 1.50  2010-04-07 19:30:13+05:30  Cprogrammer
+ * use HOSTNAME environment variable to record host
+ *
  * Revision 1.49  2010-03-25 10:16:11+05:30  Cprogrammer
  * added documentation
  *
@@ -348,6 +351,7 @@ receivedfmt(char *s)
 		if (tcpremoteip)
 		{
 			char            Hostname[128];
+			char           *host_name;
 
 			i = fmt_str(s, " from ");
 			len += i;
@@ -361,9 +365,13 @@ receivedfmt(char *s)
 			len += i;
 			if (s)
 				s += i;
-			if (gethostname(Hostname, sizeof(Hostname)) == -1)
-				str_copy(Hostname, "unknown");
-			i = fmt_str(s, Hostname);
+			if (!(host_name = env_get("HOSTNAME")))
+			{
+				if (gethostname(Hostname, sizeof(Hostname)) == -1)
+					str_copy(Hostname, "unknown");
+				host_name = Hostname;
+			}
+			i = fmt_str(s, host_name);
 			len += i;
 			if (s)
 				s += i;
@@ -1095,7 +1103,7 @@ main()
 void
 getversion_qmail_queue_c()
 {
-	static char    *x = "$Id: qmail-queue.c,v 1.49 2010-03-25 10:16:11+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: qmail-queue.c,v 1.50 2010-04-07 19:30:13+05:30 Cprogrammer Stab mbhangui $";
 
 #ifdef INDIMAIL
 	x = sccsidh;
