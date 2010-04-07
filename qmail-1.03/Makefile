@@ -1835,7 +1835,7 @@ qmail-qmqpc.o: \
 compile qmail-qmqpc.c substdio.h getln.h exit.h \
 stralloc.h gen_alloc.h slurpclose.h error.h sig.h ip.h timeoutconn.h \
 timeoutread.h timeoutwrite.h auto_qmail.h control.h fmt.h str.h \
-haveip6.h socket.h conf-ip
+scan.h env.h haveip6.h socket.h conf-ip
 	./compile `grep -h -v "^#" conf-ip` qmail-qmqpc.c
 
 qmail-qmqpd: \
