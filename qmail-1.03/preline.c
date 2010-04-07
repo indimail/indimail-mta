@@ -1,5 +1,8 @@
 /*
  * $Log: preline.c,v $
+ * Revision 1.8  2010-04-07 16:05:53+05:30  Cprogrammer
+ * fixed SIGSEGV when QQEH env variable was absent
+ *
  * Revision 1.7  2004-10-22 20:27:59+05:30  Cprogrammer
  * added RCS id
  *
@@ -56,7 +59,7 @@ main(argc, argv)
 		die_usage();
 	if (!(dtline = env_get("DTLINE")))
 		die_usage();
-	while ((opt = getopt(argc, argv, "frdFRD")) != opteof)
+	while ((opt = getopt(argc, argv, "frde")) != opteof)
 	{
 		switch (opt)
 		{
@@ -71,18 +74,6 @@ main(argc, argv)
 			break;
 		case 'e':
 			flagqqeh = 0;
-			break;
-		case 'F':
-			flagufline = 1;
-			break;
-		case 'R':
-			flagrpline = 1;
-			break;
-		case 'D':
-			flagdtline = 1;
-			break;
-		case 'E':
-			flagqqeh = 1;
 			break;
 		default:
 			die_usage();
@@ -115,6 +106,8 @@ main(argc, argv)
 		substdio_bputs(&ssout, rpline);
 	if (flagdtline)
 		substdio_bputs(&ssout, dtline);
+	if (flagqqeh && !(qqeh = env_get("QQEH")))
+		flagqqeh = 0;
 	if (flagqqeh)
 		substdio_bputs(&ssout, qqeh);
 	if (substdio_copy(&ssout, &ssin) != 0)
@@ -133,7 +126,7 @@ main(argc, argv)
 void
 getversion_preline_c()
 {
-	static char    *x = "$Id: preline.c,v 1.7 2004-10-22 20:27:59+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: preline.c,v 1.8 2010-04-07 16:05:53+05:30 Cprogrammer Stab mbhangui $";
 
 	x++;
 }
