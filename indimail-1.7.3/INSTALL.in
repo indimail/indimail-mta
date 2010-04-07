@@ -5,7 +5,7 @@ Installation Instructions
 *************************
 
 Copyright (C) 1994, 1995, 1996, 1999, 2000, 2001, 2002, 2004, 2005,
-2006, 2007 Free Software Foundation, Inc.
+2006, 2007, 2008, 2009, 2010 Free Software Foundation, Inc.
 
 This file is free documentation; the Free Software Foundation gives
 unlimited permission to copy, distribute and modify it.
@@ -40,11 +40,9 @@ at "Manvendra Bhangui" <mbhangui@gmail.com>
 Checklist
 =========
 
-You need to have answers to the following ready before starting the installation (I need to
-bring more clarity to this section so that it becomes easy for a novice to install a mail
-server)
+You need to have answers to the following ready before starting the installation.
 
-   1.  Whether you want a full fledged mailstore or just a relay server installation
+   1.  Whether you want a full featured mailstore or just a relay server installation
    2.  Default Domain name for your Mail Server (mailstore)
        1. postmaster email account
        2. abuse account
@@ -119,8 +117,8 @@ IndiMail will install and run on most UNIX and UNIX-like systems, but there are 
     on a filesystem with traditional BSD FFS semantics. Most modern local filesystems meet these
     requirements with one important exception: the link() system call is often
     asynchronous--meaning that the results of the link() operation might not have been written to
-    disk when the link() call returns. Bruce Guenter's syncdir library can be used to work around
-    this problem.
+    disk when the link() call returns. Bruce Guenter's syncdir library is used by IndiMail
+    to work around this problem.
   * Sufficient disk space for the queue. Small single-user systems only need a couple megabytes.
     Large servers may need a couple gigabytes.
   * A filesystem for the user's home directories where mail will be delivered.
@@ -180,8 +178,9 @@ If a command is prefixed with the '#' sign, it means that it was run using root.
     structure below. You may skip extraction of nssd-1.0, fetchmail-6.3.14,
     depending on whether you require them. Most probably you have downloaded
     indimail-@version@.tar.gz only. You require to additionally download the
-    following sources mentioned below. The link from which you can download
-    the sources are mentioned in SECTION 3 below.
+    following sources mentioned below. Except for bogofilter, clamav & fetchmail,
+    the sources are available at indimail.sourceforge.net. The link from which you
+    can download the sources are mentioned in SECTION 3 below.
 
     +-/home/local/src/indimail/.+
                                .
@@ -246,7 +245,7 @@ the installation.
 
     Create a Work Directory
 
-    # mkdir /home/local/src
+    # mkdir -p /home/local/src
     % cd /home/local/src
     % wget http://downloads.sourceforge.net/indimail/INSTALL-@version@ # This file
     % wget http://downloads.sourceforge.net/indimail/INSTALL-RPM-@version@
@@ -450,13 +449,13 @@ the installation.
     
     NOTE: UPGRADE Information. You can always upgrade to the latest version of courier-imap
     by applying the latest patch available in the indimail source patch subdirectory
-    to the orignal courier-imap package.
+    to the orignal courier-imap-3.0.8 package.
     Then do ./configure <same_parameters_as_earlier_install> ; make ; make install-strip
 
     ##### STEP 6  ##### SPAM Filter ###########################
     Install Bogofilter (http://www.bogofilter.org) MD5 2eb802f4e271b99c3d8f68b14f8df9ef
     current working directory /home/local/src
-    Download the bogofilter package. The latest published bogofilter package is
+    Download the bogofilter package. The latest tested bogofilter package is
     bogofilter-1.2.1.tar.bz2. 
 
     % wget http://downloads.sourceforge.net/bogofilter/bogofilter-1.2.1.tar.bz2
@@ -539,7 +538,7 @@ the installation.
     ##### STEP 8  ## Optional STEP ##### Fetchmail ############
     Install fetchmail MD5 86d3cfbce151881d8bf76a1efd5bda6a  
     current working directory /home/local/src
-    Download the fetchmail package. The latest published fetchmail package tested is
+    Download the fetchmail package. The latest tested fetchmail package tested is
     fetchmail-6.3.14.tar.bz2.
 
     % wget http://prdownload.berlios.de/fetchmail/fetchmail-6.3.14.tar.bz2 
@@ -792,6 +791,7 @@ the installation.
     # echo "192.9.200.:allow,RELAYCLIENT=\"\"" >> @indimaildir@/etc/tcp.smtp
     # echo ":allow,GREYIP=\":\""               >> @indimaildir@/etc/tcp.smtp
     # echo "192.9.200.:allow"                  >> @indimaildir@/etc/tcp.qmtp
+    # echo "192.9.200.:allow"                  >> @indimaildir@/etc/tcp.qmqp
     # echo "192.9.200.:allow,IMAPCLIENT=\"\""  >> @indimaildir@/etc/tcp.imap
     # echo "192.9.200.:allow,POP3CLIENT=\"\""  >> @indimaildir@/etc/tcp.pop3
     # echo "192.9.200.:allow"                  >> @indimaildir@/etc/tcp.poppass
@@ -801,6 +801,8 @@ the installation.
         @indimaildir@/etc/tcp.smtp.tmp < @indimaildir@/etc/tcp.smtp
     % sudo @indimaildir@/bin/tcprules @indimaildir@/etc/tcp.qmtp.cdb \
         @indimaildir@/etc/tcp.qmtp.tmp < @indimaildir@/etc/tcp.qmtp
+    % sudo @indimaildir@/bin/tcprules @indimaildir@/etc/tcp.qmqp.cdb \
+        @indimaildir@/etc/tcp.qmqp.tmp < @indimaildir@/etc/tcp.qmqp
     % sudo @indimaildir@/bin/tcprules @indimaildir@/etc/tcp.imap.cdb \
         @indimaildir@/etc/tcp.imap.tmp < @indimaildir@/etc/tcp.imap
     % sudo @indimaildir@/bin/tcprules @indimaildir@/etc/tcp.pop3.cdb \
@@ -1272,8 +1274,12 @@ indimail 31499  0.0  0.0   6572   860 ?        S    15:24   0:00 @indimaildir@/s
 indimail 31500  0.0  0.0   6572   860 ?        S    15:24   0:00 @indimaildir@/sbin/inlookup -i 5
 qmails   31501  0.0  0.0   1900   392 ?        S    15:24   0:00 qmail-todo
 qmailq   31502  0.0  0.0   1872   368 ?        S    15:24   0:00 qmail-clean
-indimail  1078  0.0  0.0   6640  1108 ?        S    08:51   0:00 @indimaildir@/bin/tcpserver -v -H -R -l 0 -x /var/indimail/etc/tcp.qmtp.cdb -c /service/qmail-qmtpd.209/variables/MAXDAEMONS -o -b 75 -u 555 -g 555 0 209 /var/indimail/bin/qmail-qmtpd
-qmaill    1089  0.0  0.0   1756   336 ?        S    08:51   0:00 @indimaildir@/bin/multilog t /var/log/indimail/qmtpd.209
+root      1056  0.0  0.0   1740   316 ?        S    15:24   0:00 supervise qmail-qmtpd.209
+indimail  1078  0.0  0.0   6640  1108 ?        S    15:24   0:00 @indimaildir@/bin/tcpserver -v -H -R -l 0 -x /var/indimail/etc/tcp.qmtp.cdb -c /service/qmail-qmtpd.209/variables/MAXDAEMONS -o -b 75 -u 555 -g 555 0 209 /var/indimail/bin/qmail-qmtpd
+qmaill    1089  0.0  0.0   1756   336 ?        S    15:24   0:00 @indimaildir@/bin/multilog t @logdir@/qmtpd.209
+root      1058  0.0  0.0   1740   316 ?        S    15:24   0:00 supervise qmail-qmqpd.628
+indimail  1102  0.0  0.0   6640   836 ?        S    15:24   0:00 @indimaildir@/bin/tcpserver -v -H -R -l 0 -x /var/indimail/etc/tcp.qmqp.cdb -c /service/qmail-qmqpd.628/variables/MAXDAEMONS -o -b 75 -u 555 -g 555 0 628 /var/indimail/bin/qmail-qmqpd
+qmaill    1110  0.0  0.0   1756   288 ?        S    15:24   0:00 @indimaildir@/bin/multilog t @logdir@/qmqpd.628
 ------------------------------------------------------------------------------------
 
 Basic Installation
@@ -1281,7 +1287,7 @@ Basic Installation
 
 Briefly, the shell commands `./configure; make; make install' should
 configure, build, and install this package.  The following
-more-detailed instructions are generic; see the `README.cdb' file for
+more-detailed instructions are generic; see the `INSTALL*' files for
 instructions specific to this package.
 
    The `configure' shell script attempts to guess correct values for
@@ -1503,4 +1509,3 @@ an Autoconf bug.  Until the bug is fixed you can use this workaround:
 
 `configure' also accepts some other, not widely useful, options.  Run
 `configure --help' for more details.
-

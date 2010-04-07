@@ -15,7 +15,7 @@ IndiMail also has yum repositories for most of the Linux Distros at
 http://download.opensuse.org/repositories/home:/indimail/
 
 The latest RPM (for yet to be released version) can be found at
-http://download.opensuse.org/repositories/home:/indimail/
+http://download.opensuse.org/repositories/home:/mbhangui/
 
 What the RPM does
 -----------------
@@ -29,9 +29,9 @@ A) Package Installation/Upgrade
       and groups (indimail, nofiles, qmail, qscand)
    3. Installs files/binaries in @indimaildir@
    4. Installs services under supervise in /service
-       smtp, smtp - odmr, qmail-send, imap/pop3, indisrvr, inlookup, pwdlookup)
+       smtp, smtp - odmr, qmtp, qmqp, qmail-send, imap/pop3, indisrvr, inlookup, pwdlookup,
        clamav antivirus service, freshclam - virus signature update service,
-       bogofilter spam filter service)
+       bogofilter spam filter service
    5. Installs (for installation only) MySQL database for use by IndiMail
       (database in @indimaildir@/mysqldb/data and logs in @indimaildir@/mysqldb/logs)
    6. Installs 5 queues in @indimaildir@/queue (queue1, queue2, ... queue5)
@@ -44,9 +44,9 @@ B) Package Removal
       and groups (indimail, nofiles, qmail, qscand)
    3. Removes files/binaries in @indimaildir@
    4. Removes services under supervise in /service
-       smtp, smtp - odmr, qmail-send, imap/pop3, indisrvr, inlookup, pwdlookup)
+       smtp, smtp - odmr, qmtp, qmqp, qmail-send, imap/pop3, indisrvr, inlookup, pwdlookup,
        clamav antivirus service, freshclam - virus signature update service,
-       bogofilter spam filter service)
+       bogofilter spam filter service
    5. Sets up svscan to be run by init (/etc/inittab) or by upstart (/etc/event.d)
    NOTE: MySQL database is not removed, config files in @indimaildir@/etc,
          @indimaildir@/control, @indimaildir@/users, .qmail files in @indimaildir@/alias,
