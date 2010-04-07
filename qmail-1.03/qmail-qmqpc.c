@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-qmqpc.c,v $
+ * Revision 1.12  2010-04-06 20:25:20+05:30  Cprogrammer
+ * use PORT_QMQP environment variable to configure QMQP port
+ *
  * Revision 1.11  2008-07-15 19:57:55+05:30  Cprogrammer
  * porting for Mac OS X
  *
@@ -30,6 +33,8 @@
 #include "substdio.h"
 #include "socket.h"
 #include "str.h"
+#include "env.h"
+#include "scan.h"
 #include "getln.h"
 #include "exit.h"
 #include "stralloc.h"
@@ -210,6 +215,8 @@ getmess()
 void
 doit(char *server, union v46addr *outip)
 {
+	int             port_qmqp = -1;
+	char           *x;
 #ifdef IPV6
 	ip6_addr        ip;
 #else
@@ -228,10 +235,14 @@ doit(char *server, union v46addr *outip)
 #endif
 	if (qmqpfd == -1)
 		die_socket();
+	if ((x = env_get("PORT_QMQP")))
+		scan_int(x, &port_qmqp);
+	else
+		port_qmqp = PORT_QMQP;
 #ifdef IPV6
-	if (timeoutconn6(qmqpfd, &ip, outip, PORT_QMQP, timeoutconnect) != 0)
+	if (timeoutconn6(qmqpfd, &ip, outip, port_qmqp, timeoutconnect) != 0)
 #else
-	if (timeoutconn4(qmqpfd, &ip, outip, PORT_QMQP, timeoutconnect) != 0)
+	if (timeoutconn4(qmqpfd, &ip, outip, port_qmqp, timeoutconnect) != 0)
 #endif
 	{
 		lasterror = 73;
@@ -327,7 +338,7 @@ main()
 void
 getversion_qmail_qmqpc_c()
 {
-	static char    *x = "$Id: qmail-qmqpc.c,v 1.11 2008-07-15 19:57:55+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: qmail-qmqpc.c,v 1.12 2010-04-06 20:25:20+05:30 Cprogrammer Stab mbhangui $";
 
 	x++;
 }
