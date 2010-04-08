@@ -1,6 +1,9 @@
 # chkconfig: 345 50 80
 # description: Starts qmail system and associated services
 # $Log: qmailctl.sh,v $
+# Revision 1.19  2010-04-07 20:20:20+05:30  Cprogrammer
+# change ownership of cdb files to indimail
+#
 # Revision 1.18  2010-04-03 16:48:00+05:30  Cprogrammer
 # added option to create tcp.qmqp.cdb
 #
@@ -162,7 +165,8 @@ case "$1" in
 		done
 		for j in `/bin/ls $INDIMAILDIR/etc/tcp*.$i 2>/dev/null`
 		do
-    		QMAIL/bin/tcprules $j.cdb $j.tmp < $j && /bin/chmod 644 $j.cdb
+    		QMAIL/bin/tcprules $j.cdb $j.tmp < $j && /bin/chmod 664 $j.cdb \
+				&& /bin/chown indimail:indimail $j.cdb
 			if [ $? -eq 0 ] ; then
     			echo "Rebuilt $j.cdb"
 			else
