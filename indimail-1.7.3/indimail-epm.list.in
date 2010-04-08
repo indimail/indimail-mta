@@ -1,5 +1,9 @@
 #
 # $Log: indimail-epm.list.in,v $
+# Revision 2.51  2010-04-08 08:40:06+05:30  Cprogrammer
+# removed IndiMail.pdf, added indimail_queue.png
+# added other changes from indimail.spec
+#
 # Revision 2.50  2010-04-03 16:46:54+05:30  Cprogrammer
 # added QMQP service
 #
@@ -782,7 +786,7 @@ f 444 root qmail ${prefix}/doc/FROMISP BUILDROOT${prefix}/doc/FROMISP
 f 444 root qmail ${prefix}/doc/HOWTO.bogofilter BUILDROOT${prefix}/doc/HOWTO.bogofilter
 f 444 root qmail ${prefix}/doc/HOWTO.sharedmaildir BUILDROOT${prefix}/doc/HOWTO.sharedmaildir
 f 444 root qmail ${prefix}/doc/indimail_arch.png BUILDROOT${prefix}/doc/indimail_arch.png
-f 444 root qmail ${prefix}/doc/IndiMail.pdf BUILDROOT${prefix}/doc/IndiMail.pdf
+f 444 root qmail ${prefix}/doc/indimail_queue.png BUILDROOT${prefix}/doc/indimail_queue.png
 f 444 root qmail ${prefix}/doc/INSTALL.alias BUILDROOT${prefix}/doc/INSTALL.alias
 f 444 root qmail ${prefix}/doc/INSTALL.ctl BUILDROOT${prefix}/doc/INSTALL.ctl
 f 444 root qmail ${prefix}/doc/INSTALL.ids BUILDROOT${prefix}/doc/INSTALL.ids
@@ -1796,10 +1800,11 @@ ${prefix}/sbin/svctool --greylist=1999 --servicedir=${servicedir} --min-resend-m
 ${prefix}/sbin/svctool --qmtp=209 --servicedir=${servicedir} --qbase=${qbase} \
 	--qcount=${qcount} --qstart=1 --cntrldir=control --localip=0 --maxdaemons=75 --maxperip=25 \
 	--fsync --syncdir --memory=$$qmtp_soft_mem --min-free=52428800
-# qmail-qmtqd service
+# qmail-qmqpd service
 ${prefix}/sbin/svctool --qmqp=628 --servicedir=${servicedir} --qbase=${qbase} \
 	--qcount=${qcount} --qstart=1 --cntrldir=control --localip=0 --maxdaemons=75 --maxperip=25 \
 	--fsync --syncdir --memory=$$qmqp_soft_mem --min-free=52428800
+/bin/touch ${servicedir}/qmail-qmqpd.628/down
 
 if [ $$nofetchmail -eq 0 ] ; then
 # fetchmail
@@ -2023,8 +2028,8 @@ if [ -s ${prefix}/etc/stat.override -a -f /usr/sbin/dpkg-statoverride ] ; then
 	done
 fi
 echo "removing configuration"
-for i in indimail.cnf nssd.conf tcp.imap tcp.pop3 tcp.smtp clamd.conf freshclam.conf \
-stat.override
+for i in indimail.cnf nssd.conf tcp.imap tcp.pop3 tcp.smtp tcp.qmtp tcp.qmqp tcp.poppass \
+clamd.conf freshclam.conf stat.override
 do
 	/bin/rm -f ${prefix}/etc/$$i
 done
@@ -2072,10 +2077,11 @@ do
 done
 /bin/rmdir --ignore-fail-on-non-empty ${prefix}/share 2>/dev/null
 echo "removing startup services"
-for i in clamd fetchmail freshclam indisrvr.4000 inlookup.infifo mysql.3306 pwdlookup qmail-imapd.143 \
-qmail-imapd-ssl.993 qmail-pop3d.110 qmail-pop3d-ssl.995 qmail-send.25 qmail-smtpd.25 qmail-smtpd.366 \
-qmail-spamlog qscanq qmail-imapd.4143 qmail-pop3d.4110 qmail-smtpd.465 qmail-smtpd.587 \
-qmail-poppass.106 greylist.1999.svscan
+for i in clamd fetchmail freshclam indisrvr.4000 inlookup.infifo mysql.3306 \
+pwdlookup qmail-imapd.143 qmail-imapd-ssl.993 qmail-pop3d.110 qmail-pop3d-ssl.995 \
+qmail-send.25 qmail-smtpd.25 qmail-smtpd.366 qmail-spamlog qscanq qmail-imapd.4143 \
+qmail-pop3d.4110 qmail-smtpd.465 qmail-smtpd.587 qmail-qmtpd.209 qmail-qmqpd.628 \
+qmail-poppass.106 greylist.1999 .svscan
 do
 	if [ -d ${servicedir}/$$i ] ; then
 		/bin/rm -rf ${servicedir}/$$i || true

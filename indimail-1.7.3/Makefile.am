@@ -51,9 +51,9 @@ setuid_list = ../sbin/systpass vdeldomain vadddomain vadduser vdeluser \
 			  vmoveuser vcfilter ../libexec/sq_vacation
 
 doc_list= 37rules.pdf ChangeLog COPYING CREDITS FAQ.pdf HOWTO.bogofilter \
-	HOWTO.sharedmaildir INSTALL.indimail IndiMail.pdf percenthack.shtml README.indimail \
+	HOWTO.sharedmaildir INSTALL.indimail percenthack.shtml README.indimail \
 	INSTALL-MYSQL RELEASE-Notes INSTALL-RPM README-CLUSTER README.vlimits indimail_arch.png \
-	Quick-INSTALL
+	indimail_queue.png Quick-INSTALL
 
 COMMONSOURCES = addaliasdomain.c add_control.c add_domain_assign.c adddomain.c addressToken.c \
 add_user_assign.c adduser.c addusercntrl.c add_vacation.c \

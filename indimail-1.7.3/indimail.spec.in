@@ -1,5 +1,8 @@
 #
 # $Log: indimail.spec.in,v $
+# Revision 2.149  2010-04-08 08:19:40+05:30  Cprogrammer
+# removed IndiMail.pdf, added indimail_queue.png
+#
 # Revision 2.148  2010-04-03 16:47:03+05:30  Cprogrammer
 # added QMQP service
 #
@@ -467,7 +470,7 @@
 # rpm spec file for indimail
 #
 #
-# $Id: indimail.spec.in,v 2.148 2010-04-03 16:47:03+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 2.149 2010-04-08 08:19:40+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %define _unpackaged_files_terminate_build 1
 
@@ -1939,6 +1942,7 @@ fi
 %attr(444,root,qmail)                   %{_prefix}/doc/SENDMAIL
 %attr(444,root,qmail)                   %{_prefix}/doc/37rules.pdf
 %attr(444,root,qmail)                   %{_prefix}/doc/indimail_arch.png
+%attr(444,root,qmail)                   %{_prefix}/doc/indimail_queue.png
 %attr(444,root,qmail)                   %{_prefix}/doc/COPYING
 %attr(444,root,qmail)                   %{_prefix}/doc/FAQ.pdf
 %attr(444,root,qmail)                   %{_prefix}/doc/FROMISP
@@ -1957,7 +1961,6 @@ fi
 %attr(444,root,qmail)                   %{_prefix}/doc/PIC.local2virt
 %attr(444,root,qmail)                   %{_prefix}/doc/PIC.relaygood
 %attr(444,root,qmail)                   %{_prefix}/doc/PIC.local2rem
-%attr(444,root,qmail)                   %{_prefix}/doc/IndiMail.pdf
 %attr(444,root,qmail)                   %{_prefix}/doc/TOISP
 
 # Shared libraries (omit for architectures that don't support them)
@@ -2342,7 +2345,7 @@ done
 %{_prefix}/sbin/svctool --qmqp=628 --servicedir=%{servicedir} --qbase=%{qbase} \
 	--qcount=%{qcount} --qstart=1 --cntrldir=control --localip=0 --maxdaemons=75 --maxperip=25 \
 	--fsync --syncdir --memory=%{qmqp_soft_mem} --min-free=52428800
-/bin/touch %{servicedir}/qmqpd.628/down
+/bin/touch %{servicedir}/qmail-qmqpd.628/down
 
 if [ %nofetchmail -eq 0 ] ; then
 # fetchmail
