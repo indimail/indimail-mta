@@ -1,5 +1,8 @@
 #
 # $Log: indimail.spec.in,v $
+# Revision 2.150  2010-04-08 11:19:40+05:30  Cprogrammer
+# upgrade to clamav 0.96
+#
 # Revision 2.149  2010-04-08 08:19:40+05:30  Cprogrammer
 # removed IndiMail.pdf, added indimail_queue.png
 #
@@ -470,7 +473,7 @@
 # rpm spec file for indimail
 #
 #
-# $Id: indimail.spec.in,v 2.149 2010-04-08 08:19:40+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 2.150 2010-04-08 11:19:40+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %define _unpackaged_files_terminate_build 1
 
@@ -510,7 +513,7 @@
 %define ucspi_version      0.88
 %define qmail_version      1.03
 %define fetchmail_version  6.3.14
-%define clamav_version     0.96rc1
+%define clamav_version     0.96
 %define fortune_version    1.1
 %define nssd_version       1.0
 %define flash_version      0.9.4
