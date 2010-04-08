@@ -70,5 +70,7 @@ added printed, printchar() functions
 27/05/2009
 use getuid, setuid in imapd.c pop3dserver.c to prevent root privileges
 update to courier-imap 4.5.0
+31/05/2009
+sync imap version with with courier-imap-4.5.0 (except proxy and tcpd)
 10/03/2010
 update to courier-imap 4.7.0
