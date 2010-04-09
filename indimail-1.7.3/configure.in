@@ -1431,6 +1431,17 @@ then
 	echo
 	sleep 20
 else
-	echo "CONGRATULATIONS!! All IndiMail components found"
+	if ! test -f ../qmail-1.03/tryindimail.c
+	then
+		clear
+		echo "My dear friend"
+		echo "you need to do (at your shell prompt)"
+		echo "cd .."
+		echo "gunzip -c $PWD/patches/qmail-1.03.patch.gz | patch -p0"
+		echo "It might be wise to read the INSTALL* documents now"
+  		AC_MSG_ERROR([qmail-1.03 source found but not patched; functionality will be limited. aborting])
+	else
+		echo "CONGRATULATIONS!! All IndiMail components found"
+	fi
 fi
 ) | tee indimail.settings
