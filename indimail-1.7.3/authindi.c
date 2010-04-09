@@ -1,5 +1,8 @@
 /*
  * $Log: authindi.c,v $
+ * Revision 2.16  2010-04-09 13:59:08+05:30  Cprogrammer
+ * added env variable AUTHSERVICE to denote imap, pop3 or webmail
+ *
  * Revision 2.15  2010-03-07 09:28:06+05:30  Cprogrammer
  * check return value of is_distributed_domain for error
  *
@@ -54,7 +57,7 @@
 #include <errno.h>
 
 #ifndef lint
-static char     sccsid[] = "$Id: authindi.c,v 2.15 2010-03-07 09:28:06+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: authindi.c,v 2.16 2010-04-09 13:59:08+05:30 Cprogrammer Stab mbhangui $";
 #endif
 #ifdef AUTH_SIZE
 #undef AUTH_SIZE
@@ -334,8 +337,9 @@ main(int argc, char **argv)
 static int
 exec_local(char **argv, char *userid, char *TheDomain, struct passwd *pw, char *service)
 {
-	char            Maildir[MAX_BUFF], authenv1[MAX_BUFF], authenv2[MAX_BUFF], authenv3[MAX_BUFF],
-	                authenv4[MAX_BUFF], authenv5[MAX_BUFF], authenv6[MAX_BUFF], TheUser[MAX_BUFF],
+	char            Maildir[MAX_BUFF], authenv1[MAX_BUFF], authenv2[MAX_BUFF],
+					authenv3[MAX_BUFF], authenv4[MAX_BUFF], authenv5[MAX_BUFF],
+					authenv6[MAX_BUFF], authenv7[MAX_BUFF], TheUser[MAX_BUFF],
 					TmpBuf[MAX_BUFF];
 	char           *ptr, *cptr;
 	int             status;
@@ -368,11 +372,13 @@ exec_local(char **argv, char *userid, char *TheDomain, struct passwd *pw, char *
 	snprintf(authenv4, MAX_BUFF, "MAILDIRQUOTA=%sS", pw->pw_shell);
 #endif
 	snprintf(authenv5, MAX_BUFF, "HOME=%s", pw->pw_dir);
+	snprintf(authenv6, MAX_BUFF, "AUTHSERVICE=%s", service);
 	putenv(authenv1);
 	putenv(authenv2);
 	putenv(authenv3);
 	putenv(authenv4);
 	putenv(authenv5);
+	putenv(authenv6);
 	switch ((status = Login_Tasks(pw, userid, TmpBuf)))
 	{
 		case 2:
@@ -421,8 +427,8 @@ exec_local(char **argv, char *userid, char *TheDomain, struct passwd *pw, char *
 		fprintf(stderr, "authindi: chdir: %s: %s\n", Maildir, strerror(errno));
 		return(1);
 	}
-	snprintf(authenv6, MAX_BUFF, "MAILDIR=%s/Maildir", Maildir);
-	putenv(authenv6);
+	snprintf(authenv7, MAX_BUFF, "MAILDIR=%s/Maildir", Maildir);
+	putenv(authenv7);
 	execv(argv[0], argv);
 	return(1);
 }
