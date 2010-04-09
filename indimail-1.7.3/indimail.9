@@ -890,7 +890,8 @@ POSTAUTH          |authindi     |used    |Command to be run post successful
                   |systpass     |        |authentication. If return value is 2 or
                   |vchkpass     |        |3, the homedir gets set to the
                   |proxyimap    |        |environment variable TMP_MAILDIR if
-                  |proxypop3    |        |defined else the user's home directoriy.
+                  |proxypop3    |        |defined else it gets set to the user's home
+                  |             |        |directory.
                   |             |        |If the return value is 3, authindi will
                   |             |        |additionally display a message defined
                   |             |        |by the environment variable MSG_ONERROR
@@ -909,6 +910,7 @@ EXIT_ONERROR      |             |        |If the command defined by POSTAUTH
                   |             |        |defined, IMAP/POP3 client will exit
                   |             |        |preventing the user from accessing
                   |             |        |mailbox
+AUTHSERVICE       |authindi     |set     |imap, pop3 or webmail
 ------------------|-------------|--------|----------------------------------------
 DESTPORT          |proxyimap    |used    |Used to determine whether the
                   |proxypop3    |        |destination port is imap or pop3. The
