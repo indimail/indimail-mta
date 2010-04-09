@@ -140,6 +140,13 @@ do
 				;;
 			esac
 		fi
+	else
+		if test " $missing_list" = " "
+		then
+			missing_list="$i"
+		else
+			missing_list="$missing_list $i"
+		fi
 	fi
 done
 
@@ -1381,4 +1388,49 @@ echo "      SHA512 Crypt = OFF --enable-sha512-crypt=n default"
 esac
 echo "-------------------------------------------------------------"
 echo "Additonal Components = $subdir_list"
+if test "$missing_list" != ""
+then
+	clear
+	echo
+	echo
+	echo "============ WARNING WARNING WARNING WARNING ==============="
+	echo "Missing   Components = $missing_list"
+	echo
+	echo "Download and extract the following additional component(s)"
+	echo
+	if ! test -d ../qmail-1.03
+	then
+		echo "http://cr.yp.to/software/qmail-1.03.tar.gz"
+	fi
+	if ! test -d ../flash-0.9.4
+	then
+		echo "http://downloads.sourceforge.net/indimail/flash-0.9.4.tar.gz"
+	fi
+	if ! test -d ../altermime-0.3.10
+	then
+		echo "http://downloads.sourceforge.net/indimail/altermime-0.3.10.tar.gz"
+	fi
+	if ! test -d ../ripmime-1.4.0.9
+	then
+		echo "http://downloads.sourceforge.net/indimail/ripmime-1.4.0.9.tar.gz"
+	fi
+	if ! test -d ../mpack-1.6
+	then
+		echo "http://downloads.sourceforge.net/indimail/mpack-1.6.tar.gz"
+	fi
+	if ! test -d ../fortune-1.1
+	then
+		echo "http://downloads.sourceforge.net/indimail/fortune-1.1.tar.gz"
+	fi
+	if ! test -d ../pam-multi-1.0
+	then
+		echo "http://downloads.sourceforge.net/indimail/pam-multi-1.0.tar.gz"
+	fi
+	echo
+	echo "in the directory `dirname $PWD`"
+	echo
+	sleep 20
+else
+	echo "CONGRATULATIONS!! All IndiMail components found"
+fi
 ) | tee indimail.settings
