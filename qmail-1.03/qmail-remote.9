@@ -241,23 +241,6 @@ refuses to run.  If the envelope sender address matches a domain in the
 control file, the envelope sender domain will be used instead of this value.
 
 .TP 5
-.I qmtproutes
-Additional QMTP routes which have precedence over
-.IR smtproutes .
-QMTP routes should obey the form
-.IR domain\fB:\fIrelay\fB:\fIport ,
-without any extra spaces.
-.I qmtproutes
-follows the same syntax as
-.IR smtproutes .
-By default, 
-.B qmail-remote
-connects to QMTP service port 209. However
-you can chose a dedicated high-port for QMTP communication
-as defined in
-.IR qmtproutes .
-
-.TP 5
 .I smtproutes
 Artificial SMTP routes.
 Each route has the form
@@ -382,6 +365,25 @@ moresmtproutes.cdb overrides control file \fBsmtproutes\fR or environment variab
 \fBSMTPROUTES\fR. One can also redirect all bounces to a host by specifying
 
 !@<sp><ip_address>
+
+.TP 5
+.I qmtproutes
+Additional QMTP routes which have precedence over
+.IR smtproutes .
+QMTP routes should obey the form
+.IR domain\fB:\fIrelay\fB:\fIport ,
+without any extra spaces.
+.I qmtproutes
+follows the same syntax as
+.IR smtproutes .
+By default, 
+.B qmail-remote
+connects to QMTP service port 209. However
+you can chose a dedicated high-port for QMTP communication
+as defined in
+.IR qmtproutes .
+If the recipient domain is listed neither in \fIqmtproutes\fR nor in \fIsmtproutes\fR,
+\fBqmail-remote\fR will choose the protocol according to MX priority.
 
 .TP 5
 .I timeoutconnect
