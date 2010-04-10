@@ -1,5 +1,8 @@
 /*
  * $Log: pam-multi.c,v $
+ * Revision 1.11  2010-04-10 14:50:16+05:30  Cprogrammer
+ * changed all units to seconds to avoid mistakes during comparision
+ *
  * Revision 1.10  2009-10-17 20:14:09+05:30  Cprogrammer
  * duplicate definition of pam_err removed
  *
@@ -166,7 +169,7 @@ static int      update_passwd(pam_handle_t *, const char *, const char *);
 #endif
 
 #ifndef	lint
-static char     sccsid[] = "$Id: pam-multi.c,v 1.10 2009-10-17 20:14:09+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: pam-multi.c,v 1.11 2010-04-10 14:50:16+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 /*
@@ -848,7 +851,7 @@ pam_sm_acct_mgmt(pam_handle_t *pamh, int flags, int argc, const char *argv[])
 	if (!_global_user)
 		return (PAM_AUTH_ERR);
 	/*- Calculate current time */
-	curtime = time(0) / 86400;
+	curtime = time(0);
 	if ((pam_err = pam_get_user(pamh, &user, NULL)) != PAM_SUCCESS)
 		return (pam_err);
 	if (!user || !*user)
@@ -981,12 +984,12 @@ pam_sm_acct_mgmt(pam_handle_t *pamh, int flags, int argc, const char *argv[])
 			_pam_log(LOG_INFO, "expiry[%d]=%ld", c, *expiry_ptr);
 		if (*expiry_ptr > 0)
 		{
-			if (curtime > *expiry_ptr / 86400)
+			if (curtime > *expiry_ptr)
 			{
 				_pam_log(LOG_WARNING, "%s has expired!", ptr);
 				return (PAM_ACCT_EXPIRED);
 			} else
-			if (*expiry_ptr / 86400 - curtime < DEFAULT_WARN)
+			if (*expiry_ptr - curtime < DEFAULT_WARN)
 				_pam_log(LOG_WARNING, "Warning: your %s expires on %s", ptr, ctime(expiry_ptr));
 		}
 		expiry_ptr++;
