@@ -187,11 +187,11 @@ restart -- stops and restarts smtp, sends qmail-send a TERM & restarts it
   queue -- shows status of queue
   pause -- temporarily stops mail service (connections accepted, nothing leaves)
    cont -- continues paused mail service
-    cdb -- rebuild the tcpserver cdb file for smtp, imap, pop3 and poppass
+    cdb -- rebuild the tcpserver cdb file for smtp, qmtp, qmqp, imap, pop3 and poppass
 HELP
     ;;
   *)
-    echo "Usage: `basename $0` {start|stop|restart|flush|reload|stat|queue|pause|cont|cdb|help}"
+    echo "Usage: `basename $0` {start|stop|restart|kill|flush|reload|stat|queue|pause|cont|cdb|help}"
     exit 1
     ;;
 esac
