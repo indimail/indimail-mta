@@ -3,23 +3,27 @@
    1. Non-Clustered domain - A domain existing on a single server
    2. Clustered domain - A domain extended across multiple servers, with each
       server having its own set of users.
+   
+   You must decide if you want Non-clustered setup or a clustered setup. If you have millions
+   of users, then you must chose clustered setup. Even if you chose to install a non-clustered
+   setup, you can always migrated to a clustered setup later.
 
     Creating a non-clustered Domain
     -------------------------------
 
     % sudo rpm -ivh indimail-@version@-1.1.i386.rpm
-    % cd /var/indimail/control
+    % cd @indimaildir@/control
     % su
     # echo "localhost:indimail:ssh-1.5-:/tmp/mysql.sock" > host.mysql
-    # /var/indimail/sbin/initsvc -on
+    # @indimaildir@/sbin/initsvc -on
     # exit
 
     NOTE: replace localhost, indimail, ssh-1.5-, /tmp/mysql.sock as relevant to your MySQL
     installation. You can use 3306 instead of /tmp/mysql.sock in case your MySQL
     database is on another host.
     you must use host:user:password:socket or host:user:password:port format
-    for host.cntrl (for IndiMail 1.6.9 and above). Also set your PATH to 
-    have /var/indimail/bin in the path.
+    for host.mysql (for IndiMail 1.6.9 and above). Also set your PATH to 
+    have @indimaildir@/bin in the path.
 
     Ensure MySQL is running
 
@@ -27,27 +31,27 @@
     not come up unless you use the command svc -u. Also to ensure that the
     service comes up automatically after system reboot, remove the file 'down'
 
-    % sudo rm /service/mysql.3306/down
-    % sudo svc -u /service/mysql.3306
+    % sudo /bin/rm /service/mysql.3306/down
+    % sudo @indimaildir@/bin/svc -u /service/mysql.3306
 
-    % sudo /var/indimail/bin/svstat /service/mysql.3306
-    /service/mysql.3306: up (pid 11936) 3927 seconds
+    % sudo @indimaildir@/bin/svstat /service/mysql.3306
+    /service/mysql.3306: up (pid 11936) 5 seconds
 
-    % sudo /var/indimail/bin/vadddomain example.com pass
-    % vuserinfo postmaster@example.com
-    % sudo /var/indimail/bin/vadduser testuser1@example.com pass
-    % vuserinfo testuser1@example.com
+    % sudo @indimaildir@/bin/vadddomain example.com pass
+    % @indimaildir@/bin/vuserinfo postmaster@example.com
+    % sudo @indimaildir@/bin/vadduser testuser1@example.com pass
+    % @indimaildir@/bin/vuserinfo testuser1@example.com
 
     Creating a Clustered Domain
     ---------------------------
 
     % sudo rpm -ivh indimail-@version@-1.1.i386.rpm
-    % cd /var/indimail/control
+    % cd @indimaildir@/control
     % su
     # echo "localhost:indimail:ssh-1.5-:/tmp/mysql.sock" > host.cntrl
     # ln -s host.cntrl host.master
     # echo 192.168.1.100 > hostip (replace 192.168.1.100 with your mailserver IP)
-    # /var/indimail/sbin/initsvc -on
+    # @indimaildir@/sbin/initsvc -on
     # exit
 
     NOTE: replace localhost, indimail, ssh-1.5-, /tmp/mysql.sock as relevant to your MySQL
@@ -55,7 +59,7 @@
     database is on another host.
     you must use host:user:password:socket or host:user:password:port format
     for host.cntrl (for IndiMail 1.6.9 and above). Also set your PATH to 
-    have /var/indimail/bin in the path.
+    have @indimaildir@/bin in the path.
 
     Ensure MySQL is running
 
@@ -63,18 +67,18 @@
     not come up unless you use the command svc -u. Also to ensure that the
     service comes up automatically after system reboot, remove the file 'down'
 
-    % sudo rm /service/mysql.3306/down
-    % sudo svc -u /service/mysql.3306
+    % sudo /bin/rm /service/mysql.3306/down
+    % sudo @indimaildir@/bin/svc -u /service/mysql.3306
 
-    % sudo /var/indimail/bin/svstat /service/mysql.3306
-    /service/mysql.3306: up (pid 11936) 3927 seconds
+    % sudo @indimaildir@/bin/svstat /service/mysql.3306
+    /service/mysql.3306: up (pid 11936) 7 seconds
 
-    % sudo /var/indimail/bin/vadddomain -D indimail -S localhost \
+    % sudo @indimaildir@/bin/vadddomain -D indimail -S localhost \
         -U indimail -P ssh-1.5- -p 3306 -c example.com pass
-    % vuserinfo postmaster@example.com
-    % sudo /var/indimail/bin/vadduser testuser1@example.com pass
-    % vuserinfo testuser1@example.com
-    % dbinfo -s
+    % @indimaildir@/bin/vuserinfo postmaster@example.com
+    % sudo @indimaildir@/bin/vadduser testuser1@example.com pass
+    % @indimaildir@/bin/vuserinfo testuser1@example.com
+    % @indimaildir@/bin/dbinfo -s
 
 NOTE: You can email me at mbhangui@gmail.com, if you find this confusing or need any
 help/clarification.

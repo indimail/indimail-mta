@@ -81,7 +81,7 @@ Start IndiMail Services
 -----------------------
    Review the email in @indimaildir@/alias/.qmail-postmaster, before starting services
 
-   % sudo /var/indimail/sbin/initsvc -on
+   % sudo @indimaildir@/sbin/initsvc -on
    % sudo init q # (if your system uses traditional init)
        or
    % sudo /sbin/initctl emit qmailstart # (if your system uses upstart - ubuntu/fedora10)
