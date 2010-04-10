@@ -28,6 +28,8 @@ To INSTALL carry out the following steps
 % sudo make install
 (replace indimail.org with your domain)
 
+review the file pam.d/pam-multi and copy it to /etc/pam.d
+
 Briefly, the shell commands `./configure; make; make install' should
 configure, build, and install this package.  The following
 more-detailed instructions are generic; see the `README' file for
