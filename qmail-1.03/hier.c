@@ -897,6 +897,7 @@ hier(inst_dir)
 	c(auto_qmail_home, "man/cat5", "tcp-environ.0", auto_uido, auto_gidq, 0444);
 	c(auto_qmail_home, "man/man5", "rewriting.5", auto_uido, auto_gidq, 0444);
 	c(auto_qmail_home, "man/cat5", "rewriting.0", auto_uido, auto_gidq, 0444);
+	c(auto_qmail_home, "man/man5", "qmtp.5", auto_uido, auto_gidq, 0444);
 	c(auto_qmail_home, "man/man5", "rfc-822.5", auto_uido, auto_gidq, 0444);
 	c(auto_qmail_home, "man/man5", "rfc-1845.5", auto_uido, auto_gidq, 0444);
 	c(auto_qmail_home, "man/man5", "rfc-2821.5", auto_uido, auto_gidq, 0444);
