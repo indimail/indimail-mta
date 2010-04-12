@@ -1,5 +1,8 @@
 /*
  * $Log: vmoddomlimits.c,v $
+ * Revision 2.9  2010-04-11 18:54:38+05:30  Cprogrammer
+ * fixed domain_expiry, passwd_expiry getting reset
+ *
  * Revision 2.8  2009-12-01 16:28:42+05:30  Cprogrammer
  * removed delete permission for user quota
  *
@@ -46,7 +49,7 @@
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vmoddomlimits.c,v 2.8 2009-12-01 16:28:42+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: vmoddomlimits.c,v 2.9 2010-04-11 18:54:38+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef ENABLE_DOMAIN_LIMITS
@@ -95,8 +98,8 @@ int             PermMaillistUsersFlag = 0;
 int             PermMaillistModeratorsFlag = 0;
 int             PermQuotaFlag = 0;
 int             PermDefaultQuotaFlag = 0;
-long            domain_expiry = -1;
-long            passwd_expiry = -1;
+long            domain_expiry = 0;
+long            passwd_expiry = 0;
 
 int             QuotaFlag = 0;
 int             ShowLimits = 1;
@@ -133,8 +136,10 @@ main(int argc, char *argv[])
 			return (-1);
 		}
 	}
-	limits.domain_expiry = domain_expiry;
-	limits.passwd_expiry = passwd_expiry;
+	if (domain_expiry)
+		limits.domain_expiry = domain_expiry;
+	if (passwd_expiry)
+		limits.passwd_expiry = passwd_expiry;
 	if (MaxPopAccounts[0] != 0)
 		limits.maxpopaccounts = atoi(MaxPopAccounts);
 	if (MaxAliases[0] != 0)
@@ -569,8 +574,8 @@ get_options(int argc, char **argv)
 	PermMaillistModeratorsFlag = 0;
 	PermQuotaFlag = 0;
 	PermDefaultQuotaFlag = 0;
-	domain_expiry = -1;
-	passwd_expiry = -1;
+	domain_expiry = 0;
+	passwd_expiry = 0;
 	/*- NoMakeIndex = 0; */
 	DeleteLimits = 0;
 	errflag = 0;
@@ -588,15 +593,15 @@ get_options(int argc, char **argv)
 		case 'e':
 			ShowLimits = 0;
 			flag[0] = 1;
-			if(strncmp(optarg, "-1", 3))
+			if (strncmp(optarg, "-1", 3))
 			{
-				if(strlen(optarg) != 14 || !strptime(optarg, "%d%m%Y%H%M%S", &tm))
+				if (strlen(optarg) != 14 || !strptime(optarg, "%d%m%Y%H%M%S", &tm))
 				{
 					fprintf(stderr, "Invalid domain expiry date [%s]\n", optarg);
 					usage();
 					return(1);
 				} else
-				if((domain_expiry = mktime(&tm)) == -1)
+				if ((domain_expiry = mktime(&tm)) == -1)
 				{
 					fprintf(stderr, "Invalid start date [%s]\n", optarg);
 					usage();
@@ -613,15 +618,15 @@ get_options(int argc, char **argv)
 		case 't':
 			ShowLimits = 0;
 			flag[2] = 1;
-			if(strncmp(optarg, "-1", 3))
+			if (strncmp(optarg, "-1", 3))
 			{
-				if(strlen(optarg) != 14 || !strptime(optarg, "%d%m%Y%H%M%S", &tm))
+				if (strlen(optarg) != 14 || !strptime(optarg, "%d%m%Y%H%M%S", &tm))
 				{
 					fprintf(stderr, "Invalid password expiry date [%s]\n", optarg);
 					usage();
 					return(1);
 				} else
-				if((passwd_expiry = mktime(&tm)) == -1)
+				if ((passwd_expiry = mktime(&tm)) == -1)
 				{
 					fprintf(stderr, "Invalid start date [%s]\n", optarg);
 					usage();
