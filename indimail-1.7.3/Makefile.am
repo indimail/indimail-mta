@@ -102,11 +102,11 @@ vfilter_header.c vfilter_insert.c vfilter_mlistOpt.c vfilter_select.c vfilter_up
 vfstab_delete.c vfstab_insert.c vfstabNew.c vfstab_select.c vfstab_status.c \
 vfstab_update.c vget_assign.c vgetent.c vget_ip_map.c vget_lastauth.c vgetpasswd.c \
 vget_real_domain.c vhostid_delete.c vhostid_insert.c vhostid_select.c vhostid_update.c \
-vlog.c vmake_maildir.c vopen_smtp_relay.c vpriv_delete.c vpriv_insert.c vpriv_select.c \
-vpriv_update.c vquota_select.c vread_dir_control.c vset_default_domain.c vset_lastauth.c \
-vset_lastdeliver.c vshow_atrn_map.c vshow_ip_map.c vsmtp_delete.c vsmtp_delete_domain.c \
-vsmtp_insert.c vsmtp_select.c vsmtp_update.c vupdate_rules.c vupd_atrn_map.c \
-vupd_ip_map.c vwrite_dir_control.c wildmat.c
+VlimitInLookup.c vlog.c vmake_maildir.c vopen_smtp_relay.c vpriv_delete.c vpriv_insert.c \
+vpriv_select.c vpriv_update.c vquota_select.c vread_dir_control.c vset_default_domain.c \
+vset_lastauth.c vset_lastdeliver.c vshow_atrn_map.c vshow_ip_map.c vsmtp_delete.c \
+vsmtp_delete_domain.c vsmtp_insert.c vsmtp_select.c vsmtp_update.c vupdate_rules.c \
+vupd_atrn_map.c vupd_ip_map.c vwrite_dir_control.c wildmat.c
 
 libindimail.la: $(libindimail_la_OBJECTS) $(libindimail_la_DEPENDENCIES)
 	$(LIBTOOL) --mode=link --tag=CC gcc $(libindimail_la_LDFLAGS) \
@@ -574,6 +574,7 @@ dbinfoUpdate.lo: indimail.h config.h
 dbload.lo: indimail.h config.h
 RelayInLookup.lo: indimail.h config.h
 UserInLookup.lo: indimail.h config.h
+VlimitInLookup.lo: indimail.h config.h
 AliasInLookup.lo: indimail.h config.h
 spam.lo: indimail.h config.h
 SqlServer.lo: indimail.h config.h

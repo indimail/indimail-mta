@@ -1,5 +1,8 @@
 /*
  * $Log: indiversion.c,v $
+ * Revision 2.125  2010-04-11 22:55:01+05:30  Cprogrammer
+ * added VlimitInLookup()
+ *
  * Revision 2.124  2010-03-06 14:55:20+05:30  Cprogrammer
  * added program sslerator
  *
@@ -490,7 +493,7 @@
 #endif
 
 #ifndef	lint
-static char     sccsid[] = "$Id: indiversion.c,v 2.124 2010-03-06 14:55:20+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: indiversion.c,v 2.125 2010-04-11 22:55:01+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 void            getversion_indimail_settings_c();
@@ -663,6 +666,7 @@ void            getversion_parse_quota_c();
 void            getversion_remove_quotes_c();
 void            getversion_vauth_init_c();
 void            getversion_UserInLookup_c();
+void            getversion_VlimitInLookup_c();
 void            getversion_RelayInLookup_c();
 void            getversion_SqlServer_c();
 void            getversion_LoadDbinfo_c();

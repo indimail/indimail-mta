@@ -1,5 +1,9 @@
 /*
  * $Log: indimail.h,v $
+ * Revision 2.187  2010-04-11 22:09:27+05:30  Cprogrammer
+ * changed LPWD_QUERY to LIMIT_QUERY (domain limits)
+ * added VlimitInlookup() function
+ *
  * Revision 2.186  2010-02-24 15:03:28+05:30  Cprogrammer
  * removed SOCKET and PORT definitions for MySQL
  *
@@ -872,7 +876,7 @@
 #define INDIMAILH_H
 
 #ifndef	lint
-static char     sccsidh[] = "$Id: indimail.h,v 2.186 2010-02-24 15:03:28+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsidh[] = "$Id: indimail.h,v 2.187 2010-04-11 22:09:27+05:30 Cprogrammer Stab mbhangui $";
 #endif
 
 #include "config.h"
@@ -1477,7 +1481,7 @@ struct vlimits {
 #define HOST_QUERY   4
 #endif
 #define ALIAS_QUERY  5
-#define LPWD_QUERY   6
+#define LIMIT_QUERY  6
 #define DOMAIN_QUERY 7
 
 #define MAX_LINK_COUNT 32000
@@ -1733,6 +1737,9 @@ int             OpenDatabases();
 int             connect_db(DBINFO **, MYSQL **);
 void            close_db();
 int             UserInLookup(char *);
+#ifdef ENABLE_DOMAIN_LIMITS
+int             VlimitInLookup(char *, struct vlimits *);
+#endif
 int             RelayInLookup(char *, char *);
 struct passwd  *PwdInLookup(char *);
 char           *AliasInLookup(char *);
