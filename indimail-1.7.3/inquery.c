@@ -1,5 +1,8 @@
 /*
  * $Log: inquery.c,v $
+ * Revision 2.16  2010-04-11 22:21:19+05:30  Cprogrammer
+ * replaced LPWD_QUERY with LIMIT_QUERY for domain limits
+ *
  * Revision 2.15  2008-05-28 21:55:09+05:30  Cprogrammer
  * removed LDAP_QUERY
  *
@@ -57,7 +60,7 @@
  */
 
 #ifndef	lint
-static char     sccsid[] = "$Id: inquery.c,v 2.15 2008-05-28 21:55:09+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: inquery.c,v 2.16 2010-04-11 22:21:19+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #include <stdlib.h>
@@ -65,6 +68,7 @@ static char     sccsid[] = "$Id: inquery.c,v 2.15 2008-05-28 21:55:09+05:30 Cpro
 #include <fcntl.h>
 #include <signal.h>
 #include <errno.h>
+#include <string.h>
 #include "indimail.h"
 
 /*- 
@@ -97,7 +101,9 @@ inquery(char query_type, char *email, char *ip)
 		case HOST_QUERY:
 #endif
 		case ALIAS_QUERY:
-		case LPWD_QUERY:
+#ifdef ENABLE_DOMAIN_LIMITS
+		case LIMIT_QUERY:
+#endif
 		case DOMAIN_QUERY:
 			break;
 		default:
@@ -222,7 +228,9 @@ inquery(char query_type, char *email, char *ip)
 		case HOST_QUERY:
 #endif
 		case ALIAS_QUERY:
-		case LPWD_QUERY:
+#ifdef ENABLE_DOMAIN_LIMITS
+		case LIMIT_QUERY:
+#endif
 		case DOMAIN_QUERY:
 			snprintf(TmpBuf, MAX_BUFF, "%s/%s/timeoutread", qmaildir, controldir);
 			if((fp = fopen(TmpBuf, "r")))
@@ -266,7 +274,9 @@ inquery(char query_type, char *email, char *ip)
 					unlink(myFifo);
 					return(&intBuf);
 				case PWD_QUERY:
-				case LPWD_QUERY:
+#ifdef ENABLE_DOMAIN_LIMITS
+				case LIMIT_QUERY:
+#endif
 					if(!intBuf)
 					{
 						close(rfd);
@@ -294,7 +304,14 @@ inquery(char query_type, char *email, char *ip)
 					}
 					close(rfd);
 					unlink(myFifo);
+#ifdef ENABLE_DOMAIN_LIMITS
+					if (query_type == PWD_QUERY)
+						return(strToPw(pwbuf, intBuf));
+					else
+						return (pwbuf);
+#else
 					return(strToPw(pwbuf, intBuf));
+#endif
 				case ALIAS_QUERY:
 #ifdef CLUSTERED_SITE
 				case HOST_QUERY:
@@ -311,7 +328,7 @@ inquery(char query_type, char *email, char *ip)
 					if(!(pwbuf = (char *) realloc(pwbuf, intBuf + 1)))
 					{
 						tmperrno = errno;
-						perror("realloc");
+						fprintf(stderr, "query_type=%d: realloc: %s\n", query_type, strerror(errno));
 						close(rfd);
 						unlink(myFifo);
 						errno = tmperrno;

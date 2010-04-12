@@ -1,5 +1,8 @@
 /*
  * $Log: inquerytest.c,v $
+ * Revision 2.17  2010-04-11 22:21:52+05:30  Cprogrammer
+ * replaced LPWD_QUERY with LIMIT_QUERY for domain limits
+ *
  * Revision 2.16  2008-05-28 21:55:29+05:30  Cprogrammer
  * removed LDAP Query
  *
@@ -65,15 +68,19 @@
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: inquerytest.c,v 2.16 2008-05-28 21:55:29+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: inquerytest.c,v 2.17 2010-04-11 22:21:52+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
+void            print_limits(struct vlimits *);
 void            SigChild();
 
 int
 main(int argc, char **argv)
 {
 	struct passwd  *pw;
+#ifdef ENABLE_DOMAIN_LIMITS
+	struct vlimits *lmt;
+#endif
 	void           *dbptr;
 	char           *ptr, *infifo, *qmaildir, *controldir;
 	char            InFifo[MAX_BUFF], InFifoEnv[MAX_BUFF];
@@ -92,7 +99,7 @@ main(int argc, char **argv)
 		fprintf(stderr, "3   - Passwd       Query\n");
 		fprintf(stderr, "4   - SmtpRoute    Query\n");
 		fprintf(stderr, "5   - Valias       Query\n");
-		fprintf(stderr, "6   - Local Passwd Query\n");
+		fprintf(stderr, "6   - Domain Limit Query\n");
 		fprintf(stderr, "7   - Domain       Query\n");
 		return (1);
 	}
@@ -105,7 +112,7 @@ main(int argc, char **argv)
 	case HOST_QUERY:
 #endif
 	case ALIAS_QUERY:
-	case LPWD_QUERY:
+	case LIMIT_QUERY:
 	case DOMAIN_QUERY:
 		break;
 	default:
@@ -116,7 +123,7 @@ main(int argc, char **argv)
 		fprintf(stderr, "3   - Passwd       Query\n");
 		fprintf(stderr, "4   - SmtpRoute    Query\n");
 		fprintf(stderr, "5   - Valias       Query\n");
-		fprintf(stderr, "6   - Local Passwd Query\n");
+		fprintf(stderr, "6   - Domain Limit Query\n");
 		fprintf(stderr, "7   - Domain       Query\n");
 		return (1);
 	}
@@ -226,7 +233,6 @@ main(int argc, char **argv)
 		fprintf(stdout, "%s is %s\n", argv[3], (int) *((int *) dbptr) == 1 ? "authenticated" : "not authenticated");
 		break;
 	case PWD_QUERY:
-	case LPWD_QUERY:
 		pw = (struct passwd *) dbptr;
 		printf("pw_name  : %s\n", pw->pw_name);
 		printf("pw_passwd: %s\n", pw->pw_passwd);
@@ -236,6 +242,10 @@ main(int argc, char **argv)
 		printf("pw_dir   : %s\n", pw->pw_dir);
 		printf("pw_shell : %s\n", pw->pw_shell);
 		printf("Table    : %s\n", is_inactive ? inactive_table : default_table);
+		break;
+	case LIMIT_QUERY:
+		lmt = (struct vlimits *) dbptr;
+		print_limits(lmt);
 		break;
 #ifdef CLUSTERED_SITE
 	case HOST_QUERY:
@@ -273,6 +283,83 @@ main(int argc, char **argv)
 		kill(pid, SIGTERM);
 	wait(&status);
 	return (0);
+}
+
+void
+print_limits(struct vlimits *limits)
+{
+	printf("Domain Expiry Date   : %s", limits->domain_expiry == -1 ? "Never Expires\n" : ctime(&limits->domain_expiry));
+	printf("Password Expiry Date : %s", limits->passwd_expiry == -1 ? "Never Expires\n" : ctime(&limits->passwd_expiry));
+	printf("Max Domain Quota     : %d\n", limits->diskquota);
+	printf("Max Domain Messages  : %d\n", limits->maxmsgcount);
+	printf("Default User Quota   : %d\n", limits->defaultquota);
+	printf("Default User Messages: %d\n", limits->defaultmaxmsgcount);
+	printf("Max Pop Accounts     : %d\n", limits->maxpopaccounts);
+	printf("Max Aliases          : %d\n", limits->maxaliases);
+	printf("Max Forwards         : %d\n", limits->maxforwards);
+	printf("Max Autoresponders   : %d\n", limits->maxautoresponders);
+	printf("Max Mailinglists     : %d\n", limits->maxmailinglists);
+	printf("GID Flags:\n");
+	if (limits->disable_imap != 0)
+		printf("  NO_IMAP\n");
+	if (limits->disable_smtp != 0)
+		printf("  NO_SMTP\n");
+	if (limits->disable_pop != 0)
+		printf("  NO_POP\n");
+	if (limits->disable_webmail != 0)
+		printf("  NO_WEBMAIL\n");
+	if (limits->disable_passwordchanging != 0)
+		printf("  NO_PASSWD_CHNG\n");
+	if (limits->disable_relay != 0)
+		printf("  NO_RELAY\n");
+	if (limits->disable_dialup != 0)
+		printf("  NO_DIALUP\n");
+	printf("Flags for non postmaster accounts:\n");
+	printf("  pop account           : ");
+	printf((limits->perm_account & VLIMIT_DISABLE_CREATE ? "DENY_CREATE  " : "ALLOW_CREATE "));
+	printf((limits->perm_account & VLIMIT_DISABLE_MODIFY ? "DENY_MODIFY  " : "ALLOW_MODIFY "));
+	printf((limits->perm_account & VLIMIT_DISABLE_DELETE ? "DENY_DELETE  " : "ALLOW_DELETE "));
+	printf("\n");
+	printf("  alias                 : ");
+	printf((limits->perm_alias & VLIMIT_DISABLE_CREATE ? "DENY_CREATE  " : "ALLOW_CREATE "));
+	printf((limits->perm_alias & VLIMIT_DISABLE_MODIFY ? "DENY_MODIFY  " : "ALLOW_MODIFY "));
+	printf((limits->perm_alias & VLIMIT_DISABLE_DELETE ? "DENY_DELETE  " : "ALLOW_DELETE "));
+	printf("\n");
+	printf("  forward               : ");
+	printf((limits->perm_forward & VLIMIT_DISABLE_CREATE ? "DENY_CREATE  " : "ALLOW_CREATE "));
+	printf((limits->perm_forward & VLIMIT_DISABLE_MODIFY ? "DENY_MODIFY  " : "ALLOW_MODIFY "));
+	printf((limits->perm_forward & VLIMIT_DISABLE_DELETE ? "DENY_DELETE  " : "ALLOW_DELETE "));
+	printf("\n");
+	printf("  autoresponder         : ");
+	printf((limits->perm_autoresponder & VLIMIT_DISABLE_CREATE ? "DENY_CREATE  " : "ALLOW_CREATE "));
+	printf((limits->perm_autoresponder & VLIMIT_DISABLE_MODIFY ? "DENY_MODIFY  " : "ALLOW_MODIFY "));
+	printf((limits->perm_autoresponder & VLIMIT_DISABLE_DELETE ? "DENY_DELETE  " : "ALLOW_DELETE "));
+	printf("\n");
+	printf("  mailinglist           : ");
+	printf((limits->perm_maillist & VLIMIT_DISABLE_CREATE ? "DENY_CREATE  " : "ALLOW_CREATE "));
+	printf((limits->perm_maillist & VLIMIT_DISABLE_MODIFY ? "DENY_MODIFY  " : "ALLOW_MODIFY "));
+	printf((limits->perm_maillist & VLIMIT_DISABLE_DELETE ? "DENY_DELETE  " : "ALLOW_DELETE "));
+	printf("\n");
+	printf("  mailinglist users     : ");
+	printf((limits->perm_maillist_users & VLIMIT_DISABLE_CREATE ? "DENY_CREATE  " : "ALLOW_CREATE "));
+	printf((limits->perm_maillist_users & VLIMIT_DISABLE_MODIFY ? "DENY_MODIFY  " : "ALLOW_MODIFY "));
+	printf((limits->perm_maillist_users & VLIMIT_DISABLE_DELETE ? "DENY_DELETE  " : "ALLOW_DELETE "));
+	printf("\n");
+	printf("  mailinglist moderators: ");
+	printf((limits->perm_maillist_moderators & VLIMIT_DISABLE_CREATE ? "DENY_CREATE  " : "ALLOW_CREATE "));
+	printf((limits->perm_maillist_moderators & VLIMIT_DISABLE_MODIFY ? "DENY_MODIFY  " : "ALLOW_MODIFY "));
+	printf((limits->perm_maillist_moderators & VLIMIT_DISABLE_DELETE ? "DENY_DELETE  " : "ALLOW_DELETE "));
+	printf("\n");
+	printf("  domain quota          : ");
+	printf((limits->perm_quota & VLIMIT_DISABLE_CREATE ? "DENY_CREATE  " : "ALLOW_CREATE "));
+	printf((limits->perm_quota & VLIMIT_DISABLE_MODIFY ? "DENY_MODIFY  " : "ALLOW_MODIFY "));
+	printf((limits->perm_quota & VLIMIT_DISABLE_DELETE ? "DENY_DELETE  " : "ALLOW_DELETE "));
+	printf("\n");
+	printf("  default quota         : ");
+	printf((limits->perm_defaultquota & VLIMIT_DISABLE_CREATE ? "DENY_CREATE  " : "ALLOW_CREATE "));
+	printf((limits->perm_defaultquota & VLIMIT_DISABLE_MODIFY ? "DENY_MODIFY  " : "ALLOW_MODIFY "));
+	printf("\n");
+	return;
 }
 
 void

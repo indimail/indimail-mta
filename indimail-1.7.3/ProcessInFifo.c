@@ -1,5 +1,8 @@
 /*
  * $Log: ProcessInFifo.c,v $
+ * Revision 2.31  2010-04-11 22:22:25+05:30  Cprogrammer
+ * replaced LPWD_QUERY with LIMIT_QUERY for domain limits
+ *
  * Revision 2.30  2010-03-28 18:54:25+05:30  Cprogrammer
  * use 127.0.0.1 if get_local_ip() fails
  *
@@ -105,7 +108,7 @@
  */
 
 #ifndef	lint
-static char     sccsid[] = "$Id: ProcessInFifo.c,v 2.30 2010-03-28 18:54:25+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: ProcessInFifo.c,v 2.31 2010-04-11 22:22:25+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #include <fcntl.h>
@@ -118,7 +121,7 @@ static char     sccsid[] = "$Id: ProcessInFifo.c,v 2.30 2010-03-28 18:54:25+05:3
 #include "indimail.h"
 
 int             user_query_count, relay_query_count, pwd_query_count, alias_query_count;
-int             lpwd_query_count, dom_query_count, _debug;
+int             limit_query_count, dom_query_count, _debug;
 time_t          start_time;
 #ifdef CLUSTERED_SITE
 int             host_query_count;
@@ -142,16 +145,17 @@ int
 ProcessInFifo()
 {
 	int             rfd, wfd, bytes, status, idx, pipe_size, readTimeout, writeTimeout;
-	MYSQL         **mysqlptr;
 	struct passwd  *pw;
 	FILE           *fp;
-	char            InFifo[MAX_BUFF], username[MAX_BUFF], pwbuf[MAX_BUFF], domain[MAX_BUFF],
-					host_path[MAX_BUFF], tmpbuf[MAX_BUFF];
+	char            InFifo[MAX_BUFF], pwbuf[MAX_BUFF], host_path[MAX_BUFF], tmpbuf[MAX_BUFF];
 	char           *ptr, *cptr, *qmaildir, *controldir, *QueryBuf, *email, *myFifo,
 				   *remoteip, *infifo, *local_ip, *cntrl_host;
 	char           *real_domain;
 	void            (*pstat) ();
 	time_t          prev_time = 0l;
+#ifdef ENABLE_DOMAIN_LIMITS
+	struct vlimits  limits;
+#endif
 
 	_debug = (getenv("DEBUG") ? 1 : 0);
 	start_time = time(0);
@@ -197,7 +201,7 @@ ProcessInFifo()
 		fprintf(stderr, "InLookup: malloc(%d bytes): %s: %s\n", pipe_size, InFifo, strerror(errno));
 		return (-1);
 	}
-	user_query_count = relay_query_count = pwd_query_count = lpwd_query_count = alias_query_count = dom_query_count = 0;
+	user_query_count = relay_query_count = pwd_query_count = limit_query_count = alias_query_count = dom_query_count = 0;
 #ifdef CLUSTERED_SITE
 	host_query_count = 0;
 #endif
@@ -321,9 +325,11 @@ ProcessInFifo()
 			case ALIAS_QUERY:
 				alias_query_count++;
 				break;
-			case LPWD_QUERY:
-				lpwd_query_count++;
+#ifdef ENABLE_DOMAIN_LIMITS
+			case LIMIT_QUERY:
+				limit_query_count++;
 				break;
+#endif
 			case DOMAIN_QUERY:
 				dom_query_count++;
 				break;
@@ -392,8 +398,7 @@ ProcessInFifo()
 				{
 					if ((bytes = slen(ptr) + 1) > pipe_size)
 						bytes = -1;
-				}
-				else
+				} else
 				{
 					bytes = 1; /*- write Null Byte */
 					ptr = "\0";
@@ -436,57 +441,27 @@ ProcessInFifo()
 					fprintf(stderr, "InLookup: write-PwdInLookup: %s\n", strerror(errno));
 				close(wfd);
 				break;
-			case LPWD_QUERY:
-				/*- Connect directly to mysql without going to hostcntrl
-				 * This is done by figuring out the mysql parameters from
-				 * dbinfo structure for the local ip
-				 */
-				for (ptr = email, cptr = username;*ptr && *ptr != '@';*cptr++ = *ptr++);
-				*cptr = 0;
-				if (*(ptr++) == '@' && *ptr)
-					scopy(domain, ptr, MAX_BUFF);
+#ifdef ENABLE_DOMAIN_LIMITS
+			case LIMIT_QUERY:
+				if ((status = VlimitInLookup(email, &limits)) == -1)
+					bytes = -1;
+				else
+				if (status) /*- user not found */
+					bytes = 0;
 				else
 				{
-					getEnvConfigStr(&ptr, "DEFAULT_DOMAIN", DEFAULT_DOMAIN);
-					scopy(domain, ptr, MAX_BUFF);
-				}
-				if (!(real_domain = vget_real_domain(domain)))
-					real_domain = domain;
-				if (!(mysqlptr = mdaMysqlConnect(local_ip, real_domain)))
-				{
-					fprintf(stderr, "InLookup: mdaMysqlConnect: %s %s: failure\n", local_ip, real_domain);
-					bytes = -1;
-				} else
-				{
-					vauth_init(1, *mysqlptr);
-					if ((pw = vauth_getpw(username, domain)))
-					{
-						snprintf(pwbuf, sizeof(pwbuf), "PWSTRUCT=%s:%s:%d:%d:%s:%s:%s:%d", 
-							email,
-							pw->pw_passwd,
-							pw->pw_uid,
-							pw->pw_gid,
-							pw->pw_gecos,
-							pw->pw_dir,
-							pw->pw_shell, is_inactive);
-						if ((bytes = (slen(pwbuf) + 1)) > pipe_size)
-							bytes = -1;
-					} else
-					if (userNotFound)
-					{
-						snprintf(pwbuf, sizeof(pwbuf), "PWSTRUCT=No such user %s", email);
-						bytes = slen(pwbuf) + 1;
-					} else
-						bytes = 0;
-					is_open = 0;
+					bytes = sizeof(struct vlimits);
+					if (bytes > pipe_size)
+						bytes = -1;
 				}
 				if (timeoutwrite(writeTimeout, wfd, (char *) &bytes, sizeof(int)) == -1)
-					fprintf(stderr, "InLookup: write-mdaMysqlConnect: %s\n", strerror(errno));
+					fprintf(stderr, "InLookup: write-PwdInLookup: %s\n", strerror(errno));
 				else
-				if (bytes > 0 && timeoutwrite(writeTimeout, wfd, pwbuf, bytes) == -1)
-					fprintf(stderr, "InLookup: write-mdaMysqlConnect: %s\n", strerror(errno));
+				if (bytes > 0 && timeoutwrite(writeTimeout, wfd, (char *) &limits, bytes) == -1)
+					fprintf(stderr, "InLookup: write-PwdInLookup: %s\n", strerror(errno));
 				close(wfd);
 				break;
+#endif
 			case DOMAIN_QUERY:
 				if (!(real_domain = vget_real_domain(email)))
 					real_domain = email;
@@ -530,8 +505,10 @@ query_type(int status)
 #endif
 		case ALIAS_QUERY:
 			return("'Alias Query'");
-		case LPWD_QUERY:
-			return("'Local Password Query'");
+#ifdef ENABLE_DOMAIN_LIMITS
+		case LIMIT_QUERY:
+			return("'Domain Limits Query'");
+#endif
 		case DOMAIN_QUERY:
 			return("'Domain Query'");
 		default:
@@ -573,14 +550,14 @@ sig_usr1()
 	cur_time = time(0);
 #ifdef CLUSTERED_SITE
 	printf("User Query %d, Relay Query %d, Password Query %d:%d, Alias Query %d, Host Query %d, Domain Query %d\n", 
-		user_query_count, relay_query_count, pwd_query_count, lpwd_query_count, alias_query_count, 
+		user_query_count, relay_query_count, pwd_query_count, limit_query_count, alias_query_count, 
 		host_query_count, dom_query_count);
-	total_count = user_query_count + relay_query_count + pwd_query_count + lpwd_query_count + alias_query_count + 
+	total_count = user_query_count + relay_query_count + pwd_query_count + limit_query_count + alias_query_count + 
 		host_query_count + dom_query_count;
 #else
 	printf("User Query %d, Relay Query %d, Password Query %d:%d, Alias Query %d, Domain Query %d\n", 
-		user_query_count, relay_query_count, pwd_query_count, lpwd_query_count, alias_query_count, dom_query_count);
-	total_count = user_query_count + relay_query_count + pwd_query_count + lpwd_query_count + alias_query_count + dom_query_count;
+		user_query_count, relay_query_count, pwd_query_count, limit_query_count, alias_query_count, dom_query_count);
+	total_count = user_query_count + relay_query_count + pwd_query_count + limit_query_count + alias_query_count + dom_query_count;
 #endif
 	printf("Start Time: %s", ctime(&start_time));
 	printf("End   Time: %s", ctime(&cur_time));
@@ -661,14 +638,14 @@ sig_term()
 	cur_time = time(0);
 #ifdef CLUSTERED_SITE
 	printf("User Query %d, Relay Query %d, Password Query %d:%d, Alias Query %d, Host Query %d, Domain Query %d\n", 
-		user_query_count, relay_query_count, pwd_query_count, lpwd_query_count, alias_query_count, 
+		user_query_count, relay_query_count, pwd_query_count, limit_query_count, alias_query_count, 
 		host_query_count, dom_query_count);
-	total_count = user_query_count + relay_query_count + pwd_query_count + lpwd_query_count + alias_query_count + 
+	total_count = user_query_count + relay_query_count + pwd_query_count + limit_query_count + alias_query_count + 
 		host_query_count + dom_query_count;
 #else
 	printf("User Query %d, Relay Query %d, Password Query %d:%d, Alias Query %d, Domain Query %d\n", 
-		user_query_count, relay_query_count, pwd_query_count, lpwd_query_count, alias_query_count, dom_query_count);
-	total_count = user_query_count + relay_query_count + pwd_query_count + lpwd_query_count + alias_query_count + dom_query_count;
+		user_query_count, relay_query_count, pwd_query_count, limit_query_count, alias_query_count, dom_query_count);
+	total_count = user_query_count + relay_query_count + pwd_query_count + limit_query_count + alias_query_count + dom_query_count;
 #endif
 	printf("Start Time: %s", ctime(&start_time));
 	printf("End   Time: %s", ctime(&cur_time));
@@ -705,14 +682,14 @@ sig_hand(sig, code, scp, addr)
 			cur_time = time(0);
 #ifdef CLUSTERED_SITE
 			printf("User Query %d, Relay Query %d, Password Query %d:%d, Alias Query %d, Host Query %d, Domain Query %d\n", 
-				user_query_count, relay_query_count, pwd_query_count, lpwd_query_count, alias_query_count, 
+				user_query_count, relay_query_count, pwd_query_count, limit_query_count, alias_query_count, 
 				host_query_count, dom_query_count);
-			total_count = user_query_count + relay_query_count + pwd_query_count + lpwd_query_count + alias_query_count + 
+			total_count = user_query_count + relay_query_count + pwd_query_count + limit_query_count + alias_query_count + 
 				host_query_count + dom_query_count;
 #else
 			printf("User Query %d, Relay Query %d, Password Query %d:%d, Alias Query %d, Domain Query %d\n", 
-				user_query_count, relay_query_count, pwd_query_count, lpwd_query_count, alias_query_count, dom_query_count);
-			total_count = user_query_count + relay_query_count + pwd_query_count + lpwd_query_count + alias_query_count + dom_query_count;
+				user_query_count, relay_query_count, pwd_query_count, limit_query_count, alias_query_count, dom_query_count);
+			total_count = user_query_count + relay_query_count + pwd_query_count + limit_query_count + alias_query_count + dom_query_count;
 #endif
 			printf("Start Time: %s", ctime(&start_time));
 			printf("End   Time: %s", ctime(&cur_time));

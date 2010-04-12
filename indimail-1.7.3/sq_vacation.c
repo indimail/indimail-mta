@@ -1,5 +1,8 @@
 /*
  * $Log: sq_vacation.c,v $
+ * Revision 2.6  2010-04-11 22:22:43+05:30  Cprogrammer
+ * LPWD_QUERY changed to LIMIT_QUERY
+ *
  * Revision 2.5  2010-02-18 22:44:34+05:30  Cprogrammer
  * removed unused definitions
  *
@@ -54,7 +57,7 @@
 #define HOST_QUERY   4
 #endif
 #define ALIAS_QUERY  5
-#define LPWD_QUERY   6
+#define LIMIT_QUERY  6
 #define DOMAIN_QUERY 7
 
 #endif /* INDIMAILH_H */
@@ -82,7 +85,7 @@
 #define ERR_UNEXPECTED  126     /*- other unexpected error */
 
 #ifndef lint
-static char     sccsid[] = "$Id: sq_vacation.c,v 2.5 2010-02-18 22:44:34+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: sq_vacation.c,v 2.6 2010-04-11 22:22:43+05:30 Cprogrammer Exp mbhangui $";
 #endif
 #ifndef INDIMAILH_H
 int             vauthOpen_user(char *);

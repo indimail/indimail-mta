@@ -170,7 +170,7 @@ UserInLookup(char *email)
 					}
 #endif
 				}
-			}
+			} /*- for (count = 1, mysqlptr = MdaMysql, rhostsptr = RelayHosts;*rhostsptr;mysqlptr++, rhostsptr++) */
 			is_open = 0;
 #else /*- #ifdef CLUSTERED_SITE */
 #ifdef VALIAS
@@ -182,7 +182,7 @@ UserInLookup(char *email)
 #endif
 #endif /*- #ifdef CLUSTERED_SITE */
 			return (1);
-		} else
+		} else /*- if (userNotFound) */
 			return (-1);
 	}
 	if (!vauth_getpw(user, real_domain))
