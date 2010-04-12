@@ -465,7 +465,7 @@ EXTRAQUEUE        |qmail-queue  |used    |Extra recipient to be added to the
 QHPSI             |qmail-queue  |used    |If set enables the Qmail High
                   |             |        |Performance Scanner Interface. This
                   |             |        |should be set to the path of the virus
-                  |             |        |scanner. If SCANCMD is defined
+                  |             |        |scanner.
 QHPSIRC           |qmail-queue  |used    |To specify the return code of the virus
                   |             |        |scanner in case of an infection;
                   |             |        |default is 1.
@@ -1130,6 +1130,12 @@ TLS_PROTOCOL      |imapd/pop3d  |        | TLS1 or SSL3 depending on wheter you
 TLS_VERIFYPEER    |imapd/pop3d  |        | Set to NONE if you don't want to require
                   |             |        | a client certificate
 BANNER            |sslerator    |        | Banner to display when STARTTLS is issued
+------------------|-------------|--------|----------------------------------------
+ACCT_INACT_EXPIRY |pam-multi    |used    |Max days a account can be inactive after
+                  |pam-checkpwd |        |PAM authentication will expire the account
+PASSWORD_EXPIRY   |(if using    |        |Max days within which the password has
+                  |iauth.so)    |        |to be changed. After this, authentication
+                  |             |        |will return failure
 ------------------|-------------|--------|----------------------------------------
 .TE
 
