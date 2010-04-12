@@ -78,7 +78,7 @@
  * added missing initialization of quota
  *
  * Revision 2.5  2003-10-26 11:35:10+05:30  Cprogrammer
- * use defaultquota from limits if quota on given on command line
+ * use defaultquota from limits if quota not given on command line
  *
  * Revision 2.4  2003-10-23 13:21:34+05:30  Cprogrammer
  * change for argument added to genpass()
