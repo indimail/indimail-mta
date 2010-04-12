@@ -1,5 +1,9 @@
 /*
  * $Log: vchkpass.c,v $
+ * Revision 2.34  2010-04-12 08:48:22+05:30  Cprogrammer
+ * use domain limits for account/password expiry
+ * use inquery() for domain limits if QUERY_CACHE is defined
+ *
  * Revision 2.33  2009-11-15 14:40:32+05:30  Cprogrammer
  * use vauthOpen_user() if QUERY_CACHE is not set for an extended domain
  *
@@ -108,12 +112,15 @@
 #include "indimail.h"
 #include <stdlib.h>
 #include <string.h>
+#ifdef ENABLE_DOMAIN_LIMITS
+#include <time.h>
+#endif
 #define _XOPEN_SOURCE
 #include <unistd.h>
 #include <errno.h>
 
 #ifndef lint
-static char     sccsid[] = "$Id: vchkpass.c,v 2.33 2009-11-15 14:40:32+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: vchkpass.c,v 2.34 2010-04-12 08:48:22+05:30 Cprogrammer Exp mbhangui $";
 #endif
 #ifdef AUTH_SIZE
 #undef AUTH_SIZE
@@ -129,6 +136,10 @@ main(int argc, char **argv)
 	char            user[AUTH_SIZE], domain[AUTH_SIZE], buf[MAX_BUFF];
 	int             count, offset, norelay = 0, status;
 	struct passwd  *pw;
+#ifdef ENABLE_DOMAIN_LIMITS
+	time_t          curtime;
+	struct vlimits  limits;
+#endif
 
 	if (argc < 2)
 		_exit(2);
@@ -238,7 +249,7 @@ main(int argc, char **argv)
 	} else
 	if (is_inactive && !getenv("ALLOW_INACTIVE"))
 	{
-		printf("553-Sorry, this account has expired (#5.7.1)\r\n");
+		printf("553-Sorry, this account is inactive (#5.7.1)\r\n");
 		fflush(stdout);
 		_exit (1);
 	} else
@@ -258,6 +269,48 @@ main(int argc, char **argv)
 		fflush(stdout);
 		_exit (111);
 	}
+#ifdef ENABLE_DOMAIN_LIMITS
+	if (getenv("DOMAIN_LIMITS"))
+	{
+		struct vlimits *lmt;
+#ifdef QUERY_CACHE
+		if (!getenv("QUERY_CACHE"))
+		{
+			if (vget_limits(domain, &limits))
+			{
+				fprintf(stderr, "vchkpass: unable to get domain limits for for %s\n", domain);
+				printf("454-unable to get domain limits for %s\r\n", domain);
+				fflush(stdout);
+				_exit (111);
+			}
+			lmt = &limits;
+		} else
+			lmt = inquery(LIMIT_QUERY, login, 0);
+#else
+		if (vget_limits(domain, &limits))
+		{
+			fprintf(stderr, "vchkpass: unable to get domain limits for for %s\n", domain);
+			printf("454-unable to get domain limits for %s\r\n", domain);
+			fflush(stdout);
+			_exit (111);
+		}
+		lmt = &limits;
+#endif
+		curtime = time(0);
+		if (lmt->domain_expiry > -1 && curtime > lmt->domain_expiry)
+		{
+			printf("553-Sorry, your domain has expired (#5.7.1)\r\n");
+			fflush(stdout);
+			_exit (1);
+		} else
+		if (lmt->passwd_expiry > -1 && curtime > lmt->passwd_expiry)
+		{
+			printf("553-Sorry, your password has expired (#5.7.1)\r\n");
+			fflush(stdout);
+			_exit (1);
+		} 
+	}
+#endif
 	status = 0;
 	if ((ptr = (char *) getenv("POSTAUTH")) && !access(ptr, X_OK))
 	{

@@ -1,5 +1,11 @@
 /*
  * $Log: iauth.c,v $
+ * Revision 2.8  2010-04-12 08:45:59+05:30  Cprogrammer
+ * use inquery() for domain limits if QUERY_CACHE is set
+ *
+ * Revision 2.7  2010-04-11 18:55:30+05:30  Cprogrammer
+ * added domain_expiry, passwd_expiry from domain limits
+ *
  * Revision 2.6  2009-11-08 00:49:11+05:30  Cprogrammer
  * PASSWD_CACHE renamed to QUERY_CACHE
  *
@@ -70,7 +76,7 @@
 static int      defaultTask(char *, char *, struct passwd *, char *);
 
 #ifndef lint
-static char     sccsid[] = "$Id: iauth.c,v 2.6 2009-11-08 00:49:11+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: iauth.c,v 2.8 2010-04-12 08:45:59+05:30 Cprogrammer Exp mbhangui $";
 #endif
 /*
 #define iauth ltdl_module_LTX_iauth
@@ -120,7 +126,7 @@ i_auth(char *email, char *service, int *size, int debug)
 	*cptr = 0;
 	/*- crypt("pass", "kk"); -*/
 	if (debug)
-		fprintf(stderr, "authenticate.so: opening MySQL connection\n");
+		fprintf(stderr, "iauth.so: opening MySQL connection\n");
 #ifdef QUERY_CACHE
 	if (!getenv("QUERY_CACHE"))
 	{
@@ -143,12 +149,12 @@ i_auth(char *email, char *service, int *size, int debug)
 	if (getenv("QUERY_CACHE"))
 	{
 		if (debug)
-			fprintf(stderr, "authenticate.so: doing inquery\n");
+			fprintf(stderr, "iauth.so: doing inquery\n");
 		pw = inquery(PWD_QUERY, email, 0);
 	} else
 	{
 		if (debug)
-			fprintf(stderr, "authenticate.so: doing vauth_getpw\n");
+			fprintf(stderr, "iauth.so: doing vauth_getpw\n");
 		if (!vget_assign(Domain, 0, 0, &uid, &gid)) 
 		{
 			fprintf(stderr, "iauth: domain %s does not exist\n", Domain);
@@ -160,7 +166,7 @@ i_auth(char *email, char *service, int *size, int debug)
 	}
 #else
 	if (debug)
-		fprintf(stderr, "authenticate.so: doing vauth_getpw\n");
+		fprintf(stderr, "iauth.so: doing vauth_getpw\n");
 	if (!vget_assign(Domain, 0, 0, &uid, &gid)) 
 	{
 		fprintf(stderr, "i_auth: domain %s does not exist\n", Domain);
@@ -189,7 +195,7 @@ i_auth(char *email, char *service, int *size, int debug)
 	_global_pw = pw;
 	*size = strlen(crypt_pass) + 1;
 	if (debug)
-		fprintf(stderr, "authenticate.so: returning data of size %d\n", *size);
+		fprintf(stderr, "iauth.so: returning data of size %d\n", *size);
 	return(crypt_pass);
 }
 
@@ -201,13 +207,16 @@ i_acctmgmt(char *email, char *service, int *size, int *nitems, int debug)
 	char           *ptr, *cptr, *real_domain, *crypt_pass;
 	char            User[AUTH_SIZE], Domain[AUTH_SIZE];
 	char            SqlBuf[SQL_BUF_SIZE];
-	int             i;
+	int             i, exp_day;
 	static long     exp_times[NO_OF_ITEMS];
 	time_t          tmval;
 	uid_t           uid;
 	gid_t           gid;
 	MYSQL_RES      *res;
 	MYSQL_ROW       row;
+#ifdef ENABLE_DOMAIN_LIMITS
+	struct vlimits  limits;
+#endif
 
 	*nitems = NO_OF_ITEMS;
 	*size = 0;
@@ -220,7 +229,7 @@ i_acctmgmt(char *email, char *service, int *size, int *nitems, int debug)
 	for (cptr = Domain;*ptr;*cptr++ = *ptr++);
 	*cptr = 0;
 	if (debug)
-		fprintf(stderr, "authenticate.so: opening MySQL connection\n");
+		fprintf(stderr, "iauth.so: opening MySQL connection\n");
 	if (vauth_open((char *) 0))
 		return ((char *) 0);
 	if (!vget_assign(Domain, 0, 0, &uid, &gid)) 
@@ -230,6 +239,40 @@ i_acctmgmt(char *email, char *service, int *size, int *nitems, int debug)
 	}
 	if (!(real_domain = vget_real_domain(Domain)))
 		real_domain = Domain;
+#ifdef ENABLE_DOMAIN_LIMITS
+	if (getenv("DOMAIN_LIMITS"))
+	{
+		struct vlimits *lmt;
+#ifdef QUERY_CACHE
+		if (!getenv("QUERY_CACHE"))
+		{
+			if (vget_limits(real_domain, &limits))
+			{
+				fprintf(stderr, "vchkpass: unable to get domain limits for for %s\n", real_domain);
+				printf("454-unable to get domain limits for %s\r\n", real_domain);
+				fflush(stdout);
+				_exit (111);
+			}
+			lmt = &limits;
+		} else
+			lmt = inquery(LIMIT_QUERY, email, 0);
+#else
+		if (vget_limits(real_domain, &limits))
+		{
+			fprintf(stderr, "i_acctmgmt: unable to get domain limits for for %s\n", real_domain);
+			return ((char *) 0);
+		}
+		lmt = &limits;
+#endif
+		exp_times[0] = lmt->domain_expiry == -1 ? 0 : lmt->domain_expiry;
+		exp_times[1] = lmt->passwd_expiry == -1 ? 0 : lmt->passwd_expiry;
+		if (debug)
+		{
+			fprintf(stderr, "iauth.so: expiry[%d] = %ld\n", 0, exp_times[0]);
+			fprintf(stderr, "iauth.so: expiry[%d] = %ld\n", 1, exp_times[1]);
+		}
+	}  else
+#endif
 	for (i = 0;i < NO_OF_ITEMS;i++)
 	{
 		switch (i)
@@ -238,11 +281,19 @@ i_acctmgmt(char *email, char *service, int *size, int *nitems, int debug)
 			snprintf(SqlBuf, SQL_BUF_SIZE, 
 				"select high_priority UNIX_TIMESTAMP(timestamp) from lastauth where user=\"%s\" and domain=\"%s\" \
 				and (service = \"pop3\" or service=\"imap\" or service=\"webm\")", User, Domain);
+			if (!(ptr = getenv("ACCT_INACT_EXPIRY")))
+				exp_day = 60;
+			else
+				exp_day = atoi(ptr);
 			break;
 		case 1:
 			snprintf(SqlBuf, SQL_BUF_SIZE, 
 				"select high_priority UNIX_TIMESTAMP(timestamp) from lastauth where user=\"%s\" and domain=\"%s\" \
 				and service=\"pass\"", User, Domain);
+			if (!(ptr = getenv("PASSWORD_EXPIRY")))
+				exp_day = 60;
+			else
+				exp_day = atoi(ptr);
 			break;
 		}
 		if (mysql_query(&mysql[1], SqlBuf))
@@ -251,8 +302,6 @@ i_acctmgmt(char *email, char *service, int *size, int *nitems, int debug)
 			{
 				create_table(ON_LOCAL, "lastauth", LASTAUTH_TABLE_LAYOUT);
 				exp_times[i] = 0;
-				if (debug)
-					fprintf(stderr, "authenticate.so: expiry[%d] = %ld\n", i, exp_times[i]);
 				continue;
 			}
 			mysql_perror("i_acctmgmt: mysql_query: %s", SqlBuf);
@@ -266,8 +315,10 @@ i_acctmgmt(char *email, char *service, int *size, int *nitems, int debug)
 			if (tmval > exp_times[i])
 				exp_times[i] = tmval;
 		}
+		if (exp_times[i])
+			exp_times[i] += exp_day * 86400;
 		if (debug)
-			fprintf(stderr, "authenticate.so: expiry[%d] = %ld\n", i, exp_times[i]);
+			fprintf(stderr, "iauth.so: expiry[%d] = %ld\n", i, exp_times[i]);
 		mysql_free_result(res);
 	}
 	/*
