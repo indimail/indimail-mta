@@ -1,5 +1,9 @@
 /*
  * $Log: authindi.c,v $
+ * Revision 2.17  2010-04-12 12:59:18+05:30  Cprogrammer
+ * use domain limits for account/password expiry
+ * use inquery() for domain limits if QUERY_CACHE is defined
+ *
  * Revision 2.16  2010-04-09 13:59:08+05:30  Cprogrammer
  * added env variable AUTHSERVICE to denote imap, pop3 or webmail
  *
@@ -57,7 +61,7 @@
 #include <errno.h>
 
 #ifndef lint
-static char     sccsid[] = "$Id: authindi.c,v 2.16 2010-04-09 13:59:08+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: authindi.c,v 2.17 2010-04-12 12:59:18+05:30 Cprogrammer Exp mbhangui $";
 #endif
 #ifdef AUTH_SIZE
 #undef AUTH_SIZE
@@ -90,6 +94,10 @@ main(int argc, char **argv)
 	struct passwd  *pw;
 	char           *(indiargs[]) = { INDIMAILDIR"/sbin/imaplogin", INDIMAILDIR"/libexec/authlib/authindi",
 					INDIMAILDIR"/bin/imapd", "Maildir", 0 };
+#ifdef ENABLE_DOMAIN_LIMITS
+	time_t          curtime;
+	struct vlimits  limits;
+#endif
 
 	if ((prog_name = strrchr(argv[0], '/')))
 		prog_name++;
@@ -330,6 +338,51 @@ main(int argc, char **argv)
 		pipe_exec(argv, buf, offset);
 		return (1);
 	}
+#ifdef ENABLE_DOMAIN_LIMITS
+	if (getenv("DOMAIN_LIMITS"))
+	{
+		struct vlimits *lmt;
+#ifdef QUERY_CACHE
+		if (!getenv("QUERY_CACHE"))
+		{
+			if (vget_limits(real_domain, &limits))
+			{
+				fprintf(stderr, "%s: unable to get domain limits for for %s\n", prog_name, real_domain);
+				close_connection();
+				pipe_exec(argv, buf, offset);
+				return (1);
+			}
+			lmt = &limits;
+		} else
+			lmt = inquery(LIMIT_QUERY, login, 0);
+#else
+		if (vget_limits(real_domain, &limits))
+		{
+			fprintf(stderr, "%s: unable to get domain limits for for %s\n", prog_name, real_domain);
+			close_connection();
+			pipe_exec(argv, buf, offset);
+			return (1);
+		}
+		lmt = &limits;
+#endif
+		curtime = time(0);
+		if (lmt->domain_expiry > -1 && curtime > lmt->domain_expiry)
+		{
+			fprintf(stderr, "%s: Sorry, your domain has expired\n", prog_name);
+			if (write(2, "AUTHFAILURE\n", 12) == -1) ;
+			close_connection();
+			execv(*indiargs, indiargs);
+			return (1);
+		} else
+		if (lmt->passwd_expiry > -1 && curtime > lmt->passwd_expiry)
+		{
+			fprintf(stderr, "%s: Sorry, your password has expired\n", prog_name);
+			if (write(2, "AUTHFAILURE\n", 12) == -1) ;
+			close_connection();
+			execv(*indiargs, indiargs);
+		} 
+	}
+#endif
 	exec_local(argv + argc - 2, login, real_domain, pw, service);
 	return(0);
 }
@@ -365,6 +418,7 @@ exec_local(char **argv, char *userid, char *TheDomain, struct passwd *pw, char *
 	if ((size_limit = parse_quota(pw->pw_shell, &count_limit)) == -1)
 	{
 		fprintf(stderr, "parse_quota: %s: %s\n", pw->pw_shell, strerror(errno));
+		close_connection();
 		return (1);
 	}
 	snprintf(authenv4, MAX_BUFF, "MAILDIRQUOTA=%"PRIu64"S,%"PRIu64"C", size_limit, count_limit);
