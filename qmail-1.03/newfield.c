@@ -1,5 +1,8 @@
 /*
  * $Log: newfield.c,v $
+ * Revision 1.5  2010-04-13 15:10:06+05:30  Cprogrammer
+ * use indimail in message id
+ *
  * Revision 1.4  2004-10-22 20:27:42+05:30  Cprogrammer
  * added RCS id
  *
@@ -19,7 +22,7 @@
  */
 stralloc        newfield_date = { 0 };
 /*
- * "Message-ID: <19950926044653.12345.qmail@silverton.berkeley.edu>\n" 
+ * "Message-ID: <19950926044653.12345.indimail@org>\n" 
  */
 stralloc        newfield_msgid = { 0 };
 
@@ -92,7 +95,7 @@ msgidfmt(s, idhost, idhostlen, when)
 	len += i;
 	if (s)
 		s += i;
-	i = fmt_str(s, ".qmail@");
+	i = fmt_str(s, ".indimail@");
 	len += i;
 	if (s)
 		s += i;
@@ -132,7 +135,7 @@ newfield_msgidmake(idhost, idhostlen, when)
 void
 getversion_newfield_c()
 {
-	static char    *x = "$Id: newfield.c,v 1.4 2004-10-22 20:27:42+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: newfield.c,v 1.5 2010-04-13 15:10:06+05:30 Cprogrammer Stab mbhangui $";
 
 	x++;
 }
