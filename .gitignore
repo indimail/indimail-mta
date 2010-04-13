@@ -1,4 +1,5 @@
 .gitignore
+cscope.*
 RELEASE
 dist
 experiments
