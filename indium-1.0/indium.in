@@ -339,7 +339,7 @@ proc main {} {
 		menu .mbar1.admin.domain -tearoff 0
 		.mbar1.admin.domain add command -label "Add    Domain"        -command {vadddomain}      -underline 0
 		.mbar1.admin.domain add command -label "Modify Domain"        -command {vmodDomain}      -underline 0
-		.mbar1.admin.domain add command -label "Domain Limits"        -command {vmoddomlimits}   -underline 7
+		.mbar1.admin.domain add command -label "Domain Limits"        -command {vlimit}   -underline 7
 		.mbar1.admin.domain add separator
 		.mbar1.admin.domain add command -label "Database Controls"    -command {dbcontrol}       -underline 0
 		.mbar1.admin.domain add separator
@@ -12509,7 +12509,7 @@ proc commandLine {} {
 		"vuserinfo" \
 		"vatrn" \
 		"vpriv" \
-		"vmoddomlimits" \
+		"vlimit" \
 		"hostcntrl" \
 		"ipchange" \
 	}
@@ -13851,7 +13851,7 @@ proc run_priv {operation dbwin} {
 	return 0
 }
 
-proc vmoddomlimits {} {
+proc vlimit {} {
 	global BWidget_present prgtext User
 	source @scriptdir@/global.tcl
 	set result ""
@@ -13864,7 +13864,7 @@ proc vmoddomlimits {} {
 	set Description "Set Domain Limits"
 	wm title . $Description
 	.statusBar.lab configure -text $Description
-	bind . <F1> {doHelp vmoddomlimits}
+	bind . <F1> {doHelp vlimit}
 	if {$BWidget_present == 1} {
 		set   pw  [PanedWindow $w -weights available -side top]
 		pack $pw -expand 1 -fill both
@@ -14107,9 +14107,9 @@ proc run_domlimits {} {
 		set gidflags "x"
 	}
 	if {$gidflags != ""} {
-		set domlimitcmd "\"vmoddomlimits $domain -g $gidflags\""
+		set domlimitcmd "\"vlimit $domain -g $gidflags\""
 	} else {
-		set domlimitcmd "\"vmoddomlimits $domain\""
+		set domlimitcmd "\"vlimit $domain\""
 	}
 	set cmd "exec @indimaildir@/sbin/adminclient -h $server -p $adminport -u $adminuser -P $adminpass -n @indimaildir@/control/clientcert.pem -c $domlimitcmd"
 	if {$BWidget_present == 1} {
@@ -14143,7 +14143,7 @@ proc del_domlimits {} {
 	if {$action != 1} {
 		return
 	}
-	set domlimitcmd "\"vmoddomlimits -D $domain\""
+	set domlimitcmd "\"vlimit -D $domain\""
 	set cmd "exec @indimaildir@/sbin/adminclient -h $server -p $adminport -u $adminuser -P $adminpass -n @indimaildir@/control/clientcert.pem -c $domlimitcmd"
 	if {$BWidget_present == 1} {
 		set prgtext "Hmm... I am Busy"
@@ -14179,7 +14179,7 @@ proc get_domlimits {} {
 	set domlimits::nosmtp 0
 	set domlimits::norelay 0
 	set domlimits::reset 0
-	set domlimitcmd "\"vmoddomlimits -s $domain\""
+	set domlimitcmd "\"vlimit -s $domain\""
 	set cmd "| @indimaildir@/sbin/adminclient -h $server -p $adminport -u $adminuser -P $adminpass -n @indimaildir@/control/clientcert.pem -c $domlimitcmd"
 
 	if {$BWidget_present == 1} {
@@ -14188,7 +14188,7 @@ proc get_domlimits {} {
 	}
 	if {[catch {open $cmd r} f] } {
 		catch {destroy .progress}
-		msg_dialog .d {vmoddomlimits} $f @imagedir@/warning.gif 0 "OK"
+		msg_dialog .d {vlimit} $f @imagedir@/warning.gif 0 "OK"
 		return 1
 	}
 	catch {unset limitline}
@@ -14221,7 +14221,7 @@ proc get_domlimits {} {
 	catch {destroy .progress}
 	set returnstatus [catch {close $f} result]
 	if {$returnstatus != 0} {
-		msg_dialog .d "vmoddomlimits" $result @imagedir@/warning.gif 0 "OK"
+		msg_dialog .d "vlimit" $result @imagedir@/warning.gif 0 "OK"
 		continue
 	}
 	foreach {infotag vartag} { \
