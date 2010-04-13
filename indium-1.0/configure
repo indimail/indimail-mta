@@ -12621,6 +12621,8 @@ $as_echo "$as_me: error: Unable to find your sql libraries dir, specify --enable
 
 fi
 
+mysqlPrefix="`dirname $mysql_libdir`"
+mysqlPrefix="`dirname $mysqlPrefix`"
 else
 	mysql_incdir=$mysql_prefix/include/mysql
 	if test -d $mysql_prefix/lib64/mysql
