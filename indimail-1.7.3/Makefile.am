@@ -41,7 +41,7 @@ man_MANS=vadduser.1 adminclient.8 chowkidar.8 clearopensmtp.8 dbinfo.8 hostcntrl
 	vacation.8 vaddaliasdomain.1 vadddomain.1 valias.1 vatrn.1 vbulletin.1 vcalias.8 \
 	vcaliasrev.sh.8 vcfilter.1 vchkpass.8 vdeldomain.1 vdelivermail.8 vdeloldusers.8 \
 	vdeluser.1 vdominfo.1 vfilter.8 vfstab.8 vgroup.1 vhostid.8 vipmap.1 vmoddomain.1 \
-	vmoddomlimits.1 vmoduser.1 vmoveuser.1 vpasswd.1 vpriv.8 vproxy.8 vrenamedomain.1 \
+	vlimit.1 vmoduser.1 vmoveuser.1 vpasswd.1 vpriv.8 vproxy.8 vrenamedomain.1 \
 	vrenameuser.1 vreorg.8 vsetuserquota.1 vsmtp.8 vuserinfo.1 indimail.7 IndiMail.7 \
 	updaterules.8 osh.8 svctool.8 systpass.8 vserverinfo.1 sslerator.1
 
@@ -137,7 +137,7 @@ lib_deps: configure Makefile
 indimailbin_PROGRAMS = crc crcdiff dbinfo displaytop hashtable hostcntrl indiversion \
 	printdir proxyimap proxypop3 resetquota sslerator vacation vaddaliasdomain vadddomain \
 	vadduser vadduserl valias vatrn vbulletin vcalias vcfilter vdeldomain vdeluser \
-	vdominfo vgroup vhostid vipmap vmoddomlimits vmoduser vmoveuser vpasswd vpriv \
+	vdominfo vgroup vhostid vipmap vlimit vmoduser vmoveuser vpasswd vpriv \
 	vproxy vrenamedomain vrenameuser vsetuserquota vsmtp vuserinfo crypt
 indimailsbin_PROGRAMS = adminclient chowkidar cindimail clearopensmtp config_settings \
 	copyemail execmysql hostsync indisrvr initsvc inlookup inquerytest install_tables \
@@ -231,8 +231,8 @@ vdeloldusers_LDADD = @auth_libs@
 vmoduser_SOURCES = vmoduser.c 
 vmoduser_LDADD = @auth_libs@
 
-vmoddomlimits_SOURCES = vmoddomlimits.c
-vmoddomlimits_LDADD = @auth_libs@
+vlimit_SOURCES = vlimit.c
+vlimit_LDADD = @auth_libs@
 
 valias_SOURCES = valias.c 
 valias_LDADD = @auth_libs@
@@ -690,7 +690,7 @@ vsmtp_select.lo: indimail.h config.h
 vsmtp_update.lo: indimail.h config.h
 vupdate_rules.lo: indimail.h config.h
 vuserinfo.lo: indimail.h config.h
-vmoddomlimits.lo: indimail.h config.h
+vlimit.lo: indimail.h config.h
 cindimail.lo: indimail.h config.h
 execmysql.lo: indimail.h config.h
 vserverinfo.lo: indimail.h config.h

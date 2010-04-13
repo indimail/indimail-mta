@@ -1,5 +1,8 @@
 /*
  * $Log: indiversion.c,v $
+ * Revision 2.126  2010-04-13 08:15:41+05:30  Cprogrammer
+ * renamed vmoddomlimits to vlimit
+ *
  * Revision 2.125  2010-04-11 22:55:01+05:30  Cprogrammer
  * added VlimitInLookup()
  *
@@ -493,7 +496,7 @@
 #endif
 
 #ifndef	lint
-static char     sccsid[] = "$Id: indiversion.c,v 2.125 2010-04-11 22:55:01+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: indiversion.c,v 2.126 2010-04-13 08:15:41+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 void            getversion_indimail_settings_c();
@@ -813,7 +816,7 @@ char           *bin_program_list[] =
 	"vgroup",
 	"vatrn",
 	"vpriv",
-	"vmoddomlimits",
+	"vlimit",
 	"hostcntrl",
 	"vcaliasrev",
 	"versioninfo",

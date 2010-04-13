@@ -1,5 +1,8 @@
 /*
  * $Log: variables.c,v $
+ * Revision 2.49  2010-04-13 08:16:52+05:30  Cprogrammer
+ * renamed vmoddomlimits to vlimit
+ *
  * Revision 2.48  2010-02-16 09:28:47+05:30  Cprogrammer
  * added mailer-daemon to rfc ids
  *
@@ -191,7 +194,7 @@
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: variables.c,v 2.48 2010-02-16 09:28:47+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: variables.c,v 2.49 2010-04-13 08:16:52+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 vdir_type       vdir;
@@ -362,7 +365,7 @@ ADMINCOMMAND adminCommands[] = {
 	{INDIMAILDIR"/bin/vgroup", "Add/Modify/Delete Groups "},
 	{INDIMAILDIR"/bin/vatrn", "Add ATRN Maps for ODMR"},
 	{INDIMAILDIR"/bin/vpriv", "Add Privileges to Program for IndiSrvr"},
-	{INDIMAILDIR"/bin/vmoddomlimits", "Administer Domain Wide Limits"},
+	{INDIMAILDIR"/bin/vlimit", "Administer Domain Wide Limits"},
 	{INDIMAILDIR"/bin/hostcntrl", "Administer Hostcntrl Entries"},
 	{INDIMAILDIR"/sbin/execmysql", "Connect to Mail Database server"},
 	{INDIMAILDIR"/sbin/updatefile", "Update Control Files"},

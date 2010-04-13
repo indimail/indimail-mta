@@ -1,5 +1,8 @@
 #
 # $Log: indimail.spec.in,v $
+# Revision 2.151  2010-04-13 08:14:52+05:30  Cprogrammer
+# renamed vmoddomlimits to vlimit
+#
 # Revision 2.150  2010-04-08 11:19:40+05:30  Cprogrammer
 # upgrade to clamav 0.96
 #
@@ -473,7 +476,7 @@
 # rpm spec file for indimail
 #
 #
-# $Id: indimail.spec.in,v 2.150 2010-04-08 11:19:40+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 2.151 2010-04-13 08:14:52+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %define _unpackaged_files_terminate_build 1
 
@@ -1114,7 +1117,7 @@ if [ -x /usr/bin/chrpath ] ; then
 for i in clambc clamconf clamscan dbinfo flash freshclam hostcntrl indiversion printdir \
 proxyimap proxypop3 resetquota sigtool vacation vaddaliasdomain vadddomain vadduser \
 vadduserl valias vatrn vbulletin vcalias vcfilter vdeldomain vdeluser vdominfo \
-vgroup vhostid vipmap vmoddomlimits vmoduser vmoveuser vpasswd vpriv sslerator \
+vgroup vhostid vipmap vlimit vmoduser vmoveuser vpasswd vpriv sslerator \
 vproxy vrenamedomain vrenameuser vsetuserquota vsmtp vuserinfo tcpserver
 do
 	if [ -f %{buildroot}%{_prefix}/bin/$i ] ; then
@@ -1445,7 +1448,7 @@ fi
 %attr(555,root,qmail)                   %{_prefix}/bin/successes
 %attr(555,root,qmail)                   %{_prefix}/bin/qmail-sigterm
 %attr(555,root,qmail)                   %{_prefix}/bin/spipe
-%attr(555,root,qmail)                   %{_prefix}/bin/vmoddomlimits
+%attr(555,root,qmail)                   %{_prefix}/bin/vlimit
 %attr(555,root,qmail)                   %{_prefix}/bin/delcr
 %attr(555,root,qmail)                   %{_prefix}/bin/svc
 %attr(555,root,qmail)                   %{_prefix}/bin/crypt
