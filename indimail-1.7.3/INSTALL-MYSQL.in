@@ -13,8 +13,8 @@
 
           o mysql-6.0.3-alpha
           o mysql-6.0.9-alpha
-		  o mysql-5.0.26
-		  o mysql-5.0.77
+          o mysql-5.0.26
+          o mysql-5.0.77
           o mysql-5.1.40
           o mysql-5.1.44
           o mysql-5.4.3-beta
@@ -78,8 +78,8 @@
        # @indimaildir@/sbin/svctool --config=mysqldb --mysqlPrefix=@mysql_prefix@ \
            --databasedir=@indimaildir@/mysqldb --default-domain=indimail.org --base_path=/home/mail \
            --stdout | mysql -u user -ppassword
-       (here user and password are the userid and password of a privileged user in your
-        existing MySQL Database)
+       NOTE: user and password are the userid and password of a privileged user in your
+       existing MySQL Database)
 
        Method 2 - Using mysql client
        -----------------------------
@@ -96,6 +96,9 @@
 
        also have 'sql-mode=NO_BACKSLASH_ESCAPES' in the server option
        file (my.cnf or wherever your my.cnf lies)
+
+       NOTE: user and password are the userid and password of a privileged user in your
+       existing MySQL Database)
 
 NOTE: You can email me at mbhangui@gmail.com, if you find this confusing or need any
 help/clarification.

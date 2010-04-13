@@ -6,7 +6,7 @@
    
    You must decide if you want Non-clustered setup or a clustered setup. If you have millions
    of users, then you must chose clustered setup. Even if you chose to install a non-clustered
-   setup, you can always migrated to a clustered setup later.
+   setup, you can always migrate to a clustered setup later.
 
     Creating a non-clustered Domain
     -------------------------------
@@ -79,6 +79,29 @@
     % sudo @indimaildir@/bin/vadduser testuser1@example.com pass
     % @indimaildir@/bin/vuserinfo testuser1@example.com
     % @indimaildir@/bin/dbinfo -s
+
+    Send / Receive Mails
+    ====================
+
+    At this stage, your setup is ready to send mails to the outside world. To receive
+    mails, you need to create your actual domain (instead of example.com) using vadddomain
+    and setup a mail exchanger record for your domain (MX record).
+    To send mails, you can either use SMTP or use a sendmail replacement -
+    @indimaildir@/bin/sendmail.sh
+
+    You may also want to link sendmail to @indimaildir@/bin/sendmail.sh
+
+    % sudo rm /usr/sbin/sendmail
+    % ln -s @indimaildir@/bin/sendmail.sh /usr/sbin/sendmail
+
+    If you link sendmail to @indimaildir@/bin/sendmail.sh, then
+    you can do the following to send a test mail.
+
+    % ( echo 'First M. Last'; uname -a) | mail -s "IndiMail Installation" mbhangui@gmail.com
+
+    Replace First M. Last with your name.
+
+    --- * --- * ---- * --- * --- THE END --- * --- * --- * --- * ---
 
 NOTE: You can email me at mbhangui@gmail.com, if you find this confusing or need any
 help/clarification.
