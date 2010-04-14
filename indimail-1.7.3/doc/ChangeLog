@@ -1,6 +1,40 @@
-* Wed Mar 31 2010 mbhangui@gmail.com
+* Wed Apr 14 2010 mbhangui@gmail.com
 Release 1.7.3 Start 31/03/2010
-
+02/04/2010
+1.  Added new program swaks - Swiss Army Knife for SMTP
+2.  Fix extra new lines after Deliverd-To header
+03/04/2010
+3.  fix binding on ipv6 address in timeoutconn.c
+4.  Added option to create QMQP service in svctool, RPM
+5.  configure script now detects missing components
+04/04/2010
+6.  added -fno-strict-aliasing to compilation flags
+07/04/2010
+7.  preline segfaults [2983128]
+8.  use HOSTNAME environment variable to record host in qmail-queue.c (bypass
+    gethostname()
+9.  Change permissions of cdb files to indimail in qmailctl
+08/04/2010
+10. Upgrade to clamav-0.96
+09/04/2010
+11. Define environment variable AUTHSERVICE in courier-imap authmodule
+    authindi to denote authentication for imap, pop3 or webmail
+10/04/2010
+12. Added ACCT_INACT_EXPIRY, PASSWORD_EXPIRY variables in iauth.so pam plugin
+    to enable pam-checkpwd (pam checkpassword) to return failures on account and
+    password expiry
+13. Fixed maths in calculating account/password expiry (iauth.c, pam-multi.c)
+11/04/2010
+14. Added domain limits in iauth.so
+15. fixed domain_expiry, passwd_expiry getting reset in vmoddomlimits
+16. added domain limits query in inlookup (replaced LPWD_QUERY with
+    LIMIT_QUERY)
+12/04/2010
+17. use inquery in vchkpass, authindi, iauth.so for domain limits
+    (when QUERY_CACHE is defined)
+13/04/2010
+18. Renamed vmoddomlimits to vlimit
+19. use 'indimail' in Message-ID
 
 * Wed Mar 31 2010 mbhangui@gmail.com
 Release 1.7.2 Start 15/03/2010
@@ -11,8 +45,7 @@ Release 1.7.2 Start 15/03/2010
 2.  Added --deliverycount-limit option for vdelivermail to record email
     delivery counts
 3.  Tested with MariaDB 5.1.42
-4.  fixed calling of overquota command when user becomes overquota
-    [2974478]
+4.  fixed calling of overquota command when user becomes overquota [2974478]
 24/03/2010
 5.  Moved overquota.sh to libexec
 25/03/2010
@@ -35,7 +68,7 @@ Release 1.7.2 Start 15/03/2010
 16. BUG - fixed "Invalid TIMESTAMP: Internal Bug problem" in LoadBMF.c
     [2979103]
 17. BUG - call qmail-cdb instead of qmail-spamdb in spam.c [2979103]
-18. BUG - Fix output being sent to client instead of log [2979100]
+18. BUG - Fix output being sent to client instead of log in smtpd.c [2979100]
 19. BUG - pass ipv4 address to greylist() in smtpd.c [2979391]
 
 * Mon Mar 15 2010 mbhangui@gmail.com

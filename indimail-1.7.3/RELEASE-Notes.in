@@ -3,12 +3,10 @@ RELEASE NOTES
 DATE: @DATE@
 
 This is Release @version@ of IndiMail. The release has both source.tar.gz and RPMs
-This release introduces QMTP support in qmail-remote. The RPM installation now
-creates a QMTP service. To enable QMTP service to your servers, you will have
-to create qmtproutes file.
-
-This release fixes quite many bugs identified by Tobias Schmidt (greylisting,
-documentation, chowkidar)
+This release introduces QMQP support in svctool. The RPM installation now
+creates a QMQP service. To use QMQP service to your servers, you will have
+to create qmqpservers file. This release also integrates domain limits into
+authentication modules vchkpass, iauth.so and authindi
 
 This release includes the following files
 
@@ -66,29 +64,24 @@ both 32 and 64 bit) are
 
 ChangeLog
 =========
-* Wed Mar 31 2010 mbhangui@gmail.com
-Release 1.7.2 Start 15/03/2010
-1.  Added unsigned integer overflow check to alloc.c in ucspi-tcp, qmail
-    Matthew Dempsky - http://marc.info/?l=qmail&m=125213850310173&w=2
-2.  Added --deliverycount-limit option for vdelivermail to record email
-    delivery counts
-3.  Tested with MariaDB 5.1.42
-4.  fixed calling of overquota command when user becomes overquota [2974478]
-5.  Moved overquota.sh to libexec
-6.  Added QMTP support in qmail-remote [2976840]
-7.  Added option to create qmail-qmtpd service in svctool, create_services
-8.  Added dkim man page
-9.  Added QUEUEPROG environment variable in qmail-multi to execute alternate
-    queue program instead of qmail-queue
-10. Updated envrules environment variables in qmail-smtpd, qmail-inject,
-    spawn-filter man pages
-11. use tcp.qmtp.cdb for qmtpd service
-12. use localiphost instead of hostip for local IP address
-13. use 127.0.0.1 if get_local_ip() fails in inlookup [2977996]
-14. BUG - Fixed typo in cronlist.in
-15. BUG - Fixed SIGSEGV in spamReport() function in spam.c [2979103]
-16. BUG - fixed "Invalid TIMESTAMP: Internal Bug problem" in LoadBMF.c
-    [2979103]
-17. BUG - call qmail-cdb instead of qmail-spamdb in spam.c [2979103]
-18. BUG - Fix output being sent to client instead of log [2979100]
-19. BUG - pass ipv4 address to greylist() in smtpd.c [2979391]
+* Wed Apr 14 2010 mbhangui@gmail.com
+Release 1.7.3 Start 31/03/2010
+
+1.  Added new program swaks - Swiss Army Knife for SMTP
+2.  Fix extra new lines after Deliverd-To header
+3.  fix binding on ipv6 address in timeoutconn.c
+4.  Added option to create QMQP service in svctool, RPM
+5.  added -fno-strict-aliasing to compilation flags
+6.  configure script now detects missing components
+7.  preline segfaults [2983128]
+8.  use HOSTNAME environment variable to record host in qmail-queue.c (bypass gethostname()
+9.  Change permissions of cdb files to indimail in qmailctl
+10. Upgrade to clamav-0.96
+11. Define environment variable AUTHSERVICE in courier-imap authmodule (authindi) to denote authentication for imap, pop3 or webmail
+12. Added ACCT_INACT_EXPIRY, PASSWORD_EXPIRY variables in iauth.so pam plugin to enable pam-checkpwd (pam checkpassword) to return failures on account and password expiry
+13. Fixed maths in calculating account/password expiry (iauth.c, pam-multi.c)
+14. Added domain limits in iauth.so
+15. fixed domain_expiry, passwd_expiry getting reset in vmoddomlimits
+16. added domain limits query in inlookup (replaced LPWD_QUERY with LIMIT_QUERY)
+17. use inquery in vchkpass, authindi, iauth.so for domain limits (when QUERY_CACHE is defined)
+18. Renamed vmoddomlimits to vlimit
