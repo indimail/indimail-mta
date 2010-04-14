@@ -1,5 +1,8 @@
 #
 # $Log: indium.in,v $
+# Revision 2.109  2010-04-14 10:43:28+05:30  Cprogrammer
+# renamed vmoddomlimits to vlimit
+#
 # Revision 2.108  2010-02-20 11:16:54+05:30  Cprogrammer
 # added -n option to adminclient
 #
@@ -2083,7 +2086,7 @@ proc vmoduser {} {
 	global lwin rwin awin dwin list awinfr inactiveFlag vdelLine delInsList
 	source @scriptdir@/global.tcl
 	global epassword BWidget_present prgtext t_username oldmaildir userList2 vacationflag
-	global User
+	global User filename
 
 	set username ""
 	set domain ""
