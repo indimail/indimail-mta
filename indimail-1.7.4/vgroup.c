@@ -1,5 +1,9 @@
 /*
  * $Log: vgroup.c,v $
+ * Revision 2.17  2010-04-14 15:46:27+05:30  Cprogrammer
+ * added hostid argument.
+ * changed -m option to -I
+ *
  * Revision 2.16  2009-11-25 12:54:41+05:30  Cprogrammer
  * do not allow empty email addresses
  *
@@ -53,7 +57,7 @@
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vgroup.c,v 2.16 2009-11-25 12:54:41+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: vgroup.c,v 2.17 2010-04-14 15:46:27+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef VALIAS
@@ -68,8 +72,8 @@ static char     sccsid[] = "$Id: vgroup.c,v 2.16 2009-11-25 12:54:41+05:30 Cprog
 #define DELETE_MEMBER 2
 #define UPDATE_MEMBER 3
 
-static int      get_options(int, char **, int *, char **, char **, char **, char **, char **,
-					char **, char **, int *);
+static int      get_options(int, char **, int *, char **, char **, char **, char **,
+					char **, char **, char **, char **, int *);
 static void     usage();
 int             addGroup(char *, char *, char *, char *, char *, int);
 
@@ -77,14 +81,16 @@ int
 main(int argc, char **argv)
 {
 	char            User[MAX_BUFF], Domain[MAX_BUFF], alias_line[MAX_BUFF], old_alias[MAX_BUFF];
-	char           *group, *gecos, *member, *old_member, *passwd, *mdahost, *Quota, *real_domain;
+	char           *group, *gecos, *member, *old_member, *passwd, *hostid, 
+				   *mdahost, *Quota, *real_domain;
 #ifdef CLUSTERED_SITE
 	char           *ptr;
 #endif
 	int             option, ignore = 0, ret = -1;
 	long            quota;
 
-	if (get_options(argc, argv, &option, &group, &gecos, &member, &old_member, &passwd, &mdahost, &Quota, &ignore))
+	if (get_options(argc, argv, &option, &group, &gecos, &member, &old_member, &passwd,
+		&hostid, &mdahost, &Quota, &ignore))
 		return (1);
 	if (parse_email(group, User, Domain, MAX_BUFF))
 	{
@@ -115,8 +121,17 @@ main(int argc, char **argv)
 			else
 				quota = 0;
 #ifdef CLUSTERED_SITE
+			if (!mdahost && hostid)
+			{
+				if (!(ptr = vauth_getipaddr(hostid)))
+				{
+					error_stack(stderr, "Failed to obtain mdahost for host %s domain %s\n", hostid, real_domain);
+					return(1);
+				} else
+					mdahost = ptr;
+			}
 			/* add the user */
-			if (mdahost && *mdahost)
+			if (mdahost)
 			{
 				if (!(ptr = SqlServer(mdahost, real_domain)))
 				{
@@ -180,14 +195,14 @@ addGroup(char *user, char *domain, char *mdahost, char *gecos, char *passwd, int
 
 static int
 get_options(int argc, char **argv, int *option, char **group, char **gecos, char **member, char **old_member, char **passwd,
-	char **mdahost, char **quota, int *ignore)
+	char **hostid, char **mdahost, char **quota, int *ignore)
 {
 	int             c;
 
-	*group = *gecos = *member = *old_member = *passwd = *mdahost = *quota = 0;
+	*group = *gecos = *member = *old_member = *passwd = *hostid, *mdahost = *quota = 0;
 	*option = -1;
 	*ignore = 0;
-	while ((c = getopt(argc, argv, "amc:i:d:o:u:h:q:")) != -1)
+	while ((c = getopt(argc, argv, "vVaIc:i:d:o:u:h:m:q:")) != -1)
 	{
 		switch (c)
 		{
@@ -209,7 +224,7 @@ get_options(int argc, char **argv, int *option, char **group, char **gecos, char
 			}
 			*option = ADDNEW_GROUP;
 			break;
-		case 'm':
+		case 'I':
 			*ignore = 1;
 			break;
 		case 'c':
@@ -274,6 +289,9 @@ get_options(int argc, char **argv, int *option, char **group, char **gecos, char
 			break;
 #ifdef CLUSTERED_SITE
 		case 'h':
+			*hostid = optarg;
+			break;
+		case 'm':
 			*mdahost = optarg;
 			break;
 #endif

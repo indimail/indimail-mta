@@ -47,9 +47,13 @@ Passwd for the user. If not given, user will be prompted.
 \fB\-a\fR
 Add a new group.
 .TP
-\fB\-h\fR
-Host on which the account needs to be created (valid if group account is being created on a
-clusted domain).
+\fB\-h\fR \fIHost\fR
+For a clustered domain, this option can be used to create the user on a specific host having
+hostid as \fIHost\fR.
+.TP
+\fB\-m\fR \fImdahost\fR
+For a clustered domain, this option can be used to create the user on a specific cluster
+having Mail Delivery Host as \fImdahost\fR.
 .TP
 \fB\-c\fR
 Comment field (gecos) for the group account. Internally the comment starts with the
@@ -62,7 +66,7 @@ field starts with the word 'IndiGroup'.
 Sets the Quota for the group. This should be set in case the group will also function as a
 normal user and receive mails.
 .TP
-\fB\-m\fR
+\fB\-I\fR
 Ignore requirement of groupAddress to be a local address on the node where vgroup is
 being run (option valid for clustered domain only)
 
