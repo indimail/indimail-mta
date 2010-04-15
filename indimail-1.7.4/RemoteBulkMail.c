@@ -1,5 +1,8 @@
 /*
  * $Log: RemoteBulkMail.c,v $
+ * Revision 2.10  2010-04-15 14:13:10+05:30  Cprogrammer
+ * added flags argument to mysql_real_connect()
+ *
  * Revision 2.9  2010-02-24 09:11:16+05:30  Cprogrammer
  * use BULK_SOCKET, BULK_VPORT env variable to override indimail.cnf variables
  *
@@ -44,7 +47,7 @@
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: RemoteBulkMail.c,v 2.9 2010-02-24 09:11:16+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: RemoteBulkMail.c,v 2.10 2010-04-15 14:13:10+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #include <stdlib.h>
@@ -116,6 +119,7 @@ bulk_host_connect()
 	char           *bulk_host, *bulk_user = 0, *bulk_passwd = 0, *bulk_database,
 				   *bulk_socket = 0, *port = 0, *ptr;
 	int             bulk_port, count;
+	unsigned int    flags;
 	static MYSQL    bulkMySql;
 
 	if ((bulk_host = (char *) getenv("BULK_HOST")) == (char *) 0)
@@ -154,13 +158,14 @@ bulk_host_connect()
 		if (!port && !(port = (char *) getenv("BULK_VPORT")))
 			port = "0";
 		mysql_init(&bulkMySql);
-		if (set_mysql_options(&mysql[1], "indimail.cnf", "indimail"))
+		if (set_mysql_options(&mysql[1], "indimail.cnf", "indimail", &flags))
 		{
 			fprintf(stderr, "mysql_options: Invalid options in MySQL options file\n");
 			return ((MYSQL *) 0);
 		}
 		bulk_port = atoi(port);
-		if ((mysql_real_connect(&bulkMySql, bulk_host, bulk_user, bulk_passwd, bulk_database, bulk_port, bulk_socket, 0)))
+		if ((mysql_real_connect(&bulkMySql, bulk_host, bulk_user, bulk_passwd,
+				bulk_database, bulk_port, bulk_socket, flags)))
 			return (&bulkMySql);
 		else
 			return ((MYSQL *) 0);

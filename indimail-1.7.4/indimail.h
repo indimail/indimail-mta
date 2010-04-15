@@ -1,5 +1,8 @@
 /*
  * $Log: indimail.h,v $
+ * Revision 2.188  2010-04-15 13:43:04+05:30  Cprogrammer
+ * added flags argument to set_mysql_options()
+ *
  * Revision 2.187  2010-04-11 22:09:27+05:30  Cprogrammer
  * changed LPWD_QUERY to LIMIT_QUERY (domain limits)
  * added VlimitInlookup() function
@@ -876,7 +879,7 @@
 #define INDIMAILH_H
 
 #ifndef	lint
-static char     sccsidh[] = "$Id: indimail.h,v 2.187 2010-04-11 22:09:27+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsidh[] = "$Id: indimail.h,v 2.188 2010-04-15 13:43:04+05:30 Cprogrammer Stab mbhangui $";
 #endif
 
 #include "config.h"
@@ -1771,7 +1774,7 @@ char           *vshow_atrn_map(char **, char **);
 int             vadd_atrn_map(char *, char *, char *);
 int             vdel_atrn_map(char *, char *, char *);
 int             vupd_atrn_map(char *, char *, char *, char *);
-int             set_mysql_options(MYSQL *, char *, char *);
+int             set_mysql_options(MYSQL *, char *, char *, unsigned int *);
 int             vauth_renamedomain(char *, char *, char *);
 int             vset_lastdeliver(char *, char *, int);
 int             disable_mysql_escape(int);

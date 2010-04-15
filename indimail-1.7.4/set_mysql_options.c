@@ -1,5 +1,8 @@
 /*
  * $Log: set_mysql_options.c,v $
+ * Revision 2.8  2010-04-15 14:14:25+05:30  Cprogrammer
+ * set client flags for mysql_real_connect()
+ *
  * Revision 2.7  2010-04-15 12:47:36+05:30  Cprogrammer
  * corrected data type of 3rd argument of mysql_options()
  *
@@ -26,11 +29,11 @@
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: set_mysql_options.c,v 2.7 2010-04-15 12:47:36+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: set_mysql_options.c,v 2.8 2010-04-15 14:14:25+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 int
-set_mysql_options(MYSQL *mysql, char *file, char *group)
+set_mysql_options(MYSQL *mysql, char *file, char *group, unsigned int *flags)
 {
 	char           *default_file, *default_group, *c_timeout, 
 				   *r_timeout, *w_timeout, *init_cmd,
@@ -39,6 +42,23 @@ set_mysql_options(MYSQL *mysql, char *file, char *group)
 	char            o_reconnect;
 	unsigned int    protocol, connect_timeout, read_timeout, write_timeout;
 
+	*flags = 0;
+	if (getenv("CLIENT_COMPRESS"))
+		*flags += CLIENT_COMPRESS;
+	if (getenv("CLIENT_INTERACTIVE"))
+		*flags += CLIENT_INTERACTIVE;
+#if 0
+	if (getenv("CLIENT_FOUND_ROWS"))
+		*flags += CLIENT_FOUND_ROWS;
+	if (getenv("CLIENT_IGNORE_SPACE"))
+		*flags += CLIENT_IGNORE_SPACE;
+	if (getenv("CLIENT_NO_SCHEMA"))
+		*flags += CLIENT_NO_SCHEMA;
+	if (getenv("CLIENT_ODBC"))
+		*flags += CLIENT_ODBC;
+	if (getenv("CLIENT_TRANSACTIONS"))
+		*flags += CLIENT_TRANSACTIONS;
+#endif
 	getEnvConfigStr(&init_cmd, "MYSQL_INIT_COMMAND", 0);
 	getEnvConfigStr(&default_file, "MYSQL_READ_DEFAULT_FILE", file);
 	getEnvConfigStr(&default_group, "MYSQL_READ_DEFAULT_GROUP", group);

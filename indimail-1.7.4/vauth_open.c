@@ -1,5 +1,8 @@
 /*
  * $Log: vauth_open.c,v $
+ * Revision 2.24  2010-04-15 14:13:44+05:30  Cprogrammer
+ * added flags argument to mysql_real_connect()
+ *
  * Revision 2.23  2010-02-26 10:55:50+05:30  Cprogrammer
  * allow mysql host in host:user:password:socket/port format
  *
@@ -102,7 +105,7 @@
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vauth_open.c,v 2.23 2010-02-26 10:55:50+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: vauth_open.c,v 2.24 2010-04-15 14:13:44+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #include <stdio.h>
@@ -118,6 +121,7 @@ vauth_open(char *dbhost)
 	char           *ptr, *mysql_user = 0, *mysql_passwd = 0, *mysql_database = 0,
 		           *mysql_socket = 0, *qmaildir, *controldir;
 	int             mysqlport = -1, count;
+	unsigned int    flags;
 	FILE           *fp;
 
 	if (is_open == 1)
@@ -199,19 +203,21 @@ vauth_open(char *dbhost)
 	if (!isopen_cntrl || strncmp(cntrl_host, mysql_host, MAX_BUFF) || strncmp(cntrl_port, indi_port, MAX_BUFF))
 	{
 #endif
-		if (set_mysql_options(&mysql[1], "indimail.cnf", "indimail"))
+		if (set_mysql_options(&mysql[1], "indimail.cnf", "indimail", &flags))
 		{
 			fprintf(stderr, "mysql_options: Invalid options in MySQL options file\n");
 			return(-1);
 		}
-		if (!(mysql_real_connect(&mysql[1], mysql_host, mysql_user, mysql_passwd, mysql_database, mysqlport, mysql_socket, 0)))
+		if (!(mysql_real_connect(&mysql[1], mysql_host, mysql_user, mysql_passwd,
+			mysql_database, mysqlport, mysql_socket, flags)))
 		{
-			if (set_mysql_options(&mysql[1], "indimail.cnf", "indimail"))
+			if (set_mysql_options(&mysql[1], "indimail.cnf", "indimail", &flags))
 			{
 				fprintf(stderr, "mysql_options: Invalid options in MySQL options file\n");
 				return(-1);
 			}
-			if (!(mysql_real_connect(&mysql[1], mysql_host, mysql_user, mysql_passwd, NULL, mysqlport, mysql_socket, 0)))
+			if (!(mysql_real_connect(&mysql[1], mysql_host, mysql_user, mysql_passwd, NULL,
+				mysqlport, mysql_socket, flags)))
 			{
 				mysql_perror("mysql_real_connect: %s", mysql_host);
 				return (-1);

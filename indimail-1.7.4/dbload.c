@@ -1,5 +1,8 @@
 /*
  * $Log: dbload.c,v $
+ * Revision 2.15  2010-04-15 14:12:55+05:30  Cprogrammer
+ * added flags argument to mysql_real_connect()
+ *
  * Revision 2.14  2009-11-09 08:34:13+05:30  Cprogrammer
  * use set_mysql_options() to set mysql options before connecting to MDA MySQL db
  *
@@ -56,7 +59,7 @@
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: dbload.c,v 2.14 2009-11-09 08:34:13+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: dbload.c,v 2.15 2010-04-15 14:12:55+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #include <unistd.h>
@@ -195,6 +198,7 @@ connect_db(DBINFO **ptr, MYSQL **mysqlptr)
 	char            mcdFile[MAX_BUFF];
 	char           *qmaildir, *controldir, *mcdfile, *server;
 	long            maxattempts, retry_interval;
+	unsigned int    flags;
 
 	if ((*ptr)->failed_attempts)
 	{
@@ -225,7 +229,7 @@ connect_db(DBINFO **ptr, MYSQL **mysqlptr)
 		fprintf(stderr, "MYSQL Init Error: %s@%s\n", (*ptr)->database, (*ptr)->server);
 		return (1);
 	}
-	if (set_mysql_options(*mysqlptr, "indimail.cnf", "indimail"))
+	if (set_mysql_options(*mysqlptr, "indimail.cnf", "indimail", &flags))
 	{
 		fprintf(stderr, "mysql_options: Invalid options in MySQL options file\n");
 		return(-1);
@@ -236,7 +240,7 @@ connect_db(DBINFO **ptr, MYSQL **mysqlptr)
 		server = (*ptr)->server;
 	(*ptr)->last_attempted = time(0);
 	if (!mysql_real_connect(*mysqlptr, server, (*ptr)->user,
-			(*ptr)->password, (*ptr)->database, (*ptr)->port, NULL, 0))
+			(*ptr)->password, (*ptr)->database, (*ptr)->port, NULL, flags))
 	{
 		char           *my_error;
 		int             my_error_len;

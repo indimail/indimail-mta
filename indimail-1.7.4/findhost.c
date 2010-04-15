@@ -1,5 +1,8 @@
 /*
  * $Log: findhost.c,v $
+ * Revision 2.31  2010-04-15 14:14:05+05:30  Cprogrammer
+ * added flags argument to mysql_real_connect()
+ *
  * Revision 2.30  2010-02-26 10:55:34+05:30  Cprogrammer
  * use host.mysql if host.cntrl is not present
  *
@@ -183,7 +186,7 @@
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: findhost.c,v 2.30 2010-02-26 10:55:34+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: findhost.c,v 2.31 2010-04-15 14:14:05+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #include <stdio.h>
@@ -352,6 +355,7 @@ open_central_db(char *dbhost)
 	char           *ptr, *mysql_user = 0, *mysql_passwd = 0, *mysql_database = 0,
 				   *cntrl_socket = 0, *qmaildir, *controldir;
 	int             mysqlport = -1, count;
+	unsigned int    flags;
 	FILE           *fp;
 
 	if (isopen_cntrl == 1)
@@ -439,19 +443,19 @@ open_central_db(char *dbhost)
 	mysqlport = atoi(cntrl_port);
 	if (!is_open || strncmp(cntrl_host, mysql_host, MAX_BUFF) || strncmp(cntrl_port, indi_port, MAX_BUFF))
 	{
-		if (set_mysql_options(&mysql[0], "indimail.cnf", "indimail"))
+		if (set_mysql_options(&mysql[0], "indimail.cnf", "indimail", &flags))
 		{
 			fprintf(stderr, "mysql_options: Invalid options in MySQL options file\n");
 			return(-1);
 		}
-		if (!(mysql_real_connect(&mysql[0], cntrl_host, mysql_user, mysql_passwd, mysql_database, mysqlport, cntrl_socket, 0)))
+		if (!(mysql_real_connect(&mysql[0], cntrl_host, mysql_user, mysql_passwd, mysql_database, mysqlport, cntrl_socket, flags)))
 		{
-			if (set_mysql_options(&mysql[0], "indimail.cnf", "indimail"))
+			if (set_mysql_options(&mysql[0], "indimail.cnf", "indimail", &flags))
 			{
 				fprintf(stderr, "mysql_options: Invalid options in MySQL options file\n");
 				return(-1);
 			}
-			if (!(mysql_real_connect(&mysql[0], cntrl_host, mysql_user, mysql_passwd, NULL, mysqlport, cntrl_socket, 0)))
+			if (!(mysql_real_connect(&mysql[0], cntrl_host, mysql_user, mysql_passwd, NULL, mysqlport, cntrl_socket, flags)))
 			{
 				fprintf(stderr, "open_central_db: mysql_real_connect: %s: %s\n", cntrl_host, mysql_error(&mysql[0]));
 				return (-1);
