@@ -1,4 +1,4 @@
-[indium Raw]
+[indium-Raw]
 name=indium (Mandriva_2010)
 type=rpm-md
 baseurl=http://download.opensuse.org/repositories/home:/mbhangui:/indium/Mandriva_2010/
@@ -6,7 +6,7 @@ gpgcheck=1
 gpgkey=http://download.opensuse.org/repositories/home:/mbhangui:/indium/Mandriva_2010/repodata/repomd.xml.key
 enabled=1
 
-[indium Stable]
+[indium]
 name=indium (Mandriva_2010)
 type=rpm-md
 baseurl=http://download.opensuse.org/repositories/home:/indimail:/indium/Mandriva_2010/

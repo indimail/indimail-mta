@@ -1,4 +1,4 @@
-[IndiMail Raw]
+[IndiMail-Raw]
 name=IndiMail Raw (RHEL_5)
 type=rpm-md
 baseurl=http://download.opensuse.org/repositories/home:/mbhangui/RHEL_5/

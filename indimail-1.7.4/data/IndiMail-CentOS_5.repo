@@ -1,4 +1,4 @@
-[IndiMail Raw]
+[IndiMail-Raw]
 name=IndiMail Raw (CentOS_5)
 type=rpm-md
 baseurl=http://download.opensuse.org/repositories/home:/mbhangui/CentOS_5/

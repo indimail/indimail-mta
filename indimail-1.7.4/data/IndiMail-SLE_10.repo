@@ -1,4 +1,4 @@
-[IndiMail Raw]
+[IndiMail-Raw]
 name=IndiMail Raw (SLE_10)
 type=rpm-md
 baseurl=http://download.opensuse.org/repositories/home:/mbhangui/SLE_10/

@@ -1,4 +1,4 @@
-[indium Raw]
+[indium-Raw]
 name=indium (Fedora_12)
 type=rpm-md
 baseurl=http://download.opensuse.org/repositories/home:/mbhangui:/indium/Fedora_12/
@@ -6,7 +6,7 @@ gpgcheck=1
 gpgkey=http://download.opensuse.org/repositories/home:/mbhangui:/indium/Fedora_12/repodata/repomd.xml.key
 enabled=1
 
-[indium Stable]
+[indium]
 name=indium (Fedora_12)
 type=rpm-md
 baseurl=http://download.opensuse.org/repositories/home:/indimail:/indium/Fedora_12/

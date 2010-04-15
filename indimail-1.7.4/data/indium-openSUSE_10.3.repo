@@ -1,4 +1,4 @@
-[indium Raw]
+[indium-Raw]
 name=indium (openSUSE_10.3)
 type=rpm-md
 baseurl=http://download.opensuse.org/repositories/home:/mbhangui:/indium/openSUSE_10.3/
@@ -6,7 +6,7 @@ gpgcheck=1
 gpgkey=http://download.opensuse.org/repositories/home:/mbhangui:/indium/openSUSE_10.3/repodata/repomd.xml.key
 enabled=1
 
-[indium Stable]
+[indium]
 name=indium (openSUSE_10.3)
 type=rpm-md
 baseurl=http://download.opensuse.org/repositories/home:/indimail:/indium/openSUSE_10.3/
