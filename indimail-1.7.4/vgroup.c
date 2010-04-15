@@ -1,5 +1,8 @@
 /*
  * $Log: vgroup.c,v $
+ * Revision 2.18  2010-04-14 18:13:03+05:30  Cprogrammer
+ * corrected usage description
+ *
  * Revision 2.17  2010-04-14 15:46:27+05:30  Cprogrammer
  * added hostid argument.
  * changed -m option to -I
@@ -57,7 +60,7 @@
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vgroup.c,v 2.17 2010-04-14 15:46:27+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: vgroup.c,v 2.18 2010-04-14 18:13:03+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef VALIAS
@@ -199,7 +202,7 @@ get_options(int argc, char **argv, int *option, char **group, char **gecos, char
 {
 	int             c;
 
-	*group = *gecos = *member = *old_member = *passwd = *hostid, *mdahost = *quota = 0;
+	*group = *gecos = *member = *old_member = *passwd = *hostid = *mdahost = *quota = 0;
 	*option = -1;
 	*ignore = 0;
 	while ((c = getopt(argc, argv, "vVaIc:i:d:o:u:h:m:q:")) != -1)
@@ -324,14 +327,15 @@ get_options(int argc, char **argv, int *option, char **group, char **gecos, char
 void
 usage()
 {
-	fprintf(stderr, "usage1: vgroup -a [-h] [-c] [-q] [-v] [-V] groupAddress [password]\n");
-	fprintf(stderr, "usage2: vgroup    [-i] [-d] [-u new_mail -o old_email] [-v] [-V] groupAddress\n\n");
+	fprintf(stderr, "usage1: vgroup -a [-cqvVhmI] groupAddress [password]\n");
+	fprintf(stderr, "usage2: vgroup    [-iduovV]  groupAddress\n\n");
 	fprintf(stderr, "options: -V (print version number)\n");
 	fprintf(stderr, "         -v (verbose)\n");
 	fprintf(stderr, "         -a (Add new group)\n");
 #ifdef CLUSTERED_SITE
-	fprintf(stderr, "         -h Mail_Delivery_Host (host on which the account needs to be created)\n");
-	fprintf(stderr, "         -m Ignore requirement of of groupAddress to be local\n");
+	fprintf(stderr, "         -h hostid   (host on which the group needs to be created - specify hostid)\n");
+	fprintf(stderr, "         -m mdahost  (host on which the group needs to be created - specify mdahost)\n");
+	fprintf(stderr, "         -I Ignore requirement of of groupAddress to be local\n");
 #endif
 	fprintf(stderr, "         -c comment (sets the gecos comment field)\n");
 	fprintf(stderr, "         -q quota_in_bytes (sets the users quota)\n");
