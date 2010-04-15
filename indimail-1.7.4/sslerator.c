@@ -1,5 +1,8 @@
 /*
  * $Log: sslerator.c,v $
+ * Revision 2.2  2010-04-15 12:49:45+05:30  Cprogrammer
+ * include string.h for Mac OS X
+ *
  * Revision 2.1  2010-03-06 16:10:18+05:30  Cprogrammer
  * ssl enabler utility
  *
@@ -7,11 +10,12 @@
 #include "indimail.h"
 
 #ifndef lint
-static char     sccsid[] = "$Id: sslerator.c,v 2.1 2010-03-06 16:10:18+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: sslerator.c,v 2.2 2010-04-15 12:49:45+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef HAVE_SSL
 #include <unistd.h>
+#include <string.h>
 #include <signal.h>
 #include <stdlib.h>
 #include <sys/types.h>

@@ -1,5 +1,8 @@
 /*
  * $Log: tls.c,v $
+ * Revision 2.3  2010-04-15 12:49:55+05:30  Cprogrammer
+ * included string.h for Mac OS X
+ *
  * Revision 2.2  2009-09-16 09:04:28+05:30  Cprogrammer
  * fixed compilation error on mandriva systems
  *
@@ -14,6 +17,7 @@
 #include <openssl/err.h>
 #include <sys/select.h>
 #include <errno.h>
+#include <string.h>
 #include <unistd.h>
 
 static int      usessl = 0;
@@ -297,7 +301,7 @@ safewrite(fd, buf, len, timeout)
 void
 getversion_tls_c()
 {
-	static char    *x = "$Id: tls.c,v 2.2 2009-09-16 09:04:28+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: tls.c,v 2.3 2010-04-15 12:49:55+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
