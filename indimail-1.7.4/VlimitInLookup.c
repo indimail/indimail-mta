@@ -1,10 +1,13 @@
 /*
- * $Log: $
+ * $Log: VlimitInLookup.c,v $
+ * Revision 2.1  2010-04-15 22:58:32+05:30  Cprogrammer
+ * InLookup function to fetch vlimit
+ *
  */
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: UserInLookup.c,v 2.16 2010-03-07 09:27:27+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: VlimitInLookup.c,v 2.1 2010-04-15 22:58:32+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #include <string.h>
