@@ -1,5 +1,8 @@
 /*
  * $Log: set_mysql_options.c,v $
+ * Revision 2.7  2010-04-15 12:47:36+05:30  Cprogrammer
+ * corrected data type of 3rd argument of mysql_options()
+ *
  * Revision 2.6  2009-11-09 10:43:01+05:30  Cprogrammer
  * added comment for MYSQL_OPT_PROTOCOL enum values
  *
@@ -23,46 +26,51 @@
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: set_mysql_options.c,v 2.6 2009-11-09 10:43:01+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: set_mysql_options.c,v 2.7 2010-04-15 12:47:36+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 int
 set_mysql_options(MYSQL *mysql, char *file, char *group)
 {
-	char           *default_file, *default_group, *connect_timeout, 
-				   *read_timeout, *write_timeout, *init_cmd,
+	char           *default_file, *default_group, *c_timeout, 
+				   *r_timeout, *w_timeout, *init_cmd,
 				   *set_client_ip, *opt_reconnect, *opt_protocol;
 	char            temp[4];
-	unsigned int    protocol;
+	char            o_reconnect;
+	unsigned int    protocol, connect_timeout, read_timeout, write_timeout;
 
 	getEnvConfigStr(&init_cmd, "MYSQL_INIT_COMMAND", 0);
 	getEnvConfigStr(&default_file, "MYSQL_READ_DEFAULT_FILE", file);
 	getEnvConfigStr(&default_group, "MYSQL_READ_DEFAULT_GROUP", group);
-	getEnvConfigStr(&connect_timeout, "MYSQL_OPT_CONNECT_TIMEOUT", "120");
-	getEnvConfigStr(&read_timeout, "MYSQL_OPT_READ_TIMEOUT", "20");
-	getEnvConfigStr(&write_timeout, "MYSQL_OPT_WRITE_TIMEOUT", "20");
+	getEnvConfigStr(&c_timeout, "MYSQL_OPT_CONNECT_TIMEOUT", "120");
+	getEnvConfigStr(&r_timeout, "MYSQL_OPT_READ_TIMEOUT", "20");
+	getEnvConfigStr(&w_timeout, "MYSQL_OPT_WRITE_TIMEOUT", "20");
 	getEnvConfigStr(&set_client_ip, "MYSQL_SET_CLIENT_IP", 0);
 	getEnvConfigStr(&opt_reconnect, "MYSQL_OPT_RECONNECT", "0");
 	snprintf(temp, sizeof(temp) - 1, "%d", MYSQL_PROTOCOL_DEFAULT);
 	getEnvConfigStr(&opt_protocol, "MYSQL_OPT_PROTOCOL", temp);
 	protocol = atoi(opt_protocol);
+	o_reconnect = atoi(opt_reconnect);
+	connect_timeout = atoi(c_timeout);
+	read_timeout = atoi(r_timeout);
+	write_timeout = atoi(w_timeout);
 	if (init_cmd && mysql_options(mysql, MYSQL_INIT_COMMAND, init_cmd))
 		return (1);
 	if (mysql_options(mysql, MYSQL_READ_DEFAULT_FILE, default_file))
 		return (1);
 	if (mysql_options(mysql, MYSQL_READ_DEFAULT_GROUP, default_group))
 		return (1);
-	if (mysql_options(mysql, MYSQL_OPT_CONNECT_TIMEOUT, connect_timeout))
+	if (mysql_options(mysql, MYSQL_OPT_CONNECT_TIMEOUT, (char *) &connect_timeout))
 		return (1);
-	if (mysql_options(mysql, MYSQL_OPT_READ_TIMEOUT, read_timeout))
+	if (mysql_options(mysql, MYSQL_OPT_READ_TIMEOUT, (char *) &read_timeout))
 		return (1);
-	if (mysql_options(mysql, MYSQL_OPT_WRITE_TIMEOUT, write_timeout))
+	if (mysql_options(mysql, MYSQL_OPT_WRITE_TIMEOUT, (char *) &write_timeout))
 		return (1);
 	if (getenv("MYSQL_SET_CLIENT_IP") && 
 			mysql_options(mysql, MYSQL_SET_CLIENT_IP, set_client_ip))
 		return (1);
 	if (getenv("MYSQL_OPT_RECONNECT") &&
-			mysql_options(mysql, MYSQL_OPT_RECONNECT, opt_reconnect))
+			mysql_options(mysql, MYSQL_OPT_RECONNECT, (char *) &o_reconnect))
 		return (1);
 	/*-
 	 * enum mysql_protocol_type 
