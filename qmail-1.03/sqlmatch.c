@@ -1,5 +1,9 @@
 /*
  * $Log: sqlmatch.c,v $
+ * Revision 1.7  2010-04-16 09:12:02+05:30  Cprogrammer
+ * fixed setting MYSQL_OPT_CONNECT_TIMEOUT
+ * make query work for MySQL server without NO_BACKSLASH_ESCAPES
+ *
  * Revision 1.6  2009-09-07 15:33:31+05:30  Cprogrammer
  * renamed create_table(), connect_db() to avoid clash with indimail
  *
@@ -37,26 +41,27 @@
 #include <mysqld_error.h>
 #include <unistd.h>
 
-struct stralloc dbserver = {0};
-struct stralloc dbuser = {0};
-struct stralloc dbpass = {0};
-struct stralloc dbname = {0};
-struct stralloc dbtable = {0};
+stralloc        dbserver = {0};
+stralloc        dbuser = {0};
+stralloc        dbpass = {0};
+stralloc        dbname = {0};
+stralloc        dbtable = {0};
 MYSQL          *conn = (MYSQL *) 0;
 
 static int
 connect_sqldb(char *fn, char **error)
 {
-	char           *x, *mysql_timeout;
+	char           *x, *m_timeout;
 	int             fd, i = 0;
-	unsigned int    next, xlen;
+	unsigned int    next, xlen, mysql_timeout;
 	struct stat     st;
 	static MYSQL    mysql;
 
 	if (conn)
 		return (0);
-	if (!(mysql_timeout = env_get("MYSQL_TIMEOUT")))
-		mysql_timeout = "30";
+	if (!(m_timeout = env_get("MYSQL_TIMEOUT")))
+		m_timeout = "30";
+	scan_int(m_timeout, (int *) &mysql_timeout);
 	if ((fd = open_read(fn)) == -1)
 	{
 		if (error) 
@@ -217,15 +222,15 @@ connect_sqldb(char *fn, char **error)
 		close(fd);
 		return (AM_FILE_ERR);
 	}
-	munmap(x, st.st_size);
 	close(fd);
+	munmap(x, st.st_size);
 	if (!mysql_init(&mysql))
 	{
 		if (error)
 			*error = "mysql_init: no memory";
 		return (AM_MEMORY_ERR);
 	}
-	if (mysql_options(&mysql, MYSQL_OPT_CONNECT_TIMEOUT, mysql_timeout))
+	if (mysql_options(&mysql, MYSQL_OPT_CONNECT_TIMEOUT, (char *) &mysql_timeout))
 	{
 		if (error)
 			*error = "Invalid options in mysql config";
@@ -312,7 +317,7 @@ check_db(char *addr, unsigned long *row_count, unsigned long *tmval, char *envSt
 
 	MYSQL_RES      *res;
 	MYSQL_ROW       row;
-	int             num;
+	int             num, m_error;
 	static stralloc envStore = { 0 };
 	static stralloc sql = { 0 };
 
@@ -330,7 +335,7 @@ check_db(char *addr, unsigned long *row_count, unsigned long *tmval, char *envSt
 			*errStr = error_str(errno);
 		return (AM_MEMORY_ERR);
 	}
-	if (!stralloc_cats(&sql, " where email = '"))
+	if (!stralloc_cats(&sql, " where email=\""))
 	{
 		if (errStr) 
 			*errStr = error_str(errno);
@@ -342,12 +347,13 @@ check_db(char *addr, unsigned long *row_count, unsigned long *tmval, char *envSt
 			*errStr = error_str(errno);
 		return (AM_MEMORY_ERR);
 	}
-	if (!stralloc_cats(&sql, "'"))
+	if (!stralloc_cats(&sql, "\""))
 	{
 		if (errStr) 
 			*errStr = error_str(errno);
 		return (AM_MEMORY_ERR);
 	}
+again:
 	if (!stralloc_0(&sql))
 	{
 		if (errStr) 
@@ -356,11 +362,45 @@ check_db(char *addr, unsigned long *row_count, unsigned long *tmval, char *envSt
 	}
 	if (mysql_query(conn, sql.s))
 	{
-		if (mysql_errno(conn) == ER_NO_SUCH_TABLE)
+		if ((m_error = mysql_errno(conn)) == ER_NO_SUCH_TABLE)
 		{
 			if (create_sqltable(conn, errStr))
 				return (AM_MYSQL_ERR);
 			return (0);
+		} else
+		if (m_error == ER_PARSE_ERROR)
+		{
+			if (!stralloc_copys(&sql, "select UNIX_TIMESTAMP(timestamp) from "))
+			{
+				if (errStr) 
+					*errStr = error_str(errno);
+				return (AM_MEMORY_ERR);
+			}
+			if (!stralloc_cats(&sql, dbtable.s))
+			{
+				if (errStr) 
+					*errStr = error_str(errno);
+				return (AM_MEMORY_ERR);
+			}
+			if (!stralloc_cats(&sql, " where email='"))
+			{
+				if (errStr) 
+					*errStr = error_str(errno);
+				return (AM_MEMORY_ERR);
+			}
+			if (!stralloc_cats(&sql, addr))
+			{
+				if (errStr) 
+					*errStr = error_str(errno);
+				return (AM_MEMORY_ERR);
+			}
+			if (!stralloc_cats(&sql, "'"))
+			{
+				if (errStr) 
+					*errStr = error_str(errno);
+				return (AM_MEMORY_ERR);
+			}
+			goto again;
 		}
 		sql.len--;
 		if (!stralloc_cats(&sql, ": "))
@@ -480,7 +520,7 @@ sqlmatch_close_db(void)
 void
 getversion_sqlmatch_c()
 {
-	static char    *x = "$Id: sqlmatch.c,v 1.6 2009-09-07 15:33:31+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: sqlmatch.c,v 1.7 2010-04-16 09:12:02+05:30 Cprogrammer Stab mbhangui $";
 
 #ifdef INDIMAIL
 	x = sccsidh;
