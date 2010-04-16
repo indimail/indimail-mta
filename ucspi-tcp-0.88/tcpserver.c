@@ -1,5 +1,8 @@
 /*
  * $Log: tcpserver.c,v $
+ * Revision 1.46  2010-04-16 13:13:13+05:30  Cprogrammer
+ * fixed passing parameter for MYSQL_OPT_CONNECT_TIMEOUT
+ *
  * Revision 1.45  2010-03-12 08:59:54+05:30  Cprogrammer
  * print connected IPs table on sigusr1
  *
@@ -156,7 +159,7 @@
 #include "auto_home.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: tcpserver.c,v 1.45 2010-03-12 08:59:54+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: tcpserver.c,v 1.46 2010-04-16 13:13:13+05:30 Cprogrammer Stab mbhangui $";
 #endif
 
 #ifdef IPV6
@@ -705,14 +708,15 @@ create_table(MYSQL *conn)
 void
 connect_db(char *dbfile)
 {
-	char           *x = 0, *mysql_timeout;
+	char           *x = 0, *m_timeout;
 	int             fd, i = 0;
-	unsigned int    next, xlen;
+	unsigned int    next, xlen, mysql_timeout;
 	struct stat     st;
 	static MYSQL    mysql;
 
-	if (!(mysql_timeout = env_get("MYSQL_TIMEOUT")))
-		mysql_timeout = "30";
+	if (!(m_timeout = env_get("MYSQL_TIMEOUT")))
+		m_timeout = "30";
+	scan_ulong(m_timeout, (unsigned long *) &mysql_timeout);
 	if ((fd = open_read(dbfile)) == -1)
 		strerr_die4sys(111, FATAL, "unable to read ", dbfile, ": ");
 	if (fstat(fd, &st) == -1)
@@ -842,7 +846,7 @@ connect_db(char *dbfile)
 	munmap(x, st.st_size);
 	close(fd);
 	mysql_init(&mysql);
-	mysql_options(&mysql, MYSQL_OPT_CONNECT_TIMEOUT, mysql_timeout);
+	mysql_options(&mysql, MYSQL_OPT_CONNECT_TIMEOUT, (char *) &mysql_timeout);
 	if (!mysql_real_connect(&mysql, dbserver.s, dbuser.s, dbpass.s, dbname.s, 0, NULL, 0))
 		strerr_die3x(111, FATAL, "Unable to connect to MySQL Server: ", (char *) mysql_error(&mysql));
 	conn = &mysql;
