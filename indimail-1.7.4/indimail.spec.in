@@ -1,5 +1,11 @@
 #
 # $Log: indimail.spec.in,v $
+# Revision 2.153  2010-04-16 18:25:58+05:30  Cprogrammer
+# upgrade to fetchmail 6.3.16
+#
+# Revision 2.152  2010-04-15 23:19:13+05:30  Cprogrammer
+# fixed files getting removed in devel, shared package during upgrade
+#
 # Revision 2.151  2010-04-13 08:14:52+05:30  Cprogrammer
 # renamed vmoddomlimits to vlimit
 #
@@ -476,7 +482,7 @@
 # rpm spec file for indimail
 #
 #
-# $Id: indimail.spec.in,v 2.151 2010-04-13 08:14:52+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 2.153 2010-04-16 18:25:58+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %define _unpackaged_files_terminate_build 1
 
@@ -515,7 +521,7 @@
 %define pam_multi_version  1.0
 %define ucspi_version      0.88
 %define qmail_version      1.03
-%define fetchmail_version  6.3.14
+%define fetchmail_version  6.3.16
 %define clamav_version     0.96
 %define fortune_version    1.1
 %define nssd_version       1.0
@@ -2696,6 +2702,10 @@ echo ""
 
 ### SCRIPTLET ###############################################################################
 %postun shared
+# we are doing upgrade
+if [ $argv1 -eq 1 ] ; then
+	exit 0
+fi
 # Shared libraries (omit for architectures that don't support them)
 echo "removing shared libraries"
 %if %noclamav == 0
@@ -2716,6 +2726,10 @@ echo "removing shared libraries"
 /sbin/ldconfig
 
 %postun devel
+# we are doing upgrade
+if [ $argv1 -eq 1 ] ; then
+	exit 0
+fi
 echo "removing man pages, include files"
 for i in %{_prefix}/include %{_prefix}/man/man3
 do
