@@ -1,6 +1,9 @@
 # chkconfig: 345 50 80
 # description: Starts qmail system and associated services
 # $Log: qmailctl.sh,v $
+# Revision 1.20  2010-04-16 09:09:03+05:30  Cprogrammer
+# added description for qmtp in usage
+#
 # Revision 1.19  2010-04-07 20:20:20+05:30  Cprogrammer
 # change ownership of cdb files to indimail
 #
