@@ -108,7 +108,7 @@
  */
 
 #ifndef	lint
-static char     sccsid[] = "$Id: ProcessInFifo.c,v 2.31 2010-04-11 22:22:25+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: ProcessInFifo.c,v 2.31 2010-04-11 22:22:25+05:30 Cprogrammer Stab mbhangui $";
 #endif
 
 #include <fcntl.h>

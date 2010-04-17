@@ -105,7 +105,7 @@
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vauth_open.c,v 2.24 2010-04-15 14:13:44+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: vauth_open.c,v 2.24 2010-04-15 14:13:44+05:30 Cprogrammer Stab mbhangui $";
 #endif
 
 #include <stdio.h>
