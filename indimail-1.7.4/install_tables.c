@@ -1,5 +1,8 @@
 /*
  * $Log: install_tables.c,v $
+ * Revision 2.7  2010-04-17 11:43:59+05:30  Cprogrammer
+ * disable_mysql_escape() to be used for all MySQL queries
+ *
  * Revision 2.6  2010-03-07 12:31:49+05:30  Cprogrammer
  * BUG - host.master path was not set correctly
  *
@@ -26,7 +29,7 @@
 #endif
 
 #ifndef	lint
-static char     sccsid[] = "$Id: install_tables.c,v 2.6 2010-03-07 12:31:49+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: install_tables.c,v 2.7 2010-04-17 11:43:59+05:30 Cprogrammer Stab mbhangui $";
 #endif
 
 int
@@ -44,6 +47,7 @@ main(int argc, char **argv)
 
 	getEnvConfigStr(&default_table, "MYSQL_TABLE", MYSQL_DEFAULT_TABLE);
 	getEnvConfigStr(&inactive_table, "MYSQL_INACTIVE_TABLE", MYSQL_INACTIVE_TABLE);
+	disable_mysql_escape(1);
 	for (i = 0; i < 2; i++)
 	{
 		if (create_table(ON_LOCAL, i == 0 ? default_table : inactive_table,
@@ -64,7 +68,6 @@ main(int argc, char **argv)
 #ifdef CLUSTERED_SITE
 	getEnvConfigStr(&qmaildir, "QMAILDIR", QMAILDIR);
 	getEnvConfigStr(&controldir, "CONTROLDIR", "control");
-	disable_mysql_escape(1);
 	if (snprintf(host_path, MAX_BUFF, "%s/%s/host.master", qmaildir, controldir) == -1)
 		host_path[MAX_BUFF - 1] = 0;
 	if (!access(host_path, F_OK) || getenv("MASTER_HOST"))

@@ -1,5 +1,8 @@
 /*
  * $Log: mysql_query.c,v $
+ * Revision 2.7  2010-04-17 09:27:29+05:30  Cprogrammer
+ * added fix for MySQL server not started with NO_BACKSLASH_ESCAPES
+ *
  * Revision 2.6  2009-02-18 21:30:43+05:30  Cprogrammer
  * removed compiler warning
  *
@@ -21,12 +24,15 @@
  */
 #include <stdlib.h>
 #include <mysql.h>
+#include <mysqld_error.h>
 #include <unistd.h>
 #include <errno.h>
 
 #ifndef	lint
-static char     sccsid[] = "$Id: mysql_query.c,v 2.6 2009-02-18 21:30:43+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: mysql_query.c,v 2.7 2010-04-17 09:27:29+05:30 Cprogrammer Exp mbhangui $";
 #endif
+
+extern char    *replacestr(char *, char *, char *);
 
 static int      _es_opt;
 
@@ -34,7 +40,7 @@ int
 _mysql_Query(MYSQL *mysql, char *query_str)
 {
 	int             i, ret, len, end;
-	char           *ptr;
+	char           *ptr, *rptr;
 
 	if (_es_opt)
 		return(mysql_query(mysql, query_str));
@@ -47,7 +53,20 @@ _mysql_Query(MYSQL *mysql, char *query_str)
 	end = mysql_real_escape_string(mysql, ptr, query_str, len);
 	ptr[end] = 0;
 	ptr[end - 1] = 0;
-	ret = mysql_query(mysql, ptr);
+	ret = mysql_query(mysql, (const char *) ptr);
+	if (mysql_errno(mysql) == ER_PARSE_ERROR) /*- NO_BACKSLASH_ESCAPES stupidity */
+	{
+		ptr[end - 2] = 0;
+		if (!(rptr = replacestr(ptr, "\\\"", "'")))
+		{
+			i = errno;
+			free(ptr);
+			errno = i;
+			return (-1);
+		}
+		ret = mysql_query(mysql, (const char *) rptr);
+		free(rptr);
+	}
 	free(ptr);
 	return (ret);
 }
