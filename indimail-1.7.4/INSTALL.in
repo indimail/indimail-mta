@@ -541,7 +541,7 @@ the installation.
     Download the fetchmail package. The latest tested fetchmail package tested is
     fetchmail-6.3.16.tar.bz2.
 
-    % wget http://prdownload.berlios.de/fetchmail/fetchmail-6.3.16.tar.bz2 
+	% wget http://download.berlios.de/fetchmail/fetchmail-6.3.16.tar.bz2
     % bzip2 -d -c fetchmail-6.3.16.tar.bz2 | tar xf -
     % gunzip -c indimail-@version@/patches/fetchmail-6.3.16.patch.gz | patch -p0
     % cd fetchmail-6.3.16
