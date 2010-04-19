@@ -1,11 +1,9 @@
 /*
  * $Log: sqlmatch.c,v $
- * Revision 1.8  2010-04-18 17:01:32+05:30  Cprogrammer
- * changes for qmail-sql
- *
- * Revision 1.7  2010-04-16 09:12:02+05:30  Cprogrammer
+ * Revision 1.7  2010-04-19 10:19:44+05:30  Cprogrammer
  * fixed setting MYSQL_OPT_CONNECT_TIMEOUT
  * make query work for MySQL server without NO_BACKSLASH_ESCAPES
+ * changes for qmail-sql
  *
  * Revision 1.6  2009-09-07 15:33:31+05:30  Cprogrammer
  * renamed create_table(), connect_db() to avoid clash with indimail
@@ -60,6 +58,8 @@ connect_sqldb(char *fn, MYSQL **conn, char **table_name, char **error)
 	unsigned int    next, xlen, mysql_timeout;
 	struct stat     st;
 
+	if (conn)
+		*conn = (MYSQL *) 0;
 	if (db_mysql)
 	{
 		if (conn)
@@ -536,7 +536,7 @@ sqlmatch_close_db(void)
 void
 getversion_sqlmatch_c()
 {
-	static char    *x = "$Id: sqlmatch.c,v 1.8 2010-04-18 17:01:32+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: sqlmatch.c,v 1.7 2010-04-19 10:19:44+05:30 Cprogrammer Exp mbhangui $";
 
 #ifdef INDIMAIL
 	x = sccsidh;
