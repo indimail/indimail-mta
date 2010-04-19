@@ -7,6 +7,8 @@
        a) MySQL fails to startup under supervise
        b) svctool fails to create a default MySQL database for IndiMail during RPM
           installation or when you run the command svctool --config=mysqldb ...
+          However, this issue is not a big deal as each and every IndiMail program has
+          been coded to create the required MySQl table when the table is accessed.
 
           The following versions have been confirmed to work. Let me know your version
           of MySQL and if you faced any of the above issue
@@ -17,10 +19,12 @@
           o mysql-5.0.77
           o mysql-5.1.40
           o mysql-5.1.44
+          o MariaDB 5.1.42
+          o MariaDB 5.1.44
           o mysql-5.4.3-beta
           o mysql-5.5.0-m2
           o mysql-5.5.2-m2
-          o MariaDB 5.1.42
+          o mysql-5.5.3-m3
 
     2. If you have /etc/my.conf, replace socket=/var/lib/mysql/mysql.sock with
        socket=/tmp/mysql.sock 
