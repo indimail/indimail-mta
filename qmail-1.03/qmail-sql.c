@@ -1,13 +1,15 @@
 /*
  * $Log: qmail-sql.c,v $
- * Revision 1.1  2010-04-18 17:02:03+05:30  Cprogrammer
+ * Revision 1.1  2010-04-19 14:08:05+05:30  Cprogrammer
  * Initial revision
  *
  */
 
-#include "hasindimail.h"
-#ifdef INDIMAIL
 #include <unistd.h>
+#include "hasindimail.h"
+#include "subfd.h"
+#include "substdio.h"
+#ifdef INDIMAIL
 #include "auto_uids.h"
 #include "auto_qmail.h"
 #include <fcntl.h>
@@ -19,7 +21,6 @@
 #include "fmt.h"
 #include "str.h"
 #include "sgetopt.h"
-#include "subfd.h"
 #include "stralloc.h"
 #include "strerr.h"
 #include "sqlmatch.h"
@@ -311,9 +312,8 @@ main(int argc, char **argv)
 int
 main(int argc, char **argv)
 {
-	substdio_fdbuf(&sserr, write, 2, sserrbuf, sizeof(sserrbuf));
-	substdio_puts(&sserr, "not compiled with -DINDIMAIL. Probably IndiMail is missing\n");
-	substdio_flush(&sserr);
+	substdio_puts(subfderr, "not compiled with -DINDIMAIL. Probably IndiMail is missing\n");
+	substdio_flush(subfderr);
 	_exit(111);
 }
 #endif
@@ -321,7 +321,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_sql_c()
 {
-	static char    *x = "$Id: qmail-sql.c,v 1.1 2010-04-18 17:02:03+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-sql.c,v 1.1 2010-04-19 14:08:05+05:30 Cprogrammer Exp mbhangui $";
 
 #ifdef INDIMAIL
 	x = sccsidh;

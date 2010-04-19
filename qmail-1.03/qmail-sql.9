@@ -23,6 +23,22 @@ The below command will replace contents of file badmailfrom in QMAIL/control int
  qmail-sql -r badmailfrom
 .EE
 
+The following control files can also be specified in cdb format or
+be in MySQL
+
+.IR authdomains ,
+.IR badhelo ,
+.IR badext ,
+.IR badmailfrom ,
+.IR badrcptto ,
+.IR blackholedsender ,
+.IR blackholedrcpt ,
+.IR chkrcptdomains ,
+.IR goodrcptto ,
+.IR relaymailfrom ,
+and
+.IR spamignore .
+
 .SH OPTIONS
 .TP
 .B -S
@@ -45,4 +61,5 @@ Table in MySQL in which data from plain-text control file will be inserted
 
 .SH SEE ALSO
 qmail-cdb(8),
-qmail-smtpd(8)
+qmail-smtpd(8),
+qmail-control(5)
