@@ -39,7 +39,7 @@
 #define _QREGEX_H_
 #include "constmap.h"
 #include "stralloc.h"
-#if USE_SQL
+#ifdef USE_SQL
 #include "sqlmatch.h"
 #endif
 

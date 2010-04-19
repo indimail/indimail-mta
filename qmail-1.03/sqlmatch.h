@@ -1,11 +1,15 @@
 /*
  * $Log: sqlmatch.h,v $
+ * Revision 1.2  2010-04-19 14:19:45+05:30  Cprogrammer
+ * conditional compilation of MySQL code
+ *
  * Revision 1.1  2010-04-18 17:01:50+05:30  Cprogrammer
  * Initial revision
  *
  */
 #ifndef _SQLMATCH_H_
 #define _SQLMATCH_H_
+#ifdef INDIMAIL
 #include <mysql.h>
 
 #ifndef AM_MEMORY_ERR
@@ -29,6 +33,7 @@
 
 int             create_sqltable(MYSQL *, char *, char **);
 int             connect_sqldb(char *, MYSQL **, char **, char **);
+#endif
 int             sqlmatch(char *, char *, int, char **);
 void            sqlmatch_close_db(void);
 #endif
