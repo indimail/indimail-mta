@@ -1,5 +1,8 @@
 #
 # $Log: indimail.spec.in,v $
+# Revision 2.154  2010-04-19 19:14:55+05:30  Cprogrammer
+# added qmail-sql
+#
 # Revision 2.153  2010-04-16 18:25:58+05:30  Cprogrammer
 # upgrade to fetchmail 6.3.16
 #
@@ -482,7 +485,7 @@
 # rpm spec file for indimail
 #
 #
-# $Id: indimail.spec.in,v 2.153 2010-04-16 18:25:58+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 2.154 2010-04-19 19:14:55+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %define _unpackaged_files_terminate_build 1
 

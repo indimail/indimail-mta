@@ -1,5 +1,8 @@
 #
 # $Log: indimail-epm.list.in,v $
+# Revision 2.52  2010-04-19 19:14:36+05:30  Cprogrammer
+# added qmail-sql and clamav-0.96
+#
 # Revision 2.51  2010-04-08 08:40:06+05:30  Cprogrammer
 # removed IndiMail.pdf, added indimail_queue.png
 # added other changes from indimail.spec
