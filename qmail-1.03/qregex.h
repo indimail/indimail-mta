@@ -1,5 +1,8 @@
 /*
  * $Log: qregex.h,v $
+ * Revision 1.10  2010-04-18 17:00:54+05:30  Cprogrammer
+ * moved common sql functions to sqlmatch.h
+ *
  * Revision 1.9  2009-05-01 10:42:21+05:30  Cprogrammer
  * added error definitions
  * new prototypes for address_match(), cdbmatch(), sqlmatch() for errstr argument
@@ -36,17 +39,30 @@
 #define _QREGEX_H_
 #include "constmap.h"
 #include "stralloc.h"
+#if USE_SQL
+#include "sqlmatch.h"
+#endif
 
+#ifndef AM_MEMORY_ERR
 #define  AM_MEMORY_ERR -1
+#endif
+#ifndef AM_FILE_ERR
 #define  AM_FILE_ERR   -2
+#endif
+#ifndef AM_LSEEK_ERR
 #define  AM_LSEEK_ERR  -3
+#endif
+#ifndef AM_REGEX_ERR
 #define  AM_REGEX_ERR  -4
+#endif
+#ifndef AM_CONFIG_ERR
 #define  AM_CONFIG_ERR -5
+#endif
+#ifndef AM_MYSQL_ERR
 #define  AM_MYSQL_ERR  -6
+#endif
 
 int             address_match(char *, stralloc *, stralloc *, struct constmap *, stralloc *, char **);
 void            setdotChar(char);
 int             cdbmatch(char *, char *, int, struct constmap *, char **);
-int             sqlmatch(char *, char *, int, char **);
-void            sqlmatch_close_db(void);
 #endif

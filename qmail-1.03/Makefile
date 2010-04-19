@@ -1166,7 +1166,7 @@ qmail-smtpd sendmail tcp-env qmail-newmrh recipient-cdb qmail-cdb qmailconfig \
 config-fast dnscname dnsptr dnsip dnsmxip dnsfq dnstxt hostname ipmeprint qreceipt \
 qsmhook forward rrforward preline condredirect bouncesaying except qmail-todo \
 queue-fix idedit setup instcheck rpmattr maildir2mbox qmaildirmake maildirwatch base64 \
-maildirdeliver autoresponder qmail-rm qail elq pinq etrn \
+maildirdeliver autoresponder qmail-rm qail elq pinq etrn qmail-sql \
 atrn qmailctl indimail.plist svscanboot upstart qmail-sighup qmail-sigalrm qmail-sigterm \
 home home+df proc proc+df binm1 binm1+df binm2 binm2+df \
 binm3 binm3+df spfquery multirotate qpq 822header qmail-nullqueue \
@@ -1328,7 +1328,7 @@ qmail-pop3d.0 qmail-popbull.0 qmail-popup.0 qmail-qmqpc.0 \
 qmail-qmqpd.0 qmail-qmtpd.0 qmail-smtpd.0 greydaemon.0 qmail-poppass.0 \
 dktest.8 dkim.8 svscanboot.0 \
 qmail-multi.0 spawn-filter.0 tcp-env.0 qmail-greyd.0 \
-qmail-newmrh.0 recipient-cdb.0 qmail-cdb.0 qreceipt.0 forward.0 \
+qmail-newmrh.0 recipient-cdb.0 qmail-cdb.0 qmail-sql.8 qreceipt.0 forward.0 \
 rrforward.0 preline.0 condredirect.0 bouncesaying.0 except.0 \
 maildir2mbox.0 maildirwatch.0 qmail.0 qmail-limits.0 qmail-log.0 \
 qmail-control.0 qmail-header.0 qmail-users.0 dot-qmail.0 \
@@ -2305,7 +2305,7 @@ str.h cdb.h uint32.h open.h error.h control.h variables.h hasindimail.h
 
 # qregex.c compiled with sqlmatch()
 qregex_smtpd.o: \
-compile qregex.c qregex.h case.h stralloc.h constmap.h matchregex.h byte.h env.h \
+compile qregex.c qregex.h sqlmatch.h case.h stralloc.h constmap.h matchregex.h byte.h env.h \
 str.h cdb.h uint32.h open.h error.h control.h variables.h
 	./compile -DUSE_SQL $(inc_deps) qregex.c -o qregex_smtpd.o
 
@@ -2370,12 +2370,12 @@ error.h ipme.h ip.h ipalloc.h qmail.h recipients.h greylist.h \
 matchregex.o str.h fmt.h scan.h byte.h case.h env.h now.h datetime.h \
 variables.h exit.h rcpthosts.h timeoutread.h timeoutwrite.h commands.h \
 wait.h etrn.h date822fmt.h fd.h base64.h envrules.h tablematch.h cdb.h uint32.h \
-matchregex.h qregex.h hasindimail.h conf-tls conf-spf conf-ip conf-batv
-	./compile $(inc_deps) `grep -h -v "^#" conf-tls conf-spf conf-ip conf-batv` smtpd.c
+matchregex.h qregex.h sqlmatch.h hasindimail.h conf-tls conf-spf conf-ip conf-batv
+	./compile -DUSE_SQL $(inc_deps) `grep -h -v "^#" conf-tls conf-spf conf-ip conf-batv` smtpd.c
 
 sqlmatch.o: \
-compile sqlmatch.c stralloc.h byte.h error.h env.h open.h variables.h scan.h qregex.h \
-hasindimail.h
+compile sqlmatch.c stralloc.h byte.h error.h env.h open.h variables.h scan.h \
+sqlmatch.h qregex.h hasindimail.h
 	./compile $(inc_deps) sqlmatch.c
 
 greylist.o: \
@@ -4980,5 +4980,30 @@ compile uacl.c qregex.h auto_qmail.h subfd.h \
 env.h strerr.h fmt.h str.h matchregex.h scan.h control.h
 	./compile uacl.c
 
+qmail-sql: \
+load qmail-sql.o sgetopt.o str_len.o stralloc.a error_str.o \
+error.o envread.o variables.o subgetopt.o str_diffn.o \
+byte_copy.o alloc_re.o alloc.o strerr_die.o strerr_sys.o \
+fmt_ulong.o scan_ulong.o open_read.o byte_chr.o ndelay.o ndelay_off.o \
+sqlmatch.o auto_uids.o auto_qmail.o substdio.a indimail.lib tls.lib
+	./load qmail-sql sgetopt.o str_len.o stralloc.a error_str.o \
+	error.o envread.o variables.o subgetopt.o str_diffn.o \
+	byte_copy.o alloc_re.o alloc.o strerr_die.o strerr_sys.o \
+	fmt_ulong.o scan_ulong.o open_read.o byte_chr.o ndelay.o ndelay_off.o \
+	sqlmatch.o auto_uids.o auto_qmail.o substdio.a `cat indimail.lib tls.lib`
+
+qmail-sql.o: \
+compile qmail-sql.c sgetopt.h subfd.h stralloc.h str.h env.h \
+sqlmatch.h auto_qmail.h variables.h error.h strerr.h auto_uids.h \
+fmt.h
+	./compile $(inc_deps) qmail-sql.c
+
+qmail-sql.8: \
+qmail-sql.9 conf-break conf-spawn
+	cat qmail-sql.9 \
+	| sed s}QMAIL}"`head -1 conf-qmail`"}g \
+	| sed s}BREAK}"`head -1 conf-break`"}g \
+	| sed s}SPAWN}"`head -1 conf-spawn`"}g \
+	> qmail-sql.8
 
 #################################################################

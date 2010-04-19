@@ -1,5 +1,8 @@
 /*
  * $Log: hier.c,v $
+ * Revision 1.141  2010-04-18 16:26:26+05:30  Cprogrammer
+ * added qmail-sql
+ *
  * Revision 1.140  2010-04-16 09:08:51+05:30  Cprogrammer
  * added qmtp man page
  *
@@ -413,6 +416,7 @@ hier(inst_dir)
 	c(auto_qmail_home, "bin", "qmail-newmrh", auto_uido, auto_gidq, 0500);
 	c(auto_qmail_home, "bin", "recipient-cdb", auto_uido, auto_gidq, 0500);
 	c(auto_qmail_home, "bin", "qmail-cdb", auto_uido, auto_gidq, 0500);
+	c(auto_qmail_home, "bin", "qmail-sql", auto_uido, auto_gidq, 0500);
 	c(auto_qmail_home, "bin", "qmail-pw2u", auto_uido, auto_gidq, 0511);
 	c(auto_qmail_home, "bin", "qmail-inject", auto_uido, auto_gidq, 0555);
 	c(auto_qmail_home, "bin", "predate", auto_uido, auto_gidq, 0555);
@@ -978,6 +982,7 @@ hier(inst_dir)
 	c(auto_qmail_home, "man/cat8", "qmail-newmrh.0", auto_uido, auto_gidq, 0444);
 	c(auto_qmail_home, "man/man8", "recipient-cdb.8", auto_uido, auto_gidq, 0444);
 	c(auto_qmail_home, "man/cat8", "recipient-cdb.0", auto_uido, auto_gidq, 0444);
+	c(auto_qmail_home, "man/man8", "qmail-sql.8", auto_uido, auto_gidq, 0444);
 	c(auto_qmail_home, "man/man8", "qmail-cdb.8", auto_uido, auto_gidq, 0444);
 	c(auto_qmail_home, "man/cat8", "qmail-cdb.0", auto_uido, auto_gidq, 0444);
 	c(auto_qmail_home, "man/man8", "qmail-newu.8", auto_uido, auto_gidq, 0444);
@@ -1045,7 +1050,7 @@ hier(inst_dir)
 void
 getversion_install_big_c()
 {
-	static char    *x = "$Id: hier.c,v 1.140 2010-04-16 09:08:51+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: hier.c,v 1.141 2010-04-18 16:26:26+05:30 Cprogrammer Exp mbhangui $";
 
 #ifdef INDIMAIL
 	x = sccsidh;
