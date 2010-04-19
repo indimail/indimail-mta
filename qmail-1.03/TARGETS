@@ -957,3 +957,6 @@ qmail-greyd
 uacl
 uacl.o
 dkim.8
+qmail-sql
+qmail-sql.o
+qmail-sql.8

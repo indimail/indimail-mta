@@ -1,5 +1,8 @@
 /*
  * $Log: sqlmatch.c,v $
+ * Revision 1.8  2010-04-18 17:01:32+05:30  Cprogrammer
+ * changes for qmail-sql
+ *
  * Revision 1.7  2010-04-16 09:12:02+05:30  Cprogrammer
  * fixed setting MYSQL_OPT_CONNECT_TIMEOUT
  * make query work for MySQL server without NO_BACKSLASH_ESCAPES
@@ -34,6 +37,7 @@
 #include "variables.h"
 #include "scan.h"
 #include "qregex.h"
+#include "sqlmatch.h"
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <sys/mman.h>
@@ -46,19 +50,22 @@ stralloc        dbuser = {0};
 stralloc        dbpass = {0};
 stralloc        dbname = {0};
 stralloc        dbtable = {0};
-MYSQL          *conn = (MYSQL *) 0;
+MYSQL          *db_mysql = (MYSQL *) 0;
 
-static int
-connect_sqldb(char *fn, char **error)
+int
+connect_sqldb(char *fn, MYSQL **conn, char **table_name, char **error)
 {
 	char           *x, *m_timeout;
 	int             fd, i = 0;
 	unsigned int    next, xlen, mysql_timeout;
 	struct stat     st;
-	static MYSQL    mysql;
 
-	if (conn)
+	if (db_mysql)
+	{
+		if (conn)
+			*conn = db_mysql;
 		return (0);
+	}
 	if (!(m_timeout = env_get("MYSQL_TIMEOUT")))
 		m_timeout = "30";
 	scan_int(m_timeout, (int *) &mysql_timeout);
@@ -224,39 +231,39 @@ connect_sqldb(char *fn, char **error)
 	}
 	close(fd);
 	munmap(x, st.st_size);
-	if (!mysql_init(&mysql))
+	if (!(db_mysql = mysql_init(0)))
 	{
 		if (error)
 			*error = "mysql_init: no memory";
 		return (AM_MEMORY_ERR);
 	}
-	if (mysql_options(&mysql, MYSQL_OPT_CONNECT_TIMEOUT, (char *) &mysql_timeout))
+	if (mysql_options(db_mysql, MYSQL_OPT_CONNECT_TIMEOUT, (char *) &mysql_timeout))
 	{
 		if (error)
-			*error = "Invalid options in mysql config";
+			*error = "unable to set MYSQL_OPT_CONNECT_TIMEOUT";
 		return (AM_CONFIG_ERR);
 	}
-	if (!mysql_real_connect(&mysql, dbserver.s, dbuser.s, dbpass.s, dbname.s, 0, NULL, 0))
+	if (mysql_options(db_mysql, MYSQL_OPT_LOCAL_INFILE, 0))
 	{
 		if (error)
-			*error = (char *) mysql_error(&mysql);
+			*error = "unable to set MYSQL_OPT_LOCAL_INFILE";
+		return (AM_CONFIG_ERR);
+	}
+	if (!mysql_real_connect(db_mysql, dbserver.s, dbuser.s, dbpass.s, dbname.s, 0, NULL, 0))
+	{
+		if (error)
+			*error = (char *) mysql_error(db_mysql);
 		return (AM_MYSQL_ERR);
 	}
-	conn = &mysql;
+	if (conn)
+		*conn = db_mysql;
+	if (table_name)
+		*table_name = dbtable.s;
 	return (0);
 }
 
-void
-sqlmatch_close_db(void)
-{
-	if (!conn)
-		return;
-	mysql_close(conn);
-	conn = (MYSQL *) 0;
-}
-
-static int
-create_sqltable(MYSQL *conn, char **error)
+int
+create_sqltable(MYSQL *conn, char *table_name, char **error)
 {
 	static stralloc sql = { 0 };
 
@@ -266,7 +273,7 @@ create_sqltable(MYSQL *conn, char **error)
 			*error = error_str(errno);
 		return (AM_MEMORY_ERR);
 	}
-	if (!stralloc_cats(&sql, dbtable.s))
+	if (!stralloc_cats(&sql, table_name))
 	{
 		if (error)
 			*error = error_str(errno);
@@ -312,7 +319,7 @@ create_sqltable(MYSQL *conn, char **error)
 }
 
 int
-check_db(char *addr, unsigned long *row_count, unsigned long *tmval, char *envStr, char **errStr)
+check_db(MYSQL *conn, char *addr, unsigned long *row_count, unsigned long *tmval, char *envStr, char **errStr)
 {
 
 	MYSQL_RES      *res;
@@ -364,7 +371,7 @@ again:
 	{
 		if ((m_error = mysql_errno(conn)) == ER_NO_SUCH_TABLE)
 		{
-			if (create_sqltable(conn, errStr))
+			if (create_sqltable(conn, dbtable.s, errStr))
 				return (AM_MYSQL_ERR);
 			return (0);
 		} else
@@ -475,6 +482,7 @@ sqlmatch(char *fn, char *addr, int len, char **errStr)
 {
 	static stralloc controlfile = {0};
 	int             cntrl_ok;
+	MYSQL          *conn;
 
 	if (!len || !*addr || !fn)
 		return (0);
@@ -495,12 +503,20 @@ sqlmatch(char *fn, char *addr, int len, char **errStr)
 		return AM_MEMORY_ERR;
 	if (!stralloc_0(&controlfile))
 		return AM_MEMORY_ERR;
-	if ((cntrl_ok = connect_sqldb(controlfile.s, errStr)) < 0)
+	if ((cntrl_ok = connect_sqldb(controlfile.s, &conn, 0, errStr)) < 0)
 		return (cntrl_ok);
-	if ((cntrl_ok = check_db(addr, 0, 0, 0, errStr)) < 0)
+	if ((cntrl_ok = check_db(conn, addr, 0, 0, 0, errStr)) < 0)
 		return (cntrl_ok);
-	sqlmatch_close_db();
 	return (cntrl_ok ? 1 : 0);
+}
+
+void
+sqlmatch_close_db(void)
+{
+	if (!db_mysql)
+		return;
+	mysql_close(db_mysql);
+	db_mysql = (MYSQL *) 0;
 }
 #else
 #warning "not compiled with -DINDIMAIL"
@@ -520,7 +536,7 @@ sqlmatch_close_db(void)
 void
 getversion_sqlmatch_c()
 {
-	static char    *x = "$Id: sqlmatch.c,v 1.7 2010-04-16 09:12:02+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: sqlmatch.c,v 1.8 2010-04-18 17:01:32+05:30 Cprogrammer Exp mbhangui $";
 
 #ifdef INDIMAIL
 	x = sccsidh;
