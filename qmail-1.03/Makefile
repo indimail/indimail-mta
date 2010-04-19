@@ -4995,7 +4995,7 @@ sqlmatch.o auto_uids.o auto_qmail.o substdio.a indimail.lib tls.lib
 qmail-sql.o: \
 compile qmail-sql.c sgetopt.h subfd.h stralloc.h str.h env.h \
 sqlmatch.h auto_qmail.h variables.h error.h strerr.h auto_uids.h \
-fmt.h
+fmt.h hasindimail.h substdio.h
 	./compile $(inc_deps) qmail-sql.c
 
 qmail-sql.8: \
