@@ -1515,6 +1515,7 @@ fi
 %attr(555,root,qmail)                   %{_prefix}/bin/rhosts
 %attr(555,root,qmail)                   %{_prefix}/bin/replier
 %attr(500,root,qmail)                   %{_prefix}/bin/qmail-cdb
+%attr(500,root,qmail)                   %{_prefix}/bin/qmail-sql
 %attr(555,root,qmail)                   %{_prefix}/bin/cdbtest
 %attr(555,root,qmail)                   %{_prefix}/bin/dnsfq
 %attr(555,root,qmail)                   %{_prefix}/bin/tai64n

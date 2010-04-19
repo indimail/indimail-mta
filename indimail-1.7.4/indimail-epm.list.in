@@ -128,7 +128,7 @@ $courier_version=3.0.8
 $bogofilter_version=1.2.1
 $ucspi_version=0.88
 $qmail_version=1.03
-$fetchmail_version=6.3.13
+$fetchmail_version=6.3.16
 $clamav_version=0.95.1
 $fortune_version=1.1
 $nssd_version=1.0
@@ -637,6 +637,7 @@ f 444 root qmail ${prefix}/man/man8/postdel.8.gz BUILDROOT${prefix}/man/man8/pos
 f 444 root qmail ${prefix}/man/man8/proxyimap.8.gz BUILDROOT${prefix}/man/man8/proxyimap.8.gz
 f 444 root qmail ${prefix}/man/man8/proxypop3.8.gz BUILDROOT${prefix}/man/man8/proxypop3.8.gz
 f 444 root qmail ${prefix}/man/man8/qmail-cdb.8.gz BUILDROOT${prefix}/man/man8/qmail-cdb.8.gz
+f 444 root qmail ${prefix}/man/man8/qmail-sql.8.gz BUILDROOT${prefix}/man/man8/qmail-sql.8.gz
 f 444 root qmail ${prefix}/man/man8/qmail-clean.8.gz BUILDROOT${prefix}/man/man8/qmail-clean.8.gz
 f 444 root qmail ${prefix}/man/man8/qmail-command.8.gz BUILDROOT${prefix}/man/man8/qmail-command.8.gz
 f 444 root qmail ${prefix}/man/man8/qmail-daemon.8.gz BUILDROOT${prefix}/man/man8/qmail-daemon.8.gz
@@ -967,6 +968,7 @@ f 6511 qscand qmail ${prefix}/bin/qhpsi BUILDROOT${prefix}/bin/qhpsi
 f 555 root qmail ${prefix}/bin/autoresponder BUILDROOT${prefix}/bin/autoresponder
 f 555 root qmail ${prefix}/bin/qmail-cat BUILDROOT${prefix}/bin/qmail-cat
 f 500 root qmail ${prefix}/bin/qmail-cdb BUILDROOT${prefix}/bin/qmail-cdb
+f 500 root qmail ${prefix}/bin/qmail-sql BUILDROOT${prefix}/bin/qmail-sql
 f 511 root qmail ${prefix}/bin/qmail-clean BUILDROOT${prefix}/bin/qmail-clean
 f 555 root qmail ${prefix}/bin/qmailctl BUILDROOT${prefix}/bin/qmailctl
 f 500 root qmail ${prefix}/bin/qmail-daemon BUILDROOT${prefix}/bin/qmail-daemon
@@ -1354,18 +1356,18 @@ f 555 root qmail ${prefix}/plugins/generic.so BUILDROOT${prefix}/plugins/generic
 
 %ifdef !noclamavdef
 f 644 root root ${prefix}/lib/libclamav.a BUILDROOT${prefix}/lib/libclamav.a
-f 755 root root ${prefix}/lib/libclamav.so.6.1.0 BUILDROOT${prefix}/lib/libclamav.so.6.1.0
-l 777 root root ${prefix}/lib/libclamav.so.6 BUILDROOT${prefix}/lib/libclamav.so.6.1.0
-l 777 root root ${prefix}/lib/libclamav.so BUILDROOT${prefix}/lib/libclamav.so.6.1.0
+f 755 root root ${prefix}/lib/libclamav.so.6.1.2 BUILDROOT${prefix}/lib/libclamav.so.6.1.2
+l 777 root root ${prefix}/lib/libclamav.so.6 BUILDROOT${prefix}/lib/libclamav.so.6.1.2
+l 777 root root ${prefix}/lib/libclamav.so BUILDROOT${prefix}/lib/libclamav.so.6.1.2
 f 644 root root ${prefix}/lib/pkgconfig/libclamav.pc BUILDROOT${prefix}/lib/pkgconfig/libclamav.pc
 f 644 root root ${prefix}/lib/libclamunrar.a BUILDROOT${prefix}/lib/libclamunrar.a
 f 644 root root ${prefix}/lib/libclamunrar_iface.a BUILDROOT${prefix}/lib/libclamunrar_iface.a
-f 755 root root ${prefix}/lib/libclamunrar_iface.so.6.1.0 BUILDROOT${prefix}/lib/libclamunrar_iface.so.6.1.0
-l 777 root root ${prefix}/lib/libclamunrar_iface.so.6 BUILDROOT${prefix}/lib/libclamunrar_iface.so.6.1.0
-l 777 root root ${prefix}/lib/libclamunrar_iface.so BUILDROOT${prefix}/lib/libclamunrar_iface.so.6.1.0
-f 755 root root ${prefix}/lib/libclamunrar.so.6.1.0 BUILDROOT${prefix}/lib/libclamunrar.so.6.1.0
-l 777 root root ${prefix}/lib/libclamunrar.so.6 BUILDROOT${prefix}/lib/libclamunrar.so.6.1.0
-l 777 root root ${prefix}/lib/libclamunrar.so BUILDROOT${prefix}/lib/libclamunrar.so.6.1.0
+f 755 root root ${prefix}/lib/libclamunrar_iface.so.6.1.2 BUILDROOT${prefix}/lib/libclamunrar_iface.so.6.1.2
+l 777 root root ${prefix}/lib/libclamunrar_iface.so.6 BUILDROOT${prefix}/lib/libclamunrar_iface.so.6.1.2
+l 777 root root ${prefix}/lib/libclamunrar_iface.so BUILDROOT${prefix}/lib/libclamunrar_iface.so.6.1.2
+f 755 root root ${prefix}/lib/libclamunrar.so.6.1.2 BUILDROOT${prefix}/lib/libclamunrar.so.6.1.2
+l 777 root root ${prefix}/lib/libclamunrar.so.6 BUILDROOT${prefix}/lib/libclamunrar.so.6.1.2
+l 777 root root ${prefix}/lib/libclamunrar.so BUILDROOT${prefix}/lib/libclamunrar.so.6.1.2
 %endif
 
 %ifdef !nonssddef
