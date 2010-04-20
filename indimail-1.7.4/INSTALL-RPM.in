@@ -35,8 +35,9 @@ A) Package Installation/Upgrade
    5. Installs (for installation only) MySQL database for use by IndiMail
       (database in @indimaildir@/mysqldb/data and logs in @indimaildir@/mysqldb/logs)
    6. Installs 5 queues in @indimaildir@/queue (queue1, queue2, ... queue5)
-   7. Creates directory for supervise logs in @logdir@
-   8. Sets up svscan to be run by init (/etc/inittab) or by upstart (/etc/event.d)
+   7. Creates link sendmail in /usr/sbin or /usr/lib to @indimaildir@/bin/sendmail.sh
+   8. Creates directory for supervise logs in @logdir@
+   9. Sets up svscan to be run by init (/etc/inittab) or by upstart (/etc/event.d)
 
 B) Package Removal
    1. Stops IndiMail services (in case the system already has IndiMail installed)

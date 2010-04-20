@@ -877,6 +877,8 @@ the installation.
    % sudo rm /usr/sbin/sendmail
    % ln -s @indimaildir@/bin/sendmail.sh /usr/sbin/sendmail
 
+   On some systems sendmail could be in /usr/lib instead of /usr/sbin
+
    NOTE: on Fedora Core 8 and above which has moved to upstart, putting an entry in inittab will
    not work.
 
