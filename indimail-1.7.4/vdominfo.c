@@ -1,5 +1,8 @@
 /*
  * $Log: vdominfo.c,v $
+ * Revision 2.10  2010-04-20 13:17:40+05:30  Cprogrammer
+ * skip cluster code if host.cntrl is missing
+ *
  * Revision 2.9  2009-12-30 13:15:03+05:30  Cprogrammer
  * run vdominfo with uid, gid of domain specfified or with indimail uid
  *
@@ -103,7 +106,7 @@
 #include <memory.h>
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vdominfo.c,v 2.9 2009-12-30 13:15:03+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: vdominfo.c,v 2.10 2010-04-20 13:17:40+05:30 Cprogrammer Stab mbhangui $";
 #endif
 
 char            Domain[MAX_BUFF];
@@ -139,7 +142,7 @@ main(argc, argv)
 {
 	uid_t           myuid;
 
-	if(get_options(argc, argv))
+	if (get_options(argc, argv))
 		return(1);
 	myuid = getuid();
 	if (*Domain)
@@ -159,13 +162,13 @@ main(argc, argv)
 			fprintf(stderr, "setuid/setgid (%d/%d): %s", Uid, Gid, strerror(errno));
 			return (1);
 		}
-		if(isvirtualdomain(Domain) == 1)
+		if (isvirtualdomain(Domain) == 1)
 			display_domain(Domain, Dir, Uid, Gid);
 		else
 			printf("domain %s does not exist\n", Domain);
 	} else
 	{
-		if(indimailuid == -1 || indimailgid == -1)
+		if (indimailuid == -1 || indimailgid == -1)
 			GetIndiId(&indimailuid, &indimailgid);
 		if (setgid(indimailgid) || setuid(0))
 		{
@@ -278,46 +281,54 @@ display_domain(char *domain, char *dir, uid_t uid, gid_t gid)
 	FILE           *fp;
 	unsigned long   total;
 #ifdef CLUSTERED_SITE
-	char           *ptr, *hostid;
-	int             Port;
+	char           *ptr, *hostid, *qmaildir, *controldir;
+	char            host_path[MAX_BUFF];
+	int             Port, host_cntrl;
 #endif
 
-	if(!(real_domain = vget_real_domain(domain)))
+	if (!(real_domain = vget_real_domain(domain)))
 		return;
 	if (DisplayAll)
 	{
 		printf("---- Domain %-25s -------------------------------\n", domain);
-		if(!strcmp(real_domain, domain))
+		if (!strcmp(real_domain, domain))
 			printf("domain: %s\n", domain);
 		else
 			printf("domain: %s aliased to %s\n", domain, real_domain);
 		printf("uid  :    %lu\n", (long unsigned) uid);
 		printf("gid  :    %lu\n", (long unsigned) gid);
 #ifdef CLUSTERED_SITE
-		if((hostid = get_local_hostid()))
-			printf("H Id :    %s\n", hostid);
-		else
-			printf("H Id :    ???\n");
-		if((ptr = get_local_ip()))
-			printf("Ip   :    %s\n", ptr);
-		else
-			printf("Ip   :    ??\n");
-		for(total = 0;(ptr = vsmtp_select(domain, &Port)) != NULL;total++)
-			printf("%s: %35s@%-20s -> %d\n", total ? "     " : "Ports", ptr, domain, Port);
+		getEnvConfigStr(&qmaildir, "QMAILDIR", QMAILDIR);
+		getEnvConfigStr(&controldir, "CONTROLDIR", "control");
+		if (snprintf(host_path, MAX_BUFF, "%s/%s/host.cntrl", qmaildir, controldir) == -1)
+			host_path[MAX_BUFF - 1] = 0;
+		if ((host_cntrl = !access(host_path, F_OK)))
+		{
+			if ((hostid = get_local_hostid()))
+				printf("H Id :    %s\n", hostid);
+			else
+				printf("H Id :    ???\n");
+			if ((ptr = get_local_ip()))
+				printf("Ip   :    %s\n", ptr);
+			else
+				printf("Ip   :    ??\n");
+			for (total = 0;(ptr = vsmtp_select(domain, &Port)) != NULL;total++)
+				printf("%s: %35s@%-20s -> %d\n", total ? "     " : "Ports", ptr, domain, Port);
+		}
 #endif
 		printf("dir  :    %s\n", dir);
-		if(!strcmp(real_domain, domain))
+		if (!strcmp(real_domain, domain))
 		{
 			snprintf(tmpbuf, MAX_BUFF, "%s/.filesystems", dir);
 			total = print_control(tmpbuf, domain, 0);
 			printf("Users:  %ld\n", total);
 			snprintf(tmpbuf, MAX_BUFF, "%s/.aliasdomains", dir);
-			if((fp = fopen(tmpbuf, "r")))
+			if ((fp = fopen(tmpbuf, "r")))
 			{
 				printf("AliasDomains:\n");
-				for(;;)
+				for (;;)
 				{
-					if(!fgets(tmpbuf, sizeof(tmpbuf) - 2, fp))
+					if (!fgets(tmpbuf, sizeof(tmpbuf) - 2, fp))
 						break;
 					printf("%s", tmpbuf);
 				}
@@ -328,19 +339,22 @@ display_domain(char *domain, char *dir, uid_t uid, gid_t gid)
 		printf("---- Domain %-25s -------------------------------\n", domain);
 		if (DisplayName)
 		{
-			if(!strcmp(real_domain, domain))
+			if (!strcmp(real_domain, domain))
 				printf("domain: %s\n", domain);
 			else
 				printf("domain: %s aliased to %s\n", domain, real_domain);
 #ifdef CLUSTERED_SITE
-			if((hostid = get_local_hostid()))
-				printf("H Id :    %s\n", hostid);
-			else
-				printf("H Id :    ???\n");
-			if((ptr = get_local_ip()))
-				printf("Ip   :    %s\n", ptr);
-			else
-				printf("Ip   :    ??\n");
+			if (host_cntrl)
+			{
+				if ((hostid = get_local_hostid()))
+					printf("H Id :    %s\n", hostid);
+				else
+					printf("H Id :    ???\n");
+				if ((ptr = get_local_ip()))
+					printf("Ip   :    %s\n", ptr);
+				else
+					printf("Ip   :    ??\n");
+			}
 #endif
 		}
 		if (DisplayUid)
@@ -348,15 +362,15 @@ display_domain(char *domain, char *dir, uid_t uid, gid_t gid)
 		if (DisplayGid)
 			printf("%lu\n", (long unsigned) gid);
 #ifdef CLUSTERED_SITE
-		if(DisplayPort)
+		if (DisplayPort && host_cntrl)
 		{
-			for(total = 0;(ptr = vsmtp_select(domain, &Port)) != NULL;total++)
+			for (total = 0;(ptr = vsmtp_select(domain, &Port)) != NULL;total++)
 				printf("%s: %s@%s -> %d\n", total ? "     " : "Ports", ptr, domain, Port);
 		}
 #endif
 		if (DisplayDir)
 			printf("%s\n", dir);
-		if(!strncmp(real_domain, domain, MAX_BUFF))
+		if (!strncmp(real_domain, domain, MAX_BUFF))
 		{
 			if (DisplayTotalUsers)
 			{
@@ -367,12 +381,12 @@ display_domain(char *domain, char *dir, uid_t uid, gid_t gid)
 			if (DisplayAliasDomains)
 			{
 				snprintf(tmpbuf, MAX_BUFF, "%s/.aliasdomains", dir);
-				if((fp = fopen(tmpbuf, "r")))
+				if ((fp = fopen(tmpbuf, "r")))
 				{
 					printf("AliasDomains:\n");
-					for(;;)
+					for (;;)
 					{
-						if(!fgets(tmpbuf, sizeof(tmpbuf) - 2, fp))
+						if (!fgets(tmpbuf, sizeof(tmpbuf) - 2, fp))
 							break;
 						printf("%s", tmpbuf);
 					}
@@ -403,7 +417,7 @@ display_all_domains()
 			continue;
 		if ((tmpstr = strtok(NULL, VDOMTOKENS)) == NULL)
 			continue;
-		if(!isvirtualdomain(tmpstr))
+		if (!isvirtualdomain(tmpstr))
 			continue;
 		if (!strchr(tmpstr, '.')) /*- non-indimail entries */
 			continue;
