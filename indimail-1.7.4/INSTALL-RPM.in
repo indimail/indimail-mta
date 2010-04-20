@@ -92,7 +92,7 @@ to run, you need to create @indimaildir@/etc/fetchmailrc file. You can use fetch
 for configuring fetchmail. To have these services started automatically during reboot,
 delete the files /service/mysql.3306/down and /service/fetchmail/down .
 
-Proceed to SECTION 8 in the file INSTALL-@version@ for further instruction on 
+Proceed to SECTION 8, STEP 2 in the file INSTALL-@version@ for further instruction on 
 configuration of IndiMail
 
 Log files are creaed in /var/log/indimail/*

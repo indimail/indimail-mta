@@ -541,7 +541,7 @@ the installation.
     Download the fetchmail package. The latest tested fetchmail package tested is
     fetchmail-6.3.16.tar.bz2.
 
-	% wget http://download.berlios.de/fetchmail/fetchmail-6.3.16.tar.bz2
+    % wget http://download.berlios.de/fetchmail/fetchmail-6.3.16.tar.bz2
     % bzip2 -d -c fetchmail-6.3.16.tar.bz2 | tar xf -
     % gunzip -c indimail-@version@/patches/fetchmail-6.3.16.patch.gz | patch -p0
     % cd fetchmail-6.3.16
@@ -610,8 +610,8 @@ the installation.
     Create Supervise Directory for starting MySQL.
 
     Remove mysqld startup in boot scripts
-    % sudo chkconfig mysql off
-    % sudo /etc/init.d/mysql stop
+    % sudo chkconfig mysqld off
+    % sudo /etc/init.d/mysqld stop
 
     Some operating systems also use `/etc/rc.local' or `/etc/init.d/boot.local' to start additional
     services on startup. You must remove any invocation of mysqld_safe from these scripts.
@@ -917,31 +917,69 @@ the installation.
 You can go on to add a virtual domain and users if you wish
 
 ########### SECTION 8  ### VIRTUAL DOMAIN ADMIN #########################
-8. Operations on Virtual Domains (I need your help to simplify/improve this)
+8. Operations on Virtual Domains
+   IndiMail supports two types of virtual domains
+
+   1. Non-Clustered domain - A domain existing on a single server
+   2. Clustered domain - A domain extended across multiple servers, with each
+      server having its own set of users.
+   
+   You must decide if you want Non-clustered setup or a clustered setup. If you have millions
+   of users, then you must chose clustered setup. Even if you chose to install a non-clustered
+   setup, you can always migrate to a clustered setup later.
 
     ##### STEP 1  #############################################
-    Add MySQL hosts information
+    Creating a non-clustered Domain
+    -------------------------------
+    Create configuration for IndiMail to connect to MySQL
 
-    First you need to have all local information stored in MySQL (change localhost to the
-    appropriate host)
+    First you need to have all local information stored in MySQL
 
-    # echo localhost > @indimaildir@/control/host.mysql   (MySQL host to which all programs
-      will connect)
+    % cd @indimaildir@/control
+    % su
+    # echo "localhost:indimail:ssh-1.5-:/tmp/mysql.sock" > host.mysql
+      or
+    # echo localhost > host.mysql
 
-    If you need to setup a cluster of mailstores having the same domain, you need to
-    do the following (change localhost to the appropriate host)
+    Ensure MySQL is running
 
-    # echo "localhost:indimail:ssh-1.5-:/tmp/mysql.sock" > host.cntrl
-    # echo "localhost" > host.cntrl (replace localhost with IP of your MySQL host)
-    # ln -s host.cntrl host.master
-    # echo 192.168.1.100 > localiphost (replace 192.168.1.100 with your mailserver/mailstore IP)
-    # exit
+    % sudo @indimaildir@/bin/svc -u /service/mysql.3306
+    % sudo @indimaildir@/bin/svstat /service/mysql.3306
+    /service/mysql.3306: up (pid 11936) 5 seconds
 
     NOTE: replace localhost, indimail, ssh-1.5-, /tmp/mysql.sock as relevant to your MySQL
     installation. You can use 3306 instead of /tmp/mysql.sock in case your MySQL
     database is on another host.
     you must use host:user:password:socket or host:user:password:port format
-    for host.cntrl (for IndiMail 1.6.9 and above)
+    for host.mysql (for IndiMail 1.6.9 and above). Also set your PATH to 
+    have @indimaildir@/bin in the path.
+
+    Creating a Clustered Domain
+    ---------------------------
+    If you need to setup a cluster of mailstores having the same domain, you need to
+    do the following
+
+    % cd @indimaildir@/control
+    % su
+    # echo "localhost:indimail:ssh-1.5-:/tmp/mysql.sock" > host.cntrl
+       or
+    # echo "localhost" > host.cntrl
+    # ln -s host.cntrl host.master
+    # echo 192.168.1.100 > localiphost (replace 192.168.1.100 with your mailserver/mailstore IP)
+    # exit
+
+    Ensure MySQL is running
+
+    % sudo @indimaildir@/bin/svc -u /service/mysql.3306
+    % sudo @indimaildir@/bin/svstat /service/mysql.3306
+    /service/mysql.3306: up (pid 11936) 5 seconds
+
+    NOTE: replace localhost, indimail, ssh-1.5-, /tmp/mysql.sock as relevant to your MySQL
+    installation. You can use 3306 instead of /tmp/mysql.sock in case your MySQL
+    database is on another host.
+    you must use host:user:password:socket or host:user:password:port format
+    for host.cntrl (for IndiMail 1.6.9 and above). Also set your PATH to 
+    have @indimaildir@/bin in the path.
 
     ##### STEP 2  #############################################
     Add a virtual domain
@@ -1027,7 +1065,25 @@ You can go on to add a virtual domain and users if you wish
 
 ########### SECTION 10 #### SUPPORT INFORMATION #########################
 10. Good luck
+    Send / Receive Mails
+    ====================
+
+    At this stage, your setup is ready to send mails to the outside world. To receive
+    mails, you need to create your actual domain (instead of example.com) using vadddomain
+    and setup a mail exchanger record for your domain (MX record).
+    To send mails, you can either use SMTP or use a sendmail replacement -
+    @indimaildir@/bin/sendmail.sh
+
+    You may also want to link sendmail to @indimaildir@/bin/sendmail.sh
+
+    % sudo rm /usr/sbin/sendmail
+    % ln -s @indimaildir@/bin/sendmail.sh /usr/sbin/sendmail
+
+    If you link sendmail to @indimaildir@/bin/sendmail.sh, then
+    you can do the following to send a test mail.
+
     % ( echo 'First M. Last'; uname -a) | mail -s "IndiMail Installation" mbhangui@gmail.com
+
     Replace First M. Last with your name.
 
     If you have questions about indimail, join the indimail mailing list; You can also use the
