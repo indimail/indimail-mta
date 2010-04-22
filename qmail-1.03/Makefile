@@ -1171,7 +1171,7 @@ atrn qmailctl indimail.plist svscanboot upstart qmail-sighup qmail-sigalrm qmail
 home home+df proc proc+df binm1 binm1+df binm2 binm2+df \
 binm3 binm3+df spfquery multirotate qpq 822header qmail-nullqueue \
 maildirserial serialsmtp serialqmtp maildirsmtp maildirqmtp \
-serialcmd maildircmd rewind relaytest qmail-qfilter \
+serialcmd maildircmd rewind relaytest qmail-qfilter sys-checkpwd ldap-checkpwd \
 iftocc ofmipd ofmipname 822field new-inject 822date 822received 822print \
 tokenize addrlist qquote parsedate qmail-greyd greydaemon \
 analyzer qtools qlog viruscanner update_tmprsadh dknewkey \
@@ -5006,4 +5006,70 @@ qmail-sql.9 conf-break conf-spawn
 	| sed s}SPAWN}"`head -1 conf-spawn`"}g \
 	> qmail-sql.8
 
+sys-checkpwd: \
+load sys-checkpwd.o error.o str_diff.o pathexec_env.o \
+alloc.o alloc_re.o str_chr.o stralloc.a byte_copy.o str_len.o \
+pathexec_run.o envread.o byte_diff.o str_diffn.o \
+strerr_sys.o strerr_die.o error_str.o substdio.a \
+shadow.lib crypt.lib
+	./load sys-checkpwd error.o str_diff.o pathexec_env.o \
+	alloc.o alloc_re.o str_chr.o stralloc.a byte_copy.o str_len.o \
+	pathexec_run.o envread.o byte_diff.o str_diffn.o \
+	strerr_sys.o strerr_die.o error_str.o substdio.a \
+	`cat shadow.lib crypt.lib`
+
+sys-checkpwd.o: \
+compile sys-checkpwd.c error.h pathexec.h hasspnam.h \
+hasuserpw.h str.h subfd.h substdio.h env.h
+	./compile sys-checkpwd.c
+
+hasspnam.h: \
+tryspnam.c compile load
+	( ( ./compile tryspnam.c && ./load tryspnam ) >/dev/null \
+	2>&1 \
+	&& echo \#define HASGETSPNAM 1 || exit 0 ) > hasspnam.h
+	rm -f tryspnam.o tryspnam
+
+hasuserpw.h: \
+tryuserpw.c compile load
+	( ( ./compile tryuserpw.c \
+	  && ./load tryuserpw ) >/dev/null 2>&1 \
+	&& echo \#define HASGETUSERPW 1 || exit 0 ) > hasuserpw.h
+	rm -f tryuserpw.o tryuserpw
+
+crypt.lib: \
+trycrypt.c compile load
+	( ( ./compile trycrypt.c && \
+	./load trycrypt -lcrypt ) >/dev/null 2>&1 \
+	&& echo -lcrypt || exit 0 ) > crypt.lib
+	rm -f trycrypt.o trycrypt
+
+shadow.lib: \
+tryshadow.c compile load
+	( ( ./compile tryshadow.c && \
+	./load tryshadow -lshadow ) >/dev/null 2>&1 \
+	&& echo -lshadow || exit 0 ) > shadow.lib
+	rm -f tryshadow.o tryshadow
+
+ldap-checkpwd: \
+load ldap-checkpwd.o envread.o error.o error_str.o \
+scan_ulong.o str_chr.o str_diffn.o byte_copy.o \
+alloc.o alloc_re.o strerr_sys.o strerr_die.o str_len.o \
+stralloc_catb.o stralloc_opyb.o stralloc_opys.o stralloc_cats.o \
+stralloc_eady.o stralloc_pend.o substdio.a
+	./load ldap-checkpwd envread.o error.o error_str.o \
+	scan_ulong.o str_chr.o str_diffn.o byte_copy.o \
+	alloc.o alloc_re.o strerr_sys.o strerr_die.o str_len.o \
+	stralloc_catb.o stralloc_opyb.o stralloc_opys.o stralloc_cats.o \
+	stralloc_eady.o stralloc_pend.o substdio.a -lldap -llber
+
+ldap-checkpwd.o: \
+compile ldap-checkpwd.c error.h stralloc.h pathexec.h str.h env.h scan.h \
+subfd.h substdio.h strerr.h
+	./compile -DLDAP_DEPRECATED ldap-checkpwd.c
+
+#	./load ldap-checkpwd error.o envread.o scan_ulong.o str_chr.o error_str.o \
+#	byte_copy.o str_diffn.o stralloc_opyb.o stralloc_eady.o \
+#	strerr_sys.o strerr_die.o substdio.a \
+#	str_len.o alloc.o alloc_re.o stralloc_opys.o stralloc_pend.o -lldap -llber
 #################################################################

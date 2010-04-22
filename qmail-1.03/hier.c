@@ -339,6 +339,7 @@ hier(inst_dir)
 	d(auto_qmail_home, "domains", auto_uido, auto_gidv, 0775);
 	d(auto_qmail_home, "users", auto_uido, auto_gidq, 0555);
 	d(auto_qmail_home, "bin", auto_uido, auto_gidq, 0555);
+	d(auto_qmail_home, "sbin", auto_uido, auto_gidv, 0555);
 	d(auto_qmail_home, "boot", auto_uido, auto_gidq, 0555);
 	d(auto_qmail_home, "doc", auto_uido, auto_gidq, 0555);
 #ifdef INDIMAIL
@@ -651,6 +652,8 @@ hier(inst_dir)
 	c(auto_qmail_home, "bin", "qhpsi", auto_uidc, auto_gidq, 06511);
 	c(auto_qmail_home, "bin", "qscanq", auto_uidc, auto_gidc, 04511);
 	c(auto_qmail_home, "bin", "run-cleanq", auto_uido, auto_gidc, 02511);
+	c(auto_qmail_home, "sbin", "sys-checkpwd", auto_uido, auto_gidq, 0555);
+	c(auto_qmail_home, "sbin", "ldap-checkpwd", auto_uido, auto_gidq, 0555);
 
 	/* Man Pages, Documents */
 	c(auto_qmail_home, "doc", "QMAILFAQ", auto_uido, auto_gidq, 0444);
@@ -838,6 +841,8 @@ hier(inst_dir)
 	c(auto_qmail_home, "man/man1", "cdbstats.1", auto_uido, auto_gidq, 0444);
 	c(auto_qmail_home, "man/man1", "cdbmake.1", auto_uido, auto_gidq, 0444);
 	c(auto_qmail_home, "man/man1", "cdbdump.1", auto_uido, auto_gidq, 0444);
+	c(auto_qmail_home, "man/man1", "sys-checkpwd.1", auto_uido, auto_gidq, 0444);
+	c(auto_qmail_home, "man/man1", "ldap-checkpwd.1", auto_uido, auto_gidq, 0444);
 
 	c(auto_qmail_home, "man/man3", "alloc.3", auto_uido, auto_gidq, 0444);
 	c(auto_qmail_home, "man/man3", "case.3", auto_uido, auto_gidq, 0444);
