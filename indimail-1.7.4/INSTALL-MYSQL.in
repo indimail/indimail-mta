@@ -28,6 +28,8 @@
 
     2. If you have /etc/my.conf, replace socket=/var/lib/mysql/mysql.sock with
        socket=/tmp/mysql.sock 
+       NOTE: If you change the socket/port then you have to edit @indimaildir@control/host.*
+       and @indimaildir@etc/indimail.cnf to change the socket path / port
 
     3. If the user root in mysql does not have a password. This will prevent anyone on
        the system to connect to MySQL using a password.
@@ -43,7 +45,7 @@
     
     Remove mysqld startup in boot scripts
     # chkconfig mysqld off
-    # /etc/init.d/mysql stop
+    # /etc/init.d/mysqld stop
 
     Some operating systems also use '/etc/rc.local' or '/etc/init.d/boot.local' to start additional
     services on startup. You must remove any invocation of mysqld_safe from these scripts.

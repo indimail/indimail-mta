@@ -31,6 +31,8 @@
    you must use host:user:password:socket or host:user:password:port format
    for host.mysql (for IndiMail 1.6.9 and above). Also set your PATH to 
    have @indimaildir@/bin in the path.
+   If you change the socket/port then you have to edit @indimaildir@control/host.*
+   and @indimaildir@etc/indimail.cnf to change the socket path / port
 
    Ensure MySQL is running
 
@@ -67,6 +69,8 @@
    you must use host:user:password:socket or host:user:password:port format
    for host.cntrl (for IndiMail 1.6.9 and above). Also set your PATH to 
    have @indimaildir@/bin in the path.
+   If you change the socket/port then you have to edit @indimaildir@control/host.*
+   and @indimaildir@etc/indimail.cnf to change the socket path / port
 
    Ensure MySQL is running
 
