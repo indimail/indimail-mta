@@ -112,7 +112,7 @@ EACCES;
 -13;
 #endif
 
-int  error_nodevice =
+int error_nodevice =
 #ifdef ENXIO
 	ENXIO;
 #else
