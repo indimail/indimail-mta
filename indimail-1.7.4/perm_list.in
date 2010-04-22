@@ -19,7 +19,7 @@
 %dir %attr(0555,root,root) @indimaildir@/libexec
 %dir %attr(0555,root,root) @indimaildir@/libexec/authlib
 %dir %attr(0555,root,root) @indimaildir@/modules
-%dir %attr(0555,root,root) @indimaildir@/sbin
+%dir %attr(0555,root,indimail) @indimaildir@/sbin
 %dir %attr(0555,root,root) @indimaildir@/share
 %dir %attr(0750,qscand,qscand) @indimaildir@/qscanq
 %dir %attr(0750,qscand,qscand) @indimaildir@/qscanq/root
@@ -97,8 +97,9 @@
 %attr(0555,root,qmail) @indimaildir@/bin/altermime
 %attr(0555,root,qmail) @indimaildir@/bin/argv0
 %attr(0555,root,qmail) @indimaildir@/bin/atrn
-%attr(0555,root,qmail) @indimaildir@/bin/b64decode
-%attr(0555,root,qmail) @indimaildir@/bin/b64encode
+%attr(0555,root,qmail) @indimaildir@/bin/base64
+%attr(0555,root,qmail) @indimaildir@/bin/uacl
+%attr(0555,root,qmail) @indimaildir@/bin/swaks
 %attr(0555,root,qmail) @indimaildir@/bin/batv
 %attr(6511,root,indimail) @indimaildir@/bin/bogofilter
 %attr(0555,root,qmail) @indimaildir@/bin/bogofilter-qfe
@@ -226,7 +227,7 @@
 %attr(0555,root,qmail) @indimaildir@/bin/qail
 %attr(0555,root,qmail) @indimaildir@/bin/qfilelog
 %attr(6511,qscand,qmail) @indimaildir@/bin/qhpsi
-%attr(0555,root,qmail) @indimaildir@/bin/qmail-autoresponder
+%attr(0555,root,qmail) @indimaildir@/bin/autoresponder
 %attr(0555,root,qmail) @indimaildir@/bin/qmail-cat
 %attr(0500,root,qmail) @indimaildir@/bin/qmail-cdb
 %attr(0511,root,qmail) @indimaildir@/bin/qmail-clean
@@ -260,7 +261,7 @@
 %attr(0555,root,qmail) @indimaildir@/bin/qmail-qstat
 %attr(6511,qmailq,qmail) @indimaildir@/bin/qmail-queue
 %attr(0555,root,qmail) @indimaildir@/bin/qmail-queue-print
-%attr(0500,root,qmail) @indimaildir@/bin/qmail-recipients
+%attr(0500,root,qmail) @indimaildir@/bin/recipient-cdb
 %attr(0511,root,qmail) @indimaildir@/bin/qmail-remote
 %attr(0555,root,qmail) @indimaildir@/bin/qmail-rm
 %attr(0511,root,qmail) @indimaildir@/bin/qmail-rspawn
@@ -362,7 +363,7 @@
 %attr(0555,root,qmail) @indimaildir@/bin/vgroup
 %attr(0555,root,qmail) @indimaildir@/bin/vhostid
 %attr(0555,root,qmail) @indimaildir@/bin/vipmap
-%attr(0555,root,qmail) @indimaildir@/bin/vmoddomlimits
+%attr(0555,root,qmail) @indimaildir@/bin/vlimit
 %attr(4555,root,root) @indimaildir@/bin/vmoduser
 %attr(4555,root,root) @indimaildir@/bin/vmoveuser
 %attr(0555,root,qmail) @indimaildir@/bin/vpasswd
@@ -580,7 +581,7 @@
 %attr(0444,root,qmail) @indimaildir@/man/cat1/preline.0.gz
 %attr(0444,root,qmail) @indimaildir@/man/cat1/printforward.0.gz
 %attr(0444,root,qmail) @indimaildir@/man/cat1/printmaillist.0.gz
-%attr(0444,root,qmail) @indimaildir@/man/cat1/qmail-autoresponder.0.gz
+%attr(0444,root,qmail) @indimaildir@/man/cat1/autoresponder.0.gz
 %attr(0444,root,qmail) @indimaildir@/man/cat1/qmaildirmake.0.gz
 %attr(0444,root,qmail) @indimaildir@/man/cat1/qmail-qfilter.0.gz
 %attr(0444,root,qmail) @indimaildir@/man/cat1/qreceipt.0.gz
@@ -635,7 +636,7 @@
 %attr(0444,root,qmail) @indimaildir@/man/cat8/qmail-qread.0.gz
 %attr(0444,root,qmail) @indimaildir@/man/cat8/qmail-qstat.0.gz
 %attr(0444,root,qmail) @indimaildir@/man/cat8/qmail-queue.0.gz
-%attr(0444,root,qmail) @indimaildir@/man/cat8/qmail-recipients.0.gz
+%attr(0444,root,qmail) @indimaildir@/man/cat8/recipient-cdb.0.gz
 %attr(0444,root,qmail) @indimaildir@/man/cat8/qmail-remote.0.gz
 %attr(0444,root,qmail) @indimaildir@/man/cat8/qmail-rm.0.gz
 %attr(0444,root,qmail) @indimaildir@/man/cat8/qmail-rspawn.0.gz
@@ -651,6 +652,15 @@
 %attr(0444,root,qmail) @indimaildir@/man/cat8/run-cleanq.0.gz
 %attr(0444,root,qmail) @indimaildir@/man/cat8/spawn-filter.0.gz
 %attr(0444,root,qmail) @indimaildir@/man/cat8/splogger.0.gz
+%attr(0444,root,qmail) @indimaildir@/man/man1/uacl.1.gz
+%attr(0444,root,qmail) @indimaildir@/man/man1/cdbmake.1.gz
+%attr(0444,root,qmail) @indimaildir@/man/man1/cdbdump.1.gz
+%attr(0444,root,qmail) @indimaildir@/man/man1/cdbget.1.gz
+%attr(0444,root,qmail) @indimaildir@/man/man1/cdbstats.1.gz
+%attr(0444,root,qmail) @indimaildir@/man/man1/cdbtest.1.gz
+%attr(0444,root,qmail) @indimaildir@/man/man1/predate.1.gz
+%attr(0444,root,qmail) @indimaildir@/man/man1/datemail.1.gz
+%attr(0444,root,qmail) @indimaildir@/man/man1/logselect.1.gz
 %attr(0444,root,qmail) @indimaildir@/man/man1/822addr.1.gz
 %attr(0444,root,qmail) @indimaildir@/man/man1/822body.1.gz
 %attr(0444,root,qmail) @indimaildir@/man/man1/822bodyfilter.1.gz
@@ -731,7 +741,7 @@
 %attr(0444,root,qmail) @indimaildir@/man/man1/printmaillist.1.gz
 %attr(0444,root,qmail) @indimaildir@/man/man1/qfilelog.1.gz
 %attr(0444,root,qmail) @indimaildir@/man/man1/qlogselect.1.gz
-%attr(0444,root,qmail) @indimaildir@/man/man1/qmail-autoresponder.1.gz
+%attr(0444,root,qmail) @indimaildir@/man/man1/autoresponder.1.gz
 %attr(0444,root,qmail) @indimaildir@/man/man1/qmaildirmake.1.gz
 %attr(0444,root,qmail) @indimaildir@/man/man1/qmail-qfilter.1.gz
 %attr(0444,root,qmail) @indimaildir@/man/man1/qreceipt.1.gz
@@ -774,7 +784,7 @@
 %attr(0444,root,qmail) @indimaildir@/man/man1/vgroup.1.gz
 %attr(0444,root,qmail) @indimaildir@/man/man1/vipmap.1.gz
 %attr(0444,root,qmail) @indimaildir@/man/man1/vmoddomain.1.gz
-%attr(0444,root,qmail) @indimaildir@/man/man1/vmoddomlimits.1.gz
+%attr(0444,root,qmail) @indimaildir@/man/man1/vlimit.1.gz
 %attr(0444,root,qmail) @indimaildir@/man/man1/vmoduser.1.gz
 %attr(0444,root,qmail) @indimaildir@/man/man1/vmoveuser.1.gz
 %attr(0444,root,qmail) @indimaildir@/man/man1/vpasswd.1.gz
@@ -887,6 +897,7 @@
 %attr(0444,root,qmail) @indimaildir@/man/man8/dk-filter.8.gz
 %attr(0444,root,qmail) @indimaildir@/man/man8/dknewkey.8.gz
 %attr(0444,root,qmail) @indimaildir@/man/man8/dktest.8.gz
+%attr(0444,root,qmail) @indimaildir@/man/man8/dkim.8.gz
 %attr(0444,root,qmail) @indimaildir@/man/man8/envdir.8.gz
 %attr(0444,root,qmail) @indimaildir@/man/man8/envuidgid.8.gz
 %attr(0444,root,qmail) @indimaildir@/man/man8/fghack.8.gz
@@ -942,7 +953,7 @@
 %attr(0444,root,qmail) @indimaildir@/man/man8/qmail-qread.8.gz
 %attr(0444,root,qmail) @indimaildir@/man/man8/qmail-qstat.8.gz
 %attr(0444,root,qmail) @indimaildir@/man/man8/qmail-queue.8.gz
-%attr(0444,root,qmail) @indimaildir@/man/man8/qmail-recipients.8.gz
+%attr(0444,root,qmail) @indimaildir@/man/man8/recipient-cdb.8.gz
 %attr(0444,root,qmail) @indimaildir@/man/man8/qmail-remote.8.gz
 %attr(0444,root,qmail) @indimaildir@/man/man8/qmail-rm.8.gz
 %attr(0444,root,qmail) @indimaildir@/man/man8/qmail-rspawn.8.gz
