@@ -960,3 +960,11 @@ dkim.8
 qmail-sql
 qmail-sql.o
 qmail-sql.8
+sys-checkpwd
+sys-checkpwd.o
+ldap-checkpwd
+ldap-checkpwd.o
+hasspnam.h
+hasuserpw.h
+crypt.lib
+shadow.lib

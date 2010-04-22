@@ -457,3 +457,11 @@ queue-fix.0
 uacl
 base64
 dkim.8
+hasspnam.h
+hasuserpw.h
+ldap-checkpwd
+qmail-sql
+qmail-sql.8
+sys-checkpwd
+sys-checkpwd.8
+
