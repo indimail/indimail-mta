@@ -1,5 +1,8 @@
 /*
  * $Log: hier.c,v $
+ * Revision 1.142  2010-04-22 15:20:02+05:30  Cprogrammer
+ * added checkpassword modules sys-checkpwd and ldap-checkpwd
+ *
  * Revision 1.141  2010-04-18 16:26:26+05:30  Cprogrammer
  * added qmail-sql
  *
@@ -841,8 +844,6 @@ hier(inst_dir)
 	c(auto_qmail_home, "man/man1", "cdbstats.1", auto_uido, auto_gidq, 0444);
 	c(auto_qmail_home, "man/man1", "cdbmake.1", auto_uido, auto_gidq, 0444);
 	c(auto_qmail_home, "man/man1", "cdbdump.1", auto_uido, auto_gidq, 0444);
-	c(auto_qmail_home, "man/man1", "sys-checkpwd.1", auto_uido, auto_gidq, 0444);
-	c(auto_qmail_home, "man/man1", "ldap-checkpwd.1", auto_uido, auto_gidq, 0444);
 
 	c(auto_qmail_home, "man/man3", "alloc.3", auto_uido, auto_gidq, 0444);
 	c(auto_qmail_home, "man/man3", "case.3", auto_uido, auto_gidq, 0444);
@@ -1050,12 +1051,14 @@ hier(inst_dir)
 	c(auto_qmail_home, "man/cat8", "cleanq.0", auto_uido, auto_gidq, 0444);
 	c(auto_qmail_home, "man/man8", "run-cleanq.8", auto_uido, auto_gidq, 0444);
 	c(auto_qmail_home, "man/cat8", "run-cleanq.0", auto_uido, auto_gidq, 0444);
+	c(auto_qmail_home, "man/man8", "sys-checkpwd.8", auto_uido, auto_gidq, 0444);
+	c(auto_qmail_home, "man/man8", "ldap-checkpwd.8", auto_uido, auto_gidq, 0444);
 }
 
 void
 getversion_install_big_c()
 {
-	static char    *x = "$Id: hier.c,v 1.141 2010-04-18 16:26:26+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: hier.c,v 1.142 2010-04-22 15:20:02+05:30 Cprogrammer Stab mbhangui $";
 
 #ifdef INDIMAIL
 	x = sccsidh;
