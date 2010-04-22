@@ -1,6 +1,6 @@
 /*
  * $Log: qmail-sql.c,v $
- * Revision 1.1  2010-04-19 14:08:05+05:30  Cprogrammer
+ * Revision 1.1  2010-04-22 15:21:36+05:30  Cprogrammer
  * Initial revision
  *
  */
@@ -46,6 +46,7 @@ flush()
 		strerr_die2sys(111, FATAL, "write: ");
 	return;
 }
+
 void
 logerr(char *s)
 {
@@ -321,7 +322,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_sql_c()
 {
-	static char    *x = "$Id: qmail-sql.c,v 1.1 2010-04-19 14:08:05+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-sql.c,v 1.1 2010-04-22 15:21:36+05:30 Cprogrammer Exp mbhangui $";
 
 #ifdef INDIMAIL
 	x = sccsidh;
