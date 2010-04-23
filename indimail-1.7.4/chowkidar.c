@@ -122,7 +122,7 @@ main(int argc, char **argv)
 			if (!outfile)
 			{
 				outfile = "badmailfrom";
-				if (!chdir(qmaildir) || !chdir(controldir))
+				if (chdir(qmaildir) || chdir(controldir))
 				{
 					fprintf(stderr, "unable to cd to qmaildir or controldir\n");
 					return (1);
@@ -141,7 +141,7 @@ main(int argc, char **argv)
 			if (!outfile)
 			{
 				outfile = "badrcptto";
-				if (!chdir(qmaildir) || !chdir(controldir))
+				if (chdir(qmaildir) || chdir(controldir))
 				{
 					fprintf(stderr, "unable to cd to qmaildir or controldir\n");
 					return (1);
@@ -160,7 +160,7 @@ main(int argc, char **argv)
 			if (!outfile)
 			{
 				outfile = "spamdb";
-				if (!chdir(qmaildir) || !chdir(controldir))
+				if (chdir(qmaildir) || chdir(controldir))
 				{
 					fprintf(stderr, "unable to cd to qmaildir or controldir\n");
 					return (1);
