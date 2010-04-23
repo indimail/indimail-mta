@@ -6,15 +6,15 @@ chowkidar \- SPAM Guard for IndiMail
 .SH SYNOPSYS
 .PP
 badmailfrom usage
- \fBchowkidar\fR [\fB\-V\fR] [\fB\-f\fR \fIfilename\fR] [\fB\-b\fR \fIbadmailfrom_file\fR] [\fB\-B\fR] -n\fR \fIcount\fR
- \fBchowkidar\fR [\fB\-r\fR] [\fB\-V\fR] [\fB\-v\fR] \fB\-q\fR [\fB\-b\fR \fIbadmailfrom_file\fR]
+ \fBchowkidar\fR [\fB\-V\fR] [\fB\-f\fR \fIfilename\fR] [\fB\-b\fR \fIbadmailfrom\fR] [\fB\-B\fR] -n\fR \fIcount\fR
+ \fBchowkidar\fR [\fB\-r\fR] [\fB\-V\fR] [\fB\-v\fR] \fB\-q\fR [\fB\-b\fR \fIbadmailfrom\fR]
 .PP
 badrcptto usage
  \fBchowkidar [\fB\-V\fR] [\fB\-f\fR \fIfilename\fR] [\fB\-t\fR \fIbadrcptto\fR] [\fB\-T] \fB\-n\fR \fIcount\fR
- \fBchowkidar [\fB\-r\fR] [\fB\-V\fR] [\fB\-v\fR] \fB\-q\fR [\fB\-t\fR \fIbadrcptto_file\fR]
+ \fBchowkidar [\fB\-r\fR] [\fB\-V\fR] [\fB\-v\fR] \fB\-q\fR [\fB\-t\fR \fIbadrcptto\fR]
 .PP
 spamdb usage
- \fBchowkidar\fR [\fB-V\fR] [\fB-s\fR \fIspamdb\fR] [\fB-S\fR] \fB-n\fR \fIcount\fR
+ \fBchowkidar\fR [\fB-V\fR] [\fB-f\fR \fIfilename\fR] [\fB-s\fR \fIspamdb\fR] [\fB-S\fR] \fB-n\fR \fIcount\fR
  \fBchowkidar\fR [\fB-r\fR] [\fB-V\fR] [\fB-v\fR] \fB-q\fR [\fB-s\fR \fIspamdb\fR]
 
 .SH DESCRIPTION
@@ -85,24 +85,35 @@ Sets verbose option
 Display Version Number\fR
 .TP
 \fB\-f\fR \fIfilename\fR
-The qmail deliver log file. If not given, the file defaults to stdin.
+The qmail SMTP/deliver log file. If not given, the file defaults to stdin.
 .TP
 \fB\-b\fR \fIoutput_file\fR
 file in badmailfrom format. If not given, the environment variable BADMAILFROM is used. If the
 environment variable is also not defined, the badmailfrom file defaults to the qmail control
-file 'badmailfrom'
+file 'badmailfrom'. Input should be qmail-send log file.
 .TP
 \fB\-B\fR
-If '-b' option is not used this can be set to indicate badmailfrom format.
+If '-b' option is not used, this can be set to indicate badmailfrom format. Additionaly
+\fBchowkidar\fR will cd to qmail's control directory.
 .TP
 \fB\-t\fR \fIoutput_file\fR
-file in badrcptto format. If not given, the environment variable BADRCPTTO is used. If the environment variable is also not defined, the badrcptto file defaults to the qmail control file 'badrcptto'
+file in badrcptto format. If not given, the environment variable BADRCPTTO is used. If the
+environment variable is also not defined, the badrcptto file defaults to the qmail control
+file 'badrcptto'. Input should be qmail-send log file.
 .TP
 \fB\-T\fR
-If '-t' option is not used, this can be set to indicate badrcptto format. i.e. recipients are to be blocked (spammers generally get lot of bounces). A socially responsible ISP for example can use this option to prevent their own users from spamming.
+If '-t' option is not used, this can be set to indicate badrcptto format. i.e. recipients are
+to be blocked (spammers generally get lot of bounces). A socially responsible ISP for example
+can use this option to prevent their own users from spamming. Additionaly
+\fBchowkidar\fR will cd to qmail's control directory.
 .TP
-\fB\-s\fR
-Input should be SMTPD's log file. The output file will be spamdb. Additionally, qmail-cdb will be run to create spamdb.cdb.
+\fB\-s\fR \fIoutput_file\fR
+Input should be qmail-smtpd log file. The output file will be spamdb. Additionally, qmail-cdb
+will be run to create spamdb.cdb.
+.TP
+\fB\-S\fR
+If '-s' option is not used, this can be set to indicate spamdb format. In this option,
+\fBchowkidar\fR does cd to qmail's control directory.
 .TP
 \fB\-n\fR \fIcount\fR
 Mail count from senders - above which the sender should be treated as a spammer.
