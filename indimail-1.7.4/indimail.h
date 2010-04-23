@@ -1,5 +1,8 @@
 /*
  * $Log: indimail.h,v $
+ * Revision 2.189  2010-04-23 10:24:48+05:30  Cprogrammer
+ * added spamcount arg to readLogFile()
+ *
  * Revision 2.188  2010-04-15 13:43:04+05:30  Cprogrammer
  * added flags argument to set_mysql_options()
  *
@@ -879,7 +882,7 @@
 #define INDIMAILH_H
 
 #ifndef	lint
-static char     sccsidh[] = "$Id: indimail.h,v 2.188 2010-04-15 13:43:04+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsidh[] = "$Id: indimail.h,v 2.189 2010-04-23 10:24:48+05:30 Cprogrammer Stab mbhangui $";
 #endif
 
 #include "config.h"
@@ -1655,7 +1658,7 @@ char           *getactualpath(char *);
 int             skip_system_files(char *);
 int             loadIgnoreList(char *);
 int             spamReport(int, char *);
-int             readLogFile(char *, int);
+int             readLogFile(char *, int, int);
 int             isIgnored(char *);
 maddr          *insertAddr(int, char *);
 unsigned int    hash(char *);
