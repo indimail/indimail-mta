@@ -89,7 +89,7 @@ static int      uplen;
 int
 main(int argc, char **argv)
 {
-	char           *login, *password, *encrypted, *stored;
+	char           *login, *password, *encrypted, *stored = 0;
 	int             r, i;
 
 	if (argc < 2)
