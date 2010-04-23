@@ -1,5 +1,16 @@
 #!/bin/sh
+#
+# $Log: vadddomain_handle.in,v $
+# Revision 2.1  2010-04-23 09:21:51+05:30  Cprogrammer
+# post handle for vadddomain
+#
+#
+# $Id: vadddomain_handle.in,v 2.1 2010-04-23 09:21:51+05:30 Cprogrammer Exp mbhangui $
 /var/indimail/bin/vdominfo $1
+/var/indimail/bin/valias -i '&register-spam' register-spam@$1
+/var/indimail/bin/valias -i '&register-ham' register-ham@$1
+/var/indimail/bin/valias -i '&spam' spam@$1
+/var/indimail/bin/valias -i '&ham' ham@$1
 /bin/ls -dl /var/indimail/domains/$1
 /bin/ls -al /var/indimail/domains/$1
 exit 0
