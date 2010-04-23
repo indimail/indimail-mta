@@ -77,7 +77,7 @@
 # added creation of vfilter table
 #
 # Revision 2.152  2009-12-21 09:19:17+05:30  Cprogrammer
-# fixed problem with delivery to register-spam, spam, register-nonspam, nonspam ids
+# fixed problem with delivery to register-spam, spam, register-ham, ham ids
 #
 # Revision 2.151  2009-12-17 14:59:53+05:30  Cprogrammer
 # added case for mysql-5.5
@@ -253,7 +253,7 @@
 # added silent option for fetchmail service creation
 #
 # Revision 2.95  2009-02-22 11:32:57+05:30  Cprogrammer
-# added creatoin of spam,nonspam,register-spam,register-nonspam aliases
+# added creatoin of spam,ham,register-spam,register-ham aliases
 #
 # Revision 2.94  2009-02-11 10:35:10+05:30  Cprogrammer
 # remove skip_federated for mysql-6.0.9-alpha
@@ -5018,17 +5018,17 @@ create_qmail_config()
 	echo $postmaster > "$DESTDIR"$QmailHOME/alias/.qmail-postmaster
 	$chown -R alias:qmail "$DESTDIR"$QmailHOME/alias/.qmail-postmaster
 	if ("$DESTDIR"$QmailHOME/bin/maildirmake "$DESTDIR"$QmailHOME/alias/spam && \
-		"$DESTDIR"$QmailHOME/bin/maildirmake "$DESTDIR"$QmailHOME/alias/nonspam && \
+		"$DESTDIR"$QmailHOME/bin/maildirmake "$DESTDIR"$QmailHOME/alias/ham && \
 		"$DESTDIR"$QmailHOME/bin/maildirmake "$DESTDIR"$QmailHOME/alias/register-spam && \
-		"$DESTDIR"$QmailHOME/bin/maildirmake "$DESTDIR"$QmailHOME/alias/register-nonspam) ; then
+		"$DESTDIR"$QmailHOME/bin/maildirmake "$DESTDIR"$QmailHOME/alias/register-ham) ; then
 		$chown -R alias:qmail "$DESTDIR"$QmailHOME/alias/spam
-		$chown -R alias:qmail "$DESTDIR"$QmailHOME/alias/nonspam
+		$chown -R alias:qmail "$DESTDIR"$QmailHOME/alias/ham
 		$chown -R alias:qmail "$DESTDIR"$QmailHOME/alias/register-spam
-		$chown -R alias:qmail "$DESTDIR"$QmailHOME/alias/register-nonspam
+		$chown -R alias:qmail "$DESTDIR"$QmailHOME/alias/register-ham
 		chmod -R 775 "$DESTDIR"$QmailHOME/alias/spam
-		chmod -R 775 "$DESTDIR"$QmailHOME/alias/nonspam
+		chmod -R 775 "$DESTDIR"$QmailHOME/alias/ham
 		chmod -R 775 "$DESTDIR"$QmailHOME/alias/register-spam
-		chmod -R 775 "$DESTDIR"$QmailHOME/alias/register-nonspam
+		chmod -R 775 "$DESTDIR"$QmailHOME/alias/register-ham
 	fi
 	cd "$DESTDIR"$QmailHOME/alias
 	if [ $? -eq 0 ] ; then
@@ -5041,7 +5041,7 @@ create_qmail_config()
 			mkdir -p "$DESTDIR"$QmailHOME/domains/$default_domain
 			$chown indimail:indimail "$DESTDIR"$QmailHOME/domains/$default_domain
 	fi
-	for i in spam nonspam register-spam register-nonspam
+	for i in spam ham register-spam register-ham
 	do
 		(
 			echo "|$QmailHOME/bin/bogofilter-qfe"

@@ -1,6 +1,9 @@
 #!/bin/sh
 # WARNING: This file was auto-generated. Do not edit!
 # $Log: bogofilter-qfe.in,v $
+# Revision 2.10  2010-04-23 08:38:16+05:30  Cprogrammer
+# allow nonspam as a valid anologous token for ham
+#
 # Revision 2.9  2009-12-19 20:20:40+05:30  Cprogrammer
 # change tail syntax to gnu usage
 #
@@ -32,7 +35,7 @@
 # This a qmail specific bogofilter frontend script which allows the use of a 
 # centralized bogofilter running on an smtp mail server
 # Copyright (C) Gyepi Sam <gyepi@praxis-sw.com> 2002
-# $Id: bogofilter-qfe.in,v 2.9 2009-12-19 20:20:40+05:30 Cprogrammer Stab mbhangui $
+# $Id: bogofilter-qfe.in,v 2.10 2010-04-23 08:38:16+05:30 Cprogrammer Stab mbhangui $
  
 domain=$HOST
 #
@@ -92,7 +95,7 @@ case "$EXT" in
 	PAT="/^X-Spam-Rating/d; /^X-Filter/d; /^X-Bogosity/d; /^Delivered-To/d; /$domain/d;"
 	opt="-s"
 ;;
-	register-nonspam)	# register as non-spam
+	register-ham|register-nonspam)	# register as ham
 	PAT="/^X-Spam-Rating/d; /^X-Filter/d; /^X-Bogosity/d; /^Delivered-To/d;"
 	opt="-n"
 ;;
@@ -101,7 +104,7 @@ case "$EXT" in
 	PAT="/^X-Spam-Rating/d; /^X-Filter/d; /^X-Bogosity/d; /^Delivered-To/d; /$domain/d;"
 	opt="-Ns"
 ;;
-	nonspam)	# unregister as spam
+	ham|nonspam)# unregister as spam
 				# register as ham
 	PAT="/^X-Spam-Rating/d; /^X-Filter/d; /^X-Bogosity/d; /^Delivered-To/d;"
 	opt="-Sn"
