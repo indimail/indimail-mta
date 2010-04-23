@@ -5044,6 +5044,13 @@ trycrypt.c compile load
 	&& echo -lcrypt || exit 0 ) > crypt.lib
 	rm -f trycrypt.o trycrypt
 
+ldap.lib: \
+tryldap.c compile load
+	( ( ./compile tryldap.c && \
+	./load tryldap -lldap ) >/dev/null 2>&1 \
+	&& echo -lldap || exit 0 ) > ldap.lib
+	rm -f tryldap.o tryldap
+
 shadow.lib: \
 tryshadow.c compile load
 	( ( ./compile tryshadow.c && \
@@ -5056,20 +5063,16 @@ load ldap-checkpwd.o envread.o error.o error_str.o \
 scan_ulong.o str_chr.o str_diffn.o byte_copy.o \
 alloc.o alloc_re.o strerr_sys.o strerr_die.o str_len.o \
 stralloc_catb.o stralloc_opyb.o stralloc_opys.o stralloc_cats.o \
-stralloc_eady.o stralloc_pend.o substdio.a
+stralloc_eady.o stralloc_pend.o substdio.a ldap.lib
 	./load ldap-checkpwd envread.o error.o error_str.o \
 	scan_ulong.o str_chr.o str_diffn.o byte_copy.o \
 	alloc.o alloc_re.o strerr_sys.o strerr_die.o str_len.o \
 	stralloc_catb.o stralloc_opyb.o stralloc_opys.o stralloc_cats.o \
-	stralloc_eady.o stralloc_pend.o substdio.a -lldap -llber
+	stralloc_eady.o stralloc_pend.o substdio.a `cat ldap.lib`
 
 ldap-checkpwd.o: \
 compile ldap-checkpwd.c error.h stralloc.h pathexec.h str.h env.h scan.h \
 subfd.h substdio.h strerr.h
 	./compile -DLDAP_DEPRECATED ldap-checkpwd.c
 
-#	./load ldap-checkpwd error.o envread.o scan_ulong.o str_chr.o error_str.o \
-#	byte_copy.o str_diffn.o stralloc_opyb.o stralloc_eady.o \
-#	strerr_sys.o strerr_die.o substdio.a \
-#	str_len.o alloc.o alloc_re.o stralloc_opys.o stralloc_pend.o -lldap -llber
 #################################################################
