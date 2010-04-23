@@ -1,5 +1,8 @@
 /*
  * $Log: chowkidar.c,v $
+ * Revision 2.11  2010-04-23 11:03:44+05:30  Cprogrammer
+ * for -T, -B, -S option, chdir to qmail control directory
+ *
  * Revision 2.10  2008-06-13 08:43:36+05:30  Cprogrammer
  * do not compile sync_mode if CLUSTERED_SITE is not defined
  *
@@ -43,7 +46,7 @@
 #define SPAMDB  3
 
 #ifndef	lint
-static char     sccsid[] = "$Id: chowkidar.c,v 2.10 2008-06-13 08:43:36+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: chowkidar.c,v 2.11 2010-04-23 11:03:44+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 void            usage();
@@ -51,7 +54,7 @@ void            usage();
 int
 main(int argc, char **argv)
 {
-	char           *ptr, *revision = "$Revision: 2.10 $";
+	char           *ptr, *revision = "$Revision: 2.11 $";
 	int             spamNumber, spamFilter, c, silent, type;
 	char            ignfile[SQL_BUF_SIZE], bad_from_rcpt_file[MAX_BUFF];
 	char           *filename = (char *) 0, *outfile = (char *) 0;
@@ -68,6 +71,8 @@ main(int argc, char **argv)
 #endif
 	spamNumber = spamFilter = 0;
 	filename = (char *) 0;
+	getEnvConfigStr(&qmaildir, "QMAILDIR", QMAILDIR);
+	getEnvConfigStr(&controldir, "CONTROLDIR", "control");
 #ifdef CLUSTERED_SITE
 	while ((c = getopt(argc, argv, "f:t:b:s:n:o:BTSVrqv")) != -1)
 #else
@@ -115,7 +120,14 @@ main(int argc, char **argv)
 			outfile = optarg;
 		case 'B':
 			if (!outfile)
+			{
 				outfile = "badmailfrom";
+				if (!chdir(qmaildir) || !chdir(controldir))
+				{
+					fprintf(stderr, "unable to cd to qmaildir or controldir\n");
+					return (1);
+				}
+			}
 			if (type)
 			{
 				fprintf(stderr, "only one of -b|-B, -t|-T, -s|-S can be selected\n");
@@ -127,7 +139,14 @@ main(int argc, char **argv)
 			outfile = optarg;
 		case 'T':
 			if (!outfile)
+			{
 				outfile = "badrcptto";
+				if (!chdir(qmaildir) || !chdir(controldir))
+				{
+					fprintf(stderr, "unable to cd to qmaildir or controldir\n");
+					return (1);
+				}
+			}
 			if (type)
 			{
 				fprintf(stderr, "only one of -b|-B, -t|-T, -s|-S can be selected\n");
@@ -139,7 +158,14 @@ main(int argc, char **argv)
 			outfile = optarg;
 		case 'S':
 			if (!outfile)
+			{
 				outfile = "spamdb";
+				if (!chdir(qmaildir) || !chdir(controldir))
+				{
+					fprintf(stderr, "unable to cd to qmaildir or controldir\n");
+					return (1);
+				}
+			}
 			if (type)
 			{
 				fprintf(stderr, "only one of -b|-B, -t|-T, -s|-S can be selected\n");
@@ -184,7 +210,7 @@ main(int argc, char **argv)
 	} 
 #endif
 	/*- Update mode */
-	if (!readLogFile(filename, type))
+	if (!readLogFile(filename, type, spamNumber))
 	{
 		/*
 		 * ignore list is our list of priviliged mail users 
@@ -192,8 +218,6 @@ main(int argc, char **argv)
 		 * ... and from qmail's badmailfrom, since we do not want
 		 * to have duplicate spammer addresses 
 		 */
-		getEnvConfigStr(&qmaildir, "QMAILDIR", QMAILDIR);
-		getEnvConfigStr(&controldir, "CONTROLDIR", "control");
 		if (strchr(outfile, '.') || strchr(outfile, '/'))
 			strncpy(bad_from_rcpt_file, outfile, MAX_BUFF);
 		else
