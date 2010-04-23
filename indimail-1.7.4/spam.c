@@ -1,5 +1,8 @@
 /*
  * $Log: spam.c,v $
+ * Revision 2.17  2010-04-23 11:02:44+05:30  Cprogrammer
+ * use spamcount for project id in ftok
+ *
  * Revision 2.16  2010-03-30 12:03:36+05:30  Cprogrammer
  * parse MAIL from instead of Mail from:
  *
@@ -65,7 +68,7 @@
 #define SPAMDB  3
 
 #ifndef	lint
-static char     sccsid[] = "$Id: spam.c,v 2.16 2010-03-30 12:03:36+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: spam.c,v 2.17 2010-04-23 11:02:44+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 static char    *parseLine1(char *);
@@ -299,7 +302,7 @@ spamReport(int spamNumber, char *outfile)
  * This function reads the logfile and fills the " from " linked list 
  */
 int
-readLogFile(char *fn, int type)
+readLogFile(char *fn, int type, int count)
 {
 
 	FILE           *fp, *keyfp;
@@ -317,7 +320,7 @@ readLogFile(char *fn, int type)
 			fprintf(stderr, "readLogFile: fopen: %s: %s\n", fn, strerror(errno));
 			return(-1);
 		}
-		snprintf(keyfile, 1024, "/tmp/%d", ftok(fn, 1));
+		snprintf(keyfile, 1024, "/tmp/%d", ftok(fn, count == -1 ? 1 : count));
 		pos = 0;
 		if ((keyfp = fopen(keyfile, "r")))
 		{
