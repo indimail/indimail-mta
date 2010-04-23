@@ -1,5 +1,9 @@
 /*
  * $Log: smtpd.c,v $
+ * Revision 1.141  2010-04-23 19:20:52+05:30  Cprogrammer
+ * added badip functionality
+ * fixed setup_state with badhost functionality
+ *
  * Revision 1.140  2010-03-30 16:43:44+05:30  Cprogrammer
  * fix for IPV6 hosts
  *
@@ -560,7 +564,7 @@ int             wildmat_internal(char *, char *);
 int             ssl_rfd = -1, ssl_wfd = -1;	/*- SSL_get_Xfd() are broken */
 char           *servercert, *clientca, *clientcrl;
 #endif
-char           *revision = "$Revision: 1.140 $";
+char           *revision = "$Revision: 1.141 $";
 char           *protocol = "SMTP";
 stralloc        proto = { 0 };
 static stralloc Revision = { 0 };
@@ -684,6 +688,13 @@ struct constmap maprmf;
 int             nodnschecksok = 0;
 static stralloc nodnschecks = { 0 };
 struct constmap mapnodnschecks;
+/*- badip Check */
+char           *dobadipcheck = (char *) 0;
+char           *badipfn = (char *) 0;
+int             briok = 0;
+stralloc        bri = {0};
+stralloc        ipaddr = {0};
+struct constmap mapbri;
 /*- badhost Check */
 char           *dobadhostcheck = (char *) 0;
 int             brhok = 0;
@@ -891,6 +902,22 @@ die_logfilter()
 	out("451 Requested action aborted: unable to create temporary files (#4.3.0)\r\n");
 	flush();
 	_exit(1);
+}
+
+void
+die_addressmatch(char *errStr)
+{
+	logerr("qmail-smtpd: ");
+	logerrpid();
+	logerr(remoteip);
+	logerr(" address_match: ");
+	logerr(errStr);
+	logerrf("\n");
+	out("451 Requested action aborted: ");
+	out(errStr);
+	out(" (#4.3.0)\r\n");
+	flush();
+	_exit (1);
 }
 
 void
@@ -1129,6 +1156,35 @@ err_rcp(char *arg1, char *arg2, char *arg3)
 }
 
 void
+smtp_badip(char *arg)
+{
+	logerr("qmail-smtpd: ");
+	logerrpid();
+	logerr(arg);
+	logerrf(" BAD IP client\n");
+	sleep(5);
+	out("421 sorry, your IP (");
+	out(arg);
+	out(") is temporarily denied (#4.7.1)\r\n");
+	return;
+}
+
+void
+smtp_badhost(char *arg)
+{
+	logerr("qmail-smtpd: ");
+	logerrpid();
+	logerr(remoteip);
+	logerr(" BAD HOST ");
+	logerr(remotehost);
+	logerrf("\n");
+	sleep(5);
+	out("553 sorry, your host (");
+	out(remotehost);
+	out(") has been denied (#5.7.1)\r\n");
+}
+
+void
 smtp_relayreject(char *arg)
 {
 	logerr("qmail-smtpd: ");
@@ -1136,37 +1192,59 @@ smtp_relayreject(char *arg)
 	logerr(arg);
 	logerrf(" OPEN RELAY client\n");
 	sleep(5);
-	out("553 sorry ");
-	out(arg);
-	out(", No mail accepted from an open relay; check your server configs (#5.7.1)\r\n");
+	out("553 No mail accepted from an open relay (");
+	out(remoteip);
+	out("); check your server configs (#5.7.1)\r\n");
 	return;
 }
 
 void
 smtp_paranoid(char *arg)
 {
+	char           *ptr;
+
 	logerr("qmail-smtpd: ");
 	logerrpid();
 	logerr(arg);
 	logerrf(" PTR (reverse DNS) record points to wrong hostname\n");
 	sleep(5);
-	out("553 sorry Your IP address (");
+	ptr = env_get("TCPPARANOID");
+	out("553 sorry, your IP address (");
 	out(arg);
-	out(") PTR (reverse DNS) record points to wrong hostname (#5.7.1)\r\n");
+	if (ptr && *ptr)
+	{
+		out(") PTR (reverse DNS) record points to wrong hostname ");
+		out(ptr);
+		out(" (#5.7.1)\r\n");
+	} else
+		out(") PTR (reverse DNS) record points to wrong hostname (#5.7.1)\r\n");
 	return;
 }
 
 void
 smtp_ptr(char *arg)
 {
+	char           *ptr;
+
 	logerr("qmail-smtpd: ");
 	logerrpid();
 	logerr(arg);
 	logerrf(" unable to obain PTR (reverse DNS) record\n");
 	sleep(5);
-	out("553 Sorry, no PTR (reverse DNS) record for (");
-	out(remoteip);
-	out(") (#5.7.1)\r\n");
+	ptr = env_get("REQPTR");
+	out("553 ");
+	if (*ptr)
+	{
+		out(ptr);
+		out(": from ");
+		out(arg);
+		out(": (#5.7.1)\r\n");
+	} else
+	{
+		out(" Sorry, no PTR (reverse DNS) record for (");
+		out(arg);
+		out(") (#5.7.1)\r\n");
+	}
 	return;
 }
 
@@ -1324,6 +1402,12 @@ smtp_noop(char *arg)
 	case 4:
 		smtp_ptr(remoteip);
 		return;
+	case 5:
+		smtp_badhost(remoteip);
+		return;
+	case 6:
+		smtp_badip(remoteip);
+		return;
 	}
 	out("250 ok\r\n");
 	return;
@@ -1347,6 +1431,12 @@ smtp_vrfy(char *arg)
 		return;
 	case 4:
 		smtp_ptr(remoteip);
+		return;
+	case 5:
+		smtp_badhost(remoteip);
+		return;
+	case 6:
+		smtp_badip(remoteip);
 		return;
 	}
 	out("252 Cannot VRFY user, but will accept message and attempt delivery (#2.7.0)\r\n");
@@ -2170,6 +2260,29 @@ smtp_quit(char *arg)
 	_exit(0);
 }
 
+int
+badipcheck(char *arg)
+{
+	/*- badip */
+	if (!stralloc_copys(&ipaddr, arg))
+		die_nomem();
+	if (!stralloc_0(&ipaddr))
+		die_nomem();
+	switch (address_match(badipfn, &ipaddr, briok ? &bri : 0, briok ? &mapbri : 0, 0, &errStr))
+	{
+	case 1: 
+		return (1);
+	case 0:
+		return (0);
+	case -1:
+		die_nomem();
+	default:
+		die_addressmatch(errStr);
+		return (-1);
+	}
+	return (0);
+}
+
 /*
  * $TCPREMOTEHOST check against regular expressions depending on $RELAYCLIENT:
  * domain-based blacklist/right-hand-side blackhole list (RHSBL)
@@ -2367,6 +2480,20 @@ setup()
 	{
 		if (control_readint(&greetdelay, "greetdelay") == -1)
 			die_control();
+	}
+	/*
+	 * Enable badip if
+	 * BADIPCHECK is defined (default control file badip)
+	 * or
+	 * BADIP (control file defined by BADIP env variable)
+	 * is defined
+	 */
+	if ((dobadipcheck = (env_get("BADIPCHECK") ? "" : env_get("BADIP"))))
+	{
+		if ((briok = control_readfile(&bri, (badipfn = env_get("BADIP")) && *badipfn ? badipfn : "badip", 0)) == -1)
+			die_control();
+		if (briok && !constmap_init(&mapbri, bri.s, bri.len, 0))
+			die_nomem();
 	}
 	/*
 	 * Enable badhost if
@@ -2711,6 +2838,12 @@ smtp_helo(char *arg)
 	case 4:
 		smtp_ptr(remoteip);
 		return;
+	case 5:
+		smtp_badhost(remoteip);
+		return;
+	case 6:
+		smtp_badip(remoteip);
+		return;
 	}
 	smtp_greet("250 ");
 	if (!arg || !*arg)
@@ -2747,6 +2880,12 @@ smtp_ehlo(char *arg)
 		return;
 	case 4:
 		smtp_ptr(remoteip);
+		return;
+	case 5:
+		smtp_badhost(remoteip);
+		return;
+	case 6:
+		smtp_badip(remoteip);
 		return;
 	}
 	smtp_greet("250-");
@@ -3290,6 +3429,12 @@ smtp_mail(char *arg)
 	case 4:
 		smtp_ptr(remoteip);
 		return;
+	case 5:
+		smtp_badhost(remoteip);
+		return;
+	case 6:
+		smtp_badip(remoteip);
+		return;
 	}
 	if (!env_put2("SPFRESULT", "unknown"))
 		die_nomem();
@@ -3798,6 +3943,12 @@ smtp_rcpt(char *arg)
 		return;
 	case 4:
 		smtp_ptr(remoteip);
+		return;
+	case 5:
+		smtp_badhost(remoteip);
+		return;
+	case 6:
+		smtp_badip(remoteip);
 		return;
 	}
 	if (!seenmail)
@@ -4832,6 +4983,12 @@ smtp_auth(char *arg)
 	case 4:
 		smtp_ptr(remoteip);
 		return;
+	case 5:
+		smtp_badhost(remoteip);
+		return;
+	case 6:
+		smtp_badip(remoteip);
+		return;
 	}
 	if (!hostname || !*hostname || !childargs || !*childargs)
 	{
@@ -5661,12 +5818,21 @@ qmail_smtpd(int argc, char **argv, char **envp)
 		setup_state = 1;
 	} else
 	{
+		if (dobadipcheck && badipcheck(remoteip))
+		{
+			smtp_greet("421 ");
+			out(" sorry, your IP (");
+			out(remoteip);
+			out(") is temporarily denied (#4.7.1)");
+			setup_state = 6;
+		} else
 		if (dobadhostcheck && badhostcheck())
 		{
 			smtp_greet("553 ");
-			out("553 sorry, your host ");
-			out(remoteip);
-			out(" has been denied (#5.7.1)");
+			out(" sorry, your host (");
+			out(remotehost);
+			out(") has been denied (#5.7.1)");
+			setup_state = 5;
 		} else
 		if (env_get("OPENRELAY"))
 		{
@@ -5679,7 +5845,7 @@ qmail_smtpd(int argc, char **argv, char **envp)
 		if ((ptr = env_get("TCPPARANOID")))
 		{
 			smtp_greet("553 ");
-			out(" Your IP address (");
+			out(" sorry, your IP address (");
 			out(remoteip);
 			if (*ptr)
 			{
@@ -5695,6 +5861,7 @@ qmail_smtpd(int argc, char **argv, char **envp)
 			smtp_greet("553 ");
 			if (*ptr)
 			{
+				out(" ");
 				out(ptr);
 				out(": from ");
 				out(remoteip);
@@ -5758,7 +5925,7 @@ addrrelay() /*- Rejection of relay probes. */
 void
 getversion_smtpd_c()
 {
-	static char    *x = "$Id: smtpd.c,v 1.140 2010-03-30 16:43:44+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: smtpd.c,v 1.141 2010-04-23 19:20:52+05:30 Cprogrammer Exp mbhangui $";
 
 #ifdef INDIMAIL
 	x = sccsidh;
