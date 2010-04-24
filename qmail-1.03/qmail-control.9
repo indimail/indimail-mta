@@ -58,6 +58,7 @@ in
 .IR rcpthosts ,
 .IR signatures ,
 .IR smtproutes ,
+.IR qmtproutes ,
 .IR rejectspam ,
 .IR spamfilter ,
 .IR spamredirect ,
@@ -68,6 +69,7 @@ in
 .IR signaturedomains ,
 .IR nosignaturedomains ,
 .IR badhost ,
+.IR badip ,
 and
 .IR virtualdomains .
 Trailing spaces and tabs are allowed in any control file.
@@ -112,7 +114,8 @@ The following control files can have regular expressions for match if QREGEX env
 variable is defined
 
 .IR badhelo ,
-.IR badhost
+.IR badhost ,
+.IR badip ,
 .IR blackholedsender ,
 .IR blackholedrcpt ,
 .IR badmailfrom ,
@@ -202,6 +205,7 @@ control	default	used by
 .I recipients	\fR(none)	\fRqmail-smtpd
 .I smtpgreeting	\fIme	\fRqmail-smtpd
 .I smtproutes	\fR(none)	\fRqmail-remote
+.I qmtproutes	\fR(none)	\fRqmail-remote
 .I spfbehavior	\fR0	\fRqmail-smtpd
 .I spfexp	\fR(default)	\fRqmail-smtpd
 .I spfguess	\fR(none)	\fRqmail-smtpd
