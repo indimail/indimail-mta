@@ -358,7 +358,8 @@ main(int argc, char **argv)
 	do_lst("blackholedrcpt",  "Any SMTP connection is allowed.", "", " is immediately dropped for RCPT TO.");
 	do_lst("blackholedrcptpatterns","Any SMTP connection is allowed.", "", " is immediately dropped for RCPT TO. (Not if line starts with !).");
 	do_lst("badhelo", "Any HELO/EHLO greeting is allowed.", "", " not accepted in HELO/EHLO.");
-	do_lst("badhost","Any external remote hosts are allow.",""," pattern will be rejected for external host.");
+	do_lst("badhost","Any external remote hosts are allowed.",""," pattern will be rejected for external host.");
+	do_lst("badip","Any external IP are allowed.",""," pattern will be rejected for external IP.");
 	do_lst("badmailfrom",     "Any MAIL FROM is allowed.", "", " not accepted in MAIL FROM.");
 	do_lst("badmailpatterns", "Any MAIL FROM is allowed.", "", " not accepted in MAIL FROM (Not if line starts with !).");
 	do_lst("badrcptto",       "Any RCPT TO is allowed.", "", " not accepted in RCPT TO.");
@@ -432,6 +433,7 @@ main(int argc, char **argv)
 
 	do_str("smtpgreeting", 1, "smtpgreeting", "SMTP greeting: 220 ");
 	do_lst("smtproutes", "No artificial SMTP routes.", "SMTP route: ", "");
+	do_lst("qmtproutes", "No artificial QMTP routes.", "QMTP route: ", "");
 	do_int("timeoutconnect", "60", "SMTP client connection timeout is ", " seconds");
 	do_int("timeoutremote", "1200", "SMTP client data timeout is ", " seconds");
 	do_int("timeoutsmtpd", "1200", "SMTP server data timeout is ", " seconds");
@@ -507,6 +509,8 @@ main(int argc, char **argv)
 		if (str_equal(d->d_name,"badhelo"))
 			continue;
 		if (str_equal(d->d_name,"badhost"))
+			continue;
+		if (str_equal(d->d_name,"badip"))
 			continue;
 		if (str_equal(d->d_name, "badmailpatterns"))
 			continue;
@@ -585,6 +589,8 @@ main(int argc, char **argv)
 		if (str_equal(d->d_name, "smtpgreeting"))
 			continue;
 		if (str_equal(d->d_name, "smtproutes"))
+			continue;
+		if (str_equal(d->d_name, "qmtproutes"))
 			continue;
 		if (str_equal(d->d_name, "queue_base"))
 			continue;
