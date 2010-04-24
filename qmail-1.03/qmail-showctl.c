@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-showctl.c,v $
+ * Revision 1.51  2010-04-24 20:13:53+05:30  Cprogrammer
+ * added badip, qmtproutes control files
+ *
  * Revision 1.50  2010-02-10 08:59:05+05:30  Cprogrammer
  * removed dependency on indimail
  *
@@ -710,7 +713,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_showctl_c()
 {
-	static char    *x = "$Id: qmail-showctl.c,v 1.50 2010-02-10 08:59:05+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: qmail-showctl.c,v 1.51 2010-04-24 20:13:53+05:30 Cprogrammer Stab mbhangui $";
 
 #ifdef INDIMAIL
 	x = sccsidh;
