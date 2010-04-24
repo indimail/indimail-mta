@@ -1,5 +1,9 @@
 /*
  * $Log: GetSmtproute.c,v $
+ * Revision 2.5  2010-04-24 15:27:38+05:30  Cprogrammer
+ * new function get_smtp_qmtp_port to parse both smtproutes, qmtproutes file
+ * return QMTP or SMTP port.
+ *
  * Revision 2.4  2005-12-29 22:44:55+05:30  Cprogrammer
  * use getEnvConfigStr to set variables from environment variables
  *
@@ -20,7 +24,7 @@
 #include <ctype.h>
 
 #ifndef	lint
-static char     sccsid[] = "$Id: GetSmtproute.c,v 2.4 2005-12-29 22:44:55+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: GetSmtproute.c,v 2.5 2010-04-24 15:27:38+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 /*
@@ -33,25 +37,40 @@ static char     sccsid[] = "$Id: GetSmtproute.c,v 2.4 2005-12-29 22:44:55+05:30 
 int
 GetSmtproute(char *domain)
 {
-	char           *ptr, *qmaildir, *controldir;
-	FILE           *fp;
-	int             len;
-	char            buffer[2048], smtproute[1024];
+	char           *qmaildir, *controldir, *routes;
+	int             default_port;
+	char            smtproute[1024];
 
 	getEnvConfigStr(&qmaildir, "QMAILDIR", QMAILDIR);
 	getEnvConfigStr(&controldir, "CONTROLDIR", "control");
-	if (snprintf(smtproute, sizeof(smtproute) - 1, "%s/%s/smtproutes", qmaildir, controldir) == -1)
+	if ((routes = getenv("ROUTES")) && *routes && !memcmp(routes, "qmtp", 4))
+		default_port = PORT_QMTP;
+	else
+		default_port = PORT_SMTP;
+	if (snprintf(smtproute, sizeof(smtproute) - 1,
+		"%s/%s/%s", qmaildir, controldir, default_port == PORT_SMTP ? "smtproutes" : "qmtproutes") == -1)
 	{
 		errno = ENAMETOOLONG;
 		return(-1);
 	}
-	if(!(fp = fopen(smtproute, "r")))
+	return (get_smtp_qmtp_port(smtproute, domain, default_port));
+}
+
+int
+get_smtp_qmtp_port(char *file, char *domain, int default_port)
+{
+	char            buffer[2048];
+	char           *ptr;
+	int             len;
+	FILE           *fp;
+
+	if(!(fp = fopen(file, "r")))
 	{
 		if(errno == ENOENT)
-			return(25);
+			return(default_port);
 		else
 		{
-			fprintf(stderr, "GetSmtproute: %s %s\n", smtproute, strerror(errno));
+			fprintf(stderr, "GetSmtproute: %s %s\n", file, strerror(errno));
 			return(-1);
 		}
 	}
@@ -72,9 +91,9 @@ GetSmtproute(char *domain)
 				if(*(ptr + 1))
 					return(atoi(ptr + 1));
 				else
-					return(25);
+					return(default_port);
 			} else
-				return(25);
+				return(default_port);
 		}
 		if((ptr = strchr(buffer, ':')))
 		{
@@ -89,14 +108,14 @@ GetSmtproute(char *domain)
 					if(*(ptr + 1))
 						return(atoi(ptr + 1));
 					else
-						return(25);
+						return(default_port);
 				} else
-					return(25);
+					return(default_port);
 			}
 		}
 	}
 	fclose(fp);
-	return(25);
+	return(default_port);
 }
 
 void
