@@ -1217,10 +1217,11 @@ you can use the \fBinitsvc(8)\fR command.
 .SH POST Execution Handle
 Some indimail programs have a post execution handle. A post execution handle is a program with
 the same name as that of the calling program but in the directory INDIMAIL/libexec.
-On successful completion, such programs with this handle will execute the handle program and return
-the status of the called handle program. If the handle program is not accessible, the return status
-is zero. Normally, the handle program always gets executed from INDIMAIL/libexec directory, but
-you can override the program called by setting the environment variable \fBPOST_HANDLE\fR.
+On successful completion, such programs will execute the handle program and return
+the status of the called handle program. If the handle program is not accessible, the return
+status is zero. Normally, the handle program always gets executed from INDIMAIL/libexec
+directory, but you can override the program called by setting the environment variable
+\fBPOST_HANDLE\fR.
 
 Post execution handle is useful when you want to achieve a task that is beyond the scope of IndiMail's
 programs. These handle help you to extend the functionality of indimail programs when adding domains,
