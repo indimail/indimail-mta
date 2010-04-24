@@ -1,5 +1,8 @@
 /*
  * $Log: vdelivermail.c,v $
+ * Revision 2.53  2010-04-24 15:21:45+05:30  Cprogrammer
+ * set env variable SMTPROUTE or QMTPROUTE depending on value of ROUTES env variable
+ *
  * Revision 2.52  2010-03-24 10:15:18+05:30  Cprogrammer
  * moved overquota.sh to libexec
  *
@@ -239,7 +242,7 @@
 #include <sys/wait.h>
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vdelivermail.c,v 2.52 2010-03-24 10:15:18+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: vdelivermail.c,v 2.53 2010-04-24 15:21:45+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 /*- Globals */
@@ -366,7 +369,11 @@ main(int argc, char **argv)
 				} else /* avoid looping of mails */
 				if (strncmp(remote_hostid, local_hostid, MAX_BUFF))
 				{
-					snprintf(route, sizeof(route), "SMTPROUTE=%s", ip);
+					if ((ptr = getenv("ROUTES")) && (*ptr && !memcmp(ptr, "qmtp", 4)))
+						*ptr = 'Q';
+					else
+						*ptr = 'S';
+					snprintf(route, sizeof(route), "%cMTPROUTE=%s", *ptr, ip);
 					putenv(route);
 					switch (qmail_remote(TheUser, TheDomain))
 					{

@@ -826,7 +826,9 @@ USE_SYNCDIR       |qmail-queue  |used    |Emulates BSD style synchronous
                   |qmail-todo   |        |
 ROUTES            |qmail-rspawn |set     |If defined as static, control/smtproutes
                   |             |        |is used, else hostcntrl is used and
-                  |             |        |SMTPROUTE environment variables is set
+                  |             |        |SMTPROUTE/QMTPROUTE environment variables
+                  |             |        |is set depending on ROUTES is defined as
+                  |             |        |smtp or qmtp
 SMTPROUTE         |qmail-rspawn |used    |overrides control/smtproutes
 SMTPROUTE         |qmail-remote |        |
 AUTH_SMTP         |qmail-remote |used    |Uses Authenticated SMTP on the remote

@@ -1,5 +1,9 @@
 /*
  * $Log: indimail.h,v $
+ * Revision 2.190  2010-04-24 14:58:51+05:30  Cprogrammer
+ * define SMTP, QMTP, QMQP ports
+ * new function get_smtp_qmtp_port to parse both smtproutes / qmtproutes
+ *
  * Revision 2.189  2010-04-23 10:24:48+05:30  Cprogrammer
  * added spamcount arg to readLogFile()
  *
@@ -882,7 +886,7 @@
 #define INDIMAILH_H
 
 #ifndef	lint
-static char     sccsidh[] = "$Id: indimail.h,v 2.189 2010-04-23 10:24:48+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsidh[] = "$Id: indimail.h,v 2.190 2010-04-24 14:58:51+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #include "config.h"
@@ -915,6 +919,9 @@ typedef long long mdir_t;
 #define SCNu64 "llu"
 #endif
 #define SALTSIZE        32
+#define PORT_SMTP 25
+#define PORT_QMTP 209
+#define PORT_QMQP 628
 
 #ifdef USE_MYSQL
 #include <mysql.h>
@@ -1619,6 +1626,7 @@ char           *get_local_ip();
 char           *get_local_hostid();
 int             get_smtp_service_port(char *, char *, char *);
 int             GetSmtproute(char *);
+int             get_smtp_qmtp_port(char *, char *, int);
 int             qmail_remote(char *, char *);
 int             qmail_tmda(char *, int *);
 int             error_temp(int);

@@ -34,7 +34,7 @@ Known values for options are:
     [--domainlimits]
     [--chkrecipient --cugmail --authsmtp --authall --chkrelay]
     [--masquerade] [--antispoof]
-    [--routes --min-free=M --skipsend]
+	[--routes=smtp|qmtp|static]
     [--deliverylimit-count=D --deliverylimit-size=S]
     [--rbl=list]
     [--content-filter=c]
@@ -107,8 +107,8 @@ Known values for options are:
   e              - Exit value of spamfilter that should be treated as spam
   localfilter    - enable filtering of mails to qmail-local
   remotefilter   - enable filtering of mails to qmail-remote
-  routes         - Perform Dynamic routing (instead of static smtproutes)
   masquerade     - Allow user to change Mail From when using authenticated smtp
+  routes         - Perform SMTPROUTE / QMTPROUTE / static routing
   rbl            - Deploy RBL lookups
   skipsend       - Skip creation of send script
   fsync          - Sync files and directories when writing files
@@ -130,6 +130,92 @@ Known values for options are:
   odmr           - Setup SMTP for ODMR (On Demand Mail Relay)
   private_key    - Path to Private key created by dknewkey
   ssl            - Use SSL encrypted communication
+
+--qmtp=Port --qbase=queue_path --qcount=N --qstart=I
+	--servicedir=service_path --cntrldir=cntrl_path
+	--localip=a --maxdaemons=m --maxperip=i
+	[--fsync --syncdir]
+	[--memory=b --min-free=M]
+	[--qhpsi=q]
+	[--spamfilter=spamfilter_args]
+	[--logfilter=filter_fifo]
+	[--rejectspam=r --spamexitcode=e]
+	[--dkverify=dk|dkim|both|none]
+	[--dksign=dk|dkim|both|none --private_key=private_key]
+
+ Installs a new queue with a QMTP Listener
+  m              - Concurrency of connections to allow
+  i              - Concurrency of connections to be allowed from a
+                   single ip address
+  a              - IP Address to listen
+  N              - No of Queues
+  I              - Numeral Prefix of first queue (i.e 1 for INDIMAIL/queue/queue1)
+  M              - Minimum Disk Space to maintain in queue after which
+                   Temporary error will be returned
+  b              - Max Memory that QMTP can allocate
+  Port           - Bind on this port for QMTP
+  service_path   - Path where supervise scripts will be installed
+  queue_path     - Path where the queues are installed. If this is different from
+                   INDIMAIL appropriate links will be created in
+                   INDIMAIL
+  cntrl_path     - Path where Qmail control files are stored
+  fsync          - Sync files and directories when writing files
+  syncdir        - Use BSD style sync semantics for flushing directories
+  q              - Full path to an external virus scanner (like clamdscan)
+  spamfilter     - Spamfilter program along with arguments
+
+  filter_fifo    - Capture additional status message from spamfilter in 
+                   smtpd logfile via filter_fifo
+  r              - Mails get rejected as spam if exit status of spamfilter
+                   equals the value of spamexitcode. r can have following values
+                   0 - Do not reject SPAM mails
+                   1 - Bounce SPAM Mails.
+                   2 - Blackhole SPAM Mails
+  e              - Exit value of spamfilter that should be treated as spam
+  private_key    - Path to Private key created by dknewkey
+
+--qmqp=Port --qbase=queue_path --qcount=N --qstart=I
+	--servicedir=service_path --cntrldir=cntrl_path
+	--localip=a --maxdaemons=m --maxperip=i
+	[--fsync --syncdir]
+	[--memory=b --min-free=M]
+	[--qhpsi=q]
+	[--spamfilter=spamfilter_args]
+	[--logfilter=filter_fifo]
+	[--rejectspam=r --spamexitcode=e]
+	[--dkverify=dk|dkim|both|none]
+	[--dksign=dk|dkim|both|none --private_key=private_key]
+
+ Installs a new queue with a QMQP Listener
+  m              - Concurrency of connections to allow
+  i              - Concurrency of connections to be allowed from a
+                   single ip address
+  a              - IP Address to listen
+  N              - No of Queues
+  I              - Numeral Prefix of first queue (i.e 1 for INDIMAIL/queue/queue1)
+  M              - Minimum Disk Space to maintain in queue after which
+                   Temporary error will be returned
+  b              - Max Memory that QMTP can allocate
+  Port           - Bind on this port for QMTP
+  service_path   - Path where supervise scripts will be installed
+  queue_path     - Path where the queues are installed. If this is different from
+                   INDIMAIL appropriate links will be created in
+                   INDIMAIL
+  cntrl_path     - Path where Qmail control files are stored
+  fsync          - Sync files and directories when writing files
+  syncdir        - Use BSD style sync semantics for flushing directories
+  q              - Full path to an external virus scanner (like clamdscan)
+  spamfilter     - Spamfilter program along with arguments
+
+  filter_fifo    - Capture additional status message from spamfilter in 
+                   smtpd logfile via filter_fifo
+  r              - Mails get rejected as spam if exit status of spamfilter
+                   equals the value of spamexitcode. r can have following values
+                   0 - Do not reject SPAM mails
+                   1 - Bounce SPAM Mails.
+                   2 - Blackhole SPAM Mails
+  e              - Exit value of spamfilter that should be treated as spam
+  private_key    - Path to Private key created by dknewkey
 
 --greylist=port --min-resend-min=m --resend-win-hr=g --timeout-days=t
         --context-file=f --save_interval=s --whitelist=w --hash-size=s
@@ -155,7 +241,7 @@ Known values for options are:
     [--proxy=destport]
     [--legacyserver]
     [--postmaster=user[@domain]]
-    [--ssl]
+	[--ssl|--tlsprog|--starttls]
 
   Installs a new IMAP4 Listner
   Port           - Bind on this port for IMAP
@@ -167,6 +253,8 @@ Known values for options are:
                    IMAP server
   postmaster     - name of the user who will be the contact for Certificates.
   ssl            - Use SSL encrypted communication
+  tlsprog        - External progam to enable TLS session
+  starttls       - Advertise STARTTLS capability
   m              - Concurrency of connections to allow
   i              - Concurrency of connections to be allowed from a
                    single ip address
@@ -180,7 +268,7 @@ Known values for options are:
     [--proxy=destport]
     [--legacyserver]
     [--postmaster=user[@domain]]
-    [--ssl]
+	[--ssl|--tlsprog|--starttls]
 
   Installs a new POP3 Listner
   Port           - Bind on this port for POP3
@@ -192,6 +280,8 @@ Known values for options are:
                    POP3 server
   postmaster     - name of the user who will be the contact for Certificates.
   ssl            - Use SSL encrypted communication
+  tlsprog        - External progam to enable TLS session
+  starttls       - Advertise STARTTLS capability
   m              - Concurrency of connections to allow
   i              - Concurrency of connections to be allowed from a
                    single ip address
@@ -202,6 +292,7 @@ Known values for options are:
     --domainlimits
     --servicedir=service_path --cntrldir=cntrl_path
     [--password-cache] [--query-cache]
+	[--routes=smtp|qmtp|static]
 
   Installs a new IndiMail Name Lookup Server
   fifo_path      - Install fifo specified by this path
@@ -212,6 +303,7 @@ Known values for options are:
   domainlimits   - Apply Domain Limits configured by vmoddomlimits(1)
   password-cache - Enable caching of passwords
   query-cache    - Enable caching of queries
+  routes         - Perform SMTPROUTE / QMTPROUTE / static routing
 
 --pwdlookup=socket_path --threads=N --timeout=t
     [--mysqlhost=mysqlhost --mysqluser=mysqluser --mysqlpass=mysqlpass]

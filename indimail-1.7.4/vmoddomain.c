@@ -1,5 +1,8 @@
 /*
  * $Log: vmoddomain.c,v $
+ * Revision 2.4  2010-04-24 09:31:01+05:30  Cprogrammer
+ * description now specifies SMTPROUTE/QMTPROUTE
+ *
  * Revision 2.3  2009-12-02 11:05:33+05:30  Cprogrammer
  * added option to turn on and off domain limits
  *
@@ -20,7 +23,7 @@
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vmoddomain.c,v 2.3 2009-12-02 11:05:33+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: vmoddomain.c,v 2.4 2010-04-24 09:31:01+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 static void     usage();
@@ -117,7 +120,7 @@ set_handler(char *dir, char *handler, uid_t uid, gid_t gid, int use_vfilter)
 				}
 				if (i != 2)
 				{
-					error_stack(stderr, "Invalid SMTPROUTE Specification [%s]\n", handler);
+					error_stack(stderr, "Invalid SMTPROUTE/QMTPROUTE Specification [%s]\n", handler);
 					return (1);
 				}
 			}
@@ -218,7 +221,7 @@ usage()
  	fprintf(stderr, "                    (2 %s)\n", BOUNCE_ALL);
 	fprintf(stderr, "                    (3 Maildir)\n");
 	fprintf(stderr, "                    (4 Email Addres)\n");
-	fprintf(stderr, "                    (5 IP Address - SMTPROUTE spec)\n");
+	fprintf(stderr, "                    (5 IP Address - SMTPROUTE/QMTPROUTE spec)\n");
 	return;
 }
 

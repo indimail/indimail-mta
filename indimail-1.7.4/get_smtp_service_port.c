@@ -1,5 +1,8 @@
 /*
  * $Log: get_smtp_service_port.c,v $
+ * Revision 2.4  2010-04-24 14:58:11+05:30  Cprogrammer
+ * return qmtp or smtp port depending on the value of ROUTES env variable
+ *
  * Revision 2.3  2008-05-28 16:35:49+05:30  Cprogrammer
  * removed USE_MYSQL
  *
@@ -38,7 +41,7 @@
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: get_smtp_service_port.c,v 2.3 2008-05-28 16:35:49+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: get_smtp_service_port.c,v 2.4 2010-04-24 14:58:11+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef CLUSTERED_SITE
@@ -52,11 +55,16 @@ get_smtp_service_port(char *SrcHost, char *domain, char *hostname)
 	char            Domain[MAX_BUFF], SqlBuf[SQL_BUF_SIZE];
 	char           *ptr, *src_host;
 	register int    i;
+	int             default_port;
 	MYSQL_RES      *res;
 	MYSQL_ROW       row;
 
+	if ((ptr = getenv("ROUTES")) && (*ptr && !memcmp(ptr, "qmtp", 4)))
+		default_port = PORT_QMTP;
+	else
+		default_port = PORT_SMTP;
 	if (open_central_db(0))
-		return (25);
+		return (default_port);
 	if(!domain || !*domain)
 	{
 		getEnvConfigStr(&ptr, "DEFAULT_DOMAIN", DEFAULT_DOMAIN);
@@ -66,7 +74,7 @@ get_smtp_service_port(char *SrcHost, char *domain, char *hostname)
 	if(!SrcHost || !*SrcHost)
 	{
 		if(!(src_host = get_local_ip()))
-			return(25);
+			return(default_port);
 	} else
 		src_host = SrcHost;
 	snprintf(SqlBuf, SQL_BUF_SIZE, 
@@ -78,12 +86,12 @@ get_smtp_service_port(char *SrcHost, char *domain, char *hostname)
 			create_table(ON_MASTER, "smtp_port", SMTP_TABLE_LAYOUT);
 		else
 			fprintf(stderr, "get_smtp_service_port: %s: %s\n", SqlBuf, mysql_error(&mysql[0]));
-		return(25);
+		return(default_port);
 	}
 	if (!(res = mysql_store_result(&mysql[0])))
 	{
 		fprintf(stderr, "get_smtp_service_port: mysql_store_result: %s\n", mysql_error(&mysql[0]));
-		return(25);
+		return(default_port);
 	}
 	for(i = -1;;)
 	{
@@ -93,15 +101,15 @@ get_smtp_service_port(char *SrcHost, char *domain, char *hostname)
 		{
 			i = atoi(row[0]);
 			mysql_free_result(res);
-			return(i);
+			return(i ? i : default_port);
 		}
 		if(*row[1] == '*')
 			i = atoi(row[0]);
 	}
 	mysql_free_result(res);
 	if(i == -1)
-		return(25);
-	return(i);
+		return(default_port);
+	return(i ? i : default_port);
 }
 #endif
 

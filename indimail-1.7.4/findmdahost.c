@@ -1,5 +1,8 @@
 /*
  * $Log: findmdahost.c,v $
+ * Revision 2.15  2010-04-24 09:29:23+05:30  Cprogrammer
+ * default port already set in GetSmtproute() or get_smtp_service_port()
+ *
  * Revision 2.14  2010-03-07 11:10:35+05:30  Cprogrammer
  * no need of checking host.cntrl. Check mcdinfo instead
  *
@@ -53,7 +56,7 @@
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: findmdahost.c,v 2.14 2010-03-07 11:10:35+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: findmdahost.c,v 2.15 2010-04-24 09:29:23+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef CLUSTERED_SITE
@@ -145,9 +148,6 @@ findmdahost(char *email)
 				port = GetSmtproute(real_domain);
 			if (port == -1)
 				return ((char *) 0);
-			else
-			if (!port)
-				port = 25;
 			snprintf(mailhost, MAX_BUFF, "%s:%s:%d", domain, (*rhostsptr)->mdahost, port);
 			return (mailhost);
 		}
