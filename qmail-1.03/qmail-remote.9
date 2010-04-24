@@ -384,6 +384,11 @@ as defined in
 .IR qmtproutes .
 If the recipient domain is listed neither in \fIqmtproutes\fR nor in \fIsmtproutes\fR,
 \fBqmail-remote\fR will choose the protocol according to MX priority.
+The qmtproutes control file is bypassed if the QMTPROUTE environment variable is set by
+.B qmail-rspawn.
+The QMTPROUTE environment variable has the same format as the entries in qmtproutes control files. It is used
+in a clustered environment where a single domain can exist across multiple hosts. In such a case the QMTPROUTE
+variable points to the host where the user's mailbox lies.
 
 .TP 5
 .I timeoutconnect

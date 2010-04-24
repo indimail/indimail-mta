@@ -240,7 +240,7 @@ stralloc        helohost = { 0 };
 stralloc        senderbind = { 0 };
 stralloc        localips = { 0 };
 stralloc        outgoingip = { 0 };
-int             cntrl_stat;
+int             cntrl_stat1, cntrl_stat2;
 stralloc        smtproutes = { 0 };
 struct constmap mapsmtproutes;
 #ifdef MXPS
@@ -1677,14 +1677,39 @@ getcontrols()
 		temp_control();
 	if (control_rldef(&helohost, "helohost", 1, (char *) 0) != 1)
 		temp_control();
+#ifdef MXPS
+	if ((ip = env_get("QMTPROUTE"))) /* mysql */
+	{
+		if (!stralloc_copyb(&qmtproutes, ip, str_len(ip) + 1))
+			temp_nomem();
+		cntrl_stat2 = 2;
+	} else
+		cntrl_stat2 = control_readfile(&qmtproutes, "qmtproutes", 0);
+	switch (cntrl_stat2)
+	{
+	case -1:
+		temp_control();
+	case 0:
+		if (!constmap_init(&mapqmtproutes, "", 0, 1))
+			temp_nomem();
+		break;
+	case 1:
+	case 2:
+		if (!constmap_init(&mapqmtproutes, qmtproutes.s, qmtproutes.len, 1))
+			temp_nomem();
+		break;
+	}
+#endif
 	if ((ip = env_get("SMTPROUTE"))) /* mysql */
 	{
 		if (!stralloc_copyb(&smtproutes, ip, str_len(ip) + 1))
 			temp_nomem();
-		cntrl_stat = 1;
+		cntrl_stat1 = 1;
+		if (cntrl_stat2 != 2)
+			cntrl_stat2 = 0;
 	} else
 	{
-		cntrl_stat = control_readfile(&smtproutes, "smtproutes", 0);
+		cntrl_stat1 = control_readfile(&smtproutes, "smtproutes", 0);
 		if (!controldir)
 		{
 			if (!(controldir = env_get("CONTROLDIR")))
@@ -1705,10 +1730,10 @@ getcontrols()
 		if ((fdmoreroutes = open_read(controlfile.s)) == -1)
 		{
 			if (errno != error_noent)
-				cntrl_stat = -1;
+				cntrl_stat1 = -1;
 		}
 	}
-	switch (cntrl_stat)
+	switch (cntrl_stat1)
 	{
 	case -1: /*- error reading smtproutes */
 		temp_control();
@@ -1721,21 +1746,6 @@ getcontrols()
 			temp_nomem();
 		break;
 	}
-#ifdef MXPS
-	switch (control_readfile(&qmtproutes, "qmtproutes", 0))
-	{
-	case -1:
-		temp_control();
-	case 0:
-		if (!constmap_init(&mapqmtproutes, "", 0, 1))
-			temp_nomem();
-		break;
-	case 1:
-		if (!constmap_init(&mapqmtproutes, qmtproutes.s, qmtproutes.len, 1))
-			temp_nomem();
-		break;
-	}
-#endif
 #ifdef BATV
 	if ((batvok = control_readline(&signkey, (x = env_get("SIGNKEY")) ? x : "signkey")) == -1)
 		temp_control();
@@ -2013,7 +2023,7 @@ main(int argc, char **argv)
 	if (relayhost && !*relayhost)
 		relayhost = 0;
 #endif
-	if (cntrl_stat) /*- set in getcontrols() above */
+	if (cntrl_stat1 ||  cntrl_stat2) /*- set in getcontrols() above */
 	{
 		/*- Look at smtproutes */
 		for (i = 0; !relayhost && i <= host.len; ++i)
@@ -2021,7 +2031,7 @@ main(int argc, char **argv)
 			if ((i == 0) || (i == host.len) || (host.s[i] == '.'))
 			{
 #ifdef MXPS
-				if ((relayhost = constmap(&mapqmtproutes, host.s + i, host.len - i))) {
+				if (cntrl_stat2 && (relayhost = constmap(&mapqmtproutes, host.s + i, host.len - i))) {
 					type = 's';
 					qmtpsend = 1;
 					port = PORT_QMTP;

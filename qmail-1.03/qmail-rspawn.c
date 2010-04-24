@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-rspawn.c,v $
+ * Revision 1.26  2010-04-24 07:40:36+05:30  Cprogrammer
+ * set SMTPROUTE / QMTPROUTE depending on route variable
+ *
  * Revision 1.25  2010-02-10 08:58:59+05:30  Cprogrammer
  * removed dependency on indimail
  *
@@ -223,13 +226,16 @@ spawn(fdmess, fdout, msgsize, s, qqeh, r, at)
 	*smtproute = 0;
 	if (!env_unset("SMTPROUTE"))
 		return (-1);
+	else
+	if (!env_unset("QMTPROUTE"))
+		return (-1);
 	/*
 	 * On SIGHUP have to figure out a way to set rcptflag to 0.
 	 * A new Distributed domain added will not work as distributed as
 	 * long as rcptflag is not reinitialized. Static smtproutes will
 	 * be used instead.
 	 */
-	if (!(ptr = env_get("ROUTES")) || (ptr &&  str_diffn(ptr, "static", 6)))
+	if ((ptr = env_get("ROUTES")) && (!str_diffn(ptr, "smtp", 4) || !str_diffn(ptr, "qmtp", 4)))
 	{
 		if (rcptflag)
 		{
@@ -248,7 +254,7 @@ spawn(fdmess, fdout, msgsize, s, qqeh, r, at)
 			{
 				if ((ip = findhost(r, 0)) != (char *) 0)
 				{
-					i = fmt_str(smtproute, "SMTPROUTE=");
+					i = fmt_str(smtproute, !str_diffn(ptr, "smtp", 4) ? "SMTPROUTE=" : "QMTPROUTE=");
 					i += fmt_strn(smtproute + i, ip, MAX_BUFF - 11);
 					if (i > MAX_BUFF - 1)
 						return (-1);
@@ -284,7 +290,7 @@ spawn(fdmess, fdout, msgsize, s, qqeh, r, at)
 void
 getversion_qmail_rspawn_c()
 {
-	static char    *x = "$Id: qmail-rspawn.c,v 1.25 2010-02-10 08:58:59+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: qmail-rspawn.c,v 1.26 2010-04-24 07:40:36+05:30 Cprogrammer Exp mbhangui $";
 
 #ifdef INDIMAIL
 	x = sccsidh;
