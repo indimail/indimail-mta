@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-remote.c,v $
+ * Revision 1.55  2010-04-24 20:13:17+05:30  Cprogrammer
+ * ability to use either QMTP or SMTP for clustered domains
+ *
  * Revision 1.54  2010-03-25 10:16:24+05:30  Cprogrammer
  * added QMTP support
  *
@@ -2259,7 +2262,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_remote_c()
 {
-	static char    *x = "$Id: qmail-remote.c,v 1.54 2010-03-25 10:16:24+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-remote.c,v 1.55 2010-04-24 20:13:17+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
