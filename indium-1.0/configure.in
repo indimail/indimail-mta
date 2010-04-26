@@ -15,6 +15,10 @@ AC_CONFIG_MACRO_DIR([m4])
 dnl Does not work on RHEL 5, CentOS 5 64 bit systems
 RPATH_LIB="$acl_libdirstem"
 
+dnl Checks for libraries.
+AC_CHECK_LIB(ssl, EVP_MD_CTX_init, [AC_SUBST([LIB_SSL], ["-lssl"]) AC_DEFINE([HAVE_SSL], [1],[OpenSSL Library])],,-lssl)
+AC_CHECK_LIB(crypt, crypt, [AC_SUBST([LIB_CRYPT], ["-lcrypt"]) AC_DEFINE([HAVE_CRYPT], [1],[crypt Library])],,)
+
 if test "$GCC" = yes ; then
 	CXXFLAGS="$CXXFLAGS -Wall"
 fi
@@ -255,10 +259,10 @@ AC_CHECK_LIB(mysqlclient -L${mysql_libdir}, mysql_real_connect,libs="$libs -lmys
 auth_inc="-I$indimaildir/include -I$mysql_incdir"
 case "$host" in
 	*-*-darwin*)
-	auth_libs="-L. -L$prefix/lib -lindimail $LIB_CRYPT -leps -lcdb -L$mysql_libdir -lmysqlclient $LIB_SSL -lm"
+	auth_libs="-L. -L$libdir -lindimail -leps -lcdb $LIB_CRYPT -L$mysql_libdir -lmysqlclient $LIB_SSL -lm"
 	;;
 	*)
-	auth_libs="-L. -L$libdir -lindimail $LIB_CRYPT -L$mysql_libdir -lmysqlclient $LIB_SSL -lm"
+	auth_libs="-L. -L$libdir -lindimail -leps -lcdb $LIB_CRYPT -L$mysql_libdir -lmysqlclient $LIB_SSL -lm"
 	;;
 esac
 
