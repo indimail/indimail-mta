@@ -1,5 +1,8 @@
 #
 # $Log: iwebadmin.spec.in,v $
+# Revision 1.2  2010-04-26 16:06:55+05:30  Cprogrammer
+# fixed --enable-ezmlmdir
+#
 # Revision 1.1  2010-04-26 15:17:29+05:30  Cprogrammer
 # Initial revision
 #
@@ -19,7 +22,7 @@
 # Initial revision
 #
 #
-# $Id: iwebadmin.spec.in,v 1.1 2010-04-26 15:17:29+05:30 Cprogrammer Exp mbhangui $
+# $Id: iwebadmin.spec.in,v 1.2 2010-04-26 16:06:55+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %define _unpackaged_files_terminate_build 1
 
@@ -181,7 +184,7 @@ fi
 if [ " %dist" = " mandrake" ] ; then
 ./configure --enable-indimaildir=%{_prefix} \
 	--libdir=%{_libdir} --x-libraries=%{_libdir} \
-	--enable-ezmlmdir=indimail --disable-ipauth --disable-trivial-password \
+	--enable-ezmlmdir=%{_prefix}/bin --disable-ipauth --disable-trivial-password \
 	--enable-mysqlincdir=%{mysqlPrefix}/include/mysql \
 	--enable-mysqllibdir=%{mysqlPrefix}/%{_lib}/mysql \
 	--enable-qmaildir=/var/indimail \
@@ -193,7 +196,7 @@ if [ " %dist" = " mandrake" ] ; then
 else
 ./configure --enable-indimaildir=%{_prefix} \
 	--libdir=%{_libdir} \
-	--enable-ezmlmdir=indimail --disable-ipauth --disable-trivial-password \
+	--enable-ezmlmdir=%{_prefix}/bin --disable-ipauth --disable-trivial-password \
 	--enable-mysqlincdir=%{mysqlPrefix}/include/mysql \
 	--enable-mysqllibdir=%{mysqlPrefix}/%{_lib}/mysql \
 	--enable-qmaildir=/var/indimail \

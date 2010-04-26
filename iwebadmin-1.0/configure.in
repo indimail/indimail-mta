@@ -270,7 +270,7 @@ AC_ARG_ENABLE(qmaildir, [  --enable-qmaildir=DIR     directory where qmail is in
 AC_DEFINE_UNQUOTED(QMAILDIR,"$qmaildir","")
 
 ezmlmdir=""
-for f in /usr/local/bin/ezmlm /usr/bin /usr/sbin /usr/local/bin
+for f in /var/indimail/bin/ezmlm /usr/bin /usr/sbin /usr/local/bin
 do
     if test -f $f/ezmlm-make
     then
