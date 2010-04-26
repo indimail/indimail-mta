@@ -1,5 +1,5 @@
 /*
- * $Id: limits.h,v 1.1.2.1 2004/11/20 01:10:41 tomcollins Exp $
+ * $Id: limits.h,v 1.1 2010-04-26 12:07:53+05:30 Cprogrammer Exp mbhangui $
  */
 
 #define LIMIT_TOKENS " :\t\r\n"

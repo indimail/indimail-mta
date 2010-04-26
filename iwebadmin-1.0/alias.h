@@ -1,5 +1,5 @@
 /*
- * $Id: alias.h,v 1.1.2.1 2004/11/20 01:10:41 tomcollins Exp $
+ * $Id: alias.h,v 1.1 2010-04-26 12:08:19+05:30 Cprogrammer Exp mbhangui $
  */
 
 void            adddotqmail();
