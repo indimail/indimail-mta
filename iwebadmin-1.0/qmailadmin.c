@@ -1,5 +1,5 @@
 /*
- * $Id: qmailadmin.c,v 1.6.2.16 2009/05/02 19:13:29 tomcollins Exp $
+ * $Id: qmailadmin.c,v 1.1 2010-04-26 11:24:01+05:30 Cprogrammer Exp mbhangui $
  * Copyright (C) 1999-2004 Inter7 Internet Technologies, Inc. 
  *
  * This program is free software; you can redistribute it and/or modify
@@ -39,7 +39,7 @@
 #include <stdlib.h>
 #include <stdlib.h>
 #include <string.h>
-#define _XOPEN_SOURCE
+#define _USE_XOPEN
 #include <unistd.h>
 #include <sys/stat.h>
 #include <unistd.h>
@@ -142,6 +142,7 @@ main(argc, argv)
 	char            returntext[MAX_BUFF];
 	int             i;
 	struct passwd  *pw;
+	extern char    *crypt(char *, char *);
 
 	init_globals();
 

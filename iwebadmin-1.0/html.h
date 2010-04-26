@@ -61,4 +61,3 @@
 #define HTML_ALIAS_MOD_DEST		"<td align=\"center\" valign=\"top\">%s</td>\n"
 #define HTML_ALIAS_MOD_DELETE		"<td align=\"center\" valign=\"top\">" \
 	"<a href=\"%s&modu=%C&linedata=%C&action=delentry\">" HTML_BTN_DELETE "</a></td>\n"
-	

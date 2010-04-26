@@ -1,5 +1,5 @@
 /*
- * $Id: show.c,v 1.2.2.1 2004/11/20 01:10:41 tomcollins Exp $
+ * $Id: show.c,v 1.1 2010-04-26 11:25:12+05:30 Cprogrammer Exp mbhangui $
  * Copyright (C) 1999-2004 Inter7 Internet Technologies, Inc. 
  *
  * This program is free software; you can redistribute it and/or modify

@@ -1,4 +1,3 @@
-
 @SET_MAKE@
 
 EXTRA_DIST=BUGS FAQ TRANSLATORS README.hooks html lang images contrib
@@ -8,8 +7,6 @@ htmldir=@htmldir@
 imagedir=@imagedir@
 QA_PACKAGE=@QA_PACKAGE@
 QA_VERSION=@QA_VERSION@
-PACKAGE=@QA_PACKAGE@
-VERSION=@QA_VERSION@
 
 #
 # Install qmailadmin setuid to @indimailuser@
@@ -31,6 +28,19 @@ COMMONSOURCES=qmailadmin.c alias.c autorespond.c forward.c mailinglist.c \
 qmailadmin_SOURCES=$(COMMONSOURCES) 
 qmailadmin_LDADD=@auth_libs@
 
+noinst_SCRIPTS = iwebadmin.spec iwebadmin-@VERSION@-rpmlintrc
+
+MOSTLYCLEANFILES = iwebadmin.spec iwebadmin-@VERSION@-rpmlintrc
+
+edit = sed \
+	-e 's,@indimaildir\@,$(indimaildir),g' \
+	-e 's,@htmldir\@,$(htmldir),g' \
+	-e 's,@htmllibdir\@,$(htmllibdir),g' \
+	-e 's,@cgibindir\@,$(cgibindir),g' \
+	-e 's,@imagedir\@,$(imagedir),g' \
+	-e 's,@version\@,$(VERSION),g' \
+	-e 's,@prefix\@,$(prefix),g'
+
 qmailadmin.o: config.h qmailadmin.h 
 alias.o: config.h qmailadmin.h qmailadminx.h 
 autorespond.o: config.h qmailadmin.h qmailadminx.h 
@@ -47,7 +57,12 @@ cgi.o: config.h qmailadmin.h qmailadminx.h
 limits.o: config.h qmailadmin.h qmailadminx.h 
 dotqmail.o: config.h qmailadmin.h qmailadminx.h 
 
-DEFS=-I. @auth_incs@ 
+iwebadmin.spec: iwebadmin.spec.in
+	($(edit) $@.in;cat doc/ChangeLog) > $@
+iwebadmin-@VERSION@-rpmlintrc: iwebadmin-rpmlintrc.in
+	$(edit) iwebadmin-rpmlintrc.in > $@
+
+DEFS=-I. @auth_incs@
 
 # Maintainer stuff
 

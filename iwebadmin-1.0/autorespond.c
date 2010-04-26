@@ -1,5 +1,5 @@
 /*
- * $Id: autorespond.c,v 1.3.2.7 2007/09/21 23:27:38 tomcollins Exp $
+ * $Id: autorespond.c,v 1.1 2010-04-26 11:24:48+05:30 Cprogrammer Exp mbhangui $
  * Copyright (C) 1999-2004 Inter7 Internet Technologies, Inc. 
  *
  * This program is free software; you can redistribute it and/or modify

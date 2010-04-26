@@ -1,5 +1,5 @@
 /*
- * $Id: auth.c,v 1.3.2.7 2009/05/02 17:51:40 tomcollins Exp $
+ * $Id: auth.c,v 1.1 2010-04-26 11:24:45+05:30 Cprogrammer Exp mbhangui $
  * Copyright (C) 1999-2004 Inter7 Internet Technologies, Inc. 
  *
  * This program is free software; you can redistribute it and/or modify

@@ -1,4 +1,4 @@
-/* 
+/*
  * $Id: printh.h,v 1.1.2.1 2004/11/10 05:24:11 tomcollins Exp $
  * Copyright (C) 2004 Tom Logic LLC 
  *
@@ -20,6 +20,6 @@
 #include <stdlib.h>
 #include <stdarg.h>
 
-int vsnprinth (char *buffer, size_t size, const char *format, va_list ap);
-int snprinth (char *buffer, size_t size, const char *format, ...);
-int printh (const char *format, ...);
+int             vsnprinth(char *buffer, size_t size, const char *format, va_list ap);
+int             snprinth(char *buffer, size_t size, const char *format, ...);
+int             printh(const char *format, ...);

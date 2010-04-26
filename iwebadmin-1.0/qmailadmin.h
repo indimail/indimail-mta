@@ -1,4 +1,4 @@
-/* 
+/*
  * $Id: qmailadmin.h,v 1.1.1.1.2.6 2006/02/05 17:07:27 tomcollins Exp $
  * Copyright (C) 1999-2004 Inter7 Internet Technologies, Inc. 
  *
@@ -19,15 +19,18 @@
 
 #include <time.h>
 
-/* Some platforms use '.maildir' instead of 'Maildir' as the mail directory
- * name.  Furture versions of Vpopmail might define it.  Until then, change
- * it below.
+/*
+ * Some platforms use '.maildir' instead of 'Maildir' as the mail directory
+ * * name.  Furture versions of Vpopmail might define it.  Until then, change
+ * * it below.
  */
 #ifndef MAILDIR
 #define MAILDIR "Maildir"
 #endif
 
-/* max # of forwards a user can set on the Modify User screen */
+/*
+ * max # of forwards a user can set on the Modify User screen 
+ */
 #define MAX_FORWARD_PER_USER 5
 
 #define QMAILADMIN_TEMPLATEDIR "QMAILADMIN_TEMPLATEDIR"
@@ -56,11 +59,12 @@
 #define ACTION_MODIFY 1
 #define ACTION_DELETE 2
 
-void del_id_files( char *);
-void init_globals();
-void quickAction (char *username, int action);
+void            del_id_files(char *);
+void            init_globals();
+void            quickAction(char *username, int action);
 
-/* copied from maildirquota.c in vpopmail
- * it really needs to get into vpopmail.h somehow
+/*
+ * copied from maildirquota.c in vpopmail
+ * * it really needs to get into vpopmail.h somehow
  */
-int readuserquota(const char* dir, long *sizep, int *cntp);
+int             readuserquota(const char *dir, long *sizep, int *cntp);
