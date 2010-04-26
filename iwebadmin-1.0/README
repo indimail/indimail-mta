@@ -1,0 +1,32 @@
+What is it?
+~~~~~~~~~~~
+QmailAdmin is a cgi program for administering Qmail with vchkpw.
+This version of QmailAdmin has been hacked to work with IndiMail
+
+Requirements:
+~~~~~~~~~~~~~
+- A UNIX computer (Linux/Solaris/BSD) and C compiler (gcc)
+
+- A web server (Apache, Zeus)
+    http://www.apache.org/
+
+- qmail 1.03 
+    http://cr.yp.to/qmail.html 
+    http://www.qmail.org/
+
+- indimail (a virtual domain addon for qmail) 
+    http://www.indimail.org/
+
+- ezmlm installed in /usr/local/bin/ezmlm 
+    http://cr.yp.to/ezmlm.html
+    http://www.ezmlm.org/
+
+Updates?
+~~~~~~~~
+ Latest version is available at:
+
+ http://sourceforge.net/projects/indimail/
+
+ Please refer your suggestions/bug reports to indimail-support@lists.sourceforge.net
+
+
