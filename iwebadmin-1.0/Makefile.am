@@ -11,7 +11,7 @@ QA_VERSION=@QA_VERSION@
 #
 # Install qmailadmin setuid to @indimailuser@
 #
-INSTALL_PROGRAM=${INSTALL} -o @indimailuser@ -m 6755 -g @indimailgroup@ $(AM_INSTALL_PROGRAM_FLAGS)
+INSTALL_PROGRAM = ${INSTALL}          -c
 INSTALL_STRIP_PROGRAM=${INSTALL_PROGRAM} -s
 
 bindir=@cgibindir@
@@ -95,3 +95,9 @@ install-data-local:
 	$(mkinstalldirs)         $(DESTDIR)@imagedir@
 	cp $(srcdir)/images/*.png $(DESTDIR)@imagedir@
 
+	if test `@idcommand@` = "0" ; then \
+		echo "chown root $(DESTDIR)$(bindir)/qmailadmin"; \
+		chown root $(DESTDIR)$(bindir)/qmailadmin; \
+		echo "chmod 4555 $(DESTDIR)$(bindir)/qmailadmin"; \
+		chmod 4555 $(DESTDIR)$(bindir)/qmailadmin; \
+	fi
