@@ -1,4 +1,4 @@
-/* 
+/*
  * $Id: qmailadminx.h,v 1.2.2.5 2007/09/21 23:27:39 tomcollins Exp $
  * Copyright (C) 1999-2004 Inter7 Internet Technologies, Inc. 
  *
@@ -20,61 +20,61 @@
 #include <unistd.h>
 #include <stdio.h>
 
-extern char Username[MAX_BUFF];
-extern char Domain[MAX_BUFF];
-extern char Password[MAX_BUFF];
-extern char Gecos[MAX_BUFF];
-extern char Quota[MAX_BUFF];
-extern char Time[MAX_BUFF];
-extern char ActionUser[MAX_BUFF];
-extern char Newu[MAX_BUFF];
-extern char Password1[MAX_BUFF];
-extern char Password2[MAX_BUFF];
-extern char Crypted[MAX_BUFF];
-extern char Alias[MAX_BUFF];
-extern char LineData[MAX_BUFF];
-extern char Action[MAX_BUFF];
-extern char Message[MAX_BIG_BUFF];
-extern char StatusMessage[MAX_BIG_BUFF];
-extern int CGIValues[256];
-extern char Pagenumber[MAX_BUFF];
-extern char SearchUser[MAX_BUFF];
-extern time_t Mytime;
-extern char *TmpCGI;
-extern char TmpBuf[MAX_BIG_BUFF];
-extern char TmpBuf1[MAX_BUFF];
-extern char TmpBuf2[MAX_BUFF];
-extern char TmpBuf3[MAX_BUFF];
-extern char TempBuf[MAX_BUFF];
-extern int Compressed;
-extern FILE *actout;
-extern char *html_text[MAX_LANG_STR+1];
+extern char     Username[MAX_BUFF];
+extern char     Domain[MAX_BUFF];
+extern char     Password[MAX_BUFF];
+extern char     Gecos[MAX_BUFF];
+extern char     Quota[MAX_BUFF];
+extern char     Time[MAX_BUFF];
+extern char     ActionUser[MAX_BUFF];
+extern char     Newu[MAX_BUFF];
+extern char     Password1[MAX_BUFF];
+extern char     Password2[MAX_BUFF];
+extern char     Crypted[MAX_BUFF];
+extern char     Alias[MAX_BUFF];
+extern char     LineData[MAX_BUFF];
+extern char     Action[MAX_BUFF];
+extern char     Message[MAX_BIG_BUFF];
+extern char     StatusMessage[MAX_BIG_BUFF];
+extern int      CGIValues[256];
+extern char     Pagenumber[MAX_BUFF];
+extern char     SearchUser[MAX_BUFF];
+extern time_t   Mytime;
+extern char    *TmpCGI;
+extern char     TmpBuf[MAX_BIG_BUFF];
+extern char     TmpBuf1[MAX_BUFF];
+extern char     TmpBuf2[MAX_BUFF];
+extern char     TmpBuf3[MAX_BUFF];
+extern char     TempBuf[MAX_BUFF];
+extern int      Compressed;
+extern FILE    *actout;
+extern char    *html_text[MAX_LANG_STR + 1];
 
 extern struct vlimits Limits;
-extern int num_of_mailinglist;
-extern int AdminType;
-extern int MaxPopAccounts;
-extern int MaxAliases;
-extern int MaxForwards;
-extern int MaxAutoResponders;
-extern int MaxMailingLists;
+extern int      num_of_mailinglist;
+extern int      AdminType;
+extern int      MaxPopAccounts;
+extern int      MaxAliases;
+extern int      MaxForwards;
+extern int      MaxAutoResponders;
+extern int      MaxMailingLists;
 
-extern int CallVmoduser;
-extern int DisablePOP;
-extern int DisableIMAP;
-extern int DisableDialup;
-extern int DisablePasswordChanging;
-extern int DisableWebmail;
-extern int DisableRelay;
+extern int      CallVmoduser;
+extern int      DisablePOP;
+extern int      DisableIMAP;
+extern int      DisableDialup;
+extern int      DisablePasswordChanging;
+extern int      DisableWebmail;
+extern int      DisableRelay;
 
-extern int CurPopAccounts;
-extern int CurForwards;
-extern int CurBlackholes;
-extern int CurAutoResponders;
-extern int CurMailingLists;
+extern int      CurPopAccounts;
+extern int      CurForwards;
+extern int      CurBlackholes;
+extern int      CurAutoResponders;
+extern int      CurMailingLists;
 
-extern int Uid;
-extern int Gid;
-extern char RealDir[156];
+extern int      Uid;
+extern int      Gid;
+extern char     RealDir[156];
 
-extern char Lang[40];
+extern char     Lang[40];

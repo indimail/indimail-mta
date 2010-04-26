@@ -1,5 +1,5 @@
 /*
- * $Id: forward.c,v 1.2.2.5 2005/01/23 17:35:11 tomcollins Exp $
+ * $Id: forward.c,v 1.1 2010-04-26 11:25:01+05:30 Cprogrammer Exp mbhangui $
  * Copyright (C) 1999-2004 Inter7 Internet Technologies, Inc. 
  *
  * This program is free software; you can redistribute it and/or modify

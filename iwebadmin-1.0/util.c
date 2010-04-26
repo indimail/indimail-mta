@@ -1,5 +1,5 @@
 /*
- * $Id: util.c,v 1.4.2.10 2009/05/02 18:22:25 tomcollins Exp $
+ * $Id: util.c,v 1.1 2010-04-26 11:25:21+05:30 Cprogrammer Exp mbhangui $
  * Copyright (C) 1999-2004 Inter7 Internet Technologies, Inc. 
  *
  * This program is free software; you can redistribute it and/or modify

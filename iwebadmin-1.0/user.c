@@ -1,5 +1,5 @@
 /*
- * $Id: user.c,v 1.11.2.21 2009/05/02 19:13:29 tomcollins Exp $
+ * $Id: user.c,v 1.1 2010-04-26 11:25:29+05:30 Cprogrammer Exp mbhangui $
  * Copyright (C) 1999-2004 Inter7 Internet Technologies, Inc. 
  *
  * This program is free software; you can redistribute it and/or modify
