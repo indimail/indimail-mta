@@ -15,6 +15,7 @@
 
 @SET_MAKE@
 
+
 VPATH = @srcdir@
 pkgdatadir = $(datadir)/@PACKAGE@
 pkgincludedir = $(includedir)/@PACKAGE@
@@ -61,6 +62,7 @@ am__objects_1 = qmailadmin.$(OBJEXT) alias.$(OBJEXT) \
 	cgi.$(OBJEXT) limits.$(OBJEXT) dotqmail.$(OBJEXT)
 am_qmailadmin_OBJECTS = $(am__objects_1)
 qmailadmin_OBJECTS = $(am_qmailadmin_OBJECTS)
+SCRIPTS = $(noinst_SCRIPTS)
 DEFAULT_INCLUDES = -I.@am__isrc@
 depcomp = $(SHELL) $(top_srcdir)/depcomp
 am__depfiles_maybe = depfiles
@@ -97,7 +99,7 @@ CGIBINTARGETS = @CGIBINTARGETS@
 CPP = @CPP@
 CPPFLAGS = @CPPFLAGS@
 CYGPATH_W = @CYGPATH_W@
-DEFS = -I. @auth_incs@ 
+DEFS = -I. @auth_incs@
 DEPDIR = @DEPDIR@
 ECHO_C = @ECHO_C@
 ECHO_N = @ECHO_N@
@@ -122,7 +124,7 @@ LTLIBOBJS = @LTLIBOBJS@
 MAKEINFO = @MAKEINFO@
 MKDIR_P = @MKDIR_P@
 OBJEXT = @OBJEXT@
-PACKAGE = @QA_PACKAGE@
+PACKAGE = @PACKAGE@
 PACKAGE_BUGREPORT = @PACKAGE_BUGREPORT@
 PACKAGE_NAME = @PACKAGE_NAME@
 PACKAGE_STRING = @PACKAGE_STRING@
@@ -135,7 +137,7 @@ RANLIB = @RANLIB@
 SET_MAKE = @SET_MAKE@
 SHELL = @SHELL@
 STRIP = @STRIP@
-VERSION = @QA_VERSION@
+VERSION = @VERSION@
 abs_builddir = @abs_builddir@
 abs_srcdir = @abs_srcdir@
 abs_top_builddir = @abs_top_builddir@
@@ -210,6 +212,17 @@ COMMONSOURCES = qmailadmin.c alias.c autorespond.c forward.c mailinglist.c \
 
 qmailadmin_SOURCES = $(COMMONSOURCES) 
 qmailadmin_LDADD = @auth_libs@
+noinst_SCRIPTS = iwebadmin.spec iwebadmin-@VERSION@-rpmlintrc
+MOSTLYCLEANFILES = iwebadmin.spec iwebadmin-@VERSION@-rpmlintrc
+edit = sed \
+	-e 's,@indimaildir\@,$(indimaildir),g' \
+	-e 's,@htmldir\@,$(htmldir),g' \
+	-e 's,@htmllibdir\@,$(htmllibdir),g' \
+	-e 's,@cgibindir\@,$(cgibindir),g' \
+	-e 's,@imagedir\@,$(imagedir),g' \
+	-e 's,@version\@,$(VERSION),g' \
+	-e 's,@prefix\@,$(prefix),g'
+
 all: config.h
 	$(MAKE) $(AM_MAKEFLAGS) all-am
 
@@ -547,7 +560,7 @@ distcleancheck: distclean
 	       exit 1; } >&2
 check-am: all-am
 check: check-am
-all-am: Makefile $(PROGRAMS) config.h
+all-am: Makefile $(PROGRAMS) $(SCRIPTS) config.h
 installdirs:
 	for dir in "$(DESTDIR)$(bindir)"; do \
 	  test -z "$$dir" || $(MKDIR_P) "$$dir"; \
@@ -567,6 +580,7 @@ install-strip:
 	  `test -z '$(STRIP)' || \
 	    echo "INSTALL_PROGRAM_ENV=STRIPPROG='$(STRIP)'"` install
 mostlyclean-generic:
+	-test -z "$(MOSTLYCLEANFILES)" || rm -f $(MOSTLYCLEANFILES)
 
 clean-generic:
 
@@ -667,7 +681,6 @@ uninstall-am: uninstall-binPROGRAMS
 	mostlyclean-generic pdf pdf-am ps ps-am tags uninstall \
 	uninstall-am uninstall-binPROGRAMS
 
-
 @SET_MAKE@
 
 qmailadmin.o: config.h qmailadmin.h 
@@ -685,6 +698,11 @@ show.o: config.h qmailadmin.h qmailadminx.h
 cgi.o: config.h qmailadmin.h qmailadminx.h 
 limits.o: config.h qmailadmin.h qmailadminx.h 
 dotqmail.o: config.h qmailadmin.h qmailadminx.h 
+
+iwebadmin.spec: iwebadmin.spec.in
+	($(edit) $@.in;cat doc/ChangeLog) > $@
+iwebadmin-@VERSION@-rpmlintrc: iwebadmin-rpmlintrc.in
+	$(edit) iwebadmin-rpmlintrc.in > $@
 
 # Maintainer stuff
 
