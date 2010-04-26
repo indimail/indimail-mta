@@ -1,5 +1,8 @@
 #
-# $Log: indium.spec.in,v $
+# $Log: iwebadmin.spec.in,v $
+# Revision 1.1  2010-04-26 15:17:29+05:30  Cprogrammer
+# Initial revision
+#
 # Revision 1.5  2010-02-24 09:13:43+05:30  Cprogrammer
 # added bwidget to Requires
 #
@@ -16,7 +19,7 @@
 # Initial revision
 #
 #
-# $Id: indium.spec.in,v 1.5 2010-02-24 09:13:43+05:30 Cprogrammer Exp mbhangui $
+# $Id: iwebadmin.spec.in,v 1.1 2010-04-26 15:17:29+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %define _unpackaged_files_terminate_build 1
 
@@ -42,7 +45,7 @@
 
 %if 0%{?opensuse_bs}
 # define to 1 if building on openSUSE build service
-%define build_on_obs       0
+%define build_on_obs       1
 %define fast_mode          0
 %else
 %define build_on_obs       0
@@ -52,10 +55,13 @@
 %define _prefix            @indimaildir@
 %define see_base           For a description of IndiMail visit http://www.indimail.org
 %define _verbose           0
-%define tai_version        1.0
-%define fbsql_version      1.0
-%define bwidget_version    1.8.0
-%define tcl_version        8.5
+
+%if %build_on_obs != 0
+# change mysqlPrefix to /usr for openSUSE buildservice
+%define mysqlPrefix        /usr
+%else
+%define mysqlPrefix        /usr
+%endif
 
 Summary: Web Administration GUI for IndiMail User Administration
 Name: iwebadmin
@@ -172,13 +178,31 @@ echo "reconfiguring..."
 fi
 fi
 
+if [ " %dist" = " mandrake" ] ; then
 ./configure --enable-indimaildir=%{_prefix} \
+	--libdir=%{_libdir} --x-libraries=%{_libdir} \
 	--enable-ezmlmdir=indimail --disable-ipauth --disable-trivial-password \
+	--enable-mysqlincdir=%{mysqlPrefix}/include/mysql \
+	--enable-mysqllibdir=%{mysqlPrefix}/%{_lib}/mysql \
+	--enable-qmaildir=/var/indimail \
 	--enable-modify-quota \
 	--enable-htmldir=@htmldir@ \
 	--enable-cgibindir=@cgibindir@ \
 	--enable-imagedir=@imagedir@ \
 	--enable-htmllibdir=@htmllibdir@
+else
+./configure --enable-indimaildir=%{_prefix} \
+	--libdir=%{_libdir} \
+	--enable-ezmlmdir=indimail --disable-ipauth --disable-trivial-password \
+	--enable-mysqlincdir=%{mysqlPrefix}/include/mysql \
+	--enable-mysqllibdir=%{mysqlPrefix}/%{_lib}/mysql \
+	--enable-qmaildir=/var/indimail \
+	--enable-modify-quota \
+	--enable-htmldir=@htmldir@ \
+	--enable-cgibindir=@cgibindir@ \
+	--enable-imagedir=@imagedir@ \
+	--enable-htmllibdir=@htmllibdir@
+fi
 
 %install
 [ "$RPM_BUILD_ROOT" != "/" ] && /bin/rm -fr $RPM_BUILD_ROOT
@@ -202,85 +226,85 @@ fi
 %defattr(-,root,root,0555)
 %dir %attr(555,root,qmail)              %{_prefix}
 
-%attr(444,root,indimail)                @cgibindir@/qmailadmin
+%attr(6755,indimail,indimail)       @cgibindir@/qmailadmin
 
-%attr(444,root,indimail)                %{_prefix}/share/qmailadmin/html/add_autorespond.html
-%attr(444,root,indimail)                %{_prefix}/share/qmailadmin/html/add_forward.html
-%attr(444,root,indimail)                %{_prefix}/share/qmailadmin/html/add_listdig.html
-%attr(444,root,indimail)                %{_prefix}/share/qmailadmin/html/add_listmod.html
-%attr(444,root,indimail)                %{_prefix}/share/qmailadmin/html/add_listuser.html
-%attr(444,root,indimail)                %{_prefix}/share/qmailadmin/html/add_mailinglist-idx.html
-%attr(444,root,indimail)                %{_prefix}/share/qmailadmin/html/add_mailinglist-no-idx.html
-%attr(444,root,indimail)                %{_prefix}/share/qmailadmin/html/add_user.html
-%attr(444,root,indimail)                %{_prefix}/share/qmailadmin/html/change_password.html
-%attr(444,root,indimail)                %{_prefix}/share/qmailadmin/html/change_password_success.html
-%attr(444,root,indimail)                %{_prefix}/share/qmailadmin/html/colortable
-%attr(444,root,indimail)                %{_prefix}/share/qmailadmin/html/del_autorespond_confirm.html
-%attr(444,root,indimail)                %{_prefix}/share/qmailadmin/html/del_forward_confirm.html
-%attr(444,root,indimail)                %{_prefix}/share/qmailadmin/html/del_listdig.html
-%attr(444,root,indimail)                %{_prefix}/share/qmailadmin/html/del_listmod.html
-%attr(444,root,indimail)                %{_prefix}/share/qmailadmin/html/del_listuser.html
-%attr(444,root,indimail)                %{_prefix}/share/qmailadmin/html/del_mailinglist_confirm.html
-%attr(444,root,indimail)                %{_prefix}/share/qmailadmin/html/del_user_confirm.html
-%attr(444,root,indimail)                %{_prefix}/share/qmailadmin/html/footer.html
-%attr(444,root,indimail)                %{_prefix}/share/qmailadmin/html/header.html
-%attr(444,root,indimail)                %{_prefix}/share/qmailadmin/html/main_menu.html
-%attr(444,root,indimail)                %{_prefix}/share/qmailadmin/html/mod_autorespond.html
-%attr(444,root,indimail)                %{_prefix}/share/qmailadmin/html/mod_dotqmail.html
-%attr(444,root,indimail)                %{_prefix}/share/qmailadmin/html/mod_mailinglist-idx.html
-%attr(444,root,indimail)                %{_prefix}/share/qmailadmin/html/mod_user.html
-%attr(444,root,indimail)                %{_prefix}/share/qmailadmin/html/setremotecatchall.html
-%attr(444,root,indimail)                %{_prefix}/share/qmailadmin/html/show_autorespond.html
-%attr(444,root,indimail)                %{_prefix}/share/qmailadmin/html/show_digest_subscribers.html
-%attr(444,root,indimail)                %{_prefix}/share/qmailadmin/html/show_forwards.html
-%attr(444,root,indimail)                %{_prefix}/share/qmailadmin/html/show_login.html
-%attr(444,root,indimail)                %{_prefix}/share/qmailadmin/html/show_mailinglist.html
-%attr(444,root,indimail)                %{_prefix}/share/qmailadmin/html/show_moderators.html
-%attr(444,root,indimail)                %{_prefix}/share/qmailadmin/html/show_subscribers.html
-%attr(444,root,indimail)                %{_prefix}/share/qmailadmin/html/show_users.html
-%attr(444,root,indimail)                %{_prefix}/share/qmailadmin/lang/bg
-%attr(444,root,indimail)                %{_prefix}/share/qmailadmin/lang/cs
-%attr(444,root,indimail)                %{_prefix}/share/qmailadmin/lang/da
-%attr(444,root,indimail)                %{_prefix}/share/qmailadmin/lang/de
-%attr(444,root,indimail)                %{_prefix}/share/qmailadmin/lang/en
-%attr(444,root,indimail)                %{_prefix}/share/qmailadmin/lang/es
-%attr(444,root,indimail)                %{_prefix}/share/qmailadmin/lang/fi
-%attr(444,root,indimail)                %{_prefix}/share/qmailadmin/lang/fr
-%attr(444,root,indimail)                %{_prefix}/share/qmailadmin/lang/hu
-%attr(444,root,indimail)                %{_prefix}/share/qmailadmin/lang/it
-%attr(444,root,indimail)                %{_prefix}/share/qmailadmin/lang/ja
-%attr(444,root,indimail)                %{_prefix}/share/qmailadmin/lang/lt
-%attr(444,root,indimail)                %{_prefix}/share/qmailadmin/lang/nl
-%attr(444,root,indimail)                %{_prefix}/share/qmailadmin/lang/no
-%attr(444,root,indimail)                %{_prefix}/share/qmailadmin/lang/pl
-%attr(444,root,indimail)                %{_prefix}/share/qmailadmin/lang/pt-br
-%attr(444,root,indimail)                %{_prefix}/share/qmailadmin/lang/ru
-%attr(444,root,indimail)                %{_prefix}/share/qmailadmin/lang/sk
-%attr(444,root,indimail)                %{_prefix}/share/qmailadmin/lang/sv
-%attr(444,root,indimail)                %{_prefix}/share/qmailadmin/lang/tr
-%attr(444,root,indimail)                %{_prefix}/share/qmailadmin/lang/zh-cn
+%attr(444,root,root)                %{_prefix}/share/qmailadmin/html/add_autorespond.html
+%attr(444,root,root)                %{_prefix}/share/qmailadmin/html/add_forward.html
+%attr(444,root,root)                %{_prefix}/share/qmailadmin/html/add_listdig.html
+%attr(444,root,root)                %{_prefix}/share/qmailadmin/html/add_listmod.html
+%attr(444,root,root)                %{_prefix}/share/qmailadmin/html/add_listuser.html
+%attr(444,root,root)                %{_prefix}/share/qmailadmin/html/add_mailinglist-idx.html
+%attr(444,root,root)                %{_prefix}/share/qmailadmin/html/add_mailinglist-no-idx.html
+%attr(444,root,root)                %{_prefix}/share/qmailadmin/html/add_user.html
+%attr(444,root,root)                %{_prefix}/share/qmailadmin/html/change_password.html
+%attr(444,root,root)                %{_prefix}/share/qmailadmin/html/change_password_success.html
+%attr(444,root,root)                %{_prefix}/share/qmailadmin/html/colortable
+%attr(444,root,root)                %{_prefix}/share/qmailadmin/html/del_autorespond_confirm.html
+%attr(444,root,root)                %{_prefix}/share/qmailadmin/html/del_forward_confirm.html
+%attr(444,root,root)                %{_prefix}/share/qmailadmin/html/del_listdig.html
+%attr(444,root,root)                %{_prefix}/share/qmailadmin/html/del_listmod.html
+%attr(444,root,root)                %{_prefix}/share/qmailadmin/html/del_listuser.html
+%attr(444,root,root)                %{_prefix}/share/qmailadmin/html/del_mailinglist_confirm.html
+%attr(444,root,root)                %{_prefix}/share/qmailadmin/html/del_user_confirm.html
+%attr(444,root,root)                %{_prefix}/share/qmailadmin/html/footer.html
+%attr(444,root,root)                %{_prefix}/share/qmailadmin/html/header.html
+%attr(444,root,root)                %{_prefix}/share/qmailadmin/html/main_menu.html
+%attr(444,root,root)                %{_prefix}/share/qmailadmin/html/mod_autorespond.html
+%attr(444,root,root)                %{_prefix}/share/qmailadmin/html/mod_dotqmail.html
+%attr(444,root,root)                %{_prefix}/share/qmailadmin/html/mod_mailinglist-idx.html
+%attr(444,root,root)                %{_prefix}/share/qmailadmin/html/mod_user.html
+%attr(444,root,root)                %{_prefix}/share/qmailadmin/html/setremotecatchall.html
+%attr(444,root,root)                %{_prefix}/share/qmailadmin/html/show_autorespond.html
+%attr(444,root,root)                %{_prefix}/share/qmailadmin/html/show_digest_subscribers.html
+%attr(444,root,root)                %{_prefix}/share/qmailadmin/html/show_forwards.html
+%attr(444,root,root)                %{_prefix}/share/qmailadmin/html/show_login.html
+%attr(444,root,root)                %{_prefix}/share/qmailadmin/html/show_mailinglist.html
+%attr(444,root,root)                %{_prefix}/share/qmailadmin/html/show_moderators.html
+%attr(444,root,root)                %{_prefix}/share/qmailadmin/html/show_subscribers.html
+%attr(444,root,root)                %{_prefix}/share/qmailadmin/html/show_users.html
+%attr(444,root,root)                %{_prefix}/share/qmailadmin/lang/bg
+%attr(444,root,root)                %{_prefix}/share/qmailadmin/lang/cs
+%attr(444,root,root)                %{_prefix}/share/qmailadmin/lang/da
+%attr(444,root,root)                %{_prefix}/share/qmailadmin/lang/de
+%attr(444,root,root)                %{_prefix}/share/qmailadmin/lang/en
+%attr(444,root,root)                %{_prefix}/share/qmailadmin/lang/es
+%attr(444,root,root)                %{_prefix}/share/qmailadmin/lang/fi
+%attr(444,root,root)                %{_prefix}/share/qmailadmin/lang/fr
+%attr(444,root,root)                %{_prefix}/share/qmailadmin/lang/hu
+%attr(444,root,root)                %{_prefix}/share/qmailadmin/lang/it
+%attr(444,root,root)                %{_prefix}/share/qmailadmin/lang/ja
+%attr(444,root,root)                %{_prefix}/share/qmailadmin/lang/lt
+%attr(444,root,root)                %{_prefix}/share/qmailadmin/lang/nl
+%attr(444,root,root)                %{_prefix}/share/qmailadmin/lang/no
+%attr(444,root,root)                %{_prefix}/share/qmailadmin/lang/pl
+%attr(444,root,root)                %{_prefix}/share/qmailadmin/lang/pt-br
+%attr(444,root,root)                %{_prefix}/share/qmailadmin/lang/ru
+%attr(444,root,root)                %{_prefix}/share/qmailadmin/lang/sk
+%attr(444,root,root)                %{_prefix}/share/qmailadmin/lang/sv
+%attr(444,root,root)                %{_prefix}/share/qmailadmin/lang/tr
+%attr(444,root,root)                %{_prefix}/share/qmailadmin/lang/zh-cn
 
-%attr(444,root,indimail)                @imagedir@/delete.png
-%attr(444,root,indimail)                @imagedir@/disabled.png
-%attr(444,root,indimail)                @imagedir@/lowerleft.png
-%attr(444,root,indimail)                @imagedir@/lowermiddle.png
-%attr(444,root,indimail)                @imagedir@/lowerright.png
-%attr(444,root,indimail)                @imagedir@/main.png
-%attr(444,root,indimail)                @imagedir@/main1.png
-%attr(444,root,indimail)                @imagedir@/main2.png
-%attr(444,root,indimail)                @imagedir@/middleleft1.png
-%attr(444,root,indimail)                @imagedir@/middleleft2.png
-%attr(444,root,indimail)                @imagedir@/middlelogin.png
-%attr(444,root,indimail)                @imagedir@/middleright1.png
-%attr(444,root,indimail)                @imagedir@/modify.png
-%attr(444,root,indimail)                @imagedir@/pixel.png
-%attr(444,root,indimail)                @imagedir@/radio-off.png
-%attr(444,root,indimail)                @imagedir@/radio-on.png
-%attr(444,root,indimail)                @imagedir@/trash.png
-%attr(444,root,indimail)                @imagedir@/upperleft.png
-%attr(444,root,indimail)                @imagedir@/uppermiddle1.png
-%attr(444,root,indimail)                @imagedir@/uppermiddle2.png
-%attr(444,root,indimail)                @imagedir@/upperright.png
+%attr(444,root,root)                @imagedir@/delete.png
+%attr(444,root,root)                @imagedir@/disabled.png
+%attr(444,root,root)                @imagedir@/lowerleft.png
+%attr(444,root,root)                @imagedir@/lowermiddle.png
+%attr(444,root,root)                @imagedir@/lowerright.png
+%attr(444,root,root)                @imagedir@/main.png
+%attr(444,root,root)                @imagedir@/main1.png
+%attr(444,root,root)                @imagedir@/main2.png
+%attr(444,root,root)                @imagedir@/middleleft1.png
+%attr(444,root,root)                @imagedir@/middleleft2.png
+%attr(444,root,root)                @imagedir@/middlelogin.png
+%attr(444,root,root)                @imagedir@/middleright1.png
+%attr(444,root,root)                @imagedir@/modify.png
+%attr(444,root,root)                @imagedir@/pixel.png
+%attr(444,root,root)                @imagedir@/radio-off.png
+%attr(444,root,root)                @imagedir@/radio-on.png
+%attr(444,root,root)                @imagedir@/trash.png
+%attr(444,root,root)                @imagedir@/upperleft.png
+%attr(444,root,root)                @imagedir@/uppermiddle1.png
+%attr(444,root,root)                @imagedir@/uppermiddle2.png
+%attr(444,root,root)                @imagedir@/upperright.png
 
 #
 # If the configuration file should not be replaced when the RPM is
