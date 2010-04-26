@@ -1,5 +1,5 @@
 /*
- * $Id: user.h,v 1.1.2.2 2004/11/27 17:18:06 tomcollins Exp $
+ * $Id: user.h,v 1.1 2010-04-26 12:08:11+05:30 Cprogrammer Exp mbhangui $
  */
 
 void            adduser();

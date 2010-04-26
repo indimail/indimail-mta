@@ -1,5 +1,5 @@
 /*
- * $Id: util.h,v 1.1.2.4 2007/09/21 23:27:40 tomcollins Exp $
+ * $Id: util.h,v 1.1 2010-04-26 12:08:13+05:30 Cprogrammer Exp mbhangui $
  */
 
 int             check_local_user(char *user);

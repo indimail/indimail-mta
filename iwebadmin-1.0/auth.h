@@ -1,5 +1,5 @@
 /*
- * $Id: auth.h,v 1.1.2.1 2004/11/20 01:10:41 tomcollins Exp $
+ * $Id: auth.h,v 1.1 2010-04-26 12:07:27+05:30 Cprogrammer Exp mbhangui $
  */
 
 void            auth_system(const char *ip_addr, struct passwd *pw);
