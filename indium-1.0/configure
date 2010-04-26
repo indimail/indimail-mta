@@ -12715,10 +12715,10 @@ fi
 auth_inc="-I$indimaildir/include -I$mysql_incdir"
 case "$host" in
 	*-*-darwin*)
-	auth_libs="-L. -L$prefix/lib -lindimail $LIB_CRYPT -leps -lcdb -L$mysql_libdir -lmysqlclient $LIB_SSL -lm"
+	auth_libs="-L. -L$prefix/lib -lindimail -leps -lcdb -L$mysql_libdir -lmysqlclient $LIB_SSL -lm"
 	;;
 	*)
-	auth_libs="-L. -L$libdir -lindimail $LIB_CRYPT -L$mysql_libdir -lmysqlclient $LIB_SSL -lm"
+	auth_libs="-L. -L$libdir -lindimail -L$mysql_libdir -lmysqlclient $LIB_SSL -lm"
 	;;
 esac
 
