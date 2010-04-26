@@ -1,0 +1,346 @@
+#
+# $Log: indium.spec.in,v $
+# Revision 1.5  2010-02-24 09:13:43+05:30  Cprogrammer
+# added bwidget to Requires
+#
+# Revision 1.4  2010-02-20 13:52:50+05:30  Cprogrammer
+# added ldconfig
+#
+# Revision 1.3  2010-02-20 11:44:02+05:30  Cprogrammer
+# added fast_mode
+#
+# Revision 1.2  2010-02-20 11:17:17+05:30  Cprogrammer
+# fix for autoreconf
+#
+# Revision 1.1  2010-02-20 10:53:59+05:30  Cprogrammer
+# Initial revision
+#
+#
+# $Id: indium.spec.in,v 1.5 2010-02-24 09:13:43+05:30 Cprogrammer Exp mbhangui $
+%undefine _missing_build_ids_terminate_build
+%define _unpackaged_files_terminate_build 1
+
+%define is_mandrake %(test -e /etc/mandrake-release && echo 1 || echo 0)
+%define is_suse %(test -e /etc/SuSE-release && echo 1 || echo 0)
+%define is_fedora %(test -e /etc/fedora-release && echo 1 || echo 0)
+
+%define dist redhat
+%define disttag rh
+
+%if %is_mandrake
+%define dist mandrake
+%define disttag mdk
+%endif
+%if %is_suse
+%define dist suse
+%define disttag suse
+%endif
+%if %is_fedora
+%define dist fedora
+%define disttag rhfc
+%endif
+
+%if 0%{?opensuse_bs}
+# define to 1 if building on openSUSE build service
+%define build_on_obs       0
+%define fast_mode          0
+%else
+%define build_on_obs       0
+%define fast_mode          0
+%endif
+
+%define _prefix            @indimaildir@
+%define see_base           For a description of IndiMail visit http://www.indimail.org
+%define _verbose           0
+%define tai_version        1.0
+%define fbsql_version      1.0
+%define bwidget_version    1.8.0
+%define tcl_version        8.5
+
+Summary: Web Administration GUI for IndiMail User Administration
+Name: iwebadmin
+Version: @version@
+Release: 1
+License: GPLv3
+Group: System Environment/Base
+Source0:  http://downloads.sourceforge.net/indimail/%{name}-%{version}.tar.gz
+Source2: %{name}-%{version}-rpmlintrc
+
+URL: http://www.indimail.org
+AutoReqProv: No
+BuildRequires: rpm gcc make binutils coreutils grep
+BuildRequires: glibc glibc-devel procps cpio
+BuildRequires: sed gettext-devel
+BuildRequires: findutils
+BuildRequires: sharutils gzip autoconf indimail-devel
+%if %build_on_obs == 1
+BuildRequires: mysql-devel
+%endif
+%if %{undefined centos_version} && %{undefined rhel_version} && %{undefined sles_version}
+BuildRequires: chrpath
+%endif
+%if 0%{?suse_version}
+BuildRequires: -post-build-checks  
+#!BuildIgnore: post-build-checks  
+%endif
+
+Requires: coreutils grep /bin/sh glibc /usr/sbin/useradd /usr/sbin/groupadd
+Requires: procps /usr/bin/awk indimail > 1.6
+BuildRoot: %(mktemp -ud %{_tmppath}/%{name}-%{version}-%{release}-XXXXXX)
+Excludeos: windows 
+
+%description
+iwebadmin provides a Web frontent for administering IndiMail Users
+
+%{see_base}
+
+%prep
+echo "---------------- INFORMATION ------------------------"
+echo target        %_target
+echo target_alias  %_target_alias
+echo target_cpu    %_target_cpu
+echo target_os     %_target_os
+echo target_vendor %_target_vendor
+echo Building %{name}-%{version}-%{release} Build %{_build} OS %{_os} Dist %dist disttag %disttag libs %{_lib} %{_libdir}
+echo "------------------------------------------------------"
+
+for i in %{name}-%{version}
+do
+(
+if [ -d $i ] ; then
+	/bin/rm -rf $i
+fi
+if [ -f ../SOURCES/$i.tar.gz ] ; then
+	gunzip -c ../SOURCES/$i.tar.gz |tar xf -
+elif [ -f ../SOURCES/$i.tar.bz2 ] ; then
+	bzip2 -d -c ../SOURCES/$i.tar.bz2 |tar xf -
+else
+	echo "No Source Archive for $i"
+	exit 1
+fi
+if [ -d $i ] ; then
+	if [ -f %{name}-%{version}/patches/$i.patch ] ; then
+	    # Copy for the SRPM
+		/bin/cp %{name}-%{version}/patches/$i.patch ../SOURCES
+	fi
+fi
+)
+done
+
+%build
+ID=$(id -u)
+if [ $ID -eq 0 ] ; then
+	/usr/bin/getent group indimail || /usr/sbin/groupadd -r -g 555 indimail
+	if [ $? = 4 ] ; then
+		/usr/sbin/groupadd -r indimail
+	fi
+	/usr/bin/getent passwd indimail || /usr/sbin/useradd -r -g indimail -u 555 -d {_prefix} indimail || true
+	if [ $? = 4 ] ; then
+		/usr/sbin/useradd -r -g indimail -d {_prefix} indimail
+	fi
+fi
+
+if [ %{_verbose} -eq 0 ] ; then
+	DEVICE=/dev/null
+else
+	DEVICE=/dev/tty
+fi
+echo "Will send output to $DEVICE"
+#### Stupid Mandriva ######################
+%if 0%{?mandriva_version} > 2009
+%ifarch x86_64
+%define _libdir %{_prefix}/lib64
+%define _lib lib64
+%else
+%define _libdir %{_prefix}/lib
+%define _lib lib
+%endif
+%endif
+
+cd %{name}-%{version}
+if [ %{fast_mode} -eq 0 ] ; then
+if [ %{build_on_obs} -eq 0 ] ; then
+	echo "reconfiguring..."
+	autoreconf -fi
+else
+echo "reconfiguring..."
+%if %{undefined centos_version} && %{undefined rhel_version} && %{undefined sles_version}
+%if 0%{?fedora_version} > 10 || 0%{?suse_version} || 0%{?mandriva_version} > 2009
+	autoreconf -fi
+%endif
+%endif
+fi
+fi
+
+./configure --enable-indimaildir=%{_prefix} \
+	--enable-ezmlmdir=indimail --disable-ipauth --disable-trivial-password \
+	--enable-modify-quota \
+	--enable-htmldir=@htmldir@ \
+	--enable-cgibindir=@cgibindir@ \
+	--enable-imagedir=@imagedir@ \
+	--enable-htmllibdir=@htmllibdir@
+
+%install
+[ "$RPM_BUILD_ROOT" != "/" ] && /bin/rm -fr $RPM_BUILD_ROOT
+ID=$(id -u)
+for i in %{name}-%{version}
+do
+if [ -d $i ] ; then
+	cd $i
+	%{__make} DESTDIR=%{buildroot}
+	%{__make} DESTDIR=%{buildroot} install-strip
+	cd ..
+fi
+done
+
+# copy files here
+if [ -x /usr/bin/chrpath ] ; then
+	/usr/bin/chrpath -d %{buildroot}@cgibindir@/qmailadmin
+fi
+
+%files
+%defattr(-,root,root,0555)
+%dir %attr(555,root,qmail)              %{_prefix}
+
+%attr(444,root,indimail)                @cgibindir@/qmailadmin
+
+%attr(444,root,indimail)                %{_prefix}/share/qmailadmin/html/add_autorespond.html
+%attr(444,root,indimail)                %{_prefix}/share/qmailadmin/html/add_forward.html
+%attr(444,root,indimail)                %{_prefix}/share/qmailadmin/html/add_listdig.html
+%attr(444,root,indimail)                %{_prefix}/share/qmailadmin/html/add_listmod.html
+%attr(444,root,indimail)                %{_prefix}/share/qmailadmin/html/add_listuser.html
+%attr(444,root,indimail)                %{_prefix}/share/qmailadmin/html/add_mailinglist-idx.html
+%attr(444,root,indimail)                %{_prefix}/share/qmailadmin/html/add_mailinglist-no-idx.html
+%attr(444,root,indimail)                %{_prefix}/share/qmailadmin/html/add_user.html
+%attr(444,root,indimail)                %{_prefix}/share/qmailadmin/html/change_password.html
+%attr(444,root,indimail)                %{_prefix}/share/qmailadmin/html/change_password_success.html
+%attr(444,root,indimail)                %{_prefix}/share/qmailadmin/html/colortable
+%attr(444,root,indimail)                %{_prefix}/share/qmailadmin/html/del_autorespond_confirm.html
+%attr(444,root,indimail)                %{_prefix}/share/qmailadmin/html/del_forward_confirm.html
+%attr(444,root,indimail)                %{_prefix}/share/qmailadmin/html/del_listdig.html
+%attr(444,root,indimail)                %{_prefix}/share/qmailadmin/html/del_listmod.html
+%attr(444,root,indimail)                %{_prefix}/share/qmailadmin/html/del_listuser.html
+%attr(444,root,indimail)                %{_prefix}/share/qmailadmin/html/del_mailinglist_confirm.html
+%attr(444,root,indimail)                %{_prefix}/share/qmailadmin/html/del_user_confirm.html
+%attr(444,root,indimail)                %{_prefix}/share/qmailadmin/html/footer.html
+%attr(444,root,indimail)                %{_prefix}/share/qmailadmin/html/header.html
+%attr(444,root,indimail)                %{_prefix}/share/qmailadmin/html/main_menu.html
+%attr(444,root,indimail)                %{_prefix}/share/qmailadmin/html/mod_autorespond.html
+%attr(444,root,indimail)                %{_prefix}/share/qmailadmin/html/mod_dotqmail.html
+%attr(444,root,indimail)                %{_prefix}/share/qmailadmin/html/mod_mailinglist-idx.html
+%attr(444,root,indimail)                %{_prefix}/share/qmailadmin/html/mod_user.html
+%attr(444,root,indimail)                %{_prefix}/share/qmailadmin/html/setremotecatchall.html
+%attr(444,root,indimail)                %{_prefix}/share/qmailadmin/html/show_autorespond.html
+%attr(444,root,indimail)                %{_prefix}/share/qmailadmin/html/show_digest_subscribers.html
+%attr(444,root,indimail)                %{_prefix}/share/qmailadmin/html/show_forwards.html
+%attr(444,root,indimail)                %{_prefix}/share/qmailadmin/html/show_login.html
+%attr(444,root,indimail)                %{_prefix}/share/qmailadmin/html/show_mailinglist.html
+%attr(444,root,indimail)                %{_prefix}/share/qmailadmin/html/show_moderators.html
+%attr(444,root,indimail)                %{_prefix}/share/qmailadmin/html/show_subscribers.html
+%attr(444,root,indimail)                %{_prefix}/share/qmailadmin/html/show_users.html
+%attr(444,root,indimail)                %{_prefix}/share/qmailadmin/lang/bg
+%attr(444,root,indimail)                %{_prefix}/share/qmailadmin/lang/cs
+%attr(444,root,indimail)                %{_prefix}/share/qmailadmin/lang/da
+%attr(444,root,indimail)                %{_prefix}/share/qmailadmin/lang/de
+%attr(444,root,indimail)                %{_prefix}/share/qmailadmin/lang/en
+%attr(444,root,indimail)                %{_prefix}/share/qmailadmin/lang/es
+%attr(444,root,indimail)                %{_prefix}/share/qmailadmin/lang/fi
+%attr(444,root,indimail)                %{_prefix}/share/qmailadmin/lang/fr
+%attr(444,root,indimail)                %{_prefix}/share/qmailadmin/lang/hu
+%attr(444,root,indimail)                %{_prefix}/share/qmailadmin/lang/it
+%attr(444,root,indimail)                %{_prefix}/share/qmailadmin/lang/ja
+%attr(444,root,indimail)                %{_prefix}/share/qmailadmin/lang/lt
+%attr(444,root,indimail)                %{_prefix}/share/qmailadmin/lang/nl
+%attr(444,root,indimail)                %{_prefix}/share/qmailadmin/lang/no
+%attr(444,root,indimail)                %{_prefix}/share/qmailadmin/lang/pl
+%attr(444,root,indimail)                %{_prefix}/share/qmailadmin/lang/pt-br
+%attr(444,root,indimail)                %{_prefix}/share/qmailadmin/lang/ru
+%attr(444,root,indimail)                %{_prefix}/share/qmailadmin/lang/sk
+%attr(444,root,indimail)                %{_prefix}/share/qmailadmin/lang/sv
+%attr(444,root,indimail)                %{_prefix}/share/qmailadmin/lang/tr
+%attr(444,root,indimail)                %{_prefix}/share/qmailadmin/lang/zh-cn
+
+%attr(444,root,indimail)                @imagedir@/delete.png
+%attr(444,root,indimail)                @imagedir@/disabled.png
+%attr(444,root,indimail)                @imagedir@/lowerleft.png
+%attr(444,root,indimail)                @imagedir@/lowermiddle.png
+%attr(444,root,indimail)                @imagedir@/lowerright.png
+%attr(444,root,indimail)                @imagedir@/main.png
+%attr(444,root,indimail)                @imagedir@/main1.png
+%attr(444,root,indimail)                @imagedir@/main2.png
+%attr(444,root,indimail)                @imagedir@/middleleft1.png
+%attr(444,root,indimail)                @imagedir@/middleleft2.png
+%attr(444,root,indimail)                @imagedir@/middlelogin.png
+%attr(444,root,indimail)                @imagedir@/middleright1.png
+%attr(444,root,indimail)                @imagedir@/modify.png
+%attr(444,root,indimail)                @imagedir@/pixel.png
+%attr(444,root,indimail)                @imagedir@/radio-off.png
+%attr(444,root,indimail)                @imagedir@/radio-on.png
+%attr(444,root,indimail)                @imagedir@/trash.png
+%attr(444,root,indimail)                @imagedir@/upperleft.png
+%attr(444,root,indimail)                @imagedir@/uppermiddle1.png
+%attr(444,root,indimail)                @imagedir@/uppermiddle2.png
+%attr(444,root,indimail)                @imagedir@/upperright.png
+
+#
+# If the configuration file should not be replaced when the RPM is
+# upgraded, mark it as follows:
+# %config(noreplace) filename
+#
+# For files that should be included in the list of files so that they
+# are uninstalled when the package is removed but may not exist until
+# they are created during post-install should be marked as follows:
+# %config(missingok) filename
+#
+
+%clean
+%{__rm} -rf %{buildroot}
+
+#          install   erase   upgrade  reinstall
+# % pre         1        -         2         2
+# % post        1        -         2         2
+# % preun       -        0         1         -
+# % postun      -        0         1         -
+%pre 
+#echo This is pre for %{version}-%{release} : arg=$1
+argv1=$1
+ID=$(id -u)
+if [ $ID -ne 0 ] ; then
+	echo "You are not root"
+	exit 1
+fi
+
+%post
+argv1=$1
+ID=$(id -u)
+if [ $ID -ne 0 ] ; then
+	echo "You are not root"
+	exit 1
+fi
+/sbin/ldconfig
+
+%preun
+#echo This is preun for %{version}-%{release} : arg=$1
+ID=$(id -u)
+if [ $ID -ne 0 ] ; then
+	echo "You are not root"
+	exit 1
+fi
+
+%postun
+#echo This is postun for %{version}-%{release} : arg=$1
+ID=$(id -u)
+if [ $ID -ne 0 ] ; then
+	echo "You are not root"
+	exit 1
+fi
+if [ $argv1 -eq 1 ] ; then
+	echo "recreating ld.so cache"
+	/sbin/ldconfig
+	exit 0
+fi
+echo "recreating ld.so cache"
+/sbin/ldconfig
+
+# fix changelog for openSUSE buildservice
+%changelog
