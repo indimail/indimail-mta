@@ -198,6 +198,7 @@ If a command is prefixed with the '#' sign, it means that it was run using root.
                                . nssd-1.0           (2.0  Mb)
                                . fetchmail-6.3.16   (10.5 Mb)
                                . pam-multi-1.0      (3.0  Mb)
+                               . iwebadmin-1.0      (3.0  Mb)
 
 ########### SECTION 2  ##### USER/GROUP Creation ########################
 2. add groups and users and home directory
@@ -262,6 +263,7 @@ the installation.
     % wget http://downloads.sourceforge.net/indimail/fortune-1.1.tar.gz
     % wget http://downloads.sourceforge.net/indimail/nssd-1.0.tar.gz
     % wget http://downloads.sourceforge.net/indimail/pam-multi-1.0.tar.gz
+    % wget http://downloads.sourceforge.net/indimail/iwebadmin-1.0.tar.gz
 
     You may omit STEP 1 if you already have a working installation of MySQL and would want to use
     the existing MySQL installation with IndiMail. You may also omit STEP 2 in cause you do not
@@ -559,7 +561,7 @@ the installation.
     to the orignal latest available fetchmail package.
     Then do ./configure <same_parameters_as_earlier_install> ; make ; make install-strip
 
-    ##### STEP 9  ## Optional STEP ############################
+    ##### STEP 9  ## Optional STEP ## nssd ####################
     Install nssd MD5 5bf5083b074adbb89d07c6f60aec9701
     current working directory /home/local/src
     Download the nssd package from http://www.indimail.org
@@ -576,7 +578,29 @@ the installation.
     % cd ..
 
     NOTE: UPGRADE Information. You can always upgrade to the latest version of fetchmail
-    by downloading the lastest nssd package
+    by downloading the latest nssd package
+    Then do ./configure <same_parameters_as_earlier_install> ; make ; make install-strip
+
+    ##### STEP 10 ## Optional STEP ## iwebadmin ###############
+    Install iwebadmin MD5 de91befa14e72352b5230c7a16fb7f3d
+    % gunzip -c iwebadmin-1.0.tar.gz | tar xf -
+    % cd iwebadmin-1.0
+    % ./configure --enable-indimaildir= @indimaildir@ \
+        --enable-ezmlmdir=@indimaildir@ \
+        --enable-qmaildir=@indimaildir@ \
+        --disable-ipauth --disable-trivial-password --enable-modify-quota \
+        --enable-mysqlincdir=@mysql_incdir@ \
+        --enable-mysqllibdir=@mysql_libdir@ \
+        --enable-htmldir=/var/www/html \
+        --enable-cgibindir=/var/www/cgi-bin \
+        --enable-imagedir=/var/www/html/images/qmailadmin \
+        --enable-htmllibdir=@indimaildir@/share/qmailadmin
+    % make -s [DESTDIR=staging_directory]
+    % sudo make -s install-strip [DESTDIR=staging_directory]
+    % cd ..
+
+    NOTE: UPGRADE Information. You can always upgrade to the latest version of iwebadmin
+    by downloading the latest iwebadmin package
     Then do ./configure <same_parameters_as_earlier_install> ; make ; make install-strip
 
 ########### SECTION 4  ### Configuration and SETUP ######################
