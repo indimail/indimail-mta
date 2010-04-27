@@ -1,5 +1,8 @@
 #
 # $Log: iwebadmin.spec.in,v $
+# Revision 1.5  2010-04-27 19:43:00+05:30  Cprogrammer
+# no ldconfig required
+#
 # Revision 1.4  2010-04-27 19:32:05+05:30  Cprogrammer
 # increment release number for every run
 #
@@ -28,7 +31,7 @@
 # Initial revision
 #
 #
-# $Id: iwebadmin.spec.in,v 1.4 2010-04-27 19:32:05+05:30 Cprogrammer Exp mbhangui $
+# $Id: iwebadmin.spec.in,v 1.5 2010-04-27 19:43:00+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %define _unpackaged_files_terminate_build 1
 
@@ -354,7 +357,6 @@ if [ $ID -ne 0 ] ; then
 	echo "You are not root"
 	exit 1
 fi
-/sbin/ldconfig
 
 %preun
 #echo This is preun for %{version}-%{release} : arg=$1
@@ -371,13 +373,6 @@ if [ $ID -ne 0 ] ; then
 	echo "You are not root"
 	exit 1
 fi
-if [ $argv1 -eq 1 ] ; then
-	echo "recreating ld.so cache"
-	/sbin/ldconfig
-	exit 0
-fi
-echo "recreating ld.so cache"
-/sbin/ldconfig
 
 # fix changelog for openSUSE buildservice
 %changelog
