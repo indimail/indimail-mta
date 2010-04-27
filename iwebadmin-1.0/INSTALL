@@ -25,9 +25,18 @@ the above information then starting from scratch.
 
 0. fast install guide.. 
    type as root: 
-   		# ./configure
-		# make
-		# make install-strip
+    # ./configure --enable-indimaildir= /var/indimail \
+        --enable-ezmlmdir=/var/indimail \
+        --enable-qmaildir=/var/indimail \
+        --disable-ipauth --disable-trivial-password --enable-modify-quota \
+        --enable-mysqlincdir=/usr/include/mysql \
+        --enable-mysqllibdir=/usr/lib/mysql \
+        --enable-htmldir=/var/www/html \
+        --enable-cgibindir=/var/www/cgi-bin \
+        --enable-imagedir=/var/www/html/images/qmailadmin \
+        --enable-htmllibdir=/var/indimailshare/qmailadmin
+    # make
+    # make install-strip
 
    If it works, you are done!
    If it doesn't.. read below.
