@@ -649,6 +649,9 @@ imageurl
 cgibindir
 auth_libs
 auth_incs
+mysql_libdir
+mysql_incdir
+mysql_prefix
 idcommand
 indimaildir
 CGIBINTARGETS
@@ -5620,6 +5623,9 @@ esac
 
 
 
+
+
+
 htmldir=""
 for f in /home/httpd/html /usr/local/apache/htdocs /usr/local/www/data /var/www/html
 do
@@ -5772,7 +5778,7 @@ _ACEOF
 
 
 ezmlmdir=""
-for f in /usr/local/bin/ezmlm /usr/bin /usr/sbin /usr/local/bin
+for f in /var/indimail/bin/ezmlm /usr/bin /usr/sbin /usr/local/bin
 do
     if test -f $f/ezmlm-make
     then
