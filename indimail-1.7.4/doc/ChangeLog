@@ -1,6 +1,43 @@
 * Wed Apr 14 2010 mbhangui@gmail.com
 Release 1.7.4 Start 14/04/2010
-
+1.  Add -h argument in vgroup (just like in vadduser)
+15/04/2010
+2.  BUG - Fixed data type of 3rd argument to mysql_options() in
+    set_mysql_options.c
+3.  Added flags argument to set_mysql_options() which can be used in
+    mysql_real_connect()
+16/04/2010
+4.  Fixed setting MYSQL_OPT_CONNECT_TIMEOUT in sqlmatch.c, tcpserver.c
+5.  Fixed sql query syntax error in sqlmatch.c if NO_BACKSLASH_ESCAPES
+    is set for MySQL server
+6.  Upgraded to fetchmail-6.3.16
+17/04/2010
+7.  Removed --skip-safemalloc option for MySQL 5.5.3, 5.5.4 in svctool
+8.  Added fix in mysql_query.c for MySQL server not started with
+    NO_BACKSLASH_ESCAPES
+18/04/2010
+9.  New program qmail-sql
+20/04/2010
+10. fixed hostip softlink in /var/indimail/control
+11. vdominfo to bypass cluster code if host.cntrl is missing
+22/04/2010
+12. Added checkpassword modules sys-checkpwd, ldap-checkpwd
+23/04/2010
+13. renamed nonspam to ham in bogofilter-qfe, svctool.
+14. use spamCount for project id in ftok() in spam.c
+15. for -T, -B, -S option, chdir to qmail control directory in chowkidar.c
+16. Added BADIP functionality in qmail-smtpd
+24/04/2010
+17. set SMTPROUTE / QMTPROUTE in qmail-rspawn based on routes variable
+    [2991775]
+18. use QMTP protocol in qmail-remote, if QMTPROUTE variable set. [2991775]
+19. modified GetSmtproute.c, findmdahost.c, get_smtp_service_port.c, svctool,
+    vdelivermail.c, vmoddomain.c for supporting QMTP [2991775]
+20. add alias to register-spam, register-ham, spam, ham ids in
+    vadddomain_handle [2991775]
+25/04/2010
+21. iwebadmin - Web frontend for IndiMail user administration, built
+    by hacking qmailadmin source code [2992161]
 
 * Wed Apr 14 2010 mbhangui@gmail.com
 Release 1.7.3 Start 31/03/2010
