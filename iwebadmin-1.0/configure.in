@@ -164,6 +164,9 @@ case "$host" in
 	auth_libs="-L. -L$libdir -L$indimaildir/lib -lindimail -lcdb $LIB_CRYPT -L$mysql_libdir -lmysqlclient $LIB_SSL -lm"
 	;;
 esac
+AC_SUBST(mysql_prefix)
+AC_SUBST(mysql_incdir)
+AC_SUBST(mysql_libdir)
 AC_SUBST(auth_incs)
 AC_SUBST(auth_libs)
 
