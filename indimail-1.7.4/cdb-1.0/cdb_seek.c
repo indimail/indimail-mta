@@ -49,7 +49,7 @@ cdb_bread(fd, buf, len)
 static int
 match(fd, key, len)
 	int             fd;
-	char           *key;
+	unsigned char  *key;
 	unsigned int    len;
 {
 	char            buf[32];
