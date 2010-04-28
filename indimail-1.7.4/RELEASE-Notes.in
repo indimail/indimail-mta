@@ -80,7 +80,7 @@ both 32 and 64 bit) are
 
 ChangeLog
 =========
-* Wed Apr 14 2010 mbhangui@gmail.com
+* Wed Apr 28 2010 mbhangui@gmail.com
 Release 1.7.4 Start 14/04/2010
 
 1.  Add -h argument in vgroup (just like in vadduser)
@@ -108,3 +108,4 @@ Release 1.7.4 Start 14/04/2010
     vadddomain_handle [2991775]
 21. iwebadmin - Web frontend for IndiMail user administration, built
     by hacking qmailadmin source code [2992161]
+22. Fixed deletion of files during RPM upgrade of indimail-devel, indimail-shared packages

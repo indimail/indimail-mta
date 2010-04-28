@@ -1,4 +1,4 @@
-* Wed Apr 14 2010 mbhangui@gmail.com
+* Wed Apr 28 2010 mbhangui@gmail.com
 Release 1.7.4 Start 14/04/2010
 1.  Add -h argument in vgroup (just like in vadduser)
 15/04/2010
@@ -38,6 +38,9 @@ Release 1.7.4 Start 14/04/2010
 25/04/2010
 21. iwebadmin - Web frontend for IndiMail user administration, built
     by hacking qmailadmin source code [2992161]
+27/04/2010
+22. Fixed deletion of files during RPM upgrade of indimail-devel,
+    indimail-shared packages
 
 * Wed Apr 14 2010 mbhangui@gmail.com
 Release 1.7.3 Start 31/03/2010
