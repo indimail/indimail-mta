@@ -283,7 +283,7 @@ display_domain(char *domain, char *dir, uid_t uid, gid_t gid)
 #ifdef CLUSTERED_SITE
 	char           *ptr, *hostid, *qmaildir, *controldir;
 	char            host_path[MAX_BUFF];
-	int             Port, host_cntrl;
+	int             Port, host_cntrl = 0;
 #endif
 
 	if (!(real_domain = vget_real_domain(domain)))
