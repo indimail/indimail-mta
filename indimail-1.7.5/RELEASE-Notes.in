@@ -1,0 +1,64 @@
+RELEASE NOTES
+=============
+DATE: @DATE@
+
+This is Release @version@ of IndiMail. The release has both source.tar.gz and RPMs
+
+This release includes the following files
+
+README                      (Introduction to IndiMail)
+INSTALL-@version@               (Installation Instructions)
+INSTALL-RPM-@version@           (Install Instructions for RPM)
+INSTALL-MYSQL-@version@         (MySQL specific Installation Instructions)
+README-CLUSTER              (Steps on installing a clustered setup)
+Quick-INSTALL-@version@         (A minimal documentation on Installation)
+RELEASE-Notes-@version@         (This file)
+indimail-@version@.tar.gz       (IndiMail source)
+
+
+IndiMail has two RPM / yum repositories for most of the Linux Distros at
+
+Stable Releases
+---------------
+
+http://download.opensuse.org/repositories/home:/indimail/
+
+
+Bleeding Edge Releases
+----------------------
+IndiMail has RPM / yum repositories for the latest features being added. You will find
+the bleeding edge RPMs at
+
+http://download.opensuse.org/repositories/home:/mbhangui/
+
+
+You will find the RPMs for both 32bit and 64bit OS on the above
+two repositories
+
+Currently, the list of supported distributions for IndiMail is (for
+both 32 and 64 bit) are
+
+    * SUSE
+          o openSUSE 11.2
+          o openSUSE 11.1
+          o openSUSE 11.0
+          o SUSE Linux Enterprise 11
+          o SUSE Linux Enterprise 10
+          o openSUSE Factory
+
+    * Red Hat
+          o Fedora 12
+          o Fedora 11
+          o Fedora 10
+          o Red Hat Enterprise Linux 5
+          o CentOS 5
+
+    * Mandriva Linux
+          o Mandriva 2010
+          o Mandriva 2009.1
+          o Mandriva 2009
+
+ChangeLog
+=========
+* Wed Apr 28 2010 mbhangui@gmail.com
+Release 1.7.5 Start 28/04/2010
