@@ -340,13 +340,13 @@ reject()
 void
 accept()
 {
-	buffer_putsflush(&out, "250 rblsmtpd.local\r\n");
+	buffer_putsflush(&out, "250 rblsmtpd.indimail\r\n");
 }
 
 void
 verify()
 {
-	buffer_putsflush(&out, "252 rblsmtpd.local\r\n");
+	buffer_putsflush(&out, "252 rblsmtpd.indimail\r\n");
 }
 
 int
@@ -459,13 +459,13 @@ smtp_rcpt(char *arg)
 void
 greet()
 {
-	buffer_putsflush(&out, "220 rblsmtpd.local\r\n");
+	buffer_putsflush(&out, "220 rblsmtpd.indimail\r\n");
 }
 
 void
 quit()
 {
-	buffer_putsflush(&out, "221 rblsmtpd.local\r\n");
+	buffer_putsflush(&out, "221 rblsmtpd.indimail\r\n");
 	_exit(0);
 }
 
