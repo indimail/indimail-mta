@@ -36,7 +36,7 @@ SYSCONFDIR = @sysconfdir@
 sysconf_DATA = indimail.settings controlfiles headerlist osh.table cronlist perm_list \
 			   indimail.mrtg.cfg
 man_MANS=vadduser.1 adminclient.8 chowkidar.8 clearopensmtp.8 dbinfo.8 hostcntrl.8 hostsync.8 \
-	initsvc.1 indisrvr.8 indiversion.8 InLookup.8 inlookup.8 inquerytest.8 ipchange.8 \
+	initsvc.1 indisrvr.8 indiversion.8 inlookup.8 InLookup.8 inquerytest.8 ipchange.8 \
 	logmonitor.8 mgmtpass.8 postdel.8 printdir.1 proxyimap.8 proxypop3.8 resetquota.8 \
 	vacation.8 vaddaliasdomain.1 vadddomain.1 valias.1 vatrn.1 vbulletin.1 vcalias.8 \
 	vcaliasrev.sh.8 vcfilter.1 vchkpass.8 vdeldomain.1 vdelivermail.8 vdeloldusers.8 \
