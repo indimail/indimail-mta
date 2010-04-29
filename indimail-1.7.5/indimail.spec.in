@@ -1,5 +1,8 @@
 #
 # $Log: indimail.spec.in,v $
+# Revision 2.157  2010-04-28 22:08:02+05:30  Cprogrammer
+# added openldap-devel in BuildRequires
+#
 # Revision 2.156  2010-04-27 19:47:14+05:30  Cprogrammer
 # argv1 was not set in devel package causing shared libraries to get
 # removed on rpm upgrade
@@ -492,7 +495,7 @@
 # rpm spec file for indimail
 #
 #
-# $Id: indimail.spec.in,v 2.156 2010-04-27 19:47:14+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 2.157 2010-04-28 22:08:02+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %define _unpackaged_files_terminate_build 1
 
@@ -661,6 +664,11 @@ BuildRequires: glibc glibc-devel openssl procps gdbm-devel readline-devel
 BuildRequires: sed ncurses-devel gettext-devel
 BuildRequires: python-devel flex findutils
 BuildRequires: readline sharutils gzip autoconf
+%if 0%{?suse_version}
+BuildRequires: openldap2-devel
+%else
+BuildRequires: openldap-devel
+%endif
 %if %build_on_obs == 1
 BuildRequires: mysql-devel
 %endif
