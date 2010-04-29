@@ -1,5 +1,8 @@
 /*
  * $Log: smtpd.c,v $
+ * Revision 1.142  2010-04-29 12:09:53+05:30  Cprogrammer
+ * fixed cdb search for control files badip, badhelo, authdomains & chkrcptdomains
+ *
  * Revision 1.141  2010-04-23 19:20:52+05:30  Cprogrammer
  * added badip functionality
  * fixed setup_state with badhost functionality
@@ -564,7 +567,7 @@ int             wildmat_internal(char *, char *);
 int             ssl_rfd = -1, ssl_wfd = -1;	/*- SSL_get_Xfd() are broken */
 char           *servercert, *clientca, *clientcrl;
 #endif
-char           *revision = "$Revision: 1.141 $";
+char           *revision = "$Revision: 1.142 $";
 char           *protocol = "SMTP";
 stralloc        proto = { 0 };
 static stralloc Revision = { 0 };
@@ -702,6 +705,7 @@ stralloc        brh = {0};
 struct constmap mapbrh;
 /*- Helo Check */
 char           *dohelocheck = (char *) 0;
+char           *badhelofn = (char *) 0;
 int             badhelook = 0;
 stralloc        badhelo = { 0 };
 struct constmap maphelo;
@@ -2268,7 +2272,8 @@ badipcheck(char *arg)
 		die_nomem();
 	if (!stralloc_0(&ipaddr))
 		die_nomem();
-	switch (address_match(badipfn, &ipaddr, briok ? &bri : 0, briok ? &mapbri : 0, 0, &errStr))
+	switch (address_match((badipfn && *badipfn) ? badipfn : "badip", 
+		&ipaddr, briok ? &bri : 0, briok ? &mapbri : 0, 0, &errStr))
 	{
 	case 1: 
 		return (1);
@@ -2343,7 +2348,8 @@ dohelo(char *arg)
 	/*- badhelo */
 	if (dohelocheck)
 	{
-		switch (address_match(0, &helohost, badhelook ? &badhelo : 0, badhelook ? &maphelo : 0, 0, &errStr))
+		switch (address_match((badhelofn && *badhelofn) ? badhelofn : "badhelo", 
+			&helohost, badhelook ? &badhelo : 0, badhelook ? &maphelo : 0, 0, &errStr))
 		{
 		case 1:
 			err_badhelo(remoteip, helohost.s, remotehost);
@@ -2518,7 +2524,8 @@ setup()
 	 */
 	if ((dohelocheck = (env_get("BADHELOCHECK") ? "" : env_get("BADHELO"))))
 	{
-		if ((badhelook = control_readfile(&badhelo, (x = env_get("BADHELO")) && *x ? x : "badhelo", 0)) == -1)
+		if ((badhelook = control_readfile(&badhelo, 
+				(badhelofn = env_get("BADHELO")) && *badhelofn ? badhelofn : "badhelo", 0)) == -1)
 			die_control();
 		if (badhelook && !constmap_init(&maphelo, badhelo.s, badhelo.len, 0))
 			die_nomem();
@@ -3885,7 +3892,7 @@ smtp_mail(char *arg)
 	/*- authdomains */
 	if (chkdomok)
 	{
-		switch (address_match(0, &mailfrom, chkdomok ? &chkdom : 0, chkdomok ? &mapchkdom : 0, 0, &errStr))
+		switch (address_match("authdomains", &mailfrom, chkdomok ? &chkdom : 0, chkdomok ? &mapchkdom : 0, 0, &errStr))
 		{
 		case 0:
 			chkdomok = 0;
@@ -4054,7 +4061,7 @@ smtp_rcpt(char *arg)
 	if (allowed_rcpthosts == 1 && (tmp = env_get("CHECKRECIPIENT")))
 	{
 		/*- chkrcptdomains */
-		switch (address_match(0, &addr, chkrcptok ? &chkrcpt : 0, chkrcptok ? &mapchkrcpt : 0, 0, &errStr))
+		switch (address_match("chkrcptdomains", &addr, chkrcptok ? &chkrcpt : 0, chkrcptok ? &mapchkrcpt : 0, 0, &errStr))
 		{
 		case 1:
 			chkrcptok = 0;
@@ -5925,7 +5932,7 @@ addrrelay() /*- Rejection of relay probes. */
 void
 getversion_smtpd_c()
 {
-	static char    *x = "$Id: smtpd.c,v 1.141 2010-04-23 19:20:52+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: smtpd.c,v 1.142 2010-04-29 12:09:53+05:30 Cprogrammer Stab mbhangui $";
 
 #ifdef INDIMAIL
 	x = sccsidh;
