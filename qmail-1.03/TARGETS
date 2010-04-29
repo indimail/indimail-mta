@@ -968,3 +968,4 @@ hasspnam.h
 hasuserpw.h
 crypt.lib
 shadow.lib
+ldap.lib
