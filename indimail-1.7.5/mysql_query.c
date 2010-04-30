@@ -1,5 +1,8 @@
 /*
  * $Log: mysql_query.c,v $
+ * Revision 2.8  2010-04-30 14:43:12+05:30  Cprogrammer
+ * fixed illegal free of pointer returned by replacestr()
+ *
  * Revision 2.7  2010-04-17 09:27:29+05:30  Cprogrammer
  * added fix for MySQL server not started with NO_BACKSLASH_ESCAPES
  *
@@ -29,7 +32,7 @@
 #include <errno.h>
 
 #ifndef	lint
-static char     sccsid[] = "$Id: mysql_query.c,v 2.7 2010-04-17 09:27:29+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: mysql_query.c,v 2.8 2010-04-30 14:43:12+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 extern char    *replacestr(char *, char *, char *);
@@ -65,7 +68,8 @@ _mysql_Query(MYSQL *mysql, char *query_str)
 			return (-1);
 		}
 		ret = mysql_query(mysql, (const char *) rptr);
-		free(rptr);
+		if (rptr != ptr)
+			free(rptr);
 	}
 	free(ptr);
 	return (ret);
