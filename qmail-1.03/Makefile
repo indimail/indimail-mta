@@ -1180,7 +1180,7 @@ fastforward printforward setforward newaliases printmaillist \
 setmaillist newinclude sortedtest logselect mbox2maildir \
 envdir envuidgid fghack multilog pgrphack readproctitle setlock \
 setuidgid softlimit supervise svc svok svscan svstat tai64n tai64nlocal tai64nunix \
-recordio argv0 addcr delcr fixcrio generic.so cdbmake cdbget \
+recordio argv0 addcr delcr fixcrio generic.so cdbmake cdbget cdbgetm \
 cdbdump cdbstats cdbtest cdbmake-12 cdbmake-sv testzero dk-filter \
 uacl
 
@@ -1334,7 +1334,7 @@ maildir2mbox.0 maildirwatch.0 qmail.0 qmail-limits.0 qmail-log.0 \
 qmail-control.0 qmail-header.0 qmail-users.0 dot-qmail.0 \
 qmail-command.0 tcp-environ.0 maildir.0 mbox.0 addresses.0 \
 envelopes.0 forgeries.0 autoresponder.0 predate.1 datemail.1 mlmatchup.8 \
-qmail-rm.0 maildirdeliver.0 822header.0 cdbdump.1 cdbmake.1 cdbget.1 \
+qmail-rm.0 maildirdeliver.0 822header.0 cdbdump.1 cdbmake.1 cdbget.1 cdbgetm.1 \
 matchup.0 mlmatchup.0 columnt.0 xqp.0 xsender.0 xrecipient.0 \
 serialcmd.0 maildircmd.0 rewind.0 logselect.8 \
 maildirserial.0 serialsmtp.0 serialqmtp.0 maildirsmtp.0 \
@@ -4889,6 +4889,13 @@ warn-auto.sh cdbmake-sv.sh conf-qmail
 	| sed s}QMAIL}"`head -1 conf-qmail`"}g \
 	> cdbmake-sv
 	chmod 755 cdbmake-sv
+
+cdbgetm: \
+warn-auto.sh cdbgetm.sh conf-qmail
+	cat warn-auto.sh cdbgetm.sh \
+	| sed s}QMAIL}"`head -1 conf-qmail`"}g \
+	> cdbgetm
+	chmod 755 cdbgetm
 
 uint32_pack.o: compile uint32_pack.c uint32.h
 	./compile uint32_pack.c

@@ -643,6 +643,7 @@ hier(inst_dir)
 	c(auto_qmail_home, "bin", "rspamhist", auto_uido, auto_gidq, 0555);
 	c(auto_qmail_home, "bin", "cdbmake", auto_uido, auto_gidq, 0555);
 	c(auto_qmail_home, "bin", "cdbget", auto_uido, auto_gidq, 0555);
+	c(auto_qmail_home, "bin", "cdbgetm", auto_uido, auto_gidq, 0555);
 	c(auto_qmail_home, "bin", "cdbdump", auto_uido, auto_gidq, 0555);
 	c(auto_qmail_home, "bin", "cdbstats", auto_uido, auto_gidq, 0555);
 	c(auto_qmail_home, "bin", "cdbtest", auto_uido, auto_gidq, 0555);
@@ -840,6 +841,7 @@ hier(inst_dir)
 	c(auto_qmail_home, "man/man1", "tai64n2tai.1", auto_uido, auto_gidq, 0444);
 	c(auto_qmail_home, "man/man1", "qlogselect.1", auto_uido, auto_gidq, 0444);
 	c(auto_qmail_home, "man/man1", "cdbget.1", auto_uido, auto_gidq, 0444);
+	c(auto_qmail_home, "man/man1", "cdbgetm.1", auto_uido, auto_gidq, 0444);
 	c(auto_qmail_home, "man/man1", "cdbtest.1", auto_uido, auto_gidq, 0444);
 	c(auto_qmail_home, "man/man1", "cdbstats.1", auto_uido, auto_gidq, 0444);
 	c(auto_qmail_home, "man/man1", "cdbmake.1", auto_uido, auto_gidq, 0444);
