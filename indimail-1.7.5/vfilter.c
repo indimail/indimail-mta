@@ -1,5 +1,8 @@
 /*-
  * $Log: vfilter.c,v $
+ * Revision 2.44  2010-04-30 14:43:58+05:30  Cprogrammer
+ * free pointer returned by replacestr()
+ *
  * Revision 2.43  2008-07-13 19:49:45+05:30  Cprogrammer
  * use ERESTART only if available
  *
@@ -142,7 +145,7 @@
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vfilter.c,v 2.43 2008-07-13 19:49:45+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: vfilter.c,v 2.44 2010-04-30 14:43:58+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef VFILTER
@@ -620,32 +623,46 @@ numerical_compare(char *data, char *expression)
 	case ERROR_SYNTAX:
 		if (interactive && verbose)
 			printf("syntax error\n");
+		if (ptr != expression)
+			free(ptr);
 		return (-1);
 	case ERROR_VARNOTFOUND:
 		if (interactive && verbose)
 			printf("variable not found\n");
+		if (ptr != expression)
+			free(ptr);
 		return (-1);
 	case ERROR_NOMEM:
 		if (interactive && verbose)
 			printf("not enough memory\n");
+		if (ptr != expression)
+			free(ptr);
 		return (-1);
 	case ERROR_DIV0:
 		if (interactive && verbose)
 			printf("division by zero\n");
+		if (ptr != expression)
+			free(ptr);
 		return (-1);
 	case RESULT_OK:
 		if (result.type == T_INT)
 		{
 			if (interactive && verbose)
 				printf("result = %ld\n", result.ival);
+			if (ptr != expression)
+				free(ptr);
 			return (result.ival);
 		} else
 		{
 			if (interactive && verbose)
 				printf("result = %g\n", result.rval);
+			if (ptr != expression)
+				free(ptr);
 			return (0);
 		}
 	}
+	if (ptr != expression)
+		free(ptr);
 	free_vartable(vt);
 	return (0);
 }
@@ -804,7 +821,7 @@ get_options(int argc, char **argv, char *bounce, char *emailid, char *user, char
 static int
 myExit(int argc, char **argv, int status, int bounce, char *DestFolder, char *forward)
 {
-	char           *revision = "$Revision: 2.43 $";
+	char           *revision = "$Revision: 2.44 $";
 	char           *ptr;
 	char            MaildirFolder[MAX_BUFF], XFilter[MAX_BUFF];
 	pid_t           pid;

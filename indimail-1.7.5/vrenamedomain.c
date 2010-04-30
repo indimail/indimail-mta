@@ -1,5 +1,8 @@
 /*
  * $Log: vrenamedomain.c,v $
+ * Revision 2.14  2010-04-30 14:44:12+05:30  Cprogrammer
+ * free pointer returned by replacestr()
+ *
  * Revision 2.13  2010-02-17 10:58:50+05:30  Cprogrammer
  * added post handle
  *
@@ -50,7 +53,7 @@
 #include <sys/stat.h>
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vrenamedomain.c,v 2.13 2010-02-17 10:58:50+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: vrenamedomain.c,v 2.14 2010-04-30 14:44:12+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 int
@@ -128,16 +131,30 @@ main(int argc, char **argv)
 		*tmpstr = 0;
 	printf("Renaming real domain %s to %s\n", argv[1], argv[2]);
 	if(vauth_renamedomain(argv[1], argv[2], ptr))
+	{
+		if (ptr != NewDir)
+			free(ptr);
 		return (1);
+	}
 	else
 	if(add_domain_assign(argv[2], DomDir, uid, gid))
+	{
+		if (ptr != NewDir)
+			free(ptr);
 		return (1);
-	else
+	} else
 	if(add_control(argv[2], 0))
+	{
+		if (ptr != NewDir)
+			free(ptr);
 		return (1);
-	else
+	} else
 	if(del_domain_assign(argv[1], OldDir, uid, gid))
+	{
+		if (ptr != NewDir)
+			free(ptr);
 		return (1);
+	}
 	CreateDomainDirs(argv[2], uid, gid);
 	if (!OptimizeAddDomain)
 	{
@@ -216,6 +233,8 @@ main(int argc, char **argv)
 	}
 	snprintf(TmpBuf, MAX_BUFF, "%s/.domain_rename", ptr);
 	unlink(TmpBuf);
+	if (ptr != NewDir)
+		free(ptr);
 	if (!(ptr = getenv("POST_HANDLE")))
 	{
 		if (!(base_argv0 = strrchr(argv[0], '/')))
