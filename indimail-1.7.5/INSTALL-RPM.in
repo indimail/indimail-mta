@@ -85,7 +85,8 @@ Start IndiMail Services
    % sudo @indimaildir@/sbin/initsvc -on
    % sudo init q # (if your system uses traditional init)
        or
-   % sudo /sbin/initctl emit qmailstart # (if your system uses upstart - ubuntu/fedora10)
+   % sudo /sbin/initctl emit qmailstart # (if your system uses upstart - ubuntu/fedora10
+                                           &above)
 
 The RPM installation deliberately installs MySQL and fetchmail services in down state.
 This is for you to review your MySQL installation and configuration. For fetchmail service
