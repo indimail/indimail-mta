@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-remote.c,v $
+ * Revision 1.56  2010-04-30 13:17:44+05:30  Cprogrammer
+ * fixed domainbindings for ipv4 addresses
+ *
  * Revision 1.55  2010-04-24 20:13:17+05:30  Cprogrammer
  * ability to use either QMTP or SMTP for clustered domains
  *
@@ -1806,8 +1809,12 @@ getcontrols()
 		for (i = 0;i < 16;i++)
 			outip.ip6.d[i] = 0;
 	} else
-	if (!ip6_scan(outgoingip.s, &outip.ip6))
-		temp_noip();
+	{
+		if (!ip6_scan(outgoingip.s, &outip.ip6))
+			temp_noip();
+		if (ip6_isv4mapped(&outip.ip6.d) && !ip_scan(outgoingip.s, &outip.ip))
+			temp_noip();
+	}
 #else
 	if (0 == r && !stralloc_copys(&outgoingip, "0.0.0.0"))
 		temp_nomem();
@@ -1856,6 +1863,8 @@ getcontrols()
 		{ 
 #ifdef IPV6
 			if (!ip6_scan(senderdomain, &outip.ip6))
+				temp_noip();
+			if (ip6_isv4mapped(&outip.ip6.d) && !ip_scan(senderdomain, &outip.ip))
 				temp_noip();
 #else
 			if (!ip_scan(senderdomain, &outip.ip))
@@ -2262,7 +2271,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_remote_c()
 {
-	static char    *x = "$Id: qmail-remote.c,v 1.55 2010-04-24 20:13:17+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-remote.c,v 1.56 2010-04-30 13:17:44+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
