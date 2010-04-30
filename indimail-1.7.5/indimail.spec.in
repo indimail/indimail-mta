@@ -1,5 +1,8 @@
 #
 # $Log: indimail.spec.in,v $
+# Revision 2.158  2010-04-30 14:43:02+05:30  Cprogrammer
+# added program cdbgetm
+#
 # Revision 2.157  2010-04-28 22:08:02+05:30  Cprogrammer
 # added openldap-devel in BuildRequires
 #
@@ -495,7 +498,7 @@
 # rpm spec file for indimail
 #
 #
-# $Id: indimail.spec.in,v 2.157 2010-04-28 22:08:02+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 2.158 2010-04-30 14:43:02+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %define _unpackaged_files_terminate_build 1
 
@@ -1495,6 +1498,7 @@ fi
 %attr(555,root,qmail)                   %{_prefix}/bin/supervise
 %attr(555,root,qmail)                   %{_prefix}/bin/preline
 %attr(555,root,qmail)                   %{_prefix}/bin/cdbget
+%attr(555,root,qmail)                   %{_prefix}/bin/cdbgetm
 %attr(555,root,qmail)                   %{_prefix}/bin/822addr
 %attr(555,root,qmail)                   %{_prefix}/bin/atrn
 %attr(555,root,qmail)                   %{_prefix}/bin/cdbstats
