@@ -1,5 +1,8 @@
 /*
  * $Log: indimail.h,v $
+ * Revision 2.191  2010-05-01 14:11:28+05:30  Cprogrammer
+ * added connect_all argument to vauthOpen_user
+ *
  * Revision 2.190  2010-04-24 14:58:51+05:30  Cprogrammer
  * define SMTP, QMTP, QMQP ports
  * new function get_smtp_qmtp_port to parse both smtproutes / qmtproutes
@@ -886,7 +889,7 @@
 #define INDIMAILH_H
 
 #ifndef	lint
-static char     sccsidh[] = "$Id: indimail.h,v 2.190 2010-04-24 14:58:51+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsidh[] = "$Id: indimail.h,v 2.191 2010-05-01 14:11:28+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #include "config.h"
@@ -1664,13 +1667,6 @@ char           *getremoteip();
 char           *replacestr(char *, char *, char *);
 char           *getactualpath(char *);
 int             skip_system_files(char *);
-int             loadIgnoreList(char *);
-int             spamReport(int, char *);
-int             readLogFile(char *, int, int);
-int             isIgnored(char *);
-maddr          *insertAddr(int, char *);
-unsigned int    hash(char *);
-void            print_list(int);
 int             wildmat(char *, char *);
 int             atrn_access(char *, char *);
 int             loadbalance(int);
@@ -1766,7 +1762,7 @@ int             writedbinfo(DBINFO **, time_t);
 char          **LoadBMF(int *, char *);
 int             UpdateSpamTable(char *);
 void           *inquery(char, char *, char *);
-int             vauthOpen_user(char *);
+int             vauthOpen_user(char *, int);
 int             ProcessInFifo();
 struct passwd  *strToPw(char *, int);
 long            bulletin(char *, char *);
@@ -1789,6 +1785,13 @@ int             set_mysql_options(MYSQL *, char *, char *, unsigned int *);
 int             vauth_renamedomain(char *, char *, char *);
 int             vset_lastdeliver(char *, char *, int);
 int             disable_mysql_escape(int);
+int             loadIgnoreList(char *);
+int             spamReport(int, char *);
+int             readLogFile(char *, int, int);
+int             isIgnored(char *);
+maddr          *insertAddr(int, char *);
+unsigned int    hash(char *);
+void            print_list(int);
 #ifdef QUERY_CACHE
 void            vauth_getpw_cache(char);
 void            vauth_get_realdomain_cache(char);
