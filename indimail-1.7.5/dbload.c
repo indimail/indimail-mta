@@ -1,5 +1,8 @@
 /*
  * $Log: dbload.c,v $
+ * Revision 2.16  2010-05-01 12:27:49+05:30  Cprogrammer
+ * print error only if verbose is set
+ *
  * Revision 2.15  2010-04-15 14:12:55+05:30  Cprogrammer
  * added flags argument to mysql_real_connect()
  *
@@ -59,7 +62,7 @@
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: dbload.c,v 2.15 2010-04-15 14:12:55+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: dbload.c,v 2.16 2010-05-01 12:27:49+05:30 Cprogrammer Stab mbhangui $";
 #endif
 
 #include <unistd.h>
@@ -129,7 +132,8 @@ OpenDatabases()
 				(*ptr)->last_error = 0;
 				if (connect_db(ptr, mysqlptr))
 				{
-					fprintf(stderr, "%d: %s Failed db %s@%s for user %s port %d\n",
+					if (verbose)
+						fprintf(stderr, "%d: %s Failed db %s@%s for user %s port %d\n",
 							count, (*ptr)->domain, (*ptr)->database,
 							(*ptr)->server, (*ptr)->user, (*ptr)->port);
 					(*ptr)->fd = -1;
@@ -255,9 +259,10 @@ connect_db(DBINFO **ptr, MYSQL **mysqlptr)
 			}
 			strncpy((*ptr)->last_error, my_error, my_error_len);
 		}
-		fprintf(stderr, "MYSQLconnect: %s@%s: Domain %s Port %d %s\n",
-			(*ptr)->database, server, (*ptr)->domain, (*ptr)->port,
-			mysql_error(*mysqlptr));
+		if (verbose)
+			fprintf(stderr, "MYSQLconnect: %s@%s: Domain %s Port %d %s\n",
+				(*ptr)->database, server, (*ptr)->domain, (*ptr)->port,
+				mysql_error(*mysqlptr));
 		(*ptr)->failed_attempts++;
 		return (1);
 	}
