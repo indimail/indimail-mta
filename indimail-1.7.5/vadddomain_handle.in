@@ -1,16 +1,23 @@
 #!/bin/sh
 #
 # $Log: vadddomain_handle.in,v $
+# Revision 2.2  2010-05-01 15:13:19+05:30  Cprogrammer
+# added users prefilt, postfilt for pre & post filters
+# added rule for moving spam mails to Spam folder
+#
 # Revision 2.1  2010-04-23 09:21:51+05:30  Cprogrammer
 # post handle for vadddomain
 #
 #
-# $Id: vadddomain_handle.in,v 2.1 2010-04-23 09:21:51+05:30 Cprogrammer Exp mbhangui $
+# $Id: vadddomain_handle.in,v 2.2 2010-05-01 15:13:19+05:30 Cprogrammer Exp mbhangui $
 @indimaildir@/bin/vdominfo $1
 @indimaildir@/bin/valias -i '&register-spam' register-spam@$1
 @indimaildir@/bin/valias -i '&register-ham' register-ham@$1
 @indimaildir@/bin/valias -i '&spam' spam@$1
 @indimaildir@/bin/valias -i '&ham' ham@$1
+@indimaildir@/bin/vadduser -e xxxxxxxx prefilt@$1
+@indimaildir@/bin/vadduser -e xxxxxxxx postfilt@$1
+@indimaildir@/bin/vcfilter -i -t spamFilter -c 3 -k "Yes, spamicity=" -f Spam -b 0 -h 33 prefilt@$1
 /bin/ls -dl @indimaildir@/domains/$1
 /bin/ls -al @indimaildir@/domains/$1
 exit 0
