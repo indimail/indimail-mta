@@ -1,5 +1,8 @@
 /*
  * $Log: vcfilter.c,v $
+ * Revision 2.25  2010-05-01 14:14:39+05:30  Cprogrammer
+ * added -C option to connect to cluster
+ *
  * Revision 2.24  2009-12-30 13:12:11+05:30  Cprogrammer
  * run vcfilter with uid,gid of domain
  *
@@ -81,7 +84,7 @@
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vcfilter.c,v 2.24 2009-12-30 13:12:11+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: vcfilter.c,v 2.25 2010-05-01 14:14:39+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef VFILTER
@@ -118,12 +121,12 @@ char           *ptr1, *ptr2;
 int             FilterAction;
 
 void            usage();
-int             get_options(int argc, char **argv, int *);
+int             get_options(int argc, char **argv, int *, int *);
 
 int
 main(int argc, char **argv)
 {
-	int             i, j, status = -1, raw = 0;
+	int             i, j, status = -1, raw = 0, cluster_conn = 0;
 	uid_t           uid, uidtmp;
 	gid_t           gid;
 	struct passwd  *pw;
@@ -131,7 +134,7 @@ main(int argc, char **argv)
 	char            user[AUTH_SIZE], domain[AUTH_SIZE], vfilter_file[MAX_BUFF],
 					buffer[AUTH_SIZE];
 
-	if (get_options(argc, argv, &raw))
+	if (get_options(argc, argv, &raw, &cluster_conn))
 		return(1);
 	if (parse_email(emailid, user, domain, AUTH_SIZE))
 	{
@@ -145,17 +148,33 @@ main(int argc, char **argv)
 		error_stack(stderr, "%s: domain does not exist\n", real_domain);
 		return (1);
 	}
+	if (cluster_conn && vauthOpen_user(emailid, 0) == -1)
+	{
+		if (userNotFound)
+		{
+			fprintf(stderr, "%s: No such user\n", emailid);
+			return(1);
+		} else
+		{
+			fprintf(stderr, "Temporary database Errror\n");
+			return(1);
+		}
+	}
 	if (FilterAction != FILTER_SELECT)
 	{
 		uidtmp = getuid();
 		if (uidtmp != 0 && uidtmp != uid)
 		{
 			error_stack(stderr, "you must be root or domain user (uid=%d) to run this program\n", uid);
+			if (cluster_conn)
+				vclose();
 			return(1);
 		}
 		if (setgid(gid) || setuid(uid))
 		{
 			error_stack(stderr, "setuid/setgid (%d/%d): %s", uid, gid, strerror(errno));
+			if (cluster_conn)
+				vclose();
 			return(1);
 		}
 	}
@@ -167,6 +186,8 @@ main(int argc, char **argv)
 				fprintf(stderr, "%s@%s: No such user\n", user, real_domain);
 			else
 				fprintf(stderr, "Temporary database Errror\n");
+			if (cluster_conn)
+				vclose();
 			return(1);
 		}
 		snprintf(vfilter_file, sizeof(vfilter_file), "%s/Maildir/vfilter", pw->pw_dir);
@@ -264,11 +285,13 @@ main(int argc, char **argv)
 		printf("%s\n", mailing_list[i]);
 	}
 #endif
+	if (cluster_conn)
+		vclose();
 	return(status);
 }
 
 int
-get_options(int argc, char **argv, int *raw)
+get_options(int argc, char **argv, int *raw, int *cluster_conn)
 {
 	int             i, c, max_header, max_comparision;
 	char           *ptr;
@@ -285,13 +308,19 @@ get_options(int argc, char **argv, int *raw)
 	for (max_comparision = 0;vfilter_comparision[max_comparision];max_comparision++);
 	max_header--;
 	max_comparision--;
-	while ((c = getopt(argc, argv, "vsirm:d:u:h:c:b:k:f:o:t:DU")) != -1)
+	*cluster_conn = 0;
+	while ((c = getopt(argc, argv, "vCsirm:d:u:h:c:b:k:f:o:t:DU")) != -1)
 	{
 		switch (c)
 		{
 		case 'v':
 			verbose = 1;
 			break;
+#ifdef CLUSTERED_SITE
+		case 'C':
+			*cluster_conn = 1;
+			break;
+#endif
 		case 's':
 			FilterAction = FILTER_SELECT;
 			break;
@@ -436,7 +465,7 @@ get_options(int argc, char **argv, int *raw)
 			usage();
 			return(1);
 		}
-	} /*- while ((c = getopt(argc, argv, "Vvsim:d:u:h:c:b:k:f:o:DU")) != -1) */
+	} /*- while ((c = getopt(argc, argv, "vCsirm:d:u:h:c:b:k:f:o:DU")) != -1) */
 	if (FilterAction == -1)
 	{
 		fprintf(stderr, "Must specify one of -s -i, -u, -d, -m option\n");
@@ -463,22 +492,6 @@ get_options(int argc, char **argv, int *raw)
 				usage();
 				return(1);
 			}
-		}
-	}
-#ifdef CLUSTERED_SITE
-	if (vauthOpen_user(emailid) == -1)
-#else
-	if (vauth_open((char *) 0))
-#endif
-	{
-		if (userNotFound)
-		{
-			fprintf(stderr, "%s: No such user\n", emailid);
-			return(1);
-		} else
-		{
-			fprintf(stderr, "Temporary database Errror\n");
-			return(1);
 		}
 	}
 	mailing_list = argv + optind;
@@ -568,6 +581,7 @@ usage()
 
 	fprintf(stderr, "usage: vcfilter [options] emailid [mailing_list1..mailing_listn]\n");
 	fprintf(stderr, "options: -v verbose\n");
+	fprintf(stderr, "         -C connect to Cluster\n");
 	fprintf(stderr, "         -r raw display (for -s option)\n");
 	fprintf(stderr, "         -s show filter(s)\n");
 	fprintf(stderr, "         -i add filter\n");
