@@ -6,6 +6,7 @@ vcfilter \- create, modify, delete vfilters
 .SH SYNOPSYS
 .PP
 \fBvcfilter\fR [\fIoptions\fR] \fIemailid\fR [\fImailing_list1\fR..\fImailing_listn\fR]
+
 \fBvcfilter\fR \fB\-m\fR \fIemailid\fR [\fIoptions\fR] [\fImailing_list1\fR..\fImailing_listn\fR]
 
 .SH DESCRIPTION
@@ -25,6 +26,10 @@ updation is also possible). The second form of usage is for mailing list updatio
 .TP
 \fB\-v\fR
 Sets verbose option
+.TP
+\fB\-C\fR
+Connect to cluster. Allows vcfilter to operate on users belonging to any cluster
+rather than just the local users.
 .TP
 \fB\-s\fR
 Show Filters
