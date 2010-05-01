@@ -536,7 +536,7 @@ sqlmatch_close_db(void)
 void
 getversion_sqlmatch_c()
 {
-	static char    *x = "$Id: sqlmatch.c,v 1.7 2010-04-19 10:19:44+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: sqlmatch.c,v 1.7 2010-04-19 10:19:44+05:30 Cprogrammer Stab mbhangui $";
 
 #ifdef INDIMAIL
 	x = sccsidh;
