@@ -1,5 +1,8 @@
 /*
  * $Log: sq_vacation.c,v $
+ * Revision 2.7  2010-05-01 14:14:03+05:30  Cprogrammer
+ * added connect_all argument to vauthOpen_user
+ *
  * Revision 2.6  2010-04-11 22:22:43+05:30  Cprogrammer
  * LPWD_QUERY changed to LIMIT_QUERY
  *
@@ -85,7 +88,7 @@
 #define ERR_UNEXPECTED  126     /*- other unexpected error */
 
 #ifndef lint
-static char     sccsid[] = "$Id: sq_vacation.c,v 2.6 2010-04-11 22:22:43+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: sq_vacation.c,v 2.7 2010-05-01 14:14:03+05:30 Cprogrammer Exp mbhangui $";
 #endif
 #ifndef INDIMAILH_H
 int             vauthOpen_user(char *);
@@ -330,7 +333,7 @@ main(int argc, char **argv)
 	if (!getenv("QUERY_CACHE"))
 	{
 #ifdef CLUSTERED_SITE
-		if (vauthOpen_user(email))
+		if (vauthOpen_user(email, 0))
 #else
 		if (vauth_open((char *) 0))
 #endif
@@ -338,7 +341,7 @@ main(int argc, char **argv)
 	}
 #else
 #ifdef CLUSTERED_SITE
-	if (vauthOpen_user(email))
+	if (vauthOpen_user(email, 0))
 #else
 	if (vauth_open((char *) 0))
 #endif

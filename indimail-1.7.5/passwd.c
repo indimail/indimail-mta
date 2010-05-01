@@ -1,5 +1,8 @@
 /*
  * $Log: passwd.c,v $
+ * Revision 2.8  2010-05-01 14:13:11+05:30  Cprogrammer
+ * close database before return
+ *
  * Revision 2.7  2008-08-02 09:08:21+05:30  Cprogrammer
  * use new function error_stack
  *
@@ -44,7 +47,7 @@
 #include <unistd.h>
 
 #ifndef	lint
-static char     sccsid[] = "$Id: passwd.c,v 2.7 2008-08-02 09:08:21+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: passwd.c,v 2.8 2010-05-01 14:13:11+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 /*
@@ -63,7 +66,7 @@ vpasswd(char *username, char *domain, char *password,
 	lowerit(domain);
 	snprintf(email, MAX_BUFF, "%s@%s", username, domain);
 #ifdef CLUSTERED_SITE
-	if (vauthOpen_user(email))
+	if (vauthOpen_user(email, 0))
 #else
 	if (vauth_open((char *) 0))
 #endif
@@ -74,29 +77,18 @@ vpasswd(char *username, char *domain, char *password,
 			return(-1);
 	}
 	if (!(pw = vauth_getpw(username, domain)))
-	{
-#ifdef CLUSTERED_SITE
-		is_open = 0;
-#endif
 		return (0);
-	}
 	if (pw->pw_gid & NO_PASSWD_CHNG)
 	{
 		error_stack(stderr, "User not allowed to change passwd\n");
-#ifdef CLUSTERED_SITE
-		is_open = 0;
-#endif
 		return (-1);
 	}
 	if (apop & USE_APOP)
 	{
 		i = vauth_vpasswd (username, domain, password, apop);
-#ifdef CLUSTERED_SITE
-		is_open = 0;
-#endif
+		vclose();
 		return(i);
-	}
-	else
+	} else
 	{
 		mkpasswd3(password, Crypted, MAX_BUFF);
 		if ((i = vauth_vpasswd(username, domain, Crypted, apop)) == 1)
@@ -116,9 +108,7 @@ vpasswd(char *username, char *domain, char *password,
 			vset_lastauth(username, domain, "pass", GetIpaddr(), pw->pw_gecos, quota);
 #endif
 		}
-#ifdef CLUSTERED_SITE
-		is_open = 0;
-#endif
+		vclose();
 		return(i);
 	}
 }

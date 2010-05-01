@@ -1,5 +1,8 @@
 /*
  * $Log: vsetpass.c,v $
+ * Revision 2.2  2010-05-01 14:15:21+05:30  Cprogrammer
+ * added connect_all argument to vauthOpen_user
+ *
  * Revision 2.1  2009-08-05 14:35:38+05:30  Cprogrammer
  * setpassword interface for indimail
  *
@@ -12,7 +15,7 @@
 #include <errno.h>
 
 #ifndef lint
-static char     sccsid[] = "$Id: vsetpass.c,v 2.1 2009-08-05 14:35:38+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: vsetpass.c,v 2.2 2010-05-01 14:15:21+05:30 Cprogrammer Exp mbhangui $";
 #endif
 #ifdef AUTH_SIZE
 #undef AUTH_SIZE
@@ -95,7 +98,7 @@ main(int argc, char **argv)
 	}
 #else
 #ifdef CLUSTERED_SITE
-	if (vauthOpen_user(login))
+	if (vauthOpen_user(login, 0))
 #else
 	if (vauth_open((char *) 0))
 #endif

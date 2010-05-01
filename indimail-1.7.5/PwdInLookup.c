@@ -1,5 +1,8 @@
 /*
  * $Log: PwdInLookup.c,v $
+ * Revision 2.5  2010-05-01 14:13:28+05:30  Cprogrammer
+ * added connect_all argument to vauthOpen_user
+ *
  * Revision 2.4  2008-05-28 16:37:29+05:30  Cprogrammer
  * removed USE_MYSQL
  *
@@ -19,7 +22,7 @@
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: PwdInLookup.c,v 2.4 2008-05-28 16:37:29+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: PwdInLookup.c,v 2.5 2010-05-01 14:13:28+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 struct passwd *
@@ -30,14 +33,14 @@ PwdInLookup(char *email)
 	struct passwd  *pw;
 
 #ifdef CLUSTERED_SITE
-	if(vauthOpen_user(email))
+	if (vauthOpen_user(email, 1))
 #else
-	if(vauth_open((char *) 0))
+	if (vauth_open((char *) 0))
 #endif
 		return((struct passwd *) 0);
 	for(cptr = user, ptr = email;*ptr && *ptr != '@';*cptr++ = *ptr++);
 	*cptr = 0;
-	if(*ptr)
+	if (*ptr)
 		ptr++;
 	else
 		getEnvConfigStr(&ptr, "DEFAULT_DOMAIN", DEFAULT_DOMAIN);

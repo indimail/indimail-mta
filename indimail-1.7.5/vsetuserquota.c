@@ -1,5 +1,8 @@
 /*
  * $Log: vsetuserquota.c,v $
+ * Revision 2.6  2010-05-01 14:15:31+05:30  Cprogrammer
+ * added connect_all argument to vauthOpen_user
+ *
  * Revision 2.5  2009-12-02 11:05:12+05:30  Cprogrammer
  * use .domain_limits in domain directory to turn on domain limits
  *
@@ -77,7 +80,7 @@
 #include <signal.h>
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vsetuserquota.c,v 2.5 2009-12-02 11:05:12+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: vsetuserquota.c,v 2.6 2010-05-01 14:15:31+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 char            Email[MAX_BUFF];
@@ -147,7 +150,7 @@ main(argc, argv)
 	domain_limits = ((access(tmpbuf, F_OK) && !getenv("DOMAIN_LIMITS")) ? 0 : 1);
 #endif
 #ifdef CLUSTERED_SITE
-	if (vauthOpen_user(Email))
+	if (vauthOpen_user(Email, 0))
 #else
 	if (vauth_open((char *) 0))
 #endif

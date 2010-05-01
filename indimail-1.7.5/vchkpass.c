@@ -1,5 +1,8 @@
 /*
  * $Log: vchkpass.c,v $
+ * Revision 2.35  2010-05-01 14:14:52+05:30  Cprogrammer
+ * added connect_all argument to vauthOpen_user
+ *
  * Revision 2.34  2010-04-12 08:48:22+05:30  Cprogrammer
  * use domain limits for account/password expiry
  * use inquery() for domain limits if QUERY_CACHE is defined
@@ -120,7 +123,7 @@
 #include <errno.h>
 
 #ifndef lint
-static char     sccsid[] = "$Id: vchkpass.c,v 2.34 2010-04-12 08:48:22+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: vchkpass.c,v 2.35 2010-05-01 14:14:52+05:30 Cprogrammer Exp mbhangui $";
 #endif
 #ifdef AUTH_SIZE
 #undef AUTH_SIZE
@@ -196,7 +199,7 @@ main(int argc, char **argv)
 	if (!getenv("QUERY_CACHE"))
 	{
 #ifdef CLUSTERED_SITE
-		if (vauthOpen_user(login))
+		if (vauthOpen_user(login, 0))
 #else
 		if (vauth_open((char *) 0))
 #endif
@@ -215,7 +218,7 @@ main(int argc, char **argv)
 		pw = inquery(PWD_QUERY, login, 0);
 #else
 #ifdef CLUSTERED_SITE
-	if (vauthOpen_user(login))
+	if (vauthOpen_user(login, 0))
 #else
 	if (vauth_open((char *) 0))
 #endif

@@ -1,5 +1,8 @@
 /*
  * $Log: iauth.c,v $
+ * Revision 2.9  2010-05-01 14:11:00+05:30  Cprogrammer
+ * added connect_all argument to vauthOpen_user
+ *
  * Revision 2.8  2010-04-12 08:45:59+05:30  Cprogrammer
  * use inquery() for domain limits if QUERY_CACHE is set
  *
@@ -76,7 +79,7 @@
 static int      defaultTask(char *, char *, struct passwd *, char *);
 
 #ifndef lint
-static char     sccsid[] = "$Id: iauth.c,v 2.8 2010-04-12 08:45:59+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: iauth.c,v 2.9 2010-05-01 14:11:00+05:30 Cprogrammer Exp mbhangui $";
 #endif
 /*
 #define iauth ltdl_module_LTX_iauth
@@ -131,7 +134,7 @@ i_auth(char *email, char *service, int *size, int debug)
 	if (!getenv("QUERY_CACHE"))
 	{
 #ifdef CLUSTERED_SITE
-		if (vauthOpen_user(email))
+		if (vauthOpen_user(email, 0))
 #else
 		if (vauth_open((char *) 0))
 #endif
@@ -139,7 +142,7 @@ i_auth(char *email, char *service, int *size, int debug)
 	}
 #else
 #ifdef CLUSTERED_SITE
-	if (vauthOpen_user(email))
+	if (vauthOpen_user(email, 0))
 #else
 	if (vauth_open((char *) 0))
 #endif

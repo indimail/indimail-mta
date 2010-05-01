@@ -1,5 +1,8 @@
 /*
  * $Log: UserInLookup.c,v $
+ * Revision 2.17  2010-05-01 14:14:14+05:30  Cprogrammer
+ * added connect_all argument to vauthOpen_user
+ *
  * Revision 2.16  2010-03-07 09:27:27+05:30  Cprogrammer
  * check return value of is_distributed_domain for error
  *
@@ -56,7 +59,7 @@
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: UserInLookup.c,v 2.16 2010-03-07 09:27:27+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: UserInLookup.c,v 2.17 2010-05-01 14:14:14+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #include <string.h>
@@ -93,7 +96,7 @@ UserInLookup(char *email)
 	if (!(real_domain = vget_real_domain(domain)))
 		real_domain = domain;
 #ifdef CLUSTERED_SITE
-	if (vauthOpen_user(email))
+	if (vauthOpen_user(email, 1))
 #else
 	if (vauth_open((char *) 0))
 #endif

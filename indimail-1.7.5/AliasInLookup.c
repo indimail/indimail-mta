@@ -1,5 +1,8 @@
 /*
  * $Log: AliasInLookup.c,v $
+ * Revision 2.7  2010-05-01 14:10:26+05:30  Cprogrammer
+ * added connect_all argument to vauthOpen_user()
+ *
  * Revision 2.6  2008-06-13 08:34:59+05:30  Cprogrammer
  * return NULL result if VALIAS is not defined
  *
@@ -25,7 +28,7 @@
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: AliasInLookup.c,v 2.6 2008-06-13 08:34:59+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: AliasInLookup.c,v 2.7 2010-05-01 14:10:26+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef VALIAS
@@ -40,9 +43,9 @@ AliasInLookup(char *email)
 	static char    *memptr;
 	int             len, tmplen;
 
-	if(!email)
+	if (!email)
 	{
-		if(memptr)
+		if (memptr)
 		{
 			free(memptr);
 			memptr = (char *) 0;
@@ -51,22 +54,22 @@ AliasInLookup(char *email)
 	}
 	for(cptr = user, ptr = email;*ptr && *ptr != '@';*cptr++ = *ptr++);
 	*cptr = 0;
-	if(*ptr)
+	if (*ptr)
 		ptr++;
 	else
 		getEnvConfigStr(&ptr, "DEFAULT_DOMAIN", DEFAULT_DOMAIN);
 	for(cptr = domain;*ptr;*cptr++ = *ptr++);
 	*cptr = 0;
 #ifdef CLUSTERED_SITE
-	if(vauthOpen_user(email))
+	if (vauthOpen_user(email, 1))
 #else
-	if(vauth_open((char *) 0))
+	if (vauth_open((char *) 0))
 #endif
 		return((char *) 0);
 	if (!(real_domain = vget_real_domain(domain)))
 		real_domain = domain;
 	/* Allocate one byte for NULL */
-	if(!memptr && !(memptr = (char *) malloc(1 * sizeof(char))))
+	if (!memptr && !(memptr = (char *) malloc(1 * sizeof(char))))
 	{
 		fprintf(stderr, "malloc: 1 bytes: %s\n", strerror(errno));
 #ifdef CLUSTERED_SITE
@@ -76,11 +79,11 @@ AliasInLookup(char *email)
 	}
 	for(*memptr = 0, len = 1;;)
 	{
-		if(!(cptr = valias_select(user, real_domain)))
+		if (!(cptr = valias_select(user, real_domain)))
 			break;
 		tmplen = slen(cptr) + 1;
 		len += tmplen;
-		if(!(memptr = (char *) realloc(memptr, len)))
+		if (!(memptr = (char *) realloc(memptr, len)))
 		{
 			fprintf(stderr, "realloc: %d bytes: %s\n", len, strerror(errno));
 #ifdef CLUSTERED_SITE

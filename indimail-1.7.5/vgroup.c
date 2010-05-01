@@ -1,5 +1,8 @@
 /*
  * $Log: vgroup.c,v $
+ * Revision 2.19  2010-05-01 13:50:26+05:30  Cprogrammer
+ * close all database connections before exit
+ *
  * Revision 2.18  2010-04-14 18:13:03+05:30  Cprogrammer
  * corrected usage description
  *
@@ -60,7 +63,7 @@
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vgroup.c,v 2.18 2010-04-14 18:13:03+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: vgroup.c,v 2.19 2010-05-01 13:50:26+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef VALIAS
@@ -103,9 +106,9 @@ main(int argc, char **argv)
 	if (option != ADDNEW_GROUP)
 	{
 #ifdef CLUSTERED_SITE
-		if(vauthOpen_user(group))
+		if (vauthOpen_user(group, 0))
 #else
-		if(vauth_open((char *) 0))
+		if (vauth_open((char *) 0))
 #endif
 			return(1);
 	}
@@ -114,6 +117,7 @@ main(int argc, char **argv)
 	if (*Domain && !(real_domain = vget_real_domain(Domain)))
 	{
 		fprintf(stderr, "%s: No such domain\n", Domain);
+		vclose();
 		return(1);
 	}
 	switch (option)
@@ -129,6 +133,7 @@ main(int argc, char **argv)
 				if (!(ptr = vauth_getipaddr(hostid)))
 				{
 					error_stack(stderr, "Failed to obtain mdahost for host %s domain %s\n", hostid, real_domain);
+					vclose();
 					return(1);
 				} else
 					mdahost = ptr;
@@ -136,6 +141,7 @@ main(int argc, char **argv)
 			/* add the user */
 			if (mdahost)
 			{
+				vclose();
 				if (!(ptr = SqlServer(mdahost, real_domain)))
 				{
 					fprintf(stderr, "Failed to obtain sqlserver for host %s domain %s\n", mdahost, real_domain);

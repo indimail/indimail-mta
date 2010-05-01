@@ -1,5 +1,8 @@
 /*
  * $Log: VlimitInLookup.c,v $
+ * Revision 2.2  2010-05-01 14:15:04+05:30  Cprogrammer
+ * added connect_all argument to vauthOpen_user
+ *
  * Revision 2.1  2010-04-15 22:58:32+05:30  Cprogrammer
  * InLookup function to fetch vlimit
  *
@@ -7,7 +10,7 @@
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: VlimitInLookup.c,v 2.1 2010-04-15 22:58:32+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: VlimitInLookup.c,v 2.2 2010-05-01 14:15:04+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #include <string.h>
@@ -23,7 +26,7 @@ VlimitInLookup(char *email, struct vlimits *lim)
 #endif
 
 #ifdef CLUSTERED_SITE
-	if (vauthOpen_user(email))
+	if (vauthOpen_user(email, 1))
 #else
 	if (vauth_open((char *) 0))
 #endif

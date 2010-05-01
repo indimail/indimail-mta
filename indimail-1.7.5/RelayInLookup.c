@@ -1,5 +1,8 @@
 /*
  * $Log: RelayInLookup.c,v $
+ * Revision 2.6  2010-05-01 14:13:51+05:30  Cprogrammer
+ * added connect_all argument to vauthOpen_user
+ *
  * Revision 2.5  2008-06-13 09:58:41+05:30  Cprogrammer
  * return -2 if POP_AUTH_OPEN_RELAY not defined
  *
@@ -22,7 +25,7 @@
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: RelayInLookup.c,v 2.5 2008-06-13 09:58:41+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: RelayInLookup.c,v 2.6 2010-05-01 14:13:51+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 /*
@@ -39,19 +42,19 @@ RelayInLookup(char *mailfrom, char *remoteip)
 	int             retval;
 
 #ifdef CLUSTERED_SITE
-	if(vauthOpen_user(mailfrom))
+	if (vauthOpen_user(mailfrom, 1))
 #else
-	if(vauth_open((char *) 0))
+	if (vauth_open((char *) 0))
 #endif
 	{
-		if(userNotFound)
+		if (userNotFound)
 			return(0);
 		else
 			return(-1);
 	}
 	for(cptr = user, ptr = mailfrom;*ptr && *ptr != '@';*cptr++ = *ptr++);
 	*cptr = 0;
-	if(*ptr)
+	if (*ptr)
 		ptr++;
 	else
 		getEnvConfigStr(&ptr, "DEFAULT_DOMAIN", DEFAULT_DOMAIN);
