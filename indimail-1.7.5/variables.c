@@ -1,5 +1,8 @@
 /*
  * $Log: variables.c,v $
+ * Revision 2.50  2010-05-01 15:12:24+05:30  Cprogrammer
+ * removed editor from list of rfc_ids
+ *
  * Revision 2.49  2010-04-13 08:16:52+05:30  Cprogrammer
  * renamed vmoddomlimits to vlimit
  *
@@ -194,7 +197,7 @@
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: variables.c,v 2.49 2010-04-13 08:16:52+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: variables.c,v 2.50 2010-05-01 15:12:24+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 vdir_type       vdir;
@@ -222,7 +225,6 @@ char           *rfc_ids[] = {
 	"postmaster",
 	"abuse",
 	"mailer-daemon",
-	"editor",
 	"prefilt",
 	"postfilt",
 	"spam",
