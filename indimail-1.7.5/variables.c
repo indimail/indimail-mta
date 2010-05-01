@@ -197,7 +197,7 @@
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: variables.c,v 2.50 2010-05-01 15:12:24+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: variables.c,v 2.50 2010-05-01 15:12:24+05:30 Cprogrammer Stab mbhangui $";
 #endif
 
 vdir_type       vdir;
