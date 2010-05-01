@@ -1,5 +1,8 @@
 /*
  * $Log: vauthOpen_user.c,v $
+ * Revision 2.9  2010-05-01 14:19:57+05:30  Cprogrammer
+ * connect to only one MySQL database if connect_all = 0
+ *
  * Revision 2.8  2009-09-23 21:22:54+05:30  Cprogrammer
  * record error when mysql_ping reports MySQL server has gone away
  *
@@ -35,7 +38,7 @@
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vauthOpen_user.c,v 2.8 2009-09-23 21:22:54+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: vauthOpen_user.c,v 2.9 2010-05-01 14:19:57+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef CLUSTERED_SITE
@@ -44,9 +47,9 @@ static char     sccsid[] = "$Id: vauthOpen_user.c,v 2.8 2009-09-23 21:22:54+05:3
 #include <errno.h>
 
 int
-vauthOpen_user(char *email)
+vauthOpen_user(char *email, int connect_all)
 {
-	int             count;
+	int             count, total = 0;
 	char            user[MAX_BUFF], domain[MAX_BUFF], mdahost[MAX_BUFF];
 	char           *ptr, *cptr, *real_domain;
 	DBINFO        **rhostsptr;
@@ -60,8 +63,6 @@ vauthOpen_user(char *email)
 		getEnvConfigStr(&ptr, "DEFAULT_DOMAIN", DEFAULT_DOMAIN);
 	for (cptr = domain;*ptr;*cptr++ = *ptr++);
 	*cptr = 0;
-	if (OpenDatabases())
-		return(-1);
 	if (!(ptr = findmdahost(email)))
 		return(-1);
 	for (;*ptr && *ptr != ':';ptr++);
@@ -69,23 +70,52 @@ vauthOpen_user(char *email)
 		return(-1);
 	for (cptr = mdahost;*ptr && *ptr != ':';*cptr++ = *ptr++);
 	*cptr = 0;
+	if (connect_all)
+	{
+		if (OpenDatabases())
+			return(-1);
+	} else
+	{
+		if (!RelayHosts && !(RelayHosts = LoadDbInfo_TXT(&total)))
+		{
+			perror("vauthOpen_user: LoadDbInfo_TXT");
+			return(-1);
+		}
+		if (!(MdaMysql = (MYSQL **) calloc(1, sizeof(MYSQL *) * (total))))
+		{
+			fprintf(stderr, "vauthOpen_user: calloc: %d Bytes: %s",
+				total * (int) sizeof(MYSQL *), strerror(errno));
+			return (-1);
+		}
+	}
 	rhostsptr = RelayHosts;
 	mysqlptr = MdaMysql;
 	if (!(real_domain = vget_real_domain(domain)))
 		real_domain = domain;
-	for (count = 1, mysqlptr = MdaMysql, rhostsptr = RelayHosts;*rhostsptr;mysqlptr++, rhostsptr++, count++)
+	for (count = 1, rhostsptr = RelayHosts;*rhostsptr;mysqlptr++, rhostsptr++, count++)
 	{
-		if (!strncmp(real_domain, (*rhostsptr)->domain, DBINFO_BUFF) && !strncmp(mdahost, (*rhostsptr)->mdahost, DBINFO_BUFF))
+		if (!strncmp(real_domain, (*rhostsptr)->domain, DBINFO_BUFF) &&
+				!strncmp(mdahost, (*rhostsptr)->mdahost, DBINFO_BUFF))
 			break;
+		if (!connect_all)
+			*mysqlptr = (MYSQL *) 0;
 	}
 	if (*rhostsptr)
 	{
+		if (!connect_all && !((*mysqlptr) = (MYSQL *) calloc(1, sizeof(MYSQL))))
+		{
+			fprintf(stderr, "vauthOpen_user: calloc: %d Bytes: %s",
+				(int) sizeof(MYSQL *), strerror(errno));
+			(*rhostsptr)->fd = -1;
+			return (-1);
+		}
 		if ((*rhostsptr)->fd == -1)
 		{
 			if (connect_db(rhostsptr, mysqlptr))
 			{
-				fprintf(stderr, "%d: %s Failed db %s@%s for user %s port %d\n", count, (*rhostsptr)->domain, 
-					(*rhostsptr)->database, (*rhostsptr)->server, (*rhostsptr)->user, (*rhostsptr)->port);
+				fprintf(stderr, "%d: %s Failed db %s@%s for user %s port %d\n",
+					count, (*rhostsptr)->domain, (*rhostsptr)->database, (*rhostsptr)->server,
+					(*rhostsptr)->user, (*rhostsptr)->port);
 				(*rhostsptr)->fd = -1;
 				return(-1);
 			} else
@@ -99,8 +129,9 @@ vauthOpen_user(char *email)
 			mysql_close(*mysqlptr);
 			if (connect_db(rhostsptr, mysqlptr))
 			{
-				fprintf(stderr, "%d: %s Failed db %s@%s for user %s port %d\n", count, (*rhostsptr)->domain, 
-					(*rhostsptr)->database, (*rhostsptr)->server, (*rhostsptr)->user, (*rhostsptr)->port);
+				fprintf(stderr, "%d: %s Failed db %s@%s for user %s port %d\n",
+					count, (*rhostsptr)->domain, (*rhostsptr)->database, (*rhostsptr)->server,
+					(*rhostsptr)->user, (*rhostsptr)->port);
 				(*rhostsptr)->fd = -1;
 				return(-1);
 			} else
