@@ -1,5 +1,8 @@
 /*
  * $Log: LoadDbinfo.c,v $
+ * Revision 2.39  2010-05-01 14:11:41+05:30  Cprogrammer
+ * initialize fd, last_error, failed_attempts
+ *
  * Revision 2.38  2010-02-24 14:54:45+05:30  Cprogrammer
  * allow MYSQL_SOCKET, MYSQL_VPORT variables to override indimail.cnf variables
  *
@@ -128,7 +131,7 @@
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: LoadDbinfo.c,v 2.38 2010-02-24 14:54:45+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: LoadDbinfo.c,v 2.39 2010-05-01 14:11:41+05:30 Cprogrammer Stab mbhangui $";
 #endif
 
 #include <sys/types.h>
@@ -364,6 +367,9 @@ LoadDbInfo_TXT(int *total)
 			scopy((*ptr)->database, row[5], DBINFO_BUFF);
 			scopy((*ptr)->user, row[6], DBINFO_BUFF);
 			scopy((*ptr)->password, row[7], DBINFO_BUFF);
+			(*ptr)->fd = -1;
+			(*ptr)->last_error = 0;
+			(*ptr)->failed_attempts = 0;
 			(*ptr)->isLocal = 0;
 		}
 		if (writedbinfo(relayhosts, mcd_time))
@@ -573,6 +579,9 @@ LoadDbInfo_TXT_internal(int *total)
 			}
 			items++;
 			(*rhostsptr)->isLocal = 0;
+			(*rhostsptr)->fd = -1;
+			(*rhostsptr)->last_error = 0;
+			(*rhostsptr)->failed_attempts = 0;
 			scopy((*rhostsptr)->server, dummy2, DBINFO_BUFF);
 		} else
 		if ((*rhostsptr))
@@ -817,6 +826,9 @@ localDbinfo(int *total, DBINFO ***rhosts)
 		}
 		/*- Should check virtual domains and smtproutes */
 		(*rhostsptr)->isLocal = 1;
+		(*rhostsptr)->fd = -1;
+		(*rhostsptr)->last_error = 0;
+		(*rhostsptr)->failed_attempts = 0;
 		if (!(localhost = get_local_ip()))
 			localhost = "localhost";
 		scopy((*rhostsptr)->mdahost, localhost, DBINFO_BUFF);
