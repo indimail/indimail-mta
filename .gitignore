@@ -19,6 +19,7 @@ pam-multi*
 #
 # remaining programs
 #
+indimail-2.0
 fortune-*/.gitignore
 fortune-*/configure
 altermime-*/altermime
