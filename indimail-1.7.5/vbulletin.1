@@ -5,12 +5,13 @@ vbulletin - instant bulletin for IndiMail
 
 .SH SYNOPSYS
 .B vbulletin
-[\fB\-f\fR \fIfilename\fR] [\fB\-e\fR \fIexclude email addresses file\fR] [\fB\-v\fR] [\fB\-n\fR] [\fB\-c\fR] [\fB\-h\fR] [\fB\-s\fR] 
+[\fB\-f\fR \fIfilename\fR] [\fB\-e\fR \fIexclude email addresses file\fR]
+[\fB\-V\fR] [\fB\-n\fR] [\fB\-c\fR] [\fB\-h\fR] [\fB\-s\fR] [\fB\-a\fR]
 [-S subscriber_list_file] [virtual_domain ...]
 
 .SH DESCRIPTION
-.B vbulletin
 .PP
+.B vbulletin
 implements instant bulletin for IndiMail. It does this by copying an email file in the user's
 inbox (Maildir). The various options given on the command line decide how this copying is to
 be done. vbulletin has setuid set to root and runs as user indimail.
@@ -18,7 +19,7 @@ be done. vbulletin has setuid set to root and runs as user indimail.
 .SH OPTIONS
 .PP
 .TP
-[\fB\-v\fR]
+[\fB\-V\fR]
 Verbose mode. Prints out each email address it is sending to. 
 .TP
 [\fB\-f\fR \fIfilename\fR]
@@ -28,7 +29,7 @@ File containing the email message to be posted.
 File containing a list of email addresses to exclude from posting. 
 .TP
 [\fB\-n\fR]
-Don't actually mail it. using \fB\-v\fR and \fB\-n\fR can be used to list out all virtual
+Don't actually mail it. using \fB\-V\fR and \fB\-n\fR can be used to list out all virtual
 domain email accounts. 
 .TP
 [\fB\-c\fR]
