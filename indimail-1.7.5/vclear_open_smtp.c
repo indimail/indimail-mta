@@ -59,7 +59,7 @@ static char     sccsid[] = "$Id: vclear_open_smtp.c,v 2.6 2008-05-28 16:40:12+05
 
 #ifdef POP_AUTH_OPEN_RELAY
 int
-vclear_open_smtp(time_t clear_seconds)
+vclear_open_smtp(time_t clear_seconds, int connect_all)
 {
 	char            SqlBuf[SQL_BUF_SIZE];
 	time_t          delete_time;
@@ -76,7 +76,8 @@ vclear_open_smtp(time_t clear_seconds)
 #ifndef CLUSTERED_SITE
 	if (vauth_open((char *)0))
 		return(1);
-	snprintf(SqlBuf, SQL_BUF_SIZE, "delete low_priority from %s where timestamp <= %ld", relay_table, delete_time);
+	snprintf(SqlBuf, SQL_BUF_SIZE, "delete low_priority from %s where timestamp <= %ld",
+		relay_table, delete_time);
 	if (mysql_query(&mysql[1], SqlBuf))
 	{
 		if(mysql_errno(&mysql[1]) == ER_NO_SUCH_TABLE)
@@ -88,6 +89,24 @@ vclear_open_smtp(time_t clear_seconds)
 		return(1);
 	}
 #else
+	if (!connect_all)
+	{
+		if (vauth_open((char *)0))
+			return(1);
+		snprintf(SqlBuf, SQL_BUF_SIZE, "delete low_priority from %s where timestamp <= %ld",
+			relay_table, delete_time);
+		if (mysql_query(&mysql[1], SqlBuf))
+		{
+			if(mysql_errno(&mysql[1]) == ER_NO_SUCH_TABLE)
+			{
+				create_table(ON_LOCAL, relay_table, RELAY_TABLE_LAYOUT);
+				return(0);
+			}
+			fprintf(stderr, "vclear_open_smtp: %s\n", mysql_error(&mysql[1]));
+			return(1);
+		}
+		return (0);
+	}
 	if(OpenDatabases())
 		return(1);
 	for (mysqlptr = MdaMysql, ptr = RelayHosts;(*ptr);mysqlptr++, ptr++)
@@ -95,8 +114,8 @@ vclear_open_smtp(time_t clear_seconds)
 		if((*ptr)->fd == -1)
 		{
 			fprintf(stderr, "mysql_real_connect %s %s %s %s %s %d fd %d: %s\n", 
-				(*ptr)->domain, (*ptr)->server, (*ptr)->mdahost, (*ptr)->database, (*ptr)->user, (*ptr)->port,
-				(*ptr)->fd, mysql_error((*mysqlptr)));
+				(*ptr)->domain, (*ptr)->server, (*ptr)->mdahost, (*ptr)->database, (*ptr)->user,
+				(*ptr)->port, (*ptr)->fd, mysql_error((*mysqlptr)));
 			continue;
 		}
 		snprintf(SqlBuf, SQL_BUF_SIZE, 
@@ -112,8 +131,8 @@ vclear_open_smtp(time_t clear_seconds)
 				continue;
 			}
 			fprintf(stderr, "mysql_query: %s %s %s %s %s %d fd %d: %s: %s\n", 
-				(*ptr)->domain, (*ptr)->server, (*ptr)->mdahost, (*ptr)->database, (*ptr)->user, (*ptr)->port,
-				(*ptr)->fd, SqlBuf, mysql_error((*mysqlptr)));
+				(*ptr)->domain, (*ptr)->server, (*ptr)->mdahost, (*ptr)->database, (*ptr)->user,
+				(*ptr)->port, (*ptr)->fd, SqlBuf, mysql_error((*mysqlptr)));
 			err = 1;
 			continue;
 		}

@@ -1,5 +1,8 @@
 /*
  * $Log: indimail.h,v $
+ * Revision 2.192  2010-05-02 08:28:51+05:30  Cprogrammer
+ * added connect_all argument to vclear_open_smtp()
+ *
  * Revision 2.191  2010-05-01 14:11:28+05:30  Cprogrammer
  * added connect_all argument to vauthOpen_user
  *
@@ -889,7 +892,7 @@
 #define INDIMAILH_H
 
 #ifndef	lint
-static char     sccsidh[] = "$Id: indimail.h,v 2.191 2010-05-01 14:11:28+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsidh[] = "$Id: indimail.h,v 2.192 2010-05-02 08:28:51+05:30 Cprogrammer Stab mbhangui $";
 #endif
 
 #include "config.h"
@@ -1695,7 +1698,7 @@ int             update_rules(int);
 int             skip_relay(char *);
 int             vopen_smtp_relay(char *, char *);
 int             vupdate_rules(int);
-int             vclear_open_smtp(time_t);
+int             vclear_open_smtp(time_t, int);
 #endif
 
 #ifdef IP_ALIAS_DOMAINS

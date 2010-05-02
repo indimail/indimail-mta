@@ -58,17 +58,19 @@ void            usage();
 int
 main(int argc, char **argv)
 {
-	char           *mcdfile, *controldir;
-	char           *tmpstr;
+	char           *mcdfile, *controldir, *tmpstr;
 	char            TmpBuf[MAX_BUFF];
 	time_t          clear_seconds;
-	int             c, errflag, job_type = 1;
+	int             c, errflag, job_type = 1, cluster_opt = 0;
 
 	errflag = 0;
 	while (!errflag && (c = getopt(argc, argv, "tsV")) != -1)
 	{
 		switch (c)
 		{
+		case 'C':
+			cluster_opt = 1;
+			break;
 		case 't':
 			job_type = 2;
 			break;
@@ -96,7 +98,7 @@ main(int argc, char **argv)
 	if (job_type == 1 || job_type == 3)
 	{
 		clear_seconds = atoi(RELAY_CLEAR_MINUTES) * 60;
-		errflag = vclear_open_smtp(clear_seconds);
+		errflag = vclear_open_smtp(clear_seconds, cluster_opt);
 #ifdef CLUSTERED_SITE
 		close_db();
 #else
