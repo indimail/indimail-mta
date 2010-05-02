@@ -15,8 +15,8 @@
 @indimaildir@/bin/valias -i '&register-ham' register-ham@$1
 @indimaildir@/bin/valias -i '&spam' spam@$1
 @indimaildir@/bin/valias -i '&ham' ham@$1
-@indimaildir@/bin/vadduser -e xxxxxxxx prefilt@$1
-@indimaildir@/bin/vadduser -e xxxxxxxx postfilt@$1
+@indimaildir@/bin/vadduser -e prefilt@$1  xxxxxxxx
+@indimaildir@/bin/vadduser -e postfilt@$1 xxxxxxxx
 @indimaildir@/bin/vcfilter -i -t spamFilter -c 3 -k "Yes, spamicity=" -f Spam -b 0 -h 33 prefilt@$1
 /bin/ls -dl @indimaildir@/domains/$1
 /bin/ls -al @indimaildir@/domains/$1
