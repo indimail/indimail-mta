@@ -1,5 +1,8 @@
 #
 # $Log: indium.spec.in,v $
+# Revision 1.6  2010-05-02 00:31:45+05:30  Cprogrammer
+# added missing assignment of argv1
+#
 # Revision 1.5  2010-02-24 09:13:43+05:30  Cprogrammer
 # added bwidget to Requires
 #
@@ -16,7 +19,7 @@
 # Initial revision
 #
 #
-# $Id: indium.spec.in,v 1.5 2010-02-24 09:13:43+05:30 Cprogrammer Exp mbhangui $
+# $Id: indium.spec.in,v 1.6 2010-05-02 00:31:45+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %define _unpackaged_files_terminate_build 1
 
@@ -565,6 +568,7 @@ fi
 
 %postun
 #echo This is postun for %{version}-%{release} : arg=$1
+argv1=$1
 ID=$(id -u)
 if [ $ID -ne 0 ] ; then
 	echo "You are not root"
