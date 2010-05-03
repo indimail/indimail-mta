@@ -1,8 +1,26 @@
-* Wed Apr 28 2010 mbhangui@gmail.com
+* Wed May 28 2010 mbhangui@gmail.com
 Release 1.7.5 Start 28/04/2010
 29/04/2010
 1.  fixed cdb search for control files badip, badhelo, authdomains &
-    chkrcptdomains in smtpd.c
+    chkrcptdomains in smtpd.c [2994668]
+2.  New program cdbgetm to search for multiple records matching a key
+    in a cdb
+30/04/2010
+3.  Fix domainbindings in qmail-remote.c for ipv4 addresses [2994670]
+4.  BUG - illegal free of pointer returned by replacestr() in mysql_query.c
+    [2994664]
+5.  Free pointer returned by replacestr() in vrenamedomain.c, vfilter.c
+01/05/2010
+6.  Optimized vauthOpen_user to connect to only one MySQL database. Improved
+    speed in non-server programs like iauth, vpasswd, vcfilter, vsetuserquota,
+    vchkpass, vsetpass, sq_vacation, vgroup
+7.  Added vfilter rule for automatic delivery of SPAM mails to Spam folder in
+    vadddomain handle
+8   Optimized clearopensmtp. Clearopensmtp can now be run only on the local
+    mdahost. Option -C will simulate the old behaviour of running on all mdahosts
+9.  Added -C option in clearopensmtp to process all mdahosts in MCD file.
+    Without -C option only local mdahost will be processed
+10. Added connect_all argument to vclear_open_smtp()
 
 * Wed Apr 28 2010 mbhangui@gmail.com
 Release 1.7.4 Start 14/04/2010
@@ -46,7 +64,7 @@ Release 1.7.4 Start 14/04/2010
     by hacking qmailadmin source code [2992161]
 27/04/2010
 22. Fixed deletion of files during RPM upgrade of indimail-devel,
-    indimail-shared packages
+    indimail-shared packages [2993010]
 
 * Wed Apr 14 2010 mbhangui@gmail.com
 Release 1.7.3 Start 31/03/2010
