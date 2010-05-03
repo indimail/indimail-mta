@@ -1,5 +1,6 @@
 *_handle
 doc/CREDITS
+doc/ChangeLog
 post_handle
 post_handle/*
 indisub.c
