@@ -48,6 +48,8 @@ ripmime-*/ripole
 ripmime-*/Makefile
 ripmime-*/Makefile.in
 indimail-*/Makefile.in
+indimail-*/ChangeLog
+indimail-*/doc/ChangeLog
 indimail-*/doc/INSTALL-RPM
 indimail-*/doc/INSTALL.indimail
 indimail-*/doc/README-CLUSTER
