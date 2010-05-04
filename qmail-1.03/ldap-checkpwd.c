@@ -168,7 +168,7 @@ main(int argc, char *argv[])
 		out(login);
 		out("] password [");
 		out(password);
-		out("\n");
+		out("]\n");
 		flush();
 	}
 	i = ldap_lookup(login, password, &error, &uid, &gid);
@@ -431,7 +431,7 @@ ldap_lookup(char *login, char *password, char **error, uid_t *userId, gid_t *gro
 void
 getversion_ldap_checkpwd_c()
 {
-	static char    *x = "$Id: ldap-checkpwd.c,v 1.1 2010-04-22 14:27:09+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: ldap-checkpwd.c,v 1.1 2010-04-22 14:27:09+05:30 Cprogrammer Stab mbhangui $";
 
 	x++;
 }
