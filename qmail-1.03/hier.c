@@ -1,5 +1,8 @@
 /*
  * $Log: hier.c,v $
+ * Revision 1.143  2010-05-04 10:00:40+05:30  Cprogrammer
+ * added cdbgetm
+ *
  * Revision 1.142  2010-04-22 15:20:02+05:30  Cprogrammer
  * added checkpassword modules sys-checkpwd and ldap-checkpwd
  *
@@ -1060,7 +1063,7 @@ hier(inst_dir)
 void
 getversion_install_big_c()
 {
-	static char    *x = "$Id: hier.c,v 1.142 2010-04-22 15:20:02+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: hier.c,v 1.143 2010-05-04 10:00:40+05:30 Cprogrammer Stab mbhangui $";
 
 #ifdef INDIMAIL
 	x = sccsidh;
