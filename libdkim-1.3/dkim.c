@@ -1,5 +1,8 @@
 /*
  * $Log: dkim.c,v $
+ * Revision 1.12  2010-05-04 14:00:13+05:30  Cprogrammer
+ * make option '-z' work on systems without SHA_256
+ *
  * Revision 1.11  2009-04-20 08:35:45+05:30  Cprogrammer
  * corrected usage()
  *
@@ -535,11 +538,7 @@ main(int argc, char **argv)
 	opts.pfnHeaderCallback = SignThisHeader;
 	while (1)
 	{
-#ifdef HAVE_EVP_SHA256
 		if ((ch = getopt(argc, argv, "lqthHvVp:b:c:d:i:s:x:y:z:")) == -1)
-#else
-		if ((ch = getopt(argc, argv, "lqthHvVp:b:c:d:i:s:x:y:")) == -1)
-#endif
 			break;
 		switch (ch)
 		{
@@ -646,8 +645,8 @@ main(int argc, char **argv)
 		case 'y':
 			strncpy(opts.szSelector, optarg, sizeof (opts.szSelector) - 1);
 			break;
-#ifdef HAVE_EVP_SHA256
 		case 'z': /*- sign w/ sha1, sha256 or both */
+#ifdef HAVE_EVP_SHA256
 			switch (*optarg)
 			{
 			case '1':
@@ -663,8 +662,10 @@ main(int argc, char **argv)
 				fprintf(stderr, "%s: unrecognized hash.\n", program);
 				return (1);
 			}
-			break;
+#else
+			opts.nHash = DKIM_HASH_SHA1;
 #endif
+			break;
 		} /*- switch (ch) */
 	}
 	if (bSign) { /*- sign */
@@ -848,7 +849,7 @@ main(int argc, char **argv)
 void
 getversion_dkim_c()
 {
-	static char    *x = (char *) "$Id: dkim.c,v 1.11 2009-04-20 08:35:45+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = (char *) "$Id: dkim.c,v 1.12 2010-05-04 14:00:13+05:30 Cprogrammer Stab mbhangui $";
 
 	x++;
 }
