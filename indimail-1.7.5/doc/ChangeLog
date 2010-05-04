@@ -14,13 +14,16 @@ Release 1.7.5 Start 28/04/2010
 6.  Optimized vauthOpen_user to connect to only one MySQL database. Improved
     speed in non-server programs like iauth, vpasswd, vcfilter, vsetuserquota,
     vchkpass, vsetpass, sq_vacation, vgroup
-7.  Added vfilter rule for automatic delivery of SPAM mails to Spam folder in
+7.  Added prefilt, postfilt id creation in vadddomain_handle
+8.  Added vfilter rule for automatic delivery of SPAM mails to Spam folder in
     vadddomain handle
-8   Optimized clearopensmtp. Clearopensmtp can now be run only on the local
+9   Optimized clearopensmtp. Clearopensmtp can now be run only on the local
     mdahost. Option -C will simulate the old behaviour of running on all mdahosts
-9.  Added -C option in clearopensmtp to process all mdahosts in MCD file.
+10. Added -C option in clearopensmtp to process all mdahosts in MCD file.
     Without -C option only local mdahost will be processed
-10. Added connect_all argument to vclear_open_smtp()
+11. Added connect_all argument to vclear_open_smtp()
+04/05/2010
+12. Fixed DK_SYNTAX error in dk-filter when using buth DKIM, DK Signing
 
 * Wed Apr 28 2010 mbhangui@gmail.com
 Release 1.7.4 Start 14/04/2010
