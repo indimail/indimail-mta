@@ -1,5 +1,8 @@
 #
 # $Log: dk-filter.sh,v $
+# Revision 1.12  2010-05-04 08:37:42+05:30  Cprogrammer
+# do DK signing before DKIM signing to prevent DK_SYNTAX error
+#
 # Revision 1.11  2009-12-10 19:25:13+05:30  Cprogrammer
 # added RCS id
 #
@@ -36,7 +39,7 @@
 # Revision 1.1  2009-04-02 14:52:27+05:30  Cprogrammer
 # Initial revision
 #
-# $Id: dk-filter.sh,v 1.11 2009-12-10 19:25:13+05:30 Cprogrammer Stab mbhangui $
+# $Id: dk-filter.sh,v 1.12 2010-05-04 08:37:42+05:30 Cprogrammer Stab mbhangui $
 #
 if [ -z "$QMAILREMOTE" -a -z "$QMAILLOCAL" ]; then
 	echo "dk-filter should be run by spawn-filter" 1>&2
@@ -93,58 +96,6 @@ if [ ! -z $DKIMVERIFY ] ; then
 	dkimverify=1
 fi
 cat > /tmp/dk.$$
-if [ $dksign -eq 1 ] ; then
-	#dktest: [-f] [-b advice_length] [-c nofws|simple] [-v|-s selector] [-h] [-t#] [-r] [-T][-d dnsrecord]
-	# DKSIGNOPTIONS="-z 1 -b 2 -x - -y $dkimselector -s $dkimkeyfn"
-	set -- `getopt hrb:c:s: $DKSIGNOPTIONS`
-	dkopts="QMAILHOME/bin/dktest"
-	sopt=0
-	while [ $1 != -- ]
-	do
-		case $1 in
-		-h)
-		dkopts="$dkopts -h"
-		;;
-		-r)
-		dkopts="$dkopts -r"
-		;;
-
-		-b)
-		dkopts="$dkopts -b $2"
-		shift
-		;;
-
-		-c)
-		dkopts="$dkopts -c $2"
-		shift
-		;;
-
-		-s)
-		sopt=1
-		dkopts="$dkopts -s $2"
-		shift
-		;;
-		esac
-		shift   # next flag
-	done
-	if [ $sopt -eq 0 ] ; then
-		dkopts="$dkopts -s $dkkeyfn"
-	fi
-	exec 0</tmp/dk.$$
-	#QMAILHOME/bin/dktest -h -s $dkkeyfn
-	eval $dkopts
-	exit_val=$?
-	if [ $exit_val -ne 0 ] ; then
-		if [ $exit_val -eq 6 ] ; then
-			exec 0</tmp/dk.$$
-			/bin/rm -f /tmp/dk.$$
-			cat
-			exit $?
-		fi
-		/bin/rm -f /tmp/dk.$$
-		exit $exit_val
-	fi
-fi
 if [ $dkimsign -eq 1 ] ; then
 	# DKIMSIGNOPTIONS="-z 1 -b 2 -x - -y $dkimselector -s $dkimkeyfn"
 	set -- `getopt lqthb:c:d:i:x:z:y:s: $DKIMSIGNOPTIONS`
@@ -232,6 +183,58 @@ if [ $dkimsign -eq 1 ] ; then
 	if [ $? -ne 0 ] ; then
 		/bin/rm -f /tmp/dk.$$
 		exit 1
+	fi
+fi
+if [ $dksign -eq 1 ] ; then
+	#dktest: [-f] [-b advice_length] [-c nofws|simple] [-v|-s selector] [-h] [-t#] [-r] [-T][-d dnsrecord]
+	# DKSIGNOPTIONS="-z 1 -b 2 -x - -y $dkimselector -s $dkimkeyfn"
+	set -- `getopt hrb:c:s: $DKSIGNOPTIONS`
+	dkopts="QMAILHOME/bin/dktest"
+	sopt=0
+	while [ $1 != -- ]
+	do
+		case $1 in
+		-h)
+		dkopts="$dkopts -h"
+		;;
+		-r)
+		dkopts="$dkopts -r"
+		;;
+
+		-b)
+		dkopts="$dkopts -b $2"
+		shift
+		;;
+
+		-c)
+		dkopts="$dkopts -c $2"
+		shift
+		;;
+
+		-s)
+		sopt=1
+		dkopts="$dkopts -s $2"
+		shift
+		;;
+		esac
+		shift   # next flag
+	done
+	if [ $sopt -eq 0 ] ; then
+		dkopts="$dkopts -s $dkkeyfn"
+	fi
+	exec 0</tmp/dk.$$
+	#QMAILHOME/bin/dktest -h -s $dkkeyfn
+	eval $dkopts
+	exit_val=$?
+	if [ $exit_val -ne 0 ] ; then
+		if [ $exit_val -eq 6 ] ; then
+			exec 0</tmp/dk.$$
+			/bin/rm -f /tmp/dk.$$
+			cat
+			exit $?
+		fi
+		/bin/rm -f /tmp/dk.$$
+		exit $exit_val
 	fi
 fi
 if [ $dkimverify -eq 1 ] ; then
