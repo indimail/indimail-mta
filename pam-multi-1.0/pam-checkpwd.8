@@ -4,7 +4,7 @@
 pam-checkpwd \- PAM-based checkpassword compatible authentication
 .SH SYNOPSIS
 .PP
-pam-checkpwd [-\fBs\fR \fIPAM\fR-\fISERVICE\fR] [-\fBe\fR|--\fBnoenv\fR] -- \fIprog\fR \fIargs\fR...
+pam-checkpwd [-\fBs\fR \fIPAM\fR-\fISERVICE\fR] [-\fBd\fR] [-\fBH\fR] [-\fBe\fR] -- \fIprog\fR \fIargs\fR...
 .PP
 pam-checkpwd --\fBhelp\fR
 .PP
@@ -38,7 +38,7 @@ uses PAM service name specified by
 environment variable, or by the -\fBs\fR " or " --\fBservice\fR command-line option.
 
 .PP
-After successful authentication, if --\fBnoenv\fR option is not specified,
+After successful authentication, if -\fBe\fR or --\fBnoenv\fR or option is not specified,
 \fBpam-checkpwd\fR sets up supplementary groups of authenticated user,
 its gid, its uid, and its working directory (those values are taken from the system
 user database).
@@ -47,7 +47,7 @@ user database).
 Normally,
 .B pam-checkpwd
 switches to user home directory.   If
---\fBno\fR-\fBchdir\fR-\fBhome\fR or -\fBH\fR option is specified, this step is skipped.
+-\fBH\fR or --\fBno\fR-\fBchdir\fR-\fBhome\fR option is specified, this step is skipped.
 This option is useful when you have automounted home directories, but mail is delivered to a
 central location.
 
