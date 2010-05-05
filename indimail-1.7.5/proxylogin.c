@@ -1,5 +1,8 @@
 /*
  * $Log: proxylogin.c,v $
+ * Revision 2.41  2010-05-05 14:44:59+05:30  Cprogrammer
+ * added setting of AUTHSERVICE environment variable
+ *
  * Revision 2.40  2010-03-06 14:55:46+05:30  Cprogrammer
  * identify STLS or STARTTLS
  *
@@ -141,7 +144,7 @@
 #include <unistd.h>
 
 #ifndef	lint
-static char     sccsid[] = "$Id: proxylogin.c,v 2.40 2010-03-06 14:55:46+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: proxylogin.c,v 2.41 2010-05-05 14:44:59+05:30 Cprogrammer Stab mbhangui $";
 #endif
 
 #ifdef CLUSTERED_SITE
@@ -325,9 +328,10 @@ LocalLogin(char **argv, char *user, char *TheDomain, char *service,
 static int
 ExecImapd(char **argv, char *userid, char *TheDomain, struct passwd *pw, char *service, char *imaptag)
 {
-	char            Maildir[MAX_BUFF], authenv1[MAX_BUFF], authenv2[MAX_BUFF], authenv3[MAX_BUFF],
-	                authenv4[MAX_BUFF], authenv5[MAX_BUFF], authenv6[MAX_BUFF], TheUser[MAX_BUFF],
-					TmpBuf[MAX_BUFF];
+	char            Maildir[MAX_BUFF], authenv1[MAX_BUFF], authenv2[MAX_BUFF],
+	                authenv3[MAX_BUFF], authenv4[MAX_BUFF], authenv5[MAX_BUFF],
+	                authenv6[MAX_BUFF], authenv7[MAX_BUFF], TheUser[MAX_BUFF],
+	                TmpBuf[MAX_BUFF];
 	char           *ptr, *cptr;
 	int             status;
 #ifdef USE_MAILDIRQUOTA
@@ -357,11 +361,13 @@ ExecImapd(char **argv, char *userid, char *TheDomain, struct passwd *pw, char *s
 	snprintf(authenv4, MAX_BUFF, "MAILDIRQUOTA=%sS", pw->pw_shell);
 #endif
 	snprintf(authenv5, MAX_BUFF, "HOME=%s", pw->pw_dir);
+	snprintf(authenv6, MAX_BUFF, "AUTHSERVICE=%s", service);
 	putenv(authenv1);
 	putenv(authenv2);
 	putenv(authenv3);
 	putenv(authenv4);
 	putenv(authenv5);
+	putenv(authenv6);
 	switch ((status = Login_Tasks(pw, userid, TmpBuf)))
 	{
 		case 2:
@@ -408,8 +414,8 @@ ExecImapd(char **argv, char *userid, char *TheDomain, struct passwd *pw, char *s
 		fprintf(stderr, "proxylogin: chdir: %s: %s\n", Maildir, strerror(errno));
 		return(1);
 	}
-	snprintf(authenv6, MAX_BUFF, "MAILDIR=%s/Maildir", Maildir);
-	putenv(authenv6);
+	snprintf(authenv7, MAX_BUFF, "MAILDIR=%s/Maildir", Maildir);
+	putenv(authenv7);
 	execv(argv[1], argv + 1);
 	return(1);
 }

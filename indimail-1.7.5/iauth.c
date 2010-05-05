@@ -1,5 +1,8 @@
 /*
  * $Log: iauth.c,v $
+ * Revision 2.10  2010-05-05 14:42:14+05:30  Cprogrammer
+ * added settin of AUTHSERVICE env variable
+ *
  * Revision 2.9  2010-05-01 14:11:00+05:30  Cprogrammer
  * added connect_all argument to vauthOpen_user
  *
@@ -79,7 +82,7 @@
 static int      defaultTask(char *, char *, struct passwd *, char *);
 
 #ifndef lint
-static char     sccsid[] = "$Id: iauth.c,v 2.9 2010-05-01 14:11:00+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: iauth.c,v 2.10 2010-05-05 14:42:14+05:30 Cprogrammer Stab mbhangui $";
 #endif
 /*
 #define iauth ltdl_module_LTX_iauth
@@ -387,8 +390,10 @@ iauth(char *email, char *service, int auth_or_accmgmt, int *size, int *nitems, i
 static int
 defaultTask(char *userid, char *TheDomain, struct passwd *pw, char *service)
 {
-	char            Maildir[MAX_BUFF], authenv1[MAX_BUFF], authenv2[MAX_BUFF], authenv3[MAX_BUFF],
-	                authenv4[MAX_BUFF], authenv5[MAX_BUFF], TheUser[MAX_BUFF], TmpBuf[MAX_BUFF];
+	char            Maildir[MAX_BUFF], authenv1[MAX_BUFF], authenv2[MAX_BUFF],
+					authenv3[MAX_BUFF], authenv4[MAX_BUFF], authenv5[MAX_BUFF],
+					authenv6[MAX_BUFF], authenv7[MAX_BUFF], TheUser[MAX_BUFF],
+					TmpBuf[MAX_BUFF];
 	char           *ptr, *cptr;
 	int             status;
 #ifdef USE_MAILDIRQUOTA
@@ -398,7 +403,7 @@ defaultTask(char *userid, char *TheDomain, struct passwd *pw, char *service)
 	for (cptr = TheUser, ptr = userid;*ptr && *ptr != '@';*cptr++ = *ptr++);
 	*cptr = 0;
 	scopy(TmpBuf, service, MAX_BUFF);
-	if ((ptr = strrchr(TmpBuf, ':')))
+	if ((ptr = strrchr(TmpBuf, ':'))) /*- service:remote_port */
 		*ptr = 0;
 	if (Check_Login(TmpBuf, TheDomain, pw->pw_gecos))
 	{
@@ -427,12 +432,16 @@ defaultTask(char *userid, char *TheDomain, struct passwd *pw, char *service)
 #else
 	snprintf(authenv4, MAX_BUFF, "MAILDIRQUOTA=%sS", pw->pw_shell);
 #endif
-	snprintf(authenv5, MAX_BUFF, "MAILDIR=%s", Maildir);
+	snprintf(authenv5, MAX_BUFF, "HOME=%s", pw->pw_dir);
+	snprintf(authenv6, MAX_BUFF, "AUTHSERVICE=%s", service);
+	snprintf(authenv7, MAX_BUFF, "MAILDIR=%s", Maildir);
 	putenv(authenv1);
 	putenv(authenv2);
 	putenv(authenv3);
 	putenv(authenv4);
 	putenv(authenv5);
+	putenv(authenv6);
+	putenv(authenv7);
 	return(0);
 }
 
