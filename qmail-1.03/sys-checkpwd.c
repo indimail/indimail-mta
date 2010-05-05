@@ -1,5 +1,8 @@
 /*
  * $Log: sys-checkpwd.c,v $
+ * Revision 1.2  2010-05-05 11:48:44+05:30  Cprogrammer
+ * fixed calls to my_error
+ *
  * Revision 1.1  2010-04-21 20:01:49+05:30  Cprogrammer
  * Initial revision
  *
@@ -107,7 +110,7 @@ main(int argc, char **argv)
 			break;
 		uplen += r;
 		if (uplen >= sizeof (up))
-			my_error("read", "data too big", 1);
+			my_error("read", "data too big", -1);
 	}
 	close(3);
 	i = 0;
@@ -116,13 +119,13 @@ main(int argc, char **argv)
 	login = up + i;
 	while (up[i++])
 		if (i >= uplen)
-			my_error("invalid data", 0, 2);
+			my_error("invalid data", 0, -2);
 	password = up + i;
 	if (i >= uplen)
-		my_error("invalid data", 0, 2);
+		my_error("invalid data", 0, -2);
 	while (up[i++])
 		if (i >= uplen)
-			my_error("invalid data", 0, 2);
+			my_error("invalid data", 0, -2);
 	if (!(pw = getpwnam(login))) {
 		if (errno == error_txtbsy)
 			my_error("getpwnam", 0, 111);
@@ -179,7 +182,7 @@ main(int argc, char **argv)
 void
 getversion_sys_checkpwd_c()
 {
-	static char    *x = "$Id: sys-checkpwd.c,v 1.1 2010-04-21 20:01:49+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: sys-checkpwd.c,v 1.2 2010-05-05 11:48:44+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

@@ -1,5 +1,8 @@
 /*-
  * $Log: ldap-checkpwd.c,v $
+ * Revision 1.2  2010-05-05 11:48:11+05:30  Cprogrammer
+ * fixed calls to my_error()
+ *
  * Revision 1.1  2010-04-22 14:27:09+05:30  Cprogrammer
  * Initial revision
  *
@@ -145,24 +148,24 @@ main(int argc, char *argv[])
 			break;
 		uplen += r;
 		if (uplen >= sizeof (up))
-			my_error("read", "data too big", 1);
+			my_error("read", "data too big", -1);
 	}
 	close(3);
 	i = 0;
 	if (i >= uplen)
-		my_error("invalid data", 0, 2);
+		my_error("invalid data", 0, -2);
 	login = up + i;
 	while (up[i++])
 		if (i >= uplen)
-			my_error("invalid data", 0, 2);
+			my_error("invalid data", 0, -2);
 	password = up + i;
 	if (i >= uplen)
-		my_error("invalid data", 0, 2);
+		my_error("invalid data", 0, -2);
 	while (up[i++])
 		if (i >= uplen)
-			my_error("invalid data", 0, 2);
+			my_error("invalid data", 0, -2);
 	if (!*login || !*password)
-		my_error("invalid data", 0, 2);
+		my_error("invalid data", 0, -2);
 	if (debug) {
 		out("login [");
 		out(login);
@@ -431,7 +434,7 @@ ldap_lookup(char *login, char *password, char **error, uid_t *userId, gid_t *gro
 void
 getversion_ldap_checkpwd_c()
 {
-	static char    *x = "$Id: ldap-checkpwd.c,v 1.1 2010-04-22 14:27:09+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: ldap-checkpwd.c,v 1.2 2010-05-05 11:48:11+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
