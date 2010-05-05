@@ -1,5 +1,8 @@
 /*
  * $Log: clearopensmtp.c,v $
+ * Revision 2.10  2010-05-05 14:40:51+05:30  Cprogrammer
+ * added connect_all argument to vclear_open_smtp
+ *
  * Revision 2.9  2008-05-28 21:34:27+05:30  Cprogrammer
  * added option to selectively run clearing of relay table or run update tcp.smtp.cdb
  *
@@ -43,7 +46,7 @@
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: clearopensmtp.c,v 2.9 2008-05-28 21:34:27+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: clearopensmtp.c,v 2.10 2010-05-05 14:40:51+05:30 Cprogrammer Stab mbhangui $";
 #endif
 
 #ifdef POP_AUTH_OPEN_RELAY

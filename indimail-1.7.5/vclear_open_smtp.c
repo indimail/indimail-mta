@@ -1,5 +1,9 @@
 /*
  * $Log: vclear_open_smtp.c,v $
+ * Revision 2.7  2010-05-05 14:39:57+05:30  Cprogrammer
+ * added connect_all argument to vclear_open_smtp
+ * to process all mda hosts
+ *
  * Revision 2.6  2008-05-28 16:40:12+05:30  Cprogrammer
  * removed USE_MYSQL
  *
@@ -52,7 +56,7 @@
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vclear_open_smtp.c,v 2.6 2008-05-28 16:40:12+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: vclear_open_smtp.c,v 2.7 2010-05-05 14:39:57+05:30 Cprogrammer Stab mbhangui $";
 #endif
 
 #include <mysqld_error.h>
