@@ -1,5 +1,8 @@
 /*
  * $Log: pam-support.c,v $
+ * Revision 1.3  2010-05-05 15:21:34+05:30  Cprogrammer
+ * added setting of credentials
+ *
  * Revision 1.2  2009-10-07 11:58:08+05:30  Cprogrammer
  * removed stray debug statements
  *
@@ -120,13 +123,13 @@ auth_pam(const char *service_name, const char *username, const char *password, i
 		fprintf(stderr, "Initialization failed: %s\n", pam_strerror(pamh, retval));
 		return 111;
 	}
-	if (debug)
-		fprintf(stderr, "PAM library initialization succeeded\n");
 	/*- provided by tcpserver */
 	remoteip = getenv("TCPREMOTEIP");
 	if (remoteip) /*- we don't care if this succeeds or not */
 		pam_set_item(pamh, PAM_RHOST, remoteip);
 	/*- Authenticate the user */
+	if (debug)
+		fprintf(stderr, "Authenticating\n");
 	if ((retval = pam_authenticate(pamh, PAM_DISALLOW_NULL_AUTHTOK)) != PAM_SUCCESS) {
 		/*
 		 * usually PAM itself logs auth failures, but we need to see
@@ -138,34 +141,40 @@ auth_pam(const char *service_name, const char *username, const char *password, i
 		return 1;
 	}
 	if (debug)
-		fprintf(stderr, "Authentication passed\n");
+		fprintf(stderr, "doing Account management\n");
 	if ((retval = pam_acct_mgmt(pamh, 0)) != PAM_SUCCESS) {
 		fprintf(stderr, "PAM account management failed: %s\n", pam_strerror(pamh, retval));
 		pam_end(pamh, retval);
 		return 1;
 	}
+	/*
+	 * Not sure how this works. If someone can enlighten me
+	 * it would be great mbhangui@gmail.com
+	 */
 	if (debug)
-		fprintf(stderr, "Account management succeeded\n");
-#if 0
+		fprintf(stderr, "Setting PAM credentials\n");
 	if ((retval = pam_setcred(pamh, PAM_ESTABLISH_CRED)) != PAM_SUCCESS){
 		fprintf(stderr, "Setting credentials failed: %s", pam_strerror(pamh, retval));
 		return 1;
 	}
 	if (debug)
-		fprintf(stderr, "Setting PAM credentials succeeded\n");
+		fprintf(stderr, "opening PAM session\n");
 	if ((retval = pam_open_session(pamh, PAM_SILENT)) != PAM_SUCCESS) {
 		fprintf(stderr, "Session opening failed: %s\n", pam_strerror(pamh, retval));
 		return 1;
 	}
 	if (debug)
-		fprintf(stderr, "PAM session opened\n");
+		fprintf(stderr, "closing PAM session\n");
 	if ((retval = pam_close_session(pamh, PAM_SILENT)) != PAM_SUCCESS) {
 		fprintf(stderr, "Session closing failed: %s\n", pam_strerror(pamh, retval));
 		return 1;
 	}
 	if (debug)
-		fprintf(stderr, "PAM session closed\n");
-#endif
+		fprintf(stderr, "Deleting credentials\n");
+	if ((retval = pam_setcred(pamh, PAM_DELETE_CRED)) != PAM_SUCCESS){
+		fprintf(stderr, "Setting credentials failed: %s", pam_strerror(pamh, retval));
+		return 1;
+	}
 	/*- terminate the PAM library */
 	if (debug)
 		fprintf(stderr, "Terminating PAM library\n");
