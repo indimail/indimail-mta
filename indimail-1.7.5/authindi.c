@@ -1,5 +1,8 @@
 /*
  * $Log: authindi.c,v $
+ * Revision 2.18  2010-05-05 14:47:24+05:30  Cprogrammer
+ * no need of using service:port format for service variable
+ *
  * Revision 2.17  2010-04-12 12:59:18+05:30  Cprogrammer
  * use domain limits for account/password expiry
  * use inquery() for domain limits if QUERY_CACHE is defined
@@ -61,7 +64,7 @@
 #include <errno.h>
 
 #ifndef lint
-static char     sccsid[] = "$Id: authindi.c,v 2.17 2010-04-12 12:59:18+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: authindi.c,v 2.18 2010-05-05 14:47:24+05:30 Cprogrammer Stab mbhangui $";
 #endif
 #ifdef AUTH_SIZE
 #undef AUTH_SIZE
@@ -402,12 +405,9 @@ exec_local(char **argv, char *userid, char *TheDomain, struct passwd *pw, char *
 
 	for (cptr = TheUser, ptr = userid;*ptr && *ptr != '@';*cptr++ = *ptr++);
 	*cptr = 0;
-	scopy(TmpBuf, service, MAX_BUFF);
-	if ((ptr = strrchr(TmpBuf, ':')))
-		*ptr = 0;
-	if (Check_Login(TmpBuf, TheDomain, pw->pw_gecos))
+	if (Check_Login(service, TheDomain, pw->pw_gecos))
 	{
-		fprintf(stderr, "Login not permitted for %s\n", TmpBuf);
+		fprintf(stderr, "Login not permitted for %s\n", service);
 		close_connection();
 		return (1);
 	}
@@ -433,7 +433,7 @@ exec_local(char **argv, char *userid, char *TheDomain, struct passwd *pw, char *
 	putenv(authenv4);
 	putenv(authenv5);
 	putenv(authenv6);
-	switch ((status = Login_Tasks(pw, userid, TmpBuf)))
+	switch ((status = Login_Tasks(pw, userid, service)))
 	{
 		case 2:
 			if (!(ptr = getenv("TMP_MAILDIR")))
