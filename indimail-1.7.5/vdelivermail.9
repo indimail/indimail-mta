@@ -67,9 +67,21 @@ answerme@savetrees.com.  Further, any E-Mail with a sender address containing a 
 
 .SH Quota Checking
 .PP
-If the size of the mail is within the quota, or if the size of the mail is
-less than QUOTA_MAILSIZE (defined in indimail.h) but would bring the user overquota,
-the mail is delivered and the user's current quota usage updated. Else the mail is
+\fBvdelivermail\fR uses Maildir++ specification. Maildir++ quota relies on maildirsize file
+having correct information, so if your users can modify the file in some way (e.g. shell access),
+you're relying on the goodwill of your users for the quota to work. As a trade-off between
+accuracy and performance quota recalculation happens when the size of maildirsize file reaches
+512 bytes or becomes older 43200 seconds. The command \fBvuserinfo(1)\fR also recalculates
+the quota.
+
+The maildirsize file in the Maildir root directory contains both the quota limit information
+and the current quota status. It contains a header in format:
+.EX
+ <storage limit in bytes>S,<message count limit>C
+.EE
+If the size of the mail is within the quota, or if the size of the mail is less than
+OVERQUOTA_MAILSIZE (1000 bytes as defined in indimail.h) but would bring the user
+overquota, the mail is delivered and the user's current quota usage updated. Else the mail is
 bounced back with Over Quota message. Also if INDIMAIL/libexec/overquota.sh exists, the
 command is executed with the following arguments
 
@@ -165,11 +177,12 @@ indimail.org and 25 is the SMTP port.
 .PP
 If IndiMail is configured for hard quotas (default is yes with 5 Meg quota), then the size
 of the user's current usage Maildir/new and Maildir/cur directories and other folders
-(excluding Trash) are counted and added to \fImaildirsize\fR. If the user is over quota the
-email is bounced back to the user with a bounce message that can be customized (See the 
-section '\fBQuota Checking\fR' above. If the message is 1Kbytes or smaller the email will always
-be delivered. This allows system administration programs to always get a message through
-to the user. 
+(excluding Trash) are counted and added to \fImaildirsize\fR. \fBvdelivermail\fR recalculates once
+\fImaildirsize\fR reaches 512 bytes. This ensures that quota is as accurate as possible even if files
+are deleted externally. If the user is over quota the email is bounced back to the user with a
+bounce message that can be customized (See the section '\fBQuota Checking\fR' above. If the
+message is 1Kbytes or smaller the email will always be delivered. This allows system
+administration programs to always get a message through to the user. 
 
 .SH RETURN VALUE
 .TP
