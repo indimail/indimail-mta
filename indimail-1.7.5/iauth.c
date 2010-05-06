@@ -1,5 +1,9 @@
 /*
  * $Log: iauth.c,v $
+ * Revision 2.12  2010-05-06 13:23:37+05:30  Cprogrammer
+ * added debug argument to defaultTask
+ * added debug statements in defaultTask()
+ *
  * Revision 2.11  2010-05-06 09:03:05+05:30  Cprogrammer
  * added debug statement
  *
@@ -82,10 +86,10 @@
 #include <mysqld_error.h>
 #endif
 
-static int      defaultTask(char *, char *, struct passwd *, char *);
+static int      defaultTask(char *, char *, struct passwd *, char *, int);
 
 #ifndef lint
-static char     sccsid[] = "$Id: iauth.c,v 2.11 2010-05-06 09:03:05+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: iauth.c,v 2.12 2010-05-06 13:23:37+05:30 Cprogrammer Exp mbhangui $";
 #endif
 /*
 #define iauth ltdl_module_LTX_iauth
@@ -336,11 +340,11 @@ i_acctmgmt(char *email, char *service, int *size, int *nitems, int debug)
 	 * of connection
 	 */
 	if (debug)
-		fprintf(stderr, "service=[%s] pw_name = %s\n", service,
+		fprintf(stderr, "service=[%s] pw_name = %s\n", service ? service : "null",
 			_global_pw ? _global_pw->pw_name : "absent");
 	if (service && _global_pw)
 	{
-		if (strcmp("webmail", service) == 0)
+		if (!strncmp("webmail", service, 4))
 		{
 			if (_global_pw->pw_gid & NO_WEBMAIL)
 			{
@@ -349,7 +353,7 @@ i_acctmgmt(char *email, char *service, int *size, int *nitems, int debug)
 				return ((char *) 0);
 			}
 		} else
-		if (strcmp("pop3", service) == 0)
+		if (!strncmp("pop3", service, 4))
 		{
 			if (_global_pw->pw_gid & NO_POP)
 			{
@@ -358,7 +362,7 @@ i_acctmgmt(char *email, char *service, int *size, int *nitems, int debug)
 				return ((char *) 0);
 			}
 		} else
-		if (strcmp("imap", service) == 0)
+		if (!strncmp("imap", service, 4))
 		{
 			if (_global_pw->pw_gid & NO_IMAP)
 			{
@@ -367,7 +371,7 @@ i_acctmgmt(char *email, char *service, int *size, int *nitems, int debug)
 				return ((char *) 0);
 			}
 		}
-		if (defaultTask(email, Domain, _global_pw, service))
+		if (defaultTask(email, Domain, _global_pw, service, debug))
 		{
 			close_connection();
 			return ((char *) 0);
@@ -394,7 +398,7 @@ iauth(char *email, char *service, int auth_or_accmgmt, int *size, int *nitems, i
 }
 
 static int
-defaultTask(char *userid, char *TheDomain, struct passwd *pw, char *service)
+defaultTask(char *userid, char *TheDomain, struct passwd *pw, char *service, int debug)
 {
 	char            Maildir[MAX_BUFF], authenv1[MAX_BUFF], authenv2[MAX_BUFF],
 					authenv3[MAX_BUFF], authenv4[MAX_BUFF], authenv5[MAX_BUFF],
@@ -411,11 +415,15 @@ defaultTask(char *userid, char *TheDomain, struct passwd *pw, char *service)
 	scopy(TmpBuf, service, MAX_BUFF);
 	if ((ptr = strrchr(TmpBuf, ':'))) /*- service:remote_port */
 		*ptr = 0;
+	if (debug)
+		fprintf(stderr, "checking Login permission\n");
 	if (Check_Login(TmpBuf, TheDomain, pw->pw_gecos))
 	{
 		fprintf(stderr, "Login not permitted for %s\n", TmpBuf);
 		return (1);
 	}
+	if (debug)
+		fprintf(stderr, "performing Login Tasks\n");
 	status = Login_Tasks(pw, userid, TmpBuf);
 	if (status == 2 && !strncasecmp(service, "imap", 4))
 		return(1);
@@ -428,6 +436,8 @@ defaultTask(char *userid, char *TheDomain, struct passwd *pw, char *service)
 	snprintf(authenv1, MAX_BUFF, "AUTHENTICATED=%s", userid);
 	snprintf(authenv2, MAX_BUFF, "AUTHADDR=%s@%s", TheUser, TheDomain);
 	snprintf(authenv3, MAX_BUFF, "AUTHFULLNAME=%s", pw->pw_gecos);
+	if (debug)
+		fprintf(stderr, "checking quota\n");
 #ifdef USE_MAILDIRQUOTA	
 	if ((size_limit = parse_quota(pw->pw_shell, &count_limit)) == -1)
 	{
