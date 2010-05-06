@@ -1,5 +1,8 @@
 /*
  * $Log: iauth.c,v $
+ * Revision 2.11  2010-05-06 09:03:05+05:30  Cprogrammer
+ * added debug statement
+ *
  * Revision 2.10  2010-05-05 14:42:14+05:30  Cprogrammer
  * added settin of AUTHSERVICE env variable
  *
@@ -82,7 +85,7 @@
 static int      defaultTask(char *, char *, struct passwd *, char *);
 
 #ifndef lint
-static char     sccsid[] = "$Id: iauth.c,v 2.10 2010-05-05 14:42:14+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: iauth.c,v 2.11 2010-05-06 09:03:05+05:30 Cprogrammer Stab mbhangui $";
 #endif
 /*
 #define iauth ltdl_module_LTX_iauth
@@ -332,6 +335,9 @@ i_acctmgmt(char *email, char *service, int *size, int *nitems, int debug)
 	 * And then see if the user is permitted to make this type
 	 * of connection
 	 */
+	if (debug)
+		fprintf(stderr, "service=[%s] pw_name = %s\n", service,
+			_global_pw ? _global_pw->pw_name : "absent");
 	if (service && _global_pw)
 	{
 		if (strcmp("webmail", service) == 0)
