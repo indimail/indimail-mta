@@ -1,5 +1,8 @@
 #
 # $Log: indimail.spec.in,v $
+# Revision 2.159  2010-05-06 15:14:59+05:30  Cprogrammer
+# upgrade to pam-multi-1.1
+#
 # Revision 2.158  2010-04-30 14:43:02+05:30  Cprogrammer
 # added program cdbgetm
 #
@@ -498,7 +501,7 @@
 # rpm spec file for indimail
 #
 #
-# $Id: indimail.spec.in,v 2.158 2010-04-30 14:43:02+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 2.159 2010-05-06 15:14:59+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %define _unpackaged_files_terminate_build 1
 
@@ -534,7 +537,7 @@
 %define default_domain     @defaultdomain@
 %define courier_version    3.0.8
 %define bogofilter_version 1.2.1
-%define pam_multi_version  1.0
+%define pam_multi_version  1.1
 %define ucspi_version      0.88
 %define qmail_version      1.03
 %define fetchmail_version  6.3.16

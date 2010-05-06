@@ -197,7 +197,7 @@ If a command is prefixed with the '#' sign, it means that it was run using root.
                                . clamav-0.96        (600  Mb)
                                . nssd-1.0           (2.0  Mb)
                                . fetchmail-6.3.16   (10.5 Mb)
-                               . pam-multi-1.0      (3.0  Mb)
+                               . pam-multi-1.1      (3.0  Mb)
                                . iwebadmin-1.0      (3.0  Mb)
 
 ########### SECTION 2  ##### USER/GROUP Creation ########################
@@ -262,7 +262,7 @@ the installation.
     % wget http://downloads.sourceforge.net/indimail/mpack-1.6.tar.gz
     % wget http://downloads.sourceforge.net/indimail/fortune-1.1.tar.gz
     % wget http://downloads.sourceforge.net/indimail/nssd-1.0.tar.gz
-    % wget http://downloads.sourceforge.net/indimail/pam-multi-1.0.tar.gz
+    % wget http://downloads.sourceforge.net/indimail/pam-multi-1.1.tar.gz
     % wget http://downloads.sourceforge.net/indimail/iwebadmin-1.0.tar.gz
 
     You may omit STEP 1 if you already have a working installation of MySQL and would want to use
