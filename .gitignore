@@ -49,6 +49,7 @@ ripmime-*/Makefile
 ripmime-*/Makefile.in
 indimail-*/Makefile.in
 indimail-*/ChangeLog
+indimail-*/RELEASE-Notes.in
 indimail-*/doc/ChangeLog
 indimail-*/doc/INSTALL-RPM
 indimail-*/doc/INSTALL.indimail
