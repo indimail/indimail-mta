@@ -1,5 +1,8 @@
 /*
  * $Log: Login_Tasks.c,v $
+ * Revision 2.28  2010-05-06 13:25:57+05:30  Cprogrammer
+ * fixed argument 'user' getting modified inside Login_Tasks()
+ *
  * Revision 2.27  2009-10-14 20:43:17+05:30  Cprogrammer
  * check return status of parse_quota()
  *
@@ -131,18 +134,18 @@
 #include <fcntl.h>
 
 #ifndef	lint
-static char     sccsid[] = "$Id: Login_Tasks.c,v 2.27 2009-10-14 20:43:17+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: Login_Tasks.c,v 2.28 2010-05-06 13:25:57+05:30 Cprogrammer Stab mbhangui $";
 #endif
 
 int
-Login_Tasks(pw, user, ServiceType)
+Login_Tasks(pw, User, ServiceType)
 	struct passwd  *pw;
-	const char     *user;
+	const char     *User;
 	char           *ServiceType;
 {
 	char           *domain, *ptr, *migrateflag, *migrateuser, *postauth;
 	char            fqemail[MAX_BUFF], Maildir[MAX_BUFF], tmpbuf[MAX_BUFF];
-	char            pwbuf[MAX_BUFF], last_pass_change[MAX_BUFF];
+	char            pwbuf[MAX_BUFF], last_pass_change[MAX_BUFF], user[MAX_BUFF];
 	struct stat     statbuf;
 	int             status, flag = 0;
 #ifdef ENABLE_AUTH_LOGGING
@@ -155,6 +158,7 @@ Login_Tasks(pw, user, ServiceType)
 
 	if (!pw)
 		return(1);
+	strncpy(user, User, MAX_BUFF);
 	lowerit((char *) user);
 	lowerit(pw->pw_name);
 	if (!(ptr = strchr(user, '@')))
