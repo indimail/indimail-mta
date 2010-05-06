@@ -1,5 +1,8 @@
 /*
  * $Log: bulk_mail.c,v $
+ * Revision 2.3  2010-05-06 22:30:33+05:30  Cprogrammer
+ * corrected BulkMail flag path
+ *
  * Revision 2.2  2004-07-02 18:04:20+05:30  Cprogrammer
  * rename .BulkMail to BulkMail
  *
@@ -46,7 +49,7 @@
 #include <sys/stat.h>
 
 #ifndef	lint
-static char     sccsid[] = "$Id: bulk_mail.c,v 2.2 2004-07-02 18:04:20+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: bulk_mail.c,v 2.3 2010-05-06 22:30:33+05:30 Cprogrammer Stab mbhangui $";
 #endif
 
 int
@@ -70,7 +73,7 @@ bulk_mail(email, domain, homedir)
 		fprintf(stderr, "opendir:%s: %s\n", bulkdir, strerror(errno));
 		return (1);
 	}
-	snprintf(TmpBuf, MAX_BUFF, "%s/BulkMail", homedir);
+	snprintf(TmpBuf, MAX_BUFF, "%s/Maildir/BulkMail", homedir);
 	if (stat(TmpBuf, &statbuf))
 		last_mtime = 0;
 	else
