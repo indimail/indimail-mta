@@ -60,5 +60,37 @@ both 32 and 64 bit) are
 
 ChangeLog
 =========
-* Wed Apr 28 2010 mbhangui@gmail.com
+* Fri May 07 2010 mbhangui@gmail.com
 Release 1.7.5 Start 28/04/2010
+29/04/2010
+1.  fixed cdb search for control files badip, badhelo, authdomains &
+    chkrcptdomains in smtpd.c [2994668]
+2.  New program cdbgetm to search for multiple records matching a key
+    in a cdb
+3.  Fix domainbindings in qmail-remote.c for ipv4 addresses [2994670]
+4.  BUG - illegal free of pointer returned by replacestr() in mysql_query.c
+    [2994664]
+5.  Free pointer returned by replacestr() in vrenamedomain.c, vfilter.c
+6.  Optimized vauthOpen_user to connect to only one MySQL database. Improved
+    speed in non-server programs like iauth, vpasswd, vcfilter, vsetuserquota,
+    vchkpass, vsetpass, sq_vacation, vgroup
+7.  Added prefilt, postfilt id creation in vadddomain_handle
+8.  Added vfilter rule for automatic delivery of SPAM mails to Spam folder in
+    vadddomain handle
+9   Optimized clearopensmtp to run on the local mdahost. Option -C will
+    simulate the old behaviour of running on all mdahosts
+10. Added -C option in clearopensmtp to process all mdahosts in MCD file.
+    Without -C option only local mdahost will be processed
+11. Added connect_all argument to vclear_open_smtp()
+12. Fixed DK_SYNTAX error in dk-filter when using buth DKIM, DK Signing
+13. Set AUTHSERVICE environment variable in iauth, proxylogin
+14. [pam-multi] Added setting of credentials using pam_setcred() in pam-checkpwd
+15. [pam-multi] Added --enable-mysqlprefix to configure
+16. [pam-multi] Added -i option to pam-checkpwd to add authservice
+17. [pam-multi] use AUTHSERVICE environment variable in pam-multi if not set
+    using -i option
+18. [pam-multi] use RTLD_NODELETE in dlopen() to prevent static variables
+    getting reinitialized
+19. Added debug argument to defaultTask() in iauth.so
+20. Fixed argument getting modified in Login_Tasks() causing auth failure in
+    dovecot imap
