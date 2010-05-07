@@ -1,5 +1,6 @@
 .gitignore
 cscope.*
+.DS_Store
 RELEASE
 dist
 experiments
@@ -19,6 +20,8 @@ pam-multi*
 #
 # remaining programs
 #
+IndiMail
+mariadb-5.1.42
 indimail-2.0
 fortune-*/.gitignore
 fortune-*/configure
@@ -68,6 +71,8 @@ indimail-*/doc/Quick-INSTALL
 indimail-*/doc/README.indimail
 indimail-*/Makefile
 indimail-*/svctool
+indimail-*/InLookup.8
+indimail-*/IndiMail.7
 fetchmail-*/Makefile
 fetchmail-*/fetchmail
 fetchmail-*/fetchmail.cron
@@ -83,4 +88,3 @@ fetchmail-*/po/Makefile.in
 fetchmail-*/po/POTFILES
 fetchmail-*/slemsPrivate
 fetchmail-*/writefifo
-
