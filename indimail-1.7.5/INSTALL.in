@@ -431,8 +431,10 @@ the installation.
 
     % bzip2 -d -c courier-imap-3.0.8.tar.bz2 | tar xf -
     % gunzip -c indimail-@version@/patches/courier-imap-3.0.8.patch.gz | patch -p0
-    # If you are on Mac OS X 10.5.x you will need to apply a supplement patch
-    # gunzip -c indimail-@version@/patches/courier-imap-3.0.8-1.2.mac-supplement.patch.gz | patch -p0
+    # If you are on Mac OS X 10.5.x you will need to apply courier-imap-3.0.8-1.2.patch and
+      a supplement patch
+    % gunzip -c indimail-@version@/patches/courier-imap-3.0.8-1.2.patch.gz | patch -p0
+    % gunzip -c indimail-@version@/patches/courier-imap-3.0.8-1.2.mac-supplement.patch.gz | patch -p0
     % cd courier-imap-3.0.8
     % ./configure --prefix=@indimaildir@ --disable-root-check --bindir=@indimaildir@/bin \
         --with-redhat \
