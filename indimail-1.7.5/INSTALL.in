@@ -175,7 +175,7 @@ If a command is prefixed with the '#' sign, it means that it was run using root.
 
     Prepare Source Directory Structure in the disk partition selected
     you have to extract minimum of 10 sources as per the directory
-    structure below. You may skip extraction of nssd-1.0, fetchmail-6.3.16,
+    structure below. You may skip extraction of nssd-1.1, fetchmail-6.3.16,
     depending on whether you require them. Most probably you have downloaded
     indimail-@version@.tar.gz only. You require to additionally download the
     following sources mentioned below. Except for bogofilter, clamav & fetchmail,
@@ -195,7 +195,7 @@ If a command is prefixed with the '#' sign, it means that it was run using root.
                                . fortune-1.1        (8.4  Mb)
                                . bogofilter-1.2.1   (11.6 Mb)
                                . clamav-0.96        (600  Mb)
-                               . nssd-1.0           (2.0  Mb)
+                               . nssd-1.1           (2.0  Mb)
                                . fetchmail-6.3.16   (10.5 Mb)
                                . pam-multi-1.1      (3.0  Mb)
                                . iwebadmin-1.0      (3.0  Mb)
@@ -261,7 +261,7 @@ the installation.
     % wget http://downloads.sourceforge.net/indimail/ripmime-1.4.0.9.tar.gz
     % wget http://downloads.sourceforge.net/indimail/mpack-1.6.tar.gz
     % wget http://downloads.sourceforge.net/indimail/fortune-1.1.tar.gz
-    % wget http://downloads.sourceforge.net/indimail/nssd-1.0.tar.gz
+    % wget http://downloads.sourceforge.net/indimail/nssd-1.1.tar.gz
     % wget http://downloads.sourceforge.net/indimail/pam-multi-1.1.tar.gz
     % wget http://downloads.sourceforge.net/indimail/iwebadmin-1.0.tar.gz
 
@@ -562,12 +562,12 @@ the installation.
     Then do ./configure <same_parameters_as_earlier_install> ; make ; make install-strip
 
     ##### STEP 9  ## Optional STEP ## nssd ####################
-    Install nssd MD5 5bf5083b074adbb89d07c6f60aec9701
+    Install nssd MD5 cbb373d0cd43c96aa12dd76608a3af09
     current working directory /home/local/src
     Download the nssd package from http://www.indimail.org
 
-    % gunzip -c nssd-1.0.tar.gz | tar xf -
-    % cd nssd-1.0
+    % gunzip -c nssd-1.1.tar.gz | tar xf -
+    % cd nssd-1.1
     % ./configure --prefix=@indimaildir@ --sysconfdir=@indimaildir@/etc \
         --enable-mysqlincdir=@mysql_incdir@ \
         --enable-mysqllibdir=@mysql_libdir@ \
