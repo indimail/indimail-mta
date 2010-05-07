@@ -1,5 +1,8 @@
 #
 # $Log: indimail.spec.in,v $
+# Revision 2.160  2010-05-07 13:56:30+05:30  Cprogrammer
+# added check_getpw in nssd package
+#
 # Revision 2.159  2010-05-06 15:14:59+05:30  Cprogrammer
 # upgrade to pam-multi-1.1
 #
@@ -501,7 +504,7 @@
 # rpm spec file for indimail
 #
 #
-# $Id: indimail.spec.in,v 2.159 2010-05-06 15:14:59+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 2.160 2010-05-07 13:56:30+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %define _unpackaged_files_terminate_build 1
 
