@@ -21,7 +21,7 @@ which extends the functions getpwnam(3), getpwuid(3), getpwent(3), getspnam(3), 
 getgrnam(3), getgrgid(3), getgrent(3). These functions are implemented as a shared library in
 \fB/usr/lib/libnss_nssd.so\fR. All of these functions connect to the \fBnssd\fR daemon to lookup
 users and groups in \fBIndiMail\'s\fR MySQL database. In fact one can use any MySQL database by
-modifying the relevent SQL query string in the \fBnssd\fR configuration file
+modifying the relevant SQL query string in the \fBnssd\fR configuration file
 \fBINDIMAIL/etc/nssd.conf\fR.
 .PP
 To enable the \fInssd\fR library, the following entries should be made in /etc/nsswitch.conf
