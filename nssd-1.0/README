@@ -56,11 +56,6 @@ INSTALLATION DETAILS
       o ./configure --prefix=/var/indimail --default-domain=indimail.org --with-mysql=/usr/local/mysql
       o make
       o make install-strip
-	  # For IndiMail, to install a supervise service, run the svctool command
-      # For vpopmail, you need to have nssd run either by supervise or by your favourite method (rc, etc)
-	  o ./svctool --pwdlookup=/tmp/nssd.sock --threads=5 --timeout=5000 \
-	    --mysqlhost=localhost --mysqluser=indimail --mysqlpass=xxxxxxxx \
-		--mysqlsocket=/tmp/mysql.sock --servicedir=/service
 
     On some systems, libtool insists on adding "-lc" to the link stage
     (due to the way gcc was built for that system), which breaks nssd
@@ -77,7 +72,7 @@ INSTALLATION DETAILS
     "./configure --with-mysql=/usr2"
 
     o Edit /var/indimail/etc/nssd.conf (or /var/vpopmail/etc/nssd.conf)
-	  You will find nssd.conf in samples directory of the source
+      You will find nssd.conf in samples directory of the source
 
     o Edit (or create) /etc/nsswitch.conf such that it contains at least the
       following:
@@ -88,12 +83,24 @@ INSTALLATION DETAILS
       in the 'group' line.
 
     o Start 'nssd' (e.g. "/var/indimail/sbin/nssd" or "/var/vpopmail/sbin/nssd")
-	  you can use supervise
-	  I have the following lines in the run file
+
+      For vpopmail, you need to have nssd run either by supervise or by your favourite method
+      (rc, etc)
+      For IndiMail, to install a supervise service, run the svctool command
+      # ./svctool --pwdlookup=/tmp/nssd.sock --threads=5 --timeout=5000 \
+          --mysqlhost=localhost --mysqluser=indimail --mysqlpass=xxxxxxxx \
+          --mysqlsocket=/tmp/mysql.sock --servicedir=/service
+
+      The above command will create /service/pwlookup/run as below
       #!/bin/sh
       # $Id: svctool.in,v 2.69 2008-09-04 16:41:45+05:30 Cprogrammer Exp mbhangui $
       # generated on i686-pc-linux-gnu on Thu Sep  4 16:45:35 IST 2008
-      # ./svctool --pwdlookup=/tmp/nssd.sock --threads=5 --timeout=5000 --mysqlhost=localhost --mysqluser=indimail --mysqlpass=ssh-1.5- --mysqlsocket=/tmp/mysql.sock --servicedir=/service
+      # ./svctool --pwdlookup=/tmp/nssd.sock --threads=5 --timeout=5000 \
+      # --mysqlhost=localhost --mysqluser=indimail --mysqlpass=ssh-1.5- \
+      # --mysqlsocket=/tmp/mysql.sock --servicedir=/service
 
       exec /var/indimail/bin/envdir /service/pwdlookup/variables \
-      /var/indimail/bin/setuidgid indimail /var/indimail/sbin/nssd -d debug 2>&1
+      /var/indimail/bin/setuidgid indimail /var/indimail/sbin/nssd -d notice 2>&1
+
+    o Test pwlookup using a virtual user configured in indimail/vpopmail
+      # /var/indimail/sbin/check_getpw user@domain 
