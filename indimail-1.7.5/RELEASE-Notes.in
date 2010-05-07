@@ -62,7 +62,6 @@ ChangeLog
 =========
 * Fri May 07 2010 mbhangui@gmail.com
 Release 1.7.5 Start 28/04/2010
-29/04/2010
 1.  fixed cdb search for control files badip, badhelo, authdomains &
     chkrcptdomains in smtpd.c [2994668]
 2.  New program cdbgetm to search for multiple records matching a key
@@ -82,7 +81,7 @@ Release 1.7.5 Start 28/04/2010
 10. Added -C option in clearopensmtp to process all mdahosts in MCD file.
     Without -C option only local mdahost will be processed
 11. Added connect_all argument to vclear_open_smtp()
-12. Fixed DK_SYNTAX error in dk-filter when using buth DKIM, DK Signing
+12. [qmail] Fixed DK_SYNTAX error in dk-filter when using buth DKIM, DK Signing
 13. Set AUTHSERVICE environment variable in iauth, proxylogin
 14. [pam-multi] Added setting of credentials using pam_setcred() in pam-checkpwd
 15. [pam-multi] Added --enable-mysqlprefix to configure
@@ -91,6 +90,10 @@ Release 1.7.5 Start 28/04/2010
     using -i option
 18. [pam-multi] use RTLD_NODELETE in dlopen() to prevent static variables
     getting reinitialized
-19. Added debug argument to defaultTask() in iauth.so
-20. Fixed argument getting modified in Login_Tasks() causing auth failure in
+19. [pam-multi] New package pam-multi-1.1
+20. Added debug argument to defaultTask() in iauth.so
+21. Fixed argument getting modified in Login_Tasks() causing auth failure in
     dovecot imap
+22. Fixed BulkMail flag path
+23. [nssd] Added program check_getpw
+24. [nssd] New package nssd-1.1
