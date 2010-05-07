@@ -22,6 +22,7 @@ pam-multi*
 #
 IndiMail
 mariadb-5.1.42
+netqmail-addons
 indimail-2.0
 fortune-*/.gitignore
 fortune-*/configure
