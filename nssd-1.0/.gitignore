@@ -6,4 +6,4 @@ nssd
 configure
 nssd.8
 nssd.conf.5
-try
+check_getpw
