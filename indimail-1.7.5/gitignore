@@ -13,6 +13,7 @@ INSTALL-MYSQL
 INSTALL-RPM
 README-CLUSTER
 RELEASE-Notes
+RELEASE-Notes.in
 bogofilter-qfe
 controlsync
 create_services
