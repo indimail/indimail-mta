@@ -1,5 +1,8 @@
 /*
  * $Log: vauthOpen_user.c,v $
+ * Revision 2.10  2010-05-07 13:56:50+05:30  Cprogrammer
+ * include stdlib.h to fix compiler warnng
+ *
  * Revision 2.9  2010-05-01 14:19:57+05:30  Cprogrammer
  * connect to only one MySQL database if connect_all = 0
  *
@@ -38,11 +41,12 @@
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vauthOpen_user.c,v 2.9 2010-05-01 14:19:57+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: vauthOpen_user.c,v 2.10 2010-05-07 13:56:50+05:30 Cprogrammer Stab mbhangui $";
 #endif
 
 #ifdef CLUSTERED_SITE
 #include <unistd.h>
+#include <stdlib.h>
 #include <string.h>
 #include <errno.h>
 
