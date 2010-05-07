@@ -543,7 +543,7 @@
 %define fetchmail_version  6.3.16
 %define clamav_version     0.96
 %define fortune_version    1.1
-%define nssd_version       1.0
+%define nssd_version       1.1
 %define flash_version      0.9.4
 %define eps_version        1.2
 %define cdb_version        1.0
@@ -1162,7 +1162,7 @@ done
 for i in adminclient chowkidar cindimail clamd clearopensmtp copyemail execmysql \
 hostsync indisrvr inlookup inquerytest install_tables ipchange mail_report \
 mgmtpass postdel systpass testmra updatefile updaterules vchkpass vdelivermail \
-vdeloldusers vfilter vfstab vmoddomain vreorg vsetpass nssd vserverinfo
+vdeloldusers vfilter vfstab vmoddomain vreorg vsetpass nssd vserverinfo check_getpw
 do
 	if [ -f %{buildroot}%{_prefix}/sbin/$i ] ; then
     	/usr/bin/chrpath -d %{buildroot}%{_prefix}/sbin/$i
@@ -1653,6 +1653,7 @@ fi
 %attr(555,root,qmail)                   %{_prefix}/sbin/mgmtpass
 %attr(555,root,qmail)                   %{_prefix}/sbin/myslave
 %attr(555,root,qmail)                   %{_prefix}/sbin/nssd
+%attr(555,root,qmail)                   %{_prefix}/sbin/check_getpw
 %attr(555,root,qmail)                   %{_prefix}/sbin/osh
 %attr(555,root,qmail)                   %{_prefix}/sbin/postdel
 %attr(555,root,qmail)                   %{_prefix}/sbin/rot
