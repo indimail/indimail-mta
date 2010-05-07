@@ -1,0 +1,13 @@
+---------- nssd 1.1 i686-pc-linux-gnu ----------
+Host               = i686-pc-linux-gnu
+CPPFLAGS           =  -DLINUX
+CXXFLAGS           = 
+CFLAGS             = -g -O2 -s -O4 -Wall -fPIC
+LDFLAGS            = 
+            Current settings
+---------------------------------------
+    default domain =  --enable-default-domain=
+       include dir = /usr/local/mysql/include/mysql --enable-mysqlincdir=/usr/local/mysql/include/mysql
+     MySQL lib dir = /usr/local/mysql/lib/mysql --enable-mysqllibdir=/usr/local/mysql/lib/mysql
+       socket Path = /tmp/nssd.sock --enable-nssd-socket-path=/tmp/nssd.sock
+       config Path = /var/indimail/etc/nssd.conf --enable-nssd-config-path=/var/indimail/etc/nssd.conf
