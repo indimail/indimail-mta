@@ -1,5 +1,11 @@
 /*
  * $Log: auto-uid.c,v $
+ * Revision 1.8  2010-05-16 16:11:44+05:30  Cprogrammer
+ * added rcs id
+ *
+ * Revision 1.7  2010-05-16 16:03:57+05:30  Cprogrammer
+ * use user "daemon" as a substitute for "mail" on OS X
+ *
  * Revision 1.6  2009-02-10 09:27:44+05:30  Cprogrammer
  * allow auto-uid to run as non-root
  *
@@ -49,7 +55,11 @@ main(argc, argv)
 	if (!(pw = getpwnam(value)))
 	{
 		if (!(pw = getpwuid(getuid())))
+#ifndef DARWIN
 			pw = getpwnam("mail");
+#else
+			pw = getpwnam("daemon");
+#endif
 	}
 	if (!pw)
 	{
@@ -68,4 +78,11 @@ main(argc, argv)
 	if (substdio_flush(&ss1) == -1)
 		_exit(111);
 	return(0);
+}
+
+void
+getversion_auto_uid_c()
+{
+	static char    *x = "$Id: auto-uid.c,v 1.8 2010-05-16 16:11:44+05:30 Cprogrammer Exp mbhangui $";
+	x++;
 }
