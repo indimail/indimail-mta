@@ -1,5 +1,8 @@
 #
 # $Log: dknewkey.sh,v $
+# Revision 1.4  2010-05-16 19:59:48+05:30  Cprogrammer
+# fix for Mac OS X
+#
 # Revision 1.3  2004-11-02 20:48:31+05:30  Cprogrammer
 # fixed error when dknewkey was called without arguments
 #
@@ -19,6 +22,6 @@ if test -n "$2"; then BITS=$2; fi
 
 openssl genrsa -out $1 $BITS 2>/dev/null
 openssl rsa -in $1 -out /tmp/dknewkey.$$ -pubout -outform PEM 2>/dev/null
-printf "%s._domainkey\tIN\tTXT\t\"k=rsa; p=%s\"\n" `basename $1` `/bin/grep -v ^-- /tmp/dknewkey.$$ | tr -d '\n'` > $1.pub
+printf "%s._domainkey\tIN\tTXT\t\"k=rsa; p=%s\"\n" `basename $1` `grep -v ^-- /tmp/dknewkey.$$ | tr -d '\n'` > $1.pub
 /bin/cat $1.pub
 /bin/rm -f /tmp/dknewkey.$$
