@@ -1,5 +1,8 @@
 #
 # $Log: indimail.spec.in,v $
+# Revision 2.161  2010-05-16 18:27:11+05:30  Cprogrammer
+# changes for OS X
+#
 # Revision 2.160  2010-05-07 13:56:30+05:30  Cprogrammer
 # added check_getpw in nssd package
 #
@@ -504,7 +507,7 @@
 # rpm spec file for indimail
 #
 #
-# $Id: indimail.spec.in,v 2.160 2010-05-07 13:56:30+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 2.161 2010-05-16 18:27:11+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %define _unpackaged_files_terminate_build 1
 
@@ -531,11 +534,13 @@
 %if 0%{?opensuse_bs}
 # define to 1 if building on openSUSE build service
 %define build_on_obs       1
-%define fast_mode          0
+%define fast_mode          1
 %else
 %define build_on_obs       0
 %define fast_mode          0
 %endif
+%define darwin_version     1
+
 %define	_prefix            @indimaildir@
 %define default_domain     @defaultdomain@
 %define courier_version    3.0.8
@@ -552,22 +557,37 @@
 %define cdb_version        1.0
 %define libdkim_version    1.3
 %define mysql_version      6.0.9-alpha
+%define host               @HOST@
 %define see_base           For a description of IndiMail visit http://www.indimail.org
+
+%if %{undefined darwin_version}
+%define nonssd             0
+%define noclamav           0
+%else
+%define nonssd             1
+%define noclamav           1
+%define fast_mode          1
+%endif
 %define noproxy            0
 %define nocourierimap      0
 %define nolibdkim          0
-%define noclamav           0
 %define nofetchmail        0
 %define nobogofilter       0
 %define nopam_multi        0
 %define nodksignatures     0
 %define noepm              1
+
 %define _verbose           0
 %define qcount             5
 %define qbase              %{_prefix}/queue
 %define mbase              @basepath@
 %define logdir             @logdir@
 %define servicedir         /service
+%if 0%{?darwin_version}
+%define module_dir         /usr/%{_lib}/pam
+%else
+%define module_dir         /%{_lib}/security
+%endif
 
 %if %build_on_obs != 0
 %define packager Manvendra Bhangui <mbhangui@gmail.com>
@@ -583,10 +603,14 @@
 Summary: A Fast, Efficient & Secure Mail Server with Multi-Domain/Multi-Host support
 Name: indimail
 Version: @version@
+%if %{undefined darwin_version}
 %if %build_on_obs != 0
 Release: 1.<B_CNT>
 %else
 Release: 1.B_CNT
+%endif
+%else
+Release: 1
 %endif
 License: GPLv3
 %if %{undefined suse_version} && %{undefined sles_version}
@@ -605,7 +629,9 @@ Source5:  http://downloads.sourceforge.net/%{name}/altermime-0.3.10.tar.gz
 Source6:  http://downloads.sourceforge.net/%{name}/ripmime-1.4.0.9.tar.gz
 Source7:  http://downloads.sourceforge.net/%{name}/mpack-1.6.tar.gz
 Source8:  http://downloads.sourceforge.net/%{name}/fortune-%{fortune_version}.tar.gz
+%if %nonssd == 0
 Source9:  http://downloads.sourceforge.net/%{name}/nssd-%{nssd_version}.tar.gz
+%endif
 %if %nobogofilter == 0
 Source10: http://downloads.sourceforge.net/bogofilter/bogofilter-%{bogofilter_version}.tar.bz2
 %endif
@@ -623,7 +649,11 @@ Patch2:  http://downloads.sourceforge.net/%{name}/Patches/ucspi-tcp-%{ucspi_vers
 
 %if %nocourierimap == 0
 %if %build_on_obs == 0
+%if 0%{?darwin_version}
+Patch3:  http://downloads.sourceforge.net/%{name}/Patches/courier-imap-%{courier_version}-1.2.patch.gz
+%else
 Patch3:  http://downloads.sourceforge.net/%{name}/Patches/courier-imap-%{courier_version}.patch.gz
+%endif
 %else
 Patch3:  http://downloads.sourceforge.net/%{name}/Patches/courier-imap-%{courier_version}-1.0.patch.gz
 %endif
@@ -642,6 +672,11 @@ Patch11: http://downloads.sourceforge.net/%{name}/Patches/fetchmail-%{fetchmail_
 %if %noclamav == 0
 Patch12: http://downloads.sourceforge.net/%{name}/Patches/clamav-%{clamav_version}.patch.gz
 %endif
+
+%if 0%{?darwin_version}
+Patch13: http://downloads.sourceforge.net/%{name}/Patches/courier-imap-%{courier_version}-1.2.mac_supplement.patch.gz
+%endif
+
 NoSource: 1
 NoSource: 2
 %if %nocourierimap == 0
@@ -652,7 +687,9 @@ NoSource: 5
 NoSource: 6
 NoSource: 7
 NoSource: 8
+%if %nonssd == 0
 NoSource: 9
+%endif
 %if %nobogofilter == 0
 NoSource: 10
 %endif
@@ -834,6 +871,9 @@ done
 %patch2  -p0
 %if %nocourierimap == 0
 %patch3  -p0
+%if 0%{?darwin_version}
+%patch13  -p0
+%endif
 %endif
 
 # Comment out below for openSUSE buildservice
@@ -852,40 +892,6 @@ done
 
 %build
 ID=$(id -u)
-if [ $ID -eq 0 ] ; then
-	nscd_up=`ps -ef |grep nscd |grep -v grep|wc -l`
-	if [ $nscd_up -ge 1 ] ; then
-		if [ -x %{_sysconfdir}/init.d/nscd ] ; then
-			%{_sysconfdir}/init.d/nscd stop
-		fi
-	fi
-	/usr/bin/getent group indimail || /usr/sbin/groupadd -r -g 555 indimail
-	if [ $? = 4 ] ; then # not unique
-		/usr/sbin/groupadd -r indimail
-	fi
-	/usr/bin/getent group nofiles  || /usr/sbin/groupadd nofiles  || true
-	/usr/bin/getent group qmail    || /usr/sbin/groupadd qmail    || true
-	/usr/bin/getent group qscand   || /usr/sbin/groupadd qscand   || true
-
-	for i in indimail alias qmaild qmaill qmailp qmailq qmailr qmails qscand
-	do
-		%{__rm} -f /var/spool/mail/$i
-	done
-
-	/usr/bin/getent passwd indimail || /usr/sbin/useradd -r -g indimail -u 555 -d %{_prefix} indimail || true
-	if [ $? = 4 ] ; then
-		/usr/sbin/useradd -r -g indimail -d %{_prefix} indimail -s /sbin/nologin
-	fi
-	/usr/bin/getent passwd alias    || /usr/sbin/useradd -M -g nofiles  -d %{_prefix}/alias  -s /sbin/nologin  alias || true
-	/usr/bin/getent passwd qmaild   || /usr/sbin/useradd -M -g nofiles  -d %{_prefix}        -s /sbin/nologin qmaild || true
-	/usr/bin/getent passwd qmaill   || /usr/sbin/useradd -M -g nofiles  -d %{_prefix}        -s /sbin/nologin qmaill || true
-	/usr/bin/getent passwd qmailp   || /usr/sbin/useradd -M -g nofiles  -d %{_prefix}        -s /sbin/nologin qmailp || true
-	/usr/bin/getent passwd qmailq   || /usr/sbin/useradd -M -g qmail    -d %{_prefix}        -s /sbin/nologin qmailq || true
-	/usr/bin/getent passwd qmailr   || /usr/sbin/useradd -M -g qmail    -d %{_prefix}        -s /sbin/nologin qmailr || true
-	/usr/bin/getent passwd qmails   || /usr/sbin/useradd -M -g qmail    -d %{_prefix}        -s /sbin/nologin qmails || true
-	/usr/bin/getent passwd qscand   || /usr/sbin/useradd -M -g qscand   -d %{_prefix}/qscanq -G qmail,qscand -s /sbin/nologin qscand || true
-fi
-
 if [ %{_verbose} -eq 0 ] ; then
 	DEVICE=/dev/null
 else
@@ -953,7 +959,7 @@ if [ " %dist" = " mandrake" ] ; then
 	--mandir=%{_prefix}/man --sysconfdir=%{_prefix}/etc --enable-qmaildir=%{_prefix} \
 	--enable-basepath=@basepath@ --enable-logdir=@logdir@ \
 	--enable-tcprules-prog=%{_prefix}/bin/tcprules --enable-tcpserver-file=%{_prefix}/etc/tcp.smtp \
-	--enable-moduledir=/%{_lib}/security \
+	--enable-moduledir=%module_dir \
 	`%{__cat} config/indimail.opts` > $DEVICE
 else
 %configure --prefix=%{_prefix} --libexecdir=%{_prefix}/libexec --sysconfdir=%{_prefix}/etc \
@@ -962,7 +968,7 @@ else
 	--mandir=%{_prefix}/man --sysconfdir=%{_prefix}/etc --enable-qmaildir=%{_prefix} \
 	--enable-basepath=@basepath@ --enable-logdir=@logdir@ \
 	--enable-tcprules-prog=%{_prefix}/bin/tcprules --enable-tcpserver-file=%{_prefix}/etc/tcp.smtp \
-	--enable-moduledir=/%{_lib}/security \
+	--enable-moduledir=%module_dir \
 	`%{__cat} config/indimail.opts` > $DEVICE
 fi
 
@@ -1125,7 +1131,9 @@ if [ %noclamav -eq 0 ] ; then
 		%{__rm} -f %{buildroot}%{_libdir}/lib"$i".la
 	done
 fi
-%{__rm} -f %{buildroot}/usr/%{_lib}/libnss_nssd.la
+if [ %nonssd -eq 0 ] ; then
+	%{__rm} -f %{buildroot}/usr/%{_lib}/libnss_nssd.la
+fi
 
 %{__mkdir_p} %{buildroot}%{_prefix}/domains
 %{__mkdir_p} %{buildroot}%{_prefix}/etc
@@ -1190,12 +1198,12 @@ if [ -f %{buildroot}%{_prefix}/man/man8/makeuserdb.8.gz ] ; then
 		done
 fi
 if [ %nopam_multi -eq 0 ] ; then
-/bin/rm -f %{buildroot}/%{_lib}/security/pam-multi.la
-/bin/rm -f %{buildroot}/%{_lib}/security/pam-multi.a
-if [ -x /usr/bin/chrpath ] ; then
-	/usr/bin/chrpath -d %{buildroot}/%{_lib}/security/pam-multi.so
-	/usr/bin/chrpath -d %{buildroot}%{_prefix}/sbin/pam-checkpwd
-fi
+	/bin/rm -f %{buildroot}%{module_dir}/pam-multi.la
+	/bin/rm -f %{buildroot}%{module_dir}/pam-multi.a
+	if [ -x /usr/bin/chrpath ] ; then
+		/usr/bin/chrpath -d %{buildroot}%{module_dir}/pam-multi.so
+		/usr/bin/chrpath -d %{buildroot}%{_prefix}/sbin/pam-checkpwd
+	fi
 fi
 
 
@@ -1217,29 +1225,39 @@ if [ -x /usr/bin/epm -a %noepm -eq 0 ] ; then
 	fi
 fi
 
+if [ -x /bin/touch ] ; then
+	TOUCH=/bin/touch
+elif [ -x /usr/bin/touch ] ; then
+	TOUCH=/usr/bin/touch
+else
+	TOUCH=/bin/touch
+fi
 # Create these files so that %ghost does not complain
-for i in indimail.cnf nssd.conf tcp.imap tcp.imap.cdb tcp.pop3 \
-tcp.pop3.cdb tcp.smtp tcp.smtp.cdb tcp.qmtp tcp.qmtp.cdb tcp.qmqp tcp.qmqp.cdb \
+for i in indimail.cnf tcp.imap tcp.imap.cdb tcp.pop3 tcp.pop3.cdb \
+tcp.smtp tcp.smtp.cdb tcp.qmtp tcp.qmtp.cdb tcp.qmqp tcp.qmqp.cdb \
 tcp.poppass tcp.poppass.cdb services.log
 do
-	/bin/touch %{buildroot}%{_prefix}/etc/$i
+	$TOUCH %{buildroot}%{_prefix}/etc/$i
 done
+%if %nonssd == 0
+	$TOUCH %{buildroot}%{_prefix}/etc/nssd.conf
+%endif
 (
 for i in `%{__cat} %{buildroot}%{_prefix}/etc/controlfiles`
 do
 	echo "%ghost %config(noreplace,missingok)               %{_prefix}/control/$i"
-	/bin/touch %{buildroot}%{_prefix}/control/$i
+	$TOUCH %{buildroot}%{_prefix}/control/$i
 done
 ) > config_files.list
 if [ %nobogofilter -eq 0 ] ; then
-	/bin/touch %{buildroot}%{_prefix}/etc/bogofilter.cf
+	$TOUCH %{buildroot}%{_prefix}/etc/bogofilter.cf
 fi
 if [ %nofetchmail -eq 0 ] ; then
-	/bin/touch %{buildroot}%{_prefix}/etc/fetchmailrc
+	$TOUCH %{buildroot}%{_prefix}/etc/fetchmailrc
 fi
 if [ %noclamav -eq 0 ] ; then
-	/bin/touch %{buildroot}%{_prefix}/share/clamd/clamav
-	/bin/touch %{buildroot}%{_prefix}/share/clamd/mirrors.dat
+	$TOUCH %{buildroot}%{_prefix}/share/clamd/clamav
+	$TOUCH %{buildroot}%{_prefix}/share/clamd/mirrors.dat
 fi
 
 %files -f config_files.list
@@ -1272,17 +1290,23 @@ fi
 %dir %attr(555,root,qmail)        %{_prefix}/man/cat8
 %dir %attr(555,root,root)         %{_prefix}/include
 %dir %attr(555,root,root)         %{_libdir}
+
 %if %nofetchmail == 0
+%if %{undefined darwin_version}
 %dir %attr(755,root,root)         %{_prefix}/share/locale
+%endif
 %dir %attr(755,root,root)         %{_prefix}/lib*/python*
 %dir %attr(755,root,root)         %{_prefix}/lib*/python*/site-packages
 %endif
+
 %dir %attr(775,root,indimail)     %{_prefix}/domains
 %dir %attr(555,root,root)         %{_prefix}/share
+
 %if %noclamav == 0
 %dir %attr(755,root,root)         %{_libdir}/pkgconfig
 %dir %attr(775,qscand,qscand)     %{_prefix}/share/clamd
 %endif
+
 %dir %attr(755,root,root)         %{_prefix}/share/fortunes
 %dir %attr(555,root,qmail)        %{_prefix}/users
 %dir %attr(555,root,qmail)        %{_prefix}/plugins
@@ -1327,7 +1351,9 @@ fi
 %endif
 
 %ghost %config(noreplace,missingok)               %{_prefix}/etc/indimail.cnf
+%if %nonssd == 0
 %ghost %config(noreplace,missingok)               %{_prefix}/etc/nssd.conf
+%endif
 %ghost %config(noreplace,missingok)               %{_prefix}/etc/tcp.imap
 %ghost %config(noreplace,missingok)               %{_prefix}/etc/tcp.pop3
 %ghost %config(noreplace,missingok)               %{_prefix}/etc/tcp.smtp
@@ -1655,8 +1681,10 @@ fi
 %attr(555,root,qmail)                   %{_prefix}/sbin/mail_report
 %attr(555,root,qmail)                   %{_prefix}/sbin/mgmtpass
 %attr(555,root,qmail)                   %{_prefix}/sbin/myslave
+%if %nonssd == 0
 %attr(555,root,qmail)                   %{_prefix}/sbin/nssd
 %attr(555,root,qmail)                   %{_prefix}/sbin/check_getpw
+%endif
 %attr(555,root,qmail)                   %{_prefix}/sbin/osh
 %attr(555,root,qmail)                   %{_prefix}/sbin/postdel
 %attr(555,root,qmail)                   %{_prefix}/sbin/rot
@@ -1719,7 +1747,9 @@ fi
 %attr(777,root,root)                    %{_prefix}/sbin/pw2userdb
 %attr(777,root,root)                    %{_prefix}/sbin/userdb
 %attr(777,root,root)                    %{_prefix}/sbin/vchkpw2userdb
+%if %{undefined darwin_version}
 %attr(4555,root,root)                   %{_prefix}/libexec/authlib/authshadow
+%endif
 %endif
 # ucspi-tcp
 %attr(555,root,root)                    %{_prefix}/bin/mconnect-io
@@ -1760,10 +1790,12 @@ fi
 %attr(555,root,root)                    %{_prefix}/sbin/clamd
 %attr(555,root,root)                    %{_prefix}/bin/clamconf
 %endif
+
 # fetchmail
 %if %nofetchmail == 0
 %attr(555,root,root)                    %{_prefix}/bin/fetchmailconf
 %attr(555,root,root)                    %{_prefix}/bin/fetchmail
+%if %{undefined darwin_version}
 %attr(555,root,root)                    %{_prefix}/sbin/fetchmail.cron
 %attr(555,root,root)                    %{_prefix}/sbin/fetchmail.down
 %attr(555,root,root)                    %{_prefix}/sbin/fetchmail.up
@@ -1774,6 +1806,8 @@ fi
 %attr(555,root,root)                    %{_prefix}/sbin/slemsPrivate
 %attr(555,root,root)                    %{_prefix}/sbin/writefifo
 %endif
+%endif
+
 # pam-multi
 %if %nopam_multi == 0
 %attr(555,root,root)                    %{_prefix}/sbin/pam-checkpwd
@@ -1790,6 +1824,10 @@ fi
 %attr(555,root,qmail)                   %{_prefix}/boot/home
 %attr(555,root,qmail)                   %{_prefix}/boot/binm2+df
 %attr(444,root,qmail)                   %{_prefix}/boot/upstart
+%if 0%{?darwin_version}
+%attr(444,root,qmail)                   %{_prefix}/boot/StartupParameters.plist
+%attr(444,root,qmail)                   %{_prefix}/boot/indimail.plist
+%endif
 
 %if %nocourierimap == 0
 %attr(555,root,root)                    %{_prefix}/libexec/pop3d-ssl.rc
@@ -1928,7 +1966,9 @@ fi
 %endif
 
 %if %nofetchmail == 0
+%if %{undefined darwin_version}
 %attr(644,root,root)                    %{_prefix}/share/locale/*/LC_MESSAGES/*.mo
+%endif
 %attr(644,root,root)                    %{_prefix}/lib*/python*/site-packages/fetchmailconf.pyo
 %attr(555,root,root)                    %{_prefix}/lib*/python*/site-packages/fetchmailconf.py
 %attr(644,root,root)                    %{_prefix}/lib*/python*/site-packages/fetchmailconf.pyc
@@ -2011,12 +2051,22 @@ fi
 
 # pam-multi
 %if %nopam_multi == 0
-%attr(755,root,root)                    /%{_lib}/security/pam-multi.so
+%attr(755,root,root)                    /%{module_dir}/pam-multi.so
 %endif
 
 %if %noclamav == 0
 %{_libdir}/libclam*.so*
 %endif
+%if 0%{?darwin_version}
+%{_libdir}/libeps.dylib
+%{_libdir}/libeps-%{eps_version}.0.dylib
+%{_libdir}/libcdb.dylib
+%{_libdir}/libcdb-%{cdb_version}.0.dylib
+%{_libdir}/libflash.dylib
+%{_libdir}/libflash-%{flash_version}.0.dylib
+%{_libdir}/libindimail.dylib
+%{_libdir}/libindimail-%{version}.0.dylib
+%else
 %{_libdir}/libeps.so
 %{_libdir}/libeps-%{eps_version}.so.0
 %{_libdir}/libeps-%{eps_version}.so.0.0.0
@@ -2029,10 +2079,13 @@ fi
 %{_libdir}/libindimail.so
 %{_libdir}/libindimail-%{version}.so.0
 %{_libdir}/libindimail-%{version}.so.0.0.0
+%endif
 
+%if %nonssd == 0
 %attr(777,root,root)                    /usr/%{_lib}/libnss_nssd.so
 %attr(777,root,root)                    /usr/%{_lib}/libnss_nssd.so.2
 %attr(755,root,root)                    /usr/%{_lib}/libnss_nssd.so.2.0.0
+%endif
 
 %files devel
 %defattr(-, root, root, 0755)
@@ -2091,6 +2144,16 @@ fi
 %if %noclamav == 0
 %{_libdir}/libclam*.so*
 %endif
+%if 0%{?darwin_version}
+%{_libdir}/libeps.dylib
+%{_libdir}/libeps-%{eps_version}.0.dylib
+%{_libdir}/libcdb.dylib
+%{_libdir}/libcdb-%{cdb_version}.0.dylib
+%{_libdir}/libflash.dylib
+%{_libdir}/libflash-%{flash_version}.0.dylib
+%{_libdir}/libindimail.dylib
+%{_libdir}/libindimail-%{version}.0.dylib
+%else
 %{_libdir}/libeps.so
 %{_libdir}/libeps-%{eps_version}.so.0
 %{_libdir}/libeps-%{eps_version}.so.0.0.0
@@ -2103,6 +2166,7 @@ fi
 %{_libdir}/libindimail.so
 %{_libdir}/libindimail-%{version}.so.0
 %{_libdir}/libindimail-%{version}.so.0.0.0
+%endif
 
 %clean
 %{__rm} -rf %{buildroot}
@@ -2172,14 +2236,24 @@ if [ $argv1 -eq 2 ] ; then
 	exit 0
 fi
 echo "Checking for mandatory user/group mysql.."
-/usr/bin/getent group  mysql > /dev/null || (echo "group mysql does not exist. Aborting..." && false)
-if [ $? -ne 0 ] ; then
-	exit 1
-fi
-/usr/bin/getent passwd mysql > /dev/null || (echo "user  mysql does not exist. Aborting..." && false)
-if [ $? -ne 0 ] ; then
-	exit 1
-fi
+case "%host" in
+	*-*-darwin*)
+	%{_prefix}/sbin/svctool --config=users
+	;;
+	*)
+	/usr/bin/getent group  mysql > /dev/null || (echo "group mysql does not exist. Aborting..." && false)
+	if [ $? -ne 0 ] ; then
+		exit 1
+	fi
+	/usr/bin/getent passwd mysql > /dev/null || (echo "user  mysql does not exist. Aborting..." && false)
+	if [ $? -ne 0 ] ; then
+		exit 1
+	fi
+esac
+%if 0%{?darwin_version}
+echo "Adding IndiMail users/groups"
+%{_prefix}/sbin/svctool --config=users
+%else
 #
 # Create a users and groups. Do not report any problems if they already
 # exists.
@@ -2221,6 +2295,7 @@ if [ $nscd_up -ge 1 ] ; then
 		%{_sysconfdir}/init.d/nscd start
 	fi
 fi
+%endif
 
 ### SCRIPTLET ###############################################################################
 %post
@@ -2232,11 +2307,20 @@ if [ $ID -ne 0 ] ; then
 fi
 if [ $argv1 -eq 2 ] ; then
 	if [ -f %{_prefix}/boot/rpm.init ] ; then
+%if %{undefined darwin_version}
 		/sbin/ldconfig
+%endif
 		echo "Running Custom Upgrade Script for post"
 		/bin/sh %{_prefix}/boot/rpm.init upgrade
 	fi
 	exit 0
+fi
+if [ -x /bin/touch ] ; then
+	TOUCH=/bin/touch
+elif [ -x /usr/bin/touch ] ; then
+	TOUCH=/usr/bin/touch
+else
+	TOUCH=/bin/touch
 fi
 
 # MySQL
@@ -2260,7 +2344,7 @@ if [ -f %{mysqlPrefix}/bin/mysql_config ] ; then
 	%{_prefix}/sbin/svctool --mysql=3306 --servicedir=%{servicedir} --mysqlPrefix=%{mysqlPrefix} \
 		--databasedir=%{_prefix}/mysqldb --config=%{_prefix}/etc/indimail.cnf --default-domain=%{default_domain} \
 		--model=small --no-of-cpu=2
-	/bin/touch %{servicedir}/mysql.3306/down
+	$TOUCH %{servicedir}/mysql.3306/down
 else
 	echo "WARNING!!! Did not find mysql_config in %{mysqlPrefix}. Skipping MySQL configuration" 1>&2
 fi
@@ -2389,7 +2473,7 @@ done
 %{_prefix}/sbin/svctool --qmqp=628 --servicedir=%{servicedir} --qbase=%{qbase} \
 	--qcount=%{qcount} --qstart=1 --cntrldir=control --localip=0 --maxdaemons=75 --maxperip=25 \
 	--fsync --syncdir --memory=%{qmqp_soft_mem} --min-free=52428800
-/bin/touch %{servicedir}/qmail-qmqpd.628/down
+$TOUCH %{servicedir}/qmail-qmqpd.628/down
 
 if [ %nofetchmail -eq 0 ] ; then
 # fetchmail
@@ -2425,7 +2509,7 @@ if [ %nofetchmail -eq 0 ] ; then
 	#
 	# user has to create fetchmailrc before which fetchmail cannot be started
 	#
-	/bin/touch %{servicedir}/fetchmail/down
+	$TOUCH %{servicedir}/fetchmail/down
 fi
 
 if [ %nocourierimap -eq 0 ] ; then
@@ -2465,9 +2549,11 @@ fi
 	--hardquota=52428800 --base_path=%{mbase}
 %{_prefix}/sbin/svctool --inlookup=infifo --servicedir=%{servicedir} --cntrldir=control \
 	--threads=5 --query-cache --password-cache
-%{_prefix}/sbin/svctool --pwdlookup=/tmp/nssd.sock --threads=5 --timeout=-1 \
-	--mysqlhost=localhost --mysqluser=indimail \
-	--mysqlpass=ssh-1.5- --mysqlsocket=/tmp/mysql.sock --servicedir=%{servicedir}
+if [ %nonssd -eq 0 ] ; then
+	%{_prefix}/sbin/svctool --pwdlookup=/tmp/nssd.sock --threads=5 --timeout=-1 \
+		--mysqlhost=localhost --mysqluser=indimail \
+		--mysqlpass=ssh-1.5- --mysqlsocket=/tmp/mysql.sock --servicedir=%{servicedir}
+fi
 %{_prefix}/sbin/svctool --poppass=106 --localip=0 --maxdaemons=40 --maxperip=25 \
 	--memory=%{poppass_mem} \
     --certfile=%{_prefix}/control/servercert.pem --ssl \
@@ -2477,7 +2563,7 @@ fi
 if [ %noclamav -eq 0 ] ; then
 	%{_prefix}/sbin/svctool --config=clamd
 	%{_prefix}/sbin/svctool --qscanq --servicedir=%{servicedir} --clamdPrefix=%{_prefix} --scanint=200
-	/bin/touch %{servicedir}/freshclam/down
+	$TOUCH %{servicedir}/freshclam/down
 fi
 if [ %nobogofilter -eq 0 ] ; then
 	%{_prefix}/sbin/svctool --config=bogofilter
@@ -2505,6 +2591,7 @@ R0lGODlhaAA7APcAAP///+rp6puSp6GZrDUjUUc6Zn53mFJMdbGvvVtXh2xre8bF1x8cU4yLprOy:Vir
 EOF
 %{__chown} qscand:qscand %{_prefix}/control/signatures
 
+%if %{undefined darwin_version}
 # Recreate ld.so links and cache
 if [ -d %{_sysconfdir}/ld.so.conf.d ] ; then
 	(
@@ -2513,6 +2600,7 @@ if [ -d %{_sysconfdir}/ld.so.conf.d ] ; then
 	) > %{_sysconfdir}/ld.so.conf.d/indimail-%{_arch}.conf
 fi
 /sbin/ldconfig
+%endif
 
 # Misc/Configuration
 %{_prefix}/sbin/svctool --svscanlog --servicedir=%{servicedir}
@@ -2587,7 +2675,9 @@ fi
 # we are doing upgrade
 if [ $argv1 -eq 1 ] ; then
 	echo "recreating ld.so cache"
+%if %{undefined darwin_version}
 	/sbin/ldconfig
+%endif
 	exit 0
 fi
 nscd_up=`ps -ef |grep nscd |grep -v grep|wc -l`
@@ -2622,11 +2712,14 @@ done
 /bin/rmdir --ignore-fail-on-non-empty %{_prefix}/man 2>/dev/null
 
 echo "removing configuration"
-for i in indimail.cnf nssd.conf tcp.imap tcp.pop3 tcp.smtp tcp.qmtp tcp.qmqp tcp.poppass \
+for i in indimail.cnf tcp.imap tcp.pop3 tcp.smtp tcp.qmtp tcp.qmqp tcp.poppass \
 clamd.conf freshclam.conf
 do
 	%{__rm} -f %{_prefix}/etc/$i
 done
+%if %nonssd == 0
+	%{__rm} -f %{_prefix}/etc/nssd.conf
+%endif
 
 /bin/rmdir --ignore-fail-on-non-empty %{_prefix}/users 2>/dev/null
 
@@ -2703,8 +2796,10 @@ else
 	log_dir=%{logdir}
 fi
 [ "$log_dir" != "/" ] && %{__rm} -fr $log_dir
+%if %{undefined darwin_version}
 echo "recreating ld.so cache"
 /sbin/ldconfig
+%endif
 if [ -f %{_prefix}/boot/rpm.init ] ; then
 	echo "Running Custom Un-Installation Script for postun"
 	/bin/sh %{_prefix}/boot/rpm.init postun
@@ -2730,7 +2825,9 @@ echo ""
 
 ### SCRIPTLET ###############################################################################
 %post shared
+%if %{undefined darwin_version}
 /sbin/ldconfig
+%endif
 
 ### SCRIPTLET ###############################################################################
 %postun shared
@@ -2744,6 +2841,16 @@ echo "removing shared libraries"
 %if %noclamav == 0
 %{__rm} -f %{_libdir}/libclam*.so*
 %endif
+%if 0%{?darwin_version}
+%{__rm} -f %{_libdir}/libeps.dylib
+%{__rm} -f %{_libdir}/libeps-%{eps_version}.0.dylib
+%{__rm} -f %{_libdir}/libcdb.dylib
+%{__rm} -f %{_libdir}/libcdb-%{cdb_version}.0.dylib
+%{__rm} -f %{_libdir}/libflash.dylib
+%{__rm} -f %{_libdir}/libflash-%{flash_version}.0.dylib
+%{__rm} -f %{_libdir}/libindimail.dylib
+%{__rm} -f %{_libdir}/libindimail-%{version}.0.dylib
+%else
 %{__rm} -f %{_libdir}/libeps.so
 %{__rm} -f %{_libdir}/libeps-%{eps_version}.so.0
 %{__rm} -f %{_libdir}/libeps-%{eps_version}.so.0.0.0
@@ -2757,6 +2864,7 @@ echo "removing shared libraries"
 %{__rm} -f %{_libdir}/libindimail-%{version}.so.0
 %{__rm} -f %{_libdir}/libindimail-%{version}.so.0.0.0
 /sbin/ldconfig
+%endif
 
 %postun devel
 argv1=$1
