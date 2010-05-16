@@ -1,5 +1,8 @@
 /*
  * $Log: vadduser.c,v $
+ * Revision 2.31  2010-05-17 00:00:00+05:30  Cprogrammer
+ * fixed setting of BASE PATH
+ *
  * Revision 2.30  2010-02-16 13:08:47+05:30  Cprogrammer
  * added post_handle function
  *
@@ -144,7 +147,7 @@
 #include <signal.h>
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vadduser.c,v 2.30 2010-02-16 13:08:47+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: vadduser.c,v 2.31 2010-05-17 00:00:00+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 char            Email[MAX_BUFF];
@@ -153,6 +156,7 @@ char            Domain[MAX_BUFF];
 char            Passwd[MAX_BUFF];
 char            Quota[MAX_BUFF];
 char            Gecos[MAX_BUFF];
+char            envbuf[MAX_BUFF];
 #ifdef CLUSTERED_SITE
 char            mdahost[MAX_BUFF];
 char            hostid[MAX_BUFF];
@@ -164,7 +168,7 @@ extern int      encrypt_flag;
 extern int      create_flag;
 
 void            usage();
-int             get_options(int argc, char **argv, char *, int *);
+int             get_options(int argc, char **argv, int *);
 int             checklicense(char *, int, long, char *, int);
 
 int
@@ -174,7 +178,7 @@ main(argc, argv)
 {
 	int             i, quota, pass_len = 8;
 	char           *real_domain, *ptr, *base_argv0;
-	char            tmpbuf[MAX_BUFF], envbuf[MAX_BUFF], buffer[MAX_BUFF];
+	char            tmpbuf[MAX_BUFF], buffer[MAX_BUFF];
 	FILE           *fp;
 	uid_t           uid, uidtmp;
 	gid_t           gid;
@@ -183,7 +187,7 @@ main(argc, argv)
 	struct vlimits  limits;
 #endif
 
-	if (get_options(argc, argv, envbuf, &pass_len))
+	if (get_options(argc, argv, &pass_len))
 		return(1);
 	/*
 	 * parse the email address into user and domain 
@@ -355,7 +359,7 @@ usage()
 }
 
 int
-get_options(int argc, char **argv, char *envbuf, int *pass_len)
+get_options(int argc, char **argv, int *pass_len)
 {
 	int             c;
 	int             errflag;
@@ -417,7 +421,8 @@ get_options(int argc, char **argv, char *envbuf, int *pass_len)
 				errflag = 1;
 				break;
 			}
-			strncpy(envbuf, optarg, MAX_BUFF);
+			snprintf(envbuf, sizeof(envbuf), "BASE_PATH=%s", optarg);
+			putenv(envbuf);
 			break;
 		case 'q':
 			scopy(Quota, optarg, MAX_BUFF);
