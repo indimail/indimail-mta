@@ -1,5 +1,8 @@
 /*
  * $Log: vadddomain.c,v $
+ * Revision 2.28  2010-05-16 23:59:20+05:30  Cprogrammer
+ * added -B option to specify BASE PATH
+ *
  * Revision 2.27  2010-02-16 13:08:35+05:30  Cprogrammer
  * added post_handle function
  *
@@ -146,12 +149,12 @@
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vadddomain.c,v 2.27 2010-02-16 13:08:35+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: vadddomain.c,v 2.28 2010-05-16 23:59:20+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 
 char            Domain[MAX_BUFF], Passwd[MAX_BUFF], User[MAX_BUFF], Dir[MAX_BUFF], Quota[MAX_BUFF], BounceEmail[MAX_BUFF];
-char            TmpBuf[MAX_BUFF], ipaddr[16], a_dir[MAX_BUFF];
+char            TmpBuf[MAX_BUFF], ipaddr[16], a_dir[MAX_BUFF], envbuf[MAX_BUFF];
 #ifdef CLUSTERED_SITE
 char            database[MAX_BUFF], sqlserver[MAX_BUFF], database[MAX_BUFF], dbuser[MAX_BUFF], dbpass[MAX_BUFF];
 int             dbport, distributed;
@@ -375,9 +378,9 @@ get_options(int argc, char **argv, int *chk_rcpt)
 	*sqlserver = *database = *dbuser = *dbpass = 0;
 	dbport = -1;
 	distributed = -1;
-	scopy(optbuf, "atT:q:be:u:VvCci:g:d:D:S:U:P:p:O", MAX_BUFF);
+	scopy(optbuf, "atT:q:bB:e:u:VvCci:g:d:D:S:U:P:p:O", MAX_BUFF);
 #else
-	scopy(optbuf, "atT:q:be:u:VvCi:g:d:O", MAX_BUFF);
+	scopy(optbuf, "atT:q:bB:e:u:VvCi:g:d:O", MAX_BUFF);
 #endif
 #ifdef VFILTER
 	scat(optbuf, "f", MAX_BUFF);
@@ -388,6 +391,16 @@ get_options(int argc, char **argv, int *chk_rcpt)
 		{
 		case 'V':
 			getversion(sccsid);
+			break;
+		case 'B':
+			if (access(optarg, F_OK) && r_mkdir(optarg, INDIMAIL_DIR_MODE, Uid, Gid))
+			{
+				fprintf(stderr, "%s: %s\n", optarg, strerror(errno));
+				errflag = 1;
+				break;
+			}
+			snprintf(envbuf, MAX_BUFF, "BASE_PATH=%s", optarg);
+			putenv(envbuf);
 			break;
 		case 'v':
 			verbose = 1;
@@ -422,6 +435,20 @@ get_options(int argc, char **argv, int *chk_rcpt)
 #endif
 		case 'u':
 			scopy(User, optarg, MAX_BUFF);
+			if (*User)
+			{
+				if ((mypw = getpwnam(User)) != NULL)
+				{
+					if (!*Dir)
+						scopy(Dir, mypw->pw_dir, MAX_BUFF);
+					Uid = mypw->pw_uid;
+					Gid = mypw->pw_gid;
+				} else
+				{
+					error_stack(stderr, "user %s not found in /etc/passwd\n", User);
+					return (1);
+				}
+			}
 			break;
 		case 'q':
 			scopy(Quota, optarg, MAX_BUFF);
@@ -457,29 +484,15 @@ get_options(int argc, char **argv, int *chk_rcpt)
 			OptimizeAddDomain = 1;
 			break;
 		default:
-			errflag = 1;
-			break;
+			usage();
+			return (1);
 		}
 	}
 	if (optind < argc)
 		scopy(Domain, argv[optind++], MAX_BUFF);
 	if (optind < argc)
 		scopy(Passwd, argv[optind++], MAX_BUFF);
-	if (*User)
-	{
-		if ((mypw = getpwnam(User)) != NULL)
-		{
-			if (!*Dir)
-				scopy(Dir, mypw->pw_dir, MAX_BUFF);
-			Uid = mypw->pw_uid;
-			Gid = mypw->pw_gid;
-		} else
-		{
-			error_stack(stderr, "user %s not found in /etc/passwd\n", User);
-			return(1);
-		}
-	}
-	if (errflag || !*Domain)
+	if (!*Domain)
 	{
 		error_stack(stderr, "Domain not specified\n");
 		usage();
@@ -499,30 +512,31 @@ get_options(int argc, char **argv, int *chk_rcpt)
 void
 usage()
 {
-	printf("usage: vaddomain [options] virtual_domain [postmaster password]\n");
-	printf("options: -V print version number\n");
-	printf("         -v verbose\n");
-	printf("         -q quota_in_bytes (sets the quota for postmaster account)\n");
-	printf("         -C (Do recipient check for this domain)\n");
-	printf("         -b (bounces all mail that doesn't match a user, default)\n");
-	printf("         -e [email_address|maildir] (forwards all non matching user to this address [*])\n");
-	printf("         -u user (sets the uid/gid based on a user in /etc/passwd)\n");
-	printf("         -d dir (sets the dir to use for this domain)\n");
-	printf("         -i uid (sets the uid to use for this domain)\n");
-	printf("         -g gid (sets the gid to use for this domain)\n");
-	printf("         -a sets the account to use APOP, default is POP\n");
-	printf("         -f Sets the Domain with VFILTER capability\n");
-	printf("         -t Sets the Domain for ETRN/ATRN\n");
-	printf("         -T ip_address Sets the Domain for AUTOTURN\n");
-	printf("         -O optimize adding, for bulk adds set this for all\n");
-	printf("            except the last one\n");
+	error_stack(stderr, "usage: vaddomain [options] virtual_domain [postmaster password]\n");
+	error_stack(stderr, "options: -V print version number\n");
+	error_stack(stderr, "         -v verbose\n");
+	error_stack(stderr, "         -q quota_in_bytes (sets the quota for postmaster account)\n");
+	error_stack(stderr, "         -C (Do recipient check for this domain)\n");
+	error_stack(stderr, "         -b (bounces all mail that doesn't match a user, default)\n");
+	error_stack(stderr, "         -e [email_address|maildir] (forwards all non matching user to this address [*])\n");
+	error_stack(stderr, "         -u user (sets the uid/gid based on a user in /etc/passwd)\n");
+	error_stack(stderr, "         -B basepath Specify the base directory for posmater's home directory\n");
+	error_stack(stderr, "         -d dir (sets the dir to use for this domain)\n");
+	error_stack(stderr, "         -i uid (sets the uid to use for this domain)\n");
+	error_stack(stderr, "         -g gid (sets the gid to use for this domain)\n");
+	error_stack(stderr, "         -a sets the account to use APOP, default is POP\n");
+	error_stack(stderr, "         -f Sets the Domain with VFILTER capability\n");
+	error_stack(stderr, "         -t Sets the Domain for ETRN/ATRN\n");
+	error_stack(stderr, "         -T ip_address Sets the Domain for AUTOTURN\n");
+	error_stack(stderr, "         -O optimize adding, for bulk adds set this for all\n");
+	error_stack(stderr, "            except the last one\n");
 #ifdef CLUSTERED_SITE
-	printf("         -D database (adds a clustered domain, extra options apply as below)\n");
-	printf("         -S SqlServer host/IP\n");
-	printf("         -U Database User\n");
-	printf("         -P Database Password\n");
-	printf("         -p Database Port\n");
-	printf("         -c Add domain as a clustered domain\n");
+	error_stack(stderr, "         -D database (adds a clustered domain, extra options apply as below)\n");
+	error_stack(stderr, "         -S SqlServer host/IP\n");
+	error_stack(stderr, "         -U Database User\n");
+	error_stack(stderr, "         -P Database Password\n");
+	error_stack(stderr, "         -p Database Port\n");
+	error_stack(stderr, "         -c Add domain as a clustered domain\n");
 #endif
 	return;
 }
