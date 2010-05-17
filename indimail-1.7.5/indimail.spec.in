@@ -1,5 +1,8 @@
 #
 # $Log: indimail.spec.in,v $
+# Revision 2.162  2010-05-16 23:28:23+05:30  Cprogrammer
+# modifications for OS x
+#
 # Revision 2.161  2010-05-16 18:27:11+05:30  Cprogrammer
 # changes for OS X
 #
@@ -507,7 +510,7 @@
 # rpm spec file for indimail
 #
 #
-# $Id: indimail.spec.in,v 2.161 2010-05-16 18:27:11+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 2.162 2010-05-16 23:28:23+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %define _unpackaged_files_terminate_build 1
 
@@ -603,14 +606,10 @@
 Summary: A Fast, Efficient & Secure Mail Server with Multi-Domain/Multi-Host support
 Name: indimail
 Version: @version@
-%if %{undefined darwin_version}
 %if %build_on_obs != 0
 Release: 1.<B_CNT>
 %else
 Release: 1.B_CNT
-%endif
-%else
-Release: 1
 %endif
 License: GPLv3
 %if %{undefined suse_version} && %{undefined sles_version}
@@ -744,9 +743,11 @@ Requires: pam
 # rpm -qp --queryformat '%{arch}\n' some-file.rpm
 # rpm --showrc for all macros
 # rpm -qlp some-file.rpm
-Requires: coreutils grep /bin/sh glibc openssl /usr/sbin/useradd /usr/sbin/groupadd
+%if %{undefined darwin_version}
+Requires: /usr/sbin/useradd /usr/sbin/groupadd
 Requires: /sbin/chkconfig /usr/sbin/userdel /usr/sbin/groupdel procps /usr/bin/awk
-Requires: mysql-server
+%endif
+Requires: coreutils grep /bin/sh glibc openssl mysql-server
 BuildRoot: %(mktemp -ud %{_tmppath}/%{name}-%{version}-%{release}-XXXXXXX)
 #
 # IndiMail is choosy and runs on reliable OS only
@@ -2221,6 +2222,8 @@ then
 elif test -x %{_prefix}/sbin/initsvc
 then
 	%{_prefix}/sbin/initsvc -off
+	echo "Giving IndiMail exactly 5 seconds to exit nicely"
+	sleep 5
 fi
 
 ### SCRIPTLET ###############################################################################
@@ -2238,7 +2241,14 @@ fi
 echo "Checking for mandatory user/group mysql.."
 case "%host" in
 	*-*-darwin*)
-	%{_prefix}/sbin/svctool --config=users
+	/usr/bin/dscl . -list /Groups/mysql > /dev/null || (echo "group mysql does not exist. Aborting..." && false)
+	if [ $? -ne 0 ] ; then
+		exit 1
+	fi
+	/usr/bin/dscl . -list /Users/mysql > /dev/null || (echo "user mysql does not exist. Aborting..." && false)
+	if [ $? -ne 0 ] ; then
+		exit 1
+	fi
 	;;
 	*)
 	/usr/bin/getent group  mysql > /dev/null || (echo "group mysql does not exist. Aborting..." && false)
@@ -2252,7 +2262,48 @@ case "%host" in
 esac
 %if 0%{?darwin_version}
 echo "Adding IndiMail users/groups"
-%{_prefix}/sbin/svctool --config=users
+/usr/bin/dscl . -create /Groups/indimail PrimaryGroupID 555
+/usr/bin/dscl . -create /Groups/nofiles PrimaryGroupID 556
+/usr/bin/dscl . -create /Groups/qmail   PrimaryGroupID 557
+/usr/bin/dscl . -create /Groups/qscand  PrimaryGroupID 558
+
+/usr/bin/dscl . -create /Users/indimail UniqueID 555
+/usr/bin/dscl . -create /Users/indimail home @indimaildir@
+/usr/bin/dscl . -create /Users/indimail PrimaryGroupID 555
+/usr/bin/dscl . -create /Users/indimail UserShell /bin/bash
+/usr/bin/dscl . -create /Users/indimail RealName indimail
+
+/usr/bin/dscl . -create /Users/alias    UniqueID 556
+/usr/bin/dscl . -create /Users/alias    home @indimaildir@/alias
+/usr/bin/dscl . -create /Users/alias    PrimaryGroupID 556
+/usr/bin/dscl . -create /Users/alias    UserShell /bin/bash
+/usr/bin/dscl . -create /Users/alias    RealName alias
+id=557
+for i in qmaild qmaill qmailp
+do
+	/usr/bin/dscl . -create /Users/$i   UniqueID $id
+	/usr/bin/dscl . -create /Users/$i   home @indimaildir@
+	/usr/bin/dscl . -create /Users/$i   PrimaryGroupID 556
+	/usr/bin/dscl . -create /Users/$i   UserShell /bin/bash
+	/usr/bin/dscl . -create /Users/$i   RealName qmaild
+	id=`expr $id + 1`
+done
+id=560
+for i in qmailq qmailr qmails
+do
+	/usr/bin/dscl . -create /Users/$i   UniqueID $id
+	/usr/bin/dscl . -create /Users/$i   home @indimaildir@
+	/usr/bin/dscl . -create /Users/$i   PrimaryGroupID 557
+	/usr/bin/dscl . -create /Users/$i   UserShell /bin/bash
+	/usr/bin/dscl . -create /Users/$i   RealName qmailq
+	id=`expr $id + 1`
+done
+/usr/bin/dscl . -create /Users/qscand UniqueID 563
+/usr/bin/dscl . -create /Users/qscand home @indimaildir@/qscanq
+/usr/bin/dscl . -create /Users/qscand PrimaryGroupID 558
+/usr/bin/dscl . -create /Users/qscand UserShell /bin/false
+/usr/bin/dscl . -create /Users/qscand RealName qscand
+/usr/bin/dscl . -append /Groups/qmail GroupMembership qscand
 %else
 #
 # Create a users and groups. Do not report any problems if they already
@@ -2348,12 +2399,6 @@ if [ -f %{mysqlPrefix}/bin/mysql_config ] ; then
 else
 	echo "WARNING!!! Did not find mysql_config in %{mysqlPrefix}. Skipping MySQL configuration" 1>&2
 fi
-
-echo "Creating catch-all alias (%{_prefix}/alias/Maildir) for all system users"
-echo "Creating default control files"
-%{_prefix}/sbin/svctool --config=qmail --postmaster=%{_prefix}/alias/Maildir/ \
-	--default-domain=%{default_domain} --mysqlhost=localhost --mysqluser=indimail \
-	--mysqlpass=ssh-1.5- --mysqlsocket=/tmp/mysql.sock
 
 if [ %nodksignatures -eq 0 ] ; then
 	if [ -x %{_prefix}/bin/dknewkey ] ; then
@@ -2569,6 +2614,10 @@ if [ %nobogofilter -eq 0 ] ; then
 	%{_prefix}/sbin/svctool --config=bogofilter
 fi
 
+%{_prefix}/sbin/svctool --config=qmail --postmaster=%{_prefix}/alias/Maildir/ \
+	--default-domain=%{default_domain} --mysqlhost=localhost --mysqluser=indimail \
+	--mysqlpass=ssh-1.5- --mysqlsocket=/tmp/mysql.sock
+
 %{__cat} <<EOF > %{_prefix}/control/signatures
 # Windows executables seen in active virii
 TVqQAAMAA:
@@ -2613,25 +2662,29 @@ fi
 if [ %noclamav -eq 0 ] ; then
 	%{__rm} -f %{servicedir}/freshclam/down
 fi
+
 if [ -f %{_sysconfdir}/event.d/svscan ] ; then
 	echo "1. Issue /sbin/initctl emit qmailstart to start services"
-	echo "2. Change your default domain in %{_prefix}/control/defaultdomain"
-	echo "3. You can optionally run the following command to verify installation"
-	echo "   sudo rpm -V indimail"
-	if [ ! -f %{_prefix}/control/servercert.pem ] ; then
-	echo "4. You also need to create CERTS for IMAP/POP3. run the following command to create cert"
-	echo "   %{_prefix}/sbin/svctool --postmaster=postmaster@indimail.org --config=cert"
-	fi
+	count=1
 else
+%if %{undefined darwin_version}
 	echo "1. Issue /var/indimail/sbin/initsvc -on"
 	echo "2. Issue /sbin/init q to start services"
-	echo "3. Change your default domain in %{_prefix}/control/defaultdomain"
-	echo "4. You can optionally run the following command to verify installation"
-	echo "   sudo rpm -V indimail"
-	if [ ! -f %{_prefix}/control/servercert.pem ] ; then
-	echo "5. You also need to create CERTS for IMAP/POP3. run the following command to create cert"
-	echo "   %{_prefix}/sbin/svctool --postmaster=postmaster@indimail.org --config=cert"
-	fi
+	count=2
+%else
+	echo "1. Issue /bin/launchctl load /System/Library/LaunchDaemons/indimail.plist"
+	count=1
+%endif
+fi
+count=`expr $count + 1`
+echo "$count. Change your default domain in %{_prefix}/control/defaultdomain"
+count=`expr $count + 1`
+echo "$count. You can optionally run the following command to verify installation"
+echo "   sudo rpm -V indimail"
+if [ ! -f %{_prefix}/control/servercert.pem ] ; then
+count=`expr $count + 1`
+echo "$count. You also need to create CERTS for IMAP/POP3. run the following command to create cert"
+echo "   %{_prefix}/sbin/svctool --postmaster=postmaster@indimail.org --config=cert"
 fi
 
 ### SCRIPTLET ###############################################################################
@@ -2658,6 +2711,8 @@ then
 elif test -x %{_prefix}/sbin/initsvc
 then
 	%{_prefix}/sbin/initsvc -off
+	echo "Giving IndiMail exactly 5 seconds to exit nicely"
+	sleep 5
 fi
 if [ -f %{_prefix}/boot/rpm.init ] ; then
 	echo "Running Custom Un-Installation Script for preun"
@@ -2674,8 +2729,8 @@ if [ $ID -ne 0 ] ; then
 fi
 # we are doing upgrade
 if [ $argv1 -eq 1 ] ; then
-	echo "recreating ld.so cache"
 %if %{undefined darwin_version}
+	echo "recreating ld.so cache"
 	/sbin/ldconfig
 %endif
 	exit 0
@@ -2686,6 +2741,7 @@ if [ $nscd_up -ge 1 ] ; then
 		%{_sysconfdir}/init.d/nscd stop
 	fi
 fi
+%if %{undefined darwin_version}
 for i in alias qmaild qmaill qmailp qmailq qmailr qmails qscand indimail
 do
 	echo "Removing user $i"
@@ -2701,6 +2757,16 @@ if [ $nscd_up -ge 1 ] ; then
 		%{_sysconfdir}/init.d/nscd start
 	fi
 fi
+%else
+	for i in indimail qmail nofiles qscand; do
+		echo "Removing group $i"
+		dscl . -delete /Groups/$i
+	done
+	for i in indimail alias qmaild qmaill qmailp qmailq qmailr qmails qscand; do
+		echo "Removing user $i"
+		dscl . -delete /Users/$i
+	done
+%endif
 
 echo "removing binaries, libraries, queues, man pages"
 for i in %{_prefix}/bin %{_prefix}/sbin %{_prefix}/lib %{_prefix}/queue \
