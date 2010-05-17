@@ -113,8 +113,8 @@ Generates Random Password. Need not give password on command line.
 \fB\-a\fR
 Set the account to use APOP instead of the default POP. 
 .TP
-\fB\-B\fR
-Set the base path for the home directories. This overrides the default base path \fI/home/mail\fR.
+\fB\-B\fR \fIbase_path\fR
+Set the base path for the user's home directory. This overrides the default base path \fI/home/mail\fR.
 .TP
 \fB\-b\fR
 Balances users across filesystems listed in fstab table as they are created. This option
@@ -146,9 +146,9 @@ Set the password for the user. If the password is not supplied on the command li
 vadduser will prompt standard in for the password. The password must be typed in twice. 
 
 .PP
-The user is added to the inactive table â€“ indibak (except for RFC ids postmaster and abuse)
+The user is added to the inactive table â indibak (except for RFC ids postmaster and abuse)
 and is treated as an inactive user until the user logs in, upon which the user record is moved
-to the  active table â€“ indimail.
+to the  active table â indimail.
 
 .SH RETURN VALUE
 0 if all steps were successful, non-zero otherwise. If any of the steps fail, a diagnostic
