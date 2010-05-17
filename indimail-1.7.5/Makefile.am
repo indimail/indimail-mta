@@ -157,7 +157,7 @@ indimailsbin_SCRIPTS = myslave controlsync svctool cputime tls-cert-check
 
 noinst_SCRIPTS = create_services indimail.spec indimail-@VERSION@-rpmlintrc indimail-epm.list \
 	INSTALL INSTALL-RPM INSTALL-MYSQL README-CLUSTER RELEASE-Notes Quick-INSTALL \
-	vadddomain_handle vadduser_handle 
+	vadddomain_handle vadduser_handle
 
 post_handle_list = vadddomain vadduser
 
