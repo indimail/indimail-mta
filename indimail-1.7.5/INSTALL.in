@@ -79,23 +79,25 @@ Before starting the installation, there are a few things you need to think about
   * If possible, install IndiMail on a "practice" system. This will give you a chance to make
     mistakes without losing important mail or interrupting mail service to your users. You can
     also use
+
     DESTDIR=staging_directory
+
     to install indimail in a staging directory before copying to the actual destination.
     Pre-pending the variable DESTDIR to each target in this way provides for staged installs, where
     the installed files are not placed directly into their expected location but are instead
     copied into a temporary location (DESTDIR). However, installed files maintain their relative
     directory structure and any embedded file names will not be modified.
     DESTDIR support is commonly used in package creation. It is also helpful to users who want to
-    understand what a given package will install where, and to allow users who don't normally have
-    permissions to install into protected areas to build and install before gaining those
+    understand what a given package will install where, and to allow users, who don't normally have
+    permissions to install into protected areas, to build and install before gaining those
     permissions.
     Finally, it can be useful with tools such as stow, where code is installed in one place but
     made to appear to be installed somewhere else using symbolic links or special mount operations.
-  * If you don't have a spare, and your system is already handling mail using sendmail, smail, or
-    some other MTA, you can install and test most pieces of IndiMail without interfering with the
+  * If you don't have a spare system, and your system is already handling mail using sendmail, smail,
+    or some other MTA, you can install and test most pieces of IndiMail without interfering with the
     existing service.
-  * When migrating a system from some other MTA to IndiMail--even if you've got some IndiMail
-    experience under your belt--it's a good idea to formulate a plan.
+  * When migrating a system from some other MTA to IndiMail, even if you've got some IndiMail
+    experience under your belt, it's a good idea to formulate a plan.
 
 
 Requirements
@@ -105,13 +107,8 @@ IndiMail will install and run on most UNIX and UNIX-like systems, but there are 
 
   * Around 300 megabytes of diskspace for all the packages (you will download this in the build
     area).
-  * About 100 megabytes of free space in the build area during the build. After the build, you can
-    free about 15 megabytes by doing make clean
-  * A complete, functioning C development system including a compiler, system header files, and
-    libraries. The installation steps will guide you through the installation process.
-  * MySQL 5.1.x or greater. You can make IndiMail work with 5.0 or less but you will have to
-    do some manual tweaking with MySQL database and configuration to make MySQL work with
-    IndiMail (read INSTALL-MYSQL for more information).
+  * About 800 megabytes of free space in the build area during the build. After the build, you can
+    free about 500 megabytes by doing make clean
   * Around 80 megabytes for the binaries, documentation, and configuration files.
   * A safe filesystem for the queue. qmail's reliability guarantee requires that the queue reside
     on a filesystem with traditional BSD FFS semantics. Most modern local filesystems meet these
@@ -125,15 +122,20 @@ IndiMail will install and run on most UNIX and UNIX-like systems, but there are 
   * A compatible operating system. Most flavors of UNIX are acceptable which have GNU Compilation
     tools (autoconf/automake/libtool/texinfo/emacs).
     NOTE: autoconf 2.6 and above is required.
+  * A complete, functioning C development system including a compiler, system header files, and
+    libraries. The installation steps will guide you through the installation process.
+  * Commands like gzip, bzip2, tar, vi, etc. If you can't find a compiler installed, you'll have to
+    locate one and install it. Contact your administrator or OS vendor.
+  * MySQL 5.1.x or greater. You can make IndiMail work with 5.0 or less but you will have to
+    do some manual tweaking with MySQL database and configuration to make MySQL work with
+    IndiMail (read INSTALL-MYSQL for more information).
   * Access to a domain name server (DNS) is highly recommended. Without one, qmail can only send
     to remote systems configured in its smtproutes config file.
   * Adequate network connectivity. IndiMail was designed for well-connected systems, so you
     probably don't want to try to use it for a mailing list server on a 28.8k dial-up. The
     fetchmail package was designed to make Mail more compatible with poorly-connected systems
-    works well with IndiMail. The installation and configuration for fetchmail is also discussed.
-    Unix Development Environment (C compiler, make, etc) and other commands like gzip, bzip2, tar,
-    vi, etc. If you can't find a compiler installed, you'll have to locate one and install it.
-    Contact your administrator or OS vendor.
+    works well with IndiMail. IndiMail also provides On Demand Mail Relay Protocol (ODMR) for
+    such systems. The installation and configuration for fetchmail is also discussed.
   * IndiMail supports the concept of staged installation. You need to specify
     make DESTDIR=path_to_staging_directory when doing the build. Also svctool (see below) can
     be passed an extra argument --destdir=path_to_staging_directory to create/modify all
@@ -152,7 +154,7 @@ For more information, read Basic Installation instructions at the bottom. In all
 
 a) you are doing this on a fresh system or
 b) in case you are installing this on a live IndiMail System and do not wish
-   to do make install or make install-strip
+   to do make install or make install-strip immediately.
 c) By default IndiMail is installed in @indimaildir@. You may want to set the following
    in your .profile, or equivalent startup file
    PATH=$PATH:@indimaildir@/bin:@indimaildir@/sbin
@@ -164,6 +166,10 @@ If a command is prefixed with the '%' sign, it means that it was run using a non
 % df -k
 If a command is prefixed with the '#' sign, it means that it was run using root. e.g.
 # df -k
+
+I usually prefer to run privileged commands like this (so that I don't get fond of login in as root)
+
+% sudo df -k
 
 ########### SECTION 1  ##### DISK SPACE Check ###########################
 1. check for diskspace
@@ -178,27 +184,35 @@ If a command is prefixed with the '#' sign, it means that it was run using root.
     structure below. You may skip extraction of nssd-1.1, fetchmail-6.3.16,
     depending on whether you require them. Most probably you have downloaded
     indimail-@version@.tar.gz only. You require to additionally download the
-    following sources mentioned below. Except for bogofilter, clamav & fetchmail,
-    the sources are available at indimail.sourceforge.net. The link from which you
-    can download the sources are mentioned in SECTION 3 below.
+    following sources mentioned below. Except for qmail, ucspi-tcp, bogofilter,
+    clamav & fetchmail, the sources are available at indimail.sourceforge.net.
+    The link from which you can download the sources are mentioned in SECTION 3
+    below. Also remember that IndiMail requires patch to be applied to qmail,
+    ucspi-tcp, courier-imap, bogofilter, clamav and fetchmail to make all
+    components work seamlessly with each other.
+
+    NOTE: nssd does not compile on Mac OS X
 
     +-/home/local/src/indimail/.+
                                .
+                               . libdkim-1.3        (4.0  Mb)
                                . indimail-@version@ (50   Mb)
                                . qmail-1.03         (21   Mb)
-                               . libdkim-1.3        (4.0  Mb)
-                               . courier-imap-3.0.8 (50   Mb)
+                               . ucspi-tcp-0.88     (4.0  Mb)
+                               . nssd-1.1           (2.0  Mb)
+                               . pam-multi-1.1      (3.0  Mb)
                                . flash-0.9.4        (4.3  Mb)
                                . altermime-0.3.10   (1.5  Mb)
                                . ripmime-1.4.0.9    (2.1  Mb)
                                . mpack-1.6          (1.5  Mb)
                                . fortune-1.1        (8.4  Mb)
+                               . courier-imap-3.0.8 (50   Mb)
                                . bogofilter-1.2.1   (11.6 Mb)
                                . clamav-0.96        (600  Mb)
-                               . nssd-1.1           (2.0  Mb)
                                . fetchmail-6.3.16   (10.5 Mb)
-                               . pam-multi-1.1      (3.0  Mb)
                                . iwebadmin-1.0      (3.0  Mb)
+                               ------------------------------
+                                 Total              (800  Mb)
 
 ########### SECTION 2  ##### USER/GROUP Creation ########################
 2. add groups and users and home directory
@@ -225,14 +239,72 @@ If a command is prefixed with the '#' sign, it means that it was run using root.
 
     For Mac OS X 10.5.4 or greater
 
-    # dscl . create /Groups/indimail PrimaryGroupID 555
-    # dscl . create /Users/indimail UniqueID 555
-    # dscl . create /Users/indimail home @indimaildir@
-    # dscl . create /Users/indimail PrimaryGroupID 555
-    # dscl . create /Users/indimail UserShell /bin/bash
-    # dscl . create /Users/indimail RealName indimail
+    # dscl . -create /Groups/indimail PrimaryGroupID 555
+    # dscl . -create /Users/indimail UniqueID 555
+    # dscl . -create /Users/indimail home @indimaildir@
+    # dscl . -create /Users/indimail PrimaryGroupID 555
+    # dscl . -create /Users/indimail UserShell /bin/bash
+    # dscl . -create /Users/indimail RealName indimail
+
+    # dscl . -create /Groups/nofiles PrimaryGroupID 556
+    # dscl . -create /Groups/qmail   PrimaryGroupID 557
+    # dscl . -create /Groups/qscand  PrimaryGroupID 558
+
+    # dscl . -create /Users/alias    UniqueID 556
+    # dscl . -create /Users/alias    home @indimaildir@/alias
+    # dscl . -create /Users/alias    PrimaryGroupID 556
+    # dscl . -create /Users/alias    UserShell /bin/bash
+    # dscl . -create /Users/alias    RealName alias
+
+    # dscl . -create /Users/qmaild   UniqueID 557
+    # dscl . -create /Users/qmaild   home @indimaildir@
+    # dscl . -create /Users/qmaild   PrimaryGroupID 556
+    # dscl . -create /Users/qmaild   UserShell /bin/bash
+    # dscl . -create /Users/qmaild   RealName qmaild
+
+    # dscl . -create /Users/qmaill   UniqueID 558
+    # dscl . -create /Users/qmaill   home @indimaildir@
+    # dscl . -create /Users/qmaill   PrimaryGroupID 556
+    # dscl . -create /Users/qmaill   UserShell /bin/bash
+    # dscl . -create /Users/qmaill   RealName qmaill
+
+    # dscl . -create /Users/qmailp   UniqueID 559
+    # dscl . -create /Users/qmailp   home @indimaildir@
+    # dscl . -create /Users/qmailp   PrimaryGroupID 556
+    # dscl . -create /Users/qmailp   UserShell /bin/bash
+    # dscl . -create /Users/qmailp   RealName qmailp
+
+    # dscl . -create /Users/qmailq   UniqueID 560
+    # dscl . -create /Users/qmailq   home @indimaildir@
+    # dscl . -create /Users/qmailq   PrimaryGroupID 557
+    # dscl . -create /Users/qmailq   UserShell /bin/bash
+    # dscl . -create /Users/qmailq   RealName qmailq
+
+    # dscl . -create /Users/qmailr   UniqueID 561
+    # dscl . -create /Users/qmailr   home @indimaildir@
+    # dscl . -create /Users/qmailr   PrimaryGroupID 557
+    # dscl . -create /Users/qmailr   UserShell /bin/bash
+    # dscl . -create /Users/qmailr   RealName qmailr
+
+    # dscl . -create /Users/qmails   UniqueID 562
+    # dscl . -create /Users/qmails   home @indimaildir@
+    # dscl . -create /Users/qmails   PrimaryGroupID 557
+    # dscl . -create /Users/qmails   UserShell /bin/bash
+    # dscl . -create /Users/qmails   RealName qmails
+
+    # dscl . -create /Users/qscand UniqueID 563
+    # dscl . -create /Users/qscand home @indimaildir@/qscanq
+    # dscl . -create /Users/qscand PrimaryGroupID 558
+    # dscl . -create /Users/qscand UserShell /bin/false
+    # dscl . -create /Users/qscand RealName qscand
+    # dscl . -append /Groups/qmail GroupMembership qscand
+
+    If you don't want to see the above added  users in the login-window,
+    you might want to use the following command
+
     # defaults write /Library/Preferences/com.apple.loginwindow HiddenUsersList \
-        -array-add indimail alias qmaild qmaill qmailp qmailq qmailr qmails qscand
+        -array-add indimail alias qmaild qmaill qmailp qmailq qmailr qmails qscand \
+         mysql
     # exit
 
     RedHat and other linux systems place useradd and groupadd in
@@ -281,6 +353,9 @@ the installation.
     % sudo make install-strip DESTDIR=staging_directory
     cd ..
 
+    NOTE: You may install any version of MySQL you like. The steps would be similar. You
+    can also choose to install MariaDB. MariaDB is a drop-in replacement for MySQL
+
     ##### STEP 2  ##### Install libdkim-1.3 ###################
     Install libdkim-1.3 (libdkim-1.3.tar.bz2) MD5 0e391288bb16f726b0532ae188037392
     current working directory /home/local/src
@@ -305,7 +380,7 @@ the installation.
     configure script will detect these packages if present in /home/local/src
 
     This step also involves applying a patch to qmail-1.03. This patch adds many features
-    missing in stock qmail installations.
+    missing in stock qmail/netqmail installations.
 
     current working directory /home/local/src
     Download the indimail package from http://www.indimail.org
@@ -431,8 +506,9 @@ the installation.
 
     % bzip2 -d -c courier-imap-3.0.8.tar.bz2 | tar xf -
     % gunzip -c indimail-@version@/patches/courier-imap-3.0.8.patch.gz | patch -p0
-    # If you are on Mac OS X 10.5.x you will need to apply courier-imap-3.0.8-1.2.patch and
-      a supplement patch
+
+    If you are on Mac OS X 10.5.x you will need to apply courier-imap-3.0.8-1.2.patch and
+    a supplement patch
     % gunzip -c indimail-@version@/patches/courier-imap-3.0.8-1.2.patch.gz | patch -p0
     % gunzip -c indimail-@version@/patches/courier-imap-3.0.8-1.2.mac-supplement.patch.gz | patch -p0
     % cd courier-imap-3.0.8
@@ -455,6 +531,9 @@ the installation.
     by applying the latest patch available in the indimail source patch subdirectory
     to the orignal courier-imap-3.0.8 package.
     Then do ./configure <same_parameters_as_earlier_install> ; make ; make install-strip
+    Also, remember that IndiMail can work with any IMAP/POP3 server that provides authentication
+    using PAM or getpwnam(3), getspnam(3). This happens transparently by using pam-multi(8) in
+    conjunction with nssd(8)
 
     ##### STEP 6  ##### SPAM Filter ###########################
     Install Bogofilter (http://www.bogofilter.org) MD5 2eb802f4e271b99c3d8f68b14f8df9ef
@@ -476,7 +555,7 @@ the installation.
     NOTE: If you are installing bogofilter on Mac OS X, you may need to install
     Berkeley db (libdb)
 
-    # Training Bogofilter ##### Virus Scanner #####################################
+    # Training Bogofilter ##### SPAM Filter #######################################
     OK, now onto the corpus description.  It's split into three parts, as follows:
     - spam: 500 spam messages, all received from non-spam-trap sources.
     - easy_ham: 2500 non-spam messages.  These are typically quite easy to
@@ -609,7 +688,7 @@ the installation.
 4. run svctool
 
     The steps in SECTION 3 above would have installed indimail, qmail, courier-imap, bogofilter,
-    clamav (optionally fetchmail)
+    clamav (optionally fetchmail, nssd, iwebadmin)
 
     The steps below will help you to install a fresh MySQL database, configure MySQL and have a
     service installed under supervise which will start MySQL along with all other IndiMail services.
@@ -632,8 +711,9 @@ the installation.
 
     ##### STEP 2  ## MySQL Startup ############################
     If you plan to use an existing MySQL server, read INSTALL-MYSQL in indimail-@version@/doc
-    directory and proceed to STEP 3 after that.
-    Create Supervise Directory for starting MySQL.
+    directory and proceed to STEP 3 after that. The instructions below are for MySQL to be
+    managed by supervise and hence will require you to disable MySQL startup in your OS
+    startup/boot scripts.
 
     Remove mysqld startup in boot scripts
     % sudo chkconfig mysqld off
@@ -710,6 +790,10 @@ the installation.
     % sudo @indimaildir@/sbin/svctool --qmqp=628 --servicedir=/service \
         --qbase=@indimaildir@/queue --qcount=5 --qstart=1 --cntrldir=control --localip=0 \
         --maxdaemons=75 --maxperip=25 --fsync --syncdir --memory=104857600 --min-free=52428800
+
+    The above will create a QMQP service for a centralized queue. On servers which do not have
+    its own queue, you need to create @indimaildir@/control/qmqpservers containing the IP address
+    of the server which has the QMQP service running.
 
     You can implement Greylisting as described at
     http://www.gossamer-threads.com/lists/qmail/users/136740?page=last
@@ -985,13 +1069,14 @@ You can go on to add a virtual domain and users if you wish
     Creating a Clustered Domain
     ---------------------------
     If you need to setup a cluster of mailstores having the same domain, you need to
-    do the following
+    have a common MySQL server to store cluster information for all mailstores.
+    After you have setup a MySQL server, you need do the following
 
     % cd @indimaildir@/control
     % su
-    # echo "localhost:indimail:ssh-1.5-:/tmp/mysql.sock" > host.cntrl
+    # echo "mysql_server_ip:indimail:ssh-1.5-:/tmp/mysql.sock" > host.cntrl
        or
-    # echo "localhost" > host.cntrl
+    # echo mysql_server_ip > host.cntrl
     # ln -s host.cntrl host.master
     # echo 192.168.1.100 > localiphost (replace 192.168.1.100 with your mailserver/mailstore IP)
     # exit
@@ -1005,9 +1090,16 @@ You can go on to add a virtual domain and users if you wish
     NOTE: replace localhost, indimail, ssh-1.5-, /tmp/mysql.sock as relevant to your MySQL
     installation. You can use 3306 instead of /tmp/mysql.sock in case your MySQL
     database is on another host.
+
     you must use host:user:password:socket or host:user:password:port format
     for host.cntrl (for IndiMail 1.6.9 and above). Also set your PATH to 
     have @indimaildir@/bin in the path.
+
+    mysql_server_ip ideally should point to a dedicated MySQL server.
+    host.cntrl needs to be same for all mailstores. Also you can have host.master
+    pointing to another MySQL server. host.master, host.cntrl implements
+    MySQL Master / Slave architecture. However, you need to configure master slave
+    replication in MySQL.
 
     ##### STEP 2  #############################################
     Add a virtual domain
@@ -1131,29 +1223,38 @@ You can go on to add a virtual domain and users if you wish
      A Project Tracker is at (Bugs, Feature Requests, Patches, Support Requests)
      http://sourceforge.net/tracker/?group_id=230686
 
+You can also get titbits about IndiMail at
 
+Tips&Tricks - http://indimail.blogspot.com
+twitter     - http://twitter.com/indimail
+facebook    - http://www.facebook.com/pages/indimail/88063516703?_fb_noscript=1
+sourceforge - https://sourceforge.net/apps/laconica/indimail/
+
+IndiMail has two YUM / RPM repositories for most of the Linux Distros at
+http://download.opensuse.org/repositories/home:/indimail/
+
+---------- * -------------- * ------------ * -------------- * ------------ * -------------- * ------------
 OS X NOTES
-----------
 
 Post Install
--------------
+============
 
-In order to get qmail to start automatically when OS X boots, you will need to create a new
-startup item containing the qmail startup script and paramters list. Create a new startup
-directory for qmail using the following command:
+In order to get IndiMail to start automatically when OS X boots, you will need to create a new
+startup item containing the IndiMail startup script and paramters list. Create a new startup
+directory for IndiMail using the following command:
 
 Mac OS X 10.5.x or later
-% sudo cp @qmaildir@/boot/indimail.plist /System/Library/LaunchDaemons
+% sudo cp @indimaildir@/boot/indimail.plist /System/Library/LaunchDaemons
 
-NOTE: You can also add @qmaildir@/bin/svscanboot to /etc/rc.local
+NOTE: You can also add @indimaildir@/bin/svscanboot to /etc/rc.local
 
 prior to Mac OS X 10.5.x (NOTE: I have not compiled/tested IndiMail on Mac OS X prior to 10.5.x)
 % cd ..
-% sudo mkdir /Library/StartupItems/Qmail
-% sudo cp @qmaildir@/bin/qmailctl /Library/StartupItems/Qmail/Qmail
-% sudo cp @qmaildir@/StartupParameters.plist /Library/StartupItems/Qmail
+% sudo mkdir /Library/StartupItems/IndiMail
+% sudo cp @indimaildir@/bin/qmailctl /Library/StartupItems/IndiMail/IndiMail
+% sudo cp @indimaildir@/StartupParameters.plist /Library/StartupItems/IndiMail
 
-When you reboot your machine qmail will automatically start.
+When you reboot your machine IndiMail will automatically start.
 
 In order to have a Maildir created automatically when a new user is added to the system you will
 need to modify the new user template. The new user template can be found in the
@@ -1181,14 +1282,15 @@ If you see the new users in the login-window, you might want to use one of the f
 (depending on which one works for you) to hide them:
 
 % sudo defaults write /Library/Preferences/com.apple.loginwindow HiddenUsersList \
-   -array-add _alias _qmaild _qmaill _qmailp _qmailq _qmailr _qmails
+   -array-add indimail alias qmaild qmaill qmailp qmailq qmailr qmails qscand \
+   mysql
 
 If the above doesn't work, try this one:
 
 % sudo defaults write /Library/Preferences/com.apple.loginwindow Hide500User -bool YES
 
 (source:http://qmail.jms1.net/djbdns/osx.shtml)
----------------------------------------------
+---------- * -------------- * ------------ * -------------- * ------------ * -------------- * ------------
 
 MySQL NOTES
 -----------
@@ -1227,9 +1329,9 @@ with_option =
   | MAX_UPDATES_PER_HOUR count
   | MAX_CONNECTIONS_PER_HOUR count
   | MAX_USER_CONNECTIONS count
-
+---------- * -------------- * ------------ * -------------- * ------------ * -------------- * ------------
 PS Output
-----------------
+=========
 % ps waux
 user       pid %cpu %mem    vsz   rss tty      stat start   time command
 smmsp     2506  0.0  0.0   9180  1512 ?        Ss   14:21   0:00 sendmail: Queue runner@01:00:00 for /var/spool/clientmqueue
@@ -1364,8 +1466,7 @@ qmaill    1089  0.0  0.0   1756   336 ?        S    15:24   0:00 @indimaildir@/b
 root      1058  0.0  0.0   1740   316 ?        S    15:24   0:00 supervise qmail-qmqpd.628
 indimail  1102  0.0  0.0   6640   836 ?        S    15:24   0:00 @indimaildir@/bin/tcpserver -v -H -R -l 0 -x /var/indimail/etc/tcp.qmqp.cdb -c /service/qmail-qmqpd.628/variables/MAXDAEMONS -o -b 75 -u 555 -g 555 0 628 /var/indimail/bin/qmail-qmqpd
 qmaill    1110  0.0  0.0   1756   288 ?        S    15:24   0:00 @indimaildir@/bin/multilog t @logdir@/qmqpd.628
-------------------------------------------------------------------------------------
-
+---------- * -------------- * ------------ * -------------- * ------------ * -------------- * ------------
 Basic Installation
 ==================
 
@@ -1593,3 +1694,4 @@ an Autoconf bug.  Until the bug is fixed you can use this workaround:
 
 `configure' also accepts some other, not widely useful, options.  Run
 `configure --help' for more details.
+---------- * -------------- * ------------ * -------------- * ------------ * -------------- * ------------
