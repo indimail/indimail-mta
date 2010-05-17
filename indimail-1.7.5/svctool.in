@@ -1660,7 +1660,7 @@ fi
 echo "Checking Alias User"
 case $host in
 	*-*-darwin*)
-	AHOME=`dscl . read /Users/alias|grep NFSHomeDi|awk '{print $2}'`
+	AHOME=`dscl . -read /Users/alias|grep NFSHomeDi|awk '{print $2}'`
 	;;
 	*)
 	AHOME=`grep "^alias:" /etc/passwd | awk -F: '{print $6}'`
@@ -4742,7 +4742,7 @@ macOSgroupadd()
 		echo "group $1 exists"
 		return 1
 	fi
-	dscl . create /Groups/$1 PrimaryGroupID $groupid
+	dscl . -create /Groups/$1 PrimaryGroupID $groupid
 	return $?
 }
 
@@ -4798,16 +4798,16 @@ macOSuseradd()
 		echo "user $1 exists"
 		return 1
 	fi
-	echo "dscl . create /Users/$1 UniqueID $userid"
-	dscl . create /Users/$1 UniqueID $userid
-	echo "dscl . create /Users/$1 home $homedir"
-	dscl . create /Users/$1 home $homedir
-	echo "dscl . create /Users/$1 PrimaryGroupID $groupid"
-	dscl . create /Users/$1 PrimaryGroupID $groupid
-	echo "dscl . create /Users/$1 UserShell $shell"
-	dscl . create /Users/$1 UserShell $shell
-	echo "dscl . create /Users/$1 RealName $1"
-	dscl . create /Users/$1 RealName $1
+	echo "dscl . -create /Users/$1 UniqueID $userid"
+	dscl . -create /Users/$1 UniqueID $userid
+	echo "dscl . -create /Users/$1 home $homedir"
+	dscl . -create /Users/$1 home $homedir
+	echo "dscl . -create /Users/$1 PrimaryGroupID $groupid"
+	dscl . -create /Users/$1 PrimaryGroupID $groupid
+	echo "dscl . -create /Users/$1 UserShell $shell"
+	dscl . -create /Users/$1 UserShell $shell
+	echo "dscl . -create /Users/$1 RealName $1"
+	dscl . -create /Users/$1 RealName $1
 	if [ ! " $password" = " " ] ; then
 		echo "dscl . -passwd /Users/$1 $password"
 		dscl . -passwd /Users/$1 $password
