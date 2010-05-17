@@ -1,5 +1,8 @@
 /*
  * $Log: vadduser.c,v $
+ * Revision 2.32  2010-05-17 10:16:13+05:30  Cprogrammer
+ * use control file .base_path in domains directory
+ *
  * Revision 2.31  2010-05-17 00:00:00+05:30  Cprogrammer
  * fixed setting of BASE PATH
  *
@@ -147,28 +150,20 @@
 #include <signal.h>
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vadduser.c,v 2.31 2010-05-17 00:00:00+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: vadduser.c,v 2.32 2010-05-17 10:16:13+05:30 Cprogrammer Stab mbhangui $";
 #endif
 
-char            Email[MAX_BUFF];
-char            User[MAX_BUFF];
-char            Domain[MAX_BUFF];
-char            Passwd[MAX_BUFF];
-char            Quota[MAX_BUFF];
-char            Gecos[MAX_BUFF];
-char            envbuf[MAX_BUFF];
+char            Email[MAX_BUFF], User[MAX_BUFF], Domain[MAX_BUFF], Passwd[MAX_BUFF],
+                Quota[MAX_BUFF], Gecos[MAX_BUFF], envbuf[MAX_BUFF];
 #ifdef CLUSTERED_SITE
-char            mdahost[MAX_BUFF];
-char            hostid[MAX_BUFF];
+char            mdahost[MAX_BUFF], hostid[MAX_BUFF];
 #endif
-char            TmpBuf1[MAX_BUFF];
 int             apop, Random, balance_flag, actFlag = 1;
 
-extern int      encrypt_flag;
-extern int      create_flag;
+extern int      encrypt_flag, create_flag;
 
 void            usage();
-int             get_options(int argc, char **argv, int *);
+int             get_options(int, char **, char **, int *);
 int             checklicense(char *, int, long, char *, int);
 
 int
@@ -177,7 +172,7 @@ main(argc, argv)
 	char           *argv[];
 {
 	int             i, quota, pass_len = 8;
-	char           *real_domain, *ptr, *base_argv0;
+	char           *real_domain, *ptr, *base_argv0, *base_path, *domain_dir;
 	char            tmpbuf[MAX_BUFF], buffer[MAX_BUFF];
 	FILE           *fp;
 	uid_t           uid, uidtmp;
@@ -187,7 +182,7 @@ main(argc, argv)
 	struct vlimits  limits;
 #endif
 
-	if (get_options(argc, argv, &pass_len))
+	if (get_options(argc, argv, &base_path, &pass_len))
 		return(1);
 	/*
 	 * parse the email address into user and domain 
@@ -204,13 +199,13 @@ main(argc, argv)
 		error_stack(stderr, "%s: No such domain\n", Domain);
 		return(1);
 	}
-#ifdef ENABLE_DOMAIN_LIMITS
-	if (!vget_assign(real_domain, buffer, AUTH_SIZE, &uid, &gid))
+	if (!(domain_dir = vget_assign(real_domain, 0, AUTH_SIZE, &uid, &gid)))
 	{
 		error_stack(stderr, "%s: domain does not exist\n", real_domain);
 		return (1);
 	}
-	snprintf(tmpbuf, MAX_BUFF, "%s/.domain_limits", buffer);
+#ifdef ENABLE_DOMAIN_LIMITS
+	snprintf(tmpbuf, MAX_BUFF, "%s/.domain_limits", domain_dir);
 	domain_limits = ((access(tmpbuf, F_OK) && !getenv("DOMAIN_LIMITS")) ? 0 : 1);
 	if (domain_limits && vget_limits(real_domain, &limits))
 	{
@@ -297,6 +292,21 @@ main(argc, argv)
 			printf("Adding to MDAhost %s SqlServer %s\n", mdahost, ptr);
 	} 
 #endif
+	*envbuf = 0;
+	snprintf(tmpbuf, sizeof(tmpbuf), "%s/.base_path", domain_dir);
+	if ((fp = fopen(tmpbuf, "r")))
+	{
+		if (fscanf(fp, "%s", buffer) != 1)
+		{
+			error_stack(stderr, "%s: premature eof\n", tmpbuf);
+			fclose(fp);
+			return (1);
+		}
+		fclose(fp);
+		snprintf(envbuf, sizeof(envbuf), "BASE_PATH=%s", buffer);
+	}
+	if (base_path)
+		snprintf(envbuf, sizeof(envbuf), "BASE_PATH=%s", base_path);
 	if (balance_flag)
 	{
 		snprintf(tmpbuf, sizeof(tmpbuf), "%s/etc/lastfstab", INDIMAILDIR);
@@ -308,13 +318,16 @@ main(argc, argv)
 		if (!fgets(buffer, sizeof(buffer) - 2, fp))
 		{
 			error_stack(stderr, "%s: premature eof\n", tmpbuf);
+			fclose(fp);
 			return(1);
 		}
+		fclose(fp);
 		if ((ptr = strchr(buffer, '\n')))
 			*ptr = 0;
 		snprintf(envbuf, sizeof(envbuf), "BASE_PATH=%s", buffer);
-		putenv(envbuf);
 	}
+	if (*envbuf)
+		putenv(envbuf);
 #ifdef CLUSTERED_SITE
 	if ((i = vadduser(User, real_domain, mdahost, Passwd, Gecos, quota, apop, actFlag)) < 0)
 #else
@@ -359,7 +372,7 @@ usage()
 }
 
 int
-get_options(int argc, char **argv, int *pass_len)
+get_options(int argc, char **argv, char **base_path, int *pass_len)
 {
 	int             c;
 	int             errflag;
@@ -368,10 +381,10 @@ get_options(int argc, char **argv, int *pass_len)
 	memset(Passwd, 0, MAX_BUFF);
 	memset(Domain, 0, MAX_BUFF);
 	memset(Quota, 0, MAX_BUFF);
-	memset(TmpBuf1, 0, MAX_BUFF);
 	apop = USE_POP;
 	errflag = 0;
 	actFlag = 1;
+	*base_path = 0;
 #ifdef CLUSTERED_SITE
 	while (!errflag && (c = getopt(argc, argv, "aidbB:Vvc:q:h:m:er:")) != -1)
 #else
@@ -415,14 +428,7 @@ get_options(int argc, char **argv, int *pass_len)
 			balance_flag = 1;
 			break;
 		case 'B':
-			if (access(optarg, F_OK))
-			{
-				fprintf(stderr, "%s: %s\n", optarg, strerror(errno));
-				errflag = 1;
-				break;
-			}
-			snprintf(envbuf, sizeof(envbuf), "BASE_PATH=%s", optarg);
-			putenv(envbuf);
+			*base_path = optarg;
 			break;
 		case 'q':
 			scopy(Quota, optarg, MAX_BUFF);

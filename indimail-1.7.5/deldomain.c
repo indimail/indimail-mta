@@ -1,5 +1,8 @@
 /*
  * $Log: deldomain.c,v $
+ * Revision 2.14  2010-05-17 10:15:38+05:30  Cprogrammer
+ * use .base_path control file in domains directory
+ *
  * Revision 2.13  2009-09-23 14:59:28+05:30  Cprogrammer
  * change for new runcmmd()
  *
@@ -75,19 +78,18 @@
 #include <signal.h>
 
 #ifndef	lint
-static char     sccsid[] = "$Id: deldomain.c,v 2.13 2009-09-23 14:59:28+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: deldomain.c,v 2.14 2010-05-17 10:15:38+05:30 Cprogrammer Stab mbhangui $";
 #endif
 
 int
 vdeldomain(char *domain)
 {
-	char            Dir[MAX_BUFF], TmpBuf[MAX_BUFF];
-	char           *ptr, *tmpstr;
+	char            Dir[MAX_BUFF], TmpBuf[MAX_BUFF], BasePath[MAX_BUFF];
+	char           *ptr, *tmpstr, *qmaildir, *base_path;
 	int             is_alias, i;
 	FILE           *fp;
 	uid_t           uid;
 	gid_t           gid;
-	char           *qmaildir, *base_path;
 	char           *FileSystems[] = {
 		"A2E",
 		"F2K",
@@ -152,6 +154,14 @@ vdeldomain(char *domain)
 		error_stack(stderr, "Domain %s does not exist\n", domain);
 		return (-1);
 	}
+	snprintf(TmpBuf, MAX_BUFF, "%s/.base_path", Dir);
+	if ((fp = fopen(TmpBuf, "r")))
+	{
+		if (fscanf(fp, "%s", BasePath) != 1)
+			*BasePath = 0;
+		fclose(fp);
+	} else
+		*BasePath = 0;
 	snprintf(TmpBuf, MAX_BUFF, "%s/.aliasdomains", Dir);
 	if ((is_alias = is_alias_domain(domain)) == 1)
 	{
@@ -220,7 +230,10 @@ vdeldomain(char *domain)
 	/* delete the Mail File systems */
 	if (is_alias != 1)
 	{
-		getEnvConfigStr(&base_path, "BASE_PATH", BASE_PATH);
+		if (*BasePath)
+			base_path = BasePath;
+		else
+			getEnvConfigStr(&base_path, "BASE_PATH", BASE_PATH);
 		for (i = 0; i < 5;i++)
 		{
 			snprintf(TmpBuf, MAX_BUFF, "%s/%s/%s", base_path, FileSystems[i], domain);
@@ -229,7 +242,7 @@ vdeldomain(char *domain)
 			if (vdelfiles(TmpBuf, "", domain))
 			{
 				error_stack(stderr, "Failed to remove Dir %s: %s\n", TmpBuf, strerror(errno));
-				return (-1);
+				continue;
 			}
 		}
 	}
