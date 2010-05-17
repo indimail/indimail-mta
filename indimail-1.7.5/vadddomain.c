@@ -1,5 +1,8 @@
 /*
  * $Log: vadddomain.c,v $
+ * Revision 2.29  2010-05-17 10:14:15+05:30  Cprogrammer
+ * create control file .base_path in domains directory
+ *
  * Revision 2.28  2010-05-16 23:59:20+05:30  Cprogrammer
  * added -B option to specify BASE PATH
  *
@@ -149,12 +152,12 @@
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vadddomain.c,v 2.28 2010-05-16 23:59:20+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: vadddomain.c,v 2.29 2010-05-17 10:14:15+05:30 Cprogrammer Stab mbhangui $";
 #endif
 
 
 char            Domain[MAX_BUFF], Passwd[MAX_BUFF], User[MAX_BUFF], Dir[MAX_BUFF], Quota[MAX_BUFF], BounceEmail[MAX_BUFF];
-char            TmpBuf[MAX_BUFF], ipaddr[16], a_dir[MAX_BUFF], envbuf[MAX_BUFF];
+char            TmpBuf[MAX_BUFF], ipaddr[16], a_dir[MAX_BUFF];
 #ifdef CLUSTERED_SITE
 char            database[MAX_BUFF], sqlserver[MAX_BUFF], database[MAX_BUFF], dbuser[MAX_BUFF], dbpass[MAX_BUFF];
 int             dbport, distributed;
@@ -164,18 +167,18 @@ uid_t           Uid, a_uid;
 gid_t           Gid, a_gid;
 
 void            usage();
-int             get_options(int argc, char **argv, int *);
+int             get_options(int argc, char **argv, char **, int *);
 
 int
 main(argc, argv)
 	int             argc;
 	char           *argv[];
 {
-	int             err, chk_rcpt, i;
+	int             err, fd, chk_rcpt, i;
 	uid_t           uid;
 	gid_t           gid;
 	extern int      create_flag;
-	char           *qmaildir, *ptr, *base_argv0;
+	char           *qmaildir, *ptr, *base_argv0, *base_path;
 	FILE           *fs;
 	char            AliasLine[MAX_BUFF];
 	char           *auto_ids[] = {
@@ -189,7 +192,7 @@ main(argc, argv)
 	int             is_dist, user_present, total;
 #endif
 
-	if (get_options(argc, argv, &chk_rcpt))
+	if (get_options(argc, argv, &base_path, &chk_rcpt))
 		return(1);
 	if (!isvalid_domain(Domain))
 	{
@@ -232,11 +235,54 @@ main(argc, argv)
 	 * add domain to /var/indimail/users/assign, /var/indimail/users/cdb
 	 * create .qmail-default file
 	 */
+	if (base_path && !use_etrn)
+	{
+		if (access(base_path, F_OK) && r_mkdir(base_path, INDIMAIL_DIR_MODE, Uid, Gid))
+		{
+			error_stack(stderr, "%s: %s\n", base_path, strerror(errno));
+			vdeldomain(Domain);
+			vclose();
+			return(1);
+		}
+		if (setenv("BASE_PATH", base_path, 1))
+		{
+			error_stack(stderr, "setenv BASE_PATH=%s: %s\n", base_path, strerror(errno));
+			vdeldomain(Domain);
+			vclose();
+			return(1);
+		}
+	}
 	if ((err = vadddomain(Domain, ipaddr, Dir, Uid, Gid, chk_rcpt)) != VA_SUCCESS)
 	{
 		error_stack(stderr, 0);
 		vclose();
 		return(err);
+	}
+	if (base_path && !use_etrn)
+	{
+		if (!vget_assign(Domain, Dir, MAX_BUFF, &uid, &gid))
+		{
+			error_stack(stderr, "Domain %s does not exist\n", Domain);
+			vdeldomain(Domain);
+			vclose();
+			return(1);
+		}
+		snprintf(TmpBuf, sizeof(TmpBuf), "%s/.base_path", Dir);
+		if ((fd = open(TmpBuf, O_CREAT|O_TRUNC|O_WRONLY)) == -1)
+		{
+			error_stack(stderr, "open: %s: %s\n", TmpBuf, strerror(errno));
+			vdeldomain(Domain);
+			vclose();
+			return(1);
+		}
+		if (write(fd, base_path, strlen(base_path)) == -1)
+		{
+			error_stack(stderr, "write: %s\n", strerror(errno));
+			vdeldomain(Domain);
+			vclose();
+			return(1);
+		}
+		close(fd);
 	}
 #ifdef CLUSTERED_SITE
 	/*
@@ -359,7 +405,7 @@ main(argc, argv)
 }
 
 int
-get_options(int argc, char **argv, int *chk_rcpt)
+get_options(int argc, char **argv, char **base_path, int *chk_rcpt)
 {
 	int             c;
 	int             errflag;
@@ -367,6 +413,7 @@ get_options(int argc, char **argv, int *chk_rcpt)
 	char            optbuf[MAX_BUFF];
 
 	*Domain = *Passwd = *Quota = *Dir = *BounceEmail = *TmpBuf = 0;
+	*base_path = 0;
 	if (indimailuid == -1 || indimailgid == -1)
 		GetIndiId(&indimailuid, &indimailgid);
 	Uid = indimailuid;
@@ -393,14 +440,10 @@ get_options(int argc, char **argv, int *chk_rcpt)
 			getversion(sccsid);
 			break;
 		case 'B':
-			if (access(optarg, F_OK) && r_mkdir(optarg, INDIMAIL_DIR_MODE, Uid, Gid))
-			{
-				fprintf(stderr, "%s: %s\n", optarg, strerror(errno));
-				errflag = 1;
-				break;
-			}
-			snprintf(envbuf, MAX_BUFF, "BASE_PATH=%s", optarg);
-			putenv(envbuf);
+			if (use_etrn)
+				error_stack(stderr, "option -B not valid for ETRN/ATRN/AUTORUN\n");
+			else
+				*base_path = optarg;
 			break;
 		case 'v':
 			verbose = 1;
