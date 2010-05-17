@@ -1,5 +1,8 @@
 #!/bin/sh
 # $Log: create_services.in,v $
+# Revision 2.41  2010-05-17 18:57:02+05:30  Cprogrammer
+# skip qscanq service if noclamav is set
+#
 # Revision 2.40  2010-04-03 16:46:44+05:30  Cprogrammer
 # added QMQP service
 #
@@ -141,7 +144,7 @@ indimaildir=@indimaildir@
 # End USER Configuration OPTIONS
 #
 
-# $Id: create_services.in,v 2.40 2010-04-03 16:46:44+05:30 Cprogrammer Stab mbhangui $
+# $Id: create_services.in,v 2.41 2010-05-17 18:57:02+05:30 Cprogrammer Stab mbhangui $
 
 usage()
 {
@@ -501,9 +504,9 @@ $dir_prefix$indimaildir/sbin/svctool --poppass=106 --localip=0 --maxdaemons=40 -
 #
 # virus clamav/spam filter
 #
-$dir_prefix$indimaildir/sbin/svctool --qscanq --servicedir=$servicedir --clamdPrefix=$indimaildir \
-	--scanint=200 $extra_opt
 if [ $noclamav -eq 0 ] ; then
+	$dir_prefix$indimaildir/sbin/svctool --qscanq --servicedir=$servicedir --clamdPrefix=$indimaildir \
+		--scanint=200 $extra_opt
 	$dir_prefix$indimaildir/sbin/svctool --config=clamd $extra_opt
 fi
 if [ $nobogofilter -eq 0 ] ; then
