@@ -4,7 +4,7 @@
 valias \- add/modify/delete alias for virtual users
 
 .SH SYNOPSYS
-\fBvalias\fR [\fIoptions\fR] [\fIemail_address\fR | \fIdomain_name\fR]
+\fBvalias\fR [\fIoptions\fR] [\fIalias\fR | \fIdomain_name\fR]
 
 .SH DESCRIPTION
 .PP
@@ -25,26 +25,26 @@ Set Verbose mode
 \fB\-s\fR
 Show aliases (domain_name needs to be given)
 .TP
-\fB\-d\fR \fIalias_line\fR
-Delete alias line corresponding to \fIalias_line\fR
+\fB\-d\fR \fIaddress\fR
+Delete alias \fIalias\fR corresponding to address \fIaddress\fR
 .TP
-\fB\-i\fR \fIalias_line\fR
-Insert new alias line. An alias line has one of the 3 forms. See \fBdot-qmail(5)\fR for more details.
+\fB\-i\fR \fIaddress\fR
+Insert new address for an alias. An address has one of the 3 forms. See \fBdot-qmail(5)\fR for more details.
 
 .EX
- 1. &\fIemail\fR       - Forward mails to \fIemail\fR
- 2. Maildir      - copy mails to a Maildir with path \fIMaildir\fR
- 3. | Command    - pipe the mail through command \fICommand\fR
+ 1. &\fIuser@domain\fR  - Forward mails to \fIuser@domain\fR
+ 2. \fIMaildir\fR       - copy mails to a Maildir with path \fIMaildir\fR
+ 3. | \fICommand\fR     - pipe the mail through command \fICommand\fR
 .EE
 .TP
-\fB\-u\fR \fIold_alias_line\fR \fB\-i\fR \fInew_alias_line\fR
-Change an existing alias line
+\fB\-u\fR \fIold_address\fR \fB\-i\fR \fInew_address\fR
+Change address for an existing alias
 .TP
 \fB\-m\fR
-Ignore requirement of email_address to be local (option for clustered domain only)
+Ignore requirement of \fIalias\fR to be local (option for clustered domain only)
 .TP
-\fIemail_address\fR
-Should point to an existing deliverable address on the host where valias is executed.
+\fIalias\fR
+Should point to an existing deliverable address on the host where \fBvalias\fR is executed.
 
 .SH RETURN VALUE
 0 in   case of success, 1 in case of any failure.
