@@ -1,5 +1,8 @@
 /*
  * $Log: vdominfo.c,v $
+ * Revision 2.11  2010-05-17 18:54:15+05:30  Cprogrammer
+ * display base dir
+ *
  * Revision 2.10  2010-04-20 13:17:40+05:30  Cprogrammer
  * skip cluster code if host.cntrl is missing
  *
@@ -106,7 +109,7 @@
 #include <memory.h>
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vdominfo.c,v 2.10 2010-04-20 13:17:40+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: vdominfo.c,v 2.11 2010-05-17 18:54:15+05:30 Cprogrammer Stab mbhangui $";
 #endif
 
 char            Domain[MAX_BUFF];
@@ -319,6 +322,13 @@ display_domain(char *domain, char *dir, uid_t uid, gid_t gid)
 		printf("dir  :    %s\n", dir);
 		if (!strcmp(real_domain, domain))
 		{
+			snprintf(tmpbuf, MAX_BUFF, "%s/.base_path", dir);
+			if ((fp = fopen(tmpbuf, "r")))
+			{
+				fscanf(fp, "%s", tmpbuf);
+				printf("base dir: %s\n", tmpbuf);
+				fclose(fp);
+			}
 			snprintf(tmpbuf, MAX_BUFF, "%s/.filesystems", dir);
 			total = print_control(tmpbuf, domain, 0);
 			printf("Users:  %ld\n", total);
@@ -332,6 +342,7 @@ display_domain(char *domain, char *dir, uid_t uid, gid_t gid)
 						break;
 					printf("%s", tmpbuf);
 				}
+				fclose(fp);
 			}
 		}
 	} else
@@ -390,6 +401,7 @@ display_domain(char *domain, char *dir, uid_t uid, gid_t gid)
 							break;
 						printf("%s", tmpbuf);
 					}
+					fclose(fp);
 				}
 			}
 		}
