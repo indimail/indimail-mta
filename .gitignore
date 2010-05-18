@@ -9,6 +9,7 @@ rpmbuild
 clamav-*
 private
 pam-multi*
+*/post_handle
 */config.log
 */config.status
 */stamp-h1
