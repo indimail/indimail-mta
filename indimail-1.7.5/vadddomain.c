@@ -1,5 +1,8 @@
 /*
  * $Log: vadddomain.c,v $
+ * Revision 2.30  2010-05-18 18:49:46+05:30  Cprogrammer
+ * fix ownership of .base_path
+ *
  * Revision 2.29  2010-05-17 10:14:15+05:30  Cprogrammer
  * create control file .base_path in domains directory
  *
@@ -152,7 +155,7 @@
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vadddomain.c,v 2.29 2010-05-17 10:14:15+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: vadddomain.c,v 2.30 2010-05-18 18:49:46+05:30 Cprogrammer Stab mbhangui $";
 #endif
 
 
@@ -268,7 +271,7 @@ main(argc, argv)
 			return(1);
 		}
 		snprintf(TmpBuf, sizeof(TmpBuf), "%s/.base_path", Dir);
-		if ((fd = open(TmpBuf, O_CREAT|O_TRUNC|O_WRONLY)) == -1)
+		if ((fd = open(TmpBuf, O_CREAT|O_TRUNC|O_WRONLY, S_IRUSR|S_IWUSR)) == -1)
 		{
 			error_stack(stderr, "open: %s: %s\n", TmpBuf, strerror(errno));
 			vdeldomain(Domain);
@@ -278,6 +281,13 @@ main(argc, argv)
 		if (write(fd, base_path, strlen(base_path)) == -1)
 		{
 			error_stack(stderr, "write: %s\n", strerror(errno));
+			vdeldomain(Domain);
+			vclose();
+			return(1);
+		}
+		if (fchown(fd, uid, gid))
+		{
+			error_stack(stderr, "fchown: %s: (uid %d: gid %d): %s\n", TmpBuf, uid, gid, strerror(errno));
 			vdeldomain(Domain);
 			vclose();
 			return(1);
