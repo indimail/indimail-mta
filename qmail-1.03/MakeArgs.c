@@ -144,7 +144,7 @@ FreeMakeArgs(char **argv)
 void
 getversion_MakeArgs__c()
 {
-	static char     *x = "$Id: MakeArgs.c,v 2.10 2009-04-20 22:18:33+05:30 Cprogrammer Exp mbhangui $";
+	static char     *x = "$Id: MakeArgs.c,v 2.10 2009-04-20 22:18:33+05:30 Cprogrammer Stab mbhangui $";
 	x++;
 	x--;
 	return;
