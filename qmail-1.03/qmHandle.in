@@ -28,7 +28,7 @@ my ($fileName) = 'info';
 # For instance, this is if you have DJB's daemontools
 my ($stopqmail) = 'QMAIL/bin/svc -d /service/qmail-send.25';
 my ($startqmail) = 'QMAIL/bin/svc -u /service/qmail-send.25';
-my ($pidcmd) = 'pidof qmail-send';
+my ($pidcmd) = 'QMAIL/bin/svstat /service/qmail-send.25|awk \'{print $4}\' |cut -d\) -f1';
 
 ####################  USER CONFIGURATION END  ####################
 
