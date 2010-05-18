@@ -4,7 +4,7 @@
 IndiMail -\ A Multi-host distributed Mail Server
 
 .SH DESCRIPTION
-IndiMail is an email server built using following packages
+IndiMail is an messaging platform built using following packages
 .IP \[bu] 2
 qmail
 .sp -1
@@ -484,9 +484,9 @@ QHPSIFORWARD      |qmail-queue  |used    |If set, virus infected mails get
                   |             |        |environment variable
 REJECTVIRUS       |qmail-queue  |used    |Sets action to be carried out on
                   |             |        |detection of virus
-                  |             |        | 0 â€“ Accept infected mails
-                  |             |        | 1 â€“ Bounce the mail.
-                  |             |        | 2 â€“ Blackhole the mail.
+                  |             |        | 0 â Accept infected mails
+                  |             |        | 1 â Bounce the mail.
+                  |             |        | 2 â Blackhole the mail.
 NULLQUEUE         |qmail-queue  |used    |If set, mail transaction is sent to
                   |             |        |/dev/null without returning an error
                   |             |        |(blackholing)
@@ -787,11 +787,11 @@ SPFBEHAVIOUR      |             |        |SPF check gets enabled
                   |             |        |    available or for syntax error
 OPENRELAY         |             |        |If set, qmail-smtpd rejects incoming
                   |             |        |connection with (553 code) the message
-                  |             |        |â€œNo mail accepted from an open relayâ€
+                  |             |        |âNo mail accepted from an open relayâ
 GREYIP            |             |        |If set, will send a UDP packet to
                   |             |        |greydaemon for greylisting
 GREETDELAY        |             |        |Time in seconds by which qmail-smtpd
-                  |             |        |delays the â€œ220 ESMTPâ€ welcome prompt.
+                  |             |        |delays the â220 ESMTPâ welcome prompt.
                   |             |        |This overrides the greetdelay control
                   |             |        |file.
 ------------------|-------------|--------|----------------------------------------
@@ -1217,7 +1217,7 @@ you can use the \fBinitsvc(8)\fR command.
 .SH POST Execution Handle
 Some indimail programs have a post execution handle. A post execution handle is a program with
 the same name as that of the calling program but in the directory INDIMAIL/libexec.
-On successful completion, such programs will execute the handle program and return
+On successful completion, such programs execute the handle program and return
 the status of the called handle program. If the handle program is not accessible, the return
 status is zero. Normally, the handle program always gets executed from INDIMAIL/libexec
 directory, but you can override the program called by setting the environment variable
@@ -1231,6 +1231,8 @@ man page for the programs mentioned below having post execution handle.
 
 Programs that support this post execution handle are vadddomain(1), vdeldomain(1), vrenamedomain(1),
 vadduser(1), vdeluser(1), vrenameuser(1), vmoveuser(1), vpasswd(1).
+
+The distribution includes two post execution handles \fBvadddomain\fR and \fBvadduser\fR.
 
 .SH PROGRAMS
 IndiMail has > 250 programs installed in INDIMAIL/bin, INDIMAIL/sbin.
@@ -1396,7 +1398,7 @@ versioninfo(1)     - Display version information for all IndiMail programs
 hostsync(8)        - Sync uncommited entries in a IndiMail cluster
 .sp -1
 .IP \n+[step]
-clearopensmtp(8)   - remove stale IPâ€™s authorized for pop before SMTP
+clearopensmtp(8)   - remove stale IPâs authorized for pop before SMTP
 .sp -1
 .IP \n+[step]
 updaterules(8)     - Rebuild tcp.smtp.cdb with IP address open for relay.
@@ -1528,10 +1530,10 @@ serialsmtp    - Blast messages to SMTP
 envdir        - run program with env according to files in a directory
 .sp -1
 .IP \n+[step]
-envuidgid     - run program with env variables with an accountâ€™s uid, gid
+envuidgid     - run program with env variables with an accountâs uid, gid
 .sp -1
 .IP \n+[step]
-setuidgid     - run program under a specified accountâ€™s uid and gid
+setuidgid     - run program under a specified accountâs uid and gid
 .sp -1
 .IP \n+[step]
 supervise     - starts and monitors a service
