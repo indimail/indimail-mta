@@ -41,7 +41,7 @@
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: get_smtp_service_port.c,v 2.4 2010-04-24 14:58:11+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: get_smtp_service_port.c,v 2.4 2010-04-24 14:58:11+05:30 Cprogrammer Stab mbhangui $";
 #endif
 
 #ifdef CLUSTERED_SITE

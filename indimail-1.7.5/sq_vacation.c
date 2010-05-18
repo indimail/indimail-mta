@@ -88,7 +88,7 @@
 #define ERR_UNEXPECTED  126     /*- other unexpected error */
 
 #ifndef lint
-static char     sccsid[] = "$Id: sq_vacation.c,v 2.7 2010-05-01 14:14:03+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: sq_vacation.c,v 2.7 2010-05-01 14:14:03+05:30 Cprogrammer Stab mbhangui $";
 #endif
 #ifndef INDIMAILH_H
 int             vauthOpen_user(char *);

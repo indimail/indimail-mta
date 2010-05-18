@@ -47,7 +47,7 @@
 #include <unistd.h>
 
 #ifndef	lint
-static char     sccsid[] = "$Id: passwd.c,v 2.8 2010-05-01 14:13:11+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: passwd.c,v 2.8 2010-05-01 14:13:11+05:30 Cprogrammer Stab mbhangui $";
 #endif
 
 /*

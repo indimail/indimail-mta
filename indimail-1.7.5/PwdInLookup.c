@@ -22,7 +22,7 @@
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: PwdInLookup.c,v 2.5 2010-05-01 14:13:28+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: PwdInLookup.c,v 2.5 2010-05-01 14:13:28+05:30 Cprogrammer Stab mbhangui $";
 #endif
 
 struct passwd *
