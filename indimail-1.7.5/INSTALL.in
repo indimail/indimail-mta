@@ -761,7 +761,8 @@ the installation.
     If you want to have a message submission port (587) for users to submit outgoing mails
     you can create the Message Submission Port. Note the additional --skipsend option which
     creates a service without delivery process. Mails will be processed by delivery process
-    created above. The message submission port will enforce authenticated SMTP.
+    created above for port 25. The message submission port will enforce authenticated SMTP and
+    hence you do not require rblsmtpd to frontend the SMTP service.
 
     % sudo @indimaildir@/sbin/svctool --smtp=587 --servicedir=/service \
         --qbase=@indimaildir@/queue --qcount=5 --qstart=1 --authsmtp --antispoof \
@@ -996,9 +997,9 @@ the installation.
 6. Check your installation
 
    % sudo @indimaildir@/sbin/svctool --check-install --servicedir=/service \
-       --qbase=@indimaildir@/queue --qcount=2 --qstart=1
+       --qbase=@indimaildir@/queue --qcount=5 --qstart=1
 
-   NOTE: All the above svctool commands in all previous steps are in the script
+   NOTE: All the above svctool commands, in all previous steps, are in the script
    create_services. You can run this script from IndiMail's source directory to
    create all services with reasonable defaults.
 
