@@ -34,7 +34,7 @@ Known values for options are:
     [--domainlimits]
     [--chkrecipient --cugmail --authsmtp --authall --chkrelay]
     [--masquerade] [--antispoof]
-	[--routes=smtp|qmtp|static]
+    [--routes=smtp|qmtp|static]
     [--deliverylimit-count=D --deliverylimit-size=S]
     [--rbl=list]
     [--content-filter=c]
@@ -132,16 +132,16 @@ Known values for options are:
   ssl            - Use SSL encrypted communication
 
 --qmtp=Port --qbase=queue_path --qcount=N --qstart=I
-	--servicedir=service_path --cntrldir=cntrl_path
-	--localip=a --maxdaemons=m --maxperip=i
-	[--fsync --syncdir]
-	[--memory=b --min-free=M]
-	[--qhpsi=q]
-	[--spamfilter=spamfilter_args]
-	[--logfilter=filter_fifo]
-	[--rejectspam=r --spamexitcode=e]
-	[--dkverify=dk|dkim|both|none]
-	[--dksign=dk|dkim|both|none --private_key=private_key]
+    --servicedir=service_path --cntrldir=cntrl_path
+    --localip=a --maxdaemons=m --maxperip=i
+    [--fsync --syncdir]
+    [--memory=b --min-free=M]
+    [--qhpsi=q]
+    [--spamfilter=spamfilter_args]
+    [--logfilter=filter_fifo]
+    [--rejectspam=r --spamexitcode=e]
+    [--dkverify=dk|dkim|both|none]
+    [--dksign=dk|dkim|both|none --private_key=private_key]
 
  Installs a new queue with a QMTP Listener
   m              - Concurrency of connections to allow
@@ -175,16 +175,16 @@ Known values for options are:
   private_key    - Path to Private key created by dknewkey
 
 --qmqp=Port --qbase=queue_path --qcount=N --qstart=I
-	--servicedir=service_path --cntrldir=cntrl_path
-	--localip=a --maxdaemons=m --maxperip=i
-	[--fsync --syncdir]
-	[--memory=b --min-free=M]
-	[--qhpsi=q]
-	[--spamfilter=spamfilter_args]
-	[--logfilter=filter_fifo]
-	[--rejectspam=r --spamexitcode=e]
-	[--dkverify=dk|dkim|both|none]
-	[--dksign=dk|dkim|both|none --private_key=private_key]
+    --servicedir=service_path --cntrldir=cntrl_path
+    --localip=a --maxdaemons=m --maxperip=i
+    [--fsync --syncdir]
+    [--memory=b --min-free=M]
+    [--qhpsi=q]
+    [--spamfilter=spamfilter_args]
+    [--logfilter=filter_fifo]
+    [--rejectspam=r --spamexitcode=e]
+    [--dkverify=dk|dkim|both|none]
+    [--dksign=dk|dkim|both|none --private_key=private_key]
 
  Installs a new queue with a QMQP Listener
   m              - Concurrency of connections to allow
@@ -241,7 +241,7 @@ Known values for options are:
     [--proxy=destport]
     [--legacyserver]
     [--postmaster=user[@domain]]
-	[--ssl|--tlsprog|--starttls]
+    [--ssl|--tlsprog|--starttls]
 
   Installs a new IMAP4 Listner
   Port           - Bind on this port for IMAP
@@ -268,7 +268,7 @@ Known values for options are:
     [--proxy=destport]
     [--legacyserver]
     [--postmaster=user[@domain]]
-	[--ssl|--tlsprog|--starttls]
+    [--ssl|--tlsprog|--starttls]
 
   Installs a new POP3 Listner
   Port           - Bind on this port for POP3
@@ -292,7 +292,7 @@ Known values for options are:
     --domainlimits
     --servicedir=service_path --cntrldir=cntrl_path
     [--password-cache] [--query-cache]
-	[--routes=smtp|qmtp|static]
+    [--routes=smtp|qmtp|static]
 
   Installs a new IndiMail Name Lookup Server
   fifo_path      - Install fifo specified by this path
