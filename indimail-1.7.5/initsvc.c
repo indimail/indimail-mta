@@ -1,5 +1,8 @@
 /*
  * $Log: initsvc.c,v $
+ * Revision 2.11  2010-05-18 08:24:43+05:30  Cprogrammer
+ * fixed -list option for Mac OS X
+ *
  * Revision 2.10  2009-11-17 20:14:50+05:30  Cprogrammer
  * run initsvc only for root
  *
@@ -40,7 +43,7 @@
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: initsvc.c,v 2.10 2009-11-17 20:14:50+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: initsvc.c,v 2.11 2010-05-18 08:24:43+05:30 Cprogrammer Stab mbhangui $";
 #endif
 
 int
@@ -152,7 +155,9 @@ main(int argc, char **argv)
 				perror("/bin/launchctl");
 				break;
 			case 3:
-				execl("/bin/launchctl", "launchctl",  "list", "indimail", (char *) 0);
+				execl("/bin/sh", "sh", "-c",
+				"/bin/launchctl list indimail || /bin/cat /System/Library/LaunchDaemons/indimail.plist;\
+				/bin/ls -l /System/Library/LaunchDaemons/indimail.plist", (char *) 0);
 				perror("/bin/launchctl");
 				break;
 			case 4:
