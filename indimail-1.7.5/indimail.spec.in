@@ -1,5 +1,14 @@
 #
 # $Log: indimail.spec.in,v $
+# Revision 2.165  2010-05-18 08:23:35+05:30  Cprogrammer
+# added rbl check for SMTPS
+#
+# Revision 2.164  2010-05-17 23:43:28+05:30  Cprogrammer
+# fixed syntax error
+#
+# Revision 2.163  2010-05-17 23:32:36+05:30  Cprogrammer
+# fixed sslerator path
+#
 # Revision 2.162  2010-05-16 23:28:23+05:30  Cprogrammer
 # modifications for OS x
 #
@@ -510,7 +519,7 @@
 # rpm spec file for indimail
 #
 #
-# $Id: indimail.spec.in,v 2.162 2010-05-16 23:28:23+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 2.165 2010-05-18 08:23:35+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %define _unpackaged_files_terminate_build 1
 
@@ -2432,8 +2441,13 @@ fi
 for port in 465 25 587
 do
 	if [ $port -eq 465 ] ; then
-		spamfilter=1
+		if [ %nobogofilter -eq 1 ] ; then
+			spamfilter=0
+		else
+			spamfilter=1
+		fi
 		extra_opt="--skipsend --ssl"
+		extra_opt="$extra_opt --rbl=-rzen.spamhaus.org --rbl=-rdnsbl-1.uceprotect.net"
 	elif [ $port -eq 587 ] ; then
 		# local authenticated users
 		# why bother with spamfilter
@@ -2443,7 +2457,11 @@ do
 		spamfilter=0
 		extra_opt="--skipsend --authsmtp --antispoof"
 	else
-		spamfilter=1
+		if [ %nobogofilter -eq 1 ] ; then
+			spamfilter=0
+		else
+			spamfilter=1
+		fi
 		extra_opt="--remote-authsmtp=plain --localfilter --remotefilter"
 		extra_opt="$extra_opt --deliverylimit-count=-1"
 		extra_opt="$extra_opt --rbl=-rzen.spamhaus.org --rbl=-rdnsbl-1.uceprotect.net"
@@ -2560,30 +2578,30 @@ fi
 if [ %nocourierimap -eq 0 ] ; then
 # IMAP/POP3
 %{_prefix}/sbin/svctool --imap=143 --servicedir=%{servicedir} --localip=0 --maxdaemons=40 \
-	--query-cache --maxperip=25 --default-domain=%{default_domain} --memory=%{imap_pop3_mem} \
+	--maxperip=25 --query-cache --default-domain=%{default_domain} --memory=%{imap_pop3_mem} \
 	--starttls
 %{_prefix}/sbin/svctool --imap=993 --servicedir=%{servicedir} --localip=0 --maxdaemons=40 \
-	--query-cache --maxperip=25 --default-domain=%{default_domain} --memory=%{imap_pop3_mem} \
+	--maxperip=25 --query-cache --default-domain=%{default_domain} --memory=%{imap_pop3_mem} \
 	--ssl
 %{_prefix}/sbin/svctool --pop3=110 --servicedir=%{servicedir} --localip=0 --maxdaemons=40 \
-	--query-cache --maxperip=25 --default-domain=%{default_domain} --memory=%{imap_pop3_mem} \
+	--maxperip=25 --query-cache --default-domain=%{default_domain} --memory=%{imap_pop3_mem} \
 	--starttls
 %{_prefix}/sbin/svctool --pop3=995 --servicedir=%{servicedir} --localip=0 --maxdaemons=40 \
-	--query-cache --maxperip=25 --default-domain=%{default_domain} --memory=%{imap_pop3_mem} \
+	--maxperip=25 --query-cache --default-domain=%{default_domain} --memory=%{imap_pop3_mem} \
 	--ssl
 fi
 if [ %noproxy -eq 0 ] ; then
 %{_prefix}/sbin/svctool --imap=4143 --servicedir=%{servicedir} --localip=0 --maxdaemons=40 \
-	--query-cache --maxperip=25 --default-domain=%{default_domain} --memory=%{imap_pop3_mem} \
-	--proxy=143 --starttls --tlsprog=${_prefix}/bin/sslerator
+	--maxperip=25 --query-cache --default-domain=%{default_domain} --memory=%{imap_pop3_mem} \
+	--proxy=143 --starttls --tlsprog=%{_prefix}/bin/sslerator
 %{_prefix}/sbin/svctool --imap=9143 --servicedir=%{servicedir} --localip=0 --maxdaemons=40 \
-	--query-cache --maxperip=25 --default-domain=%{default_domain} --memory=%{imap_pop3_mem} \
+	--maxperip=25 --query-cache --default-domain=%{default_domain} --memory=%{imap_pop3_mem} \
 	--proxy=143 --ssl
 %{_prefix}/sbin/svctool --pop3=4110 --servicedir=%{servicedir} --localip=0 --maxdaemons=40 \
-	--query-cache --maxperip=25 --default-domain=%{default_domain} --memory=%{imap_pop3_mem} \
-	--proxy=110 --starttls --tlsprog=${_prefix}/bin/sslerator
+	--maxperip=25 --query-cache --default-domain=%{default_domain} --memory=%{imap_pop3_mem} \
+	--proxy=110 --starttls --tlsprog=%{_prefix}/bin/sslerator
 %{_prefix}/sbin/svctool --pop3=9110 --servicedir=%{servicedir} --localip=0 --maxdaemons=40 \
-	--query-cache --maxperip=25 --default-domain=%{default_domain} --memory=%{imap_pop3_mem} \
+	--maxperip=25 --query-cache --default-domain=%{default_domain} --memory=%{imap_pop3_mem} \
 	--proxy=110 --ssl
 fi
 
