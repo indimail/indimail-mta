@@ -1,5 +1,9 @@
 #!/bin/sh
 # $Log: create_services.in,v $
+# Revision 2.43  2010-05-18 08:22:59+05:30  Cprogrammer
+# added rbl check for SMTPS
+# fixed greylisting, qmtp and qmqp services
+#
 # Revision 2.42  2010-05-17 23:33:16+05:30  Cprogrammer
 # fixed dk and spamfilter options
 #
@@ -147,7 +151,7 @@ indimaildir=@indimaildir@
 # End USER Configuration OPTIONS
 #
 
-# $Id: create_services.in,v 2.42 2010-05-17 23:33:16+05:30 Cprogrammer Stab mbhangui $
+# $Id: create_services.in,v 2.43 2010-05-18 08:22:59+05:30 Cprogrammer Exp mbhangui $
 
 usage()
 {
@@ -332,6 +336,7 @@ for port in 465 25 587
 do
 	if [ $port -eq 465 ] ; then
 		e_opt="--skipsend --ssl"
+		e_opt="$e_opt --rbl=-rzen.spamhaus.org --rbl=-rdnsbl-1.uceprotect.net"
 	elif [ $port -eq 587 ] ; then
 		nobogofilter=1
 		e_opt="--skipsend --authsmtp --antispoof"
@@ -402,19 +407,19 @@ $dir_prefix$indimaildir/sbin/svctool --smtp=366 --odmr --servicedir=$servicedir 
 #
 # Greylist
 #
-$dir_prefix$indimaildir/sbin/svctool --greylist=1999 --servicedir=/service --min-resend-min=2 \
+$dir_prefix$indimaildir/sbin/svctool --greylist=1999 --servicedir=$servicedir --min-resend-min=2 \
     --resend-win-hr=24 --timeout-days=30 --context-file=greylist.context \
 	--hash-size=65536 --save-interval=5 --whitelist=greylist.white --use-greydaemon $extra_opt
 #
 # qmtpd service
 #
-$dir_prefix$indimaildir/sbin/svctool --qmtp=209 --servicedir=%servicedir --qbase=$qbase \
+$dir_prefix$indimaildir/sbin/svctool --qmtp=209 --servicedir=$servicedir --qbase=$qbase \
 	--qcount=$qcount --qstart=1 --cntrldir=control --localip=0 --maxdaemons=75 --maxperip=25 \
 	--fsync --syncdir --memory=$qmtp_soft_mem --min-free=52428800 $extra_opt
 #
 # qmqpd service
 #
-$dir_prefix$indimaildir/sbin/svctool --qmqp=628 --servicedir=%servicedir --qbase=$qbase \
+$dir_prefix$indimaildir/sbin/svctool --qmqp=628 --servicedir=$servicedir --qbase=$qbase \
 	--qcount=$qcount --qstart=1 --cntrldir=control --localip=0 --maxdaemons=75 --maxperip=25 \
 	--fsync --syncdir --memory=$qmqp_soft_mem --min-free=52428800 $extra_opt
 
