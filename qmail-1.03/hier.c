@@ -1,5 +1,8 @@
 /*
  * $Log: hier.c,v $
+ * Revision 1.144  2010-05-19 18:56:38+05:30  Cprogrammer
+ * moved qmail-rm man page to section 1
+ *
  * Revision 1.143  2010-05-04 10:00:40+05:30  Cprogrammer
  * added cdbgetm
  *
@@ -849,6 +852,8 @@ hier(inst_dir)
 	c(auto_qmail_home, "man/man1", "cdbstats.1", auto_uido, auto_gidq, 0444);
 	c(auto_qmail_home, "man/man1", "cdbmake.1", auto_uido, auto_gidq, 0444);
 	c(auto_qmail_home, "man/man1", "cdbdump.1", auto_uido, auto_gidq, 0444);
+	c(auto_qmail_home, "man/man1", "qmail-rm.1", auto_uido, auto_gidq, 0444);
+	c(auto_qmail_home, "man/cat1", "qmail-rm.0", auto_uido, auto_gidq, 0444);
 
 	c(auto_qmail_home, "man/man3", "alloc.3", auto_uido, auto_gidq, 0444);
 	c(auto_qmail_home, "man/man3", "case.3", auto_uido, auto_gidq, 0444);
@@ -938,8 +943,6 @@ hier(inst_dir)
 	c(auto_qmail_home, "man/man8", "mlmatchup.8", auto_uido, auto_gidq, 0444);
 	c(auto_qmail_home, "man/cat8", "mlmatchup.0", auto_uido, auto_gidq, 0444);
 	c(auto_qmail_home, "man/man8", "qmailctl.8", auto_uido, auto_gidq, 0444);
-	c(auto_qmail_home, "man/man8", "qmail-rm.8", auto_uido, auto_gidq, 0444);
-	c(auto_qmail_home, "man/cat8", "qmail-rm.0", auto_uido, auto_gidq, 0444);
 	c(auto_qmail_home, "man/man8", "ofmipd.8", auto_uido, auto_gidq, 0444);
 	c(auto_qmail_home, "man/cat8", "ofmipd.0", auto_uido, auto_gidq, 0444);
 	c(auto_qmail_home, "man/man8", "ofmipname.8", auto_uido, auto_gidq, 0444);
@@ -1063,7 +1066,7 @@ hier(inst_dir)
 void
 getversion_install_big_c()
 {
-	static char    *x = "$Id: hier.c,v 1.143 2010-05-04 10:00:40+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: hier.c,v 1.144 2010-05-19 18:56:38+05:30 Cprogrammer Stab mbhangui $";
 
 #ifdef INDIMAIL
 	x = sccsidh;

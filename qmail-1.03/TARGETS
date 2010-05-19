@@ -599,6 +599,7 @@ qmail-remote.8
 qmail-remote.o
 qmail-rm
 qmail-rm.0
+qmail-rm.1
 qmail-rm.o
 qmail-rspawn
 qmail-rspawn.0
