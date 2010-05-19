@@ -3193,13 +3193,13 @@ qmail-rm.o: \
 compile qmail-rm.c auto_split.h stralloc.h open.h lock.h auto_qmail.h substdio.h fmt.h error.h
 	./compile qmail-rm.c
 
-qmail-rm.0: qmail-rm.8
-	nroff -man qmail-rm.8 > qmail-rm.0
+qmail-rm.0: qmail-rm.1
+	nroff -man qmail-rm.1 > qmail-rm.0
 
-qmail-rm.8: qmail-rm.9
+qmail-rm.1: qmail-rm.9
 	cat qmail-rm.9 \
 	| sed s}QMAILHOME}"`head -1 conf-qmail`"}g \
-	> qmail-rm.8
+	> qmail-rm.1
 
 autoresponder: load autoresponder.o alloc.o error.o error_str.o \
 alloc_re.o case_diffs.o case_diffb.o case_lowers.o env.o envread.o auto_qmail.o subgetopt.o \
