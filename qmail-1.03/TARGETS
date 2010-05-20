@@ -569,7 +569,6 @@ qmail-pw2u.8
 qmail-pw2u.o
 qmail-qfilter
 qmail-qfilter.o
-qmail-qmHandle
 qmail-qmqpc
 qmail-qmqpc.0
 qmail-qmqpc.o
@@ -582,9 +581,6 @@ qmail-qmtpd.o
 qmail-qread
 qmail-qread.0
 qmail-qread.o
-qmail-qstat
-qmail-qstat.0
-qmail-qstat.o
 qmail-queue
 qmail-queue.0
 qmail-queue.8

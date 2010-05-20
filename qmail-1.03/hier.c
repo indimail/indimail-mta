@@ -434,8 +434,6 @@ hier(inst_dir)
 	c(auto_qmail_home, "bin", "mailsubj", auto_uido, auto_gidq, 0555);
 	c(auto_qmail_home, "bin", "qmail-showctl", auto_uido, auto_gidq, 0555);
 	c(auto_qmail_home, "bin", "qmail-qread", auto_uido, auto_gidq, 0555);
-	c(auto_qmail_home, "bin", "qmail-qstat", auto_uido, auto_gidq, 0555);
-	c(auto_qmail_home, "bin", "qmail-qmHandle", auto_uido, auto_gidq, 0555);
 	c(auto_qmail_home, "bin", "qmail-lint", auto_uido, auto_gidq, 0555);
 	c(auto_qmail_home, "bin", "qmail-multi", auto_uido, auto_gidq, 0555);
 	c(auto_qmail_home, "bin", "qmail-qfilter", auto_uido, auto_gidq, 0555);
@@ -1005,8 +1003,6 @@ hier(inst_dir)
 	c(auto_qmail_home, "man/cat8", "qmail-pw2u.0", auto_uido, auto_gidq, 0444);
 	c(auto_qmail_home, "man/man8", "qmail-qread.8", auto_uido, auto_gidq, 0444);
 	c(auto_qmail_home, "man/cat8", "qmail-qread.0", auto_uido, auto_gidq, 0444);
-	c(auto_qmail_home, "man/man8", "qmail-qstat.8", auto_uido, auto_gidq, 0444);
-	c(auto_qmail_home, "man/cat8", "qmail-qstat.0", auto_uido, auto_gidq, 0444);
 	c(auto_qmail_home, "man/man8", "queue-fix.8", auto_uido, auto_gidq, 0444);
 	c(auto_qmail_home, "man/man8", "queue-fix.0", auto_uido, auto_gidq, 0444);
 	c(auto_qmail_home, "man/man8", "qmail-tcpok.8", auto_uido, auto_gidq, 0444);
