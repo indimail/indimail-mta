@@ -5076,15 +5076,15 @@ create_qmail_config()
 		fi
 	fi
 	for i in /usr/lib/sendmail /usr/sbin/sendmail; do
-	if [ -f $i -a ! -L $i ]; then
-		echo "! $i is a file, should be a link"
-		/bin/mv $i $i.old
-		/bin/ln -s $QmailHOME/bin/sendmail.sh $i
-	elif [ ! -f $i ];then
-		echo "! $i is missing"
-		/bin/ln -s $QmailHOME/bin/sendmail.sh $i
-	fi
-done
+		if [ -f $i -a ! -L $i ]; then
+			echo "! $i is a file, should be a link"
+			/bin/mv $i $i.old
+			/bin/ln -s $QmailHOME/bin/sendmail.sh $i
+		elif [ ! -f $i ];then
+			echo "! $i is missing"
+			/bin/ln -s $QmailHOME/bin/sendmail.sh $i
+		fi
+	done
 }
 
 create_clamd_conf()
