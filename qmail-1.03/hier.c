@@ -1,5 +1,8 @@
 /*
  * $Log: hier.c,v $
+ * Revision 1.145  2010-05-20 11:28:29+05:30  Cprogrammer
+ * removed qmail-qstat, qmail-qmHandle
+ *
  * Revision 1.144  2010-05-19 18:56:38+05:30  Cprogrammer
  * moved qmail-rm man page to section 1
  *
@@ -1062,7 +1065,7 @@ hier(inst_dir)
 void
 getversion_install_big_c()
 {
-	static char    *x = "$Id: hier.c,v 1.144 2010-05-19 18:56:38+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: hier.c,v 1.145 2010-05-20 11:28:29+05:30 Cprogrammer Stab mbhangui $";
 
 #ifdef INDIMAIL
 	x = sccsidh;

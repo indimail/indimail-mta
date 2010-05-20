@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-qread.c,v $
+ * Revision 1.21  2010-05-20 11:28:46+05:30  Cprogrammer
+ * added queue count functionality of qmail-qstat
+ *
  * Revision 1.20  2010-02-17 10:38:55+05:30  Cprogrammer
  * removed compiler warning
  *
@@ -603,7 +606,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_qread_c()
 {
-	static char    *x = "$Id: qmail-qread.c,v 1.20 2010-02-17 10:38:55+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: qmail-qread.c,v 1.21 2010-05-20 11:28:46+05:30 Cprogrammer Stab mbhangui $";
 
 #ifdef INDIMAIL
 	x = sccsidh;
