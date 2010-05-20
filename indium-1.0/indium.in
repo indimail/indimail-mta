@@ -417,7 +417,7 @@ proc main {} {
 		menu .mbar1.help.menu.qmail1 -tearoff 0
 		foreach line {forward rrforward condredirect bouncesaying except maildirkw maildirmake maildir2mbox maildirwatch \
 			maildirdeliver mailsubj qreceipt qbiff preline addcr delcr fixcrio recordio rblsmtpd qmail-autoresponder \
-			xqp qmail-showctl qmail-newmrh qmail-newu qmail-pw2u qmail-qread qmail-qstat qmail-rm qmail-tcpok \
+			xqp qmail-showctl qmail-newmrh qmail-newu qmail-pw2u qmail-qread qmail-rm qmail-tcpok \
 			maildircmd serialcmd rewind qmail-tcpto bogofilter bogotune bogoutil \
 			bogolexer bogoupgrade altermime ripmime reformime makemime shit} {
 			.mbar1.help.menu.qmail1 add command -label $line -command "Browse command \"man $line | ul -t unknown\""

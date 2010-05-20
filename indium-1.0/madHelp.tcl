@@ -2586,22 +2586,22 @@ set Help(queuestat) {
 	text {}
 	text {}
 	text {-------------------------------------------------------------------------------------}
-	bold {Command qmail-qstat}
+	bold {Command qmail-qread}
 	text {}
 	text {}
 	text {}
 	bold {NAME}
-	text {       qmail-qstat - summarize status of mail queue}
+	text {       qmail-qread - summarize status of mail queue}
 	text {}
 	bold {SYNOPSIS}
-	text {       qmail-qstat}
+	text {       qmail-qread}
 	text {}
 	bold {DESCRIPTION}
-	text {          qmail-qstat gives a human-readable breakdown of the number}
+	text {          qmail-qread gives a human-readable breakdown of the number}
 	text {          of messages at various spots in the mail queue.}
 	text {}
-	text {          qmail-qstat must be run either as root or  with  group  id}
-	text {          qmail.}
+	text {          qmail-qread must be run either as root or  with  group  id}
+	text {          qmails.}
 	text {}
 }
 

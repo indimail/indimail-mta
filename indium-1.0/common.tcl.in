@@ -3908,26 +3908,16 @@ proc qmailAdv {mode} {
 			set output_desc "Queued Mail Stats"; \
 			$bwin1.2.run configure -text "Queue Info"; \
 			$bwin1.2.run configure -cursor {}; \
-			set cmd "exec @indimaildir@/bin/qmail-qstat"; \
+			set cmd "exec @indimaildir@/bin/qmail-qread"; \
 			set mycmd "$cmd $arguments"; \
 			$bwin1.1.queue configure -state disabled; \
 		}
 	balloonHelp $opframe2.1 \
-"qmail-qstat \[options\] queue_dir
- -l		list message queues
- -L		list local message queue
- -R		list remote message queue
- -s		show some statistics
- -vN		display message number N
- -dN		delete  message number N
- -qqueuedir	Use queuedir as the queue directory
-
-Additional (optional) parameters are:
- -c		display colored output (command line version)
- -N		list message numbers only queues
-		(to be used either with -l, -L or -R)
-
-You can view/delete multiple message eg -d123 -v456 -d567"
+"qmail-qread \[options\] queue_dir
+ -l		list local message queue
+ -r		list remote message queue
+ -c		show some statistics
+"
 
 	radiobutton $opframe2.2 -value 2 -variable flag2 -text "Queue Read" \
 		-command { \
