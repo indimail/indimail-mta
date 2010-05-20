@@ -1,5 +1,8 @@
 #
 # $Log: indimail-epm.list.in,v $
+# Revision 2.53  2010-05-20 11:20:50+05:30  Cprogrammer
+# removed qmail-qstat
+#
 # Revision 2.52  2010-04-19 19:14:36+05:30  Cprogrammer
 # added qmail-sql and clamav-0.96
 #

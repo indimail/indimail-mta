@@ -1,5 +1,8 @@
 #
 # $Log: indimail.spec.in,v $
+# Revision 2.166  2010-05-20 11:20:56+05:30  Cprogrammer
+# remvoed qmail-qstat, qmail-qmHandle
+#
 # Revision 2.165  2010-05-18 08:23:35+05:30  Cprogrammer
 # added rbl check for SMTPS
 #
@@ -519,7 +522,7 @@
 # rpm spec file for indimail
 #
 #
-# $Id: indimail.spec.in,v 2.165 2010-05-18 08:23:35+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 2.166 2010-05-20 11:20:56+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %define _unpackaged_files_terminate_build 1
 
