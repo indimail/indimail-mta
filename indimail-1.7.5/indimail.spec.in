@@ -1,5 +1,8 @@
 #
 # $Log: indimail.spec.in,v $
+# Revision 2.167  2010-05-20 22:05:13+05:30  Cprogrammer
+# added indimail-mini package
+#
 # Revision 2.166  2010-05-20 11:20:56+05:30  Cprogrammer
 # remvoed qmail-qstat, qmail-qmHandle
 #
@@ -522,7 +525,7 @@
 # rpm spec file for indimail
 #
 #
-# $Id: indimail.spec.in,v 2.166 2010-05-20 11:20:56+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 2.167 2010-05-20 22:05:13+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %define _unpackaged_files_terminate_build 1
 
@@ -716,6 +719,7 @@ NoSource: 13
 
 URL: http://www.indimail.org
 #AutoReqProv: No
+Conflicts: %{name}-mini
 BuildRequires: openssl-devel rpm gcc gcc-c++ make bison binutils coreutils grep
 BuildRequires: glibc glibc-devel openssl procps gdbm-devel readline-devel
 BuildRequires: sed ncurses-devel gettext-devel
@@ -815,6 +819,21 @@ Provides: %{name}-shared
 %description shared
 This package contains the shared libraries (*.so*) which certain
 languages and applications need to dynamically load and use IndiMail.
+
+%{see_base}
+
+%package mini
+Summary: IndiMail - Mini Client Installation
+Group: Applications/Databases
+Provides: %{name}-mini
+Conflicts: %{name}
+
+%description mini
+This package contains sendmail, qmail-inject and qmail-qmqpc - Bare minimum
+programs to have a mini-indimail installation.
+
+A mini-indimail installation doesn't have a mail queue. It gives each new message to a
+central server using QMQP.
 
 %{see_base}
 
@@ -2179,6 +2198,60 @@ fi
 %{_libdir}/libindimail-%{version}.so.0.0.0
 %endif
 
+%files mini
+%defattr(-, root, root, 0555)
+#
+# Directories
+#
+%dir %attr(555,root,qmail)        %{_prefix}
+%dir %attr(755,indimail,indimail) %{_prefix}/control
+%dir %attr(555,root,qmail)        %{_prefix}/man
+%dir %attr(555,root,qmail)        %{_prefix}/man/man1
+%dir %attr(555,root,qmail)        %{_prefix}/man/cat1
+%dir %attr(555,root,qmail)        %{_prefix}/man/man8
+%dir %attr(555,root,qmail)        %{_prefix}/man/cat8
+#
+%attr(555,root,qmail)             %{_prefix}/bin/sendmail
+%attr(555,root,qmail)             %{_prefix}/bin/qmail-inject
+%attr(555,root,qmail)             %{_prefix}/bin/qmail-qmqpc
+%attr(555,root,qmail)             %{_prefix}/bin/forward
+%attr(555,root,qmail)             %{_prefix}/bin/predate
+%attr(555,root,qmail)             %{_prefix}/bin/datemail
+%attr(555,root,qmail)             %{_prefix}/bin/mailsubj
+%attr(555,root,qmail)             %{_prefix}/bin/qmail-showctl
+%attr(555,root,qmail)             %{_prefix}/bin/maildirmake
+%attr(555,root,qmail)             %{_prefix}/bin/qmaildirmake
+%attr(555,root,qmail)             %{_prefix}/bin/maildir2mbox
+%attr(555,root,qmail)             %{_prefix}/bin/maildirwatch
+%attr(555,root,qmail)             %{_prefix}/bin/qail
+%attr(555,root,qmail)             %{_prefix}/bin/elq
+%attr(555,root,qmail)             %{_prefix}/bin/pinq
+#
+%attr(555,root,qmail)             %{_prefix}/man/man1/forward.1.gz
+%attr(555,root,qmail)             %{_prefix}/man/cat1/forward.0.gz
+%attr(555,root,qmail)             %{_prefix}/man/man1/predate.1.gz
+%attr(555,root,qmail)             %{_prefix}/man/man1/datemail.1.gz
+%attr(555,root,qmail)             %{_prefix}/man/man1/mailsubj.1.gz
+%attr(555,root,qmail)             %{_prefix}/man/cat1/mailsubj.0.gz
+%attr(555,root,qmail)             %{_prefix}/man/man1/maildirmake.1.gz
+%attr(555,root,qmail)             %{_prefix}/man/man1/qmaildirmake.1.gz
+%attr(555,root,qmail)             %{_prefix}/man/cat1/qmaildirmake.0.gz
+%attr(555,root,qmail)             %{_prefix}/man/man1/maildir2mbox.1.gz
+%attr(555,root,qmail)             %{_prefix}/man/cat1/maildir2mbox.0.gz
+%attr(555,root,qmail)             %{_prefix}/man/man1/maildirwatch.1.gz
+%attr(555,root,qmail)             %{_prefix}/man/cat1/maildirwatch.0.gz
+#
+%attr(555,root,qmail)             %{_prefix}/man/man8/qmail-showctl.8.gz
+%attr(555,root,qmail)             %{_prefix}/man/cat8/qmail-showctl.0.gz
+%attr(555,root,qmail)             %{_prefix}/man/man8/qmail-inject.8.gz
+%attr(555,root,qmail)             %{_prefix}/man/cat8/qmail-inject.0.gz
+%attr(555,root,qmail)             %{_prefix}/man/man8/qmail-qmqpc.8.gz
+%attr(555,root,qmail)             %{_prefix}/man/cat8/qmail-qmqpc.0.gz
+
+# a copy of /var/qmail/control/me, /var/qmail/control/defaultdomain,
+# and /var/qmail/control/plusdomain from your central server, so that qmail-inject uses appropriate host names in outgoing mail; and
+# this host's name in /var/qmail/control/idhost, so that qmail-inject generates Message-ID without any risk of collision
+
 %clean
 %{__rm} -rf %{buildroot}
 
@@ -2968,6 +3041,58 @@ echo "removing static libraries"
 %{__rm} -f %{_libdir}/libcdb.a
 %{__rm} -f %{_libdir}/libflash.a
 %{__rm} -f %{_libdir}/libindimail.a
+
+%post mini
+argv1=$1
+ID=$(id -u)
+if [ $ID -ne 0 ] ; then
+	echo "You are not root" 1>&2
+	exit 1
+fi
+# we are doing upgrade
+if [ $argv1 -eq 1 ] ; then
+	exit 0
+fi
+if [ -f /etc/init.d/sendmail ] ; then
+	/etc/init.d/sendmail stop
+	if [ -f /sbin/chkconfig ] ; then
+		/sbin/chkconfig --del sendmail
+	fi
+fi
+/bin/rm -f $QmailHOME/bin/qmail-queue
+/bin/ln -s $QmailHOME/bin/qmail-qmqpc $QmailHOME/bin/qmail-queue
+/bin/ln -s $QmailHOME/bin/sendmail $QmailHOME/bin/sendmail.sh
+for i in /usr/lib/sendmail /usr/sbin/sendmail; do
+	if [ -f $i -a ! -L $i ]; then
+		echo "! $i is a file, should be a link"
+		/bin/mv $i $i.old
+		/bin/ln -s $QmailHOME/bin/sendmail.sh $i
+	elif [ ! -f $i ];then
+		echo "! $i is missing"
+		/bin/ln -s $QmailHOME/bin/sendmail.sh $i
+	fi
+done
+uname -n > $QmailHOME/control/idhost
+
+%postun mini
+argv1=$1
+# we are doing upgrade
+if [ $argv1 -eq 1 ] ; then
+	exit 0
+fi
+for i in /usr/lib/sendmail /usr/sbin/sendmail; do
+	if [ -f $i.old -a -L $i ]; then
+		echo "restoring sendmail"
+		/bin/rm -f $i
+		/bin/mv $i.old $i
+	fi
+done
+if [ -f /etc/init.d/sendmail ] ; then
+	if [ -f /sbin/chkconfig ] ; then
+		/sbin/chkconfig --add sendmail
+		/etc/init.d/sendmail start
+	fi
+fi
 
 # fix changelog for openSUSE buildservice
 %changelog
