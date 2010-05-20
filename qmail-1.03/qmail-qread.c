@@ -197,8 +197,7 @@ fmtstats(s)
 	len += i;
 	if (s)
 		s += i;
-	if (flagbounce)
-	{
+	if (flagbounce) {
 		i = fmt_str(s, " bouncing");
 		len += i;
 		if (s)
@@ -214,8 +213,7 @@ out(s, n)
 	char           *s;
 	unsigned int    n;
 {
-	while (n > 0)
-	{
+	while (n > 0) {
 		substdio_put(subfdout, ((*s >= 32) && (*s <= 126)) ? s : "_", 1);
 		--n;
 		++s;
@@ -236,7 +234,7 @@ outok(s)
 }
 
 void
-putstats()
+putstats(int doCount)
 {
 	if (!stralloc_ready(&stats, fmtstats(FMT_LEN)))
 		die_nomem();
@@ -245,7 +243,7 @@ putstats()
 	outok("\n");
 }
 
-int             doLocal = 1, doRemote = 1, doTodo = 0;
+int             doLocal = 1, doRemote = 1, doTodo = 0, doCount = 0;
 
 #ifdef MULTI_QUEUE
 static int
@@ -256,11 +254,14 @@ get_arguments(int argc, char **argv)
 
 	errflag = 0;
 	doTodo = 0;
+	doCount = 0;
 	doLocal = doRemote = 1;
-	while (!errflag && (c = getopt(argc, argv, "alrt")) != -1)
-	{
+	while (!errflag && (c = getopt(argc, argv, "calrt")) != -1) {
 		switch (c)
 		{
+		case 'c':
+			doCount = 1;
+			break;
 		case 'a':
 			doTodo = 1;
 			doLocal = 1;
@@ -283,11 +284,13 @@ get_arguments(int argc, char **argv)
 			break;
 		case 'h':
 		default:
-			outs("qmail-read [-a] [-l] [-r] [-t]");
+			outs("qmail-read [-calrt]");
 			outok("\n\t");
 			outs("-a - Display local, remote and todo Queues");
 			outok("\n\t");
-			outs("-l - Display local Queue");
+			outs("-c - Display local, remote and todo Counts");
+			outok("\n\t");
+			outs("-l - Display local  Queue");
 			outok("\n\t");
 			outs("-r - Display remote Queue");
 			outok("\n");
@@ -296,32 +299,64 @@ get_arguments(int argc, char **argv)
 			break;
 		}
 	}
+	if (doCount)
+		doLocal = doRemote = doTodo = 1;
 	return(0);
 }
 #endif
+
+void
+putcounts(char *pre_str, int lCount, int rCount, int bCount, int tCount)
+{
+	char            foo[FMT_ULONG];
+
+	if (pre_str)
+		outs(pre_str);
+	outs("Messages in local  queue: ");
+	foo[fmt_ulong(foo, lCount)] = 0;
+	outs(foo);
+	outok("\n");
+	if (pre_str)
+		outs(pre_str);
+	outs("Messages in remote queue: ");
+	foo[fmt_ulong(foo, rCount)] = 0;
+	outs(foo);
+	outok("\n");
+	if (pre_str)
+		outs(pre_str);
+	outs("Messages in bounce queue: ");
+	foo[fmt_ulong(foo, bCount)] = 0;
+	outs(foo);
+	outok("\n");
+	if (pre_str)
+		outs(pre_str);
+	outs("Messages in todo   queue: ");
+	foo[fmt_ulong(foo, tCount)] = 0;
+	outs(foo);
+	outok("\n");
+}
 
 stralloc        line = { 0 };
 char           *qbase;
 stralloc        QueueBase = { 0 };
 
 #ifdef MULTI_QUEUE
-
 int
-main_function()
+main_function(int *lcount, int *rcount, int *bcount, int *tcount)
 #else
 int
 main(int argc, char **argv)
 #endif
 {
-	int             channel, match, fd, x;
+	int             channel, match, fd, x, flag;
+	int             bCount, lCount, rCount, tCount;
 	struct stat     st;
 	substdio        ss;
 
 #ifndef MULTI_QUEUE
 	if (chdir(auto_qmail))
 		die_home();
-	if (!(qbase = env_get("QUEUE_BASE")))
-	{
+	if (!(qbase = env_get("QUEUE_BASE"))) {
 		switch (control_readfile(&QueueBase, "queue_base", 0))
 		{
 		case -1:
@@ -343,52 +378,41 @@ main(int argc, char **argv)
 	if (chdir(queuedir) == -1)
 		die_chdir(queuedir);
 	readsubdir_init(&rs, "info", die_opendir);
-	while ((x = readsubdir_next(&rs, &id)))
-	{
-		if (x > 0)
-		{
+	bCount = lCount = rCount = tCount = 0;
+	while ((x = readsubdir_next(&rs, &id))) {
+		if (x > 0) {
 			fmtqfn(fnmess, "mess/", id, 1);
 			fmtqfn(fninfo, "info/", id, 1);
 			fmtqfn(fnlocal, "local/", id, 1);
 			fmtqfn(fnremote, "remote/", id, 1);
 			fmtqfn(fnbounce, "bounce/", id, 0);
-			if (stat(fnmess, &st) == -1)
-			{
+			if (stat(fnmess, &st) == -1) {
 				err(id);
 				continue;
 			}
 			size = st.st_size;
-			flagbounce = !stat(fnbounce, &st);
-			fd = open_read(fninfo);
-			if (fd == -1)
-			{
+			if ((flagbounce = !stat(fnbounce, &st)))
+				bCount++;
+			if ((fd = open_read(fninfo)) == -1) {
 				err(id);
 				continue;
 			}
 			substdio_fdbuf(&ss, read, fd, inbuf, sizeof(inbuf));
 			if (getln(&ss, &sender, &match, 0) == -1)
 				die_nomem();
-			if (fstat(fd, &st) == -1)
-			{
+			if (fstat(fd, &st) == -1) {
 				close(fd);
 				err(id);
 				continue;
 			}
 			close(fd);
 			qtime = st.st_mtime;
-			putstats();
-			/*- for (channel = (doLocal ? 0 : 1); channel < (doRemote ? 2 : 1); ++channel) -*/
-			for (channel = 0; channel <  2; ++channel)
-			{
-				fd = open_read(channel ? fnremote : fnlocal);
-				if (fd == -1)
-				{
+			for (flag = 0,channel = (doLocal ? 0 : 1); channel < (doRemote ? 2 : 1); ++channel) {
+				if ((fd = open_read(channel ? fnremote : fnlocal)) == -1) {
 					if (errno != error_noent)
 						err(id);
-				} else
-				{
-					for (;;)
-					{
+				} else {
+					for (;;) {
 						if (getln(&ss, &line, &match, 0) == -1)
 							die_nomem();
 						if (!match)
@@ -396,8 +420,16 @@ main(int argc, char **argv)
 						switch (line.s[0])
 						{
 						case 'D':
+							if (!flag++)
+								putstats(doCount);
 							outok("  done");
 						case 'T':
+							if (!flag++)
+								putstats(doCount);
+							if (channel)
+								rCount++;
+							else
+								lCount++;
 							outok(channel ? "\tremote\t" : "\tlocal\t");
 							outs(line.s + 1);
 							outok("\n");
@@ -409,68 +441,58 @@ main(int argc, char **argv)
 			}
 		}
 	} /*- while (x = readsubdir_next(&rs, &id)) */
-	if (!doTodo)
-	{
+	if (!doTodo && !doCount) {
 		substdio_flush(subfdout);
 		return(0);
 	}
 	flagbounce = 0;
 	readsubdir_init(&rs, "todo", die_opendir);
-	while ((x = readsubdir_next(&rs, &id)))
-	{
-		if (x > 0)
-		{
+	while ((x = readsubdir_next(&rs, &id))) {
+		if (x > 0) {
 			fmtqfn(fnmess, "mess/", id, 1);
 			fmtqfn(fninfo, "todo/", id, 1);
-			if (stat(fnmess, &st) == -1)
-			{
+			if (stat(fnmess, &st) == -1) {
 				err(id);
 				continue;
 			}
 			size = st.st_size;
-			fd = open_read(fninfo);
-			if (fd == -1)
-			{
+			if ((fd = open_read(fninfo)) == -1) {
 				err(id);
 				continue;
 			}
 			substdio_fdbuf(&ss, read, fd, inbuf, sizeof(inbuf));
-			for (;;)
-			{
+			for (;;) {
 				if (getln(&ss, &sender, &match, 0) == -1)
 					die_nomem();
 				if (!match || sender.s[0] == 'F')
 					break;
 			}
-			if (fstat(fd, &st) == -1)
-			{
+			if (fstat(fd, &st) == -1) {
 				close(fd);
 				err(id);
 				continue;
 			}
 			close(fd);
 			qtime = st.st_mtime;
-			putstats();
-			for (channel = 0; channel < 2; ++channel)
-			{
-				fd = open_read(fnmess);
-				if (fd == -1)
-				{
+			for (flag = 0,channel = 0; channel < 2; ++channel) {
+				if ((fd = open_read(fnmess)) == -1) {
 					if (errno != error_noent)
 						err(id);
-				} else
-				{
-					for (;;)
-					{
+				} else {
+					for (;;) {
 						if (getln(&ss, &line, &match, 0) == -1)
 							die_nomem();
 						if (!match)
 							break;
-						switch (line.s[0])
-						{
+						switch (line.s[0]) {
 						case 'D':
+							if (!flag++)
+								putstats(doCount);
 							outok("  done");
 						case 'T':
+							if (!flag++)
+								putstats(doCount);
+							tCount++;
 							outok("\ttodo\t");
 							outs(line.s + 1);
 							outok("\n");
@@ -482,6 +504,21 @@ main(int argc, char **argv)
 			}
 		}
 	} /*- while (x = readsubdir_next(&rs, &id)) */
+#ifdef MULTI_QUEUE
+	if (lcount)
+		*lcount += lCount;
+	if (rcount)
+		*rcount += rCount;
+	if (bcount)
+		*bcount += bCount;
+	if (tcount)
+		*tcount += tCount;
+	if (doCount)
+		putcounts(0, lCount, rCount, bCount, tCount);
+#else
+	if (doCount)
+		putcounts("Total ", lCount, rCount, bCount, tCount);
+#endif
 	substdio_flush(subfdout);
 	return(0);
 }
@@ -492,18 +529,16 @@ main(int argc, char **argv)
 {
 	char           *queue_count_ptr, *queue_start_ptr;
 	char            strnum[FMT_ULONG];
-	int             idx, count, qcount, qstart;
+	int             idx, count, qcount, qstart, lcount, rcount, bcount, tcount;
 	static stralloc Queuedir = { 0 };
 
-	if (get_arguments(argc, argv))
-	{
+	if (get_arguments(argc, argv)) {
 		substdio_flush(subfdout);
 		return(1);
 	}
 	if (chdir(auto_qmail))
 		die_home();
-	if (!(qbase = env_get("QUEUE_BASE")))
-	{
+	if (!(qbase = env_get("QUEUE_BASE"))) {
 		switch (control_readfile(&QueueBase, "queue_base", 0))
 		{
 		case -1:
@@ -525,8 +560,8 @@ main(int argc, char **argv)
 		qstart = 1;
 	else
 		scan_int(queue_start_ptr, &qstart);
-	for (idx = qstart, count=1; count <= qcount; count++, idx++)
-	{
+	lcount = rcount = bcount = tcount = 0;
+	for (idx = qstart, count=1; count <= qcount; count++, idx++) {
 		if (!stralloc_copys(&Queuedir, qbase))
 			die_nomem();
 		if (!stralloc_cats(&Queuedir, "/queue"))
@@ -541,7 +576,8 @@ main(int argc, char **argv)
 		outok("processing queue ");
 		outok(queuedir);
 		outok("\n");
-		main_function();
+		main_function(&lcount, &rcount, &bcount, &tcount);
+		outok("\n");
 	}
 	if (!stralloc_copys(&Queuedir, qbase))
 		die_nomem();
@@ -549,14 +585,16 @@ main(int argc, char **argv)
 		die_nomem();
 	if (!stralloc_0(&Queuedir))
 		die_nomem();
-	if (!access(Queuedir.s, F_OK))
-	{
+	if (!access(Queuedir.s, F_OK)) {
 		queuedir = Queuedir.s;
 		outok("processing queue ");
 		outok(queuedir);
 		outok("\n");
-		main_function();
+		main_function(&lcount, &rcount, &bcount, &tcount);
+		outok("\n");
 	}
+	if (doCount)
+		putcounts("Total ", lcount, rcount, bcount, tcount);
 	substdio_flush(subfdout);
 	return(0);
 }

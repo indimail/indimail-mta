@@ -1459,7 +1459,6 @@ fi
 %attr(555,root,qmail)                   %{_prefix}/bin/qmailctl
 %attr(555,root,qmail)                   %{_prefix}/bin/mpack
 %attr(555,root,qmail)                   %{_prefix}/bin/munpack
-%attr(555,root,qmail)                   %{_prefix}/bin/qmail-qmHandle
 %attr(500,root,qmail)                   %{_prefix}/bin/qmail-lspawn
 %attr(555,root,qmail)                   %{_prefix}/bin/dnstxt
 %attr(555,root,qmail)                   %{_prefix}/bin/printmaillist
@@ -1544,7 +1543,6 @@ fi
 %attr(555,root,qmail)                   %{_prefix}/bin/822addr
 %attr(555,root,qmail)                   %{_prefix}/bin/atrn
 %attr(555,root,qmail)                   %{_prefix}/bin/cdbstats
-%attr(555,root,qmail)                   %{_prefix}/bin/qmail-qstat
 %attr(555,root,qmail)                   %{_prefix}/bin/zsenders
 %attr(500,root,qmail)                   %{_prefix}/bin/instcheck
 %attr(555,root,qmail)                   %{_prefix}/bin/suids

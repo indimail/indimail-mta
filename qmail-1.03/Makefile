@@ -1160,7 +1160,7 @@ it: \
 qmail-local qmail-lspawn qmail-getpw qmail-remote qmail-rspawn \
 qmail-clean qmail-send qmail-start qmail-daemon splogger qmail-multi qmail-queue qmail-inject \
 qmail-dk qmail-dkim predate datemail mailsubj qmail-upq qmail-showctl qmail-newu spawn-filter \
-qmail-pw2u qmail-qread qmail-qstat qmail-tcpto qmail-tcpok qmail-cat qmail-poppass \
+qmail-pw2u qmail-qread qmail-tcpto qmail-tcpok qmail-cat qmail-poppass \
 qmail-pop3d qmail-popbull qmail-popup qmail-qmqpc qmail-qmqpd qmail-qmtpd \
 qmail-smtpd sendmail tcp-env qmail-newmrh recipient-cdb qmail-cdb qmailconfig \
 config-fast dnscname dnsptr dnsip dnsmxip dnsfq dnstxt hostname ipmeprint qreceipt \
@@ -1175,7 +1175,7 @@ serialcmd maildircmd rewind relaytest qmail-qfilter sys-checkpwd ldap-checkpwd \
 iftocc ofmipd ofmipname 822field new-inject 822date 822received 822print \
 tokenize addrlist qquote parsedate qmail-greyd greydaemon \
 analyzer qtools qlog viruscanner update_tmprsadh dknewkey \
-dktest dot-forward qmail-qmHandle batv \
+dktest dot-forward batv \
 fastforward printforward setforward newaliases printmaillist \
 setmaillist newinclude sortedtest logselect mbox2maildir \
 envdir envuidgid fghack multilog pgrphack readproctitle setlock \
@@ -1323,7 +1323,7 @@ qmail-local.0 qmail-lspawn.0 qmail-getpw.0 qmail-remote.0 \
 qmail-rspawn.0 qmail-clean.0 qmail-send.0 qmail-todo.0 qmail-start.0 splogger.0 \
 qmail-queue.0 qmail-dk.0 qmail-dkim.8 dk-filter.8 qmail-inject.0 mailsubj.0 \
 qmail-showctl.0 qmail-newu.0 \
-qmail-pw2u.0 qmail-qread.0 qmail-qstat.0 qmail-tcpto.0 qmail-tcpok.0 \
+qmail-pw2u.0 qmail-qread.0 qmail-tcpto.0 qmail-tcpok.0 \
 qmail-pop3d.0 qmail-popbull.0 qmail-popup.0 qmail-qmqpc.0 \
 qmail-qmqpd.0 qmail-qmtpd.0 qmail-smtpd.0 greydaemon.0 qmail-poppass.0 \
 dktest.8 dkim.8 svscanboot.0 \
@@ -1899,22 +1899,6 @@ scan.h exit.h env.h variables.h hasindimail.h conf-queue
 	else \
 	./compile $(inc_deps) -DQUEUE_COUNT=10 qmail-qread.c; \
 	fi;
-
-qmail-qstat: \
-load qmail-qstat.o scan_ulong.o auto_qmail.o
-	./load qmail-qstat scan_ulong.o auto_qmail.o
-
-qmail-qstat.o: \
-compile qmail-qstat.c auto_qmail.h scan.h conf-queue
-	if test -f conf-queue ; then \
-	./compile $(inc_deps) -DQUEUE_COUNT=`cat conf-queue` qmail-qstat.c; \
-	else \
-	./compile $(inc_deps) -DQUEUE_COUNT=10 qmail-qstat.c; \
-	fi;
-
-qmail-qstat.0: \
-qmail-qstat.8
-	nroff -man qmail-qstat.8 > qmail-qstat.0
 
 queue-fix.0: \
 queue-fix.8
@@ -2665,7 +2649,7 @@ qmail-inject.8 qmail-limits.9 qmail-local.8 qmail-log.5 \
 qmail-lspawn.8 qmail-newmrh.9 qmail-newu.9 qmail-pop3d.8 recipient-cdb.9 \
 qmail-popbull.8 \
 qmail-popup.8 qmail-pw2u.9 qmail-qmqpc.8 qmail-qmqpd.8 qmail-qmtpd.8 \
-qmail-qread.8 qmail-qstat.8 qmail-queue.9 qmail-remote.9 \
+qmail-qread.8 qmail-queue.9 qmail-remote.9 \
 qmail-rspawn.8 qmail-send.9 qmail-todo.9 qmail-showctl.8 qmail-smtpd.9 \
 qmail-start.9 qmail-tcpok.8 qmail-tcpto.8 qmail-users.9 qmail.7 qmail-multi.9 \
 qreceipt.1 splogger.8 tcp-env.1 qmailconfig.sh config-fast.sh \
@@ -4276,11 +4260,6 @@ update_tmprsadh: conf-qmail update_tmprsadh.sh
 tmprsadh: update_tmprsadh
 	echo "Creating new temporary RSA and DH parameters"
 	./update_tmprsadh
-
-qmail-qmHandle: conf-qmail qmHandle.in
-	@cat qmHandle.in\
-	| sed s}QMAIL}"`head -1 conf-qmail`"}g \
-	> $@
 
 #
 # Domain KEYS

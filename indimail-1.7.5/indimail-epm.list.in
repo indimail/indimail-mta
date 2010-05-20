@@ -398,7 +398,6 @@ f 444 root qmail ${prefix}/man/cat8/qmail-qmqpc.0.gz BUILDROOT${prefix}/man/cat8
 f 444 root qmail ${prefix}/man/cat8/qmail-qmqpd.0.gz BUILDROOT${prefix}/man/cat8/qmail-qmqpd.0.gz
 f 444 root qmail ${prefix}/man/cat8/qmail-qmtpd.0.gz BUILDROOT${prefix}/man/cat8/qmail-qmtpd.0.gz
 f 444 root qmail ${prefix}/man/cat8/qmail-qread.0.gz BUILDROOT${prefix}/man/cat8/qmail-qread.0.gz
-f 444 root qmail ${prefix}/man/cat8/qmail-qstat.0.gz BUILDROOT${prefix}/man/cat8/qmail-qstat.0.gz
 f 444 root qmail ${prefix}/man/cat8/qmail-queue.0.gz BUILDROOT${prefix}/man/cat8/qmail-queue.0.gz
 f 444 root qmail ${prefix}/man/cat8/recipient-cdb.0.gz BUILDROOT${prefix}/man/cat8/recipient-cdb.0.gz
 f 444 root qmail ${prefix}/man/cat8/qmail-remote.0.gz BUILDROOT${prefix}/man/cat8/qmail-remote.0.gz
@@ -663,7 +662,6 @@ f 444 root qmail ${prefix}/man/man8/qmail-qmqpc.8.gz BUILDROOT${prefix}/man/man8
 f 444 root qmail ${prefix}/man/man8/qmail-qmqpd.8.gz BUILDROOT${prefix}/man/man8/qmail-qmqpd.8.gz
 f 444 root qmail ${prefix}/man/man8/qmail-qmtpd.8.gz BUILDROOT${prefix}/man/man8/qmail-qmtpd.8.gz
 f 444 root qmail ${prefix}/man/man8/qmail-qread.8.gz BUILDROOT${prefix}/man/man8/qmail-qread.8.gz
-f 444 root qmail ${prefix}/man/man8/qmail-qstat.8.gz BUILDROOT${prefix}/man/man8/qmail-qstat.8.gz
 f 444 root qmail ${prefix}/man/man8/qmail-queue.8.gz BUILDROOT${prefix}/man/man8/qmail-queue.8.gz
 f 444 root qmail ${prefix}/man/man8/recipient-cdb.8.gz BUILDROOT${prefix}/man/man8/recipient-cdb.8.gz
 f 444 root qmail ${prefix}/man/man8/qmail-remote.8.gz BUILDROOT${prefix}/man/man8/qmail-remote.8.gz
@@ -995,12 +993,10 @@ f 555 root qmail ${prefix}/bin/qmail-poppass BUILDROOT${prefix}/bin/qmail-poppas
 f 511 root qmail ${prefix}/bin/qmail-popup BUILDROOT${prefix}/bin/qmail-popup
 f 511 root qmail ${prefix}/bin/qmail-pw2u BUILDROOT${prefix}/bin/qmail-pw2u
 f 555 root qmail ${prefix}/bin/qmail-qfilter BUILDROOT${prefix}/bin/qmail-qfilter
-f 555 root qmail ${prefix}/bin/qmail-qmHandle BUILDROOT${prefix}/bin/qmail-qmHandle
 f 555 root qmail ${prefix}/bin/qmail-qmqpc BUILDROOT${prefix}/bin/qmail-qmqpc
 f 555 root qmail ${prefix}/bin/qmail-qmqpd BUILDROOT${prefix}/bin/qmail-qmqpd
 f 555 root qmail ${prefix}/bin/qmail-qmtpd BUILDROOT${prefix}/bin/qmail-qmtpd
 f 555 root qmail ${prefix}/bin/qmail-qread BUILDROOT${prefix}/bin/qmail-qread
-f 555 root qmail ${prefix}/bin/qmail-qstat BUILDROOT${prefix}/bin/qmail-qstat
 f 555 root qmail ${prefix}/bin/qmail-queue-print BUILDROOT${prefix}/bin/qmail-queue-print
 f 6511 qmailq qmail ${prefix}/bin/qmail-queue BUILDROOT${prefix}/bin/qmail-queue
 f 500 root qmail ${prefix}/bin/recipient-cdb BUILDROOT${prefix}/bin/recipient-cdb
