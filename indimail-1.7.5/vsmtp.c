@@ -1,5 +1,8 @@
 /*
  * $Log: vsmtp.c,v $
+ * Revision 2.5  2010-05-20 10:58:07+05:30  Cprogrammer
+ * error messages on stderr instead of stdout
+ *
  * Revision 2.4  2004-07-03 23:56:17+05:30  Cprogrammer
  * check return status of parse_email
  *
@@ -35,7 +38,7 @@
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vsmtp.c,v 2.4 2004-07-03 23:56:17+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: vsmtp.c,v 2.5 2010-05-20 10:58:07+05:30 Cprogrammer Stab mbhangui $";
 #endif
 
 #ifdef CLUSTERED_SITE
@@ -119,7 +122,7 @@ main(argc, argv)
 				err = vsmtp_update(Host, mta, Domain, OldPort, Port);
 		break;
 	default:
-		printf("error, Smtp Action is invalid %d\n", SmtpAction);
+		fprintf(stderr, "error, Smtp Action is invalid %d\n", SmtpAction);
 		err = 1;
 		break;
 	}
@@ -129,17 +132,17 @@ main(argc, argv)
 void
 usage()
 {
-	printf("usage: vsmtp [options] [[-d|-i port|-u port] -m mta host@domain_name]\n");
-	printf("       vsmtp [options] [-s domain_name]\n");
-	printf("       vsmtp [options] [-s host@domain_name]\n");
-	printf("       vsmtp [options] [-s -m mta host@domain_name]\n");
-	printf("options: -V ( print version number )\n");
-	printf("         -v ( verbose )\n");
-	printf("         -s domain_name ( show smtp ports )\n");
-	printf("         -d ( delete smtp ports )\n");
-	printf("         -i port (insert smtp port)\n");
-	printf("         -u port (update smtp port)\n");
-	printf("         -m mta_ipaddress\n");
+	fprintf(stderr, "usage: vsmtp [options] [[-d|-i port|-u port] -m mta host@domain_name]\n");
+	fprintf(stderr, "       vsmtp [options] [-s domain_name]\n");
+	fprintf(stderr, "       vsmtp [options] [-s host@domain_name]\n");
+	fprintf(stderr, "       vsmtp [options] [-s -m mta host@domain_name]\n");
+	fprintf(stderr, "options: -V ( print version number )\n");
+	fprintf(stderr, "         -v ( verbose )\n");
+	fprintf(stderr, "         -s domain_name ( show smtp ports )\n");
+	fprintf(stderr, "         -d ( delete smtp ports )\n");
+	fprintf(stderr, "         -i port (insert smtp port)\n");
+	fprintf(stderr, "         -u port (update smtp port)\n");
+	fprintf(stderr, "         -m mta_ipaddress\n");
 }
 
 int
