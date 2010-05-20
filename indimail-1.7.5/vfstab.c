@@ -106,7 +106,7 @@ main(argc, argv)
 		break;
 	default:
 		retval = 1;
-		printf("error, FSTAB Action is invalid %d\n", FstabAction);
+		fprintf(stderr, "error, FSTAB Action is invalid %d\n", FstabAction);
 		break;
 	}
 	return(retval);
@@ -115,19 +115,19 @@ main(argc, argv)
 void
 usage()
 {
-	printf("usage: vfstab [options] [ -d|-i|-l|-u|-o status -n user_quota -q size_quota -m mdaHost filesystem | -s [-m host] | -b ]\n");
-	printf("options: -V (print version number)\n");
-	printf("         -v (verbose )\n");
-	printf("         -d (delete local/remote filesystem)\n");
-	printf("         -i (insert local/remote filesystem)\n");
-	printf("         -u (update local/remote filesystem)\n");
-	printf("         -o (make   local/remote filesystem offline/online, 0 - Offline, 1 - Online)\n");
-	printf("         -l (add    local filesystem)\n");
-	printf("         -n max number of users\n");
-	printf("         -q max size of filesystem\n");
-	printf("         -m mdaHost\n");
-	printf("         -s [-m mdaHost] (show filesystems)\n");
-	printf("         -b (balance filesystems)\n");
+	fprintf(stderr, "usage: vfstab [options] [ -dilu|-o status -n user_quota -q size_quota -m mdaHost filesystem | -s [-m host] | -b ]\n");
+	fprintf(stderr, "options: -V (print version number)\n");
+	fprintf(stderr, "         -v (verbose )\n");
+	fprintf(stderr, "         -d (delete local/remote filesystem)\n");
+	fprintf(stderr, "         -i (insert local/remote filesystem)\n");
+	fprintf(stderr, "         -u (update local/remote filesystem)\n");
+	fprintf(stderr, "         -o (make   local/remote filesystem offline/online, 0 - Offline, 1 - Online)\n");
+	fprintf(stderr, "         -l (add    local filesystem)\n");
+	fprintf(stderr, "         -n max number of users\n");
+	fprintf(stderr, "         -q max size of filesystem\n");
+	fprintf(stderr, "         -m mdaHost\n");
+	fprintf(stderr, "         -s [-m mdaHost] (show filesystems)\n");
+	fprintf(stderr, "         -b (balance filesystems)\n");
 }
 
 int

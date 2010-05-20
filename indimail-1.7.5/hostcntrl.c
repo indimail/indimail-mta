@@ -109,7 +109,7 @@ main(argc, argv)
 	case V_USER_UPDATE:
 		return (updusercntrl(user, domain, hostid, 1));
 	default:
-		printf("error, Action %d is invalid\n", action);
+		fprintf(stderr, "error, Action %d is invalid\n", action);
 		return(1);
 	}
 	return(0);

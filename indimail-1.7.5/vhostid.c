@@ -64,7 +64,7 @@ main(argc, argv)
 		vhostid_update(HostId, IpAddr);
 		break;
 	default:
-		printf("error, HostId Action is invalid %d\n", HostAction);
+		fprintf(stderr, "error, HostId Action is invalid %d\n", HostAction);
 		break;
 	}
 	return(0);

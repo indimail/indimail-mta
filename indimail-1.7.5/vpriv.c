@@ -96,7 +96,7 @@ main(argc, argv)
 		return(err);
 		break;
 	default:
-		printf("error, Action is invalid %d\n", action);
+		fprintf(stderr, "error, Action is invalid %d\n", action);
 		return(1);
 	}
 	return(0);

@@ -140,7 +140,7 @@ main(argc, argv)
 			valias_update(Alias, Domain, OAliasLine, AliasLine);
 		break;
 	default:
-		printf("error, Alias Action is invalid %d\n", AliasAction);
+		fprintf(stderr, "error, Alias Action is invalid %d\n", AliasAction);
 		break;
 	}
 	return(0);
