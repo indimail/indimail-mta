@@ -55,6 +55,7 @@ indimail-*/ChangeLog
 indimail-*/RELEASE-Notes.in
 indimail-*/doc/ChangeLog
 indimail-*/doc/INSTALL-RPM
+indimail-*/doc/INSTALL-MINI
 indimail-*/doc/INSTALL.indimail
 indimail-*/doc/README-CLUSTER
 indimail-*/doc/RELEASE-Steps
