@@ -36,9 +36,9 @@ Then create @indimaildir@/etc/qmqp.cdb:
 You can change @indimaildir@/etc/qmqp.tcp and run tcprules again at any
 time. Finally qmail-qmqpd to be run under supervise:
 
-sudo @indimaildir@/sbin/svctool --qmqp=628 --servicedir=/service \
+sudo @indimaildir@/sbin/svctool --qmqp=628 --servicedir=/service --maxdaemons=75 --maxperip=25 \
         --qbase=@indimaildir@/queue --qcount=5 --qstart=1 --cntrldir=control --localip=0 \
-        --maxdaemons=75 --maxperip=25 --fsync --syncdir --memory=104857600 --min-free=52428800
+         --fsync --syncdir --memory=104857600 --min-free=52428800
 
 628 is the TCP port for QMQP.
 
@@ -46,6 +46,7 @@ How do I install indimail-mini?
 ==============================
 A indimail-mini installation is just like a indimail installation, except that it's much easier to set up:
 
+    * You don't need MySQL
     * You don't need @indimaildir@/alias. A indimail-mini installation doesn't
       do any local delivery.
     * You don't need indimail entries in /etc/group or /etc/passwd. indimail-mini
