@@ -20,12 +20,19 @@ so the results may not be in the same order as the commands. For a clustered dom
 .B hostcntrl
 in
 .B MySQL(1)
-to figure out the host where it needs to send out the mail through SMTP and sets the SMTPROUTE
-environment variable. To turn of this behaviour of setting dynamic SMTPROUTE, set the
-environment variable ROUTES=static. If SMTPROUTE is set
+to figure out the host where it needs to send out the mail through SMTP or QMTP. It sets the SMTPROUTE
+environment variable if the environment variable ROUTES is set as "smtp". It sets the QMTPROUTE
+environment variable if the environment variable ROUTES is set as "qmtp". To turn of this behaviour
+of setting dynamically SMTPROUTE/QMTPROUTE variable, set the environment variable ROUTES=static.
+If SMTPROUTE is set
 .B
 qmail-remote
-uses SMTPROUTE variables instead of control/smtproutes.
+uses SMTPROUTE variables instead of control/smtproutes and uses SMTP.
+If QMTPROUTE is set
+.B
+qmail-remote
+uses QMTPROUTE variables instead of control/qmtproutes and uses QMTP. \fBqmail-remote\fR prefers
+QMTP over SMTP.
 .SH "SEE ALSO"
 qmail-send(8),
 qmail-remote(8)
