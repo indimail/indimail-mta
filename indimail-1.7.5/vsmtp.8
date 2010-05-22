@@ -19,11 +19,13 @@ vsmtp \- Setup artificial routes for qmail-remote
 .PP
 \fBvsmtp\fR sets up artificial routes for \fBqmail-remote(8)\fR to be able to deliver mails to the
 mailstore on host \fIhost\fR and domain \fIdomain_name\fR. This route is used by \fBqmail-remote(8)\fR
-for clustered domains. For all other domains the control/smtproutes is consulted. This information
-is stored in MySQL on a host which by nomenclature is called the \fBcontrol host\fR. In case,
-the \fBcontrol host\fR is unavailable due to any reason, qmail-remote fall backs to
-control/smtproutes and expects the MDA on the mailstore to re-route the mail to the correct
-destination.
+to send mails using SMTP or QMTP for clustered domains. For all other domains the control/smtproutes or
+control/qmtproutes is consulted. This routing information is stored in MySQL on a host which by nomenclature
+is called the \fBcontrol host\fR.
+
+.PP
+The \fIcontrol host\fR is defined by the control files \fIhost.master\fR / \fIhost.cntrl\fR or the environment
+variables \fBCNTRL_HOST\fR, \fBCNTRL_USER\fR, \fBCNTRL_PASS\fR, \fBCNTRL_VPORT\fR or \fBCNTRL_SOCKET\fB.
 
 .SH OPTIONS
 .PP
