@@ -824,13 +824,17 @@ USE_SYNCDIR       |qmail-queue  |used    |Emulates BSD style synchronous
                   |qmail-local  |        |directories.
                   |qmail-send   |        |
                   |qmail-todo   |        |
-ROUTES            |qmail-rspawn |set     |If defined as static, control/smtproutes
-                  |             |        |is used, else hostcntrl is used and
-                  |             |        |SMTPROUTE/QMTPROUTE environment variables
-                  |             |        |is set depending on ROUTES is defined as
-                  |             |        |smtp or qmtp
-SMTPROUTE         |qmail-rspawn |used    |overrides control/smtproutes
-SMTPROUTE         |qmail-remote |        |
+ROUTES            |qmail-rspawn |used    |If defined as static, control/smtproutes
+                  |             |        |or control/qmtproutes is used, else hostcntrl
+                  |             |        |is used to set SMTPROUTE / QMTPROUTE
+                  |             |        |variables depending on whether
+                  |             |        |the ROUTES is defined as "smtp" or "qmtp"
+SMTPROUTE         |qmail-rspawn |set     |set to user's mailstore ip if ROUTES is
+                  |             |        |defined as "smtp"
+QMTPROUTE         |qmail-rspawn |set     |set to user's mailstore ip if ROUTES is
+                  |             |        |defined as "qmtp"
+SMTPROUTE         |qmail-remote |used    |overrides control/smtproutes
+QMTPROUTE         |qmail-remote |used    |overrides control/qmtproutes
 AUTH_SMTP         |qmail-remote |used    |Uses Authenticated SMTP on the remote
                   |             |        |SMTP server to push out mails. The
                   |             |        |username and password must be specified
