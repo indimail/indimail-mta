@@ -1,5 +1,8 @@
 #
 # $Log: indimail.spec.in,v $
+# Revision 2.169  2010-05-23 14:37:00+05:30  Cprogrammer
+# fixed perms for man pages
+#
 # Revision 2.168  2010-05-21 13:15:16+05:30  Cprogrammer
 # added INSTALL-MINI
 #
@@ -528,7 +531,7 @@
 # rpm spec file for indimail
 #
 #
-# $Id: indimail.spec.in,v 2.168 2010-05-21 13:15:16+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 2.169 2010-05-23 14:37:00+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %define _unpackaged_files_terminate_build 1
 
@@ -560,7 +563,6 @@
 %define build_on_obs       0
 %define fast_mode          0
 %endif
-%define darwin_version     1
 
 %define	_prefix            @indimaildir@
 %define default_domain     @defaultdomain@
@@ -2231,26 +2233,26 @@ fi
 %attr(555,root,qmail)             %{_prefix}/bin/elq
 %attr(555,root,qmail)             %{_prefix}/bin/pinq
 #
-%attr(555,root,qmail)             %{_prefix}/man/man1/forward.1.gz
-%attr(555,root,qmail)             %{_prefix}/man/cat1/forward.0.gz
-%attr(555,root,qmail)             %{_prefix}/man/man1/predate.1.gz
-%attr(555,root,qmail)             %{_prefix}/man/man1/datemail.1.gz
-%attr(555,root,qmail)             %{_prefix}/man/man1/mailsubj.1.gz
-%attr(555,root,qmail)             %{_prefix}/man/cat1/mailsubj.0.gz
-%attr(555,root,qmail)             %{_prefix}/man/man1/maildirmake.1.gz
-%attr(555,root,qmail)             %{_prefix}/man/man1/qmaildirmake.1.gz
-%attr(555,root,qmail)             %{_prefix}/man/cat1/qmaildirmake.0.gz
-%attr(555,root,qmail)             %{_prefix}/man/man1/maildir2mbox.1.gz
-%attr(555,root,qmail)             %{_prefix}/man/cat1/maildir2mbox.0.gz
-%attr(555,root,qmail)             %{_prefix}/man/man1/maildirwatch.1.gz
-%attr(555,root,qmail)             %{_prefix}/man/cat1/maildirwatch.0.gz
+%attr(444,root,qmail)             %{_prefix}/man/man1/forward.1.gz
+%attr(444,root,qmail)             %{_prefix}/man/cat1/forward.0.gz
+%attr(444,root,qmail)             %{_prefix}/man/man1/predate.1.gz
+%attr(444,root,qmail)             %{_prefix}/man/man1/datemail.1.gz
+%attr(444,root,qmail)             %{_prefix}/man/man1/mailsubj.1.gz
+%attr(444,root,qmail)             %{_prefix}/man/cat1/mailsubj.0.gz
+%attr(444,root,qmail)             %{_prefix}/man/man1/maildirmake.1.gz
+%attr(444,root,qmail)             %{_prefix}/man/man1/qmaildirmake.1.gz
+%attr(444,root,qmail)             %{_prefix}/man/cat1/qmaildirmake.0.gz
+%attr(444,root,qmail)             %{_prefix}/man/man1/maildir2mbox.1.gz
+%attr(444,root,qmail)             %{_prefix}/man/cat1/maildir2mbox.0.gz
+%attr(444,root,qmail)             %{_prefix}/man/man1/maildirwatch.1.gz
+%attr(444,root,qmail)             %{_prefix}/man/cat1/maildirwatch.0.gz
 #
-%attr(555,root,qmail)             %{_prefix}/man/man8/qmail-showctl.8.gz
-%attr(555,root,qmail)             %{_prefix}/man/cat8/qmail-showctl.0.gz
-%attr(555,root,qmail)             %{_prefix}/man/man8/qmail-inject.8.gz
-%attr(555,root,qmail)             %{_prefix}/man/cat8/qmail-inject.0.gz
-%attr(555,root,qmail)             %{_prefix}/man/man8/qmail-qmqpc.8.gz
-%attr(555,root,qmail)             %{_prefix}/man/cat8/qmail-qmqpc.0.gz
+%attr(444,root,qmail)             %{_prefix}/man/man8/qmail-showctl.8.gz
+%attr(444,root,qmail)             %{_prefix}/man/cat8/qmail-showctl.0.gz
+%attr(444,root,qmail)             %{_prefix}/man/man8/qmail-inject.8.gz
+%attr(444,root,qmail)             %{_prefix}/man/cat8/qmail-inject.0.gz
+%attr(444,root,qmail)             %{_prefix}/man/man8/qmail-qmqpc.8.gz
+%attr(444,root,qmail)             %{_prefix}/man/cat8/qmail-qmqpc.0.gz
 
 # a copy of /var/qmail/control/me, /var/qmail/control/defaultdomain,
 # and /var/qmail/control/plusdomain from your central server, so that qmail-inject uses appropriate host names in outgoing mail; and
