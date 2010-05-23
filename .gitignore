@@ -1,4 +1,5 @@
 .gitignore
+*/depcomp
 cscope.*
 .DS_Store
 RELEASE
