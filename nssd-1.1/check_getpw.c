@@ -1,8 +1,19 @@
+/*
+ * $Log: check_getpw.c,v $
+ * Revision 1.1  2010-05-23 14:13:29+05:30  Cprogrammer
+ * Initial revision
+ *
+ */
 #include <stdio.h>
 #include <string.h>
+#include <unistd.h>
 #include <errno.h>
 #include <pwd.h>
 #include <shadow.h>
+
+#ifndef	lint
+static char     rcsid[] = "$Id: check_getpw.c,v 1.1 2010-05-23 14:13:29+05:30 Cprogrammer Stab mbhangui $";
+#endif
 
 int
 main(int argc, char **argv)
@@ -33,4 +44,10 @@ main(int argc, char **argv)
 		printf("%d:%d:%s:%s:%s\n", pw->pw_uid, pw->pw_gid, pw->pw_gecos, pw->pw_dir, pw->pw_shell);
 	}
 	return(0);
+}
+
+void
+getversion_check_getpw_c()
+{
+	printf("%s\n", rcsid);
 }
