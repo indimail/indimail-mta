@@ -1,5 +1,16 @@
+*/m4/ltversion.m4
+*/m4/libtool.m4
+*/m4/ltoptions.m4
+*/m4/ltsugar.m4
+*/m4/lt~obsolete.m4
+ltversion.m4
+libtool.m4
+ltoptions.m4
+ltsugar.m4
+lt~obsolete.m4
 .gitignore
 */depcomp
+.deps
 cscope.*
 .DS_Store
 RELEASE
@@ -55,6 +66,8 @@ ripmime-*/ripole
 indimail-*/ChangeLog
 indimail-*/RELEASE-Notes.in
 indimail-*/doc/ChangeLog
+indimail-*/INSTALL
+indimail-*/RELEASE-Notes
 indimail-*/doc/INSTALL-RPM
 indimail-*/doc/INSTALL-MINI
 indimail-*/doc/INSTALL.indimail
