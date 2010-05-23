@@ -1,5 +1,8 @@
 #
 # $Log: indimail.spec.in,v $
+# Revision 2.170  2010-05-23 16:08:57+05:30  Cprogrammer
+# upgrade to clamav-0.96.1
+#
 # Revision 2.169  2010-05-23 14:37:00+05:30  Cprogrammer
 # fixed perms for man pages
 #
@@ -531,7 +534,7 @@
 # rpm spec file for indimail
 #
 #
-# $Id: indimail.spec.in,v 2.169 2010-05-23 14:37:00+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 2.170 2010-05-23 16:08:57+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %define _unpackaged_files_terminate_build 1
 
@@ -572,7 +575,7 @@
 %define ucspi_version      0.88
 %define qmail_version      1.03
 %define fetchmail_version  6.3.16
-%define clamav_version     0.96
+%define clamav_version     0.96.1
 %define fortune_version    1.1
 %define nssd_version       1.1
 %define flash_version      0.9.4
@@ -808,7 +811,6 @@ locations) and tools to manage virtual domains ?
 %package devel
 Summary: IndiMail - Development header files and libraries
 Group: Applications/Databases
-Provides: %{name}-devel
 
 %description devel
 This package contains the development header files and libraries
@@ -819,7 +821,6 @@ necessary to develop IndiMail client applications.
 %package shared
 Summary: IndiMail - Shared libraries
 Group: Applications/Databases
-Provides: %{name}-shared
 
 %description shared
 This package contains the shared libraries (*.so*) which certain
@@ -830,7 +831,6 @@ languages and applications need to dynamically load and use IndiMail.
 %package mini
 Summary: IndiMail - Mini Client Installation
 Group: Applications/Databases
-Provides: %{name}-mini
 Conflicts: %{name}
 
 %description mini

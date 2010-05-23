@@ -1,5 +1,8 @@
 #
 # $Log: indimail-epm.list.in,v $
+# Revision 2.54  2010-05-23 15:44:57+05:30  Cprogrammer
+# upgrade to clamav version 0.96.1
+#
 # Revision 2.53  2010-05-20 11:20:50+05:30  Cprogrammer
 # removed qmail-qstat
 #
@@ -135,7 +138,7 @@ $bogofilter_version=1.2.1
 $ucspi_version=0.88
 $qmail_version=1.03
 $fetchmail_version=6.3.16
-$clamav_version=0.95.1
+$clamav_version=0.96.1
 $fortune_version=1.1
 $nssd_version=1.0
 $mysql_version=6.0.9-alpha
