@@ -573,7 +573,7 @@ usage()
 	error_stack(stderr, "         -b (bounces all mail that doesn't match a user, default)\n");
 	error_stack(stderr, "         -e [email_address|maildir] (forwards all non matching user to this address [*])\n");
 	error_stack(stderr, "         -u user (sets the uid/gid based on a user in /etc/passwd)\n");
-	error_stack(stderr, "         -B basepath Specify the base directory for posmater's home directory\n");
+	error_stack(stderr, "         -B basepath Specify the base directory for postmaster's home directory\n");
 	error_stack(stderr, "         -d dir (sets the dir to use for this domain)\n");
 	error_stack(stderr, "         -i uid (sets the uid to use for this domain)\n");
 	error_stack(stderr, "         -g gid (sets the gid to use for this domain)\n");
