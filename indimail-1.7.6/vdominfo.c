@@ -1,5 +1,8 @@
 /*
  * $Log: vdominfo.c,v $
+ * Revision 2.12  2010-05-25 13:14:18+05:30  Cprogrammer
+ * added option -b to display user's base home directory
+ *
  * Revision 2.11  2010-05-17 18:54:15+05:30  Cprogrammer
  * display base dir
  *
@@ -109,7 +112,7 @@
 #include <memory.h>
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vdominfo.c,v 2.11 2010-05-17 18:54:15+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: vdominfo.c,v 2.12 2010-05-25 13:14:18+05:30 Cprogrammer Stab mbhangui $";
 #endif
 
 char            Domain[MAX_BUFF];
@@ -122,6 +125,7 @@ int             DisplayName;
 int             DisplayUid;
 int             DisplayGid;
 int             DisplayDir;
+int             DisplayBaseDir;
 #ifdef CLUSTERED_SITE
 int             DisplayPort;
 #endif
@@ -194,6 +198,7 @@ usage()
 	printf("         -u (display uid field)\n");
 	printf("         -g (display gid field)\n");
 	printf("         -d (display domain directory)\n");
+	printf("         -b (display user's base directory)\n");
 	printf("         -t (display total users)\n");
 	printf("         -l (display alias domains)\n");
 #ifdef CLUSTERED_SITE
@@ -213,6 +218,7 @@ get_options(int argc, char **argv)
 	DisplayUid = 0;
 	DisplayGid = 0;
 	DisplayDir = 0;
+	DisplayBaseDir = 0;
 #ifdef CLUSTERED_SITE
 	DisplayPort = 0;
 #endif
@@ -221,7 +227,7 @@ get_options(int argc, char **argv)
 	DisplayAll = 1;
 	memset(Domain, 0, MAX_BUFF);
 	errflag = 0;
-	while (!errflag && (c = getopt(argc, argv, "vanugdtpl")) != -1)
+	while (!errflag && (c = getopt(argc, argv, "vanugdbtpl")) != -1)
 	{
 		switch (c)
 		{
@@ -242,6 +248,10 @@ get_options(int argc, char **argv)
 			break;
 		case 'd':
 			DisplayDir = 1;
+			DisplayAll = 0;
+			break;
+		case 'b':
+			DisplayBaseDir = 1;
 			DisplayAll = 0;
 			break;
 		case 't':
@@ -279,7 +289,7 @@ get_options(int argc, char **argv)
 void
 display_domain(char *domain, char *dir, uid_t uid, gid_t gid)
 {
-	char           *real_domain;
+	char           *real_domain, *base_path;
 	char            tmpbuf[MAX_BUFF];
 	FILE           *fp;
 	unsigned long   total;
@@ -295,11 +305,11 @@ display_domain(char *domain, char *dir, uid_t uid, gid_t gid)
 	{
 		printf("---- Domain %-25s -------------------------------\n", domain);
 		if (!strcmp(real_domain, domain))
-			printf("domain: %s\n", domain);
+			printf("    domain: %s\n", domain);
 		else
-			printf("domain: %s aliased to %s\n", domain, real_domain);
-		printf("uid  :    %lu\n", (long unsigned) uid);
-		printf("gid  :    %lu\n", (long unsigned) gid);
+			printf("    domain: %s aliased to %s\n", domain, real_domain);
+		printf("       uid: %lu\n", (long unsigned) uid);
+		printf("       gid: %lu\n", (long unsigned) gid);
 #ifdef CLUSTERED_SITE
 		getEnvConfigStr(&qmaildir, "QMAILDIR", QMAILDIR);
 		getEnvConfigStr(&controldir, "CONTROLDIR", "control");
@@ -308,30 +318,32 @@ display_domain(char *domain, char *dir, uid_t uid, gid_t gid)
 		if ((host_cntrl = !access(host_path, F_OK)))
 		{
 			if ((hostid = get_local_hostid()))
-				printf("H Id :    %s\n", hostid);
+				printf("   host ID: %s\n", hostid);
 			else
-				printf("H Id :    ???\n");
+				printf("   host ID: ???\n");
 			if ((ptr = get_local_ip()))
-				printf("Ip   :    %s\n", ptr);
+				printf("   IP Addr: %s\n", ptr);
 			else
-				printf("Ip   :    ??\n");
+				printf("   IP Addr: ??\n");
 			for (total = 0;(ptr = vsmtp_select(domain, &Port)) != NULL;total++)
-				printf("%s: %35s@%-20s -> %d\n", total ? "     " : "Ports", ptr, domain, Port);
+				printf("%10s: %35s@%-20s -> %d\n", total ? "     " : "Ports", ptr, domain, Port);
 		}
 #endif
-		printf("dir  :    %s\n", dir);
+		printf("Domain Dir: %s\n", dir);
 		if (!strcmp(real_domain, domain))
 		{
 			snprintf(tmpbuf, MAX_BUFF, "%s/.base_path", dir);
-			if ((fp = fopen(tmpbuf, "r")))
-			{
+			if ((fp = fopen(tmpbuf, "r"))) {
 				fscanf(fp, "%s", tmpbuf);
-				printf("base dir: %s\n", tmpbuf);
+				printf("  Base Dir: %s\n", tmpbuf);
 				fclose(fp);
+			} else {
+				getEnvConfigStr(&base_path, "BASE_PATH", BASE_PATH);
+				printf("  Base Dir: %s\n", base_path);
 			}
 			snprintf(tmpbuf, MAX_BUFF, "%s/.filesystems", dir);
 			total = print_control(tmpbuf, domain, 0);
-			printf("Users:  %ld\n", total);
+			printf("     Users: %ld\n", total);
 			snprintf(tmpbuf, MAX_BUFF, "%s/.aliasdomains", dir);
 			if ((fp = fopen(tmpbuf, "r")))
 			{
@@ -351,43 +363,54 @@ display_domain(char *domain, char *dir, uid_t uid, gid_t gid)
 		if (DisplayName)
 		{
 			if (!strcmp(real_domain, domain))
-				printf("domain: %s\n", domain);
+				printf("    domain: %s\n", domain);
 			else
-				printf("domain: %s aliased to %s\n", domain, real_domain);
+				printf("    domain: %s aliased to %s\n", domain, real_domain);
 #ifdef CLUSTERED_SITE
 			if (host_cntrl)
 			{
 				if ((hostid = get_local_hostid()))
-					printf("H Id :    %s\n", hostid);
+					printf("   host ID: %s\n", hostid);
 				else
-					printf("H Id :    ???\n");
+					printf("   host ID: ??\n");
 				if ((ptr = get_local_ip()))
-					printf("Ip   :    %s\n", ptr);
+					printf("   IP Addr: %s\n", ptr);
 				else
-					printf("Ip   :    ??\n");
+					printf("   IP Addr: ??\n");
 			}
 #endif
 		}
 		if (DisplayUid)
-			printf("%lu\n", (long unsigned) uid);
+			printf("       uid: %lu\n", (long unsigned) uid);
 		if (DisplayGid)
-			printf("%lu\n", (long unsigned) gid);
+			printf("       gid: %lu\n", (long unsigned) gid);
 #ifdef CLUSTERED_SITE
 		if (DisplayPort && host_cntrl)
 		{
 			for (total = 0;(ptr = vsmtp_select(domain, &Port)) != NULL;total++)
-				printf("%s: %s@%s -> %d\n", total ? "     " : "Ports", ptr, domain, Port);
+				printf("%10s: %s@%s -> %d\n", total ? "     " : "Ports", ptr, domain, Port);
 		}
 #endif
 		if (DisplayDir)
-			printf("%s\n", dir);
+			printf("Domain Dir: %s\n", dir);
 		if (!strncmp(real_domain, domain, MAX_BUFF))
 		{
+			if (DisplayBaseDir) {
+				snprintf(tmpbuf, MAX_BUFF, "%s/.base_path", dir);
+				if ((fp = fopen(tmpbuf, "r"))) {
+					fscanf(fp, "%s", tmpbuf);
+					printf("  Base Dir: %s\n", tmpbuf);
+					fclose(fp);
+				} else {
+					getEnvConfigStr(&base_path, "BASE_PATH", BASE_PATH);
+					printf("  Base Dir: %s\n", base_path);
+				}
+			}
 			if (DisplayTotalUsers)
 			{
 				snprintf(tmpbuf, MAX_BUFF, "%s/.filesystems", dir);
 				total = print_control(tmpbuf, domain, 0);
-				printf("Users:  %ld\n", total);
+				printf("     Users: %ld\n", total);
 			}
 			if (DisplayAliasDomains)
 			{
