@@ -185,7 +185,7 @@ I usually prefer to run privileged commands like this (so that I don't get fond 
     depending on whether you require them. Most probably you have downloaded
     indimail-@version@.tar.gz only. You require to additionally download the
     following sources mentioned below. Except for qmail, ucspi-tcp, bogofilter,
-    clamav & fetchmail, the sources are available at indimail.sourceforge.net.
+    clamav & fetchmail, all the sources are available at indimail.sourceforge.net.
     The link from which you can download the sources are mentioned in SECTION 3
     below. Also remember that IndiMail requires patch to be applied to qmail,
     ucspi-tcp, courier-imap, bogofilter, clamav and fetchmail to make all
