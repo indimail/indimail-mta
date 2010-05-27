@@ -1,5 +1,8 @@
 #
 # $Log: indimail.spec.in,v $
+# Revision 2.171  2010-05-27 15:30:10+05:30  Cprogrammer
+# fix spec for darwin
+#
 # Revision 2.170  2010-05-23 16:08:57+05:30  Cprogrammer
 # upgrade to clamav-0.96.1
 #
@@ -534,7 +537,7 @@
 # rpm spec file for indimail
 #
 #
-# $Id: indimail.spec.in,v 2.170 2010-05-23 16:08:57+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 2.171 2010-05-27 15:30:10+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %define _unpackaged_files_terminate_build 1
 
@@ -585,12 +588,12 @@
 %define mysql_version      6.0.9-alpha
 %define host               @HOST@
 %define see_base           For a description of IndiMail visit http://www.indimail.org
-#%define darwin_version     1
-%if %{undefined darwin_version}
-%define nonssd             0
-%else
+%define darwin_version     0
+%if %darwin_version == 1
 %define nonssd             1
 %define fast_mode          1
+%else
+%define nonssd             0
 %endif
 %define noclamav           0
 %define noproxy            0
@@ -608,10 +611,10 @@
 %define mbase              @basepath@
 %define logdir             @logdir@
 %define servicedir         /service
-%if 0%{?darwin_version}
-%define module_dir         /usr/%{_lib}/pam
-%else
+%if %darwin_version == 0
 %define module_dir         /%{_lib}/security
+%else
+%define module_dir         /usr/%{_lib}/pam
 %endif
 
 %if %build_on_obs != 0
@@ -670,7 +673,7 @@ Patch2:  http://downloads.sourceforge.net/%{name}/Patches/ucspi-tcp-%{ucspi_vers
 
 %if %nocourierimap == 0
 %if %build_on_obs == 0
-%if 0%{?darwin_version}
+%if %darwin_version == 1
 Patch3:  http://downloads.sourceforge.net/%{name}/Patches/courier-imap-%{courier_version}-1.2.patch.gz
 %else
 Patch3:  http://downloads.sourceforge.net/%{name}/Patches/courier-imap-%{courier_version}.patch.gz
@@ -694,7 +697,7 @@ Patch11: http://downloads.sourceforge.net/%{name}/Patches/fetchmail-%{fetchmail_
 Patch12: http://downloads.sourceforge.net/%{name}/Patches/clamav-%{clamav_version}.patch.gz
 %endif
 
-%if 0%{?darwin_version}
+%if %darwin_version == 1
 Patch13: http://downloads.sourceforge.net/%{name}/Patches/courier-imap-%{courier_version}-1.2.mac_supplement.patch.gz
 %endif
 
@@ -766,7 +769,7 @@ Requires: pam
 # rpm -qp --queryformat '%{arch}\n' some-file.rpm
 # rpm --showrc for all macros
 # rpm -qlp some-file.rpm
-%if %{undefined darwin_version}
+%if %darwin_version == 0
 Requires: /usr/sbin/useradd /usr/sbin/groupadd
 Requires: /sbin/chkconfig /usr/sbin/userdel /usr/sbin/groupdel procps /usr/bin/awk
 %endif
@@ -907,7 +910,7 @@ done
 %patch2  -p0
 %if %nocourierimap == 0
 %patch3  -p0
-%if 0%{?darwin_version}
+%if %darwin_version == 1
 %patch13  -p0
 %endif
 %endif
@@ -1328,7 +1331,7 @@ fi
 %dir %attr(555,root,root)         %{_libdir}
 
 %if %nofetchmail == 0
-%if %{undefined darwin_version}
+%if %darwin_version == 0
 %dir %attr(755,root,root)         %{_prefix}/share/locale
 %endif
 %dir %attr(755,root,root)         %{_prefix}/lib*/python*
@@ -1781,7 +1784,7 @@ fi
 %attr(777,root,root)                    %{_prefix}/sbin/pw2userdb
 %attr(777,root,root)                    %{_prefix}/sbin/userdb
 %attr(777,root,root)                    %{_prefix}/sbin/vchkpw2userdb
-%if %{undefined darwin_version}
+%if %darwin_version == 0
 %attr(4555,root,root)                   %{_prefix}/libexec/authlib/authshadow
 %endif
 %endif
@@ -1856,7 +1859,7 @@ fi
 %attr(555,root,qmail)                   %{_prefix}/boot/home
 %attr(555,root,qmail)                   %{_prefix}/boot/binm2+df
 %attr(444,root,qmail)                   %{_prefix}/boot/upstart
-%if 0%{?darwin_version}
+%if %darwin_version == 1
 %attr(444,root,qmail)                   %{_prefix}/boot/StartupParameters.plist
 %attr(444,root,qmail)                   %{_prefix}/boot/indimail.plist
 %endif
@@ -1998,7 +2001,7 @@ fi
 %endif
 
 %if %nofetchmail == 0
-%if %{undefined darwin_version}
+%if %darwin_version == 0
 %attr(644,root,root)                    %{_prefix}/share/locale/*/LC_MESSAGES/*.mo
 %endif
 %attr(644,root,root)                    %{_prefix}/lib*/python*/site-packages/fetchmailconf.pyo
@@ -2088,13 +2091,14 @@ fi
 %endif
 
 %if %noclamav == 0
-%if 0%{?darwin_version}
+%if %darwin_version == 1
 %{_libdir}/libclam*.dylib
 %else
 %{_libdir}/libclam*.so*
 %endif
 %endif
-%if 0%{?darwin_version}
+
+%if %darwin_version == 1
 %{_libdir}/libeps.dylib
 %{_libdir}/libeps-%{eps_version}.0.dylib
 %{_libdir}/libcdb.dylib
@@ -2179,18 +2183,14 @@ fi
 %defattr(-, root, root, 0755)
 # Shared libraries (omit for architectures that don't support them)
 %if %noclamav == 0
+%if %darwin_version == 1
+%{_libdir}/libclam*.dylib
+%else
 %{_libdir}/libclam*.so*
 %endif
-%if 0%{?darwin_version}
-%{_libdir}/libeps.dylib
-%{_libdir}/libeps-%{eps_version}.0.dylib
-%{_libdir}/libcdb.dylib
-%{_libdir}/libcdb-%{cdb_version}.0.dylib
-%{_libdir}/libflash.dylib
-%{_libdir}/libflash-%{flash_version}.0.dylib
-%{_libdir}/libindimail.dylib
-%{_libdir}/libindimail-%{version}.0.dylib
-%else
+%endif
+
+%if %darwin_version == 0
 %{_libdir}/libeps.so
 %{_libdir}/libeps-%{eps_version}.so.0
 %{_libdir}/libeps-%{eps_version}.so.0.0.0
@@ -2203,6 +2203,15 @@ fi
 %{_libdir}/libindimail.so
 %{_libdir}/libindimail-%{version}.so.0
 %{_libdir}/libindimail-%{version}.so.0.0.0
+%else
+%{_libdir}/libeps.dylib
+%{_libdir}/libeps-%{eps_version}.0.dylib
+%{_libdir}/libcdb.dylib
+%{_libdir}/libcdb-%{cdb_version}.0.dylib
+%{_libdir}/libflash.dylib
+%{_libdir}/libflash-%{flash_version}.0.dylib
+%{_libdir}/libindimail.dylib
+%{_libdir}/libindimail-%{version}.0.dylib
 %endif
 
 %files mini
@@ -2350,7 +2359,7 @@ case "%host" in
 		exit 1
 	fi
 esac
-%if 0%{?darwin_version}
+%if %darwin_version == 1
 echo "Adding IndiMail users/groups"
 /usr/bin/dscl . -create /Groups/indimail PrimaryGroupID 555
 /usr/bin/dscl . -create /Groups/nofiles PrimaryGroupID 556
@@ -2448,7 +2457,7 @@ if [ $ID -ne 0 ] ; then
 fi
 if [ $argv1 -eq 2 ] ; then
 	if [ -f %{_prefix}/boot/rpm.init ] ; then
-%if %{undefined darwin_version}
+%if %darwin_version == 0
 		/sbin/ldconfig
 %endif
 		echo "Running Custom Upgrade Script for post"
@@ -2739,7 +2748,7 @@ R0lGODlhaAA7APcAAP///+rp6puSp6GZrDUjUUc6Zn53mFJMdbGvvVtXh2xre8bF1x8cU4yLprOy:Vir
 EOF
 %{__chown} qscand:qscand %{_prefix}/control/signatures
 
-%if %{undefined darwin_version}
+%if %darwin_version == 0
 # Recreate ld.so links and cache
 if [ -d %{_sysconfdir}/ld.so.conf.d ] ; then
 	(
@@ -2766,7 +2775,7 @@ if [ -f %{_sysconfdir}/event.d/svscan ] ; then
 	echo "1. Issue /sbin/initctl emit qmailstart to start services"
 	count=1
 else
-%if %{undefined darwin_version}
+%if %darwin_version == 0
 	echo "1. Issue /var/indimail/sbin/initsvc -on"
 	echo "2. Issue /sbin/init q to start services"
 	count=2
@@ -2828,7 +2837,7 @@ if [ $ID -ne 0 ] ; then
 fi
 # we are doing upgrade
 if [ $argv1 -eq 1 ] ; then
-%if %{undefined darwin_version}
+%if %darwin_version == 0
 	echo "recreating ld.so cache"
 	/sbin/ldconfig
 %endif
@@ -2840,7 +2849,7 @@ if [ $nscd_up -ge 1 ] ; then
 		%{_sysconfdir}/init.d/nscd stop
 	fi
 fi
-%if %{undefined darwin_version}
+%if %darwin_version == 0
 for i in alias qmaild qmaill qmailp qmailq qmailr qmails qscand indimail
 do
 	echo "Removing user $i"
@@ -2961,7 +2970,7 @@ else
 	log_dir=%{logdir}
 fi
 [ "$log_dir" != "/" ] && %{__rm} -fr $log_dir
-%if %{undefined darwin_version}
+%if %darwin_version == 0
 echo "recreating ld.so cache"
 /sbin/ldconfig
 %endif
@@ -2990,7 +2999,7 @@ echo ""
 
 ### SCRIPTLET ###############################################################################
 %post shared
-%if %{undefined darwin_version}
+%if %darwin_version == 0
 /sbin/ldconfig
 %endif
 
@@ -3006,7 +3015,7 @@ echo "removing shared libraries"
 %if %noclamav == 0
 %{__rm} -f %{_libdir}/libclam*.so*
 %endif
-%if 0%{?darwin_version}
+%if %darwin_version == 1
 %{__rm} -f %{_libdir}/libeps.dylib
 %{__rm} -f %{_libdir}/libeps-%{eps_version}.0.dylib
 %{__rm} -f %{_libdir}/libcdb.dylib
