@@ -585,15 +585,14 @@
 %define mysql_version      6.0.9-alpha
 %define host               @HOST@
 %define see_base           For a description of IndiMail visit http://www.indimail.org
-
+#%define darwin_version     1
 %if %{undefined darwin_version}
 %define nonssd             0
-%define noclamav           0
 %else
 %define nonssd             1
-%define noclamav           1
 %define fast_mode          1
 %endif
+%define noclamav           0
 %define noproxy            0
 %define nocourierimap      0
 %define nolibdkim          0
@@ -1830,7 +1829,6 @@ fi
 %if %nofetchmail == 0
 %attr(555,root,root)                    %{_prefix}/bin/fetchmailconf
 %attr(555,root,root)                    %{_prefix}/bin/fetchmail
-%if %{undefined darwin_version}
 %attr(555,root,root)                    %{_prefix}/sbin/fetchmail.cron
 %attr(555,root,root)                    %{_prefix}/sbin/fetchmail.down
 %attr(555,root,root)                    %{_prefix}/sbin/fetchmail.up
@@ -1840,7 +1838,6 @@ fi
 %attr(555,root,root)                    %{_prefix}/sbin/ppp-off
 %attr(555,root,root)                    %{_prefix}/sbin/slemsPrivate
 %attr(555,root,root)                    %{_prefix}/sbin/writefifo
-%endif
 %endif
 
 # pam-multi
@@ -2091,7 +2088,11 @@ fi
 %endif
 
 %if %noclamav == 0
+%if 0%{?darwin_version}
+%{_libdir}/libclam*.dylib
+%else
 %{_libdir}/libclam*.so*
+%endif
 %endif
 %if 0%{?darwin_version}
 %{_libdir}/libeps.dylib
