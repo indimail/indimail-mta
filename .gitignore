@@ -3,6 +3,12 @@
 */m4/ltoptions.m4
 */m4/ltsugar.m4
 */m4/lt~obsolete.m4
+Quick-INSTALL
+README-CLUSTER
+INSTALL-MINI
+INSTALL-MYSQL
+INSTALL-RPM
+INSTALL
 ltversion.m4
 libtool.m4
 ltoptions.m4
