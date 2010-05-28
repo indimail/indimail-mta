@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-remote.c,v $
+ * Revision 1.57  2010-05-28 14:25:00+05:30  Cprogrammer
+ * indicate protocol in the accepted message
+ *
  * Revision 1.56  2010-04-30 13:17:44+05:30  Cprogrammer
  * fixed domainbindings for ipv4 addresses
  *
@@ -1622,7 +1625,7 @@ smtp()
 		quit("D", " failed after I sent the message", 1);
 	if (code >= 400)
 		quit("Z", " failed after I sent the message", 0);
-	quit("K", " accepted message", 1);
+	quit("K", " accepted message - Protocol SMTP", 1);
 }
 
 stralloc        canonhost = { 0 };
@@ -2271,7 +2274,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_remote_c()
 {
-	static char    *x = "$Id: qmail-remote.c,v 1.56 2010-04-30 13:17:44+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: qmail-remote.c,v 1.57 2010-05-28 14:25:00+05:30 Cprogrammer Stab mbhangui $";
 
 	x++;
 }
