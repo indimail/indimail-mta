@@ -1,5 +1,8 @@
 /*
  * $Log: get_smtp_service_port.c,v $
+ * Revision 2.5  2010-05-28 14:11:12+05:30  Cprogrammer
+ * use QMTP as default
+ *
  * Revision 2.4  2010-04-24 14:58:11+05:30  Cprogrammer
  * return qmtp or smtp port depending on the value of ROUTES env variable
  *
@@ -41,7 +44,7 @@
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: get_smtp_service_port.c,v 2.4 2010-04-24 14:58:11+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: get_smtp_service_port.c,v 2.5 2010-05-28 14:11:12+05:30 Cprogrammer Stab mbhangui $";
 #endif
 
 #ifdef CLUSTERED_SITE
@@ -59,10 +62,10 @@ get_smtp_service_port(char *SrcHost, char *domain, char *hostname)
 	MYSQL_RES      *res;
 	MYSQL_ROW       row;
 
-	if ((ptr = getenv("ROUTES")) && (*ptr && !memcmp(ptr, "qmtp", 4)))
-		default_port = PORT_QMTP;
-	else
+	if ((ptr = getenv("ROUTES")) && (*ptr && !memcmp(ptr, "smtp", 4)))
 		default_port = PORT_SMTP;
+	else
+		default_port = PORT_QMTP;
 	if (open_central_db(0))
 		return (default_port);
 	if(!domain || !*domain)

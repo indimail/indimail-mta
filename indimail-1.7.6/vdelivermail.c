@@ -1,5 +1,8 @@
 /*
  * $Log: vdelivermail.c,v $
+ * Revision 2.54  2010-05-28 14:11:24+05:30  Cprogrammer
+ * use QMTP as default
+ *
  * Revision 2.53  2010-04-24 15:21:45+05:30  Cprogrammer
  * set env variable SMTPROUTE or QMTPROUTE depending on value of ROUTES env variable
  *
@@ -242,7 +245,7 @@
 #include <sys/wait.h>
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vdelivermail.c,v 2.53 2010-04-24 15:21:45+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: vdelivermail.c,v 2.54 2010-05-28 14:11:24+05:30 Cprogrammer Stab mbhangui $";
 #endif
 
 /*- Globals */
@@ -369,10 +372,10 @@ main(int argc, char **argv)
 				} else /* avoid looping of mails */
 				if (strncmp(remote_hostid, local_hostid, MAX_BUFF))
 				{
-					if ((ptr = getenv("ROUTES")) && (*ptr && !memcmp(ptr, "qmtp", 4)))
-						*ptr = 'Q';
+					if ((ptr = getenv("ROUTES")) && (*ptr && !memcmp(ptr, "smtp", 4)))
+						ptr = "SMTP";
 					else
-						*ptr = 'S';
+						ptr = "QMTP";
 					snprintf(route, sizeof(route), "%cMTPROUTE=%s", *ptr, ip);
 					putenv(route);
 					switch (qmail_remote(TheUser, TheDomain))

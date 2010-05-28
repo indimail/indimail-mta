@@ -1,5 +1,8 @@
 /*
  * $Log: findhost.c,v $
+ * Revision 2.32  2010-05-28 14:11:00+05:30  Cprogrammer
+ * use QMTP as default
+ *
  * Revision 2.31  2010-04-15 14:14:05+05:30  Cprogrammer
  * added flags argument to mysql_real_connect()
  *
@@ -186,7 +189,7 @@
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: findhost.c,v 2.31 2010-04-15 14:14:05+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: findhost.c,v 2.32 2010-05-28 14:11:00+05:30 Cprogrammer Stab mbhangui $";
 #endif
 
 #include <stdio.h>
@@ -341,7 +344,7 @@ again:
 		return ((char *) 0);
 	} else
 	if (!port)
-		port = 25;
+		port = PORT_QMTP;
 	strncpy(prevEmail, email, len);
 	snprintf(mailhost, MAX_BUFF, "%s:%s:%d", domain, ip_addr, port);
 	return (mailhost);

@@ -1,5 +1,8 @@
 /*
  * $Log: GetSmtproute.c,v $
+ * Revision 2.6  2010-05-28 14:11:07+05:30  Cprogrammer
+ * use QMTP as default
+ *
  * Revision 2.5  2010-04-24 15:27:38+05:30  Cprogrammer
  * new function get_smtp_qmtp_port to parse both smtproutes, qmtproutes file
  * return QMTP or SMTP port.
@@ -19,12 +22,13 @@
  */
 #include "indimail.h"
 #include <string.h>
+#include <unistd.h>
 #include <stdlib.h>
 #include <errno.h>
 #include <ctype.h>
 
 #ifndef	lint
-static char     sccsid[] = "$Id: GetSmtproute.c,v 2.5 2010-04-24 15:27:38+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: GetSmtproute.c,v 2.6 2010-05-28 14:11:07+05:30 Cprogrammer Stab mbhangui $";
 #endif
 
 /*
@@ -43,12 +47,23 @@ GetSmtproute(char *domain)
 
 	getEnvConfigStr(&qmaildir, "QMAILDIR", QMAILDIR);
 	getEnvConfigStr(&controldir, "CONTROLDIR", "control");
-	if ((routes = getenv("ROUTES")) && *routes && !memcmp(routes, "qmtp", 4))
-		default_port = PORT_QMTP;
-	else
-		default_port = PORT_SMTP;
-	if (snprintf(smtproute, sizeof(smtproute) - 1,
-		"%s/%s/%s", qmaildir, controldir, default_port == PORT_SMTP ? "smtproutes" : "qmtproutes") == -1)
+	if (snprintf(smtproute, sizeof(smtproute) - 1, "%s/%s/qmtproutes",
+		qmaildir, controldir) == -1)
+	{
+		errno = ENAMETOOLONG;
+		return(-1);
+	}
+	default_port = access(smtproute, F_OK) ? PORT_SMTP : PORT_QMTP;
+	if ((routes = getenv("ROUTES")) && *routes)
+	{
+		if (!memcmp(routes, "qmtp", 4))
+			default_port = PORT_QMTP;
+		else
+		if (!memcmp(routes, "smtp", 4))
+			default_port = PORT_SMTP;
+	}
+	if (snprintf(smtproute, sizeof(smtproute) - 1, "%s/%s/%s",
+		qmaildir, controldir, default_port == PORT_SMTP ? "smtproutes" : "qmtproutes") == -1)
 	{
 		errno = ENAMETOOLONG;
 		return(-1);
