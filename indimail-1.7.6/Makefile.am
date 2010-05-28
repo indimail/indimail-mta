@@ -162,12 +162,12 @@ noinst_SCRIPTS = create_services indimail.spec indimail-@VERSION@-rpmlintrc indi
 post_handle_list = vadddomain vadduser
 
 MOSTLYCLEANFILES=versioninfo vcaliasrev myslave logmonitor controlsync bogofilter-qfe \
-svctool indimail_settings.c cronlist crypt create_services INSTALL INSTALL-RPM INSTALL-MYSQL \
-INSTALL-MINI indimail.spec cscope.* *.dSYM inc_deps lib_deps socket.lib \
-indimail-@VERSION@-rpmlintrc indimail-epm.list README-CLUSTER tls-cert-check mailzipper \
-perm_list RELEASE-Notes dbinfo.8 inlookup.8 vadddomain.1 vdeldomain.1 vadduser.1 \
+svctool indimail_settings.c cronlist crypt create_services \
+indimail.spec cscope.* *.dSYM inc_deps lib_deps socket.lib \
+indimail-@VERSION@-rpmlintrc indimail-epm.list tls-cert-check mailzipper \
+perm_list dbinfo.8 inlookup.8 vadddomain.1 vdeldomain.1 vadduser.1 \
 vdeluser.1 vdelivermail.8 vrenamedomain.1 vrenameuser.1 vpasswd.1 vmoveuser.1 \
-indimail.7 svctool.8 indisub.c Quick-INSTALL indimail.mrtg.cfg overquota.sh \
+indimail.7 svctool.8 indisub.c indimail.mrtg.cfg overquota.sh \
 vadddomain_handle vadduser_handle
 
 DISTCLEANFILES=.gitignore
@@ -774,19 +774,19 @@ cronlist: cronlist.in
 perm_list: perm_list.in
 	$(edit) $@.in > $@
 INSTALL: INSTALL.in configure.in
-	$(edit) $@.in > doc/$@.indimail; ln -sf doc/$@.indimail $@
+	$(edit) $@.in > doc/$@.indimail; rm -f $@;ln -sf doc/$@.indimail $@
 Quick-INSTALL: Quick-INSTALL.in configure.in
-	$(edit) $@.in > doc/$@; ln -sf doc/$@ $@
+	$(edit) $@.in > doc/$@; rm -f $@;ln -sf doc/$@ $@
 INSTALL-RPM: INSTALL-RPM.in configure.in
-	$(edit) $@.in > doc/$@; ln -sf doc/$@ $@
+	$(edit) $@.in > doc/$@; rm -f $@;ln -sf doc/$@ $@
 INSTALL-MINI: INSTALL-MINI.in configure.in
-	$(edit) $@.in > doc/$@; ln -sf doc/$@ $@
+	$(edit) $@.in > doc/$@; rm -f $@;ln -sf doc/$@ $@
 INSTALL-MYSQL: INSTALL-MYSQL.in configure.in
-	$(edit) $@.in > doc/$@; ln -sf doc/$@ $@
+	$(edit) $@.in > doc/$@; rm -f $@;ln -sf doc/$@ $@
 RELEASE-Notes: RELEASE-Notes.in configure.in
-	$(edit) $@.in > doc/$@; ln -sf doc/$@ $@
+	$(edit) $@.in > doc/$@; rm -f $@;ln -sf doc/$@ $@
 README-CLUSTER: README-CLUSTER.in configure.in
-	$(edit) $@.in > doc/$@; ln -sf doc/$@ $@
+	$(edit) $@.in > doc/$@; rm -f $@;ln -sf doc/$@ $@
 vadddomain_handle: vadddomain_handle.in
 	$(edit) $@.in > post_handle/vadddomain; ln -s post_handle/vadddomain $@
 vadduser_handle: vadduser_handle.in
