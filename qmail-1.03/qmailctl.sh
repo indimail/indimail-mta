@@ -1,6 +1,9 @@
 # chkconfig: 345 50 80
 # description: Starts qmail system and associated services
 # $Log: qmailctl.sh,v $
+# Revision 1.21  2010-05-28 11:52:48+05:30  Cprogrammer
+# fix for Mac OS X
+#
 # Revision 1.20  2010-04-16 09:09:03+05:30  Cprogrammer
 # added description for qmtp in usage
 #
@@ -96,15 +99,7 @@ esac
 PATH=$PATH:QMAIL/bin:QMAIL/sbin:/usr/local/bin:/usr/bin:/bin
 export PATH
 
-[ -x QMAIL/bin/svscanboot ] || exit 0
-
-case "$SYSTEM" in
-	DARWIN*)
-		RunService $1
-		exit $?
-	;;
-esac
-
+RETVAL=0
 case "$1" in
   stop)
     QMAIL/bin/svc -d /service/qmail-smtpd.*
@@ -121,6 +116,7 @@ case "$1" in
     ;;
   kill)
     kill `ps -ef|egrep "tcpserver|supervise|qmail-send" | grep -v grep | awk '{print $2}'`
+	RETVAL=$?
     ;;
   stat)
     QMAIL/bin/svstat $SERVICE/* $SERVICE/*/log
@@ -151,7 +147,14 @@ case "$1" in
     QMAIL/bin/svc -c $SERVICE/qmail-smtpd*
     ;;
   cdb)
-    INDIMAILDIR=`grep -w "^indimail" /etc/passwd | cut -d: -f6|head -1`
+	case "$SYSTEM" in
+		DARWIN*)
+		INDIMAILDIR=`dscl . -read /Users/indimail|grep NFSHomeDi|awk '{print $2}'`
+		;;
+		*)
+    	INDIMAILDIR=`grep -w "^indimail" /etc/passwd | cut -d: -f6|head -1`
+		;;
+	esac
 	for i in smtp qmtp qmqp imap pop3 poppass
 	do
 		for j in `/bin/ls $INDIMAILDIR/etc/tcp*.$i.cdb 2>/dev/null`
@@ -163,17 +166,19 @@ case "$1" in
 					echo "Deleted $j"
 				else
 					echo "Deleted $j: failed!!"
+					RETVAL=1
 				fi
 			fi
 		done
 		for j in `/bin/ls $INDIMAILDIR/etc/tcp*.$i 2>/dev/null`
 		do
     		QMAIL/bin/tcprules $j.cdb $j.tmp < $j && /bin/chmod 664 $j.cdb \
-				&& /bin/chown indimail:indimail $j.cdb
+				&& chown indimail:indimail $j.cdb
 			if [ $? -eq 0 ] ; then
     			echo "Rebuilt $j.cdb"
 			else
     			echo "Rebuild $j.cdb: failed!!"
+				RETVAL=1
 			fi
 		done
 	done
