@@ -1,5 +1,8 @@
 /*
  * $Log: userinfo.c,v $
+ * Revision 2.31  2010-05-29 16:52:33+05:30  Cprogrammer
+ * do not calculate quota for remote mailstore
+ *
  * Revision 2.30  2009-10-14 20:45:45+05:30  Cprogrammer
  * use strtoll() instead of atol()
  *
@@ -184,7 +187,7 @@
 #include <errno.h>
 
 #ifndef	lint
-static char     sccsid[] = "$Id: userinfo.c,v 2.30 2009-10-14 20:45:45+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: userinfo.c,v 2.31 2010-05-29 16:52:33+05:30 Cprogrammer Stab mbhangui $";
 #endif
 
 extern char *strptime(const char *, const char *, struct tm *);
@@ -202,6 +205,7 @@ vuserinfo(Email, User, Domain, DisplayName, DisplayPasswd, DisplayUid, DisplayGi
 #ifdef CLUSTERED_SITE
 	int             is_dist = 0;
 #endif
+	int             islocal = 1;
 	char            maildir[MAX_BUFF], tmpbuf[MAX_BUFF];
 	uid_t           uid;
 	gid_t           gid;
@@ -391,22 +395,29 @@ vuserinfo(Email, User, Domain, DisplayName, DisplayPasswd, DisplayUid, DisplayGi
 		snprintf(maildir, MAX_BUFF, "%s/Maildir", mypw->pw_dir);
 		printf("quota         : %s [%-4.2f Mb]\n", mypw->pw_shell,
 			(float) strtoll(mypw->pw_shell, 0, 0)/(1024 * 1024));
-#ifdef USE_MAILDIRQUOTA	
-		if ((size_limit = parse_quota(mypw->pw_shell, &count_limit)) == -1)
-			cur_size = mcount = -1;
-		else
-			cur_size = recalc_quota(maildir, &mcount, size_limit, count_limit, 2);
-		printf("curr quota    : %"PRIu64"S,%"PRIu64"C\n", cur_size, mcount);
-#else
-		printf("curr quota    : %"PRIu64"\n", recalc_quota(maildir, 2));
+#ifdef CLUSTERED_SITE
+		islocal = islocalif(mailstore);
 #endif
+		if (islocal)
+		{
+#ifdef USE_MAILDIRQUOTA	
+			if ((size_limit = parse_quota(mypw->pw_shell, &count_limit)) == -1)
+				cur_size = mcount = -1;
+			else
+				cur_size = recalc_quota(maildir, &mcount, size_limit, count_limit, 2);
+			printf("curr quota    : %"PRIu64"S,%"PRIu64"C\n", cur_size, mcount);
+#else
+			printf("curr quota    : %"PRIu64"\n", recalc_quota(maildir, 2));
+#endif
+		} else
+			printf("curr quota    : unknown (remote)\n");
 	}
 	if (DisplayAll)
 	{
 #ifdef CLUSTERED_SITE
 		printf("Mail Store IP : %s (%s - %s)\n", mailstore,
 			(is_dist ? "Clustered" : "NonClustered"), 
-			islocalif (mailstore) ? "local" : "remote");
+			islocal ? "local" : "remote");
 		if (is_dist)
 			ptr = vauth_gethostid(mailstore);
 		else
