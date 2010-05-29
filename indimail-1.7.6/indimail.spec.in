@@ -1,5 +1,8 @@
 #
 # $Log: indimail.spec.in,v $
+# Revision 2.173  2010-05-29 17:01:11+05:30  Cprogrammer
+# added libclam*.so for mac
+#
 # Revision 2.172  2010-05-27 15:32:04+05:30  Cprogrammer
 # renamed darwin_version variable to i_m_on_mac
 #
@@ -540,7 +543,7 @@
 # rpm spec file for indimail
 #
 #
-# $Id: indimail.spec.in,v 2.172 2010-05-27 15:32:04+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 2.173 2010-05-29 17:01:11+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %define _unpackaged_files_terminate_build 1
 
@@ -2096,6 +2099,7 @@ fi
 %if %noclamav == 0
 %if %i_m_on_mac == 1
 %{_libdir}/libclam*.dylib
+%{_libdir}/libclam*.so*
 %else
 %{_libdir}/libclam*.so*
 %endif
@@ -2166,9 +2170,6 @@ fi
 
 %if %noclamav == 0
 %attr(644,root,qmail)                   %{_prefix}/include/clamav.h
-#%{_libdir}/libclamav.a
-#%{_libdir}/libclamunrar.a
-#%{_libdir}/libclamunrar_iface.a
 %endif
 
 %if %nolibdkim == 0
@@ -2188,6 +2189,7 @@ fi
 %if %noclamav == 0
 %if %i_m_on_mac == 1
 %{_libdir}/libclam*.dylib
+%{_libdir}/libclam*.so*
 %else
 %{_libdir}/libclam*.so*
 %endif
