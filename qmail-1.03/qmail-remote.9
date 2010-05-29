@@ -10,24 +10,12 @@ qmail-remote \- send mail via SMTP / ESMTP or QMTP
 .I recip
 [ \fIrecip\fR ... ]
 .SH DESCRIPTION
-.B qmail-remote
-reads a mail message from its input
-and sends the message
-to one or more recipients
-at a remote host.
-
-The remote host \fIhost\fR is \fBqmail-remote\fR's
-first argument.
-.B qmail-remote
-sends the message to
-.IR host ,
-or to a mail exchanger for
-.I host
-listed in the Domain Name System,
-via the Simple Mail Transfer Protocol (SMTP/ESMTP) - default -
-or the Quick Mail Transfer Protocol (QMTP). QMTP is implemented by \fBqmail-qmtpd\fR.
-.I host
-can be either a fully-qualified domain name:
+\fBqmail-remote\fR reads a mail message from its input and sends the message to one or more
+recipients at a remote host. The remote host \fIhost\fR is \fBqmail-remote\fR's first argument.
+\fBqmail-remote\fR sends the message to \fIhost\fR, or to a mail exchanger for \fIhost\fR
+listed in the Domain Name System, via the Simple Mail Transfer Protocol (SMTP/ESMTP) or the
+Quick Mail Transfer Protocol (QMTP).  QMTP is implemented by \fBqmail-qmtpd\fR. \fIhost\fR can
+be either a fully-qualified domain name:
 
 .EX
      silverton.berkeley.edu
@@ -40,24 +28,18 @@ or an IP address enclosed in brackets:
 .EE
  
 The size parameter is only used if the remote host uses the ESMTP SIZE extension defined in
-.I RFC 1870\fP. It gives the size of the message in bytes. 
-.BR qmail-remote
-does not use this value to process the mail, the value is only passed to the remote mailserver.
+\fIRFC- 1870\fR. It gives the size of the message in bytes. \fBqmail-remote\fR does not use
+this value to process the mail, the value is only passed to the remote mailserver.
 
-The envelope recipient addresses are listed as
-.I recip
-arguments to
-.BR qmail-remote .
-The envelope sender address is listed as
-.I sender\fP.
-Any QQEH information passed to qmail-queue is passed in
-.I qqeh\fP.
+The envelope recipient addresses are listed as \fIrecip\fR arguments to \fBqmail-remote\fR.
 
-If
-.B qmail-remote
-is not able to get the greeting from the remote SMTP server, it tries the next MX (as per 
-.B rfc-2821(5)
-) under the following conditions
+The envelope sender address is listed as \fIsender\fR.
+
+Any Qmail Queue Extra Header (QQEH) information passed to \fBqmail-queue(8)\fR is passed in
+\fIqqeh\fR.
+
+If \fBqmail-remote\fR is not able to get the greeting from the remote SMTP server, it tries the
+next MX (as per \fBrfc-2821(5)\fR) under the following conditions
 
 1. connection to remote host gets dropped without a greeting from the remote host
 
@@ -67,15 +49,21 @@ is not able to get the greeting from the remote SMTP server, it tries the next M
 
 In these cases, the remote host's IP address is recorded in the timeout table QMAIL/queue/lock/tcpto, which causes
 subsequent deliveries to back off from the IP address and try the next MX (if it exists).
-.B qmail-tcpto(8)
-can be used to print the TCP timeout table.
+\fBqmail-tcpto(8)\fR can be used to print the TCP timeout table.
 
-Note that
-.B qmail-remote
-does not take options
-and does not follow the
-.B getopt
+\fBqmail-remote\fR is MXPS compliant. If it sees the MX record
+
+     12801 mailin-01.mx.aol.com
+
+it will try a QMTP connection to mailin-01.mx.aol.com before trying a SMTP connection to
+mailin-01.mx.aol.com. The point is that QMTP is faster than SMTP. If the QMTP connection
+attempt fails, the client tries a SMTP connection to port 25 as usual. \fBqmail-remote\fR
+does not try SMTP if the QMTP connection attempt succeeds but mail delivery through that
+connection fails.
+
+Note that \fBqmail-remote\fR does not take options and does not follow the \fBgetopt\fR
 standard.
+
 .SH TRANSPARENCY
 End-of-file in SMTP is encoded as dot CR LF.
 A dot at the beginning of a line is encoded as dot dot.
