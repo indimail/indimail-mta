@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-remote.c,v $
+ * Revision 1.59  2010-05-29 20:54:41+05:30  Cprogrammer
+ * environment variable QMTPROUTE, SMTPROUTE takes precedence over control files
+ *
  * Revision 1.58  2010-05-29 17:27:27+05:30  Cprogrammer
  * added fallback to SMTP as per MXPS
  *
@@ -1684,7 +1687,7 @@ getcontrols()
 	{
 		if (!stralloc_copyb(&qmtproutes, ip, str_len(ip) + 1))
 			temp_nomem();
-		cntrl_stat2 = 1;
+		cntrl_stat2 = 2;
 	} else
 		cntrl_stat2 = control_readfile(&qmtproutes, "qmtproutes", 0);
 	switch (cntrl_stat2)
@@ -1696,6 +1699,7 @@ getcontrols()
 			temp_nomem();
 		break;
 	case 1: /*- qmtproutes present */
+	case 2:
 		if (!constmap_init(&mapqmtproutes, qmtproutes.s, qmtproutes.len, 1))
 			temp_nomem();
 		break;
@@ -1704,7 +1708,7 @@ getcontrols()
 	{
 		if (!stralloc_copyb(&smtproutes, ip, str_len(ip) + 1))
 			temp_nomem();
-		cntrl_stat1 = 1;
+		cntrl_stat1 = 2;
 	} else
 	{
 		cntrl_stat1 = control_readfile(&smtproutes, "smtproutes", 0);
@@ -1740,6 +1744,7 @@ getcontrols()
 			temp_nomem();
 		break;
 	case 1: /*- smtproutes present */
+	case 2:
 		if (!constmap_init(&mapsmtproutes, smtproutes.s, smtproutes.len, 1))
 			temp_nomem();
 		break;
@@ -2032,13 +2037,26 @@ main(int argc, char **argv)
 			if ((i == 0) || (i == host.len) || (host.s[i] == '.'))
 			{
 				/* default qmtproutes */
+				if (cntrl_stat2 == 2 && (relayhost = constmap(&mapqmtproutes, host.s + i, host.len - i))) {
+					type = 's';
+					port = PORT_QMTP;
+					break;
+				} else
+				if (cntrl_stat1 == 2 && (relayhost = constmap(&mapsmtproutes, host.s + i, host.len - i)))
+				{
+					port = PORT_SMTP;
+					break;
+				} else
 				if (cntrl_stat2 && (relayhost = constmap(&mapqmtproutes, host.s + i, host.len - i))) {
 					type = 's';
 					port = PORT_QMTP;
 					break;
-				} 
+				} else
 				if (cntrl_stat1 && (relayhost = constmap(&mapsmtproutes, host.s + i, host.len - i)))
+				{
+					port = PORT_SMTP;
 					break;
+				} else
 				if ((relayhost = lookup_host(host.s + i, host.len - i)))
 					break;
 			}
@@ -2256,7 +2274,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_remote_c()
 {
-	static char    *x = "$Id: qmail-remote.c,v 1.58 2010-05-29 17:27:27+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: qmail-remote.c,v 1.59 2010-05-29 20:54:41+05:30 Cprogrammer Stab mbhangui $";
 
 	x++;
 }
