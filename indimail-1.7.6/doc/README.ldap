@@ -41,9 +41,9 @@ include    /etc/openldap/schema/collective.schema
 #######################################################################
 
 database    bdb
-suffix      "dc=indimail,dc=org"
+suffix      "o=indimail.org"
 checkpoint  1024 15
-rootdn      "cn=Manager,dc=indimail,dc=org"
+rootdn      "cn=Manager,o=indimail.org"
 rootpw      {SSHA}gDPX3cS87+B31mAF5zHCGtEJBYSuqrN/
 # Cleartext passwords, especially for the rootdn, should
 # be avoided.  See slappasswd(8) and slapd.conf(5) for details.
@@ -77,8 +77,12 @@ directory    /var/lib/ldap
 #
 # rootdn can always read and write EVERYTHING!
 
-access to dn.subtree="ou=addressbook,dc=indimail,dc=org"
+access to dn.subtree="ou=addressbook,o=indimail.org"
        by anonymous auth
+       by self write
+       by users read
+access to dn.subtree="ou=users,o=indimail.org"
+       by anonymous read
        by self write
        by users read
 access to *
@@ -137,16 +141,16 @@ Access Control
 The standard access controls for the server defines that everyone can read the directory
 entries, but only the manager (administrator) can write to the directories. To add the LDIF
 file the manager is authenicating on the command line with the
-"-D 'cn=Manager,dc=indimail,dc=org' -W" string.
+"-D 'cn=Manager,o=indimail.org' -W" string.
 
 The section below details the access controls based on the users authentication and basic
 anonymous access. The default access controls (below) have been defined to deny everyone
 access, however people are allowed to bind to the server to authenticate. All authenticated
 users are allowed to change their own details, and all of the entries in the
-"ou=addressbook,dc=indimail,dc=org" directory; anonymous access it disallowed.
+"ou=addressbook,o=indimail.org" directory; anonymous access it disallowed.
 
 #disallow bind_anon
-access to dn.subtree="ou=addressbook,dc=indimail,dc=org"
+access to dn.subtree="ou=addressbook,o=indimail.org"
        by anonymous auth
        by self write
        by users read
@@ -206,7 +210,7 @@ The "namingContexts" should be similar to the example below.
 # requesting: namingContexts
 
 dn:
-namingContexts: dc=indimail,dc=org
+namingContexts: o=indimail.org
 
 # search result
 search: 2
@@ -225,44 +229,44 @@ The bolded entries should be changed to suit your configuration requirements.
 
 % cat addressbook.ldif
 # Domain entry
-dn: dc=indimail,dc=org
-o: IndiMail LDAP Server
+dn: o=indimail.org
+o: indimail
 dc: indimail
 objectclass: dcObject
 objectclass: organization
 
 # Manager entry
-dn: cn=Manager,dc=indimail,dc=org
+dn: cn=Manager,o=indimail.org
 cn: Manager
 objectclass: organizationalRole
 
 # Users
-dn: ou=users,dc=indimail,dc=org
+dn: ou=users,o=indimail.org
 ou: users
 objectClass: top
 objectClass: organizationalUnit
 
 # Addressbook entry
-dn: ou=addressbook,dc=indimail,dc=org
+dn: ou=addressbook,o=indimail.org
 ou: addressbook
 objectClass: top
 objectClass: organizationalUnit
 
-% ldapadd -x -D 'cn=Manager,dc=indimail,dc=org' -W -f addressbook.ldif
+% ldapadd -x -D 'cn=Manager,o=indimail.org' -W -f addressbook.ldif
 Enter LDAP Password:
-adding new entry "dc=indimail,dc=org"
-adding new entry "cn=Manager,dc=indimail,dc=org"
-adding new entry "ou=users,dc=indimail,dc=org"
-adding new entry "ou=addressbook,dc=indimail,dc=org"
+adding new entry "o=indimail.org"
+adding new entry "cn=Manager,o=indimail.org"
+adding new entry "ou=users,o=indimail.org"
+adding new entry "ou=addressbook,o=indimail.org"
 
 The following LDAP search is requesting a listing of all entries starting from the
-base "dc=indimail,dc=org". This should return all of the entries that where added in the
+base "o=indimail.org". This should return all of the entries that where added in the
 previous step.
 
-% ldapsearch -x -b 'dc=indimail,dc=org' '(objectclass=*)'
+% ldapsearch -x -b 'o=indimail.org' '(objectclass=*)'
 
 # indimail.com
-dn: dc=indimail,dc=org
+dn: o=indimail.org
 objectClass: top
 objectClass: dcObject
 objectClass: organization
@@ -270,18 +274,18 @@ o: Home LDAP Network
 dc: indimail
 
 # Manager, indimail.com
-dn: cn=Manager,dc=indimail,dc=org
+dn: cn=Manager,o=indimail.org
 objectClass: organizationalRole
 cn: Manager
 
 # users, indimail.com
-dn: ou=users,dc=indimail,dc=org
+dn: ou=users,o=indimail.org
 ou: users
 objectClass: top
 objectClass: organizationalUnit
 
 # addressbook, indimail.com
-dn: ou=addressbook,dc=indimail,dc=org
+dn: ou=addressbook,o=indimail.org
 ou: addressbook
 objectClass: top
 objectClass: organizationalUnit
@@ -293,7 +297,7 @@ The first line (dn:) designates where about in the directory the entry will belo
 imported, this should be changed to suit your needs.
 
 % cat newcontact.ldif
-dn:uid=mbhangui,ou=addressbook,dc=indimail,dc=org
+dn:uid=mbhangui,ou=addressbook,o=indimail.org
 uid: mbhangui
 cn: Manvendra Bhangui
 gn: Manvendra
@@ -316,13 +320,13 @@ userPassword: {MD5}j+eKwOqr8vR0sN46lo4WXg==
 The contents of the LDIF file can be added into the directory service using the "ldapadd"
 command below.
 
-% ldapadd -x -D 'cn=Manager,dc=indimail,dc=org' -W -f newcontact.ldif
+% ldapadd -x -D 'cn=Manager,o=indimail.org' -W -f newcontact.ldif
 Enter LDAP Password:
-adding new entry "uid=mbhangui,ou=addressbook,dc=indimail,dc=org"
+adding new entry "uid=mbhangui,ou=addressbook,o=indimail.org"
 
 You can now use ldapsearch with authentication to test
-% ldapsearch -x -b 'dc=indimail,dc=org' \
-    -D "uid=mbhangui,ou=AddressBook,dc=indimail,dc=org" '(objectclass=*)' \
+% ldapsearch -x -b 'o=indimail.org' \
+    -D "uid=mbhangui,ou=AddressBook,o=indimail.org" '(objectclass=*)' \
     -s sub -w manny
 
 If you do not require an address book and just require a basic user object to use for
@@ -334,23 +338,24 @@ It should also be noted that this object is stored in the "users" organisational
 is located outside of the address book directory.
 
 % cat useraccount.ldif 
-dn:uid=mbhangui,ou=users,dc=indimail,dc=org
+dn:uid=mbhangui,ou=users,o=indimail.org
 uid: mbhangui
+o:indimail.org
 userPassword: {MD5}j+eKwOqr8vR0sN46lo4WXg==
 objectClass: top
 objectClass: account
 objectClass: simpleSecurityObject
 
-% ldapadd -x -D 'cn=Manager,dc=indimail,dc=org' -W -f useraccount.ldif
+% ldapadd -x -D 'cn=Manager,o=indimail.org' -W -f useraccount.ldif
 Enter LDAP Password:
-adding new entry "uid=mbhangui,ou=users,dc=indimail,dc=org"
+adding new entry "uid=mbhangui,ou=users,o=indimail.org"
 
 For mbhangui to authenticate to the server, one needs to pass
-"uid=mbhangui,ou=users,dc=indimail,dc=org" as username along with the the plain text value of
+"uid=mbhangui,ou=users,o=indimail.org" as username along with the the plain text value of
 password, the hashed value is only for storage purposes. 
 
-% ldapsearch -x -b 'ou=addressbook,dc=indimail,dc=org' \
-      -D "uid=mbhangui,ou=users,dc=indimail,dc=org" '(objectclass=*)' -s sub -w manny
+% ldapsearch -x -b 'ou=addressbook,o=indimail.org' \
+      -D "uid=mbhangui,ou=users,o=indimail.org" '(objectclass=*)' -s sub -w manny
 
 NOTE: You can use ldap-checkpwd(8) if you want IndiMail to authenticate against ldap
 
@@ -381,11 +386,18 @@ Remember, not all clients can write to the address book, so use the phpLDAPadmin
 to add and manage the entries as needed.
 
 LDAP Server      : your_host_IP:389
-Search Base      : ou=addressbook,dc=indimail,dc=org
+Search Base      : ou=addressbook,o=indimail.org
 Login Method     : use distinguished name (if listed)
-Username         : uid=user,ou=addressbook,dc=indimail,dc=org
+Username         : uid=user,ou=addressbook,o=indimail.org
 Password         : As entered in newcontact.ldif file (plain text version)
 Secure Connection: Never (unless encryption has been configured)
 
 In the above replace 'user' with the actual user created in ldap by using ldapadd
 
+checkpassword authentication
+
+declare -x LDAP_BASE="ou=users,o=indimail.org"
+declare -x LDAP_FILTER="(&(uid=%u)(o=%h))"
+% printf "mbhangui@indimail.org\0manny\0\0" | ldap-checkpwd /bin/ls -ld /tmp 3<&0
+% echo $?
+0
