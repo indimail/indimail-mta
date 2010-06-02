@@ -1,5 +1,8 @@
 /*-
  * $Log: ldap-checkpwd.c,v $
+ * Revision 1.4  2010-06-02 15:20:37+05:30  Cprogrammer
+ * fix for users without '@' sign
+ *
  * Revision 1.3  2010-06-02 14:55:05+05:30  Cprogrammer
  * added anon bind
  *
@@ -222,7 +225,10 @@ ldap_lookup(char *login, char *password, char **error, uid_t *userId, gid_t *gro
 			*error = error_str(errno);
 		return(-1);
 	}
-	host = login + (at = str_chr(login, '@')) + 1;
+	if (login[at = str_chr(login, '@')] == 0)
+		host = "";
+	else
+		host = login + at + 1;
 	/*
 	 * The bind DN. This is always used for simple authentication (although it may be a
 	 * zero-length string for anonymous simple authentication), and is generally not used
@@ -454,7 +460,7 @@ ldap_lookup(char *login, char *password, char **error, uid_t *userId, gid_t *gro
 void
 getversion_ldap_checkpwd_c()
 {
-	static char    *x = "$Id: ldap-checkpwd.c,v 1.3 2010-06-02 14:55:05+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: ldap-checkpwd.c,v 1.4 2010-06-02 15:20:37+05:30 Cprogrammer Stab mbhangui $";
 
 	x++;
 }
