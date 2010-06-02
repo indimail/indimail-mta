@@ -1,5 +1,8 @@
 /*-
  * $Log: ldap-checkpwd.c,v $
+ * Revision 1.3  2010-06-02 14:55:05+05:30  Cprogrammer
+ * added anon bind
+ *
  * Revision 1.2  2010-05-05 11:48:11+05:30  Cprogrammer
  * fixed calls to my_error()
  *
@@ -197,7 +200,7 @@ ldap_lookup(char *login, char *password, char **error, uid_t *userId, gid_t *gro
 {
 	char           *attrs[] = { NULL };
 	char           *host, *dn, *port, *ptr;
-	char           *ldap_host, *ldap_bind_dn, *ldap_bind_passwd, *ldap_filter,
+	char           *ldap_host, *ldap_bind_dn, *ldap_bind_passwd = 0, *ldap_filter,
 				   *ldap_base, *ldap_scope;
 #ifdef EXTENDED_ATTRIBUTES
 	char           *ldap_home_field, *ldap_uid_field, *ldap_gid_field;
@@ -220,8 +223,26 @@ ldap_lookup(char *login, char *password, char **error, uid_t *userId, gid_t *gro
 		return(-1);
 	}
 	host = login + (at = str_chr(login, '@')) + 1;
-	ldap_bind_dn = env_get("LDAP_BIND_DN");
-	ldap_bind_passwd = env_get("LDAP_BIND_PASSWD");
+	/*
+	 * The bind DN. This is always used for simple authentication (although it may be a
+	 * zero-length string for anonymous simple authentication), and is generally not used
+	 * for SASL authentication.
+	 *
+	 * The credentials. The type of credentials provided vary based on the authentication
+	 * type.
+	 *
+	 *  For simple authentication, the credentials should be the password for the target
+	 *  bind DN, or an empty string for anonymous simple authentication.
+	 *
+	 *  For SASL authentication, the credentials should include the name of the SASL
+	 *  mechanism to use, and may optionally include encoded credential information
+	 *  appropriate for the SASL mechanism. 
+	 */
+	if (!(ldap_bind_dn = env_get("LDAP_BIND_DN"))) {
+		ldap_bind_dn = "";
+		ldap_bind_passwd = "";
+	} else
+		ldap_bind_passwd = env_get("LDAP_BIND_PASSWD");
 	switch((ret = ldap_simple_bind_s(ld, ldap_bind_dn, ldap_bind_passwd)))
 	{
 	case LDAP_SUCCESS:
@@ -321,7 +342,6 @@ ldap_lookup(char *login, char *password, char **error, uid_t *userId, gid_t *gro
 		return(-1);
 	}
 	if (!(res0 = ldap_first_entry(ld, res))) {
-		return(1);
 		if (error) {
 			ldap_get_option(ld, LDAP_OPT_RESULT_CODE, &ret);
 			*error = ldap_err2string(ret);
@@ -434,7 +454,7 @@ ldap_lookup(char *login, char *password, char **error, uid_t *userId, gid_t *gro
 void
 getversion_ldap_checkpwd_c()
 {
-	static char    *x = "$Id: ldap-checkpwd.c,v 1.2 2010-05-05 11:48:11+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: ldap-checkpwd.c,v 1.3 2010-06-02 14:55:05+05:30 Cprogrammer Stab mbhangui $";
 
 	x++;
 }
