@@ -181,7 +181,7 @@ I usually prefer to run privileged commands like this (so that I don't get fond 
 
     Prepare Source Directory Structure in the disk partition selected
     you have to extract minimum of 10 sources as per the directory
-    structure below. You may skip extraction of nssd-1.1, fetchmail-6.3.16,
+    structure below. You may skip extraction of nssd-1.1, fetchmail-6.3.17,
     depending on whether you require them. Most probably you have downloaded
     indimail-@version@.tar.gz only. You require to additionally download the
     following sources mentioned below. Except for qmail, ucspi-tcp, bogofilter,
@@ -209,7 +209,7 @@ I usually prefer to run privileged commands like this (so that I don't get fond 
                                . courier-imap-3.0.8 (50   Mb)
                                . bogofilter-1.2.1   (11.6 Mb)
                                . clamav-0.96.1      (600  Mb)
-                               . fetchmail-6.3.16   (10.5 Mb)
+                               . fetchmail-6.3.17   (10.5 Mb)
                                . iwebadmin-1.0      (3.0  Mb)
                                ------------------------------
                                  Total              (800  Mb)
@@ -619,15 +619,15 @@ the installation.
     Then do ./configure <same_parameters_as_earlier_install> ; make ; make install-strip
  
     ##### STEP 8  ## Optional STEP ##### Fetchmail ############
-    Install fetchmail MD5 1a40acb371376c7d54fe468c99dfc216  
+    Install fetchmail MD5 7b1d449ecddb6164e22c32854adc4a75  
     current working directory /home/local/src
     Download the fetchmail package. The latest tested fetchmail package tested is
-    fetchmail-6.3.16.tar.bz2.
+    fetchmail-6.3.17.tar.bz2.
 
-    % wget http://download.berlios.de/fetchmail/fetchmail-6.3.16.tar.bz2
-    % bzip2 -d -c fetchmail-6.3.16.tar.bz2 | tar xf -
-    % gunzip -c indimail-@version@/patches/fetchmail-6.3.16.patch.gz | patch -p0
-    % cd fetchmail-6.3.16
+    % wget http://download.berlios.de/fetchmail/fetchmail-6.3.17.tar.bz2
+    % bzip2 -d -c fetchmail-6.3.17.tar.bz2 | tar xf -
+    % gunzip -c indimail-@version@/patches/fetchmail-6.3.17.patch.gz | patch -p0
+    % cd fetchmail-6.3.17
     % autoreconf -fi
     % ./configure --prefix=@indimaildir@ --enable-indimail --enable-indimaildir=@indimaildir@ \
         --with-ssl \
