@@ -74,3 +74,5 @@ use getuid, setuid in imapd.c pop3dserver.c to prevent root privileges
 sync imap version with with courier-imap-4.5.0 (except proxy and tcpd)
 10/03/2010
 update to courier-imap 4.7.0
+03/06/2010
+update to courier-imap 4.8.0
