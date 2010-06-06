@@ -239,7 +239,7 @@ if [ -x /usr/bin/chrpath ] ; then
 fi
 
 %files
-%defattr(-,root,root,0555)
+%defattr(-,root,root,-)
 %dir %attr(555,root,qmail)              %{_prefix}
 
 %attr(6755,indimail,indimail)       @cgibindir@/qmailadmin
