@@ -67,6 +67,7 @@
        output of `mysql_real_escape_string()'.
        so have `sql-mode=NO_BACKSLASH_ESCAPES' in the server option
        file (@indimaildir@/etc/indimail.cnf)
+
        # @indimaildir@/sbin/svctool --config=mysql --mysqlPrefix=@mysql_prefix@ \
            --model=medium --no-of-cpu=2 --mysqlport=3306 --mysqlsocket=/tmp/mysql.sock
 
@@ -74,6 +75,9 @@
        # @indimaildir@/sbin/svctool --config=mysqldb --mysqlPrefix=@mysql_prefix@ \
            --databasedir=@indimaildir@/mysqldb --default-domain=indimail.org \
            --base_path=/home/mail
+
+       Create a link to IndiMail's MySQL config file
+       # ln -sf @indimaildir@/etc/indimail.cnf /etc/indimail.cnf
 
     b) For creation of a database in an existing running copy of MySQL on your server
        The below are needed only if you are going to use the existing MySQL database).
@@ -84,6 +88,10 @@
        # @indimaildir@/sbin/svctool --config=mysqldb --mysqlPrefix=@mysql_prefix@ \
            --databasedir=@indimaildir@/mysqldb --default-domain=indimail.org --base_path=/home/mail \
            --stdout | mysql -u user -ppassword
+
+       Create a link to existing MySQL config file
+       # ln -sf /etc/my.cnf /etc/indimail.cnf
+
        NOTE: user and password are the userid and password of a privileged user in your
        existing MySQL Database)
 
@@ -102,6 +110,9 @@
 
        also have 'sql-mode=NO_BACKSLASH_ESCAPES' in the server option
        file (my.cnf or wherever your my.cnf lies)
+
+       Create a link to existing MySQL config file
+       # ln -sf /etc/my.cnf /etc/indimail.cnf
 
        NOTE: user and password are the userid and password of a privileged user in your
        existing MySQL Database)
