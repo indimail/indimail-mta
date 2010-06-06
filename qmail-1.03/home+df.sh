@@ -5,5 +5,5 @@
 # Using qmail-local to deliver messages to ~/Mailbox by default.
 
 exec env - PATH="QMAIL/bin:$PATH" \
-qmail-start '|dot-forward .forward
+qmail-daemon '|dot-forward .forward
 ./Mailbox' splogger qmail
