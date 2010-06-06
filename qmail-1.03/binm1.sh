@@ -5,6 +5,6 @@
 # Using BSD 4.4 binmail interface: /usr/libexec/mail.local -r
 
 exec env - PATH="QMAIL/bin:$PATH" \
-qmail-start \
+qmail-daemon \
 '|preline -f /usr/libexec/mail.local -r "${SENDER:-MAILER-DAEMON}" -d "$USER"' \
 splogger qmail

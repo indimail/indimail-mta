@@ -639,7 +639,7 @@ reliable.
 Answer: Install daemontools (http://pobox.com/~djb/daemontools.html).
 Make a /var/log/qmail directory, owned by qmaill, mode 2700. Do
 
-   qmail-start ./Mailbox /usr/local/bin/accustamp \
+   qmail-daemon ./Mailbox /usr/local/bin/accustamp \
    | setuser qmaill /usr/local/bin/cyclog /var/log/qmail &
 
 in /var/qmail/rc.
