@@ -1,5 +1,14 @@
 #
 # $Log: indimail.spec.in,v $
+# Revision 2.176  2010-06-06 10:08:35+05:30  Cprogrammer
+# changed defattr after problem with RPM packaging permissions after upgrade to FC13
+#
+# Revision 2.175  2010-06-05 14:34:15+05:30  Cprogrammer
+# fedora 13 port
+#
+# Revision 2.174  2010-06-03 12:21:12+05:30  Cprogrammer
+# upgraded to fetchmail 6.3.17
+#
 # Revision 2.173  2010-05-29 17:01:11+05:30  Cprogrammer
 # added libclam*.so for mac
 #
@@ -543,7 +552,7 @@
 # rpm spec file for indimail
 #
 #
-# $Id: indimail.spec.in,v 2.173 2010-05-29 17:01:11+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 2.176 2010-06-06 10:08:35+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %define _unpackaged_files_terminate_build 1
 
@@ -634,7 +643,7 @@
 %define mysqlPrefix        @mysql_prefix@
 %endif
 
-Summary: A Fast, Efficient & Secure Mail Server with Multi-Domain/Multi-Host support
+Summary: A Fast, Efficient & Secure Mail Server with Multi-Domain/Multi-Host/Multi-Protocol support
 Name: indimail
 Version: @version@
 %if %build_on_obs != 0
@@ -1306,7 +1315,7 @@ if [ %noclamav -eq 0 ] ; then
 fi
 
 %files -f config_files.list
-%defattr(-, root, root, 0555)
+%defattr(-, root, root,-)
 #
 # Directories
 #
@@ -2318,7 +2327,13 @@ fi
 if [ -f %{_prefix}/sbin/initsvc ] ; then
 	%{_prefix}/sbin/initsvc -status
 fi
-if test -f %{_sysconfdir}/event.d/svscan
+
+if test -f %{_sysconfdir}/init/svscan.conf
+then
+	/sbin/initctl emit qmailstop > /dev/null 2>&1
+	echo "Giving IndiMail exactly 5 seconds to exit nicely"
+	sleep 5
+elif test -f %{_sysconfdir}/event.d/svscan
 then
 	/sbin/initctl emit qmailstop > /dev/null 2>&1
 	echo "Giving IndiMail exactly 5 seconds to exit nicely"
@@ -2772,11 +2787,21 @@ if [ -f %{_prefix}/boot/rpm.init ] ; then
 fi
 
 %{_prefix}/sbin/initsvc -status
+if [ -f %{_sysconfdir}/rc.local ] ; then #FC13 stupidity
+	grep "/sbin/initctl emit qmailstart" %{_sysconfdir}/rc.local >/dev/null 2>&1
+	if [ $? -ne 0 ] ; then
+		(
+		echo "# Start IndiMail"
+		echo "/sbin/initctl emit qmailstart"
+		) >> %{_sysconfdir}/rc.local
+	fi
+fi
+
 if [ %noclamav -eq 0 ] ; then
 	%{__rm} -f %{servicedir}/freshclam/down
 fi
 
-if [ -f %{_sysconfdir}/event.d/svscan ] ; then
+if [ -f %{_sysconfdir}/init/svscan.conf -o -f %{_sysconfdir}/event.d/svscan ] ; then
 	echo "1. Issue /sbin/initctl emit qmailstart to start services"
 	count=1
 else
@@ -2813,7 +2838,15 @@ fi
 #if [ $argv1 -eq 1 ] ; then
 #fi
 
-if test -f %{_sysconfdir}/event.d/svscan
+if test -f %{_sysconfdir}/init/svscan.conf
+then
+	/sbin/initctl emit qmailstop > /dev/null 2>&1
+	echo "Giving IndiMail exactly 5 seconds to exit nicely"
+	sleep 5
+	if [ $argv1 -ne 1 ] ; then # not an upgrade
+		%{__rm} -f %{_sysconfdir}/init/svscan.conf
+	fi
+elif test -f %{_sysconfdir}/event.d/svscan
 then
 	/sbin/initctl emit qmailstop > /dev/null 2>&1
 	echo "Giving IndiMail exactly 5 seconds to exit nicely"
@@ -3074,8 +3107,8 @@ fi
 if [ $argv1 -eq 1 ] ; then
 	exit 0
 fi
-if [ -f /etc/init.d/sendmail ] ; then
-	/etc/init.d/sendmail stop
+if [ -f %{_sysconfdir}/init.d/sendmail ] ; then
+	%{_sysconfdir}/init.d/sendmail stop
 	if [ -f /sbin/chkconfig ] ; then
 		/sbin/chkconfig --del sendmail
 	fi
@@ -3108,10 +3141,10 @@ for i in /usr/lib/sendmail /usr/sbin/sendmail; do
 		/bin/mv $i.old $i
 	fi
 done
-if [ -f /etc/init.d/sendmail ] ; then
+if [ -f %{_sysconfdir}/init.d/sendmail ] ; then
 	if [ -f /sbin/chkconfig ] ; then
 		/sbin/chkconfig --add sendmail
-		/etc/init.d/sendmail start
+		%{_sysconfdir}/init.d/sendmail start
 	fi
 fi
 
