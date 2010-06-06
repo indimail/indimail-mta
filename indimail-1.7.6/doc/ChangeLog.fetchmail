@@ -14,7 +14,8 @@
 
 10. rcfile_y.c - authmeth
 11. rcfile_y.h - authmeth
-                          Checklist for Adding Options
+
+Checklist for Adding Options
 
    Adding a control option is not complicated in principle, but there are
    a lot of fiddly details in the process. You'll need to do the following
