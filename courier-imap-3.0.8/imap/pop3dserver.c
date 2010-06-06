@@ -1093,9 +1093,21 @@ main(int argc, char **argv)
 		exit(1);
 	}
 	free(p);
+	p = authgetoptionenv("disableinsecurepop3");
+	if (p && atoi(p))
+	{
+		free (p);
+	    if (!(p = getenv("POP3_TLS")) || !atoi(p))
+		{
+			printed(printf("-ERR POP3 access disabled via insecure connection.\r\n"));
+			fflush(stdout);
+			exit(1);
+		}
+	} else
+	if (p)
+		free(p);
 	fprintf(stderr, "INFO: LOGIN, user=%s, ip=[%s], port=[%s], protocol=%s\n", authaddr, remoteip, remoteport, protocol);
 	fflush(stderr);
-
 	msglist_cnt = 0;
 	msglist_l = 0;
 	msglist_a = 0;

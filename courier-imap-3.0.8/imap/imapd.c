@@ -1394,7 +1394,8 @@ int imapenhancedidle(void)
 
 	if ((w=maildirwatch_alloc(current_mailbox)) == NULL)
 	{
-		perror("malloc");
+		perror(current_mailbox);
+		fprintf(stderr, "This may be a problem with FAM or Gamin\n");
 		return (-1);
 	}
 
@@ -6192,18 +6193,31 @@ char	*p, *q;
 
 static void chkdisabled(const char *ip, const char *port)
 {
-	char *p;
+	char *p1, *p2;
 
-	p=authgetoptionenv("disableimap");
-
-	if (p && atoi(p))
+	p1 = authgetoptionenv("disableimap");
+	if (p1 && atoi(p1))
 	{
 		writes("* BYE IMAP access disabled for this account.\r\n");
 		writeflush();
+		free(p1);
 		exit(0);
 	}
-
-	free(p);
+	if (p1)
+		free(p1);
+	p1 = authgetoptionenv("disableinsecureimap");
+	if (p1 && atoi(p1))
+	{
+		if (!(p2 = getenv("IMAP_TLS")) || !atoi(p2))
+		{
+			writes("* BYE IMAP access disabled via insecure connection.\r\n");
+			writeflush();
+			free(p1);
+			exit(0);
+		}
+	}
+	if (p1)
+		free(p1);
 	fprintf(stderr, "INFO: LOGIN, user=%s, ip=[%s], port=[%s], protocol=%s\n",
 		getenv("AUTHENTICATED"), ip, port, protocol);
 }
@@ -6481,7 +6495,14 @@ int main(int argc, char **argv)
 		writeflush();
 		exit(0);
 	}
+	{
+		struct maildirwatch *w;
 
+		if ((w=maildirwatch_alloc(".")) == NULL)
+			writes("* OK [ALERT] Filesystem notification initialization error -- contact your mail administrator (check for configuration errors with the FAM/Gamin library)\r\n");
+		else
+			maildirwatch_free(w);
+	}
 	if ((tag=getenv("IMAPLOGINTAG")) != 0)
 	{
 		writes(tag);
