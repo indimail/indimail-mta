@@ -124,7 +124,8 @@ all-local: libindimail.la iauth.la inc_deps lib_deps .gitignore
 
 inc_deps: configure Makefile
 	if test -d ../qmail-1.03 ; then \
-		echo "-I../indimail-@VERSION@ -I../indimail-@VERSION@/eps-1.2 @auth_inc@" > ../qmail-1.03/inc_deps; \
+		echo "-I../indimail-@VERSION@ -I../indimail-@VERSION@/eps-1.2 @auth_inc@" \
+			> ../qmail-1.03/inc_deps; \
 	fi ; \
 	echo @auth_inc@ > inc_deps
 lib_deps: configure Makefile
