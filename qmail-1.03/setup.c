@@ -1,7 +1,10 @@
 /*
  * $Log: setup.c,v $
+ * Revision 1.17  2010-06-06 10:10:13+05:30  Cprogrammer
+ * use a less restrictive umask when not running as root
+ *
  * Revision 1.16  2010-05-16 16:08:18+05:30  Cprogrammer
- * use daemon as substitute for "mail" uer on OS X
+ * use daemon as substitute for "mail" user on OS X
  *
  * Revision 1.15  2009-12-09 23:57:53+05:30  Cprogrammer
  * additional closeflag argument to uidinit()
@@ -345,10 +348,13 @@ main(int argc, char **argv)
 			strerr_die2sys(111, FATAL, "unable to get uids/gids: ");
 		auto_uida = pw->pw_uid;
 		auto_gidn = pw->pw_gid;
+		umask(022);
 	} else
-	if(uidinit(1) == -1)
-		strerr_die2sys(111, FATAL, "unable to get uids/gids: ");
-	umask(077);
+	{
+		if(uidinit(1) == -1)
+			strerr_die2sys(111, FATAL, "unable to get uids/gids: ");
+		umask(077);
+	}
 	if (argc == 1)
 		hier(0);
 	else
@@ -360,7 +366,7 @@ main(int argc, char **argv)
 void
 getversion_setup_c()
 {
-	static char    *x = "$Id: setup.c,v 1.16 2010-05-16 16:08:18+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: setup.c,v 1.17 2010-06-06 10:10:13+05:30 Cprogrammer Stab mbhangui $";
 
 	x++;
 }
