@@ -1,5 +1,8 @@
 /*
  * $Log: initsvc.c,v $
+ * Revision 2.12  2010-06-05 14:33:04+05:30  Cprogrammer
+ * port for fedora 13
+ *
  * Revision 2.11  2010-05-18 08:24:43+05:30  Cprogrammer
  * fixed -list option for Mac OS X
  *
@@ -43,14 +46,18 @@
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: initsvc.c,v 2.11 2010-05-18 08:24:43+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: initsvc.c,v 2.12 2010-06-05 14:33:04+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
+#define SV_ON    1
+#define SV_OFF   2
+#define SV_STAT  3
+#define SV_PRINT 4
 int
 main(int argc, char **argv)
 {
 	FILE           *fp;
-	char           *qmaildir, *ptr;
+	char           *qmaildir, *ptr, *jobfile = 0, *print_cmd = 0, *jobdir;
 	char            buffer[2048];
 	int             flag, found, colonCount;
 	long            pos;
@@ -67,28 +74,41 @@ main(int argc, char **argv)
 		return (1);
 	}
 	if (!strncmp(argv[1], "-on", 4))
-		flag = 1;
+		flag = SV_ON;
 	else
 	if (!strncmp(argv[1], "-off", 5))
-		flag = 2;
+		flag = SV_OFF;
 	else
 	if (!strncmp(argv[1], "-status", 8))
-		flag = 3;
+		flag = SV_STAT;
 	else
 	if (!strncmp(argv[1], "-print", 7))
-		flag = 4;
+		flag = SV_PRINT;
 	else
 	{
 		fprintf(stderr, "usage: initsvc -on|-off|-status|-print\n");
 		return (1);
 	}
 	getEnvConfigStr(&qmaildir, "QMAILDIR", QMAILDIR);
+	if (!access("/etc/init", F_OK)) /*- Upstart */
+	{
+		jobdir = "/etc/init";
+		jobfile = "/etc/init/svscan.conf";
+		print_cmd = "/bin/cat /etc/init/svscan.conf;/bin/ls -l /etc/init/svscan.conf";
+	} else
 	if (!access("/etc/event.d", F_OK)) /*- Upstart */
 	{
+		jobdir = "/etc/event.d";
+		jobfile = "/etc/event.d/svscan";
+		print_cmd = "/bin/cat /etc/event.d/svscan;/bin/ls -l /etc/event.d/svscan";
+	} else
+		jobdir = (char *) 0;
+	if (jobdir)
+	{
 		/* Install upstart */
-		if (access("/etc/event.d/svscan", F_OK))
+		if (access(jobfile, F_OK))
 		{
-			if (flag == 2)
+			if (flag == SV_OFF)
 				return (0);
 			printf("Installing upstart service\n");
 			if (chdir(QMAILDIR) || chdir("boot"))
@@ -96,28 +116,29 @@ main(int argc, char **argv)
 				fprintf(stderr, "chdir %s/boot: %s\n", QMAILDIR, strerror(errno));
 				return(1);
 			} else
-			if (fappend("upstart", "/etc/event.d/svscan", "w", 0644, 0, getgid()))
+			if (fappend("upstart", jobfile, "w", 0644, 0, getgid()))
 			{
-				fprintf(stderr, "fappend %s %s: %s\n", "upstart", "/etc/event.d/svscan", strerror(errno));
+				fprintf(stderr, "fappend %s %s: %s\n", "upstart", jobfile, strerror(errno));
 				return(1);
 			}
 		} 
 		switch(flag)
 		{
-			case 1:
+			case SV_ON:
 				execl("/sbin/initctl", "initctl", "start", "svscan", (char *) 0);
 				perror("/sbin/initctl");
 				break;
-			case 2:
+			case SV_OFF:
 				execl("/sbin/initctl", "initctl", "stop", "svscan", (char *) 0);
 				perror("/sbin/initctl");
 				break;
-			case 3:
-				execl("/sbin/initctl", "initctl",  "list", "svscan", (char *) 0);
+			case SV_STAT:
+				execl("/sbin/initctl", "initctl",  "status", "svscan", (char *) 0);
 				perror("/sbin/initctl");
 				break;
-			case 4:
-				execl("/bin/sh", "sh", "-c",  "/bin/cat /etc/event.d/svscan;/bin/ls -l /etc/event.d/svscan", (char *) 0);
+			case SV_PRINT:
+				if (print_cmd)
+					execl("/bin/sh", "sh", "-c",  print_cmd, (char *) 0);
 				perror("/bin/ls");
 				break;
 		}
@@ -130,7 +151,7 @@ main(int argc, char **argv)
 		/* Install indimail.plist */
 		if (access("/System/Library/LaunchDaemons/indimail.plist", F_OK))
 		{
-			if (flag == 2)
+			if (flag == SV_OFF)
 				return (0);
 			printf("Installing indimail.plist\n");
 			if (chdir(QMAILDIR) || chdir("boot"))
@@ -146,21 +167,21 @@ main(int argc, char **argv)
 		} 
 		switch(flag)
 		{
-			case 1:
+			case SV_ON:
 				execl("/bin/launchctl", "launchctl", "load", "/System/Library/LaunchDaemons/indimail.plist", (char *) 0);
 				perror("/bin/launchctl");
 				break;
-			case 2:
+			case SV_OFF:
 				execl("/bin/launchctl", "launchctl", "unload", "/System/Library/LaunchDaemons/indimail.plist", (char *) 0);
 				perror("/bin/launchctl");
 				break;
-			case 3:
+			case SV_STAT:
 				execl("/bin/sh", "sh", "-c",
 				"/bin/launchctl list indimail || /bin/cat /System/Library/LaunchDaemons/indimail.plist;\
 				/bin/ls -l /System/Library/LaunchDaemons/indimail.plist", (char *) 0);
 				perror("/bin/launchctl");
 				break;
-			case 4:
+			case SV_PRINT:
 				execl("/bin/sh", "sh", "-c",
 				"/bin/cat /System/Library/LaunchDaemons/indimail.plist;/bin/ls -l /System/Library/LaunchDaemons/indimail.plist",
 				(char *) 0);
@@ -184,7 +205,7 @@ main(int argc, char **argv)
 			break;
 		if ((ptr = strstr(buffer, "SV:345:")) && strstr(buffer, "svscanboot"))
 		{
-			if(flag == 3)
+			if(flag == SV_STAT)
 			{
 				fclose(fp);
 				for(colonCount = 0;*ptr;ptr++)
@@ -204,7 +225,7 @@ main(int argc, char **argv)
 				}
 				return(2);
 			} else
-			if(flag == 4)
+			if(flag == SV_PRINT)
 			{
 				printf("%s", buffer);
 				fclose(fp);
@@ -214,7 +235,7 @@ main(int argc, char **argv)
 			break;
 		}
 	}
-	if(flag == 3)
+	if(flag == SV_STAT)
 		return(2);
 	if (!(fp = freopen("/etc/inittab", found ? "r+" : "a", fp)))
 	{
@@ -244,7 +265,7 @@ main(int argc, char **argv)
 	 * SV:345:respawn:/var/qmail/bin/svscanboot /service /service1 <>/dev/console 2<>/dev/console
 	 */
 	snprintf(buffer, sizeof(buffer), "SV:345:%s:%s/bin/svscanboot%s/service /service1 <>/dev/console 2<>/dev/console",
-			 flag == 1 ? "respawn" : "off", qmaildir, flag == 1 ? " " : "     ");
+			 flag == SV_ON ? "respawn" : "off", qmaildir, flag == SV_ON ? " " : "     ");
 	fprintf(fp, "%s\n", buffer);
 	if (fclose(fp))
 	{
