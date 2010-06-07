@@ -1,5 +1,8 @@
 #
 # $Log: indimail.spec.in,v $
+# Revision 2.178  2010-06-07 12:02:38+05:30  Cprogrammer
+# create tcp*.cdb before running rpm.init
+#
 # Revision 2.177  2010-06-07 09:42:06+05:30  Cprogrammer
 # preserve tcp.* files after uninstall. Create cdb files during installation
 #
@@ -555,7 +558,7 @@
 # rpm spec file for indimail
 #
 #
-# $Id: indimail.spec.in,v 2.177 2010-06-07 09:42:06+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 2.178 2010-06-07 12:02:38+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %define _unpackaged_files_terminate_build 1
 
@@ -2506,6 +2509,7 @@ fi
 %{__chown} -R qmaill:nofiles %{logdir}
 
 if [ -d /service ] ; then
+	echo "UFO found in /service. Moving it to /service.org"
 	%{__mv} -f %{servicedir} %{servicedir}.org
 fi
 if [ -f %{mysqlPrefix}/bin/mysql_config ] ; then
@@ -2784,13 +2788,6 @@ fi
 /sbin/ldconfig
 %endif
 
-# Misc/Configuration
-%{_prefix}/sbin/svctool --svscanlog --servicedir=%{servicedir}
-if [ -f %{_prefix}/boot/rpm.init ] ; then
-	echo "Running Custom Installation Script for post"
-	/bin/sh %{_prefix}/boot/rpm.init post
-fi
-
 # rebuild cdb
 for i in smtp qmtp qmqp imap pop3 poppass
 do
@@ -2802,7 +2799,6 @@ do
 	done
 done
 
-%{_prefix}/sbin/initsvc -status
 if [ -f %{_sysconfdir}/rc.local ] ; then #FC13 stupidity
 	grep "/sbin/initctl emit qmailstart" %{_sysconfdir}/rc.local >/dev/null 2>&1
 	if [ $? -ne 0 ] ; then
@@ -2812,6 +2808,15 @@ if [ -f %{_sysconfdir}/rc.local ] ; then #FC13 stupidity
 		) >> %{_sysconfdir}/rc.local
 	fi
 fi
+
+# Misc/Configuration
+%{_prefix}/sbin/svctool --svscanlog --servicedir=%{servicedir}
+if [ -f %{_prefix}/boot/rpm.init ] ; then
+	echo "Running Custom Installation Script for post"
+	/bin/sh %{_prefix}/boot/rpm.init post
+fi
+
+%{_prefix}/sbin/initsvc -status
 
 if [ %noclamav -eq 0 ] ; then
 	%{__rm} -f %{servicedir}/freshclam/down
