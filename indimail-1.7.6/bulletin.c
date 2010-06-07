@@ -1,5 +1,8 @@
 /*
  * $Log: bulletin.c,v $
+ * Revision 2.12  2010-06-07 18:31:28+05:30  Cprogrammer
+ * additional connect_all argument to findmdahost()
+ *
  * Revision 2.11  2009-02-06 11:36:37+05:30  Cprogrammer
  * fixed potential buffer overflow
  *
@@ -37,7 +40,7 @@
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: bulletin.c,v 2.11 2009-02-06 11:36:37+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: bulletin.c,v 2.12 2010-06-07 18:31:28+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef CLUSTERED_SITE
@@ -94,7 +97,7 @@ bulletin(char *emailFile, char *subscriber_list)
 			continue;
 		} else
 			domain = ptr + 1;
-		for (ptr = findmdahost(buffer); ptr && *ptr && *ptr != ':'; ptr++);
+		for (ptr = findmdahost(buffer, 0); ptr && *ptr && *ptr != ':'; ptr++);
 		if (ptr)
 		{
 			ptr++;

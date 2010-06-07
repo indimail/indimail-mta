@@ -1,5 +1,8 @@
 /*
  * $Log: ProcessInFifo.c,v $
+ * Revision 2.32  2010-06-07 18:33:18+05:30  Cprogrammer
+ * pass additional connect_all argument to findmdahost()
+ *
  * Revision 2.31  2010-04-11 22:22:25+05:30  Cprogrammer
  * replaced LPWD_QUERY with LIMIT_QUERY for domain limits
  *
@@ -108,7 +111,7 @@
  */
 
 #ifndef	lint
-static char     sccsid[] = "$Id: ProcessInFifo.c,v 2.31 2010-04-11 22:22:25+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: ProcessInFifo.c,v 2.32 2010-06-07 18:33:18+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #include <fcntl.h>
@@ -377,7 +380,7 @@ ProcessInFifo()
 				break;
 #ifdef CLUSTERED_SITE
 			case HOST_QUERY:
-				ptr = findmdahost(email);
+				ptr = findmdahost(email, 0);
 				if (ptr)
 					bytes = slen(ptr) + 1;
 				else

@@ -1,5 +1,8 @@
 /*
  * $Log: indimail.h,v $
+ * Revision 2.193  2010-06-07 18:32:06+05:30  Cprogrammer
+ * added connect_all argument to findmdahost()
+ *
  * Revision 2.192  2010-05-02 08:28:51+05:30  Cprogrammer
  * added connect_all argument to vclear_open_smtp()
  *
@@ -892,7 +895,7 @@
 #define INDIMAILH_H
 
 #ifndef	lint
-static char     sccsidh[] = "$Id: indimail.h,v 2.192 2010-05-02 08:28:51+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsidh[] = "$Id: indimail.h,v 2.193 2010-06-07 18:32:06+05:30 Cprogrammer Stab mbhangui $";
 #endif
 
 #include "config.h"
@@ -1624,7 +1627,7 @@ int             sstrcmp(char *, char *);
 int             sstrncmp(char *, char *, int);
 int             CreateDomainDirs(char *, uid_t, gid_t);
 char           *findhost(char *, int);
-char           *findmdahost(char *);
+char           *findmdahost(char *, int *);
 int             is_distributed_domain(char *);
 void            getversion(char *);
 char           *no_of_days(time_t);

@@ -1,5 +1,9 @@
 /*
  * $Log: findmdahost.c,v $
+ * Revision 2.16  2010-06-07 18:43:27+05:30  Cprogrammer
+ * added addition argument to indicate connection to all MySQL database or just one
+ * return number of dbinfo records in the additional argument
+ *
  * Revision 2.15  2010-04-24 09:29:23+05:30  Cprogrammer
  * default port already set in GetSmtproute() or get_smtp_service_port()
  *
@@ -56,16 +60,18 @@
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: findmdahost.c,v 2.15 2010-04-24 09:29:23+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: findmdahost.c,v 2.16 2010-06-07 18:43:27+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef CLUSTERED_SITE
 #include <string.h>
+#include <stdlib.h>
+#include <errno.h>
 
 char           *
-findmdahost(char *email)
+findmdahost(char *email, int *total)
 {
-	int             is_dist, count, port;
+	int             is_dist, count, port, connect_all;
 	char            user[MAX_BUFF], domain[MAX_BUFF];
 	static char     mailhost[MAX_BUFF];
 	char           *ptr, *cptr, *real_domain, *ip;
@@ -98,8 +104,42 @@ findmdahost(char *email)
 			return (ip);
 	} 
 	/*- reach here if non-distributed */
-	if (OpenDatabases())
-		return ((char *) 0);
+	if (!total)
+		connect_all = 1;
+	else
+		connect_all = *total;
+	if (connect_all)
+	{
+		if (OpenDatabases())
+			return ((char *) 0);
+	} else
+	{
+		if (RelayHosts)
+		{
+			for (count = 0, rhostsptr = RelayHosts;*rhostsptr;rhostsptr++, count++);
+			*total = count;
+		} else
+		{
+			if (!(RelayHosts = LoadDbInfo_TXT(total)))
+			{
+				perror("vauthOpen_user: LoadDbInfo_TXT");
+				return ((char *) 0);
+			}
+			for (rhostsptr = RelayHosts;*rhostsptr;rhostsptr++)
+				(*rhostsptr)->fd = -1;
+		}
+		if (!MdaMysql)
+		{
+			if (!(MdaMysql = (MYSQL **) calloc(1, sizeof(MYSQL *) * (*total))))
+			{
+				fprintf(stderr, "vauthOpen_user: calloc: %d Bytes: %s\n",
+					*total * (int) sizeof(MYSQL *), strerror(errno));
+				return ((char *) 0);
+			}
+			for (mysqlptr = MdaMysql, rhostsptr = RelayHosts;*rhostsptr;mysqlptr++, rhostsptr++)
+				*mysqlptr = (MYSQL *) 0;
+		}
+	}
 	for (count= 1, mysqlptr = MdaMysql, rhostsptr = RelayHosts;*rhostsptr;mysqlptr++, rhostsptr++, count++)
 	{
 		/*- for non distributed only one entry is there in mcd file */
@@ -108,6 +148,13 @@ findmdahost(char *email)
 	}
 	if (*rhostsptr)
 	{
+		if (!connect_all && !*mysqlptr && !((*mysqlptr) = (MYSQL *) calloc(1, sizeof(MYSQL))))
+		{
+			fprintf(stderr, "vauthOpen_user: calloc: %d Bytes: %s",
+				(int) sizeof(MYSQL *), strerror(errno));
+			(*rhostsptr)->fd = -1;
+			return ((char *) 0);
+		}
 		if ((*rhostsptr)->fd == -1)
 		{
 			if (connect_db(rhostsptr, mysqlptr))

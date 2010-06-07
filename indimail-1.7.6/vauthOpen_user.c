@@ -1,5 +1,8 @@
 /*
  * $Log: vauthOpen_user.c,v $
+ * Revision 2.11  2010-06-07 18:44:12+05:30  Cprogrammer
+ * pass additional connect_all argument to findmdahost()
+ *
  * Revision 2.10  2010-05-07 13:56:50+05:30  Cprogrammer
  * include stdlib.h to fix compiler warnng
  *
@@ -41,7 +44,7 @@
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vauthOpen_user.c,v 2.10 2010-05-07 13:56:50+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: vauthOpen_user.c,v 2.11 2010-06-07 18:44:12+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef CLUSTERED_SITE
@@ -67,7 +70,7 @@ vauthOpen_user(char *email, int connect_all)
 		getEnvConfigStr(&ptr, "DEFAULT_DOMAIN", DEFAULT_DOMAIN);
 	for (cptr = domain;*ptr;*cptr++ = *ptr++);
 	*cptr = 0;
-	if (!(ptr = findmdahost(email)))
+	if (!(ptr = findmdahost(email, &total)))
 		return(-1);
 	for (;*ptr && *ptr != ':';ptr++);
 	if (!*ptr++)
@@ -80,33 +83,44 @@ vauthOpen_user(char *email, int connect_all)
 			return(-1);
 	} else
 	{
-		if (!RelayHosts && !(RelayHosts = LoadDbInfo_TXT(&total)))
+		if (RelayHosts)
 		{
-			perror("vauthOpen_user: LoadDbInfo_TXT");
-			return(-1);
+			for (count = 0, rhostsptr = RelayHosts, mysqlptr = MdaMysql;*rhostsptr;mysqlptr++, rhostsptr++, count++);
+			total = count;
+		} else
+		{
+			total = 0;
+			if (!(RelayHosts = LoadDbInfo_TXT(&total)))
+			{
+				perror("vauthOpen_user: LoadDbInfo_TXT");
+				return(-1);
+			}
+			for (rhostsptr = RelayHosts; *rhostsptr; rhostsptr++)
+				(*rhostsptr)->fd = -1;
 		}
-		if (!(MdaMysql = (MYSQL **) calloc(1, sizeof(MYSQL *) * (total))))
+		if (!MdaMysql)
 		{
-			fprintf(stderr, "vauthOpen_user: calloc: %d Bytes: %s",
-				total * (int) sizeof(MYSQL *), strerror(errno));
-			return (-1);
+			if (!(MdaMysql = (MYSQL **) calloc(1, sizeof(MYSQL *) * (total))))
+			{
+				fprintf(stderr, "vauthOpen_user: calloc: %d Bytes: %s\n",
+					total * (int) sizeof(MYSQL *), strerror(errno));
+				return (-1);
+			}
+			for (rhostsptr = RelayHosts, mysqlptr = MdaMysql;*rhostsptr;mysqlptr++, rhostsptr++)
+				*mysqlptr = (MYSQL *) 0;
 		}
 	}
-	rhostsptr = RelayHosts;
-	mysqlptr = MdaMysql;
 	if (!(real_domain = vget_real_domain(domain)))
 		real_domain = domain;
-	for (count = 1, rhostsptr = RelayHosts;*rhostsptr;mysqlptr++, rhostsptr++, count++)
+	for (count = 1, rhostsptr = RelayHosts, mysqlptr = MdaMysql;*rhostsptr;mysqlptr++, rhostsptr++, count++)
 	{
 		if (!strncmp(real_domain, (*rhostsptr)->domain, DBINFO_BUFF) &&
 				!strncmp(mdahost, (*rhostsptr)->mdahost, DBINFO_BUFF))
 			break;
-		if (!connect_all)
-			*mysqlptr = (MYSQL *) 0;
 	}
 	if (*rhostsptr)
 	{
-		if (!connect_all && !((*mysqlptr) = (MYSQL *) calloc(1, sizeof(MYSQL))))
+		if (!connect_all && !*mysqlptr && !((*mysqlptr) = (MYSQL *) calloc(1, sizeof(MYSQL))))
 		{
 			fprintf(stderr, "vauthOpen_user: calloc: %d Bytes: %s",
 				(int) sizeof(MYSQL *), strerror(errno));
