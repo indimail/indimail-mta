@@ -1,5 +1,8 @@
 #
 # $Log: indimail.spec.in,v $
+# Revision 2.177  2010-06-07 09:42:06+05:30  Cprogrammer
+# preserve tcp.* files after uninstall. Create cdb files during installation
+#
 # Revision 2.176  2010-06-06 10:08:35+05:30  Cprogrammer
 # changed defattr after problem with RPM packaging permissions after upgrade to FC13
 #
@@ -552,7 +555,7 @@
 # rpm spec file for indimail
 #
 #
-# $Id: indimail.spec.in,v 2.176 2010-06-06 10:08:35+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 2.177 2010-06-07 09:42:06+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %define _unpackaged_files_terminate_build 1
 
@@ -1291,7 +1294,9 @@ for i in indimail.cnf tcp.imap tcp.imap.cdb tcp.pop3 tcp.pop3.cdb \
 tcp.smtp tcp.smtp.cdb tcp.qmtp tcp.qmtp.cdb tcp.qmqp tcp.qmqp.cdb \
 tcp.poppass tcp.poppass.cdb services.log
 do
-	$TOUCH %{buildroot}%{_prefix}/etc/$i
+	if [ ! -f %{buildroot}%{_prefix}/etc/$i ] ; then
+		$TOUCH %{buildroot}%{_prefix}/etc/$i
+	fi
 done
 %if %nonssd == 0
 	$TOUCH %{buildroot}%{_prefix}/etc/nssd.conf
@@ -2786,6 +2791,17 @@ if [ -f %{_prefix}/boot/rpm.init ] ; then
 	/bin/sh %{_prefix}/boot/rpm.init post
 fi
 
+# rebuild cdb
+for i in smtp qmtp qmqp imap pop3 poppass
+do
+	for j in `/bin/ls %{_prefix}/etc/tcp*.$i 2>/dev/null`
+	do
+		echo "Creating CDB $j.cdb"
+   		%{_prefix}/bin/tcprules $j.cdb $j.tmp < $j && /bin/chmod 664 $j.cdb \
+			&& chown indimail:indimail $j.cdb
+	done
+done
+
 %{_prefix}/sbin/initsvc -status
 if [ -f %{_sysconfdir}/rc.local ] ; then #FC13 stupidity
 	grep "/sbin/initctl emit qmailstart" %{_sysconfdir}/rc.local >/dev/null 2>&1
@@ -2924,8 +2940,7 @@ done
 /bin/rmdir --ignore-fail-on-non-empty %{_prefix}/man 2>/dev/null
 
 echo "removing configuration"
-for i in indimail.cnf tcp.imap tcp.pop3 tcp.smtp tcp.qmtp tcp.qmqp tcp.poppass \
-clamd.conf freshclam.conf
+for i in indimail.cnf clamd.conf freshclam.conf
 do
 	%{__rm} -f %{_prefix}/etc/$i
 done
