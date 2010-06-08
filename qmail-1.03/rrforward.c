@@ -1,5 +1,8 @@
 /*
  * $Log: rrforward.c,v $
+ * Revision 1.5  2010-06-08 22:00:46+05:30  Cprogrammer
+ * use envdir_set() on queuedefault to set default queue parameters
+ *
  * Revision 1.4  2008-07-15 19:53:39+05:30  Cprogrammer
  * porting for Mac OS X
  *
@@ -172,7 +175,7 @@ main(argc, argv)
 void
 getversion_rrforward_c()
 {
-	static char    *x = "$Id: rrforward.c,v 1.4 2008-07-15 19:53:39+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: rrforward.c,v 1.5 2010-06-08 22:00:46+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

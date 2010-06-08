@@ -1,5 +1,8 @@
 /*
  * $Log: qreceipt.c,v $
+ * Revision 1.7  2010-06-08 22:00:33+05:30  Cprogrammer
+ * use envdir_set() on queuedefault to set default queue parameters
+ *
  * Revision 1.6  2004-10-24 21:39:21+05:30  Cprogrammer
  * removed extra lines
  *
@@ -248,7 +251,7 @@ main(argc, argv)
 void
 getversion_qreceipt_c()
 {
-	static char    *x = "$Id: qreceipt.c,v 1.6 2004-10-24 21:39:21+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: qreceipt.c,v 1.7 2010-06-08 22:00:33+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

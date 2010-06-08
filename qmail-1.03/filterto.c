@@ -1,5 +1,8 @@
 /*
  * $Log: filterto.c,v $
+ * Revision 1.6  2010-06-08 21:59:20+05:30  Cprogrammer
+ * use envdir_set() on queuedefault to set default queue parameters
+ *
  * Revision 1.5  2008-07-15 19:51:11+05:30  Cprogrammer
  * porting for Mac OS X
  *
@@ -144,7 +147,7 @@ main(int argc, char **argv, char **envp)
 void
 getversion_filterto_c()
 {
-	static char    *x = "$Id: filterto.c,v 1.5 2008-07-15 19:51:11+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: filterto.c,v 1.6 2010-06-08 21:59:20+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

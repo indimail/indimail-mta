@@ -1,5 +1,8 @@
 /*
  * $Log: condredirect.c,v $
+ * Revision 1.10  2010-06-08 21:56:48+05:30  Cprogrammer
+ * use envdir_set() on queuedefault to set default queue parameters
+ *
  * Revision 1.9  2008-07-15 19:49:51+05:30  Cprogrammer
  * porting for Mac OS X
  *
@@ -134,7 +137,7 @@ main(argc, argv)
 void
 getversion_condredirect_c()
 {
-	static char    *x = "$Id: condredirect.c,v 1.9 2008-07-15 19:49:51+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: condredirect.c,v 1.10 2010-06-08 21:56:48+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

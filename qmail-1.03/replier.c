@@ -1,5 +1,8 @@
 /*
  * $Log: replier.c,v $
+ * Revision 1.6  2010-06-08 22:00:41+05:30  Cprogrammer
+ * use envdir_set() on queuedefault to set default queue parameters
+ *
  * Revision 1.5  2008-07-15 20:04:44+05:30  Cprogrammer
  * porting for Mac OS X
  *
@@ -309,7 +312,7 @@ main(int argc, char **argv)
 void
 getversion_replier_c()
 {
-	static char    *x = "$Id: replier.c,v 1.5 2008-07-15 20:04:44+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: replier.c,v 1.6 2010-06-08 22:00:41+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

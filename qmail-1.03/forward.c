@@ -1,5 +1,8 @@
 /*
  * $Log: forward.c,v $
+ * Revision 1.7  2010-06-08 21:59:24+05:30  Cprogrammer
+ * use envdir_set() on queuedefault to set default queue parameters
+ *
  * Revision 1.6  2008-07-15 19:51:23+05:30  Cprogrammer
  * porting for Mac OS X
  *
@@ -107,7 +110,7 @@ main(argc, argv)
 void
 getversion_forward_c()
 {
-	static char    *x = "$Id: forward.c,v 1.6 2008-07-15 19:51:23+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: forward.c,v 1.7 2010-06-08 21:59:24+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

@@ -1,5 +1,8 @@
 /*
  * $Log: envdir.c,v $
+ * Revision 1.3  2010-06-08 21:57:51+05:30  Cprogrammer
+ * moved code to set environment variables to envdir_set.c
+ *
  * Revision 1.2  2004-10-22 20:24:48+05:30  Cprogrammer
  * added RCS id
  *
@@ -50,7 +53,7 @@ main(int argc, char **argv)
 void
 getversion_envdir_c()
 {
-	static char    *x = "$Id: envdir.c,v 1.2 2004-10-22 20:24:48+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: envdir.c,v 1.3 2010-06-08 21:57:51+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
