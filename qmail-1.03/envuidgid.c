@@ -1,5 +1,8 @@
 /*
  * $Log: envuidgid.c,v $
+ * Revision 1.3  2010-06-08 21:58:33+05:30  Cprogrammer
+ * pathexec now returns allocated environment on failure which should be freed
+ *
  * Revision 1.2  2004-10-22 20:24:51+05:30  Cprogrammer
  * added RCS id
  *
@@ -58,7 +61,7 @@ main(int argc, char **argv)
 void
 getversion_envuidgid_c()
 {
-	static char    *x = "$Id: envuidgid.c,v 1.2 2004-10-22 20:24:51+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: envuidgid.c,v 1.3 2010-06-08 21:58:33+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

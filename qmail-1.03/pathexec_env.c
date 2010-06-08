@@ -1,5 +1,8 @@
 /*
  * $Log: pathexec_env.c,v $
+ * Revision 1.3  2010-06-08 21:59:53+05:30  Cprogrammer
+ * return allocated environment variable
+ *
  * Revision 1.2  2004-10-22 20:27:54+05:30  Cprogrammer
  * added RCS id
  *
@@ -89,7 +92,7 @@ pathexec(char **argv)
 void
 getversion_pathexec_env_c()
 {
-	static char    *x = "$Id: pathexec_env.c,v 1.2 2004-10-22 20:27:54+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: pathexec_env.c,v 1.3 2010-06-08 21:59:53+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

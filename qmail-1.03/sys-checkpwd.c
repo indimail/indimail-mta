@@ -1,5 +1,8 @@
 /*
  * $Log: sys-checkpwd.c,v $
+ * Revision 1.3  2010-06-08 22:00:54+05:30  Cprogrammer
+ * pathexec() now returns allocated environment variable which should be freed
+ *
  * Revision 1.2  2010-05-05 11:48:44+05:30  Cprogrammer
  * fixed calls to my_error
  *
@@ -189,7 +192,7 @@ main(int argc, char **argv)
 void
 getversion_sys_checkpwd_c()
 {
-	static char    *x = "$Id: sys-checkpwd.c,v 1.2 2010-05-05 11:48:44+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: sys-checkpwd.c,v 1.3 2010-06-08 22:00:54+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
