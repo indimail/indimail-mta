@@ -1,5 +1,8 @@
 /*
  * $Log: maildirserial.c,v $
+ * Revision 1.7  2010-06-08 21:59:30+05:30  Cprogrammer
+ * use envdir_set() on queuedefault to set default queue parameters
+ *
  * Revision 1.6  2004-10-22 20:26:29+05:30  Cprogrammer
  * added RCS id
  *
@@ -649,7 +652,7 @@ main(argc, argv)
 void
 getversion_maildirserial_c()
 {
-	static char    *x = "$Id: maildirserial.c,v 1.6 2004-10-22 20:26:29+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: maildirserial.c,v 1.7 2010-06-08 21:59:30+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

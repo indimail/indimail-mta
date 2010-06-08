@@ -1,5 +1,8 @@
 /*
  * $Log: new-inject.c,v $
+ * Revision 1.6  2010-06-08 21:59:42+05:30  Cprogrammer
+ * use envdir_set() on queuedefault to set default queue parameters
+ *
  * Revision 1.5  2009-08-13 19:05:56+05:30  Cprogrammer
  * code beautified
  *
@@ -684,7 +687,7 @@ main(argc, argv)
 void
 getversion_new_inject_c()
 {
-	static char    *x = "$Id: new-inject.c,v 1.5 2009-08-13 19:05:56+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: new-inject.c,v 1.6 2010-06-08 21:59:42+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

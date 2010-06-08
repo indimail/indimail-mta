@@ -1,5 +1,8 @@
 /*
  * $Log: dot-forward.c,v $
+ * Revision 1.5  2010-06-08 21:57:35+05:30  Cprogrammer
+ * use envdir_set() on queuedefault to set default queue parameters
+ *
  * Revision 1.4  2008-07-15 19:50:45+05:30  Cprogrammer
  * porting for Mac OS X
  *
@@ -521,7 +524,7 @@ main(argc, argv)
 void
 getversion_dot_forward_c()
 {
-	static char    *x = "$Id: dot-forward.c,v 1.4 2008-07-15 19:50:45+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: dot-forward.c,v 1.5 2010-06-08 21:57:35+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

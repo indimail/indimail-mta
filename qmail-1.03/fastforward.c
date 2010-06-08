@@ -1,5 +1,8 @@
 /*
  * $Log: fastforward.c,v $
+ * Revision 1.5  2010-06-08 21:59:13+05:30  Cprogrammer
+ * use envdir_set() on queuedefault to set default queue parameters
+ *
  * Revision 1.4  2008-07-15 19:51:02+05:30  Cprogrammer
  * porting for Mac OS X
  *
@@ -532,7 +535,7 @@ main(argc, argv)
 void
 getversion_fastforward_c()
 {
-	static char    *x = "$Id: fastforward.c,v 1.4 2008-07-15 19:51:02+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: fastforward.c,v 1.5 2010-06-08 21:59:13+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

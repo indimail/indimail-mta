@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-inject.c,v $
+ * Revision 1.22  2010-06-08 22:00:27+05:30  Cprogrammer
+ * use envdir_set() on queuedefault to set default queue parameters
+ *
  * Revision 1.21  2010-01-20 09:25:09+05:30  Cprogrammer
  * corrected error message
  *
@@ -1255,7 +1258,7 @@ main(argc, argv)
 void
 getversion_qmail_inject_c()
 {
-	static char    *x = "$Id: qmail-inject.c,v 1.21 2010-01-20 09:25:09+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: qmail-inject.c,v 1.22 2010-06-08 22:00:27+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
