@@ -12,6 +12,6 @@
 
 void            pathexec_run(char *, char **, char **);
 int             pathexec_env(char *, char *);
-void            pathexec(char **);
+char          **pathexec(char **);
 
 #endif

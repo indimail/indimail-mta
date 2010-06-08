@@ -17,6 +17,10 @@
  *
  */
 #include <unistd.h>
+#include "auto_qmail.h"
+#include "env.h"
+#include "envdir.h"
+#include "pathexec.h"
 #include "sgetopt.h"
 #include "substdio.h"
 #include "subfd.h"
@@ -30,13 +34,13 @@
 #include "tai.h"
 #include "stralloc.h"
 #include "sconfig.h"
-#include "auto_qmail.h"
 #include "case.h"
 #include "constmap.h"
 #include "qmail.h"
 #include "sig.h"
 #include "rewritehost.h"
 #include "rwhconfig.h"
+#include "variables.h"
 
 #define FATAL "new-inject: fatal: "
 
@@ -444,9 +448,9 @@ main(argc, argv)
 	int             argc;
 	char          **argv;
 {
-	int             i;
-	int             flagheader = 1;
-	int             opt;
+	int             i, opt, flagheader = 1;
+	char           *qbase;
+	char          **e;
 
 	sig_pipeignore();
 	tai_now(&start);
@@ -545,6 +549,22 @@ main(argc, argv)
 	}
 	if (chdir(auto_qmail) == -1)
 		strerr_die4sys(111, FATAL, "unable to switch to ", auto_qmail, ": ");
+	if (!(qbase = env_get("QUEUE_BASE")))
+	{
+		if (!controldir)
+		{
+			if (!(controldir = env_get("CONTROLDIR")))
+				controldir = "control";
+		}
+		if (chdir(controldir) == -1)
+			strerr_die4sys(111, FATAL, "unable to switch to ", controldir, ": ");
+		if (!access("defaultqueue", X_OK))
+		{
+			envdir_set("defaultqueue");
+			if ((e = pathexec(0)))
+				environ = e;
+		}
+	}
 	if (config_env(&name, "QMAILNAME") == -1)
 		nomem();
 	if (config_env(&name, "MAILNAME") == -1)

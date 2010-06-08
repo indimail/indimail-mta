@@ -8,6 +8,7 @@
  *
  */
 #include <unistd.h>
+#include "alloc.h"
 #include "error.h"
 #include "str.h"
 #include "pathexec.h"
@@ -93,7 +94,8 @@ int
 main(int argc, char **argv)
 {
 	char           *login, *password, *encrypted, *stored = 0;
-	int             r, i;
+	char          **e;
+	int             r, i, tmperrno;
 
 	if (argc < 2)
 		_exit(2);
@@ -166,7 +168,12 @@ main(int argc, char **argv)
 			out("authentication failure\n");
 			flush();
 		}
-		pathexec(argv + 1);
+		if ((e = pathexec(argv + 1)))
+		{
+			tmperrno = errno;
+			alloc_free((char *) e);
+			errno = tmperrno;
+		}
 		my_error("exec", 0, 111);
 	}
 	if (debug) {

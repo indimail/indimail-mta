@@ -14,6 +14,9 @@
  *
  */
 #include <unistd.h>
+#include "auto_qmail.h"
+#include "envdir.h"
+#include "pathexec.h"
 #include "sig.h"
 #include "exit.h"
 #include "env.h"
@@ -21,6 +24,7 @@
 #include "strerr.h"
 #include "substdio.h"
 #include "fmt.h"
+#include "variables.h"
 
 #define FATAL "forward: fatal: "
 
@@ -54,13 +58,32 @@ main(argc, argv)
 	int             argc;
 	char          **argv;
 {
-	char           *sender, *dtline, *qqeh, *qqx;
+	char           *sender, *dtline, *qqeh, *qqx, *qbase;
+	char         **e;
 
 	sig_pipeignore();
 	if (!(sender = env_get("NEWSENDER")))
 		strerr_die2x(100, FATAL, "NEWSENDER not set");
 	if (!(dtline = env_get("DTLINE")))
 		strerr_die2x(100, FATAL, "DTLINE not set");
+	if (chdir(auto_qmail) == -1)
+		strerr_die4sys(111, FATAL, "unable to chdir to ", auto_qmail, ": ");
+	if (!(qbase = env_get("QUEUE_BASE")))
+	{
+		if (!controldir)
+		{
+			if (!(controldir = env_get("CONTROLDIR")))
+				controldir = "control";
+		}
+		if (chdir(controldir) == -1)
+			strerr_die4sys(111, FATAL, "unable to switch to ", controldir, ": ");
+		if (!access("defaultqueue", X_OK))
+		{
+			envdir_set("defaultqueue");
+			if ((e = pathexec(0)))
+				environ = e;
+		}
+	}
 	if (qmail_open(&qqt) == -1)
 		strerr_die2sys(111, FATAL, "unable to fork: ");
 	qmail_puts(&qqt, dtline);

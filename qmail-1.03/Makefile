@@ -401,10 +401,14 @@ choose: choose.sh warn-auto.sh
 	chmod 555 choose
 
 condredirect: \
-load condredirect.o qmail.o strerr.a fd.a sig.a wait.a seek.a env.a \
-substdio.a error.a str.a fs.a auto_qmail.o alloc.a
-	./load condredirect qmail.o strerr.a fd.a sig.a wait.a \
-	seek.a env.a substdio.a error.a str.a fs.a auto_qmail.o alloc.a
+load condredirect.o qmail.o envdir_set.o pathexec_env.o \
+open_read.o openreadclose.o auto_qmail.o variables.o \
+pathexec_run.o strerr.a fd.a sig.a wait.a seek.a env.a \
+substdio.a error.a str.a fs.a stralloc.a alloc.a
+	./load condredirect qmail.o envdir_set.o pathexec_env.o \
+	open_read.o openreadclose.o auto_qmail.o variables.o \
+	pathexec_run.o strerr.a fd.a sig.a wait.a \
+	seek.a env.a substdio.a error.a str.a fs.a stralloc.a alloc.a
 
 condredirect.0: \
 condredirect.1
@@ -412,7 +416,8 @@ condredirect.1
 
 condredirect.o: \
 compile condredirect.c sig.h exit.h env.h error.h \
-wait.h seek.h qmail.h substdio.h strerr.h fmt.h
+wait.h seek.h qmail.h substdio.h strerr.h fmt.h \
+auto_qmail.h envdir.h pathexec.h variables.h
 	./compile condredirect.c
 
 qmailconfig: \
@@ -768,18 +773,22 @@ forgeries.7
 	nroff -man forgeries.7 > forgeries.0
 
 forward: \
-load forward.o qmail.o strerr.a alloc.a fd.a wait.a sig.a env.a \
-substdio.a error.a str.a fs.a auto_qmail.o alloc.a
-	./load forward qmail.o strerr.a alloc.a fd.a wait.a sig.a \
-	env.a substdio.a error.a str.a fs.a auto_qmail.o alloc.a
+load forward.o auto_qmail.o qmail.o variables.o \
+openreadclose.o envdir_set.o pathexec_env.o pathexec_run.o \
+open_read.o strerr.a alloc.a fd.a wait.a sig.a env.a \
+substdio.a error.a str.a fs.a alloc.a stralloc.a
+	./load forward auto_qmail.o qmail.o variables.o \
+	openreadclose.o envdir_set.o pathexec_env.o pathexec_run.o \
+	open_read.o strerr.a alloc.a fd.a wait.a sig.a \
+	env.a substdio.a error.a str.a fs.a alloc.a stralloc.a
 
 forward.0: \
 forward.1
 	nroff -man forward.1 > forward.0
 
 forward.o: \
-compile forward.c sig.h exit.h env.h qmail.h \
-strerr.h substdio.h fmt.h
+compile forward.c sig.h exit.h env.h qmail.h variables.h \
+strerr.h substdio.h fmt.h envdir.h pathexec.h auto_qmail.h
 	./compile forward.c
 
 fs.a: \
@@ -1530,12 +1539,14 @@ qmail-header.5
 qmail-inject: \
 load qmail-inject.o headerbody.o hfield.o newfield.o quote.o now.o \
 control.o date822fmt.o constmap.o qmail.o envrules.o wildmat.o \
-matchregex.o cdb_seek.o cdb_unpack.o cdb_hash.o case.a \
+matchregex.o cdb_seek.o cdb_unpack.o cdb_hash.o case.a pathexec_run.o \
+openreadclose.o pathexec_env.o envdir_set.o strerr_sys.o strerr_die.o \
 fd.a wait.a open.a getln.a sig.a getopt.a datetime.a token822.o env.a \
 stralloc.a alloc.a substdio.a error.a str.a fs.a auto_qmail.o variables.o \
 dns.lib
 	./load qmail-inject headerbody.o hfield.o newfield.o \
-	quote.o now.o control.o date822fmt.o constmap.o qmail.o \
+	quote.o now.o control.o date822fmt.o constmap.o qmail.o pathexec_run.o \
+	openreadclose.o pathexec_env.o envdir_set.o strerr_sys.o strerr_die.o \
 	matchregex.o cdb_seek.o cdb_unpack.o cdb_hash.o envrules.o \
 	wildmat.o case.a fd.a wait.a open.a getln.a sig.a getopt.a datetime.a \
 	token822.o env.a stralloc.a alloc.a substdio.a error.a \
@@ -1554,8 +1565,9 @@ qmail-inject.o: \
 compile qmail-inject.c sig.h substdio.h stralloc.h gen_alloc.h \
 subfd.h sgetopt.h subgetopt.h getln.h alloc.h str.h fmt.h \
 hfield.h token822.h control.h env.h gen_allocdefs.h error.h \
-qmail.h now.h datetime.h exit.h quote.h headerbody.h \
-auto_qmail.h newfield.h constmap.h envrules.h scan.h
+qmail.h now.h datetime.h exit.h quote.h headerbody.h envdir.h \
+auto_qmail.h newfield.h constmap.h envrules.h scan.h pathexec.h \
+variables.h
 	./compile qmail-inject.c
 
 envrules.o: \
@@ -2488,9 +2500,13 @@ qmail.h env.h auto_qmail.h scan.h
 
 qreceipt: \
 load qreceipt.o headerbody.o hfield.o quote.o token822.o qmail.o \
+envdir_set.o pathexec_env.o pathexec_run.o openreadclose.o \
+open_read.o strerr_die.o strerr_sys.o variables.o \
 getln.a fd.a wait.a sig.a env.a stralloc.a alloc.a substdio.a error.a \
 str.a auto_qmail.o scan_ulong.o
 	./load qreceipt headerbody.o hfield.o quote.o token822.o \
+	envdir_set.o pathexec_env.o pathexec_run.o openreadclose.o \
+	open_read.o strerr_die.o strerr_sys.o variables.o \
 	qmail.o getln.a fd.a wait.a sig.a env.a stralloc.a alloc.a \
 	substdio.a error.a str.a auto_qmail.o scan_ulong.o
 
@@ -2500,9 +2516,9 @@ qreceipt.1
 
 qreceipt.o: \
 compile qreceipt.c sig.h env.h substdio.h stralloc.h \
-subfd.h getln.h alloc.h str.h hfield.h token822.h \
+subfd.h getln.h alloc.h str.h hfield.h token822.h variables.h \
 gen_alloc.h error.h gen_allocdefs.h headerbody.h exit.h \
-open.h quote.h qmail.h
+open.h quote.h qmail.h auto_qmail.h envdir.h pathexec.h strerr.h
 	./compile qreceipt.c
 
 qsmhook: \
@@ -2554,10 +2570,14 @@ remoteinfo.h conf-ip
 	./compile `grep -h -v "^#" conf-ip` remoteinfo.c
 
 rrforward: \
-load rrforward.o qmail.o strerr.a alloc.a fd.a wait.a sig.a env.a \
-substdio.a error.a str.a fs.a lock.a seek.a auto_qmail.o alloc.a
-	./load rrforward qmail.o strerr.a alloc.a fd.a wait.a sig.a \
-	env.a substdio.a error.a str.a fs.a lock.a seek.a auto_qmail.o alloc.a
+load rrforward.o qmail.o openreadclose.o auto_qmail.o \
+open_read.o envdir_set.o pathexec_env.o pathexec_run.o \
+variables.o strerr.a alloc.a fd.a wait.a sig.a env.a stralloc.a \
+substdio.a error.a str.a fs.a lock.a seek.a alloc.a
+	./load rrforward qmail.o openreadclose.o auto_qmail.o \
+	open_read.o envdir_set.o pathexec_env.o pathexec_run.o \
+	variables.o strerr.a alloc.a fd.a wait.a sig.a stralloc.a \
+	env.a substdio.a error.a str.a fs.a lock.a seek.a alloc.a
 
 rrforward.0: \
 rrforward.1
@@ -2565,7 +2585,8 @@ rrforward.1
 
 rrforward.o: \
 compile rrforward.c sig.h seek.h exit.h env.h qmail.h \
-strerr.h substdio.h fmt.h lock.h scan.h str.h
+strerr.h substdio.h fmt.h lock.h scan.h str.h auto_qmail.h \
+envdir.h pathexec.h variables.h
 	./compile rrforward.c
 
 scan_8long.o: \
@@ -3283,10 +3304,12 @@ gen_alloc.h sig.h str.h case.h quote.h scan.h env.h byte.h conf-ip
 
 maildirserial: \
 load maildirserial.o auto_qmail.o qmail.o maildir.o sconfig.o quote.o \
+openreadclose.o envdir_set.o pathexec_env.o pathexec_run.o variables.o \
 prioq.o now.o env.a getopt.a mess822.a libtai.a getln.a strerr.a \
 substdio.a stralloc.a alloc.a error.a str.a open.a wait.a sig.a fd.a \
 fs.a
-	./load maildirserial auto_qmail.o qmail.o maildir.o \
+	./load maildirserial auto_qmail.o qmail.o maildir.o variables.o \
+	openreadclose.o envdir_set.o pathexec_env.o pathexec_run.o \
 	sconfig.o quote.o prioq.o now.o env.a getopt.a mess822.a \
 	libtai.a getln.a strerr.a substdio.a stralloc.a alloc.a \
 	error.a str.a open.a wait.a sig.a fd.a fs.a 
@@ -3298,10 +3321,10 @@ maildirserial.1
 maildirserial.o: \
 compile maildirserial.c sgetopt.h subgetopt.h scan.h stralloc.h \
 gen_alloc.h fd.h open.h getln.h subfd.h strerr.h \
-maildir.h prioq.h datetime.h \
+maildir.h prioq.h datetime.h envdir.h pathexec.h \
 wait.h sig.h str.h fmt.h tai.h uint64.h mess822.h \
-caltime.h caldate.h now.h datetime.h sconfig.h \
-qmail.h substdio.h auto_qmail.h conf-mime
+caltime.h caldate.h now.h datetime.h sconfig.h env.h \
+variables.h qmail.h substdio.h auto_qmail.h conf-mime
 	./compile `grep -h -v "^#" conf-mime` maildirserial.c
 
 serialcmd: \
@@ -3865,10 +3888,12 @@ exit.h byte.h
 
 new-inject: \
 load new-inject.o qmail.o auto_qmail.o rewritehost.o rwhconfig.o \
+envdir_set.o pathexec_env.o pathexec_run.o openreadclose.o variables.o \
 constmap.o sconfig.o env.a getopt.a mess822.a getln.a strerr.a \
 substdio.a stralloc.a alloc.a error.a sig.a fd.a wait.a open.a case.a \
 str.a fs.a libtai.a
-	./load new-inject qmail.o auto_qmail.o rewritehost.o \
+	./load new-inject qmail.o auto_qmail.o rewritehost.o variables.o \
+	envdir_set.o pathexec_env.o pathexec_run.o openreadclose.o \
 	rwhconfig.o constmap.o sconfig.o env.a getopt.a mess822.a \
 	getln.a strerr.a substdio.a stralloc.a alloc.a error.a \
 	sig.a fd.a wait.a open.a case.a str.a fs.a libtai.a 
@@ -3878,11 +3903,11 @@ new-inject.1
 	nroff -man new-inject.1 > new-inject.0
 
 new-inject.o: \
-compile new-inject.c subfd.h substdio.h getln.h mess822.h \
+compile new-inject.c subfd.h substdio.h getln.h mess822.h variables.h \
 stralloc.h gen_alloc.h caltime.h caldate.h strerr.h exit.h caltime.h \
 leapsecs.h tai.h uint64.h sgetopt.h subgetopt.h stralloc.h sconfig.h \
-stralloc.h auto_qmail.h case.h constmap.h qmail.h sig.h \
-rewritehost.h rwhconfig.h strerr.h str.h
+stralloc.h auto_qmail.h case.h constmap.h qmail.h sig.h env.h \
+rewritehost.h rwhconfig.h strerr.h str.h envdir.h pathexec.h
 	./compile new-inject.c
 
 tai_now.o: compile tai.h tai_now.c uint64.h
@@ -4100,17 +4125,21 @@ substdio.h strerr.h getln.h stralloc.h gen_alloc.h mess822.h caltime.h \
 caldate.h case.h env.h exit.h str.h
 	./compile checkdomain.c
 
-filterto.o: compile filterto.c \
+filterto.o: compile filterto.c variables.h \
 sig.h exit.h env.h error.h wait.h qmail.h substdio.h \
 strerr.h fmt.h getln.h stralloc.h gen_alloc.h mess822.h caltime.h \
-caldate.h fd.h pathexec.h
+caldate.h fd.h pathexec.h envdir.h auto_qmail.h
 	./compile filterto.c
 
-filterto: load filterto.o auto_qmail.o qmail.o strerr.a fd.a sig.a wait.a \
-env.a pathexec_run.o getln.a mess822.a substdio.a error.a str.a fs.a stralloc.a \
+filterto: load filterto.o auto_qmail.o qmail.o \
+openreadclose.o envdir_set.o pathexec_env.o variables.o \
+open_read.o strerr.a fd.a sig.a wait.a \
+env.a getln.a mess822.a substdio.a error.a str.a fs.a stralloc.a \
 alloc.a
-	./load filterto auto_qmail.o qmail.o strerr.a fd.a sig.a wait.a env.a \
-	pathexec_run.o getln.a mess822.a substdio.a error.a str.a fs.a stralloc.a \
+	./load filterto auto_qmail.o qmail.o variables.o \
+	openreadclose.o envdir_set.o pathexec_env.o pathexec_run.o \
+	open_read.o strerr.a fd.a sig.a wait.a env.a \
+	getln.a mess822.a substdio.a error.a str.a fs.a stralloc.a \
 	alloc.a 
 
 tomaildir: load tomaildir.o sig.a open.a strerr.a substdio.a env.a str.a \
@@ -4157,18 +4186,23 @@ substdio.h strerr.h getln.h stralloc.h gen_alloc.h mess822.h caltime.h \
 caldate.h case.h env.h exit.h alloc.h str.h
 	./compile ifaddr.c
 
-replier.o: compile replier.c \
+replier.o: compile replier.c auto_qmail.h variables.h \
 stralloc.h gen_alloc.h strerr.h error.h qmail.h substdio.h env.h sig.h \
 open.h getln.h case.h scan.h str.h fmt.h exit.h getconf.h \
 constmap.h fd.h wait.h pathexec.h byte.h
 	./compile replier.c
 
-replier: load replier.o qmail.o stralloc.a alloc.a strerr.a substdio.a \
-env.a pathexec_env.o pathexec_run.o str.a error.a sig.a openreadclose.o open.a \
-getln.a case.a fs.a fd.a wait.a getconf.o constmap.o auto_qmail.o
-	./load replier qmail.o stralloc.a alloc.a strerr.a substdio.a env.a \
-	pathexec_env.o pathexec_run.o str.a error.a sig.a openreadclose.o open.a \
-	getln.a case.a fs.a fd.a wait.a getconf.o constmap.o auto_qmail.o 
+replier: load replier.o qmail.o variables.o \
+stralloc.a alloc.a strerr.a substdio.a \
+pathexec_env.o pathexec_run.o openreadclose.o open.a \
+getconf.o constmap.o auto_qmail.o \
+envdir_set.o str.a error.a sig.a env.a \
+getln.a case.a fs.a fd.a wait.a
+	./load replier qmail.o variables.o \
+	stralloc.a alloc.a strerr.a substdio.a env.a \
+	pathexec_env.o pathexec_run.o openreadclose.o \
+	getconf.o constmap.o auto_qmail.o envdir_set.o \
+	open.a str.a error.a sig.a getln.a case.a fs.a fd.a wait.a
 
 replier-config: load replier-config.o strerr.a substdio.a stralloc.a str.a \
 error.a alloc.a open.a auto_ezmlm.o auto_qmail.o
@@ -4274,10 +4308,12 @@ makehader.o: makeheader.c compile
 	./compile makeheader.c
 
 dot-forward: \
-load dot-forward.o control.o qmail.o auto_qmail.o variables.o token822.o env.a \
+load dot-forward.o control.o qmail.o auto_qmail.o variables.o \
+openreadclose.o envdir_set.o pathexec_env.o token822.o pathexec_run.o \
 getln.a getopt.a strerr.a error.a substdio.a stralloc.a alloc.a \
-case.a str.a sig.a seek.a open.a wait.a fd.a fs.a
+env.o case.a str.a sig.a seek.a open.a wait.a fd.a fs.a
 	./load dot-forward control.o qmail.o auto_qmail.o variables.o \
+	openreadclose.o envdir_set.o pathexec_env.o pathexec_run.o \
 	token822.o env.a getln.a getopt.a strerr.a error.a \
 	substdio.a stralloc.a alloc.a case.a str.a sig.a seek.a \
 	open.a wait.a fd.a fs.a 
@@ -4290,14 +4326,17 @@ dot-forward.o: \
 compile dot-forward.c sgetopt.h subgetopt.h substdio.h \
 stralloc.h gen_alloc.h getln.h strerr.h error.h exit.h open.h wait.h \
 seek.h env.h str.h fmt.h token822.h gen_alloc.h control.h qmail.h \
-substdio.h auto_qmail.h variables.h fd.h case.h sig.h
+substdio.h auto_qmail.h variables.h fd.h case.h sig.h envdir.h \
+pathexec.h
 	./compile dot-forward.c
 
 fastforward: \
 load fastforward.o slurpclose.o coe.o strset.o qmail.o auto_qmail.o \
+envdir_set.o pathexec_env.o pathexec_run.o openreadclose.o variables.o \
 getopt.a cdb.a env.a strerr.a substdio.a stralloc.a alloc.a error.a \
 case.a str.a fs.a sig.a wait.a seek.a open.a fd.a
-	./load fastforward slurpclose.o coe.o strset.o qmail.o \
+	./load fastforward slurpclose.o coe.o strset.o qmail.o variables.o \
+	envdir_set.o pathexec_env.o pathexec_run.o openreadclose.o \
 	auto_qmail.o getopt.a cdb.a env.a strerr.a substdio.a \
 	stralloc.a alloc.a error.a case.a str.a fs.a sig.a wait.a \
 	seek.a open.a fd.a 
@@ -4310,7 +4349,8 @@ fastforward.o: \
 compile fastforward.c stralloc.h gen_alloc.h substdio.h subfd.h \
 substdio.h strset.h uint32.h sgetopt.h subgetopt.h exit.h \
 strerr.h env.h sig.h qmail.h substdio.h fmt.h case.h alloc.h coe.h \
-seek.h wait.h open.h slurpclose.h str.h cdb.h byte.h
+seek.h wait.h open.h slurpclose.h str.h cdb.h byte.h auto_qmail.h \
+envdir.h pathexec.h variables.h
 	./compile fastforward.c
 
 strset.o: \
@@ -4414,14 +4454,17 @@ getln.h open.h token822.h gen_alloc.h control.h \
 auto_qmail.h env.h variables.h byte.h
 	./compile newinclude.c
 
-envdir: load envdir.o openreadclose.o pathexec_env.o pathexec_run.o \
+envdir: load envdir.o envdir_set.o openreadclose.o pathexec_env.o pathexec_run.o \
 strerr.a substdio.a env.a str.a open.a error.a stralloc.a alloc.a
-	./load envdir openreadclose.o pathexec_env.o pathexec_run.o \
+	./load envdir envdir_set.o openreadclose.o pathexec_env.o pathexec_run.o \
 	strerr.a substdio.a env.a str.a open.a error.a stralloc.a alloc.a
 
-envdir.o: byte.h compile direntry.h envdir.c error.h gen_alloc.h \
-open.h openreadclose.h pathexec.h stralloc.h strerr.h
+envdir.o: compile envdir.c gen_alloc.h pathexec.h strerr.h envdir.h alloc.h error.h
 	./compile envdir.c
+
+envdir_set.o: compile envdir_set.c error.h openreadclose.h byte.h direntry.h \
+stralloc.h pathexec.h strerr.h open.h
+	./compile envdir_set.c
 
 envuidgid: envuidgid.o load strerr_die.o byte_copy.o str_len.o \
 str_chr.o str_diffn.o byte_diff.o pathexec_env.o pathexec_run.o \
@@ -4432,7 +4475,7 @@ envread.o alloc.o alloc_re.o substdio.a stralloc.a
 	fmt_ulong.o error.o error_str.o strerr_sys.o \
 	envread.o alloc.o alloc_re.o substdio.a stralloc.a
 
-envuidgid.o: compile envuidgid.c fmt.h pathexec.h strerr.h
+envuidgid.o: compile envuidgid.c fmt.h pathexec.h strerr.h alloc.h error.h
 	./compile envuidgid.c
 
 fghack: fghack.o load strerr_die.o strerr_sys.o byte_copy.o str_len.o str_diffn.o \

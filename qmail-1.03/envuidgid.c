@@ -10,6 +10,8 @@
 #include <sys/types.h>
 #include <pwd.h>
 #include "fmt.h"
+#include "error.h"
+#include "alloc.h"
 #include "strerr.h"
 #include "pathexec.h"
 
@@ -28,22 +30,26 @@ struct passwd  *pw;
 int
 main(int argc, char **argv)
 {
+	char          **e;
+	int             tmperrno;
+
 	account = *++argv;
 	if (!account || !*++argv)
 		strerr_die1x(100, "envuidgid: usage: envuidgid account child");
-
-	pw = getpwnam(account);
-	if (!pw)
+	if (!(pw = getpwnam(account)))
 		strerr_die3x(111, FATAL, "unknown account ", account);
-
 	strnum[fmt_ulong(strnum, pw->pw_gid)] = 0;
 	if (!pathexec_env("GID", strnum))
 		nomem();
 	strnum[fmt_ulong(strnum, pw->pw_uid)] = 0;
 	if (!pathexec_env("UID", strnum))
 		nomem();
-
-	pathexec(argv);
+	if ((e = pathexec(argv)))
+	{
+		tmperrno = errno;
+		alloc_free((char *) e);
+		errno = tmperrno;
+	}
 	strerr_die4sys(111, FATAL, "unable to run ", *argv, ": ");
 	/*- Not reached */
 	return(1);
