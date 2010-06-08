@@ -51,7 +51,7 @@ setuid_list = ../sbin/systpass vdeldomain vadddomain vadduser vdeluser \
 			  vmoveuser vcfilter ../libexec/sq_vacation
 
 doc_list= 37rules.pdf ChangeLog COPYING CREDITS FAQ.pdf HOWTO.bogofilter \
-	HOWTO.sharedmaildir INSTALL.indimail percenthack.shtml README.indimail \
+	HOWTO.sharedmaildir INSTALL.indimail percenthack.shtml README \
 	INSTALL-MYSQL RELEASE-Notes INSTALL-RPM README-CLUSTER README.vlimits \
 	indimail_arch.png INSTALL-MINI indimail_queue.png Quick-INSTALL
 
@@ -158,7 +158,7 @@ indimailsbin_SCRIPTS = myslave controlsync svctool cputime tls-cert-check
 
 noinst_SCRIPTS = create_services indimail.spec indimail-@VERSION@-rpmlintrc indimail-epm.list \
 	INSTALL INSTALL-RPM INSTALL-MYSQL README-CLUSTER RELEASE-Notes Quick-INSTALL \
-	INSTALL-MINI vadddomain_handle vadduser_handle
+	README INSTALL-MINI vadddomain_handle vadduser_handle
 
 post_handle_list = vadddomain vadduser
 
@@ -787,6 +787,8 @@ INSTALL-MYSQL: INSTALL-MYSQL.in configure.in
 RELEASE-Notes: RELEASE-Notes.in configure.in
 	$(edit) $@.in > doc/$@; rm -f $@;ln -sf doc/$@ $@
 README-CLUSTER: README-CLUSTER.in configure.in
+	$(edit) $@.in > doc/$@; rm -f $@;ln -sf doc/$@ $@
+README: README.in configure.in
 	$(edit) $@.in > doc/$@; rm -f $@;ln -sf doc/$@ $@
 vadddomain_handle: vadddomain_handle.in
 	$(edit) $@.in > post_handle/vadddomain; ln -s post_handle/vadddomain $@
