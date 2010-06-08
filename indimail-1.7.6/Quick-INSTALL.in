@@ -13,6 +13,7 @@
    http://download.opensuse.org/repositories/home:/indimail/
 
    The latest RPM (for yet to be released version) can be found at
+
    http://download.opensuse.org/repositories/home:/mbhangui/
 
    Creating a non-clustered Domain
@@ -50,6 +51,8 @@
    % @indimaildir@/bin/vuserinfo postmaster@example.com
    % sudo @indimaildir@/bin/vadduser testuser1@example.com pass
    % @indimaildir@/bin/vuserinfo testuser1@example.com
+   % @indimaildir@/bin/vpasswd testuser1@example.com newpass
+   % @indimaildir@/bin/vmoduser -q 50000000 testuser1@example.com
 
    Creating a Clustered Domain
    ---------------------------
@@ -89,6 +92,8 @@
    % @indimaildir@/bin/vuserinfo postmaster@example.com
    % sudo @indimaildir@/bin/vadduser testuser1@example.com pass
    % @indimaildir@/bin/vuserinfo testuser1@example.com
+   % @indimaildir@/bin/vpasswd testuser1@example.com newpass
+   % @indimaildir@/bin/vmoduser -q 50000000 testuser1@example.com
    % @indimaildir@/bin/dbinfo -s
 
    Send / Receive Mails
