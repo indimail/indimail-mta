@@ -122,7 +122,7 @@ findmdahost(char *email, int *total)
 		{
 			if (!(RelayHosts = LoadDbInfo_TXT(total)))
 			{
-				perror("vauthOpen_user: LoadDbInfo_TXT");
+				perror("findmdahost: LoadDbInfo_TXT");
 				return ((char *) 0);
 			}
 			for (rhostsptr = RelayHosts;*rhostsptr;rhostsptr++)
@@ -132,7 +132,7 @@ findmdahost(char *email, int *total)
 		{
 			if (!(MdaMysql = (MYSQL **) calloc(1, sizeof(MYSQL *) * (*total))))
 			{
-				fprintf(stderr, "vauthOpen_user: calloc: %d Bytes: %s\n",
+				fprintf(stderr, "findmdahost: calloc: %d Bytes: %s\n",
 					*total * (int) sizeof(MYSQL *), strerror(errno));
 				return ((char *) 0);
 			}
@@ -150,7 +150,7 @@ findmdahost(char *email, int *total)
 	{
 		if (!connect_all && !*mysqlptr && !((*mysqlptr) = (MYSQL *) calloc(1, sizeof(MYSQL))))
 		{
-			fprintf(stderr, "vauthOpen_user: calloc: %d Bytes: %s",
+			fprintf(stderr, "findmdahost: calloc: %d Bytes: %s",
 				(int) sizeof(MYSQL *), strerror(errno));
 			(*rhostsptr)->fd = -1;
 			return ((char *) 0);
