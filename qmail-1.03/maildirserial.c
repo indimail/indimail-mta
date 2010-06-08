@@ -24,6 +24,9 @@
 #include <unistd.h>
 #include <sys/types.h>
 #include <sys/stat.h>
+#include "env.h"
+#include "envdir.h"
+#include "pathexec.h"
 #include "sgetopt.h"
 #include "scan.h"
 #include "stralloc.h"
@@ -47,6 +50,7 @@
 #include "quote.h"
 #include "byte.h"
 #include "auto_qmail.h"
+#include "variables.h"
 
 #define FATAL "maildirserial: fatal: "
 #define WARNING "maildirserial: warning: "
@@ -106,11 +110,29 @@ void
 readcontrols()
 {
 	int             fddir;
+	char           *qbase;
+	char          **e;
 
 	if ((fddir = open_read(".")) == -1)
 		strerr_die2sys(111, FATAL, "unable to open current directory: ");
 	if (chdir(auto_qmail) == -1)
 		strerr_die4sys(111, FATAL, "unable to chdir to ", auto_qmail, ": ");
+	if (!(qbase = env_get("QUEUE_BASE")))
+	{
+		if (!controldir)
+		{
+			if (!(controldir = env_get("CONTROLDIR")))
+				controldir = "control";
+		}
+		if (chdir(controldir) == -1)
+			strerr_die4sys(111, FATAL, "unable to switch to ", controldir, ": ");
+		if (!access("defaultqueue", X_OK))
+		{
+			envdir_set("defaultqueue");
+			if ((e = pathexec(0)))
+				environ = e;
+		}
+	}
 	if (config_readline(&me, "control/me") == -1)
 		strerr_die4sys(111, FATAL, "unable to read ", auto_qmail, "/control/me: ");
 	if (config_default(&me, "me") == -1)

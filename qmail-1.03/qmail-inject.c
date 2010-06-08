@@ -60,6 +60,8 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <unistd.h>
+#include "envdir.h"
+#include "pathexec.h"
 #include "sgetopt.h"
 #include "sig.h"
 #include "scan.h"
@@ -90,6 +92,7 @@
 #include "envrules.h"
 #include "case.h"
 #include "byte.h"
+#include "variables.h"
 
 int             wildmat_internal(char *, char *);
 
@@ -217,6 +220,16 @@ void
 die_chdir()
 {
 	substdio_putsflush(subfderr, "qmail-inject: fatal: unable to chdir to home\n");
+	temp();
+}
+
+void
+die_controldir(char *x)
+{
+	substdio_puts(subfderr, "qmail-inject: fatal: unable to chdir to ");
+	substdio_puts(subfderr, x);
+	substdio_puts(subfderr, "\n");
+	substdio_flush(subfderr);
 	temp();
 }
 
@@ -1004,13 +1017,30 @@ getcontrols()
 {
 	struct stat     statbuf;
 	static stralloc sa = { 0 };
-	char           *x;
+	char           *x, *qbase;
+	char          **e;
 
 	mft_init();
 	if (chdir(auto_qmail) == -1)
 		die_chdir();
 	if (control_init() == -1)
 		die_read();
+	if (!(qbase = env_get("QUEUE_BASE")))
+	{
+		if (!controldir)
+		{
+			if (!(controldir = env_get("CONTROLDIR")))
+				controldir = "control";
+		}
+		if (chdir(controldir) == -1)
+			die_controldir(controldir);
+		if (!access("defaultqueue", X_OK))
+		{
+			envdir_set("defaultqueue");
+			if ((e = pathexec(0)))
+				environ = e;
+		}
+	}
 	if (!(x = env_get("QMAILDEFAULTDOMAIN")))
 	{
 		if (control_rldef(&control_defaultdomain, "defaultdomain", 1, "defaultdomain") != 1)

@@ -10,7 +10,12 @@
  * added RCS log
  *
  */
+#include <unistd.h>
 #include "sig.h"
+#include "auto_qmail.h"
+#include "envdir.h"
+#include "pathexec.h"
+#include "strerr.h"
 #include "env.h"
 #include "substdio.h"
 #include "stralloc.h"
@@ -28,6 +33,9 @@
 #include "open.h"
 #include "quote.h"
 #include "qmail.h"
+#include "variables.h"
+
+#define FATAL "qreceipt: fatal: "
 
 void
 die_noreceipt()
@@ -204,11 +212,32 @@ main(argc, argv)
 	int             argc;
 	char          **argv;
 {
+	char           *qbase;
+	char          **e;
+
 	sig_pipeignore();
 	if (!(target = argv[1]))
 		die_usage();
 	if (!(returnpath = env_get("SENDER")))
 		die_usage();
+	if (chdir(auto_qmail) == -1)
+		strerr_die4sys(111, FATAL, "unable to chdir to ", auto_qmail, ": ");
+	if (!(qbase = env_get("QUEUE_BASE")))
+	{
+		if (!controldir)
+		{
+			if (!(controldir = env_get("CONTROLDIR")))
+				controldir = "control";
+		}
+		if (chdir(controldir) == -1)
+			strerr_die4sys(111, FATAL, "unable to switch to ", controldir, ": ");
+		if (!access("defaultqueue", X_OK))
+		{
+			envdir_set("defaultqueue");
+			if ((e = pathexec(0)))
+				environ = e;
+		}
+	}
 	if (headerbody(subfdin, doheaderfield, finishheader, dobody) == -1)
 		die_read();
 	die_noreceipt();

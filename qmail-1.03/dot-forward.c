@@ -15,6 +15,8 @@
  */
 #include <unistd.h>
 #include "substdio.h"
+#include "envdir.h"
+#include "pathexec.h"
 #include "stralloc.h"
 #include "getln.h"
 #include "strerr.h"
@@ -183,13 +185,30 @@ run(cmd)
 void
 readcontrols()
 {
-	int             r;
-	int             fddir;
+	int             r, fddir;
+	char           *qbase;
+	char          **e;
 
 	if ((fddir = open_read(".")) == -1)
 		strerr_die2sys(111, FATAL, "unable to open current directory: ");
 	if (chdir(auto_qmail) == -1)
 		strerr_die4sys(111, FATAL, "unable to chdir to ", auto_qmail, ": ");
+	if (!(qbase = env_get("QUEUE_BASE")))
+	{
+		if (!controldir)
+		{
+			if (!(controldir = env_get("CONTROLDIR")))
+				controldir = "control";
+		}
+		if (chdir(controldir) == -1)
+			strerr_die4sys(111, FATAL, "unable to switch to ", controldir, ": ");
+		if (!access("defaultqueue", X_OK))
+		{
+			envdir_set("defaultqueue");
+			if ((e = pathexec(0)))
+				environ = e;
+		}
+	}
 	if ((r = control_readline(&me, "me")) == -1)
 		die_control();
 	if (!r && !stralloc_copys(&me, "me"))

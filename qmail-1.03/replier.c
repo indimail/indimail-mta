@@ -20,6 +20,9 @@
 #include <signal.h>
 #include <sys/types.h>
 #include <sys/stat.h>
+#include "alloc.h"
+#include "envdir.h"
+#include "auto_qmail.h"
 #include "stralloc.h"
 #include "byte.h"
 #include "strerr.h"
@@ -40,6 +43,7 @@
 #include "fd.h"
 #include "wait.h"
 #include "pathexec.h"
+#include "variables.h"
 
 #define FATAL "replier: fatal: "
 
@@ -121,37 +125,44 @@ stralloc        mydtline = { 0 };
 int
 main(int argc, char **argv)
 {
-	char           *dir, *addr, *sender, *local, *action;
-	char           *qqx;
-	int             flagmlwasthere, match, i, flaginheader, flagbadfield, pid, wstat;
+	char           *dir, *addr, *sender, *local, *action, *qqx, *qbase;
+	char          **e;
+	int             flagmlwasthere, match, i, flaginheader, flagbadfield, pid, wstat,
+					tmperrno;
 	int             pf[2];
 
-	dir = argv[1];
-	if (!dir)
+	if (!(dir = argv[1]))
 		usage();
-	addr = argv[2];
-	if (!addr)
+	if (!(addr = argv[2]))
 		usage();
-
 	umask(022);
 	sig_ignore(SIGPIPE);
 	sig_catch(SIGALRM, sigalrm);
 	alarm(86400);
-
+	if (chdir(auto_qmail) == -1)
+		strerr_die4sys(111, FATAL, "unable to switch to ", auto_qmail, ": ");
+	if (!(qbase = env_get("QUEUE_BASE")))
+	{
+		if (!controldir)
+		{
+			if (!(controldir = env_get("CONTROLDIR")))
+				controldir = "control";
+		}
+		if (chdir(controldir) == -1)
+			strerr_die4sys(111, FATAL, "unable to switch to ", controldir, ": ");
+		if (!access("defaultqueue", X_OK))
+			envdir_set("defaultqueue");
+	}
 	if (chdir(dir) == -1)
 		strerr_die4sys(111, FATAL, "unable to switch to ", dir, ": ");
-
-	sender = env_get("SENDER");
-	if (sender)
+	if ((sender = env_get("SENDER")))
 	{
 		if (!*sender)
 			strerr_die2x(100, FATAL, "I don't reply to bounce messages (#5.7.2)");
 		if (str_equal(sender, "#@[]"))
 			strerr_die2x(100, FATAL, "I don't reply to bounce messages (#5.7.2)");
 	}
-
-	local = env_get("LOCAL");
-	if (!local)
+	if (!(local = env_get("LOCAL")))
 		strerr_die2sys(111, FATAL, "LOCAL not set");
 	getconf_line(&inlocal, "inlocal", 1, FATAL, dir);
 	if (inlocal.len > str_len(local))
@@ -162,18 +173,15 @@ main(int argc, char **argv)
 	if (*action != '-')
 		badaddr();
 	++action;
-
 	if (pipe(pf) == -1)
 		strerr_die2sys(111, FATAL, "unable to create pipe: ");
-	pid = fork();
-	if (pid == -1)
+	if ((pid = fork()) == -1)
 		strerr_die2sys(111, FATAL, "unable to fork: ");
 	if (pid == 0)
 	{
 		close(pf[0]);
 		if (fd_move(1, pf[1]) == -1)
 			_exit(111);
-
 		if (!pathexec_env("REQUEST", action))
 			_exit(111);
 		action += str_chr(action, '-');
@@ -191,29 +199,28 @@ main(int argc, char **argv)
 			++action;
 		if (!pathexec_env("REQUEST4", action))
 			_exit(111);
-
-		pathexec(argv + 3);
+		if ((e = pathexec(argv + 3)))
+		{
+			tmperrno = errno;
+			alloc_free((char *) e);
+			errno = tmperrno;
+		}
 		if (error_temp(errno))
 			_exit(111);
 		_exit(100);
 	}
 	close(pf[1]);
-
 	if (qmail_open(&qq) == -1)
 		strerr_die2sys(111, FATAL, "unable to run qmail-queue: ");
-
 	getconf_line(&outhost, "outhost", 1, FATAL, dir);
 	getconf_line(&outlocal, "outlocal", 1, FATAL, dir);
 	getconf_line(&mailinglist, "mailinglist", 1, FATAL, dir);
-
 	getconf(&headerremove, "headerremove", 1, FATAL, dir);
 	constmap_init(&headerremovemap, headerremove.s, headerremove.len, 0);
-
 	getconf(&headeradd, "headeradd", 1, FATAL, dir);
 	for (i = 0; i < headeradd.len; ++i)
 		if (!headeradd.s[i])
 			headeradd.s[i] = '\n';
-
 	if (!stralloc_copys(&mydtline, "Delivered-To: replier "))
 		nomem();
 	if (!stralloc_cat(&mydtline, &outlocal))
@@ -226,18 +233,14 @@ main(int argc, char **argv)
 		nomem();
 	if (!stralloc_cats(&mydtline, "\n"))
 		nomem();
-
 	myputs("Mailing-List: ");
 	put(mailinglist.s, mailinglist.len);
 	myputs("\n");
-
 	put(headeradd.s, headeradd.len);
 	put(mydtline.s, mydtline.len);
-
 	flagmlwasthere = 0;
 	flaginheader = 1;
 	flagbadfield = 0;
-
 	substdio_fdbuf(&ssin, read, pf[0], inbuf, sizeof(inbuf));
 	for (;;)
 	{
@@ -274,13 +277,11 @@ main(int argc, char **argv)
 	if (!stralloc_0(&line))
 		nomem();
 	qmail_from(&qq, line.s);
-
 	substdio_fdbuf(&ssout, mywrite, -1, outbuf, sizeof(outbuf));
 	if (substdio_copy(&ssout, &ssin) != 0)
 		strerr_die2sys(111, FATAL, "unable to read input: ");
 	if (substdio_flush(&ssout) == -1)
 		strerr_die2sys(111, FATAL, "unable to write output: ");
-
 	if (wait_pid(&wstat, pid) == -1)
 		strerr_die2x(111, FATAL, "wait failed");
 	if (wait_crashed(wstat))
@@ -295,9 +296,7 @@ main(int argc, char **argv)
 		_exit(0);
 	}
 	close(pf[0]);
-
 	strnum[fmt_ulong(strnum, qmail_qp(&qq))] = 0;
-
 	qmail_to(&qq, addr);
 	qqx = qmail_close(&qq);
 	if (*qqx)

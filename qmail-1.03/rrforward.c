@@ -16,6 +16,9 @@
 #include <sys/types.h>
 #include <unistd.h>
 #include <fcntl.h>
+#include "auto_qmail.h"
+#include "envdir.h"
+#include "pathexec.h"
 #include "sig.h"
 #include "lock.h"
 #include "str.h"
@@ -27,6 +30,7 @@
 #include "strerr.h"
 #include "substdio.h"
 #include "fmt.h"
+#include "variables.h"
 
 #define FATAL "rrforward: fatal: "
 
@@ -90,23 +94,17 @@ main(argc, argv)
 	int             argc;
 	char          **argv;
 {
-	char           *rrfile;
-	char           *extension;
-	char           *sender;
-	char           *dtline;
-	int             rrfd;
 	char            strpos[FMT_ULONG + 2];
-	int             r;
+	char           *rrfile, *extension, *sender, *dtline, *qbase;
+	char          **e;
+	int             rrfd, r;
 	unsigned long   pos;
 
-	extension = env_get("EXT");
-	if (!extension)
+	if (!(extension = env_get("EXT")))
 		strerr_die2x(100, FATAL, "EXT not set");
-	sender = env_get("NEWSENDER");
-	if (!sender)
+	if (!(sender = env_get("NEWSENDER")))
 		strerr_die2x(100, FATAL, "NEWSENDER not set");
-	dtline = env_get("DTLINE");
-	if (!dtline)
+	if (!(dtline = env_get("DTLINE")))
 		strerr_die2x(100, FATAL, "DTLINE not set");
 	if (argc < 4)
 		strerr_die2x(111, FATAL, "too few args (" QRR_FILE "[-ext] rr1@domain rr2@domain ...)");
@@ -124,13 +122,11 @@ main(argc, argv)
 		if (QRR_SEPARATOR(rrfile) != '\0')
 			_exit(0);
 	}
-	rrfd = open(rrfile, O_RDWR | O_CREAT, 0600);
-	if (rrfd == -1)
+	if ((rrfd = open(rrfile, O_RDWR | O_CREAT, 0600)) == -1)
 		strerr_die3sys(111, FATAL, "unable to open rr: ", rrfile);
 	if (lock_ex(rrfd) == -1)
 		strerr_die3sys(111, FATAL, "unable to lock rr: ", rrfile);
-	r = read(rrfd, strpos, FMT_ULONG);
-	if (r < 0)
+	if ((r = read(rrfd, strpos, FMT_ULONG)) < 0)
 		strerr_die3sys(111, FATAL, "unable to read rr: ", rrfile);
 	strpos[r] = '\0';
 	argc -= 2;
@@ -150,6 +146,24 @@ main(argc, argv)
 	lock_un(rrfd);
 	close(rrfd);
 	strpos[r] = '\0';
+	if (chdir(auto_qmail) == -1)
+		strerr_die4sys(111, FATAL, "unable to chdir to ", auto_qmail, ": ");
+	if (!(qbase = env_get("QUEUE_BASE")))
+	{
+		if (!controldir)
+		{
+			if (!(controldir = env_get("CONTROLDIR")))
+				controldir = "control";
+		}
+		if (chdir(controldir) == -1)
+			strerr_die4sys(111, FATAL, "unable to switch to ", controldir, ": ");
+		if (!access("defaultqueue", X_OK))
+		{
+			envdir_set("defaultqueue");
+			if ((e = pathexec(0)))
+				environ = e;
+		}
+	}
 	rr_forward(argv[pos], sender, dtline, strpos);
 	/*- Not reached */
 	return(0);

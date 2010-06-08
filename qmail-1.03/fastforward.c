@@ -16,6 +16,9 @@
 #include <unistd.h>
 #include <sys/types.h>
 #include <sys/stat.h>
+#include "auto_qmail.h"
+#include "envdir.h"
+#include "pathexec.h"
 #include "stralloc.h"
 #include "substdio.h"
 #include "subfd.h"
@@ -36,6 +39,7 @@
 #include "coe.h"
 #include "seek.h"
 #include "wait.h"
+#include "variables.h"
 
 #define FATAL "fastforward: fatal: "
 
@@ -360,9 +364,9 @@ main(argc, argv)
 	int             argc;
 	char          **argv;
 {
-	int             opt;
-	char           *x;
-	int             i;
+	int             opt, i;
+	char           *x, *qbase;
+	char          **e;
 
 	sig_pipeignore();
 	if (!(dtline = env_get("DTLINE")))
@@ -482,6 +486,24 @@ main(argc, argv)
 		}
 		substdio_flush(subfderr);
 		_exit(flagpassthrough ? 99 : 0);
+	}
+	if (chdir(auto_qmail) == -1)
+		strerr_die4sys(111, FATAL, "unable to chdir to ", auto_qmail, ": ");
+	if (!(qbase = env_get("QUEUE_BASE")))
+	{
+		if (!controldir)
+		{
+			if (!(controldir = env_get("CONTROLDIR")))
+				controldir = "control";
+		}
+		if (chdir(controldir) == -1)
+			strerr_die4sys(111, FATAL, "unable to switch to ", controldir, ": ");
+		if (!access("defaultqueue", X_OK))
+		{
+			envdir_set("defaultqueue");
+			if ((e = pathexec(0)))
+				environ = e;
+		}
 	}
 	if (qmail_open(&qq) == -1)
 		strerr_die2sys(111, FATAL, "unable to fork: ");

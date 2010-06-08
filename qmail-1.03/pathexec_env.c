@@ -36,7 +36,7 @@ pathexec_env(char *s, char *t)
 	return stralloc_cat(&plus, &tmp);
 }
 
-void
+char **
 pathexec(char **argv)
 {
 	char           *path;
@@ -48,44 +48,42 @@ pathexec(char **argv)
 	unsigned int    t;
 
 	if (!stralloc_cats(&plus, ""))
-		return;
-
+		return ((char **) 0);
 	elen = 0;
 	for (i = 0; environ[i]; ++i)
 		++elen;
 	for (i = 0; i < plus.len; ++i)
 		if (!plus.s[i])
 			++elen;
-
-	e = (char **) alloc((elen + 1) * sizeof(char *));
-	if (!e)
-		return;
-
+	if (!(e = (char **) alloc((elen + 1) * sizeof(char *))))
+		return ((char **) 0);
 	elen = 0;
 	for (i = 0; environ[i]; ++i)
 		e[elen++] = environ[i];
-
 	j = 0;
 	for (i = 0; i < plus.len; ++i)
+	{
 		if (!plus.s[i])
 		{
 			split = str_chr(plus.s + j, '=');
 			for (t = 0; t < elen; ++t)
-				if (byte_equal(plus.s + j, split, e[t]))
-					if (e[t][split] == '=')
-					{
-						--elen;
-						e[t] = e[elen];
-						break;
-					}
+			{
+				if (byte_equal(plus.s + j, split, e[t]) && e[t][split] == '=')
+				{
+					--elen;
+					e[t] = e[elen];
+					break;
+				}
+			}
 			if (plus.s[j + split])
 				e[elen++] = plus.s + j;
 			j = i + 1;
 		}
+	}
 	e[elen] = 0;
-
-	pathexec_run(*argv, argv, e);
-	alloc_free((char *) e);
+	if (argv)
+		pathexec_run(*argv, argv, e);
+	return (e);
 }
 
 void
