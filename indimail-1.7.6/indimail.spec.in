@@ -2647,7 +2647,7 @@ do
 	fi
 done
 if [ %noclamav -eq 0 ] ; then
-	%{_prefix}/sbin/svctool --queueParam=queuedef \
+	%{_prefix}/sbin/svctool --queueParam=defaultqueue \
 		--qbase=%{qbase} --qcount=%{qcount} --qstart=1 \
 		--min-free=52428800 --fsync --syncdir --virus-filter \
 		--qhpsi="%{_prefix}/bin/clamdscan %s --quiet --no-summary" \
@@ -2655,7 +2655,7 @@ if [ %noclamav -eq 0 ] ; then
 		--private_key=%{_prefix}/control/domainkeys/indimail \
 		$extra_opt
 else
-	%{_prefix}/sbin/svctool --queueParam=queuedef \
+	%{_prefix}/sbin/svctool --queueParam=defaultqueue \
 		--qbase=%{qbase} --qcount=%{qcount} --qstart=1 \
 		--min-free=52428800 --fsync --syncdir --virus-filter \
 		--dkverify="none" --dksign=$sign_opt \
