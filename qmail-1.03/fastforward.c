@@ -535,7 +535,7 @@ main(argc, argv)
 void
 getversion_fastforward_c()
 {
-	static char    *x = "$Id: fastforward.c,v 1.5 2010-06-08 21:59:13+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: fastforward.c,v 1.5 2010-06-08 21:59:13+05:30 Cprogrammer Stab mbhangui $";
 
 	x++;
 }

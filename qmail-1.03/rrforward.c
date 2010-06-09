@@ -175,7 +175,7 @@ main(argc, argv)
 void
 getversion_rrforward_c()
 {
-	static char    *x = "$Id: rrforward.c,v 1.5 2010-06-08 22:00:46+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: rrforward.c,v 1.5 2010-06-08 22:00:46+05:30 Cprogrammer Stab mbhangui $";
 
 	x++;
 }

@@ -70,7 +70,7 @@ envdir_set(char *fn)
 void
 getversion_envdir_set_c()
 {
-	static char    *x = "$Id: envdir_set.c,v 1.1 2010-06-08 19:06:28+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: envdir_set.c,v 1.1 2010-06-08 19:06:28+05:30 Cprogrammer Stab mbhangui $";
 
 	x++;
 }

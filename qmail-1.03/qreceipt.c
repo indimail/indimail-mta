@@ -251,7 +251,7 @@ main(argc, argv)
 void
 getversion_qreceipt_c()
 {
-	static char    *x = "$Id: qreceipt.c,v 1.7 2010-06-08 22:00:33+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qreceipt.c,v 1.7 2010-06-08 22:00:33+05:30 Cprogrammer Stab mbhangui $";
 
 	x++;
 }

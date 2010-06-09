@@ -61,7 +61,7 @@ main(int argc, char **argv)
 void
 getversion_envuidgid_c()
 {
-	static char    *x = "$Id: envuidgid.c,v 1.3 2010-06-08 21:58:33+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: envuidgid.c,v 1.3 2010-06-08 21:58:33+05:30 Cprogrammer Stab mbhangui $";
 
 	x++;
 }
