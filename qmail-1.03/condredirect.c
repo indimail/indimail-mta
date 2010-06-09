@@ -137,7 +137,7 @@ main(argc, argv)
 void
 getversion_condredirect_c()
 {
-	static char    *x = "$Id: condredirect.c,v 1.10 2010-06-08 21:56:48+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: condredirect.c,v 1.10 2010-06-08 21:56:48+05:30 Cprogrammer Stab mbhangui $";
 
 	x++;
 }

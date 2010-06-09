@@ -312,7 +312,7 @@ main(int argc, char **argv)
 void
 getversion_replier_c()
 {
-	static char    *x = "$Id: replier.c,v 1.6 2010-06-08 22:00:41+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: replier.c,v 1.6 2010-06-08 22:00:41+05:30 Cprogrammer Stab mbhangui $";
 
 	x++;
 }

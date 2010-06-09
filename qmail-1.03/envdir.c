@@ -53,7 +53,7 @@ main(int argc, char **argv)
 void
 getversion_envdir_c()
 {
-	static char    *x = "$Id: envdir.c,v 1.3 2010-06-08 21:57:51+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: envdir.c,v 1.3 2010-06-08 21:57:51+05:30 Cprogrammer Stab mbhangui $";
 
 	x++;
 }

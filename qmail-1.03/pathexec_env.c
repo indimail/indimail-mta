@@ -92,7 +92,7 @@ pathexec(char **argv)
 void
 getversion_pathexec_env_c()
 {
-	static char    *x = "$Id: pathexec_env.c,v 1.3 2010-06-08 21:59:53+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: pathexec_env.c,v 1.3 2010-06-08 21:59:53+05:30 Cprogrammer Stab mbhangui $";
 
 	x++;
 }
