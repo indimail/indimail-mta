@@ -1,5 +1,10 @@
 #
 # $Log: indimail.spec.in,v $
+# Revision 2.179  2010-06-09 22:20:20+05:30  Cprogrammer
+# fixed %post, %postun scriptlet in indimail-mini
+# added svctool --queueParam to create defaultqueue for qmail-inject, sendmail and other
+# qmail-queue clients
+#
 # Revision 2.178  2010-06-07 12:02:38+05:30  Cprogrammer
 # create tcp*.cdb before running rpm.init
 #
@@ -37,7 +42,7 @@
 # added indimail-mini package
 #
 # Revision 2.166  2010-05-20 11:20:56+05:30  Cprogrammer
-# remvoed qmail-qstat, qmail-qmHandle
+# removed qmail-qstat, qmail-qmHandle
 #
 # Revision 2.165  2010-05-18 08:23:35+05:30  Cprogrammer
 # added rbl check for SMTPS
@@ -558,7 +563,7 @@
 # rpm spec file for indimail
 #
 #
-# $Id: indimail.spec.in,v 2.178 2010-06-07 12:02:38+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 2.179 2010-06-09 22:20:20+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %define _unpackaged_files_terminate_build 1
 
@@ -2092,7 +2097,7 @@ fi
 %attr(444,root,qmail)                   %{_prefix}/doc/README.mpack
 %attr(444,root,qmail)                   %{_prefix}/doc/REMOVE.binmail
 %attr(444,root,qmail)                   %{_prefix}/doc/PIC.local2ext
-%attr(444,root,qmail)                   %{_prefix}/doc/README.indimail
+%attr(444,root,qmail)                   %{_prefix}/doc/README
 %attr(444,root,qmail)                   %{_prefix}/doc/REMOVE.sendmail
 %attr(444,root,qmail)                   %{_prefix}/doc/AUTOTURN
 %attr(444,root,qmail)                   %{_prefix}/doc/INSTALL.vsm
@@ -2483,7 +2488,7 @@ if [ $ID -ne 0 ] ; then
 	echo "You are not root" 1>&2
 	exit 1
 fi
-if [ $argv1 -eq 2 ] ; then
+if [ $argv1 -eq 2 ] ; then # upgrade
 	if [ -f %{_prefix}/boot/rpm.init ] ; then
 %if %i_m_on_mac == 0
 		/sbin/ldconfig
@@ -2641,6 +2646,22 @@ do
 		fi
 	fi
 done
+if [ %noclamav -eq 0 ] ; then
+	%{_prefix}/sbin/svctool --queueParam=queuedef \
+		--qbase=%{qbase} --qcount=%{qcount} --qstart=1 \
+		--min-free=52428800 --fsync --syncdir --virus-filter \
+		--qhpsi="%{_prefix}/bin/clamdscan %s --quiet --no-summary" \
+		--dkverify="none" --dksign=$sign_opt \
+		--private_key=%{_prefix}/control/domainkeys/indimail \
+		$extra_opt
+else
+	%{_prefix}/sbin/svctool --queueParam=queuedef \
+		--qbase=%{qbase} --qcount=%{qcount} --qstart=1 \
+		--min-free=52428800 --fsync --syncdir --virus-filter \
+		--dkverify="none" --dksign=$sign_opt \
+		--private_key=%{_prefix}/control/domainkeys/indimail \
+		$extra_opt
+fi
 %{_prefix}/sbin/svctool --smtp=366 --odmr --servicedir=%{servicedir} \
 	--query-cache --password-cache
 # Greylist daemon
@@ -3124,29 +3145,79 @@ if [ $ID -ne 0 ] ; then
 	exit 1
 fi
 # we are doing upgrade
-if [ $argv1 -eq 1 ] ; then
+if [ $argv1 -eq 2 ] ; then
 	exit 0
 fi
+%if %i_m_on_mac == 1
+echo "Adding IndiMail users/groups"
+/usr/bin/dscl . -create /Groups/indimail PrimaryGroupID 555
+/usr/bin/dscl . -create /Groups/nofiles PrimaryGroupID 556
+/usr/bin/dscl . -create /Groups/qmail   PrimaryGroupID 557
+
+/usr/bin/dscl . -create /Users/indimail UniqueID 555
+/usr/bin/dscl . -create /Users/indimail home @indimaildir@
+/usr/bin/dscl . -create /Users/indimail PrimaryGroupID 555
+/usr/bin/dscl . -create /Users/indimail UserShell /bin/bash
+/usr/bin/dscl . -create /Users/indimail RealName indimail
+%else
+#
+# Create user/groups indimail. Do not report any problems if it already
+# exists.
+#
+nscd_up=`ps -ef |grep nscd |grep -v grep|wc -l`
+if [ $nscd_up -ge 1 ] ; then
+	if [ -x %{_sysconfdir}/init.d/nscd ] ; then
+		%{_sysconfdir}/init.d/nscd stop
+	fi
+fi
+echo "Adding IndiMail users/groups"
+/usr/bin/getent group indimail  > /dev/null || /usr/sbin/groupadd -r -g 555 indimail || true
+if [ $? = 4 ] ; then
+	/usr/sbin/groupadd indimail
+fi
+/usr/bin/getent group nofiles   > /dev/null || /usr/sbin/groupadd nofiles  || true
+/usr/bin/getent group qmail     > /dev/null || /usr/sbin/groupadd qmail    || true
+
+%{__rm} -f /var/spool/mail/indimail
+
+/usr/bin/getent passwd indimail > /dev/null || /usr/sbin/useradd -r -g indimail -u 555 -d %{_prefix} indimail || true
+if [ $? = 4 ] ; then
+	/usr/sbin/useradd -r -g indimail -d %{_prefix} indimail
+fi
+if [ $nscd_up -ge 1 ] ; then
+	if [ -x %{_sysconfdir}/init.d/nscd ] ; then
+		%{_sysconfdir}/init.d/nscd start
+	fi
+fi
+%endif
+
 if [ -f %{_sysconfdir}/init.d/sendmail ] ; then
 	%{_sysconfdir}/init.d/sendmail stop
 	if [ -f /sbin/chkconfig ] ; then
 		/sbin/chkconfig --del sendmail
 	fi
 fi
-/bin/rm -f $QmailHOME/bin/qmail-queue
-/bin/ln -s $QmailHOME/bin/qmail-qmqpc $QmailHOME/bin/qmail-queue
-/bin/ln -s $QmailHOME/bin/sendmail $QmailHOME/bin/sendmail.sh
+if [ -f %{_prefix}/bin/qmail-qmqpc ] ; then
+	/bin/rm -f %{_prefix}/bin/qmail-queue
+fi
+cd %{_prefix}/bin
+/bin/ln -sf qmail-qmqpc qmail-queue
 for i in /usr/lib/sendmail /usr/sbin/sendmail; do
 	if [ -f $i -a ! -L $i ]; then
 		echo "! $i is a file, should be a link"
 		/bin/mv $i $i.old
-		/bin/ln -s $QmailHOME/bin/sendmail.sh $i
+		/bin/ln -s %{_prefix}/bin/sendmail $i
+	elif [ -L $i ];then
+		/bin/mv $i $i.old
+		/bin/ln -s %{_prefix}/bin/sendmail $i
 	elif [ ! -f $i ];then
 		echo "! $i is missing"
-		/bin/ln -s $QmailHOME/bin/sendmail.sh $i
+		/bin/ln -s %{_prefix}/bin/sendmail $i
 	fi
 done
-uname -n > $QmailHOME/control/idhost
+if [ ! -f %{_prefix}/control/idhost ] ; then
+	uname -n > %{_prefix}/control/idhost
+fi
 
 %postun mini
 argv1=$1
@@ -3155,7 +3226,7 @@ if [ $argv1 -eq 1 ] ; then
 	exit 0
 fi
 for i in /usr/lib/sendmail /usr/sbin/sendmail; do
-	if [ -f $i.old -a -L $i ]; then
+	if [ -f $i.old -o -L $i.old ]; then
 		echo "restoring sendmail"
 		/bin/rm -f $i
 		/bin/mv $i.old $i
@@ -3164,7 +3235,8 @@ done
 if [ -f %{_sysconfdir}/init.d/sendmail ] ; then
 	if [ -f /sbin/chkconfig ] ; then
 		/sbin/chkconfig --add sendmail
-		%{_sysconfdir}/init.d/sendmail start
+		echo "to start sendmail, issue"
+		echo "%{_sysconfdir}/init.d/sendmail start"
 	fi
 fi
 
