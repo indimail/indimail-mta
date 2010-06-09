@@ -131,6 +131,76 @@ Known values for options are:
   private_key    - Path to Private key created by dknewkey
   ssl            - Use SSL encrypted communication
 
+--queueParam=dir --qbase=queue_path --qcount=N --qstart=I
+	--cntrldir=cntrl_path
+	[--min-free=M]
+	[--no-multi]
+	[--fsync --syncdir]
+	[--qregex]
+	[--content-filter=c]
+	[--virus-filter=v]
+	[--qhpsi=q]
+	[--spamfilter=spamfilter_args]
+	[--logfilter=filter_fifo]
+	[--rejectspam=r --spamexitcode=e --localfilter --remotefilter]
+	[--dkverify=dk|dkim|both|none]
+	[--dksign=dk|dkim|both|none --private_key=private_key]
+
+ Installs a new queue with a SMTP Listener
+  dir            - dir where to install queuedef environment variable directory
+  queue_path     - Path where the queues are installed. If this is different from
+                   $QmailHOME appropriate links will be created in
+                   $QmailHOME
+  N              - No of Queues
+  I              - Numeral Prefix of first queue (i.e 1 for $QmailHOME/queue1)
+  cntrl_path     - Path where Qmail control files are stored
+  M              - Minimum Disk Space to maintain in queue after which
+                   Temporary error will be returned
+  no-multi       - Do not set QMAILQUEUE to qmail-multi
+  qregex         - Use regular expressions for matching entries in
+                   badmailfrom, badrcptto, blackholedsenders, spamignore
+                   relaymailfrom, authdomains, chkuserdomains
+  q              - Full path to an external virus scanner (like clamdscan)
+  v              - Enable Virus/Attachment scanner. v can have following values
+                   1 - Internal Scanner
+                   2 - Internal + External + Attachment Scan
+                   3 - Internal + Attachment Scan
+                   4 - External + Attachment Scan
+                   5 - External Scanner
+                   6 - Attachment Scan
+  content-filter - Enable content filtering against regex in bodycheck control
+                   file or the filename given as argument to content-filter
+  c              - Optional filename passed to content-filter argument
+  spamfilter     - Spamfilter program along with arguments
+  filter_fifo    - Capture additional status message from spamfilter in 
+                   smtpd logfile via filter_fifo
+  r              - Mails get rejected as spam if exit status of spamfilter
+                   equals the value of spamexitcode. r can have following values
+                   0 - Do not reject SPAM mails
+                   1 - Bounce SPAM Mails.
+                   2 - Blackhole SPAM Mails
+  e              - Exit value of spamfilter that should be treated as spam
+  fsync          - Sync files and directories when writing files
+  syncdir        - Use BSD style sync semantics for flushing directories
+  private_key    - Path to Private key created by dknewkey
+
+--greylist=port --min-resend-min=m --resend-win-hr=g --timeout-days=t
+		--context-file=f --save_interval=s --whitelist=w --hash-size=s
+		--use-greydaemon
+
+  Installs a new Greylist Daemon
+  Port           - Bind on this port for qmail-greyd
+  service_path   - Path where supervise scripts will be installed
+  m              - Minimum resend time after which mail will be accepted
+  g              - Window in which mail must be seen
+  t              - Max period for a mail to be received after which IP will be removed
+                   from whitelist
+  s              - Size of hash table (0 to disable hashing)
+  context_file   - File in which context information is saved for startup
+  save_interval  - Time interval in which context file gets saved
+  whitelist      - List of whitelisted IP
+  use-greydaemon - Use John Levine's greydaemon
+
 --qmtp=Port --qbase=queue_path --qcount=N --qstart=I
     --servicedir=service_path --cntrldir=cntrl_path
     --localip=a --maxdaemons=m --maxperip=i
