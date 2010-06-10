@@ -201,6 +201,9 @@ environment to be used as a call-interface for an external virus scanner:
  QHPSI="clamdscan %s --quiet --no-summary"
 .EE
 
+Any \fB'%s'\fR in the \fBQHPSI\fR gets replaced with
+the message filename in the queue's '\fImess\fR' directory.
+
 .IP \n+[step]
 is set to list of plugins starting with a keyword 'plugin:'.
 
@@ -210,10 +213,19 @@ is set to list of plugins starting with a keyword 'plugin:'.
 
 Sets \fBqmail-queue\fR to load three plugins clamd, fsecure and symantec from
 QMAILHOME/plugins directory.
-.LP
 
-Any \fB'%s'\fR in the \fBQHPSI\fR gets replaced with
+You can also use the plugin generic.so. generic.so plugin can use any scanner defined
+by the \fBSCANCMD\fR environment variable.
+
+.EX
+ QHPSI="plugin: generic"
+ SCANCMD="clamdscan %s --quiet --no-summary"
+.EE
+
+Any \fB'%s'\fR in the \fBSCANCMD\fR gets replaced with
 the message filename in the queue's '\fImess\fR' directory.
+
+.LP
 
 .TP
 .B QHPSIRC

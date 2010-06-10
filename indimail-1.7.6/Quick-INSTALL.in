@@ -19,10 +19,15 @@
    Creating a non-clustered Domain
    -------------------------------
 
+   Install IndiMail from RPM
    % sudo rpm -ivh indimail-@version@-1.1.i386.rpm
+
+   Create a basic configuration file required by IndiMail
    % cd @indimaildir@/control
    % su
    # echo "localhost:indimail:ssh-1.5-:/tmp/mysql.sock" > host.mysql
+
+   Start IndiMail
    # @indimaildir@/sbin/initsvc -on
    # exit
 
@@ -47,6 +52,7 @@
    % sudo @indimaildir@/bin/svstat /service/mysql.3306
    /service/mysql.3306: up (pid 11936) 5 seconds
 
+   Create a virtual domain and do various operations
    % sudo @indimaildir@/bin/vadddomain example.com pass
    % @indimaildir@/bin/vuserinfo postmaster@example.com
    % sudo @indimaildir@/bin/vadduser testuser1@example.com pass
@@ -57,12 +63,17 @@
    Creating a Clustered Domain
    ---------------------------
 
+   Install IndiMail from RPM
    % sudo rpm -ivh indimail-@version@-1.1.i386.rpm
+
+   Create basic configuration files required by IndiMail
    % cd @indimaildir@/control
    % su
    # echo "localhost:indimail:ssh-1.5-:/tmp/mysql.sock" > host.cntrl
    # ln -s host.cntrl host.master
    # echo 192.168.1.100 > hostip (replace 192.168.1.100 with your mailserver IP)
+
+   Start IndiMail
    # @indimaildir@/sbin/initsvc -on
    # exit
 
@@ -87,6 +98,7 @@
    % sudo @indimaildir@/bin/svstat /service/mysql.3306
    /service/mysql.3306: up (pid 11936) 7 seconds
 
+   Create a virtual domain and do various operations
    % sudo @indimaildir@/bin/vadddomain -D indimail -S localhost \
        -U indimail -P ssh-1.5- -p 3306 -c example.com pass
    % @indimaildir@/bin/vuserinfo postmaster@example.com
@@ -94,6 +106,8 @@
    % @indimaildir@/bin/vuserinfo testuser1@example.com
    % @indimaildir@/bin/vpasswd testuser1@example.com newpass
    % @indimaildir@/bin/vmoduser -q 50000000 testuser1@example.com
+
+   Query the cluster definition
    % @indimaildir@/bin/dbinfo -s
 
    Send / Receive Mails
