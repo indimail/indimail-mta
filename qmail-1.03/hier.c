@@ -1,5 +1,8 @@
 /*
  * $Log: hier.c,v $
+ * Revision 1.146  2010-06-11 16:30:03+05:30  Cprogrammer
+ * added sendmail man page
+ *
  * Revision 1.145  2010-05-20 11:28:29+05:30  Cprogrammer
  * removed qmail-qstat, qmail-qmHandle
  *
@@ -991,6 +994,7 @@ hier(inst_dir)
 	c(auto_qmail_home, "man/cat8", "spawn-filter.0", auto_uido, auto_gidq, 0444);
 	c(auto_qmail_home, "man/man8", "qmail-inject.8", auto_uido, auto_gidq, 0444);
 	c(auto_qmail_home, "man/cat8", "qmail-inject.0", auto_uido, auto_gidq, 0444);
+	c(auto_qmail_home, "man/man8", "sendmail.8", auto_uido, auto_gidq, 0444);
 	c(auto_qmail_home, "man/man8", "qmail-showctl.8", auto_uido, auto_gidq, 0444);
 	c(auto_qmail_home, "man/cat8", "qmail-showctl.0", auto_uido, auto_gidq, 0444);
 	c(auto_qmail_home, "man/man8", "qmail-newmrh.8", auto_uido, auto_gidq, 0444);
@@ -1065,7 +1069,7 @@ hier(inst_dir)
 void
 getversion_install_big_c()
 {
-	static char    *x = "$Id: hier.c,v 1.145 2010-05-20 11:28:29+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: hier.c,v 1.146 2010-06-11 16:30:03+05:30 Cprogrammer Stab mbhangui $";
 
 #ifdef INDIMAIL
 	x = sccsidh;
