@@ -974,24 +974,45 @@ the installation.
    # /sbin/ldconfig
    # exit
 
-   Install svscanboot in /etc/inittab or /etc/event.d (in case your system uses upstart)
+   Run the following command to install indimail in startup scripts and have
+   sendmail removed. The command below will also install indimail as an
+   alternative MTA in case your system has /usr/sbin/alternatives. Additionally
+   sendmail will be disabled.
 
-   % sudo @indimaildir@/sbin/initsvc -on
+   % sudo /var/indimail/sbin/svctool --config=add-boot
 
-   The above command will install svscanboot (in inittab or /etc/event.d) and start all services
+   The above command will install svscanboot (in inittab, /etc/init or /etc/event.d)
 
-   Make sure that sendmail is disabled on your system
-   % sudo chkconfig --level 2345 sendmail off
+   To make sure that sendmail is disabled on your system
+
+   % sudo chkconfig --list sendmail
+
+   In case sendmail is not disabled
+   % sudo chkconfig sendmail off
+
+   Shutdown down sendmail
    % sudo /etc/init.d/sendmail stop
 
-   You may also want to link sendmail to @indimaildir@/bin/sendmail.sh
-   % sudo rm /usr/sbin/sendmail
-   % ln -s @indimaildir@/bin/sendmail.sh /usr/sbin/sendmail
+   Make sure that sendmail is linked to @indimaildir@/bin/sendmail. If not, then do the
+   following
+
+   % ln -s @indimaildir@/bin/sendmail /usr/sbin/sendmail
 
    On some systems sendmail could be in /usr/lib instead of /usr/sbin
 
-   NOTE: on Fedora Core 8 and above which has moved to upstart, putting an entry in inittab will
-   not work.
+   % ln -s @indimaildir@/bin/sendmail /usr/lib/sendmail
+
+   FINALLY! To start all services
+
+   % sudo @indimaildir@/sbin/initsvc -on
+
+   Instead of the above initsvc command, you can also do (a more portable way)
+
+   % sudo service indimail start
+
+   NOTE: on Fedora Core 8 and above which has moved to upstart, putting an entry in inittab
+   will not work. However, if you use initsvc, then you don't have to worry about your
+   system
 
 ########### SECTION 6  ### Verfiy INSTALLATION ##########################
 6. Check your installation

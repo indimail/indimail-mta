@@ -1175,6 +1175,7 @@ for proper functioning of email server. svscan is installed as an entry in /etc/
 systems which use \fBinit(8)\fR. Some of the newer systems come with \fBupstart(8)\fR, in whih case,
 svscan is installed in /etc/event.d. On MacOS the file indimail.plist in the directory
 /System/Library/LaunchDaemons is used by launchctl to start IndiMail.
+
 .PP
 The program \fBinitsvc(1)\fR can be used to enable svscan to get automatically started on
 system boot. All services are installed in /service which each directory representing a
@@ -1217,6 +1218,15 @@ The services on port 25, 587, 110, 4110, 143, 4143 support STARTTLS
 
 You can use \fBsvc(8)\fR to start / stop individual services. To disable / enable all services,
 you can use the \fBinitsvc(8)\fR command.
+
+IndiMail attempts to be as portable as possible across different system. You can use
+any of the following two commands to start IndiMail on all systems
+
+.EX
+ # service indimail start
+ or 
+ # initsvc -on
+.EE
 
 .SH POST Execution Handle
 Some indimail programs have a post execution handle. A post execution handle is a program with
