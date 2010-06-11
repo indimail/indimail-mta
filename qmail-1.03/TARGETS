@@ -245,6 +245,7 @@ echo
 echo.o
 elq
 env.a
+envdir_set.o
 envdir
 envdir.o
 envelopes.0
