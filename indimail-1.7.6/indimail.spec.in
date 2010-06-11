@@ -1,5 +1,8 @@
 #
 # $Log: indimail.spec.in,v $
+# Revision 2.180  2010-06-11 21:58:33+05:30  Cprogrammer
+# use /usr/sbin/alternatives to install indimail as an alternative MTA
+#
 # Revision 2.179  2010-06-09 22:20:20+05:30  Cprogrammer
 # fixed %post, %postun scriptlet in indimail-mini
 # added svctool --queueParam to create defaultqueue for qmail-inject, sendmail and other
@@ -563,7 +566,7 @@
 # rpm spec file for indimail
 #
 #
-# $Id: indimail.spec.in,v 2.179 2010-06-09 22:20:20+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 2.180 2010-06-11 21:58:33+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %define _unpackaged_files_terminate_build 1
 
@@ -2820,6 +2823,16 @@ do
 	done
 done
 
+# Misc/Configuration
+%{_prefix}/sbin/svctool --svscanlog --servicedir=%{servicedir}
+if [ -f %{_prefix}/boot/rpm.init ] ; then
+	echo "Running Custom Installation Script for post"
+	/bin/sh %{_prefix}/boot/rpm.init post
+fi
+
+# Install IndiMail to be started on system boot
+echo "adding indimail startup"
+%{_prefix}/sbin/svctool --config=add-boot
 if [ -f %{_sysconfdir}/rc.local ] ; then #FC13 stupidity
 	grep "/sbin/initctl emit qmailstart" %{_sysconfdir}/rc.local >/dev/null 2>&1
 	if [ $? -ne 0 ] ; then
@@ -2830,15 +2843,6 @@ if [ -f %{_sysconfdir}/rc.local ] ; then #FC13 stupidity
 	fi
 fi
 
-# Misc/Configuration
-%{_prefix}/sbin/svctool --svscanlog --servicedir=%{servicedir}
-if [ -f %{_prefix}/boot/rpm.init ] ; then
-	echo "Running Custom Installation Script for post"
-	/bin/sh %{_prefix}/boot/rpm.init post
-fi
-
-%{_prefix}/sbin/initsvc -status
-
 if [ %noclamav -eq 0 ] ; then
 	%{__rm} -f %{servicedir}/freshclam/down
 fi
@@ -2848,7 +2852,7 @@ if [ -f %{_sysconfdir}/init/svscan.conf -o -f %{_sysconfdir}/event.d/svscan ] ; 
 	count=1
 else
 %if %i_m_on_mac == 0
-	echo "1. Issue /var/indimail/sbin/initsvc -on"
+	echo "1. Issue %{_prefix}/sbin/initsvc -on"
 	echo "2. Issue /sbin/init q to start services"
 	count=2
 %else
@@ -2902,6 +2906,16 @@ then
 	echo "Giving IndiMail exactly 5 seconds to exit nicely"
 	sleep 5
 fi
+# Remove IndiMail being started on system boot
+echo "removing indimail startup"
+%{_prefix}/sbin/svctool --config=rm-boot
+if [ -f %{_sysconfdir}/rc.local ] ; then #FC13 stupidity
+	egrep -iv "indimail|qmail" %{_sysconfdir}/rc.local > %{_sysconfdir}/rc.local.$$
+	if [ $? -eq 0 ] ; then
+		%{__mv} -f %{_sysconfdir}/rc.local.$$ %{_sysconfdir}/rc.local
+	fi
+fi
+
 if [ -f %{_prefix}/boot/rpm.init ] ; then
 	echo "Running Custom Un-Installation Script for preun"
 	/bin/sh %{_prefix}/boot/rpm.init preun "$argv1"
@@ -3191,30 +3205,40 @@ if [ $nscd_up -ge 1 ] ; then
 fi
 %endif
 
+if [ -f %{_prefix}/bin/qmail-qmqpc ] ; then
+	/bin/rm -f %{_prefix}/bin/qmail-queue
+fi
+cd %{_prefix}/bin
+/bin/ln -sf qmail-qmqpc qmail-queue
 if [ -f %{_sysconfdir}/init.d/sendmail ] ; then
 	%{_sysconfdir}/init.d/sendmail stop
 	if [ -f /sbin/chkconfig ] ; then
 		/sbin/chkconfig --del sendmail
 	fi
 fi
-if [ -f %{_prefix}/bin/qmail-qmqpc ] ; then
-	/bin/rm -f %{_prefix}/bin/qmail-queue
+if [ -x /usr/sbin/alternatives ] ; then
+	/usr/sbin/alternatives --install \
+		/usr/sbin/sendmail mta %{_prefix}/bin/sendmail 120 \
+		--slave /usr/share/man/man8/sendmail.8.gz mta-sendmailman \
+			%{_prefix}/man/man8/qmail-inject.8.gz \
+		--slave /usr/lib/sendmail mta-sendmail \
+			%{_prefix}/bin/sendmail
+	/usr/sbin/alternatives --set mta %{_prefix}/bin/sendmail
+else
+	for i in /usr/lib/sendmail /usr/sbin/sendmail; do
+		if [ -f $i -a ! -L $i ]; then
+			echo "! $i is a file, should be a link"
+			/bin/mv $i $i.old
+			/bin/ln -s %{_prefix}/bin/sendmail $i
+		elif [ -L $i ];then
+			/bin/mv $i $i.old
+			/bin/ln -s %{_prefix}/bin/sendmail $i
+		elif [ ! -f $i ];then
+			echo "! $i is missing"
+			/bin/ln -s %{_prefix}/bin/sendmail $i
+		fi
+	done
 fi
-cd %{_prefix}/bin
-/bin/ln -sf qmail-qmqpc qmail-queue
-for i in /usr/lib/sendmail /usr/sbin/sendmail; do
-	if [ -f $i -a ! -L $i ]; then
-		echo "! $i is a file, should be a link"
-		/bin/mv $i $i.old
-		/bin/ln -s %{_prefix}/bin/sendmail $i
-	elif [ -L $i ];then
-		/bin/mv $i $i.old
-		/bin/ln -s %{_prefix}/bin/sendmail $i
-	elif [ ! -f $i ];then
-		echo "! $i is missing"
-		/bin/ln -s %{_prefix}/bin/sendmail $i
-	fi
-done
 if [ ! -f %{_prefix}/control/idhost ] ; then
 	uname -n > %{_prefix}/control/idhost
 fi
@@ -3225,19 +3249,24 @@ argv1=$1
 if [ $argv1 -eq 1 ] ; then
 	exit 0
 fi
-for i in /usr/lib/sendmail /usr/sbin/sendmail; do
-	if [ -f $i.old -o -L $i.old ]; then
-		echo "restoring sendmail"
-		/bin/rm -f $i
-		/bin/mv $i.old $i
+if [ -x /usr/sbin/alternatives ] ; then
+	/usr/sbin/alternatives --remove mta %{_prefix}/bin/sendmail
+	/usr/sbin/alternatives --auto mta
+else
+	if [ -f %{_sysconfdir}/init.d/sendmail ] ; then
+		if [ -f /sbin/chkconfig ] ; then
+			/sbin/chkconfig --add sendmail
+			echo "to start sendmail, issue"
+			echo "%{_sysconfdir}/init.d/sendmail start"
+		fi
 	fi
-done
-if [ -f %{_sysconfdir}/init.d/sendmail ] ; then
-	if [ -f /sbin/chkconfig ] ; then
-		/sbin/chkconfig --add sendmail
-		echo "to start sendmail, issue"
-		echo "%{_sysconfdir}/init.d/sendmail start"
-	fi
+	for i in /usr/lib/sendmail /usr/sbin/sendmail; do
+		if [ -f $i.old -o -L $i.old ]; then
+			echo "restoring sendmail"
+			/bin/rm -f $i
+			/bin/mv $i.old $i
+		fi
+	done
 fi
 
 # fix changelog for openSUSE buildservice
