@@ -1,5 +1,8 @@
 /*
  * $Log: sendmail.c,v $
+ * Revision 1.9  2010-06-11 16:32:36+05:30  Cprogrammer
+ * added more sendmail compatible options (but to be ignored)
+ *
  * Revision 1.8  2008-06-01 15:32:47+05:30  Cprogrammer
  * added -N dsn option
  *
@@ -128,12 +131,31 @@ main(argc, argv)
 
 	flagh = 0;
 	sender = 0;
-	while ((opt = getopt(argc, argv, "vimte:f:p:o:B:F:EJxb:")) != opteof)
+	while ((opt = getopt(argc, argv, "ULhnIAvimte:f:p:o:B:F:EJxb:")) != opteof)
 	{
 		switch (opt)
 		{
-		case 'B':
+		case 'B': /*- ignored */
 			break;
+		case 'A':
+			switch (optarg[0])
+			{
+			case 'm': /*- ignored */
+				break;
+			case 'c': /*- ignored */
+				break;
+			default:
+				die_usage();
+			}
+			break;
+		case 'L': /*- ignored */
+		case 'h': /*- ignored */
+		case 'n': /*- ignored */
+		case 'U': /*- ignored */
+			break;
+		case 'I':
+			substdio_putsflush(subfderr, "sendmail: fatal: please use fastforward/newaliases instead\n");
+			_exit(100);
 		case 't':
 			flagh = 1;
 			break;
@@ -169,6 +191,10 @@ main(argc, argv)
 				break;	/*- see 'i' above */
 			case 'm':
 				break;	/*- see 'm' above */
+			case 'o':
+			case '7':   /*- ignored */
+			case '8':
+				break;
 			}
 			break;
 		case 'E':
@@ -179,12 +205,17 @@ main(argc, argv)
 		case 'b':
 			switch (optarg[0])
 			{
+			case 'h':
+			case 'H':
 			case 'm':
 				break;
 			case 'p':
 				mailq();
 			case 's':
 				smtpd();
+			case 'i':
+				substdio_putsflush(subfderr, "sendmail: fatal: please use fastforward/newaliases instead\n");
+				_exit(100);
 			default:
 				die_usage();
 			}
@@ -229,7 +260,7 @@ main(argc, argv)
 void
 getversion_sendmail_c()
 {
-	static char    *x = "$Id: sendmail.c,v 1.8 2008-06-01 15:32:47+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: sendmail.c,v 1.9 2010-06-11 16:32:36+05:30 Cprogrammer Stab mbhangui $";
 
 	x++;
 }
