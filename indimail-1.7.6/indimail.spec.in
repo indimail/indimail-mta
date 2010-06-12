@@ -1,5 +1,8 @@
 #
 # $Log: indimail.spec.in,v $
+# Revision 2.181  2010-06-12 10:16:35+05:30  Cprogrammer
+# use man page for sendmail instead of qmail-inject
+#
 # Revision 2.180  2010-06-11 21:58:33+05:30  Cprogrammer
 # use /usr/sbin/alternatives to install indimail as an alternative MTA
 #
@@ -566,7 +569,7 @@
 # rpm spec file for indimail
 #
 #
-# $Id: indimail.spec.in,v 2.180 2010-06-11 21:58:33+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 2.181 2010-06-12 10:16:35+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %define _unpackaged_files_terminate_build 1
 
@@ -2290,6 +2293,7 @@ fi
 %attr(444,root,qmail)             %{_prefix}/man/man8/qmail-showctl.8.gz
 %attr(444,root,qmail)             %{_prefix}/man/cat8/qmail-showctl.0.gz
 %attr(444,root,qmail)             %{_prefix}/man/man8/qmail-inject.8.gz
+%attr(444,root,qmail)             %{_prefix}/man/man8/sendmail.8.gz
 %attr(444,root,qmail)             %{_prefix}/man/cat8/qmail-inject.0.gz
 %attr(444,root,qmail)             %{_prefix}/man/man8/qmail-qmqpc.8.gz
 %attr(444,root,qmail)             %{_prefix}/man/cat8/qmail-qmqpc.0.gz
@@ -3220,7 +3224,7 @@ if [ -x /usr/sbin/alternatives ] ; then
 	/usr/sbin/alternatives --install \
 		/usr/sbin/sendmail mta %{_prefix}/bin/sendmail 120 \
 		--slave /usr/share/man/man8/sendmail.8.gz mta-sendmailman \
-			%{_prefix}/man/man8/qmail-inject.8.gz \
+			%{_prefix}/man/man8/sendmail.8.gz \
 		--slave /usr/lib/sendmail mta-sendmail \
 			%{_prefix}/bin/sendmail
 	/usr/sbin/alternatives --set mta %{_prefix}/bin/sendmail
