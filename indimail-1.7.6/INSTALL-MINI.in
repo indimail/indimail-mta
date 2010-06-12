@@ -8,12 +8,13 @@ There are three standard applications of indimail-mini:
     * At a large site, mail service is centralized on a few hosts. All other hosts
       are null clients running indimail-mini. Setting up the null clients is easy; see below.
     * A firewall sends all incoming messages to an internal gateway. The firewalls run
-      indimail-mini plus qmail-smtpd. There's very little code to audit, and none of it runs as root.
+      indimail-mini plus qmail-smtpd. There's very little code to audit, and none of it runs
+      as root.
     * A computer sends mail to a huge mailing list through a better-connected smarthost. The
       computer runs indimail for its own local deliveries, but it also has ezmlm configured to
-      use a separate indimail-mini installation for the mailing list. QMQP is typically 100 times
-      faster than SMTP here; for example, you can send a 1000-recipient message through a 28.8
-      modem in about 10 seconds. 
+      use a separate indimail-mini installation for the mailing list. QMQP is typically 100
+      times faster than SMTP here; for example, you can send a 1000-recipient message through
+      a 28.8 modem in about 10 seconds. 
 
 How do I set up a QMQP server?
 =============================
@@ -40,7 +41,7 @@ sudo @indimaildir@/sbin/svctool --qmqp=628 --servicedir=/service --maxdaemons=75
         --qbase=@indimaildir@/queue --qcount=5 --qstart=1 --cntrldir=control --localip=0 \
          --fsync --syncdir --memory=104857600 --min-free=52428800
 
-628 is the TCP port for QMQP.
+628 is the standard TCP port for QMQP.
 
 How do I install indimail-mini?
 ==============================
