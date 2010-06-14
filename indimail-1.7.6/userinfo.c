@@ -1,5 +1,8 @@
 /*
  * $Log: userinfo.c,v $
+ * Revision 2.32  2010-06-14 21:25:31+05:30  Cprogrammer
+ * show mailbox path as remote if user account is on remote machine
+ *
  * Revision 2.31  2010-05-29 16:52:33+05:30  Cprogrammer
  * do not calculate quota for remote mailstore
  *
@@ -187,7 +190,7 @@
 #include <errno.h>
 
 #ifndef	lint
-static char     sccsid[] = "$Id: userinfo.c,v 2.31 2010-05-29 16:52:33+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: userinfo.c,v 2.32 2010-06-14 21:25:31+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 extern char *strptime(const char *, const char *, struct tm *);
@@ -296,6 +299,7 @@ vuserinfo(Email, User, Domain, DisplayName, DisplayPasswd, DisplayUid, DisplayGi
 		}
 	} else
 		mailstore = "localhost";
+	islocal = islocalif(mailstore);
 #else
 	mailstore = "localhost";
 #endif
@@ -311,7 +315,7 @@ vuserinfo(Email, User, Domain, DisplayName, DisplayPasswd, DisplayUid, DisplayGi
 				printf("gid           : %d\n", (int) gid);
 			if (DisplayDir || DisplayAll)
 				printf("dir           : %s%s\n", tmpbuf,
-					access(tmpbuf, F_OK) && errno == ENOENT ? " (missing)" : "");
+					access(tmpbuf, F_OK) && errno == ENOENT ? (islocal ? " (missing)" : " (remote)") : "");
 			return(0);
 		} else
 		if (valiasinfo(User, real_domain))
@@ -385,7 +389,7 @@ vuserinfo(Email, User, Domain, DisplayName, DisplayPasswd, DisplayUid, DisplayGi
 		printf("gecos         : %s\n", mypw->pw_gecos);
 	if (DisplayDir || DisplayAll)
 		printf("dir           : %s%s\n", mypw->pw_dir,
-			access(mypw->pw_dir, F_OK) && errno == ENOENT ? " (missing)" : "");
+			access(mypw->pw_dir, F_OK) && errno == ENOENT ? (islocal ? " (missing)" : " (remote)") : "");
 	if (DisplayQuota || DisplayAll)
 	{
 #ifdef USE_MAILDIRQUOTA	
@@ -395,9 +399,6 @@ vuserinfo(Email, User, Domain, DisplayName, DisplayPasswd, DisplayUid, DisplayGi
 		snprintf(maildir, MAX_BUFF, "%s/Maildir", mypw->pw_dir);
 		printf("quota         : %s [%-4.2f Mb]\n", mypw->pw_shell,
 			(float) strtoll(mypw->pw_shell, 0, 0)/(1024 * 1024));
-#ifdef CLUSTERED_SITE
-		islocal = islocalif(mailstore);
-#endif
 		if (islocal)
 		{
 #ifdef USE_MAILDIRQUOTA	
