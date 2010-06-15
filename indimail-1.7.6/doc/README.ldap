@@ -128,7 +128,7 @@ create /service/.slapd.389 so that svscan does not discover this new service yet
 % sudo mv /tmp/run1 /service/.slapd.389/run
 % sudo chmod +x /service/.slapd.389/run /service/.slapd.389/log/run
 
-rename .slapd.389 to slapd.389 for svscan to discover and start slapd
+rename .slapd.389 to slapd.389 and wait for svscan to discover and start slapd
 
 % sudo mv /service/.slapd.389 /service/slapd.389
 

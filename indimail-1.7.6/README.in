@@ -68,7 +68,10 @@ and the queue destination directories are also configurable. You can have one In
 installation cater to multiple instances having different properties / configuration. The
 multiple queues eliminates what is known as 'the silly qmail syndrome' and gives IndiMail the
 capability to perform better than a stock qmail installation. All IndiMail files lie under
-/var/indimail (including qmail binaries).
+/var/indimail (including qmail binaries). IndiMail's multiple queue gives allows one to achieve
+tremendous inject rates using commodity hardware as can be seen here
+
+http://groups.google.co.in/group/indimail/browse_thread/thread/f9e0b6214d88ca6d#
 
 A pictorial representation of IndiMail's Queue Mechanism is shown below
 
