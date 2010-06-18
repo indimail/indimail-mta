@@ -267,7 +267,7 @@ main(int argc, char **argv)
 		/*- 
 		 * Mail content read from pipfd[0]
 		 * which has been filtered through SPAMFILTER
-		 * Envelope information can be read through rcpfd[0]
+		 * Envelope information can be read through recpfd[0]
 		 */
 		if (dup2(pipefd[0], 0) == -1 || close(pipefd[1]) == -1)
 			_exit(60);
