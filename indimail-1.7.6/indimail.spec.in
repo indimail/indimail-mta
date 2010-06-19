@@ -1,5 +1,8 @@
 #
 # $Log: indimail.spec.in,v $
+# Revision 2.183  2010-06-19 13:44:44+05:30  Cprogrammer
+# added mta-rmail in alternatives
+#
 # Revision 2.182  2010-06-19 13:36:09+05:30  Cprogrammer
 # remove indimail from alternative mta in the postun script instead of preun
 #
@@ -572,7 +575,7 @@
 # rpm spec file for indimail
 #
 #
-# $Id: indimail.spec.in,v 2.182 2010-06-19 13:36:09+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 2.183 2010-06-19 13:44:44+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %define _unpackaged_files_terminate_build 1
 
@@ -3229,8 +3232,8 @@ if [ -x /usr/sbin/alternatives ] ; then
 		/usr/sbin/sendmail mta %{_prefix}/bin/sendmail 120 \
 		--slave /usr/share/man/man8/sendmail.8.gz mta-sendmailman \
 			%{_prefix}/man/man8/sendmail.8.gz \
-		--slave /usr/lib/sendmail mta-sendmail \
-			%{_prefix}/bin/sendmail
+		--slave /usr/lib/sendmail mta-sendmail %{_prefix}/bin/sendmail \
+		--slave /usr/bin/rmail mta-rmail %{_prefix}/bin/rmail
 	/usr/sbin/alternatives --set mta %{_prefix}/bin/sendmail
 else
 	for i in /usr/lib/sendmail /usr/sbin/sendmail; do
