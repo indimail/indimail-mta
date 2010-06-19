@@ -604,6 +604,12 @@ warn-auto.sh elq.sh conf-qmail conf-break conf-split
 	| sed s}SPLIT}"`head -1 conf-split`"}g \
 	> elq
 
+rmail: \
+warn-auto.sh rmail.sh conf-qmail
+	cat warn-auto.sh rmail.sh \
+	| sed s}QMAIL}"`head -1 conf-qmail`"}g \
+	> rmail
+
 etrn: \
 warn-auto.sh etrn.sh conf-qmail
 	cat warn-auto.sh etrn.sh \
