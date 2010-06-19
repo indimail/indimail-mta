@@ -1,5 +1,8 @@
 /*
  * $Log: envrules.c,v $
+ * Revision 1.13  2010-06-18 19:37:58+05:30  Cprogrammer
+ * initialize errStr
+ *
  * Revision 1.12  2009-05-01 12:52:03+05:30  Cprogrammer
  * return error if control_readfile() fails
  *
@@ -55,12 +58,11 @@ do_match(int use_regex, char *text, char *regex, char **errStr)
 {
 	int             i;
 
+	if (errStr)
+		*errStr = 0;
 	if (use_regex)
-	{
-		if (errStr)
-			*errStr = 0;
 		return (matchregex(text, regex, errStr));
-	} else
+	else
 	{
 #ifdef FNM_CASEFOLD
 		i = FNM_PATHNAME|FNM_CASEFOLD;
@@ -173,7 +175,7 @@ parse_env(char *envStrings)
 void
 getversion_envrules_c()
 {
-	static char    *x = "$Id: envrules.c,v 1.12 2009-05-01 12:52:03+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: envrules.c,v 1.13 2010-06-18 19:37:58+05:30 Cprogrammer Stab mbhangui $";
 
 	x++;
 }
