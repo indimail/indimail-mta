@@ -1557,6 +1557,7 @@ fi
 %attr(555,root,qmail)                   %{_prefix}/bin/822print
 %attr(511,root,qmail)                   %{_prefix}/bin/qmail-send
 %attr(555,root,qmail)                   %{_prefix}/bin/sendmail
+%attr(555,root,qmail)                   %{_prefix}/bin/rmail
 %attr(555,root,qmail)                   %{_prefix}/bin/dbinfo
 %attr(555,root,qmail)                   %{_prefix}/bin/sslerator
 %attr(555,root,qmail)                   %{_prefix}/bin/ifaddr
