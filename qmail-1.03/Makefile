@@ -1177,7 +1177,7 @@ qmail-clean qmail-send qmail-start qmail-daemon splogger qmail-multi qmail-queue
 qmail-dk qmail-dkim predate datemail mailsubj qmail-upq qmail-showctl qmail-newu spawn-filter \
 qmail-pw2u qmail-qread qmail-tcpto qmail-tcpok qmail-cat qmail-poppass \
 qmail-pop3d qmail-popbull qmail-popup qmail-qmqpc qmail-qmqpd qmail-qmtpd \
-qmail-smtpd sendmail tcp-env qmail-newmrh recipient-cdb qmail-cdb qmailconfig \
+qmail-smtpd sendmail rmail tcp-env qmail-newmrh recipient-cdb qmail-cdb qmailconfig \
 config-fast dnscname dnsptr dnsip dnsmxip dnsfq dnstxt hostname ipmeprint qreceipt \
 qsmhook forward rrforward preline condredirect bouncesaying except qmail-todo \
 queue-fix idedit setup instcheck rpmattr maildir2mbox qmaildirmake maildirwatch base64 \
