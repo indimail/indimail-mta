@@ -1,5 +1,8 @@
 /*
  * $Log: hier.c,v $
+ * Revision 1.148  2010-06-19 16:49:00+05:30  Cprogrammer
+ * added rmail man page
+ *
  * Revision 1.147  2010-06-19 15:52:11+05:30  Cprogrammer
  * Dummy UUCP rmail command for postfix/qmail systems
  *
@@ -999,6 +1002,7 @@ hier(inst_dir)
 	c(auto_qmail_home, "man/man8", "qmail-inject.8", auto_uido, auto_gidq, 0444);
 	c(auto_qmail_home, "man/cat8", "qmail-inject.0", auto_uido, auto_gidq, 0444);
 	c(auto_qmail_home, "man/man8", "sendmail.8", auto_uido, auto_gidq, 0444);
+	c(auto_qmail_home, "man/man8", "rmail.8", auto_uido, auto_gidq, 0444);
 	c(auto_qmail_home, "man/man8", "qmail-showctl.8", auto_uido, auto_gidq, 0444);
 	c(auto_qmail_home, "man/cat8", "qmail-showctl.0", auto_uido, auto_gidq, 0444);
 	c(auto_qmail_home, "man/man8", "qmail-newmrh.8", auto_uido, auto_gidq, 0444);
@@ -1073,7 +1077,7 @@ hier(inst_dir)
 void
 getversion_install_big_c()
 {
-	static char    *x = "$Id: hier.c,v 1.147 2010-06-19 15:52:11+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: hier.c,v 1.148 2010-06-19 16:49:00+05:30 Cprogrammer Stab mbhangui $";
 
 #ifdef INDIMAIL
 	x = sccsidh;
