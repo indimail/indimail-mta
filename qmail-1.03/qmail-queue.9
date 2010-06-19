@@ -39,6 +39,30 @@ exists, its content is added to recipient list. The environment variable
 also does the same thing. The value of the environment variable overrides the
 value in the control file.
 
+if the control file
+.I mailarchive
+exists, its content can be used for rule based archival. The environment variable
+.B MAILARCHIVE
+overrides the name of the \fImailarchive\fR control file. A line in this control file
+can be of the form
+
+.EX
+ type:regexp:dest_mailbox
+.EE
+
+where type is \fBF\fR  or \fBT\fR. If type is \fBF\fR, rule is appled on sender. If type is
+\fBT\fR, the rule is applied on the recipient. \fIregexp\fR is an expression to match the
+address (sender or recipient as specfied by \fItype\fR) and \fRdest_mailbox\fR is a valid
+email address. A % in \fIdest_mailbox\fR followed by u, d or e gets replaced as below
+
+.EX
+ %u - user component in address without the '@' sign
+ %d - domain component in address
+ %e - email address
+.EE
+
+The address used is sender in case type is \fBF\fR and recipient in case type is \fBT\fR
+
 If the control file
 .I originipfield
 is set or if the environment variable 

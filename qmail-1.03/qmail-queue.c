@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-queue.c,v $
+ * Revision 1.51  2010-06-18 23:52:36+05:30  Cprogrammer
+ * added mailarchive functionality
+ *
  * Revision 1.50  2010-04-07 19:30:13+05:30  Cprogrammer
  * use HOSTNAME environment variable to record host
  *
@@ -135,6 +138,7 @@
 #include <unistd.h>
 #include <fcntl.h>
 #include <string.h>
+#include "matchregex.h"
 #include "sig.h"
 #include "case.h"
 #include "str.h"
@@ -188,6 +192,11 @@ stralloc        line = { 0 };
 stralloc        excl = { 0 };
 stralloc        incl = { 0 };
 stralloc        logh = { 0 };
+#if MAILARCHIVE
+stralloc        arch = { 0 };
+stralloc        arch_email = {0};
+int             flagarchive = 0;
+#endif
 stralloc        envheaders = { 0 };
 
 void
@@ -674,6 +683,84 @@ qhpsiprog(char *program)
 	return;
 }
 #endif
+#if MAILARCHIVE
+/*
+ * F:abc*@example.com:arch_%u@example.com
+ * F:postmaster@*:arch_postmaster@%d
+ * F:postmaster@*:arch_%e
+ * T:suspicious_user@example.com:ceo@example.com
+ * F:abc@xyz.com:abc_13@example.com
+ */
+int
+set_archive(char *rule, int rule_len, char *addr, char type)
+{
+	char           *addr_ptr, *dest, *ptr, *errStr = 0;
+	int             len, token_len, at;
+
+	for (addr_ptr = rule, len = 0;len < rule_len;len++)
+	{
+		if (*addr_ptr != type)
+		{
+			len += ((token_len = str_len(addr_ptr)) + 1);
+			addr_ptr = rule + len;
+			continue;
+		}
+		for(dest = addr_ptr + 2;*dest && *dest != ':';dest++);
+		if (*dest != ':') /*- invalid line in control file */
+		{
+			len += ((token_len = str_len(addr_ptr)) + 1);
+			addr_ptr = rule + len;
+			continue;
+		}
+		*dest++ = 0;
+		if (*dest && matchregex(addr, addr_ptr + 2, &errStr))
+		{
+			*(dest - 1) = ':';
+			if (!stralloc_copys(&arch_email, "T"))
+				return (1);
+			for (ptr = dest;*ptr;)
+			{
+				if (*ptr == '%' && *(ptr + 1))
+				{
+					switch (*(ptr + 1))
+					{
+					case 'u':
+						at = str_chr(addr, '@');
+						if (!stralloc_catb(&arch_email, addr, at))
+							return (1);
+						ptr++;
+						break;
+					case 'd':
+						if (addr[at = str_chr(addr, '@')] &&
+							!stralloc_cats(&arch_email, addr + at + 1))
+							return (1);
+						ptr++;
+						break;
+					case 'e':
+						if (!stralloc_cats(&arch_email, addr))
+							return (1);
+						ptr++;
+						break;
+					default:
+						if (!stralloc_catb(&arch_email, ptr, 1))
+							return (1);
+						break;
+					}
+				} else
+				if (!stralloc_catb(&arch_email, ptr, 1))
+					return (1);
+				ptr++;
+			} /*-for (*ptr = dest;*ptr;) */
+			if (!stralloc_0(&arch_email))
+				return (1);
+		} else
+			*(dest - 1) = ':';
+		len += ((token_len = str_len(addr_ptr)) + 1);
+		addr_ptr = rule + len;
+	} /*- for (addr_ptr = rule, len = 0;len < rule_len;len++) */
+	return (0);
+}
+#endif
 
 int
 main()
@@ -726,6 +813,12 @@ main()
 		die(55);
 	if (control_readfile(&logh, (ptr = env_get("LOGHEADERS")) && *ptr ? ptr : "logheaders", 0) == -1)
 		die(55);
+#if MAILARCHIVE
+	if (control_readfile(&arch, (ptr = env_get("MAILARCHIVE")) && *ptr ? ptr : "mailarchive", 0) == -1)
+		die(55);
+	if (arch.s && arch.len)
+		flagarchive = 1;
+#endif
 	if (!(queuedir = env_get("QUEUEDIR")))
 #ifdef INDIMAIL
 		queuedir = "queue1";
@@ -768,7 +861,7 @@ main()
 	}
 	flagmademess = 1;
 	substdio_fdbuf(&ssout, write, messfd, outbuf, sizeof(outbuf));
-	/*- read the message headers */
+	/*- read the message body */
 	substdio_fdbuf(&ssin, read, 0, inbuf, sizeof(inbuf));
 	if (logh.len)
 	{
@@ -902,8 +995,6 @@ main()
 	}
 	flagmadeintd = 1;
 	substdio_fdbuf(&ssout, write, intdfd, outbuf, sizeof(outbuf));
-	/*- read the message body */
-	substdio_fdbuf(&ssin, read, 1, inbuf, sizeof(inbuf));
 	if (substdio_bput(&ssout, "u", 1) == -1)
 		die_write();
 	if (substdio_bput(&ssout, tmp, fmt_ulong(tmp, uid)) == -1)
@@ -916,6 +1007,8 @@ main()
 		die_write();
 	if (substdio_bput(&ssout, "", 1) == -1)
 		die_write();
+	/*- read the message envelope */
+	substdio_fdbuf(&ssin, read, 1, inbuf, sizeof(inbuf));
 	if (substdio_get(&ssin, &ch, 1) < 1)
 		die_read();
 	/*- Get the Sender */
@@ -924,6 +1017,10 @@ main()
 		cleanup();
 		die(91);
 	}
+#if MAILARCHIVE
+	if (flagarchive && !stralloc_copys(&line, ""))
+		die(51);
+#endif
 	if (substdio_bput(&ssout, &ch, 1) == -1)
 		die_write();
 	for (len = 0; len < ADDR; ++len)
@@ -932,14 +1029,34 @@ main()
 			die_read();
 		if (substdio_put(&ssout, &ch, 1) == -1)
 			die_write();
+#if MAILARCHIVE
+		if (flagarchive && !stralloc_catb(&line, &ch, 1))
+			die(51);
+#endif
 		if (!ch)
 			break;
 	}
+#if MAILARCHIVE
+	if (flagarchive)
+	{
+		if (!stralloc_0(&line))
+			die(51);
+		if (set_archive(arch.s, arch.len, line.s, 'F'))
+			die(51);
+	}
+#endif
 	if (len >= ADDR)
 	{
 		cleanup();
 		die(11);
 	}
+#if MAILARCHIVE
+	if (arch_email.s && arch_email.len)
+	{
+		if (substdio_bput(&ssout, arch_email.s, arch_email.len) == -1)
+			die_write();
+	}
+#endif
 	if (extraqueue.s && extraqueue.len)
 	{
 		if (substdio_bput(&ssout, "T", 1) == -1)
@@ -971,6 +1088,7 @@ main()
 			die(51);
 		}
 	}
+	/*- Get the recipients */
 	if (flagblackhole)
 	{
 		for (;;) /*- empty the pipe created by qmail_open() */
@@ -985,6 +1103,7 @@ main()
 	} else /*- Write all recipients */
 	for (;;)
 	{
+		/*- get one recipient at a time */
 		if (substdio_get(&ssin, &ch, 1) < 1)
 			die_read();
 		if (!ch)
@@ -1025,7 +1144,7 @@ main()
 			} else
 			if (substdio_bput(&ssout, &ch, 1) == -1)
 				die_write();
-			if (!ch)
+			if (!ch) /* this completes one recipient */
 				break;
 		}
 		if (len >= ADDR)
@@ -1103,7 +1222,7 @@ main()
 void
 getversion_qmail_queue_c()
 {
-	static char    *x = "$Id: qmail-queue.c,v 1.50 2010-04-07 19:30:13+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: qmail-queue.c,v 1.51 2010-06-18 23:52:36+05:30 Cprogrammer Exp mbhangui $";
 
 #ifdef INDIMAIL
 	x = sccsidh;

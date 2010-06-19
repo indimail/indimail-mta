@@ -1964,12 +1964,12 @@ spawn-filter.9
 
 qmail-queue: \
 load qmail-queue.o triggerpull.o fmtqfn.o now.o date822fmt.o get_uid.o MakeArgs.o \
-auto_qmail.o auto_split.o auto_uids.o envread.o str_diffn.o variables.o \
+auto_qmail.o auto_split.o auto_uids.o envread.o str_diffn.o variables.o matchregex.o \
 byte_chr.o case_diffb.o control.o alloc_re.o getln2.o getln.o open_read.o \
 mess822_ok.o stralloc.a wait.a strerr.a str.a fs.a datetime.a seek.a ndelay.a open.a sig.a \
 strsalloc.o alloc.a substdio.a error.a socket.lib libsyncdir.a
 	./load qmail-queue triggerpull.o fmtqfn.o now.o date822fmt.o get_uid.o MakeArgs.o \
-	auto_qmail.o auto_split.o auto_uids.o envread.o str_diffn.o variables.o \
+	auto_qmail.o auto_split.o auto_uids.o envread.o str_diffn.o variables.o matchregex.o \
 	byte_chr.o case_diffb.o control.o alloc_re.o getln2.o getln.o open_read.o \
 	mess822_ok.o strsalloc.o wait.a strerr.a stralloc.a datetime.a seek.a ndelay.a open.a \
 	sig.a alloc.a substdio.a error.a str.a fs.a `cat socket.lib` -L. -lsyncdir
@@ -1986,12 +1986,13 @@ qmail-queue.9
 	> qmail-queue.8
 
 qmail-queue.o: \
-compile qmail-queue.c sig.h exit.h open.h seek.h fmt.h tai.h \
+compile qmail-queue.c sig.h exit.h open.h seek.h fmt.h tai.h matchregex.h \
 alloc.h substdio.h datetime.h now.h datetime.h triggerpull.h stralloc.h \
 control.h auto_qmail.h auto_uids.h date822fmt.h fmtqfn.h error.h env.h \
 mess822.h scan.h str.h variables.h hasindimail.h wait.h getln.h \
-conf-sync conf-qhpsi conf-ip
-	./compile $(inc_deps) `grep -h -v "^#" conf-sync conf-qhpsi conf-ip` qmail-queue.c
+conf-sync conf-qhpsi conf-ip conf-mailarch
+	./compile $(inc_deps) `grep -h -v "^#" conf-sync conf-qhpsi conf-ip conf-mailarch` \
+		qmail-queue.c
 
 domainkeys.o: compile domainkeys.c case.h alloc.h str.h byte.h conf-domainkeys
 	./compile `grep -h -v "^#" conf-domainkeys` domainkeys.c
