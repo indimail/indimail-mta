@@ -1,5 +1,8 @@
 #
 # $Log: indimail.spec.in,v $
+# Revision 2.182  2010-06-19 13:36:09+05:30  Cprogrammer
+# remove indimail from alternative mta in the postun script instead of preun
+#
 # Revision 2.181  2010-06-12 10:16:35+05:30  Cprogrammer
 # use man page for sendmail instead of qmail-inject
 #
@@ -569,7 +572,7 @@
 # rpm spec file for indimail
 #
 #
-# $Id: indimail.spec.in,v 2.181 2010-06-12 10:16:35+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 2.182 2010-06-19 13:36:09+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %define _unpackaged_files_terminate_build 1
 
@@ -2910,16 +2913,6 @@ then
 	echo "Giving IndiMail exactly 5 seconds to exit nicely"
 	sleep 5
 fi
-# Remove IndiMail being started on system boot
-echo "removing indimail startup"
-%{_prefix}/sbin/svctool --config=rm-boot
-if [ -f %{_sysconfdir}/rc.local ] ; then #FC13 stupidity
-	egrep -iv "indimail|qmail" %{_sysconfdir}/rc.local > %{_sysconfdir}/rc.local.$$
-	if [ $? -eq 0 ] ; then
-		%{__mv} -f %{_sysconfdir}/rc.local.$$ %{_sysconfdir}/rc.local
-	fi
-fi
-
 if [ -f %{_prefix}/boot/rpm.init ] ; then
 	echo "Running Custom Un-Installation Script for preun"
 	/bin/sh %{_prefix}/boot/rpm.init preun "$argv1"
@@ -2947,6 +2940,16 @@ if [ $nscd_up -ge 1 ] ; then
 		%{_sysconfdir}/init.d/nscd stop
 	fi
 fi
+# Remove IndiMail being started on system boot
+echo "removing indimail startup"
+%{_prefix}/sbin/svctool --config=rm-boot
+if [ -f %{_sysconfdir}/rc.local ] ; then #FC13 stupidity
+	egrep -iv "indimail|qmail" %{_sysconfdir}/rc.local > %{_sysconfdir}/rc.local.$$
+	if [ $? -eq 0 ] ; then
+		%{__mv} -f %{_sysconfdir}/rc.local.$$ %{_sysconfdir}/rc.local
+	fi
+fi
+
 %if %i_m_on_mac == 0
 for i in alias qmaild qmaill qmailp qmailq qmailr qmails qscand indimail
 do
@@ -3034,6 +3037,7 @@ do
 	%{__rm} -rf %{_prefix}/share/$i || true
 done
 /bin/rmdir --ignore-fail-on-non-empty %{_prefix}/share 2>/dev/null
+
 echo "removing startup services"
 for i in clamd fetchmail freshclam indisrvr.4000 inlookup.infifo mysql.3306 \
 pwdlookup qmail-imapd.143 qmail-imapd-ssl.993 qmail-pop3d.110 qmail-pop3d-ssl.995 \
