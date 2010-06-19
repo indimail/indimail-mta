@@ -1,5 +1,8 @@
 /*
  * $Log: hier.c,v $
+ * Revision 1.147  2010-06-19 15:52:11+05:30  Cprogrammer
+ * Dummy UUCP rmail command for postfix/qmail systems
+ *
  * Revision 1.146  2010-06-11 16:30:03+05:30  Cprogrammer
  * added sendmail man page
  *
@@ -461,6 +464,7 @@ hier(inst_dir)
 	c(auto_qmail_home, "bin", "qmail-greyd", auto_uido, auto_gidq, 0555);
 	c(auto_qmail_home, "bin", "greydaemon", auto_uido, auto_gidq, 0555);
 	c(auto_qmail_home, "bin", "sendmail", auto_uido, auto_gidq, 0555);
+	c(auto_qmail_home, "bin", "rmail", auto_uido, auto_gidq, 0555);
 	c(auto_qmail_home, "bin", "tcp-env", auto_uido, auto_gidq, 0555);
 	c(auto_qmail_home, "bin", "qreceipt", auto_uido, auto_gidq, 0555);
 	c(auto_qmail_home, "bin", "qsmhook", auto_uido, auto_gidq, 0555);
@@ -1069,7 +1073,7 @@ hier(inst_dir)
 void
 getversion_install_big_c()
 {
-	static char    *x = "$Id: hier.c,v 1.146 2010-06-11 16:30:03+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: hier.c,v 1.147 2010-06-19 15:52:11+05:30 Cprogrammer Stab mbhangui $";
 
 #ifdef INDIMAIL
 	x = sccsidh;
