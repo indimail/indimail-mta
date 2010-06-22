@@ -1,5 +1,8 @@
 #
 # $Log: indimail.spec.in,v $
+# Revision 2.184  2010-06-22 20:02:17+05:30  Cprogrammer
+# replaced mv with %{__mv}
+#
 # Revision 2.183  2010-06-19 13:44:44+05:30  Cprogrammer
 # added mta-rmail in alternatives
 #
@@ -575,7 +578,7 @@
 # rpm spec file for indimail
 #
 #
-# $Id: indimail.spec.in,v 2.183 2010-06-19 13:44:44+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 2.184 2010-06-22 20:02:17+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %define _unpackaged_files_terminate_build 1
 
@@ -3240,10 +3243,10 @@ else
 	for i in /usr/lib/sendmail /usr/sbin/sendmail; do
 		if [ -f $i -a ! -L $i ]; then
 			echo "! $i is a file, should be a link"
-			/bin/mv $i $i.old
+			%{__mv} $i $i.old
 			/bin/ln -s %{_prefix}/bin/sendmail $i
 		elif [ -L $i ];then
-			/bin/mv $i $i.old
+			%{__mv} $i $i.old
 			/bin/ln -s %{_prefix}/bin/sendmail $i
 		elif [ ! -f $i ];then
 			echo "! $i is missing"
@@ -3276,7 +3279,7 @@ else
 		if [ -f $i.old -o -L $i.old ]; then
 			echo "restoring sendmail"
 			/bin/rm -f $i
-			/bin/mv $i.old $i
+			%{__mv} $i.old $i
 		fi
 	done
 fi
