@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-remote.c,v $
+ * Revision 1.60  2010-06-24 08:54:30+05:30  Cprogrammer
+ * made outgoingip control file name configureable
+ *
  * Revision 1.59  2010-05-29 20:54:41+05:30  Cprogrammer
  * environment variable QMTPROUTE, SMTPROUTE takes precedence over control files
  *
@@ -1790,7 +1793,7 @@ getcontrols()
 	if (!stralloc_0(&outgoingipfn))
 		temp_nomem();
 	if (!(r = control_readline(&outgoingip, outgoingipfn.s)))
-		r = control_readline(&outgoingip, "outgoingip");
+		r = control_readline(&outgoingip, (x = env_get("OUTGOINGIP")) ? x : "outgoingip");
 	if (r == -1)
 	{
 		if (errno == error_nomem)
@@ -1825,7 +1828,7 @@ getcontrols()
 		temp_noip();
 #endif
 	/*- domainbinding patch */
-	switch (control_readfile(&localips, (x = env_get("DOMAINBINDINGS")) ? x : "domainbindings" ,0))
+	switch (control_readfile(&localips, (x = env_get("DOMAINBINDINGS")) ? x : "domainbindings", 0))
 	{
 	case -1:
 		temp_control();
@@ -2274,7 +2277,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_remote_c()
 {
-	static char    *x = "$Id: qmail-remote.c,v 1.59 2010-05-29 20:54:41+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: qmail-remote.c,v 1.60 2010-06-24 08:54:30+05:30 Cprogrammer Stab mbhangui $";
 
 	x++;
 }
