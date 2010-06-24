@@ -193,7 +193,7 @@ control_readulong(i, fn)
  * read entire file in variable sa
  * without any interpretation (e.g. comments)
  * To be used in case a file contains '#' character
- * in the first column (which control_readnativefile() will
+ * in the first column (which control_readfile() will
  * skip
  */
 int
@@ -336,6 +336,91 @@ control_readfile(sa, fn, flagme)
 	close(fd);
 	return -1;
 }
+
+#ifdef CONTROL_CMD
+#include "wait.h"
+char          **MakeArgs(char *);
+
+int
+control_readcmd(stralloc *sa, char *fn)
+{
+	substdio        ss, ssin;
+	int             fd, match, child, wstat;
+	char          **argv;
+	int             pi[2];
+	static stralloc controlfile = {0};
+
+	if (*fn != '/' && *fn != '.')
+	{
+		if (!controldir)
+		{
+			if (!(controldir = env_get("CONTROLDIR")))
+				controldir = "control";
+		}
+		if (!stralloc_copys(&controlfile, controldir))
+			return(-1);
+		if (controlfile.s[controlfile.len - 1] != '/' && !stralloc_cats(&controlfile, "/"))
+			return(-1);
+		if (!stralloc_cats(&controlfile, fn))
+			return(-1);
+	} else
+	if (!stralloc_copys(&controlfile, fn))
+		return(-1);
+	if (!stralloc_0(&controlfile))
+		return(-1);
+	if ((fd = open_read(controlfile.s)) == -1)
+	{
+		if (errno == error_noent)
+			return 0;
+		return -1;
+	}
+	substdio_fdbuf(&ss, read, fd, inbuf, sizeof(inbuf));
+	if (getln(&ss, sa, &match, '\n') == -1)
+	{
+		close(fd);
+		return -1;
+	}
+	striptrailingwhitespace(sa);
+	close(fd);
+	if (sa->s[0] == '!')
+	{
+		if (pipe(pi) == -1)
+			return -1;
+		switch ((child = fork()))
+		{
+		case -1:
+			return -1;
+		case 0:
+			if (dup2(pi[1], 1) == -1)
+				return -1;
+			close(pi[0]); /*- close read end */
+			if (!stralloc_0(sa))
+				return -1;
+			if (!(argv = MakeArgs(sa->s + 1)))
+				return -1;
+			execv(*argv, argv);
+			exit (1);
+		}
+		close(pi[1]); /*- close write end */
+		substdio_fdbuf(&ssin, read, pi[0], inbuf, sizeof(inbuf));
+		if (getln(&ssin, sa, &match, '\n') == -1)
+		{
+			close(fd);
+			close(pi[0]);
+			return -1;
+		}
+		striptrailingwhitespace(sa);
+		close(pi[0]);
+		if (wait_pid(&wstat, child) == -1)
+			return -1;
+		if (wait_crashed(wstat))
+			return -1;
+		if (wait_exitcode(wstat))
+			return -1;
+	}
+	return 1;
+}
+#endif
 
 void
 getversion_control_c()
