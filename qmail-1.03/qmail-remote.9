@@ -131,25 +131,22 @@ by default looks at QMAIL/control for all control files. This path can be change
 CONTROLDIR environment variable.
 
 .TP 5
-.I outgoingip.host
-Per host/domain IP address to be used on outgoing connections.
-.I host
-is the domain or host to which the mail is being delivered.
-Default: system-defined.
-The value
-.IR 0.0.0.0
-is equivalent to the system default.
-.I outgoingip.host
-takes precedence over
-.IR outgoingip .
-
-.TP 5
 .I outgoingip
 IP address to be used on outgoing connections.
 Default: system-defined.
 The value
 .IR 0.0.0.0
-is equivalent to the system default.
+is equivalent to the system default. The name for this control file can also be configured
+by setting the environment variable \fBOUTGOINGIP\fR
+
+.TP 5
+.I outgoingip.host
+Local IP bindings based on envelope recipient domain.
+.I host
+is the domain or host to which the mail is being delivered.
+.I outgoingip.host
+takes precedence over
+.IR outgoingip .
 
 .TP 5
 .I domainbindings
@@ -197,7 +194,9 @@ All other outgoing connections (including messages with the null return-path)
 use the OS-chosen default local address. The
 .B qmail
 system does not protect you if you specify an invalid local address to
-bind to. \fIdomainbindings\fR takes precedence over \fIoutgoingip\fR.
+bind to. \fIdomainbindings\fR takes precedence over \fIoutgoingip\fR. The name for
+domainbindings control file can be configured by setting \fBDOMAINBINDINGS\fR environment
+variable.
 
 .TP 5
 .I bindroutes
