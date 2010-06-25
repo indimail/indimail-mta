@@ -633,10 +633,11 @@
 %if %i_m_on_mac == 1
 %define nonssd             1
 %define fast_mode          1
+%define noclamav           1
 %else
 %define nonssd             0
-%endif
 %define noclamav           0
+%endif
 %define noproxy            0
 %define nocourierimap      0
 %define nolibdkim          0
