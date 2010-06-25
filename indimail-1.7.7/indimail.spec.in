@@ -1,5 +1,11 @@
 #
 # $Log: indimail.spec.in,v $
+# Revision 2.186  2010-06-25 16:27:39+05:30  Cprogrammer
+# use native commands instead of svctool for removing boot entries
+#
+# Revision 2.185  2010-06-25 12:37:57+05:30  Cprogrammer
+# disable clamav for mac
+#
 # Revision 2.184  2010-06-22 20:02:17+05:30  Cprogrammer
 # replaced mv with %{__mv}
 #
@@ -578,7 +584,7 @@
 # rpm spec file for indimail
 #
 #
-# $Id: indimail.spec.in,v 2.184 2010-06-22 20:02:17+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 2.186 2010-06-25 16:27:39+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %define _unpackaged_files_terminate_build 1
 
@@ -2950,7 +2956,29 @@ if [ $nscd_up -ge 1 ] ; then
 fi
 # Remove IndiMail being started on system boot
 echo "removing indimail startup"
-%{_prefix}/sbin/svctool --config=rm-boot
+if [ -f /etc/init.d/indimail ] ; then
+	if [ -f /sbin/chkconfig ] ; then
+		/sbin/chkconfig --del indimail
+	fi
+	/bin/rm -f /etc/init.d/indimail
+fi
+if [ -f /etc/init.d/sendmail ] ; then
+	if [ -f /sbin/chkconfig ] ; then
+		/sbin/chkconfig --add sendmail
+	fi
+fi
+if [ -x /usr/sbin/alternatives ] ; then
+	/usr/sbin/alternatives --remove mta $QmailHOME/bin/sendmail
+	/usr/sbin/alternatives --auto mta
+else
+	for i in /usr/lib/sendmail /usr/sbin/sendmail; do
+		if [ -f $i.old -o -L $i.old ]; then
+			echo "restoring sendmail"
+			/bin/rm -f $i
+			/bin/mv $i.old $i
+		fi
+	done
+fi
 if [ -f %{_sysconfdir}/rc.local ] ; then #FC13 stupidity
 	egrep -iv "indimail|qmail" %{_sysconfdir}/rc.local > %{_sysconfdir}/rc.local.$$
 	if [ $? -eq 0 ] ; then
