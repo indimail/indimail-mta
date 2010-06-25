@@ -1,5 +1,8 @@
 #
 # $Log: common.tcl.in,v $
+# Revision 2.20  2010-06-25 17:43:33+05:30  Cprogrammer
+# replaced qmail-qstat with qmail-qread
+#
 # Revision 2.19  2010-02-20 13:52:28+05:30  Cprogrammer
 # set firefox as default browser and gnome-terminal as default terminal
 #
