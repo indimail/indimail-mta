@@ -260,6 +260,7 @@ Some of the features available in this package
     and systpass
 51. iwebadmin - Web frontend for IndiMail User administration
 52. badhost, badip control files for spam control
+53. mailarchive control file (SOX, HIPAA compliance)
 53. Updated man pages.
 
 You can take a detailed look at the feature list at
