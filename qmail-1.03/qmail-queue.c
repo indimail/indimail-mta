@@ -193,7 +193,7 @@ stralloc        excl = { 0 };
 stralloc        incl = { 0 };
 stralloc        logh = { 0 };
 #if MAILARCHIVE
-stralloc        arch = { 0 };
+stralloc        ar_rules = { 0 };
 stralloc        arch_email = {0};
 int             flagarchive = 0;
 #endif
@@ -692,11 +692,13 @@ qhpsiprog(char *program)
  * F:abc@xyz.com:abc_13@example.com
  */
 int
-set_archive(char *rule, int rule_len, char *addr, char type)
+set_archive(char *rule, int rule_len, char *eaddr)
 {
-	char           *addr_ptr, *dest, *ptr, *errStr = 0;
-	int             len, token_len, at;
+	char           *addr_ptr, *dest, *ptr, *errStr = 0, *addr;
+	int             len, token_len, at, type;
 
+	addr = eaddr + 1;
+	type = *eaddr;
 	for (addr_ptr = rule, len = 0;len < rule_len;len++)
 	{
 		if (*addr_ptr != type)
@@ -814,9 +816,9 @@ main()
 	if (control_readfile(&logh, (ptr = env_get("LOGHEADERS")) && *ptr ? ptr : "logheaders", 0) == -1)
 		die(55);
 #if MAILARCHIVE
-	if (control_readfile(&arch, (ptr = env_get("MAILARCHIVE")) && *ptr ? ptr : "mailarchive", 0) == -1)
+	if (control_readfile(&ar_rules, (ptr = env_get("MAILARCHIVE")) && *ptr ? ptr : "mailarchive", 0) == -1)
 		die(55);
-	if (arch.s && arch.len)
+	if (ar_rules.s && ar_rules.len)
 		flagarchive = 1;
 #endif
 	if (!(queuedir = env_get("QUEUEDIR")))
@@ -1017,12 +1019,17 @@ main()
 		cleanup();
 		die(91);
 	}
-#if MAILARCHIVE
-	if (flagarchive && !stralloc_copys(&line, ""))
-		die(51);
-#endif
 	if (substdio_bput(&ssout, &ch, 1) == -1)
 		die_write();
+#if MAILARCHIVE
+	if (flagarchive)
+	{
+		if (!stralloc_copys(&line, ""))
+			die(51);
+		if (!stralloc_catb(&line, &ch, 1))
+			die(51);
+	}
+#endif
 	for (len = 0; len < ADDR; ++len)
 	{
 		if (substdio_get(&ssin, &ch, 1) < 1)
@@ -1041,8 +1048,16 @@ main()
 	{
 		if (!stralloc_0(&line))
 			die(51);
-		if (set_archive(arch.s, arch.len, line.s, 'F'))
-			die(51);
+		/*
+		 * cycle through all the sender/recipients addresses
+		 * assign special address F<> for bounces
+		 */
+		for (ptr = line.s;*ptr;)
+		{
+			if (set_archive(ar_rules.s, ar_rules.len, *(ptr + 1) ? ptr : "F<>"))
+				die(51);
+			ptr += str_len(ptr) + 1;
+		}
 	}
 #endif
 	if (len >= ADDR)
