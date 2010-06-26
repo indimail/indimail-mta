@@ -1,5 +1,8 @@
 #
 # $Log: indium.in,v $
+# Revision 2.110  2010-06-25 17:44:13+05:30  Cprogrammer
+# changes for field name changes in vdominfo
+#
 # Revision 2.109  2010-04-14 10:43:28+05:30  Cprogrammer
 # renamed vmoddomlimits to vlimit
 #
@@ -3436,7 +3439,7 @@ proc run_dominfo {domval w4} {
 		msg_dialog .d "vdominfo" $result @imagedir@/warning.gif 0 "OK"
 		return 1
 	}
-	foreach {infotag vartag} {domain domain uid uid gid gid hostid "H Id" ip ip ports ports dir dir} {
+	foreach {infotag vartag} {domain domain uid uid gid gid hostid "host ID" ip "IP Addr" ports Ports dir "Domain Dir"} {
 		set lineNo [lsearch -regexp $domline $vartag]
 		set str [lindex $domline $lineNo]
 		set $infotag [string trim [string range $str [expr [string first ":" $str] + 1] end]]
