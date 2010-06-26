@@ -16,7 +16,8 @@ dnl Does not work on RHEL 5, CentOS 5 64 bit systems
 RPATH_LIB="$acl_libdirstem"
 
 dnl Checks for libraries.
-AC_CHECK_LIB(ssl, EVP_MD_CTX_init, [AC_SUBST([LIB_SSL], ["-lssl"]) AC_DEFINE([HAVE_SSL], [1],[OpenSSL Library])],,-lssl)
+AC_CHECK_LIB(ssl, SSL_CTX_new, [AC_SUBST([LIB_SSL], ["-lssl -lcrypto"]) AC_DEFINE([HAVE_SSL], [1],[OpenSSL Library])],,-lssl -lcrypto)
+#AC_CHECK_LIB(ssl, EVP_MD_CTX_init, [AC_SUBST([LIB_SSL], ["-lssl"]) AC_DEFINE([HAVE_SSL], [1],[OpenSSL Library])],,-lssl)
 AC_CHECK_LIB(crypt, crypt, [AC_SUBST([LIB_CRYPT], ["-lcrypt"]) AC_DEFINE([HAVE_CRYPT], [1],[crypt Library])],,)
 
 if test "$GCC" = yes ; then
