@@ -7,7 +7,7 @@ set Help(About) {
 	heading {About "IndiMail Administration"}
 
 	text {Copyright (c) 2002-2003 Indi Limited}
-	text {$Id: madHelp.tcl,v 2.3 2009-02-25 16:58:08+05:30 Cprogrammer Exp mbhangui $}
+	text {$Id: madHelp.tcl,v 2.4 2010-06-25 17:45:07+05:30 Cprogrammer Exp mbhangui $}
 	text {}
 	text {This is Indium Release 1.0 released on 01 Apr 2003 on All Fools day.}
 	text {Indium itself and the associated command line utilities are covered by GPLv3 License.}
