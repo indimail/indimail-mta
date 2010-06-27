@@ -1,5 +1,8 @@
 /*
  * $Log: qsutil.c,v $
+ * Revision 1.9  2010-06-27 09:04:38+05:30  Cprogrammer
+ * added log7() function
+ *
  * Revision 1.8  2009-05-03 22:46:46+05:30  Cprogrammer
  * added log5() function
  *
@@ -96,6 +99,25 @@ log5(s1, s2, s3, s4, s5)
 }
 
 void
+log7(s1, s2, s3, s4, s5, s6, s7)
+	char           *s1;
+	char           *s2;
+	char           *s3;
+	char           *s4;
+	char           *s5;
+	char           *s6;
+	char           *s7;
+{
+	substdio_puts(&sserr, s1);
+	substdio_puts(&sserr, s2);
+	substdio_puts(&sserr, s3);
+	substdio_puts(&sserr, s4);
+	substdio_puts(&sserr, s5);
+	substdio_puts(&sserr, s6);
+	substdio_putsflush(&sserr, s7);
+}
+
+void
 nomem()
 {
 	log1("alert: out of memory, sleeping...\n");
@@ -136,7 +158,7 @@ logsafe(s)
 void
 getversion_qsutil_c()
 {
-	static char    *x = "$Id: qsutil.c,v 1.8 2009-05-03 22:46:46+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: qsutil.c,v 1.9 2010-06-27 09:04:38+05:30 Cprogrammer Stab mbhangui $";
 
 	x++;
 }
