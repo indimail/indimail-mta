@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-queue.c,v $
+ * Revision 1.52  2010-06-27 09:01:41+05:30  Cprogrammer
+ * fixed recipient based rules for archival
+ *
  * Revision 1.51  2010-06-18 23:52:36+05:30  Cprogrammer
  * added mailarchive functionality
  *
@@ -692,26 +695,26 @@ qhpsiprog(char *program)
  * F:abc@xyz.com:abc_13@example.com
  */
 int
-set_archive(char *rule, int rule_len, char *eaddr)
+set_archive(char *eaddr)
 {
 	char           *addr_ptr, *dest, *ptr, *errStr = 0, *addr;
 	int             len, token_len, at, type;
 
 	addr = eaddr + 1;
 	type = *eaddr;
-	for (addr_ptr = rule, len = 0;len < rule_len;len++)
+	for (addr_ptr = ar_rules.s, len = 0;len < ar_rules.len;len++)
 	{
 		if (*addr_ptr != type)
 		{
 			len += ((token_len = str_len(addr_ptr)) + 1);
-			addr_ptr = rule + len;
+			addr_ptr = ar_rules.s + len;
 			continue;
 		}
 		for(dest = addr_ptr + 2;*dest && *dest != ':';dest++);
 		if (*dest != ':') /*- invalid line in control file */
 		{
 			len += ((token_len = str_len(addr_ptr)) + 1);
-			addr_ptr = rule + len;
+			addr_ptr = ar_rules.s + len;
 			continue;
 		}
 		*dest++ = 0;
@@ -758,8 +761,8 @@ set_archive(char *rule, int rule_len, char *eaddr)
 		} else
 			*(dest - 1) = ':';
 		len += ((token_len = str_len(addr_ptr)) + 1);
-		addr_ptr = rule + len;
-	} /*- for (addr_ptr = rule, len = 0;len < rule_len;len++) */
+		addr_ptr = ar_rules.s + len;
+	} /*- for (addr_ptr = ar_rule.s, len = 0;len < ar_rule.len;len++) */
 	return (0);
 }
 #endif
@@ -1043,35 +1046,11 @@ main()
 		if (!ch)
 			break;
 	}
-#if MAILARCHIVE
-	if (flagarchive)
-	{
-		if (!stralloc_0(&line))
-			die(51);
-		/*
-		 * cycle through all the sender/recipients addresses
-		 * assign special address F<> for bounces
-		 */
-		for (ptr = line.s;*ptr;)
-		{
-			if (set_archive(ar_rules.s, ar_rules.len, *(ptr + 1) ? ptr : "F<>"))
-				die(51);
-			ptr += str_len(ptr) + 1;
-		}
-	}
-#endif
 	if (len >= ADDR)
 	{
 		cleanup();
 		die(11);
 	}
-#if MAILARCHIVE
-	if (arch_email.s && arch_email.len)
-	{
-		if (substdio_bput(&ssout, arch_email.s, arch_email.len) == -1)
-			die_write();
-	}
-#endif
 	if (extraqueue.s && extraqueue.len)
 	{
 		if (substdio_bput(&ssout, "T", 1) == -1)
@@ -1115,7 +1094,7 @@ main()
 		}
 		cleanup();
 		die(0);
-	} else /*- Write all recipients */
+	} else /*- write all recipients */
 	for (;;)
 	{
 		/*- get one recipient at a time */
@@ -1145,6 +1124,10 @@ main()
 		} else
 		if (substdio_bput(&ssout, &ch, 1) == -1)
 			die_write();
+#ifdef MAILARCHIVE
+		if (flagarchive && !stralloc_catb(&line, &ch, 1))
+			die(51);
+#endif
 		for (len = 0; len < ADDR; ++len)
 		{
 			if (substdio_get(&ssin, &ch, 1) < 1)
@@ -1159,6 +1142,10 @@ main()
 			} else
 			if (substdio_bput(&ssout, &ch, 1) == -1)
 				die_write();
+#ifdef MAILARCHIVE
+			if (flagarchive && !stralloc_catb(&line, &ch, 1))
+				die(51);
+#endif
 			if (!ch) /* this completes one recipient */
 				break;
 		}
@@ -1168,6 +1155,26 @@ main()
 			die(11);
 		}
 	} /*- for (;;) */
+#if MAILARCHIVE
+	if (flagarchive)
+	{
+		/*
+		 * cycle through all the sender/recipients addresses
+		 * assign special address F<> for bounces
+		 */
+		for (ptr = line.s;*ptr;)
+		{
+			if (set_archive(*(ptr + 1) ? ptr : "F<>"))
+				die(51);
+			ptr += str_len(ptr) + 1;
+		}
+	}
+	if (arch_email.s && arch_email.len)
+	{
+		if (substdio_bput(&ssout, arch_email.s, arch_email.len) == -1)
+			die_write();
+	}
+#endif
 	if (flagquarantine && !stralloc_append(&qqehextra, "\n"))
 	{
 		cleanup();
@@ -1237,7 +1244,7 @@ main()
 void
 getversion_qmail_queue_c()
 {
-	static char    *x = "$Id: qmail-queue.c,v 1.51 2010-06-18 23:52:36+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-queue.c,v 1.52 2010-06-27 09:01:41+05:30 Cprogrammer Stab mbhangui $";
 
 #ifdef INDIMAIL
 	x = sccsidh;
