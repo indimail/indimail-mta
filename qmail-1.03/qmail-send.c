@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-send.c,v $
+ * Revision 1.45  2010-06-27 09:08:04+05:30  Cprogrammer
+ * report all recipients in log_stat() for single transaction multiple recipient emails
+ *
  * Revision 1.44  2009-09-01 22:03:10+05:30  Cprogrammer
  * added Bounce Address Tag Validation (BATV) code
  *
@@ -1891,14 +1894,17 @@ stralloc        mailto = { 0 };
 char            strnum[FMT_ULONG];
 
 void
-log_stat(long bytes, char *from, char *to)
+log_stat(long bytes)
 {
+	char           *ptr;
+
 	strnum[fmt_ulong(strnum, bytes)] = 0;
-	if (to && *to && from && *from)
+	for (ptr = mailto.s;ptr < mailto.s + mailto.len;)
 	{
-		log4(to, from, strnum, "\n");
-		*to = *from = 0;
+		log7(*ptr == 'L' ? "local: " : "remote: ", mailfrom.s + 1, " ", ptr + 2, " ", strnum, "\n");
+		ptr += str_len(ptr) + 1;
 	}
+	mailfrom.len = mailto.len = 0;
 }
 #endif
 
@@ -2049,22 +2055,7 @@ todo_do(rfds)
 			my_log2(" uid ", strnum2);
 			log1("\n");
 #ifdef INDIMAIL
-			if (!stralloc_copys(&mailfrom, "<"))
-			{
-				nomem();
-				goto fail;
-			}
-			if (!stralloc_cats(&mailfrom, todoline.s + 1))
-			{
-				nomem();
-				goto fail;
-			}
-			if (!stralloc_cats(&mailfrom, "> "))
-			{
-				nomem();
-				goto fail;
-			}
-			if (!stralloc_0(&mailfrom))
+			if (!stralloc_copy(&mailfrom, &todoline) || !stralloc_0(&mailfrom))
 			{
 				nomem();
 				goto fail;
@@ -2079,22 +2070,7 @@ todo_do(rfds)
 				goto fail;
 			case 2: /*- Sea */
 #ifdef INDIMAIL
-				if (!stralloc_copys(&mailto, "remote: <"))
-				{
-					nomem();
-					goto fail;
-				}
-				if (!stralloc_cats(&mailto, todoline.s + 1))
-				{
-					nomem();
-					goto fail;
-				}
-				if (!stralloc_cats(&mailto, "> "))
-				{
-					nomem();
-					goto fail;
-				}
-				if (!stralloc_0(&mailto))
+				if (!stralloc_cats(&mailto, "R") || !stralloc_cat(&mailto, &todoline))
 				{
 					nomem();
 					goto fail;
@@ -2104,22 +2080,7 @@ todo_do(rfds)
 				break;
 			default: /*- Land */
 #ifdef INDIMAIL
-				if (!stralloc_copys(&mailto, "local: <"))
-				{
-					nomem();
-					goto fail;
-				}
-				if (!stralloc_cats(&mailto, todoline.s + 1))
-				{
-					nomem();
-					goto fail;
-				}
-				if (!stralloc_cats(&mailto, "> "))
-				{
-					nomem();
-					goto fail;
-				}
-				if (!stralloc_0(&mailto))
+				if (!stralloc_cats(&mailto, "L") || !stralloc_cat(&mailto, &todoline))
 				{
 					nomem();
 					goto fail;
@@ -2232,7 +2193,7 @@ todo_do(rfds)
 			nomem();
 	}
 #ifdef INDIMAIL
-	log_stat(Bytes, mailfrom.s, mailto.s);
+	log_stat(Bytes);
 #endif
 	return;
 
@@ -2788,7 +2749,7 @@ main()
 void
 getversion_qmail_send_c()
 {
-	static char    *x = "$Id: qmail-send.c,v 1.44 2009-09-01 22:03:10+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: qmail-send.c,v 1.45 2010-06-27 09:08:04+05:30 Cprogrammer Exp mbhangui $";
 
 #ifdef INDIMAIL
 	x = sccsidh;

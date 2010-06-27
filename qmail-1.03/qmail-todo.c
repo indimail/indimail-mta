@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-todo.c,v $
+ * Revision 1.29  2010-06-27 09:08:55+05:30  Cprogrammer
+ * report all recipients in log_stat() for single transaction multiple recipient emails
+ *
  * Revision 1.28  2007-12-20 13:50:59+05:30  Cprogrammer
  * removed compiler warning
  *
@@ -103,6 +106,7 @@ datetime_sec    recent;
 void            log1(char *w);
 void            log3(char *w, char *x, char *y);
 void            log4(char *w, char *x, char *y, char *z);
+void            log7(char *t, char *u, char *v, char *w, char *x, char *y, char *z);
 int             flagstopasap = 0;
 
 void
@@ -362,6 +366,36 @@ fail:
 }
 
 void
+log7(char *t, char *u, char *v, char *w, char *x, char *y, char *z)
+{
+	int             pos;
+
+	pos = comm_buf.len;
+	if (!stralloc_cats(&comm_buf, "L"))
+		goto fail;
+	if (!stralloc_cats(&comm_buf, t))
+		goto fail;
+	if (!stralloc_cats(&comm_buf, u))
+		goto fail;
+	if (!stralloc_cats(&comm_buf, v))
+		goto fail;
+	if (!stralloc_cats(&comm_buf, w))
+		goto fail;
+	if (!stralloc_cats(&comm_buf, x))
+		goto fail;
+	if (!stralloc_cats(&comm_buf, y))
+		goto fail;
+	if (!stralloc_cats(&comm_buf, z))
+		goto fail;
+	if (!stralloc_0(&comm_buf))
+		goto fail;
+	return;
+fail:
+	/*- either all or nothing */
+	comm_buf.len = pos;
+}
+
+void
 comm_write(unsigned long id, int local, int remote)
 {
 	int             pos;
@@ -575,15 +609,17 @@ stralloc        mailfrom = { 0 };
 stralloc        mailto = { 0 };
 
 void
-log_stat(long bytes, char *from, char *to)
+log_stat(long bytes)
 {
+	char           *ptr;
 
 	strnum[fmt_ulong(strnum, bytes)] = 0;
-	if (to && *to && from && *from)
+	for (ptr = mailto.s;ptr < mailto.s + mailto.len;)
 	{
-		log4(to, from, strnum, "\n");
-		*to = *from = 0;
+		log7(*ptr == 'L' ? "local: " : "remote: ", mailfrom.s + 1, " ", ptr + 2, " ", strnum, "\n");
+		ptr += str_len(ptr) + 1;
 	}
+	mailfrom.len = mailto.len = 0;
 }
 #endif
 
@@ -708,22 +744,7 @@ todo_do(fd_set * rfds)
 				goto fail;
 			}
 #ifdef INDIMAIL
-			if (!stralloc_copys(&mailfrom, "<"))
-			{
-				nomem();
-				goto fail;
-			}
-			if(!stralloc_cats(&mailfrom, todoline.s + 1))
-			{
-				nomem();
-				goto fail;
-			}
-			if (!stralloc_cats(&mailfrom, "> "))
-			{
-				nomem();
-				goto fail;
-			}
-			if (!stralloc_0(&mailfrom))
+			if (!stralloc_copy(&mailfrom, &todoline) || !stralloc_0(&mailfrom))
 			{
 				nomem();
 				goto fail;
@@ -739,22 +760,7 @@ todo_do(fd_set * rfds)
 				goto fail;
 			case 2: /* Sea */
 #ifdef INDIMAIL
-				if (!stralloc_copys(&mailto, "remote: <"))
-				{
-					nomem();
-					goto fail;
-				}
-				if (!stralloc_cats(&mailto, todoline.s + 1))
-				{
-					nomem();
-					goto fail;
-				}
-				if (!stralloc_cats(&mailto, "> "))
-				{
-					nomem();
-					goto fail;
-				}
-				if (!stralloc_0(&mailto))
+				if (!stralloc_cats(&mailto, "R") || !stralloc_cat(&mailto, &todoline))
 				{
 					nomem();
 					goto fail;
@@ -764,22 +770,7 @@ todo_do(fd_set * rfds)
 				break;
 			default: /* Land */
 #ifdef INDIMAIL
-				if (!stralloc_copys(&mailto, "local: <"))
-				{
-					nomem();
-					goto fail;
-				}
-				if (!stralloc_cats(&mailto, todoline.s + 1))
-				{
-					nomem();
-					goto fail;
-				}
-				if (!stralloc_cats(&mailto, "> "))
-				{
-					nomem();
-					goto fail;
-				}
-				if (!stralloc_0(&mailto))
+				if (!stralloc_cats(&mailto, "L") || !stralloc_cat(&mailto, &todoline))
 				{
 					nomem();
 					goto fail;
@@ -875,7 +866,7 @@ todo_do(fd_set * rfds)
 	}
 	comm_write(id, flagchan[0], flagchan[1]);
 #ifdef INDIMAIL
-	log_stat(Bytes, mailfrom.s, mailto.s);
+	log_stat(Bytes);
 #endif
 	return;
 
@@ -1119,7 +1110,7 @@ main()
 void
 getversion_qmail_todo_c()
 {
-	static char    *x = "$Id: qmail-todo.c,v 1.28 2007-12-20 13:50:59+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: qmail-todo.c,v 1.29 2010-06-27 09:08:55+05:30 Cprogrammer Exp mbhangui $";
 
 #ifdef INDIMAIL
 	x = sccsidh;
