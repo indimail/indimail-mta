@@ -1,5 +1,10 @@
 #
 # $Log: indimail.spec.in,v $
+# Revision 2.187  2010-06-27 14:20:54+05:30  Cprogrammer
+# use --fdpass in clamdscan
+# fixed removal of indimail as alternative mta
+# moved removal of boot entries to %preun
+#
 # Revision 2.186  2010-06-25 16:27:39+05:30  Cprogrammer
 # use native commands instead of svctool for removing boot entries
 #
@@ -584,7 +589,7 @@
 # rpm spec file for indimail
 #
 #
-# $Id: indimail.spec.in,v 2.186 2010-06-25 16:27:39+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 2.187 2010-06-27 14:20:54+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %define _unpackaged_files_terminate_build 1
 
@@ -676,7 +681,7 @@
 %define mysqlPrefix        @mysql_prefix@
 %endif
 
-Summary: A Fast, Efficient & Secure Mail Server with Multi-Domain/Multi-Host/Multi-Protocol support
+Summary: A Flexible Messaging Platform with Multi-Host/Multi-Protocol support
 Name: indimail
 Version: @version@
 %if %build_on_obs != 0
@@ -1285,8 +1290,8 @@ if [ -f %{buildroot}%{_prefix}/man/man8/makeuserdb.8.gz ] ; then
 		done
 fi
 if [ %nopam_multi -eq 0 ] ; then
-	/bin/rm -f %{buildroot}%{module_dir}/pam-multi.la
-	/bin/rm -f %{buildroot}%{module_dir}/pam-multi.a
+	%{__rm} -f %{buildroot}%{module_dir}/pam-multi.la
+	%{__rm} -f %{buildroot}%{module_dir}/pam-multi.a
 	if [ -x /usr/bin/chrpath ] ; then
 		/usr/bin/chrpath -d %{buildroot}%{module_dir}/pam-multi.so
 		/usr/bin/chrpath -d %{buildroot}%{_prefix}/sbin/pam-checkpwd
@@ -2901,10 +2906,6 @@ if [ $ID -ne 0 ] ; then
 	exit 1
 fi
 
-# we are doing upgrade
-#if [ $argv1 -eq 1 ] ; then
-#fi
-
 if test -f %{_sysconfdir}/init/svscan.conf
 then
 	/sbin/initctl emit qmailstop > /dev/null 2>&1
@@ -2932,6 +2933,43 @@ if [ -f %{_prefix}/boot/rpm.init ] ; then
 	/bin/sh %{_prefix}/boot/rpm.init preun "$argv1"
 fi
 
+# we are doing upgrade
+if [ $argv1 -eq 1 ] ; then
+	exit 0
+fi
+
+# Remove IndiMail being started on system boot
+echo "removing indimail startup"
+if [ -f /etc/init.d/indimail ] ; then
+	if [ -f /sbin/chkconfig ] ; then
+		/sbin/chkconfig --del indimail
+	fi
+	%{__rm} -f /etc/init.d/indimail
+fi
+if [ -f /etc/init.d/sendmail ] ; then
+	if [ -f /sbin/chkconfig ] ; then
+		/sbin/chkconfig --add sendmail
+	fi
+fi
+if [ -x /usr/sbin/alternatives ] ; then
+	/usr/sbin/alternatives --remove mta %{_prefix}/bin/sendmail
+	/usr/sbin/alternatives --auto mta
+else
+	for i in /usr/lib/sendmail /usr/sbin/sendmail; do
+		if [ -f $i.old -o -L $i.old ]; then
+			echo "restoring sendmail"
+			%{__rm} -f $i
+			%{__mv} $i.old $i
+		fi
+	done
+fi
+if [ -f %{_sysconfdir}/rc.local ] ; then #FC13 stupidity
+	egrep -iv "indimail|qmail" %{_sysconfdir}/rc.local > %{_sysconfdir}/rc.local.$$
+	if [ $? -eq 0 ] ; then
+		%{__mv} -f %{_sysconfdir}/rc.local.$$ %{_sysconfdir}/rc.local
+	fi
+fi
+
 ### SCRIPTLET ###############################################################################
 %postun
 argv1=$1
@@ -2948,44 +2986,14 @@ if [ $argv1 -eq 1 ] ; then
 %endif
 	exit 0
 fi
+
+# remove users / groups
 nscd_up=`ps -ef |grep nscd |grep -v grep|wc -l`
 if [ $nscd_up -ge 1 ] ; then
 	if [ -x %{_sysconfdir}/init.d/nscd ] ; then
 		%{_sysconfdir}/init.d/nscd stop
 	fi
 fi
-# Remove IndiMail being started on system boot
-echo "removing indimail startup"
-if [ -f /etc/init.d/indimail ] ; then
-	if [ -f /sbin/chkconfig ] ; then
-		/sbin/chkconfig --del indimail
-	fi
-	/bin/rm -f /etc/init.d/indimail
-fi
-if [ -f /etc/init.d/sendmail ] ; then
-	if [ -f /sbin/chkconfig ] ; then
-		/sbin/chkconfig --add sendmail
-	fi
-fi
-if [ -x /usr/sbin/alternatives ] ; then
-	/usr/sbin/alternatives --remove mta $QmailHOME/bin/sendmail
-	/usr/sbin/alternatives --auto mta
-else
-	for i in /usr/lib/sendmail /usr/sbin/sendmail; do
-		if [ -f $i.old -o -L $i.old ]; then
-			echo "restoring sendmail"
-			/bin/rm -f $i
-			/bin/mv $i.old $i
-		fi
-	done
-fi
-if [ -f %{_sysconfdir}/rc.local ] ; then #FC13 stupidity
-	egrep -iv "indimail|qmail" %{_sysconfdir}/rc.local > %{_sysconfdir}/rc.local.$$
-	if [ $? -eq 0 ] ; then
-		%{__mv} -f %{_sysconfdir}/rc.local.$$ %{_sysconfdir}/rc.local
-	fi
-fi
-
 %if %i_m_on_mac == 0
 for i in alias qmaild qmaill qmailp qmailq qmailr qmails qscand indimail
 do
@@ -3250,7 +3258,7 @@ fi
 %endif
 
 if [ -f %{_prefix}/bin/qmail-qmqpc ] ; then
-	/bin/rm -f %{_prefix}/bin/qmail-queue
+	%{__rm} -f %{_prefix}/bin/qmail-queue
 fi
 cd %{_prefix}/bin
 /bin/ln -sf qmail-qmqpc qmail-queue
@@ -3307,7 +3315,7 @@ else
 	for i in /usr/lib/sendmail /usr/sbin/sendmail; do
 		if [ -f $i.old -o -L $i.old ]; then
 			echo "restoring sendmail"
-			/bin/rm -f $i
+			%{__rm} -f $i
 			%{__mv} $i.old $i
 		fi
 	done
