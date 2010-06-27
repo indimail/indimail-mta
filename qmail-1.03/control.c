@@ -1,5 +1,9 @@
 /*
  * $Log: control.c,v $
+ * Revision 1.16  2010-06-27 09:02:43+05:30  Cprogrammer
+ * added control_readcmd() function giving ability of control files to
+ * have lines which are output of external commands
+ *
  * Revision 1.15  2008-11-15 17:31:25+05:30  Cprogrammer
  * read signed integers instead of unsigned
  *
@@ -425,7 +429,7 @@ control_readcmd(stralloc *sa, char *fn)
 void
 getversion_control_c()
 {
-	static char    *x = "$Id: control.c,v 1.15 2008-11-15 17:31:25+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: control.c,v 1.16 2010-06-27 09:02:43+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
