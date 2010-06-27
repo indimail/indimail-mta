@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-remote.c,v $
+ * Revision 1.61  2010-06-27 08:43:43+05:30  Cprogrammer
+ * display bind ip (outgoing ip) in error messages for failed connections
+ *
  * Revision 1.60  2010-06-24 08:54:30+05:30  Cprogrammer
  * made outgoingip control file name configureable
  *
@@ -516,6 +519,9 @@ temp_noconn(stralloc *h, char *ip, int port)
 		out(" port ");
 		strnum[fmt_ulong(strnum, port)] = 0;
 		out(strnum);
+		out(" bind IP [");
+		substdio_put(subfdoutsmall, outgoingip.s, outgoingip.len);
+		out("]");
 		alloc_free(ip);
 	}
 	out(". (#4.4.1)\n");
@@ -1861,6 +1867,8 @@ getcontrols()
 			senderdomain = 0;
 		if (senderdomain)
 		{ 
+			if (!stralloc_copys(&outgoingip, senderdomain))
+				temp_nomem();
 #ifdef IPV6
 			if (!ip6_scan(senderdomain, &outip.ip6))
 				temp_noip();
@@ -2277,7 +2285,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_remote_c()
 {
-	static char    *x = "$Id: qmail-remote.c,v 1.60 2010-06-24 08:54:30+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: qmail-remote.c,v 1.61 2010-06-27 08:43:43+05:30 Cprogrammer Stab mbhangui $";
 
 	x++;
 }
