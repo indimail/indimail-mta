@@ -80,13 +80,16 @@ http://upload.wikimedia.org/wikipedia/en/f/f9/Indimail_queue.png
 However, IndiMail is a pure messaging solution. It does not provide frills like calendars,
 todo lists, address books, meeting requests, etc. Also, since I have absolutely no knowledge
 of web, I have not been able to provide a webmail. However, folks are using squirrelmail and
-roundcube with IndiMail. Also because of my lack of knowledge of web scripting, I have not
-provided any web tool for administration. However, I welcome any one who can build a web
-administration tool.
+roundcube with IndiMail. For administration, you can use a web administration tool called
+iwebadmin. iwebadmin has its own folder under the indimail project at sourceforge.net. It also
+has its own folder, at openSUSE build service, for the RPM for various linux distros.
 
 Few of the tools for administering virtual domains/users will have a lot in similarity to the
 vpopmail package from inter7.com. The table structures are the same. Plenty of idea/code
 (for managing virtual domains/users) has been borrowed from there (but modified significantly).
+IndiMail comes with a power tcl/tk administration client called indium. indium has its own
+folder under the indimail project at sourceforge.net. It also has its own folder at openSUSE
+build service for the RPM for various linux distros.
 
 IndiMail is not a package that is very easy to install from source. Installing from source
 requires you to download multiple original sources of packages like qmail, ucspi-tcp, etc.
@@ -261,7 +264,7 @@ Some of the features available in this package
 51. iwebadmin - Web frontend for IndiMail User administration
 52. badhost, badip control files for spam control
 53. mailarchive control file (SOX, HIPAA compliance)
-53. Updated man pages.
+54. Updated man pages.
 
 You can take a detailed look at the feature list at
 
@@ -338,6 +341,16 @@ both 32 and 64 bit) are
           o Mandriva 2009.1
           o Mandriva 2009
 
+iwebadmin RPM download
+----------------------
+http://download.opensuse.org/repositories/home:/indimail:/iwebadmin/
+
+indium RPM download
+-------------------
+http://download.opensuse.org/repositories/home:/indimail:/indium/
+
+GIT Repository
+--------------
 IndiMail has a git repository at http://indimail.git.sourceforge.net/
 
 Supported/Tested MySQL versions (read INSTALL-MYSQL*)
