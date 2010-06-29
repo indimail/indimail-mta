@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-queue.c,v $
+ * Revision 1.53  2010-06-29 11:15:33+05:30  Cprogrammer
+ * fixed various bugs with rule based archival, eliminated duplication of emails
+ *
  * Revision 1.52  2010-06-27 09:01:41+05:30  Cprogrammer
  * fixed recipient based rules for archival
  *
@@ -688,40 +691,62 @@ qhpsiprog(char *program)
 #endif
 #if MAILARCHIVE
 /*
+ * sender based rules
+ * ------------------
  * F:abc*@example.com:arch_%u@example.com
  * F:postmaster@*:arch_postmaster@%d
  * F:postmaster@*:arch_%e
- * T:suspicious_user@example.com:ceo@example.com
  * F:abc@xyz.com:abc_13@example.com
+ *
+ * recipient based rules
+ * ---------------------
+ * T:spam_trap@example.com:spam_classifier@example.com
+ * :abc@xyz.com:abc_13@example.com
+ * *:abc@xyz.com:abc_13@example.com
  */
 int
 set_archive(char *eaddr)
 {
-	char           *addr_ptr, *dest, *ptr, *errStr = 0, *addr;
-	int             len, token_len, at, type;
+	char           *rule_ptr, *dest, *ptr, *errStr = 0, *addr, *addr_ptr;
+	int             len, at, type, found;
+	static stralloc tmpe = {0};
 
 	addr = eaddr + 1;
 	type = *eaddr;
-	for (addr_ptr = ar_rules.s, len = 0;len < ar_rules.len;len++)
+	for (rule_ptr = ar_rules.s, len = 0;len < ar_rules.len;len++)
 	{
-		if (*addr_ptr != type)
+		if (((*rule_ptr == ':' || *rule_ptr == '*') && type == 'F')
+			|| ((*rule_ptr == 'F' || *rule_ptr == 'T') && *rule_ptr != type))
 		{
-			len += ((token_len = str_len(addr_ptr)) + 1);
-			addr_ptr = ar_rules.s + len;
+			len += (str_len(rule_ptr) + 1);
+			rule_ptr = ar_rules.s + len;
+			continue; /*- type does not match */
+		}
+		for (addr_ptr = rule_ptr;*addr_ptr && *addr_ptr != ':';addr_ptr++);
+		if (*addr_ptr != ':') /*- invalid line in control file */
+		{
+			len += (str_len(rule_ptr) + 1);
+			rule_ptr = ar_rules.s + len;
 			continue;
 		}
-		for(dest = addr_ptr + 2;*dest && *dest != ':';dest++);
+		addr_ptr++; /*- address field in rule */
+		for (dest = addr_ptr;*dest && *dest != ':';dest++);
 		if (*dest != ':') /*- invalid line in control file */
 		{
-			len += ((token_len = str_len(addr_ptr)) + 1);
-			addr_ptr = ar_rules.s + len;
+			len += (str_len(rule_ptr) + 1);
+			rule_ptr = ar_rules.s + len;
 			continue;
 		}
-		*dest++ = 0;
-		if (*dest && matchregex(addr, addr_ptr + 2, &errStr))
+		*dest++ = 0; /*- destination archival address */
+		if (!*addr_ptr) /*- treat this as wildcard */
+			addr_ptr = 0;
+		else
+		if (matchregex(addr, addr_ptr, &errStr))
+			addr_ptr = 0;
+		if (*dest && !addr_ptr) /*- rule matched */
 		{
 			*(dest - 1) = ':';
-			if (!stralloc_copys(&arch_email, "T"))
+			if (!stralloc_copys(&tmpe, "T"))
 				return (1);
 			for (ptr = dest;*ptr;)
 			{
@@ -731,38 +756,50 @@ set_archive(char *eaddr)
 					{
 					case 'u':
 						at = str_chr(addr, '@');
-						if (!stralloc_catb(&arch_email, addr, at))
+						if (!stralloc_catb(&tmpe, addr, at))
 							return (1);
 						ptr++;
 						break;
 					case 'd':
 						if (addr[at = str_chr(addr, '@')] &&
-							!stralloc_cats(&arch_email, addr + at + 1))
+							!stralloc_cats(&tmpe, addr + at + 1))
 							return (1);
 						ptr++;
 						break;
 					case 'e':
-						if (!stralloc_cats(&arch_email, addr))
+						if (!stralloc_cats(&tmpe, addr))
 							return (1);
 						ptr++;
 						break;
 					default:
-						if (!stralloc_catb(&arch_email, ptr, 1))
+						if (!stralloc_catb(&tmpe, ptr, 1))
 							return (1);
 						break;
 					}
 				} else
-				if (!stralloc_catb(&arch_email, ptr, 1))
+				if (!stralloc_catb(&tmpe, ptr, 1))
 					return (1);
 				ptr++;
 			} /*-for (*ptr = dest;*ptr;) */
-			if (!stralloc_0(&arch_email))
+			if (!stralloc_0(&tmpe))
+				return (1);
+			/*- avoid duplicates */
+			for (found = 0, ptr = arch_email.s;arch_email.len && *ptr;)
+			{
+				if (!str_diffn(ptr, tmpe.s, tmpe.len))
+				{
+					found = 1;
+					break;
+				}
+				ptr += (str_len(ptr) + 1);
+			}
+			if (!found && !stralloc_cat(&arch_email, &tmpe))
 				return (1);
 		} else
 			*(dest - 1) = ':';
-		len += ((token_len = str_len(addr_ptr)) + 1);
-		addr_ptr = ar_rules.s + len;
-	} /*- for (addr_ptr = ar_rule.s, len = 0;len < ar_rule.len;len++) */
+		len += (str_len(rule_ptr) + 1);
+		rule_ptr = ar_rules.s + len;
+	} /*- for (rule_ptr = ar_rule.s, len = 0;len < ar_rule.len;len++) */
 	return (0);
 }
 #endif
@@ -1162,6 +1199,8 @@ main()
 		 * cycle through all the sender/recipients addresses
 		 * assign special address F<> for bounces
 		 */
+		if (!stralloc_0(&line))
+			die(51);
 		for (ptr = line.s;*ptr;)
 		{
 			if (set_archive(*(ptr + 1) ? ptr : "F<>"))
@@ -1244,7 +1283,7 @@ main()
 void
 getversion_qmail_queue_c()
 {
-	static char    *x = "$Id: qmail-queue.c,v 1.52 2010-06-27 09:01:41+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: qmail-queue.c,v 1.53 2010-06-29 11:15:33+05:30 Cprogrammer Exp mbhangui $";
 
 #ifdef INDIMAIL
 	x = sccsidh;
