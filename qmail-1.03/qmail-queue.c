@@ -198,7 +198,7 @@ stralloc        line = { 0 };
 stralloc        excl = { 0 };
 stralloc        incl = { 0 };
 stralloc        logh = { 0 };
-#if MAILARCHIVE
+#if defined(MAILARCHIVE)
 stralloc        ar_rules = { 0 };
 stralloc        arch_email = {0};
 int             flagarchive = 0;
@@ -689,7 +689,7 @@ qhpsiprog(char *program)
 	return;
 }
 #endif
-#if MAILARCHIVE
+#if defined(MAILARCHIVE)
 /*
  * sender based rules
  * ------------------
@@ -855,7 +855,7 @@ main()
 		die(55);
 	if (control_readfile(&logh, (ptr = env_get("LOGHEADERS")) && *ptr ? ptr : "logheaders", 0) == -1)
 		die(55);
-#if MAILARCHIVE
+#if defined(MAILARCHIVE)
 	if (control_readfile(&ar_rules, (ptr = env_get("MAILARCHIVE")) && *ptr ? ptr : "mailarchive", 0) == -1)
 		die(55);
 	if (ar_rules.s && ar_rules.len)
@@ -1061,7 +1061,7 @@ main()
 	}
 	if (substdio_bput(&ssout, &ch, 1) == -1)
 		die_write();
-#if MAILARCHIVE
+#if defined(MAILARCHIVE)
 	if (flagarchive)
 	{
 		if (!stralloc_copys(&line, ""))
@@ -1076,7 +1076,7 @@ main()
 			die_read();
 		if (substdio_put(&ssout, &ch, 1) == -1)
 			die_write();
-#if MAILARCHIVE
+#if defined(MAILARCHIVE)
 		if (flagarchive && !stralloc_catb(&line, &ch, 1))
 			die(51);
 #endif
@@ -1161,7 +1161,7 @@ main()
 		} else
 		if (substdio_bput(&ssout, &ch, 1) == -1)
 			die_write();
-#ifdef MAILARCHIVE
+#if defined(MAILARCHIVE)
 		if (flagarchive && !stralloc_catb(&line, &ch, 1))
 			die(51);
 #endif
@@ -1179,7 +1179,7 @@ main()
 			} else
 			if (substdio_bput(&ssout, &ch, 1) == -1)
 				die_write();
-#ifdef MAILARCHIVE
+#if defined(MAILARCHIVE)
 			if (flagarchive && !stralloc_catb(&line, &ch, 1))
 				die(51);
 #endif
@@ -1192,7 +1192,7 @@ main()
 			die(11);
 		}
 	} /*- for (;;) */
-#if MAILARCHIVE
+#if defined(MAILARCHIVE)
 	if (flagarchive)
 	{
 		/*
