@@ -50,10 +50,12 @@ can be of the form
  type:regexp:dest_mailbox
 .EE
 
-where type is \fBF\fR  or \fBT\fR. If type is \fBF\fR, rule is appled on sender. If type is
-\fBT\fR, the rule is applied on the recipient. \fIregexp\fR is an expression to match the
-address (sender or recipient as specfied by \fItype\fR) and \fRdest_mailbox\fR is a valid
-email address. Howerver, a % in \fIdest_mailbox\fR followed by u, d or e gets replaced as below
+where \fItype\fR is \fBF\fR  or \fBT\fR. If \fItype\fR is \fBF\fR, rule is appled on sender.
+If \fItype\fR is \fBT\fR, the rule is applied on the recipient. \fItype\fR can be omitted to
+match all recipients. \fIregexp\fR is an expression to match the address (sender or recipient
+as specfied by \fItype\fR) and \fIdest_mailbox\fR is a valid email address. \fIregexp\fR can be
+omitted to match any address. A \fB%\fR in \fIdest_mailbox\fR followed by u, d or e gets
+replaced as below
 
 .EX
  %u - user component in address without the '@' sign
@@ -82,9 +84,9 @@ If the control file
 .B quarantine
 exists, recipient list is replaced with its content. The environment variable
 .B QUARANTINE
-also does the same thing. The value of the environment variable overrides the
-value in the control file. Additionally, the header \fBX-Quarantine-ID\fR containing the
-list of original recipient list is added.
+also does the same thing. The value of the environment variable overrides the value in the
+control file. Additionally, comma separated list of original recipient list is added to the
+header \fBX-Quarantine-ID\fR.
 
 If the control file
 .B removeheaders
