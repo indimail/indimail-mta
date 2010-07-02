@@ -1,6 +1,9 @@
-# chkconfig: 345 50 80
+# chkconfig: 345 50 15
 # description: Starts qmail system and associated services
 # $Log: qmailctl.sh,v $
+# Revision 1.24  2010-07-02 16:20:22+05:30  Cprogrammer
+# shutdown indimail early
+#
 # Revision 1.23  2010-06-24 16:20:46+05:30  Cprogrammer
 # made messages fedora boot style
 #
