@@ -264,7 +264,8 @@ Some of the features available in this package
 51. iwebadmin - Web frontend for IndiMail User administration
 52. badhost, badip control files for spam control
 53. mailarchive control file (SOX, HIPAA compliance)
-54. Updated man pages.
+54. Notify recipients when message size exceeds databyte limits
+55. Updated man pages.
 
 You can take a detailed look at the feature list at
 
@@ -293,10 +294,11 @@ http://sourceforge.net/tracker/?group_id=230686
 
 You can also get titbits about IndiMail at
 
-Tips&Tricks - http://indimail.blogspot.com
-            - http://feeds.feedburner.com/indimail
+Tips&Tricks - http://indimail.blogspot.com         (WEB)
+            - http://feeds.feedburner.com/indimail (RSS)
 twitter     - http://twitter.com/indimail
 facebook    - http://www.facebook.com/pages/indimail/88063516703?_fb_noscript=1
+              (You can become a facebook fan of IndiMail at the above link)
 sourceforge - https://sourceforge.net/apps/laconica/indimail/
 
 IndiMail has two yum / rpm repositories for most of the Linux Distros at

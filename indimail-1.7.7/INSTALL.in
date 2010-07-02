@@ -215,7 +215,7 @@ I usually prefer to run privileged commands like this (so that I don't get fond 
                                  Total              (800  Mb)
 
 ########### SECTION 2  ##### USER/GROUP Creation ########################
-2. add groups and users and home directory
+1. add groups and users and home directory
     For Linux (I presume this should hold good for OS like Solaris too)
     You will have to run this commands under root. The commands may be
     different for the OS you are running. Please consult your OS man pages/documentation
@@ -1247,9 +1247,11 @@ You can go on to add a virtual domain and users if you wish
 
 You can also get titbits about IndiMail at
 
-Tips&Tricks - http://indimail.blogspot.com
+Tips&Tricks - http://indimail.blogspot.com         (WEB)
+            - http://feeds.feedburner.com/indimail (RSS)
 twitter     - http://twitter.com/indimail
 facebook    - http://www.facebook.com/pages/indimail/88063516703?_fb_noscript=1
+              (You can become a facebook fan of IndiMail at the above link)
 sourceforge - https://sourceforge.net/apps/laconica/indimail/
 
 IndiMail has two YUM / RPM repositories for most of the Linux Distros at
