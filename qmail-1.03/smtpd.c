@@ -1,5 +1,9 @@
 /*
  * $Log: smtpd.c,v $
+ * Revision 1.143  2010-07-02 16:18:29+05:30  Cprogrammer
+ * new function msg_notify() for short email notifications to recipients
+ * notify recipients when message size exceeds databyte limits
+ *
  * Revision 1.142  2010-04-29 12:09:53+05:30  Cprogrammer
  * fixed cdb search for control files badip, badhelo, authdomains & chkrcptdomains
  *
@@ -567,7 +571,7 @@ int             wildmat_internal(char *, char *);
 int             ssl_rfd = -1, ssl_wfd = -1;	/*- SSL_get_Xfd() are broken */
 char           *servercert, *clientca, *clientcrl;
 #endif
-char           *revision = "$Revision: 1.142 $";
+char           *revision = "$Revision: 1.143 $";
 char           *protocol = "SMTP";
 stralloc        proto = { 0 };
 static stralloc Revision = { 0 };
@@ -944,6 +948,358 @@ straynewline()
 	_exit(1);
 }
 
+int
+addrallowed(char *rcpt)
+{
+	int             r;
+
+	if ((r = rcpthosts(rcpt, str_len(rcpt), 0)) == -1)
+		die_control();
+#ifdef TLS
+	if (r == 0 && tls_verify())
+		r = -2;
+#endif
+	return r;
+}
+
+void
+log_spam(char *arg1, char *arg2, unsigned long size, stralloc *line)
+{
+	int             logfifo, match;
+	char           *fifo_name;
+	struct stat     statbuf;
+	static char     spambuf[256], inbuf[1024];
+	static substdio spamin;
+	static substdio spamout;
+
+	if (!env_get("SPAMFILTER"))
+		return;
+	fifo_name = env_get("LOGFILTER");
+	if (!fifo_name || !*fifo_name)
+		return;
+	if (*fifo_name != '/')
+		return;
+	if ((logfifo = open(fifo_name, O_NDELAY | O_WRONLY)) == -1)
+	{
+		if (errno == ENXIO)
+			return;
+		logerr("qmail-smtpd: ");
+		logerrpid();
+		logerr(fifo_name);
+		logerr(": ");
+		logerr(error_str(errno));
+		logerrf("\n");
+		out("451 Unable to queue messages (#4.3.0)\r\n");
+		flush();
+		_exit(1);
+	}
+	substdio_fdbuf(&spamout, write, logfifo, spambuf, sizeof(spambuf));
+	if (substdio_puts(&spamout, "qmail-smtpd: ") == -1)
+	{
+		close(logfifo);
+		return;
+	}
+	if (substdio_puts(&spamout, "pid ") == -1)
+	{
+		close(logfifo);
+		return;
+	}
+	strnum[fmt_ulong(strnum, getpid())] = 0;
+	if (substdio_puts(&spamout, strnum) == -1)
+	{
+		close(logfifo);
+		return;
+	}
+	if (substdio_puts(&spamout, " MAIL from <") == -1)
+	{
+		close(logfifo);
+		return;
+	}
+	if (substdio_puts(&spamout, arg1) == -1)
+	{
+		close(logfifo);
+		return;
+	}
+	if (substdio_puts(&spamout, "> RCPT <") == -1)
+	{
+		close(logfifo);
+		return;
+	}
+	if (substdio_puts(&spamout, arg2) == -1)
+	{
+		close(logfifo);
+		return;
+	}
+	if (substdio_puts(&spamout, "> Size: ") == -1)
+	{
+		close(logfifo);
+		return;
+	}
+	strnum[fmt_ulong(strnum, msg_size)] = 0;
+	if (substdio_puts(&spamout, strnum) == -1)
+	{
+		close(logfifo);
+		return;
+	}
+	/*
+	 * Read X-Bogosity line from bogofilter
+	 * on fd 255. Write it to LOGFILTER
+	 * fifo for qmail-cat spamlogger
+	 */
+	if (!fstat(255, &statbuf) && statbuf.st_size > 0 && !lseek(255, 0, SEEK_SET))
+	{
+		if (substdio_puts(&spamout, " ") == -1)
+		{
+			close(logfifo);
+			close(255);
+			return;
+		}
+		substdio_fdbuf(&spamin, read, 255, inbuf, sizeof(inbuf));
+		if (getln(&spamin, line, &match, '\n') == -1)
+		{
+			logerr("qmail-smtpd: read error: ");
+			logerr(error_str(errno));
+			logerrf("\n");
+			close(255);
+			return;
+		}
+		close(255);
+		if (!stralloc_0(line))
+			die_nomem();
+		if (line->len)
+		{
+			if (substdio_puts(&spamout, line->s) == -1)
+			{
+				logerr("qmail-smtpd: write error: ");
+				logerr(error_str(errno));
+				logerrf("\n");
+			}
+		}
+	}
+	if (substdio_puts(&spamout, "\n") == -1)
+	{
+		logerr("qmail-smtpd: write error: ");
+		logerr(error_str(errno));
+		logerrf("\n");
+	}
+	if (substdio_flush(&spamout) == -1)
+	{
+		close(logfifo);
+		return;
+	}
+	close(logfifo);
+	return;
+}
+
+void
+log_trans(char *arg1, char *arg2, char *arg3, int len, char *arg4, int notify)
+{
+	char           *ptr;
+	int             idx;
+	stralloc        tmpLine = { 0 };
+
+	for (ptr = arg3 + 1, idx = 0; idx < len; idx++)
+	{
+		if (!arg3[idx])
+		{
+			/*
+			 * write data to spamlogger and get X-Bogosity line in tmpLine
+			 */
+			if (!notify)
+				log_spam(arg2, ptr, msg_size, &tmpLine);
+			logerr("qmail-smtpd: ");
+			logerrpid();
+			logerr(arg1);
+			if (!notify)
+			{
+				logerr(" HELO <");
+				logerr(helohost.s);
+				logerr("> ");
+			} else
+				logerr(" NOTIFY: ");
+			logerr("MAIL from <");
+			logerr(arg2);
+			logerr("> RCPT <");
+			logerr(ptr);
+			if (!notify)
+			{
+				logerr("> AUTH <");
+				if (arg4 && *arg4)
+				{
+					logerr(arg4);
+					switch (authd)
+					{
+					case 0:
+						break;
+					case 1:
+						logerr(": AUTH LOGIN");
+						break;
+					case 2:
+						logerr(": AUTH PLAIN");
+						break;
+					case 3:
+						logerr(": AUTH CRAM-MD5");
+						break;
+					default:
+						logerr(": AUTH unknown");
+						break;
+					}
+				}
+				if (addrallowed(ptr))
+				{
+					if (arg4 && *arg4)
+						logerr(": ");
+					logerr("local-rcpt");
+				} else
+				if (!arg4 || !*arg4)
+					logerr("pop-bef-smtp");
+			}
+			logerr("> Size: ");
+			strnum[fmt_ulong(strnum, msg_size)] = 0;
+			logerr(strnum);
+			if (!notify && tmpLine.len)
+			{
+				logerr(" ");
+				logerr(tmpLine.s);
+			}
+			logerr("\n");
+			ptr = arg3 + idx + 2;
+		}
+	}
+	if (substdio_flush(&sserr) == -1)
+		_exit(1);
+}
+
+void
+err_queue(char *arg1, char *arg2, char *arg3, int len, char *arg4, char *qqx,
+	int permanent, unsigned long qp)
+{
+	char           *ptr;
+	int             idx;
+	stralloc        line = { 0 };
+
+	accept_buf[fmt_ulong(accept_buf, qp)] = 0;
+	strnum[fmt_ulong(strnum, msg_size)] = 0;
+	for (ptr = arg3 + 1, idx = 0; idx < len; idx++)
+	{
+		if (!arg3[idx])
+		{
+			/*
+			 * write data to spamlogger 
+			 */
+			log_spam(arg2, ptr, msg_size, &line);
+			logerr("qmail-smtpd: ");
+			logerrpid();
+			logerr(arg1);
+			logerr(" ");
+			logerr(qqx);
+			if (permanent)
+				logerr(" (permanent): ");
+			else
+				logerr(" (temporary): ");
+			logerr("HELO <");
+			logerr(helohost.s);
+			logerr("> MAIL from <");
+			logerr(arg2);
+			logerr("> RCPT <");
+			logerr(ptr);
+			logerr("> AUTH <");
+			if (arg4 && *arg4)
+			{
+				logerr(arg4);
+				switch (authd)
+				{
+				case 0:
+					break;
+				case 1:
+					logerr(": AUTH LOGIN");
+					break;
+				case 2:
+					logerr(": AUTH PLAIN");
+					break;
+				case 3:
+					logerr(": AUTH CRAM-MD5");
+					break;
+				default:
+					logerr(": AUTH unknown");
+					break;
+				}
+			}
+			if (addrallowed(ptr))
+			{
+				if (arg4 && *arg4)
+					logerr(": ");
+				logerr("local-rcpt");
+			} else
+			if (!arg4 || !*arg4)
+				logerr("pop-bef-smtp");
+			logerr("> Size: ");
+			logerr(strnum);
+			if (line.len)
+			{
+				logerr(" ");
+				logerr(line.s); /*- X-Bogosity line */
+			}
+			logerr(" qp ");
+			logerr(accept_buf);
+			logerr("\n");
+			ptr = arg3 + idx + 2;
+		}
+	}
+	if (substdio_flush(&sserr) == -1)
+		_exit(1);
+}
+
+void
+msg_notify()
+{
+	unsigned long   qp;
+	char           *qqx;
+	char            buf[DATE822FMT];
+	struct datetime dt;
+
+	if (qmail_open(&qqt) == -1)
+	{
+		logerr("qmail-smtpd: ");
+		logerrpid();
+		logerr(remoteip);
+		logerrf(" qqt failure");
+		return;
+	}
+	qp = qmail_qp(&qqt); /*- pid of queue process */
+	if (proto.len)
+	{
+		if (!stralloc_0(&proto))
+			die_nomem();
+		protocol = proto.s;
+	}
+	datetime_tai(&dt, now());
+	received(&qqt, (char *) protocol, local, remoteip, remotehost, remoteinfo, fakehelo);
+	strnum[fmt_ulong(strnum, msg_size)] = 0;
+	qmail_puts(&qqt, "X-size-Notification: ");
+	qmail_puts(&qqt, "size=");
+	qmail_puts(&qqt, strnum);
+	qmail_puts(&qqt, ",");
+	qmail_put(&qqt, buf, date822fmt(buf, &dt));
+	qmail_puts(&qqt, "To: do-not-reply\nFrom: ");
+	qmail_put(&qqt, mailfrom.s, mailfrom.len);
+	qmail_puts(&qqt, "\nSubject: Notification Message size ");
+	qmail_puts(&qqt, strnum);
+	qmail_puts(&qqt, " exceeds data limit\n");
+	qmail_puts(&qqt, "Date: ");
+	qmail_put(&qqt, buf, date822fmt(buf, &dt));
+	qmail_from(&qqt, mailfrom.s);
+	qmail_put(&qqt, rcptto.s, rcptto.len);
+	qqx = qmail_close(&qqt);
+	if (!*qqx) /*- mail is now in queue */
+	{
+		log_trans(remoteip, mailfrom.s, rcptto.s, rcptto.len, 0, 1);
+		return;
+	}
+	err_queue(remoteip, mailfrom.s, rcptto.s, rcptto.len,
+		authd ? remoteinfo : 0, qqx + 1, *qqx == 'D', qp);
+}
+
 void
 err_smf()
 {
@@ -951,9 +1307,32 @@ err_smf()
 }
 
 void
-err_size()
+err_size(char *rip, char *mailfrom, char *rcpt, int len)
 {
+	int             idx;
+	char           *ptr;
+
 	out("552 sorry, that message size exceeds my databytes limit (#5.3.4)\r\n");
+	if (env_get("DATABYTES_NOTIFY"))
+		msg_notify();
+	for (ptr = rcpt + 1, idx = 0; idx < len; idx++)
+	{
+		if (!rcpt[idx])
+		{
+			logerr("qmail-smtpd: ");
+			logerrpid();
+			logerr(rip);
+			logerr(" data size exceeded: MAIL from <");
+			logerr(mailfrom);
+			logerr("> RCPT <");
+			logerr(ptr);
+			logerr("> Size: ");
+			strnum[fmt_ulong(strnum, msg_size)] = 0;
+			logerr(strnum);
+			logerr("\n");
+			ptr = rcpt + idx + 2;
+		}
+	}
 }
 
 void
@@ -1710,20 +2089,6 @@ sigscheck(stralloc *line, char **desc, int in_header)
 	return 0;
 }
 
-int
-addrallowed(char *rcpt)
-{
-	int             r;
-
-	if ((r = rcpthosts(rcpt, str_len(rcpt), 0)) == -1)
-		die_control();
-#ifdef TLS
-	if (r == 0 && tls_verify())
-		r = -2;
-#endif
-	return r;
-}
-
 #ifdef INDIMAIL
 int
 check_recipient_cdb(char *rcpt)
@@ -1818,281 +2183,6 @@ dnscheck(char *addr, int len, int paranoid)
 }
 
 void
-log_spam(char *arg1, char *arg2, unsigned long size, stralloc *line)
-{
-	int             logfifo, match;
-	char           *fifo_name;
-	struct stat     statbuf;
-	static char     spambuf[256], inbuf[1024];
-	static substdio spamin;
-	static substdio spamout;
-
-	if (!env_get("SPAMFILTER"))
-		return;
-	fifo_name = env_get("LOGFILTER");
-	if (!fifo_name || !*fifo_name)
-		return;
-	if (*fifo_name != '/')
-		return;
-	if ((logfifo = open(fifo_name, O_NDELAY | O_WRONLY)) == -1)
-	{
-		if (errno == ENXIO)
-			return;
-		logerr("qmail-smtpd: ");
-		logerrpid();
-		logerr(fifo_name);
-		logerr(": ");
-		logerr(error_str(errno));
-		logerrf("\n");
-		out("451 Unable to queue messages (#4.3.0)\r\n");
-		flush();
-		_exit(1);
-	}
-	substdio_fdbuf(&spamout, write, logfifo, spambuf, sizeof(spambuf));
-	if (substdio_puts(&spamout, "qmail-smtpd: ") == -1)
-	{
-		close(logfifo);
-		return;
-	}
-	if (substdio_puts(&spamout, "pid ") == -1)
-	{
-		close(logfifo);
-		return;
-	}
-	strnum[fmt_ulong(strnum, getpid())] = 0;
-	if (substdio_puts(&spamout, strnum) == -1)
-	{
-		close(logfifo);
-		return;
-	}
-	if (substdio_puts(&spamout, " MAIL from <") == -1)
-	{
-		close(logfifo);
-		return;
-	}
-	if (substdio_puts(&spamout, arg1) == -1)
-	{
-		close(logfifo);
-		return;
-	}
-	if (substdio_puts(&spamout, "> RCPT <") == -1)
-	{
-		close(logfifo);
-		return;
-	}
-	if (substdio_puts(&spamout, arg2) == -1)
-	{
-		close(logfifo);
-		return;
-	}
-	if (substdio_puts(&spamout, "> Size: ") == -1)
-	{
-		close(logfifo);
-		return;
-	}
-	strnum[fmt_ulong(strnum, msg_size)] = 0;
-	if (substdio_puts(&spamout, strnum) == -1)
-	{
-		close(logfifo);
-		return;
-	}
-	/*
-	 * Read X-Bogosity line from bogofilter
-	 * on fd 255. Write it to LOGFILTER
-	 * fifo for qmail-cat spamlogger
-	 */
-	if (!fstat(255, &statbuf) && statbuf.st_size > 0 && !lseek(255, 0, SEEK_SET))
-	{
-		if (substdio_puts(&spamout, " ") == -1)
-		{
-			close(logfifo);
-			close(255);
-			return;
-		}
-		substdio_fdbuf(&spamin, read, 255, inbuf, sizeof(inbuf));
-		if (getln(&spamin, line, &match, '\n') == -1)
-		{
-			logerr("qmail-smtpd: read error: ");
-			logerr(error_str(errno));
-			logerrf("\n");
-			close(255);
-			return;
-		}
-		close(255);
-		if (!stralloc_0(line))
-			die_nomem();
-		if (line->len)
-		{
-			if (substdio_puts(&spamout, line->s) == -1)
-			{
-				logerr("qmail-smtpd: write error: ");
-				logerr(error_str(errno));
-				logerrf("\n");
-			}
-		}
-	}
-	if (substdio_puts(&spamout, "\n") == -1)
-	{
-		logerr("qmail-smtpd: write error: ");
-		logerr(error_str(errno));
-		logerrf("\n");
-	}
-	if (substdio_flush(&spamout) == -1)
-	{
-		close(logfifo);
-		return;
-	}
-	close(logfifo);
-	return;
-}
-
-void
-log_trans(char *arg1, char *arg2, char *arg3, int len, char *arg4)
-{
-	char           *ptr;
-	int             idx;
-	stralloc        tmpLine = { 0 };
-
-	for (ptr = arg3 + 1, idx = 0; idx < len; idx++)
-	{
-		if (!arg3[idx])
-		{
-			/*
-			 * write data to spamlogger and get X-Bogosity line in tmpLine
-			 */
-			log_spam(arg2, ptr, msg_size, &tmpLine);
-			logerr("qmail-smtpd: ");
-			logerrpid();
-			logerr(arg1);
-			logerr(" HELO <");
-			logerr(helohost.s);
-			logerr("> MAIL from <");
-			logerr(arg2);
-			logerr("> RCPT <");
-			logerr(ptr);
-			logerr("> AUTH <");
-			if (arg4 && *arg4)
-			{
-				logerr(arg4);
-				switch (authd)
-				{
-				case 0:
-					break;
-				case 1:
-					logerr(": AUTH LOGIN");
-					break;
-				case 2:
-					logerr(": AUTH PLAIN");
-					break;
-				case 3:
-					logerr(": AUTH CRAM-MD5");
-					break;
-				default:
-					logerr(": AUTH unknown");
-					break;
-				}
-			}
-			if (addrallowed(ptr))
-			{
-				if (arg4 && *arg4)
-					logerr(": ");
-				logerr("local-rcpt");
-			} else
-			if (!arg4 || !*arg4)
-				logerr("pop-bef-smtp");
-			logerr("> Size: ");
-			strnum[fmt_ulong(strnum, msg_size)] = 0;
-			logerr(strnum);
-			if (tmpLine.len)
-			{
-				logerr(" ");
-				logerr(tmpLine.s);
-			}
-			logerr("\n");
-			ptr = arg3 + idx + 2;
-		}
-	}
-	if (substdio_flush(&sserr) == -1)
-		_exit(1);
-}
-
-void
-err_queue(char *arg1, char *arg2, char *arg3, int len, char *arg4, char *qqx, int permanent)
-{
-	char           *ptr;
-	int             idx;
-	stralloc        line = { 0 };
-
-	for (ptr = arg3 + 1, idx = 0; idx < len; idx++)
-	{
-		if (!arg3[idx])
-		{
-			/*
-			 * write data to spamlogger 
-			 */
-			log_spam(arg2, ptr, msg_size, &line);
-			logerr("qmail-smtpd: ");
-			logerrpid();
-			logerr(arg1);
-			logerr(" ");
-			logerr(qqx);
-			if (permanent)
-				logerr(" (permanent): ");
-			else
-				logerr(" (temporary): ");
-			logerr("HELO <");
-			logerr(helohost.s);
-			logerr("> MAIL from <");
-			logerr(arg2);
-			logerr("> RCPT <");
-			logerr(ptr);
-			logerr("> AUTH <");
-			if (arg4 && *arg4)
-			{
-				logerr(arg4);
-				switch (authd)
-				{
-				case 0:
-					break;
-				case 1:
-					logerr(": AUTH LOGIN");
-					break;
-				case 2:
-					logerr(": AUTH PLAIN");
-					break;
-				case 3:
-					logerr(": AUTH CRAM-MD5");
-					break;
-				default:
-					logerr(": AUTH unknown");
-					break;
-				}
-			}
-			if (addrallowed(ptr))
-			{
-				if (arg4 && *arg4)
-					logerr(": ");
-				logerr("local-rcpt");
-			} else
-			if (!arg4 || !*arg4)
-				logerr("pop-bef-smtp");
-			logerr("> Size: ");
-			strnum[fmt_ulong(strnum, msg_size)] = 0;
-			logerr(strnum);
-			if (line.len)
-			{
-				logerr(" ");
-				logerr(line.s);
-			}
-			logerr("\n");
-			ptr = arg3 + idx + 2;
-		}
-	}
-	if (substdio_flush(&sserr) == -1)
-		_exit(1);
-}
-
-void
 log_etrn(char *arg1, char *arg2, char *arg3)
 {
 	logerr("qmail-smtpd: ");
@@ -2157,7 +2247,6 @@ esmtp_print()
 	char           *ptr;
 	char            buf[DATE822FMT];
 	int             i;
-	datetime_sec    when;
 	struct datetime dt;
 
 	substdio_puts(&ssout, " (NO UCE) ESMTP IndiMail ");
@@ -2170,8 +2259,7 @@ esmtp_print()
 		}
 		substdio_put(&ssout, ptr, 1);
 	}
-	when = now();
-	datetime_tai(&dt, when);
+	datetime_tai(&dt, now());
 	i = date822fmt(buf, &dt);
 	buf[i - 1] = 0;
 	out(buf);
@@ -3146,6 +3234,7 @@ mailfrom_size(char *arg)
 
 	scan_ulong(arg, (unsigned long *) &r);
 	sizebytes = r;
+	msg_size = r;
 	if (databytes && (sizebytes > databytes))
 		return 1;
 	return 0;
@@ -3503,12 +3592,6 @@ smtp_mail(char *arg)
 		die_nomem();
 	flagsize = 0;
 	mailfrom_parms(arg);
-	/*- Return error if incoming SMTP msg exceeds DATABYTES */
-	if (flagsize)
-	{
-		err_size();
-		return;
-	}
 	if ((requireauth = env_get("REQUIREAUTH")) && !authd)
 	{
 		err_authrequired();
@@ -4678,6 +4761,12 @@ smtp_data(char *arg)
 		}
 	}
 	seenmail = 0;
+	/*- Return error if incoming SMTP msg exceeds DATABYTES */
+	if (flagsize)
+	{
+		err_size(remoteip, mailfrom.s, rcptto.s, rcptto.len);
+		return;
+	}
 	if (databytes)
 		BytesToOverflow = databytes + 1;
 	if (sigsok)
@@ -4697,7 +4786,7 @@ smtp_data(char *arg)
 		err_qqt(remoteip);
 		return;
 	}
-	qp = qmail_qp(&qqt);
+	qp = qmail_qp(&qqt); /*- pid of queue process */
 	out("354 go ahead\r\n");
 	if (proto.len)
 	{
@@ -4725,7 +4814,7 @@ smtp_data(char *arg)
 	if (!*qqx) /*- mail is now in queue */
 	{
 		acceptmessage(qp);
-		log_trans(remoteip, mailfrom.s, rcptto.s, rcptto.len, authd ? remoteinfo : 0);
+		log_trans(remoteip, mailfrom.s, rcptto.s, rcptto.len, authd ? remoteinfo : 0, 0);
 		return;
 	}
 	if (flagexecutable || flagbody)
@@ -4752,7 +4841,7 @@ smtp_data(char *arg)
 	}
 	if (databytes && !BytesToOverflow)
 	{
-		err_size();
+		err_size(remoteip, mailfrom.s, rcptto.s, rcptto.len);
 		return;
 	}
 	if (*qqx == 'D')
@@ -4761,7 +4850,8 @@ smtp_data(char *arg)
 		out("451 ");
 	out(qqx + 1);
 	out("\r\n");
-	err_queue(remoteip, mailfrom.s, rcptto.s, rcptto.len, authd ? remoteinfo : 0, qqx + 1, *qqx == 'D');
+	err_queue(remoteip, mailfrom.s, rcptto.s, rcptto.len,
+		authd ? remoteinfo : 0, qqx + 1, *qqx == 'D', qp);
 }
 
 int
@@ -5932,7 +6022,7 @@ addrrelay() /*- Rejection of relay probes. */
 void
 getversion_smtpd_c()
 {
-	static char    *x = "$Id: smtpd.c,v 1.142 2010-04-29 12:09:53+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: smtpd.c,v 1.143 2010-07-02 16:18:29+05:30 Cprogrammer Exp mbhangui $";
 
 #ifdef INDIMAIL
 	x = sccsidh;
