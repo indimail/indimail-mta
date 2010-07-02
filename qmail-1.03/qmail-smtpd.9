@@ -781,7 +781,9 @@ the disk is full or
 .B qmail-smtpd
 hits a resource limit,
 .B qmail-smtpd
-returns a temporary error code.
+returns a temporary error code. If you define the environment variable \fBDATABYTES_NOTIFY\fR,
+then the recipient gets notified in case a message is bounced back to the sender due to crossing
+the databyte limit.
 
 .I databytes
 counts bytes as stored on disk, not as transmitted through the network.
@@ -1471,6 +1473,7 @@ The following list of environment variables can be modified using envrules
 .IR DKIMEXPIRE ,
 .IR SIGN_PRACTICE
 .IR DKIMQUEUE ,
+.IR MAILARCHIVE ,
 .IR SIGNATUREDOMAINS ,
 and
 .IR NOSIGNATUREDOMAINS
