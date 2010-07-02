@@ -428,7 +428,7 @@ ENVRULES          |qmail-smtpd  |used    |Any environment variable(s) can be set
                   |             |        |REQUIREAUTH, QREGEX, ENFORCE_FQDN_HELO,
                   |             |        |DATABYTES, BADHELOCHECK, BADHELO,
                   |             |        |NODNSCHECK, VIRUSCHECK, SIGNATURES,
-                  |             |        |BODYCHECK, BADMAILFROM,
+                  |             |        |BODYCHECK, BADMAILFROM, DATABYTES_NOTIFY,
                   |             |        |BADMAILFROMPATTERNS, BOUNCEMAIL,
                   |             |        |CUGMAIL, MASQUERADE, DEFAULT_DOMAIN,
                   |             |        |BADRCPTTO, BADRCPTPATTERNS, TARPITCOUNT,
@@ -491,8 +491,21 @@ REJECTVIRUS       |qmail-queue  |used    |Sets action to be carried out on
 NULLQUEUE         |qmail-queue  |used    |If set, mail transaction is sent to
                   |             |        |/dev/null without returning an error
                   |             |        |(blackholing)
-ENVHEADERS        |qmail-queue  |used    |
-LOGHEADERS        |qmail-queue  |used    |
+MAILARCHIVE       |qmail-queue  |used    |mail archival rules based on sender
+                  |             |        |or recipient addresses
+ENVHEADERS        |qmail-queue  |used    |Contains list of email headers that
+                  |             |        |should be available as environment
+                  |             |        |variables in qmail-local and
+                  |             |        |qmail-remote
+LOGHEADERS        |qmail-queue  |used    |Name of control file containing list
+                  |             |        |of email headers whose value along
+                  |             |        |with header name should be written
+                  |             |        |to the file descriptor defined by the
+                  |             |        |LOGHEADERFD env variable
+LOGHEADERFD       |qmail-queue  |used    |This defines the file descriptor to be
+                  |             |        |used for writing when logheaders control
+                  |             |        |file or LOGHEADERS environment variable
+                  |             |        |is used.
 REMOVEHEADERS     |qmail-queue  |used    |Name of control file containing a list
                   |             |        |of email headers that should be removed
                   |             |        |before putting into the queue. If not 
@@ -631,9 +644,11 @@ SIGN_PRACTICE     |qmail-dkim   |used    |For using SSP or ADSP as the signing
                   |             |        |practice
 ------------------|-------------|-------------------------------------------------
 DATABYTES         |qmail-smtpd  |used    |override control/databytes
-DATABYTES         |qmail-inject |used    |override control/databytes
-DATABYTES         |sendmail     |used    |override control/databytes
-DATABYTES         |spawn-filter |used    |override control/databytes
+                  |qmail-inject |used    |override control/databytes
+                  |sendmail     |used    |override control/databytes
+                  |spawn-filter |used    |override control/databytes
+DATABYTES_NOTIFY  |qmail-smtpd  |used    |notification is sent to recipient in
+                  |             |        |databyte limit gets exceeded.
 ------------------|-------------|--------|----------------------------------------
 BOUNCEPROCESSOR   |qmail-send   |used    |External bounceprocess to call for
                   |             |        |handling bounces.
