@@ -1,5 +1,8 @@
 /*
  * $Log: indiversion.c,v $
+ * Revision 2.127  2010-07-04 14:39:39+05:30  Cprogrammer
+ * removed open_smtp_relay
+ *
  * Revision 2.126  2010-04-13 08:15:41+05:30  Cprogrammer
  * renamed vmoddomlimits to vlimit
  *
@@ -496,7 +499,7 @@
 #endif
 
 #ifndef	lint
-static char     sccsid[] = "$Id: indiversion.c,v 2.126 2010-04-13 08:15:41+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: indiversion.c,v 2.127 2010-07-04 14:39:39+05:30 Cprogrammer Stab mbhangui $";
 #endif
 
 void            getversion_indimail_settings_c();
@@ -556,7 +559,6 @@ void            getversion_MoveFile_c();
 void            getversion_mysql_perror_c();
 void            getversion_next_big_dir_c();
 void            getversion_open_big_dir_c();
-void            getversion_open_smtp_relay_c();
 void            getversion_parse_email_c();
 void            getversion_passwd_c();
 void            getversion_print_control_c();
@@ -981,7 +983,6 @@ getversion(char *id)
 	getversion_mysql_perror_c();
 	getversion_next_big_dir_c();
 	getversion_open_big_dir_c();
-	getversion_open_smtp_relay_c();
 	getversion_parse_email_c();
 	getversion_passwd_c();
 	getversion_print_control_c();

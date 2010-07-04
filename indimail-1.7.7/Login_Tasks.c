@@ -1,5 +1,8 @@
 /*
  * $Log: Login_Tasks.c,v $
+ * Revision 2.29  2010-07-04 14:36:40+05:30  Cprogrammer
+ * replaced open_smtp_relay() with vopen_smtp_relay()
+ *
  * Revision 2.28  2010-05-06 13:25:57+05:30  Cprogrammer
  * fixed argument 'user' getting modified inside Login_Tasks()
  *
@@ -134,7 +137,7 @@
 #include <fcntl.h>
 
 #ifndef	lint
-static char     sccsid[] = "$Id: Login_Tasks.c,v 2.28 2010-05-06 13:25:57+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: Login_Tasks.c,v 2.29 2010-07-04 14:36:40+05:30 Cprogrammer Stab mbhangui $";
 #endif
 
 int
@@ -214,8 +217,9 @@ Login_Tasks(pw, User, ServiceType)
 #endif /*- ENABLE_AUTH_LOGGING */
 #ifdef POP_AUTH_OPEN_RELAY
 	/*- open the relay to pop3/imap users */
-	if (!getenv("NORELAY") && (pw->pw_gid & NO_RELAY) == 0)
-		open_smtp_relay(pw->pw_name, domain);
+	if (!getenv("NORELAY") && (pw->pw_gid & NO_RELAY) == 0 && getenv("OPEN_SMTP")
+			&& vopen_smtp_relay(pw->pw_name, domain))
+		update_rules(1); /*- update tcp.smtp.cdb */
 #endif
 #ifdef ENABLE_AUTH_LOGGING
 	getEnvConfigStr(&ptr, "MIN_LOGIN_INTERVAL", "0");
