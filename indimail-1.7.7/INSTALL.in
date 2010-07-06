@@ -981,7 +981,9 @@ the installation.
 
    % sudo /var/indimail/sbin/svctool --config=add-boot
 
-   The above command will install svscanboot (in inittab, /etc/init or /etc/event.d)
+   The above command will install svscanboot (in inittab, /etc/init or /etc/event.d). It
+   will also set IndiMail as an alternative MTA and replace /usr/sbin/sendmail or
+   /usr/lib/sendmail as link to @indimaildir@/bin/sendmail
 
    To make sure that sendmail is disabled on your system
 
@@ -1213,15 +1215,9 @@ You can go on to add a virtual domain and users if you wish
     At this stage, your setup is ready to send mails to the outside world. To receive
     mails, you need to create your actual domain (instead of example.com) using vadddomain
     and setup a mail exchanger record for your domain (MX record).
-    To send mails, you can either use SMTP or use a sendmail replacement -
-    @indimaildir@/bin/sendmail.sh
+    To send mails, you can either use SMTP or use sendmail (which is actually
+    @indimaildir@/bin/sendmail).
 
-    You may also want to link sendmail to @indimaildir@/bin/sendmail.sh
-
-    % sudo rm /usr/sbin/sendmail
-    % ln -s @indimaildir@/bin/sendmail.sh /usr/sbin/sendmail
-
-    If you link sendmail to @indimaildir@/bin/sendmail.sh, then
     you can do the following to send a test mail.
 
     % ( echo 'First M. Last'; uname -a) | mail -s "IndiMail Installation" mbhangui@gmail.com
