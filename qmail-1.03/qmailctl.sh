@@ -1,6 +1,9 @@
 # chkconfig: 345 50 15
 # description: Starts qmail system and associated services
 # $Log: qmailctl.sh,v $
+# Revision 1.25  2010-07-06 13:16:31+05:30  Cprogrammer
+# stop svscan on stop
+#
 # Revision 1.24  2010-07-02 16:20:22+05:30  Cprogrammer
 # shutdown indimail early
 #
@@ -195,6 +198,10 @@ stop()
 		echo
 		let ret+=$RETVAL
 	done
+	echo -n $"Stopping svscan: "
+	QMAIL/sbin/initsvc -off > /dev/null && $succ || $fail
+	RETVAL=$?
+	echo
 	[ $ret -eq 0 ] && rm -f /var/lock/subsys/indimail
 	return $ret
 }
