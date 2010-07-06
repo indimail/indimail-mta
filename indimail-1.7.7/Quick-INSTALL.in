@@ -116,16 +116,8 @@
    At this stage, your setup is ready to send mails to the outside world. To receive
    mails, you need to create your actual domain (instead of example.com) using vadddomain
    and setup a mail exchanger record for your domain (MX record).
-   To send mails, you can either use SMTP or use a sendmail replacement -
-   @indimaildir@/bin/sendmail.sh
-
-   You may also want to link sendmail to @indimaildir@/bin/sendmail.sh
-
-   % sudo rm /usr/sbin/sendmail
-   % ln -s @indimaildir@/bin/sendmail.sh /usr/sbin/sendmail
-
-   If you link sendmail to @indimaildir@/bin/sendmail.sh, then
-   you can do the following to send a test mail.
+   To send mails, you can either use SMTP or use a sendmail (IndiMail's sendmail replacement
+   @indimaildir@/bin/sendmail).
 
    % ( echo 'First M. Last'; uname -a) | mail -s "IndiMail Installation" mbhangui@gmail.com
 
