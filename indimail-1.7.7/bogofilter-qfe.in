@@ -1,6 +1,9 @@
 #!/bin/sh
 # WARNING: This file was auto-generated. Do not edit!
 # $Log: bogofilter-qfe.in,v $
+# Revision 2.11  2010-07-06 13:26:40+05:30  Cprogrammer
+# use sendmail instead of sendmail.sh
+#
 # Revision 2.10  2010-04-23 08:38:16+05:30  Cprogrammer
 # allow nonspam as a valid anologous token for ham
 #
@@ -35,7 +38,7 @@
 # This a qmail specific bogofilter frontend script which allows the use of a 
 # centralized bogofilter running on an smtp mail server
 # Copyright (C) Gyepi Sam <gyepi@praxis-sw.com> 2002
-# $Id: bogofilter-qfe.in,v 2.10 2010-04-23 08:38:16+05:30 Cprogrammer Stab mbhangui $
+# $Id: bogofilter-qfe.in,v 2.11 2010-07-06 13:26:40+05:30 Cprogrammer Stab mbhangui $
  
 domain=$HOST
 #
@@ -133,7 +136,7 @@ if [ ! " $REPORT" = " " ] ; then
 		echo "Analysis of mail sent by $SENDER to $EXT@$HOST"
 		echo
 		@indimaildir@/bin/bogofilter -vvv < /tmp/bogofilter.$$
-		) | @qmaildir@/bin/sendmail.sh -t
+		) | @qmaildir@/bin/sendmail -t
 	else
 		(
 		echo
