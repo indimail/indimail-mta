@@ -1,6 +1,9 @@
 # chkconfig: 345 50 15
 # description: Starts qmail system and associated services
 # $Log: qmailctl.sh,v $
+# Revision 1.26  2010-07-07 10:18:10+05:30  Cprogrammer
+# stop and start all services
+#
 # Revision 1.25  2010-07-06 13:16:31+05:30  Cprogrammer
 # stop svscan on stop
 #
@@ -190,7 +193,7 @@ HELP
 stop()
 {
 	local ret=0
-	for i in `echo $SERVICE/qmail-smtpd.* $SERVICE/qmail-qmqpd.* $SERVICE/qmail-qmtpd.* $SERVICE/qmail-send.*`
+	for i in `echo $SERVICE/*`
 	do
 		echo -n $"Stopping $i: "
 		QMAIL/bin/svc -d $i && $succ || $fail
@@ -202,7 +205,9 @@ stop()
 	QMAIL/sbin/initsvc -off > /dev/null && $succ || $fail
 	RETVAL=$?
 	echo
-	[ $ret -eq 0 ] && rm -f /var/lock/subsys/indimail
+	if [ -d /var/log/subsys ] ; then
+		[ $ret -eq 0 ] && rm -f /var/lock/subsys/indimail
+	fi
 	return $ret
 }
 
@@ -217,7 +222,7 @@ start()
 		echo
 		let ret+=$RETVAL
 	else
-		for i in `echo $SERVICE/qmail-smtpd.* $SERVICE/qmail-qmqpd.* $SERVICE/qmail-qmtpd.* $SERVICE/qmail-send.*`
+		for i in `echo $SERVICE/*`
 		do
 			if [ ! -f $i/down ] ; then
 				echo -n $"Starting $i: "
@@ -228,7 +233,9 @@ start()
 			fi
 		done
 	fi
-	[ $ret -eq 0 ] && touch /var/lock/subsys/indimail
+	if [ -d /var/log/subsys ] ; then
+		[ $ret -eq 0 ] && touch /var/lock/subsys/indimail
+	fi
 	return $ret
 }
 
