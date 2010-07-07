@@ -1,5 +1,9 @@
 #!/bin/sh
 # $Log: create_services.in,v $
+# Revision 2.44  2010-07-07 11:51:28+05:30  Cprogrammer
+# added --fdpass option to clamdscan
+# added indimail startup
+#
 # Revision 2.43  2010-05-18 08:22:59+05:30  Cprogrammer
 # added rbl check for SMTPS
 # fixed greylisting, qmtp and qmqp services
@@ -151,7 +155,7 @@ indimaildir=@indimaildir@
 # End USER Configuration OPTIONS
 #
 
-# $Id: create_services.in,v 2.43 2010-05-18 08:22:59+05:30 Cprogrammer Exp mbhangui $
+# $Id: create_services.in,v 2.44 2010-07-07 11:51:28+05:30 Cprogrammer Exp mbhangui $
 
 usage()
 {
