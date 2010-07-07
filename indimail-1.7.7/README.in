@@ -324,9 +324,11 @@ Currently, the list of supported distributions for IndiMail is (for
 both 32 and 64 bit) are
 
     * SUSE
+          o openSUSE 11.3
           o openSUSE 11.2
           o openSUSE 11.1
           o openSUSE 11.0
+          o SUSE Linux Enterprise 11 SP1
           o SUSE Linux Enterprise 11
           o SUSE Linux Enterprise 10
           o openSUSE Factory
