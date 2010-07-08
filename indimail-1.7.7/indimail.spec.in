@@ -1,5 +1,8 @@
 #
 # $Log: indimail.spec.in,v $
+# Revision 2.188  2010-07-08 11:27:37+05:30  Cprogrammer
+# fixed permission of iauth.so
+#
 # Revision 2.187  2010-06-27 14:20:54+05:30  Cprogrammer
 # use --fdpass in clamdscan
 # fixed removal of indimail as alternative mta
@@ -589,7 +592,7 @@
 # rpm spec file for indimail
 #
 #
-# $Id: indimail.spec.in,v 2.187 2010-06-27 14:20:54+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 2.188 2010-07-08 11:27:37+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %define _unpackaged_files_terminate_build 1
 
@@ -1941,7 +1944,7 @@ fi
 %attr(555,root,root)                    %{_prefix}/modules/background
 %attr(555,root,root)                    %{_prefix}/modules/alarms
 %attr(555,root,root)                    %{_prefix}/modules/countdown
-%attr(755,root,root)                    %{_prefix}/modules/iauth.so
+%attr(555,root,root)                    %{_prefix}/modules/iauth.so
 
 %attr(644,root,root)                    %{_prefix}/share/fortunes/definitions
 %attr(644,root,root)                    %{_prefix}/share/fortunes/linux.dat
