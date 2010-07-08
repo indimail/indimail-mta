@@ -1,5 +1,8 @@
 /*
  * $Log: instcheck.c,v $
+ * Revision 1.14  2010-07-08 11:23:03+05:30  Cprogrammer
+ * fix perms for all indimail programs for debian stupidity
+ *
  * Revision 1.13  2009-12-09 23:58:36+05:30  Cprogrammer
  * additional closeflag argument to uidinit()
  *
@@ -39,14 +42,18 @@
 #include "alloc.h"
 #include "error.h"
 #include "exit.h"
+#include "hasindimail.h"
 
 void            hier(char *);
+#ifdef INDIMAIL
+void            _hier(char *);
+#endif
 int             uidinit(int);
 
 #define FATAL "instcheck: fatal: "
 #define WARNING "instcheck: warning: "
 void
-perm(prefix1, prefix2, prefix3, file, type, uid, gid, mode)
+perm(prefix1, prefix2, prefix3, file, type, uid, gid, mode, should_exit)
 	char           *prefix1;
 	char           *prefix2;
 	char           *prefix3;
@@ -55,6 +62,7 @@ perm(prefix1, prefix2, prefix3, file, type, uid, gid, mode)
 	int             uid;
 	int             gid;
 	int             mode;
+	int             should_exit;
 {
 	struct stat     st;
 	int             len, err = 0;
@@ -64,7 +72,7 @@ perm(prefix1, prefix2, prefix3, file, type, uid, gid, mode)
 	{
 		if (errno == error_noent)
 		{
-			if (!str_diffn(prefix2, "man/", 4))
+			if (!str_diffn(prefix2, "man/", 4)) /*- check for .gz extension */
 			{
 				if (!(tfile = (char *) alloc((len = str_len(file)) + 4)))
 					strerr_die2sys(111, FATAL, "unable to allocate mem: ");
@@ -128,7 +136,7 @@ h(home, uid, gid, mode)
 	int             gid;
 	int             mode;
 {
-	perm("", "", "", home, S_IFDIR, uid, gid, mode);
+	perm("", "", "", home, S_IFDIR, uid, gid, mode, 1);
 }
 
 void
@@ -141,7 +149,7 @@ d(home, subdir, uid, gid, mode)
 {
 	if (chdir(home) == -1)
 		strerr_die4sys(111, FATAL, "unable to switch to ", home, ": ");
-	perm("", home, "/", subdir, S_IFDIR, uid, gid, mode);
+	perm("", home, "/", subdir, S_IFDIR, uid, gid, mode, 1);
 }
 
 void
@@ -154,7 +162,7 @@ p(home, fifo, uid, gid, mode)
 {
 	if (chdir(home) == -1)
 		strerr_die4sys(111, FATAL, "unable to switch to ", home, ": ");
-	perm("", home, "/", fifo, S_IFIFO, uid, gid, mode);
+	perm("", home, "/", fifo, S_IFIFO, uid, gid, mode, 1);
 }
 
 void
@@ -174,8 +182,41 @@ c(home, subdir, file, uid, gid, mode)
 			return;
 		strerr_die6sys(111, FATAL, "unable to switch to ", home, "/", subdir, ": ");
 	}
-	perm(".../", subdir, "/", file, S_IFREG, uid, gid, mode);
+	perm(".../", subdir, "/", file, S_IFREG, uid, gid, mode, 1);
 }
+
+#ifdef INDIMAIL
+void
+ci(home, subdir, file, uid, gid, mode)
+	char           *home;
+	char           *subdir;
+	char           *file;
+	int             uid;
+	int             gid;
+	int             mode;
+{
+	if (chdir(home) == -1)
+		strerr_die4sys(111, FATAL, "unable to switch to ", home, ": ");
+	if (chdir(subdir) == -1)
+	{
+		if (errno == error_noent)
+		{
+			if (!str_diff(subdir, "lib"))
+			{
+				if (chdir("lib64") == -1)
+				{
+					if (errno == error_noent)
+						return;
+					strerr_die6sys(111, FATAL, "unable to switch to ", home, "/", subdir, ": ");
+				} /*- fall through */
+			} else
+				return;
+		} else
+			strerr_die6sys(111, FATAL, "unable to switch to ", home, "/", subdir, ": ");
+	}
+	perm(".../", subdir, "/", file, S_IFREG, uid, gid, mode, 0);
+}
+#endif
 
 void
 cd(home, subdir, file, uid, gid, mode)
@@ -190,7 +231,7 @@ cd(home, subdir, file, uid, gid, mode)
 		strerr_die4sys(111, FATAL, "unable to switch to ", home, ": ");
 	if (chdir(subdir) == -1)
 		strerr_die6sys(111, FATAL, "unable to switch to ", home, "/", subdir, ": ");
-	perm(".../", subdir, "/", file, S_IFREG, uid, gid, mode);
+	perm(".../", subdir, "/", file, S_IFREG, uid, gid, mode, 1);
 }
 
 void
@@ -204,7 +245,7 @@ z(home, file, len, uid, gid, mode)
 {
 	if (chdir(home) == -1)
 		strerr_die4sys(111, FATAL, "unable to switch to ", home, ": ");
-	perm("", home, "/", file, S_IFREG, uid, gid, mode);
+	perm("", home, "/", file, S_IFREG, uid, gid, mode, 1);
 }
 
 int
@@ -215,17 +256,29 @@ main(int argc, char **argv)
 	if(uidinit(1) == -1)
 		strerr_die2sys(111, FATAL, "unable to get uids/gids: ");
 	if (argc == 1)
+	{
 		hier(0);
-	else
+#ifdef INDIMAIL
+		_hier(0);
+#endif
+	} else
 	for (i = 1;i < argc;i++)
+	{
 		hier(argv[i]);
+#ifdef INDIMAIL
+		_hier(argv[i]);
+#endif
+	}
 	return (0);
 }
 
 void
 getversion_instcheck_c()
 {
-	static char    *x = "$Id: instcheck.c,v 1.13 2009-12-09 23:58:36+05:30 Cprogrammer Stab mbhangui $";
-
+	static char    *x = "$Id: instcheck.c,v 1.14 2010-07-08 11:23:03+05:30 Cprogrammer Stab mbhangui $";
+#ifdef INDIMAIL
+	x = sccsidh;
+#else
 	x++;
+#endif
 }
