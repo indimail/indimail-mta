@@ -957,8 +957,8 @@ strerr.a substdio.a error.a str.a fs.a alloc.a
 	auto_uids.o strerr.a substdio.a error.a str.a fs.a alloc.a
 
 instcheck.o: \
-compile instcheck.c strerr.h error.h exit.h
-	./compile instcheck.c
+compile instcheck.c strerr.h error.h exit.h hasindimail.h
+	./compile $(inc_deps) instcheck.c
 
 ip.o: \
 compile ip.c fmt.h scan.h ip.h byte.h conf-ip
