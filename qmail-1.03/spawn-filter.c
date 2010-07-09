@@ -1,5 +1,8 @@
 /*
  * $Log: spawn-filter.c,v $
+ * Revision 1.50  2010-07-09 08:22:42+05:30  Cprogrammer
+ * implemented sender based envrules using control file fromd.envrules
+ *
  * Revision 1.49  2009-11-09 20:32:52+05:30  Cprogrammer
  * Use control file queue_base to process multiple indimail queues
  *
@@ -752,11 +755,18 @@ main(int argc, char **argv)
 	}
 	if (chdir(auto_qmail) == -1)
 		report(111, "spawn-filter: Unable to switch to ", auto_qmail, ": ", error_str(errno), ". (#4.3.0)", 0);
+	if ((ret = envrules(sender.s, "fromd.envrules", "FROMRULES", 0)) == -1)
+		report(111, "spawn-filter: out of mem: ", error_str(errno), ". (#4.3.0)", 0, 0, 0);
+	else
+	if (ret == -2)
+		report(111, "spawn-filter: Unable to read from envrules: ", error_str(errno), ". (#4.3.0)", 0, 0, 0);
+	if (ret == -4)
+		report(111, "spawn-filter: regex compilation failed: ", error_str(errno), ". (#4.3.0)", 0, 0, 0);
 	if ((ret = envrules(recipient.s, "rcpt.envrules", "RCPTRULES", 0)) == -1)
 		report(111, "spawn-filter: out of mem: ", error_str(errno), ". (#4.3.0)", 0, 0, 0);
 	else
 	if (ret == -2)
-		report(111, "spawn-filter: Unable to read envrules: ", error_str(errno), ". (#4.3.0)", 0, 0, 0);
+		report(111, "spawn-filter: Unable to read rcpt envrules: ", error_str(errno), ". (#4.3.0)", 0, 0, 0);
 	if (ret == -4)
 		report(111, "spawn-filter: regex compilation failed: ", error_str(errno), ". (#4.3.0)", 0, 0, 0);
 	/*- DATABYTES Check */
@@ -904,7 +914,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_spawn_filter_c()
 {
-	static char    *x = "$Id: spawn-filter.c,v 1.49 2009-11-09 20:32:52+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: spawn-filter.c,v 1.50 2010-07-09 08:22:42+05:30 Cprogrammer Stab mbhangui $";
 
 	x++;
 }
