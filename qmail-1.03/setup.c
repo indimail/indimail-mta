@@ -1,5 +1,8 @@
 /*
  * $Log: setup.c,v $
+ * Revision 1.18  2010-07-08 11:47:46+05:30  Cprogrammer
+ * added ci() for debian packaging
+ *
  * Revision 1.17  2010-06-06 10:10:13+05:30  Cprogrammer
  * use a less restrictive umask when not running as root
  *
@@ -54,6 +57,7 @@
 #include "open.h"
 #include "fifo.h"
 #include "exit.h"
+#include "hasindimail.h"
 
 void            hier(char *);
 int             uidinit(int);
@@ -297,6 +301,14 @@ c(home, subdir, file, uid, gid, mode)
 	df(uid, gid, mode, file, home, subdir, is_prog ? 1 : 0);
 }
 
+#ifdef INDIMAIL
+void
+ci(char *home, char *subdir, char *file, int uid, int gid, int mode)
+{
+	return;
+}
+#endif
+
 void
 z(home, file, len, uid, gid, mode)
 	char           *home;
@@ -366,7 +378,7 @@ main(int argc, char **argv)
 void
 getversion_setup_c()
 {
-	static char    *x = "$Id: setup.c,v 1.17 2010-06-06 10:10:13+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: setup.c,v 1.18 2010-07-08 11:47:46+05:30 Cprogrammer Stab mbhangui $";
 
 	x++;
 }
