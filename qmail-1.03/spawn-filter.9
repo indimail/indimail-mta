@@ -97,8 +97,28 @@ The value of databytes determines the maximum size of a message that
 will accept.
 
 .TP 5
+.I fromd.envrules
+Specific environment variables can be set for specific senders.
+The format of this file is of the form                                       
+pat:envar1=val,envar2=val,...]
+where pat is a regular expression which matches a sender. envar1, envar2
+are list of environment variables to be set. If
+.I var
+is omitted, the environment variable is unset. \fBspawn-filter\fR uses
+\fIfromd\fR.\fIenvrules\fR to distinguish from \fIfrom\fR.\fIenvrules\fR used
+by \fBqmail-smtpd(8)\fR
+
+The name of the control file can be overriden by the environment
+variable FROMRULES. Any environment variable used by
+.BR spawn-filter ,
+.B qmail-remote
+or
+.B qmail-local
+can be set sender specific by using fromd.envrules.
+
+.TP 5
 .I rcpt.envrules
-Specific environment variables can be set for specific senders/recipients.
+Specific environment variables can be set for specific recipients.
 The format of this file is of the form                                       
 pat:envar1=val,envar2=val,...]
 where pat is a regular expression which matches a sender. envar1, envar2
@@ -112,7 +132,7 @@ variable RCPTRULES. Any environment variable used by
 .B qmail-remote
 or
 .B qmail-local
-can be set by using rcpt.envrules.
+can be set recpient specific by using rcpt.envrules.
 
 The following list of environment variables can be modified using envrules
 
