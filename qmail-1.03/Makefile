@@ -947,8 +947,8 @@ strerr.a substdio.a open.a error.a str.a fs.a
 
 setup.o: \
 compile setup.c substdio.h strerr.h error.h open.h \
-exit.h fifo.h subfd.h str.h auto_uids.h
-	./compile setup.c
+exit.h fifo.h subfd.h str.h auto_uids.h hasindimail.h
+	./compile $(inc_deps) setup.c
 
 instcheck: \
 load instcheck.o fifo.o hier.o auto_qmail.o get_uid.o auto_split.o auto_uids.o \
