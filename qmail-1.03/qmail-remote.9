@@ -150,14 +150,20 @@ takes precedence over
 
 .TP 5
 .I domainbindings
-Local IP bindings based on envelope sender domain.
+Local IP bindings based on envelope sender domain or envelope sender address.
 Each binding has the form
 .IR domain\fB:\fIlocal-ip ,
+or
+.IR sender_addr\fB:\fIlocal-ip ,
 without any extra spaces.
 If
 .I domain
 matches
 .IR host ,
+or
+.I sender_addr
+matches
+.IR sender ,
 .B qmail-remote
 will bind the local side of the socket for the outgoing connection to
 .IR local-ip .
@@ -170,9 +176,11 @@ to let the OS choose the local address for outgoing connections as usual.
 may include wildcards:
 
 .EX
-   example.com:5.6.7.8
-   .example.com:5.6.7.9
-   heaven.af.mil:1.2.3.4
+ user1@example.com:6.5.4.3
+ example.com:5.6.7.8
+ .example.com:5.6.7.9
+ heaven.af.mil:1.2.3.4
+ :1.2.3.5
 .EE
 
 Here the connection for any message with an envelope sender address ending with
@@ -184,14 +192,29 @@ is bound to local address
 .BR 5.6.7.9 ,
 while envelope senders in
 .B example.com
+(but not
+.B user1@example.com
+itself)
 are bound to 
 .BR 5.6.7.8 ,
 and senders in
 .B heaven.af.mil
 are bound to 
 .BR 1.2.3.4 .
+Connection for message with an envelope sender address of \fBuser1@example.com\fR gets
+bound to
+.BR 6.5.4.3 .
 All other outgoing connections (including messages with the null return-path)
-use the OS-chosen default local address. The
+use the OS-chosen default local address. If you have the following line,
+
+.EX
+ :1.2.3.5
+.EE
+
+then all connections with address not matching any line in \fIdomainbindings\fR, will get
+bound to
+.BR 1.2.3.5 .
+The
 .B qmail
 system does not protect you if you specify an invalid local address to
 bind to. \fIdomainbindings\fR takes precedence over \fIoutgoingip\fR. The name for
