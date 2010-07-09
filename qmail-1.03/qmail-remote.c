@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-remote.c,v $
+ * Revision 1.62  2010-07-08 21:53:42+05:30  Cprogrammer
+ * domainbindings based on envelope sender address
+ *
  * Revision 1.61  2010-06-27 08:43:43+05:30  Cprogrammer
  * display bind ip (outgoing ip) in error messages for failed connections
  *
@@ -1851,13 +1854,16 @@ getcontrols()
 	if (sender.len)
 	{
 		int             i;
-		i = str_rchr(sender.s, '@');
-		if (i)
+
+		if ((i = str_rchr(sender.s, '@')))
 			senderdomain = sender.s + i + 1;
 		stralloc_copyb(&senderbind, senderdomain, sender.len - i - 1);
-		for (i = 0;i <= senderbind.len;++i)
+		senderdomain = constmap(&maplocalips, sender.s, sender.len);
+		if (senderdomain && !*senderdomain)
+			senderdomain = 0;
+		for (i = 0;!senderdomain && i <= senderbind.len;++i)
 		{
-			if ((i == 0) || (i == senderbind.len) || (senderbind.s[i] == '.'))
+			if (!i || i == senderbind.len || senderbind.s[i] == '.')
 			{
 				if ((senderdomain = constmap(&maplocalips, senderbind.s + i, senderbind.len - i)))
 					break;
@@ -2285,7 +2291,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_remote_c()
 {
-	static char    *x = "$Id: qmail-remote.c,v 1.61 2010-06-27 08:43:43+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: qmail-remote.c,v 1.62 2010-07-08 21:53:42+05:30 Cprogrammer Stab mbhangui $";
 
 	x++;
 }
