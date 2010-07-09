@@ -1108,6 +1108,7 @@ _hier(inst_dir)
 	ci(auto_qmail_home, "bin", "bogofilter-qfe", auto_uido, auto_gidq, 0555);
 	ci(auto_qmail_home, "bin", "crc", auto_uido, auto_gidq, 0555);
 	ci(auto_qmail_home, "bin", "crcdiff", auto_uido, auto_gidq, 0555);
+	ci(auto_qmail_home, "bin", "echo", auto_uido, auto_gidq, 0555);
 	ci(auto_qmail_home, "bin", "crypt", auto_uido, auto_gidq, 0555);
 	ci(auto_qmail_home, "bin", "dbinfo", auto_uido, auto_gidq, 0555);
 	ci(auto_qmail_home, "bin", "displaytop", auto_uido, auto_gidq, 0555);
@@ -1277,6 +1278,7 @@ _hier(inst_dir)
 	ci(auto_qmail_home, "man/man1", "vserverinfo.1", auto_uido, auto_gidq, 0444);
 	ci(auto_qmail_home, "man/man1", "vsetuserquota.1", auto_uido, auto_gidq, 0444);
 	ci(auto_qmail_home, "man/man1", "vuserinfo.1", auto_uido, auto_gidq, 0444);
+	ci(auto_qmail_home, "man/man1", "echo.1", auto_uido, auto_gidq, 0444);
 
 	ci(auto_qmail_home, "man/man7", "indimail.7", auto_uido, auto_gidq, 0444);
 	ci(auto_qmail_home, "man/man7", "IndiMail.7", auto_uido, auto_gidq, 0444);

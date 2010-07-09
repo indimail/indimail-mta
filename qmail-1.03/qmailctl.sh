@@ -1,6 +1,9 @@
 # chkconfig: 345 50 15
 # description: Starts qmail system and associated services
 # $Log: qmailctl.sh,v $
+# Revision 1.27  2010-07-09 14:49:22+05:30  Cprogrammer
+# added portable echo
+#
 # Revision 1.26  2010-07-07 10:18:10+05:30  Cprogrammer
 # stop and start all services
 #
@@ -86,36 +89,41 @@ SERVICE=/service
 #
 #
 SYSTEM=`uname -s | tr "[:lower:]" "[:upper:]"`
+if [ -x QMAIL/bin/echo ] ; then
+	ECHO=QMAIL/bin/echo
+else
+	ECHO=echo
+fi
 case "$SYSTEM" in
 	DARWIN*)
 		RES_COL=60
-		MOVE_TO_COL="echo -en \\033[${RES_COL}G"
-		SETCOLOR_SUCCESS="echo -en \\033[1;32m"
-		SETCOLOR_FAILURE="echo -en \\033[1;31m"
-		SETCOLOR_WARNING="echo -en \\033[1;33m"
-		SETCOLOR_NORMAL="echo -en \\033[0;39m"
+		MOVE_TO_COL="$ECHO -en \\033[${RES_COL}G"
+		SETCOLOR_SUCCESS="$ECHO -en \\033[1;32m"
+		SETCOLOR_FAILURE="$ECHO -en \\033[1;31m"
+		SETCOLOR_WARNING="$ECHO -en \\033[1;33m"
+		SETCOLOR_NORMAL="$ECHO -en \\033[0;39m"
 		;;
 esac
 
 myecho_success() {
   $MOVE_TO_COL
-  echo -n "["
+  $ECHO -n "["
   $SETCOLOR_SUCCESS
-  echo -n $"  OK  "
+  $ECHO -n $"  OK  "
   $SETCOLOR_NORMAL
-  echo -n "]"
-  echo -ne "\r"
+  $ECHO -n "]"
+  $ECHO -ne "\r"
   return 0
 }
 
 myecho_failure() {
   $MOVE_TO_COL
-  echo -n "["
+  $ECHO -n "["
   $SETCOLOR_FAILURE
-  echo -n $"FAILED"
+  $ECHO -n $"FAILED"
   $SETCOLOR_NORMAL
-  echo -n "]"
-  echo -ne "\r"
+  $ECHO -n "]"
+  $ECHO -ne "\r"
   return 1
 }
 
@@ -195,13 +203,13 @@ stop()
 	local ret=0
 	for i in `echo $SERVICE/*`
 	do
-		echo -n $"Stopping $i: "
+		$ECHO -n $"Stopping $i: "
 		QMAIL/bin/svc -d $i && $succ || $fail
 		RETVAL=$?
 		echo
 		let ret+=$RETVAL
 	done
-	echo -n $"Stopping svscan: "
+	$ECHO -n $"Stopping svscan: "
 	QMAIL/sbin/initsvc -off > /dev/null && $succ || $fail
 	RETVAL=$?
 	echo
@@ -216,7 +224,7 @@ start()
 	local ret=0
 	QMAIL/bin/svstat $SERVICE/.svscan/log > /dev/null
 	if [ $? -ne 0 ] ; then
-		echo -n $"Starting svscan: "
+		$ECHO -n $"Starting svscan: "
 		QMAIL/sbin/initsvc -on > /dev/null && $succ || $fail
 		RETVAL=$?
 		echo
@@ -225,7 +233,7 @@ start()
 		for i in `echo $SERVICE/*`
 		do
 			if [ ! -f $i/down ] ; then
-				echo -n $"Starting $i: "
+				$ECHO -n $"Starting $i: "
 				QMAIL/bin/svc -u $i && $succ || $fail
 				RETVAL=$?
 				echo
@@ -261,7 +269,7 @@ case "$1" in
 	ret=0
 	for i in `echo $SERVICE/qmail-smtpd.* $SERVICE/qmail-qmqpd.* $SERVICE/qmail-qmtpd.*`
 	do
-		echo -n $"Stopping $i: "
+		$ECHO -n $"Stopping $i: "
 		QMAIL/bin/svc -d $i && $succ || $fail
 		RETVAL=$?
 		echo
@@ -269,7 +277,7 @@ case "$1" in
 	done
 	for i in `echo $SERVICE/qmail-send.*`
 	do
-		echo -n $"Terminating $i: "
+		$ECHO -n $"Terminating $i: "
 		QMAIL/bin/svc -t $i && $succ || $fail
 		RETVAL=$?
 		echo
@@ -278,7 +286,7 @@ case "$1" in
 	for i in `echo $SERVICE/qmail-smtpd.* $SERVICE/qmail-qmqpd.* $SERVICE/qmail-qmtpd.*`
 	do
 		if [ ! -f $i/down ] ; then
-		echo -n $"Starting $i: "
+		$ECHO -n $"Starting $i: "
 			QMAIL/bin/svc -u $i && $succ || $fail
 			RETVAL=$?
 			echo
@@ -288,14 +296,14 @@ case "$1" in
 	[ $ret -eq 0 ] && exit 0 || exit 1
 	;;
   shut)
-	echo -n $"shutdown svscan: "
+	$ECHO -n $"shutdown svscan: "
 	QMAIL/sbin/initsvc -off > /dev/null && $succ || $fail
 	ret=$?
 	echo
 	[ $ret -eq 0 ] && exit 0 || exit 1
 	;;
   kill)
-	echo -n $"killing tcpserver,supervise,qmail-send: "
+	$ECHO -n $"killing tcpserver,supervise,qmail-send: "
 	kill `ps -ef|egrep "tcpserver|supervise|qmail-send" | grep -v grep | awk '{print $2}'` && $succ || $fail
 	ret=$?
 	echo
@@ -307,12 +315,12 @@ case "$1" in
 	;;
   flush)
 	ret=0
-	echo -n $"Flushing timeout table + ALRM signal to qmail-send."
+	$ECHO -n $"Flushing timeout table + ALRM signal to qmail-send."
 	QMAIL/bin/qmail-tcpok > /dev/null && $succ || $fail
 	echo
 	for i in `echo $SERVICE/qmail-send.*`
 	do
-		echo -n $"Flushing $i: "
+		$ECHO -n $"Flushing $i: "
 		QMAIL/bin/svc -a $i && $succ || $fail
 		RETVAL=$?
 		echo
@@ -341,7 +349,7 @@ case "$1" in
     ret=0
 	for i in `echo $SERVICE/qmail-send.*`
 	do
-		echo -n $"sending HUP signal to $i: "
+		$ECHO -n $"sending HUP signal to $i: "
 		QMAIL/bin/svc -h $i && $succ || $fail
 		RETVAL=$?
 		echo
@@ -353,7 +361,7 @@ case "$1" in
     ret=0
 	for i in `echo $SERVICE/qmail-send.* $SERVICE/qmail-smtpd.*`
 	do
-		echo -n $"pausing $i: "
+		$ECHO -n $"pausing $i: "
 		QMAIL/bin/svc -p $i && $succ || $fail
 		RETVAL=$?
 		echo
@@ -365,7 +373,7 @@ case "$1" in
     ret=0
 	for i in `echo $SERVICE/qmail-send.* $SERVICE/qmail-smtpd.*`
 	do
-		echo -n $"continuing $i: "
+		$ECHO -n $"continuing $i: "
 		QMAIL/bin/svc -c $i && $succ || $fail
 		RETVAL=$?
 		echo
@@ -389,7 +397,7 @@ case "$1" in
 		do
 			t_file=`echo $j | cut -d. -f1,2`
 			if [ ! -f $t_file ] ; then
-				echo -n $"deleting $j: "
+				$ECHO -n $"deleting $j: "
 				/bin/rm -f $j && $succ || $fail
 				RETVAL=$?
 				echo
@@ -398,7 +406,7 @@ case "$1" in
 		done
 		for j in `/bin/ls $INDIMAILDIR/etc/tcp*.$i 2>/dev/null`
 		do
-			echo -n $"building $j.cdb: "
+			$ECHO -n $"building $j.cdb: "
 			QMAIL/bin/tcprules $j.cdb $j.tmp < $j && /bin/chmod 664 $j.cdb \
 				&& chown indimail:indimail $j.cdb && $succ || $fail
 			RETVAL=$?
