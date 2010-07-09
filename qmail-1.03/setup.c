@@ -1,5 +1,8 @@
 /*
  * $Log: setup.c,v $
+ * Revision 1.19  2010-07-09 10:02:09+05:30  Cprogrammer
+ * fixed compilation warning
+ *
  * Revision 1.18  2010-07-08 11:47:46+05:30  Cprogrammer
  * added ci() for debian packaging
  *
@@ -378,7 +381,10 @@ main(int argc, char **argv)
 void
 getversion_setup_c()
 {
-	static char    *x = "$Id: setup.c,v 1.18 2010-07-08 11:47:46+05:30 Cprogrammer Stab mbhangui $";
-
+	static char    *x = "$Id: setup.c,v 1.19 2010-07-09 10:02:09+05:30 Cprogrammer Stab mbhangui $";
+#ifdef INDIMAIL
+	x = sccsidh;
+#else
 	x++;
+#endif
 }
