@@ -1744,6 +1744,7 @@ fi
 %attr(555,root,qmail)                   %{_prefix}/bin/proxypop3
 %attr(555,root,qmail)                   %{_prefix}/bin/dnsip
 %attr(555,root,qmail)                   %{_prefix}/bin/crc
+%attr(555,root,qmail)                   %{_prefix}/bin/echo
 %attr(555,root,qmail)                   %{_prefix}/bin/qsmhook
 %attr(555,root,qmail)                   %{_prefix}/bin/rspamhist
 %attr(555,root,qmail)                   %{_prefix}/bin/versioninfo

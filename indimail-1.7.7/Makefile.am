@@ -139,7 +139,7 @@ indimailbin_PROGRAMS = crc crcdiff dbinfo displaytop hashtable hostcntrl indiver
 	printdir proxyimap proxypop3 resetquota sslerator vacation vaddaliasdomain vadddomain \
 	vadduser vadduserl valias vatrn vbulletin vcalias vcfilter vdeldomain vdeluser \
 	vdominfo vgroup vhostid vipmap vlimit vmoduser vmoveuser vpasswd vpriv \
-	vproxy vrenamedomain vrenameuser vsetuserquota vsmtp vuserinfo crypt
+	vproxy vrenamedomain vrenameuser vsetuserquota vsmtp vuserinfo crypt echo
 indimailsbin_PROGRAMS = adminclient chowkidar cindimail clearopensmtp config_settings \
 	copyemail execmysql hostsync indisrvr initsvc inlookup inquerytest install_tables \
 	ipchange mail_report mgmtpass osh postdel systpass testmra updatefile updaterules \
@@ -400,6 +400,9 @@ install_tables_LDADD = @auth_libs@
 indiversion_SOURCE = indiversion.c
 indiversion_LDADD = @auth_libs@
 indiversion_DEPENDENCIES = indimail_settings.o
+
+echo_SOURCES=echo.c
+echo_LDADD=
 
 addaliasdomain.lo: indimail.h config.h
 add_control.lo: indimail.h config.h
@@ -832,6 +835,11 @@ crc.o: crc.c
 	$(COMPILE) $(DEFS) -DMAIN -c crc.c
 crc$(EXEEXT): $(crc_DEPENDENCIES) $(crc_OBJECTS)
 	$(LINK) $@.o $(crc_LDADD)
+
+echo.o: echo.c
+	$(COMPILE) $(DEFS) -c echo.c
+echo$(EXEEXT): $(echo_DEPENDENCIES) $(echo_OBJECTS)
+	$(LINK) $@.o $(echo_LDADD)
 
 displaytop.o: displaytop.c
 	$(COMPILE) $(DEFS) -DMAIN -c displaytop.c
