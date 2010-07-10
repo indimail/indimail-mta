@@ -1,5 +1,8 @@
 /*
  * $Log: hier.c,v $
+ * Revision 1.150  2010-07-10 10:25:55+05:30  Cprogrammer
+ * added portable echo
+ *
  * Revision 1.149  2010-07-08 11:21:53+05:30  Cprogrammer
  * added all indimail programs to fix debian stupidity
  *
@@ -1593,7 +1596,7 @@ _hier(inst_dir)
 void
 getversion_install_big_c()
 {
-	static char    *x = "$Id: hier.c,v 1.149 2010-07-08 11:21:53+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: hier.c,v 1.150 2010-07-10 10:25:55+05:30 Cprogrammer Stab mbhangui $";
 
 #ifdef INDIMAIL
 	x = sccsidh;
