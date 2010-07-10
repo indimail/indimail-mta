@@ -14,7 +14,7 @@ environment variables, to the path of \fBspawn-filter\fR respectively in \fBqmai
 supervise or rc script. For spam filtering you can additionally, set the environment variable
 \fBSPAMFILTER\fR.  If \fBspawn-filter\fR is invoked as \fBqmail-local\fR, it executes the original
 \fBqmail-local\fR or \ffBqmail-remote\fR after running the custom filter.  \fBspawn-filter\fR unsets
-\fBQMAILLOCAL\fR when it runs as \fBqmail-local\fR. Similarly, it unsets \fBQMAILREMOTE\fR when
+\fBQMAILREMOTE\fR when it runs as \fBqmail-local\fR. Similarly, it unsets \fBQMAILLOCAL\fR when
 it runs as \fBqmail-remote\fR. This is useful in scripts to figure out whether \fBspawn-filter\fR
 is running as \fBqmail-local\fR or \fBqmail-remote\fR.
 
@@ -38,13 +38,12 @@ The environment variable
 takes precedence over the control file.
 
 .B spawn-filter
-sets the environment variable
-.B DOMAIN
-to the recipient domain. This can be conveniently used in programs/scripts which get invoked by
-setting
+sets multiple environment variables which can be conveniently used in programs/scripts
+which get invoked by setting
 .B FILTERARGS
 environment variable or by rules in the control file
 .BR filterargs .
+See the section on \fBEnvironment Variables\fR below.
 
 .SH Control Files
 
@@ -183,7 +182,6 @@ specfic to \fBqmail-local\fR.
 and
 .IR LOCALDOMAINS
 
-
 .SH SPAM Filtering
 If SPAMFILTER is defined,
 .B spawn-filter
@@ -253,7 +251,7 @@ than 1 for blackholing.
 
 .TP 5
 .I spamredirect
-The value of environment variable NOTIFYSPAM overrides this control file.
+The value of environment variable SPAMREDIRECT overrides this control file.
 The format of this file is
 .B domain:value
 without any extra spaces. The format also can be specified as
@@ -316,6 +314,31 @@ REGEX patterns of envelope sender addresses which should bypass spam filter.
 can be overriden by the environment variable
 .B SPAMIGNOREPATTERNS
 
+.SH Environment Variables
+\fBspawn-filter\fR sets few environment variables. The following environment variables
+are set for both local and remote deliveries
+
+.TS
+l l.
+Environment variable | Description
+--------------------------------------------------------------------------------
+DOMAIN               | domain part of recipient address
+_EXT                 | the address extension
+_QQEH                | qmail queue extra header
+_SENDER              | envelope sender address
+_RECIPIENT           | envelope recipient address
+SPAMREDIRECT         | set to the envelope recipient if mail is identified
+                     | by spam and redirected to address other than the
+                     | original recipient using control file \fIspamredirect\fR
+QUEUEDIR             | set to notification queue. This gets set when mail gets
+                     | redirected to another address using control file
+                     | \fIspamredirect\fR. spam filtering does not happen for
+                     | the notification queue
+QMAILREMOTE          | set for remote deliveries
+QMAILLOCAL           | set for local deliveries
+
+.TE
+
 .SH "EXIT CODES"
 \fBspawn-filter\fR exits 111 for any error (non-zero exit status by called program) or if it
 is not able to exec QMAILHOME/bin/qmail-local (for local mails) or QMAILHOME/bin/qmail-remote
@@ -336,6 +359,7 @@ qmail-multi(8),
 qmail-cdb(8),
 qmail-control(5),
 qmail-queue(8),
+qmail-command(8),
 bogofilter(1)
 
 .SH "AUTHORS"
