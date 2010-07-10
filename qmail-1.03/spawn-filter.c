@@ -1,5 +1,8 @@
 /*
  * $Log: spawn-filter.c,v $
+ * Revision 1.51  2010-07-10 09:36:11+05:30  Cprogrammer
+ * standardized environment variables set for filters
+ *
  * Revision 1.50  2010-07-09 08:22:42+05:30  Cprogrammer
  * implemented sender based envrules using control file fromd.envrules
  *
@@ -194,12 +197,13 @@
 static int      mkTempFile(int);
 static void     report(int, char *, char *, char *, char *, char *, char *);
 char           *getDomainToken(char *, stralloc *);
-static int      run_mailfilter(char *, char *, char **);
+static int      run_mailfilter(char *, char *, char *, char *, char **);
 void            log_spam(char *, char *, char *, stralloc *);
 int             wildmat_internal(char *, char *);
-static int      redirect_mail(char *);
+static int      redirect_mail(char *, char *, char *, char *);
 static void     create_logfilter();
 static int      check_size(char *);
+void            set_environ(char *, char *, char *, char *, char *);
 extern char   **MakeArgs(char *);
 
 static int      spfok = 0;
@@ -209,6 +213,8 @@ static stralloc spp = { 0 };
 struct constmap mapspf;
 struct constmap mapspp;
 static int      remotE;
+stralloc        sender = { 0 };
+stralloc        recipient = { 0 };
 stralloc        QueueBase = { 0 };
 
 static void
@@ -323,8 +329,24 @@ log_spam(char *arg1, char *arg2, char *size, stralloc *line)
 	return;
 }
 
+void
+set_environ(char *host, char *ext, char *qqeh, char *sender, char *recipient)
+{
+	if (!env_put2("DOMAIN", host)) 
+		report(111, "spawn-filter: out of mem: ", error_str(errno), ". (#4.3.0)", 0, 0, 0);
+	if (!env_put2("_EXT", ext))
+		report(111, "spawn-filter: out of mem: ", error_str(errno), ". (#4.3.0)", 0, 0, 0);
+	if (!env_put2("_QQEH", qqeh))
+		report(111, "spawn-filter: out of mem: ", error_str(errno), ". (#4.3.0)", 0, 0, 0);
+	if (!env_put2("_SENDER", sender))
+		report(111, "spawn-filter: out of mem: ", error_str(errno), ". (#4.3.0)", 0, 0, 0);
+	if (!env_put2("_RECIPIENT", sender))
+		report(111, "spawn-filter: out of mem: ", error_str(errno), ". (#4.3.0)", 0, 0, 0);
+	return;
+}
+
 static int
-run_mailfilter(char *domain, char *mailprog, char **argv)
+run_mailfilter(char *domain, char *ext, char *qqeh, char *mailprog, char **argv)
 {
 	char            strnum[FMT_ULONG];
 	pid_t           filt_pid;
@@ -358,8 +380,7 @@ run_mailfilter(char *domain, char *mailprog, char **argv)
 	case -1:
 		report(111, "spawn-filter: Trouble creating child filter: ", error_str(errno), ". (#4.3.0)", 0, 0, 0);
 	case 0: /*- Filter Program */
-		if (!env_put2("DOMAIN", domain)) 
-			report(111, "spawn-filter: out of mem: ", error_str(errno), ". (#4.3.0)", 0, 0, 0);
+		set_environ(domain, ext, qqeh, sender.s, recipient.s);
 		/*- Mail content read from fd 0 */
 		if (mkTempFile(0))
 			report(111, "spawn-filter: lseek error: ", error_str(errno), ". (#4.3.0)", 0, 0, 0);
@@ -569,7 +590,7 @@ create_logfilter()
 }
 
 static int
-redirect_mail(char *recipient)
+redirect_mail(char *notifyaddress, char *domain, char *ext, char *qqeh)
 {
 	char           *(args[7]);
 	char           *qbase;
@@ -582,16 +603,20 @@ redirect_mail(char *recipient)
 	args[2] = "-s";
 	args[3] = "-f";
 	args[4] = "\"\"";
-	args[5] = recipient;
+	args[5] = notifyaddress;
 	args[6] = 0;
 	switch((pid = fork()))
 	{
 	case -1:
 		report(111, "spawn-filter: Trouble creating child inject: ", error_str(errno), ". (#4.3.0)", 0, 0, 0);
 	case 0:
+		if (!env_put2("SPAMREDIRECT", notifyaddress))
+			report(111, "spawn-filter: out of mem: ", error_str(errno), ". (#4.3.0)", 0, 0, 0);
+		set_environ(domain, ext, qqeh, sender.s, recipient.s);
 		/*- 
 		 * we do not want notifications to be
 		 * caught by spamfilter :)
+		 * unset SPAMFILTER
 		 */
 		if (!(qbase = env_get("QUEUE_BASE")))
 		{
@@ -656,12 +681,10 @@ check_size(char *size)
 int
 main(int argc, char **argv)
 {
-	char           *ptr, *mailprog, *domain, *errStr = 0, *size = "0";
+	char           *ptr, *mailprog, *domain, *errStr = 0, *size = "0", *qqeh, *ext;
 	int             len;
 	char            sizebuf[FMT_ULONG];
 	struct stat     statbuf;
-	stralloc        sender = { 0 };
-	stralloc        recipient = { 0 };
 	int             wstat, filt_exitcode;
 	pid_t           filt_pid;
 	int             pipefd[2], ret;
@@ -683,15 +706,9 @@ main(int argc, char **argv)
 	{
 		mailprog = "bin/qmail-local";
 		domain = argv[7];
+		ext = argv[6];
+		qqeh = argv[10];
 		remotE = 0;
-		if (!env_put2("SPAMEXT", argv[6]))
-			report(111, "spawn-filter: out of mem: ", error_str(errno), ". (#4.3.0)", 0, 0, 0);
-		if (!env_put2("SPAMHOST", argv[7]))
-			report(111, "spawn-filter: out of mem: ", error_str(errno), ". (#4.3.0)", 0, 0, 0);
-		if (!env_put2("SPAMSENDER", argv[8])) //Dunno whether this is required
-			report(111, "spawn-filter: out of mem: ", error_str(errno), ". (#4.3.0)", 0, 0, 0);
-		if (!env_put2("QQEH", argv[10]))
-			report(111, "spawn-filter: out of mem: ", error_str(errno), ". (#4.3.0)", 0, 0, 0);
 		if (!env_unset("QMAILREMOTE"))
 			report(111, "spawn-filter: out of mem: ", error_str(errno), ". (#4.3.0)", 0, 0, 0);
 		if (!fstat(0, &statbuf)) 
@@ -705,13 +722,12 @@ main(int argc, char **argv)
 			report(111, "spawn-filter: out of mem: ", error_str(errno), ". (#4.3.0)", 0, 0, 0);
 		if (!stralloc_0(&sender))
 			report(111, "spawn-filter: out of mem: ", error_str(errno), ". (#4.3.0)", 0, 0, 0);
-
 		/*- recipient */
-		if (*argv[6])
+		if (*ext) /*- EXT */
 		{
-			if (!stralloc_copys(&recipient, argv[6]))
+			if (!stralloc_copys(&recipient, ext))
 				report(111, "spawn-filter: out of mem: ", error_str(errno), ". (#4.3.0)", 0, 0, 0);
-		} else
+		} else /*- user */
 			if (!stralloc_copys(&recipient, argv[2]))
 				report(111, "spawn-filter: out of mem: ", error_str(errno), ". (#4.3.0)", 0, 0, 0);
 		if (!stralloc_cats(&recipient, "@"))
@@ -725,24 +741,15 @@ main(int argc, char **argv)
 	{
 		mailprog = "bin/qmail-remote";
 		domain = argv[1];
+		ext = argv[5];
+		qqeh = argv[3];
 		size = argv[4];
 		remotE = 1;
-		if (!env_put2("SPAMEXT", argv[5])) 
-			report(111, "spawn-filter: out of mem: ", error_str(errno), ". (#4.3.0)", 0, 0, 0);
-		if (!env_put2("SPAMHOST", argv[1]))
-			report(111, "spawn-filter: out of mem: ", error_str(errno), ". (#4.3.0)", 0, 0, 0);
-		if (!env_put2("SPAMSENDER", argv[2]))
-			report(111, "spawn-filter: out of mem: ", error_str(errno), ". (#4.3.0)", 0, 0, 0);
-		if (!env_put2("QQEH", argv[3]))
-			report(111, "spawn-filter: out of mem: ", error_str(errno), ". (#4.3.0)", 0, 0, 0);
-		if (!env_unset("QMAILLOCAL"))
-			report(111, "spawn-filter: out of mem: ", error_str(errno), ". (#4.3.0)", 0, 0, 0);
 		/*- sender */
 		if (!stralloc_copys(&sender, argv[2]))
 			report(111, "spawn-filter: out of mem: ", error_str(errno), ". (#4.3.0)", 0, 0, 0);
 		if (!stralloc_0(&sender))
 			report(111, "spawn-filter: out of mem: ", error_str(errno), ". (#4.3.0)", 0, 0, 0);
-
 		/*- recipient */
 		if (!stralloc_copys(&recipient, argv[5]))
 			report(111, "spawn-filter: out of mem: ", error_str(errno), ". (#4.3.0)", 0, 0, 0);
@@ -778,7 +785,7 @@ main(int argc, char **argv)
 			report(111, "spawn-filter: Unable to read spamfilter: ", error_str(errno), ". (#4.3.0)", 0, 0, 0);
 		if (!(spamfilterprog = getDomainToken(domain, &spamfilterdefs)))
 		{
-			run_mailfilter(domain, mailprog, argv);
+			run_mailfilter(domain, ext, qqeh, mailprog, argv);
 			report(111, "spawn-filter: could not exec ", mailprog, ": ", error_str(errno), ". (#4.3.0)", 0);
 		}
 	}
@@ -800,7 +807,7 @@ main(int argc, char **argv)
 	switch (address_match(spf_fn, &sender, spfok ? &spf : 0, spfok ? &mapspf : 0, sppok ? &spp : 0, &errStr))
 	{
 	case 1:
-		run_mailfilter(domain, mailprog, argv);
+		run_mailfilter(domain, ext, qqeh, mailprog, argv);
 		report(111, "spawn-filter: could not exec ", mailprog, ": ", error_str(errno), ". (#4.3.0)", 0);
 	case 0:
 		break;
@@ -823,8 +830,9 @@ main(int argc, char **argv)
 	switch ((filt_pid = fork()))
 	{
 	case -1:
-		report(111, "spawn-filter: Trouble creating child filter: ", error_str(errno), ". (#4.3.0)", 0, 0, 0);
-	case 0: /*- Filter Program */
+		report(111, "spawn-filter: Trouble creating child spamfilter: ", error_str(errno), ". (#4.3.0)", 0, 0, 0);
+	case 0: /*- SPAM Filter Program */
+		set_environ(domain, ext, qqeh, sender.s, recipient.s);
 		if (!stralloc_copys(&spamfilterargs, spamfilterprog))
 			report(111, "spawn-filter: out of mem: ", error_str(errno), ". (#4.3.0)", 0, 0, 0);
 		if (!stralloc_0(&spamfilterargs))
@@ -890,7 +898,7 @@ main(int argc, char **argv)
 					report(111, "spawn-filter: Unable to read ", ptr, ": ", error_str(errno), ". (#4.3.0)", 0);
 				notifyaddress = getDomainToken(domain, &addresslist);
 			}
-			if (notifyaddress && *notifyaddress && redirect_mail(notifyaddress))
+			if (notifyaddress && *notifyaddress && redirect_mail(notifyaddress, domain, ext, qqeh))
 				report(111, "spawn-filter: unable to send spam notification. (#4.3.0)", 0, 0, 0, 0, 0);
 			if (rejectspam && *rejectspam > '0')
 			{
@@ -904,7 +912,7 @@ main(int argc, char **argv)
 		}
 	} else
 		report(111, "spawn-filter bug. (#4.3.0)", 0, 0, 0, 0, 0);
-	run_mailfilter(domain, mailprog, argv);
+	run_mailfilter(domain, ext, qqeh, mailprog, argv);
 	report(111, "spawn-filter: could not exec ", mailprog, ": ", error_str(errno), ". (#4.3.0)", 0);
 	_exit(111);
 	/*- Not reached */
@@ -914,7 +922,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_spawn_filter_c()
 {
-	static char    *x = "$Id: spawn-filter.c,v 1.50 2010-07-09 08:22:42+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: spawn-filter.c,v 1.51 2010-07-10 09:36:11+05:30 Cprogrammer Stab mbhangui $";
 
 	x++;
 }
