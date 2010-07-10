@@ -1,5 +1,8 @@
 /*
  * $Log: spawn-filter.c,v $
+ * Revision 1.52  2010-07-10 10:43:09+05:30  Cprogrammer
+ * fixed matching of local/remote directives in filterargs control file
+ *
  * Revision 1.51  2010-07-10 09:36:11+05:30  Cprogrammer
  * standardized environment variables set for filters
  *
@@ -483,29 +486,34 @@ getDomainToken(char *domain, stralloc *sa)
 				} else
 					retval = !wildmat_internal(domain, ptr);
 			}
-			if (!retval)
+			*p = ':';
+			if (!retval) /*- match occurred for domain or wildcard */
 			{
-				*p = ':';
 				/* check for local/remote directives */
 				if (remotE)
 				{
 					if (!str_diffn(p + 1, "remote:", 7))
 						return (p + 8);
 					if (!str_diffn(p + 1, "local:", 6))
-						return((char *) 0);
+					{
+						ptr = sa->s + len;
+						continue; /*- skip local directives for remote mails */
+					}
 				} else
 				{
-					if (!str_diffn(p + 1, "remote:", 7))
-						return((char *) 0);
 					if (!str_diffn(p + 1, "local:", 6))
 						return (p + 7);
+					if (!str_diffn(p + 1, "remote:", 7))
+					{
+						ptr = sa->s + len;
+						continue; /*- skip remote directives for remote mails */
+					}
 				}
 				return (p + 1);
 			}
-			*p = ':';
 		}
 		ptr = sa->s + len;
-	}
+	} /*- for (len = 0, ptr = sa->s;len < sa->len;) */
 	return ((char *) 0);
 }
 
@@ -922,7 +930,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_spawn_filter_c()
 {
-	static char    *x = "$Id: spawn-filter.c,v 1.51 2010-07-10 09:36:11+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: spawn-filter.c,v 1.52 2010-07-10 10:43:09+05:30 Cprogrammer Stab mbhangui $";
 
 	x++;
 }
