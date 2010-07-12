@@ -1,5 +1,8 @@
 #
 # $Log: indimail.spec.in,v $
+# Revision 2.189  2010-07-10 19:12:16+05:30  Cprogrammer
+# added portable echo command
+#
 # Revision 2.188  2010-07-08 11:27:37+05:30  Cprogrammer
 # fixed permission of iauth.so
 #
@@ -592,7 +595,7 @@
 # rpm spec file for indimail
 #
 #
-# $Id: indimail.spec.in,v 2.188 2010-07-08 11:27:37+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 2.189 2010-07-10 19:12:16+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %define _unpackaged_files_terminate_build 1
 
