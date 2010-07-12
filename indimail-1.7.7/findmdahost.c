@@ -60,7 +60,7 @@
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: findmdahost.c,v 2.16 2010-06-07 18:43:27+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: findmdahost.c,v 2.16 2010-06-07 18:43:27+05:30 Cprogrammer Stab mbhangui $";
 #endif
 
 #ifdef CLUSTERED_SITE
