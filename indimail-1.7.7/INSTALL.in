@@ -1012,9 +1012,6 @@ the installation.
 
    % sudo service indimail start
 
-   NOTE: on Fedora Core 8 and above which has moved to upstart, putting an entry in inittab
-   will not work. However, if you use initsvc, then you don't have to worry about your
-   system
 
 ########### SECTION 6  ### Verfiy INSTALLATION ##########################
 6. Check your installation

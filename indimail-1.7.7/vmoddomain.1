@@ -34,19 +34,22 @@ Set domain limit. 0 to turn off, 1 to turn on.
 Sets the domain with VFILTER capability
 .TP
 \fB\-h\fR \fIhandler\fR
-Sets the handler for delivery instruction. The handler can be one of the following values
+Sets the handler for delivery instruction for non-existing local users. The handler can be one
+of the following values
 .RS
 .nr step 1 1
 .IP \n[step] 3
-The keyword 'delete'
+The keyword 'delete' - Any mail addressed to a non-existing user gets deleted.
 .IP \n+[step]
-The keyword 'bounce-no-mailbox'
+The keyword 'bounce-no-mailbox' - Any mail addressed to a non-existing user gets bounced to the sender.
 .IP \n+[step]
-Maildir – A full path to a Maildir (e.g. /home/manny/Maildir/)
+Maildir – A full path to a Maildir (e.g. /home/manny/Maildir/). - Mails for non-existing users get
+stored in a Maildir
 .IP \n+[step]
-Email Address – Email address for forwarding emails
+Email Address - Any mail addressed to a non-existing user gets forwarded to an email address.
 .IP \n+[step]
-IP Address – An IP address in SMTPROUTE specification (e.g. indimail.org:192.168.2.1:25)
+IP Address – An IP address in SMTPROUTE specification (e.g. indimail.org:192.168.2.1:25) - The mail
+gets redirected to another server which has the user.
 .RE
 
 .SH RETURN VALUE

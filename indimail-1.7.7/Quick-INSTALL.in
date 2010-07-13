@@ -16,6 +16,8 @@
 
    http://download.opensuse.org/repositories/home:/mbhangui/
 
+   --------------------------------------------------------------------------------------
+
    Creating a non-clustered Domain
    -------------------------------
 
@@ -31,14 +33,20 @@
    # @indimaildir@/sbin/initsvc -on
    # exit
 
-   NOTE: replace localhost, indimail, ssh-1.5-, /tmp/mysql.sock as relevant to your MySQL
-   installation. You can use 3306 instead of /tmp/mysql.sock in case your MySQL
-   database is on another host.
-   you must use host:user:password:socket or host:user:password:port format
-   for host.mysql (for IndiMail 1.6.9 and above). Also set your PATH to 
-   have @indimaildir@/bin in the path.
-   If you change the socket/port then you have to edit @indimaildir@control/host.*
-   and @indimaildir@etc/indimail.cnf to change the socket path / port
+   x------------------------------------------------------------------------------------x
+   | NOTE: replace localhost, indimail, ssh-1.5-, /tmp/mysql.sock as relevant to your   |
+   | MySQL installation. You can use 3306 instead of /tmp/mysql.sock in case your MySQL |
+   | database is on another host.                                                       |
+   | you must use host:user:password:socket or host:user:password:port format           |
+   | for host.mysql (for IndiMail 1.6.9 and above). Also set your PATH to               |
+   | have @indimaildir@/bin in the path.                                                |
+   | If you change the socket/port then you have to edit @indimaildir@control/host.*    |
+   | and @indimaildir@etc/indimail.cnf to change the socket path / port                 |
+   |                                                                                    |
+   | Instead of the above initsvc command, you can also do (a more portable way)        |
+   |                                                                                    |
+   | % sudo service indimail start                                                      |
+   x------------------------------------------------------------------------------------x
 
    Ensure MySQL is running
 
@@ -60,6 +68,8 @@
    % @indimaildir@/bin/vpasswd testuser1@example.com newpass
    % @indimaildir@/bin/vmoduser -q 50000000 testuser1@example.com
 
+   --------------------------------------------------------------------------------------
+
    Creating a Clustered Domain
    ---------------------------
 
@@ -77,14 +87,20 @@
    # @indimaildir@/sbin/initsvc -on
    # exit
 
-   NOTE: replace localhost, indimail, ssh-1.5-, /tmp/mysql.sock as relevant to your MySQL
-   installation. You can use 3306 instead of /tmp/mysql.sock in case your MySQL
-   database is on another host.
-   you must use host:user:password:socket or host:user:password:port format
-   for host.cntrl (for IndiMail 1.6.9 and above). Also set your PATH to 
-   have @indimaildir@/bin in the path.
-   If you change the socket/port then you have to edit @indimaildir@control/host.*
-   and @indimaildir@etc/indimail.cnf to change the socket path / port
+   x------------------------------------------------------------------------------------x
+   | NOTE: replace localhost, indimail, ssh-1.5-, /tmp/mysql.sock as relevant to your   |
+   | MySQL installation. You can use 3306 instead of /tmp/mysql.sock in case your MySQL |
+   | database is on another host.                                                       |
+   | you must use host:user:password:socket or host:user:password:port format           |
+   | for host.cntrl (for IndiMail 1.6.9 and above). Also set your PATH to               |
+   | have @indimaildir@/bin in the path.                                                |
+   | If you change the socket/port then you have to edit @indimaildir@control/host.*    |
+   | and @indimaildir@etc/indimail.cnf to change the socket path / port                 |
+   |                                                                                    |
+   | Instead of the above initsvc command, you can also do (a more portable way)        |
+   |                                                                                    |
+   | % sudo service indimail start                                                      |
+   x------------------------------------------------------------------------------------x
 
    Ensure MySQL is running
 
@@ -110,8 +126,10 @@
    Query the cluster definition
    % @indimaildir@/bin/dbinfo -s
 
+   --------------------------------------------------------------------------------------
+
    Send / Receive Mails
-   ====================
+   --------------------
 
    At this stage, your setup is ready to send mails to the outside world. To receive
    mails, you need to create your actual domain (instead of example.com) using vadddomain
@@ -125,5 +143,7 @@
 
    --- * --- * ---- * --- * --- THE END --- * --- * --- * --- * ---
 
-NOTE: You can email me at mbhangui@gmail.com, if you find this confusing or need any
-help/clarification.
+   x------------------------------------------------------------------------------------x
+   |NOTE: You can email me at mbhangui@gmail.com, if you find this confusing or need any|
+   |help/clarification.                                                                 |
+   x------------------------------------------------------------------------------------x
