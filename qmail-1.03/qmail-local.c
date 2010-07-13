@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-local.c,v $
+ * Revision 1.21  2010-07-13 18:22:11+05:30  Cprogrammer
+ * removed commented out code
+ *
  * Revision 1.20  2009-12-05 20:07:40+05:30  Cprogrammer
  * ansic conversion
  *
@@ -258,19 +261,6 @@ maildir_child(char *dir)
 	for (loop = 0;; ++loop)
 	{
 		gettimeofday(&tmval, 0);
-#if 0
-		s = fntmptph;
-		s += fmt_str(s, "tmp/");
-		s += fmt_ulong(s, tmval.tv_sec);
-		*s++ = '.';
-		*s++ = 'M';
-		s += fmt_ulong(s, tmval.tv_usec);
-		*s++ = 'P';
-		s += fmt_ulong(s, pid);
-		*s++ = '.';
-		s += fmt_strn(s, hostname.s, hostname.len);
-		*s++ = 0;
-#endif
 		if (!stralloc_copys(&fntmptph, "tmp/"))
 			temp_nomem();
 		strnum[fmt_ulong(strnum, tmval.tv_sec)] = 0;
@@ -337,25 +327,6 @@ maildir_child(char *dir)
 #endif
 	if (close(fd) == -1)
 		goto fail;	/*- NFS dorks */
-#if 0
-	s = fnnewtph;
-	s += fmt_str(s, "new/");
-	s += fmt_ulong(s, tmval.tv_sec);
-	*s++ = '.';
-	/*- in hexadecimal */
-	*s++ = 'I';
-	s += fmt_xlong(s, st.st_ino);
-	*s++ = 'V';
-	s += fmt_xlong(s, st.st_dev);
-	/*- in decimal */
-	*s++ = 'M';
-	s += fmt_ulong(s, tmval.tv_usec);
-	*s++ = 'P';
-	s += fmt_ulong(s, pid);
-	*s++ = '.';
-	s += fmt_strn(s, hostname.s, hostname.len);
-	*s++ = 0;
-#endif
 	if (!stralloc_copys(&fnnewtph, "new/"))
 		temp_nomem();
 	strnum[fmt_ulong(strnum, tmval.tv_sec)] = 0;
@@ -1208,7 +1179,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_local_c()
 {
-	static char    *x = "$Id: qmail-local.c,v 1.20 2009-12-05 20:07:40+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: qmail-local.c,v 1.21 2010-07-13 18:22:11+05:30 Cprogrammer Stab mbhangui $";
 
 	x++;
 }
