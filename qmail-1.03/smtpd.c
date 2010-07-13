@@ -1,5 +1,8 @@
 /*
  * $Log: smtpd.c,v $
+ * Revision 1.144  2010-07-13 16:26:50+05:30  Cprogrammer
+ * fix accesslist problems occurring with multiple rcpt
+ *
  * Revision 1.143  2010-07-02 16:18:29+05:30  Cprogrammer
  * new function msg_notify() for short email notifications to recipients
  * notify recipients when message size exceeds databyte limits
@@ -571,7 +574,7 @@ int             wildmat_internal(char *, char *);
 int             ssl_rfd = -1, ssl_wfd = -1;	/*- SSL_get_Xfd() are broken */
 char           *servercert, *clientca, *clientcrl;
 #endif
-char           *revision = "$Revision: 1.143 $";
+char           *revision = "$Revision: 1.144 $";
 char           *protocol = "SMTP";
 stralloc        proto = { 0 };
 static stralloc Revision = { 0 };
@@ -3371,8 +3374,10 @@ mail_acl(char *sender, char *recipient)
 			if (qregex)
 			{
 				if ((err = matchregex(recipient, cptr + 1, &errStr)) < 0)
+				{
+					*cptr = 0;
 					return (err);
-				else
+				} else
 				{
 					rcpt_found = 1;
 					rcpt_match = cptr + 1;
@@ -3405,16 +3410,18 @@ mail_acl(char *sender, char *recipient)
 			if (qregex)
 			{
 				if ((err = matchregex(sender, ptr + 5, &errStr)) < 0)
+				{
+					*cptr = ':';
 					return (err);
-				else
+				} else
 					from_match = ptr + 5;
 			} else
 			if (wildmat_internal(sender, ptr + 5))
 				from_match = ptr + 5;
 		}
+		*cptr = ':';
 		if (rcpt_reject && from_match) /*- explicit allow rule found for sender */
 			return (0);
-		*cptr = ':';
 		ptr = acclist.s + len; /*- go to the next rule */
 	}
 	for (from_reject = len = 0, ptr = acclist.s;len < acclist.len;)
@@ -3440,8 +3447,10 @@ mail_acl(char *sender, char *recipient)
 			if (qregex)
 			{
 				if ((err = matchregex(sender, ptr + 5, &errStr)) < 0)
+				{
+					*cptr = ':';
 					return (err);
-				else
+				} else
 				{
 					from_found = 1;
 					from_match = ptr + 5;
@@ -3474,16 +3483,18 @@ mail_acl(char *sender, char *recipient)
 			if (qregex)
 			{
 				if ((err = matchregex(recipient, cptr + 1, &errStr)) < 0)
+				{
+					*cptr = ':';
 					return (err);
-				else
+				} else
 					rcpt_match = cptr + 1;
 			} else
 			if (wildmat_internal(recipient, cptr + 1))
 				rcpt_match = cptr + 1;
 		}
+		*cptr = ':';
 		if (from_reject && rcpt_match) /*- explicit allow rule found for recipient */
 			return (0);
-		*cptr = ':';
 		ptr = acclist.s + len; /*- go to the next rule */
 	}
 	return (rcpt_reject || from_reject);
@@ -6022,7 +6033,7 @@ addrrelay() /*- Rejection of relay probes. */
 void
 getversion_smtpd_c()
 {
-	static char    *x = "$Id: smtpd.c,v 1.143 2010-07-02 16:18:29+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: smtpd.c,v 1.144 2010-07-13 16:26:50+05:30 Cprogrammer Stab mbhangui $";
 
 #ifdef INDIMAIL
 	x = sccsidh;
