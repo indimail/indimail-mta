@@ -1,0 +1,31 @@
+Subject: This is a test message to check bogofilter's qp decoding of 
+	 continuation lines in the presence of spurious CR characters.
+MIME-Version: 1.0
+Content-Type: multipart/alternative;
+	boundary="----=_NextPart_000_0007_01C9DC27.B9F73130"
+
+This is a multi-part message in MIME format.
+
+------=_NextPart_000_0007_01C9DC27.B9F73130
+Content-Type: text/html;
+	charset="iso-8859-2"
+Content-Transfer-Encoding: quoted-printable
+
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<HTML><HEAD>
+<META http-equiv=3DContent-Type content=3D"text/html; charset=3Diso-8859-2"=
+>
+<META content=3D"MSHTML 6.00.2800.1506" name=3DGENERATOR>
+<STYLE></STYLE>
+</HEAD>
+<BODY>
+<DIV align=3Dcenter><FONT face=3DArial size=3D2>50mg x 10 pills $6.00 per p=
+ill</FONT></DIV>
+<DIV align=3Dcenter><FONT face=3DArial size=3D2></FONT>&nbsp;</DIV>
+<DIV align=3Dcenter><FONT face=3DArial size=3D2>
+<A href=3D"http://groups.yahoo.com/group/ganebawusexut64/message/1">Visit h=
+ere</A></FONT></DIV>
+</BODY></HTML>
+
+------=_NextPart_000_0007_01C9DC27.B9F73130--
+
