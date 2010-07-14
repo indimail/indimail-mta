@@ -1,9 +1,0 @@
-README.bogofilter -- (C) 2004 by Matthias Andree, GNU GPL v2.
-------------------------------------------------------------------------
-This is a stripped-down import of the GNU Scientific Library v1.4.
-This GSL distribution has been modified:
-
-1. functions unneeded for bogofilter have been dropped
-2. all HAVE_INLINE have been replaced by HAVE_EXTERN_INLINE.
-------------------------------------------------------------------------
-END of README.bogofilter

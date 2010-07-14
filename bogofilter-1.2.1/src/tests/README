@@ -1,5 +1,0 @@
-Developer warnings:
-
-Solaris 8 head(1) cuts the output at the first NUL character.
-
-Solaris 8 sed(1) skips embedded NUL characters.
