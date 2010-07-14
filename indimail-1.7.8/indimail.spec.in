@@ -1,5 +1,8 @@
 #
 # $Log: indimail.spec.in,v $
+# Revision 2.190  2010-07-14 14:20:12+05:30  Cprogrammer
+# upgraded to bogofilter-1.2.2
+#
 # Revision 2.189  2010-07-10 19:12:16+05:30  Cprogrammer
 # added portable echo command
 #
@@ -595,7 +598,7 @@
 # rpm spec file for indimail
 #
 #
-# $Id: indimail.spec.in,v 2.189 2010-07-10 19:12:16+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 2.190 2010-07-14 14:20:12+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %define _unpackaged_files_terminate_build 1
 
@@ -631,7 +634,7 @@
 %define	_prefix            @indimaildir@
 %define default_domain     @defaultdomain@
 %define courier_version    3.0.8
-%define bogofilter_version 1.2.1
+%define bogofilter_version 1.2.2
 %define pam_multi_version  1.1
 %define ucspi_version      0.88
 %define qmail_version      1.03

@@ -207,7 +207,7 @@ I usually prefer to run privileged commands like this (so that I don't get fond 
                                . mpack-1.6          (1.5  Mb)
                                . fortune-1.1        (8.4  Mb)
                                . courier-imap-3.0.8 (50   Mb)
-                               . bogofilter-1.2.1   (11.6 Mb)
+                               . bogofilter-1.2.2   (11.6 Mb)
                                . clamav-0.96.1      (600  Mb)
                                . fetchmail-6.3.17   (10.5 Mb)
                                . iwebadmin-1.0      (3.0  Mb)
@@ -536,15 +536,15 @@ the installation.
     conjunction with nssd(8)
 
     ##### STEP 6  ##### SPAM Filter ###########################
-    Install Bogofilter (http://www.bogofilter.org) MD5 2eb802f4e271b99c3d8f68b14f8df9ef
+    Install Bogofilter (http://www.bogofilter.org) MD5 4bcabdf8c5e7efefcb508eda7e80eebc
     current working directory /home/local/src
     Download the bogofilter package. The latest tested bogofilter package is
-    bogofilter-1.2.1.tar.bz2. 
+    bogofilter-1.2.2.tar.bz2. 
 
-    % wget http://downloads.sourceforge.net/bogofilter/bogofilter-1.2.1.tar.bz2
-    % bzip2 -d -c bogofilter-1.2.1.tar.bz2 | tar xf -
-    % gunzip -c indimail-@version@/patches/bogofilter-1.2.1.patch.gz | patch -p0
-    % cd bogofilter-1.2.1
+    % wget http://downloads.sourceforge.net/bogofilter/bogofilter-1.2.2.tar.bz2
+    % bzip2 -d -c bogofilter-1.2.2.tar.bz2 | tar xf -
+    % gunzip -c indimail-@version@/patches/bogofilter-1.2.2.patch.gz | patch -p0
+    % cd bogofilter-1.2.2
     % autoreconf -fi
     % ./configure --prefix=@indimaildir@ --sysconfdir=@indimaildir@/etc --enable-indimail \
          --libexecdir=@indimaildir@/libexec \
