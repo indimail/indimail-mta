@@ -13,3 +13,35 @@ baseurl=http://download.opensuse.org/repositories/home:/indimail/openSUSE_11.2/
 gpgcheck=1
 gpgkey=http://download.opensuse.org/repositories/home:/indimail/openSUSE_11.2/repodata/repomd.xml.key
 enabled=1
+
+[indium]
+name=indium - TCL/TK Graphical UI for Managing Indimail (openSUSE_11.2)
+type=rpm-md
+baseurl=http://download.opensuse.org/repositories/home:/indimail:/indium/openSUSE_11.2/
+gpgcheck=1
+gpgkey=http://download.opensuse.org/repositories/home:/indimail:/indium/openSUSE_11.2/repodata/repomd.xml.key
+enabled=1
+
+[indium-Raw]
+name=indium - TCL/TK Graphical UI for Managing Indimail (openSUSE_11.2)
+type=rpm-md
+baseurl=http://download.opensuse.org/repositories/home:/mbhangui:/indium/openSUSE_11.2/
+gpgcheck=1
+gpgkey=http://download.opensuse.org/repositories/home:/mbhangui:/indium/openSUSE_11.2/repodata/repomd.xml.key
+enabled=1
+
+[iwebadmin]
+name=iwebadmin - Web Administration for IndiMail (openSUSE_11.2)
+type=rpm-md
+baseurl=http://download.opensuse.org/repositories/home:/indimail:/iwebadmin/openSUSE_11.2/
+gpgcheck=1
+gpgkey=http://download.opensuse.org/repositories/home:/indimail:/iwebadmin/openSUSE_11.2/repodata/repomd.xml.key
+enabled=1
+
+[iwebadmin-Raw]
+name=iwebadmin - Web Administration for IndiMail (openSUSE_11.2)
+type=rpm-md
+baseurl=http://download.opensuse.org/repositories/home:/mbhangui:/iwebadmin/openSUSE_11.2/
+gpgcheck=1
+gpgkey=http://download.opensuse.org/repositories/home:/mbhangui:/iwebadmin/openSUSE_11.2/repodata/repomd.xml.key
+enabled=1

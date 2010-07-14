@@ -13,3 +13,35 @@ baseurl=http://download.opensuse.org/repositories/home:/indimail/Fedora_11/
 gpgcheck=1
 gpgkey=http://download.opensuse.org/repositories/home:/indimail/Fedora_11/repodata/repomd.xml.key
 enabled=1
+
+[indium]
+name=indium - TCL/TK Graphical UI for Managing Indimail (Fedora_11)
+type=rpm-md
+baseurl=http://download.opensuse.org/repositories/home:/indimail:/indium/Fedora_11/
+gpgcheck=1
+gpgkey=http://download.opensuse.org/repositories/home:/indimail:/indium/Fedora_11/repodata/repomd.xml.key
+enabled=1
+
+[indium-Raw]
+name=indium - TCL/TK Graphical UI for Managing Indimail (Fedora_11)
+type=rpm-md
+baseurl=http://download.opensuse.org/repositories/home:/mbhangui:/indium/Fedora_11/
+gpgcheck=1
+gpgkey=http://download.opensuse.org/repositories/home:/mbhangui:/indium/Fedora_11/repodata/repomd.xml.key
+enabled=1
+
+[iwebadmin]
+name=iwebadmin - Web Administration for IndiMail (Fedora_11)
+type=rpm-md
+baseurl=http://download.opensuse.org/repositories/home:/indimail:/iwebadmin/Fedora_11/
+gpgcheck=1
+gpgkey=http://download.opensuse.org/repositories/home:/indimail:/iwebadmin/Fedora_11/repodata/repomd.xml.key
+enabled=1
+
+[iwebadmin-Raw]
+name=iwebadmin - Web Administration for IndiMail (Fedora_11)
+type=rpm-md
+baseurl=http://download.opensuse.org/repositories/home:/mbhangui:/iwebadmin/Fedora_11/
+gpgcheck=1
+gpgkey=http://download.opensuse.org/repositories/home:/mbhangui:/iwebadmin/Fedora_11/repodata/repomd.xml.key
+enabled=1
