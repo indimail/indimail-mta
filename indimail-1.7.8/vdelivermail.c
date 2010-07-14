@@ -1,5 +1,9 @@
 /*
  * $Log: vdelivermail.c,v $
+ * Revision 2.55  2010-07-14 22:16:21+05:30  Cprogrammer
+ * display only MAILCOUNT_LIMIT, MAILSIZE_LIMIT quota message when recordMailcount() returns
+ * overquota
+ *
  * Revision 2.54  2010-05-28 14:11:24+05:30  Cprogrammer
  * use QMTP as default
  *
@@ -245,7 +249,7 @@
 #include <sys/wait.h>
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vdelivermail.c,v 2.54 2010-05-28 14:11:24+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: vdelivermail.c,v 2.55 2010-07-14 22:16:21+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 /*- Globals */
@@ -636,8 +640,9 @@ processMail(struct passwd *pw, char *user, char *domain, mdir_t MsgSize)
 		&MailQuotaCount, &MailQuotaSize);
 	if (ret == -1 || ret == -4)
 	{
-		fprintf(stderr, "%s@%s has insufficient quota. %"PRIu64"/%"PRIu64":%"PRIu64"/%"PRIu64":%"PRIu64". indimail (#5.1.4)", 
-			user, domain, MsgSize, CurBytes, CurCount, MailQuotaCount, MailQuotaSize);
+		if (ret == -1)
+			fprintf(stderr, "%s@%s has insufficient quota. %"PRIu64"/%"PRIu64":%"PRIu64"/%"PRIu64":%"PRIu64". indimail (#5.1.4)", 
+				user, domain, MsgSize, CurBytes, CurCount, MailQuotaCount, MailQuotaSize);
 		vdl_exit(100);
 	} else
 	if (ret == -2)
@@ -709,8 +714,9 @@ doAlias(char *dir, char *user, char *domain, mdir_t MsgSize)
 			&MailQuotaSize, &MailQuotaCount);
 		if (ret == -1 || ret == -4)
 		{
-			fprintf(stderr, "%s has insufficient quota. %"PRIu64"/%"PRIu64":%"PRIu64"/%"PRIu64":%"PRIu64". indimail (#5.1.4)", 
-				qmail_line, MsgSize, CurBytes, CurCount, MailQuotaCount, MailQuotaSize);
+			if (ret == -1)
+				fprintf(stderr, "%s has insufficient quota. %"PRIu64"/%"PRIu64":%"PRIu64"/%"PRIu64":%"PRIu64". indimail (#5.1.4)", 
+					qmail_line, MsgSize, CurBytes, CurCount, MailQuotaCount, MailQuotaSize);
 			vdl_exit(100);
 		} else
 		if (ret == -2)
@@ -813,8 +819,9 @@ reject_mail(char *user, char *domain, int status, mdir_t MsgSize, char *bounce)
 	ret = deliver_mail(bounce, MsgSize, "AUTO", indimailuid, indimailgid, domain, &MailQuotaSize, &MailQuotaCount);
 	if (ret == -1 || ret == -4)
 	{
-		fprintf(stderr, "%s has insufficient quota. %"PRIu64"/%"PRIu64":%"PRIu64"/%"PRIu64":%"PRIu64". indimail (#5.1.4)", 
-			bounce, MsgSize, CurBytes, CurCount, MailQuotaCount, MailQuotaSize);
+		if (ret == -1)
+			fprintf(stderr, "%s has insufficient quota. %"PRIu64"/%"PRIu64":%"PRIu64"/%"PRIu64":%"PRIu64". indimail (#5.1.4)", 
+				bounce, MsgSize, CurBytes, CurCount, MailQuotaCount, MailQuotaSize);
 		vdl_exit(100);
 	} else
 	if (ret == -2)
@@ -1021,8 +1028,9 @@ process_valias(char *user, char *domain, mdir_t MsgSize)
 		{
 			if (status++)
 				printf("\n\n");
-			fprintf(stderr, "%s has insufficient quota. %"PRIu64"/%"PRIu64":%"PRIu64"/%"PRIu64":%"PRIu64". indimail (#5.1.4)", 
-				tmpstr, MsgSize, CurBytes, CurCount, MailQuotaCount, MailQuotaSize);
+			if (ret == -1)
+				fprintf(stderr, "%s has insufficient quota. %"PRIu64"/%"PRIu64":%"PRIu64"/%"PRIu64":%"PRIu64". indimail (#5.1.4)", 
+					tmpstr, MsgSize, CurBytes, CurCount, MailQuotaCount, MailQuotaSize);
 			continue;
 		} else
 		if (ret == -2)

@@ -1,5 +1,8 @@
 /*
  * $Log: deliver_mail.c,v $
+ * Revision 2.52  2010-07-14 22:14:49+05:30  Cprogrammer
+ * initialize CurBytes, CurCount if NOQUOTA is set
+ *
  * Revision 2.51  2010-04-03 20:32:05+05:30  Cprogrammer
  * fixed calling overquota_command when user is over quota
  * moved overquota.sh to libexec directory
@@ -181,7 +184,7 @@
 #endif
 
 #ifndef	lint
-static char     sccsid[] = "$Id: deliver_mail.c,v 2.51 2010-04-03 20:32:05+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: deliver_mail.c,v 2.52 2010-07-14 22:14:49+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 /*- Function Prototypes */
@@ -514,7 +517,7 @@ deliver_mail(char *address, mdir_t MsgSize, char *quota, uid_t uid, gid_t gid,
 	} else
 	if (code == -1)
 		return (-2);
-	CurBytes = CurCount = -1;
+	CurBytes = CurCount = 0;
 	/*- This is a directory/Maildir location */
 	if (*address == '/')
 	{
@@ -723,7 +726,8 @@ deliver_mail(char *address, mdir_t MsgSize, char *quota, uid_t uid, gid_t gid,
 					}
 				}
 			}
-		}
+		} else
+			CurBytes = CurCount = 0;
 #ifdef HAVE_SSL 
 		if (getenv("ELIMINATE_DUPS") && is_duplicate(address))
 		{
