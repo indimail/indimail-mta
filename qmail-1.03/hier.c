@@ -1,5 +1,8 @@
 /*
  * $Log: hier.c,v $
+ * Revision 1.152  2010-07-14 15:37:04+05:30  Cprogrammer
+ * commented out repo files for instcheck
+ *
  * Revision 1.151  2010-07-14 15:11:54+05:30  Cprogrammer
  * removed obsolete files
  *
@@ -1201,12 +1204,12 @@ _hier(inst_dir)
 	ci(auto_qmail_home, "etc", "system.rc", auto_uido, auto_gido, 0444);
 	ci(auto_qmail_home, "etc", "wordlist.db", auto_uidv, auto_gidv, 0644);
 	/*- */
+#if 0
 	ci(auto_qmail_home, "etc/yum.repos.d", "IndiMail-CentOS_5.repo", auto_uido, auto_gido, 0444);
 	ci(auto_qmail_home, "etc/yum.repos.d", "IndiMail-Fedora_12.repo", auto_uido, auto_gido, 0444);
 	ci(auto_qmail_home, "etc/yum.repos.d", "IndiMail-Fedora_13.repo", auto_uido, auto_gido, 0444);
 	ci(auto_qmail_home, "etc/yum.repos.d", "IndiMail-Mandriva_2009.1.repo", auto_uido, auto_gido, 0444);
 	ci(auto_qmail_home, "etc/yum.repos.d", "IndiMail-Mandriva_2010.repo", auto_uido, auto_gido, 0444);
-	ci(auto_qmail_home, "etc/yum.repos.d", "IndiMail-openSUSE_10.3.repo", auto_uido, auto_gido, 0444);
 	ci(auto_qmail_home, "etc/yum.repos.d", "IndiMail-openSUSE_11.0.repo", auto_uido, auto_gido, 0444);
 	ci(auto_qmail_home, "etc/yum.repos.d", "IndiMail-openSUSE_11.1.repo", auto_uido, auto_gido, 0444);
 	ci(auto_qmail_home, "etc/yum.repos.d", "IndiMail-openSUSE_11.2.repo", auto_uido, auto_gido, 0444);
@@ -1215,6 +1218,7 @@ _hier(inst_dir)
 	ci(auto_qmail_home, "etc/yum.repos.d", "IndiMail-SLE_10.repo", auto_uido, auto_gido, 0444);
 	ci(auto_qmail_home, "etc/yum.repos.d", "IndiMail-SLE_11.repo", auto_uido, auto_gido, 0444);
 	ci(auto_qmail_home, "etc/yum.repos.d", "IndiMail-SLE_11_SP1.repo", auto_uido, auto_gido, 0444);
+#endif
 	/*- */
 	ci(auto_qmail_home, "lib", "libcdb-1.0.so.0.0.0", auto_uido, auto_gido, 0755);
 	ci(auto_qmail_home, "lib", "libcdb.so", auto_uido, auto_gido, 0755);
@@ -1583,7 +1587,7 @@ _hier(inst_dir)
 void
 getversion_install_big_c()
 {
-	static char    *x = "$Id: hier.c,v 1.151 2010-07-14 15:11:54+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: hier.c,v 1.152 2010-07-14 15:37:04+05:30 Cprogrammer Exp mbhangui $";
 
 #ifdef INDIMAIL
 	x = sccsidh;
