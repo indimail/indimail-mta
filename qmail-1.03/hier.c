@@ -1,5 +1,8 @@
 /*
  * $Log: hier.c,v $
+ * Revision 1.151  2010-07-14 15:11:54+05:30  Cprogrammer
+ * removed obsolete files
+ *
  * Revision 1.150  2010-07-10 10:25:55+05:30  Cprogrammer
  * added portable echo
  *
@@ -1199,35 +1202,19 @@ _hier(inst_dir)
 	ci(auto_qmail_home, "etc", "wordlist.db", auto_uidv, auto_gidv, 0644);
 	/*- */
 	ci(auto_qmail_home, "etc/yum.repos.d", "IndiMail-CentOS_5.repo", auto_uido, auto_gido, 0444);
-	ci(auto_qmail_home, "etc/yum.repos.d", "IndiMail-Fedora_10.repo", auto_uido, auto_gido, 0444);
-	ci(auto_qmail_home, "etc/yum.repos.d", "IndiMail-Fedora_11.repo", auto_uido, auto_gido, 0444);
 	ci(auto_qmail_home, "etc/yum.repos.d", "IndiMail-Fedora_12.repo", auto_uido, auto_gido, 0444);
 	ci(auto_qmail_home, "etc/yum.repos.d", "IndiMail-Fedora_13.repo", auto_uido, auto_gido, 0444);
-	ci(auto_qmail_home, "etc/yum.repos.d", "IndiMail-Fedora_9.repo", auto_uido, auto_gido, 0444);
-	ci(auto_qmail_home, "etc/yum.repos.d", "IndiMail-Mandriva_2008.repo", auto_uido, auto_gido, 0444);
 	ci(auto_qmail_home, "etc/yum.repos.d", "IndiMail-Mandriva_2009.1.repo", auto_uido, auto_gido, 0444);
-	ci(auto_qmail_home, "etc/yum.repos.d", "IndiMail-Mandriva_2009.repo", auto_uido, auto_gido, 0444);
 	ci(auto_qmail_home, "etc/yum.repos.d", "IndiMail-Mandriva_2010.repo", auto_uido, auto_gido, 0444);
 	ci(auto_qmail_home, "etc/yum.repos.d", "IndiMail-openSUSE_10.3.repo", auto_uido, auto_gido, 0444);
 	ci(auto_qmail_home, "etc/yum.repos.d", "IndiMail-openSUSE_11.0.repo", auto_uido, auto_gido, 0444);
 	ci(auto_qmail_home, "etc/yum.repos.d", "IndiMail-openSUSE_11.1.repo", auto_uido, auto_gido, 0444);
 	ci(auto_qmail_home, "etc/yum.repos.d", "IndiMail-openSUSE_11.2.repo", auto_uido, auto_gido, 0444);
+	ci(auto_qmail_home, "etc/yum.repos.d", "IndiMail-openSUSE_11.3.repo", auto_uido, auto_gido, 0444);
 	ci(auto_qmail_home, "etc/yum.repos.d", "IndiMail-RHEL_5.repo", auto_uido, auto_gido, 0444);
 	ci(auto_qmail_home, "etc/yum.repos.d", "IndiMail-SLE_10.repo", auto_uido, auto_gido, 0444);
 	ci(auto_qmail_home, "etc/yum.repos.d", "IndiMail-SLE_11.repo", auto_uido, auto_gido, 0444);
-	ci(auto_qmail_home, "etc/yum.repos.d", "indium-CentOS_5.repo", auto_uido, auto_gido, 0444);
-	ci(auto_qmail_home, "etc/yum.repos.d", "indium-Fedora_10.repo", auto_uido, auto_gido, 0444);
-	ci(auto_qmail_home, "etc/yum.repos.d", "indium-Fedora_11.repo", auto_uido, auto_gido, 0444);
-	ci(auto_qmail_home, "etc/yum.repos.d", "indium-Fedora_12.repo", auto_uido, auto_gido, 0444);
-	ci(auto_qmail_home, "etc/yum.repos.d", "indium-Mandriva_2009.1.repo", auto_uido, auto_gido, 0444);
-	ci(auto_qmail_home, "etc/yum.repos.d", "indium-Mandriva_2010.repo", auto_uido, auto_gido, 0444);
-	ci(auto_qmail_home, "etc/yum.repos.d", "indium-openSUSE_10.3.repo", auto_uido, auto_gido, 0444);
-	ci(auto_qmail_home, "etc/yum.repos.d", "indium-openSUSE_11.0.repo", auto_uido, auto_gido, 0444);
-	ci(auto_qmail_home, "etc/yum.repos.d", "indium-openSUSE_11.1.repo", auto_uido, auto_gido, 0444);
-	ci(auto_qmail_home, "etc/yum.repos.d", "indium-openSUSE_11.2.repo", auto_uido, auto_gido, 0444);
-	ci(auto_qmail_home, "etc/yum.repos.d", "indium-RHEL_5.repo", auto_uido, auto_gido, 0444);
-	ci(auto_qmail_home, "etc/yum.repos.d", "indium-SLE_10.repo", auto_uido, auto_gido, 0444);
-	ci(auto_qmail_home, "etc/yum.repos.d", "indium-SLE_11.repo", auto_uido, auto_gido, 0444);
+	ci(auto_qmail_home, "etc/yum.repos.d", "IndiMail-SLE_11_SP1.repo", auto_uido, auto_gido, 0444);
 	/*- */
 	ci(auto_qmail_home, "lib", "libcdb-1.0.so.0.0.0", auto_uido, auto_gido, 0755);
 	ci(auto_qmail_home, "lib", "libcdb.so", auto_uido, auto_gido, 0755);
@@ -1596,7 +1583,7 @@ _hier(inst_dir)
 void
 getversion_install_big_c()
 {
-	static char    *x = "$Id: hier.c,v 1.150 2010-07-10 10:25:55+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: hier.c,v 1.151 2010-07-14 15:11:54+05:30 Cprogrammer Stab mbhangui $";
 
 #ifdef INDIMAIL
 	x = sccsidh;
