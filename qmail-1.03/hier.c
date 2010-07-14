@@ -1,5 +1,8 @@
 /*
  * $Log: hier.c,v $
+ * Revision 1.153  2010-07-14 15:57:56+05:30  Cprogrammer
+ * fixed libindimail-1.7.8
+ *
  * Revision 1.152  2010-07-14 15:37:04+05:30  Cprogrammer
  * commented out repo files for instcheck
  *
@@ -1226,7 +1229,7 @@ _hier(inst_dir)
 	ci(auto_qmail_home, "lib", "libeps.so", auto_uido, auto_gido, 0755);
 	ci(auto_qmail_home, "lib", "libflash-0.9.4.so.0.0.0", auto_uido, auto_gido, 0755);
 	ci(auto_qmail_home, "lib", "libflash.so", auto_uido, auto_gido, 0755);
-	ci(auto_qmail_home, "lib", "libindimail-1.7.7.so.0.0.0", auto_uido, auto_gido, 0755);
+	ci(auto_qmail_home, "lib", "libindimail-1.7.8.so.0.0.0", auto_uido, auto_gido, 0755);
 	ci(auto_qmail_home, "lib", "libindimail.so", auto_uido, auto_gido, 0755);
 	/*- */
 	ci(auto_qmail_home, "libexec", "overquota.sh", auto_uido, auto_gidq, 0555);
@@ -1587,7 +1590,7 @@ _hier(inst_dir)
 void
 getversion_install_big_c()
 {
-	static char    *x = "$Id: hier.c,v 1.152 2010-07-14 15:37:04+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: hier.c,v 1.153 2010-07-14 15:57:56+05:30 Cprogrammer Stab mbhangui $";
 
 #ifdef INDIMAIL
 	x = sccsidh;
