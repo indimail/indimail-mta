@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-qread.c,v $
+ * Revision 1.22  2010-07-14 22:54:29+05:30  Cprogrammer
+ * ability to toggle local, remote queues when displaying counts
+ *
  * Revision 1.21  2010-05-20 11:28:46+05:30  Cprogrammer
  * added queue count functionality of qmail-qstat
  *
@@ -246,7 +249,7 @@ putstats(int doCount)
 	outok("\n");
 }
 
-int             doLocal = 1, doRemote = 1, doTodo = 0, doCount = 0;
+int             doLocal = 0, doRemote = 0, doTodo = 0, doCount = 0;
 
 #ifdef MULTI_QUEUE
 static int
@@ -258,7 +261,6 @@ get_arguments(int argc, char **argv)
 	errflag = 0;
 	doTodo = 0;
 	doCount = 0;
-	doLocal = doRemote = 1;
 	while (!errflag && (c = getopt(argc, argv, "calrt")) != -1) {
 		switch (c)
 		{
@@ -271,18 +273,12 @@ get_arguments(int argc, char **argv)
 			doRemote = 1;
 			break;
 		case 'l':
-			doTodo = 0;
-			doRemote = 0;
 			doLocal = 1;
 			break;
 		case 'r':
-			doTodo = 0;
-			doLocal = 0;
 			doRemote = 1;
 			break;
 		case 't':
-			doRemote = 0;
-			doLocal = 0;
 			doTodo = 1;
 			break;
 		case 'h':
@@ -291,7 +287,7 @@ get_arguments(int argc, char **argv)
 			outok("\n\t");
 			outs("-a - Display local, remote and todo Queues");
 			outok("\n\t");
-			outs("-c - Display local, remote and todo Counts");
+			outs("-c - Display Counts");
 			outok("\n\t");
 			outs("-l - Display local  Queue");
 			outok("\n\t");
@@ -302,8 +298,8 @@ get_arguments(int argc, char **argv)
 			break;
 		}
 	}
-	if (doCount)
-		doLocal = doRemote = doTodo = 1;
+	if (!doTodo && !doLocal && !doRemote)
+		doLocal = doRemote = 1;
 	return(0);
 }
 #endif
@@ -313,30 +309,36 @@ putcounts(char *pre_str, int lCount, int rCount, int bCount, int tCount)
 {
 	char            foo[FMT_ULONG];
 
+	if (doLocal) {
 	if (pre_str)
 		outs(pre_str);
 	outs("Messages in local  queue: ");
 	foo[fmt_ulong(foo, lCount)] = 0;
 	outs(foo);
 	outok("\n");
+	}
+	if (doRemote) {
 	if (pre_str)
 		outs(pre_str);
 	outs("Messages in remote queue: ");
 	foo[fmt_ulong(foo, rCount)] = 0;
 	outs(foo);
 	outok("\n");
+	}
 	if (pre_str)
 		outs(pre_str);
 	outs("Messages in bounce queue: ");
 	foo[fmt_ulong(foo, bCount)] = 0;
 	outs(foo);
 	outok("\n");
+	if (doTodo) {
 	if (pre_str)
 		outs(pre_str);
 	outs("Messages in todo   queue: ");
 	foo[fmt_ulong(foo, tCount)] = 0;
 	outs(foo);
 	outok("\n");
+	}
 }
 
 stralloc        line = { 0 };
@@ -539,6 +541,7 @@ main(int argc, char **argv)
 		substdio_flush(subfdout);
 		return(1);
 	}
+	printf("%d %d\n", doLocal, doRemote);
 	if (chdir(auto_qmail))
 		die_home();
 	if (!(qbase = env_get("QUEUE_BASE"))) {
@@ -606,7 +609,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_qread_c()
 {
-	static char    *x = "$Id: qmail-qread.c,v 1.21 2010-05-20 11:28:46+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: qmail-qread.c,v 1.22 2010-07-14 22:54:29+05:30 Cprogrammer Stab mbhangui $";
 
 #ifdef INDIMAIL
 	x = sccsidh;
