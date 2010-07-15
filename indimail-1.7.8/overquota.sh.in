@@ -2,6 +2,9 @@
 # WARNING: This file was auto-generated. Do not edit!
 #
 # $Log: overquota.sh.in,v $
+# Revision 2.2  2010-07-15 13:53:14+05:30  Cprogrammer
+# skip generation of mails when address is a maildir
+#
 # Revision 2.1  2010-03-22 14:39:13+05:30  Cprogrammer
 # sample overquota script
 #
@@ -11,6 +14,10 @@ domain=`echo $1 | cut -d@ -f2`
 if [ " $domain" = " " ] ; then
 	domain=`cat @indimaildir@/control/me`
 fi
+f_char=`echo $1 | cut -c1`
+if [ " $f_char" = " /" ] ; then
+	exit 0
+fi
 (
 case $arg_count in
 	#
@@ -18,7 +25,7 @@ case $arg_count in
 	#
 	5)
 		echo "From: postmaster@`cat @indimaildir@/control/me`"
-		echo "To: Owner of address $1"
+		echo "To: \"Owner of address\" <$1>"
 		echo "Subject: [Warning] Your Daily Limit has been exceeded"
 		echo ""
 		echo "Dear User"
@@ -32,7 +39,7 @@ case $arg_count in
 	# address curMessSize totalCurUsage totalCurCount maildirquota "dummy"
 	#
 		echo "From: postmaster@`cat @indimaildir@/control/me`"
-    	echo "To: Owner of address $1"
+    	echo "To: \"Owner of address\" <$1>"
 		echo "Subject: [Warning] Your Mail Box is overquota"
 		echo ""
 		echo "Dear User"
@@ -62,5 +69,5 @@ esac
 echo ""
 echo "Regards,"
 echo ""
-) | @indimaildir@/bin/sendmail.sh $1
+) | @indimaildir@/bin/sendmail $1
 exit 0 
