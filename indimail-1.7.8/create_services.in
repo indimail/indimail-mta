@@ -1,5 +1,8 @@
 #!/bin/sh
 # $Log: create_services.in,v $
+# Revision 2.45  2010-07-15 15:17:50+05:30  Cprogrammer
+# disable MAILSIZE_LIMIT
+#
 # Revision 2.44  2010-07-07 11:51:28+05:30  Cprogrammer
 # added --fdpass option to clamdscan
 # added indimail startup
@@ -155,7 +158,7 @@ indimaildir=@indimaildir@
 # End USER Configuration OPTIONS
 #
 
-# $Id: create_services.in,v 2.44 2010-07-07 11:51:28+05:30 Cprogrammer Exp mbhangui $
+# $Id: create_services.in,v 2.45 2010-07-15 15:17:50+05:30 Cprogrammer Stab mbhangui $
 
 usage()
 {
@@ -346,7 +349,7 @@ do
 		e_opt="--skipsend --authsmtp --antispoof"
 	else
 		e_opt="--remote-authsmtp=plain --localfilter --remotefilter"
-		e_opt="$e_opt --deliverylimit-count=-1"
+		e_opt="$e_opt --deliverylimit-count=-1 --deliverylimit-size=-1"
 		e_opt="$e_opt --rbl=-rzen.spamhaus.org --rbl=-rdnsbl-1.uceprotect.net"
 	fi
 	if [ $nobogofilter -eq 0 ] ; then

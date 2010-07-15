@@ -1,5 +1,8 @@
 #
 # $Log: indimail.spec.in,v $
+# Revision 2.191  2010-07-15 15:18:16+05:30  Cprogrammer
+# disable MAILSIZE_LIMIT
+#
 # Revision 2.190  2010-07-14 14:20:12+05:30  Cprogrammer
 # upgraded to bogofilter-1.2.2
 #
@@ -598,7 +601,7 @@
 # rpm spec file for indimail
 #
 #
-# $Id: indimail.spec.in,v 2.190 2010-07-14 14:20:12+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 2.191 2010-07-15 15:18:16+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %define _unpackaged_files_terminate_build 1
 
@@ -2626,7 +2629,7 @@ do
 			spamfilter=1
 		fi
 		extra_opt="--remote-authsmtp=plain --localfilter --remotefilter"
-		extra_opt="$extra_opt --deliverylimit-count=-1"
+		extra_opt="$extra_opt --deliverylimit-count=-1 --deliverylimit-size=-1"
 		extra_opt="$extra_opt --rbl=-rzen.spamhaus.org --rbl=-rdnsbl-1.uceprotect.net"
 	fi
 	if [ $spamfilter -eq 1 ] ; then
