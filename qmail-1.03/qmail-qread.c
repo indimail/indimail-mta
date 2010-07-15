@@ -1,6 +1,6 @@
 /*
  * $Log: qmail-qread.c,v $
- * Revision 1.22  2010-07-14 22:54:29+05:30  Cprogrammer
+ * Revision 1.22  2010-07-15 08:24:44+05:30  Cprogrammer
  * ability to toggle local, remote queues when displaying counts
  *
  * Revision 1.21  2010-05-20 11:28:46+05:30  Cprogrammer
@@ -541,7 +541,6 @@ main(int argc, char **argv)
 		substdio_flush(subfdout);
 		return(1);
 	}
-	printf("%d %d\n", doLocal, doRemote);
 	if (chdir(auto_qmail))
 		die_home();
 	if (!(qbase = env_get("QUEUE_BASE"))) {
@@ -609,7 +608,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_qread_c()
 {
-	static char    *x = "$Id: qmail-qread.c,v 1.22 2010-07-14 22:54:29+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: qmail-qread.c,v 1.22 2010-07-15 08:24:44+05:30 Cprogrammer Stab mbhangui $";
 
 #ifdef INDIMAIL
 	x = sccsidh;
