@@ -394,7 +394,7 @@ the installation.
     % gunzip -c qmail-1.03.tar.gz | tar xf -
     % gunzip -c indimail-@version@/patches/qmail-1.03.patch.gz | patch -p0
 
-    change first line in conf-qmail to @indimaildir@
+    change first line in qmail-1.03/conf-qmail to @indimaildir@
 
     % cd indimail-@version@
     % ./configure \
@@ -455,10 +455,10 @@ the installation.
     % sudo make -s install-strip [DESTDIR=staging_directory]
     % cd ..
 
-    You can omit DESTDIR=staging_directory if you do not have a running indimail system or
+    You can omit DESTDIR=staging_directory if you do not have a running indimail system.
     Staged installation is required if you have a running indimail system. Staged installation
-    installs indimail in a staging are which you will have to manually copy to the production
-    directories after shutting down indimail
+    installs indimail in a staging area. You will have to manually copy the staging area to the
+    production directories, after shutting down indimail
 
     The above 'sudo make -s install-strip' installs indimail.
     'sudo make -s install-strip' also shuts down indimail (if running). You may want to start

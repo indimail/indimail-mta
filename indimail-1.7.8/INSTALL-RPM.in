@@ -71,7 +71,7 @@ available rpm for MySQL from www.mysql.com
 1) Package Install Instruction
    ---------------------------
    % sudo rpm -ivh indimail-@version@-1.i386
-   % sudo dpkg -i indiamil-@version@-1.deb
+   % sudo dpkg -i indimail-@version@-1.deb
 
 2) Package Upgrade Instruction
    ---------------------------
@@ -81,7 +81,7 @@ available rpm for MySQL from www.mysql.com
 3) Package Removal Instrucation
    ----------------------------
    % sudo rpm -e indimail-@version@-1.i386
-   % sudo dpkg -r indiamil-@version@-1.deb
+   % sudo dpkg -r indimail-@version@-1.deb
 
 Start IndiMail Services
 -----------------------
