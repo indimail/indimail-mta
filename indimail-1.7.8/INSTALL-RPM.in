@@ -16,7 +16,8 @@ IndiMail also has yum repositories for RPM of most of the Linux Distros at
 
 http://download.opensuse.org/repositories/home:/indimail/
 
-The latest RPM (for yet to be released version) can be found at
+The latest RPM (for yet to be released version and can have untested code) can be found at
+
 http://download.opensuse.org/repositories/home:/mbhangui/
 
 What the RPM does
