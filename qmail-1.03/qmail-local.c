@@ -1,7 +1,7 @@
 /*
  * $Log: qmail-local.c,v $
- * Revision 1.21  2010-07-13 18:22:11+05:30  Cprogrammer
- * removed commented out code
+ * Revision 1.21  2010-07-16 14:12:15+05:30  Cprogrammer
+ * formatted code and comments
  *
  * Revision 1.20  2009-12-05 20:07:40+05:30  Cprogrammer
  * ansic conversion
@@ -195,8 +195,8 @@ fmt_xlong(s, u)
  * to collisions between Maildir-style filenames, which must 
  * be unique and non-repeatable within one second.
  * 
- * This patch is just a means of updating qmail-local to use 
- * the format of the revised Maildir protocol, available at:
+ * This uses the format of the revised Maildir protocol,
+ * available at:
  * 
  * http://cr.yp.to/proto/maildir.html
  * 
@@ -393,9 +393,7 @@ fail:
 	}
 }
 
-/*
- * end child process 
- */
+/*- end child process */
 
 void
 maildir(char *fn)
@@ -1124,11 +1122,12 @@ main(int argc, char **argv)
 				if (flagforwardonly)
 					strerr_die1x(111, "Uh-oh: .qmail has file delivery but has x bit set. (#4.7.0)");
 				if (cmds.s[k - 1] == '/')
+				{
 					if (flagdoit)
 						maildir(cmds.s + i);
 					else
 						sayit("maildir ", cmds.s + i, k - i);
-				else
+				} else
 				if (flagdoit)
 					mailfile(cmds.s + i);
 				else
@@ -1179,7 +1178,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_local_c()
 {
-	static char    *x = "$Id: qmail-local.c,v 1.21 2010-07-13 18:22:11+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: qmail-local.c,v 1.21 2010-07-16 14:12:15+05:30 Cprogrammer Stab mbhangui $";
 
 	x++;
 }
