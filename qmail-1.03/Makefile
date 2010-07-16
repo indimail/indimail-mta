@@ -2137,18 +2137,18 @@ dk-filter.8: dk-filter.9
 qmail-remote: \
 load qmail-remote.o control.o constmap.o timeoutread.o timeoutwrite.o base64sub.o \
 timeoutconn.o tcpto.o now.o dns.o ip.o ipalloc.o strsalloc.o ipme.o quote.o variables.o \
-socket_ip4loopback.o socket_v6loopback.o socket_v6any.o \
+error_str.o socket_ip4loopback.o socket_v6loopback.o socket_v6any.o \
 ndelay.a case.a sig.a open.a lock.a seek.a getln.a stralloc.a alloc.a \
-socket_v4mappedprefix.o scan_xlong.o socket_tcp.o socket_tcp6.o \
-substdio.a error.a str.a fs.a cdb.a auto_qmail.o envread.o dns.lib socket.lib error_str.o \
+socket_v4mappedprefix.o scan_xlong.o socket_tcp.o socket_tcp6.o wait_pid.o \
+substdio.a str.a fs.a cdb.a auto_qmail.o envread.o error.a dns.lib socket.lib \
 tls.lib
 	./load qmail-remote control.o constmap.o timeoutread.o base64sub.o \
 	timeoutwrite.o timeoutconn.o tcpto.o now.o dns.o ip.o scan_xlong.o \
 	socket_ip4loopback.o socket_v6loopback.o socket_v6any.o ipalloc.o \
-	socket_v4mappedprefix.o strsalloc.o ipme.o quote.o \
+	error_str.o socket_v4mappedprefix.o strsalloc.o ipme.o quote.o wait_pid.o \
 	variables.o socket_tcp.o socket_tcp6.o ndelay.a case.a sig.a open.a \
-	lock.a seek.a getln.a stralloc.a alloc.a substdio.a error.a \
-	str.a fs.a cdb.a auto_qmail.o envread.o error_str.o `cat dns.lib socket.lib \
+	lock.a seek.a getln.a stralloc.a alloc.a substdio.a \
+	str.a fs.a cdb.a auto_qmail.o envread.o error.a `cat dns.lib socket.lib \
 	tls.lib`
 
 qmail-remote.0: \
@@ -2167,7 +2167,8 @@ auto_qmail.h control.h dns.h alloc.h quote.h ip.h ipalloc.h \
 ipme.h cdb.h open.h base64.h gen_allocdefs.h str.h now.h \
 datetime.h exit.h constmap.h tcpto.h timeoutconn.h timeoutread.h \
 timeoutwrite.h env.h uint32.h haveip6.h socket.h variables.h \
-byte.h fmt.h conf-tls conf-ip conf-batv conf-mxps hasindimail.h
+byte.h fmt.h conf-tls conf-ip conf-batv conf-mxps wait.h \
+hasindimail.h
 	./compile `grep -h -v "^#" conf-tls conf-ip conf-mxps conf-batv` qmail-remote.c
 
 qmail-rspawn: \
