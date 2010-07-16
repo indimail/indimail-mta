@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-remote.c,v $
+ * Revision 1.63  2010-07-16 15:41:02+05:30  Cprogrammer
+ * execute script on successful delivery
+ *
  * Revision 1.62  2010-07-08 21:53:42+05:30  Cprogrammer
  * domainbindings based on envelope sender address
  *
@@ -233,6 +236,7 @@
 #include "fmt.h"
 #include "socket.h"
 #include "base64.h"
+#include "wait.h"
 #include <unistd.h>
 #ifdef TLS
 #include <sys/stat.h>
@@ -283,6 +287,8 @@ struct ip_mx    partner;
 union v46addr   outip;
 static int      inside_greeting = 0;
 static char    *msgsize, *use_auth_smtp;
+char          **my_argv;
+int             my_argc;
 #ifdef TLS
 const char     *ssl_err_str = 0;
 #endif
@@ -312,6 +318,91 @@ out(char *s)
 }
 
 void
+my_error(char *s1, char *s2, char *s3)
+{
+	if (substdio_puts(subfderr, s1) == -1)
+		_exit(0);
+	if (s2)
+	{
+		if (substdio_puts(subfderr, ": ") == -1)
+			_exit(0);
+		if (substdio_puts(subfderr, s2) == -1)
+			_exit(0);
+	}
+	if (s3)
+	{
+		if (substdio_puts(subfderr, ": ") == -1)
+			_exit(0);
+		if (substdio_puts(subfderr, s3) == -1)
+			_exit(0);
+	}
+	if (substdio_puts(subfderr, ": ") == -1)
+		_exit(0);
+	if (substdio_puts(subfderr, error_str(errno)) == -1)
+		_exit(0);
+	if (substdio_puts(subfderr, "\n") == -1)
+		_exit(0);
+}
+
+int
+success()
+{
+	char           *prog, **args;
+	int             child, wstat, i;
+
+	if (!(prog = env_get("ONSUCCESS_REMOTE")))
+		return (0);
+	if (!(args = (char **) alloc(my_argc + 1)))
+	{
+		my_error("alert: Out of memory", 0, 0);
+		_exit (1);
+	}
+	switch (child = fork())
+	{
+	case -1:
+		my_error("alert: fork failed", 0, 0);
+		_exit(0);
+		return (1);
+	case 0:
+		if (!stralloc_0(&host))
+		{
+			my_error("alert: Out of memory", 0, 0);
+			_exit (1);
+		} else
+		if (!stralloc_0(&sender))
+		{
+			my_error("alert: Out of memory", 0, 0);
+			_exit (1);
+		} else
+		if (!stralloc_0(&qqeh))
+		{
+			my_error("alert: Out of memory", 0, 0);
+			_exit (1);
+		}
+		args[0] = prog;
+		args[1] = host.s;
+		args[2] = sender.s;
+		args[3] = qqeh.s;
+		args[4] = msgsize;
+		for (i = 5;i < my_argc;i++)
+			args[i] = my_argv[i];
+		args[i] = 0;
+		execv(*args, args);
+		my_error("alert: Unable to run", prog, 0);
+		_exit (1);
+	}
+	wait_pid(&wstat, child);
+	if (wait_crashed(wstat))
+	{
+		my_error("alert", prog, "crashed");
+		_exit (1);
+	}
+	_exit (wait_exitcode(wstat));
+	/* Not reached */
+	return (1);
+}
+
+void
 zero()
 {
 	if (substdio_put(subfdoutsmall, "\0", 1) == -1)
@@ -319,10 +410,12 @@ zero()
 }
 
 void
-zerodie()
+zerodie(int succ)
 {
 	zero();
 	substdio_flush(subfdoutsmall);
+	if (succ)
+		success();
 	_exit(0);
 }
 
@@ -355,70 +448,70 @@ temp_noip()
 	out("Zinvalid ipaddr in ");
 	out(controldir);
 	out("/outgoingip (#4.3.0)\n");
-	zerodie();
+	zerodie(0);
 }
 
 void
 temp_nomem()
 {
 	out("ZOut of memory. (#4.3.0)\n");
-	zerodie();
+	zerodie(0);
 }
 
 void
 temp_oserr()
 {
 	out("ZSystem resources temporarily unavailable. (#4.3.0)\n");
-	zerodie();
+	zerodie(0);
 }
 
 void
 temp_read()
 {
 	out("ZUnable to read message. (#4.3.0)\n");
-	zerodie();
+	zerodie(0);
 }
 
 void
 temp_dnscanon()
 {
 	out("ZCNAME lookup failed temporarily. (#4.4.3)\n");
-	zerodie();
+	zerodie(0);
 }
 
 void
 temp_dns()
 {
 	out("ZSorry, I couldn't find any host by that name. (#4.1.2)\n");
-	zerodie();
+	zerodie(0);
 }
 
 void
 temp_chdir()
 {
 	out("ZUnable to switch to home directory. (#4.3.0)\n");
-	zerodie();
+	zerodie(0);
 }
 
 void
 temp_control()
 {
 	out("ZUnable to read control files. (#4.3.0)\n");
-	zerodie();
+	zerodie(0);
 }
 
 void
 perm_partialline()
 {
 	out("DSMTP cannot transfer messages with partial final lines. (#5.6.2)\n");
-	zerodie();
+	zerodie(0);
 }
 
 void
 perm_usage()
 {
 	out("DI (qmail-remote) was invoked improperly. (#5.3.5)\n");
-	zerodie();
+	zerodie(0);
 }
 
 void
@@ -427,14 +520,14 @@ perm_dns()
 	out("DSorry, I couldn't find any host named ");
 	outsafe(&host);
 	out(". (#5.1.2)\n");
-	zerodie();
+	zerodie(0);
 }
 
 void
 perm_nomx()
 {
 	out("DSorry, I couldn't find a mail exchanger or IP address. (#5.4.4)\n");
-	zerodie();
+	zerodie(0);
 }
 
 void
@@ -448,7 +541,7 @@ perm_ambigmx()
 	out("DSorry. Although I'm listed as a best-preference MX or A for that host,\nit isn't in my ");
 	out(controldir);
 	out("/locals file, so I don't treat it as local. (#5.4.6)\n");
-	zerodie();
+	zerodie(0);
 }
 
 void
@@ -503,7 +596,7 @@ dropped()
 	}
 #endif
 	out("(#4.4.2)\n");
-	zerodie();
+	zerodie(0);
 }
 
 void
@@ -528,7 +621,7 @@ temp_noconn(stralloc *h, char *ip, int port)
 		alloc_free(ip);
 	}
 	out(". (#4.4.1)\n");
-	zerodie();
+	zerodie(0);
 }
 
 void
@@ -549,13 +642,13 @@ temp_qmtp_noconn(stralloc *h, char *ip, int port)
 		alloc_free(ip);
 	}
 	out(". (#4.4.1)\n");
-	zerodie();
+	zerodie(0);
 }
 
 void
 err_authprot()
 {
-	out("Kno supported AUTH method found, continuing without authentication.\n");
+	out("Jno supported AUTH method found, continuing without authentication.\n");
 	zero();
 	substdio_flush(subfdoutsmall);
 }
@@ -765,7 +858,7 @@ quit(char *prepend, char *append, int die)
 	substdio_putsflush(&smtpto, "QUIT\r\n");
 #endif
 	/*- waiting for remote side is just too ridiculous */
-	out(prepend);
+	out(prepend[0] == 'J' ? "K" : prepend);
 	outhost();
 	out(append);
 	out(".\n");
@@ -803,7 +896,7 @@ quit(char *prepend, char *append, int die)
 	}
 #endif
 	if (die)
-		zerodie();
+		zerodie(*prepend == 'K' ? 1 : 0);
 	else
 	{
 		zero();
@@ -1353,7 +1446,7 @@ smtp_auth(char *type, int use_size)
 void temp_proto()
 {
 	out("Zrecipient did not talk proper QMTP (#4.3.0)\n");
-	zerodie();
+	zerodie(0);
 }
 
 #ifdef MXPS
@@ -1484,7 +1577,7 @@ qmtp(stralloc *h, char *ip, int port)
 		outhost();
 		out(" accepted message - Protocol QMTP\n");
 	}
-	zerodie();
+	zerodie(flagallok);
 }
 
 stralloc         helo_str = { 0 };
@@ -2001,6 +2094,7 @@ timeoutconn46(int fd, struct ip_mx *ix, union v46addr *ip, int port, int timeout
 }
 
 /*
+ * argv[0] - qmail-remote
  * argv[1] - Recipient SMTP Domain/host
  * argv[2] - Sender
  * argv[3] - qqeh
@@ -2019,6 +2113,8 @@ main(int argc, char **argv)
 	sig_pipeignore();
 	if (argc < 5)
 		perm_usage();
+	my_argc = argc;
+	my_argv = argv;
 	if (chdir(auto_qmail) == -1)
 		temp_chdir();
 	if (!stralloc_copys(&host, argv[1])) /*- host required by getcontrols below */
@@ -2291,7 +2387,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_remote_c()
 {
-	static char    *x = "$Id: qmail-remote.c,v 1.62 2010-07-08 21:53:42+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: qmail-remote.c,v 1.63 2010-07-16 15:41:02+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
