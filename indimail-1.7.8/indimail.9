@@ -442,12 +442,11 @@ ENVRULES          |qmail-smtpd  |used    |Any environment variable(s) can be set
                   |             |        |RELAYCLIENT, QQEH, BADEXT,
                   |             |        |BADEXTPATTERNS, ACCESSLIST, QHPSI,
                   |             |        |REJECTSPAM, REJECTVIRUS
-                  |             |        |spawn-filter
-                  |             |        |SPAMFILTER, LOGFILTER, SPAMFILTERARGS,
+                  |spawn-filter |        |SPAMFILTER, LOGFILTER, SPAMFILTERARGS,
                   |             |        |FILTERARGS, SPAMEXITCODE, REJECTSPAM,
                   |             |        |SPAMREDIRECT, SPAMIGNORE,
                   |             |        |SPAMIGNOREPATTERNS, QREGEX, DATABYTES,
-                  |             |        |SMTPROUTE
+                  |             |        |SMTPROUTE, ONSUCCESS_REMOTE
 ------------------|-------------|--------|----------------------------------------
 QREGEX            |qmail-smtpd  |used    |If set, regex is used to evaluate
                   |spawn-filter |        |patterns in
@@ -567,6 +566,13 @@ QMAILLOCAL        |spawn-filter |used    |The mda to call for local deliveries
 QMAILREMOTE       |spawn-filter |used    |The smtp client to call for remote
                   |             |        |deliveries (default qmail-remote if
                   |             |        |not defined)
+------------------|-------------|--------|----------------------------------------
+ONSUCCESS_REMOTE  |qmail-remote |used    |if set, program defined by
+                  |             |        |ONSUCCESS_REMOTE gets called on
+                  |             |        |successful remote deliveries. The argument
+                  |             |        |passed to this program are same as that
+                  |             |        |for qmail-remote. The program runs as uid
+                  |             |        |qmailr.
 ------------------|-------------|--------|----------------------------------------
 DEFAULT           |qmail-command|set     |Portion of address matching "-default"
                   |             |        |in a .qmail file name.
