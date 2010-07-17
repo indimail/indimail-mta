@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-remote.c,v $
+ * Revision 1.64  2010-07-17 16:21:32+05:30  Cprogrammer
+ * use qmail-remote as argv0 when executing ONSUCCESS_REMOTE program
+ *
  * Revision 1.63  2010-07-16 15:41:02+05:30  Cprogrammer
  * execute script on successful delivery
  *
@@ -379,15 +382,11 @@ success()
 			my_error("alert: Out of memory", 0, 0);
 			_exit (1);
 		}
-		args[0] = prog;
-		args[1] = host.s;
-		args[2] = sender.s;
-		args[3] = qqeh.s;
-		args[4] = msgsize;
-		for (i = 5;i < my_argc;i++)
+		/*- copy all arguments */
+		for (i = 0;i < my_argc;i++)
 			args[i] = my_argv[i];
 		args[i] = 0;
-		execv(*args, args);
+		execv(prog, args);
 		my_error("alert: Unable to run", prog, 0);
 		_exit (1);
 	}
@@ -2387,7 +2386,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_remote_c()
 {
-	static char    *x = "$Id: qmail-remote.c,v 1.63 2010-07-16 15:41:02+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-remote.c,v 1.64 2010-07-17 16:21:32+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
