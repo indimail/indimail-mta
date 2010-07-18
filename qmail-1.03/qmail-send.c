@@ -1,7 +1,8 @@
 /*
  * $Log: qmail-send.c,v $
- * Revision 1.45  2010-06-27 09:08:04+05:30  Cprogrammer
- * report all recipients in log_stat() for single transaction multiple recipient emails
+ * Revision 1.45  2010-07-18 19:20:18+05:30  Cprogrammer
+ * report all recipients in log_stat()
+ * added startup plugins functionality
  *
  * Revision 1.44  2009-09-01 22:03:10+05:30  Cprogrammer
  * added Bounce Address Tag Validation (BATV) code
@@ -98,6 +99,7 @@
 #include <unistd.h>
 #include <ctype.h>
 #include <utime.h>
+#include <dlfcn.h>
 #include <sys/stat.h>
 #include "sig.h"
 #include "direntry.h"
@@ -2596,6 +2598,13 @@ main()
 #ifndef EXTERNAL_TODO
 	char           *ptr;
 #endif
+	/*- startup plugins */
+	void           *handle;
+	int             i, status, len;
+	int             (*func) (void);
+	char            strnum[FMT_ULONG];
+	char           *error, *start_plugin, *plugin_symb, *plugindir, *ptr, *plugin_ptr, *end;
+	stralloc        plugin = { 0 }, splugin = { 0 };
 
 	if (chdir(auto_qmail) == -1)
 	{
@@ -2620,6 +2629,79 @@ main()
 		log1("alert: cannot start: unable to read controls\n");
 		_exit(111);
 	}
+	if (!(plugindir = env_get("PLUGINDIR")))
+		plugindir = "plugins";
+	if (plugindir[i = str_chr(plugindir, '/')])
+	{
+		log1("alert: plugindir cannot have an absolute path\n");
+		_exit(111);
+	}
+	if (!(plugin_symb = env_get("START_PLUGIN_SYMB")))
+		plugin_symb = "startup";
+	if (!(start_plugin = env_get("START_PLUGIN")))
+		start_plugin = "qmail-send.so";
+	if (!stralloc_copyb(&splugin, start_plugin, (len = str_len(start_plugin))))
+		nomem();
+	if (!stralloc_0(&splugin))
+		nomem();
+	end = splugin.s + len;
+	for (ptr = plugin_ptr = splugin.s;;ptr++)
+	{
+		if (*ptr != ' ' && ptr != end)
+			continue;
+		if (ptr != end)
+			*ptr = 0;
+		if (!stralloc_copys(&plugin, auto_qmail))
+			nomem();
+		if (!stralloc_append(&plugin, "/"))
+			nomem();
+		if (!stralloc_cats(&plugin, plugindir))
+			nomem();
+		if (!stralloc_append(&plugin, "/"))
+			nomem();
+		if (!stralloc_cats(&plugin, plugin_ptr))
+			nomem();
+		if (!stralloc_0(&plugin))
+			nomem();
+		if (ptr != end)
+			plugin_ptr = ptr + 1;
+		if (access(plugin.s, F_OK))
+		{
+			if (ptr == end)
+				break;
+			else
+				continue;
+		}
+		if (!(handle = dlopen(plugin.s, RTLD_LAZY|RTLD_GLOBAL)))
+		{
+			log5("alert: dlopen failed for ", plugin.s, ": ", dlerror(), "\n");
+			_exit(111);
+		}
+		dlerror(); /*- man page told me to do this */
+		func = dlsym(handle, plugin_symb);
+		if ((error = dlerror()))
+		{
+			log5("alert: dlsym ", plugin_symb, " failed: ", error, "\n");
+			_exit(111);
+		}
+		log3("status: qmail-send executing function ", plugin_symb, "\n");
+		if ((status = (*func) ()))
+		{
+			strnum[fmt_ulong(strnum, status)] = 0;
+			log5("alert: function ", plugin_symb, " failed with status ", strnum, "\n");
+		}
+		if (dlclose(handle))
+		{
+			log5("dlclose for ", plugin.s, "failed: ", error, "\n");
+			_exit(111);
+		}
+		if (ptr == end)
+			break;
+		if (status)
+			break;
+	}
+	if (status)
+		_exit(status);
 	if (!(queuedir = env_get("QUEUEDIR")))
 #ifdef INDIMAIL
 		queuedir = "queue1";
@@ -2749,7 +2831,7 @@ main()
 void
 getversion_qmail_send_c()
 {
-	static char    *x = "$Id: qmail-send.c,v 1.45 2010-06-27 09:08:04+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: qmail-send.c,v 1.45 2010-07-18 19:20:18+05:30 Cprogrammer Exp mbhangui $";
 
 #ifdef INDIMAIL
 	x = sccsidh;

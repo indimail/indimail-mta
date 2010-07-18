@@ -465,7 +465,9 @@ EXTRAQUEUE        |qmail-queue  |used    |Extra recipient to be added to the
 QHPSI             |qmail-queue  |used    |If set enables the Qmail High
                   |             |        |Performance Scanner Interface. This
                   |             |        |should be set to the path of the virus
-                  |             |        |scanner.
+                  |             |        |scanner. It can also be set to a list of
+                  |             |        |space separted plugins starting with the
+                  |             |        |keyword plugin:
 QHPSIRC           |qmail-queue  |used    |To specify the return code of the virus
                   |             |        |scanner in case of an infection;
                   |             |        |default is 1.
@@ -510,16 +512,17 @@ REMOVEHEADERS     |qmail-queue  |used    |Name of control file containing a list
                   |             |        |before putting into the queue. If not 
                   |             |        |supplied, qmail-queue uses the control
                   |             |        |file removeheaders.
-PLUGINDIR         |qmail-queue  |used    |Directory in /var/indimail containing
-                  |             |        |dynamically loadable virus scanner
-                  |             |        |plugins
-VIRUS_PLUGIN      |qmail-queue  |used    |The function to be called when a
-                  |             |        |dynamic virus scanner plugin is loaded
 QQEH              |qmail-queue  |used    |qmail-queue passes this variable into
                   |qmail-local  |        |the queue. qmail-local and qmail-remote
                   |forward      |        |will prepend it to the headers of email
                   |condredirect |        |when it is delivered
-                  |             |        |
+PLUGINDIR         |qmail-queue  |used    |Directory in /var/indimail containing
+                  |qmail-send   |        |dynamically loadable plugins
+QUEUE_PLUGIN_SYMB |qmail-queue  |used    |The function to be called when a
+                  |             |        |dynamic virus scanner plugin is loaded
+START_PLUGIN      |qmail-send   |used    |List of startup plugins to be loaded
+START_PLUGIN_SYMB |qmail-send   |used    |function to be executed from the loaded
+                  |qmail-send   |used    |plugins
 ------------------|-------------|--------|----------------------------------------
 QUEUE_COUNT       |qmail-multi  |used    |No of queues setup
 QUEUE_START       |qmail-multi  |used    |Number denoting the first queue

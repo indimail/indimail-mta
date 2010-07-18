@@ -2211,7 +2211,7 @@ wildmat.o env.a str.a libsyncdir.a
 	case_lowerb.o envrules.o matchregex.o \
 	datetime.a case.a ndelay.a getln.a \
 	wait.a seek.a fd.a sig.a open.a lock.a stralloc.a alloc.a \
-	substdio.a error.a fs.a env.a str.a -L. -lsyncdir
+	substdio.a error.a fs.a env.a str.a -L. -lsyncdir -ldl
 
 qmail-send.0: \
 qmail-send.8
