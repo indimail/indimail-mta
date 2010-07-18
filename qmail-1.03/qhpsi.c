@@ -1,5 +1,8 @@
 /*
  * $Log: qhpsi.c,v $
+ * Revision 1.5  2010-07-18 19:17:27+05:30  Cprogrammer
+ * renamed QUEUE_PLUGIN to QUEUE_PLUGIN_SYMB
+ *
  * Revision 1.4  2009-12-09 23:57:04+05:30  Cprogrammer
  * additional closeflag argument to uidinit()
  *
@@ -40,7 +43,7 @@ main(int argc, char **argv)
 	int             childrc = -1, i, u, flaglog = 0;
 	void           *handle;
 	int             (*func) (char *);
-	char           *messfn, *error, *queue_plugin, *plugindir;
+	char           *messfn, *error, *queue_plugin_symbol, *plugindir;
 	stralloc        plugin = { 0 };
 
 	if (uidinit(0) == -1)
@@ -63,8 +66,8 @@ main(int argc, char **argv)
 			plugindir = "plugins";
 		if (plugindir[i = str_chr(plugindir, '/')])
 			_exit(87);
-		if (!(queue_plugin = env_get("QUEUE_PLUGIN")))
-			queue_plugin = "virusscan";
+		if (!(queue_plugin_symbol = env_get("QUEUE_PLUGIN_SYMB")))
+			queue_plugin_symbol = "virusscan";
 		messfn = argv[0] + 7;
 		for (u = 1; argv[u]; u++)
 		{
@@ -96,21 +99,22 @@ main(int argc, char **argv)
 				_exit(57);
 			}
 			dlerror(); /*- man page told me to do this */
-			func = dlsym(handle, queue_plugin);
+			func = dlsym(handle, queue_plugin_symbol);
 			if ((error = dlerror()))
 			{
 				if (flaglog)
 					strerr_die(58, FATAL, "dlsym: ", plugin.s, ": ", error, 0, 0, 0, (struct strerr *) 0);
 				_exit(58);
 			}
-			if ((childrc = (*func) (messfn)))
-				break;
+			childrc = (*func) (messfn); /*- execute the function */
 			if (dlclose(handle))
 			{
 				if (flaglog)
 					strerr_die(59, FATAL, "dlclose: ", plugin.s, ": ", error, 0, 0, 0, (struct strerr *) 0);
 				_exit(59);
 			}
+			if (childrc)
+				break;
 		}
 		_exit(childrc);
 	} else
@@ -129,6 +133,6 @@ main(int argc, char **argv)
 void
 getversion_qmail_qhpsi_c()
 {
-	static char    *x = "$Id: qhpsi.c,v 1.4 2009-12-09 23:57:04+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: qhpsi.c,v 1.5 2010-07-18 19:17:27+05:30 Cprogrammer Exp mbhangui $";
 	x++;
 }

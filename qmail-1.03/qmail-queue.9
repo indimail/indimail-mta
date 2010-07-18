@@ -204,7 +204,7 @@ the QMAILHOME/plugins directory. This directory can be changed by defining
 multiple arguments to the virus scanner for customization. To run external scanner
 or load scanner plugins, \fBqmail-queue\fR calls \fBqhpsi\fR, a program setuid to \fIqscand\fR.
 By default, \fBqhpsi\fR looks for the symbol \fIvirusscan\fR to invoke the scanner.
-The symbol can be changed by setting the environment variable \fBQUEUE_PLUGIN\fR to the
+The symbol can be changed by setting the environment variable \fBQUEUE_PLUGIN_SYMB\fR to the
 desired symbol.
 
 In order to use the QHPSI, the virus scanner has to have
@@ -249,7 +249,7 @@ the message filename in the queue's '\fImess\fR' directory.
 is set to list of plugins starting with a keyword 'plugin:'.
 
 .EX
- QHPSI="plugin: clamd fsecure symantec"
+ QHPSI="plugin: clamd.so fsecure.so symantec.so"
 .EE
 
 Sets \fBqmail-queue\fR to load three plugins clamd, fsecure and symantec from
@@ -259,7 +259,7 @@ You can also use the plugin generic.so. generic.so plugin can use any scanner de
 by the \fBSCANCMD\fR environment variable.
 
 .EX
- QHPSI="plugin: generic"
+ QHPSI="plugin: generic.so"
  SCANCMD="clamdscan %s --quiet --no-summary"
 .EE
 
