@@ -36,10 +36,16 @@ invokes
 .BR qmail-rspawn ,
 and
 .BR qmail-clean ,
-under the proper uids and gids for multiple queues. It starts multiple copies (=$QUEUE_COUNT) of
-.B qmail-send
-by defining environment variable QUEUEDIR. A queue is defined by the environment variables
-QUEUE_START and QUEUE_COUNT.
+under the proper uids and gids for multiple queues. It starts multiple copies of
+\fBqmail-send\fR. The number of \fBqmail-send\fR instance it runs is defined by the environment
+variable \fBQUEUE_COUNT\fR. For each instance of \fBqmail-send\fR,  the queue is defined by
+\fBqmail-daemon\fR by setting the environment variable \fBQUEUEDIR\fR. A queue is defined by
+the integers defined by environment variables \fBQUEUE_START\fR and \fBQUEUE_COUNT\fR.
+
+Setting QUEUE_COUNT=2, QUEUE_START=1 will make \fBqmail-daemon\fR run two instances of
+\fBqmail-send\fR. The first \fBqmail-send\fR instance will use the queue QMAIL/queue/queue1
+and the second instance will use QMAIL/queue/queue2
+
 .B qmail-daemon
 also monitors 
 .B qmail-send

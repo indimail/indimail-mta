@@ -123,10 +123,12 @@ arguments.
 
 If \fBONSUCCESS_REMOTE\fR environment variable is defined and points to a program,
 \fBqmail-remote\fR will execute the same, with uid \fIqmailr\fR, on successful email delivery
-to remote host \fIhost\fR. The exit status will be the exit status of the program. If
-\fBONSUCCESS_REMOTE\fR is not defined \fBqmail-remote\fR always exits zero. \fBqmail-remote\fR
-uses many environment variables. These environment variables can be recipient specific by using
-envrules. See \fBspawn-filter(8)\fR for more details.
+to remote host \fIhost\fR. The exit status of \fBqmail-remote\fR will be the exit status of the
+program. The argument passed to this program will be the same as those for \fBqmail-remote\fR.
+If \fBONSUCCESS_REMOTE\fR is not defined \fBqmail-remote\fR always exits zero.
+
+\fBqmail-remote\fR uses many environment variables. These environment variables can be recipient
+specific by using envrules. See \fBspawn-filter(8)\fR for more details.
 
 .SH "CONTROL FILES"
 .B qmail-remote
