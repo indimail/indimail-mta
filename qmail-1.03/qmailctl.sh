@@ -1,6 +1,9 @@
-# chkconfig: 345 50 15
+# chkconfig: 345 14 91
 # description: Starts qmail system and associated services
 # $Log: qmailctl.sh,v $
+# Revision 1.28  2010-07-21 16:26:37+05:30  Cprogrammer
+# fixed typo (/var/lock/subsys)
+#
 # Revision 1.27  2010-07-09 14:49:22+05:30  Cprogrammer
 # added portable echo
 #
@@ -213,7 +216,7 @@ stop()
 	QMAIL/sbin/initsvc -off > /dev/null && $succ || $fail
 	RETVAL=$?
 	echo
-	if [ -d /var/log/subsys ] ; then
+	if [ -d /var/lock/subsys ] ; then
 		[ $ret -eq 0 ] && rm -f /var/lock/subsys/indimail
 	fi
 	return $ret
@@ -241,7 +244,7 @@ start()
 			fi
 		done
 	fi
-	if [ -d /var/log/subsys ] ; then
+	if [ -d /var/lock/subsys ] ; then
 		[ $ret -eq 0 ] && touch /var/lock/subsys/indimail
 	fi
 	return $ret
