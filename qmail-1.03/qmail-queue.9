@@ -118,7 +118,9 @@ environment variable (if set), and passes it into the queue.
 .B qmail-local
 and
 .B qmail-remote
-will prepend it to the headers of the email when it is delivered. If the control file
+will prepend it to the headers of the email when it is delivered.
+
+If the control file
 .B envheaders
 exists, \fBqmail-queue\fR passes all headers listed in the control file to the queue along
 with the value.
@@ -129,7 +131,9 @@ will set environment variables corresponding to the headers with the values.
 An optional length, separated by a ':', can be appended to the name
 of the header. If length is specified, the environment variable will be set only if the actual
 length of the header value is less than or equal to this value. The environment variable
-\fBENVHEADERS\fR can be set to use a different name for this control file. If the control file
+\fBENVHEADERS\fR can be set to use a different name for this control file.
+
+If the control file
 .B logheaders
 exists, \fBqmail-queue\fR writes all headers (along with values) listed in the control file to
 file descriptor defined by \fBLOGHEADERFD\fR environment variable. The file descriptor needs to be
