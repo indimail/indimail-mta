@@ -1,5 +1,9 @@
 /*
  * $Log: qmail-send.c,v $
+ * Revision 1.46  2010-07-20 18:39:03+05:30  Cprogrammer
+ * changed order of arguments of original recipient and bounce sender when running
+ * bounceprocessor script
+ *
  * Revision 1.45  2010-07-18 19:20:18+05:30  Cprogrammer
  * report all recipients in log_stat()
  * added startup plugins functionality
@@ -1015,9 +1019,9 @@ bounce_process(struct qmail *qq, char *bouncefn, char *bounce_report, char *orig
 			args[0] = prog;
 			args[1] = bouncefn;
 			args[2] = bounce_report;
-			args[3] = origrecip;
-			args[4] = sender;
-			args[5] = recipient;
+			args[3] = sender;
+			args[4] = origrecip; /*- original recipient */
+			args[5] = recipient; /*- original sender */
 			args[6] = 0;
 			execv(*args, args);
 			log5("alert: Unable to run: ", prog, ": ", error_str(errno), "\n");
@@ -2831,7 +2835,7 @@ main()
 void
 getversion_qmail_send_c()
 {
-	static char    *x = "$Id: qmail-send.c,v 1.45 2010-07-18 19:20:18+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-send.c,v 1.46 2010-07-20 18:39:03+05:30 Cprogrammer Stab mbhangui $";
 
 #ifdef INDIMAIL
 	x = sccsidh;
