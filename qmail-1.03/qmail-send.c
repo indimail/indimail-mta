@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-send.c,v $
+ * Revision 1.47  2010-07-21 21:20:51+05:30  Cprogrammer
+ * added envheader code
+ *
  * Revision 1.46  2010-07-20 18:39:03+05:30  Cprogrammer
  * changed order of arguments of original recipient and bounce sender when running
  * bounceprocessor script
@@ -426,8 +429,9 @@ senderadd(sa, sender, recip)
 /* this file is too long ---------------------------------------------- INFO */
 
 int
-getinfo(sa, eh, dt, id)
+getinfo(sa, qh, eh, dt, id)
 	stralloc       *sa;
+	stralloc       *qh;
 	stralloc       *eh;
 	datetime_sec   *dt;
 	unsigned long   id;
@@ -448,7 +452,7 @@ getinfo(sa, eh, dt, id)
 		return 0;
 	}
 	substdio_fdbuf(&ss, read, fdinfo, buf, sizeof(buf));
-	sa->len = eh->len = 0;
+	sa->len = qh->len = eh->len = 0;
 	for (;;)
 	{
 		if (getln(&ss, &line, &match, '\0') == -1)
@@ -462,11 +466,16 @@ getinfo(sa, eh, dt, id)
 			while (!stralloc_copys(sa, line.s + 1))
 				nomem();
 		if (line.s[0] == 'e')
+			while (!stralloc_copys(qh, line.s + 1))
+				nomem();
+		if (line.s[0] == 'h')
 			while (!stralloc_copys(eh, line.s + 1))
 				nomem();
 	}
 	close(fdinfo);
 	while (!stralloc_0(sa))
+		nomem();
+	while (!stralloc_0(qh))
 		nomem();
 	while (!stralloc_0(eh))
 		nomem();
@@ -509,12 +518,13 @@ comm_canwrite(c)
 }
 
 void
-comm_write(c, delnum, id, sender, qqeh, recip)
+comm_write(c, delnum, id, sender, qqeh, envh, recip)
 	int             c;
 	int             delnum;
 	unsigned long   id;
 	char           *sender;
 	char           *qqeh;
+	char           *envh;
 	char           *recip;
 {
 	char            ch;
@@ -538,6 +548,10 @@ comm_write(c, delnum, id, sender, qqeh, recip)
 	while (!stralloc_0(&comm_buf[c]))
 		nomem();
 	while (!stralloc_cats(&comm_buf[c], qqeh))
+			nomem();
+	while (!stralloc_0(&comm_buf[c]))
+		nomem();
+	while (!stralloc_cats(&comm_buf[c], envh))
 			nomem();
 	while (!stralloc_0(&comm_buf[c]))
 		nomem();
@@ -803,7 +817,7 @@ struct job
 	int             flaghiteof;
 	int             flagdying;
 	datetime_sec    retry;
-	stralloc        sender, qqeh;
+	stralloc        sender, qqeh, envh;
 } ;
 
 int             numjobs;
@@ -820,6 +834,7 @@ job_init()
 		jo[j].refs = 0;
 		jo[j].sender.s = 0;
 		jo[j].qqeh.s = 0;
+		jo[j].envh.s = 0;
 	}
 }
 
@@ -1047,6 +1062,7 @@ injectbounce(id)
 	struct stat     st;
 	static stralloc sender = { 0 };
 	static stralloc qqeh = { 0 };
+	static stralloc envh = { 0 };
 	static stralloc quoted = { 0 };
 	static stralloc orig_recip = { 0 };
 	datetime_sec    birth;
@@ -1060,7 +1076,7 @@ injectbounce(id)
 	stralloc        boundary = {0};
 #endif
 
-	if (!getinfo(&sender, &qqeh, &birth, id))
+	if (!getinfo(&sender, &qqeh, &envh, &birth, id))
 		return 0;				/*- XXX: print warning */
 	/*- owner-@host-@[] -> owner-@host */
 	if (sender.len >= 5 && str_equal(sender.s + sender.len - 5, "-@[]"))
@@ -1422,7 +1438,7 @@ del_start(j, mpos, recip)
 	d[c][i].mpos = mpos;
 	d[c][i].used = 1;
 	++concurrencyused[c];
-	comm_write(c, i, jo[j].id, jo[j].sender.s, jo[j].qqeh.s, recip);
+	comm_write(c, i, jo[j].id, jo[j].sender.s, jo[j].qqeh.s, jo[j].envh.s, recip);
 	strnum2[fmt_ulong(strnum2, d[c][i].delid)] = 0;
 	strnum3[fmt_ulong(strnum3, jo[j].id)] = 0;
 	my_log2("starting delivery ", strnum2);
@@ -1679,6 +1695,7 @@ pass_dochan(c)
 	struct prioq_elt pe;
 	static stralloc line = { 0 };
 	static stralloc qqeh = { 0 };
+	static stralloc envh = { 0 };
 	int             match;
 
 	if (flagexitasap)
@@ -1696,7 +1713,7 @@ pass_dochan(c)
 		pass[c].mpos = 0;
 		if ((pass[c].fd = open_read(fn.s)) == -1)
 			goto trouble;
-		if (!getinfo(&line, &qqeh, &birth, pe.id))
+		if (!getinfo(&line, &qqeh, &envh, &birth, pe.id))
 		{
 			close(pass[c].fd);
 			goto trouble;
@@ -1713,6 +1730,8 @@ pass_dochan(c)
 		while (!stralloc_copy(&jo[pass[c].j].sender, &line))
 			nomem();
 		while (!stralloc_copy(&jo[pass[c].j].qqeh, &qqeh))
+			nomem();
+		while (!stralloc_copy(&jo[pass[c].j].envh, &envh))
 			nomem();
 	}
 	if (!del_avail(c))
@@ -2826,7 +2845,7 @@ main()
 			pass_do();
 			cleanup_do();
 		}
-	}
+	} /*- while (!flagexitasap || !del_canexit() || flagtodoalive) */
 	pqfinish();
 	log1("status: qmail-send exiting\n");
 	return(0);
@@ -2835,7 +2854,7 @@ main()
 void
 getversion_qmail_send_c()
 {
-	static char    *x = "$Id: qmail-send.c,v 1.46 2010-07-20 18:39:03+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: qmail-send.c,v 1.47 2010-07-21 21:20:51+05:30 Cprogrammer Exp mbhangui $";
 
 #ifdef INDIMAIL
 	x = sccsidh;
