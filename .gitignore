@@ -106,3 +106,4 @@ fetchmail-*/ip-up.local
 fetchmail-*/po/POTFILES
 fetchmail-*/slemsPrivate
 fetchmail-*/writefifo
+icampaign-*
