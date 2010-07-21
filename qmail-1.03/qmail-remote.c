@@ -1,5 +1,10 @@
 /*
  * $Log: qmail-remote.c,v $
+ * Revision 1.65  2010-07-20 20:11:12+05:30  Cprogrammer
+ * execute program/script on failure if ONFAILURE_REMOTE is defined
+ * set SMTPTEXT, SMTPCODE environment variables if success() or failure() function
+ * is executed
+ *
  * Revision 1.64  2010-07-17 16:21:32+05:30  Cprogrammer
  * use qmail-remote as argv0 when executing ONSUCCESS_REMOTE program
  *
@@ -401,6 +406,60 @@ success()
 	return (1);
 }
 
+int
+failure()
+{
+	char           *prog, **args;
+	int             child, wstat, i;
+
+	if (!(prog = env_get("ONFAILURE_REMOTE")))
+		return (0);
+	if (!(args = (char **) alloc(my_argc + 1)))
+	{
+		my_error("alert: Out of memory", 0, 0);
+		_exit (1);
+	}
+	switch (child = fork())
+	{
+	case -1:
+		my_error("alert: fork failed", 0, 0);
+		_exit(0);
+		return (1);
+	case 0:
+		if (!stralloc_0(&host))
+		{
+			my_error("alert: Out of memory", 0, 0);
+			_exit (1);
+		} else
+		if (!stralloc_0(&sender))
+		{
+			my_error("alert: Out of memory", 0, 0);
+			_exit (1);
+		} else
+		if (!stralloc_0(&qqeh))
+		{
+			my_error("alert: Out of memory", 0, 0);
+			_exit (1);
+		}
+		/*- copy all arguments */
+		for (i = 0;i < my_argc;i++)
+			args[i] = my_argv[i];
+		args[i] = 0;
+		execv(prog, args);
+		my_error("alert: Unable to run", prog, 0);
+		_exit (1);
+	}
+	wait_pid(&wstat, child);
+	if (wait_crashed(wstat))
+	{
+		my_error("alert", prog, "crashed");
+		_exit (1);
+	}
+	_exit (wait_exitcode(wstat));
+	/* Not reached */
+	return (1);
+}
+
 void
 zero()
 {
@@ -413,9 +472,7 @@ zerodie(int succ)
 {
 	zero();
 	substdio_flush(subfdoutsmall);
-	if (succ)
-		success();
-	_exit(0);
+	_exit((succ ?  success : failure) ());
 }
 
 void
@@ -821,7 +878,7 @@ ehlo()
 }
 
 void
-outsmtptext()
+outsmtptext(unsigned int code)
 {
 	int             i;
 
@@ -837,6 +894,18 @@ outsmtptext()
 			}
 			if (substdio_put(subfdoutsmall, smtptext.s, smtptext.len) == -1)
 				_exit(0);
+			if (env_get("ONFAILURE_REMOTE") || env_get("ONSUCCESS_REMOTE"))
+			{
+				char            strnum[FMT_ULONG];
+
+				if (!stralloc_0(&smtptext))
+					temp_nomem();
+				if (!env_put2("SMTPTEXT", smtptext.s))
+					_exit(0);
+				strnum[fmt_ulong(strnum, code)] = 0;
+				if (!env_put2("SMTPCODE", strnum))
+					_exit(0);
+			}
 			smtptext.len = 0;
 		}
 	}
@@ -861,7 +930,7 @@ quit(char *prepend, char *append, int die)
 	outhost();
 	out(append);
 	out(".\n");
-	outsmtptext();
+	outsmtptext(-1);
 #if defined(TLS) && defined(DEBUG)
 	if (ssl)
 	{
@@ -1686,7 +1755,7 @@ smtp()
 			out("> ");
 			outhost();
 			out(" does not like recipient.\n");
-			outsmtptext();
+			outsmtptext(code);
 			zero();
 		} else
 		if (code >= 400)
@@ -1698,7 +1767,7 @@ smtp()
 			out("> ");
 			outhost();
 			out(" does not like recipient.\n");
-			outsmtptext();
+			outsmtptext(code);
 			zero();
 		} else
 		{
@@ -2386,7 +2455,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_remote_c()
 {
-	static char    *x = "$Id: qmail-remote.c,v 1.64 2010-07-17 16:21:32+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-remote.c,v 1.65 2010-07-20 20:11:12+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
