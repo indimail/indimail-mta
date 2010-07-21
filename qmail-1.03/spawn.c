@@ -1,5 +1,8 @@
 /*
  * $Log: spawn.c,v $
+ * Revision 1.18  2010-07-21 21:24:57+05:30  Cprogrammer
+ * added envheader code
+ *
  * Revision 1.17  2009-12-10 10:46:46+05:30  Cprogrammer
  * display MySQL error
  *
@@ -121,12 +124,13 @@ int             flagreading = 1;
 char            outbuf[1024];
 substdio        ssout;
 
-int             stage = 0;	/*- reading 0:delnum 1:delnum 2:messid 3:sender 4:qqeh 5:recip */
+int             stage = 0;	/*- reading 0:delnum 1:delnum 2:messid 3:sender 4:qqeh 5:envh 6:recip */
 int             flagabort = 0;	/*- if 1, everything except delnum is garbage */
 int             delnum;
 stralloc        messid = { 0 };
 stralloc        sender = { 0 };
 stralloc        qqeh = { 0 };
+stralloc        envh = { 0 };
 stralloc        recip = { 0 };
 
 void
@@ -143,13 +147,70 @@ err(s)
 	substdio_putflush(&ssout, "", 1);
 }
 
+int
+variables_set()
+{
+	char           *x, *y, *z, *c, *n;
+
+	for (y = z = envh.s;envh.len && *z;z++)
+	{
+		if (*z == '\n')
+		{
+			*(n = z) = 0;
+			for (x = y;*x;x++)
+			{
+				if (*x == ':')
+				{
+					c = x;
+					*x++ = 0;
+					for (;*x && *x == ' ';x++);
+					if (!env_put2(y, x))
+					{
+						*n = '\n';
+						*c = ':';
+						return (1);
+					}
+					*c = ':';
+					break;
+				}
+			}
+			*n = '\n';
+			y = z + 1;
+		}
+	}
+	return (0);
+}
+
+int
+variables_unset()
+{
+	char           *x, *y, *z;
+
+	for (y = z = envh.s;envh.len && *z;z++)
+	{
+		if (*z == '\n')
+		{
+			*z = 0;
+			for (x = y;*x;x++)
+			{
+				if (*x == ':')
+				{
+					*x = 0;
+					if (!env_unset(y))
+						return (1);
+					break;
+				}
+			}
+			y = z + 1;
+		}
+	}
+	return (0);
+}
+
 void
 docmd()
 {
-	int             f;
-	int             i;
-	int             j;
-	int             fdmess;
+	int             f, i, j, fdmess;
 	int             pi[2];
 	struct stat     st;
 
@@ -197,20 +258,17 @@ docmd()
 		err("DInternal error: messid too short. (#5.3.5)\n");
 		return;
 	}
-
 	if (!stralloc_copys(&d[delnum].output, ""))
 	{
 		err("Zqmail-spawn out of memory. (#4.3.0)\n");
 		return;
 	}
-	j = byte_rchr(recip.s, recip.len, '@');
-	if (j >= recip.len)
+	if ((j = byte_rchr(recip.s, recip.len, '@')) >= recip.len)
 	{
 		err("DSorry, address must include host name. (#5.1.3)\n");
 		return;
 	}
-	fdmess = open_read(messid.s);
-	if (fdmess == -1)
+	if ((fdmess = open_read(messid.s)) == -1)
 	{
 		err("Zqmail-spawn unable to open message. (#4.3.0)\n");
 		return;
@@ -243,7 +301,23 @@ docmd()
 		return;
 	}
 	coe(pi[0]);
+	if (envh.len && !stralloc_0(&envh))
+	{
+		err("Zqmail-spawn out of memory. (#4.3.0)\n");
+		return;
+	}
+	if (variables_set())
+	{
+		err("Zqmail-spawn out of memory. (#4.3.0)\n");
+		variables_unset();
+		return;
+	}
 	f = spawn(fdmess, pi[1], st.st_size, sender.s, qqeh.s, recip.s, j);
+	if (variables_unset())
+	{
+		err("Zqmail-spawn out of memory. (#4.3.0)\n");
+		return;
+	}
 	close(fdmess);
 	if (f < 0)
 	{
@@ -271,8 +345,7 @@ getcmd()
 	int             r;
 	char            ch;
 
-	r = read(0, cmdbuf, sizeof(cmdbuf));
-	if (r == 0)
+	if (!(r = read(0, cmdbuf, sizeof(cmdbuf))))
 	{
 		flagreading = 0;
 		return;
@@ -318,10 +391,18 @@ getcmd()
 				flagabort = 1;
 			if (ch)
 				break;
-			recip.len = 0;
+			envh.len = 0;
 			stage = 5;
 			break;
 		case 5:
+			if (!stralloc_append(&envh, &ch))
+				flagabort = 1;
+			if (ch)
+				break;
+			recip.len = 0;
+			stage = 6;
+			break;
+		case 6:
 			if (!stralloc_append(&recip, &ch))
 				flagabort = 1;
 			if (ch)
@@ -349,11 +430,11 @@ main(argc, argv)
 	fd_set          rfds;
 	int             nfds;
 
-	if(uidinit(1) == -1)
+	if (uidinit(1) == -1)
 		_exit(111);
 	if (chdir(auto_qmail) == -1)
 		_exit(111);
-	if(!(queuedir = env_get("QUEUEDIR")))
+	if (!(queuedir = env_get("QUEUEDIR")))
 #ifdef INDIMAIL
 		queuedir = "queue1";
 #else
@@ -369,9 +450,11 @@ main(argc, argv)
 		_exit(111);
 	if (!stralloc_copys(&qqeh, ""))
 		_exit(111);
+	if (!stralloc_copys(&envh, ""))
+		_exit(111);
 	if (!stralloc_copys(&recip, ""))
 		_exit(111);
-	if(!(d = (struct delivery *) alloc((auto_spawn + 10) * sizeof(struct delivery))))
+	if (!(d = (struct delivery *) alloc((auto_spawn + 10) * sizeof(struct delivery))))
 		_exit(111);
 	substdio_fdbuf(&ssout, okwrite, 1, outbuf, sizeof(outbuf));
 	sig_pipeignore();
@@ -422,7 +505,7 @@ main(argc, argv)
 				{
 					if (FD_ISSET(d[i].fdin, &rfds))
 					{
-						if((r = read(d[i].fdin, inbuf, 128)) == -1)
+						if ((r = read(d[i].fdin, inbuf, 128)) == -1)
 							continue;	/*- read error on a readable pipe? be serious */
 						if (r == 0)
 						{
@@ -460,7 +543,7 @@ main(argc, argv)
 void
 getversion_spawn_c()
 {
-	static char    *x = "$Id: spawn.c,v 1.17 2009-12-10 10:46:46+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: spawn.c,v 1.18 2010-07-21 21:24:57+05:30 Cprogrammer Exp mbhangui $";
 
 #ifdef INDIMAIL
 	x = sccsidh;
