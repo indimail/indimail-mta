@@ -1,5 +1,8 @@
 /*
  * $Log: maildirserial.c,v $
+ * Revision 1.8  2010-07-21 08:57:49+05:30  Cprogrammer
+ * use CONTROLDIR environment variable instead of a hardcoded control directory
+ *
  * Revision 1.7  2010-06-08 21:59:30+05:30  Cprogrammer
  * use envdir_set() on queuedefault to set default queue parameters
  *
@@ -89,6 +92,7 @@ char            messbuf[256];
 substdio        ssmess;
 stralloc        line = { 0 };
 stralloc        recipient = { 0 };
+stralloc        fn = {0};
 char            buf[1024];
 substdio        ss;				/*- in parent, reading from child; in scanner, writing to child */
 int             pid;			/*- in parent, pid of scanner; in scanner, pid of child */
@@ -109,6 +113,26 @@ config_str      doublebouncehost = CONFIG_STR;
 stralloc        boundary = { 0 };
 #endif
 
+static void
+my_config_readline(config_str *c, char *fname)
+{
+	if (!controldir)
+	{
+		if (!(controldir = env_get("CONTROLDIR")))
+			controldir = "control";
+	}
+	if (!stralloc_copys(&fn, controldir))
+		die_nomem();
+	if (!stralloc_cats(&fn, "/"))
+		die_nomem();
+	if (!stralloc_cats(&fn, fname))
+		die_nomem();
+	if (!stralloc_0(&fn))
+		die_nomem();
+	if (config_readline(c, fn.s) == -1)
+		strerr_die4sys(111, FATAL, "unable to read ", fn.s, ": ");
+}
+
 void
 readcontrols()
 {
@@ -127,33 +151,32 @@ readcontrols()
 			if (!(controldir = env_get("CONTROLDIR")))
 				controldir = "control";
 		}
-		if (chdir(controldir) == -1)
-			strerr_die4sys(111, FATAL, "unable to switch to ", controldir, ": ");
-		if (!access("defaultqueue", X_OK))
+		if (!stralloc_copys(&fn, controldir))
+			die_nomem();
+		if (!stralloc_cats(&fn, "/defaultqueue"))
+			die_nomem();
+		if (!stralloc_0(&fn))
+			die_nomem();
+		if (!access(fn.s, X_OK))
 		{
 			envdir_set("defaultqueue");
 			if ((e = pathexec(0)))
 				environ = e;
 		}
 	}
-	if (config_readline(&me, "control/me") == -1)
-		strerr_die4sys(111, FATAL, "unable to read ", auto_qmail, "/control/me: ");
+	my_config_readline(&me, "me");
 	if (config_default(&me, "me") == -1)
 		die_nomem();
-	if (config_readline(&bouncefrom, "control/bouncefrom") == -1)
-		strerr_die4sys(111, FATAL, "unable to read ", auto_qmail, "/control/bouncefrom: ");
+	my_config_readline(&bouncefrom, "bouncefrom");
 	if (config_default(&bouncefrom, "MAILER-DAEMON") == -1)
 		die_nomem();
-	if (config_readline(&bouncehost, "control/bouncehost") == -1)
-		strerr_die4sys(111, FATAL, "unable to read ", auto_qmail, "/control/bouncehost: ");
+	my_config_readline(&bouncehost, "bouncehost");
 	if (config_copy(&bouncehost, &me) == -1)
 		die_nomem();
-	if (config_readline(&doublebouncehost, "control/doublebouncehost") == -1)
-		strerr_die4sys(111, FATAL, "unable to read ", auto_qmail, "/control/doublebouncehost: ");
+	my_config_readline(&doublebouncehost, "doublebouncehost");
 	if (config_copy(&doublebouncehost, &me) == -1)
 		die_nomem();
-	if (config_readline(&doublebounceto, "control/doublebounceto") == -1)
-		strerr_die4sys(111, FATAL, "unable to read ", auto_qmail, "/control/doublebounceto: ");
+	my_config_readline(&doublebounceto, "doublebounceto");
 	if (config_default(&doublebounceto, "postmaster") == -1)
 		die_nomem();
 	if (!stralloc_cats(config_data(&doublebounceto), "@"))
@@ -469,7 +492,6 @@ int             flagtimeout;
 
 int             pic2p[2];
 
-stralloc        fn = { 0 };
 stralloc        err = { 0 };
 int             match;
 
@@ -652,7 +674,7 @@ main(argc, argv)
 void
 getversion_maildirserial_c()
 {
-	static char    *x = "$Id: maildirserial.c,v 1.7 2010-06-08 21:59:30+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: maildirserial.c,v 1.8 2010-07-21 08:57:49+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

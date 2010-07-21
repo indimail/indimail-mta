@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-greyd.c,v $
+ * Revision 1.9  2010-07-21 09:13:47+05:30  Cprogrammer
+ * use CONTROLDIR environment variable instead of a hardcoded control directory
+ *
  * Revision 1.8  2009-10-28 13:34:51+05:30  Cprogrammer
  * fix segmentation fault due to free()
  *
@@ -212,9 +215,7 @@ whitelist_init(char *arg)
 #ifdef NETQMAIL /*- look for control files in QMAILHOME/control */
 	static stralloc controlfile = {0};
 
-	if (!stralloc_copys(&controlfile, auto_qmail))
-		die_nomem();
-	if (!stralloc_cats(&controlfile, "/control/"))
+	if (!stralloc_copys(&controlfile, "control/"))
 		die_nomem();
 	if (!stralloc_cats(&controlfile, arg))
 		die_nomem();
@@ -240,21 +241,14 @@ cdb_match(char *fn, char *addr, int len)
 
 	if (!len || !*addr || !fn)
 		return (0);
-#ifndef NETQMAIL
-	if (!controldir) {
-		if(!(controldir = env_get("CONTROLDIR")))
-			controldir = "control";
-	}
+#ifdef NETQMAIL
+	if (!stralloc_copys(&controlfile, "control"))
+#else
 	if (!stralloc_copys(&controlfile, controldir))
+#endif
 		die_nomem();
 	if (!stralloc_cats(&controlfile, "/"))
 		die_nomem();
-#else
-	if (!stralloc_copys(&controlfile, auto_qmail))
-		die_nomem();
-	if (!stralloc_cats(&controlfile, "/control/"))
-		die_nomem();
-#endif
 	if (!stralloc_cats(&controlfile, fn))
 		die_nomem();
 	if (!stralloc_cats(&controlfile, ".cdb"))
@@ -1109,25 +1103,22 @@ main(int argc, char **argv)
 	}
 	if (chdir(auto_qmail) == -1)
 		strerr_die4sys(111, FATAL, "unable to chdir: ", auto_qmail, ": ");
+#ifndef NETQMAIL
+	if(!(controldir = env_get("CONTROLDIR")))
+		controldir = "control";
+#endif
 	if (whitefn) {
 		whitelist_init(whitefn);
 		sig_catch(SIGHUP, sighup);
 	}
 #ifndef NETQMAIL
-	if (!controldir) {
-		if(!(controldir = env_get("CONTROLDIR")))
-			controldir = "control";
-	}
 	if (!stralloc_copys(&context_file, controldir))
+#else
+	if (!stralloc_copys(&context_file, "control"))
+#endif
 		die_nomem();
 	if (!stralloc_cats(&context_file, "/"))
 		die_nomem();
-#else
-	if (!stralloc_copys(&context_file, auto_qmail))
-		die_nomem();
-	if (!stralloc_cats(&context_file, "/control/"))
-		die_nomem();
-#endif
 	if (!stralloc_cats(&context_file, argv[optind++]))
 		die_nomem();
 	if (!stralloc_0(&context_file))
@@ -1333,7 +1324,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_greyd_c()
 {
-	static char    *x = "$Id: qmail-greyd.c,v 1.8 2009-10-28 13:34:51+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: qmail-greyd.c,v 1.9 2010-07-21 09:13:47+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
