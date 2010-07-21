@@ -249,7 +249,7 @@ ldap_lookup(char *login, char *password, char **error, uid_t *userId, gid_t *gro
 		ldap_bind_passwd = "";
 	} else
 		ldap_bind_passwd = env_get("LDAP_BIND_PASSWD");
-	switch((ret = ldap_simple_bind_s(ld, ldap_bind_dn, ldap_bind_passwd)))
+	switch ((ret = ldap_simple_bind_s(ld, ldap_bind_dn, ldap_bind_passwd)))
 	{
 	case LDAP_SUCCESS:
 		break;
@@ -377,7 +377,7 @@ ldap_lookup(char *login, char *password, char **error, uid_t *userId, gid_t *gro
 		out("]\n");
 		flush();
 	}
-	switch((ret = ldap_simple_bind_s(ld, dn, password)))
+	switch ((ret = ldap_simple_bind_s(ld, dn, password)))
 	{
 	case LDAP_SUCCESS:
 		break;

@@ -58,7 +58,7 @@ main(int argc, char **argv, char **envp)
 	file = *argv++;
 	if (!*argv)
 		usage();
-	if((fd = open_append(file)) == -1)
+	if ((fd = open_append(file)) == -1)
 	{
 		if (flagx)
 			_exit(0);
