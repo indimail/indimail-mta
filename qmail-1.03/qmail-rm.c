@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-rm.c,v $
+ * Revision 1.11  2010-07-20 20:10:46+05:30  Cprogrammer
+ * process multiple queues
+ *
  * Revision 1.10  2009-04-17 20:15:25+05:30  Cprogrammer
  * rearraged cases in switch statement
  *
@@ -149,12 +152,19 @@
 #include "error.h"
 #include "open.h"
 #include "fmt.h"
+#include "env.h"
+#include "scan.h"
+#include "control.h"
 #include "auto_split.h"
 #include "auto_qmail.h"
 
 /*- many linux fcntl.h's seem to be broken */
 #ifndef O_NOFOLLOW
 #define O_NOFOLLOW  0400000
+#endif
+
+#ifndef QUEUE_COUNT
+#define QUEUE_COUNT 10
 #endif
 
 /*- prototypes */
@@ -170,11 +180,10 @@ char           *mk_hashpath(char *, int);
 char           *mk_newpath(char *, int);
 int             rename(const char *, const char *);
 
-const char      cvsrid[] = "$Id: qmail-rm.c,v 1.10 2009-04-17 20:15:25+05:30 Cprogrammer Stab mbhangui $";
+const char      cvsrid[] = "$Id: qmail-rm.c,v 1.11 2010-07-20 20:10:46+05:30 Cprogrammer Exp mbhangui $";
 
 /*- globals */
 extern const char *__progname;
-char           *queuedir;
 const char     *default_pattern = ".*";
 int             regex_flags = 0, verbosity = 0, conf_split, remove_files = 0;
 char           *yank_dir = "yanked";
@@ -232,6 +241,24 @@ logerrf(s)
 		_exit(1);
 }
 
+void
+die_nomem()
+{
+	substdio_puts(&sserr, "fatal: out of memory\n");
+	_exit(111);
+}
+
+void
+die_chdir(dir)
+{
+	logerr("chdir: ");
+	logerr(dir);
+	logerr(": ");
+	logerr(error_str(errno));
+	logerrf("\n");
+	_exit(111);
+}
+
 int
 check_send(char *queuedir)
 {
@@ -282,17 +309,23 @@ check_send(char *queuedir)
 	return(fd);
 }
 
+stralloc        QueueBase = { 0 };
+stralloc        Queuedir = { 0 };
+
 int
 main(int argc, char **argv)
 {
 	int             fd = -1, ch, matches, tmp = 0;
-	char           *ptr, *pattern = NULL;
+	int             idx, count, qcount, qstart;
+	char           *ptr, *pattern = NULL, *qbase = 0, *queuedir = 0;
+	char           *queue_count_ptr, *queue_start_ptr;
+	char            strnum[FMT_ULONG];
 	struct tm       stime;
 
 	if (argc < 2)
 		usage();
 	conf_split = auto_split;
-	while ((ch = getopt(argc, argv, "eirvh?n:p:q:s:y:X:x:")) != -1)
+	while ((ch = getopt(argc, argv, "eirvh?n:p:s:y:X:x:")) != -1)
 	{
 		switch (ch)
 		{
@@ -330,16 +363,7 @@ main(int argc, char **argv)
 			pattern = optarg;
 			break;
 		case 'q':
-			if (chdir(optarg) == -1)
-			{
-				logerr("chdir: ");
-				logerr(optarg);
-				logerr(": ");
-				logerr(error_str(errno));
-				logerrf("\n");
-				_exit(111);
-			}
-			queuedir = optarg;
+			qbase = optarg;
 			break;
 		case 's':
 			if ((tmp = strtoul(optarg, &ptr, 10)) == ULONG_MAX)
@@ -429,31 +453,72 @@ main(int argc, char **argv)
 			break;
 		}
 	}
-	if (!queuedir)
+	if (chdir(auto_qmail))
+		die_chdir(auto_qmail);
+	if (!qbase && !(qbase = env_get("QUEUE_BASE")))
 	{
-		if (chdir(auto_qmail) == -1)
+		switch (control_readfile(&QueueBase, "queue_base", 0))
 		{
-			logerr("chdir: ");
-			logerr(auto_qmail);
-			logerr(": ");
-			logerr(error_str(errno));
-			logerrf("\n");
+		case -1:
+			logerrf("fatal: unable to read controls\n");
 			_exit(111);
+			break;
+		case 0:
+			qbase = auto_qmail;
+			break;
+		case 1:
+			qbase = QueueBase.s;
+			break;
 		}
-		queuedir = auto_qmail;
 	}
-	if (remove_files)
-		fd = check_send(queuedir);
-	matches = find_files(queuedir, (char **) queues, (pattern ? pattern : default_pattern));
-	if (matches >= 0)
+	if (access(qbase, F_OK))
 	{
-		strnum[fmt_ulong(strnum, matches)] = 0;
-		out(strnum);
-		out(" file(s) match\n");
-		flush();
+		logerr(qbase);
+		logerr(": ");
+		logerr(error_str(errno));
+		logerrf("\n");
+		_exit(111);
 	}
-	if (remove_files)
-		close(fd);
+	if (!(queue_count_ptr = env_get("QUEUE_COUNT")))
+		qcount = QUEUE_COUNT;
+	else
+		scan_int(queue_count_ptr, &qcount);
+	if (!(queue_start_ptr = env_get("QUEUE_START")))
+		qstart = 1;
+	else
+		scan_int(queue_start_ptr, &qstart);
+	for (idx = qstart, count=1; count <= qcount; count++, idx++)
+	{
+		if (!stralloc_copys(&Queuedir, qbase))
+			die_nomem();
+		if (!stralloc_cats(&Queuedir, "/queue"))
+			die_nomem();
+		if (!stralloc_catb(&Queuedir, strnum, fmt_ulong(strnum, (unsigned long) idx)))
+			die_nomem();
+		if (!stralloc_0(&Queuedir))
+			die_nomem();
+		if (access(Queuedir.s, F_OK))
+			break;
+		queuedir = Queuedir.s;
+		out("processing queue ");
+		out(queuedir);
+		out("\n");
+		flush();
+		if (remove_files)
+			fd = check_send(queuedir);
+		if (chdir(queuedir))
+			die_chdir(queuedir);
+		matches = find_files(queuedir, (char **) queues, (pattern ? pattern : default_pattern));
+		if (matches >= 0)
+		{
+			strnum[fmt_ulong(strnum, matches)] = 0;
+			out(strnum);
+			out(" file(s) match\n");
+			flush();
+		}
+		if (remove_files)
+			close(fd);
+	}
 	_exit(0);
 }
 
@@ -468,9 +533,9 @@ usage(void)
 	logerr("  -i            search case insensitively [default: case sensitive]\n");
 	logerr("  -n <bytes>    limit our search to the first <bytes> bytes of each file\n");
 	logerr("  -p <pattern>  specify the pattern to search for\n");
-	logerr("  -q <queuedir> specify the base qmail queue dir [default: ");
+	logerr("  -q <qbase>    specify the base qmail queue dir [default: ");
 	logerr(auto_qmail);
-	logerr("]\n");
+	logerr("/queue]\n");
 	logerr("  -r            actually remove files, without this we'll only print them\n");
 	logerr("  -s <split>    specify your conf-split value if non-standard [default: ");
 	strnum[fmt_ulong(strnum, auto_split)] = 0;
@@ -588,7 +653,6 @@ find_files(char *queuedir, char *dir_list[], const char *pattern)
 
 	argv[0] = dir_list[0];
 	argv[1] = NULL;
-
 	if ((fts = fts_open((char **) argv, FTS_PHYSICAL, NULL)) == NULL)
 	{
 		logerr("fts_open: ");
@@ -614,7 +678,8 @@ find_files(char *queuedir, char *dir_list[], const char *pattern)
 				tmp_fd = open(".", O_RDONLY);
 				if (tmp_fd >= 0 && (remove_files == 1 || expire_files == 1))
 				{
-					chdir(queuedir);
+					if (chdir(queuedir))
+						die_chdir(queuedir);
 					remove_file(ftsp->fts_name);
 					if (fchdir(tmp_fd) != 0)
 					{
@@ -1015,7 +1080,7 @@ digits(unsigned long num)
 void
 getversion_qmail_rm_c()
 {
-	static char    *x = "$Id: qmail-rm.c,v 1.10 2009-04-17 20:15:25+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: qmail-rm.c,v 1.11 2010-07-20 20:10:46+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
