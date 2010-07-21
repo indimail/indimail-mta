@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-dkim.c,v $
+ * Revision 1.23  2010-07-21 08:59:57+05:30  Cprogrammer
+ * use CONTROLDIR environment variable instead of a hardcoded control directory
+ *
  * Revision 1.22  2009-04-22 13:42:51+05:30  Cprogrammer
  * made fd for custom error configurable through env variable ERROR_FD
  *
@@ -94,6 +97,7 @@
 #include "env.h"
 #include "control.h"
 #include "dkim.h"
+#include "variables.h"
 
 #define DEATH 86400	/*- 24 hours; _must_ be below q-s's OSSIFIED (36 hours) */
 #define ADDR 1003
@@ -988,6 +992,7 @@ main(int argc, char *argv[])
 	int             ret = 0, origRet = DKIM_MAX_ERROR, i, nSigCount = 0, len, token_len;
 	unsigned long   pid;
 	char           *selector, *p;
+	stralloc        dkimfn = {0};
 	DKIMSignOptions opts = { 0 };
 	DKIMVerifyDetails *pDetails;
 	DKIMVerifyOptions vopts = { 0 };
@@ -1002,7 +1007,20 @@ main(int argc, char *argv[])
 	if (!dkimverify)
 		dkimverify = env_get("DKIMVERIFY");
 	if (!dkimsign && !dkimverify && (p = env_get("RELAYCLIENT")))
-		dkimsign = "control/domainkeys/%/default";
+	{
+		if (!controldir)
+		{
+			if (!(controldir = env_get("CONTROLDIR")))
+				controldir = "control";
+		}
+		if (!stralloc_copys(&dkimfn, controldir))
+			die(51);
+		if (!stralloc_cats(&dkimfn, "/domainkeys/%/default"))
+			die(51);
+		if (!stralloc_0(&dkimfn))
+			die(51);
+		dkimsign = dkimfn.s;
+	}
 	dkimqueue = env_get("DKIMQUEUE");
 	if (dkimqueue && *dkimqueue)
 		binqqargs[0] = dkimqueue;
@@ -1308,7 +1326,7 @@ main(argc, argv)
 void
 getversion_qmail_dkim_c()
 {
-	static char    *x = "$Id: qmail-dkim.c,v 1.22 2009-04-22 13:42:51+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: qmail-dkim.c,v 1.23 2010-07-21 08:59:57+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

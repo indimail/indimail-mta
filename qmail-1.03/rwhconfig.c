@@ -1,5 +1,8 @@
 /*
  * $Log: rwhconfig.c,v $
+ * Revision 1.3  2010-07-21 09:02:42+05:30  Cprogrammer
+ * use CONTROLDIR environment variable instead of a hardcoded control directory
+ *
  * Revision 1.2  2004-10-22 20:30:04+05:30  Cprogrammer
  * added RCS id
  *
@@ -12,35 +15,60 @@
 #include "sconfig.h"
 #include "strerr.h"
 #include "rwhconfig.h"
-#include <unistd.h>
 #include "auto_qmail.h"
+#include "variables.h"
+#include "env.h"
+#include <unistd.h>
 
 struct strerr   rwhconfig_err;
 
-static stralloc tmp = { 0 };
+static stralloc tmp = { 0 }, fn = {0};
 static config_str me = CONFIG_STR;
 static config_str defaultdomain = CONFIG_STR;
 static config_str defaulthost = CONFIG_STR;
 static config_str plusdomain = CONFIG_STR;
 static config_str idhost = CONFIG_STR;
 
+static int
+my_config_read(config_str *c, char *fname, int line)
+{
+	if (!controldir)
+	{
+		if (!(controldir = env_get("CONTROLDIR")))
+			controldir = "control";
+	}
+	if (!stralloc_copys(&fn, controldir))
+		STRERR_SYS(-1, rwhconfig_err, 0)
+	if (!stralloc_cats(&fn, "/"))
+		STRERR_SYS(-1, rwhconfig_err, 0)
+	if (!stralloc_cats(&fn, fname))
+		STRERR_SYS(-1, rwhconfig_err, 0)
+	if (!stralloc_0(&fn))
+		STRERR_SYS(-1, rwhconfig_err, 0)
+	if ((line ? config_readline : config_readfile) (c, fn.s) == -1)
+		STRERR_SYS3(-1, rwhconfig_err, "unable to read ", fn.s, ": ")
+	return (0);
+}
+
 int
 rwhconfig(rewrite, idappend)
 	config_str     *rewrite;
 	stralloc       *idappend;
 {
-	if (config_readline(&me, "control/me") == -1)
-		STRERR_SYS3(-1, rwhconfig_err, "unable to read ", auto_qmail, "/control/me: ")
+	int             i;
+
+	if ((i = my_config_read(&me, "me", 1)))
+		return (i);
 	if (!config(rewrite))
 	{
-		if (config_readfile(rewrite, "control/rewrite") == -1)
-			STRERR_SYS3(-1, rwhconfig_err, "unable to read ", auto_qmail, "/control/rewrite: ")
+		if ((i = my_config_read(rewrite, "rewrite", 0)))
+			return (i);
 		if (!config(rewrite))
 		{
 			if (config_env(&defaulthost, "QMAILDEFAULTHOST") == -1)
 				goto nomem;
-			if (config_readline(&defaulthost, "control/defaulthost") == -1)
-				STRERR_SYS3(-1, rwhconfig_err, "unable to read ", auto_qmail, "/control/defaulthost: ")
+			if ((i = my_config_read(&defaulthost, "defaulthost", 1)))
+				return (i);
 			if (config_copy(&defaulthost, &me) == -1)
 				goto nomem;
 			if (config_default(&defaulthost, "DEFAULTHOST") == -1)
@@ -48,8 +76,8 @@ rwhconfig(rewrite, idappend)
 
 			if (config_env(&defaultdomain, "QMAILDEFAULTDOMAIN") == -1)
 				goto nomem;
-			if (config_readline(&defaultdomain, "control/defaultdomain") == -1)
-				STRERR_SYS3(-1, rwhconfig_err, "unable to read ", auto_qmail, "/control/defaultdomain: ")
+			if ((i = my_config_read(&defaultdomain, "defaultdomain", 1)))
+				return (i);
 			if (config_copy(&defaultdomain, &me) == -1)
 				goto nomem;
 			if (config_default(&defaultdomain, "DEFAULTDOMAIN") == -1)
@@ -57,8 +85,8 @@ rwhconfig(rewrite, idappend)
 
 			if (config_env(&plusdomain, "QMAILPLUSDOMAIN") == -1)
 				goto nomem;
-			if (config_readline(&plusdomain, "control/plusdomain") == -1)
-				STRERR_SYS3(-1, rwhconfig_err, "unable to read ", auto_qmail, "/control/plusdomain: ")
+			if ((i = my_config_read(&plusdomain, "plusdomain", 1)))
+				return (i);
 			if (config_copy(&plusdomain, &me) == -1)
 				goto nomem;
 			if (config_default(&plusdomain, "PLUSDOMAIN") == -1)
@@ -90,8 +118,8 @@ rwhconfig(rewrite, idappend)
 	}
 	if (config_env(&idhost, "QMAILIDHOST") == -1)
 		goto nomem;
-	if (config_readline(&idhost, "control/idhost") == -1)
-		STRERR_SYS3(-1, rwhconfig_err, "unable to read ", auto_qmail, "/control/idhost: ")
+	if ((i = my_config_read(&idhost, "idhost", 1)))
+		return (i);
 	if (config_copy(&idhost, &me) == -1)
 		goto nomem;
 	if (config_default(&idhost, "IDHOST") == -1)
@@ -118,7 +146,7 @@ nomem:
 void
 getversion_rwhconfig_c()
 {
-	static char    *x = "$Id: rwhconfig.c,v 1.2 2004-10-22 20:30:04+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: rwhconfig.c,v 1.3 2010-07-21 09:02:42+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

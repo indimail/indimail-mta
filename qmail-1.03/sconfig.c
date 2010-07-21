@@ -1,5 +1,8 @@
 /*
  * $Log: sconfig.c,v $
+ * Revision 1.4  2010-07-21 09:17:58+05:30  Cprogrammer
+ * minor coding style change
+ *
  * Revision 1.3  2004-10-22 20:30:08+05:30  Cprogrammer
  * added RCS id
  *
@@ -24,9 +27,7 @@ config_default(c, s)
 	config_str     *c;
 	char           *s;
 {
-	if (c->flagconf)
-		return 0;
-	if (!s)
+	if (c->flagconf || !s)
 		return 0;
 	if (!stralloc_copys(&c->sa, s))
 		return -1;
@@ -39,9 +40,7 @@ config_copy(c, d)
 	config_str     *c;
 	config_str     *d;
 {
-	if (c->flagconf)
-		return 0;
-	if (!d->flagconf)
+	if (c->flagconf || !d->flagconf)
 		return 0;
 	if (!stralloc_copy(&c->sa, &d->sa))
 		return -1;
@@ -54,10 +53,7 @@ config_env(c, s)
 	config_str     *c;
 	char           *s;
 {
-	if (c->flagconf)
-		return 0;
-	s = env_get(s);
-	if (!s)
+	if (c->flagconf || !(s = env_get(s)))
 		return 0;
 	if (!stralloc_copys(&c->sa, s))
 		return -1;
@@ -72,6 +68,7 @@ process(sa)
 	int             i;
 
 	while (sa->len > 0)
+	{
 		switch (sa->s[sa->len - 1])
 		{
 		case '\n':
@@ -85,6 +82,7 @@ process(sa)
 					sa->s[i] = '\n';
 			return;
 		}
+	}
 }
 
 static char     inbuf[128];
@@ -101,23 +99,19 @@ config_readline(c, fn)
 
 	if (c->flagconf)
 		return 0;
-
-	fd = open_read(fn);
-	if (fd == -1)
+	if ((fd = open_read(fn)) == -1)
 	{
 		if (errno == error_noent)
 			return 0;
 		return -1;
 	}
 	substdio_fdbuf(&ss, read, fd, inbuf, sizeof inbuf);
-
 	if (getln(&ss, &line, &match, '\n') == -1)
 	{
 		close(fd);
 		return -1;
 	}
 	close(fd);
-
 	process(&line);
 	if (!stralloc_copy(&c->sa, &line))
 		return -1;
@@ -136,19 +130,15 @@ config_readfile(c, fn)
 
 	if (c->flagconf)
 		return 0;
-
 	if (!stralloc_copys(&c->sa, ""))
 		return -1;
-
-	fd = open_read(fn);
-	if (fd == -1)
+	if ((fd = open_read(fn)) == -1)
 	{
 		if (errno == error_noent)
 			return 0;
 		return -1;
 	}
 	substdio_fdbuf(&ss, read, fd, inbuf, sizeof inbuf);
-
 	for (;;)
 	{
 		if (getln(&ss, &line, &match, '\n') == -1)
@@ -162,18 +152,15 @@ config_readfile(c, fn)
 			close(fd);
 			return -1;
 		}
-		if (line.s[0])
-			if (line.s[0] != '#')
-				if (!stralloc_cat(&c->sa, &line))
-				{
-					close(fd);
-					return -1;
-				}
+		if (line.s[0] && line.s[0] != '#' && !stralloc_cat(&c->sa, &line))
+		{
+			close(fd);
+			return -1;
+		}
 		if (!match)
 			break;
 	}
 	close(fd);
-
 	c->flagconf = 1;
 	return 0;
 }
@@ -181,7 +168,7 @@ config_readfile(c, fn)
 void
 getversion_sconfig_c()
 {
-	static char    *x = "$Id: sconfig.c,v 1.3 2004-10-22 20:30:08+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: sconfig.c,v 1.4 2010-07-21 09:17:58+05:30 Cprogrammer Stab mbhangui $";
 
 	x++;
 }

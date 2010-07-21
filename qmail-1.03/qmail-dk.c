@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-dk.c,v $
+ * Revision 1.29  2010-07-21 08:59:14+05:30  Cprogrammer
+ * use CONTROLDIR environment variable instead of a hardcoded control directory
+ *
  * Revision 1.28  2009-08-13 18:36:39+05:30  Cprogrammer
  * for verification continue in case of DK_SYNTAX errors
  *
@@ -111,6 +114,7 @@
 #include "scan.h"
 #include "mess822.h"
 #include "control.h"
+#include "variables.h"
 #include "domainkeys.h"
 
 #define DEATH 86400	/*- 24 hours; _must_ be below q-s's OSSIFIED (36 hours) */
@@ -515,7 +519,7 @@ main(int argc, char *argv[])
 	int             wstat, match, opth = 0, optr = 0, optc = DK_CANON_NOFWS,
 					advicelen = ADVICE_BUF;
 	char           *x, *relayclient, *canon = "nofws", *selector = 0; 
-	stralloc        line = {0};
+	stralloc        line = {0}, dkfn = {0};
 	unsigned long   pid;
 
 	sig_blocknone();
@@ -527,7 +531,20 @@ main(int argc, char *argv[])
 	if (!dkverify)
 		dkverify = env_get("DKVERIFY");
 	if (!dksign && !dkverify && (relayclient = env_get("RELAYCLIENT")))
-		dksign = "control/domainkeys/%/default";
+	{
+		if (!controldir)
+		{
+			if (!(controldir = env_get("CONTROLDIR")))
+				controldir = "control";
+		}
+		if (!stralloc_copys(&dkfn, controldir))
+			die(51);
+		if (!stralloc_cats(&dkfn, "/domainkeys/%/default"))
+			die(51);
+		if (!stralloc_0(&dkfn))
+			die(51);
+		dksign = dkfn.s;
+	}
 	dkqueue = env_get("DKQUEUE");
 	if (dkqueue && *dkqueue)
 		binqqargs[0] = dkqueue;
@@ -797,7 +814,7 @@ main(argc, argv)
 void
 getversion_qmail_dk_c()
 {
-	static char    *x = "$Id: qmail-dk.c,v 1.28 2009-08-13 18:36:39+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: qmail-dk.c,v 1.29 2010-07-21 08:59:14+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

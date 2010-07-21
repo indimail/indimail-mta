@@ -2057,7 +2057,8 @@ domainkeys.o dktrace.o getopt.a env.a getln.a control.o dns_text.o stralloc.a dn
 qmail-dk.o: \
 compile qmail-dk.c substdio.h open.h sig.h fmt.h fd.h \
 qmail.h alloc.h str.h stralloc.h datetime.h now.h wait.h auto_qmail.h \
-sgetopt.h case.h getln.h env.h control.h domainkeys.h conf-domainkeys uint64.h
+sgetopt.h case.h getln.h env.h control.h domainkeys.h \
+uint64.h variables.h conf-domainkeys
 	./compile `grep -h -v "^#" conf-domainkeys` qmail-dk.c
 
 qmail-dk.0: qmail-dk.8
@@ -2121,7 +2122,7 @@ getopt.a sig.a stralloc.a substdio.a str.a dns.lib dkim.lib
 qmail-dkim.o: \
 compile qmail-dkim.c substdio.h open.h sig.h fmt.h fd.h \
 qmail.h alloc.h str.h stralloc.h datetime.h now.h wait.h auto_qmail.h \
-sgetopt.h case.h env.h control.h domainkeys.h hasdkim.h
+sgetopt.h case.h env.h control.h domainkeys.h hasdkim.h variables.h
 	./compile -I$(DESTDIR)$(INDIDIR)/include -I../libdkim-$(DKIM_VERSION) $(inc_deps) qmail-dkim.c
 
 qmail-dkim.8: qmail-dkim.9
@@ -2137,14 +2138,14 @@ dk-filter.8: dk-filter.9
 qmail-remote: \
 load qmail-remote.o control.o constmap.o timeoutread.o timeoutwrite.o base64sub.o \
 timeoutconn.o tcpto.o now.o dns.o ip.o ipalloc.o strsalloc.o ipme.o quote.o variables.o \
-error_str.o socket_ip4loopback.o socket_v6loopback.o socket_v6any.o \
+error_str.o socket_ip4loopback.o socket_v6loopback.o socket_v6any.o env.o \
 ndelay.a case.a sig.a open.a lock.a seek.a getln.a stralloc.a alloc.a \
 socket_v4mappedprefix.o scan_xlong.o socket_tcp.o socket_tcp6.o wait_pid.o \
 substdio.a str.a fs.a cdb.a auto_qmail.o envread.o error.a dns.lib socket.lib \
 tls.lib
 	./load qmail-remote control.o constmap.o timeoutread.o base64sub.o \
 	timeoutwrite.o timeoutconn.o tcpto.o now.o dns.o ip.o scan_xlong.o \
-	socket_ip4loopback.o socket_v6loopback.o socket_v6any.o ipalloc.o \
+	socket_ip4loopback.o socket_v6loopback.o socket_v6any.o ipalloc.o env.o \
 	error_str.o socket_v4mappedprefix.o strsalloc.o ipme.o quote.o wait_pid.o \
 	variables.o socket_tcp.o socket_tcp6.o ndelay.a case.a sig.a open.a \
 	lock.a seek.a getln.a stralloc.a alloc.a substdio.a \
@@ -3198,12 +3199,15 @@ sig.h str.h strerr.h substdio.h env.h
 	./compile maildirdeliver.c
 
 qmail-rm: load qmail-rm.o auto_split.o auto_qmail.o error_str.o error.o fmt_str.o \
+	control.o envread.o scan_ulong.o open_read.o getln.o getln2.o variables.o \
 	open_write.o lock_exnb.o fmt_ulong.o stralloc.a substdio.a str.a alloc.a
 	./load qmail-rm auto_split.o auto_qmail.o error_str.o error.o fmt_str.o \
+	control.o envread.o scan_ulong.o open_read.o getln.o getln2.o variables.o \
 	open_write.o lock_exnb.o fmt_ulong.o stralloc.a substdio.a str.a alloc.a
 
 qmail-rm.o: \
-compile qmail-rm.c auto_split.h stralloc.h open.h lock.h auto_qmail.h substdio.h fmt.h error.h
+compile qmail-rm.c auto_split.h stralloc.h open.h lock.h auto_qmail.h \
+substdio.h fmt.h error.h control.h env.h scan.h
 	./compile qmail-rm.c
 
 qmail-rm.0: qmail-rm.1
@@ -3845,11 +3849,12 @@ exit.h
 	./compile iftocc.c
 
 ofmipd: load ofmipd.o rewritehost.o rwhconfig.o sconfig.o qmail.o auto_qmail.o \
-timeoutread.o timeoutwrite.o commands.o base64sub.o now.o env.a cdb.a mess822.a \
-libtai.a getln.a strerr.a substdio.a stralloc.a alloc.a error.a \
-case.a str.a fs.a open.a wait.a sig.a fd.a
+variables.o timeoutread.o timeoutwrite.o commands.o base64sub.o now.o \
+env.a cdb.a mess822.a libtai.a getln.a strerr.a substdio.a stralloc.a \
+alloc.a error.a case.a str.a fs.a open.a wait.a sig.a fd.a
 	./load ofmipd rewritehost.o rwhconfig.o sconfig.o qmail.o \
-	auto_qmail.o timeoutread.o timeoutwrite.o commands.o base64sub.o now.o env.a \
+	auto_qmail.o variables.o timeoutread.o timeoutwrite.o \
+	commands.o base64sub.o now.o env.a \
 	cdb.a mess822.a libtai.a getln.a strerr.a substdio.a \
 	stralloc.a alloc.a error.a case.a str.a fs.a open.a wait.a \
 	sig.a fd.a 
@@ -3862,7 +3867,8 @@ timeoutread.h timeoutwrite.h stralloc.h gen_alloc.h \
 sconfig.h env.h exit.h error.h str.h mess822.h \
 caltime.h caldate.h tai.h uint64.h caltime.h cdb.h \
 fmt.h now.h case.h base64.h wait.h \
-uint32.h byte.h getln.h open.h leapsecs.h rewritehost.h rwhconfig.h
+uint32.h byte.h getln.h open.h variables.h \
+leapsecs.h rewritehost.h rwhconfig.h
 	./compile ofmipd.c
 
 rewritehost.0: rewritehost.3
@@ -3876,7 +3882,7 @@ rewriting.0: rewriting.5
 	nroff -man rewriting.5 > rewriting.0
 
 rwhconfig.o: compile rwhconfig.c rewritehost.h stralloc.h gen_alloc.h sconfig.h \
-stralloc.h strerr.h rwhconfig.h strerr.h auto_qmail.h
+stralloc.h strerr.h rwhconfig.h strerr.h auto_qmail.h variables.h
 	./compile rwhconfig.c
 
 ofmipname: load ofmipname.o cdbmss.o cdbmake.a strerr.a getln.a substdio.a \
@@ -4110,7 +4116,7 @@ stralloc.a substdio.a alloc.a str.a stralloc.a case.a
 
 822fields.o: compile 822fields.c \
 substdio.h strerr.h getln.h stralloc.h gen_alloc.h mess822.h caltime.h \
-caldate.h case.h exit.h alloc.h
+caldate.h case.h exit.h alloc.h uint64.h
 	./compile 822fields.c
 
 checkaddr: load checkaddr.o mess822.a getln.a strerr.a substdio.a \
@@ -5111,5 +5117,4 @@ ldap-checkpwd.o: \
 compile ldap-checkpwd.c error.h stralloc.h pathexec.h str.h env.h scan.h \
 subfd.h substdio.h strerr.h
 	./compile -DLDAP_DEPRECATED ldap-checkpwd.c
-
 #################################################################
