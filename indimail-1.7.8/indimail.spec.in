@@ -1,5 +1,8 @@
 #
 # $Log: indimail.spec.in,v $
+# Revision 2.192  2010-07-22 13:53:21+05:30  Cprogrammer
+# removed FC13 rc.local invocation of initctl
+#
 # Revision 2.191  2010-07-15 15:18:16+05:30  Cprogrammer
 # disable MAILSIZE_LIMIT
 #
@@ -601,7 +604,7 @@
 # rpm spec file for indimail
 #
 #
-# $Id: indimail.spec.in,v 2.191 2010-07-15 15:18:16+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 2.192 2010-07-22 13:53:21+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %define _unpackaged_files_terminate_build 1
 
@@ -2872,15 +2875,6 @@ fi
 # Install IndiMail to be started on system boot
 echo "adding indimail startup"
 %{_prefix}/sbin/svctool --config=add-boot
-if [ -f %{_sysconfdir}/rc.local ] ; then #FC13 stupidity
-	grep "/sbin/initctl emit qmailstart" %{_sysconfdir}/rc.local >/dev/null 2>&1
-	if [ $? -ne 0 ] ; then
-		(
-		echo "# Start IndiMail"
-		echo "/sbin/initctl emit qmailstart"
-		) >> %{_sysconfdir}/rc.local
-	fi
-fi
 
 if [ %noclamav -eq 0 ] ; then
 	%{__rm} -f %{servicedir}/freshclam/down
@@ -2975,12 +2969,6 @@ else
 			%{__mv} $i.old $i
 		fi
 	done
-fi
-if [ -f %{_sysconfdir}/rc.local ] ; then #FC13 stupidity
-	egrep -iv "indimail|qmail" %{_sysconfdir}/rc.local > %{_sysconfdir}/rc.local.$$
-	if [ $? -eq 0 ] ; then
-		%{__mv} -f %{_sysconfdir}/rc.local.$$ %{_sysconfdir}/rc.local
-	fi
 fi
 
 ### SCRIPTLET ###############################################################################
