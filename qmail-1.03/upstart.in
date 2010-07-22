@@ -1,4 +1,7 @@
 # $Log: upstart.in,v $
+# Revision 1.4  2010-07-22 19:01:16+05:30  Cprogrammer
+# handle upstart bug on shutdown (svscan getting respawned)
+#
 # Revision 1.3  2008-09-08 15:24:34+05:30  Cprogrammer
 # use the shorter notation for denoting multiple run levels
 #
@@ -14,18 +17,17 @@
 # to stop  - initctl emit qmailstop
 # start svscan
 # stop  svscan
-# $Id: upstart.in,v 1.3 2008-09-08 15:24:34+05:30 Cprogrammer Stab mbhangui $
+# $Id: upstart.in,v 1.4 2010-07-22 19:01:16+05:30 Cprogrammer Exp mbhangui $
 description "Start IndiMail Services"
-author      "Manvendra Bhangui"
+author      "$Author: Cprogrammer $"
+version     "$Revision: 1.4 $"
 
 start on runlevel [345]
 start on qmailstart
-start on started network
 
 stop on runlevel [0126]
 stop on runlevel r
 stop on starting shutdown
-stop on stopping network
 stop on qmailstop
 
 console none
@@ -33,7 +35,28 @@ emits indimail
 
 respawn
 respawn limit 10 5
+
+pre-start script
+	if [ -d /var/lock/subsys ] ; then
+		touch /var/lock/subsys/svscan
+	fi
+end script
+
 script
+	if [ -d /var/lock/subsys ] ; then
+		while true
+		do
+			if [ -f /var/lock/subsys/indimail ] ; then
+				break;
+			fi
+			sleep 5
+		done
+	fi
 	exec QMAIL/bin/svscanboot /service /service1
 end script
 
+post-stop script
+	if [ -d /var/lock/subsys ] ; then
+		rm -f /var/lock/subsys/svscan
+	fi
+end script
