@@ -2,7 +2,7 @@
 # Process this file with autoconf to produce a configure script.
 
 AC_PREREQ([2.60])
-AC_INIT([libdkim], [1.3], [mbhangui@gmail.com])
+AC_INIT([libdkim], [1.3], [manvendra@indimail.org])
 PACKAGE=$PACKAGE_NAME
 VERSION=$PACKAGE_VERSION
 AC_CONFIG_SRCDIR([dkimverify.h])
