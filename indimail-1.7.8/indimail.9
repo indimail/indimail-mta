@@ -447,6 +447,7 @@ ENVRULES          |qmail-smtpd  |used    |Any environment variable(s) can be set
                   |             |        |SPAMREDIRECT, SPAMIGNORE,
                   |             |        |SPAMIGNOREPATTERNS, QREGEX, DATABYTES,
                   |             |        |SMTPROUTE, ONSUCCESS_REMOTE
+                  |             |        |ONFAILURE_REMOTE
 ------------------|-------------|--------|----------------------------------------
 QREGEX            |qmail-smtpd  |used    |If set, regex is used to evaluate
                   |spawn-filter |        |patterns in
@@ -571,11 +572,13 @@ QMAILREMOTE       |spawn-filter |used    |The smtp client to call for remote
                   |             |        |not defined)
 ------------------|-------------|--------|----------------------------------------
 ONSUCCESS_REMOTE  |qmail-remote |used    |if set, program defined by
-                  |             |        |ONSUCCESS_REMOTE gets called on
-                  |             |        |successful remote deliveries. The argument
-                  |             |        |passed to this program are same as that
-                  |             |        |for qmail-remote. The program runs as uid
-                  |             |        |qmailr.
+ONFAILURE_REMOTE  |             |        |ONSUCCESS_REMOTE gets called on
+                  |             |        |successful remote deliveries. similarly
+                  |             |        |program defined by ONFAILURE_REMOET gets
+                  |             |        |called on failed remote deliveries.
+                  |             |        |Arguments passed to this program are same
+                  |             |        |as that for qmail-remote. These programs
+                  |             |        |runs as uid qmailr.
 ------------------|-------------|--------|----------------------------------------
 DEFAULT           |qmail-command|set     |Portion of address matching "-default"
                   |             |        |in a .qmail file name.
