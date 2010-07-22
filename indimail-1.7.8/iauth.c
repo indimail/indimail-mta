@@ -43,7 +43,7 @@
  *
  *
  * authenticate.c - Generic PAM Authentication module for pam_multi
- * Copyright (C) <2008>  Manvendra Bhangui <mbhangui@gmail.com>
+ * Copyright (C) <2008>  Manvendra Bhangui <manvendra@indimail.org>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by

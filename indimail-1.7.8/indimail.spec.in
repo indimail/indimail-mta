@@ -1,5 +1,8 @@
 #
 # $Log: indimail.spec.in,v $
+# Revision 2.193  2010-07-22 23:05:23+05:30  Cprogrammer
+# email changed to manvendra@indimail.org
+#
 # Revision 2.192  2010-07-22 13:53:21+05:30  Cprogrammer
 # removed FC13 rc.local invocation of initctl
 #
@@ -604,7 +607,7 @@
 # rpm spec file for indimail
 #
 #
-# $Id: indimail.spec.in,v 2.192 2010-07-22 13:53:21+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 2.193 2010-07-22 23:05:23+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %define _unpackaged_files_terminate_build 1
 
@@ -686,7 +689,7 @@
 %endif
 
 %if %build_on_obs != 0
-%define packager Manvendra Bhangui <mbhangui@gmail.com>
+%define packager Manvendra Bhangui <manvendra@indimail.org>
 %endif
 
 %if %build_on_obs != 0
@@ -2872,7 +2875,10 @@ if [ -f %{_prefix}/boot/rpm.init ] ; then
 	/bin/sh %{_prefix}/boot/rpm.init post
 fi
 
+#
 # Install IndiMail to be started on system boot
+# The add-boot command installs svscan to be started by init, upstart or launchctl
+#
 echo "adding indimail startup"
 %{_prefix}/sbin/svctool --config=add-boot
 

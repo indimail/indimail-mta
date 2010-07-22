@@ -1,5 +1,8 @@
 /*
  * $Log: indisrvr.c,v $
+ * Revision 2.42  2010-07-22 23:05:38+05:30  Cprogrammer
+ * email changed to manvendra@indimail.org
+ *
  * Revision 2.41  2010-03-06 14:55:02+05:30  Cprogrammer
  * return error code in ssl translate function correctly
  *
@@ -151,7 +154,7 @@
 #include "indimail.h"
 
 #ifndef lint
-static char     sccsid[] = "$Id: indisrvr.c,v 2.41 2010-03-06 14:55:02+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: indisrvr.c,v 2.42 2010-07-22 23:05:38+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef CLUSTERED_SITE
@@ -195,8 +198,8 @@ static char     sccsid[] = "$Id: indisrvr.c,v 2.41 2010-03-06 14:55:02+05:30 Cpr
  * Login: admin<lf>
  * Password: xxxxxxxx<lf>
  * OK
- * 7 vuserinfo -n mbhangui@indimail.org<lf>
- * name          : mbhangui@indimail.org
+ * 7 vuserinfo -n manvendra@indimail.org<lf>
+ * name          : manvendra@indimail.org
  * <lf>
  * RETURNSTATUS0
  *

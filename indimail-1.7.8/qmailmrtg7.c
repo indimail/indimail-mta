@@ -42,7 +42,7 @@
  * Richard A. Secor <rsecor@seqlogic.com>
  * Added support for rblsmtpd deny
  *
- * Modified for IndiMail by Manvendra Bhangui <mbhangui@gmail.com>
+ * Modified for IndiMail by Manvendra Bhangui <manvendra@indimail.org>
  */
 #include <stdio.h>
 #include <unistd.h>

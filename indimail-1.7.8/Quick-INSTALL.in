@@ -137,13 +137,13 @@
    To send mails, you can either use SMTP or use a sendmail (IndiMail's sendmail replacement
    @indimaildir@/bin/sendmail).
 
-   % ( echo 'First M. Last'; uname -a) | mail -s "IndiMail Installation" mbhangui@gmail.com
+   % ( echo 'First M. Last'; uname -a) | mail -s "IndiMail Installation" manvendra@indimail.org
 
    Replace First M. Last with your name.
 
    --- * --- * ---- * --- * --- THE END --- * --- * --- * --- * ---
 
    x------------------------------------------------------------------------------------x
-   |NOTE: You can email me at mbhangui@gmail.com, if you find this confusing or need any|
-   |help/clarification.                                                                 |
+   |NOTE: You can email me at manvendra@indimail.org, if you find this confusing or     |
+   |need any help/clarification.                                                        |
    x------------------------------------------------------------------------------------x

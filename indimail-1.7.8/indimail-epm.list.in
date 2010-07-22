@@ -1,5 +1,8 @@
 #
 # $Log: indimail-epm.list.in,v $
+# Revision 2.56  2010-07-22 23:04:46+05:30  Cprogrammer
+# email changed to manvendra@indimail.org
+#
 # Revision 2.55  2010-07-15 15:18:09+05:30  Cprogrammer
 # disable MAILSIZE_LIMIT
 #
@@ -217,7 +220,7 @@ $default_domain=@defaultdomain@
 
 %version @version@
 %release 1
-%packager Manvendra Bhangui <mbhangui@gmail.com>
+%packager Manvendra Bhangui <manvendra@indimail.org>
 
 d 555 root qmail ${prefix} -
 d 2555 alias qmail ${prefix}/alias -

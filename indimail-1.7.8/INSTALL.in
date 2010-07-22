@@ -35,7 +35,7 @@ Installation of IndiMail using source involves going through ten sections. Don't
 I didn't warn you. You may jump to Section 1 below if you are in a hurry and have some Unix
 experience under your belt. If you have ideas on how to simplify this documentation further,
 do write to me. In case you get stuck, do write to me
-at "Manvendra Bhangui" <mbhangui@gmail.com>
+at "Manvendra Bhangui" <manvendra@indimail.org>
 
 Checklist
 =========
@@ -1217,7 +1217,7 @@ You can go on to add a virtual domain and users if you wish
 
     you can do the following to send a test mail.
 
-    % ( echo 'First M. Last'; uname -a) | mail -s "IndiMail Installation" mbhangui@gmail.com
+    % ( echo 'First M. Last'; uname -a) | mail -s "IndiMail Installation" manvendra@indimail.org
 
     Replace First M. Last with your name.
 
