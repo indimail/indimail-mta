@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-queue.c,v $
+ * Revision 1.54  2010-07-22 13:48:53+05:30  Cprogrammer
+ * terminate QQEH header with newline
+ *
  * Revision 1.53  2010-06-29 11:15:33+05:30  Cprogrammer
  * fixed various bugs with rule based archival, eliminated duplication of emails
  *
@@ -807,8 +810,8 @@ set_archive(char *eaddr)
 int
 main()
 {
-	int             token_len, exclude = 0, include = 0, loghead = 0, line_brk_excl = 1, line_brk_incl = 1,
-					in_header = 1, line_brk_log = 1, logfd = -1;
+	int             token_len, exclude = 0, include = 0, loghead = 0, line_brk_excl = 1,
+					line_brk_incl = 1, in_header = 1, line_brk_log = 1, logfd = -1;
 #ifdef USE_FSYNC
 	int             fd;
 #endif
@@ -1233,6 +1236,9 @@ main()
 	{
 		if (substdio_bputs(&ssout, qqeh) == -1)
 			die_write();
+		len = str_len(qqeh);
+		if (qqeh[len - 1] != '\n' && substdio_bput(&ssout, "\n", 1) == -1)
+			die_write();
 	}
 	if ((qqeh && *qqeh) || (qqehextra.s && qqehextra.len))
 	{
@@ -1283,7 +1289,7 @@ main()
 void
 getversion_qmail_queue_c()
 {
-	static char    *x = "$Id: qmail-queue.c,v 1.53 2010-06-29 11:15:33+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: qmail-queue.c,v 1.54 2010-07-22 13:48:53+05:30 Cprogrammer Stab mbhangui $";
 
 #ifdef INDIMAIL
 	x = sccsidh;
