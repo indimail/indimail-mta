@@ -1,4 +1,4 @@
-# $Log: upstart.sh,v $
+# $Log: upstart.in,v $
 # Revision 1.3  2008-09-08 15:24:34+05:30  Cprogrammer
 # use the shorter notation for denoting multiple run levels
 #
@@ -14,17 +14,25 @@
 # to stop  - initctl emit qmailstop
 # start svscan
 # stop  svscan
-# $Id: upstart.sh,v 1.3 2008-09-08 15:24:34+05:30 Cprogrammer Stab mbhangui $
+# $Id: upstart.in,v 1.3 2008-09-08 15:24:34+05:30 Cprogrammer Stab mbhangui $
+description "Start IndiMail Services"
+author      "Manvendra Bhangui"
 
 start on runlevel [345]
 start on qmailstart
+start on started network
 
 stop on runlevel [0126]
 stop on runlevel r
+stop on starting shutdown
+stop on stopping network
 stop on qmailstop
 
 console none
+emits indimail
+
 respawn
+respawn limit 10 5
 script
 	exec QMAIL/bin/svscanboot /service /service1
 end script
