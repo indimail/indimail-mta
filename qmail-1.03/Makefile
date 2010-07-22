@@ -668,11 +668,11 @@ warn-auto.sh svscanboot.sh conf-qmail
 	| sed s}QMAIL}"`head -1 conf-qmail`"}g \
 	> svscanboot
 
-upstart:upstart.sh conf-qmail
+upstart:upstart.in conf-qmail
 	( \
 	echo "# svscan - runlevel compatibility"; \
 	echo "# WARNING: This file was auto-generated. Do not edit!"; \
-	cat upstart.sh | sed s}QMAIL}"`head -1 conf-qmail`"}g \
+	cat upstart.in | sed s}QMAIL}"`head -1 conf-qmail`"}g \
 	) > upstart
 
 svscanboot.0: \
