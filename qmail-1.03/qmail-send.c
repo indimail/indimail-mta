@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-send.c,v $
+ * Revision 1.48  2010-07-23 13:59:20+05:30  Cprogrammer
+ * fixed envrules() not working
+ *
  * Revision 1.47  2010-07-21 21:20:51+05:30  Cprogrammer
  * added envheader code
  *
@@ -1054,6 +1057,25 @@ bounce_process(struct qmail *qq, char *bouncefn, char *bounce_report, char *orig
 	return (1);
 }
 
+void
+chdir_toqueue()
+{
+	if (!queuedir)
+	{
+		if (!(queuedir = env_get("QUEUEDIR")))
+#ifdef INDIMAIL
+			queuedir = "queue1";
+#else
+			queuedir = "queue";
+#endif
+	}
+	while (chdir(queuedir) == -1)
+	{
+		log3("alert: unable to switch back to queue directory; HELP! sleeping...", error_str(errno), "\n");
+		sleep(10);
+	}
+}
+
 int
 injectbounce(id)
 	unsigned long   id;
@@ -1119,37 +1141,64 @@ injectbounce(id)
 		 * Unset SPAMFILTER & FILTERARGS before calling qmail-queue
 		 * and set it back after queue-queue returns
 		 */
-		if ((env_get("SPAMFILTER") && !env_unset("SPAMFILTER")) || (env_get("FILTERARGS") && !env_unset("FILTERARGS")))
+		if ((env_get("SPAMFILTER") && !env_unset("SPAMFILTER")) ||
+			(env_get("FILTERARGS") && !env_unset("FILTERARGS")))
 		{
 			log1("alert: out of memory; will try again later\n");
 			restore_env();
-			return(0);
+			return (0);
 		}
 		/*-
 		 * Allow bounces to have different rules, queue, controls, etc
 		 */
-		if ((ret = envrules(sender.s, "bounce.envrules", "BOUNCERULES", 0)) == -1)
+		if (chdir(auto_qmail) == -1)
 		{
-			log1("alert: out of memory; will try again later\n");
-			restore_env();
-			return (0);
-		} else
-		if (ret == -2)
-		{
-			log1("alert: cannot start: unable to read bounce.envrules\n");
-			restore_env();
-			return (0);
-		} else
-		if (ret == -4)
-		{
-			log1("alert: cannot start: regex compilation failed\n");
+			log3("alert: unable to reread controls: unable to switch to home directory",
+				error_str(errno), "\n");
 			restore_env();
 			return (0);
 		}
-		if (ret)
+		switch ((ret = envrules(sender.s, "bounce.envrules", "BOUNCERULES", 0)))
+		{
+		case AM_MEMORY_ERR:
+			log1("alert: out of memory; will try again later\n");
+			restore_env();
+			chdir_toqueue();
+			return (0);
+			break;
+		case AM_FILE_ERR:
+			log1("alert: cannot start: unable to read bounce.envrules\n");
+			restore_env();
+			chdir_toqueue();
+			return (0);
+			break;
+		case AM_REGEX_ERR:
+			log1("alert: cannot start: regex compilation failed\n");
+			restore_env();
+			chdir_toqueue();
+			return (0);
+			break;
+		case 0:
+			chdir_toqueue();
+			break;
+		default:
+			if (ret > 0)
 #ifdef EXTERNAL_TODO
-			reread(0);
+				reread(0); /*- this does chdir_toqueue() */
+#else
+				reread(); /*- this does chdir_toqueue() */
 #endif
+			else
+			if (ret)
+			{
+				log1("alert: cannot start: envrules failed\n");
+				restore_env();
+				chdir_toqueue();
+				return (0);
+			} else
+				chdir_toqueue();
+			break;
+		}
 		if (qmail_open(&qqt) == -1)
 		{
 			log1("warning: unable to start qmail-queue, will try later\n");
@@ -2595,20 +2644,7 @@ reread()
 		write(todofdout, "H", 1);
 #endif
 	regetcontrols();
-	if (!queuedir)
-	{
-		if (!(queuedir = env_get("QUEUEDIR")))
-#ifdef INDIMAIL
-			queuedir = "queue1";
-#else
-			queuedir = "queue";
-#endif
-	}
-	while (chdir(queuedir) == -1)
-	{
-		log3("alert: unable to switch back to queue directory; HELP! sleeping...", error_str(errno), "\n");
-		sleep(10);
-	}
+	chdir_toqueue();
 }
 
 int
@@ -2848,13 +2884,13 @@ main()
 	} /*- while (!flagexitasap || !del_canexit() || flagtodoalive) */
 	pqfinish();
 	log1("status: qmail-send exiting\n");
-	return(0);
+	return (0);
 }
 
 void
 getversion_qmail_send_c()
 {
-	static char    *x = "$Id: qmail-send.c,v 1.47 2010-07-21 21:20:51+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-send.c,v 1.48 2010-07-23 13:59:20+05:30 Cprogrammer Exp mbhangui $";
 
 #ifdef INDIMAIL
 	x = sccsidh;

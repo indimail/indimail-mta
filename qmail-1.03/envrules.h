@@ -1,5 +1,8 @@
 /*
  * $Log: envrules.h,v $
+ * Revision 1.5  2010-07-23 13:58:35+05:30  Cprogrammer
+ * added error definition constants
+ *
  * Revision 1.4  2009-05-01 10:40:23+05:30  Cprogrammer
  * added errorstr argument to envrules()
  *
@@ -16,4 +19,24 @@
 #ifndef _ENVRULES_H
 #define _ENVRULES_H
 int             envrules(char *, char *, char *, char **);
+
+#ifndef AM_MEMORY_ERR
+#define  AM_MEMORY_ERR -1
+#endif
+#ifndef AM_FILE_ERR
+#define  AM_FILE_ERR   -2
+#endif
+#ifndef AM_LSEEK_ERR
+#define  AM_LSEEK_ERR  -3
+#endif
+#ifndef AM_REGEX_ERR
+#define  AM_REGEX_ERR  -4
+#endif
+#ifndef AM_CONFIG_ERR
+#define  AM_CONFIG_ERR -5
+#endif
+#ifndef AM_MYSQL_ERR
+#define  AM_MYSQL_ERR  -6
+#endif
+
 #endif
