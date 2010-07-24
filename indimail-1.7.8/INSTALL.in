@@ -237,6 +237,8 @@ I usually prefer to run privileged commands like this (so that I don't get fond 
     # useradd -M -g qmail    -u 562 -d @indimaildir@        -s /bin/false qmails
     # useradd -M -g qscand   -u 563 -d @indimaildir@/qscanq -G qmail,qscand -s /bin/false qscand
 
+#   on a debian system omit the -M option above
+
     For Mac OS X 10.5.4 or greater
 
     # dscl . -create /Groups/indimail PrimaryGroupID 555
