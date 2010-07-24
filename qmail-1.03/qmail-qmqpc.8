@@ -22,7 +22,12 @@ is replaced with a symbolic link to
 IP addresses of QMQP servers, one address per line.
 .B qmail-qmqpc
 will try each address in turn until it establishes a QMQP connection
-or runs out of addresses.
+or runs out of addresses. If \fIqmqpservers\fR control file has the sticky bit set,
+\fBqmail-qmqpc\fR will use the modulus of current
+time in seconds and the number of servers in \fIqmqpservers\fR file to select just one
+address. If this address fails, \fBqmail-qmqpc\fR will revert to the traditional method where
+it tries each address till it establishes a QMQP connection. This allows one to distribute
+the load across multiple QMQP servers.
 .TP 5
 .I timeoutconnect
 Number of seconds
@@ -30,12 +35,23 @@ Number of seconds
 will wait for the remote QMQP server to accept a connection.
 Default: 10.
 The kernel normally imposes a 75-second upper limit.
+
 .TP 5
 .I timeoutremote
 Number of seconds
 .B qmail-qmqpc
 will wait for each response from the remote QMQP server.
 Default: 60.
+
+.TP 5
+.I outgoingip
+IP address to be used on outgoing connections.
+Default: system-defined.
+The value
+.IR 0.0.0.0
+is equivalent to the system default. The name for this control file can also be configured
+by setting the environment variable \fBOUTGOINGIP\fR
+
 .SH "SEE ALSO"
 qmail-control(5),
 qmail-queue(8),

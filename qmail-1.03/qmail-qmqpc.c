@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-qmqpc.c,v $
+ * Revision 1.13  2010-07-24 18:58:41+05:30  Cprogrammer
+ * added load distribution logic
+ *
  * Revision 1.12  2010-04-06 20:25:20+05:30  Cprogrammer
  * use PORT_QMQP environment variable to configure QMQP port
  *
@@ -26,6 +29,7 @@
  *
  */
 #include <sys/types.h>
+#include <sys/stat.h>
 #include <unistd.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
@@ -48,6 +52,8 @@
 #include "auto_qmail.h"
 #include "control.h"
 #include "fmt.h"
+#include "now.h"
+#include "variables.h"
 
 #define PORT_QMQP 628
 
@@ -276,9 +282,11 @@ stralloc        servers = { 0 };
 int
 main()
 {
-	int             i, j, r;
+	int             i, j, r, server_count, server_no = 0, load_dist = 0;
 	union v46addr   outip;
+	struct stat     st;
 	stralloc        outgoingip = { 0 };
+	stralloc        qmqpfn = {0};
 
 	sig_pipeignore();
 	if (chdir(auto_qmail) == -1)
@@ -321,12 +329,51 @@ main()
 	if (!ip_scan(outgoingip.s, &outip.ip))
 		die_format();
 #endif
+	if (!controldir)
+	{
+		if (!(controldir = env_get("CONTROLDIR")))
+			controldir = "control";
+	}
+	if (!stralloc_copys(&qmqpfn, controldir))
+		nomem();
+	if (!stralloc_catb(&qmqpfn, "/qmqpservers\0", 13))
+		nomem();
+	if (stat(qmqpfn.s, &st) == -1)
+		die_control();
+	if (st.st_mode & 01000)
+		load_dist = 1;
 	i = 0;
+	if (load_dist)
+	{
+		server_count = 0;
+		for (j = 0; j < servers.len; ++j)
+		{
+			if (!servers.s[j])
+			{
+				server_count++;
+				i = j + 1;
+			}
+		}
+		server_no = (now() % server_count);
+	}
+again:
+	i = server_count = 0;
 	for (j = 0; j < servers.len; ++j)
 	{
 		if (!servers.s[j])
 		{
-			doit(servers.s + i, &outip);
+			if (load_dist)
+			{
+				if (server_count == server_no || server_count == -1)
+				{
+					doit(servers.s + i, &outip);
+					load_dist = 0; /*- fallback to traditional method */
+					goto again;
+				}
+				if (server_count != -1)
+					server_count++;
+			} else
+				doit(servers.s + i, &outip);
 			i = j + 1;
 		}
 	}
@@ -338,7 +385,7 @@ main()
 void
 getversion_qmail_qmqpc_c()
 {
-	static char    *x = "$Id: qmail-qmqpc.c,v 1.12 2010-04-06 20:25:20+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: qmail-qmqpc.c,v 1.13 2010-07-24 18:58:41+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
