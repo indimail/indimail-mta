@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-remote.c,v $
+ * Revision 1.67  2010-07-24 20:15:31+05:30  Cprogrammer
+ * define ERRTEXT env variable for ONSUCCESS_REMOTE, ONFAILURE_REMOTE scripts
+ *
  * Revision 1.66  2010-07-24 17:37:52+05:30  Cprogrammer
  * fixed SMTPCODE, SMTPTEXT not getting set for failures
  * fixed logic for quit() function
@@ -310,6 +313,7 @@ int             fdmoreroutes = -1;
 int             flagtcpto = 1;
 int             min_penalty = MIN_PENALTY;
 unsigned long   max_tolerance = MAX_TOLERANCE;
+stralloc        smtptext = { 0 };
 
 /*- http://mipassoc.org/pipermail/batv-tech/2007q4/000032.html */
 #ifdef BATV 
@@ -359,7 +363,7 @@ my_error(char *s1, char *s2, char *s3)
 }
 
 int
-success()
+success(char *s1, char *s2, char *s3)
 {
 	char           *prog, **args;
 	int             child, wstat, i;
@@ -393,6 +397,26 @@ success()
 			my_error("alert: Out of memory", 0, 0);
 			_exit (1);
 		}
+		if (s1 && !stralloc_copys(&smtptext, s1))
+		{
+			my_error("alert: Out of memory", 0, 0);
+			_exit (1);
+		}
+		if (s1 && s2 && !stralloc_cats(&smtptext, s2))
+		{
+			my_error("alert: Out of memory", 0, 0);
+			_exit (1);
+		}
+		if (s1 && s2 && s3 && !stralloc_cats(&smtptext, s3))
+		{
+			my_error("alert: Out of memory", 0, 0);
+			_exit (1);
+		}
+		if (!env_put2("ERRTEXT", smtptext.s))
+		{
+			my_error("alert: Out of memory", 0, 0);
+			_exit (1);
+		}
 		/*- copy all arguments */
 		for (i = 0;i < my_argc;i++)
 			args[i] = my_argv[i];
@@ -413,7 +437,7 @@ success()
 }
 
 int
-failure()
+failure(char *s1, char *s2, char *s3)
 {
 	char           *prog, **args;
 	int             child, wstat, i;
@@ -443,6 +467,26 @@ failure()
 			_exit (1);
 		} else
 		if (!stralloc_0(&qqeh))
+		{
+			my_error("alert: Out of memory", 0, 0);
+			_exit (1);
+		}
+		if (s1 && !stralloc_copys(&smtptext, s1))
+		{
+			my_error("alert: Out of memory", 0, 0);
+			_exit (1);
+		}
+		if (s1 && s2 && !stralloc_cats(&smtptext, s2))
+		{
+			my_error("alert: Out of memory", 0, 0);
+			_exit (1);
+		}
+		if (s1 && s2 && s3 && !stralloc_cats(&smtptext, s3))
+		{
+			my_error("alert: Out of memory", 0, 0);
+			_exit (1);
+		}
+		if (!env_put2("ERRTEXT", smtptext.s))
 		{
 			my_error("alert: Out of memory", 0, 0);
 			_exit (1);
@@ -479,7 +523,7 @@ zerodie(char *s1, char *s2, char *s3, int fail)
 	zero();
 	substdio_flush(subfdoutsmall);
 	if (!fail || fail == 1)
-		_exit((fail ?  failure : success) ());
+		_exit((fail ?  failure : success) (s1, s2, s3));
 	else
 		_exit(0);
 }
@@ -792,7 +836,6 @@ substdio        ssin = SUBSTDIO_FDBUF(read, 0, inbuf, sizeof inbuf);
 substdio        smtpto = SUBSTDIO_FDBUF(safewrite, -1, smtptobuf, sizeof smtptobuf);
 char            smtpfrombuf[128];
 substdio        smtpfrom = SUBSTDIO_FDBUF(saferead, -1, smtpfrombuf, sizeof smtpfrombuf);
-stralloc        smtptext = { 0 };
 
 void
 get(char *ch)
@@ -2493,7 +2536,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_remote_c()
 {
-	static char    *x = "$Id: qmail-remote.c,v 1.66 2010-07-24 17:37:52+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-remote.c,v 1.67 2010-07-24 20:15:31+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
