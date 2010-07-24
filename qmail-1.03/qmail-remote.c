@@ -1,5 +1,10 @@
 /*
  * $Log: qmail-remote.c,v $
+ * Revision 1.66  2010-07-24 17:37:52+05:30  Cprogrammer
+ * fixed SMTPCODE, SMTPTEXT not getting set for failures
+ * fixed logic for quit() function
+ * execute failure() script only for permanent failures
+ *
  * Revision 1.65  2010-07-20 20:11:12+05:30  Cprogrammer
  * execute program/script on failure if ONFAILURE_REMOTE is defined
  * set SMTPTEXT, SMTPCODE environment variables if success() or failure() function
@@ -286,6 +291,7 @@ int             mxps = 0;
 #endif
 struct constmap maplocalips;
 stralloc        host = { 0 };
+stralloc        rhost = { 0 }; /*- host to which qmail-remote ultimately connects */
 stralloc        sender = { 0 };
 stralloc        qqeh = { 0 };
 stralloc        user = { 0 };
@@ -468,11 +474,14 @@ zero()
 }
 
 void
-zerodie(int succ)
+zerodie(char *s1, char *s2, char *s3, int fail)
 {
 	zero();
 	substdio_flush(subfdoutsmall);
-	_exit((succ ?  success : failure) ());
+	if (!fail || fail == 1)
+		_exit((fail ?  failure : success) ());
+	else
+		_exit(0);
 }
 
 void
@@ -504,119 +513,143 @@ temp_noip()
 	out("Zinvalid ipaddr in ");
 	out(controldir);
 	out("/outgoingip (#4.3.0)\n");
-	zerodie(0);
+	zerodie(0, 0, 0, -1);
 }
 
 void
 temp_nomem()
 {
 	out("ZOut of memory. (#4.3.0)\n");
-	zerodie(0);
+	zerodie(0, 0, 0, -1);
 }
 
 void
 temp_oserr()
 {
 	out("ZSystem resources temporarily unavailable. (#4.3.0)\n");
-	zerodie(0);
+	zerodie(0, 0, 0, -1);
 }
 
 void
 temp_read()
 {
 	out("ZUnable to read message. (#4.3.0)\n");
-	zerodie(0);
+	zerodie(0, 0, 0, -1);
 }
 
 void
 temp_dnscanon()
 {
 	out("ZCNAME lookup failed temporarily. (#4.4.3)\n");
-	zerodie(0);
+	zerodie(0, 0, 0, -1);
 }
 
 void
 temp_dns()
 {
 	out("ZSorry, I couldn't find any host by that name. (#4.1.2)\n");
-	zerodie(0);
+	zerodie(0, 0, 0, -1);
 }
 
 void
 temp_chdir()
 {
 	out("ZUnable to switch to home directory. (#4.3.0)\n");
-	zerodie(0);
+	zerodie(0, 0, 0, -1);
 }
 
 void
 temp_control()
 {
 	out("ZUnable to read control files. (#4.3.0)\n");
-	zerodie(0);
+	zerodie(0, 0, 0, -1);
 }
 
 void
 perm_partialline()
 {
-	out("DSMTP cannot transfer messages with partial final lines. (#5.6.2)\n");
-	zerodie(0);
+	char           *r = "DSMTP cannot transfer messages with partial final lines. (#5.6.2)\n";
+
+	out(r);
+	zerodie(r, 0, 0, 0);
 }
 
 void
 perm_usage()
 {
-	out("DI (qmail-remote) was invoked improperly. (#5.3.5)\n");
-	zerodie(0);
+	char           *r = "DI (qmail-remote) was invoked improperly. (#5.3.5)\n";
+
+	out(r);
+	zerodie(r, 0, 0, 0);
 }
 
 void
 perm_dns()
 {
-	out("DSorry, I couldn't find any host named ");
+	char           *r = "DSorry, I couldn't find any host named ";
+
+	out(r);
 	outsafe(&host);
 	out(". (#5.1.2)\n");
-	zerodie(0);
+	zerodie(r, !stralloc_0(&host) ? 0 : host.s, 0, 0);
 }
 
 void
 perm_nomx()
 {
-	out("DSorry, I couldn't find a mail exchanger or IP address. (#5.4.4)\n");
-	zerodie(0);
+	char           *r = "DSorry, I couldn't find a mail exchanger or IP address. (#5.4.4)\n";
+
+	out(r);
+	zerodie(r, 0, 0, 0);
 }
 
 void
 perm_ambigmx()
 {
+	char           *r = "DSorry. Although I'm listed as a best-preference MX or A for that host,\nit isn't in my ";
+
 	if (!controldir)
 	{
 		if (!(controldir = env_get("CONTROLDIR")))
 			controldir = "control";
 	}
-	out("DSorry. Although I'm listed as a best-preference MX or A for that host,\nit isn't in my ");
+	out(r);
 	out(controldir);
 	out("/locals file, so I don't treat it as local. (#5.4.6)\n");
-	zerodie(0);
+	zerodie(r, controldir, "/locals file, so I don't treat it as local. (#5.4.6)\n", 0);
 }
 
 void
 outhost()
 {
 	char            x[IPFMT];
+	unsigned int    len;
 
 #ifdef IPV6
 	if (partner.af == AF_INET)
 	{
-		if (substdio_put(subfdoutsmall, x, ip_fmt(x, &partner.addr.ip)) == -1)
+		len = ip_fmt(x, &partner.addr.ip);
+		if (!stralloc_copyb(&rhost, x, len))
+			temp_nomem();
+		if (substdio_put(subfdoutsmall, x, len) == -1)
 			_exit(0);
 	} else
-	if (substdio_put(subfdoutsmall, x, ip6_fmt(x, &partner.addr.ip6)) == -1)
-		_exit(0);
+	{
+		len = ip6_fmt(x, &partner.addr.ip6);
+		if (!stralloc_copyb(&rhost, x, len))
+			temp_nomem();
+		if (substdio_put(subfdoutsmall, x, len) == -1)
+			_exit(0);
+	}
 #else
-	if (substdio_put(subfdoutsmall, x, ip_fmt(x, &partner.addr.ip)) == -1)
+	len = ip_fmt(x, &partner.addr.ip);
+	if (!stralloc_copyb(&rhost, x, len))
+		temp_nomem();
+	if (substdio_put(subfdoutsmall, x, len) == -1)
 		_exit(0);
 #endif
+	if (!stralloc_0(&rhost))
+		temp_nomem();
 }
 
 int             flagcritical = 0;
@@ -652,7 +685,7 @@ dropped()
 	}
 #endif
 	out("(#4.4.2)\n");
-	zerodie(0);
+	zerodie(0, 0, 0, -1);
 }
 
 void
@@ -677,7 +710,7 @@ temp_noconn(stralloc *h, char *ip, int port)
 		alloc_free(ip);
 	}
 	out(". (#4.4.1)\n");
-	zerodie(0);
+	zerodie(0, 0, 0, -1);
 }
 
 void
@@ -698,13 +731,13 @@ temp_qmtp_noconn(stralloc *h, char *ip, int port)
 		alloc_free(ip);
 	}
 	out(". (#4.4.1)\n");
-	zerodie(0);
+	zerodie(0, 0, 0, -1);
 }
 
 void
 err_authprot()
 {
-	out("Jno supported AUTH method found, continuing without authentication.\n");
+	out("Kno supported AUTH method found, continuing without authentication.\n");
 	zero();
 	substdio_flush(subfdoutsmall);
 }
@@ -878,7 +911,7 @@ ehlo()
 }
 
 void
-outsmtptext(unsigned int code)
+outsmtptext()
 {
 	int             i;
 
@@ -894,25 +927,13 @@ outsmtptext(unsigned int code)
 			}
 			if (substdio_put(subfdoutsmall, smtptext.s, smtptext.len) == -1)
 				_exit(0);
-			if (env_get("ONFAILURE_REMOTE") || env_get("ONSUCCESS_REMOTE"))
-			{
-				char            strnum[FMT_ULONG];
-
-				if (!stralloc_0(&smtptext))
-					temp_nomem();
-				if (!env_put2("SMTPTEXT", smtptext.s))
-					_exit(0);
-				strnum[fmt_ulong(strnum, code)] = 0;
-				if (!env_put2("SMTPCODE", strnum))
-					_exit(0);
-			}
 			smtptext.len = 0;
 		}
 	}
 }
 
 void
-quit(char *prepend, char *append, int die)
+quit(char *prepend, char *append, int code, int die)
 {
 #ifdef TLS
 	/*
@@ -926,11 +947,31 @@ quit(char *prepend, char *append, int die)
 	substdio_putsflush(&smtpto, "QUIT\r\n");
 #endif
 	/*- waiting for remote side is just too ridiculous */
-	out(prepend[0] == 'J' ? "K" : prepend);
+	out(prepend);
 	outhost();
 	out(append);
 	out(".\n");
-	outsmtptext(-1);
+	if (env_get("ONFAILURE_REMOTE") || env_get("ONSUCCESS_REMOTE"))
+	{
+		char            strnum[FMT_ULONG];
+
+		if (smtptext.s[smtptext.len - 1] == '\n')
+			smtptext.s[smtptext.len - 1] = 0;
+		else
+		if (!stralloc_0(&smtptext))
+			goto quit_now;
+		if (!env_put2("SMTPTEXT", smtptext.s))
+			goto quit_now;
+		smtptext.len--;
+		if (code > 0)
+		{
+			strnum[fmt_ulong(strnum, code)] = 0;
+			if (!env_put2("SMTPCODE", strnum))
+				goto quit_now;
+		}
+	}
+quit_now:
+	outsmtptext();
 #if defined(TLS) && defined(DEBUG)
 	if (ssl)
 	{
@@ -963,13 +1004,7 @@ quit(char *prepend, char *append, int die)
 		out(";\n");
 	}
 #endif
-	if (die)
-		zerodie(*prepend == 'K' ? 1 : 0);
-	else
-	{
-		zero();
-		substdio_flush(subfdoutsmall);
-	}
+	zerodie(prepend, rhost.s, append, die);
 }
 
 void
@@ -1010,7 +1045,7 @@ blast()
 
 #ifdef TLS
 
-#define TLS_QUIT quit(ssl ? "; connected to " : "; connecting to ", "", 1)
+#define TLS_QUIT quit(ssl ? "; connected to " : "; connecting to ", "", -1, 1)
 #define tls_quit_error(s) tls_quit(s, ssl_error())
 
 char           *partner_fqdn = 0;
@@ -1056,7 +1091,7 @@ verify_cb(int preverify_ok, X509_STORE_CTX * ctx)
 int
 tls_init()
 {
-	int             i = 0, needtlsauth = 0;
+	int             code, i = 0, needtlsauth = 0;
 	const char     *ciphers;
 	SSL            *myssl;
 	SSL_CTX        *ctx;
@@ -1314,8 +1349,8 @@ tls_init()
 
 		X509_free(peercert);
 	}
-	if (smtps && smtpcode() != 220)
-		quit("ZTLS Connected to ", " but greeting failed", 1);
+	if (smtps && (code = smtpcode()) != 220)
+		quit("ZTLS Connected to ", " but greeting failed", code, -1);
 	return 1;
 }
 #endif
@@ -1371,10 +1406,12 @@ mailfrom(int use_size)
 void
 auth_plain(int use_size)
 {
+	int             code;
+
 	substdio_puts(&smtpto, "AUTH PLAIN\r\n");
 	substdio_flush(&smtpto);
-	if (smtpcode() != 334)
-		quit("ZConnected to ", " but authentication was rejected (AUTH PLAIN).", 1);
+	if ((code = smtpcode()) != 334)
+		quit("ZConnected to ", " but authentication was rejected (AUTH PLAIN).", code, -1);
 	if (!stralloc_cat(&plain, &sender))
 		temp_nomem();			/*- Mail From: <authorize-id> */
 	if (!stralloc_0(&plain))
@@ -1388,12 +1425,12 @@ auth_plain(int use_size)
 	if (!stralloc_0(&plain))
 		temp_nomem();
 	if (b64encode(&plain, &auth))
-		quit("ZConnected to ", " but unable to base64encode (plain).", 1);
+		quit("ZConnected to ", " but unable to base64encode (plain).", -1, -1);
 	substdio_put(&smtpto, auth.s, auth.len);
 	substdio_puts(&smtpto, "\r\n");
 	substdio_flush(&smtpto);
-	if (smtpcode() != 235)
-		quit("ZConnected to ", " but authentication was rejected (plain).", 1);
+	if ((code = smtpcode()) != 235)
+		quit("ZConnected to ", " but authentication was rejected (plain).", code, -1);
 	if (!xtext(&xuser, user.s, user.len))
 		temp_nomem();
 	substdio_puts(&smtpto, "MAIL FROM:<");
@@ -1413,30 +1450,32 @@ auth_plain(int use_size)
 void
 auth_login(int use_size)
 {
+	int             code;
+
 	substdio_puts(&smtpto, "AUTH LOGIN\r\n");
 	substdio_flush(&smtpto);
-	if (smtpcode() != 334)
-		quit("ZConnected to ", " but authentication was rejected (AUTH LOGIN).", 1);
+	if ((code = smtpcode()) != 334)
+		quit("ZConnected to ", " but authentication was rejected (AUTH LOGIN).", code, -1);
 
 	if (!stralloc_copys(&auth, ""))
 		temp_nomem();
 	if (b64encode(&user, &auth))
-		quit("ZConnected to ", " but unable to base64encode user.", 1);
+		quit("ZConnected to ", " but unable to base64encode user.", -1, -1);
 	substdio_put(&smtpto, auth.s, auth.len);
 	substdio_puts(&smtpto, "\r\n");
 	substdio_flush(&smtpto);
-	if (smtpcode() != 334)
-		quit("ZConnected to ", " but authentication was rejected (username).", 1);
+	if ((code = smtpcode()) != 334)
+		quit("ZConnected to ", " but authentication was rejected (username).", code, -1);
 
 	if (!stralloc_copys(&auth, ""))
 		temp_nomem();
 	if (b64encode(&pass, &auth))
-		quit("ZConnected to ", " but unable to base64encode pass.", 1);
+		quit("ZConnected to ", " but unable to base64encode pass.", -1, -1);
 	substdio_put(&smtpto, auth.s, auth.len);
 	substdio_puts(&smtpto, "\r\n");
 	substdio_flush(&smtpto);
-	if (smtpcode() != 235)
-		quit("ZConnected to ", " but authentication was rejected (password)", 1);
+	if ((code = smtpcode()) != 235)
+		quit("ZConnected to ", " but authentication was rejected (password)", code, -1);
 
 	if (!xtext(&xuser, user.s, user.len))
 		temp_nomem();
@@ -1514,7 +1553,7 @@ smtp_auth(char *type, int use_size)
 void temp_proto()
 {
 	out("Zrecipient did not talk proper QMTP (#4.3.0)\n");
-	zerodie(0);
+	zerodie(0, 0, 0, -1);
 }
 
 #ifdef MXPS
@@ -1546,14 +1585,12 @@ qmtp(stralloc *h, char *ip, int port)
 	struct stat     st;
 	unsigned long   len;
 	char           *x;
-	int             i;
-	int             n;
+	int             i, n, flagallok;
 	unsigned char   ch;
 	char            num[FMT_ULONG];
-	int             flagallok;
 
 	if (fstat(0, &st) == -1)
-		quit("Z", "unable to fstat fd 0", 1);
+		quit("Z", "unable to fstat fd 0", -1, -1);
 	len = st.st_size;
 	/*
 	 * the following code was substantially taken from serialmail'ss serialqmtp.c 
@@ -1635,17 +1672,18 @@ qmtp(stralloc *h, char *ip, int port)
 		if (substdio_put(subfdoutsmall, smtptext.s + 1, smtptext.len - 1) == -1)
 			temp_qmtp_noconn(h, ip, port);
 		zero();
-	}
+	} /*- for (i = 0; i < reciplist.len; ++i) */
 	if (!flagallok) {
 		out("DGiving up on ");
 		outhost();
 		out(" - Protocol QMTP\n");
+		zerodie("DGiving up on ", rhost.s, " - Protocol QMTP\n", !flagallok);
 	} else {
 		out("K");
 		outhost();
 		out(" accepted message - Protocol QMTP\n");
+		zerodie("K", rhost.s, " accepted message - Protocol QMTP\n", !flagallok);
 	}
-	zerodie(flagallok);
 }
 
 stralloc         helo_str = { 0 };
@@ -1673,13 +1711,13 @@ smtp()
 #endif /*- #ifdef TLS */
 	inside_greeting = 0;
 	if (code >= 500 && code < 600)
-		quit("DConnected to ", " but greeting failed", 1);
+		quit("DConnected to ", " but greeting failed", code, 1);
 	else
 	if (code >= 400 && code < 500)
 		return; /* try next MX, see RFC-2821 */
 	else
 	if (code != 220)
-		quit("ZConnected to ", " but greeting failed", 1);
+		quit("ZConnected to ", " but greeting failed", code, -1);
 #ifdef TLS
 	if (!smtps)
 		code = ehlo();
@@ -1715,7 +1753,7 @@ smtp()
 			temp_nomem();
 		if (!stralloc_0(&helo_str))
 			temp_nomem();
-		quit(code >= 500 ? "DConnected to " : "ZConnected to " , helo_str.s, code >= 500 ? 1 : 0);
+		quit(code >= 500 ? "DConnected to " : "ZConnected to " , helo_str.s, code, code >= 500 ? 1 : -1);
 	}
 	/*
 	 * go through all lines of the multi line answer until one begins
@@ -1735,9 +1773,9 @@ smtp()
 	substdio_flush(&smtpto);
 	code = smtpcode();
 	if (code >= 500)
-		quit("DConnected to ", " but sender was rejected", 1);
+		quit("DConnected to ", " but sender was rejected", code, 1);
 	if (code >= 400)
-		quit("ZConnected to ", " but sender was rejected", 0);
+		quit("ZConnected to ", " but sender was rejected", code, -1);
 	flagbother = 0;
 	for (i = 0; i < reciplist.len; ++i)
 	{
@@ -1755,7 +1793,7 @@ smtp()
 			out("> ");
 			outhost();
 			out(" does not like recipient.\n");
-			outsmtptext(code);
+			outsmtptext();
 			zero();
 		} else
 		if (code >= 400)
@@ -1767,7 +1805,7 @@ smtp()
 			out("> ");
 			outhost();
 			out(" does not like recipient.\n");
-			outsmtptext(code);
+			outsmtptext();
 			zero();
 		} else
 		{
@@ -1781,21 +1819,21 @@ smtp()
 		}
 	}
 	if (!flagbother)
-		quit("DGiving up on ", "", 1);
+		quit("DGiving up on ", "", code, 1);
 	substdio_putsflush(&smtpto, "DATA\r\n");
 	code = smtpcode();
 	if (code >= 500)
-		quit("D", " failed on DATA command", 1);
+		quit("D", " failed on DATA command", code, 1);
 	if (code >= 400)
-		quit("Z", " failed on DATA command", 0);
+		quit("Z", " failed on DATA command", code, -1);
 	blast();
 	code = smtpcode();
 	flagcritical = 0;
 	if (code >= 500)
-		quit("D", " failed after I sent the message", 1);
+		quit("D", " failed after I sent the message", code, 1);
 	if (code >= 400)
-		quit("Z", " failed after I sent the message", 0);
-	quit("K", " accepted message - Protocol SMTP", 1);
+		quit("Z", " failed after I sent the message", code, -1);
+	quit("K", " accepted message - Protocol SMTP", code, 0);
 }
 
 stralloc        canonhost = { 0 };
@@ -2455,7 +2493,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_remote_c()
 {
-	static char    *x = "$Id: qmail-remote.c,v 1.65 2010-07-20 20:11:12+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-remote.c,v 1.66 2010-07-24 17:37:52+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
