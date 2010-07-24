@@ -1832,14 +1832,14 @@ auto_usera.h byte.h
 qmail-qmqpc: \
 load qmail-qmqpc.o slurpclose.o timeoutread.o timeoutwrite.o \
 constmap.o case_diffb.o timeoutconn.o ip.o control.o auto_qmail.o \
-socket_ip4loopback.o socket_v6loopback.o socket_v6any.o \
+now.o socket_ip4loopback.o socket_v6loopback.o socket_v6any.o \
 scan_xlong.o socket_v4mappedprefix.o socket_tcp.o socket_tcp6.o \
 envread.o str_diffn.o variables.o sig.a ndelay.a open.a \
 getln.a substdio.a stralloc.a alloc.a error.a str.a fs.a socket.lib
 	./load qmail-qmqpc slurpclose.o timeoutread.o \
 	constmap.o case_diffb.o socket_tcp.o socket_tcp6.o \
 	socket_ip4loopback.o socket_v6loopback.o socket_v6any.o \
-	scan_xlong.o socket_v4mappedprefix.o \
+	now.o scan_xlong.o socket_v4mappedprefix.o \
 	timeoutwrite.o timeoutconn.o ip.o control.o \
 	auto_qmail.o envread.o str_diffn.o variables.o \
 	sig.a ndelay.a open.a getln.a substdio.a stralloc.a alloc.a \
@@ -1853,7 +1853,7 @@ qmail-qmqpc.o: \
 compile qmail-qmqpc.c substdio.h getln.h exit.h \
 stralloc.h gen_alloc.h slurpclose.h error.h sig.h ip.h timeoutconn.h \
 timeoutread.h timeoutwrite.h auto_qmail.h control.h fmt.h str.h \
-scan.h env.h haveip6.h socket.h conf-ip
+variables.h now.h scan.h env.h haveip6.h socket.h conf-ip
 	./compile `grep -h -v "^#" conf-ip` qmail-qmqpc.c
 
 qmail-qmqpd: \
