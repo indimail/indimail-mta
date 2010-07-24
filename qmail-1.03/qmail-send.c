@@ -2659,7 +2659,7 @@ main()
 #endif
 	/*- startup plugins */
 	void           *handle;
-	int             i, status, len;
+	int             i, status = 0, len;
 	int             (*func) (void);
 	char            strnum[FMT_ULONG];
 	char           *error, *start_plugin, *plugin_symb, *plugindir, *ptr, *plugin_ptr, *end;
