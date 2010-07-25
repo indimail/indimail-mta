@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-remote.c,v $
+ * Revision 1.68  2010-07-25 19:48:21+05:30  Cprogrammer
+ * replaced success(), failure() script with a single run_script()
+ *
  * Revision 1.67  2010-07-24 20:15:31+05:30  Cprogrammer
  * define ERRTEXT env variable for ONSUCCESS_REMOTE, ONFAILURE_REMOTE scripts
  *
@@ -363,12 +366,27 @@ my_error(char *s1, char *s2, char *s3)
 }
 
 int
-success(char *s1, char *s2, char *s3)
+run_script(int succ, char *s1, char *s2, char *s3)
 {
-	char           *prog, **args;
+	char           *prog, *str;
+	char          **args;
 	int             child, wstat, i;
 
-	if (!(prog = env_get("ONSUCCESS_REMOTE")))
+	switch (succ)
+	{
+		case -1: /*- transient error */
+			str = "ONTRANSIENT_REMOTE";
+			break;
+		case 0: /*- failure */
+			str = "ONFAILURE_REMOTE";
+			break;
+		case 1: /*- success */
+			str = "ONSUCCESS_REMOTE";
+			break;
+		default:
+			return 0;
+	}
+	if (!(prog = env_get(str)))
 		return (0);
 	if (!(args = (char **) alloc(my_argc + 1)))
 	{
@@ -431,83 +449,7 @@ success(char *s1, char *s2, char *s3)
 		my_error("alert", prog, "crashed");
 		_exit (1);
 	}
-	_exit (wait_exitcode(wstat));
-	/* Not reached */
-	return (1);
-}
-
-int
-failure(char *s1, char *s2, char *s3)
-{
-	char           *prog, **args;
-	int             child, wstat, i;
-
-	if (!(prog = env_get("ONFAILURE_REMOTE")))
-		return (0);
-	if (!(args = (char **) alloc(my_argc + 1)))
-	{
-		my_error("alert: Out of memory", 0, 0);
-		_exit (1);
-	}
-	switch (child = fork())
-	{
-	case -1:
-		my_error("alert: fork failed", 0, 0);
-		_exit(0);
-		return (1);
-	case 0:
-		if (!stralloc_0(&host))
-		{
-			my_error("alert: Out of memory", 0, 0);
-			_exit (1);
-		} else
-		if (!stralloc_0(&sender))
-		{
-			my_error("alert: Out of memory", 0, 0);
-			_exit (1);
-		} else
-		if (!stralloc_0(&qqeh))
-		{
-			my_error("alert: Out of memory", 0, 0);
-			_exit (1);
-		}
-		if (s1 && !stralloc_copys(&smtptext, s1))
-		{
-			my_error("alert: Out of memory", 0, 0);
-			_exit (1);
-		}
-		if (s1 && s2 && !stralloc_cats(&smtptext, s2))
-		{
-			my_error("alert: Out of memory", 0, 0);
-			_exit (1);
-		}
-		if (s1 && s2 && s3 && !stralloc_cats(&smtptext, s3))
-		{
-			my_error("alert: Out of memory", 0, 0);
-			_exit (1);
-		}
-		if (!env_put2("ERRTEXT", smtptext.s))
-		{
-			my_error("alert: Out of memory", 0, 0);
-			_exit (1);
-		}
-		/*- copy all arguments */
-		for (i = 0;i < my_argc;i++)
-			args[i] = my_argv[i];
-		args[i] = 0;
-		execv(prog, args);
-		my_error("alert: Unable to run", prog, 0);
-		_exit (1);
-	}
-	wait_pid(&wstat, child);
-	if (wait_crashed(wstat))
-	{
-		my_error("alert", prog, "crashed");
-		_exit (1);
-	}
-	_exit (wait_exitcode(wstat));
-	/* Not reached */
-	return (1);
+	return (wait_exitcode(wstat));
 }
 
 void
@@ -518,14 +460,11 @@ zero()
 }
 
 void
-zerodie(char *s1, char *s2, char *s3, int fail)
+zerodie(char *s1, char *s2, char *s3, int succ)
 {
 	zero();
 	substdio_flush(subfdoutsmall);
-	if (!fail || fail == 1)
-		_exit((fail ?  failure : success) (s1, s2, s3));
-	else
-		_exit(0);
+	_exit(run_script(succ, s1, s2, s3));
 }
 
 void
@@ -1047,7 +986,7 @@ quit_now:
 		out(";\n");
 	}
 #endif
-	zerodie(prepend, rhost.s, append, die);
+	zerodie(prepend, rhost.s, append, !die);
 }
 
 void
@@ -1720,12 +1659,12 @@ qmtp(stralloc *h, char *ip, int port)
 		out("DGiving up on ");
 		outhost();
 		out(" - Protocol QMTP\n");
-		zerodie("DGiving up on ", rhost.s, " - Protocol QMTP\n", !flagallok);
+		zerodie("DGiving up on ", rhost.s, " - Protocol QMTP\n", flagallok);
 	} else {
 		out("K");
 		outhost();
 		out(" accepted message - Protocol QMTP\n");
-		zerodie("K", rhost.s, " accepted message - Protocol QMTP\n", !flagallok);
+		zerodie("K", rhost.s, " accepted message - Protocol QMTP\n", flagallok);
 	}
 }
 
@@ -2536,7 +2475,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_remote_c()
 {
-	static char    *x = "$Id: qmail-remote.c,v 1.67 2010-07-24 20:15:31+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-remote.c,v 1.68 2010-07-25 19:48:21+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
