@@ -125,13 +125,19 @@ If \fBONSUCCESS_REMOTE\fR environment variable is defined and points to a progra
 \fBqmail-remote\fR will execute the same, with uid \fIqmailr\fR, on successful email delivery
 to remote host \fIhost\fR. The exit status of \fBqmail-remote\fR will be the exit status of the
 program. The argument passed to this program will be the same as those for \fBqmail-remote\fR.
-If \fBONSUCCESS_REMOTE\fR is not defined \fBqmail-remote\fR always exits zero.
 
 If \fBONFAILURE_REMOTE\fR environment variable is defined and points to a program,
 \fBqmail-remote\fR will execute the same, with uid \fIqmailr\fR, on a failed email delivery
 to remote host \fIhost\fR. The exit status of \fBqmail-remote\fR will be the exit status of the
 program. The argument passed to this program will be the same as those for \fBqmail-remote\fR.
-If \fBONFAILURE_REMOTE\fR is not defined \fBqmail-remote\fR always exits zero.
+
+If \fBONTRANSIENT_REMOTE\fR environment variable is defined and points to a program,
+\fBqmail-remote\fR will execute the same, with uid \fIqmailr\fR, on a deferred email delivery
+to remote host \fIhost\fR. The exit status of \fBqmail-remote\fR will be the exit status of the
+program. The argument passed to this program will be the same as those for \fBqmail-remote\fR.
+
+If neither of these variables \fBONSUCCESS_REMOTE\fR, \fBONFAILURE_REMOTE\fR and \fBONTRANSIENT_REMOTE\fR
+are defined, \fBqmail-remote\fR will always return zero exit status.
 
 When these two variables are set, \fBqmail-remote\fR will also set the environment variables
 .TP
