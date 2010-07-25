@@ -265,7 +265,9 @@ Some of the features available in this package
 52. badhost, badip control files for spam control
 53. mailarchive control file (SOX, HIPAA compliance)
 54. Notify recipients when message size exceeds databyte limits
-55. Updated man pages.
+55. Ability to run programs on successful or failed remote deliveries
+56. Ability to distribute QMQP traffic across servers.
+57. Updated man pages.
 
 You can take a detailed look at the feature list at
 
