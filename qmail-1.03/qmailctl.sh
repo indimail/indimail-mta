@@ -1,6 +1,9 @@
 # chkconfig: 345 14 91
 # description: Starts qmail system and associated services
 # $Log: qmailctl.sh,v $
+# Revision 1.29  2010-07-26 20:09:35+05:30  Cprogrammer
+# show status of all services in service directory
+#
 # Revision 1.28  2010-07-21 16:26:37+05:30  Cprogrammer
 # fixed typo (/var/lock/subsys)
 #
@@ -337,7 +340,10 @@ case "$1" in
 	else
 		ps -ef|grep svscanboot|grep -v grep
 	fi
-	[ $? -eq 0 ] && exit 0 || exit 1
+	RETVAL=$?
+	QMAIL/bin/svstat $SERVICE/*
+	let ret+=$RETVAL
+	[ $ret -eq 0 ] && exit 0 || exit 1
 	;;
   queue)
 	QMAIL/bin/qmail-qstat
