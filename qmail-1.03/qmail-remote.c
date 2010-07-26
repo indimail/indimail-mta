@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-remote.c,v $
+ * Revision 1.69  2010-07-26 19:26:23+05:30  Cprogrammer
+ * added default case in switch statement in run_script function()
+ *
  * Revision 1.68  2010-07-25 19:48:21+05:30  Cprogrammer
  * replaced success(), failure() script with a single run_script()
  *
@@ -374,14 +377,14 @@ run_script(int succ, char *s1, char *s2, char *s3)
 
 	switch (succ)
 	{
-		case -1: /*- transient error */
-			str = "ONTRANSIENT_REMOTE";
+		case 1: /*- success */
+			str = "ONSUCCESS_REMOTE";
 			break;
 		case 0: /*- failure */
 			str = "ONFAILURE_REMOTE";
 			break;
-		case 1: /*- success */
-			str = "ONSUCCESS_REMOTE";
+		case -1: /*- transient error */
+			str = "ONTRANSIENT_REMOTE";
 			break;
 		default:
 			return 0;
@@ -2475,7 +2478,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_remote_c()
 {
-	static char    *x = "$Id: qmail-remote.c,v 1.68 2010-07-25 19:48:21+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-remote.c,v 1.69 2010-07-26 19:26:23+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
