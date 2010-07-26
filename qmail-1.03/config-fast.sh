@@ -27,12 +27,17 @@ chmod 644 "$DESTDIR"QMAIL/control/me
 	)
 )
 
-echo Putting "$fqdn" into "$DESTDIR"QMAIL/control/locals...
-echo "$fqdn" >> "$DESTDIR"QMAIL/control/locals
-chmod 644 "$DESTDIR"QMAIL/control/locals
+grep $fqdn "$DESTDIR"QMAIL/control/virtualdomains > /dev/null
+if [ $? -ne 0 ] ; then
+	echo Putting "$fqdn" into "$DESTDIR"QMAIL/control/locals...
+	echo "$fqdn" >> "$DESTDIR"QMAIL/control/locals
+	sort -u "$DESTDIR"QMAIL/control/locals -o "$DESTDIR"QMAIL/control/locals
+	chmod 644 "$DESTDIR"QMAIL/control/locals
+fi
 
 echo Putting "$fqdn" into "$DESTDIR"QMAIL/control/rcpthosts...
 echo "$fqdn" >> "$DESTDIR"QMAIL/control/rcpthosts
+sort -u "$DESTDIR"QMAIL/control/rcpthosts -o "$DESTDIR"QMAIL/control/rcpthosts
 chmod 644 "$DESTDIR"QMAIL/control/rcpthosts
 echo "Now qmail will refuse to accept SMTP messages except to $fqdn."
 echo 'Make sure to change rcpthosts if you add hosts to locals or virtualdomains!'
