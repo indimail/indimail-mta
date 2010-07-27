@@ -1,5 +1,8 @@
 /*
  * $Log: serialsmtp.c,v $
+ * Revision 1.6  2010-07-27 09:47:15+05:30  Cprogrammer
+ * added logging of sender and recipients
+ *
  * Revision 1.5  2008-07-15 19:53:54+05:30  Cprogrammer
  * porting for Mac OS X
  *
@@ -232,6 +235,16 @@ result(code)
 		if (!stralloc_copyb(&line, "K", 1))
 			die_nomem();
 	}
+	if (!stralloc_cats(&line, "MAIL from <"))
+		die_nomem();
+	if (!stralloc_catb(&line, quosender.s, quosender.len))
+		die_nomem();
+	if (!stralloc_cats(&line, "> RCPT <"))
+		die_nomem();
+	if (!stralloc_catb(&line, quorecip.s, quorecip.len))
+		die_nomem();
+	if (!stralloc_cats(&line, ">, "))
+		die_nomem();
 	if (remoteip)
 	{
 		if (!stralloc_cats(&line, remoteip))
@@ -440,7 +453,7 @@ main(argc, argv)
 void
 getversion_serialsmtp_c()
 {
-	static char    *x = "$Id: serialsmtp.c,v 1.5 2008-07-15 19:53:54+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: serialsmtp.c,v 1.6 2010-07-27 09:47:15+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

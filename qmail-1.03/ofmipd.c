@@ -1,5 +1,8 @@
 /*
  * $Log: ofmipd.c,v $
+ * Revision 1.10  2010-07-27 09:50:46+05:30  Cprogrammer
+ * added logging of senders and recipients
+ *
  * Revision 1.9  2008-07-15 19:52:10+05:30  Cprogrammer
  * porting for Mac OS X
  *
@@ -66,6 +69,9 @@ int             err_noauth();
 int             timeout = 1200, auth_smtp = 0;
 int             ctl_maxcmdlen=0;    /*- max length a smtp command may have */
 int             authd = 0;
+int             rcptcount = 0;
+unsigned int    databytes = 0;
+static char     strnum[FMT_ULONG], pid_str[FMT_ULONG], accept_buf[FMT_ULONG];
 char           *protocol = "SMTP";
 char           *hostname, *remoteip, *relayclient, *remoteinfo;
 char          **childargs;
@@ -87,6 +93,10 @@ static stralloc pass = { 0 };
 static stralloc resp = { 0 };
 static stralloc slop = { 0 };
 
+void            logerr(char *);
+void            logerrf(char *);
+void            logerr_start();
+
 ssize_t
 safewrite(fd, buf, len)
 	int             fd;
@@ -94,14 +104,19 @@ safewrite(fd, buf, len)
 	int             len;
 {
 	int             r;
-	r = timeoutwrite(timeout, fd, buf, len);
-	if (r <= 0)
+
+	if ((r = timeoutwrite(timeout, fd, buf, len)) <= 0)
+	{
+		logerr_start();
+		logerrf("write error (disconnect?): quitting\n");
 		_exit(1);
+	}
 	return r;
 }
 
-char            ssoutbuf[512];
+char            ssoutbuf[512], sserrbuf[512];
 substdio        ssout = SUBSTDIO_FDBUF(safewrite, 1, ssoutbuf, sizeof ssoutbuf);
+substdio        sserr = SUBSTDIO_FDBUF(safewrite, 2, sserrbuf, sizeof sserrbuf);
 
 void
 flush()
@@ -117,8 +132,145 @@ out(s)
 }
 
 void
+logerr(s)
+	char           *s;
+{
+	if (substdio_puts(&sserr, s))
+		_exit (1);
+}
+
+void
+logerr_start()
+{
+	logerr("ofmpid: ");
+	if (*pid_str == '?')
+		pid_str[fmt_ulong(pid_str, getpid())] = 0;
+	logerr("pid ");
+	logerr(pid_str);
+	logerr(" from ");
+	logerr(remoteip);
+	logerr(" ");
+}
+
+void
+logerrf(char *s)
+{
+	if (substdio_puts(&sserr, s))
+		_exit (1);
+	if (substdio_flush(&sserr))
+		_exit (1);
+}
+
+void
+log_trans(char *arg1, char *arg2, int rcptlen, char *arg3)
+{
+	char           *ptr;
+	int             idx;
+
+	for (ptr = arg2 + 1, idx = 0; idx < rcptlen; idx++)
+	{
+		if (!arg2[idx])
+		{
+			logerr_start();
+			logerr("MAIL from <");
+			logerr(arg1);
+			logerr("> RCPT <");
+			logerr(ptr);
+			logerr("> AUTH <");
+			if (arg3 && *arg3)
+			{
+				logerr(arg3);
+				switch (authd)
+				{
+				case 0:
+					break;
+				case 1:
+					logerr(": AUTH LOGIN");
+				break;
+				case 2:
+					logerr(": AUTH PLAIN");
+					break;
+				case 3:
+					logerr(": AUTH CRAM-MD5");
+					break;
+				default:
+					logerr(": AUTH unknown");
+					break;
+				}
+			}
+			logerr("> Size: ");
+			strnum[fmt_ulong(strnum, databytes)] = 0;
+			logerr(strnum);
+			logerr("\n");
+			ptr = arg2 + idx + 2;
+		}
+	}
+	if (substdio_flush(&sserr) == -1)
+		_exit(1);
+}
+
+void
+err_queue(char *arg1, char *arg2, int len, char *arg3, char *qqx,
+	int permanent, unsigned long qp)
+{
+	char           *ptr;
+	int             idx;
+
+	accept_buf[fmt_ulong(accept_buf, qp)] = 0;
+	strnum[fmt_ulong(strnum, databytes)] = 0;
+	for (ptr = arg2 + 1, idx = 0; idx < len; idx++)
+	{
+		if (!arg2[idx])
+		{
+			logerr_start();
+			logerr(qqx);
+			if (permanent)
+				logerr(" (permanent): ");
+			else
+				logerr(" (temporary): ");
+			logerr("MAIL from <");
+			logerr(arg1);
+			logerr("> RCPT <");
+			logerr(ptr);
+			logerr("> AUTH <");
+			if (arg3 && *arg3)
+			{
+				logerr(arg3);
+				switch (authd)
+				{
+				case 0:
+					break;
+				case 1:
+					logerr(": AUTH LOGIN");
+					break;
+				case 2:
+					logerr(": AUTH PLAIN");
+					break;
+				case 3:
+					logerr(": AUTH CRAM-MD5");
+					break;
+				default:
+					logerr(": AUTH unknown");
+					break;
+				}
+			}
+			logerr("> Size: ");
+			logerr(strnum);
+			logerr(" qp ");
+			logerr(accept_buf);
+			logerr("\n");
+			ptr = arg2 + idx + 2;
+		}
+	}
+	if (substdio_flush(&sserr) == -1)
+		_exit(1);
+}
+
+void
 die_read()
 {
+	logerr_start();
+	logerrf("read error (disconnect?): quitting\n");
 	_exit(1);
 }
 
@@ -188,6 +340,8 @@ nomem()
 {
 	out("451 out of memory (#4.3.0)\r\n");
 	flush();
+	logerr_start();
+	logerrf("out of memory: quitting\n");
 	_exit(1);
 }
 
@@ -196,6 +350,8 @@ die_config()
 {
 	out("451 unable to read configuration (#4.3.0)\r\n");
 	flush();
+	logerr_start();
+	logerrf("unable to read configuration: quitting\n");
 	_exit(1);
 }
 
@@ -253,20 +409,22 @@ void
 err_qqt()
 {
 	out("451 qqt failure (#4.3.0)\r\n");
+	logerr_start();
+	logerrf("qqt failure\n");
 }
 
 void
 err_cdb()
 {
 	out("451 unable to read cdb (#4.3.0)\r\n");
+	logerr_start();
+	logerrf("unable to read cdb: quitting\n");
 }
 
 config_str      rewrite = CONFIG_STR;
 stralloc        idappend = { 0 };
 
-stralloc        addr = { 0 };	/*
-								 * will be 0-terminated, if addrparse returns 1 
-								 */
+stralloc        addr = { 0 };	/*- will be 0-terminated, if addrparse returns 1 */
 stralloc        rwaddr = { 0 };
 
 int
@@ -284,7 +442,7 @@ addrparse(arg)
 	if (arg[i])
 		arg += i + 1;
 	else
-	{							/*- partner should go read rfc 821 */
+	{	/*- partner should go read rfc 821 */
 		terminator = ' ';
 		arg += str_chr(arg, ':');
 		if (*arg == ':')
@@ -426,6 +584,7 @@ smtp_mail(arg)
 	if (!stralloc_copys(&rcptto, ""))
 		nomem();
 	seenmail = 1;
+	rcptcount = 0;
 	out("250 ok\r\n");
 }
 
@@ -451,23 +610,30 @@ smtp_rcpt(arg)
 		nomem();
 	if (!stralloc_0(&rcptto))
 		nomem();
+	++rcptcount;
 	out("250 ok\r\n");
 }
 
 struct qmail    qqt;
+
 void
 put(buf, len)
 	char           *buf;
 	int             len;
 {
 	qmail_put(&qqt, buf, len);
+	databytes += len;
 }
 
 void
 myputs(buf)
 	char           *buf;
 {
-	qmail_puts(&qqt, buf);
+	int             len;
+
+	len = str_len(buf);
+	qmail_put(&qqt, buf, len);
+	databytes += len;
 }
 
 stralloc        tmp = { 0 };
@@ -700,6 +866,7 @@ smtp_data()
 {
 	struct tai      now;
 	char           *qqx;
+	unsigned long   qp;
 
 	tai_now(&now);
 	caltime_utc(&datastart.ct, &now, (int *) 0, (int *) 0);
@@ -717,15 +884,18 @@ smtp_data()
 		return;
 	}
 	seenmail = 0;
+	databytes = 0;
 	if (qmail_open(&qqt) == -1)
 	{
 		err_qqt();
 		return;
 	}
+	qp = qmail_qp(&qqt); /*- pid of queue process */
 	out("354 go ahead\r\n");
 	qmail_put(&qqt, received.s, received.len);
 	qmail_put(&qqt, datastamp.s, datastamp.len);
 	qmail_puts(&qqt, "\n");
+	databytes += (received.len + datastamp.len + 1);
 	blast();
 	qmail_from(&qqt, mailfrom.s);
 	qmail_put(&qqt, rcptto.s, rcptto.len);
@@ -733,6 +903,7 @@ smtp_data()
 	if (!*qqx)
 	{
 		out("250 ok\r\n");
+		log_trans(mailfrom.s, rcptto.s, rcptto.len, authd ? remoteinfo : 0);
 		return;
 	}
 	if (*qqx == 'D')
@@ -741,6 +912,8 @@ smtp_data()
 		out("451 ");
 	out(qqx + 1);
 	out("\r\n");
+	err_queue(mailfrom.s, rcptto.s, rcptto.len, authd ? remoteinfo : 0,
+		qqx + 1, *qqx == 'D', qp);
 }
 
 void
@@ -1084,6 +1257,8 @@ main(argc, argv)
 {
 	sig_pipeignore();
 
+	if (!(remoteip = env_get("TCPREMOTEIP")))
+		remoteip = "unknown";
 	fncdb = argv[1];
 	if (fncdb && *fncdb)
 	{
@@ -1116,7 +1291,7 @@ main(argc, argv)
 void
 getversion_ofmipd_c()
 {
-	static char    *x = "$Id: ofmipd.c,v 1.9 2008-07-15 19:52:10+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: ofmipd.c,v 1.10 2010-07-27 09:50:46+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
