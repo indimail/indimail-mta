@@ -1,6 +1,9 @@
 # chkconfig: 345 14 91
 # description: Starts qmail system and associated services
 # $Log: qmailctl.sh,v $
+# Revision 1.30  2010-07-27 10:55:23+05:30  Cprogrammer
+# display status of log services also
+#
 # Revision 1.29  2010-07-26 20:09:35+05:30  Cprogrammer
 # show status of all services in service directory
 #
@@ -195,8 +198,7 @@ restart -- stops and restarts smtp, sends qmail-send a TERM & restarts it
    shut -- Shutdown entire indimail service.
   flush -- Schedules queued messages for immediate delivery
  reload -- sends qmail-send HUP, rereading locals and virtualdomains
- status -- status of svscan process
-   stat -- displays status of mail service
+ status -- status of svscan process & IndiMail services
   queue -- shows status of queue
   pause -- temporarily stops mail service (connections accepted, nothing leaves)
    cont -- continues paused mail service
@@ -315,10 +317,6 @@ case "$1" in
 	echo
 	[ $ret -eq 0 ] && exit 0 || exit 1
 	;;
-  stat)
-	QMAIL/bin/svstat $SERVICE/* $SERVICE/*/log
-	[ $? -eq 0 ] && exit 0 || exit 1
-	;;
   flush)
 	ret=0
 	$ECHO -n $"Flushing timeout table + ALRM signal to qmail-send."
@@ -334,14 +332,14 @@ case "$1" in
 	done
 	[ $ret -eq 0 ] && exit 0 || exit 1
 	;;
-  status)
+  status|stat)
 	if [ -x /sbin/initctl ] ; then
 		/sbin/initctl status svscan
 	else
 		ps -ef|grep svscanboot|grep -v grep
 	fi
 	RETVAL=$?
-	QMAIL/bin/svstat $SERVICE/*
+	QMAIL/bin/svstat $SERVICE/.svscan/log $SERVICE/* $SERVICE/*/log
 	let ret+=$RETVAL
 	[ $ret -eq 0 ] && exit 0 || exit 1
 	;;
