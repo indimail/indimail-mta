@@ -65,8 +65,10 @@ To migrate from an existing proprietary mail server like MS Exchange requires 5 
 IndiMail is highly configurable. No hardcoded directories like /var/qmail/control or
 /var/qmail/queue. All directories are configurable at run time. IndiMail has multiple queues
 and the queue destination directories are also configurable. You can have one IndiMail
-installation cater to multiple instances having different properties / configuration. The
-multiple queues eliminates what is known as 'the silly qmail syndrome' and gives IndiMail the
+installation cater to multiple instances having different properties / configuration. 
+To setup a new IndiMail instance, requires you to just set few environment variables. Unlike
+qmail/netqmail, IndiMail doesn't force you to recompile each time you require a new instance.
+Multiple queues eliminates what is known as 'the silly qmail syndrome' and gives IndiMail the
 capability to perform better than a stock qmail installation. All IndiMail files lie under
 /var/indimail (including qmail binaries). IndiMail's multiple queue gives allows one to achieve
 tremendous inject rates using commodity hardware as can be seen here

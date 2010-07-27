@@ -6,7 +6,7 @@ DATE: @DATE@
     volume servers, IndiMail uses MySQL to store some of the information in MySQL tables. All
     indimail program depend on one or more control file to figure out how to extract this
     information stored in MySQL tables. These control files are host.cntrl, host.master,
-    host.mysql. Take a look at http://groups.google.com/group/indimail/web/quick-install
+    host.mysql. Take a look at http://downloads.sourceforge.net/indimail/Quick-INSTALL-1.7.8
 
     IndiMail supports a cluster of servers for a domain. A cluster is a set of servers
     having the same domain. In other words, a clustered domain is a domain which has been
