@@ -1179,7 +1179,7 @@ err_queue(char *arg1, char *arg2, char *arg3, int len, char *arg4, char *qqx,
 {
 	char           *ptr;
 	int             idx;
-	stralloc        line = { 0 };
+	stralloc        tmpLine = { 0 };
 
 	accept_buf[fmt_ulong(accept_buf, qp)] = 0;
 	strnum[fmt_ulong(strnum, msg_size)] = 0;
@@ -1190,7 +1190,7 @@ err_queue(char *arg1, char *arg2, char *arg3, int len, char *arg4, char *qqx,
 			/*
 			 * write data to spamlogger 
 			 */
-			log_spam(arg2, ptr, msg_size, &line);
+			log_spam(arg2, ptr, msg_size, &tmpLine);
 			logerr("qmail-smtpd: ");
 			logerrpid();
 			logerr(arg1);
@@ -1238,10 +1238,10 @@ err_queue(char *arg1, char *arg2, char *arg3, int len, char *arg4, char *qqx,
 				logerr("pop-bef-smtp");
 			logerr("> Size: ");
 			logerr(strnum);
-			if (line.len)
+			if (tmpLine.len)
 			{
 				logerr(" ");
-				logerr(line.s); /*- X-Bogosity line */
+				logerr(tmpLine.s); /*- X-Bogosity line */
 			}
 			logerr(" qp ");
 			logerr(accept_buf);
