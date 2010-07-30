@@ -19,7 +19,7 @@
  * changed strncpy to scopy
  *
  * Revision 1.4  2001-12-19 16:29:10+05:30  Cprogrammer
- * added code to bind on unix domain sockets
+ * added code to connect to unix domain sockets
  *
  * Revision 1.3  2001-12-13 11:52:27+05:30  Cprogrammer
  * variable for inaddr changed to in_addr_t
