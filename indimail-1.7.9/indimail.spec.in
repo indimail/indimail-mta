@@ -1,5 +1,8 @@
 #
 # $Log: indimail.spec.in,v $
+# Revision 2.194  2010-07-30 20:02:26+05:30  Cprogrammer
+# added Provides
+#
 # Revision 2.193  2010-07-22 23:05:23+05:30  Cprogrammer
 # email changed to manvendra@indimail.org
 #
@@ -607,7 +610,7 @@
 # rpm spec file for indimail
 #
 #
-# $Id: indimail.spec.in,v 2.193 2010-07-22 23:05:23+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 2.194 2010-07-30 20:02:26+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %define _unpackaged_files_terminate_build 1
 
@@ -801,6 +804,7 @@ NoSource: 13
 URL: http://www.indimail.org
 #AutoReqProv: No
 Conflicts: %{name}-mini
+Provides: %{name}-shared
 BuildRequires: openssl-devel rpm gcc gcc-c++ make bison binutils coreutils grep
 BuildRequires: glibc glibc-devel openssl procps gdbm-devel readline-devel
 BuildRequires: sed ncurses-devel gettext-devel
