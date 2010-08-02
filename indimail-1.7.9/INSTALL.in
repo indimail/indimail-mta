@@ -649,6 +649,7 @@ the installation.
     current working directory /home/local/src
     Download the nssd package from http://www.indimail.org
 
+    % wget http://downloads.sourceforge.net/indimail/nssd-1.1.tar.gz
     % gunzip -c nssd-1.1.tar.gz | tar xf -
     % cd nssd-1.1
     % ./configure --prefix=@indimaildir@ --sysconfdir=@indimaildir@/etc \
@@ -666,6 +667,7 @@ the installation.
 
     ##### STEP 10 ## Optional STEP ## iwebadmin ###############
     Install iwebadmin MD5 de91befa14e72352b5230c7a16fb7f3d
+    % wget http://downloads.sourceforge.net/indimail/iwebadmin-1.0.tar.gz
     % gunzip -c iwebadmin-1.0.tar.gz | tar xf -
     % cd iwebadmin-1.0
     % ./configure --enable-indimaildir= @indimaildir@ \
