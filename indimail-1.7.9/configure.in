@@ -952,7 +952,7 @@ AC_ARG_ENABLE(ipv6,
   AC_HELP_STRING([--disable-ipv6],[disable IPv6 support]),
   [case "${enable_ipv6}" in
     n|no)
-      AC_MSG_NOTICE([disabling IPv6 at user request])
+      AC_MSG_RESULT([disabling IPv6 at user request])
       dnl Disable IPv6 checking
       ipv6=no
       ;;
@@ -977,21 +977,21 @@ AC_ARG_ENABLE(ipv6,
 
 if test "X$ipv6" = "Xyes"; then
   AC_CHECK_FUNCS(getaddrinfo, [], [
-    AC_MSG_NOTICE([Disabling IPv6 support: your system does not support getaddrinfo(3)])
+    AC_MSG_RESULT([Disabling IPv6 support: your system does not support getaddrinfo(3)])
     ipv6=no
   ])
 fi
 
 if test "X$ipv6" = "Xyes"; then
   PROTO_INET6([], [
-    AC_MSG_NOTICE([Disabling IPv6 support: your system does not support the PF_INET6 protocol family])
+    AC_MSG_RESULT([Disabling IPv6 support: your system does not support the PF_INET6 protocol family])
     ipv6=no
   ])
 fi
 
 if test "X$ipv6" = "Xyes"; then
   TYPE_STRUCT_SOCKADDR_IN6([],[
-    AC_MSG_NOTICE([Disabling IPv6 support: your system does not support \`struct sockaddr_in6'])
+    AC_MSG_RESULT([Disabling IPv6 support: your system does not support \`struct sockaddr_in6'])
     ipv6=no
   ])
   if test "X$ipv6" = "Xyes"; then
@@ -1002,7 +1002,7 @@ fi
 
 if test "X$ipv6" = "Xyes"; then
   AC_DEFINE([ENABLE_IPV6], 1, [Define if IPv6 support is enabled.])
-  AC_MSG_NOTICE([Enabling support for IPv6.])
+  AC_MSG_RESULT([Enabling support for IPv6.])
 elif test "x$force_ipv6" = "xyes"; then
   AC_MSG_ERROR([IPv6 support requested but not found; aborting])
 fi
