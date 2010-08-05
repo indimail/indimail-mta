@@ -204,6 +204,12 @@ base64sub.o: \
 compile base64sub.c base64.h stralloc.h substdio.h str.h
 	./compile base64sub.c
 
+md5c.o : compile md5c.c md5.h global.h
+	./compile md5c.c
+
+hmac_md5.o : compile hmac_md5.c hmac_md5.h global.h
+	./compile hmac_md5.c
+
 binm1: \
 binm1.sh conf-qmail
 	cat binm1.sh \
@@ -2139,6 +2145,7 @@ qmail-remote: \
 load qmail-remote.o control.o constmap.o timeoutread.o timeoutwrite.o base64sub.o \
 timeoutconn.o tcpto.o now.o dns.o ip.o ipalloc.o strsalloc.o ipme.o quote.o variables.o \
 error_str.o socket_ip4loopback.o socket_v6loopback.o socket_v6any.o env.o \
+md5c.o hmac_md5.o \
 ndelay.a case.a sig.a open.a lock.a seek.a getln.a stralloc.a alloc.a \
 socket_v4mappedprefix.o scan_xlong.o socket_tcp.o socket_tcp6.o wait_pid.o \
 substdio.a str.a fs.a cdb.a auto_qmail.o envread.o error.a dns.lib socket.lib \
@@ -2147,6 +2154,7 @@ tls.lib
 	timeoutwrite.o timeoutconn.o tcpto.o now.o dns.o ip.o scan_xlong.o \
 	socket_ip4loopback.o socket_v6loopback.o socket_v6any.o ipalloc.o env.o \
 	error_str.o socket_v4mappedprefix.o strsalloc.o ipme.o quote.o wait_pid.o \
+	md5c.o hmac_md5.o \
 	variables.o socket_tcp.o socket_tcp6.o ndelay.a case.a sig.a open.a \
 	lock.a seek.a getln.a stralloc.a alloc.a substdio.a \
 	str.a fs.a cdb.a auto_qmail.o envread.o error.a `cat dns.lib socket.lib \
@@ -2163,7 +2171,7 @@ qmail-remote.9
 
 qmail-remote.o: \
 compile qmail-remote.c tls.h ssl_timeoutio.h sig.h stralloc.h \
-gen_alloc.h substdio.h subfd.h scan.h case.h error.h \
+gen_alloc.h substdio.h subfd.h scan.h case.h error.h hmac_md5.h \
 auto_qmail.h control.h dns.h alloc.h quote.h ip.h ipalloc.h \
 ipme.h cdb.h open.h base64.h gen_allocdefs.h str.h now.h \
 datetime.h exit.h constmap.h tcpto.h timeoutconn.h timeoutread.h \
