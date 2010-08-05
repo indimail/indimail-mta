@@ -78,6 +78,68 @@ However,
 .B qmail-remote
 will happily send such messages.
 It is the user's responsibility to avoid generating illegal messages.
+
+.B qmail-remote
+may use SMTP Authenticaton to connect to remote hosts.
+The following reports are provided:
+.TP 5
+K
+no supported AUTH method found, continuing without authentication.
+.TP 5
+Z
+Connected to 
+.I host
+but authentication was rejected (AUTH PLAIN).
+.TP 5
+Z
+Connected to 
+.I host 
+but unable to base64encode (plain).
+.TP 5
+Z
+Connected to 
+.I host
+but authentication was rejected (plain)."
+.TP 5
+Z
+Connected to
+.I host
+but authentication was rejected (AUTH LOGIN).
+.TP 5
+Z
+Connected to 
+.I host
+but unable to base64encode user.
+.TP 5
+Z
+Connected to 
+.I host 
+but authentication was rejected (username).
+.TP 5
+Z
+Connected to 
+.I host 
+but unable to base64encode pass.
+.TP 5
+Z
+Connected to
+.I host
+but authentication was rejected (AUTH CRAM-MD5).
+Z
+Connected to 
+.I host
+but unable to base64decode challenge.
+.TP 5
+Z
+Connected to 
+.I host
+but unable to base64encode username+digest.
+.TP 5
+Z
+Connected to 
+.I host 
+but authentication was rejected (username+digest).
+
 .SH "RESULTS"
 .B qmail-remote
 prints some number of 
@@ -371,8 +433,8 @@ and
 .B password
 to relay out mails through server 
 .B relay
-using authenticated SMTP (AUTH_LOGIN). <sp> is a single space character.
-If all connections to the 
+using authenticated SMTP. <sp> is a single space character. AUTH_SMTP can have the values CRAM-MD5, LOGIN or PLAIN to use
+the desired authentication method. If all connections to the 
 .I relay
 server fail for a 
 .I max_tolerance
@@ -395,13 +457,20 @@ variable
 
 .TP 5
 .I moresmtproutes.cdb
-This file gives smtproutes functionality on a per-user basis. You need to create moresmtproutes file
+This file gives smtproutes functionality on a per-user basis. You need to create \fBmoresmtproutes.cdb\fR file
 in the following format
 
+.EX
 <email_address><sp><ip_address>
+.EE
 
-Then run the command cdbmake-12 moresmtproutes.cdb < moresmtproutes.tmp < moresmtproutes.cdb. A route obtained from
-moresmtproutes.cdb overrides control file \fBsmtproutes\fR or environment variable
+Then run the command
+
+.EX
+\fBcdbmake-12\fR \fImoresmtproutes\fR.\fIcdb\fR < \fImoresmtproutes\fR.\fItmp\fR < \fImoresmtproutes\fR.\fIcdb\fR
+.EE
+
+A route obtained from moresmtproutes.cdb overrides control file \fBsmtproutes\fR or environment variable
 \fBSMTPROUTES\fR. One can also redirect all bounces to a host by specifying
 
 !@<sp><ip_address>
