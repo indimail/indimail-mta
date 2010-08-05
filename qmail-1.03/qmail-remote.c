@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-remote.c,v $
+ * Revision 1.70  2010-08-05 20:56:37+05:30  Cprogrammer
+ * added cram-md5 authentication
+ *
  * Revision 1.69  2010-07-26 19:26:23+05:30  Cprogrammer
  * added default case in switch statement in run_script function()
  *
@@ -1397,6 +1400,8 @@ mailfrom_xtext(int use_size)
 {
 	if (!xtext(&xuser, user.s, user.len))
 		temp_nomem();
+	substdio_puts(&smtpto, "MAIL FROM:<");
+	substdio_put(&smtpto, sender.s, sender.len);
 	if (use_size)
 	{
 		substdio_puts(&smtpto, "> SIZE=");
@@ -1407,6 +1412,58 @@ mailfrom_xtext(int use_size)
 	substdio_put(&smtpto, xuser.s, xuser.len);
 	substdio_puts(&smtpto, "\r\n");
 	substdio_flush(&smtpto);
+}
+
+void 
+auth_cram(int use_size)
+{
+	int             j, code;
+	unsigned char   digest[16];
+	unsigned char   digascii[33];
+	static char     hextab[] = "0123456789abcdef";
+
+	substdio_puts(&smtpto, "AUTH CRAM-MD5\r\n");
+	substdio_flush(&smtpto);
+	if ((code = smtpcode()) != 334)
+		quit("ZConnected to ", " but authentication was rejected (AUTH CRAM-MD5).", code, -1);
+	if ((j = str_chr(smtptext.s + 5, '\n')) > 0) /* Challenge */
+	{
+		if (!stralloc_copys(&slop, ""))
+			temp_nomem();
+		if (!stralloc_copyb(&slop, smtptext.s + 4, smtptext.len - 5))
+			temp_nomem();
+		if (b64decode((unsigned char *) slop.s, slop.len, &chal))
+			quit("ZConnected to ", " but unable to base64decode challenge.", -1, -1);
+	} else
+		quit("ZConnected to ", " but got no challenge.", -1, -1);
+	hmac_md5((unsigned char *) chal.s, chal.len, (unsigned char *) pass.s, pass.len, digest);
+
+	for (j = 0; j < 16; j++) {	/* HEX => ASCII */
+		digascii[2 * j] = hextab[digest[j] >> 4];
+		digascii[2 * j + 1] = hextab[digest[j] & 0xf];
+	}
+	digascii[32] = 0;
+
+	slop.len = 0;
+	if (!stralloc_copys(&slop, ""))
+		temp_nomem();
+	if (!stralloc_cat(&slop, &user))
+		temp_nomem();	/* user-id */
+	if (!stralloc_cats(&slop, " "))
+		temp_nomem();
+	if (!stralloc_catb(&slop, (char *) digascii, 32))
+		temp_nomem();	/* digest */
+
+	if (!stralloc_copys(&auth, ""))
+		temp_nomem();
+	if (b64encode(&slop, &auth))
+		quit("ZConnected to ", " but unable to base64encode username+digest.", -1, -1);
+	substdio_put(&smtpto, auth.s, auth.len);
+	substdio_puts(&smtpto, "\r\n");
+	substdio_flush(&smtpto);
+	if ((code = smtpcode()) != 235)
+		quit("ZConnected to ", " but authentication was rejected (username+digest)", code, -1);
+	mailfrom_xtext(use_size);
 }
 
 void
@@ -1469,58 +1526,6 @@ auth_login(int use_size)
 	substdio_flush(&smtpto);
 	if ((code = smtpcode()) != 235)
 		quit("ZConnected to ", " but authentication was rejected (password)", code, -1);
-	mailfrom_xtext(use_size);
-}
-
-void 
-auth_cram(int use_size)
-{
-	int             j, code;
-	unsigned char   digest[16];
-	unsigned char   digascii[33];
-	static char     hextab[] = "0123456789abcdef";
-
-	substdio_puts(&smtpto, "AUTH CRAM-MD5\r\n");
-	substdio_flush(&smtpto);
-	if ((code = smtpcode()) != 334)
-		quit("ZConnected to ", " but authentication was rejected (AUTH CRAM-MD5).", code, -1);
-	if ((j = str_chr(smtptext.s + 5, '\n')) > 0) /* Challenge */
-	{
-		if (!stralloc_copys(&slop, ""))
-			temp_nomem();
-		if (!stralloc_copyb(&slop, smtptext.s + 4, smtptext.len - 5))
-			temp_nomem();
-		if (b64decode((unsigned char *) slop.s, slop.len, &chal))
-			quit("ZConnected to ", " but unable to base64decode challenge.", -1, -1);
-	} else
-		quit("ZConnected to ", " but got no challenge.", -1, -1);
-	hmac_md5((unsigned char *) chal.s, chal.len, (unsigned char *) pass.s, pass.len, digest);
-
-	for (j = 0; j < 16; j++) {	/* HEX => ASCII */
-		digascii[2 * j] = hextab[digest[j] >> 4];
-		digascii[2 * j + 1] = hextab[digest[j] & 0xf];
-	}
-	digascii[32] = 0;
-
-	slop.len = 0;
-	if (!stralloc_copys(&slop, ""))
-		temp_nomem();
-	if (!stralloc_cat(&slop, &user))
-		temp_nomem();	/* user-id */
-	if (!stralloc_cats(&slop, " "))
-		temp_nomem();
-	if (!stralloc_catb(&slop, (char *) digascii, 32))
-		temp_nomem();	/* digest */
-
-	if (!stralloc_copys(&auth, ""))
-		temp_nomem();
-	if (b64encode(&slop, &auth))
-		quit("ZConnected to ", " but unable to base64encode username+digest.", -1, -1);
-	substdio_put(&smtpto, auth.s, auth.len);
-	substdio_puts(&smtpto, "\r\n");
-	substdio_flush(&smtpto);
-	if ((code = smtpcode()) != 235)
-		quit("ZConnected to ", " but authentication was rejected (username+digest)", code, -1);
 	mailfrom_xtext(use_size);
 }
 
@@ -2542,7 +2547,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_remote_c()
 {
-	static char    *x = "$Id: qmail-remote.c,v 1.69 2010-07-26 19:26:23+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-remote.c,v 1.70 2010-08-05 20:56:37+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
