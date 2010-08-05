@@ -1475,7 +1475,7 @@ auth_login(int use_size)
 void 
 auth_cram(int use_size)
 {
-	int             j = 1, code;
+	int             j, code;
 	unsigned char   digest[16];
 	unsigned char   digascii[33];
 	static char     hextab[] = "0123456789abcdef";
@@ -1484,9 +1484,7 @@ auth_cram(int use_size)
 	substdio_flush(&smtpto);
 	if ((code = smtpcode()) != 334)
 		quit("ZConnected to ", " but authentication was rejected (AUTH CRAM-MD5).", code, -1);
-	if (str_chr(smtptext.s + 4, ' '))	/* Challenge */
-		j = str_chr(smtptext.s + 5, '\n');
-	if (j > 0)
+	if ((j = str_chr(smtptext.s + 5, '\n')) > 0) /* Challenge */
 	{
 		if (!stralloc_copys(&slop, ""))
 			temp_nomem();
@@ -1494,7 +1492,8 @@ auth_cram(int use_size)
 			temp_nomem();
 		if (b64decode((unsigned char *) slop.s, slop.len, &chal))
 			quit("ZConnected to ", " but unable to base64decode challenge.", -1, -1);
-	}
+	} else
+		quit("ZConnected to ", " but got no challenge.", -1, -1);
 	hmac_md5((unsigned char *) chal.s, chal.len, (unsigned char *) pass.s, pass.len, digest);
 
 	for (j = 0; j < 16; j++) {	/* HEX => ASCII */
