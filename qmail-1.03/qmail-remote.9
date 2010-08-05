@@ -122,13 +122,24 @@ Connected to
 but unable to base64encode pass.
 .TP 5
 Z
+Connected to 
+.I host 
+but authentication was rejected (password).
+.TP 5
+Z
 Connected to
 .I host
 but authentication was rejected (AUTH CRAM-MD5).
+.TP 5
 Z
 Connected to 
 .I host
 but unable to base64decode challenge.
+.TP 5
+Z
+Connected to 
+.I host
+but got no challenge.
 .TP 5
 Z
 Connected to 
@@ -421,7 +432,10 @@ in a clustered environment where a single domain can exist across multiple hosts
 variable points to the host where the user's mailbox lies.
 
 route may also have the form
- \fIdomain\fB:\fIrelay\fB:\fIport\fB:\fIpenalty\fB:\fImax_tolerance<sp>username<sp>\fIpassword\fR
+
+.EX
+\fIdomain\fB:\fIrelay\fB:\fIport\fB:\fIpenalty\fB:\fImax_tolerance<sp>username<sp>\fIpassword\fR
+.EE
 
 without any extra spaces. If the environment variable
 .B AUTH_SMTP
