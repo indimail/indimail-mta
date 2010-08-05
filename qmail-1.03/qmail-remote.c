@@ -1559,7 +1559,7 @@ smtp_auth(char *type, int use_size)
 			auth_cram(use_size);
 			return;
 		}
-	}
+	} else
 	if (!case_diffs(type, "LOGIN"))
 	{
 		if (login_supp)
@@ -1578,6 +1578,11 @@ smtp_auth(char *type, int use_size)
 	} else
 	if (!*type)
 	{
+		if (cram_supp)
+		{
+			auth_cram(use_size);
+			return;
+		}
 		if (login_supp)
 		{
 			auth_login(use_size);
