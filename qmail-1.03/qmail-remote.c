@@ -265,6 +265,8 @@
 #include "tls.h"
 #include "ssl_timeoutio.h"
 #include <openssl/x509v3.h>
+#include "hmac_md5.h"
+
 #define EHLO 1
 #endif
 #define HUGESMTPTEXT  5000
@@ -305,6 +307,8 @@ stralloc        sender = { 0 };
 stralloc        qqeh = { 0 };
 stralloc        user = { 0 };
 stralloc        pass = { 0 };
+stralloc        slop  = { 0 };
+stralloc        chal  = { 0 };
 saa             reciplist = { 0 };
 struct ip_mx    partner;
 union v46addr   outip;
@@ -1389,6 +1393,23 @@ mailfrom(int use_size)
 }
 
 void
+mailfrom_xtext(int use_size)
+{
+	if (!xtext(&xuser, user.s, user.len))
+		temp_nomem();
+	if (use_size)
+	{
+		substdio_puts(&smtpto, "> SIZE=");
+		substdio_puts(&smtpto, msgsize);
+		substdio_puts(&smtpto, " AUTH=<");
+	} else
+		substdio_puts(&smtpto, "> AUTH=");
+	substdio_put(&smtpto, xuser.s, xuser.len);
+	substdio_puts(&smtpto, "\r\n");
+	substdio_flush(&smtpto);
+}
+
+void
 auth_plain(int use_size)
 {
 	int             code;
@@ -1416,20 +1437,7 @@ auth_plain(int use_size)
 	substdio_flush(&smtpto);
 	if ((code = smtpcode()) != 235)
 		quit("ZConnected to ", " but authentication was rejected (plain).", code, -1);
-	if (!xtext(&xuser, user.s, user.len))
-		temp_nomem();
-	substdio_puts(&smtpto, "MAIL FROM:<");
-	substdio_put(&smtpto, sender.s, sender.len);
-	if (use_size)
-	{
-		substdio_puts(&smtpto, "> SIZE=");
-		substdio_puts(&smtpto, msgsize);
-		substdio_puts(&smtpto, " AUTH=<");
-	} else
-		substdio_puts(&smtpto, "> AUTH=");
-	substdio_put(&smtpto, xuser.s, xuser.len);
-	substdio_puts(&smtpto, "\r\n");
-	substdio_flush(&smtpto);
+	mailfrom_xtext(use_size);
 }
 
 void
@@ -1461,27 +1469,66 @@ auth_login(int use_size)
 	substdio_flush(&smtpto);
 	if ((code = smtpcode()) != 235)
 		quit("ZConnected to ", " but authentication was rejected (password)", code, -1);
+	mailfrom_xtext(use_size);
+}
 
-	if (!xtext(&xuser, user.s, user.len))
-		temp_nomem();
-	substdio_puts(&smtpto, "MAIL FROM:<");
-	substdio_put(&smtpto, sender.s, sender.len);
-	if (use_size)
+void 
+auth_cram(int use_size)
+{
+	int             j = 1, code;
+	unsigned char   digest[16];
+	unsigned char   digascii[33];
+	static char     hextab[] = "0123456789abcdef";
+
+	substdio_puts(&smtpto, "AUTH CRAM-MD5\r\n");
+	substdio_flush(&smtpto);
+	if ((code = smtpcode()) != 334)
+		quit("ZConnected to ", " but authentication was rejected (AUTH CRAM-MD5).", code, -1);
+	if (str_chr(smtptext.s + 4, ' '))	/* Challenge */
+		j = str_chr(smtptext.s + 5, '\n');
+	if (j > 0)
 	{
-		substdio_puts(&smtpto, "> SIZE=");
-		substdio_puts(&smtpto, msgsize);
-		substdio_puts(&smtpto, " AUTH=<");
-	} else
-		substdio_puts(&smtpto, "> AUTH=");
-	substdio_put(&smtpto, xuser.s, xuser.len);
+		if (!stralloc_copys(&slop, ""))
+			temp_nomem();
+		if (!stralloc_copyb(&slop, smtptext.s + 4, smtptext.len - 5))
+			temp_nomem();
+		if (b64decode((unsigned char *) slop.s, slop.len, &chal))
+			quit("ZConnected to ", " but unable to base64decode challenge.", -1, -1);
+	}
+	hmac_md5((unsigned char *) chal.s, chal.len, (unsigned char *) pass.s, pass.len, digest);
+
+	for (j = 0; j < 16; j++) {	/* HEX => ASCII */
+		digascii[2 * j] = hextab[digest[j] >> 4];
+		digascii[2 * j + 1] = hextab[digest[j] & 0xf];
+	}
+	digascii[32] = 0;
+
+	slop.len = 0;
+	if (!stralloc_copys(&slop, ""))
+		temp_nomem();
+	if (!stralloc_cat(&slop, &user))
+		temp_nomem();	/* user-id */
+	if (!stralloc_cats(&slop, " "))
+		temp_nomem();
+	if (!stralloc_catb(&slop, (char *) digascii, 32))
+		temp_nomem();	/* digest */
+
+	if (!stralloc_copys(&auth, ""))
+		temp_nomem();
+	if (b64encode(&slop, &auth))
+		quit("ZConnected to ", " but unable to base64encode username+digest.", -1, -1);
+	substdio_put(&smtpto, auth.s, auth.len);
 	substdio_puts(&smtpto, "\r\n");
 	substdio_flush(&smtpto);
+	if ((code = smtpcode()) != 235)
+		quit("ZConnected to ", " but authentication was rejected (username+digest)", code, -1);
+	mailfrom_xtext(use_size);
 }
 
 void
 smtp_auth(char *type, int use_size)
 {
-	int             i = 0, j, login_supp = 0, plain_supp = 0;
+	int             i = 0, j, login_supp = 0, plain_supp = 0, cram_supp = 0;
 
 	if (!type)
 	{
@@ -1491,6 +1538,11 @@ smtp_auth(char *type, int use_size)
 	while ((i += str_chr(smtptext.s + i, '\n') + 1) && (i + 8 < smtptext.len)
 		&& str_diffn(smtptext.s + i + 4, "AUTH", 4));
 
+	if ((j = str_chr(smtptext.s + i + 8, 'C')) > 0)	/* AUTH CRAM-MD5 */
+	{
+		if (case_starts(smtptext.s + i + 8 + j, "CRAM"))
+			cram_supp = 1;
+	}
 	if ((j = str_chr(smtptext.s + i + 8, 'L')) > 0)	/*- AUTH LOGIN */
 	{
 		if (case_starts(smtptext.s + i + 8 + j, "LOGIN"))
@@ -1500,6 +1552,14 @@ smtp_auth(char *type, int use_size)
 	{
 		if (case_starts(smtptext.s + i + 8 + j, "PLAIN"))
 			plain_supp = 1;
+	}
+	if (!case_diffs(type, "CRAM-MD5"))
+	{
+		if (cram_supp)
+		{
+			auth_cram(use_size);
+			return;
+		}
 	}
 	if (!case_diffs(type, "LOGIN"))
 	{
