@@ -1,8 +1,5 @@
 /*
  * $Log: renameuser.c,v $
- * Revision 2.15  2010-08-08 13:11:53+05:30  Cprogrammer
- * made users_per_level configurable
- *
  * Revision 2.14  2010-03-02 08:18:13+05:30  Cprogrammer
  * changed Username xxx@yyy does not exist to xxx@yyy: No such user
  *
@@ -50,7 +47,7 @@
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: renameuser.c,v 2.15 2010-08-08 13:11:53+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: renameuser.c,v 2.14 2010-03-02 08:18:13+05:30 Cprogrammer Stab mbhangui $";
 #endif
 
 #include <ctype.h>
@@ -62,7 +59,7 @@ static char     sccsid[] = "$Id: renameuser.c,v 2.15 2010-08-08 13:11:53+05:30 C
 #include <mysqld_error.h>
 
 int
-vrenameuser(char *oldUser, char *oldDomain, char *newUser, char *newDomain, int users_per_level)
+vrenameuser(char *oldUser, char *oldDomain, char *newUser, char *newDomain)
 {
 	char            oldDir[MAX_PW_DIR], SqlBuf[SQL_BUF_SIZE];
 	char           *real_domain;
@@ -166,7 +163,7 @@ vrenameuser(char *oldUser, char *oldDomain, char *newUser, char *newDomain, int 
 	}
 	encrypt_flag = 1;
 	if ((err = vadduser(newUser, newDomain, 0, pw->pw_passwd, pw->pw_gecos,
-		strtoll(pw->pw_shell, 0, 0), users_per_level, 1, !inactive_flag)) == -1)
+		strtoll(pw->pw_shell, 0, 0), 0, 1, !inactive_flag)) == -1)
 	{
 		error_stack(stderr, 0);
 		return (-1);

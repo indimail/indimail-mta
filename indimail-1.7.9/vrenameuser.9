@@ -30,14 +30,6 @@ Print Version Numbers
 \fB\-v\fR
 Set verbose mode
 .TP
-\fB\-l\fR users_per_level
-By default, \fBvadduser\fR uses an adaptive directory structure based on a table dir-control
-which is automatically managed by \fBvadduser(1)\fR, \fBvdeluser(1)\fR and \fBvreorg(8).
-The basic idea is to break up the user Maildir directories across multiple directories and sub
-directories so that there are never more than 100 user directories in a single directory. Use
-this option to change the default compile time value of 100 users per directory, when doing
-a rename (remember that \fBvrenameuser\fR actually adds \fInew_email_address\fR).
-.TP
 \fIold_email_address\fR
 Current email address of the user.
 .TP
