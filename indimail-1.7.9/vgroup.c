@@ -189,7 +189,7 @@ addGroup(char *user, char *domain, char *mdahost, char *gecos, char *passwd, int
 		snprintf(Gecos, sizeof(Gecos), "MailGroup %s", gecos);
 	else
 		snprintf(Gecos, sizeof(Gecos), "MailGroup %s", user);
-	if ((i = vadduser(user, domain, mdahost, passwd, Gecos, quota, USE_POP, 1)) < 0)
+	if ((i = vadduser(user, domain, mdahost, passwd, Gecos, quota, 0, USE_POP, 1)) < 0)
 	{
 		error_stack(stderr, 0);
 		return(i);
