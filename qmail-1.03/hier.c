@@ -1,5 +1,8 @@
 /*
  * $Log: hier.c,v $
+ * Revision 1.154  2010-08-08 22:29:09+05:30  Cprogrammer
+ * removed shared libs from checks
+ *
  * Revision 1.153  2010-07-14 15:57:56+05:30  Cprogrammer
  * fixed libindimail-1.7.8
  *
@@ -1223,13 +1226,9 @@ _hier(inst_dir)
 	ci(auto_qmail_home, "etc/yum.repos.d", "IndiMail-SLE_11_SP1.repo", auto_uido, auto_gido, 0444);
 #endif
 	/*- */
-	ci(auto_qmail_home, "lib", "libcdb-1.0.so.0.0.0", auto_uido, auto_gido, 0755);
 	ci(auto_qmail_home, "lib", "libcdb.so", auto_uido, auto_gido, 0755);
-	ci(auto_qmail_home, "lib", "libeps-1.2.so.0.0.0", auto_uido, auto_gido, 0755);
 	ci(auto_qmail_home, "lib", "libeps.so", auto_uido, auto_gido, 0755);
-	ci(auto_qmail_home, "lib", "libflash-0.9.4.so.0.0.0", auto_uido, auto_gido, 0755);
 	ci(auto_qmail_home, "lib", "libflash.so", auto_uido, auto_gido, 0755);
-	ci(auto_qmail_home, "lib", "libindimail-1.7.8.so.0.0.0", auto_uido, auto_gido, 0755);
 	ci(auto_qmail_home, "lib", "libindimail.so", auto_uido, auto_gido, 0755);
 	/*- */
 	ci(auto_qmail_home, "libexec", "overquota.sh", auto_uido, auto_gidq, 0555);
@@ -1590,7 +1589,7 @@ _hier(inst_dir)
 void
 getversion_install_big_c()
 {
-	static char    *x = "$Id: hier.c,v 1.153 2010-07-14 15:57:56+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: hier.c,v 1.154 2010-08-08 22:29:09+05:30 Cprogrammer Stab mbhangui $";
 
 #ifdef INDIMAIL
 	x = sccsidh;
