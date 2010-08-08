@@ -670,7 +670,7 @@ the installation.
     % wget http://downloads.sourceforge.net/indimail/iwebadmin-1.0.tar.gz
     % gunzip -c iwebadmin-1.0.tar.gz | tar xf -
     % cd iwebadmin-1.0
-    % ./configure --enable-indimaildir= @indimaildir@ \
+    % ./configure --enable-indimaildir=@indimaildir@ \
         --enable-ezmlmdir=@indimaildir@ \
         --enable-qmaildir=@indimaildir@ \
         --disable-ipauth --disable-trivial-password --enable-modify-quota \
