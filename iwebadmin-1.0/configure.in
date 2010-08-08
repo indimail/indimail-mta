@@ -1,18 +1,17 @@
 dnl Process this file with autoconf to produce a configure script.
 
-AC_INIT(iwebadmin, 1.0, manvendra@indimail.org)
+AC_INIT(iwebadmin, 1.0, [Manvendra Bhangui <manvendra@indimail.org>],iwebadmin)
 AC_CANONICAL_TARGET
 VERSION=$PACKAGE_VERSION
 QA_PACKAGE="iwebadmin"
 QA_VERSION="1.0"
-AM_INIT_AUTOMAKE($QA_PACKAGE,$QA_VERSION)
-AM_CONFIG_HEADER(config.h)
-
-AC_DEFINE_UNQUOTED(PACKAGE_BUGREPORT, "indimail-support@lists.sourceforge.net")
 AC_DEFINE_UNQUOTED(QA_PACKAGE,"$QA_PACKAGE","")
 AC_DEFINE_UNQUOTED(QA_VERSION,"$QA_VERSION","")
+AC_DEFINE_UNQUOTED(PACKAGE_BUGREPORT, "indimail-support@lists.sourceforge.net")
 AC_SUBST(QA_PACKAGE)
 AC_SUBST(QA_VERSION)
+AM_INIT_AUTOMAKE($QA_PACKAGE,$QA_VERSION)
+AM_CONFIG_HEADER(config.h)
 
 dnl Checks for programs.
 AC_PROG_CC
