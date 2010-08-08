@@ -2286,7 +2286,7 @@ main(int argc, char **argv)
 	recips = argv + 5;
 	getcontrols();
 	use_auth_smtp = env_get("AUTH_SMTP");
-	/*- Per user SMTPROUTE functionality */
+	/*- Per user SMTPROUTE functionality using moresmtproutes.cdb */
 	relayhost = lookup_host(*recips, str_len(*recips));
 	min_penalty = (x = env_get("MIN_PENALTY")) ? scan_int(x, &min_penalty) : MIN_PENALTY;
 	max_tolerance = (x = env_get("MAX_TOLERANCE")) ? scan_ulong(x, &max_tolerance) : MAX_TOLERANCE;
@@ -2547,7 +2547,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_remote_c()
 {
-	static char    *x = "$Id: qmail-remote.c,v 1.70 2010-08-05 20:56:37+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-remote.c,v 1.70 2010-08-05 20:56:37+05:30 Cprogrammer Stab mbhangui $";
 
 	x++;
 }
