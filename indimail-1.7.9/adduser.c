@@ -1,5 +1,8 @@
 /*
  * $Log: adduser.c,v $
+ * Revision 2.22  2010-08-08 20:39:41+05:30  Cprogrammer
+ * take users_per_level from domain directory
+ *
  * Revision 2.21  2010-08-08 13:00:06+05:30  Cprogrammer
  * made users_per_level configurable
  *
@@ -115,7 +118,7 @@
 #define ALLOWCHARS              " .!#$%&'*+-/=?^_`{|}~\""
 
 #ifndef	lint
-static char     sccsid[] = "$Id: adduser.c,v 2.21 2010-08-08 13:00:06+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: adduser.c,v 2.22 2010-08-08 20:39:41+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 /*
@@ -156,11 +159,12 @@ int
 vadduser(char *username, char *domain, char *mdahost, char *password,
 		 char *gecos, int quota, int users_per_level, int apop, int actFlag)
 {
-	char            Dir[MAX_BUFF], Crypted[MAX_BUFF];
+	char            Dir[MAX_BUFF], Crypted[MAX_BUFF], tmpbuf[MAX_BUFF];
 	char           *tmpstr, *dir, *ptr, *allow_chars;
 	uid_t           uid;
 	gid_t           gid;
-	int             ulen;
+	FILE           *fp;
+	int             ulen, u_level = 0;
 #ifdef CLUSTERED_SITE
 	char            SqlBuf[SQL_BUF_SIZE];
 	int             err;
@@ -271,7 +275,24 @@ vadduser(char *username, char *domain, char *mdahost, char *password,
 			return (-1);
 		}
 		GetIndiId(&uid, &gid);
-	} 
+	}
+	snprintf(tmpbuf, MAX_BUFF, "%s/.users_per_level", Dir);
+	if (!(fp = fopen(tmpbuf, "r")))
+	{
+		if (errno != ENOENT)
+		{
+			error_stack(stderr, "%s: %s\n", tmpbuf, strerror(errno));
+			return (-1);
+		}
+	} else
+	{
+		if (fscanf(fp, "%d", &u_level) != 1)
+		{
+			error_stack(stderr, "invalid domain users per level\n");
+			return (-1);
+		}
+		fclose(fp);
+	}
 	/*
 	 * check gecos for : characters - bad 
 	 */
@@ -280,8 +301,9 @@ vadduser(char *username, char *domain, char *mdahost, char *password,
 		error_stack(stderr, "':' not allowed in names\n");
 		return (-1);
 	}
-	umask(INDIMAIL_UMASK); /*- This function always suceeds according to man */
-	if (!(dir = make_user_dir(username, domain, uid, gid, users_per_level)))
+	umask(INDIMAIL_UMASK); /*- This function always succeeds according to man */
+	if (!(dir = make_user_dir(username, domain, uid, gid,
+		!users_per_level ? u_level : users_per_level)))
 	{
 		error_stack(stderr, "make user dir failed\n");
 		return (-1);

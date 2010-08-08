@@ -1,5 +1,8 @@
 /*
  * $Log: vadddomain.c,v $
+ * Revision 2.31  2010-08-08 20:17:35+05:30  Cprogrammer
+ * added option to configure users per level
+ *
  * Revision 2.30  2010-05-18 18:49:46+05:30  Cprogrammer
  * fix ownership of .base_path
  *
@@ -155,7 +158,7 @@
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vadddomain.c,v 2.30 2010-05-18 18:49:46+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: vadddomain.c,v 2.31 2010-08-08 20:17:35+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 
@@ -170,14 +173,14 @@ uid_t           Uid, a_uid;
 gid_t           Gid, a_gid;
 
 void            usage();
-int             get_options(int argc, char **argv, char **, int *);
+int             get_options(int argc, char **argv, char **, int *, int *);
 
 int
 main(argc, argv)
 	int             argc;
 	char           *argv[];
 {
-	int             err, fd, chk_rcpt, i;
+	int             err, fd, chk_rcpt, i, users_per_level = 0;
 	uid_t           uid;
 	gid_t           gid;
 	extern int      create_flag;
@@ -195,7 +198,7 @@ main(argc, argv)
 	int             is_dist, user_present, total;
 #endif
 
-	if (get_options(argc, argv, &base_path, &chk_rcpt))
+	if (get_options(argc, argv, &base_path, &chk_rcpt, &users_per_level))
 		return(1);
 	if (!isvalid_domain(Domain))
 	{
@@ -260,6 +263,39 @@ main(argc, argv)
 		error_stack(stderr, 0);
 		vclose();
 		return(err);
+	}
+	if (users_per_level)
+	{
+		if (!vget_assign(Domain, Dir, MAX_BUFF, &uid, &gid))
+		{
+			error_stack(stderr, "Domain %s does not exist\n", Domain);
+			vdeldomain(Domain);
+			vclose();
+			return(1);
+		}
+		snprintf(TmpBuf, sizeof(TmpBuf), "%s/.users_per_level", Dir);
+		if ((fd = open(TmpBuf, O_CREAT|O_TRUNC|O_WRONLY, S_IRUSR|S_IWUSR)) == -1)
+		{
+			error_stack(stderr, "open: %s: %s\n", TmpBuf, strerror(errno));
+			vdeldomain(Domain);
+			vclose();
+			return(1);
+		}
+		if (filewrt(fd, "%d", users_per_level) == -1)
+		{
+			error_stack(stderr, "write: %s\n", strerror(errno));
+			vdeldomain(Domain);
+			vclose();
+			return(1);
+		}
+		if (fchown(fd, uid, gid))
+		{
+			error_stack(stderr, "fchown: %s: (uid %d: gid %d): %s\n", TmpBuf, uid, gid, strerror(errno));
+			vdeldomain(Domain);
+			vclose();
+			return(1);
+		}
+		close(fd);
 	}
 	if (base_path && !use_etrn)
 	{
@@ -385,7 +421,8 @@ main(argc, argv)
 		}
 	}
 #endif
-	if ((err = vadduser("postmaster", Domain, 0, Passwd, "Postmaster", 0, Apop, 1)) != VA_SUCCESS)
+	if ((err = vadduser("postmaster", Domain, 0, Passwd, "Postmaster", 0, users_per_level,
+		Apop, 1)) != VA_SUCCESS)
 	{
 		if (errno != EEXIST)
 		{
@@ -415,7 +452,7 @@ main(argc, argv)
 }
 
 int
-get_options(int argc, char **argv, char **base_path, int *chk_rcpt)
+get_options(int argc, char **argv, char **base_path, int *chk_rcpt, int *users_per_level)
 {
 	int             c;
 	int             errflag;
@@ -506,6 +543,9 @@ get_options(int argc, char **argv, char **base_path, int *chk_rcpt)
 		case 'q':
 			scopy(Quota, optarg, MAX_BUFF);
 			break;
+		case 'l':
+			*users_per_level = atoi(optarg);
+			break;
 		case 'e':
 			scopy(BounceEmail, optarg, MAX_BUFF);
 			break;
@@ -569,6 +609,7 @@ usage()
 	error_stack(stderr, "options: -V print version number\n");
 	error_stack(stderr, "         -v verbose\n");
 	error_stack(stderr, "         -q quota_in_bytes (sets the quota for postmaster account)\n");
+	error_stack(stderr, "         -l level (users per level)\n");
 	error_stack(stderr, "         -C (Do recipient check for this domain)\n");
 	error_stack(stderr, "         -b (bounces all mail that doesn't match a user, default)\n");
 	error_stack(stderr, "         -e [email_address|maildir] (forwards all non matching user to this address [*])\n");

@@ -1,5 +1,8 @@
 /*
  * $Log: vgroup.c,v $
+ * Revision 2.20  2010-08-08 20:17:47+05:30  Cprogrammer
+ * use configurable users per level
+ *
  * Revision 2.19  2010-05-01 13:50:26+05:30  Cprogrammer
  * close all database connections before exit
  *
@@ -63,7 +66,7 @@
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vgroup.c,v 2.19 2010-05-01 13:50:26+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: vgroup.c,v 2.20 2010-08-08 20:17:47+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef VALIAS

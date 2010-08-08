@@ -1,10 +1,7 @@
 /*
  * $Log: indimail.h,v $
- * Revision 2.196  2010-08-08 13:09:00+05:30  Cprogrammer
- * added users_per_level argument to vrenameuser()
- *
- * Revision 2.195  2010-08-08 13:01:56+05:30  Cprogrammer
- * made users_per_level configurable
+ * Revision 2.195  2010-08-08 20:16:55+05:30  Cprogrammer
+ * use configurable users per level
  *
  * Revision 2.194  2010-06-19 20:40:25+05:30  Cprogrammer
  * fix for syntax error during create_table on some MySQL versions
@@ -904,7 +901,7 @@
 #define INDIMAILH_H
 
 #ifndef	lint
-static char     sccsidh[] = "$Id: indimail.h,v 2.196 2010-08-08 13:09:00+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsidh[] = "$Id: indimail.h,v 2.195 2010-08-08 20:16:55+05:30 Cprogrammer Stab mbhangui $";
 #endif
 
 #include "config.h"
@@ -1526,7 +1523,7 @@ int             is_alias_domain(char *);
 int             vdeldomain(char *);
 int             vadduser(char *, char *, char *, char *, char *, int, int, int, int);
 int             vdeluser(char *, char *, int);
-int             vrenameuser(char *, char *, char *, char *, int);
+int             vrenameuser(char *, char *, char *, char *);
 int             parse_email(char *, char *, char *, int);
 int             vpasswd(char *, char *, char *, int);
 int             vsetuserquota(char *, char *, char *);

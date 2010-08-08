@@ -1,5 +1,8 @@
 /*
  * $Log: renameuser.c,v $
+ * Revision 2.15  2010-08-08 20:17:13+05:30  Cprogrammer
+ * use configurable users per level
+ *
  * Revision 2.14  2010-03-02 08:18:13+05:30  Cprogrammer
  * changed Username xxx@yyy does not exist to xxx@yyy: No such user
  *
@@ -47,7 +50,7 @@
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: renameuser.c,v 2.14 2010-03-02 08:18:13+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: renameuser.c,v 2.15 2010-08-08 20:17:13+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #include <ctype.h>
