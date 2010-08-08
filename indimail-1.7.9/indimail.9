@@ -63,7 +63,10 @@ aware (on which server the user's mailbox lies). This gives IndiMail the ability
 the users across multiple hosts using standard non-proprietary protocols and RFCs. The other
 use of user-location aware property is to have a single domain consisting of a heterogeneous
 email server environment (with some users on MS Exchange and some on Lotus Notes some on
-IndiMail). You can have multiple hosts hosting a domain placed geographically anywhere and tied
+IndiMail). To distribute mails for users across multiple hosts, IndiMail uses \fBqmail-remote(8)\fR.
+\fBqmail-remote(8)\fR gives the ability to distribute the mails using SMTP or QMTP. You can
+use the \fBROUTES\fR environment variable to "smtp" or "qmtp" to choose the protocol.
+You can have multiple hosts hosting a domain placed geographically anywhere and tied
 up by IndiMail. The architecture does not force a filesystem architecture like NFS to be used
 to distribute the users. In other words, \fBIndiMail\fR allows you to extend a domain across
 multiple servers and hence provide the ability to scale to any number of users. Such a domain

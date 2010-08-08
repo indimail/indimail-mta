@@ -72,6 +72,7 @@ DATE: @DATE@
     echo hostcntrl_host > @indimaildir@/control/host.mysql   (MySQL host to which all programs will
                                                              connect)
       or
+
     echo "hostcntrl_host:user:password:mysql socket/port" > @indimaildir@/control/host.mysql
 
     When you have a clustered domain, IndiMail supports the use of Master-Slave architecture in
