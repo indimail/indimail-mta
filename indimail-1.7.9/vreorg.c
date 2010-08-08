@@ -1,5 +1,8 @@
 /*
  * $Log: vreorg.c,v $
+ * Revision 2.13  2010-08-08 13:03:35+05:30  Cprogrammer
+ * made users_per_level configurable
+ *
  * Revision 2.12  2009-12-30 13:16:15+05:30  Cprogrammer
  * run vreorg with uid of domain if uid does not match domain uid
  *
@@ -90,10 +93,10 @@
 #include <sys/stat.h>
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vreorg.c,v 2.12 2009-12-30 13:16:15+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: vreorg.c,v 2.13 2010-08-08 13:03:35+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
-int             get_options(int argc, char **argv, char *, char *, int *, int *);
+int             get_options(int argc, char **argv, char *, char *, int *, int *, int *);
 
 int
 main(int argc, char **argv)
@@ -106,12 +109,12 @@ main(int argc, char **argv)
 	char           *ptr1, *ptr2;
 #endif
 	char            Domain[MAX_PW_DOMAIN], DomainDir[MAX_BUFF], OldDir[MAX_BUFF], User[MAX_BUFF], listfile[MAX_BUFF];
-	int             count, reset_dir, dec_dir;
+	int             count, reset_dir, dec_dir, users_per_level = 0;
 	uid_t           uid, myuid;
 	gid_t           gid;
 
 	dec_dir = 1;
-	if(get_options(argc, argv, Domain, listfile, &reset_dir, &dec_dir))
+	if(get_options(argc, argv, Domain, listfile, &reset_dir, &dec_dir, &users_per_level))
 		return(1);
 	if(!vget_assign(Domain, DomainDir, MAX_BUFF, &uid, &gid))
 	{
@@ -167,7 +170,7 @@ main(int argc, char **argv)
 		mplexdir = (char *) get_Mplexdir(User, Domain, 0, uid, gid);
 		/*- get next dir */
 		fname = open_big_dir(User, Domain, mplexdir);
-		tmpstr = next_big_dir(uid, gid);
+		tmpstr = next_big_dir(uid, gid, users_per_level);
 		close_big_dir(fname, Domain, uid, gid);
 		/*- get space for pw_dir */
 		if(!(pw->pw_dir = (char *) malloc(MAX_BUFF)))
@@ -224,7 +227,8 @@ main(int argc, char **argv)
 }
 
 int
-get_options(int argc, char **argv, char *Domain, char *listfile, int *reset_dir, int *dec_dir)
+get_options(int argc, char **argv, char *Domain, char *listfile, int *reset_dir,
+	int *dec_dir, int *users_per_level)
 {
 	int             c;
 	char           *tmpstr;
@@ -247,6 +251,9 @@ get_options(int argc, char **argv, char *Domain, char *listfile, int *reset_dir,
 			break;
 		case 'r':
 			*reset_dir = 1;
+			break;
+		case 'l':
+			*users_per_level = atoi(optarg);
 			break;
 		case 'R':
 			*dec_dir = 0;

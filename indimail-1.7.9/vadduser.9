@@ -128,6 +128,13 @@ Balances users across filesystems listed in fstab table as they are created. Thi
 should be used if vfstab (with -b option) is enabled in cron. This option overrides the
 \fB\-B\fR option.
 .TP
+\fB\-l\fR users_per_level
+By default, \fBvadduser\fR uses an adaptive directory structure based on a table dir-control
+which is automatically managed by \fBvadduser(1)\fR, \fBvdeluser(1)\fR and \fBvreorg(8).
+The basic idea is to break up the user Maildir directories across multiple directories and sub
+directories so that there are never more than 100 user directories in a single directory. Use
+this option to change the default compile time value of 100 users per directory.
+.TP
 \fB\-q\fR [\fIquota in bytes\fR]
 Set the hard quota limit for the user. If not supplied then the default system hard quota
 limit is set. The default limit is either 50M or what ever is set via --enable-hardquota.

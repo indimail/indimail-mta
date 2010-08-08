@@ -1,5 +1,8 @@
 /*
  * $Log: make_user_dir.c,v $
+ * Revision 2.9  2010-08-08 13:02:21+05:30  Cprogrammer
+ * made users_per_level configurable
+ *
  * Revision 2.8  2009-01-13 14:40:50+05:30  Cprogrammer
  * added add operation to backfill
  *
@@ -47,7 +50,7 @@
 #include <stdlib.h>
 
 #ifndef	lint
-static char     sccsid[] = "$Id: make_user_dir.c,v 2.8 2009-01-13 14:40:50+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: make_user_dir.c,v 2.9 2010-08-08 13:02:21+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 /*
@@ -55,7 +58,7 @@ static char     sccsid[] = "$Id: make_user_dir.c,v 2.8 2009-01-13 14:40:50+05:30
  * make the directories if needed
  */
 char           *
-make_user_dir(char *username, char *domain, uid_t uid, gid_t gid)
+make_user_dir(char *username, char *domain, uid_t uid, gid_t gid, int users_per_level)
 {
 	char           *tmpstr, *tmpdir, *fname;
 	char            tmpbuf1[MAX_BUFF], tmpbuf2[MAX_BUFF];
@@ -77,7 +80,7 @@ make_user_dir(char *username, char *domain, uid_t uid, gid_t gid)
 			fprintf(stderr, "open_big_dir: %s\n", strerror(errno));
 			return ((char *) 0);
 		}
-		tmpstr = next_big_dir(uid, gid);
+		tmpstr = next_big_dir(uid, gid, users_per_level);
 		close_big_dir(fname, domain, uid, gid);
 	}
 	if(tmpstr && *tmpstr)

@@ -1,5 +1,8 @@
 /*
  * $Log: vrenameuser.c,v $
+ * Revision 2.10  2010-08-08 13:12:07+05:30  Cprogrammer
+ * made users_per_level configurable
+ *
  * Revision 2.9  2010-02-17 10:58:55+05:30  Cprogrammer
  * added post handle
  *
@@ -41,7 +44,7 @@
 #include <signal.h>
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vrenameuser.c,v 2.9 2010-02-17 10:58:55+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: vrenameuser.c,v 2.10 2010-08-08 13:12:07+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 char            oldEmail[MAX_BUFF];
@@ -52,19 +55,19 @@ char            newUser[MAX_BUFF];
 char            newDomain[MAX_BUFF];
 
 void            usage();
-int             get_options(int argc, char **argv);
+int             get_options(int argc, char **argv, int *);
 
 int
 main(argc, argv)
 	int             argc;
 	char           *argv[];
 {
-	int             err;
+	int             err, users_per_level = 0;
 	uid_t           uid1, uid2, myuid;
 	gid_t           gid1, gid2;
 	char           *ptr, *base_argv0;
 
-	if(get_options(argc, argv))
+	if(get_options(argc, argv, &users_per_level))
 		return (1);
 	if (parse_email(oldEmail, oldUser, oldDomain, MAX_BUFF))
 	{
@@ -112,7 +115,7 @@ main(argc, argv)
 			return (1);
 		}
 	}
-	err = vrenameuser(oldUser, oldDomain, newUser, newDomain);
+	err = vrenameuser(oldUser, oldDomain, newUser, newDomain, users_per_level);
 	vclose();
 	if (!(ptr = getenv("POST_HANDLE")))
 	{
@@ -127,13 +130,14 @@ main(argc, argv)
 void
 usage()
 {
-	printf("usage: vrenameuser [options] old_email_address new_email_address\n");
-	printf("options: -V (print version number)\n");
-	printf("options: -v (verbose)\n");
+	error_stack(stderr, "usage: vrenameuser [options] old_email_address new_email_address\n");
+	error_stack(stderr, "options: -V (print version number)\n");
+	error_stack(stderr, "options: -v (verbose)\n");
+	error_stack(stderr, "         -l level    users per level\n");
 }
 
 int
-get_options(int argc, char **argv)
+get_options(int argc, char **argv, int *users_per_level)
 {
 	int             c;
 	int             errflag;
@@ -154,6 +158,9 @@ get_options(int argc, char **argv)
 			break;
 		case 'v':
 			verbose = 1;
+			break;
+		case 'l':
+			*users_per_level = atoi(optarg);
 			break;
 		default:
 			errflag = 1;

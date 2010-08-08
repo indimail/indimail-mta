@@ -1,5 +1,11 @@
 /*
  * $Log: indimail.h,v $
+ * Revision 2.196  2010-08-08 13:09:00+05:30  Cprogrammer
+ * added users_per_level argument to vrenameuser()
+ *
+ * Revision 2.195  2010-08-08 13:01:56+05:30  Cprogrammer
+ * made users_per_level configurable
+ *
  * Revision 2.194  2010-06-19 20:40:25+05:30  Cprogrammer
  * fix for syntax error during create_table on some MySQL versions
  *
@@ -898,7 +904,7 @@
 #define INDIMAILH_H
 
 #ifndef	lint
-static char     sccsidh[] = "$Id: indimail.h,v 2.194 2010-06-19 20:40:25+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsidh[] = "$Id: indimail.h,v 2.196 2010-08-08 13:09:00+05:30 Cprogrammer Stab mbhangui $";
 #endif
 
 #include "config.h"
@@ -1518,13 +1524,13 @@ int             vadddomain(char *, char *, char *, uid_t, gid_t, int);
 int             vaddaliasdomain(char *, char *);
 int             is_alias_domain(char *);
 int             vdeldomain(char *);
-int             vadduser(char *, char *, char *, char *, char *, int, int, int);
+int             vadduser(char *, char *, char *, char *, char *, int, int, int, int);
 int             vdeluser(char *, char *, int);
-int             vrenameuser(char *, char *, char *, char *);
+int             vrenameuser(char *, char *, char *, char *, int);
 int             parse_email(char *, char *, char *, int);
 int             vpasswd(char *, char *, char *, int);
 int             vsetuserquota(char *, char *, char *);
-char           *make_user_dir(char *, char *, uid_t, gid_t);
+char           *make_user_dir(char *, char *, uid_t, gid_t, int);
 char           *maildir_to_email(char *, char *);
 void            vset_default_domain(char *);
 int             vadddotqmail(char *, char *, ...);
@@ -1588,7 +1594,7 @@ int             ScanDir(FILE *, char *, int, mdir_t *, mdir_t *, mdir_t *, mdir_
 int             MoveFile(const char *, const char *);
 char           *open_big_dir(char *, char *, char *);
 int             close_big_dir(char *, char *, uid_t, gid_t);
-char           *next_big_dir(uid_t uid, gid_t gid);
+char           *next_big_dir(uid_t uid, gid_t gid, int);
 char           *inc_dir(vdir_type *, int);
 int             read_dir_control(vdir_type *);
 int             write_dir_control(vdir_type *, uid_t, gid_t);
@@ -1596,7 +1602,7 @@ int             vread_dir_control(char *, vdir_type *, char *);
 int             vwrite_dir_control(char *, vdir_type *, char *, uid_t, gid_t);
 int             vcreate_dir_control(char *, char *);
 int             vdel_dir_control(char *);
-int             inc_dir_control(vdir_type *);
+int             inc_dir_control(vdir_type *, int);
 int             dec_dir_control(char *, char *, char *, uid_t, gid_t);
 void            init_dir_control(vdir_type *);
 unsigned long   print_control(char *, char *, int);

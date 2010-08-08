@@ -33,6 +33,14 @@ Reset Dir Structure Layout for virtual_domain
 \fB\-R\fR
 Do not decrement Dir Structure Layout in the original filesystem.
 .TP
+\fB\-l\fR users_per_level
+By default, \fBvadduser\fR uses an adaptive directory structure based on a table dir-control
+which is automatically managed by \fBvadduser(1)\fR, \fBvdeluser(1)\fR and \fBvreorg(8).
+The basic idea is to break up the user Maildir directories across multiple directories and sub
+directories so that there are never more than 100 user directories in a single directory. Use
+this option to change the default compile time value of 100 users per directory, when doing
+a reorg.
+.TP
 \fIuser_list\fR
 Name of a file contain valid users for the virtual domain.
 

@@ -1,5 +1,8 @@
 /*
  * $Log: inc_dir_control.c,v $
+ * Revision 2.1  2010-08-08 13:01:38+05:30  Cprogrammer
+ * made users_per_level configurable
+ *
  * Revision 1.4  2002-03-03 17:13:54+05:30  Cprogrammer
  * replaced strcat with scat
  *
@@ -17,14 +20,17 @@
 #include <string.h>
 
 #ifndef	lint
-static char     sccsid[] = "$Id: inc_dir_control.c,v 1.4 2002-03-03 17:13:54+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: inc_dir_control.c,v 2.1 2010-08-08 13:01:38+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 int
-inc_dir_control(vdir_type * vdir)
+inc_dir_control(vdir_type * vdir, int max_users_per_level)
 {
+	int             users_per_level;
+
 	++vdir->cur_users;
-	if (vdir->cur_users % MAX_USERS_PER_LEVEL == 0)
+	users_per_level = max_users_per_level ? max_users_per_level : MAX_USERS_PER_LEVEL;
+	if (vdir->cur_users % users_per_level == 0)
 	{
 		if (!*(vdir->the_dir))
 		{

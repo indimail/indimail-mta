@@ -1,5 +1,8 @@
 /*
  * $Log: vadduser.c,v $
+ * Revision 2.33  2010-08-08 13:03:10+05:30  Cprogrammer
+ * made users_per_level configurable
+ *
  * Revision 2.32  2010-05-17 10:16:13+05:30  Cprogrammer
  * use control file .base_path in domains directory
  *
@@ -150,7 +153,7 @@
 #include <signal.h>
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vadduser.c,v 2.32 2010-05-17 10:16:13+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: vadduser.c,v 2.33 2010-08-08 13:03:10+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 char            Email[MAX_BUFF], User[MAX_BUFF], Domain[MAX_BUFF], Passwd[MAX_BUFF],
@@ -163,7 +166,7 @@ int             apop, Random, balance_flag, actFlag = 1;
 extern int      encrypt_flag, create_flag;
 
 void            usage();
-int             get_options(int, char **, char **, int *);
+int             get_options(int, char **, char **, int *, int *);
 int             checklicense(char *, int, long, char *, int);
 
 int
@@ -171,7 +174,7 @@ main(argc, argv)
 	int             argc;
 	char           *argv[];
 {
-	int             i, quota, pass_len = 8;
+	int             i, quota, pass_len = 8, users_per_level = 0;
 	char           *real_domain, *ptr, *base_argv0, *base_path, *domain_dir;
 	char            tmpbuf[MAX_BUFF], buffer[MAX_BUFF];
 	FILE           *fp;
@@ -182,7 +185,7 @@ main(argc, argv)
 	struct vlimits  limits;
 #endif
 
-	if (get_options(argc, argv, &base_path, &pass_len))
+	if (get_options(argc, argv, &base_path, &pass_len, &users_per_level))
 		return(1);
 	/*
 	 * parse the email address into user and domain 
@@ -329,9 +332,11 @@ main(argc, argv)
 	if (*envbuf)
 		putenv(envbuf);
 #ifdef CLUSTERED_SITE
-	if ((i = vadduser(User, real_domain, mdahost, Passwd, Gecos, quota, apop, actFlag)) < 0)
+	if ((i = vadduser(User, real_domain, mdahost, Passwd, Gecos, quota,
+		users_per_level, apop, actFlag)) < 0)
 #else
-	if ((i = vadduser(User, real_domain, 0, Passwd, Gecos, quota, apop, actFlag)) < 0)
+	if ((i = vadduser(User, real_domain, 0, Passwd, Gecos, quota,
+		users_per_level, apop, actFlag)) < 0)
 #endif
 	{
 		error_stack(stderr, 0);
@@ -357,6 +362,7 @@ usage()
 	error_stack(stderr, "options: -V          (print version number)\n");
 	error_stack(stderr, "         -v          (verbose)\n");
 	error_stack(stderr, "         -q          quota (in bytes) (sets the users quota)\n");
+	error_stack(stderr, "         -l level    users per level\n");
 	error_stack(stderr, "         -c          comment (sets the gecos comment field)\n");
 	error_stack(stderr, "         -e          Standard Encrypted Password\n");
 	error_stack(stderr, "         -r [len]    generate a len (default 8) char random password\n");
@@ -372,7 +378,7 @@ usage()
 }
 
 int
-get_options(int argc, char **argv, char **base_path, int *pass_len)
+get_options(int argc, char **argv, char **base_path, int *pass_len, int *users_per_level)
 {
 	int             c;
 	int             errflag;
@@ -386,7 +392,7 @@ get_options(int argc, char **argv, char **base_path, int *pass_len)
 	actFlag = 1;
 	*base_path = 0;
 #ifdef CLUSTERED_SITE
-	while (!errflag && (c = getopt(argc, argv, "aidbB:Vvc:q:h:m:er:")) != -1)
+	while (!errflag && (c = getopt(argc, argv, "aidbB:Vvc:q:l:h:m:er:")) != -1)
 #else
 	while (!errflag && (c = getopt(argc, argv, "aidbB:Vvc:q:er:")) != -1)
 #endif
@@ -432,6 +438,9 @@ get_options(int argc, char **argv, char **base_path, int *pass_len)
 			break;
 		case 'q':
 			scopy(Quota, optarg, MAX_BUFF);
+			break;
+		case 'l':
+			*users_per_level = atoi(optarg);
 			break;
 #ifdef CLUSTERED_SITE
 		case 'm':

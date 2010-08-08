@@ -1,5 +1,8 @@
 /*
  * $Log: adduser.c,v $
+ * Revision 2.21  2010-08-08 13:00:06+05:30  Cprogrammer
+ * made users_per_level configurable
+ *
  * Revision 2.20  2009-05-27 16:02:57+05:30  Cprogrammer
  * allow char in username as per RFC-5321
  *
@@ -112,7 +115,7 @@
 #define ALLOWCHARS              " .!#$%&'*+-/=?^_`{|}~\""
 
 #ifndef	lint
-static char     sccsid[] = "$Id: adduser.c,v 2.20 2009-05-27 16:02:57+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: adduser.c,v 2.21 2010-08-08 13:00:06+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 /*
@@ -151,7 +154,7 @@ static char     sccsid[] = "$Id: adduser.c,v 2.20 2009-05-27 16:02:57+05:30 Cpro
  */
 int
 vadduser(char *username, char *domain, char *mdahost, char *password,
-		 char *gecos, int quota, int apop, int actFlag)
+		 char *gecos, int quota, int users_per_level, int apop, int actFlag)
 {
 	char            Dir[MAX_BUFF], Crypted[MAX_BUFF];
 	char           *tmpstr, *dir, *ptr, *allow_chars;
@@ -278,7 +281,7 @@ vadduser(char *username, char *domain, char *mdahost, char *password,
 		return (-1);
 	}
 	umask(INDIMAIL_UMASK); /*- This function always suceeds according to man */
-	if (!(dir = make_user_dir(username, domain, uid, gid)))
+	if (!(dir = make_user_dir(username, domain, uid, gid, users_per_level)))
 	{
 		error_stack(stderr, "make user dir failed\n");
 		return (-1);
