@@ -1628,9 +1628,10 @@ compile qmail-local.c sig.h env.h byte.h exit.h \
 open.h wait.h lock.h seek.h getln.h strerr.h subfd.h \
 sgetopt.h subgetopt.h alloc.h error.h stralloc.h \
 gen_alloc.h fmt.h str.h now.h datetime.h case.h quote.h qmail.h \
-substdio.h slurpclose.h myctime.h gfrom.h auto_patrn.h constmap.h control.h auto_qmail.h variables.h \
-conf-sync
-	./compile `grep -h -v "^#" conf-sync` qmail-local.c
+substdio.h slurpclose.h myctime.h gfrom.h auto_patrn.h \
+constmap.h control.h auto_qmail.h variables.h \
+conf-sync conf-mailarchive
+	./compile `grep -h -v "^#" conf-sync conf-mailarchive` qmail-local.c
 
 qmail-log.0: \
 qmail-log.5
