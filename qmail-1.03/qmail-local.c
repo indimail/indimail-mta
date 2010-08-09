@@ -1,5 +1,9 @@
 /*
  * $Log: qmail-local.c,v $
+ * Revision 1.22  2010-08-09 18:30:41+05:30  Cprogrammer
+ * use different archival rules for forwarding/aliases to prevent duplication
+ * when sending to groups
+ *
  * Revision 1.21  2010-07-16 14:12:15+05:30  Cprogrammer
  * formatted code and comments
  *
@@ -887,6 +891,10 @@ main(int argc, char **argv)
 		temp_nomem();
 	if (!env_unset("SPAMFILTER"))
 		temp_nomem();
+#if defined(MAILARCHIVE)
+	if (!env_put2("MAILARCHIVE", "forward.arch"))
+		temp_nomem();
+#endif
 	if (!stralloc_copys(&envrecip, local))
 		temp_nomem();
 	if (!stralloc_cats(&envrecip, "@"))
@@ -1178,7 +1186,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_local_c()
 {
-	static char    *x = "$Id: qmail-local.c,v 1.21 2010-07-16 14:12:15+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: qmail-local.c,v 1.22 2010-08-09 18:30:41+05:30 Cprogrammer Stab mbhangui $";
 
 	x++;
 }
