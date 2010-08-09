@@ -1630,8 +1630,8 @@ sgetopt.h subgetopt.h alloc.h error.h stralloc.h \
 gen_alloc.h fmt.h str.h now.h datetime.h case.h quote.h qmail.h \
 substdio.h slurpclose.h myctime.h gfrom.h auto_patrn.h \
 constmap.h control.h auto_qmail.h variables.h \
-conf-sync conf-mailarchive
-	./compile `grep -h -v "^#" conf-sync conf-mailarchive` qmail-local.c
+conf-sync conf-mailarch
+	./compile `grep -h -v "^#" conf-sync conf-mailarch` qmail-local.c
 
 qmail-log.0: \
 qmail-log.5
