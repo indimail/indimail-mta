@@ -53,7 +53,7 @@ static char     sccsid[] = "$Id: get_smtp_service_port.c,v 2.5 2010-05-28 14:11:
 #include <mysqld_error.h>
 
 int
-get_smtp_service_port(char *SrcHost, char *domain, char *hostname)
+get_smtp_service_port(char *SrcHost, char *domain, char *hostid)
 {
 	char            Domain[MAX_BUFF], SqlBuf[SQL_BUF_SIZE];
 	char           *ptr, *src_host;
@@ -82,7 +82,7 @@ get_smtp_service_port(char *SrcHost, char *domain, char *hostname)
 		src_host = SrcHost;
 	snprintf(SqlBuf, SQL_BUF_SIZE, 
 		"select high_priority port,src_host from smtp_port where host=\"%s\" and domain=\"%s\"", 
-		hostname, Domain);
+		hostid, Domain);
 	if (mysql_query(&mysql[0], SqlBuf))
 	{
 		if(mysql_errno(&mysql[0]) == ER_NO_SUCH_TABLE)

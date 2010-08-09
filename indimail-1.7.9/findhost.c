@@ -1,5 +1,8 @@
 /*
  * $Log: findhost.c,v $
+ * Revision 2.33  2010-08-09 18:28:12+05:30  Cprogrammer
+ * use hostid instead of ip address
+ *
  * Revision 2.32  2010-05-28 14:11:00+05:30  Cprogrammer
  * use QMTP as default
  *
@@ -189,7 +192,7 @@
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: findhost.c,v 2.32 2010-05-28 14:11:00+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: findhost.c,v 2.33 2010-08-09 18:28:12+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #include <stdio.h>
@@ -216,8 +219,7 @@ char           *
 findhost(char *email, int connect_primarydb)
 {
 	static char     _mailhost[MAX_BUFF], mailhost[MAX_BUFF], prevEmail[MAX_BUFF];
-	char            user[MAX_BUFF], domain[MAX_BUFF];
-	char            SqlBuf[SQL_BUF_SIZE];
+	char            user[MAX_BUFF], domain[MAX_BUFF], SqlBuf[SQL_BUF_SIZE], hostid[MAX_BUFF];
 	char           *ptr, *real_domain, *ip_addr;
 	static int      mlen;
 	int             len, port, err, attempt = 0;
@@ -326,6 +328,7 @@ again:
 		mysql_free_result(res);
 		return ((char *) 0);
 	}
+	scopy(hostid, row[0], MAX_BUFF);
 	mysql_free_result(res);
 	if (connect_primarydb == 1 || connect_primarydb == 3)
 	{
@@ -337,10 +340,10 @@ again:
 		if (vauth_open(ptr))
 			return ((char *) 0);
 	}
-	if ((port = get_smtp_service_port(0, real_domain, ip_addr)) == -1)
+	if ((port = get_smtp_service_port(0, real_domain, hostid)) == -1)
 	{
-		(void) fprintf(stderr, "findhost: get_smtp_service_port: failed to get smtp port for %s %s\n", 
-		   real_domain, ip_addr);
+		(void) fprintf(stderr, "findhost: failed to get smtp port for %s %s\n", 
+		   real_domain, hostid);
 		return ((char *) 0);
 	} else
 	if (!port)

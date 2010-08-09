@@ -5,7 +5,9 @@ vfstab \- Filesystem balancing Utility
 
 .SH SYNOPSYS
 \fBvfstab\fR \fB\-d\fR | \fB\-i\fR | \fB\-l\fR | \fB\-u\fR | \fB\-o\fR | \fB\-n\fR \fIuser_quota\fR \fB\-q\fR \fIsize_quota\fR \fB\-m\fR \fImdaHost\fR \fIFilesystem\fR
+
 \fBvfstab\fR \fB\-s\fR [\fB\-m\fR \fImdaHost\fR]
+
 \fBvfstab\fR \fB\-b\fR
 
 .SH DESCRIPTION
@@ -47,7 +49,7 @@ Max number of users to be added on this file system.
 Max size of file system
 .TP
 \fB\-m\fR
-Mail Delivery Host. The host on which the user's mailbox lie.
+Mailstore. The hostid of mailstore on which the user's mailbox lie.
 .TP
 \fB\-s\fR
 Show filesystems configured in FSTAB table. If -m option is given, displays the file system only for the specified Mail Delivery Host.

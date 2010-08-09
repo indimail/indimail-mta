@@ -1,5 +1,8 @@
 /*
  * $Log: getFreeFS.c,v $
+ * Revision 2.6  2010-08-09 18:28:38+05:30  Cprogrammer
+ * use hostid instead of ip address
+ *
  * Revision 2.5  2008-05-28 16:35:38+05:30  Cprogrammer
  * removed USE_MYSQL
  *
@@ -19,7 +22,7 @@
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: getFreeFS.c,v 2.5 2008-05-28 16:35:38+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: getFreeFS.c,v 2.6 2010-08-09 18:28:38+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #include <stdlib.h>
@@ -32,23 +35,23 @@ static int      putLastFstab(char *);
 char           *
 getFreeFS()
 {
-	char           *lastSelectedFS, *tmpfstab, *local_ip, *ptr;
+	char           *lastSelectedFS, *tmpfstab, *local_hostid, *ptr;
 	int             status;
 	float           load, prev_load;
 	long            cur_user, cur_size, max_user, max_size;
-	char            LocalHost[MAX_BUFF];
+	char            HostID[MAX_BUFF];
 	static char     FileSystem[MAX_BUFF];
 
 	lastSelectedFS = getLastFstab();
-	if (!(local_ip = get_local_ip()))
+	if (!(local_hostid = get_local_hostid()))
 	{
 		fprintf(stderr, "getFreeFilesystem: Could not get local ip: %s\n", strerror(errno));
 		return ((char *) 0);
 	} else
-		scopy(LocalHost, local_ip, MAX_BUFF);
+		scopy(HostID, local_hostid, MAX_BUFF);
 	for (*FileSystem = 0, prev_load = -1;;)
 	{
-		if (!(tmpfstab = vfstab_select(LocalHost, &status, &max_user, &cur_user, &max_size, &cur_size)))
+		if (!(tmpfstab = vfstab_select(HostID, &status, &max_user, &cur_user, &max_size, &cur_size)))
 			break;
 		if (status == FS_OFFLINE)
 			continue;

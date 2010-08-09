@@ -9,7 +9,7 @@ vsmtp \- Setup artificial routes for qmail-remote
 .I options
 ]
 [
-.I host@domain_name
+.I hostid@domain_name
 \fB\-m\fR \fImta\fR
 |
 \fB\-s\fR \fIdomain_name\fR
@@ -52,8 +52,8 @@ Change SMTP Route between a MTA host and a mailstore
 \fB\-m\fR \fImta_ipaddress\fR
 The ip address of the MTA which needs a SMTP route to the mailstore.
 .TP
-\fIhost@domain\fR
-The name of the mailstore followed by '@' sign and the domain_name.
+\fIhostid@domain\fR
+The mailstore hostid followed by '@' sign and the domain_name.
 .TP
 \fIdomain_name\fR
 The name of the virtual domain.
