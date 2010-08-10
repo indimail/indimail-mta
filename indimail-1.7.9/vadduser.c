@@ -1,7 +1,7 @@
 /*
  * $Log: vadduser.c,v $
- * Revision 2.33  2010-08-08 13:03:10+05:30  Cprogrammer
- * made users_per_level configurable
+ * Revision 2.33  2010-08-10 18:41:05+05:30  Cprogrammer
+ * made dir control user level configurable
  *
  * Revision 2.32  2010-05-17 10:16:13+05:30  Cprogrammer
  * use control file .base_path in domains directory
@@ -153,7 +153,7 @@
 #include <signal.h>
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vadduser.c,v 2.33 2010-08-08 13:03:10+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: vadduser.c,v 2.33 2010-08-10 18:41:05+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 char            Email[MAX_BUFF], User[MAX_BUFF], Domain[MAX_BUFF], Passwd[MAX_BUFF],
@@ -394,7 +394,7 @@ get_options(int argc, char **argv, char **base_path, int *pass_len, int *users_p
 #ifdef CLUSTERED_SITE
 	while (!errflag && (c = getopt(argc, argv, "aidbB:Vvc:q:l:h:m:er:")) != -1)
 #else
-	while (!errflag && (c = getopt(argc, argv, "aidbB:Vvc:q:er:")) != -1)
+	while (!errflag && (c = getopt(argc, argv, "aidbB:Vvc:q:l:er:")) != -1)
 #endif
 	{
 		switch (c)

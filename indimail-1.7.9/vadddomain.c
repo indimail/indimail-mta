@@ -1,7 +1,7 @@
 /*
  * $Log: vadddomain.c,v $
- * Revision 2.31  2010-08-08 20:17:35+05:30  Cprogrammer
- * added option to configure users per level
+ * Revision 2.31  2010-08-10 18:42:13+05:30  Cprogrammer
+ * made dir control user level configurable
  *
  * Revision 2.30  2010-05-18 18:49:46+05:30  Cprogrammer
  * fix ownership of .base_path
@@ -158,7 +158,7 @@
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vadddomain.c,v 2.31 2010-08-08 20:17:35+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: vadddomain.c,v 2.31 2010-08-10 18:42:13+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 
@@ -472,9 +472,9 @@ get_options(int argc, char **argv, char **base_path, int *chk_rcpt, int *users_p
 	*sqlserver = *database = *dbuser = *dbpass = 0;
 	dbport = -1;
 	distributed = -1;
-	scopy(optbuf, "atT:q:bB:e:u:VvCci:g:d:D:S:U:P:p:O", MAX_BUFF);
+	scopy(optbuf, "atT:q:l:bB:e:u:VvCci:g:d:D:S:U:P:p:O", MAX_BUFF);
 #else
-	scopy(optbuf, "atT:q:bB:e:u:VvCi:g:d:O", MAX_BUFF);
+	scopy(optbuf, "atT:q:l:bB:e:u:VvCi:g:d:O", MAX_BUFF);
 #endif
 #ifdef VFILTER
 	scat(optbuf, "f", MAX_BUFF);
