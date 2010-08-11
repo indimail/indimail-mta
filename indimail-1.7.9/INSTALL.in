@@ -760,6 +760,7 @@ the installation.
         --rbl=-rzen.spamhaus.org --rbl=-rdnsbl-1.uceprotect.net
 
     The command below will create the public and private key for domainkey, dkim signatures
+
     % sudo @indimaildir@/bin/dknewkey @indimaildir@/control/domainkeys/indimail
 
     If you want to have a message submission port (587) for users to submit outgoing mails
@@ -1029,7 +1030,9 @@ the installation.
 
    sudo sh ./create_services --qbase=@indimaildir@/queue --mbase=@basepath@ \
      --mysqlPrefix=@mysql_prefix@
+
    On Mac OS X you may run
+
    sudo sh ./create_services --qbase=@indimaildir@/queue --mbase=@basepath@ \
      --mysqlPrefix=@mysql_prefix@ --no-nssd
 
@@ -1205,7 +1208,9 @@ You can go on to add a virtual domain and users if you wish
     file. This is on purpose. If you want to find out the internal
     workings of indimail and qmail look into all files in @indimaildir@/doc
     and /var/indimail/man?
+
     As a first step, do
+
     % man -M INDIMAIL/man indimail
 
 ########### SECTION 10 #### SUPPORT INFORMATION #########################
