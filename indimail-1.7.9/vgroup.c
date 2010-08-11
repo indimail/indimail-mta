@@ -1,5 +1,8 @@
 /*
  * $Log: vgroup.c,v $
+ * Revision 2.21  2010-08-11 18:36:51+05:30  Cprogrammer
+ * added checks for group member syntax
+ *
  * Revision 2.20  2010-08-08 20:17:47+05:30  Cprogrammer
  * use configurable users per level
  *
@@ -66,7 +69,7 @@
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vgroup.c,v 2.20 2010-08-08 20:17:47+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: vgroup.c,v 2.21 2010-08-11 18:36:51+05:30 Cprogrammer Stab mbhangui $";
 #endif
 
 #ifdef VALIAS
@@ -162,16 +165,52 @@ main(int argc, char **argv)
 			ret = addGroup(User, real_domain, mdahost, gecos, passwd, quota);
 			break;
 		case INSERT_MEMBER:
-			snprintf(alias_line, sizeof(alias_line),  "&%s",  member);
+			if (*member == '.')
+			{
+				fprintf(stderr, "Illegal member %s\n", member);
+				vclose();
+				return(1);
+			}
+			if (*member != '&' && *member != '/' && *member != '|')
+				snprintf(alias_line, sizeof(alias_line),  "&%s",  member);
+			else
+				strncpy(alias_line, member, sizeof(alias_line));
 			ret = valias_insert(User, real_domain, alias_line, ignore);
 			break;
 		case DELETE_MEMBER:
-			snprintf(alias_line, sizeof(alias_line),  "&%s",  member);
+			if (*member == '.')
+			{
+				fprintf(stderr, "Illegal member %s\n", member);
+				vclose();
+				return(1);
+			}
+			if (*member != '&' && *member != '/' && *member != '|')
+				snprintf(alias_line, sizeof(alias_line),  "&%s",  member);
+			else
+				strncpy(alias_line, member, sizeof(alias_line));
 			ret = valias_delete(User, real_domain, alias_line);
 			break;
 		case UPDATE_MEMBER:
-			snprintf(alias_line, sizeof(alias_line),  "&%s",  member);
-			snprintf(old_alias, sizeof(old_alias),  "&%s",  old_member);
+			if (*member == '.')
+			{
+				fprintf(stderr, "Illegal member %s\n", member);
+				vclose();
+				return(1);
+			} else
+			if (*old_member == '.')
+			{
+				fprintf(stderr, "Illegal member %s\n", old_member);
+				vclose();
+				return(1);
+			}
+			if (*member != '&' && *member != '/' && *member != '|')
+				snprintf(alias_line, sizeof(alias_line),  "&%s",  member);
+			else
+				strncpy(alias_line, member, sizeof(alias_line));
+			if (*old_member != '&' && *old_member != '/' && *old_member != '|')
+				snprintf(old_alias, sizeof(old_alias),  "&%s",  old_member);
+			else
+				strncpy(old_alias, old_member, sizeof(old_alias));
 			ret = valias_update(User, real_domain, old_alias, alias_line);
 			break;
 	}
