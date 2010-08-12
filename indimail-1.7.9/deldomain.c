@@ -1,5 +1,8 @@
 /*
  * $Log: deldomain.c,v $
+ * Revision 2.15  2010-08-12 18:55:28+05:30  Cprogrammer
+ * remove filters prefilt and postfilt when removing a domain
+ *
  * Revision 2.14  2010-05-17 10:15:38+05:30  Cprogrammer
  * use .base_path control file in domains directory
  *
@@ -78,7 +81,7 @@
 #include <signal.h>
 
 #ifndef	lint
-static char     sccsid[] = "$Id: deldomain.c,v 2.14 2010-05-17 10:15:38+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: deldomain.c,v 2.15 2010-08-12 18:55:28+05:30 Cprogrammer Stab mbhangui $";
 #endif
 
 int
@@ -222,6 +225,10 @@ vdeldomain(char *domain)
 		vdel_limits(domain);
 #endif
 	}
+	snprintf(TmpBuf, sizeof(TmpBuf), "prefilt@%s", domain);
+	vfilter_delete(TmpBuf, -1);
+	snprintf(TmpBuf, sizeof(TmpBuf), "postfilt@%s", domain);
+	vfilter_delete(TmpBuf, -1);
 	/*
 	 * delete the assign file line 
 	 */
