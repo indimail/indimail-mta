@@ -810,6 +810,8 @@ dbinfo.8: dbinfo.9
 	cat $^ | sed s}INDIMAIL}$(indimaildir)}g > $@
 inlookup.8: inlookup.9
 	cat $^ | sed s}INDIMAIL}$(indimaildir)}g | sed s}LOGDIR}$(logdir)}g > $@
+vcfilter.1: vcfilter.9
+	cat $^ | sed s}INDIMAIL}$(indimaildir)}g > $@
 vadddomain.1:vadddomain.9
 	cat $^ | sed s}INDIMAIL}$(indimaildir)}g > $@
 vdeldomain.1:vdeldomain.9
