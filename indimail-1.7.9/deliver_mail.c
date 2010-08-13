@@ -491,7 +491,7 @@ deliver_mail(char *address, mdir_t MsgSize, char *quota, uid_t uid, gid_t gid,
 	                DeliveredTo[AUTH_SIZE], msgbuf[MSG_BUF_SIZE], user[AUTH_SIZE],
 	                homedir[MAX_BUFF], mailalert_host[MAX_BUFF], mailalert_port[MAX_BUFF];
 	char           *maildirquota, *domain, *email, *rpline, *dtline, *xfilter, *ptr, *alert_host,
-	               *alert_port, *cmmd, *ptr1, *ptr2, *qqeh;
+	               *alert_port, *cmmd, *ptr1, *ptr2, *qqeh, *faddr;
 	mdir_t         *MailQuotaCount, *MailQuotaSize;
 	mdir_t          _MailQuotaCount, _MailQuotaSize, quota_mailsize, dailyMsgCount, dailyMsgSize;
 	static int      counter;
@@ -798,7 +798,7 @@ deliver_mail(char *address, mdir_t MsgSize, char *quota, uid_t uid, gid_t gid,
 	{
 		char           *tstr = 0;
 		getEnvConfigStr(&rpline, "RPLINE", "Return-Path: <>\n");
-		if ((dtline = getenv("DTLINE")))
+		if ((dtline = getenv("DTLINE"))) /*- original address */
 		{
 
 			for (;*dtline && *dtline != ':';dtline++);
@@ -820,19 +820,20 @@ deliver_mail(char *address, mdir_t MsgSize, char *quota, uid_t uid, gid_t gid,
 				++address;
 			dtline = address;
 		}
+		faddr = (*address == '&' || *address == '|') ? address + 1 : address;
 		xfilter = getenv("XFILTER");
 		qqeh = getenv("QQEH");
 		if (qqeh && *qqeh)
 			snprintf(DeliveredTo, AUTH_SIZE, 
-				"%sXDelivered-To: %s\n%s%s\nReceived: (indimail %d invoked by uid %d); %s\n",
-				rpline, dtline, qqeh,
-				xfilter ? xfilter : "X-Filter: None",
+				"%sX-Forwarded-To: %s\nX-Forwarded-For: %s\n%s%s\n"
+				"Received: (indimail %d invoked by uid %d); %s\n",
+				rpline, faddr, dtline, qqeh, xfilter ? xfilter : "X-Filter: None",
 				getpid(), getuid(), get_localtime());
 		else
 			snprintf(DeliveredTo, AUTH_SIZE, 
-				"%sXDelivered-To: %s\n%s\nReceived: (indimail %d invoked by uid %d); %s\n",
-				rpline, dtline,
-				xfilter ? xfilter : "X-Filter: None",
+				"%sX-Forwarded-To: %s\nX-Forwarded-For: %s\n%s\n"
+				"Received: (indimail %d invoked by uid %d); %s\n",
+				rpline, faddr, dtline, xfilter ? xfilter : "X-Filter: None",
 				getpid(), getuid(), get_localtime());
 		if (tstr) /*- replace the newline in DTLINE environment variable */
 			*tstr = '\n';

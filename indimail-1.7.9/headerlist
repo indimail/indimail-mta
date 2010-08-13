@@ -38,3 +38,5 @@ Domainkey-Signature
 DKIM-Signature
 DKIM-Status
 Domainkey-Status
+X-Forwarded-To
+X-Forwarded-For
