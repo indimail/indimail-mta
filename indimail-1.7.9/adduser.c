@@ -157,7 +157,7 @@ static char     sccsid[] = "$Id: adduser.c,v 2.22 2010-08-08 20:39:41+05:30 Cpro
  */
 int
 vadduser(char *username, char *domain, char *mdahost, char *password,
-		 char *gecos, int quota, int users_per_level, int apop, int actFlag)
+		 char *gecos, int quota, int max_users_per_level, int apop, int actFlag)
 {
 	char            Dir[MAX_BUFF], Crypted[MAX_BUFF], tmpbuf[MAX_BUFF];
 	char           *tmpstr, *dir, *ptr, *allow_chars;
@@ -303,7 +303,7 @@ vadduser(char *username, char *domain, char *mdahost, char *password,
 	}
 	umask(INDIMAIL_UMASK); /*- This function always succeeds according to man */
 	if (!(dir = make_user_dir(username, domain, uid, gid,
-		!users_per_level ? u_level : users_per_level)))
+		!max_users_per_level ? u_level : max_users_per_level)))
 	{
 		error_stack(stderr, "make user dir failed\n");
 		return (-1);

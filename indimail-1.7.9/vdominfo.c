@@ -1,5 +1,8 @@
 /*
  * $Log: vdominfo.c,v $
+ * Revision 2.13  2010-08-15 15:54:59+05:30  Cprogrammer
+ * display max users per level and vlimits status
+ *
  * Revision 2.12  2010-05-25 13:14:18+05:30  Cprogrammer
  * added option -b to display user's base home directory
  *
@@ -112,7 +115,7 @@
 #include <memory.h>
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vdominfo.c,v 2.12 2010-05-25 13:14:18+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: vdominfo.c,v 2.13 2010-08-15 15:54:59+05:30 Cprogrammer Stab mbhangui $";
 #endif
 
 char            Domain[MAX_BUFF];
@@ -293,6 +296,7 @@ display_domain(char *domain, char *dir, uid_t uid, gid_t gid)
 	char            tmpbuf[MAX_BUFF];
 	FILE           *fp;
 	unsigned long   total;
+	int             users_per_level = 0;
 #ifdef CLUSTERED_SITE
 	char           *ptr, *hostid, *qmaildir, *controldir;
 	char            host_path[MAX_BUFF];
@@ -341,9 +345,26 @@ display_domain(char *domain, char *dir, uid_t uid, gid_t gid)
 				getEnvConfigStr(&base_path, "BASE_PATH", BASE_PATH);
 				printf("  Base Dir: %s\n", base_path);
 			}
+			snprintf(tmpbuf, MAX_BUFF, "%s/.users_per_level", dir);
+			if ((fp = fopen(tmpbuf, "r")))
+			{
+				if (fscanf(fp, "%d", &users_per_level) != 1)
+				{
+					error_stack(stderr, "invalid domain users per level\n");
+					return;
+				}
+				fclose(fp);
+			} else
+			if (errno != ENOENT)
+			{
+				error_stack(stderr, "%s: %s\n", tmpbuf, strerror(errno));
+				return;
+			}
 			snprintf(tmpbuf, MAX_BUFF, "%s/.filesystems", dir);
-			total = print_control(tmpbuf, domain, 0);
+			total = print_control(tmpbuf, domain, users_per_level, 0);
 			printf("     Users: %ld\n", total);
+			snprintf(tmpbuf, MAX_BUFF, "%s/.domain_limits", dir);
+			printf("   vlimits: %s\n", access(tmpbuf, F_OK) ? "disabled" : "enabled");
 			snprintf(tmpbuf, MAX_BUFF, "%s/.aliasdomains", dir);
 			if ((fp = fopen(tmpbuf, "r")))
 			{
@@ -408,9 +429,26 @@ display_domain(char *domain, char *dir, uid_t uid, gid_t gid)
 			}
 			if (DisplayTotalUsers)
 			{
+				snprintf(tmpbuf, MAX_BUFF, "%s/.users_per_level", dir);
+				if ((fp = fopen(tmpbuf, "r")))
+				{
+					if (fscanf(fp, "%d", &users_per_level) != 1)
+					{
+						error_stack(stderr, "invalid domain users per level\n");
+						return;
+					}
+					fclose(fp);
+				} else
+				if (errno != ENOENT)
+				{
+					error_stack(stderr, "%s: %s\n", tmpbuf, strerror(errno));
+					return;
+				}
 				snprintf(tmpbuf, MAX_BUFF, "%s/.filesystems", dir);
-				total = print_control(tmpbuf, domain, 0);
+				total = print_control(tmpbuf, domain, users_per_level, 0);
 				printf("     Users: %ld\n", total);
+				snprintf(tmpbuf, MAX_BUFF, "%s/.domain_limits", dir);
+				printf("   vlimits: %s\n", access(tmpbuf, F_OK) ? "disabled" : "enabled");
 			}
 			if (DisplayAliasDomains)
 			{

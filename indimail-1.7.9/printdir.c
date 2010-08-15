@@ -1,5 +1,8 @@
 /*
  * $Log: printdir.c,v $
+ * Revision 2.4  2010-08-15 15:54:12+05:30  Cprogrammer
+ * display max users per level
+ *
  * Revision 2.3  2009-12-30 13:09:12+05:30  Cprogrammer
  * run with uid of domain
  *
@@ -26,7 +29,7 @@
 #include <string.h>
 
 #ifndef	lint
-static char     sccsid[] = "$Id: printdir.c,v 2.3 2009-12-30 13:09:12+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: printdir.c,v 2.4 2010-08-15 15:54:12+05:30 Cprogrammer Stab mbhangui $";
 #endif
 
 int
@@ -34,6 +37,8 @@ main(int argc, char **argv)
 {
 	char           *ptr;
 	char            tmpbuf[MAX_BUFF];
+	int             users_per_level = 0;
+	FILE           *fp;
 	uid_t           uid, myuid;
 	gid_t           gid;
 
@@ -43,26 +48,41 @@ main(int argc, char **argv)
 		ptr = argv[0];
 	if (argc != 2)
 	{
-		fprintf(stderr, "usage: %s domain_name\n", ptr);
+		error_stack(stderr, "usage: %s domain_name\n", ptr);
 		return (1);
 	}
 	if(indimailuid == -1 || indimailgid == -1)
 		GetIndiId(&indimailuid, &indimailgid);
 	if(!(ptr = vget_assign(argv[1], NULL, 0, &uid, &gid)))
 	{
-		fprintf(stderr, "%s: No such domain\n", argv[1]);
+		error_stack(stderr, "%s: No such domain\n", argv[1]);
 		return(-1);
 	}
 	if ((myuid = getuid()) != uid)
 	{
 		if (setgid(gid) || setuid(uid))
 		{
-			fprintf(stderr, "setuid/setgid (%d/%d): %s", uid, gid, strerror(errno));
+			error_stack(stderr, "setuid/setgid (%d/%d): %s", uid, gid, strerror(errno));
 			return (1);
 		}
 	}
+	snprintf(tmpbuf, MAX_BUFF, "%s/.users_per_level", ptr);
+	if ((fp = fopen(tmpbuf, "r")))
+	{
+		if (fscanf(fp, "%d", &users_per_level) != 1)
+		{
+			error_stack(stderr, "invalid domain users per level\n");
+			return (1);
+		}
+		fclose(fp);
+	} else
+	if (errno != ENOENT)
+	{
+		error_stack(stderr, "%s: %s\n", tmpbuf, strerror(errno));
+		return (1);
+	}
 	snprintf(tmpbuf, MAX_BUFF, "%s/.filesystems", ptr);
-	print_control(tmpbuf, argv[1], 0);
+	print_control(tmpbuf, argv[1], users_per_level, 0);
 	return(0);
 }
 

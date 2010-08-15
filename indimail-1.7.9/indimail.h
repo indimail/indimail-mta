@@ -1,5 +1,8 @@
 /*
  * $Log: indimail.h,v $
+ * Revision 2.196  2010-08-15 15:51:33+05:30  Cprogrammer
+ * added users_per_level argument to print_control()
+ *
  * Revision 2.195  2010-08-08 20:16:55+05:30  Cprogrammer
  * use configurable users per level
  *
@@ -901,7 +904,7 @@
 #define INDIMAILH_H
 
 #ifndef	lint
-static char     sccsidh[] = "$Id: indimail.h,v 2.195 2010-08-08 20:16:55+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsidh[] = "$Id: indimail.h,v 2.196 2010-08-15 15:51:33+05:30 Cprogrammer Stab mbhangui $";
 #endif
 
 #include "config.h"
@@ -1602,7 +1605,7 @@ int             vdel_dir_control(char *);
 int             inc_dir_control(vdir_type *, int);
 int             dec_dir_control(char *, char *, char *, uid_t, gid_t);
 void            init_dir_control(vdir_type *);
-unsigned long   print_control(char *, char *, int);
+unsigned long   print_control(char *, char *, int, int);
 int             vread_dir_control_cdb(char *, vdir_type *, char *);
 int             vwrite_dir_control_cdb(char *, vdir_type *, char *, uid_t, gid_t);
 int             vdel_dir_control_cdb(char *, char *);

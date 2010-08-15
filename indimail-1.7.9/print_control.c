@@ -1,5 +1,8 @@
 /*
  * $Log: print_control.c,v $
+ * Revision 2.5  2010-08-15 15:53:50+05:30  Cprogrammer
+ * display users per level
+ *
  * Revision 2.4  2009-02-18 21:33:05+05:30  Cprogrammer
  * check return value of fscanf
  *
@@ -33,19 +36,21 @@
 #include <stdio.h>
 
 #ifndef	lint
-static char     sccsid[] = "$Id: print_control.c,v 2.4 2009-02-18 21:33:05+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: print_control.c,v 2.5 2010-08-15 15:53:50+05:30 Cprogrammer Stab mbhangui $";
 #endif
 
 unsigned long
-print_control(char *filename, char *domain, int silent)
+print_control(char *filename, char *domain, int max_users_per_level, int silent)
 {
 	FILE           *fp;
 	char           *ptr;
 	char            buffer[MAX_BUFF];
+	int             users_per_level = 0;
 	unsigned long   total = 0;
 
 	if ((fp = fopen(filename, "r")) != (FILE *) 0)
 	{
+		users_per_level = max_users_per_level ? max_users_per_level : MAX_USERS_PER_LEVEL;
 		for (;;)
 		{
 			if (fscanf(fp, "%s", buffer) != 1)
@@ -61,23 +66,24 @@ print_control(char *filename, char *domain, int silent)
 					*ptr = '/';
 			if (!silent)
 			{
-				printf("Dir Control   = %s\n", buffer);
-				printf("cur users     = %-8lu\n", vdir.cur_users);
-				printf("dir prefix    = %s\n", vdir.the_dir);
-				printf("level_cur     = %-5d\n", vdir.level_cur);
-				printf("level_max     = %-5d\n", vdir.level_max);
-				printf("level_index 0 = %-5d\n", vdir.level_index[0]);
-				printf("            1 = %-5d\n", vdir.level_index[1]);
-				printf("            2 = %-5d\n", vdir.level_index[2]);
-				printf("level_start 0 = %-5d\n", vdir.level_start[0]);
-				printf("            1 = %-5d\n", vdir.level_start[1]);
-				printf("            2 = %-5d\n", vdir.level_start[2]);
-				printf("level_end   0 = %-5d\n", vdir.level_end[0]);
-				printf("            1 = %-5d\n", vdir.level_end[1]);
-				printf("            2 = %-5d\n", vdir.level_end[2]);
-				printf("level_mod   0 = %-5d\n", vdir.level_mod[0]);
-				printf("            1 = %-5d\n", vdir.level_mod[1]);
-				printf("            2 = %-5d\n", vdir.level_mod[2]);
+				printf("Dir Control     = %s\n", buffer);
+				printf("cur users       = %-8lu\n", vdir.cur_users);
+				printf("dir prefix      = %s\n", vdir.the_dir);
+				printf("Users per level = %d\n", users_per_level);
+				printf("level_cur       = %-5d\n", vdir.level_cur);
+				printf("level_max       = %-5d\n", vdir.level_max);
+				printf("level_index 0   = %-5d\n", vdir.level_index[0]);
+				printf("            1   = %-5d\n", vdir.level_index[1]);
+				printf("            2   = %-5d\n", vdir.level_index[2]);
+				printf("level_start 0   = %-5d\n", vdir.level_start[0]);
+				printf("            1   = %-5d\n", vdir.level_start[1]);
+				printf("            2   = %-5d\n", vdir.level_start[2]);
+				printf("level_end   0   = %-5d\n", vdir.level_end[0]);
+				printf("            1   = %-5d\n", vdir.level_end[1]);
+				printf("            2   = %-5d\n", vdir.level_end[2]);
+				printf("level_mod   0   = %-5d\n", vdir.level_mod[0]);
+				printf("            1   = %-5d\n", vdir.level_mod[1]);
+				printf("            2   = %-5d\n", vdir.level_mod[2]);
 				putchar(10);
 			}
 			total += vdir.cur_users;
