@@ -23,25 +23,25 @@ show current settings
 delete limits for this domain, i.e. switch to default limits)
 .TP
 \fB\-Q\fR \fIquota\fR
-set domain quota
+set domain quota limit
 .TP
 \fB\-M\fR \fIcount\fR
-set domain max msg count
+set domain max msg count limit
 .TP
 \fB\-q\fR \fIquota\fR
-set default user quota
+set default user quota limit
 .TP
 \fB\-m\fR \fIcount\fR
-set default user max msg count
+set default user max msg count limit
 .TP
 \fB\-P\fR \fIcount\fR
-set max amount of pop accounts
+set max amount of pop accounts limit
 .TP
 \fB\-A\fR \fIcount\fR
-set max amount of aliases
+set max amount of aliases limit
 .TP
 \fB\-F\fR \fIcount\fR
-set max amount of forwards
+set max amount of forwards limit
 .TP
 \fB\-R\fR \fIcount\fR
 set max amount of autoresponders
@@ -106,7 +106,9 @@ perm_flags:
  1 if any error occurred
 
 .SH NOTES
-domain limits is work in progress and not fully implemented.
+domain limits is work in progress and not fully implemented. For \fBvlimit\fR to work, domain
+limits need to be enabled for a domain using \fBvmoddomain(1)\fR.
 
 .SH "SEE ALSO"
+vmoddomain(1)
 vmoduser(1)
