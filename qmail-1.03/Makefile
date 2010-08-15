@@ -419,6 +419,10 @@ substdio.a error.a str.a fs.a stralloc.a alloc.a
 condredirect.0: \
 condredirect.1
 	nroff -man condredirect.1 > condredirect.0
+condredirect.1: condredirect.9
+	cat condredirect.9 \
+	| sed s}QMAILHOME}"`head -1 conf-qmail`"}g \
+	> condredirect.1
 
 condredirect.o: \
 compile condredirect.c sig.h exit.h env.h error.h \
@@ -2531,6 +2535,10 @@ str.a auto_qmail.o scan_ulong.o
 qreceipt.0: \
 qreceipt.1
 	nroff -man qreceipt.1 > qreceipt.0
+qreceipt.1: qreceipt.9
+	cat qreceipt.9 \
+	| sed s}QMAILHOME}"`head -1 conf-qmail`"}g \
+	> qreceipt.1
 
 qreceipt.o: \
 compile qreceipt.c sig.h env.h substdio.h stralloc.h \
@@ -2600,6 +2608,10 @@ substdio.a error.a str.a fs.a lock.a seek.a alloc.a
 rrforward.0: \
 rrforward.1
 	nroff -man rrforward.1 > rrforward.0
+rrforward.1: rrforward.9
+	cat rrforward.9 \
+	| sed s}QMAILHOME}"`head -1 conf-qmail`"}g \
+	> rrforward.1
 
 rrforward.o: \
 compile rrforward.c sig.h seek.h exit.h env.h qmail.h \
@@ -3338,6 +3350,10 @@ fs.a
 maildirserial.0: \
 maildirserial.1
 	nroff -man maildirserial.1 > maildirserial.0
+maildirserial.1: maildirserial.9
+	cat maildirserial.9 \
+	| sed s}QMAILHOME}"`head -1 conf-qmail`"}g \
+	> maildirserial.1
 
 maildirserial.o: \
 compile maildirserial.c sgetopt.h subgetopt.h scan.h stralloc.h \
@@ -4057,6 +4073,10 @@ checkdomain.0: checkdomain.1
 
 filterto.0: filterto.1
 	nroff -man filterto.1 > filterto.0
+filterto.1: filterto.9
+	cat filterto.9 \
+	| sed s}QMAILHOME}"`head -1 conf-qmail`"}g \
+	> filterto.1
 
 condtomaildir.0: condtomaildir.1
 	nroff -man condtomaildir.1 > condtomaildir.0
@@ -4069,6 +4089,10 @@ ifaddr.0: ifaddr.1
 
 replier.0: replier.1
 	nroff -man replier.1 > replier.0
+replier.1: replier.9
+	cat replier.9 \
+	| sed s}QMAILHOME}"`head -1 conf-qmail`"}g \
+	> replier.1
 
 replier-config.0: replier-config.1
 	nroff -man replier-config.1 > replier-config.0
@@ -4344,6 +4368,10 @@ env.o case.a str.a sig.a seek.a open.a wait.a fd.a fs.a
 dot-forward.0: \
 dot-forward.1
 	nroff -man dot-forward.1 > dot-forward.0
+dot-forward.1: dot-forward.9
+	cat dot-forward.9 \
+	| sed s}QMAILHOME}"`head -1 conf-qmail`"}g \
+	> dot-forward.1
 
 dot-forward.o: \
 compile dot-forward.c sgetopt.h subgetopt.h substdio.h \
@@ -4367,6 +4395,10 @@ case.a str.a fs.a sig.a wait.a seek.a open.a fd.a
 fastforward.0: \
 fastforward.1
 	nroff -man fastforward.1 > fastforward.0
+fastforward.1: fastforward.9
+	cat fastforward.9 \
+	| sed s}QMAILHOME}"`head -1 conf-qmail`"}g \
+	> fastforward.1
 
 fastforward.o: \
 compile fastforward.c stralloc.h gen_alloc.h substdio.h subfd.h \
