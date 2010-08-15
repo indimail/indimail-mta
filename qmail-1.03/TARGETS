@@ -969,3 +969,11 @@ shadow.lib
 ldap.lib
 cdbgetm
 rmail
+fastforward.1
+dot-forward.1
+replier.1
+filterto.1
+maildirserial.1
+condredirect.1
+rrforward.1
+qreceipt.1
