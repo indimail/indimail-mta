@@ -343,7 +343,7 @@ set_environ(char *host, char *ext, char *qqeh, char *sender, char *recipient)
 		report(111, "spawn-filter: out of mem: ", error_str(errno), ". (#4.3.0)", 0, 0, 0);
 	if (!env_put2("_SENDER", sender))
 		report(111, "spawn-filter: out of mem: ", error_str(errno), ". (#4.3.0)", 0, 0, 0);
-	if (!env_put2("_RECIPIENT", sender))
+	if (!env_put2("_RECIPIENT", recipient))
 		report(111, "spawn-filter: out of mem: ", error_str(errno), ". (#4.3.0)", 0, 0, 0);
 	return;
 }
