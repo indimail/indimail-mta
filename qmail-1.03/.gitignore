@@ -467,3 +467,11 @@ qmail-sql.8
 sys-checkpwd
 sys-checkpwd.8
 cdbgetm
+condredirect.1
+dot-forward.1
+fastforward.1
+filterto.1
+maildirserial.1
+qreceipt.1
+replier.1
+rrforward.1
