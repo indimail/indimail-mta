@@ -69,6 +69,7 @@ vrenamedomain.1
 vrenameuser.1
 vpasswd.1
 vmoveuser.1
+vcfilter.1
 RELEASE-Notes.in
 overquota.sh
 doc/ChangeLog
