@@ -13,7 +13,7 @@ for local and remote mails by defining, \fBQMAILLOCAL\fR and \fBQMAILREMOTE\fR
 environment variables, to the path of \fBspawn-filter\fR respectively in \fBqmail-send\fR's
 supervise or rc script. For spam filtering you can additionally, set the environment variable
 \fBSPAMFILTER\fR.  If \fBspawn-filter\fR is invoked as \fBqmail-local\fR, it executes the original
-\fBqmail-local\fR or \ffBqmail-remote\fR after running the custom filter.  \fBspawn-filter\fR unsets
+\fBqmail-local\fR or \fBqmail-remote\fR after running the custom filter.  \fBspawn-filter\fR unsets
 \fBQMAILREMOTE\fR when it runs as \fBqmail-local\fR. Similarly, it unsets \fBQMAILLOCAL\fR when
 it runs as \fBqmail-remote\fR. This is useful in scripts to figure out whether \fBspawn-filter\fR
 is running as \fBqmail-local\fR or \fBqmail-remote\fR.
