@@ -1,5 +1,8 @@
 /*
  * $Log: deliver_mail.c,v $
+ * Revision 2.53  2010-08-15 09:44:21+05:30  Cprogrammer
+ * added X-Forwarded-To, X-Forwarded-For headers
+ *
  * Revision 2.52  2010-07-14 22:14:49+05:30  Cprogrammer
  * initialize CurBytes, CurCount if NOQUOTA is set
  *
@@ -184,7 +187,7 @@
 #endif
 
 #ifndef	lint
-static char     sccsid[] = "$Id: deliver_mail.c,v 2.52 2010-07-14 22:14:49+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: deliver_mail.c,v 2.53 2010-08-15 09:44:21+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 /*- Function Prototypes */
