@@ -1,5 +1,8 @@
 /*
  * $Log: is_already_running.c,v $
+ * Revision 2.2  2010-08-15 20:49:53+05:30  Cprogrammer
+ * fixed double fclose()
+ *
  * Revision 2.1  2009-02-18 21:27:18+05:30  Cprogrammer
  * check return value of fscanf
  *
@@ -13,7 +16,7 @@
 #include <unistd.h>
 
 #ifndef lint
-static char     sccsid[] = "$Id: is_already_running.c,v 2.1 2009-02-18 21:27:18+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: is_already_running.c,v 2.2 2010-08-15 20:49:53+05:30 Cprogrammer Stab mbhangui $";
 #endif
 
 #define MAX_BUFF 1024
@@ -33,9 +36,11 @@ is_already_running(char *pgname)
 	{
 		if (fscanf(fp, "%d", &pid) == 1)
 		{
-			fclose(fp);
 			if (pid && !kill(pid, 0))
+			{
+				fclose(fp);
 				return (pid);
+			}
 		}
 		fclose(fp);
 	}
