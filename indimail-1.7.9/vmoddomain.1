@@ -30,8 +30,8 @@ verbose
 \fB\-l\fR \fI0\fR | \fI1\fR
 Set domain limit. 0 to turn off, 1 to turn on.
 .TP
-\fB\-f\fR
-Sets the domain with VFILTER capability
+\fB\-f\fR \fI0\fR | \fI1\fR
+Sets the domain with VFILTER capability. 0 to turn off, 1 to turn on.
 .TP
 \fB\-h\fR \fIhandler\fR
 Sets the handler for delivery instruction for non-existing local users. The handler can be one
@@ -51,6 +51,12 @@ Email Address - Any mail addressed to a non-existing user gets forwarded to an e
 IP Address – An IP address in SMTPROUTE specification (e.g. indimail.org:192.168.2.1:25) - The mail
 gets redirected to another server which has the user.
 .RE
+
+.EX
+Example Usage
+
+vmoddomain -f 1 bounce-no-mailbox example.com
+.EE
 
 .SH RETURN VALUE
 0 if all steps were successful, non-zero otherwise. If any of the steps fail, a diagnostic

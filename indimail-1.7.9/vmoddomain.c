@@ -1,5 +1,8 @@
 /*
  * $Log: vmoddomain.c,v $
+ * Revision 2.5  2010-08-16 21:12:35+05:30  Cprogrammer
+ * fixed usage & setting of handler
+ *
  * Revision 2.4  2010-04-24 09:31:01+05:30  Cprogrammer
  * description now specifies SMTPROUTE/QMTPROUTE
  *
@@ -23,7 +26,7 @@
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vmoddomain.c,v 2.4 2010-04-24 09:31:01+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: vmoddomain.c,v 2.5 2010-08-16 21:12:35+05:30 Cprogrammer Stab mbhangui $";
 #endif
 
 static void     usage();
@@ -154,7 +157,7 @@ set_handler(char *dir, char *handler, uid_t uid, gid_t gid, int use_vfilter)
 		return (1);
 	}
 #ifdef VFILTER
-	if(use_vfilter)
+	if(use_vfilter == 1)
 		filewrt(fd, "| %s/sbin/vfilter '' %s\n", INDIMAILDIR, handler);
 	else
 #endif
@@ -217,11 +220,11 @@ usage()
 	fprintf(stderr, "         -l 0|1     Enable Domain Limits\n");
 	fprintf(stderr, "         -f         (Sets the Domain with VFILTER capability)\n");
 	fprintf(stderr, "         -h handler (can be one of the following\n");
- 	fprintf(stderr, "                    (1 %s)\n", DELETE_ALL);
- 	fprintf(stderr, "                    (2 %s)\n", BOUNCE_ALL);
-	fprintf(stderr, "                    (3 Maildir)\n");
-	fprintf(stderr, "                    (4 Email Addres)\n");
-	fprintf(stderr, "                    (5 IP Address - SMTPROUTE/QMTPROUTE spec)\n");
+ 	fprintf(stderr, "                    %s\n", DELETE_ALL);
+ 	fprintf(stderr, "                    %s\n", BOUNCE_ALL);
+	fprintf(stderr, "                    Maildir    - Maildir Path\n");
+	fprintf(stderr, "                    email      - Email Addres\n");
+	fprintf(stderr, "                    IP Address - SMTPROUTE/QMTPROUTE spec)\n");
 	return;
 }
 
@@ -231,10 +234,10 @@ get_options(int argc, char **argv, int *use_vfilter, int *domain_limits,
 {
 	int             c;
 
-	*use_vfilter = 0;
+	*use_vfilter = -1;
 	*domain_limits = -1;
 	*handler = *domain = 0;
-	while ((c = getopt(argc, argv, "aVvfh:l:")) != -1) 
+	while ((c = getopt(argc, argv, "aVvf:h:l:")) != -1) 
 	{
 		switch (c)
 		{
@@ -248,7 +251,7 @@ get_options(int argc, char **argv, int *use_vfilter, int *domain_limits,
 			*domain_limits = atoi(optarg);
 			break;
 		case 'f':
-			*use_vfilter = 1;
+			*use_vfilter = atoi(optarg);
 			break;
 		case 'h':
 			*handler = optarg;
@@ -258,7 +261,7 @@ get_options(int argc, char **argv, int *use_vfilter, int *domain_limits,
 			return (1);
 		}
 	}
-	if (!*handler && *domain_limits == -1)
+	if (!*handler && *domain_limits == -1 && *use_vfilter == -1)
 	{
 		usage();
 		return (1);
