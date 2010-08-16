@@ -1,5 +1,8 @@
 /*
  * $Log: vcfilter.c,v $
+ * Revision 2.26  2010-08-16 21:14:25+05:30  Cprogrammer
+ * skip creating Maildir/vfilter file for prefilt & postfilt users
+ *
  * Revision 2.25  2010-05-01 14:14:39+05:30  Cprogrammer
  * added -C option to connect to cluster
  *
@@ -84,7 +87,7 @@
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vcfilter.c,v 2.25 2010-05-01 14:14:39+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: vcfilter.c,v 2.26 2010-08-16 21:14:25+05:30 Cprogrammer Stab mbhangui $";
 #endif
 
 #ifdef VFILTER
@@ -208,7 +211,8 @@ main(int argc, char **argv)
 		break;
 	case FILTER_INSERT:
 		status = vfilter_insert(emailid, filter_name, header_name, comparision, keyword, folder, bounce_action, faddr, mailing_list);
-		if (access(vfilter_file, F_OK) && !status)
+		if (!status && strncmp(emailid, "prefilt@", 8) && strncmp(emailid, "postfilt@", 9)
+			&& access(vfilter_file, F_OK))
 		{
 			if ((i = open(vfilter_file, O_CREAT | O_TRUNC, 0644)) == -1)
 			{
