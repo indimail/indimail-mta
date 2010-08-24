@@ -43,7 +43,8 @@ man_MANS=vadduser.1 adminclient.8 chowkidar.8 clearopensmtp.8 dbinfo.8 hostcntrl
 	vdeluser.1 vdominfo.1 vfilter.8 vfstab.8 vgroup.1 vhostid.8 vipmap.1 vmoddomain.1 \
 	vlimit.1 vmoduser.1 vmoveuser.1 vpasswd.1 vpriv.8 vproxy.8 vrenamedomain.1 \
 	vrenameuser.1 vreorg.8 vsetuserquota.1 vsmtp.8 vuserinfo.1 indimail.7 IndiMail.7 \
-	updaterules.8 osh.8 svctool.8 systpass.8 vserverinfo.1 sslerator.1 echo.1
+	updaterules.8 osh.8 svctool.8 systpass.8 vserverinfo.1 sslerator.1 echo.1 \
+	login_tasks.3
 
 setuid_list = ../sbin/systpass vdeldomain vadddomain vadduser vdeluser \
 			  vaddaliasdomain vrenamedomain vrenameuser vbulletin vdominfo \
@@ -169,7 +170,7 @@ indimail-@VERSION@-rpmlintrc indimail-epm.list tls-cert-check mailzipper \
 perm_list dbinfo.8 inlookup.8 vadddomain.1 vdeldomain.1 vadduser.1 \
 vdeluser.1 vdelivermail.8 vrenamedomain.1 vrenameuser.1 vpasswd.1 vmoveuser.1 \
 vcfilter.1 indimail.7 svctool.8 indisub.c indimail.mrtg.cfg overquota.sh \
-vadddomain_handle vadduser_handle
+vadddomain_handle vadduser_handle login_tasks.3
 
 DISTCLEANFILES=.gitignore
 
@@ -804,6 +805,8 @@ indimail-@VERSION@-rpmlintrc: indimail-rpmlintrc.in
 	$(edit) indimail-rpmlintrc.in > $@
 indimail-epm.list: indimail-epm.list.in
 	$(edit) $@.in > $@
+login_tasks.3: login_tasks.9
+	cat $^ | sed s}INDIMAIL}$(indimaildir)}g > $@
 svctool.8: svctool.9
 	cat $^ | sed s}INDIMAIL}$(indimaildir)}g > $@
 dbinfo.8: dbinfo.9
