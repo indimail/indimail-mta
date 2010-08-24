@@ -35,11 +35,11 @@ SendWelcomeMail(char *homedir, char *username, char *domain, int inactFlag, char
 
 	snprintf(bulkdir, MAX_BUFF, "%s/control/%s/%s", 
 		INDIMAILDIR, domain, (ptr = getenv("BULK_MAILDIR")) ? ptr : BULK_MAILDIR);
-	if(!access(bulkdir, F_OK))
+	if (!access(bulkdir, F_OK))
 	{
 		snprintf(TmpBuf, MAX_BUFF, "%s/%s", 
 			bulkdir, inactFlag ? ((ptr = getenv("ACTIVATEMAIL")) ? ptr : ACTIVATEMAIL) : ((ptr = getenv("WELCOMEMAIL")) ? ptr : WELCOMEMAIL));
-		if(!stat(TmpBuf, &statbuf))
+		if (!stat(TmpBuf, &statbuf))
 		{
 			snprintf(email, MAX_BUFF, "%s@%s", username, domain);
 			CopyEmailFile(homedir, TmpBuf, email, 0, 0, subject, 1, 0, statbuf.st_size);

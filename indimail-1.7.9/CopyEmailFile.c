@@ -90,43 +90,43 @@ CopyEmailFile(homedir, fname, email, To, From, Subject, setDate, copy_method, me
 	tm = time(0);
 	pid = getpid();
 	gethostname(hostname, sizeof(hostname));
-	if(copy_method == 1 && (ptr = GetPrefix((char *) email, (char *) homedir)))
+	if (copy_method == 1 && (ptr = GetPrefix((char *) email, (char *) homedir)))
 	{
-		if(*ptr == '_')
+		if (*ptr == '_')
 			*ptr = '/';
-		for(cptr = ptr + 1;*cptr && *cptr != '_';cptr++);
+		for (cptr = ptr + 1;*cptr && *cptr != '_';cptr++);
 		*cptr = 0;
 		snprintf(TmpFile, MAX_BUFF, "%s/bulk_mail", ptr);
-		if(indimailuid == -1 || indimailgid == -1)
+		if (indimailuid == -1 || indimailgid == -1)
 			GetIndiId(&indimailuid, &indimailgid);
-		if(!r_mkdir(TmpFile, 0755, indimailuid, indimailgid))
+		if (!r_mkdir(TmpFile, 0755, indimailuid, indimailgid))
 		{
-			if((cptr = strrchr(fname, '/')))
+			if ((cptr = strrchr(fname, '/')))
 				cptr++;
 			else
 				cptr = fname;
 			snprintf(TmpFile, MAX_BUFF, "%s/bulk_mail/%s", ptr, cptr);
 			snprintf(MailFile, MAX_BUFF, "%s/Maildir/new/%lu.%lu.%s,S=%lu", 
 				homedir, (long unsigned) tm, (long unsigned) pid, hostname, message_size);
-			if(stat(TmpFile, &statbuf))
+			if (stat(TmpFile, &statbuf))
 			{
-				if(errno == ENOENT && !fappend(fname, TmpFile, "w", 0644, indimailuid, indimailgid) && !link(TmpFile, MailFile))
+				if (errno == ENOENT && !fappend(fname, TmpFile, "w", 0644, indimailuid, indimailgid) && !link(TmpFile, MailFile))
 				{
 					snprintf(buffer, sizeof(buffer), "%s/Maildir", homedir);
 					(void) update_quota(buffer, message_size);
 					return(0);
 				}
 			} else
-			if(statbuf.st_nlink > MAX_LINK_COUNT)
+			if (statbuf.st_nlink > MAX_LINK_COUNT)
 			{
-				if(!unlink(TmpFile) && !fappend(fname, TmpFile, "w", 0644, indimailuid, indimailgid) && !link(TmpFile, MailFile))
+				if (!unlink(TmpFile) && !fappend(fname, TmpFile, "w", 0644, indimailuid, indimailgid) && !link(TmpFile, MailFile))
 				{
 					snprintf(buffer, sizeof(buffer), "%s/Maildir", homedir);
 					(void) update_quota(buffer, message_size);
 					return(0);
 				}
 			} else
-			if(!link(TmpFile, MailFile))
+			if (!link(TmpFile, MailFile))
 			{
 				snprintf(buffer, sizeof(buffer), "%s/Maildir", homedir);
 				(void) update_quota(buffer, message_size);
@@ -138,23 +138,23 @@ CopyEmailFile(homedir, fname, email, To, From, Subject, setDate, copy_method, me
 	Fromlen = Tolen = Subjectlen = dlen = Datelen = 0;
 	snprintf(DeliveredTo, MAX_BUFF, "Delivered-To: %s\n", email);
 	count = (dlen = slen(DeliveredTo));
-	if(setDate)
+	if (setDate)
 	{
 		snprintf(Date, MAX_BUFF, "Date: %s", ctime(&tm));
 		count += (Datelen = slen(Date));
 	}
 	tm += counter++;
-	if(To && *To)
+	if (To && *To)
 	{
 		snprintf(Tolist, MAX_BUFF, "To: %s\n", To);
 		count += (Tolen = slen(Tolist));
 	}
-	if(From && *From)
+	if (From && *From)
 	{
 		snprintf(Fromlist, MAX_BUFF, "From: %s\n", From);
 		count += (Fromlen = slen(Fromlist));
 	}
-	if(Subject && *Subject)
+	if (Subject && *Subject)
 	{
 		snprintf(SubJect, MAX_BUFF, "Subject: %s\n", Subject);
 		count += (Subjectlen = slen(SubJect));
@@ -182,22 +182,22 @@ CopyEmailFile(homedir, fname, email, To, From, Subject, setDate, copy_method, me
 		fprintf(stderr, "write-header: %s\n", strerror(errno));
 		return(-2);
 	}
-	if(setDate && write(wfd,  Date, Datelen) != Datelen)
+	if (setDate && write(wfd,  Date, Datelen) != Datelen)
 	{
 		fprintf(stderr, "write-header: %s\n", strerror(errno));
 		return(-2);
 	}
-	if(Tolen && write(wfd,  Tolist, Tolen) != Tolen)
+	if (Tolen && write(wfd,  Tolist, Tolen) != Tolen)
 	{
 		fprintf(stderr, "write-header: %s\n", strerror(errno));
 		return(-2);
 	}
-	if(Fromlen && write(wfd,  Fromlist, Fromlen) != Fromlen)
+	if (Fromlen && write(wfd,  Fromlist, Fromlen) != Fromlen)
 	{
 		fprintf(stderr, "write-header: %s\n", strerror(errno));
 		return(-2);
 	}
-	if(Subjectlen && write(wfd,  SubJect, Subjectlen) != Subjectlen)
+	if (Subjectlen && write(wfd,  SubJect, Subjectlen) != Subjectlen)
 	{
 		fprintf(stderr, "write-header: %s\n", strerror(errno));
 		return(-2);
@@ -229,7 +229,7 @@ CopyEmailFile(homedir, fname, email, To, From, Subject, setDate, copy_method, me
 			unlink(TmpFile);
 			return (-2);
 		}
-	} /*- for(;;) */
+	} /*- for (;;) */
 	close(wfd);
 	close(rfd);
 	snprintf(buffer, sizeof(buffer), "%s/Maildir", homedir);
