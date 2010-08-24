@@ -52,6 +52,16 @@ challenge, and response, in the case of CRAM-MD5.  If the user checks out, \fBvc
 exits with a status of 0 for the user to be authenticated. Otherwise, subprogram should exit
 with a non-zero status, or call an alternate checkpassword program. The last subprogram can
 usually be /usr/bin/false (or /bin/false, depending on your flavor of OS).
+
+.PP
+\fBvchkpass\fR does not authenticate if user is inactive. A user is active if one logs in using
+IMAP or POP3 protocol. If \fBALLOW_INACTIVE\fR is defined, \fBvchkpass\fR will proceed regardless
+of the user's active or inactive status.
+
+If the environment variable \fBDOMAIN_LIMITS\fR is defined, \fBvchkpass\fR validates domain
+expiry and password expiry set by \fBvmoduser(1)\fR program.
+
+\fBvchkpass\fR can execute a script defined by environment variable \fBPOSTAUTH\fR
 .PP
 MUAs and AUTH types tested with this software are:
 
@@ -79,4 +89,10 @@ advertised by qmail-smtpd.
 0 if authenticated, 1 on authentication failure or system problems.
 
 .SH "SEE ALSO"
-qmail-smtpd(8), qmail-poppass(8), sys-checkpwd(8), ldap-checkpwd(8), pam-checkpwd(8), nssd(8), pam-multi(8)
+qmail-smtpd(8),
+qmail-poppass(8),
+sys-checkpwd(8),
+ldap-checkpwd(8),
+pam-checkpwd(8),
+nssd(8),
+pam-multi(8)
