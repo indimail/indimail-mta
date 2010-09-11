@@ -1,5 +1,8 @@
 /*
  * $Log: smtpd.c,v $
+ * Revision 1.145  2010-09-11 10:20:50+05:30  Cprogrammer
+ * fixed few environment variables not geting set by envrules
+ *
  * Revision 1.144  2010-07-13 16:26:50+05:30  Cprogrammer
  * fix accesslist problems occurring with multiple rcpt
  *
@@ -574,7 +577,7 @@ int             wildmat_internal(char *, char *);
 int             ssl_rfd = -1, ssl_wfd = -1;	/*- SSL_get_Xfd() are broken */
 char           *servercert, *clientca, *clientcrl;
 #endif
-char           *revision = "$Revision: 1.144 $";
+char           *revision = "$Revision: 1.145 $";
 char           *protocol = "SMTP";
 stralloc        proto = { 0 };
 static stralloc Revision = { 0 };
@@ -666,6 +669,13 @@ struct constmap mapbhrcp;
 int             bhbrpok = 0;
 static stralloc bhbrp = { 0 };
 char           *bhrcpFn = 0;
+/*- BLACKHOLE Sender Check Variables */
+int             bhfok = 0;
+stralloc        bhf = { 0 };
+struct constmap mapbhf;
+int             bhpok = 0;
+static stralloc bhp = { 0 };
+char           *bhsndFn = 0;
 /*- badrcptto */
 int             rcpok = 0;
 static stralloc rcp = { 0 };
@@ -676,12 +686,6 @@ char           *rcpFn = 0;
 /*- accesslist */
 int             acclistok = 0;
 static stralloc acclist = { 0 };
-/*- BLACKHOLE Sender Check Variables */
-int             bhfok = 0;
-stralloc        bhf = { 0 };
-struct constmap mapbhf;
-int             bhpok = 0;
-static stralloc bhp = { 0 };
 /*- RELAYCLIENT Check Variables */
 int             relayclientsok = 0;
 static stralloc relayclients = { 0 };
@@ -2517,7 +2521,7 @@ greetdelay_check(int delay)
  * Set any environment variables again using envrules
  */
 void
-env_setup()
+databytes_setup()
 {
 	char           *x;
 
@@ -2529,6 +2533,178 @@ env_setup()
 		scan_ulong(x, &databytes);
 	if (!(databytes + 1))
 		--databytes;
+}
+
+void
+post_setup()
+{
+	char           *x;
+
+	/*- BADMAILFROM */
+	if ((bmfok = control_readfile(&bmf, bmfFn = ((x = env_get("BADMAILFROM")) && *x ? x : "badmailfrom"), 0)) == -1)
+		die_control();
+	if (bmfok && !constmap_init(&mapbmf, bmf.s, bmf.len, 0))
+		die_nomem();
+	if ((bmpok = control_readfile(&bmp, (x = env_get("BADMAILPATTERNS")) && *x ? x : "badmailpatterns", 0)) == -1)
+		die_control();
+	/*
+	 * BLACKHOLE Sender Patch - include Control file 
+	 */
+	if ((bhfok = control_readfile(&bhf, bhsndFn = ((x = env_get("BLACKHOLEDSENDER")) && *x ? x : "blackholedsender"), 0)) == -1)
+		die_control();
+	if (bhfok && !constmap_init(&mapbhf, bhf.s, bhf.len, 0))
+		die_nomem();
+	if ((bhpok = control_readfile(&bhp, (x = env_get("BLACKHOLEDPATTERNS")) && *x ? x : "blackholedpatterns", 0)) == -1)
+		die_control();
+	/*
+	 * BLACKHOLE RECIPIENT Patch - include Control file 
+	 */
+	if ((bhrcpok = control_readfile(&bhrcp, bhrcpFn = ((x = env_get("BLACKHOLERCPT")) && *x ? x : "blackholercpt"), 0)) == -1)
+		die_control();
+	if (bhrcpok && !constmap_init(&mapbhrcp, bhrcp.s, bhrcp.len, 0))
+		die_nomem();
+	if ((bhbrpok = control_readfile(&bhbrp, (x = env_get("BLACKHOLERCPTPATTERNS")) && *x ? x : "blackholercptpatterns", 0)) == -1)
+		die_control();
+	/*
+	 * RECIPIENT Patch - include Control file 
+	 */
+	if ((rcpok = control_readfile(&rcp, rcpFn = ((x = env_get("BADRCPTTO")) && *x ? x : "badrcptto"), 0)) == -1)
+		die_control();
+	if (rcpok && !constmap_init(&maprcp, rcp.s, rcp.len, 0))
+		die_nomem();
+	if ((brpok = control_readfile(&brp, (x = env_get("BADRCPTPATTERNS")) && *x ? x : "badrcptpatterns", 0)) == -1)
+		die_control();
+	/*
+	 * goodrcpt
+	 */
+	if ((chkgrcptok = control_readfile(&grcpt, grcptFn = ((x = env_get("GOODRCPTTO")) && *x ? x : "goodrcptto"), 0)) == -1)
+		die_control();
+	if (chkgrcptok && !constmap_init(&mapgrcpt, grcpt.s, grcpt.len, 0))
+		die_nomem();
+	if ((chkgrcptokp = control_readfile(&grcptp, (x = env_get("GOODRCPTPATTERNS")) && *x ? x : "goodrcptpatterns", 0)) == -1)
+		die_control();
+	/*
+	 * Spam Ignore Patch - include Control file 
+	 */
+	if (env_get("SPAMFILTER"))
+	{
+		if ((spfok = control_readfile(&spf, spfFn = ((x = env_get("SPAMIGNORE")) && *x ? x : "spamignore"), 0)) == -1)
+			die_control();
+		if (spfok && !constmap_init(&mapspf, spf.s, spf.len, 0))
+			die_nomem();
+		if ((sppok = control_readfile(&spp, (x = env_get("SPAMIGNOREPATTERNS")) && *x ? x : "spamignorepatterns", 0)) == -1)
+			die_control();
+	}
+	/*
+	 * DNSCHECK Patch - include Control file 
+	 */
+	if (!(nodnscheck = env_get("NODNSCHECK")))
+	{
+		/*- Look up "MAIL from:" addresses to skip for DNS check in control/nodnscheck. */
+		if ((nodnschecksok = control_readfile(&nodnschecks, "nodnscheck", 0)) == -1)
+			die_control();
+		if (nodnschecksok && !constmap_init(&mapnodnschecks, nodnschecks.s, nodnschecks.len, 0))
+			die_nomem();
+	}
+#ifdef BATV
+	if ((batvok = control_readline(&signkey, (x = env_get("SIGNKEY")) ? x : "signkey")) == -1)
+		die_control();
+	if (batvok)
+	{
+		switch (control_readfile(&nosign, "nosignhosts",0))
+		{
+		case -1:
+			die_control();
+		case 0:
+			if (!constmap_init(&mapnosign, "", 0, 1))
+				die_nomem();
+			break;
+		case 1:
+			if (!constmap_init(&mapnosign, nosign.s, nosign.len, 0))
+				die_nomem();
+			break;
+		}
+		if (control_readint(&signkeystale, "signkeystale") == -1) /*- Joerg Backschues */
+			die_control();
+		if ((x = env_get("SIGNKEYSTALE")))
+			scan_int(x, &signkeystale);
+	}
+#endif
+	if ((acclistok = control_readfile(&acclist, (x = env_get("ACCESSLIST")) && *x ? x : "accesslist", 0)) == -1)
+		die_control();
+	if ((x = env_get("BODYCHECK")))
+	{
+		if ((bodyok = control_readfile(&body, (x = env_get("BODYCHECK")) && *x ? x : "bodycheck", 0)) == -1)
+			die_control();
+		bodyok_orig = bodyok;
+	}
+#ifdef USE_SPF
+	if ((x = env_get("SPFBEHAVIOR")))
+		scan_int(x, (int *) &spfbehavior);
+	else
+	if (control_readint((int *) &spfbehavior, "spfbehavior") == -1)
+		die_control();
+#endif
+	/*
+	 * TARPIT Patch - include Control Files 
+	 */
+	if (!(x = env_get("TARPITCOUNT")))
+	{
+		if (control_readint(&tarpitcount, "tarpitcount") == -1)
+			die_control();
+		if (tarpitcount < 0)
+			tarpitcount = 0;
+	} else
+		scan_int(x, &tarpitcount);
+	if (!(x = env_get("TARPITDELAY")))
+	{
+		if (control_readint(&tarpitdelay, "tarpitdelay") == -1)
+			die_control();
+		if (tarpitdelay < 0)
+			tarpitdelay = 0;
+	} else
+		scan_int(x, &tarpitdelay);
+	/*- MAXRECPIENTS - include Control Files */
+	if (!(x = env_get("MAXRECIPIENTS")))
+	{
+		if (control_readint(&maxrcptcount, "maxrecipients") == -1)
+			die_control();
+		if (maxrcptcount < 0)
+			maxrcptcount = 0;
+	} else
+		scan_int(x, &maxrcptcount);
+	if ((x = env_get("VIRUSCHECK")))
+	{
+		unsigned long   u;
+		if (!*x)
+			x = "1";
+		scan_ulong(x, &u);
+		switch (u)
+		{
+			case 1: /*- Virus Scanner (Internal) */
+			case 2: /*- Virus Scanner (Internal + External) */
+			case 3: /*- Virus Scanner (Internal) + Bad Attachment Scan */
+			case 4: /*- Virus Scanner (Internal + External) + Bad Attachment Scan */
+				if ((sigsok = control_readfile(&sigs, (x = env_get("SIGNATURES")) && *x ? x : "signatures", 0)) == -1)
+					die_control();
+				sigsok_orig = sigsok;
+				break;
+			case 5: /*- Virus Scanner (External) + Bad Attachment Scan*/
+			case 6: /*- Virus Scanner (External) */
+			case 7: /*- Bad Attachment scan */
+				break;
+		}
+	}
+	if ((x = env_get("QREGEX")))
+		scan_int(x, &qregex);
+	else
+	{
+		if (control_readint(&qregex, "qregex") == -1)
+			die_control();
+		if (qregex && !env_put("QREGEX=1"))
+			die_nomem();
+	}
+	return;
 }
 
 void
@@ -2566,7 +2742,7 @@ setup()
 		die_control();
 	if (ctl_maxcmdlen < 0)
 		ctl_maxcmdlen = 0;
-	env_setup();
+	databytes_setup();
 	if (rcpthosts_init() == -1)
 		die_control();
 	if (recipients_init() == -1)
@@ -2638,61 +2814,6 @@ setup()
 		die_control();
 	if (chkdomok && !constmap_init(&mapchkdom, chkdom.s, chkdom.len, 0))
 		die_nomem();
-	/*
-	 * BLACKHOLE Sender Patch - include Control file 
-	 */
-	if ((bhfok = control_readfile(&bhf, "blackholedsender", 0)) == -1)
-		die_control();
-	if (bhfok && !constmap_init(&mapbhf, bhf.s, bhf.len, 0))
-		die_nomem();
-	if ((bhpok = control_readfile(&bhp, "blackholedpatterns", 0)) == -1)
-		die_control();
-	/*- BADMAILFROM */
-	if ((bmfok = control_readfile(&bmf, bmfFn = ((x = env_get("BADMAILFROM")) && *x ? x : "badmailfrom"), 0)) == -1)
-		die_control();
-	if (bmfok && !constmap_init(&mapbmf, bmf.s, bmf.len, 0))
-		die_nomem();
-	if ((bmpok = control_readfile(&bmp, (x = env_get("BADMAILPATTERNS")) && *x ? x : "badmailpatterns", 0)) == -1)
-		die_control();
-	/*
-	 * BLACKHOLE RECIPIENT Patch - include Control file 
-	 */
-	if ((bhrcpok = control_readfile(&bhrcp, bhrcpFn = ((x = env_get("BLACKHOLERCPT")) && *x ? x : "blackholercpt"), 0)) == -1)
-		die_control();
-	if (bhrcpok && !constmap_init(&mapbhrcp, bhrcp.s, bhrcp.len, 0))
-		die_nomem();
-	if ((bhbrpok = control_readfile(&bhbrp, (x = env_get("BLACKHOLERCPTPATTERNS")) && *x ? x : "blackholercptpatterns", 0)) == -1)
-		die_control();
-	/*
-	 * RECIPIENT Patch - include Control file 
-	 */
-	if ((rcpok = control_readfile(&rcp, rcpFn = ((x = env_get("BADRCPTTO")) && *x ? x : "badrcptto"), 0)) == -1)
-		die_control();
-	if (rcpok && !constmap_init(&maprcp, rcp.s, rcp.len, 0))
-		die_nomem();
-	if ((brpok = control_readfile(&brp, (x = env_get("BADRCPTPATTERNS")) && *x ? x : "badrcptpatterns", 0)) == -1)
-		die_control();
-	/*
-	 * goodrcpt
-	 */
-	if ((chkgrcptok = control_readfile(&grcpt, grcptFn = ((x = env_get("GOODRCPTTO")) && *x ? x : "goodrcptto"), 0)) == -1)
-		die_control();
-	if (chkgrcptok && !constmap_init(&mapgrcpt, grcpt.s, grcpt.len, 0))
-		die_nomem();
-	if ((chkgrcptokp = control_readfile(&grcptp, (x = env_get("GOODRCPTPATTERNS")) && *x ? x : "goodrcptpatterns", 0)) == -1)
-		die_control();
-	/*
-	 * Spam Ignore Patch - include Control file 
-	 */
-	if (env_get("SPAMFILTER"))
-	{
-		if ((spfok = control_readfile(&spf, spfFn = ((x = env_get("SPAMIGNORE")) && *x ? x : "spamignore"), 0)) == -1)
-			die_control();
-		if (spfok && !constmap_init(&mapspf, spf.s, spf.len, 0))
-			die_nomem();
-		if ((sppok = control_readfile(&spp, (x = env_get("SPAMIGNOREPATTERNS")) && *x ? x : "spamignorepatterns", 0)) == -1)
-			die_control();
-	}
 #ifdef IPV6
 	if (!(remoteip4 = env_get("TCPREMOTEIP")))
 		remoteip4 = "unknown";
@@ -2720,17 +2841,6 @@ setup()
 	greyip = env_get("GREYIP");
 	if (!greyip || !*greyip)
 		greyip = (char *) 0; /*- Disable greylisting if GREYIP="" */
-	/*
-	 * DNSCHECK Patch - include Control file 
-	 */
-	if (!(nodnscheck = env_get("NODNSCHECK")))
-	{
-		/*- Look up "MAIL from:" addresses to skip for DNS check in control/nodnscheck. */
-		if ((nodnschecksok = control_readfile(&nodnschecks, "nodnscheck", 0)) == -1)
-			die_control();
-		if (nodnschecksok && !constmap_init(&mapnodnschecks, nodnschecks.s, nodnschecks.len, 0))
-			die_nomem();
-	}
 	if (!relayclient)
 	{
 		/*- Attempt to look up the IP number in control/relayclients. */
@@ -2769,30 +2879,7 @@ setup()
 			}
 		}
 	}
-#ifdef BATV
-	if ((batvok = control_readline(&signkey, (x = env_get("SIGNKEY")) ? x : "signkey")) == -1)
-		die_control();
-	if (batvok)
-	{
-		switch (control_readfile(&nosign, "nosignhosts",0))
-		{
-		case -1:
-			die_control();
-		case 0:
-			if (!constmap_init(&mapnosign, "", 0, 1))
-				die_nomem();
-			break;
-		case 1:
-			if (!constmap_init(&mapnosign, nosign.s, nosign.len, 0))
-				die_nomem();
-			break;
-		}
-		if (control_readint(&signkeystale, "signkeystale") == -1) /*- Joerg Backschues */
-			die_control();
-		if ((x = env_get("SIGNKEYSTALE")))
-			scan_int(x, &signkeystale);
-	}
-#endif
+	post_setup();
 #ifdef USE_SPF
 	if (control_readline(&spflocal, "spfrules") == -1)
 		die_control();
@@ -3586,7 +3673,8 @@ smtp_mail(char *arg)
 			 * SMTPS, NODNSCHECK, RELAYCLIENT, TCPREMOTEINFO, TCPREMOTEHOST, TCPLOCALIP
 			 * TCPLOCALHOST, TCPREMOTEIP, GREETDELAY, BADHELO, BADHELOCHECK
 			 */
-			env_setup(); /*- so that it is possible to set DATABYTES again using envrules */
+			databytes_setup(); /*- so that it is possible to set DATABYTES again using envrules */
+			post_setup();
 			log_rules(remoteip, addr.s, authd ? remoteinfo : 0, ret);
 		}
 		break;
@@ -3608,17 +3696,8 @@ smtp_mail(char *arg)
 		err_authrequired();
 		return;
 	}
-	if ((x = env_get("QREGEX")))
-		scan_int(x, &qregex);
-	else
-	{
-		if (control_readint(&qregex, "qregex") == -1)
-			die_control();
-		if (qregex && !env_put("QREGEX=1"))
-			die_nomem();
-	}
 	/*- Terminate SMTP Session immediatly if BLACKHOLED Sender is seen */
-	switch (address_match("blackholedsender", &addr, bhfok ? &bhf : 0, bhfok ? &mapbhf : 0, bhpok ? &bhp : 0, &errStr))
+	switch (address_match(bhsndFn, &addr, bhfok ? &bhf : 0, bhfok ? &mapbhf : 0, bhpok ? &bhp : 0, &errStr))
 	{
 	case 1: /*- flow through */
 		err_bhf(remoteip, addr.s); /*- This sets NULLQUEUE */
@@ -3645,8 +3724,6 @@ smtp_mail(char *arg)
 		return;
 	}
 
-	if ((acclistok = control_readfile(&acclist, (x = env_get("ACCESSLIST")) && *x ? x : "accesslist", 0)) == -1)
-		die_control();
 	if (!nodnscheck)
 	{
 		switch (dnscheck(addr.s, addr.len - 1, 0))
@@ -3682,34 +3759,6 @@ smtp_mail(char *arg)
 			err_addressmatch(errStr);
 			return;
 		}
-	}
-	if ((x = env_get("VIRUSCHECK")))
-	{
-		unsigned long   u;
-		if (!*x)
-			x = "1";
-		scan_ulong(x, &u);
-		switch (u)
-		{
-			case 1: /*- Virus Scanner (Internal) */
-			case 2: /*- Virus Scanner (Internal + External) */
-			case 3: /*- Virus Scanner (Internal) + Bad Attachment Scan */
-			case 4: /*- Virus Scanner (Internal + External) + Bad Attachment Scan */
-				if ((sigsok = control_readfile(&sigs, (x = env_get("SIGNATURES")) && *x ? x : "signatures", 0)) == -1)
-					die_control();
-				sigsok_orig = sigsok;
-				break;
-			case 5: /*- Virus Scanner (External) + Bad Attachment Scan*/
-			case 6: /*- Virus Scanner (External) */
-			case 7: /*- Bad Attachment scan */
-				break;
-		}
-	}
-	if ((x = env_get("BODYCHECK")))
-	{
-		if ((bodyok = control_readfile(&body, (x = env_get("BODYCHECK")) && *x ? x : "bodycheck", 0)) == -1)
-			die_control();
-		bodyok_orig = bodyok;
 	}
 	if (!stralloc_copys(&rcptto, ""))
 		die_nomem();
@@ -3880,11 +3929,6 @@ smtp_mail(char *arg)
 #endif
 #ifdef USE_SPF
 	flagbarfspf = 0;
-	if ((x = env_get("SPFBEHAVIOR")))
-		scan_int(x, (int *) &spfbehavior);
-	else
-	if (control_readint((int *) &spfbehavior, "spfbehavior") == -1)
-		die_control();
 	if (spfbehavior && !relayclient)
 	{
 		switch (r = spfcheck())
@@ -3955,34 +3999,6 @@ smtp_mail(char *arg)
 	}
 #endif /*- #ifdef USE_SPF */
 	seenmail = 1;
-	/*
-	 * TARPIT Patch - include Control Files 
-	 */
-	if (!(x = env_get("TARPITCOUNT")))
-	{
-		if (control_readint(&tarpitcount, "tarpitcount") == -1)
-			die_control();
-		if (tarpitcount < 0)
-			tarpitcount = 0;
-	} else
-		scan_int(x, &tarpitcount);
-	if (!(x = env_get("TARPITDELAY")))
-	{
-		if (control_readint(&tarpitdelay, "tarpitdelay") == -1)
-			die_control();
-		if (tarpitdelay < 0)
-			tarpitdelay = 0;
-	} else
-		scan_int(x, &tarpitdelay);
-	/*- MAXRECPIENTS - include Control Files */
-	if (!(x = env_get("MAXRECIPIENTS")))
-	{
-		if (control_readint(&maxrcptcount, "maxrecipients") == -1)
-			die_control();
-		if (maxrcptcount < 0)
-			maxrcptcount = 0;
-	} else
-		scan_int(x, &maxrcptcount);
 	/*- authdomains */
 	if (chkdomok)
 	{
@@ -5912,7 +5928,7 @@ qmail_smtpd(int argc, char **argv, char **envp)
 	if (chdir(auto_qmail) == -1)
 		die_control();
 	/*
-	 * setup calls env_setup(), which sets
+	 * setup calls databytes_setup(), which sets
 	 * databytes
 	 */
 	setup(); /*- remoteip is set */
@@ -6033,7 +6049,7 @@ addrrelay() /*- Rejection of relay probes. */
 void
 getversion_smtpd_c()
 {
-	static char    *x = "$Id: smtpd.c,v 1.144 2010-07-13 16:26:50+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: smtpd.c,v 1.145 2010-09-11 10:20:50+05:30 Cprogrammer Exp mbhangui $";
 
 #ifdef INDIMAIL
 	x = sccsidh;
