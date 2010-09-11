@@ -615,6 +615,8 @@ meaning every address at
 can also be in cdb format. If
 .I blackholedsender.cdb
 is present, it will be searched first.
+The filename can be overriden by the environment variable
+.IR BLACKHOLEDSENDER .
 
 .TP 5
 .I blackholedpatterns
@@ -636,6 +638,8 @@ file with this contents stops all mail from Earthlink except from
 fred@earthlink.net. It also stops all mail with addresses like:
 12345@123.com and answerme@savetrees.com. Further, any E-Mail with       
 a sender address containing a percent sign (%) is rejected.
+The filename can be overriden by the environment variable
+.IR BLACKHOLEDPATTERNS .
 
 .TP 5
 .I blackholercpt
@@ -654,7 +658,7 @@ can also be in cdb format. If
 .I blackholercpt.cdb
 is present, it will be searched first.
 The filename can be overriden by the environment variable
-.BR BLACKHOLERCPT
+.BR BLACKHOLERCPT .
 
 .TP 5
 .I blackholercptpatterns
@@ -662,7 +666,9 @@ Gives
 .B qmail-smtpd
 the ability to blackhole E-Mails by comparing the recipient address with a
 REGEX pattern in
-.IR blackholercptpatterns
+.IR blackholercptpatterns .
+The filename can be overriden by the environment variable
+.BR BLACKHOLERCPTPATTERNS .
 
 .TP 5
 .I hostaccess
@@ -671,7 +677,7 @@ sender domains to orignate from certian IP addresses. The host access
 list can also be set in the environment variable 
 .B HOSTACCESS .
 When this is set, the control file 
-.IR hostaccess
+.I hostaccess
 is not used. If the environment variable PARANOID is set, then only
 domain-ip pairs listed in the control file will be granted access. If
 the variable DOMAIN_MASQUERADE is set then for IP addresses listed in
@@ -1411,6 +1417,8 @@ The following list of environment variables can be modified using envrules
 .IR CLIENTCA ,
 .IR TLSCIPHERS ,
 .IR SERVERCERT ,
+.IR BLACKHOLEDSENDER ,
+.IR BLACKHOLEDPATTERNS ,
 .IR BLACKHOLERCPT ,
 .IR BLACKHOLERCPTPATTERNS ,
 .IR SIGNKEY ,
