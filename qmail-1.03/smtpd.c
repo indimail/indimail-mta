@@ -1,5 +1,8 @@
 /*
  * $Log: smtpd.c,v $
+ * Revision 1.146  2010-09-11 15:26:25+05:30  Cprogrammer
+ * reopen all setup control files after envrules
+ *
  * Revision 1.145  2010-09-11 10:20:50+05:30  Cprogrammer
  * fixed few environment variables not geting set by envrules
  *
@@ -577,7 +580,7 @@ int             wildmat_internal(char *, char *);
 int             ssl_rfd = -1, ssl_wfd = -1;	/*- SSL_get_Xfd() are broken */
 char           *servercert, *clientca, *clientcrl;
 #endif
-char           *revision = "$Revision: 1.145 $";
+char           *revision = "$Revision: 1.146 $";
 char           *protocol = "SMTP";
 stralloc        proto = { 0 };
 static stralloc Revision = { 0 };
@@ -3594,7 +3597,7 @@ smtp_mail(char *arg)
 	struct passwd  *pw;
 #endif
 	char           *x;
-	int             ret;
+	int             ret, envret = 0;
 #ifdef USE_SPF
 	int             r;
 #endif
@@ -3607,6 +3610,11 @@ smtp_mail(char *arg)
 	 * in the previous session
 	 */
 	restore_env();
+	if (envret)
+	{
+		post_setup();
+		envret = 0;
+	}
 	switch (setup_state)
 	{
 	case 0:
@@ -3654,7 +3662,7 @@ smtp_mail(char *arg)
 	if (batvok)
 		(void) check_batv_sig(); /*- unwrap in case it's ours */
 #endif
-	switch ((ret = envrules(addr.s, "from.envrules", "FROMRULES", &errStr)))
+	switch ((envret = envrules(addr.s, "from.envrules", "FROMRULES", &errStr)))
 	{
 	case AM_MEMORY_ERR:
 		die_nomem();
@@ -3665,7 +3673,7 @@ smtp_mail(char *arg)
 	case 0:
 		break;
 	default:
-		if (ret > 0)
+		if (envret > 0)
 		{
 			/*
 			 * No point in setting Following environment variables as they have been
@@ -6049,7 +6057,7 @@ addrrelay() /*- Rejection of relay probes. */
 void
 getversion_smtpd_c()
 {
-	static char    *x = "$Id: smtpd.c,v 1.145 2010-09-11 10:20:50+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: smtpd.c,v 1.146 2010-09-11 15:26:25+05:30 Cprogrammer Exp mbhangui $";
 
 #ifdef INDIMAIL
 	x = sccsidh;
