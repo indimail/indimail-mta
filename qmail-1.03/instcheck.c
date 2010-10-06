@@ -1,5 +1,8 @@
 /*
  * $Log: instcheck.c,v $
+ * Revision 1.15  2010-10-06 22:30:06+05:30  Cprogrammer
+ * fix for 64 bit systems
+ *
  * Revision 1.14  2010-07-08 11:23:03+05:30  Cprogrammer
  * fix perms for all indimail programs for debian stupidity
  *
@@ -88,6 +91,15 @@ perm(prefix1, prefix2, prefix3, file, type, uid, gid, mode, should_exit)
 						alloc_free(tfile);
 					return;
 				}
+			} else
+			if (!str_diffn(file, "lib", 3))
+			{
+				if (stat("lib64", &st) == -1)
+				{
+					strerr_warn4(WARNING, "unable to stat .../", file, ": ", &strerr_sys);
+					return;
+				}
+				tfile = file;
 			} else
 			{
 				if (!str_diffn(file, "man/", 4))
@@ -275,7 +287,7 @@ main(int argc, char **argv)
 void
 getversion_instcheck_c()
 {
-	static char    *x = "$Id: instcheck.c,v 1.14 2010-07-08 11:23:03+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: instcheck.c,v 1.15 2010-10-06 22:30:06+05:30 Cprogrammer Stab mbhangui $";
 #ifdef INDIMAIL
 	x = sccsidh;
 #else
