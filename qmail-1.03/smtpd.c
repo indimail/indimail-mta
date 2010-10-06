@@ -1,5 +1,8 @@
 /*
  * $Log: smtpd.c,v $
+ * Revision 1.147  2010-10-06 21:59:24+05:30  Cprogrammer
+ * fixed wrong return value passed to log_rules()
+ *
  * Revision 1.146  2010-09-11 15:26:25+05:30  Cprogrammer
  * reopen all setup control files after envrules
  *
@@ -580,7 +583,7 @@ int             wildmat_internal(char *, char *);
 int             ssl_rfd = -1, ssl_wfd = -1;	/*- SSL_get_Xfd() are broken */
 char           *servercert, *clientca, *clientcrl;
 #endif
-char           *revision = "$Revision: 1.146 $";
+char           *revision = "$Revision: 1.147 $";
 char           *protocol = "SMTP";
 stralloc        proto = { 0 };
 static stralloc Revision = { 0 };
@@ -3683,7 +3686,7 @@ smtp_mail(char *arg)
 			 */
 			databytes_setup(); /*- so that it is possible to set DATABYTES again using envrules */
 			post_setup();
-			log_rules(remoteip, addr.s, authd ? remoteinfo : 0, ret);
+			log_rules(remoteip, addr.s, authd ? remoteinfo : 0, envret);
 		}
 		break;
 	}
@@ -6057,7 +6060,7 @@ addrrelay() /*- Rejection of relay probes. */
 void
 getversion_smtpd_c()
 {
-	static char    *x = "$Id: smtpd.c,v 1.146 2010-09-11 15:26:25+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: smtpd.c,v 1.147 2010-10-06 21:59:24+05:30 Cprogrammer Stab mbhangui $";
 
 #ifdef INDIMAIL
 	x = sccsidh;
