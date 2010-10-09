@@ -1,5 +1,5 @@
 /*
- * $Id: user.c,v 1.1 2010-04-26 11:25:29+05:30 Cprogrammer Exp mbhangui $
+ * $Id: user.c,v 1.2 2010-10-09 08:31:15+05:30 Cprogrammer Stab mbhangui $
  * Copyright (C) 1999-2004 Inter7 Internet Technologies, Inc. 
  *
  * This program is free software; you can redistribute it and/or modify
@@ -25,6 +25,7 @@
 #undef PACKAGE_TARNAME
 #undef PACKAGE_VERSION
 #undef PACKAGE_BUGREPORT
+#undef PACKAGE_URL
 #include <indimail.h>
 #undef PACKAGE
 #undef VERSION
@@ -33,6 +34,7 @@
 #undef PACKAGE_TARNAME
 #undef PACKAGE_VERSION
 #undef PACKAGE_BUGREPORT
+#undef PACKAGE_URL
 #include "config.h"
 
 #include <stdlib.h>
@@ -53,6 +55,7 @@
 #undef PACKAGE_TARNAME
 #undef PACKAGE_VERSION
 #undef PACKAGE_BUGREPORT
+#undef PACKAGE_URL
 #include "alias.h"
 #include "cgi.h"
 #include "config.h"
@@ -498,7 +501,7 @@ addusernow()
 	}
 	/*- add the user then get the vpopmail password structure */
 	create_flag = 1;
-	if (vadduser(Newu, Domain, 0, Password1, Gecos, 0, USE_POP, 1) == 0 &&
+	if (vadduser(Newu, Domain, 0, Password1, Gecos, 0, 0, USE_POP, 1) == 0 &&
 #ifdef MYSQL_REPLICATION
 		!sleep(2) &&
 #endif
