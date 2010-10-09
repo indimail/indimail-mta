@@ -1,5 +1,5 @@
 /*
- * $Id: qmailadmin.c,v 1.1 2010-04-26 11:24:01+05:30 Cprogrammer Exp mbhangui $
+ * $Id: qmailadmin.c,v 1.2 2010-10-09 13:54:19+05:30 Cprogrammer Exp mbhangui $
  * Copyright (C) 1999-2004 Inter7 Internet Technologies, Inc. 
  *
  * This program is free software; you can redistribute it and/or modify
@@ -25,6 +25,7 @@
 #undef PACKAGE_TARNAME
 #undef PACKAGE_VERSION
 #undef PACKAGE_BUGREPORT
+#undef PACKAGE_URL
 #include <indimail.h>
 #undef PACKAGE
 #undef VERSION
@@ -33,6 +34,7 @@
 #undef PACKAGE_TARNAME
 #undef PACKAGE_VERSION
 #undef PACKAGE_BUGREPORT
+#undef PACKAGE_URL
 #include "config.h"
 
 #include <stdio.h>
