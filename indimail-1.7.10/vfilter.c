@@ -1,5 +1,8 @@
 /*-
  * $Log: vfilter.c,v $
+ * Revision 2.45  2010-10-09 13:48:15+05:30  Cprogrammer
+ * display the mda used in errors
+ *
  * Revision 2.44  2010-04-30 14:43:58+05:30  Cprogrammer
  * free pointer returned by replacestr()
  *
@@ -145,7 +148,7 @@
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vfilter.c,v 2.44 2010-04-30 14:43:58+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: vfilter.c,v 2.45 2010-10-09 13:48:15+05:30 Cprogrammer Stab mbhangui $";
 #endif
 
 #ifdef VFILTER
@@ -172,7 +175,6 @@ static void     process_filter(int, char **, struct header **, char *, int *, ch
 int             numerical_compare(char *, char *);
 
 int             interactive;
-char           *(vdelargs[]) = { INDIMAILDIR"/sbin/vdelivermail", "''", BOUNCE_ALL, 0};
 
 int
 main(int argc, char **argv)
@@ -578,11 +580,13 @@ process_filter(int argc, char **argv, struct header **hptr, char *filterid, int 
 }
 
 int
-execMda(char **argptr)
+execMda(char **argptr, char **mda)
 {
 	char           *x;
 	char          **argv;
+	char           *(vdelargs[]) = { INDIMAILDIR"/sbin/vdelivermail", "''", BOUNCE_ALL, 0};
 
+	*mda = *vdelargs;
 	if ((x = getenv("MDA")))
 	{
 		if (!(argv = MakeArgs(x)))
@@ -590,6 +594,7 @@ execMda(char **argptr)
 			fprintf(stderr, "vfilter: MakeArgs: %s\n", strerror(errno));
 			return(1);
 		}
+		*mda = *argv;
 		if (*argv[0] != '/' && *argv[0] != '.')
 			execvp(*argv, argv);
 		else
@@ -821,8 +826,8 @@ get_options(int argc, char **argv, char *bounce, char *emailid, char *user, char
 static int
 myExit(int argc, char **argv, int status, int bounce, char *DestFolder, char *forward)
 {
-	char           *revision = "$Revision: 2.44 $";
-	char           *ptr;
+	char           *revision = "$Revision: 2.45 $";
+	char           *ptr, *mda;
 	char            MaildirFolder[MAX_BUFF], XFilter[MAX_BUFF];
 	pid_t           pid;
 	int             tmp_stat, wait_status;
@@ -862,9 +867,9 @@ myExit(int argc, char **argv, int status, int bounce, char *DestFolder, char *fo
 						_exit(111);
 					}
 				}
-				execMda(argv);
+				execMda(argv, &mda);
 				_exit(111);
-			default:
+			default: /*- parent */
 				for (;;)
 				{
 					pid = wait(&wait_status);
@@ -877,7 +882,7 @@ myExit(int argc, char **argv, int status, int bounce, char *DestFolder, char *fo
 					else
 					if (pid == -1)
 					{
-						fprintf(stderr, "vfilter: %s. indimail bug\n", *vdelargs);
+						fprintf(stderr, "vfilter: %s. indimail bug\n", mda);
 						_status = -1;
 					}
 					break;
@@ -886,7 +891,7 @@ myExit(int argc, char **argv, int status, int bounce, char *DestFolder, char *fo
 					break;
 				if (WIFSTOPPED(wait_status) || WIFSIGNALED(wait_status))
 				{
-					fprintf(stderr, "vfilter: %s crashed.\n", *vdelargs);
+					fprintf(stderr, "vfilter: %s crashed.\n", mda);
 					_status = -1;
 				} else
 				if (WIFEXITED(wait_status))
@@ -901,7 +906,7 @@ myExit(int argc, char **argv, int status, int bounce, char *DestFolder, char *fo
 					case 111:
 						_exit(tmp_stat);
 					default:
-						fprintf(stderr, "vfilter: Unable to run %s.\n", *vdelargs);
+						fprintf(stderr, "vfilter: Unable to run %s.\n", mda);
 						_status = -1;
 						break;
 					}
@@ -931,7 +936,7 @@ myExit(int argc, char **argv, int status, int bounce, char *DestFolder, char *fo
 		}
 	} /*- if(_status > 0) */
 	/*- Mail has passed through the filter or filter failure */
-	execMda(argv);
+	execMda(argv, &mda);
 	_exit(111);
 	return (0);/*- Not reached */
 }
