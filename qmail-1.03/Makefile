@@ -2109,7 +2109,7 @@ MakeArgs.o envread.o fd_move.o wait_pid.o open_excl.o open_read.o \
 scan_ulong.o getln.o getln2.o case_diffs.o dns_text_dkim.o \
 getopt.a sig.a stralloc.a substdio.a str.a dns.lib dkim.lib
 	if test $(SYSTEM) = Darwin ; then \
-	g++ -o qmail-dkim qmail-dkim.o now.o error.o \
+	g++ -s -o qmail-dkim qmail-dkim.o now.o error.o \
 	date822fmt.o datetime.o datetime_un.o stralloc_cats.o stralloc_catb.o \
 	stralloc_pend.o fmt_str.o byte_cr.o byte_copy.o \
 	fmt_uint.o fmt_uint0.o fmt_ulong.o alloc.o alloc_re.o \
@@ -2301,7 +2301,7 @@ load qmail-smtpd.o smtpd.o rcpthosts.o recipients.o commands.o timeoutread.o \
 timeoutwrite.o ip.o ipme.o ipalloc.o strsalloc.o control.o etrn.o atrn.o constmap.o \
 received.o date822fmt.o wildmat.o now.o qmail.o variables.o cdb.a fd.a \
 wait.a datetime.a getln.a envrules.o bodycheck.o sqlmatch.o matchregex.o \
-scan_xlong.o socket_v4mappedprefix.o socket_v6any.o \
+scan_xlong.o socket_v4mappedprefix.o socket_v6any.o mail_acl.o \
 open.a sig.a case.a spf.o dns.o auto_qmail.o auto_uids.o base64sub.o qregex_smtpd.o \
 tablematch.o ndelay.o ndelay_off.o greylist.o auto_break.o \
 env.a stralloc.a alloc.a substdio.a error.a str.a fs.a lock.a \
@@ -2310,11 +2310,15 @@ socket.lib tai.lib dns.lib indimail.lib tls.lib
 	timeoutwrite.o ip.o ipme.o ipalloc.o strsalloc.o control.o etrn.o atrn.o constmap.o \
 	received.o date822fmt.o wildmat.o now.o qmail.o variables.o \
 	envrules.o bodycheck.o spf.o dns.o auto_qmail.o sqlmatch.o matchregex.o \
-	scan_xlong.o socket_v4mappedprefix.o socket_v6any.o \
+	scan_xlong.o socket_v4mappedprefix.o socket_v6any.o mail_acl.o \
 	auto_uids.o base64sub.o qregex_smtpd.o tablematch.o ndelay.o ndelay_off.o \
 	cdb.a fd.a wait.a datetime.a greylist.o auto_break.o \
 	getln.a open.a sig.a case.a env.a stralloc.a alloc.a substdio.a error.a \
 	str.a fs.a lock.a `cat socket.lib tai.lib dns.lib indimail.lib tls.lib`
+
+mail_acl.o: \
+compile mail_acl.c str.h matchregex.h fmt.h stralloc.h
+	./compile mail_acl.c
 
 qregex.o: \
 compile qregex.c qregex.h case.h stralloc.h constmap.h matchregex.h byte.h env.h \
@@ -5046,13 +5050,13 @@ stralloc.h subfd.h now.h env.h scan.h conf-batv
 	./compile `grep -h -v "^#" conf-batv` batv.c
 
 uacl: \
-load uacl.o case_lowerb.o byte_rchr.o byte_copy.o open_read.o \
+load uacl.o case_lowerb.o byte_rchr.o byte_copy.o open_read.o mail_acl.o \
 matchregex.o scan_ulong.o alloc.o alloc_re.o wildmat.o control.o \
 constmap.o env.o getln.o case_diffb.o cdb_seek.o getln2.o strerr_die.o \
 strerr_sys.o str_cpy.o cdb_hash.o cdb_unpack.o byte_chr.o byte_cr.o \
 variables.o str_diff.o str_diffn.o qregex.o envread.o str_len.o \
 fmt_ulong.o auto_qmail.o error.o error_str.o stralloc.a substdio.a
-	./load uacl case_lowerb.o byte_rchr.o byte_copy.o open_read.o \
+	./load uacl case_lowerb.o byte_rchr.o byte_copy.o open_read.o mail_acl.o \
 	matchregex.o scan_ulong.o alloc.o alloc_re.o wildmat.o control.o \
 	constmap.o env.o getln.o case_diffb.o cdb_seek.o getln2.o strerr_die.o \
 	strerr_sys.o str_cpy.o cdb_hash.o cdb_unpack.o byte_chr.o byte_cr.o \
@@ -5060,7 +5064,7 @@ fmt_ulong.o auto_qmail.o error.o error_str.o stralloc.a substdio.a
 	fmt_ulong.o auto_qmail.o error.o error_str.o stralloc.a substdio.a
 
 uacl.o: \
-compile uacl.c qregex.h auto_qmail.h subfd.h \
+compile uacl.c qregex.h auto_qmail.h subfd.h mail_acl.h \
 env.h strerr.h fmt.h str.h matchregex.h scan.h control.h
 	./compile uacl.c
 
