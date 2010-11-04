@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-dkim.c,v $
+ * Revision 1.24  2010-11-02 18:45:14+05:30  Cprogrammer
+ * Improve DKIM signing/verification speed
+ *
  * Revision 1.23  2010-07-21 08:59:57+05:30  Cprogrammer
  * use CONTROLDIR environment variable instead of a hardcoded control directory
  *
@@ -1116,37 +1119,13 @@ main(int argc, char *argv[])
 	{
 		register int    n;
 		register char  *x;
-		int             i, j;
 
 		if ((n = substdio_feed(&ssin)) < 0)
 			die_read();
 		if (!n)
 			break;
 		x = substdio_PEEK(&ssin);
-		if (dkimsign || dkimverify)
-		{
-			for (i = 0; i < n; i++)
-			{
-				if (x[i] == '\n')
-				{
-					if (dkimsign)
-						j = DKIMSignProcess(&ctxt, "\r\n", 2);
-					else
-						j = DKIMVerifyProcess(&ctxt, "\r\n", 2);
-				} else
-				{
-					if (dkimsign)
-						j = DKIMSignProcess(&ctxt, x + i, 1);
-					else
-						j = DKIMVerifyProcess(&ctxt, x + i, 1);
-				}
-				maybe_die_dkim(j);
-				if (j > 0 && j < DKIM_FINISHED_BODY)
-					break;
-				if (!ret && j)
-					ret = j;
-			}
-		} /*- for(;;) */
+		ret = (dkimsign ? DKIMSignProcess : DKIMVerifyProcess) (&ctxt, x, n);
 		if (substdio_put(&ssout, x, n) == -1)
 			die_write();
 		substdio_SEEK(&ssin, n);
@@ -1179,7 +1158,9 @@ main(int argc, char *argv[])
 				if (!nSigCount)
 					ret = DKIM_NO_SIGNATURES;
 			}
-			if (checkPractice(ret)) {
+			/*- what to do if DKIM Verification fails */
+			if (checkPractice(ret))
+			{
 				char           *domain;
 
 				origRet = ret;
@@ -1326,7 +1307,7 @@ main(argc, argv)
 void
 getversion_qmail_dkim_c()
 {
-	static char    *x = "$Id: qmail-dkim.c,v 1.23 2010-07-21 08:59:57+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-dkim.c,v 1.24 2010-11-02 18:45:14+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
