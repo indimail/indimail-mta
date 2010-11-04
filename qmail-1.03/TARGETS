@@ -979,3 +979,5 @@ rrforward.1
 qreceipt.1
 hmac_md5.o
 md5c.o
+trywaitp.o
+mail_acl.o
