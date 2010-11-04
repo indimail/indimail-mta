@@ -20,6 +20,15 @@ The latest RPM (for yet to be released version and can have untested code) can b
 
 http://download.opensuse.org/repositories/home:/mbhangui/
 
+You can install indimail using yum by using the following command (depending on
+your architecture)
+
+# yum install indimail.i386
+
+or
+
+# yum install indimail.x86_64
+
 What the RPM does
 -----------------
 
