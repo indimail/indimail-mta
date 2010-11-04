@@ -543,6 +543,7 @@
 #include "bodycheck.h"
 #include "getln.h"
 #include "qregex.h"
+#include "mail_acl.h"
 #ifdef TLS
 #include "tls.h"
 #include "ssl_timeoutio.h"
@@ -783,6 +784,13 @@ struct authcmd
 int             smtp_port;
 
 extern char   **environ;
+
+/*- dummy function for mail_acl */
+void
+die_qregex(char *str)
+{
+	return;
+}
 
 void
 logerr(char *s)
@@ -3420,179 +3428,6 @@ mailfrom_parms(char *arg)
 	}
 }
 
-int
-mail_acl(char *sender, char *recipient)
-{
-	int             err, len, from_reject, rcpt_reject, rcpt_found, from_found;
-	char           *ptr, *cptr, *rcpt_match, *from_match;
-
-	if (!acclistok)
-		return(0);
-	/*- Cannot reject bounces */
-	if (!*sender || !str_diff(sender, "#@[]"))
-		return(0);
-	if (!str_diffn(recipient, "postmaster@", 11) || !str_diff(recipient, "postmaster"))
-		return(0);
-	if (!str_diffn(recipient, "abuse@", 6) || !str_diff(recipient, "abuse"))
-		return(0);
-	/*
-	 * Format:
-	 * rcpt:sender:recipient
-	 * from:sender:recipient
-	 * e.g.
-	 * rcpt:ceo@indimail.org:country_distribution_list@indimail.org
-	 * rcpt:md@indimail.org:country_distribution_list@indimail.org
-	 * from:recruiter@yahoo.com:hr@indimail.org 
-	 */
-	for (rcpt_reject = len = 0, ptr = acclist.s;len < acclist.len;)
-	{
-		len += (str_len(ptr) + 1); /*- length of each rule */
-		/*
-		 * recipient is cptr + 1
-		 */
-		for (cptr = ptr + 5;*cptr && *cptr != ':';cptr++);
-		if (*cptr == ':')
-			*cptr = 0;
-		else
-			continue;
-		rcpt_found = 0;
-		from_match = rcpt_match = 0;
-		/*- find if a match for recipient occurs in the rule */
-		if (!str_diff(recipient, cptr + 1)) /*- recipient */
-		{
-			rcpt_found = 1;
-			rcpt_match = cptr + 1;
-		} else
-		{
-			if (qregex)
-			{
-				if ((err = matchregex(recipient, cptr + 1, &errStr)) < 0)
-				{
-					*cptr = 0;
-					return (err);
-				} else
-				{
-					rcpt_found = 1;
-					rcpt_match = cptr + 1;
-				}
-			} else
-			if (wildmat_internal(recipient, cptr + 1))
-			{
-				rcpt_found = 1;
-				rcpt_match = cptr + 1;
-			}
-		}
-		if (!rcpt_found)
-		{
-			*cptr = ':';
-			ptr = acclist.s + len;
-			continue;
-		}
-		if (!str_diffn(ptr, "rcpt:", 5))
-			rcpt_reject = 1;
-		if (!rcpt_reject)
-		{
-			*cptr = ':';
-			ptr = acclist.s + len;
-			continue;
-		}
-		if (!str_diff(sender, ptr + 5)) /*- sender */
-			from_match = ptr + 5;
-		else
-		{
-			if (qregex)
-			{
-				if ((err = matchregex(sender, ptr + 5, &errStr)) < 0)
-				{
-					*cptr = ':';
-					return (err);
-				} else
-					from_match = ptr + 5;
-			} else
-			if (wildmat_internal(sender, ptr + 5))
-				from_match = ptr + 5;
-		}
-		*cptr = ':';
-		if (rcpt_reject && from_match) /*- explicit allow rule found for sender */
-			return (0);
-		ptr = acclist.s + len; /*- go to the next rule */
-	}
-	for (from_reject = len = 0, ptr = acclist.s;len < acclist.len;)
-	{
-		len += (str_len(ptr) + 1); /*- length of each rule */
-		/*
-		 * sender is ptr + 5
-		 */
-		for (cptr = ptr + 5;*cptr && *cptr != ':';cptr++);
-		if (*cptr == ':')
-			*cptr = 0;
-		else
-			continue;
-		from_found = 0;
-		from_match = rcpt_match = 0;
-		/*- find if a match for sender occurs in the rule */
-		if (!str_diff(sender, ptr + 5)) /*- sender */
-		{
-			from_found = 1;
-			from_match = ptr + 5;
-		} else
-		{
-			if (qregex)
-			{
-				if ((err = matchregex(sender, ptr + 5, &errStr)) < 0)
-				{
-					*cptr = ':';
-					return (err);
-				} else
-				{
-					from_found = 1;
-					from_match = ptr + 5;
-				}
-			} else
-			if (wildmat_internal(sender, ptr + 5))
-			{
-				from_found = 1;
-				from_match = ptr + 5;
-			}
-		}
-		if (!from_found) /*- this rule is irrelevant for the sender */
-		{
-			*cptr = ':';
-			ptr = acclist.s + len;
-			continue;
-		}
-		if (!str_diffn(ptr, "from:", 5))
-			from_reject = 1;
-		if (!from_reject)
-		{
-			*cptr = ':';
-			ptr = acclist.s + len;
-			continue;
-		}
-		if (!str_diff(recipient, cptr + 1)) /*- recipient */
-			rcpt_match = cptr + 1;
-		else
-		{
-			if (qregex)
-			{
-				if ((err = matchregex(recipient, cptr + 1, &errStr)) < 0)
-				{
-					*cptr = ':';
-					return (err);
-				} else
-					rcpt_match = cptr + 1;
-			} else
-			if (wildmat_internal(recipient, cptr + 1))
-				rcpt_match = cptr + 1;
-		}
-		*cptr = ':';
-		if (from_reject && rcpt_match) /*- explicit allow rule found for recipient */
-			return (0);
-		ptr = acclist.s + len; /*- go to the next rule */
-	}
-	return (rcpt_reject || from_reject);
-}
-
 void
 smtp_mail(char *arg)
 {
@@ -4129,22 +3964,25 @@ smtp_rcpt(char *arg)
 			return;
 		}
 	}
-	switch (mail_acl(mailfrom.s, addr.s))
+	if (acclistok)
 	{
-	case 1:
-		err_acl(remoteip, mailfrom.s, addr.s);
-		return;
-	case 0:
-		break;
-	default:
-		out("451 Requested action aborted: local system failure (#4.3.0)\r\n");
-		logerr("qmail-smtpd: ");
-		logerrpid();
-		logerr(remoteip);
-		logerr(" accesslist: ");
-		logerr(errStr);
-		logerrf("\n");
-		return;
+		switch (mail_acl(&acclist, qregex, mailfrom.s, addr.s, 0))
+		{
+		case 1:
+			err_acl(remoteip, mailfrom.s, addr.s);
+			return;
+		case 0:
+			break;
+		default:
+			out("451 Requested action aborted: local system failure (#4.3.0)\r\n");
+			logerr("qmail-smtpd: ");
+			logerrpid();
+			logerr(remoteip);
+			logerr(" accesslist: ");
+			logerr(errStr);
+			logerrf("\n");
+			return;
+		}
 	}
 	/*
 	 * If AUTH_ALL is defined, allowed_rcpthosts = 0 
