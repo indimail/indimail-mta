@@ -1,5 +1,8 @@
 /*
  * $Log: smtpd.c,v $
+ * Revision 1.148  2010-11-05 06:28:45+05:30  Cprogrammer
+ * moved mail_acl() function to mail_acl.c
+ *
  * Revision 1.147  2010-10-06 21:59:24+05:30  Cprogrammer
  * fixed wrong return value passed to log_rules()
  *
@@ -584,7 +587,7 @@ int             wildmat_internal(char *, char *);
 int             ssl_rfd = -1, ssl_wfd = -1;	/*- SSL_get_Xfd() are broken */
 char           *servercert, *clientca, *clientcrl;
 #endif
-char           *revision = "$Revision: 1.147 $";
+char           *revision = "$Revision: 1.148 $";
 char           *protocol = "SMTP";
 stralloc        proto = { 0 };
 static stralloc Revision = { 0 };
@@ -5898,7 +5901,7 @@ addrrelay() /*- Rejection of relay probes. */
 void
 getversion_smtpd_c()
 {
-	static char    *x = "$Id: smtpd.c,v 1.147 2010-10-06 21:59:24+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: smtpd.c,v 1.148 2010-11-05 06:28:45+05:30 Cprogrammer Exp mbhangui $";
 
 #ifdef INDIMAIL
 	x = sccsidh;

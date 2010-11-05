@@ -1,5 +1,8 @@
 /*
  * $Log: uacl.c,v $
+ * Revision 1.4  2010-11-05 06:29:38+05:30  Cprogrammer
+ * moved mail_acl() to mail_acl.c
+ *
  * Revision 1.3  2010-01-20 11:26:32+05:30  Cprogrammer
  * new logic for access list
  *
@@ -120,7 +123,7 @@ main(int argc, char **argv)
 void
 getversion_uacl_c()
 {
-	static char    *x = "$Id: uacl.c,v 1.3 2010-01-20 11:26:32+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: uacl.c,v 1.4 2010-11-05 06:29:38+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

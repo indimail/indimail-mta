@@ -181,7 +181,7 @@ I usually prefer to run privileged commands like this (so that I don't get fond 
 
     Prepare Source Directory Structure in the disk partition selected
     you have to extract minimum of 10 sources as per the directory
-    structure below. You may skip extraction of nssd-1.1, fetchmail-6.3.17,
+    structure below. You may skip extraction of nssd-1.1, fetchmail-6.3.18,
     depending on whether you require them. Most probably you have downloaded
     indimail-@version@.tar.gz only. You require to additionally download the
     following sources mentioned below. Except for qmail, ucspi-tcp, bogofilter,
@@ -208,8 +208,8 @@ I usually prefer to run privileged commands like this (so that I don't get fond 
                                . fortune-1.1        (8.4  Mb)
                                . courier-imap-3.0.8 (50   Mb)
                                . bogofilter-1.2.2   (11.6 Mb)
-                               . clamav-0.96.2      (600  Mb)
-                               . fetchmail-6.3.17   (10.5 Mb)
+                               . clamav-0.96.4      (600  Mb)
+                               . fetchmail-6.3.18   (10.5 Mb)
                                . iwebadmin-1.0      (3.0  Mb)
                                ------------------------------
                                  Total              (800  Mb)
@@ -598,14 +598,14 @@ the installation.
     Then do ./configure <same_parameters_as_earlier_install> ; make ; make install-strip
 
     ##### STEP 7  ##### Virus Scanner #########################
-    Install clamav MD5 a2c2555d86868f91a01d0e2c2403bbec
+    Install clamav MD5 7d47f73fe16b96544a4b5e41686e5060
     current working directory /home/local/src
-    Download clamav package. The latest tested clamav package tested is clamav-0.96.2.tar.gz.
+    Download clamav package. The latest tested clamav package tested is clamav-0.96.4.tar.gz.
 
-    % wget http://downloads.sourceforge.net/clamav/clamav-0.96.2.tar.gz
-    % gunzip -c clamav-0.96.2.tar.gz | tar xf -
-    % gunzip -c indimail-@version@/patches/clamav-0.96.2.patch.gz | patch -p0
-    % cd clamav-0.96.2
+    % wget http://downloads.sourceforge.net/clamav/clamav-0.96.4.tar.gz
+    % gunzip -c clamav-0.96.4.tar.gz | tar xf -
+    % gunzip -c indimail-@version@/patches/clamav-0.96.4.patch.gz | patch -p0
+    % cd clamav-0.96.4
     % ./configure --prefix=@indimaildir@ --sysconfdir=@indimaildir@/etc \
         --with-dbdir=@indimaildir@/share/clamd \
         --libexecdir=@indimaildir@/libexec \
@@ -621,15 +621,15 @@ the installation.
     Then do ./configure <same_parameters_as_earlier_install> ; make ; make install-strip
  
     ##### STEP 8  ## Optional STEP ##### Fetchmail ############
-    Install fetchmail MD5 7b1d449ecddb6164e22c32854adc4a75  
+    Install fetchmail MD5 e01377cf2751465c509c39029e8da92b  
     current working directory /home/local/src
     Download the fetchmail package. The latest tested fetchmail package tested is
-    fetchmail-6.3.17.tar.bz2.
+    fetchmail-6.3.18.tar.bz2.
 
-    % wget http://download.berlios.de/fetchmail/fetchmail-6.3.17.tar.bz2
-    % bzip2 -d -c fetchmail-6.3.17.tar.bz2 | tar xf -
-    % gunzip -c indimail-@version@/patches/fetchmail-6.3.17.patch.gz | patch -p0
-    % cd fetchmail-6.3.17
+    % wget http://download.berlios.de/fetchmail/fetchmail-6.3.18.tar.bz2
+    % bzip2 -d -c fetchmail-6.3.18.tar.bz2 | tar xf -
+    % gunzip -c indimail-@version@/patches/fetchmail-6.3.18.patch.gz | patch -p0
+    % cd fetchmail-6.3.18
     % autoreconf -fi
     % ./configure --prefix=@indimaildir@ --enable-indimail --enable-indimaildir=@indimaildir@ \
         --with-ssl \
