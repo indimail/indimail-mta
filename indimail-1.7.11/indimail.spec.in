@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail.spec.in,v 2.196 2010-11-05 06:56:57+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 2.197 2010-11-12 21:58:28+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %define _unpackaged_files_terminate_build 1
 
@@ -1348,6 +1348,7 @@ fi
 %attr(555,root,root)                    %{_prefix}/share/makeuserdb
 %endif
 %attr(555,root,root)                    %{_prefix}/libexec/authlib/authindi
+%attr(555,root,root)                    %{_prefix}/libexec/authlib/authgeneric
 
 %attr(555,root,qmail)                   %{_prefix}/plugins/generic.so
 

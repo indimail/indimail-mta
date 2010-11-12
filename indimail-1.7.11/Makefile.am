@@ -149,7 +149,7 @@ indimailsbin_PROGRAMS = adminclient chowkidar cindimail clearopensmtp config_set
 
 indimaillibexec_PROGRAMS = sq_vacation qmailmrtg7
 
-indimailauthlib_PROGRAMS = authindi
+indimailauthlib_PROGRAMS = authindi authgeneric
 
 indimaillibexec_SCRIPTS = overquota.sh
 
@@ -770,6 +770,8 @@ svctool: svctool.in /etc/passwd
 tls-cert-check: tls-cert-check.in /etc/passwd
 	$(edit) $@.in > $@
 overquota.sh: overquota.sh.in
+	$(edit) $@.in > $@
+authgeneric: authgeneric.in
 	$(edit) $@.in > $@
 bogofilter-qfe: bogofilter-qfe.in
 	$(edit) $@.in > $@
