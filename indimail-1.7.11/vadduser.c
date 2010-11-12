@@ -1,5 +1,8 @@
 /*
  * $Log: vadduser.c,v $
+ * Revision 2.34  2010-11-12 21:56:35+05:30  Cprogrammer
+ * return error code 17 for EEXIST
+ *
  * Revision 2.33  2010-08-10 18:41:05+05:30  Cprogrammer
  * made dir control user level configurable
  *
@@ -153,7 +156,7 @@
 #include <signal.h>
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vadduser.c,v 2.33 2010-08-10 18:41:05+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: vadduser.c,v 2.34 2010-11-12 21:56:35+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 char            Email[MAX_BUFF], User[MAX_BUFF], Domain[MAX_BUFF], Passwd[MAX_BUFF],
@@ -339,6 +342,8 @@ main(argc, argv)
 		users_per_level, apop, actFlag)) < 0)
 #endif
 	{
+		if (errno == EEXIST)
+			i = errno;
 		error_stack(stderr, 0);
 		vclose();
 		return(i);
