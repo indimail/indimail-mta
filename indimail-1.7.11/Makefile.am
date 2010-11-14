@@ -149,7 +149,9 @@ indimailsbin_PROGRAMS = adminclient chowkidar cindimail clearopensmtp config_set
 
 indimaillibexec_PROGRAMS = sq_vacation qmailmrtg7
 
-indimailauthlib_PROGRAMS = authindi authgeneric
+indimailauthlib_PROGRAMS = authindi
+
+indimailauthlib_SCRIPTS = authgeneric
 
 indimaillibexec_SCRIPTS = overquota.sh
 
