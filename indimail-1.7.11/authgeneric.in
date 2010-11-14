@@ -24,7 +24,7 @@ fi
 #
 # create the user here
 #
-@indimaildir@/bin/vadduser -d -e "$user"@"$domain" $PASSWORD > /dev/null
+@indimaildir@/bin/vadduser -d "$user"@"$domain" $PASSWORD > /dev/null
 if [ $? -ne 0 ] ; then
 	if [ $? -eq 17 ] ; then
 		echo "generic_auth: user exists" 1>&2
