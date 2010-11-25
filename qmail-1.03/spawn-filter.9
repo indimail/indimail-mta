@@ -313,6 +313,9 @@ REGEX patterns of envelope sender addresses which should bypass spam filter.
 .I spamignorepatterns
 can be overriden by the environment variable
 .B SPAMIGNOREPATTERNS
+\fIspamignorepatterns\fR gets disabled of you set \fBQREGEX\fR environment variable.
+\fIspamignorepatterns\fR uses simple shell-style pattern matching unlike regular
+expressions used by setting \fBQREGEX\fR environment variable.
 
 .SH Environment Variables
 \fBspawn-filter\fR sets few environment variables. The following environment variables

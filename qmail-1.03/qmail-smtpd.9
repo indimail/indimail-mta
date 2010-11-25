@@ -456,6 +456,9 @@ fred@earthlink.net. It also stops all mail with addresses like:
 a sender address containing a percent sign (%) is rejected.
 The filename can be overriden by the environment variable
 .BR BADMAILPATTERNS .
+\fIbadmailpatterns\fR gets disabled of you set \fBQREGEX\fR environment variable.
+\fIbadmailpatterns\fR uses simple shell-style pattern matching unlike regular
+expressions used by setting \fBQREGEX\fR environment variable.
 
 .TP 5
 .I clientca.pem
@@ -568,6 +571,9 @@ in the
 file, where dd.dd.dd is the IP address in brackets. 
 The filename can be overriden by the environment variable
 .BR BADRCPTPATTERNS .
+\fIbadrcptpatterns\fR gets disabled of you set \fBQREGEX\fR environment variable.
+\fIbadrcptpatterns\fR uses simple shell-style pattern matching unlike regular
+expressions used by setting \fBQREGEX\fR environment variable.
 
 .TP 5
 .I goodrcptto
@@ -596,6 +602,9 @@ The filename can be overriden by the environment variable
 REGEX patterns of envelope recipient addresses which should bypass CHECKRECIPIENT checks
 The filename can be overriden by the environment variable
 .BR GOODRCPTPATTERNS .
+\fIgoodrcptpatterns\fR gets disabled of you set \fBQREGEX\fR environment variable.
+\fIgoodrcptpatterns\fR uses simple shell-style pattern matching unlike regular
+expressions used by setting \fBQREGEX\fR environment variable.
 
 .TP 5
 .I blackholedsender
@@ -640,6 +649,9 @@ fred@earthlink.net. It also stops all mail with addresses like:
 a sender address containing a percent sign (%) is rejected.
 The filename can be overriden by the environment variable
 .IR BLACKHOLEDPATTERNS .
+\fIblackholedpatterns\fR gets disabled of you set \fBQREGEX\fR environment variable.
+\fIblackholedpatterns\fR uses simple shell-style pattern matching unlike regular
+expressions used by setting \fBQREGEX\fR environment variable.
 
 .TP 5
 .I blackholercpt
@@ -669,6 +681,9 @@ REGEX pattern in
 .IR blackholercptpatterns .
 The filename can be overriden by the environment variable
 .BR BLACKHOLERCPTPATTERNS .
+\fIblackholercptpatterns\fR gets disabled of you set \fBQREGEX\fR environment variable.
+\fIblackholercptpatterns\fR uses simple shell-style pattern matching unlike regular
+expressions used by setting \fBQREGEX\fR environment variable.
 
 .TP 5
 .I hostaccess
@@ -736,6 +751,9 @@ The filename can be overriden by the environment variable
 REGEX patterns of envelope sender addresses which should bypass spam filter.
 The filename can be overriden by the environment variable
 .BR SPAMIGNOREPATTERNS .
+\fIspamignorepatterns\fR gets disabled of you set \fBQREGEX\fR environment variable.
+\fIspamignorepatterns\fR uses simple shell-style pattern matching unlike regular
+expressions used by setting \fBQREGEX\fR environment variable.
 
 .TP 5
 .I QREGEX
@@ -743,8 +761,8 @@ The filename can be overriden by the environment variable
 The files badhelo, badmailfrom, badrcptto, blackholedsender, spamignore,
 relaymailfrom, authdomains, chkrcptdomains, goodrcptto, blackholercpt can be used with
 regular expressions if the environment variable QREGEX is defined (in which case, the control
-files badhelopatterns, badmailfrompatterns, badrcpttopatterns, blackholedpatterns etc
-are not required).
+files badhelopatterns, badmailfrompatterns, badrcpttopatterns, blackholedpatterns,
+blackholercptpatterns, etc are not required and get disabled).
 
 Setting QREGEX also causes regular expressions to be used for the control files
 relaymailfrom, authdomains, chkrcptdomains, goodrcptto, blackholercpto
