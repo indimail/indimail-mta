@@ -74,3 +74,4 @@ RELEASE-Notes.in
 overquota.sh
 doc/ChangeLog
 login_tasks.3
+authgeneric
