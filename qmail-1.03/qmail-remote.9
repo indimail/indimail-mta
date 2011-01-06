@@ -235,16 +235,18 @@ CONTROLDIR environment variable.
 
 .TP 5
 .I outgoingip
-IP address to be used on outgoing connections.
+file containing local IP address to be bound on socket and used on outgoing connections.
 Default: system-defined.
 The value
 .IR 0.0.0.0
 is equivalent to the system default. The name for this control file can also be configured
-by setting the environment variable \fBOUTGOINGIP\fR
+by setting the environment variable \fBOUTGOINGIP\fR. You can also set the IP address for
+outgoing connection by setting the environment variable \fBOUTIP\fR. \fBOUTIP\fR overrides the
+control file \fIoutgoingip\fR or the environment variable \fBOUTGOINGIP\fR.
 
 .TP 5
 .I outgoingip.host
-Local IP bindings based on envelope recipient domain.
+file having a local IP address to be bound on socket and used on outgoing connections.
 .I host
 is the domain or host to which the mail is being delivered.
 .I outgoingip.host
@@ -253,8 +255,8 @@ takes precedence over
 
 .TP 5
 .I domainbindings
-Local IP bindings based on envelope sender domain or envelope sender address.
-Each binding has the form
+file having local IP addresses to be bound based on envelope sender domain or envelope sender
+address. Each binding has the form
 .IR domain\fB:\fIlocal-ip ,
 or
 .IR sender_addr\fB:\fIlocal-ip ,
@@ -339,6 +341,15 @@ may contain suffix wildcards.
 .I bindroutes
 takes precedence over
 .IR domainbindings .
+
+.EX
+# Send this on the internal net
+10.:10.0.0.1
+# Rest goes on external "mail" address (yes, its bogus!)
+:301.32.1.1
+# Hey, we could 'cheat' on stopping qmail-remote sending to this host
+555.123.123.123:this-isnt-an-ip-address
+.EE
 
 .TP 5
 .I helohost

@@ -1,5 +1,9 @@
 /*
  * $Log: qmail-remote.c,v $
+ * Revision 1.71  2011-01-06 22:40:06+05:30  Cprogrammer
+ * added environment variable OUTIP to select OUTGOINGIP
+ * added check for correct number of command line arguments
+ *
  * Revision 1.70  2010-08-05 20:56:37+05:30  Cprogrammer
  * added cram-md5 authentication
  *
@@ -2046,21 +2050,29 @@ getcontrols()
 	}
 #endif
 	/*- per recipient domain outgoingip */
-	if (!stralloc_copys(&outgoingipfn, "outgoingip."))
-		temp_nomem();
-	else
-	if (!stralloc_cat(&outgoingipfn, &host))
-		temp_nomem();
-	else
-	if (!stralloc_0(&outgoingipfn))
-		temp_nomem();
-	if (!(r = control_readline(&outgoingip, outgoingipfn.s)))
-		r = control_readline(&outgoingip, (x = env_get("OUTGOINGIP")) ? x : "outgoingip");
-	if (r == -1)
+	if ((x = env_get("OUTIP")) && *x)
 	{
-		if (errno == error_nomem)
+		if (!stralloc_copys(&outgoingip, x))
 			temp_nomem();
-		temp_control();
+		r = 1;
+	} else
+	{
+		if (!stralloc_copys(&outgoingipfn, "outgoingip."))
+			temp_nomem();
+		else
+		if (!stralloc_cat(&outgoingipfn, &host))
+			temp_nomem();
+		else
+		if (!stralloc_0(&outgoingipfn))
+			temp_nomem();
+		if (!(r = control_readline(&outgoingip, outgoingipfn.s)))
+			r = control_readline(&outgoingip, (x = env_get("OUTGOINGIP")) ? x : "outgoingip");
+		if (r == -1)
+		{
+			if (errno == error_nomem)
+				temp_nomem();
+			temp_control();
+		}
 	}
 #ifdef IPV6
 	if (0 == r && !stralloc_copys(&outgoingip, "::"))
@@ -2271,7 +2283,7 @@ main(int argc, char **argv)
 	char           *relayhost, *x;
 
 	sig_pipeignore();
-	if (argc < 5)
+	if (argc < 6)
 		perm_usage();
 	my_argc = argc;
 	my_argv = argv;
@@ -2547,7 +2559,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_remote_c()
 {
-	static char    *x = "$Id: qmail-remote.c,v 1.70 2010-08-05 20:56:37+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: qmail-remote.c,v 1.71 2011-01-06 22:40:06+05:30 Cprogrammer Stab mbhangui $";
 
 	x++;
 }
