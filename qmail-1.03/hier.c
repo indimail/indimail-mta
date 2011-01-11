@@ -509,6 +509,7 @@ hier(inst_dir)
 	c(auto_qmail_home, "bin", "elq", auto_uido, auto_gidq, 0555);
 	c(auto_qmail_home, "bin", "etrn", auto_uido, auto_gidq, 0555);
 	c(auto_qmail_home, "bin", "atrn", auto_uido, auto_gidq, 0555);
+	c(auto_qmail_home, "bin", "balance_outgoing", auto_uido, auto_gidq, 0555);
 #if defined(HASDKIM) || defined(DOMAIN_KEYS)
 	c(auto_qmail_home, "bin", "dk-filter", auto_uido, auto_gidq, 0555);
 #endif
