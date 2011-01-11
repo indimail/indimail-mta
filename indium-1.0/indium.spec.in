@@ -90,7 +90,14 @@ BuildRequires: tcl-devel rpm gcc gcc-c++ make binutils coreutils grep
 BuildRequires: tk-devel glibc glibc-devel procps tcl tk cpio
 BuildRequires: sed gettext-devel
 BuildRequires: findutils openssl-devel openssl
-BuildRequires: sharutils gzip autoconf indimail-devel
+BuildRequires: gzip autoconf indimail-devel
+%if %{undefined rhel_version}
+BuildRequires: sharutils
+%else
+%if 0%{?rhel_version} != 600
+BuildRequires: sharutils
+%endif
+%endif
 %if %build_on_obs == 1
 BuildRequires: mysql-devel
 %endif
