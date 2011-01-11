@@ -1,5 +1,8 @@
 /*
  * $Log: spawn-filter.c,v $
+ * Revision 1.53  2011-01-08 16:41:27+05:30  Cprogrammer
+ * added comments
+ *
  * Revision 1.52  2010-07-10 10:43:09+05:30  Cprogrammer
  * fixed matching of local/remote directives in filterargs control file
  *
@@ -370,7 +373,7 @@ run_mailfilter(char *domain, char *ext, char *qqeh, char *mailprog, char **argv)
 	}
 	if (!filterargs)
 	{
-		execv(mailprog, argv);
+		execv(mailprog, argv); /*- do the delivery (qmail-local/qmail-remote) */
 		report(111, "spawn-filter: could not exec ", mailprog, ": ", error_str(errno), ". (#4.3.0)", 0);
 		_exit(111); /*- To make compiler happy */
 	}
@@ -439,7 +442,7 @@ run_mailfilter(char *domain, char *ext, char *qqeh, char *mailprog, char **argv)
 	switch (filt_exitcode = wait_exitcode(wstat))
 	{
 	case 0:
-		execv(mailprog, argv);
+		execv(mailprog, argv); /*- do the delivery (qmail-local/qmail-remote) */
 		report(111, "spawn-filter: could not exec ", mailprog, ": ", error_str(errno), ". (#4.3.0)", 0);
 	case 100:
 		report(100, "Mail Rejected (#5.7.1)", 0, 0, 0, 0, 0);
@@ -653,7 +656,7 @@ redirect_mail(char *notifyaddress, char *domain, char *ext, char *qqeh)
 			report(111, "spawn-filter: out of mem: ", error_str(errno), ". (#4.3.0)", 0, 0, 0);
 		if (!env_put(Queuedir.s))
 			report(111, "spawn-filter: out of mem: ", error_str(errno), ". (#4.3.0)", 0, 0, 0);
-		execv(*args, args);
+		execv(*args, args); /*- run qmail-inject */
 		report(111, "spawn-filter: could not exec ", *args, ": ", error_str(errno), ". (#4.3.0)", 0);
 	default:
 		break;
@@ -854,7 +857,7 @@ main(int argc, char **argv)
 			report(111, "spawn-filter: dup2 error: ", error_str(errno), ". (#4.3.0)", 0, 0, 0);
 		if (pipefd[1] != 1)
 			close(pipefd[1]);
-		execv(*Argv, Argv);
+		execv(*Argv, Argv); /*- run the spam filter */
 		report(111, "spawn-filter: could not exec ", *Argv, ": ", error_str(errno), ". (#4.3.0)", 0);
 	default:
 		close(pipefd[1]);
@@ -930,7 +933,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_spawn_filter_c()
 {
-	static char    *x = "$Id: spawn-filter.c,v 1.52 2010-07-10 10:43:09+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: spawn-filter.c,v 1.53 2011-01-08 16:41:27+05:30 Cprogrammer Stab mbhangui $";
 
 	x++;
 }
