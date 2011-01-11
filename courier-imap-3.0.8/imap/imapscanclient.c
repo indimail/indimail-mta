@@ -1,5 +1,5 @@
 /*
-** Copyright 1998 - 2003 Double Precision, Inc.
+** Copyright 1998 - 2007 Double Precision, Inc.
 ** See COPYING for distribution information.
 */
 
@@ -59,7 +59,7 @@
 #include	"imapwrite.h"
 #include	"imapd.h"
 
-static const char rcsid[]="$Id: imapscanclient.c,v 1.45 2004/07/19 23:54:14 mrsam Exp $";
+static const char rcsid[]="$Id: imapscanclient.c,v 1.47 2009/06/27 16:32:38 mrsam Exp $";
 
 static int do_imapscan_maildir2(struct imapscaninfo *, const char *,
 				int, int, struct uidplus_info *);
@@ -810,7 +810,7 @@ int	dowritecache=0;
 			if (q)	*q=MDIRSEP[0];
 		}
 		need_fclose = 1;
-		if (fflush(fp) || ferror(fp) || (need_fclose = 0,fclose(fp)))
+		if (fflush(fp) || ferror(fp) || ((need_fclose = 0),fclose(fp)))
 		{
 			imapscanfail(dir);
 			if(need_fclose)
@@ -947,9 +947,9 @@ void imapscan_free(struct imapscaninfo *i)
 	}
 }
 
-//////////////////////////////////////////////////////////////////////////
-//
-// Keyword-related stuff  See README.imapkeywords.html for more information.
+/*
+ * Keyword-related stuff  See README.imapkeywords.html for more information.
+ */
 
 extern char *current_mailbox;
 

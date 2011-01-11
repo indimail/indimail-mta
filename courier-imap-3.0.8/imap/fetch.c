@@ -1,5 +1,5 @@
 /*
-** Copyright 1998 - 2009 Double Precision, Inc.
+** Copyright 1998 - 2010 Double Precision, Inc.
 ** See COPYING for distribution information.
 */
 
@@ -29,7 +29,7 @@
 #include	"maildir/maildirquota.h"
 #include	"maildir/maildiraclt.h"
 
-static const char rcsid[]="$Id: fetch.c,v 1.29 2009/06/03 00:33:05 mrsam Exp $";
+static const char rcsid[]="$Id: fetch.c,v 1.30 2010/03/19 01:09:26 mrsam Exp $";
 #if SMAP
 extern int smapflag;
 #endif
@@ -199,7 +199,7 @@ struct	stat	stat_buf;
 			&& fstat(fd, &stat_buf) == 0)
 		{
 			struct maildirsize quotainfo;
-			long	nbytes;
+			int64_t	nbytes;
 			unsigned long unbytes;
 			int	nmsgs=1;
 

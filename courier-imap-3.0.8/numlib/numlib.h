@@ -25,6 +25,7 @@ static const char numlib_h_rcsid[]="$Id: numlib.h,v 1.10 2004/01/11 02:47:33 mrs
 
 char	*libmail_str_time_t(time_t, char *);
 char	*libmail_str_off_t(off_t, char *);
+char	*libmail_str_int64_t(int64_t, char *);
 char	*libmail_str_pid_t(pid_t, char *);
 char	*libmail_str_dev_t(dev_t, char *);
 char	*libmail_str_ino_t(ino_t, char *);

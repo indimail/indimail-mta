@@ -66,7 +66,7 @@
 
 #define SMAP_BUFSIZ 8192
 
-static const char rcsid[]="$Id: smap.c,v 1.27 2005/11/21 23:36:47 mrsam Exp $";
+static const char rcsid[]="$Id: smap.c,v 1.28 2009/09/05 11:59:26 mrsam Exp $";
 #define SHARED "shared"
 
 #define LIST_FOLDER 1
@@ -3496,8 +3496,7 @@ void smap()
 						}
 						argvec[i]=0;
 
-						i=imapd_sendmsg(tmpname, argvec,
-							  &senderr);
+						i=imapd_sendmsg(tmpname, argvec, &senderr);
 						free(argvec);
 						if (i)
 						{

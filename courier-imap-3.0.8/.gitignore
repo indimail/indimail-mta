@@ -1,7 +1,6 @@
 INSTALL.html
 authenumerate
 authlib/COPYING
-authlib/INSTALL
 authlib/README.authdebug.html
 authlib/authchangepwdir.h
 authlib/authconfiglist

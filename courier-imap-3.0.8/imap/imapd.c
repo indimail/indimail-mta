@@ -1,5 +1,5 @@
 /*
-** Copyright 1998 - 2004 Double Precision, Inc.
+** Copyright 1998 - 2010 Double Precision, Inc.
 ** See COPYING for distribution information.
 */
 
@@ -89,7 +89,7 @@
 #define KEYWORD_IMAPVERBOTTEN " (){%*\"\\]"
 #define KEYWORD_SMAPVERBOTTEN ","
 
-static const char rcsid[]="$Id: imapd.c,v 1.127 2004/09/12 23:25:56 mrsam Exp $";
+static const char rcsid[]="$Id: imapd.c,v 1.162 2010/03/21 00:33:59 mrsam Exp $";
 extern time_t rfc822_parsedt(const char *);
 extern void fetchflags(unsigned long);
 extern unsigned long header_count, body_count;
@@ -187,8 +187,8 @@ void quotainfo_out(const char* qroot)
 		if (quotainfo.quota.nbytes > 0)
 		{
 			sprintf(qbuf,"STORAGE %ld %ld",
-				((long)quotainfo.size.nbytes+1023)/1024,
-				((long)quotainfo.quota.nbytes+1023)/1024);
+				(long)((quotainfo.size.nbytes+1023)/1024),
+				(long)((quotainfo.quota.nbytes+1023)/1024));
 			strcat(qresult,qbuf);
 		}
 		if (quotainfo.quota.nmessages > 0)
@@ -617,7 +617,6 @@ FILE *maildir_mkfilename(const char *mailbox, struct imapflags *flags,
 	sprintf(uniqbuf, "%u", uniqcnt++);
 
 	maildir_tmpcreate_init(&createInfo);
-
 	createInfo.openmode=0666;
 	createInfo.maildir=mailbox;
 	createInfo.uniq=uniqbuf;
@@ -1033,8 +1032,12 @@ static void mailboxflags(int ro)
 	writes("* FLAGS (");
 
 	if (current_maildir_info.keywordList)
+	{
+		void (*writefunc)(const char *)=writes;
+
 		libmail_kwEnumerate(current_maildir_info.keywordList,
-				 &write_keyword_name, writes);
+				    &write_keyword_name, &writefunc);
+	}
 
 	writes("\\Draft \\Answered \\Flagged"
 	       " \\Deleted \\Seen \\Recent)\r\n");
@@ -1048,10 +1051,14 @@ static void mailboxflags(int ro)
 	else
 	{
 		if (current_maildir_info.keywordList)
+		{
+			void (*writefunc)(const char *)=writes;
+
 			libmail_kwEnumerate(current_maildir_info
-					 .keywordList,
-					 &write_keyword_name,
-					 writes);
+					    .keywordList,
+					    &write_keyword_name,
+					    &writefunc);
+		}
 
 		if (keywords())
 			writes("\\* ");
@@ -1062,10 +1069,10 @@ static void mailboxflags(int ro)
 
 static int write_keyword_name(struct libmail_keywordEntry *kw, void *dummy)
 {
-	void (*writefunc)(const char *)=(void (*)(const char *))dummy;
+	void (**writefunc)(const char *)=(void (**)(const char *))dummy;
 
-	(*writefunc)(keywordName(kw));
-	(*writefunc)(" ");
+	(**writefunc)(keywordName(kw));
+	(**writefunc)(" ");
 	return 0;
 }
 
@@ -1771,6 +1778,10 @@ static void unsubscribe(const char *f)
 	free(newf);
 }
 
+/*
+** Count selected messages (if there's >1 copy to OUTBOX should fail).
+*/
+
 static int do_count(unsigned long n, int byuid, void *voidptr)
 {
 	const char *p=getenv("OUTBOX_MULTIPLE_SEND");
@@ -1779,6 +1790,7 @@ static int do_count(unsigned long n, int byuid, void *voidptr)
 
 	if (p && atoi(p))
 		*(int *)voidptr=1; /* Suppress the error, below */
+
 	return 0;
 }
 
@@ -2185,12 +2197,13 @@ static void uidplus_abort(struct uidplus_info *uidplus_list)
 static void rename_callback(const char *old_path, const char *new_path)
 {
 struct imapscaninfo minfo;
-	char *p=malloc(strlen(old_path)+sizeof("/" IMAPDB));
+
+	char *p=malloc(strlen(new_path)+sizeof("/" IMAPDB));
 
 	if (!p)
 		write_error_exit(0);
 
-	strcat(strcpy(p, old_path), "/" IMAPDB);
+	strcat(strcpy(p, new_path), "/" IMAPDB);
 	unlink(p);
 	free(p);
 	imapscan_init(&minfo);
@@ -2730,6 +2743,7 @@ char *get_myrightson(const char *mailbox)
 	maildir_aclt_list_destroy(&l);
 	return rights;
 }
+
 
 char *compute_myrights(maildir_aclt_list *l, const char *l_owner)
 {
@@ -5077,6 +5091,7 @@ int	uid=0;
 		{
 			writes(tag);
 			writes(" NO Invalid mailbox.\r\n");
+			free(mailbox);
 			return 0;
 		}
 
@@ -5085,6 +5100,7 @@ int	uid=0;
 			maildir_info_destroy(&mi);
 			writes(tag);
 			writes(" NO Cannot set ACLs for this mailbox\r\n");
+			free(mailbox);
 			return 0;
 		}
 
@@ -6271,7 +6287,7 @@ static int is_smap()
 int main(int argc, char **argv)
 {
 	const char *ip;
-	const char *p;
+	char *p;
 	const char *tag;
 	const char *port;
 	mode_t oldumask;
@@ -6379,14 +6395,13 @@ int main(int argc, char **argv)
 		p=getenv("MAILDIR");
 	if (!p)
 		p="./Maildir";
-
 #if 0
 	imapscanpath=getimapscanpath(argv[0]);
 #endif
 	if (chdir(p))
 	{
 		fprintf(stderr, "chdir %s: %s\n", p, strerror(errno));
-		write_error_exit(p);
+		write_error_exit(strerror(errno));
 	}
 	maildir_loginexec();
 
@@ -6396,6 +6411,8 @@ int main(int argc, char **argv)
 		maildir_acl_disabled=1;
 		maildir_newshared_disabled=1;
 	}
+	if (p)
+		free(p);
 
 	/* Remember my device/inode */
 
@@ -6442,22 +6459,20 @@ int main(int argc, char **argv)
 #endif
 
 	if ((p=getenv("IMAPDEBUGFILE")) != 0 && *p)
-    {
+	{
 		oldumask = umask(027);
 		debugfile=fopen(p, "a");
 		umask(oldumask);
 		if (debugfile==NULL)
 			write_error_exit(0);
-    }
+	}
 	initcapability();
 
 	emptytrash();
 	signal(SIGPIPE, SIG_IGN);
 
-
 	libmail_kwVerbotten=KEYWORD_IMAPVERBOTTEN;
 	libmail_kwCaseSensitive=0;
-
 
 	if (!keywords())
 		libmail_kwEnabled=0;
@@ -6495,6 +6510,7 @@ int main(int argc, char **argv)
 		writeflush();
 		exit(0);
 	}
+
 	{
 		struct maildirwatch *w;
 
@@ -6503,6 +6519,7 @@ int main(int argc, char **argv)
 		else
 			maildirwatch_free(w);
 	}
+
 	if ((tag=getenv("IMAPLOGINTAG")) != 0)
 	{
 		writes(tag);

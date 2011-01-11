@@ -67,7 +67,7 @@
 #include	"unicode/unicode.h"
 #include	"authlib/auth.h"
 
-static const char rcsid[]="$Id: mailboxlist.c,v 1.20 2007/07/27 02:41:01 mrsam Exp $";
+static const char rcsid[]="$Id: mailboxlist.c,v 1.21 2009/06/27 16:32:38 mrsam Exp $";
 
 static const char hierchs[]={HIERCH, 0};
 
@@ -740,7 +740,7 @@ static int list_newshared_cb(struct maildir_newshared_enum_cb *cb)
 			strcat(strcat(strcpy(new_pfix, homedir), "/"),
 			       maildir);
 
-		//		if (lni->dorecurse)
+		/*		if (lni->dorecurse) */
 
 		maildir_scan(new_pfix, n, lni->shared_info);
 #if 0

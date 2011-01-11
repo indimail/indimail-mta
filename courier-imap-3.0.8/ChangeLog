@@ -74,3 +74,5 @@ update to courier-imap 4.5.0
 sync imap version with with courier-imap-4.5.0 (except proxy and tcpd)
 10/03/2010
 update to courier-imap 4.7.0
+11/01/2011
+update to courier-imap 4.8.1

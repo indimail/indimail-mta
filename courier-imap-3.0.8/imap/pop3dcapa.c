@@ -1,5 +1,5 @@
 /*
-** Copyright 1998 - 2002 Double Precision, Inc.
+** Copyright 1998 - 2008 Double Precision, Inc.
 ** See COPYING for distribution information.
 */
 
@@ -18,7 +18,7 @@
 #include	<unistd.h>
 #endif
 
-static const char rcsid[]="$Id: pop3dcapa.c,v 1.4 2002/10/25 12:19:50 mrsam Exp $";
+static const char rcsid[]="$Id: pop3dcapa.c,v 1.5 2008/06/29 20:18:36 mrsam Exp $";
 
 extern const char *externalauth();
 

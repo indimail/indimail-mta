@@ -1,5 +1,5 @@
 /*
-** Copyright 1998 - 2003 Double Precision, Inc.
+** Copyright 1998 - 2009 Double Precision, Inc.
 ** See COPYING for distribution information.
 */
 
@@ -47,11 +47,12 @@
 #define	EX_NOPERM	77
 #endif
 
-static const char rcsid[]="$Id: deliverquota.c,v 1.21 2003/01/20 13:47:19 mrsam Exp $";
+static const char rcsid[]="$Id: deliverquota.c,v 1.24 2009/09/05 21:44:05 mrsam Exp $";
 
 static long deliver(int fdin, const char *dir, long s,
 		    int auto_create, int quota_warn_percent, const char *pfix,
-		    const char *newquota)
+		    const char *newquota,
+		    const char *quota_warn_msg)
 {
 	struct maildir_tmpcreate_info createInfo;
 	char	buf[BUFSIZ];
@@ -60,7 +61,7 @@ static long deliver(int fdin, const char *dir, long s,
 	int	fd;
 
 	maildir_tmpcreate_init(&createInfo);
-
+	createInfo.openmode=0666;
 	createInfo.maildir=dir;
 	createInfo.uniq=pfix;
 	createInfo.msgsize=s;
@@ -131,7 +132,11 @@ static long deliver(int fdin, const char *dir, long s,
 			{
 				unlink(createInfo.tmpname);
 				printf("Mail quota exceeded.\n");
+#if HAVE_COURIER
+				exit(EX_TEMPFAIL);
+#else
 				exit(EX_NOPERM);
+#endif
 			}
 			maildir_quota_add_end(&info, ss-s, 1);
 		}
@@ -146,7 +151,8 @@ static long deliver(int fdin, const char *dir, long s,
 	maildir_tmpcreate_free(&createInfo);
 
 	if (quota_warn_percent >= 0)
-		maildir_deliver_quota_warning(dir, quota_warn_percent);
+		maildir_deliver_quota_warning(dir, quota_warn_percent,
+					      quota_warn_msg);
 
 	return (ss);
 }
@@ -159,6 +165,7 @@ int main(int argc, char **argv)
 	int	quota_warn_percent = -1;
 	int i;
 	const char *quota=NULL;
+	const   char *quota_warn_msg=0;
 
 	for (i=1; i<argc; i++)
 	{
@@ -174,6 +181,14 @@ int main(int argc, char **argv)
 			++i;
 			continue;
 		}
+
+		if (strcmp(argv[i], "-W") == 0 && argc - i > 1)
+		{
+			quota_warn_msg = argv[i+1];
+			++i;
+			continue;
+		}
+
 		break;
 	}
 	if (i >= argc || quota_warn_percent < -1 || quota_warn_percent > 100)
@@ -200,17 +215,20 @@ int main(int argc, char **argv)
 					    quota))
 		{
 			if (quota_warn_percent >= 0)
-				maildir_deliver_quota_warning(dir, quota_warn_percent);
+				maildir_deliver_quota_warning(dir, quota_warn_percent,
+							      quota_warn_msg);
 			printf("Mail quota exceeded.\n");
 			exit(77);
 		}
 		deliver(0, dir, stat_buf.st_size,
-			auto_create, quota_warn_percent, NULL, quota);
+			auto_create, quota_warn_percent, NULL, quota,
+			quota_warn_msg);
 
 		if (doquota)
 			maildir_quota_add_end(&info, stat_buf.st_size, 1);
 		exit(0);
 	}
-	deliver(0, dir, 0, auto_create, quota_warn_percent, NULL, quota);
+	deliver(0, dir, 0, auto_create, quota_warn_percent, NULL, quota,
+		quota_warn_msg);
 	exit(0);
 }

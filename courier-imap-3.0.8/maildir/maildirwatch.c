@@ -1,5 +1,5 @@
 /*
-** Copyright 2002-2003 Double Precision, Inc.
+** Copyright 2002-2009 Double Precision, Inc.
 ** See COPYING for distribution information.
 */
 
@@ -17,7 +17,7 @@
 #define PATH_MAX 4096
 #endif
 
-static const char rcsid[]="$Id: maildirwatch.c,v 1.10 2004/11/10 01:01:40 mrsam Exp $";
+static const char rcsid[]="$Id: maildirwatch.c,v 1.11 2010/08/16 00:43:03 mrsam Exp $";
 
 #if HAVE_FAM
 static struct maildirwatch_fam *maildirwatch_currentfam;
@@ -59,12 +59,14 @@ struct maildirwatch *maildirwatch_alloc(const char *maildir)
 			maildirwatch_currentfam->broken=0;
 			maildirwatch_currentfam->refcnt=0;
 
+			alarm(15);
 			if (FAMOpen(&maildirwatch_currentfam->fc) < 0)
 			{
 				errno=EIO;
 				free(maildirwatch_currentfam);
 				maildirwatch_currentfam=NULL;
 			}
+			alarm(0);
 		}
 	}
 

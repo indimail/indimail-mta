@@ -1,9 +1,9 @@
 /*
-** Copyright 1998 - 2004 Double Precision, Inc.
-** See COPYING for distribution information.
-**
-** $Id: pop3dserver.c,v 1.31 2004/09/12 23:25:56 mrsam Exp $
-*/
+ * Copyright 1998 - 2010 Double Precision, Inc.
+ * See COPYING for distribution information.
+ *
+ * $Id: pop3dserver.c,v 1.46 2010/07/11 13:36:23 mrsam Exp $
+ */
 
 #if	HAVE_CONFIG_H
 #include	"config.h"
@@ -65,20 +65,17 @@ static void     acctout(const char *disc);
 
 static const char *authaddr, *remoteip, *remoteport;
 
-struct msglist
-{
+struct msglist {
 	struct msglist *next;
 	char           *filename;
 	int             isdeleted;
 	int             isnew;
 	off_t           size;
 
-	struct
-	{
+	struct {
 		unsigned long   uidv;
 		unsigned long   n;
-	}
-	uid;
+	} uid;
 };
 
 static struct msglist *msglist_l;
@@ -104,13 +101,14 @@ static int      enomem_1msg;
  * use a UIDL that's derived from the message's dev_t/ino_t.  The client
  * will see that message only.  After deleting it, hopefully a new
  * courierpop3dsizelist file could be written out next time.
-*/
+ */
 
 
 static unsigned long top_count = 0;
 static unsigned long retr_count = 0;
-unsigned long   bytes_sent_count = 0;
-unsigned long   bytes_received_count = 0;
+
+static unsigned long bytes_sent_count = 0;
+static unsigned long bytes_received_count = 0;
 
 static unsigned long uidv = 0;
 static int      convert_v0 = 0;
@@ -120,7 +118,7 @@ static time_t   start_time;
 /*
  * The RFC is pretty strict in stating that octet size must count the CR
  * in the CRLF endofline.
-*/
+ */
 
 static void
 calcsize(struct msglist *m)
@@ -155,8 +153,8 @@ calcsize(struct msglist *m)
 
 
 /*
-** Read courierpop3dsizelist
-*/
+ * Read courierpop3dsizelist
+ */
 
 static int      cmpmsgs(const void *a, const void *b);
 
@@ -178,8 +176,9 @@ readpop3dlist(unsigned long *uid)
 
 	convert_v0 = 0;
 
-	if (fp == NULL || fgets(linebuf, sizeof(linebuf) - 1, fp) == NULL || linebuf[0] != '/' ||
-		sscanf(linebuf + 1, "%d %lu %lu", &vernum, uid, &uidv) < 2 || (vernum != 1 && vernum != 2))
+	if (fp == NULL || fgets(linebuf, sizeof (linebuf) - 1, fp) == NULL || linebuf[0] != '/'
+		|| sscanf(linebuf + 1, "%d %lu %lu", &vernum, uid, &uidv)
+		< 2 || (vernum != 1 && vernum != 2))
 	{
 		if (fp == NULL)
 			convert_v0 = 1;
@@ -212,7 +211,7 @@ readpop3dlist(unsigned long *uid)
 
 			if (ch != '\n')
 			{
-				if (n < sizeof(linebuf) - 3)
+				if (n < sizeof (linebuf) - 3)
 					linebuf[n++] = ch;
 				continue;
 			}
@@ -237,7 +236,7 @@ readpop3dlist(unsigned long *uid)
 			if (linebuf[0] == 0)
 				continue;
 
-			if ((m = (struct msglist *) malloc(sizeof(struct msglist))) == 0)
+			if ((m = (struct msglist *) malloc(sizeof (struct msglist))) == 0)
 			{
 				perror("malloc");
 				exit(1);
@@ -269,7 +268,7 @@ readpop3dlist(unsigned long *uid)
 		}
 		fclose(fp);
 	}
-	if ((a = (struct msglist **) malloc((mcnt + 1) * sizeof(struct msglist *))) == 0)
+	if ((a = (struct msglist **) malloc((mcnt + 1) * sizeof (struct msglist *))) == 0)
 	{
 		perror("malloc");
 		exit(1);
@@ -279,7 +278,7 @@ readpop3dlist(unsigned long *uid)
 		a[i++] = list;
 
 	a[i] = NULL;
-	qsort(a, i, sizeof(*a), cmpmsgs);
+	qsort(a, i, sizeof (*a), cmpmsgs);
 
 	return a;
 }
@@ -331,7 +330,7 @@ savepop3dlist(struct msglist **a, size_t cnt, unsigned long uid)
 	return 0;
 }
 
-/* Scan cur, and pick up all messages contained therein */
+/*- Scan cur, and pick up all messages contained therein */
 
 static int
 scancur()
@@ -351,7 +350,7 @@ scancur()
 		if (de->d_name[0] == '.')
 			continue;
 
-		if ((m = (struct msglist *) malloc(sizeof(struct msglist))) == 0)
+		if ((m = (struct msglist *) malloc(sizeof (struct msglist))) == 0)
 		{
 			perror("malloc");
 			exit(1);
@@ -375,7 +374,7 @@ scancur()
 /*
  * When sorting messages, sort on the arrival date - the first part of the
  * name of the file in the maildir is the timestamp.
-*/
+ */
 
 static int
 cmpmsgs(const void *a, const void *b)
@@ -406,7 +405,7 @@ cmpmsgs(const void *a, const void *b)
 
 	while (*ap || *bp)
 	{
-		if (*ap == ':' && *bp == ':')
+		if (*ap == MDIRSEP[0] && *bp == MDIRSEP[0])
 			break;
 
 		if (*ap < *bp)
@@ -433,7 +432,7 @@ sortmsgs()
 	if (msglist_cnt == 0)
 		return;
 
-	if ((msglist_a = (struct msglist **) malloc(msglist_cnt * sizeof(struct msglist *))) == 0)
+	if ((msglist_a = (struct msglist **) malloc(msglist_cnt * sizeof (struct msglist *))) == 0)
 	{
 		perror("malloc");
 		msglist_cnt = 0;
@@ -445,7 +444,7 @@ sortmsgs()
 		m->isnew = 0;
 		msglist_a[i] = m;
 	}
-	qsort(msglist_a, msglist_cnt, sizeof(*msglist_a), cmpmsgs);
+	qsort(msglist_a, msglist_cnt, sizeof (*msglist_a), cmpmsgs);
 
 	nextuid = 1;
 
@@ -528,8 +527,8 @@ cleanup()
 {
 	unsigned        i;
 
-	long            deleted_bytes = 0;
-	long            deleted_messages = 0;
+	int64_t         deleted_bytes = 0;
+	int64_t         deleted_messages = 0;
 
 	for (i = 0; i < msglist_cnt; i++)
 		if (msglist_a[i]->isdeleted)
@@ -565,21 +564,13 @@ cleanup()
 	return;
 }
 
-static void
-printed(int cnt)
-{
-	if (cnt > 0)
-		bytes_sent_count += cnt;
-}
+#define printed(c) do {int cnt=(c); if (cnt > 0)			\
+					   bytes_sent_count += cnt;	\
+	} while(0)
 
-static void
-printchar(int ch)
-{
-	putchar(ch);
-	printed(1);
-}
+#define printchar(ch) do { putchar((ch)); printed(1); } while(0);
 
-/* POP3 STAT */
+/*- POP3 STAT */
 
 static void
 do_stat()
@@ -615,7 +606,7 @@ getmsgnum(const char *p)
 	return (i);
 }
 
-/* POP3 LIST */
+/*- POP3 LIST */
 
 static void
 do_list(const char *msgnum)
@@ -644,7 +635,7 @@ do_list(const char *msgnum)
 	fflush(stdout);
 }
 
-/* RETR and TOP POP3 commands */
+/*- RETR and TOP POP3 commands */
 
 static void
 do_retr(unsigned i, unsigned *lptr)
@@ -829,8 +820,9 @@ acctout(const char *disc)
 	libmail_str_size_t(bytes_received_count, numAR);
 	libmail_str_size_t(bytes_sent_count, numAS);
 
-	p = malloc(strlen(authaddr) + strlen(remoteip) + strlen(remoteport) + strlen(disc) + strlen(num1) + strlen(num2) +
-			   strlen(num3) + strlen(numAR) + strlen(numAS) + 200);	/*- Should be enough */
+	p = malloc(strlen(authaddr) + strlen(remoteip) + strlen(remoteport) + strlen(disc)
+			+ strlen(num1) + strlen(num2)
+			+ strlen(num3) + strlen(numAR) + strlen(numAS) + 200);	/*- Should be enough */
 	strcpy(p, disc);
 	strcat(p, msg2);
 	strcat(p, authaddr);
@@ -851,7 +843,7 @@ acctout(const char *disc)
 	if ((q = getenv("POP3_TLS")) && atoi(q))
 		strcat(p, msg7);
 	strcat(p, "\n");
-	write(2, p, strlen(p));
+	if (write(2, p, strlen(p)) < 0);	/* make gcc shut up */
 	free(p);
 }
 
@@ -873,15 +865,14 @@ loop()
 	int             c;
 
 	signal(SIGALRM, bye);
-	while (alarm(300), fgets(buf, sizeof(buf), stdin))
+	while (alarm(300), fgets(buf, sizeof (buf), stdin))
 	{
 		bytes_received_count += strlen(buf);
 		alarm(0);
 		if ((p = strchr(buf, '\n')) != 0)
 			*p = 0;
 		else
-			while ((c = getc(stdin)) >= 0 && c != '\n')
-				;
+			while ((c = getc(stdin)) >= 0 && c != '\n');
 		p = strtok(buf, " \t\r");
 		if (!p)
 			p = "";
