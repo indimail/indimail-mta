@@ -1,5 +1,8 @@
 /*
  * $Log: hier.c,v $
+ * Revision 1.155  2011-01-11 10:28:03+05:30  Cprogrammer
+ * added balance_outgoing
+ *
  * Revision 1.154  2010-08-08 22:29:09+05:30  Cprogrammer
  * removed shared libs from checks
  *
@@ -1590,7 +1593,7 @@ _hier(inst_dir)
 void
 getversion_install_big_c()
 {
-	static char    *x = "$Id: hier.c,v 1.154 2010-08-08 22:29:09+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: hier.c,v 1.155 2011-01-11 10:28:03+05:30 Cprogrammer Exp mbhangui $";
 
 #ifdef INDIMAIL
 	x = sccsidh;
