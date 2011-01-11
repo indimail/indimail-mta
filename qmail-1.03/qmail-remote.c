@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-remote.c,v $
+ * Revision 1.72  2011-01-08 16:30:05+05:30  Cprogrammer
+ * use OUTGOINGIP env variable to set local interface address
+ *
  * Revision 1.71  2011-01-06 22:40:06+05:30  Cprogrammer
  * added environment variable OUTIP to select OUTGOINGIP
  * added check for correct number of command line arguments
@@ -2049,13 +2052,12 @@ getcontrols()
 		}
 	}
 #endif
-	/*- per recipient domain outgoingip */
-	if ((x = env_get("OUTIP")) && *x)
+	if ((x = env_get("OUTGOINGIP")) && *x)
 	{
 		if (!stralloc_copys(&outgoingip, x))
 			temp_nomem();
 		r = 1;
-	} else
+	} else /*- per recipient domain outgoingip */
 	{
 		if (!stralloc_copys(&outgoingipfn, "outgoingip."))
 			temp_nomem();
@@ -2066,7 +2068,7 @@ getcontrols()
 		if (!stralloc_0(&outgoingipfn))
 			temp_nomem();
 		if (!(r = control_readline(&outgoingip, outgoingipfn.s)))
-			r = control_readline(&outgoingip, (x = env_get("OUTGOINGIP")) ? x : "outgoingip");
+			r = control_readline(&outgoingip, "outgoingip");
 		if (r == -1)
 		{
 			if (errno == error_nomem)
@@ -2559,7 +2561,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_remote_c()
 {
-	static char    *x = "$Id: qmail-remote.c,v 1.71 2011-01-06 22:40:06+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: qmail-remote.c,v 1.72 2011-01-08 16:30:05+05:30 Cprogrammer Stab mbhangui $";
 
 	x++;
 }

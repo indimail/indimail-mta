@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-qmqpc.c,v $
+ * Revision 1.14  2011-01-11 10:27:37+05:30  Cprogrammer
+ * use OUTGOINGIP to override control file outgoingip
+ *
  * Revision 1.13  2010-07-24 18:58:41+05:30  Cprogrammer
  * added load distribution logic
  *
@@ -283,6 +286,7 @@ int
 main()
 {
 	int             i, j, r, server_count, server_no = 0, load_dist = 0;
+	char           *x;
 	union v46addr   outip;
 	struct stat     st;
 	stralloc        outgoingip = { 0 };
@@ -300,6 +304,12 @@ main()
 	if (control_readint(&timeoutconnect, "timeoutconnect") == -1)
 		die_control();
 	getmess();
+	if ((x = env_get("OUTGOINGIP")) && *x)
+	{
+		if (!stralloc_copys(&outgoingip, x))
+			nomem();
+		r = 1;
+	} else
 	if (-1 == (r = control_readline(&outgoingip, "outgoingip")))
 	{
 		if (errno == error_nomem)
@@ -385,7 +395,7 @@ again:
 void
 getversion_qmail_qmqpc_c()
 {
-	static char    *x = "$Id: qmail-qmqpc.c,v 1.13 2010-07-24 18:58:41+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-qmqpc.c,v 1.14 2011-01-11 10:27:37+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
