@@ -239,10 +239,7 @@ file containing local IP address to be bound on socket and used on outgoing conn
 Default: system-defined.
 The value
 .IR 0.0.0.0
-is equivalent to the system default. The name for this control file can also be configured
-by setting the environment variable \fBOUTGOINGIP\fR. You can also set the IP address for
-outgoing connection by setting the environment variable \fBOUTIP\fR. \fBOUTIP\fR overrides the
-control file \fIoutgoingip\fR or the environment variable \fBOUTGOINGIP\fR.
+is equivalent to the system default.
 
 .TP 5
 .I outgoingip.host
@@ -250,8 +247,9 @@ file having a local IP address to be bound on socket and used on outgoing connec
 .I host
 is the domain or host to which the mail is being delivered.
 .I outgoingip.host
-takes precedence over
-.IR outgoingip .
+takes precedence over \fIoutgoingip\fR. You can also set the IP address for outgoing connection
+by setting the environment variable \fBOUTGOINGIP\fR. \fBOUTGOINGIP\fR overrides the
+control files \fIoutgoingip\fR and \fIoutgoingip.host\fR.
 
 .TP 5
 .I domainbindings
