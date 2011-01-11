@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail.spec.in,v 2.197 2010-11-12 21:58:28+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 2.198 2011-01-11 10:24:19+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %define _unpackaged_files_terminate_build 1
 
@@ -1012,6 +1012,7 @@ fi
 %attr(555,root,qmail)                   %{_prefix}/bin/vhostid
 %attr(511,root,qmail)                   %{_prefix}/bin/qmail-getpw
 %attr(555,root,qmail)                   %{_prefix}/bin/vatrn
+%attr(555,root,qmail)                   %{_prefix}/bin/balance_outgoing
 %attr(555,root,qmail)                   %{_prefix}/bin/indiversion
 %attr(555,root,qmail)                   %{_prefix}/bin/rsmtpfailures
 %attr(555,root,qmail)                   %{_prefix}/bin/fghack
