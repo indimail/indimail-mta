@@ -632,6 +632,12 @@ warn-auto.sh atrn.sh conf-qmail
 	| sed s}QMAIL}"`head -1 conf-qmail`"}g \
 	> atrn
 
+balance_outgoing: \
+warn-auto.sh balance_outgoing.sh conf-qmail
+	cat warn-auto.sh balance_outgoing.sh \
+	| sed s}QMAIL}"`head -1 conf-qmail`"}g \
+	> balance_outgoing
+
 multirotate: \
 warn-auto.sh multirotate.sh conf-qmail
 	cat warn-auto.sh multirotate.sh \
@@ -1200,7 +1206,7 @@ serialcmd maildircmd rewind relaytest qmail-qfilter sys-checkpwd ldap-checkpwd \
 iftocc ofmipd ofmipname 822field new-inject 822date 822received 822print \
 tokenize addrlist qquote parsedate qmail-greyd greydaemon \
 analyzer qtools qlog viruscanner update_tmprsadh dknewkey \
-dktest dot-forward batv \
+dktest dot-forward batv balance_outgoing \
 fastforward printforward setforward newaliases printmaillist \
 setmaillist newinclude sortedtest logselect mbox2maildir \
 envdir envuidgid fghack multilog pgrphack readproctitle setlock \
