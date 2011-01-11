@@ -92,6 +92,7 @@ indimail-*/doc/Quick-INSTALL
 indimail-*/doc/README.indimail
 indimail-*/Makefile
 indimail-*/svctool
+indimail-*/authgeneric
 indimail-*/InLookup.8
 indimail-*/IndiMail.7
 fetchmail-*/fetchmail
