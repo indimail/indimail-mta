@@ -99,14 +99,14 @@ const char *maildir_shared_index_file()
 		{
 			const char *q=authgetoptionenv("sharedgroup");
 
-			if (!q) q="";
-
-			filenamep=malloc(strlen(p)+strlen(q)+1);
-
-			if (!filenamep)
+			if (!(filenamep = malloc(strlen(p) + strlen(q) + 1)))
 				write_error_exit(0);
-
-			strcat(strcpy(filenamep, p), q);
+			if (q)
+			{
+				strcat(strcpy(filenamep, p), q);
+				free((char *) q);
+			} else
+				strcpy(filenamep, p);
 		}
 	}
 
