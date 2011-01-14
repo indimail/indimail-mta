@@ -1,5 +1,8 @@
 /*
  * $Log: recipients.c,v $
+ * Revision 1.7  2011-01-14 22:19:52+05:30  Cprogrammer
+ * upgrade to verion 0.7 of EH's recipients extension
+ *
  * Revision 1.6  2009-09-01 21:24:52+05:30  Cprogrammer
  * use break character from auto_break.c
  *
@@ -55,6 +58,7 @@ static int      fdrcps;
 /*- return  1: CDB lookup */
 /*- return  2: PAM lookup */
 /*- return  3: Wildcarded domain */
+/*- return  4: Pass-thru */
 /*- return 10: none existing control file; pass-thru */
 
 extern ssize_t  safewrite(int, char *, int);
@@ -180,14 +184,15 @@ recipients_init()
 }
 
 int
-recipients_parse(rhost, rlen, addr, rkey, vaddr, vrkey, flag)
+recipients_parse(rhost, rlen, addr, rkey, klen, vaddr, vkey, vlen)
 	char           *rhost;
 	int             rlen;
 	char           *addr;
 	char           *rkey;
+	int             klen;
 	char           *vaddr;
-	char           *vrkey;
-	int             flag;
+	char           *vkey;
+	int             vlen;
 {
 	int             i;
 	int             r;
@@ -196,6 +201,9 @@ recipients_parse(rhost, rlen, addr, rkey, vaddr, vrkey, flag)
 	uint32          dlen;
 	static stralloc line = { 0 };
 	int             seenhost = 0;
+
+	wildhost.len = 0;
+	line.len = 0;
 
 	if (!stralloc_copys(&wildhost, "!"))
 		return -2;
@@ -216,54 +224,57 @@ recipients_parse(rhost, rlen, addr, rkey, vaddr, vrkey, flag)
 			if (!str_diffn(line.s, wildhost.s, wildhost.len - 1))
 				return 3;	/*- wilddomain */
 			if (j > 0 || k > 0)
-				if (!str_diffn(line.s, "@", 1))		/*- exact */
+				if (!str_diffn(line.s, "@", 1))	/*- exact */
 					if (!str_diffn(line.s + 1, rhost, rlen - 1))
 						seenhost = 1;
 			if (!seenhost) {	/*- domain */
 				if (j > 0 && rlen >= j)
 					if (!str_diffn(line.s, rhost + rlen - j - 1, j - 1))
-						seenhost = 1;
+						seenhost = 2;
 				if (k > 0 && rlen >= k)
 					if (!str_diffn(line.s, rhost + rlen - k - 1, k - 1))
-						seenhost = 1;
+						seenhost = 3;
 			}
 			if (!seenhost)	/*- pass-thru */
 				if (!str_diffn(line.s, "!*", 2))
-					return 3;
-			if (j > 0 && j < line.len) {	/*- cdb */
-				if (seenhost || !str_diffn(line.s, "*", 1)) {
-					fdrcps = open_read(line.s + j + 1);
-					if (fdrcps != -1) {
-						r = cdb_seek(fdrcps, rkey, str_len(rkey), &dlen);
-						if (flag && r == 0)
-							r = cdb_seek(fdrcps, vrkey, str_len(vrkey), &dlen);
-						close(fdrcps);
-						if (r)
-							return 1;
-					}
-				}
-			}
+					return 4;
 
-			if (k > 0 && k < line.len) {	/*- pam */
+			if (k > 0 && k < line.len)	/*- pam */
 				if (seenhost || !str_diffn(line.s, "*", 1)) {
 					r = callapam(line.s + k + 1, addr);
-					if (flag && r != 0)
+					if (vlen > 0 && r != 0)
 						r = callapam(line.s + k + 1, vaddr);
 					if (r == 0)
 						return 2;
 					if (r == 111)
 						return r;
 				}
+
+			if (j > 0 && j < line.len)	/*- cdb */
+				if (seenhost || !str_diffn(line.s, "*", 1)) {
+					fdrcps = open_read(line.s + j + 1);
+					if (fdrcps != -1) {
+						r = cdb_seek(fdrcps, rkey, klen - 2, &dlen);
+						if (vlen > 0 && r == 0)
+							r = cdb_seek(fdrcps, vkey, vlen - 2, &dlen);
+						close(fdrcps);
+						if (r)
+							return 1;
+					}
+				}
+
+			if (!seenhost) {
+				fdrcps = open_read(line.s);	/*- legacy cdb */
+				if (fdrcps != -1) {
+					r = cdb_seek(fdrcps, rkey, klen - 2, &dlen);
+					if (vlen > 0 && r == 0)
+						r = cdb_seek(fdrcps, vkey, vlen - 2, &dlen);
+					close(fdrcps);
+					if (r)
+						return 1;
+				}
 			}
-			fdrcps = open_read(line.s);		/*- legacy cdb */
-			if (fdrcps != -1) {
-				r = cdb_seek(fdrcps, rkey, str_len(rkey), &dlen);
-				if (flag && r == 0)
-					r = cdb_seek(fdrcps, vrkey, str_len(vrkey), &dlen);
-				close(fdrcps);
-				if (r)
-					return 1;
-			}
+
 			line.len = 0;
 		}
 	}
@@ -309,32 +320,31 @@ recipients(buf, len)
 	if (!stralloc_cat(&key, &address))
 		return -2;
 	if (!stralloc_0(&key))
-		return -2;
+		return -2;				/* \0\0 terminated */
 	case_lowerb(key.s, key.len);
 	case_lowerb(domain.s, domain.len);
 	vkey.len = 0;
 	verp.len = 0;
-	for (i = 0; i < at; i++)
-	{
-		if (buf[i] == *auto_break)
-		{
-			if (!stralloc_copyb(&verp,buf,i+1))
+	for (i = 0; i < at; i++) {
+		if (buf[i] == *auto_break) {
+			if (!stralloc_copyb(&verp, buf, i + 1))
 				return -2;
-			if (!stralloc_append(&verp,"@"))
+			if (!stralloc_append(&verp, "@"))
 				return -2;
-			if (!stralloc_cat(&verp,&domain))
+			if (!stralloc_cat(&verp, &domain))
 				return -2;
-			if (!stralloc_copys(&vkey,":"))
+			if (!stralloc_copys(&vkey, ":"))
 				return -2;
-			if (!stralloc_cat(&vkey,&verp))
+			if (!stralloc_cat(&vkey, &verp))
 				return -2;
 			if (!stralloc_0(&vkey))
-				return -2;
-			case_lowerb(vkey.s,vkey.len);
+				return -2;		/* \0\0 terminated */
+			case_lowerb(vkey.s, vkey.len);
 			break;
-		} 
+		}
 	}
-	r = recipients_parse(domain.s, domain.len, address.s, key.s, verp.s, vkey.s, vkey.len);
+
+	r = recipients_parse(domain.s, domain.len, address.s, key.s, key.len, verp.s, vkey.s, vkey.len);
 	if (r)
 		return r;
 	return 0;
@@ -343,7 +353,7 @@ recipients(buf, len)
 void
 getversion_recipients_c()
 {
-	static char    *x = "$Id: recipients.c,v 1.6 2009-09-01 21:24:52+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: recipients.c,v 1.7 2011-01-14 22:19:52+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
