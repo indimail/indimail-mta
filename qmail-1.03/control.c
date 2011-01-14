@@ -1,5 +1,8 @@
 /*
  * $Log: control.c,v $
+ * Revision 1.17  2011-01-14 20:36:48+05:30  Cprogrammer
+ * added documentation on control_readfile()
+ *
  * Revision 1.16  2010-06-27 09:02:43+05:30  Cprogrammer
  * added control_readcmd() function giving ability of control files to
  * have lines which are output of external commands
@@ -269,6 +272,11 @@ control_readnativefile(sa, fn, mode)
 /*
  * read entire file into variable sa
  * skipping line containing comments
+ *
+ * returns
+ *  0 - file not found
+ *  1 - file is opened successfuly
+ * -1 - system error
  */
 int
 control_readfile(sa, fn, flagme)
@@ -429,7 +437,7 @@ control_readcmd(stralloc *sa, char *fn)
 void
 getversion_control_c()
 {
-	static char    *x = "$Id: control.c,v 1.16 2010-06-27 09:02:43+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: control.c,v 1.17 2011-01-14 20:36:48+05:30 Cprogrammer Stab mbhangui $";
 
 	x++;
 }
