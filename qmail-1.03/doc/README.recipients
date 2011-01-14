@@ -76,12 +76,11 @@ NOTE: The new wilddomain mechanism superseeds the old cdb-only
 
 3. Setting up the recipients control file:
 
-Release 0.5 the RECIPIENTS extension provides a flexible
+Release 0.5+ the RECIPIENTS extension provides a flexible
 new syntax to interprete control/recipients on a domain
 base, as part of the RCPT TO: envelope address.
 
-a) Read 'man qmail-smtpd' and 'man qmail-recipients.'
-   Some additional scripts can be found in doc.
+a) Read 'man qmail-smtpd' and 'man recipient-cdb.'
 
 b) Legacy:
    Put 'recipients.cdb' into control/recipients.
@@ -140,10 +139,10 @@ a) Build a list of recipients (with full qualified address).
    You may need to change "localhost" in the above scripts
    to the real hostname.
 
-b) Run qmail-recipients to transform that list into a cdb:
+b) Run recipient-cdb to transform that list into a cdb:
    users/recipients.cdb
 
-c)   After the successful generation of the recipients.cdb
+c) After the successful generation of the recipients.cdb
    you can rename it to your taste.
 
 d) Edit control/recipients and
@@ -164,14 +163,38 @@ f) You can add an arbitary number of cdbs to control/recipients.
    Any change regarding control/recipients and/or the content
    of the cdbs is effective on the fly.
 
-g) If you run EZMLM, you have to set up a list of recipient
+
+5. VERP support
+
+The RECIPIENTS extension allows now per default VERP support.
+The local part of the recipient addresses is truncted AFTER 
+the character defined as AUTO_BREAK and only the first part 
+of the address (plus domain) is used for the evaluation.
+
+a) If you run EZMLM, you have to set up a list of recipient
    addresses for all your mailing lists.
-   Simply put the full qualified list name into recipients;
-   The qmail-smtpd RECIPIENTS extension supports EZMLM VERPs
-   usage.
 
+b) Simply put the full qualified list name apppended with the VERP 
+   charcater into the recipients database (or into the LDAP dir).
 
-5. Using a checkpassword compatible PAM:
+c) Sample: If your list is called:
+   
+	mylist@example.com 
+
+   define 
+
+  	mylist-@example.com
+
+   This makes VERP addresses distinguishable from normal addresses.
+
+d) In order to support generic and VERP addresses, you have to 
+   add both address schemes into the recipient database:
+  
+ 	me@example.com
+	me-@example.com
+ 
+
+6. Using a checkpassword compatible PAM:
 
 The checkpassword API is defined in:
 
@@ -204,28 +227,20 @@ additional arguments; which are specific to the PAM.
 The attached PERL ldap_mail.pl serves as a sample.
 
 
-6. Customization:
+7. Customization:
 
 The RECIPIENTS extension needs no customization except for 
 the following circumstances:
 
-a) Your Qmail address extension string is not '-'.
-   This can be modified in 'recipients.c' 
-   ('#define AUTO_BREAK').
-
-b) You don't won't the RECIPIENTS extension to support 
-   Qmail's VERP mechanism. Modify 'recipients.c'
-   (remove/comment the '#define VERP').
-
-c) You may need to adjust the provided scripts
+a) You may need to adjust the provided scripts
    'qmail-pwd2recipients', 'qmail-users2recipients', and
    'qmail-alias2recipient' to your need; these are samples.
 
-d) The script 'qmail-vpopmail2recipients' is contributed
+b) The script 'qmail-vpopmail2recipients' is contributed
    by David Du SERRE-TELMON, pls. check whether it 
    suits your vpopmail installation.
 
-e) A phyton script to generate "Recipients" users out of
+c) A phyton script to generate "Recipients" users out of
    - /var/qmail/users/assign
    - /var/qmail/alias
    -/etc/aliases
@@ -237,4 +252,4 @@ e) A phyton script to generate "Recipients" users out of
 
 
 
-Erwin Hoffmann (www.fehcom.de) - Cologne 2009-02-18
+Erwin Hoffmann (www.fehcom.de) - Cologne 2010-12-16
