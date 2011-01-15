@@ -103,7 +103,7 @@
  *
  * Revision 1.116  2009-04-29 10:34:36+05:30  Cprogrammer
  * added cdb lookup for spamignore, blackholedsender, badmailfrom,relaymailfrom,authdomains,
- * badrcptto,chkrcptdomains,goodrcptto,blackholercpt
+ * badrcptto,chkrcptdomains,goodrcptto,blackholedrcpt
  *
  * Revision 1.115  2009-04-17 21:09:53+05:30  Cprogrammer
  * added SMTP error message for temporary auth failure
@@ -672,7 +672,7 @@ struct constmap mapbmf;
 int             bmpok = 0;
 static stralloc bmp = { 0 };
 char           *bmfFn = 0;
-/*- blackholercpt */
+/*- blackholedrcpt */
 int             bhrcpok = 0;
 static stralloc bhrcp = { 0 };
 struct constmap mapbhrcp;
@@ -2576,11 +2576,11 @@ post_setup()
 	/*
 	 * BLACKHOLE RECIPIENT Patch - include Control file 
 	 */
-	if ((bhrcpok = control_readfile(&bhrcp, bhrcpFn = ((x = env_get("BLACKHOLERCPT")) && *x ? x : "blackholercpt"), 0)) == -1)
+	if ((bhrcpok = control_readfile(&bhrcp, bhrcpFn = ((x = env_get("BLACKHOLERCPT")) && *x ? x : "blackholedrcpt"), 0)) == -1)
 		die_control();
 	if (bhrcpok && !constmap_init(&mapbhrcp, bhrcp.s, bhrcp.len, 0))
 		die_nomem();
-	if ((bhbrpok = control_readfile(&bhbrp, (x = env_get("BLACKHOLERCPTPATTERNS")) && *x ? x : "blackholercptpatterns", 0)) == -1)
+	if ((bhbrpok = control_readfile(&bhbrp, (x = env_get("BLACKHOLERCPTPATTERNS")) && *x ? x : "blackholedrcptpatterns", 0)) == -1)
 		die_control();
 	/*
 	 * RECIPIENT Patch - include Control file 
@@ -4089,7 +4089,7 @@ smtp_rcpt(char *arg)
 	/*- RECIPIENT BLACKHOLE */
 	if (isgoodrcpt != 4)
 	{
-		/*- blackholercpt, blackholercptpatterns */
+		/*- blackholedrcpt, blackholedrcptpatterns */
 		switch (address_match(bhrcpFn, &addr, bhrcpok ? &bhrcp : 0, bhrcpok ? &mapbhrcp : 0, bhbrpok ? &bhbrp : 0, &errStr))
 		{
 		case 1:

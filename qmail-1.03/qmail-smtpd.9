@@ -581,9 +581,9 @@ If CHECKRECIPIENT environment variable is defined, user status check will not be
 out for addresses listed in this file. Addresses listed in this file will additionally bypass
 .IR badrcptto ,
 .IR badrcptpatterns ,
-.I blackholercpt
+.I blackholedrcpt
 and
-.IR blackholercptpatterns .
+.IR blackholedrcptpatterns .
 A line in
 .I goodrcptto
 may be of the form
@@ -654,35 +654,35 @@ The filename can be overriden by the environment variable
 expressions used by setting \fBQREGEX\fR environment variable.
 
 .TP 5
-.I blackholercpt
+.I blackholedrcpt
 Envelope recipient address causing delivery of mail to a blackhole.
 .B qmail-smtpd
 will cause the mail not to be written to the queue. However the client
 will be notified of success.
 A line in
-.I blackholercpt
+.I blackholedrcpt
 may be of the form
 .BR @\fIhost ,
 meaning every address at
 .IR host .
-.I blackholercpt
+.I blackholedrcpt
 can also be in cdb format. If
-.I blackholercpt.cdb
+.I blackholedrcpt.cdb
 is present, it will be searched first.
 The filename can be overriden by the environment variable
 .BR BLACKHOLERCPT .
 
 .TP 5
-.I blackholercptpatterns
+.I blackholedrcptpatterns
 Gives
 .B qmail-smtpd
 the ability to blackhole E-Mails by comparing the recipient address with a
 REGEX pattern in
-.IR blackholercptpatterns .
+.IR blackholedrcptpatterns .
 The filename can be overriden by the environment variable
 .BR BLACKHOLERCPTPATTERNS .
-\fIblackholercptpatterns\fR gets disabled of you set \fBQREGEX\fR environment variable.
-\fIblackholercptpatterns\fR uses simple shell-style pattern matching unlike regular
+\fIblackholedrcptpatterns\fR gets disabled of you set \fBQREGEX\fR environment variable.
+\fIblackholedrcptpatterns\fR uses simple shell-style pattern matching unlike regular
 expressions used by setting \fBQREGEX\fR environment variable.
 
 .TP 5
@@ -759,13 +759,13 @@ expressions used by setting \fBQREGEX\fR environment variable.
 .I QREGEX
 
 The files badhelo, badmailfrom, badrcptto, blackholedsender, spamignore,
-relaymailfrom, authdomains, chkrcptdomains, goodrcptto, blackholercpt can be used with
+relaymailfrom, authdomains, chkrcptdomains, goodrcptto, blackholedrcpt can be used with
 regular expressions if the environment variable QREGEX is defined (in which case, the control
 files badhelopatterns, badmailfrompatterns, badrcpttopatterns, blackholedpatterns,
-blackholercptpatterns, etc are not required and get disabled).
+blackholedrcptpatterns, etc are not required and get disabled).
 
 Setting QREGEX also causes regular expressions to be used for the control files
-relaymailfrom, authdomains, chkrcptdomains, goodrcptto, blackholercpto
+relaymailfrom, authdomains, chkrcptdomains, goodrcptto, blackholedrcpto
 
 # drop everything containing the word spam
 
