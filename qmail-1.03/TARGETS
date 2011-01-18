@@ -312,6 +312,7 @@ get_uid
 get_uid.o
 gfrom.o
 hasflock.h
+hasldap.h
 hasindimail.h
 haslic.h
 hasmkffo.h

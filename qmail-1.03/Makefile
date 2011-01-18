@@ -5145,6 +5145,13 @@ tryldap.c compile load
 	&& echo -lldap || exit 0 ) > ldap.lib
 	rm -f tryldap.o tryldap
 
+hasldap.h: \
+tryldap.c compile load
+	( ( ./compile tryldap.c && \
+	./load tryldap -lldap ) >/dev/null 2>&1 \
+	&& echo \#define HASLDAP 1 || exit 0 ) > hasldap.h
+	rm -f tryldap.o tryldap
+
 shadow.lib: \
 tryshadow.c compile load
 	( ( ./compile tryshadow.c && \
@@ -5166,6 +5173,6 @@ stralloc_eady.o stralloc_pend.o substdio.a ldap.lib
 
 ldap-checkpwd.o: \
 compile ldap-checkpwd.c error.h stralloc.h pathexec.h str.h env.h scan.h \
-subfd.h substdio.h strerr.h
+subfd.h substdio.h strerr.h hasldap.h
 	./compile -DLDAP_DEPRECATED ldap-checkpwd.c
 #################################################################
