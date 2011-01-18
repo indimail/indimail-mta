@@ -1,5 +1,8 @@
 /*-
  * $Log: ldap-checkpwd.c,v $
+ * Revision 1.5  2011-01-18 21:16:33+05:30  Cprogrammer
+ * conditional compilation of ldap code in ldap-checkpwd.c
+ *
  * Revision 1.4  2010-06-02 15:20:37+05:30  Cprogrammer
  * fix for users without '@' sign
  *
@@ -18,7 +21,8 @@
  * checkpassword implementation that searches an LDAP database
  * for all the necessary parameter.
  */
-#include <stdio.h>
+#include "hasldap.h"
+#ifdef HASLDAP
 #include <unistd.h>
 #include <string.h>
 #include <ldap.h>
@@ -456,11 +460,30 @@ ldap_lookup(char *login, char *password, char **error, uid_t *userId, gid_t *gro
 	ldap_unbind(ld);
 	return(0);
 }
+#else
+#warning "not compiled with -DHASLDAP or ldap libraries absent"
+#include "substdio.h"
+#include <unistd.h>
+
+static char     sserrbuf[512];
+struct substdio sserr;
+
+int
+main(argc, argv)
+	int             argc;
+	char          **argv;
+{
+	substdio_fdbuf(&sserr, write, 2, sserrbuf, sizeof(sserrbuf));
+	substdio_puts(&sserr, "not compiled with -DHASDKIM or ldap libraries absent\n");
+	substdio_flush(&sserr);
+	_exit(111);
+}
+#endif
 
 void
 getversion_ldap_checkpwd_c()
 {
-	static char    *x = "$Id: ldap-checkpwd.c,v 1.4 2010-06-02 15:20:37+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: ldap-checkpwd.c,v 1.5 2011-01-18 21:16:33+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
