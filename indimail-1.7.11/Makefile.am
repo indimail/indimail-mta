@@ -884,7 +884,7 @@ indimail.spec iauth.la
 			exit 1; \
 		fi ; \
 		echo "Shutting down IndiMail"; \
-		./initsvc -off; \
+		./initsvc -off || exit 0; \
 	fi;
 
 # This is the last step in indimail installation. Post this installation will start in qmail
