@@ -22,7 +22,7 @@
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: getFreeFS.c,v 2.6 2010-08-09 18:28:38+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: getFreeFS.c,v 2.6 2010-08-09 18:28:38+05:30 Cprogrammer Stab mbhangui $";
 #endif
 
 #include <stdlib.h>
