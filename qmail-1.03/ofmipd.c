@@ -1291,7 +1291,7 @@ main(argc, argv)
 void
 getversion_ofmipd_c()
 {
-	static char    *x = "$Id: ofmipd.c,v 1.10 2010-07-27 09:50:46+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: ofmipd.c,v 1.10 2010-07-27 09:50:46+05:30 Cprogrammer Stab mbhangui $";
 
 	x++;
 }
