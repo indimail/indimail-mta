@@ -201,11 +201,13 @@ else
 	then
 		mysql_libdir=$mysql_prefix/lib64/mysql
 	elif test -d $mysql_prefix/lib/mysql
+  then
 		mysql_libdir=$mysql_prefix/lib/mysql
 	elif test -d $mysql_prefix/lib64
 	then
 		mysql_libdir=$mysql_prefix/lib64
 	elif test -d $mysql_prefix/lib
+  then
 		mysql_libdir=$mysql_prefix/lib
 	else
 		mysql_libdir=$mysql_prefix/lib/mysql
