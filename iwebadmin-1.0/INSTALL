@@ -29,7 +29,7 @@ the above information then starting from scratch.
         --enable-ezmlmdir=/var/indimail \
         --enable-qmaildir=/var/indimail \
         --disable-ipauth --disable-trivial-password --enable-modify-quota \
-		--enable-mysqlprefix=/usr/local/mysql \
+        --enable-mysqlprefix=/usr/local/mysql \
         --enable-htmldir=/var/www/html \
         --enable-cgibindir=/var/www/cgi-bin \
         --enable-imagedir=/var/www/html/images/qmailadmin \
