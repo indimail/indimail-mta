@@ -1324,7 +1324,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_greyd_c()
 {
-	static char    *x = "$Id: qmail-greyd.c,v 1.9 2010-07-21 09:13:47+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-greyd.c,v 1.9 2010-07-21 09:13:47+05:30 Cprogrammer Stab mbhangui $";
 
 	x++;
 }

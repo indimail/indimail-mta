@@ -453,7 +453,7 @@ main(argc, argv)
 void
 getversion_serialsmtp_c()
 {
-	static char    *x = "$Id: serialsmtp.c,v 1.6 2010-07-27 09:47:15+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: serialsmtp.c,v 1.6 2010-07-27 09:47:15+05:30 Cprogrammer Stab mbhangui $";
 
 	x++;
 }

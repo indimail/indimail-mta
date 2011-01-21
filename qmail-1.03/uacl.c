@@ -123,7 +123,7 @@ main(int argc, char **argv)
 void
 getversion_uacl_c()
 {
-	static char    *x = "$Id: uacl.c,v 1.4 2010-11-05 06:29:38+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: uacl.c,v 1.4 2010-11-05 06:29:38+05:30 Cprogrammer Stab mbhangui $";
 
 	x++;
 }
