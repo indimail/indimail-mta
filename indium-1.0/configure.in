@@ -258,19 +258,18 @@ else
 	if test -d $mysql_prefix/lib64/mysql
 	then
 		mysql_libdir=$mysql_prefix/lib64/mysql
-	elif test -d $mysql_prefix/lib/mysql
-	then
-		mysql_libdir=$mysql_prefix/lib/mysql
 	elif test -d $mysql_prefix/lib64
 	then
 		mysql_libdir=$mysql_prefix/lib64
+	elif test -d $mysql_prefix/lib/mysql
+	then
+		mysql_libdir=$mysql_prefix/lib/mysql
 	elif test -d $mysql_prefix/lib
 	then
 		mysql_libdir=$mysql_prefix/lib
 	else
 		mysql_libdir=$mysql_prefix/lib/mysql
 	fi
-	mysqlbindir=$mysql_prefix/bin
 fi
 
 AC_CHECK_LIB(mysqlclient -L${mysql_libdir}, mysql_real_connect,libs="$libs -lmysqlclient",

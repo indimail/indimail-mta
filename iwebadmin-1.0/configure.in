@@ -156,12 +156,12 @@ else
 	if test -d $mysql_prefix/lib64/mysql
 	then
 		mysql_libdir=$mysql_prefix/lib64/mysql
-	elif test -d $mysql_prefix/lib/mysql
-	then
-		mysql_libdir=$mysql_prefix/lib/mysql
 	elif test -d $mysql_prefix/lib64
 	then
 		mysql_libdir=$mysql_prefix/lib64
+	elif test -d $mysql_prefix/lib/mysql
+	then
+		mysql_libdir=$mysql_prefix/lib/mysql
 	elif test -d $mysql_prefix/lib
 	then
 		mysql_libdir=$mysql_prefix/lib
@@ -269,25 +269,6 @@ AC_ARG_ENABLE(htmllibdir, [  --enable-htmllibdir=DIR   qmailadmin HTML library d
 AC_SUBST(htmllibdir,$htmllibdir)
 AC_DEFINE_UNQUOTED(HTMLLIBDIR, "$htmllibdir","")
 
-
-qmaildir=""
-for f in /var/indimail
-do
-    if test -d $f
-    then
-        qmaildir=$f
-    fi
-done
-
-AC_ARG_ENABLE(qmaildir, [  --enable-qmaildir=DIR     directory where qmail is installed.],
-    qmaildir="$enableval",
-    [
-        if test "$qmaildir" = ""
-        then
-            AC_MSG_ERROR([Unable to find your qmaildir directory, specify --enable-qmaildir.])
-        fi
-    ] )
-AC_DEFINE_UNQUOTED(QMAILDIR,"$qmaildir","")
 
 ezmlmdir=""
 for f in /var/indimail/bin/ezmlm /usr/bin /usr/sbin /usr/local/bin
@@ -524,7 +505,6 @@ echo "          html dir = "$htmldir""
 echo "         image dir = "$imagedir""
 echo "         image URL = "$imageurl""
 echo "      template dir = "$htmllibdir""
-echo "         qmail dir = "$qmaildir""
 echo "      indimail dir = "$indimaildir""
 echo "         ezmlm dir = "$ezmlmdir""
 echo "         ezmlm idx = "$ezmlmidx""
