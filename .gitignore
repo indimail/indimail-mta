@@ -1,3 +1,12 @@
+*.o
+*.lo
+*.la
+*.BAK
+*.a
+*.org
+configure.lineno
+autom4te.cache
+m4
 */m4/ltversion.m4
 */m4/libtool.m4
 */m4/ltoptions.m4
@@ -12,13 +21,8 @@ INSTALL-MINI
 INSTALL-MYSQL
 INSTALL-RPM
 INSTALL
-ltversion.m4
-libtool.m4
-ltoptions.m4
-ltsugar.m4
-lt~obsolete.m4
 .gitignore
-*/depcomp
+depcomp
 .deps
 cscope.*
 .DS_Store
@@ -67,7 +71,6 @@ flash-*/flash
 flash-*/system.menu
 flash-*/system.rc
 mpack-*/README
-mpack-*/configure
 mpack-*/mpack
 mpack-*/munpack
 ripmime-*/ripmime
@@ -108,4 +111,7 @@ fetchmail-*/ip-up.local
 fetchmail-*/po/POTFILES
 fetchmail-*/slemsPrivate
 fetchmail-*/writefifo
+fetchmail-*/rcfile_l.c
+fetchmail-*/rcfile_y.c
+fetchmail-*/rcfile_y.h
 icampaign-*
