@@ -4,8 +4,7 @@ fast install guide..
    type as root: 
     # ./configure --prefix=/var/indimail \
         --libexecdir=/var/indimail/libexec --sysconfdir=/var/indimail/etc \
-        --enable-mysqlincdir=/usr/include/mysql \
-        --enable-mysqllibdir=/usr/lib/mysql \
+        --enable-mysqlprefix=/usr/local/mysql \
         --mandir=/var/indimail/man --sysconfdir=/var/indimail/etc
     # make
     # make install-strip
