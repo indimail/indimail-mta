@@ -684,8 +684,7 @@ the installation.
         --enable-ezmlmdir=@indimaildir@ \
         --enable-qmaildir=@indimaildir@ \
         --disable-ipauth --disable-trivial-password --enable-modify-quota \
-        --enable-mysqlincdir=@mysql_incdir@ \
-        --enable-mysqllibdir=@mysql_libdir@ \
+        --enable-mysqlprefix=@mysql_prefix@ \
         --enable-htmldir=/var/www/html \
         --enable-cgibindir=/var/www/cgi-bin \
         --enable-imagedir=/var/www/html/images/qmailadmin \
@@ -1280,8 +1279,14 @@ of most of the packages
 % sudo apt-get install libpam0g-dev
 % sudo apt-get install libreadline-dev
 % sudo apt-get install libdb4.8-dev
-% sudo apt-get install flex bison
 % sudo apt-get install automake autopoint libtool
+
+# for qmailmrtg you will additionally require
+% sudo apt-get install mrtg
+% sudo apt-get install apache2
+
+# for fetchmail you will additionally require
+% sudo apt-get install flex bison
 
 ---------- * -------------- * ------------ * -------------- * ------------ * -------------- * ------------
 OS X NOTES
