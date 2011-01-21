@@ -357,6 +357,16 @@ the installation.
 
     NOTE: You may install any version of MySQL you like. The steps would be similar. You
     can also choose to install MariaDB. MariaDB is a drop-in replacement for MySQL
+    New versions of MySQL use cmake.
+
+    % cmake . -DCMAKE_INSTALL_PREFIX=@mysql_prefix@ -DENABLED_LOCAL_INFILE=1
+    % make -s DESTDIR=staging_directory
+    % sudo make install-strip DESTDIR=staging_directory
+    cd ..
+
+    You can read the transition guide at
+
+    http://forge.mysql.com/wiki/Autotools_to_CMake_Transition_Guide
 
     ##### STEP 2  ##### Install libdkim-1.3 ###################
     Install libdkim-1.3 (libdkim-1.3.tar.bz2) MD5 0e391288bb16f726b0532ae188037392
@@ -1258,6 +1268,20 @@ sourceforge - https://sourceforge.net/apps/laconica/indimail/
 
 IndiMail has two YUM / RPM repositories for most of the Linux Distros at
 http://download.opensuse.org/repositories/home:/indimail/
+
+---------- * -------------- * ------------ * -------------- * ------------ * -------------- * ------------
+Ubuntu NOTES
+
+You may need to install the following additional packages before you can start the compilation
+of most of the packages
+
+% sudo apt-get install libssl-dev
+% sudo apt-get install libncurses5-dev
+% sudo apt-get install libpam0g-dev
+% sudo apt-get install libreadline-dev
+% sudo apt-get install libdb4.8-dev
+% sudo apt-get install flex bison
+% sudo apt-get install automake autopoint libtool
 
 ---------- * -------------- * ------------ * -------------- * ------------ * -------------- * ------------
 OS X NOTES

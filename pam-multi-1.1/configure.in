@@ -131,7 +131,7 @@ AC_ARG_ENABLE(mysqlprefix, [  --enable-mysqlprefix=""       MySQL Prefix Directo
 if test "$mysql_prefix" = ""
 then
 mysql_incdir=""
-for f in /usr/local/mysql/include/mysql /usr/include/mysql
+for f in /usr/local/mysql/include/mysql /usr/local/mysql/include /usr/include/mysql
 do
 	if test -d $f
 	then
@@ -150,7 +150,7 @@ mysql_incdir="$enableval",
 ])
 
 mysql_libdir=""
-for f in /usr/local/mysql/lib/mysql /usr/lib/mysql
+for f in /usr/local/mysql/lib64/mysql /usr/local/mysql/lib64 /usr/local/mysql/lib/mysql /usr/local/mysql/lib /usr/lib/mysql
 do
 	if test -d $f
 	then
@@ -187,8 +187,31 @@ mysqlbindir="$enableval",
 ])
 mysql_prefix=`dirname $mysqlbindir`
 else
-	mysql_incdir=$mysql_prefix/include/mysql
-	mysql_libdir=$mysql_prefix/lib/mysql
+	if test -d $mysql_prefix/include/mysql
+	then
+		mysql_incdir=$mysql_prefix/include/mysql
+	elif test -d $mysql_prefix/include
+	then
+		mysql_incdir=$mysql_prefix/include
+	else
+		mysql_incdir=$mysql_prefix/include/mysql
+	fi
+
+	if test -d $mysql_prefix/lib64/mysql
+	then
+		mysql_libdir=$mysql_prefix/lib64/mysql
+	elif test -d $mysql_prefix/lib/mysql
+  then
+		mysql_libdir=$mysql_prefix/lib/mysql
+	elif test -d $mysql_prefix/lib64
+	then
+		mysql_libdir=$mysql_prefix/lib64
+	elif test -d $mysql_prefix/lib
+  then
+		mysql_libdir=$mysql_prefix/lib
+	else
+		mysql_libdir=$mysql_prefix/lib/mysql
+	fi
 	mysqlbindir=$mysql_prefix/bin
 fi
 AC_CHECK_LIB(mysqlclient -L${mysql_libdir}, mysql_real_connect,libs="$libs -lmysqlclient",

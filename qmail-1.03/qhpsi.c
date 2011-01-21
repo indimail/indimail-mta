@@ -133,6 +133,6 @@ main(int argc, char **argv)
 void
 getversion_qmail_qhpsi_c()
 {
-	static char    *x = "$Id: qhpsi.c,v 1.5 2010-07-18 19:17:27+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qhpsi.c,v 1.5 2010-07-18 19:17:27+05:30 Cprogrammer Stab mbhangui $";
 	x++;
 }

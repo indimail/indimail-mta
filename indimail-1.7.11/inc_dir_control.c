@@ -20,7 +20,7 @@
 #include <string.h>
 
 #ifndef	lint
-static char     sccsid[] = "$Id: inc_dir_control.c,v 2.1 2010-08-08 13:01:38+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: inc_dir_control.c,v 2.1 2010-08-08 13:01:38+05:30 Cprogrammer Stab mbhangui $";
 #endif
 
 int
