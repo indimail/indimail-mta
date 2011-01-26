@@ -1,15 +1,16 @@
 /*
-** Copyright 2001 Double Precision, Inc.
+** Copyright 2001-2011 Double Precision, Inc.
 ** See COPYING for distribution information.
 */
 
+#include	"config.h"
 #include	<stdio.h>
 #include	<ctype.h>
 #include	<stdlib.h>
 #include	<string.h>
 #include	"rfc822hdr.h"
 
-static const char rcsid[]="$Id: rfc822hdr.c,v 1.2 2009/11/08 18:14:47 mrsam Exp $";
+static const char rcsid[]="$Id: rfc822hdr.c,v 1.4 2011/01/09 05:27:06 mrsam Exp $";
 
 /*
 ** Read the next mail header.
@@ -128,14 +129,33 @@ void rfc822hdr_collapse(struct rfc822hdr *h)
 	*q=0;
 }
 
+/* This is, basically, a case-insensitive US-ASCII comparison function */
+
+#define lc(x) ((x) >= 'A' && (x) <= 'Z' ? (x) + ('a'-'A'):(x))
+
+int rfc822hdr_namecmp(const char *a, const char *b)
+{
+	int rc;
+
+	while ((rc=(int)(unsigned char)lc(*a) - (int)(unsigned char)lc(*b))==0)
+	{
+		if (!*a)
+			return 0;
+		++a;
+		++b;
+	}
+
+	return rc;
+}
+
 int rfc822hdr_is_addr(const char *hdr)
 {
-	return strcasecmp(hdr, "from") == 0 ||
-		strcasecmp(hdr, "to") == 0 ||
-		strcasecmp(hdr, "cc") == 0 ||
-		strcasecmp(hdr, "bcc") == 0 ||
-		strcasecmp(hdr, "resent-from") == 0 ||
-		strcasecmp(hdr, "resent-to") == 0 ||
-		strcasecmp(hdr, "resent-cc") == 0 ||
-		strcasecmp(hdr, "resent-bcc") == 0;
+	return rfc822hdr_namecmp(hdr, "from") == 0 ||
+		rfc822hdr_namecmp(hdr, "to") == 0 ||
+		rfc822hdr_namecmp(hdr, "cc") == 0 ||
+		rfc822hdr_namecmp(hdr, "bcc") == 0 ||
+		rfc822hdr_namecmp(hdr, "resent-from") == 0 ||
+		rfc822hdr_namecmp(hdr, "resent-to") == 0 ||
+		rfc822hdr_namecmp(hdr, "resent-cc") == 0 ||
+		rfc822hdr_namecmp(hdr, "resent-bcc") == 0;
 }

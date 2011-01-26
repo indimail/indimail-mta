@@ -1,15 +1,24 @@
 /*
-** Copyright 1998 - 1999 Double Precision, Inc.
+** Copyright 1998 - 2011 Double Precision, Inc.
 ** See COPYING for distribution information.
 */
 
 /*
-** $Id: rfc822_parsedt.c,v 1.4 2002/05/21 16:02:19 mrsam Exp $
+** $Id: rfc822_parsedt.c,v 1.6 2011/01/10 01:46:39 mrsam Exp $
 */
+#include	"config.h"
 #include	<stdio.h>
 #include	<string.h>
-#include	<ctype.h>
 #include	<time.h>
+
+#define my_isalpha(c) ( ( (c) >= 'a' && (c) <= 'z' ) ||	\
+			( (c) >= 'A' && (c) <= 'Z' ) )
+
+#define my_isdigit(c) ( (c) >= '0' && (c) <= '9' )
+
+#define my_isalnum(c) ( my_isalpha(c) || my_isdigit(c) )
+
+#define my_isspace(c) ( (c) == ' ' || (c) == '\t' || (c) == '\r' || (c) == '\n')
 
 /*
 ** time_t rfc822_parsedate(const char *p)
@@ -21,9 +30,9 @@
 
 static unsigned parsedig(const char **p)
 {
-unsigned i=0;
+	unsigned i=0;
 
-	while (isdigit((int)(unsigned char)**p))
+	while (my_isdigit(**p))
 	{
 		i=i*10 + **p - '0';
 		++*p;
@@ -71,6 +80,8 @@ static int zoneoffset[] = {
 	ZH(-1), ZH(-2), ZH(-3), ZH(-4), ZH(-5), ZH(-6), ZH(-7), ZH(-8), ZH(-9), ZH(-10), ZH(-11), ZH(-12),
 	ZH(1), ZH(2), ZH(3), ZH(4), ZH(5), ZH(6), ZH(7), ZH(8), ZH(9), ZH(10), ZH(11), ZH(12) };
 
+#define lc(x) ((x) >= 'A' && (x) <= 'Z' ? (x) + ('a'-'A'):(x))
+
 static unsigned parsekey(const char **mon, const char * const *ary)
 {
 unsigned m, j;
@@ -78,7 +89,7 @@ unsigned m, j;
 	for (m=0; ary[m]; m++)
 	{
 		for (j=0; ary[m][j]; j++)
-			if (tolower(ary[m][j]) != tolower((*mon)[j]))
+			if (lc(ary[m][j]) != lc((*mon)[j]))
 				break;
 		if (!ary[m][j])
 		{
@@ -91,19 +102,21 @@ unsigned m, j;
 
 static int parsetime(const char **t)
 {
-unsigned h,m,s=0;
+	unsigned h,m,s=0;
 
-	if (!isdigit((int)(unsigned char)**t))	return (-1);
+	if (!my_isdigit(**t))	return (-1);
+
 	h=parsedig(t);
 	if (h > 23)		return (-1);
 	if (**t != ':')		return (-1);
 	++*t;
-	if (!isdigit((int)(unsigned char)**t))	return (-1);
+	if (!my_isdigit(**t))	return (-1);
 	m=parsedig(t);
 	if (**t == ':')
 	{
 		++*t;
-		if (!isdigit((int)(unsigned char)**t))	return (-1);
+
+		if (!my_isdigit(**t))	return (-1);
 		s=parsedig(t);
 	}
 	if (m > 59 || s > 59)	return (-1);
@@ -125,17 +138,17 @@ unsigned y;
 	while (!day || !mon)
 	{
 		if (!*rfcdt)	return (0);
-		if (isalpha((int)(unsigned char)*rfcdt))
+		if (my_isalpha(*rfcdt))
 		{
 			if (mon)	return (0);
 			mon=parsekey(&rfcdt, mnames);
 			if (!mon)
-				while (*rfcdt && isalpha((int)(unsigned char)*rfcdt))
+				while (*rfcdt && my_isalpha(*rfcdt))
 					++rfcdt;
 			continue;
 		}
 
-		if (isdigit((int)(unsigned char)*rfcdt))
+		if (my_isdigit(*rfcdt))
 		{
 			if (day)	return (0);
 			day=parsedig(&rfcdt);
@@ -145,14 +158,14 @@ unsigned y;
 		++rfcdt;
 	}
 
-	while (*rfcdt && isspace((int)(unsigned char)*rfcdt))
+	while (*rfcdt && my_isspace(*rfcdt))
 		++rfcdt;
-	if (!isdigit((int)(unsigned char)*rfcdt))	return (0);
+	if (!my_isdigit(*rfcdt))	return (0);
 	year=parsedig(&rfcdt);
 	if (year < 70)	year += 2000;
 	if (year < 100)	year += 1900;
 
-	while (*rfcdt && isspace((int)(unsigned char)*rfcdt))
+	while (*rfcdt && my_isspace(*rfcdt))
 		++rfcdt;
 
 	if (day == 0 || mon == 0 || mon > 12 || day > mdays(mon,year))
@@ -167,12 +180,12 @@ unsigned y;
 
 	while ( *rfcdt )
 	{
-		if (isalnum((int)(unsigned char)*rfcdt) || *rfcdt == '+' || *rfcdt == '-')
+		if (my_isalnum(*rfcdt) || *rfcdt == '+' || *rfcdt == '-')
 			break;
 		++rfcdt;
 	}
 
-	if (isalpha((int)(unsigned char)*rfcdt))
+	if (my_isalpha((int)(unsigned char)*rfcdt))
 	{
 	int	n=parsekey(&rfcdt, zonenames);
 
@@ -190,7 +203,7 @@ unsigned y;
 			++rfcdt;
 		}
 
-		if (isdigit((int)(unsigned char)*rfcdt))
+		if (my_isdigit(*rfcdt))
 		{
 			n=parsedig(&rfcdt);
 			if (n > 2359 || (n % 100) > 59)	n=0;
