@@ -2,13 +2,14 @@
 #define	storeinfo_h
 
 /*
-** Copyright 1998 - 1999 Double Precision, Inc.
+** Copyright 1998 - 2010 Double Precision, Inc.
 ** See COPYING for distribution information.
 */
 
 #include	"imaptoken.h"
+#include	"numlib/numlib.h"
 
-static const char storeinfo_h_rcsid[]="$Id: storeinfo.h,v 1.6 2004/01/11 02:47:33 mrsam Exp $";
+static const char storeinfo_h_rcsid[]="$Id: storeinfo.h,v 1.7 2010/03/19 01:09:26 mrsam Exp $";
 
 struct storeinfo {
 	int plusminus;
@@ -39,7 +40,7 @@ struct do_copy_info {
 
 struct copyquotainfo {
 	char *destmailbox;
-	long nbytes;
+	int64_t nbytes;
 	int nfiles;
 
 	const char *acls;
