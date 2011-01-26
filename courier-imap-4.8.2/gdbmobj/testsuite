@@ -1,0 +1,13 @@
+#!/bin/sh
+#$Id: testsuite,v 1.1 1999/06/02 02:29:10 mrsam Exp $
+
+rm -f testgdbm.dat
+
+./testgdbm testgdbm.dat foo bar
+./testgdbm testgdbm.dat foo baz
+./testgdbm testgdbm.dat bar foo
+./testgdbm testgdbm.dat foo
+./testgdbm testgdbm.dat bar
+./testgdbm testgdbm.dat
+./testgdbm testgdbm.dat -foo
+./testgdbm testgdbm.dat
