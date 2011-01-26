@@ -9,7 +9,7 @@
 #include	<arpa/inet.h>
 #include	<errno.h>
 
-static const char rcsid[]="$Id: rfc1035mksocket.c,v 1.3 2000/05/28 18:17:25 mrsam Exp $";
+static const char rcsid[]="$Id: rfc1035mksocket.c,v 1.4 2011/01/22 22:16:26 mrsam Exp $";
 
 /*
 **	Create a socket.  Duh.  If we've compiled IPv6 support, but we can't
@@ -20,11 +20,21 @@ static const char rcsid[]="$Id: rfc1035mksocket.c,v 1.3 2000/05/28 18:17:25 mrsa
 int	rfc1035_mksocket(int sock_type, int sock_protocol, int *af)
 {
 #if	RFC1035_IPV6
-int	s;
+	int	s;
+	int	on=0;
 
 	*af=AF_INET6;
 	if ( (s=socket(PF_INET6, sock_type, sock_protocol)) >= 0)
+	{
+#ifdef IPV6_V6ONLY
+
+		if (setsockopt(s, IPPROTO_IPV6, IPV6_V6ONLY,
+			       (char *)&on, sizeof(on)) < 0)
+			perror("setsockopt IPV6_V6ONLY");
+#endif
+
 		return (s);
+	}
 #endif
 	*af=AF_INET;
 	return (socket(PF_INET, sock_type, sock_protocol));
