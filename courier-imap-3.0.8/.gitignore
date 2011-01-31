@@ -169,7 +169,7 @@ userdbpw
 userdbpw.8
 vchkpw2userdb
 waitlib/testwait
-courier-imap-3.0.8/bdbobj/testbdb
+bdbobj/testbdb
 rfc2045_config.h.in
 \[config.h\].in
 soxwrap_config.h.in
