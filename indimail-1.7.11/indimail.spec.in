@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail.spec.in,v 2.198 2011-01-11 10:24:19+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 2.199 2011-01-29 20:29:14+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %define _unpackaged_files_terminate_build 1
 
@@ -35,7 +35,7 @@
 
 %define	_prefix            @indimaildir@
 %define default_domain     @defaultdomain@
-%define courier_version    3.0.8
+%define courier_version    4.8.2
 %define bogofilter_version 1.2.2
 %define pam_multi_version  1.1
 %define ucspi_version      0.88
@@ -380,6 +380,7 @@ done
 
 %patch1  -p0
 %patch2  -p0
+
 %if %nocourierimap == 0
 %patch3  -p0
 %if %i_m_on_mac == 1
@@ -694,8 +695,7 @@ fi
 # Compress the man pages
 find %{buildroot}%{_prefix}/man -type f -exec gzip {} \;
 if [ -f %{buildroot}%{_prefix}/man/man7/authlib.7.gz ] ; then
-	for i in authldap.7 authmysql.7 authdaemond.7 authshadow.7 authuserdb.7 authpwd.7 \
-	authvchkpw.7 authdaemon.7 authcram.7 authpam.7
+	for i in authshadow.7 authpwd.7 authpam.7 authcustom.7
 	do
 		%{__rm} -f %{buildroot}%{_prefix}/man/man7/$i
 		ln -sf %{_prefix}/man/man7/authlib.7.gz %{buildroot}%{_prefix}/man/man7/$i.gz
@@ -1248,19 +1248,12 @@ fi
 %attr(555,root,root)                    %{_prefix}/bin/maildiracl
 %attr(555,root,root)                    %{_prefix}/bin/imapd
 %attr(555,root,root)                    %{_prefix}/bin/pop3d
-%attr(555,root,root)                    %{_prefix}/sbin/authenumerate
-%attr(555,root,root)                    %{_prefix}/sbin/courierlogger
 %attr(555,root,root)                    %{_prefix}/sbin/imaplogin
 %attr(555,root,root)                    %{_prefix}/sbin/pop3login
 %attr(555,root,root)                    %{_prefix}/sbin/sharedindexinstall
 %attr(555,root,root)                    %{_prefix}/sbin/sharedindexsplit
-%attr(555,root,root)                    %{_prefix}/sbin/userdbpw
-%attr(777,root,root)                    %{_prefix}/sbin/makeuserdb
 %attr(777,root,root)                    %{_prefix}/sbin/mkimapdcert
 %attr(777,root,root)                    %{_prefix}/sbin/mkpop3dcert
-%attr(777,root,root)                    %{_prefix}/sbin/pw2userdb
-%attr(777,root,root)                    %{_prefix}/sbin/userdb
-%attr(777,root,root)                    %{_prefix}/sbin/vchkpw2userdb
 %if %i_m_on_mac == 0
 %attr(4555,root,root)                   %{_prefix}/libexec/authlib/authshadow
 %endif
@@ -1348,12 +1341,8 @@ fi
 %attr(555,root,root)                    %{_prefix}/libexec/couriertcpd
 %attr(555,root,root)                    %{_prefix}/libexec/imapd.rc
 %attr(555,root,root)                    %{_prefix}/libexec/pop3d.rc
-%attr(555,root,root)                    %{_prefix}/share/vchkpw2userdb
 %attr(555,root,root)                    %{_prefix}/share/mkimapdcert
 %attr(555,root,root)                    %{_prefix}/share/mkpop3dcert
-%attr(555,root,root)                    %{_prefix}/share/pw2userdb
-%attr(555,root,root)                    %{_prefix}/share/userdb
-%attr(555,root,root)                    %{_prefix}/share/makeuserdb
 %endif
 %attr(555,root,root)                    %{_prefix}/libexec/authlib/authindi
 %attr(555,root,root)                    %{_prefix}/libexec/authlib/authgeneric
