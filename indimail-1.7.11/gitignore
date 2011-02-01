@@ -61,6 +61,7 @@ svctool.8
 .gitignore
 Quick-INSTALL
 patches/courier-imap-3.0.8.patch.gz
+patches/courier-imap-4.8.2.patch.gz
 patches/fetchmail-6.3.9.patch.gz
 vadduser.1
 vdeldomain.1
