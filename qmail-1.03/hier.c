@@ -1,5 +1,8 @@
 /*
  * $Log: hier.c,v $
+ * Revision 1.156  2011-01-29 22:20:47+05:30  Cprogrammer
+ * changes for courier-imap-4.8.2
+ *
  * Revision 1.155  2011-01-11 10:28:03+05:30  Cprogrammer
  * added balance_outgoing
  *
@@ -1499,48 +1502,29 @@ _hier(inst_dir)
 	ci(auto_qmail_home, "libexec", "pop3d.rc", auto_uido, auto_gido, 0555);
 	ci(auto_qmail_home, "libexec", "pop3d-ssl.rc", auto_uido, auto_gido, 0555);
 	/*- */
-	ci(auto_qmail_home, "man/man1", "courierlogger.1", auto_uido, auto_gidq, 0444);
 	ci(auto_qmail_home, "man/man1", "couriertcpd.1", auto_uido, auto_gidq, 0444);
 	ci(auto_qmail_home, "man/man1", "maildiracl.1", auto_uido, auto_gidq, 0444);
 	ci(auto_qmail_home, "man/man1", "maildirkw.1", auto_uido, auto_gidq, 0444);
 	ci(auto_qmail_home, "man/man1", "maildirmake.1", auto_uido, auto_gidq, 0444);
 
-	ci(auto_qmail_home, "man/man7", "authcram.7", auto_uido, auto_gidq, 0444);
-	ci(auto_qmail_home, "man/man7", "authdaemon.7", auto_uido, auto_gidq, 0444);
-	ci(auto_qmail_home, "man/man7", "authdaemond.7", auto_uido, auto_gidq, 0444);
-	ci(auto_qmail_home, "man/man7", "authldap.7", auto_uido, auto_gidq, 0444);
 	ci(auto_qmail_home, "man/man7", "authlib.7", auto_uido, auto_gidq, 0444);
-	ci(auto_qmail_home, "man/man7", "authmysql.7", auto_uido, auto_gidq, 0444);
 	ci(auto_qmail_home, "man/man7", "authpam.7", auto_uido, auto_gidq, 0444);
 	ci(auto_qmail_home, "man/man7", "authpwd.7", auto_uido, auto_gidq, 0444);
+	ci(auto_qmail_home, "man/man7", "authcustom.7", auto_uido, auto_gidq, 0444);
 	ci(auto_qmail_home, "man/man7", "authshadow.7", auto_uido, auto_gidq, 0444);
-	ci(auto_qmail_home, "man/man7", "authuserdb.7", auto_uido, auto_gidq, 0444);
-	ci(auto_qmail_home, "man/man7", "authvchkpw.7", auto_uido, auto_gidq, 0444);
 
 	ci(auto_qmail_home, "man/man8", "deliverquota.8", auto_uido, auto_gidq, 0444);
 	ci(auto_qmail_home, "man/man8", "imapd.8", auto_uido, auto_gidq, 0444);
-	ci(auto_qmail_home, "man/man8", "makeuserdb.8", auto_uido, auto_gidq, 0444);
 	ci(auto_qmail_home, "man/man8", "mkimapdcert.8", auto_uido, auto_gidq, 0444);
 	ci(auto_qmail_home, "man/man8", "mkpop3dcert.8", auto_uido, auto_gidq, 0444);
-	ci(auto_qmail_home, "man/man8", "pw2userdb.8", auto_uido, auto_gidq, 0444);
-	ci(auto_qmail_home, "man/man8", "userdb.8", auto_uido, auto_gidq, 0444);
-	ci(auto_qmail_home, "man/man8", "userdbpw.8", auto_uido, auto_gidq, 0444);
-	ci(auto_qmail_home, "man/man8", "vchkpw2userdb.8", auto_uido, auto_gidq, 0444);
 	/*- */
-	ci(auto_qmail_home, "sbin", "authenumerate", auto_uido, auto_gido, 0555);
-	ci(auto_qmail_home, "sbin", "courierlogger", auto_uido, auto_gido, 0555);
 	ci(auto_qmail_home, "sbin", "imaplogin", auto_uido, auto_gido, 0555);
 	ci(auto_qmail_home, "sbin", "pop3login", auto_uido, auto_gido, 0555);
 	ci(auto_qmail_home, "sbin", "sharedindexinstall", auto_uido, auto_gido, 0555);
 	ci(auto_qmail_home, "sbin", "sharedindexsplit", auto_uido, auto_gido, 0555);
-	ci(auto_qmail_home, "sbin", "userdbpw", auto_uido, auto_gido, 0555);
 	/*- */
-	ci(auto_qmail_home, "share", "makeuserdb", auto_uido, auto_gido, 0555);
 	ci(auto_qmail_home, "share", "mkimapdcert", auto_uido, auto_gido, 0555);
 	ci(auto_qmail_home, "share", "mkpop3dcert", auto_uido, auto_gido, 0555);
-	ci(auto_qmail_home, "share", "pw2userdb", auto_uido, auto_gido, 0555);
-	ci(auto_qmail_home, "share", "userdb", auto_uido, auto_gido, 0555);
-	ci(auto_qmail_home, "share", "vchkpw2userdb", auto_uido, auto_gido, 0555);
 
 	/*- bogofilter */
 	ci(auto_qmail_home, "bin", "bogofilter", auto_uido, auto_gidv, 06511);
@@ -1593,7 +1577,7 @@ _hier(inst_dir)
 void
 getversion_install_big_c()
 {
-	static char    *x = "$Id: hier.c,v 1.155 2011-01-11 10:28:03+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: hier.c,v 1.156 2011-01-29 22:20:47+05:30 Cprogrammer Exp mbhangui $";
 
 #ifdef INDIMAIL
 	x = sccsidh;
