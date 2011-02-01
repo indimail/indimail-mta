@@ -153,6 +153,10 @@ install-exec-hook:
 	chmod 755 $(DESTDIR)$(sysconfdir)/shared.tmp
 
 install-data-local: install-man
+	for f in `cat authlib/modulelist ; echo $$authmodulelist ` ; do \
+		test "$$f" = "authpam" || test "$$f" = "authshadow" || continue ; \
+		chmod 4555 $(DESTDIR)/$(prefix)/libexec/authlib/$$f || exit 1; \
+	done
 	test -d $(DESTDIR)/etc/pam.d || exit 0 ; \
 	test -w $(DESTDIR)/etc/pam.d || exit 0 ; \
 	test -f $(DESTDIR)/etc/pam.d/imap || \
