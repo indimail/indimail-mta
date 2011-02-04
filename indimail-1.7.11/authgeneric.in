@@ -27,14 +27,14 @@ fi
 @indimaildir@/bin/vadduser -d "$user"@"$domain" $PASSWORD > /dev/null
 if [ $? -ne 0 ] ; then
 	if [ $? -eq 17 ] ; then
-		echo "generic_auth: user exists" 1>&2
+		echo "authgeneric: user exists" 1>&2
 		exec 4>/tmp/courier_auth.$$ 3</tmp/courier_auth.$$
 		/bin/rm -f /tmp/courier_auth.$$
 		# supply the original input on fd 3
 		echo $data_input | tr [" "] ["\n"] 1>&4
 		exec $*
 	else
-		echo "generic_auth: vadduser failed" 1>&2
+		echo "authgeneric: vadduser failed" 1>&2
 	fi
 	exit 1
 fi
@@ -54,7 +54,7 @@ if [ $? -eq 0 ] ; then
 	if [ ! -d $MAILDIR ] ; then
 		@indimaildir@/bin/maildirmake $MAILDIR > /dev/null
 		if [ $? -ne 0 ] ; then
-			echo "generic_auth: maildirmaike $MAILDIR failed" 1>&2
+			echo "authgeneric: maildirmaike $MAILDIR failed" 1>&2
 			exit 1
 		fi
 	fi
@@ -62,16 +62,16 @@ if [ $? -eq 0 ] ; then
 	if [ $? -eq 0 ] ; then
 		exec $*
 	else
-		echo "generic_auth: cd $HOME failed" 1>&2
+		echo "authgeneric: cd $HOME failed" 1>&2
 		exit 1
 	fi
 else
 	/bin/rm -f /tmp/courier_auth.$$
-	echo "generic_auth: userinfo failed" 1>&2
+	echo "authgeneric: userinfo failed" 1>&2
 	exit 1
 fi
 if [ $# -lt 3 ] ; then
-	echo "generic_auth: no more modules will be tried" 1>&2
+	echo "authgeneric: no more modules will be tried" 1>&2
 	echo "AUTHFAILURE" 1>&2
 	exit 1
 fi
