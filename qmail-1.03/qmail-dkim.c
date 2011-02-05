@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-dkim.c,v $
+ * Revision 1.25  2011-02-05 09:47:47+05:30  Cprogrammer
+ * fixed SIGSEGV occuring for messages without body
+ *
  * Revision 1.24  2010-11-02 18:45:14+05:30  Cprogrammer
  * Improve DKIM signing/verification speed
  *
@@ -313,19 +316,35 @@ write_signature(char *domain, char *keyfn)
 	if (keyfn[i])
 	{
 		if (!stralloc_copyb(&keyfnfrom, keyfn, i))
+		{
+			DKIMSignFree(&ctxt);
 			die(51);
+		}
 		if (!stralloc_cats(&keyfnfrom, domain))
+		{
+			DKIMSignFree(&ctxt);
 			die(51);
+		}
 		if (!stralloc_cats(&keyfnfrom, keyfn + i + 1))
+		{
+			DKIMSignFree(&ctxt);
 			die(51);
+		}
 	} else
 	if (!stralloc_copys(&keyfnfrom, keyfn))
+	{
+		DKIMSignFree(&ctxt);
 		die(51);
+	}
 	if (!stralloc_0(&keyfnfrom))
+	{
+		DKIMSignFree(&ctxt);
 		die(51);
+	}
 	switch (control_readnativefile(&dksignature, keyfnfrom.s, 1))
 	{
 	case 0: /*- missing signature file */
+		DKIMSignFree(&ctxt);
 		if (keyfn[i])
 			return;
 		die(35);
@@ -333,6 +352,7 @@ write_signature(char *domain, char *keyfn)
 		break;
 	default:
 		custom_error("Z", "Unable to read private key. (#4.3.0)", 0);
+		DKIMSignFree(&ctxt);
 		_exit(88);
 	}
 	for (i = 0; i < dksignature.len; i++)
@@ -341,8 +361,12 @@ write_signature(char *domain, char *keyfn)
 			dksignature.s[i] = '\n';
 	}
 	if (!stralloc_0(&dksignature))
+	{
+		DKIMSignFree(&ctxt);
 		die(51);
+	}
 	i = DKIMSignGetSig2(&ctxt, dksignature.s, &pSig);
+	DKIMSignFree(&ctxt);
 	maybe_die_dkim(i);
 	if (pSig)
 	{
@@ -351,7 +375,6 @@ write_signature(char *domain, char *keyfn)
 		if (!stralloc_cats(&dkimoutput, "\n"))
 			die(51);
 	}
-	DKIMSignFree(&ctxt);
 }
 
 #include <openssl/evp.h>
@@ -1110,33 +1133,61 @@ main(int argc, char *argv[])
 	alarm(DEATH);
 	pidopen(); /*- fd = messfd */
 	if ((readfd = open_read(pidfn)) == -1)
+	{
+		(dkimsign ? DKIMSignFree : DKIMVerifyFree) (&ctxt);
 		die(63);
+	}
 	if (unlink(pidfn) == -1)
+	{
+		(dkimsign ? DKIMSignFree : DKIMVerifyFree) (&ctxt);
 		die(63);
+	}
 	substdio_fdbuf(&ssout, write, messfd, outbuf, sizeof(outbuf));
 	substdio_fdbuf(&ssin, read, 0, inbuf, sizeof(inbuf));
-	for (;;)
+	for (ret = 0;;)
 	{
 		register int    n;
 		register char  *x;
 
 		if ((n = substdio_feed(&ssin)) < 0)
+		{
+			(dkimsign ? DKIMSignFree : DKIMVerifyFree) (&ctxt);
 			die_read();
+		}
 		if (!n)
 			break;
 		x = substdio_PEEK(&ssin);
-		ret = (dkimsign ? DKIMSignProcess : DKIMVerifyProcess) (&ctxt, x, n);
+		if (!ret)
+		{
+			if ((ret = (dkimsign ? DKIMSignProcess : DKIMVerifyProcess) (&ctxt, x, n)) == DKIM_INVALID_CONTEXT)
+				(dkimsign ? DKIMSignFree : DKIMVerifyFree) (&ctxt);
+			maybe_die_dkim(ret);
+		}
 		if (substdio_put(&ssout, x, n) == -1)
+		{
+			(dkimsign ? DKIMSignFree : DKIMVerifyFree) (&ctxt);
 			die_write();
+		}
 		substdio_SEEK(&ssin, n);
 	}
 	if (substdio_flush(&ssout) == -1)
+	{
+		(dkimsign ? DKIMSignFree : DKIMVerifyFree) (&ctxt);
 		die_write();
+	}
 	if (dkimsign || dkimverify)
 	{
 		if (dkimsign)
-			write_signature(DKIMSignGetDomain(&ctxt), dkimsign);
-		else
+		{
+			char           *p;
+
+			if (!(p = DKIMSignGetDomain(&ctxt)))
+			{
+				DKIMSignFree(&ctxt);
+				maybe_die_dkim(DKIM_INVALID_CONTEXT);
+			}
+			write_signature(p, dkimsign); /*- calls DKIMSignFree(&ctxt) */
+		} else
 		if (dkimverify)
 		{
 			char            szPolicy[512];
@@ -1159,8 +1210,7 @@ main(int argc, char *argv[])
 					ret = DKIM_NO_SIGNATURES;
 			}
 			/*- what to do if DKIM Verification fails */
-			if (checkPractice(ret))
-			{
+			if (checkPractice(ret)) {
 				char           *domain;
 
 				origRet = ret;
@@ -1169,10 +1219,16 @@ main(int argc, char *argv[])
 					if (!(p = env_get("SIGNATUREDOMAINS")))
 					{
 						if (control_readfile(&sigdomains, "signaturedomains", 0) == -1)
+						{
+							DKIMVerifyFree(&ctxt);
 							die(55);
+						}
 					} else
 					if (!stralloc_copys(&sigdomains, p))
+					{
+						DKIMVerifyFree(&ctxt);
 						die(51);
+					}
 					for (len = 0, p = sigdomains.s;len < sigdomains.len;)
 					{
 						len += ((token_len = str_len(p)) + 1); /*- next domain */
@@ -1188,10 +1244,16 @@ main(int argc, char *argv[])
 					if (!(p = env_get("NOSIGNATUREDOMAINS")))
 					{
 						if (control_readfile(&nsigdomains, "nosignaturedomains", 0) == -1)
+						{
+							DKIMVerifyFree(&ctxt);
 							die(55);
+						}
 					} else
 					if (!stralloc_copys(&nsigdomains, p))
+					{
+						DKIMVerifyFree(&ctxt);
 						die(51);
+					}
 					for (len = 0, p = nsigdomains.s;len < nsigdomains.len;)
 					{
 						len += ((token_len = str_len(p)) + 1); /*- next domain */
@@ -1307,7 +1369,7 @@ main(argc, argv)
 void
 getversion_qmail_dkim_c()
 {
-	static char    *x = "$Id: qmail-dkim.c,v 1.24 2010-11-02 18:45:14+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: qmail-dkim.c,v 1.25 2011-02-05 09:47:47+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
