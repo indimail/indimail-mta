@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-dkim.c,v $
+ * Revision 1.26  2011-02-06 10:13:50+05:30  Cprogrammer
+ * BUG - signature was wrongly freed before being accessed.
+ *
  * Revision 1.25  2011-02-05 09:47:47+05:30  Cprogrammer
  * fixed SIGSEGV occuring for messages without body
  *
@@ -366,15 +369,21 @@ write_signature(char *domain, char *keyfn)
 		die(51);
 	}
 	i = DKIMSignGetSig2(&ctxt, dksignature.s, &pSig);
-	DKIMSignFree(&ctxt);
 	maybe_die_dkim(i);
 	if (pSig)
 	{
 		if (!stralloc_catb(&dkimoutput, pSig, str_len(pSig)))
+		{
+			DKIMSignFree(&ctxt);
 			die(51);
+		}
 		if (!stralloc_cats(&dkimoutput, "\n"))
+		{
+			DKIMSignFree(&ctxt);
 			die(51);
+		}
 	}
+	DKIMSignFree(&ctxt);
 }
 
 #include <openssl/evp.h>
@@ -1369,7 +1378,7 @@ main(argc, argv)
 void
 getversion_qmail_dkim_c()
 {
-	static char    *x = "$Id: qmail-dkim.c,v 1.25 2011-02-05 09:47:47+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-dkim.c,v 1.26 2011-02-06 10:13:50+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
