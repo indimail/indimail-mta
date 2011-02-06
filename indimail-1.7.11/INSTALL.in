@@ -206,7 +206,7 @@ I usually prefer to run privileged commands like this (so that I don't get fond 
                                . ripmime-1.4.0.9    (2.1  Mb)
                                . mpack-1.6          (1.5  Mb)
                                . fortune-1.1        (8.4  Mb)
-                               . courier-imap-3.0.8 (50   Mb)
+                               . courier-imap-4.8.2 (65   Mb)
                                . bogofilter-1.2.2   (11.6 Mb)
                                . clamav-0.96.5      (600  Mb)
                                . fetchmail-6.3.19   (10.5 Mb)
@@ -329,7 +329,7 @@ the installation.
     % wget http://downloads.sourceforge.net/indimail/package.checksums # MD5 sum of all the packages
     % wget http://downloads.sourceforge.net/indimail/indimail-@version@.tar.gz
     % wget http://downloads.sourceforge.net/indimail/libdkim-1.3.tar.gz
-    % wget http://downloads.sourceforge.net/indimail/courier-imap-3.0.8.tar.bz2
+    % wget http://downloads.sourceforge.net/indimail/courier-imap-4.8.2.tar.bz2
     % wget http://downloads.sourceforge.net/indimail/flash-0.9.4.tar.gz
     % wget http://downloads.sourceforge.net/indimail/altermime-0.3.10.tar.gz
     % wget http://downloads.sourceforge.net/indimail/ripmime-1.4.0.9.tar.gz
@@ -511,37 +511,40 @@ the installation.
     Then do ./configure <same_parameters_as_earlier_install> ; make ; make install-strip
 
     ##### STEP 5  ##### Courier IMAP/POP3 #####################
-    Install courier-imap (courier-imap-3.0.8.tar.bz2) MD5 1b431e6dac39ed728d839ceb35474040
+    Install courier-imap (courier-imap-4.8.2.tar.bz2) MD5 xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
     current working directory /home/local/src
     Download the courier-imap package. The latest tested courier-imap package is
-    courier-imap-3.0.8.tar.bz2. The patch brings up the version upto courier-imap version to 4.5.0
+    courier-imap-4.8.2.tar.bz2. The patch brings up the version upto courier-imap version to 4.5.0
 
-    % bzip2 -d -c courier-imap-3.0.8.tar.bz2 | tar xf -
-    % gunzip -c indimail-@version@/patches/courier-imap-3.0.8.patch.gz | patch -p0
+    % bzip2 -d -c courier-imap-4.8.2.tar.bz2 | tar xf -
+    % gunzip -c indimail-@version@/patches/courier-imap-4.8.2.patch.gz | patch -p0
+    % cd courier-imap-4.8.2
 
-    If you are on Mac OS X 10.5.x you will need to apply courier-imap-3.0.8-1.2.patch and
-    a supplement patch
-    % gunzip -c indimail-@version@/patches/courier-imap-3.0.8-1.2.patch.gz | patch -p0
-    % gunzip -c indimail-@version@/patches/courier-imap-3.0.8-1.2.mac-supplement.patch.gz | patch -p0
-    % cd courier-imap-3.0.8
+   x-------------------------------- Mac OS X ONLY -----------------------------------------x
+   |% bzip2 -d -c courier-imap-3.0.8.tar.bz2 | tar xf -                                     |
+   |If you are on Mac OS X 10.5.x you will need to apply courier-imap-3.0.8-1.2.patch and   |
+   |a supplement patch                                                                      |
+   |% gunzip -c indimail-@version@/patches/courier-imap-3.0.8-1.2.patch.gz | patch -p0      |
+   |% gunzip -c indimail-@version@/patches/courier-imap-3.0.8-1.2.mac-supplement.patch.gz \ |
+   | | patch -p0                                                                            |
+   |% cd courier-imap-3.0.8                                                                 |
+   x----------------------------------------------------------------------------------------x
+
     % ./configure --prefix=@indimaildir@ --disable-root-check --bindir=@indimaildir@/bin \
         --with-redhat \
         --mandir=@indimaildir@/man \
         --sysconfdir=@indimaildir@/etc \
         --libexecdir=@indimaildir@/libexec \
-        --without-authldap --without-authmysql --without-authcram \
-        --without-authvchkpw --without-authpam --without-authdaemon \
-        --without-userdb --without-authcustom \
-        --without-authchangepwdir --without-authuserdb \
-        --without-authpwd --without-authpgsql --without-makedatprog \
-        --with-authshadow
+        --without-authchangepwdir \
+        --without-authpam --without-authcustom \
+        --without-authpwd --with-authshadow
     % make -s [DESTDIR=staging_directory]
     % sudo make -s install-strip [DESTDIR=staging_directory]
     % cd ..
     
     NOTE: UPGRADE Information. You can always upgrade to the latest version of courier-imap
     by applying the latest patch available in the indimail source patch subdirectory
-    to the orignal courier-imap-3.0.8 package.
+    to the orignal courier-imap-4.8.2 package.
     Then do ./configure <same_parameters_as_earlier_install> ; make ; make install-strip
     Also, remember that IndiMail can work with any IMAP/POP3 server that provides authentication
     using PAM or getpwnam(3), getspnam(3). This happens transparently by using pam-multi(8) in
@@ -1267,6 +1270,8 @@ sourceforge - https://sourceforge.net/apps/laconica/indimail/
 
 IndiMail has two YUM / RPM repositories for most of the Linux Distros at
 http://download.opensuse.org/repositories/home:/indimail/
+&
+http://download.opensuse.org/repositories/home:/mbhangui/
 
 ---------- * -------------- * ------------ * -------------- * ------------ * -------------- * ------------
 Ubuntu NOTES
