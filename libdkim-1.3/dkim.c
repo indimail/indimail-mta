@@ -1,5 +1,8 @@
 /*
  * $Log: dkim.c,v $
+ * Revision 1.13  2011-02-07 22:05:23+05:30  Cprogrammer
+ * added case DKIM_3PS_SIGNATURE
+ *
  * Revision 1.12  2010-05-04 14:00:13+05:30  Cprogrammer
  * make option '-z' work on systems without SHA_256
  *
@@ -828,9 +831,9 @@ main(int argc, char **argv)
 		{
 			if (ret < 0)
 			{
-				if (dkimverify[str_chr(dkimverify, 'E' - ret)])
+				if (dkimverify[str_chr(dkimverify, 'F' - ret)])
 					ret = 14; /*- return permanent error */
-				if (dkimverify[str_chr(dkimverify, 'e' - ret)])
+				if (dkimverify[str_chr(dkimverify, 'f' - ret)])
 					ret = 88; /*- return temporary error */
 			} else
 			{
@@ -849,7 +852,7 @@ main(int argc, char **argv)
 void
 getversion_dkim_c()
 {
-	static char    *x = (char *) "$Id: dkim.c,v 1.12 2010-05-04 14:00:13+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = (char *) "$Id: dkim.c,v 1.13 2011-02-07 22:05:23+05:30 Cprogrammer Stab mbhangui $";
 
 	x++;
 }
