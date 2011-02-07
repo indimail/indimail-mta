@@ -670,7 +670,7 @@ warn-auto.sh qpq.sh conf-qmail
 
 qmailctl: \
 warn-auto.sh qmailctl.sh conf-qmail
-	(head -1 warn-auto.sh;cat qmailctl.sh) \
+	(head -1 warn-auto.sh | sed  s}sh}bash};cat qmailctl.sh) \
 	| sed s}QMAIL}"`head -1 conf-qmail`"}g \
 	> qmailctl
 

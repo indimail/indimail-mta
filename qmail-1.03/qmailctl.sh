@@ -97,14 +97,18 @@ SERVICE=/service
 #
 #
 #
-SYSTEM=`uname -s | tr "[:lower:]" "[:upper:]"`
+if [ -f /etc/lsb-release ] ; then
+	SYSTEM=Ubuntu
+else
+	SYSTEM=`uname -s | tr "[:lower:]" "[:upper:]"`
+fi
 if [ -x QMAIL/bin/echo ] ; then
 	ECHO=QMAIL/bin/echo
 else
 	ECHO=echo
 fi
 case "$SYSTEM" in
-	DARWIN*)
+	DARWIN*|Ubuntu)
 		RES_COL=60
 		MOVE_TO_COL="$ECHO -en \\033[${RES_COL}G"
 		SETCOLOR_SUCCESS="$ECHO -en \\033[1;32m"
@@ -118,7 +122,7 @@ myecho_success() {
   $MOVE_TO_COL
   $ECHO -n "["
   $SETCOLOR_SUCCESS
-  $ECHO -n $"  OK  "
+  $ECHO -n "  OK  "
   $SETCOLOR_NORMAL
   $ECHO -n "]"
   $ECHO -ne "\r"
@@ -159,6 +163,10 @@ case "$SYSTEM" in
 	then
 		exit 0
 	fi
+	succ=mysuccess
+	fail=myfailure
+	;;
+	Ubuntu)
 	succ=mysuccess
 	fail=myfailure
 	;;
