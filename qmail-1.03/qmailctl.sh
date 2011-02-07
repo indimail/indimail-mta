@@ -1,6 +1,9 @@
 # chkconfig: 345 14 91
 # description: Starts qmail system and associated services
 # $Log: qmailctl.sh,v $
+# Revision 1.31  2011-02-07 22:09:29+05:30  Cprogrammer
+# added case for ubuntu
+#
 # Revision 1.30  2010-07-27 10:55:23+05:30  Cprogrammer
 # display status of log services also
 #
