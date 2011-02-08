@@ -59,9 +59,10 @@ if [ ! -z $DKSIGN ] ; then
 		exit 1
 	fi
 	dksign=1
-	if [ ! " $DOMAIN" = " " ] ; then
+	if [ ! " $_SENDER" = " " ] ; then
+		domain=`echo $_SENDER | cut -d@ -f2`
 		# replace '%' in filename with domain
-		dkkeyfn=`echo $DKSIGN | sed s{%{$DOMAIN{g`
+		dkkeyfn=`echo $DKSIGN | sed s{%{$domain{g`
 	else
 		dkkeyfn=$DKSIGN
 	fi
@@ -73,9 +74,10 @@ if [ ! -z $DKIMSIGN ] ; then
 		exit 1
 	fi
 	dkimsign=1
-	if [ ! " $DOMAIN" = " " ] ; then
+	if [ ! " $_SENDER" = " " ] ; then
 		# replace '%' in filename with domain
-		dkimkeyfn=`echo $DKIMSIGN | sed s{%{$DOMAIN{g`
+		domain=`echo $_SENDER | cut -d@ -f2`
+		dkimkeyfn=`echo $DKIMSIGN | sed s{%{$domain{g`
 	else
 		dkimkeyfn=$DKIMSIGN
 	fi
