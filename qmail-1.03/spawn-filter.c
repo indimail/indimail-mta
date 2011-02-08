@@ -756,6 +756,8 @@ main(int argc, char **argv)
 		qqeh = argv[3];
 		size = argv[4];
 		remotE = 1;
+		if (!env_unset("QMAILLOCAL"))
+			report(111, "spawn-filter: out of mem: ", error_str(errno), ". (#4.3.0)", 0, 0, 0);
 		/*- sender */
 		if (!stralloc_copys(&sender, argv[2]))
 			report(111, "spawn-filter: out of mem: ", error_str(errno), ". (#4.3.0)", 0, 0, 0);
