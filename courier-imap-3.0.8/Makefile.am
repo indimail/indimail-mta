@@ -167,6 +167,12 @@ quotawarnmsg.example: maildir/quotawarnmsg
 install-exec-local:
 	$(mkinstalldirs) $(DESTDIR)$(libexecdir)/authlib
 	for f in `cat authlib/installlist` dummy ; do \
+		test "$$f" = "authpam" && chown root:root \
+		$(DESTDIR)$(libexecdir)/authlib/$$f &&
+		chmod 4555 \ $(DESTDIR)$(libexecdir)/authlib/$$f ; \
+		test "$$f" = "authshadow" && chown root:root \
+		$(DESTDIR)$(libexecdir)/authlib/$$f &&
+		chmod 4555 \ $(DESTDIR)$(libexecdir)/authlib/$$f ; \
 		test "$$f" = "dummy" && continue ; \
 		$(INSTALL_PROGRAM) $(INSTALL_STRIP_FLAG) authlib/$$f \
 			$(DESTDIR)$(libexecdir)/authlib/$$f ; done
