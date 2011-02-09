@@ -250,7 +250,18 @@ if [ $dkimverify -eq 1 ] ; then
 	fi
 	exec 0</tmp/dk.$$
 	QMAILHOME/bin/dkim -p $practice -v
-	if [ $? -ne 0 ] ; then
+	ret=$?
+	case $ret in
+		14)
+		/bin/rm -f /tmp/dk.$$
+		exit 100
+		;;
+		88)
+		/bin/rm -f /tmp/dk.$$
+		exit 111
+		;;
+	esac
+	if [ $ret -lt 0 ] ; then
 		/bin/rm -f /tmp/dk.$$
 		exit 1
 	fi
