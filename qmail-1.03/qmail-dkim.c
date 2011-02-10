@@ -1101,6 +1101,8 @@ main(int argc, char *argv[])
 	{
 		char           *x;
 
+		if (!dkimverify)
+			dkimverify = "";
 		if (!(x = env_get("SIGN_PRACTICE")))
 			x = "adsp";
 		if (!str_diffn("adsp", x, 4))
