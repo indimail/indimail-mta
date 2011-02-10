@@ -1,5 +1,11 @@
 #
 # $Log: dk-filter.sh,v $
+# Revision 1.14  2011-02-10 22:47:01+05:30  Cprogrammer
+# fixed exit code of dk-filter when doing verification
+#
+# Revision 1.13  2011-02-08 22:02:29+05:30  Cprogrammer
+# use sender domain when replacing '%' in private key
+#
 # Revision 1.12  2010-05-04 08:37:42+05:30  Cprogrammer
 # do DK signing before DKIM signing to prevent DK_SYNTAX error
 #
@@ -39,7 +45,7 @@
 # Revision 1.1  2009-04-02 14:52:27+05:30  Cprogrammer
 # Initial revision
 #
-# $Id: dk-filter.sh,v 1.12 2010-05-04 08:37:42+05:30 Cprogrammer Stab mbhangui $
+# $Id: dk-filter.sh,v 1.14 2011-02-10 22:47:01+05:30 Cprogrammer Exp mbhangui $
 #
 if [ -z "$QMAILREMOTE" -a -z "$QMAILLOCAL" ]; then
 	echo "dk-filter should be run by spawn-filter" 1>&2
