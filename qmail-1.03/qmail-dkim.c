@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-dkim.c,v $
+ * Revision 1.27  2011-02-10 23:39:59+05:30  Cprogrammer
+ * use DKIMKEY to override defult control/domainkeys/%/default
+ *
  * Revision 1.26  2011-02-06 10:13:50+05:30  Cprogrammer
  * BUG - signature was wrongly freed before being accessed.
  *
@@ -1383,7 +1386,7 @@ main(argc, argv)
 void
 getversion_qmail_dkim_c()
 {
-	static char    *x = "$Id: qmail-dkim.c,v 1.26 2011-02-06 10:13:50+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-dkim.c,v 1.27 2011-02-10 23:39:59+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
