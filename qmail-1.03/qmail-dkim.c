@@ -1043,18 +1043,21 @@ main(int argc, char *argv[])
 		dkimverify = env_get("DKIMVERIFY");
 	if (!dkimsign && !dkimverify && (p = env_get("RELAYCLIENT")))
 	{
-		if (!controldir)
+		if (!(dkimsign = env_get("DKIMKEY")))
 		{
-			if (!(controldir = env_get("CONTROLDIR")))
-				controldir = "control";
+			if (!controldir)
+			{
+				if (!(controldir = env_get("CONTROLDIR")))
+					controldir = "control";
+			}
+			if (!stralloc_copys(&dkimfn, controldir))
+				die(51);
+			if (!stralloc_cats(&dkimfn, "/domainkeys/%/default"))
+				die(51);
+			if (!stralloc_0(&dkimfn))
+				die(51);
+			dkimsign = dkimfn.s;
 		}
-		if (!stralloc_copys(&dkimfn, controldir))
-			die(51);
-		if (!stralloc_cats(&dkimfn, "/domainkeys/%/default"))
-			die(51);
-		if (!stralloc_0(&dkimfn))
-			die(51);
-		dkimsign = dkimfn.s;
 	}
 	dkimqueue = env_get("DKIMQUEUE");
 	if (dkimqueue && *dkimqueue)

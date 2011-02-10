@@ -257,7 +257,8 @@ are set, then
 will be set to QMAILHOME/control/domainkeys/%/default. The % will be replaced by the domain in the
 From: header. If such a file does not exist, then it will be set to
 QMAILHOME/control/domainkeys/default. If such a private key exists, it will be used to sign the
-domain.
+domain. You can also set \fBDKIMKEY\fR to chose a key different from
+QMAILHOME/control/domainkeys/%/default.
 
 By default
 .B qmail-dkim
