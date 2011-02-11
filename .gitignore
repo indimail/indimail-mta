@@ -31,7 +31,7 @@ dist
 experiments
 packages
 rpmbuild
-clamav-0.96.5
+clamav-0.97
 private
 pam-multi*
 install-sh
