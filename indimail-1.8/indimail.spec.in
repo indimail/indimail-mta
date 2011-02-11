@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail.spec.in,v 2.199 2011-01-29 20:29:14+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 2.200 2011-02-11 08:14:31+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %define _unpackaged_files_terminate_build 1
 
@@ -41,7 +41,7 @@
 %define ucspi_version      0.88
 %define qmail_version      1.03
 %define fetchmail_version  6.3.19
-%define clamav_version     0.96.5
+%define clamav_version     0.97
 %define fortune_version    1.1
 %define nssd_version       1.1
 %define flash_version      0.9.4
