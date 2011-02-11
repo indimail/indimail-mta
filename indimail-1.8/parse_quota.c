@@ -1,5 +1,8 @@
 /*
  * $Log: parse_quota.c,v $
+ * Revision 2.5  2011-02-11 23:00:08+05:30  Cprogrammer
+ * corrected mathematical calculation for 'k', 'K', 'm', 'M' modifier for quota
+ *
  * Revision 2.4  2009-10-15 10:47:32+05:30  Cprogrammer
  * skip LLONG_MAX, LLONG_MIN if not defined and use ERANGE
  *
@@ -27,7 +30,7 @@
 #endif
 
 #ifndef	lint
-static char     sccsid[] = "$Id: parse_quota.c,v 2.4 2009-10-15 10:47:32+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: parse_quota.c,v 2.5 2011-02-11 23:00:08+05:30 Cprogrammer Stab mbhangui $";
 #endif
 
 mdir_t
@@ -66,12 +69,12 @@ parse_quota(char *quota, mdir_t *count)
 	{
 		if (quota[i] == 'k' || quota[i] == 'K')
 		{
-			per_user_limit = per_user_limit * 1000;
+			per_user_limit = per_user_limit * 1024;
 			break;
 		}
 		if (quota[i] == 'm' || quota[i] == 'M')
 		{
-			per_user_limit = per_user_limit * 1000000;
+			per_user_limit = per_user_limit * 1048576;
 			break;
 		}
 	}
