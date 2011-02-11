@@ -1,5 +1,8 @@
 /*
  * $Log: newfield.c,v $
+ * Revision 1.6  2011-02-11 23:44:27+05:30  Cprogrammer
+ * added blank lines for code readability
+ *
  * Revision 1.5  2010-04-13 15:10:06+05:30  Cprogrammer
  * use indimail in message id
  *
@@ -34,6 +37,7 @@ datefmt(s, when)
 	unsigned int    i;
 	unsigned int    len;
 	struct datetime dt;
+
 	datetime_tai(&dt, when);
 	len = 0;
 	i = fmt_str(s, "Date: ");
@@ -57,7 +61,9 @@ msgidfmt(s, idhost, idhostlen, when)
 	unsigned int    i;
 	unsigned int    len;
 	struct datetime dt;
+
 	datetime_tai(&dt, when);
+
 	len = 0;
 	i = fmt_str(s, "Message-ID: <");
 	len += i;
@@ -135,7 +141,7 @@ newfield_msgidmake(idhost, idhostlen, when)
 void
 getversion_newfield_c()
 {
-	static char    *x = "$Id: newfield.c,v 1.5 2010-04-13 15:10:06+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: newfield.c,v 1.6 2011-02-11 23:44:27+05:30 Cprogrammer Stab mbhangui $";
 
 	x++;
 }
