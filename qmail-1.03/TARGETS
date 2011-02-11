@@ -983,3 +983,5 @@ md5c.o
 trywaitp.o
 mail_acl.o
 balance_outgoing
+arfgen
+arfgen.o
