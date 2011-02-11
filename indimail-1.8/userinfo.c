@@ -1,5 +1,8 @@
 /*
  * $Log: userinfo.c,v $
+ * Revision 2.33  2011-02-11 23:01:46+05:30  Cprogrammer
+ * fix for displaying quota, counts > 2Gb
+ *
  * Revision 2.32  2010-06-14 21:25:31+05:30  Cprogrammer
  * show mailbox path as remote if user account is on remote machine
  *
@@ -190,7 +193,7 @@
 #include <errno.h>
 
 #ifndef	lint
-static char     sccsid[] = "$Id: userinfo.c,v 2.32 2010-06-14 21:25:31+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: userinfo.c,v 2.33 2011-02-11 23:01:46+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 extern char *strptime(const char *, const char *, struct tm *);
@@ -398,7 +401,7 @@ vuserinfo(Email, User, Domain, DisplayName, DisplayPasswd, DisplayUid, DisplayGi
 
 		snprintf(maildir, MAX_BUFF, "%s/Maildir", mypw->pw_dir);
 		printf("quota         : %s [%-4.2f Mb]\n", mypw->pw_shell,
-			(float) strtoll(mypw->pw_shell, 0, 0)/(1024 * 1024));
+			(float) parse_quota(mypw->pw_shell, 0)/(1024 * 1024));
 		if (islocal)
 		{
 #ifdef USE_MAILDIRQUOTA	
@@ -406,7 +409,8 @@ vuserinfo(Email, User, Domain, DisplayName, DisplayPasswd, DisplayUid, DisplayGi
 				cur_size = mcount = -1;
 			else
 				cur_size = recalc_quota(maildir, &mcount, size_limit, count_limit, 2);
-			printf("curr quota    : %"PRIu64"S,%"PRIu64"C\n", cur_size, mcount);
+			printf("curr quota    : %"PRIu64"S,%"PRIu64"C\n",
+				cur_size == -1 ? 0 : cur_size, mcount == -1 ? 0 : mcount);
 #else
 			printf("curr quota    : %"PRIu64"\n", recalc_quota(maildir, 2));
 #endif

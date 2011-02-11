@@ -1,5 +1,8 @@
 /*
  * $Log: vlimit.c,v $
+ * Revision 2.10  2011-02-11 23:02:05+05:30  Cprogrammer
+ * fix for setting & displaying > 2Gb in quota and message counts
+ *
  * Revision 2.9  2010-04-11 18:54:38+05:30  Cprogrammer
  * fixed domain_expiry, passwd_expiry getting reset
  *
@@ -49,13 +52,14 @@
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vlimit.c,v 2.9 2010-04-11 18:54:38+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: vlimit.c,v 2.10 2011-02-11 23:02:05+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef ENABLE_DOMAIN_LIMITS
 #include <stdlib.h>
 #include <unistd.h>
 #include <string.h>
+#include <errno.h>
 #include <pwd.h>
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -153,14 +157,40 @@ main(int argc, char *argv[])
 	/*
 	 * quota & message count limits 
 	 */
-	if (DomainQuota[0] != 0)
-		limits.diskquota = parse_quota(DomainQuota, 0);
+	if (DomainQuota[0] != 0 && (limits.diskquota = parse_quota(DomainQuota, 0)) == -1)
+	{
+		fprintf(stderr, "diskquota: %s\n", strerror(errno));
+		return (-1);
+	}
 	if (DomainMaxMsgCount[0] != 0)
-		limits.maxmsgcount = atoi(DomainMaxMsgCount);
+		limits.maxmsgcount = strtoll(DomainMaxMsgCount, 0, 0);
+#if defined(LLONG_MIN) && defined(LLONG_MAX)
+	if (limits.maxmsgcount == LLONG_MIN || limits.maxmsgcount == LLONG_MAX)
+#else
+	if (errno == ERANGE)
+#endif
+	{
+		fprintf(stderr, "maxmsgcount: %s\n", strerror(errno));
+		return (-1);
+	}
+
 	if (DefaultUserQuota[0] != 0)
-		limits.defaultquota = atoi(DefaultUserQuota);
-	if (DefaultUserMaxMsgCount[0] != 0)
-		limits.defaultmaxmsgcount = atoi(DefaultUserMaxMsgCount);
+		limits.defaultquota = parse_quota(DefaultUserQuota, 0);
+	if (DefaultUserMaxMsgCount[0] != 0 &&
+			(limits.defaultmaxmsgcount = strtoll(DefaultUserMaxMsgCount, 0, 0)) == -1)
+	{
+		fprintf(stderr, "defaultmaxmsgcount: %s\n", strerror(errno));
+		return (-1);
+	}
+#if defined(LLONG_MIN) && defined(LLONG_MAX)
+	if (limits.defaultmaxmsgcount == LLONG_MIN || limits.defaultmaxmsgcount == LLONG_MAX)
+#else
+	if (errno == ERANGE)
+#endif
+	{
+		fprintf(stderr, "defaultmaxmsgcount: %s\n", strerror(errno));
+		return (-1);
+	}
 	if (GidFlag == 1)
 	{
 		GidFlag = 0;
@@ -412,10 +442,10 @@ main(int argc, char *argv[])
 	{
 		printf("Domain Expiry Date   : %s", limits.domain_expiry == -1 ? "Never Expires\n" : ctime(&limits.domain_expiry));
 		printf("Password Expiry Date : %s", limits.passwd_expiry == -1 ? "Never Expires\n" : ctime(&limits.passwd_expiry));
-		printf("Max Domain Quota     : %d\n", limits.diskquota);
-		printf("Max Domain Messages  : %d\n", limits.maxmsgcount);
-		printf("Default User Quota   : %d\n", limits.defaultquota);
-		printf("Default User Messages: %d\n", limits.defaultmaxmsgcount);
+		printf("Max Domain Quota     : %"PRIu64"\n", limits.diskquota);
+		printf("Max Domain Messages  : %"PRIu64"\n", limits.maxmsgcount);
+		printf("Default User Quota   : %"PRIu64"\n", limits.defaultquota);
+		printf("Default User Messages: %"PRIu64"\n", limits.defaultmaxmsgcount);
 		printf("Max Pop Accounts     : %d\n", limits.maxpopaccounts);
 		printf("Max Aliases          : %d\n", limits.maxaliases);
 		printf("Max Forwards         : %d\n", limits.maxforwards);

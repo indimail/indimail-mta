@@ -1,5 +1,8 @@
 /*
  * $Log: indimail.h,v $
+ * Revision 2.197  2011-02-11 23:01:15+05:30  Cprogrammer
+ * fix for specifying > 2GB values in quota and message counts
+ *
  * Revision 2.196  2010-08-15 15:51:33+05:30  Cprogrammer
  * added users_per_level argument to print_control()
  *
@@ -904,7 +907,7 @@
 #define INDIMAILH_H
 
 #ifndef	lint
-static char     sccsidh[] = "$Id: indimail.h,v 2.196 2010-08-15 15:51:33+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsidh[] = "$Id: indimail.h,v 2.197 2011-02-11 23:01:15+05:30 Cprogrammer Stab mbhangui $";
 #endif
 
 #include "config.h"
@@ -936,7 +939,7 @@ typedef long long mdir_t;
 #define SCNd64 "lld"
 #define SCNu64 "llu"
 #endif
-#define SALTSIZE        32
+#define SALTSIZE  32
 #define PORT_SMTP 25
 #define PORT_QMTP 209
 #define PORT_QMQP 628
@@ -1203,7 +1206,7 @@ index timestamp (timestamp)"
 #define USERQUOTA_TABLE_LAYOUT "\
 user char(40) not null, \
 domain char(67) not null,\
-quota int not null, \
+quota bigint unsigned not null, \
 timestamp datetime DEFAULT \"0000-00-00 00:00:00\" NOT NULL, \
 primary key(user, domain), index quota (quota)"
 #endif
@@ -1342,10 +1345,10 @@ primary key(emailid, mailing_list), index emailid (emailid, filter_no)"
 	maxforwards              INT(10) NOT NULL DEFAULT -1, \
 	maxautoresponders        INT(10) NOT NULL DEFAULT -1, \
 	maxmailinglists          INT(10) NOT NULL DEFAULT -1, \
-	diskquota                INT(12) NOT NULL DEFAULT 0, \
-	maxmsgcount              INT(12) NOT NULL DEFAULT 0, \
-	defaultquota             INT(12) NOT NULL DEFAULT 0, \
-	defaultmaxmsgcount       INT(12) NOT NULL DEFAULT 0, \
+	diskquota                BIGINT UNSIGNED NOT NULL DEFAULT 0, \
+	maxmsgcount              BIGINT UNSIGNED NOT NULL DEFAULT 0, \
+	defaultquota             BIGINT UNSIGNED NOT NULL DEFAULT 0, \
+	defaultmaxmsgcount       BIGINT UNSIGNED NOT NULL DEFAULT 0, \
 	disable_pop              TINYINT(1) NOT NULL DEFAULT 0, \
 	disable_imap             TINYINT(1) NOT NULL DEFAULT 0, \
 	disable_dialup           TINYINT(1) NOT NULL DEFAULT 0, \
@@ -1477,10 +1480,10 @@ struct vlimits {
       int       maxmailinglists;
 
       /* quota & message count limits */
-      int       diskquota;
-      int       maxmsgcount;
-      int       defaultquota;
-      int       defaultmaxmsgcount;
+      mdir_t    diskquota;
+      mdir_t    maxmsgcount;
+      mdir_t    defaultquota;
+      mdir_t    defaultmaxmsgcount;
 
       /* the following are 0 (false) or 1 (true) */
       short     disable_pop;

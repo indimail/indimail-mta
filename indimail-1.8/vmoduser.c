@@ -1,5 +1,8 @@
 /*
  * $Log: vmoduser.c,v $
+ * Revision 2.24  2011-02-11 22:57:47+05:30  Cprogrammer
+ * fix for specifying 'k', 'K', 'm', 'M' units in quota
+ *
  * Revision 2.23  2009-12-02 11:05:04+05:30  Cprogrammer
  * use .domain_limits in domain directory to turn on domain limits
  *
@@ -138,7 +141,7 @@
 #include <signal.h>
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vmoduser.c,v 2.23 2009-12-02 11:05:04+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: vmoduser.c,v 2.24 2011-02-11 22:57:47+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 char            Email[MAX_BUFF];
@@ -285,9 +288,9 @@ main(argc, argv)
 	if (QuotaFlag == 1)
 	{
 		if ((*Quota == '+') || (*Quota == '-'))
-			snprintf(tmpQuota, sizeof(tmpQuota), "%lld", strtoll(pw->pw_shell, 0, 0) + atol(Quota));
+			snprintf(tmpQuota, sizeof(tmpQuota), "%"PRId64"", parse_quota(pw->pw_shell, 0) + parse_quota(Quota, 0));
 		else
-			scopy(tmpQuota, Quota, MAX_BUFF);
+			snprintf(tmpQuota, sizeof(tmpQuota), "%"PRId64"", parse_quota(Quota, 0));
 		if (!(ptr = strchr(tmpQuota, ',')))
 		{
 			if ((ptr = strchr(pw->pw_shell, ',')))

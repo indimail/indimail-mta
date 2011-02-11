@@ -1,5 +1,8 @@
 /*
  * $Log: limits.c,v $
+ * Revision 2.12  2011-02-11 22:59:39+05:30  Cprogrammer
+ * fix for specifing > 2GB quota
+ *
  * Revision 2.11  2009-12-01 11:59:23+05:30  Cprogrammer
  * fixed syntax error in mysql_query
  *
@@ -40,12 +43,13 @@
  */
 
 #ifndef	lint
-static char     sccsid[] = "$Id: limits.c,v 2.11 2009-12-01 11:59:23+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: limits.c,v 2.12 2011-02-11 22:59:39+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #include "indimail.h"
 #ifdef ENABLE_DOMAIN_LIMITS
 #include <stdlib.h>
+#include <limits.h>
 #include <errno.h>
 #include <string.h>
 #include <mysqld_error.h>
@@ -102,10 +106,46 @@ vget_limits(char *domain, struct vlimits *limits)
 		limits->maxforwards = atoi(row[4]);
 		limits->maxautoresponders = atoi(row[5]);
 		limits->maxmailinglists = atoi(row[6]);
-		limits->diskquota = atoi(row[7]);
-		limits->maxmsgcount = atoi(row[8]);
-		limits->defaultquota = atoi(row[9]);
-		limits->defaultmaxmsgcount = atoi(row[10]);
+		limits->diskquota = strtoll(row[7], 0, 0);
+#if defined(LLONG_MIN) && defined(LLONG_MAX)
+		if (limits->diskquota == LLONG_MIN || limits->diskquota == LLONG_MAX)
+#else
+		if (errno == ERANGE)
+#endif
+		{
+			mysql_free_result(res);
+			return (-1);
+		}
+		limits->maxmsgcount = strtoll(row[8], 0, 0);
+#if defined(LLONG_MIN) && defined(LLONG_MAX)
+		if (limits->maxmsgcount == LLONG_MIN || limits->maxmsgcount == LLONG_MAX)
+#else
+		if (errno == ERANGE)
+#endif
+		{
+			mysql_free_result(res);
+			return (-1);
+		}
+		limits->defaultquota = strtoll(row[9], 0, 0);
+#if defined(LLONG_MIN) && defined(LLONG_MAX)
+		if (limits->defaultquota == LLONG_MIN || limits->defaultquota == LLONG_MAX)
+#else
+		if (errno == ERANGE)
+#endif
+		{
+			mysql_free_result(res);
+			return (-1);
+		}
+		limits->defaultmaxmsgcount = strtoll(row[10], 0, 0);
+#if defined(LLONG_MIN) && defined(LLONG_MAX)
+		if (limits->defaultmaxmsgcount == LLONG_MIN || limits->defaultmaxmsgcount == LLONG_MAX)
+#else
+		if (errno == ERANGE)
+#endif
+		{
+			mysql_free_result(res);
+			return (-1);
+		}
 		limits->disable_pop = atoi(row[11]);
 		limits->disable_imap = atoi(row[12]);
 		limits->disable_dialup = atoi(row[13]);
@@ -182,7 +222,7 @@ vset_limits(char *domain, struct vlimits *limits)
 		"perm_alias, perm_forward, perm_autoresponder, perm_maillist, perm_quota, "
 		"perm_defaultquota) \n"
 		"VALUES \n"
-		"(\"%s\", %ld, %ld, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d)",
+		"(\"%s\", %ld, %ld, %d, %d, %d, %d, %d, %"PRIu64", %"PRIu64", %"PRIu64", %"PRIu64", %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d)",
 		domain, limits->domain_expiry, limits->passwd_expiry, limits->maxpopaccounts,
 		limits->maxaliases, limits->maxforwards, limits->maxautoresponders, limits->maxmailinglists,
 		limits->diskquota, limits->maxmsgcount, limits->defaultquota, limits->defaultmaxmsgcount,
