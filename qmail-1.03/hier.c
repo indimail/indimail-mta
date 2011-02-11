@@ -1,5 +1,8 @@
 /*
  * $Log: hier.c,v $
+ * Revision 1.157  2011-02-11 23:41:37+05:30  Cprogrammer
+ * added arfgen
+ *
  * Revision 1.156  2011-01-29 22:20:47+05:30  Cprogrammer
  * changes for courier-imap-4.8.2
  *
@@ -620,6 +623,7 @@ hier(inst_dir)
 	c(auto_qmail_home, "bin", "maildirqmtp", auto_uido, auto_gidq, 0555);
 	c(auto_qmail_home, "bin", "maildirsmtp", auto_uido, auto_gidq, 0555);
 	c(auto_qmail_home, "bin", "maildirserial", auto_uido, auto_gidq, 0555);
+	c(auto_qmail_home, "bin", "arfgen", auto_uido, auto_gidq, 0555);
 
 #ifdef USE_SPF
 	c(auto_qmail_home, "bin", "spfquery", auto_uido, auto_gidq, 0555);
@@ -1577,7 +1581,7 @@ _hier(inst_dir)
 void
 getversion_install_big_c()
 {
-	static char    *x = "$Id: hier.c,v 1.156 2011-01-29 22:20:47+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: hier.c,v 1.157 2011-02-11 23:41:37+05:30 Cprogrammer Stab mbhangui $";
 
 #ifdef INDIMAIL
 	x = sccsidh;
