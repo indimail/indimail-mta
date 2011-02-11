@@ -371,9 +371,11 @@ mysql-5.1.48
 MariaDB 5.1.42
 MariaDB 5.1.44
 MariaDB 5.1.47
+MariaDB 5.2.4
 mysql-5.4.3-beta
 mysql-5.5.0-m2
 mysql-5.5.2-m2
 mysql-5.5.3-m3
+mysql-5.5.8
 
 -- Manvendra Bhangui <manvendra@indimail.org>

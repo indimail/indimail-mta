@@ -208,7 +208,7 @@ I usually prefer to run privileged commands like this (so that I don't get fond 
                                . fortune-1.1        (8.4  Mb)
                                . courier-imap-4.8.2 (65   Mb)
                                . bogofilter-1.2.2   (11.6 Mb)
-                               . clamav-0.96.5      (600  Mb)
+                               . clamav-0.97        (600  Mb)
                                . fetchmail-6.3.19   (10.5 Mb)
                                . iwebadmin-1.0      (3.0  Mb)
                                ------------------------------
@@ -511,10 +511,11 @@ the installation.
     Then do ./configure <same_parameters_as_earlier_install> ; make ; make install-strip
 
     ##### STEP 5  ##### Courier IMAP/POP3 #####################
-    Install courier-imap (courier-imap-4.8.2.tar.bz2) MD5 xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+    Install courier-imap (courier-imap-4.8.2.tar.bz2) MD5 e1b90a2692a5f2ca3407d2d640a70892
     current working directory /home/local/src
     Download the courier-imap package. The latest tested courier-imap package is
-    courier-imap-4.8.2.tar.bz2. The patch brings up the version upto courier-imap version to 4.5.0
+    courier-imap-4.8.2.tar.bz2. The patch brings up the version upto courier-imap to be
+    compatabile with flexible and database independent
 
     % bzip2 -d -c courier-imap-4.8.2.tar.bz2 | tar xf -
     % gunzip -c indimail-@version@/patches/courier-imap-4.8.2.patch.gz | patch -p0
@@ -611,14 +612,14 @@ the installation.
     Then do ./configure <same_parameters_as_earlier_install> ; make ; make install-strip
 
     ##### STEP 7  ##### Virus Scanner #########################
-    Install clamav MD5 202e51d47298779e5babacc443102c6a
+    Install clamav MD5 605ed132b2f8e89df11064adea2b183b
     current working directory /home/local/src
-    Download clamav package. The latest tested clamav package tested is clamav-0.96.5.tar.gz.
+    Download clamav package. The latest tested clamav package tested is clamav-0.97.tar.gz.
 
-    % wget http://downloads.sourceforge.net/clamav/clamav-0.96.5.tar.gz
-    % gunzip -c clamav-0.96.5.tar.gz | tar xf -
-    % gunzip -c indimail-@version@/patches/clamav-0.96.5.patch.gz | patch -p0
-    % cd clamav-0.96.5
+    % wget http://downloads.sourceforge.net/clamav/clamav-0.97.tar.gz
+    % gunzip -c clamav-0.97.tar.gz | tar xf -
+    % gunzip -c indimail-@version@/patches/clamav-0.97.patch.gz | patch -p0
+    % cd clamav-0.97
     % ./configure --prefix=@indimaildir@ --sysconfdir=@indimaildir@/etc \
         --with-dbdir=@indimaildir@/share/clamd \
         --libexecdir=@indimaildir@/libexec \
