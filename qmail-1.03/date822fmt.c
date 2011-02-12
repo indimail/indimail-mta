@@ -1,5 +1,8 @@
 /*
  * $Log: date822fmt.c,v $
+ * Revision 1.5  2011-02-12 15:44:47+05:30  Cprogrammer
+ * added display of week days
+ *
  * Revision 1.4  2004-10-22 20:24:13+05:30  Cprogrammer
  * added RCS id
  *
@@ -14,6 +17,9 @@
 
 static char    *montab[12] = {
 	"Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
+};
+static char    *daytab[7] = {
+	"Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"
 };
 
 unsigned int
@@ -36,11 +42,22 @@ date822fmt(s, dt)
 	new_dt.year = tm->tm_year;
 	new_dt.mon = tm->tm_mon;
 	new_dt.mday = tm->tm_mday;
+	new_dt.wday = tm->tm_wday;
 	new_dt.hour = tm->tm_hour;
 	new_dt.min = tm->tm_min;
 	new_dt.sec = tm->tm_sec;
 	local = datetime_untai(&new_dt);
 	len = 0;
+
+	i = fmt_str(s, daytab[new_dt.wday]);
+	len += i;
+	if (s)
+		s += i;
+	i = fmt_str(s, ", ");
+	len += i;
+	if (s)
+		s += i;
+
 	i = fmt_uint(s, new_dt.mday);
 	len += i;
 	if (s)
@@ -127,7 +144,7 @@ date822fmt(s, dt)
 void
 getversion_date822fmt_c()
 {
-	static char    *x = "$Id: date822fmt.c,v 1.4 2004-10-22 20:24:13+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: date822fmt.c,v 1.5 2011-02-12 15:44:47+05:30 Cprogrammer Stab mbhangui $";
 
 	x++;
 }
