@@ -1,7 +1,10 @@
 /*
  * $Log: hier.c,v $
+ * Revision 1.158  2011-02-12 16:04:27+05:30  Cprogrammer
+ * added qarf man page
+ *
  * Revision 1.157  2011-02-11 23:41:37+05:30  Cprogrammer
- * added arfgen
+ * added qarf
  *
  * Revision 1.156  2011-01-29 22:20:47+05:30  Cprogrammer
  * changes for courier-imap-4.8.2
@@ -623,7 +626,7 @@ hier(inst_dir)
 	c(auto_qmail_home, "bin", "maildirqmtp", auto_uido, auto_gidq, 0555);
 	c(auto_qmail_home, "bin", "maildirsmtp", auto_uido, auto_gidq, 0555);
 	c(auto_qmail_home, "bin", "maildirserial", auto_uido, auto_gidq, 0555);
-	c(auto_qmail_home, "bin", "arfgen", auto_uido, auto_gidq, 0555);
+	c(auto_qmail_home, "bin", "qarf", auto_uido, auto_gidq, 0555);
 
 #ifdef USE_SPF
 	c(auto_qmail_home, "bin", "spfquery", auto_uido, auto_gidq, 0555);
@@ -895,6 +898,7 @@ hier(inst_dir)
 	c(auto_qmail_home, "man/man1", "cdbstats.1", auto_uido, auto_gidq, 0444);
 	c(auto_qmail_home, "man/man1", "cdbmake.1", auto_uido, auto_gidq, 0444);
 	c(auto_qmail_home, "man/man1", "cdbdump.1", auto_uido, auto_gidq, 0444);
+	c(auto_qmail_home, "man/man1", "qarf.1", auto_uido, auto_gidq, 0444);
 	c(auto_qmail_home, "man/man1", "qmail-rm.1", auto_uido, auto_gidq, 0444);
 	c(auto_qmail_home, "man/cat1", "qmail-rm.0", auto_uido, auto_gidq, 0444);
 
@@ -1581,7 +1585,7 @@ _hier(inst_dir)
 void
 getversion_install_big_c()
 {
-	static char    *x = "$Id: hier.c,v 1.157 2011-02-11 23:41:37+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: hier.c,v 1.158 2011-02-12 16:04:27+05:30 Cprogrammer Stab mbhangui $";
 
 #ifdef INDIMAIL
 	x = sccsidh;
