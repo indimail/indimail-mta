@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail.spec.in,v 2.200 2011-02-11 08:14:31+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 2.201 2011-02-12 15:51:55+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %define _unpackaged_files_terminate_build 1
 
@@ -1095,6 +1095,7 @@ fi
 %attr(555,root,qmail)                   %{_prefix}/bin/zrhosts
 %attr(555,root,qmail)                   %{_prefix}/bin/qmail-smtpd
 %attr(555,root,qmail)                   %{_prefix}/bin/batv
+%attr(555,root,qmail)                   %{_prefix}/bin/qarf
 %attr(555,root,qmail)                   %{_prefix}/sbin/sys-checkpwd
 %attr(555,root,qmail)                   %{_prefix}/sbin/ldap-checkpwd
 %attr(555,root,qmail)                   %{_prefix}/bin/greydaemon
