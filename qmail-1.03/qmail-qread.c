@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-qread.c,v $
+ * Revision 1.23  2011-02-12 15:35:36+05:30  Cprogrammer
+ * added usage() function
+ *
  * Revision 1.22  2010-07-15 08:24:44+05:30  Cprogrammer
  * ability to toggle local, remote queues when displaying counts
  *
@@ -252,6 +255,23 @@ putstats(int doCount)
 int             doLocal = 0, doRemote = 0, doTodo = 0, doCount = 0;
 
 #ifdef MULTI_QUEUE
+
+void
+usage()
+{
+	outs("qmail-read [-calrt]");
+	outok("\n\t");
+	outs("-a - Display local, remote and todo Queues");
+	outok("\n\t");
+	outs("-c - Display Counts");
+	outok("\n\t");
+	outs("-l - Display local  Queue");
+	outok("\n\t");
+	outs("-r - Display remote Queue");
+	outok("\n");
+	substdio_flush(subfdout);
+}
+
 static int
 get_arguments(int argc, char **argv)
 {
@@ -283,17 +303,7 @@ get_arguments(int argc, char **argv)
 			break;
 		case 'h':
 		default:
-			outs("qmail-read [-calrt]");
-			outok("\n\t");
-			outs("-a - Display local, remote and todo Queues");
-			outok("\n\t");
-			outs("-c - Display Counts");
-			outok("\n\t");
-			outs("-l - Display local  Queue");
-			outok("\n\t");
-			outs("-r - Display remote Queue");
-			outok("\n");
-			substdio_flush(subfdout);
+			usage();
 			return(1);
 			break;
 		}
@@ -608,7 +618,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_qread_c()
 {
-	static char    *x = "$Id: qmail-qread.c,v 1.22 2010-07-15 08:24:44+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: qmail-qread.c,v 1.23 2011-02-12 15:35:36+05:30 Cprogrammer Stab mbhangui $";
 
 #ifdef INDIMAIL
 	x = sccsidh;
