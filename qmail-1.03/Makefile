@@ -1206,7 +1206,7 @@ serialcmd maildircmd rewind relaytest qmail-qfilter sys-checkpwd ldap-checkpwd \
 iftocc ofmipd ofmipname 822field new-inject 822date 822received 822print \
 tokenize addrlist qquote parsedate qmail-greyd greydaemon \
 analyzer qtools qlog viruscanner update_tmprsadh dknewkey \
-dktest dot-forward batv balance_outgoing arfgen \
+dktest dot-forward batv balance_outgoing qarf \
 fastforward printforward setforward newaliases printmaillist \
 setmaillist newinclude sortedtest logselect mbox2maildir \
 envdir envuidgid fghack multilog pgrphack readproctitle setlock \
@@ -3834,24 +3834,24 @@ qmail-cat.o: \
 compile qmail-cat.c substdio.h error.h stralloc.h getln.h
 	./compile qmail-cat.c
 
-arfgen: \
-load  arfgen.o error.o substdi.o substdo.o stralloc_opys.o stralloc_opyb.o stralloc_pend.o \
-	stralloc_cats.o substdio.o substdio_copy.o \
+qarf: \
+load  qarf.o error.o substdi.o substdo.o stralloc_opys.o stralloc_opyb.o stralloc_pend.o \
+	stralloc_cats.o substdio.o substdio_copy.o str_chr.o subfderr.o \
 	fmt_ulong.o now.o str_len.o stralloc_cat.o stralloc_catb.o stralloc_eady.o \
-	alloc_re.o alloc.o byte_copy.o error_str.o date822fmt.o subgetopt.o \
+	alloc_re.o alloc.o byte_copy.o error_str.o date822fmt.o sgetopt.o subgetopt.o \
 	datetime.o fmt_str.o fmt_uint0.o datetime_un.o fmt_uint.o envread.o \
 	byte_chr.o str_diffn.o byte_cr.o getln.o getln2.o
-	./load arfgen error.o substdi.o substdo.o stralloc_opys.o stralloc_opyb.o stralloc_pend.o \
-	stralloc_cats.o substdio.o substdio_copy.o \
+	./load qarf error.o substdi.o substdo.o stralloc_opys.o stralloc_opyb.o stralloc_pend.o \
+	stralloc_cats.o substdio.o substdio_copy.o str_chr.o subfderr.o \
 	fmt_ulong.o now.o str_len.o stralloc_cat.o stralloc_catb.o stralloc_eady.o \
-	alloc_re.o alloc.o byte_copy.o error_str.o date822fmt.o subgetopt.o \
+	alloc_re.o alloc.o byte_copy.o error_str.o date822fmt.o sgetopt.o subgetopt.o \
 	datetime.o fmt_str.o fmt_uint0.o datetime_un.o fmt_uint.o envread.o \
 	byte_chr.o str_diffn.o byte_cr.o getln.o getln2.o
 
-arfgen.o: \
-compile arfgen.c substdio.h error.h stralloc.h now.h fmt.h datetime.h date822fmt.h \
+qarf.o: \
+compile qarf.c substdio.h error.h stralloc.h now.h fmt.h datetime.h date822fmt.h \
 sgetopt.h env.h str.h getln.h
-	./compile arfgen.c
+	./compile qarf.c
 
 qmail-poppass: \
 load  qmail-poppass.o error.o error_str.o byte_copy.o str_len.o byte_cr.o \
