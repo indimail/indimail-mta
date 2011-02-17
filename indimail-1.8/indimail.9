@@ -405,7 +405,6 @@ CONTROLDIR        |qmail-smtpd  |used    |The directory containing control files
                   |qmail-local  |        |
                   |ipmeprint    |        |
                   |qmail-newmrh |        |
-                  |qmail-qstat  |        |
                   |qmail-send   |        |
                   |qmail-showctl|        |
                   |qmail-spamdb |        |
@@ -1428,6 +1427,9 @@ vchkpass(8)        - IndiMail's checkpassword utility
 systpass(8)        - checkpassword utility to authenticate against shadow
 .sp -1
 .IP \n+[step]
+ldap-checkpwd(8)   - checkpassword utility to authenticate against LDAP
+.sp -1
+.IP \n+[step]
 InLookup(8)        - IndiMail's name lookup daemon
 .sp -1
 .IP \n+[step]
@@ -1799,6 +1801,12 @@ qmail-start     - turn on qmail delivery
 qmail-smtpd     - receive mail via SMTP
 .sp -1
 .IP \n+[step]
+swaks           - SMTP transaction tester
+.sp -1
+.IP \n+[step]
+qmail-sql       - prepare data in MySQL for \fBqmail-smtpd\fR(8)
+.sp -1
+.IP \n+[step]
 qmail-cdb       - prepare data in cdb format for \fBqmail-smtpd\fR(8), and \fBspawn-filter\fR(8)
 .sp -1
 .IP \n+[step]
@@ -1865,10 +1873,7 @@ qmail-tcpok     - clear TCP timeout tabl
 qmail-tcpto     - print TCP timeout table
 .sp -1
 .IP \n+[step]
-qmail-qread     - list outgoing messages and recipients
-.sp -1
-.IP \n+[step]
-qmail-qstat     - summarize mail queue statistics
+qmail-qread     - list outgoing messages, recipients, summarize queue stats
 .sp -1
 .IP \n+[step]
 qmail-rm        - Remove mails from Queue
@@ -1953,6 +1958,9 @@ qmail-greyd     - greylisting daemon for IndiMail, qmail and netqmail
 .sp -1
 .IP \n+[step]
 base64          - base64 encoding/decoding utility
+.sp -1
+.IP \n+[step]
+uarf            - Abuse Report Format Generator
 
 .SH CDB
 
@@ -1965,6 +1973,9 @@ cdbdump   - read cdb in stdin and print database in \fBcdbmake\fR(1) format
 .sp -1
 .IP \n+[step]
 cdbget    - search for records in cdb
+.sp -1
+.IP \n+[step]
+cdbgetm   - search for multiple records matching a key in cdb
 .sp -1
 .IP \n+[step]
 cdbstats  - read cdb on stdin and print statistics
@@ -2159,12 +2170,15 @@ importing the RPM key. e.g. for Fedora 12 one could do the following
 # rpm --import \\
  http://download.opensuse.org/repositories/home:/indimail/Fedora_12/repodata/repomd.xml.key
 
-# yum install indimail
+# yum install indimail.x86_64
+    or
+# yum install indimail.i386
 .EE
 
 .SH "SEE ALSO"
 dbinfo(8),
 inlookup(8),
+pam-multi(8),
 vhostid(8),
 vsmtp(8),
 vreorg(8),
