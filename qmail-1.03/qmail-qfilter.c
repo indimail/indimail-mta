@@ -1,5 +1,8 @@
 /* 
  * $Log: qmail-qfilter.c,v $
+ * Revision 1.8  2011-02-17 22:11:19+05:30  Cprogrammer
+ * lseek envelope fd
+ *
  * Revision 1.7  2009-04-24 23:50:47+05:30  Cprogrammer
  * version 2.1 of qmail-qfilter
  *
@@ -295,6 +298,7 @@ parse_args(int argc, char *argv[])
 {
 	command        *tail = 0;
 	command        *head = 0;
+
 	while (argc > 0) {
 		command        *cmd;
 		int             end = 0;
@@ -322,6 +326,7 @@ static void
 mktmpfd(int fd)
 {
 	int             tmp;
+
 	close(fd);
 	tmp = mktmpfile();
 	move_fd(tmp, fd);
@@ -331,6 +336,7 @@ static void
 move_unless_empty(int src, int dst, const void *reopen, size_t * var)
 {
 	struct stat     st;
+
 	if (fstat(src, &st) != 0)
 		_exit(QQ_INTERNAL);
 	if (st.st_size > 0) {
@@ -355,6 +361,7 @@ read_qqfd(void)
 {
 	struct stat     st;
 	char           *buf;
+
 	if (fstat(QQFD, &st) != 0)
 		_exit(QQ_INTERNAL);
 	if (st.st_size > 0) {
@@ -389,6 +396,11 @@ run_filters(const command * first)
 		strnum[fmt_ulong(strnum, msg_len)] = 0;
 		if (!env_put2("MSGSIZE", strnum))
 			_exit(QQ_OOM);
+		if (lseek(1, 0, SEEK_SET) != 0)
+		{
+			custom_error("Z", "unable to lseek envelope. (#4.3.0)", 0);
+			_exit(88);
+		}
 		switch ((pid = fork()))
 		{
 		case -1:
@@ -442,7 +454,7 @@ main(int argc, char *argv[])
 void
 getversion_qmail_qfilter_c()
 {
-	static char    *x = "$Id: qmail-qfilter.c,v 1.7 2009-04-24 23:50:47+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: qmail-qfilter.c,v 1.8 2011-02-17 22:11:19+05:30 Cprogrammer Stab mbhangui $";
 
 	x++;
 }
