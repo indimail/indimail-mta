@@ -3991,7 +3991,11 @@ if [ ! -f "$DESTDIR"$conf_file ] ; then
 	echo ""$DESTDIR"$conf_file: No such File or directory" 1>&2
 	return 1
 else
+	if [ -d /etc/mysql ] ; then
+	/bin/ln -sf $indimaildir/etc/indimail.cnf /etc/mysql/indimail.cnf
+	else
 	/bin/ln -sf $indimaildir/etc/indimail.cnf /etc/indimail.cnf
+	fi
 fi
 
 mkdir -p "$DESTDIR"$SERVICEDIR/mysql.$port/log
@@ -4315,51 +4319,76 @@ if [ " $model" = " small" ] ; then
 	case $mysql_version in
 	6.0.9-alpha)
 	cat $mysqlPrefix/share/mysql/my-small.cnf | sed \
-		-e 's{#log-bin=mysql-bin{log-bin=@indimaildir@/mysqldb/logs/mysql-bin{g' \
-		-e 's{skip-federated{#skip-federated{g' \
+		-e "s{#log-bin=mysql-bin{log-bin=@indimaildir@/mysqldb/logs/mysql-bin{g" \
+		-e "s{skip-federated{#skip-federated{g" \
+		-e "s{skip-locking{skip-external-locking{g" \
 		-e "s{port		= 3306{port		= $mysql_port{g" \
 		-e "s{socket		= .*\${socket        = $mysql_socket{g"
 	;;
 	*)
+	if [ ! -f $mysqlPrefix/share/mysql/my-small.cnf ] ; then
+		echo "[client]"
+		echo "port		= $mysql_port"
+		echo "socket        = $mysql_socket"
+	else
 	cat $mysqlPrefix/share/mysql/my-small.cnf | sed \
-		-e 's{#log-bin=mysql-bin{log-bin=@indimaildir@/mysqldb/logs/mysql-bin{g' \
+		-e "s{#log-bin=mysql-bin{log-bin=@indimaildir@/mysqldb/logs/mysql-bin{g" \
+		-e "s{skip-federated{#skip-federated{g" \
+		-e "s{skip-locking{skip-external-locking{g" \
 		-e "s{port		= 3306{port		= $mysql_port{g" \
 		-e "s{socket		= .*\${socket        = $mysql_socket{g"
+	fi
 	;;
 	esac
 elif [ " $model" = " medium" ] ; then
 	case $mysql_version in
 	6.0.9-alpha)
 	cat $mysqlPrefix/share/mysql/my-medium.cnf | sed \
-		-e 's{log-bin=mysql-bin{log-bin=@indimaildir@/mysqldb/logs/mysql-bin{g' \
-		-e 's{skip-federated{#skip-federated{g' \
+		-e "s{log-bin=mysql-bin{log-bin=@indimaildir@/mysqldb/logs/mysql-bin{g" \
+		-e "s{skip-federated{#skip-federated{g" \
+		-e "s{skip-locking{skip-external-locking{g" \
 		-e "s{port		= 3306{port		= $mysql_port{g" \
 		-e "s{socket		= .*\${socket        = $mysql_socket{g"
 	;;
 	*)
+	if [ ! -f $mysqlPrefix/share/mysql/my-medium.cnf ] ; then
+		echo "[client]"
+		echo "port		= $mysql_port"
+		echo "socket        = $mysql_socket"
+	else
 	cat $mysqlPrefix/share/mysql/my-medium.cnf | sed \
-		-e 's{log-bin=mysql-bin{log-bin=@indimaildir@/mysqldb/logs/mysql-bin{g' \
+		-e "s{log-bin=mysql-bin{log-bin=@indimaildir@/mysqldb/logs/mysql-bin{g" \
+		-e "s{skip-federated{#skip-federated{g" \
 		-e "s{skip-locking{skip-external-locking{g" \
 		-e "s{port		= 3306{port		= $mysql_port{g" \
 		-e "s{socket		= .*\${socket        = $mysql_socket{g"
+	fi
 	;;
 	esac
 elif [ " $model" = " large" ] ; then
 	if [ " $no_of_cpu" = " " ] ; then
 		case $mysql_version in
 		6.0.9-alpha)
-		cat $mysqlPrefix/share/mysql/my-medium.cnf | sed \
-			-e 's{log-bin=mysql-bin{log-bin=@indimaildir@/mysqldb/logs/mysql-bin{g' \
-			-e 's{skip-federated{#skip-federated{g' \
+		cat $mysqlPrefix/share/mysql/my-large.cnf | sed \
+			-e "s{log-bin=mysql-bin{log-bin=@indimaildir@/mysqldb/logs/mysql-bin{g" \
+			-e "s{skip-federated{#skip-federated{g" \
+			-e "s{skip-locking{skip-external-locking{g" \
 			-e "s{port		= 3306{port		= $mysql_port{g" \
 			-e "s{socket		= .*\${socket        = $mysql_socket{g"
 		;;
 		*)
-		cat $mysqlPrefix/share/mysql/my-medium.cnf | sed \
-			-e 's{log-bin=mysql-bin{log-bin=@indimaildir@/mysqldb/logs/mysql-bin{g' \
+		if [ ! -f $mysqlPrefix/share/mysql/my-large.cnf ] ; then
+			echo "[client]"
+			echo "port		= $mysql_port"
+			echo "socket        = $mysql_socket"
+		else
+		cat $mysqlPrefix/share/mysql/my-large.cnf | sed \
+			-e "s{log-bin=mysql-bin{log-bin=@indimaildir@/mysqldb/logs/mysql-bin{g" \
+			-e "s{skip-federated{#skip-federated{g" \
 			-e "s{skip-locking{skip-external-locking{g" \
 			-e "s{port		= 3306{port		= $mysql_port{g" \
 			-e "s{socket		= .*\${socket        = $mysql_socket{g"
+		fi
 		;;
 		esac
 	else
@@ -4367,19 +4396,28 @@ elif [ " $model" = " large" ] ; then
 		case $mysql_version in
 		6.0.9-alpha)
 		cat $mysqlPrefix/share/mysql/my-large.cnf | sed \
-			-e 's{log-bin=mysql-bin{log-bin=@indimaildir@/mysqldb/logs/mysql-bin{g' \
-			-e 's/thread_concurrency = 8/thread_concurrency=$thr_con/g' \
-			-e 's{skip-federated{#skip-federated{g' \
+			-e "s{log-bin=mysql-bin{log-bin=@indimaildir@/mysqldb/logs/mysql-bin{g" \
+			-e "s/thread_concurrency = 8/thread_concurrency=$thr_con/g" \
+			-e "s{skip-federated{#skip-federated{g" \
+			-e "s{skip-locking{skip-external-locking{g" \
 			-e "s{port		= 3306{port		= $mysql_port{g" \
 			-e "s{socket		= .*\${socket        = $mysql_socket{g"
 		;;
 		*)
+		if [ ! -f $mysqlPrefix/share/mysql/my-large.cnf ] ; then
+			echo "[client]"
+			echo "thread_concurrency=$thr_con"
+			echo "port		= $mysql_port"
+			echo "socket        = $mysql_socket"
+		else
 		cat $mysqlPrefix/share/mysql/my-large.cnf | sed \
-			-e 's{log-bin=mysql-bin{log-bin=@indimaildir@/mysqldb/logs/mysql-bin{g' \
+			-e "s{log-bin=mysql-bin{log-bin=@indimaildir@/mysqldb/logs/mysql-bin{g" \
+			-e "s/thread_concurrency = 8/thread_concurrency=$thr_con/g" \
+			-e "s{skip-federated{#skip-federated{g" \
 			-e "s{skip-locking{skip-external-locking{g" \
-			-e 's/thread_concurrency = 8/thread_concurrency=$thr_con/g' \
 			-e "s{port		= 3306{port		= $mysql_port{g" \
 			-e "s{socket		= .*\${socket        = $mysql_socket{g"
+		fi
 		;;
 		esac
 	fi
@@ -4388,17 +4426,25 @@ elif [ " $model" = " huge" ] ; then
 		case $mysql_version in
 		6.0.9-alpha)
 		cat $mysqlPrefix/share/mysql/my-huge.cnf | sed \
-			-e 's{log-bin=mysql-bin{log-bin=@indimaildir@/mysqldb/logs/mysql-bin{g' \
-			-e 's{skip-federated{#skip-federated{g' \
+			-e "s{log-bin=mysql-bin{log-bin=@indimaildir@/mysqldb/logs/mysql-bin{g" \
+			-e "s{skip-federated{#skip-federated{g" \
+			-e "s{skip-locking{skip-external-locking{g" \
 			-e "s{port		= 3306{port		= $mysql_port{g" \
 			-e "s{socket		= .*\${socket        = $mysql_socket{g"
 		;;
 		*)
+		if [ ! -f $mysqlPrefix/share/mysql/my-huge.cnf ] ; then
+			echo "[client]"
+			echo "port		= $mysql_port"
+			echo "socket        = $mysql_socket"
+		else
 		cat $mysqlPrefix/share/mysql/my-huge.cnf | sed \
-			-e 's{log-bin=mysql-bin{log-bin=@indimaildir@/mysqldb/logs/mysql-bin{g' \
+			-e "s{log-bin=mysql-bin{log-bin=@indimaildir@/mysqldb/logs/mysql-bin{g" \
+			-e "s{skip-federated{#skip-federated{g" \
 			-e "s{skip-locking{skip-external-locking{g" \
 			-e "s{port		= 3306{port		= $mysql_port{g" \
 			-e "s{socket		= .*\${socket        = $mysql_socket{g"
+		fi
 		;;
 		esac
 	else
@@ -4406,41 +4452,51 @@ elif [ " $model" = " huge" ] ; then
 		case $mysql_version in
 		6.0.9-alpha)
 		cat $mysqlPrefix/share/mysql/my-huge.cnf | sed \
-			-e 's{log-bin=mysql-bin{log-bin=@indimaildir@/mysqldb/logs/mysql-bin{g' \
-			-e 's/thread_concurrency = 8/thread_concurrency=$thr_con/g' \
-			-e 's{skip-federated{#skip-federated{g' \
+			-e "s{log-bin=mysql-bin{log-bin=@indimaildir@/mysqldb/logs/mysql-bin{g" \
+			-e "s/thread_concurrency = 8/thread_concurrency=$thr_con/g" \
+			-e "s{skip-federated{#skip-federated{g" \
+			-e "s{skip-locking{skip-external-locking{g" \
 			-e "s{port		= 3306{port		= $mysql_port{g" \
 			-e "s{socket		= .*\${socket        = $mysql_socket{g"
 		;;
 		*)
+		if [ ! -f $mysqlPrefix/share/mysql/my-large.cnf ] ; then
+			echo "[client]"
+			echo "thread_concurrency=$thr_con"
+			echo "port		= $mysql_port"
+			echo "socket        = $mysql_socket"
+		else
 		cat $mysqlPrefix/share/mysql/my-huge.cnf | sed \
-			-e 's{log-bin=mysql-bin{log-bin=@indimaildir@/mysqldb/logs/mysql-bin{g' \
+			-e "s{log-bin=mysql-bin{log-bin=@indimaildir@/mysqldb/logs/mysql-bin{g" \
+			-e "s/thread_concurrency = 8/thread_concurrency=$thr_con/g" \
+			-e "s{skip-federated{#skip-federated{g" \
 			-e "s{skip-locking{skip-external-locking{g" \
-			-e 's/thread_concurrency = 8/thread_concurrency=$thr_con/g' \
 			-e "s{port		= 3306{port		= $mysql_port{g" \
 			-e "s{socket		= .*\${socket        = $mysql_socket{g"
+		fi
 		;;
 		esac
 	fi
 fi
+echo
 echo "[inlookup]"
 echo "#The number of seconds the server waits for activity on an"
 echo "#interactive connection before closing it. An interactive client is"
 echo "#defined as a client that uses the 'CLIENT_INTERACTIVE' option to connect"
 echo "interactive_timeout=28880"
-
+echo
 echo "#The number of seconds to wait for more data from a connection"
 echo "#before aborting the read. This timeout applies only to TCP/IP"
 echo "#connections, not to connections made via Unix socket files, named"
 echo "#pipes, or shared memory."
 echo "net_read_timeout=5"
-
+echo
 echo "#The number of seconds to wait for a block to be written to a"
 echo "#connection before aborting the write. This timeout applies only to"
 echo "#TCP/IP connections, not to connections made via Unix socket files,"
 echo "#named pipes, or shared memory."
 echo "net_write_timeout=5"
-
+echo
 echo "#The number of seconds the server waits for activity on a"
 echo "#non-interactive connection before closing it. This timeout applies"
 echo "#only to TCP/IP and Unix socket file connections, not to"
