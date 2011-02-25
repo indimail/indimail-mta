@@ -130,7 +130,8 @@ Source12: http://downloads.sourceforge.net/clamav/clamav-%{clamav_version}.tar.g
 %if %nopam_multi == 0
 Source13: http://downloads.sourceforge.net/%{name}/pam-multi-%{pam_multi_version}.tar.gz
 %endif
-Source14: http://downloads.sourceforge.net/%{name}/%{name}-%{version}-rpmlintrc
+Source14: http://downloads.sourceforge.net/%{name}/logalert-0.3.tar.gz
+Source15: http://downloads.sourceforge.net/%{name}/%{name}-%{version}-rpmlintrc
 
 Patch1:  http://downloads.sourceforge.net/%{name}/Patches/qmail-%{qmail_version}.patch.gz
 Patch2:  http://downloads.sourceforge.net/%{name}/Patches/ucspi-tcp-%{ucspi_version}.patch.gz
@@ -331,7 +332,7 @@ mpack-1.6 fortune-%{fortune_version} pam-multi-%{pam_multi_version} \
 qmail-%{qmail_version} ucspi-tcp-%{ucspi_version} nssd-%{nssd_version} \
 bogofilter-%{bogofilter_version} fetchmail-%{fetchmail_version} \
 courier-imap-%{courier_version} clamav-%{clamav_version} \
-libdkim-%{libdkim_version}
+libdkim-%{libdkim_version} logalert-0.3
 do
 	(
 	if [ -d $i ] ; then
@@ -591,7 +592,6 @@ if [ -d ../fetchmail-%{fetchmail_version} ] ; then
 		`%{__cat} ../%{name}-%{version}/config/fetchmail.opts` > $DEVICE
 	fi
 fi
-cd ..
 
 #### ucspi-tcp ######################
 if [ -d ucspi-tcp-%{ucspi_version} ] ; then
@@ -1298,6 +1298,8 @@ fi
 %attr(555,root,root)                    %{_prefix}/sbin/clamd
 %attr(555,root,root)                    %{_prefix}/bin/clamconf
 %endif
+# logalert
+%attr(555,root,root)                    %{_prefix}/bin/logalert
 
 # fetchmail
 %if %nofetchmail == 0
