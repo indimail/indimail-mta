@@ -1,4 +1,4 @@
-LIBS = -ly @LEXLIB@ @LIBPCRE_LIBS@
+LIBS = @LEXLIB@ @LIBPCRE_LIBS@
 
 bin_PROGRAMS = logalert
 
