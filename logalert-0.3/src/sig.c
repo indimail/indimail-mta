@@ -21,15 +21,13 @@ sig_handle_abort(int sig)
 void
 sig_handle_timer(uint timeout)
 {
-        active = YES;
+	active = YES;
 }
 
 void sig_init()
 {
-        signal(SIGALRM, sig_handle_timer);
-
-        signal(SIGINT, sig_handle_abort);
-        signal(SIGTERM, sig_handle_abort);
-
+	signal(SIGALRM, (void (*)()) sig_handle_timer);
+	signal(SIGINT, (void (*)()) sig_handle_abort);
+	signal(SIGTERM, (void (*)()) sig_handle_abort);
 }
 

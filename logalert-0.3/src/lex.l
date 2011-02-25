@@ -1,5 +1,6 @@
 %{
 
+#include <string.h>
 #include "parser.h"
 
 unsigned int in_block = 0;

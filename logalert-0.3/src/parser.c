@@ -1,10 +1,9 @@
-
-/* A Bison parser, made by GNU Bison 2.4.1.  */
+/* A Bison parser, made by GNU Bison 2.4.3.  */
 
 /* Skeleton implementation for Bison's Yacc-like parsers in C
    
-      Copyright (C) 1984, 1989, 1990, 2000, 2001, 2002, 2003, 2004, 2005, 2006
-   Free Software Foundation, Inc.
+      Copyright (C) 1984, 1989, 1990, 2000, 2001, 2002, 2003, 2004, 2005, 2006,
+   2009, 2010 Free Software Foundation, Inc.
    
    This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -46,7 +45,7 @@
 #define YYBISON 1
 
 /* Bison version.  */
-#define YYBISON_VERSION "2.4.1"
+#define YYBISON_VERSION "2.4.3"
 
 /* Skeleton name.  */
 #define YYSKELETON_NAME "yacc.c"
@@ -79,36 +78,36 @@
                             (c)->matchcount = DEFAULT_MATCHCOUNT; \
                             (c)->readall = FALSE ; \
                             (c)->parent_mode = FALSE ; \
-                            (c)->regex = (c)->cmd =  NULL ;\
+                            (c)->regex = NULL ;\
+							(c)->cmd =  NULL ;\
                             (c)->watchfile = (c)->parent_conffile = NULL
 #endif
 
 
-unsigned int lineno = 1;
-char *filename;
+unsigned int    lineno = 1;
+char           *filename;
 struct entry_conf **conf_table;
-unsigned int cur_pconf = 0;
-FILE * yyin;
+unsigned int    cur_pconf = 0;
+FILE           *yyin;
 
 
-static const struct entry_attribute entry_attributes[] =
-{
-   { "match",    A_MATCH,    1,  regex_parser     },
-   { "exec",    A_EXEC,    1,  exec_parser     },
-   { "match_sleep",    A_MATCHSLEEP,    1,  matchsleep_parser     },
-   { "match_count",    A_MATCHCOUNT,    1,  matchcount_parser     },
-   { "retry",           A_RETRY,           1,  retry_parser            },
-   { "user",           A_USER,           1,  user_parser            },
-   { "readall",          A_READALL,      0,  readall_parser  },
-   { "verbose",          A_VERBOSE,      0,  verbose_parser  },
-   { NULL,          0,          0,  0           },
-} ;
+static const struct entry_attribute entry_attributes[] = {
+		{"match", A_MATCH, 1, (status_e(*)())regex_parser},
+		{"exec", A_EXEC, 1, (status_e(*)())exec_parser},
+		{"match_sleep", A_MATCHSLEEP, 1, (status_e(*)())matchsleep_parser},
+		{"match_count", A_MATCHCOUNT, 1, (status_e(*)())matchcount_parser},
+		{"retry", A_RETRY, 1, (status_e(*)())retry_parser},
+		{"user", A_USER, 1, (status_e(*)())user_parser},
+		{"readall", A_READALL, 0, (status_e(*)())readall_parser},
+		{"verbose", A_VERBOSE, 0, (status_e(*)())verbose_parser},
+		{NULL, 0, 0, (status_e(*)())0},
+};
 
 
 
 
 /* Line 189 of yacc.c  */
-#line 112 "parser.c"
+#line 111 "parser.c"
 
 /* Enabling traces.  */
 #ifndef YYDEBUG
@@ -171,13 +170,13 @@ typedef union YYSTYPE
 /* Line 214 of yacc.c  */
 #line 39 "parser.y"
 
-	char *string;
-	int integer;
+	char           *string;
+	int             integer;
 
 
 
 /* Line 214 of yacc.c  */
-#line 181 "parser.c"
+#line 180 "parser.c"
 } YYSTYPE;
 # define YYSTYPE_IS_TRIVIAL 1
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */
@@ -189,7 +188,7 @@ typedef union YYSTYPE
 
 
 /* Line 264 of yacc.c  */
-#line 193 "parser.c"
+#line 192 "parser.c"
 
 #ifdef short
 # undef short
@@ -239,7 +238,7 @@ typedef short int yytype_int16;
 #define YYSIZE_MAXIMUM ((YYSIZE_T) -1)
 
 #ifndef YY_
-# if YYENABLE_NLS
+# if defined YYENABLE_NLS && YYENABLE_NLS
 #  if ENABLE_NLS
 #   include <libintl.h> /* INFRINGES ON USER NAME SPACE */
 #   define YY_(msgid) dgettext ("bison-runtime", msgid)
@@ -477,8 +476,8 @@ static const yytype_int8 yyrhs[] =
 /* YYRLINE[YYN] -- source line where rule number YYN was defined.  */
 static const yytype_uint8 yyrline[] =
 {
-       0,    58,    58,    59,    60,    61,    62,    63,    64,    65,
-      66,    69,    75,    79,    83,    87,    91,    95,    99
+       0,    56,    56,    57,    58,    59,    60,    61,    62,    63,
+      64,    67,    74,    80,    86,    92,    98,   104,   109
 };
 #endif
 
@@ -590,9 +589,18 @@ static const yytype_uint8 yystos[] =
 
 /* Like YYERROR except do call yyerror.  This remains here temporarily
    to ease the transition to the new meaning of YYERROR, for GCC.
-   Once GCC version 2 has supplanted version 1, this can go.  */
+   Once GCC version 2 has supplanted version 1, this can go.  However,
+   YYFAIL appears to be in use.  Nevertheless, it is formally deprecated
+   in Bison 2.4.2's NEWS entry, where a plan to phase it out is
+   discussed.  */
 
 #define YYFAIL		goto yyerrlab
+#if defined YYFAIL
+  /* This is here to suppress warnings from the GCC cpp's
+     -Wunused-macros.  Normally we don't worry about that warning, but
+     some users do, and we want to make it easy for users to remove
+     YYFAIL uses, which will produce warnings from Bison 2.5.  */
+#endif
 
 #define YYRECOVERING()  (!!yyerrstatus)
 
@@ -649,7 +657,7 @@ while (YYID (0))
    we won't break user code: when these are the locations we know.  */
 
 #ifndef YY_LOCATION_PRINT
-# if YYLTYPE_IS_TRIVIAL
+# if defined YYLTYPE_IS_TRIVIAL && YYLTYPE_IS_TRIVIAL
 #  define YY_LOCATION_PRINT(File, Loc)			\
      fprintf (File, "%d.%d-%d.%d",			\
 	      (Loc).first_line, (Loc).first_column,	\
@@ -1388,82 +1396,87 @@ yyreduce:
     {
         case 11:
 
-/* Line 1455 of yacc.c  */
-#line 69 "parser.y"
-    { 
-				if(handle_entry_conf((yyvsp[(2) - (2)].string)) == 0) 
-					yyerror("Error creating file entry %d",cur_pconf);
-				free((yyvsp[(2) - (2)].string)); 
-			}
+/* Line 1464 of yacc.c  */
+#line 67 "parser.y"
+    {
+	if (handle_entry_conf((yyvsp[(2) - (2)]. string )) == 0)
+		yyerror("Error creating file entry %d", cur_pconf);
+	free((yyvsp[(2) - (2)]. string ));
+}
     break;
 
   case 12:
 
-/* Line 1455 of yacc.c  */
-#line 75 "parser.y"
-    { 
-				handle_entry_args(A_MATCH,(yyvsp[(3) - (3)].string));
-				free((yyvsp[(3) - (3)].string)); }
+/* Line 1464 of yacc.c  */
+#line 74 "parser.y"
+    {
+	handle_entry_args(A_MATCH, (yyvsp[(3) - (3)]. string ));
+	free((yyvsp[(3) - (3)]. string ));
+}
     break;
 
   case 13:
 
-/* Line 1455 of yacc.c  */
-#line 79 "parser.y"
-    { 
-				handle_entry_args(A_EXEC,(yyvsp[(3) - (3)].string));
-				free((yyvsp[(3) - (3)].string));}
+/* Line 1464 of yacc.c  */
+#line 80 "parser.y"
+    {
+	handle_entry_args(A_EXEC, (yyvsp[(3) - (3)]. string ));
+	free((yyvsp[(3) - (3)]. string ));
+}
     break;
 
   case 14:
 
-/* Line 1455 of yacc.c  */
-#line 83 "parser.y"
+/* Line 1464 of yacc.c  */
+#line 86 "parser.y"
     {
-				handle_entry_args(A_MATCHSLEEP,(yyvsp[(3) - (3)].string));
-				free((yyvsp[(3) - (3)].string));}
+	handle_entry_args(A_MATCHSLEEP, (yyvsp[(3) - (3)]. string ));
+	free((yyvsp[(3) - (3)]. string ));
+}
     break;
 
   case 15:
 
-/* Line 1455 of yacc.c  */
-#line 87 "parser.y"
+/* Line 1464 of yacc.c  */
+#line 92 "parser.y"
     {
-				handle_entry_args(A_RETRY,(yyvsp[(3) - (3)].string));
-				free((yyvsp[(3) - (3)].string));}
+	handle_entry_args(A_RETRY, (yyvsp[(3) - (3)]. string ));
+	free((yyvsp[(3) - (3)]. string ));
+}
     break;
 
   case 16:
 
-/* Line 1455 of yacc.c  */
-#line 91 "parser.y"
+/* Line 1464 of yacc.c  */
+#line 98 "parser.y"
     {
-				handle_entry_args(A_USER,(yyvsp[(3) - (3)].string));
-				free((yyvsp[(3) - (3)].string));}
+	handle_entry_args(A_USER, (yyvsp[(3) - (3)]. string ));
+	free((yyvsp[(3) - (3)]. string ));
+}
     break;
 
   case 17:
 
-/* Line 1455 of yacc.c  */
-#line 95 "parser.y"
+/* Line 1464 of yacc.c  */
+#line 104 "parser.y"
     {
-				handle_entry_args(A_READALL,NULL);
-				}
+	handle_entry_args(A_READALL, NULL);
+}
     break;
 
   case 18:
 
-/* Line 1455 of yacc.c  */
-#line 99 "parser.y"
+/* Line 1464 of yacc.c  */
+#line 109 "parser.y"
     {
-				handle_entry_args(A_VERBOSE,NULL);
-				}
+	handle_entry_args(A_VERBOSE, NULL);
+}
     break;
 
 
 
-/* Line 1455 of yacc.c  */
-#line 1467 "parser.c"
+/* Line 1464 of yacc.c  */
+#line 1480 "parser.c"
       default: break;
     }
   YY_SYMBOL_PRINT ("-> $$ =", yyr1[yyn], &yyval, &yyloc);
@@ -1674,55 +1687,54 @@ yyreturn:
 
 
 
-/* Line 1675 of yacc.c  */
-#line 106 "parser.y"
-
+/* Line 1684 of yacc.c  */
+#line 117 "parser.y"
 
 struct entry_attribute *
 find_arg(unsigned int a_id)
 {
 
-        struct entry_attribute *pa;
+	struct entry_attribute *pa;
 
-        for(pa=(struct entry_attribute *)&entry_attributes[0];pa->a_name;pa++)
-                if ( a_id == pa->a_id )
-                        return pa;
+	for (pa = (struct entry_attribute *) &entry_attributes[0]; pa->a_name; pa++)
+		if (a_id == pa->a_id)
+			return pa;
 
-        return NULL;
+	return NULL;
 }
 
 void
 handle_entry_args(unsigned int a_id, char *value)
 {
 
-        struct entry_attribute *pa;
-	char *fixed_val,*aux;
+	struct entry_attribute *pa;
+	char           *fixed_val, *aux;
 
-        pa = find_arg(a_id);
-        if(!pa)
-                return;
+	pa = find_arg(a_id);
+	if (!pa)
+		return;
 
-	if(pa->a_nvalues == 0) { //bolean value
-        	if( ! (*pa->a_parser)(conf_table[cur_pconf]) == OK )
-			yyerror("Error while parsing function %s",pa->a_name);
+	if (pa->a_nvalues == 0) {	//bolean value
+		if (!(*pa->a_parser) (conf_table[cur_pconf]) == OK)
+			yyerror("Error while parsing function %s", pa->a_name);
 		return;
 	}
 	//chop out white spaces before and after
 	fixed_val = value;
 	aux = value + strlen(value);
 
-	while(*fixed_val == ' ')
+	while (*fixed_val == ' ')
 		fixed_val++;
 
-	while(*aux == ' ')
+	while (*aux == ' ')
 		*aux-- = '\0';
 
-	if(aux == fixed_val)
-		yyerror("null value for %s parameter",pa->a_name);
-	
+	if (aux == fixed_val)
+		yyerror("null value for %s parameter", pa->a_name);
+
 	// start the specific parser
-        if( ! (*pa->a_parser)(conf_table[cur_pconf], fixed_val ) == OK )
-		yyerror("Error while parsing function %s",pa->a_name);
+	if (!(*pa->a_parser) (conf_table[cur_pconf], fixed_val) == OK)
+		yyerror("Error while parsing function %s", pa->a_name);
 
 	return;
 
@@ -1734,16 +1746,12 @@ new_entry_conf(struct entry_conf **new, char *name)
 {
 
 
-        (*new) = (struct entry_conf *)xmalloc(sizeof(struct entry_conf));
-        SET_DEFAULT_CONF(*new);
+	*new = (struct entry_conf *) xmalloc(sizeof (struct entry_conf));
 
+	SET_DEFAULT_CONF(*new);
 	(*new)->watchfile = strdup(name);
-        //(*new)->watchfile = (char *)xmalloc(strlen(name)+1);
-        //SCP((*new)->watchfile,name);
-
-	if((*new)->watchfile)
-        	return 1;
-
+	if ((*new)->watchfile)
+		return 1;
 	return 0;
 }
 
@@ -1752,12 +1760,12 @@ int
 handle_entry_conf(char *pname)
 {
 
-        if(cur_pconf > MAXFILENAME-1) {
-                debug("[*] - MAXFILENAME reached ! No more entries will be created.");
-                return 0;
-        }
-        //fprintf(stdout,"- Criando novo entry conf [%d]: %s\n",cur_pconf,pname);
-        return new_entry_conf(&conf_table[cur_pconf],pname);
+	if (cur_pconf > MAXFILENAME - 1) {
+		debug("[*] - MAXFILENAME reached ! No more entries will be created.");
+		return 0;
+	}
+	//fprintf(stdout,"- Criando novo entry conf [%d]: %s\n",cur_pconf,pname);
+	return new_entry_conf(&conf_table[cur_pconf], pname);
 
 }
 
@@ -1766,13 +1774,13 @@ int
 yyerror(char *fmt, ...)
 {
 
-	va_list ap;
+	va_list         ap;
 
-        va_start(ap, fmt);
-        fprintf(stderr, "[!] ERROR:%s:%d: ", filename, lineno);
-        vfprintf(stderr, fmt, ap);
-        fprintf(stderr, "\n");
-        va_end(ap);
+	va_start(ap, fmt);
+	fprintf(stderr, "[!] ERROR:%s:%d: ", filename, lineno);
+	vfprintf(stderr, fmt, ap);
+	fprintf(stderr, "\n");
+	va_end(ap);
 	exit(1);
 }
 
@@ -1780,21 +1788,21 @@ int
 handle_conf_file(const char *file)
 {
 
-	FILE *input;
+	FILE           *input;
 	//extern FILE * yyin;
 
-	filename = (char *)file;
+	filename = (char *) file;
 
-	input = fopen(filename,"r");
+	input = fopen(filename, "r");
 
-	if(!input) {
+	if (!input) {
 		perror(filename);
-		debug("%s: %s","could not open",(char *)filename);
+		debug("%s: %s", "could not open", (char *) filename);
 		exit(1);
 	}
 
-	conf_table = (struct entry_conf **)xmalloc((MAXFILENAME+1)*sizeof(struct entry_conf *));
-	
+	conf_table = (struct entry_conf **) xmalloc((MAXFILENAME + 1) * sizeof (struct entry_conf *));
+
 	yyin = input;
 
 	yyparse();
@@ -1816,16 +1824,16 @@ int
 matchsleep_parser(struct entry_conf *p, char *value)
 {
 
-        p->matchsleep = atoi(value);
-        return 1;
+	p->matchsleep = atoi(value);
+	return 1;
 }
 
 int
 matchcount_parser(struct entry_conf *p, char *value)
 {
 
-        p->matchcount = atoi(value);
-        return 1;
+	p->matchcount = atoi(value);
+	return 1;
 }
 
 
@@ -1833,39 +1841,41 @@ int
 regex_parser(struct entry_conf *p, char *value)
 {
 
-	char *s,*e;
-	const char *error;
-        int erroroff;
+	char           *s, *e;
+	const char     *error;
+	int             erroroff;
 
-	/* our regex pattern starts and ends with /
-	 */
-	
-	s = strchr(value,'/');
-	e = strrchr(value,'/');
-	if( (!s) || (!e) || (s == e) ) 
+/*
+ * our regex pattern starts and ends with /
+ */
+
+	s = strchr(value, '/');
+	e = strrchr(value, '/');
+	if ((!s) || (!e) || (s == e))
 		yyerror("error in match regex definition - must be inside '/.../' block");
-	
+
 	s++;
 	(*e) = '\0';
-	
+
 	p->pattern = strdup(s);
 
-        return 1;
+	return 1;
 }
 
 int
 readall_parser(struct entry_conf *p)
 {
 
-        p->readall = 1;
+	p->readall = 1;
 	return 1;
 
 }
+
 int
 verbose_parser(struct entry_conf *p)
 {
 
-        p->verbose = 1;
+	p->verbose = 1;
 	return 1;
 
 }
@@ -1883,9 +1893,8 @@ int
 user_parser(struct entry_conf *p, char *value)
 {
 
-	p->user = (char *)xmalloc(strlen(value)+1);
+	p->user = (char *) xmalloc(strlen(value) + 1);
 	SCP(p->user, value);
 	return 1;
 }
-
 
