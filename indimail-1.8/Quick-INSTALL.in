@@ -55,6 +55,11 @@
    The RPM installation creates MySQL service in down state. The MySQL service
    will not come up unless you use the command svc -u. Also to ensure that the
    service comes up automatically after system reboot, remove the file 'down'
+   Also check the MySQl configuration file @indimaildir@/etc/indimail.cnf
+   for the port and socket parameter.
+    [client]
+    port   = 3306
+    socket = /tmp/mysql.sock
 
    % sudo /bin/rm /service/mysql.3306/down
    % sudo @indimaildir@/bin/svc -u /service/mysql.3306
