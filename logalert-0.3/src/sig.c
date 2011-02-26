@@ -12,10 +12,8 @@ extern unsigned int active;
 void
 sig_handle_abort(int sig)
 {
-
-	debug("\n[!] Caught signal %d, exiting ...\n",sig);
+	debug("\n[!] Caught signal %d, exiting ...\n", sig);
 	exit(0);
-
 }
 
 void
@@ -24,10 +22,10 @@ sig_handle_timer(uint timeout)
 	active = YES;
 }
 
-void sig_init()
+void
+sig_init()
 {
 	signal(SIGALRM, (void (*)()) sig_handle_timer);
 	signal(SIGINT, (void (*)()) sig_handle_abort);
 	signal(SIGTERM, (void (*)()) sig_handle_abort);
 }
-
