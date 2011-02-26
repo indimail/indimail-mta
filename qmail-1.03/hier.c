@@ -1,5 +1,8 @@
 /*
  * $Log: hier.c,v $
+ * Revision 1.159  2011-02-26 11:11:18+05:30  Cprogrammer
+ * added man page for qmail-cat
+ *
  * Revision 1.158  2011-02-12 16:04:27+05:30  Cprogrammer
  * added qarf man page
  *
@@ -758,6 +761,7 @@ hier(inst_dir)
 	c(auto_qmail_home, "doc", "README.tls", auto_uido, auto_gidq, 0444);
 	c(auto_qmail_home, "doc", "README.wildmat", auto_uido, auto_gidq, 0444);
 
+	c(auto_qmail_home, "man/man1", "qmail-cat.1", auto_uido, auto_gidq, 0444);
 	c(auto_qmail_home, "man/man1", "predate.1", auto_uido, auto_gidq, 0444);
 	c(auto_qmail_home, "man/man1", "datemail.1", auto_uido, auto_gidq, 0444);
 	c(auto_qmail_home, "man/man1", "argv0.1", auto_uido, auto_gidq, 0444);
@@ -1585,7 +1589,7 @@ _hier(inst_dir)
 void
 getversion_install_big_c()
 {
-	static char    *x = "$Id: hier.c,v 1.158 2011-02-12 16:04:27+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: hier.c,v 1.159 2011-02-26 11:11:18+05:30 Cprogrammer Stab mbhangui $";
 
 #ifdef INDIMAIL
 	x = sccsidh;
