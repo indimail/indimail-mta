@@ -50,3 +50,46 @@ default, among other things.
 See qmail-rm -h for more commandline options.
 
 WARNING: YOU MUST STOP IndiMail BEFORE USING THIS PROGRAM.
+
+.SH OPTIONS
+
+.TP
+-e 
+use extended POSIX regular expressions
+.TP
+-i
+search case insensitively [default: case sensitive]
+.TP
+-n \fIbytes\fR
+limit our search to the first \fIbytes\fR bytes of each file
+.TP
+-p \fIpattern\fR
+specify the \fIpattern\fR to search for
+.TP
+-q \fIqbase\fR
+specify the base qmail queue dir [default: QMAILHOME/queue]
+.TP
+-r
+actually remove files, without this we'll only print them
+.TP
+-s \fIsplit\fR
+specify your conf-split value if non-standard [default: 151]
+.TP
+-y \fIyankdir\fR
+directory to put files yanked from the queue [default: <queuedir>/yanked]
+.TP
+-X \fIsecs\fR
+modify timestamp on matching files, to make qmail expire mail. \fIsecs\fR is the number of
+seconds we want to move the file into the past. specifying a value of 0 causes this to default
+to [604800]
+.TP
+-x \fItimespec\fR
+modify timestamp on matching files, to make qmail expire mail. \fItimespec\fR is a date/time
+string in the format of output of the "date" program. see manpage for \fBstrptime(2)\fR for
+details of this format
+.TP
+-v
+increase verbosity (can be used more than once)
+.TP
+-h, -?
+this help message
