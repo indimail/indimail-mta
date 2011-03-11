@@ -833,17 +833,17 @@ the installation.
 
     % sudo @indimaildir@/sbin/svctool --imap=143 --servicedir=/service --localip=0 \
         --query-cache --maxdaemons=150 --maxperip=25 \
-        --default-domain=indimail.org --memory=10485760 --starttls
+        --default-domain=indimail.org --memory=52428800 --starttls
     % sudo @indimaildir@/sbin/svctool --imap=993 --servicedir=/service --localip=0 \
         --query-cache --maxdaemons=150 --maxperip=25 \
-        --default-domain=indimail.org --memory=10485760 \
+        --default-domain=indimail.org --memory=52428800 \
         --postmaster=postmaster@indimail.org --ssl
     % sudo @indimaildir@/sbin/svctool --pop3=110 --servicedir=/service --localip=0 \
         --query-cache --maxdaemons=150 --maxperip=25 \
-        --default-domain=indimail.org --memory=10485760 --starttls
+        --default-domain=indimail.org --memory=52428800 --starttls
     % sudo @indimaildir@/sbin/svctool --pop3=995 --servicedir=/service --localip=0 \
         --maxdaemons=150 --maxperip=25 \
-        --default-domain=indimail.org --memory=10485760 \
+        --default-domain=indimail.org --memory=52428800 \
         --postmaster=postmaster@indimail.org --ssl
 
     The below four command will create proxies (ssl and non-ssl) for IMAP and POP3. These
@@ -853,18 +853,18 @@ the installation.
     % sudo @indimaildir@/sbin/svctool --imap=4143 --servicedir=/service --localip=0 \
         --query-cache --maxdaemons=150 --maxperip=25 --starttls \
         --tlsprog=@indimaildir@/bin/sslerator \
-        --default-domain=indimail.org --memory=10485760 --proxy=143
+        --default-domain=indimail.org --memory=52428800 --proxy=143
     % sudo @indimaildir@/sbin/svctool --imap=4990 --servicedir=/service --localip=0 \
         --query-cache --maxdaemons=150 --maxperip=25 \
-        --default-domain=indimail.org --memory=10485760 --proxy=143 \
+        --default-domain=indimail.org --memory=52428800 --proxy=143 \
         --postmaster=postmaster@indimail.org --ssl
     % sudo @indimaildir@/sbin/svctool --pop3=4110 --servicedir=/service --localip=0 \
         --query-cache --maxdaemons=150 --maxperip=25 --starttls \
         --tlsprog=@indimaildir@/bin/sslerator \
-        --default-domain=indimail.org --memory=10485760 --proxy=110
+        --default-domain=indimail.org --memory=52428800 --proxy=110
     % sudo @indimaildir@/sbin/svctool --pop3=4995 --servicedir=/service --localip=0 \
         --query-cache --maxdaemons=150 --maxperip=25 \
-        --default-domain=indimail.org --memory=10485760 --proxy=110 \
+        --default-domain=indimail.org --memory=52428800 --proxy=110 \
         --postmaster=postmaster@indimail.org --ssl
 
     If you have used the --ssl option above, you can quickly generate a self-signed X.509 key for
@@ -979,6 +979,7 @@ the installation.
     allows you to change passwords over the network.
 
     % sudo @indimaildir@/sbin/svctool --poppass=106 --localip=0 --maxdaemons=40 --maxperip-25 \
+        --memory=52428800 \
         --certfile=@indimaildir@/control/servercert.pem --ssl \
         --setpassword=@indimaildir@/sbin/vsetpass --servicedir=/service
 
@@ -1283,6 +1284,7 @@ You may need to install the following additional packages before you can start t
 of most of the packages
 
 % sudo apt-get install libssl-dev
+% sudo apt-get install gettext
 % sudo apt-get install libncurses5-dev
 % sudo apt-get install libpam0g-dev
 % sudo apt-get install libreadline-dev
@@ -1295,6 +1297,12 @@ of most of the packages
 
 # for fetchmail you will additionally require
 % sudo apt-get install flex bison
+
+# To remvoe MySQL from startup
+# update-rc.d -f mysql remove
+
+# To enable indimail at startup
+# update-rc.d indimail start 345 stop 016
 
 ---------- * -------------- * ------------ * -------------- * ------------ * -------------- * ------------
 OS X NOTES
