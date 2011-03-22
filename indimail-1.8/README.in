@@ -364,6 +364,7 @@ Supported/Tested MySQL versions (read INSTALL-MYSQL*)
 mysql-6.0.3-alpha
 mysql-6.0.9-alpha
 mysql-5.0.26
+mysql-5.0.45
 mysql-5.0.77
 mysql-5.1.40
 mysql-5.1.44
