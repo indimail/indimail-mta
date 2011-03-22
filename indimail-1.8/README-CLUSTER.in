@@ -54,9 +54,9 @@ DATE: @DATE@
     Clustered Domain
     ----------------
 
-    Each mailstore requires a MySQL database to store user information. When a domain is
-    extended across multiple mailstores, you require an additional MySQL database called
-    the clusterinfo. The clusterinfo is used to store information about all the MySQL
+    Each mailstore requires a MySQL database to store its local user information. When a
+    domain is extended across multiple mailstores, you require an additional MySQL database
+    called the clusterinfo. The clusterinfo is used to store information about all the MySQL
     databases for each of the mailstores. When you extend a domain, each mailstore needs
     to have the control files host.cntrl and host.master. These control files has  the IP
     address or hostname of the clusterinfo MySQL database. The clusterinfo database also
@@ -75,8 +75,8 @@ DATE: @DATE@
 
     echo "hostcntrl_host:user:password:mysql socket/port" > @indimaildir@/control/host.mysql
 
-    When you have a clustered domain, IndiMail supports the use of Master-Slave architecture in
-    MySQL.
+    For a clustered domain you need to have two additional files - host.cntrl & host.master.
+    Additionally, IndiMail supports the use of Master-Slave architecture in MySQL.
 
     echo hostcntrl_master > @indimaildir@/control/host.master (for a clustered domain, the master host)
     echo hostcntrl_slave  > @indimaildir@/control/host.cntrl  (for a clustered domain, the slave host)
@@ -137,16 +137,19 @@ DATE: @DATE@
 
     You can use the command @indimaildir@/bin/dbinfo -s to show this information.
 
-    The cluster information is maintained in the MySQL table dbinfo
-    Every host has to be assigned a unique identifier called hostid
-    Each hostid is associated with the IP address of the mail store host    
-    You can use the command vhostid to add, insert, delete or update this
-    information. The hostid can be stored in the conrol file @indimaildir@/control/hostid.
+    The cluster information is maintained in the MySQL table dbinfo. You can modify
+    the table dbinfo directly or use the '-i' option to the dbinfo commmand. The
+    immediate next call to 'dbinfo -s' will create the file mcdinfo. In a cluster
+    you need to update mcdinfo on any of the hosts. The entries to mcdinfo on all
+    hosts part of the cluster automatically get updated.
+
+    Every host has to be assigned a unique identifier called hostid Each hostid is
+    associated with the IP address of the mail store host. You can use the
+    command vhostid to add, insert, delete or update this information. The hostid
+    for a mailstore can be stored in the conrol file @indimaildir@/control/hostid.
     In case this control file is not there, IndiMail will use the gethostid(2) system
-    call to get the hostid. The dbinfo table can also be modified directly. The immediate
-    next call to 'dbinfo -s' will create the file mcdinfo. One can also use 'dbinfo -i'
-    to add entries to dbinfo table. In a cluster you need to update mcdinfo only on one
-    host. The entries to mcdinfo on all hosts part of the cluster automatically get updated.
+    call to get the hostid. The mapping of hostid of a mailstore to its IP address
+    is maintained in the table host_table.
 
     When you add a user to a host in the cluster, the user gets added to a 
     MySQL table hostcntrl. This table maintains the username, domain and the
@@ -161,6 +164,9 @@ DATE: @DATE@
     1) use vadddomain on the new node to add domain
     2) Create the files host.cntrl, host.master in @indimaildir@/control
     3) Use dbinfo -i to add entry for the new node
+    4) assign a hostid to the mailstore (e.g. 1000)
+       % sudo vhostid -i 192.168.2.115 1000
+       % sudo vhostid -i 192.168.2.116 1001
 
     Adding a New Relay Server/Proxy IMAP/Proxy POP3 Server to a cluster
     ===================================================================
