@@ -1,19 +1,26 @@
 File README-CLUSTER, Version @version@
 DATE: @DATE@
 
-    You can either have a normal non-clustered domain or a clustered domain. A clustered domain
-    is a domain extended across multiple hosts. To achieve high performance needed for high
-    volume servers, IndiMail uses MySQL to store some of the information in MySQL tables. All
-    indimail program depend on one or more control file to figure out how to extract this
-    information stored in MySQL tables. These control files are host.cntrl, host.master,
-    host.mysql. Take a look at http://downloads.sourceforge.net/indimail/Quick-INSTALL-1.7.8
-
     IndiMail supports a cluster of servers for a domain. A cluster is a set of servers
     having the same domain. In other words, a clustered domain is a domain which has been
     extended across more than one server.
+
+    You can either have a normal non-clustered domain or a clustered domain. To achieve high
+    performance needed for high volume servers, IndiMail uses MySQL to store some of the
+    information in MySQL tables. All indimail program depend on one or more control file to
+    figure out how to extract this information stored in MySQL tables. The control file
+    host.mysql is required regardless of whether the domain is clustered or not. See
+
+    http://downloads.sourceforge.net/indimail/Quick-INSTALL-1.7.8
+
+
+    For a clusterd domain you require the additional control files host.master, host.cntrl
+    and mcdinfo.
+
     (Refer to the diagram at https://sourceforge.net/project/screenshots.php?group_id=230686)
 
     There are five types of servers
+
     1) clusterinfo  - This is the host which has a MySQL database for storing the location
        of each user. Location information is hostid and ip address.
        If this host is going to serve as a pure MySQL database server only, you need not
@@ -34,14 +41,15 @@ DATE: @DATE@
        In case your webmail software connects to localhost on the IMAP/POP3 port, you will
        need to install IndiMail for having the IMAP/POP3 proxy.
 
-    The control files used to figure out the MySQL server storing IndiMail configuration/information
-    depends on whether you are running a clustered or a non-clustered domain. Read below to
-    know more about this.
+    The control files used to figure out the MySQL server storing IndiMail configuration &
+    information depends on whether you are running a clustered or a non-clustered domain.
+    Read below to know more about this.
 
     Non-Clustered Domain
     --------------------
-    In this case IndiMail just requires how to connect to a single MySQL database. You can
-    create a control file host.mysql which has the IP address or hostname for the MySQL
+    A mailstore requires a MySQL database to store its local user infomation. For a
+    non-clustered domain IndiMail needs to connect to a single MySQL database. You can
+    create the control file host.mysql which has the IP address or hostname for the MySQL
     database. If this file is missing, IndiMail program will use 'localhost' my default.
 
     # echo localhost > @indimaildir@/control/host.mysql (MySQL host to which all programs will
@@ -54,14 +62,14 @@ DATE: @DATE@
     Clustered Domain
     ----------------
 
-    Each mailstore requires a MySQL database to store its local user information. When a
-    domain is extended across multiple mailstores, you require an additional MySQL database
-    called the clusterinfo. The clusterinfo is used to store information about all the MySQL
-    databases for each of the mailstores. When you extend a domain, each mailstore needs
-    to have the control files host.cntrl and host.master. These control files has  the IP
-    address or hostname of the clusterinfo MySQL database. The clusterinfo database also
-    stores each user's mailstore IP. This is required to ensure that each mail reaches the
-    correct user on the correct mailstore.
+    A clustered domain has multiple mailstores configured with the same domain. Each
+    mailstore requires a MySQL database to store its local user information. To have a
+    catalogue of the multiple mailstores, you require an additional MySQL database
+    called the clusterinfo. In a clustered domain setup, each mailstore needs to have the
+    control files host.cntrl and host.master. These control files has the IP address or
+    hostname of the clusterinfo MySQL database. The clusterinfo database also stores each
+    user's mailstore IP. This is required to ensure that mails for a clustered domain reaches
+    the correct mailstore on which the user account exists.
 
     Adding the first Mailstore in a cluster
     =======================================
@@ -95,22 +103,22 @@ DATE: @DATE@
 
     e.g. run the following command to create a clustered domain with just two mail clusters on
     hosts 192.168.2.115 and 192.168.2.116. The cluster information for all users will be
-    maintained on the MySQL host at 192.168.2.110. Updating the file on any host updates the file
-    on all hosts. You can use any text editor to edit this file.
+    maintained on the MySQL host at 192.168.2.110. Updating the file on any host updates the
+	file mcdinfo on all hosts. You can use any text editor to edit this file.
 
 
     (
     echo "domain   indimail.org                     1"
-    echo "server   192.168.2.110" # MySQL Server for Cluster Information
-    echo "mdahost  192.168.2.115" # Mail Store
+    echo "server   192.168.2.115" # MySQL Server for Mail Store1
+    echo "mdahost  192.168.2.115" # Mail Store1
     echo "port     3306"
     echo "database indimail"
     echo "user     indimail"
     echo "pass     ssh-1.5-"
     echo
     echo "domain   indimail.org                     1"
-    echo "server   192.168.2.110" # MySQL Server for Cluster Information
-    echo "mdahost  192.168.2.116" # Mail Store
+    echo "server   192.168.2.116" # MySQL Server for Mail Store2
+    echo "mdahost  192.168.2.116" # Mail Store2
     echo "port     3306"
     echo "database indimail"
     echo "user     indimail"
@@ -119,9 +127,9 @@ DATE: @DATE@
     ) > @indimaildir@/control/mcdinfo
     
     The above can also be achieved by executing the following commands
-    % @indimaildir@/bin/dbinfo -i -S 192.168.2.110 -D indimail -U indimail -P ssh-1.5- \
+    % @indimaildir@/bin/dbinfo -i -S 192.168.2.115 -D indimail -U indimail -P ssh-1.5- \
         -p 3306 -d indimail.org -m 192.168.2.115
-    % @indimaildir@/bin/dbinfo -i -S 192.168.2.110 -D indimail -U indimail -P ssh-1.5- \
+    % @indimaildir@/bin/dbinfo -i -S 192.168.2.116 -D indimail -U indimail -P ssh-1.5- \
         -p 3306 -d indimail.org -m 192.168.2.116
 
     -- NOTE ----------------------------------------------------------------------------
@@ -178,7 +186,6 @@ DATE: @DATE@
        # echo dynamic > /service/qmail-send.25/variables/ROUTES
        % svc -d /service/qmail-send.25; svc -u /service/qmail-send.25
 
-
-NOTE: This document is WIP and will undergo frequent changes till i get satisfied. Help
-in simplifying this will be highly apprecated. You can email me at manvendra@indimail.org,
-if you find this confusing or need any help/clarification.
+    Remember that if your webmail server uses IMAP/POP3, you will need to run
+    imap/pop3 proxy on the standard IMAP/POP3 ports and have the control files
+    host.cntrl and host.master
