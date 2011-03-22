@@ -28,13 +28,11 @@ start_process(struct process_hdr *p)
 		uint            i, j;
 
 		i = 0;
-		getcwd(pwd, PATH_MAX);
-		if (!pwd) {
+		if (!getcwd(pwd, PATH_MAX) || !pwd) {
 			perror("getcwd");
 			fatal("getcwd failed");
 		}
-		pgname = strrchr(progname, '/');
-		if (!pgname)
+		if (!(pgname = strrchr(progname, '/')))
 			pgname = progname;
 		else
 			pgname++;
