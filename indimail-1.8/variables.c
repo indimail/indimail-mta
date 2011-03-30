@@ -1,5 +1,9 @@
 /*
  * $Log: variables.c,v $
+ * Revision 2.51  2011-03-30 18:57:14+05:30  Cprogrammer
+ * removed ncursed based program 'shit' & execmysql program. added svstat, resetquota form
+ * admin commands list
+ *
  * Revision 2.50  2010-05-01 15:12:24+05:30  Cprogrammer
  * removed editor from list of rfc_ids
  *
@@ -197,7 +201,7 @@
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: variables.c,v 2.50 2010-05-01 15:12:24+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: variables.c,v 2.51 2011-03-30 18:57:14+05:30 Cprogrammer Stab mbhangui $";
 #endif
 
 vdir_type       vdir;
@@ -354,7 +358,7 @@ ADMINCOMMAND adminCommands[] = {
 	{INDIMAILDIR"/bin/mgmtpass", "Manage Admin Client Passwords"},
 	{INDIMAILDIR"/bin/inquerytest", "Test Database Server"},
 	{INDIMAILDIR"/bin/printdir", "Print Mail Hash Directory Info"},
-	{INDIMAILDIR"/bin/shit", "Terminfo Based Mail Administration GUI"},
+	{INDIMAILDIR"/bin/svstat", "Get Service Status for IndiMail Services"},
 	{INDIMAILDIR"/bin/vaddaliasdomain", "Add an Alias Domain"},
 	{INDIMAILDIR"/bin/vadddomain", "Add a Virtual Domain"},
 	{INDIMAILDIR"/bin/vcalias", "Convert .qmail files to valias format"},
@@ -369,7 +373,7 @@ ADMINCOMMAND adminCommands[] = {
 	{INDIMAILDIR"/bin/vpriv", "Add Privileges to Program for IndiSrvr"},
 	{INDIMAILDIR"/bin/vlimit", "Administer Domain Wide Limits"},
 	{INDIMAILDIR"/bin/hostcntrl", "Administer Hostcntrl Entries"},
-	{INDIMAILDIR"/sbin/execmysql", "Connect to Mail Database server"},
+	{INDIMAILDIR"/sbin/resetquota", "Reset/Correct quota for a Maildir"},
 	{INDIMAILDIR"/sbin/updatefile", "Update Control Files"},
 	{INDIMAILDIR"/sbin/vreorg", "Reorganize Mail Database"},
 	{INDIMAILDIR"/sbin/vdeloldusers", "Delete Old Mail Users"},
