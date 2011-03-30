@@ -17,7 +17,10 @@ reasons, the list of these administration programs are hard-coded in the \fBadmi
 and \fBindisrvr\fR executable. \fBadminclient\Fr uses environment variable \fBADMIN_TIMEOUT\fR
 to timeout connections to \fBindisrvr\fR.
 
-You can use \fBvpriv(8)\fR to control access to certain programs and certain arguments.
+\fBadminclient\fR needs to supply credentials of users with administration privileges. These
+users can be created using the \fBmgmtpass(8)\fR program. You can furhter use \fBvpriv(8)\fR
+to control/restrict access of these admin users to certain programs (and even command line
+arguments)
 
 .EX
  e.g. The following command runs the command vadduser with arguments 
@@ -57,6 +60,41 @@ ADMIN_PORT, ADMIN_USER, ADMIN_PASS will be used for these variables.
 .SH RETURN VALUE
 Returns the return status of the remote command executed. All output printed by the remote
 command on stdout/stderr are printed on stdout of adminclient.
+
+.SH PROTOCOL
+The adminclient protocol is descibed below. You can connect to port 4000 and execute
+the below sequence of commands to execute. Here 's' denotes server and 'c' denotes client.
+
+.EX
+.B adminclient Protocol
+ s - server
+ c - client
+
+ s: "Login: "
+ c: "userid\\n"
+ s: "Password: "
+ c: "password\\n"
+ s: "OK\\n"
+ c: "index command arg1 arg2 ...\\n"
+ s: <output of above command if any>
+ c: "\\n"
+ s: "RETURNSTATUS[return value of command]\\n"
+.EE
+
+The below shows an actual example of vuserinfo getting executed by executing the
+\fBtelnet\fR(1) client on port 4000.
+
+.EX
+ <lf> - linefeed
+
+ Login: admin<lf>
+ Password: xxxxxxxx<lf>
+ OK
+ 7 vuserinfo -n manvendra@indimail.org<lf>
+ name          : manvendra@indimail.org
+ <lf>
+ RETURNSTATUS0
+.EE
 
 .SH "SEE ALSO"
 indisrvr(8), mgmtpass(8), vpriv(8), IndiMail(7)
