@@ -1298,7 +1298,7 @@ of most of the packages
 # for fetchmail you will additionally require
 % sudo apt-get install flex bison
 
-# To remvoe MySQL from startup
+# To remove MySQL from startup
 # update-rc.d -f mysql remove
 
 # To enable indimail at startup
