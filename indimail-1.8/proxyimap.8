@@ -38,6 +38,12 @@ tcp.pop3
 w.x.y.z:allow,POP3CLIENT=""
 .EE
 
+If you set the \fBAUTOADDUSER\fR environment variable, users can be automatically added by
+using the \fBadminclient(8)\fR protocol to connect to \fBindisrvr(8)\fR. The auto provisioning
+happens only if the user does not exist in IndiMail's authentication database. If you set the
+\fBADDUSERCMD\fR environment variable to a program, the program will be run with the password
+passed as an argument.
+
 Following environment variables are needed by these two proxies to start up
 
 .TP
@@ -85,4 +91,4 @@ username and PASS passwd sequence to login.
 0 for success and 1 for failure in which case all diagnostics are printed on stdout.
 
 .SH "SEE ALSO"
-authindi(8)
+authindi(8), adminclient(8), indisrvr(8)

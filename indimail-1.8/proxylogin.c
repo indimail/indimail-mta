@@ -1,5 +1,8 @@
 /*
  * $Log: proxylogin.c,v $
+ * Revision 2.42  2011-04-01 14:14:53+05:30  Cprogrammer
+ * added code to auto provision users
+ *
  * Revision 2.41  2010-05-05 14:44:59+05:30  Cprogrammer
  * added setting of AUTHSERVICE environment variable
  *
@@ -144,7 +147,7 @@
 #include <unistd.h>
 
 #ifndef	lint
-static char     sccsid[] = "$Id: proxylogin.c,v 2.41 2010-05-05 14:44:59+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: proxylogin.c,v 2.42 2011-04-01 14:14:53+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef CLUSTERED_SITE
@@ -153,8 +156,69 @@ static int      ExecImapd(char **, char *, char *, struct passwd *, char *, char
 static int      have_imap_starttls();
 static int      have_pop3_starttls();
 static int      tlsrequired();
+int             auth_admin(char *, char *, char *, char *, char *);
+int             adminCmmd(int, int, char *, int);
 
 static char     imaptagenv[MAX_BUFF];
+
+int
+autoAddUser(char *email, char *pass, char *service)
+{
+	char           *admin_user, *admin_pass, *admin_host, *admin_port,
+                   *hard_quota, *ptr, *cptr, *certfile;
+	char            cmdbuf[MAX_BUFF], encrypted[MAX_BUFF], tmpbuf[5];
+	int             len, sfd;
+
+	if (!getenv("AUTOADDUSERS"))
+		return (1);
+	if (encrypt_flag)
+		scopy(encrypted, pass, MAX_BUFF);
+	else
+		mkpasswd3(pass, encrypted, MAX_BUFF);
+	getEnvConfigStr(&ptr, "ADDUSERCMD", INDIMAILDIR"/bin/autoadduser");
+	if (!access(ptr, X_OK))
+	{
+		snprintf(cmdbuf, sizeof(cmdbuf), "%s %s %s", ptr, email, encrypted);
+		return (runcmmd(cmdbuf, 0));
+	}
+	if (!(admin_user = (char *) getenv("ADMIN_USER")))
+	{
+		fprintf(stderr, "Admin User not specified\n");
+		return (-1);
+	} else
+	if (!(admin_pass = (char *) getenv("ADMIN_PASS")))
+	{
+		fprintf(stderr, "Admin Pass not specified\n");
+		return (-1);
+	} else
+	if (!(admin_host = (char *) getenv("ADMIN_HOST")))
+	{
+		fprintf(stderr, "Admin Host not specified\n");
+		return (-1);
+	} else
+	if (!(admin_port = (char *) getenv("ADMIN_PORT")))
+	{
+		fprintf(stderr, "Admin Port not specified\n");
+		return (-1);
+	} else
+	if (!(certfile = (char *) getenv("CERTFILE")))
+	{
+		fprintf(stderr, "Client Certificate not specified\n");
+		return (-1);
+	}
+	if ((sfd = auth_admin(admin_user, admin_pass, admin_host, admin_port, certfile)) == -1)
+	{
+		perror("admin user");
+		return (-1);
+	}
+	/*- Copy 4 Bytes (plus NULL) to tmpbuf */
+	for (ptr = service, cptr = tmpbuf, len = 1;*ptr && *ptr != ':' && len < sizeof(tmpbuf);*cptr++ = *ptr++, len++);
+	*cptr = 0;
+	getEnvConfigStr(&hard_quota, "HARD_QUOTA", HARD_QUOTA);
+	snprintf(cmdbuf, sizeof(cmdbuf), "0 vadduser -e -c auto.%s.%s -q %s %s %s",
+		admin_port, tmpbuf, hard_quota, email, encrypted);
+	return (adminCmmd(sfd, 0, cmdbuf, strlen(cmdbuf)));
+}
 
 int
 proxylogin(char **argv, char *service, char *userid, char *plaintext, char *remoteip, char *imaptag, int skip_nl)
@@ -190,6 +254,38 @@ proxylogin(char **argv, char *service, char *userid, char *plaintext, char *remo
 	}
 	snprintf(Email, MAX_BUFF, "%s@%s", TheUser, TheDomain);
 	mailstore = (char *) 0;
+	if (!(mailstore = inquery(HOST_QUERY, Email, 0)))
+	{
+		if (userNotFound)
+		{
+			switch ((retval = autoAddUser(Email, plaintext, service)))
+			{
+			case -1:
+				printf("Temporary Service Problem provisioning user - code %d\n", __LINE__);
+				fflush(stdout);
+				fprintf(stderr, "%s %d\n", __FILE__, __LINE__);
+				return(1);
+			case 0: /*- user successfully provisioned */
+				break;
+			case 1: /*- auth failure */
+				if (!strncmp(service, "imap", 4))
+				{
+					snprintf(imaptagenv, MAX_BUFF, "IMAPLOGINTAG=%s", imaptag);
+					putenv(imaptagenv);
+				}
+				execv(argv[0], argv);
+				fprintf(stderr, "execv: %s: %s\n", argv[0], strerror(errno));
+				return(1);
+			}
+		} else
+		{
+			printf("Temporary Service Problem - code %d\n", __LINE__);
+			fflush(stdout);
+			fprintf(stderr, "%s %d\n", __FILE__, __LINE__);
+			return(1);
+		}
+	}
+	/*- user provisioned by autoAdduser */
 	if (!mailstore && !(mailstore = inquery(HOST_QUERY, Email, 0)))
 	{
 		if (userNotFound)

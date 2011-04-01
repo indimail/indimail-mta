@@ -81,7 +81,7 @@ mlist_delete.c mlist_filterno.c mlist_filterupdate.c mlist_insert.c mlist_update
 monkey.c MoveFile.c mysql_perror.c mysql_query.c next_big_dir.c no_of_days.c \
 open_big_dir.c open_master.c parseAddress.c parse_email.c \
 parse_quota.c passwd.c passwd_policy.c pathToFilesystem.c pipe_exec.c post_handle.c \
-print_control.c ProcessInFifo.c proxylogin.c purge_files.c pw_comp.c pwcomp.c \
+print_control.c ProcessInFifo.c purge_files.c pw_comp.c pwcomp.c \
 PwdInLookup.c qmail_remote.c r_chown.c recalc_quota.c RelayInLookup.c relay_select.c \
 RemoteBulkMail.c remove_line.c remove_quotes.c renameuser.c replacestr.c r_mkdir.c \
 runcmmd.c ScanDir.c scat.c scopy.c SendWelcomeMail.c set_mysql_options.c setsockbuf.c \
@@ -282,10 +282,12 @@ sslerator_SOURCES = sslerator.c
 sslerator_LDADD = @auth_libs@ $(shell cat socket.lib 2>/dev/null)
 
 proxyimap_SOURCES = proxyimap.c 
-proxyimap_LDADD = @auth_libs@
+proxyimap_LDADD = @auth_libs@ proxylogin.lo tls.lo auth_admin.lo adminCmmd.lo
+proxyimap_DEPENDENCIES = proxylogin.lo tls.lo auth_admin.lo adminCmmd.lo
 
 proxypop3_SOURCES = proxypop3.c 
-proxypop3_LDADD = @auth_libs@
+proxypop3_LDADD = @auth_libs@ proxylogin.lo tls.lo auth_admin.lo adminCmmd.lo
+proxypop3_DEPENDENCIES = proxylogin.lo tls.lo auth_admin.lo adminCmmd.lo
 
 vchkpass_SOURCES = vchkpass.c 
 vchkpass_LDADD = @auth_libs@
@@ -315,7 +317,7 @@ mgmtpass_SOURCES = mgmtpass.c
 mgmtpass_LDADD = @auth_libs@
 
 adminclient_SOURCES = adminclient.c
-adminclient_LDADD = @auth_libs@ tls.o auth_admin.o adminCmmd.o
+adminclient_LDADD = @auth_libs@ tls.lo auth_admin.lo adminCmmd.lo
 adminclient_DEPENDENCIES = tls.lo auth_admin.lo adminCmmd.lo
 
 sq_vacation_SOURCES = sq_vacation.c
@@ -384,25 +386,25 @@ displaytop_LDADD = @LIB_CURSES@ @LIB_TERMCAP@
 
 osh_SOURCES = osh.c
 osh_LDADD = @LIB_CURSES@
-osh_DEPENDENCIES = exp.o handlers.o getEnvConfig.o
+osh_DEPENDENCIES = exp.lo handlers.lo getEnvConfig.lo
 
 hashtable_SOURCES = hashtable.c
 hashtable_LDADD =
-hashtable_DEPENDENCIES = makeseekable.o sockwrite.o
+hashtable_DEPENDENCIES = makeseekable.lo sockwrite.lo
 
 updatefile_SOURCES=updatefile.c
 updatefile_LDADD= @auth_libs@
 
 initsvc_SOURCES = initsvc.c
 initsvc_LDADD =
-initsvc_DEPENDENCIES = getEnvConfig.o fappend.o
+initsvc_DEPENDENCIES = getEnvConfig.lo fappend.lo
 
 install_tables_SOURCES = install_tables.c
 install_tables_LDADD = @auth_libs@
 
 indiversion_SOURCE = indiversion.c
-indiversion_LDADD = @auth_libs@
-indiversion_DEPENDENCIES = indimail_settings.o
+indiversion_LDADD = @auth_libs@ proxylogin.lo tls.lo auth_admin.lo adminCmmd.lo
+indiversion_DEPENDENCIES = indimail_settings.lo tls.lo proxylogin.lo auth_admin.lo adminCmmd.lo
 
 echo_SOURCES=echo.c
 echo_LDADD=
