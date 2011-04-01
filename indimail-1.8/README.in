@@ -11,6 +11,7 @@ fastforward,
 mess822,
 daemontools,
 ucspi-tcp,
+logalert,
 Courier IMAP/POP3, (you can use any IMAP/POP3 server which supports PAM)
 Bogofilter - A Bayesian Spam Filter,
 Clam AntiVirus - GPL anti-virus toolkit for UNIX,
