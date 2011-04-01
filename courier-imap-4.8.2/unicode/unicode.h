@@ -5,13 +5,14 @@
 ** Copyright 2000-2011 Double Precision, Inc.
 ** See COPYING for distribution information.
 **
-** $Id: unicode.h,v 1.28 2011/01/22 22:07:05 mrsam Exp $
+** $Id: unicode.h,v 1.38 2011/03/05 18:43:23 mrsam Exp $
 */
 
 #ifdef	__cplusplus
 
 #include <string>
 #include <vector>
+#include <list>
 
 extern "C" {
 #endif
@@ -50,9 +51,149 @@ extern unicode_char unicode_uc(unicode_char);
 extern unicode_char unicode_lc(unicode_char);
 extern unicode_char unicode_tc(unicode_char);
 
-/* Return width of unicode character */
+/*
+**
+** Return "width" of unicode character.
+**
+** This is defined as follows: for characters having the F or W property in
+** tr11 (EastAsianWidth), unicode_wcwidth() returns 2.
+**
+** Otherwise, characters having the BK, CR, LF, CM, NL, WJ, and ZW line
+** breaking property as per tr14, unicode_wcwdith() returns 0. For all other
+** cases, 1.
+**
+** This provides a rough estimate of the "width" of the character if its
+** shown on a text console.
+*/
 
 extern int unicode_wcwidth(unicode_char c);
+extern size_t unicode_wcwidth_str(const unicode_char *c);
+
+/* Internal unicode table lookup function */
+
+extern uint8_t unicode_tab_lookup(unicode_char ch,
+				  const size_t *unicode_indextab,
+				  size_t unicode_indextab_sizeof,
+				  const uint8_t (*unicode_rangetab)[2],
+				  const uint8_t *unicode_classtab,
+				  uint8_t uclass);
+
+/*
+** Implementation of grapheme cluster boundary rules, as per tr29,
+** including  GB9a and GB9b.
+**
+** Returns non-zero if there's a grapheme break between the two referenced
+** characters.
+*/
+
+int unicode_grapheme_break(unicode_char a, unicode_char b);
+
+/*
+** Implementation of line break rules, as per tr14.
+**
+** Invoke unicode_lb_init() to initialize the linebreaking algorithm. The
+** first parameter is a callback function that gets invoked with two
+** arguments: UNICODE_LB_{MANDATORY|NONE|ALLOWED}, and a passthrough argument.
+** The second parameter to unicode_lb_init() is the opaque passthrough
+** pointer, that is passed as the second argument to the callback function
+** with no further interpretation.
+**
+** unicode_lb_init() returns an opaque handle. Invoke unicode_lb_next(),
+** passing the handle and one unicode character. Repeatedly invoke
+** unicode_lb_next() to specify the input string for the linebreaking
+** algorithm, then invoke unicode_lb_end() to finish calculating the
+** linebreaking algorithm, and deallocate the opaque linebreaking handle.
+**
+** The callback function gets invoked once for each invocation of
+** unicode_lb_next(). The contract is that before unicode_lb_end() returns,
+** the callback function will get invoked the exact number of times that
+** unicode_lb_next(), as long as each invocation of the callback function
+** returned 0; nothing more, nothing less. The first parameter to the callback
+** function will be one of the following values:
+**
+** UNICODE_LB_MANDATORY - a linebreak is MANDATORY before the corresponding
+** character.
+** UNICODE_LB_NONE - a linebreak is PROHIBITED before the corresponding
+** character.
+** UNICODE_LB_ALLOWED - a linebreak is OPTIONAL before the corresponding
+** character (the preceding character is a space, or an equivalent).
+**
+** The callback function should return 0. A non-zero value indicates an
+** error, which gets propagated up to the caller. The contract that the
+** callback function gets invoked the same number of times that
+** unicode_lb_next() gets invoked is now broken.
+*/
+
+#define UNICODE_LB_MANDATORY	-1
+#define UNICODE_LB_NONE		0
+#define UNICODE_LB_ALLOWED	1
+
+struct unicode_lb_info;
+
+typedef struct unicode_lb_info *unicode_lb_info_t;
+
+/*
+** Allocate a linebreaking handle.
+*/
+extern unicode_lb_info_t unicode_lb_init(int (*cb_func)(int, void *),
+					 void *cb_arg);
+
+/*
+** Feed the next character through the linebreaking algorithm.
+** A non-zero return code indicates that the callback function was invoked
+** and it returned a non-zero return code (which is propagated as a return
+** value). unicode_lb_end() must still be invoked, in this case.
+**
+** A zero return code indicates that if the callback function was invoked,
+** it returned 0.
+*/
+
+extern int unicode_lb_next(unicode_lb_info_t i, unicode_char ch);
+
+/*
+** Convenience function that invokes unicode_lb_next() with a list of
+** unicode chars. Returns 0 if all invocations of unicode_lb_next() returned
+** 0, or the first non-zero return value from unicode_lb_next().
+*/
+
+extern int unicode_lb_next_cnt(unicode_lb_info_t i,
+			       const unicode_char *chars,
+			       size_t cnt);
+
+/*
+** Finish the linebreaking algorithm.
+**
+** A non-zero return code indicates that the callback function was invoked
+** and it returned a non-zero return code (which is propagated as a return
+** value).
+**
+** A zero return code indicates that if the callback function was invoked,
+** it returned 0, and that the callback function was invoked exactly the same
+** number of times that unicode_lb_next() was invoked.
+**
+** In all case, the linebreak handle will no longer be valid when this
+** function returns.
+*/
+
+extern int unicode_lb_end(unicode_lb_info_t i);
+
+/*
+** An alternative linebreak API where the callback function receives the
+** original unicode character in addition to its linebreak value.
+**
+** User unicode_lbc_init(), unicode_lbc_next(), and unicode_lbc_end(), whose
+** semantics are the same as their _lb_ counterparts.
+*/
+
+struct unicode_lbc_info;
+
+typedef struct unicode_lbc_info *unicode_lbc_info_t;
+
+extern unicode_lbc_info_t unicode_lbc_init(int (*cb_func)(int, unicode_char,
+							  void *),
+					   void *cb_arg);
+extern int unicode_lbc_next(unicode_lbc_info_t i, unicode_char ch);
+extern int unicode_lbc_end(unicode_lbc_info_t i);
 
 
 /*
@@ -473,7 +614,18 @@ extern const char libmail_u_ucs2_native[];
 #ifdef	__cplusplus
 }
 
+extern size_t unicode_wcwidth(const std::vector<unicode_char> &uc);
+
 namespace mail {
+
+	/*
+	** Interface to iconv.
+	**
+	** Subclass converted(). Invoke begin(), then operator(), repeatedly,
+	** then end().
+	**
+	** converted() receives the converted text.
+	*/
 
 	class iconvert {
 
@@ -483,20 +635,48 @@ namespace mail {
 		iconvert();
 		~iconvert();
 
-		bool begin(const std::string &src_chset,
+		/* Start conversion.
+		** Returns false if the requested conversion cannot be done.
+		**/
+
+		bool begin(/* Convert from */
+			   const std::string &src_chset,
+
+			   /* Convert to */
 			   const std::string &dst_chset);
 
+		/* Feed iconv(3). Returns false if the conversion was aborted.
+		 */
+
 		bool operator()(const char *, size_t);
-		virtual int converted(const char *, size_t);
+
+		bool operator()(const unicode_char *, size_t);
+
+		/*
+		** Get the results here. If the subclass returns a non-0
+		** value, the conversion is aborted.
+		*/
+
+		virtual int converted(const char *, size_t)=0;
+
+		/*
+		** End of conversion.
+		**
+		** Returns true if all calls to converted() returned 0,
+		** false if the conversion was aborted.
+		**
+		** errflag is set to true if there was a character that could
+		** not be converted, and passed to converted().
+		*/
+
+		bool end(bool &errflag)
+		{
+			return end(&errflag);
+		}
 
 		bool end()
 		{
 			return end(NULL);
-		}
-
-		bool end(int &errptr)
-		{
-			return end(&errptr);
 		}
 
 		/* Convert between two different charsets */
@@ -582,7 +762,568 @@ namespace mail {
 				       unicode_char (*char_func)(unicode_char)
 				       =NULL);
 	private:
-		bool end(int *);
+		bool end(bool *);
+
+	public:
+		class tou;
+		class fromu;
+	};
+
+	/* Convert output of iconvert to unicode_chars. */
+
+	class iconvert::tou : public iconvert {
+
+	public:
+		bool begin(const std::string &chset);
+
+		virtual int converted(const unicode_char *, size_t)=0;
+
+		using iconvert::operator();
+	private:
+		int converted(const char *ptr, size_t cnt);
+
+	public:
+		template<typename iter_t> class to_iter_class;
+
+		template<typename input_iter_t,
+			typename output_iter_t>
+			static output_iter_t convert(input_iter_t from_iter,
+						     input_iter_t to_iter,
+						     const std::string &chset,
+						     output_iter_t out_iter);
+
+		template<typename input_iter_t>
+			static void convert(input_iter_t from_iter,
+					    input_iter_t to_iter,
+					    const std::string &chset,
+					    std::vector<unicode_char> &out_buf)
+		{
+			out_buf.clear();
+			std::back_insert_iterator<std::vector<unicode_char> >
+				insert_iter(out_buf);
+
+			convert(from_iter, to_iter, chset, insert_iter);
+		}
+
+		static void convert(const std::string &str,
+				    const std::string &chset,
+				    std::vector<unicode_char> &out_buf);
+	};
+
+	/* Helper class that saves unicode output into an output iterator */
+
+	template<typename iter_t>
+		class iconvert::tou::to_iter_class : public iconvert::tou {
+
+		iter_t iter;
+	public:
+
+	to_iter_class(iter_t iterValue)
+		: iter(iterValue) {}
+
+		using tou::operator();
+
+		operator iter_t() const { return iter; }
+
+	private:
+		int converted(const unicode_char *ptr, size_t cnt)
+		{
+			while (cnt)
+			{
+				*iter=*ptr;
+
+				++iter;
+				++ptr;
+				--cnt;
+			}
+			return 0;
+		}
+	};
+		
+	template<typename input_iter_t,
+		typename output_iter_t>
+		output_iter_t iconvert::tou::convert(input_iter_t from_iter,
+						     input_iter_t to_iter,
+						     const std::string &chset,
+						     output_iter_t out_iter)
+		{
+			class to_iter_class<output_iter_t> out(out_iter);
+
+			if (!out.begin(chset))
+				return out;
+
+			std::vector<char> string;
+
+			while (from_iter != to_iter)
+			{
+				string.push_back(*from_iter++);
+
+				if (string.size() > 31)
+				{
+					out(&string[0], string.size());
+					string.clear();
+				}
+			}
+
+			if (string.size() > 0)
+				out(&string[0], string.size());
+
+			out.end();
+			return out;
+		}
+		
+	/* Convert output of iconvert from unicode_chars. */
+
+	class iconvert::fromu : public iconvert {
+
+	public:
+		bool begin(const std::string &chset);
+
+		using iconvert::operator();
+
+		template<typename iter_t> class to_iter_class;
+
+		template<typename input_iter_t,
+			typename output_iter_t>
+			static output_iter_t convert(input_iter_t from_iter,
+						     input_iter_t to_iter,
+						     const std::string &chset,
+						     output_iter_t out_iter);
+
+		template<typename input_iter_t>
+			static void convert(input_iter_t from_iter,
+					    input_iter_t to_iter,
+					    const std::string &chset,
+					    std::string &out_buf)
+		{
+			out_buf="";
+			std::back_insert_iterator<std::string>
+				insert_iter(out_buf);
+
+			convert(from_iter, to_iter, chset, insert_iter);
+		}
+
+		static void convert(const std::vector<unicode_char> &ubuf,
+				    const std::string &chset,
+				    std::string &out_buf);
+
+		static std::string convert(const std::vector<unicode_char>
+					   &ubuf,
+					   const std::string &chset);
+	};
+
+	/* Helper class that saves unicode output into an output iterator */
+
+	template<typename iter_t>
+		class iconvert::fromu::to_iter_class : public iconvert::fromu {
+
+		iter_t iter;
+	public:
+
+	to_iter_class(iter_t iterValue)
+		: iter(iterValue) {}
+
+		using fromu::operator();
+
+		operator iter_t() const { return iter; }
+
+	private:
+		int converted(const char *ptr, size_t cnt)
+		{
+			while (cnt)
+			{
+				*iter=*ptr;
+
+				++iter;
+				++ptr;
+				--cnt;
+			}
+			return 0;
+		}
+	};
+		
+	template<typename input_iter_t,
+		typename output_iter_t>
+		output_iter_t iconvert::fromu::convert(input_iter_t from_iter,
+						       input_iter_t to_iter,
+						       const std::string &chset,
+						       output_iter_t out_iter)
+		{
+			class to_iter_class<output_iter_t> out(out_iter);
+
+			if (!out.begin(chset))
+				return out;
+
+			std::vector<unicode_char> string;
+
+			while (from_iter != to_iter)
+			{
+				string.push_back(*from_iter++);
+
+				if (string.size() > 31)
+				{
+					out(&string[0], string.size());
+					string.clear();
+				}
+			}
+
+			if (string.size() > 0)
+				out(&string[0], string.size());
+
+			out.end();
+			return out;
+		}
+
+	/*
+	** Unicode linebreaking algorithm, tr14.
+	*/
+
+	extern "C" int linebreak_trampoline(int value, void *ptr);
+	extern "C" int linebreakc_trampoline(int value, unicode_char ch,
+					     void *ptr);
+
+	/*
+	** Subclass linebreak_callback_base, implement operator()(int).
+	**
+	** Use operator<< or operator()(iterator, iterator) to feed
+	** unicode_chars into the linebreaking algorithm. The subclass receives
+	** UNICODE_LB values, as they become available.
+	*/
+
+	class linebreak_callback_base {
+
+		unicode_lb_info_t handle;
+
+		linebreak_callback_base(const linebreak_callback_base &);
+		/* NOT IMPLEMENTED */
+
+		linebreak_callback_base &operator==(const
+						    linebreak_callback_base &);
+		/* NOT IMPLEMENTED */
+
+	public:
+		linebreak_callback_base();
+		~linebreak_callback_base();
+
+		void finish();
+
+		friend int linebreak_trampoline(int, void *);
+
+		linebreak_callback_base &operator<<(unicode_char uc);
+
+		template<typename iter_type>
+			linebreak_callback_base &operator()(iter_type beg_iter,
+							    iter_type end_iter)
+		{
+			while (beg_iter != end_iter)
+				operator<<(*beg_iter++);
+			return *this;
+		}
+
+		linebreak_callback_base &operator<<(const
+						    std::vector<unicode_char>
+						    &vec)
+		{
+			return operator()(vec.begin(), vec.end());
+		}
+	private:
+		virtual int operator()(int)=0;
+	};
+
+	class linebreak_callback_save_buf : public linebreak_callback_base {
+
+	public:
+		std::list<int> lb_buf;
+
+		linebreak_callback_save_buf();
+		~linebreak_callback_save_buf();
+
+	private:
+		int operator()(int value);
+	};
+
+	/*
+	** Convert an input iterator sequence over unicode_chars into
+	** an input iterator sequence over linebreak values.
+	*/
+
+	template<typename input_t> class linebreak_iter
+		: public std::iterator<std::input_iterator_tag, int, void>
+	{
+		mutable input_t iter_value, end_iter_value;
+
+		mutable linebreak_callback_save_buf *buf;
+
+		void fill() const
+		{
+			if (buf == NULL)
+				return;
+
+			while (buf->lb_buf.empty())
+			{
+				if (iter_value == end_iter_value)
+				{
+					buf->finish();
+					if (buf->lb_buf.empty())
+					{
+						delete buf;
+						buf=NULL;
+					}
+					break;
+				}
+
+				buf->operator<<(*iter_value++);
+			}
+		}
+
+		mutable value_type bufvalue;
+
+	public:
+		linebreak_iter(const input_t &iter_valueArg,
+			       const input_t &iter_endvalueArg)
+			: iter_value(iter_valueArg),
+			end_iter_value(iter_endvalueArg),
+			buf(new linebreak_callback_save_buf)
+			{
+			}
+
+		linebreak_iter() : buf(NULL)
+		{
+		}
+
+		~linebreak_iter()
+		{
+			if (buf)
+				delete buf;
+		}
+
+		linebreak_iter(const linebreak_iter<input_t> &v)
+			: buf(NULL)
+		{
+			operator=(v);
+		}
+
+		linebreak_iter<input_t> &operator=(const
+						   linebreak_iter<input_t> &v)
+		{
+			if (buf)
+				delete buf;
+			buf=v.buf;
+			iter_value=v.iter_value;
+			end_iter_value=v.end_iter_value;
+			v.buf=NULL;
+			return *this;
+		}
+
+		bool operator==(const linebreak_iter<input_t> &v) const
+		{
+			fill();
+			v.fill();
+
+			return buf == NULL && v.buf == NULL;
+		}
+
+		bool operator!=(const linebreak_iter<input_t> &v) const
+		{
+			return !operator==(v);
+		}
+
+		value_type operator*() const
+		{
+			fill();
+			return buf == NULL ? UNICODE_LB_MANDATORY:
+				buf->lb_buf.front();
+		}
+
+		linebreak_iter<input_t> &operator++()
+		{
+			bufvalue=operator*();
+
+			if (buf)
+				buf->lb_buf.pop_front();
+			return *this;
+		}
+
+		const value_type *operator++(int)
+		{
+			operator++();
+			return &bufvalue;
+		}
+	};
+
+	/*
+	** Like linebreak_callback_base, except the subclass receives both
+	** the linebreaking value, and the unicode character.
+	*/
+
+	class linebreakc_callback_base {
+
+		unicode_lbc_info_t handle;
+
+		linebreakc_callback_base(const linebreakc_callback_base &);
+		/* NOT IMPLEMENTED */
+
+		linebreakc_callback_base &operator==(const
+						     linebreakc_callback_base
+						     &);
+		/* NOT IMPLEMENTED */
+
+
+	public:
+		linebreakc_callback_base();
+		~linebreakc_callback_base();
+
+		void finish();
+
+		friend int linebreakc_trampoline(int, unicode_char, void *);
+
+		linebreakc_callback_base &operator<<(unicode_char uc);
+
+		template<typename iter_type>
+			linebreakc_callback_base &operator()(iter_type beg_iter,
+							    iter_type end_iter)
+		{
+			while (beg_iter != end_iter)
+				operator<<(*beg_iter++);
+			return *this;
+		}
+
+		linebreakc_callback_base &operator<<(const
+						    std::vector<unicode_char>
+						    &vec)
+		{
+			return operator()(vec.begin(), vec.end());
+		}
+	private:
+		virtual int operator()(int, unicode_char)=0;
+	};
+
+	class linebreakc_callback_save_buf : public linebreakc_callback_base {
+
+	public:
+		std::list<std::pair<int, unicode_char> > lb_buf;
+
+		linebreakc_callback_save_buf();
+		~linebreakc_callback_save_buf();
+
+	private:
+		int operator()(int, unicode_char);
+	};
+
+
+	/*
+	** Convert an input iterator sequence over unicode_chars into
+	** an input iterator sequence over std::pair<int, unicode_char>,
+	** the original unicode character, and the linebreaking value before
+	** the character.
+	*/
+
+	template<typename input_t> class linebreakc_iter
+		: public std::iterator<std::input_iterator_tag,
+		std::pair<int, unicode_char>, void>
+	{
+		mutable input_t iter_value, end_iter_value;
+
+		mutable linebreakc_callback_save_buf *buf;
+
+		void fill() const
+		{
+			if (buf == NULL)
+				return;
+
+			while (buf->lb_buf.empty())
+			{
+				if (iter_value == end_iter_value)
+				{
+					buf->finish();
+					if (buf->lb_buf.empty())
+					{
+						delete buf;
+						buf=NULL;
+					}
+					break;
+				}
+
+				buf->operator<<(*iter_value);
+				++iter_value;
+			}
+		}
+
+		mutable value_type bufvalue;
+
+	public:
+		linebreakc_iter(const input_t &iter_valueArg,
+				const input_t &iter_endvalueArg)
+			: iter_value(iter_valueArg),
+			end_iter_value(iter_endvalueArg),
+			buf(new linebreakc_callback_save_buf)
+			{
+			}
+
+		linebreakc_iter() : buf(NULL)
+		{
+		}
+
+		~linebreakc_iter()
+		{
+			if (buf)
+				delete buf;
+		}
+
+		linebreakc_iter(const linebreakc_iter<input_t> &v)
+			: buf(NULL)
+		{
+			operator=(v);
+		}
+
+		linebreakc_iter<input_t> &operator=(const
+						   linebreakc_iter<input_t> &v)
+		{
+			if (buf)
+				delete buf;
+			buf=v.buf;
+			iter_value=v.iter_value;
+			end_iter_value=v.end_iter_value;
+			v.buf=NULL;
+			return *this;
+		}
+
+		bool operator==(const linebreakc_iter<input_t> &v) const
+		{
+			fill();
+			v.fill();
+
+			return buf == NULL && v.buf == NULL;
+		}
+
+		bool operator!=(const linebreakc_iter<input_t> &v) const
+		{
+			return !operator==(v);
+		}
+
+		value_type operator*() const
+		{
+			fill();
+			return buf == NULL ?
+				std::make_pair(UNICODE_LB_MANDATORY,
+					       (unicode_char)0):
+				buf->lb_buf.front();
+		}
+
+		linebreakc_iter<input_t> &operator++()
+		{
+			bufvalue=operator*();
+
+			if (buf)
+				buf->lb_buf.pop_front();
+			return *this;
+		}
+
+		const value_type *operator++(int)
+		{
+			operator++();
+			return &bufvalue;
+		}
 	};
 }
 #endif

@@ -2,7 +2,7 @@
 ** Copyright 2000-2011 Double Precision, Inc.
 ** See COPYING for distribution information.
 **
-** $Id: unicode.c,v 1.19 2011/01/25 03:08:02 mrsam Exp $
+** $Id: unicode.c,v 1.21 2011/03/06 22:19:24 mrsam Exp $
 */
 
 #include	"unicode_config.h"
@@ -920,6 +920,8 @@ static void convert_flush(struct libmail_u_convert_iconv *h)
 static void convert_flush_iconv(struct libmail_u_convert_iconv *h,
 				char **inbuf, size_t *inbytesleft)
 {
+	int save_errno;
+
 	while (1)
 	{
 		char outbuf[1024];
@@ -959,6 +961,8 @@ static void convert_flush_iconv(struct libmail_u_convert_iconv *h,
 		outleft=sizeof(outbuf);
 
 		n=iconv(h->h, inbuf, inbytesleft, &outp, &outleft);
+
+		save_errno=errno;
 
 		/* Anything produced by iconv() gets pushed down the stack */
 
@@ -1030,10 +1034,10 @@ static void convert_flush_iconv(struct libmail_u_convert_iconv *h,
 		** Stopped at an incomplete multibyte sequence, try again on
 		** the next round.
 		*/
-		else if (errno == EINVAL)
+		else if (save_errno == EINVAL)
 			break;
 
-		if (errno == EILSEQ)
+		if (save_errno == EILSEQ)
 			h->converr=1; /* Another possibility this can happen */
 
 		/*
@@ -1042,7 +1046,7 @@ static void convert_flush_iconv(struct libmail_u_convert_iconv *h,
 		** Otherwise, upon encountering any other error condition,
 		** reset the conversion state.
 		*/
-		if (errno != E2BIG)
+		if (save_errno != E2BIG)
 			iconv(h->h, NULL, NULL, NULL, NULL);
 	}
 }
@@ -1323,6 +1327,7 @@ struct libmail_u_convert_buf {
 	struct libmail_u_convert_buf *next;
 	unicode_char *fragment;
 	size_t fragment_size;
+	size_t max_fragment_size;
 };
 
 struct libmail_u_convert_tou {
@@ -1334,7 +1339,7 @@ struct libmail_u_convert_tou {
 	size_t tot_size;
 	int nullterminate;
 
-	struct libmail_u_convert_buf *first, **last;
+	struct libmail_u_convert_buf *first, *tail, **last;
 };
 
 static int save_unicode(const char *, size_t, void *);
@@ -1406,25 +1411,57 @@ static int save_unicode(const char *text, size_t cnt, void *ptr)
 {
 	struct libmail_u_convert_tou *p=
 		(struct libmail_u_convert_tou *)ptr;
-	struct libmail_u_convert_buf *fragment=
-		malloc(sizeof(struct libmail_u_convert_buf)+cnt);
+	struct libmail_u_convert_buf *fragment;
 	size_t tot_size;
 
-	if (!fragment)
+	cnt /= sizeof(unicode_char);
+
+	tot_size=p->tot_size + cnt*sizeof(unicode_char);
+	/* Keep track of the total size saved */
+
+	if (p->tail)
 	{
-		p->errflag=1;
-		return 1;
+		size_t n=p->tail->max_fragment_size-p->tail->fragment_size;
+
+		if (n > cnt)
+			n=cnt;
+
+		if (n)
+		{
+			memcpy(p->tail->fragment+p->tail->fragment_size,
+			       text, n*sizeof(unicode_char));
+
+			cnt -= n;
+			text += n*sizeof(unicode_char);
+			p->tail->fragment_size += n;
+		}
 	}
 
-	fragment->next=NULL;
-	fragment->fragment=(unicode_char *)(fragment+1);
-	if ((fragment->fragment_size=cnt / sizeof(unicode_char)) > 0)
-		memcpy(fragment->fragment, text, cnt);
+	if (cnt > 0)
+	{
+		size_t cnt_alloc=cnt;
 
-	*(p->last)=fragment;
-	p->last=&fragment->next;
+		if (cnt_alloc < 16)
+			cnt_alloc=16;
 
-	tot_size=p->tot_size + cnt; /* Keep track of the total size saved */
+		if ((fragment=malloc(sizeof(struct libmail_u_convert_buf)
+				     +cnt_alloc*sizeof(unicode_char)))
+		    == NULL)
+		{
+			p->errflag=1;
+			return 1;
+		}
+
+		fragment->next=NULL;
+		fragment->fragment=(unicode_char *)(fragment+1);
+		fragment->max_fragment_size=cnt_alloc;
+		fragment->fragment_size=cnt;
+		memcpy(fragment->fragment, text, cnt*sizeof(unicode_char));
+
+		*(p->last)=fragment;
+		p->last=&fragment->next;
+		p->tail=fragment;
+	}
 
 	if (tot_size < p->tot_size) /* Overflow? */
 	{

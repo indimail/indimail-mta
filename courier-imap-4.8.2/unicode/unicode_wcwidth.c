@@ -2,6 +2,7 @@
 #include "unicode.h"
 
 #include "eastasianwidth.h"
+#include "linebreaktab_internal.h"
 
 #include <stdlib.h>
 
@@ -25,5 +26,29 @@ int unicode_wcwidth(unicode_char c)
 			e=n;
 		}
 	}
+
+	switch (unicode_lb_lookup(c)) {
+	case UNICODE_LB_BK:
+	case UNICODE_LB_CR:
+	case UNICODE_LB_LF:
+	case UNICODE_LB_CM:
+	case UNICODE_LB_NL:
+	case UNICODE_LB_WJ:
+	case UNICODE_LB_ZW:
+		return 0;
+	default:
+		break;
+	}
 	return 1;
+}
+
+size_t unicode_wcwidth_str(const unicode_char *c)
+{
+	size_t w=0;
+
+	while (*c)
+		w += unicode_wcwidth(*c++);
+
+
+	return w;
 }

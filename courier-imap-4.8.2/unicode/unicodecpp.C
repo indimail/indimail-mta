@@ -2,7 +2,7 @@
 ** Copyright 2011 Double Precision, Inc.
 ** See COPYING for distribution information.
 **
-** $Id: unicodecpp.C,v 1.4 2011/01/19 03:55:48 mrsam Exp $
+** $Id: unicodecpp.C,v 1.10 2011/02/26 17:54:52 mrsam Exp $
 */
 
 #include	"unicode_config.h"
@@ -15,6 +15,29 @@ extern "C" {
 		return reinterpret_cast<mail::iconvert *>(arg)
 			->converted(str, cnt);
 	}
+
+	
+	int mail::linebreak_trampoline(int value, void *ptr)
+	{
+		return (*reinterpret_cast<mail::linebreak_callback_base *>
+			(ptr))(value);
+	}
+
+	int mail::linebreakc_trampoline(int value, unicode_char ch, void *ptr)
+	{
+		return (*reinterpret_cast<mail::linebreakc_callback_base *>
+			(ptr))(value, ch);
+	}
+}
+
+size_t unicode_wcwidth(const std::vector<unicode_char> &uc)
+{
+	size_t w=0;
+
+	for (std::vector<unicode_char>::const_iterator
+		     b(uc.begin()), e(uc.end()); b != e; ++b)
+		w += unicode_wcwidth(*b);
+	return w;
 }
 
 mail::iconvert::iconvert() : handle(NULL)
@@ -39,15 +62,20 @@ bool mail::iconvert::begin(const std::string &src_chset,
 	return true;
 }
 
-bool mail::iconvert::end(int *errptr)
+bool mail::iconvert::end(bool *errflag)
 {
+	int errptr;
+
 	int rc;
 
 	if (!handle)
 		return true;
 
-	rc=libmail_u_convert_deinit(handle, errptr);
+	rc=libmail_u_convert_deinit(handle, &errptr);
 	handle=NULL;
+
+	if (errflag)
+		*errflag=errptr != 0;
 	return rc == 0;
 }
 
@@ -59,11 +87,13 @@ bool mail::iconvert::operator()(const char *str, size_t cnt)
 	return (libmail_u_convert(handle, str, cnt) == 0);
 }
 
-int mail::iconvert::converted(const char *str, size_t cnt)
+bool mail::iconvert::operator()(const unicode_char *str, size_t cnt)
 {
-	return 0;
-}
+	if (!handle)
+		return false;
 
+	return (libmail_u_convert_uc(handle, str, cnt) == 0);
+}
 
 std::string mail::iconvert::convert(const std::string &text,
 				    const std::string &charset,
@@ -71,14 +101,14 @@ std::string mail::iconvert::convert(const std::string &text,
 				    bool &errflag)
 {
 	std::string buf;
-	int flag;
+	int errptr;
 
 	char *p=libmail_u_convert_tobuf(text.c_str(),
 					charset.c_str(),
 					dstcharset.c_str(),
-					&flag);
+					&errptr);
 
-	errflag= flag != 0;
+	errflag= errptr != 0;
 
 	try {
 		buf=p;
@@ -158,6 +188,45 @@ bool mail::iconvert::convert(const std::string &text,
 	return err == 0;
 }
 
+bool mail::iconvert::tou::begin(const std::string &chset)
+{
+	return iconvert::begin(chset, libmail_u_ucs4_native);
+}
+
+int mail::iconvert::tou::converted(const char *ptr, size_t cnt)
+{
+	return converted(reinterpret_cast<const unicode_char *>(ptr),
+			 cnt/sizeof(unicode_char));
+}
+
+void mail::iconvert::tou::convert(const std::string &str,
+				  const std::string &chset,
+				  std::vector<unicode_char> &out_buf)
+{
+	convert(str.begin(), str.end(), chset, out_buf);
+}
+
+bool mail::iconvert::fromu::begin(const std::string &chset)
+{
+	return iconvert::begin(libmail_u_ucs4_native, chset);
+}
+
+std::string mail::iconvert::fromu::convert(const std::vector<unicode_char>
+					   &ubuf,
+					   const std::string &chset)
+{
+	std::string s;
+
+	convert(ubuf, chset, s);
+	return s;
+}
+
+void mail::iconvert::fromu::convert(const std::vector<unicode_char> &ubuf,
+				    const std::string &chset,
+				    std::string &out_buf)
+{
+	convert(ubuf.begin(), ubuf.end(), chset, out_buf);
+}
 
 std::string mail::iconvert::convert_tocase(const std::string &text,
 					   const std::string &charset,
@@ -187,4 +256,98 @@ std::string mail::iconvert::convert_tocase(const std::string &text,
 		throw;
 	}
 	return s;
+}
+
+mail::linebreak_callback_base::linebreak_callback_base()
+	: handle(NULL)
+{
+}
+
+mail::linebreak_callback_base::~linebreak_callback_base()
+{
+	finish();
+}
+
+mail::linebreak_callback_base
+&mail::linebreak_callback_base::operator<<(unicode_char uc)
+{
+	if (!handle)
+		handle=unicode_lb_init(linebreak_trampoline,
+				       reinterpret_cast<void *>
+				       (static_cast<linebreak_callback_base *>
+					(this)));
+
+	if (handle)
+		if (unicode_lb_next(handle, uc))
+			finish();
+	return *this;
+}
+
+void mail::linebreak_callback_base::finish()
+{
+	if (handle)
+		unicode_lb_end(handle);
+	handle=NULL;
+}
+
+
+mail::linebreak_callback_save_buf::linebreak_callback_save_buf()
+{
+}
+
+mail::linebreak_callback_save_buf::~linebreak_callback_save_buf()
+{
+}
+
+int mail::linebreak_callback_save_buf::operator()(int value)
+{
+	lb_buf.push_back(value);
+	return 0;
+}
+
+mail::linebreakc_callback_base::linebreakc_callback_base()
+	: handle(NULL)
+{
+}
+
+mail::linebreakc_callback_base::~linebreakc_callback_base()
+{
+	finish();
+}
+
+mail::linebreakc_callback_base
+&mail::linebreakc_callback_base::operator<<(unicode_char uc)
+{
+	if (handle == NULL)
+		handle=unicode_lbc_init(linebreakc_trampoline,
+					reinterpret_cast<void *>
+					(static_cast<linebreakc_callback_base *>
+					 (this)));
+
+	if (handle)
+		if (unicode_lbc_next(handle, uc))
+			finish();
+	return *this;
+}
+
+void mail::linebreakc_callback_base::finish()
+{
+	if (handle)
+		unicode_lbc_end(handle);
+	handle=NULL;
+}
+
+
+mail::linebreakc_callback_save_buf::linebreakc_callback_save_buf()
+{
+}
+
+mail::linebreakc_callback_save_buf::~linebreakc_callback_save_buf()
+{
+}
+
+int mail::linebreakc_callback_save_buf::operator()(int c, unicode_char ch)
+{
+	lb_buf.push_back(std::make_pair(c, ch));
+	return 0;
 }

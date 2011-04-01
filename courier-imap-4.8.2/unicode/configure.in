@@ -75,7 +75,7 @@ iconv_open("","");
 
 if test "$GCC" = "yes"
 then
-	CFLAGS="$CFLAGS -Wall"
+	CFLAGS="$CFLAGS -Wall -fexceptions"
 fi
 
 AC_OUTPUT(Makefile)

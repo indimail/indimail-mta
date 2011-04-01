@@ -18,7 +18,7 @@
 #include <stringprep.h>
 #endif
 
-static const char rcsid[]="$Id: rfc2047.c,v 1.27 2011/01/25 03:08:02 mrsam Exp $";
+static const char rcsid[]="$Id: rfc2047.c,v 1.29 2011/02/12 21:29:57 mrsam Exp $";
 
 #define	RFC2047_ENCODE_FOLDLENGTH	76
 
@@ -438,6 +438,9 @@ static int encode_words(const unicode_char *uc,
 	return flag;
 }
 
+/*
+** Encode a sequence of words.
+*/
 static int do_encode_words_method(const unicode_char *uc,
 				  size_t ucsize,
 				  const char *charset,
@@ -460,6 +463,7 @@ static int do_encode_words_method(const unicode_char *uc,
 	while (ucsize)
 	{
 		size_t j;
+		size_t i;
 
 		if (!first)
 		{
@@ -472,8 +476,22 @@ static int do_encode_words_method(const unicode_char *uc,
 
 		j=(RFC2047_ENCODE_FOLDLENGTH-offset)/2;
 
-		if (j > ucsize)
+		if (j >= ucsize)
 			j=ucsize;
+		else
+		{
+			/*
+			** Do not split rfc2047-encoded works across a
+			** grapheme break.
+			*/
+
+			for (i=j; i > 0; --i)
+				if (unicode_grapheme_break(uc[i-1], uc[i]))
+				{
+					j=i;
+					break;
+				}
+		}
 
 		if ((rc=libmail_u_convert_fromu_tobuf(uc, j, charset,
 						      &p, &psize,
@@ -502,6 +520,10 @@ static int cnt_conv(const char *dummy, size_t n, void *arg)
 	return 0;
 }
 
+/*
+** Encode, or not encode, words.
+*/
+
 static int do_encode_words(const unicode_char *uc,
 			   size_t ucsize,
 			   const char *charset,
@@ -516,6 +538,10 @@ static int do_encode_words(const unicode_char *uc,
 	int rc;
 	size_t b64len, qlen;
 
+	/*
+	** Convert from unicode
+	*/
+
 	if ((rc=libmail_u_convert_fromu_tobuf(uc, ucsize, charset,
 					      &p, &psize,
 					      NULL)) != 0)
@@ -524,7 +550,7 @@ static int do_encode_words(const unicode_char *uc,
 	if (psize && p[psize-1] == 0)
 		--psize;
 
-	if (!flag)
+	if (!flag) /* If not converting, then the job is done */
 	{
 		rc=(*func)(p, psize, arg);
 		free(p);
@@ -532,6 +558,10 @@ static int do_encode_words(const unicode_char *uc,
 	}
 	free(p);
 
+	/*
+	** Try first quoted-printable, then base64, then pick whichever
+	** one gives the shortest results.
+	*/
 	qlen=0;
 	b64len=0;
 
@@ -550,6 +580,9 @@ static int do_encode_words(const unicode_char *uc,
 				      func, arg);
 }
 
+/*
+** RFC2047-encoding pass.
+*/
 static int rfc2047_encode_callback(const unicode_char *uc,
 				   size_t ucsize,
 				   const char *charset,
@@ -565,6 +598,8 @@ static int rfc2047_encode_callback(const unicode_char *uc,
 
 	while (ucsize)
 	{
+		/* Pass along all the whitespace */
+
 		if (ISSPACE(*uc))
 		{
 			char c= *uc++;
@@ -572,11 +607,18 @@ static int rfc2047_encode_callback(const unicode_char *uc,
 
 			if ((rc=(*func)(&c, 1, arg)) != 0)
 				return rc;
+			continue;
 		}
 
 		i=0;
 
+		/* Check if the next word needs to be encoded, or not. */
+
 		flag=encode_words(uc, ucsize, qp_allow, &i);
+
+		/*
+		** Then proceed to encode, or not encode, the following words.
+		*/
 
 		if ((rc=do_encode_words(uc, i, charset, flag,
 					qp_allow, offset,
@@ -618,15 +660,17 @@ char *rfc2047_encode_str(const char *str, const char *charset,
 	size_t ucsize;
 	int err;
 
+	/* Convert string to unicode */
+
 	if (libmail_u_convert_tou_tobuf(str, strlen(str), charset,
 					&uc, &ucsize, &err))
 		return NULL;
 
-	if (err)
-	{
-		free(uc);
-		return NULL;
-	}
+	/*
+	** Perform two passes: calculate size of the buffer where the
+	** encoded string gets saved into, then allocate the buffer and
+	** do a second pass to actually do it.
+	*/
 
 	if (rfc2047_encode_callback(uc, ucsize,
 				    charset,
