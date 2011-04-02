@@ -1,5 +1,8 @@
 /*
  * $Log: inquerytest.c,v $
+ * Revision 2.18  2011-04-02 13:59:24+05:30  Cprogrammer
+ * fix for 64 bit data type
+ *
  * Revision 2.17  2010-04-11 22:21:52+05:30  Cprogrammer
  * replaced LPWD_QUERY with LIMIT_QUERY for domain limits
  *
@@ -68,7 +71,7 @@
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: inquerytest.c,v 2.17 2010-04-11 22:21:52+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: inquerytest.c,v 2.18 2011-04-02 13:59:24+05:30 Cprogrammer Stab mbhangui $";
 #endif
 
 void            print_limits(struct vlimits *);
@@ -290,10 +293,10 @@ print_limits(struct vlimits *limits)
 {
 	printf("Domain Expiry Date   : %s", limits->domain_expiry == -1 ? "Never Expires\n" : ctime(&limits->domain_expiry));
 	printf("Password Expiry Date : %s", limits->passwd_expiry == -1 ? "Never Expires\n" : ctime(&limits->passwd_expiry));
-	printf("Max Domain Quota     : %d\n", limits->diskquota);
-	printf("Max Domain Messages  : %d\n", limits->maxmsgcount);
-	printf("Default User Quota   : %d\n", limits->defaultquota);
-	printf("Default User Messages: %d\n", limits->defaultmaxmsgcount);
+	printf("Max Domain Quota     : %"PRId64"\n", limits->diskquota);
+	printf("Max Domain Messages  : %"PRId64"\n", limits->maxmsgcount);
+	printf("Default User Quota   : %"PRId64"\n", limits->defaultquota);
+	printf("Default User Messages: %"PRId64"\n", limits->defaultmaxmsgcount);
 	printf("Max Pop Accounts     : %d\n", limits->maxpopaccounts);
 	printf("Max Aliases          : %d\n", limits->maxaliases);
 	printf("Max Forwards         : %d\n", limits->maxforwards);
