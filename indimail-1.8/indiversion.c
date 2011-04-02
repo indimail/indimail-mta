@@ -1,5 +1,8 @@
 /*
  * $Log: indiversion.c,v $
+ * Revision 2.128  2011-04-02 14:00:56+05:30  Cprogrammer
+ * fix for getversion_proxylogin() function which has been moved out of libindimail
+ *
  * Revision 2.127  2010-07-04 14:39:39+05:30  Cprogrammer
  * removed open_smtp_relay
  *
@@ -499,7 +502,7 @@
 #endif
 
 #ifndef	lint
-static char     sccsid[] = "$Id: indiversion.c,v 2.127 2010-07-04 14:39:39+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: indiversion.c,v 2.128 2011-04-02 14:00:56+05:30 Cprogrammer Stab mbhangui $";
 #endif
 
 void            getversion_indimail_settings_c();
@@ -1089,7 +1092,9 @@ getversion(char *id)
 	getversion_vauth_delaliasdomain_c();
 	getversion_vauth_insertaliasdomain_c();
 	getversion_vauth_get_realdomain_c();
+#ifdef MAIN
 	getversion_proxylogin_c();
+#endif
 	getversion_isvalid_domain_c();
 	getversion_parse_quota_c();
 	getversion_remove_quotes_c();
