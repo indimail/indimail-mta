@@ -1,6 +1,6 @@
 dnl Process this file with autoconf to produce a configure script.
 
-AC_INIT(iwebadmin, 1.0, [Manvendra Bhangui <manvendra@indimail.org>],iwebadmin)
+AC_INIT(iwebadmin, 1.0, [Manvendra Bhangui manvendra@indimail.org],iwebadmin)
 AC_CANONICAL_TARGET
 VERSION=$PACKAGE_VERSION
 QA_PACKAGE="iwebadmin"
