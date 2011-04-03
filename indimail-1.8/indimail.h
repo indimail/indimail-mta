@@ -1,5 +1,8 @@
 /*
  * $Log: indimail.h,v $
+ * Revision 2.198  2011-04-03 16:22:26+05:30  Cprogrammer
+ * added instance count arg to ProcessInFifo()
+ *
  * Revision 2.197  2011-02-11 23:01:15+05:30  Cprogrammer
  * fix for specifying > 2GB values in quota and message counts
  *
@@ -907,7 +910,7 @@
 #define INDIMAILH_H
 
 #ifndef	lint
-static char     sccsidh[] = "$Id: indimail.h,v 2.197 2011-02-11 23:01:15+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsidh[] = "$Id: indimail.h,v 2.198 2011-04-03 16:22:26+05:30 Cprogrammer Stab mbhangui $";
 #endif
 
 #include "config.h"
@@ -1781,7 +1784,7 @@ char          **LoadBMF(int *, char *);
 int             UpdateSpamTable(char *);
 void           *inquery(char, char *, char *);
 int             vauthOpen_user(char *, int);
-int             ProcessInFifo();
+int             ProcessInFifo(int);
 struct passwd  *strToPw(char *, int);
 long            bulletin(char *, char *);
 int             vfstabNew(char *, long, long);
