@@ -15,8 +15,8 @@ environment variable.
 be changed by defining the \fBPLUGINDIR\fR environment variable. By default, qmail-send will
 attempt to load the plugin qmail-send.so. This can be changed by defining \fBSTART_PLUGIN\fR
 environment variable. You can define multiple plugins separated by the space charater in the
-\fBSTART_PLUGIN\fR variable. \fBqmail-send\fR will use \fBdlopen(3)\fR function to load the
-plugin and by default try to execute the symbol \fIstartup\fR. The symbol to be loaded can
+\fBSTART_PLUGIN\fR variable. \fBqmail-send\fR will use \fBdlopen(3)\fR function to load all the
+plugins and by default try to execute the symbol \fIstartup\fR. The symbol to be loaded can
 be changed by defining the \fBSTART_PLUGIN_SYMB\fR environment variable. \fBqmail-send\fR
 will terminate if any of the loaded functions return non-zero status.
 
