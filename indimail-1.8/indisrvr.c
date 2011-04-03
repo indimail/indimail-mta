@@ -1,5 +1,8 @@
 /*
  * $Log: indisrvr.c,v $
+ * Revision 2.43  2011-04-03 20:11:14+05:30  Cprogrammer
+ * BUG - getpid not called correctly
+ *
  * Revision 2.42  2010-07-22 23:05:38+05:30  Cprogrammer
  * email changed to manvendra@indimail.org
  *
@@ -154,7 +157,7 @@
 #include "indimail.h"
 
 #ifndef lint
-static char     sccsid[] = "$Id: indisrvr.c,v 2.42 2010-07-22 23:05:38+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: indisrvr.c,v 2.43 2011-04-03 20:11:14+05:30 Cprogrammer Stab mbhangui $";
 #endif
 
 #ifdef CLUSTERED_SITE
@@ -855,7 +858,7 @@ get_options(int argc, char **argv, char **ipaddr, char **port, int *backlog)
 static void
 SigTerm()
 {
-	filewrt(3, "%d: IndiServer going down on SIGTERM\n", getpid);
+	filewrt(3, "%d: IndiServer going down on SIGTERM\n", getpid());
 	unlink(pidFile);
 	exit(0);
 }
@@ -894,7 +897,7 @@ SigUsr(void)
 static void
 SigHup(void)
 {
-	filewrt(3, "%d: IndiServer received SIGHUP\n", getpid);
+	filewrt(3, "%d: IndiServer received SIGHUP\n", getpid());
 	ctx = load_certificate(certfile);
 	signal(SIGHUP, (void(*)()) SigHup);
 	errno = EINTR;
