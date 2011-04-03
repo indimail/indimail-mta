@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail.spec.in,v 2.202 2011-02-26 11:10:24+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 2.203 2011-04-03 09:41:59+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %define _unpackaged_files_terminate_build 1
 
@@ -137,14 +137,10 @@ Patch1:  http://downloads.sourceforge.net/%{name}/Patches/qmail-%{qmail_version}
 Patch2:  http://downloads.sourceforge.net/%{name}/Patches/ucspi-tcp-%{ucspi_version}.patch.gz
 
 %if %nocourierimap == 0
-%if %build_on_obs == 0
 %if %i_m_on_mac == 1
 Patch3:  http://downloads.sourceforge.net/%{name}/Patches/courier-imap-%{courier_version}-1.2.patch.gz
 %else
 Patch3:  http://downloads.sourceforge.net/%{name}/Patches/courier-imap-%{courier_version}.patch.gz
-%endif
-%else
-Patch3:  http://downloads.sourceforge.net/%{name}/Patches/courier-imap-%{courier_version}-1.0.patch.gz
 %endif
 %endif
 
@@ -201,6 +197,7 @@ BuildRequires: glibc glibc-devel openssl procps readline-devel
 BuildRequires: sed ncurses-devel gettext-devel
 BuildRequires: python-devel flex findutils
 BuildRequires: readline gzip autoconf
+BuildRequires: libidn-devel
 %if %{undefined rhel_version}
 BuildRequires: gdbm-devel sharutils
 %else
@@ -374,10 +371,6 @@ do
 	fi
 	)
 done
-# unComment out below for openSUSE buildservice
-%if %build_on_obs != 0
-	%{__cp} %{name}-%{version}/patches/courier-imap-%{courier_version}-1.0.patch.gz ../SOURCES
-%endif
 
 %patch1  -p0
 %patch2  -p0
@@ -700,13 +693,6 @@ if [ -f %{buildroot}%{_prefix}/man/man7/authlib.7.gz ] ; then
 		%{__rm} -f %{buildroot}%{_prefix}/man/man7/$i
 		ln -sf %{_prefix}/man/man7/authlib.7.gz %{buildroot}%{_prefix}/man/man7/$i.gz
 	done
-fi
-if [ -f %{buildroot}%{_prefix}/man/man8/makeuserdb.8.gz ] ; then
-		for i in vchkpw2userdb.8 pw2userdb.8
-		do
-			%{__rm} -f %{buildroot}%{_prefix}/man/man8/$i
-			ln -sf %{_prefix}/man/man8/makeuserdb.8.gz %{buildroot}%{_prefix}/man/man8/$i.gz
-		done
 fi
 if [ %nopam_multi -eq 0 ] ; then
 	%{__rm} -f %{buildroot}%{module_dir}/pam-multi.la
