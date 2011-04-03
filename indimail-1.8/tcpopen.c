@@ -1,5 +1,8 @@
 /*
  * $Log: tcpopen.c,v $
+ * Revision 2.6  2011-04-03 09:28:33+05:30  Cprogrammer
+ * fix for trying the next IPv6 address record in list
+ *
  * Revision 2.5  2010-03-26 19:17:41+05:30  Cprogrammer
  * return correct error instead of EINVAL
  *
@@ -33,7 +36,7 @@
  */
 
 #ifndef	lint
-static char     sccsid[] = "$Id: tcpopen.c,v 2.5 2010-03-26 19:17:41+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: tcpopen.c,v 2.6 2011-04-03 09:28:33+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #include "config.h"
@@ -142,7 +145,7 @@ tcpopen(host, service, port) /*- Thanks to Richard's Steven */
 		fprintf(stderr, "tcpopen: getaddrinfo: %s\n", gai_strerror(retval));
 		return (-1);
 	}
-	for (res = res0; res; res = res->ai_next)
+	for (fd = -1, res = res0; res && fd == -1; res = res->ai_next)
 	{
 		for (;;)
 		{
@@ -203,10 +206,11 @@ tcpopen(host, service, port) /*- Thanks to Richard's Steven */
 					break;
 				}
 			} /*- for (errno = 0;;) */
-	 		if (!retval)
+	 		if (!retval || errno != ECONNREFUSED)
 	 			break;
 		} /*- for (;;) */
-	} /*- for (res = res0; res; res = res->ai_next) */
+		/*- try the next address record in list */
+	} /*- for (res = res0; res && fd == -1; res = res->ai_next) */
 	freeaddrinfo(res0);
 #else
 	/*
