@@ -1,5 +1,8 @@
 /*
  * $Log: tcpopen.c,v $
+ * Revision 2.7  2011-04-03 09:33:44+05:30  Cprogrammer
+ * set fd to -1 when connect fails for ipv6
+ *
  * Revision 2.6  2011-04-03 09:28:33+05:30  Cprogrammer
  * fix for trying the next IPv6 address record in list
  *
@@ -36,7 +39,7 @@
  */
 
 #ifndef	lint
-static char     sccsid[] = "$Id: tcpopen.c,v 2.6 2011-04-03 09:28:33+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: tcpopen.c,v 2.7 2011-04-03 09:33:44+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #include "config.h"
@@ -203,6 +206,7 @@ tcpopen(host, service, port) /*- Thanks to Richard's Steven */
 					optval = errno;
 					(void) close(fd);
 					errno = optval;
+					fd = -1;
 					break;
 				}
 			} /*- for (errno = 0;;) */
