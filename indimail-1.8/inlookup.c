@@ -1,5 +1,8 @@
 /*
  * $Log: inlookup.c,v $
+ * Revision 2.17  2011-04-03 17:59:39+05:30  Cprogrammer
+ * pass instance number to ProcessInFifo()
+ *
  * Revision 2.16  2010-03-28 13:46:04+05:30  Cprogrammer
  * prevent rapid spawning of inlookup children when ProcessInFifo() exits
  *
@@ -51,7 +54,7 @@
  */
 
 #ifndef	lint
-static char     sccsid[] = "$Id: inlookup.c,v 2.16 2010-03-28 13:46:04+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: inlookup.c,v 2.17 2011-04-03 17:59:39+05:30 Cprogrammer Stab mbhangui $";
 #endif
 
 #include "indimail.h"
@@ -218,7 +221,7 @@ main(int argc, char **argv)
 		putenv(envbuf);
 		printf("InLookup INFIFO=%s\n", infifo);
 		fflush(stdout);
-		return(ProcessInFifo());
+		return(ProcessInFifo(0));
 	}
 	return(0);
 }
@@ -243,9 +246,10 @@ fork_child(char *infifo, int instNum)
 #endif
 			snprintf(pid_table[instNum].infifo, MAX_BUFF, "INFIFO=%s.%d", infifo, instNum + 1);
 			putenv(pid_table[instNum].infifo);
-			printf("InLookup[%d] PPID %d Ready with INFIFO=%s.%d\n", instNum + 1, (int) getppid(), infifo, instNum + 1);
+			printf("InLookup[%d] PPID %d PID %d Ready with INFIFO=%s.%d\n", instNum + 1,
+				(int) getppid(), (int) getpid(), infifo, instNum + 1);
 			fflush(stdout);
-			i = ProcessInFifo();
+			i = ProcessInFifo(instNum + 1);
 			sleep(5);
 			exit(i);
 		default:
