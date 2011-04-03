@@ -585,7 +585,7 @@ if [ -d ../fetchmail-%{fetchmail_version} ] ; then
 		`%{__cat} ../%{name}-%{version}/config/fetchmail.opts` > $DEVICE
 	fi
 fi
-
+cd ..
 #### ucspi-tcp ######################
 if [ -d ucspi-tcp-%{ucspi_version} ] ; then
 	%{__sed} 's{HOME{%{_prefix}{' ucspi-tcp-%{ucspi_version}/conf-home.in > ucspi-tcp-%{ucspi_version}/conf-home
