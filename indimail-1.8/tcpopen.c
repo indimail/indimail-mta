@@ -1,5 +1,8 @@
 /*
  * $Log: tcpopen.c,v $
+ * Revision 2.8  2011-04-03 09:37:23+05:30  Cprogrammer
+ * try next address record when ipv6 socket fails
+ *
  * Revision 2.7  2011-04-03 09:33:44+05:30  Cprogrammer
  * set fd to -1 when connect fails for ipv6
  *
@@ -39,7 +42,7 @@
  */
 
 #ifndef	lint
-static char     sccsid[] = "$Id: tcpopen.c,v 2.7 2011-04-03 09:33:44+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: tcpopen.c,v 2.8 2011-04-03 09:37:23+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #include "config.h"
@@ -155,10 +158,7 @@ tcpopen(host, service, port) /*- Thanks to Richard's Steven */
 			if (port >= 0)
 			{
 				if ((fd = socket(res->ai_family, res->ai_socktype, res->ai_protocol)) == -1)
-				{
-					freeaddrinfo(res0);
-					return -1;
-				}
+					break; /*- Try the next address record in the list. */
 			}
 #ifndef WindowsNT
 			else /*- if (port < 0) */
