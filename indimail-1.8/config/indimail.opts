@@ -1,3 +1,4 @@
+--enable-enterprise-support=y
 --enable-indiuser=indimail
 --enable-indigroup=indimail
 --enable-default-domain=indimail.org

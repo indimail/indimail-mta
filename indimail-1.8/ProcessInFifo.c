@@ -1,5 +1,11 @@
 /*
  * $Log: ProcessInFifo.c,v $
+ * Revision 2.34  2011-04-03 21:51:52+05:30  Cprogrammer
+ * added enterprise support code
+ *
+ * Revision 2.33  2011-04-03 18:00:19+05:30  Cprogrammer
+ * added instance number argument to ProcessInFifo()
+ *
  * Revision 2.32  2010-06-07 18:33:18+05:30  Cprogrammer
  * pass additional connect_all argument to findmdahost()
  *
@@ -111,7 +117,7 @@
  */
 
 #ifndef	lint
-static char     sccsid[] = "$Id: ProcessInFifo.c,v 2.32 2010-06-07 18:33:18+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: ProcessInFifo.c,v 2.34 2011-04-03 21:51:52+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #include <fcntl.h>
@@ -122,6 +128,10 @@ static char     sccsid[] = "$Id: ProcessInFifo.c,v 2.32 2010-06-07 18:33:18+05:3
 #include <signal.h>
 #include <time.h>
 #include "indimail.h"
+#include "error_stack.h"
+#ifdef ENABLE_ENTERPRISE
+#include <dlfcn.h>
+#endif
 
 int             user_query_count, relay_query_count, pwd_query_count, alias_query_count;
 int             limit_query_count, dom_query_count, _debug;
@@ -144,20 +154,76 @@ static char    *getFifo_name();
 static void     getTimeoutValues(int *, int *, char *, char *);
 static char    *query_type(int);
 
+#ifdef ENABLE_ENTERPRISE
 int
-ProcessInFifo()
+do_startup(int instNum)
+{
+	void           *handle;
+	char           *plugindir, *plugin_symb, *start_plugin, *error;
+	char            plugin[MAX_BUFF];
+	int             (*func) (void);
+	int             status;
+
+	if (!(plugindir = getenv("PLUGINDIR")))
+		plugindir = "plugins";
+	if (strchr(plugindir, '/'))
+	{
+		fprintf(stderr, "alert: plugindir cannot have an absolute path\n");
+		return (-1);
+	}
+	if (!(plugin_symb = getenv("START_PLUGIN_SYMB")))
+		plugin_symb = "startup";
+	if (!(start_plugin = getenv("START_PLUGIN")))
+		start_plugin = "indimail-license.so";
+	snprintf(plugin, MAX_BUFF - 1, INDIMAILDIR"/%s/%s", plugindir, start_plugin);
+	if (access(plugin, F_OK))
+	{
+		fprintf(stderr, "InLookup[%d] plugin %s: %s\n", instNum, plugin, strerror(errno));
+		return (2);
+	}
+	if (!(handle = dlopen(plugin, RTLD_LAZY|RTLD_GLOBAL)))
+	{
+		fprintf(stderr, "InLookup[%d] dlopen failed for %s: %s\n", instNum, plugin, dlerror());
+		return (-1);
+	}
+	dlerror(); /*- man page told me to do this */
+	func = dlsym(handle, plugin_symb);
+	if ((error = dlerror()))
+	{
+		fprintf(stderr, "InLookup[%d] dlsym %s failed: %s\n", instNum, plugin_symb, error);
+		_exit(111);
+	}
+	printf("InLookup[%d] Checking License %s\n", instNum, start_plugin);
+	fflush(stdout);
+	if ((status = (*func) ()))
+		fprintf(stderr, "InLookup[%d] function %s failed with status %d\n",
+			instNum, plugin_symb, status);
+	if (dlclose(handle))
+	{
+		fprintf(stderr, "InLookup[%d] dlclose for %s failed: %s\n", instNum, plugin, error);
+		return (-1);
+	}
+	return(status);
+}
+#endif
+
+int
+ProcessInFifo(int instNum)
 {
 	int             rfd, wfd, bytes, status, idx, pipe_size, readTimeout, writeTimeout;
 	struct passwd  *pw;
 	FILE           *fp;
 	char            InFifo[MAX_BUFF], pwbuf[MAX_BUFF], host_path[MAX_BUFF], tmpbuf[MAX_BUFF];
 	char           *ptr, *cptr, *qmaildir, *controldir, *QueryBuf, *email, *myFifo,
-				   *remoteip, *infifo, *local_ip, *cntrl_host;
-	char           *real_domain;
+				   *remoteip, *infifo, *local_ip, *cntrl_host, *real_domain;
 	void            (*pstat) ();
 	time_t          prev_time = 0l;
 #ifdef ENABLE_DOMAIN_LIMITS
 	struct vlimits  limits;
+#endif
+#ifdef ENABLE_ENTERPRISE
+	mdir_t          count;
+	long            ucount;
 #endif
 
 	_debug = (getenv("DEBUG") ? 1 : 0);
@@ -174,6 +240,35 @@ ProcessInFifo()
 	signal(SIGUSR2, (void(*)()) sig_hand);
 	signal(SIGHUP, (void(*)()) sig_hand);
 	signal(SIGINT, (void(*)()) sig_hand);
+#endif
+#ifdef ENABLE_ENTERPRISE
+	for (;;)
+	{
+		if ((count = count_table("indimail")) == -1)
+		{
+			flush_stack();
+			printf("InLookup[%d] PPID %d PID %d unable to get count\n",
+				instNum, getppid(), getpid());
+			fflush(stdout);
+			sleep(5);
+			continue;
+		}
+		vclose();
+		getEnvConfigInt(&ucount, "MAXUSERS", 10000);
+		if (count > ucount && (idx = do_startup(instNum)))
+		{
+			printf("enterprise version requires license\n");
+			if (idx)
+				printf("invalid license\n");
+			fflush(stdout);
+			sleep(5);
+			return (-1);
+		}
+		printf("InLookup[%d] PPID %d PID %d with %"PRId64" users\n",
+			instNum, getppid(), getpid(), count);
+		fflush(stdout);
+		break;
+	}
 #endif
 	getEnvConfigStr(&qmaildir, "QMAILDIR", QMAILDIR);
 	getEnvConfigStr(&controldir, "CONTROLDIR", "control");
@@ -786,4 +881,5 @@ getversion_ProcessInFifo_c()
 {
 	printf("%s\n", sccsid);
 	printf("%s\n", sccsidh);
+	printf("%s\n", sccsid_error_stackh);
 }
