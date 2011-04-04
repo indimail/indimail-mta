@@ -513,7 +513,7 @@ the installation.
     Then do ./configure <same_parameters_as_earlier_install> ; make ; make install-strip
 
     ##### STEP 5  ##### Courier IMAP/POP3 #####################
-    Install courier-imap (courier-imap-4.8.2.tar.bz2) MD5 e4f2a8f34247f5acb8f84e3c89055027
+    Install courier-imap (courier-imap-4.8.2.tar.bz2) MD5 dae6c91303d01b042b2fcc8f1648c351
     current working directory /home/local/src
     Download the courier-imap package. The latest tested courier-imap package is
     courier-imap-4.8.2.tar.bz2. The patch brings up the version upto courier-imap to be
