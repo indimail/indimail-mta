@@ -1,5 +1,8 @@
 /*
  * $Log: inquerytest.c,v $
+ * Revision 2.19  2011-04-04 23:04:21+05:30  Cprogrammer
+ * added instance number to ProcessInFifo()
+ *
  * Revision 2.18  2011-04-02 13:59:24+05:30  Cprogrammer
  * fix for 64 bit data type
  *
@@ -71,7 +74,7 @@
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: inquerytest.c,v 2.18 2011-04-02 13:59:24+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: inquerytest.c,v 2.19 2011-04-04 23:04:21+05:30 Cprogrammer Stab mbhangui $";
 #endif
 
 void            print_limits(struct vlimits *);
@@ -157,7 +160,7 @@ main(int argc, char **argv)
 			case 0:
 				snprintf(InFifoEnv, MAX_BUFF, "INFIFO=%s", InFifo);
 				putenv(InFifoEnv);
-				return (ProcessInFifo());
+				return (ProcessInFifo(0));
 			default:
 				signal(SIGCHLD, SigChild);
 				break;

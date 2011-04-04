@@ -193,7 +193,7 @@ do_startup(int instNum)
 		fprintf(stderr, "InLookup[%d] dlsym %s failed: %s\n", instNum, plugin_symb, error);
 		_exit(111);
 	}
-	printf("InLookup[%d] Checking License %s\n", instNum, start_plugin);
+	printf("InLookup[%d] Checking Plugin %s\n", instNum, start_plugin);
 	fflush(stdout);
 	if ((status = (*func) ()))
 		fprintf(stderr, "InLookup[%d] function %s failed with status %d\n",
@@ -257,9 +257,9 @@ ProcessInFifo(int instNum)
 		getEnvConfigInt(&ucount, "MAXUSERS", 10000);
 		if (count > ucount && (idx = do_startup(instNum)))
 		{
-			printf("enterprise version requires license\n");
+			printf("enterprise version requires plugin\n");
 			if (idx)
-				printf("invalid license\n");
+				printf("invalid plugin\n");
 			fflush(stdout);
 			sleep(5);
 			return (-1);
