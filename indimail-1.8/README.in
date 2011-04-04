@@ -270,7 +270,9 @@ Some of the features available in this package
 54. Notify recipients when message size exceeds databyte limits
 55. Ability to run programs on successful or failed remote deliveries
 56. Ability to distribute QMQP traffic across servers.
-57. Updated man pages.
+57. Abuse Report Format Generator using qarf
+58. Auto provision users in proxyimap/proxypop3
+59. Updated man pages.
 
 You can take a detailed look at the feature list at
 

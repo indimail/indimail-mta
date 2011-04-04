@@ -513,11 +513,11 @@ the installation.
     Then do ./configure <same_parameters_as_earlier_install> ; make ; make install-strip
 
     ##### STEP 5  ##### Courier IMAP/POP3 #####################
-    Install courier-imap (courier-imap-4.8.2.tar.bz2) MD5 e1b90a2692a5f2ca3407d2d640a70892
+    Install courier-imap (courier-imap-4.8.2.tar.bz2) MD5 e4f2a8f34247f5acb8f84e3c89055027
     current working directory /home/local/src
     Download the courier-imap package. The latest tested courier-imap package is
     courier-imap-4.8.2.tar.bz2. The patch brings up the version upto courier-imap to be
-    compatabile with flexible and database independent
+    compatible with IndiMail.
 
     % bzip2 -d -c courier-imap-4.8.2.tar.bz2 | tar xf -
     % gunzip -c indimail-@version@/patches/courier-imap-4.8.2.patch.gz | patch -p0
