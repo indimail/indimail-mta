@@ -1,0 +1,47 @@
+[IndiMail-Raw]
+name=IndiMail Raw (Mandriva_2009.1)
+type=rpm-md
+baseurl=http://download.opensuse.org/repositories/home:/mbhangui/Mandriva_2009.1/
+gpgcheck=1
+gpgkey=http://download.opensuse.org/repositories/home:/mbhangui/Mandriva_2009.1/repodata/repomd.xml.key
+enabled=1
+
+[IndiMail]
+name=IndiMail (Mandriva_2009.1)
+type=rpm-md
+baseurl=http://download.opensuse.org/repositories/home:/indimail/Mandriva_2009.1/
+gpgcheck=1
+gpgkey=http://download.opensuse.org/repositories/home:/indimail/Mandriva_2009.1/repodata/repomd.xml.key
+enabled=1
+
+[indium]
+name=indium - TCL/TK Graphical UI for Managing Indimail (Mandriva_2009.1)
+type=rpm-md
+baseurl=http://download.opensuse.org/repositories/home:/indimail:/indium/Mandriva_2009.1/
+gpgcheck=1
+gpgkey=http://download.opensuse.org/repositories/home:/indimail:/indium/Mandriva_2009.1/repodata/repomd.xml.key
+enabled=1
+
+[indium-Raw]
+name=indium - TCL/TK Graphical UI for Managing Indimail (Mandriva_2009.1)
+type=rpm-md
+baseurl=http://download.opensuse.org/repositories/home:/mbhangui:/indium/Mandriva_2009.1/
+gpgcheck=1
+gpgkey=http://download.opensuse.org/repositories/home:/mbhangui:/indium/Mandriva_2009.1/repodata/repomd.xml.key
+enabled=1
+
+[iwebadmin]
+name=iwebadmin - Web Administration for IndiMail (Mandriva_2009.1)
+type=rpm-md
+baseurl=http://download.opensuse.org/repositories/home:/indimail:/iwebadmin/Mandriva_2009.1/
+gpgcheck=1
+gpgkey=http://download.opensuse.org/repositories/home:/indimail:/iwebadmin/Mandriva_2009.1/repodata/repomd.xml.key
+enabled=1
+
+[iwebadmin-Raw]
+name=iwebadmin - Web Administration for IndiMail (Mandriva_2009.1)
+type=rpm-md
+baseurl=http://download.opensuse.org/repositories/home:/mbhangui:/iwebadmin/Mandriva_2009.1/
+gpgcheck=1
+gpgkey=http://download.opensuse.org/repositories/home:/mbhangui:/iwebadmin/Mandriva_2009.1/repodata/repomd.xml.key
+enabled=1
