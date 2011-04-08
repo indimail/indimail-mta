@@ -4,7 +4,7 @@ SUBDIRS=@subdir_list@
 COFLAGS=-z+05:30
 ACLOCAL_AMFLAGS=-I m4
 
-DEFS=@DEFS@ -I. -Ieps-1.2 @auth_inc@ 
+DEFS=@DEFS@ -I. -Ieps-1.2 @auth_inc@
 
 INSTALL_PROGRAM = ${INSTALL}          -c
 install_sh_PROGRAM = $(install_sh)    -c
