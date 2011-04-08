@@ -1,5 +1,8 @@
 /*
  * $Log: indimail.h,v $
+ * Revision 2.199  2011-04-08 17:26:18+05:30  Cprogrammer
+ * added HAVE_CONFIG_H
+ *
  * Revision 2.198  2011-04-03 16:22:26+05:30  Cprogrammer
  * added instance count arg to ProcessInFifo()
  *
@@ -910,10 +913,12 @@
 #define INDIMAILH_H
 
 #ifndef	lint
-static char     sccsidh[] = "$Id: indimail.h,v 2.198 2011-04-03 16:22:26+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsidh[] = "$Id: indimail.h,v 2.199 2011-04-08 17:26:18+05:30 Cprogrammer Stab mbhangui $";
 #endif
 
+#ifdef HAVE_CONFIG_H
 #include "config.h"
+#endif
 #include <stdio.h>
 #include <pwd.h>
 #include <sys/types.h>
