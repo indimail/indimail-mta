@@ -22,7 +22,9 @@
 #include <string.h>
 #include <ctype.h>
 #include <stdbool.h>
+#ifdef HAVE_CONFIG_H
 #include "config.h"
+#endif
 
 /*
  * The official name of this program (e.g., no `g' prefix).  
