@@ -1,5 +1,8 @@
 /*
  * $Log: islocalif.c,v $
+ * Revision 2.4  2011-04-08 17:26:42+05:30  Cprogrammer
+ * added HAVE_CONFIG_H
+ *
  * Revision 2.3  2009-12-11 13:11:21+05:30  Cprogrammer
  * removed compiler warning
  *
@@ -20,7 +23,9 @@
  * Initial revision
  *
  */
+#ifdef HAVE_CONFIG_H
 #include "config.h"
+#endif
 #include <stdio.h>
 #include <stdlib.h>
 #include <sys/types.h>
@@ -46,7 +51,7 @@
 #endif
 
 #ifndef	lint
-static char     sccsid[] = "$Id: islocalif.c,v 2.3 2009-12-11 13:11:21+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: islocalif.c,v 2.4 2011-04-08 17:26:42+05:30 Cprogrammer Stab mbhangui $";
 #endif
 
 /*

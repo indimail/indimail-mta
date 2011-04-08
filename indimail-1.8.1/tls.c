@@ -1,5 +1,8 @@
 /*
  * $Log: tls.c,v $
+ * Revision 2.4  2011-04-08 17:27:19+05:30  Cprogrammer
+ * added HAVE_CONFIG_H
+ *
  * Revision 2.3  2010-04-15 12:49:55+05:30  Cprogrammer
  * included string.h for Mac OS X
  *
@@ -10,7 +13,9 @@
  * tls routines
  *
  */
+#ifdef HAVE_CONFIG_H
 #include "config.h"
+#endif
 #include <sys/types.h>
 #ifdef HAVE_SSL
 #include <openssl/ssl.h>
@@ -301,7 +306,7 @@ safewrite(fd, buf, len, timeout)
 void
 getversion_tls_c()
 {
-	static char    *x = "$Id: tls.c,v 2.3 2010-04-15 12:49:55+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: tls.c,v 2.4 2011-04-08 17:27:19+05:30 Cprogrammer Stab mbhangui $";
 
 	x++;
 }

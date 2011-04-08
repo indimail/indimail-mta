@@ -1,5 +1,8 @@
 /*
  * $Log: getpeer.c,v $
+ * Revision 2.6  2011-04-08 17:26:12+05:30  Cprogrammer
+ * added HAVE_CONFIG_H
+ *
  * Revision 2.5  2009-12-11 13:11:15+05:30  Cprogrammer
  * removed compiler warning
  *
@@ -31,7 +34,9 @@
  * Initial revision
  *
  */
+#ifdef HAVE_CONFIG_H
 #include "config.h"
+#endif
 #include <errno.h>
 #include <unistd.h>
 #include <sys/socket.h>
@@ -45,7 +50,7 @@
 #include <stdio.h>
 
 #ifndef	lint
-static char     sccsid[] = "$Id: getpeer.c,v 2.5 2009-12-11 13:11:15+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: getpeer.c,v 2.6 2011-04-08 17:26:12+05:30 Cprogrammer Stab mbhangui $";
 #endif
 
 #ifndef INET_ADDRSTRLEN

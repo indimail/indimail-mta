@@ -1,5 +1,8 @@
 /*
  * $Log: sha256_crypt.c,v $
+ * Revision 2.3  2011-04-08 17:27:03+05:30  Cprogrammer
+ * added HAVE_CONFIG_H
+ *
  * Revision 2.2  2008-11-21 16:03:08+05:30  Cprogrammer
  * show version information in case internal SHA256_CRYPT is not used
  *
@@ -8,7 +11,9 @@
  *
  * Released into the Public Domain by Ulrich Drepper <drepper@redhat.com>.
  */
+#ifdef HAVE_CONFIG_H
 #include "config.h"
+#endif
 #ifndef HAVE_SHA256_CRYPT
 #include <endian.h>
 #define	__USE_GNU
@@ -776,7 +781,7 @@ main(void)
 #endif /*- #ifndef HAVE_SHA256_CRYPT */
 
 #ifndef	lint
-static char     sccsid[] = "$Id: sha256_crypt.c,v 2.2 2008-11-21 16:03:08+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: sha256_crypt.c,v 2.3 2011-04-08 17:27:03+05:30 Cprogrammer Stab mbhangui $";
 #endif
 
 #ifdef HAVE_SHA256_CRYPT

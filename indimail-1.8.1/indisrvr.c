@@ -1,5 +1,8 @@
 /*
  * $Log: indisrvr.c,v $
+ * Revision 2.44  2011-04-08 17:26:35+05:30  Cprogrammer
+ * added HAVE_CONFIG_H
+ *
  * Revision 2.43  2011-04-03 20:11:14+05:30  Cprogrammer
  * BUG - getpid not called correctly
  *
@@ -153,11 +156,13 @@
  * Initial revision
  *
  */
+#ifdef HAVE_CONFIG_H
 #include "config.h"
+#endif
 #include "indimail.h"
 
 #ifndef lint
-static char     sccsid[] = "$Id: indisrvr.c,v 2.43 2011-04-03 20:11:14+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: indisrvr.c,v 2.44 2011-04-08 17:26:35+05:30 Cprogrammer Stab mbhangui $";
 #endif
 
 #ifdef CLUSTERED_SITE

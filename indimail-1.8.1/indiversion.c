@@ -1,5 +1,8 @@
 /*
  * $Log: indiversion.c,v $
+ * Revision 2.129  2011-04-08 17:26:38+05:30  Cprogrammer
+ * added HAVE_CONFIG_H
+ *
  * Revision 2.128  2011-04-02 14:00:56+05:30  Cprogrammer
  * fix for getversion_proxylogin() function which has been moved out of libindimail
  *
@@ -498,11 +501,13 @@
 #include "indimail.h"
 #include <string.h>
 #else
+#ifdef HAVE_CONFIG_H
 #include "config.h"
+#endif
 #endif
 
 #ifndef	lint
-static char     sccsid[] = "$Id: indiversion.c,v 2.128 2011-04-02 14:00:56+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: indiversion.c,v 2.129 2011-04-08 17:26:38+05:30 Cprogrammer Stab mbhangui $";
 #endif
 
 void            getversion_indimail_settings_c();

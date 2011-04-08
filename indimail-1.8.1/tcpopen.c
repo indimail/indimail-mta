@@ -1,5 +1,8 @@
 /*
  * $Log: tcpopen.c,v $
+ * Revision 2.9  2011-04-08 17:27:15+05:30  Cprogrammer
+ * added HAVE_CONFIG_H
+ *
  * Revision 2.8  2011-04-03 09:37:23+05:30  Cprogrammer
  * try next address record when ipv6 socket fails
  *
@@ -42,10 +45,12 @@
  */
 
 #ifndef	lint
-static char     sccsid[] = "$Id: tcpopen.c,v 2.8 2011-04-03 09:37:23+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: tcpopen.c,v 2.9 2011-04-08 17:27:15+05:30 Cprogrammer Stab mbhangui $";
 #endif
 
+#ifdef HAVE_CONFIG_H
 #include "config.h"
+#endif
 #include "indimail.h"
 #include <stdlib.h>
 #include <netdb.h>

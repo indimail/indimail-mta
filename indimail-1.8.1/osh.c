@@ -1,5 +1,8 @@
 /*
  * $Log: osh.c,v $
+ * Revision 2.6  2011-04-08 17:26:54+05:30  Cprogrammer
+ * added HAVE_CONFIG_H
+ *
  * Revision 2.5  2009-02-24 22:39:22+05:30  Cprogrammer
  * removed left over semi colon
  *
@@ -38,9 +41,11 @@
  * MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
-static char    *rcsid = "@(#) $Id: osh.c,v 2.5 2009-02-24 22:39:22+05:30 Cprogrammer Exp mbhangui $";
+static char    *rcsid = "@(#) $Id: osh.c,v 2.6 2011-04-08 17:26:54+05:30 Cprogrammer Stab mbhangui $";
 
+#ifdef HAVE_CONFIG_H
 #include "config.h"
+#endif
 #include <stdio.h>
 #include <string.h>
 #include <errno.h>

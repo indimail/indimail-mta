@@ -1,5 +1,8 @@
 /*
  * $Log: post_handle.c,v $
+ * Revision 2.3  2011-04-08 17:26:58+05:30  Cprogrammer
+ * added HAVE_CONFIG_H
+ *
  * Revision 2.2  2010-02-16 13:30:15+05:30  Cprogrammer
  * return 0 if post_handle script does not exist
  *
@@ -13,11 +16,13 @@
 #include <string.h>
 #include <stdlib.h>
 #include <errno.h>
+#ifdef HAVE_CONFIG_H
 #include "config.h"
+#endif
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: post_handle.c,v 2.2 2010-02-16 13:30:15+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: post_handle.c,v 2.3 2011-04-08 17:26:58+05:30 Cprogrammer Stab mbhangui $";
 #endif
 
 #ifdef HAVE_STDARG_H

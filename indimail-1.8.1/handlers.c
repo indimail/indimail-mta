@@ -1,5 +1,8 @@
 /*
  * $Log: handlers.c,v $
+ * Revision 2.5  2011-04-08 17:26:15+05:30  Cprogrammer
+ * added HAVE_CONFIG_H
+ *
  * Revision 2.4  2009-02-19 09:30:43+05:30  Cprogrammer
  * check return value of getcwd
  *
@@ -36,9 +39,11 @@
  * MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
-static char    *rcsid = "@(#) $Id: handlers.c,v 2.4 2009-02-19 09:30:43+05:30 Cprogrammer Exp mbhangui $";
+static char    *rcsid = "@(#) $Id: handlers.c,v 2.5 2011-04-08 17:26:15+05:30 Cprogrammer Stab mbhangui $";
 
+#ifdef HAVE_CONFIG_H
 #include "config.h"
+#endif
 
 #include <stdio.h>
 #include <errno.h>

@@ -1,5 +1,8 @@
 /*
  * $Log: unsetenv.c,v $
+ * Revision 2.4  2011-04-08 17:27:22+05:30  Cprogrammer
+ * added HAVE_CONFIG_H
+ *
  * Revision 2.3  2008-07-14 19:49:30+05:30  Cprogrammer
  * fixed empty symbols warning on Mac OS X
  *
@@ -10,10 +13,12 @@
  * unsetenv() function
  *
  */
-#include "config.h"
-
 #ifndef	lint
-static char     sccsid[] = "$Id: unsetenv.c,v 2.3 2008-07-14 19:49:30+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: unsetenv.c,v 2.4 2011-04-08 17:27:22+05:30 Cprogrammer Stab mbhangui $";
+#endif
+
+#ifdef HAVE_CONFIG_H
+#include "config.h"
 #endif
 
 #if !defined(HAVE_SETENV) || !defined(HAVE_UNSETENV)

@@ -1,5 +1,8 @@
 /*-
  * $Log: md5c.c,v $
+ * Revision 2.4  2011-04-08 17:26:50+05:30  Cprogrammer
+ * added HAVE_CONFIG_H
+ *
  * Revision 2.3  2008-09-11 22:49:51+05:30  Cprogrammer
  * added md5_crypt()
  *
@@ -104,7 +107,7 @@ static unsigned char PADDING[64] = {
   }
 
 #ifndef	lint
-static char     sccsid[] = "$Id: md5c.c,v 2.3 2008-09-11 22:49:51+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: md5c.c,v 2.4 2011-04-08 17:26:50+05:30 Cprogrammer Stab mbhangui $";
 #endif
 
 /*
@@ -413,7 +416,9 @@ hmac_md5(text, text_len, key, key_len, digest)
 }
 
 
+#ifdef HAVE_CONFIG_H
 #include "config.h"
+#endif
 #ifndef HAVE_MD5_CRYPT
 static void
 to64(char *s, unsigned long v, int n)

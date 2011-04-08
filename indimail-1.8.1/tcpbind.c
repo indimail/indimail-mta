@@ -1,5 +1,8 @@
 /*
  * $Log: tcpbind.c,v $
+ * Revision 2.4  2011-04-08 17:27:12+05:30  Cprogrammer
+ * added HAVE_CONFIG_H
+ *
  * Revision 2.3  2009-09-02 08:24:21+05:30  Cprogrammer
  * passed sizeof(struct sockaddr_in) to 3rd argument of bind
  *
@@ -27,10 +30,12 @@
  */
 
 #ifndef	lint
-static char     sccsid[] = "$Id: tcpbind.c,v 2.3 2009-09-02 08:24:21+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: tcpbind.c,v 2.4 2011-04-08 17:27:12+05:30 Cprogrammer Stab mbhangui $";
 #endif
 
+#ifdef HAVE_CONFIG_H
 #include "config.h"
+#endif
 #include "indimail.h"
 #include <stdlib.h>
 #include <unistd.h>

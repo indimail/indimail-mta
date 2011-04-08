@@ -1,5 +1,8 @@
 /*
  * $Log: error_stack.c,v $
+ * Revision 2.6  2011-04-08 17:26:04+05:30  Cprogrammer
+ * added HAVE_CONFIG_H
+ *
  * Revision 2.5  2010-02-16 13:31:54+05:30  Cprogrammer
  * free memory allocated by vasprintf
  *
@@ -22,11 +25,13 @@
 #include <string.h>
 #include <errno.h>
 #include <stdlib.h>
+#ifdef HAVE_CONFIG_H
 #include "config.h"
+#endif
 #include "error_stack.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: error_stack.c,v 2.5 2010-02-16 13:31:54+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: error_stack.c,v 2.6 2011-04-08 17:26:04+05:30 Cprogrammer Stab mbhangui $";
 #endif
 
 void
