@@ -45,3 +45,19 @@ baseurl=http://download.opensuse.org/repositories/home:/mbhangui:/iwebadmin/Fedo
 gpgcheck=1
 gpgkey=http://download.opensuse.org/repositories/home:/mbhangui:/iwebadmin/Fedora_12/repodata/repomd.xml.key
 enabled=1
+
+[ilmgrd]
+name=indimail-enterprise (Fedora_12)
+type=rpm-md
+baseurl=http://download.opensuse.org/repositories/home:/indimail:/ilmgrd/Fedora_12/
+gpgcheck=1
+gpgkey=http://download.opensuse.org/repositories/home:/indimail:/ilmgrd/Fedora_12/repodata/repomd.xml.key
+enabled=1
+
+[ilmgrd-Raw]
+name=indimail-enterprise (Fedora_12)
+type=rpm-md
+baseurl=http://download.opensuse.org/repositories/home:/mbhangui:/ilmgrd/Fedora_12/
+gpgcheck=1
+gpgkey=http://download.opensuse.org/repositories/home:/mbhangui:/ilmgrd/Fedora_12/repodata/repomd.xml.key
+enabled=1

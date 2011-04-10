@@ -45,3 +45,19 @@ baseurl=http://download.opensuse.org/repositories/home:/mbhangui:/iwebadmin/SLE_
 gpgcheck=1
 gpgkey=http://download.opensuse.org/repositories/home:/mbhangui:/iwebadmin/SLE_10/repodata/repomd.xml.key
 enabled=1
+
+[ilmgrd]
+name=indimail-enterprise (SLE_10_SDK)
+type=rpm-md
+baseurl=http://download.opensuse.org/repositories/home:/indimail:/ilmgrd/SLE_10_SDK/
+gpgcheck=1
+gpgkey=http://download.opensuse.org/repositories/home:/indimail:/ilmgrd/SLE_10_SDK/repodata/repomd.xml.key
+enabled=1
+
+[ilmgrd-Raw]
+name=indimail-enterprise (SLE_10_SDK)
+type=rpm-md
+baseurl=http://download.opensuse.org/repositories/home:/mbhangui:/ilmgrd/SLE_10_SDK/
+gpgcheck=1
+gpgkey=http://download.opensuse.org/repositories/home:/mbhangui:/ilmgrd/SLE_10_SDK/repodata/repomd.xml.key
+enabled=1
