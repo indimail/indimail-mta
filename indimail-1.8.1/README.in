@@ -348,10 +348,6 @@ both 32 and 64 bit) are
           o Red Hat Enterprise Linux 6
           o CentOS 5
 
-    * Mandriva Linux
-          o Mandriva 2010.1
-          o Mandriva 2010
-          o Mandriva 2009.1
 
 iwebadmin RPM download
 ----------------------
@@ -360,6 +356,35 @@ http://download.opensuse.org/repositories/home:/indimail:/iwebadmin/
 indium RPM download
 -------------------
 http://download.opensuse.org/repositories/home:/indimail:/indium/
+
+
+Enterprise Support
+------------------
+
+If you are a commercial distributor (such as OEMs, ISVs and VARs) or plan to have greater
+than 10,000 users on a server, you need an IndiMail Commercial License. The cost of license
+is $1 per user per annum. The license enables you to ask for bug fixes,
+installation/configuraton help 24 X 5 throughout the validity period of the license. I am
+willing to work with you for a customized support package.
+
+You can request for a commercial license by writing to
+
+"License Support" license-support@indimail.org
+
+If you are a student or belong to a charitable organization/trust or a NGO or have an OSS
+project requiring more than 10,000 users, you can obtain a IndiMail Commercial License free
+of cost by writing to the above email address.
+
+To enable IndiMail function for more than 10,000 users, you need to install the
+indimail-enterprise package from
+
+http://download.opensuse.org/repositories/home:/indimail:/ilmgrd/
+
+Developing IndiMail is my hobby. To continue working on IndiMail, I need people/organization
+who like the project to support me by buying software support from me. If you can afford to
+pay, I would urge you to ask for features and pay me for it. The source code of IndiMail is
+always available for download free of cost.
+
 
 GIT Repository
 --------------
