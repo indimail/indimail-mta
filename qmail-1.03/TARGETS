@@ -985,3 +985,5 @@ mail_acl.o
 balance_outgoing
 qarf
 qarf.o
+smtp_plugin.o
+smtpd-plugin.so
