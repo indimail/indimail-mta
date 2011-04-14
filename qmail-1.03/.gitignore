@@ -133,7 +133,7 @@ fixcrio
 forgeries.0
 forward
 forward.0
-generic.so
+*.so
 greydaemon
 greydaemon.0
 hasdkim.h
