@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail.spec.in,v 2.205 2011-04-08 17:26:25+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 2.206 2011-04-13 21:26:52+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %define _unpackaged_files_terminate_build 1
 
@@ -2074,6 +2074,7 @@ do
 				$extra_opt
 		fi
 	fi
+	echo "1" > %{servicedir}/qmail-smtpd.$port/variables/DISABLE_PLUGIN
 done
 if [ %noclamav -eq 0 ] ; then
 	%{_prefix}/sbin/svctool --queueParam=defaultqueue \
@@ -2093,6 +2094,7 @@ else
 fi
 %{_prefix}/sbin/svctool --smtp=366 --odmr --servicedir=%{servicedir} \
 	--query-cache --password-cache
+echo "1" > %{servicedir}/qmail-smtpd.366/variables/DISABLE_PLUGIN
 # Greylist daemon
 %{_prefix}/sbin/svctool --greylist=1999 --servicedir=%{servicedir} --min-resend-min=2 \
     --resend-win-hr=24 --timeout-days=30 --context-file=greylist.context \

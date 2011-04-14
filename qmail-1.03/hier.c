@@ -1,5 +1,11 @@
 /*
  * $Log: hier.c,v $
+ * Revision 1.161  2011-04-13 22:11:50+05:30  Cprogrammer
+ * added plugin_init man page
+ *
+ * Revision 1.160  2011-04-13 19:43:22+05:30  Cprogrammer
+ * added smtpd-plugin.so plugin
+ *
  * Revision 1.159  2011-02-26 11:11:18+05:30  Cprogrammer
  * added man page for qmail-cat
  *
@@ -646,6 +652,9 @@ hier(inst_dir)
 #ifdef HASDKIM
 	c(auto_qmail_home, "bin", "qmail-dkim", auto_uido, auto_gidq, 0555);
 #endif
+#ifdef SMTP_PLUGIN
+	c(auto_qmail_home, "plugins", "smtpd-plugin.so", auto_uido, auto_gidq, 0555);
+#endif
 	c(auto_qmail_home, "plugins", "generic.so", auto_uido, auto_gidq, 0555);
 	c(auto_qmail_home, "bin", "cleanq", auto_uido, auto_gidq, 0555);
 	c(auto_qmail_home, "bin", "qscanq-stdin", auto_uido, auto_gidq, 0555);
@@ -948,6 +957,7 @@ hier(inst_dir)
 	c(auto_qmail_home, "man/man3", "mess822_quote.3", auto_uido, auto_gidq, 0444);
 	c(auto_qmail_home, "man/man3", "mess822_token.3", auto_uido, auto_gidq, 0444);
 	c(auto_qmail_home, "man/man3", "mess822_when.3", auto_uido, auto_gidq, 0444);
+	c(auto_qmail_home, "man/man3", "plugin_init.3", auto_uido, auto_gidq, 0444);
 
 	c(auto_qmail_home, "man/man5", "addresses.5", auto_uido, auto_gidq, 0444);
 	c(auto_qmail_home, "man/cat5", "addresses.0", auto_uido, auto_gidq, 0444);
@@ -1589,7 +1599,7 @@ _hier(inst_dir)
 void
 getversion_install_big_c()
 {
-	static char    *x = "$Id: hier.c,v 1.159 2011-02-26 11:11:18+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: hier.c,v 1.161 2011-04-13 22:11:50+05:30 Cprogrammer Stab mbhangui $";
 
 #ifdef INDIMAIL
 	x = sccsidh;

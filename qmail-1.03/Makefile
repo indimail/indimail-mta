@@ -920,9 +920,10 @@ compile hfield.c hfield.h
 hier.o: \
 compile hier.c auto_qmail.h auto_split.h auto_uids.h fmt.h fifo.h \
 qmail-todo.h hasindimail.h tcpto.h ip.h ipalloc.h \
-conf-domainkeys conf-spf conf-ip conf-dkim conf-batv
+conf-domainkeys conf-spf conf-ip conf-dkim conf-batv conf-plugin
 	./compile $(inc_deps) \
-	`grep -h -v "^#" conf-tls conf-spf conf-ip conf-domainkeys conf-dkim conf-batv` hier.c
+	`grep -h -v "^#" conf-tls conf-spf conf-ip conf-domainkeys conf-dkim \
+	conf-batv conf-plugin` hier.c
 
 home: \
 home.sh conf-qmail
@@ -1213,7 +1214,7 @@ envdir envuidgid fghack multilog pgrphack readproctitle setlock \
 setuidgid softlimit supervise svc svok svscan svstat tai64n tai64nlocal tai64nunix \
 recordio argv0 addcr delcr fixcrio generic.so cdbmake cdbget cdbgetm \
 cdbdump cdbstats cdbtest cdbmake-12 cdbmake-sv testzero dk-filter \
-uacl
+uacl smtpd-plugin.so
 
 analyzer: \
 mlmatchup matchup columnt zoverall zsendmail xqp xsender xrecipient ddist \
@@ -2320,7 +2321,7 @@ socket.lib tai.lib dns.lib indimail.lib tls.lib
 	auto_uids.o base64sub.o qregex_smtpd.o tablematch.o ndelay.o ndelay_off.o \
 	cdb.a fd.a wait.a datetime.a greylist.o auto_break.o \
 	getln.a open.a sig.a case.a env.a stralloc.a alloc.a substdio.a error.a \
-	str.a fs.a lock.a `cat socket.lib tai.lib dns.lib indimail.lib tls.lib`
+	str.a fs.a lock.a `cat socket.lib tai.lib dns.lib indimail.lib tls.lib` -ldl
 
 mail_acl.o: \
 compile mail_acl.c str.h matchregex.h fmt.h stralloc.h
@@ -2397,9 +2398,11 @@ substdio.h alloc.h auto_qmail.h control.h received.h constmap.h \
 error.h ipme.h ip.h ipalloc.h qmail.h recipients.h greylist.h \
 matchregex.o str.h fmt.h scan.h byte.h case.h env.h now.h datetime.h \
 variables.h exit.h rcpthosts.h timeoutread.h timeoutwrite.h commands.h \
-wait.h etrn.h date822fmt.h fd.h base64.h envrules.h tablematch.h cdb.h uint32.h \
-matchregex.h qregex.h sqlmatch.h hasindimail.h conf-tls conf-spf conf-ip conf-batv
-	./compile -DUSE_SQL $(inc_deps) `grep -h -v "^#" conf-tls conf-spf conf-ip conf-batv` smtpd.c
+wait.h etrn.h date822fmt.h fd.h base64.h envrules.h tablematch.h cdb.h \
+uint32.h matchregex.h qregex.h sqlmatch.h hasindimail.h smtp_plugin.h \
+conf-tls conf-spf conf-ip conf-plugin conf-batv
+	./compile -DUSE_SQL $(inc_deps) `grep -h -v "^#" conf-tls conf-spf conf-ip conf-batv \
+	conf-plugin` smtpd.c
 
 sqlmatch.o: \
 compile sqlmatch.c stralloc.h byte.h error.h env.h open.h variables.h scan.h \
@@ -4854,6 +4857,17 @@ sortedtest.o: compile sortedtest.c sorted.h stralloc.h
 generic.o: \
 compile generic.c str.h env.h wait.h
 	./compile generic.c
+
+smtpd-plugin.so:smtp_plugin.o
+	if test $(SYSTEM) = Darwin ; then \
+	$(LD) -bundle -undefined dynamic_lookup -o smtpd-plugin.so \
+	smtp_plugin.o; \
+	else \
+	$(CC) -shared -rdynamic -nostartfiles -fPIC -s -O4 -o smtpd-plugin.so \
+	smtp_plugin.o; fi
+
+smtp_plugin.o: compile smtp_plugin.c smtp_plugin.h
+	./compile smtp_plugin.c
 
 generic.so:generic.o wait_pid.o envread.o auto_scancmd.o MakeArgs.o \
 byte_copy.o alloc.o alloc_re.o stralloc.a str_diffn.o error.o str_len.o

@@ -1,5 +1,8 @@
 #!/bin/sh
 # $Log: create_services.in,v $
+# Revision 2.47  2011-04-13 21:26:38+05:30  Cprogrammer
+# disable SMTP plugin by default
+#
 # Revision 2.46  2011-03-11 23:08:41+05:30  Cprogrammer
 # increased soft_mem to 52428800
 #
@@ -161,7 +164,7 @@ indimaildir=@indimaildir@
 # End USER Configuration OPTIONS
 #
 
-# $Id: create_services.in,v 2.46 2011-03-11 23:08:41+05:30 Cprogrammer Stab mbhangui $
+# $Id: create_services.in,v 2.47 2011-04-13 21:26:38+05:30 Cprogrammer Exp mbhangui $
 
 usage()
 {
@@ -410,6 +413,7 @@ do
 				$e_opt $extra_opt
 		fi
 	fi
+	echo "1" > $dir_prefix$servicedir/qmail-smtpd.$port/variables/DISABLE_PLUGIN
 	nobogofilter=$orig_bogofilter
 done
 
@@ -432,6 +436,7 @@ fi
 
 $dir_prefix$indimaildir/sbin/svctool --smtp=366 --odmr --servicedir=$servicedir \
 	--query-cache --password-cache $extra_opt
+echo "1" > $dir_prefix$servicedir/qmail-smtpd.366/variables/DISABLE_PLUGIN
 #
 # Greylist
 #

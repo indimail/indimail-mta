@@ -334,7 +334,7 @@ extension. If you desire that the control file to be in MySQL, the file (with
 .I .sql
 extension) should have an entry in the following format
 
-.BR database_server_ip:database_user:database_password:database_name:table_name .
+.BR dbase_server_ip:dbase_user:dbase_password:dbase_name:table_name .
 
 .TP 5
 .I badhelo
@@ -1511,6 +1511,15 @@ Example:
 .EE
 
 DATABYTES gets set to 4 MB in for any email matching answerme@save*
+.SH SMTP PLUGINS
+\fBqmail-smtpd\fR has ability to load plugins from the plugins directory. This is done by
+using dlopen(3) on smtpd-plugin.so. The plugin file can be changed by setting environment
+variable \fBSMTP_PLUGIN\fR. After loading the plugin, the function \fIplugin_init\fR is
+executed. The function to be executed can be changed by setting environment variable
+\fBSMTP_PLUGIN_SYM\fR. The function \fIplugin_init\fR should return a PLUGIN structure (see
+plugin_init(3) for details). The PLUGIN structure returns pointer to three functions to
+be executed in the MAIL FROM, RCPT and DATA phase of SMTP. You can disable the loading
+of plugins by setting \fBDISABLE_PLUGIN\fR environment variable
 
 .SH GREYLISTING
 .B qmail-smtpd

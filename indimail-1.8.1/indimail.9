@@ -521,11 +521,20 @@ QQEH              |qmail-queue  |used    |qmail-queue passes this variable into
                   |condredirect |        |when it is delivered
 PLUGINDIR         |qmail-queue  |used    |Directory in /var/indimail containing
                   |qmail-send   |        |dynamically loadable plugins
+                  |qmail-smtpd  |        |
 QUEUE_PLUGIN_SYMB |qmail-queue  |used    |The function to be called when a
                   |             |        |dynamic virus scanner plugin is loaded
+                  |             |        |default is 'virruscan'
 START_PLUGIN      |qmail-send   |used    |List of startup plugins to be loaded
+                  |             |        |default is qmail-send.so
 START_PLUGIN_SYMB |qmail-send   |used    |function to be executed from the loaded
-                  |qmail-send   |used    |plugins
+                  |             |        |plugins. Default is 'startup'
+SMTP_PLUGIN       |qmail-smtpd  |used    |SMTP plugin to be loaded. Default is
+                  |             |        |smtpd-plugin.so
+SMTP_PLUGIN_SYMB  |qmail-smtpd  |used    |The function to be called after loading
+                  |             |        |SMTP plugins. Default is 'plugin_init'
+DISABLE_PLUGIN    |qmail-smtpd  |used    |If set, loading of SMTP plugin is
+                  |             |        |disabled
 ------------------|-------------|--------|----------------------------------------
 QUEUE_COUNT       |qmail-multi  |used    |No of queues setup
 QUEUE_START       |qmail-multi  |used    |Number denoting the first queue
