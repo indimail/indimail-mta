@@ -2751,7 +2751,7 @@ main()
 		}
 		if (dlclose(handle))
 		{
-			log5("dlclose for ", plugin.s, "failed: ", error, "\n");
+			log5("alert: dlclose for ", plugin.s, "failed: ", error, "\n");
 			_exit(111);
 		}
 		if (ptr == end)
