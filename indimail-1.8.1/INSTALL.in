@@ -776,7 +776,7 @@ the installation.
 
     The command below will create the public and private key for domainkey, dkim signatures
 
-    % sudo @indimaildir@/bin/dknewkey @indimaildir@/control/domainkeys/indimail
+    % sudo @indimaildir@/bin/dknewkey @indimaildir@/control/domainkeys/indimail 1024
 
     If you want to have a message submission port (587) for users to submit outgoing mails
     you can create the Message Submission Port. Note the additional --skipsend option which
