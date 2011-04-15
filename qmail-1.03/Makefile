@@ -2369,6 +2369,12 @@ qmail-smtpd.9
 	| sed s}QMAILHOME}"`head -1 conf-qmail`"}g \
 	> qmail-smtpd.8
 
+plugin_init.3: \
+plugin_init.9
+	cat plugin_init.9 \
+	| sed s}QMAILHOME}"`head -1 conf-qmail`"}g \
+	> plugin_init.3
+
 greydaemon.0: \
 greydaemon.8
 	nroff -man greydaemon.8 > greydaemon.0
