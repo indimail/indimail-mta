@@ -104,7 +104,7 @@ main(int argc, char **argv)
 		usage();
 		exit(-1);
 	}
-	snprintf(TheDir, sizeof (TheDir), argv[2]);
+	snprintf(TheDir, sizeof (TheDir), "%s", argv[2]);
 	TheType = *argv[1];
 	cmmd = (argc == 4 ? argv[3] : 0);
 	switch (TheType) {
