@@ -2321,8 +2321,8 @@ todo_selprep(nfds, rfds, wakeup)
 {
 	if (flagexitasap)
 	{
-		if (flagtodoalive)
-			write(todofdout, "X", 1);
+		if (flagtodoalive && write(todofdout, "X", 1) != 1)
+			tododied();
 	}
 	if (flagtodoalive)
 	{
@@ -2640,8 +2640,11 @@ reread()
 		return;
 	}
 #ifdef EXTERNAL_TODO
-	if (hupflag)
-		write(todofdout, "H", 1);
+	if (hupflag && write(todofdout, "H", 1) != 1)
+	{
+		log3("alert: unable to write", error_str(errno), "\n");
+		return;
+	}
 #endif
 	regetcontrols();
 	chdir_toqueue();
