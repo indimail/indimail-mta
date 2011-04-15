@@ -56,6 +56,7 @@ plugin_init()
 To compile the plugin you can use \fBgcc(1)\fR.
 
 .EX
+gcc -Wall -O2 -fPIC -fno-strict-aliasing -c smtp_plugin.c
 gcc -shared -rdynamic -nostartfiles -fPIC -s -O4 -o smtpd-plugin.so smtp_plugin.o
 .EE
 
