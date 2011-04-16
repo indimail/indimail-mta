@@ -338,7 +338,7 @@ display_domain(char *domain, char *dir, uid_t uid, gid_t gid)
 		{
 			snprintf(tmpbuf, MAX_BUFF, "%s/.base_path", dir);
 			if ((fp = fopen(tmpbuf, "r"))) {
-				fscanf(fp, "%s", tmpbuf);
+				(void) fscanf(fp, "%s", tmpbuf);
 				printf("  Base Dir: %s\n", tmpbuf);
 				fclose(fp);
 			} else {
@@ -419,7 +419,7 @@ display_domain(char *domain, char *dir, uid_t uid, gid_t gid)
 			if (DisplayBaseDir) {
 				snprintf(tmpbuf, MAX_BUFF, "%s/.base_path", dir);
 				if ((fp = fopen(tmpbuf, "r"))) {
-					fscanf(fp, "%s", tmpbuf);
+					(void) fscanf(fp, "%s", tmpbuf);
 					printf("  Base Dir: %s\n", tmpbuf);
 					fclose(fp);
 				} else {
