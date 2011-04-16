@@ -33,7 +33,7 @@
 %define fast_mode          0
 %endif
 
-%define	_prefix            @indimaildir@
+%define _prefix            @indimaildir@
 %define default_domain     @defaultdomain@
 %define courier_version    4.9.1
 %define bogofilter_version 1.2.2
