@@ -2313,7 +2313,7 @@ todo_init()
 	/*- sync with external todo */
 	if (write(todofdout, "S", 1) != 1)
 	{
-		log3("alert: unable to write a byte to external todo! dying...:", .error_str(errno), "\n");
+		log3("alert: unable to write a byte to external todo! dying...:", error_str(errno), "\n");
 		flagexitasap = 1;
 		flagtodoalive = 0;
 	}
@@ -2330,7 +2330,7 @@ todo_selprep(nfds, rfds, wakeup)
 	{
 		if (flagtodoalive && write(todofdout, "X", 1) != 1)
 		{
-			log3("alert: unable to write a byte to external todo! dying...:", .error_str(errno), "\n");
+			log3("alert: unable to write a byte to external todo! dying...:", error_str(errno), "\n");
 			flagexitasap = 1;
 			flagtodoalive = 0;
 		}
@@ -2653,7 +2653,7 @@ reread()
 #ifdef EXTERNAL_TODO
 	if (hupflag && write(todofdout, "H", 1) != 1)
 	{
-		log3("alert: unable to write a byte to external todo:", .error_str(errno), "\n");
+		log3("alert: unable to write a byte to external todo:", error_str(errno), "\n");
 		return;
 	}
 #endif
