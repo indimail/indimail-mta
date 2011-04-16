@@ -217,7 +217,7 @@ EXTRA_libbogofilter_a_SOURCES = datastore_db.c datastore_db_trad.c \
 				convert_charset.c chUnicodeTo866.h \
 				convert_unicode.c iconvert.c iconvert.h
 
-CLEANFILES=version.c directories.c bogoupgrade
+CLEANFILES=version.c directories.c bogoupgrade lexer_v3.c
 
 bogofilter_SOURCES = bogofilter.c bogofilter.h main.c \
 		     common.h
