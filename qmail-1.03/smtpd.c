@@ -785,6 +785,7 @@ char           *content_desc;
 PLUGIN         *plug = (PLUGIN *) 0;
 void           *handle;
 #endif
+int             spamfd = 255;
 
 struct authcmd
 {
@@ -1065,6 +1066,10 @@ log_spam(char *arg1, char *arg2, unsigned long size, stralloc *line)
 		flush();
 		_exit(1);
 	}
+	/*-
+	 * write the SMTP transaction line to LOGFILTER fifo. All lines written
+	 * to this fifo will be read by the qmail-cat spamlogger service
+	 */
 	substdio_fdbuf(&spamout, write, logfifo, spambuf, sizeof(spambuf));
 	if (substdio_puts(&spamout, "qmail-smtpd: ") == -1)
 	{
@@ -1114,28 +1119,27 @@ log_spam(char *arg1, char *arg2, unsigned long size, stralloc *line)
 		return;
 	}
 	/*
-	 * Read X-Bogosity line from bogofilter
-	 * on fd 255. Write it to LOGFILTER
-	 * fifo for qmail-cat spamlogger
+	 * Read X-Bogosity line from bogofilter on spamfd. spamfd would have already
+	 * been opened before qmail_open() by create_logfiler() function
 	 */
-	if (!fstat(255, &statbuf) && statbuf.st_size > 0 && !lseek(255, 0, SEEK_SET))
+	if (!fstat(spamfd, &statbuf) && statbuf.st_size > 0 && !lseek(spamfd, 0, SEEK_SET))
 	{
 		if (substdio_puts(&spamout, " ") == -1)
 		{
 			close(logfifo);
-			close(255);
+			close(spamfd);
 			return;
 		}
-		substdio_fdbuf(&spamin, read, 255, inbuf, sizeof(inbuf));
+		substdio_fdbuf(&spamin, read, spamfd, inbuf, sizeof(inbuf));
 		if (getln(&spamin, line, &match, '\n') == -1)
 		{
 			logerr("qmail-smtpd: read error: ");
 			logerr(error_str(errno));
 			logerrf("\n");
-			close(255);
+			close(spamfd);
 			return;
 		}
-		close(255);
+		close(spamfd);
 		if (!stralloc_0(line))
 			die_nomem();
 		if (line->len)
@@ -4639,7 +4643,7 @@ static void
 create_logfilter()
 {
 	int             fd;
-	char           *tmpdir;
+	char           *tmpdir, *x;
 	static stralloc tmpFile = { 0 };
 
 	if (env_get("LOGFILTER"))
@@ -4654,13 +4658,15 @@ create_logfilter()
 			die_nomem();
 		if (!stralloc_0(&tmpFile))
 			die_nomem();
+		if ((x = env_get("SPAMFD")))
+			scan_int(x, &spamfd);
 		if ((fd = open(tmpFile.s, O_RDWR | O_EXCL | O_CREAT, 0600)) == -1)
 			die_logfilter();
 		if (unlink(tmpFile.s))
 			die_logfilter();
-		if (dup2(fd, 255) == -1)
+		if (dup2(fd, spamfd) == -1)
 			die_logfilter();
-		if (fd != 255)
+		if (fd != spamfd)
 			close(fd);
 	}
 	return;
