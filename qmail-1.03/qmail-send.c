@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-send.c,v $
+ * Revision 1.49  2011-04-16 11:29:28+05:30  Cprogrammer
+ * check for write errors
+ *
  * Revision 1.48  2010-07-23 13:59:20+05:30  Cprogrammer
  * fixed envrules() not working
  *
@@ -2309,7 +2312,11 @@ todo_init()
 	flagtodoalive = 1;
 	/*- sync with external todo */
 	if (write(todofdout, "S", 1) != 1)
-		tododied();
+	{
+		log3("alert: unable to write a byte to external todo! dying...:", .error_str(errno), "\n");
+		flagexitasap = 1;
+		flagtodoalive = 0;
+	}
 	return;
 }
 
@@ -2322,7 +2329,11 @@ todo_selprep(nfds, rfds, wakeup)
 	if (flagexitasap)
 	{
 		if (flagtodoalive && write(todofdout, "X", 1) != 1)
-			tododied();
+		{
+			log3("alert: unable to write a byte to external todo! dying...:", .error_str(errno), "\n");
+			flagexitasap = 1;
+			flagtodoalive = 0;
+		}
 	}
 	if (flagtodoalive)
 	{
@@ -2642,7 +2653,7 @@ reread()
 #ifdef EXTERNAL_TODO
 	if (hupflag && write(todofdout, "H", 1) != 1)
 	{
-		log3("alert: unable to write", error_str(errno), "\n");
+		log3("alert: unable to write a byte to external todo:", .error_str(errno), "\n");
 		return;
 	}
 #endif
@@ -2893,7 +2904,7 @@ main()
 void
 getversion_qmail_send_c()
 {
-	static char    *x = "$Id: qmail-send.c,v 1.48 2010-07-23 13:59:20+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: qmail-send.c,v 1.49 2011-04-16 11:29:28+05:30 Cprogrammer Exp mbhangui $";
 
 #ifdef INDIMAIL
 	x = sccsidh;
