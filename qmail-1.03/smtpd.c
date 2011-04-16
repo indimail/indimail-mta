@@ -1,5 +1,8 @@
 /*
  * $Log: smtpd.c,v $
+ * Revision 1.151  2011-04-16 14:43:47+05:30  Cprogrammer
+ * spamfd can be confugured using SPAMFD env variable
+ *
  * Revision 1.150  2011-04-13 21:27:15+05:30  Cprogrammer
  * added env variable DISABLE_PLUGIN to disable loading of smtp plugins
  *
@@ -597,7 +600,7 @@ int             wildmat_internal(char *, char *);
 int             ssl_rfd = -1, ssl_wfd = -1;	/*- SSL_get_Xfd() are broken */
 char           *servercert, *clientca, *clientcrl;
 #endif
-char           *revision = "$Revision: 1.150 $";
+char           *revision = "$Revision: 1.151 $";
 char           *protocol = "SMTP";
 stralloc        proto = { 0 };
 static stralloc Revision = { 0 };
@@ -6031,7 +6034,7 @@ addrrelay() /*- Rejection of relay probes. */
 void
 getversion_smtpd_c()
 {
-	static char    *x = "$Id: smtpd.c,v 1.150 2011-04-13 21:27:15+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: smtpd.c,v 1.151 2011-04-16 14:43:47+05:30 Cprogrammer Stab mbhangui $";
 
 #ifdef INDIMAIL
 	x = sccsidh;
