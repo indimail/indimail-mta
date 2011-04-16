@@ -348,6 +348,9 @@ char *convert_format_to_string(char *buff, size_t size, const char *format)
 	    case 'I':		/* M - Message ID */
 		buff += format_string(buff, (*msg_id->u.text != '\0') ? (const char *)msg_id->u.text : "UNKNOWN", 0, prec, flags, end);
 		break;
+	    case 's':		/* s - Subject */
+		buff += format_string(buff, (*subject->u.text != '\0') ? (const char *)subject->u.text : "UNKNOWN", 0, prec, flags, end);
+		break;
 	    case 'Q':		/* Q - Queue ID */
 		buff += format_string(buff, (*queue_id->u.text != '\0') ? (const char *)queue_id->u.text : "UNKNOWN", 0, prec, flags, end);
 		break;

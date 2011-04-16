@@ -131,6 +131,7 @@
 #
 #	    A - IP address (from first Received: statement having one)
 #		Not guaranteed to be the originating address of the message.
+#		s - Subject
 #	    I - Message ID
 #	    Q - Queue ID (from first id tag found in Received: headers)
 #
@@ -170,7 +171,7 @@
 #terse_format = %1.1c %f
 #log_header_format = %h: %c, spamicity=%p, version=%v
 #log_update_format = register-%r, %w words, %m messages
-##log_header_format = %h: %c, spamicity=%f, ipaddr=%A, queueID=%Q, msgID=%I, version=%v
+##log_header_format = %h: %c, spamicity=%f, ipaddr=%A, queueID=%Q, msgID=%I, subject=%s,version=%v
 
 #### TERSE
 #

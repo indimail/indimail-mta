@@ -32,7 +32,7 @@
  * LEXED_TOKENS, which are found in "msg-count" files need a special pattern
  * because they can be:
  *	1 - normal bogofilter tokens
- *	2 - url:xxx and subj: tokens
+ *	2 - url:xxx and from: tokens
  *	3 - mime boundaries
  */
 
@@ -49,9 +49,9 @@
  *
  * 4. A price range like $20-25 yields two tokens, $20 and $25.
  *
- * 5. Tokens that occur within the To, From, Subject, and Return-Path
+ * 5. Tokens that occur within the To, From, and Return-Path
  *    lines, or within urls, get marked accordingly.
- *    For example. "foo" in the Subject line becomes "subj:foo".
+ *    For example. "my@example.com" in the From line becomes "from:my@example.com".
 */
 
 /* DR 08/29/2003:
@@ -237,9 +237,17 @@ VERP		{TOKEN}-{VERPID}-{TOKEN}={TOKEN}@{TOKEN}
 						  yy_unput(txt->u.text, txt->leng);
 						}
 
-<INITIAL>^(To|CC|From|Return-Path|Subject|Received):	{ set_tag(yytext); }
+<INITIAL>^(To|CC|From|Return-Path|Received):	{ set_tag(yytext); }
 <INITIAL>^Content-(Transfer-Encoding|Type|Disposition):{MTYPE}	{ mime_content(yy_text()); skip_to(':'); header(); return TOKEN; }
 
+<INITIAL>^Subject:.*				{ /* save token for logging */
+						  int off = 9;
+						  while(isspace((unsigned char)yytext[off]) && off < yyleng)
+						      off++;
+						  set_subject((unsigned char *)(yytext+off), yyleng-off);
+						  header();
+						  return HEADKEY;
+						}
 <INITIAL>^Message-ID:.*				{ /* save token for logging */
 						  int off = 11;
 						  while(isspace((unsigned char)yytext[off]) && off < yyleng)

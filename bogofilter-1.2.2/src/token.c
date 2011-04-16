@@ -33,6 +33,7 @@ AUTHOR:
 
 word_t	*msg_addr;	/* First IP Address in Received: statement */
 word_t	*msg_id;	/* Message ID */
+word_t	*subject;	/* Subject */
 word_t	*queue_id;	/* Message's first queue ID */
 
 static token_t save_class = NONE;
@@ -45,7 +46,6 @@ static word_t yylval;
 static word_t *w_to   = NULL;	/* To:          */
 static word_t *w_from = NULL;	/* From:        */
 static word_t *w_rtrn = NULL;	/* Return-Path: */
-static word_t *w_subj = NULL;	/* Subject:     */
 static word_t *w_recv = NULL;	/* Received:    */
 static word_t *w_head = NULL;	/* Header:      */
 static word_t *w_mime = NULL;	/* Mime:        */
@@ -311,6 +311,22 @@ token_t parse_new_token(word_t *token)
 	    }
 	    break;
 
+	case SUBJECT:
+	    /* special token;  saved for formatted output, but not returned to bogofilter */
+	    /** \bug: the parser MUST be aligned with lexer_v3.l! */
+	    if (leng < max_token_len)
+	    {
+		while (!isspace(text[0])) {
+		    text += 1;
+		    leng -= 1;
+		}
+		while (isspace(text[0])) {
+		    text += 1;
+		    leng -= 1;
+		}
+		token_set( subject, text, leng);
+	    }
+	    continue;
 	case MESSAGE_ID:
 	    /* special token;  saved for formatted output, but not returned to bogofilter */
 	    /** \bug: the parser MUST be aligned with lexer_v3.l! */
@@ -576,6 +592,9 @@ void token_init(void)
 	/* Message ID */
 	msg_id = word_new( NULL, max_token_len * 3 );
 
+	/* Subject */
+	subject = word_new( NULL, max_token_len * 3 );
+
 	/* Message's first queue ID */
 	queue_id = word_new( NULL, max_token_len );
 
@@ -585,7 +604,6 @@ void token_init(void)
 	w_to   = word_news("to:");	/* To:          */
 	w_from = word_news("from:");	/* From:        */
 	w_rtrn = word_news("rtrn:");	/* Return-Path: */
-	w_subj = word_news("subj:");	/* Subject:     */
 	w_recv = word_news("rcvd:");	/* Received:    */
 	w_head = word_news("head:");	/* Header:      */
 	w_mime = word_news("mime:");	/* Mime:        */
@@ -639,9 +657,6 @@ void set_tag(const char *text)
 	else
 	    token_prefix = w_recv;	/* Received: */
 	break;
-    case 's':
-	token_prefix = w_subj;		/* Subject: */
-	break;
     default:
 	fprintf(stderr, "%s:%d  invalid tag - '%s'\n",
 		__FILE__, __LINE__,
@@ -672,6 +687,12 @@ void set_msg_id(byte *text, uint leng)
     token_set( msg_id, text, msg_id->leng );
 }
 
+void set_subject(byte *text, uint leng)
+{
+    (void) leng;		/* suppress compiler warning */
+    token_set( subject, text, subject->leng );
+}
+
 #define WFREE(n)	word_free(n); n = NULL
 
 /* Cleanup storage allocation */
@@ -680,7 +701,6 @@ void token_cleanup()
     WFREE(w_to);
     WFREE(w_from);
     WFREE(w_rtrn);
-    WFREE(w_subj);
     WFREE(w_recv);
     WFREE(w_head);
     WFREE(w_mime);
@@ -700,6 +720,7 @@ void token_clear()
     {
 	*msg_addr->u.text = '\0';
 	*msg_id->u.text   = '\0';
+	*subject->u.text   = '\0';
 	*queue_id->u.text = '\0';
     }
 }
