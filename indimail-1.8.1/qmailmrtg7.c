@@ -1,5 +1,8 @@
 /*
  * $Log: qmailmrtg7.c,v $
+ * Revision 2.7  2011-04-15 20:21:47+05:30  Cprogrammer
+ * fixed format for snprintf
+ *
  * Revision 2.6  2009-11-26 11:34:08+05:30  Cprogrammer
  * removed system command
  *
@@ -54,7 +57,7 @@
 #include <dirent.h>
 
 #ifndef lint
-static char     sccsid[] = "$Id: qmailmrtg7.c,v 2.6 2009-11-26 11:34:08+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: qmailmrtg7.c,v 2.7 2011-04-15 20:21:47+05:30 Cprogrammer Stab mbhangui $";
 #endif
 
 #define MAX_BUFF 1000
