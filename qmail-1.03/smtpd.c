@@ -2426,7 +2426,8 @@ smtp_quit(char *arg)
 	out(" closing connection\r\n");
 	flush();
 #ifdef SMTP_PLUGIN
-	dlclose(handle);
+	if (handle)
+		dlclose(handle);
 #endif
 	_exit(0);
 }
