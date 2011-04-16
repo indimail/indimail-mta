@@ -1,5 +1,8 @@
 #!/bin/sh
 # $Log: create_services.in,v $
+# Revision 2.48  2011-04-16 13:23:24+05:30  Cprogrammer
+# added --logfilter argument for fetchmail service
+#
 # Revision 2.47  2011-04-13 21:26:38+05:30  Cprogrammer
 # disable SMTP plugin by default
 #
@@ -164,7 +167,7 @@ indimaildir=@indimaildir@
 # End USER Configuration OPTIONS
 #
 
-# $Id: create_services.in,v 2.47 2011-04-13 21:26:38+05:30 Cprogrammer Exp mbhangui $
+# $Id: create_services.in,v 2.48 2011-04-16 13:23:24+05:30 Cprogrammer Stab mbhangui $
 
 usage()
 {
@@ -446,14 +449,16 @@ $dir_prefix$indimaildir/sbin/svctool --greylist=1999 --servicedir=$servicedir --
 #
 # qmtpd service
 #
-$dir_prefix$indimaildir/sbin/svctool --qmtp=209 --servicedir=$servicedir --qbase=$qbase \
-	--qcount=$qcount --qstart=1 --cntrldir=control --localip=0 --maxdaemons=75 --maxperip=25 \
+$dir_prefix$indimaildir/sbin/svctool --qmtp=209 --servicedir=$servicedir \
+	--qbase=$qbase --qcount=$qcount --qstart=1 \
+	--cntrldir=control --localip=0 --maxdaemons=75 --maxperip=25 \
 	--fsync --syncdir --memory=$qmtp_soft_mem --min-free=52428800 $extra_opt
 #
 # qmqpd service
 #
-$dir_prefix$indimaildir/sbin/svctool --qmqp=628 --servicedir=$servicedir --qbase=$qbase \
-	--qcount=$qcount --qstart=1 --cntrldir=control --localip=0 --maxdaemons=75 --maxperip=25 \
+$dir_prefix$indimaildir/sbin/svctool --qmqp=628 --servicedir=$servicedir \
+	--qbase=$qbase --qcount=$qcount --qstart=1 \
+	--cntrldir=control --localip=0 --maxdaemons=75 --maxperip=25 \
 	--fsync --syncdir --memory=$qmqp_soft_mem --min-free=52428800 $extra_opt
 
 #
@@ -462,26 +467,32 @@ $dir_prefix$indimaildir/sbin/svctool --qmqp=628 --servicedir=$servicedir --qbase
 if [ $nofetchmail -eq 0 ] ; then
 	if [ $nobogofilter -eq 0 ] ; then
 		if [ $noclamav -eq 0 ] ; then
-			$dir_prefix$indimaildir/sbin/svctool --fetchmail --servicedir=$servicedir --qbase=$qbase --qcount=$qcount \
-				--qstart=1 --cntrldir=control --default-domain=indimail.org \
+			$dir_prefix$indimaildir/sbin/svctool --fetchmail --servicedir=$servicedir \
+				--qbase=$qbase --qcount=$qcount --qstart=1 \
+				--cntrldir=control --default-domain=indimail.org \
 				--qhpsi="$indimaildir/bin/clamdscan %s --fdpass --quiet --no-summary" \
-				--spamfilter="$indimaildir/bin/bogofilter -p -d $indimaildir/etc" --spamexitcode=0 \
+				--spamfilter="$indimaildir/bin/bogofilter -p -d $indimaildir/etc" \
+				--logfilter=/tmp/spamfifo --rejectspam=0 --spamexitcode=0 \
 				--memory=$fetchmail_mem --fsync --syncdir --dkverify=$ver_opt $extra_opt
 		else
-			$dir_prefix$indimaildir/sbin/svctool --fetchmail --servicedir=$servicedir --qbase=$qbase --qcount=$qcount \
-				--qstart=1 --cntrldir=control --default-domain=indimail.org \
-				--spamfilter="$indimaildir/bin/bogofilter -p -d $indimaildir/etc" --spamexitcode=0 \
+			$dir_prefix$indimaildir/sbin/svctool --fetchmail --servicedir=$servicedir \
+				--qbase=$qbase --qcount=$qcount --qstart=1 \
+				--cntrldir=control --default-domain=indimail.org \
+				--spamfilter="$indimaildir/bin/bogofilter -p -d $indimaildir/etc" \
+				--logfilter=/tmp/spamfifo --rejectspam=0 --spamexitcode=0 \
 				--memory=$fetchmail_mem --fsync --syncdir --dkverify=$ver_opt $extra_opt
 		fi
 	else
 		if [ $noclamav -eq 0 ] ; then
-			$dir_prefix$indimaildir/sbin/svctool --fetchmail --servicedir=$servicedir --qbase=$qbase --qcount=$qcount \
-				--qstart=1 --cntrldir=control --default-domain=indimail.org \
+			$dir_prefix$indimaildir/sbin/svctool --fetchmail --servicedir=$servicedir \
+				--qbase=$qbase --qcount=$qcount --qstart=1 \
+				--cntrldir=control --default-domain=indimail.org \
 				--qhpsi="$indimaildir/bin/clamdscan %s --fdpass --quiet --no-summary" \
 				--memory=$fetchmail_mem --fsync --syncdir --dkverify=$ver_opt $extra_opt
 		else
-			$dir_prefix$indimaildir/sbin/svctool --fetchmail --servicedir=$servicedir --qbase=$qbase --qcount=$qcount \
-				--qstart=1 --cntrldir=control --default-domain=indimail.org \
+			$dir_prefix$indimaildir/sbin/svctool --fetchmail --servicedir=$servicedir \
+				--qbase=$qbase --qcount=$qcount --qstart=1 \
+				--cntrldir=control --default-domain=indimail.org \
 				--memory=$fetchmail_mem --fsync --syncdir --dkverify=$ver_opt $extra_opt
 		fi
 	fi
@@ -574,5 +585,5 @@ if [ -f /etc/rc.local ] ; then #FC13 stupidity
 		) >> /etc/rc.local
 	fi
 fi
-$dir_prefix$indimaildir/sbin/svctool --check-install --servicedir=$servicedir --qbase=$qbase \
-	--qcount=$qcount --qstart=1 $extra_opt
+$dir_prefix$indimaildir/sbin/svctool --check-install --servicedir=$servicedir \
+	--qbase=$qbase --qcount=$qcount --qstart=1 $extra_opt
