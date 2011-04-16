@@ -84,10 +84,10 @@ void            write_fifolog(rc_t);
 void
 write_fifolog(rc_t status)
 {
-	char           *fifo_name;
+	char           *fifo_name, *ptr;
 	FILE           *logfp;
 	pid_t           pid;
-	int             logfifo;
+	int             logfifo, spamfd = 255;
 
 	fifo_name = getenv("LOGFILTER");
 	if (!fifo_name || !*fifo_name)
@@ -98,7 +98,10 @@ write_fifolog(rc_t status)
 #if 0
 	sprintf(msg_bogofilter + strlen(msg_bogofilter), ", ratio %0.2f", unknown_count / total_count);
 #endif
-	write(255, msg_bogofilter, strlen(msg_bogofilter));
+	/*- write to qmail-smtpd fifo */
+	if ((ptr = getenv("SPAMFD")))
+		spamfd = atoi(ptr);
+	write(spamfd, msg_bogofilter, strlen(msg_bogofilter));
 	if (logflag)
 		return;
 	if ((logfifo = open(fifo_name, O_NDELAY | O_WRONLY)) == -1)
