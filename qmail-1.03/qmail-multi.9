@@ -13,7 +13,8 @@ QMAILQUEUE=QMAILHOME/bin/qmail-multi
 
 The filter can be turned on by defining the \fBFILTERARGS\fR environment variable.
 \fBqmail-multi\fR can also do spam filtering by setting the \fBSPAMFILTER\fR
-environment variable.
+environment variable. If \fBRELAYCLIENT\fR environment is set, \fBqmail-multi(8)\fR
+skips spam filtering regardless of \fBSPAMFILTER\fR setting.
 
 .B qmail-multi
 also calls
