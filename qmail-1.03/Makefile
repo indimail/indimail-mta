@@ -1207,7 +1207,7 @@ serialcmd maildircmd rewind relaytest qmail-qfilter sys-checkpwd ldap-checkpwd \
 iftocc ofmipd ofmipname 822field new-inject 822date 822received 822print \
 tokenize addrlist qquote parsedate qmail-greyd greydaemon \
 analyzer qtools qlog viruscanner update_tmprsadh dknewkey \
-dktest dot-forward batv balance_outgoing qarf \
+dktest dot-forward batv balance_outgoing qarf tplugin \
 fastforward printforward setforward newaliases printmaillist \
 setmaillist newinclude sortedtest logselect mbox2maildir \
 envdir envuidgid fghack multilog pgrphack readproctitle setlock \
@@ -1358,7 +1358,7 @@ qmail-showctl.0 qmail-newu.0 qarf.1 \
 qmail-pw2u.0 qmail-qread.0 qmail-tcpto.0 qmail-tcpok.0 \
 qmail-pop3d.0 qmail-popbull.0 qmail-popup.0 qmail-qmqpc.0 \
 qmail-qmqpd.0 qmail-qmtpd.0 qmail-smtpd.0 greydaemon.0 qmail-poppass.0 \
-dktest.8 dkim.8 svscanboot.0 \
+dktest.8 dkim.8 svscanboot.0 tplugin.1 \
 qmail-multi.0 spawn-filter.0 tcp-env.0 qmail-greyd.0 \
 qmail-newmrh.0 recipient-cdb.0 qmail-cdb.0 qmail-sql.8 qreceipt.0 forward.0 \
 rrforward.0 preline.0 condredirect.0 bouncesaying.0 except.0 \
@@ -2303,6 +2303,18 @@ auto_uids.h auto_qmail.h auto_break.h auto_patrn.h auto_spawn.h \
 auto_split.h spf.h env.h variables.h hasindimail.h conf-spf conf-batv
 	./compile $(inc_deps) `grep -h -v "^#" conf-spf conf-batv` qmail-showctl.c
 
+tplugin: \
+load tplugin.o
+	./load tplugin alloc.o alloc_re.o str_len.o str_chr.o \
+	str_diffn.o error.o strerr_die.o strerr_sys.o byte_copy.o \
+	auto_qmail.o fmt_ulong.o envread.o error_str.o sgetopt.o \
+	subgetopt.o stralloc.a substdio.a -ldl
+
+tplugin.o: \
+compile tplugin.c sgetopt.h alloc.h str.h strerr.h env.h stralloc.h \
+fmt.h auto_qmail.h subfd.h smtp_plugin.h
+	./compile tplugin.c
+
 qmail-smtpd: \
 load qmail-smtpd.o smtpd.o rcpthosts.o recipients.o commands.o timeoutread.o \
 timeoutwrite.o ip.o ipme.o ipalloc.o strsalloc.o control.o etrn.o atrn.o constmap.o \
@@ -2374,6 +2386,12 @@ plugin_init.9
 	cat plugin_init.9 \
 	| sed s}QMAILHOME}"`head -1 conf-qmail`"}g \
 	> plugin_init.3
+
+tplugin.1: \
+tplugin.9
+	cat tplugin.9 \
+	| sed s}QMAILHOME}"`head -1 conf-qmail`"}g \
+	> tplugin.1
 
 greydaemon.0: \
 greydaemon.8
@@ -2779,7 +2797,7 @@ ipalloc.h ipalloc.c select.h1 select.h2 trysysel.c ndelay.h ndelay.c \
 ndelay_off.c direntry.3 direntry.h1 direntry.h2 trydrent.c prot.h \
 prot.c chkshsgr.c warn-shsgr tryshsgr.c ipme.h ipme.c trysalen.c \
 maildir.5 maildir.h maildir.c tcp-environ.5 constmap.h constmap.c \
-tryltai.c trytai.c tryip6.c update_tmprsadh
+tryltai.c trytai.c tryip6.c update_tmprsadh plugin_init.3 tplugin.1
 	shar -m `cat FILES` > shar
 	chmod 400 shar
 

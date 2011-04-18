@@ -5879,7 +5879,7 @@ load_plugin(char *library, char *plugin_symb, int j)
 	if (!(handle[j] = dlopen(library, RTLD_NOW|RTLD_GLOBAL)))
 		die_plugin("dlopen failed for ", library, ": ", dlerror());
 	dlerror(); /*- man page told me to do this */
-	func = dlsym(handle[j], plugin_symb);
+	*(void **) (&func) = dlsym(handle[j], plugin_symb);
 	if ((error = dlerror()))
 		die_plugin("dlsym ", plugin_symb, " failed: ", error);
 	/*- execute the function */

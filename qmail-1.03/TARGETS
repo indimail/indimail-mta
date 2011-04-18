@@ -987,3 +987,6 @@ qarf
 qarf.o
 smtp_plugin.o
 smtpd-plugin.so
+tplugin
+tplugin.o
+tplugin.1

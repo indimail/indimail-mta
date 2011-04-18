@@ -1,5 +1,8 @@
 /*
  * $Log: hier.c,v $
+ * Revision 1.162  2011-04-18 22:22:38+05:30  Cprogrammer
+ * added tplugin
+ *
  * Revision 1.161  2011-04-13 22:11:50+05:30  Cprogrammer
  * added plugin_init man page
  *
@@ -636,6 +639,7 @@ hier(inst_dir)
 	c(auto_qmail_home, "bin", "maildirsmtp", auto_uido, auto_gidq, 0555);
 	c(auto_qmail_home, "bin", "maildirserial", auto_uido, auto_gidq, 0555);
 	c(auto_qmail_home, "bin", "qarf", auto_uido, auto_gidq, 0555);
+	c(auto_qmail_home, "bin", "tplugin", auto_uido, auto_gidq, 0555);
 
 #ifdef USE_SPF
 	c(auto_qmail_home, "bin", "spfquery", auto_uido, auto_gidq, 0555);
@@ -1045,6 +1049,7 @@ hier(inst_dir)
 #endif
 	c(auto_qmail_home, "man/man8", "qmail-multi.8", auto_uido, auto_gidq, 0444);
 	c(auto_qmail_home, "man/cat8", "qmail-multi.0", auto_uido, auto_gidq, 0444);
+	c(auto_qmail_home, "man/man1", "tplugin.1", auto_uido, auto_gidq, 0444);
 	c(auto_qmail_home, "man/man1", "qmail-qfilter.1", auto_uido, auto_gidq, 0444);
 	c(auto_qmail_home, "man/cat1", "qmail-qfilter.0", auto_uido, auto_gidq, 0444);
 	c(auto_qmail_home, "man/man8", "spawn-filter.8", auto_uido, auto_gidq, 0444);
@@ -1599,7 +1604,7 @@ _hier(inst_dir)
 void
 getversion_install_big_c()
 {
-	static char    *x = "$Id: hier.c,v 1.161 2011-04-13 22:11:50+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: hier.c,v 1.162 2011-04-18 22:22:38+05:30 Cprogrammer Stab mbhangui $";
 
 #ifdef INDIMAIL
 	x = sccsidh;
