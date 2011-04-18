@@ -14,21 +14,21 @@
  */
 
 int
-from_plug(char *remoteip, char *from, char **mesg)
+from_plug_1(char *remoteip, char *from, char **mesg)
+{
+	*mesg = "530 denied by plugin (#5.7.1)\r\n";
+	return (1);
+}
+
+int
+rcpt_plug_1(char *remoteip, char *from, char *rcpt, char **mesg)
 {
 	*mesg = "530 denied by plugin (#5.7.1)\r\n";
 	return (0);
 }
 
 int
-rcpt_plug(char *remoteip, char *from, char *rcpt, char **mesg)
-{
-	*mesg = "530 denied by plugin (#5.7.1)\r\n";
-	return (0);
-}
-
-int
-data_plug(char *local, char *remoteip, char *remotehost, char *remoteinfo, char **mesg)
+data_plug_1(char *local, char *remoteip, char *remotehost, char *remoteinfo, char **mesg)
 {
 	return (0);
 }
@@ -40,8 +40,8 @@ plugin_init()
 	PLUGIN         *ptr;
 
 	ptr = &plug;
-	ptr->mail_func = from_plug;
-	ptr->rcpt_func = rcpt_plug;
-	ptr->data_func = data_plug;
+	ptr->mail_func = from_plug_1;
+	ptr->rcpt_func = rcpt_plug_1;
+	ptr->data_func = data_plug_1;
 	return &plug;
 }

@@ -1,5 +1,8 @@
 /*
  * $Log: smtpd.c,v $
+ * Revision 1.152  2011-04-17 18:31:32+05:30  Cprogrammer
+ * multiple plugin feature
+ *
  * Revision 1.151  2011-04-16 14:43:47+05:30  Cprogrammer
  * spamfd can be confugured using SPAMFD env variable
  *
@@ -600,7 +603,7 @@ int             wildmat_internal(char *, char *);
 int             ssl_rfd = -1, ssl_wfd = -1;	/*- SSL_get_Xfd() are broken */
 char           *servercert, *clientca, *clientcrl;
 #endif
-char           *revision = "$Revision: 1.151 $";
+char           *revision = "$Revision: 1.152 $";
 char           *protocol = "SMTP";
 stralloc        proto = { 0 };
 static stralloc Revision = { 0 };
@@ -785,8 +788,9 @@ int             bodyok_orig = 0;
 stralloc        body = { 0 };
 char           *content_desc;
 #ifdef SMTP_PLUGIN
-PLUGIN         *plug = (PLUGIN *) 0;
-void           *handle;
+PLUGIN         **plug = (PLUGIN **) 0;
+void           **handle;
+int              plugin_count;
 #endif
 int             spamfd = 255;
 
@@ -2425,12 +2429,16 @@ smtp_help(char *arg)
 void
 smtp_quit(char *arg)
 {
+#ifdef SMTP_PLUGIN
+	int             i;
+#endif
+
 	smtp_greet("221 ");
 	out(" closing connection\r\n");
 	flush();
 #ifdef SMTP_PLUGIN
-	if (handle)
-		dlclose(handle);
+	for (i = 0;i < plugin_count;i++)
+		dlclose(handle[i]);
 #endif
 	_exit(0);
 }
@@ -3500,6 +3508,7 @@ smtp_mail(char *arg)
 	int             ret, envret = 0;
 #ifdef SMTP_PLUGIN
 	char           *mesg;
+	int             i;
 #endif
 #ifdef USE_SPF
 	int             r;
@@ -3591,10 +3600,15 @@ smtp_mail(char *arg)
 		break;
 	}
 #ifdef SMTP_PLUGIN
-	if (plug && plug->mail_func && plug->mail_func(remoteip, addr.s, &mesg))
+	for (i = 0;i < plugin_count;i++)
 	{
-		out(mesg);
-		return;
+		if (!plug[i] || !plug[i]->mail_func)
+			continue;
+		if (plug[i]->mail_func(remoteip, addr.s, &mesg))
+		{
+			out(mesg);
+			return;
+		}
 	}
 #endif
 	if (!(ret = tablematch("hostaccess", remoteip, addr.s + str_chr(addr.s, '@'))))
@@ -3964,6 +3978,7 @@ smtp_rcpt(char *arg)
 #endif
 #ifdef SMTP_PLUGIN
 	char           *mesg;
+	int             i;
 #endif
 
 	switch (setup_state)
@@ -4009,10 +4024,15 @@ smtp_rcpt(char *arg)
 		return;
 	}
 #ifdef SMTP_PLUGIN
-	if (plug && plug->rcpt_func && plug->rcpt_func(remoteip, mailfrom.s, addr.s, &mesg))
+	for (i = 0;i < plugin_count;i++)
 	{
-		out(mesg);
-		return;
+		if (!plug[i] || !plug[i]->rcpt_func)
+			continue;
+		if (plug[i]->rcpt_func(remoteip, mailfrom.s, addr.s, &mesg))
+		{
+			out(mesg);
+			return;
+		}
 	}
 #endif
 	/*- goodrcpt, goodrcptpatterns */
@@ -4683,6 +4703,7 @@ smtp_data(char *arg)
 	unsigned long   qp;
 	char           *qqx;
 #ifdef SMTP_PLUGIN
+	int             i;
 	char           *mesg;
 #endif
 
@@ -4744,10 +4765,15 @@ smtp_data(char *arg)
 		virus_desc = "";
 	}
 #ifdef SMTP_PLUGIN
-	if (plug && plug->data_func && plug->data_func(local, remoteip, remotehost, remoteinfo, &mesg))
+	for (i = 0;i < plugin_count;i++)
 	{
-		out(mesg);
-		return;
+		if (!plug[i] || !plug[i]->data_func)
+			continue;
+		if (plug[i]->data_func(local, remoteip, remotehost, remoteinfo, &mesg))
+		{
+			out(mesg);
+			return;
+		}
 	}
 #endif
 	create_logfilter();
@@ -5843,15 +5869,34 @@ struct commands submcommands[] = {
 	{0, err_unimpl, flush}
 };
 
+#ifdef SMTP_PLUGIN
+void
+load_plugin(char *library, char *plugin_symb, int j)
+{
+	PLUGIN         *(*func) (void);
+	char           *error;
+
+	if (!(handle[j] = dlopen(library, RTLD_NOW|RTLD_GLOBAL)))
+		die_plugin("dlopen failed for ", library, ": ", dlerror());
+	dlerror(); /*- man page told me to do this */
+	func = dlsym(handle[j], plugin_symb);
+	if ((error = dlerror()))
+		die_plugin("dlsym ", plugin_symb, " failed: ", error);
+	/*- execute the function */
+	if (!(plug[j] = (*func) ())) /*- this function returns a pointer to PLUGIN */
+		die_plugin("function ", plugin_symb, " failed", 0);
+	return;
+}
+#endif
+
 void
 qmail_smtpd(int argc, char **argv, char **envp)
 {
 	char           *ptr;
 	struct commands *cmdptr;
 #ifdef SMTP_PLUGIN
-	int             i;
-	char           *error, *start_plugin, *plugin_symb, *plugindir;
-	PLUGIN         *(*func) (void);
+	int             i, j, len;
+	char           *start_plugin, *plugin_symb, *plugindir;
 	stralloc        plugin = { 0 };
 #endif
 
@@ -5976,8 +6021,6 @@ qmail_smtpd(int argc, char **argv, char **envp)
 		die_plugin(plugindir, "plugindir cannot have an absolute path", 0, 0);
 	if (!(plugin_symb = env_get("SMTP_PLUGIN_SYMB")))
 		plugin_symb = "plugin_init";
-	if (!(start_plugin = env_get("SMTP_PLUGIN")))
-		start_plugin = "smtpd-plugin.so";
 	if (!stralloc_copys(&plugin, auto_qmail))
 		die_nomem();
 	if (!stralloc_append(&plugin, "/"))
@@ -5986,21 +6029,82 @@ qmail_smtpd(int argc, char **argv, char **envp)
 		die_nomem();
 	if (!stralloc_append(&plugin, "/"))
 		die_nomem();
+	if (!(start_plugin = env_get("SMTP_PLUGIN")))
+		start_plugin = "smtpd-plugin.so";
 	if (!stralloc_cats(&plugin, start_plugin))
 		die_nomem();
 	if (!stralloc_0(&plugin))
 		die_nomem();
-	if (access(plugin.s, R_OK))
-		goto command;
-	if (!(handle = dlopen(plugin.s, RTLD_NOW|RTLD_GLOBAL)))
-		die_plugin("dlopen failed for ", plugin.s, ": ", dlerror());
-	dlerror(); /*- man page told me to do this */
-	func = dlsym(handle, plugin_symb);
-	if ((error = dlerror()))
-		die_plugin("dlsym ", plugin_symb, " failed: ", error);
-	/*- execute the function */
-	if (!(plug = (*func) ())) /*- this function returns a pointer to PLUGIN */
-		die_plugin("function ", plugin_symb, " failed", 0);
+	len = plugin.len;
+	/*- figure out plugin count */
+	for (i = plugin_count = 0;;plugin_count++) {
+		if (!plugin_count) {
+			if (access(plugin.s, R_OK)) {
+				plugin.len -= 4;
+				strnum[fmt_ulong(strnum, i++)] = 0;
+				if (!stralloc_catb(&plugin, strnum, 1))
+					die_nomem();
+				if (!stralloc_cats(&plugin, ".so"))
+					die_nomem();
+				if (!stralloc_0(&plugin))
+					die_nomem();
+				if (access(plugin.s, R_OK))
+					goto command;
+			}
+		} else {
+			plugin.len = len - 4;
+			strnum[fmt_ulong(strnum, i++)] = 0;
+			if (!stralloc_catb(&plugin, strnum, 1))
+				die_nomem();
+			if (!stralloc_cats(&plugin, ".so"))
+				die_nomem();
+			if (!stralloc_0(&plugin))
+				die_nomem();
+			if (access(plugin.s, R_OK))
+				break;
+		}
+	}
+	if (!(handle = (void **) alloc(sizeof(void *) * plugin_count)))
+		die_nomem();
+	if (!(plug = (PLUGIN **) alloc(sizeof(PLUGIN *) * plugin_count)))
+		die_nomem();
+	plugin.len = len - 4;
+	if (!stralloc_cats(&plugin, ".so"))
+		die_nomem();
+	if (!stralloc_0(&plugin))
+		die_nomem();
+	for (i = j = 0;i < plugin_count;) {
+		if (!j) {
+			if (access(plugin.s, R_OK)) { /*- smtpd-plugin.so */
+				plugin.len -= 4;
+				strnum[fmt_ulong(strnum, i)] = 0;
+				if (!stralloc_catb(&plugin, strnum, 1))
+					die_nomem();
+				if (!stralloc_cats(&plugin, ".so"))
+					die_nomem();
+				if (!stralloc_0(&plugin))
+					die_nomem();
+				if (access(plugin.s, R_OK)) /*- smtpd-plugin0.so */
+					goto command;
+				load_plugin(plugin.s, plugin_symb, j++);
+				i++;
+			} else
+				load_plugin(plugin.s, plugin_symb, j++);
+		} else { /*- smtpd-plugin1.so, smtpd-plugin2.so, ... */
+			plugin.len = len - 4;
+			strnum[fmt_ulong(strnum, i)] = 0;
+			if (!stralloc_catb(&plugin, strnum, 1))
+				die_nomem();
+			if (!stralloc_cats(&plugin, ".so"))
+				die_nomem();
+			if (!stralloc_0(&plugin))
+				die_nomem();
+			if (access(plugin.s, R_OK))
+				break;
+			load_plugin(plugin.s, plugin_symb, j++);
+			i++;
+		}
+	}
 command:
 #endif
 	if (commands(&ssin, cmdptr) == 0)
@@ -6034,7 +6138,7 @@ addrrelay() /*- Rejection of relay probes. */
 void
 getversion_smtpd_c()
 {
-	static char    *x = "$Id: smtpd.c,v 1.151 2011-04-16 14:43:47+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: smtpd.c,v 1.152 2011-04-17 18:31:32+05:30 Cprogrammer Exp mbhangui $";
 
 #ifdef INDIMAIL
 	x = sccsidh;
