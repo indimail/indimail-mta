@@ -63,6 +63,26 @@ gcc -shared -rdynamic -nostartfiles -fPIC -s -O4 -o smtpd-plugin.so smtp_plugin.
 You need to copy the plugin in \fIQMAILHOME/plugins\fR directory for it to get loaded by
 \fBqmail-smtpd(8)\fR at runtime.
 
+If you desire to write multiple plugins, you should have your plugins as
+smtpd-plugin.so, smtpd-plugin0.so, smtpd-plugin1.so and so on. To ensure functions to be
+executed from all libraries, you should append an index to the \fImail_func\fR, \fIrcpt_func\fR
+and \fIdata_func\fR functions. eg. Your \fBplugin_init()\fR in smtpd-plugin0.so can be
+
+.EX
+PLUGIN         *
+plugin_init()
+{
+	static PLUGIN   plug;
+	PLUGIN         *ptr;
+
+	ptr = &plug;
+	ptr->mail_func = from_plug_0;
+	ptr->rcpt_func = rcpt_plug_0;
+	ptr->data_func = data_plug_0;
+	return &plug;
+}
+.EE
+
 .SH RETURN VALUE
 
 The functions \fBfrom_plug\fR, \fBrcpt_plug\fR, \fBdata_plug\fR must return 0 on success. These

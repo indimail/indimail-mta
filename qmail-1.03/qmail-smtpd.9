@@ -1521,6 +1521,10 @@ plugin_init(3) for details). The PLUGIN structure returns pointer to three funct
 be executed in the MAIL FROM, RCPT and DATA phase of SMTP. You can disable the loading
 of plugins by setting \fBDISABLE_PLUGIN\fR environment variable
 
+By default \fBqmail-smtpd\fR looks for plugins in QMAILHOME/plugins directory. You can
+change this by defining \fBPLUGINDIR\fR environment variable. You can also load multiple
+plugins by creating smtpd-plugin0.so, smtpd-plugin1.so, and so on.
+
 .SH GREYLISTING
 .B qmail-smtpd
 has the ability to greylist incoming mails. Subject to the environment variable
