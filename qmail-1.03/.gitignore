@@ -480,5 +480,5 @@ balance_outgoing
 hasldap.h
 qarf
 plugin_init.3
-tplugin
-tplugin.1
+plugtest
+plugtest.1
