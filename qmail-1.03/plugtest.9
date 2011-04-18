@@ -1,8 +1,8 @@
-.TH tplugin 1
+.TH plugtest 1
 .SH NAME
-tplugin \- test qmail-smtpd plugins
+plugtest \- test qmail-smtpd plugins
 .SH SYNOPSIS
-.B tplugin
+.B plugtest
 .B \-MRD
 [
 .B \-l
@@ -17,10 +17,10 @@ tplugin \- test qmail-smtpd plugins
 \fIrecip\fR ...
 
 .SH DESCRIPTION
-\fBtplugin(1)\fR tests SMTP plugins for \fBqmail-smtpd(8)\fR. By default \tplugin(1)\fR
+\fBplugtest(1)\fR tests SMTP plugins for \fBqmail-smtpd(8)\fR. By default \plugtest(1)\fR
 looks for plugins in QMAILHOME/plugins directory. You can change this by defining
 \fBPLUGINDIR\fR environment variable. You can also load multiple plugins by creating
-smtpd-plugin0.so, smtpd-plugin1.so, and so on. tplugin(1) uses \fBdlopen(3)\fR to open
+smtpd-plugin0.so, smtpd-plugin1.so, and so on. plugtest(1) uses \fBdlopen(3)\fR to open
 the plugins and execute the MAIL, RCPT & DATA plugins defined in the shared library
 representing a plugin.
 After loading the plugin, the function \fIplugin_init()\fR is executed. The function to
