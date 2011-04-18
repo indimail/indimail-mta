@@ -1,5 +1,5 @@
 /*
- * $Log: tplugin.c,v $
+ * $Log: plugtest.c,v $
  * Revision 1.1  2011-04-18 22:15:35+05:30  Cprogrammer
  * Initial revision
  *
@@ -17,7 +17,7 @@
 #include "subfd.h"
 #include "smtp_plugin.h"
 
-#define FATAL "tplugin: fatal: "
+#define FATAL "plugtest: fatal: "
 
 PLUGIN         **plug = (PLUGIN **) 0;
 void           **handle;
@@ -44,7 +44,7 @@ void
 die_nomem()
 {
 	substdio_flush(subfdout);
-	substdio_puts(subfderr, "tplugin: out of memory\n");
+	substdio_puts(subfderr, "plugtest: out of memory\n");
 	substdio_flush(subfderr);
 	_exit(1);
 }
@@ -77,19 +77,19 @@ load_plugin(char *library, char *plugin_symb, int j)
 	out("\n");
 	flush();
 	if (!(handle[j] = dlopen(library, RTLD_LAZY|RTLD_GLOBAL)))
-		die_plugin("tplugin: dlopen failed for ", library, ": ", dlerror());
+		die_plugin("plugtest: dlopen failed for ", library, ": ", dlerror());
 	dlerror(); /*- man page told me to do this */
 	*(void **) (&func) = dlsym(handle[j], plugin_symb);
 	if ((error = dlerror()))
-		die_plugin("tplugin: dlsym ", plugin_symb, " failed: ", error);
+		die_plugin("plugtest: dlsym ", plugin_symb, " failed: ", error);
 	/*- execute the function */
 	if (!(plug[j] = (*func) ())) /*- this function returns a pointer to PLUGIN */
-		die_plugin("tplugin: function ", plugin_symb, " failed", 0);
+		die_plugin("plugtest: function ", plugin_symb, " failed", 0);
 	return;
 }
 
 char           *usage =
-				"usage: tplugin -MTD -l localip -r remoteip  -R remotehost -m mailfrom recipient ...]\n"
+				"usage: plugtest -MTD -l localip -r remoteip  -R remotehost -m mailfrom recipient ...]\n"
 				"        -M test mail plugin\n"
 				"        -T test rcpt plugin\n"
 				"        -D test data plugin\n";
@@ -172,7 +172,7 @@ main(int argc, char **argv)
 					die_nomem();
 				if (access(plugin.s, R_OK))
 				{
-					out("tplugin: no plugins found\n");
+					out("plugtest: no plugins found\n");
 					return (0);
 				}
 			}
@@ -211,7 +211,7 @@ main(int argc, char **argv)
 					die_nomem();
 				if (access(plugin.s, R_OK)) /*- smtpd-plugin0.so */
 				{
-					out("tplugin: no plugins found\n");
+					out("plugtest: no plugins found\n");
 					return (0);
 				}
 				load_plugin(plugin.s, plugin_symb, j++);
@@ -309,9 +309,9 @@ main(int argc, char **argv)
 }
 
 void
-getversion_tplugin_c()
+getversion_plugtest_c()
 {
-	static char    *x = "$Id: tplugin.c,v 1.1 2011-04-18 22:15:35+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: plugtest.c,v 1.1 2011-04-18 22:15:35+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
