@@ -1,5 +1,8 @@
 /*
  * $Log: plugtest.c,v $
+ * Revision 1.2  2011-04-19 20:51:24+05:30  Cprogrammer
+ * added checking of arguments
+ *
  * Revision 1.1  2011-04-18 22:15:35+05:30  Cprogrammer
  * Initial revision
  *
@@ -343,7 +346,7 @@ main(int argc, char **argv)
 void
 getversion_plugtest_c()
 {
-	static char    *x = "$Id: plugtest.c,v 1.1 2011-04-18 22:15:35+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: plugtest.c,v 1.2 2011-04-19 20:51:24+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
