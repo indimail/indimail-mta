@@ -92,7 +92,7 @@ char           *usage =
 				"usage: plugtest -MTD -l localip -r remoteip  -R remotehost -m mailfrom recipient ...]\n"
 				"        -M test mail plugin\n"
 				"        -T test rcpt plugin\n"
-				"        -D test data plugin\n";
+				"        -D test data plugin";
 
 int
 main(int argc, char **argv)
@@ -101,7 +101,7 @@ main(int argc, char **argv)
 				   *plugindir, *start_plugin, *plugin_symb, *mesg;
 	char          **argv_ptr;
 	char            strnum[FMT_ULONG];
-	int             opt, i, j, len, mail_opt, rcpt_opt, data_opt, plugin_count;
+	int             opt, i, j, len, mail_opt, rcpt_opt, data_opt, plugin_count, status;
 	stralloc        plugin = { 0 };
 
 	mail_opt = rcpt_opt = data_opt = 0;
@@ -131,12 +131,42 @@ main(int argc, char **argv)
 			break;
 		}
 	}
+	argc -= optind;
+	argv += optind;
 	if (!mail_opt && !rcpt_opt && !data_opt)
 	{
 		strerr_die1x(100, usage);
 	}
-	argc -= optind;
-	argv += optind;
+	if (mail_opt || rcpt_opt || data_opt)
+	{
+		if (!remoteip)
+		{
+			out("remoteip not specified\n");
+			flush();
+			_exit(100);
+		}
+		if (!mailfrom)
+		{
+			out("mailfrom not specified\n");
+			flush();
+			_exit(100);
+		}
+	}
+	if ((rcpt_opt || data_opt) && !argc)
+	{
+		out("recipients not specified\n");
+		flush();
+		_exit(100);
+	}
+	if (data_opt)
+	{
+		if (!remoteip)
+		{
+			out("localip not specified\n");
+			flush();
+			_exit(100);
+		}
+	}
 	if (!(plugindir = env_get("PLUGINDIR")))
 		plugindir = "plugins";
 	if (plugindir[i = str_chr(plugindir, '/')])
@@ -235,7 +265,7 @@ main(int argc, char **argv)
 	}
 
 	argv_ptr = argv;
-	for (i = 0;i < plugin_count;i++) {
+	for (status = i = 0;i < plugin_count;i++) {
 		if (!plug[i])
 		{
 			out("plugin ");
@@ -258,7 +288,7 @@ main(int argc, char **argv)
 				out(strnum);
 				out(": mail plugin returned non-zero: ");
 				out(mesg);
-				out("\n");
+				status = 1;
 			}
 		}
 		if (rcpt_opt) {
@@ -276,7 +306,7 @@ main(int argc, char **argv)
 						out(strnum);
 						out(": rcpt plugin returned non-zero: ");
 						out(mesg);
-						out("\n");
+						status = 1;
 					}
 				}
 			}
@@ -297,7 +327,7 @@ main(int argc, char **argv)
 						out(strnum);
 						out(": data plugin returned non-zero: ");
 						out(mesg);
-						out("\n");
+						status = 1;
 					}
 				}
 			}
@@ -305,7 +335,9 @@ main(int argc, char **argv)
 	} /*- for (i = 0;i < plugin_count;i++) */
 	for (i = 0;i < plugin_count;i++)
 		dlclose(handle[i]);
-	return (0);
+	out(status ? "reject\n" : "accept\n");
+	flush();
+	return (status);
 }
 
 void
