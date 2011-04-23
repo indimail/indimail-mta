@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail.spec.in,v 2.209 2011-04-22 13:36:50+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 2.210 2011-04-23 11:13:09+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %define _unpackaged_files_terminate_build 1
 
@@ -1038,9 +1038,6 @@ fi
 %attr(555,root,qmail)                   %{_prefix}/bin/zsenders
 %attr(500,root,qmail)                   %{_prefix}/bin/instcheck
 %attr(555,root,qmail)                   %{_prefix}/bin/suids
-%attr(555,root,qmail)                   %{_prefix}/bin/hostname
-%attr(555,root,qmail)                   %{_prefix}/bin/config-fast
-%attr(555,root,qmail)                   %{_prefix}/bin/qmailconfig
 %attr(555,root,qmail)                   %{_prefix}/bin/maildirserial
 %attr(500,root,qmail)                   %{_prefix}/bin/qmail-start
 %attr(555,root,qmail)                   %{_prefix}/bin/822fields
@@ -1081,9 +1078,12 @@ fi
 %attr(555,root,qmail)                   %{_prefix}/bin/columnt
 %attr(555,root,qmail)                   %{_prefix}/bin/zrhosts
 %attr(555,root,qmail)                   %{_prefix}/bin/qmail-smtpd
-%attr(555,root,qmail)                   %{_prefix}/bin/batv
-%attr(555,root,qmail)                   %{_prefix}/bin/plugtest
 %attr(555,root,qmail)                   %{_prefix}/bin/qarf
+%attr(555,root,qmail)                   %{_prefix}/sbin/hostname
+%attr(555,root,qmail)                   %{_prefix}/sbin/config-fast
+%attr(555,root,qmail)                   %{_prefix}/sbin/qmailconfig
+%attr(555,root,qmail)                   %{_prefix}/sbin/batv
+%attr(555,root,qmail)                   %{_prefix}/sbin/plugtest
 %attr(555,root,qmail)                   %{_prefix}/sbin/sys-checkpwd
 %attr(555,root,qmail)                   %{_prefix}/sbin/ldap-checkpwd
 %attr(555,root,qmail)                   %{_prefix}/bin/greydaemon

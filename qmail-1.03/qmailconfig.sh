@@ -1,13 +1,23 @@
 #
 # $Log: qmailconfig.sh,v $
+# Revision 1.6  2011-04-23 09:35:25+05:30  Cprogrammer
+# use hostname command from /var/indimail/sbin/hostname
+#
 # Revision 1.5  2009-11-26 18:13:43+05:30  Cprogrammer
 # fixed syntax error
 # renamed config.sh to qmailconfig.sh
 #
 #
-# $Id: qmailconfig.sh,v 1.5 2009-11-26 18:13:43+05:30 Cprogrammer Stab mbhangui $
+# $Id: qmailconfig.sh,v 1.6 2011-04-23 09:35:25+05:30 Cprogrammer Exp mbhangui $
 #
-./hostname | tr '[A-Z]' '[a-z]' |
+if [ -x ./hostname ] ; then
+	HOSTNAME_CMD=./hostname
+elif [ -x QMAIL/sbin/hostname ] ; then
+	HOSTNAME_CMD=QMAIL/sbin/hostname
+else
+	HOSTNAME_CMD=hostname
+fi
+$HOSTNAME_CMD | tr '[A-Z]' '[a-z]' |
 (
 if read host
 then
