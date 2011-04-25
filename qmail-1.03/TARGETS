@@ -990,3 +990,4 @@ smtpd-plugin.so
 plugtest
 plugtest.o
 plugtest.1
+plugin_init.3
