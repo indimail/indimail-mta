@@ -51,7 +51,7 @@ build-stamp:
 	touch build-stamp
 
 clean:
-	$(MAKE) -s clean; $(MAKE) -s distclean
+	$(MAKE) -s clean; $(MAKE) -s distclean || true
 	dh_testdir
 	dh_testroot
 	rm -f build-stamp configure-stamp
