@@ -116,3 +116,12 @@ fetchmail-*/rcfile_l.c
 fetchmail-*/rcfile_y.c
 fetchmail-*/rcfile_y.h
 icampaign-*
+*/debian/*.ex
+*/debian/changelog
+*/debian/files
+*/debian/indimail.cron.d
+*/debian/indimail.debhelper.log
+*/debian/indimail.substvars
+*/debian/orules
+*/debian/patches
+*/debian/source
