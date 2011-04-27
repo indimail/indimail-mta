@@ -76,3 +76,13 @@ overquota.sh
 doc/ChangeLog
 login_tasks.3
 authgeneric
+debian/*.ex
+debian/changelog
+debian/files
+debian/indimail.cron.d
+debian/indimail.debhelper.log
+debian/indimail.substvars
+debian/orules
+debian/patches
+debian/source
+

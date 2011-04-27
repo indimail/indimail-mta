@@ -1,0 +1,93 @@
+#!/usr/bin/make -f
+
+# -*- makefile -*-
+# Sample debian/rules that uses debhelper.
+# This file was originally written by Joey Hess and Craig Small.
+# As a special exception, when this file is copied by dh-make into a
+# dh-make output file, you may use that output file without restriction.
+# This special exception was added by Craig Small in version 0.37 of dh-make.
+
+# Uncomment this to turn on verbose mode.
+export DH_VERBOSE=1
+
+#%:
+#	dh $@ 
+
+prefix=/var/indimail
+version=1.8.1
+clamav_version=0.97
+libdkim_version=1.3
+courier_version=4.9.1
+bogofilter_version=1.2.2
+fetchmail_version=6.3.19
+nssd_version=1.1
+DESTDIR=/home/local/src/indimail/indimail-"$(version)"/debian/indimail
+
+configure: configure-stamp
+configure-stamp:
+	dh_testdir
+	./configure --prefix=$(prefix) --libexecdir=$(prefix)/libexec --mandir=$(prefix)/man --sysconfdir=$(prefix)/etc --enable-qmaildir=$(prefix) --enable-tcprules-prog=$(prefix)/bin/tcprules --enable-tcpserver-file=$(prefix)/etc/tcp.smtp --enable-mysqlprefix=/usr `cat config/indimail.opts`
+	if [ -d ../clamav-$(clamav_version) ] ; then  cd ../clamav-$(clamav_version) ; ./configure --prefix=$(prefix) --sysconfdir=$(prefix)/etc --with-dbdir=$(prefix)/share/clamd --libexecdir=$(prefix)/libexec --mandir=$(prefix)/man `cat ../indimail-$(version)/config/clamav.opts`; fi
+	if [ -d ../libdkim-$(libdkim_version) ] ; then cd ../libdkim-$(libdkim_version) ; ./configure --prefix=$(prefix); fi
+	if [ -d ../courier-imap-$(courier_version) ] ; then cd ../courier-imap-$(courier_version) ; ./configure --prefix=$(prefix) `cat ../indimail-$(version)/config/courier-imap.opts`; fi
+	if [ -d ../bogofilter-$(bogofilter_version) ] ; then cd ../bogofilter-$(bogofilter_version) ; ./configure --prefix=$(prefix) --sysconfdir=$(prefix)/etc --libexecdir=$(prefix)/libexec --mandir=$(prefix)/man `cat ../indimail-$(version)/config/bogofilter.opts`; fi
+	if [ -d ../fetchmail-$(fetchmail_version) ] ; then cd ../fetchmail-$(fetchmail_version); ./configure --prefix=$(prefix) --enable-indimail --enable-indimaildir=$(prefix) --libexecdir=$(prefix)/libexec --mandir=$(prefix)/man `cat ../indimail-$(version)/config/fetchmail.opts`; fi
+	if [ -d ../nssd-$(nssd_version) ] ; then cd ../nssd-$(nssd_version) ; ./configure --prefix=$(prefix) --sysconfdir=$(prefix)/etc --enable-mysqlprefix=/usr `cat ../indimail-$(version)/config/nssd.opts`; fi
+	cd ..
+	# configure indimail
+	touch configure-stamp
+
+build: configure-stamp build-stamp
+build-stamp:
+	dh_testdir
+	$(MAKE) -s
+	$(MAKE) -s -C ../libdkim-$(libdkim_version) DESTDIR=$(DESTDIR)
+	$(MAKE) -s -C ../ucspi-tcp-0.88 DESTDIR=$(DESTDIR)
+	$(MAKE) -s -C ../courier-imap-$(courier_version) DESTDIR=$(DESTDIR)
+	$(MAKE) -s -C ../bogofilter-$(bogofilter_version) DESTDIR=$(DESTDIR)
+	$(MAKE) -s -C ../fetchmail-$(fetchmail_version) DESTDIR=$(DESTDIR)
+	$(MAKE) -s -C ../nssd-$(nssd_version) DESTDIR=$(DESTDIR)
+	$(MAKE) -s -C ../clamav-$(clamav_version) DESTDIR=$(DESTDIR)
+	touch build-stamp
+
+clean:
+	dh_testdir
+	dh_testroot
+	rm -f build-stamp configure-stamp
+	dh_clean
+
+install: build
+	dh_testdir
+	dh_testroot
+	dh_prep
+	dh_installdirs
+	$(MAKE) -s install -C ../libdkim-$(libdkim_version) DESTDIR=$(DESTDIR)
+	$(MAKE) -s install -C ../ucspi-tcp-0.88 DESTDIR=$(DESTDIR)
+	$(MAKE) -s install -C ../courier-imap-$(courier_version) DESTDIR=$(DESTDIR)
+	$(MAKE) -s install -C ../bogofilter-$(bogofilter_version) DESTDIR=$(DESTDIR)
+	$(MAKE) -s install -C ../fetchmail-$(fetchmail_version) DESTDIR=$(DESTDIR)
+	$(MAKE) -s install -C ../nssd-$(nssd_version) DESTDIR=$(DESTDIR)
+	$(MAKE) -s install -C ../clamav-$(clamav_version) DESTDIR=$(DESTDIR)
+	$(MAKE) -s install DESTDIR=$(DESTDIR)
+
+binary-indep: build install
+	dh_testdir
+	dh_testroot
+	dh_installchangelogs
+	dh_installdocs
+	dh_link
+	dh_strip
+	dh_compress
+	dh_fixperms
+	dh_installdeb
+	dh_shlibdeps
+	dh_gencontrol
+	dh_md5sums
+	dh_builddeb
+
+# Build architecture-dependent files here. 
+binary-arch: build install
+
+binary: binary-indep binary-arch
+.PHONY: build clean binary-indep binary-arch binary install configure
+

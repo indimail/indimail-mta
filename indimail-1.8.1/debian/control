@@ -1,0 +1,39 @@
+Source: indimail
+Section: unknown
+Priority: extra
+Maintainer: Manvendra Bhangui <manvendra@indimail.org>
+#Build-Depends: cdbs, debhelper (>= 7.0.50~), libssl-dev, libmysqlclient16 (>= 5.1), libmysqlclient16-dev (>= 5.1), libreadline5, libreadline-dev, libncurses5 (>= 5.7), libncurses5-dev (>= 5.7), bison (>= 1.2), flex (>= 2.5), libpam0g-dev, mime-support, m4, flex, gawk
+Standards-Version: 3.8.4
+Homepage: indimail.sourceforge.net
+#Vcs-Git: git://git.debian.org/collab-maint/indimail.git
+#Vcs-Browser: http://git.debian.org/?p=collab-maint/indimail.git;a=summary
+
+Package: indimail
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Description: IndiMail is a mailing solution built using following packages
+ .
+ qmail,
+ serialmail,
+ qmailanalog,
+ dotforward,
+ fastforward,
+ mess822,
+ daemontools,
+ ucspi-tcp,
+ Courier IMAP/POP3,
+ Bogofilter - A Bayesian Spam Filter,
+ Clam AntiVirus - GPL anti-virus toolkit for UNIX,
+ Fetchmail,
+ other useful utilities (mpack, unpack, altermime, ripmime, fortune, flash).
+ . 
+ IndiMail also provides Management of Virtual domains. Lot of the
+ integration has been done by modifying some of the core components.
+ You can read the feature list to get an idea of the changes and new
+ features that have been added over the original packages.
+ . 
+ The package combines qmail with other packages like courier-imap for
+ IMAP/POP3, bogofilter for SPAM control, fetchmail for hosts with 
+ intermittent connectivity. IndiMail provides ability for a single domain
+ to have users across multiple hosts (even across different geographical
+ locations) and tools to manage virtual domains ?
