@@ -1,6 +1,19 @@
 # chkconfig: 345 14 91
 # description: Starts qmail system and associated services
+### BEGIN INIT INFO
+# Provides:          indimail
+# Required-Start:    $network
+# Required-Stop:
+# Default-Start:     3 4 5
+# Default-Stop:      0 1 5
+# Description:       Starts indimail system and associated services
+# Short-Description: Start/Stop indimail
+### END INIT INFO
+
 # $Log: qmailctl.sh,v $
+# Revision 1.32  2011-04-27 17:18:26+05:30  Cprogrammer
+# added LSB header
+#
 # Revision 1.31  2011-02-07 22:09:29+05:30  Cprogrammer
 # added case for ubuntu
 #
@@ -181,6 +194,8 @@ case "$SYSTEM" in
 		. /etc/rc.d/init.d/functions
 	elif [ -f /etc/init.d/functions ] ; then
 		. /etc/init.d/functions
+	elif [ -f /lib/lsb/init-functions ] ; then
+		. /lib/lsb/initfunctions
 	fi
 	# Get config.
 	if [ -f /etc/sysconfig/network ] ; then
