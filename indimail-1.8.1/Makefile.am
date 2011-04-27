@@ -157,9 +157,9 @@ indimaillibexec_SCRIPTS = overquota.sh
 
 indimailbin_SCRIPTS = versioninfo vcaliasrev logmonitor bogofilter-qfe mailzipper
 
-indimailsbin_SCRIPTS = myslave controlsync svctool cputime tls-cert-check
+indimailsbin_SCRIPTS = myslave controlsync svctool cputime tls-cert-check create_services
 
-noinst_SCRIPTS = create_services indimail.spec indimail-@VERSION@-rpmlintrc indimail-epm.list \
+noinst_SCRIPTS = indimail.spec indimail-@VERSION@-rpmlintrc indimail-epm.list \
 	INSTALL INSTALL-RPM INSTALL-MYSQL README-CLUSTER RELEASE-Notes Quick-INSTALL \
 	README INSTALL-MINI vadddomain_handle vadduser_handle prerm preinst postrm postinst \
 	rules

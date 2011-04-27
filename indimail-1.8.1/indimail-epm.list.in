@@ -873,6 +873,9 @@ f 555 root qmail ${prefix}/bin/argv0 BUILDROOT${prefix}/bin/argv0
 f 555 root qmail ${prefix}/bin/atrn BUILDROOT${prefix}/bin/atrn
 f 555 root qmail ${prefix}/bin/base64 BUILDROOT${prefix}/bin/base64
 f 555 root qmail ${prefix}/bin/batv BUILDROOT${prefix}/bin/batv
+f 555 root qmail ${prefix}/bin/rmail BUILDROOT${prefix}/bin/rmail
+f 555 root qmail ${prefix}/bin/plugtest BUILDROOT${prefix}/bin/plugtest
+f 555 root qmail ${prefix}/bin/qarf BUILDROOT${prefix}/bin/qarf
 f 555 root qmail ${prefix}/bin/bouncesaying BUILDROOT${prefix}/bin/bouncesaying
 f 555 root qmail ${prefix}/bin/cdbdump BUILDROOT${prefix}/bin/cdbdump
 f 555 root qmail ${prefix}/bin/cdbget BUILDROOT${prefix}/bin/cdbget
@@ -887,11 +890,12 @@ f 555 root qmail ${prefix}/bin/cleanq BUILDROOT${prefix}/bin/cleanq
 f 555 root qmail ${prefix}/bin/columnt BUILDROOT${prefix}/bin/columnt
 f 555 root qmail ${prefix}/bin/condredirect BUILDROOT${prefix}/bin/condredirect
 f 555 root qmail ${prefix}/bin/condtomaildir BUILDROOT${prefix}/bin/condtomaildir
-f 555 root qmail ${prefix}/bin/config-fast BUILDROOT${prefix}/bin/config-fast
-f 555 root qmail ${prefix}/bin/qmailconfig BUILDROOT${prefix}/bin/qmailconfig
-f 555 root qmail ${prefix}/bin/hostname BUILDROOT${prefix}/bin/hostname
+f 555 root qmail ${prefix}/sbin/config-fast BUILDROOT${prefix}/sbin/config-fast
+f 555 root qmail ${prefix}/sbin/qmailconfig BUILDROOT${prefix}/sbin/qmailconfig
+f 555 root qmail ${prefix}/sbin/hostname BUILDROOT${prefix}/sbin/hostname
 f 555 root qmail ${prefix}/bin/crcdiff BUILDROOT${prefix}/bin/crcdiff
 f 555 root qmail ${prefix}/bin/crc BUILDROOT${prefix}/bin/crc
+f 555 root qmail ${prefix}/bin/swaks BUILDROOT${prefix}/bin/swaks
 f 555 root qmail ${prefix}/bin/crypt BUILDROOT${prefix}/bin/crypt
 f 555 root qmail ${prefix}/bin/datemail BUILDROOT${prefix}/bin/datemail
 f 555 root root ${prefix}/bin/date@ BUILDROOT${prefix}/bin/date@

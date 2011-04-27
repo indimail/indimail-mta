@@ -101,6 +101,8 @@
 %attr(0555,root,qmail) @indimaildir@/bin/uacl
 %attr(0555,root,qmail) @indimaildir@/bin/swaks
 %attr(0555,root,qmail) @indimaildir@/bin/batv
+%attr(0555,root,qmail) @indimaildir@/bin/qarf
+%attr(0555,root,qmail) @indimaildir@/bin/plugtest
 %attr(6511,root,indimail) @indimaildir@/bin/bogofilter
 %attr(0555,root,qmail) @indimaildir@/bin/bogofilter-qfe
 %attr(0555,root,root) @indimaildir@/bin/bogolexer
@@ -128,7 +130,11 @@
 %attr(0555,root,qmail) @indimaildir@/bin/condtomaildir
 %attr(0555,root,qmail) @indimaildir@/bin/config
 %attr(0555,root,qmail) @indimaildir@/bin/config-fast
+%attr(0500,root,qmail) @indimaildir@/sbin/qmailconfig
+%attr(0500,root,qmail) @indimaildir@/sbin/hostname
 %attr(0555,root,root) @indimaildir@/bin/couriertls
+%attr(0555,root,qmail) @indimaildir@/bin/echo
+%attr(0555,root,qmail) @indimaildir@/bin/rmail
 %attr(0555,root,qmail) @indimaildir@/bin/crc
 %attr(0555,root,qmail) @indimaildir@/bin/crcdiff
 %attr(0555,root,qmail) @indimaildir@/bin/crypt
@@ -1056,6 +1062,7 @@
 %attr(0555,root,root) @indimaildir@/sbin/slemsPrivate
 %attr(0555,root,qmail) @indimaildir@/sbin/strfile
 %attr(0555,root,qmail) @indimaildir@/sbin/svctool
+%attr(0555,root,qmail) @indimaildir@/sbin/create_services
 %attr(4555,root,root) @indimaildir@/sbin/systpass
 %attr(0555,root,qmail) @indimaildir@/sbin/testmra
 %attr(0555,root,qmail) @indimaildir@/sbin/tls-cert-check
