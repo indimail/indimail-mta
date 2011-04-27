@@ -21,7 +21,7 @@ set -e
 
 prefix=@indimaildir@
 sysconfdir=/etc
-servicedir=@servicedir@
+servicedir=/service
 logdir=@logdir@
 rm=/bin/rm
 rmdir=/bin/rmdir

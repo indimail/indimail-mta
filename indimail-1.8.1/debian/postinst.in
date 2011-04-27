@@ -23,7 +23,7 @@ qbase=${prefix}/queue
 mbase=@basepath@
 logdir=@logdir@
 mysqlPrefix=@mysql_prefix@
-servicedir=@servicedir@
+servicedir=/service
 sysconfdir=/etc
 rm=/bin/rm
 ####################################
