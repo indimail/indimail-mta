@@ -135,3 +135,4 @@ indimail-*/postrm
 indimail-*/postinst
 indimail-*/prerm
 indimail-*/preinst
+.libs
