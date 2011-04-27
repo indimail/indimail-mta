@@ -161,7 +161,8 @@ indimailsbin_SCRIPTS = myslave controlsync svctool cputime tls-cert-check
 
 noinst_SCRIPTS = create_services indimail.spec indimail-@VERSION@-rpmlintrc indimail-epm.list \
 	INSTALL INSTALL-RPM INSTALL-MYSQL README-CLUSTER RELEASE-Notes Quick-INSTALL \
-	README INSTALL-MINI vadddomain_handle vadduser_handle
+	README INSTALL-MINI vadddomain_handle vadduser_handle prerm preinst postrm postinst \
+	rules
 
 post_handle_list = vadddomain vadduser
 
@@ -783,6 +784,16 @@ cronlist: cronlist.in
 	$(edit) $@.in > $@
 perm_list: perm_list.in
 	$(edit) $@.in > $@
+prerm: debian/prerm.in
+	$(edit) debian/$@.in > debian/$@; rm -f $@;ln -sf debian/$@ $@
+preinst: debian/preinst.in
+	$(edit) debian/$@.in > debian/$@; rm -f $@;ln -sf debian/$@ $@
+rules: debian/rules.in
+	$(edit) debian/$@.in > debian/$@; chmod +x debian/$@; rm -f $@;ln -sf debian/$@ $@
+postrm: debian/postrm.in
+	$(edit) debian/$@.in > debian/$@; rm -f $@;ln -sf debian/$@ $@
+postinst: debian/postinst.in
+	$(edit) debian/$@.in > debian/$@; rm -f $@;ln -sf debian/$@ $@
 INSTALL: INSTALL.in configure.in
 	$(edit) $@.in > doc/$@.indimail; rm -f $@;ln -sf doc/$@.indimail $@
 Quick-INSTALL: Quick-INSTALL.in configure.in
