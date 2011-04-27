@@ -125,3 +125,13 @@ icampaign-*
 */debian/orules
 */debian/patches
 */debian/source
+*/debian/postrm
+*/debian/preinst
+*/debian/prerm
+*/debian/postinst
+*/debian/rules
+indimail-*/rules
+indimail-*/postrm
+indimail-*/postinst
+indimail-*/prerm
+indimail-*/preinst
