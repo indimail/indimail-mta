@@ -2163,6 +2163,9 @@ if [ " $servicetag" = " " ] ; then
 else
 	tag=$servicetag
 fi
+if [ $nooverwrite -eq 1 -a -d "$DESTDIR"$SERVICEDIR/qmail-smtpd.$tag/log ] ; then
+	exit 0
+fi
 /bin/mkdir -p "$DESTDIR"$SERVICEDIR/qmail-smtpd.$tag/log
 conf_dir="$DESTDIR"$SERVICEDIR/qmail-smtpd.$tag/variables
 /bin/mkdir -p $conf_dir
@@ -2507,6 +2510,9 @@ else
 fi
 conf_dir="$DESTDIR"$QmailHOME/$cntrldir/$QUEUE_DEF
 /bin/mkdir -p $conf_dir
+if [ $overwrite -eq 1 -a -d $conf_dir ] ; then
+	exit 0
+fi
 echo $QUEUE_BASE > $conf_dir/QUEUE_BASE
 echo $NO_OF_QUEUES > $conf_dir/QUEUE_COUNT
 echo $FIRST_QUEUE > $conf_dir/QUEUE_START
@@ -2619,6 +2625,10 @@ if [ " $servicetag" = " " ] ; then
 	tag=$QMTP_PORT
 else
 	tag=$servicetag
+fi
+
+if [ $overwrite -eq 1 -a -d "$DESTDIR"$SERVICEDIR/qmail-$type.$tag/log ] ; then
+	exit 0
 fi
 /bin/mkdir -p "$DESTDIR"$SERVICEDIR/qmail-$type.$tag/log
 conf_dir="$DESTDIR"$SERVICEDIR/qmail-$type.$tag/variables
@@ -2849,6 +2859,9 @@ if [ " $servicetag" = " " ] ; then
 else
 	tag=$servicetag
 fi
+if [ $overwrite -eq 1 -a -d "$DESTDIR"$SERVICEDIR/greylist.$tag/log ] ; then
+	exit 0
+fi
 /bin/mkdir -p "$DESTDIR"$SERVICEDIR/greylist.$tag/log
 conf_dir="$DESTDIR"$SERVICEDIR/greylist.$tag/variables
 /bin/mkdir -p $conf_dir
@@ -2938,9 +2951,15 @@ else
 	proxy_type="proxy"
 fi
 if [ " $use_ssl" = " 1" ] ; then
+	if [ $overwrite -eq 1 -a -d "$DESTDIR"$SERVICEDIR/"$proxy_type"-imapd-ssl.$tag/log ] ; then
+		exit 0
+	fi
 	/bin/mkdir -p "$DESTDIR"$SERVICEDIR/"$proxy_type"-imapd-ssl.$tag/log
 	conf_dir="$DESTDIR"$SERVICEDIR/"$proxy_type"-imapd-ssl.$tag/variables
 else
+	if [ $overwrite -eq 1 -a -d "$DESTDIR"$SERVICEDIR/"$proxy_type"-imapd.$tag/log ] ; then
+		exit 0
+	fi
 	/bin/mkdir -p "$DESTDIR"$SERVICEDIR/"$proxy_type"-imapd.$tag/log
 	conf_dir="$DESTDIR"$SERVICEDIR/"$proxy_type"-imapd.$tag/variables
 fi
@@ -3288,9 +3307,15 @@ else
 fi
 
 if [ " $use_ssl" = " 1" ] ; then
+	if [ $overwrite -eq 1 -a -d "$DESTDIR"$SERVICEDIR/"$proxy_type"-pop3d-ssl.$tag/log ] ; then
+		exit 0
+	fi
 	/bin/mkdir -p "$DESTDIR"$SERVICEDIR/"$proxy_type"-pop3d-ssl.$tag/log
 	conf_dir="$DESTDIR"$SERVICEDIR/"$proxy_type"-pop3d-ssl.$tag/variables
 else
+	if [ $overwrite -eq 1 -a -d "$DESTDIR"$SERVICEDIR/"$proxy_type"-pop3d.$tag/log ] ; then
+		exit 0
+	fi
 	/bin/mkdir -p "$DESTDIR"$SERVICEDIR/"$proxy_type"-pop3d.$tag/log
 	conf_dir="$DESTDIR"$SERVICEDIR/"$proxy_type"-pop3d.$tag/variables
 fi
@@ -3539,6 +3564,9 @@ if [ " $servicetag" = " " ] ; then
 else
 	tag=$servicetag
 fi
+if [ $overwrite -eq 1 -a -d "$DESTDIR"$SERVICEDIR/indisrvr.$tag/log ] ; then
+	exit 0
+fi
 /bin/mkdir -p "$DESTDIR"$SERVICEDIR/indisrvr.$tag/log
 conf_dir="$DESTDIR"$SERVICEDIR/indisrvr.$tag/variables
 /bin/mkdir -p $conf_dir
@@ -3638,6 +3666,9 @@ if [ $# -ne 2 ] ; then
 fi
 clamdPrefix=$1
 SERVICEDIR=$2
+if [ $overwrite -eq 1 -a -d "$DESTDIR"$SERVICEDIR/qscanq/log ] ; then
+	exit 0
+fi
 /bin/mkdir -p "$DESTDIR"$SERVICEDIR/qscanq/log
 conf_dir="$DESTDIR"$SERVICEDIR/qscanq/variables
 /bin/mkdir -p $conf_dir
@@ -3784,6 +3815,9 @@ THREAD_COUNT=$2
 LISTEN_TIMEOUT=$3
 SERVICEDIR=$4
 base_socket=`basename $SOCKET_PATH`
+if [ $overwrite -eq 1 -a -d "$DESTDIR"$SERVICEDIR/pwdlookup/log ] ; then
+	exit 0
+fi
 mkdir -p "$DESTDIR"$SERVICEDIR/pwdlookup/log
 conf_dir="$DESTDIR"$SERVICEDIR/pwdlookup/variables
 mkdir -p $conf_dir
@@ -3875,6 +3909,9 @@ THREAD_COUNT=$2
 SERVICEDIR=$3
 base_fifo_name=`basename $INFIFO_PATH`
 
+if [ $overwrite -eq 1 -a -d "$DESTDIR"$SERVICEDIR/inlookup.$base_fifo_name/log ] ; then
+	exit 0
+fi
 mkdir -p "$DESTDIR"$SERVICEDIR/inlookup.$base_fifo_name/log
 conf_dir="$DESTDIR"$SERVICEDIR/inlookup.$base_fifo_name/variables
 mkdir -p $conf_dir
@@ -4017,6 +4054,9 @@ else
 	mysqld=libexec/mysqld
 fi
 
+if [ $overwrite -eq 1 -a -d "$DESTDIR"$SERVICEDIR/mysql.$port/log ] ; then
+	exit 0
+fi
 if [ ! -f "$DESTDIR"$conf_file ] ; then
 	echo ""$DESTDIR"$conf_file: No such File or directory" 1>&2
 	return 1
@@ -4541,6 +4581,9 @@ if [ $# -ne 1 ] ; then
 	return 1
 fi
 SERVICEDIR=$1
+if [ $overwrite -eq 1 -a -d "$DESTDIR"$SERVICEDIR/.svscan/log ] ; then
+	exit 0
+fi
 mkdir -p "$DESTDIR"$SERVICEDIR/.svscan/log
 
 if [ ! -d $LOGDIR ] ; then
@@ -4571,6 +4614,9 @@ NO_OF_QUEUES=$2
 FIRST_QUEUE=$3
 SERVICEDIR=$4
 
+if [ $overwrite -eq 1 -a -d "$DESTDIR"$SERVICEDIR/fetchmail/log ] ; then
+	exit 0
+fi
 mkdir -p "$DESTDIR"$SERVICEDIR/fetchmail/log
 conf_dir="$DESTDIR"$SERVICEDIR/fetchmail/variables
 mkdir -p $conf_dir
@@ -4729,6 +4775,9 @@ if [ ! -d /usr/xpg4 ] ; then
 	/bin/ln -s /usr/bin /usr/xpg4/bin
 fi
 
+if [ $overwrite -eq 1 -a -d "$DESTDIR"$SERVICEDIR/qmail-poppass.$tag/log ] ; then
+	exit 0
+fi
 /bin/mkdir -p "$DESTDIR"$SERVICEDIR/qmail-poppass.$tag/log
 conf_dir="$DESTDIR"$SERVICEDIR/qmail-poppass.$tag/variables
 /bin/mkdir -p $conf_dir
@@ -4836,6 +4885,9 @@ else
 	tag=$servicetag
 fi
 
+if [ $overwrite -eq 1 -a -d "$DESTDIR"$QUEUE_BASE/nqueue ] ; then
+	exit 0
+fi
 # Create QUEUES
 #---------------------------------------------------------------------------------------
 if [ ! " $QUEUE_BASE" = " $QmailHOME" ] ; then
@@ -5480,7 +5532,11 @@ create_startup()
 	fi
 	if [ -f /etc/init.d/indimail ] ; then
 		if [ -f /sbin/chkconfig ] ; then
-			/sbin/chkconfig --add indimail
+			if [ -f /etc/debian_version ] ; then
+				/sbin/chkconfig --add indimail 2>/dev/null
+			else
+				/sbin/chkconfig --add indimail
+			fi
 		elif [ -f /usr/sbin/update-rc.d ] ; then
 			/usr/sbin/update-rc.d indimail start 345 stop 016
 		fi
@@ -5488,7 +5544,11 @@ create_startup()
 	if [ -f /etc/init.d/sendmail ] ; then
 		/etc/init.d/sendmail stop
 		if [ -f /sbin/chkconfig ] ; then
+			if [ -f /etc/debian_version ] ; then
+			/sbin/chkconfig --del sendmail 2>/dev/null
+			else
 			/sbin/chkconfig --del sendmail
+			fi
 		elif [ -f /usr/sbin/update-rc.d ] ; then
 			/usr/sbin/update-rc.d -f sendmail remove
 		fi
@@ -6575,6 +6635,7 @@ silent=0
 use_ssl=0
 use_starttls=0
 bootstrap=1
+nooverwrite=0
 if [ -x /bin/chown ] ; then
 	chown=/bin/chown
 elif [ -x /usr/sbin/chown ] ; then
@@ -6999,6 +7060,10 @@ while test $# -gt 0; do
 
     --fetchmail)
 	option=9
+	;;
+
+	--nooverwrite)
+	overwrite=1
 	;;
 
     --config=*)
