@@ -4,15 +4,13 @@
  * use /usr/local/mysql as the first mysql prefix
  *
  */
-#include <unistd.h>
 
 int
 main(int argc, char **argv)
 {
 #ifdef MYSQL_CONFIG
-	if (!access("/usr/local/mysql/bin/mysql_config", X_OK))
-		execv("/usr/local/mysql/bin/mysql_config", argv);
-	execvp("mysql_config", argv);
+	execvp("/usr/bin/mysql_config", argv);
+	execv("/usr/local/mysql/bin/mysql_config", argv);
 #endif
 	return(1);
 }
