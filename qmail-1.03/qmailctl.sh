@@ -5,7 +5,7 @@
 # Required-Start:    $network
 # Required-Stop:
 # Default-Start:     3 4 5
-# Default-Stop:      0 1 5
+# Default-Stop:      0 1 6
 # Description:       Starts indimail system and associated services
 # Short-Description: Start/Stop indimail
 ### END INIT INFO
