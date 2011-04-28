@@ -88,7 +88,7 @@ fi
 
 case "$1" in
     configure)
-		echo "installing version $2" >&2
+		echo "installing version $2"
     ;;
 
     abort-upgrade|abort-remove|abort-deconfigure)
@@ -110,7 +110,7 @@ esac
 # We need to do this for debian. SIGH!!
 #
 if [ -f ${prefix}/etc/perm_list ] ; then
-	echo "Fixing Permissions (debian stuipdity)" >&2
+	echo "Fixing Permissions (debian stuipdity)"
 (
 /bin/grep -v "^#" ${prefix}/etc/perm_list | while read line
 do
@@ -119,14 +119,16 @@ done
 ) > ${prefix}/etc/stat.override
 fi
 
-if [ $# -eq 3 ] ; then # upgrade
+if [ -f /tmp/indimail.upgrade ] ; then # upgrade
 	if [ -f ${prefix}/boot/rpm.init ] ; then
 		/sbin/ldconfig
 		echo "Running Custom Upgrade Script"
 		/bin/sh ${prefix}/boot/rpm.init upgrade
 	fi
+	/bin/rm -f /tmp/indimail.upgrade
 	exit 0
 fi
+/bin/rm -f /tmp/indimail.install /tmp/indimail.upgrade
 
 # MySQL
 echo "Creating ${logdir}"
@@ -205,7 +207,8 @@ do
 				--qbase=${qbase} --qcount=${qcount} --qstart=1 \
 				--query-cache --password-cache \
 				--cntrldir=control --localip=0 --maxdaemons=75 --maxperip=25 --persistdb \
-				--starttls --fsync --syncdir --memory=$smtp_soft_mem --chkrecipient --chkrelay --masquerade \
+				--starttls --fsync --syncdir --memory=$smtp_soft_mem \
+				--chkrecipient --chkrelay --masquerade \
 				--min-free=52428800 --content-filter --virus-filter \
 				--qhpsi="${prefix}/bin/clamdscan %s --quiet --no-summary" \
 				--spamfilter="${prefix}/bin/bogofilter -p -d ${prefix}/etc" \
@@ -219,7 +222,8 @@ do
 				--qbase=${qbase} --qcount=${qcount} --qstart=1 \
 				--query-cache --password-cache \
 				--cntrldir=control --localip=0 --maxdaemons=75 --maxperip=25 --persistdb \
-				--starttls --fsync --syncdir --memory=$smtp_soft_mem --chkrecipient --chkrelay --masquerade \
+				--starttls --fsync --syncdir --memory=$smtp_soft_mem \
+				--chkrecipient --chkrelay --masquerade \
 				--min-free=52428800 --content-filter --virus-filter \
 				--spamfilter="${prefix}/bin/bogofilter -p -d ${prefix}/etc" \
 				--logfilter=/tmp/spamfifo --rejectspam=0 --spamexitcode=0 \
@@ -234,7 +238,8 @@ do
 				--qbase=${qbase} --qcount=${qcount} --qstart=1 \
 				--query-cache --password-cache \
 				--cntrldir=control --localip=0 --maxdaemons=75 --maxperip=25 --persistdb \
-				--starttls --fsync --syncdir --memory=$smtp_soft_mem --chkrecipient --chkrelay --masquerade \
+				--starttls --fsync --syncdir --memory=$smtp_soft_mem \
+				--chkrecipient --chkrelay --masquerade \
 				--min-free=52428800 --content-filter --virus-filter \
 				--qhpsi="${prefix}/bin/clamdscan %s --quiet --no-summary" \
 				--dmasquerade \
@@ -246,7 +251,8 @@ do
 				--qbase=${qbase} --qcount=${qcount} --qstart=1 \
 				--query-cache --password-cache \
 				--cntrldir=control --localip=0 --maxdaemons=75 --maxperip=25 --persistdb \
-				--starttls --fsync --syncdir --memory=$smtp_soft_mem --chkrecipient --chkrelay --masquerade \
+				--starttls --fsync --syncdir --memory=$smtp_soft_mem \
+				--chkrecipient --chkrelay --masquerade \
 				--min-free=52428800 --content-filter --virus-filter \
 				--dmasquerade \
 				--dkverify=both \
@@ -263,11 +269,13 @@ ${prefix}/sbin/svctool --greylist=1999 --servicedir=$servicedir --min-resend-min
     --hash-size=65536 --save-interval=5 --whitelist=greylist.white --use-greydaemon
 # qmail-qmtpd service
 ${prefix}/sbin/svctool --qmtp=209 --servicedir=$servicedir --qbase=${qbase} \
-	--qcount=${qcount} --qstart=1 --cntrldir=control --localip=0 --maxdaemons=75 --maxperip=25 \
+	--qcount=${qcount} --qstart=1 --cntrldir=control --localip=0 \
+	--maxdaemons=75 --maxperip=25 \
 	--fsync --syncdir --memory=$qmtp_soft_mem --min-free=52428800
 # qmail-qmqpd service
 ${prefix}/sbin/svctool --qmqp=628 --servicedir=$servicedir --qbase=${qbase} \
-	--qcount=${qcount} --qstart=1 --cntrldir=control --localip=0 --maxdaemons=75 --maxperip=25 \
+	--qcount=${qcount} --qstart=1 --cntrldir=control --localip=0 \
+	--maxdaemons=75 --maxperip=25 \
 	--fsync --syncdir --memory=$qmqp_soft_mem --min-free=52428800
 /bin/touch $servicedir/qmail-qmqpd.628/down
 
@@ -275,29 +283,33 @@ if [ $nofetchmail -eq 0 ] ; then
 # fetchmail
 	if [ $nobogofilter -eq 0 ] ; then
 		if [ $noclamav -eq 0 ] ; then
-			${prefix}/sbin/svctool --fetchmail --servicedir=$servicedir --qbase=${qbase} --qcount=${qcount} \
-				--qstart=1 --cntrldir=control --default-domain=${default_domain} \
+			${prefix}/sbin/svctool --fetchmail --servicedir=$servicedir \
+				--qbase=${qbase} --qcount=${qcount} --qstart=1 \
+				--cntrldir=control --default-domain=${default_domain} \
 				--qhpsi="${prefix}/bin/clamdscan %s --quiet --no-summary" \
 				--spamfilter="${prefix}/bin/bogofilter -p -d ${prefix}/etc" --spamexitcode=0 \
 				--memory=$fetchmail_mem --fsync --syncdir \
 				--dkverify=$ver_opt
 		else
-			${prefix}/sbin/svctool --fetchmail --servicedir=$servicedir --qbase=${qbase} --qcount=${qcount} \
-				--qstart=1 --cntrldir=control --default-domain=${default_domain} \
+			${prefix}/sbin/svctool --fetchmail --servicedir=$servicedir \
+				--qbase=${qbase} --qcount=${qcount} --qstart=1 \
+				--cntrldir=control --default-domain=${default_domain} \
 				--spamfilter="${prefix}/bin/bogofilter -p -d ${prefix}/etc" --spamexitcode=0 \
 				--memory=$fetchmail_mem --fsync --syncdir \
 				--dkverify=$ver_opt
 		fi
 	else
 		if [ $noclamav -eq 0 ] ; then
-			${prefix}/sbin/svctool --fetchmail --servicedir=$servicedir --qbase=${qbase} --qcount=${qcount} \
-				--qstart=1 --cntrldir=control --default-domain=${default_domain} \
+			${prefix}/sbin/svctool --fetchmail --servicedir=$servicedir \
+				--qbase=${qbase} --qcount=${qcount} --qstart=1 \
+				--cntrldir=control --default-domain=${default_domain} \
 				--qhpsi="${prefix}/bin/clamdscan %s --quiet --no-summary" \
 				--memory=$fetchmail_mem --fsync --syncdir \
 				--dkverify=$ver_opt
 		else
-			${prefix}/sbin/svctool --fetchmail --servicedir=$servicedir --qbase=${qbase} --qcount=${qcount} \
-				--qstart=1 --cntrldir=control --default-domain=${default_domain} \
+			${prefix}/sbin/svctool --fetchmail --servicedir=$servicedir \
+				--qbase=${qbase} --qcount=${qcount} --qstart=1 \
+				--cntrldir=control --default-domain=${default_domain} \
 				--memory=$fetchmail_mem --fsync --syncdir \
 				--dkverify=$ver_opt
 		fi
@@ -311,26 +323,34 @@ fi
 /bin/touch $servicedir/mysql.3306/down
 if [ $nocourierimap -eq 0 ] ; then
 # IMAP/POP3
-${prefix}/sbin/svctool --imap=143 --servicedir=$servicedir --localip=0 --maxdaemons=40 --maxperip=25 \
+${prefix}/sbin/svctool --imap=143 --servicedir=$servicedir --localip=0 \
+	--maxdaemons=40 --maxperip=25 \
 	--starttls --default-domain=${default_domain} --memory=$imap_pop3_mem
-${prefix}/sbin/svctool --imap=993 --servicedir=$servicedir --localip=0 --maxdaemons=40 --maxperip=25 \
+${prefix}/sbin/svctool --imap=993 --servicedir=$servicedir --localip=0 \
+	--maxdaemons=40 --maxperip=25 \
 	--default-domain=${default_domain} --memory=$imap_pop3_mem --ssl
-${prefix}/sbin/svctool --pop3=110 --servicedir=$servicedir --localip=0 --maxdaemons=40 --maxperip=25 \
-		--starttls --default-domain=${default_domain} --memory=$imap_pop3_mem
-${prefix}/sbin/svctool --pop3=995 --servicedir=$servicedir --localip=0 --maxdaemons=40 --maxperip=25 \
-		--default-domain=${default_domain} --memory=$imap_pop3_mem --ssl
+${prefix}/sbin/svctool --pop3=110 --servicedir=$servicedir --localip=0 \
+	--maxdaemons=40 --maxperip=25 \
+	--starttls --default-domain=${default_domain} --memory=$imap_pop3_mem
+${prefix}/sbin/svctool --pop3=995 --servicedir=$servicedir --localip=0 \
+	--maxdaemons=40 --maxperip=25 \
+	--default-domain=${default_domain} --memory=$imap_pop3_mem --ssl
 fi
 if [ $noproxy -eq 0 ] ; then
-${prefix}/sbin/svctool --imap=4143 --servicedir=$servicedir --localip=0 --maxdaemons=40 \
-	--maxperip=25 --default-domain=${default_domain} --memory=$imap_pop3_mem --proxy=143 \
+${prefix}/sbin/svctool --imap=4143 --servicedir=$servicedir --localip=0 \
+	--maxdaemons=40 --maxperip=25 \
+	--default-domain=${default_domain} --memory=$imap_pop3_mem --proxy=143 \
 	--starttls
-${prefix}/sbin/svctool --imap=9143 --servicedir=$servicedir --localip=0 --maxdaemons=40 \
-	--maxperip=25 --default-domain=${default_domain} --memory=$imap_pop3_mem --proxy=143 --ssl
-${prefix}/sbin/svctool --pop3=4110 --servicedir=$servicedir --localip=0 --maxdaemons=40 \
-	--maxperip=25 --default-domain=${default_domain} --memory=$imap_pop3_mem --proxy=110 \
+${prefix}/sbin/svctool --imap=9143 --servicedir=$servicedir --localip=0 \
+	--maxdaemons=40 --maxperip=25 \
+	--default-domain=${default_domain} --memory=$imap_pop3_mem --proxy=143 --ssl
+${prefix}/sbin/svctool --pop3=4110 --servicedir=$servicedir --localip=0 \
+	--maxdaemons=40 --maxperip=25 \
+	--default-domain=${default_domain} --memory=$imap_pop3_mem --proxy=110 \
 	--starttls
-${prefix}/sbin/svctool --pop3=9110 --servicedir=$servicedir --localip=0 --maxdaemons=40 \
-	--maxperip=25 --default-domain=${default_domain} --memory=$imap_pop3_mem --proxy=110 --ssl
+${prefix}/sbin/svctool --pop3=9110 --servicedir=$servicedir --localip=0 \
+	--maxdaemons=40 --maxperip=25 \
+	--default-domain=${default_domain} --memory=$imap_pop3_mem --proxy=110 --ssl
 fi
 
 # IndiMail Daemons
@@ -338,8 +358,8 @@ ${prefix}/sbin/svctool --indisrvr=4000 --servicedir=$servicedir \
 	--localip=0 --maxdaemons=40 --maxperip=25 --avguserquota=2097152 \
     --certfile=${prefix}/control/servercert.pem --ssl \
 	--hardquota=52428800 --base_path=${mbase}
-${prefix}/sbin/svctool --inlookup=infifo --servicedir=$servicedir --cntrldir=control --threads=5 \
-	--password-cache
+${prefix}/sbin/svctool --inlookup=infifo --servicedir=$servicedir \
+	--cntrldir=control --threads=5 --password-cache
 ${prefix}/sbin/svctool --pwdlookup=/tmp/nssd.sock --threads=5 --timeout=-1 \
 	--mysqlhost=localhost --mysqluser=indimail \
 	--mysqlpass=ssh-1.5- --mysqlsocket=/tmp/mysql.sock --servicedir=$servicedir
@@ -351,7 +371,8 @@ ${prefix}/sbin/svctool --poppass=106 --localip=0 --maxdaemons=40 --maxperip=25 \
 # virus/spam filtering
 if [ $noclamav -eq 0 ] ; then
 	${prefix}/sbin/svctool --config=clamd
-	${prefix}/sbin/svctool --qscanq --servicedir=$servicedir --clamdPrefix=${prefix} --scanint=200
+	${prefix}/sbin/svctool --qscanq --servicedir=$servicedir \
+		--clamdPrefix=${prefix} --scanint=200
 fi
 if [ $nobogofilter -eq 0 ] ; then
 	${prefix}/sbin/svctool --config=bogofilter
@@ -426,9 +447,11 @@ else
 fi
 count=`expr $count + 1`
 echo "$count. Change your default domain in ${prefix}/control/defaultdomain"
+if [ ! -f /etc/debian_version ] ; then
 count=`expr $count + 1`
 echo "$count. You can optionally run the following command to verify installation"
 echo "   sudo rpm -V indimail"
+fi
 if [ ! -f ${prefix}/control/servercert.pem ] ; then
 count=`expr $count + 1`
 echo "$count. You also need to create CERTS for IMAP/POP3. run the following command to create cert"
