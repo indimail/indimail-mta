@@ -2510,7 +2510,7 @@ else
 fi
 conf_dir="$DESTDIR"$QmailHOME/$cntrldir/$QUEUE_DEF
 /bin/mkdir -p $conf_dir
-if [ $overwrite -eq 1 -a -d $conf_dir ] ; then
+if [ $nooverwrite -eq 1 -a -d $conf_dir ] ; then
 	exit 0
 fi
 echo $QUEUE_BASE > $conf_dir/QUEUE_BASE
@@ -2627,7 +2627,7 @@ else
 	tag=$servicetag
 fi
 
-if [ $overwrite -eq 1 -a -d "$DESTDIR"$SERVICEDIR/qmail-$type.$tag/log ] ; then
+if [ $nooverwrite -eq 1 -a -d "$DESTDIR"$SERVICEDIR/qmail-$type.$tag/log ] ; then
 	exit 0
 fi
 /bin/mkdir -p "$DESTDIR"$SERVICEDIR/qmail-$type.$tag/log
@@ -2859,7 +2859,7 @@ if [ " $servicetag" = " " ] ; then
 else
 	tag=$servicetag
 fi
-if [ $overwrite -eq 1 -a -d "$DESTDIR"$SERVICEDIR/greylist.$tag/log ] ; then
+if [ $nooverwrite -eq 1 -a -d "$DESTDIR"$SERVICEDIR/greylist.$tag/log ] ; then
 	exit 0
 fi
 /bin/mkdir -p "$DESTDIR"$SERVICEDIR/greylist.$tag/log
@@ -2951,13 +2951,13 @@ else
 	proxy_type="proxy"
 fi
 if [ " $use_ssl" = " 1" ] ; then
-	if [ $overwrite -eq 1 -a -d "$DESTDIR"$SERVICEDIR/"$proxy_type"-imapd-ssl.$tag/log ] ; then
+	if [ $nooverwrite -eq 1 -a -d "$DESTDIR"$SERVICEDIR/"$proxy_type"-imapd-ssl.$tag/log ] ; then
 		exit 0
 	fi
 	/bin/mkdir -p "$DESTDIR"$SERVICEDIR/"$proxy_type"-imapd-ssl.$tag/log
 	conf_dir="$DESTDIR"$SERVICEDIR/"$proxy_type"-imapd-ssl.$tag/variables
 else
-	if [ $overwrite -eq 1 -a -d "$DESTDIR"$SERVICEDIR/"$proxy_type"-imapd.$tag/log ] ; then
+	if [ $nooverwrite -eq 1 -a -d "$DESTDIR"$SERVICEDIR/"$proxy_type"-imapd.$tag/log ] ; then
 		exit 0
 	fi
 	/bin/mkdir -p "$DESTDIR"$SERVICEDIR/"$proxy_type"-imapd.$tag/log
@@ -3307,13 +3307,13 @@ else
 fi
 
 if [ " $use_ssl" = " 1" ] ; then
-	if [ $overwrite -eq 1 -a -d "$DESTDIR"$SERVICEDIR/"$proxy_type"-pop3d-ssl.$tag/log ] ; then
+	if [ $nooverwrite -eq 1 -a -d "$DESTDIR"$SERVICEDIR/"$proxy_type"-pop3d-ssl.$tag/log ] ; then
 		exit 0
 	fi
 	/bin/mkdir -p "$DESTDIR"$SERVICEDIR/"$proxy_type"-pop3d-ssl.$tag/log
 	conf_dir="$DESTDIR"$SERVICEDIR/"$proxy_type"-pop3d-ssl.$tag/variables
 else
-	if [ $overwrite -eq 1 -a -d "$DESTDIR"$SERVICEDIR/"$proxy_type"-pop3d.$tag/log ] ; then
+	if [ $nooverwrite -eq 1 -a -d "$DESTDIR"$SERVICEDIR/"$proxy_type"-pop3d.$tag/log ] ; then
 		exit 0
 	fi
 	/bin/mkdir -p "$DESTDIR"$SERVICEDIR/"$proxy_type"-pop3d.$tag/log
@@ -3564,7 +3564,7 @@ if [ " $servicetag" = " " ] ; then
 else
 	tag=$servicetag
 fi
-if [ $overwrite -eq 1 -a -d "$DESTDIR"$SERVICEDIR/indisrvr.$tag/log ] ; then
+if [ $nooverwrite -eq 1 -a -d "$DESTDIR"$SERVICEDIR/indisrvr.$tag/log ] ; then
 	exit 0
 fi
 /bin/mkdir -p "$DESTDIR"$SERVICEDIR/indisrvr.$tag/log
@@ -3666,7 +3666,7 @@ if [ $# -ne 2 ] ; then
 fi
 clamdPrefix=$1
 SERVICEDIR=$2
-if [ $overwrite -eq 1 -a -d "$DESTDIR"$SERVICEDIR/qscanq/log ] ; then
+if [ $nooverwrite -eq 1 -a -d "$DESTDIR"$SERVICEDIR/qscanq/log ] ; then
 	exit 0
 fi
 /bin/mkdir -p "$DESTDIR"$SERVICEDIR/qscanq/log
@@ -3815,7 +3815,7 @@ THREAD_COUNT=$2
 LISTEN_TIMEOUT=$3
 SERVICEDIR=$4
 base_socket=`basename $SOCKET_PATH`
-if [ $overwrite -eq 1 -a -d "$DESTDIR"$SERVICEDIR/pwdlookup/log ] ; then
+if [ $nooverwrite -eq 1 -a -d "$DESTDIR"$SERVICEDIR/pwdlookup/log ] ; then
 	exit 0
 fi
 mkdir -p "$DESTDIR"$SERVICEDIR/pwdlookup/log
@@ -3909,7 +3909,7 @@ THREAD_COUNT=$2
 SERVICEDIR=$3
 base_fifo_name=`basename $INFIFO_PATH`
 
-if [ $overwrite -eq 1 -a -d "$DESTDIR"$SERVICEDIR/inlookup.$base_fifo_name/log ] ; then
+if [ $nooverwrite -eq 1 -a -d "$DESTDIR"$SERVICEDIR/inlookup.$base_fifo_name/log ] ; then
 	exit 0
 fi
 mkdir -p "$DESTDIR"$SERVICEDIR/inlookup.$base_fifo_name/log
@@ -4054,7 +4054,7 @@ else
 	mysqld=libexec/mysqld
 fi
 
-if [ $overwrite -eq 1 -a -d "$DESTDIR"$SERVICEDIR/mysql.$port/log ] ; then
+if [ $nooverwrite -eq 1 -a -d "$DESTDIR"$SERVICEDIR/mysql.$port/log ] ; then
 	exit 0
 fi
 if [ ! -f "$DESTDIR"$conf_file ] ; then
@@ -4581,7 +4581,7 @@ if [ $# -ne 1 ] ; then
 	return 1
 fi
 SERVICEDIR=$1
-if [ $overwrite -eq 1 -a -d "$DESTDIR"$SERVICEDIR/.svscan/log ] ; then
+if [ $nooverwrite -eq 1 -a -d "$DESTDIR"$SERVICEDIR/.svscan/log ] ; then
 	exit 0
 fi
 mkdir -p "$DESTDIR"$SERVICEDIR/.svscan/log
@@ -4614,7 +4614,7 @@ NO_OF_QUEUES=$2
 FIRST_QUEUE=$3
 SERVICEDIR=$4
 
-if [ $overwrite -eq 1 -a -d "$DESTDIR"$SERVICEDIR/fetchmail/log ] ; then
+if [ $nooverwrite -eq 1 -a -d "$DESTDIR"$SERVICEDIR/fetchmail/log ] ; then
 	exit 0
 fi
 mkdir -p "$DESTDIR"$SERVICEDIR/fetchmail/log
@@ -4775,7 +4775,7 @@ if [ ! -d /usr/xpg4 ] ; then
 	/bin/ln -s /usr/bin /usr/xpg4/bin
 fi
 
-if [ $overwrite -eq 1 -a -d "$DESTDIR"$SERVICEDIR/qmail-poppass.$tag/log ] ; then
+if [ $nooverwrite -eq 1 -a -d "$DESTDIR"$SERVICEDIR/qmail-poppass.$tag/log ] ; then
 	exit 0
 fi
 /bin/mkdir -p "$DESTDIR"$SERVICEDIR/qmail-poppass.$tag/log
@@ -4885,7 +4885,7 @@ else
 	tag=$servicetag
 fi
 
-if [ $overwrite -eq 1 -a -d "$DESTDIR"$QUEUE_BASE/nqueue ] ; then
+if [ $nooverwrite -eq 1 -a -d "$DESTDIR"$QUEUE_BASE/nqueue ] ; then
 	exit 0
 fi
 # Create QUEUES
@@ -7063,7 +7063,7 @@ while test $# -gt 0; do
 	;;
 
 	--nooverwrite)
-	overwrite=1
+	nooverwrite=1
 	;;
 
     --config=*)
