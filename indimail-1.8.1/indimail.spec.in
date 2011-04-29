@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail.spec.in,v 2.213 2011-04-29 16:42:32+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 2.214 2011-04-29 17:54:18+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %define _unpackaged_files_terminate_build 1
 
@@ -2434,6 +2434,13 @@ echo "removing configuration"
 for i in indimail.cnf clamd.conf freshclam.conf
 do
 	%{__rm} -f %{_prefix}/etc/$i
+done
+for i in smtp qmtp qmqp imap pop3 poppass
+do
+	for j in `/bin/ls %{_prefix}/etc/tcp*.$i 2>/dev/null`
+	do
+			%{_rm} -f $j.cdb
+	done
 done
 %if %nonssd == 0
 	%{__rm} -f %{_prefix}/etc/nssd.conf
