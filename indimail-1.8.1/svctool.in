@@ -4385,6 +4385,116 @@ echo $c_d
 echo "flush privileges;"
 }
 
+default_mysql_config()
+{
+echo "[client]"
+echo "port		= $mysql_port"
+echo "socket		= $mysql_socket"
+echo "[mysqld]"
+echo "#"
+echo "# * Basic Settings"
+echo "#"
+echo 
+echo "#"
+echo "# * IMPORTANT"
+echo "#   If you make changes to these settings and your system uses apparmor, you may"
+echo "#   also need to also adjust /etc/apparmor.d/usr.sbin.mysqld."
+echo "#"
+echo 
+echo "user		= mysql"
+echo "socket		= $mysql_socket"
+echo "port		= $mysql_port"
+echo "basedir		= @mysql_prefix@"
+echo "datadir		= @indimaildir@/mysqldb"
+echo "tmpdir		= /tmp"
+echo "skip-external-locking"
+if [ $# -eq 1 ] ; then
+echo "thread_concurrency=$1"
+fi
+echo "#"
+echo "# Instead of skip-networking the default is now to listen only on"
+echo "# localhost which is more compatible and is not less secure."
+echo "bind-address		= 127.0.0.1"
+echo "#"
+echo "# * Fine Tuning"
+echo "#"
+echo "key_buffer		= 16M"
+echo "max_allowed_packet	= 16M"
+echo "thread_stack		= 192K"
+echo "thread_cache_size       = 8"
+echo "# This replaces the startup script and checks MyISAM tables if needed"
+echo "# the first time they are touched"
+echo "myisam-recover         = BACKUP"
+echo "#max_connections        = 100"
+echo "#table_cache            = 64"
+echo "#thread_concurrency     = 10"
+echo "#"
+echo "# * Query Cache Configuration"
+echo "#"
+echo "query_cache_limit	= 1M"
+echo "query_cache_size        = 16M"
+echo "#"
+echo "# * Logging and Replication"
+echo "#"
+echo "# Both location gets rotated by the cronjob."
+echo "# Be aware that this log type is a performance killer."
+echo "# As of 5.1 you can enable the log at runtime!"
+echo "#general_log_file        = /var/log/mysql/mysql.log"
+echo "#general_log             = 1"
+echo 
+echo "log_error                = /var/log/mysql/error.log"
+echo 
+echo "# Here you can see queries with especially long duration"
+echo "#log_slow_queries	= /var/log/mysql/mysql-slow.log"
+echo "#long_query_time = 2"
+echo "#log-queries-not-using-indexes"
+echo "#"
+echo "# The following can be used as easy to replay backup logs or for replication."
+echo "# note: if you are setting up a replication slave, see README.Debian about"
+echo "#       other settings you may need to change."
+echo "#server-id		= 1"
+echo "#log_bin			= /var/log/mysql/mysql-bin.log"
+echo "expire_logs_days	= 10"
+echo "max_binlog_size         = 100M"
+echo "#binlog_do_db		= include_database_name"
+echo "#binlog_ignore_db	= include_database_name"
+echo "#"
+echo "# * InnoDB"
+echo "#"
+echo "# InnoDB is enabled by default with a 10MB datafile in /var/lib/mysql/."
+echo "# Read the manual for more InnoDB related options. There are many!"
+echo "#"
+echo "# * Security Features"
+echo "#"
+echo "# Read the manual, too, if you want chroot!"
+echo "# chroot = /var/lib/mysql/"
+echo "#"
+echo "# For generating SSL certificates I recommend the OpenSSL GUI "tinyca"."
+echo "#"
+echo "# ssl-ca=/etc/mysql/cacert.pem"
+echo "# ssl-cert=/etc/mysql/server-cert.pem"
+echo "# ssl-key=/etc/mysql/server-key.pem"
+echo 
+echo 
+echo 
+echo "[mysqldump]"
+echo "quick"
+echo "quote-names"
+echo "max_allowed_packet	= 16M"
+echo 
+echo "[mysql]"
+echo "#no-auto-rehash	# faster start of mysql but no tab completition"
+echo 
+echo "[isamchk]"
+echo "key_buffer		= 16M"
+echo 
+echo "#"
+echo "# * IMPORTANT: Additional settings that can override those from this file!"
+echo "#   The files must end with '.cnf', otherwise they'll be ignored."
+echo "#"
+echo "!includedir /etc/mysql/conf.d/"
+}
+
 create_mysql_config()
 {
 mysql_version=`$mysqlPrefix/bin/mysql_config --version`
@@ -4396,20 +4506,18 @@ if [ " $model" = " small" ] ; then
 		-e "s{skip-federated{#skip-federated{g" \
 		-e "s{skip-locking{skip-external-locking{g" \
 		-e "s{port		= 3306{port		= $mysql_port{g" \
-		-e "s{socket		= .*\${socket        = $mysql_socket{g"
+		-e "s{socket		= .*\${socket		= $mysql_socket{g"
 	;;
 	*)
 	if [ ! -f $mysqlPrefix/share/mysql/my-small.cnf ] ; then
-		echo "[client]"
-		echo "port		= $mysql_port"
-		echo "socket        = $mysql_socket"
+		default_mysql_config
 	else
 	cat $mysqlPrefix/share/mysql/my-small.cnf | sed \
 		-e "s{#log-bin=mysql-bin{log-bin=@indimaildir@/mysqldb/logs/mysql-bin{g" \
 		-e "s{skip-federated{#skip-federated{g" \
 		-e "s{skip-locking{skip-external-locking{g" \
 		-e "s{port		= 3306{port		= $mysql_port{g" \
-		-e "s{socket		= .*\${socket        = $mysql_socket{g"
+		-e "s{socket		= .*\${socket		= $mysql_socket{g"
 	fi
 	;;
 	esac
@@ -4421,20 +4529,18 @@ elif [ " $model" = " medium" ] ; then
 		-e "s{skip-federated{#skip-federated{g" \
 		-e "s{skip-locking{skip-external-locking{g" \
 		-e "s{port		= 3306{port		= $mysql_port{g" \
-		-e "s{socket		= .*\${socket        = $mysql_socket{g"
+		-e "s{socket		= .*\${socket		= $mysql_socket{g"
 	;;
 	*)
 	if [ ! -f $mysqlPrefix/share/mysql/my-medium.cnf ] ; then
-		echo "[client]"
-		echo "port		= $mysql_port"
-		echo "socket        = $mysql_socket"
+		default_mysql_config
 	else
 	cat $mysqlPrefix/share/mysql/my-medium.cnf | sed \
 		-e "s{log-bin=mysql-bin{log-bin=@indimaildir@/mysqldb/logs/mysql-bin{g" \
 		-e "s{skip-federated{#skip-federated{g" \
 		-e "s{skip-locking{skip-external-locking{g" \
 		-e "s{port		= 3306{port		= $mysql_port{g" \
-		-e "s{socket		= .*\${socket        = $mysql_socket{g"
+		-e "s{socket		= .*\${socket		= $mysql_socket{g"
 	fi
 	;;
 	esac
@@ -4447,20 +4553,18 @@ elif [ " $model" = " large" ] ; then
 			-e "s{skip-federated{#skip-federated{g" \
 			-e "s{skip-locking{skip-external-locking{g" \
 			-e "s{port		= 3306{port		= $mysql_port{g" \
-			-e "s{socket		= .*\${socket        = $mysql_socket{g"
+			-e "s{socket		= .*\${socket		= $mysql_socket{g"
 		;;
 		*)
 		if [ ! -f $mysqlPrefix/share/mysql/my-large.cnf ] ; then
-			echo "[client]"
-			echo "port		= $mysql_port"
-			echo "socket        = $mysql_socket"
+			default_mysql_config
 		else
 		cat $mysqlPrefix/share/mysql/my-large.cnf | sed \
 			-e "s{log-bin=mysql-bin{log-bin=@indimaildir@/mysqldb/logs/mysql-bin{g" \
 			-e "s{skip-federated{#skip-federated{g" \
 			-e "s{skip-locking{skip-external-locking{g" \
 			-e "s{port		= 3306{port		= $mysql_port{g" \
-			-e "s{socket		= .*\${socket        = $mysql_socket{g"
+			-e "s{socket		= .*\${socket		= $mysql_socket{g"
 		fi
 		;;
 		esac
@@ -4474,14 +4578,11 @@ elif [ " $model" = " large" ] ; then
 			-e "s{skip-federated{#skip-federated{g" \
 			-e "s{skip-locking{skip-external-locking{g" \
 			-e "s{port		= 3306{port		= $mysql_port{g" \
-			-e "s{socket		= .*\${socket        = $mysql_socket{g"
+			-e "s{socket		= .*\${socket		= $mysql_socket{g"
 		;;
 		*)
 		if [ ! -f $mysqlPrefix/share/mysql/my-large.cnf ] ; then
-			echo "[client]"
-			echo "thread_concurrency=$thr_con"
-			echo "port		= $mysql_port"
-			echo "socket        = $mysql_socket"
+			default_mysql_config $thr_con
 		else
 		cat $mysqlPrefix/share/mysql/my-large.cnf | sed \
 			-e "s{log-bin=mysql-bin{log-bin=@indimaildir@/mysqldb/logs/mysql-bin{g" \
@@ -4489,7 +4590,7 @@ elif [ " $model" = " large" ] ; then
 			-e "s{skip-federated{#skip-federated{g" \
 			-e "s{skip-locking{skip-external-locking{g" \
 			-e "s{port		= 3306{port		= $mysql_port{g" \
-			-e "s{socket		= .*\${socket        = $mysql_socket{g"
+			-e "s{socket		= .*\${socket		= $mysql_socket{g"
 		fi
 		;;
 		esac
@@ -4503,20 +4604,18 @@ elif [ " $model" = " huge" ] ; then
 			-e "s{skip-federated{#skip-federated{g" \
 			-e "s{skip-locking{skip-external-locking{g" \
 			-e "s{port		= 3306{port		= $mysql_port{g" \
-			-e "s{socket		= .*\${socket        = $mysql_socket{g"
+			-e "s{socket		= .*\${socket		= $mysql_socket{g"
 		;;
 		*)
 		if [ ! -f $mysqlPrefix/share/mysql/my-huge.cnf ] ; then
-			echo "[client]"
-			echo "port		= $mysql_port"
-			echo "socket        = $mysql_socket"
+			default_mysql_config
 		else
 		cat $mysqlPrefix/share/mysql/my-huge.cnf | sed \
 			-e "s{log-bin=mysql-bin{log-bin=@indimaildir@/mysqldb/logs/mysql-bin{g" \
 			-e "s{skip-federated{#skip-federated{g" \
 			-e "s{skip-locking{skip-external-locking{g" \
 			-e "s{port		= 3306{port		= $mysql_port{g" \
-			-e "s{socket		= .*\${socket        = $mysql_socket{g"
+			-e "s{socket		= .*\${socket		= $mysql_socket{g"
 		fi
 		;;
 		esac
@@ -4530,14 +4629,11 @@ elif [ " $model" = " huge" ] ; then
 			-e "s{skip-federated{#skip-federated{g" \
 			-e "s{skip-locking{skip-external-locking{g" \
 			-e "s{port		= 3306{port		= $mysql_port{g" \
-			-e "s{socket		= .*\${socket        = $mysql_socket{g"
+			-e "s{socket		= .*\${socket		= $mysql_socket{g"
 		;;
 		*)
 		if [ ! -f $mysqlPrefix/share/mysql/my-large.cnf ] ; then
-			echo "[client]"
-			echo "thread_concurrency=$thr_con"
-			echo "port		= $mysql_port"
-			echo "socket        = $mysql_socket"
+			default_mysql_config $thr_con
 		else
 		cat $mysqlPrefix/share/mysql/my-huge.cnf | sed \
 			-e "s{log-bin=mysql-bin{log-bin=@indimaildir@/mysqldb/logs/mysql-bin{g" \
@@ -4545,7 +4641,7 @@ elif [ " $model" = " huge" ] ; then
 			-e "s{skip-federated{#skip-federated{g" \
 			-e "s{skip-locking{skip-external-locking{g" \
 			-e "s{port		= 3306{port		= $mysql_port{g" \
-			-e "s{socket		= .*\${socket        = $mysql_socket{g"
+			-e "s{socket		= .*\${socket		= $mysql_socket{g"
 		fi
 		;;
 		esac

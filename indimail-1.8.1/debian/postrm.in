@@ -102,13 +102,12 @@ if [ $nscd_up -ge 1 ] ; then
 fi
 
 echo "removing binaries, libraries, queues"
-for i in bin sbin lib queue man include
+for i in bin sbin lib queue include
 do
 	${rm} -rf ${prefix}/$i || true
 done
-echo "removing binaries, libraries, queues, man pages"
-for i in ${prefix}/bin ${prefix}/sbin ${prefix}/lib ${prefix}/queue \
-	${prefix}/man/man1 ${prefix}/man/cat1 ${prefix}/man/man5 ${prefix}/man/cat5 \
+echo "removing man pages"
+for i in ${prefix}/man/man1 ${prefix}/man/cat1 ${prefix}/man/man5 ${prefix}/man/cat5 \
 	${prefix}/man/man7 ${prefix}/man/cat7 ${prefix}/man/man8 ${prefix}/man/cat8
 do
 	${rm} -rf $i || true
