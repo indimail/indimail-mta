@@ -2,6 +2,7 @@
 # Copyright 1998 - 2009 Double Precision, Inc.  See COPYING for
 # distribution information.
 
+ACLOCAL_AMFLAGS=-I m4
 
 noinst_LTLIBRARIES=libencode.la librfc822.la
 

@@ -2,6 +2,7 @@
 # Copyright 2000-2011 Double Precision, Inc.  See COPYING for
 # distribution information.
 
+ACLOCAL_AMFLAGS=-I m4
 
 noinst_SCRIPTS=update.sh \
 	mkultcase.pl unicodefilter.pl \
