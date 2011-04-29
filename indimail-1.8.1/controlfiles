@@ -45,11 +45,11 @@ helohost
 holdlocal
 holdremote
 hostaccess
-host.cntrl
 hostid
 hostip
 host.ldap
 host.master
+host.cntrl
 host.mysql
 idhost
 localdomains
@@ -109,3 +109,4 @@ nosignaturedomains
 goodrcptto
 goodrcptpatterns
 qbase
+greylist.white
