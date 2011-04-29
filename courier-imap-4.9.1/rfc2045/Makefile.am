@@ -2,6 +2,8 @@
 # Copyright 1998 - 2011 Double Precision, Inc.  See COPYING for
 # distribution information.
 
+ACLOCAL_AMFLAGS=-I m4
+
 noinst_LTLIBRARIES=librfc2045.la
 noinst_PROGRAMS=reformime makemime headercheck testrfc3676parser
 

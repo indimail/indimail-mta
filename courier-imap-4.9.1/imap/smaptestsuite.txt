@@ -1883,41 +1883,41 @@
 001878 +OK LIST completed
 001879 * LIST "x" "x" FOLDER
 001879 +OK LIST completed
-001880 * GETACL "owner" "aceilrstwx"
+001880 * GETACL "owner" "aceilrstwx" "administrators" "aceilrstwx"
 001881 +OK ACLs retrieved
-001882 * GETACL "owner" "aceilr"
+001882 * GETACL "owner" "aceilr" "administrators" "aceilrstwx"
 001883 +OK Updated ACLs
-001884 * GETACL "owner" "aceilrstw"
+001884 * GETACL "owner" "aceilrstw" "administrators" "aceilrstwx"
 001885 +OK Updated ACLs
-001886 * GETACL "owner" "aceilrstwx"
+001886 * GETACL "owner" "aceilrstwx" "administrators" "aceilrstwx"
 001887 +OK Updated ACLs
 001888 * ACLMINIMUM owner al c e i p r s t w x
-001889 +ERR ACL update failed
-001890 * ACLMINIMUM -owner "" c e i p r s t w x
-001891 +ERR ACL update failed
-001892 * GETACL "owner" "aceilrstwx" "user=testuser1" "ace"
+001889 -ERR --error--
+001890 * ACLMINIMUM owner al c e i p r s t w x
+001891 -ERR --error--
+001892 * GETACL "owner" "aceilrstwx" "administrators" "aceilrstwx" "user=testuser1" "ace"
 001893 +OK Updated ACLs
-001894 * GETACL "owner" "aceilrstwx" "user=testuser1" "acex"
+001894 * GETACL "owner" "aceilrstwx" "administrators" "aceilrstwx" "user=testuser1" "acex"
 001895 +OK Updated ACLs
-001896 * GETACL "owner" "aceilrstwx" "user=testuser1" "ace"
+001896 * GETACL "owner" "aceilrstwx" "administrators" "aceilrstwx" "user=testuser1" "ace"
 001897 +OK Updated ACLs
-001898 * GETACL "owner" "aceilrstwx"
+001898 * GETACL "owner" "aceilrstwx" "administrators" "aceilrstwx"
 001899 +OK Updated ACLs
-001900 * GETACL "owner" "aceilrstwx" "user=testuser1" "ace"
+001900 * GETACL "owner" "aceilrstwx" "administrators" "aceilrstwx" "user=testuser1" "ace"
 001901 +OK Updated ACLs
-001902 * GETACL "owner" "aceilrstwx" "user=testuser1" "ace"
+001902 * GETACL "owner" "aceilrstwx" "administrators" "aceilrstwx" "user=testuser1" "ace"
 001903 +OK Updated ACLs
-001904 * GETACL "owner" "aceilrstwx"
+001904 * GETACL "owner" "aceilrstwx" "administrators" "aceilrstwx"
 001905 +OK Updated ACLs
 001906 * ACLMINIMUM owner al c e i p r s t w x
-001907 +ERR ACL update failed
+001907 -ERR --error--
 001908 * ACL "aceilrstwx"
 001909 +OK ACLs retrieved
-001910 * GETACL "owner" "aceilrstwx" "user=confmdtest" "aceilrstwx"
+001910 * GETACL "owner" "aceilrstwx" "administrators" "aceilrstwx" "user=confmdtest" "aceilrstwx"
 001911 +OK ACLs retrieved
 001912 * ACL "aceilrstwx"
 001913 +OK ACLs retrieved
-001914 * GETACL "owner" "aceilrstwx" "user=confmdtest" "aceilrstwx"
+001914 * GETACL "owner" "aceilrstwx" "administrators" "aceilrstwx" "user=confmdtest" "aceilrstwx"
 001915 +OK ACLs retrieved
 001916 * ACL "aceilrstwx"
 001917 +OK ACLs retrieved
@@ -1935,7 +1935,7 @@
 001929 +OK Folder updated
 001930 * FETCH 1 FLAGS=MARKED,SEEN,DELETED "KEYWORDS=keyword1"
 001931 +OK Message retrieved.
-001932 * GETACL "owner" "aceilrstx"
+001932 * GETACL "owner" "aceilrstx" "administrators" "aceilrstwx"
 001933 +OK Updated ACLs
 001934 +OK FLAGS set
 001935 > Go ahead
@@ -1945,7 +1945,7 @@
 001939 +OK Folder updated
 001940 * FETCH 2 FLAGS=SEEN,DELETED "KEYWORDS="
 001941 +OK Message retrieved.
-001942 * GETACL "owner" "aceilrtwx"
+001942 * GETACL "owner" "aceilrtwx" "administrators" "aceilrstwx"
 001943 +OK Updated ACLs
 001944 +OK KEYWORDS set
 001945 > Go ahead
@@ -1955,7 +1955,7 @@
 001949 +OK Folder updated
 001950 * FETCH 3 FLAGS=MARKED,DELETED "KEYWORDS=keyword1"
 001951 +OK Message retrieved.
-001952 * GETACL "owner" "aceilrswx"
+001952 * GETACL "owner" "aceilrswx" "administrators" "aceilrstwx"
 001953 +OK Updated ACLs
 001954 +OK KEYWORDS set
 001955 > Go ahead
@@ -1965,37 +1965,37 @@
 001959 +OK Folder updated
 001960 * FETCH 4 FLAGS=MARKED,SEEN "KEYWORDS=keyword1"
 001961 +OK Message retrieved.
-001962 * GETACL "owner" "acelrstwx"
+001962 * GETACL "owner" "acelrstwx" "administrators" "aceilrstwx"
 001963 +OK Updated ACLs
 001964 -ERR --error--
-001965 * GETACL "owner" "aceilrstwx"
+001965 * GETACL "owner" "aceilrstwx" "administrators" "aceilrstwx"
 001966 +OK Updated ACLs
-001967 * GETACL "owner" "aceilrstwx" "user=confmdtest" "aceirstwx"
+001967 * GETACL "owner" "aceilrstwx" "administrators" "aceilrstwx" "user=confmdtest" "aceirstwx"
 001968 +OK Updated ACLs
 001969 -ERR --error--
-001970 * GETACL "owner" "aceilrstwx" "user=confmdtest" "aceilrstwx"
+001970 * GETACL "owner" "aceilrstwx" "administrators" "aceilrstwx" "user=confmdtest" "aceilrstwx"
 001971 +OK Updated ACLs
 001972 * STATUS EXISTS=0 UNSEEN=0
 001973 +OK Folder status retrieved
 001974 -ERR --error--
 001975 +OK Folder created
-001976 * GETACL "owner" "aceilrstw"
+001976 * GETACL "owner" "aceilrstw" "administrators" "aceilrstwx"
 001977 +OK Updated ACLs
 001978 -ERR --error--
-001979 * GETACL "owner" "aceilrstwx"
+001979 * GETACL "owner" "aceilrstwx" "administrators" "aceilrstwx"
 001980 +OK Updated ACLs
 001981 +OK Folder deleted
-001982 * GETACL "owner" "aceilrstwx" "-owner" "r"
+001982 * GETACL "owner" "aceilrstwx" "administrators" "aceilrstwx" "-owner" "r"
 001983 +OK Updated ACLs
 001984 -ERR --error--
-001985 * GETACL "owner" "aceilrstwx"
+001985 * GETACL "owner" "aceilrstwx" "administrators" "aceilrstwx"
 001986 +OK Updated ACLs
 001987 * EXISTS 4
 001988 +OK Folder opened
-001989 * GETACL "owner" "aceilrstwx" "-owner" "i"
+001989 * GETACL "owner" "aceilrstwx" "administrators" "aceilrstwx" "-owner" "i"
 001990 +OK Updated ACLs
 001991 -ERR --error--
-001992 * GETACL "owner" "aceilrstwx"
+001992 * GETACL "owner" "aceilrstwx" "administrators" "aceilrstwx"
 001993 +OK Updated ACLs
 001994 * COPY NEWUID
 001995 * COPY NEWUID
@@ -2005,51 +2005,59 @@
 001999 +OK Folder closed
 002000 +OK Folder created
 002001 +OK Folder created
-002002 * GETACL "owner" "aeilrstwx"
+002002 * GETACL "owner" "aeilrstwx" "administrators" "aceilrstwx"
 002003 +OK Updated ACLs
 002004 -ERR --error--
-002005 * GETACL "owner" "aceilrstwx"
+002005 * GETACL "owner" "aceilrstwx" "administrators" "aceilrstwx"
 002006 +OK Updated ACLs
 002007 +OK Folder renamed.
-002008 * GETACL "owner" "aceilrstw"
+002008 * GETACL "owner" "aceilrstw" "administrators" "aceilrstwx"
 002009 +OK Updated ACLs
 002010 -ERR --error--
-002011 * GETACL "owner" "aceilrstwx"
+002011 * GETACL "owner" "aceilrstwx" "administrators" "aceilrstwx"
 002012 +OK Updated ACLs
 002013 +OK Folder renamed.
 002014 * EXISTS 8
 002015 +OK Folder opened
 002016 * FETCH 1 FLAGS=MARKED,SEEN,DELETED "KEYWORDS=keyword1"
 002017 +OK Message retrieved.
-002018 * GETACL "owner" "aceilrstx"
+002018 * GETACL "owner" "aceilrstx" "administrators" "aceilrstwx"
 002019 +OK Updated ACLs
 002020 * FETCH 1 FLAGS=MARKED,SEEN
 002021 * FETCH 1 "KEYWORDS=keyword1"
 002022 +OK Folder status updated
-002023 * GETACL "owner" "aceilrswx"
+002023 * GETACL "owner" "aceilrswx" "administrators" "aceilrstwx"
 002024 +OK Updated ACLs
 002025 * FETCH 1 FLAGS=MARKED,SEEN
 002026 * FETCH 1 "KEYWORDS=keyword2"
 002027 +OK Folder status updated
-002028 * GETACL "owner" "aceilrtwx"
+002028 * GETACL "owner" "aceilrtwx" "administrators" "aceilrstwx"
 002029 +OK Updated ACLs
 002030 * FETCH 1 FLAGS=SEEN
 002031 +OK Folder status updated
-002032 * GETACL "owner" "acilrstwx"
+002032 * GETACL "owner" "acilrstwx" "administrators" "aceilrstwx"
 002033 +OK Updated ACLs
 002034 * FETCH 1 FLAGS=DELETED
 002035 +OK Folder status updated
 002036 -ERR --error--
-002037 * GETACL "owner" "aceilrstwx"
+002037 * GETACL "owner" "aceilrstwx" "administrators" "aceilrstwx"
 002038 +OK Updated ACLs
 002039 * EXPUNGE 1-3 5-7
 002040 +OK Folder updated
-002041 * GETACL "owner" "aceilrswx"
+002041 * GETACL "owner" "aceilrswx" "administrators" "aceilrstwx"
 002042 +OK Updated ACLs
 002043 -ERR --error--
-002044 * GETACL "owner" "aceilrstwx"
+002044 * GETACL "owner" "aceilrstwx" "administrators" "aceilrstwx"
 002045 +OK Updated ACLs
 002046 * EXPUNGE 1
 002047 +OK Folder updated
 002048 * BYE Courier-SMAP server shutting down
 002049 +OK LOGOUT completed
+002050 +OK SMAP1 LOGIN Ok.
+002051 * EXISTS 256
+002052 +OK Folder opened
+002053 * EXPUNGE 2 4 6 8 10 12 14 16 18 20 22 24 26 28 30 32 34 36 38 40 42 44 46 48 50 52 54 56 58 60 62 64 66 68 70 72 74 76 78 80 82 84 86 88 90 92 94 96 98 100 102 104 106 108 110 112 114 116 118 120 122 124 126 128 130 132 134 136 138 140 142 144 146 148 150 152 154 156 158 160 162 164 166 168 170 172 174 176 178 180 182 184 186 188 190 192 194 196 198 200 202
+002054 * EXPUNGE 103 105 107 109 111 113 115 117 119 121 123 125 127 129 131 133 135 137 139 141 143 145 147 149 151 153 155
+002055 +OK Folder updated
+002056 * BYE Courier-SMAP server shutting down
+002057 +OK LOGOUT completed

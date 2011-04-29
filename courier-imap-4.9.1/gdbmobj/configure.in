@@ -18,6 +18,7 @@ AC_ISC_POSIX
 AC_PROG_AWK
 AC_PROG_CXX
 AC_PROG_LIBTOOL
+AC_CONFIG_MACRO_DIR([m4])
 
 dnl Checks for libraries.
 

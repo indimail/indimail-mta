@@ -2,6 +2,7 @@
 # Copyright 1998 - 2005 Double Precision, Inc.  See COPYING for
 # distribution information.
 
+ACLOCAL_AMFLAGS=-I m4
 
 noinst_LTLIBRARIES=librandom128.la
 

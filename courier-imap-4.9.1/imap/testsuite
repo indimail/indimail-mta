@@ -798,7 +798,7 @@ R008 ACL STORE INBOX.a user=systemuser1 -alr
 R009 ACL STORE INBOX.a user=systemuser1 alr
 R010 ACL STORE INBOX.a user=systemuser1 ""
 R011 ACL STORE INBOX.a user=systemuser1 alr
-R012 ACL SET (INBOX *) "owner" "acdilrsw" user=systemuser2 alr
+R012 ACL SET (INBOX *) "owner" "acdilrsw" administrators "acdilrsw" user=systemuser2 alr
 R013 ACL DELETE INBOX.a user=systemuser1
 R014 ACL DELETE INBOX.a user=systemuser2
 R015 ACL STORE INBOX.a owner -a
