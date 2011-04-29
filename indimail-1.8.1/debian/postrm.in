@@ -151,7 +151,7 @@ else
 	done
 fi
 
-for i in indimail.cnf clamd.conf freshclam.conf stat.override
+for i in indimail.cnf clamd.conf freshclam.conf stat.override \
 	backup.conf cronlist headerlist \
 	imapd.cnf imapd.dist imapd-ssl.dist inc_deps indimail.mrtg.cfg \
 	indimail.settings lib_deps osh.table perm_list pop3d.cnf \
