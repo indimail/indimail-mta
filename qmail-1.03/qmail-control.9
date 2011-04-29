@@ -18,8 +18,9 @@ fully-qualified name of the current host.
 This file is used as the default for
 other hostname-related control files.
 
-If control files are required apart from what is present in QMAIL/control, you can set the environment variable
-CONTROLDIR. This forces qmail system to look at path defined by CONTROLDIR for all control files.
+If control files are required apart from what is present in QMAIL/control, you can
+set the environment variable CONTROLDIR. This forces qmail system to look at path
+defined by CONTROLDIR for all control files.
 
 Comments are allowed
 in
@@ -106,14 +107,13 @@ specified in the file. The parameters are as given below.
 .BR database_server_ip:database_user:database_password:database_name:table_name .
 
 .EX
-Having the following entry in
-.I badmailfrom.sql
+Having the following entry in \fIbadmailfrom\fR.\fIsql\fR
 
 localhost:indimail:ssh-1.5-:qmail:my_badmailfrom
 
-specifies that entries for badmailfrom should be checked in the MySQL table my_badmailfrom on
-localhost. The username and password for connecting to MySQL is indimail and ssh-1.5- and the
-database name to use is qmail.
+specifies that entries for  badmailfrom should  be  checked in the MySQL table
+\fImy_badmailfrom\fR on localhost. The username and password for connecting to MySQL
+is \fIindimail\fR and \fIssh-1.5-\fR and the database name to use is \fIqmail\fR.
 .EE
 
 The following control files can have regular expressions for match if QREGEX environment
@@ -134,8 +134,9 @@ variable is defined
 .IR goodrcptto ,
 and
 .IR accesslist .
-Once you define QREGEX, the corresponding pattern file gets disabled (e.g. badhelopatterns,
-badhostpatterns, badmailfrompatterns, etc).
+
+Once you define QREGEX, the corresponding pattern file gets disabled
+(e.g. badhelopatterns, badhostpatterns, badmailfrompatterns, etc).
 
 The following table lists all control files
 other than

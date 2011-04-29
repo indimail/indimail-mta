@@ -136,3 +136,4 @@ indimail-*/postinst
 indimail-*/prerm
 indimail-*/preinst
 .libs
+conffiles
