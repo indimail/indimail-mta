@@ -117,33 +117,68 @@ if [ -d ${prefix}/man ] ; then
 	/bin/rmdir --ignore-fail-on-non-empty ${prefix}/man 2>/dev/null
 fi
 
-echo "removing configuration"
+if [ " $1" = " purge" ] ; then
+	echo "removing configuration"
+	for i in imap pop3 smtp qmtp qmqp poppass
+	do
+		${rm} -f ${prefix}/etc/tcp.$i ${prefix}/etc/tcp."$i".cdb
+	done
+	if [ -f ${prefix}/etc/controlfiles ] ; then
+		for i in `/bin/cat ${prefix}/etc/controlfiles`
+		do
+			${rm} -f ${prefix}/control/$i
+		done
+	else
+		for i in databytes defaultdelivery defaultdomain localiphost locals \
+			me nodnscheck plusdomain queue_base rcpthosts smtpgreeting signatures
+			chkrcptdomains defaulthost envnoathost filterargs greylist.white \
+			hostip timeoutremote timeoutsmtpd
+		do
+			${rm} -f ${prefix}/control/$i
+		done
+	fi
+	${rm} -f ${prefix}/etc/wordlist.db
+	${rm} -f ${prefix}/control/domainkeys/indimail.pub \
+		${prefix}/control/domainkeys/indimail
+	if [ $nofetchmail -eq 0 ] ; then
+		${rm} -f ${prefix}/etc/fetchmailrc
+	fi
+else
+	echo "removing configuration"
+	for i in imap pop3 smtp qmtp qmqp poppass
+	do
+		${rm} -f ${prefix}/etc/tcp.$i
+	done
+fi
+
 for i in indimail.cnf clamd.conf freshclam.conf stat.override
+	backup.conf cronlist headerlist \
+	imapd.cnf imapd.dist imapd-ssl.dist inc_deps indimail.mrtg.cfg \
+	indimail.settings lib_deps osh.table perm_list pop3d.cnf \
+	pop3d.dist pop3d-ssl.dist qmailprog.list quotawarnmsg.example services.log \
+	system.flashlogin system.menu system.module system.rc \
 do
 	${rm} -f ${prefix}/etc/$i
 done
+${rm} -f ${prefix}/control/controlfiles
 if [ $nonssd -eq 0 ] ; then
 	${rm} -f ${prefix}/etc/nssd.conf
 fi
-
 if [ -d ${prefix}/users ] ; then
-${rmdir} --ignore-fail-on-non-empty ${prefix}/users 2>/dev/null
+	${rmdir} --ignore-fail-on-non-empty ${prefix}/users 2>/dev/null
 fi
 
-if [ -f ${prefix}/etc/controlfiles ] ; then
-	for i in `/bin/cat ${prefix}/etc/controlfiles`
-	do
-		${rm} -f ${prefix}/control/$i
-	done
-else
-	for i in databytes defaultdelivery defaultdomain localiphost locals \
-		me nodnscheck plusdomain queue_base rcpthosts smtpgreeting signatures
-	do
-		${rm} -f ${prefix}/control/$i
-	done
+if [ $nobogofilter -eq 0 ] ; then
+	${rm} -f ${prefix}/etc/bogofilter.cf ${prefix}/etc/bogofilter.cf.example
+fi
+if [ -d ${prefix}/etc ] ; then
+	${rmdir} --ignore-fail-on-non-empty ${prefix}/etc 2>/dev/null
+fi
+if [ -d ${prefix}/control/domainkeys ] ; then
+	${rmdir} --ignore-fail-on-non-empty ${prefix}/control/domainkeys 2>/dev/null
 fi
 if [ -d ${prefix}/control ] ; then
-${rmdir} --ignore-fail-on-non-empty ${prefix}/control 2>/dev/null
+	${rmdir} --ignore-fail-on-non-empty ${prefix}/control 2>/dev/null
 fi
 
 for i in .qmail-nonspam .qmail-register-nonspam .qmail-register-spam .qmail-spam .qmail-default
@@ -151,25 +186,16 @@ do
 	${rm} -f ${prefix}/domains/${default_domain}/$i
 done
 if [ -d ${prefix}/${default_domain} ] ; then
-${rmdir} --ignore-fail-on-non-empty ${prefix}/domains/${default_domain} 2>/dev/null
+	${rmdir} --ignore-fail-on-non-empty ${prefix}/domains/${default_domain} 2>/dev/null
 fi
 for i in postmaster mailer-daemon root
 do
 	${rm} -f ${prefix}/alias/.qmail-"$i"
 done
 if [ -d ${prefix}/alias ] ; then
-${rmdir} --ignore-fail-on-non-empty ${prefix}/alias 2>/dev/null
+	${rmdir} --ignore-fail-on-non-empty ${prefix}/alias 2>/dev/null
 fi
 
-if [ $nofetchmail -eq 0 ] ; then
-	${rm} -f ${prefix}/etc/fetchmailrc
-fi
-if [ $nobogofilter -eq 0 ] ; then
-	${rm} -f ${prefix}/etc/bogofilter.cf
-fi
-if [ -d ${prefix}/etc ] ; then
-${rmdir} --ignore-fail-on-non-empty ${prefix}/etc 2>/dev/null
-fi
 for i in `/bin/ls ${prefix}/share 2>/dev/null`
 do
 	if [ " $i" = " clamd" ] ; then # leave the signatures
@@ -178,8 +204,9 @@ do
 	${rm} -rf ${prefix}/share/$i || true
 done
 if [ -d ${prefix}/share ] ; then
-${rmdir} --ignore-fail-on-non-empty ${prefix}/share 2>/dev/null
+	${rmdir} --ignore-fail-on-non-empty ${prefix}/share 2>/dev/null
 fi
+
 echo "removing startup services"
 for i in clamd fetchmail freshclam indisrvr.4000 inlookup.infifo mysql.3306 \
 pwdlookup qmail-imapd.143 qmail-imapd-ssl.993 qmail-pop3d.110 qmail-pop3d-ssl.995 \

@@ -125,10 +125,10 @@ if [ -f /tmp/indimail.upgrade ] ; then # upgrade
 		echo "Running Custom Upgrade Script"
 		/bin/sh ${prefix}/boot/rpm.init upgrade
 	fi
-	/bin/rm -f /tmp/indimail.upgrade
+	${rm} -f /tmp/indimail.upgrade
 	exit 0
 fi
-/bin/rm -f /tmp/indimail.install /tmp/indimail.upgrade
+${rm} -f /tmp/indimail.install /tmp/indimail.upgrade
 
 # MySQL
 echo "Creating ${logdir}"
@@ -450,11 +450,12 @@ echo "$count. Change your default domain in ${prefix}/control/defaultdomain"
 if [ ! -f /etc/debian_version ] ; then
 count=`expr $count + 1`
 echo "$count. You can optionally run the following command to verify installation"
-echo "   sudo rpm -V indimail"
+echo "   sudo dpkg-query -s indimail"
 fi
 if [ ! -f ${prefix}/control/servercert.pem ] ; then
 count=`expr $count + 1`
-echo "$count. You also need to create CERTS for IMAP/POP3. run the following command to create cert"
+echo "$count. You also need to create CERTS for IMAP/POP3. run the following"
+echo "command to create cert"
 echo "   ${prefix}/sbin/svctool --postmaster=postmaster@indimail.org --config=cert"
 fi
 
