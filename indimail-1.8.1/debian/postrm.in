@@ -118,7 +118,7 @@ if [ -d ${prefix}/man ] ; then
 fi
 
 if [ " $1" = " purge" ] ; then
-	echo "removing configuration"
+	echo "purging configuration"
 	for i in imap pop3 smtp qmtp qmqp poppass
 	do
 		${rm} -f ${prefix}/etc/tcp.$i ${prefix}/etc/tcp."$i".cdb
