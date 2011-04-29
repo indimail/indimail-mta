@@ -1096,87 +1096,87 @@
 000966 qDONE OK LOGOUT completed
 000967 * PREAUTH Ready.
 000968 R001 OK "INBOX.a" created.
-000969 * LIST (\HasNoChildren) "." "INBOX.a" (("ACL" (("owner" "acdilrsw")))("MYRIGHTS" "acdilrsw")(POSTADDRESS NIL))
-000969 * LIST (\Unmarked \HasChildren) "." "INBOX" (("ACL" (("owner" "acdilrsw")))("MYRIGHTS" "acdilrsw")(POSTADDRESS NIL))
+000969 * LIST (\HasNoChildren) "." "INBOX.a" (("ACL" (("owner" "acdilrsw")("administrators" "acdilrsw")))("MYRIGHTS" "acdilrsw")(POSTADDRESS NIL))
+000969 * LIST (\Unmarked \HasChildren) "." "INBOX" (("ACL" (("owner" "acdilrsw")("administrators" "acdilrsw")))("MYRIGHTS" "acdilrsw")(POSTADDRESS NIL))
 000969 R002 OK LIST completed
-000970 * LIST (\Unmarked \HasChildren) "." "INBOX" (("ACL" (("owner" "aceilrswx"))))
+000970 * LIST (\Unmarked \HasChildren) "." "INBOX" (("ACL" (("owner" "aceilrswx")("administrators" "acdilrsw"))))
 000970 R003 OK ACL STORE completed.
-000971 * LIST (\HasNoChildren) "." "INBOX.a" (("ACL" (("owner" "acdilrsw"))))
-000971 * LIST (\Unmarked \HasChildren) "." "INBOX" (("ACL" (("owner" "acdilrsw"))))
+000971 * LIST (\HasNoChildren) "." "INBOX.a" (("ACL" (("owner" "acdilrsw")("administrators" "acdilrsw"))))
+000971 * LIST (\Unmarked \HasChildren) "." "INBOX" (("ACL" (("owner" "acdilrsw")("administrators" "acdilrsw"))))
 000971 R004 OK ACL STORE completed.
-000972 * LIST (\HasNoChildren) "." "INBOX.a" (("ACL" (("owner" "acdilrsw")("user=systemuser1" "alr"))))
+000972 * LIST (\HasNoChildren) "." "INBOX.a" (("ACL" (("owner" "acdilrsw")("administrators" "acdilrsw")("user=systemuser1" "alr"))))
 000972 R005 OK ACL STORE completed.
-000973 * LIST (\HasNoChildren) "." "INBOX.a" (("ACL" (("owner" "acdilrsw")("user=systemuser1" "alrw"))))
+000973 * LIST (\HasNoChildren) "." "INBOX.a" (("ACL" (("owner" "acdilrsw")("administrators" "acdilrsw")("user=systemuser1" "alrw"))))
 000973 R006 OK ACL STORE completed.
-000974 * LIST (\HasNoChildren) "." "INBOX.a" (("ACL" (("owner" "acdilrsw")("user=systemuser1" "alr"))))
+000974 * LIST (\HasNoChildren) "." "INBOX.a" (("ACL" (("owner" "acdilrsw")("administrators" "acdilrsw")("user=systemuser1" "alr"))))
 000974 R007 OK ACL STORE completed.
-000975 * LIST (\HasNoChildren) "." "INBOX.a" (("ACL" (("owner" "acdilrsw"))))
+000975 * LIST (\HasNoChildren) "." "INBOX.a" (("ACL" (("owner" "acdilrsw")("administrators" "acdilrsw"))))
 000975 R008 OK ACL STORE completed.
-000976 * LIST (\HasNoChildren) "." "INBOX.a" (("ACL" (("owner" "acdilrsw")("user=systemuser1" "alr"))))
+000976 * LIST (\HasNoChildren) "." "INBOX.a" (("ACL" (("owner" "acdilrsw")("administrators" "acdilrsw")("user=systemuser1" "alr"))))
 000976 R009 OK ACL STORE completed.
-000977 * LIST (\HasNoChildren) "." "INBOX.a" (("ACL" (("owner" "acdilrsw"))))
+000977 * LIST (\HasNoChildren) "." "INBOX.a" (("ACL" (("owner" "acdilrsw")("administrators" "acdilrsw"))))
 000977 R010 OK ACL STORE completed.
-000978 * LIST (\HasNoChildren) "." "INBOX.a" (("ACL" (("owner" "acdilrsw")("user=systemuser1" "alr"))))
+000978 * LIST (\HasNoChildren) "." "INBOX.a" (("ACL" (("owner" "acdilrsw")("administrators" "acdilrsw")("user=systemuser1" "alr"))))
 000978 R011 OK ACL STORE completed.
-000979 * LIST (\HasNoChildren) "." "INBOX.a" (("ACL" (("owner" "acdilrsw")("user=systemuser2" "alr"))))
-000979 * LIST (\Unmarked \HasChildren) "." "INBOX" (("ACL" (("owner" "acdilrsw")("user=systemuser2" "alr"))))
+000979 * LIST (\HasNoChildren) "." "INBOX.a" (("ACL" (("owner" "acdilrsw")("administrators" "acdilrsw")("user=systemuser2" "alr"))))
+000979 * LIST (\Unmarked \HasChildren) "." "INBOX" (("ACL" (("owner" "acdilrsw")("administrators" "acdilrsw")("user=systemuser2" "alr"))))
 000979 R012 OK ACL SET completed.
-000980 * LIST (\HasNoChildren) "." "INBOX.a" (("ACL" (("owner" "acdilrsw")("user=systemuser2" "alr"))))
+000980 * LIST (\HasNoChildren) "." "INBOX.a" (("ACL" (("owner" "acdilrsw")("administrators" "acdilrsw")("user=systemuser2" "alr"))))
 000980 R013 OK ACL DELETE completed.
-000981 * LIST (\HasNoChildren) "." "INBOX.a" (("ACL" (("owner" "acdilrsw"))))
+000981 * LIST (\HasNoChildren) "." "INBOX.a" (("ACL" (("owner" "acdilrsw")("administrators" "acdilrsw"))))
 000981 R014 OK ACL DELETE completed.
 000982 * RIGHTS-INFO "INBOX.a" "owner" al c e i p r s t w x
-000983 * LIST (\HasNoChildren) "." "INBOX.a" (("ACL" (("owner" "acdilrsw"))))
+000983 * LIST (\HasNoChildren) "." "INBOX.a" (("ACL" (("owner" "acdilrsw")("administrators" "acdilrsw"))))
 000983 R015 OK ACL STORE completed.
-000984 * LIST (\HasNoChildren) "." "INBOX.a" (("ACL" (("owner" "acdilrsw")("-owner" "tw"))))
+000984 * LIST (\HasNoChildren) "." "INBOX.a" (("ACL" (("owner" "acdilrsw")("administrators" "acdilrsw")("-owner" "tw"))))
 000984 R016 OK ACL STORE completed.
-000985 * LIST (\HasNoChildren) "." "INBOX.a" (("ACL" (("owner" "acdilrsw")("-owner" "t"))))
+000985 * LIST (\HasNoChildren) "." "INBOX.a" (("ACL" (("owner" "acdilrsw")("administrators" "acdilrsw")("-owner" "t"))))
 000985 R017 OK ACL STORE completed.
-000986 * LIST (\HasNoChildren) "." "INBOX.a" (("ACL" (("owner" "acdilrsw"))))
+000986 * LIST (\HasNoChildren) "." "INBOX.a" (("ACL" (("owner" "acdilrsw")("administrators" "acdilrsw"))))
 000986 R018 OK ACL DELETE completed.
-000987 * RIGHTS-INFO "INBOX.a" "-owner" "" c e i p r s t w x
-000988 * LIST (\HasNoChildren) "." "INBOX.a" (("ACL" (("owner" "acdilrsw"))))
+000987 * RIGHTS-INFO "INBOX.a" "owner" al c e i p r s t w x
+000988 * LIST (\HasNoChildren) "." "INBOX.a" (("ACL" (("owner" "acdilrsw")("administrators" "acdilrsw"))))
 000988 R019 OK ACL STORE completed.
-000989 * LIST (\HasNoChildren) "." "INBOX.a" (("ACL" (("owner" "adlrsw"))))
+000989 * LIST (\HasNoChildren) "." "INBOX.a" (("ACL" (("owner" "adlrsw")("administrators" "acdilrsw"))))
 000989 R020 OK ACL STORE completed.
 000990 R021 NO Access denied for CREATE on INBOX.a (ACL "c" required)
-000991 * LIST (\HasNoChildren) "." "INBOX.a" (("ACL" (("owner" "acdlrsw"))))
+000991 * LIST (\HasNoChildren) "." "INBOX.a" (("ACL" (("owner" "acdlrsw")("administrators" "acdilrsw"))))
 000991 R022 OK ACL STORE completed.
 000992 R023 OK "INBOX.a.b" created.
-000993 * LIST (\HasNoChildren) "." "INBOX.a.b" (("ACL" (("owner" "acdlrsw"))))
+000993 * LIST (\HasNoChildren) "." "INBOX.a.b" (("ACL" (("owner" "acdlrsw")("administrators" "acdilrsw"))))
 000993 R024 OK LIST completed
 000994 R025 OK "INBOX.c.d" created.
-000995 * LIST (\HasNoChildren) "." "INBOX.c.d" (("ACL" (("owner" "acdilrsw")("user=systemuser2" "alr"))))
-000995 * LIST (\Noselect \HasChildren) "." "INBOX.c" (("ACL" (("owner" "acdilrsw")("user=systemuser2" "alr"))))
+000995 * LIST (\HasNoChildren) "." "INBOX.c.d" (("ACL" (("owner" "acdilrsw")("administrators" "acdilrsw")("user=systemuser2" "alr"))))
+000995 * LIST (\Noselect \HasChildren) "." "INBOX.c" (("ACL" (("owner" "acdilrsw")("administrators" "acdilrsw")("user=systemuser2" "alr"))))
 000995 R026 OK LIST completed
-000996 * LIST (\HasNoChildren) "." "INBOX.c.d" (("ACL" (("owner" "acdilrsw")("user=systemuser2" "alr")("-owner" "x"))))
-000996 * LIST (\Noselect \HasChildren) "." "INBOX.c" (("ACL" (("owner" "acdilrsw")("user=systemuser2" "alr")("-owner" "x"))))
+000996 * LIST (\HasNoChildren) "." "INBOX.c.d" (("ACL" (("owner" "acdilrsw")("administrators" "acdilrsw")("user=systemuser2" "alr")("-owner" "x"))))
+000996 * LIST (\Noselect \HasChildren) "." "INBOX.c" (("ACL" (("owner" "acdilrsw")("administrators" "acdilrsw")("user=systemuser2" "alr")("-owner" "x"))))
 000996 R027 OK ACL STORE completed.
 000997 R028 NO Access denied for DELETE on INBOX.c.d (ACL "x" required)
-000998 * LIST (\HasNoChildren) "." "INBOX.c.d" (("ACL" (("owner" "acdilrsw")("user=systemuser2" "alr"))))
+000998 * LIST (\HasNoChildren) "." "INBOX.c.d" (("ACL" (("owner" "acdilrsw")("administrators" "acdilrsw")("user=systemuser2" "alr"))))
 000998 R029 OK ACL DELETE completed.
 000999 R030 OK Folder deleted.
 001000 R031 OK Folder directory delete punted.
-001001 * LIST (\HasChildren) "." "INBOX.a" (("ACL" (("owner" "acdlrsw"))))
-001001 * LIST (\HasNoChildren) "." "INBOX.a.b" (("ACL" (("owner" "acdlrsw"))))
-001001 * LIST (\Unmarked \HasChildren) "." "INBOX" (("ACL" (("owner" "acdilrsw")("user=systemuser2" "alr"))))
+001001 * LIST (\HasChildren) "." "INBOX.a" (("ACL" (("owner" "acdlrsw")("administrators" "acdilrsw"))))
+001001 * LIST (\HasNoChildren) "." "INBOX.a.b" (("ACL" (("owner" "acdlrsw")("administrators" "acdilrsw"))))
+001001 * LIST (\Unmarked \HasChildren) "." "INBOX" (("ACL" (("owner" "acdilrsw")("administrators" "acdilrsw")("user=systemuser2" "alr"))))
 001001 R032 OK LIST completed
 001002 R033 OK Folder deleted.
-001003 * LIST (\HasNoChildren) "." "INBOX.a.b" (("ACL" (("owner" "acdlrsw"))))
-001003 * LIST (\Noselect \HasChildren) "." "INBOX.a" (("ACL" (("owner" "acdlrsw"))))
-001003 * LIST (\Unmarked \HasChildren) "." "INBOX" (("ACL" (("owner" "acdilrsw")("user=systemuser2" "alr"))))
+001003 * LIST (\HasNoChildren) "." "INBOX.a.b" (("ACL" (("owner" "acdlrsw")("administrators" "acdilrsw"))))
+001003 * LIST (\Noselect \HasChildren) "." "INBOX.a" (("ACL" (("owner" "acdlrsw")("administrators" "acdilrsw"))))
+001003 * LIST (\Unmarked \HasChildren) "." "INBOX" (("ACL" (("owner" "acdilrsw")("administrators" "acdilrsw")("user=systemuser2" "alr"))))
 001003 R034 OK LIST completed
 001004 R035 OK Folder renamed.
-001005 * LIST (\HasNoChildren) "." "INBOX.f.b" (("ACL" (("owner" "acdlrsw"))))
-001005 * LIST (\Noselect \HasChildren) "." "INBOX.f" (("ACL" (("owner" "acdlrsw"))))
-001005 * LIST (\Unmarked \HasChildren) "." "INBOX" (("ACL" (("owner" "acdilrsw")("user=systemuser2" "alr"))))
+001005 * LIST (\HasNoChildren) "." "INBOX.f.b" (("ACL" (("owner" "acdlrsw")("administrators" "acdilrsw"))))
+001005 * LIST (\Noselect \HasChildren) "." "INBOX.f" (("ACL" (("owner" "acdlrsw")("administrators" "acdilrsw"))))
+001005 * LIST (\Unmarked \HasChildren) "." "INBOX" (("ACL" (("owner" "acdilrsw")("administrators" "acdilrsw")("user=systemuser2" "alr"))))
 001005 R036 OK LIST completed
 001006 R037 OK "INBOX.f" created.
-001007 * LIST (\HasChildren) "." "INBOX.f" (("ACL" (("owner" "acdlrsw"))))
-001007 * LIST (\HasNoChildren) "." "INBOX.f.b" (("ACL" (("owner" "acdlrsw"))))
-001007 * LIST (\Unmarked \HasChildren) "." "INBOX" (("ACL" (("owner" "acdilrsw")("user=systemuser2" "alr"))))
+001007 * LIST (\HasChildren) "." "INBOX.f" (("ACL" (("owner" "acdlrsw")("administrators" "acdilrsw"))))
+001007 * LIST (\HasNoChildren) "." "INBOX.f.b" (("ACL" (("owner" "acdlrsw")("administrators" "acdilrsw"))))
+001007 * LIST (\Unmarked \HasChildren) "." "INBOX" (("ACL" (("owner" "acdilrsw")("administrators" "acdilrsw")("user=systemuser2" "alr"))))
 001007 R038 OK LIST completed
-001008 * LIST (\Unmarked \HasChildren) "." "INBOX" (("ACL" (("owner" "acdlrsw")("user=systemuser2" "alr"))))
+001008 * LIST (\Unmarked \HasChildren) "." "INBOX" (("ACL" (("owner" "acdlrsw")("administrators" "acdilrsw")("user=systemuser2" "alr"))))
 001008 R039 OK ACL STORE completed.
 001009 * FLAGS (\Draft \Answered \Flagged \Deleted \Seen \Recent)
 001010 * OK [PERMANENTFLAGS (\* \Draft \Answered \Flagged \Deleted \Seen)] Limited
@@ -1187,7 +1187,7 @@
 001015 R040 OK [READ-WRITE] Ok
 001016 R041 NO Access denied for APPEND on INBOX (ACL "i" required)
 001017 * OK [MYRIGHTS "acdilrsw"] ACL
-001018 * LIST (\Unmarked \HasChildren) "." "INBOX" (("ACL" (("owner" "acdilrsw")("user=systemuser2" "alr"))))
+001018 * LIST (\Unmarked \HasChildren) "." "INBOX" (("ACL" (("owner" "acdilrsw")("administrators" "acdilrsw")("user=systemuser2" "alr"))))
 001018 R042 OK ACL STORE completed.
 001019 + OK
 001020 R043 OK APPEND Ok.
@@ -1199,7 +1199,7 @@
 001026 * 1 FETCH (FLAGS (\Answered \Seen \Deleted Foo))
 001027 R044 OK FETCH completed.
 001028 * OK [MYRIGHTS "aceilrsx"] ACL
-001029 * LIST (\Unmarked \HasChildren) "." "INBOX" (("ACL" (("owner" "aceilrsx")("user=systemuser2" "alr"))))
+001029 * LIST (\Unmarked \HasChildren) "." "INBOX" (("ACL" (("owner" "aceilrsx")("administrators" "acdilrsw")("user=systemuser2" "alr"))))
 001029 R045 OK ACL STORE completed.
 001030 + OK
 001031 R046 OK APPEND Ok.
@@ -1209,10 +1209,10 @@
 001035 * 2 FETCH (FLAGS (\Seen))
 001036 R048 OK FETCH completed.
 001037 * OK [MYRIGHTS "acdilrsw"] ACL
-001038 * LIST (\Unmarked \HasChildren) "." "INBOX" (("ACL" (("owner" "acdilrsw")("user=systemuser2" "alr"))))
+001038 * LIST (\Unmarked \HasChildren) "." "INBOX" (("ACL" (("owner" "acdilrsw")("administrators" "acdilrsw")("user=systemuser2" "alr"))))
 001038 R049 OK ACL STORE completed.
 001039 * OK [MYRIGHTS "acdilrw"] ACL
-001040 * LIST (\Unmarked \HasChildren) "." "INBOX" (("ACL" (("owner" "acdilrw")("user=systemuser2" "alr"))))
+001040 * LIST (\Unmarked \HasChildren) "." "INBOX" (("ACL" (("owner" "acdilrw")("administrators" "acdilrsw")("user=systemuser2" "alr"))))
 001040 R050 OK ACL STORE completed.
 001041 + OK
 001042 R051 OK APPEND Ok.
@@ -1234,7 +1234,7 @@
 001058 * 1 FETCH (FLAGS (\Answered \Seen \Deleted Foo))
 001059 R057 OK STORE completed.
 001060 * OK [MYRIGHTS "acdilrsw"] ACL
-001061 * LIST (\Unmarked \HasChildren) "." "INBOX" (("ACL" (("owner" "acdilrsw")("user=systemuser2" "alr"))))
+001061 * LIST (\Unmarked \HasChildren) "." "INBOX" (("ACL" (("owner" "acdilrsw")("administrators" "acdilrsw")("user=systemuser2" "alr"))))
 001061 R058 OK ACL STORE completed.
 001062 R059 OK "INBOX.x" created.
 001063 R060 OK COPY completed.
@@ -1254,7 +1254,7 @@
 001077 * OK [UIDVALIDITY] Ok
 001078 * OK [MYRIGHTS "acdilrsw"] ACL
 001079 R063 OK [READ-WRITE] Ok
-001080 * LIST (\HasNoChildren) "." "INBOX.x" (("ACL" (("owner" "acdilrw")("user=systemuser2" "alr"))))
+001080 * LIST (\HasNoChildren) "." "INBOX.x" (("ACL" (("owner" "acdilrw")("administrators" "acdilrsw")("user=systemuser2" "alr"))))
 001080 R064 OK ACL STORE completed.
 001081 R065 OK COPY completed.
 001082 * FLAGS (Foo \Draft \Answered \Flagged \Deleted \Seen \Recent)
@@ -1273,9 +1273,9 @@
 001095 * OK [UIDVALIDITY] Ok
 001096 * OK [MYRIGHTS "acdilrsw"] ACL
 001097 R068 OK [READ-WRITE] Ok
-001098 * LIST (\HasNoChildren) "." "INBOX.x" (("ACL" (("owner" "acdilrsw")("user=systemuser2" "alr"))))
+001098 * LIST (\HasNoChildren) "." "INBOX.x" (("ACL" (("owner" "acdilrsw")("administrators" "acdilrsw")("user=systemuser2" "alr"))))
 001098 R069 OK ACL STORE completed.
-001099 * LIST (\HasNoChildren) "." "INBOX.x" (("ACL" (("owner" "acdilrs")("user=systemuser2" "alr"))))
+001099 * LIST (\HasNoChildren) "." "INBOX.x" (("ACL" (("owner" "acdilrs")("administrators" "acdilrsw")("user=systemuser2" "alr"))))
 001099 R070 OK ACL STORE completed.
 001100 R071 OK COPY completed.
 001101 * FLAGS (Foo \Draft \Answered \Flagged \Deleted \Seen \Recent)
@@ -1294,9 +1294,9 @@
 001114 * OK [UIDVALIDITY] Ok
 001115 * OK [MYRIGHTS "acdilrsw"] ACL
 001116 R074 OK [READ-WRITE] Ok
-001117 * LIST (\HasNoChildren) "." "INBOX.x" (("ACL" (("owner" "acdilrsw")("user=systemuser2" "alr"))))
+001117 * LIST (\HasNoChildren) "." "INBOX.x" (("ACL" (("owner" "acdilrsw")("administrators" "acdilrsw")("user=systemuser2" "alr"))))
 001117 R075 OK ACL STORE completed.
-001118 * LIST (\HasNoChildren) "." "INBOX.x" (("ACL" (("owner" "aceilrswx")("user=systemuser2" "alr"))))
+001118 * LIST (\HasNoChildren) "." "INBOX.x" (("ACL" (("owner" "aceilrswx")("administrators" "acdilrsw")("user=systemuser2" "alr"))))
 001118 R076 OK ACL STORE completed.
 001119 R077 OK COPY completed.
 001120 * FLAGS (Foo \Draft \Answered \Flagged \Deleted \Seen \Recent)
@@ -1334,7 +1334,7 @@
 001152 * 1 RECENT
 001153 S005 OK NOOP completed
 001154 * OK [MYRIGHTS "acilrstwx"] ACL
-001155 * LIST (\HasNoChildren) "." "INBOX.a" (("ACL" (("owner" "acilrstwx"))))
+001155 * LIST (\HasNoChildren) "." "INBOX.a" (("ACL" (("owner" "acilrstwx")("administrators" "acdilrsw"))))
 001155 S006 OK ACL STORE completed.
 001156 * 1 FETCH (FLAGS (\Seen \Deleted \Recent))
 001157 S007 OK STORE completed.
@@ -1348,7 +1348,7 @@
 001165 * OK [MYRIGHTS "acilrstwx"] ACL
 001166 S010 OK [READ-WRITE] Ok
 001167 * OK [MYRIGHTS "acdilrsw"] ACL
-001168 * LIST (\HasNoChildren) "." "INBOX.a" (("ACL" (("owner" "acdilrsw"))))
+001168 * LIST (\HasNoChildren) "." "INBOX.a" (("ACL" (("owner" "acdilrsw")("administrators" "acdilrsw"))))
 001168 S011 OK ACL STORE completed.
 001169 * 1 EXPUNGE
 001170 * 3 EXISTS
@@ -1365,12 +1365,12 @@
 001181 * OK [MYRIGHTS "acdilrsw"] ACL
 001182 S015 OK [READ-WRITE] Ok
 001183 S016 OK mailbox closed.
-001184 * LIST (\HasNoChildren) "." "INBOX.a" (("ACL" (("owner" "acdilsw"))))
+001184 * LIST (\HasNoChildren) "." "INBOX.a" (("ACL" (("owner" "acdilsw")("administrators" "acdilrsw"))))
 001184 S017 OK ACL STORE completed.
 001185 S018 NO Access denied for SELECT/EXAMINE on INBOX.a (ACL "r" required)
 001186 S019 NO Access denied for SELECT/EXAMINE on INBOX.a (ACL "r" required)
 001187 S020 NO Access denied for STATUS on INBOX.a (ACL "r" required)
-001188 * LIST (\HasNoChildren) "." "INBOX.a" (("ACL" (("owner" "acdilrsw"))))
+001188 * LIST (\HasNoChildren) "." "INBOX.a" (("ACL" (("owner" "acdilrsw")("administrators" "acdilrsw"))))
 001188 S021 OK ACL STORE completed.
 001189 * FLAGS (\Draft \Answered \Flagged \Deleted \Seen \Recent)
 001190 * OK [PERMANENTFLAGS (\* \Draft \Answered \Flagged \Deleted \Seen)] Limited
@@ -1389,7 +1389,7 @@
 001203 * 3 FETCH (FLAGS ())
 001204 S025 OK STORE completed.
 001205 * OK [MYRIGHTS "acdilrw"] ACL
-001206 * LIST (\HasNoChildren) "." "INBOX.a" (("ACL" (("owner" "acdilrw"))))
+001206 * LIST (\HasNoChildren) "." "INBOX.a" (("ACL" (("owner" "acdilrw")("administrators" "acdilrsw"))))
 001206 S027 OK ACL STORE completed.
 001207 * 1 FETCH (BODY[] {83}
 001208 From: John <john@example.com>
@@ -1400,7 +1400,7 @@
 001213 )
 001214 S028 OK FETCH completed.
 001215 * OK [MYRIGHTS "acdilrsw"] ACL
-001216 * LIST (\HasNoChildren) "." "INBOX.a" (("ACL" (("owner" "acdilrsw"))))
+001216 * LIST (\HasNoChildren) "." "INBOX.a" (("ACL" (("owner" "acdilrsw")("administrators" "acdilrsw"))))
 001216 S029 OK ACL STORE completed.
 001217 * 1 FETCH (BODY[] {83}
 001218 From: John <john@example.com>
@@ -1412,7 +1412,7 @@
 001224 * 1 FETCH (FLAGS (\Seen))
 001225 S030 OK FETCH completed.
 001226 * OK [MYRIGHTS "acdilrw"] ACL
-001227 * LIST (\HasNoChildren) "." "INBOX.a" (("ACL" (("owner" "acdilrw"))))
+001227 * LIST (\HasNoChildren) "." "INBOX.a" (("ACL" (("owner" "acdilrw")("administrators" "acdilrsw"))))
 001227 S031 OK ACL STORE completed.
 001228 * FLAGS (Foo \Draft \Answered \Flagged \Deleted \Seen \Recent)
 001229 * OK [PERMANENTFLAGS (Foo \* \Draft \Answered \Flagged \Deleted \Seen)] Limited
@@ -1432,10 +1432,10 @@
 001243 * 2 FETCH (FLAGS (\Answered \Deleted Foo))
 001244 S035 OK FETCH completed.
 001245 * OK [MYRIGHTS "acdilrsw"] ACL
-001246 * LIST (\HasNoChildren) "." "INBOX.a" (("ACL" (("owner" "acdilrsw"))))
+001246 * LIST (\HasNoChildren) "." "INBOX.a" (("ACL" (("owner" "acdilrsw")("administrators" "acdilrsw"))))
 001246 S036 OK ACL STORE completed.
 001247 * OK [MYRIGHTS "acdilrs"] ACL
-001248 * LIST (\HasNoChildren) "." "INBOX.a" (("ACL" (("owner" "acdilrs"))))
+001248 * LIST (\HasNoChildren) "." "INBOX.a" (("ACL" (("owner" "acdilrs")("administrators" "acdilrsw"))))
 001248 S037 OK ACL STORE completed.
 001249 * FLAGS (Bar Foo \Draft \Answered \Flagged \Deleted \Seen \Recent)
 001250 * OK [PERMANENTFLAGS (Bar Foo \* \Draft \Answered \Flagged \Deleted \Seen)] Limited
@@ -1459,12 +1459,12 @@
 001268 * OK [PERMANENTFLAGS (Foo \* \Draft \Answered \Flagged \Deleted \Seen)] Limited
 001269 S040 OK STORE completed.
 001270 * OK [MYRIGHTS "acdilrsw"] ACL
-001271 * LIST (\HasNoChildren) "." "INBOX.a" (("ACL" (("owner" "acdilrsw"))))
+001271 * LIST (\HasNoChildren) "." "INBOX.a" (("ACL" (("owner" "acdilrsw")("administrators" "acdilrsw"))))
 001271 S041 OK ACL STORE completed.
 001272 * 2 FETCH (FLAGS (\Answered \Seen Foo))
 001273 S042 OK STORE completed.
 001274 * OK [MYRIGHTS "aceilrswx"] ACL
-001275 * LIST (\HasNoChildren) "." "INBOX.a" (("ACL" (("owner" "aceilrswx"))))
+001275 * LIST (\HasNoChildren) "." "INBOX.a" (("ACL" (("owner" "aceilrswx")("administrators" "acdilrsw"))))
 001275 S043 OK ACL STORE completed.
 001276 * FLAGS (Bar Foo \Draft \Answered \Flagged \Deleted \Seen \Recent)
 001277 * OK [PERMANENTFLAGS (Bar Foo \* \Draft \Answered \Flagged \Deleted \Seen)] Limited
@@ -1484,26 +1484,26 @@
 001291 * 2 FETCH (FLAGS (\Seen Bar))
 001292 S046 OK STORE completed.
 001293 S047 OK mailbox closed.
-001294 * LIST (\Unmarked \HasChildren) "." "INBOX" (("ACL" (("owner" "acdilrsw")("user=courierimaptestuser1" "alr"))))
+001294 * LIST (\Unmarked \HasChildren) "." "INBOX" (("ACL" (("owner" "acdilrsw")("administrators" "acdilrsw")("user=courierimaptestuser1" "alr"))))
 001294 S048 OK ACL STORE completed.
-001295 * LIST (\Unmarked \HasChildren) "." "INBOX" (("ACL" (("owner" "acdilrsw")("user=courierimaptestuser1" "alr")("user=courierimaptestuser2" "lr"))))
+001295 * LIST (\Unmarked \HasChildren) "." "INBOX" (("ACL" (("owner" "acdilrsw")("administrators" "acdilrsw")("user=courierimaptestuser1" "alr")("user=courierimaptestuser2" "lr"))))
 001295 S049 OK ACL STORE completed.
-001296 * LIST (\Unmarked \HasChildren) "." "INBOX" (("ACL" (("owner" "acdilrsw")("user=courierimaptestuser1" "alr")("user=courierimaptestuser2" "lr"))))
+001296 * LIST (\Unmarked \HasChildren) "." "INBOX" (("ACL" (("owner" "acdilrsw")("administrators" "acdilrsw")("user=courierimaptestuser1" "alr")("user=courierimaptestuser2" "lr"))))
 001296 S050 OK LIST completed
 001297 * BYE Courier-IMAP server shutting down
 001298 SDONE OK LOGOUT completed
 001299 * PREAUTH Ready.
-001300 * LIST (\Unmarked \HasNoChildren) "." "INBOX" (("ACL" (("owner" "acdilrsw")("user=user0" "l"))))
+001300 * LIST (\Unmarked \HasNoChildren) "." "INBOX" (("ACL" (("owner" "acdilrsw")("administrators" "acdilrsw")("user=user0" "l"))))
 001300 T001 OK ACL STORE completed.
 001301 T002 OK "INBOX.a" created.
-001302 * LIST (\HasNoChildren) "." "INBOX.a" (("ACL" (("owner" "acdilrsw")("user=user0" "l")("anyone" "lr"))))
+001302 * LIST (\HasNoChildren) "." "INBOX.a" (("ACL" (("owner" "acdilrsw")("administrators" "acdilrsw")("user=user0" "l")("anyone" "lr"))))
 001302 T003 OK ACL STORE completed.
 001303 + OK
 001304 T004 OK APPEND Ok.
 001305 * BYE Courier-IMAP server shutting down
 001306 T005 OK LOGOUT completed
 001307 * PREAUTH Ready.
-001308 * LIST (\Unmarked \HasNoChildren) "." "INBOX" (("ACL" (("owner" "acdilrsw")("anyone" "l"))))
+001308 * LIST (\Unmarked \HasNoChildren) "." "INBOX" (("ACL" (("owner" "acdilrsw")("administrators" "acdilrsw")("anyone" "l"))))
 001308 T010 OK ACL STORE completed.
 001309 T011 OK "INBOX.a" created.
 001310 + OK
@@ -1518,7 +1518,7 @@
 001315 * LIST (\Noselect \HasChildren) "." "#shared.a"
 001315 * LIST (\Noselect \HasChildren) "." "#shared.b"
 001315 T020 OK LIST completed
-001316 * LIST (\Unmarked \HasNoChildren) "." "INBOX" (("ACL" (("owner" "acdilrsw")("anyone" "acdilrsw"))))
+001316 * LIST (\Unmarked \HasNoChildren) "." "INBOX" (("ACL" (("owner" "acdilrsw")("administrators" "acdilrsw")("anyone" "acdilrsw"))))
 001316 T021 OK ACL STORE completed.
 001317 * LIST (\Noselect \HasChildren) "." "#shared.a"
 001317 * LIST (\Noselect \HasChildren) "." "#shared.b"
@@ -1562,21 +1562,21 @@
 001345 T041 NO Access denied for CREATE on #shared.c (ACL "c" required)
 001346 T042 OK "#shared.user0.foo" created.
 001347 T043 OK Folder renamed.
-001348 * LIST (\HasChildren) "." "#shared.user0" (("ACL" (("owner" "acdilrsw")("anyone" "acdilrsw"))))
-001348 * LIST (\HasNoChildren) "." "#shared.user0.bar" (("ACL" (("owner" "acdilrsw")("anyone" "acdilrsw"))))
+001348 * LIST (\HasChildren) "." "#shared.user0" (("ACL" (("owner" "acdilrsw")("administrators" "acdilrsw")("anyone" "acdilrsw"))))
+001348 * LIST (\HasNoChildren) "." "#shared.user0.bar" (("ACL" (("owner" "acdilrsw")("administrators" "acdilrsw")("anyone" "acdilrsw"))))
 001348 T044 OK LIST completed
 001349 * ACLFAILED "#shared.a.user1.a" NO Access denied for ACL STORE on #shared.a.user1.a (ACL "a" required)
 001350 T045 OK ACL STORE completed.
 001351 T046 OK "#shared.user0.foo" created.
-001352 * LIST (\HasNoChildren) "." "#shared.user0.foo" (("ACL" (("owner" "acdilrsw")("anyone" "alr"))))
+001352 * LIST (\HasNoChildren) "." "#shared.user0.foo" (("ACL" (("owner" "acdilrsw")("administrators" "acdilrsw")("anyone" "alr"))))
 001352 T047 OK ACL STORE completed.
-001353 * LIST (\HasNoChildren) "." "#shared.user0.bar" (("ACL" (("owner" "acdilrsw")("anyone" "aceilrstw"))))
+001353 * LIST (\HasNoChildren) "." "#shared.user0.bar" (("ACL" (("owner" "acdilrsw")("administrators" "acdilrsw")("anyone" "aceilrstw"))))
 001353 T048 OK ACL STORE completed.
 001354 T049 NO Access denied for RENAME on #shared.user0.bar (ACL "x" required)
-001355 * LIST (\HasNoChildren) "." "#shared.user0.bar" (("ACL" (("owner" "acdilrsw")("anyone" "acdilrsw"))))
+001355 * LIST (\HasNoChildren) "." "#shared.user0.bar" (("ACL" (("owner" "acdilrsw")("administrators" "acdilrsw")("anyone" "acdilrsw"))))
 001355 T050 OK ACL STORE completed.
 001356 T051 NO Access denied for RENAME on #shared.user0.foo (ACL "c" required)
-001357 * LIST (\HasNoChildren) "." "#shared.user0.foo" (("ACL" (("owner" "acdilrsw")("anyone" "aclr"))))
+001357 * LIST (\HasNoChildren) "." "#shared.user0.foo" (("ACL" (("owner" "acdilrsw")("administrators" "acdilrsw")("anyone" "aclr"))))
 001357 T052 OK ACL STORE completed.
 001358 T053 OK Folder renamed.
 001359 * LIST (\HasChildren) "." "#shared.user0"
@@ -1670,28 +1670,28 @@
 001396 * LIST (\HasChildren) "." "#shared.usergroup1.foo"
 001396 * LIST (\HasNoChildren) "." "#shared.usergroup1.foo.bar"
 001396 T072 OK LIST completed
-001397 * LIST (\Unmarked \HasChildren) "." "INBOX" (("ACL" (("owner" "acdilrsw")("user=user0" "l"))))
+001397 * LIST (\Unmarked \HasChildren) "." "INBOX" (("ACL" (("owner" "acdilrsw")("administrators" "acdilrsw")("user=user0" "l"))))
 001397 T073 OK LIST completed
-001398 * LIST (\Unmarked \HasChildren) "." "INBOX" (("ACL" (("owner" "acdilrsw")("user=user0" "l")("user=fred" "lr"))))
+001398 * LIST (\Unmarked \HasChildren) "." "INBOX" (("ACL" (("owner" "acdilrsw")("administrators" "acdilrsw")("user=user0" "l")("user=fred" "lr"))))
 001398 T074 OK ACL STORE completed.
-001399 * LIST (\Unmarked \HasChildren) "." "INBOX" (("ACL" (("owner" "acdilrsw")("user=user0" "l")("user=fred" "lr")("-user=john" "lr"))))
+001399 * LIST (\Unmarked \HasChildren) "." "INBOX" (("ACL" (("owner" "acdilrsw")("administrators" "acdilrsw")("user=user0" "l")("user=fred" "lr")("-user=john" "lr"))))
 001399 T075 OK ACL STORE completed.
-001400 * LIST (\Unmarked \HasChildren) "." "INBOX" (("ACL" (("owner" "acdilrsw")("user=user0" "l")("user=fred" "lr")("-user=john" "lr")("-authuser" "lr"))))
+001400 * LIST (\Unmarked \HasChildren) "." "INBOX" (("ACL" (("owner" "acdilrsw")("administrators" "acdilrsw")("user=user0" "l")("user=fred" "lr")("-user=john" "lr")("-authuser" "lr"))))
 001400 T076 OK ACL STORE completed.
-001401 * ACL "INBOX" "owner" "acdilrsw" "user0" "l" "fred" "lr" "-john" "lr" "-authuser" "lr"
+001401 * ACL "INBOX" "owner" "acdilrsw" "administrators" "acdilrsw" "user0" "l" "fred" "lr" "-john" "lr" "-authuser" "lr"
 001402 T077 OK GETACL completed.
 001403 T078 OK ACLs updated.
 001404 T079 OK ACLs updated.
 001405 T080 OK ACLs updated.
-001406 * ACL "INBOX" "owner" "acdilrsw" "user0" "l" "fred" "cr" "-john" "clr" "-authuser" "clr"
+001406 * ACL "INBOX" "owner" "acdilrsw" "administrators" "acdilrsw" "user0" "l" "fred" "cr" "-john" "clr" "-authuser" "clr"
 001407 T081 OK GETACL completed.
-001408 * LIST (\Unmarked \HasChildren) "." "INBOX" (("ACL" (("owner" "acdilrsw")("user=user0" "l")("user=fred" "cr")("-user=john" "clr")("-authuser" "clr"))))
+001408 * LIST (\Unmarked \HasChildren) "." "INBOX" (("ACL" (("owner" "acdilrsw")("administrators" "acdilrsw")("user=user0" "l")("user=fred" "cr")("-user=john" "clr")("-authuser" "clr"))))
 001408 T082 OK LIST completed
 001409 T083 OK ACLs updated.
 001410 T084 OK ACLs updated.
-001411 * ACL "INBOX" "owner" "acdilrsw" "user0" "l" "-authuser" "clr"
+001411 * ACL "INBOX" "owner" "acdilrsw" "administrators" "acdilrsw" "user0" "l" "-authuser" "clr"
 001412 T085 OK GETACL completed.
-001413 * LIST (\Unmarked \HasChildren) "." "INBOX" (("ACL" (("owner" "acdilrsw")("user=user0" "l")("-authuser" "clr"))))
+001413 * LIST (\Unmarked \HasChildren) "." "INBOX" (("ACL" (("owner" "acdilrsw")("administrators" "acdilrsw")("user=user0" "l")("-authuser" "clr"))))
 001413 T086 OK LIST completed
 001414 * BYE Courier-IMAP server shutting down
 001415 TDONE OK LOGOUT completed

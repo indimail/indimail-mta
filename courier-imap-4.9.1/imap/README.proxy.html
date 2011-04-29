@@ -5,7 +5,7 @@ Copyright 1998 - 2009 Double Precision, Inc.  See COPYING for distribution
 information.
 
 --></head><body><div class="chapter" title="The Courier IMAP/POP3 proxy"><div class="titlepage"><div><div><h2 class="title"><a id="proxy" shape="rect"> </a>The <span class="application">Courier</span>
-    IMAP/POP3 proxy</h2></div></div></div><div class="toc"><p><b>Table of Contents</b></p><dl><dt><span class="section"><a href="#requirements" shape="rect">Requirements</a></span></dt><dt><span class="section"><a href="#configuration" shape="rect">Configuration</a></span></dt><dd><dl><dt><span class="section"><a href="#id301992" shape="rect">Using the same configuration files on all servers</a></span></dt><dt><span class="section"><a href="#id302016" shape="rect">Alternative configurations</a></span></dt><dt><span class="section"><a href="#id302031" shape="rect">Homogenous environments</a></span></dt><dt><span class="section"><a href="#id301241" shape="rect">Heterogenous environments</a></span></dt></dl></dd></dl></div><p>
+    IMAP/POP3 proxy</h2></div></div></div><div class="toc"><p><b>Table of Contents</b></p><dl><dt><span class="section"><a href="#requirements" shape="rect">Requirements</a></span></dt><dt><span class="section"><a href="#configuration" shape="rect">Configuration</a></span></dt><dd><dl><dt><span class="section"><a href="#id335882" shape="rect">Using the same configuration files on all servers</a></span></dt><dt><span class="section"><a href="#id335907" shape="rect">Alternative configurations</a></span></dt><dt><span class="section"><a href="#id335921" shape="rect">Homogenous environments</a></span></dt><dt><span class="section"><a href="#id335963" shape="rect">Heterogenous environments</a></span></dt></dl></dd></dl></div><p>
 The <span class="application">Courier</span>
 IMAP and POP3 servers now include a built-in proxy aggregator.
 With a proxy aggregator, the mail accounts are split between multiple,
@@ -70,7 +70,7 @@ The final step is to set <span class="quote">“<span class="quote">IMAP_PROXY</
 <span class="quote">“<span class="quote">POP3_PROXY</span>”</span> to <span class="quote">“<span class="quote">1</span>”</span> in the
 <code class="filename">imapd</code> and/or the <code class="filename">pop3d</code>
 configuration file, in the Courier configuration file directory on
-the proxy server.</p><div class="section" title="Using the same configuration files on all servers"><div class="titlepage"><div><div><h3 class="title"><a id="id301992" shape="rect"> </a>Using the same configuration files on all servers</h3></div></div></div><p>
+the proxy server.</p><div class="section" title="Using the same configuration files on all servers"><div class="titlepage"><div><div><h3 class="title"><a id="id335882" shape="rect"> </a>Using the same configuration files on all servers</h3></div></div></div><p>
 It is possible to have both the proxy server, and the back-end servers with
 the actual accounts, read the same configuration file that enables proxying.
 Ordinarily, if the back-end server also has the proxy setting turned on, it
@@ -80,7 +80,7 @@ However, if the <span class="quote">“<span class="quote">mailhost</span>”</s
 as returned by <span class="quote">“<span class="quote">gethostname</span>”</span>, no proxying takes place.
 Therefore, if specific attention and care is made, when setting up the
 server names and account options, all servers can boot off the
-same configuration file.</p></div><div class="section" title="Alternative configurations"><div class="titlepage"><div><div><h3 class="title"><a id="id302016" shape="rect"> </a>Alternative configurations</h3></div></div></div><p>
+same configuration file.</p></div><div class="section" title="Alternative configurations"><div class="titlepage"><div><div><h3 class="title"><a id="id335907" shape="rect"> </a>Alternative configurations</h3></div></div></div><p>
 If the server names are set up properly, it's possible to set things up
 without a dedicated front-end proxy aggregator server.
 All mail accounts are divided between a pool of servers, who are just one,
@@ -89,7 +89,7 @@ IMAP and POP3 clients can connect to any server, at random.
 If they try to log into an account that happens to reside on the
 same box, then everything will be ready to go.
 If not, the server automatically opens a proxy connection to the right
-box, and everything will be ready to go as well.</p></div><div class="section" title="Homogenous environments"><div class="titlepage"><div><div><h3 class="title"><a id="id302031" shape="rect"> </a>Homogenous environments</h3></div></div></div><p>
+box, and everything will be ready to go as well.</p></div><div class="section" title="Homogenous environments"><div class="titlepage"><div><div><h3 class="title"><a id="id335921" shape="rect"> </a>Homogenous environments</h3></div></div></div><p>
 Both servers involved in a proxy connections should be running the
 same version of the
 <span class="application">Courier</span> IMAP/POP3 server.
@@ -106,7 +106,7 @@ All servers
 use the same identical <code class="filename">imapd</code>
 and <code class="filename">pop3d</code> configuration files (with the possible
 exception of the proxy flag).
-The next section explains why.</p></div><div class="section" title="Heterogenous environments"><div class="titlepage"><div><div><h3 class="title"><a id="id301241" shape="rect"> </a>Heterogenous environments</h3></div></div></div><p>
+The next section explains why.</p></div><div class="section" title="Heterogenous environments"><div class="titlepage"><div><div><h3 class="title"><a id="id335963" shape="rect"> </a>Heterogenous environments</h3></div></div></div><p>
 It should generally be possible to have the
 The <span class="application">Courier</span>
 IMAP/POP3 server establish a proxy connection to some other third party,
