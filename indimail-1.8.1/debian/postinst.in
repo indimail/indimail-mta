@@ -437,6 +437,8 @@ if [ $noclamav -eq 0 ] ; then
 	${rm} -f $servicedir/freshclam/down
 fi
 
+${prefix}/sbin/svctool --check-install --servicedir=${servicedir} \
+	--qbase=${qbase} --qcount=${qcount} --qstart=1
 if [ -f /etc/init/svscan.conf -o -f /etc/event.d/svscan ] ; then
 	echo "1. Issue /sbin/initctl emit qmailstart to start services"
 	count=1
