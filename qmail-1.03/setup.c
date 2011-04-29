@@ -1,5 +1,8 @@
 /*
  * $Log: setup.c,v $
+ * Revision 1.20  2011-04-29 16:12:16+05:30  Cprogrammer
+ * check env variable FAKED_MODE to detect fakeroot environment
+ *
  * Revision 1.19  2010-07-09 10:02:09+05:30  Cprogrammer
  * fixed compilation warning
  *
@@ -55,6 +58,7 @@
 #include "auto_uids.h"
 #include "subfd.h"
 #include "str.h"
+#include "env.h"
 #include "strerr.h"
 #include "error.h"
 #include "open.h"
@@ -354,7 +358,10 @@ main(int argc, char **argv)
 #ifdef DARWIN
 	mailuser = "daemon";
 #endif
-	my_uid = getuid();
+	if (env_get("FAKED_MODE"))
+		my_uid = 1;
+	else
+		my_uid = getuid();
 	if((fdsourcedir = open_read(".")) == -1)
 		strerr_die2sys(111, FATAL, "unable to open current directory: ");
 	if (my_uid)
@@ -381,7 +388,7 @@ main(int argc, char **argv)
 void
 getversion_setup_c()
 {
-	static char    *x = "$Id: setup.c,v 1.19 2010-07-09 10:02:09+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: setup.c,v 1.20 2011-04-29 16:12:16+05:30 Cprogrammer Exp mbhangui $";
 #ifdef INDIMAIL
 	x = sccsidh;
 #else
