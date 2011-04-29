@@ -156,7 +156,7 @@ for i in indimail.cnf clamd.conf freshclam.conf stat.override \
 	imapd.cnf imapd.dist imapd-ssl.dist inc_deps indimail.mrtg.cfg \
 	indimail.settings lib_deps osh.table perm_list pop3d.cnf \
 	pop3d.dist pop3d-ssl.dist qmailprog.list quotawarnmsg.example services.log \
-	system.flashlogin system.menu system.module system.rc \
+	system.flashlogin system.menu system.module system.rc
 do
 	${rm} -f ${prefix}/etc/$i
 done
