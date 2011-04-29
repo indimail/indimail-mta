@@ -137,3 +137,13 @@ indimail-*/prerm
 indimail-*/preinst
 .libs
 conffiles
+*.cdbs-orig
+configure-stamp
+build-stamp
+indimail-*/debian/indimail
+indimail_*.debian.tar.gz
+indimail_*.dsc
+indimail_*.changes
+indimail_*.deb
+indimail_*.orig.tar.gz
+logalert-*/src/logalert
