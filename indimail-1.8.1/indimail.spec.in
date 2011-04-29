@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail.spec.in,v 2.211 2011-04-27 12:28:36+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 2.212 2011-04-29 16:11:10+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %define _unpackaged_files_terminate_build 1
 
@@ -2448,11 +2448,15 @@ if [ -f %{_prefix}/etc/controlfiles ] ; then
 	done
 else
 	for i in databytes defaultdelivery defaultdomain localiphost locals \
-		me nodnscheck plusdomain queue_base smtpgreeting signatures
+		me nodnscheck plusdomain queue_base smtpgreeting signatures \
+		chkrcptdomains defaulthost envnoathost filterargs greylist.white \
+		hostip timeoutremote timeoutsmtpd
 	do
 		%{__rm} -f %{_prefix}/control/$i
 	done
 fi
+{__rm} -f %{_prefix}/domainkeys/indimail.pub %{_prefix}/domainkeys/indimail
+/bin/rmdir --ignore-fail-on-non-empty %{_prefix}/domainkeys 2>/dev/null
 /bin/rmdir --ignore-fail-on-non-empty %{_prefix}/control 2>/dev/null
 
 for i in .qmail-nonspam .qmail-register-nonspam .qmail-register-spam .qmail-spam .qmail-default
