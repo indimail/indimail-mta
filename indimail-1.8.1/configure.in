@@ -59,7 +59,12 @@ case "$host" in
 *-*-linux*)
 	AC_LIB_PREPARE_MULTILIB
 	INSTALL="/usr/bin/install -c"
-	idcommand="/usr/bin/id -u"
+	if test x"$FAKED_MODE" = x
+	then
+		idcommand="/usr/bin/id -u"
+	else
+		idcommand="/usr/bin/id -u mail"
+	fi
 	CPPFLAGS="$CPPFLAGS -DLINUX"
 	CFLAGS="$CFLAGS -O4 -Wall -fPIC -fno-strict-aliasing"
 	MODFLAGS="-O4 -fPIC -shared -Wall"
@@ -1155,6 +1160,7 @@ echo "Target CPU           = $target_cpu"
 echo "Target Vendor        = $target_vendor"
 echo "Target OS            = $target_os"
 echo "Host                 = $host"
+echo "ID command           = $idcommand"
 echo "CPPFLAGS             = $CPPFLAGS"
 echo "CXXFLAGS             = $CXXFLAGS"
 echo "CFLAGS               = $CFLAGS"

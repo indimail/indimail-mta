@@ -936,7 +936,6 @@ install-data-hook:
 				chmod 4555 $(DESTDIR)@prefix@/bin/$$f; \
 			fi;  \
 		done; \
-		chown indimail:indimail $(DESTDIR)@prefix@/etc/perm_list || exit 1; \
 		chown indimail:indimail $(DESTDIR)@prefix@/etc/wordlist.db || exit 1; \
 	fi
 

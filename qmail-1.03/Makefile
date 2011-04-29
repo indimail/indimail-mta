@@ -958,12 +958,14 @@ seek.h wait.h
 
 setup: \
 load setup.o fifo.o hier.o auto_qmail.o auto_split.o auto_uids.o get_uid.o \
-strerr.a substdio.a open.a error.a str.a fs.a
+str_cpy.o strerr.a substdio.a open.a error.a str.a fs.a env.a \
+stralloc.a alloc.a
 	./load setup fifo.o hier.o auto_qmail.o auto_split.o auto_uids.o get_uid.o \
-	strerr.a substdio.a open.a error.a str.a fs.a 
+	str_cpy.o strerr.a substdio.a open.a error.a str.a fs.a env.a \
+	stralloc.a alloc.a
 
 setup.o: \
-compile setup.c substdio.h strerr.h error.h open.h \
+compile setup.c substdio.h strerr.h error.h open.h env.h \
 exit.h fifo.h subfd.h str.h auto_uids.h hasindimail.h
 	./compile $(inc_deps) setup.c
 
