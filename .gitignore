@@ -147,3 +147,4 @@ indimail_*.changes
 indimail_*.deb
 indimail_*.orig.tar.gz
 logalert-*/src/logalert
+indimail-*/.pc
