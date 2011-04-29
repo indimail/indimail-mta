@@ -130,7 +130,7 @@ if [ " $1" = " purge" ] ; then
 		done
 	else
 		for i in databytes defaultdelivery defaultdomain localiphost locals \
-			me nodnscheck plusdomain queue_base rcpthosts smtpgreeting signatures
+			me nodnscheck plusdomain queue_base rcpthosts smtpgreeting signatures \
 			chkrcptdomains defaulthost envnoathost filterargs greylist.white \
 			hostip timeoutremote timeoutsmtpd
 		do

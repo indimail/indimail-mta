@@ -447,7 +447,7 @@ else
 fi
 count=`expr $count + 1`
 echo "$count. Change your default domain in ${prefix}/control/defaultdomain"
-if [ ! -f /etc/debian_version ] ; then
+if [ -f /etc/debian_version ] ; then
 count=`expr $count + 1`
 echo "$count. You can optionally run the following command to verify installation"
 echo "   sudo dpkg-query -s indimail"
@@ -455,7 +455,7 @@ fi
 if [ ! -f ${prefix}/control/servercert.pem ] ; then
 count=`expr $count + 1`
 echo "$count. You also need to create CERTS for IMAP/POP3. run the following"
-echo "command to create cert"
+echo "   command to create cert"
 echo "   ${prefix}/sbin/svctool --postmaster=postmaster@indimail.org --config=cert"
 fi
 

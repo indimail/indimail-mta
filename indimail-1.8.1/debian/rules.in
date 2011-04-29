@@ -26,7 +26,7 @@ DESTDIR=/home/local/src/indimail/indimail-"$(version)"/debian/indimail
 configure: configure-stamp
 configure-stamp:
 	dh_testdir
-	./configure --prefix=$(prefix) --libexecdir=$(prefix)/libexec --mandir=$(prefix)/man --sysconfdir=$(prefix)/etc --enable-qmaildir=$(prefix) --enable-tcprules-prog=$(prefix)/bin/tcprules --enable-tcpserver-file=$(prefix)/etc/tcp.smtp --enable-mysqlprefix=@mysql_prefix@ `cat config/indimail.opts`
+	FAKED_MODE=1;export FAKED_MODE;./configure --prefix=$(prefix) --libexecdir=$(prefix)/libexec --mandir=$(prefix)/man --sysconfdir=$(prefix)/etc --enable-qmaildir=$(prefix) --enable-tcprules-prog=$(prefix)/bin/tcprules --enable-tcpserver-file=$(prefix)/etc/tcp.smtp --enable-mysqlprefix=@mysql_prefix@ `cat config/indimail.opts`;unset FAKED_MODE
 	if [ -d ../clamav-$(clamav_version) ] ; then  cd ../clamav-$(clamav_version) ; ./configure --prefix=$(prefix) --sysconfdir=$(prefix)/etc --with-dbdir=$(prefix)/share/clamd --libexecdir=$(prefix)/libexec --mandir=$(prefix)/man `cat ../indimail-$(version)/config/clamav.opts`; fi
 	if [ -d ../libdkim-$(libdkim_version) ] ; then cd ../libdkim-$(libdkim_version) ; ./configure --prefix=$(prefix); fi
 	if [ -d ../courier-imap-$(courier_version) ] ; then cd ../courier-imap-$(courier_version) ; ./configure --prefix=$(prefix) `cat ../indimail-$(version)/config/courier-imap.opts`; fi
@@ -40,7 +40,7 @@ configure-stamp:
 build: configure-stamp build-stamp
 build-stamp:
 	dh_testdir
-	$(MAKE) -s
+	FAKED_MODE=1;export FAKED_MODE;$(MAKE) -s;unset FAKED_MODE
 	$(MAKE) -s -C ../libdkim-$(libdkim_version) DESTDIR=$(DESTDIR)
 	$(MAKE) -s -C ../ucspi-tcp-0.88 DESTDIR=$(DESTDIR)
 	$(MAKE) -s -C ../courier-imap-$(courier_version) DESTDIR=$(DESTDIR)
