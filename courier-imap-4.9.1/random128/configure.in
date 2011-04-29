@@ -21,6 +21,7 @@ AC_PROG_CC
 AC_PATH_PROGS(PS, ps, ps, $LPATH)
 AC_PATH_PROGS(W, w, w, $LPATH)
 AC_PROG_LIBTOOL
+AC_CONFIG_MACRO_DIR([m4])
 
 if test "$PS" = "ps"
 then
