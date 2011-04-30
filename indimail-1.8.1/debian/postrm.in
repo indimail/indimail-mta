@@ -66,8 +66,8 @@ if [ " $1" = " upgrade" ] ; then
 fi
 
 case "$1" in
-    purge|failed-upgrade|abort-install|abort-upgrade|disappear)
-		exit 0
+    failed-upgrade|abort-install|abort-upgrade|disappear)
+	exit 0
     ;;
 esac
 nscd_up=`ps -ef |grep nscd |grep -v grep|wc -l`
@@ -102,56 +102,38 @@ if [ $nscd_up -ge 1 ] ; then
 fi
 
 echo "removing binaries, libraries, queues"
-for i in bin sbin lib queue include
+for i in bin sbin lib queue
 do
 	${rm} -rf ${prefix}/$i || true
 done
 echo "removing man pages"
 for i in ${prefix}/man/man1 ${prefix}/man/cat1 ${prefix}/man/man5 ${prefix}/man/cat5 \
-	${prefix}/man/man7 ${prefix}/man/cat7 ${prefix}/man/man8 ${prefix}/man/cat8
+	${prefix}/man/man7 ${prefix}/man/cat7 ${prefix}/man/man8 ${prefix}/man/cat8 \
+	${prefix}/man/man3
 do
 	${rm} -rf $i || true
 done
 if [ -d ${prefix}/man ] ; then
 	/bin/rmdir --ignore-fail-on-non-empty ${prefix}/man 2>/dev/null
 fi
-
 if [ " $1" = " purge" ] ; then
 	echo "purging configuration"
-	for i in imap pop3 smtp qmtp qmqp poppass
+	for i in mysqldb etc control domains users alias
 	do
-		${rm} -f ${prefix}/etc/tcp.$i ${prefix}/etc/tcp."$i".cdb
+		${rm} -rf ${prefix}/$i || true
 	done
-	if [ -f ${prefix}/etc/controlfiles ] ; then
-		for i in `/bin/cat ${prefix}/etc/controlfiles`
-		do
-			${rm} -f ${prefix}/control/$i
-		done
-	else
-		for i in databytes defaultdelivery defaultdomain localiphost locals \
-			me nodnscheck plusdomain queue_base rcpthosts smtpgreeting signatures \
-			chkrcptdomains defaulthost envnoathost filterargs greylist.white \
-			hostip timeoutremote timeoutsmtpd
-		do
-			${rm} -f ${prefix}/control/$i
-		done
-	fi
-	${rm} -f ${prefix}/etc/wordlist.db
-	${rm} -f ${prefix}/control/domainkeys/indimail.pub \
-		${prefix}/control/domainkeys/indimail
-	if [ $nofetchmail -eq 0 ] ; then
-		${rm} -f ${prefix}/etc/fetchmailrc
-	fi
 else
 	echo "removing configuration"
 	for i in imap pop3 smtp qmtp qmqp poppass
 	do
-		${rm} -f ${prefix}/etc/tcp.$i
+		${rm} -f ${prefix}/etc/tcp.$i.cdb
 	done
+	if [ $nofetchmail -eq 0 ] ; then
+		${rm} -f ${prefix}/etc/fetchmailrc
+	fi
 fi
 
-for i in indimail.cnf clamd.conf freshclam.conf stat.override \
-	backup.conf cronlist headerlist \
+for i in indimail.cnf stat.override backup.conf cronlist headerlist \
 	imapd.cnf imapd.dist imapd-ssl.dist inc_deps indimail.mrtg.cfg \
 	indimail.settings lib_deps osh.table perm_list pop3d.cnf \
 	pop3d.dist pop3d-ssl.dist qmailprog.list quotawarnmsg.example services.log \
@@ -159,6 +141,10 @@ for i in indimail.cnf clamd.conf freshclam.conf stat.override \
 do
 	${rm} -f ${prefix}/etc/$i
 done
+if [ $noclamav -eq 0 ] ; then
+	${rm} -f ${prefix}/etc/clamd.conf ${prefix}/etc/freshclam.conf
+	${rm} -rf ${prefix}/share/clamd
+fi
 ${rm} -f ${prefix}/control/controlfiles
 if [ $nonssd -eq 0 ] ; then
 	${rm} -f ${prefix}/etc/nssd.conf
@@ -168,7 +154,8 @@ if [ -d ${prefix}/users ] ; then
 fi
 
 if [ $nobogofilter -eq 0 ] ; then
-	${rm} -f ${prefix}/etc/bogofilter.cf ${prefix}/etc/bogofilter.cf.example
+	${rm} -f ${prefix}/etc/bogofilter.cf ${prefix}/etc/bogofilter.cf.example \
+		${prefix}/etc/wordlist.db
 fi
 if [ -d ${prefix}/etc ] ; then
 	${rmdir} --ignore-fail-on-non-empty ${prefix}/etc 2>/dev/null

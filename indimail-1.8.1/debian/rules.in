@@ -29,10 +29,10 @@ configure-stamp:
 	FAKED_MODE=1;export FAKED_MODE;./configure --prefix=$(prefix) --libexecdir=$(prefix)/libexec --mandir=$(prefix)/man --sysconfdir=$(prefix)/etc --enable-qmaildir=$(prefix) --enable-tcprules-prog=$(prefix)/bin/tcprules --enable-tcpserver-file=$(prefix)/etc/tcp.smtp --enable-mysqlprefix=@mysql_prefix@ `cat config/indimail.opts`;unset FAKED_MODE
 	if [ -d ../clamav-$(clamav_version) ] ; then  cd ../clamav-$(clamav_version) ; ./configure --prefix=$(prefix) --sysconfdir=$(prefix)/etc --with-dbdir=$(prefix)/share/clamd --libexecdir=$(prefix)/libexec --mandir=$(prefix)/man `cat ../indimail-$(version)/config/clamav.opts`; fi
 	if [ -d ../libdkim-$(libdkim_version) ] ; then cd ../libdkim-$(libdkim_version) ; ./configure --prefix=$(prefix); fi
-	if [ -d ../courier-imap-$(courier_version) ] ; then cd ../courier-imap-$(courier_version) ; ./configure --prefix=$(prefix) `cat ../indimail-$(version)/config/courier-imap.opts`; fi
+	if [ -d ../courier-imap-$(courier_version) ] ; then cd ../courier-imap-$(courier_version) ; ./configure --prefix=$(prefix) --mandir=$(prefix)/man `cat ../indimail-$(version)/config/courier-imap.opts`; fi
 	if [ -d ../bogofilter-$(bogofilter_version) ] ; then cd ../bogofilter-$(bogofilter_version) ; ./configure --prefix=$(prefix) --sysconfdir=$(prefix)/etc --libexecdir=$(prefix)/libexec --mandir=$(prefix)/man `cat ../indimail-$(version)/config/bogofilter.opts`; fi
 	if [ -d ../fetchmail-$(fetchmail_version) ] ; then cd ../fetchmail-$(fetchmail_version); ./configure --prefix=$(prefix) --enable-indimail --enable-indimaildir=$(prefix) --libexecdir=$(prefix)/libexec --mandir=$(prefix)/man `cat ../indimail-$(version)/config/fetchmail.opts`; fi
-	if [ -d ../nssd-$(nssd_version) ] ; then cd ../nssd-$(nssd_version) ; ./configure --prefix=$(prefix) --sysconfdir=$(prefix)/etc --enable-mysqlprefix=/usr `cat ../indimail-$(version)/config/nssd.opts`; fi
+	if [ -d ../nssd-$(nssd_version) ] ; then cd ../nssd-$(nssd_version) ; ./configure --prefix=$(prefix) --sysconfdir=$(prefix)/etc --mandir=$(prefix)/man --enable-mysqlprefix=/usr `cat ../indimail-$(version)/config/nssd.opts`; fi
 	cd ..
 	# configure indimail
 	touch configure-stamp

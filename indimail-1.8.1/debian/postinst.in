@@ -28,6 +28,7 @@ sysconfdir=/etc
 rm=/bin/rm
 ####################################
 noproxy=0
+nonssd=0
 nocourierimap=0
 nolibdkim=0
 noclamav=0
@@ -88,7 +89,11 @@ fi
 
 case "$1" in
     configure)
-		echo "installing version $2"
+		if [ " $2" = " " ] ; then
+		echo "installing version @version@"
+		else
+		echo "upgrading to version $2"
+		fi
     ;;
 
     abort-upgrade|abort-remove|abort-deconfigure)
@@ -110,7 +115,7 @@ esac
 # We need to do this for debian. SIGH!!
 #
 if [ -f ${prefix}/etc/perm_list ] ; then
-	echo "Fixing Permissions (debian stuipdity)"
+	echo "Fixing Permissions (debian stupidity)"
 (
 /bin/grep -v "^#" ${prefix}/etc/perm_list | while read line
 do
@@ -129,6 +134,15 @@ if [ -f /tmp/indimail.upgrade ] ; then # upgrade
 	exit 0
 fi
 ${rm} -f /tmp/indimail.install /tmp/indimail.upgrade
+# Recreate ld.so links and cache
+echo "ldconfig..."
+if [ -d ${sysconfdir}/ld.so.conf.d ] ; then
+	(
+		echo @mysql_libdir@
+		echo @libdir@
+	) > ${sysconfdir}/ld.so.conf.d/indimail-`arch`.conf
+fi
+/sbin/ldconfig
 
 # MySQL
 echo "Creating ${logdir}"
@@ -360,9 +374,11 @@ ${prefix}/sbin/svctool --indisrvr=4000 --servicedir=$servicedir \
 	--hardquota=52428800 --base_path=${mbase}
 ${prefix}/sbin/svctool --inlookup=infifo --servicedir=$servicedir \
 	--cntrldir=control --threads=5 --password-cache
+if [ $nonssd -eq 0 ] ; then
 ${prefix}/sbin/svctool --pwdlookup=/tmp/nssd.sock --threads=5 --timeout=-1 \
 	--mysqlhost=localhost --mysqluser=indimail \
 	--mysqlpass=ssh-1.5- --mysqlsocket=/tmp/mysql.sock --servicedir=$servicedir
+fi
 ${prefix}/sbin/svctool --poppass=106 --localip=0 --maxdaemons=40 --maxperip=25 \
 	--memory=$poppass_mem \
     --certfile=${prefix}/control/servercert.pem --ssl \
@@ -400,15 +416,6 @@ R0lGODlhaAA7APcAAP///+rp6puSp6GZrDUjUUc6Zn53mFJMdbGvvVtXh2xre8bF1x8cU4yLprOy
 EOFUU
 /bin/chown qscand:qscand ${prefix}/control/signatures
 
-# Recreate ld.so links and cache
-if [ -d ${sysconfdir}/ld.so.conf.d ] ; then
-	(
-		echo @mysql_libdir@
-		echo @libdir@
-	) > ${sysconfdir}/ld.so.conf.d/indimail-`arch`.conf
-fi
-/sbin/ldconfig
-
 # rebuild cdb
 for i in smtp qmtp qmqp imap pop3 poppass
 do
@@ -419,6 +426,15 @@ do
 			&& chown indimail:indimail $j.cdb
 	done
 done
+echo "compressing man pages"
+find ${prefix}/man -type f -exec gzip {} \;
+if [ -f ${prefix}/man/man7/authlib.7.gz ] ; then
+	for i in authshadow.7 authpwd.7 authpam.7 authcustom.7
+	do
+		${rm} -f ${prefix}/man/man7/$i
+		ln -sf ${prefix}/man/man7/authlib.7.gz ${prefix}/man/man7/$i.gz
+	done
+fi
 
 # Misc/Configuration
 ${prefix}/sbin/svctool --svscanlog --servicedir=$servicedir
@@ -437,8 +453,15 @@ if [ $noclamav -eq 0 ] ; then
 	${rm} -f $servicedir/freshclam/down
 fi
 
+if [ -f ${prefix}/bin/instcheck ] ; then
+	${prefix}/bin/instcheck > /dev/null 2>&1
+fi
+LD_LIBRARY_PATH=/var/indimail/lib:/var/indimail/lib64
+export LD_LIBRARY_PATH
+touch /tmp/skip-install_tables
 ${prefix}/sbin/svctool --check-install --servicedir=${servicedir} \
 	--qbase=${qbase} --qcount=${qcount} --qstart=1
+${rm} -f /tmp/skip-install_tables
 if [ -f /etc/init/svscan.conf -o -f /etc/event.d/svscan ] ; then
 	echo "1. Issue /sbin/initctl emit qmailstart to start services"
 	count=1
@@ -449,11 +472,10 @@ else
 fi
 count=`expr $count + 1`
 echo "$count. Change your default domain in ${prefix}/control/defaultdomain"
-if [ -f /etc/debian_version ] ; then
 count=`expr $count + 1`
 echo "$count. You can optionally run the following command to verify installation"
-echo "   sudo dpkg-query -s indimail"
-fi
+echo "   sudo ${prefix}/sbin/svctool --check-install --servicedir=${servicedir} \\"
+echo "       --qbase=${qbase} --qcount=${qcount} --qstart=1"
 if [ ! -f ${prefix}/control/servercert.pem ] ; then
 count=`expr $count + 1`
 echo "$count. You also need to create CERTS for IMAP/POP3. run the following"

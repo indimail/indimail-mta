@@ -1674,10 +1674,12 @@ else
   if [ "$VERB" = y ]; then
     echo "install_tables from indimail is installed. Executing..."
   fi
-  "$DESTDIR"$indimaildir/sbin/install_tables > /dev/null
-  if [ $? -ne 0 ]; then
-    echo "install_tables returned non-zero exit status. Check Installation" 1>&2
-    OK=0
+  if [ ! -f /tmp/skip-install_tables ] ; then
+    "$DESTDIR"$indimaildir/sbin/install_tables > /dev/null
+    if [ $? -ne 0 ]; then
+      echo "install_tables returned non-zero exit status. Check Installation" 1>&2
+      OK=0
+    fi
   fi
 fi
 
@@ -4173,7 +4175,7 @@ if [ $use_stdout -eq 1 ] ; then
     echo "GRANT RELOAD,SHUTDOWN,PROCESS,SUPER on *.* to admin;"
     echo "GRANT REPLICATION SLAVE on *.* to repl;"
 else
-	echo "drop database test;"
+	#echo "drop database test;"
 	echo "delete from user where user='';"
 	echo "delete from user where user='root';"
 	echo "delete from db where db like 'test%'"
@@ -4387,6 +4389,7 @@ echo "flush privileges;"
 
 default_mysql_config()
 {
+#/usr/share/doc/mysql-server-5.1/examples/my-small.cnf
 echo "[client]"
 echo "port		= $mysql_port"
 echo "socket		= $mysql_socket"
@@ -4509,15 +4512,22 @@ if [ " $model" = " small" ] ; then
 		-e "s{socket		= .*\${socket		= $mysql_socket{g"
 	;;
 	*)
-	if [ ! -f $mysqlPrefix/share/mysql/my-small.cnf ] ; then
-		default_mysql_config
+	if [ -f /usr/share/doc/mysql-server-"$mysql_version"/examples/my-small.cnf ] ; then
+		cat /usr/share/doc/mysql-server-"$mysql_version"/examples/my-small.cnf | sed \
+			-e "s{#log-bin=mysql-bin{log-bin=@indimaildir@/mysqldb/logs/mysql-bin{g" \
+			-e "s{skip-federated{#skip-federated{g" \
+			-e "s{skip-locking{skip-external-locking{g" \
+			-e "s{port		= 3306{port		= $mysql_port{g" \
+			-e "s{socket		= .*\${socket		= $mysql_socket{g"
+	elif [ -f $mysqlPrefix/share/mysql/my-small.cnf ] ; then
+		cat $mysqlPrefix/share/mysql/my-small.cnf | sed \
+			-e "s{#log-bin=mysql-bin{log-bin=@indimaildir@/mysqldb/logs/mysql-bin{g" \
+			-e "s{skip-federated{#skip-federated{g" \
+			-e "s{skip-locking{skip-external-locking{g" \
+			-e "s{port		= 3306{port		= $mysql_port{g" \
+			-e "s{socket		= .*\${socket		= $mysql_socket{g"
 	else
-	cat $mysqlPrefix/share/mysql/my-small.cnf | sed \
-		-e "s{#log-bin=mysql-bin{log-bin=@indimaildir@/mysqldb/logs/mysql-bin{g" \
-		-e "s{skip-federated{#skip-federated{g" \
-		-e "s{skip-locking{skip-external-locking{g" \
-		-e "s{port		= 3306{port		= $mysql_port{g" \
-		-e "s{socket		= .*\${socket		= $mysql_socket{g"
+		default_mysql_config
 	fi
 	;;
 	esac
@@ -4532,15 +4542,22 @@ elif [ " $model" = " medium" ] ; then
 		-e "s{socket		= .*\${socket		= $mysql_socket{g"
 	;;
 	*)
-	if [ ! -f $mysqlPrefix/share/mysql/my-medium.cnf ] ; then
-		default_mysql_config
+	if [ -f /usr/share/doc/mysql-server-"$mysql_version"/examples/my-medium.cnf.gz ] ; then
+		gunzip -c /usr/share/doc/mysql-server-"$mysql_version"/examples/my-medium.cnf.gz | sed \
+			-e "s{log-bin=mysql-bin{log-bin=@indimaildir@/mysqldb/logs/mysql-bin{g" \
+			-e "s{skip-federated{#skip-federated{g" \
+			-e "s{skip-locking{skip-external-locking{g" \
+			-e "s{port		= 3306{port		= $mysql_port{g" \
+			-e "s{socket		= .*\${socket		= $mysql_socket{g"
+	elif [ -f $mysqlPrefix/share/mysql/my-medium.cnf ] ; then
+		cat $mysqlPrefix/share/mysql/my-medium.cnf | sed \
+			-e "s{log-bin=mysql-bin{log-bin=@indimaildir@/mysqldb/logs/mysql-bin{g" \
+			-e "s{skip-federated{#skip-federated{g" \
+			-e "s{skip-locking{skip-external-locking{g" \
+			-e "s{port		= 3306{port		= $mysql_port{g" \
+			-e "s{socket		= .*\${socket		= $mysql_socket{g"
 	else
-	cat $mysqlPrefix/share/mysql/my-medium.cnf | sed \
-		-e "s{log-bin=mysql-bin{log-bin=@indimaildir@/mysqldb/logs/mysql-bin{g" \
-		-e "s{skip-federated{#skip-federated{g" \
-		-e "s{skip-locking{skip-external-locking{g" \
-		-e "s{port		= 3306{port		= $mysql_port{g" \
-		-e "s{socket		= .*\${socket		= $mysql_socket{g"
+		default_mysql_config
 	fi
 	;;
 	esac
@@ -4556,15 +4573,22 @@ elif [ " $model" = " large" ] ; then
 			-e "s{socket		= .*\${socket		= $mysql_socket{g"
 		;;
 		*)
-		if [ ! -f $mysqlPrefix/share/mysql/my-large.cnf ] ; then
-			default_mysql_config
+		if [ -f /usr/share/doc/mysql-server-"$mysql_version"/examples/my-large.cnf.gz ] ; then
+			gunzip -c /usr/share/doc/mysql-server-"$mysql_version"/examples/my-large.cnf.gz | sed \
+				-e "s{log-bin=mysql-bin{log-bin=@indimaildir@/mysqldb/logs/mysql-bin{g" \
+				-e "s{skip-federated{#skip-federated{g" \
+				-e "s{skip-locking{skip-external-locking{g" \
+				-e "s{port		= 3306{port		= $mysql_port{g" \
+				-e "s{socket		= .*\${socket		= $mysql_socket{g"
+		elif [ -f $mysqlPrefix/share/mysql/my-large.cnf ] ; then
+			cat $mysqlPrefix/share/mysql/my-large.cnf | sed \
+				-e "s{log-bin=mysql-bin{log-bin=@indimaildir@/mysqldb/logs/mysql-bin{g" \
+				-e "s{skip-federated{#skip-federated{g" \
+				-e "s{skip-locking{skip-external-locking{g" \
+				-e "s{port		= 3306{port		= $mysql_port{g" \
+				-e "s{socket		= .*\${socket		= $mysql_socket{g"
 		else
-		cat $mysqlPrefix/share/mysql/my-large.cnf | sed \
-			-e "s{log-bin=mysql-bin{log-bin=@indimaildir@/mysqldb/logs/mysql-bin{g" \
-			-e "s{skip-federated{#skip-federated{g" \
-			-e "s{skip-locking{skip-external-locking{g" \
-			-e "s{port		= 3306{port		= $mysql_port{g" \
-			-e "s{socket		= .*\${socket		= $mysql_socket{g"
+			default_mysql_config
 		fi
 		;;
 		esac
@@ -4581,16 +4605,24 @@ elif [ " $model" = " large" ] ; then
 			-e "s{socket		= .*\${socket		= $mysql_socket{g"
 		;;
 		*)
-		if [ ! -f $mysqlPrefix/share/mysql/my-large.cnf ] ; then
-			default_mysql_config $thr_con
+		if [ -f /usr/share/doc/mysql-server-"$mysql_version"/examples/my-large.cnf.gz ] ; then
+			gunzip -c /usr/share/doc/mysql-server-"$mysql_version"/examples/my-large.cnf.gz | sed \
+				-e "s{log-bin=mysql-bin{log-bin=@indimaildir@/mysqldb/logs/mysql-bin{g" \
+				-e "s/thread_concurrency = 8/thread_concurrency=$thr_con/g" \
+				-e "s{skip-federated{#skip-federated{g" \
+				-e "s{skip-locking{skip-external-locking{g" \
+				-e "s{port		= 3306{port		= $mysql_port{g" \
+				-e "s{socket		= .*\${socket		= $mysql_socket{g"
+		elif [ -f $mysqlPrefix/share/mysql/my-large.cnf ] ; then
+			cat $mysqlPrefix/share/mysql/my-large.cnf | sed \
+				-e "s{log-bin=mysql-bin{log-bin=@indimaildir@/mysqldb/logs/mysql-bin{g" \
+				-e "s/thread_concurrency = 8/thread_concurrency=$thr_con/g" \
+				-e "s{skip-federated{#skip-federated{g" \
+				-e "s{skip-locking{skip-external-locking{g" \
+				-e "s{port		= 3306{port		= $mysql_port{g" \
+				-e "s{socket		= .*\${socket		= $mysql_socket{g"
 		else
-		cat $mysqlPrefix/share/mysql/my-large.cnf | sed \
-			-e "s{log-bin=mysql-bin{log-bin=@indimaildir@/mysqldb/logs/mysql-bin{g" \
-			-e "s/thread_concurrency = 8/thread_concurrency=$thr_con/g" \
-			-e "s{skip-federated{#skip-federated{g" \
-			-e "s{skip-locking{skip-external-locking{g" \
-			-e "s{port		= 3306{port		= $mysql_port{g" \
-			-e "s{socket		= .*\${socket		= $mysql_socket{g"
+			default_mysql_config $thr_con
 		fi
 		;;
 		esac
@@ -4607,15 +4639,22 @@ elif [ " $model" = " huge" ] ; then
 			-e "s{socket		= .*\${socket		= $mysql_socket{g"
 		;;
 		*)
-		if [ ! -f $mysqlPrefix/share/mysql/my-huge.cnf ] ; then
-			default_mysql_config
+		if [ -f /usr/share/doc/mysql-server-"$mysql_version"/examples/my-huge.cnf.gz ] ; then
+			gunzip -c /usr/share/doc/mysql-server-"$mysql_version"/examples/my-huge.cnf.gz | sed \
+				-e "s{log-bin=mysql-bin{log-bin=@indimaildir@/mysqldb/logs/mysql-bin{g" \
+				-e "s{skip-federated{#skip-federated{g" \
+				-e "s{skip-locking{skip-external-locking{g" \
+				-e "s{port		= 3306{port		= $mysql_port{g" \
+				-e "s{socket		= .*\${socket		= $mysql_socket{g"
+		elif [ -f $mysqlPrefix/share/mysql/my-huge.cnf ] ; then
+			cat $mysqlPrefix/share/mysql/my-huge.cnf | sed \
+				-e "s{log-bin=mysql-bin{log-bin=@indimaildir@/mysqldb/logs/mysql-bin{g" \
+				-e "s{skip-federated{#skip-federated{g" \
+				-e "s{skip-locking{skip-external-locking{g" \
+				-e "s{port		= 3306{port		= $mysql_port{g" \
+				-e "s{socket		= .*\${socket		= $mysql_socket{g"
 		else
-		cat $mysqlPrefix/share/mysql/my-huge.cnf | sed \
-			-e "s{log-bin=mysql-bin{log-bin=@indimaildir@/mysqldb/logs/mysql-bin{g" \
-			-e "s{skip-federated{#skip-federated{g" \
-			-e "s{skip-locking{skip-external-locking{g" \
-			-e "s{port		= 3306{port		= $mysql_port{g" \
-			-e "s{socket		= .*\${socket		= $mysql_socket{g"
+			default_mysql_config
 		fi
 		;;
 		esac
@@ -4632,16 +4671,24 @@ elif [ " $model" = " huge" ] ; then
 			-e "s{socket		= .*\${socket		= $mysql_socket{g"
 		;;
 		*)
-		if [ ! -f $mysqlPrefix/share/mysql/my-large.cnf ] ; then
-			default_mysql_config $thr_con
+		if [ -f /usr/share/doc/mysql-server-"$mysql_version"/examples/my-huge.cnf.gz ] ; then
+			gunzip -c /usr/share/doc/mysql-server-"$mysql_version"/examples/my-huge.cnf.gz | sed \
+				-e "s{log-bin=mysql-bin{log-bin=@indimaildir@/mysqldb/logs/mysql-bin{g" \
+				-e "s/thread_concurrency = 8/thread_concurrency=$thr_con/g" \
+				-e "s{skip-federated{#skip-federated{g" \
+				-e "s{skip-locking{skip-external-locking{g" \
+				-e "s{port		= 3306{port		= $mysql_port{g" \
+				-e "s{socket		= .*\${socket		= $mysql_socket{g"
+		elif [ -f $mysqlPrefix/share/mysql/my-huge.cnf ] ; then
+			cat $mysqlPrefix/share/mysql/my-huge.cnf | sed \
+				-e "s{log-bin=mysql-bin{log-bin=@indimaildir@/mysqldb/logs/mysql-bin{g" \
+				-e "s/thread_concurrency = 8/thread_concurrency=$thr_con/g" \
+				-e "s{skip-federated{#skip-federated{g" \
+				-e "s{skip-locking{skip-external-locking{g" \
+				-e "s{port		= 3306{port		= $mysql_port{g" \
+				-e "s{socket		= .*\${socket		= $mysql_socket{g"
 		else
-		cat $mysqlPrefix/share/mysql/my-huge.cnf | sed \
-			-e "s{log-bin=mysql-bin{log-bin=@indimaildir@/mysqldb/logs/mysql-bin{g" \
-			-e "s/thread_concurrency = 8/thread_concurrency=$thr_con/g" \
-			-e "s{skip-federated{#skip-federated{g" \
-			-e "s{skip-locking{skip-external-locking{g" \
-			-e "s{port		= 3306{port		= $mysql_port{g" \
-			-e "s{socket		= .*\${socket		= $mysql_socket{g"
+			default_mysql_config $thr_con
 		fi
 		;;
 		esac
@@ -5670,6 +5717,19 @@ create_startup()
 				$QmailHOME/bin/sendmail \
 			--slave /etc/pam.d/smtp mta-pam /etc/pam.d/pam-multi \
 			--initscript indimail
+	elif [ -x /usr/sbin/alternatives ] ; then
+		/usr/sbin/update-alternatives --install \
+			/usr/sbin/sendmail-mta sendmail-mta /var/indimail/bin/sendmail 120 \
+			--slave /usr/share/man/man8/sendmail-mta.8.gz sendmail-mta.8.gz $QmailHOME/man/man8/sendmail.8.gz \
+			--slave /usr/sbin/newaliases newaliases $QmailHOME/bin/newaliases \
+			--slave /usr/share/man/man8/newaliases.8.gz newaliases.8.gz $QmailHOME/man/man1/newaliases.1.gz \
+			--slave /usr/bin/mailq mailq $QmailHOME/bin/qmail-qread \
+			--slave /usr/share/man/man1/mailq.1.gz mailq.1.gz $QmailHOME/man/man8/qmail-qread.8.gz \
+			--slave /usr/bin/rmail rmail $QmailHOME/bin/rmail \
+			--slave /usr/share/man/man8/rmail.8.gz rmail.8.gz $QmailHOME/man/man8/rmail.8.gz \
+			--slave /usr/sbin/sendmail sendmail $QmailHOME/bin/sendmail \
+			--slave /usr/lib/sendmail lib.sendmail $QmailHOME/bin/sendmail \
+			--slave /etc/pam.d/smtp mta-pam /etc/pam.d/pam-multi
 	else
 		for i in /usr/lib/sendmail /usr/sbin/sendmail; do
 			if [ -f $i -a ! -L $i ]; then
@@ -5716,6 +5776,9 @@ remove_startup()
 	if [ -x /usr/sbin/alternatives ] ; then
 		/usr/sbin/alternatives --remove mta $QmailHOME/bin/sendmail
 		/usr/sbin/alternatives --auto mta
+	elif [ -x /usr/sbin/update--alternatives ] ; then
+		/usr/sbin/update-alternatives --remove sendmail-mta $QmailHOME/bin/sendmail
+		/usr/sbin/alternatives --auto sendmail-mta
 	else
 		for i in /usr/lib/sendmail /usr/sbin/sendmail; do
 			if [ -f $i.old -o -L $i.old ]; then
