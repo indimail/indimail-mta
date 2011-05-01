@@ -448,8 +448,8 @@ fi
 #
 echo "adding indimail startup"
 if [ /usr/lib/sm.bin/sendmail ] ; then
-	/usr/sbin/update-alternatives --remove-all sendmail-mta /usr/lib/sm.bin/sendmail || true
-	/usr/sbin/update-alternatives --remove-all sendmail-msp /usr/lib/sm.bin/sendmail || true
+	/usr/sbin/update-alternatives --remove-all sendmail-mta || true
+	/usr/sbin/update-alternatives --remove-all sendmail-msp || true
 fi
 ${prefix}/sbin/svctool --config=add-boot
 

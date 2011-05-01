@@ -90,12 +90,15 @@ if [ -f ${sysconfdir}/init.d/sendmail ] ; then
 		/sbin/chkconfig --add sendmail 2>/dev/null
 	fi
 fi
+echo "removing ${prefix}/bin/sendmail as alternative"
 if [ -x /usr/sbin/alternatives ] ; then
 	/usr/sbin/alternatives --remove mta ${prefix}/bin/sendmail
+	echo "adding default alternative for sendmail"
 	/usr/sbin/alternatives --auto mta
 elif [ -x /usr/sbin/update-alternatives ] ; then
 	if [ -f /usr/lib/sm.bin/sendmail ] ; then
-	/usr/sbin/update-alternatives --remove-all mta ${prefix}/bin/sendmail || true
+	/usr/sbin/update-alternatives --remove-all mta || true
+	echo "adding default alternative for sendmail"
 	/usr/sbin/update-alternatives --install /usr/sbin/sendmail-mta sendmail-mta /usr/lib/sm.bin/sendmail 25 \
 		--slave /usr/share/man/man8/sendmail-mta.8.gz sendmail-mta.8.gz /usr/share/man/man8/sendmail.sendmail.8.gz \
 		--slave /usr/sbin/runq runq /usr/share/sendmail/runq \
@@ -112,6 +115,7 @@ elif [ -x /usr/sbin/update-alternatives ] ; then
 		--slave /usr/share/man/man8/sendmail.8.gz sendmail.8.gz /usr/share/man/man8/sendmail.sendmail.8.gz
 	else
 	/usr/sbin/update-alternatives --remove mta ${prefix}/bin/sendmail || true
+	echo "adding default alternative for sendmail"
 	/usr/sbin/update-alternatives --auto mta || true
 	fi
 else
