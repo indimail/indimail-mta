@@ -79,13 +79,8 @@ fi
 #
 # Debian silliness
 #
-if [ -s ${prefix}/etc/stat.override -a -f /usr/sbin/dpkg-statoverride ] ; then
-	cat ${prefix}/etc/stat.override | while read line
-	do
-		/usr/sbin/dpkg-statoverride --remove $line
-	done
-fi
 if [ " $1" = " purge" ] ; then
+	echo "purging configuration"
 	for i in alias qmaild qmaill qmailp qmailq qmailr qmails qscand indimail
 	do
 		echo "Removing user $i"
@@ -101,10 +96,7 @@ if [ " $1" = " purge" ] ; then
 			${sysconfdir}/init.d/nscd start
 		fi
 	fi
-fi
 
-if [ " $1" = " purge" ] ; then
-	echo "purging configuration"
 	for i in mysqldb etc control domains users alias
 	do
 		${rm} -rf ${prefix}/$i || true
@@ -168,7 +160,6 @@ if [ " $1" = " purge" ] ; then
 		${rmdir} --ignore-fail-on-non-empty ${prefix}/share 2>/dev/null
 	fi
 
-	echo "removing startup services"
 	for i in clamd fetchmail freshclam indisrvr.4000 inlookup.infifo mysql.3306 \
 	pwdlookup qmail-imapd.143 qmail-imapd-ssl.993 qmail-pop3d.110 qmail-pop3d-ssl.995 \
 	qmail-send.25 qmail-smtpd.25 qmail-smtpd.366 qmail-spamlog qscanq qmail-imapd.4143 \
@@ -202,6 +193,13 @@ if [ " $1" = " purge" ] ; then
 	fi
 	[ "$log_dir" != "/" ] && ${rm} -fr $log_dir
 else
+	echo "removing startup services"
+	if [ -s ${prefix}/etc/stat.override -a -f /usr/sbin/dpkg-statoverride ] ; then
+		cat ${prefix}/etc/stat.override | while read line
+		do
+			/usr/sbin/dpkg-statoverride --remove $line
+		done
+	fi
 	echo "removing binaries, libraries, queues"
 	for i in bin sbin lib queue
 	do
@@ -225,12 +223,11 @@ else
 	if [ $nofetchmail -eq 0 ] ; then
 		${rm} -f ${prefix}/etc/fetchmailrc
 	fi
-fi
-
-echo "recreating ld.so cache"
-/sbin/ldconfig
-if [ -f ${prefix}/boot/rpm.init ] ; then
-	echo "Running Custom Un-Installation Script for postun"
-	/bin/sh ${prefix}/boot/rpm.init postun
+	echo "recreating ld.so cache"
+	/sbin/ldconfig
+	if [ -f ${prefix}/boot/rpm.init ] ; then
+		echo "Running Custom Un-Installation Script for postun"
+		/bin/sh ${prefix}/boot/rpm.init postun
+	fi
 fi
 exit 0
