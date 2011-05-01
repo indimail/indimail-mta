@@ -1,0 +1,15 @@
+Format: 1.0
+Source: indimail
+Binary: indimail
+Architecture: any
+Version: 1.8.1-1
+Maintainer: Manvendra Bhangui <manvendra@indimail.org>
+Homepage: indimail.sourceforge.net
+Standards-Version: 3.8.4
+Build-Depends: cdbs, debhelper (>= 7.0.50~), libssl-dev, libmysqlclient16 (>= 5.1), libmysqlclient16-dev (>= 5.1), libreadline5, libreadline-dev, libncurses5 (>= 5.7), libncurses5-dev (>= 5.7), bison (>= 1.2), flex (>= 2.5), libpam0g-dev, libidn11-dev, mime-support, m4, gawk
+Checksums-Sha1: 
+ 99fd4d8416b47fbc2ee16f1473dec42ceb07f278 141249413 indimail_1.8.1-1.tar.gz
+Checksums-Sha256: 
+ e5e20237fc99eb3e15a30a852c560b8e69b3d9776ed537d8cffbde3456a24553 141249413 indimail_1.8.1-1.tar.gz
+Files: 
+ 09b618fbd1f4a25a98d734a755382a99 141249413 indimail_1.8.1-1.tar.gz
