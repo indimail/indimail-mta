@@ -5705,7 +5705,7 @@ create_startup()
 		else
 			alternatives_cmd=/usr/sbin/update-alternatives
 		fi
-		if [ -f /etc/debian_release ] ; then
+		if [ -f /etc/debian_version ] ; then
 			$alternatives_cmd --install \
 				/usr/sbin/sendmail mta $QmailHOME/bin/sendmail 120 \
 				--slave /usr/share/man/man8/sendmail.8.gz mta-sendmailman \
