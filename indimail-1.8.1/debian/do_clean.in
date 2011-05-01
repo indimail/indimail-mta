@@ -1,0 +1,43 @@
+#!/bin/sh
+version=@version@
+libdkim_version=1.3
+pam_multi_version=1.1
+altermime_version=0.3.10
+ripmime_version=1.4.0.9
+flash_version=0.9.4
+mpack_version=1.6
+logalert_version=0.3
+fortune_version=1.1
+nssd_version=1.1
+courier_version=4.9.1
+bogofilter_version=1.2.2
+fetchmail_version=6.3.19
+clamav_version=0.97
+
+for i in libdkim_"$libdkim_version" bogofilter_"$bogofilter_version" \
+	altermime_"$altermime_version" ripmime_"$ripmime_version" flash_"$flash_version" \
+	fortune_"$fortune_version" logalert_"$logalert_version" mpack_"$mpack_version" \
+	pam-multi_"$pam_multi_version" qmail_1.03 ucspi-tcp_0.88 \
+	courier-imap_"$courier_version" fetchmail_"$fetchmail_version" nssd_"$nssd_version" clamav_"$clamav_version"
+do
+	if [ "$i" = "ucspi-tcp_0.88" ] ; then
+		j=ucspi-tcp-0.88
+	elif [ "$i" = "pam-multi_"$pam_multi_version"" ] ; then
+		j=pam-multi-"$pam_multi_version"
+	elif [ "$i" = "courier-imap_"$pam_multi_version"" ] ; then
+		j=courier-imap-"$courier_version"
+	else
+		j=`echo $i | sed s{_{-{g`
+	fi
+	/bin/rm -rf $j
+	if [ -f $i.orig.tar.bz2 ] ; then
+		mv $i.orig.tar.bz2 $j.tar.bz2
+	elif [ -f $i.orig.tar.gz ] ; then
+		mv $i.orig.tar.gz $j.tar.gz
+	elif [ -f $j.tar.gz -o -f $j.tar.bz2 ] ; then
+		continue
+	else
+		echo "Missing archive for $i"
+		exit 1
+	fi
+done
