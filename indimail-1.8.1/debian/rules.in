@@ -23,16 +23,22 @@ fetchmail_version=6.3.19
 nssd_version=1.1
 DESTDIR=/home/local/src/indimail/indimail-"$(version)"/debian/indimail
 
+prepare: prepare-stamp
+prepare-stamp:
+	cd ..;indimail-$(version)/debian/do_build;cd indimail-$(version)
+	touch prepare-stamp
+
 configure: configure-stamp
+#configure-stamp: prepare
 configure-stamp:
 	dh_testdir
 	FAKED_MODE=1;export FAKED_MODE;./configure --prefix=$(prefix) --libexecdir=$(prefix)/libexec --mandir=$(prefix)/man --sysconfdir=$(prefix)/etc --enable-qmaildir=$(prefix) --enable-tcprules-prog=$(prefix)/bin/tcprules --enable-tcpserver-file=$(prefix)/etc/tcp.smtp --enable-mysqlprefix=@mysql_prefix@ `cat config/indimail.opts`;unset FAKED_MODE
 	if [ -d ../clamav-$(clamav_version) ] ; then  cd ../clamav-$(clamav_version) ; ./configure --prefix=$(prefix) --sysconfdir=$(prefix)/etc --with-dbdir=$(prefix)/share/clamd --libexecdir=$(prefix)/libexec --mandir=$(prefix)/man `cat ../indimail-$(version)/config/clamav.opts`; fi
 	if [ -d ../libdkim-$(libdkim_version) ] ; then cd ../libdkim-$(libdkim_version) ; ./configure --prefix=$(prefix); fi
-	if [ -d ../courier-imap-$(courier_version) ] ; then cd ../courier-imap-$(courier_version) ; ./configure --prefix=$(prefix) --mandir=$(prefix)/man `cat ../indimail-$(version)/config/courier-imap.opts`; fi
+	if [ -d ../courier-imap-$(courier_version) ] ; then cd ../courier-imap-$(courier_version) ; ./configure --prefix=$(prefix) `cat ../indimail-$(version)/config/courier-imap.opts`; fi
 	if [ -d ../bogofilter-$(bogofilter_version) ] ; then cd ../bogofilter-$(bogofilter_version) ; ./configure --prefix=$(prefix) --sysconfdir=$(prefix)/etc --libexecdir=$(prefix)/libexec --mandir=$(prefix)/man `cat ../indimail-$(version)/config/bogofilter.opts`; fi
 	if [ -d ../fetchmail-$(fetchmail_version) ] ; then cd ../fetchmail-$(fetchmail_version); ./configure --prefix=$(prefix) --enable-indimail --enable-indimaildir=$(prefix) --libexecdir=$(prefix)/libexec --mandir=$(prefix)/man `cat ../indimail-$(version)/config/fetchmail.opts`; fi
-	if [ -d ../nssd-$(nssd_version) ] ; then cd ../nssd-$(nssd_version) ; ./configure --prefix=$(prefix) --sysconfdir=$(prefix)/etc --mandir=$(prefix)/man --enable-mysqlprefix=/usr `cat ../indimail-$(version)/config/nssd.opts`; fi
+	if [ -d ../nssd-$(nssd_version) ] ; then cd ../nssd-$(nssd_version) ; ./configure --prefix=$(prefix) --sysconfdir=$(prefix)/etc --enable-mysqlprefix=/usr `cat ../indimail-$(version)/config/nssd.opts`; fi
 	cd ..
 	# configure indimail
 	touch configure-stamp
@@ -40,19 +46,20 @@ configure-stamp:
 build: configure-stamp build-stamp
 build-stamp:
 	dh_testdir
-	FAKED_MODE=1;export FAKED_MODE;$(MAKE) -s;unset FAKED_MODE
-	$(MAKE) -s -C ../libdkim-$(libdkim_version) DESTDIR=$(DESTDIR)
-	$(MAKE) -s -C ../ucspi-tcp-0.88 DESTDIR=$(DESTDIR)
-	$(MAKE) -s -C ../courier-imap-$(courier_version) DESTDIR=$(DESTDIR)
-	$(MAKE) -s -C ../bogofilter-$(bogofilter_version) DESTDIR=$(DESTDIR)
-	$(MAKE) -s -C ../fetchmail-$(fetchmail_version) DESTDIR=$(DESTDIR)
-	$(MAKE) -s -C ../nssd-$(nssd_version) DESTDIR=$(DESTDIR)
-	$(MAKE) -s -C ../clamav-$(clamav_version) DESTDIR=$(DESTDIR)
+	FAKED_MODE=1;export FAKED_MODE;                      $(MAKE) -s;unset FAKED_MODE
+	if [ -d ../libdkim-$(libdkim_version) ] ; then       $(MAKE) -s -C ../libdkim-$(libdkim_version) DESTDIR=$(DESTDIR); fi
+	if [ -d ../ucspi-tcp-0.88 ] ; then                   $(MAKE) -s -C ../ucspi-tcp-0.88 DESTDIR=$(DESTDIR); fi
+	if [ -d ../courier-imap-$(courier_version) ] ; then  $(MAKE) -s -C ../courier-imap-$(courier_version) DESTDIR=$(DESTDIR); fi
+	if [ -d ../bogofilter-$(bogofilter_version) ] ; then $(MAKE) -s -C ../bogofilter-$(bogofilter_version) DESTDIR=$(DESTDIR); fi
+	if [ -d ../fetchmail-$(fetchmail_version) ] ; then   $(MAKE) -s -C ../fetchmail-$(fetchmail_version) DESTDIR=$(DESTDIR); fi
+	if [ -d ../nssd-$(nssd_version) ] ; then             $(MAKE) -s -C ../nssd-$(nssd_version) DESTDIR=$(DESTDIR); fi
+	if [ -d ../clamav-$(clamav_version) ] ; then         $(MAKE) -s -C ../clamav-$(clamav_version) DESTDIR=$(DESTDIR); fi
 	touch build-stamp
 
 clean:
 	rm -f build-stamp configure-stamp
 	$(MAKE) -s clean; $(MAKE) -s distclean || true
+	#cd ..;indimail-$(version)/debian/do_clean;cd indimail-$(version)
 	dh_testdir
 	dh_testroot
 	dh_clean
@@ -62,13 +69,13 @@ install: build
 	dh_testroot
 	dh_prep
 	dh_installdirs
-	$(MAKE) -s install -C ../libdkim-$(libdkim_version) DESTDIR=$(DESTDIR)
-	$(MAKE) -s install -C ../ucspi-tcp-0.88 DESTDIR=$(DESTDIR)
-	$(MAKE) -s install -C ../courier-imap-$(courier_version) DESTDIR=$(DESTDIR)
-	$(MAKE) -s install -C ../bogofilter-$(bogofilter_version) DESTDIR=$(DESTDIR)
-	$(MAKE) -s install -C ../fetchmail-$(fetchmail_version) DESTDIR=$(DESTDIR)
-	$(MAKE) -s install -C ../nssd-$(nssd_version) DESTDIR=$(DESTDIR)
-	$(MAKE) -s install -C ../clamav-$(clamav_version) DESTDIR=$(DESTDIR)
+	if [ -d ../libdkim-$(libdkim_version) ] ; then       $(MAKE) -s install -C ../libdkim-$(libdkim_version) DESTDIR=$(DESTDIR); fi
+	if [ -d ../ucspi-tcp-0.88 ] ; then                   $(MAKE) -s install -C ../ucspi-tcp-0.88 DESTDIR=$(DESTDIR); fi
+	if [ -d ../courier-imap-$(courier_version) ] ; then  $(MAKE) -s install -C ../courier-imap-$(courier_version) DESTDIR=$(DESTDIR); fi
+	if [ -d ../bogofilter-$(bogofilter_version) ] ; then $(MAKE) -s install -C ../bogofilter-$(bogofilter_version) DESTDIR=$(DESTDIR); fi
+	if [ -d ../fetchmail-$(fetchmail_version) ] ; then   $(MAKE) -s install -C ../fetchmail-$(fetchmail_version) DESTDIR=$(DESTDIR); fi
+	if [ -d ../nssd-$(nssd_version) ] ; then             $(MAKE) -s install -C ../nssd-$(nssd_version) DESTDIR=$(DESTDIR); fi
+	if [ -d ../clamav-$(clamav_version) ] ; then         $(MAKE) -s install -C ../clamav-$(clamav_version) DESTDIR=$(DESTDIR); fi
 	$(MAKE) -s install DESTDIR=$(DESTDIR)
 
 binary-indep: build install
