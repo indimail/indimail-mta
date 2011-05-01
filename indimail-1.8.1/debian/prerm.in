@@ -93,6 +93,27 @@ fi
 if [ -x /usr/sbin/alternatives ] ; then
 	/usr/sbin/alternatives --remove mta ${prefix}/bin/sendmail
 	/usr/sbin/alternatives --auto mta
+elif [ -x /usr/sbin/update-alternatives ] ; then
+	if [ -f /usr/lib/sm.bin/sendmail ] ; then
+	/usr/sbin/update-alternatives --remove-all mta ${prefix}/bin/sendmail || true
+	/usr/sbin/update-alternatives --install /usr/sbin/sendmail-mta sendmail-mta /usr/lib/sm.bin/sendmail 25 \
+		--slave /usr/share/man/man8/sendmail-mta.8.gz sendmail-mta.8.gz /usr/share/man/man8/sendmail.sendmail.8.gz \
+		--slave /usr/sbin/runq runq /usr/share/sendmail/runq \
+		--slave /usr/share/man/man8/runq.8.gz runq.8.gz /usr/share/man/man8/runq.sendmail.8.gz \
+		--slave /usr/sbin/newaliases newaliases /usr/share/sendmail/newaliases \
+		--slave /usr/share/man/man8/newaliases.8.gz newaliases.8.gz /usr/share/man/man8/newaliases.sendmail.8.gz \
+		--slave /usr/bin/mailq mailq /usr/share/sendmail/mailq \
+		--slave /usr/share/man/man1/mailq.1.gz mailq.1.gz /usr/share/man/man1/mailq.sendmail.1.gz \
+		--slave /usr/share/man/man5/aliases.5.gz aliases.5.gz /usr/share/man/man5/aliases.sendmail.5.gz
+	/usr/sbin/update-alternatives --install /usr/sbin/sendmail-msp sendmail-msp /usr/lib/sm.bin/sendmail 25 \
+		--slave /usr/share/man/man8/sendmail-msp.8.gz sendmail-msp.8.gz /usr/share/man/man8/sendmail.sendmail.8.gz \
+		--slave /usr/sbin/sendmail sendmail /usr/lib/sm.bin/sendmail \
+		--slave /usr/lib/sendmail lib.sendmail /usr/lib/sm.bin/sendmail \
+		--slave /usr/share/man/man8/sendmail.8.gz sendmail.8.gz /usr/share/man/man8/sendmail.sendmail.8.gz
+	else
+	/usr/sbin/update-alternatives --remove mta ${prefix}/bin/sendmail || true
+	/usr/sbin/update-alternatives --auto mta || true
+	fi
 else
 	for i in /usr/lib/sendmail /usr/sbin/sendmail; do
 		if [ -f $i.old -o -L $i.old ]; then

@@ -11,7 +11,7 @@ Homepage: indimail.sourceforge.net
 Package: indimail
 Architecture: any
 Depends: ${shlibs:Depends}, ${misc:Depends}
-Description: IndiMail is a mailing solution built using following packages
+Description: IndiMail is a messaging platform for Mail Service Providers
  .
  qmail,
  serialmail,

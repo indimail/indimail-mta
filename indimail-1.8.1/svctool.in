@@ -5699,37 +5699,48 @@ create_startup()
 			/usr/sbin/update-rc.d -f sendmail remove
 		fi
 	fi
-	if [ -x /usr/sbin/alternatives ] ; then
-		/usr/sbin/alternatives --install \
-			/usr/sbin/sendmail mta $QmailHOME/bin/sendmail 120 \
-			--slave /usr/share/man/man8/sendmail.8.gz mta-sendmailman \
-				$QmailHOME/man/man8/sendmail.8.gz \
-			--slave /usr/bin/mailq mta-mailq $QmailHOME/bin/qmail-qread \
-			--slave /usr/share/man/man1/mailq.1.gz mta-mailqman \
-				$QmailHOME/man/man8/qmail-qread.8.gz \
-			--slave /usr/bin/rmail mta-rmail $QmailHOME/bin/rmail \
-			--slave /usr/share/man/man8/rmail.8.gz mta-rmailman $QmailHOME/man/man8/rmail.8.gz \
-			--slave /usr/bin/newaliases mta-newaliases \
-				$QmailHOME/bin/newaliases \
-			--slave /usr/share/man/man1/newaliases.1.gz mta-newaliasesman \
-				$QmailHOME/man/man1/newaliases.1.gz \
-			--slave /usr/lib/sendmail mta-sendmail \
-				$QmailHOME/bin/sendmail \
-			--slave /etc/pam.d/smtp mta-pam /etc/pam.d/pam-multi \
-			--initscript indimail
-	elif [ -x /usr/sbin/alternatives ] ; then
-		/usr/sbin/update-alternatives --install \
-			/usr/sbin/sendmail-mta sendmail-mta /var/indimail/bin/sendmail 120 \
-			--slave /usr/share/man/man8/sendmail-mta.8.gz sendmail-mta.8.gz $QmailHOME/man/man8/sendmail.8.gz \
-			--slave /usr/sbin/newaliases newaliases $QmailHOME/bin/newaliases \
-			--slave /usr/share/man/man8/newaliases.8.gz newaliases.8.gz $QmailHOME/man/man1/newaliases.1.gz \
-			--slave /usr/bin/mailq mailq $QmailHOME/bin/qmail-qread \
-			--slave /usr/share/man/man1/mailq.1.gz mailq.1.gz $QmailHOME/man/man8/qmail-qread.8.gz \
-			--slave /usr/bin/rmail rmail $QmailHOME/bin/rmail \
-			--slave /usr/share/man/man8/rmail.8.gz rmail.8.gz $QmailHOME/man/man8/rmail.8.gz \
-			--slave /usr/sbin/sendmail sendmail $QmailHOME/bin/sendmail \
-			--slave /usr/lib/sendmail lib.sendmail $QmailHOME/bin/sendmail \
-			--slave /etc/pam.d/smtp mta-pam /etc/pam.d/pam-multi
+	if [ -x /usr/sbin/alternatives -o -x /usr/sbin/update-alternatives ] ; then
+		if [ -x /usr/sbin/alternatives ] ; then
+			alternatives_cmd=/usr/sbin/alternatives
+		else
+			alternatives_cmd=/usr/sbin/update-alternatives
+		fi
+		if [ -f /etc/debian_release ] ; then
+			$alternatives_cmd --install \
+				/usr/sbin/sendmail mta $QmailHOME/bin/sendmail 120 \
+				--slave /usr/share/man/man8/sendmail.8.gz mta-sendmailman \
+					$QmailHOME/man/man8/sendmail.8.gz \
+				--slave /usr/bin/mailq mta-mailq $QmailHOME/bin/qmail-qread \
+				--slave /usr/share/man/man1/mailq.1.gz mta-mailqman \
+					$QmailHOME/man/man8/qmail-qread.8.gz \
+				--slave /usr/bin/rmail mta-rmail $QmailHOME/bin/rmail \
+				--slave /usr/share/man/man8/rmail.8.gz mta-rmailman $QmailHOME/man/man8/rmail.8.gz \
+				--slave /usr/bin/newaliases mta-newaliases \
+					$QmailHOME/bin/newaliases \
+				--slave /usr/share/man/man1/newaliases.1.gz mta-newaliasesman \
+					$QmailHOME/man/man1/newaliases.1.gz \
+				--slave /usr/lib/sendmail mta-sendmail \
+					$QmailHOME/bin/sendmail \
+				--slave /etc/pam.d/smtp mta-pam /etc/pam.d/pam-multi
+		else
+			$alternatives_cmd --install \
+				/usr/sbin/sendmail mta $QmailHOME/bin/sendmail 120 \
+				--slave /usr/share/man/man8/sendmail.8.gz mta-sendmailman \
+					$QmailHOME/man/man8/sendmail.8.gz \
+				--slave /usr/bin/mailq mta-mailq $QmailHOME/bin/qmail-qread \
+				--slave /usr/share/man/man1/mailq.1.gz mta-mailqman \
+					$QmailHOME/man/man8/qmail-qread.8.gz \
+				--slave /usr/bin/rmail mta-rmail $QmailHOME/bin/rmail \
+				--slave /usr/share/man/man8/rmail.8.gz mta-rmailman $QmailHOME/man/man8/rmail.8.gz \
+				--slave /usr/bin/newaliases mta-newaliases \
+					$QmailHOME/bin/newaliases \
+				--slave /usr/share/man/man1/newaliases.1.gz mta-newaliasesman \
+					$QmailHOME/man/man1/newaliases.1.gz \
+				--slave /usr/lib/sendmail mta-sendmail \
+					$QmailHOME/bin/sendmail \
+				--slave /etc/pam.d/smtp mta-pam /etc/pam.d/pam-multi \
+				--initscript indimail
+		fi
 	else
 		for i in /usr/lib/sendmail /usr/sbin/sendmail; do
 			if [ -f $i -a ! -L $i ]; then
@@ -5776,9 +5787,9 @@ remove_startup()
 	if [ -x /usr/sbin/alternatives ] ; then
 		/usr/sbin/alternatives --remove mta $QmailHOME/bin/sendmail
 		/usr/sbin/alternatives --auto mta
-	elif [ -x /usr/sbin/update--alternatives ] ; then
-		/usr/sbin/update-alternatives --remove sendmail-mta $QmailHOME/bin/sendmail
-		/usr/sbin/alternatives --auto sendmail-mta
+	elif [ -x /usr/sbin/update-alternatives ] ; then
+		/usr/sbin/update-alternatives --remove mta $QmailHOME/bin/sendmail
+		/usr/sbin/update-alternatives --auto mta
 	else
 		for i in /usr/lib/sendmail /usr/sbin/sendmail; do
 			if [ -f $i.old -o -L $i.old ]; then

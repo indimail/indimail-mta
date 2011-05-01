@@ -447,6 +447,10 @@ fi
 # The add-boot command installs svscan to be started by init, upstart or launchctl
 #
 echo "adding indimail startup"
+if [ /usr/lib/sm.bin/sendmail ] ; then
+	/usr/sbin/update-alternatives --remove-all sendmail-mta /usr/lib/sm.bin/sendmail || true
+	/usr/sbin/update-alternatives --remove-all sendmail-msp /usr/lib/sm.bin/sendmail || true
+fi
 ${prefix}/sbin/svctool --config=add-boot
 
 if [ $noclamav -eq 0 ] ; then
