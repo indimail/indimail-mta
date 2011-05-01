@@ -125,7 +125,15 @@ AC_ARG_ENABLE(moduledir, [  --enable-moduledir=dir specify PAM module installati
   ])
 AC_DEFINE_UNQUOTED(PAM_MOD_DIR,"$moduledir",full path to PAM Module Directory)
 AC_DEFINE_UNQUOTED(USE_MYSQL,$USE_MYSQL,Use MySQL for primary authentication)
-
+pam_confdir=/etc/pam.d
+for if in /etc/pam.d
+do
+  if test -d $f
+  then
+    pam_confdir=$f
+    break
+  fi
+done
 AC_ARG_ENABLE(mysqlprefix, [  --enable-mysqlprefix=""       MySQL Prefix Directory.],[mysql_prefix=$enableval],[mysql_prefix=""])
 
 if test "$mysql_prefix" = ""
@@ -236,6 +244,7 @@ AC_SUBST(MODFLAGS)
 AC_SUBST(auth_inc)
 AC_SUBST(auth_libs)
 AC_SUBST(moduledir)
+AC_SUBST(pam_confdir)
 AC_SUBST(HOST)
 
 (
