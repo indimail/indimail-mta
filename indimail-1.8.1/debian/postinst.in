@@ -474,10 +474,10 @@ else
 	echo "2. Issue /sbin/init q to start services"
 	count=2
 fi
-echo "You can also use the 'service' command to start indimail"
-echo "sudo service indimail start"
+echo "   You can also use the 'service' command to start indimail"
+echo "   sudo service indimail start"
 count=`expr $count + 1`
-echo "   If you want to use IndiMail to manage MySQL startup, remove"
+echo "$count. If you want to use IndiMail to manage MySQL startup, remove"
 echo "   ${servicedir}/mysql.3306/down"
 count=`expr $count + 1`
 echo "$count. Change your default domain in ${prefix}/control/defaultdomain"
