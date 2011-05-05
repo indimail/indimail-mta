@@ -1,6 +1,16 @@
 #!/bin/sh
+set -e
+#
+# Unpacker for OpenSUSE build service
+#
 version=@version@
+clamav_version=0.97
 libdkim_version=1.3
+courier_version=4.8.2
+bogofilter_version=1.2.2
+fetchmail_version=6.3.19
+nssd_version=1.1
+#
 pam_multi_version=1.1
 altermime_version=0.3.10
 ripmime_version=1.4.0.9
@@ -8,47 +18,38 @@ flash_version=0.9.4
 mpack_version=1.6
 logalert_version=0.3
 fortune_version=1.1
-nssd_version=1.1
-courier_version=4.9.1
-bogofilter_version=1.2.2
-fetchmail_version=6.3.19
-clamav_version=0.97
-
-for i in libdkim-"$libdkim_version" bogofilter-"$bogofilter_version" \
-	altermime-"$altermime_version" ripmime-"$ripmime_version" flash-"$flash_version" \
-	fortune-"$fortune_version" logalert-"$logalert_version" mpack-"$mpack_version" \
-	pam-multi-"$pam_multi_version" qmail-1.03 ucspi-tcp-0.88 \
-	courier-imap-"$courier_version" fetchmail-"$fetchmail_version" nssd-"$nssd_version" clamav-"$clamav_version"
+for i in indimail-"$version" qmail-1.03 ucspi-tcp-0.88 clamav-"$clamav_version" \
+	libdkim-"$libdkim_version" courier-imap-"$courier_version" nssd-"$nssd_version" \
+	pam-multi-"$pam_multi_version" altermime-"$altermime_version" \
+	ripmime-"$ripmime_version" flash-"$flash_version" mpack-"$mpack_version" \
+	logalert-"$logalert_version" fortune-"$fortune_version" \
+	bogofilter-"$bogofilter_version" fetchmail-"$fetchmail_version"
 do
-	if [ "$i" = "ucspi-tcp-0.88" ] ; then
-		j=ucspi-tcp_0.88
-	elif [ "$i" = "pam-multi-"$pam_multi_version"" ] ; then
-		j=pam-multi_"$pam_multi_version"
-	elif [ "$i" = "courier-imap-"$courier_version"" ] ; then
-		j=courier-imap_"$courier_version"
+	/bin/rm -rf $i
+	if [ -f ../SOURCES/$i.tar.gz ] ; then
+		echo "extracting $i.tar.gz"
+		gunzip -c ../SOURCES/$i.tar.gz |tar xf -
+	elif [ -f ../SOURCES/$i.tar.bz2 ] ; then
+		echo "extracting $i.tar.bz2"
+		bzip2 -d -c ../SOURCES/$i.tar.bz2|tar xf -
 	else
-		j=`echo $i | sed s{-{_{g`
-	fi
-	if [ -f $i.tar.bz2 ] ; then
-		echo "Extracting $i.tar.bz2"
-		bzip2 -d -c $i.tar.bz2|tar xf -
-		mv $i.tar.bz2 $j.orig.tar.bz2
-	elif [ -f $i.tar.gz ] ; then
-		echo "Extracting $i.tar.gz"
-		gunzip -c $i.tar.gz|tar xf -
-		mv $i.tar.gz $j.orig.tar.gz
-	elif [ -f $j.orig.tar.gz -o -f $j.orig.tar.bz2 ] ; then
-		continue
-	else
-		echo "Missing archive for $i" >&2
+		echo "no source archive for $i"
 		exit 1
 	fi
+	if [ " $i" = " bogofilter-"$bogofilter_version"" -o " $i" = " fetchmail-"$fetchmail_version"" ] ; then
+		continue
+	fi
 	if [ -f indimail-"$version"/patches/$i.patch.gz ] ; then
-		echo "Patching $i"
-		gunzip -c indimail-"$version"/patches/$i.patch.gz | patch -p0
+		echo "applying patch for $i"
+		gunzip -c indimail-"$version"/patches/$i.patch.gz | patch -p0 > /dev/null
 	elif [ -f indimail-"$version"/patches/$i.patch ] ; then
-		echo "Patching $i"
-		patch -p0 < indimail-"$version"/patches/$i.patch
+		echo "applying patch for $i"
+		patch -p0 < indimail-"$version"/patches/$i.patch > /dev/null
 	fi
 done
+# Local Stuff
+if [ -f ../SOURCES/debian_qmail.patch ] ; then
+	echo "applying debian_qmail.patch"
+	patch -p0 < ../SOURCES/debian_qmail.patch
+fi
 exit 0
