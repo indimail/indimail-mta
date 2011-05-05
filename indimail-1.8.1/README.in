@@ -85,20 +85,20 @@ todo lists, address books, meeting requests, etc. Also, since I have absolutely 
 of web, I have not been able to provide a webmail. However, folks are using squirrelmail and
 roundcube with IndiMail. For administration, you can use a web administration tool called
 iwebadmin. iwebadmin has its own folder under the indimail project at sourceforge.net. It also
-has its own folder, at openSUSE build service, for the RPM for various linux distros.
+has its own folder, at openSUSE build service, for the RPM/Deb for various linux distros.
 
 Few of the tools for administering virtual domains/users will have a lot in similarity to the
 vpopmail package from inter7.com. The table structures are the same. Plenty of idea/code
 (for managing virtual domains/users) has been borrowed from there (but modified significantly).
 IndiMail comes with a power tcl/tk administration client called indium. indium has its own
 folder under the indimail project at sourceforge.net. It also has its own folder at openSUSE
-build service for the RPM for various linux distros.
+build service for the RPM/Deb for various linux distros.
 
 IndiMail is not a package that is very easy to install from source. Installing from source
 requires you to download multiple original sources of packages like qmail, ucspi-tcp, etc.
 The Installation also involves applying patch to these original packages from the indimail
 patches subdirectory. However if you read the file INSTALL and follow it step by step, there
-should be no problem installing IndiMail. If you are a newbie, the RPM provides an easy way
+should be no problem installing IndiMail. If you are a newbie, the RPM/Deb provides an easy way
 to install the entire package with all features. In case you are a newbie, it will always be
 a pleasure to assist you (at no cost or any obligation) with the installation and please feel
 free to email me. In my experience, it has taken 2-3 email exchanges for newbies to get going.
@@ -324,7 +324,7 @@ the bleeding edge rpms at
 http://download.opensuse.org/repositories/home:/mbhangui/
 
 
-You will also find the RPMs for both 32bit and 64bit OS on the above
+You will also find the RPMs/Deb for both 32bit and 64bit OS on the above
 repositories
 
 Currently, the list of supported distributions for IndiMail is (for
@@ -334,7 +334,7 @@ both 32 and 64 bit) are
           o openSUSE 11.4
           o openSUSE 11.3
           o openSUSE 11.2
-		  o openSUSE Tumbleweed
+          o openSUSE Tumbleweed
           o SUSE Linux Enterprise 11 SP1
           o SUSE Linux Enterprise 11
           o SUSE Linux Enterprise 10
@@ -348,12 +348,20 @@ both 32 and 64 bit) are
           o Red Hat Enterprise Linux 6
           o CentOS 5
 
+    * Debian
+          o Debian 6.0
+          o Debian 5.0
+          o Ubuntu 11.04
+          o Ubuntu 10.10
+          o Ubuntu 10.04
+          o Ubuntu  9.10
 
-iwebadmin RPM download
+
+iwebadmin RPM/Deb download
 ----------------------
 http://download.opensuse.org/repositories/home:/indimail:/iwebadmin/
 
-indium RPM download
+indium RPM/Deb download
 -------------------
 http://download.opensuse.org/repositories/home:/indimail:/indium/
 

@@ -24,7 +24,7 @@ http://downloads.sourceforge.net/indimail/INSTALL-RPM-@version@
 
 This document is complicated as it involves installing from multiple sources. However, there
 is a crash course on IndiMail installation if you want to skip the above
-two documents and directly install from the RPM. Read the file Quick-INSTALL-@version@.
+two documents and directly install from the RPM/Deb. Read the file Quick-INSTALL-@version@.
 You will also find the file as
 http://downloads.sourceforge.net/indimail/Quick-INSTALL-@version@
 
@@ -330,7 +330,7 @@ the installation.
     % wget http://downloads.sourceforge.net/indimail/package.checksums # MD5 sum of all the packages
     % wget http://downloads.sourceforge.net/indimail/indimail-@version@.tar.gz
     % wget http://downloads.sourceforge.net/indimail/libdkim-1.3.tar.gz
-	% wget http://downloads.sourceforge.net/courier/courier-imap-4.9.1.tar.bz2
+    % wget http://downloads.sourceforge.net/courier/courier-imap-4.9.1.tar.bz2
     % wget http://downloads.sourceforge.net/indimail/flash-0.9.4.tar.gz
     % wget http://downloads.sourceforge.net/indimail/altermime-0.3.10.tar.gz
     % wget http://downloads.sourceforge.net/indimail/ripmime-1.4.0.9.tar.gz
@@ -1272,7 +1272,7 @@ facebook    - http://www.facebook.com/pages/indimail/88063516703?_fb_noscript=1
               (You can become a facebook fan of IndiMail at the above link)
 sourceforge - https://sourceforge.net/apps/laconica/indimail/
 
-IndiMail has two YUM / RPM repositories for most of the Linux Distros at
+IndiMail has two YUM / RPM / Deb repositories for most of the Linux Distros at
 http://download.opensuse.org/repositories/home:/indimail/
 &
 http://download.opensuse.org/repositories/home:/mbhangui/

@@ -12,11 +12,11 @@ better.
 You will also find this file as 
 http://downloads.sourceforge.net/indimail/INSTALL-RPM-@version@
 
-IndiMail also has yum repositories for RPM of most of the Linux Distros at
+IndiMail also has yum repositories for RPM/Deb of most of the Linux Distros at
 
 http://download.opensuse.org/repositories/home:/indimail/
 
-The latest RPM (for yet to be released version and can have untested code) can be found at
+The latest RPM/Deb (for yet to be released version and can have untested code) can be found at
 
 http://download.opensuse.org/repositories/home:/mbhangui/
 
@@ -29,11 +29,11 @@ or
 
 # yum install indimail.x86_64
 
-What the RPM does
------------------
+What the RPM/Deb does
+---------------------
 
 It depends on whether you are Installing, upgrading or removing IndiMail using the rpm
-version. Following are the steps carried out during RPM installation.
+version. Following are the steps carried out during RPM/Deb installation.
 
 A) Package Installation/Upgrade
    1. Stops IndiMail services (in case the system already has IndiMail installed)
@@ -68,7 +68,7 @@ B) Package Removal
          @indimaildir@/control, @indimaildir@/users, .qmail files in @indimaildir@/alias,
          domain information in @indimaildir@/domains are not removed.
 
-What the RPM does not do
+What the RPM/Deb does not do
 ------------------------
 1. Install and configure MySQL (See How to install MySQL below)
 2. Configure IndiMail
@@ -106,10 +106,10 @@ Start IndiMail Services
    % sudo /sbin/initctl emit qmailstart  # (if your system uses upstart - ubuntu/fedora10
                                            &above)
        or
-	% sudo /bin/launchctl load /System/Library/LaunchDaemons/indimail.plist
-	% sudo service indimail start        # (If you are on Mac OSX)
+   % sudo /bin/launchctl load /System/Library/LaunchDaemons/indimail.plist
+   % sudo service indimail start        # (If you are on Mac OSX)
 
-The RPM installation deliberately installs MySQL and fetchmail services in down state.
+The RPM/Deb installation deliberately installs MySQL and fetchmail services in down state.
 This is for you to review your MySQL installation and configuration. For fetchmail service
 to run, you need to create @indimaildir@/etc/fetchmailrc file. You can use fetchmailconf
 for configuring fetchmail. To have these services started automatically during reboot,
@@ -135,23 +135,3 @@ How to install MySQL
     % make -s DESTDIR=staging_directory
     % sudo make install-strip DESTDIR=staging_directory
     cd ..
-
-Converting RPM to .deb
-----------------------
-The Ubuntu / Debian systems use the tool dpkg for package management. There is a tool to 
-convert .rpm packages to Debian .deb files using called 'alien'.
-
-Install Alien on your system
-% sudo apt-get update
-% sudo apt-get install alien
-
-Convert the rpm file from .rpm to .deb:
-% sudo alien -ck name-of-rpm-file.rpm
-
-To install .deb packages
-% dpkg -i name-of-created-deb-file.deb
-
-Alternatively you can simply install rpm files. This command converts rpm to deb
-then installs the deb file. After the installation, it will delete the temporary
-.deb created.
-% sudo alien -i name-of-rpm-file.rpm
