@@ -21,20 +21,21 @@ endif
 
 prefix=@indimaildir@
 version=@version@
-clamav_version=0.97
-libdkim_version=1.3
-courier_version=4.8.2
-bogofilter_version=1.2.2
-fetchmail_version=6.3.19
-nssd_version=1.1
+clamav_version=@clamav_version@
+libdkim_version=@libdkim_version@
+courier_version=@courier_version@
+bogofilter_version=@bogofilter_version@
+fetchmail_version=@fetchmail_version@
+nssd_version=@nssd_version@
 #
-pam_multi_version=1.1
-altermime_version=0.3.10
-ripmime_version=1.4.0.9
-flash_version=0.9.4
-mpack_version=1.6
-logalert_version=0.3
-fortune_version=1.1
+pam_multi_version=@pam_multi_version@
+altermime_version=@altermime_version@
+ripmime_version=@ripmime_version@
+flash_version=@flash_version@
+mpack_version=@mpack_version@
+logalert_version=@logalert_version@
+fortune_version=@fortune_version@
+
 #DESTDIR=`pwd`/debian/indimail
 DESTDIR=/usr/src/packages/BUILD/debian/indimail
 

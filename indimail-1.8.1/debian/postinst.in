@@ -36,7 +36,7 @@ nofetchmail=0
 nobogofilter=0
 nodksignature=0
 nopam_multi=0
-default_domain=indimail.org
+default_domain=@defaultdomain@
 
 setperm()
 {
