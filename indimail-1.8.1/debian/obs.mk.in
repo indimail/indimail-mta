@@ -1,0 +1,82 @@
+indimaildir=@indimaildir@
+qmaildir=@qmaildir@
+mysqlbindir=@mysqlbindir@
+moduledir=@moduledir@
+auth_inc=@auth_inc@
+auth_libs=@auth_libs@
+libdir=@libdir@
+logdir=@logdir@
+basepath=@basepath@
+mysql_prefix=@mysql_prefix@
+mysql_incdir=@mysql_incdir@
+mysql_libdir=@mysql_libdir@
+defaultdomain=@defaultdomain@
+version=@version@
+prefix=@prefix@
+#
+clamav_version=0.97
+libdkim_version=1.3
+courier_version=4.8.2
+bogofilter_version=1.2.2
+fetchmail_version=6.3.19
+nssd_version=1.1
+#
+pam_multi_version=1.1
+altermime_version=0.3.10
+ripmime_version=1.4.0.9
+flash_version=0.9.4
+mpack_version=1.6
+logalert_version=0.3
+fortune_version=1.1
+
+all: rules prerm preinst postrm postinst obs_dep_prep
+
+noinst_SCRIPTS = prerm preinst postrm postinst rules obs_deb_prep
+MOSTLYCLEANFILES= prerm preinst postrm postinst rules obs_deb_prep
+
+edit = sed \
+	-e 's,@indimaildir\@,$(indimaildir),g' \
+	-e 's,@qmaildir\@,$(qmaildir),g' \
+	-e 's,@mysqlbindir\@,$(mysqlbindir),g' \
+	-e 's,@moduledir\@,$(moduledir),g' \
+	-e 's,@auth_inc\@,$(auth_inc),g' \
+	-e 's,@auth_libs\@,$(auth_libs),g' \
+	-e 's,@libdir\@,$(libdir),g' \
+	-e 's,@logdir\@,$(logdir),g' \
+	-e 's,@basepath\@,$(basepath),g' \
+	-e 's,@mysql_prefix\@,$(mysql_prefix),g' \
+	-e 's,@mysql_incdir\@,$(mysql_incdir),g' \
+	-e 's,@mysql_libdir\@,$(mysql_libdir),g' \
+	-e 's,@defaultdomain\@,$(defaultdomain),g' \
+	-e 's,@version\@,$(VERSION),g' \
+	-e 's,@VERSION\@,$(VERSION),g' \
+	-e 's,@DESTDIR\@,$(DESTDIR),g' \
+	-e 's,@HOST\@,$(host),g' \
+	-e 's,@DATE\@,$(DATE),g' \
+	-e 's,@clamav_version\@,$(clamav_version),g' \
+	-e 's,@libdkim_version\@,$(libdkim_version),g' \
+	-e 's,@courier_version\@,$(courier_version),g' \
+	-e 's,@bogofilter_version\@,$(bogofilter_version),g' \
+	-e 's,@fetchmail_version\@,$(fetchmail_version),g' \
+	-e 's,@nssd_version\@,$(nssd_version),g' \
+	-e 's,@pam_multi_version\@,$(pam_multi_version),g' \
+	-e 's,@altermime_version\@,$(altermime_version),g' \
+	-e 's,@ripmime_version\@,$(ripmime_version),g' \
+	-e 's,@flash_version\@,$(flash_version),g' \
+	-e 's,@mpack_version\@,$(mpack_version),g' \
+	-e 's,@logalert_version\@,$(logalert_version),g' \
+	-e 's,@fortune_version\@,$(fortune_version),g' \
+	-e 's,@prefix\@,$(prefix),g'
+
+rules: rules.in
+	$(edit) $@.in > $@; chmod +x $@;
+prerm: prerm.in
+	$(edit) $@.in > $@;
+preinst: preinst.in
+	$(edit) $@.in > $@;
+postrm: postrm.in
+	$(edit) $@.in > debian/$@;
+postinst: postinst.in
+	$(edit) $@.in > debian/$@;
+obs_deb_prep: obs_deb_prep.in
+	$(edit) $@.in > debian/$@;
