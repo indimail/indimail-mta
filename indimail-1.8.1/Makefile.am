@@ -161,8 +161,7 @@ indimailsbin_SCRIPTS = myslave controlsync svctool cputime tls-cert-check create
 
 noinst_SCRIPTS = indimail.spec indimail-@VERSION@-rpmlintrc indimail-epm.list \
 	INSTALL INSTALL-RPM INSTALL-MYSQL README-CLUSTER RELEASE-Notes Quick-INSTALL \
-	README INSTALL-MINI vadddomain_handle vadduser_handle prerm preinst postrm postinst \
-	rules obs_deb_prep
+	README INSTALL-MINI vadddomain_handle vadduser_handle obs.mk
 
 post_handle_list = vadddomain vadduser
 
@@ -173,8 +172,7 @@ indimail-@VERSION@-rpmlintrc indimail-epm.list tls-cert-check mailzipper \
 perm_list dbinfo.8 inlookup.8 vadddomain.1 vdeldomain.1 vadduser.1 \
 vdeluser.1 vdelivermail.8 vrenamedomain.1 vrenameuser.1 vpasswd.1 vmoveuser.1 \
 vcfilter.1 indimail.7 svctool.8 indisub.c indimail.mrtg.cfg overquota.sh \
-vadddomain_handle vadduser_handle login_tasks.3 prerm preinst postrm postinst \
-rules authgeneric obs_deb_prep
+vadddomain_handle vadduser_handle login_tasks.3 authgeneric obs.mk
 
 DISTCLEANFILES=.gitignore
 
@@ -785,20 +783,9 @@ cronlist: cronlist.in
 	$(edit) $@.in > $@
 perm_list: perm_list.in
 	$(edit) $@.in > $@
-conffiles: debian/conffiles.in
-	$(edit) debian/$@.in > debian/$@; rm -f $@;ln -sf debian/$@ $@
-rules: debian/rules.in
-	$(edit) debian/$@.in > debian/$@; chmod +x debian/$@; rm -f $@;ln -sf debian/$@ $@
-prerm: debian/prerm.in
-	$(edit) debian/$@.in > debian/$@; rm -f $@;ln -sf debian/$@ $@
-preinst: debian/preinst.in
-	$(edit) debian/$@.in > debian/$@; rm -f $@;ln -sf debian/$@ $@
-postrm: debian/postrm.in
-	$(edit) debian/$@.in > debian/$@; rm -f $@;ln -sf debian/$@ $@
-postinst: debian/postinst.in
-	$(edit) debian/$@.in > debian/$@; rm -f $@;ln -sf debian/$@ $@
-obs_deb_prep: debian/obs_deb_prep.in
-	$(edit) debian/$@.in > debian/$@; rm -f $@;ln -sf debian/$@ $@
+obs.mk: debian/obs.mk.in
+	$(edit) debian/$@.in > debian/$@;/bin/rm -f $@;ln -s debian/$@ $@
+
 INSTALL: INSTALL.in configure.in
 	$(edit) $@.in > doc/$@.indimail; rm -f $@;ln -sf doc/$@.indimail $@
 Quick-INSTALL: Quick-INSTALL.in configure.in
