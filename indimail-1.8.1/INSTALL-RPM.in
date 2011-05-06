@@ -12,7 +12,7 @@ better.
 You will also find this file as 
 http://downloads.sourceforge.net/indimail/INSTALL-RPM-@version@
 
-IndiMail also has yum repositories for RPM/Deb of most of the Linux Distros at
+IndiMail also has yum/apt-get repositories for RPM/Deb of most of the Linux Distros at
 
 http://download.opensuse.org/repositories/home:/indimail/
 

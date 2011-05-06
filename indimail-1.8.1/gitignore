@@ -82,6 +82,9 @@ debian/files
 debian/indimail.cron.d
 debian/indimail.debhelper.log
 debian/indimail.substvars
-debian/orules
+debian/obs_deb_prep
 debian/patches
 debian/source
+_service
+debian.tar.gz
+dummy.tar.gz
