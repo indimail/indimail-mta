@@ -36,8 +36,7 @@ mpack_version=@mpack_version@
 logalert_version=@logalert_version@
 fortune_version=@fortune_version@
 
-#DESTDIR=`pwd`/debian/indimail
-DESTDIR=/usr/src/packages/BUILD/debian/indimail
+DESTDIR=$(CURDIR)/debian/indimail
 
 prepare: prepare-stamp
 prepare-stamp:
@@ -54,12 +53,12 @@ build-stamp:
 	#
 	# run configure script
 	#
-	if [ -d libdkim-$(libdkim_version) ] ; then cd libdkim-$(libdkim_version) ; ./configure --prefix=$(prefix); cd ..; fi
+	if [ -d libdkim-$(libdkim_version) ] ; then cd libdkim-$(libdkim_version) ; ./configure --prefix=$(prefix) --mandir=$(prefix)/man ; cd ..; fi
 	FAKED_MODE=1;export FAKED_MODE;cd indimail-$(version);autoreconf -fi;./configure --prefix=$(prefix) --libexecdir=$(prefix)/libexec --mandir=$(prefix)/man --sysconfdir=$(prefix)/etc --enable-qmaildir=$(prefix) --enable-tcprules-prog=$(prefix)/bin/tcprules --enable-tcpserver-file=$(prefix)/etc/tcp.smtp --enable-mysqlprefix=/usr --enable-moduledir=/lib/security `cat config/indimail.opts`;cd ..;unset FAKED_MODE
-	if [ -d courier-imap-$(courier_version) ] ; then cd courier-imap-$(courier_version) ; ./configure --prefix=$(prefix) `cat ../indimail-$(version)/config/courier-imap.opts`; cd ..; fi
+	if [ -d courier-imap-$(courier_version) ] ; then cd courier-imap-$(courier_version) ; ./configure --prefix=$(prefix) --mandir=$(prefix)/man `cat ../indimail-$(version)/config/courier-imap.opts`; cd ..; fi
 	if [ -d bogofilter-$(bogofilter_version) ] ; then cd bogofilter-$(bogofilter_version) ; ./configure --prefix=$(prefix) --sysconfdir=$(prefix)/etc --libexecdir=$(prefix)/libexec --mandir=$(prefix)/man `cat ../indimail-$(version)/config/bogofilter.opts`; cd ..; fi
 	if [ -d fetchmail-$(fetchmail_version) ] ; then cd fetchmail-$(fetchmail_version); ./configure --prefix=$(prefix) --enable-indimail --enable-indimaildir=$(prefix) --libexecdir=$(prefix)/libexec --mandir=$(prefix)/man `cat ../indimail-$(version)/config/fetchmail.opts`; cd ..; fi
-	if [ -d nssd-$(nssd_version) ] ; then cd nssd-$(nssd_version) ; ./configure --prefix=$(prefix) --sysconfdir=$(prefix)/etc --enable-mysqlprefix=/usr `cat ../indimail-$(version)/config/nssd.opts`; cd ..; fi
+	if [ -d nssd-$(nssd_version) ] ; then cd nssd-$(nssd_version) ; ./configure --prefix=$(prefix) --sysconfdir=$(prefix)/etc --mandir=$(prefix)/man --enable-mysqlprefix=/usr `cat ../indimail-$(version)/config/nssd.opts`; cd ..; fi
 	if [ -d clamav-$(clamav_version) ] ; then  cd clamav-$(clamav_version) ; ./configure --prefix=$(prefix) --sysconfdir=$(prefix)/etc --with-dbdir=$(prefix)/share/clamd --libexecdir=$(prefix)/libexec --mandir=$(prefix)/man `cat ../indimail-$(version)/config/clamav.opts`; cd ..; fi
 	#
 	# run make

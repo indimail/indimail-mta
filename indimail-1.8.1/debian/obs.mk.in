@@ -29,7 +29,10 @@ mpack_version=1.6
 logalert_version=0.3
 fortune_version=1.1
 
-all: rules prerm preinst postrm postinst obs_deb_prep debian.tar.gz dummy.tar.gz
+all: rules prerm preinst postrm postinst obs_deb_prep _service debian.tar.gz dummy.tar.gz
+
+clean:
+	/bin/rm -f rules prerm preinst postrm postinst obs_deb_prep debian.tar.gz dummy.tar.gz
 
 noinst_SCRIPTS = prerm preinst postrm postinst rules obs_deb_prep
 MOSTLYCLEANFILES= prerm preinst postrm postinst rules obs_deb_prep dummy.tar.gz \
@@ -49,8 +52,7 @@ edit = sed \
 	-e 's,@mysql_incdir\@,$(mysql_incdir),g' \
 	-e 's,@mysql_libdir\@,$(mysql_libdir),g' \
 	-e 's,@defaultdomain\@,$(defaultdomain),g' \
-	-e 's,@version\@,$(VERSION),g' \
-	-e 's,@VERSION\@,$(VERSION),g' \
+	-e 's,@version\@,$(version),g' \
 	-e 's,@DESTDIR\@,$(DESTDIR),g' \
 	-e 's,@HOST\@,$(host),g' \
 	-e 's,@DATE\@,$(DATE),g' \
@@ -71,16 +73,18 @@ edit = sed \
 
 rules: rules.in
 	$(edit) $@.in > $@; chmod +x $@;
+_service: _service.in
+	$(edit) $@.in > $@; chmod +x $@;
 prerm: prerm.in
 	$(edit) $@.in > $@;
 preinst: preinst.in
 	$(edit) $@.in > $@;
 postrm: postrm.in
-	$(edit) $@.in > debian/$@;
+	$(edit) $@.in > $@;
 postinst: postinst.in
-	$(edit) $@.in > debian/$@;
+	$(edit) $@.in > $@;
 obs_deb_prep: obs_deb_prep.in
-	$(edit) $@.in > debian/$@;
+	$(edit) $@.in > $@;
 dummy.tar.gz: README
 	tar cf - README |gzip > $@
 debian.tar.gz: copyright preinst.in postinst.in prerm.in postrm.in rules.in obs_deb_prep
