@@ -29,10 +29,11 @@ mpack_version=1.6
 logalert_version=0.3
 fortune_version=1.1
 
-all: rules prerm preinst postrm postinst obs_dep_prep
+all: rules prerm preinst postrm postinst obs_deb_prep debian.tar.gz dummy.tar.gz
 
 noinst_SCRIPTS = prerm preinst postrm postinst rules obs_deb_prep
-MOSTLYCLEANFILES= prerm preinst postrm postinst rules obs_deb_prep
+MOSTLYCLEANFILES= prerm preinst postrm postinst rules obs_deb_prep dummy.tar.gz \
+				  debian.tar.gz
 
 edit = sed \
 	-e 's,@indimaildir\@,$(indimaildir),g' \
@@ -80,3 +81,8 @@ postinst: postinst.in
 	$(edit) $@.in > debian/$@;
 obs_deb_prep: obs_deb_prep.in
 	$(edit) $@.in > debian/$@;
+dummy.tar.gz: README
+	tar cf - README |gzip > $@
+debian.tar.gz: copyright preinst.in postinst.in prerm.in postrm.in rules.in obs_deb_prep
+	tar cf - copyright preinst postinst prerm postrm rules control changelog \
+		obs_deb_prep|gzip > $@
