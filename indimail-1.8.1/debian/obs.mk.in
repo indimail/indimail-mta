@@ -87,6 +87,7 @@ obs_deb_prep: obs_deb_prep.in
 	$(edit) $@.in > $@;
 dummy.tar.gz: README
 	tar cf - README |gzip > $@
-debian.tar.gz: copyright preinst.in postinst.in prerm.in postrm.in rules.in obs_deb_prep
+debian.tar.gz: copyright preinst postinst prerm postrm rules control changelog \
+compat obs_deb_prep
 	tar cf - copyright preinst postinst prerm postrm rules control changelog \
 		obs_deb_prep|gzip > $@
