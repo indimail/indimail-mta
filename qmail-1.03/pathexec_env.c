@@ -1,5 +1,8 @@
 /*
  * $Log: pathexec_env.c,v $
+ * Revision 1.4  2011-05-07 15:58:21+05:30  Cprogrammer
+ * removed unused variable
+ *
  * Revision 1.3  2010-06-08 21:59:53+05:30  Cprogrammer
  * return allocated environment variable
  *
@@ -42,7 +45,6 @@ pathexec_env(char *s, char *t)
 char **
 pathexec(char **argv)
 {
-	char           *path;
 	char          **e;
 	unsigned int    elen;
 	unsigned int    i;
@@ -92,7 +94,7 @@ pathexec(char **argv)
 void
 getversion_pathexec_env_c()
 {
-	static char    *x = "$Id: pathexec_env.c,v 1.3 2010-06-08 21:59:53+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: pathexec_env.c,v 1.4 2011-05-07 15:58:21+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

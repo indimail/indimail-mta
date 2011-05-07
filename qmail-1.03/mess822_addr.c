@@ -1,5 +1,8 @@
 /*
  * $Log: mess822_addr.c,v $
+ * Revision 1.4  2011-05-07 15:58:45+05:30  Cprogrammer
+ * removed unused variable
+ *
  * Revision 1.3  2004-10-22 20:27:26+05:30  Cprogrammer
  * added RCS id
  *
@@ -60,8 +63,6 @@ static int
 doit(out)
 	stralloc       *out;
 {
-	int             i;
-
 	if (!state)
 		return 1;
 	if (!stralloc_0(out))
@@ -272,7 +273,7 @@ mess822_addrlist(out, in)
 void
 getversion_mess822_addr_c()
 {
-	static char    *x = "$Id: mess822_addr.c,v 1.3 2004-10-22 20:27:26+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: mess822_addr.c,v 1.4 2011-05-07 15:58:45+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

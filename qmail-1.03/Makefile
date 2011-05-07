@@ -3350,6 +3350,12 @@ strerr.h error.h fd.h getln.h stralloc.h gen_alloc.h mess822.h \
 caltime.h caldate.h exit.h
 	./compile 822body.c
 
+mess822_when.o: compile mess822_when.c case.h str.h scan.h mess822.h
+	./compile mess822_when.c
+
+mess822_line.o: compile mess822_line.c case.h str.h mess822.h
+	./compile mess822_line.c
+
 mess822.a: \
 makelib mess822_date.o mess822_quote.o mess822_fold.o mess822_token.o \
 mess822_addr.o mess822_when.o mess822_line.o mess822_ok.o

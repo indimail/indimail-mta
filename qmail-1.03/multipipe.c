@@ -1,5 +1,8 @@
 /*
  * $Log: multipipe.c,v $
+ * Revision 1.3  2011-05-07 15:57:11+05:30  Cprogrammer
+ * added error checks
+ *
  * Revision 1.2  2004-10-22 20:27:36+05:30  Cprogrammer
  * added RCS id
  *
@@ -40,18 +43,25 @@
 void
 err(const char *msg)
 {
-	write(2, "multipipe: Error: ", 18);
-	write(2, msg, strlen(msg));
-	write(2, "\n", 1);
+	if (write(2, "multipipe: Error: ", 18) == -1)
+		_exit(111);
+	if (write(2, msg, strlen(msg)) == -1)
+		_exit(111);
+	if (write(2, "\n", 1) == -1)
+		_exit(111);
 }
 
 void
 err2(const char *msg1, const char *msg2)
 {
-	write(2, "multipipe: Error: ", 18);
-	write(2, msg1, strlen(msg1));
-	write(2, msg2, strlen(msg2));
-	write(2, "\n", 1);
+	if (write(2, "multipipe: Error: ", 18) == -1)
+		_exit(111);
+	if (write(2, msg1, strlen(msg1)) == -1)
+		_exit(111);
+	if (write(2, msg2, strlen(msg2)) == -1)
+		_exit(111);
+	if (write(2, "\n", 1) == -1)
+		_exit(111);
 }
 
 void
@@ -171,10 +181,11 @@ void
 start_reader(struct reader *reader)
 {
 	int             fd[2];
+
 	if (pipe(fd))
 	{
 		err2("Could not create pipe to reader ", reader->name);
-		return;
+		_exit(111);
 	}
 	reader->pid = start_supervise(reader->name, fd[0], FD_STDOUT);
 	close(fd[0]);
@@ -242,11 +253,13 @@ scan_dirs(void)
 		if (!S_ISDIR(statbuf.st_mode))
 			continue;
 		for (reader = readers; reader; reader = reader->next)
+		{
 			if (reader->inode == statbuf.st_ino)
 			{
 				reader->marked = true;
 				break;
 			}
+		}
 		if (!reader)
 		{
 			add_reader(entry->d_name, statbuf.st_ino);
@@ -296,6 +309,7 @@ void
 read_event(void)
 {
 	char            buf[1];
+
 	if (read(selfpipe[0], buf, 1) != 1)
 		return;
 	switch (buf[0])
@@ -412,7 +426,7 @@ main(int argc, char **argv)
 void
 getversion_multipipe_c()
 {
-	static char    *x = "$Id: multipipe.c,v 1.2 2004-10-22 20:27:36+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: multipipe.c,v 1.3 2011-05-07 15:57:11+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
