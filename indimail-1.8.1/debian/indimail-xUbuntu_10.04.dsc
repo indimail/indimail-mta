@@ -10,4 +10,4 @@ Homepage: http://indimail.sourceforge.net
 Debtransform-Files-Tar: debian.tar.gz
 Debtransform-Tar: dummy.tar.gz
 Standards-Version: 3.8.4
-Build-Depends: cdbs, debhelper (>= 7.0.50~), gcc, g++, libssl-dev, libmysqlclient16 (>= 5.1), libmysqlclient16-dev, libreadline5, libreadline-dev, libncurses5 (>= 5.7), libncurses5-dev (>= 5.7), bison (>= 1.2), flex (>= 2.5), libpam0g-dev, libidn11-dev, libdb4.8-dev, mime-support, m4, gawk
+Build-Depends: cdbs, debhelper (>= 7.0.50~), gcc, g++, libldap2-dev, libssl-dev, libmysqlclient16 (>= 5.1), libmysqlclient16-dev, libreadline5, libreadline-dev, libncurses5 (>= 5.7), libncurses5-dev (>= 5.7), bison (>= 1.2), flex (>= 2.5), libpam0g-dev, libidn11-dev, libdb4.8-dev, mime-support, m4, gawk
