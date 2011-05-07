@@ -1,5 +1,8 @@
 /*
  * $Log: mess822_line.c,v $
+ * Revision 1.4  2011-05-07 15:57:43+05:30  Cprogrammer
+ * added headers for str & case function prototypes
+ *
  * Revision 1.3  2004-10-22 20:27:29+05:30  Cprogrammer
  * added RCS id
  *
@@ -11,6 +14,8 @@
  *
  */
 #include "mess822.h"
+#include "case.h"
+#include "str.h"
 
 int
 mess822_begin(h, a)
@@ -140,7 +145,7 @@ mess822_line(h, s)
 void
 getversion_mess822_line_c()
 {
-	static char    *x = "$Id: mess822_line.c,v 1.3 2004-10-22 20:27:29+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: mess822_line.c,v 1.4 2011-05-07 15:57:43+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

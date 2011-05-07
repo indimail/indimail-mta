@@ -1,5 +1,8 @@
 /*
  * $Log: mess822_when.c,v $
+ * Revision 1.3  2011-05-07 15:58:11+05:30  Cprogrammer
+ * added headers for str & case function prototypes
+ *
  * Revision 1.2  2004-10-22 20:27:32+05:30  Cprogrammer
  * added RCS id
  *
@@ -9,6 +12,8 @@
  */
 #include "mess822.h"
 #include "scan.h"
+#include "str.h"
+#include "case.h"
 
 static stralloc tokens = { 0 };
 static struct caltime ct;
@@ -275,7 +280,7 @@ mess822_when(out, in)
 void
 getversion_mess822_when_c()
 {
-	static char    *x = "$Id: mess822_when.c,v 1.2 2004-10-22 20:27:32+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: mess822_when.c,v 1.3 2011-05-07 15:58:11+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
