@@ -85,6 +85,7 @@ debian/indimail.substvars
 debian/obs_deb_prep
 debian/patches
 debian/source
-_service
-debian.tar.gz
-dummy.tar.gz
+debian/conffiles
+debian/_service
+debian/debian.tar.gz
+debian/dummy.tar.gz
