@@ -28,13 +28,10 @@ rmdir=/bin/rmdir
 ####################################
 noproxy=0
 nocourierimap=0
-nolibdkim=0
 noclamav=0
 nofetchmail=0
 nobogofilter=0
 nonssd=0
-nodksignature=0
-nopam_multi=0
 default_domain=@defaultdomain@
 
 ID=`id -u`

@@ -83,7 +83,7 @@ clean:
 install: build
 	dh_testdir
 	dh_testroot
-	dh_prep # this is what dh_clean -k does
+	dh_prep || dh_clean -k
 	dh_installdirs
 	if [ -d libdkim-$(libdkim_version) ] ; then       $(MAKE) -s install -C libdkim-$(libdkim_version) DESTDIR=$(DESTDIR); fi
 	if [ -d ucspi-tcp-0.88 ] ; then                   $(MAKE) -s install -C ucspi-tcp-0.88 DESTDIR=$(DESTDIR); fi
