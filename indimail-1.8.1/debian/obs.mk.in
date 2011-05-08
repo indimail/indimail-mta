@@ -32,7 +32,7 @@ fortune_version=1.1
 all: rules prerm preinst postrm postinst obs_deb_prep _service debian.tar.gz dummy.tar.gz
 
 clean:
-	/bin/rm -f rules prerm preinst postrm postinst obs_deb_prep debian.tar.gz dummy.tar.gz
+	/bin/rm -f rules prerm preinst postrm postinst obs_deb_prep _service debian.tar.gz dummy.tar.gz
 
 noinst_SCRIPTS = prerm preinst postrm postinst rules obs_deb_prep
 MOSTLYCLEANFILES= prerm preinst postrm postinst rules obs_deb_prep dummy.tar.gz \
@@ -74,7 +74,7 @@ edit = sed \
 rules: rules.in
 	$(edit) $@.in > $@; chmod +x $@;
 _service: _service.in
-	$(edit) $@.in > $@; chmod +x $@;
+	$(edit) $@.in > $@;
 prerm: prerm.in
 	$(edit) $@.in > $@;
 preinst: preinst.in
@@ -90,4 +90,4 @@ dummy.tar.gz: README
 debian.tar.gz: copyright preinst postinst prerm postrm rules control changelog \
 compat obs_deb_prep
 	tar cf - copyright preinst postinst prerm postrm rules control changelog \
-		obs_deb_prep|gzip > $@
+		compat obs_deb_prep|gzip > $@
