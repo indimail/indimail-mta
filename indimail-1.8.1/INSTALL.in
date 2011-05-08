@@ -647,10 +647,11 @@ the installation.
     % gunzip -c indimail-@version@/patches/fetchmail-6.3.19.patch.gz | patch -p0
     % cd fetchmail-6.3.19
     % autoreconf -fi
-    % ./configure --prefix=@indimaildir@ --enable-indimail --enable-indimaildir=@indimaildir@ \
-        --with-ssl \
+    % ./configure --prefix=@indimaildir@ --enable-indimail \
+        --enable-indimaildir=@indimaildir@ \
         --libexecdir=@indimaildir@/libexec \
-        --mandir=@indimaildir@/man
+        --mandir=@indimaildir@/man \
+        --with-ssl
     % make -s [DESTDIR=staging_directory]
     % sudo make -s install-strip [DESTDIR=staging_directory]
     % cd ..
@@ -669,6 +670,7 @@ the installation.
     % gunzip -c nssd-1.1.tar.gz | tar xf -
     % cd nssd-1.1
     % ./configure --prefix=@indimaildir@ --sysconfdir=@indimaildir@/etc \
+        --mandir=@indimaildir@/man \
         --enable-mysqlincdir=@mysql_incdir@ \
         --enable-mysqllibdir=@mysql_libdir@ \
         --libdir=/usr/lib \ # replace with /usr/lib64 on a 64bit system
@@ -688,8 +690,8 @@ the installation.
     % cd iwebadmin-1.0
     % ./configure --enable-indimaildir=@indimaildir@ \
         --enable-ezmlmdir=@indimaildir@ \
-        --enable-qmaildir=@indimaildir@ \
-        --disable-ipauth --disable-trivial-password --enable-modify-quota \
+        --disable-ipauth --disable-trivial-password \
+        --enable-modify-quota \
         --enable-mysqlprefix=@mysql_prefix@ \
         --enable-htmldir=/var/www/html \
         --enable-cgibindir=/var/www/cgi-bin \
