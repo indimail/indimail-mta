@@ -1,0 +1,38 @@
+indimaildir=@indimaildir@
+mysql_prefix=@mysql_prefix@
+prefix=@prefix@
+htmldir=@htmldir@
+htmllibdir=@htmllibdir@
+sys_libdir=@sys_libdir@
+cgibindir=@cgibindir@
+imagedir=@imagedir@
+version=@version@
+#
+
+all: rules _service debian.tar.gz dummy.tar.gz
+
+clean:
+	/bin/rm -f _service rules debian.tar.gz dummy.tar.gz
+
+noinst_SCRIPTS = rules
+MOSTLYCLEANFILES= rules dummy.tar.gz debian.tar.gz
+
+edit = sed \
+	-e 's,@indimaildir\@,$(indimaildir),g' \
+	-e 's,@mysql_prefix\@,$(mysql_prefix),g' \
+	-e 's,@htmldir\@,$(htmldir),g' \
+	-e 's,@htmllibdir\@,$(htmllibdir),g' \
+	-e 's,@sys_libdir\@,$(sys_libdir),g' \
+	-e 's,@cgibindir\@,$(cgibindir),g' \
+	-e 's,@imagedir\@,$(imagedir),g' \
+	-e 's,@version\@,$(version),g' \
+	-e 's,@prefix\@,$(prefix),g'
+
+rules: rules.in
+	$(edit) $@.in > $@; chmod +x $@;
+_service: _service.in
+	$(edit) $@.in > $@
+dummy.tar.gz: README
+	tar cf - README |gzip > $@
+debian.tar.gz: copyright
+	tar cf - copyright rules control changelog |gzip > $@

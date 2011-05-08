@@ -222,7 +222,7 @@ main(argc, argv)
 			if (*Domain == '\0') {
 				snprintf(StatusMessage, sizeof (StatusMessage), "%s", html_text[198]);
 			} else {
-				chdir(RealDir);
+				(void) chdir(RealDir);
 				load_limits();
 				pw = vauth_getpw(User, Domain);
 				if (pw == NULL) {
@@ -272,7 +272,7 @@ main(argc, argv)
 		qmailadmin_suid(Gid, Uid);
 		/*- Authenticate a user and domain admin */
 		if (strlen(Domain) > 0) {
-			chdir(RealDir);
+			(void) chdir(RealDir);
 			load_limits();
 
 			pw = vauth_getpw(Username, Domain);
