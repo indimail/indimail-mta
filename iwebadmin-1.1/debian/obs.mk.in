@@ -9,10 +9,10 @@ imagedir=@imagedir@
 version=@version@
 #
 
-all: rules _service debian.tar.gz dummy.tar.gz
+all: rules debian.tar.gz dummy.tar.gz
 
 clean:
-	/bin/rm -f _service rules debian.tar.gz dummy.tar.gz
+	/bin/rm -f rules debian.tar.gz dummy.tar.gz
 
 noinst_SCRIPTS = rules
 MOSTLYCLEANFILES= rules dummy.tar.gz debian.tar.gz
@@ -34,5 +34,5 @@ _service: _service.in
 	$(edit) $@.in > $@
 dummy.tar.gz: README
 	tar cf - README |gzip > $@
-debian.tar.gz: copyright
+debian.tar.gz: copyright rules control changelog
 	tar cf - copyright rules control changelog |gzip > $@
