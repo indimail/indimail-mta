@@ -1,12 +1,11 @@
 @SET_MAKE@
+ACLOCAL_AMFLAGS=-I m4
 
 EXTRA_DIST=BUGS FAQ TRANSLATORS README.hooks html lang images contrib
 
 htmllibdir=@htmllibdir@
 htmldir=@htmldir@
 imagedir=@imagedir@
-QA_PACKAGE=@QA_PACKAGE@
-QA_VERSION=@QA_VERSION@
 
 #
 # Install qmailadmin setuid to @indimailuser@
@@ -28,14 +27,16 @@ COMMONSOURCES=qmailadmin.c alias.c autorespond.c forward.c mailinglist.c \
 qmailadmin_SOURCES=$(COMMONSOURCES) 
 qmailadmin_LDADD=@auth_libs@
 
-noinst_SCRIPTS = iwebadmin.spec iwebadmin-@VERSION@-rpmlintrc
+noinst_SCRIPTS = iwebadmin.spec iwebadmin-@VERSION@-rpmlintrc obs.mk
 
-MOSTLYCLEANFILES = iwebadmin.spec iwebadmin-@VERSION@-rpmlintrc
+MOSTLYCLEANFILES = iwebadmin.spec iwebadmin-@VERSION@-rpmlintrc obs.mk
 
 edit = sed \
 	-e 's,@indimaildir\@,$(indimaildir),g' \
+	-e 's,@mysql_prefix\@,$(mysql_prefix),g' \
 	-e 's,@htmldir\@,$(htmldir),g' \
 	-e 's,@htmllibdir\@,$(htmllibdir),g' \
+	-e 's,@sys_libdir\@,$(sys_libdir),g' \
 	-e 's,@cgibindir\@,$(cgibindir),g' \
 	-e 's,@imagedir\@,$(imagedir),g' \
 	-e 's,@version\@,$(VERSION),g' \
@@ -61,19 +62,12 @@ iwebadmin.spec: iwebadmin.spec.in
 	($(edit) $@.in;cat doc/ChangeLog) > $@
 iwebadmin-@VERSION@-rpmlintrc: iwebadmin-rpmlintrc.in
 	$(edit) iwebadmin-rpmlintrc.in > $@
+obs.mk: debian/obs.mk.in
+	$(edit) debian/$@.in > debian/$@;/bin/rm -f $@;ln -s debian/$@ $@
 
 DEFS=-I. @auth_incs@
 
 # Maintainer stuff
-
-dist-rpm:
-	cp @QA_PACKAGE@-@QA_VERSION@.tar.gz $$HOME/src/rpm/SOURCES
-	cp @QA_PACKAGE@.spec $$HOME/src/rpm/SPECS
-	cd $$HOME/src/rpm/SPECS && rpm -ba --sign @QA_PACKAGE@.spec
-	rm -rf htmldist
-	mkdir htmldist
-	ln NEWS.html htmldist/index.html
-	ln $$HOME/src/rpm/SRPMS/@QA_PACKAGE@-@QA_VERSION@-1.src.rpm @QA_PACKAGE@-@QA_VERSION@.tar.gz htmldist
 
 dist-hook:
 

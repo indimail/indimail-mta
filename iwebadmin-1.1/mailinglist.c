@@ -160,8 +160,8 @@ show_mailing_list_line(char *user, char *dom, time_t mytime, char *dir)
 #endif
 				continue;
 			}
-			fgets(TmpBuf2, sizeof (TmpBuf2), fs);
-			fclose(fs);
+			(void) fgets(TmpBuf2, sizeof (TmpBuf2), fs);
+			(void) fclose(fs);
 			if (strstr(TmpBuf2, "ezmlm-reject") != 0) {
 				sort_add_entry(&mydirent->d_name[7], 0);
 			}
@@ -218,7 +218,7 @@ int
 ismailing_list(FILE * fs)
 {
 	while (!feof(fs)) {
-		fgets(TmpBuf2, sizeof (TmpBuf2), fs);
+		(void) fgets(TmpBuf2, sizeof (TmpBuf2), fs);
 		if (strstr(TmpBuf2, "ezmlm-reject") != 0 || strstr(TmpBuf2, "ezmlm-send") != 0)
 			return -1;
 	}
@@ -262,7 +262,7 @@ show_mailing_list_line2(char *user, char *dom, time_t mytime, char *dir)
 				printf("%s %s<br>\n", html_text[144], mydirent->d_name);
 				continue;
 			}
-			fgets(TmpBuf2, sizeof (TmpBuf2), fs);
+			(void) fgets(TmpBuf2, sizeof (TmpBuf2), fs);
 			fclose(fs);
 			if (strstr(TmpBuf2, "ezmlm-reject") != 0) {
 				sort_add_entry(&mydirent->d_name[7], 0);
@@ -625,7 +625,7 @@ ezmlm_make(int newlist)
 	 */
 		sprintf(tmp, "%s/%s/digest", RealDir, ActionUser);
 		vdelfiles(tmp, ActionUser, Domain);
-		chdir(RealDir);
+		(void) chdir(RealDir);
 	}
 
 /*
@@ -752,12 +752,16 @@ show_list_group_now(int mod)
 	}
 
 	lowerit(ActionUser);
-	pipe(handles);
+	if (pipe(handles))
+	{
+		vclose();
+		exit(0);
+	}
 
 	pid = fork();
 	if (pid == 0) {
-		close(handles[0]);
-		dup2(handles[1], fileno(stdout));
+		(void) close(handles[0]);
+		(void) dup2(handles[1], fileno(stdout));
 		sprintf(TmpBuf1, "%s/ezmlm-list", EZMLMDIR);
 		if (mod == 1) {
 			sprintf(TmpBuf2, "%s/%s/mod", RealDir, ActionUser);
@@ -848,10 +852,6 @@ show_list_group_now(int mod)
 		close(handles[0]);
 		wait(&pid);
 		snprintf(StatusMessage, sizeof (StatusMessage), "%s\n", html_text[190]);
-	/*
-	 * printf (get_html_text("END_LIST_NAMES")); 
-	 */
-
 	}
 }
 
@@ -1050,7 +1050,11 @@ count_mailinglists()
 				printf(html_text[144], mydirent->d_name);
 				continue;
 			}
-			fgets(TmpBuf2, sizeof (TmpBuf2), fs);
+			if (!fgets(TmpBuf2, sizeof (TmpBuf2), fs))
+			{
+				printf(html_text[144], mydirent->d_name);
+				continue;
+			}
 			if (strstr(TmpBuf2, "ezmlm-reject") != 0) {
 				++CurMailingLists;
 			}
@@ -1674,9 +1678,8 @@ get_mailinglist_prefix(char *prefix)
 	file = fopen(buffer, "r");
 
 	if (file) {
-		fgets(buffer, sizeof (buffer), file);
-		fclose(file);
-
+		(void) fgets(buffer, sizeof (buffer), file);
+		(void) fclose(file);
 		b = buffer;
 		p = prefix;
 		while (*b == '[')

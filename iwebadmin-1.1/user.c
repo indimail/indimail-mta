@@ -125,7 +125,7 @@ show_user_lines(char *user, char *dom, time_t mytime, char *dir)
 		exit(0);
 	}
 
-	fgets(TmpBuf, sizeof (TmpBuf), fs);
+	(void) fgets(TmpBuf, sizeof (TmpBuf), fs);
 	fclose(fs);
 
 	if (*SearchUser) {
@@ -517,7 +517,7 @@ addusernow()
 			vsetuserquota(Newu, Domain, "NOQUOTA");
 		} else if (Quota[0] != 0) {
 			if (quota_to_bytes(qconvert, Quota)) {
-				snprintf(StatusMessage, sizeof (StatusMessage), html_text[314]);
+				snprintf(StatusMessage, sizeof (StatusMessage), "%s", html_text[314]);
 			} else {
 				vsetuserquota(Newu, Domain, qconvert);
 			}
@@ -746,7 +746,7 @@ get_catchall()
 		vclose();
 		exit(0);
 	}
-	fgets(TmpBuf, sizeof (TmpBuf), fs);
+	(void) fgets(TmpBuf, sizeof (TmpBuf), fs);
 	fclose(fs);
 
 	if (strstr(TmpBuf, " bounce-no-mailbox\n") != NULL) {
@@ -968,8 +968,8 @@ modusergo()
 		if (olddotqmail != NULL) {
 			fs = fopen(dotqmailfn, "r");
 			if (fs != NULL) {
-				fread(olddotqmail, sb.st_size, 1, fs);
-				fclose(fs);
+				(void) fread(olddotqmail, sb.st_size, 1, fs);
+				(void) fclose(fs);
 			}
 		}
 	}
