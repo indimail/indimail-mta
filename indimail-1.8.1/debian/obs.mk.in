@@ -29,10 +29,14 @@ mpack_version=1.6
 logalert_version=0.3
 fortune_version=1.1
 
-all: rules prerm preinst postrm postinst obs_deb_prep _service debian.tar.gz dummy.tar.gz
+all: rules prerm preinst postrm postinst obs_deb_prep _service debian.tar.gz dummy.tar.gz \
+indimail-Debian_5.0.dsc indimail-Debian_6.0.dsc indimail-xUbuntu_10.04.dsc \
+indimail-xUbuntu_10.10.dsc indimail-xUbuntu_11.04.dsc indimail-xUbuntu_8.04.dsc \
+indimail-xUbuntu_9.10.dsc
 
 clean:
-	/bin/rm -f rules prerm preinst postrm postinst obs_deb_prep _service debian.tar.gz dummy.tar.gz
+	/bin/rm -f rules prerm preinst postrm postinst obs_deb_prep _service \
+	debian.tar.gz dummy.tar.gz *.dsc
 
 noinst_SCRIPTS = prerm preinst postrm postinst rules obs_deb_prep
 MOSTLYCLEANFILES= prerm preinst postrm postinst rules obs_deb_prep dummy.tar.gz \
@@ -85,6 +89,22 @@ postinst: postinst.in
 	$(edit) $@.in > $@;
 obs_deb_prep: obs_deb_prep.in
 	$(edit) $@.in > $@;
+
+indimail-Debian_5.0.dsc:indimail-Debian_5.0.dsc.in
+	$(edit) $@.in > $@;
+indimail-Debian_6.0.dsc: indimail-Debian_6.0.dsc.in
+	$(edit) $@.in > $@;
+indimail-xUbuntu_10.04.dsc: indimail-xUbuntu_10.04.dsc.in
+	$(edit) $@.in > $@;
+indimail-xUbuntu_10.10.dsc: indimail-xUbuntu_10.10.dsc.in
+	$(edit) $@.in > $@;
+indimail-xUbuntu_11.04.dsc: indimail-xUbuntu_11.04.dsc.in
+	$(edit) $@.in > $@;
+indimail-xUbuntu_8.04.dsc: indimail-xUbuntu_8.04.dsc.in
+	$(edit) $@.in > $@;
+indimail-xUbuntu_9.10.dsc: indimail-xUbuntu_9.10.dsc.in
+	$(edit) $@.in > $@;
+
 dummy.tar.gz: README
 	tar cf - README |gzip > $@
 debian.tar.gz: copyright preinst postinst prerm postrm rules control changelog \

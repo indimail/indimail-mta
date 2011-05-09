@@ -105,6 +105,7 @@ binary-indep: build install
 	dh_fixperms
 	dh_installdeb
 	dh_shlibdeps
+	#dpkg-shlibdeps debian/tmp/usr/bin/* debian/tmp/usr/sbin/* debian/tmp/usr/lib/*
 	dh_gencontrol
 	dh_md5sums
 	dh_builddeb
