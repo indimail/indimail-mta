@@ -9,7 +9,7 @@ imagedir=@imagedir@
 version=@version@
 #
 
-all: rules debian.tar.gz dummy.tar.gz
+all: rules debian.tar.gz dummy.tar.gz iwebadmin-Debian_5.0.dsc
 
 clean:
 	/bin/rm -f rules debian.tar.gz dummy.tar.gz
@@ -30,6 +30,8 @@ edit = sed \
 
 rules: rules.in
 	$(edit) $@.in > $@; chmod +x $@;
+iwebadmin-Debian_5.0.dsc: iwebadmin-Debian_5.0.dsc.in
+	$(edit) $@.in > $@
 _service: _service.in
 	$(edit) $@.in > $@
 dummy.tar.gz: README
