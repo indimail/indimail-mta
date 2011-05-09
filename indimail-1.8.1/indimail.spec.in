@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail.spec.in,v 2.214 2011-04-29 17:54:18+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 2.215 2011-05-09 22:40:34+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %define _unpackaged_files_terminate_build 1
 
@@ -75,6 +75,7 @@
 %define mbase              @basepath@
 %define logdir             @logdir@
 %define servicedir         /service
+%define pam_confdir        /etc/pam.d
 %if %i_m_on_mac == 0
 %define module_dir         /%{_lib}/security
 %else
@@ -891,6 +892,8 @@ fi
 %attr(600,root,root)                              %{_prefix}/etc/imapd.cnf
 %attr(600,root,root)                              %{_prefix}/etc/pop3d.dist
 %attr(600,root,root)                              %{_prefix}/etc/imapd.dist
+%attr(644,root,root) %config(noreplace)           %{pam_confdir}/pop3
+%attr(644,root,root) %config(noreplace)           %{pam_confdir}/imap
 %endif
 
 #
@@ -1308,6 +1311,7 @@ fi
 # pam-multi
 %if %nopam_multi == 0
 %attr(555,root,root)                    %{_prefix}/sbin/pam-checkpwd
+%attr(644,root,root) %config(noreplace) %{pam_confdir}/pam-multi
 %endif
 
 %attr(555,root,qmail)                   %{_prefix}/boot/binm2
