@@ -34,16 +34,18 @@ all: rules indimail.prerm indimail.preinst indimail.postrm indimail.postinst \
 obs_deb_prep _service indimail-devel.install debian.tar.gz dummy.tar.gz \
 indimail-Debian_5.0.dsc indimail-Debian_6.0.dsc indimail-xUbuntu_10.04.dsc \
 indimail-xUbuntu_10.10.dsc indimail-xUbuntu_11.04.dsc indimail-xUbuntu_8.04.dsc \
-indimail-xUbuntu_9.10.dsc
+indimail-xUbuntu_9.10.dsc indimail-devel.postinst
 
 clean:
 	/bin/rm -f rules indimail.prerm indimail.preinst indimail.postrmindimail. postinst \
-	obs_deb_prep _service indimail-devel.install debian.tar.gz dummy.tar.gz *.dsc
+	obs_deb_prep _service indimail-devel.install debian.tar.gz indimail-devel.postinst \
+	dummy.tar.gz *.dsc
 
 noinst_SCRIPTS = indimail.prerm indimail.preinst indimail.postrm indimail.postinst \
-				 rules obs_deb_prep indimail-devel.install
+				 rules obs_deb_prep indimail-devel.install indimail-devel.postinst
 MOSTLYCLEANFILES= indimail.prerm indimail.preinst indimail.postrm indimail.postinst \
-				  rules obs_deb_prep indimail-devel.install dummy.tar.gz debian.tar.gz
+				  rules obs_deb_prep indimail-devel.install indimail-devel.postinst \
+				  dummy.tar.gz debian.tar.gz
 
 edit = sed \
 	-e 's,@indimaildir\@,$(indimaildir),g' \
@@ -93,6 +95,8 @@ indimail.postinst: indimail.postinst.in
 	$(edit) $@.in > $@;
 indimail-devel.install: indimail-devel.install.in
 	$(edit) $@.in > $@;
+indimail-devel.postinst: indimail-devel.postinst.in
+	$(edit) $@.in > $@;
 obs_deb_prep: obs_deb_prep.in
 	$(edit) $@.in > $@;
 
@@ -114,6 +118,7 @@ indimail-xUbuntu_9.10.dsc: indimail-xUbuntu_9.10.dsc.in
 dummy.tar.gz: README
 	tar cf - README |gzip > $@
 debian.tar.gz: copyright indimail.preinst indimail.postinst indimail.prerm indimail.postrm \
-rules control changelog compat indimail-devel.install obs_deb_prep
+rules control changelog compat indimail-devel.install obs_deb_prep indimail-devel.postinst
 	tar cf - copyright indimail.preinst indimail.postinst indimail.prerm indimail.postrm \
-		rules control changelog compat indimail-devel.install obs_deb_prep|gzip > $@
+		rules control changelog compat indimail-devel.install obs_deb_prep \
+		indimail-devel.postinst |gzip > $@

@@ -94,3 +94,4 @@ debian/*postinst
 debian/*preinst
 debian/*prerm
 debian/*postrm
+debian/indimail-devel.install
