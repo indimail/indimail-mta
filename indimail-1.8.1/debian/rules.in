@@ -97,6 +97,7 @@ install: build
 binary-indep: build install
 	dh_testdir
 	dh_testroot
+	dh_install --sourcedir=$(CURDIR)/debian/indimail -pindimail-devel
 	dh_installchangelogs
 	dh_installdocs
 	dh_link
@@ -104,8 +105,8 @@ binary-indep: build install
 	dh_compress
 	dh_fixperms
 	dh_installdeb
+	dh_makeshlibs -V
 	dh_shlibdeps
-	#dpkg-shlibdeps debian/tmp/usr/bin/* debian/tmp/usr/sbin/* debian/tmp/usr/lib/*
 	dh_gencontrol
 	dh_md5sums
 	dh_builddeb
