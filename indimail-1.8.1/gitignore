@@ -90,3 +90,7 @@ debian/_service
 debian/debian.tar.gz
 debian/dummy.tar.gz
 debian/indimail-*.dsc
+debian/*postinst
+debian/*preinst
+debian/*prerm
+debian/*postrm
