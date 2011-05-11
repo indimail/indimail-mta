@@ -2,8 +2,7 @@ Source: indimail
 Section: misc
 Priority: extra
 Maintainer: Manvendra Bhangui <manvendra@indimail.org>
-#Build-Depends: cdbs, debhelper (>= 7.0.50~), gcc, g++, libssl-dev, libmysqlclient16 (>= 5.1), libmysqlclient16-dev (>= 5.1), libreadline5, libreadline-dev, libncurses5 (>= 5.7), libncurses5-dev (>= 5.7), bison (>= 1.2), flex (>= 2.5), libpam0g-dev, libidn11-dev, libdb4.8-dev, mime-support, m4, flex, gawk
-Standards-Version: 3.8.4
+Standards-Version: 3.9.1
 Homepage: http://indimail.sourceforge.net
 Vcs-Git:git://indimail.git.sourceforge.net/gitroot/indimail/indimail
 Vcs-Browser: http://indimail.git.sourceforge.net/git/gitweb.cgi?p=indimail/indimail;a=summary
@@ -11,7 +10,10 @@ Vcs-Browser: http://indimail.git.sourceforge.net/git/gitweb.cgi?p=indimail/indim
 Package: indimail
 Architecture: any
 Depends: ${shlibs:Depends}, ${misc:Depends}
+Breaks: indimail-mini
+Replaces: indimail-mini
 Description: IndiMail is a messaging platform for Mail Service Providers
+ It is built using the following packages
  .
  qmail,
  serialmail,
@@ -37,3 +39,23 @@ Description: IndiMail is a messaging platform for Mail Service Providers
  intermittent connectivity. IndiMail provides ability for a single domain
  to have users across multiple hosts (even across different geographical
  locations) and tools to manage virtual domains ?
+
+Package: indimail-devel
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Section: devel
+Architecture: any
+Description: IndiMail - Development header files and libraries
+ This package contains the development header files and libraries
+ necessary to develop IndiMail client applications.
+
+Package: indimail-mini
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Section: misc
+Architecture: any
+Conflicts: indimail
+Description: IndiMail - Mini Client Installation
+ This package contains sendmail, qmail-inject and qmail-qmqpc - Bare minimum
+ programs to have a mini-indimail installation.
+ .
+ A mini-indimail installation doesn't have a mail queue. It gives each new message to a
+ central server using QMQP.
