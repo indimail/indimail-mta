@@ -11,6 +11,7 @@ mysql_prefix=@mysql_prefix@
 mysql_incdir=@mysql_incdir@
 mysql_libdir=@mysql_libdir@
 defaultdomain=@defaultdomain@
+acl_libdirstem := $(shell basename @libdir@ 2>/dev/null|| echo "lib")
 version=@version@
 prefix=@prefix@
 #
@@ -29,18 +30,20 @@ mpack_version=1.6
 logalert_version=0.3
 fortune_version=1.1
 
-all: rules prerm preinst postrm postinst obs_deb_prep _service debian.tar.gz dummy.tar.gz \
+all: rules indimail.prerm indimail.preinst indimail.postrm indimail.postinst \
+obs_deb_prep _service indimail-devel.install debian.tar.gz dummy.tar.gz \
 indimail-Debian_5.0.dsc indimail-Debian_6.0.dsc indimail-xUbuntu_10.04.dsc \
 indimail-xUbuntu_10.10.dsc indimail-xUbuntu_11.04.dsc indimail-xUbuntu_8.04.dsc \
 indimail-xUbuntu_9.10.dsc
 
 clean:
-	/bin/rm -f rules prerm preinst postrm postinst obs_deb_prep _service \
-	debian.tar.gz dummy.tar.gz *.dsc
+	/bin/rm -f rules indimail.prerm indimail.preinst indimail.postrmindimail. postinst \
+	obs_deb_prep _service indimail-devel.install debian.tar.gz dummy.tar.gz *.dsc
 
-noinst_SCRIPTS = prerm preinst postrm postinst rules obs_deb_prep
-MOSTLYCLEANFILES= prerm preinst postrm postinst rules obs_deb_prep dummy.tar.gz \
-				  debian.tar.gz
+noinst_SCRIPTS = indimail.prerm indimail.preinst indimail.postrm indimail.postinst \
+				 rules obs_deb_prep indimail-devel.install
+MOSTLYCLEANFILES= indimail.prerm indimail.preinst indimail.postrm indimail.postinst \
+				  rules obs_deb_prep indimail-devel.install dummy.tar.gz debian.tar.gz
 
 edit = sed \
 	-e 's,@indimaildir\@,$(indimaildir),g' \
@@ -49,6 +52,7 @@ edit = sed \
 	-e 's,@moduledir\@,$(moduledir),g' \
 	-e 's,@auth_inc\@,$(auth_inc),g' \
 	-e 's,@auth_libs\@,$(auth_libs),g' \
+	-e 's,@acl_libdirstem\@,$(acl_libdirstem),g' \
 	-e 's,@libdir\@,$(libdir),g' \
 	-e 's,@logdir\@,$(logdir),g' \
 	-e 's,@basepath\@,$(basepath),g' \
@@ -79,13 +83,15 @@ rules: rules.in
 	$(edit) $@.in > $@; chmod +x $@;
 _service: _service.in
 	$(edit) $@.in > $@;
-prerm: prerm.in
+indimail.prerm: indimail.prerm.in
 	$(edit) $@.in > $@;
-preinst: preinst.in
+indimail.preinst: indimail.preinst.in
 	$(edit) $@.in > $@;
-postrm: postrm.in
+indimail.postrm: indimail.postrm.in
 	$(edit) $@.in > $@;
-postinst: postinst.in
+indimail.postinst: indimail.postinst.in
+	$(edit) $@.in > $@;
+indimail-devel.install: indimail-devel.install.in
 	$(edit) $@.in > $@;
 obs_deb_prep: obs_deb_prep.in
 	$(edit) $@.in > $@;
@@ -107,7 +113,7 @@ indimail-xUbuntu_9.10.dsc: indimail-xUbuntu_9.10.dsc.in
 
 dummy.tar.gz: README
 	tar cf - README |gzip > $@
-debian.tar.gz: copyright preinst postinst prerm postrm rules control changelog \
-compat obs_deb_prep
-	tar cf - copyright preinst postinst prerm postrm rules control changelog \
-		compat obs_deb_prep|gzip > $@
+debian.tar.gz: copyright indimail.preinst indimail.postinst indimail.prerm indimail.postrm \
+rules control changelog compat indimail-devel.install obs_deb_prep
+	tar cf - copyright indimail.preinst indimail.postinst indimail.prerm indimail.postrm \
+		rules control changelog compat indimail-devel.install obs_deb_prep|gzip > $@
