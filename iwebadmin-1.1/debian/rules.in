@@ -22,7 +22,7 @@ endif
 prefix=@indimaildir@
 version=@version@
 #
-DESTDIR=$(CURDIR)/debian/indimail
+DESTDIR=$(CURDIR)/debian/iwebadmin
 
 build: build-stamp
 build-stamp:
