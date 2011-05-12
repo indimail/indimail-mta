@@ -38,11 +38,6 @@ fortune_version=@fortune_version@
 
 DESTDIR=$(CURDIR)/debian/indimail
 
-prepare: prepare-stamp
-prepare-stamp:
-	cd ..;indimail-$(version)/debian/do_build;cd indimail-$(version)
-	touch prepare-stamp
-
 build: build-stamp
 build-stamp:
 	dh_testdir
@@ -98,6 +93,7 @@ binary-indep: build install
 	dh_testdir
 	dh_testroot
 	dh_install --sourcedir=$(CURDIR)/debian/indimail -pindimail-devel
+	dh_install --sourcedir=$(CURDIR)/debian/indimail -pindimail-mini
 	dh_installchangelogs
 	dh_installdocs
 	dh_link
