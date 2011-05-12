@@ -17,6 +17,9 @@ bindir=@cgibindir@
 bin_PROGRAMS=@CGIBINTARGETS@
 EXTRA_PROGRAMS=qmailadmin
 
+SYSCONFDIR = @sysconfdir@
+sysconf_DATA = iwebadmin_perm_list
+
 qmailadmin_DEPENDENCIES=$(COMMONDEPENDENCIES)
 
 COMMONSOURCES=qmailadmin.c alias.c autorespond.c forward.c mailinglist.c \
@@ -29,7 +32,8 @@ qmailadmin_LDADD=@auth_libs@
 
 noinst_SCRIPTS = iwebadmin.spec iwebadmin-@VERSION@-rpmlintrc obs.mk
 
-MOSTLYCLEANFILES = iwebadmin.spec iwebadmin-@VERSION@-rpmlintrc obs.mk
+MOSTLYCLEANFILES = iwebadmin.spec iwebadmin-@VERSION@-rpmlintrc obs.mk \
+				   iwebadmin_perm_list
 
 edit = sed \
 	-e 's,@indimaildir\@,$(indimaildir),g' \
@@ -64,6 +68,8 @@ iwebadmin-@VERSION@-rpmlintrc: iwebadmin-rpmlintrc.in
 	$(edit) iwebadmin-rpmlintrc.in > $@
 obs.mk: debian/obs.mk.in
 	$(edit) debian/$@.in > debian/$@;/bin/rm -f $@;ln -s debian/$@ $@
+iwebadmin_perm_list: iwebadmin_perm_list.in
+	$(edit) $@.in > $@
 
 DEFS=-I. @auth_incs@
 
@@ -95,3 +101,6 @@ install-data-local:
 		echo "chmod 4555 $(DESTDIR)$(bindir)/qmailadmin"; \
 		chmod 4555 $(DESTDIR)$(bindir)/qmailadmin; \
 	fi
+install-data-hook:
+	$(mkinstalldirs)         $(DESTDIR)@indimaildir@/etc
+	$(INSTALL_DATA) iwebadmin_perm_list $(DESTDIR)@indimaildir@/etc/iwebadmin_perm_list  || exit 1
