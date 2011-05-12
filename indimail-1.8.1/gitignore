@@ -95,3 +95,10 @@ debian/*preinst
 debian/*prerm
 debian/*postrm
 debian/indimail-devel.install
+*/*.substvars
+*/*.debhelper
+debian/indimail-devel
+debian/indimail-mini
+debian/indimail-doc.docs
+debian/indimail-doc.install
+obs_deb_prep
