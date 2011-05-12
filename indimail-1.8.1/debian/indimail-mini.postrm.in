@@ -40,6 +40,12 @@ esac
 #
 if [ " $1" = " remove" ] ; then
 	${rm} -f ${prefix}/bin/qmail-queue ${prefix}/control/idhost || true
+	for i in bin
+	do
+		${rm} -rf ${prefix}/$i || true
+	done
+	${rmdir} --ignore-fail-on-non-empty ${prefix}/control 2>/dev/null || true
+	${rmdir} --ignore-fail-on-non-empty ${prefix} 2>/dev/null || true
 fi
 if [ " $1" = " purge" ] ; then
 	nscd_up=`ps -ef |grep nscd |grep -v grep|wc -l`
