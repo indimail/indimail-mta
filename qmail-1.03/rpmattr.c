@@ -75,12 +75,15 @@ outs_octal(int dec)
 int
 main(int argc, char **argv)
 {
-	int             i;
+	int             i, uid_stat = 1;
 	char           *user, *group;
 	struct stat     statbuf;
 	struct passwd  *pw;
 	struct group   *gr;
 
+	if (!(pw = getpwnam("alias")))
+		uid_stat = 0;
+	else
 	if (uidinit(1) == -1)
 		return (1);
 	for (i = 1;i < argc;i++)
@@ -100,8 +103,9 @@ main(int argc, char **argv)
 		outs_octal(statbuf.st_mode & 07777);
 		if (substdio_puts(&ssout, ",") == -1)
 			return (1);
-		user = get_user(statbuf.st_uid);
-		if (!str_diff(user, "nobody"))
+		if (uid_stat)
+			user = get_user(statbuf.st_uid);
+		if (!uid_stat || !str_diff(user, "nobody"))
 		{
 			pw = getpwuid(statbuf.st_uid);
 			user = pw->pw_name;
@@ -110,8 +114,9 @@ main(int argc, char **argv)
 			return (1);
 		if (substdio_puts(&ssout, ",") == -1)
 			return (1);
-		group = get_group(statbuf.st_gid);
-		if (!str_diff(group, "nobody"))
+		if (uid_stat)
+			group = get_group(statbuf.st_gid);
+		if (!uid_stat || !str_diff(group, "nobody"))
 		{
 			gr = getgrgid(statbuf.st_gid);
 			group = gr->gr_name;
