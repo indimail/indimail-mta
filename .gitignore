@@ -148,6 +148,7 @@ indimail_*.deb
 indimail_*.orig.tar.gz
 logalert-*/src/logalert
 indimail-*/.pc
+iwebadmin*/debian/*.dsc
 iwebadmin-*/.pc
 iwebadmin-*/*.mk
 iwebadmin_*.deb
@@ -156,3 +157,4 @@ iwebadmin_*.changes
 iwebadmin_*.orig.tar.gz
 iwebadmin_*.debian.tar.gz
 *.deb
+*.debhelper.log
