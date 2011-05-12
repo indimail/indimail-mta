@@ -55,8 +55,8 @@ esac
 
 #DEBHELPER#
 
-# we are doing upgrade
-if [ " $1" = " upgrade" ] ; then
+# we are doing upgrade or removal
+if [ " $1" = " upgrade" -o " $1" = " remove"] ; then
 	echo "recreating ld.so cache"
 	/sbin/ldconfig
 	exit 0
@@ -67,25 +67,25 @@ case "$1" in
 	exit 0
     ;;
 esac
-nscd_up=`ps -ef |grep nscd |grep -v grep|wc -l`
-if [ $nscd_up -ge 1 ] ; then
-	if [ -x %{sysconfdir}/init.d/nscd ] ; then
-		%{sysconfdir}/init.d/nscd stop
-	fi
-fi
 #
 # Debian silliness
 #
 if [ " $1" = " purge" ] ; then
+	nscd_up=`ps -ef |grep nscd |grep -v grep|wc -l`
+	if [ $nscd_up -ge 1 ] ; then
+		if [ -x ${sysconfdir}/init.d/nscd ] ; then
+			${sysconfdir}/init.d/nscd stop
+		fi
+	fi
 	echo "purging configuration"
 	for i in alias qmaild qmaill qmailp qmailq qmailr qmails qscand indimail
 	do
-		echo "Removing user $i"
+		echo "removing user $i"
 		/usr/bin/getent passwd $i > /dev/null && /usr/sbin/userdel $i >/dev/null || true
 	done
 	for i in nofiles qmail qscand indimail
 	do
-		echo "Removing group $i"
+		echo "removing group $i"
 		/usr/bin/getent group $i > /dev/null && /usr/sbin/groupdel $i  >/dev/null || true
 	done
 	if [ $nscd_up -ge 1 ] ; then
