@@ -155,3 +155,4 @@ iwebadmin_*.dsc
 iwebadmin_*.changes
 iwebadmin_*.orig.tar.gz
 iwebadmin_*.debian.tar.gz
+*.deb
