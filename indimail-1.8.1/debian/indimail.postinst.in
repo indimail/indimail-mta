@@ -88,9 +88,9 @@ fi
 case "$1" in
     configure)
 		if [ " $2" = " " ] ; then
-		echo "installing version @version@"
+		echo "installing indimail @version@"
 		else
-		echo "upgrading to version $2"
+		echo "upgrading to indimail $2"
 		fi
     ;;
 
@@ -138,7 +138,7 @@ if [ -d ${sysconfdir}/ld.so.conf.d ] ; then
 	(
 		echo @mysql_libdir@
 		echo @libdir@
-	) > ${sysconfdir}/ld.so.conf.d/indimail-`arch`.conf
+	) > ${sysconfdir}/ld.so.conf.d/indimail-`uname -m`.conf
 fi
 /sbin/ldconfig
 
@@ -176,7 +176,7 @@ else
 	ver_opt="none"
 	sign_opt="none"
 fi
-a_arch=`arch`
+a_arch=`uname -m`
 if [ " $a_arch" = " x86_64" ] ; then
 	fetchmail_mem=144857600
 	smtp_soft_mem=104857600
