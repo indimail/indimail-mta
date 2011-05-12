@@ -4,6 +4,7 @@ prefix=@indimaildir@
 sysconfdir=/etc
 rm=/bin/rm
 mv=/bin/mv
+rmdir=/bin/rmdir
 ####################################
 ID=`id -u`
 if [ $ID -ne 0 ] ; then
@@ -30,6 +31,7 @@ esac
 if [ " $1" = " upgrade" ] ; then
 	exit 0
 fi
+
 case "$1" in
     failed-upgrade|abort-install|abort-upgrade|disappear)
 	exit 0
@@ -44,6 +46,7 @@ if [ " $1" = " remove" ] ; then
 	do
 		${rm} -rf ${prefix}/$i || true
 	done
+	${rmdir} --ignore-fail-on-non-empty ${prefix}/bin 2>/dev/null || true
 	${rmdir} --ignore-fail-on-non-empty ${prefix}/control 2>/dev/null || true
 	${rmdir} --ignore-fail-on-non-empty ${prefix} 2>/dev/null || true
 fi

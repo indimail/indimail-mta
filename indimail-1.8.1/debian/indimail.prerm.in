@@ -20,6 +20,7 @@ prefix=@indimaildir@
 sysconfdir=/etc
 rm=/bin/rm
 mv=/bin/mv
+nocourierimap=0
 
 ID=`id -u`
 if [ $ID -ne 0 ] ; then
@@ -128,4 +129,11 @@ else
 	done
 fi
 
+if [ $nocourierimap -eq 0 ] ; then
+	for i in authcustom authpam authpwd
+	do
+		${rm} -f ${prefix}/man/man7/$i || true
+	done
+	${rmdir} --ignore-fail-on-non-empty ${prefix}/man/man7 2>/dev/null || true
+fi
 exit 0

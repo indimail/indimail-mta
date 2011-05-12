@@ -425,7 +425,7 @@ do
 	done
 done
 echo "compressing man pages"
-find ${prefix}/man -type f -exec gzip {} \;
+find ${prefix}/man -type f -exec gzip -q {} \;
 if [ -f ${prefix}/man/man7/authlib.7.gz ] ; then
 	for i in authshadow.7 authpwd.7 authpam.7 authcustom.7
 	do

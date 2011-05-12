@@ -53,6 +53,8 @@ if [ -f ${prefix}/bin/qmail-qmqpc ] ; then
 fi
 cd ${prefix}/bin
 /bin/ln -sf qmail-qmqpc qmail-queue
+echo "compressing man pages"
+find ${prefix}/man -type f -exec gzip -q {} \;
 if [ -f ${sysconfdir}/init.d/sendmail ] ; then
 	${sysconfdir}/init.d/sendmail stop
 	if [ -f /sbin/chkconfig ] ; then
