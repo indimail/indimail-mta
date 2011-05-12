@@ -142,10 +142,12 @@ dummy.tar.gz: README
 	tar cf - README |gzip > $@
 debian.tar.gz: copyright indimail.preinst indimail.postinst indimail.prerm \
 indimail.postrm rules control changelog compat indimail-devel.install \
-obs_deb_prep indimail-devel.postinst indimail-devel.postrm
-	tar cf - copyright indimail.preinst indimail.postinst indimail.prerm indimail.postrm \
-		rules control changelog compat indimail-devel.install obs_deb_prep \
-		indimail-mini.prerm indimail-mini.preinst indimail-mini.postrm \
-		indimail-mini.postinst indimail-devel.postinst indimail-devel.prerm \
-		indimail-mini.prerm indimail-mini.preinst indimail-mini.postrm \
-		indimail-mini.postinst |gzip > $@
+obs_deb_prep indimail-devel.postinst indimail-devel.postrm \
+indimail-mini.prerm indimail-mini.preinst indimail-mini.postrm \
+indimail-mini.postinst indimail-mini.install
+	tar cf - copyright indimail.preinst indimail.postinst indimail.prerm \
+		indimail.postrm rules control changelog compat obs_deb_prep \
+		indimail-devel.install indimail-devel.postinst \
+		indimail-devel.postrm indimail-mini.prerm indimail-mini.preinst \
+		indimail-mini.postrm indimail-mini.postinst indimail-mini.install \
+		|gzip > $@
