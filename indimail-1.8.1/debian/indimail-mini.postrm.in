@@ -38,6 +38,9 @@ esac
 #
 # Debian silliness
 #
+if [ " $1" = " remove" ] ; then
+	${rm} -f ${prefix}/bin/qmail-queue ${prefix}/control/idhost || true
+fi
 if [ " $1" = " purge" ] ; then
 	nscd_up=`ps -ef |grep nscd |grep -v grep|wc -l`
 	if [ $nscd_up -ge 1 ] ; then
@@ -55,5 +58,10 @@ if [ " $1" = " purge" ] ; then
 			${sysconfdir}/init.d/nscd start
 		fi
 	fi
+	for i in bin control
+	do
+		${rm} -rf ${prefix}/$i || true
+	done
+	${rmdir} --ignore-fail-on-non-empty ${prefix} 2>/dev/null || true
 fi
 exit 0

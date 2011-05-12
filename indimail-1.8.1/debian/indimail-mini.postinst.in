@@ -56,17 +56,22 @@ cd ${prefix}/bin
 if [ -f ${sysconfdir}/init.d/sendmail ] ; then
 	${sysconfdir}/init.d/sendmail stop
 	if [ -f /sbin/chkconfig ] ; then
-		/sbin/chkconfig --del sendmail
+		/sbin/chkconfig --del sendmail 2>/dev/null
 	fi
 fi
-if [ -x /usr/sbin/alternatives ] ; then
-	/usr/sbin/alternatives --install \
-		/usr/sbin/sendmail mta ${prefix}/bin/sendmail 120 \
-		--slave /usr/share/man/man8/sendmail.8.gz mta-sendmailman \
+
+if [ -x /usr/sbin/update-alternatives ] ; then
+	if [ /usr/lib/sm.bin/sendmail ] ; then
+		/usr/sbin/update-alternatives --remove-all sendmail-msp || true
+	fi
+	/usr/sbin/update-alternatives --install \
+		/usr/sbin/sendmail-msp sendmail-msp ${prefix}/bin/sendmail 120 \
+		--slave /usr/share/man/man8/sendmail.8.gz sendmail.8.gz \
 			${prefix}/man/man8/sendmail.8.gz \
-		--slave /usr/lib/sendmail mta-sendmail ${prefix}/bin/sendmail \
-		--slave /usr/bin/rmail mta-rmail ${prefix}/bin/rmail
-	/usr/sbin/alternatives --set mta ${prefix}/bin/sendmail
+		--slave /usr/share/man/man8/sendmail-msp.8.gz sendmail-msp.8.gz \
+			${prefix}/man/man8/sendmail.8.gz \
+		--slave /usr/sbin/sendmail sendmail ${prefix}/bin/sendmail \
+		--slave /usr/lib/sendmail lib.sendmail ${prefix}/bin/sendmail
 else
 	for i in /usr/lib/sendmail /usr/sbin/sendmail; do
 		if [ -f $i -a ! -L $i ]; then

@@ -1,5 +1,6 @@
 #!/bin/sh
 set -e
+prefix=@indimaildir@
 sysconfdir=/etc
 
 ID=`id -u`
@@ -32,8 +33,10 @@ esac
 
 #DEBHELPER#
 
-echo "compressing man pages"
-find ${prefix}/man/man3 -type f -exec gzip {} \;
+if [ -d ${prefix}/man/man3 ] ; then
+	echo "compressing man pages"
+	find ${prefix}/man/man3 -type f -exec gzip {} \;
+fi
 echo "ldconfig..."
 if [ -d ${sysconfdir}/ld.so.conf.d ] ; then
 	(
