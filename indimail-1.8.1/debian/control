@@ -11,7 +11,7 @@ Package: indimail
 Architecture: any
 Depends: ${shlibs:Depends}, ${misc:Depends}
 Breaks: indimail-mini
-Replaces: indimail-mini
+Replaces: indimail-mini, indimail-devel
 Description: IndiMail is a messaging platform for Mail Service Providers
  It is built using the following packages
  .
