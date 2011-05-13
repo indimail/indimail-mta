@@ -212,7 +212,7 @@ else
 		${rmdir} --ignore-fail-on-non-empty ${prefix}/share 2>/dev/null
 	fi
 	echo "removing binaries, libraries, queues"
-	for i in bin sbin lib queue
+	for i in bin sbin queue
 	do
 		${rm} -rf ${prefix}/$i || true
 	done
