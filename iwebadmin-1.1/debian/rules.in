@@ -36,7 +36,7 @@ build-stamp:
 	./configure --prefix=${prefix} --enable-indimaildir=${prefix} \
 		--enable-ezmlmdir=${prefix}/bin --disable-ipauth \
 		--disable-trivial-password \
-		--enable-mysqlprefix=@mysql_prefix@ \
+		--enable-mysqlprefix=/usr \
 		--enable-qmaildir=@indimaildir@ \
 		--enable-modify-quota \
 		--enable-htmldir=@htmldir@ \
@@ -59,7 +59,7 @@ clean:
 install: build
 	dh_testdir
 	dh_testroot
-	dh_prep
+	dh_prep || dh_clean -k
 	dh_installdirs
 	$(MAKE) -s install DESTDIR=$(DESTDIR)
 
