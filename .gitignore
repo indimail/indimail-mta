@@ -33,7 +33,6 @@ packages
 rpmbuild
 clamav-0.97
 private
-pam-multi*
 install-sh
 missing
 configure

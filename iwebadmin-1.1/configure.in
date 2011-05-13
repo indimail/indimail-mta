@@ -173,10 +173,10 @@ AC_CHECK_LIB(mysqlclient -L${mysql_libdir}, mysql_real_connect,libs="$libs -lmys
 auth_incs="-I$indimaildir/include -I$mysql_incdir"
 case "$host" in
 	*-*-darwin*)
-	auth_libs="-L. -L$libdir -L$indimaildir/lib -lindimail -lcdb $LIB_CRYPT -L$mysql_libdir -lmysqlclient $LIB_SSL -lm"
+	auth_libs="-L. -L$libdir -L$indimaildir/lib -lindimail -lcdb $LIB_CRYPT -L$mysql_libdir -lmysqlclient $LIB_SSL"
 	;;
 	*)
-	auth_libs="-L. -L$libdir -L$indimaildir/lib -lindimail -lcdb $LIB_CRYPT -L$mysql_libdir -lmysqlclient $LIB_SSL -lm"
+	auth_libs="-L. -L$libdir -L$indimaildir/lib -lindimail -lcdb $LIB_CRYPT -L$mysql_libdir -lmysqlclient $LIB_SSL"
 	;;
 esac
 sys_libdir=${acl_libdirstem}
