@@ -37,25 +37,25 @@ for i in indimail-"$version" qmail-1.03 ucspi-tcp-0.88 clamav-"$clamav_version" 
 	bogofilter-"$bogofilter_version" fetchmail-"$fetchmail_version"
 do
 	/bin/rm -rf $i
-	if [ $(nonssd) -eq 1 -a $i =  nssd-"$nssd_version" ] ; then
+	if [ ${nonssd} -eq 1 -a $i =  nssd-"$nssd_version" ] ; then
 		continue
 	fi
-	if [ $(nocourierimap) -eq 1 -a $i =  courier-imap-"$courier_version" ] ; then
+	if [ ${nocourierimap} -eq 1 -a $i =  courier-imap-"$courier_version" ] ; then
 		continue
 	fi
-	if [ $(nolibdkim) -eq 1 -a $i =  libdkim-"$libdkim_version" ] ; then
+	if [ ${nolibdkim} -eq 1 -a $i =  libdkim-"$libdkim_version" ] ; then
 		continue
 	fi
-	if [ $(noclamav) -eq 1 -a $i =  clamav-"$clamav_version" ] ; then
+	if [ ${noclamav} -eq 1 -a $i =  clamav-"$clamav_version" ] ; then
 		continue
 	fi
-	if [ $(nofetchmail) -eq 1 -a $i =  fetchmail-"$fetchmail_version" ] ; then
+	if [ ${nofetchmail} -eq 1 -a $i =  fetchmail-"$fetchmail_version" ] ; then
 		continue
 	fi
-	if [ $(nobogofilter) -eq 1 -a $i =  bogofilter-"$bogofilter_version" ] ; then
+	if [ ${nobogofilter} -eq 1 -a $i =  bogofilter-"$bogofilter_version" ] ; then
 		continue
 	fi
-	if [ $(nopam_multi) -eq 1 -a $i =  pam-multi-"$pam_multi_version" ] ; then
+	if [ ${nopam_multi} -eq 1 -a $i =  pam-multi-"$pam_multi_version" ] ; then
 		continue
 	fi
 	if [ -f ../SOURCES/$i.tar.gz ] ; then
