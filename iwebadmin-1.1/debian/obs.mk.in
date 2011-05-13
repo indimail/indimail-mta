@@ -12,10 +12,7 @@ version=@version@
 all: rules postinst postrm debian.tar.gz dummy.tar.gz iwebadmin-Debian_5.0.dsc
 
 clean:
-	/bin/rm -f rules postinst postrm *.dsc debian.tar.gz dummy.tar.gz
-
-noinst_SCRIPTS = rules postinst postrm
-MOSTLYCLEANFILES= rules postinst postrm *.dsc dummy.tar.gz debian.tar.gz
+	/bin/rm -f rules postinst postrm *.dsc debian.tar.gz dummy.tar.gz _service
 
 edit = sed \
 	-e 's,@indimaildir\@,$(indimaildir),g' \
