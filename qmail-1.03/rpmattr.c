@@ -1,5 +1,8 @@
 /*
  * $Log: rpmattr.c,v $
+ * Revision 1.5  2011-05-13 10:57:00+05:30  Cprogrammer
+ * make rpmattr work for non-indimail installations
+ *
  * Revision 1.4  2009-12-09 23:57:46+05:30  Cprogrammer
  * additional closeflag argument to uidinit()
  *
@@ -138,6 +141,6 @@ main(int argc, char **argv)
 void
 getversion_rpmattr_c()
 {
-	static char    *x = "$Id: rpmattr.c,v 1.4 2009-12-09 23:57:46+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: rpmattr.c,v 1.5 2011-05-13 10:57:00+05:30 Cprogrammer Exp mbhangui $";
 	x++;
 }
