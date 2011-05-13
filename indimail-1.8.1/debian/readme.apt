@@ -9,8 +9,9 @@ After the creation of .deb packages, you want to add the repository to the sourc
 
 Here is an example entry.
 
-deb http://download.opensuse.org/repositories/home:/mbhangui/Debian_5.0 ./
 deb http://download.opensuse.org/repositories/home:/indimail/Debian_5.0 ./
+  or
+deb http://download.opensuse.org/repositories/home:/mbhangui/Debian_5.0 ./
 
 The problem is that apt-get does not handle HTTP redirections (302) for mirrors, and apt-get
 considers that an error.
@@ -31,6 +32,7 @@ http://download.opensuse.org/repositories/<project>://<package>/<repository>/Pac
 
 So, for example:
 http://download.opensuse.org/repositories/home:/mbhangui/xUbuntu_10.10/Packages?mirrorlist
+  or
 http://download.opensuse.org/repositories/home:/indimail/xUbuntu_10.10/Packages?mirrorlist
 
 pick one of the mirrors listed, for example:
@@ -53,11 +55,13 @@ repository key to the list of keys accepted by apt.
 you can take the one from api.opensuse.org, eg:
 
 https://api.opensuse.org/source/home:indimail/_pubkey (replace "home:indimail" with your project)
+  or
 https://api.opensuse.org/source/home:mbhangui/_pubkey (replace "home:mbhangui" with your project)
 
 or take one from a repomd archive, eg:
 http://download.opensuse.org/repositories/home:/indimail/Fedora_12/repodata/repomd.xml.key
 (replace "home:/indimail" with your project and "Fedora_12" with a repository of the project)
+  or
 http://download.opensuse.org/repositories/home:/mbhangui/Fedora_12/repodata/repomd.xml.key
 (replace "home:/mbhangui" with your project and "Fedora_12" with a repository of the project)
 
