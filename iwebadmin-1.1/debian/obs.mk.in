@@ -9,7 +9,14 @@ imagedir=@imagedir@
 version=@version@
 #
 
-all: rules postinst postrm debian.tar.gz dummy.tar.gz iwebadmin-Debian_5.0.dsc
+all: rules postinst postrm debian.tar.gz dummy.tar.gz  \
+	iwebadmin-Debian_5.0.dsc \
+	iwebadmin-Debian_6.0.dsc \
+	iwebadmin-xUbuntu_11.04.dsc \
+	iwebadmin-xUbuntu_10.10.dsc \
+	iwebadmin-xUbuntu_10.04.dsc \
+	iwebadmin-xUbuntu_9.10.dsc \
+	iwebadmin-xUbuntu_8.04.dsc
 
 clean:
 	/bin/rm -f rules postinst postrm *.dsc debian.tar.gz dummy.tar.gz _service
@@ -32,6 +39,18 @@ postinst: postinst.in
 postrm: postrm.in
 	$(edit) $@.in > $@;
 iwebadmin-Debian_5.0.dsc: iwebadmin-Debian_5.0.dsc.in
+	$(edit) $@.in > $@
+iwebadmin-Debian_6.0.dsc: iwebadmin-Debian_6.0.dsc.in
+	$(edit) $@.in > $@
+iwebadmin-xUbuntu_11.04.dsc: iwebadmin-xUbuntu_11.04.dsc.in
+	$(edit) $@.in > $@
+iwebadmin-xUbuntu_10.10.dsc: iwebadmin-xUbuntu_10.10.dsc.in
+	$(edit) $@.in > $@
+iwebadmin-xUbuntu_10.04.dsc: iwebadmin-xUbuntu_10.04.dsc.in
+	$(edit) $@.in > $@
+iwebadmin-xUbuntu_9.10.dsc: iwebadmin-xUbuntu_9.10.dsc.in
+	$(edit) $@.in > $@
+iwebadmin-xUbuntu_8.04.dsc: iwebadmin-xUbuntu_8.04.dsc.in
 	$(edit) $@.in > $@
 _service: _service.in
 	$(edit) $@.in > $@
