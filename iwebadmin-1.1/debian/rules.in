@@ -33,11 +33,10 @@ build-stamp:
 	#
 	# run configure script
 	#
-	./configure --enable-indimaildir=${prefix} \
+	./configure --prefix=${prefix} --enable-indimaildir=${prefix} \
 		--enable-ezmlmdir=${prefix}/bin --disable-ipauth \
 		--disable-trivial-password \
-		--enable-mysqlincdir=@mysql_prefix@/include/mysql \
-		--enable-mysqllibdir=@mysql_prefix@/lib/mysql \
+		--enable-mysqlprefix=@mysql_prefix@ \
 		--enable-qmaildir=@indimaildir@ \
 		--enable-modify-quota \
 		--enable-htmldir=@htmldir@ \
