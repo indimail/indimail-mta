@@ -102,7 +102,7 @@ mess822_end(h)
 		return 0;
 	if (a->value)
 	{
-		for (i = 0; ch = h->inprogress.s[i]; ++i)
+		for (i = 0; (ch = h->inprogress.s[i]); ++i)
 		{
 			if (ch == '\n')
 				ch = 0;
