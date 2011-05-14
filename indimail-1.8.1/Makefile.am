@@ -784,7 +784,8 @@ cronlist: cronlist.in
 perm_list: perm_list.in
 	$(edit) $@.in > $@
 obs.mk: debian/obs.mk.in
-	$(edit) debian/$@.in > debian/$@;/bin/rm -f $@;ln -s debian/$@ $@
+	$(edit) debian/$@.in > debian/$@;/bin/rm -f $@ debian/Makefile; \
+		ln -s debian/$@ $@;ln -s $@ debian/Makefile
 
 INSTALL: INSTALL.in configure.in
 	$(edit) $@.in > doc/$@.indimail; rm -f $@;ln -sf doc/$@.indimail $@

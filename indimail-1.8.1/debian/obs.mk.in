@@ -31,17 +31,17 @@ logalert_version=0.3
 fortune_version=1.1
 
 all: rules indimail.prerm indimail.preinst indimail.postrm indimail.postinst \
-obs_deb_prep _service indimail-devel.install debian.tar.gz dummy.tar.gz \
+obs_deb_prep _service indimail-devel.install \
 indimail-Debian_5.0.dsc indimail-Debian_6.0.dsc indimail-xUbuntu_10.04.dsc \
 indimail-xUbuntu_10.10.dsc indimail-xUbuntu_11.04.dsc indimail-xUbuntu_8.04.dsc \
 indimail-xUbuntu_9.10.dsc indimail-devel.postinst indimail-devel.postrm \
 indimail-mini.prerm indimail-mini.preinst indimail-mini.postrm \
-indimail-mini.postinst
+indimail-mini.postinst debian.tar.gz dummy.tar.gz
 
 clean:
 	/bin/rm -f rules indimail.prerm indimail.preinst indimail.postrm \
 	indimail.postinst obs_deb_prep _service indimail-devel.install \
-	indimail-devel.postinst indimail-devel.postrm \
+	indimail-devel.postinst indimail-devel.postrm obs.mk Makefile \
 	indimail-mini.prerm indimail-mini.preinst indimail-mini.postrm \
 	indimail-mini.postinst debian.tar.gz dummy.tar.gz *.dsc
 
