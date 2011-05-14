@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail.spec.in,v 2.215 2011-05-09 22:40:34+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 2.216 2011-05-13 20:33:16+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %define _unpackaged_files_terminate_build 1
 
@@ -688,7 +688,7 @@ do
 done
 fi
 # Compress the man pages
-find %{buildroot}%{_prefix}/man -type f -exec gzip {} \;
+find %{buildroot}%{_prefix}/man -type f -exec gzip -q {} \;
 if [ -f %{buildroot}%{_prefix}/man/man7/authlib.7.gz ] ; then
 	for i in authshadow.7 authpwd.7 authpam.7 authcustom.7
 	do
