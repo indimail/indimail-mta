@@ -44,12 +44,12 @@ build-stamp:
 	#
 	# Extract source archives
 	#
-	sh ../BUILD/debian/obs_deb_prep
+	if [ -f ../BUILD/debian/obs_deb_prep ] ; then sh ../BUILD/debian/obs_deb_prep; fi
 	#
 	# run configure script
 	#
 	if [ -d libdkim-$(libdkim_version) ] ; then cd libdkim-$(libdkim_version) ; ./configure --prefix=$(prefix) --mandir=$(prefix)/man ; cd ..; fi
-	FAKED_MODE=1;export FAKED_MODE;cd indimail-$(version);autoreconf -fi;./configure --prefix=$(prefix) --libexecdir=$(prefix)/libexec --mandir=$(prefix)/man --sysconfdir=$(prefix)/etc --enable-qmaildir=$(prefix) --enable-tcprules-prog=$(prefix)/bin/tcprules --enable-tcpserver-file=$(prefix)/etc/tcp.smtp --enable-mysqlprefix=/usr --enable-moduledir=/lib/security `cat config/indimail.opts`;cd ..;unset FAKED_MODE
+	if [ -d indimail-$(version) ] ; then FAKED_MODE=1;export FAKED_MODE;cd indimail-$(version);autoreconf -fi;./configure --prefix=$(prefix) --libexecdir=$(prefix)/libexec --mandir=$(prefix)/man --sysconfdir=$(prefix)/etc --enable-qmaildir=$(prefix) --enable-tcprules-prog=$(prefix)/bin/tcprules --enable-tcpserver-file=$(prefix)/etc/tcp.smtp --enable-mysqlprefix=/usr --enable-moduledir=/lib/security `cat config/indimail.opts`;cd ..;unset FAKED_MODE; fi
 	if [ -d courier-imap-$(courier_version) ] ; then cd courier-imap-$(courier_version) ; ./configure --prefix=$(prefix) --mandir=$(prefix)/man `cat ../indimail-$(version)/config/courier-imap.opts`; cd ..; fi
 	if [ -d bogofilter-$(bogofilter_version) ] ; then cd bogofilter-$(bogofilter_version) ; ./configure --prefix=$(prefix) --sysconfdir=$(prefix)/etc --libexecdir=$(prefix)/libexec --mandir=$(prefix)/man `cat ../indimail-$(version)/config/bogofilter.opts`; cd ..; fi
 	if [ -d fetchmail-$(fetchmail_version) ] ; then cd fetchmail-$(fetchmail_version); ./configure --prefix=$(prefix) --enable-indimail --enable-indimaildir=$(prefix) --libexecdir=$(prefix)/libexec --mandir=$(prefix)/man `cat ../indimail-$(version)/config/fetchmail.opts`; cd ..; fi
@@ -59,7 +59,7 @@ build-stamp:
 	# run make
 	#
 	if [ -d libdkim-$(libdkim_version) ] ; then       $(MAKE) -s -C libdkim-$(libdkim_version) DESTDIR=$(DESTDIR); fi
-	FAKED_MODE=1;export FAKED_MODE;                   $(MAKE) -s -C indimail-$(version) DESTDIR=$(DESTDIR);cd ..;unset FAKED_MODE
+	if [ -d indimail-$(version) ] ; then FAKED_MODE=1;export FAKED_MODE; $(MAKE) -s -C indimail-$(version) DESTDIR=$(DESTDIR);cd ..;unset FAKED_MODE; fi
 	if [ -d ucspi-tcp-0.88 ] ; then                   $(MAKE) -s -C ucspi-tcp-0.88 DESTDIR=$(DESTDIR); fi
 	if [ -d courier-imap-$(courier_version) ] ; then  $(MAKE) -s -C courier-imap-$(courier_version) DESTDIR=$(DESTDIR); fi
 	if [ -d bogofilter-$(bogofilter_version) ] ; then $(MAKE) -s -C bogofilter-$(bogofilter_version) DESTDIR=$(DESTDIR); fi
