@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-send.c,v $
+ * Revision 1.50  2011-05-18 12:56:38+05:30  Cprogrammer
+ * fix qmail-queue waiting endlessly if bounceprocessor returned non-zero status
+ *
  * Revision 1.49  2011-04-16 11:29:28+05:30  Cprogrammer
  * check for write errors
  *
@@ -1346,7 +1349,7 @@ I tried to deliver a bounce message to this address, but the bounce bounced!\n\
 		if (bounce_process(&qqt, fn2.s, brep, orig_recip.s, bouncesender, bouncerecip)) /*- hook for processing bounce */
 		{
 			log1("warning: trouble running bounce processor, will try later\n");
-			return 0;
+			qmail_fail(&qqt);
 		}
 		qmail_from(&qqt, bouncesender);
 		qmail_to(&qqt, bouncerecip);
@@ -2904,7 +2907,7 @@ main()
 void
 getversion_qmail_send_c()
 {
-	static char    *x = "$Id: qmail-send.c,v 1.49 2011-04-16 11:29:28+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-send.c,v 1.50 2011-05-18 12:56:38+05:30 Cprogrammer Exp mbhangui $";
 
 #ifdef INDIMAIL
 	x = sccsidh;
