@@ -2360,11 +2360,13 @@ compile matchregex.c stralloc.h error.h qregex.h
 	./compile matchregex.c
 
 qmail-nullqueue: \
-load qmail-nullqueue.o
-	./load qmail-nullqueue
+load qmail-nullqueue.o sig_bug.o sig_alarm.o sig_catch.o sig_block.o \
+envread.o scan_ulong.o str_len.o str_diffn.o
+	./load qmail-nullqueue sig_bug.o sig_alarm.o sig_catch.o sig_block.o \
+	envread.o scan_ulong.o str_len.o str_diffn.o
 
 qmail-nullqueue.o: \
-compile qmail-nullqueue.c
+compile qmail-nullqueue.c sig.h scan.h env.h
 	./compile qmail-nullqueue.c
 
 qmail-todo.0: \
