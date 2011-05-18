@@ -1,5 +1,8 @@
 /*
  * $Log: variables.c,v $
+ * Revision 2.52  2011-05-18 12:54:19+05:30  Cprogrammer
+ * added vserverinfo
+ *
  * Revision 2.51  2011-03-30 18:57:14+05:30  Cprogrammer
  * removed ncursed based program 'shit' & execmysql program. added svstat, resetquota form
  * admin commands list
@@ -201,7 +204,7 @@
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: variables.c,v 2.51 2011-03-30 18:57:14+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: variables.c,v 2.52 2011-05-18 12:54:19+05:30 Cprogrammer Stab mbhangui $";
 #endif
 
 vdir_type       vdir;
@@ -383,6 +386,7 @@ ADMINCOMMAND adminCommands[] = {
 	{INDIMAILDIR"/sbin/hostsync", "Sync Hostcntrl Information"},
 	{INDIMAILDIR"/sbin/inquerytest", "Test inlookup queries"},
 	{INDIMAILDIR"/sbin/vmoddomain", "Modify Domain Information"},
+	{INDIMAILDIR"/bin/vserverinfo", "Mail Server Information"},
 	{(char *) NULL, (char *) NULL}
 };
 
