@@ -157,7 +157,7 @@ get_options(int argc, char **argv, char **mdahost, char **server, char **domain,
 			display_all = 1;
 			break;
 		default:
-			fprintf(stderr, "USAGE: vserserverinfo [-upPsmd] [-D domain -H host | -S server] | [email]\n");
+			fprintf(stderr, "USAGE: vserserverinfo [-upPsmd] [-D domain -M host | -S server] | [email]\n");
 			return (1);
 		}
 	}
@@ -170,7 +170,7 @@ get_options(int argc, char **argv, char **mdahost, char **server, char **domain,
 			*email = argv[optind++];
 		else
 		{
-			fprintf(stderr, "USAGE: vserserverinfo [-upPsmd] [-D domain -H host | -S server] | [email]\n");
+			fprintf(stderr, "USAGE: vserserverinfo [-upPsmd] [-D domain -M host | -S server] | [email]\n");
 			return (1);
 		}
 	}
