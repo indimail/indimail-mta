@@ -769,7 +769,7 @@ the installation.
         --cntrldir=control --localip=0 --maxdaemons=150 --maxperip=25 --persistdb \
         --starttls --fsync --syncdir --memory=104857600 --chkrecipient --chkrelay --masquerade \
         --min-free=52428800 --content-filter --virus-filter \
-        --qhpsi="@indimaildir@/bin/clamdscan %s --quiet --disable-summary" \
+        --qhpsi="@indimaildir@/bin/clamdscan %s --fdpass --quiet --no-summary" \
         --spamfilter="@indimaildir@/bin/bogofilter -p -d @indimaildir@/etc" \
         --logfilter=/tmp/spamfifo --rejectspam=0 --spamexitcode=0 --localfilter --remotefilter \
         --remote-authsmtp=plain --dmasquerade \
@@ -792,13 +792,24 @@ the installation.
         --cntrldir=control --localip=0 --maxdaemons=150 --maxperip=25 --persistdb \
         --starttls --fsync --syncdir --memory=104857600 --chkrecipient --chkrelay --masquerade \
         --min-free=52428800 --content-filter --virus-filter \
-        --qhpsi="@indimaildir@/bin/clamdscan %s --quiet --disable-summary" \
+        --qhpsi="@indimaildir@/bin/clamdscan %s --fdpass --quiet --no-summary" \
         --dmasquerade --skipsend \
         --dkverify=both --dksign=both --private_key=@indimaildir@/control/domainkeys/indimail
 
     NOTE: You can create a deliver process for port 587 too either by having a different --qbase
     or have a qstart > 5. The point to remember is you can have multiple delivery process as long
     as you do not share a queue between delivery processes.
+
+    If you are going to use the local mail, sendmail, qmail-inject command, they need to figure
+    out the queue location. This is done by having a directory called 'defaultqueue' in
+    @indimaildir@/control. Run the following command to create this
+
+    % sudo @indimaildir@/sbin/svctool --queueParam=defaultqueue \
+        --qbase=@indimaildir@/queue --qcount=5 --qstart=1 \
+        --min-free=52428800 --fsync --syncdir --virus-filter \
+        --qhpsi="@indimaildir@/bin/clamdscan %s --fdpass --quiet --no-summary" \
+        --dkverify="both" --dksign=both \
+        --private_key=@indimaildir@/control/domainkeys/indimail
 
     You can implement QMTP service if you want a faster distribution of mails from your
     relay servers. Remember you will also need to create the file
@@ -963,7 +974,7 @@ the installation.
         --query-cache --password-cache \
         --qbase=@indimaildir@/queue --qcount=5 --qstart=1 \
         --cntrldir=control --default-domain=indimail.org \
-        --qhpsi="@indimaildir@/bin/clamdscan %s --quiet --disable-summary" \
+        --qhpsi="@indimaildir@/bin/clamdscan %s --fdpass --quiet --no-summary" \
         --spamfilter="@indimaildir@/bin/bogofilter -p -d @indimaildir@/etc" --spamexitcode=0 \
         --memory=72428800 --fsync --syncdir \
         --dkverify=both
