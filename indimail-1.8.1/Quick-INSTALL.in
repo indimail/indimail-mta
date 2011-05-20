@@ -8,7 +8,7 @@
    of users, then you must chose clustered setup. Even if you chose to install a non-clustered
    setup, you can always migrate to a clustered setup later.
 
-   IndiMail has yum / RPM repositories for most of the Linux Distros at
+   IndiMail has yum / RPM / Debian repositories for most of the Linux Distros at
 
    http://download.opensuse.org/repositories/home:/indimail/
 
@@ -23,8 +23,10 @@
    Creating a non-clustered Domain
    -------------------------------
 
-   Install IndiMail from RPM
-   % sudo rpm -ivh indimail-@version@-1.1.i386.rpm
+   Install IndiMail from RPM / Debian
+   % sudo rpm -ivh indimail-@version@-1.1.i386.rpm (for RPM)
+    or
+   % sudo dpkg -i indimail_@version@-1_i386.deb (for Debian)
 
    Create a basic configuration file required by IndiMail
    % cd @indimaildir@/control
@@ -43,7 +45,7 @@
    | for host.mysql (for IndiMail 1.6.9 and above). Also set your PATH to               |
    | have @indimaildir@/bin in the path.                                                |
    | If you change the socket/port then you have to edit @indimaildir@control/host.*    |
-   | and @indimaildir@etc/indimail.cnf to change the socket path / port                 |
+   | and @indimaildir@/etc/indimail.cnf to change the socket path / port                 |
    |                                                                                    |
    | Instead of the above initsvc command, you can also do (a more portable way)        |
    |                                                                                    |
@@ -80,8 +82,10 @@
    Creating a Clustered Domain
    ---------------------------
 
-   Install IndiMail from RPM
+   Install IndiMail from RPM / Debian
    % sudo rpm -ivh indimail-@version@-1.1.i386.rpm
+    or
+   % sudo dpkg -i indimail_@version@-1_i386.deb (for Debian)
 
    Create basic configuration files required by IndiMail
    % cd @indimaildir@/control
@@ -102,7 +106,7 @@
    | for host.cntrl (for IndiMail 1.6.9 and above). Also set your PATH to               |
    | have @indimaildir@/bin in the path.                                                |
    | If you change the socket/port then you have to edit @indimaildir@control/host.*    |
-   | and @indimaildir@etc/indimail.cnf to change the socket path / port                 |
+   | and @indimaildir@/etc/indimail.cnf to change the socket path / port                 |
    |                                                                                    |
    | Instead of the above initsvc command, you can also do (a more portable way)        |
    |                                                                                    |
