@@ -45,7 +45,7 @@ distclean: clean
 clean:
 	/bin/rm -f rules indimail.prerm indimail.preinst indimail.postrm \
 	indimail.postinst obs_deb_prep _service indimail-devel.install \
-	indimail-devel.postinst indimail-devel.postrm obs.mk \
+	indimail-devel.postinst indimail-devel.postrm \
 	indimail-mini.prerm indimail-mini.preinst indimail-mini.postrm \
 	indimail-mini.postinst debian.tar.gz dummy.tar.gz *.dsc
 
