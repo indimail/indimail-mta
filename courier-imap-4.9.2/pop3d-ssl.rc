@@ -1,0 +1,53 @@
+#! /bin/sh
+#
+# Copyright 1998 - 2005 Double Precision, Inc.
+# See COPYING for distribution information.
+
+
+prefix=/var/indimail
+exec_prefix=/var/indimail
+bindir=/var/indimail/bin
+libexecdir=/var/indimail/libexec
+
+if test ! -f /var/indimail/etc/pop3d
+then
+	echo "/var/indimail/etc/pop3d does not exist, forgot make install-configure?"
+	exit 1
+fi
+
+if test ! -f /var/indimail/etc/pop3d-ssl
+then
+	echo "/var/indimail/etc/pop3d-ssl does not exist, forgot make install-configure?"
+	exit 1
+fi
+
+
+. /var/indimail/etc/pop3d
+. /var/indimail/etc/pop3d-ssl
+
+case $1 in
+start)
+	/usr/bin/env -i /bin/sh -c " set -a ;
+		prefix=/var/indimail ;
+		exec_prefix=/var/indimail ;
+		bindir=/var/indimail/bin ;
+		libexecdir=/var/indimail/libexec ;
+		. /var/indimail/etc/pop3d ; \
+		. /var/indimail/etc/pop3d-ssl ; \
+		PROXY_HOSTNAME=$PROXY_HOSTNAME ; \
+		POP3_TLS=1; \
+		POP3_STARTTLS=NO; \
+		POP3_TLS_REQUIRED=0; \
+		@courierlogger@ -pid=$SSLPIDFILE -start $SSLLOGGEROPTS \
+		/var/indimail/libexec/couriertcpd -address=$SSLADDRESS \
+			-maxprocs=$MAXDAEMONS -maxperip=$MAXPERIP \
+			$TCPDOPTS \
+			$SSLPORT $COURIERTLS -server -tcpd \
+				${exec_prefix}/sbin/pop3login \
+				/var/indimail/bin/pop3d ${MAILDIRPATH}"
+	;;
+stop)
+	@courierlogger@ -pid=$SSLPIDFILE -stop
+	;;
+esac
+exit 0

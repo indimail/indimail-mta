@@ -1,0 +1,38 @@
+#! /bin/sh
+#
+# $Id: mkimapdcert.in,v 1.4 2001/08/26 15:49:50 mrsam Exp $
+#
+# Copyright 2000 Double Precision, Inc.  See COPYING for
+# distribution information.
+#
+# This is a short script to quickly generate a self-signed X.509 key for
+# IMAP over SSL.  Normally this script would get called by an automatic
+# package installation routine.
+
+test -x /usr/bin/openssl || exit 0
+
+prefix="/var/indimail"
+
+if test -f /var/indimail/share/imapd.pem
+then
+	echo "/var/indimail/share/imapd.pem already exists."
+	exit 1
+fi
+
+cp /dev/null /var/indimail/share/imapd.pem
+chmod 600 /var/indimail/share/imapd.pem
+chown root /var/indimail/share/imapd.pem
+
+cleanup() {
+	rm -f /var/indimail/share/imapd.pem
+	rm -f /var/indimail/share/imapd.rand
+	exit 1
+}
+
+cd /var/indimail/share
+dd if=/dev/urandom of=/var/indimail/share/imapd.rand count=1 2>/dev/null
+/usr/bin/openssl req -new -x509 -days 365 -nodes \
+	-config /var/indimail/etc/imapd.cnf -out /var/indimail/share/imapd.pem -keyout /var/indimail/share/imapd.pem || cleanup
+/usr/bin/openssl gendh -rand /var/indimail/share/imapd.rand 512 >>/var/indimail/share/imapd.pem || cleanup
+/usr/bin/openssl x509 -subject -dates -fingerprint -noout -in /var/indimail/share/imapd.pem || cleanup
+rm -f /var/indimail/share/imapd.rand

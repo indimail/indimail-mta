@@ -1,0 +1,57 @@
+#! /bin/sh
+#
+# Copyright 1998 - 2008 Double Precision, Inc.
+# See COPYING for distribution information.
+
+
+prefix=/var/indimail
+exec_prefix=/var/indimail
+bindir=/var/indimail/bin
+libexecdir=/var/indimail/libexec
+
+if test ! -f /var/indimail/etc/imapd
+then
+	echo "/var/indimail/etc/imapd does not exist, forgot make install-configure?"
+	exit 1
+fi
+
+if test ! -f /var/indimail/etc/imapd-ssl
+then
+	echo "/var/indimail/etc/imapd-ssl does not exist, forgot make install-configure?"
+	exit 1
+fi
+
+TLS_CACHEFILE=""
+. /var/indimail/etc/imapd-ssl
+. /var/indimail/etc/imapd
+
+case $1 in
+start)
+	if test "$TLS_CACHEFILE" != ""
+	then
+		rm -f $TLS_CACHEFILE
+	fi
+
+	umask $IMAP_UMASK
+	ulimit -v $IMAP_ULIMITD
+	/usr/bin/env -i /bin/sh -c " set -a ;
+			prefix=/var/indimail ;
+			exec_prefix=/var/indimail ;
+			bindir=/var/indimail/bin ;
+			libexecdir=/var/indimail/libexec ;
+				. /var/indimail/etc/imapd-ssl ; \
+				. /var/indimail/etc/imapd ; \
+		IMAP_STARTTLS=$IMAPDSTARTTLS ; \
+		PROXY_HOSTNAME=$PROXY_HOSTNAME ; \
+		TLS_PROTOCOL=$TLS_STARTTLS_PROTOCOL ; \
+		@courierlogger@ -pid=$PIDFILE -start $LOGGEROPTS \
+		/var/indimail/libexec/couriertcpd -address=$ADDRESS \
+			-maxprocs=$MAXDAEMONS -maxperip=$MAXPERIP \
+			$TCPDOPTS \
+			$PORT ${exec_prefix}/sbin/imaplogin /var/indimail/bin/imapd ${MAILDIRPATH}"
+	;;
+stop)
+	@courierlogger@ -pid=$PIDFILE -stop
+	;;
+esac
+exit 0
