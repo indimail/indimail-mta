@@ -40,11 +40,12 @@ indimail-mini.postinst debian.tar.gz dummy.tar.gz
 
 install: all
 install-strip: install
+distclean: clean
 
 clean:
 	/bin/rm -f rules indimail.prerm indimail.preinst indimail.postrm \
 	indimail.postinst obs_deb_prep _service indimail-devel.install \
-	indimail-devel.postinst indimail-devel.postrm obs.mk Makefile \
+	indimail-devel.postinst indimail-devel.postrm obs.mk \
 	indimail-mini.prerm indimail-mini.preinst indimail-mini.postrm \
 	indimail-mini.postinst debian.tar.gz dummy.tar.gz *.dsc
 
