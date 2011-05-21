@@ -9,7 +9,7 @@ lib_deps := -L$(DESTDIR)$(INDIDIR)/lib `cat ./lib_deps 2>/dev/null`
 
 default: it man
 
-all:it man show
+all:it man
 
 show:
 	echo $(inc_deps);echo ----;echo $(lib_deps)
