@@ -38,6 +38,9 @@ indimail-xUbuntu_9.10.dsc indimail-devel.postinst indimail-devel.postrm \
 indimail-mini.prerm indimail-mini.preinst indimail-mini.postrm \
 indimail-mini.postinst debian.tar.gz dummy.tar.gz
 
+install: all
+install-strip: install
+
 clean:
 	/bin/rm -f rules indimail.prerm indimail.preinst indimail.postrm \
 	indimail.postinst obs_deb_prep _service indimail-devel.install \
