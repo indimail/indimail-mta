@@ -35,7 +35,7 @@
 
 %define _prefix            @indimaildir@
 %define default_domain     @defaultdomain@
-%define courier_version    4.9.1
+%define courier_version    4.9.2
 %define bogofilter_version 1.2.2
 %define pam_multi_version  1.1
 %define ucspi_version      0.88
@@ -680,7 +680,8 @@ done
 for i in adminclient chowkidar cindimail clamd clearopensmtp copyemail execmysql \
 hostsync indisrvr inlookup inquerytest install_tables ipchange mail_report \
 mgmtpass postdel systpass testmra updatefile updaterules vchkpass vdelivermail \
-vdeloldusers vfilter vfstab vmoddomain vreorg vsetpass nssd vserverinfo check_getpw
+vdeloldusers vfilter vfstab vmoddomain vreorg vsetpass nssd vserverinfo check_getpw \
+vtable
 do
 	if [ -f %{buildroot}%{_prefix}/sbin/$i ] ; then
     	/usr/bin/chrpath -d %{buildroot}%{_prefix}/sbin/$i
@@ -1183,6 +1184,7 @@ fi
 %attr(555,root,qmail)                   %{_prefix}/sbin/inlookup
 %attr(555,root,qmail)                   %{_prefix}/sbin/inquerytest
 %attr(555,root,qmail)                   %{_prefix}/sbin/install_tables
+%attr(555,root,qmail)                   %{_prefix}/sbin/vtable
 %attr(555,root,qmail)                   %{_prefix}/sbin/ipchange
 %attr(555,root,qmail)                   %{_prefix}/sbin/mail_report
 %attr(555,root,qmail)                   %{_prefix}/sbin/mgmtpass

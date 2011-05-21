@@ -44,7 +44,7 @@ man_MANS=vadduser.1 adminclient.8 chowkidar.8 clearopensmtp.8 dbinfo.8 hostcntrl
 	vlimit.1 vmoduser.1 vmoveuser.1 vpasswd.1 vpriv.8 vproxy.8 vrenamedomain.1 \
 	vrenameuser.1 vreorg.8 vsetuserquota.1 vsmtp.8 vuserinfo.1 indimail.7 IndiMail.7 \
 	updaterules.8 osh.8 svctool.8 systpass.8 vserverinfo.1 sslerator.1 echo.1 \
-	login_tasks.3
+	login_tasks.3 vtable.1 install_tables.8
 
 setuid_list = ../sbin/systpass vdeldomain vadddomain vadduser vdeluser \
 			  vaddaliasdomain vrenamedomain vrenameuser vbulletin vdominfo \
@@ -145,7 +145,7 @@ indimailsbin_PROGRAMS = adminclient chowkidar cindimail clearopensmtp config_set
 	copyemail execmysql hostsync indisrvr initsvc inlookup inquerytest install_tables \
 	ipchange mail_report mgmtpass osh postdel systpass testmra updatefile updaterules \
 	vserverinfo vchkpass vsetpass vdelivermail vdeloldusers vfilter vfstab \
-	vmoddomain vreorg
+	vmoddomain vreorg vtable
 
 indimaillibexec_PROGRAMS = sq_vacation qmailmrtg7
 
@@ -401,6 +401,9 @@ initsvc_DEPENDENCIES = getEnvConfig.lo fappend.lo
 
 install_tables_SOURCES = install_tables.c
 install_tables_LDADD = @auth_libs@
+
+vtable_SOURCES = vtable.c
+vtable_LDADD = @auth_libs@
 
 indiversion_SOURCE = indiversion.c
 indiversion_LDADD = @auth_libs@ proxylogin.lo tls.lo auth_admin.lo adminCmmd.lo
@@ -729,6 +732,7 @@ osh.lo: config.h osh.h
 exp.lo: config.h osh.h
 handlers.lo: config.h osh.h
 install_tables.lo: indimail.h config.h
+vtable.lo: config.h
 error_stack.lo: error_stack.c error_stack.h config.h
 post_handle.lo: post_handle.c config.h
 randltr.lo: indimail.h config.h

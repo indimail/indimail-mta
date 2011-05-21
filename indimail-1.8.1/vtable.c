@@ -1,3 +1,12 @@
+/*
+ * $Log: vtable.c,v $
+ * Revision 2.1  2011-05-20 21:16:54+05:30  Cprogrammer
+ * create MySQL table from a template
+ *
+ */
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
 #define _GNU_SOURCE
 #include <stdio.h>
 #include <mysql.h>
@@ -5,13 +14,9 @@
 #include <unistd.h>
 #include <errno.h>
 #include <stdlib.h>
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
-#include "error_stack.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: $";
+static char     sccsid[] = "$Id: vtable.c,v 2.1 2011-05-20 21:16:54+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef HAVE_STDARG_H
@@ -71,11 +76,12 @@ va_dcl
 				/*- fprintf(stderr, "%s", mysqlQueryStr + i); */
 			}
 		}
-		printf("%s", mysqlQueryStr);
-		free((void *) mysqlQueryStr);
-		mysqlQueryStr = (char *) 0;
+		mysqlQueryStr[mylen - 3] = ';';
+		mysqlQueryStr[mylen - 1] = 0;
 		mylen = 0;
-		return ("");
+		ptr = mysqlQueryStr;
+		mysqlQueryStr = (char *) 0;
+		return (ptr);
 	}
 }
 
@@ -109,8 +115,7 @@ get_options(int argc, char **argv, char **mysql_server, char **mysql_socket, cha
 	int             c;
 
 	*mysql_port = *mysql_server = *mysql_database = *mysql_socket = *mysql_user = *mysql_pass = 0;
-	while ((c = getopt(argc, argv, "vS:p:s:D:U:P:")) != -1)
-	{
+	while ((c = getopt(argc, argv, "vS:p:s:D:U:P:")) != -1) {
 		switch (c)
 		{
 		case 'v':
@@ -141,8 +146,7 @@ get_options(int argc, char **argv, char **mysql_server, char **mysql_socket, cha
 	} /*- while ((c = getopt(argc, argv, "vS:p:s:D:U:P:")) != -1) */
 	if (optind < argc)
 		*filename = argv + optind;
-	else
-	{
+	else {
 		usage();
 		return (1);
 	}
@@ -168,13 +172,11 @@ main(int argc, char **argv)
 	mysql_init(&mysql);
 	mysql_port = port ? atoi(port) : 0;
 	if (!(mysql_real_connect(&mysql, mysql_host, mysql_user, mysql_pass,
-		mysql_db, mysql_port, mysql_sock, 0)))
-	{
+		mysql_db, mysql_port, mysql_sock, 0))) {
 		fprintf(stderr, "mysql_real_connect: %s: %s\n", mysql_host, mysql_error(&mysql));
 		return (1);
 	}
-	for (errors = 0, fptr = filename;*fptr;fptr++)
-	{
+	for (errors = 0, fptr = filename;*fptr;fptr++) {
 		if (verbose)
 			printf("processing %s\n", *fptr);
 		if (!(fp = fopen(*fptr, "r")))
@@ -183,18 +185,32 @@ main(int argc, char **argv)
 			errors++;
 			continue;
 		}
-		for(;;)
-		{
+		mysql_stack("create table IF NOT EXISTS ");
+		for(;;) {
 			if (!fgets(buffer, sizeof(buffer) - 2, fp))
 				break;
 			if ((ptr = strrchr(buffer, '\n')))
 				*ptr = 0;
 			mysql_stack(buffer);
-			mysql_stack("\\\n");
+			mysql_stack(" ");
 		}
-		mysql_stack(0);
+		if (!(ptr = mysql_stack(0))) {
+			fprintf(stderr, "mysql_stack returned NULL\n");
+		} else {
+			if (verbose)
+				printf("%s", ptr);
+			if (mysql_query(&mysql, ptr))
+				fprintf(stderr, "mysql_query: %s: %s\n", ptr, mysql_error(&mysql));
+			free((void *) ptr);
+		}
 		fclose(fp);
 	}
 	mysql_close(&mysql);
 	return (errors);
+}
+
+void
+getversion_vtable_c()
+{
+	printf("%s\n", sccsid);
 }
