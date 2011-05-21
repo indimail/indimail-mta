@@ -1,5 +1,8 @@
 /*
  * $Log: vtable.c,v $
+ * Revision 2.2  2011-05-21 19:20:49+05:30  Cprogrammer
+ * skip comments
+ *
  * Revision 2.1  2011-05-20 21:16:54+05:30  Cprogrammer
  * create MySQL table from a template
  *
@@ -9,14 +12,15 @@
 #endif
 #define _GNU_SOURCE
 #include <stdio.h>
-#include <mysql.h>
+#include <ctype.h>
 #include <string.h>
 #include <unistd.h>
 #include <errno.h>
 #include <stdlib.h>
+#include <mysql.h>
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vtable.c,v 2.1 2011-05-20 21:16:54+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: vtable.c,v 2.2 2011-05-21 19:20:49+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef HAVE_STDARG_H
@@ -189,8 +193,11 @@ main(int argc, char **argv)
 		for(;;) {
 			if (!fgets(buffer, sizeof(buffer) - 2, fp))
 				break;
-			if ((ptr = strrchr(buffer, '\n')))
-				*ptr = 0;
+			if ((ptr = strchr(buffer, '#')) || (ptr = strrchr(buffer, '\n')))
+				*ptr = '\0';
+			for (ptr = buffer; *ptr && isspace((int) *ptr); ptr++);
+			if (!*ptr)
+				continue;
 			mysql_stack(buffer);
 			mysql_stack(" ");
 		}
@@ -198,7 +205,7 @@ main(int argc, char **argv)
 			fprintf(stderr, "mysql_stack returned NULL\n");
 		} else {
 			if (verbose)
-				printf("%s", ptr);
+				printf("%s\n", ptr);
 			if (mysql_query(&mysql, ptr))
 				fprintf(stderr, "mysql_query: %s: %s\n", ptr, mysql_error(&mysql));
 			free((void *) ptr);
