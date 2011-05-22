@@ -5,7 +5,7 @@
 COFLAGS=-z+05:30
 ACLOCAL_AMFLAGS=-I m4
 
-DEFS=-I. @auth_inc@ 
+DEFS=-I. -I/usr/include/tcl @auth_inc@ 
 
 libfbsql_LTLIBRARIES = libfbsql.la
 libfbsql_la_SOURCES = fbsql.c
@@ -35,10 +35,10 @@ guisbin_PROGRAMS = pwhelper
 
 guibin_SCRIPTS = indium litesrc supernotepad secpanel FMbrowse tkdiff
 
-noinst_SCRIPTS = indium.spec indium-@VERSION@-rpmlintrc
+noinst_SCRIPTS = indium.spec indium-@VERSION@-rpmlintrc obs.mk
 
 MOSTLYCLEANFILES = indium litesrc common.tcl fileman.tcl supernotepad secpanel FMbrowse \
-				   indium.spec indium-@VERSION@-rpmlintrc tkdiff
+				   indium.spec indium-@VERSION@-rpmlintrc tkdiff obs.mk
 
 pwhelper_SOURCES = pwhelper.c
 pwhelper_LDADD = @auth_libs@
@@ -78,6 +78,8 @@ indium.spec: indium.spec.in
 	($(edit) $@.in;cat doc/ChangeLog) > $@
 indium-@VERSION@-rpmlintrc: indium-rpmlintrc.in
 	$(edit) indium-rpmlintrc.in > $@
+obs.mk: debian/obs.mk.in
+	$(edit) debian/$@.in > debian/$@;/bin/rm -f $@;ln -s debian/$@ $@
 
 install-data-hook:
 	for f in `ls images`; do \
