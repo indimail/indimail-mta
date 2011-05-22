@@ -9,7 +9,7 @@ imagedir=@imagedir@
 version=@version@
 #
 
-all: rules postrm debian.tar.gz dummy.tar.gz  \
+all: rules postrm postinst debian.tar.gz dummy.tar.gz  \
 	indium-Debian_5.0.dsc \
 	indium-Debian_6.0.dsc \
 	indium-xUbuntu_11.04.dsc \
@@ -19,7 +19,7 @@ all: rules postrm debian.tar.gz dummy.tar.gz  \
 	indium-xUbuntu_8.04.dsc
 
 clean:
-	/bin/rm -f rules postrm *.dsc debian.tar.gz dummy.tar.gz
+	/bin/rm -f rules postrm postinst *.dsc debian.tar.gz dummy.tar.gz
 
 edit = sed \
 	-e 's,@indimaildir\@,$(indimaildir),g' \
@@ -35,6 +35,8 @@ edit = sed \
 rules: rules.in
 	$(edit) $@.in > $@; chmod +x $@;
 postrm: postrm.in
+	$(edit) $@.in > $@;
+postinst: postinst.in
 	$(edit) $@.in > $@;
 indium-Debian_5.0.dsc: indium-Debian_5.0.dsc.in
 	$(edit) $@.in > $@
@@ -52,5 +54,5 @@ indium-xUbuntu_8.04.dsc: indium-xUbuntu_8.04.dsc.in
 	$(edit) $@.in > $@
 dummy.tar.gz: README
 	tar cf - README |gzip > $@
-debian.tar.gz: copyright rules control changelog postrm
-	tar cf - copyright rules postrm control changelog |gzip > $@
+debian.tar.gz: copyright rules control changelog postrm postinst
+	tar cf - copyright rules postrm postinst control changelog |gzip > $@
