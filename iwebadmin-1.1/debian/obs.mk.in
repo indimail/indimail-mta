@@ -56,5 +56,5 @@ _service: _service.in
 	$(edit) $@.in > $@
 dummy.tar.gz: README
 	tar cf - README |gzip > $@
-debian.tar.gz: copyright rules control changelog postinst postrm
-	tar cf - copyright rules postinst postrm control changelog |gzip > $@
+debian.tar.gz: copyright rules control changelog postinst postrm compat
+	tar cf - copyright rules postinst postrm control changelog compat |gzip > $@
