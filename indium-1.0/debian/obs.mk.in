@@ -1,0 +1,56 @@
+indimaildir=@indimaildir@
+mysql_prefix=@mysql_prefix@
+prefix=@prefix@
+htmldir=@htmldir@
+htmllibdir=@htmllibdir@
+sys_libdir=@sys_libdir@
+cgibindir=@cgibindir@
+imagedir=@imagedir@
+version=@version@
+#
+
+all: rules postrm debian.tar.gz dummy.tar.gz  \
+	indium-Debian_5.0.dsc \
+	indium-Debian_6.0.dsc \
+	indium-xUbuntu_11.04.dsc \
+	indium-xUbuntu_10.10.dsc \
+	indium-xUbuntu_10.04.dsc \
+	indium-xUbuntu_9.10.dsc \
+	indium-xUbuntu_8.04.dsc
+
+clean:
+	/bin/rm -f rules postrm *.dsc debian.tar.gz dummy.tar.gz
+
+edit = sed \
+	-e 's,@indimaildir\@,$(indimaildir),g' \
+	-e 's,@mysql_prefix\@,$(mysql_prefix),g' \
+	-e 's,@htmldir\@,$(htmldir),g' \
+	-e 's,@htmllibdir\@,$(htmllibdir),g' \
+	-e 's,@sys_libdir\@,$(sys_libdir),g' \
+	-e 's,@cgibindir\@,$(cgibindir),g' \
+	-e 's,@imagedir\@,$(imagedir),g' \
+	-e 's,@version\@,$(version),g' \
+	-e 's,@prefix\@,$(prefix),g'
+
+rules: rules.in
+	$(edit) $@.in > $@; chmod +x $@;
+postrm: postrm.in
+	$(edit) $@.in > $@;
+indium-Debian_5.0.dsc: indium-Debian_5.0.dsc.in
+	$(edit) $@.in > $@
+indium-Debian_6.0.dsc: indium-Debian_6.0.dsc.in
+	$(edit) $@.in > $@
+indium-xUbuntu_11.04.dsc: indium-xUbuntu_11.04.dsc.in
+	$(edit) $@.in > $@
+indium-xUbuntu_10.10.dsc: indium-xUbuntu_10.10.dsc.in
+	$(edit) $@.in > $@
+indium-xUbuntu_10.04.dsc: indium-xUbuntu_10.04.dsc.in
+	$(edit) $@.in > $@
+indium-xUbuntu_9.10.dsc: indium-xUbuntu_9.10.dsc.in
+	$(edit) $@.in > $@
+indium-xUbuntu_8.04.dsc: indium-xUbuntu_8.04.dsc.in
+	$(edit) $@.in > $@
+dummy.tar.gz: README
+	tar cf - README |gzip > $@
+debian.tar.gz: copyright rules control changelog postrm
+	tar cf - copyright rules postrm control changelog |gzip > $@
