@@ -14,38 +14,6 @@ gpgcheck=1
 gpgkey=http://download.opensuse.org/repositories/home:/indimail/Fedora_14/repodata/repomd.xml.key
 enabled=1
 
-[indium]
-name=indium - TCL/TK Graphical UI for Managing Indimail (Fedora_14)
-type=rpm-md
-baseurl=http://download.opensuse.org/repositories/home:/indimail:/indium/Fedora_14/
-gpgcheck=1
-gpgkey=http://download.opensuse.org/repositories/home:/indimail:/indium/Fedora_14/repodata/repomd.xml.key
-enabled=1
-
-[indium-Raw]
-name=indium - TCL/TK Graphical UI for Managing Indimail (Fedora_14)
-type=rpm-md
-baseurl=http://download.opensuse.org/repositories/home:/mbhangui:/indium/Fedora_14/
-gpgcheck=1
-gpgkey=http://download.opensuse.org/repositories/home:/mbhangui:/indium/Fedora_14/repodata/repomd.xml.key
-enabled=1
-
-[iwebadmin]
-name=iwebadmin - Web Administration for IndiMail (Fedora_14)
-type=rpm-md
-baseurl=http://download.opensuse.org/repositories/home:/indimail:/iwebadmin/Fedora_14/
-gpgcheck=1
-gpgkey=http://download.opensuse.org/repositories/home:/indimail:/iwebadmin/Fedora_14/repodata/repomd.xml.key
-enabled=1
-
-[iwebadmin-Raw]
-name=iwebadmin - Web Administration for IndiMail (Fedora_14)
-type=rpm-md
-baseurl=http://download.opensuse.org/repositories/home:/mbhangui:/iwebadmin/Fedora_14/
-gpgcheck=1
-gpgkey=http://download.opensuse.org/repositories/home:/mbhangui:/iwebadmin/Fedora_14/repodata/repomd.xml.key
-enabled=1
-
 [ilmgrd]
 name=indimail-enterprise (Fedora_14)
 type=rpm-md
