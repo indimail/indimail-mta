@@ -33,7 +33,7 @@ build-stamp:
 	#
 	# run configure script
 	#
-    ./configure --prefix=${prefix} \
+	./configure --prefix=${prefix} \
         --libexecdir=${prefix}/libexec --sysconfdir=${prefix}/etc \
         --enable-mysqlincdir=/usr/include/mysql \
         --enable-mysqllibdir=/usr/lib/mysql \
