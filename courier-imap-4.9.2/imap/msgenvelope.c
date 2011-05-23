@@ -72,7 +72,8 @@ void msgappends(void (*writefunc)(const char *, size_t),
 			if (l)
 				memcpy(p, s, l);
 			p[l]=0;
-			q=rfc2047_encode_str(p, "x-unknown",
+			/* Assume UTF-8, if not, well, GIGO */
+			q=rfc2047_encode_str(p, "utf-8",
 					     rfc2047_qp_allow_any);
 			free(p);
 			if (!q)
