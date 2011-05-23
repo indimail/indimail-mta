@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail.spec.in,v 2.217 2011-05-21 19:29:52+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 2.218 2011-05-23 22:50:40+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %define _unpackaged_files_terminate_build 1
 
@@ -354,6 +354,11 @@ do
 	if [ " $i" = " clamav-%{clamav_version}" -a %noclamav -ne 0 ] ; then
 		continue
 	fi
+%if %build_on_obs == 1
+	if [ " $i" = " courier-imap-%{courier_version}" ] ; then
+		continue
+	fi
+%endif
 	if [ -f ../SOURCES/$i.tar.bz2 ] ; then
 		%{__bzip2} -d -c ../SOURCES/$i.tar.bz2 |tar xf -
 	elif [ -f ../SOURCES/$i.tar.gz ] ; then
@@ -424,9 +429,9 @@ if [ %{build_on_obs} -eq 0 ] ; then
 	echo "reconfiguring..."
 	autoreconf -fi
 else
-	echo "reconfiguring..."
 %if %{undefined centos_version} && %{undefined rhel_version} && %{undefined sles_version}
 %if 0%{?fedora_version} > 10 || 0%{?suse_version} || 0%{?mandriva_version} > 2009
+	echo "reconfiguring..."
 	autoreconf -fi
 %endif
 %endif
@@ -449,9 +454,9 @@ if [ %{build_on_obs} -eq 0 ] ; then
 	echo "reconfiguring..."
 	autoreconf -fi
 else
-echo "reconfiguring..."
 %if %{undefined centos_version} && %{undefined rhel_version} && %{undefined sles_version}
 %if 0%{?fedora_version} > 10 || 0%{?suse_version} || 0%{?mandriva_version} > 2009
+	echo "reconfiguring..."
 	autoreconf -fi
 %endif
 %endif
@@ -488,9 +493,9 @@ if [ %{build_on_obs} -eq 0 ] ; then
 	echo "reconfiguring..."
 	autoreconf -fi
 else
-	echo "reconfiguring..."
 %if %{undefined centos_version} && %{undefined rhel_version} && %{undefined sles_version}
 %if 0%{?fedora_version} > 10 || 0%{?suse_version} || 0%{?mandriva_version} > 2009
+	echo "reconfiguring..."
 	autoreconf -fi
 %endif
 %endif
@@ -498,6 +503,11 @@ fi
 fi
 
 if [ " %dist" = " mandrake" ] ; then
+	if [ %{build_on_obs} -eq 1 ] ; then
+		echo "reconfiguring..."
+		aclocal
+		autoreconf -fi
+	fi
 	./configure --prefix=%{_prefix} --libexecdir=%{_prefix}/libexec --sysconfdir=%{_prefix}/etc \
 	--mandir=%{_prefix}/man --libdir=/usr/%{_lib} --x-libraries=/usr/%{_lib} \
 	--enable-mysqlincdir=%{mysqlPrefix}/include/mysql --enable-mysqllibdir=%{mysqlPrefix}/%{_lib}/mysql \
@@ -515,8 +525,10 @@ fi
 #### courier-imap ######################
 if [ -d ../courier-imap-%{courier_version} ] ; then
 	cd ../courier-imap-%{courier_version}
-	mkdir -p m4 > /dev/null 2>&1
 if [ " %dist" = " mandrake" ] ; then
+	if [ %{build_on_obs} -eq 1 ] ; then
+		autoreconf -fi
+	fi
 	%configure --prefix=%{_prefix} --exec-prefix=%{_prefix}/ --bindir=%{_prefix}/bin \
 	--sbindir=%{_prefix}/sbin --datadir=%{_prefix}/share --includedir=%{_prefix}/include \
 	--libexecdir=%{_prefix}/libexec --mandir=%{_prefix}/man --sysconfdir=%{_prefix}/etc \
@@ -561,18 +573,18 @@ fi
 if [ -d ../fetchmail-%{fetchmail_version} ] ; then
 	cd ../fetchmail-%{fetchmail_version}
 	if [ %{build_on_obs} -eq 0 ] ; then
-		echo "reconfiguring..."
 		if [ %{fast_mode} -eq 0 ] ; then
+			echo "reconfiguring..."
 			autoreconf -fi
 		fi
 	%configure --prefix=%{_prefix} --libexecdir=%{_prefix}/libexec --sysconfdir=%{_prefix}/etc \
 		--enable-indimaildir=%{_prefix} --mandir=%{_prefix}/man \
 		`%{__cat} ../%{name}-%{version}/config/fetchmail.opts` > $DEVICE
 	else
-		echo "reconfiguring..."
 %if %{undefined centos_version} && %{undefined rhel_version} && %{undefined sles_version}
 %if 0%{?fedora_version} || 0%{?suse_version}
 		if [ %{fast_mode} -eq 0 ] ; then
+			echo "reconfiguring..."
 			autoreconf -fi
 		fi
 %else
