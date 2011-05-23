@@ -54,5 +54,5 @@ indium-xUbuntu_8.04.dsc: indium-xUbuntu_8.04.dsc.in
 	$(edit) $@.in > $@
 dummy.tar.gz: README
 	tar cf - README |gzip > $@
-debian.tar.gz: copyright rules control changelog postrm postinst
-	tar cf - copyright rules postrm postinst control changelog |gzip > $@
+debian.tar.gz: copyright rules control changelog postrm postinst compat
+	tar cf - copyright rules postrm postinst control changelog compat|gzip > $@
