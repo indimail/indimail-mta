@@ -157,3 +157,6 @@ iwebadmin_*.orig.tar.gz
 iwebadmin_*.debian.tar.gz
 *.deb
 *.debhelper.log
+*.gz
+indium_*.dsc
+indium_*.changes
