@@ -14,38 +14,6 @@ gpgcheck=1
 gpgkey=http://download.opensuse.org/repositories/home:/indimail/SLE_11/repodata/repomd.xml.key
 enabled=1
 
-[indium]
-name=indium - TCL/TK Graphical UI for Managing Indimail (SLE_11)
-type=rpm-md
-baseurl=http://download.opensuse.org/repositories/home:/indimail:/indium/SLE_11/
-gpgcheck=1
-gpgkey=http://download.opensuse.org/repositories/home:/indimail:/indium/SLE_11/repodata/repomd.xml.key
-enabled=1
-
-[indium-Raw]
-name=indium - TCL/TK Graphical UI for Managing Indimail (SLE_11)
-type=rpm-md
-baseurl=http://download.opensuse.org/repositories/home:/mbhangui:/indium/SLE_11/
-gpgcheck=1
-gpgkey=http://download.opensuse.org/repositories/home:/mbhangui:/indium/SLE_11/repodata/repomd.xml.key
-enabled=1
-
-[iwebadmin]
-name=iwebadmin - Web Administration for IndiMail (SLE_11)
-type=rpm-md
-baseurl=http://download.opensuse.org/repositories/home:/indimail:/iwebadmin/SLE_11/
-gpgcheck=1
-gpgkey=http://download.opensuse.org/repositories/home:/indimail:/iwebadmin/SLE_11/repodata/repomd.xml.key
-enabled=1
-
-[iwebadmin-Raw]
-name=iwebadmin - Web Administration for IndiMail (SLE_11)
-type=rpm-md
-baseurl=http://download.opensuse.org/repositories/home:/mbhangui:/iwebadmin/SLE_11/
-gpgcheck=1
-gpgkey=http://download.opensuse.org/repositories/home:/mbhangui:/iwebadmin/SLE_11/repodata/repomd.xml.key
-enabled=1
-
 [ilmgrd]
 name=indimail-enterprise (SLE_11)
 type=rpm-md
