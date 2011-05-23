@@ -93,7 +93,10 @@ AC_FUNC_REALLOC
 AC_CHECK_FUNCS([memset putenv strcasecmp strchr strerror strncasecmp strrchr])
 AC_CHECK_LIB(ssl, EVP_MD_CTX_init, [AC_SUBST([LIB_SSL], ["-lssl"]) AC_DEFINE([HAVE_SSL], [1],[OpenSSL Library])],,-lssl)
 
-. /usr/lib/tclConfig.sh
+if test -f /usr/lib/tclConfig.sh
+then
+	. /usr/lib/tclConfig.sh
+fi
 
 indiuser="indimail"
 AC_ARG_ENABLE(indiuser, [  --enable-indiuser=indimail    user IndiMail was installed as.],
@@ -278,14 +281,7 @@ AC_CHECK_LIB(mysqlclient -L${mysql_libdir}, mysql_real_connect,libs="$libs -lmys
 	AC_MSG_ERROR([could not find libmysqlclient which is needed for MySQL support]),)
 
 auth_inc="$TCL_INCLUDE_SPEC -I$indimaildir/include -I$mysql_incdir"
-case "$host" in
-	*-*-darwin*)
-	auth_libs="-L. -L$libdir -lindimail -leps -lcdb $LIB_CRYPT -L$mysql_libdir -lmysqlclient $LIB_SSL -lm"
-	;;
-	*)
-	auth_libs="-L. -L$libdir -lindimail -leps -lcdb $LIB_CRYPT -L$mysql_libdir -lmysqlclient $LIB_SSL -lm"
-	;;
-esac
+auth_libs="-L. -L$libdir -L$mysql_libdir -lmysqlclient"
 
 AC_SUBST(mysql_prefix)
 AC_SUBST(mysql_incdir)

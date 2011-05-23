@@ -5,16 +5,15 @@
 COFLAGS=-z+05:30
 ACLOCAL_AMFLAGS=-I m4
 
-DEFS=-I. @auth_inc@ 
+DEFS=-I. -I/usr/include/tcl8.4 @auth_inc@ 
 
 libfbsql_LTLIBRARIES = libfbsql.la
 libfbsql_la_SOURCES = fbsql.c
-libfbsql_la_LIBADD = -L@mysql_libdir@ -lmysqlclient -lm
+libfbsql_la_LIBADD = @auth_libs@
 libfbsql_la_LDFLAGS = -version-info @LIBVER@ -release @VERSION@
 
 libtai64_LTLIBRARIES = libtai64.la
 libtai64_la_SOURCES = tai64.c
-libtai64_la_LIBADD = -L@mysql_libdir@ -lmysqlclient -lm
 libtai64_la_LDFLAGS = -version-info @LIBVER@ -release @VERSION@
 
 libfbsqldir=@libdir@
@@ -35,13 +34,13 @@ guisbin_PROGRAMS = pwhelper
 
 guibin_SCRIPTS = indium litesrc supernotepad secpanel FMbrowse tkdiff
 
-noinst_SCRIPTS = indium.spec indium-@VERSION@-rpmlintrc obs.mk
+noinst_SCRIPTS = indium.spec indium-@VERSION@-rpmlintrc
 
 MOSTLYCLEANFILES = indium litesrc common.tcl fileman.tcl supernotepad secpanel FMbrowse \
-				   indium.spec indium-@VERSION@-rpmlintrc tkdiff obs.mk
+				   indium.spec indium-@VERSION@-rpmlintrc tkdiff
 
 pwhelper_SOURCES = pwhelper.c
-pwhelper_LDADD = @auth_libs@
+pwhelper_DEPENDENCIES = pipe_exec.lo
 
 edit = sed \
 	-e 's,@indimaildir\@,$(indimaildir),g' \
@@ -76,6 +75,10 @@ tkdiff: tkdiff.tcl
 	$(edit) $@.tcl > $@
 indium.spec: indium.spec.in
 	($(edit) $@.in;cat doc/ChangeLog) > $@
+pwhelper.o: pwhelper.c
+	$(COMPILE) $(DEFS) -c pwhelper.c
+pwhelper$(EXEEXT): $(pwhelper_DEPENDENCIES) $(pwhelper_OBJECTS)
+	$(LINK) $@.o pipe_exec.lo $(pwhelper_LDADD)
 indium-@VERSION@-rpmlintrc: indium-rpmlintrc.in
 	$(edit) indium-rpmlintrc.in > $@
 obs.mk: debian/obs.mk.in
