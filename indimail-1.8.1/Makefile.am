@@ -161,7 +161,7 @@ indimailsbin_SCRIPTS = myslave controlsync svctool cputime tls-cert-check create
 
 noinst_SCRIPTS = indimail.spec indimail-@VERSION@-rpmlintrc indimail-epm.list \
 	INSTALL INSTALL-RPM INSTALL-MYSQL README-CLUSTER RELEASE-Notes Quick-INSTALL \
-	README INSTALL-MINI vadddomain_handle vadduser_handle obs.mk
+	README INSTALL-MINI vadddomain_handle vadduser_handle
 
 post_handle_list = vadddomain vadduser
 
@@ -172,7 +172,7 @@ indimail-@VERSION@-rpmlintrc indimail-epm.list tls-cert-check mailzipper \
 perm_list dbinfo.8 inlookup.8 vadddomain.1 vdeldomain.1 vadduser.1 \
 vdeluser.1 vdelivermail.8 vrenamedomain.1 vrenameuser.1 vpasswd.1 vmoveuser.1 \
 vcfilter.1 indimail.7 svctool.8 indisub.c indimail.mrtg.cfg overquota.sh \
-vadddomain_handle vadduser_handle login_tasks.3 authgeneric obs.mk
+vadddomain_handle vadduser_handle login_tasks.3 authgeneric
 
 DISTCLEANFILES=.gitignore
 
