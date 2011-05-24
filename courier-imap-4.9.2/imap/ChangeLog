@@ -1,3 +1,22 @@
+4.9.3
+
+2011-05-22  Sam Varshavchik  <mrsam@courier-mta.com>
+
+	* msgenvelope.c (msgappends): Fix a fatal error upon encountering
+	8-bit header content. Heuristically try to interpret it as UTF-8, and
+	just ignore invalid UTF-8 sequences.
+
+4.9.2
+
+2011-05-17  Sam Varshavchik  <mrsam@courier-mta.com>
+
+	* rfc2045/rfc2045cdecode.c: Tolerate lowercase hexadecimal characters
+	in quoted-printable-encoded content.
+
+2011-05-06  Thomas Jacob <jacob@internet24.de>
+
+	* unicode/unicode.c: Compilation fixes.
+
 4.9.1
 
 2011-04-11  Sam Varshavchik  <mrsam@courier-mta.com>
