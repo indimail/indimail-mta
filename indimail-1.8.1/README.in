@@ -333,7 +333,6 @@ both 32 and 64 bit) are
     * SUSE
           o openSUSE 11.4
           o openSUSE 11.3
-          o openSUSE 11.2
           o openSUSE Tumbleweed
           o SUSE Linux Enterprise 11 SP1
           o SUSE Linux Enterprise 11
@@ -347,6 +346,7 @@ both 32 and 64 bit) are
           o Red Hat Enterprise Linux 5
           o Red Hat Enterprise Linux 6
           o CentOS 5
+          o Mandriva_2010.1
 
     * Debian
           o Debian 6.0
