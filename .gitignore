@@ -160,3 +160,6 @@ iwebadmin_*.debian.tar.gz
 *.gz
 indium_*.dsc
 indium_*.changes
+ilmgrd_*.dsc
+ilmgrd_*.changes
+obs.mk
