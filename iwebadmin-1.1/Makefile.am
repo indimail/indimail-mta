@@ -30,9 +30,9 @@ COMMONSOURCES=qmailadmin.c alias.c autorespond.c forward.c mailinglist.c \
 qmailadmin_SOURCES=$(COMMONSOURCES) 
 qmailadmin_LDADD=@auth_libs@
 
-noinst_SCRIPTS = iwebadmin.spec iwebadmin-@VERSION@-rpmlintrc obs.mk
+noinst_SCRIPTS = iwebadmin.spec iwebadmin-@VERSION@-rpmlintrc
 
-MOSTLYCLEANFILES = iwebadmin.spec iwebadmin-@VERSION@-rpmlintrc obs.mk \
+MOSTLYCLEANFILES = iwebadmin.spec iwebadmin-@VERSION@-rpmlintrc \
 				   iwebadmin_perm_list
 
 edit = sed \
