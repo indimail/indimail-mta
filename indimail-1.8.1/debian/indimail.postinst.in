@@ -458,7 +458,7 @@ fi
 if [ -f ${prefix}/bin/instcheck ] ; then
 	${prefix}/bin/instcheck > /dev/null 2>&1
 fi
-LD_LIBRARY_PATH=/var/indimail/lib:/var/indimail/lib64
+LD_LIBRARY_PATH=${prefix}/lib:${prefix}/lib64
 export LD_LIBRARY_PATH
 touch /tmp/skip-install_tables
 ${prefix}/sbin/svctool --check-install --servicedir=${servicedir} \
