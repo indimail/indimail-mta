@@ -113,8 +113,8 @@ SERVICE=/service
 #
 #
 #
-if [ -f /etc/lsb-release ] ; then
-	SYSTEM=Ubuntu
+if [ -f /etc/lsb-release -o -f /etc/debian_version ] ; then
+	SYSTEM=Debian
 else
 	SYSTEM=`uname -s | tr "[:lower:]" "[:upper:]"`
 fi
@@ -124,7 +124,7 @@ else
 	ECHO=echo
 fi
 case "$SYSTEM" in
-	DARWIN*|Ubuntu)
+	DARWIN*|Debian)
 		RES_COL=60
 		MOVE_TO_COL="$ECHO -en \\033[${RES_COL}G"
 		SETCOLOR_SUCCESS="$ECHO -en \\033[1;32m"
@@ -171,6 +171,14 @@ myfailure() {
 
 # Check that we're a privileged user
 [ `id -u` = 0 ] || exit 4
+# Source function library.
+if [ -f /etc/rc.d/init.d/functions ] ; then
+	. /etc/rc.d/init.d/functions
+elif [ -f /etc/init.d/functions ] ; then
+	. /etc/init.d/functions
+elif [ -f /lib/lsb/init-functions ] ; then
+	. /lib/lsb/init-functions
+fi
 case "$SYSTEM" in
 	DARWIN*)
 	. /etc/rc.common
@@ -182,21 +190,13 @@ case "$SYSTEM" in
 	succ=mysuccess
 	fail=myfailure
 	;;
-	Ubuntu)
+	Debian)
 	succ=mysuccess
 	fail=myfailure
 	;;
 	LINUX)
 	succ=success
 	fail=failure
-	# Source function library.
-	if [ -f /etc/rc.d/init.d/functions ] ; then
-		. /etc/rc.d/init.d/functions
-	elif [ -f /etc/init.d/functions ] ; then
-		. /etc/init.d/functions
-	elif [ -f /lib/lsb/init-functions ] ; then
-		. /lib/lsb/initfunctions
-	fi
 	# Get config.
 	if [ -f /etc/sysconfig/network ] ; then
 		. /etc/sysconfig/network
@@ -238,15 +238,19 @@ stop()
 	for i in `echo $SERVICE/*`
 	do
 		$ECHO -n $"Stopping $i: "
-		QMAIL/bin/svc -d $i && $succ || $fail
+		QMAIL/bin/svc -d $i 2>>/tmp/sv.err && $succ || $fail
 		RETVAL=$?
 		echo
 		let ret+=$RETVAL
 	done
 	$ECHO -n $"Stopping svscan: "
-	QMAIL/sbin/initsvc -off > /dev/null && $succ || $fail
+	QMAIL/sbin/initsvc -off > /dev/null 2>>/tmp/sv.err && $succ || $fail
 	RETVAL=$?
 	echo
+	if [ -s /tmp/sv.err ] ; then
+		cat /tmp/sv.err
+	fi
+	/bin/rm -f /tmp/sv.err
 	if [ -d /var/lock/subsys ] ; then
 		[ $ret -eq 0 ] && rm -f /var/lock/subsys/indimail
 	fi
@@ -259,7 +263,7 @@ start()
 	QMAIL/bin/svstat $SERVICE/.svscan/log > /dev/null
 	if [ $? -ne 0 ] ; then
 		$ECHO -n $"Starting svscan: "
-		QMAIL/sbin/initsvc -on > /dev/null && $succ || $fail
+		QMAIL/sbin/initsvc -on > /dev/null 2>/tmp/sv.err && $succ || $fail
 		RETVAL=$?
 		echo
 		let ret+=$RETVAL
@@ -268,13 +272,17 @@ start()
 		do
 			if [ ! -f $i/down ] ; then
 				$ECHO -n $"Starting $i: "
-				QMAIL/bin/svc -u $i && $succ || $fail
+				QMAIL/bin/svc -u $i 2>/tmp/sv.err && $succ || $fail
 				RETVAL=$?
 				echo
 				let ret+=$RETVAL
 			fi
 		done
 	fi
+	if [ -s /tmp/sv.err ] ; then
+		cat /tmp/sv.err
+	fi
+	/bin/rm -f /tmp/sv.err
 	if [ -d /var/lock/subsys ] ; then
 		[ $ret -eq 0 ] && touch /var/lock/subsys/indimail
 	fi
