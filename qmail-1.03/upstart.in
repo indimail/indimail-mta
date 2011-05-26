@@ -22,16 +22,18 @@ description "Start IndiMail Services"
 author      "$Author: Cprogrammer $"
 version     "$Revision: 1.4 $"
 
-start on runlevel [345]
-start on qmailstart
+umask 022
 
-stop on runlevel [0126]
-stop on runlevel r
-stop on starting shutdown
-stop on qmailstop
+start on ((net-device-up and local-filesystems and runlevel [2345])
+		or qmailstart)
+stop on (runlevel [016r] or starting shutdown or qmailstop)
 
-console none
+#console none
 emits indimail
+
+# The default of 5 seconds is too low for mysql which needs to flush buffers
+kill timeout 300
+normal exit 0 TERM
 
 respawn
 respawn limit 10 5
@@ -39,6 +41,8 @@ respawn limit 10 5
 pre-start script
 	if [ -d /var/lock/subsys ] ; then
 		touch /var/lock/subsys/svscan
+	else
+		touch /tmp/svscan
 	fi
 end script
 
@@ -58,5 +62,7 @@ end script
 post-stop script
 	if [ -d /var/lock/subsys ] ; then
 		rm -f /var/lock/subsys/svscan
+	else
+		rm -f /tmp/svscan
 	fi
 end script
