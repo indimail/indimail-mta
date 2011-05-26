@@ -1,5 +1,8 @@
 /*
  * $Log: initsvc.c,v $
+ * Revision 2.13  2011-05-26 23:54:18+05:30  Cprogrammer
+ * change in svscanboot usage
+ *
  * Revision 2.12  2010-06-05 14:33:04+05:30  Cprogrammer
  * port for fedora 13
  *
@@ -46,7 +49,7 @@
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: initsvc.c,v 2.12 2010-06-05 14:33:04+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: initsvc.c,v 2.13 2011-05-26 23:54:18+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #define SV_ON    1
@@ -197,7 +200,7 @@ main(int argc, char **argv)
 		return (1);
 	}
 	/*
-	 * SV:345:respawn:/var/qmail/bin/svscanboot /service /service1 <>/dev/console 2<>/dev/console
+	 * SV:345:respawn:/var/qmail/bin/svscanboot /service <>/dev/console 2<>/dev/console
 	 */
 	for (found = 0;;)
 	{
@@ -262,10 +265,10 @@ main(int argc, char **argv)
 		return (1);
 	}
 	/*
-	 * SV:345:respawn:/var/qmail/bin/svscanboot /service /service1 <>/dev/console 2<>/dev/console
+	 * SV:345:respawn:/var/qmail/bin/svscanboot <>/dev/console 2<>/dev/console
 	 */
-	snprintf(buffer, sizeof(buffer), "SV:345:%s:%s/bin/svscanboot%s/service /service1 <>/dev/console 2<>/dev/console",
-			 flag == SV_ON ? "respawn" : "off", qmaildir, flag == SV_ON ? " " : "     ");
+	snprintf(buffer, sizeof(buffer), "SV:345:%s:%s/bin/svscanboot <>/dev/console 2<>/dev/console",
+			 flag == SV_ON ? "respawn" : "off", qmaildir);
 	fprintf(fp, "%s\n", buffer);
 	if (fclose(fp))
 	{
