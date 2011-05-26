@@ -11,6 +11,9 @@
 ### END INIT INFO
 
 # $Log: qmailctl.sh,v $
+# Revision 1.33  2011-05-26 22:37:51+05:30  Cprogrammer
+# fix for debian systems
+#
 # Revision 1.32  2011-04-27 17:18:26+05:30  Cprogrammer
 # added LSB header
 #

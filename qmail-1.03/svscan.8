@@ -72,7 +72,8 @@ output can be driven through
 or other logger which supervise monitors. If a directory (or symlink to a directory)
 named
 .B /service/.svscan
-exists, then svscan will direct its stdout and stderr to the supervised service run from the
+exists and environment variable \fBSCANLOG\fR is defined, then svscan will direct its
+stdout and stderr to the supervised service run from the
 .B /service/.svscan/log
 directory. This simplifies
 .B svscan
@@ -84,8 +85,8 @@ output through
 .B multilog
 also provides a much better solution than other
 .B svscan
-startup scripts which direct output exclusively to console, causing problems to go undetected for a long time if the server is in a
-closet somewhere and nobody looks at console.
+startup scripts which direct output exclusively to console, causing problems to go
+undetected for a long time if the server is in a closet somewhere and nobody looks at console.
 
 .SH SEE ALSO
 supervise(8),
