@@ -13,20 +13,15 @@ svscanboot is available in daemontools 0.75 and above.
 ]
 .SH DESCRIPTION
 .B svscanboot
-(without any command-line arguments) runs the pipeline
+(without any command-line arguments) runs svscan command
 
-svscan /service 2>&1 | readproctitle service errors: .....
+svscan /service 2>&1 
 
-with 400 dots. The last 400 bytes of error messages from
-.BR svscan (8)
-will be visible to
-.BR ps (1)
-through
-.BR readproctitle (8).
+with SCANLOG defined and SCANINTERVAL set to 300 seconds.
 
 If
 .B svscanboot
-is given command-line arguments, it startups up svscan for each
+is given a command-line argument, it startups up svscan for the
 .I directory
 given on the command line (instead of just svscan /service).
 
@@ -41,7 +36,7 @@ and clears all other environment variables.
 
 The recommended way is to put the following entry in /etc/inittab to invoke svscanboot.
 
-SV:345:respawn:QMAIL/bin/svscanboot /service1 /service2 <>/dev/console 2<>/dev/console
+SV:345:respawn:QMAIL/bin/svscanboot <>/dev/console 2<>/dev/console
 
 (assuming that you have configured services in both /service1 and /service2)
 .SH SEE ALSO

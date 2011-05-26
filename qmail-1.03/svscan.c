@@ -1,5 +1,8 @@
 /*
  * $Log: svscan.c,v $
+ * Revision 1.5  2011-05-26 23:17:52+05:30  Cprogrammer
+ * open svscan log only if SCANLOG is defined
+ *
  * Revision 1.4  2008-06-07 13:54:28+05:30  Cprogrammer
  * added logging of svscan through external loggers like multilog
  *
@@ -244,10 +247,19 @@ doit(void)
 static int      scannow = 0;
 
 static void
-sighandler(int i)
+sighup(int i)
 {
 	scannow = 1;
-	signal(SIGHUP,sighandler);
+	signal(SIGHUP, sighup);
+	strerr_warn2(INFO, "Stopping svscan", 0);
+}
+
+static void
+sigterm(int i)
+{
+	signal(SIGTERM, sigterm);
+	strerr_warn2(INFO, "got sighup", 0);
+	_exit(0);
 }
 
 static void
@@ -273,8 +285,7 @@ open_svscan_log(void)
 		{
 			(void) dup2(x[i].pi[1], STDOUT_FILENO);
 			(void) dup2(x[i].pi[1], STDERR_FILENO);
-			strerr_warn1("", 0);
-			strerr_warn2(INFO, "*** Starting svscan", 0);
+			strerr_warn2(INFO, "Starting svscan", 0);
 		}
 	}
 }
@@ -290,12 +301,14 @@ main(int argc, char **argv)
 		if (chdir(argv[1]) == -1)
 			strerr_die4sys(111, FATAL, "unable to chdir to ", argv[1], ": ");
 	}
-	signal(SIGHUP,sighandler);
+	signal(SIGHUP, sighup);
+	signal(SIGTERM, sigterm);
 	if((s = env_get("SCANINTERVAL")))
 		scan_ulong(s, &wait);
 	else
-		wait = 5;  
-	open_svscan_log();
+		wait = 5;
+	if (env_get("SCANLOG"))
+		open_svscan_log();
 	for (;;)
 	{
 		doit();
@@ -310,7 +323,7 @@ main(int argc, char **argv)
 void
 getversion_svscan_c()
 {
-	static char    *x = "$Id: svscan.c,v 1.4 2008-06-07 13:54:28+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: svscan.c,v 1.5 2011-05-26 23:17:52+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

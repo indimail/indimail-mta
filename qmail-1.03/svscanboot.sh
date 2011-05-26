@@ -1,4 +1,7 @@
 # $Log: svscanboot.sh,v $
+# Revision 1.9  2011-05-26 23:37:41+05:30  Cprogrammer
+# removed readproctitle
+#
 # Revision 1.8  2009-06-18 19:47:48+05:30  Cprogrammer
 # do wait only for job in background
 #
@@ -21,7 +24,7 @@
 # Revision 1.2  2002-09-26 20:56:02+05:30  Cprogrammer
 # made service directory configurable
 #
-# $Id: svscanboot.sh,v 1.8 2009-06-18 19:47:48+05:30 Cprogrammer Stab mbhangui $
+# $Id: svscanboot.sh,v 1.9 2011-05-26 23:37:41+05:30 Cprogrammer Exp mbhangui $
 
 PATH=QMAIL/bin:/usr/local/bin:/bin:/sbin:/usr/bin:/usr/sbin
 
@@ -42,21 +45,9 @@ if [ $# -eq 0 ] ; then
 	else
 		SERVICEDIR=/service
 	fi
-	QMAIL/bin/svc -dx $SERVICEDIR/* $SERVICEDIR/*/log
-	env - PATH=$PATH SCANINTERVAL=$SCANINTERVAL \
-		QMAIL/bin/svscan $SERVICEDIR 2>&1 | \
-	env - PATH=$PATH QMAIL/bin/readproctitle $SERVICEDIR errors: ................................................................................................................................................................................................................................................................................................................................................................................................................
 else
-	for i in $*
-	do
-		if [ ! -d $i ] ; then
-			continue
-		fi
-		SERVICEDIR=$i
-		QMAIL/bin/svc -dx $SERVICEDIR/* $SERVICEDIR/*/log
-		env - PATH=$PATH SCANINTERVAL=$SCANINTERVAL \
-			QMAIL/bin/svscan $SERVICEDIR 2>&1 | \
-		env - PATH=$PATH QMAIL/bin/readproctitle $SERVICEDIR errors: ................................................................................................................................................................................................................................................................................................................................................................................................................ &
-	done
-	wait
+	SERVICEDIR=$1
 fi
+QMAIL/bin/svc -dx $SERVICEDIR/* $SERVICEDIR/*/log $SERVICEDIR/.svscan/log
+env - PATH=$PATH SCANINTERVAL=$SCANINTERVAL SCANLOG="" \
+	QMAIL/bin/svscan $SERVICEDIR
