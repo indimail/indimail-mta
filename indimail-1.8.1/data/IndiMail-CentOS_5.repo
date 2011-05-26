@@ -13,19 +13,3 @@ baseurl=http://download.opensuse.org/repositories/home:/indimail/CentOS_5/
 gpgcheck=1
 gpgkey=http://download.opensuse.org/repositories/home:/indimail/CentOS_5/repodata/repomd.xml.key
 enabled=1
-
-[ilmgrd]
-name=indimail-enterprise (CentOS_CentOS-5)
-type=rpm-md
-baseurl=http://download.opensuse.org/repositories/home:/indimail:/ilmgrd/CentOS_CentOS-5/
-gpgcheck=1
-gpgkey=http://download.opensuse.org/repositories/home:/indimail:/ilmgrd/CentOS_CentOS-5/repodata/repomd.xml.key
-enabled=1
-
-[ilmgrd-Raw]
-name=indimail-enterprise (CentOS_CentOS-5)
-type=rpm-md
-baseurl=http://download.opensuse.org/repositories/home:/mbhangui:/ilmgrd/CentOS_CentOS-5/
-gpgcheck=1
-gpgkey=http://download.opensuse.org/repositories/home:/mbhangui:/ilmgrd/CentOS_CentOS-5/repodata/repomd.xml.key
-enabled=1

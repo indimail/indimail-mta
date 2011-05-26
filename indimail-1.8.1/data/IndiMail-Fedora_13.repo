@@ -13,19 +13,3 @@ baseurl=http://download.opensuse.org/repositories/home:/indimail/Fedora_13/
 gpgcheck=1
 gpgkey=http://download.opensuse.org/repositories/home:/indimail/Fedora_13/repodata/repomd.xml.key
 enabled=1
-
-[ilmgrd]
-name=indimail-enterprise (Fedora_13)
-type=rpm-md
-baseurl=http://download.opensuse.org/repositories/home:/indimail:/ilmgrd/Fedora_13/
-gpgcheck=1
-gpgkey=http://download.opensuse.org/repositories/home:/indimail:/ilmgrd/Fedora_13/repodata/repomd.xml.key
-enabled=1
-
-[ilmgrd-Raw]
-name=indimail-enterprise (Fedora_13)
-type=rpm-md
-baseurl=http://download.opensuse.org/repositories/home:/mbhangui:/ilmgrd/Fedora_13/
-gpgcheck=1
-gpgkey=http://download.opensuse.org/repositories/home:/mbhangui:/ilmgrd/Fedora_13/repodata/repomd.xml.key
-enabled=1
