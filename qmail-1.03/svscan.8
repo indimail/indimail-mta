@@ -30,9 +30,7 @@ with a pipe between them. It does this if the name
 .I s
 is at most 255 bytes long and
 .I s\fR/\fBlog
-exists. (In versions 0.70 and below, it does this if
-.I s
-is sticky.)
+exists.
 .B svscan
 needs two free descriptors for each pipe.
 
@@ -67,17 +65,15 @@ it switches to that
 when it starts.
 
 .B svscan
-output can be driven through
-.B multilog
-or other logger which supervise monitors. If a directory (or symlink to a directory)
+output can be driven through \fBmultilog\fR. If a directory (or symlink to a directory)
 named
 .B /service/.svscan
-exists and environment variable \fBSCANLOG\fR is defined, then svscan will direct its
+exists and the environment variable \fBSCANLOG\fR is defined, then svscan will direct its
 stdout and stderr to the supervised service run from the
 .B /service/.svscan/log
 directory. This simplifies
 .B svscan
-startup scripts and replaces the use of
+startup scripts and eliminates the use of
 .BR readproctitle ,
 which does not work on some platforms, e.g. FreeBSD 5.1. Redirecting
 .B svscan
@@ -86,7 +82,7 @@ output through
 also provides a much better solution than other
 .B svscan
 startup scripts which direct output exclusively to console, causing problems to go
-undetected for a long time if the server is in a closet somewhere and nobody looks at console.
+undetected for a long time.
 
 .SH SEE ALSO
 supervise(8),
