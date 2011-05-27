@@ -12,13 +12,15 @@ variables are set
 
 QUEUE_BASE  - This should point to a directory which has multiple queues.
 QUEUE_COUNT - This should indicate the number of queues that qmail should use
-QuEUE_START - This indicates the first qeueue that should be used. 
+QUEUE_START - This indicates the first qeueue that should be used. 
+QMAILQUEUE  - This should be /var/qmail/bin/qmail-multi
 
 e.g. If you want qmail to use 3 queues
 
 QUEUE_BASE=/var/qmail/queue
 QUEUE_COUNT=7
 QUEUE_START=1
+QMAILQUEUE=/var/qmail/bin/qmail-multi
 
 for i in 1 2 3
 do
@@ -35,14 +37,14 @@ To start qmail-send on the multiple queues, you need to use qmail-daemon instead
 qmail-start
 
 env - QUEUE_COUNT=3 QUEUE_BASE=/var/qmail/queue QUEUE_START=1 \
-	qmail-daemon "`cat /var/indimail/control/defaultdelivery`" 2>&1
+	qmail-daemon "`cat /var/qmail/control/defaultdelivery`" 2>&1
 
 
 You also need to set the above 3 environment variables in the SMTP run script.
 Even if you need to inject mails, you need to set these environment variables.
 
-A wrapper sendmail.sh in /var/qmail/bin has been provided which you can use
-instead of sendmail
+qmail-inject uses environment variables stored in /var/qmail/bin/defaultqueue
+directory.
 
-In case of any doubt, email "Manvendra Bhangui" <mbhangui@gmail.com>
+In case of any doubt, email "Manvendra Bhangui" <manvendra@indimail.org>
 
