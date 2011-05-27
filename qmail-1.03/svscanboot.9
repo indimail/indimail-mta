@@ -1,34 +1,35 @@
 .TH svscanboot 8
 .SH NAME
-svscanboot \- starts
+\fBsvscanboot\fR \- starts
 .BR svscan (8)
 in the service directories, with output and error messages logged through
-.BR readproctitle (8).
+.BR multilog (8).
 
-svscanboot is available in daemontools 0.75 and above.
+\fBsvscanboot\fR is available in \fBindimail(7)\fR package.
+
 .SH SYNOPSIS
-.B svscanboot
-[
-.I directory1 directory2 ...
-]
+\fBsvscanboot\fR [ \fIservicedir\fR ]
+
 .SH DESCRIPTION
-.B svscanboot
-(without any command-line arguments) runs svscan command
+
+\fBsvscanboot\fR (without any command-line arguments) runs \fBsvscan\fR command
 
 svscan /service 2>&1 
 
-with SCANLOG defined and SCANINTERVAL set to 300 seconds.
+If \fBsvscanboot\fR is given a command-line argument, it startups up svscan for the directory
+\fIservicedir\fR given on the command line (instead of just svscan /service).
 
-If
-.B svscanboot
-is given a command-line argument, it startups up svscan for the
-.I directory
-given on the command line (instead of just svscan /service).
+\fBsvscanboot\fR sets \fBSCANINTERVAL\fR environment variable to 300 seconds. This causes
+\fBsvscan\fR to look for new services every 300 seconds. You can change the interval by having
+the scan interval specified in the control file QMAIL/control/scaninterval. \fBsvscan\fR also
+sets the \fBSCANLOG\fR environment variable to have \fBsvscan\fR log all messages
+and errors using \fBmultilog\fR, in the directory \fIservicedir\fR/.svscan/log/current.
 
-.B svscanboot
-sets $PATH to
+\fBsvscanboot\fR sets PATH to
 
- QMAIL/bin:/usr/local/bin:/bin:/sbin:/usr/bin:/usr/sbin
+.EX
+QMAIL/bin:/usr/local/bin:/bin:/sbin:/usr/bin:/usr/sbin
+.EE
 
 (all in one line, no space)
 
@@ -38,7 +39,6 @@ The recommended way is to put the following entry in /etc/inittab to invoke svsc
 
 SV:345:respawn:QMAIL/bin/svscanboot <>/dev/console 2<>/dev/console
 
-(assuming that you have configured services in both /service1 and /service2)
 .SH SEE ALSO
 supervise(8),
 svc(8),
