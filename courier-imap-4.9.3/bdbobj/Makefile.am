@@ -2,8 +2,7 @@
 # Copyright 1998 - 2005 Double Precision, Inc.  See COPYING for
 # distribution information.
 
-
-ACLOCAL_AMFLAGS=-I m4
+ACLOCAL_AMFLAGS=-I ../m4
 LIBDBOBJSOURCES=bdbobj.h bdbobj.c bdbobj2.c bdbobj3.c
 TESTBDBSOURCES=testbdb.C
 

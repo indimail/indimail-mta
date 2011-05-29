@@ -1,4 +1,4 @@
-ACLOCAL_AMFLAGS=-I m4
+ACLOCAL_AMFLAGS=-I ../m4
 AUTOMAKE = srcdir=${srcdir} @SHELL@ ${srcdir}/../automake.fix @AUTOMAKE@
 
 noinst_LTLIBRARIES=libauth.la libauthmod.la

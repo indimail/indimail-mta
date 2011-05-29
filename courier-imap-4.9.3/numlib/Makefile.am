@@ -3,7 +3,7 @@
 # distribution information.
 
 
-ACLOCAL_AMFLAGS=-I m4
+ACLOCAL_AMFLAGS=-I ../m4
 CLEANFILES=$(noinst_DATA)
 noinst_LTLIBRARIES=libnumlib.la
 

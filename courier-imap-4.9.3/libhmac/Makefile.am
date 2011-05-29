@@ -2,8 +2,7 @@
 # Copyright 1998 - 2005 Double Precision, Inc.  See COPYING for
 # distribution information.
 
-
-ACLOCAL_AMFLAGS=-I m4
+ACLOCAL_AMFLAGS=-I ../m4
 noinst_LTLIBRARIES=libhmac.la
 
 libhmac_la_SOURCES=hmac.c hmac.h

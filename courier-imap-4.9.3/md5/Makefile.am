@@ -3,7 +3,7 @@
 # distribution information.
 
 
-ACLOCAL_AMFLAGS=-I m4
+ACLOCAL_AMFLAGS=-I ../m4
 if HMACC
 HMAC=hmac.c
 else
