@@ -163,3 +163,11 @@ indium_*.changes
 ilmgrd_*.dsc
 ilmgrd_*.changes
 obs.mk
+*/debian/*.dsc
+*/debian/*.postinst
+*/debian/*.postrm
+*/debian/*.preinst
+*/debian/*.prerm
+*/debian/*.install
+*/debian/obs_deb_prep
+*/debian/_service
