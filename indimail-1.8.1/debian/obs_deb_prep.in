@@ -72,7 +72,18 @@ do
 		continue
 	fi
 	if [ " $i" = " courier-imap-"$courier_version"" ] ; then
-		continue
+		if [ -f ../SOURCES/$i.patch.gz ] ; then
+			echo "applying patch for $i"
+			gunzip -c ../SOURCES/$i.patch.gz | patch -p0 > /dev/null
+			continue
+		fi
+	fi
+	if [ " $i" = " qmail-1.03" ] ; then
+		if [ -f ../SOURCES/$i.patch.gz ] ; then
+			echo "applying patch for $i"
+			gunzip -c ../SOURCES/$i.patch.gz | patch -p0 > /dev/null
+			continue
+		fi
 	fi
 	if [ -f indimail-"$version"/patches/$i.patch.gz ] ; then
 		echo "applying patch for $i"
