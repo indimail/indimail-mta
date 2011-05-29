@@ -4,4 +4,5 @@
 --without-authcustom
 --without-authchangepwdir
 --without-authpwd
+--without-userdb
 --with-authshadow
