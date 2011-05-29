@@ -13,13 +13,13 @@ AM_INIT_AUTOMAKE([foreign no-define])
 dnl Checks for programs.
 
 AC_PROG_MAKE_SET
-AC_PROG_LIBTOOL
+AM_PROG_LIBTOOL
 AC_PROG_INSTALL
 AC_PROG_LN_S
 AC_PROG_CC
 AC_PROG_CXX
 AC_PATH_PROGS(PERL, perl5 perl, perl, $LPATH)
-AC_CONFIG_MACRO_DIR([m4])
+AC_CONFIG_MACRO_DIR([../m4])
 
 if test "$PERL" = "perl"
 then
