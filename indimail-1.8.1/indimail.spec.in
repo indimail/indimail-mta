@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail.spec.in,v 2.219 2011-05-27 19:55:36+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 2.220 2011-05-28 16:13:52+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %define _unpackaged_files_terminate_build 1
 
@@ -35,7 +35,7 @@
 
 %define _prefix            @indimaildir@
 %define default_domain     @defaultdomain@
-%define courier_version    4.9.2
+%define courier_version    4.9.3
 %define bogofilter_version 1.2.2
 %define pam_multi_version  1.1
 %define ucspi_version      0.88
@@ -82,11 +82,11 @@
 %define module_dir         /usr/%{_lib}/pam
 %endif
 
-%if %build_on_obs != 0
+%if %build_on_obs == 1
 %define packager Manvendra Bhangui <manvendra@indimail.org>
 %endif
 
-%if %build_on_obs != 0
+%if %build_on_obs == 1
 # change mysqlPrefix to /usr for openSUSE buildservice
 %define mysqlPrefix        /usr
 %else
@@ -96,8 +96,8 @@
 Summary: A Flexible Messaging Platform with Multi-Host/Multi-Protocol support
 Name: indimail
 Version: @version@
-%if %build_on_obs != 0
-Release: 1.<B_CNT>
+%if %build_on_obs == 1
+Release: <B_CNT>.1
 %else
 Release: 1.B_CNT
 %endif
@@ -197,7 +197,7 @@ BuildRequires: openssl-devel rpm gcc gcc-c++ make bison binutils coreutils grep
 BuildRequires: glibc glibc-devel openssl procps readline-devel
 BuildRequires: sed ncurses-devel gettext-devel
 BuildRequires: python-devel flex findutils
-BuildRequires: readline gzip autoconf
+BuildRequires: readline gzip autoconf pkgconfig
 BuildRequires: libidn-devel
 %if %{undefined rhel_version}
 BuildRequires: gdbm-devel sharutils
@@ -355,7 +355,13 @@ do
 		continue
 	fi
 %if %build_on_obs == 1
+	#
+	# Apply patch picked up from indimail.sourceforge.net
+	#
 	if [ " $i" = " courier-imap-%{courier_version}" ] ; then
+		continue
+	fi
+	if [ " $i" = " qmail-%{qmail_version}" ] ; then
 		continue
 	fi
 %endif
@@ -506,7 +512,6 @@ fi
 if [ " %dist" = " mandrake" ] ; then
 	if [ %{build_on_obs} -eq 1 ] ; then
 		echo "reconfiguring..."
-		aclocal
 		autoreconf -fi
 	fi
 	./configure --prefix=%{_prefix} --libexecdir=%{_prefix}/libexec --sysconfdir=%{_prefix}/etc \
@@ -526,10 +531,11 @@ fi
 #### courier-imap ######################
 if [ -d ../courier-imap-%{courier_version} ] ; then
 	cd ../courier-imap-%{courier_version}
-if [ " %dist" = " mandrake" ] ; then
+	mkdir -p m4
 	if [ %{build_on_obs} -eq 1 ] ; then
 		autoreconf -fi
 	fi
+if [ " %dist" = " mandrake" ] ; then
 	%configure --prefix=%{_prefix} --exec-prefix=%{_prefix}/ --bindir=%{_prefix}/bin \
 	--sbindir=%{_prefix}/sbin --datadir=%{_prefix}/share --includedir=%{_prefix}/include \
 	--libexecdir=%{_prefix}/libexec --mandir=%{_prefix}/man --sysconfdir=%{_prefix}/etc \
