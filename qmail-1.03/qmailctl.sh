@@ -11,6 +11,9 @@
 ### END INIT INFO
 
 # $Log: qmailctl.sh,v $
+# Revision 1.34  2011-05-28 21:25:04+05:30  Cprogrammer
+# play nicely with upstart job control
+#
 # Revision 1.33  2011-05-26 22:37:51+05:30  Cprogrammer
 # fix for debian systems
 #
@@ -238,6 +241,9 @@ HELP
 stop()
 {
 	local ret=0
+	if [ -d /var/lock/subsys -a ! -f /var/lock/subsys/svscan ] ; then
+		exit 0
+	fi
 	for i in `echo $SERVICE/*`
 	do
 		$ECHO -n $"Stopping $i: "
@@ -263,6 +269,9 @@ stop()
 start()
 {
 	local ret=0
+	if [ -d /var/lock/subsys -a -f /var/lock/subsys/svscan ] ; then
+		exit 0
+	fi
 	QMAIL/bin/svstat $SERVICE/.svscan/log > /dev/null
 	if [ $? -ne 0 ] ; then
 		$ECHO -n $"Starting svscan: "
