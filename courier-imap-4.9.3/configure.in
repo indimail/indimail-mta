@@ -4,7 +4,7 @@ dnl Copyright 1998 - 2011 Double Precision, Inc.  See COPYING for
 dnl distribution information.
 
 AC_PREREQ(2.59)
-AC_INIT(courier-imap, 4.9.2, [courier-imap@lists.sourceforge.net])
+AC_INIT(courier-imap, 4.9.3, [courier-imap@lists.sourceforge.net])
 AC_CONFIG_SRCDIR(imap/imapd.c)
 AM_CONFIG_HEADER(config.h)
 AM_INIT_AUTOMAKE
@@ -219,11 +219,6 @@ AC_CONFIG_SUBDIRS(authlib)
 AC_CONFIG_SUBDIRS(imap)
 
 mkdir -p m4
-for i in numlib bdbobj gdbmobj soxwrap unicode rfc822 rfc1035 rfc2045 md5 \
-sha1 random128 liblock maildir makedat libhmac waitlib tcpd authlib imap
-do
-	mkdir -p $i/m4
-done
 
 # Courier-IMAP standalone does not use SOCKSv5
 
