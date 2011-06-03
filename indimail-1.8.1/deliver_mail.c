@@ -1,5 +1,8 @@
 /*
  * $Log: deliver_mail.c,v $
+ * Revision 2.54  2011-06-03 22:10:10+05:30  Cprogrammer
+ * added comment for the return status of deliver_mail()
+ *
  * Revision 2.53  2010-08-15 09:44:21+05:30  Cprogrammer
  * added X-Forwarded-To, X-Forwarded-For headers
  *
@@ -187,7 +190,7 @@
 #endif
 
 #ifndef	lint
-static char     sccsid[] = "$Id: deliver_mail.c,v 2.53 2010-08-15 09:44:21+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: deliver_mail.c,v 2.54 2011-06-03 22:10:10+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 /*- Function Prototypes */
@@ -482,6 +485,8 @@ recordMailcount(char *maildir, mdir_t curmsgsize, mdir_t *dailyMsgSize, mdir_t *
  * -1 user is over quota
  * -2 system errors
  * -3 mail is looping 
+ * -4 mail is over quota due to limits (MAILSIZE_LIMIT or MAILCOUNT_LIMIT)
+ * -5 defer over quota mail instead of bouncing
  */
 int
 deliver_mail(char *address, mdir_t MsgSize, char *quota, uid_t uid, gid_t gid, 
