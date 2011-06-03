@@ -1,5 +1,8 @@
 /*
  * $Log: vdelivermail.c,v $
+ * Revision 2.56  2011-06-02 20:25:41+05:30  Cprogrammer
+ * defer overquota mails when deliver_mail() returns -5
+ *
  * Revision 2.55  2010-07-14 22:16:21+05:30  Cprogrammer
  * display only MAILCOUNT_LIMIT, MAILSIZE_LIMIT quota message when recordMailcount() returns
  * overquota
@@ -249,7 +252,7 @@
 #include <sys/wait.h>
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vdelivermail.c,v 2.55 2010-07-14 22:16:21+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: vdelivermail.c,v 2.56 2011-06-02 20:25:41+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 /*- Globals */
@@ -1044,15 +1047,14 @@ process_valias(char *user, char *domain, mdir_t MsgSize)
 				printf("\n\n");
 			fprintf(stderr, "%s is looping\n", tmpstr);
 			continue;
-		}
-		else
+		} else
 		if (ret == -5) /*- Defer Overquota mails */
 		{
 			if (status++)
 				printf("\n\n");
 			fprintf(stderr, "%s has insufficient quota. %"PRIu64"/%"PRIu64":%"PRIu64"/%"PRIu64":%"PRIu64". indimail (#5.1.4)", 
 				tmpstr, MsgSize, CurBytes, CurCount, MailQuotaCount, MailQuotaSize);
-			continue;
+			vdl_exit(111);
 		}
 	} /*- for (found = 0;;found++) */
 	if (status)
