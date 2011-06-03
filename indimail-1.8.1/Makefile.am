@@ -850,41 +850,41 @@ vdelivermail.8:vdelivermail.9
 indimail.7:indimail.9
 	cat $^ | sed s}INDIMAIL}$(indimaildir)}g > $@
 
-crc.o: crc.c
+crc.$(OBJEXT): crc.c
 	$(COMPILE) $(DEFS) -DMAIN -c crc.c
 crc$(EXEEXT): $(crc_DEPENDENCIES) $(crc_OBJECTS)
-	$(LINK) $@.o $(crc_LDADD)
+	$(LINK) $@.$(OBJEXT) $(crc_LDADD)
 
-echo.o: echo.c
+echo.$(OBJEXT): echo.c
 	$(COMPILE) $(DEFS) -c echo.c
 echo$(EXEEXT): $(echo_DEPENDENCIES) $(echo_OBJECTS)
-	$(LINK) $@.o $(echo_LDADD)
+	$(LINK) $@.$(OBJEXT) $(echo_LDADD)
 
-displaytop.o: displaytop.c
+displaytop.$(OBJEXT): displaytop.c
 	$(COMPILE) $(DEFS) -DMAIN -c displaytop.c
 displaytop$(EXEEXT): $(displaytop_DEPENDENCIES) $(displaytop_OBJECTS)
-	$(LINK) $@.o $(displaytop_LDADD)
+	$(LINK) $@.$(OBJEXT) $(displaytop_LDADD)
 
 indisub.c: indiversion.c
 	$(RM) indisub.c
 	$(LN_S) indiversion.c indisub.c
 
-indiversion.o: indiversion.c
+indiversion.$(OBJEXT): indiversion.c
 	$(COMPILE) $(DEFS) -DMAIN -c indiversion.c
 indiversion$(EXEEXT): $(indiversion_OBJECTS) $(indiversion_DEPENDENCIES)
-	$(LINK) $@.o indimail_settings.o $(indiversion_LDADD)
+	$(LINK) $@.$(OBJEXT) indimail_settings.$(OBJEXT) $(indiversion_LDADD)
 
 osh$(EXEEXT): $(osh_DEPENDENCIES) $(osh_OBJECTS)
-	$(LINK) $@.o exp.o handlers.o getEnvConfig.o $(osh_LDADD)
+	$(LINK) $@.$(OBJEXT) exp.$(OBJEXT) handlers.$(OBJEXT) getEnvConfig.$(OBJEXT) $(osh_LDADD)
 
 hashtable$(EXEEXT): $(hashtable_DEPENDENCIES) $(hashtable_OBJECTS)
-	$(LINK) $@.o makeseekable.o sockwrite.o
+	$(LINK) $@.$(OBJEXT) makeseekable.$(OBJEXT) sockwrite.$(OBJEXT)
 
-hashtable.o: hashtable.c
+hashtable.$(OBJEXT): hashtable.c
 	$(COMPILE) $(DEFS) -DMAIN -c hashtable.c
 
 initsvc$(EXEEXT): $(initsvc_OBJECTS) $(initsvc_DEPENDENCIES)
-	$(LINK) $(initsvc_LDFLAGS) $(initsvc_OBJECTS) fappend.o getEnvConfig.o $(initsvc_LDADD)
+	$(LINK) $(initsvc_LDFLAGS) $(initsvc_OBJECTS) fappend.$(OBJEXT) getEnvConfig.$(OBJEXT) $(initsvc_LDADD)
 
 install-data-local: initsvc libindimail.la indimail-epm.list indimail-@VERSION@-rpmlintrc \
 indimail.spec iauth.la

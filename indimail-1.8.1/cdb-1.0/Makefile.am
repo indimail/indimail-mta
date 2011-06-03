@@ -34,7 +34,7 @@ uint32.h: tryulong32.c compile load uint32.h1 uint32.h2
 	( ( ./compile tryulong32.c && ./load tryulong32 && \
 	./tryulong32 ) >/dev/null 2>&1 \
 	&& cat uint32.h2 || cat uint32.h1 ) > uint32.h
-	rm -f tryulong32.o tryulong32
+	rm -f tryulong32.$(OBJEXT) tryulong32
 
 compile: warn-auto.sh conf-cc
 	( cat warn-auto.sh; \
@@ -46,7 +46,7 @@ load: warn-auto.sh conf-ld
 	( cat warn-auto.sh; \
 	echo 'main="$$1"; shift'; \
 	echo exec "`head -1 conf-ld`" \
-	'-o "$$main" "$$main".o $${1+"$$@"}' \
+	'-o "$$main" "$$main".$(OBJEXT) $${1+"$$@"}' \
 	) > load
 	chmod 755 load
 

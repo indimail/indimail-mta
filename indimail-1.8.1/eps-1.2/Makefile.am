@@ -21,22 +21,22 @@ libeps_la_LIBADD =
 libeps_la_LDFLAGS = -version-info @LIBVER@ -release @VERSION@
 libepsdir=@libdir@
 
-eps_line.o: $(INC)
-eps_buffer.o: $(INC)
-eps_unroll.o: $(INC)
-eps_content.o: $(INC)
-eps.o: $(INC)
-eps_int_stream.o: $(INC)
-rfc2822.o: $(INC)
-eps_misc.o: $(INC)
-eps_header.o: $(INC)
-eps_email.o: $(INC)
-eps_boundary.o: $(INC)
-eps_mime.o: $(INC)
-eps_address.o: $(INC)
-eps_base64.o: $(INC)
-eps_roll.o: $(INC)
-eps_int_buffer.o: $(INC)
+eps_line.lo: $(INC)
+eps_buffer.lo: $(INC)
+eps_unroll.lo: $(INC)
+eps_content.lo: $(INC)
+eps.lo: $(INC)
+eps_int_stream.lo: $(INC)
+rfc2822.lo: $(INC)
+eps_misc.lo: $(INC)
+eps_header.lo: $(INC)
+eps_email.lo: $(INC)
+eps_boundary.lo: $(INC)
+eps_mime.lo: $(INC)
+eps_address.lo: $(INC)
+eps_base64.lo: $(INC)
+eps_roll.lo: $(INC)
+eps_int_buffer.lo: $(INC)
 
 install-data-local:
 	$(mkinstalldirs)  $(DESTDIR)@prefix@/lib
