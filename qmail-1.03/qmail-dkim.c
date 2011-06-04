@@ -696,6 +696,10 @@ writeHeaderNexit(int ret, int origRet, int resDKIMSSP, int resDKIMADSP, int useS
 		dkimStatus = "signature error: incompatible v=";
 		code = "X.7.6";
 		break;
+	case DKIM_UNSIGNED_FROM:
+		dkimStatus = "signature error: not all message's From headers in signature";
+		code = "X.7.7";
+		break;
 	default:
 		dkimStatus = "error";
 		code = "X.3.0";
@@ -820,6 +824,9 @@ writeHeaderNexit(int ret, int origRet, int resDKIMSSP, int resDKIMADSP, int useS
 			break;
 		case DKIM_STAT_INCOMPAT:
 			orig = "STAT INCOMPAT";
+			break;
+		case DKIM_UNSIGNED_FROM:
+			orig = "UNSIGNED FROM";
 			break;
 		default:
 			orig = "Unkown error";
@@ -1137,6 +1144,8 @@ main(int argc, char *argv[])
 			vopts.nCheckPractices = 0;
 		vopts.nAccept3ps = accept3ps;
 		vopts.pfnSelectorCallback = NULL;	/*- SelectorCallback; */
+		if (env_get("UNSIGNED_FROM"))
+			vopts.nAllowUnsignedFromHeaders = 1;
 		DKIMVerifyInit(&ctxt, &vopts);		/*- this is always successful */
 	}
 	/*- Initialization */
