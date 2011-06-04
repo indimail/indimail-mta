@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-dkim.c,v $
+ * Revision 1.28  2011-06-04 14:07:41+05:30  Cprogrammer
+ * added DKIM_UNSIGNED_FROM
+ *
  * Revision 1.27  2011-02-10 23:39:59+05:30  Cprogrammer
  * use DKIMKEY to override defult control/domainkeys/%/default
  *
@@ -1395,7 +1398,7 @@ main(argc, argv)
 void
 getversion_qmail_dkim_c()
 {
-	static char    *x = "$Id: qmail-dkim.c,v 1.27 2011-02-10 23:39:59+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-dkim.c,v 1.28 2011-06-04 14:07:41+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
