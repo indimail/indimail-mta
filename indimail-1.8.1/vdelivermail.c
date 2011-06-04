@@ -252,7 +252,7 @@
 #include <sys/wait.h>
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vdelivermail.c,v 2.56 2011-06-02 20:25:41+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: vdelivermail.c,v 2.56 2011-06-02 20:25:41+05:30 Cprogrammer Stab mbhangui $";
 #endif
 
 /*- Globals */

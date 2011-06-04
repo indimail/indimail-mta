@@ -52,7 +52,7 @@
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vlimit.c,v 2.10 2011-02-11 23:02:05+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: vlimit.c,v 2.10 2011-02-11 23:02:05+05:30 Cprogrammer Stab mbhangui $";
 #endif
 
 #ifdef ENABLE_DOMAIN_LIMITS

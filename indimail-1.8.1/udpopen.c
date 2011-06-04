@@ -9,7 +9,7 @@
  */
 
 #ifndef	lint
-static char     sccsid[] = "$Id: udpopen.c,v 2.2 2011-04-03 09:38:29+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: udpopen.c,v 2.2 2011-04-03 09:38:29+05:30 Cprogrammer Stab mbhangui $";
 #endif
 
 #include "indimail.h"
