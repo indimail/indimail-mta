@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail.spec.in,v 2.220 2011-05-28 16:13:52+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 2.221 2011-06-04 17:49:07+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %define _unpackaged_files_terminate_build 1
 
@@ -446,9 +446,9 @@ fi
 
 if [ " %dist" = " mandrake" ] ; then
 ./configure --prefix=%{_prefix} --libdir=%{_libdir} --libexecdir=%{_prefix}/libexec \
-	--x-libraries=%{_libdir} > $DEVICE
+	--x-libraries=%{_libdir} --mandir=%{_prefix}/man > $DEVICE
 else
-%configure --prefix=%{_prefix} > $DEVICE
+%configure --prefix=%{_prefix} --mandir=%{_prefix}/man > $DEVICE
 fi
 cd ..
 fi
