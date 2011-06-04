@@ -353,7 +353,7 @@ recipients(buf, len)
 void
 getversion_recipients_c()
 {
-	static char    *x = "$Id: recipients.c,v 1.7 2011-01-14 22:19:52+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: recipients.c,v 1.7 2011-01-14 22:19:52+05:30 Cprogrammer Stab mbhangui $";
 
 	x++;
 }

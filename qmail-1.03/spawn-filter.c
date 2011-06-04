@@ -938,7 +938,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_spawn_filter_c()
 {
-	static char    *x = "$Id: spawn-filter.c,v 1.54 2011-02-08 22:17:37+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: spawn-filter.c,v 1.54 2011-02-08 22:17:37+05:30 Cprogrammer Stab mbhangui $";
 
 	x++;
 }

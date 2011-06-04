@@ -1609,7 +1609,7 @@ _hier(inst_dir)
 void
 getversion_install_big_c()
 {
-	static char    *x = "$Id: hier.c,v 1.165 2011-06-04 14:03:45+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: hier.c,v 1.165 2011-06-04 14:03:45+05:30 Cprogrammer Stab mbhangui $";
 
 #ifdef INDIMAIL
 	x = sccsidh;

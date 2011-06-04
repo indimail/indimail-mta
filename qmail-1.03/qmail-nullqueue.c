@@ -71,7 +71,7 @@ main()
 void
 getversion_qmail_nullqueue_c()
 {
-	static char    *x = "$Id: qmail-nullqueue.c,v 1.4 2011-05-17 21:21:11+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-nullqueue.c,v 1.4 2011-05-17 21:21:11+05:30 Cprogrammer Stab mbhangui $";
 
 	x++;
 }

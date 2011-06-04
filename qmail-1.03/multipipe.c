@@ -426,7 +426,7 @@ main(int argc, char **argv)
 void
 getversion_multipipe_c()
 {
-	static char    *x = "$Id: multipipe.c,v 1.3 2011-05-07 15:57:11+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: multipipe.c,v 1.3 2011-05-07 15:57:11+05:30 Cprogrammer Stab mbhangui $";
 
 	x++;
 }
