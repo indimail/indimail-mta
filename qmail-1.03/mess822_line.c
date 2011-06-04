@@ -145,7 +145,7 @@ mess822_line(h, s)
 void
 getversion_mess822_line_c()
 {
-	static char    *x = "$Id: mess822_line.c,v 1.4 2011-05-07 15:57:43+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: mess822_line.c,v 1.4 2011-05-07 15:57:43+05:30 Cprogrammer Stab mbhangui $";
 
 	x++;
 }

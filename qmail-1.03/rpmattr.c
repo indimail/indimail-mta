@@ -141,6 +141,6 @@ main(int argc, char **argv)
 void
 getversion_rpmattr_c()
 {
-	static char    *x = "$Id: rpmattr.c,v 1.5 2011-05-13 10:57:00+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: rpmattr.c,v 1.5 2011-05-13 10:57:00+05:30 Cprogrammer Stab mbhangui $";
 	x++;
 }

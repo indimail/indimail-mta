@@ -273,7 +273,7 @@ mess822_addrlist(out, in)
 void
 getversion_mess822_addr_c()
 {
-	static char    *x = "$Id: mess822_addr.c,v 1.4 2011-05-07 15:58:45+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: mess822_addr.c,v 1.4 2011-05-07 15:58:45+05:30 Cprogrammer Stab mbhangui $";
 
 	x++;
 }
