@@ -1,5 +1,8 @@
 /*
  * $Log: dkim.h,v $
+ * Revision 1.7  2011-06-04 13:56:06+05:30  Cprogrammer
+ * corrected return codes
+ *
  * Revision 1.6  2011-06-04 10:04:00+05:30  Cprogrammer
  * unified error code for signing & verifcation
  * added signature and identity domain information to
@@ -95,12 +98,12 @@ extern          "C" {
 #define DKIM_SELECTOR_ALGORITHM_MISMATCH	-16	// signature error: selector h= doesn't match signature a=
 #define DKIM_STAT_INCOMPAT					-17	// signature error: incompatible v=
 #define DKIM_UNSIGNED_FROM                  -18 // signature error: not all message's From headers in signature
-#define DKIM_OUT_OF_MEMORY                  -20 // memory allocation failed
-#define DKIM_INVALID_CONTEXT                -21 // DKIMContext structure invalid for this operation
-#define DKIM_NO_SENDER                      -22 // signing error: Could not find From: or Sender: header in message
-#define DKIM_BAD_PRIVATE_KEY                -23 // signing error: Could not parse private key
-#define DKIM_BUFFER_TOO_SMALL               -24 // signing error: Buffer passed in is not large enough
-#define DKIM_MAX_ERROR                      -25 // set this to 1 greater than the highest error code (but negative)
+#define DKIM_OUT_OF_MEMORY                  -19 // memory allocation failed
+#define DKIM_INVALID_CONTEXT                -20 // DKIMContext structure invalid for this operation
+#define DKIM_NO_SENDER                      -21 // signing error: Could not find From: or Sender: header in message
+#define DKIM_BAD_PRIVATE_KEY                -22 // signing error: Could not parse private key
+#define DKIM_BUFFER_TOO_SMALL               -23 // signing error: Buffer passed in is not large enough
+#define DKIM_MAX_ERROR                      -24 // set this to 1 greater than the highest error code (but negative)
 
 #define DKIM_SSP_UNKNOWN			 1 /*- some messages may be signed */
 #define DKIM_SSP_ALL				 2 /*- all messages are signed, 3rd party allowed */
