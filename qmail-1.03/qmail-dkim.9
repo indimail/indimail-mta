@@ -33,7 +33,8 @@ The selector (s=) will be taken from the basename of the file.
 The private key should be created by 
 .BR dknewkey(8) .
 
-You can set various DKIM options in getopt style, by setting the environment variable DKIMSIGNOPTIONS
+You can set various DKIM options in getopt style, by setting the environment variable
+.B DKIMSIGNOPTIONS
 
  b <standard>         1 - allman, 2 - ietf or 3 - both
  c <canonicalization> r for relaxed [DEFAULT], s - simple,
@@ -68,8 +69,8 @@ Similarly,
 takes precedence over -x option specifed in
 .BR DKIMSIGNOPTIONS.
 .B qmail-dkim
-uses the domain found in the Sender: header to set the domain tag. If not it uses the From: header. You can override this by
-setting 
+uses the domain found in the Sender: header to set the domain tag. If not it uses the
+From: header. You can override this by setting 
 .B DKIMDOMAIN
 environment variable.
 .B DKIMDOMAIN
@@ -166,12 +167,12 @@ To verify a message against SSP/ADSP, set the
 .B DKIMPRACTICE
 environment variable to the desired set of letters allowed for DKIMVERIFY environment variable.
 SSP/ADSP should be used only when signature verification fails. SSP/ADSP should be invoked only when libdkim returns the
-error codes (F,G,H,I,J,K,L,M,N,P,Q,R,S,T,U,V,W) for signature verification. In case you want to test
+error codes (F,G,H,I,J,K,L,M,N,P,Q,R,S,T,U,V,W,X) for signature verification. In case you want to test
 against SSP/ADSP only for DKIM_NO_SIGNATURE and DKIM_NO_VALID_SIGNATURE
 set the environment variable 
 .BR DKIMPRACTICE="ST" .
 If you want automatic behaviour, set DKIMADSPERROR to an empty string. In this case ADSP/SSP will be used when return code
-matches "FGHIJKLMNPQRSTUVW".
+matches "FGHIJKLMNPQRSTUVWX".
 .B qmail-dkim
 uses ADSP as the default signing practice. You can override this by setting the SIGN_PRACTICE to ssp, adsp, local (lowercase).
 if you set SIGN_PRACTICE to \fIlocal\fB,
