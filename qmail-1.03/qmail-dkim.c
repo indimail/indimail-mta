@@ -1,5 +1,11 @@
 /*
  * $Log: qmail-dkim.c,v $
+ * Revision 1.30  2011-06-04 14:49:48+05:30  Cprogrammer
+ * remove '%' sign from private key if key not found
+ *
+ * Revision 1.29  2011-06-04 14:22:29+05:30  Cprogrammer
+ * added DKIM_UNSIGNED_FROM error code for dkimadspverify
+ *
  * Revision 1.28  2011-06-04 14:07:41+05:30  Cprogrammer
  * added DKIM_UNSIGNED_FROM
  *
@@ -306,7 +312,7 @@ char            tmp[FMT_ULONG];
 DKIMContext     ctxt;
 char           *dkimsign = 0;
 char           *dkimverify = 0;
-char           *dkimadspverify = 0, *dkimpractice =  "FGHIJKLMNPQRSTUVW";
+char           *dkimadspverify = 0, *dkimpractice =  "FGHIJKLMNPQRSTUVWX";
 stralloc        dkimoutput = { 0 };  /*- DKIM-Signature */
 stralloc        dksignature = { 0 }; /*- content of private signature */
 stralloc        sigdomains = { 0 };  /*- domains which must have signatures */
@@ -349,6 +355,25 @@ write_signature(char *domain, char *keyfn)
 	{
 		DKIMSignFree(&ctxt);
 		die(51);
+	}
+	if (keyfn[i] && access(keyfnfrom.s, F_OK))
+	{
+		/*- since file is not found remove '%' sign */
+		if (!stralloc_copyb(&keyfnfrom, keyfn, i))
+		{
+			DKIMSignFree(&ctxt);
+			die(51);
+		}
+		if (!stralloc_cats(&keyfnfrom, keyfn + i + 1))
+		{
+			DKIMSignFree(&ctxt);
+			die(51);
+		}
+		if (!stralloc_0(&keyfnfrom))
+		{
+			DKIMSignFree(&ctxt);
+			die(51);
+		}
 	}
 	switch (control_readnativefile(&dksignature, keyfnfrom.s, 1))
 	{
@@ -1398,7 +1423,7 @@ main(argc, argv)
 void
 getversion_qmail_dkim_c()
 {
-	static char    *x = "$Id: qmail-dkim.c,v 1.28 2011-06-04 14:07:41+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-dkim.c,v 1.30 2011-06-04 14:49:48+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
