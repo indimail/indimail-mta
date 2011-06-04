@@ -1,5 +1,8 @@
 /*
  * $Log: dkimverify.h,v $
+ * Revision 1.3  2011-06-04 09:37:25+05:30  Cprogrammer
+ * added AllowUnsignedFromHeaders
+ *
  * Revision 1.2  2009-03-26 15:12:15+05:30  Cprogrammer
  * changes for ADSP
  *
@@ -111,6 +114,7 @@ protected:
 	bool            m_Accept3ps;		//TBS(Luc) : accept 3rd party signature(s)
 	bool            m_SubjectIsRequired;
 	bool            m_SaveCanonicalizedData;
+	bool            m_AllowUnsignedFromHeaders;
 	vector <DKIMVerifyDetails> Details;
 	string          Practices;
 };
