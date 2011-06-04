@@ -27,10 +27,10 @@ It uses the libdkim and OpenSSL libraries.  To sign a message, set the
 environment variable to the pathname of the private key that will be
 used to sign the message. If there is a % character in the environment
 variable, it is removed and replaced by the domain name in the From: header.
-If, after substituting the %, that file does not exist, the message will not be signed.
-If there is no % and the file does not exist, the message will be rejected with error 35.
-The selector (s=) will be taken from the basename of the file.
-The private key should be created by 
+If, after substituting the %, that file does not exist, the % character will be
+removed. If the private key file does not exist, the message will be rejected with error 35.
+The selector (s=) will be taken from the basename of the file. The private key should be
+created by 
 .BR dknewkey(8) .
 
 You can set various DKIM options in getopt style, by setting the environment variable
@@ -263,7 +263,8 @@ From: header. If such a file does not exist, then it will be set to
 QMAILHOME/control/domainkeys/default. If such a private key exists, it will be used to sign the
 domain. You can also set \fBDKIMKEY\fR to chose a key different from
 QMAILHOME/control/domainkeys/%/default. \fBDKIMKEY\fR can also have % character that will be
-replaced by the domain in the From: header.
+replaced by the domain in the From: header. If the private key does not exist, qmail-dkim
+will exit with return code 35.
 
 By default
 .B qmail-dkim

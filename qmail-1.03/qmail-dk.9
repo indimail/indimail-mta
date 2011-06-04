@@ -24,10 +24,10 @@ and OpenSSL libraries.  To sign a message, set the
 environment variable to the pathname to the private key that will be
 used to sign the message.  If there is a % character in the environment
 variable, it is removed and replaced by the domain name in the From: header.
-If, after substituting the %, that file does not exist, the message will not be signed.
-If there is no % and the file does not exist, the message will be rejected with error 35.
-The selector will be taken from the
-basename of the file.  The private key should be created by 
+If, after substituting the %, that file does not exist, the % will be removed.
+If the privae key file does not exist, the message will be rejected with error 35.
+The selector will be taken from the basename of the file. The private key should be
+created by 
 .BR dknewkey(8) .
 
 You can set various DK options in getopt style, by setting the environment variable DKSIGNOPTIONS
@@ -106,7 +106,12 @@ nor
 .B DKVERIFY
 are set, then
 .B DKSIGN
-will be set to QMAILHOME/control/domainkeys/%/default.  If such a private key exists, it will be used to sign the domain.
+will be set to QMAILHOME/control/domainkeys/%/default. The % will be replaced by the domain in the
+From: header. If such a file does not exist, then it will be set to
+QMAILHOME/control/domainkeys/default. If such a private key exists, it will be used to sign the
+domain. You can also set \fBDKKEY\fR to chose a key different from
+QMAILHOME/control/domainkeys/%/default. \fBDKKEY\fR can also have % character that will be
+replaced by the domain in the From: header.
 
 By default
 .B qmail-dk
