@@ -47,7 +47,7 @@
 %define flash_version      0.9.4
 %define eps_version        1.2
 %define cdb_version        1.0
-%define libdkim_version    1.3
+%define libdkim_version    1.4
 %define mysql_version      6.0.9-alpha
 %define host               @HOST@
 %define see_base           For a description of IndiMail visit http://www.indimail.org
@@ -659,6 +659,9 @@ if [ %noclamav -eq 0 ] ; then
 fi
 if [ %nonssd -eq 0 ] ; then
 	%{__rm} -f %{buildroot}/usr/%{_lib}/libnss_nssd.la
+fi
+if [ %nolibdkim -eq 0 ] ; then
+	%{__rm} -f %{buildroot}%{_libdir}/libdkim.la
 fi
 
 %{__mkdir_p} %{buildroot}%{_prefix}/domains
@@ -1578,9 +1581,19 @@ fi
 %if %noclamav == 0
 %if %i_m_on_mac == 1
 %{_libdir}/libclam*.dylib
-%{_libdir}/libclam*.so*
 %else
 %{_libdir}/libclam*.so*
+%endif
+%endif
+
+%if %nolibdkim == 0
+%if %i_m_on_mac == 1
+%{_libdir}/libdkim.dylib
+%{_libdir}/libdkim-%{libdkim_version}.0.dylib
+%else
+%{_libdir}/libdkim.so
+%{_libdir}/libdkim-%{libdkim_version}.so.0
+%{_libdir}/libdkim-%{libdkim_version}.so.0.0.0
 %endif
 %endif
 
@@ -1668,9 +1681,19 @@ fi
 %if %noclamav == 0
 %if %i_m_on_mac == 1
 %{_libdir}/libclam*.dylib
-%{_libdir}/libclam*.so*
 %else
 %{_libdir}/libclam*.so*
+%endif
+%endif
+
+%if %nolibdkim == 0
+%if %i_m_on_mac == 1
+%{_libdir}/libdkim.dylib
+%{_libdir}/libdkim-%{libdkim_version}.0.dylib
+%else
+%{_libdir}/libdkim.so
+%{_libdir}/libdkim-%{libdkim_version}.so.0
+%{_libdir}/libdkim-%{libdkim_version}.so.0.0.0
 %endif
 %endif
 
@@ -2597,6 +2620,18 @@ echo "removing shared libraries"
 %if %noclamav == 0
 %{__rm} -f %{_libdir}/libclam*.so*
 %endif
+
+%if %nolibdkim == 0
+%if %i_m_on_mac == 1
+%{__rm} -f %{_libdir}/libdkim*.dylib
+%{__rm} -f %{_libdir}/libdkim-%{libdkim_version}.0.dylib
+%else
+%{__rm} -f %{_libdir}/libdkim.so
+%{__rm} -f %{_libdir}/libdkim-%{libdkim_version}.so.0
+%{__rm} -f %{_libdir}/libdkim-%{libdkim_version}.so.0.0.0
+%endif
+%endif
+
 %if %i_m_on_mac == 1
 %{__rm} -f %{_libdir}/libeps.dylib
 %{__rm} -f %{_libdir}/libeps-%{eps_version}.0.dylib
@@ -2639,6 +2674,9 @@ echo "removing static libraries"
 %{__rm} -f %{_libdir}/libcdb.a
 %{__rm} -f %{_libdir}/libflash.a
 %{__rm} -f %{_libdir}/libindimail.a
+%if %nolibdkim == 0
+%{__rm} -f %{_libdir}/libdkim.a
+%endif
 
 %post mini
 argv1=$1

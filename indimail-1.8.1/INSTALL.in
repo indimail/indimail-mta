@@ -378,7 +378,7 @@ the installation.
 
     % gunzip -c libdkim-1.4.tar.gz | tar xf -
     % cd libdkim-1.4
-    % ./configure --prefix=@indimaildir@
+    % ./configure --prefix=@indimaildir@ --mandir=@indimaildir@/man
     % make -s [DESTDIR=staging_directory]
     % sudo make -s install-strip [DESTDIR=staging_directory]
     % cd ..
