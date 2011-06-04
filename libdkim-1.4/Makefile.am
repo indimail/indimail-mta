@@ -19,6 +19,8 @@ dkimbin_PROGRAMS = dkim
 dkim_SOURCES = dkim.c
 dkim_LDADD = libdkim.la $(LIBS)
 
+man_MANS=dkim.8
+
 dkim$(EXEEXT): dkim.$(OBJEXT) libdkim.la
 	$(LINK) $@.$(OBJEXT) $(dkim_LDADD) $(LIB_RESOLV) $(LIB_CRYPTO)
 dkim.$(OBJEXT): dkim.h dkim.c dns.h config.h
@@ -28,6 +30,9 @@ dns.$(OBJEXT): dns.h dns.cpp
 dkimbase.$(OBJEXT): dkimbase.cpp dkim.h dkimbase.h
 dkimsign.$(OBJEXT): dkimsign.cpp dkim.h dkimsign.h
 dkimverify.$(OBJEXT): dns.h dkim.h dkimverify.h config.h dkimverify.cpp
+
+dkim.8: dkim.9
+	cat $^ | sed s}INDIMAIL}$(prefix)}g > $@
 
 LIBTOOL_DEPS = @LIBTOOL_DEPS@
 libtool: $(LIBTOOL_DEPS)
