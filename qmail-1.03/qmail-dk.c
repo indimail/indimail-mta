@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-dk.c,v $
+ * Revision 1.30  2011-06-04 17:44:16+05:30  Cprogrammer
+ * remove % sign from private key if file not found
+ *
  * Revision 1.29  2010-07-21 08:59:14+05:30  Cprogrammer
  * use CONTROLDIR environment variable instead of a hardcoded control directory
  *
@@ -335,6 +338,16 @@ write_signature(DK *dk, char *dk_selector, char *keyfn,
 		die(51);
 	if (!stralloc_0(&keyfnfrom))
 		die(51);
+	if (keyfn[i] && access(keyfnfrom.s, F_OK))
+	{
+		/*- since file is not found remove '%' sign */
+		if (!stralloc_copyb(&keyfnfrom, keyfn, i))
+			die(51);
+		if (!stralloc_cats(&keyfnfrom, keyfn + i + 1))
+			die(51);
+		if (!stralloc_0(&keyfnfrom))
+			die(51);
+	}
 	switch (control_readnativefile(&dksignature, keyfnfrom.s, 1))
 	{
 	case 0: /*- file not present */
@@ -532,18 +545,21 @@ main(int argc, char *argv[])
 		dkverify = env_get("DKVERIFY");
 	if (!dksign && !dkverify && (relayclient = env_get("RELAYCLIENT")))
 	{
-		if (!controldir)
+		if (!(dksign = env_get("DKKEY")))
 		{
-			if (!(controldir = env_get("CONTROLDIR")))
-				controldir = "control";
+			if (!controldir)
+			{
+				if (!(controldir = env_get("CONTROLDIR")))
+					controldir = "control";
+			}
+			if (!stralloc_copys(&dkfn, controldir))
+				die(51);
+			if (!stralloc_cats(&dkfn, "/domainkeys/%/default"))
+				die(51);
+			if (!stralloc_0(&dkfn))
+				die(51);
+			dksign = dkfn.s;
 		}
-		if (!stralloc_copys(&dkfn, controldir))
-			die(51);
-		if (!stralloc_cats(&dkfn, "/domainkeys/%/default"))
-			die(51);
-		if (!stralloc_0(&dkfn))
-			die(51);
-		dksign = dkfn.s;
 	}
 	dkqueue = env_get("DKQUEUE");
 	if (dkqueue && *dkqueue)
@@ -814,7 +830,7 @@ main(argc, argv)
 void
 getversion_qmail_dk_c()
 {
-	static char    *x = "$Id: qmail-dk.c,v 1.29 2010-07-21 08:59:14+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: qmail-dk.c,v 1.30 2011-06-04 17:44:16+05:30 Cprogrammer Stab mbhangui $";
 
 	x++;
 }
