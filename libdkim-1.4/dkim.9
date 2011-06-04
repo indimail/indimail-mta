@@ -14,7 +14,7 @@ exercises the dkim library. Both signing and verification merely print out the D
 They do not keep a copy of the input file. You will need to do something like this:
 
 .EX
- (./dkim -s QMAILHOME/control/domainkeys/dog </tmp/testmsg; cat /tmp/testmsg)\
+ (./dkim -s INDIMAIL/control/domainkeys/dog </tmp/testmsg; cat /tmp/testmsg)\
  | ./dkim -v
 .EE
 
