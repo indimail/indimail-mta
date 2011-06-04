@@ -323,7 +323,7 @@ main(int argc, char **argv)
 void
 getversion_svscan_c()
 {
-	static char    *x = "$Id: svscan.c,v 1.5 2011-05-26 23:17:52+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: svscan.c,v 1.5 2011-05-26 23:17:52+05:30 Cprogrammer Stab mbhangui $";
 
 	x++;
 }
