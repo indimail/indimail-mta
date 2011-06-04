@@ -127,6 +127,8 @@ The complete set of letters with the corresponding return status is given below
  V - DKIM_SELECTOR_ALGORITHM_MISMATCH    - signature error: selector
                                            h= doesn't match signature a=
  W - DKIM_STAT_INCOMPAT                  - signature error: incompatible v=
+ X - DKIM_UNSIGNED_FROM                  - signature error: not all message's
+                                           From headers in signature
 
 For example, if you want to permanently reject messages that have a
 signature that is expired, include the letter 'K' in the
@@ -147,7 +149,8 @@ always inserts the
 header, so that messages can be
 rejected later at delivery time, or in the mail reader. In that case you may set
 .B DKIMVERIFY
-to an empty string.
+to an empty string. If you want to check all message's From header in signature set the
+\fBUNSIGNED_FROM\fR environment variable to an empty string.
 
 qmail-dkim supports signing practice which can be additonall checked when a signature
 verifcation fails -
