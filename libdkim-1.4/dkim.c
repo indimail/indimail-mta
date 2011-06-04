@@ -1,5 +1,8 @@
 /*
  * $Log: dkim.c,v $
+ * Revision 1.15  2011-06-04 13:55:50+05:30  Cprogrammer
+ * set AllowUnsignedFromHeaders
+ *
  * Revision 1.14  2011-06-04 09:36:36+05:30  Cprogrammer
  * added AllowUnsignedFromHeaders option
  *
@@ -516,6 +519,7 @@ main(int argc, char **argv)
 	int             i, ret, ch, nPrivKeyLen, PrivKeyFD, verbose = 0;
 	int             bSign = 1, nSigCount = 0, useSSP = 0, useADSP = 0, accept3ps = 0;
 	int             sCount = 0, sSize = 0, resDKIMSSP = -1, resDKIMADSP = -1;
+	int             nAllowUnsignedFromHeaders = 0;
 	char            Buffer[1024], szPolicy[512];
 	time_t          t;
 	struct stat     statbuf;
@@ -557,7 +561,7 @@ main(int argc, char **argv)
 			opts.nIncludeQueryMethod = 1;
 			break;
 		case 'f':
-			vopts.nAllowUnsignedFromHeaders = 1;
+			nAllowUnsignedFromHeaders = 1;
 		case 't': /*- timestamp tag */
 			opts.nIncludeTimeStamp = 1;
 			break;
@@ -751,6 +755,7 @@ main(int argc, char **argv)
 			vopts.nCheckPractices = 0;
 		vopts.nAccept3ps = accept3ps;
 		vopts.pfnSelectorCallback = NULL;	/*- SelectorCallback; */
+		vopts.nAllowUnsignedFromHeaders = nAllowUnsignedFromHeaders;
 		DKIMVerifyInit(&ctxt, &vopts);		/*- this is always successful */
 		for (;;)
 		{
@@ -859,7 +864,7 @@ main(int argc, char **argv)
 void
 getversion_dkim_c()
 {
-	static char    *x = (char *) "$Id: dkim.c,v 1.14 2011-06-04 09:36:36+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = (char *) "$Id: dkim.c,v 1.15 2011-06-04 13:55:50+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
