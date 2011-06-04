@@ -1,3 +1,4 @@
 dkim
 Makefile
 Makefile.in
+dkim.8
