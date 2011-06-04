@@ -1,5 +1,8 @@
 /*
  * $Log: dkimfuncs.cpp,v $
+ * Revision 1.4  2011-06-04 10:06:33+05:30  Cprogrammer
+ * unified error strings for signing & verification
+ *
  * Revision 1.3  2009-04-15 20:45:29+05:30  Cprogrammer
  * code beautified
  *
@@ -205,7 +208,13 @@ static char    *DKIMErrorStrings[-1 - DKIM_MAX_ERROR] = {
 	(char *) "DKIM_NO_VALID_SIGNATURES",
 	(char *) "DKIM_BODY_HASH_MISMATCH",
 	(char *) "DKIM_SELECTOR_ALGORITHM_MISMATCH",
-	(char *) "DKIM_STAT_INCOMPAT"
+	(char *) "DKIM_STAT_INCOMPAT",
+	(char *) "DKIM_UNSIGNED_FROM",
+	(char *) "DKIM_OUT_OF_MEMORY",
+	(char *) "DKIM_INVALID_CONTEXT",
+	(char *) "DKIM_NO_SENDER",
+	(char *) "DKIM_BAD_PRIVATE_KEY",
+	(char *) "DKIM_BUFFER_TOO_SMALL"
 };
 
 char           *DKIM_CALL
@@ -221,7 +230,7 @@ DKIMGetErrorString(int ErrorCode)
 void
 getversion_dkimfuncs_cpp()
 {
-	static char    *x = (char *) "$Id: dkimfuncs.cpp,v 1.3 2009-04-15 20:45:29+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = (char *) "$Id: dkimfuncs.cpp,v 1.4 2011-06-04 10:06:33+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

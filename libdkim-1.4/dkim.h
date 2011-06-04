@@ -1,5 +1,10 @@
 /*
  * $Log: dkim.h,v $
+ * Revision 1.6  2011-06-04 10:04:00+05:30  Cprogrammer
+ * unified error code for signing & verifcation
+ * added signature and identity domain information to
+ *     DKIMVerifyDetails structure
+ *
  * Revision 1.5  2009-03-27 20:19:05+05:30  Cprogrammer
  * major changes made for incorporating ADSP
  *
@@ -62,13 +67,6 @@ extern          "C" {
 #define DKIM_SIGN_RELAXED			MAKELONG(DKIM_CANON_RELAXED,DKIM_CANON_RELAXED)
 #define DKIM_SIGN_RELAXED_SIMPLE	MAKELONG(DKIM_CANON_SIMPLE,DKIM_CANON_RELAXED)
 
-// DKIM Error codes
-#define DKIM_OUT_OF_MEMORY					 6	// memory allocation failed
-#define DKIM_INVALID_CONTEXT				 7	// DKIMContext structure invalid for this operation
-#define DKIM_NO_SENDER						 8	// Could not find From: or Sender: header in message
-#define DKIM_BAD_PRIVATE_KEY				 9	// Could not parse private key
-#define DKIM_BUFFER_TOO_SMALL				10	// Buffer passed in is not large enough
-
 // DKIM_SUCCESS                                 // verify result: all signatures verified
 // signature result: signature verified
 #define DKIM_SUCCESS						 0	// operation successful
@@ -78,7 +76,7 @@ extern          "C" {
 #define DKIM_SUCCESS_BUT_EXTRA				 4	// signature result: signature verified but it did not include all of the body
 #define DKIM_3PS_SIGNATURE					 5	// 3rd-party signature
 
-// DKIM Verification Error codes
+// DKIM Error codes
 #define DKIM_FAIL							-1	// verify error: message is suspicious
 #define DKIM_BAD_SYNTAX						-2	// signature error: DKIM-Signature could not parse or has bad tags/values
 #define DKIM_SIGNATURE_BAD					-3	// signature error: RSA verify failed
@@ -96,7 +94,13 @@ extern          "C" {
 #define DKIM_BODY_HASH_MISMATCH				-15	// sigature verify error: message body does not hash to bh value
 #define DKIM_SELECTOR_ALGORITHM_MISMATCH	-16	// signature error: selector h= doesn't match signature a=
 #define DKIM_STAT_INCOMPAT					-17	// signature error: incompatible v=
-#define DKIM_MAX_ERROR						-18	// set this to 1 greater than the highest error code (but negative)
+#define DKIM_UNSIGNED_FROM                  -18 // signature error: not all message's From headers in signature
+#define DKIM_OUT_OF_MEMORY                  -20 // memory allocation failed
+#define DKIM_INVALID_CONTEXT                -21 // DKIMContext structure invalid for this operation
+#define DKIM_NO_SENDER                      -22 // signing error: Could not find From: or Sender: header in message
+#define DKIM_BAD_PRIVATE_KEY                -23 // signing error: Could not parse private key
+#define DKIM_BUFFER_TOO_SMALL               -24 // signing error: Buffer passed in is not large enough
+#define DKIM_MAX_ERROR                      -25 // set this to 1 greater than the highest error code (but negative)
 
 #define DKIM_SSP_UNKNOWN			 1 /*- some messages may be signed */
 #define DKIM_SSP_ALL				 2 /*- all messages are signed, 3rd party allowed */
@@ -148,12 +152,15 @@ typedef struct DKIMVerifyOptions_t {
 	int             nCheckPractices;		// 0 = use default (unknown) practices, 1 = request and use sender's signing practices
 	int             nSubjectRequired;		// 0 = subject is required to be signed, 1 = not required
 	int             nSaveCanonicalizedData;	// 0 = canonicalized data is not saved, 1 = canonicalized data is saved
+	int             nAllowUnsignedFromHeaders;	// 0 = From headers not included in the signature are not allowed, 1 = allowed
 	int             nAccept3ps;				// 0 = don't check 3rd party signature(s), 1 = check 3rd party signature(s)
 } DKIMVerifyOptions;
 
 typedef struct DKIMVerifyDetails_t {
 	char           *szSignature;
 	char           *DNS;
+	char           *szSignatureDomain;
+	char           *szIdentityDomain;
 	char           *szCanonicalizedData;
 	int             nResult;
 } DKIMVerifyDetails;

@@ -9,16 +9,28 @@ Implementations as permitted, you agree to the terms and conditions of the
 Yahoo! DomainKeys Patent License Agreement or other agreement contained herein.
 
 ----------------------
-1.0.19 May 12, 2008
+1.0.21 
 ----------------------
+  o updated verifier to latest draft of DKIM ADSP
+  o fixed some error codes overlapping success codes
+  o added signature and identity domain information to 
+    DKIMVerifyDetails structure
 
+-------------------
+1.0.20 Aug 26, 2008
+-------------------
+  o verifier by default requires all From headers in the
+    message to be signed
+
+-------------------
+1.0.19 May 12, 2008
+-------------------
   o fix to trailing lines of whitespace not being ignored
     with relaxed body canonicalization
 
 ----------------------
 1.0.18 January 9, 2008
 ----------------------
-
   o fix to incorrect body hashes for empty bodies
   o fix to verification error for signatures with whitespace
     around the b= value
@@ -28,7 +40,6 @@ Yahoo! DomainKeys Patent License Agreement or other agreement contained herein.
 -----------------------
 1.0.17 October 29, 2007
 -----------------------
-
   o verifier fully supports g= value wildcard matching
   o fix to verifier not canonicalizing message headers that
     had whitespace between the header name and :
@@ -39,14 +50,12 @@ Yahoo! DomainKeys Patent License Agreement or other agreement contained herein.
 ----------------------
 1.0.16 August 22, 2007
 ----------------------
-
   o supports SSP (Sender Signing Practices) draft 00
   o added verifier option to save canonicalized message data
 
 -------------------
 1.0.15 May 30, 2007
 -------------------
-
   o fix to DKIM_FAIL being returned for messages with
     invalid signatures
 

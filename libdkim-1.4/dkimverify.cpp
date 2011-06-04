@@ -1,5 +1,12 @@
 /*
  * $Log: dkimverify.cpp,v $
+ * Revision 1.9  2011-06-04 10:05:01+05:30  Cprogrammer
+ * added signature and identity domain information to
+ *     DKIMVerifyDetails structure
+ *
+ * Revision 1.8  2011-06-04 09:37:13+05:30  Cprogrammer
+ * added AllowUnsignedFromHeaders
+ *
  * Revision 1.7  2009-06-11 13:58:34+05:30  Cprogrammer
  * port for DARWIN
  *
@@ -375,6 +382,7 @@ CDKIMVerify::CDKIMVerify()
 	m_Accept3ps = false;
 	m_SubjectIsRequired = true;
 	m_SaveCanonicalizedData = false;
+	m_AllowUnsignedFromHeaders = false;
 }
 
 CDKIMVerify::~CDKIMVerify()
@@ -394,6 +402,7 @@ CDKIMVerify::Init(DKIMVerifyOptions *pOptions)
 	m_SubjectIsRequired = pOptions->nSubjectRequired == 0;
 	m_Accept3ps = pOptions->nAccept3ps != 0;		//TBS(Luc)
 	m_SaveCanonicalizedData = pOptions->nSaveCanonicalizedData != 0;
+	m_AllowUnsignedFromHeaders = pOptions->nAllowUnsignedFromHeaders != 0;
 	return nRet;
 }
 
@@ -653,6 +662,29 @@ CDKIMVerify::ProcessHeaders(void)
 		if (sig.BodyHashData.empty()) {
 			// hash CRLF separating headers from body
 			sig.Hash("\r\n", 2);
+		}
+		if (!m_AllowUnsignedFromHeaders) {
+			// make sure the message has no unsigned From headers
+			list<string>::reverse_iterator i;
+			for( i = HeaderList.rbegin(); i != HeaderList.rend(); ++i ) {
+				if( _strnicmp(i->c_str(), "From", 4 ) == 0 ) {
+					// skip over whitespace between the header name and :
+					const char *s = i->c_str()+4;
+					while (*s == ' ' || *s == '\t')
+						s++;
+					if (*s == ':') {
+						if (find(used.begin(), used.end(), i) == used.end()) {
+							// this From header was not signed
+							break;
+						}
+					}
+				}
+			}
+			if (i != HeaderList.rend()) {
+				// treat signature as invalid
+				sig.Status = DKIM_UNSIGNED_FROM;
+				continue;
+			}
 		}
 		ValidSigFound = true;
 	} /*- for (list < SignatureInfo >::iterator s = Signatures.begin(); s != Signatures.end(); ++s) { */
@@ -1122,6 +1154,8 @@ CDKIMVerify::GetDetails(int *nSigCount, DKIMVerifyDetails ** pDetails)
 	for (list < SignatureInfo >::iterator i = Signatures.begin(); i != Signatures.end(); ++i) {
 		DKIMVerifyDetails d;
 		d.szSignature = (char *) i->Header.c_str();
+		d.szSignatureDomain = (char*)i->Domain.c_str();
+		d.szIdentityDomain = (char*)i->IdentityDomain.c_str();
 		d.nResult = i->Status;
 		d.szCanonicalizedData = (char *) i->CanonicalizedData.c_str();
 		Details.push_back(d);
@@ -1156,7 +1190,7 @@ CDKIMVerify::GetDomain(void)
 void
 getversion_dkimverify_cpp()
 {
-	static char    *x = (char *) "$Id: dkimverify.cpp,v 1.7 2009-06-11 13:58:34+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = (char *) "$Id: dkimverify.cpp,v 1.9 2011-06-04 10:05:01+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

@@ -1,5 +1,8 @@
 /*
  * $Log: dkim.c,v $
+ * Revision 1.14  2011-06-04 09:36:36+05:30  Cprogrammer
+ * added AllowUnsignedFromHeaders option
+ *
  * Revision 1.13  2011-02-07 22:05:23+05:30  Cprogrammer
  * added case DKIM_3PS_SIGNATURE
  *
@@ -121,6 +124,8 @@ usage()
 #ifdef HAVE_EVP_SHA256
 	fprintf(stderr, "z <hash>             1 for sha1, 2 for sha256, 3 for both\n");
 #endif
+	fprintf(stderr, "f                    0 = From headers not included in the signature are not allowed\n");
+	fprintf(stderr, "                     1 = allowed\n");
 	fprintf(stderr, "y <selector>         the selector tag DEFAULT=private\n");
 	fprintf(stderr, "s <privkeyfile>      sign the message using the private key in privkeyfile\n");
 	fprintf(stderr, "H                    this help\n");
@@ -541,7 +546,7 @@ main(int argc, char **argv)
 	opts.pfnHeaderCallback = SignThisHeader;
 	while (1)
 	{
-		if ((ch = getopt(argc, argv, "lqthHvVp:b:c:d:i:s:x:y:z:")) == -1)
+		if ((ch = getopt(argc, argv, "lqtfhHvVp:b:c:d:i:s:x:y:z:")) == -1)
 			break;
 		switch (ch)
 		{
@@ -551,6 +556,8 @@ main(int argc, char **argv)
 		case 'q': /*- query method tag */
 			opts.nIncludeQueryMethod = 1;
 			break;
+		case 'f':
+			vopts.nAllowUnsignedFromHeaders = 1;
 		case 't': /*- timestamp tag */
 			opts.nIncludeTimeStamp = 1;
 			break;
@@ -852,7 +859,7 @@ main(int argc, char **argv)
 void
 getversion_dkim_c()
 {
-	static char    *x = (char *) "$Id: dkim.c,v 1.13 2011-02-07 22:05:23+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = (char *) "$Id: dkim.c,v 1.14 2011-06-04 09:36:36+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
