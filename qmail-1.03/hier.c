@@ -1,5 +1,8 @@
 /*
  * $Log: hier.c,v $
+ * Revision 1.165  2011-06-04 14:03:45+05:30  Cprogrammer
+ * removed dkim.8 man page
+ *
  * Revision 1.164  2011-05-17 21:15:46+05:30  Cprogrammer
  * added man page for qmail-nullqueue
  *
@@ -1057,7 +1060,6 @@ hier(inst_dir)
 	c(auto_qmail_home, "man/cat8", "qmail-dk.0", auto_uido, auto_gidq, 0444);
 	c(auto_qmail_home, "man/man8", "dknewkey.8", auto_uido, auto_gidq, 0444);
 	c(auto_qmail_home, "man/man8", "dktest.8", auto_uido, auto_gidq, 0444);
-	c(auto_qmail_home, "man/man8", "dkim.8", auto_uido, auto_gidq, 0444);
 #endif
 	c(auto_qmail_home, "man/man8", "qmail-multi.8", auto_uido, auto_gidq, 0444);
 	c(auto_qmail_home, "man/cat8", "qmail-multi.0", auto_uido, auto_gidq, 0444);
@@ -1607,7 +1609,7 @@ _hier(inst_dir)
 void
 getversion_install_big_c()
 {
-	static char    *x = "$Id: hier.c,v 1.164 2011-05-17 21:15:46+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: hier.c,v 1.165 2011-06-04 14:03:45+05:30 Cprogrammer Exp mbhangui $";
 
 #ifdef INDIMAIL
 	x = sccsidh;
