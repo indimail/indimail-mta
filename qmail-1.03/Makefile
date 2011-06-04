@@ -1,6 +1,6 @@
 # Don't edit Makefile! Use conf-* for configuration.
 COFLAGS=-z+05:30
-DKIM_VERSION=1.3
+DKIM_VERSION=1.4
 INDIDIR := $(shell head -1 conf-qmail 2>/dev/null|| echo "/var/indimail")
 SYSTEM := $(shell uname -s)
 SHELL=/bin/sh
