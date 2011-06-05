@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail.spec.in,v 2.221 2011-06-04 17:49:07+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 2.222 2011-06-05 20:03:04+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %define _unpackaged_files_terminate_build 1
 
@@ -354,17 +354,6 @@ do
 	if [ " $i" = " clamav-%{clamav_version}" -a %noclamav -ne 0 ] ; then
 		continue
 	fi
-%if %build_on_obs == 1
-	#
-	# Apply patch picked up from indimail.sourceforge.net
-	#
-	if [ " $i" = " courier-imap-%{courier_version}" ] ; then
-		continue
-	fi
-	if [ " $i" = " qmail-%{qmail_version}" ] ; then
-		continue
-	fi
-%endif
 	if [ -f ../SOURCES/$i.tar.bz2 ] ; then
 		%{__bzip2} -d -c ../SOURCES/$i.tar.bz2 |tar xf -
 	elif [ -f ../SOURCES/$i.tar.gz ] ; then
@@ -374,6 +363,17 @@ do
 		exit 1
 	fi
 	if [ -d $i ] ; then
+%if %build_on_obs == 1
+		#
+		# Apply patch picked up from indimail.sourceforge.net
+		#
+		if [ " $i" = " courier-imap-%{courier_version}" ] ; then
+			continue
+		fi
+		if [ " $i" = " qmail-%{qmail_version}" ] ; then
+			continue
+		fi
+%endif
 		if [ -f %{name}-%{version}/patches/$i.patch ] ; then
 			# Copy for the SRPM
 			%{__cp} %{name}-%{version}/patches/$i.patch ../SOURCES
@@ -532,9 +532,6 @@ fi
 if [ -d ../courier-imap-%{courier_version} ] ; then
 	cd ../courier-imap-%{courier_version}
 	mkdir -p m4
-	if [ %{build_on_obs} -eq 1 ] ; then
-		autoreconf -fi
-	fi
 if [ " %dist" = " mandrake" ] ; then
 	%configure --prefix=%{_prefix} --exec-prefix=%{_prefix}/ --bindir=%{_prefix}/bin \
 	--sbindir=%{_prefix}/sbin --datadir=%{_prefix}/share --includedir=%{_prefix}/include \
@@ -662,6 +659,9 @@ if [ %nonssd -eq 0 ] ; then
 fi
 if [ %nolibdkim -eq 0 ] ; then
 	%{__rm} -f %{buildroot}%{_libdir}/libdkim.la
+	if [ -x /usr/bin/chrpath ] ; then
+    	/usr/bin/chrpath -d %{buildroot}%{_prefix}/bin/dkim
+	fi
 fi
 
 %{__mkdir_p} %{buildroot}%{_prefix}/domains
