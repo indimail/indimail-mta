@@ -21,8 +21,8 @@ dkim_LDADD = libdkim.la $(LIBS)
 
 man_MANS=dkim.8
 
-dkim$(EXEEXT): dkim.$(OBJEXT) libdkim.la
-	$(LINK) $@.$(OBJEXT) $(dkim_LDADD) $(LIB_RESOLV) $(LIB_CRYPTO)
+dkim$(EXEEXT): $(dkim_OBJECTS) dkim.$(OBJEXT) libdkim.la
+	$(CXXLINK) $(dkim_OBJECTS) $(dkim_LDADD) $(LIB_RESOLV) $(LIB_CRYPTO)
 dkim.$(OBJEXT): dkim.h dkim.c dns.h config.h
 	$(LIBTOOL) --mode=compile g++ $(DEFS) -c dkim.c
 dkimfuncs.$(OBJEXT): dkim.h dkimverify.h dkimsign.h config.h dkimfuncs.cpp
