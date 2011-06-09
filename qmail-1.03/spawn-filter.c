@@ -1,5 +1,8 @@
 /*
  * $Log: spawn-filter.c,v $
+ * Revision 1.55  2011-06-09 21:28:11+05:30  Cprogrammer
+ * blackhole mails if filter program exits 2
+ *
  * Revision 1.54  2011-02-08 22:17:37+05:30  Cprogrammer
  * added missing unset of QMAILLOCAL when executing qmail-remote
  *
@@ -447,6 +450,8 @@ run_mailfilter(char *domain, char *ext, char *qqeh, char *mailprog, char **argv)
 	case 0:
 		execv(mailprog, argv); /*- do the delivery (qmail-local/qmail-remote) */
 		report(111, "spawn-filter: could not exec ", mailprog, ": ", error_str(errno), ". (#4.3.0)", 0);
+	case 2:
+		report(0, 0, 0, 0, 0, 0, 0); /*- Blackhole */
 	case 100:
 		report(100, "Mail Rejected (#5.7.1)", 0, 0, 0, 0, 0);
 	default:
@@ -938,7 +943,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_spawn_filter_c()
 {
-	static char    *x = "$Id: spawn-filter.c,v 1.54 2011-02-08 22:17:37+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: spawn-filter.c,v 1.55 2011-06-09 21:28:11+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
