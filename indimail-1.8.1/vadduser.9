@@ -13,14 +13,16 @@ vadduser \- Add a new user to a virtual domain
 
 .SH DESCRIPTION
 .PP
-\fBvadduser\fR adds a new user to a virtual domain. The account created is inactive. The
-account becomes active when the user logs in (using IMAP4 or POP3). The username should be
-either alpha-numeric or have the characters '.', '-', '_'. The username, gecos and domain
-component cannot have the ':' character. The case is changed to lower case before adding to
-the database. For a clustered domain, the user is also added to the table \fBhostcntrl\fR
-on the \fBcontrol host\fR. \fBvadduser\fR has setuid bit as root and must be run as root
-or indimail user. Password is encrypted using \fBcrypt(3)\fR. The Directory Structure Layout's
-hashed component (See Below) is incremented by one.
+\fBvadduser\fR adds a new user to a virtual domain. The account created is
+inactive. The account becomes active when the user logs in (using IMAP4 or
+POP3), or gets an email.  The username should be either alpha-numeric or have
+the characters '.', '-', '_'. The username, gecos and domain component cannot
+have the ':' character. The case is changed to lower case before adding to the
+database. For a clustered domain, the user is also added to the table \fBhostcntrl\fR
+on the \fBcontrol host\fR. \fBvadduser\fR has setuid bit as root and must be
+run as root or indimail user. Password is encrypted using \fBcrypt(3)\fR. The
+Directory Structure Layout's hashed component (See Below) is incremented by
+one.
 
 The user's home dirctory has four components
 .nr step 1 1
