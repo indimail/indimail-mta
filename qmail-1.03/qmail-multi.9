@@ -104,9 +104,9 @@ can be specified by the
 control file. The email id in \fBglobalspamdirect\fR can be overriden by the environment
 variable \fBGLOBALSPAMREDIRECT\fR. If both REJECTSPAM and NOTIFYSPAM is set, spam mails will
 be bounced back to the sender with a copy redirected to the recipient
-specified in by the NOTIFYSPAM environment variable or the
+specified in by the NOTIFYSPAM environment variable as well (or the
 .B globalspamredirect
-control file as well. you may decide not to generate
+control file). you may decide not to generate
 a bounce to the sender by setting the environment variable 
 .B REJECTSPAM
 to a value greater than 1 (i.e. black hole SPAM mails). In addition to running
@@ -122,7 +122,8 @@ e.g.
 FILTERARGS="/usr/bin/altermime --input=- --disclaimer=/etc/motd"
 .EE
 
-will append the output of altermime command to all mails.
+will append the output of altermime command to all mails. \fBqmail-multi(8)\fR will bounce the
+message if the return status is 100. The mail will be blackholed if the return status is 1.
 .PP
 \fBqmail-multi\fR invokes \fBqmail-queue\fR to deposit the mail. If the environment variable
 \fBQUEUEPROG\fR is defined, the program defined by \fBQUEUEPROG\fR will be used instead.
