@@ -11,4 +11,4 @@ AM_LFLAGS  = -Pc
 AM_YFLAGS  = -d
 #$(am__skiplex) $(SHELL) $(YLWRAP) $< $(LEX_OUTPUT_ROOT).c $@ -- flex
 lex.c: lex.l
-	 $(LEX) $(LFLAGS) -o $@ $^
+	 $(LEX) $(LFLAGS) -o$@ $^
