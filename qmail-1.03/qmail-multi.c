@@ -214,7 +214,7 @@ main(int argc, char **argv)
 		return (run_mailfilter(argc, argv)); /*- Does not return */
 	if (pipe(pipefd) == -1)
 		_exit(60);
-	switch ((filt_pid = fork()))
+	switch ((filt_pid = fork())) /*- spam filter */
 	{
 	case -1:
 		close(0);
@@ -409,7 +409,7 @@ run_mailfilter(int argc, char **argv)
 		_exit(75);
 	default:
 		close(pipefd[1]);
-		if(dup2(pipefd[0], 0))
+		if (dup2(pipefd[0], 0))
 		{
 			close(pipefd[0]);
 			wait_pid(&wstat, filt_pid);
@@ -417,7 +417,7 @@ run_mailfilter(int argc, char **argv)
 		}
 		if (pipefd[0] != 0)
 			close(pipefd[0]);
-		if(mkTempFile(0))
+		if (mkTempFile(0))
 		{
 			close(0);
 			wait_pid(&wstat, filt_pid);
@@ -433,7 +433,9 @@ run_mailfilter(int argc, char **argv)
 	switch (filt_exitcode = wait_exitcode(wstat))
 	{
 	case 0:
-		return(qmail_multi(argc, argv));
+		return (qmail_multi(argc, argv));
+	case 2:
+		return (0); /*- Blackhole */
 	case 100:
 		_exit(31);
 	default:
@@ -546,7 +548,7 @@ mkTempFile(int seekfd)
 
 	if (lseek(seekfd, 0, SEEK_SET) == 0)
 		return (0);
-	if(errno == EBADF)
+	if (errno == EBADF)
 		_exit(54);
 	if (!(tmpdir = env_get("TMPDIR")))
 		tmpdir = "/tmp";
@@ -577,7 +579,7 @@ mkTempFile(int seekfd)
 		close(fd);
 		_exit(68);
 	}
-	if(fd != seekfd)
+	if (fd != seekfd)
 	{
 		if (dup2(fd, seekfd) == -1)
 		{
@@ -611,8 +613,8 @@ rewrite_envelope(int outfd)
 
 	if (!(ptr = env_get("SPAMREDIRECT")))
 	{
-		if(control_readline(&notifyaddress, "globalspamredirect") == -1)
-			return(55);
+		if (control_readline(&notifyaddress, "globalspamredirect") == -1)
+			return (55);
 	} else
 	if (!stralloc_copys(&notifyaddress, ptr))
 		_exit(51);
@@ -659,7 +661,7 @@ discard_envelope()
 	}
 	if (!total)
 		return (54);
-	return(0);
+	return (0);
 }
 
 void
