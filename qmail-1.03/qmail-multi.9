@@ -123,7 +123,8 @@ FILTERARGS="/usr/bin/altermime --input=- --disclaimer=/etc/motd"
 .EE
 
 will append the output of altermime command to all mails. \fBqmail-multi(8)\fR will bounce the
-message if the return status is 100. The mail will be blackholed if the return status is 1.
+message if the return status is 100. The mail will be blackholed if the return status is 2. If
+the return status is non-zero, qmail-multi will exit issuing a temporary error.
 .PP
 \fBqmail-multi\fR invokes \fBqmail-queue\fR to deposit the mail. If the environment variable
 \fBQUEUEPROG\fR is defined, the program defined by \fBQUEUEPROG\fR will be used instead.

@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-multi.c,v $
+ * Revision 1.46  2011-06-09 21:27:40+05:30  Cprogrammer
+ * blackhole mails if filter program exits 2
+ *
  * Revision 1.45  2010-03-26 15:02:37+05:30  Cprogrammer
  * Use QUEUEPROG to call an alternate queue program like qmail-qmqpc
  *
@@ -667,6 +670,6 @@ discard_envelope()
 void
 getversion_qmail_multi_c()
 {
-	static char    *x = "$Id: qmail-multi.c,v 1.45 2010-03-26 15:02:37+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: qmail-multi.c,v 1.46 2011-06-09 21:27:40+05:30 Cprogrammer Exp mbhangui $";
 	x++;
 }
