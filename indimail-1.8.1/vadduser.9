@@ -14,15 +14,17 @@ vadduser \- Add a new user to a virtual domain
 .SH DESCRIPTION
 .PP
 \fBvadduser\fR adds a new user to a virtual domain. The account created is
-inactive. The account becomes active when the user logs in (using IMAP4 or
-POP3), or gets an email.  The username should be either alpha-numeric or have
-the characters '.', '-', '_'. The username, gecos and domain component cannot
-have the ':' character. The case is changed to lower case before adding to the
-database. For a clustered domain, the user is also added to the table \fBhostcntrl\fR
-on the \fBcontrol host\fR. \fBvadduser\fR has setuid bit as root and must be
-run as root or indimail user. Password is encrypted using \fBcrypt(3)\fR. The
-Directory Structure Layout's hashed component (See Below) is incremented by
-one.
+active. You can also create the user as inactive by specifying the \fB-i\fR option.
+An inactive account becomes active when the user logs in (using IMAP4 or POP3).
+You can use the \fBvmoduser(1)\fR command to make an account active or inactive.
+The username should be either alpha-numeric or have the characters '.', '-', '_'.
+The username, gecos and domain component cannot have the ':' character. The case is
+changed to lower case before adding to the database. For a clustered domain,
+the user is also added to the table \fBhostcntrl\fR on the \fBcontrol host\fR.
+\fBvadduser\fR has setuid bit as root and must be run as root or indimail user.
+Password is encrypted using \fBcrypt(3)\fR and supports all encryption methods supported by
+\fBcrypt(3)\fR. The Directory Structure Layout's hashed component (See Below) is incremented
+by one.
 
 The user's home dirctory has four components
 .nr step 1 1
@@ -36,14 +38,15 @@ Domain Name
 Hashed Component
 
 .PP
-If the domain was created using \fB\-B\fR option to \fBvadddomain\fR, the Base Path is taken from
-the file .\fIbase_path\fR file in the domains directory. Else the Base Path can be defined by the
-environment variable \fBBASE_PATH\fR. If this variable is not set, the value is taken from BASE_PATH
-defined in indimail.h. Base Path can be provided on the command line by the \fB\-B\fR option. The
-\fB\-B\fR to \fBvadduser\fR overrides environment variable and value in the .\fIbase_path\fR file.
-If \fBvfstab\fR (\fB\-b\fR option) is run periodically, \fB\-b\fR option in \fBvadduser\fR can be
-used to balance optimally user creation across filesystems to distribute the load. The \fB\-b\fR
-option overrides \fB\-B\fR option, environment variable \fBBASE_PATH\fR and the file .\fIbase_path\fR.
+If the domain was created using \fB\-B\fR option to \fBvadddomain\fR, the Base Path is taken
+from the file .\fIbase_path\fR file in the domains directory. Else the Base Path can be defined
+by the environment variable \fBBASE_PATH\fR. If this variable is not set, the value is taken
+from BASE_PATH defined in indimail.h. Base Path can be provided on the command line by the
+\fB\-B\fR option. The \fB\-B\fR to \fBvadduser\fR overrides environment variable and value in
+the .\fIbase_path\fR file.  If \fBvfstab\fR (\fB\-b\fR option) is run periodically, \fB\-b\fR
+option in \fBvadduser\fR can be used to balance optimally user creation across filesystems to
+distribute the load. The \fB\-b\fR option overrides \fB\-B\fR option, environment variable
+\fBBASE_PATH\fR and the file .\fIbase_path\fR in the domains directory.
 
 The Directory Prefix depends on the first character of the username. It can have one of the
 five values

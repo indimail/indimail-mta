@@ -61,6 +61,12 @@ print version
 \fB\-v\fR
 make \fBvaddomain\fR be verbose
 .TP
+\fB\-B\fR \fIbase_path\fR
+sets the BASE PATH for user's home directory for users created on this domain. This
+overrides the environment variable \fBBASE_PATH\fR and the default base path \fI/home/mail\fR.
+You can use this option to assign specific directories/filesystems to users added to a domain.
+The base path is maintained in the file INDIMAIL/\fIvirtual_domain\fR/.\fIbase_path\fR
+.TP
 \fB\-l\fR users_per_level
 By default, \fBvadduser\fR uses an adaptive directory structure based on a table dir-control
 which is automatically managed by \fBvadduser(1)\fR, \fBvdeluser(1)\fR and \fBvreorg(8).
@@ -83,11 +89,6 @@ sets the uid/gid based on a user in /etc/passwd. Default is user \fBindimail\fR
 \fB\-d\fR \fIdir\fR
 sets the dir to use for the domain in the file \fIINDIMAIL/users/assign\fR. See \fBdot-qmail(5)\fR.
 All configuration files for the domain are placed in this directory.
-.TP
-\fB\-B\fR \fIbase_path\fR
-sets the BASE PATH for user's home directory for users created on this domain. This
-overrides the environment variable \fBBASE_PATH\fR and the default base path \fI/home/mail\fR.
-You can use this option to assign specific directories/filesystems to users added to a domain.
 .TP
 \fB\-i\fR \fIuid\fR
 sets the uid to use for this domain
