@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail.spec.in,v 2.222 2011-06-05 20:03:04+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 2.223 2011-06-15 12:28:28+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %define _unpackaged_files_terminate_build 1
 
@@ -472,8 +472,7 @@ fi
 
 if [ " %dist" = " mandrake" ] ; then
 ./configure --prefix=%{_prefix} --libexecdir=%{_prefix}/libexec --sysconfdir=%{_prefix}/etc \
-	--enable-mysqlbindir=%{mysqlPrefix}/bin --enable-mysqlincdir=%{mysqlPrefix}/include/mysql \
-	--enable-mysqllibdir=%{mysqlPrefix}/%{_lib}/mysql \
+	--enable-mysqlbindir=%{mysqlPrefix}/bin --enable-mysqlprefix=%{mysqlPrefix} \
 	--libdir=%{_libdir} --x-libraries=%{_libdir} \
 	--mandir=%{_prefix}/man --sysconfdir=%{_prefix}/etc --enable-qmaildir=%{_prefix} \
 	--enable-basepath=@basepath@ --enable-logdir=@logdir@ \
@@ -482,8 +481,7 @@ if [ " %dist" = " mandrake" ] ; then
 	`%{__cat} config/indimail.opts` > $DEVICE
 else
 %configure --prefix=%{_prefix} --libexecdir=%{_prefix}/libexec --sysconfdir=%{_prefix}/etc \
-	--enable-mysqlbindir=%{mysqlPrefix}/bin --enable-mysqlincdir=%{mysqlPrefix}/include/mysql \
-	--enable-mysqllibdir=%{mysqlPrefix}/%{_lib}/mysql \
+	--enable-mysqlbindir=%{mysqlPrefix}/bin --enable-mysqlprefix=%{mysqlPrefix} \
 	--mandir=%{_prefix}/man --sysconfdir=%{_prefix}/etc --enable-qmaildir=%{_prefix} \
 	--enable-basepath=@basepath@ --enable-logdir=@logdir@ \
 	--enable-tcprules-prog=%{_prefix}/bin/tcprules --enable-tcpserver-file=%{_prefix}/etc/tcp.smtp \
@@ -516,12 +514,12 @@ if [ " %dist" = " mandrake" ] ; then
 	fi
 	./configure --prefix=%{_prefix} --libexecdir=%{_prefix}/libexec --sysconfdir=%{_prefix}/etc \
 	--mandir=%{_prefix}/man --libdir=/usr/%{_lib} --x-libraries=/usr/%{_lib} \
-	--enable-mysqlincdir=%{mysqlPrefix}/include/mysql --enable-mysqllibdir=%{mysqlPrefix}/%{_lib}/mysql \
+	--enable-mysqlprefix=%{mysqlPrefix} --enable-mysqllibdir=%{mysqlPrefix}/%{_lib}/mysql \
 	`%{__cat} ../%{name}-%{version}/config/nssd.opts` > $DEVICE
 else
 	%configure --prefix=%{_prefix} --libexecdir=%{_prefix}/libexec --sysconfdir=%{_prefix}/etc \
 	--mandir=%{_prefix}/man --libdir=/usr/%{_lib} \
-	--enable-mysqlincdir=%{mysqlPrefix}/include/mysql --enable-mysqllibdir=%{mysqlPrefix}/%{_lib}/mysql \
+	--enable-mysqlprefix=%{mysqlPrefix} --enable-mysqllibdir=%{mysqlPrefix}/%{_lib}/mysql \
 	`%{__cat} ../%{name}-%{version}/config/nssd.opts` > $DEVICE
 fi
 fi
@@ -698,6 +696,7 @@ done
 /usr/bin/chrpath -d %{buildroot}%{_prefix}/libexec/authlib/authindi
 /usr/bin/chrpath -d %{buildroot}%{_prefix}/libexec/sq_vacation
 /usr/bin/chrpath -d %{buildroot}%{_prefix}/libexec/qmailmrtg7
+/usr/bin/chrpath -d %{buildroot}%{_prefix}/modules/iauth.so
 
 for i in adminclient chowkidar cindimail clamd clearopensmtp copyemail execmysql \
 hostsync indisrvr inlookup inquerytest install_tables ipchange mail_report \
@@ -2292,7 +2291,11 @@ EOF
 if [ -d %{_sysconfdir}/ld.so.conf.d ] ; then
 	(
 		echo %{_libdir}
-		echo %{mysqlPrefix}/%{_lib}/mysql 
+		if [ -f %{mysqlPrefix}/%{_lib}/mysql/libmysqlclient.so ] ; then
+			echo %{mysqlPrefix}/%{_lib}/mysql 
+		elif [ -f %{mysqlPrefix}/%{_lib}/libmysqlclient.so ] ; then
+			echo %{mysqlPrefix}/%{_lib}
+		fi
 	) > %{_sysconfdir}/ld.so.conf.d/indimail-%{_arch}.conf
 fi
 /sbin/ldconfig
