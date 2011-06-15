@@ -340,9 +340,9 @@ both 32 and 64 bit) are
           o openSUSE Factory
 
     * Red Hat
+          o Fedora 15
           o Fedora 14
           o Fedora 13
-          o Fedora 12
           o Red Hat Enterprise Linux 5
           o Red Hat Enterprise Linux 6
           o CentOS 5
@@ -403,10 +403,12 @@ MariaDB 5.1.42
 MariaDB 5.1.44
 MariaDB 5.1.47
 MariaDB 5.2.4
+MariaDB 5.2.6
 mysql-5.4.3-beta
 mysql-5.5.0-m2
 mysql-5.5.2-m2
 mysql-5.5.3-m3
 mysql-5.5.8
+mysql-5.5.13
 
 -- Manvendra Bhangui <manvendra@indimail.org>
