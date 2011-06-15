@@ -126,7 +126,7 @@ AC_ARG_ENABLE(mysqlprefix, [  --enable-mysqlprefix=""       MySQL Prefix Directo
 if test "$mysql_prefix" = ""
 then
 mysql_incdir=""
-for f in /usr/local/mysql/include/mysql /usr/local/mysql/include /usr/include/mysql
+for f in /usr/local/mysql/include /usr/include/mysql
 do
 	if test -d $f
 	then
@@ -162,14 +162,11 @@ mysql_libdir="$enableval",
 	fi
 ] )
 else
-	if test -d $mysql_prefix/include/mysql
-	then
-		mysql_incdir=$mysql_prefix/include/mysql
-	elif test -d $mysql_prefix/include
+	if test -d $mysql_prefix/include
 	then
 		mysql_incdir=$mysql_prefix/include
 	else
-		mysql_incdir=$mysql_prefix/include/mysql
+		mysql_incdir=/usr/include/mysql
 	fi
 
 	if test -d $mysql_prefix/lib64/mysql
@@ -192,7 +189,7 @@ fi
 
 AC_CHECK_LIB(mysqlclient -L${mysql_libdir}, mysql_real_connect,libs="$libs -lmysqlclient",
 	AC_MSG_ERROR([could not find libmysqlclient which is needed for MySQL support]),)
-auth_inc="-I$indimaildir/include -I$mysql_incdir"
+auth_inc="-I$indimaildir/include -I$mysql_incdir -I$mysql_incdir/mysql"
 case "$host" in
 	*-*-darwin*)
 	auth_libs="-L$mysql_libdir -lmysqlclient"
