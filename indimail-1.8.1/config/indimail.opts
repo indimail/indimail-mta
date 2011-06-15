@@ -3,7 +3,6 @@
 --enable-indigroup=indimail
 --enable-default-domain=indimail.org
 --enable-log-name=indimail
---enable-libs=mysqlclient
 --enable-roaming-users=y
 --enable-relay-clear-minutes=30
 --enable-logging=e
