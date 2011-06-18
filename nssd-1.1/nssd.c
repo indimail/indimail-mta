@@ -19,7 +19,7 @@
 /*- A SIGNIFICANT PORTION OF THIS CODE IS BASED ON GNU NSCD */
 
 /*
- * $Id: nsvsd.c,v 1.13 2006/09/16 04:08:13 cinergi Exp $ 
+ * $Id: nssd.c,v 1.1 2011-06-18 11:38:37+05:30 Cprogrammer Exp mbhangui $ 
  */
 #include "common.h"
 #include <errno.h>

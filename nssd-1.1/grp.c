@@ -17,7 +17,7 @@
  */
 
 /*
- * $Id: grp.c,v 1.3 2005/06/01 00:46:40 cinergi Exp $ 
+ * $Id: grp.c,v 1.1 2011-06-18 11:38:29+05:30 Cprogrammer Exp mbhangui $ 
  */
 #include "common.h"
 #include <grp.h>

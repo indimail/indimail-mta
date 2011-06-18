@@ -17,7 +17,7 @@
  */
 
 /*
- * $Id: pwd.c,v 1.2 2004/11/24 21:25:47 cinergi Exp $ 
+ * $Id: pwd.c,v 1.1 2011-06-18 11:38:46+05:30 Cprogrammer Exp mbhangui $ 
  */
 #include "common.h"
 #include <pwd.h>

@@ -17,7 +17,7 @@
  */
 
 /*
- * $Id: nsvsd.h,v 1.2 2005/01/31 01:09:22 cinergi Exp $ 
+ * $Id: nssd.h,v 1.1 2011-06-18 11:38:08+05:30 Cprogrammer Exp mbhangui $ 
  */
 #define MAX_LINE_SIZE       1024	/* Max line length in config file */
 #define MAX_KEY_SIZE        128	/* Max length of a key in cfg file */

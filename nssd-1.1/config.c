@@ -17,9 +17,9 @@
  */
 
 /*
- * $Id: config.c,v 1.3 2005/01/31 01:09:21 cinergi Exp $ 
+ * $Id: config.c,v 1.1 2011-06-18 11:38:25+05:30 Cprogrammer Exp mbhangui $ 
  */
-static const char rcsid[] = "$Id: config.c,v 1.3 2005/01/31 01:09:21 cinergi Exp $";
+static const char rcsid[] = "$Id: config.c,v 1.1 2011-06-18 11:38:25+05:30 Cprogrammer Exp mbhangui $";
 
 #include "common.h"
 #include <string.h>

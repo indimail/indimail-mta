@@ -17,7 +17,7 @@
  */
 
 /*
- * $Id: spwd.c,v 1.2 2004/11/24 21:25:48 cinergi Exp $ 
+ * $Id: spwd.c,v 1.1 2011-06-18 11:38:54+05:30 Cprogrammer Exp mbhangui $ 
  */
 #include "common.h"
 #ifdef HAVE_SHADOW_H

@@ -17,7 +17,7 @@
  */
 
 /*
- * $Id: sock.c,v 1.4 2005/01/30 03:49:30 cinergi Exp $ 
+ * $Id: sock.c,v 1.1 2011-06-18 11:38:50+05:30 Cprogrammer Exp mbhangui $ 
  */
 #include "common.h"
 #include <sys/socket.h>

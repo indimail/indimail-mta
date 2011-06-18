@@ -17,7 +17,7 @@
  */
 
 /*
- * $Id: misc.c,v 1.4 2004/12/15 00:06:03 cinergi Exp $ 
+ * $Id: misc.c,v 1.1 2011-06-18 11:38:32+05:30 Cprogrammer Exp mbhangui $ 
  */
 #include "common.h"
 #include <stdarg.h>
