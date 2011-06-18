@@ -1,4 +1,5 @@
 Writing Filters for IndiMail
+============================
 
 IndiMail provides multiple methods by which you can intercept an email in transit and modify
 the email headers or the email body. Some methods can be used before the mail gets queued and
@@ -14,7 +15,7 @@ stdin and outputs the email back (maybe modiying it) on stdout.
 
 The below configuration causes all inbound SMTP email to be fed through the filter
 /usr/local/bin/myfilter. You can use the programs 822header(1), 822body(1) inside myfilter to
-get and manipulate the headers and body.
+get and manipulate the headers and body (See 1.4.1).
 
 % su root
 # echo /usr/local/bin/myfilter > /service/qmail-smtpd.25/variables/FILTERARGS
@@ -123,28 +124,171 @@ e.g. the below filter looks for emails having “failure notice” in the subjec
 inserts the line “sorry about that” in the first line of the message body and puts the
 line “sent by IndiMail Messaging platform” in the last line
 
-1.4 A Sample Filter
-===================
+1.4 Examples Filters
+====================
+
+1.4.1 FILTERARGS script
+=======================
 
 #/bin/sh
 # create a temporary file
 tmp_file=`mktemp -p /var/tmp -t myfilter.XXXXXXXXXXXXXXX`
-
+if [ $? -ne 0 ] ; then
+	/bin/rm -f $inp_file
+	exit 111
+fi
 # Copy the stdin
 /bin/cat > $tmp_file
+if [ $? -ne 0 ] ; then
+	/bin/rm -f $inp_file
+	exit 111
+fi
 subject=`/var/indimail/bin/822header -I Subject < $tmp_file`
 echo $subject | grep “failure notice” > /dev/null 2>&1
-
 if [ $? -eq 0 ] ; then
     (
     /var/indimail/bin/822header < $tmp_file
     echo
     echo “sorry about that”
     /var/indimail/bin/822body < $tmp_file
-    echo “send by IndiMail Messaging platform”
+    echo “sent by IndiMail Messaging platform”
     )
 else
     /bin/cat $tmp_file
 fi
 /bin/rm -f $tmp_file
 exit 0
+
+1.4.2 QMAILQUEUE script
+=======================
+
+#!/bin/sh
+# create a temporary file
+inp_file=`mktemp -p /var/tmp -t myfilter.XXXXXXXXXXXXXXX`
+if [ $? -ne 0 ] ; then
+	/bin/rm -f $inp_file
+	exit 111
+fi
+/bin/cat > $inp_file
+if [ $? -ne 0 ] ; then
+	/bin/rm -f $inp_file
+	exit 111
+fi
+subject=`/var/indimail/bin/822header -I Subject < $inp_file`
+echo $subject | grep “failure notice” > /dev/null 2>&1
+if [ $? -eq 0 ] ; then
+    (
+    /var/indimail/bin/822header < $inp_file
+    echo
+    echo “sorry about that”
+    /var/indimail/bin/822body < $inp_file
+    echo “sent by IndiMail Messaging platform”
+    ) > $out_file
+	if [ $? -ne 0 ] ; then
+		/bin/rm -f $inp_file $out_file
+		exit 111
+	fi
+	exec 0<$out_file
+	/bin/rm -f $inp_file $out_file
+else
+	exec 0<$inp_file
+	/bin/rm -f $inp_file
+fi
+# queue the message
+exec /var/indimail/bin/qmail-multi
+exit 111
+
+
+1.4.3 QMAILREMOTE script
+========================
+
+#!/bin/sh
+if [ -n $QMAILLOCAL ] ; then
+	exec /var/indimail/bin/qmail-local $@
+fi
+# create a temporary file
+inp_file=`mktemp -p /var/tmp -t myfilter.XXXXXXXXXXXXXXX`
+if [ $? -ne 0 ] ; then
+	/bin/rm -f $inp_file
+	exit 111
+fi
+/bin/cat > $inp_file
+if [ $? -ne 0 ] ; then
+	/bin/rm -f $inp_file
+	exit 111
+fi
+subject=`/var/indimail/bin/822header -I Subject < $inp_file`
+echo $subject | grep “failure notice” > /dev/null 2>&1
+if [ $? -eq 0 ] ; then
+    (
+    /var/indimail/bin/822header < $inp_file
+    echo
+    echo “sorry about that”
+    /var/indimail/bin/822body < $inp_file
+    echo “sent by IndiMail Messaging platform”
+    ) > $out_file
+	if [ $? -ne 0 ] ; then
+		/bin/rm -f $inp_file $out_file
+		exit 111
+	fi
+	exec 0<$out_file
+	/bin/rm -f $inp_file $out_file
+else
+	exec 0<$inp_file
+	/bin/rm -f $inp_file
+fi
+
+status_line=`/var/indimail/bin/qmail-remote $@`
+case $status_line in
+         Z*)
+         exit 111
+         ;;
+         D*)
+         exit 100
+         ;;
+         K*)
+         exit 0
+         ;;
+esac
+exit 0
+
+1.4.4 QMAILLOCAL script
+=======================
+
+#!/bin/sh
+if [ -n $QMAILREMOTE ] ; then
+	exec /var/indimail/bin/qmail-remote $@
+fi
+# create a temporary file
+inp_file=`mktemp -p /var/tmp -t myfilter.XXXXXXXXXXXXXXX`
+if [ $? -ne 0 ] ; then
+	/bin/rm -f $inp_file
+	exit 111
+fi
+/bin/cat > $inp_file
+if [ $? -ne 0 ] ; then
+	/bin/rm -f $inp_file
+	exit 111
+fi
+subject=`/var/indimail/bin/822header -I Subject < $inp_file`
+echo $subject | grep “failure notice” > /dev/null 2>&1
+if [ $? -eq 0 ] ; then
+    (
+    /var/indimail/bin/822header < $inp_file
+    echo
+    echo “sorry about that”
+    /var/indimail/bin/822body < $inp_file
+    echo “sent by IndiMail Messaging platform”
+    ) > $out_file
+	if [ $? -ne 0 ] ; then
+		/bin/rm -f $inp_file $out_file
+		exit 111
+	fi
+	exec 0<$out_file
+	/bin/rm -f $inp_file $out_file
+else
+	exec 0<$inp_file
+	/bin/rm -f $inp_file
+fi
+exec /var/indimail/bin/qmail-local $@
+exit 111
