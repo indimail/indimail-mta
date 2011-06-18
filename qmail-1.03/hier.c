@@ -1,5 +1,8 @@
 /*
  * $Log: hier.c,v $
+ * Revision 1.166  2011-06-18 11:42:39+05:30  Cprogrammer
+ * added README.filters, README.indimail
+ *
  * Revision 1.165  2011-06-04 14:03:45+05:30  Cprogrammer
  * removed dkim.8 man page
  *
@@ -771,6 +774,7 @@ hier(inst_dir)
 	c(auto_qmail_home, "doc", "EXTTODO", auto_uido, auto_gidq, 0444);
 	c(auto_qmail_home, "doc", "INTERNALS", auto_uido, auto_gidq, 0444);
 	c(auto_qmail_home, "doc", "README.qmail", auto_uido, auto_gidq, 0444);
+	c(auto_qmail_home, "doc", "README.indimail", auto_uido, auto_gidq, 0444);
 	c(auto_qmail_home, "doc", "README.auth", auto_uido, auto_gidq, 0444);
 	c(auto_qmail_home, "doc", "README.clamav", auto_uido, auto_gidq, 0444);
 	c(auto_qmail_home, "doc", "README.greylist", auto_uido, auto_gidq, 0444);
@@ -787,6 +791,7 @@ hier(inst_dir)
 	c(auto_qmail_home, "doc", "README.status", auto_uido, auto_gidq, 0444);
 	c(auto_qmail_home, "doc", "README.tls", auto_uido, auto_gidq, 0444);
 	c(auto_qmail_home, "doc", "README.wildmat", auto_uido, auto_gidq, 0444);
+	c(auto_qmail_home, "doc", "README.filters", auto_uido, auto_gidq, 0444);
 
 	c(auto_qmail_home, "man/man1", "qmail-cat.1", auto_uido, auto_gidq, 0444);
 	c(auto_qmail_home, "man/man1", "predate.1", auto_uido, auto_gidq, 0444);
@@ -1609,7 +1614,7 @@ _hier(inst_dir)
 void
 getversion_install_big_c()
 {
-	static char    *x = "$Id: hier.c,v 1.165 2011-06-04 14:03:45+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: hier.c,v 1.166 2011-06-18 11:42:39+05:30 Cprogrammer Exp mbhangui $";
 
 #ifdef INDIMAIL
 	x = sccsidh;
