@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-rspawn.c,v $
+ * Revision 1.27  2011-06-19 09:09:01+05:30  Cprogrammer
+ * unset QMAILLOCAL
+ *
  * Revision 1.26  2010-04-24 07:40:36+05:30  Cprogrammer
  * set SMTPROUTE / QMTPROUTE depending on route variable
  *
@@ -276,6 +279,8 @@ spawn(fdmess, fdout, msgsize, s, qqeh, r, at)
 			_exit(111);
 		if (fd_copy(2, 1) == -1)
 			_exit(111);
+		if (!env_unset("QMAILLOCAL"))
+			_exit(111);
 		if (!(ptr = env_get("QMAILREMOTE")))
 			execvp(*args, args);
 		else
@@ -290,7 +295,7 @@ spawn(fdmess, fdout, msgsize, s, qqeh, r, at)
 void
 getversion_qmail_rspawn_c()
 {
-	static char    *x = "$Id: qmail-rspawn.c,v 1.26 2010-04-24 07:40:36+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: qmail-rspawn.c,v 1.27 2011-06-19 09:09:01+05:30 Cprogrammer Stab mbhangui $";
 
 #ifdef INDIMAIL
 	x = sccsidh;
