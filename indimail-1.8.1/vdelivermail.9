@@ -101,8 +101,9 @@ and clears the mails to reduce the quota usage. Site administrators can customiz
 Over Quota Bounce messages, by setting environment variables
 \fBQUOTAWARN1\fR, \fBQUOTAWARN2\fR ... upto \fBQUOTAWARN10\fR. These variables should be set to
 a percentage quota usage for which warning should be sent. In addition to the \fBEXT\fR and
-\fBHOST\fR environment variable, \fBRPLINE\fR variable is also used by \fBvdelivermail\fR to
-set the value for \fBReturn-Path\fR in the mail headers. 
+\fBHOST\fR environment variable, \fBRPLINE\fR and \fBDTLINE\fR variables are also used by
+\fBvdelivermail\fR to set the value for \fBReturn-Path\fR, \fBDelivered-To\fR lines in the mail
+headers. 
 .PP
 The quota limit for a user can be set by the administrator either in size, number of mails or
 combination of both. e.g. 40000,2000S means quota of 40000 Bytes and 2000 mails. Administrator
