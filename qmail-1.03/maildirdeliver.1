@@ -34,8 +34,10 @@ prepend a
 .B Return-Path
 line nor a
 .B Delivered-To
-line to the incoming message.
-If you use
+line to the incoming message. \fBmaildirdeliver\fR will use \fBRPLINE\fR if set, to prepend a
+\fBReturn-Path\fR line to the incoming message. \fBmaildirdeliver\fR will use \fBDTLINE\fR if
+set, to prepend a \fBDelivered-To\fR line to the incoming message.
+if \fBRPLINE\fR or \fBDTLINE\fR are not defined and if you use
 .B maildirdeliver
 in a program line in a
 .B .qmail
