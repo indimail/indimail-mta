@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-lspawn.c,v $
+ * Revision 1.18  2011-06-19 09:08:42+05:30  Cprogrammer
+ * unset QMAILREMOTE
+ *
  * Revision 1.17  2009-12-10 10:56:06+05:30  Cprogrammer
  * return -2 for MySQL error
  *
@@ -393,6 +396,8 @@ spawn(fdmess, fdout, msgsize, sender, qqeh, recip, at)
 			_exit(QLX_USAGE);
 		if (!getuid())
 			_exit(QLX_ROOT);
+		if (!env_unset("QMAILREMOTE"))
+			_exit(QLX_SYS);
 		if (!(ptr = env_get("QMAILLOCAL")))
 			execv(*args, args);
 		else
@@ -407,7 +412,7 @@ spawn(fdmess, fdout, msgsize, sender, qqeh, recip, at)
 void
 getversion_qmail_lspawn_c()
 {
-	static char    *x = "$Id: qmail-lspawn.c,v 1.17 2009-12-10 10:56:06+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: qmail-lspawn.c,v 1.18 2011-06-19 09:08:42+05:30 Cprogrammer Stab mbhangui $";
 
 #ifdef INDIMAIL
 	x = sccsidh;
