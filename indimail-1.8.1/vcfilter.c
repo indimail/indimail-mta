@@ -626,10 +626,12 @@ usage()
 	fprintf(stderr, "         -k keyword [\"\" string if comparision (-c option) is 5 or 6]\n");
 	fprintf(stderr, "         -f folder [Specify /NoDeliver for delivery to be junked]\n");
 	fprintf(stderr, "         -b bounce action\n");
-	fprintf(stderr, "              0 - Do not Bounce to sender\n");
-	fprintf(stderr, "              1 - Bounce to sender\n");
+	fprintf(stderr, "              0               - Do not Bounce to sender\n");
+	fprintf(stderr, "              1               - Bounce to sender\n");
 	fprintf(stderr, "              2'&user@domain' - Forward to another id\n");
+	fprintf(stderr, "              2'|program'     - Feed mail to another program\n");
 	fprintf(stderr, "              3'&user@domain' - Forward to another id and Bounce\n");
+	fprintf(stderr, "              3'|program'     - Feed mail to another program and Bounce\n");
 	fprintf(stderr, "                       or                                       \n");
 	fprintf(stderr, "usage: vcfilter -m emailid [options] [mailing_list1..mailing_listn]\n");
 	fprintf(stderr, "options: -v verbose\n");
