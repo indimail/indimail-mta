@@ -76,14 +76,14 @@ You can add your own headers by appending headers to INDIMAIL/etc/headerlist.
 \fB\-c\fR
 Comparison with the headers to make. This could be one of the following number.
 
- 0 – Equals
- 1 – Contains
- 2 – Does not contain
- 3 – Starts with
- 4 – Ends with
- 5 – Sender not in address book
- 6 – My ID not in To, Cc, Bcc
- 7 – Numerical or Logical Expression
+ 0 - Equals
+ 1 - Contains
+ 2 - Does not contain
+ 3 - Starts with
+ 4 - Ends with
+ 5 - Sender not in address book
+ 6 - My ID not in To, Cc, Bcc
+ 7 - Numerical or Logical Expression
  8 - RegExp
 
  Note: Mailing List can be specified for Comparison 5 or 6
@@ -98,17 +98,17 @@ Folder to which the mail should be delivered if a filter match occurs. This can 
 .TP
 \fB\-b\fR \fIbounce_action\fR
  bounce_action can be one of the four numbers
- 0 – Do not bounce
- 1 – Bounce mail to sender with the following custom message
+ 0 - Do not bounce
+ 1 - Bounce mail to sender with the following custom message
      "Hi. This is the IndiMail MDA for <domain_name>.
      I'm afraid I cannot accept your message as my SPAM filter
      has decided to reject this email.
      Please refrain from sending such mail in future."
- 2 – Forward mail to address following the number. An ampersand
+ 2 - Forward mail to address following the number. An ampersand
      '&' sign must separate the number and the address.
-     i.e. 3&editor@indi.com will forward all rejected mails
-     to the mailbox editor@indi.com
- 3 – Same as above but bounce as well.
+     i.e. 2&editor@indimail.org will forward all rejected mails
+     to the mailbox editor@indimail.org
+ 3 - Same as above but bounce as well.
 
 .TP
 \fImailing_list1\fR...\fImailing_listn\fR
@@ -137,9 +137,9 @@ Change name of an existing mailing list to another name.
 Change behavior when figuring out mailing lists for comparison 5 or 6. Following are the valid
 options
 
- 0 – Do not consider mailing lists in filtering
- 1 – Consider mailing lists while filtering intelligently
- 2 – Consider only mailing lists specified in the filter
+ 0 - Do not consider mailing lists in filtering
+ 1 - Consider mailing lists while filtering intelligently
+ 2 - Consider only mailing lists specified in the filter
      when filtering.
 
 .TP
