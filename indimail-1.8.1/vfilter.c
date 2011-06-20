@@ -930,7 +930,7 @@ myExit(int argc, char **argv, int status, int bounce, char *DestFolder, char *fo
 					_exit(100);
 				}
 			}
-			if (!bounce || bounce == 2)
+			if (DestFolder && *DestFolder && !strncasecmp(DestFolder, "/NoDeliver", 10))
 				printf("Mail BlackHoled\n");
 			_exit(0);
 		}
