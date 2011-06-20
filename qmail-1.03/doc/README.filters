@@ -18,7 +18,10 @@ email back (maybe modiying it) on stdout.
 
 The below configuration causes all inbound SMTP email to be fed through the filter
 /usr/local/bin/myfilter. You can use the programs 822header(1), 822body(1) inside myfilter to
-get and manipulate the headers and body (See 1.4.1).
+get and manipulate the headers and body (See 1.5.1).
+
+NOTE: If the program myfilter returns 100, the message will be bounced. If it returns 2,
+      the message will be discarded (blackholed).
 
 % su root
 # echo /usr/local/bin/myfilter > /service/qmail-smtpd.25/variables/FILTERARGS
@@ -57,6 +60,9 @@ qmail-dk(8), you can do the following
 # svc -d /service/qmail-smtpd.25
 # svc -u /service/qmail-smtpd.25
 
+NOTE: You can set the environment variable NULLQUEUE before calling qmail-multi
+      to discard the mail completely (blackhole).
+
 1.2 Filtering during local / remote delivery
 ============================================
 
@@ -76,10 +82,13 @@ If you want to filter only for local delivery or only for remote delivery, you c
 environment variable QMAILLOCAL or QMAILREMOTE. QMAILLOCAL is defined only for local deliveries
 while QMAILREMOTE is defined only for remote deliveries.
 
+NOTE: If the program myfilter returns 100, the message will be bounced. If it returns 2,
+      the message will be discarded (blackholed).
+
 e.g. the below script skips filtering for remote deliveries
 
 #!/bin/sh
-if [ -n “$QMAILREMOTE” ] ; then
+if [ -n "$QMAILREMOTE" ] ; then
     exec /bin/cat
 fi
 # rest of the script
@@ -98,6 +107,9 @@ e.g. The following entry in /var/indimail/control/filterargs causes all mails to
 fed through the filter dk-filter(8) for DK/DKIM signing.
 
 yahoo.com:remote:/var/indimail/bin/dk-filter
+
+NOTE: If the program myfilter returns 100, the message will be bounced. If it returns 2,
+      the message will be discarded (blackholed).
 
 1.2.3 Using QMAILLOCAL or QMAILREMOTE environment variables
 ===========================================================
@@ -118,6 +130,9 @@ need to also call qmail-local / qmail-remote with the same arguments. i.e
 exec qmail-local  "$@"     #(for local deliveries)
 exec qmail-remote "$@"     #(for remote deliveries)
 
+NOTE: You can exit with value 0 instead of calling qmail-local / qmail-remote to discard
+      the mail completely (blackhole)
+
 1.3 Using dot-qmail(5) or valias(1)
 ===================================
 
@@ -126,7 +141,7 @@ deliveries. See the man pages for dot-qmail(5) and valias(1) for more details. A
 manipulating the original raw email on stdin, you can pipe the out to the program
 maildirdeliver(1) for the final delivery.
 
-Assuming you write the program myscript to call maildirdeliver program, you can use
+Assuming you write the program myfilter to call maildirdeliver program, you can use
 the valias command to add the following alias
 
 % valias -i "|/usr/local/bin/myfilter" testuser01@example.com
@@ -134,13 +149,26 @@ the valias command to add the following alias
 Now any mail sent to testuser01@example.com will be given to the program
 /usr/local/bin/myfilter as standard input.
 
-1.4 Examples Filters
+NOTE: you can exit with value 0 instead of calling the maildirdeliver program to
+      discard the mail completely (blackhole).
+
+1.4 Using IndiMail rule based filter - vfilter
+==============================================
+IndiMail's vfilter(8) mechanism allows you to create rule based filter based on any keyword in the
+message headers or message body. You can create a vfilter by calling the vcfilter(1) program.
+
+% vcfilter -i -h 2 -c 0 -k "failure notice" -b "2|/usr/local/bin/myfilter"
+
+NOTE: you can exit with value 0 instead of putting anything on standard output
+      to discard the mail completely (blackhole).
+
+1.5 Examples Filters
 ====================
 e.g. the below filter looks for emails having "failure notice" in the subject line and
 inserts the line "sorry about that" in the first line of the message body and puts the
-line “sent by IndiMail Messaging platform” at the bottom of the message body.
+line "sent by IndiMail Messaging platform" at the bottom of the message body.
 
-1.4.1 FILTERARGS script
+1.5.1 FILTERARGS script
 =======================
 
 A FILTERARGS script can be used during SMTP before the mail gets queued and also after the
@@ -175,7 +203,7 @@ fi
 /bin/rm -f $tmp_file
 exit 0
 
-1.4.2 QMAILQUEUE script
+1.5.2 QMAILQUEUE script
 =======================
 
 #!/bin/sh
@@ -219,7 +247,7 @@ exec /var/indimail/bin/qmail-multi
 exit 111
 
 
-1.4.3 QMAILREMOTE script
+1.5.3 QMAILREMOTE script
 ========================
 
 #!/bin/sh
@@ -266,7 +294,7 @@ fi
 exec -a qmail-remote /var/indimail/bin/spawn-filter "$@"
 exit 111
 
-1.4.4 QMAILLOCAL script
+1.5.4 QMAILLOCAL script
 =======================
 
 #!/bin/sh
@@ -313,8 +341,8 @@ fi
 exec -a qmail-local /var/indimail/bin/spawn-filter "$@"
 exit 111
 
-1.4.5 valias script
-===================
+1.5.5 valias/vcfilter script
+============================
 
 #!/bin/sh
 # create a temporary file
