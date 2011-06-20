@@ -42,6 +42,9 @@ You can use qmail-qfilter(1)
 # svc -d /service/qmail-smtpd.25
 # svc -u /service/qmail-smtpd.25
 
+NOTE: you can define QQF_MAILQUEUE to /var/indimail/bin/qmail-nullqueue to discard
+      the mail (blackhole).
+
 1.1.3 Using QMAILQUEUE with your own program
 ============================================
 
@@ -157,7 +160,8 @@ NOTE: you can exit with value 0 instead of calling the maildirdeliver program to
 IndiMail's vfilter(8) mechanism allows you to create rule based filter based on any keyword in the
 message headers or message body. You can create a vfilter by calling the vcfilter(1) program.
 
-% vcfilter -i -h 2 -c 0 -k "failure notice" -b "2|/usr/local/bin/myfilter"
+% vcfilter -i -t myfilter -h 2 -c 0 -k "failure notice" -f /NoDeliver \
+    -b "2|/usr/local/bin/myfilter" testuser01@example.com
 
 NOTE: you can exit with value 0 instead of putting anything on standard output
       to discard the mail completely (blackhole).
@@ -380,7 +384,12 @@ else
     exec 0<$inp_file
 fi
 /bin/rm -f $inp_file $out_file
-unset RPLINE
+#
+# unset RPLINE so that maildirdeliver does not add a duplicate Return-Path line
+# unset PWSTRUCT so that password structure cached is removed for vuserinfo to
+# work correctly
+#
+unset RPLINE PWSTRUCT
 dir=`/var/indimail/bin/vuserinfo -d testuser01@example.com | cut -d: -f2 |cut -c2-`
 if [ $? -ne 0 -o " $dir" = " " ] ; then
     echo "unable to get user's homedir" 1>&1
