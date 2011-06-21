@@ -1,5 +1,8 @@
 /*-
  * $Log: vfilter.c,v $
+ * Revision 2.46  2011-06-20 21:30:25+05:30  Cprogrammer
+ * fixed Mail BlackHoled message
+ *
  * Revision 2.45  2010-10-09 13:48:15+05:30  Cprogrammer
  * display the mda used in errors
  *
@@ -148,7 +151,7 @@
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vfilter.c,v 2.45 2010-10-09 13:48:15+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: vfilter.c,v 2.46 2011-06-20 21:30:25+05:30 Cprogrammer Stab mbhangui $";
 #endif
 
 #ifdef VFILTER
@@ -826,7 +829,7 @@ get_options(int argc, char **argv, char *bounce, char *emailid, char *user, char
 static int
 myExit(int argc, char **argv, int status, int bounce, char *DestFolder, char *forward)
 {
-	char           *revision = "$Revision: 2.45 $";
+	char           *revision = "$Revision: 2.46 $";
 	char           *ptr, *mda;
 	char            MaildirFolder[MAX_BUFF], XFilter[MAX_BUFF];
 	pid_t           pid;
