@@ -1,5 +1,8 @@
 /*
  * $Log: vcfilter.c,v $
+ * Revision 2.27  2011-06-20 21:27:47+05:30  Cprogrammer
+ * added description on |program
+ *
  * Revision 2.26  2010-08-16 21:14:25+05:30  Cprogrammer
  * skip creating Maildir/vfilter file for prefilt & postfilt users
  *
@@ -87,7 +90,7 @@
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vcfilter.c,v 2.26 2010-08-16 21:14:25+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: vcfilter.c,v 2.27 2011-06-20 21:27:47+05:30 Cprogrammer Stab mbhangui $";
 #endif
 
 #ifdef VFILTER
