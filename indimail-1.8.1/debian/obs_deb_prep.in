@@ -71,6 +71,13 @@ do
 	if [ " $i" = " bogofilter-"$bogofilter_version"" -o " $i" = " fetchmail-"$fetchmail_version"" ] ; then
 		continue
 	fi
+	if [ " $i" = " indimail-"$version"" ] ; then
+		if [ -f ../SOURCES/$i.patch.gz ] ; then
+			echo "applying patch for $i"
+			gunzip -c ../SOURCES/$i.patch.gz | patch -p0 > /dev/null
+			continue
+		fi
+	fi
 	if [ " $i" = " courier-imap-"$courier_version"" ] ; then
 		if [ -f ../SOURCES/$i.patch.gz ] ; then
 			echo "applying patch for $i"
