@@ -1,5 +1,8 @@
 /*
  * $Log: vauth_getpw.c,v $
+ * Revision 2.30  2011-06-20 22:05:12+05:30  Cprogrammer
+ * fix using password cache with PWSTRUCT when a different user is specified
+ *
  * Revision 2.29  2008-11-07 10:06:30+05:30  Cprogrammer
  * removed flushpw
  *
@@ -160,7 +163,7 @@
 #include <mysqld_error.h>
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vauth_getpw.c,v 2.29 2008-11-07 10:06:30+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: vauth_getpw.c,v 2.30 2011-06-20 22:05:12+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #include <stdlib.h>
@@ -175,8 +178,8 @@ static char     _cacheSwitch = 1;
 struct passwd  *
 vauth_getpw(char *user, char *domain)
 {
-	char           *in_domain, *domstr, *pwstruct, *real_domain;
-	int             mem_size, row_count, pass, err;
+	char           *in_domain, *domstr, *pwstruct, *real_domain, *ptr;
+	int             mem_size, row_count, pass, err, dom_len;
 	static struct passwd pwent;
 	static char     IUser[MAX_BUFF], IPass[MAX_BUFF], IGecos[MAX_BUFF];
 	static char     IDir[MAX_BUFF], IShell[MAX_BUFF];
@@ -188,9 +191,10 @@ vauth_getpw(char *user, char *domain)
 #endif
 
 	if (!domain || !*domain || !user || !*user)
-		return((struct passwd *) 0);
+		return ((struct passwd *) 0);
 	scopy(_user, user, MAX_BUFF);
-	scopy(_domain, domain, MAX_BUFF);
+	for (ptr = domain, dom_len = 0;*ptr;ptr++, dom_len++);
+	scopy(_domain, domain, dom_len + 1);
 	lowerit(_user);
 	lowerit(_domain);
 	if (!pwent.pw_name) /*- first time */
@@ -212,7 +216,20 @@ vauth_getpw(char *user, char *domain)
 #endif
 	is_inactive = userNotFound = is_overquota = 0;
 	if ((pwstruct = (char *) getenv("PWSTRUCT")))
-		return(strToPw(pwstruct, slen(pwstruct) + 1));
+	{
+		for (ptr = pwstruct;*ptr && *ptr != '@';ptr++);
+		if (*ptr == '@')
+		{
+			*ptr = 0;
+			if (!strncmp(_user, pwstruct, MAX_BUFF) && !strncmp(_domain, ptr + 1, dom_len))
+			{
+				*ptr = '@';
+				return (strToPw(pwstruct, slen(pwstruct) + 1));
+			}
+			*ptr = '@';
+		} else
+			return (strToPw(pwstruct, slen(pwstruct) + 1));
+	}
 	if (vauth_open((char *) 0))
 		return ((struct passwd *) 0);
 	if (site_size == SMALL_SITE)
