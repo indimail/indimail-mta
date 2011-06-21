@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail.spec.in,v 2.223 2011-06-15 12:28:28+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 2.224 2011-06-20 21:32:42+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %define _unpackaged_files_terminate_build 1
 
@@ -364,6 +364,15 @@ do
 	fi
 	if [ -d $i ] ; then
 %if %build_on_obs == 1
+		if [ " $i" = " %{name}-%{version}" ] ; then
+			if [ -f ../SOURCES/%{name}-%{version}.patch ] ; then
+				patch -p0 < ../SOURCES/%{name}-%{version}.patch
+				continue
+			elif [ -f ../SOURCES/%{name}-%{version}.patch.gz ] ; then
+				gunzip -c ../SOURCES/%{name}-%{version}.patch.gz | patch -p0
+				continue
+			fi
+		fi
 		#
 		# Apply patch picked up from indimail.sourceforge.net
 		#
@@ -1502,6 +1511,8 @@ fi
 %attr(444,root,qmail)                   %{_prefix}/man/cat[1,4,5,7,8]/*
 
 %attr(444,root,qmail)                   %{_prefix}/doc/HOWTO.sharedmaildir
+%attr(444,root,qmail)                   %{_prefix}/doc/README.indimail
+%attr(444,root,qmail)                   %{_prefix}/doc/README.filters
 %attr(444,root,qmail)                   %{_prefix}/doc/README.qmail
 %attr(444,root,qmail)                   %{_prefix}/doc/README.auth
 %attr(444,root,qmail)                   %{_prefix}/doc/README.clamav
