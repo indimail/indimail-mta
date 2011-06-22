@@ -1051,6 +1051,10 @@ open_command(char *command, int *write_fd)
 	case 0:
 		if (getenv("QHPSI"))
 			unsetenv("QQEH");
+		if (getenv("RPLINE"))
+			unsetenv("RPLINE");
+		if (getenv("DTLINE"))
+			unsetenv("RPLINE");
 		close(pim[1]);
 		if (dup2(pim[0], 0) == -1)
 			_exit(-1);

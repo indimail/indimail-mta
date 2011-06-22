@@ -689,6 +689,9 @@ doAlias(char *dir, char *user, char *domain, mdir_t MsgSize)
 
 #ifdef VALIAS
 	/*- process valiases if configured */
+	if ((ptr =getenv("DOALIAS")) && atoi(*ptr))
+		return (0);
+	putenv("DOALIAS=1")
 	if (process_valias(user, domain, MsgSize))
 		return(1);
 #endif
