@@ -1,5 +1,8 @@
 /*
  * $Log: vdelivermail.c,v $
+ * Revision 2.57  2011-06-22 22:41:10+05:30  Cprogrammer
+ * skip alias if vdelivermail is recursively called
+ *
  * Revision 2.56  2011-06-02 20:25:41+05:30  Cprogrammer
  * defer overquota mails when deliver_mail() returns -5
  *
@@ -252,7 +255,7 @@
 #include <sys/wait.h>
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vdelivermail.c,v 2.56 2011-06-02 20:25:41+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: vdelivermail.c,v 2.57 2011-06-22 22:41:10+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 /*- Globals */
@@ -688,12 +691,14 @@ doAlias(char *dir, char *user, char *domain, mdir_t MsgSize)
 	int             ret = 0;
 
 #ifdef VALIAS
-	/*- process valiases if configured */
-	if ((ptr =getenv("DOALIAS")) && atoi(*ptr))
+	if ((ptr =getenv("NOALIAS")) && *ptr > '0')
 		return (0);
-	putenv("DOALIAS=1")
+	/*- process valiases if configured */
 	if (process_valias(user, domain, MsgSize))
+	{
+		putenv("NOALIAS=1")
 		return(1);
+	}
 #endif
 	/*- format the file name */
 	snprintf(tmpbuf, BUFF_SIZE, "%s/.qmail", dir);
@@ -744,6 +749,7 @@ doAlias(char *dir, char *user, char *domain, mdir_t MsgSize)
 	/*-
 	 * A Blank .qmail file will result in mails getting blackholed
 	 */
+	putenv("NOALIAS=2")
 	return (1);
 }
 

@@ -1,5 +1,8 @@
 /*
  * $Log: deliver_mail.c,v $
+ * Revision 2.55  2011-06-22 22:30:52+05:30  Cprogrammer
+ * unset RPLINE, DTLINE before calling external program
+ *
  * Revision 2.54  2011-06-03 22:10:10+05:30  Cprogrammer
  * added comment for the return status of deliver_mail()
  *
@@ -190,7 +193,7 @@
 #endif
 
 #ifndef	lint
-static char     sccsid[] = "$Id: deliver_mail.c,v 2.54 2011-06-03 22:10:10+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: deliver_mail.c,v 2.55 2011-06-22 22:30:52+05:30 Cprogrammer Stab mbhangui $";
 #endif
 
 /*- Function Prototypes */
@@ -1054,7 +1057,7 @@ open_command(char *command, int *write_fd)
 		if (getenv("RPLINE"))
 			unsetenv("RPLINE");
 		if (getenv("DTLINE"))
-			unsetenv("RPLINE");
+			unsetenv("DTLINE");
 		close(pim[1]);
 		if (dup2(pim[0], 0) == -1)
 			_exit(-1);
