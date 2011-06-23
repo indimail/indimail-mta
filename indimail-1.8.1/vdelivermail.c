@@ -696,7 +696,7 @@ doAlias(char *dir, char *user, char *domain, mdir_t MsgSize)
 	/*- process valiases if configured */
 	if (process_valias(user, domain, MsgSize))
 	{
-		putenv("NOALIAS=1")
+		putenv("NOALIAS=1");
 		return(1);
 	}
 #endif
@@ -749,7 +749,7 @@ doAlias(char *dir, char *user, char *domain, mdir_t MsgSize)
 	/*-
 	 * A Blank .qmail file will result in mails getting blackholed
 	 */
-	putenv("NOALIAS=2")
+	putenv("NOALIAS=2");
 	return (1);
 }
 
