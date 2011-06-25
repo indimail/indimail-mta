@@ -1,5 +1,8 @@
 /*
  * $Log: deliver_mail.c,v $
+ * Revision 2.56  2011-06-24 16:03:00+05:30  Cprogrammer
+ * do not unset DTLINE, RPLINE for preline, condtomaildir, qsmhook
+ *
  * Revision 2.55  2011-06-22 22:30:52+05:30  Cprogrammer
  * unset RPLINE, DTLINE before calling external program
  *
@@ -193,7 +196,7 @@
 #endif
 
 #ifndef	lint
-static char     sccsid[] = "$Id: deliver_mail.c,v 2.55 2011-06-22 22:30:52+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: deliver_mail.c,v 2.56 2011-06-24 16:03:00+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 /*- Function Prototypes */
@@ -1054,10 +1057,14 @@ open_command(char *command, int *write_fd)
 	case 0:
 		if (getenv("QHPSI"))
 			unsetenv("QQEH");
-		if (getenv("RPLINE"))
-			unsetenv("RPLINE");
-		if (getenv("DTLINE"))
-			unsetenv("DTLINE");
+		if (!strstr(cmmd, "preline") && !strstr(cmmd, "condtomaildir") 
+			&& !strstr(cmmd, "qsmhook"))
+		{
+			if (getenv("RPLINE"))
+				unsetenv("RPLINE");
+			if (getenv("DTLINE"))
+				unsetenv("DTLINE");
+		}
 		close(pim[1]);
 		if (dup2(pim[0], 0) == -1)
 			_exit(-1);
