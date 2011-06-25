@@ -1,6 +1,6 @@
     Do not read this without reading INSTALL-@version@. This is a important file. Most users
     in my experience have got stuck with MySQL installation and configuration. Following
-    are the most common issues that users have experienced installing IndiMail
+    are the three most common issues that users have experienced installing IndiMail
 
     1. MySQL version : As far as possible use mysql 5.1.x or greater. If you use an
        unsupported version of MySQL, you might face the following problems
@@ -54,13 +54,14 @@
     # chkconfig mysqld off (for Ubuntu : update-rc.d -f mysql remove)
     # /etc/init.d/mysqld stop
 
-    Some operating systems also use '/etc/rc.local' or '/etc/init.d/boot.local' to start additional
-    services on startup. You must remove any invocation of mysqld_safe from these scripts.
+    Some operating systems also use '/etc/rc.local' or '/etc/init.d/boot.local' to start
+    additional services on startup. You must remove any invocation of mysqld_safe from
+    these scripts.
 
     Create service in supervise to start mysqld
-    # @indimaildir@/sbin/svctool --mysql=3306 --servicedir=/service --mysqlPrefix=@mysql_prefix@ \
-        --databasedir=@indimaildir@/mysqldb --config=@indimaildir@/etc/indimail.cnf \
-        --default-domain=indimail.org \
+    # @indimaildir@/sbin/svctool --mysql=3306 --servicedir=/service \
+        --mysqlPrefix=@mysql_prefix@ --databasedir=@indimaildir@/mysqldb \
+        --config=@indimaildir@/etc/indimail.cnf --default-domain=indimail.org \
         --model=small --no-of-cpu=2 
 
     ##### STEP 2  ## MySQL Database Creation ##################
@@ -93,8 +94,8 @@
        Method 1 - Using svctool
        ------------------------
        # @indimaildir@/sbin/svctool --config=mysqldb --mysqlPrefix=@mysql_prefix@ \
-           --databasedir=@indimaildir@/mysqldb --default-domain=indimail.org --base_path=/home/mail \
-           --stdout | mysql -u user -ppassword
+           --databasedir=@indimaildir@/mysqldb --default-domain=indimail.org \
+           --base_path=/home/mail --stdout | mysql -u user -ppassword
 
        Create a link to existing MySQL config file
        # ln -sf /etc/my.cnf /etc/indimail.cnf
