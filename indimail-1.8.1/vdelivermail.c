@@ -1,5 +1,8 @@
 /*
  * $Log: vdelivermail.c,v $
+ * Revision 2.58  2011-06-23 20:01:57+05:30  Cprogrammer
+ * fixed setting of NOALIAS
+ *
  * Revision 2.57  2011-06-22 22:41:10+05:30  Cprogrammer
  * skip alias if vdelivermail is recursively called
  *
@@ -255,7 +258,7 @@
 #include <sys/wait.h>
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vdelivermail.c,v 2.57 2011-06-22 22:41:10+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: vdelivermail.c,v 2.58 2011-06-23 20:01:57+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 /*- Globals */
@@ -690,15 +693,12 @@ doAlias(char *dir, char *user, char *domain, mdir_t MsgSize)
 	char           *ptr;
 	int             ret = 0;
 
-#ifdef VALIAS
 	if ((ptr =getenv("NOALIAS")) && *ptr > '0')
 		return (0);
+#ifdef VALIAS
 	/*- process valiases if configured */
 	if (process_valias(user, domain, MsgSize))
-	{
-		putenv("NOALIAS=1");
 		return(1);
-	}
 #endif
 	/*- format the file name */
 	snprintf(tmpbuf, BUFF_SIZE, "%s/.qmail", dir);
@@ -721,8 +721,10 @@ doAlias(char *dir, char *user, char *domain, mdir_t MsgSize)
 			ptr = process_dir(qmail_line, indimailuid, indimailgid);
 		else
 			ptr = qmail_line;
+		putenv("NOALIAS=2");
 		ret = deliver_mail(ptr, MsgSize, "AUTO", indimailgid, indimailgid, domain,
 			&MailQuotaSize, &MailQuotaCount);
+		unsetenv("NOALIAS");
 		if (ret == -1 || ret == -4)
 		{
 			if (ret == -1)
@@ -749,7 +751,6 @@ doAlias(char *dir, char *user, char *domain, mdir_t MsgSize)
 	/*-
 	 * A Blank .qmail file will result in mails getting blackholed
 	 */
-	putenv("NOALIAS=2");
 	return (1);
 }
 
@@ -1035,7 +1036,9 @@ process_valias(char *user, char *domain, mdir_t MsgSize)
 			break;
 		if (tmpstr[0] == '/')
 			tmpstr = process_dir(tmpstr, indimailuid, indimailgid);
+		putenv("NOALIAS=1");
 		ret = deliver_mail(tmpstr, MsgSize, "AUTO", indimailuid, indimailgid, domain, &MailQuotaSize, &MailQuotaCount);
+		unsetenv("NOALIAS");
 		if (ret == -1 || ret == -4)
 		{
 			if (status++)
