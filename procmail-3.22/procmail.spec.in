@@ -1,0 +1,51 @@
+%define _prefix            @prefix@
+
+Summary: procmail mail delivery agent
+Name: procmail
+Version: @VERSION@
+Release: 1
+License: GPLv3
+Group: Daemons
+Source:  http://downloads.sourceforge.net/indimail/%{name}-%{version}.tar.gz
+BuildRoot: %(mktemp -ud %{_tmppath}/%{name}-%{version}-%{release}-XXXXXX)
+Packager: Bruce Guenter <bruce.guenter@qcc.sk.ca>
+
+%description
+Most mail servers such as sendmail need to have a local delivery agent.
+Procmail can be used as the local delivery agent for you mail server.  It
+supports a rich command set that allows you to pre-sort, archive, or re-mail
+incoming mail automatically.  SmartList also needs procmail to operate.
+
+%prep
+%setup
+
+%build
+%if 0%{?mandriva_version} > 2009
+	autoreconf -fi
+%endif
+%configure --prefix=%{_prefix} --mandir=%{_prefix}/man \
+	--sysconfdir=%{_prefix}/etc \
+	--enable-sendmail-prog=%{_prefix}/bin/sendmail
+
+%install
+[ "$RPM_BUILD_ROOT" != "/" ] && %{__rm} -fr $RPM_BUILD_ROOT
+%{__make} -s DESTDIR=%{buildroot}
+%{__make} -s DESTDIR=%{buildroot} install-strip
+
+%files
+%dir %attr(555,root,qmail)        %{_prefix}
+%dir %attr(555,root,qmail)        %{_prefix}/bin
+%dir %attr(555,root,qmail)        %{_prefix}/etc
+%dir %attr(555,root,qmail)        %{_prefix}/man
+%dir %attr(555,root,qmail)        %{_prefix}/man/man1
+%dir %attr(555,root,qmail)        %{_prefix}/man/man5
+
+%attr(4511,root,root)              %{_prefix}/bin/procmail
+%attr(555,root,root)               %{_prefix}/bin/lockfile
+%attr(555,root,root)               %{_prefix}/bin/formail
+%attr(444,root,root)               %{_prefix}/etc/procmail_perm_list
+%defattr(-,root,root)
+%doc %{_prefix}/man/*/*
+%doc [A-Z]* examples
+
+%changelog

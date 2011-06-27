@@ -1,0 +1,46 @@
+prefix=@prefix@
+version=@version@
+#
+
+all: rules postinst postrm debian.tar.gz dummy.tar.gz  \
+	procmail-Debian_5.0.dsc \
+	procmail-Debian_6.0.dsc \
+	procmail-xUbuntu_11.04.dsc \
+	procmail-xUbuntu_10.10.dsc \
+	procmail-xUbuntu_10.04.dsc \
+	procmail-xUbuntu_9.10.dsc \
+	procmail-xUbuntu_8.04.dsc
+
+clean:
+	/bin/rm -f rules postinst postrm *.dsc debian.tar.gz dummy.tar.gz _service
+
+edit = sed \
+	-e 's,@version\@,$(version),g' \
+	-e 's,@prefix\@,$(prefix),g'
+
+rules: rules.in
+	$(edit) $@.in > $@; chmod +x $@;
+postinst: postinst.in
+	$(edit) $@.in > $@;
+postrm: postrm.in
+	$(edit) $@.in > $@;
+procmail-Debian_5.0.dsc: procmail-Debian_5.0.dsc.in
+	$(edit) $@.in > $@
+procmail-Debian_6.0.dsc: procmail-Debian_6.0.dsc.in
+	$(edit) $@.in > $@
+procmail-xUbuntu_11.04.dsc: procmail-xUbuntu_11.04.dsc.in
+	$(edit) $@.in > $@
+procmail-xUbuntu_10.10.dsc: procmail-xUbuntu_10.10.dsc.in
+	$(edit) $@.in > $@
+procmail-xUbuntu_10.04.dsc: procmail-xUbuntu_10.04.dsc.in
+	$(edit) $@.in > $@
+procmail-xUbuntu_9.10.dsc: procmail-xUbuntu_9.10.dsc.in
+	$(edit) $@.in > $@
+procmail-xUbuntu_8.04.dsc: procmail-xUbuntu_8.04.dsc.in
+	$(edit) $@.in > $@
+_service: _service.in
+	$(edit) $@.in > $@
+dummy.tar.gz: README
+	tar cf - README |gzip > $@
+debian.tar.gz: copyright rules control changelog postinst postrm compat
+	tar cf - copyright rules postinst postrm control changelog compat |gzip > $@
