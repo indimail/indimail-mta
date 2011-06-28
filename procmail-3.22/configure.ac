@@ -30,7 +30,6 @@ case "$host" in
 	CFLAGS="$CFLAGS -O4 -fPIC"
 	;;
 *-*-linux*)
-	AC_LIB_PREPARE_MULTILIB
 	INSTALL="/usr/bin/install -c"
 	if test x"$FAKED_MODE" = x
 	then
