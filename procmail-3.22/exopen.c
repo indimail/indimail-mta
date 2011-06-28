@@ -130,8 +130,13 @@ unique(full, p, len, mode, verbos, flags)
 #endif
 	while ((!i || errno != ENOENT ||	/* casually check if it already exists */
 			(0 > (i = ropen(full, O_WRONLY | O_CREAT | O_EXCL, mode)) && errno == EEXIST)) && (i = -1, retry--));
-	if (flags & doCHOWN && didnice)
-		nice(nicediff);			/* put back the priority to the old level */
+	if (flags & doCHOWN && didnice) /* put back the priority to the old level */
+	{
+		if (nice(nicediff) == -1)
+		{
+			perror("nice");
+		}
+	}
 	if (i < 0) {
 		if (verbos)				/* this error message can be confusing */
 			writeerr(full);		/* for casual users */
@@ -162,9 +167,7 @@ unique(full, p, len, mode, verbos, flags)
 	return 1;
 }
 
-					 /*
-					  * rename MUST fail if already existent 
-					  */
+/* rename MUST fail if already existent */
 int
 myrename(old, newn)
 	const char     *const old, *const newn;

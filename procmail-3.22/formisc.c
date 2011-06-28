@@ -222,7 +222,10 @@ startprog(argv)
 	}
 	if (nrtotal > 0)
 		nrtotal--;				/* count it */
-	dup(oldstdout);
+	if (dup(oldstdout)) {
+		perror("pipe");
+		return;
+	}
 	if (*argv) {				/* do we have to start a program at all? */
 		int             poutfd[2];
 		static int      children;
@@ -236,7 +239,10 @@ startprog(argv)
 			while (*chp == ' ')
 				*chp++ = '0';
 		}
-		pipe(poutfd);
+		if (pipe(poutfd)) {
+			perror("pipe");
+			return;
+		}
 		; {
 			int             maxchild = childlimit ? childlimit : (unsigned long) children * CHILD_FACTOR, excode;
 			while (children && waitpid((pid_t) - 1, &excode, WNOHANG) > 0)
@@ -257,7 +263,10 @@ startprog(argv)
 			close(STDIN);
 			close(oldstdout);
 			close(PWRO);
-			dup(PRDO);
+			if (dup(PRDO)) {
+				perror("dup");
+				return;
+			}
 			close(PRDO);
 			shexec(argv);
 		}
