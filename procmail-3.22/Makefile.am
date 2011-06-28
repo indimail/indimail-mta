@@ -7,7 +7,8 @@ DEVNULL = /dev/null
 #	   #-Wimplicit -Wshadow -Wid-clash-6 #-Wuninitialized
 #
 MOSTLYCLEANFILES=man/*.1 man/*.5 man/man.sed.* man/man.sed procmail-@VERSION@-rpmlintrc \
-				 procmail_perm_list
+				 procmail_perm_list formail.1 lockfile.1 procmail.1 \
+				 procmailex.5 procmailrc.5 procmailsc.5
 
 noinst_SCRIPTS = procmail.spec procmail-@VERSION@-rpmlintrc
 
