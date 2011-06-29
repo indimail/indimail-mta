@@ -1,5 +1,8 @@
 /*
- * $Log: $
+ * $Log: smtp_plugin.c,v $
+ * Revision 1.1  2011-06-29 21:56:13+05:30  Cprogrammer
+ * Initial revision
+ *
  */
 #include "smtp_plugin.h"
 
@@ -17,7 +20,7 @@ int
 from_plug_1(char *remoteip, char *from, char **mesg)
 {
 	*mesg = "530 denied by plugin (#5.7.1)\r\n";
-	return (1);
+	return (0);
 }
 
 int
