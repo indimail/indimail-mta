@@ -6,9 +6,12 @@ Version: 3.22
 Release: 1
 License: GPLv3
 Group: Daemons
-Source:  http://downloads.sourceforge.net/indimail/%{name}-%{version}.tar.gz
-BuildRoot: %(mktemp -ud %{_tmppath}/%{name}-%{version}-%{release}-XXXXXX)
+Source0: http://downloads.sourceforge.net/indimail/%{name}-%{version}.tar.gz
+Source1: http://downloads.sourceforge.net/indimail/%{name}-%{version}-rpmlintrc
 Packager: Bruce Guenter <bruce.guenter@qcc.sk.ca>
+BuildRequires: -post-build-checks  
+Requires: coreutils grep /bin/sh glibc
+BuildRoot: %(mktemp -ud %{_tmppath}/%{name}-%{version}-%{release}-XXXXXX)
 
 %description
 Most mail servers such as sendmail need to have a local delivery agent.
@@ -21,7 +24,12 @@ incoming mail automatically.  SmartList also needs procmail to operate.
 
 %build
 %if 0%{?mandriva_version} > 2009
-	autoreconf -fi
+	/bin/rm m4/*
+	aclocal
+	libtoolize --force
+	autoheader
+	autoconf
+	automake
 %endif
 %configure --prefix=%{_prefix} --mandir=%{_prefix}/man \
 	--sysconfdir=%{_prefix}/etc \
