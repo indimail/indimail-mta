@@ -8,7 +8,7 @@ License: GPLv3
 Group: Daemons
 Source0: http://downloads.sourceforge.net/indimail/%{name}-%{version}.tar.gz
 Source1: http://downloads.sourceforge.net/indimail/%{name}-%{version}-rpmlintrc
-Packager: Bruce Guenter <bruce.guenter@qcc.sk.ca>
+Packager: Manvendra Bhangui <manvendra@indimail.org>
 BuildRequires: -post-build-checks  
 Requires: coreutils grep /bin/sh glibc openssl
 BuildRoot: %(mktemp -ud %{_tmppath}/%{name}-%{version}-%{release}-XXXXXX)
@@ -30,10 +30,14 @@ incoming mail automatically.  SmartList also needs procmail to operate.
 	autoheader
 	autoconf
 	automake
-%endif
+./configure --prefix=%{_prefix} --mandir=%{_prefix}/man \
+	--sysconfdir=%{_prefix}/etc \
+	--enable-sendmail-prog=%{_prefix}/bin/sendmail
+%else
 %configure --prefix=%{_prefix} --mandir=%{_prefix}/man \
 	--sysconfdir=%{_prefix}/etc \
 	--enable-sendmail-prog=%{_prefix}/bin/sendmail
+%endif
 
 %install
 [ "$RPM_BUILD_ROOT" != "/" ] && %{__rm} -fr $RPM_BUILD_ROOT
