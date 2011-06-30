@@ -1,5 +1,8 @@
 /*
  * $Log: indiversion.c,v $
+ * Revision 2.130  2011-06-30 20:40:09+05:30  Cprogrammer
+ * added ismaildup()
+ *
  * Revision 2.129  2011-04-08 17:26:38+05:30  Cprogrammer
  * added HAVE_CONFIG_H
  *
@@ -507,7 +510,7 @@
 #endif
 
 #ifndef	lint
-static char     sccsid[] = "$Id: indiversion.c,v 2.129 2011-04-08 17:26:38+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: indiversion.c,v 2.130 2011-06-30 20:40:09+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 void            getversion_indimail_settings_c();
@@ -787,6 +790,7 @@ void            getversion_in_crypt_c();
 void            getversion_mysql_query_c();
 void            getversion_unsetenv_c();
 void            getversion_post_handle_c();
+void            getversion_ismaildup_c();
 void            getversion();
 
 #ifdef MAIN
@@ -886,6 +890,7 @@ char           *sbin_program_list[] =
 	"mail_report",
 	"mgmtpass",
 	"vserverinfo",
+	"ismaildup",
 	"tls-cert-check",
 	0
 };
@@ -1209,6 +1214,7 @@ getversion(char *id)
 	getversion_set_mysql_options_c();
 	getversion_error_stack_c();
 	getversion_post_handle_c();
+	getversion_ismaildup_c();
 	getversion_in_crypt_c();
 	getversion_mysql_query_c();
 	getversion_unsetenv_c();

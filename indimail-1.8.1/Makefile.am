@@ -71,7 +71,7 @@ getAddressBook.c getDbLock.c getEnvConfig.c getFreeFS.c GetIndiId.c getindimail.
 getlastauth.c get_local_hostid.c get_local_ip.c get_localtime.c getmailingList.c \
 get_Mplexdir.c getpeer.c GetPrefix.c GetSmtproute.c get_smtp_service_port.c \
 hostcntrl_select.c host_in_locals.c in_crypt.c inc_dir.c inc_dir_control.c indisub.c \
-init_dir_control.c inquery.c is_alias_domain.c is_already_running.c \
+init_dir_control.c inquery.c is_alias_domain.c is_already_running.c ismaildup.c \
 is_distributed_domain.c islocalif.c is_mailing_list.c isnum.c is_user_present.c \
 isvalid_domain.c isvirtualdomain.c layout.c limits.c loadbalance.c LoadBMF.c \
 LoadDbinfo.c lockfile.c lockTable.c Login_Tasks.c logmysql.c lowerit.c \
@@ -139,7 +139,7 @@ lib_deps: configure Makefile
 indimailbin_PROGRAMS = crc crcdiff dbinfo displaytop hashtable hostcntrl indiversion \
 	printdir proxyimap proxypop3 resetquota sslerator vacation vaddaliasdomain vadddomain \
 	vadduser vadduserl valias vatrn vbulletin vcalias vcfilter vdeldomain vdeluser \
-	vdominfo vgroup vhostid vipmap vlimit vmoduser vmoveuser vpasswd vpriv \
+	vdominfo vgroup vhostid vipmap vlimit vmoduser vmoveuser vpasswd vpriv ismaildup \
 	vproxy vrenamedomain vrenameuser vsetuserquota vsmtp vuserinfo crypt echo
 indimailsbin_PROGRAMS = adminclient chowkidar cindimail clearopensmtp config_settings \
 	copyemail execmysql hostsync indisrvr initsvc inlookup inquerytest install_tables \
@@ -184,6 +184,10 @@ vdominfo_LDADD = @auth_libs@
 
 vdelivermail_SOURCES = vdelivermail.c 
 vdelivermail_LDADD = @auth_libs@
+
+ismaildup_SOURCES = ismaildup.c 
+ismaildup_LDADD = @auth_libs@
+ismaildup_CFLAGS = -DMAIN
 
 printdir_SOURCES = printdir.c 
 printdir_LDADD = @auth_libs@
@@ -454,7 +458,7 @@ dec_dir_control.lo: indimail.h config.h
 del_control.lo: indimail.h config.h
 del_domain_assign.lo: indimail.h config.h
 deldomain.lo: indimail.h config.h
-deliver_mail.lo: indimail.h config.h
+deliver_mail.lo: indimail.h config.h ismaildup.h
 delunreadmails.lo: indimail.h config.h
 del_user_assign.lo: indimail.h config.h
 delusercntrl.lo: indimail.h config.h
