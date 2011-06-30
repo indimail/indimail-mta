@@ -575,6 +575,7 @@ MAKE_SEEKABLE     |qmail-multi  |used    |If set, the pipe used by various
                   |spawn-filter |        |programs to communicate is made
                   |vdelivermail |        |seekable. This improves the performance
                   |autoresponder|        |of filters.
+                  |ismaildup    |        |
 ------------------|-------------|--------|----------------------------------------
 QMAILLOCAL        |spawn-filter |used    |The mda to call for local deliveries
                   |             |        |(default qmail-local if not defined)
@@ -904,6 +905,10 @@ MAILSIZE_LIMIT    |             |        |Max total size of mail delivery/day fo
                   |             |        |a user.
 OVERQUOTA_MAILSIZE|             |        |Maximum allowed size of mail when user
                   |             |        |is over quota
+ELIMINATE_DUPS    |vdelivermail |used    |If set, duplicate emails are discarded
+                  |ismaildup    |        |
+DUPLICATE_INTERVAL|vdelivermail |used    |Interval within which same email will
+                  |ismaildup    |        |be discarded as duplicate
 HOLDOVERQUOTA     |             |        |If set, vdelivermail will defer mails
                   |             |        |when user runs out of quota. The command
                   |             |        |defined by OVERQUOTA_CMD will be run.
@@ -1422,6 +1427,9 @@ vfilter(8)         - Filter mail before delivery using vfilter mechanism
 .sp -1
 .IP \n+[step]
 vdelivermail(8)    - Deliver mails to Maildir
+.sp -1
+.IP \n+[step]
+ismaildup(1)       - Discard duplicate mails during local delivery
 .sp -1
 .IP \n+[step]
 postdel(8)         - Deliver mails to Maildir if using postfix as MTA
