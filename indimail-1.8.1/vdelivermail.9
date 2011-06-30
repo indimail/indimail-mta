@@ -144,6 +144,11 @@ By defining environment variables MAILHOST_ALERT and MAILHOST_PORT.
 .IP \n+[step]
 By creating a file mailalert.cfg in the qmail/control directory. The first line of this file should have the line host x.x.x.x where x.x.x.x is an IP address. The second line of this file should have the line port port_num where port_num is an integer.
 
+.SH Discarding Duplicate Emails
+You can discard duplicate emails received within 15 minutes, by setting \fBELIMINATE_DUPS\fR
+environment variable. You can change the default time interval of 900 seconds by setting the
+\fBDUPLICATE_INTERVAL\fR environment variable in seconds.
+
 .SH OPTIONS
 .TP
 [\fB""\fR]
@@ -204,4 +209,4 @@ for all temporary error occurs during mail delivery and without the error, the m
 .SH "SEE ALSO"
 vmoduser(1), vsetuserquota(1), vmoddomlimits(1),
 qmail-lspawn(8), spawn-filter(8), qmail-local(8),
-qmail-remote(8), maildirdeliver(1)
+qmail-remote(8), maildirdeliver(1), ismaildup(1)
