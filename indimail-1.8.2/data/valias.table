@@ -1,0 +1,5 @@
+valias
+(alias  char(40) not null,
+domain char(67) not null,
+valias_line char(254) not null,
+unique index(alias, domain, valias_line), index (alias, domain))
