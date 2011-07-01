@@ -295,7 +295,7 @@ All these alternatives work in basically the same way (communicating
 with standard server daemons to fetch mail already delivered to a
 mailbox on the server) except ETRN and ODMR.  The ETRN mode
 allows you to ask a compliant ESMTP server (such as BSD sendmail at
-release 8.8.0 or higher) to immediately open a sender-SMTP connection
+release 8.8.0 or higher or IndiMail) to immediately open a sender-SMTP connection
 to your client machine and begin forwarding any items addressed to
 your client machine in the server's queue of undelivered mail.   The
 ODMR mode requires an ODMR-capable server and works similarly to
@@ -1031,6 +1031,10 @@ identify the original envelope recipient, but you have to strip the
 \&'mbox\-userstr\-' prefix to deliver to the correct user.
 This is what this option is for.
 .TP
+.B \-O <type> | \-\-authmethod <type>
+(Keyword: authmethod; ODMR only)
+set authentication to AUTH, LOGIN or PLAIN for ODMR.
+.TP
 .B \-\-configdump
 Parse the \fI~/.fetchmailrc\fP file, interpret any command-line options
 specified, and dump a configuration report to standard output.  The
@@ -1755,6 +1759,9 @@ Disable looking for envelope address
 T}
 qvirtual	\-Q	m	T{
 Qmail virtual domain prefix to remove from user name
+T}
+authmeth   \-O \&  T{
+Set AUTH, LOGIN or PLAIN for ODMR authentication
 T}
 aka      	\&	m	T{
 Specify alternate DNS names of mailserver

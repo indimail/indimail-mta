@@ -1612,6 +1612,13 @@ This is what this option is for.
 <!-- .TP -->
 </TD></TR>
 <TR valign=top><TD colspan=2>
+<!-- .B \-O <type> | \-\-authmethod <type> -->
+<B>-O &lt;type&gt; | --authmethod &lt;type&gt;</B> </TD></TR><TR valign=top><TD width=6%>&nbsp;</TD><TD>
+(Keyword: authmethod; ODMR only)
+set authentication to AUTH, LOGIN or PLAIN for ODMR.
+<!-- .TP -->
+</TD></TR>
+<TR valign=top><TD colspan=2>
 <!-- .B \-\-configdump -->
 <B>--configdump</B> </TD></TR><TR valign=top><TD width=6%>&nbsp;</TD><TD>
 Parse the <I>~/.fetchmailrc</I> file, interpret any command-line options
@@ -2604,6 +2611,9 @@ considered a TCP/IP port number).
 </TD></TR>
 <TR valign=top>
 <TD>qvirtual</TD><TD>-Q</TD><TD>m</TD><TD>Qmail virtual domain prefix to remove from user name
+</TD></TR>
+<TR valign=top>
+<TD>authmeth</TD><TD>-O</TD><TD></TD><TD>Set AUTH, LOGIN or PLAIN for ODMR authentication
 </TD></TR>
 <TR valign=top>
 <TD>aka</TD><TD></TD><TD>m</TD><TD>Specify alternate DNS names of mailserver
