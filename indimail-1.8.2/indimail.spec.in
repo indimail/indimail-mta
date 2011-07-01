@@ -40,8 +40,8 @@
 %define pam_multi_version  1.1
 %define ucspi_version      0.88
 %define qmail_version      1.03
-%define fetchmail_version  6.3.19
-%define clamav_version     0.97
+%define fetchmail_version  6.3.20
+%define clamav_version     0.97.1
 %define fortune_version    1.1
 %define nssd_version       1.1
 %define flash_version      0.9.4
@@ -711,7 +711,7 @@ for i in adminclient chowkidar cindimail clamd clearopensmtp copyemail execmysql
 hostsync indisrvr inlookup inquerytest install_tables ipchange mail_report \
 mgmtpass postdel systpass testmra updatefile updaterules vchkpass vdelivermail \
 vdeloldusers vfilter vfstab vmoddomain vreorg vsetpass nssd vserverinfo check_getpw \
-vtable
+vtable ismaildup
 do
 	if [ -f %{buildroot}%{_prefix}/sbin/$i ] ; then
     	/usr/bin/chrpath -d %{buildroot}%{_prefix}/sbin/$i
@@ -1237,6 +1237,7 @@ fi
 %attr(555,root,qmail)                   %{_prefix}/sbin/vchkpass
 %attr(555,root,qmail)                   %{_prefix}/sbin/vsetpass
 %attr(555,root,qmail)                   %{_prefix}/sbin/vdelivermail
+%attr(555,root,qmail)                   %{_prefix}/sbin/ismaildup
 %attr(555,root,qmail)                   %{_prefix}/sbin/vdeloldusers
 %attr(555,root,qmail)                   %{_prefix}/sbin/vfilter
 %attr(555,root,qmail)                   %{_prefix}/sbin/vfstab

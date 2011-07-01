@@ -32,6 +32,7 @@ experiments
 packages
 rpmbuild
 clamav-0.97
+clamav-0.97.1
 private
 install-sh
 missing

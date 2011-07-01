@@ -209,8 +209,8 @@ I usually prefer to run privileged commands like this (so that I don't get fond 
                                . fortune-1.1        (8.4  Mb)
                                . courier-imap-4.9.3 (75   Mb)
                                . bogofilter-1.2.2   (11.6 Mb)
-                               . clamav-0.97        (600  Mb)
-                               . fetchmail-6.3.19   (10.5 Mb)
+                               . clamav-0.97.1      (600  Mb)
+                               . fetchmail-6.3.20   (10.5 Mb)
                                . iwebadmin-1.0      (3.0  Mb)
                                ------------------------------
                                  Total              (800  Mb)
@@ -614,14 +614,14 @@ the installation.
     Then do ./configure <same_parameters_as_earlier_install> ; make ; make install-strip
 
     ##### STEP 7  ##### Virus Scanner #########################
-    Install clamav MD5 605ed132b2f8e89df11064adea2b183b
+    Install clamav MD5 4f3fb74ff1098c25eef8e10721478c29
     current working directory /home/local/src
-    Download clamav package. The latest tested clamav package tested is clamav-0.97.tar.gz.
+    Download clamav package. The latest tested clamav package tested is clamav-0.97.1.tar.gz.
 
-    % wget http://downloads.sourceforge.net/clamav/clamav-0.97.tar.gz
-    % gunzip -c clamav-0.97.tar.gz | tar xf -
-    % gunzip -c indimail-@version@/patches/clamav-0.97.patch.gz | patch -p0
-    % cd clamav-0.97
+    % wget http://downloads.sourceforge.net/clamav/clamav-0.97.1.tar.gz
+    % gunzip -c clamav-0.97.1.tar.gz | tar xf -
+    % gunzip -c indimail-@version@/patches/clamav-0.97.1.patch.gz | patch -p0
+    % cd clamav-0.97.1
     % ./configure --prefix=@indimaildir@ --sysconfdir=@indimaildir@/etc \
         --with-dbdir=@indimaildir@/share/clamd \
         --libexecdir=@indimaildir@/libexec \
@@ -637,15 +637,15 @@ the installation.
     Then do ./configure <same_parameters_as_earlier_install> ; make ; make install-strip
  
     ##### STEP 8  ## Optional STEP ##### Fetchmail ############
-    Install fetchmail MD5 64519711c8533f5a34d20c9ff620d880  
+    Install fetchmail MD5 9176a9005a816946f766774bc4cbc642  
     current working directory /home/local/src
     Download the fetchmail package. The latest tested fetchmail package tested is
-    fetchmail-6.3.19.tar.bz2.
+    fetchmail-6.3.20.tar.bz2.
 
-    % wget http://download.berlios.de/fetchmail/fetchmail-6.3.19.tar.bz2
-    % bzip2 -d -c fetchmail-6.3.19.tar.bz2 | tar xf -
-    % gunzip -c indimail-@version@/patches/fetchmail-6.3.19.patch.gz | patch -p0
-    % cd fetchmail-6.3.19
+    % wget http://download.berlios.de/fetchmail/fetchmail-6.3.20.tar.bz2
+    % bzip2 -d -c fetchmail-6.3.20.tar.bz2 | tar xf -
+    % gunzip -c indimail-@version@/patches/fetchmail-6.3.20.patch.gz | patch -p0
+    % cd fetchmail-6.3.20
     % autoreconf -fi
     % ./configure --prefix=@indimaildir@ --enable-indimail \
         --enable-indimaildir=@indimaildir@ \
