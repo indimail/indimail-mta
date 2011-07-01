@@ -1,7 +1,0 @@
-addFilter("indimail.* devel-file-in-non-devel-package")
-addFilter("indimail-shared.* devel-file-in-non-devel-package")
-addFilter("indimail.* permissions-file-setuid-bit")
-addFilter("indimail-devel.* unversioned-explicit-self-provides")
-addFilter("indimail-shared.* unversioned-explicit-self-provides")
-setBadness('permissions-unauthorized-file', 0)
-setBadness('permissions-file-setuid-bit', 0)
