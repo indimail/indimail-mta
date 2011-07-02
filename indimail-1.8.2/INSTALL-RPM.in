@@ -118,6 +118,15 @@ the file you can use the following to start MySQL
 
     % sudo @indimaildir@/bin/svc -u /service/mysql.3306
 
+NOTE: Please disable MySQL from getting started up by the system by executing the
+      chkconfig command
+
+      % sudo chkconfig mysqld off
+
+If you want to use the MySQL started by the system, then do not delete the file
+/service/mysql.3306/down and do not issue the above svc command. In such a case
+you will need to tell IndiMail on how to connect to MySQL.
+
 The information for IndiMail to connect to IndiMail is maintained in the file
 
 @indimaildir@/control/host.mysql    # for non-clustered setup
