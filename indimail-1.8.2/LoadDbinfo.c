@@ -1,5 +1,8 @@
 /*
  * $Log: LoadDbinfo.c,v $
+ * Revision 2.40  2011-07-02 15:13:03+05:30  Cprogrammer
+ * fix null dbinfo being returned with no entries in assign file
+ *
  * Revision 2.39  2010-05-01 14:11:41+05:30  Cprogrammer
  * initialize fd, last_error, failed_attempts
  *
@@ -131,7 +134,7 @@
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: LoadDbinfo.c,v 2.39 2010-05-01 14:11:41+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: LoadDbinfo.c,v 2.40 2011-07-02 15:13:03+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #include <sys/types.h>
@@ -673,7 +676,7 @@ localDbinfo(int *total, DBINFO ***rhosts)
 		fprintf(stderr, "fopen: %s: %s\n", TmpBuf, strerror(errno));
 		return ((DBINFO **) 0);
 	}
-	/*- +testindi.com-:testindi.com:508:508:/var/indimail/domains/testindi.com:-:: -*/
+	/*- +indimail.org-:indimail.org:508:508:/var/indimail/domains/indimail.org:-:: -*/
 	for (count = 0;;)
 	{
 		if (!fgets(TmpBuf, MAX_BUFF, fp))
@@ -707,11 +710,6 @@ localDbinfo(int *total, DBINFO ***rhosts)
 				continue;
 		}
 		count++;
-	}
-	if (!count)
-	{
-		fclose(fp);
-		return (*rhosts);
 	}
 	*mysqlhost_buf = 0;
 	if ((mysqlhost = (char *) getenv("MYSQL_HOST")) != (char *) 0)
@@ -769,6 +767,47 @@ localDbinfo(int *total, DBINFO ***rhosts)
 	if (!mysql_port && !(mysql_port = (char *) getenv("MYSQL_VPORT")))
 		mysql_port = "0";
 	getEnvConfigStr(&mysql_database, "MYSQL_DATABASE", MYSQL_DATABASE);
+	if (!count)
+	{
+		fclose(fp);
+		if (total)
+		{
+			relayhosts = (DBINFO **) realloc(relayhosts, sizeof(DBINFO *) * (*total + 2));
+			rhostsptr = relayhosts + *total;
+			for (tmpPtr = rhostsptr;tmpPtr < relayhosts + *total + 2;tmpPtr++)
+				*tmpPtr = (DBINFO *) 0;
+			(*total) += 1;
+		} else
+		{
+			relayhosts = (DBINFO **) calloc(1, sizeof(DBINFO *) * 2);
+			rhostsptr = relayhosts;
+		} 
+		if (!((*rhostsptr) = (DBINFO *) malloc(sizeof(DBINFO))))
+		{
+			perror("malloc");
+			free(relayhosts);
+			return ((DBINFO **) 0);
+		}
+		/*- Should check virtual domains and smtproutes */
+		(*rhostsptr)->isLocal = 1;
+		(*rhostsptr)->fd = -1;
+		(*rhostsptr)->last_error = 0;
+		(*rhostsptr)->failed_attempts = 0;
+		if (!(localhost = get_local_ip()))
+			localhost = "localhost";
+		scopy((*rhostsptr)->mdahost, localhost, DBINFO_BUFF);
+		scopy((*rhostsptr)->server, mysqlhost, DBINFO_BUFF);
+		getEnvConfigStr(&ptr, "DEFAULT_DOMAIN", DEFAULT_DOMAIN);
+		scopy((*rhostsptr)->domain, ptr, DBINFO_BUFF);
+		(*rhostsptr)->port = atoi(mysql_port);
+		scopy((*rhostsptr)->database, mysql_database, DBINFO_BUFF);
+		scopy((*rhostsptr)->user, mysql_user, DBINFO_BUFF);
+		scopy((*rhostsptr)->password, mysql_passwd, DBINFO_BUFF);
+		(*rhostsptr)->distributed = 0;
+		rhostsptr++;
+		(*rhostsptr) = (DBINFO *) 0;
+		return (relayhosts);
+	}
 	if (total)
 	{
 		relayhosts = (DBINFO **) realloc(relayhosts, sizeof(DBINFO *) * (*total + count + 1));
