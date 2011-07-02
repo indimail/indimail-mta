@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail.spec.in,v 2.224 2011-06-20 21:32:42+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 2.225 2011-07-01 08:17:52+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %define _unpackaged_files_terminate_build 1
 
@@ -695,7 +695,7 @@ for i in clambc clamconf clamscan dbinfo flash freshclam hostcntrl indiversion p
 proxyimap proxypop3 resetquota sigtool vacation vaddaliasdomain vadddomain vadduser \
 vadduserl valias vatrn vbulletin vcalias vcfilter vdeldomain vdeluser vdominfo \
 vgroup vhostid vipmap vlimit vmoduser vmoveuser vpasswd vpriv sslerator \
-vproxy vrenamedomain vrenameuser vsetuserquota vsmtp vuserinfo tcpserver
+vproxy vrenamedomain vrenameuser vsetuserquota vsmtp vuserinfo tcpserver ismaildup
 do
 	if [ -f %{buildroot}%{_prefix}/bin/$i ] ; then
     	/usr/bin/chrpath -d %{buildroot}%{_prefix}/bin/$i
@@ -711,7 +711,7 @@ for i in adminclient chowkidar cindimail clamd clearopensmtp copyemail execmysql
 hostsync indisrvr inlookup inquerytest install_tables ipchange mail_report \
 mgmtpass postdel systpass testmra updatefile updaterules vchkpass vdelivermail \
 vdeloldusers vfilter vfstab vmoddomain vreorg vsetpass nssd vserverinfo check_getpw \
-vtable ismaildup
+vtable
 do
 	if [ -f %{buildroot}%{_prefix}/sbin/$i ] ; then
     	/usr/bin/chrpath -d %{buildroot}%{_prefix}/sbin/$i
@@ -1237,7 +1237,7 @@ fi
 %attr(555,root,qmail)                   %{_prefix}/sbin/vchkpass
 %attr(555,root,qmail)                   %{_prefix}/sbin/vsetpass
 %attr(555,root,qmail)                   %{_prefix}/sbin/vdelivermail
-%attr(555,root,qmail)                   %{_prefix}/sbin/ismaildup
+%attr(555,root,qmail)                   %{_prefix}/bin/ismaildup
 %attr(555,root,qmail)                   %{_prefix}/sbin/vdeloldusers
 %attr(555,root,qmail)                   %{_prefix}/sbin/vfilter
 %attr(555,root,qmail)                   %{_prefix}/sbin/vfstab
