@@ -842,7 +842,7 @@ myExit(int argc, char **argv, int status, int bounce, char *DestFolder, char *fo
 	snprintf(XFilter, sizeof(XFilter), "XFILTER=X-Filter: xFilter/IndiMail Revision %s", revision + 11);
 	if ((ptr = strrchr(XFilter, '$')))
 		*ptr = 0;
-	strncat(XFilter, "(http://mail.indi.com)", 22);
+	strncat(XFilter, "(http://www.indimail.org)", 22);
 	if (putenv(XFilter) == -1)
 	{
 		fprintf(stderr, "vfilter: putenv: %s\n", strerror(ENOMEM));

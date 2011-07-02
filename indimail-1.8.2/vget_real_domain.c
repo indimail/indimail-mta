@@ -97,7 +97,7 @@ vget_real_domain(char *domain)
 		_cacheSwitch = 1;
 #endif
 	/*
-	 * e.g. indi.com:yahoo.com:hotmail.com
+	 * e.g. indimail.org:yahoo.com:hotmail.com
 	 */
 	if ((ptr = getenv("REAL_DOMAINS")))
 	{
@@ -123,7 +123,7 @@ vget_real_domain(char *domain)
 		}
 	}
 	/*
-	 * e.g. satyam.net.in,indi.com:yahoo.co.in,yahoo.com:msn.com,hotmail.com
+	 * e.g. satyam.net.in,indimail.org:yahoo.co.in,yahoo.com:msn.com,hotmail.com
 	 */
 	if ((ptr = getenv("ALIAS_DOMAINS")))
 	{
