@@ -457,7 +457,8 @@ compile constmap.c constmap.h alloc.h case.h
 
 control.o: \
 compile control.c open.h getln.h stralloc.h gen_alloc.h \
-substdio.h error.h control.h alloc.h scan.h env.h variables.h
+substdio.h error.h control.h alloc.h scan.h env.h \
+now.h str.h variables.h
 	./compile control.c
 
 date822fmt.o: \
@@ -1126,7 +1127,7 @@ MakeArgs.o: compile MakeArgs.c alloc.h str.h alloc.h stralloc.h
 qscanq-stdin: load qscanq-stdin.o auto_qmail.o strerr.a substdio.a env.a str.a \
 timestamp.o tai.a fd.a auto_spool.o mkfn.o fmt_xpid.o open_excl.o MakeArgs.o \
 open_read.o do_ripmime.o auto_ripmime_cmd.o do_scan.o auto_scancmd.o \
-seek.a do_cleanq.o auto_cleaner.o qregex.o wildmat.o matchregex.o \
+seek.a do_cleanq.o auto_cleaner.o qregex.o wildmat.o matchregex.o now.o \
 cdb_seek.o cdb_unpack.o cdb_hash.o control.o str_diff.o variables.o \
 constmap.o case_lowerb.o byte_chr.o byte_rchr.o scan_ulong.o case_diffb.o \
 alloc.a getln.a sig.a wait.a error.a stralloc.a
@@ -1134,7 +1135,7 @@ alloc.a getln.a sig.a wait.a error.a stralloc.a
 	auto_spool.o mkfn.o fmt_xpid.o open_excl.o open_read.o do_ripmime.o \
 	auto_ripmime_cmd.o do_scan.o auto_scancmd.o seek.a do_cleanq.o \
 	auto_cleaner.o qregex.o wildmat.o control.o str_diff.o variables.o \
-	cdb_seek.o cdb_unpack.o cdb_hash.o \
+	cdb_seek.o cdb_unpack.o cdb_hash.o now.o \
 	constmap.o case_lowerb.o byte_chr.o byte_rchr.o scan_ulong.o case_diffb.o \
 	env.a strerr.a substdio.a str.a tai.a fd.a \
 	stralloc.a alloc.a getln.a sig.a wait.a error.a
@@ -1827,9 +1828,9 @@ timeoutread.h timeoutwrite.h
 
 qmail-pw2u: \
 load qmail-pw2u.o constmap.o control.o open.a getln.a case.a getopt.a \
-stralloc.a alloc.a substdio.a error.a str.a fs.a auto_usera.o \
+stralloc.a alloc.a substdio.a error.a str.a fs.a auto_usera.o now.o \
 auto_break.o auto_qmail.o envread.o str_diffn.o variables.o
-	./load qmail-pw2u constmap.o control.o open.a getln.a \
+	./load qmail-pw2u constmap.o control.o open.a getln.a now.o \
 	case.a getopt.a stralloc.a alloc.a substdio.a error.a str.a \
 	fs.a auto_usera.o auto_break.o auto_qmail.o envread.o str_diffn.o variables.o
 
@@ -1919,10 +1920,10 @@ qmail-qread: \
 load qmail-qread.o fmtqfn.o readsubdir.o date822fmt.o datetime.a \
 open.a getln.a stralloc.a alloc.a substdio.a error.a str.a fs.a \
 auto_qmail.o auto_split.o envread.o str_diffn.o variables.o control.o \
-stralloc_copy.o stralloc_cat.o
+stralloc_copy.o stralloc_cat.o now.o
 	./load qmail-qread fmtqfn.o readsubdir.o date822fmt.o \
 	control.o stralloc_copy.o stralloc_cat.o str_diffn.o \
-	auto_qmail.o auto_split.o envread.o variables.o \
+	auto_qmail.o auto_split.o envread.o variables.o now.o \
 	datetime.a open.a getln.a stralloc.a alloc.a substdio.a \
 	error.a str.a fs.a 
 
@@ -1965,15 +1966,20 @@ sig.h substdio.h control.h scan.h conf-queue
 
 spawn-filter: \
 load spawn-filter.o variables.o \
-fmt_ulong.o auto_qmail.o timeoutwrite.o byte_cr.o case_lowerb.o case_diffb.o \
-scan_ulong.o constmap.o control.o open_read.o wildmat.o qregex.o MakeArgs.o \
-matchregex.o cdb_seek.o cdb_unpack.o cdb_hash.o envrules.o error.a getln.a \
-env.a stralloc.a wait.a strerr.a str.a substdio.a alloc.a socket.lib dns.lib
-	./load spawn-filter variables.o \
-	fmt_ulong.o auto_qmail.o timeoutwrite.o byte_cr.o case_lowerb.o case_diffb.o \
-	scan_ulong.o constmap.o control.o open_read.o wildmat.o qregex.o MakeArgs.o \
-	matchregex.o cdb_seek.o cdb_unpack.o cdb_hash.o envrules.o error.a \
-	getln.a env.a stralloc.a wait.a strerr.a str.a substdio.a \
+fmt_ulong.o auto_qmail.o timeoutwrite.o byte_cr.o \
+case_lowerb.o case_diffb.o now.o scan_ulong.o constmap.o \
+control.o open_read.o wildmat.o qregex.o MakeArgs.o \
+matchregex.o cdb_seek.o cdb_unpack.o cdb_hash.o \
+envrules.o error.a getln.a env.a stralloc.a wait.a \
+strerr.a str.a substdio.a alloc.a socket.lib dns.lib
+	./load spawn-filter variables.o now.o \
+	fmt_ulong.o auto_qmail.o timeoutwrite.o \
+	byte_cr.o case_lowerb.o case_diffb.o \
+	scan_ulong.o constmap.o control.o \
+	open_read.o wildmat.o qregex.o MakeArgs.o \
+	matchregex.o cdb_seek.o cdb_unpack.o \
+	cdb_hash.o envrules.o error.a getln.a \
+	env.a stralloc.a wait.a strerr.a str.a substdio.a \
 	alloc.a `cat dns.lib socket.lib`
 
 spawn-filter.o: \
@@ -2259,7 +2265,7 @@ hasindimail.h conf-mime conf-sync conf-batv
 
 qmail-daemon: \
 load qmail-daemon.o scan_ulong.o envread.o env.o \
-control.o fmt_str.o fmt_strn.o fmt_ulong.o auto_qmail.o \
+control.o fmt_str.o fmt_strn.o fmt_ulong.o auto_qmail.o now.o \
 byte_chr.o byte_cr.o open_read.o alloc.o alloc_re.o error.o open_write.o \
 getln.o getln2.o variables.o str.a lock_exnb.o sig_catch.o \
 error_str.o sig_block.o wait_pid.o substdio.a stralloc.a
@@ -2267,7 +2273,7 @@ error_str.o sig_block.o wait_pid.o substdio.a stralloc.a
 	control.o fmt_str.o fmt_strn.o fmt_ulong.o auto_qmail.o \
 	open_read.o alloc.o alloc_re.o error.o str.a open_write.o \
 	byte_chr.o byte_cr.o getln.o getln2.o variables.o \
-	lock_exnb.o sig_catch.o \
+	lock_exnb.o sig_catch.o now.o \
 	error_str.o sig_block.o wait_pid.o substdio.a stralloc.a
 
 qmail-daemon.o: \
@@ -2284,11 +2290,13 @@ compile get_uid.c auto_uids.h strerr.h str.h
 	./compile get_uid.c
 
 qmail-showctl: \
-load qmail-showctl.o auto_uids.o control.o open.a getln.a stralloc.a dns.lib \
-strerr.a alloc.a substdio.a error.a str.a fs.a auto_qmail.o auto_break.o indimail.lib \
-auto_patrn.o auto_spawn.o auto_split.o envread.o str_diffn.o variables.o get_uid.o
+load qmail-showctl.o auto_uids.o control.o open.a getln.a \
+stralloc.a dns.lib strerr.a alloc.a substdio.a now.o \
+error.a str.a fs.a auto_qmail.o auto_break.o indimail.lib \
+auto_patrn.o auto_spawn.o auto_split.o envread.o str_diffn.o \
+variables.o get_uid.o
 	./load qmail-showctl auto_uids.o control.o auto_qmail.o \
-	auto_break.o auto_patrn.o auto_spawn.o \
+	auto_break.o auto_patrn.o auto_spawn.o now.o \
 	auto_split.o envread.o str_diffn.o variables.o get_uid.o \
 	strerr.a open.a getln.a stralloc.a alloc.a substdio.a error.a \
 	str.a fs.a `cat indimail.lib` `cat dns.lib`
@@ -2466,9 +2474,9 @@ compile qmail-start.c fd.h prot.h exit.h auto_uids.h qmail-todo.h
 
 qmail-tcpok: \
 load qmail-tcpok.o scan_ulong.o auto_qmail.o envread.o str_diffn.o variables.o \
-fmt_ulong.o control.o getln.o getln2.o \
+fmt_ulong.o control.o getln.o getln2.o now.o \
 alloc.a open.a lock.a strerr.a substdio.a error.a str.a stralloc.a
-	./load qmail-tcpok scan_ulong.o auto_qmail.o envread.o \
+	./load qmail-tcpok scan_ulong.o auto_qmail.o envread.o now.o \
 	str_diffn.o variables.o fmt_ulong.o control.o getln.o getln2.o \
 	open.a lock.a strerr.a substdio.a error.a str.a stralloc.a alloc.a
 
@@ -3113,12 +3121,12 @@ tryltai.c compile load
 tcp-env: \
 load tcp-env.o dns.o remoteinfo.o timeoutread.o timeoutwrite.o \
 control.o constmap.o open_read.o variables.o getln.o getln2.o \
-socket_ip4loopback.o socket_v6loopback.o socket_v6any.o \
+socket_ip4loopback.o socket_v6loopback.o socket_v6any.o now.o \
 scan_xlong.o socket_v4mappedprefix.o socket_tcp.o socket_tcp6.o \
 timeoutconn.o ip.o ipalloc.o strsalloc.o case.a ndelay.a sig.a \
 env.a getopt.a stralloc.a alloc.a substdio.a \
 error.a str.a fs.a dns.lib socket.lib
-	./load tcp-env dns.o remoteinfo.o timeoutread.o \
+	./load tcp-env dns.o remoteinfo.o timeoutread.o now.o \
 	control.o constmap.o open_read.o variables.o getln.o getln2.o \
 	socket_ip4loopback.o socket_v6loopback.o socket_v6any.o \
 	scan_xlong.o socket_v4mappedprefix.o socket_tcp.o socket_tcp6.o \
@@ -3259,12 +3267,14 @@ compile maildirdeliver.c byte.h datetime.h error.h exit.h fmt.h now.h open.h \
 sig.h str.h strerr.h substdio.h env.h
 	./compile maildirdeliver.c
 
-qmail-rm: load qmail-rm.o auto_split.o auto_qmail.o error_str.o error.o fmt_str.o \
-	control.o envread.o scan_ulong.o open_read.o getln.o getln2.o variables.o \
-	open_write.o lock_exnb.o fmt_ulong.o stralloc.a substdio.a str.a alloc.a
-	./load qmail-rm auto_split.o auto_qmail.o error_str.o error.o fmt_str.o \
-	control.o envread.o scan_ulong.o open_read.o getln.o getln2.o variables.o \
-	open_write.o lock_exnb.o fmt_ulong.o stralloc.a substdio.a str.a alloc.a
+qmail-rm: load qmail-rm.o auto_split.o auto_qmail.o error_str.o \
+	error.o fmt_str.o control.o envread.o scan_ulong.o now.o \
+	open_read.o getln.o getln2.o variables.o open_write.o \
+	lock_exnb.o fmt_ulong.o stralloc.a substdio.a str.a alloc.a
+	./load qmail-rm auto_split.o auto_qmail.o error_str.o \
+	error.o fmt_str.o control.o envread.o scan_ulong.o now.o \
+	open_read.o getln.o getln2.o variables.o open_write.o \
+	lock_exnb.o fmt_ulong.o stralloc.a substdio.a str.a alloc.a
 
 qmail-rm.o: \
 compile qmail-rm.c auto_split.h stralloc.h open.h lock.h auto_qmail.h \
@@ -4421,12 +4431,13 @@ makehader.o: makeheader.c compile
 
 dot-forward: \
 load dot-forward.o control.o qmail.o auto_qmail.o variables.o \
-openreadclose.o envdir_set.o pathexec_env.o token822.o pathexec_run.o \
-getln.a getopt.a strerr.a error.a substdio.a stralloc.a alloc.a \
-env.o case.a str.a sig.a seek.a open.a wait.a fd.a fs.a
+openreadclose.o envdir_set.o pathexec_env.o token822.o now.o \
+pathexec_run.o getln.a getopt.a strerr.a error.a substdio.a \
+stralloc.a alloc.a env.o case.a str.a sig.a seek.a open.a \
+wait.a fd.a fs.a
 	./load dot-forward control.o qmail.o auto_qmail.o variables.o \
 	openreadclose.o envdir_set.o pathexec_env.o pathexec_run.o \
-	token822.o env.a getln.a getopt.a strerr.a error.a \
+	now.o token822.o env.a getln.a getopt.a strerr.a error.a \
 	substdio.a stralloc.a alloc.a case.a str.a sig.a seek.a \
 	open.a wait.a fd.a fs.a 
 
@@ -4539,12 +4550,14 @@ stralloc.h gen_alloc.h getln.h open.h byte.h
 	./compile setmaillist.c
 
 newaliases: \
-load newaliases.o auto_qmail.o token822.o control.o cdbmss.o variables.o \
-env.a cdbmake.a strerr.a getln.a substdio.a stralloc.a alloc.a error.a \
+load newaliases.o auto_qmail.o token822.o control.o \
+now.o cdbmss.o variables.o env.a cdbmake.a strerr.a \
+getln.a substdio.a stralloc.a alloc.a error.a \
 str.a fs.a seek.a open.a case.a
-	./load newaliases auto_qmail.o token822.o control.o variables.o \
-	cdbmss.o env.a cdbmake.a strerr.a getln.a substdio.a stralloc.a \
-	alloc.a error.a str.a fs.a seek.a open.a case.a 
+	./load newaliases auto_qmail.o token822.o control.o \
+	variables.o now.o cdbmss.o env.a cdbmake.a strerr.a \
+	getln.a substdio.a stralloc.a alloc.a error.a str.a \
+	fs.a seek.a open.a case.a 
 
 newaliases.0: \
 newaliases.1
@@ -4557,12 +4570,12 @@ auto_qmail.h case.h cdbmss.h cdbmake.h uint32.h substdio.h variables.h
 	./compile newaliases.c
 
 newinclude: \
-load newinclude.o auto_qmail.o token822.o control.o variables.o getln.a strerr.a \
-stralloc.a env.a alloc.a substdio.a error.a str.a fs.a open.a wait.a \
-fd.a
-	./load newinclude auto_qmail.o token822.o control.o variables.o \
-	getln.a strerr.a stralloc.a env.a alloc.a substdio.a \
-	error.a str.a fs.a open.a wait.a fd.a 
+load newinclude.o auto_qmail.o token822.o control.o \
+now.o variables.o getln.a strerr.a stralloc.a env.a \
+alloc.a substdio.a error.a str.a fs.a open.a wait.a fd.a
+	./load newinclude auto_qmail.o token822.o control.o now.o \
+	variables.o getln.a strerr.a stralloc.a env.a alloc.a \
+	substdio.a error.a str.a fs.a open.a wait.a fd.a 
 
 newinclude.0: \
 newinclude.1
@@ -5080,7 +5093,7 @@ case_diffb.o getln.o getln2.o fmt_ulong.o \
 byte_rchr.o byte_copy.o byte_cr.o byte_chr.o byte_diff.o \
 alloc_re.o alloc.o control.o scan_xlong.o fmt_str.o \
 cdb_seek.o cdb_hash.o cdb_unpack.o auto_qmail.o \
-sig_block.o sig_catch.o \
+sig_block.o sig_catch.o now.o \
 tablematch.o substdio.a stralloc.a
 	./load qmail-greyd sgetopt.o subgetopt.o \
 	error.o error_str.o strerr_die.o strerr_sys.o scan_ulong.o \
@@ -5091,7 +5104,7 @@ tablematch.o substdio.a stralloc.a
 	byte_rchr.o byte_copy.o byte_cr.o byte_chr.o byte_diff.o \
 	alloc_re.o alloc.o control.o scan_xlong.o fmt_str.o \
 	cdb_seek.o cdb_hash.o cdb_unpack.o auto_qmail.o \
-	sig_block.o sig_catch.o \
+	sig_block.o sig_catch.o now.o \
 	tablematch.o substdio.a stralloc.a -lm
 
 qmail-greyd.o: \
@@ -5123,13 +5136,13 @@ stralloc.h subfd.h now.h env.h scan.h conf-batv
 
 uacl: \
 load uacl.o case_lowerb.o byte_rchr.o byte_copy.o open_read.o mail_acl.o \
-matchregex.o scan_ulong.o alloc.o alloc_re.o wildmat.o control.o \
+matchregex.o scan_ulong.o alloc.o alloc_re.o wildmat.o control.o now.o \
 constmap.o env.o getln.o case_diffb.o cdb_seek.o getln2.o strerr_die.o \
 strerr_sys.o str_cpy.o cdb_hash.o cdb_unpack.o byte_chr.o byte_cr.o \
 variables.o str_diff.o str_diffn.o qregex.o envread.o str_len.o \
 fmt_ulong.o auto_qmail.o error.o error_str.o stralloc.a substdio.a
 	./load uacl case_lowerb.o byte_rchr.o byte_copy.o open_read.o mail_acl.o \
-	matchregex.o scan_ulong.o alloc.o alloc_re.o wildmat.o control.o \
+	matchregex.o scan_ulong.o alloc.o alloc_re.o wildmat.o control.o now.o \
 	constmap.o env.o getln.o case_diffb.o cdb_seek.o getln2.o strerr_die.o \
 	strerr_sys.o str_cpy.o cdb_hash.o cdb_unpack.o byte_chr.o byte_cr.o \
 	variables.o str_diff.o str_diffn.o qregex.o envread.o str_len.o \
