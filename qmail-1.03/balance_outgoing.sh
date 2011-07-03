@@ -1,5 +1,8 @@
 #
 # $Log: balance_outgoing.sh,v $
+# Revision 1.2  2011-07-03 16:54:23+05:30  Cprogrammer
+# fixed typo and do chdir to /var/indimail
+#
 # Revision 1.1  2011-01-08 16:45:13+05:30  Cprogrammer
 # Initial revision
 #
@@ -12,7 +15,7 @@
 # argv4          - size
 # argv5 .. argvn - recipients
 #
-# $Id: balance_outgoing.sh,v 1.1 2011-01-08 16:45:13+05:30 Cprogrammer Exp mbhangui $
+# $Id: balance_outgoing.sh,v 1.2 2011-07-03 16:54:23+05:30 Cprogrammer Stab mbhangui $
 #
 host=$1
 sender=$2
@@ -20,12 +23,13 @@ qqeh=$3
 size=$4
 shift 4
 
+cd QMAIL
 if [ " $CONTROLDIR" = " " ] ; then
 	FN=QMAIL/control/filterargs
 else
 	FN=$CONTROLDIR/filterargs
 fi
-if [ -n $SPAMFILTER -o -n $FILTERARGS -o -f $FN ] ; then
+if [ -n "$SPAMFILTER" -o -n "$FILTERARGS" -o -f $FN ] ; then
 	# execute spawn-filter if you have filters defined for remote/local deliveries
 	PROG="bin/spawn-filter"
 else
@@ -50,7 +54,7 @@ else
 	fi
 fi
 IP_COUNT=${#IP[*]} # array size
-if [ $IP_count -gt 1 ] ; then
+if [ $IP_COUNT -gt 1 ] ; then
 	i=`expr $RANDOM % $IP_COUNT` # chose an IP randomly
 	export OUTGOINGIP=${IP[$i]}
 fi
