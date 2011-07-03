@@ -46,6 +46,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <errno.h>
+#include <fcntl.h>
 #include "indimail.h"
 
 #ifndef	lint
@@ -60,9 +61,10 @@ int
 main(int argc, char **argv)
 {
 	FILE           *fp;
+	char           *device = "/dev/console";
 	char           *qmaildir, *ptr, *jobfile = 0, *print_cmd = 0, *jobdir;
 	char            buffer[2048];
-	int             flag, found, colonCount;
+	int             flag, found, colonCount, fd;
 	long            pos;
 	static char    *initargs[3] = { "/sbin/init", "q", 0 };
 
@@ -264,11 +266,17 @@ main(int argc, char **argv)
 		fclose(fp);
 		return (1);
 	}
+	if ((fd = open("/dev/console", O_RDWR)) == -1)
+	{
+		if (errno == EPERM) /*- some virtual servers have this problem */
+			device = "/dev/null";
+	} else
+		close(fd);
 	/*
 	 * SV:345:respawn:/var/qmail/bin/svscanboot <>/dev/console 2<>/dev/console
 	 */
-	snprintf(buffer, sizeof(buffer), "SV:345:%s:%s/bin/svscanboot <>/dev/console 2<>/dev/console",
-			 flag == SV_ON ? "respawn" : "off", qmaildir);
+	snprintf(buffer, sizeof(buffer), "SV:345:%s:%s/bin/svscanboot <>%s 2<>%s",
+			 flag == SV_ON ? "respawn" : "off", qmaildir, device, device);
 	fprintf(fp, "%s\n", buffer);
 	if (fclose(fp))
 	{
