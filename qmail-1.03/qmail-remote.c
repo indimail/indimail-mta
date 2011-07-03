@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-remote.c,v $
+ * Revision 1.73  2011-07-03 16:56:26+05:30  Cprogrammer
+ * use control_readrandom() to pick up a random line from control file
+ *
  * Revision 1.72  2011-01-08 16:30:05+05:30  Cprogrammer
  * use OUTGOINGIP env variable to set local interface address
  *
@@ -2067,8 +2070,8 @@ getcontrols()
 		else
 		if (!stralloc_0(&outgoingipfn))
 			temp_nomem();
-		if (!(r = control_readline(&outgoingip, outgoingipfn.s)))
-			r = control_readline(&outgoingip, "outgoingip");
+		if (!(r = control_readrandom(&outgoingip, outgoingipfn.s)))
+			r = control_readrandom(&outgoingip, "outgoingip");
 		if (r == -1)
 		{
 			if (errno == error_nomem)
@@ -2561,7 +2564,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_remote_c()
 {
-	static char    *x = "$Id: qmail-remote.c,v 1.72 2011-01-08 16:30:05+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: qmail-remote.c,v 1.73 2011-07-03 16:56:26+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

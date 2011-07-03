@@ -1,5 +1,8 @@
 /*
  * $Log: control.c,v $
+ * Revision 1.18  2011-07-03 16:58:41+05:30  Cprogrammer
+ * new function control_readrandom to pick up a random line from control file
+ *
  * Revision 1.17  2011-01-14 20:36:48+05:30  Cprogrammer
  * added documentation on control_readfile()
  *
@@ -45,6 +48,8 @@
  *
  */
 #include "open.h"
+#include "now.h"
+#include "str.h"
 #include "getln.h"
 #include "stralloc.h"
 #include "substdio.h"
@@ -349,6 +354,75 @@ control_readfile(sa, fn, flagme)
 	return -1;
 }
 
+int
+control_readrandom(sa, fn)
+	stralloc       *sa;
+	char           *fn;
+{
+	substdio        ss;
+	char           *ptr;
+	int             fd, match, len, ilen, count;
+	unsigned long   random;
+	static stralloc controlfile = {0};
+
+	if (!stralloc_copys(sa, ""))
+		return -1;
+	if (*fn != '/' && *fn != '.')
+	{
+		if (!controldir)
+		{
+			if (!(controldir = env_get("CONTROLDIR")))
+				controldir = "control";
+		}
+		if (!stralloc_copys(&controlfile, controldir))
+			return(-1);
+		if (controlfile.s[controlfile.len - 1] != '/' && !stralloc_cats(&controlfile, "/"))
+			return(-1);
+		if (!stralloc_cats(&controlfile, fn))
+			return(-1);
+	} else
+	if (!stralloc_copys(&controlfile, fn))
+		return(-1);
+	if (!stralloc_0(&controlfile))
+		return(-1);
+	if ((fd = open_read(controlfile.s)) == -1)
+	{
+		if (errno == error_noent)
+			return 0;
+		return -1;
+	}
+	substdio_fdbuf(&ss, read, fd, inbuf, sizeof(inbuf));
+	for (count = 0;;count++)
+	{
+		if (getln(&ss, &line, &match, '\n') == -1)
+			goto error;
+		if (!match && !line.len)
+			break;
+		striptrailingwhitespace(&line);
+		if (!stralloc_0(&line))
+			goto error;
+		if (line.s[0] && line.s[0] != '#' && !stralloc_cat(sa, &line))
+			goto error;
+		if (!match)
+			break;
+	}
+	random = (now() % count);
+	for (count = len = 0, ptr = sa->s;len < sa->len;count++)
+	{
+		len += ((ilen = str_len(ptr)) + 1);
+		if (count == random)
+		{
+			if (!stralloc_copyb(sa, ptr, ilen + 1))
+				break;
+			return (1);
+		}
+		ptr += (ilen + 1);
+	}
+error:
+	close(fd);
+	return -1;
+}
+
 #ifdef CONTROL_CMD
 #include "wait.h"
 char          **MakeArgs(char *);
@@ -437,7 +511,7 @@ control_readcmd(stralloc *sa, char *fn)
 void
 getversion_control_c()
 {
-	static char    *x = "$Id: control.c,v 1.17 2011-01-14 20:36:48+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: control.c,v 1.18 2011-07-03 16:58:41+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
