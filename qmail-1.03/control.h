@@ -1,5 +1,8 @@
 /*
  * $Log: control.h,v $
+ * Revision 1.8  2011-07-04 17:44:54+05:30  Cprogrammer
+ * added control_readrandom()
+ *
  * Revision 1.7  2004-10-21 22:44:56+05:30  Cprogrammer
  * prototype for control_nativefile changed to accomodate qmail-dk
  *
@@ -31,5 +34,6 @@ int             control_readint(int *, char *);
 int             control_readulong(unsigned long *, char *);
 int             control_readnativefile(stralloc *, char *, int);
 int             control_readfile(stralloc *, char *, int);
+int             control_readrandom(stralloc *, char *);
 void            striptrailingwhitespace(stralloc *);
 #endif

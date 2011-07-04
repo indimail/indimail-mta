@@ -2564,7 +2564,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_remote_c()
 {
-	static char    *x = "$Id: qmail-remote.c,v 1.73 2011-07-03 16:56:26+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-remote.c,v 1.73 2011-07-03 16:56:26+05:30 Cprogrammer Stab mbhangui $";
 
 	x++;
 }

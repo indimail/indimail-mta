@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-qmqpc.c,v $
+ * Revision 1.15  2011-07-04 17:45:05+05:30  Cprogrammer
+ * use control_readrandom to pickup up a single IP from outgoingip
+ *
  * Revision 1.14  2011-01-11 10:27:37+05:30  Cprogrammer
  * use OUTGOINGIP to override control file outgoingip
  *
@@ -310,7 +313,7 @@ main()
 			nomem();
 		r = 1;
 	} else
-	if (-1 == (r = control_readline(&outgoingip, "outgoingip")))
+	if (-1 == (r = control_readrandom(&outgoingip, "outgoingip")))
 	{
 		if (errno == error_nomem)
 			nomem();
@@ -395,7 +398,7 @@ again:
 void
 getversion_qmail_qmqpc_c()
 {
-	static char    *x = "$Id: qmail-qmqpc.c,v 1.14 2011-01-11 10:27:37+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: qmail-qmqpc.c,v 1.15 2011-07-04 17:45:05+05:30 Cprogrammer Stab mbhangui $";
 
 	x++;
 }
