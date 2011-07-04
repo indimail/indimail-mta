@@ -1,5 +1,8 @@
 /*
  * $Log: initsvc.c,v $
+ * Revision 2.14  2011-07-04 17:42:39+05:30  Cprogrammer
+ * fix for virtual machines where /dev/console gives problem
+ *
  * Revision 2.13  2011-05-26 23:54:18+05:30  Cprogrammer
  * change in svscanboot usage
  *
@@ -50,7 +53,7 @@
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: initsvc.c,v 2.13 2011-05-26 23:54:18+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: initsvc.c,v 2.14 2011-07-04 17:42:39+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #define SV_ON    1
