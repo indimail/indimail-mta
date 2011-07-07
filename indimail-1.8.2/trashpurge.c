@@ -42,7 +42,7 @@ mailboxpurge(char *dir, char *mailbox, long age, int fast_option)
 		"tmp",
 	};
 
-	if(access(dir, F_OK))
+	if (access(dir, F_OK))
 		return(0);
 	tmval = time(0);
 	for (deleted = 0l, file_name = 0, i = 0; i < 3; i++)
@@ -50,18 +50,18 @@ mailboxpurge(char *dir, char *mailbox, long age, int fast_option)
 		snprintf(tmpbuf, MAX_BUFF, "%s/Maildir/%s/%s", dir, mailbox, MailDirNames[i]);
 		if (!(entry = opendir(tmpbuf)))
 		{
-			if(errno != 2)
+			if (errno != 2)
 				fprintf(stderr, "opendir: %s: %s\n", tmpbuf, strerror(errno));
 			continue;
 		}
-		for(;;)
+		for (;;)
 		{
-			if(!(dp = readdir(entry)))
+			if (!(dp = readdir(entry)))
 				break;
-			if(!strcmp(dp->d_name, ".") || !strcmp(dp->d_name, ".."))
+			if (!strcmp(dp->d_name, ".") || !strcmp(dp->d_name, ".."))
 				continue;
 			len = slen(tmpbuf) + slen(dp->d_name) + 2;
-			if(!(file_name = (char *) realloc(file_name, (len * sizeof(char)))))
+			if (!(file_name = (char *) realloc(file_name, (len * sizeof(char)))))
 			{
 				fprintf(stderr, "realloc: %d bytes: %s\n", len, strerror(errno));
 				closedir(entry);
@@ -84,7 +84,7 @@ mailboxpurge(char *dir, char *mailbox, long age, int fast_option)
 				if ((age && ((tmval - tmpdate)/86400 <= age)) || (tmpdate == 0L))
 					continue;
 			}
-			if(!unlink(file_name))
+			if (!unlink(file_name))
 			{
 				if (fast_option)
 				{
@@ -102,7 +102,7 @@ mailboxpurge(char *dir, char *mailbox, long age, int fast_option)
 					deleted += statbuf.st_size;
 			} else
 				fprintf(stderr, "unlink: %s: %s\n", file_name, strerror(errno));
-		} /*- for(;;) */
+		} /*- for (;;) */
 		closedir(entry);
 	}
 	free(file_name);

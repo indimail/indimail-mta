@@ -1,5 +1,8 @@
 /*
  * $Log: vdeloldusers.c,v $
+ * Revision 2.16  2011-07-07 18:11:36+05:30  Cprogrammer
+ * local variable folderlist used outside scope causing segfault
+ *
  * Revision 2.15  2008-05-28 17:40:42+05:30  Cprogrammer
  * removed USE_MYSQL
  *
@@ -129,7 +132,7 @@
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vdeloldusers.c,v 2.15 2008-05-28 17:40:42+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: vdeloldusers.c,v 2.16 2011-07-07 18:11:36+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifndef ENABLE_AUTH_LOGGING
@@ -157,7 +160,6 @@ char            Domain[MAX_BUFF];
 char          **skipGecos, **mailboxArr;
 int             Age, mailAge, purge_db, report_only, fast_option, TrashAge, shouldexit;
 int             c_option, i_option, p_option;
-char           *(folderargs[]) = { ".Trash", ".BulkMail", 0 };
 
 void            usage();
 int             get_options(int argc, char **argv);
@@ -423,6 +425,7 @@ get_options(int argc, char **argv)
 	int             c, errflag, len, gecosCount, mailboxCount;
 	char           *ptr, *gecosarr, *mailboxarr;
 	static int      gecoslen, mailboxlen;
+	static char    *(folderlist[]) = { ".Trash", ".BulkMail", 0 };
 
 	memset(Domain, 0, MAX_BUFF);
 	gecosCount = gecoslen = mailboxCount = mailboxlen = 0;
@@ -547,7 +550,7 @@ get_options(int argc, char **argv)
 		}
 		mailboxArr[mailboxCount] = (char *) 0;
 	} else
-		mailboxArr = folderargs; /*- Only Trash */
+		mailboxArr = folderlist; /*- Only Trash */
 	return (0);
 }
 
