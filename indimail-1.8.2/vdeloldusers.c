@@ -157,6 +157,7 @@ char            Domain[MAX_BUFF];
 char          **skipGecos, **mailboxArr;
 int             Age, mailAge, purge_db, report_only, fast_option, TrashAge, shouldexit;
 int             c_option, i_option, p_option;
+char           *(folderargs[]) = { ".Trash", ".BulkMail", 0 };
 
 void            usage();
 int             get_options(int argc, char **argv);
@@ -422,7 +423,6 @@ get_options(int argc, char **argv)
 	int             c, errflag, len, gecosCount, mailboxCount;
 	char           *ptr, *gecosarr, *mailboxarr;
 	static int      gecoslen, mailboxlen;
-	char           *(folderargs[]) = { ".Trash", ".BulkMail", 0 };
 
 	memset(Domain, 0, MAX_BUFF);
 	gecosCount = gecoslen = mailboxCount = mailboxlen = 0;
