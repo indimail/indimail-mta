@@ -4,7 +4,7 @@
  * added fix to disable Verisign Wildcard Feature
  *
  * Revision 1.21  2009-03-14 08:47:31+05:30  Cprogrammer
- * removed function dnsText.c
+ * removed function dnsText()
  *
  * Revision 1.20  2008-08-03 18:25:00+05:30  Cprogrammer
  * use proper proto
