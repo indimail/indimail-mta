@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-showctl.c,v $
+ * Revision 1.52  2011-07-08 13:47:54+05:30  Cprogrammer
+ * added dnsbllist control file
+ *
  * Revision 1.51  2010-04-24 20:13:53+05:30  Cprogrammer
  * added badip, qmtproutes control files
  *
@@ -388,6 +391,7 @@ main(int argc, char **argv)
 	do_int("maxhops", "100", "MAX Hops is ", " hops");
 	do_str("defaultdomain", 1, "defaultdomain", "Default domain name is ");
 	do_str("defaulthost", 1, "defaulthost", "Default host name is ");
+	do_lst("dnsbllist","No dnsbl list configured.","List at "," configured for dnsbl check.");
 	do_str("doublebouncehost", 1, "doublebouncehost", "2B recipient host: ");
 	do_str("doublebounceto", 0, "postmaster", "2B recipient user: ");
 	do_str("envnoathost", 1, "envnoathost", "Presumed domain name is ");
@@ -546,6 +550,8 @@ main(int argc, char **argv)
 		if (str_equal(d->d_name, "defaultdomain"))
 			continue;
 		if (str_equal(d->d_name, "defaulthost"))
+			continue;
+		if (str_equal(d->d_name,"dnsbllist"))
 			continue;
 		if (str_equal(d->d_name, "doublebouncehost"))
 			continue;
@@ -713,7 +719,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_showctl_c()
 {
-	static char    *x = "$Id: qmail-showctl.c,v 1.51 2010-04-24 20:13:53+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: qmail-showctl.c,v 1.52 2011-07-08 13:47:54+05:30 Cprogrammer Stab mbhangui $";
 
 #ifdef INDIMAIL
 	x = sccsidh;
