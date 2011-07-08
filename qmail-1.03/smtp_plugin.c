@@ -1,5 +1,8 @@
 /*
  * $Log: smtp_plugin.c,v $
+ * Revision 1.2  2011-07-08 13:49:10+05:30  Cprogrammer
+ * define stubs as static
+ *
  * Revision 1.1  2011-06-29 21:56:13+05:30  Cprogrammer
  * Initial revision
  *
@@ -16,23 +19,24 @@
  * return 0 will cause smtp_mail & smtp_rcpt to proceed ahead
  */
 
-int
+static int
 from_plug_1(char *remoteip, char *from, char **mesg)
 {
 	*mesg = "530 denied by plugin (#5.7.1)\r\n";
 	return (0);
 }
 
-int
+static int
 rcpt_plug_1(char *remoteip, char *from, char *rcpt, char **mesg)
 {
 	*mesg = "530 denied by plugin (#5.7.1)\r\n";
 	return (0);
 }
 
-int
+static int
 data_plug_1(char *local, char *remoteip, char *remotehost, char *remoteinfo, char **mesg)
 {
+	*mesg = "530 denied by plugin (#5.7.1)\r\n";
 	return (0);
 }
 

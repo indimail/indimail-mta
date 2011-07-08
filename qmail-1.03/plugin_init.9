@@ -5,11 +5,11 @@ plugin_init() - Template for Dynamic SMTP Plugins
 .SH SYNTAX
 .B #include "smtp_plugin.h"
 
-char *\fBfrom_plug\fP(char *\fIrip\fR, char *\fIfrom\fR, char **\fImesg\fR);
+char *\fBfrom_plug\fR(char *\fIrip\fR, char *\fIfrom\fR, char **\fImesg\fR);
 
-char *\fBrcpt_plug\fP(char *\fIrip\fR, char *\fIfrom\fR, char *\fIrcpt\fR, char **\fImesg\fR);
+char *\fBrcpt_plug\fR(char *\fIrip\fR, char *\fIfrom\fR, char *\fIrcpt\fR, char **\fImesg\fR);
 
-char *\fBdata_plug\fP(char *\fIlocal\fR, char *\fIrip\fR, char *\fIrhost\fR, char *\fIrinfo\fR, char **\fImesg\fR);
+char *\fBdata_plug\fR(char *\fIlocal\fR, char *\fIrip\fR, char *\fIrhost\fR, char *\fIrinfo\fR, char **\fImesg\fR);
 
 PLUGIN *\fBplugin_init()\fR;
 
@@ -34,7 +34,12 @@ is a pointer to function to be executed in the SMTP DATA session.
 
 To write a SMTP plugin you have to write the \fBplugin_init()\fR function. Depending on which
 phase of SMTP (MAIL, RCPT, DATA) you want to call your function, you have to write the
-\fBfrom_plug\fR, \fBrcpt_plug\fR, \fBdata_plug\fR functions.
+\fBfrom_plug\fR, \fBrcpt_plug\fR, \fBdata_plug\fR functions. If you plan to write multiple
+plugins, define the functions as static. e.g.
+
+.EX
+ static char *from_plug(char *rip, char *from, char **mesg);
+.EE
 
 The plugin_init() function can be written as below
 
