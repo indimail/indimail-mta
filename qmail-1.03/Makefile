@@ -1220,7 +1220,7 @@ envdir envuidgid fghack multilog pgrphack readproctitle setlock \
 setuidgid softlimit supervise svc svok svscan svstat tai64n tai64nlocal tai64nunix \
 recordio argv0 addcr delcr fixcrio generic.so cdbmake cdbget cdbgetm \
 cdbdump cdbstats cdbtest cdbmake-12 cdbmake-sv testzero dk-filter \
-uacl smtpd-plugin.so
+uacl smtpd-plugin.so smtpd-plugin0.so
 
 analyzer: \
 mlmatchup matchup columnt zoverall zsendmail xqp xsender xrecipient ddist \
@@ -2313,11 +2313,24 @@ auto_split.h spf.h env.h variables.h hasindimail.h conf-spf conf-batv
 	./compile $(inc_deps) `grep -h -v "^#" conf-spf conf-batv` qmail-showctl.c
 
 plugtest: \
-load plugtest.o
-	./load plugtest alloc.o alloc_re.o str_len.o str_chr.o \
-	str_diffn.o error.o strerr_die.o strerr_sys.o byte_copy.o \
-	auto_qmail.o fmt_ulong.o envread.o error_str.o sgetopt.o \
-	subgetopt.o stralloc.a substdio.a -ldl
+load plugtest.o timeoutwrite.o strsalloc.o control.o constmap.o \
+date822fmt.o now.o qmail.o variables.o cdb.a fd.a \
+wait.a datetime.a getln.a envrules.o bodycheck.o \
+sqlmatch.o matchregex.o scan_xlong.o sgetopt.o subgetopt.o \
+ipalloc.o ip.o socket_v4mappedprefix.o socket_v6any.o \
+open.a sig.a case.a dns.o auto_qmail.o auto_uids.o base64sub.o \
+auto_break.o strerr_die.o strerr_sys.o ndelay.o ndelay_off.o \
+env.a stralloc.a alloc.a substdio.a error.a str.a fs.a lock.a \
+socket.lib tai.lib dns.lib indimail.lib tls.lib
+	./load plugtest strsalloc.o control.o constmap.o \
+	date822fmt.o now.o qmail.o variables.o ndelay.o ndelay_off.o \
+	envrules.o bodycheck.o dns.o auto_qmail.o sqlmatch.o \
+	matchregex.o scan_xlong.o sgetopt.o subgetopt.o ipalloc.o \
+	ip.o auto_uids.o base64sub.o strerr_die.o strerr_sys.o \
+	cdb.a fd.a wait.a datetime.a auto_break.o socket_v4mappedprefix.o \
+	socket_v6any.o getln.a open.a sig.a case.a env.a stralloc.a \
+	alloc.a substdio.a error.a str.a fs.a lock.a \
+	`cat socket.lib tai.lib dns.lib indimail.lib tls.lib` -ldl
 
 plugtest.o: \
 compile plugtest.c sgetopt.h alloc.h str.h strerr.h env.h stralloc.h \
@@ -4904,29 +4917,6 @@ generic.o: \
 compile generic.c str.h env.h wait.h
 	./compile generic.c
 
-smtpd-plugin.so:smtp_plugin.o
-	if test $(SYSTEM) = Darwin ; then \
-	$(LD) -bundle -undefined dynamic_lookup -o smtpd-plugin.so \
-	smtp_plugin.o; \
-	else \
-	$(CC) -shared -rdynamic -nostartfiles -fPIC -s -O4 -o smtpd-plugin.so \
-	smtp_plugin.o; fi
-
-smtp_plugin.o: compile smtp_plugin.c smtp_plugin.h
-	./compile smtp_plugin.c
-
-generic.so:generic.o wait_pid.o envread.o auto_scancmd.o MakeArgs.o \
-byte_copy.o alloc.o alloc_re.o stralloc.a str_diffn.o error.o str_len.o
-	if test $(SYSTEM) = Darwin ; then \
-	$(LD) -bundle -undefined dynamic_lookup -o generic.so generic.o wait_pid.o \
-	envread.o auto_scancmd.o MakeArgs.o byte_copy.o alloc.o \
-	alloc_re.o stralloc.a str_diffn.o error.o str_len.o; \
-	else \
-	$(CC) -shared -rdynamic -nostartfiles -fPIC -s -O4 -o generic.so generic.o wait_pid.o \
-	envread.o auto_scancmd.o MakeArgs.o byte_copy.o alloc.o \
-	alloc_re.o stralloc.a str_diffn.o error.o str_len.o; fi
-#	$(LD) -G -Bdynamic -o generic.so generic.o wait_pid.o \
-
 relaytest.o: \
 compile relaytest.c strerr.h getln.h substdio.h \
 timeoutread.h timeoutwrite.h stralloc.h scan.h byte.h
@@ -5254,4 +5244,39 @@ ldap-checkpwd.o: \
 compile ldap-checkpwd.c error.h stralloc.h pathexec.h str.h env.h scan.h \
 subfd.h substdio.h strerr.h hasldap.h
 	./compile -DLDAP_DEPRECATED ldap-checkpwd.c
+################### PLUGINS ########################################
+smtpd-plugin0.so: dnsbl.o control.o variables.o scan_ulong.o stralloc.a \
+now.o
+	if test $(SYSTEM) = Darwin ; then \
+	$(LD) -bundle -undefined dynamic_lookup -o smtpd-plugin0.so \
+	dnsbl.o control.o variables.o scan_ulong.o stralloc.a now.o; \
+	else \
+	$(CC) -shared -rdynamic -nostartfiles -fPIC -s -O4 -o smtpd-plugin0.so \
+	dnsbl.o control.o variables.o scan_ulong.o stralloc.a now.o; fi
+dnsbl.o: compile dnsbl.c smtp_plugin.h stralloc.h dns.h env.h control.h
+	./compile dnsbl.c
+
+smtpd-plugin.so:smtp_plugin.o
+	if test $(SYSTEM) = Darwin ; then \
+	$(LD) -bundle -undefined dynamic_lookup -o smtpd-plugin.so \
+	smtp_plugin.o; \
+	else \
+	$(CC) -shared -rdynamic -nostartfiles -fPIC -s -O4 -o smtpd-plugin.so \
+	smtp_plugin.o; fi
+
+smtp_plugin.o: compile smtp_plugin.c smtp_plugin.h
+	./compile smtp_plugin.c
+
+generic.so:generic.o wait_pid.o envread.o auto_scancmd.o MakeArgs.o \
+byte_copy.o alloc.o alloc_re.o stralloc.a str_diffn.o error.o str_len.o
+	if test $(SYSTEM) = Darwin ; then \
+	$(LD) -bundle -undefined dynamic_lookup -o generic.so generic.o wait_pid.o \
+	envread.o auto_scancmd.o MakeArgs.o byte_copy.o alloc.o \
+	alloc_re.o stralloc.a str_diffn.o error.o str_len.o; \
+	else \
+	$(CC) -shared -rdynamic -nostartfiles -fPIC -s -O4 -o generic.so generic.o wait_pid.o \
+	envread.o auto_scancmd.o MakeArgs.o byte_copy.o alloc.o \
+	alloc_re.o stralloc.a str_diffn.o error.o str_len.o; fi
+#	$(LD) -G -Bdynamic -o generic.so generic.o wait_pid.o \
+
 #################################################################
