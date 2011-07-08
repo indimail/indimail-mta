@@ -856,6 +856,18 @@ is set, it overrides
 control file
 
 .TP 5
+.I dnsbllist
+A list of dnsbl providers that \fBqmail-smtpd\fR checks to identify blacklisted ip addresses.
+The filename can be overriden by the environment variable
+.BR DNSBLLIST .
+
+If the environment variable \fBSKIPDNSBL\fR is set, \fBqmail-smtpd\fR ignores
+\fIdnsbllist\fR, and the dnsbl check is not performed. The check is skipped even if some
+other authentication method succedeed and authorized the client to relay (smtp-auth or tls
+client certificate), or if \fBRELAYCLIENT\fR enviromnent variable is set. The \fIdnsbllist\fR
+functionality is provided by QMAILHOME/smtpd-plugin0 plugin.
+
+.TP 5
 .I dh1024.pem
 If these 1024 bit DH parameters are provided,
 .B qmail-smtpd
@@ -1500,6 +1512,8 @@ The following list of environment variables can be modified using envrules
 .IR SIGN_PRACTICE
 .IR DKIMQUEUE ,
 .IR MAILARCHIVE ,
+.IR SKIPDNSBLLIST ,
+.IR DNSBLLIST ,
 .IR SIGNATUREDOMAINS ,
 and
 .IR NOSIGNATUREDOMAINS
