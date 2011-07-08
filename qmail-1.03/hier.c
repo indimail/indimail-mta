@@ -1,5 +1,8 @@
 /*
  * $Log: hier.c,v $
+ * Revision 1.167  2011-07-08 13:47:06+05:30  Cprogrammer
+ * added dnsbl plugin
+ *
  * Revision 1.166  2011-06-18 11:42:39+05:30  Cprogrammer
  * added README.filters, README.indimail
  *
@@ -664,6 +667,7 @@ hier(inst_dir)
 #endif
 #ifdef SMTP_PLUGIN
 	c(auto_qmail_home, "plugins", "smtpd-plugin.so", auto_uido, auto_gidq, 0555);
+	c(auto_qmail_home, "plugins", "smtpd-plugin0.so", auto_uido, auto_gidq, 0555);
 #endif
 	c(auto_qmail_home, "plugins", "generic.so", auto_uido, auto_gidq, 0555);
 	c(auto_qmail_home, "bin", "cleanq", auto_uido, auto_gidq, 0555);
@@ -1614,7 +1618,7 @@ _hier(inst_dir)
 void
 getversion_install_big_c()
 {
-	static char    *x = "$Id: hier.c,v 1.166 2011-06-18 11:42:39+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: hier.c,v 1.167 2011-07-08 13:47:06+05:30 Cprogrammer Stab mbhangui $";
 
 #ifdef INDIMAIL
 	x = sccsidh;
