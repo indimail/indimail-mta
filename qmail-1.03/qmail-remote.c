@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-remote.c,v $
+ * Revision 1.74  2011-07-08 13:52:25+05:30  Cprogrammer
+ * ipv6, ipv4 code organized
+ *
  * Revision 1.73  2011-07-03 16:56:26+05:30  Cprogrammer
  * use control_readrandom() to pick up a random line from control file
  *
@@ -628,29 +631,24 @@ outhost()
 	char            x[IPFMT];
 	unsigned int    len;
 
+	switch (partner.af)
+	{
 #ifdef IPV6
-	if (partner.af == AF_INET)
-	{
-		len = ip_fmt(x, &partner.addr.ip);
-		if (!stralloc_copyb(&rhost, x, len))
-			temp_nomem();
-		if (substdio_put(subfdoutsmall, x, len) == -1)
-			_exit(0);
-	} else
-	{
+	case AF_INET6:
 		len = ip6_fmt(x, &partner.addr.ip6);
-		if (!stralloc_copyb(&rhost, x, len))
-			temp_nomem();
-		if (substdio_put(subfdoutsmall, x, len) == -1)
-			_exit(0);
+		break;
+#endif
+	case AF_INET:
+		len = ip_fmt(x, &partner.addr.ip);
+		break;
+	default:
+		len = ip_fmt(x, &partner.addr.ip);
+		break;
 	}
-#else
-	len = ip_fmt(x, &partner.addr.ip);
 	if (!stralloc_copyb(&rhost, x, len))
 		temp_nomem();
 	if (substdio_put(subfdoutsmall, x, len) == -1)
 		_exit(0);
-#endif
 	if (!stralloc_0(&rhost))
 		temp_nomem();
 }
@@ -2260,14 +2258,19 @@ ipme_is46(struct ip_mx *mxip)
 int
 timeoutconn46(int fd, struct ip_mx *ix, union v46addr *ip, int port, int timeout)
 {
+	switch (ix->af)
+	{
 #ifdef IPV6
-	if (ix->af == AF_INET)
-		return timeoutconn4(fd, &ix->addr.ip, ip, port, timeout);
-	else
+	case AF_INET6:
 		return timeoutconn6(fd, &ix->addr.ip6, ip, port, timeout);
-#else
-	return timeoutconn4(fd, &ix->addr.ip, ip, port, timeout);
+		break;
 #endif
+	case AF_INET:
+		return timeoutconn4(fd, &ix->addr.ip, ip, port, timeout);
+		break;
+	default:
+		return timeoutconn4(fd, &ix->addr.ip, ip, port, timeout);
+	}
 }
 
 /*
@@ -2564,7 +2567,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_remote_c()
 {
-	static char    *x = "$Id: qmail-remote.c,v 1.73 2011-07-03 16:56:26+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: qmail-remote.c,v 1.74 2011-07-08 13:52:25+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
