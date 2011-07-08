@@ -29,7 +29,8 @@ Each line is a delivery instruction.
 .B qmail-local
 follows each instruction in turn.
 There are five types of delivery instructions:
-(1) comment; (2) program; (3) forward; (4) mbox; (5) maildir.
+(1) comment; (2) program; (3) forward; (4) mbox; (5) maildir; (6) branch;
+
 .TP 5
 (1)
 A comment line begins with a number sign:
@@ -40,6 +41,7 @@ A comment line begins with a number sign:
 
 .B qmail-local
 ignores the line.
+
 .TP 5
 (2)
 A program line begins with a vertical bar:
@@ -54,6 +56,7 @@ takes the rest of the line as a command to supply to
 See
 .B qmail-command(8)
 for further information.
+
 .TP 5
 (3)
 A forward line begins with an ampersand:
@@ -94,6 +97,7 @@ Note that
 omits its new
 .B Return-Path
 line when forwarding messages.
+
 .TP 5
 (4)
 An 
@@ -133,6 +137,7 @@ is able to lock the file, but has trouble writing to it
 it will truncate the file back to its original length.
 However, it cannot prevent mailbox corruption if the system
 crashes during delivery.
+
 .TP 5
 (5)
 A
@@ -152,6 +157,56 @@ It reliably stores the incoming message in that directory.
 See
 .B maildir(5)
 for more details.
+
+.TP 5
+(6)
+A
+.I branch
+line begins with a question mark, and ends with a label
+
+.EX
+  ?label command arg ...
+  ...
+  :label
+.EE
+
+A \fB.qmail\fR file using this feature might look like:
+
+.EX
+  # Sort out mail from Sue.
+  ?test [ "$SENDER" = sue@somewhere.org ] || exit 99
+  /home/b1ff/mail/sue/
+  # Skip all further processing.
+  ?done
+  :test
+
+  # Is this a copy of a mailing list message?
+  ?test iftocc `cat lists` || exit 99
+  # Bounce this copy.
+  |cat duplicate; exit 100
+  :test
+
+  # Deliver to the default mailbox.
+  /home/b1ff/mail/main/
+.EE
+
+\fBqmail-local\fR will deliver the message to the command just as it does for a |command line,
+and if the command exits with status 99, qmail-local will skip down to the :label line;
+delivery instructions in the intervening lines are ignored. If the command exits with status
+other than 99, the result is the same as with a |command line. :label lines are otherwise
+ignored, just like #comment lines.
+
+A label is a (possibly empty) sequence of non-space, non-tab, nonzero bytes. Text following a
+label on a ":" line is ignored. If there is no command on a ?label line, it's an unconditional
+jump. If a command exits 99 and the corresponding label is not found, all following delivery
+instructions are skipped (as with |command). There are no backward jumps.
+
+This makes the \fB.qmail\fR language a little more useful, IMO, but not enough to cause trouble.
+(You get if-then-else, but no loops.) The syntax is a little ugly, but it gets the job done.
+The same functionality is already available with |command lines, but then you need multiple
+\fB.qmail\fR files, which exposes extra addresses to outside senders, so it gets a little more
+complicated.
+
 .PP
 If
 .B .qmail

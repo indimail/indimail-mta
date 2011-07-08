@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-local.c,v $
+ * Revision 1.23  2011-07-07 19:55:08+05:30  Cprogrammer
+ * added branch logic
+ *
  * Revision 1.22  2010-08-09 18:30:41+05:30  Cprogrammer
  * use different archival rules for forwarding/aliases to prevent duplication
  * when sending to groups
@@ -1123,6 +1126,7 @@ main(int argc, char **argv)
 					break;
 				strerr_die1x(111, "Uh-oh: first line of .qmail file is blank. (#4.2.1)");
 			case '#':
+			case ':':
 				break;
 			case '.':
 			case '/':
@@ -1149,6 +1153,54 @@ main(int argc, char **argv)
 					mailprogram(cmds.s + i + 1);
 				else
 					sayit("program ", cmds.s + i + 1, k - i - 1);
+				break;
+			case '?': /* branch */
+				++i;
+				{
+					int             l;
+					for (l = i; l < k; ++l)
+						if (cmds.s[l] == ' ' || cmds.s[l] == '\t') {
+							cmds.s[l] = 0;
+							for (++l; l < k; ++l)
+								if (cmds.s[l] != ' ' && cmds.s[l] != '\t') {
+									++count_program;
+									if (flagforwardonly)
+										strerr_die1x(111, "Uh-oh: .qmail has prog delivery but has x bit set. (#4.7.0)");
+									if (flagdoit)
+										mailprogram(cmds.s + l);
+									else
+										sayit("program ", cmds.s + l, k - l);
+									break;
+								}
+							break;
+						}
+					if (l == k || flag99) {
+						flag99 = 0;
+						cmds.s[j] = '\n';
+						for (; j + 1 < cmds.len; ++j)
+							if (cmds.s[j] == '\n' && cmds.s[j + 1] == ':') {
+								j += 2;
+								l = j;
+								for (; j < cmds.len; ++j) {
+									if (cmds.s[j] == 0)
+										break;
+									if (cmds.s[j] == '\t')
+										break;
+									if (cmds.s[j] == '\n')
+										break;
+									if (cmds.s[j] == ' ')
+										break;
+								}
+								if (!str_diffn(cmds.s + i, cmds.s + l, j - l)) {
+									for (; j < cmds.len; ++j)
+										if (cmds.s[j] == '\n')
+											break;
+									break;
+								}
+								--j;
+							}
+					}
+				}
 				break;
 			case '+':
 				if (str_equal(cmds.s + i + 1, "list"))
@@ -1186,7 +1238,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_local_c()
 {
-	static char    *x = "$Id: qmail-local.c,v 1.22 2010-08-09 18:30:41+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: qmail-local.c,v 1.23 2011-07-07 19:55:08+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
