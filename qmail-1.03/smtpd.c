@@ -1,5 +1,8 @@
 /*
  * $Log: smtpd.c,v $
+ * Revision 1.153  2011-07-08 13:48:08+05:30  Cprogrammer
+ * execute plugins towards the end of MAIL, RCPT, DATA functions
+ *
  * Revision 1.152  2011-04-17 18:31:32+05:30  Cprogrammer
  * multiple plugin feature
  *
@@ -603,7 +606,7 @@ int             wildmat_internal(char *, char *);
 int             ssl_rfd = -1, ssl_wfd = -1;	/*- SSL_get_Xfd() are broken */
 char           *servercert, *clientca, *clientcrl;
 #endif
-char           *revision = "$Revision: 1.152 $";
+char           *revision = "$Revision: 1.153 $";
 char           *protocol = "SMTP";
 stralloc        proto = { 0 };
 static stralloc Revision = { 0 };
@@ -3599,18 +3602,6 @@ smtp_mail(char *arg)
 		}
 		break;
 	}
-#ifdef SMTP_PLUGIN
-	for (i = 0;i < plugin_count;i++)
-	{
-		if (!plug[i] || !plug[i]->mail_func)
-			continue;
-		if (plug[i]->mail_func(remoteip, addr.s, &mesg))
-		{
-			out(mesg);
-			return;
-		}
-	}
-#endif
 	if (!(ret = tablematch("hostaccess", remoteip, addr.s + str_chr(addr.s, '@'))))
 	{
 		err_hostaccess(remoteip, addr.s);
@@ -3947,7 +3938,18 @@ smtp_mail(char *arg)
 			return;
 		}
 	}
-	out("250 ok\r\n");
+#ifdef SMTP_PLUGIN
+	for (i = 0;i < plugin_count;i++)
+	{
+		if (!plug[i] || !plug[i]->mail_func)
+			continue;
+		if (plug[i]->mail_func(remoteip, addr.s, &mesg))
+		{
+			out(mesg);
+			return;
+		}
+	}
+#endif
 #if BATV
 	if (batvok)
 	{
@@ -3963,6 +3965,7 @@ smtp_mail(char *arg)
 		}
 	}
 #endif /*- BATV*/
+	out("250 ok\r\n");
 }
 
 void
@@ -4023,18 +4026,6 @@ smtp_rcpt(char *arg)
 		err_relay();
 		return;
 	}
-#ifdef SMTP_PLUGIN
-	for (i = 0;i < plugin_count;i++)
-	{
-		if (!plug[i] || !plug[i]->rcpt_func)
-			continue;
-		if (plug[i]->rcpt_func(remoteip, mailfrom.s, addr.s, &mesg))
-		{
-			out(mesg);
-			return;
-		}
-	}
-#endif
 	/*- goodrcpt, goodrcptpatterns */
 	switch (address_match(grcptFn, &addr, chkgrcptok ? &grcpt : 0, chkgrcptok ? &mapgrcpt : 0, chkgrcptokp ? &grcptp : 0, &errStr))
 	{
@@ -4216,26 +4207,38 @@ smtp_rcpt(char *arg)
 		return;
 	}
 #endif
+#ifdef SMTP_PLUGIN
+	for (i = 0;i < plugin_count;i++)
+	{
+		if (!plug[i] || !plug[i]->rcpt_func)
+			continue;
+		if (plug[i]->rcpt_func(remoteip, mailfrom.s, addr.s, &mesg))
+		{
+			out(mesg);
+			return;
+		}
+	}
+#endif
+	/*- Check on max. number of RCPTS */
+	if (maxrcptcount > 0 && (rcptcount + 1) > maxrcptcount)
+	{
+		err_mrc(remoteip, mailfrom.s, arg);
+		return;
+	}
+	if (tarpitcount && (rcptcount + 1) >= tarpitcount)
+		while (sleep(tarpitdelay));	/*- TARPIT Delay */
+	if (mailfrom.len == 1 && (rcptcount + 1) > 1)
+	{
+		err_badbounce();
+		return;
+	}
+	rcptcount++;
 	if (!stralloc_cats(&rcptto, "T"))
 		die_nomem();
 	if (!stralloc_cats(&rcptto, addr.s))
 		die_nomem();
 	if (!stralloc_0(&rcptto))
 		die_nomem();
-	rcptcount++;
-	/*- Check on max. number of RCPTS */
-	if (maxrcptcount > 0 && rcptcount > maxrcptcount)
-	{
-		err_mrc(remoteip, mailfrom.s, arg);
-		return;
-	}
-	if (tarpitcount && rcptcount >= tarpitcount)
-		while (sleep(tarpitdelay));	/*- TARPIT Delay */
-	if (mailfrom.len == 1 && rcptcount > 1)
-	{
-		err_badbounce();
-		return;
-	}
 	out("250 ok\r\n");
 }
 
@@ -4764,18 +4767,6 @@ smtp_data(char *arg)
 		linetype = ' ';
 		virus_desc = "";
 	}
-#ifdef SMTP_PLUGIN
-	for (i = 0;i < plugin_count;i++)
-	{
-		if (!plug[i] || !plug[i]->data_func)
-			continue;
-		if (plug[i]->data_func(local, remoteip, remotehost, remoteinfo, &mesg))
-		{
-			out(mesg);
-			return;
-		}
-	}
-#endif
 	create_logfilter();
 	if (qmail_open(&qqt) == -1)
 	{
@@ -4844,6 +4835,18 @@ smtp_data(char *arg)
 		out("554 ");
 	else
 		out("451 ");
+#ifdef SMTP_PLUGIN
+	for (i = 0;i < plugin_count;i++)
+	{
+		if (!plug[i] || !plug[i]->data_func)
+			continue;
+		if (plug[i]->data_func(local, remoteip, remotehost, remoteinfo, &mesg))
+		{
+			out(mesg);
+			return;
+		}
+	}
+#endif
 	out(qqx + 1);
 	out("\r\n");
 	err_queue(remoteip, mailfrom.s, rcptto.s, rcptto.len,
@@ -6138,7 +6141,7 @@ addrrelay() /*- Rejection of relay probes. */
 void
 getversion_smtpd_c()
 {
-	static char    *x = "$Id: smtpd.c,v 1.152 2011-04-17 18:31:32+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: smtpd.c,v 1.153 2011-07-08 13:48:08+05:30 Cprogrammer Exp mbhangui $";
 
 #ifdef INDIMAIL
 	x = sccsidh;
