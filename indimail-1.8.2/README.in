@@ -272,7 +272,8 @@ Some of the features available in this package
 56. Ability to distribute QMQP traffic across servers.
 57. Abuse Report Format Generator using qarf
 58. Auto provision users in proxyimap/proxypop3
-59. Updated man pages.
+59. DNSBL Support (DNS Blacklist) Author fabio.busatto@sikurezza.org
+60. Updated man pages.
 
 You can take a detailed look at the feature list at
 
