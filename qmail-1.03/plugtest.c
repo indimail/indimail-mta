@@ -1,5 +1,8 @@
 /*
  * $Log: plugtest.c,v $
+ * Revision 1.3  2011-07-08 13:47:27+05:30  Cprogrammer
+ * added setting of authenticated, relayclient variables
+ *
  * Revision 1.2  2011-04-19 20:51:24+05:30  Cprogrammer
  * added checking of arguments
  *
@@ -22,6 +25,8 @@
 
 #define FATAL "plugtest: fatal: "
 
+int              authenticated;
+char            *relayclient;
 PLUGIN         **plug = (PLUGIN **) 0;
 void           **handle;
 
@@ -74,12 +79,16 @@ load_plugin(char *library, char *plugin_symb, int j)
 {
 	PLUGIN         *(*func) (void);
 	char           *error;
+	char            strnum[FMT_ULONG];
 
-	out("loading plugin ");
+	out("plugin ");
+	strnum[fmt_ulong(strnum, j)] = 0;
+	out(strnum);
+	out(": ");
 	out(library);
 	out("\n");
 	flush();
-	if (!(handle[j] = dlopen(library, RTLD_LAZY|RTLD_GLOBAL)))
+	if (!(handle[j] = dlopen(library, RTLD_NOW|RTLD_GLOBAL)))
 		die_plugin("plugtest: dlopen failed for ", library, ": ", dlerror());
 	dlerror(); /*- man page told me to do this */
 	*(void **) (&func) = dlsym(handle[j], plugin_symb);
@@ -109,8 +118,12 @@ main(int argc, char **argv)
 
 	mail_opt = rcpt_opt = data_opt = 0;
 	localip = remoteip = remotehost = mailfrom = (char *) 0;
-	while ((opt = getopt(argc, argv, "MTDr:R:l:m:")) != opteof) {
+	while ((opt = getopt(argc, argv, "MTDiIr:R:l:m:")) != opteof) {
 		switch (opt) {
+		case 'i':
+			authenticated = 1;
+		case 'I':
+			relayclient = "";
 		case 'r':
 			remoteip = optarg;
 			break;
@@ -170,6 +183,8 @@ main(int argc, char **argv)
 			_exit(100);
 		}
 	}
+	if (chdir(auto_qmail) == -1)
+		strerr_die2sys(111, FATAL, auto_qmail);
 	if (!(plugindir = env_get("PLUGINDIR")))
 		plugindir = "plugins";
 	if (plugindir[i = str_chr(plugindir, '/')])
@@ -292,6 +307,11 @@ main(int argc, char **argv)
 				out(": mail plugin returned non-zero: ");
 				out(mesg);
 				status = 1;
+			} else {
+				out("plugin ");
+				strnum[fmt_ulong(strnum, i)] = 0;
+				out(strnum);
+				out(": from plugin success\n");
 			}
 		}
 		if (rcpt_opt) {
@@ -310,6 +330,11 @@ main(int argc, char **argv)
 						out(": rcpt plugin returned non-zero: ");
 						out(mesg);
 						status = 1;
+					} else {
+						out("plugin ");
+						strnum[fmt_ulong(strnum, i)] = 0;
+						out(strnum);
+						out(": rcpt plugin success\n");
 					}
 				}
 			}
@@ -331,6 +356,11 @@ main(int argc, char **argv)
 						out(": data plugin returned non-zero: ");
 						out(mesg);
 						status = 1;
+					} else {
+						out("plugin ");
+						strnum[fmt_ulong(strnum, i)] = 0;
+						out(strnum);
+						out(": data plugin success\n");
 					}
 				}
 			}
@@ -346,7 +376,7 @@ main(int argc, char **argv)
 void
 getversion_plugtest_c()
 {
-	static char    *x = "$Id: plugtest.c,v 1.2 2011-04-19 20:51:24+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: plugtest.c,v 1.3 2011-07-08 13:47:27+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
