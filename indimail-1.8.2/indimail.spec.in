@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail.spec.in,v 2.226 2011-07-04 17:42:24+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 2.227 2011-07-08 22:02:45+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %define _unpackaged_files_terminate_build 1
 
@@ -1378,6 +1378,7 @@ fi
 
 %attr(555,root,qmail)                   %{_prefix}/plugins/generic.so
 %attr(555,root,qmail)                   %{_prefix}/plugins/smtpd-plugin.so
+%attr(555,root,qmail)                   %{_prefix}/plugins/smtpd-plugin0.so
 
 %attr(555,root,root)                    %{_prefix}/modules/background
 %attr(555,root,root)                    %{_prefix}/modules/alarms
