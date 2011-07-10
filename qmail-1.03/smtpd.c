@@ -1,5 +1,8 @@
 /*
  * $Log: smtpd.c,v $
+ * Revision 1.154  2011-07-08 22:04:00+05:30  Cprogrammer
+ * added logging of plugin errors to fd 2
+ *
  * Revision 1.153  2011-07-08 13:48:08+05:30  Cprogrammer
  * execute plugins towards the end of MAIL, RCPT, DATA functions
  *
@@ -606,7 +609,7 @@ int             wildmat_internal(char *, char *);
 int             ssl_rfd = -1, ssl_wfd = -1;	/*- SSL_get_Xfd() are broken */
 char           *servercert, *clientca, *clientcrl;
 #endif
-char           *revision = "$Revision: 1.153 $";
+char           *revision = "$Revision: 1.154 $";
 char           *protocol = "SMTP";
 stralloc        proto = { 0 };
 static stralloc Revision = { 0 };
@@ -3921,7 +3924,6 @@ smtp_mail(char *arg)
 		return;
 	}
 #endif /*- #ifdef USE_SPF */
-	seenmail = 1;
 	/*- authdomains */
 	if (chkdomok)
 	{
@@ -3946,6 +3948,14 @@ smtp_mail(char *arg)
 		if (plug[i]->mail_func(remoteip, addr.s, &mesg))
 		{
 			out(mesg);
+			logerr("qmail-smtpd: ");
+			logerrpid();
+			logerr("plugin(from)[");
+			strnum[fmt_ulong(strnum, i)] = 0;
+			logerr(strnum);
+			logerr("]: ");
+			logerr(mesg);
+			logerrf("\n");
 			return;
 		}
 	}
@@ -3965,6 +3975,7 @@ smtp_mail(char *arg)
 		}
 	}
 #endif /*- BATV*/
+	seenmail = 1;
 	out("250 ok\r\n");
 }
 
@@ -4215,6 +4226,14 @@ smtp_rcpt(char *arg)
 		if (plug[i]->rcpt_func(remoteip, mailfrom.s, addr.s, &mesg))
 		{
 			out(mesg);
+			logerr("qmail-smtpd: ");
+			logerrpid();
+			logerr("plugin(rcpt)[");
+			strnum[fmt_ulong(strnum, i)] = 0;
+			logerr(strnum);
+			logerr("]: ");
+			logerr(mesg);
+			logerrf("\n");
 			return;
 		}
 	}
@@ -4731,9 +4750,9 @@ smtp_data(char *arg)
 	if (greyip && !relayclient)
 	{
 #ifdef IPV6
-		switch(greylist(greyip, remoteip4, mailfrom.s, rcptto.s, rcptto.len, err_greytimeout, err_grey_tmpfail))
+		switch (greylist(greyip, remoteip4, mailfrom.s, rcptto.s, rcptto.len, err_greytimeout, err_grey_tmpfail))
 #else
-		switch(greylist(greyip, remoteip, mailfrom.s, rcptto.s, rcptto.len, err_greytimeout, err_grey_tmpfail))
+		switch (greylist(greyip, remoteip, mailfrom.s, rcptto.s, rcptto.len, err_greytimeout, err_grey_tmpfail))
 #endif
 		{
 		case 1: /*- success */
@@ -4786,17 +4805,37 @@ smtp_data(char *arg)
 	spfreceived();
 #endif
 	blast(&hops); 
+	hops = (hops >= maxhops);
+	if (hops)
+		qmail_fail(&qqt);
+#ifdef SMTP_PLUGIN
+	for (i = 0;i < plugin_count;i++)
+	{
+		if (!plug[i] || !plug[i]->data_func)
+			continue;
+		if (plug[i]->data_func(local, remoteip, remotehost, remoteinfo, &mesg))
+		{
+			out(mesg);
+			logerr("qmail-smtpd: ");
+			logerrpid();
+			logerr("plugin(data)[");
+			strnum[fmt_ulong(strnum, i)] = 0;
+			logerr(strnum);
+			logerr("]: ");
+			logerr(mesg);
+			logerrf("\n");
+			return;
+		}
+	}
+#endif
+	qmail_from(&qqt, mailfrom.s);
+	qmail_put(&qqt, rcptto.s, rcptto.len);
 	/* 
 	 * RFC 1047, In case we are accepting the mail
 	 * we should immediately respond
 	 * back to client as early as possible to
 	 * avoid message duplication
 	 */
-	hops = (hops >= maxhops);
-	if (hops)
-		qmail_fail(&qqt);
-	qmail_from(&qqt, mailfrom.s);
-	qmail_put(&qqt, rcptto.s, rcptto.len);
 	qqx = qmail_close(&qqt);
 	if (!*qqx) /*- mail is now in queue */
 	{
@@ -4804,6 +4843,7 @@ smtp_data(char *arg)
 		log_trans(remoteip, mailfrom.s, rcptto.s, rcptto.len, authd ? remoteinfo : 0, 0);
 		return;
 	}
+	/*- you will reach here if qmail_fail() was called or if qmail_close returns error */
 	if (flagexecutable || flagbody)
 	{
 		sigsok = sigsok_orig;
@@ -4835,18 +4875,6 @@ smtp_data(char *arg)
 		out("554 ");
 	else
 		out("451 ");
-#ifdef SMTP_PLUGIN
-	for (i = 0;i < plugin_count;i++)
-	{
-		if (!plug[i] || !plug[i]->data_func)
-			continue;
-		if (plug[i]->data_func(local, remoteip, remotehost, remoteinfo, &mesg))
-		{
-			out(mesg);
-			return;
-		}
-	}
-#endif
 	out(qqx + 1);
 	out("\r\n");
 	err_queue(remoteip, mailfrom.s, rcptto.s, rcptto.len,
@@ -6141,7 +6169,7 @@ addrrelay() /*- Rejection of relay probes. */
 void
 getversion_smtpd_c()
 {
-	static char    *x = "$Id: smtpd.c,v 1.153 2011-07-08 13:48:08+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: smtpd.c,v 1.154 2011-07-08 22:04:00+05:30 Cprogrammer Exp mbhangui $";
 
 #ifdef INDIMAIL
 	x = sccsidh;
