@@ -1,5 +1,8 @@
 /*
  * $Log: dnsbl.c,v $
+ * Revision 1.2  2011-07-08 22:03:25+05:30  Cprogrammer
+ * added comment
+ *
  * Revision 1.1  2011-07-08 13:45:44+05:30  Cprogrammer
  * Initial revision
  *
@@ -40,7 +43,9 @@ die_dnsbl(char **mesg)
 }
 
 /*-
- * dnsbl patch
+ * dnsbl function
+ * adapted from
+ * http://qmail-dnsbl.sourceforge.net/
  * Author fabio.busatto@sikurezza.org
  */
 
@@ -126,7 +131,7 @@ dnsblcheck(char **mesg, char *remoteip)
 }
 
 static int
-from_plug_1(char *remoteip, char *from, char **mesg)
+mailfrom_hook(char *remoteip, char *from, char **mesg)
 {
 	char           *x;
 
@@ -145,6 +150,10 @@ from_plug_1(char *remoteip, char *from, char **mesg)
 	return (0);
 }
 
+/*-
+ * plugin_init() will be the function called by qmail-smtpd using
+ * dlsym()
+ */
 PLUGIN         *
 plugin_init()
 {
@@ -152,7 +161,7 @@ plugin_init()
 	PLUGIN         *ptr;
 
 	ptr = &plug;
-	ptr->mail_func = from_plug_1;
+	ptr->mail_func = mailfrom_hook;
 	ptr->rcpt_func = 0;
 	ptr->data_func = 0;
 	return &plug;
@@ -161,6 +170,6 @@ plugin_init()
 void
 getversion_dnsbl_c()
 {
-	static char    *x = "$Id: dnsbl.c,v 1.1 2011-07-08 13:45:44+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: dnsbl.c,v 1.2 2011-07-08 22:03:25+05:30 Cprogrammer Exp mbhangui $";
 	x++;
 }
