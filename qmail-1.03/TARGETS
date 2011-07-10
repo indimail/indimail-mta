@@ -991,3 +991,5 @@ plugtest
 plugtest.o
 plugtest.1
 plugin_init.3
+smtpd-plugin0.so
+dnsbl.o
