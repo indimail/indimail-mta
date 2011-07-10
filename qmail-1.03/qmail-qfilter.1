@@ -17,7 +17,7 @@ become the input to either the next filter, or
 .BR qmail-multi .
 If the filter does not modify the message it passes unchanged to the
 next step.
-It also makes the envelope avaliable to each filter as
+It also makes the envelope available to each filter as
 file descriptor 3.  File descriptor 4 is opened to a new temporary file for the
 modified envelope, allowing the filter to modify the envelope or the
 message.  If the filter does not modify the envelope, the envelope
@@ -40,10 +40,9 @@ Returns 91 (bad envelope data) if it can't read or parse the envelope
 data.
 If a filter returns anything other than 0 or 99,
 .B qmail-qfilter
-returns its exit code.
-If a filter returns 99,
-.B qmail-qfilter
-returns 0 immediately without running any other filters.
+returns its exit code. If your filter exits 88, you can put your custom error string
+on standard error. This enables client like \fBqmail-smtpd\fR to report the error. If a
+filter returns 99, \fBqmail-qfilter\fR returns 0 immediately without running any other filters.
 Otherwise returns the exit code of
 .BR qmail-multi .
 .SH ENVIRONMENT
