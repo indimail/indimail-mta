@@ -5245,14 +5245,12 @@ compile ldap-checkpwd.c error.h stralloc.h pathexec.h str.h env.h scan.h \
 subfd.h substdio.h strerr.h hasldap.h
 	./compile -DLDAP_DEPRECATED ldap-checkpwd.c
 ################### PLUGINS ########################################
-smtpd-plugin0.so: dnsbl.o control.o variables.o scan_ulong.o stralloc.a \
-now.o
+smtpd-plugin0.so: dnsbl.o
 	if test $(SYSTEM) = Darwin ; then \
-	$(LD) -bundle -undefined dynamic_lookup -o smtpd-plugin0.so \
-	dnsbl.o control.o variables.o scan_ulong.o stralloc.a now.o; \
+	$(LD) -bundle -undefined dynamic_lookup -o smtpd-plugin0.so dnsbl.o; \
 	else \
-	$(CC) -shared -rdynamic -nostartfiles -fPIC -s -O4 -o smtpd-plugin0.so \
-	dnsbl.o control.o variables.o scan_ulong.o stralloc.a now.o; fi
+	$(CC) -shared -rdynamic -nostartfiles -fPIC -s -O4 -o smtpd-plugin0.so dnsbl.o; \
+	fi
 dnsbl.o: compile dnsbl.c smtp_plugin.h stralloc.h dns.h env.h control.h
 	./compile dnsbl.c
 
