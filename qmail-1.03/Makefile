@@ -1213,7 +1213,7 @@ serialcmd maildircmd rewind relaytest qmail-qfilter sys-checkpwd ldap-checkpwd \
 iftocc ofmipd ofmipname 822field new-inject 822date 822received 822print \
 tokenize addrlist qquote parsedate qmail-greyd greydaemon \
 analyzer qtools qlog viruscanner update_tmprsadh dknewkey \
-dktest dot-forward batv balance_outgoing qarf plugtest \
+dktest dot-forward batv balance_outgoing qarf plugtest surblfilter \
 fastforward printforward setforward newaliases printmaillist \
 setmaillist newinclude sortedtest logselect mbox2maildir \
 envdir envuidgid fghack multilog pgrphack readproctitle setlock \
@@ -5244,6 +5244,42 @@ ldap-checkpwd.o: \
 compile ldap-checkpwd.c error.h stralloc.h pathexec.h str.h env.h scan.h \
 subfd.h substdio.h strerr.h hasldap.h
 	./compile -DLDAP_DEPRECATED ldap-checkpwd.c
+
+str_cspn.o: \
+compile str.h str_cspn.c
+	./compile str_cspn.c
+
+surblfilter: \
+load surblfilter.o envread.o strerr_die.o strerr_sys.o \
+control.o alloc.o alloc_re.o error.o \
+error_str.o variables.o auto_qmail.o \
+case_startb.o byte_diff.o str_cspn.o \
+byte_copy.o byte_chr.o byte_rchr.o byte_cr.o \
+getln.o getln2.o open_read.o str_len.o str_diffn.o \
+str_cpy.o str_chr.o scan_xlong.o strsalloc.o \
+now.o scan_ulong.o mess822_ok.o constmap.o \
+ip.o dns.o ipalloc.o fmt_str.o fmt_ulong.o \
+socket_v6any.o socket_v4mappedprefix.o \
+case_diffb.o stralloc.a substdio.a
+	./load surblfilter envread.o strerr_die.o strerr_sys.o \
+	control.o alloc.o alloc_re.o error.o \
+	error_str.o variables.o auto_qmail.o \
+	case_startb.o byte_diff.o str_cspn.o \
+	byte_copy.o byte_chr.o byte_rchr.o byte_cr.o \
+	getln.o getln2.o open_read.o str_len.o str_diffn.o \
+	str_cpy.o str_chr.o scan_xlong.o strsalloc.o \
+	now.o scan_ulong.o mess822_ok.o constmap.o \
+	ip.o dns.o ipalloc.o fmt_str.o fmt_ulong.o \
+	socket_v6any.o socket_v4mappedprefix.o \
+	case_diffb.o stralloc.a substdio.a -lresolv
+
+surblfilter.o: \
+compile surblfilter.c alloc.h error.h str.h case.h \
+constmap.h auto_qmail.h stralloc.h env.h control.h \
+strerr.h substdio.h getln.h byte.h dns.h ip.h \
+ipalloc.h mess822.h
+	./compile surblfilter.c
+
 ################### PLUGINS ########################################
 smtpd-plugin0.so: dnsbl.o
 	if test $(SYSTEM) = Darwin ; then \
