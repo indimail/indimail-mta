@@ -993,3 +993,6 @@ plugtest.1
 plugin_init.3
 smtpd-plugin0.so
 dnsbl.o
+str_cspn.o
+surblfilter.o
+surblfilter
