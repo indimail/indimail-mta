@@ -1,5 +1,8 @@
 /*
  * $Log: str.h,v $
+ * Revision 1.6  2011-07-12 20:42:33+05:30  Cprogrammer
+ * added str_cspn() function
+ *
  * Revision 1.5  2004-10-24 21:39:53+05:30  Cprogrammer
  * added prototype for str_chrn()
  *
@@ -25,6 +28,8 @@ unsigned int    str_chr(char *, int);
 unsigned int    str_rchr(char *, int);
 int             str_start(char *, char *);
 char           *str_chrn(char *, int, int);
+#include <sys/types.h>
+size_t          str_cspn(const char *, register const char *);
 
 #define str_equal(s,t) (!str_diff((s),(t)))
 
