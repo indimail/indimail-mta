@@ -1,5 +1,8 @@
 /* 
  * $Log: qmail-qfilter.c,v $
+ * Revision 1.9  2011-07-13 20:56:18+05:30  Cprogrammer
+ * removed useless close()
+ *
  * Revision 1.8  2011-02-17 22:11:19+05:30  Cprogrammer
  * lseek envelope fd
  *
@@ -327,7 +330,6 @@ mktmpfd(int fd)
 {
 	int             tmp;
 
-	close(fd);
 	tmp = mktmpfile();
 	move_fd(tmp, fd);
 }
@@ -347,7 +349,8 @@ move_unless_empty(int src, int dst, const void *reopen, size_t * var)
 			if (src == ENVOUT)
 				parse_envelope();
 		}
-	} else if (!reopen)
+	} else
+	if (!reopen)
 		close(src);
 	if (lseek(dst, 0, SEEK_SET) != 0)
 	{
@@ -454,7 +457,7 @@ main(int argc, char *argv[])
 void
 getversion_qmail_qfilter_c()
 {
-	static char    *x = "$Id: qmail-qfilter.c,v 1.8 2011-02-17 22:11:19+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: qmail-qfilter.c,v 1.9 2011-07-13 20:56:18+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
