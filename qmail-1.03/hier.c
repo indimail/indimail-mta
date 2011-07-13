@@ -510,6 +510,7 @@ hier(inst_dir)
 	c(auto_qmail_home, "bin", "qmail-lint", auto_uido, auto_gidq, 0555);
 	c(auto_qmail_home, "bin", "qmail-multi", auto_uido, auto_gidq, 0555);
 	c(auto_qmail_home, "bin", "qmail-qfilter", auto_uido, auto_gidq, 0555);
+	c(auto_qmail_home, "bin", "surblfilter", auto_uido, auto_gidq, 0555);
 	c(auto_qmail_home, "bin", "spawn-filter", auto_uido, auto_gidq, 0555);
 	c(auto_qmail_home, "bin", "qmail-cat", auto_uido, auto_gidq, 0555);
 	c(auto_qmail_home, "bin", "qmail-poppass", auto_uido, auto_gidq, 0555);
@@ -1072,6 +1073,7 @@ hier(inst_dir)
 #endif
 	c(auto_qmail_home, "man/man8", "qmail-multi.8", auto_uido, auto_gidq, 0444);
 	c(auto_qmail_home, "man/cat8", "qmail-multi.0", auto_uido, auto_gidq, 0444);
+	c(auto_qmail_home, "man/man8", "surblfilter.8", auto_uido, auto_gidq, 0444);
 	c(auto_qmail_home, "man/man1", "plugtest.1", auto_uido, auto_gidq, 0444);
 	c(auto_qmail_home, "man/man1", "qmail-qfilter.1", auto_uido, auto_gidq, 0444);
 	c(auto_qmail_home, "man/cat1", "qmail-qfilter.0", auto_uido, auto_gidq, 0444);

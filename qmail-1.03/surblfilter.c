@@ -1,15 +1,30 @@
 /*
- * $Log: $
+ * $Log: surblfilter.c,v $
+ * Revision 1.1  2011-07-13 20:56:34+05:30  Cprogrammer
+ * Initial revision
+ *
  */
 #include <unistd.h>
+#include <fcntl.h>
 #include <errno.h>
 #include <ctype.h>
+#include <time.h>
+#include <sys/stat.h>
 
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
+#ifdef DARWIN
+#include <nameser8_compat.h>
+#endif
+#include <arpa/nameser.h>
+#include <resolv.h>
+#include <netdb.h>
 
+#include "alloc.h"
+#include "sgetopt.h"
 #include "error.h"
+#include "scan.h"
 #include "str.h"
 #include "case.h"
 #include "constmap.h"
@@ -31,18 +46,24 @@
 char           *dns_text(char *);
 
 stralloc        line = { 0 };
-int             match, debug;
+int             debug = 0, do_text = 0, do_cache = 1;
 static int      cachelifetime = 300;
 stralloc        whitelist = { 0 };
 stralloc        surbldomain = { 0 };
 
-/*
- * SURBL: RCPT whitelist. 
- */
+/*- SURBL: RCPT whitelist. */
 stralloc        srw = { 0 };
-
 int             srwok = 0;
 struct constmap mapsrw;
+
+/*- 2 level tld */
+stralloc        l2 = { 0 };
+int             l2ok = 0;
+struct constmap mapl2;
+/*- 3 level tld */
+stralloc        l3 = { 0 };
+int             l3ok = 0;
+struct constmap mapl3;
 
 static char     ssinbuf[1024];
 static substdio ssin = SUBSTDIO_FDBUF(read, 0, ssinbuf, sizeof ssinbuf);
@@ -64,11 +85,15 @@ out(char *str)
 void
 print_debug(char *arg1, char *arg2, char *arg3)
 {
+	if (!debug)
+		return;
 	if (arg1 && substdio_puts(&sserr, arg1) == -1)
 		_exit(1);
 	if (arg2 && substdio_puts(&sserr, arg2) == -1)
 		_exit(1);
 	if (arg3 && substdio_puts(&sserr, arg3) == -1)
+		_exit(1);
+	if ((arg1 || arg2 || arg3) && substdio_puts(&sserr, "\n"))
 		_exit(1);
 	if (substdio_flush(&sserr) == -1)
 		_exit(1);
@@ -109,15 +134,18 @@ void
 my_error(char *s1, char *s2, int exit_val)
 {
 	logerr(s1);
-	logerr(": ");
 	if (s2)
 	{
-		logerr(s2);
 		logerr(": ");
+		logerr(s2);
 	}
-	logerr(error_str(errno));
+	if (exit_val > 0)
+	{
+		logerr(": ");
+		logerr(error_str(errno));
+	}
 	logerrf("\n");
-	_exit(exit_val);
+	_exit(exit_val > 0 ? exit_val : 0 - exit_val);
 }
 
 void
@@ -134,6 +162,7 @@ die_soft()
 {
 	substdio_flush(&ssout);
 	substdio_puts(&sserr, "surblfilter: DNS temporary failure\n");
+	substdio_flush(&sserr);
 	_exit(1);
 }
 
@@ -142,6 +171,7 @@ die_hard()
 {
 	substdio_flush(&ssout);
 	substdio_puts(&sserr, "surblfilter: DNS permanent failure\n");
+	substdio_flush(&sserr);
 	_exit(1);
 }
 
@@ -154,24 +184,95 @@ die_control()
 	_exit(1);
 }
 
-/*
- * SURBL: Check surbl rcpt whitelist. 
- */
-int
-srwcheck(char *arg, int len)
+static unsigned short
+getshort(unsigned char *cp)
 {
-	int             j;
+	return (cp[0] << 8) | cp[1];
+}
 
-	if (!srwok)
-		return 0;
-	if (constmap(&mapsrw, arg, len))
-		return 1;
-	if ((j = byte_rchr(arg, len, '@')) < (len - 1))
-	{
-		if (constmap(&mapsrw, arg + j, len - j))
-			return 1;
+static char *
+strdup(const char *str)
+{
+	size_t siz;
+	char *copy;
+
+	siz = str_len((char *) str) + 1;
+	if (!(copy = alloc(siz)))
+		return((char *) 0);
+	byte_copy(copy, siz, (char *) str);
+	return(copy);
+}
+
+/*
+ * we always return a null-terminated string which has been malloc'ed.  The string
+ * is always in the tag=value form.  If a temporary or permanent error occurs,
+ * the string will be exactly "e=perm;" or "e=temp;".
+ * Note that it never returns NULL.
+ */
+char           *
+dns_text(char *dn)
+{
+	u_char          response[PACKETSZ + 1];	/* response */
+	int             responselen;			/* buffer length */
+	int             rc;						/* misc variables */
+	int             ancount, qdcount;		/* answer count and query count */
+	u_short         type, rdlength;			/* fields of records returned */
+	u_char         *eom, *cp;
+	u_char          buf[PACKETSZ + 1];		/* we're storing a TXT record here, not just a DNAME */
+	u_char         *bufptr;
+
+	responselen = res_query(dn, C_IN, T_TXT, response, sizeof (response));
+	if (responselen < 0) {
+		if (h_errno == TRY_AGAIN)
+			return strdup("e=temp;");
+		else
+			return strdup("e=perm;");
 	}
-	return 0;
+	qdcount = getshort(response + 4);	/* http://crynwr.com/rfc1035/rfc1035.html#4.1.1. */
+	ancount = getshort(response + 6);
+	eom = response + responselen;
+	cp = response + HFIXEDSZ;
+	while (qdcount-- > 0 && cp < eom)
+	{
+		rc = dn_expand(response, eom, cp, (char *) buf, MAXDNAME);
+		if (rc < 0)
+			return strdup("e=perm;");
+		cp += rc + QFIXEDSZ;
+	}
+	while (ancount-- > 0 && cp < eom)
+	{
+		if ((rc = dn_expand(response, eom, cp, (char *) buf, MAXDNAME)) < 0)
+			return strdup("e=perm;");
+		cp += rc;
+		if (cp + RRFIXEDSZ >= eom)
+			return strdup("e=perm;");
+		type = getshort(cp + 0);	/* http://crynwr.com/rfc1035/rfc1035.html#4.1.3. */
+		rdlength = getshort(cp + 8);
+		cp += RRFIXEDSZ;
+		if (type != T_TXT)
+		{
+			cp += rdlength;
+			continue;
+		}
+		bufptr = buf;
+		while (rdlength && cp < eom)
+		{
+			unsigned int    cnt;
+
+			cnt = *cp++;		/* http://crynwr.com/rfc1035/rfc1035.html#3.3.14. */
+			if (bufptr - buf + cnt + 1 >= PACKETSZ)
+				return strdup("e=perm;");
+			if (cp + cnt > eom)
+				return strdup("e=perm;");
+			byte_copy((char *) bufptr, cnt, (char *) cp);
+			rdlength -= cnt + 1;
+			bufptr += cnt;
+			cp += cnt;
+			*bufptr = '\0';
+		}
+		return (char *) strdup((char *) buf);
+	}
+	return strdup("e=perm;");
 }
 
 static char    *
@@ -222,55 +323,9 @@ uri_decode(char *str, size_t str_len, char **strend)
 			break;
 		str[j] = tolower(str[i]);
 	}
-
 	str[j] = '\0';
 	*strend = str + j + 1;
 	return str;
-}
-
-/*
- * Chose this fairly inefficient method (compared to, for instance, a hash table
- * * or a binary search) because it makes the cctld list easy to adapt. 
- */
-int
-cctld(char *tld)
-{
-	static const char cctlds[] =
-		".ac.ae.ar.at.au.az.bb.bm.br.bs.ca.cn.co.cr.cu.cy.do.ec.eg.fj.ge.gg.gu.hk.hu.id.il.im.in.je.jo.jp.kh.kr.la.lb.lc.lv.ly.mm.mo.mt.mx.my.na.nc.ni.np.nz.pa.pe.ph.pl.py.ru.sg.sh.sv.sy.th.tn.tr.tw.ua.ug.uk.uy.ve.vi.yu.za";
-	const char     *ptr;
-
-	for (ptr = cctlds;*ptr;ptr++) {
-		if (*ptr == '.') {
-			if (!str_diffn((char *) ptr, tld, 3))
-				return 1;
-		}
-	}
-	return 0;
-}
-
-static void
-snipdomain(char **ouri, size_t urilen)
-{
-	char           *uri = *ouri;
-	int             parts = 2;
-	size_t          uripos = urilen;
-	int             partsreceived = 0;
-
-	while (uripos-- > 0) {
-		if (uri[uripos] == '.') {
-
-			if (partsreceived == 0) {
-				if (cctld(&uri[uripos]))
-					parts = 3;
-			}
-			partsreceived++;
-			if (partsreceived >= parts) {
-				uri = uri + uripos + 1;
-				break;
-			}
-		}
-	}
-	*ouri = uri;
 }
 
 /*
@@ -279,22 +334,70 @@ snipdomain(char **ouri, size_t urilen)
  *  0 if domain wasn't cached
  *  1 if domain was cached, and not blacklisted
  *  2 if domain was cached, and blacklisted.
- */
-static int
-cacheget(char *uri, size_t urilen, char **text)
-{
-	return (0);
-}
-
-/*
- * Returns 0 on success, -1 on error.
  *
- * text == NULL: host not blacklisted
  * text != NULL: host blacklisted, text == reason.
  */
 static int
-cacheadd(char *uri, size_t urilen, char *text)
+cachefunc(char *uri, size_t urilen, char **text, int flag)
 {
+	static char     inbuf[2048];
+	static stralloc cachefile = { 0 }, reason = { 0 };
+	int             fd, i, n, textlen, match;
+	struct stat     st;
+	substdio        ss;
+
+	if (!do_cache)
+		return (0);
+	if (uri[i = str_chr(uri, '/')])
+	{
+		errno = EINVAL;
+		return (-1);
+	}
+	if (access("control/cache", F_OK))
+		return (0);
+	if (!stralloc_copyb(&cachefile, "control/cache/", 14))
+		die_nomem();
+	if (!stralloc_cats(&cachefile, uri))
+		die_nomem();
+	if (!stralloc_0(&cachefile))
+		die_nomem();
+	if (flag) { /*- add the cache */
+		if (!access(cachefile.s, F_OK))
+			return (0);
+		if ((fd = open(cachefile.s, O_CREAT|O_WRONLY, *text ? 0600 : 0644)) == -1)
+			my_error(cachefile.s, 0, 2);
+		if (*text) {
+			textlen = str_len(*text);
+			if ((n = write(fd, *text, textlen)) == -1)
+				my_error("write", 0, 1);
+		}
+		close(fd);
+	} else {
+		if (stat(cachefile.s, &st) == -1) {
+			if (errno == ENOENT)
+				return (0);
+			my_error("stat", 0, 1);
+			return -1;
+		}
+		if (time(0) > st.st_mtime + cachelifetime) {
+			if (unlink(cachefile.s))
+			{
+				my_error("unlink", 0, 1);
+				return -1;
+			}
+			return (0);
+		}
+		if ((fd = open(cachefile.s, O_RDONLY)) == -1)
+			my_error(cachefile.s, 0, 2);
+		substdio_fdbuf(&ss, read, fd, inbuf, sizeof(inbuf));
+		if (getln(&ss, &reason, &match, '\n') == -1)
+		{
+			close(fd);
+			return -1;
+		}
+		*text = reason.s;
+		return (((st.st_mode & 07777) == 0600) ? 2 : 1);
+	}
 	return (0);
 }
 
@@ -303,42 +406,70 @@ cacheadd(char *uri, size_t urilen, char *text)
  * I chose the djbdns interface. 
  */
 static int
-getdnsip(stralloc *ip, stralloc *domain)
+getdnsip(stralloc *ip, stralloc *domain, int *code)
 {
 	char            x[IPFMT];
-	ipalloc         tip = { 0 };
+	ipalloc         ia = { 0 };
 	int             len;
 
-	if (stralloc_copys(ip, "") == 0)
-		return -1;
-	switch (dns_ip(&tip, domain))
+	if (!stralloc_copys(ip, ""))
+		die_nomem();
+	switch(dns_ip(&ia, domain))
 	{
 	case DNS_MEM:
 		die_nomem();
 	case DNS_SOFT:
 		die_soft();
 	case DNS_HARD:
-		die_hard(); /*- bruce willis in action */
+		return 0;
 	case 1:
-		if (tip.len <= 0)
+		if (ia.len <= 0)
 			die_soft();
 	}
-	switch (tip.ix->af)
-	{
-#ifdef IPV6
-	case AF_INET6:
-		len = ip6_fmt(x, &tip.ix->addr.ip6);
-		break;
-#endif
-	case AF_INET:
-		len = ip_fmt(x, &tip.ix->addr.ip);
-		break;
-	default:
-		return -1;
-	}
+	if (code)
+		*code = *(&ia.ix->addr.ip.d[3]);
+	len = ip_fmt(x, &ia.ix->addr.ip);
 	if (!stralloc_copyb(ip, x, len))
-		return -1;
+		die_nomem();
 	return 0;
+}
+
+/*- SURBL: Check surbl rcpt whitelist.  */
+int
+srwcheck(char *arg, int len)
+{
+	int             j;
+
+	if (!srwok)
+		return 0;
+	if (constmap(&mapsrw, arg, len))
+		return 1;
+	if ((j = byte_rchr(arg, len, '@')) < (len - 1))
+	{
+		if (constmap(&mapsrw, arg + j, len - j))
+			return 1;
+	}
+	return 0;
+}
+
+int
+l2check(char *arg, int len)
+{
+	if (!l2ok)
+		return (0);
+	if (constmap(&mapl2, arg, len))
+		return 1;
+	return (0);
+}
+
+int
+l3check(char *arg, int len)
+{
+	if (!l3ok)
+		return (0);
+	if (constmap(&mapl3, arg, len))
+		return 1;
+	return (0);
 }
 
 /*
@@ -347,48 +478,58 @@ getdnsip(stralloc *ip, stralloc *domain)
  * Returns 1 if host exists.
  */
 static int
-checkwhitelist(char *hostname)
+checkwhitelist(char *hostname, int hostlen)
 {
-	static stralloc ip = { 0 };
-	static stralloc host = { 0 };
-	int             token_len, len, hostlen;
+	int             len;
 	char           *ptr;
 
-	if (!whitelist.len)
-		return 0;
-	if (!stralloc_copys(&host, hostname))
-		die_nomem();
-	if (!stralloc_append(&host, "."))
-		die_nomem();
-	hostlen = host.len;
 	for (ptr = whitelist.s, len = 0;len < whitelist.len;)
 	{
-		len += ((token_len = str_len(ptr)) + 1);
-		if (!stralloc_catb(&host, ptr, token_len))
-			die_nomem();
-		if (!stralloc_0(&host))
-			die_nomem();
-		if (debug)
-			print_debug("checking whitelist: ", host.s, 0);
-		host.len--;
-		if (getdnsip(&ip, &host) == -1)
-			return -1;
-		if (ip.len >= 4)
-			return 1;
-		host.len = hostlen; /*- reset to where we started */
+		if (!str_diffn(hostname, ptr, hostlen))
+			return (1);
+		len += (str_len(ptr) + 1);
 		ptr = whitelist.s + len;
 	}
-	return 0;
+	return (0);
 }
 
 static int
-checksurbl(char *uri, char *surbldomain, char **text)
+getreason(int code, char **text)
+{
+	static stralloc reason = { 0 };
+
+	if (!stralloc_copyb(&reason, "blacklisted by ", 15))
+		die_nomem();
+	if (code & 64 && !stralloc_cats(&reason, debug ? "prolocation/jwspamspy" : "[jp]"))
+		die_nomem();
+	if (code & 32 && !stralloc_cats(&reason, debug ? "abusebutler " : "[ab]"))
+		die_nomem();
+	if (code & 16 && !stralloc_cats(&reason, debug ? "outblaze " : "[ob]"))
+		die_nomem();
+	if (code & 8 && !stralloc_cats(&reason, debug ? "phising " : "[ph]"))
+		die_nomem();
+	if (code & 2 && !stralloc_cats(&reason, debug ? "spamcop " : "[sc]"))
+		die_nomem();
+	if (code & 4 && !stralloc_cats(&reason, debug ? "w.stearns " : "[ws]"))
+		die_nomem();
+	if (!stralloc_0(&reason))
+		die_nomem();
+	*text = reason.s;
+	return (code >= 2);
+}
+
+static int
+checksurbl(char *uri, int urilen, char *surbldomain, char **text)
 {
 	static stralloc ip = { 0 };
 	static stralloc host = { 0 };
+	int             i, code = 0;
 
-	if (checkwhitelist(uri) == 1)
-		return 0;
+	if ((i = checkwhitelist(uri, urilen)) == -1)
+		return -1;
+	else
+	if (i)
+		return (0);
 	if (stralloc_copys(&host, uri) == 0)
 		die_nomem();
 	if (stralloc_append(&host, ".") == 0)
@@ -397,19 +538,48 @@ checksurbl(char *uri, char *surbldomain, char **text)
 		die_nomem();
 	if (!stralloc_0(&host))
 		die_nomem();
-	if (debug)
-		print_debug("checking blacklist: ", host.s, 0);
-	host.len--;
-	if (getdnsip(&ip, &host) == -1)
+	if (getdnsip(&ip, &host, &code) == -1)
 		return -1;
-	if (ip.len > 0) {
-		if (text != NULL) {
+	if (do_text && ip.len > 0) {
+		if (text) {
 			if ((*text = dns_text(host.s)))
 				return 2;
 		}
 		return 1;
 	}
+	if (code > 1)
+		return (getreason(code, text) ? 2 : 0);
 	return 0;
+}
+
+static int
+num_domains(const char *s)
+{
+	int             r = *s ? 1 : 0;
+
+	while (*s) {
+		if (*s++ == '.')
+			++r;
+	}
+	return r;
+}
+
+static char *
+remove_subdomains(char *orig, int output_domains)
+{
+	char           *s = orig + str_len((char *) orig);
+	int             dots = 0;
+
+	while (s > orig) {
+		if (*s == '.')
+			++dots;
+		if (dots == output_domains) {
+			++s;
+			break;
+		}
+		--s;
+	}
+	return s;
 }
 
 /*
@@ -420,12 +590,11 @@ checksurbl(char *uri, char *surbldomain, char **text)
 static int
 checkuri(char **ouri, char **text, size_t textlen)
 {
-	char           *uri = *ouri;
-	char           *uriend;
+	char           *uri = *ouri, *uriend, *ptr;
+	char            ipuri[IPFMT];
 	size_t          urilen = 0;
 	ip_addr         ip;
-	char            ipuri[IPFMT];
-	int             cached, blacklisted, i;
+	int             cached, blacklisted, i, level;
 
 	if (case_diffb(uri, 4, "http"))
 		return 0;
@@ -440,35 +609,53 @@ checkuri(char **ouri, char **text, size_t textlen)
 		return 0;
 	if (*uri == '/' || *uri == '\\')
 		uri++;
-	if (!isalpha(*uri) && !isdigit(*uri)) {
+	if (!isalpha(*uri) && !isdigit(*uri))
 		return 0;
-	}
 	uri_decode(uri, textlen, &uriend);
 	*ouri = uriend;
-	if (debug)
-		print_debug("Full URI = ", uriend, 0);
+	print_debug("Full    URI: ", uri, 0);
 	uri[(urilen = str_cspn(uri, "/\\?"))] = '\0';
 	if (uri[i = str_chr(uri, '@')])
 		uri += (i + 1);
 	uri[i = str_chr(uri, ':')] = 0;
-	urilen = str_len(uri);
 	if (ip_scan(uri, &ip)) {
 		ip_fmt(ipuri, &ip);
 		uri = ipuri;
-		if (debug)
-			print_debug("Proper IP: ", uri, 0);
+		print_debug("Proper IP: ", uri, 0);
 	} else 
 	{
-		if (debug)
-			print_debug("Full domain: ", uri, 0);
-		snipdomain(&uri, urilen);
-		if (debug)
-			print_debug("       Part: ", uri, 0);
+		urilen = str_len(uri);
+		print_debug("Full domain: ", uri, 0);
+		level = num_domains(uri);
+		if (level > 2)
+		{
+			ptr = remove_subdomains(uri, 3);
+			if (l3check(ptr, str_len(ptr)))
+				uri = remove_subdomains(uri, 4);
+			else
+			{
+				ptr = remove_subdomains(uri, 2);
+				if (l2check(ptr, str_len(ptr)))
+					uri = remove_subdomains(uri, 3);
+				else
+					uri = remove_subdomains(uri, 2);
+			}
+		} else
+		if (level > 1)
+		{
+			ptr = remove_subdomains(uri, 2);
+			if (l2check(ptr, str_len(ptr)))
+				uri = remove_subdomains(uri, 3);
+			else
+				uri = remove_subdomains(uri, 2);
+		}
+		/*- snipdomains(&uri, urilen); -*/
+		print_debug("       Part: ", uri, 0);
 	}
 	urilen = str_len(uri);
 	cached = 1;
 	blacklisted = 0;
-	switch (cacheget(uri, urilen, text))
+	switch (cachefunc(uri, urilen, text, 0))
 	{
 	case 0:
 		cached = 0;
@@ -481,26 +668,28 @@ checkuri(char **ouri, char **text, size_t textlen)
 		break;
 	}
 	if (cached == 0) {
-		switch (checksurbl(uri, surbldomain.s, text))
+		switch (checksurbl(uri, urilen, surbldomain.s, text))
 		{
 		case -1:
 			return -1;
 		case 0:
 			blacklisted = 0;
+			*text = (char *) 0;
+			print_debug(uri, ": not blacklisted", 0);
 			break;
 		case 1:
-			*text = NULL;
-			/*- flow through */
-		case 2:
+			*text = "No reason given";
 			blacklisted = 1;
+			print_debug(uri, ": blacklisted. reason - ", *text);
+			break;
+		case 2:
+			blacklisted = 2;
+			print_debug(uri, ": blacklisted. reason - ", *text);
 			break;
 		}
-
-		if (*text == NULL && blacklisted)
-			*text = "No reason given";
-		cacheadd(uri, urilen, *text);
+		cachefunc(uri, urilen, text, 1);
 	}
-	return (0);
+	return (blacklisted);
 }
 
 #define DEF_SURBL_DOMAIN "multi.surbl.org"
@@ -508,17 +697,37 @@ checkuri(char **ouri, char **text, size_t textlen)
 int
 main(int argc, char **argv)
 {
-	char           *x, *srwFn, *reason;
-	int             in_header = 1, i, blacklisted;
+	char           *x, *reason = 0;
+	int             opt, in_header = 1, i, total_bl = 0, blacklisted, match;
 
 	if (!(x = env_get("SURBL")))
 		return (0);
-
+	while ((opt = getopt(argc, argv, "vtc")) != opteof) {
+		switch (opt) {
+		case 'c':
+			do_cache = 0;
+			break;
+		case 'v':
+			debug = 1;
+			break;
+		case 't':
+			do_text = 1;
+			break;
+		}
+	}
 	if (chdir(auto_qmail) == -1)
 		die_control();
-	if ((srwok = control_readfile(&srw, srwFn = ((x = env_get("SURBLRCPT")) && *x ? x : "surblrcpt"), 0)) == -1)
+	if ((srwok = control_readfile(&srw, (x = env_get("SURBLRCPT")) && *x ? x : "surblrcpt", 0)) == -1)
 		die_control();
 	if (srwok && !constmap_init(&mapsrw, srw.s, srw.len, 0))
+		die_nomem();
+	if ((l2ok = control_readfile(&l2, (x = env_get("LEVEL2_TLD")) && *x ? x : "level2-tlds", 0)) == -1)
+		die_control();
+	if (l2ok && !constmap_init(&mapl2, l2.s, l2.len, 0))
+		die_nomem();
+	if ((l3ok = control_readfile(&l3, (x = env_get("LEVEL3_TLD")) && *x ? x : "level3-tlds", 0)) == -1)
+		die_control();
+	if (l3ok && !constmap_init(&mapl3, l3.s, l3.len, 0))
 		die_nomem();
 	switch (control_readline(&surbldomain, "surbldomain"))
 	{
@@ -532,44 +741,44 @@ main(int argc, char **argv)
 		if (!stralloc_0(&surbldomain))
 			die_nomem();
 	}
-	if (control_readint(&cachelifetime, "cachetime") == -1)
+	if ((x = env_get("CACHELIFETIME")))
+		scan_int(x, &cachelifetime);
+	else
+	if (control_readint(&cachelifetime, "cachelifetime") == -1)
 		die_control();
-	if (control_readfile(&whitelist, "surbldomainwhite", 0) == -1)
+	if (control_readfile(&whitelist, (x = env_get("SURBLDOMAINWHITE")) && *x ? x : "surbldomainwhite", 0) == -1)
 		die_control();
 	for (;;) {
 		if (getln(&ssin, &line, &match, '\n') == -1)
 			my_error("getln: ", 0, 1);
 		if (!match && line.len == 0)
 			break;
+		if (!debug && substdio_put(&ssout, line.s, line.len))
+			die_write();
 		if (!in_header)
 		{
-			blacklisted = -1;
-			for (i = 0;i < line.len; i++)
+			for (blacklisted = -1, i = 0;i < line.len; i++)
 			{
-				if (case_startb(line.s + i, 4, "http:")) {
+				if (case_startb(line.s + i, line.len - i, "http:")) {
 					x = line.s + i;
 					switch (checkuri(&x, &reason, line.len - i))
 					{
 					case -1:
-						my_error("checkuri: ", 0, 1);
+						my_error("checkuri", 0, 111);
 					case 0: /*- no valid uri in line */
-						continue;
 						break;
 					case 1:
-						blacklisted = 0;
-						break;
 					case 2:
-						if (debug)
-							print_debug("blacklisted", line.s, reason);
 						blacklisted = 1;
 						break;
 					}
 				}
 				if (blacklisted == 1)
+				{
+					total_bl++;
 					break;
+				}
 			}
-			if (substdio_put(&ssout, line.s, line.len))
-				die_write();
 			continue;
 		}
 		if (in_header && !mess822_ok(&line))
@@ -577,5 +786,15 @@ main(int argc, char **argv)
 	}
 	if (substdio_flush(&ssout) == -1)
 		die_write();
-	return (0);
+	if (total_bl)
+		my_error("451", "message contains an URL listed in SURBL blocklist", 0 - total_bl);
+	return (total_bl ? 100 : 0);
+}
+
+void
+getversion_surblfilter_c()
+{
+	static char    *x = "$Id: surblfilter.c,v 1.1 2011-07-13 20:56:34+05:30 Cprogrammer Exp mbhangui $";
+
+	x++;
 }

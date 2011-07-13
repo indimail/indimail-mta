@@ -5260,6 +5260,7 @@ str_cpy.o str_chr.o scan_xlong.o strsalloc.o \
 now.o scan_ulong.o mess822_ok.o constmap.o \
 ip.o dns.o ipalloc.o fmt_str.o fmt_ulong.o \
 socket_v6any.o socket_v4mappedprefix.o \
+sgetopt.o subgetopt.o \
 case_diffb.o stralloc.a substdio.a
 	./load surblfilter envread.o strerr_die.o strerr_sys.o \
 	control.o alloc.o alloc_re.o error.o \
@@ -5271,13 +5272,14 @@ case_diffb.o stralloc.a substdio.a
 	now.o scan_ulong.o mess822_ok.o constmap.o \
 	ip.o dns.o ipalloc.o fmt_str.o fmt_ulong.o \
 	socket_v6any.o socket_v4mappedprefix.o \
+	sgetopt.o subgetopt.o \
 	case_diffb.o stralloc.a substdio.a -lresolv
 
 surblfilter.o: \
 compile surblfilter.c alloc.h error.h str.h case.h \
 constmap.h auto_qmail.h stralloc.h env.h control.h \
 strerr.h substdio.h getln.h byte.h dns.h ip.h \
-ipalloc.h mess822.h
+ipalloc.h mess822.h scan.h subgetopt.h
 	./compile surblfilter.c
 
 ################### PLUGINS ########################################
