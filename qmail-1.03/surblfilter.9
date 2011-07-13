@@ -40,7 +40,10 @@ The default SURBL list that is used is \fBmulti.surbl.org\fR. You can use a diff
 by setting the \fIsurbldomain\fR control file.
 
 .PP
-\fBsurblfilter\fR caches results in QMAIL/control/cache. 
+\fBsurblfilter\fR caches results in QMAIL/control/cache. The filename represents the domain.
+If a file as permission 0600, it means that the domain was blacklisted. The entries are
+cached for a default of 300 seconds. You can change this by setting \fBCACHELIFETIME\fR
+environment variable.
 
 \fBsurblfilter\fR removes all leading host names, subdomains, www., randomized subdomains, etc. In
 order to determine the level of domain check, it uses the control files \fBlevel3-tlds\fR and

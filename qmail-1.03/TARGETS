@@ -996,3 +996,4 @@ dnsbl.o
 str_cspn.o
 surblfilter.o
 surblfilter
+surblfilter.8
