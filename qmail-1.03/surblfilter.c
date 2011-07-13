@@ -1,5 +1,11 @@
 /*
  * $Log: surblfilter.c,v $
+ * Revision 1.4  2011-07-13 22:28:32+05:30  Cprogrammer
+ * use configurable controldir
+ *
+ * Revision 1.3  2011-07-13 22:11:13+05:30  Cprogrammer
+ * skip surblrcpt if QMAILRCPTS is not defined
+ *
  * Revision 1.2  2011-07-13 22:02:13+05:30  Cprogrammer
  * added surblrcpt functionality
  *
@@ -43,6 +49,7 @@
 #include "ip.h"
 #include "ipalloc.h"
 #include "mess822.h"
+#include "variables.h"
 
 #define FATAL "surblfilter: fatal: "
 
@@ -137,13 +144,11 @@ void
 my_error(char *s1, char *s2, int exit_val)
 {
 	logerr(s1);
-	if (s2)
-	{
+	if (s2) {
 		logerr(": ");
 		logerr(s2);
 	}
-	if (exit_val > 0)
-	{
+	if (exit_val > 0) {
 		logerr(": ");
 		logerr(error_str(errno));
 	}
@@ -235,15 +240,13 @@ dns_text(char *dn)
 	ancount = getshort(response + 6);
 	eom = response + responselen;
 	cp = response + HFIXEDSZ;
-	while (qdcount-- > 0 && cp < eom)
-	{
+	while (qdcount-- > 0 && cp < eom) {
 		rc = dn_expand(response, eom, cp, (char *) buf, MAXDNAME);
 		if (rc < 0)
 			return strdup("e=perm;");
 		cp += rc + QFIXEDSZ;
 	}
-	while (ancount-- > 0 && cp < eom)
-	{
+	while (ancount-- > 0 && cp < eom) {
 		if ((rc = dn_expand(response, eom, cp, (char *) buf, MAXDNAME)) < 0)
 			return strdup("e=perm;");
 		cp += rc;
@@ -252,14 +255,12 @@ dns_text(char *dn)
 		type = getshort(cp + 0);	/* http://crynwr.com/rfc1035/rfc1035.html#4.1.3. */
 		rdlength = getshort(cp + 8);
 		cp += RRFIXEDSZ;
-		if (type != T_TXT)
-		{
+		if (type != T_TXT) {
 			cp += rdlength;
 			continue;
 		}
 		bufptr = buf;
-		while (rdlength && cp < eom)
-		{
+		while (rdlength && cp < eom) {
 			unsigned int    cnt;
 
 			cnt = *cp++;		/* http://crynwr.com/rfc1035/rfc1035.html#3.3.14. */
@@ -351,14 +352,25 @@ cachefunc(char *uri, size_t urilen, char **text, int flag)
 
 	if (!do_cache)
 		return (0);
-	if (uri[i = str_chr(uri, '/')])
-	{
+	if (uri[i = str_chr(uri, '/')]) {
 		errno = EINVAL;
 		return (-1);
 	}
-	if (access("control/cache", F_OK))
+	if (!controldir)
+	{
+		if (!(controldir = env_get("CONTROLDIR")))
+			controldir = "control";
+	}
+	if (!stralloc_copys(&cachefile, controldir))
+		die_nomem();
+	if (!stralloc_catb(&cachefile, "/cache", 6))
+		die_nomem();
+	if (!stralloc_0(&cachefile))
+		die_nomem();
+	if (access(cachefile.s, F_OK))
 		return (0);
-	if (!stralloc_copyb(&cachefile, "control/cache/", 14))
+	cachefile.len--;
+	if (!stralloc_append(&cachefile, "/"))
 		die_nomem();
 	if (!stralloc_cats(&cachefile, uri))
 		die_nomem();
@@ -371,8 +383,7 @@ cachefunc(char *uri, size_t urilen, char **text, int flag)
 			my_error(cachefile.s, 0, 2);
 		if (*text) {
 			textlen = str_len(*text);
-			if ((n = write(fd, *text, textlen)) == -1)
-			{
+			if ((n = write(fd, *text, textlen)) == -1) {
 				close(fd);
 				my_error("write", 0, 1);
 			}
@@ -387,8 +398,7 @@ cachefunc(char *uri, size_t urilen, char **text, int flag)
 			return -1;
 		}
 		if (time(0) > st.st_mtime + cachelifetime) {
-			if (unlink(cachefile.s))
-			{
+			if (unlink(cachefile.s)) {
 				my_error("unlink", 0, 1);
 				return -1;
 			}
@@ -397,8 +407,7 @@ cachefunc(char *uri, size_t urilen, char **text, int flag)
 		if ((fd = open(cachefile.s, O_RDONLY)) == -1)
 			my_error(cachefile.s, 0, 2);
 		substdio_fdbuf(&ss, read, fd, inbuf, sizeof(inbuf));
-		if (getln(&ss, &reason, &match, '\n') == -1)
-		{
+		if (getln(&ss, &reason, &match, '\n') == -1) {
 			close(fd);
 			return -1;
 		}
@@ -448,8 +457,7 @@ srwcheck(char *arg, int len)
 		return 0;
 	if (constmap(&mapsrw, arg, len))
 		return 1;
-	if ((j = byte_rchr(arg, len, '@')) < (len - 1))
-	{
+	if ((j = byte_rchr(arg, len, '@')) < (len - 1)) {
 		if (constmap(&mapsrw, arg + j, len - j))
 			return 1;
 	}
@@ -487,8 +495,7 @@ checkwhitelist(char *hostname, int hostlen)
 	int             len;
 	char           *ptr;
 
-	for (ptr = whitelist.s, len = 0;len < whitelist.len;)
-	{
+	for (ptr = whitelist.s, len = 0;len < whitelist.len;) {
 		if (!str_diffn(hostname, ptr, hostlen))
 			return (1);
 		len += (str_len(ptr) + 1);
@@ -626,18 +633,15 @@ checkuri(char **ouri, char **text, size_t textlen)
 		ip_fmt(ipuri, &ip);
 		uri = ipuri;
 		print_debug("Proper IP: ", uri, 0);
-	} else 
-	{
+	} else {
 		urilen = str_len(uri);
 		print_debug("Full domain: ", uri, 0);
 		level = num_domains(uri);
-		if (level > 2)
-		{
+		if (level > 2) {
 			ptr = remove_subdomains(uri, 3);
 			if (l3check(ptr, str_len(ptr)))
 				uri = remove_subdomains(uri, 4);
-			else
-			{
+			else {
 				ptr = remove_subdomains(uri, 2);
 				if (l2check(ptr, str_len(ptr)))
 					uri = remove_subdomains(uri, 3);
@@ -645,15 +649,13 @@ checkuri(char **ouri, char **text, size_t textlen)
 					uri = remove_subdomains(uri, 2);
 			}
 		} else
-		if (level > 1)
-		{
+		if (level > 1) {
 			ptr = remove_subdomains(uri, 2);
 			if (l2check(ptr, str_len(ptr)))
 				uri = remove_subdomains(uri, 3);
 			else
 				uri = remove_subdomains(uri, 2);
 		}
-		/*- snipdomains(&uri, urilen); -*/
 		print_debug("       Part: ", uri, 0);
 	}
 	urilen = str_len(uri);
@@ -706,18 +708,16 @@ setup()
 	char           *x, *y, *rcpt;
 	int             i;
 
-	if ((srwok = control_readfile(&srw, (x = env_get("SURBLRCPT")) && *x ? x : "surblrcpt", 0)) == -1)
-		die_control();
-	if (srwok && !constmap_init(&mapsrw, srw.s, srw.len, 0))
-		die_nomem();
-	rcpt = env_get("QMAILRCPTS");
-	for (x = y = rcpt, i = 0;rcpt && *x;x++, i++)
-	{
-		if (*x == '\n')
-		{
+	if ((rcpt = env_get("QMAILRCPTS"))) {
+		if ((srwok = control_readfile(&srw, (x = env_get("SURBLRCPT")) && *x ? x : "surblrcpt", 0)) == -1)
+			die_control();
+		if (srwok && !constmap_init(&mapsrw, srw.s, srw.len, 0))
+			die_nomem();
+	}
+	for (x = y = rcpt, i = 0;rcpt && *x;x++, i++) {
+		if (*x == '\n') {
 			*x = 0;
-			if (srwcheck(y, i))
-			{
+			if (srwcheck(y, i)) {
 				do_surbl = 0;
 				return;
 			}
@@ -790,10 +790,8 @@ main(int argc, char **argv)
 			die_write();
 		if (!do_surbl)
 			continue;
-		if (!in_header)
-		{
-			for (blacklisted = -1, i = 0;i < line.len; i++)
-			{
+		if (!in_header) {
+			for (blacklisted = -1, i = 0;i < line.len; i++) {
 				if (case_startb(line.s + i, line.len - i, "http:")) {
 					x = line.s + i;
 					switch (checkuri(&x, &reason, line.len - i))
@@ -809,8 +807,7 @@ main(int argc, char **argv)
 						break;
 					}
 				}
-				if (blacklisted == 1)
-				{
+				if (blacklisted == 1) {
 					total_bl++;
 					break;
 				}
@@ -822,8 +819,7 @@ main(int argc, char **argv)
 	}
 	if (substdio_flush(&ssout) == -1)
 		die_write();
-	if (do_surbl && total_bl)
-	{
+	if (do_surbl && total_bl) {
 		logerrf("Zmessage contains an URL listed in SURBL blocklist");
 		_exit (88); /*- custom error */
 	}
@@ -833,7 +829,7 @@ main(int argc, char **argv)
 void
 getversion_surblfilter_c()
 {
-	static char    *x = "$Id: surblfilter.c,v 1.2 2011-07-13 22:02:13+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: surblfilter.c,v 1.4 2011-07-13 22:28:32+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
