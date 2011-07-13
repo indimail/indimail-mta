@@ -1,5 +1,8 @@
 /*
  * $Log: surblfilter.c,v $
+ * Revision 1.2  2011-07-13 22:02:13+05:30  Cprogrammer
+ * added surblrcpt functionality
+ *
  * Revision 1.1  2011-07-13 20:56:34+05:30  Cprogrammer
  * Initial revision
  *
@@ -369,9 +372,13 @@ cachefunc(char *uri, size_t urilen, char **text, int flag)
 		if (*text) {
 			textlen = str_len(*text);
 			if ((n = write(fd, *text, textlen)) == -1)
+			{
+				close(fd);
 				my_error("write", 0, 1);
+			}
 		}
-		close(fd);
+		if (close(fd))
+			my_error(cachefile.s, 0, 1);
 	} else {
 		if (stat(cachefile.s, &st) == -1) {
 			if (errno == ENOENT)
@@ -396,15 +403,12 @@ cachefunc(char *uri, size_t urilen, char **text, int flag)
 			return -1;
 		}
 		*text = reason.s;
+		close(fd);
 		return (((st.st_mode & 07777) == 0600) ? 2 : 1);
 	}
 	return (0);
 }
 
-/*
- * I desperately want the same interface for djbdns and the libresolv wrapper.
- * I chose the djbdns interface. 
- */
 static int
 getdnsip(stralloc *ip, stralloc *domain, int *code)
 {
@@ -694,33 +698,34 @@ checkuri(char **ouri, char **text, size_t textlen)
 
 #define DEF_SURBL_DOMAIN "multi.surbl.org"
 
-int
-main(int argc, char **argv)
-{
-	char           *x, *reason = 0;
-	int             opt, in_header = 1, i, total_bl = 0, blacklisted, match;
+static int      do_surbl = 1;
 
-	if (!(x = env_get("SURBL")))
-		return (0);
-	while ((opt = getopt(argc, argv, "vtc")) != opteof) {
-		switch (opt) {
-		case 'c':
-			do_cache = 0;
-			break;
-		case 'v':
-			debug = 1;
-			break;
-		case 't':
-			do_text = 1;
-			break;
-		}
-	}
-	if (chdir(auto_qmail) == -1)
-		die_control();
+static void
+setup()
+{
+	char           *x, *y, *rcpt;
+	int             i;
+
 	if ((srwok = control_readfile(&srw, (x = env_get("SURBLRCPT")) && *x ? x : "surblrcpt", 0)) == -1)
 		die_control();
 	if (srwok && !constmap_init(&mapsrw, srw.s, srw.len, 0))
 		die_nomem();
+	rcpt = env_get("QMAILRCPTS");
+	for (x = y = rcpt, i = 0;rcpt && *x;x++, i++)
+	{
+		if (*x == '\n')
+		{
+			*x = 0;
+			if (srwcheck(y, i))
+			{
+				do_surbl = 0;
+				return;
+			}
+			y = x + 1;
+			*x = '\n';
+			i = 0;
+		}
+	}
 	if ((l2ok = control_readfile(&l2, (x = env_get("LEVEL2_TLD")) && *x ? x : "level2-tlds", 0)) == -1)
 		die_control();
 	if (l2ok && !constmap_init(&mapl2, l2.s, l2.len, 0))
@@ -748,13 +753,43 @@ main(int argc, char **argv)
 		die_control();
 	if (control_readfile(&whitelist, (x = env_get("SURBLDOMAINWHITE")) && *x ? x : "surbldomainwhite", 0) == -1)
 		die_control();
+	return;
+}
+
+int
+main(int argc, char **argv)
+{
+	char           *x, *reason = 0;
+	int             opt, in_header = 1, i, total_bl = 0, blacklisted, match;
+
+	if (!(x = env_get("SURBL")))
+		do_surbl = 0;
+	while ((opt = getopt(argc, argv, "vtc")) != opteof) {
+		switch (opt) {
+		case 'c':
+			do_cache = 0;
+			break;
+		case 'v':
+			debug = 1;
+			break;
+		case 't':
+			do_text = 1;
+			break;
+		}
+	}
+	if (chdir(auto_qmail) == -1)
+		die_control();
+	if (do_surbl)
+		setup();
 	for (;;) {
 		if (getln(&ssin, &line, &match, '\n') == -1)
 			my_error("getln: ", 0, 1);
 		if (!match && line.len == 0)
 			break;
-		if (!debug && substdio_put(&ssout, line.s, line.len))
+		if (substdio_put(&ssout, line.s, line.len))
 			die_write();
+		if (!do_surbl)
+			continue;
 		if (!in_header)
 		{
 			for (blacklisted = -1, i = 0;i < line.len; i++)
@@ -766,6 +801,7 @@ main(int argc, char **argv)
 					case -1:
 						my_error("checkuri", 0, 111);
 					case 0: /*- no valid uri in line */
+						blacklisted = 0;
 						break;
 					case 1:
 					case 2:
@@ -786,15 +822,18 @@ main(int argc, char **argv)
 	}
 	if (substdio_flush(&ssout) == -1)
 		die_write();
-	if (total_bl)
-		my_error("451", "message contains an URL listed in SURBL blocklist", 0 - total_bl);
-	return (total_bl ? 100 : 0);
+	if (do_surbl && total_bl)
+	{
+		logerrf("Zmessage contains an URL listed in SURBL blocklist");
+		_exit (88); /*- custom error */
+	}
+	return (0);
 }
 
 void
 getversion_surblfilter_c()
 {
-	static char    *x = "$Id: surblfilter.c,v 1.1 2011-07-13 20:56:34+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: surblfilter.c,v 1.2 2011-07-13 22:02:13+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

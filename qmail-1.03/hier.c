@@ -1,5 +1,8 @@
 /*
  * $Log: hier.c,v $
+ * Revision 1.168  2011-07-13 22:02:40+05:30  Cprogrammer
+ * added surblfilter
+ *
  * Revision 1.167  2011-07-08 13:47:06+05:30  Cprogrammer
  * added dnsbl plugin
  *
@@ -1620,7 +1623,7 @@ _hier(inst_dir)
 void
 getversion_install_big_c()
 {
-	static char    *x = "$Id: hier.c,v 1.167 2011-07-08 13:47:06+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: hier.c,v 1.168 2011-07-13 22:02:40+05:30 Cprogrammer Stab mbhangui $";
 
 #ifdef INDIMAIL
 	x = sccsidh;
