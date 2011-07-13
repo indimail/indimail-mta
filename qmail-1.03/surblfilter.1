@@ -1,0 +1,62 @@
+.TH surblfilter 8
+.SH NAME
+surblfilter \- qmail SURBL blocklist interface
+.SH SYNOPSIS
+.B surblfilter
+[
+.B \-v
+]
+[
+.B \-c
+]
+[
+.B \-t
+]
+.SH DESCRIPTION
+\fBSURBL\fRs are lists of web sites that have appeared in unsolicited messages. Unlike most lists,
+SURBLs are not lists of message senders.
+
+Web sites seen in unsolicited messages tend to be more stable than the rapidly changing botnet
+IP addresses used to send the vast majority of them. Sender lists like zen.spamhaus.org can be
+used in a first stage filter to help identify 80% to 90% of unsolicited messages. SURBLs can
+help find about 75% of the otherwise difficult, remaining unsolicited messages in a second
+stage filter. Used together with sender lists, SURBLs have proven to be a highly-effective way
+to detect 95% of unsolicited messages.
+
+\fBsurblfilter\fR reads an rfc822 email on stdin, extracts URL and checks them against SURBL.
+\fBsurblfilter\fR can be used as a filter using \fBqmail-qfilter(1)\fR or as a
+\fBqmail-queue(8)\fR interface by setting \fBQMAILQUEUE\fR environment variable to the path
+of \fBsurblfilter\fR executable.
+
+\fBsurblfilter\fR removes all leading host names, subdomains, www., randomized subdomains, etc. In
+order to determine the level of domain check, it uses the control files \fBlevel3-tlds\fR and
+\fBlevel2-tlds\fR. For any domain found in \fBlevel3-tlds\fR, it checks the domain at level4. For any
+domain found in \fBlevel2-tlds\fR, it checks the domain at level3. For all domains not found in
+these two control files, it checks the domain at level2. Please look at http://www.surbl.org/guidelines
+
+for more details.
+
+.SH OPTIONS
+.PP
+.TP
+\fB-v\fR
+Use debug mode
+
+.TP
+\fB-c\fR
+Do not cache results
+
+.TP
+\fB-t\fR
+Do dns text query to get the reason. This option will slow \fBsurblfilter\fR. Remember that
+last octet of the IP address obtained for the domain gives you the reason for the block
+
+.SH RETURN VALUE
+\fBsurbfilter\fR returns 100 if the domain is blocked and prints the reason on standard error.
+It returns 111 for all temporary errors. It returns 0 if the message does not contain any
+domain blocked by SURBL
+
+.SH "SEE ALSO"
+qmail-smtpd(8),
+qmail-queue(8),
+qmail-qfilter(1)
