@@ -25,8 +25,22 @@ to detect 95% of unsolicited messages.
 
 \fBsurblfilter\fR reads an rfc822 email on stdin, extracts URL and checks them against SURBL.
 \fBsurblfilter\fR can be used as a filter using \fBqmail-qfilter(1)\fR or as a
-\fBqmail-queue(8)\fR interface by setting \fBQMAILQUEUE\fR environment variable to the path
-of \fBsurblfilter\fR executable.
+\fBqmail-multi(8)\fR filter by setting \fBFILTERARGS\fR environment variable to the path
+of \fBsurblfilter\fR executable with arguments if any.
+
+\fBsurblfilter\fR uses \fBQMAILRCPTS\fR environment variable to get the recipient list. You can
+whitelist recipients by having the email addresses in \fIsurblrcpt\fR control file. You can
+change the name of this control file by setting \fBSURBLRCPT\fR environment variable.
+.PP
+\fBsurblfilter\fR uses the control file \fIsurbldomainwhite\fR to whitelist a domain. You can
+change the name of this control file by setting the \fBSURBLDOMAINWHITE\fR environment variable.
+
+.PP
+The default SURBL list that is used is \fBmulti.surbl.org\fR. You can use a different list
+by setting the \fIsurbldomain\fR control file.
+
+.PP
+\fBsurblfilter\fR caches results in QMAIL/control/cache. 
 
 \fBsurblfilter\fR removes all leading host names, subdomains, www., randomized subdomains, etc. In
 order to determine the level of domain check, it uses the control files \fBlevel3-tlds\fR and
