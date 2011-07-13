@@ -1364,7 +1364,7 @@ qmail-showctl.0 qmail-newu.0 qarf.1 plugin_init.3 \
 qmail-pw2u.0 qmail-qread.0 qmail-tcpto.0 qmail-tcpok.0 \
 qmail-pop3d.0 qmail-popbull.0 qmail-popup.0 qmail-qmqpc.0 \
 qmail-qmqpd.0 qmail-qmtpd.0 qmail-smtpd.0 greydaemon.0 qmail-poppass.0 \
-dktest.8 svscanboot.0 plugtest.1 \
+dktest.8 svscanboot.0 plugtest.1 surblfilter.8 \
 qmail-multi.0 spawn-filter.0 tcp-env.0 qmail-greyd.0 \
 qmail-newmrh.0 recipient-cdb.0 qmail-cdb.0 qmail-sql.8 qreceipt.0 forward.0 \
 rrforward.0 preline.0 condredirect.0 bouncesaying.0 except.0 \
@@ -5249,6 +5249,11 @@ str_cspn.o: \
 compile str.h str_cspn.c
 	./compile str_cspn.c
 
+surblfilter.8: surblfilter.9
+	cat surblfilter.9 \
+	| sed s}QMAILHOME}"`head -1 conf-qmail`"}g \
+	> surblfilter.8
+
 surblfilter: \
 load surblfilter.o envread.o strerr_die.o strerr_sys.o \
 control.o alloc.o alloc_re.o error.o \
@@ -5260,7 +5265,7 @@ str_cpy.o str_chr.o scan_xlong.o strsalloc.o \
 now.o scan_ulong.o mess822_ok.o constmap.o \
 ip.o dns.o ipalloc.o fmt_str.o fmt_ulong.o \
 socket_v6any.o socket_v4mappedprefix.o \
-sgetopt.o subgetopt.o \
+sgetopt.o subgetopt.o variables.o \
 case_diffb.o stralloc.a substdio.a
 	./load surblfilter envread.o strerr_die.o strerr_sys.o \
 	control.o alloc.o alloc_re.o error.o \
@@ -5279,7 +5284,7 @@ surblfilter.o: \
 compile surblfilter.c alloc.h error.h str.h case.h \
 constmap.h auto_qmail.h stralloc.h env.h control.h \
 strerr.h substdio.h getln.h byte.h dns.h ip.h \
-ipalloc.h mess822.h scan.h subgetopt.h
+ipalloc.h mess822.h scan.h subgetopt.h variables.h
 	./compile surblfilter.c
 
 ################### PLUGINS ########################################
