@@ -69,7 +69,8 @@ Do dns text query to get the reason. This option will slow \fBsurblfilter\fR. Re
 last octet of the IP address obtained for the domain gives you the reason for the block
 
 .SH RETURN VALUE
-\fBsurbfilter\fR returns 100 if the domain is blocked and prints the reason on standard error.
+\fBsurbfilter\fR returns 88 if the domain is blocked and prints the reason on standard error.
+This allows for qmail-smtpd(8) to print a permanent error during a SMTP session.
 It returns 111 for all temporary errors. It returns 0 if the message does not contain any
 domain blocked by SURBL
 
