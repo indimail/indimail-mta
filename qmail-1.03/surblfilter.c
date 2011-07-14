@@ -820,7 +820,7 @@ main(int argc, char **argv)
 	if (substdio_flush(&ssout) == -1)
 		die_write();
 	if (do_surbl && total_bl) {
-		logerrf("Zmessage contains an URL listed in SURBL blocklist");
+		logerrf("Dmessage contains an URL listed in SURBL blocklist");
 		_exit (88); /*- custom error */
 	}
 	return (0);
