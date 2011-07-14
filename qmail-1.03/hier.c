@@ -1,5 +1,8 @@
 /*
  * $Log: hier.c,v $
+ * Revision 1.169  2011-07-14 14:45:17+05:30  Cprogrammer
+ * added README.surbl
+ *
  * Revision 1.168  2011-07-13 22:02:40+05:30  Cprogrammer
  * added surblfilter
  *
@@ -800,6 +803,7 @@ hier(inst_dir)
 	c(auto_qmail_home, "doc", "README.tls", auto_uido, auto_gidq, 0444);
 	c(auto_qmail_home, "doc", "README.wildmat", auto_uido, auto_gidq, 0444);
 	c(auto_qmail_home, "doc", "README.filters", auto_uido, auto_gidq, 0444);
+	c(auto_qmail_home, "doc", "README.surbl", auto_uido, auto_gidq, 0444);
 
 	c(auto_qmail_home, "man/man1", "qmail-cat.1", auto_uido, auto_gidq, 0444);
 	c(auto_qmail_home, "man/man1", "predate.1", auto_uido, auto_gidq, 0444);
@@ -1623,7 +1627,7 @@ _hier(inst_dir)
 void
 getversion_install_big_c()
 {
-	static char    *x = "$Id: hier.c,v 1.168 2011-07-13 22:02:40+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: hier.c,v 1.169 2011-07-14 14:45:17+05:30 Cprogrammer Stab mbhangui $";
 
 #ifdef INDIMAIL
 	x = sccsidh;
