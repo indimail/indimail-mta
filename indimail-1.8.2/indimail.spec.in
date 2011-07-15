@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail.spec.in,v 2.227 2011-07-08 22:02:45+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 2.228 2011-07-15 11:52:19+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %define _unpackaged_files_terminate_build 1
 
@@ -1252,6 +1252,8 @@ fi
 %attr(555,root,qmail)                   %{_prefix}/bin/multilog
 %attr(555,root,qmail)                   %{_prefix}/bin/qmail-multi
 %attr(555,root,qmail)                   %{_prefix}/bin/qmail-qfilter
+%attr(555,root,qmail)                   %{_prefix}/bin/surblfilter
+%attr(555,root,qmail)                   %{_prefix}/bin/surblqueue
 %attr(555,root,qmail)                   %{_prefix}/bin/qmail-sigalrm
 %attr(555,root,qmail)                   %{_prefix}/bin/ripole
 %attr(555,root,qmail)                   %{_prefix}/bin/rpmattr
@@ -1533,6 +1535,7 @@ fi
 %attr(444,root,qmail)                   %{_prefix}/doc/README.tls
 %attr(444,root,qmail)                   %{_prefix}/doc/README.wildmat
 %attr(444,root,qmail)                   %{_prefix}/doc/README.cdb
+%attr(444,root,qmail)                   %{_prefix}/doc/README.surbl
 %attr(444,root,qmail)                   %{_prefix}/doc/INSTALL.maildir
 %attr(444,root,qmail)                   %{_prefix}/doc/TEST.receive
 %attr(444,root,qmail)                   %{_prefix}/doc/README-CLUSTER
