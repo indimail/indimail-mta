@@ -1214,7 +1214,7 @@ iftocc ofmipd ofmipname 822field new-inject 822date 822received 822print \
 tokenize addrlist qquote parsedate qmail-greyd greydaemon \
 analyzer qtools qlog viruscanner update_tmprsadh dknewkey \
 dktest dot-forward batv balance_outgoing qarf plugtest surblfilter \
-fastforward printforward setforward newaliases printmaillist \
+fastforward printforward setforward newaliases printmaillist surblqueue \
 setmaillist newinclude sortedtest logselect mbox2maildir \
 envdir envuidgid fghack multilog pgrphack readproctitle setlock \
 setuidgid softlimit supervise svc svok svscan svstat tai64n tai64nlocal tai64nunix \
@@ -2066,6 +2066,10 @@ testtrace.o: compile testtrace.c dktrace.h
 dknewkey: dknewkey.sh warn-auto.sh
 	rm -f dknewkey
 	cat warn-auto.sh dknewkey.sh > dknewkey
+
+mess822_ok.o: \
+compile mess822_ok.c mess822.h byte.h uint64.h
+	./compile mess822_ok.c
 
 qmail-dk: \
 load qmail-dk.o triggerpull.o fmtqfn.o now.o date822fmt.o \
@@ -5265,7 +5269,7 @@ str_cpy.o str_chr.o scan_xlong.o strsalloc.o \
 now.o scan_ulong.o mess822_ok.o constmap.o \
 ip.o dns.o ipalloc.o fmt_str.o fmt_ulong.o \
 socket_v6any.o socket_v4mappedprefix.o \
-sgetopt.o subgetopt.o variables.o \
+sgetopt.o subgetopt.o base64sub.o \
 case_diffb.o stralloc.a substdio.a
 	./load surblfilter envread.o strerr_die.o strerr_sys.o \
 	control.o alloc.o alloc_re.o error.o \
@@ -5277,15 +5281,23 @@ case_diffb.o stralloc.a substdio.a
 	now.o scan_ulong.o mess822_ok.o constmap.o \
 	ip.o dns.o ipalloc.o fmt_str.o fmt_ulong.o \
 	socket_v6any.o socket_v4mappedprefix.o \
-	sgetopt.o subgetopt.o \
+	sgetopt.o subgetopt.o base64sub.o \
 	case_diffb.o stralloc.a substdio.a -lresolv
 
 surblfilter.o: \
 compile surblfilter.c alloc.h error.h str.h case.h \
 constmap.h auto_qmail.h stralloc.h env.h control.h \
 strerr.h substdio.h getln.h byte.h dns.h ip.h \
-ipalloc.h mess822.h scan.h subgetopt.h variables.h
+ipalloc.h mess822.h scan.h subgetopt.h variables.h \
+uint64.h base64.h
 	./compile surblfilter.c
+
+surblqueue: \
+warn-auto.sh surblqueue.sh conf-qmail
+	cat warn-auto.sh surblqueue.sh \
+	| sed s}QMAIL}"`head -1 conf-qmail`"}g \
+	> surblqueue
+	chmod 755 surblqueue
 
 ################### PLUGINS ########################################
 smtpd-plugin0.so: dnsbl.o
