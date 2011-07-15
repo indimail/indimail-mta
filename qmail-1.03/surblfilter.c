@@ -1,5 +1,8 @@
 /*
  * $Log: surblfilter.c,v $
+ * Revision 1.5  2011-07-15 11:48:19+05:30  Cprogrammer
+ * added base64 decoding
+ *
  * Revision 1.4  2011-07-13 22:28:32+05:30  Cprogrammer
  * use configurable controldir
  *
@@ -49,6 +52,7 @@
 #include "ip.h"
 #include "ipalloc.h"
 #include "mess822.h"
+#include "base64.h"
 #include "variables.h"
 
 #define FATAL "surblfilter: fatal: "
@@ -759,8 +763,11 @@ setup()
 int
 main(int argc, char **argv)
 {
+	stralloc        base64out = { 0 }, boundary = { 0 };
+	stralloc       *ptr;
 	char           *x, *reason = 0;
-	int             opt, in_header = 1, i, total_bl = 0, blacklisted, match;
+	int             opt, in_header = 1, i, total_bl = 0, blacklisted, match, html_plain_text,
+					base64_decode, found_content_type = 0;
 
 	if (!(x = env_get("SURBL")))
 		do_surbl = 0;
@@ -781,7 +788,7 @@ main(int argc, char **argv)
 		die_control();
 	if (do_surbl)
 		setup();
-	for (;;) {
+	for (html_plain_text = base64_decode = 0;;) {
 		if (getln(&ssin, &line, &match, '\n') == -1)
 			my_error("getln: ", 0, 1);
 		if (!match && line.len == 0)
@@ -790,11 +797,61 @@ main(int argc, char **argv)
 			die_write();
 		if (!do_surbl)
 			continue;
-		if (!in_header) {
-			for (blacklisted = -1, i = 0;i < line.len; i++) {
-				if (case_startb(line.s + i, line.len - i, "http:")) {
-					x = line.s + i;
-					switch (checkuri(&x, &reason, line.len - i))
+		if (in_header) {
+			if (!str_diffn(line.s, "Content-Type: ", 14)) {
+				found_content_type = 1;
+			}
+			if (found_content_type) {
+				for (i = 0;i < line.len; i++) {
+					if (case_startb(line.s + i, line.len - i, "boundary=")) {
+						if (line.s[i + 9] == '\"' && line.s[line.len -2] == '\"')
+						{
+							if (!stralloc_copyb(&boundary, line.s + i + 10, line.len -i - 12))
+								die_nomem();
+						} else
+						if (!stralloc_copyb(&boundary, line.s + i + 9, line.len - i - 10))
+							die_nomem();
+						if (!stralloc_0(&boundary))
+							die_nomem();
+						boundary.len--;
+					}
+				}
+			}
+			if (!mess822_ok(&line))
+				in_header = 0;
+		} else {
+			if (!str_diffn(line.s, "Content-Type: ", 14)) {
+				if (!str_diffn(line.s + 14, "message/rfc822", 14) ||
+					!str_diffn(line.s + 14, "text/html", 9) ||
+					!str_diffn(line.s + 14, "text/plain", 10))
+						html_plain_text = 1;
+				else
+						html_plain_text = 0;
+			}
+			if (html_plain_text && !str_diffn(line.s, "Content-Transfer-Encoding: ", 27)) {
+				if (!str_diffn(line.s + 27, "base64", 6))
+					base64_decode = 1;
+				else
+					base64_decode = 0;
+			}
+			if (line.len == 1)
+				continue;
+			if (base64_decode) {
+				if (!str_diffn(line.s, "Content-", 8))
+					continue;
+				if (!str_diffn(line.s + 2, boundary.s, boundary.len)) {
+					base64_decode = 0;
+					continue;
+				}
+				if (b64decode((const unsigned char *) line.s, line.len - 1, &base64out) == -1)
+					die_nomem();
+				ptr = &base64out;
+			} else
+				ptr = &line;
+			for (blacklisted = -1, i = 0;i < ptr->len; i++) {
+				if (case_startb(line.s + i, ptr->len - i, "http:")) {
+					x = ptr->s + i;
+					switch (checkuri(&x, &reason, ptr->len - i))
 					{
 					case -1:
 						my_error("checkuri", 0, 111);
@@ -812,11 +869,8 @@ main(int argc, char **argv)
 					break;
 				}
 			}
-			continue;
 		}
-		if (in_header && !mess822_ok(&line))
-			in_header = 0;
-	}
+	} /*- for (html_plain_text = base64_decode = 0;;) { */
 	if (substdio_flush(&ssout) == -1)
 		die_write();
 	if (do_surbl && total_bl) {
@@ -829,7 +883,7 @@ main(int argc, char **argv)
 void
 getversion_surblfilter_c()
 {
-	static char    *x = "$Id: surblfilter.c,v 1.4 2011-07-13 22:28:32+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: surblfilter.c,v 1.5 2011-07-15 11:48:19+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
