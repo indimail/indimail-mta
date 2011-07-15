@@ -26,7 +26,9 @@ to detect 95% of unsolicited messages.
 \fBsurblfilter\fR reads an rfc822 email on stdin, extracts URL and checks them against SURBL.
 \fBsurblfilter\fR can be used as a filter using \fBqmail-qfilter(1)\fR or as a
 \fBqmail-multi(8)\fR filter by setting \fBFILTERARGS\fR environment variable to the path
-of \fBsurblfilter\fR executable with arguments if any.
+of \fBsurblfilter\fR executable with arguments if any. \fBsurblfilter\fR can also be used
+as a qmail-queue(8) frontend by setting QMAILQUEUE environment variable to a wrapper
+QMAIL/bin/surblqueue
 
 \fBsurblfilter\fR uses \fBQMAILRCPTS\fR environment variable to get the recipient list. You can
 whitelist recipients by having the email addresses in \fIsurblrcpt\fR control file. You can
