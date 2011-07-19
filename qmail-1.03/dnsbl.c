@@ -1,10 +1,8 @@
 /*
  * $Log: dnsbl.c,v $
- * Revision 1.2  2011-07-08 22:03:25+05:30  Cprogrammer
- * added comment
- *
- * Revision 1.1  2011-07-08 13:45:44+05:30  Cprogrammer
+ * Revision 1.1  2011-07-15 19:34:52+05:30  Cprogrammer
  * Initial revision
+ *
  *
  */
 #include "smtp_plugin.h"
@@ -15,9 +13,9 @@
 
 extern int      authenticated;
 extern char    *relayclient;
-int             dnsblok, flagdnsbl = 0;
+int             dnsblok, skipdnsbl = 0;
 stralloc        dnsblhost = { 0 }, dnsbl_mesg = { 0 }, dnsbllist = { 0 };
-char           *skipdnsbl, *dnsblFn;
+char           *dnsblFn;
 
 void
 out_of_mem(char **mesg)
@@ -58,43 +56,36 @@ dnsblcheck(char **mesg, char *remoteip)
 	char            x[IPFMT];
 	unsigned int    len;
 
-	if (!dnsblok)
-	{
-		flagdnsbl = 1;
+	if (!dnsblok) {
+		skipdnsbl = 1;
 		return (0);
 	}
 	ch = remoteip;
-	if (!stralloc_copys(&dnsblrev, ""))
-	{
+	if (!stralloc_copys(&dnsblrev, "")) {
 		out_of_mem(mesg);
 		return (1);
 	}
 	for (;;) {
-		if (!stralloc_copys(&dnsblbyte, ""))
-		{
+		if (!stralloc_copys(&dnsblbyte, "")) {
 			out_of_mem(mesg);
 			return (1);
 		}
 		while (ch[0] && (ch[0] != '.')) {
-			if (!stralloc_append(&dnsblbyte, ch))
-			{
+			if (!stralloc_append(&dnsblbyte, ch)) {
 				out_of_mem(mesg);
 				return (1);
 			}
 			ch++;
 		}
-		if (!stralloc_append(&dnsblbyte, "."))
-		{
+		if (!stralloc_append(&dnsblbyte, ".")) {
 			out_of_mem(mesg);
 			return (1);
 		}
-		if (!stralloc_cat(&dnsblbyte, &dnsblrev))
-		{
+		if (!stralloc_cat(&dnsblbyte, &dnsblrev)) {
 			out_of_mem(mesg);
 			return (1);
 		}
-		if (!stralloc_copy(&dnsblrev, &dnsblbyte))
-		{
+		if (!stralloc_copy(&dnsblrev, &dnsblbyte)) {
 			out_of_mem(mesg);
 			return (1);
 		}
@@ -104,29 +95,25 @@ dnsblcheck(char **mesg, char *remoteip)
 	}
 	ch = dnsbllist.s;
 	while (ch < (dnsbllist.s + dnsbllist.len)) {
-		if (!stralloc_copy(&dnsblhost, &dnsblrev))
-		{
+		if (!stralloc_copy(&dnsblhost, &dnsblrev)) {
 			out_of_mem(mesg);
 			return (1);
 		}
-		if (!stralloc_cats(&dnsblhost, ch))
-		{
+		if (!stralloc_cats(&dnsblhost, ch)) {
 			out_of_mem(mesg);
 			return (1);
 		}
-		if (!stralloc_0(&dnsblhost))
-		{
+		if (!stralloc_0(&dnsblhost)) {
 			out_of_mem(mesg);
 			return (1);
 		}
-		if (!dns_ip(&dnsblip, &dnsblhost))
-		{
+		if (!dns_ip(&dnsblip, &dnsblhost)) {
 			len = ip_fmt(x, &dnsblip.ix->addr.ip);
-			flagdnsbl = 1;
+			skipdnsbl = 1;
 			return 1;
 		} while (*ch++);
 	}
-	flagdnsbl = 1;
+	skipdnsbl = 1;
 	return 0;
 }
 
@@ -135,15 +122,16 @@ mailfrom_hook(char *remoteip, char *from, char **mesg)
 {
 	char           *x;
 
-	if ((skipdnsbl = env_get("SKIPDNSBL")))
+	if (env_get("SKIPDNSBL")) {
+		skipdnsbl = 1;
 		return (0);
-	if ((dnsblok = control_readfile(&dnsbllist, dnsblFn = ((x = env_get("DNSBLLIST")) && *x ? x : "dnsbllist"), 0)) == -1)
-	{
+	}
+	if ((dnsblok = control_readfile(&dnsbllist,
+			dnsblFn = ((x = env_get("DNSBLLIST")) && *x ? x : "dnsbllist"), 0)) == -1) {
 		*mesg = "451 Requested action aborted: unable to read controls (#4.3.0)\r\n";
 		return (1);
 	}
-	if ((!authenticated && !relayclient && !flagdnsbl) && dnsblcheck(mesg, remoteip))
-	{
+	if ((!authenticated && !relayclient && !skipdnsbl) && dnsblcheck(mesg, remoteip)) {
 		die_dnsbl(mesg);
 		return (1);
 	}
@@ -170,6 +158,6 @@ plugin_init()
 void
 getversion_dnsbl_c()
 {
-	static char    *x = "$Id: dnsbl.c,v 1.2 2011-07-08 22:03:25+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$id: $";
 	x++;
 }
