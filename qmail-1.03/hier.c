@@ -1,5 +1,8 @@
 /*
  * $Log: hier.c,v $
+ * Revision 1.171  2011-07-21 13:17:19+05:30  Cprogrammer
+ * added service script for systemd
+ *
  * Revision 1.170  2011-07-15 11:49:35+05:30  Cprogrammer
  * added surblqueue
  *
@@ -484,6 +487,7 @@ hier(inst_dir)
 	c(auto_qmail_home, "boot", "binm3", auto_uido, auto_gidq, 0555);
 	c(auto_qmail_home, "boot", "binm3+df", auto_uido, auto_gidq, 0555);
 	c(auto_qmail_home, "boot", "upstart", auto_uido, auto_gidq, 0444);
+	c(auto_qmail_home, "boot", "systemd", auto_uido, auto_gidq, 0444);
 #ifdef DARWIN
 	c(auto_qmail_home, "boot", "StartupParameters.plist", auto_uido, auto_gidq, 0444);
 	c(auto_qmail_home, "boot", "indimail.plist", auto_uido, auto_gidq, 0444);
@@ -1631,7 +1635,7 @@ _hier(inst_dir)
 void
 getversion_install_big_c()
 {
-	static char    *x = "$Id: hier.c,v 1.170 2011-07-15 11:49:35+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: hier.c,v 1.171 2011-07-21 13:17:19+05:30 Cprogrammer Exp mbhangui $";
 
 #ifdef INDIMAIL
 	x = sccsidh;

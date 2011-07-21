@@ -1,4 +1,7 @@
 # $Log: svscanboot.sh,v $
+# Revision 1.10  2011-07-21 13:18:05+05:30  Cprogrammer
+# create lockfile to enable working with systemd
+#
 # Revision 1.9  2011-05-26 23:37:41+05:30  Cprogrammer
 # removed readproctitle
 #
@@ -24,7 +27,7 @@
 # Revision 1.2  2002-09-26 20:56:02+05:30  Cprogrammer
 # made service directory configurable
 #
-# $Id: svscanboot.sh,v 1.9 2011-05-26 23:37:41+05:30 Cprogrammer Exp mbhangui $
+# $Id: svscanboot.sh,v 1.10 2011-07-21 13:18:05+05:30 Cprogrammer Exp mbhangui $
 
 PATH=QMAIL/bin:/usr/local/bin:/bin:/sbin:/usr/bin:/usr/sbin
 
@@ -49,5 +52,8 @@ else
 	SERVICEDIR=$1
 fi
 QMAIL/bin/svc -dx $SERVICEDIR/* $SERVICEDIR/*/log $SERVICEDIR/.svscan/log
+if [ -d /var/lock/subsys ] ; then
+	touch /var/lock/subsys/svscan
+fi
 env - PATH=$PATH SCANINTERVAL=$SCANINTERVAL SCANLOG="" \
 	QMAIL/bin/svscan $SERVICEDIR
