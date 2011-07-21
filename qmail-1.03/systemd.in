@@ -1,0 +1,17 @@
+#
+# $Log: $
+#
+# $Id: $
+#
+[Unit]
+Description=IndiMail Messaging Platform
+After=local-fs.target network.target
+
+[Service]
+ExecStart=QMAIL/bin/svscanboot /service
+ExecStop=/etc/init.d/indimail stop
+Restart=on-failure
+Type=simple
+
+[Install]
+WantedBy=multi-user.target
