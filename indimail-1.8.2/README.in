@@ -272,7 +272,7 @@ Some of the features available in this package
 56. Ability to distribute QMQP traffic across servers.
 57. Abuse Report Format Generator using qarf
 58. Auto provision users in proxyimap/proxypop3
-59. DNSBL Support (DNS Blacklist) Author fabio.busatto@sikurezza.org
+59. DNSBL Support (DNS Blacklist) Author "Fabio Busatto" <fabio.busatto@sikurezza.org>
 60. SURBL Support (SURBL Blacklist). URL parsing code borrowed from surbl.c
     Pieter Droogendijk <pieter@binky.org.uk> http://binky.org.uk
 
