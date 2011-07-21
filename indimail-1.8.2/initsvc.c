@@ -1,5 +1,8 @@
 /*
  * $Log: initsvc.c,v $
+ * Revision 2.16  2011-07-21 19:15:05+05:30  Cprogrammer
+ * added status command to display enabled or disabled status for systemd service
+ *
  * Revision 2.15  2011-07-21 13:16:26+05:30  Cprogrammer
  * code added for systemd
  *
@@ -57,7 +60,7 @@
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: initsvc.c,v 2.15 2011-07-21 13:16:26+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: initsvc.c,v 2.16 2011-07-21 19:15:05+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #define SV_ON    1
@@ -68,7 +71,7 @@ static char     sccsid[] = "$Id: initsvc.c,v 2.15 2011-07-21 13:16:26+05:30 Cpro
 int
 systemd_control(char *operation)
 {
-	int             pid, wStat, status;
+	int             pid, wStat, cStat, status;
 	char           *cmd;
 
 	if (!strncmp(operation, "enable", 6))
@@ -76,6 +79,9 @@ systemd_control(char *operation)
 	else
 	if (!strncmp(operation, "disable", 7))
 		cmd =  "stop";
+	else
+	if (!strncmp(operation, "status", 6))
+		cmd =  "is-enabled";
 	else
 	{
 		fprintf(stderr, "initsvc: unknown command %s\n", operation);
@@ -97,18 +103,62 @@ systemd_control(char *operation)
 			return (1);
 		}
 		if (WIFSTOPPED(wStat) || WIFSIGNALED(wStat))
-			fprintf(stderr, "initsvc: child [%d] died with signal %d\n", 
-				pid, 
+			fprintf(stderr, "initsvc: child [%d] died with signal %d\n", pid, 
 				WIFSIGNALED(wStat) ? WTERMSIG(wStat) : (WIFSTOPPED(wStat) ? WSTOPSIG(wStat) : -1));
 		else
 		if (WIFEXITED(wStat))
 		{
 			if (!(status = WEXITSTATUS(wStat))) {
-				execl("/bin/systemctl", "systemctl", cmd, "indimail.service", (char *) 0);
-				fprintf(stderr, "systemctl %s indimail.service: %s\n", cmd, strerror(errno));
+				if (!strncmp(operation, "status", 6)) {
+					if (!(pid = fork())) {
+						execl("/bin/systemctl", "systemctl", cmd, "indimail.service", (char *) 0);
+						fprintf(stderr, "systemctl %s indimail.service: %s\n", cmd, strerror(errno));
+					} else
+					if (pid == -1)
+						return (1);
+					if ((pid = wait(&cStat)) == -1)
+					{
+						fprintf(stderr, "initsvc: wait: %s\n", strerror(errno));
+						return (1);
+					}
+					if (WIFSTOPPED(cStat) || WIFSIGNALED(cStat))
+						fprintf(stderr, "initsvc: child [%d] died with signal %d\n", pid, 
+							WIFSIGNALED(cStat) ? WTERMSIG(cStat) : (WIFSTOPPED(cStat) ? WSTOPSIG(cStat) : -1));
+					else
+					if (WIFEXITED(cStat))
+						return (WEXITSTATUS(cStat));
+					else
+						return (-1);
+				} else {
+					execl("/bin/systemctl", "systemctl", cmd, "indimail.service", (char *) 0);
+					fprintf(stderr, "systemctl %s indimail.service: %s\n", cmd, strerror(errno));
+					return (1);
+				}
 			} else {
-				fprintf(stderr, "initsvc: systemctl exited with status %d\n", status);
-				return (1);
+				if (!strncmp(operation, "status", 6)) {
+					if (!(pid = fork())) {
+						execl("/bin/systemctl", "systemctl", cmd, "indimail.service", (char *) 0);
+						fprintf(stderr, "systemctl %s indimail.service: %s\n", cmd, strerror(errno));
+					} else
+					if (pid == -1)
+						return (1);
+					if ((pid = wait(&cStat)) == -1)
+					{
+						fprintf(stderr, "initsvc: wait: %s\n", strerror(errno));
+						return (1);
+					}
+					if (WIFSTOPPED(cStat) || WIFSIGNALED(cStat))
+						fprintf(stderr, "initsvc: child [%d] died with signal %d\n", pid, 
+							WIFSIGNALED(cStat) ? WTERMSIG(cStat) : (WIFSTOPPED(cStat) ? WSTOPSIG(cStat) : -1));
+					else
+					if (WIFEXITED(cStat))
+						return (WEXITSTATUS(cStat));
+					else
+						return (-1);
+				} else {
+					fprintf(stderr, "initsvc: systemctl exited with status %d\n", status);
+					return (1);
+				}
 			}
 		} else {
 			fprintf(stderr, "initsvc: systemctl exited with unknown status\n");
@@ -239,9 +289,10 @@ main(int argc, char **argv)
 				return (systemd_control("disable"));
 				break;
 			case SV_STAT:
+				printf("indimail.service is %s\n", systemd_control("status") ? "disabled" : "enabled");
+				fflush(stdout);
 				execl("/bin/sh", "sh", "-c",
-				"/bin/systemctl status indimail.service || /bin/cat /lib/systemd/system/indimail.service;\
-				/bin/ls -l /lib/systemd/system/indimail.service", (char *) 0);
+					"/bin/ls -l /lib/systemd/system/indimail.service", (char *) 0);
 				perror("/bin/systemctl status indimail.service");
 				break;
 			case SV_PRINT:
