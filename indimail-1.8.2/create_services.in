@@ -1,5 +1,8 @@
 #!/bin/sh
 # $Log: create_services.in,v $
+# Revision 2.49  2011-07-21 22:17:49+05:30  Cprogrammer
+# use higher soft memory for ssl enabled services
+#
 # Revision 2.48  2011-04-16 13:23:24+05:30  Cprogrammer
 # added --logfilter argument for fetchmail service
 #
@@ -167,7 +170,7 @@ indimaildir=@indimaildir@
 # End USER Configuration OPTIONS
 #
 
-# $Id: create_services.in,v 2.48 2011-04-16 13:23:24+05:30 Cprogrammer Stab mbhangui $
+# $Id: create_services.in,v 2.49 2011-07-21 22:17:49+05:30 Cprogrammer Exp mbhangui $
 
 usage()
 {
@@ -328,8 +331,9 @@ else
 	smtp_soft_mem=52428800
 	qmtp_soft_mem=52428800
 	qmqp_soft_mem=52428800
-	imap_pop3_mem=52428800
-	poppass_mem=52428800
+	imap_pop3_mem=10485760
+	imapspop3_mem=20971520
+	poppass_mem=10485760
 fi
 #
 # SMTP
@@ -508,13 +512,13 @@ if [ $nocourierimap -eq 0 ] ; then
 		--query-cache --default-domain=indimail.org --memory=$imap_pop3_mem $extra_opt
 	$dir_prefix$indimaildir/sbin/svctool --imap=993 --servicedir=$servicedir --localip=0 \
 		--maxdaemons=40 --maxperip=25 \
-		--query-cache --default-domain=indimail.org --memory=$imap_pop3_mem --ssl $extra_opt
+		--query-cache --default-domain=indimail.org --memory=$imapspop3_mem --ssl $extra_opt
 	$dir_prefix$indimaildir/sbin/svctool --pop3=110 --servicedir=$servicedir --localip=0 \
 		--starttls --maxdaemons=40 --maxperip=25 \
 		--query-cache --default-domain=indimail.org --memory=$imap_pop3_mem $extra_opt
 	$dir_prefix$indimaildir/sbin/svctool --pop3=995 --servicedir=$servicedir --localip=0 \
 		--maxdaemons=40 --maxperip=25 \
-		--query-cache --default-domain=indimail.org --memory=$imap_pop3_mem --ssl $extra_opt
+		--query-cache --default-domain=indimail.org --memory=$imapspop3_mem --ssl $extra_opt
 fi
 if [ $noproxy -eq 0 ] ; then
 	$dir_prefix$indimaildir/sbin/svctool --imap=4143 --servicedir=$servicedir --localip=0 \
@@ -523,14 +527,14 @@ if [ $noproxy -eq 0 ] ; then
 		$extra_opt
 	$dir_prefix$indimaildir/sbin/svctool --imap=9143 --servicedir=$servicedir --localip=0 \
 		--maxdaemons=40 --maxperip=25 --query-cache --default-domain=indimail.org \
-		--memory=$imap_pop3_mem --proxy=143 --ssl
+		--memory=$imapspop3_mem --proxy=143 --ssl
 	$dir_prefix$indimaildir/sbin/svctool --pop3=4110 --servicedir=$servicedir --localip=0 \
 		--maxdaemons=40 --maxperip=25 --query-cache --default-domain=indimail.org \
 		--memory=$imap_pop3_mem --proxy=110 --starttls --tlsprog=$indimaildir/bin/sslerator \
 		$extra_opt
 	$dir_prefix$indimaildir/sbin/svctool --pop3=9110 --servicedir=$servicedir --localip=0 \
 		--maxdaemons=40 --maxperip=25 --query-cache --default-domain=indimail.org \
-		--memory=$imap_pop3_mem --proxy=110 --ssl $extra_opt
+		--memory=$imapspop3_mem --proxy=110 --ssl $extra_opt
 fi
 
 #

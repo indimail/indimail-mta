@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail.spec.in,v 2.230 2011-07-21 17:06:40+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 2.231 2011-07-21 22:17:28+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %define _unpackaged_files_terminate_build 1
 
@@ -2062,6 +2062,7 @@ fi
 %define qmtp_soft_mem 52428800
 %define qmqp_soft_mem 52428800
 %define imap_pop3_mem 10485760
+%define imapspop3_mem 20971520
 %define poppass_mem   10485760
 %endif
 for port in 465 25 587
@@ -2231,13 +2232,13 @@ if [ %nocourierimap -eq 0 ] ; then
 	--maxperip=25 --query-cache --default-domain=%{default_domain} --memory=%{imap_pop3_mem} \
 	--starttls
 %{_prefix}/sbin/svctool --imap=993 --servicedir=%{servicedir} --localip=0 --maxdaemons=40 \
-	--maxperip=25 --query-cache --default-domain=%{default_domain} --memory=%{imap_pop3_mem} \
+	--maxperip=25 --query-cache --default-domain=%{default_domain} --memory=%{imapspop3_mem} \
 	--ssl
 %{_prefix}/sbin/svctool --pop3=110 --servicedir=%{servicedir} --localip=0 --maxdaemons=40 \
 	--maxperip=25 --query-cache --default-domain=%{default_domain} --memory=%{imap_pop3_mem} \
 	--starttls
 %{_prefix}/sbin/svctool --pop3=995 --servicedir=%{servicedir} --localip=0 --maxdaemons=40 \
-	--maxperip=25 --query-cache --default-domain=%{default_domain} --memory=%{imap_pop3_mem} \
+	--maxperip=25 --query-cache --default-domain=%{default_domain} --memory=%{imapspop3_mem} \
 	--ssl
 fi
 if [ %noproxy -eq 0 ] ; then
@@ -2245,13 +2246,13 @@ if [ %noproxy -eq 0 ] ; then
 	--maxperip=25 --query-cache --default-domain=%{default_domain} --memory=%{imap_pop3_mem} \
 	--proxy=143 --starttls --tlsprog=%{_prefix}/bin/sslerator
 %{_prefix}/sbin/svctool --imap=9143 --servicedir=%{servicedir} --localip=0 --maxdaemons=40 \
-	--maxperip=25 --query-cache --default-domain=%{default_domain} --memory=%{imap_pop3_mem} \
+	--maxperip=25 --query-cache --default-domain=%{default_domain} --memory=%{imapspop3_mem} \
 	--proxy=143 --ssl
 %{_prefix}/sbin/svctool --pop3=4110 --servicedir=%{servicedir} --localip=0 --maxdaemons=40 \
 	--maxperip=25 --query-cache --default-domain=%{default_domain} --memory=%{imap_pop3_mem} \
 	--proxy=110 --starttls --tlsprog=%{_prefix}/bin/sslerator
 %{_prefix}/sbin/svctool --pop3=9110 --servicedir=%{servicedir} --localip=0 --maxdaemons=40 \
-	--maxperip=25 --query-cache --default-domain=%{default_domain} --memory=%{imap_pop3_mem} \
+	--maxperip=25 --query-cache --default-domain=%{default_domain} --memory=%{imapspop3_mem} \
 	--proxy=110 --ssl
 fi
 
