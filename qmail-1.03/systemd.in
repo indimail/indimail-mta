@@ -1,7 +1,14 @@
 #
-# $Log: $
+# $Log: systemd.in,v $
+# Revision 1.1  2011-07-21 13:25:24+05:30  Cprogrammer
+# Initial revision
 #
-# $Id: $
+# 
+# Start daemontools
+# to start - systemctl start indimail.service
+# to stop  - systemctl stop  indimail.service
+#
+# $Id: systemd.in,v 1.1 2011-07-21 13:25:24+05:30 Cprogrammer Exp mbhangui $
 #
 [Unit]
 Description=IndiMail Messaging Platform
