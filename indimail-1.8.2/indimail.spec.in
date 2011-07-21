@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail.spec.in,v 2.228 2011-07-15 11:52:19+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 2.230 2011-07-21 17:06:40+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %define _unpackaged_files_terminate_build 1
 
@@ -97,9 +97,9 @@ Summary: A Flexible Messaging Platform with Multi-Host/Multi-Protocol support
 Name: indimail
 Version: @version@
 %if %build_on_obs == 1
-Release: <B_CNT>.1
+Release: 1.<B_CNT>
 %else
-Release: 1.B_CNT
+Release: 1.B_CCNT
 %endif
 License: GPLv3
 %if %{undefined suse_version} && %{undefined sles_version}
@@ -1237,12 +1237,12 @@ fi
 %attr(555,root,qmail)                   %{_prefix}/sbin/vchkpass
 %attr(555,root,qmail)                   %{_prefix}/sbin/vsetpass
 %attr(555,root,qmail)                   %{_prefix}/sbin/vdelivermail
-%attr(555,root,qmail)                   %{_prefix}/bin/ismaildup
 %attr(555,root,qmail)                   %{_prefix}/sbin/vdeloldusers
 %attr(555,root,qmail)                   %{_prefix}/sbin/vfilter
 %attr(555,root,qmail)                   %{_prefix}/sbin/vfstab
 %attr(555,root,qmail)                   %{_prefix}/sbin/vmoddomain
 %attr(555,root,qmail)                   %{_prefix}/sbin/vreorg
+%attr(555,root,qmail)                   %{_prefix}/bin/ismaildup
 %attr(555,root,qmail)                   %{_prefix}/bin/822received
 %attr(555,root,qmail)                   %{_prefix}/bin/cdbmake-12
 %attr(555,root,qmail)                   %{_prefix}/bin/dnscname
@@ -1360,6 +1360,7 @@ fi
 %attr(555,root,qmail)                   %{_prefix}/boot/home
 %attr(555,root,qmail)                   %{_prefix}/boot/binm2+df
 %attr(444,root,qmail)                   %{_prefix}/boot/upstart
+%attr(444,root,qmail)                   %{_prefix}/boot/systemd
 %if %i_m_on_mac == 1
 %attr(444,root,qmail)                   %{_prefix}/boot/StartupParameters.plist
 %attr(444,root,qmail)                   %{_prefix}/boot/indimail.plist
@@ -1845,6 +1846,11 @@ then
 elif test -f %{_sysconfdir}/event.d/svscan
 then
 	/sbin/initctl emit qmailstop > /dev/null 2>&1
+	echo "Giving IndiMail exactly 5 seconds to exit nicely"
+	sleep 5
+elif test -f %{_sysconfdir}/systemd/system/multi-user.target.wants/indimail.service
+then
+	/bin/systemctl stop indimail.service > /dev/null 2>&1
 	echo "Giving IndiMail exactly 5 seconds to exit nicely"
 	sleep 5
 elif test -x %{_prefix}/sbin/initsvc
@@ -2348,6 +2354,9 @@ fi
 
 if [ -f %{_sysconfdir}/init/svscan.conf -o -f %{_sysconfdir}/event.d/svscan ] ; then
 	echo "1. Issue /sbin/initctl emit qmailstart to start services"
+	count=1
+elif [ -f %{_sysconfdir}/systemd/system/multi-user.target.wants/indimail.service ] ; then
+	echo "1. Issue /bin/systemctl start indimail.service to start services"
 	count=1
 else
 %if %i_m_on_mac == 0
