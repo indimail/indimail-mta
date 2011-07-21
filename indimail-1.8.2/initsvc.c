@@ -1,5 +1,8 @@
 /*
  * $Log: initsvc.c,v $
+ * Revision 2.15  2011-07-21 13:16:26+05:30  Cprogrammer
+ * code added for systemd
+ *
  * Revision 2.14  2011-07-04 17:42:39+05:30  Cprogrammer
  * fix for virtual machines where /dev/console gives problem
  *
@@ -50,16 +53,71 @@
 #include <string.h>
 #include <errno.h>
 #include <fcntl.h>
+#include <sys/wait.h>
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: initsvc.c,v 2.14 2011-07-04 17:42:39+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: initsvc.c,v 2.15 2011-07-21 13:16:26+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #define SV_ON    1
 #define SV_OFF   2
 #define SV_STAT  3
 #define SV_PRINT 4
+
+int
+systemd_control(char *operation)
+{
+	int             pid, wStat, status;
+	char           *cmd;
+
+	if (!strncmp(operation, "enable", 6))
+		cmd =  "start";
+	else
+	if (!strncmp(operation, "disable", 7))
+		cmd =  "stop";
+	else
+	{
+		fprintf(stderr, "initsvc: unknown command %s\n", operation);
+		return (1);
+	}
+
+	switch (pid = fork())
+	{
+	case -1:
+		fprintf(stderr, "initsvc: fork: %s\n", strerror(errno));
+		return (1);
+	case 0:
+		execl("/bin/systemctl", "systemctl", operation, "indimail.service", (char *) 0);
+		fprintf(stderr, "systemctl %s indimail.service: %s\n", operation, strerror(errno));
+	default:
+		if ((pid = wait(&wStat)) == -1)
+		{
+			fprintf(stderr, "initsvc: wait: %s\n", strerror(errno));
+			return (1);
+		}
+		if (WIFSTOPPED(wStat) || WIFSIGNALED(wStat))
+			fprintf(stderr, "initsvc: child [%d] died with signal %d\n", 
+				pid, 
+				WIFSIGNALED(wStat) ? WTERMSIG(wStat) : (WIFSTOPPED(wStat) ? WSTOPSIG(wStat) : -1));
+		else
+		if (WIFEXITED(wStat))
+		{
+			if (!(status = WEXITSTATUS(wStat))) {
+				execl("/bin/systemctl", "systemctl", cmd, "indimail.service", (char *) 0);
+				fprintf(stderr, "systemctl %s indimail.service: %s\n", cmd, strerror(errno));
+			} else {
+				fprintf(stderr, "initsvc: systemctl exited with status %d\n", status);
+				return (1);
+			}
+		} else {
+			fprintf(stderr, "initsvc: systemctl exited with unknown status\n");
+			return (1);
+		}
+	}
+	return (0);
+}
+
 int
 main(int argc, char **argv)
 {
@@ -98,7 +156,7 @@ main(int argc, char **argv)
 		return (1);
 	}
 	getEnvConfigStr(&qmaildir, "QMAILDIR", QMAILDIR);
-	if (!access("/etc/init", F_OK)) /*- Upstart */
+	if (!access("/sbin/initctl", F_OK) && !access("/etc/init", F_OK)) /*- Upstart */
 	{
 		jobdir = "/etc/init";
 		jobfile = "/etc/init/svscan.conf";
@@ -122,12 +180,12 @@ main(int argc, char **argv)
 			if (chdir(QMAILDIR) || chdir("boot"))
 			{
 				fprintf(stderr, "chdir %s/boot: %s\n", QMAILDIR, strerror(errno));
-				return(1);
+				return (1);
 			} else
 			if (fappend("upstart", jobfile, "w", 0644, 0, getgid()))
 			{
 				fprintf(stderr, "fappend %s %s: %s\n", "upstart", jobfile, strerror(errno));
-				return(1);
+				return (1);
 			}
 		} 
 		switch(flag)
@@ -150,8 +208,50 @@ main(int argc, char **argv)
 				perror("/bin/ls");
 				break;
 		}
-		return(1);
-	} 
+		return (1);
+	} else
+	if (!access("/bin/systemctl", X_OK))
+	{
+		/* Install indimail.plist */
+		if (access("/lib/systemd/system/indimail.service", F_OK))
+		{
+			if (flag == SV_OFF)
+				return (0);
+			printf("Installing indimail.service\n");
+			if (chdir(QMAILDIR) || chdir("boot"))
+			{
+				fprintf(stderr, "chdir %s/boot: %s\n", QMAILDIR, strerror(errno));
+				return (1);
+			} else
+			if (fappend("systemd", "/lib/systemd/system/indimail.service", "w", 0644, 0, getgid()))
+			{
+				fprintf(stderr, "fappend %s %s: %s\n", "systemd", 
+					"/lib/systemd/system/indimail.service", strerror(errno));
+				return (1);
+			}
+		}
+		switch(flag)
+		{
+			case SV_ON:
+				return (systemd_control("enable"));
+				break;
+			case SV_OFF:
+				return (systemd_control("disable"));
+				break;
+			case SV_STAT:
+				execl("/bin/sh", "sh", "-c",
+				"/bin/systemctl status indimail.service || /bin/cat /lib/systemd/system/indimail.service;\
+				/bin/ls -l /lib/systemd/system/indimail.service", (char *) 0);
+				perror("/bin/systemctl status indimail.service");
+				break;
+			case SV_PRINT:
+				execl("/bin/sh", "sh", "-c",
+				"/bin/cat /lib/systemd/system/indimail.service;/bin/ls -l /lib/systemd/system/indimail.service",
+				(char *) 0);
+				perror("/bin/ls");
+				break;
+		}
+	}
 #ifdef DARWIN
 	else
 	if (!access("/bin/launchctl", X_OK))
@@ -165,12 +265,13 @@ main(int argc, char **argv)
 			if (chdir(QMAILDIR) || chdir("boot"))
 			{
 				fprintf(stderr, "chdir %s/boot: %s\n", QMAILDIR, strerror(errno));
-				return(1);
+				return (1);
 			} else
 			if (fappend("indimail.plist", "/System/Library/LaunchDaemons/indimail.plist", "w", 0644, 0, getgid()))
 			{
-				fprintf(stderr, "fappend %s %s: %s\n", "upstart", "/etc/event.d/svscan", strerror(errno));
-				return(1);
+				fprintf(stderr, "fappend %s %s: %s\n", "indimail.plist", 
+					"/System/Library/LaunchDaemons/indimail.plist", strerror(errno));
+				return (1);
 			}
 		} 
 		switch(flag)
@@ -196,7 +297,7 @@ main(int argc, char **argv)
 				perror("/bin/ls");
 				break;
 		}
-		return(1);
+		return (1);
 	} /*- if (!access("/bin/launchctl", X_OK)) */
 #endif
 	if (!(fp = fopen("/etc/inittab", "r")))
@@ -223,28 +324,28 @@ main(int argc, char **argv)
 					if(colonCount == 2)
 					{
 						if(!memcmp(ptr + 1, "respawn", 7))
-							return(0);
+							return (0);
 						else
 						if(!memcmp(ptr + 1, "off", 3))
-							return(1);
+							return (1);
 						else
-							return(2);
+							return (2);
 					}
 				}
-				return(2);
+				return (2);
 			} else
 			if(flag == SV_PRINT)
 			{
 				printf("%s", buffer);
 				fclose(fp);
-				return(0);
+				return (0);
 			}
 			found = 1;
 			break;
 		}
 	}
 	if(flag == SV_STAT)
-		return(2);
+		return (2);
 	if (!(fp = freopen("/etc/inittab", found ? "r+" : "a", fp)))
 	{
 		perror("/etc/inittab");
@@ -256,7 +357,7 @@ main(int argc, char **argv)
 		{
 			perror("ftell");
 			fclose(fp);
-			return(1);
+			return (1);
 		}
 		if (!fgets(buffer, sizeof(buffer) - 2, fp))
 			break;
@@ -288,7 +389,7 @@ main(int argc, char **argv)
 	}
 	execv(*initargs, initargs);
 	fprintf(stderr, "execv: %s: %s\n", *initargs, strerror(errno));
-	return(1);
+	return (1);
 }
 
 void
