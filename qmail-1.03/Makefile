@@ -695,6 +695,13 @@ upstart:upstart.in conf-qmail
 	cat upstart.in | sed s}QMAIL}"`head -1 conf-qmail`"}g \
 	) > upstart
 
+systemd:systemd.in conf-qmail
+	( \
+	echo "# svscan - runlevel compatibility"; \
+	echo "# WARNING: This file was auto-generated. Do not edit!"; \
+	cat systemd.in | sed s}QMAIL}"`head -1 conf-qmail`"}g \
+	) > systemd
+
 svscanboot.0: \
 svscanboot.8
 	nroff -man svscanboot.8 > svscanboot.0
@@ -1204,7 +1211,7 @@ qmail-smtpd sendmail rmail tcp-env qmail-newmrh recipient-cdb qmail-cdb qmailcon
 config-fast dnscname dnsptr dnsip dnsmxip dnsfq dnstxt hostname ipmeprint qreceipt \
 qsmhook forward rrforward preline condredirect bouncesaying except qmail-todo \
 queue-fix idedit setup instcheck rpmattr maildir2mbox qmaildirmake maildirwatch base64 \
-maildirdeliver autoresponder qmail-rm qail elq pinq etrn qmail-sql \
+maildirdeliver autoresponder qmail-rm qail elq pinq etrn qmail-sql systemd \
 atrn qmailctl indimail.plist svscanboot upstart qmail-sighup qmail-sigalrm qmail-sigterm \
 home home+df proc proc+df binm1 binm1+df binm2 binm2+df \
 binm3 binm3+df spfquery multirotate qpq 822header qmail-nullqueue \

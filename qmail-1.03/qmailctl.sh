@@ -11,6 +11,9 @@
 ### END INIT INFO
 
 # $Log: qmailctl.sh,v $
+# Revision 1.35  2011-07-21 13:17:44+05:30  Cprogrammer
+# added systemd support
+#
 # Revision 1.34  2011-05-28 21:25:04+05:30  Cprogrammer
 # play nicely with upstart job control
 #
@@ -177,6 +180,23 @@ myfailure() {
 
 # Check that we're a privileged user
 [ `id -u` = 0 ] || exit 4
+if [ -x /bin/systemctl ] ; then
+	/bin/systemctl is-enabled indimail.service
+	if [ $? -ne 0 ] ; then
+		SYSTEMCTL_SKIP_REDIRECT=1
+		if [ -f /etc/rc.d/init.d/functions ] ; then
+			. /etc/rc.d/init.d/functions
+		elif [ -f /etc/init.d/functions ] ; then
+			. /etc/init.d/functions
+		elif [ -f /lib/lsb/init-functions ] ; then
+			. /lib/lsb/init-functions
+		fi
+		$ECHO -n $"indimail is disabled: "
+		failure
+		$ECHO -ne "\n"
+		exit 1
+	fi
+fi
 # Source function library.
 if [ -f /etc/rc.d/init.d/functions ] ; then
 	. /etc/rc.d/init.d/functions
@@ -261,7 +281,7 @@ stop()
 	fi
 	/bin/rm -f /tmp/sv.err
 	if [ -d /var/lock/subsys ] ; then
-		[ $ret -eq 0 ] && rm -f /var/lock/subsys/indimail
+		[ $ret -eq 0 ] && rm -f /var/lock/subsys/svscan
 	fi
 	return $ret
 }
@@ -296,7 +316,7 @@ start()
 	fi
 	/bin/rm -f /tmp/sv.err
 	if [ -d /var/lock/subsys ] ; then
-		[ $ret -eq 0 ] && touch /var/lock/subsys/indimail
+		[ $ret -eq 0 ] && touch /var/lock/subsys/svscan
 	fi
 	return $ret
 }
