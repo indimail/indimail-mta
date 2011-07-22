@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-dk.c,v $
+ * Revision 1.31  2011-07-22 14:39:53+05:30  Cprogrammer
+ * added DKDOMAIN feature to set d= tag
+ *
  * Revision 1.30  2011-06-04 17:44:16+05:30  Cprogrammer
  * remove % sign from private key if file not found
  *
@@ -324,26 +327,46 @@ write_signature(DK *dk, char *dk_selector, char *keyfn,
 	int             i;
 
 	from = dk_from(dk);
+	if (!controldir)
+	{
+		if (!(controldir = env_get("CONTROLDIR")))
+			controldir = "control";
+	}
+	if (!stralloc_copys(&keyfnfrom, controldir))
+	{
+		DKIMSignFree(&ctxt);
+		die(51);
+	}
+	if (!stralloc_append(&keyfnfrom, "/"))
+	{
+		DKIMSignFree(&ctxt);
+		die(51);
+	}
 	i = str_chr(keyfn, '%');
 	if (keyfn[i])
 	{
-		if (!stralloc_copyb(&keyfnfrom, keyfn, i))
+		if (!stralloc_catb(&keyfnfrom, keyfn, i))
 			die(51);
 		if (!stralloc_cats(&keyfnfrom, from))
 			die(51);
 		if (!stralloc_cats(&keyfnfrom, keyfn + i + 1))
 			die(51);
 	} else
-	if (!stralloc_copys(&keyfnfrom, keyfn))
+	if (!stralloc_cats(&keyfnfrom, keyfn))
 		die(51);
 	if (!stralloc_0(&keyfnfrom))
 		die(51);
-	if (keyfn[i] && access(keyfnfrom.s, F_OK))
+	if (keyfn[i])
 	{
-		/*- since file is not found remove '%' sign */
-		if (!stralloc_copyb(&keyfnfrom, keyfn, i))
-			die(51);
-		if (!stralloc_cats(&keyfnfrom, keyfn + i + 1))
+		if (access(keyfnfrom.s, F_OK))
+		{
+			/*- since file is not found remove '%' sign */
+			if (!stralloc_copyb(&keyfnfrom, keyfn, i))
+				die(51);
+			if (!stralloc_cats(&keyfnfrom, keyfn + i + 1))
+				die(51);
+		} else
+		if (!stralloc_copys(&keyfnfrom, keyfn))
 			die(51);
 		if (!stralloc_0(&keyfnfrom))
 			die(51);
@@ -396,9 +419,10 @@ write_signature(DK *dk, char *dk_selector, char *keyfn,
 		die(51);
 	if (!stralloc_cats(&dkoutput, "; d="))
 		die(51);
-	if (from)
+	tmp = env_get("DKDOMAIN");
+	if (from || tmp)
 	{
-		if (!stralloc_cats(&dkoutput, from))
+		if (!stralloc_cats(&dkoutput, tmp ? tmp : from))
 			die(51);
 	} else
 	if (!stralloc_cats(&dkoutput, "unknown"))
@@ -547,14 +571,7 @@ main(int argc, char *argv[])
 	{
 		if (!(dksign = env_get("DKKEY")))
 		{
-			if (!controldir)
-			{
-				if (!(controldir = env_get("CONTROLDIR")))
-					controldir = "control";
-			}
-			if (!stralloc_copys(&dkfn, controldir))
-				die(51);
-			if (!stralloc_cats(&dkfn, "/domainkeys/%/default"))
+			if (!stralloc_copys(&dkfn, "domainkeys/%/default"))
 				die(51);
 			if (!stralloc_0(&dkfn))
 				die(51);
@@ -830,7 +847,7 @@ main(argc, argv)
 void
 getversion_qmail_dk_c()
 {
-	static char    *x = "$Id: qmail-dk.c,v 1.30 2011-06-04 17:44:16+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: qmail-dk.c,v 1.31 2011-07-22 14:39:53+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
