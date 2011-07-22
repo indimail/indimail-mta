@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-dkim.c,v $
+ * Revision 1.31  2011-07-22 14:40:05+05:30  Cprogrammer
+ * fixed checking of private key file
+ *
  * Revision 1.30  2011-06-04 14:49:48+05:30  Cprogrammer
  * remove '%' sign from private key if key not found
  *
@@ -327,10 +330,25 @@ write_signature(char *domain, char *keyfn)
 	int             i;
 	static stralloc keyfnfrom = { 0 };
 
+	if (!controldir)
+	{
+		if (!(controldir = env_get("CONTROLDIR")))
+			controldir = "control";
+	}
+	if (!stralloc_copys(&keyfnfrom, controldir))
+	{
+		DKIMSignFree(&ctxt);
+		die(51);
+	}
+	if (!stralloc_append(&keyfnfrom, "/"))
+	{
+		DKIMSignFree(&ctxt);
+		die(51);
+	}
 	i = str_chr(keyfn, '%');
 	if (keyfn[i])
 	{
-		if (!stralloc_copyb(&keyfnfrom, keyfn, i))
+		if (!stralloc_catb(&keyfnfrom, keyfn, i))
 		{
 			DKIMSignFree(&ctxt);
 			die(51);
@@ -346,7 +364,7 @@ write_signature(char *domain, char *keyfn)
 			die(51);
 		}
 	} else
-	if (!stralloc_copys(&keyfnfrom, keyfn))
+	if (!stralloc_cats(&keyfnfrom, keyfn))
 	{
 		DKIMSignFree(&ctxt);
 		die(51);
@@ -356,15 +374,23 @@ write_signature(char *domain, char *keyfn)
 		DKIMSignFree(&ctxt);
 		die(51);
 	}
-	if (keyfn[i] && access(keyfnfrom.s, F_OK))
+	if (keyfn[i])
 	{
-		/*- since file is not found remove '%' sign */
-		if (!stralloc_copyb(&keyfnfrom, keyfn, i))
+		if (access(keyfnfrom.s, F_OK))
 		{
-			DKIMSignFree(&ctxt);
-			die(51);
-		}
-		if (!stralloc_cats(&keyfnfrom, keyfn + i + 1))
+			/*- since file is not found remove '%' sign */
+			if (!stralloc_copyb(&keyfnfrom, keyfn, i))
+			{
+				DKIMSignFree(&ctxt);
+				die(51);
+			}
+			if (!stralloc_cats(&keyfnfrom, keyfn + i + 1))
+			{
+				DKIMSignFree(&ctxt);
+				die(51);
+			}
+		} else
+		if (!stralloc_copys(&keyfnfrom, keyfn))
 		{
 			DKIMSignFree(&ctxt);
 			die(51);
@@ -1083,14 +1109,7 @@ main(int argc, char *argv[])
 	{
 		if (!(dkimsign = env_get("DKIMKEY")))
 		{
-			if (!controldir)
-			{
-				if (!(controldir = env_get("CONTROLDIR")))
-					controldir = "control";
-			}
-			if (!stralloc_copys(&dkimfn, controldir))
-				die(51);
-			if (!stralloc_cats(&dkimfn, "/domainkeys/%/default"))
+			if (!stralloc_copys(&dkimfn, "domainkeys/%/default"))
 				die(51);
 			if (!stralloc_0(&dkimfn))
 				die(51);
@@ -1423,7 +1442,7 @@ main(argc, argv)
 void
 getversion_qmail_dkim_c()
 {
-	static char    *x = "$Id: qmail-dkim.c,v 1.30 2011-06-04 14:49:48+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-dkim.c,v 1.31 2011-07-22 14:40:05+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
