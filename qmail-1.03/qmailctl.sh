@@ -11,6 +11,9 @@
 ### END INIT INFO
 
 # $Log: qmailctl.sh,v $
+# Revision 1.36  2011-07-22 19:05:23+05:30  Cprogrammer
+# fixed service getting disabled on systems with systemctl
+#
 # Revision 1.35  2011-07-21 13:17:44+05:30  Cprogrammer
 # added systemd support
 #
@@ -272,14 +275,16 @@ stop()
 		echo
 		let ret+=$RETVAL
 	done
-	$ECHO -n $"Stopping svscan: "
-	QMAIL/sbin/initsvc -off > /dev/null 2>>/tmp/sv.err && $succ || $fail
-	RETVAL=$?
-	echo
-	if [ -s /tmp/sv.err ] ; then
-		cat /tmp/sv.err
+	if [ ! -f /bin/systemctl ] ; then
+		$ECHO -n $"Stopping svscan: "
+		QMAIL/sbin/initsvc -off > /dev/null 2>>/tmp/sv.err && $succ || $fail
+		RETVAL=$?
+		echo
+		if [ -s /tmp/sv.err ] ; then
+			cat /tmp/sv.err
+		fi
+		/bin/rm -f /tmp/sv.err
 	fi
-	/bin/rm -f /tmp/sv.err
 	if [ -d /var/lock/subsys ] ; then
 		[ $ret -eq 0 ] && rm -f /var/lock/subsys/svscan
 	fi
