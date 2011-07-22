@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-dk.c,v $
+ * Revision 1.32  2011-07-22 19:29:06+05:30  Cprogrammer
+ * fixed compilation error
+ *
  * Revision 1.31  2011-07-22 14:39:53+05:30  Cprogrammer
  * added DKDOMAIN feature to set d= tag
  *
@@ -333,15 +336,9 @@ write_signature(DK *dk, char *dk_selector, char *keyfn,
 			controldir = "control";
 	}
 	if (!stralloc_copys(&keyfnfrom, controldir))
-	{
-		DKIMSignFree(&ctxt);
 		die(51);
-	}
 	if (!stralloc_append(&keyfnfrom, "/"))
-	{
-		DKIMSignFree(&ctxt);
 		die(51);
-	}
 	i = str_chr(keyfn, '%');
 	if (keyfn[i])
 	{
@@ -847,7 +844,7 @@ main(argc, argv)
 void
 getversion_qmail_dk_c()
 {
-	static char    *x = "$Id: qmail-dk.c,v 1.31 2011-07-22 14:39:53+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-dk.c,v 1.32 2011-07-22 19:29:06+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
