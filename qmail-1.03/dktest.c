@@ -1,5 +1,8 @@
 /*
  * $Log: dktest.c,v $
+ * Revision 1.14  2011-07-22 14:39:27+05:30  Cprogrammer
+ * added -D option to specify d= tag
+ *
  * Revision 1.13  2009-12-10 15:04:09+05:30  Cprogrammer
  * exit with DK_STAT
  *
@@ -77,7 +80,7 @@ main(int argc, char *argv[])
 					optD = 0, optc = DK_CANON_SIMPLE;
 	char           *canon = "simple";
 	char           *keyfn  = 0, *selector  = 0;
-	char           *txtrec, *cp, *from;
+	char           *txtrec, *cp, *from, *dkdomain;
 	char            privkey[2048];
 	FILE           *privkeyf = 0;
 	size_t          privkeylen;
@@ -90,13 +93,16 @@ main(int argc, char *argv[])
 		DKT_CANON_BODY
 	};
 
-	while (1)
+	for (dkdomain = (char *) 0;;)
 	{
-		ch = getopt(argc, argv, "s:vt:fb:c:hrTd:");
+		ch = getopt(argc, argv, "s:vt:fb:c:hrTd:D:");
 		if (ch == -1)
 			break;
 		switch (ch)
 		{
+		case 'D':
+			dkdomain = optarg;
+			break;
 		case 'd':
 			optD = 1;
 			txtrec = dns_text(optarg);
@@ -342,7 +348,7 @@ main(int argc, char *argv[])
 #endif
 		from = dk_from(dk);
 		printf("DomainKey-Signature: a=rsa-sha1; q=dns; c=%s;\n"
-			"  s=%s; d=%s;\n" "  b=%s;\n", canon, selector, from, advice);
+			"  s=%s; d=%s;\n" "  b=%s;\n", canon, selector, dkdomain ? dkdomain : from, advice);
 		if (opth == 1)
 		{
 			if (dk_headers(dk, NULL) < sizeof(inbuf))
@@ -414,7 +420,7 @@ main(int argc, char *argv[])
 void
 getversion_dktest_c()
 {
-	static char    *x = "$Id: dktest.c,v 1.13 2009-12-10 15:04:09+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: dktest.c,v 1.14 2011-07-22 14:39:27+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
