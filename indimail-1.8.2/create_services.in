@@ -1,5 +1,8 @@
 #!/bin/sh
 # $Log: create_services.in,v $
+# Revision 2.50  2011-07-25 18:28:00+05:30  Cprogrammer
+# added imapspop3_mem softlimit for 64 bit
+#
 # Revision 2.49  2011-07-21 22:17:49+05:30  Cprogrammer
 # use higher soft memory for ssl enabled services
 #
@@ -170,7 +173,7 @@ indimaildir=@indimaildir@
 # End USER Configuration OPTIONS
 #
 
-# $Id: create_services.in,v 2.49 2011-07-21 22:17:49+05:30 Cprogrammer Exp mbhangui $
+# $Id: create_services.in,v 2.50 2011-07-25 18:28:00+05:30 Cprogrammer Exp mbhangui $
 
 usage()
 {
@@ -325,6 +328,7 @@ if [ " $$a_arch" = " x86_64" ] ; then
 	qmtp_soft_mem=104857600
 	qmqp_soft_mem=104857600
 	imap_pop3_mem=209715200
+	imapspop3_mem=209715200
 	poppass_mem=52428800
 else
 	fetchmail_mem=72428800
