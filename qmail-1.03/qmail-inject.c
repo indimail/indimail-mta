@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-inject.c,v $
+ * Revision 1.23  2011-07-28 19:39:08+05:30  Cprogrammer
+ * chdir to home after envdir_set()
+ *
  * Revision 1.22  2010-06-08 22:00:27+05:30  Cprogrammer
  * use envdir_set() on queuedefault to set default queue parameters
  *
@@ -1043,6 +1046,8 @@ getcontrols()
 			if ((e = pathexec(0)))
 				environ = e;
 		}
+		if (chdir(auto_qmail) == -1)
+			die_chdir();
 	}
 	if (!(x = env_get("QMAILDEFAULTDOMAIN")))
 	{
@@ -1258,7 +1263,7 @@ main(argc, argv)
 void
 getversion_qmail_inject_c()
 {
-	static char    *x = "$Id: qmail-inject.c,v 1.22 2010-06-08 22:00:27+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: qmail-inject.c,v 1.23 2011-07-28 19:39:08+05:30 Cprogrammer Stab mbhangui $";
 
 	x++;
 }
