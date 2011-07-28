@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-dk.c,v $
+ * Revision 1.33  2011-07-28 19:34:45+05:30  Cprogrammer
+ * BUG - fixed opening of private key with absolute path
+ *
  * Revision 1.32  2011-07-22 19:29:06+05:30  Cprogrammer
  * fixed compilation error
  *
@@ -330,18 +333,26 @@ write_signature(DK *dk, char *dk_selector, char *keyfn,
 	int             i;
 
 	from = dk_from(dk);
-	if (!controldir)
+	if (keyfn[0] != '/')
 	{
-		if (!(controldir = env_get("CONTROLDIR")))
-			controldir = "control";
+		if (!controldir)
+		{
+			if (!(controldir = env_get("CONTROLDIR")))
+				controldir = "control";
+		}
+		if (!stralloc_copys(&keyfnfrom, controldir))
+			die(51);
+		if (!stralloc_append(&keyfnfrom, "/"))
+			die(51);
 	}
-	if (!stralloc_copys(&keyfnfrom, controldir))
-		die(51);
-	if (!stralloc_append(&keyfnfrom, "/"))
-		die(51);
 	i = str_chr(keyfn, '%');
 	if (keyfn[i])
 	{
+		if (keyfn[0] == '/')
+		{
+			if (!stralloc_copyb(&keyfnfrom, keyfn, i))
+				die(51);
+		} else
 		if (!stralloc_catb(&keyfnfrom, keyfn, i))
 			die(51);
 		if (!stralloc_cats(&keyfnfrom, from))
@@ -349,8 +360,15 @@ write_signature(DK *dk, char *dk_selector, char *keyfn,
 		if (!stralloc_cats(&keyfnfrom, keyfn + i + 1))
 			die(51);
 	} else
-	if (!stralloc_cats(&keyfnfrom, keyfn))
-		die(51);
+	{
+		if (keyfn[0] == '/')
+		{
+			if (!stralloc_copys(&keyfnfrom, keyfn))
+				die(51);
+		} else
+		if (!stralloc_cats(&keyfnfrom, keyfn))
+			die(51);
+	}
 	if (!stralloc_0(&keyfnfrom))
 		die(51);
 	if (keyfn[i])
@@ -844,7 +862,7 @@ main(argc, argv)
 void
 getversion_qmail_dk_c()
 {
-	static char    *x = "$Id: qmail-dk.c,v 1.32 2011-07-22 19:29:06+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-dk.c,v 1.33 2011-07-28 19:34:45+05:30 Cprogrammer Stab mbhangui $";
 
 	x++;
 }

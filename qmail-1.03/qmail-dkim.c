@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-dkim.c,v $
+ * Revision 1.32  2011-07-28 19:36:36+05:30  Cprogrammer
+ * BUG - fixed opening of private key with absolute path
+ *
  * Revision 1.31  2011-07-22 14:40:05+05:30  Cprogrammer
  * fixed checking of private key file
  *
@@ -330,24 +333,35 @@ write_signature(char *domain, char *keyfn)
 	int             i;
 	static stralloc keyfnfrom = { 0 };
 
-	if (!controldir)
+	if (keyfn[0] != '/')
 	{
-		if (!(controldir = env_get("CONTROLDIR")))
-			controldir = "control";
-	}
-	if (!stralloc_copys(&keyfnfrom, controldir))
-	{
-		DKIMSignFree(&ctxt);
-		die(51);
-	}
-	if (!stralloc_append(&keyfnfrom, "/"))
-	{
-		DKIMSignFree(&ctxt);
-		die(51);
+		if (!controldir)
+		{
+			if (!(controldir = env_get("CONTROLDIR")))
+				controldir = "control";
+		}
+		if (!stralloc_copys(&keyfnfrom, controldir))
+		{
+			DKIMSignFree(&ctxt);
+			die(51);
+		}
+		if (!stralloc_append(&keyfnfrom, "/"))
+		{
+			DKIMSignFree(&ctxt);
+			die(51);
+		}
 	}
 	i = str_chr(keyfn, '%');
 	if (keyfn[i])
 	{
+		if (keyfn[0] == '/')
+		{
+			if (!stralloc_copyb(&keyfnfrom, keyfn, i))
+			{
+				DKIMSignFree(&ctxt);
+				die(51);
+			}
+		} else
 		if (!stralloc_catb(&keyfnfrom, keyfn, i))
 		{
 			DKIMSignFree(&ctxt);
@@ -364,10 +378,20 @@ write_signature(char *domain, char *keyfn)
 			die(51);
 		}
 	} else
-	if (!stralloc_cats(&keyfnfrom, keyfn))
 	{
-		DKIMSignFree(&ctxt);
-		die(51);
+		if (keyfn[0] == '/')
+		{
+			if (!stralloc_copys(&keyfnfrom, keyfn))
+			{
+				DKIMSignFree(&ctxt);
+				die(51);
+			}
+		} else
+		if (!stralloc_cats(&keyfnfrom, keyfn))
+		{
+			DKIMSignFree(&ctxt);
+			die(51);
+		}
 	}
 	if (!stralloc_0(&keyfnfrom))
 	{
@@ -1442,7 +1466,7 @@ main(argc, argv)
 void
 getversion_qmail_dkim_c()
 {
-	static char    *x = "$Id: qmail-dkim.c,v 1.31 2011-07-22 14:40:05+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-dkim.c,v 1.32 2011-07-28 19:36:36+05:30 Cprogrammer Stab mbhangui $";
 
 	x++;
 }
