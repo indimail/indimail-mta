@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-dkim.c,v $
+ * Revision 1.33  2011-07-29 09:29:17+05:30  Cprogrammer
+ * fixed key file name
+ *
  * Revision 1.32  2011-07-28 19:36:36+05:30  Cprogrammer
  * BUG - fixed opening of private key with absolute path
  *
@@ -146,40 +149,44 @@ unsigned long   uid;
 char           *pidfn;
 int             messfd;
 int             readfd;
+DKIMContext     ctxt;
 
 char          **MakeArgs(char *);
 void            FreeMakeArgs(char **);
 
+
 void
-die(e)
-	int             e;
+die(int e, int what)
 {
+	if (!what)
+		_exit(e);
+	(what == 1 ? DKIMSignFree : DKIMVerifyFree) (&ctxt);
 	_exit(e);
 }
 
 void
 die_write()
 {
-	die(53);
+	die(53, 0);
 }
 
 void
 die_read()
 {
-	die(54);
+	die(54, 0);
 }
 
 void
 sigalrm()
 {
 	/*- thou shalt not clean up here */
-	die(52);
+	die(52, 0);
 }
 
 void
 sigbug()
 {
-	die(81);
+	die(81, 0);
 }
 
 void
@@ -302,20 +309,19 @@ pidopen()
 	seq = 1;
 	len = pidfmt((char *) 0, seq);
 	if (!(pidfn = alloc(len)))
-		die(51);
+		die(51, 0);
 	for (seq = 1; seq < 10; ++seq)
 	{
 		if (pidfmt((char *) 0, seq) > len)
-			die(81); /*- paranoia */
+			die(81, 0); /*- paranoia */
 		pidfmt(pidfn, seq);
 		if ((messfd = open_excl(pidfn)) != -1)
 			return;
 	}
-	die(63);
+	die(63, 0);
 }
 
 char            tmp[FMT_ULONG];
-DKIMContext     ctxt;
 char           *dkimsign = 0;
 char           *dkimverify = 0;
 char           *dkimadspverify = 0, *dkimpractice =  "FGHIJKLMNPQRSTUVWX";
@@ -341,15 +347,9 @@ write_signature(char *domain, char *keyfn)
 				controldir = "control";
 		}
 		if (!stralloc_copys(&keyfnfrom, controldir))
-		{
-			DKIMSignFree(&ctxt);
-			die(51);
-		}
+			die(51, 1);
 		if (!stralloc_append(&keyfnfrom, "/"))
-		{
-			DKIMSignFree(&ctxt);
-			die(51);
-		}
+			die(51, 1);
 	}
 	i = str_chr(keyfn, '%');
 	if (keyfn[i])
@@ -357,73 +357,54 @@ write_signature(char *domain, char *keyfn)
 		if (keyfn[0] == '/')
 		{
 			if (!stralloc_copyb(&keyfnfrom, keyfn, i))
-			{
-				DKIMSignFree(&ctxt);
-				die(51);
-			}
+				die(51, 1);
 		} else
 		if (!stralloc_catb(&keyfnfrom, keyfn, i))
-		{
-			DKIMSignFree(&ctxt);
-			die(51);
-		}
+			die(51, 1);
 		if (!stralloc_cats(&keyfnfrom, domain))
-		{
-			DKIMSignFree(&ctxt);
-			die(51);
-		}
+			die(51, 1);
 		if (!stralloc_cats(&keyfnfrom, keyfn + i + 1))
-		{
-			DKIMSignFree(&ctxt);
-			die(51);
-		}
+			die(51, 1);
 	} else
 	{
 		if (keyfn[0] == '/')
 		{
 			if (!stralloc_copys(&keyfnfrom, keyfn))
-			{
-				DKIMSignFree(&ctxt);
-				die(51);
-			}
+				die(51, 1);
 		} else
 		if (!stralloc_cats(&keyfnfrom, keyfn))
-		{
-			DKIMSignFree(&ctxt);
-			die(51);
-		}
+			die(51, 1);
 	}
 	if (!stralloc_0(&keyfnfrom))
-	{
-		DKIMSignFree(&ctxt);
-		die(51);
-	}
+		die(51, 1);
 	if (keyfn[i])
 	{
 		if (access(keyfnfrom.s, F_OK))
 		{
 			/*- since file is not found remove '%' sign */
-			if (!stralloc_copyb(&keyfnfrom, keyfn, i))
+			if (keyfn[0] == '/')
 			{
-				DKIMSignFree(&ctxt);
-				die(51);
-			}
+				if (!stralloc_copyb(&keyfnfrom, keyfn, i))
+					die(51, 1);
+			} else
+			if (!stralloc_catb(&keyfnfrom, keyfn, i))
+				die(51, 1);
+			if ((i - 1) > 0 && keyfn[i - 1] == '/' && keyfn[i + 1] == '/')
+				i++;
 			if (!stralloc_cats(&keyfnfrom, keyfn + i + 1))
-			{
-				DKIMSignFree(&ctxt);
-				die(51);
-			}
+				die(51, 1);
 		} else
-		if (!stralloc_copys(&keyfnfrom, keyfn))
 		{
-			DKIMSignFree(&ctxt);
-			die(51);
+			if (keyfn[0] == '/')
+			{
+				if (!stralloc_copys(&keyfnfrom, keyfn))
+					die(51, 1);
+			} else
+			if (!stralloc_cats(&keyfnfrom, keyfn))
+				die(51, 1);
 		}
 		if (!stralloc_0(&keyfnfrom))
-		{
-			DKIMSignFree(&ctxt);
-			die(51);
-		}
+			die(51, 1);
 	}
 	switch (control_readnativefile(&dksignature, keyfnfrom.s, 1))
 	{
@@ -431,7 +412,7 @@ write_signature(char *domain, char *keyfn)
 		DKIMSignFree(&ctxt);
 		if (keyfn[i])
 			return;
-		die(35);
+		die(35, 0);
 	case 1:
 		break;
 	default:
@@ -445,24 +426,15 @@ write_signature(char *domain, char *keyfn)
 			dksignature.s[i] = '\n';
 	}
 	if (!stralloc_0(&dksignature))
-	{
-		DKIMSignFree(&ctxt);
-		die(51);
-	}
+		die(51, 1);
 	i = DKIMSignGetSig2(&ctxt, dksignature.s, &pSig);
 	maybe_die_dkim(i);
 	if (pSig)
 	{
 		if (!stralloc_catb(&dkimoutput, pSig, str_len(pSig)))
-		{
-			DKIMSignFree(&ctxt);
-			die(51);
-		}
+			die(51, 1);
 		if (!stralloc_cats(&dkimoutput, "\n"))
-		{
-			DKIMSignFree(&ctxt);
-			die(51);
-		}
+			die(51, 1);
 	}
 	DKIMSignFree(&ctxt);
 }
@@ -539,7 +511,7 @@ checkSSP(char *domain, int *bTesting)
 
 	*bTesting = 0;
 	if (!(query = DKIM_MALLOC(str_len("_ssp._domainkey.") + str_len(domain) + 1)))
-		die(51);
+		die(51, 0);
 	sprintf(query, "_ssp._domainkey.%s", domain);
 	results = dns_text(query);
 	DKIM_MFREE(query);
@@ -621,7 +593,7 @@ checkADSP(char *domain)
 		return DKIM_ADSP_TEMPFAIL;
 	}
 	if (!(query = DKIM_MALLOC(str_len("_adsp._domainkey.") + str_len(domain) + 1)))
-		die(51);
+		die(51, 0);
 	sprintf(query, "_adsp._domainkey.%s", domain);
 	results = dns_text(query);
 	DKIM_MFREE(query);
@@ -656,24 +628,24 @@ dkimverify_exit(int dkimRet, char *status, char *code)
 		if (dkimverify[str_chr(dkimverify, 'F' - dkimRet)])
 		{
 			custom_error("D", status, code);
-			die(88);
+			die(88, 0);
 		}
 		if (dkimverify[str_chr(dkimverify, 'f' - dkimRet)])
 		{
 			custom_error("Z", status, code);
-			die(88);
+			die(88, 0);
 		}
 	} else
 	{
 		if (dkimverify[str_chr(dkimverify, 'A' + dkimRet)])
 		{
 			custom_error("D", status, code);
-			die(88);
+			die(88, 0);
 		}
 		if (dkimverify[str_chr(dkimverify, 'a' + dkimRet)])
 		{
 			custom_error("Z", status, code);
-			die(88);
+			die(88, 0);
 		}
 	}
 }
@@ -828,13 +800,13 @@ writeHeaderNexit(int ret, int origRet, int resDKIMSSP, int resDKIMADSP, int useS
 		}
 	}
 	if (!stralloc_copys(&dkimoutput, "DKIM-Status: "))
-		die(51);
+		die(51, 0);
 	if (!stralloc_cats(&dkimoutput, dkimStatus))
-		die(51);
+		die(51, 0);
 	if (origRet != DKIM_MAX_ERROR && ret != origRet)
 	{
 		if (!stralloc_cats(&dkimoutput, "\n\t(old="))
-			die(51);
+			die(51, 0);
 		switch (origRet)
 		{
 		case DKIM_SUCCESS:			/*- 0 */ /*- A */
@@ -911,38 +883,38 @@ writeHeaderNexit(int ret, int origRet, int resDKIMSSP, int resDKIMADSP, int useS
 			break;
 		}
 		if (!stralloc_cats(&dkimoutput, orig))
-			die(51);
+			die(51, 0);
 		if (!stralloc_cats(&dkimoutput, ":"))
-			die(51);
+			die(51, 0);
 		if (origRet < 0)
 		{
 			if (!stralloc_cats(&dkimoutput, "-"))
-				die(51);
+				die(51, 0);
 			strnum[fmt_ulong(strnum, 0 - origRet)] = 0;
 		} else
 			strnum[fmt_ulong(strnum, origRet)] = 0;
 		if (!stralloc_cats(&dkimoutput, strnum))
-			die(51);
+			die(51, 0);
 		if (!stralloc_cats(&dkimoutput, ")"))
-			die(51);
+			die(51, 0);
 	}
 	if (!stralloc_cats(&dkimoutput, "\n"))
-		die(51);
+		die(51, 0);
 	if (useSSP && sspStatus) {
 		if (!stralloc_cats(&dkimoutput, "X-DKIM-SSP: "))
-			die(51);
+			die(51, 0);
 		if (!stralloc_cats(&dkimoutput, sspStatus))
-			die(51);
+			die(51, 0);
 		if (!stralloc_cats(&dkimoutput, "\n"))
-			die(51);
+			die(51, 0);
 	}
 	if (useADSP && adspStatus) {
 		if (!stralloc_cats(&dkimoutput, "X-DKIM-ADSP: "))
-			die(51);
+			die(51, 0);
 		if (!stralloc_cats(&dkimoutput, adspStatus))
-			die(51);
+			die(51, 0);
 		if (!stralloc_cats(&dkimoutput, "\n"))
-			die(51);
+			die(51, 0);
 	}
 	dkimverify_exit(ret, dkimStatus, code);
 	return;
@@ -1000,13 +972,13 @@ dkim_setoptions(DKIMSignOptions *opts, char *signOptions)
 	if (!signOptions)
 		return (0);
 	if (!stralloc_copys(&dkimopts, "dkim "))
-		die(51);
+		die(51, 0);
 	if (!stralloc_cats(&dkimopts, signOptions))
-		die(51);
+		die(51, 0);
 	if (!stralloc_0(&dkimopts))
-		die(51);
+		die(51, 0);
 	if (!(argv = MakeArgs(dkimopts.s)))
-		die(51);
+		die(51, 0);
 	for (argc = 0;argv[argc];argc++);
 #ifdef HAVE_EVP_SHA256
 	while ((ch = sgopt(argc, argv, "b:c:li:qthx:z:")) != sgoptdone)
@@ -1124,7 +1096,7 @@ main(int argc, char *argv[])
 	sig_blocknone();
 	umask(033);
 	if (chdir(auto_qmail) == -1)
-		die(61);
+		die(61, 0);
 	if (!dkimsign)
 		dkimsign = env_get("DKIMSIGN");
 	if (!dkimverify)
@@ -1134,9 +1106,9 @@ main(int argc, char *argv[])
 		if (!(dkimsign = env_get("DKIMKEY")))
 		{
 			if (!stralloc_copys(&dkimfn, "domainkeys/%/default"))
-				die(51);
+				die(51, 0);
 			if (!stralloc_0(&dkimfn))
-				die(51);
+				die(51, 0);
 			dkimsign = dkimfn.s;
 		}
 	}
@@ -1230,15 +1202,9 @@ main(int argc, char *argv[])
 	alarm(DEATH);
 	pidopen(); /*- fd = messfd */
 	if ((readfd = open_read(pidfn)) == -1)
-	{
-		(dkimsign ? DKIMSignFree : DKIMVerifyFree) (&ctxt);
-		die(63);
-	}
+		die(63, dkimsign ? 1 : 2);
 	if (unlink(pidfn) == -1)
-	{
-		(dkimsign ? DKIMSignFree : DKIMVerifyFree) (&ctxt);
-		die(63);
-	}
+		die(63, dkimsign ? 1 : 2);
 	substdio_fdbuf(&ssout, write, messfd, outbuf, sizeof(outbuf));
 	substdio_fdbuf(&ssin, read, 0, inbuf, sizeof(inbuf));
 	for (ret = 0;;)
@@ -1316,16 +1282,10 @@ main(int argc, char *argv[])
 					if (!(p = env_get("SIGNATUREDOMAINS")))
 					{
 						if (control_readfile(&sigdomains, "signaturedomains", 0) == -1)
-						{
-							DKIMVerifyFree(&ctxt);
-							die(55);
-						}
+							die(55, 2);
 					} else
 					if (!stralloc_copys(&sigdomains, p))
-					{
-						DKIMVerifyFree(&ctxt);
-						die(51);
-					}
+						die(51, 2);
 					for (len = 0, p = sigdomains.s;len < sigdomains.len;)
 					{
 						len += ((token_len = str_len(p)) + 1); /*- next domain */
@@ -1341,16 +1301,10 @@ main(int argc, char *argv[])
 					if (!(p = env_get("NOSIGNATUREDOMAINS")))
 					{
 						if (control_readfile(&nsigdomains, "nosignaturedomains", 0) == -1)
-						{
-							DKIMVerifyFree(&ctxt);
-							die(55);
-						}
+							die(55, 2);
 					} else
 					if (!stralloc_copys(&nsigdomains, p))
-					{
-						DKIMVerifyFree(&ctxt);
-						die(51);
-					}
+						die(51, 2);
 					for (len = 0, p = nsigdomains.s;len < nsigdomains.len;)
 					{
 						len += ((token_len = str_len(p)) + 1); /*- next domain */
@@ -1406,19 +1360,19 @@ main(int argc, char *argv[])
 		} /*- if (dkimverify) */
 	}
 	if (pipe(pim) == -1)
-		die(59);
+		die(59, 0);
 	switch (pid = vfork())
 	{
 	case -1:
 		close(pim[0]);
 		close(pim[1]);
-		die(58);
+		die(58, 0);
 	case 0:
 		close(pim[1]);
 		if (fd_move(0, pim[0]) == -1)
-			die(120);
+			die(120, 0);
 		execv(*binqqargs, binqqargs);
-		die(120);
+		die(120, 0);
 	}
 	close(pim[0]);
 	substdio_fdbuf(&ssin, read, readfd, inbuf, sizeof(inbuf));
@@ -1436,10 +1390,10 @@ main(int argc, char *argv[])
 		die_write();
 	close(pim[1]);
 	if (wait_pid(&wstat, pid) != pid)
-		die(57);
+		die(57, 0);
 	if (wait_crashed(wstat))
-		die(57);
-	die(wait_exitcode(wstat));
+		die(57, 0);
+	die(wait_exitcode(wstat), 0);
 	/*- Not Reached */
 	exit(0);
 }
@@ -1466,7 +1420,7 @@ main(argc, argv)
 void
 getversion_qmail_dkim_c()
 {
-	static char    *x = "$Id: qmail-dkim.c,v 1.32 2011-07-28 19:36:36+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: qmail-dkim.c,v 1.33 2011-07-29 09:29:17+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
