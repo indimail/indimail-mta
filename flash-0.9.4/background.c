@@ -1,5 +1,8 @@
 /*
  * $Log: background.c,v $
+ * Revision 1.5  2011-07-29 09:23:47+05:30  Cprogrammer
+ * fixed gcc warnings
+ *
  * Revision 1.4  2009-06-04 10:46:04+05:30  Cprogrammer
  * added conditional inclusion of ncurses
  *
@@ -126,7 +129,7 @@ DrawScreen(void)
 			if (back_file != (FILE *) NULL)
 			{
 				int             c, d;
-				int             xstart, ystart, defattr, attrnow;
+				int             xstart, ystart, defattr;
 
 				defattr = A_NORMAL;
 				if (x->flags & BGFLAG_REVVID)
@@ -138,7 +141,6 @@ DrawScreen(void)
 				if (x->flags & BGFLAG_STANDOUT)
 					defattr |= A_STANDOUT;
 				wattrset(_BGMS_Backgrounds->window, defattr);
-				attrnow = defattr;
 
 				xstart = (x->xoff >= 0) ? x->xoff : COLS + x->xoff;
 				if (xstart > COLS)

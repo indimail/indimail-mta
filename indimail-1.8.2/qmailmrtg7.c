@@ -1,5 +1,8 @@
 /*
  * $Log: qmailmrtg7.c,v $
+ * Revision 2.8  2011-07-29 09:26:17+05:30  Cprogrammer
+ * fixed gcc 4.6 warnings
+ *
  * Revision 2.7  2011-04-15 20:21:47+05:30  Cprogrammer
  * fixed format for snprintf
  *
@@ -57,7 +60,7 @@
 #include <dirent.h>
 
 #ifndef lint
-static char     sccsid[] = "$Id: qmailmrtg7.c,v 2.7 2011-04-15 20:21:47+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: qmailmrtg7.c,v 2.8 2011-07-29 09:26:17+05:30 Cprogrammer Stab mbhangui $";
 #endif
 
 #define MAX_BUFF 1000
@@ -99,7 +102,9 @@ main(int argc, char **argv)
 {
 	DIR            *mydir;
 	struct dirent  *mydirent;
+#if 0
 	char           *cmmd;
+#endif
 	unsigned long   secs;
 	int             i;
 
@@ -109,7 +114,9 @@ main(int argc, char **argv)
 	}
 	snprintf(TheDir, sizeof (TheDir), "%s", argv[2]);
 	TheType = *argv[1];
+#if 0
 	cmmd = (argc == 4 ? argv[3] : 0);
+#endif
 	switch (TheType) {
 	case 'C':
 	case 't':

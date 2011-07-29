@@ -330,7 +330,6 @@ int save_attach_data(char *title, uint8 *tsp, uint32 size)
 {
 	FILE *out;
 	char filename[1024];
-	size_t bc;
 
 	snprintf(filename, sizeof(filename),"%s/%s", TNEF_glb.path, title );
 
@@ -341,7 +340,7 @@ int save_attach_data(char *title, uint8 *tsp, uint32 size)
 		return -1;
 	}
 
-	bc = fwrite(tsp, sizeof(uint8), size, out);
+	fwrite(tsp, sizeof(uint8), size, out);
 	fclose(out);
 	return 0;
 }
@@ -488,7 +487,6 @@ int read_attribute(uint8 *tsp)
 	int bytes = 0, header = 0;
 	int rv = 0;
 	uint32 attribute;
-	uint8 component = 0;
 	uint32 size = 0;
 	uint16 checksum = 0;
 	static char attach_title[256] = {
@@ -496,8 +494,6 @@ int read_attribute(uint8 *tsp)
 	static uint32 attach_size = 0;
 	//static uint32 attach_loc  = 0; // 2003-02-22-1231-PLD
 	static uint8 *attach_loc  = 0;
-
-	component = *tsp;
 
 	bytes += sizeof(uint8);
 

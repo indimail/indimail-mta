@@ -1,5 +1,8 @@
 /*
  * $Log: main.c,v $
+ * Revision 1.5  2011-07-29 09:23:56+05:30  Cprogrammer
+ * fixed gcc warnings
+ *
  * Revision 1.4  2008-07-17 21:37:22+05:30  Cprogrammer
  * moved global variables to variables.[c,h]
  *
@@ -107,7 +110,9 @@ main(int argc, char *argv[])
 	char            c;
 	char           *filename = DEFAULT_MENU;
 	int             ShowVariables = 0;
+#if 0
 	pid_t           shell_pgid;
+#endif
 	sigset_t        smask;
 
 	int             debug_file = 0;
@@ -143,7 +148,9 @@ main(int argc, char *argv[])
 	sigaction(SIGCHLD, &s_act, (struct sigaction *) NULL);
 
 	setpgid(0, 0);
+#if 0
 	shell_pgid = getpgrp();
+#endif
 
 	s_act.sa_handler = (void (*)(int)) handle_snarfed_tty;
 	sigemptyset(&s_act.sa_mask);

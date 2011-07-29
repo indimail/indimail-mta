@@ -2423,7 +2423,6 @@ int AM_add_disclaimer( char *mpackname )
 	char mpackold[AM_1K_BUFFER_SIZE+1]="";
 	struct AM_disclaimer_details dd;
 	int result = 0;
-	int segment_read = 0;
 
 	/* create our temp filename */
 	snprintf(mpacktmp,AM_1K_BUFFER_SIZE, "%s.tmp",mpackname);
@@ -2615,7 +2614,6 @@ int AM_add_disclaimer( char *mpackname )
 				  */
 
 
-			segment_read = 0;
 			if (FFGET_feof(&f)) break;
 
 			// If we've found a boundary and a text content section...
@@ -3690,7 +3688,9 @@ Changes:
 int AM_attachment_replace_recurse( struct MIMEH_header_info *hinfo, FFGET_FILE *f, FILE *outputfile, regex_t *preg, char *new_attachment_name, int iteration )
 {
 	int result = 0;
+#if 0
 	int boundary_exists=0;
+#endif
 	size_t bc;
 
 	if (AM_DNORMAL) LOGGER_log("%s:%d:AM_attachment_replace_recurse:DEBUG: Starting: iteration=%d",FL, iteration );
@@ -3768,7 +3768,9 @@ int AM_attachment_replace_recurse( struct MIMEH_header_info *hinfo, FFGET_FILE *
 		{
 			if (AM_DNORMAL)LOGGER_log("%s:%d:AM_attachment_replace_recurse:DEBUG: pushing BS='%s'",FL, hinfo->boundary );
 			BS_push( hinfo->boundary );
+#if 0
 			boundary_exists = 1;
+#endif
 		}
 
 		// Now, determine if this block/segment is the one which contains our file which we must 'nullify'

@@ -1,5 +1,8 @@
 /*
  * $Log: menu.c,v $
+ * Revision 1.3  2011-07-29 09:24:03+05:30  Cprogrammer
+ * fixed gcc warnings
+ *
  * Revision 1.2  2008-07-17 21:38:13+05:30  Cprogrammer
  * moved progname to variables.h
  *
@@ -368,14 +371,12 @@ alloc_items(char *line, int i)
 static void
 process_menu_items(struct menu *menu, FILE * fp, int *start_line)
 {
-	int             i, menu_close, found_end;
+	int             i;
 	char           *line;
 	struct menu_items *d;
 	struct menu_items **attach_here;
 
 	i = *start_line;
-	menu_close = 0;
-	found_end = 0;
 
 	line = Readline(fp);
 	i++;

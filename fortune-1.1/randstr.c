@@ -163,10 +163,6 @@ get_pos(STRFILE * fp)
 void
 get_fort(STRFILE fp)
 {
-	register int    choice;
-
-	choice = random() % fp.str_numstr;
-
 	get_pos(&fp);
 	fseek(Dataf, (long) (sizeof fp + pos * sizeof Seekpts[0]), 0);
 	fread(Seekpts, sizeof Seekpts, 1, Dataf);

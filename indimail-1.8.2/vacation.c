@@ -1,5 +1,8 @@
 /*
  * $Log: vacation.c,v $
+ * Revision 2.11  2011-07-29 09:26:29+05:30  Cprogrammer
+ * fixed gcc 4.6 warnings
+ *
  * Revision 2.10  2010-03-07 14:44:28+05:30  Cprogrammer
  * changed welcome message
  *
@@ -58,7 +61,7 @@
 #include <sys/stat.h>
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vacation.c,v 2.10 2010-03-07 14:44:28+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: vacation.c,v 2.11 2011-07-29 09:26:29+05:30 Cprogrammer Stab mbhangui $";
 #endif
 
 char           *getuserinfo(char *);
@@ -72,7 +75,6 @@ main(int argc, char **argv)
 	char            buffer[MAX_BUFF + 2], VacationFname[MAXPATHLEN];
 	char            cmmd[MAX_BUFF], ToId[MAX_BUFF], FromId[MAX_BUFF], Subject[4096];
 	char           *ptr, *cptr, *HomeDir, *qmaildir, *sender;
-	int             ToFlag, FromFlag;
 
 	if(argc == 2 || argc == 3)
 	{
@@ -88,7 +90,6 @@ main(int argc, char **argv)
 		usage();
 		_exit(0);
 	}
-	ToFlag = FromFlag = 0;
 	*Subject = 0;
 	HomeDir = (char *) NULL;
 	/*- RECIPIENT=satyam.net.in-mbhangui@satyam.net.in -*/
@@ -98,7 +99,6 @@ main(int argc, char **argv)
 		if((cptr = strchr(ptr, '-')) != (char *) NULL)
 		{
 			cptr++;
-			FromFlag = 1;
 			scopy(FromId, cptr, MAX_BUFF);
 		}
 		if ((HomeDir = getuserinfo(FromId)) != (char *) NULL)
@@ -131,7 +131,6 @@ main(int argc, char **argv)
 	/*- RPLINE=Return-Path: <mbhangui@yahoo.com> -*/
 	if((ptr = (char *) getenv("RPLINE")) != (char *) NULL)
 	{
-		ToFlag = 1;
 		ptr += 12;
 		for (; isspace((int) *ptr); ptr++);
 		for (cptr = ToId; *ptr; ptr++)

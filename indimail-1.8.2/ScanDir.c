@@ -1,5 +1,8 @@
 /*
  * $Log: ScanDir.c,v $
+ * Revision 2.7  2011-07-29 09:26:21+05:30  Cprogrammer
+ * fixed gcc 4.6 warnings
+ *
  * Revision 2.6  2009-02-18 09:08:04+05:30  Cprogrammer
  * fixed fgets warning
  *
@@ -47,7 +50,7 @@
 #include <string.h>
 
 #ifndef	lint
-static char     sccsid[] = "$Id: ScanDir.c,v 2.6 2009-02-18 09:08:04+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: ScanDir.c,v 2.7 2011-07-29 09:26:21+05:30 Cprogrammer Stab mbhangui $";
 #endif
 
 static int MailPrint(FILE *, char *, int, int *, int *, int *, int *, int *, int *);
@@ -70,7 +73,7 @@ ScanDir(fp, homedir, verbose, total, mcount, trashtotal, trashcount, unread, uns
 	DIR            *dp;
 	struct dirent  *dir;
 	struct stat     statbuf;
-	int             Ltotal, len, Mailcount, LTrashcount, LTrashtotal, unreadCount, unseenCount;
+	int             Ltotal, Mailcount, LTrashcount, LTrashtotal, unreadCount, unseenCount;
 	char            DirPath[MAX_BUFF];
 	char           *ptr;
 
@@ -133,7 +136,7 @@ ScanDir(fp, homedir, verbose, total, mcount, trashtotal, trashcount, unread, uns
 		else
 		if(strncmp(dir->d_name, ".Trash", 6) && skip_system_files(dir->d_name))
 			continue;
-		len = slen(dir->d_name);
+		slen(dir->d_name);
 		snprintf(DirPath, MAX_BUFF, "%s/%s", homedir, dir->d_name);
 		if (stat(DirPath, &statbuf))
 			continue;
@@ -151,7 +154,7 @@ MailPrint(FILE *fp, char *HomeDir, int verbose, int *total, int *mailcount, int 
 	DIR            *dp;
 	char            MailFile[MAX_BUFF];
 	char           *ptr;
-	int             len, is_trash;
+	int             is_trash;
 	struct dirent  *dir;
 	struct stat     statbuf;
 
@@ -180,7 +183,7 @@ MailPrint(FILE *fp, char *HomeDir, int verbose, int *total, int *mailcount, int 
 				fprintf(fp, "From                                Subject                            Size\n");
 				fprintf(fp, "---------------------------------------------------------------------------\n");
 			}
-			len = slen(dir->d_name);
+			slen(dir->d_name);
 			if((ptr = strrchr(dir->d_name, ':')))
 				ptr++;
 			if(is_trash || (ptr && strchr(ptr, 'T')))

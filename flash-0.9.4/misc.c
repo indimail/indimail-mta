@@ -1,5 +1,8 @@
 /*
  * $Log: misc.c,v $
+ * Revision 1.5  2011-07-29 09:24:08+05:30  Cprogrammer
+ * fixed gcc warnings
+ *
  * Revision 1.4  2008-07-17 21:38:20+05:30  Cprogrammer
  * moved progname to variables.h
  *
@@ -227,14 +230,13 @@ pressanykey(void)
 {
 	struct termios  saved;
 	char            cc;
-	int             olderrno, n;
+	int             n;
 
 	fprintf(stderr, "[----Hit the ENTER key when you're ready----] ");
 	tcflush(0, TCIFLUSH);
 	tty_cbreak(0, &saved);
 	do
 	{
-		olderrno = errno;
 		do
 		{
 			errno = 0;

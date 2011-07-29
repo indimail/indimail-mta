@@ -1,5 +1,8 @@
 /*
  * $Log: vrenameuser.c,v $
+ * Revision 2.10  2011-07-29 09:26:38+05:30  Cprogrammer
+ * fixed gcc 4.6 warnings
+ *
  * Revision 2.9  2010-02-17 10:58:55+05:30  Cprogrammer
  * added post handle
  *
@@ -41,7 +44,7 @@
 #include <signal.h>
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vrenameuser.c,v 2.9 2010-02-17 10:58:55+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: vrenameuser.c,v 2.10 2011-07-29 09:26:38+05:30 Cprogrammer Stab mbhangui $";
 #endif
 
 char            oldEmail[MAX_BUFF];
@@ -59,7 +62,6 @@ main(argc, argv)
 	int             argc;
 	char           *argv[];
 {
-	int             err;
 	uid_t           uid1, uid2, myuid;
 	gid_t           gid1, gid2;
 	char           *ptr, *base_argv0;
@@ -112,7 +114,11 @@ main(argc, argv)
 			return (1);
 		}
 	}
-	err = vrenameuser(oldUser, oldDomain, newUser, newDomain);
+	if (vrenameuser(oldUser, oldDomain, newUser, newDomain))
+	{
+		vclose();
+		return (1);
+	}
 	vclose();
 	if (!(ptr = getenv("POST_HANDLE")))
 	{

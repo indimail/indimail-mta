@@ -1,5 +1,8 @@
 /*
  * $Log: handlers.c,v $
+ * Revision 2.6  2011-07-29 09:26:02+05:30  Cprogrammer
+ * fixed gcc 4.6 warnings
+ *
  * Revision 2.5  2011-04-08 17:26:15+05:30  Cprogrammer
  * added HAVE_CONFIG_H
  *
@@ -39,7 +42,7 @@
  * MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
-static char    *rcsid = "@(#) $Id: handlers.c,v 2.5 2011-04-08 17:26:15+05:30 Cprogrammer Stab mbhangui $";
+static char    *rcsid = "@(#) $Id: handlers.c,v 2.6 2011-07-29 09:26:02+05:30 Cprogrammer Stab mbhangui $";
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -666,11 +669,10 @@ i_more(argc, argv)
 
 {
 	FILE           *input_file;
-	FILE           *k;
 	char           *file_name;
 	char            temp[255];
 	char            c;
-	int             x, y;
+	int             y;
 	int             done = 0, noeof = 0;
 	int             line = 0, size = 0;
 
@@ -698,7 +700,7 @@ i_more(argc, argv)
 			fprintf(stderr, "more: %s\n", strerror(errno));
 			return(0);
 		}
-		k = fopen("/dev/tty", "r");
+		fopen("/dev/tty", "r");
 
 		initscr();
 		noecho();
@@ -722,7 +724,7 @@ i_more(argc, argv)
 			{
 				line++;
 				printw("%s", temp);
-				getyx(stdscr, y, x);
+				getyx(stdscr, y, c);
 				if (y == LINES - 1)
 				{
 					if (size == 0)

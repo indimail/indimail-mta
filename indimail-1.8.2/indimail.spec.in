@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail.spec.in,v 2.232 2011-07-25 18:28:23+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 2.233 2011-07-28 22:13:54+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %define _unpackaged_files_terminate_build 1
 
@@ -2406,6 +2406,11 @@ then
 	if [ $argv1 -ne 1 ] ; then # not an upgrade
 		%{__rm} -f %{_sysconfdir}/event.d/svscan
 	fi
+elif test -f %{_sysconfdir}/systemd/system/multi-user.target.wants/indimail.service
+then
+	/bin/systemctl stop indimail.service > /dev/null 2>&1
+	echo "Giving IndiMail exactly 5 seconds to exit nicely"
+	sleep 5
 elif test -x %{_prefix}/sbin/initsvc
 then
 	%{_prefix}/sbin/initsvc -off

@@ -1,5 +1,8 @@
 /*
  * $Log: sq_vacation.c,v $
+ * Revision 2.8  2011-07-29 09:26:24+05:30  Cprogrammer
+ * fixed gcc 4.6 warnings
+ *
  * Revision 2.7  2010-05-01 14:14:03+05:30  Cprogrammer
  * added connect_all argument to vauthOpen_user
  *
@@ -88,7 +91,7 @@
 #define ERR_UNEXPECTED  126     /*- other unexpected error */
 
 #ifndef lint
-static char     sccsid[] = "$Id: sq_vacation.c,v 2.7 2010-05-01 14:14:03+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: sq_vacation.c,v 2.8 2011-07-29 09:26:24+05:30 Cprogrammer Stab mbhangui $";
 #endif
 #ifndef INDIMAILH_H
 int             vauthOpen_user(char *);
@@ -299,8 +302,7 @@ set_eugid(uid_t uid, gid_t gid)
 int
 main(int argc, char **argv)
 {
-	char           *email = 0, *action, *server = 0, *src, *dest, *filename = 0,
-				   *ptr, *cptr, *real_domain, *crypt_pass;
+	char           *email = 0, *action, *ptr, *cptr, *real_domain, *crypt_pass;
 	char            User[AUTH_SIZE], Domain[AUTH_SIZE], passbuf[BUFSIZE];
 	char           *(vacargs[5]);
 	int             fd, status = -1;
@@ -314,11 +316,8 @@ main(int argc, char **argv)
 		die(ERR_BADPASS, "Could not read password");
 	if ((ptr = strchr(passbuf, '\n')))
 		*ptr = 0;
-	server = argv[SERVER];
 	email = argv[USER];
 	action = argv[ACTION];
-	src = argv[SRC];
-	dest = argv[DEST];
 	orig_uid = getuid();
 	orig_gid = getgid();
 	for (ptr = email, cptr = User;*ptr && *ptr != '@';*cptr++ = *ptr++);
@@ -391,14 +390,12 @@ main(int argc, char **argv)
 	{
 		if (argc != DEST + 1)
 			die(ERR_USAGE, "Incorrect usage for get");
-		filename = argv[DEST];
 		status = do_get(argv[SRC], argv[DEST], pw);
 	} else
 	if (!strncmp(action, "put", 3))
 	{
 		if (argc != DEST + 1)
 			die(ERR_USAGE, "Incorrect usage for put");
-		filename = argv[SRC];
 		status = do_put(argv[SRC], argv[DEST], pw, uid, gid);
 	} else
 	if (!strncmp(action, "delete", 6))

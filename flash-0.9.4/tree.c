@@ -1,5 +1,8 @@
 /*
  * $Log: tree.c,v $
+ * Revision 1.3  2011-07-29 09:24:22+05:30  Cprogrammer
+ * fixed gcc warnings
+ *
  * Revision 1.2  2008-06-09 15:33:15+05:30  Cprogrammer
  * added GPL copyright notice
  *
@@ -170,14 +173,13 @@ void           *
 change_node(struct dict *d, void *data)
 {
 	struct node    *head = d->head;
-	struct node    *p = head, *x = head->r;
+	struct node    *x = head->r;
 	void           *old_data;
 	int             (*compare) (void *a, void *b) = d->compare;
 	int             kcmp;
 
 	while (x != NULL)
 	{
-		p = x;
 		kcmp = (*compare) (x->data, data);
 		if (kcmp == 0)
 			break;

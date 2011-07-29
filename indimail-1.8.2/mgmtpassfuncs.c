@@ -1,5 +1,8 @@
 /*
  * $Log: mgmtpassfuncs.c,v $
+ * Revision 2.20  2011-07-29 09:26:13+05:30  Cprogrammer
+ * fixed gcc 4.6 warnings
+ *
  * Revision 2.19  2009-09-17 10:33:54+05:30  Cprogrammer
  * fixed problem with adding new user
  *
@@ -61,7 +64,7 @@
 #include "indimail.h"
 
 #ifndef lint
-static char     sccsid[] = "$Id: mgmtpassfuncs.c,v 2.19 2009-09-17 10:33:54+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: mgmtpassfuncs.c,v 2.20 2011-07-29 09:26:13+05:30 Cprogrammer Stab mbhangui $";
 #endif
 
 #ifdef CLUSTERED_SITE
@@ -442,7 +445,6 @@ mgmtgetpass(char *username)
 {
 	char            SqlBuf[SQL_BUF_SIZE];
 	static char     _user[MAX_BUFF], mysql_pass[MAX_BUFF];
-	int             status;
 	MYSQL_RES      *res;
 	MYSQL_ROW       row;
 
@@ -485,7 +487,7 @@ mgmtgetpass(char *username)
 	if ((row = mysql_fetch_row(res)))
 	{
 		snprintf(mysql_pass, MAX_BUFF, "%s", row[0]);
-		status=atoi(row[1]);
+		atoi(row[1]);
 	}
 	mysql_free_result(res);
 	snprintf(SqlBuf, SQL_BUF_SIZE, "update low_priority mgmtaccess set lastaccess=%ld where user=\"%s\"", 

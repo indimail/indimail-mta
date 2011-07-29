@@ -1,5 +1,8 @@
 /*
  * $Log: vlimit.c,v $
+ * Revision 2.11  2011-07-29 09:26:34+05:30  Cprogrammer
+ * fixed gcc 4.6 warnings
+ *
  * Revision 2.10  2011-02-11 23:02:05+05:30  Cprogrammer
  * fix for setting & displaying > 2Gb in quota and message counts
  *
@@ -52,7 +55,7 @@
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vlimit.c,v 2.10 2011-02-11 23:02:05+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: vlimit.c,v 2.11 2011-07-29 09:26:34+05:30 Cprogrammer Stab mbhangui $";
 #endif
 
 #ifdef ENABLE_DOMAIN_LIMITS
@@ -566,7 +569,6 @@ int
 get_options(int argc, char **argv)
 {
 	int             c;
-	int             errflag;
 	extern char    *optarg;
 	extern int      optind;
 	char            flag[4];
@@ -608,7 +610,6 @@ get_options(int argc, char **argv)
 	passwd_expiry = 0;
 	/*- NoMakeIndex = 0; */
 	DeleteLimits = 0;
-	errflag = 0;
 	flag[0] = flag[1] = flag[2] = flag[3] = 0;
 	while ((c = getopt(argc, argv, "vst:e:n:N:DQ:q:M:m:P:A:F:R:L:g:p:a:f:r:l:u:o:x:z:h")) != -1)
 	{
@@ -766,7 +767,6 @@ get_options(int argc, char **argv)
 			return (1);
 		default:
 			ShowLimits = 0;
-			errflag = 1;
 			break;
 		}
 	}

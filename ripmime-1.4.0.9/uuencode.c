@@ -614,8 +614,7 @@ int UUENCODE_decode_uu( FFGET_FILE *f, char *unpackdir, char *input_filename, ch
 
 					if ( wbcount >= UUENCODE_WRITE_BUFFER_LIMIT )
 					{
-						size_t bc;
-						bc = fwrite(writebuffer, 1, wbcount, outf);
+						fwrite(writebuffer, 1, wbcount, outf);
 						wbpos = writebuffer;
 						wbcount = 0;
 					}
@@ -640,10 +639,7 @@ int UUENCODE_decode_uu( FFGET_FILE *f, char *unpackdir, char *input_filename, ch
 			} // While (1)
 
 			if ((outfo)&&(wbcount > 0))
-			{
-				size_t bc;
-				bc = fwrite(writebuffer, 1, wbcount, outf);
-			}
+				fwrite(writebuffer, 1, wbcount, outf);
 
 
 			if (outfo) fclose(outf);

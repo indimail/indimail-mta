@@ -1,5 +1,8 @@
 /*
  * $Log: nc_menus.c,v $
+ * Revision 1.4  2011-07-29 09:24:13+05:30  Cprogrammer
+ * fixed gcc warnings
+ *
  * Revision 1.3  2009-06-04 10:46:41+05:30  Cprogrammer
  * added conditional inclusion of ncurses
  *
@@ -330,13 +333,13 @@ static void
 scrollup(struct menu_instance *mi, int n)
 {
 	struct menu_items *q = mi->mi_activepane_start;
-	int             i, backtrack = 1;
+	int             i;
 
 	if (n == 0)
-		n = mi->activepane_lines, backtrack = 0;
+		n = mi->activepane_lines;
 	else
 	if (n < 0)
-		n = -n, backtrack = 0;
+		n = -n;
 
 	i = 0;
 	q = mi->mi_activepane_start;

@@ -693,9 +693,8 @@ form_file_list(register char **files, register int file_cnt)
 void
 getargs(int argc, char **argv)
 {
-	register int    ignore_case;
-
 #ifndef NO_REGEX
+	register int    ignore_case;
 	register char  *pat = NULL;
 
 #endif /*- NO_REGEX */
@@ -703,7 +702,9 @@ getargs(int argc, char **argv)
 	extern int      optind;
 	int             ch;
 
+#ifndef NO_REGEX
 	ignore_case = FALSE;
+#endif
 #ifdef ENABLE_OFFENSIVE
 #ifdef DEBUG
 	while ((ch = getopt(argc, argv, "aDefilm:n:osvw")) != EOF)

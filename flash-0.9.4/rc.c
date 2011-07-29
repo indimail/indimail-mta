@@ -1,5 +1,8 @@
 /*
  * $Log: rc.c,v $
+ * Revision 1.4  2011-07-29 09:24:18+05:30  Cprogrammer
+ * fixed gcc warnings
+ *
  * Revision 1.3  2008-07-17 21:38:55+05:30  Cprogrammer
  * moved progname to variables.h
  *
@@ -380,19 +383,17 @@ rc_system(int argc, char **argv)
 void
 rc_pause(int argc, char **argv)
 {
-	char           *printme;
-	int             olderrno = 0, n;
+	int             n;
 	char            cc;
 	argv++, argc--;
 
-	for (printme = *argv; argc; argv++, argc--)
+	for (; argc; argv++, argc--)
 		printf("%s ", *argv);
 	printf("\n");
 
 	fflush(stdin), fflush(stdout);
 	do
 	{
-		olderrno = errno;
 		do
 		{
 			errno = 0;

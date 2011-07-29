@@ -1,5 +1,8 @@
 /*
  * $Log: vtable.c,v $
+ * Revision 2.3  2011-07-29 09:26:43+05:30  Cprogrammer
+ * fixed gcc 4.6 warnings
+ *
  * Revision 2.2  2011-05-21 19:20:49+05:30  Cprogrammer
  * skip comments
  *
@@ -20,8 +23,10 @@
 #include <mysql.h>
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vtable.c,v 2.2 2011-05-21 19:20:49+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: vtable.c,v 2.3 2011-07-29 09:26:43+05:30 Cprogrammer Stab mbhangui $";
 #endif
+
+int             verbose;
 
 #ifdef HAVE_STDARG_H
 #include <stdarg.h>
@@ -77,7 +82,8 @@ va_dcl
 				/*- execute mysql here */
 				*ptr = ' ';
 				i = len + 1;
-				/*- fprintf(stderr, "%s", mysqlQueryStr + i); */
+				if (verbose)
+					fprintf(stderr, "%s", mysqlQueryStr + i);
 			}
 		}
 		mysqlQueryStr[mylen - 3] = ';';
@@ -109,8 +115,6 @@ usage()
 	fprintf(stderr, "         -P MySQL Password\n");
 	return;
 }
-
-int             verbose;
 
 static int
 get_options(int argc, char **argv, char **mysql_server, char **mysql_socket, char **mysql_port,

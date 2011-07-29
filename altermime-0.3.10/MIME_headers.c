@@ -1081,12 +1081,10 @@ int MIMEH_read_headers( struct MIMEH_header_info *hinfo, FFGET_FILE *f )
 	int linesize=0;
 	int totalsize_original=0;
 	int result = 0;
-	int firstline = 1;
 	int search_count=0;
 	char *tmp;
 	char *tmp_original;
 	char *fget_result = NULL;
-	char *headerline_end;
 	char *p;
 	char *linestart;
 	char *lineend;
@@ -1184,7 +1182,6 @@ int MIMEH_read_headers( struct MIMEH_header_info *hinfo, FFGET_FILE *f )
 				glb.headerline = tmp;
 				totalsize = linesize;
 				PLD_strncpy(glb.headerline, linestart, (linesize +1));
-				headerline_end = glb.headerline +totalsize;
 			} // If the global headerline is currently NULL
 			else
 			{
@@ -1271,7 +1268,6 @@ int MIMEH_read_headers( struct MIMEH_header_info *hinfo, FFGET_FILE *f )
 				FFGET_SDL_MODE = 0;
 			} // FFGET_doubleCR test
 
-			firstline = 0;
 		} // While reading more headers from the source file.
 
 
@@ -2724,13 +2720,13 @@ int MIMEH_headers_process( struct MIMEH_header_info *hinfo, char *headers )
 {
 	/** scan through our headers string looking for information that is
 	  ** valid **/
-	char *safeh, *h, *safehl;
+	char *h, *safehl;
 	char *current_header_position;
 	int headerlength;
 
 	if (MIMEH_DNORMAL) LOGGER_log("%s:%d:MIMEH_parse_headers:DEBUG: Start [hinfo=%p]\n",FL, hinfo);
 
-	safeh = h = headers;
+	h = headers;
 
 	/** Duplicate the headers for processing - this way we don't 'taint' the
 	** original headers during our searching / altering. **/
