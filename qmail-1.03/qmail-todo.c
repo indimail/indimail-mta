@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-todo.c,v $
+ * Revision 1.30  2011-07-29 09:29:54+05:30  Cprogrammer
+ * fixed gcc 4.6 warnings
+ *
  * Revision 1.29  2010-06-27 09:08:55+05:30  Cprogrammer
  * report all recipients in log_stat() for single transaction multiple recipient emails
  *
@@ -1110,11 +1113,13 @@ main()
 void
 getversion_qmail_todo_c()
 {
-	static char    *x = "$Id: qmail-todo.c,v 1.29 2010-06-27 09:08:55+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: qmail-todo.c,v 1.30 2011-07-29 09:29:54+05:30 Cprogrammer Stab mbhangui $";
 
 #ifdef INDIMAIL
-	x = sccsidh;
+	if (x)
+		x = sccsidh;
 #else
-	x++;
+	if (x)
+		x++;
 #endif
 }

@@ -1,5 +1,8 @@
 /*
  * $Log: dktest.c,v $
+ * Revision 1.15  2011-07-29 09:28:09+05:30  Cprogrammer
+ * fixed gcc 4.6 warnings
+ *
  * Revision 1.14  2011-07-22 14:39:27+05:30  Cprogrammer
  * added -D option to specify d= tag
  *
@@ -77,7 +80,7 @@ main(int argc, char *argv[])
 	DK_STAT         st, dkt_st;
 	signed char     ch;
 	int             opts = 0, optv = 0, optt = 0, opth = 0, optr = 0, optT = 0,
-					optD = 0, optc = DK_CANON_SIMPLE;
+					optc = DK_CANON_SIMPLE;
 	char           *canon = "simple";
 	char           *keyfn  = 0, *selector  = 0;
 	char           *txtrec, *cp, *from, *dkdomain;
@@ -103,8 +106,7 @@ main(int argc, char *argv[])
 		case 'D':
 			dkdomain = optarg;
 			break;
-		case 'd':
-			optD = 1;
+		case 'd': /*- optD */
 			txtrec = dns_text(optarg);
 			cp = txtrec;
 			printf("%ld\n", (long) strlen(cp));
@@ -420,7 +422,7 @@ main(int argc, char *argv[])
 void
 getversion_dktest_c()
 {
-	static char    *x = "$Id: dktest.c,v 1.14 2011-07-22 14:39:27+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: dktest.c,v 1.15 2011-07-29 09:28:09+05:30 Cprogrammer Stab mbhangui $";
 
 	x++;
 }

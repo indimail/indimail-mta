@@ -1,5 +1,8 @@
 /*
  * $Log: instcheck.c,v $
+ * Revision 1.16  2011-07-29 09:28:28+05:30  Cprogrammer
+ * fixed gcc 4.6 warnings
+ *
  * Revision 1.15  2010-10-06 22:30:06+05:30  Cprogrammer
  * fix for 64 bit systems
  *
@@ -287,10 +290,12 @@ main(int argc, char **argv)
 void
 getversion_instcheck_c()
 {
-	static char    *x = "$Id: instcheck.c,v 1.15 2010-10-06 22:30:06+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: instcheck.c,v 1.16 2011-07-29 09:28:28+05:30 Cprogrammer Stab mbhangui $";
 #ifdef INDIMAIL
-	x = sccsidh;
+	if (x)
+		x = sccsidh;
 #else
-	x++;
+	if (x)
+		x++;
 #endif
 }

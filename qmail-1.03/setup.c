@@ -1,5 +1,8 @@
 /*
  * $Log: setup.c,v $
+ * Revision 1.21  2011-07-29 09:30:02+05:30  Cprogrammer
+ * fixed gcc 4.6 warnings
+ *
  * Revision 1.20  2011-04-29 16:12:16+05:30  Cprogrammer
  * check env variable FAKED_MODE to detect fakeroot environment
  *
@@ -388,10 +391,12 @@ main(int argc, char **argv)
 void
 getversion_setup_c()
 {
-	static char    *x = "$Id: setup.c,v 1.20 2011-04-29 16:12:16+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: setup.c,v 1.21 2011-07-29 09:30:02+05:30 Cprogrammer Stab mbhangui $";
 #ifdef INDIMAIL
-	x = sccsidh;
+	if (x)
+		x = sccsidh;
 #else
-	x++;
+	if (x)
+		x++;
 #endif
 }

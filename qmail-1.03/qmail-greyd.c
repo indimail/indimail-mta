@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-greyd.c,v $
+ * Revision 1.10  2011-07-29 09:29:30+05:30  Cprogrammer
+ * fixed gcc 4.6 warnings
+ *
  * Revision 1.9  2010-07-21 09:13:47+05:30  Cprogrammer
  * use CONTROLDIR environment variable instead of a hardcoded control directory
  *
@@ -1024,12 +1027,12 @@ char           *usage =
 int
 main(int argc, char **argv)
 {
-	int             s, buf_len, rdata_len, n, port, opt, debug = 0, fromlen, rcptlen, len;
+	int             s, buf_len, rdata_len, n, port, opt, fromlen, rcptlen, len;
 	struct sockaddr_in sin, from;
 	struct hostent *hp;
 	struct greylst *grey;
 	unsigned long   resend_window, min_resend, save_interval, free_interval;
-	char           *ptr, *ipaddr = 0, *client_ip = 0, *rpath = 0, *rcpt = 0, *rcpt_head = 0;
+	char           *ptr, *ipaddr = 0, *client_ip = 0, *rpath = 0, *rcpt_head = 0;
 #ifdef DYNAMIC_BUF
 	char           *rdata = 0, *buf = 0;
 	int             bufsize = MAXGREYDATASIZE;
@@ -1049,13 +1052,11 @@ main(int argc, char **argv)
 	free_interval = 5 * 60;    /*- 5 minutes */
 #ifdef USE_HASH
 	hash_size = BLOCK_SIZE;
-	while ((opt = getopt(argc, argv, "dw:s:t:g:m:h:")) != opteof) {
+	while ((opt = getopt(argc, argv, "w:s:t:g:m:h:")) != opteof) {
 #else
-	while ((opt = getopt(argc, argv, "dw:s:t:g:m:")) != opteof) {
+	while ((opt = getopt(argc, argv, "w:s:t:g:m:")) != opteof) {
 #endif
 		switch (opt) {
-		case 'd':
-			debug = 1;
 		case 'w':
 			whitefn = optarg;
 			break;
@@ -1247,7 +1248,6 @@ main(int argc, char **argv)
 						break;
 					case 'T':
 						out("RCPT: ");
-						rcpt = ptr + 1;
 						if (!rcpt_head)
 							rcpt_head = ptr;
 						break;
@@ -1324,7 +1324,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_greyd_c()
 {
-	static char    *x = "$Id: qmail-greyd.c,v 1.9 2010-07-21 09:13:47+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: qmail-greyd.c,v 1.10 2011-07-29 09:29:30+05:30 Cprogrammer Stab mbhangui $";
 
 	x++;
 }

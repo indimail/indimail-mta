@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-lspawn.c,v $
+ * Revision 1.19  2011-07-29 09:29:34+05:30  Cprogrammer
+ * fixed gcc 4.6 warnings
+ *
  * Revision 1.18  2011-06-19 09:08:42+05:30  Cprogrammer
  * unset QMAILREMOTE
  *
@@ -412,11 +415,13 @@ spawn(fdmess, fdout, msgsize, sender, qqeh, recip, at)
 void
 getversion_qmail_lspawn_c()
 {
-	static char    *x = "$Id: qmail-lspawn.c,v 1.18 2011-06-19 09:08:42+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: qmail-lspawn.c,v 1.19 2011-07-29 09:29:34+05:30 Cprogrammer Stab mbhangui $";
 
 #ifdef INDIMAIL
-	x = sccsidh;
+	if (x)
+		x = sccsidh;
 #else
-	x++;
+	if (x)
+		x++;
 #endif
 }

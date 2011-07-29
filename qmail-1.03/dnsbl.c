@@ -1,5 +1,8 @@
 /*
  * $Log: dnsbl.c,v $
+ * Revision 1.2  2011-07-29 09:28:12+05:30  Cprogrammer
+ * fixed gcc 4.6 warnings
+ *
  * Revision 1.1  2011-07-15 19:34:52+05:30  Cprogrammer
  * Initial revision
  *
@@ -54,7 +57,6 @@ dnsblcheck(char **mesg, char *remoteip)
 	static stralloc dnsblbyte = { 0 }, dnsblrev = { 0 };
 	static ipalloc  dnsblip = { 0 };
 	char            x[IPFMT];
-	unsigned int    len;
 
 	if (!dnsblok) {
 		skipdnsbl = 1;
@@ -108,7 +110,7 @@ dnsblcheck(char **mesg, char *remoteip)
 			return (1);
 		}
 		if (!dns_ip(&dnsblip, &dnsblhost)) {
-			len = ip_fmt(x, &dnsblip.ix->addr.ip);
+			ip_fmt(x, &dnsblip.ix->addr.ip);
 			skipdnsbl = 1;
 			return 1;
 		} while (*ch++);
