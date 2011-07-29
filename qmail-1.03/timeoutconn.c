@@ -1,5 +1,8 @@
 /*
  * $Log: timeoutconn.c,v $
+ * Revision 1.12  2011-07-29 10:20:53+05:30  Cprogrammer
+ * fixed array subscript is above array bounds [-Warray-bounds] warning
+ *
  * Revision 1.11  2010-04-03 12:54:31+05:30  Cprogrammer
  * fix for bind on ipv6 address
  *
@@ -146,7 +149,7 @@ socket_bind6(int s, char *bound, ip6_addr *ipr)
 				break;
 		}
 		if (i == 16 || ip6_isv4mapped(iplocal.d))
-			return socket_bind4(s, bound, (ip_addr *) iplocal.d + 12);
+			return socket_bind4(s, bound, (ip_addr *) (iplocal.d + 12));
 		else
 		{
 			errno = error_proto;
@@ -401,7 +404,7 @@ timeoutconn4(s, ipr, ipl, port, timeout)
 void
 getversion_timeoutconn_c()
 {
-	static char    *x = "$Id: timeoutconn.c,v 1.11 2010-04-03 12:54:31+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: timeoutconn.c,v 1.12 2011-07-29 10:20:53+05:30 Cprogrammer Stab mbhangui $";
 
 	x++;
 }
