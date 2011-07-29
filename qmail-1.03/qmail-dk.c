@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-dk.c,v $
+ * Revision 1.34  2011-07-29 09:28:48+05:30  Cprogrammer
+ * fixed key file name
+ *
  * Revision 1.33  2011-07-28 19:34:45+05:30  Cprogrammer
  * BUG - fixed opening of private key with absolute path
  *
@@ -376,13 +379,27 @@ write_signature(DK *dk, char *dk_selector, char *keyfn,
 		if (access(keyfnfrom.s, F_OK))
 		{
 			/*- since file is not found remove '%' sign */
-			if (!stralloc_copyb(&keyfnfrom, keyfn, i))
+			if (keyfn[0] == '/')
+			{
+				if (!stralloc_copyb(&keyfnfrom, keyfn, i))
+					die(51);
+			} else
+			if (!stralloc_catb(&keyfnfrom, keyfn, i))
 				die(51);
+			if ((i - 1) > 0 && keyfn[i - 1] == '/' && keyfn[i + 1] == '/')
+				i++;
 			if (!stralloc_cats(&keyfnfrom, keyfn + i + 1))
 				die(51);
 		} else
-		if (!stralloc_copys(&keyfnfrom, keyfn))
-			die(51);
+		{
+			if (keyfn[0] == '/')
+			{
+				if (!stralloc_copys(&keyfnfrom, keyfn))
+					die(51);
+			} else
+			if (!stralloc_cats(&keyfnfrom, keyfn))
+				die(51);
+		}
 		if (!stralloc_0(&keyfnfrom))
 			die(51);
 	}
@@ -862,7 +879,7 @@ main(argc, argv)
 void
 getversion_qmail_dk_c()
 {
-	static char    *x = "$Id: qmail-dk.c,v 1.33 2011-07-28 19:34:45+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: qmail-dk.c,v 1.34 2011-07-29 09:28:48+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
