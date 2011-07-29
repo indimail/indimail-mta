@@ -32,6 +32,7 @@
           o mysql-5.5.3-m3
           o mysql-5.5.8
           o mysql-5.5.13
+          o mysql-5.5.14
 
     2. If you have /etc/my.conf, replace socket=/var/lib/mysql/mysql.sock with
        socket=/tmp/mysql.sock 
