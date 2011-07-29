@@ -1,5 +1,8 @@
 /*
  * $Log: tcpto.c,v $
+ * Revision 1.13  2011-07-29 09:30:09+05:30  Cprogrammer
+ * fixed gcc 4.6 warnings
+ *
  * Revision 1.12  2007-12-20 13:53:15+05:30  Cprogrammer
  * removed compiler warning
  *
@@ -272,11 +275,13 @@ tcpto_err(ix, flagerr, max_tolerance)
 void
 getversion_tcpto_c()
 {
-	static char    *x = "$Id: tcpto.c,v 1.12 2007-12-20 13:53:15+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: tcpto.c,v 1.13 2011-07-29 09:30:09+05:30 Cprogrammer Stab mbhangui $";
 
 #ifdef INDIMAIL
-	x = sccsidh;
+	if (x)
+		x = sccsidh;
 #else
-	x++;
+	if (x)
+		x++;
 #endif
 }

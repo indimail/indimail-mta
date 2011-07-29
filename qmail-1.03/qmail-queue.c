@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-queue.c,v $
+ * Revision 1.55  2011-07-29 09:29:43+05:30  Cprogrammer
+ * fixed gcc 4.6 warnings
+ *
  * Revision 1.54  2010-07-22 13:48:53+05:30  Cprogrammer
  * terminate QQEH header with newline
  *
@@ -1289,11 +1292,13 @@ main()
 void
 getversion_qmail_queue_c()
 {
-	static char    *x = "$Id: qmail-queue.c,v 1.54 2010-07-22 13:48:53+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: qmail-queue.c,v 1.55 2011-07-29 09:29:43+05:30 Cprogrammer Stab mbhangui $";
 
 #ifdef INDIMAIL
-	x = sccsidh;
+	if (x)
+		x = sccsidh;
 #else
-	x++;
+	if (x)
+		x++;
 #endif
 }

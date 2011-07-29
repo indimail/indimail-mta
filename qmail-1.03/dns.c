@@ -1,5 +1,8 @@
 /*
  * $Log: dns.c,v $
+ * Revision 1.23  2011-07-29 09:28:15+05:30  Cprogrammer
+ * fixed gcc 4.6 warnings
+ *
  * Revision 1.22  2009-05-31 09:32:09+05:30  Cprogrammer
  * added fix to disable Verisign Wildcard Feature
  *
@@ -653,9 +656,7 @@ iaafmt6(s, ip, dom)
 	char           *dom;
 {
 	int             j;
-	unsigned int    len;
 	static char     data[] = "0123456789abcdef";
-	len = 0;
 
 	if (s)
 	{
@@ -1140,7 +1141,7 @@ dns_maps(sa, ip, suffix)
 void
 getversion_dns_c()
 {
-	static char    *x = "$Id: dns.c,v 1.22 2009-05-31 09:32:09+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: dns.c,v 1.23 2011-07-29 09:28:15+05:30 Cprogrammer Stab mbhangui $";
 
 	x++;
 }

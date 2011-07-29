@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-qread.c,v $
+ * Revision 1.24  2011-07-29 09:29:40+05:30  Cprogrammer
+ * fixed gcc 4.6 warnings
+ *
  * Revision 1.23  2011-02-12 15:35:36+05:30  Cprogrammer
  * added usage() function
  *
@@ -618,11 +621,13 @@ main(int argc, char **argv)
 void
 getversion_qmail_qread_c()
 {
-	static char    *x = "$Id: qmail-qread.c,v 1.23 2011-02-12 15:35:36+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: qmail-qread.c,v 1.24 2011-07-29 09:29:40+05:30 Cprogrammer Stab mbhangui $";
 
 #ifdef INDIMAIL
-	x = sccsidh;
+	if (x)
+		x = sccsidh;
 #else
-	x++;
+	if (x)
+		x++;
 #endif
 }

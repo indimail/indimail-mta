@@ -1,5 +1,8 @@
 /*
  * $Log: smtpd.c,v $
+ * Revision 1.155  2011-07-29 09:30:05+05:30  Cprogrammer
+ * fixed gcc 4.6 warnings
+ *
  * Revision 1.154  2011-07-08 22:04:00+05:30  Cprogrammer
  * added logging of plugin errors to fd 2
  *
@@ -609,7 +612,7 @@ int             wildmat_internal(char *, char *);
 int             ssl_rfd = -1, ssl_wfd = -1;	/*- SSL_get_Xfd() are broken */
 char           *servercert, *clientca, *clientcrl;
 #endif
-char           *revision = "$Revision: 1.154 $";
+char           *revision = "$Revision: 1.155 $";
 char           *protocol = "SMTP";
 stralloc        proto = { 0 };
 static stralloc Revision = { 0 };
@@ -6169,11 +6172,13 @@ addrrelay() /*- Rejection of relay probes. */
 void
 getversion_smtpd_c()
 {
-	static char    *x = "$Id: smtpd.c,v 1.154 2011-07-08 22:04:00+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: smtpd.c,v 1.155 2011-07-29 09:30:05+05:30 Cprogrammer Stab mbhangui $";
 
 #ifdef INDIMAIL
-	x = sccsidh;
+	if (x)
+		x = sccsidh;
 #else
-	x++;
+	if (x)
+		x++;
 #endif
 }

@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-showctl.c,v $
+ * Revision 1.53  2011-07-29 09:29:51+05:30  Cprogrammer
+ * fixed gcc 4.6 warnings
+ *
  * Revision 1.52  2011-07-08 13:47:54+05:30  Cprogrammer
  * added dnsbllist control file
  *
@@ -719,11 +722,13 @@ main(int argc, char **argv)
 void
 getversion_qmail_showctl_c()
 {
-	static char    *x = "$Id: qmail-showctl.c,v 1.52 2011-07-08 13:47:54+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: qmail-showctl.c,v 1.53 2011-07-29 09:29:51+05:30 Cprogrammer Stab mbhangui $";
 
 #ifdef INDIMAIL
-	x = sccsidh;
+	if (x)
+		x = sccsidh;
 #else
-	x++;
+	if (x)
+		x++;
 #endif
 }

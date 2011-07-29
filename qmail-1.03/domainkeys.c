@@ -1,5 +1,8 @@
 /*
  * $Log: domainkeys.c,v $
+ * Revision 1.14  2011-07-29 09:28:18+05:30  Cprogrammer
+ * fixed gcc 4.6 warnings
+ *
  * Revision 1.13  2009-03-27 16:49:55+05:30  Cprogrammer
  * moved out dns_text function
  *
@@ -1242,14 +1245,12 @@ int
 dk_headers(DK *dk, char *ptr)
 {
 	int             len;
-	char           *headers;
 	int             k, m;
 
 	if (!dk)
 		return 0;
 	if (dk->dkmarker != DKMARK)
 		return 0;
-	headers = dk->header + dk->start_signed;
 	len = 0;
 	m = dk->start_signed;
 	for (k = dk->start_signed; k < dk->headerlen; k++) {
@@ -2074,7 +2075,7 @@ strncasestr(const char *s, const char *find, size_t slen)
 void
 getversion_domainkeys_c()
 {
-	static char    *x = "$Id: domainkeys.c,v 1.13 2009-03-27 16:49:55+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: domainkeys.c,v 1.14 2011-07-29 09:28:18+05:30 Cprogrammer Stab mbhangui $";
 
 	x++;
 }

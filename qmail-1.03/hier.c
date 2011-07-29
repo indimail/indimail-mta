@@ -1,5 +1,8 @@
 /*
  * $Log: hier.c,v $
+ * Revision 1.172  2011-07-29 09:28:25+05:30  Cprogrammer
+ * fixed gcc 4.6 warnings
+ *
  * Revision 1.171  2011-07-21 13:17:19+05:30  Cprogrammer
  * added service script for systemd
  *
@@ -1635,11 +1638,13 @@ _hier(inst_dir)
 void
 getversion_install_big_c()
 {
-	static char    *x = "$Id: hier.c,v 1.171 2011-07-21 13:17:19+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: hier.c,v 1.172 2011-07-29 09:28:25+05:30 Cprogrammer Stab mbhangui $";
 
 #ifdef INDIMAIL
-	x = sccsidh;
+	if (x)
+		x = sccsidh;
 #else
-	x++;
+	if (x)
+		x++;
 #endif
 }

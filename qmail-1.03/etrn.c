@@ -1,5 +1,8 @@
 /*
  * $Log: etrn.c,v $
+ * Revision 1.9  2011-07-29 09:28:21+05:30  Cprogrammer
+ * fixed gcc 4.6 warnings
+ *
  * Revision 1.8  2008-06-25 23:15:38+05:30  Cprogrammer
  * change for 64 bit port of indimail
  *
@@ -156,9 +159,9 @@ etrn_queue(char *arg, char *remoteip)
 {
 	int             child, r, flagetrn, len, exitcode, wstat;
 #ifndef INDIMAIL
-	size_t          mailsize, mailcount;
+	size_t          mailcount;
 #else
-	mdir_t          mailsize, mailcount;
+	mdir_t          mailcount;
 #endif
 	stralloc        etrn = { 0 };
 	char            maildir1[1024], maildir2[1024];
@@ -197,10 +200,10 @@ etrn_queue(char *arg, char *remoteip)
 
 	mailcount = 0;
 	if (!access(maildir1, F_OK))
-		mailsize = count_dir(maildir1, &mailcount);
+		count_dir(maildir1, &mailcount);
 	else
 	if (!access(maildir2, F_OK))
-		mailsize = count_dir(maildir2, &mailcount);
+		count_dir(maildir2, &mailcount);
 	if (!mailcount)
 		return(-3);
 	switch (child = fork())
@@ -237,7 +240,6 @@ valid_hostname(char *name)
 	const char     *cp;
 	int             label_length = 0;
 	int             label_count = 0;
-	int             non_numeric = 0;
 	int             ch;
 
 	if (!name || !*name)
@@ -254,8 +256,6 @@ valid_hostname(char *name)
 			label_length++;
 			if (label_length > VALID_LABEL_LEN)
 				return (0);
-			if (!isdigit(ch))
-				non_numeric = 1;
 		} else
 		if (ch == '.')
 		{
@@ -279,11 +279,13 @@ valid_hostname(char *name)
 void
 getversion_etrn_c()
 {
-	static char    *x = "$Id: etrn.c,v 1.8 2008-06-25 23:15:38+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: etrn.c,v 1.9 2011-07-29 09:28:21+05:30 Cprogrammer Stab mbhangui $";
 
 #ifdef INDIMAIL
-	x = sccsidh;
+	if (x)
+		x = sccsidh;
 #else
-	x++;
+	if (x)
+		x++;
 #endif
 }

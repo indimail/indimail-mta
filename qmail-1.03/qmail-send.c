@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-send.c,v $
+ * Revision 1.51  2011-07-29 09:29:48+05:30  Cprogrammer
+ * fixed gcc 4.6 warnings
+ *
  * Revision 1.50  2011-05-18 12:56:38+05:30  Cprogrammer
  * fix qmail-queue waiting endlessly if bounceprocessor returned non-zero status
  *
@@ -2907,11 +2910,13 @@ main()
 void
 getversion_qmail_send_c()
 {
-	static char    *x = "$Id: qmail-send.c,v 1.50 2011-05-18 12:56:38+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: qmail-send.c,v 1.51 2011-07-29 09:29:48+05:30 Cprogrammer Stab mbhangui $";
 
 #ifdef INDIMAIL
-	x = sccsidh;
+	if (x)
+		x = sccsidh;
 #else
-	x++;
+	if (x)
+		x++;
 #endif
 }

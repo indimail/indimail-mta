@@ -1,5 +1,8 @@
 /*
  * $Log: relaytest.c,v $
+ * Revision 1.4  2011-07-29 09:29:58+05:30  Cprogrammer
+ * fixed gcc 4.6 warnings
+ *
  * Revision 1.3  2008-07-15 19:53:12+05:30  Cprogrammer
  * porting for Mac OS X
  *
@@ -103,11 +106,9 @@ unsigned long
 smtpcode()
 {
 	unsigned long   code;
-	int             flagfirst;
 	int             match;
 	char            num[4];
 
-	flagfirst = 1;
 	do
 	{
 		if (getln(&ss6, &smtpline, &match, '\n') != 0)
@@ -128,7 +129,6 @@ smtpcode()
 			die_proto();
 		if (smtpline.len == 3)
 			return code;
-		flagfirst = 0;
 	} while (smtpline.s[3] == '-');
 	substdio_flush(&ssout);
 	return code;
@@ -207,7 +207,7 @@ main(argc, argv)
 void
 getversion_relaytest_c()
 {
-	static char    *x = "$Id: relaytest.c,v 1.3 2008-07-15 19:53:12+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: relaytest.c,v 1.4 2011-07-29 09:29:58+05:30 Cprogrammer Stab mbhangui $";
 
 	x++;
 }
