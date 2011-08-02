@@ -1,13 +1,16 @@
 File INSTALL-RPM, Version @version@
 DATE: @DATE@
 
-This section covers installing IndiMail from rpm. This is the easy way out to install IndiMail.
+This section covers installing IndiMail from rpm/deb. This is the easy way to install IndiMail.
 If you are looking for something more simpler, then you need the Install IndiMail for
-dummies and you should be reading the file Quick-INSTALL-@version@.
+dummies - instructions for which are in the file Quick-INSTALL-@version@.
 
 There is also an Installation for Experts. For that read INSTALL-@version@. I would
 recommend you to go through the file INSTALL-@version@ so that you undertand IndiMail
-better.
+better. INSTALL-@version@ gives instructions for installing from source and could be
+challenging for those who are not accustomed with compilation, make, GNU autotools process.
+
+PLEASE DON'T HESITATE to join IndiMail group at https://groups.google.com/forum/#!forum/indimail
 
 You will also find this file as 
 http://downloads.sourceforge.net/indimail/INSTALL-RPM-@version@
