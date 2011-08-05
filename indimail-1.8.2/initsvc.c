@@ -1,5 +1,8 @@
 /*
  * $Log: initsvc.c,v $
+ * Revision 2.17  2011-08-05 14:41:21+05:30  Cprogrammer
+ * another attempt to fix problem with virtual machines
+ *
  * Revision 2.16  2011-07-21 19:15:05+05:30  Cprogrammer
  * added status command to display enabled or disabled status for systemd service
  *
@@ -60,7 +63,7 @@
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: initsvc.c,v 2.16 2011-07-21 19:15:05+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: initsvc.c,v 2.17 2011-08-05 14:41:21+05:30 Cprogrammer Stab mbhangui $";
 #endif
 
 #define SV_ON    1
@@ -423,10 +426,16 @@ main(int argc, char **argv)
 	}
 	if ((fd = open("/dev/console", O_RDWR)) == -1)
 	{
+#if 0
 		if (errno == EPERM) /*- some virtual servers have this problem */
+#endif
 			device = "/dev/null";
 	} else
+	{
+		if (write(fd, "", 1) == -1)
+			device = "/dev/null";
 		close(fd);
+	}
 	/*
 	 * SV:345:respawn:/var/qmail/bin/svscanboot <>/dev/console 2<>/dev/console
 	 */
