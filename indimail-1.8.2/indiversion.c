@@ -1,5 +1,8 @@
 /*
  * $Log: indiversion.c,v $
+ * Revision 2.131  2011-08-05 18:12:47+05:30  Cprogrammer
+ * ismaildup is a bin program
+ *
  * Revision 2.130  2011-06-30 20:40:09+05:30  Cprogrammer
  * added ismaildup()
  *
@@ -510,7 +513,7 @@
 #endif
 
 #ifndef	lint
-static char     sccsid[] = "$Id: indiversion.c,v 2.130 2011-06-30 20:40:09+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: indiversion.c,v 2.131 2011-08-05 18:12:47+05:30 Cprogrammer Stab mbhangui $";
 #endif
 
 void            getversion_indimail_settings_c();
@@ -852,6 +855,7 @@ char           *bin_program_list[] =
 	"logmonitor",
 	"bogofilter-qfe",
 	"hashtable",
+	"ismaildup",
 	0
 };
 
@@ -890,7 +894,6 @@ char           *sbin_program_list[] =
 	"mail_report",
 	"mgmtpass",
 	"vserverinfo",
-	"ismaildup",
 	"tls-cert-check",
 	0
 };

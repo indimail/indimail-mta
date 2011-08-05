@@ -163,7 +163,7 @@
 #include <mysqld_error.h>
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vauth_getpw.c,v 2.30 2011-06-20 22:05:12+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: vauth_getpw.c,v 2.30 2011-06-20 22:05:12+05:30 Cprogrammer Stab mbhangui $";
 #endif
 
 #include <stdlib.h>
