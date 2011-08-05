@@ -1,5 +1,8 @@
 /*
  * $Log: svscan.c,v $
+ * Revision 1.6  2011-08-05 14:31:05+05:30  Cprogrammer
+ * create STATUSFILE on startup and delete on shutdown
+ *
  * Revision 1.5  2011-05-26 23:17:52+05:30  Cprogrammer
  * open svscan log only if SCANLOG is defined
  *
@@ -251,14 +254,18 @@ sighup(int i)
 {
 	scannow = 1;
 	signal(SIGHUP, sighup);
-	strerr_warn2(INFO, "Stopping svscan", 0);
+	strerr_warn2(INFO, "got sighup", 0);
 }
 
 static void
 sigterm(int i)
 {
+	char           *s;
+
+	if ((s = env_get("STATUSFILE")))
+		unlink(s);
 	signal(SIGTERM, sigterm);
-	strerr_warn2(INFO, "got sighup", 0);
+	strerr_warn2(INFO, "Stopping svscan", 0);
 	_exit(0);
 }
 
@@ -294,6 +301,7 @@ int
 main(int argc, char **argv)
 {
 	unsigned long   wait;
+	int             fd;
 	char           *s;
 
 	if (argv[0] && argv[1])
@@ -309,6 +317,12 @@ main(int argc, char **argv)
 		wait = 5;
 	if (env_get("SCANLOG"))
 		open_svscan_log();
+	if ((s = env_get("STATUSFILE")))
+	{
+		if ((fd = open(s, O_CREAT, 0644)) == -1)
+			strerr_die4sys(111, FATAL, "unable to open ", s, ": ");
+		close(fd);
+	}
 	for (;;)
 	{
 		doit();
@@ -323,7 +337,7 @@ main(int argc, char **argv)
 void
 getversion_svscan_c()
 {
-	static char    *x = "$Id: svscan.c,v 1.5 2011-05-26 23:17:52+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: svscan.c,v 1.6 2011-08-05 14:31:05+05:30 Cprogrammer Stab mbhangui $";
 
 	x++;
 }
