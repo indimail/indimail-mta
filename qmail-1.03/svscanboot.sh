@@ -1,4 +1,11 @@
 # $Log: svscanboot.sh,v $
+# Revision 1.12  2011-08-05 15:49:43+05:30  Cprogrammer
+# check /var/lock/subsys before creating status file
+#
+# Revision 1.11  2011-08-05 14:30:33+05:30  Cprogrammer
+# added option to use readproctitle
+# added option to use multiple service directories
+#
 # Revision 1.10  2011-07-21 13:18:05+05:30  Cprogrammer
 # create lockfile to enable working with systemd
 #
@@ -27,7 +34,7 @@
 # Revision 1.2  2002-09-26 20:56:02+05:30  Cprogrammer
 # made service directory configurable
 #
-# $Id: svscanboot.sh,v 1.10 2011-07-21 13:18:05+05:30 Cprogrammer Exp mbhangui $
+# $Id: svscanboot.sh,v 1.12 2011-08-05 15:49:43+05:30 Cprogrammer Stab mbhangui $
 
 PATH=QMAIL/bin:/usr/local/bin:/bin:/sbin:/usr/bin:/usr/sbin
 
@@ -40,6 +47,7 @@ if [ -f  QMAIL/control/scaninterval ] ; then
 else
 	SCANINTERVAL=300
 fi
+use_readproctitle=0
 if [ $# -eq 0 ] ; then
 	if [ -d /service1 ] ; then
 		SERVICEDIR=/service1
@@ -48,12 +56,48 @@ if [ $# -eq 0 ] ; then
 	else
 		SERVICEDIR=/service
 	fi
-else
+elif [ $# -eq 1 ] ; then
 	SERVICEDIR=$1
 fi
-QMAIL/bin/svc -dx $SERVICEDIR/* $SERVICEDIR/*/log $SERVICEDIR/.svscan/log
 if [ -d /var/lock/subsys ] ; then
-	touch /var/lock/subsys/svscan
+	STATUSFILE=/var/lock/subsys/svscan
+else
+	STATUSFILE=/tmp/svscan
 fi
-env - PATH=$PATH SCANINTERVAL=$SCANINTERVAL SCANLOG="" \
-	QMAIL/bin/svscan $SERVICEDIR
+if [ $# -eq 0 -o $# -eq 1 ] ; then
+	QMAIL/bin/svc -dx $SERVICEDIR/* $SERVICEDIR/*/log $SERVICEDIR/.svscan/log
+	if [ $use_readproctitle -eq 1 ] ; then
+		exec env - PATH=$PATH SCANINTERVAL=$SCANINTERVAL \
+			STATUSFILE=$STATUSFILE \
+			QMAIL/bin/svscan $SERVICEDIR 2>&1 | \
+		env - PATH=$PATH QMAIL/bin/readproctitle $SERVICEDIR errors: ................................................................................................................................................................................................................................................................................................................................................................................................................
+	else
+		exec env - PATH=$PATH SCANINTERVAL=$SCANINTERVAL SCANLOG="" \
+			STATUSFILE=$STATUSFILE \
+			QMAIL/bin/svscan $SERVICEDIR
+	fi
+else
+	for i in $*
+	do
+		if [ ! -d $i ] ; then
+			continue
+		fi
+		SERVICEDIR=$i
+		QMAIL/bin/svc -dx $SERVICEDIR/* $SERVICEDIR/*/log
+		if [ $use_readproctitle -eq 1 ] ; then
+			env - PATH=$PATH SCANINTERVAL=$SCANINTERVAL \
+				QMAIL/bin/svscan $SERVICEDIR 2>&1 | \
+			env - PATH=$PATH QMAIL/bin/readproctitle $SERVICEDIR errors: ................................................................................................................................................................................................................................................................................................................................................................................................................ &
+		else
+			env - PATH=$PATH SCANINTERVAL=$SCANINTERVAL SCANLOG="" \
+				QMAIL/bin/svscan $SERVICEDIR &
+		fi
+	done
+	if [ -d /var/lock/subsys ] ; then
+		touch $STATUSFILE
+	fi
+	wait
+	if [ -d /var/lock/subsys ] ; then
+		/bin/rm -f $STATUSFILE
+	fi
+fi
