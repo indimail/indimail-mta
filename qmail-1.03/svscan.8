@@ -84,6 +84,9 @@ also provides a much better solution than other
 startup scripts which direct output exclusively to console, causing problems to go
 undetected for a long time.
 
+\fBsvscan\fR creates a file specified by the environment variable \fBLOCKFILE\fR (if set),
+on startup and deletes the same when it shuts down on SIGTERM.
+
 .SH SEE ALSO
 supervise(8),
 svc(8),
