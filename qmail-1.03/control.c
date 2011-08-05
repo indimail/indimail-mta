@@ -511,7 +511,7 @@ control_readcmd(stralloc *sa, char *fn)
 void
 getversion_control_c()
 {
-	static char    *x = "$Id: control.c,v 1.18 2011-07-03 16:58:41+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: control.c,v 1.18 2011-07-03 16:58:41+05:30 Cprogrammer Stab mbhangui $";
 
 	x++;
 }
