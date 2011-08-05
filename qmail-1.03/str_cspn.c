@@ -34,7 +34,7 @@ str_cspn(s1, s2)
 void
 getversion_str_cspn_c()
 {
-	static char    *x = "$Id: str_cspn.c,v 1.1 2011-07-12 20:42:00+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: str_cspn.c,v 1.1 2011-07-12 20:42:00+05:30 Cprogrammer Stab mbhangui $";
 
 	x++;
 }
