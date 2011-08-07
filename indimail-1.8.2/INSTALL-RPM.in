@@ -139,6 +139,14 @@ and
 @indimaildir@/control/host.cntrl    # for clustered setup
 @indimaildir@/control/host.master   # for clustered setup
 
+The format for this file is
+
+mysql_host:mysql_user:mysql_pass:mysql_socket
+
+or
+
+mysql_host:mysql_user:mysql_pass:mysql_port
+
 Proceed to SECTION 8, STEP 2 in the file INSTALL-@version@ for further instruction on 
 configuration of IndiMail
 

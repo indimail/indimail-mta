@@ -126,5 +126,22 @@
        NOTE: user and password are the userid and password of a privileged user in your
        existing MySQL Database)
 
+The information for IndiMail to connect to IndiMail is maintained in the file
+
+/var/indimail/control/host.mysql    # for non-clustered setup
+
+and
+
+/var/indimail/control/host.cntrl    # for clustered setup
+/var/indimail/control/host.master   # for clustered setup
+
+The format for this file is
+
+mysql_host:mysql_user:mysql_pass:mysql_socket
+
+or
+
+mysql_host:mysql_user:mysql_pass:mysql_port
+
 NOTE: You can email me at manvendra@indimail.org, if you find this confusing or need any
 help/clarification.
