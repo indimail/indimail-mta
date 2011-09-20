@@ -1,5 +1,0 @@
-vpriv
-(user        char(32) not null,
-program     char(64) not null,
-cmdswitches char(128),
-primary key(user, program))
