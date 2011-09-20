@@ -12,7 +12,8 @@
 11. smtp.c
 12. Makefile.am
 13. copy slemsPrivate.c, writefifo.c, fixwvdialconf.c, fetchmail.up.in,
-    fetchmail.down.in, ip-down.local.in, ip-up.local.in, ppp-off, fetchmail.cron
+    fetchmail.down.in, ip-down.local.in, ip-up.local.in, ppp-off,
+	fetchmail.cron.in
 
                           Checklist for Adding Options
 
