@@ -6,9 +6,9 @@
 #, fuzzy
 msgid ""
 msgstr ""
-"Project-Id-Version: fetchmail 6.3.20\n"
+"Project-Id-Version: fetchmail 6.3.21\n"
 "Report-Msgid-Bugs-To: fetchmail-devel@lists.berlios.de\n"
-"POT-Creation-Date: 2011-06-06 13:23+0200\n"
+"POT-Creation-Date: 2011-08-21 15:36+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -3080,11 +3080,11 @@ msgstr ""
 msgid "SMTP listener rejected local recipient addresses: "
 msgstr ""
 
-#: transact.c:1485
+#: transact.c:1493
 msgid "error writing message text\n"
 msgstr ""
 
-#: transact.c:1633
+#: transact.c:1641
 #, c-format
 msgid "Buffer too small. This is a bug in the caller of %s:%lu.\n"
 msgstr ""

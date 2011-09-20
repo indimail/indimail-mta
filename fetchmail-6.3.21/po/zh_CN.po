@@ -2,14 +2,14 @@
 # fetchmail 软件包的简体中文翻译.
 # Copyright (C) 2008 Eric S. Raymond (msgids)
 # This file is distributed under the same license as the fetchmail package.
-# Ji ZhengYu <zhengyuji@gmail.com>, 2008, 2009, 2010
+# Ji ZhengYu <zhengyuji@gmail.com>, 2008, 2009, 2010, 2011
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: fetchmail 6.3.19-pre1\n"
+"Project-Id-Version: fetchmail 6.3.20-rc3\n"
 "Report-Msgid-Bugs-To: fetchmail-devel@lists.berlios.de\n"
-"POT-Creation-Date: 2011-06-06 13:23+0200\n"
-"PO-Revision-Date: 2011-01-12 20:45+0800\n"
+"POT-Creation-Date: 2011-08-21 15:36+0200\n"
+"PO-Revision-Date: 2011-06-14 11:42+0800\n"
 "Last-Translator: Ji ZhengYu <zhengyuji@gmail.com>\n"
 "Language-Team: Chinese (simplified) <i18n-zh@googlegroups.com>\n"
 "Language: zh_CN\n"
@@ -613,7 +613,6 @@ msgid "Option --check is not supported with ETRN\n"
 msgstr "ETRN 不支持 --check 选项\n"
 
 #: fetchmail.c:137
-#, fuzzy
 msgid ""
 "Copyright (C) 2002, 2003 Eric S. Raymond\n"
 "Copyright (C) 2004 Matthias Andree, Eric S. Raymond,\n"
@@ -621,11 +620,11 @@ msgid ""
 "Copyright (C) 2005 - 2006, 2010 - 2011 Sunil Shetye\n"
 "Copyright (C) 2005 - 2011 Matthias Andree\n"
 msgstr ""
-"Copyright (C) 2002, 2003 Eric S. Raymond\n"
-"Copyright (C) 2004 Matthias Andree, Eric S. Raymond,\n"
+"版权所有 (C) 2002, 2003 Eric S. Raymond\n"
+"版权所有 (C) 2004 Matthias Andree, Eric S. Raymond,\n"
 "                   Robert M. Funk, Graham Wilson\n"
-"Copyright (C) 2005 - 2006, 2010 Sunil Shetye\n"
-"Copyright (C) 2005 - 2010 Matthias Andree\n"
+"版权所有 (C) 2005 - 2006, 2010 Sunil Shetye\n"
+"版权所有 (C) 2005 - 2010 Matthias Andree\n"
 
 #: fetchmail.c:143
 msgid ""
@@ -3131,14 +3130,16 @@ msgstr "邮件嵌入了 NULs"
 msgid "SMTP listener rejected local recipient addresses: "
 msgstr "SMTP 端拒绝本地收件人地址:"
 
-#: transact.c:1485
+#: transact.c:1493
 msgid "error writing message text\n"
 msgstr "在写邮件文本时出错\n"
 
-#: transact.c:1633
+#: transact.c:1641
 #, c-format
 msgid "Buffer too small. This is a bug in the caller of %s:%lu.\n"
 msgstr ""
+"缓冲区太小。这是 %s:%lu 调用的一个错误。\n"
+"\n"
 
 #: uid.c:249
 #, c-format

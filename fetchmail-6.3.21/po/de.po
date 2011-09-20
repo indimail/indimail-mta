@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: fetchmail 6.3.20\n"
 "Report-Msgid-Bugs-To: fetchmail-devel@lists.berlios.de\n"
-"POT-Creation-Date: 2011-06-06 13:23+0200\n"
+"POT-Creation-Date: 2011-08-21 15:36+0200\n"
 "PO-Revision-Date: 2011-05-29 18:35+0200\n"
 "Last-Translator: Matthias Andree <matthias.andree@gmx.de>\n"
 "Language-Team: Deutsch <de@li.org>\n"
@@ -3292,11 +3292,11 @@ msgstr "Nachricht hat eingebettete NUL-Zeichen"
 msgid "SMTP listener rejected local recipient addresses: "
 msgstr "SMTP-Server lehnte Adressen mit lokalem Empfänger ab: "
 
-#: transact.c:1485
+#: transact.c:1493
 msgid "error writing message text\n"
 msgstr "Fehler beim Schreiben des Nachrichtentextes\n"
 
-#: transact.c:1633
+#: transact.c:1641
 #, c-format
 msgid "Buffer too small. This is a bug in the caller of %s:%lu.\n"
 msgstr "Der Puffer ist zu klein. Dies ist ein Fehler im Aufrufer von %s:%lu.\n"

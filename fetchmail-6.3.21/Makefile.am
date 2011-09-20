@@ -3,23 +3,12 @@
 SUBDIRS=		. po
 AUTOMAKE_OPTIONS=	1.11 foreign no-dist-gzip dist-bzip2 dist-xz
 
-#ifdef INDIMAIL
-COFLAGS=-z+05:30
-#endif
 AM_CPPFLAGS=		-I$(srcdir)/libesmtp
 ACLOCAL_AMFLAGS=	-I m4 -I m4-local
 AM_YFLAGS=		-d
 BUILT_SOURCES=		rcfile_y.h
 
 bin_PROGRAMS=		fetchmail
-#ifdef INDIMAIL
-sbin_PROGRAMS=      slemsPrivate writefifo fixwvdialconf
-sbin_SCRIPTS=       fetchmail.up fetchmail.down ip-down.local ip-up.local ppp-off fetchmail.cron
-
-MOSTLYCLEANFILES=fetchmail.up fetchmail.down fetchmail.cron ip-up.local ip-down.local
-
-mandir=@prefix@/man
-#endif
 
 dist_noinst_SCRIPTS=	specgen.sh
 dist_man1_MANS=		fetchmail.man
@@ -136,11 +125,6 @@ mxget_SOURCES=	mxget.c
 mxget_CFLAGS=	-DSTANDALONE -DHAVE_CONFIG_H -I$(builddir)
 
 @SET_MAKE@
-#ifdef INDIMAIL
-edit = sed \
-	-e 's,@indimaildir\@,$(indimaildir),g' \
-	-e 's,@prefix\@,$(prefix),g'
-#endif
 
 fetchmail.spec: Makefile.in specgen.sh
 	$(srcdir)/specgen.sh $(VERSION) >fetchmail.spec
@@ -252,31 +236,6 @@ lsm: genlsm.sh dist
 # each of them, running them in parallel
 rsync:  distdir $(srcdir)/.rsyncs
 	@( cat $(srcdir)/.rsyncs | sed -e 's}^}rsync -aH --delete-after $(PACKAGE)-$(VERSION)/ }; s/\($$\)/ \&/;' ; echo "wait" ) | $(SHELL) -x
-
-#ifdef INDIMAIL
-slemsPrivate: slemsPrivate.o
-	$(CC) -o $@ $@.o
-slemsPrivate.o: slemsPrivate.c config.h
-	$(CC) $(CFLAGS) -c slemsPrivate.c
-fixwvdialconf: fixwvdialconf.o
-	$(CC) -o $@ $@.o
-fixwvdialconf.o: fixwvdialconf.c config.h
-	$(CC) $(CFLAGS) -c fixwvdialconf.c
-writefifo: writefifo.o
-	$(CC) -o $@ $@.o
-writefifo.o: writefifo.c
-	$(CC) -c writefifo.c
-fetchmail.up: fetchmail.up.in
-	$(edit) $@.in > $@
-fetchmail.down: fetchmail.down.in
-	$(edit) $@.in > $@
-fetchmail.cron: fetchmail.cron.in
-	$(edit) $@.in > $@
-ip-up.local: ip-up.local.in
-	$(edit) $@.in > $@
-ip-down.local: ip-down.local.in
-	$(edit) $@.in > $@
-#endif
 
 .PHONY: import-translations
 import-translations:

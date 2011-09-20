@@ -1435,7 +1435,15 @@ int readbody(int sock, struct query *ctl, flag forward, int len)
 	 * so we might end truncating messages prematurely.
 	 */
 	if (!protocol->delimited && linelen > len) {
+	    /* FIXME: HACK ALERT! This \r\n is only here to make sure the
+	     * \n\0 hunt works later on. The \n generated here was not
+	     * part of the original message!
+	     * The real fix will be to use buffer + length strings,
+	     * rather than 0-terminated C strings. */
+	    inbufp[len++] = '\r';
+	    inbufp[len++] = '\n';
 	    inbufp[len] = '\0';
+	    linelen = len;
 	}
 
 	len -= linelen;

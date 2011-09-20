@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: fetchmail 6.2.4\n"
 "Report-Msgid-Bugs-To: fetchmail-devel@lists.berlios.de\n"
-"POT-Creation-Date: 2011-06-06 13:23+0200\n"
+"POT-Creation-Date: 2011-08-21 15:36+0200\n"
 "PO-Revision-Date: 2003-09-02 20:21+0200\n"
 "Last-Translator: Byrial Ole Jensen <byrial@image.dk>\n"
 "Language-Team: Danish <dansk@klid.dk>\n"
@@ -3235,12 +3235,12 @@ msgstr "brev indeholder NUL-tegn"
 msgid "SMTP listener rejected local recipient addresses: "
 msgstr "SMTP-modtager afviste lokal modtageradresse: "
 
-#: transact.c:1485
+#: transact.c:1493
 #, fuzzy
 msgid "error writing message text\n"
 msgstr "skriver brevtekst\n"
 
-#: transact.c:1633
+#: transact.c:1641
 #, c-format
 msgid "Buffer too small. This is a bug in the caller of %s:%lu.\n"
 msgstr ""

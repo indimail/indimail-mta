@@ -9,7 +9,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: fetchmail 6.3.20-rc3\n"
 "Report-Msgid-Bugs-To: fetchmail-devel@lists.berlios.de\n"
-"POT-Creation-Date: 2011-06-06 13:23+0200\n"
+"POT-Creation-Date: 2011-08-21 15:36+0200\n"
 "PO-Revision-Date: 2011-05-31 19:26+0200\n"
 "Last-Translator: Jakub Bogusz <qboosh@pld-linux.org>\n"
 "Language-Team: Polish <translation-team-pl@lists.sourceforge.net>\n"
@@ -3303,11 +3303,11 @@ msgstr "list zawiera³ znaki NULL"
 msgid "SMTP listener rejected local recipient addresses: "
 msgstr "demon SMTP odrzuci³ adresy lokalnych odbiorców: '"
 
-#: transact.c:1485
+#: transact.c:1493
 msgid "error writing message text\n"
 msgstr "b³±d podczas zapisu tre¶ci listu\n"
 
-#: transact.c:1633
+#: transact.c:1641
 #, c-format
 msgid "Buffer too small. This is a bug in the caller of %s:%lu.\n"
 msgstr "Bufor zbyt ma³y. B³±d w funkcji wywo³uj±cej %s:%lu.\n"

@@ -32,7 +32,7 @@ typedef	long	int32;
 #error Cannot deduce a 32-bit-type
 #endif
 
-int do_rfc1731(int sock, char *command, char *truename)
+int do_rfc1731(int sock, const char *command, const char *truename)
 /* authenticate as per RFC1731 -- note 32-bit integer requirement here */
 {
     int result = 0, len;

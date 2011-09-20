@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: fetchmail 6.3.11\n"
 "Report-Msgid-Bugs-To: fetchmail-devel@lists.berlios.de\n"
-"POT-Creation-Date: 2011-06-06 13:23+0200\n"
+"POT-Creation-Date: 2011-08-21 15:36+0200\n"
 "PO-Revision-Date: 2009-08-06 14:52+0200\n"
 "Last-Translator: Ernest Adrogué Calveras <eadrogue@gmx.net>\n"
 "Language-Team: Catalan <ca@dodds.net>\n"
@@ -3291,11 +3291,11 @@ msgstr "el missatge conté caràcters NUL"
 msgid "SMTP listener rejected local recipient addresses: "
 msgstr "el receptor SMTP ha rebutjat les adreces locals de destinació: "
 
-#: transact.c:1485
+#: transact.c:1493
 msgid "error writing message text\n"
 msgstr "error en escriure el text del missatge\n"
 
-#: transact.c:1633
+#: transact.c:1641
 #, c-format
 msgid "Buffer too small. This is a bug in the caller of %s:%lu.\n"
 msgstr ""

@@ -1,5 +1,5 @@
 1.  conf.c - authmeth
-2.  configure.ac - --enable-indimaildir=dir
+2.  configure.ac - --enable-indimail and --enable-indimaildir=dir
 3.  fetchmail.c - authmeth
 4.  fetchmailconf.py - authmeth
 5.  fetchmail.h - authmeth
@@ -11,6 +11,8 @@
 10. rcfile_l.l - authmeth
 11. smtp.c
 12. Makefile.am
+13. copy slemsPrivate.c, writefifo.c, fixwvdialconf.c, fetchmail.up.in,
+    fetchmail.down.in, ip-down.local.in, ip-up.local.in, ppp-off, fetchmail.cron
 
                           Checklist for Adding Options
 

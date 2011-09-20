@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: fetchmail 6.2.5\n"
 "Report-Msgid-Bugs-To: fetchmail-devel@lists.berlios.de\n"
-"POT-Creation-Date: 2011-06-06 13:23+0200\n"
+"POT-Creation-Date: 2011-08-21 15:36+0200\n"
 "PO-Revision-Date: 2003-10-17 17:27+0200\n"
 "Last-Translator: Engin Gündüz <engin@ripe.net>\n"
 "Language-Team: Turkish <gnu-tr-u12a@lists.sourceforge.net>\n"
@@ -3336,12 +3336,12 @@ msgstr "iletinin içinde NUL karakterleri var"
 msgid "SMTP listener rejected local recipient addresses: "
 msgstr "SMTP dinleyicisi yerel alýcý adreslerini reddetti: "
 
-#: transact.c:1485
+#: transact.c:1493
 #, fuzzy
 msgid "error writing message text\n"
 msgstr "ileti metni yazýlýyor\n"
 
-#: transact.c:1633
+#: transact.c:1641
 #, c-format
 msgid "Buffer too small. This is a bug in the caller of %s:%lu.\n"
 msgstr ""
