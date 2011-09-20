@@ -1,0 +1,63 @@
+/*
+ * $Log: autoturn_dir.c,v $
+ * Revision 2.3  2005-12-29 22:39:39+05:30  Cprogrammer
+ * use getEnvConfigStr to set variables from environment variables
+ *
+ * Revision 2.2  2004-09-20 19:52:47+05:30  Cprogrammer
+ * skip comments and blank lines
+ *
+ * Revision 2.1  2002-09-01 18:34:30+05:30  Cprogrammer
+ * function to get the Maildir path for AUTOTURN domains
+ *
+ */
+#include "indimail.h"
+#include <string.h>
+#include <ctype.h>
+
+#ifndef	lint
+static char     sccsid[] = "$Id: autoturn_dir.c,v 2.3 2005-12-29 22:39:39+05:30 Cprogrammer Stab mbhangui $";
+#endif
+
+char           *
+autoturn_dir(char *domain)
+{
+	char            filename[MAX_BUFF], template[MAX_BUFF];
+	static char     tmpbuf[MAX_BUFF];
+	char           *ptr, *qmaildir, *controldir;
+	int             len;
+	FILE           *fp;
+
+	getEnvConfigStr(&qmaildir, "QMAILDIR", QMAILDIR);
+	getEnvConfigStr(&controldir, "CONTROLDIR", "control");
+	snprintf(filename, MAX_BUFF, "%s/%s/virtualdomains", qmaildir, controldir);
+	if (!(fp = fopen(filename, "r")))
+	{
+		perror(filename);
+		return ((char *) 0);
+	}
+	snprintf(template, sizeof(template), "%s:", domain);
+	for (;;)
+	{
+		if (!fgets(tmpbuf, sizeof(tmpbuf) - 2, fp))
+			break;
+		if ((ptr = strchr(tmpbuf, '\n')) || (ptr = strchr(tmpbuf, '#')))
+			*ptr = 0;
+		for (ptr = tmpbuf; *ptr && isspace((int) *ptr); ptr++);
+		if (!*ptr)
+			continue;
+		if (!strncmp(tmpbuf, template, len = slen(template)))
+		{
+			fclose(fp);
+			return (tmpbuf + len + 9);
+		}
+	}
+	fclose(fp);
+	return ((char *) 0);
+}
+
+void
+getversion_autoturn_dir_c()
+{
+	printf("%s\n", sccsid);
+	printf("%s\n", sccsidh);
+}

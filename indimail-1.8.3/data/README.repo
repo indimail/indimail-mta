@@ -1,0 +1,48 @@
+IndiMail has two yum / rpm repositories for most of the Linux Distros at
+
+Stable Releases
+---------------
+
+http://download.opensuse.org/repositories/home:/indimail/
+
+
+Bleeding Edge Releases
+----------------------
+IndiMail has yum repositories for the latest features being added. You will find
+the bleeding edge rpms at
+
+http://download.opensuse.org/repositories/home:/mbhangui/
+
+
+You will also find the RPMs/Deb for both 32bit and 64bit OS on the above
+repositories
+
+Currently, the list of supported distributions for IndiMail is (for
+both 32 and 64 bit) are
+
+    * SUSE
+          o openSUSE 11.4
+          o openSUSE 11.3
+          o openSUSE Tumbleweed
+          o SUSE Linux Enterprise 11 SP1
+          o SUSE Linux Enterprise 11
+          o SUSE Linux Enterprise 10
+          o openSUSE Factory
+
+    * Red Hat
+          o Fedora 14
+          o Fedora 13
+          o Fedora 12
+          o Red Hat Enterprise Linux 5
+          o Red Hat Enterprise Linux 6
+          o CentOS 5
+          o Mandriva 2010.1
+
+    * Debian
+          o Debian 6.0
+          o Debian 5.0
+          o Ubuntu 11.04
+          o Ubuntu 10.10
+          o Ubuntu 10.04
+          o Ubuntu  9.10
+

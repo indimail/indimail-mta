@@ -1,0 +1,8 @@
+--disable-root-check
+--with-redhat
+--without-authpam
+--without-authcustom
+--without-authchangepwdir
+--without-authpwd
+--without-userdb
+--with-authshadow

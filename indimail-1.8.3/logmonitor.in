@@ -1,0 +1,185 @@
+#!/bin/sh
+# WARNING: This file was auto-generated. Do not edit!
+# $Log: logmonitor.in,v $
+# Revision 2.9  2008-06-05 20:13:54+05:30  Cprogrammer
+# removed useless comment
+#
+# Revision 2.8  2008-06-04 13:52:09+05:30  Cprogrammer
+# added warning that file is auto-generated
+#
+# Revision 2.7  2004-10-08 19:02:19+05:30  Cprogrammer
+# fixed bug with optarg not getting set
+#
+# Revision 2.6  2004-10-08 18:43:12+05:30  Cprogrammer
+# added qmail-send-rcpt and qmail-send-from cases
+#
+# Revision 2.5  2004-10-02 19:23:52+05:30  Cprogrammer
+# moved logmonitor to logmonitor.in
+#
+# Revision 2.4  2002-12-27 11:58:56+05:30  Cprogrammer
+# modification for tail on solaris
+#
+# Revision 2.3  2002-12-26 00:44:16+05:30  Cprogrammer
+# bug fix
+#
+# Revision 2.2  2002-12-26 00:32:17+05:30  Cprogrammer
+# added smtp format
+#
+# Revision 2.1  2002-12-25 23:53:44+05:30  Cprogrammer
+# script to monitor log files
+#
+#
+# $Id: logmonitor.in,v 2.9 2008-06-05 20:13:54+05:30 Cprogrammer Stab mbhangui $
+#
+
+usage()
+{
+more <<EOF
+Usage: logmonitor [OPTIONS]
+
+Known values for OPTIONS are:
+
+--logfile=file --display_size=size --format=logformat --batchmode --follow
+--threshold=threshold
+
+logfile          - Path of log file.
+display_size     - No of displays to be shown on screen
+batchmode        - When output is a dumb terminal or a file.
+threshold        - Consider only events having occurrences above this number (default 100)
+format           - Interpret the log file as following
+                   qmail-send-rcpt - logfile is qmail-send's  log file
+                   qmail-send-from - logfile is qmail-send's  log file
+                   qmail-smtp-rcpt - logfile is qmail-smtpd's log file
+                   qmail-smtp-from - logfile is qmail-smtpd's log file
+                   imap            - logfile is imapd's log file
+follow           - follow the log file similarly to tail -f
+
+parameters enclosed in [] are optional
+
+--help
+
+  display this help and exit
+
+--version
+
+  output version information
+EOF
+exit $1
+}
+
+internal_filter()
+{
+#@40000000414d538c2810b0e4 info msg 1474565: bytes 1874 from <admin@hamaraforums.com> qp 2637 uid 508
+#@40000000414d51921a4238ac starting delivery 1: msg 1163302 to remote manvendra_bhangui@satyam-infoway.com
+#@40000000414d538c2811128c starting delivery 1: msg 1474565 to local yahoo@technology.indicorp.com
+if [ " $format" = " qmail-send-from" ] ; then 
+	grep "from <" | awk '{print $8}' | cut -d'<' -f2 | cut -d'>' -f1 | egrep -v '^$'
+elif [ " $format" = " qmail-send-rcpt" ] ; then 
+	grep "starting delivery " | awk '{print $9}' | egrep -v '^$'
+elif [ " $format" = " qmail-smtp-rcpt" ] ; then 
+	grep "RCPT <" | awk '{print $13}' | cut -d'<' -f2 | cut -d'>' -f1 | egrep -v '^$'
+elif [ " $format" = " qmail-smtp-from" ] ; then 
+	grep "MAIL from " | awk '{print $11}' | cut -d'<' -f2 | cut -d'>' -f1 | egrep -v '^$'
+elif [ " $format" = " imap" ] ; then 
+	grep "LOGIN" | awk '{print $4}' | cut -d= -f2| egrep -v '^$'
+fi
+}
+
+count_file()
+{
+if [ " $format" = " qmail-send-from" ] ; then 
+	grep "from <" $logfile | wc -l | awk '{print $1}'
+elif [ " $format" = " qmail-send-rcpt" ] ; then 
+	grep "starting delivery" $logfile | wc -l | awk '{print $1}'
+elif [ " $format" = " qmail-smtp-rcpt" ] ; then 
+	grep "RCPT <" $logfile | wc -l | awk '{print $1}'
+elif [ " $format" = " qmail-smtp-from" ] ; then 
+	grep "MAIL from " $logfile | wc -l | awk '{print $1}'
+elif [ " $format" = " imap" ] ; then 
+	grep "LOGIN" $logfile | wc -l | awk '{print $1}'
+fi
+
+}
+
+main_process()
+{
+MSG_LINE_COUNT=`count_file`
+FILE_LINE_COUNT=`wc -l $logfile | awk '{print $1}'`
+osver=`uname -sr`
+case "$osver" in
+	SunOS*)
+	TAIL=/usr/xpg4/bin/tail
+	HEAD=/usr/xpg4/bin/head
+	;;
+	*)
+	TAIL=/usr/bin/tail
+	HEAD=/usr/bin/tail
+	;;
+esac
+(
+	if [ " $followmode" = " y" ] ; then
+		$TAIL --lines="$FILE_LINE_COUNT" -f $logfile
+	else
+		$TAIL -"$FILE_LINE_COUNT" $logfile
+	fi
+) \
+| internal_filter \
+| @indimaildir@/bin/hashtable -l $MSG_LINE_COUNT -c $threshold \
+| @indimaildir@/bin/displaytop -n $display_size $batchmode
+}
+
+if test $# -eq 0; then
+	usage 1
+fi
+display_size=`stty size | awk '{print $1}'`
+threshold=100
+while test $# -gt 0; do
+	case "$1" in
+		-*=*)
+			optarg=`echo "$1" | sed 's/[-_a-zA-Z0-9]*=//'`
+		;;
+	esac
+	case "$1" in
+		--display_size=*)
+			display_size=$optarg
+		;;
+		--batchmode)
+			batchmode="-b"
+		;;
+		--follow)
+			followmode="y"
+		;;
+		--logfile=*)
+			logfile=$optarg
+		;;
+		--format=*)
+			format=$optarg
+		;;
+		--threshold=*)
+			threshold=$optarg
+		;;
+		--version)
+			echo "\$Id: logmonitor.in,v 2.9 2008-06-05 20:13:54+05:30 Cprogrammer Stab mbhangui $"
+			exit 0
+		;;
+		--help)
+			usage 0
+		;;
+		*)
+			echo "invalid option [$1]"
+			read key
+			usage 1
+		;;
+	esac
+	shift
+done
+case "$format" in
+	qmail-send-rcpt|qmail-send-from|qmail-smtp-rcpt|qmail-smtp-from|imap)
+	;;
+	*)
+		echo "invalid format [$format]"
+		read key
+		usage 1
+	;;
+esac
+main_process
