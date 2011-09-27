@@ -15,11 +15,11 @@ acl_libdirstem := $(shell basename @libdir@ 2>/dev/null|| echo "lib")
 version=@version@
 prefix=@prefix@
 #
-clamav_version=0.97.1
+clamav_version=0.97.2
 libdkim_version=1.4
 courier_version=4.9.3
 bogofilter_version=1.2.2
-fetchmail_version=6.3.20
+fetchmail_version=6.3.21
 nssd_version=1.1
 #
 pam_multi_version=1.1
@@ -59,7 +59,7 @@ MOSTLYCLEANFILES= indimail.prerm indimail.preinst indimail.postrm \
 				  indimail-devel.postinst indimail-devel.postrm \
 				  indimail-mini.prerm indimail-mini.preinst \
 				  indimail-mini.postrm indimail-mini.postinst \
-				  debian.tar.gz dummy.tar.gz
+				  changelog debian.tar.gz dummy.tar.gz
 
 edit = sed \
 	-e 's,@indimaildir\@,$(indimaildir),g' \
@@ -125,6 +125,9 @@ indimail-mini.postinst: indimail-mini.postinst.in
 	$(edit) $@.in > $@;
 
 obs_deb_prep: obs_deb_prep.in obs.mk
+	$(edit) $@.in > $@;
+
+changelog: changelog.in obs.mk
 	$(edit) $@.in > $@;
 
 indimail-Debian_5.0.dsc:indimail-Debian_5.0.dsc.in
