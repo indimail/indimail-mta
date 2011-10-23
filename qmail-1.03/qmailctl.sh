@@ -11,6 +11,9 @@
 ### END INIT INFO
 
 # $Log: qmailctl.sh,v $
+# Revision 1.37  2011-10-23 08:56:40+05:30  Cprogrammer
+# qmail-qstat removed as qmail-qread has the functionality
+#
 # Revision 1.36  2011-07-22 19:05:23+05:30  Cprogrammer
 # fixed service getting disabled on systems with systemctl
 #
@@ -415,12 +418,8 @@ case "$1" in
 	[ $ret -eq 0 ] && exit 0 || exit 1
 	;;
   queue)
-	QMAIL/bin/qmail-qstat
-	RETVAL=$?
-	let ret+=$RETVAL
-	QMAIL/bin/qmail-qread
-	RETVAL=$?
-	let ret+=$RETVAL
+	QMAIL/bin/qmail-qread -c
+	ret=$?
 	[ $ret -eq 0 ] && exit 0 || exit 1
 	;;
   reload)
