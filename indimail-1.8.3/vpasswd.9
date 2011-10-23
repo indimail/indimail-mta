@@ -43,14 +43,33 @@ as a parameter.
 
 .SH OPTIONS
 .TP
+\fB\-e\fR
+Set the encrypted Password field
+This options disables the internal encryption routine which encryptes the password provided
+on the command line. This option sets the encrypted password field exactly as given on the
+command line without any encryption. It expects you to give a standard encrypted password.
+However, you can use this to set plaintext password for CRAM-MD5 authentication.
+
+.TP
+\fB\-a\fR
+(use apop, pop is default)
+
+.TP
+\fB\-r\fR
+Generate a random password
+
+.TP
 \fB\-V\fR
 Display Version Numbers
+
 .TP
 \fB\-v\fR
 Set verbose mode.
+
 .TP
 \fIemail_address\fR
 username including the domain component
+
 .TP
 [\fIpassword\fR]
 Set the password on the command line. If the password is not supplied on the command line then user is prompted for the password. The password must be entered correctly twice in order to be accepted. 
