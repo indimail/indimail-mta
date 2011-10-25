@@ -1,5 +1,5 @@
 /*
- * $Id: qmailadmin.c,v 1.3 2011-05-13 10:36:21+05:30 Cprogrammer Exp mbhangui $
+ * $Id: qmailadmin.c,v 1.4 2011-10-25 10:40:47+05:30 Cprogrammer Exp mbhangui $
  * Copyright (C) 1999-2004 Inter7 Internet Technologies, Inc. 
  *
  * This program is free software; you can redistribute it and/or modify
