@@ -1,5 +1,8 @@
 #
 # $Log: iwebadmin.spec.in,v $
+# Revision 1.8  2011-10-25 10:40:02+05:30  Cprogrammer
+# added iwebadmin_perm_list
+#
 # Revision 1.7  2011-05-13 10:35:30+05:30  Cprogrammer
 # fix for obs
 #
@@ -37,7 +40,7 @@
 # Initial revision
 #
 #
-# $Id: iwebadmin.spec.in,v 1.7 2011-05-13 10:35:30+05:30 Cprogrammer Exp mbhangui $
+# $Id: iwebadmin.spec.in,v 1.8 2011-10-25 10:40:02+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %define _unpackaged_files_terminate_build 1
 
