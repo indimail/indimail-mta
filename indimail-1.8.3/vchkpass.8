@@ -31,12 +31,12 @@ The alternate program is invoked when vchkpass doesn't support authentication fo
 supplied login name.
 .PP
 For LOGIN, PLAIN AUTH types, the information supplied on descriptor 3 is a login name
-terminated by \0 and password terminated by \0. \fBvchkpass\fR encrypts the password using
+terminated by \\0 and password terminated by \\0. \fBvchkpass\fR encrypts the password using
 cyrpt(3) routine and compares it against the value present in the passwd database. The encrypted
 password can be in DES, MD5, SHA-256 or SHA-512 hash.
 .PP
 For CRAM-MD5 AUTH type, the information supplied on descriptor 3 is a login name terminated
-by \0, a cram-md5 challenge terminated by \0, and a cram-md5 response terminated by \0.
+by \\0, a cram-md5 challenge terminated by \\0, and a cram-md5 response terminated by \\0.
 \fBvchkpass\fR/\fBsystpass\fR encrypts the challenge with keyed MD5 using passwords from passwd
 database. It's compared with response (3rd parameter) and if they are the same then
 vchkpass/systpass uses execvp to run subprogram with the given arguments. If they differ then
