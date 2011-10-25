@@ -98,6 +98,12 @@ AC_ARG_ENABLE(indimaildir, [  --enable-indimaildir=DIR  Home directory of indima
 AC_SUBST(indimaildir)
 AC_SUBST(idcommand)
 
+if test x$prefix = xNONE
+then
+	prefix="$indimaildir"
+	ac_configure_args="$ac_configure_args -prefix=$prefix"
+fi
+
 AC_ARG_ENABLE(mysqlprefix, [  --enable-mysqlprefix=""       MySQL Prefix Directory.],[mysql_prefix=$enableval],[mysql_prefix=""])
 
 if test "$mysql_prefix" = ""

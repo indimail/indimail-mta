@@ -214,7 +214,6 @@ if [ " %dist" = " mandrake" ] ; then
 	--enable-ezmlmdir=%{_prefix}/bin --disable-ipauth --disable-trivial-password \
 	--enable-mysqlincdir=%{mysqlPrefix}/include/mysql \
 	--enable-mysqllibdir=%{mysqlPrefix}/%{_lib}/mysql \
-	--enable-qmaildir=/var/indimail \
 	--enable-modify-quota \
 	--enable-htmldir=@htmldir@ \
 	--enable-cgibindir=@cgibindir@ \
@@ -226,7 +225,6 @@ else
 	--enable-ezmlmdir=%{_prefix}/bin --disable-ipauth --disable-trivial-password \
 	--enable-mysqlincdir=%{mysqlPrefix}/include/mysql \
 	--enable-mysqllibdir=%{mysqlPrefix}/%{_lib}/mysql \
-	--enable-qmaildir=/var/indimail \
 	--enable-modify-quota \
 	--enable-htmldir=@htmldir@ \
 	--enable-cgibindir=@cgibindir@ \
@@ -313,6 +311,7 @@ fi
 %attr(444,root,root)                %{_prefix}/share/qmailadmin/lang/sv
 %attr(444,root,root)                %{_prefix}/share/qmailadmin/lang/tr
 %attr(444,root,root)                %{_prefix}/share/qmailadmin/lang/zh-cn
+%attr(444,root,root)                %{_prefix}/etc/iwebadmin_perm_list
 
 %attr(444,root,root)                @imagedir@/delete.png
 %attr(444,root,root)                @imagedir@/disabled.png
