@@ -1,5 +1,8 @@
 /*
  * $Log: pw_comp.c,v $
+ * Revision 2.9  2011-10-25 10:47:51+05:30  Cprogrammer
+ * added trivial_password option to authenticate when using cram-md5
+ *
  * Revision 2.8  2008-09-12 09:57:54+05:30  Cprogrammer
  * use in_crypt() replacement
  *
@@ -27,11 +30,12 @@
  */
 #include "indimail.h"
 #include <errno.h>
+#include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
 
 #ifndef	lint
-static char     sccsid[] = "$Id: pw_comp.c,v 2.8 2008-09-12 09:57:54+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: pw_comp.c,v 2.9 2011-10-25 10:47:51+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 static char     hextab[] = "0123456789abcdef";
@@ -41,11 +45,12 @@ pw_comp(unsigned char *testlogin, unsigned char *password, unsigned char *challe
 {
 	unsigned char   digest[16];
 	unsigned char   digascii[33];
+	char            Crypted[MAX_BUFF];
 	char           *crypt_pass;
 	unsigned char   h;
 	int             j, len;
 
-	if(!response || (response && !*response))
+	if (!response || (response && !*response))
 	{
 		if (!(crypt_pass = in_crypt((char *) challenge, (char *) password)))
 		{
@@ -54,7 +59,21 @@ pw_comp(unsigned char *testlogin, unsigned char *password, unsigned char *challe
 			_exit (111);
 		}
 		len = strlen(crypt_pass);
-		return(strncmp((const char *) crypt_pass, (const char *) password, (size_t) len + 1));
+		j = strncmp((const char *) crypt_pass, (const char *) password, (size_t) len + 1);
+		/*- non CRAM-MD5 aware app */
+		if (j && getenv("TRIVIAL_PASSWORDS"))
+		{
+			mkpasswd3((char *) password, Crypted, MAX_BUFF);
+			if (!(crypt_pass = in_crypt((char *) challenge, (char *) password)))
+			{
+				printf("454-%s (#4.3.0)\r\n", strerror(errno));
+				fflush(stdout);
+				_exit (111);
+			}
+			len = strlen(crypt_pass);
+			j = strncmp((const char *) crypt_pass, (const char *) password, (size_t) len + 1);
+		}
+		return (j);
 	}
 	hmac_md5(challenge, (int) strlen((const char *) challenge), password,
 		(int) strlen((const char *) password), digest);
@@ -66,7 +85,7 @@ pw_comp(unsigned char *testlogin, unsigned char *password, unsigned char *challe
 		h = digest[j] & 0x0f;
 		digascii[(2 * j) + 1] = hextab[h];
 	}
-	return (strcmp((const char *) digascii, (const char *) response) && strcmp((const char *) password, (const char *) challenge));
+	return (strcmp((const char *) digascii, (const char *) response));
 }
 
 void
