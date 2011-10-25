@@ -284,10 +284,25 @@ main(argc, argv)
 			}
 			if (strcmp(pw->pw_passwd, (char *) crypt(Password, pw->pw_passwd)))
 			{
-				snprintf(StatusMessage, sizeof (StatusMessage), "%s", html_text[198]);
-				show_login();
-				vclose();
-				exit(0);
+				/*- 
+				 * Authtenticate case where you have CRAM-MD5 but clients do
+				 * not have cram-md5 authentication mechanism 
+				 */
+				if  (!access(".trivial_passwords", F_OK))
+				{
+					if (strcmp(pw->pw_passwd, Password))
+					{
+						snprintf(StatusMessage, sizeof (StatusMessage), "%s", html_text[198]);
+						show_login();
+						vclose();
+						exit(0);
+					}
+				} else {
+					snprintf(StatusMessage, sizeof (StatusMessage), "%s", html_text[198]);
+					show_login();
+					vclose();
+					exit(0);
+				}
 			}
 
 			snprintf(TmpBuf, sizeof (TmpBuf), "%s/" MAILDIR, pw->pw_dir);
@@ -333,7 +348,6 @@ void
 load_lang(char *lang)
 {
 	long            lang_size;
-	size_t          bytes_read;
 	char           *lang_entries;
 	char           *id;
 	char           *p;
@@ -357,7 +371,7 @@ load_lang(char *lang)
 	if (lang_entries == NULL)
 		return;
 	rewind(lang_fs);
-	bytes_read = fread(lang_entries, 1, lang_size, lang_fs);
+	fread(lang_entries, 1, lang_size, lang_fs);
 	/*
 	 * error handling for incomplete reads? 
 	 */
