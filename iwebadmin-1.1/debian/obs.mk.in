@@ -52,6 +52,8 @@ iwebadmin-xUbuntu_9.10.dsc: iwebadmin-xUbuntu_9.10.dsc.in
 	$(edit) $@.in > $@
 iwebadmin-xUbuntu_8.04.dsc: iwebadmin-xUbuntu_8.04.dsc.in
 	$(edit) $@.in > $@
+changelog:changelog.in
+	$(edit) $@.in > $@
 _service: _service.in
 	$(edit) $@.in > $@
 dummy.tar.gz: README
