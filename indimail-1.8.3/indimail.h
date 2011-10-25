@@ -1,5 +1,8 @@
 /*
  * $Log: indimail.h,v $
+ * Revision 2.200  2011-10-25 20:17:02+05:30  Cprogrammer
+ * added status argument to mgmtgetpass()
+ *
  * Revision 2.199  2011-04-08 17:26:18+05:30  Cprogrammer
  * added HAVE_CONFIG_H
  *
@@ -913,7 +916,7 @@
 #define INDIMAILH_H
 
 #ifndef	lint
-static char     sccsidh[] = "$Id: indimail.h,v 2.199 2011-04-08 17:26:18+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsidh[] = "$Id: indimail.h,v 2.200 2011-10-25 20:17:02+05:30 Cprogrammer Stab mbhangui $";
 #endif
 
 #ifdef HAVE_CONFIG_H
@@ -1855,7 +1858,7 @@ char           *vhostid_select();
 int             vhostid_insert(char *, char *);
 int             vhostid_update(char *, char *);
 int             vhostid_delete(char *);
-char           *mgmtgetpass(char *);
+char           *mgmtgetpass(char *, int *);
 int             mgmtpassinfo(char *, int);
 int             mgmtsetpass(char *, char *, uid_t, gid_t, time_t, time_t);
 int             mgmtadduser(char *, char *, uid_t, gid_t, time_t, time_t);

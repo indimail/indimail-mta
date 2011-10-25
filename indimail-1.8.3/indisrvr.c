@@ -1,5 +1,8 @@
 /*
  * $Log: indisrvr.c,v $
+ * Revision 2.45  2011-10-25 20:47:41+05:30  Cprogrammer
+ * mgmtgetpass() function has a new status argument
+ *
  * Revision 2.44  2011-04-08 17:26:35+05:30  Cprogrammer
  * added HAVE_CONFIG_H
  *
@@ -162,7 +165,7 @@
 #include "indimail.h"
 
 #ifndef lint
-static char     sccsid[] = "$Id: indisrvr.c,v 2.44 2011-04-08 17:26:35+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: indisrvr.c,v 2.45 2011-10-25 20:47:41+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef CLUSTERED_SITE
@@ -785,9 +788,9 @@ Login_User(char *username, char *pass)
 		fprintf(stderr, "You are disabled\n");
 		return(1);
 	}
-	if (!(admin_pass = mgmtgetpass(username)))
+	if (!(admin_pass = mgmtgetpass(username, 0)))
 		return(1);
-	if (*admin_pass && !pw_comp(0, (unsigned char *) admin_pass, (unsigned char *) pass, 0))
+	if (*admin_pass && !pw_comp(0, (unsigned char *) admin_pass, 0, (unsigned char *) pass))
 	{
 		printf("OK\n");
 		fflush(stdout);
