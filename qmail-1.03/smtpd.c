@@ -1,5 +1,8 @@
 /*
  * $Log: smtpd.c,v $
+ * Revision 1.156  2011-10-25 21:16:20+05:30  Cprogrammer
+ * option to disable LOGIN, PLAIN, CRAM-MD5 using env variables
+ *
  * Revision 1.155  2011-07-29 09:30:05+05:30  Cprogrammer
  * fixed gcc 4.6 warnings
  *
@@ -612,7 +615,7 @@ int             wildmat_internal(char *, char *);
 int             ssl_rfd = -1, ssl_wfd = -1;	/*- SSL_get_Xfd() are broken */
 char           *servercert, *clientca, *clientcrl;
 #endif
-char           *revision = "$Revision: 1.155 $";
+char           *revision = "$Revision: 1.156 $";
 char           *protocol = "SMTP";
 stralloc        proto = { 0 };
 static stralloc Revision = { 0 };
@@ -3176,9 +3179,47 @@ smtp_ehlo(char *arg)
 	out("\r\n");
 	if (hostname && *hostname && childargs && *childargs)
 	{
-		out("250-AUTH LOGIN PLAIN CRAM-MD5\r\n");
-		out("250-AUTH=LOGIN PLAIN CRAM-MD5\r\n");
-	}
+		char *no_auth_login, *no_auth_plain, *no_cram_md5;
+
+		no_auth_login = env_get("DISABLE_AUTH_LOGIN");
+		no_auth_plain = env_get("DISABLE_AUTH_PLAIN");
+		no_cram_md5 = env_get("DISABLE_CRAM_MD5");
+
+		if (!no_auth_login && !no_auth_plain && !no_cram_md5)
+		{
+			out("250-AUTH LOGIN PLAIN CRAM-MD5\r\n");
+			out("250-AUTH=LOGIN PLAIN CRAM-MD5\r\n");
+		} else 
+		if (!no_auth_login || !no_auth_plain || !no_cram_md5)
+		{
+			int flag = 0;
+
+			out("250-AUTH");
+			if (!no_auth_login)
+				out(" LOGIN");
+			if (!no_auth_plain)
+				out(" PLAIN");
+			if (!no_cram_md5)
+				out(" CRAM_MD5");
+			out("\r\n");
+			if (!no_auth_login)
+			{
+				out(flag++ == 0 ? "250-AUTH=" : " ");
+				out("LOGIN");
+			}
+			if (!no_auth_plain)
+			{
+				out(flag++ == 0 ? "250-AUTH=" : " ");
+				out("PLAIN");
+			}
+			if (!no_cram_md5)
+			{
+				out(flag++ == 0 ? "250-AUTH=" : " ");
+				out("CRAM-MD5");
+			}
+			out("\r\n");
+		}
+	} 
 #ifdef INDIMAIL
 	if (smtp_port != ODMR_PORT)
 	{
@@ -6172,7 +6213,7 @@ addrrelay() /*- Rejection of relay probes. */
 void
 getversion_smtpd_c()
 {
-	static char    *x = "$Id: smtpd.c,v 1.155 2011-07-29 09:30:05+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: smtpd.c,v 1.156 2011-10-25 21:16:20+05:30 Cprogrammer Exp mbhangui $";
 
 #ifdef INDIMAIL
 	if (x)
