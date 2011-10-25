@@ -384,7 +384,6 @@ addusernow()
 	char          **mailingListNames;
 	char           *tmp;
 	char           *email;
-	char          **arguments;
 #ifdef MODIFY_QUOTA
 	char            qconvert[11];
 #endif
@@ -395,7 +394,6 @@ addusernow()
 	c_num = malloc(MAX_BUFF);
 	email = malloc(128);
 	tmp = malloc(MAX_BUFF);
-	arguments = (char **) malloc(MAX_BUFF);
 
 	count_users();
 	load_limits();
@@ -555,7 +553,6 @@ call_hooks(char *hook_type, char *p1, char *p2, char *p3, char *p4)
 	char           *hooks_path;
 	char           *cmd = NULL;
 	char           *tmpstr;
-	int             error;
 
 	hooks_path = malloc(MAX_BUFF);
 
@@ -605,11 +602,8 @@ call_hooks(char *hook_type, char *p1, char *p2, char *p3, char *p4)
 	 * without the path information.  Add a pointer to point into cmd
 	 * at the start of the program name only.    BUG 2003-12 
 	 */
-		error = execl(cmd, cmd, p1, p2, p3, p4, NULL);
+		execl(cmd, cmd, p1, p2, p3, p4, NULL);
 		printf("Error %d %s \"%s\", %s, %s, %s, %s, %s\n", errno, html_text[202], cmd, hook_type, p1, p2, p3, p4);
-	/*
-	 * if (error == -1) return (-1); 
-	 */
 		exit(127);
 	} else {
 		wait(&pid);
@@ -831,7 +825,9 @@ modusergo()
 #endif
 	int             count;
 	FILE           *fs;
+#if 0
 	int             spam_check = 0;
+#endif
 	int             vacation = 0;
 	int             saveacopy = 0;
 	int             emptydotqmail;
@@ -939,12 +935,15 @@ modusergo()
 	} else 
 	if (vpw->pw_gid != orig_gid)
 		vauth_setpw(vpw, Domain);
+
+#if 0
 	/*
 	 * get value of the spam filter box 
 	 */
 	GetValue(TmpCGI, box, "spamcheck=", sizeof (box));
 	if (strcmp(box, "on") == 0)
 		spam_check = 1;
+#endif
 
 	/*- get the value of the vacation checkbox */
 	GetValue(TmpCGI, box, "vacation=", sizeof (box));
