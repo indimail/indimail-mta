@@ -1,5 +1,8 @@
 /*
  * $Log: vchkpass.c,v $
+ * Revision 2.36  2011-10-25 20:49:56+05:30  Cprogrammer
+ * plain text password to be passed with response argument of pw_comp()
+ *
  * Revision 2.35  2010-05-01 14:14:52+05:30  Cprogrammer
  * added connect_all argument to vauthOpen_user
  *
@@ -123,7 +126,7 @@
 #include <errno.h>
 
 #ifndef lint
-static char     sccsid[] = "$Id: vchkpass.c,v 2.35 2010-05-01 14:14:52+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: vchkpass.c,v 2.36 2011-10-25 20:49:56+05:30 Cprogrammer Exp mbhangui $";
 #endif
 #ifdef AUTH_SIZE
 #undef AUTH_SIZE
@@ -186,7 +189,7 @@ main(int argc, char **argv)
 	for (;tmpbuf[count] && count < offset;count++);
 	if (count == offset || (count + 1) == offset)
 		_exit(2);
-	response = tmpbuf + count + 1; /*- response */
+	response = tmpbuf + count + 1; /*- cram-md5 response */
 	for (cptr = user, ptr = login;*ptr && *ptr != '@';*cptr++ = *ptr++);
 	*cptr = 0;
 	if (*ptr)
@@ -265,7 +268,8 @@ main(int argc, char **argv)
 			argv[0], login, challenge, response, crypt_pass);
 	}
 	if (pw_comp((unsigned char *) login, (unsigned char *) crypt_pass,
-		(unsigned char *) challenge, (unsigned char *) response))
+		(unsigned char *) (*response ? challenge : 0),
+		(unsigned char *) (*response ? response : challenge)))
 	{
 		pipe_exec(argv, tmpbuf, offset);
 		printf("454-%s (#4.3.0)\r\n", strerror(errno));

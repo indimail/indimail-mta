@@ -1,5 +1,8 @@
 /*
  * $Log: sq_vacation.c,v $
+ * Revision 2.9  2011-10-25 20:49:38+05:30  Cprogrammer
+ * plain text password to be passed with response argument of pw_comp()
+ *
  * Revision 2.8  2011-07-29 09:26:24+05:30  Cprogrammer
  * fixed gcc 4.6 warnings
  *
@@ -91,7 +94,7 @@
 #define ERR_UNEXPECTED  126     /*- other unexpected error */
 
 #ifndef lint
-static char     sccsid[] = "$Id: sq_vacation.c,v 2.8 2011-07-29 09:26:24+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: sq_vacation.c,v 2.9 2011-10-25 20:49:38+05:30 Cprogrammer Exp mbhangui $";
 #endif
 #ifndef INDIMAILH_H
 int             vauthOpen_user(char *);
@@ -378,7 +381,7 @@ main(int argc, char **argv)
 	}
 	crypt_pass = pw->pw_passwd;
 	if (pw_comp((unsigned char *) email, (unsigned char *) crypt_pass,
-		(unsigned char *) passbuf, 0))
+		0, (unsigned char *) passbuf))
 		die(ERR_BADPASS, "Password does not match");
 	if (!strncmp(action, "list", 4))
 	{

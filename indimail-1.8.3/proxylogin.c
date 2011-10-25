@@ -1,5 +1,8 @@
 /*
  * $Log: proxylogin.c,v $
+ * Revision 2.43  2011-10-25 20:49:15+05:30  Cprogrammer
+ * plain text password to be passed with response argument of pw_comp()
+ *
  * Revision 2.42  2011-04-01 14:14:53+05:30  Cprogrammer
  * added code to auto provision users
  *
@@ -147,7 +150,7 @@
 #include <unistd.h>
 
 #ifndef	lint
-static char     sccsid[] = "$Id: proxylogin.c,v 2.42 2011-04-01 14:14:53+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: proxylogin.c,v 2.43 2011-10-25 20:49:15+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef CLUSTERED_SITE
@@ -401,7 +404,8 @@ LocalLogin(char **argv, char *user, char *TheDomain, char *service,
 		}
 	}
 	remove_quotes(plaintext);
-	if (pw->pw_passwd[0] && !pw_comp(0, (unsigned char *) pw->pw_passwd, (unsigned char *) plaintext, 0))
+	if (pw->pw_passwd[0] && !pw_comp(0, (unsigned char *) pw->pw_passwd, 0,
+		(unsigned char *) plaintext))
 	{
 		if (!strncmp(service, "imap", 4))
 		{

@@ -1,5 +1,8 @@
 /*
  * $Log: pw_comp.c,v $
+ * Revision 2.10  2011-10-25 20:49:23+05:30  Cprogrammer
+ * plain text password to be passed with response argument of pw_comp()
+ *
  * Revision 2.9  2011-10-25 10:47:51+05:30  Cprogrammer
  * added trivial_password option to authenticate when using cram-md5
  *
@@ -29,19 +32,21 @@
  *
  */
 #include "indimail.h"
+#include <math.h>
 #include <errno.h>
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
 
 #ifndef	lint
-static char     sccsid[] = "$Id: pw_comp.c,v 2.9 2011-10-25 10:47:51+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: pw_comp.c,v 2.10 2011-10-25 20:49:23+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 static char     hextab[] = "0123456789abcdef";
 
 int
-pw_comp(unsigned char *testlogin, unsigned char *password, unsigned char *challenge, unsigned char *response)
+pw_comp(unsigned char *testlogin, unsigned char *password, unsigned char *challenge,
+	unsigned char *response)
 {
 	unsigned char   digest[16];
 	unsigned char   digascii[33];
@@ -50,9 +55,9 @@ pw_comp(unsigned char *testlogin, unsigned char *password, unsigned char *challe
 	unsigned char   h;
 	int             j, len;
 
-	if (!response || (response && !*response))
+	if (!challenge || (challenge && !*challenge))
 	{
-		if (!(crypt_pass = in_crypt((char *) challenge, (char *) password)))
+		if (!(crypt_pass = in_crypt((char *) response, (char *) password)))
 		{
 			printf("454-%s (#4.3.0)\r\n", strerror(errno));
 			fflush(stdout);
@@ -64,7 +69,7 @@ pw_comp(unsigned char *testlogin, unsigned char *password, unsigned char *challe
 		if (j && getenv("TRIVIAL_PASSWORDS"))
 		{
 			mkpasswd3((char *) password, Crypted, MAX_BUFF);
-			if (!(crypt_pass = in_crypt((char *) challenge, (char *) password)))
+			if (!(crypt_pass = in_crypt((char *) response, (char *) password)))
 			{
 				printf("454-%s (#4.3.0)\r\n", strerror(errno));
 				fflush(stdout);

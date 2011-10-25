@@ -1,5 +1,8 @@
 /*
  * $Log: vsetpass.c,v $
+ * Revision 2.3  2011-10-25 20:50:01+05:30  Cprogrammer
+ * plain text password to be passed with response argument of pw_comp()
+ *
  * Revision 2.2  2010-05-01 14:15:21+05:30  Cprogrammer
  * added connect_all argument to vauthOpen_user
  *
@@ -15,7 +18,7 @@
 #include <errno.h>
 
 #ifndef lint
-static char     sccsid[] = "$Id: vsetpass.c,v 2.2 2010-05-01 14:15:21+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: vsetpass.c,v 2.3 2011-10-25 20:50:01+05:30 Cprogrammer Exp mbhangui $";
 #endif
 #ifdef AUTH_SIZE
 #undef AUTH_SIZE
@@ -163,7 +166,8 @@ main(int argc, char **argv)
 			argv[0], login, old_pass, new_pass, response, crypt_pass);
 	}
 	if (pw_comp((unsigned char *) login, (unsigned char *) crypt_pass,
-		(unsigned char *) old_pass, (unsigned char *) response))
+		(unsigned char *) (*response ? old_pass : 0),
+		(unsigned char *) (*response ? response : old_pass)))
 	{
 		pipe_exec(argv, tmpbuf, offset);
 		printf("454 %s (#4.3.0)\r\n", strerror(errno));
