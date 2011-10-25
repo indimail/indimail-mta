@@ -60,6 +60,7 @@ imaplogin_SOURCES=imaplogin.c authenticate_auth.c
 imaplogin_DEPENDENCIES=libimapd.la libimaplogin.la ../authlib/libauthmod.la ../authlib/libauth.la
 imaplogin_LDADD=libimapd.la libimaplogin.la ../authlib/libauthmod.la ../authlib/libauth.la \
 	../rfc822/libencode.la ../rfc822/librfc822.la ../md5/libmd5.la ../tcpd/libspipe.la \
+	../random128/librandom128.la ../md5/libmd5.la \
 	@NETLIBS@
 
 imapd_SOURCES=fetch.c fetchinfo.c fetchinfo.h imapd.c imapd.h \
@@ -86,6 +87,7 @@ pop3login_DEPENDENCIES=libpop3d.la \
 pop3login_LDADD=../tcpd/libtlsclient.la libpop3d.la \
 	../authlib/libauthmod.la ../authlib/libauth.la \
 	../rfc822/libencode.la ../rfc822/librfc822.la ../md5/libmd5.la ../tcpd/libspipe.la \
+	../random128/librandom128.la ../md5/libmd5.la \
 	@NETLIBS@
 libpop3d_la_SOURCES=externalauth.c
 libpop3d_la_DEPENDENCIES=$(libpop3d_la_LIBADD) \

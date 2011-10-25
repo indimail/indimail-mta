@@ -78,7 +78,8 @@ void pop3dcapa()
 
 		printf("SASL %s%s%s\r\n", p, *p && *external ? " ":"",
 		       *external ? "EXTERNAL":"");
-	}
+	} else
+		printf("SASL LOGIN PLAIN CRAM-MD5\n");
 	if (have_starttls())
 		printf("STLS\r\n");
 
