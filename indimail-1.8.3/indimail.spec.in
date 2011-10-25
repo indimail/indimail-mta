@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail.spec.in,v 2.234 2011-09-20 17:50:56+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 2.235 2011-10-25 20:47:25+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %define _unpackaged_files_terminate_build 1
 
@@ -2062,7 +2062,7 @@ fi
 %define smtp_soft_mem 52428800
 %define qmtp_soft_mem 52428800
 %define qmqp_soft_mem 52428800
-%define imap_pop3_mem 10485760
+%define imap_pop3_mem 20971520
 %define imapspop3_mem 20971520
 %define poppass_mem   10485760
 %endif
