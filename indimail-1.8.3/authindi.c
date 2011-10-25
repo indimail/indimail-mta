@@ -1,5 +1,8 @@
 /*
  * $Log: authindi.c,v $
+ * Revision 2.19  2011-10-25 20:46:47+05:30  Cprogrammer
+ * added cram-md5 authentication
+ *
  * Revision 2.18  2010-05-05 14:47:24+05:30  Cprogrammer
  * no need of using service:port format for service variable
  *
@@ -62,9 +65,12 @@
 #include <string.h>
 #include <unistd.h>
 #include <errno.h>
+#include <ctype.h>
+#include <math.h>
+#include <stdint.h>
 
 #ifndef lint
-static char     sccsid[] = "$Id: authindi.c,v 2.18 2010-05-05 14:47:24+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: authindi.c,v 2.19 2011-10-25 20:46:47+05:30 Cprogrammer Exp mbhangui $";
 #endif
 #ifdef AUTH_SIZE
 #undef AUTH_SIZE
@@ -85,13 +91,86 @@ close_connection()
 #endif
 }
 
+static unsigned char encoding_table[] = { 
+	'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H',
+	'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P',
+	'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X',
+	'Y', 'Z', 'a', 'b', 'c', 'd', 'e', 'f',
+	'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n',
+	'o', 'p', 'q', 'r', 's', 't', 'u', 'v',
+	'w', 'x', 'y', 'z', '0', '1', '2', '3',
+	'4', '5', '6', '7', '8', '9', '+', '/'
+};
+
+static char    *decoding_table = NULL;
+
+void
+build_decoding_table()
+{
+	int i;
+
+	decoding_table = (char *) malloc(256);
+	for (i = 0; i < 0x40; i++)
+		decoding_table[encoding_table[i]] = i;
+}
+
+static char    *
+b64_decode(const unsigned char *data, size_t input_length, size_t * output_length)
+{
+	int i, j;
+
+	if (decoding_table == NULL)
+		build_decoding_table();
+
+	if (input_length % 4 != 0)
+		return NULL;
+
+	*output_length = input_length / 4 * 3;
+	if (data[input_length - 1] == '=')
+		(*output_length)--;
+	if (data[input_length - 2] == '=')
+		(*output_length)--;
+
+	char           *decoded_data = malloc(*output_length);
+	if (decoded_data == NULL)
+		return NULL;
+
+	for (i = 0, j = 0; i < input_length;) {
+
+		uint32_t        sextet_a = data[i] == '=' ? 0 & i++ : decoding_table[data[i++]];
+		uint32_t        sextet_b = data[i] == '=' ? 0 & i++ : decoding_table[data[i++]];
+		uint32_t        sextet_c = data[i] == '=' ? 0 & i++ : decoding_table[data[i++]];
+		uint32_t        sextet_d = data[i] == '=' ? 0 & i++ : decoding_table[data[i++]];
+
+		uint32_t        triple = (sextet_a << 3 * 6)
+			+ (sextet_b << 2 * 6)
+			+ (sextet_c << 1 * 6)
+			+ (sextet_d << 0 * 6);
+
+		if (j < *output_length)
+			decoded_data[j++] = (triple >> 2 * 8) & 0xFF;
+		if (j < *output_length)
+			decoded_data[j++] = (triple >> 1 * 8) & 0xFF;
+		if (j < *output_length)
+			decoded_data[j++] = (triple >> 0 * 8) & 0xFF;
+	}
+	return decoded_data;
+}
+
+void
+base64_cleanup()
+{
+	free(decoding_table);
+}
+
 int
 main(int argc, char **argv)
 {
-	char           *buf, *tmpbuf, *login, *challenge, *crypt_pass, *real_domain,
-				   *prog_name, *service, *service_type, *ptr;
+	char           *buf, *tmpbuf, *login, *challenge, *response, *crypt_pass, *ptr,
+				   *real_domain, *prog_name, *service, *service_type, *auth_data;
 	char            user[AUTH_SIZE], domain[AUTH_SIZE], Email[MAX_BUFF];
-	int             count, offset;
+	int             count, offset, cram_md5 = 0;
+	size_t          cram_md5_len, out_len;
 	uid_t           uid;
 	gid_t           gid;
 	struct passwd  *pw;
@@ -168,7 +247,7 @@ main(int argc, char **argv)
 	}
 	tmpbuf[count++] = 0;
 
-	service_type = tmpbuf + count; /* type (login or pass) */
+	service_type = tmpbuf + count; /* type (login, pass or cram-md5) */
 	for (;tmpbuf[count] != '\n' && count < offset;count++);
 	if (count == offset || (count + 1) == offset)
 	{
@@ -176,19 +255,48 @@ main(int argc, char **argv)
 		return(2);
 	}
 	tmpbuf[count++] = 0;
+	if (!strncmp(service_type, "cram-md5", 9))
+		cram_md5 = 1;
 
-	login = tmpbuf + count; /*- username */
-	for (;tmpbuf[count] != '\n' && count < offset;count++);
+	login = tmpbuf + count; /*- username or challenge */
+	for (cram_md5_len = 0;tmpbuf[count] != '\n' && count < offset;count++, cram_md5_len++);
 	if (count == offset || (count + 1) == offset)
 	{
 		fprintf(stderr, "%s: auth data too short\n", prog_name);
 		return(2);
 	}
 	tmpbuf[count++] = 0;
+	if (cram_md5) {
+		if (!(ptr = b64_decode((unsigned char *) login, cram_md5_len, &out_len)))
+		{
+			fprintf(stderr, "b64_decode: %s\n", strerror(errno));
+			pipe_exec(argv, buf, offset);
+			return(1);
+		}
+		challenge = ptr;
+	} else
+		challenge = 0;
 
-	challenge = tmpbuf + count; /*- challenge (plain text) */
-	for (;tmpbuf[count] != '\n' && count < offset;count++);
+	auth_data = tmpbuf + count; /*- (plain text or cram-md5 response) */
+	for (cram_md5_len = 0;tmpbuf[count] != '\n' && count < offset;count++, cram_md5_len++);
 	tmpbuf[count++] = 0;
+	if (cram_md5) {
+		if (!(ptr = b64_decode((unsigned char *) auth_data, cram_md5_len, &out_len)))
+		{
+			fprintf(stderr, "b64_decode: %s\n", strerror(errno));
+			pipe_exec(argv, buf, offset);
+			return(1);
+		}
+		for (login = ptr;*ptr && !isspace(*ptr);ptr++);
+		*ptr = 0;
+		response = ptr + 1;
+	} else
+		response = 0;
+	if (!*auth_data) {
+		auth_data = tmpbuf + count; /* in case of auth login, auth plain */
+		for (;tmpbuf[count] != '\n' && count < offset;count++);
+		tmpbuf[count++] = 0;
+	}
 	if (!strncmp(service_type, "pass", 5))
 	{
 		fprintf(stderr, "%s: Password Change not supported\n", prog_name);
@@ -322,11 +430,16 @@ main(int argc, char **argv)
 	crypt_pass = pw->pw_passwd;
 	if ((ptr = getenv("DEBUG_LOGIN")) && *ptr > '0')
 	{
-		fprintf(stderr, "%s: service[%s] type [%s] login [%s] challenge [%s] pw_passwd [%s]\n", 
-			prog_name, service, service_type, login, challenge, crypt_pass);
+		if (cram_md5)
+			fprintf(stderr, "service[%s] type [%s] login [%s] challenge [%s] response [%s]\n", 
+				service, service_type, login, challenge, response);
+		else
+			fprintf(stderr, "service[%s] type [%s] login [%s] auth [%s] pw_passwd [%s]\n", 
+				service, service_type, login, auth_data, crypt_pass);
 	}
 	if (pw_comp((unsigned char *) login, (unsigned char *) crypt_pass,
-		(unsigned char *) challenge, 0))
+		(unsigned char *) (cram_md5 ? challenge : 0),
+		(unsigned char *) (cram_md5 ? response : auth_data)))
 	{
 		if (argc == 3)
 		{
