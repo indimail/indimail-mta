@@ -1,5 +1,9 @@
 /*
  * $Log: mgmtpassfuncs.c,v $
+ * Revision 2.21  2011-10-25 20:48:21+05:30  Cprogrammer
+ * added status argument to mgmtgetpass() function
+ * plain text password to be passed with response argument of pw_comp()
+ *
  * Revision 2.20  2011-07-29 09:26:13+05:30  Cprogrammer
  * fixed gcc 4.6 warnings
  *
@@ -64,7 +68,7 @@
 #include "indimail.h"
 
 #ifndef lint
-static char     sccsid[] = "$Id: mgmtpassfuncs.c,v 2.20 2011-07-29 09:26:13+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: mgmtpassfuncs.c,v 2.21 2011-10-25 20:48:21+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef CLUSTERED_SITE
@@ -90,7 +94,7 @@ getpassword(user)
 	if (isDisabled(user))
 		pwdptr = (char *) 0;
 	else
-		pwdptr = mgmtgetpass(user);
+		pwdptr = mgmtgetpass(user, 0);
 	for (count = 0; count < LOGIN_MAX_ATTEMPTS; count++)
 	{
 		snprintf(temp, sizeof(temp), "(current %s) Password: ", user);
@@ -102,7 +106,7 @@ getpassword(user)
 		}
 		if (passwd && *passwd && *pwdptr)
 		{
-			if (!pw_comp(0, (unsigned char *) pwdptr, (unsigned char *) passwd, 0))
+			if (!pw_comp(0, (unsigned char *) pwdptr, 0, (unsigned char *) passwd))
 				return (0);
 		}
 		updateLoginFailed(user);
@@ -337,7 +341,7 @@ setpassword(user)
 	int             i1, i2, plen;
 	time_t          lastupdate;
 
-	pwdptr = mgmtgetpass(user);
+	pwdptr = mgmtgetpass(user, 0);
 	for (i1 = 0; i1 < LOGIN_MAX_ATTEMPTS; i1++)
 	{
 		passwd = (char *) getpass("Old password: ");
@@ -348,7 +352,7 @@ setpassword(user)
 		}
 		if (passwd && *passwd && *pwdptr)
 		{
-			if (!pw_comp(0, (unsigned char *) pwdptr, (unsigned char *) passwd, 0))
+			if (!pw_comp(0, (unsigned char *) pwdptr, 0, (unsigned char *) passwd))
 				break;
 		}
 		(void) updateLoginFailed(user);
@@ -381,7 +385,7 @@ setpassword(user)
 			passwd = (char *) getpass("New password: ");
 			if (passwd_policy(passwd))
 				continue;
-			if (!pw_comp(0, (unsigned char *) pwdptr, (unsigned char *) passwd, 0))
+			if (!pw_comp(0, (unsigned char *) pwdptr, 0, (unsigned char *) passwd))
 			{
 				fprintf(stderr, "Your passwd cannot be same as the previous one\n");
 				continue;
@@ -441,7 +445,7 @@ setpassword(user)
 }
 
 char           *
-mgmtgetpass(char *username)
+mgmtgetpass(char *username, int *status)
 {
 	char            SqlBuf[SQL_BUF_SIZE];
 	static char     _user[MAX_BUFF], mysql_pass[MAX_BUFF];
@@ -460,8 +464,8 @@ mgmtgetpass(char *username)
 		fprintf(stderr, "Unable to open central db\n");
 		return ((char *) 0);
 	}
-	snprintf(SqlBuf, SQL_BUF_SIZE, "select high_priority pass,status from mgmtaccess where user=\"%s\"", 
-		username);
+	snprintf(SqlBuf, SQL_BUF_SIZE, 
+		"select high_priority pass,status from mgmtaccess where user=\"%s\"", username);
 	if (mysql_query(&mysql[0], SqlBuf))
 	{
 		if (mysql_errno(&mysql[0]) == ER_NO_SUCH_TABLE)
@@ -487,7 +491,8 @@ mgmtgetpass(char *username)
 	if ((row = mysql_fetch_row(res)))
 	{
 		snprintf(mysql_pass, MAX_BUFF, "%s", row[0]);
-		atoi(row[1]);
+		if (status)
+			*status = atoi(row[1]);
 	}
 	mysql_free_result(res);
 	snprintf(SqlBuf, SQL_BUF_SIZE, "update low_priority mgmtaccess set lastaccess=%ld where user=\"%s\"", 
