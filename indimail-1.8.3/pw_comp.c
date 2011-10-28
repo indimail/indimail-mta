@@ -1,5 +1,8 @@
 /*
  * $Log: pw_comp.c,v $
+ * Revision 2.11  2011-10-28 17:58:38+05:30  Cprogrammer
+ * added AUTH CRAM-SHA1, CRAM-RIPEMD, DIGEST-MD5
+ *
  * Revision 2.10  2011-10-25 20:49:23+05:30  Cprogrammer
  * plain text password to be passed with response argument of pw_comp()
  *
@@ -39,10 +42,19 @@
 #include <unistd.h>
 
 #ifndef	lint
-static char     sccsid[] = "$Id: pw_comp.c,v 2.10 2011-10-25 20:49:23+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: pw_comp.c,v 2.11 2011-10-28 17:58:38+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 static char     hextab[] = "0123456789abcdef";
+
+/*- defined in qmail-smtpd.c, duplicated since source are not shared */
+
+#define AUTH_LOGIN       1
+#define AUTH_PLAIN       2
+#define AUTH_CRAM_MD5    3
+#define AUTH_CRAM_SHA1   4
+#define AUTH_CRAM_RIPEMD 5
+#define AUTH_DIGEST_MD5  6
 
 int
 pw_comp(unsigned char *testlogin, unsigned char *password, unsigned char *challenge,
@@ -57,7 +69,7 @@ pw_comp(unsigned char *testlogin, unsigned char *password, unsigned char *challe
 	{
 		if (!(crypt_pass = in_crypt((char *) response, (char *) password)))
 		{
-			printf("454-%s (#4.3.0)\r\n", strerror(errno));
+			printf("454-CRYPT: %s (#4.3.0)\r\n", strerror(errno));
 			fflush(stdout);
 			_exit (111);
 		}
@@ -69,7 +81,7 @@ pw_comp(unsigned char *testlogin, unsigned char *password, unsigned char *challe
 			mkpasswd3((char *) password, Crypted, MAX_BUFF);
 			if (!(crypt_pass = in_crypt((char *) response, (char *) password)))
 			{
-				printf("454-%s (#4.3.0)\r\n", strerror(errno));
+				printf("454-CRYPT: %s (#4.3.0)\r\n", strerror(errno));
 				fflush(stdout);
 				_exit (111);
 			}
@@ -78,7 +90,7 @@ pw_comp(unsigned char *testlogin, unsigned char *password, unsigned char *challe
 		}
 		return (i);
 	}
-	if ((!auth_method && !getenv("DISABLE_CRAM_MD5")) || auth_method == 3) {
+	if ((!auth_method && !getenv("DISABLE_CRAM_MD5")) || auth_method == AUTH_CRAM_MD5) {
 		hmac_md5(challenge, (int) strlen((const char *) challenge), password,
 			(int) strlen((const char *) password), digest);
 		digascii[32] = 0;
@@ -89,7 +101,7 @@ pw_comp(unsigned char *testlogin, unsigned char *password, unsigned char *challe
 		if (!(i = strcmp((const char *) digascii, (const char *) response)))
 			return (i);
 	}
-	if ((!auth_method && !getenv("DISABLE_CRAM_SHA1")) || auth_method == 4) {
+	if ((!auth_method && !getenv("DISABLE_CRAM_SHA1")) || auth_method == AUTH_CRAM_SHA1) {
 		hmac_sha1(challenge, (int) strlen((const char *) challenge), password,
 			(int) strlen((const char *) password), digest);
 		digascii[40] = 0;
@@ -100,7 +112,7 @@ pw_comp(unsigned char *testlogin, unsigned char *password, unsigned char *challe
 		if (!(i = strcmp((const char *) digascii, (const char *) response)))
 			return (i);
 	}
-	if ((!auth_method && !getenv("DISABLE_CRAM_RIPEMD")) || auth_method == 5) {
+	if ((!auth_method && !getenv("DISABLE_CRAM_RIPEMD")) || auth_method == AUTH_CRAM_RIPEMD) {
 		hmac_ripemd(challenge, (int) strlen((const char *) challenge), password,
 			(int) strlen((const char *) password), digest);
 		digascii[40] = 0;
@@ -111,9 +123,14 @@ pw_comp(unsigned char *testlogin, unsigned char *password, unsigned char *challe
 		if (!(i = strcmp((const char *) digascii, (const char *) response)))
 			return (i);
 	}
-	if ((!auth_method && !getenv("DISABLE_DIGEST_MD5")) || auth_method == 6) {
-		fprintf(stderr, "doing method 6 %d\n", __LINE__);
-		if (!(i = do_digest_md5(response, testlogin, challenge, password)))
+	if ((!auth_method && !getenv("DISABLE_DIGEST_MD5")) || auth_method == AUTH_DIGEST_MD5) {
+		if ((i = digest_md5((char *) response, testlogin, challenge, password)) == -1)
+		{
+			printf("454-DIGEST-MD5: %s (#4.3.0)\r\n", strerror(errno));
+			fflush(stdout);
+			_exit (111);
+		} else
+		if (!i)
 			return (i);
 	}
 	return (1);

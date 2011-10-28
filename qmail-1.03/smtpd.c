@@ -1,5 +1,8 @@
 /*
  * $Log: smtpd.c,v $
+ * Revision 1.157  2011-10-28 17:58:09+05:30  Cprogrammer
+ * added AUTH CRAM-SHA1, CRAM-RIPEMD, DIGEST-MD5
+ *
  * Revision 1.156  2011-10-25 21:16:20+05:30  Cprogrammer
  * option to disable LOGIN, PLAIN, CRAM-MD5 using env variables
  *
@@ -604,7 +607,10 @@ ssize_t         safewrite(int, char *, int);
 ssize_t         saferead(int, char *, int);
 int             auth_login(char *);
 int             auth_plain(char *);
-int             auth_cram();
+int             auth_cram_md5();
+int             auth_cram_sha1();
+int             auth_cram_ripemd();
+int             auth_digest_md5();
 int             err_noauth();
 int             addrrelay();
 void            smtp_greet(char *);
@@ -615,7 +621,7 @@ int             wildmat_internal(char *, char *);
 int             ssl_rfd = -1, ssl_wfd = -1;	/*- SSL_get_Xfd() are broken */
 char           *servercert, *clientca, *clientcrl;
 #endif
-char           *revision = "$Revision: 1.156 $";
+char           *revision = "$Revision: 1.157 $";
 char           *protocol = "SMTP";
 stralloc        proto = { 0 };
 static stralloc Revision = { 0 };
@@ -814,7 +820,10 @@ struct authcmd
 {
 	{"login", auth_login},
 	{"plain", auth_plain},
-	{"cram-md5", auth_cram},
+	{"cram-md5", auth_cram_md5},
+	{"cram-sha1", auth_cram_sha1},
+	{"cram-ripemd", auth_cram_ripemd},
+	{"digest-md5", auth_digest_md5},
 	{0, err_noauth}
 };
 
@@ -1235,6 +1244,15 @@ log_trans(char *arg1, char *arg2, char *arg3, int len, char *arg4, int notify)
 					case 3:
 						logerr(": AUTH CRAM-MD5");
 						break;
+					case 4:
+						logerr(": AUTH CRAM-SHA1");
+						break;
+					case 5:
+						logerr(": AUTH CRAM-RIPEMD");
+						break;
+					case 6:
+						logerr(": AUTH DIGEST-MD5");
+						break;
 					default:
 						logerr(": AUTH unknown");
 						break;
@@ -1314,6 +1332,15 @@ err_queue(char *arg1, char *arg2, char *arg3, int len, char *arg4, char *qqx,
 					break;
 				case 3:
 					logerr(": AUTH CRAM-MD5");
+					break;
+				case 4:
+					logerr(": AUTH CRAM-SHA1");
+					break;
+				case 5:
+					logerr(": AUTH CRAM-RIPEMD");
+					break;
+				case 6:
+					logerr(": AUTH DIGEST-MD5");
 					break;
 				default:
 					logerr(": AUTH unknown");
@@ -1749,6 +1776,15 @@ log_rules(char *arg1, char *arg2, char *arg3, int arg4)
 			break;
 		case 3:
 			logerr("> AUTH CRAM-MD5 <");
+			break;
+		case 4:
+			logerr("> AUTH CRAM-SHA1 <");
+			break;
+		case 5:
+			logerr("> AUTH CRAM-RIPEMD <");
+			break;
+		case 6:
+			logerr("> AUTH DIGEST-MD5 <");
 			break;
 		default:
 			logerr("> AUTH unknown <");
@@ -3179,18 +3215,24 @@ smtp_ehlo(char *arg)
 	out("\r\n");
 	if (hostname && *hostname && childargs && *childargs)
 	{
-		char *no_auth_login, *no_auth_plain, *no_cram_md5;
+		char *no_auth_login, *no_auth_plain, *no_cram_md5,
+			 *no_cram_sha1, *no_cram_ripemd, *no_digest_md5;
 
 		no_auth_login = env_get("DISABLE_AUTH_LOGIN");
 		no_auth_plain = env_get("DISABLE_AUTH_PLAIN");
 		no_cram_md5 = env_get("DISABLE_CRAM_MD5");
+		no_cram_sha1= env_get("DISABLE_CRAM_SHA1");
+		no_cram_ripemd= env_get("DISABLE_CRAM_RIPEMD");
+		no_digest_md5= env_get("DISABLE_DIGEST_MD5");
 
-		if (!no_auth_login && !no_auth_plain && !no_cram_md5)
+		if (!no_auth_login && !no_auth_plain && !no_cram_md5 && !no_cram_sha1
+			&& !no_cram_ripemd && !no_digest_md5)
 		{
-			out("250-AUTH LOGIN PLAIN CRAM-MD5\r\n");
-			out("250-AUTH=LOGIN PLAIN CRAM-MD5\r\n");
+			out("250-AUTH LOGIN PLAIN CRAM-MD5 CRAM-SHA1 CRAM-RIPEMD DIGEST-MD5\r\n");
+			out("250-AUTH=LOGIN PLAIN CRAM-MD5 CRAM-SHA1 CRAM-RIPEMD DIGEST-MD5\r\n");
 		} else 
-		if (!no_auth_login || !no_auth_plain || !no_cram_md5)
+		if (!no_auth_login || !no_auth_plain || !no_cram_md5 || !no_cram_sha1 ||
+			!no_cram_ripemd)
 		{
 			int flag = 0;
 
@@ -3216,6 +3258,21 @@ smtp_ehlo(char *arg)
 			{
 				out(flag++ == 0 ? "250-AUTH=" : " ");
 				out("CRAM-MD5");
+			}
+			if (!no_cram_sha1)
+			{
+				out(flag++ == 0 ? "250-AUTH=" : " ");
+				out("CRAM-SHA1");
+			}
+			if (!no_cram_ripemd)
+			{
+				out(flag++ == 0 ? "250-AUTH=" : " ");
+				out("CRAM-RIPEMD");
+			}
+			if (!no_digest_md5)
+			{
+				out(flag++ == 0 ? "250-AUTH=" : " ");
+				out("DIGEST_MD5");
 			}
 			out("\r\n");
 		}
@@ -4953,12 +5010,22 @@ authgetl(void)
 	return (authin.len);
 }
 
+#define AUTH_LOGIN       1
+#define AUTH_PLAIN       2
+#define AUTH_CRAM_MD5    3
+#define AUTH_CRAM_SHA1   4
+#define AUTH_CRAM_RIPEMD 5
+#define AUTH_DIGEST_MD5  6
+
+int             po[2] = {-1, -1};
+stralloc        authmethod = {0};
+
 int
-authenticate(void)
+authenticate(int method)
 {
-	int             child;
-	int             wstat;
+	int             child, wstat, i, n;
 	int             pi[2];
+	char            respbuf[1024];
 
 	if (!stralloc_0(&user))
 		die_nomem();
@@ -4968,39 +5035,84 @@ authenticate(void)
 		die_nomem();
 	if (pipe(pi) == -1)
 		return err_pipe();
+	if (pipe(po) == -1)
+		return err_pipe();
 	switch (child = fork())
 	{
 	case -1:
 		return err_fork();
 	case 0:
 		close(pi[1]);
+		close(po[0]);
 		if (pi[0] != 3)
 		{
-			dup2(pi[0], 3);
+			if (dup2(pi[0], 3) == -1)
+				return err_write();
 			close(pi[0]);
+		}
+		if (po[1] != 6)
+		{
+			if (dup2(po[1], 6) == -1)
+				return err_write();
+			close(po[1]);
 		}
 		sig_pipedefault();
 		execvp(*childargs, childargs);
 		_exit(1);
 	}
 	close(pi[0]);
-	substdio_fdbuf(&ssup, write, pi[1], upbuf, sizeof upbuf);
+	close(po[1]);
+	substdio_fdbuf(&ssup, safewrite, pi[1], upbuf, sizeof upbuf);
 	if (substdio_put(&ssup, user.s, user.len) == -1)
 		return err_write();
 	if (substdio_put(&ssup, pass.s, pass.len) == -1)
 		return err_write();
 	if (substdio_put(&ssup, resp.s, resp.len) == -1)
 		return err_write();
+	strnum[0] = method;
+	strnum[1] = 0;
+	if (!stralloc_copyb(&authmethod, strnum, 2))
+		die_nomem();
+	if (substdio_put(&ssup, authmethod.s, authmethod.len) == -1)
+		return err_write();
 	if (substdio_flush(&ssup) == -1)
 		return err_write();
 	close(pi[1]);
 	byte_zero(pass.s, pass.len);
 	byte_zero(upbuf, sizeof upbuf);
+	if (method == AUTH_DIGEST_MD5) {
+		if ((n = saferead(po[0], respbuf, 33)) == -1)
+			die_read();
+		respbuf[n] = 0;
+		close(po[0]);
+	}
 	if (wait_pid(&wstat, child) == -1)
 		return err_child();
 	if (wait_crashed(wstat))
 		return err_child();
-	return (wait_exitcode(wstat));
+	if ((i = wait_exitcode(wstat)))
+		return (i);
+	if (method == AUTH_DIGEST_MD5) {
+		if (!stralloc_copys(&slop, "rspauth="))
+			die_nomem();
+		if (!stralloc_catb(&slop, respbuf, n))
+			die_nomem();
+		slop.s[slop.len] = 0;
+		if (b64encode(&slop, &resp) < 0)
+			die_nomem();
+		resp.s[resp.len]=0;
+		out("334 ");
+		out(resp.s);
+		out("\r\n");
+		flush();
+		/* digest-md5 requires a special okay response ... */
+		if ((n = saferead(0, respbuf, 512)) == -1)
+			die_read();
+		if (n)
+			respbuf[n] = 0;
+  		return 0;
+	} else
+		return (i);
 }
 
 int
@@ -5033,7 +5145,7 @@ auth_login(char *arg)
 		die_nomem();
 	if (!user.len || !pass.len)
 		return err_input();
-	r = authenticate();
+	r = authenticate(AUTH_LOGIN);
 	if (!r || r == 3)
 		authd = 1;
 	return (r);
@@ -5069,14 +5181,14 @@ auth_plain(char *arg)
 			die_nomem();
 	if (!user.len || !pass.len)
 		return err_input();
-	r = authenticate();
+	r = authenticate(AUTH_PLAIN);
 	if (!r || r == 3)
 		authd = 2;
 	return (r);
 }
 
 int
-auth_cram()
+auth_cram(int method)
 {
 	int             i, r;
 	char           *s;
@@ -5123,9 +5235,223 @@ auth_cram()
 		die_nomem();
 	if (!user.len || !resp.len)
 		return err_input();
-	r = authenticate();
+	r = authenticate(method);
 	if (!r || r == 3)
-		authd = 3;
+		authd = method;
+	return (r);
+}
+
+int
+auth_cram_md5()
+{
+	return (auth_cram(AUTH_CRAM_MD5));
+}
+
+int
+auth_cram_sha1()
+{
+	return (auth_cram(AUTH_CRAM_SHA1));
+}
+
+int
+auth_cram_ripemd()
+{
+	return (auth_cram(AUTH_CRAM_RIPEMD));
+}
+
+/* parse digest response */
+unsigned int
+scan_response(stralloc *dst, stralloc *src, const char *search)
+{
+	char           *x = src->s;
+	int             i, len;
+	unsigned int    slen;
+
+	slen = str_len((char *) search);
+	if (!stralloc_copys(dst,""))
+		die_nomem();
+	for (i=0; src->len>i+slen; i+=str_chr(x+i, ',')+1) {
+		char *s=x+i;
+		if (case_diffb(s, slen, (char *) search) == 0) {
+			s += slen; /* skip name */
+			if (*s++ != '=')
+				return 0; /* has to be here! */
+			if (*s == '"') { /* var="value" */
+				s++;
+				len = str_chr(s, '"');
+				if (!len)
+					return 0;
+				if (!stralloc_catb(dst, s, len))
+					die_nomem();
+			} else { /* var=value */
+				len = str_chr(s, ',');
+				if (!len)
+					str_len(s); /* should be the end */
+				if (!stralloc_catb(dst, s, len))
+					die_nomem();
+			}
+			return dst->len;
+		}
+	}
+	return 0;
+}
+
+/*
+ * RFC 2831
+ *
+ * sets all 3 variables: user\0pass\0resp\0
+ */
+char            hextab[]="0123456789abcdef";
+
+int
+auth_digest_md5()
+{
+	unsigned char   unique[FMT_ULONG + FMT_ULONG + 3];
+	unsigned char   digest[20], encrypted[41];
+	unsigned char  *s, *x=encrypted;
+	int             i, r, qop = 1, len;
+	stralloc        tmp = {0}, nonce = {0};
+
+	s = unique;
+	s += fmt_uint((char *) s, getpid());
+	s += fmt_str((char *) s, ".");
+	s += fmt_ulong((char *) s, (unsigned long) now());
+	s += fmt_str((char *) s, "@");
+	*s++ = 0;
+	len = str_len((char *) unique);
+	hmac_sha1(unique, len, unique + 3, len - 3, digest); /* should be enough :) */
+	for (i = 0; i < 20; i++) {
+		*x = hextab[digest[i]/16]; ++x;
+		*x = hextab[digest[i]%16]; ++x;
+	}
+	*x=0;
+	if (!stralloc_copys(&tmp, (char *) encrypted))
+		die_nomem();
+	if (b64encode(&tmp, &nonce) != 0)
+		die_nomem();
+	if (!stralloc_cats(&slop, "realm=\""))
+		die_nomem();
+	if (!stralloc_cats(&slop, hostname))
+		die_nomem();
+	if (!stralloc_cats(&slop, "\",nonce=\""))
+		die_nomem();
+	if (!stralloc_cat(&slop, &nonce))
+		die_nomem();
+	if (!stralloc_cats(&slop, "\",qop=\"auth\""))
+		die_nomem();
+	if (!stralloc_cats(&slop, ",algorithm=md5-sess"))
+		die_nomem();
+	if (!stralloc_0(&slop))
+		die_nomem();
+	if (b64encode(&slop, &tmp) != 0)
+		die_nomem();
+	out("334 ");
+	if (substdio_put(&ssout, tmp.s, tmp.len) == -1)
+		return err_write();
+	out("\r\n");
+	flush();
+
+	/* get digest-response */
+	if (authgetl() < 0)
+		return -1;
+	if ((r = b64decode((const unsigned char *) authin.s, authin.len, &slop)) == 1)
+		return err_input();
+	if (!stralloc_0(&slop))
+		die_nomem();
+
+	/* scan slop for all required fields, fill resp for later auth.  */
+	if (scan_response(&user, &slop, "username") == 0)
+		return (err_input());
+	if (scan_response(&tmp, &slop, "digest-uri") == 0)
+		return (err_input());
+	if (!stralloc_cats(&resp, "digest-uri="))
+		die_nomem();
+	if (!stralloc_cat(&resp, &tmp))
+		die_nomem();
+
+	/* check nc field */
+	if (scan_response(&tmp, &slop, "nc") == 0)
+		return (err_input());
+	if (tmp.len != 8)
+		return (err_input());
+	if (case_diffb("00000001", 8, tmp.s) != 0)
+		return (err_input());
+	if (!stralloc_cats(&resp, "\nnc=")) die_nomem();
+	if (!stralloc_cat(&resp, &tmp)) die_nomem();
+
+	/* check nonce */
+	if (scan_response(&tmp, &slop, "nonce") == 0)
+		return (err_input());
+	if (tmp.len != nonce.len)
+		return (err_input());
+	if (case_diffb(nonce.s, tmp.len, tmp.s) != 0)
+		return (err_input());
+	if (!stralloc_cats(&resp, "\nnonce=")) die_nomem();
+	if (!stralloc_cat(&resp, &tmp)) die_nomem();
+
+	/* check cnonce */
+	if (scan_response(&tmp, &slop,  "cnonce") == 0)
+		return (err_input());
+	if (!stralloc_cats(&resp, "\ncnonce=")) die_nomem();
+	if (!stralloc_cat(&resp, &tmp)) die_nomem();
+
+	/* check qop */
+	if (scan_response(&tmp, &slop, "qop") == 0)
+		return (err_input());
+	switch (tmp.len) {
+		case 4:
+			qop=1;
+			if (case_diffb("auth", 4, tmp.s) != 0)
+				return (err_input());
+			break;
+		case 8:
+			qop=2;
+			if (case_diffb("auth-int", 8, tmp.s) != 0)
+				return (err_input());
+			break;
+		case 9:
+			qop=3;
+			if (case_diffb("auth-conf", 9, tmp.s) != 0)
+				return (err_input());
+			break;
+		default:
+			return (err_input());
+	}
+	if (!stralloc_cats(&resp, "\nqop="))
+		die_nomem();
+	if (!stralloc_cat(&resp, &tmp))
+		die_nomem();
+
+	/* xxx: todo / check realm against control/realms or so ?! */
+	if (scan_response(&tmp, &slop, "realm") == 0)
+		return (err_input());
+	if (!stralloc_cats(&resp, "\nrealm="))
+		die_nomem();
+	if (!stralloc_cat(&resp, &tmp))
+		die_nomem();
+
+	/* check response */
+	if (scan_response(&pass, &slop, "response") == 0)
+		return (err_input());
+	if (pass.len != 32)
+		return (err_input());
+
+	/* user=username
+	 * pass=response (md5 hash = 32)
+	 * resp=authfile (with all required vars for the checkpassword utility)
+	 *      -> nc,qop,realm,nonce,cnonce,digesturi
+	 *
+	 *             a1 = md5(user:realm:pass) : nonce : cnonce
+	 * qop=auth:   a2 = 'AUTHENTICATE' : digesturi
+	 * qop=auth-*: a2 = 'AUTHENTICATE' : digesturi : '00000000000000000000000000000000'
+	 * resp = md5(a1) + nonce + nc + conce + qop + md5(a2)
+	 */
+
+	if (!user.len || !pass.len || !resp.len)
+		return (err_input());
+	r = authenticate(AUTH_DIGEST_MD5);
+	if (!r || r == 3)
+		authd = 6;
 	return (r);
 }
 
@@ -6213,7 +6539,7 @@ addrrelay() /*- Rejection of relay probes. */
 void
 getversion_smtpd_c()
 {
-	static char    *x = "$Id: smtpd.c,v 1.156 2011-10-25 21:16:20+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: smtpd.c,v 1.157 2011-10-28 17:58:09+05:30 Cprogrammer Exp mbhangui $";
 
 #ifdef INDIMAIL
 	if (x)

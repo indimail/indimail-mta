@@ -1,5 +1,8 @@
 /*
  * $Log: indimail.h,v $
+ * Revision 2.203  2011-10-28 17:50:12+05:30  Cprogrammer
+ * added digest_md5() function
+ *
  * Revision 2.202  2011-10-28 14:15:27+05:30  Cprogrammer
  * added auth_method argument to pw_comp
  *
@@ -922,7 +925,7 @@
 #define INDIMAILH_H
 
 #ifndef	lint
-static char     sccsidh[] = "$Id: indimail.h,v 2.202 2011-10-28 14:15:27+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsidh[] = "$Id: indimail.h,v 2.203 2011-10-28 17:50:12+05:30 Cprogrammer Stab mbhangui $";
 #endif
 
 #ifdef HAVE_CONFIG_H
@@ -1604,6 +1607,7 @@ int             pw_comp(unsigned char *, unsigned char *, unsigned char *, unsig
 void            hmac_md5(u8 *, int, u8 *, int, u8 *);
 void            hmac_sha1(u8 *, size_t, u8 *, size_t, u8 *);
 void            hmac_ripemd(u8 *, size_t, u8 *, size_t, u8 *);
+int             digest_md5(char *, unsigned char *, unsigned char *, unsigned char *);
 char           *in_crypt(const char *, const char *);
 struct passwd  *copyPwdStruct(struct passwd *);
 int             passwd_policy(char *);

@@ -1,11 +1,11 @@
 /*
  * $Log: digest_md5.c,v $
- * Revision 2.1  2011-10-28 14:13:37+05:30  Cprogrammer
- * digest_md5 routine
+ * Revision 2.1  2011-10-28 17:59:47+05:30  Cprogrammer
+ * digest_md5() function
  *
  */
-#include <stdio.h>
 #include <string.h>
+#include <unistd.h>
 #include "md5.h"
 
 #define DIGEST_MAX              1024*11 /* max size in bytes of a /var/qmail/authdir/stamp file */
@@ -14,11 +14,11 @@
 static char     hextab[] = "0123456789abcdef";
 
 #ifndef	lint
-static char     sccsid[] = "$Id: digest_md5.c,v 2.1 2011-10-28 14:13:37+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: digest_md5.c,v 2.1 2011-10-28 17:59:47+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 int
-do_digest_md5(char *greeting, unsigned char *r_user, unsigned char *r_pass,
+digest_md5(char *greeting, unsigned char *r_user, unsigned char *r_pass,
 	unsigned char *l_pass)
 {
 	unsigned char   digest[20], encrypted[41];
@@ -40,7 +40,6 @@ do_digest_md5(char *greeting, unsigned char *r_user, unsigned char *r_pass,
 	 * resp = hex(a1) + nonce + nc + conce + qop + hex(a2)
 	 */
 
-	fprintf(stderr, "greeting [%s] [%s][%s][%s]%d\n",greeting,r_user, r_pass, l_pass,__LINE__);
 	len = strlen(greeting);
 	for (j = 0; greeting[j]; j++)	/* terminate strings */
 		if (greeting[j] == '\n')
@@ -62,9 +61,8 @@ do_digest_md5(char *greeting, unsigned char *r_user, unsigned char *r_pass,
 		if (!strncmp(x, "digest-uri", 10))
 			digesturi = x + 11;
 	}
-	if (!nc || !qop || !realm || !nonce || !cnonce || !digesturi)
-		goto next;
-
+	if (!nc || !qop || !realm || !nonce || !cnonce || !digesturi || !r_pass)
+		return (-1);
 	MD5Init(&md5);
 	MD5Update(&md5, r_user, strlen((char *) r_user));
 	MD5Update(&md5, (unsigned char *) ":", 1);
@@ -130,9 +128,7 @@ do_digest_md5(char *greeting, unsigned char *r_user, unsigned char *r_pass,
 	}
 	*e = 0;
 
-	fprintf(stderr, "[%s][%s] %d\n", r_pass, encrypted, __LINE__);
 	if (!strcmp((char *) r_pass, (char *) encrypted)) {
-	fprintf(stderr, "%s %d\n", __FILE__, __LINE__);
 		MD5Init(&md5);
 		MD5Update(&md5, (unsigned char *) ":", 1);
 		MD5Update(&md5, (unsigned char *) digesturi, strlen(digesturi));
@@ -168,27 +164,11 @@ do_digest_md5(char *greeting, unsigned char *r_user, unsigned char *r_pass,
 			++e;
 		}
 		*e = 0;
-
-#if 0
-		fd = open_trunc(r_greet);
-		if (fd == -1)
-			goto next;
-		len = write(fd, encrypted, 32);
-		if (len != 32)
-			goto next;
-		close(fd);
-
-		e = greeting;
-		e += fmt_str(e, "DIGEST_RESPONSE=");
-		e += fmt_str(e, r_greet);
-		*e = 0;
-		if (putenv(greeting) == -1)
-			die_env();
-#endif
+		if ((len = write(6, encrypted, 32)) == -1)
+			return (-1);
 		return (0);
 	}	/* if correct password */
-next:
-	return -1;
+	return (1);
 }
 
 #include <stdio.h>
