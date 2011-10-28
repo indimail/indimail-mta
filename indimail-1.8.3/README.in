@@ -220,7 +220,8 @@ Some of the features available in this package
     shared objected defined by PLUGINDIR environment. Multiple plugins can be loaded. For
     details see man qmail-queue
 22. Message Submission Port (port 587) RFC 2476
-23. Integrated authenticated SMTP with Indimail (PLAIN, LOGIN, CRAM-MD5, pop-bef-smtp)
+23. Integrated authenticated SMTP with Indimail (PLAIN, LOGIN, CRAM-MD5, CRAM-SHA1,
+    CRAM-RIPEMD, DIGEST-MD5, pop-bef-smtp)
 24. duplicate eliminator using 822header
 25. qmail-remote has configurable TCP timeout table (max_tolerance, min_backoff periods can be
     configured in smtproutes)
@@ -276,8 +277,7 @@ Some of the features available in this package
 60. SURBL Support (SURBL Blacklist). URL parsing code borrowed from surbl.c
     Pieter Droogendijk <pieter@binky.org.uk> http://binky.org.uk
 
-
-60. Updated man pages.
+61. Updated man pages.
 
 You can take a detailed look at the feature list at
 
