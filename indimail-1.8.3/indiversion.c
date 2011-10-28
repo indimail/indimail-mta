@@ -1,5 +1,8 @@
 /*
  * $Log: indiversion.c,v $
+ * Revision 2.132  2011-10-27 14:31:46+05:30  Cprogrammer
+ * added hmac_sha1(), hmac_ripemd() functions
+ *
  * Revision 2.131  2011-08-05 18:12:47+05:30  Cprogrammer
  * ismaildup is a bin program
  *
@@ -513,7 +516,7 @@
 #endif
 
 #ifndef	lint
-static char     sccsid[] = "$Id: indiversion.c,v 2.131 2011-08-05 18:12:47+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: indiversion.c,v 2.132 2011-10-27 14:31:46+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 void            getversion_indimail_settings_c();
@@ -794,6 +797,11 @@ void            getversion_mysql_query_c();
 void            getversion_unsetenv_c();
 void            getversion_post_handle_c();
 void            getversion_ismaildup_c();
+void            getversion_hmac_sha1_c();
+void            getversion_hmac_ripemd_c();
+void            getversion_sha1_c();
+void            getversion_ripemd_c();
+
 void            getversion();
 
 #ifdef MAIN
@@ -1221,6 +1229,10 @@ getversion(char *id)
 	getversion_in_crypt_c();
 	getversion_mysql_query_c();
 	getversion_unsetenv_c();
+	getversion_hmac_sha1_c();
+	getversion_hmac_ripemd_c();
+	getversion_sha1_c();
+	getversion_ripemd_c();
 	if(id)
 		printf("%s\nIndiMail Version %s\n", id, VERSION);
 	else
