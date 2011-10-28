@@ -1,5 +1,8 @@
 /*
  * $Log: indiversion.c,v $
+ * Revision 2.133  2011-10-28 14:19:21+05:30  Cprogrammer
+ * added digest_md5()
+ *
  * Revision 2.132  2011-10-27 14:31:46+05:30  Cprogrammer
  * added hmac_sha1(), hmac_ripemd() functions
  *
@@ -516,7 +519,7 @@
 #endif
 
 #ifndef	lint
-static char     sccsid[] = "$Id: indiversion.c,v 2.132 2011-10-27 14:31:46+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: indiversion.c,v 2.133 2011-10-28 14:19:21+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 void            getversion_indimail_settings_c();
@@ -801,6 +804,7 @@ void            getversion_hmac_sha1_c();
 void            getversion_hmac_ripemd_c();
 void            getversion_sha1_c();
 void            getversion_ripemd_c();
+void            getversion_digest_md5_c();
 
 void            getversion();
 
@@ -1233,6 +1237,7 @@ getversion(char *id)
 	getversion_hmac_ripemd_c();
 	getversion_sha1_c();
 	getversion_ripemd_c();
+	getversion_digest_md5_c();
 	if(id)
 		printf("%s\nIndiMail Version %s\n", id, VERSION);
 	else
