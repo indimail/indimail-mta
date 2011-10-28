@@ -1,5 +1,8 @@
 /*
  * $Log: vsetpass.c,v $
+ * Revision 2.4  2011-10-28 14:16:47+05:30  Cprogrammer
+ * added auth_method argument to pw_comp
+ *
  * Revision 2.3  2011-10-25 20:50:01+05:30  Cprogrammer
  * plain text password to be passed with response argument of pw_comp()
  *
@@ -18,7 +21,7 @@
 #include <errno.h>
 
 #ifndef lint
-static char     sccsid[] = "$Id: vsetpass.c,v 2.3 2011-10-25 20:50:01+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: vsetpass.c,v 2.4 2011-10-28 14:16:47+05:30 Cprogrammer Exp mbhangui $";
 #endif
 #ifdef AUTH_SIZE
 #undef AUTH_SIZE
@@ -167,7 +170,7 @@ main(int argc, char **argv)
 	}
 	if (pw_comp((unsigned char *) login, (unsigned char *) crypt_pass,
 		(unsigned char *) (*response ? old_pass : 0),
-		(unsigned char *) (*response ? response : old_pass)))
+		(unsigned char *) (*response ? response : old_pass), 0))
 	{
 		pipe_exec(argv, tmpbuf, offset);
 		printf("454 %s (#4.3.0)\r\n", strerror(errno));

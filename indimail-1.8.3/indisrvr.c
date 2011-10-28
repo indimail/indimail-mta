@@ -1,5 +1,8 @@
 /*
  * $Log: indisrvr.c,v $
+ * Revision 2.46  2011-10-28 14:15:49+05:30  Cprogrammer
+ * added auth_method argument to pw_comp
+ *
  * Revision 2.45  2011-10-25 20:47:41+05:30  Cprogrammer
  * mgmtgetpass() function has a new status argument
  *
@@ -165,7 +168,7 @@
 #include "indimail.h"
 
 #ifndef lint
-static char     sccsid[] = "$Id: indisrvr.c,v 2.45 2011-10-25 20:47:41+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: indisrvr.c,v 2.46 2011-10-28 14:15:49+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef CLUSTERED_SITE
@@ -790,7 +793,8 @@ Login_User(char *username, char *pass)
 	}
 	if (!(admin_pass = mgmtgetpass(username, 0)))
 		return(1);
-	if (*admin_pass && !pw_comp(0, (unsigned char *) admin_pass, 0, (unsigned char *) pass))
+	if (*admin_pass && !pw_comp(0, (unsigned char *) admin_pass, 0,
+		(unsigned char *) pass, 0))
 	{
 		printf("OK\n");
 		fflush(stdout);

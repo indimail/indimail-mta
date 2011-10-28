@@ -1,5 +1,8 @@
 /*
  * $Log: vchkpass.c,v $
+ * Revision 2.37  2011-10-28 14:16:41+05:30  Cprogrammer
+ * added auth_method argument to pw_comp
+ *
  * Revision 2.36  2011-10-25 20:49:56+05:30  Cprogrammer
  * plain text password to be passed with response argument of pw_comp()
  *
@@ -126,7 +129,7 @@
 #include <errno.h>
 
 #ifndef lint
-static char     sccsid[] = "$Id: vchkpass.c,v 2.36 2011-10-25 20:49:56+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: vchkpass.c,v 2.37 2011-10-28 14:16:41+05:30 Cprogrammer Exp mbhangui $";
 #endif
 #ifdef AUTH_SIZE
 #undef AUTH_SIZE
@@ -140,7 +143,7 @@ main(int argc, char **argv)
 {
 	char           *tmpbuf, *login, *response, *challenge, *crypt_pass, *ptr, *cptr;
 	char            user[AUTH_SIZE], domain[AUTH_SIZE], buf[MAX_BUFF];
-	int             count, offset, norelay = 0, status;
+	int             count, offset, norelay = 0, status, auth_method;
 	struct passwd  *pw;
 #ifdef ENABLE_DOMAIN_LIMITS
 	time_t          curtime;
@@ -184,12 +187,21 @@ main(int argc, char **argv)
 	for (;tmpbuf[count] && count < offset;count++);
 	if (count == offset || (count + 1) == offset)
 		_exit(2);
+
 	count++;
 	challenge = tmpbuf + count; /*- challenge (or plain text) */
 	for (;tmpbuf[count] && count < offset;count++);
 	if (count == offset || (count + 1) == offset)
 		_exit(2);
-	response = tmpbuf + count + 1; /*- cram-md5 response */
+
+	count++;
+	response = tmpbuf + count; /*- cram-md5 response */
+	for (;tmpbuf[count] && count < offset;count++);
+	if (count == offset || (count + 1) == offset)
+		auth_method = 0;
+	else
+		auth_method = tmpbuf[count + 1];
+
 	for (cptr = user, ptr = login;*ptr && *ptr != '@';*cptr++ = *ptr++);
 	*cptr = 0;
 	if (*ptr)
@@ -264,12 +276,12 @@ main(int argc, char **argv)
 	crypt_pass = pw->pw_passwd;
 	if (getenv("DEBUG"))
 	{
-		fprintf(stderr, "%s: login [%s] challenge [%s] response [%s] pw_passwd [%s]\n", 
-			argv[0], login, challenge, response, crypt_pass);
+		fprintf(stderr, "%s: login [%s] challenge [%s] response [%s] pw_passwd [%s] method[%d]\n", 
+			argv[0], login, challenge, response, crypt_pass, auth_method);
 	}
 	if (pw_comp((unsigned char *) login, (unsigned char *) crypt_pass,
 		(unsigned char *) (*response ? challenge : 0),
-		(unsigned char *) (*response ? response : challenge)))
+		(unsigned char *) (*response ? response : challenge), auth_method))
 	{
 		pipe_exec(argv, tmpbuf, offset);
 		printf("454-%s (#4.3.0)\r\n", strerror(errno));

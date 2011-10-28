@@ -1,5 +1,11 @@
 /*
  * $Log: indimail.h,v $
+ * Revision 2.202  2011-10-28 14:15:27+05:30  Cprogrammer
+ * added auth_method argument to pw_comp
+ *
+ * Revision 2.201  2011-10-27 14:31:28+05:30  Cprogrammer
+ * added hmac_sha1(), hmac_ripemd()
+ *
  * Revision 2.200  2011-10-25 20:17:02+05:30  Cprogrammer
  * added status argument to mgmtgetpass()
  *
@@ -916,7 +922,7 @@
 #define INDIMAILH_H
 
 #ifndef	lint
-static char     sccsidh[] = "$Id: indimail.h,v 2.200 2011-10-25 20:17:02+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsidh[] = "$Id: indimail.h,v 2.202 2011-10-28 14:15:27+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef HAVE_CONFIG_H
@@ -932,6 +938,7 @@ static char     sccsidh[] = "$Id: indimail.h,v 2.200 2011-10-25 20:17:02+05:30 C
 #ifdef HAVE_STDARG_H
 #include <stdarg.h>
 #endif
+#include "typesx.h"
 
 #ifndef __P
 #ifdef __STDC__
@@ -1593,8 +1600,10 @@ int             user_over_quota(char *, char *, int);
 mdir_t          count_dir(char *, mdir_t *);
 char           *maildir_to_domain(char *);
 int             FifoCreate(char *);
-int             pw_comp(unsigned char *, unsigned char *, unsigned char *, unsigned char *);
-void            hmac_md5(unsigned char *, int, unsigned char *, int, unsigned char *);
+int             pw_comp(unsigned char *, unsigned char *, unsigned char *, unsigned char *, int);
+void            hmac_md5(u8 *, int, u8 *, int, u8 *);
+void            hmac_sha1(u8 *, size_t, u8 *, size_t, u8 *);
+void            hmac_ripemd(u8 *, size_t, u8 *, size_t, u8 *);
 char           *in_crypt(const char *, const char *);
 struct passwd  *copyPwdStruct(struct passwd *);
 int             passwd_policy(char *);

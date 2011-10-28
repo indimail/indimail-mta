@@ -1,5 +1,8 @@
 /*
  * $Log: mgmtpassfuncs.c,v $
+ * Revision 2.22  2011-10-28 14:16:04+05:30  Cprogrammer
+ * added auth_method argument to pw_comp
+ *
  * Revision 2.21  2011-10-25 20:48:21+05:30  Cprogrammer
  * added status argument to mgmtgetpass() function
  * plain text password to be passed with response argument of pw_comp()
@@ -68,7 +71,7 @@
 #include "indimail.h"
 
 #ifndef lint
-static char     sccsid[] = "$Id: mgmtpassfuncs.c,v 2.21 2011-10-25 20:48:21+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: mgmtpassfuncs.c,v 2.22 2011-10-28 14:16:04+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef CLUSTERED_SITE
@@ -106,7 +109,7 @@ getpassword(user)
 		}
 		if (passwd && *passwd && *pwdptr)
 		{
-			if (!pw_comp(0, (unsigned char *) pwdptr, 0, (unsigned char *) passwd))
+			if (!pw_comp(0, (unsigned char *) pwdptr, 0, (unsigned char *) passwd, 0))
 				return (0);
 		}
 		updateLoginFailed(user);
@@ -352,7 +355,7 @@ setpassword(user)
 		}
 		if (passwd && *passwd && *pwdptr)
 		{
-			if (!pw_comp(0, (unsigned char *) pwdptr, 0, (unsigned char *) passwd))
+			if (!pw_comp(0, (unsigned char *) pwdptr, 0, (unsigned char *) passwd, 0))
 				break;
 		}
 		(void) updateLoginFailed(user);
@@ -385,7 +388,7 @@ setpassword(user)
 			passwd = (char *) getpass("New password: ");
 			if (passwd_policy(passwd))
 				continue;
-			if (!pw_comp(0, (unsigned char *) pwdptr, 0, (unsigned char *) passwd))
+			if (!pw_comp(0, (unsigned char *) pwdptr, 0, (unsigned char *) passwd, 0))
 			{
 				fprintf(stderr, "Your passwd cannot be same as the previous one\n");
 				continue;

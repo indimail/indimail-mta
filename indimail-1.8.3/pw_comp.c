@@ -46,14 +46,12 @@ static char     hextab[] = "0123456789abcdef";
 
 int
 pw_comp(unsigned char *testlogin, unsigned char *password, unsigned char *challenge,
-	unsigned char *response)
+	unsigned char *response, int auth_method)
 {
-	unsigned char   digest[16];
-	unsigned char   digascii[33];
+	unsigned char   digest[21], digascii[41];
 	char            Crypted[MAX_BUFF];
-	char           *crypt_pass;
-	unsigned char   h;
-	int             j, len;
+	char           *crypt_pass, *e;
+	int             i, len;
 
 	if (!challenge || (challenge && !*challenge))
 	{
@@ -64,9 +62,9 @@ pw_comp(unsigned char *testlogin, unsigned char *password, unsigned char *challe
 			_exit (111);
 		}
 		len = strlen(crypt_pass);
-		j = strncmp((const char *) crypt_pass, (const char *) password, (size_t) len + 1);
+		i = strncmp((const char *) crypt_pass, (const char *) password, (size_t) len + 1);
 		/*- non CRAM-MD5 aware app */
-		if (j && getenv("TRIVIAL_PASSWORDS"))
+		if (i && getenv("TRIVIAL_PASSWORDS"))
 		{
 			mkpasswd3((char *) password, Crypted, MAX_BUFF);
 			if (!(crypt_pass = in_crypt((char *) response, (char *) password)))
@@ -76,21 +74,49 @@ pw_comp(unsigned char *testlogin, unsigned char *password, unsigned char *challe
 				_exit (111);
 			}
 			len = strlen(crypt_pass);
-			j = strncmp((const char *) crypt_pass, (const char *) password, (size_t) len + 1);
+			i = strncmp((const char *) crypt_pass, (const char *) password, (size_t) len + 1);
 		}
-		return (j);
+		return (i);
 	}
-	hmac_md5(challenge, (int) strlen((const char *) challenge), password,
-		(int) strlen((const char *) password), digest);
-	digascii[32] = 0;
-	for (j = 0; j < 16; j++)
-	{
-		h = digest[j] >> 4;
-		digascii[2 * j] = hextab[h];
-		h = digest[j] & 0x0f;
-		digascii[(2 * j) + 1] = hextab[h];
+	if ((!auth_method && !getenv("DISABLE_CRAM_MD5")) || auth_method == 3) {
+		hmac_md5(challenge, (int) strlen((const char *) challenge), password,
+			(int) strlen((const char *) password), digest);
+		digascii[32] = 0;
+		for (i=0, e = (char *) digascii; i<16; i++) {
+			*e = hextab[digest[i]/16]; ++e;
+			*e = hextab[digest[i]%16]; ++e;
+		} *e=0;
+		if (!(i = strcmp((const char *) digascii, (const char *) response)))
+			return (i);
 	}
-	return (strcmp((const char *) digascii, (const char *) response));
+	if ((!auth_method && !getenv("DISABLE_CRAM_SHA1")) || auth_method == 4) {
+		hmac_sha1(challenge, (int) strlen((const char *) challenge), password,
+			(int) strlen((const char *) password), digest);
+		digascii[40] = 0;
+		for (i=0, e = (char *) digascii; i<20; i++) {
+			*e = hextab[digest[i]/16]; ++e;
+			*e = hextab[digest[i]%16]; ++e;
+		} *e = 0;
+		if (!(i = strcmp((const char *) digascii, (const char *) response)))
+			return (i);
+	}
+	if ((!auth_method && !getenv("DISABLE_CRAM_RIPEMD")) || auth_method == 5) {
+		hmac_ripemd(challenge, (int) strlen((const char *) challenge), password,
+			(int) strlen((const char *) password), digest);
+		digascii[40] = 0;
+		for (i=0, e = (char *) digascii; i<20; i++) {
+			*e = hextab[digest[i]/16]; ++e;
+			*e = hextab[digest[i]%16]; ++e;
+		} *e = 0;
+		if (!(i = strcmp((const char *) digascii, (const char *) response)))
+			return (i);
+	}
+	if ((!auth_method && !getenv("DISABLE_DIGEST_MD5")) || auth_method == 6) {
+		fprintf(stderr, "doing method 6 %d\n", __LINE__);
+		if (!(i = do_digest_md5(response, testlogin, challenge, password)))
+			return (i);
+	}
+	return (1);
 }
 
 void

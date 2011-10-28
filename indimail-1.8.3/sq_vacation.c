@@ -1,5 +1,8 @@
 /*
  * $Log: sq_vacation.c,v $
+ * Revision 2.10  2011-10-28 14:16:29+05:30  Cprogrammer
+ * added auth_method argument to pw_comp
+ *
  * Revision 2.9  2011-10-25 20:49:38+05:30  Cprogrammer
  * plain text password to be passed with response argument of pw_comp()
  *
@@ -94,12 +97,12 @@
 #define ERR_UNEXPECTED  126     /*- other unexpected error */
 
 #ifndef lint
-static char     sccsid[] = "$Id: sq_vacation.c,v 2.9 2011-10-25 20:49:38+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: sq_vacation.c,v 2.10 2011-10-28 14:16:29+05:30 Cprogrammer Exp mbhangui $";
 #endif
 #ifndef INDIMAILH_H
 int             vauthOpen_user(char *);
 char           *vget_assign(char *, char *, int, uid_t *, gid_t *);
-int             pw_comp(unsigned char *, unsigned char *, unsigned char *, unsigned char *);
+int             pw_comp(unsigned char *, unsigned char *, unsigned char *, unsigned char *, int);
 void            vclose();
 void            getEnvConfigStr(char **, char *, char *);
 struct passwd  *vauth_getpw(char *, char *);
@@ -381,7 +384,7 @@ main(int argc, char **argv)
 	}
 	crypt_pass = pw->pw_passwd;
 	if (pw_comp((unsigned char *) email, (unsigned char *) crypt_pass,
-		0, (unsigned char *) passbuf))
+		0, (unsigned char *) passbuf, 0))
 		die(ERR_BADPASS, "Password does not match");
 	if (!strncmp(action, "list", 4))
 	{

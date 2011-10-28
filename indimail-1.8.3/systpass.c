@@ -1,5 +1,8 @@
 /*
  * $Log: systpass.c,v $
+ * Revision 2.11  2011-10-28 14:16:33+05:30  Cprogrammer
+ * added auth_method argument to pw_comp
+ *
  * Revision 2.10  2011-10-25 20:49:47+05:30  Cprogrammer
  * plain text password to be passed with response argument of pw_comp()
  *
@@ -44,7 +47,7 @@
 #endif
 
 #ifndef lint
-static char     sccsid[] = "$Id: systpass.c,v 2.10 2011-10-25 20:49:47+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: systpass.c,v 2.11 2011-10-28 14:16:33+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 int             authlen = 512;
@@ -137,7 +140,7 @@ main(int argc, char **argv)
 #endif
 	if (pw_comp((unsigned char *) login, (unsigned char *) stored,
 		(unsigned char *) (*response ? challenge : 0),
-		(unsigned char *) (*response ? response : challenge)))
+		(unsigned char *) (*response ? response : challenge), 0))
 	{
 		pipe_exec(argv, tmpbuf, offset);
 		printf("454-%s (#4.3.0)\r\n", strerror(errno));

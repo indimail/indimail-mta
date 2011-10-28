@@ -1,5 +1,8 @@
 /*
  * $Log: authindi.c,v $
+ * Revision 2.20  2011-10-28 14:14:45+05:30  Cprogrammer
+ * send the auth method
+ *
  * Revision 2.19  2011-10-25 20:46:47+05:30  Cprogrammer
  * added cram-md5 authentication
  *
@@ -70,7 +73,7 @@
 #include <stdint.h>
 
 #ifndef lint
-static char     sccsid[] = "$Id: authindi.c,v 2.19 2011-10-25 20:46:47+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: authindi.c,v 2.20 2011-10-28 14:14:45+05:30 Cprogrammer Exp mbhangui $";
 #endif
 #ifdef AUTH_SIZE
 #undef AUTH_SIZE
@@ -439,7 +442,7 @@ main(int argc, char **argv)
 	}
 	if (pw_comp((unsigned char *) login, (unsigned char *) crypt_pass,
 		(unsigned char *) (cram_md5 ? challenge : 0),
-		(unsigned char *) (cram_md5 ? response : auth_data)))
+		(unsigned char *) (cram_md5 ? response : auth_data), cram_md5 ? 3 : 0))
 	{
 		if (argc == 3)
 		{
