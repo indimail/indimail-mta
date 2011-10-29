@@ -8,9 +8,6 @@
 #include <unistd.h>
 #include "md5.h"
 
-#define DIGEST_MAX              1024*11 /* max size in bytes of a /var/qmail/authdir/stamp file */
-#define BUFSIZE                 4096    /* size for buffers */
-
 static char     hextab[] = "0123456789abcdef";
 
 #ifndef	lint
@@ -105,7 +102,7 @@ digest_md5(char *greeting, unsigned char *r_user, unsigned char *r_pass,
 	*e = 0;					/* ea2 = ready */
 
 	/*
-	 * resp = hex(a1) + nonce + nc + conce + qop + hex(a2) 
+	 * resp = hex(a1) + nonce + nc + cnonce + qop + hex(a2) 
 	 */
 	MD5Init(&md5);
 	MD5Update(&md5, ea1, 32);
