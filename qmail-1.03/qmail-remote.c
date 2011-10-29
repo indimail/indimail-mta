@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-remote.c,v $
+ * Revision 1.75  2011-10-29 20:42:53+05:30  Cprogrammer
+ * added CRAM-RIPEMD, CRAM-SHA1, DIGEST-MD5 auth methods
+ *
  * Revision 1.74  2011-07-08 13:52:25+05:30  Cprogrammer
  * ipv6, ipv4 code organized
  *
@@ -281,7 +284,8 @@
 #include "tls.h"
 #include "ssl_timeoutio.h"
 #include <openssl/x509v3.h>
-#include "hmac_md5.h"
+#include "auth_cram.h"
+#include "auth_digest_md5.h"
 
 #define EHLO 1
 #endif
@@ -1422,18 +1426,184 @@ mailfrom_xtext(int use_size)
 	substdio_flush(&smtpto);
 }
 
-void 
-auth_cram(int use_size)
-{
-	int             j, code;
-	unsigned char   digest[16];
-	unsigned char   digascii[33];
-	static char     hextab[] = "0123456789abcdef";
+static char     hextab[] = "0123456789abcdef";
+stralloc        realm = {0}, nonce = {0}, digesturi = {0};
 
-	substdio_puts(&smtpto, "AUTH CRAM-MD5\r\n");
+/* parse digest response */
+unsigned int
+scan_response(stralloc *dst, stralloc *src, const char *search)
+{
+	char           *x = src->s;
+	int             i, len;
+	unsigned int    slen;
+
+	slen = str_len((char *) search);
+	if (!stralloc_copys(dst,""))
+		temp_nomem();
+	for (i=0; src->len>i+slen; i+=str_chr(x+i, ',')+1) {
+		char *s=x+i;
+		if (case_diffb(s, slen, (char *) search) == 0) {
+			s += slen; /* skip name */
+			if (*s++ != '=')
+				return 0; /* has to be here! */
+			if (*s == '"') { /* var="value" */
+				s++;
+				len = str_chr(s, '"');
+				if (!len)
+					return 0;
+				if (!stralloc_catb(dst, s, len))
+					temp_nomem();
+			} else { /* var=value */
+				len = str_chr(s, ',');
+				if (!len)
+					str_len(s); /* should be the end */
+				if (!stralloc_catb(dst, s, len))
+					temp_nomem();
+			}
+			return dst->len;
+		}
+	}
+	return 0;
+}
+
+void
+auth_digest_md5(int use_size)
+{
+	unsigned char   unique[FMT_ULONG + FMT_ULONG + 3];
+	unsigned char   digest[20], cnonce[41];
+	unsigned char  *s, *x=cnonce;
+	unsigned long   i, len = 0;
+	int             code;
+	char            z[IPFMT];
+
+	substdio_puts(&smtpto, "AUTH DIGEST-MD5\r\n");
 	substdio_flush(&smtpto);
 	if ((code = smtpcode()) != 334)
-		quit("ZConnected to ", " but authentication was rejected (AUTH CRAM-MD5).", code, -1);
+		quit("ZConnected to ", " but authentication was rejected (AUTH DIGEST-MD5).", code, -1);
+	if ((i = str_chr(smtptext.s + 5, '\n')) > 0) /* Challenge */
+	{
+		slop.len = 0;
+		if (!stralloc_copyb(&slop, smtptext.s + 4, smtptext.len - 5))
+			temp_nomem();
+		if (b64decode((unsigned char *) slop.s, slop.len, &chal))
+			quit("ZConnected to ", " but unable to base64decode challenge.", -1, -1);
+	} else
+		quit("ZConnected to ", " but got no challenge.", -1, -1);
+
+	if (scan_response(&nonce, &chal, "nonce") == 0)
+		quit("ZConnected to ", " but got no response= in challenge.", -1, -1);
+	s = unique;
+	s += (i = fmt_uint((char *) s, getpid()));
+	len += i;
+	s += (i = fmt_str((char *) s, "."));
+	len += i;
+	s += (i = fmt_ulong((char *) s, (unsigned long) now()));
+	len += i;
+	s += (i = fmt_str((char *) s, "@"));
+	len += i;
+	*s++ = 0;
+	hmac_sha1(unique, len, unique + 3, len - 3, digest);
+	for (i = 0; i < 20; i++) {
+		*x = hextab[digest[i]/16]; ++x;
+		*x = hextab[digest[i]%16]; ++x;
+	}
+	*x=0;
+	if (!stralloc_copyb(&slop, "cnonce=\"", 8))
+		temp_nomem();
+	if (!stralloc_catb(&slop, (char *) cnonce, 32))
+		temp_nomem();
+	if (!stralloc_catb(&slop, "\",digest-uri=\"", 14))
+		temp_nomem();
+	if (!stralloc_copyb(&digesturi, "smtp/", 5))
+		temp_nomem();
+	switch (partner.af)
+	{
+#ifdef IPV6
+	case AF_INET6:
+		len = ip6_fmt(z, &partner.addr.ip6);
+		break;
+#endif
+	case AF_INET:
+		len = ip_fmt(z, &partner.addr.ip);
+		break;
+	default:
+		len = ip_fmt(z, &partner.addr.ip);
+		break;
+	}
+	if (!stralloc_catb(&digesturi, z, len))
+		temp_nomem();
+	if (!stralloc_cat(&slop, &digesturi))
+		temp_nomem();
+	if (!stralloc_catb(&slop, "\",nc=00000001,nonce=\"", 21))
+		temp_nomem();
+	if (!stralloc_cat(&slop, &nonce))
+		temp_nomem();
+	if (!stralloc_catb(&slop, "\",qop=\"auth\",realm=\"", 20))
+		temp_nomem();
+	if (control_readfile(&realm, "realm", 1) == -1)
+		temp_control();
+	realm.len--;
+	if (!stralloc_cat(&slop, &realm))
+		temp_nomem();
+	if (!stralloc_catb(&slop, "\",response=", 11))
+		temp_nomem();
+	if (!(s = (unsigned char *) comp_digest_md5(user.s, user.len, realm.s, realm.len,
+		pass.s, pass.len, 0, nonce.s, nonce.len, digesturi.s, digesturi.len,
+		(char *) cnonce, "00000001", "auth")))
+		quit("ZConnected to ", " but unable to generate response.", -1, -1);
+	if (!stralloc_cats(&slop, (char *) s))
+		temp_nomem();
+	if (!stralloc_catb(&slop, ",username=\"", 11))
+		temp_nomem();
+	if (!stralloc_cat(&slop, &user))
+		temp_nomem();
+	if (!stralloc_catb(&slop, "\"", 1))
+		temp_nomem();
+	if (b64encode(&slop, &auth))
+		quit("ZConnected to ", " but unable to base64encode username+digest.", -1, -1);
+	substdio_put(&smtpto, auth.s, auth.len);
+	substdio_puts(&smtpto, "\r\n");
+	substdio_flush(&smtpto);
+	if ((code = smtpcode()) != 334)
+		quit("ZConnected to ", " but authentication was rejected (username+digest)", code, -1);
+	substdio_puts(&smtpto, "\r\n");
+	substdio_flush(&smtpto);
+	if ((code = smtpcode()) != 235)
+		quit("ZConnected to ", " but authentication was rejected (username+digest)", code, -1);
+	mailfrom_xtext(use_size);
+}
+
+void 
+auth_cram(int type, int use_size)
+{
+	int             j, code, iter = 16;
+	unsigned char   digest[21], encrypted[41];
+	unsigned char  *e;
+
+	switch (type)
+	{
+	case 3:
+		iter = 16;
+		substdio_puts(&smtpto, "AUTH CRAM-MD5\r\n");
+		substdio_flush(&smtpto);
+		if ((code = smtpcode()) != 334)
+			quit("ZConnected to ", " but authentication was rejected (AUTH CRAM-MD5).", code, -1);
+		break;
+	case 4:
+		iter = 20;
+		substdio_puts(&smtpto, "AUTH CRAM-SHA1\r\n");
+		substdio_flush(&smtpto);
+		if ((code = smtpcode()) != 334)
+			quit("ZConnected to ", " but authentication was rejected (AUTH CRAM-SHA1).", code, -1);
+		break;
+	case 5:
+		iter = 20;
+		substdio_puts(&smtpto, "AUTH CRAM-RIPEMD\r\n");
+		substdio_flush(&smtpto);
+		if ((code = smtpcode()) != 334)
+			quit("ZConnected to ", " but authentication was rejected (AUTH CRAM-RIPEMD).", code, -1);
+		break;
+	}
 	if ((j = str_chr(smtptext.s + 5, '\n')) > 0) /* Challenge */
 	{
 		if (!stralloc_copys(&slop, ""))
@@ -1444,26 +1614,31 @@ auth_cram(int use_size)
 			quit("ZConnected to ", " but unable to base64decode challenge.", -1, -1);
 	} else
 		quit("ZConnected to ", " but got no challenge.", -1, -1);
-	hmac_md5((unsigned char *) chal.s, chal.len, (unsigned char *) pass.s, pass.len, digest);
-
-	for (j = 0; j < 16; j++) {	/* HEX => ASCII */
-		digascii[2 * j] = hextab[digest[j] >> 4];
-		digascii[2 * j + 1] = hextab[digest[j] & 0xf];
+	switch (type)
+	{
+	case 3:
+		hmac_md5((unsigned char *) chal.s, chal.len, (unsigned char *) pass.s, pass.len, digest);
+		break;
+	case 4:
+		hmac_sha1((unsigned char *) chal.s, chal.len, (unsigned char *) pass.s, pass.len, digest);
+		break;
+	case 5:
+		hmac_ripemd((unsigned char *) chal.s, chal.len, (unsigned char *) pass.s, pass.len, digest);
+		break;
 	}
-	digascii[32] = 0;
 
-	slop.len = 0;
-	if (!stralloc_copys(&slop, ""))
-		temp_nomem();
-	if (!stralloc_cat(&slop, &user))
+	for (j = 0, e = encrypted; j < iter; j++) {	/* HEX => ASCII */
+		*e = hextab[digest[j]/16]; ++e;
+		*e = hextab[digest[j]%16]; ++e;
+	} *e = 0;
+
+	if (!stralloc_copy(&slop, &user))
 		temp_nomem();	/* user-id */
-	if (!stralloc_cats(&slop, " "))
+	if (!stralloc_catb(&slop, " ", 1))
 		temp_nomem();
-	if (!stralloc_catb(&slop, (char *) digascii, 32))
+	if (!stralloc_cats(&slop, (char *) encrypted))
 		temp_nomem();	/* digest */
 
-	if (!stralloc_copys(&auth, ""))
-		temp_nomem();
 	if (b64encode(&slop, &auth))
 		quit("ZConnected to ", " but unable to base64encode username+digest.", -1, -1);
 	substdio_put(&smtpto, auth.s, auth.len);
@@ -1540,7 +1715,9 @@ auth_login(int use_size)
 void
 smtp_auth(char *type, int use_size)
 {
-	int             i = 0, j, login_supp = 0, plain_supp = 0, cram_supp = 0;
+	int             i = 0, j, login_supp = 0, plain_supp = 0, cram_md5_supp = 0,
+					cram_sha1_supp = 0, cram_rmd_supp = 0, digest_md5_supp = 0;
+	char           *ptr;
 
 	if (!type)
 	{
@@ -1548,12 +1725,24 @@ smtp_auth(char *type, int use_size)
 		return;
 	}
 	while ((i += str_chr(smtptext.s + i, '\n') + 1) && (i + 8 < smtptext.len)
-		&& str_diffn(smtptext.s + i + 4, "AUTH", 4));
+		&& str_diffn(smtptext.s + i + 4, "AUTH ", 5));
 
-	if ((j = str_chr(smtptext.s + i + 8, 'C')) > 0)	/* AUTH CRAM-MD5 */
+	for (ptr = smtptext.s + i + 4 + 5;*ptr != '\n' && ptr < smtptext.s + smtptext.len; ptr++)
 	{
-		if (case_starts(smtptext.s + i + 8 + j, "CRAM"))
-			cram_supp = 1;
+		if (*ptr == '-')
+		{
+			if (case_starts(ptr - 6, "DIGEST-MD5"))
+				digest_md5_supp = 1;
+			else
+			if (case_starts(ptr - 4, "CRAM-RIPEMD"))
+				cram_rmd_supp = 1;
+			else
+			if (case_starts(ptr - 4, "CRAM-SHA1"))
+				cram_sha1_supp = 1;
+			else
+			if (case_starts(ptr - 4, "CRAM-MD5"))
+				cram_md5_supp = 1;
+		}
 	}
 	if ((j = str_chr(smtptext.s + i + 8, 'L')) > 0)	/*- AUTH LOGIN */
 	{
@@ -1565,11 +1754,35 @@ smtp_auth(char *type, int use_size)
 		if (case_starts(smtptext.s + i + 8 + j, "PLAIN"))
 			plain_supp = 1;
 	}
+	if (!case_diffs(type, "DIGEST-MD5"))
+	{
+		if (digest_md5_supp)
+		{
+			auth_digest_md5(use_size);
+			return;
+		}
+	} else
+	if (!case_diffs(type, "CRAM-RIPEMD"))
+	{
+		if (cram_rmd_supp)
+		{
+			auth_cram(5, use_size);
+			return;
+		}
+	} else
+	if (!case_diffs(type, "CRAM-SHA1"))
+	{
+		if (cram_sha1_supp)
+		{
+			auth_cram(4, use_size);
+			return;
+		}
+	} else
 	if (!case_diffs(type, "CRAM-MD5"))
 	{
-		if (cram_supp)
+		if (cram_md5_supp)
 		{
-			auth_cram(use_size);
+			auth_cram(3, use_size);
 			return;
 		}
 	} else
@@ -1591,9 +1804,24 @@ smtp_auth(char *type, int use_size)
 	} else
 	if (!*type)
 	{
-		if (cram_supp)
+		if (digest_md5_supp)
 		{
-			auth_cram(use_size);
+			auth_digest_md5(use_size);
+			return;
+		}
+		if (cram_rmd_supp)
+		{
+			auth_cram(5, use_size);
+			return;
+		}
+		if (cram_sha1_supp)
+		{
+			auth_cram(4, use_size);
+			return;
+		}
+		if (cram_md5_supp)
+		{
+			auth_cram(3, use_size);
 			return;
 		}
 		if (login_supp)
@@ -2567,7 +2795,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_remote_c()
 {
-	static char    *x = "$Id: qmail-remote.c,v 1.74 2011-07-08 13:52:25+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: qmail-remote.c,v 1.75 2011-10-29 20:42:53+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
