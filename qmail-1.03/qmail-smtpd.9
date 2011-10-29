@@ -86,12 +86,13 @@ supports ESMTP, including the 8BITMIME, DATA, PIPELINING, SIZE, ETRN, ODMR and A
 includes a \'MAIL FROM:\' parameter parser and obeys \'Auth\' and \'Size\' advertisements.
 
 .B qmail-smtpd
-can accept LOGIN, PLAIN, and CRAM-MD5 AUTH types (See rfc-1321(5)).  It invokes
+can accept LOGIN, PLAIN, CRAM-MD5, CRAM-SHA1, CRAM-RIPEMD, DIGEST-MD5 AUTH types
+(See rfc-1321(5)).  It invokes
 .IR checkprogram ,
 which reads on file descriptor 3 the username, a 0 byte, the password
 or challenge derived from
 .IR hostname ,
-another 0 byte, a CRAM-MD5 response (if applicable to the AUTH type),
+another 0 byte, a CRAM-MD5/CRAM-SHA1/CRAM-RIPEMD/DIGEST-MD5 response (if applicable to the AUTH type),
 and a final 0 byte.
 .I checkprogram
 invokes
