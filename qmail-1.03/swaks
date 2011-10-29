@@ -553,6 +553,7 @@ sub do_smtp_auth_digest {
   my $p = shift; # auth password
   my $as = shift; # auth string
   my $r = '';    # will store smtp response
+  my $hostname = get_hostname();
 
   my $auth_string = "AUTH $as";
   do_smtp_gen($auth_string, '334', \$r, '', '',
@@ -566,7 +567,7 @@ sub do_smtp_auth_digest {
   $res->got_request($req);
   # XXX using link{server} here is probably a bug, but I don;t know what else
   # XXX to use yet on a non-inet-socket connection
-  $res->set('username' => $u, 'realm' => '',
+  $res->set('username' => $u, 'realm' => $hostname,
             'digest-uri' => "smtp/$G::link{server}");
   $res->add_digest(password => $p);
   my $d = $res->output();
