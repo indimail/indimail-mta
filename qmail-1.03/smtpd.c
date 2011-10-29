@@ -1,5 +1,8 @@
 /*
  * $Log: smtpd.c,v $
+ * Revision 1.158  2011-10-29 20:40:58+05:30  Cprogrammer
+ * compute len directly instead of using str_len()
+ *
  * Revision 1.157  2011-10-28 17:58:09+05:30  Cprogrammer
  * added AUTH CRAM-SHA1, CRAM-RIPEMD, DIGEST-MD5
  *
@@ -621,7 +624,7 @@ int             wildmat_internal(char *, char *);
 int             ssl_rfd = -1, ssl_wfd = -1;	/*- SSL_get_Xfd() are broken */
 char           *servercert, *clientca, *clientcrl;
 #endif
-char           *revision = "$Revision: 1.157 $";
+char           *revision = "$Revision: 1.158 $";
 char           *protocol = "SMTP";
 stralloc        proto = { 0 };
 static stralloc Revision = { 0 };
@@ -5309,16 +5312,19 @@ auth_digest_md5()
 	unsigned char   unique[FMT_ULONG + FMT_ULONG + 3];
 	unsigned char   digest[20], encrypted[41];
 	unsigned char  *s, *x=encrypted;
-	int             i, r, qop = 1, len;
+	int             i, r, qop = 1, len = 0;
 	stralloc        tmp = {0}, nonce = {0};
 
 	s = unique;
-	s += fmt_uint((char *) s, getpid());
-	s += fmt_str((char *) s, ".");
-	s += fmt_ulong((char *) s, (unsigned long) now());
-	s += fmt_str((char *) s, "@");
+	s += (i = fmt_uint((char *) s, getpid()));
+	len += i;
+	s += (i = fmt_str((char *) s, "."));
+	len += i;
+	s += (i = fmt_ulong((char *) s, (unsigned long) now()));
+	len += i;
+	s += (i = fmt_str((char *) s, "@"));
+	len += i;
 	*s++ = 0;
-	len = str_len((char *) unique);
 	hmac_sha1(unique, len, unique + 3, len - 3, digest); /* should be enough :) */
 	for (i = 0; i < 20; i++) {
 		*x = hextab[digest[i]/16]; ++x;
@@ -5340,8 +5346,6 @@ auth_digest_md5()
 	if (!stralloc_cats(&slop, "\",qop=\"auth\""))
 		die_nomem();
 	if (!stralloc_cats(&slop, ",algorithm=md5-sess"))
-		die_nomem();
-	if (!stralloc_0(&slop))
 		die_nomem();
 	if (b64encode(&slop, &tmp) != 0)
 		die_nomem();
@@ -6539,7 +6543,7 @@ addrrelay() /*- Rejection of relay probes. */
 void
 getversion_smtpd_c()
 {
-	static char    *x = "$Id: smtpd.c,v 1.157 2011-10-28 17:58:09+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: smtpd.c,v 1.158 2011-10-29 20:40:58+05:30 Cprogrammer Exp mbhangui $";
 
 #ifdef INDIMAIL
 	if (x)
