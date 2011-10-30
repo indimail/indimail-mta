@@ -1,5 +1,8 @@
 /*
  * $Log: authindi.c,v $
+ * Revision 2.21  2011-10-30 09:01:41+05:30  Cprogrammer
+ * free base64 decoded strings
+ *
  * Revision 2.20  2011-10-28 14:14:45+05:30  Cprogrammer
  * send the auth method
  *
@@ -73,7 +76,7 @@
 #include <stdint.h>
 
 #ifndef lint
-static char     sccsid[] = "$Id: authindi.c,v 2.20 2011-10-28 14:14:45+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: authindi.c,v 2.21 2011-10-30 09:01:41+05:30 Cprogrammer Exp mbhangui $";
 #endif
 #ifdef AUTH_SIZE
 #undef AUTH_SIZE
@@ -286,6 +289,8 @@ main(int argc, char **argv)
 	if (cram_md5) {
 		if (!(ptr = b64_decode((unsigned char *) auth_data, cram_md5_len, &out_len)))
 		{
+			if (challenge)
+				free (challenge);
 			fprintf(stderr, "b64_decode: %s\n", strerror(errno));
 			pipe_exec(argv, buf, offset);
 			return(1);
@@ -303,18 +308,36 @@ main(int argc, char **argv)
 	if (!strncmp(service_type, "pass", 5))
 	{
 		fprintf(stderr, "%s: Password Change not supported\n", prog_name);
+		if (cram_md5)
+		{
+			if (challenge)
+				free (challenge);
+			free (login);
+		}
 		pipe_exec(argv, buf, offset);
 		return(1);
 	}
 	if (parse_email(login, user, domain, MAX_BUFF))
 	{
 		fprintf(stderr, "%s: could not parse email [%s]\n", prog_name, login);
+		if (cram_md5)
+		{
+			if (challenge)
+				free (challenge);
+			free (login);
+		}
 		pipe_exec(argv, buf, offset);
 		return (1);
 	}
 	if (!vget_assign(domain, 0, 0, &uid, &gid)) 
 	{
 		fprintf(stderr, "%s: domain %s does not exist\n", prog_name, domain);
+		if (cram_md5)
+		{
+			if (challenge)
+				free (challenge);
+			free (login);
+		}
 		pipe_exec(argv, buf, offset);
 		return (1);
 	}
@@ -325,6 +348,12 @@ main(int argc, char **argv)
 	if ((count = is_distributed_domain(real_domain)) == -1)
 	{
 		fprintf(stderr, "%s: is_distributed_domain failed\n", real_domain);
+		if (cram_md5)
+		{
+			if (challenge)
+				free (challenge);
+			free (login);
+		}
 		return (1);
 	} else
 	if (count)
@@ -343,6 +372,12 @@ main(int argc, char **argv)
 		{
 			if (!userNotFound)
 				fprintf(stderr, "No mailstore for %s\n", Email);
+			if (cram_md5)
+			{
+				if (challenge)
+					free (challenge);
+				free (login);
+			}
 			pipe_exec(argv, buf, offset);
 			return(1);
 		}
@@ -353,6 +388,12 @@ main(int argc, char **argv)
 		if (!islocalif(mailstore))
 		{
 			fprintf(stderr, "%s not on local (mailstore %s)\n", Email, mailstore);
+			if (cram_md5)
+			{
+				if (challenge)
+					free (challenge);
+				free (login);
+			}
 			return(1);
 		}
 	}
@@ -366,6 +407,12 @@ main(int argc, char **argv)
 		{
 			if(!userNotFound)
 				fprintf(stderr, "%s: inquery: %s\n", prog_name, strerror(errno));
+			if (cram_md5)
+			{
+				if (challenge)
+					free (challenge);
+				free (login);
+			}
 			pipe_exec(argv, buf, offset);
 			return (1);
 		}
@@ -376,6 +423,12 @@ main(int argc, char **argv)
 	{
 		if(!userNotFound)
 			fprintf(stderr, "%s: inquery: %s\n", prog_name, strerror(errno));
+		if (cram_md5)
+		{
+			if (challenge)
+				free (challenge);
+			free (login);
+		}
 		pipe_exec(argv, buf, offset);
 		return (1);
 	}
@@ -385,6 +438,12 @@ main(int argc, char **argv)
 	{
 		if(!userNotFound)
 			fprintf(stderr, "%s: inquery: %s\n", prog_name, strerror(errno));
+		if (cram_md5)
+		{
+			if (challenge)
+				free (challenge);
+			free (login);
+		}
 		pipe_exec(argv, buf, offset);
 		close_connection();
 		return (1);
@@ -401,6 +460,12 @@ main(int argc, char **argv)
 			fprintf(stderr, "%s: webmail disabled for this account", prog_name);
 			if (write(2, "AUTHFAILURE\n", 12) == -1) ;
 			close_connection();
+			if (cram_md5)
+			{
+				if (challenge)
+					free (challenge);
+				free (login);
+			}
 			execv(*indiargs, argv);
 			fprintf(stderr, "execv %s: %s", *indiargs, strerror(errno));
 			return (1);
@@ -413,6 +478,12 @@ main(int argc, char **argv)
 			fprintf(stderr, "%s: pop3 disabled for this account", prog_name);
 			if (write(2, "AUTHFAILURE\n", 12) == -1) ;
 			close_connection();
+			if (cram_md5)
+			{
+				if (challenge)
+					free (challenge);
+				free (login);
+			}
 			execv(*indiargs, argv);
 			fprintf(stderr, "execv %s: %s", *indiargs, strerror(errno));
 			return (1);
@@ -425,6 +496,12 @@ main(int argc, char **argv)
 			fprintf(stderr, "%s: imap disabled for this account", prog_name);
 			if (write(2, "AUTHFAILURE\n", 12) == -1) ;
 			close_connection();
+			if (cram_md5)
+			{
+				if (challenge)
+					free (challenge);
+				free (login);
+			}
 			execv(*indiargs, argv);
 			fprintf(stderr, "execv %s: %s", *indiargs, strerror(errno));
 			return (1);
@@ -454,8 +531,19 @@ main(int argc, char **argv)
 			return (1);
 		}
 		close_connection();
+		if (cram_md5)
+		{
+			if (challenge)
+				free (challenge);
+			free (login);
+		}
 		pipe_exec(argv, buf, offset);
 		return (1);
+	}
+	if (cram_md5)
+	{
+		if (challenge)
+			free (challenge);
 	}
 #ifdef ENABLE_DOMAIN_LIMITS
 	if (getenv("DOMAIN_LIMITS"))
@@ -468,6 +556,8 @@ main(int argc, char **argv)
 			{
 				fprintf(stderr, "%s: unable to get domain limits for for %s\n", prog_name, real_domain);
 				close_connection();
+				if (cram_md5)
+					free (login);
 				pipe_exec(argv, buf, offset);
 				return (1);
 			}
@@ -479,6 +569,8 @@ main(int argc, char **argv)
 		{
 			fprintf(stderr, "%s: unable to get domain limits for for %s\n", prog_name, real_domain);
 			close_connection();
+			if (cram_md5)
+				free (login);
 			pipe_exec(argv, buf, offset);
 			return (1);
 		}
@@ -490,6 +582,8 @@ main(int argc, char **argv)
 			fprintf(stderr, "%s: Sorry, your domain has expired\n", prog_name);
 			if (write(2, "AUTHFAILURE\n", 12) == -1) ;
 			close_connection();
+			if (cram_md5)
+				free (login);
 			execv(*indiargs, indiargs);
 			return (1);
 		} else
@@ -498,11 +592,15 @@ main(int argc, char **argv)
 			fprintf(stderr, "%s: Sorry, your password has expired\n", prog_name);
 			if (write(2, "AUTHFAILURE\n", 12) == -1) ;
 			close_connection();
+			if (cram_md5)
+				free (login);
 			execv(*indiargs, indiargs);
 		} 
 	}
 #endif
 	exec_local(argv + argc - 2, login, real_domain, pw, service);
+	if (cram_md5)
+		free (login);
 	return(0);
 }
 
