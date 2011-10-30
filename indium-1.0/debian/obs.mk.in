@@ -12,6 +12,7 @@ version=@version@
 all: rules postrm postinst debian.tar.gz dummy.tar.gz  \
 	indium-Debian_5.0.dsc \
 	indium-Debian_6.0.dsc \
+	indium-xUbuntu_11.10.dsc \
 	indium-xUbuntu_11.04.dsc \
 	indium-xUbuntu_10.10.dsc \
 	indium-xUbuntu_10.04.dsc \
@@ -42,6 +43,8 @@ indium-Debian_5.0.dsc: indium-Debian_5.0.dsc.in
 	$(edit) $@.in > $@
 indium-Debian_6.0.dsc: indium-Debian_6.0.dsc.in
 	$(edit) $@.in > $@
+indium-xUbuntu_11.10.dsc: indium-xUbuntu_11.10.dsc.in
+	$(edit) $@.in > $@
 indium-xUbuntu_11.04.dsc: indium-xUbuntu_11.04.dsc.in
 	$(edit) $@.in > $@
 indium-xUbuntu_10.10.dsc: indium-xUbuntu_10.10.dsc.in
@@ -52,6 +55,9 @@ indium-xUbuntu_9.10.dsc: indium-xUbuntu_9.10.dsc.in
 	$(edit) $@.in > $@
 indium-xUbuntu_8.04.dsc: indium-xUbuntu_8.04.dsc.in
 	$(edit) $@.in > $@
+changelog:changelog.in
+	$(edit) $@.in > $@
+
 dummy.tar.gz: README
 	tar cf - README |gzip > $@
 debian.tar.gz: copyright rules control changelog postrm postinst compat
