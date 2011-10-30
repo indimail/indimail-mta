@@ -22,8 +22,9 @@ AC_CONFIG_MACRO_DIR([m4])
 AC_ISC_POSIX
 
 dnl Checks for libraries.
-AC_CHECK_LIB(ssl, EVP_MD_CTX_init, [AC_SUBST([LIB_SSL], ["-lssl -lcrypto"]) AC_DEFINE([HAVE_SSL], [1],[OpenSSL Library])],,-lssl -lcrypto)
+AC_CHECK_LIB(ssl, SSL_CTX_new,     [AC_SUBST([LIB_SSL], ["-lssl -lcrypto"]) AC_DEFINE([HAVE_SSL], [1],[OpenSSL Library])],,-lssl -lcrypto)
 AC_CHECK_LIB(crypt, crypt, [AC_SUBST([LIB_CRYPT], ["-lcrypt"]) AC_DEFINE([HAVE_CRYPT], [1],[crypt Library])],,)
+AC_CHECK_LIB(dl, dlsym)
 
 # Checks for typedefs, structures, and compiler characteristics.
 AC_C_CONST
