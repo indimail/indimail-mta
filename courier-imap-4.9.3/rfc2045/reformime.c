@@ -996,7 +996,7 @@ int rc=0;
 		case 's':
 			if (!optarg && argn < argc)
 				optarg=argv[argn++];
-			if (optarg && *optarg)	section=optarg;
+			if (optarg && *optarg)	section=strdup(optarg);
 			break;
 		case 'i':
 			doinfo=1;
@@ -1150,14 +1150,15 @@ int rc=0;
 
 	if (doinfo)
 	{
-		mimesection = strtok(section,",");
+		mimesection = section ? strtok(section, ","):NULL;
 		do {
 			print_info(p, mimesection);
 			if (do_extract)
 				extract_section(p, mimesection,
 						extract_filename, argc-argn,
 						argv+argn, do_extract);
-			mimesection = strtok(NULL,",");
+			if (mimesection)
+				mimesection = strtok(NULL,",");
 		} while (mimesection != NULL);
 	}
 	else if (dodecode)
