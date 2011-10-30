@@ -5,6 +5,7 @@ version=@version@
 all: rules postinst postrm debian.tar.gz dummy.tar.gz  \
 	procmail-Debian_5.0.dsc \
 	procmail-Debian_6.0.dsc \
+	procmail-xUbuntu_11.10.dsc \
 	procmail-xUbuntu_11.04.dsc \
 	procmail-xUbuntu_10.10.dsc \
 	procmail-xUbuntu_10.04.dsc \
@@ -28,6 +29,8 @@ procmail-Debian_5.0.dsc: procmail-Debian_5.0.dsc.in
 	$(edit) $@.in > $@
 procmail-Debian_6.0.dsc: procmail-Debian_6.0.dsc.in
 	$(edit) $@.in > $@
+procmail-xUbuntu_11.10.dsc: procmail-xUbuntu_11.10.dsc.in
+	$(edit) $@.in > $@
 procmail-xUbuntu_11.04.dsc: procmail-xUbuntu_11.04.dsc.in
 	$(edit) $@.in > $@
 procmail-xUbuntu_10.10.dsc: procmail-xUbuntu_10.10.dsc.in
@@ -40,6 +43,9 @@ procmail-xUbuntu_8.04.dsc: procmail-xUbuntu_8.04.dsc.in
 	$(edit) $@.in > $@
 _service: _service.in
 	$(edit) $@.in > $@
+changelog: changelog.in
+	$(edit) $@.in > $@
+
 dummy.tar.gz: README
 	tar cf - README |gzip > $@
 debian.tar.gz: copyright rules control changelog postinst postrm compat
