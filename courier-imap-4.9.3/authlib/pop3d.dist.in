@@ -121,6 +121,15 @@ PORT=110
 
 ADDRESS=0
 
+##NAME: AUTHSERVICE:0
+#
+#  It's possible to authenticate using a different 'service' parameter
+#  depending on the connection's port.  This only works with authentication
+#  modules that use the 'service' parameter, such as PAM.  Example:
+#
+#  AUTHSERVICE110=pop3
+#  AUTHSERVICE995=pop3s
+
 ##NAME: TCPDOPTS:0
 #
 # Other couriertcpd(1) options.  The following defaults should be fine.
