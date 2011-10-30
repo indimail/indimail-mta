@@ -33,10 +33,10 @@ fortune_version=1.1
 all: rules indimail.prerm indimail.preinst indimail.postrm indimail.postinst \
 obs_deb_prep _service indimail-devel.install \
 indimail-Debian_5.0.dsc indimail-Debian_6.0.dsc indimail-xUbuntu_10.04.dsc \
-indimail-xUbuntu_10.10.dsc indimail-xUbuntu_11.04.dsc indimail-xUbuntu_8.04.dsc \
-indimail-xUbuntu_9.10.dsc indimail-devel.postinst indimail-devel.postrm \
-indimail-mini.prerm indimail-mini.preinst indimail-mini.postrm \
-indimail-mini.postinst debian.tar.gz dummy.tar.gz
+indimail-xUbuntu_10.10.dsc indimail-xUbuntu_11.04.dsc indimail-xUbuntu_11.10.dsc \
+indimail-xUbuntu_8.04.dsc indimail-xUbuntu_9.10.dsc indimail-devel.postinst \
+indimail-devel.postrm indimail-mini.prerm indimail-mini.preinst \
+indimail-mini.postrm indimail-mini.postinst debian.tar.gz dummy.tar.gz
 
 install: all
 install-strip: install
@@ -134,15 +134,17 @@ indimail-Debian_5.0.dsc:indimail-Debian_5.0.dsc.in
 	$(edit) $@.in > $@;
 indimail-Debian_6.0.dsc: indimail-Debian_6.0.dsc.in
 	$(edit) $@.in > $@;
-indimail-xUbuntu_10.04.dsc: indimail-xUbuntu_10.04.dsc.in
-	$(edit) $@.in > $@;
-indimail-xUbuntu_10.10.dsc: indimail-xUbuntu_10.10.dsc.in
+indimail-xUbuntu_11.10.dsc: indimail-xUbuntu_11.10.dsc.in
 	$(edit) $@.in > $@;
 indimail-xUbuntu_11.04.dsc: indimail-xUbuntu_11.04.dsc.in
 	$(edit) $@.in > $@;
-indimail-xUbuntu_8.04.dsc: indimail-xUbuntu_8.04.dsc.in
+indimail-xUbuntu_10.10.dsc: indimail-xUbuntu_10.10.dsc.in
+	$(edit) $@.in > $@;
+indimail-xUbuntu_10.04.dsc: indimail-xUbuntu_10.04.dsc.in
 	$(edit) $@.in > $@;
 indimail-xUbuntu_9.10.dsc: indimail-xUbuntu_9.10.dsc.in
+	$(edit) $@.in > $@;
+indimail-xUbuntu_8.04.dsc: indimail-xUbuntu_8.04.dsc.in
 	$(edit) $@.in > $@;
 
 dummy.tar.gz: README
