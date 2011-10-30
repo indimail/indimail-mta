@@ -29,6 +29,7 @@ COMMONSOURCES=qmailadmin.c alias.c autorespond.c forward.c mailinglist.c \
 
 qmailadmin_SOURCES=$(COMMONSOURCES) 
 qmailadmin_LDADD=@auth_libs@
+qmailadmin_CFLAGS = -I@auth_inc@
 
 noinst_SCRIPTS = iwebadmin.spec iwebadmin-@VERSION@-rpmlintrc
 
