@@ -1,0 +1,5 @@
+indium (@version@-1) unstable; urgency=low
+
+  * debian subdir for debian builds
+
+ -- Manvendra Bhangui <manvendra@indimail.org>  Fri, 22 May 2011 23:49:33 +0530
