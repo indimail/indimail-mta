@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-rm.c,v $
+ * Revision 1.12  2011-11-06 22:53:08+05:30  Cprogrammer
+ * corrected usage of strtoul()
+ *
  * Revision 1.11  2010-07-20 20:10:46+05:30  Cprogrammer
  * process multiple queues
  *
@@ -180,7 +183,7 @@ char           *mk_hashpath(char *, int);
 char           *mk_newpath(char *, int);
 int             rename(const char *, const char *);
 
-const char      cvsrid[] = "$Id: qmail-rm.c,v 1.11 2010-07-20 20:10:46+05:30 Cprogrammer Stab mbhangui $";
+const char      cvsrid[] = "$Id: qmail-rm.c,v 1.12 2011-11-06 22:53:08+05:30 Cprogrammer Exp mbhangui $";
 
 /*- globals */
 extern const char *__progname;
@@ -341,7 +344,8 @@ main(int argc, char **argv)
 			verbosity++;
 			break;
 		case 'n':
-			if ((read_bytes = strtoul(optarg, &ptr, 10)) == ULONG_MAX)
+			read_bytes = strtoul(optarg, &ptr, 10);
+			if ((read_bytes == ULONG_MAX && errno == ERANGE) || (!read_bytes && ptr == optarg))
 			{
 				logerr(optarg);
 				logerr(": ");
@@ -366,7 +370,8 @@ main(int argc, char **argv)
 			qbase = optarg;
 			break;
 		case 's':
-			if ((tmp = strtoul(optarg, &ptr, 10)) == ULONG_MAX)
+			tmp = strtoul(optarg, &ptr, 10);
+			if ((tmp == ULONG_MAX && errno == ERANGE) || (!tmp && ptr == optarg))
 			{
 				logerr(optarg);
 				logerr(": ");
@@ -389,7 +394,8 @@ main(int argc, char **argv)
 			expire_files = 1;
 			expire_date = -1;	/*- make sure we only use the offset */
 			/*- lets see if they specified a parameter for seconds */
-			if ((tmp = strtoul(optarg, &ptr, 10)) == ULONG_MAX)
+			tmp = strtoul(optarg, &ptr, 10);
+			if ((tmp == ULONG_MAX && errno == ERANGE) || (!tmp && ptr == optarg))
 			{
 				logerr(optarg);
 				logerr(": ");
@@ -743,7 +749,7 @@ remove_file(const char *filename)
 	else
 		my_name++;
 	inode_num = strtoul(my_name, &ptr, 10);
-	if (inode_num == ULONG_MAX || inode_num == 0)
+	if ((inode_num == ULONG_MAX && errno == ERANGE) || (inode_num == 0 && ptr == my_name))
 	{
 		logerr(my_name);
 		logerrf(" doesn't look like an inode number\n");
@@ -893,7 +899,7 @@ expire_file(const char *filename)
 		my_name++;
 	/*- make sure the INODE NUMBER is really an INODE */
 	inode_num = strtoul(my_name, &ptr, 10);
-	if ((inode_num == ULONG_MAX) || (inode_num == 0))
+	if ((inode_num == ULONG_MAX && errno == ERANGE) || (inode_num == 0 && ptr == my_name))
 	{
 		logerr(my_name);
 		logerrf(" doesn't look like an inode number\n");
@@ -1080,7 +1086,7 @@ digits(unsigned long num)
 void
 getversion_qmail_rm_c()
 {
-	static char    *x = "$Id: qmail-rm.c,v 1.11 2010-07-20 20:10:46+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: qmail-rm.c,v 1.12 2011-11-06 22:53:08+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

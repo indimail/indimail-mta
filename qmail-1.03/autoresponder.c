@@ -1,5 +1,8 @@
 /*
- * $Log: qmail-autoresponder.c,v $
+ * $Log: autoresponder.c,v $
+ * Revision 1.24  2011-11-06 22:54:53+05:30  Cprogrammer
+ * 1.23 2009-01-06 20:47:48+05:30
+ *
  * Revision 1.23  2009-01-06 20:47:48+05:30  Cprogrammer
  * corrected addrparse() function
  *
@@ -1262,7 +1265,7 @@ main(int argc, char *argv[])
 void
 getversion_qmail_autoresponder_c()
 {
-	static char    *x = "$Id: qmail-autoresponder.c,v 1.23 2009-01-06 20:47:48+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: autoresponder.c,v 1.24 2011-11-06 22:54:53+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
