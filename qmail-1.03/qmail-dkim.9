@@ -33,6 +33,10 @@ The selector (s=) will be taken from the basename of the file. The private key s
 created by 
 .BR dknewkey(8) .
 
+In the absense of DKIMSIGN and DKIMVERIFY environment variable, qmail-dkim will sign the
+message if RELAYCLIENT environment variable is set and verify the message if RELAYCLIENT
+environment variable is not set.
+
 You can set various DKIM options in getopt style, by setting the environment variable
 .B DKIMSIGNOPTIONS
 
