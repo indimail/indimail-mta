@@ -422,7 +422,8 @@ get_arguments(int argc, char *argv[])
 			break;
 		case 'n':
 			opt_maxmsgs = strtoul(optarg, &ptr, 10);
-			if (opt_maxmsgs == ULONG_MAX || *ptr)
+			if ((opt_maxmsgs == ULONG_MAX && errno == ERANGE) 
+				|| (!opt_maxmsgs && ptr == optarg) || *ptr)
 			{
 				substdio_puts(subfderr, "Invalid number ");
 				if (*ptr)
@@ -451,7 +452,8 @@ get_arguments(int argc, char *argv[])
 			break;
 		case 't':
 			opt_timelimit = strtoul(optarg, &ptr, 10);
-			if (opt_timelimit == ULONG_MAX || *ptr)
+			if ((opt_timelimit == ULONG_MAX && errno == ERANGE) 
+				|| (!opt_timelimit && ptr == optarg) || *ptr)
 			{
 				substdio_puts(subfderr, "Invalid number ");
 				if (*ptr)
