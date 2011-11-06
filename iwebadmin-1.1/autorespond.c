@@ -1,5 +1,5 @@
 /*
- * $Id: autorespond.c,v 1.2 2010-10-09 13:53:19+05:30 Cprogrammer Exp mbhangui $
+ * $Id: autorespond.c,v 1.3 2011-11-06 17:51:14+05:30 Cprogrammer Exp mbhangui $
  * Copyright (C) 1999-2004 Inter7 Internet Technologies, Inc. 
  *
  * This program is free software; you can redistribute it and/or modify
@@ -75,14 +75,11 @@ show_autoresponders(user, dom, mytime)
 void
 show_autorespond_line(char *user, char *dom, time_t mytime, char *dir)
 {
-	char           *addr;
+	char           *addr, *domptr;
 	int             i;
 	DIR            *mydir;
 	struct dirent  *mydirent;
-#if 0
-	char            alias_name[MAX_FILE_NAME];
-	char           *alias_line;
-#endif
+	struct passwd  *vpw;
 
 	sort_init();
 	sprintf(TmpBuf, "%s/vacation", RealDir);
@@ -95,15 +92,10 @@ show_autorespond_line(char *user, char *dom, time_t mytime, char *dir)
 			continue;
 		sort_add_entry(mydirent->d_name, 0);
 	}
-#if 0
-	alias_line = valias_select_all(alias_name, Domain, MAX_BUFF);
-	while (alias_line != NULL) {
-		if (strstr(alias_line, "/autoresponder ") != 0) {
-			sort_add_entry(alias_name, 0);
-		}
-		alias_line = valias_select_all(alias_name, Domain, MAX_BUFF);
-	}
-#endif
+	if ((domptr = strrchr(RealDir, '/')))
+		domptr++;
+	else
+		domptr = dom;
 	sort_dosort();
 	for (i = 0; (addr = (char *) sort_get_entry(i)); ++i) {
 		printf("<tr>");
@@ -112,11 +104,10 @@ show_autorespond_line(char *user, char *dom, time_t mytime, char *dir)
 		printf("<img src=\"%s/trash.png\" border=\"0\"></a>", IMAGEURL);
 		printf("</td>");
 		printf("<td align=\"center\">");
-#if 0
-		printh("<a href=\"%s&modu=%C\">", cgiurl("modautorespond"), addr);
-#else
-		printh("<a href=\"%s&moduser=%C\">", cgiurl("moduser"), addr);
-#endif
+		if ((vpw = vauth_getpw(addr, domptr)))
+			printh("<a href=\"%s&moduser=%C\">", cgiurl("moduser"), addr);
+		else
+			printh("<a href=\"%s&modu=%C\">", cgiurl("modautorespond"), addr);
 		printf("<img src=\"%s/modify.png\" border=\"0\"></a>", IMAGEURL);
 		printf("</td>");
 		printh("<td align=\"left\">%H@%H</td>", addr, Domain);
@@ -167,15 +158,20 @@ addautorespondnow()
 	*StatusMessage = '\0';
 	if (fixup_local_name(ActionUser))
 		snprinth(StatusMessage, sizeof (StatusMessage), "%s %H\n", html_text[174], ActionUser);
-	else if (check_local_user(ActionUser))
+	else
+	if (check_local_user(ActionUser))
 		snprinth(StatusMessage, sizeof (StatusMessage), "%s %H\n", html_text[175], ActionUser);
-	else if (strlen(ActionUser) == 0)
+	else
+	if (strlen(ActionUser) == 0)
 		snprintf(StatusMessage, sizeof (StatusMessage), "%s\n", html_text[176]);
-	else if (strlen(Newu) > 0 && check_email_addr(Newu))
+	else
+	if (strlen(Newu) > 0 && check_email_addr(Newu))
 		snprinth(StatusMessage, sizeof (StatusMessage), "%s %H\n", html_text[177], Newu);
-	else if (strlen(Alias) <= 1)
+	else
+	if (strlen(Alias) <= 1)
 		snprinth(StatusMessage, sizeof (StatusMessage), "%s %H\n", html_text[178], ActionUser);
-	else if (strlen(Message) <= 1)
+	else
+	if (strlen(Message) <= 1)
 		snprinth(StatusMessage, sizeof (StatusMessage), "%s %H\n", html_text[179], ActionUser);
 	/*- if there was an error, go back to the add screen */
 	if (*StatusMessage != '\0') {
@@ -223,8 +219,6 @@ delautorespond()
 void
 delautorespondnow()
 {
-	int             i;
-
 	if (AdminType != DOMAIN_ADMIN) {
 		snprintf(StatusMessage, sizeof (StatusMessage), "%s", html_text[142]);
 		vclose();
@@ -232,16 +226,8 @@ delautorespondnow()
 	}
 	/*- delete the alias */
 	valias_delete(ActionUser, Domain, 0);
-	memset(TmpBuf2, 0, sizeof (TmpBuf2));
-	for (i = 0; ActionUser[i] != 0; ++i) {
-		if (islower(ActionUser[i])) {
-			TmpBuf2[i] = toupper(ActionUser[i]);
-		} else {
-			TmpBuf2[i] = ActionUser[i];
-		}
-	}
 	/*- delete the autoresponder directory */
-	sprintf(TmpBuf, "%s/%s", RealDir, TmpBuf2);
+	sprintf(TmpBuf, "%s/vacation/%s", RealDir, ActionUser);
 	vdelfiles(TmpBuf, ActionUser, Domain);
 	snprinth(StatusMessage, sizeof (StatusMessage), "%s %H\n", html_text[182], ActionUser);
 	count_autoresponders();
@@ -260,6 +246,7 @@ modautorespond()
 		vclose();
 		exit(0);
 	}
+	/*- send_template("show_forwards.html"); -*/
 	send_template("mod_autorespond.html");
 }
 
@@ -298,15 +285,6 @@ modautorespondnow()
 	/*- Make the autoresponder directory */
 	sprintf(TmpBuf, "%s/vacation/%s", RealDir, ActionUser);
 	r_mkdir(TmpBuf, 0750, Uid, Gid);
-	/*- Make the autoresponder .qmail file */
-	valias_delete(ActionUser, Domain, 0);
-	sprintf(TmpBuf, "|%s/bin/autoresponder -q %s/vacation/%s/.vacation.msg %s/vacation/%s", INDIMAILDIR,
-		RealDir, ActionUser, RealDir, ActionUser);
-	valias_insert(ActionUser, Domain, TmpBuf, 1);
-	if (strlen(Newu) > 0) {
-		sprintf(TmpBuf, "&%s", Newu);
-		valias_insert(ActionUser, Domain, TmpBuf, 1);
-	}
 	/*- Make the autoresponder message file */
 	sprintf(TmpBuf, "%s/vacation/%s/.vacation.msg", RealDir, ActionUser);
 	if ((fs = fopen(TmpBuf, "w")) == NULL)
@@ -315,6 +293,15 @@ modautorespondnow()
 	fprintf(fs, "Subject: %s\n\n", Alias);
 	fprintf(fs, "%s", Message);
 	fclose(fs);
+	/*- Make the autoresponder .qmail file */
+	valias_delete(ActionUser, Domain, 0);
+	if (strlen(Newu) > 0) {
+		sprintf(TmpBuf, "&%s", Newu);
+		valias_insert(ActionUser, Domain, TmpBuf, 1);
+	}
+	sprintf(TmpBuf, "|%s/bin/autoresponder -q %s/vacation/%s/.vacation.msg %s/vacation/%s",
+		INDIMAILDIR, RealDir, ActionUser, RealDir, ActionUser);
+	valias_insert(ActionUser, Domain, TmpBuf, 1);
 	/*- Report success */
 	snprinth(StatusMessage, sizeof (StatusMessage), "%s %H@%H\n", html_text[183], ActionUser, Domain);
 	show_autoresponders(Username, Domain, Mytime);
