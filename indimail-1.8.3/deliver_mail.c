@@ -1,5 +1,8 @@
 /*
  * $Log: deliver_mail.c,v $
+ * Revision 2.58  2011-11-06 17:48:04+05:30  Cprogrammer
+ * added command autoresponder for preserving DTLINE env variable
+ *
  * Revision 2.57  2011-06-30 20:38:37+05:30  Cprogrammer
  * moved duplicate eliminator into a separate function in separate file ismaildup.c
  *
@@ -198,7 +201,7 @@
 #include <sys/wait.h>
 
 #ifndef	lint
-static char     sccsid[] = "$Id: deliver_mail.c,v 2.57 2011-06-30 20:38:37+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: deliver_mail.c,v 2.58 2011-11-06 17:48:04+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 /*- Function Prototypes */
@@ -1056,7 +1059,7 @@ open_command(char *command, int *write_fd)
 		if (getenv("QHPSI"))
 			unsetenv("QQEH");
 		if (!strstr(cmmd, "preline") && !strstr(cmmd, "condtomaildir") 
-			&& !strstr(cmmd, "qsmhook"))
+			&& !strstr(cmmd, "qsmhook") && !strstr(cmmd, "autoresponder"))
 		{
 			if (getenv("RPLINE"))
 				unsetenv("RPLINE");
