@@ -1,5 +1,8 @@
 /*
  * $Log: surblfilter.c,v $
+ * Revision 1.6  2011-11-07 09:36:14+05:30  Cprogrammer
+ * use ERROR_FD, CUSTOM_ERR_FD for standard error
+ *
  * Revision 1.5  2011-07-15 11:48:19+05:30  Cprogrammer
  * added base64 decoding
  *
@@ -50,6 +53,7 @@
 #include "byte.h"
 #include "dns.h"
 #include "ip.h"
+#include "qmail.h"
 #include "ipalloc.h"
 #include "mess822.h"
 #include "base64.h"
@@ -79,12 +83,8 @@ stralloc        l3 = { 0 };
 int             l3ok = 0;
 struct constmap mapl3;
 
-static char     ssinbuf[1024];
-static substdio ssin = SUBSTDIO_FDBUF(read, 0, ssinbuf, sizeof ssinbuf);
-static char     ssoutbuf[512];
-static substdio ssout = SUBSTDIO_FDBUF(write, 1, ssoutbuf, sizeof ssoutbuf);
-static char     sserrbuf[512];
-static substdio sserr = SUBSTDIO_FDBUF(write, 2, sserrbuf, sizeof(sserrbuf));
+struct substdio ssin, ssout, sserr;
+static char     ssinbuf[1024], ssoutbuf[512], sserrbuf[512];
 
 void
 out(char *str)
@@ -767,8 +767,15 @@ main(int argc, char **argv)
 	stralloc       *ptr;
 	char           *x, *reason = 0;
 	int             opt, in_header = 1, i, total_bl = 0, blacklisted, match, html_plain_text,
-					base64_decode, found_content_type = 0;
+					base64_decode, found_content_type = 0, errfd;
 
+	if (!(x = env_get("ERROR_FD")))
+		errfd = CUSTOM_ERR_FD;
+	else
+		scan_int(x, &errfd);
+	substdio_fdbuf(&sserr, write, errfd, sserrbuf, sizeof(sserrbuf));
+	substdio_fdbuf(&ssout, write, 1, ssoutbuf, sizeof(ssoutbuf));
+	substdio_fdbuf(&ssin, read, 0, ssinbuf, sizeof(ssinbuf));
 	if (!(x = env_get("SURBL")))
 		do_surbl = 0;
 	while ((opt = getopt(argc, argv, "vtc")) != opteof) {
@@ -883,7 +890,7 @@ main(int argc, char **argv)
 void
 getversion_surblfilter_c()
 {
-	static char    *x = "$Id: surblfilter.c,v 1.5 2011-07-15 11:48:19+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: surblfilter.c,v 1.6 2011-11-07 09:36:14+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
