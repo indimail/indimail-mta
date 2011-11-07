@@ -1,5 +1,8 @@
 /*
  * $Log: smtpd.c,v $
+ * Revision 1.159  2011-11-07 09:32:17+05:30  Cprogrammer
+ * removed unused variable qop
+ *
  * Revision 1.158  2011-10-29 20:40:58+05:30  Cprogrammer
  * compute len directly instead of using str_len()
  *
@@ -624,7 +627,7 @@ int             wildmat_internal(char *, char *);
 int             ssl_rfd = -1, ssl_wfd = -1;	/*- SSL_get_Xfd() are broken */
 char           *servercert, *clientca, *clientcrl;
 #endif
-char           *revision = "$Revision: 1.158 $";
+char           *revision = "$Revision: 1.159 $";
 char           *protocol = "SMTP";
 stralloc        proto = { 0 };
 static stralloc Revision = { 0 };
@@ -5312,7 +5315,7 @@ auth_digest_md5()
 	unsigned char   unique[FMT_ULONG + FMT_ULONG + 3];
 	unsigned char   digest[20], encrypted[41];
 	unsigned char  *s, *x=encrypted;
-	int             i, r, qop = 1, len = 0;
+	int             i, r, len = 0; /*- qop = 1; */
 	stralloc        tmp = {0}, nonce = {0};
 
 	s = unique;
@@ -5403,18 +5406,15 @@ auth_digest_md5()
 	if (scan_response(&tmp, &slop, "qop") == 0)
 		return (err_input());
 	switch (tmp.len) {
-		case 4:
-			qop=1;
+		case 4: /*- qop=1; */
 			if (case_diffb("auth", 4, tmp.s) != 0)
 				return (err_input());
 			break;
-		case 8:
-			qop=2;
+		case 8: /*- qop=2; */
 			if (case_diffb("auth-int", 8, tmp.s) != 0)
 				return (err_input());
 			break;
-		case 9:
-			qop=3;
+		case 9: /*- qop=3; */
 			if (case_diffb("auth-conf", 9, tmp.s) != 0)
 				return (err_input());
 			break;
@@ -6543,7 +6543,7 @@ addrrelay() /*- Rejection of relay probes. */
 void
 getversion_smtpd_c()
 {
-	static char    *x = "$Id: smtpd.c,v 1.158 2011-10-29 20:40:58+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: smtpd.c,v 1.159 2011-11-07 09:32:17+05:30 Cprogrammer Exp mbhangui $";
 
 #ifdef INDIMAIL
 	if (x)
