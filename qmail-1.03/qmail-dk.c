@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-dk.c,v $
+ * Revision 1.35  2011-11-07 09:35:25+05:30  Cprogrammer
+ * set ssout, sserr, ssin before executing other functions
+ *
  * Revision 1.34  2011-07-29 09:28:48+05:30  Cprogrammer
  * fixed key file name
  *
@@ -593,6 +596,13 @@ main(int argc, char *argv[])
 
 	sig_blocknone();
 	umask(033);
+	substdio_fdbuf(&ssout, write, messfd, outbuf, sizeof(outbuf));
+	substdio_fdbuf(&ssin, read, 0, inbuf, sizeof(inbuf));
+	if (!(x = env_get("ERROR_FD")))
+		errfd = CUSTOM_ERR_FD;
+	else
+		scan_int(x, &errfd);
+	substdio_fdbuf(&sserr, write, errfd, errbuf, sizeof(errbuf));
 	if (chdir(auto_qmail) == -1)
 		die(61);
 	if (!dksign)
@@ -665,13 +675,6 @@ main(int argc, char *argv[])
 		die(63);
 	if (unlink(pidfn) == -1)
 		die(63);
-	substdio_fdbuf(&ssout, write, messfd, outbuf, sizeof(outbuf));
-	substdio_fdbuf(&ssin, read, 0, inbuf, sizeof(inbuf));
-	if (!(x = env_get("ERROR_FD")))
-		errfd = CUSTOM_ERR_FD;
-	else
-		scan_int(x, &errfd);
-	substdio_fdbuf(&sserr, write, errfd, errbuf, sizeof(errbuf));
 	dkexcludeheaders = env_get("DKEXCLUDEHEADERS");
 	if (dkexcludeheaders)
 	{
@@ -879,7 +882,7 @@ main(argc, argv)
 void
 getversion_qmail_dk_c()
 {
-	static char    *x = "$Id: qmail-dk.c,v 1.34 2011-07-29 09:28:48+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-dk.c,v 1.35 2011-11-07 09:35:25+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

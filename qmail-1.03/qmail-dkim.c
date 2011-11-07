@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-dkim.c,v $
+ * Revision 1.34  2011-11-07 09:35:59+05:30  Cprogrammer
+ * set ssout, sserr, ssin before executing other functions
+ *
  * Revision 1.33  2011-07-29 09:29:17+05:30  Cprogrammer
  * fixed key file name
  *
@@ -1095,6 +1098,13 @@ main(int argc, char *argv[])
 	starttime = now();
 	sig_blocknone();
 	umask(033);
+	if (!(p = env_get("ERROR_FD")))
+		errfd = CUSTOM_ERR_FD;
+	else
+		scan_int(p, &errfd);
+	substdio_fdbuf(&sserr, write, errfd, errbuf, sizeof(errbuf));
+	substdio_fdbuf(&ssout, write, messfd, outbuf, sizeof(outbuf));
+	substdio_fdbuf(&ssin, read, 0, inbuf, sizeof(inbuf));
 	if (chdir(auto_qmail) == -1)
 		die(61, 0);
 	if (!dkimsign)
@@ -1115,11 +1125,6 @@ main(int argc, char *argv[])
 	dkimqueue = env_get("DKIMQUEUE");
 	if (dkimqueue && *dkimqueue)
 		binqqargs[0] = dkimqueue;
-	if (!(p = env_get("ERROR_FD")))
-		errfd = CUSTOM_ERR_FD;
-	else
-		scan_int(p, &errfd);
-	substdio_fdbuf(&sserr, write, errfd, errbuf, sizeof(errbuf));
 	if (dkimsign)
 	{
 		/* selector */
@@ -1205,8 +1210,6 @@ main(int argc, char *argv[])
 		die(63, dkimsign ? 1 : 2);
 	if (unlink(pidfn) == -1)
 		die(63, dkimsign ? 1 : 2);
-	substdio_fdbuf(&ssout, write, messfd, outbuf, sizeof(outbuf));
-	substdio_fdbuf(&ssin, read, 0, inbuf, sizeof(inbuf));
 	for (ret = 0;;)
 	{
 		register int    n;
@@ -1420,7 +1423,7 @@ main(argc, argv)
 void
 getversion_qmail_dkim_c()
 {
-	static char    *x = "$Id: qmail-dkim.c,v 1.33 2011-07-29 09:29:17+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-dkim.c,v 1.34 2011-11-07 09:35:59+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
