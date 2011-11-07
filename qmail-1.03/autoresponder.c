@@ -1,7 +1,7 @@
 /*
  * $Log: autoresponder.c,v $
  * Revision 1.24  2011-11-06 22:54:53+05:30  Cprogrammer
- * 1.23 2009-01-06 20:47:48+05:30
+ * fixed checking of strtoul function
  *
  * Revision 1.23  2009-01-06 20:47:48+05:30  Cprogrammer
  * corrected addrparse() function
@@ -152,7 +152,7 @@ char           *usage_str =
 	" -N       Don't send, just send autoresponse to standard output\n"
 	" -l       Lax Mode, allow even if RECIPIENT is not in to, cc and bcc\n"
 	" -n NUM   Set the maximum number of replies to be sent in TIME secs (defaults to 1)\n"
-	" -t TIME  Set the time interval, in seconds (defaults to 1 week)\n"
+	" -t TIME  Set the time interval, in seconds (defaults to 1 week, -1 for no rate limiting)\n"
 	" -s STR   Prefix subject by STR (defaults to \"Autoreply: Re:\"\n"
 	" -S STR   The subject in autoresponse (defaults to the subject in received mail)\n"
 	" -b SDate Date (YYYY-mm-dd HH:MM:SS) from which the autoresponder should start functioning\n"
