@@ -5311,7 +5311,7 @@ compile surblfilter.c alloc.h error.h str.h case.h \
 constmap.h auto_qmail.h stralloc.h env.h control.h \
 strerr.h substdio.h getln.h byte.h dns.h ip.h \
 ipalloc.h mess822.h scan.h subgetopt.h variables.h \
-uint64.h base64.h
+uint64.h base64.h qmail.h
 	./compile surblfilter.c
 
 surblqueue: \
