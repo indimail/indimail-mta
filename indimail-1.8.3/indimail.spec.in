@@ -41,7 +41,7 @@
 %define ucspi_version      0.88
 %define qmail_version      1.03
 %define fetchmail_version  6.3.21
-%define clamav_version     0.97.2
+%define clamav_version     0.97.3
 %define fortune_version    1.1
 %define nssd_version       1.1
 %define flash_version      0.9.4
@@ -225,10 +225,14 @@ BuildRequires: db-devel
 BuildRequires: -post-build-checks  
 #!BuildIgnore: post-build-checks  
 %else
+%if 0%{?mandriva_version} == 2011
+BuildRequires: db2-devel
+%else
 %if 0%{?mandriva_version} > 2009
 BuildRequires: db4.7-devel
 %else
 BuildRequires: db4-devel
+%endif
 %endif
 %endif
 %if %nopam_multi == 0
@@ -677,6 +681,7 @@ fi
 %{__cp} %{name}-%{version}/inc_deps %{buildroot}%{_prefix}/etc
 %{__cp} %{name}-%{version}/lib_deps %{buildroot}%{_prefix}/etc
 %{__cp} %{name}-%{version}/indimail.h %{buildroot}%{_prefix}/include
+%{__cp} %{name}-%{version}/typesx.h %{buildroot}%{_prefix}/include
 
 if [ %noclamav -eq 0 ] ; then
 	if [ -f %{buildroot}%{_prefix}/etc/clamd.conf ] ; then
@@ -1658,6 +1663,7 @@ fi
 %attr(644,root,qmail)                   %{_prefix}/include/eps_email.h
 %attr(644,root,qmail)                   %{_prefix}/include/rfc2822.h
 %attr(444,root,qmail)                   %{_prefix}/include/indimail.h
+%attr(444,root,qmail)                   %{_prefix}/include/typesx.h
 %attr(644,root,qmail)                   %{_prefix}/include/eps_mime.h
 %attr(644,root,qmail)                   %{_prefix}/include/eps_boundary.h
 %attr(444,root,qmail)                   %{_prefix}/include/indimail_config.h
