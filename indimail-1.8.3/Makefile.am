@@ -906,6 +906,7 @@ indimail.spec iauth.la
 install-data-hook:
 	$(INSTALL_DATA) config.h $(DESTDIR)@prefix@/include/indimail_config.h || exit 1
 	$(INSTALL_DATA) indimail.h $(DESTDIR)@prefix@/include/indimail.h || exit 1
+	$(INSTALL_DATA) typesx.h $(DESTDIR)@prefix@/include/typesx.h || exit 1
 	$(INSTALL_DATA) data/wordlist.db $(DESTDIR)@prefix@/etc/wordlist.db  || exit 1
 	$(INSTALL_DATA) perm_list $(DESTDIR)@prefix@/etc/perm_list  || exit 1
 	$(mkinstalldirs) $(DESTDIR)@prefix@/modules || exit 1
