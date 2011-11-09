@@ -19,9 +19,9 @@ indimailauthlibdir=@prefix@/libexec/authlib
 
 libindimail_LTLIBRARIES = libindimail.la
 libindimail_la_SOURCES = $(COMMONSOURCES)
-libindimail_la_LIBADD =  $(top_builddir)/eps-1.2/libeps.la $(top_builddir)/cdb-1.0/libcdb.la \
-						 -L@mysql_libdir@ -lmysqlclient @LIB_CRYPT@ -lm
-libindimail_la_DEPENDENCIES = $(top_builddir)/eps-1.2/libeps.la $(top_builddir)/cdb-1.0/libcdb.la
+libindimail_la_LIBADD =  $(top_builddir)/cdb-1.0/libcdb.la -L@mysql_libdir@ -lmysqlclient \
+						 @LIB_CRYPT@ @LIB_SSL@ -lm
+libindimail_la_DEPENDENCIES = $(top_builddir)/cdb-1.0/libcdb.la
 libindimail_la_LDFLAGS = -version-info @LIBVER@:0:0 -release @VERSION@
 libindimaildir=@libdir@
 
@@ -62,7 +62,7 @@ AliasInLookup.c atrn_access.c autoturn_dir.c backfill.c bulk_mail.c bulletin.c \
 Check_Login.c checkPerm.c check_quota.c close_big_dir.c cntrl_clearaddflag.c \
 cntrl_cleardelflag.c compile_morercpthosts.c CopyEmailFile.c copyPwdStruct.c \
 count_dir.c count_rcpthosts.c count_table.c CreateDomainDirs.c create_table.c \
-dbinfoAdd.c dbinfoDel.c dbinfoSelect.c dbinfoUpdate.c dbload.c \
+dbinfoAdd.c dbinfoDel.c dbinfoSelect.c dbinfoUpdate.c dbload.c indisub.c \
 dec_dir_control.c del_control.c del_domain_assign.c deldomain.c digest_md5.c \
 deliver_mail.c delunreadmails.c del_user_assign.c deluser.c delusercntrl.c \
 Dirname.c error_stack.c error_temp.c evaluate.c fappend.c FifoCreate.c \
@@ -70,7 +70,7 @@ filewrt.c findhost.c findmdahost.c fstabChangeCounters.c getactualpath.c \
 getAddressBook.c getDbLock.c getEnvConfig.c getFreeFS.c GetIndiId.c getindimail.c \
 getlastauth.c get_local_hostid.c get_local_ip.c get_localtime.c getmailingList.c \
 get_Mplexdir.c getpeer.c GetPrefix.c GetSmtproute.c get_smtp_service_port.c \
-hostcntrl_select.c host_in_locals.c in_crypt.c inc_dir.c inc_dir_control.c indisub.c \
+hostcntrl_select.c host_in_locals.c in_crypt.c inc_dir.c inc_dir_control.c \
 init_dir_control.c inquery.c is_alias_domain.c is_already_running.c ismaildup.c \
 is_distributed_domain.c islocalif.c is_mailing_list.c isnum.c is_user_present.c \
 isvalid_domain.c isvirtualdomain.c layout.c limits.c loadbalance.c LoadBMF.c \
@@ -79,7 +79,7 @@ maildir_to_domain.c maildir_to_email.c MailQuotaWarn.c MakeArgs.c makeseekable.c
 make_user_dir.c makesalt.c md5c.c mdaMysqlConnect.c mgmtpassfuncs.c mkpasswd3.c \
 mlist_delete.c mlist_filterno.c mlist_filterupdate.c mlist_insert.c mlist_update.c \
 monkey.c MoveFile.c mysql_perror.c mysql_query.c next_big_dir.c no_of_days.c \
-open_big_dir.c open_master.c parseAddress.c parse_email.c \
+open_big_dir.c open_master.c parse_email.c \
 parse_quota.c passwd.c passwd_policy.c pathToFilesystem.c pipe_exec.c post_handle.c \
 print_control.c ProcessInFifo.c purge_files.c pw_comp.c pwcomp.c \
 PwdInLookup.c qmail_remote.c r_chown.c recalc_quota.c RelayInLookup.c relay_select.c \
@@ -87,7 +87,7 @@ RemoteBulkMail.c remove_line.c remove_quotes.c renameuser.c replacestr.c r_mkdir
 runcmmd.c ScanDir.c scat.c scopy.c SendWelcomeMail.c set_mysql_options.c setsockbuf.c \
 setuserquota.c sha256_crypt.c sha512_crypt.c signal_process.c site_size.c \
 skip_relay.c skip_system_files.c slen.c hmac_sha1.c sha1.c hmac_ripemd.c ripemd.c \
-sockread.c sockwrite.c spam.c SqlServer.c storeHeader.c strToPw.c tcpbind.c \
+sockread.c sockwrite.c spam.c SqlServer.c strToPw.c tcpbind.c \
 tcpopen.c timeoutio.c trashpurge.c udpopen.c unsetenv.c update_file.c update_newu.c \
 update_quota.c update_rules.c updusercntrl.c userinfo.c UserInLookup.c user_over_quota.c \
 vadd_atrn_map.c vadd_ip_map.c valiasCount.c valias_delete.c valias_delete_domain.c \
@@ -358,7 +358,8 @@ crypt_SOURCES = crypt.c
 crypt_LDADD = @LIB_CRYPT@
 
 vfilter_SOURCES=vfilter.c
-vfilter_LDADD= @auth_libs@
+vfilter_DEPENDENCIES=storeHeader.lo parseAddress.lo
+vfilter_LDADD= storeHeader.lo parseAddress.lo $(top_builddir)/eps-1.2/libeps.la @auth_libs@
 
 vmoddomain_SOURCES=vmoddomain.c
 vmoddomain_LDADD= @auth_libs@
@@ -410,8 +411,10 @@ vtable_SOURCES = vtable.c
 vtable_LDADD = @auth_libs@
 
 indiversion_SOURCE = indiversion.c
-indiversion_LDADD = @auth_libs@ proxylogin.lo tls.lo auth_admin.lo adminCmmd.lo
-indiversion_DEPENDENCIES = indimail_settings.lo tls.lo proxylogin.lo auth_admin.lo adminCmmd.lo
+indiversion_DEPENDENCIES = indimail_settings.lo tls.lo proxylogin.lo auth_admin.lo \
+						   adminCmmd.lo storeHeader.lo parseAddress.lo
+indiversion_LDADD = proxylogin.lo tls.lo auth_admin.lo adminCmmd.lo storeHeader.lo \
+					parseAddress.lo @auth_libs@ $(top_builddir)/eps-1.2/libeps.la
 
 echo_SOURCES=echo.c
 echo_LDADD=
@@ -509,7 +512,6 @@ no_of_days.lo: indimail.h config.h
 open_big_dir.lo: indimail.h config.h
 open_master.lo: indimail.h config.h
 open_relay_db.lo: indimail.h config.h
-parseAddress.lo: indimail.h config.h
 parse_email.lo: indimail.h config.h
 parse_quota.lo: indimail.h config.h
 passwd.lo: indimail.h config.h
@@ -622,6 +624,7 @@ PwdInLookup.lo: indimail.h config.h
 config_settings.lo: indimail.h config.h
 indimail_settings.c: indimail.settings config_settings
 	./config_settings > indimail_settings.c
+parseAddress.lo: indimail.h config.h
 storeHeader.lo: indimail.h config.h
 ssl_timeout.lo: config.h
 strToPw.lo: indimail.h config.h
@@ -871,7 +874,7 @@ displaytop$(EXEEXT): $(displaytop_DEPENDENCIES) $(displaytop_OBJECTS)
 
 indisub.c: indiversion.c
 	$(RM) indisub.c
-	$(LN_S) indiversion.c indisub.c
+	egrep -v "storeHeader|parseAddress" indiversion.c > indisub.c
 
 indiversion.$(OBJEXT): indiversion.c
 	$(COMPILE) $(DEFS) -DMAIN -c indiversion.c
