@@ -32,7 +32,7 @@
 #include <errno.h>
 
 #ifndef	lint
-static char     sccsid[] = "$Id: mysql_query.c,v 2.8 2010-04-30 14:43:12+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: mysql_query.c,v 2.8 2010-04-30 14:43:12+05:30 Cprogrammer Stab mbhangui $";
 #endif
 
 extern char    *replacestr(char *, char *, char *);

@@ -28,7 +28,7 @@
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: execmysql.c,v 2.8 2011-11-09 19:44:09+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: execmysql.c,v 2.8 2011-11-09 19:44:09+05:30 Cprogrammer Stab mbhangui $";
 #endif
 
 #include <string.h>

@@ -52,7 +52,7 @@
 #endif
 
 #ifndef	lint
-static char     sccsid[] = "$Id: testmra.c,v 2.13 2011-11-09 19:45:34+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: testmra.c,v 2.13 2011-11-09 19:45:34+05:30 Cprogrammer Stab mbhangui $";
 #endif
 
 static int      get_options(int, char **, char **, char **, char **, int *, int *, int *, char **, char **);
