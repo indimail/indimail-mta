@@ -1,5 +1,8 @@
 /*
  * $Log: indiversion.c,v $
+ * Revision 2.134  2011-11-09 19:44:48+05:30  Cprogrammer
+ * remvoed parseAddress(), storeHeader() from libindimail
+ *
  * Revision 2.133  2011-10-28 14:19:21+05:30  Cprogrammer
  * added digest_md5()
  *
@@ -519,7 +522,7 @@
 #endif
 
 #ifndef	lint
-static char     sccsid[] = "$Id: indiversion.c,v 2.133 2011-10-28 14:19:21+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: indiversion.c,v 2.134 2011-11-09 19:44:48+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 void            getversion_indimail_settings_c();
@@ -749,6 +752,7 @@ void            getversion_vfilter_delete_c();
 void            getversion_vfilter_update_c();
 void            getversion_vfilter_display_c();
 void            getversion_vfilter_filterNo_c();
+void            getversion_parseAddress_c();
 void            getversion_storeHeader_c();
 void            getversion_getmailingList_c();
 void            getversion_mlist_insert_c();
@@ -756,7 +760,6 @@ void            getversion_mlist_update_c();
 void            getversion_mlist_delete_c();
 void            getversion_mlist_filterupdate_c();
 void            getversion_addressToken_c();
-void            getversion_parseAddress_c();
 void            getversion_is_mailing_list_c();
 void            getversion_mlist_filterno_c();
 void            getversion_getAddressBook_c();
@@ -1182,13 +1185,13 @@ getversion(char *id)
 	getversion_vfilter_update_c();
 	getversion_vfilter_display_c();
 	getversion_vfilter_filterNo_c();
-	getversion_storeHeader_c();
 	getversion_getmailingList_c();
 	getversion_mlist_insert_c();
 	getversion_mlist_update_c();
 	getversion_mlist_delete_c();
 	getversion_mlist_filterupdate_c();
 	getversion_addressToken_c();
+	getversion_storeHeader_c();
 	getversion_parseAddress_c();
 	getversion_is_mailing_list_c();
 	getversion_mlist_filterno_c();
