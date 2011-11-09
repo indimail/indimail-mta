@@ -2130,13 +2130,15 @@ dktest.8: dktest.9
 
 dkim.lib: trydkim.c compile load conf-dkim dns.lib
 	( ( ./compile -I$(DESTDIR)$(INDIDIR)/include -I../libdkim-$(DKIM_VERSION) `grep -h -v "^#" conf-dkim` trydkim.c && \
-	g++ -o trydkim trydkim.o  -L../libdkim-$(DKIM_VERSION) -L$(DESTDIR)$(INDIDIR)/lib `cat dns.lib` -ldkim -lcrypto ) >/dev/null 2>&1 \
+	g++ -o trydkim trydkim.o  -L../libdkim-$(DKIM_VERSION)/.libs \
+	-L../libdkim-$(DKIM_VERSION) -L$(DESTDIR)$(INDIDIR)/lib `cat dns.lib` -ldkim -lcrypto ) >/dev/null 2>&1 \
 	&& echo "-L../libdkim-$(DKIM_VERSION) -L$(DESTDIR)$(INDIDIR)/lib -ldkim" || exit 0 ) > dkim.lib
 	rm -f trydkim.o trydkim
 
 hasdkim.h:  trydkim.c compile load dns.lib dkim.lib conf-indi
 	( ( ./compile -I$(DESTDIR)$(INDIDIR)/include -I../libdkim-$(DKIM_VERSION) `grep -h -v "^#" conf-dkim` trydkim.c && \
-	g++ -o trydkim trydkim.o  -L../libdkim-$(DKIM_VERSION) `cat dkim.lib dns.lib` -lcrypto ) >/dev/null 2>&1 \
+	g++ -o trydkim trydkim.o  -L../libdkim-$(DKIM_VERSION)/.libs \
+	-L../libdkim-$(DKIM_VERSION) `cat dkim.lib dns.lib` -lcrypto ) >/dev/null 2>&1 \
 	&& (echo \#define HASDKIM 1) || exit 0 ) > hasdkim.h
 	rm -f trydkim.o trydkim
 
