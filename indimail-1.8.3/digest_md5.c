@@ -1,5 +1,8 @@
 /*
  * $Log: digest_md5.c,v $
+ * Revision 2.2  2011-11-09 19:43:38+05:30  Cprogrammer
+ * removed DIGEST_MAX, BUFSIZE definition
+ *
  * Revision 2.1  2011-10-28 17:59:47+05:30  Cprogrammer
  * digest_md5() function
  *
@@ -11,7 +14,7 @@
 static char     hextab[] = "0123456789abcdef";
 
 #ifndef	lint
-static char     sccsid[] = "$Id: digest_md5.c,v 2.1 2011-10-28 17:59:47+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: digest_md5.c,v 2.2 2011-11-09 19:43:38+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 int
