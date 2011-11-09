@@ -8,7 +8,7 @@ COMMONSOURCES= dkimfuncs.cpp dns.cpp dkimbase.cpp dkimsign.cpp dkimverify.cpp
 
 libdkim_LTLIBRARIES=libdkim.la
 libdkim_la_SOURCES=$(COMMONSOURCES) 
-libdkim_la_LIBADD =
+libdkim_la_LIBADD = -lresolv
 libdkim_la_LDFLAGS = -version-info @LIBVER@ -release @VERSION@
 libdkim_la_CFLAGS = -fPIC
 
