@@ -1,5 +1,8 @@
 /*
  * $Log: valias.c,v $
+ * Revision 2.7  2011-11-09 19:45:51+05:30  Cprogrammer
+ * removed getversion
+ *
  * Revision 2.6  2009-11-25 12:53:55+05:30  Cprogrammer
  * do not allow empty alias line
  *
@@ -69,7 +72,7 @@
 
 #include "indimail.h"
 #ifndef	lint
-static char     sccsid[] = "$Id: valias.c,v 2.6 2009-11-25 12:53:55+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: valias.c,v 2.7 2011-11-09 19:45:51+05:30 Cprogrammer Stab mbhangui $";
 #endif
 
 #ifdef VALIAS
@@ -173,13 +176,10 @@ get_options(int argc, char **argv)
 	memset(Domain, 0, MAX_BUFF);
 	memset(AliasLine, 0, MAX_BUFF);
 	AliasAction = VALIAS_SELECT;
-	while ((c = getopt(argc, argv, "Vvmsu:d:i:")) != -1)
+	while ((c = getopt(argc, argv, "vmsu:d:i:")) != -1)
 	{
 		switch (c)
 		{
-		case 'V':
-			getversion(sccsid);
-			break;
 #ifdef CLUSTERED_SITE
 		case 'm':
 			ignore_mailstore = 1;

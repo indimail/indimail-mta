@@ -1,5 +1,8 @@
 /*
  * $Log: vdeluser.c,v $
+ * Revision 2.7  2011-11-09 19:46:02+05:30  Cprogrammer
+ * removed getversion
+ *
  * Revision 2.6  2010-02-16 13:09:02+05:30  Cprogrammer
  * added post_handle function
  *
@@ -74,7 +77,7 @@
 #include <signal.h>
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vdeluser.c,v 2.6 2010-02-16 13:09:02+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: vdeluser.c,v 2.7 2011-11-09 19:46:02+05:30 Cprogrammer Stab mbhangui $";
 #endif
 
 char            Email[MAX_BUFF];
@@ -152,13 +155,10 @@ get_options(int argc, char **argv)
 	memset(User, 0, MAX_BUFF);
 	memset(Domain, 0, MAX_BUFF);
 	errflag = 0;
-	while (!errflag && (c = getopt(argc, argv, "Vv")) != -1)
+	while (!errflag && (c = getopt(argc, argv, "v")) != -1)
 	{
 		switch (c)
 		{
-		case 'V':
-			getversion(sccsid);
-			break;
 		case 'v':
 			verbose = 1;
 			break;

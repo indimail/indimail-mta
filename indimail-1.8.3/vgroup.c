@@ -1,5 +1,8 @@
 /*
  * $Log: vgroup.c,v $
+ * Revision 2.22  2011-11-09 19:46:13+05:30  Cprogrammer
+ * removed getversion
+ *
  * Revision 2.21  2010-08-11 18:36:51+05:30  Cprogrammer
  * added checks for group member syntax
  *
@@ -69,7 +72,7 @@
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vgroup.c,v 2.21 2010-08-11 18:36:51+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: vgroup.c,v 2.22 2011-11-09 19:46:13+05:30 Cprogrammer Stab mbhangui $";
 #endif
 
 #ifdef VALIAS
@@ -253,13 +256,10 @@ get_options(int argc, char **argv, int *option, char **group, char **gecos, char
 	*group = *gecos = *member = *old_member = *passwd = *hostid = *mdahost = *quota = 0;
 	*option = -1;
 	*ignore = 0;
-	while ((c = getopt(argc, argv, "vVaIc:i:d:o:u:h:m:q:")) != -1)
+	while ((c = getopt(argc, argv, "vaIc:i:d:o:u:h:m:q:")) != -1)
 	{
 		switch (c)
 		{
-		case 'V':
-			getversion(sccsid);
-			break;
 		case 'v':
 			verbose = 1;
 			break;

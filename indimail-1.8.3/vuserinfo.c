@@ -1,5 +1,8 @@
 /*
  * $Log: vuserinfo.c,v $
+ * Revision 2.7  2011-11-09 19:46:44+05:30  Cprogrammer
+ * removed getversion
+ *
  * Revision 2.6  2008-05-21 15:53:13+05:30  Cprogrammer
  * fixed usage display
  *
@@ -84,7 +87,7 @@
 #endif
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vuserinfo.c,v 2.6 2008-05-21 15:53:13+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: vuserinfo.c,v 2.7 2011-11-09 19:46:44+05:30 Cprogrammer Stab mbhangui $";
 #endif
 
 void            usage();
@@ -107,7 +110,7 @@ main(argc, argv)
 	memset(Email, 0, MAX_BUFF);
 	memset(Domain, 0, MAX_BUFF);
 	version_flag = errflag = 0;
-	snprintf(opt_str, sizeof(opt_str), "anpugcdqmV");
+	snprintf(opt_str, sizeof(opt_str), "anpugcdqm");
 #ifdef ENABLE_AUTH_LOGGING
 	strncat(opt_str, "l", 1);
 #endif
@@ -162,9 +165,6 @@ main(argc, argv)
 		case 'f':
 			DisplayFilter = 1;
 			DisplayAll = 0;
-			break;
-		case 'V':
-			getversion(sccsid);
 			break;
 		default:
 			errflag = 1;

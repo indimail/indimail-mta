@@ -1,5 +1,8 @@
 /*
  * $Log: vsmtp.c,v $
+ * Revision 2.6  2011-11-09 19:46:40+05:30  Cprogrammer
+ * removed getversion
+ *
  * Revision 2.5  2010-05-20 10:58:07+05:30  Cprogrammer
  * error messages on stderr instead of stdout
  *
@@ -38,7 +41,7 @@
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vsmtp.c,v 2.5 2010-05-20 10:58:07+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: vsmtp.c,v 2.6 2011-11-09 19:46:40+05:30 Cprogrammer Stab mbhangui $";
 #endif
 
 #ifdef CLUSTERED_SITE
@@ -156,13 +159,10 @@ get_options(int argc, char **argv)
 	memset(mta, 0, MAX_BUFF);
 	Port = 0;
 	SmtpAction = SMTP_SELECT;
-	while ((c = getopt(argc, argv, "Vvsdi:u:m:")) != -1)
+	while ((c = getopt(argc, argv, "vsdi:u:m:")) != -1)
 	{
 		switch (c)
 		{
-		case 'V':
-			getversion(sccsid);
-			break;
 		case 'v':
 			verbose = 1;
 			break;

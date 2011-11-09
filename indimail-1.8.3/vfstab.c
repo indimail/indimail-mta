@@ -1,5 +1,8 @@
 /*
  * $Log: vfstab.c,v $
+ * Revision 2.7  2011-11-09 19:46:10+05:30  Cprogrammer
+ * removed getversion
+ *
  * Revision 2.6  2009-10-14 20:47:14+05:30  Cprogrammer
  * use strtoll() instead of atol()
  *
@@ -24,7 +27,7 @@
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vfstab.c,v 2.6 2009-10-14 20:47:14+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: vfstab.c,v 2.7 2011-11-09 19:46:10+05:30 Cprogrammer Stab mbhangui $";
 #endif
 
 #define XOPEN_SOURCE = 600
@@ -137,13 +140,10 @@ get_options(int argc, char **argv)
 
 	memset(MdaHost, 0, MAX_BUFF);
 	FstabAction = FSTAB_SELECT;
-	while ((c = getopt(argc, argv, "Vvdiusblo:m:q:n:")) != -1)
+	while ((c = getopt(argc, argv, "vdiusblo:m:q:n:")) != -1)
 	{
 		switch (c)
 		{
-		case 'V':
-			getversion(sccsid);
-			break;
 		case 'v':
 			verbose = 1;
 			break;

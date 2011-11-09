@@ -1,5 +1,8 @@
 /*
  * $Log: hostcntrl.c,v $
+ * Revision 2.9  2011-11-09 19:44:15+05:30  Cprogrammer
+ * removed getversion
+ *
  * Revision 2.8  2008-06-13 08:56:03+05:30  Cprogrammer
  * fixed compilation error if CLUSTERED_SITE was not defined
  *
@@ -28,7 +31,7 @@
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: hostcntrl.c,v 2.8 2008-06-13 08:56:03+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: hostcntrl.c,v 2.9 2011-11-09 19:44:15+05:30 Cprogrammer Stab mbhangui $";
 #endif
 
 #ifdef CLUSTERED_SITE
@@ -136,13 +139,10 @@ get_options(int argc, char **argv, char **email, char **hostid, int *action)
 	verbose = 0;
 	*action = -1;
 	*hostid = *email = 0;
-	while ((c = getopt(argc, argv, "Vvlsdi:m:")) != -1)
+	while ((c = getopt(argc, argv, "vlsdi:m:")) != -1)
 	{
 		switch (c)
 		{
-		case 'V':
-			getversion(sccsid);
-			exit(0);
 		case 'v':
 			verbose = 1;
 			break;

@@ -1,5 +1,8 @@
 /*
  * $Log: vadddomain.c,v $
+ * Revision 2.32  2011-11-09 19:45:44+05:30  Cprogrammer
+ * removed getversion
+ *
  * Revision 2.31  2010-08-10 18:42:13+05:30  Cprogrammer
  * made dir control user level configurable
  *
@@ -158,7 +161,7 @@
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vadddomain.c,v 2.31 2010-08-10 18:42:13+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: vadddomain.c,v 2.32 2011-11-09 19:45:44+05:30 Cprogrammer Stab mbhangui $";
 #endif
 
 
@@ -472,9 +475,9 @@ get_options(int argc, char **argv, char **base_path, int *chk_rcpt, int *users_p
 	*sqlserver = *database = *dbuser = *dbpass = 0;
 	dbport = -1;
 	distributed = -1;
-	scopy(optbuf, "atT:q:l:bB:e:u:VvCci:g:d:D:S:U:P:p:O", MAX_BUFF);
+	scopy(optbuf, "atT:q:l:bB:e:u:vCci:g:d:D:S:U:P:p:O", MAX_BUFF);
 #else
-	scopy(optbuf, "atT:q:l:bB:e:u:VvCi:g:d:O", MAX_BUFF);
+	scopy(optbuf, "atT:q:l:bB:e:u:vCi:g:d:O", MAX_BUFF);
 #endif
 #ifdef VFILTER
 	scat(optbuf, "f", MAX_BUFF);
@@ -483,9 +486,6 @@ get_options(int argc, char **argv, char **base_path, int *chk_rcpt, int *users_p
 	{
 		switch (c)
 		{
-		case 'V':
-			getversion(sccsid);
-			break;
 		case 'B':
 			if (use_etrn)
 				error_stack(stderr, "option -B not valid for ETRN/ATRN/AUTORUN\n");

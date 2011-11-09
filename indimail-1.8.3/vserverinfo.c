@@ -1,5 +1,8 @@
 /*
  * $Log: vserverinfo.c,v $
+ * Revision 2.3  2011-11-09 19:46:35+05:30  Cprogrammer
+ * removed getversion
+ *
  * Revision 2.2  2010-03-07 09:28:42+05:30  Cprogrammer
  * check return value of is_distributed_domain for error
  *
@@ -10,7 +13,7 @@
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vserverinfo.c,v 2.2 2010-03-07 09:28:42+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: vserverinfo.c,v 2.3 2011-11-09 19:46:35+05:30 Cprogrammer Stab mbhangui $";
 #endif
 
 #include <string.h>
@@ -110,13 +113,10 @@ get_options(int argc, char **argv, char **mdahost, char **server, char **domain,
 	*email = *mdahost = *server = *domain = (char *) 0;
 	display_all = 0;
 	display_user = display_passwd = display_server = display_mdahost = display_port = display_database = 0;
-	while ((c = getopt(argc, argv, "dsmupPD:M:S:a")) != -1)
+	while ((c = getopt(argc, argv, "vdsmupPD:M:S:a")) != -1)
 	{
 		switch (c)
 		{
-		case 'V':
-			getversion(sccsid);
-			break;
 		case 'v':
 			verbose = 1;
 			break;

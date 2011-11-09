@@ -1,5 +1,8 @@
 /*-
  * $Log: vfilter.c,v $
+ * Revision 2.47  2011-11-09 19:46:07+05:30  Cprogrammer
+ * removed getversion
+ *
  * Revision 2.46  2011-06-20 21:30:25+05:30  Cprogrammer
  * fixed Mail BlackHoled message
  *
@@ -151,7 +154,7 @@
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vfilter.c,v 2.46 2011-06-20 21:30:25+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: vfilter.c,v 2.47 2011-11-09 19:46:07+05:30 Cprogrammer Stab mbhangui $";
 #endif
 
 #ifdef VFILTER
@@ -751,13 +754,10 @@ get_options(int argc, char **argv, char *bounce, char *emailid, char *user, char
 		 *
 		 */
 		interactive = 1;
-		while ((c = getopt(argc, argv, "Vv")) != -1)
+		while ((c = getopt(argc, argv, "v")) != -1)
 		{
 			switch (c)
 			{
-			case 'V':
-				getversion(sccsid);
-				exit(0);
 			case 'v':
 				verbose = 1;
 				break;
@@ -829,7 +829,7 @@ get_options(int argc, char **argv, char *bounce, char *emailid, char *user, char
 static int
 myExit(int argc, char **argv, int status, int bounce, char *DestFolder, char *forward)
 {
-	char           *revision = "$Revision: 2.46 $";
+	char           *revision = "$Revision: 2.47 $";
 	char           *ptr, *mda;
 	char            MaildirFolder[MAX_BUFF], XFilter[MAX_BUFF];
 	pid_t           pid;

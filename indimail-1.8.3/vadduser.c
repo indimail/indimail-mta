@@ -1,5 +1,8 @@
 /*
  * $Log: vadduser.c,v $
+ * Revision 2.35  2011-11-09 19:45:49+05:30  Cprogrammer
+ * removed getversion
+ *
  * Revision 2.34  2010-11-12 21:56:35+05:30  Cprogrammer
  * return error code 17 for EEXIST
  *
@@ -156,7 +159,7 @@
 #include <signal.h>
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vadduser.c,v 2.34 2010-11-12 21:56:35+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: vadduser.c,v 2.35 2011-11-09 19:45:49+05:30 Cprogrammer Stab mbhangui $";
 #endif
 
 char            Email[MAX_BUFF], User[MAX_BUFF], Domain[MAX_BUFF], Passwd[MAX_BUFF],
@@ -397,16 +400,13 @@ get_options(int argc, char **argv, char **base_path, int *pass_len, int *users_p
 	actFlag = 1;
 	*base_path = 0;
 #ifdef CLUSTERED_SITE
-	while (!errflag && (c = getopt(argc, argv, "aidbB:Vvc:q:l:h:m:er:")) != -1)
+	while (!errflag && (c = getopt(argc, argv, "aidbB:vc:q:l:h:m:er:")) != -1)
 #else
-	while (!errflag && (c = getopt(argc, argv, "aidbB:Vvc:q:l:er:")) != -1)
+	while (!errflag && (c = getopt(argc, argv, "aidbB:vc:q:l:er:")) != -1)
 #endif
 	{
 		switch (c)
 		{
-		case 'V':
-			getversion(sccsid);
-			break;
 		case 'v':
 			verbose = 1;
 			break;

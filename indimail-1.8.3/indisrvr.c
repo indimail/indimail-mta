@@ -1,5 +1,8 @@
 /*
  * $Log: indisrvr.c,v $
+ * Revision 2.47  2011-11-09 19:44:41+05:30  Cprogrammer
+ * removed getversion
+ *
  * Revision 2.46  2011-10-28 14:15:49+05:30  Cprogrammer
  * added auth_method argument to pw_comp
  *
@@ -168,7 +171,7 @@
 #include "indimail.h"
 
 #ifndef lint
-static char     sccsid[] = "$Id: indisrvr.c,v 2.46 2011-10-28 14:15:49+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: indisrvr.c,v 2.47 2011-11-09 19:44:41+05:30 Cprogrammer Stab mbhangui $";
 #endif
 
 #ifdef CLUSTERED_SITE
@@ -818,16 +821,13 @@ get_options(int argc, char **argv, char **ipaddr, char **port, int *backlog)
 	*ipaddr = *port = 0;
 	*backlog = -1;
 #ifdef HAVE_SSL
-	while ((c = getopt(argc, argv, "Vvi:p:b:n:")) != -1) 
+	while ((c = getopt(argc, argv, "vi:p:b:n:")) != -1) 
 #else
-	while ((c = getopt(argc, argv, "Vvi:p:b:")) != -1) 
+	while ((c = getopt(argc, argv, "vi:p:b:")) != -1) 
 #endif
 	{
 		switch (c)
 		{
-		case 'V':
-			getversion(sccsid);
-			break;
 		case 'v':
 			verbose = 1;
 			break;

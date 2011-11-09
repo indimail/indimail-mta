@@ -1,5 +1,8 @@
 /*
  * $Log: vpasswd.c,v $
+ * Revision 2.14  2011-11-09 19:46:27+05:30  Cprogrammer
+ * removed getversion
+ *
  * Revision 2.13  2010-02-17 14:14:29+05:30  Cprogrammer
  * added post handle
  *
@@ -98,7 +101,7 @@
 #include <signal.h>
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vpasswd.c,v 2.13 2010-02-17 14:14:29+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: vpasswd.c,v 2.14 2011-11-09 19:46:27+05:30 Cprogrammer Stab mbhangui $";
 #endif
 
 
@@ -183,13 +186,10 @@ get_options(int argc, char **argv)
 	memset(TmpBuf1, 0, MAX_BUFF);
 	apop = USE_POP;
 	Random = errflag = 0;
-	while (!errflag && (c = getopt(argc, argv, "Vvrae")) != -1)
+	while (!errflag && (c = getopt(argc, argv, "vrae")) != -1)
 	{
 		switch (c)
 		{
-		case 'V':
-			getversion(sccsid);
-			break;
 		case 'v':
 			verbose = 1;
 		case 'a':

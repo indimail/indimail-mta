@@ -1,5 +1,8 @@
 /*
  * $Log: vatrn.c,v $
+ * Revision 2.6  2011-11-09 19:45:54+05:30  Cprogrammer
+ * removed getversion
+ *
  * Revision 2.5  2009-02-26 20:26:17+05:30  Cprogrammer
  * show all atrn access if email and domain are not specfied
  *
@@ -19,7 +22,7 @@
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vatrn.c,v 2.5 2009-02-26 20:26:17+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: vatrn.c,v 2.6 2011-11-09 19:45:54+05:30 Cprogrammer Stab mbhangui $";
 #endif
 
 #include <unistd.h>
@@ -101,13 +104,10 @@ get_options(int argc, char **argv, int *Action, char *emailid, char *user, char 
 	*Action = -1;
 	*emailid = *user = *domain = *domain_list = 0;
 	*old_domain = 0;
-	while ((c = getopt(argc, argv, "Vvsd:i:u:n:")) != -1)
+	while ((c = getopt(argc, argv, "vsd:i:u:n:")) != -1)
 	{
 		switch (c)
 		{
-		case 'V':
-			getversion(sccsid);
-			break;
 		case 'v':
 			verbose = 1;
 			break;

@@ -1,5 +1,8 @@
 /*
  * $Log: vhostid.c,v $
+ * Revision 2.2  2011-11-09 19:46:16+05:30  Cprogrammer
+ * removed getversion
+ *
  * Revision 2.1  2002-05-11 15:24:19+05:30  Cprogrammer
  * Usage text corrected
  *
@@ -11,7 +14,7 @@
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vhostid.c,v 2.1 2002-05-11 15:24:19+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: vhostid.c,v 2.2 2011-11-09 19:46:16+05:30 Cprogrammer Stab mbhangui $";
 #endif
 
 #ifdef CLUSTERED_SITE
@@ -92,13 +95,10 @@ get_options(int argc, char **argv)
 	memset(HostId, 0, MAX_BUFF);
 	memset(IpAddr, 0, MAX_BUFF);
 	HostAction = HOST_SELECT;
-	while ((c = getopt(argc, argv, "Vvsdu:i:")) != -1)
+	while ((c = getopt(argc, argv, "vsdu:i:")) != -1)
 	{
 		switch (c)
 		{
-		case 'V':
-			getversion(sccsid);
-			break;
 		case 'v':
 			verbose = 1;
 			break;

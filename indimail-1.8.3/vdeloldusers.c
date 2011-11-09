@@ -1,5 +1,8 @@
 /*
  * $Log: vdeloldusers.c,v $
+ * Revision 2.17  2011-11-09 19:46:00+05:30  Cprogrammer
+ * removed getversion
+ *
  * Revision 2.16  2011-07-07 18:11:36+05:30  Cprogrammer
  * local variable folderlist used outside scope causing segfault
  *
@@ -132,7 +135,7 @@
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vdeloldusers.c,v 2.16 2011-07-07 18:11:36+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: vdeloldusers.c,v 2.17 2011-11-09 19:46:00+05:30 Cprogrammer Stab mbhangui $";
 #endif
 
 #ifndef ENABLE_AUTH_LOGGING
@@ -436,13 +439,10 @@ get_options(int argc, char **argv)
 	mailAge = DEFAULTMAIL_AGE;
 	purge_db = errflag = 0;
 	c_option = i_option = p_option = 0;
-	while (!errflag && (c = getopt(argc, argv, "Vvrpicfd:a:u:t:m:s:")) != -1)
+	while (!errflag && (c = getopt(argc, argv, "vrpicfd:a:u:t:m:s:")) != -1)
 	{
 		switch (c)
 		{
-		case 'V':
-			getversion(sccsid);
-			break;
 		case 'd':
 			scopy(Domain, optarg, MAX_BUFF);
 			break;

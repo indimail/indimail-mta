@@ -1,5 +1,8 @@
 /*
  * $Log: vipmap.c,v $
+ * Revision 2.4  2011-11-09 19:46:19+05:30  Cprogrammer
+ * removed getversion
+ *
  * Revision 2.3  2003-03-24 19:29:40+05:30  Cprogrammer
  * changed command line options for MAD compatibility
  *
@@ -34,7 +37,7 @@
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vipmap.c,v 2.3 2003-03-24 19:29:40+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: vipmap.c,v 2.4 2011-11-09 19:46:19+05:30 Cprogrammer Stab mbhangui $";
 #endif
 
 #ifdef IP_ALIAS_DOMAINS
@@ -115,13 +118,10 @@ get_options(int argc, char **argv)
 	/*- Action = PRINT_IT; -*/
 	*Ip = *Domain = 0;
 	errflag = 0;
-	while (!errflag && (c = getopt(argc, argv, "Vvsd:i:u:")) != -1)
+	while (!errflag && (c = getopt(argc, argv, "vsd:i:u:")) != -1)
 	{
 		switch (c)
 		{
-		case 'V':
-			getversion(sccsid);
-			break;
 		case 'v':
 			verbose = 1;
 			break;

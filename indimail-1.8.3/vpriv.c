@@ -1,5 +1,8 @@
 /*
  * $Log: vpriv.c,v $
+ * Revision 2.6  2011-11-09 19:46:29+05:30  Cprogrammer
+ * removed getversion
+ *
  * Revision 2.5  2009-10-19 11:24:54+05:30  Cprogrammer
  * allow only root/indimail user to execute program
  *
@@ -19,7 +22,7 @@
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vpriv.c,v 2.5 2009-10-19 11:24:54+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: vpriv.c,v 2.6 2011-11-09 19:46:29+05:30 Cprogrammer Stab mbhangui $";
 #endif
 
 #ifdef CLUSTERED_SITE
@@ -127,13 +130,10 @@ get_options(int argc, char **argv, char **user, char **program,
 	verbose = 0;
 	*action = -1;
 	*user = *program = *cmdargs = 0;
-	while ((c = getopt(argc, argv, "VvasDd:i:m:")) != -1)
+	while ((c = getopt(argc, argv, "vasDd:i:m:")) != -1)
 	{
 		switch (c)
 		{
-		case 'V':
-			getversion(sccsid);
-			break;
 		case 'v':
 			verbose = 1;
 			break;

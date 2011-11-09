@@ -1,5 +1,8 @@
 /*
  * $Log: vmoddomain.c,v $
+ * Revision 2.6  2011-11-09 19:46:21+05:30  Cprogrammer
+ * removed getversion
+ *
  * Revision 2.5  2010-08-16 21:12:35+05:30  Cprogrammer
  * fixed usage & setting of handler
  *
@@ -26,7 +29,7 @@
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vmoddomain.c,v 2.5 2010-08-16 21:12:35+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: vmoddomain.c,v 2.6 2011-11-09 19:46:21+05:30 Cprogrammer Stab mbhangui $";
 #endif
 
 static void     usage();
@@ -237,13 +240,10 @@ get_options(int argc, char **argv, int *use_vfilter, int *domain_limits,
 	*use_vfilter = -1;
 	*domain_limits = -1;
 	*handler = *domain = 0;
-	while ((c = getopt(argc, argv, "aVvf:h:l:")) != -1) 
+	while ((c = getopt(argc, argv, "avf:h:l:")) != -1) 
 	{
 		switch (c)
 		{
-		case 'V':
-			getversion(sccsid);
-			break;
 		case 'v':
 			verbose = 1;
 			break;

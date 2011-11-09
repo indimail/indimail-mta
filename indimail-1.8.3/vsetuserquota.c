@@ -1,5 +1,8 @@
 /*
  * $Log: vsetuserquota.c,v $
+ * Revision 2.7  2011-11-09 19:46:37+05:30  Cprogrammer
+ * removed getversion
+ *
  * Revision 2.6  2010-05-01 14:15:31+05:30  Cprogrammer
  * added connect_all argument to vauthOpen_user
  *
@@ -80,7 +83,7 @@
 #include <signal.h>
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vsetuserquota.c,v 2.6 2010-05-01 14:15:31+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: vsetuserquota.c,v 2.7 2011-11-09 19:46:37+05:30 Cprogrammer Stab mbhangui $";
 #endif
 
 char            Email[MAX_BUFF];
@@ -212,13 +215,10 @@ get_options(int argc, char **argv)
 	memset(Domain, 0, MAX_BUFF);
 	memset(TmpBuf1, 0, MAX_BUFF);
 	errflag = 0;
-	while (!errflag && (c = getopt(argc, argv, "Vv")) != -1)
+	while (!errflag && (c = getopt(argc, argv, "v")) != -1)
 	{
 		switch (c)
 		{
-		case 'V':
-			getversion(sccsid);
-			break;
 		case 'v':
 			verbose = 1;
 			break;

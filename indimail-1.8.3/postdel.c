@@ -1,5 +1,8 @@
 /*
  * $Log: postdel.c,v $
+ * Revision 2.7  2011-11-09 19:45:30+05:30  Cprogrammer
+ * removed getversion
+ *
  * Revision 2.6  2008-07-13 19:50:52+05:30  Cprogrammer
  * use ERESTART only if available
  *
@@ -22,7 +25,7 @@
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: postdel.c,v 2.6 2008-07-13 19:50:52+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: postdel.c,v 2.7 2011-11-09 19:45:30+05:30 Cprogrammer Stab mbhangui $";
 #endif
 
 #include <string.h>
@@ -152,13 +155,10 @@ get_options(int argc, char **argv, char *user, char *domain, char *rpline, char 
 
 	*use_filter = 0;
 	*user = *domain = *rpline = 0;
-	while ((c = getopt(argc, argv, "Vvfu:d:r:")) != -1)
+	while ((c = getopt(argc, argv, "vfu:d:r:")) != -1)
 	{
 		switch (c)
 		{
-		case 'V':
-			getversion(sccsid);
-			_exit(0);
 		case 'v':
 			verbose = 1;
 			break;

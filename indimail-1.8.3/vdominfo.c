@@ -1,5 +1,8 @@
 /*
  * $Log: vdominfo.c,v $
+ * Revision 2.14  2011-11-09 19:46:05+05:30  Cprogrammer
+ * removed getversion
+ *
  * Revision 2.13  2010-08-15 15:54:59+05:30  Cprogrammer
  * display max users per level and vlimits status
  *
@@ -115,7 +118,7 @@
 #include <memory.h>
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vdominfo.c,v 2.13 2010-08-15 15:54:59+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: vdominfo.c,v 2.14 2011-11-09 19:46:05+05:30 Cprogrammer Stab mbhangui $";
 #endif
 
 char            Domain[MAX_BUFF];
@@ -234,9 +237,6 @@ get_options(int argc, char **argv)
 	{
 		switch (c)
 		{
-		case 'V':
-			getversion(sccsid);
-			break;
 		case 'n':
 			DisplayName = 1;
 			DisplayAll = 0;

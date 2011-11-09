@@ -1,5 +1,8 @@
 /*
  * $Log: vmoduser.c,v $
+ * Revision 2.25  2011-11-09 19:46:24+05:30  Cprogrammer
+ * removed getversion
+ *
  * Revision 2.24  2011-02-11 22:57:47+05:30  Cprogrammer
  * fix for specifying 'k', 'K', 'm', 'M' units in quota
  *
@@ -141,7 +144,7 @@
 #include <signal.h>
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vmoduser.c,v 2.24 2011-02-11 22:57:47+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: vmoduser.c,v 2.25 2011-11-09 19:46:24+05:30 Cprogrammer Stab mbhangui $";
 #endif
 
 char            Email[MAX_BUFF];
@@ -402,16 +405,13 @@ get_options(int argc, char **argv)
 	QuotaFlag = 0;
 	errflag = 0;
 #ifdef ENABLE_AUTH_LOGGING
-	while ((c = getopt(argc, argv, "aVvutnxc:q:dpwisobr0123he:l:P:")) != -1) 
+	while ((c = getopt(argc, argv, "avutnxc:q:dpwisobr0123he:l:P:")) != -1) 
 #else
-	while ((c = getopt(argc, argv, "aVvuxc:q:dpwisobr0123he:l:P:")) != -1) 
+	while ((c = getopt(argc, argv, "avuxc:q:dpwisobr0123he:l:P:")) != -1) 
 #endif
 	{
 		switch (c)
 		{
-		case 'V':
-			getversion(sccsid);
-			break;
 		case 'v':
 			verbose = 1;
 			break;

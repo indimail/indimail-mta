@@ -1,5 +1,8 @@
 /*
  * $Log: clearopensmtp.c,v $
+ * Revision 2.11  2011-11-09 19:42:23+05:30  Cprogrammer
+ * removed getversion
+ *
  * Revision 2.10  2010-05-05 14:40:51+05:30  Cprogrammer
  * added connect_all argument to vclear_open_smtp
  *
@@ -46,7 +49,7 @@
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: clearopensmtp.c,v 2.10 2010-05-05 14:40:51+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: clearopensmtp.c,v 2.11 2011-11-09 19:42:23+05:30 Cprogrammer Stab mbhangui $";
 #endif
 
 #ifdef POP_AUTH_OPEN_RELAY
@@ -67,7 +70,7 @@ main(int argc, char **argv)
 	int             c, errflag, job_type = 1, cluster_opt = 0;
 
 	errflag = 0;
-	while (!errflag && (c = getopt(argc, argv, "tsV")) != -1)
+	while (!errflag && (c = getopt(argc, argv, "ts")) != -1)
 	{
 		switch (c)
 		{
@@ -79,9 +82,6 @@ main(int argc, char **argv)
 			break;
 		case 's':
 			job_type = 3;
-			break;
-		case 'V':
-			getversion(sccsid);
 			break;
 		default:
 			errflag = 1;

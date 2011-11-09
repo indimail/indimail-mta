@@ -1,5 +1,8 @@
 /*
  * $Log: vaddaliasdomain.c,v $
+ * Revision 2.5  2011-11-09 19:45:41+05:30  Cprogrammer
+ * removed getversion
+ *
  * Revision 2.4  2009-01-28 18:46:58+05:30  Cprogrammer
  * run as root for updation of qmail's assign file
  *
@@ -63,7 +66,7 @@
 #include <signal.h>
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vaddaliasdomain.c,v 2.4 2009-01-28 18:46:58+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: vaddaliasdomain.c,v 2.5 2011-11-09 19:45:41+05:30 Cprogrammer Stab mbhangui $";
 #endif
 
 char            Domain_old[MAX_BUFF], Domain_new[MAX_BUFF];
@@ -117,13 +120,10 @@ get_options(int argc, char **argv)
 
 	*Domain_old = *Domain_new = 0;
 	errflag = 0;
-	while (!errflag && (c = getopt(argc, argv, "Vv")) != -1)
+	while (!errflag && (c = getopt(argc, argv, "v")) != -1)
 	{
 		switch (c)
 		{
-		case 'V':
-			getversion(sccsid);
-			break;
 		case 'v':
 			verbose = 1;
 			break;
