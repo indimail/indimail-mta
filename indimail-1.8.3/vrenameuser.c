@@ -1,5 +1,8 @@
 /*
  * $Log: vrenameuser.c,v $
+ * Revision 2.11  2011-11-09 19:46:32+05:30  Cprogrammer
+ * removed getversion
+ *
  * Revision 2.10  2011-07-29 09:26:38+05:30  Cprogrammer
  * fixed gcc 4.6 warnings
  *
@@ -44,7 +47,7 @@
 #include <signal.h>
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vrenameuser.c,v 2.10 2011-07-29 09:26:38+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: vrenameuser.c,v 2.11 2011-11-09 19:46:32+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 char            oldEmail[MAX_BUFF];
@@ -151,13 +154,10 @@ get_options(int argc, char **argv)
 	memset(newUser, 0, MAX_BUFF);
 	memset(newDomain, 0, MAX_BUFF);
 	errflag = 0;
-	while (!errflag && (c = getopt(argc, argv, "Vv")) != -1)
+	while (!errflag && (c = getopt(argc, argv, "v")) != -1)
 	{
 		switch (c)
 		{
-		case 'V':
-			getversion(sccsid);
-			break;
 		case 'v':
 			verbose = 1;
 			break;

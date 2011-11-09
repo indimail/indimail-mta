@@ -1,5 +1,8 @@
 /*
  * $Log: execmysql.c,v $
+ * Revision 2.8  2011-11-09 19:44:09+05:30  Cprogrammer
+ * removed getversion
+ *
  * Revision 2.7  2009-09-23 14:59:40+05:30  Cprogrammer
  * change for new runcmmd()
  *
@@ -25,7 +28,7 @@
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: execmysql.c,v 2.7 2009-09-23 14:59:40+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: execmysql.c,v 2.8 2011-11-09 19:44:09+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #include <string.h>
@@ -73,9 +76,6 @@ get_options(int argc, char **argv, char **mdahost, char **domain)
 	{
 		switch (c)
 		{
-		case 'V':
-			getversion(sccsid);
-			break;
 		case 'v':
 			verbose = 1;
 			break;

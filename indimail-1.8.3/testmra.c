@@ -1,5 +1,8 @@
 /*
  * $Log: testmra.c,v $
+ * Revision 2.13  2011-11-09 19:45:34+05:30  Cprogrammer
+ * removed getversion
+ *
  * Revision 2.12  2009-02-18 21:33:49+05:30  Cprogrammer
  * removed compiler warning
  *
@@ -49,7 +52,7 @@
 #endif
 
 #ifndef	lint
-static char     sccsid[] = "$Id: testmra.c,v 2.12 2009-02-18 21:33:49+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: testmra.c,v 2.13 2011-11-09 19:45:34+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 static int      get_options(int, char **, char **, char **, char **, int *, int *, int *, char **, char **);
@@ -354,13 +357,10 @@ get_options(int argc, char **argv, char **user, char **passwd, char **host,
 	*keyb = 0;
 	getEnvConfigStr(&ptr, "DATA_TIMEOUT", "60");
 	*Timeout = ptr;
-	while ((c = getopt(argc, argv, "Vvkt:u:p:h:P:T:")) != -1)
+	while ((c = getopt(argc, argv, "vkt:u:p:h:P:T:")) != -1)
 	{
 		switch (c)
 		{
-		case 'V':
-			getversion(sccsid);
-			break;
 		case 'v':
 			verbose = 1;
 			break;

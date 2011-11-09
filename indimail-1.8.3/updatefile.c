@@ -1,5 +1,8 @@
 /*
  * $Log: updatefile.c,v $
+ * Revision 2.5  2011-11-09 19:45:38+05:30  Cprogrammer
+ * removed getversion
+ *
  * Revision 2.4  2009-01-16 14:54:47+05:30  Cprogrammer
  * option to delete all matching lines
  *
@@ -18,7 +21,7 @@
 #include <unistd.h>
 
 #ifndef	lint
-static char     sccsid[] = "$Id: updatefile.c,v 2.4 2009-01-16 14:54:47+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: updatefile.c,v 2.5 2011-11-09 19:45:38+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 static int      get_options(int argc, char **argv, char **, char **, char **, unsigned int *, int *, int *);
@@ -76,13 +79,10 @@ get_options(int argc, char **argv, char **filename, char **updateLine, char **de
 	*all = 0;*filename = *updateLine = *deleteLine = 0;
 	*mode = 0644;
 	*display = 0;
-	while (!errflag && (c = getopt(argc, argv, "Vvsau:d:m:")) != -1)
+	while (!errflag && (c = getopt(argc, argv, "vsau:d:m:")) != -1)
 	{
 		switch (c)
 		{
-		case 'V':
-			getversion(sccsid);
-			break;
 		case 'v':
 			verbose = 1;
 			break;
