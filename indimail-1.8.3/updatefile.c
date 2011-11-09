@@ -21,7 +21,7 @@
 #include <unistd.h>
 
 #ifndef	lint
-static char     sccsid[] = "$Id: updatefile.c,v 2.5 2011-11-09 19:45:38+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: updatefile.c,v 2.5 2011-11-09 19:45:38+05:30 Cprogrammer Stab mbhangui $";
 #endif
 
 static int      get_options(int argc, char **argv, char **, char **, char **, unsigned int *, int *, int *);
