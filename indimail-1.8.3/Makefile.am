@@ -131,8 +131,8 @@ inc_deps: configure Makefile
 	echo @auth_inc@ > inc_deps
 lib_deps: configure Makefile
 	if test -d ../qmail-1.03 ; then \
-		echo "-L../indimail-@VERSION@/.libs -L../indimail-@VERSION@/eps-1.2/.libs @auth_libs@" \
-			> ../qmail-1.03/lib_deps; \
+		echo "-L../indimail-@VERSION@/.libs -L../indimail-@VERSION@/eps-1.2/.libs \
+		-L../indimail-@VERSION@/cdb-1.0/.libs @auth_libs@" > ../qmail-1.03/lib_deps; \
 	fi ; \
 	echo @auth_libs@ > lib_deps
 
