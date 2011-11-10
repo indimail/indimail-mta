@@ -7,7 +7,7 @@
 #include "ripemd.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: ripemd.c,v 2.1 2011-10-27 14:29:53+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: ripemd.c,v 2.1 2011-10-27 14:29:53+05:30 Cprogrammer Stab mbhangui $";
 #endif
 
 static void compress(RIPEMD160_CTX *ctx);
