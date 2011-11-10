@@ -30,7 +30,7 @@
 #define SHA1HashSize 20
 
 #ifndef	lint
-static char     sccsidsha1h[] = "$Id: sha1.h,v 2.1 2011-10-27 14:30:52+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsidsha1h[] = "$Id: sha1.h,v 2.1 2011-10-27 14:30:52+05:30 Cprogrammer Stab mbhangui $";
 #endif
 
 typedef struct SHA1_CTX

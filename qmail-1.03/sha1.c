@@ -28,7 +28,7 @@
 	(((word) << (bits)) | ((word) >> (32-(bits))))
 
 #ifndef	lint
-static char     sccsid[] = "$Id: sha1.c,v 2.1 2011-10-27 14:30:23+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: sha1.c,v 2.1 2011-10-27 14:30:23+05:30 Cprogrammer Stab mbhangui $";
 #endif
 
 static void SHA1PadMessage(SHA1_CTX *);

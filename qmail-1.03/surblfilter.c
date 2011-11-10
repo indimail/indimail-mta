@@ -890,7 +890,7 @@ main(int argc, char **argv)
 void
 getversion_surblfilter_c()
 {
-	static char    *x = "$Id: surblfilter.c,v 1.6 2011-11-07 09:36:14+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: surblfilter.c,v 1.6 2011-11-07 09:36:14+05:30 Cprogrammer Stab mbhangui $";
 
 	x++;
 }

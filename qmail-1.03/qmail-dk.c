@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-dk.c,v $
+ * Revision 1.36  2011-11-10 14:31:42+05:30  Cprogrammer
+ * BUG ssout to be assigned only after pidopen()
+ *
  * Revision 1.35  2011-11-07 09:35:25+05:30  Cprogrammer
  * set ssout, sserr, ssin before executing other functions
  *
@@ -596,8 +599,6 @@ main(int argc, char *argv[])
 
 	sig_blocknone();
 	umask(033);
-	substdio_fdbuf(&ssout, write, messfd, outbuf, sizeof(outbuf));
-	substdio_fdbuf(&ssin, read, 0, inbuf, sizeof(inbuf));
 	if (!(x = env_get("ERROR_FD")))
 		errfd = CUSTOM_ERR_FD;
 	else
@@ -675,6 +676,8 @@ main(int argc, char *argv[])
 		die(63);
 	if (unlink(pidfn) == -1)
 		die(63);
+	substdio_fdbuf(&ssin, read, 0, inbuf, sizeof(inbuf));
+	substdio_fdbuf(&ssout, write, messfd, outbuf, sizeof(outbuf));
 	dkexcludeheaders = env_get("DKEXCLUDEHEADERS");
 	if (dkexcludeheaders)
 	{
@@ -882,7 +885,7 @@ main(argc, argv)
 void
 getversion_qmail_dk_c()
 {
-	static char    *x = "$Id: qmail-dk.c,v 1.35 2011-11-07 09:35:25+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-dk.c,v 1.36 2011-11-10 14:31:42+05:30 Cprogrammer Stab mbhangui $";
 
 	x++;
 }

@@ -11,7 +11,7 @@
 #include <string.h>
 
 #ifndef	lint
-static char     sccsidripemdh[] = "$Id: ripemd.h,v 2.1 2011-10-27 14:31:03+05:30 Cprogrammer Exp $";
+static char     sccsidripemdh[] = "$Id: ripemd.h,v 2.1 2011-10-27 14:31:03+05:30 Cprogrammer Stab $";
 #endif
 
 typedef struct {
