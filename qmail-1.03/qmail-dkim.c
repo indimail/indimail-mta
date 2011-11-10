@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-dkim.c,v $
+ * Revision 1.35  2011-11-10 14:32:08+05:30  Cprogrammer
+ * BUG ssout to be assigned only after pidopen()
+ *
  * Revision 1.34  2011-11-07 09:35:59+05:30  Cprogrammer
  * set ssout, sserr, ssin before executing other functions
  *
@@ -1103,8 +1106,6 @@ main(int argc, char *argv[])
 	else
 		scan_int(p, &errfd);
 	substdio_fdbuf(&sserr, write, errfd, errbuf, sizeof(errbuf));
-	substdio_fdbuf(&ssout, write, messfd, outbuf, sizeof(outbuf));
-	substdio_fdbuf(&ssin, read, 0, inbuf, sizeof(inbuf));
 	if (chdir(auto_qmail) == -1)
 		die(61, 0);
 	if (!dkimsign)
@@ -1210,6 +1211,8 @@ main(int argc, char *argv[])
 		die(63, dkimsign ? 1 : 2);
 	if (unlink(pidfn) == -1)
 		die(63, dkimsign ? 1 : 2);
+	substdio_fdbuf(&ssout, write, messfd, outbuf, sizeof(outbuf));
+	substdio_fdbuf(&ssin, read, 0, inbuf, sizeof(inbuf));
 	for (ret = 0;;)
 	{
 		register int    n;
@@ -1423,7 +1426,7 @@ main(argc, argv)
 void
 getversion_qmail_dkim_c()
 {
-	static char    *x = "$Id: qmail-dkim.c,v 1.34 2011-11-07 09:35:59+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-dkim.c,v 1.35 2011-11-10 14:32:08+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
