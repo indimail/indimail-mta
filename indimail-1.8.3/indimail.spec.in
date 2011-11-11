@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail.spec.in,v 2.236 2011-11-09 19:44:26+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 2.237 2011-11-11 13:27:01+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %define _unpackaged_files_terminate_build 1
 
@@ -225,10 +225,10 @@ BuildRequires: db-devel
 BuildRequires: -post-build-checks  
 #!BuildIgnore: post-build-checks  
 %else
-%if 0%{?mandriva_version} == 2011
-BuildRequires: db2-devel
+%if 0%{?mandriva_version} == 201100
+BuildRequires: db5.1-devel
 %else
-%if 0%{?mandriva_version} > 2009
+%if 0%{?mandriva_version} == 201010
 BuildRequires: db4.7-devel
 %else
 BuildRequires: db4-devel
