@@ -1,5 +1,8 @@
 #
 # $Log: zsuids.sh,v $
+# Revision 1.4  2011-11-13 15:40:47+05:30  Cprogrammer
+# fix for ubuntu (sort is /usr/bin/sort)
+#
 # Revision 1.3  2008-05-22 19:49:57+05:30  Cprogrammer
 # change for posix compliant sort
 #
@@ -23,5 +26,5 @@ One line per sender uid. Information on each line:
 '
 (
 echo mess bytes sbytes rbytes recips tries xdelay uid
-QMAIL/bin/suids | /bin/sort -n -r -k 1,1 -k 2,2 -k 3,3 -k 4,4
+QMAIL/bin/suids | sort -n -r -k 1,1 -k 2,2 -k 3,3 -k 4,4
 ) | QMAIL/bin/columnt

@@ -1,5 +1,8 @@
 #
 # $Log: zsuccesses.sh,v $
+# Revision 1.4  2011-11-13 15:40:44+05:30  Cprogrammer
+# fix for ubuntu (sort is /usr/bin/sort)
+#
 # Revision 1.3  2008-05-22 19:49:49+05:30  Cprogrammer
 # change for posix compliant sort
 #
@@ -18,5 +21,5 @@ One line per reason for successful delivery. Information on each line:
 '
 (
 echo del xdelay reason
-QMAIL/bin/successes | /bin/sort -k 2,2 -k 1,1
+QMAIL/bin/successes | sort -k 2,2 -k 1,1
 ) | QMAIL/bin/columnt | tr _ ' '

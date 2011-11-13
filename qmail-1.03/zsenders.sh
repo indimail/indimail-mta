@@ -1,5 +1,8 @@
 #
 # $Log: zsenders.sh,v $
+# Revision 1.5  2011-11-13 15:40:32+05:30  Cprogrammer
+# fix for ubuntu (sort is /usr/bin/sort)
+#
 # Revision 1.4  2008-05-22 19:49:18+05:30  Cprogrammer
 # change for posix compliant sort
 #
@@ -26,5 +29,5 @@ One line per sender. Information on each line:
 '
 ( 
 echo mess bytes sbytes rbytes recips tries xdelay sender
-QMAIL/bin/senders | /bin/sort -n -r -k 1,1 -k 2,2 -k 3,3 -k 4,4 -k 6,6
+QMAIL/bin/senders | sort -n -r -k 1,1 -k 2,2 -k 3,3 -k 4,4 -k 6,6
 ) | QMAIL/bin/columnt

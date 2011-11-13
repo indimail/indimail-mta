@@ -1,4 +1,7 @@
 # $Log: zspam.sh,v $
+# Revision 1.5  2011-11-13 15:40:41+05:30  Cprogrammer
+# fix for ubuntu (sort is /usr/bin/sort)
+#
 # Revision 1.4  2008-05-22 19:49:41+05:30  Cprogrammer
 # change for posix compliant sort
 #
@@ -27,7 +30,7 @@ One line per delivery through SPAM Filter. Information on each line:
 '
 (
 echo spambytes spam sbytes mess host
-QMAIL/bin/rspamrdomain | /bin/sort -n -r -k 1,1 -k 2,2 -k 4,4 -k 3,3
+QMAIL/bin/rspamrdomain | sort -n -r -k 1,1 -k 2,2 -k 4,4 -k 3,3
 ) | QMAIL/bin/columnt
 echo
 exec 0</tmp/smtp.$$
@@ -43,7 +46,7 @@ One line per delivery through SPAM Filter. Information on each line:
 '
 (
 echo spambytes spam sbytes mess host
-QMAIL/bin/rspamsdomain | /bin/sort -n -r -k 1,1 -k 2,2 -k 4,4 -k 3,3
+QMAIL/bin/rspamsdomain | sort -n -r -k 1,1 -k 2,2 -k 4,4 -k 3,3
 ) | QMAIL/bin/columnt
 
 echo
@@ -63,7 +66,7 @@ One line per host/domain. Information on each line:
 '
 (
 echo sbytes mess spam spam_pct unsure unsure_pct ham ham_pct
-QMAIL/bin/rspamstat | /bin/sort -n -r -k 3,3 -k 2,2 -k 1,1
+QMAIL/bin/rspamstat | sort -n -r -k 3,3 -k 2,2 -k 1,1
 ) | QMAIL/bin/columnt
 
 echo

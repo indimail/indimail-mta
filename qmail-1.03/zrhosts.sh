@@ -1,5 +1,8 @@
 #
 # $Log: zrhosts.sh,v $
+# Revision 1.4  2011-11-13 15:40:29+05:30  Cprogrammer
+# fix for ubuntu (sort is /usr/bin/sort)
+#
 # Revision 1.3  2008-05-22 19:49:15+05:30  Cprogrammer
 # change for posix compliant sort
 #
@@ -20,5 +23,5 @@ One line per recipient host. Information on each line:
 '
 (
 echo sbytes mess tries xdelay host
-QMAIL/bin/rhosts | /bin/sort -n -r -k 1.1,1.0 -k 2,2 -k 4,4 -k 3,3
+QMAIL/bin/rhosts | sort -n -r -k 1.1,1.0 -k 2,2 -k 4,4 -k 3,3
 ) | QMAIL/bin/columnt
