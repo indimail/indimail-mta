@@ -1,5 +1,8 @@
 /*
  * $Log: pw_comp.c,v $
+ * Revision 2.12  2011-11-13 15:27:20+05:30  Cprogrammer
+ * fixed password comparision for TRIVIAL_PASSWORD case
+ *
  * Revision 2.11  2011-10-28 17:58:38+05:30  Cprogrammer
  * added AUTH CRAM-SHA1, CRAM-RIPEMD, DIGEST-MD5
  *
@@ -42,7 +45,7 @@
 #include <unistd.h>
 
 #ifndef	lint
-static char     sccsid[] = "$Id: pw_comp.c,v 2.11 2011-10-28 17:58:38+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: pw_comp.c,v 2.12 2011-11-13 15:27:20+05:30 Cprogrammer Stab mbhangui $";
 #endif
 
 static char     hextab[] = "0123456789abcdef";
@@ -57,7 +60,7 @@ static char     hextab[] = "0123456789abcdef";
 #define AUTH_DIGEST_MD5  6
 
 int
-pw_comp(unsigned char *testlogin, unsigned char *password, unsigned char *challenge,
+pw_comp(unsigned char *testlogin, unsigned char *localpw, unsigned char *challenge,
 	unsigned char *response, int auth_method)
 {
 	unsigned char   digest[21], digascii[41];
@@ -67,32 +70,32 @@ pw_comp(unsigned char *testlogin, unsigned char *password, unsigned char *challe
 
 	if (!challenge || (challenge && !*challenge))
 	{
-		if (!(crypt_pass = in_crypt((char *) response, (char *) password)))
+		if (!(crypt_pass = in_crypt((char *) response, (char *) localpw)))
 		{
 			printf("454-CRYPT: %s (#4.3.0)\r\n", strerror(errno));
 			fflush(stdout);
 			_exit (111);
 		}
 		len = strlen(crypt_pass);
-		i = strncmp((const char *) crypt_pass, (const char *) password, (size_t) len + 1);
+		i = strncmp((const char *) crypt_pass, (const char *) localpw, (size_t) len + 1);
 		/*- non CRAM-MD5 aware app */
 		if (i && getenv("TRIVIAL_PASSWORDS"))
 		{
-			mkpasswd3((char *) password, Crypted, MAX_BUFF);
-			if (!(crypt_pass = in_crypt((char *) response, (char *) password)))
+			mkpasswd3((char *) localpw, Crypted, MAX_BUFF);
+			if (!(crypt_pass = in_crypt((char *) response, (char *) Crypted)))
 			{
 				printf("454-CRYPT: %s (#4.3.0)\r\n", strerror(errno));
 				fflush(stdout);
 				_exit (111);
 			}
 			len = strlen(crypt_pass);
-			i = strncmp((const char *) crypt_pass, (const char *) password, (size_t) len + 1);
+			i = strncmp((const char *) crypt_pass, (const char *) Crypted, (size_t) len + 1);
 		}
 		return (i);
 	}
 	if ((!auth_method && !getenv("DISABLE_CRAM_MD5")) || auth_method == AUTH_CRAM_MD5) {
-		hmac_md5(challenge, (int) strlen((const char *) challenge), password,
-			(int) strlen((const char *) password), digest);
+		hmac_md5(challenge, (int) strlen((const char *) challenge), localpw,
+			(int) strlen((const char *) localpw), digest);
 		digascii[32] = 0;
 		for (i=0, e = (char *) digascii; i<16; i++) {
 			*e = hextab[digest[i]/16]; ++e;
@@ -102,8 +105,8 @@ pw_comp(unsigned char *testlogin, unsigned char *password, unsigned char *challe
 			return (i);
 	}
 	if ((!auth_method && !getenv("DISABLE_CRAM_SHA1")) || auth_method == AUTH_CRAM_SHA1) {
-		hmac_sha1(challenge, (int) strlen((const char *) challenge), password,
-			(int) strlen((const char *) password), digest);
+		hmac_sha1(challenge, (int) strlen((const char *) challenge), localpw,
+			(int) strlen((const char *) localpw), digest);
 		digascii[40] = 0;
 		for (i=0, e = (char *) digascii; i<20; i++) {
 			*e = hextab[digest[i]/16]; ++e;
@@ -113,8 +116,8 @@ pw_comp(unsigned char *testlogin, unsigned char *password, unsigned char *challe
 			return (i);
 	}
 	if ((!auth_method && !getenv("DISABLE_CRAM_RIPEMD")) || auth_method == AUTH_CRAM_RIPEMD) {
-		hmac_ripemd(challenge, (int) strlen((const char *) challenge), password,
-			(int) strlen((const char *) password), digest);
+		hmac_ripemd(challenge, (int) strlen((const char *) challenge), localpw,
+			(int) strlen((const char *) localpw), digest);
 		digascii[40] = 0;
 		for (i=0, e = (char *) digascii; i<20; i++) {
 			*e = hextab[digest[i]/16]; ++e;
@@ -124,7 +127,7 @@ pw_comp(unsigned char *testlogin, unsigned char *password, unsigned char *challe
 			return (i);
 	}
 	if ((!auth_method && !getenv("DISABLE_DIGEST_MD5")) || auth_method == AUTH_DIGEST_MD5) {
-		if ((i = digest_md5((char *) response, testlogin, challenge, password)) == -1)
+		if ((i = digest_md5((char *) response, testlogin, challenge, localpw)) == -1)
 		{
 			printf("454-DIGEST-MD5: %s (#4.3.0)\r\n", strerror(errno));
 			fflush(stdout);
