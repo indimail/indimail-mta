@@ -1,5 +1,8 @@
 #
 # $Log: zfailures.sh,v $
+# Revision 1.4  2011-11-13 15:40:22+05:30  Cprogrammer
+# fix for ubuntu (sort is /usr/bin/sort)
+#
 # Revision 1.3  2008-05-22 19:48:55+05:30  Cprogrammer
 # change for posix compliant sort
 #
@@ -18,5 +21,5 @@ One line per reason for delivery failure. Information on each line:
 '
 (
 echo del xdelay reason
-QMAIL/bin/failures | /bin/sort -n -r -k 2,2
+QMAIL/bin/failures | sort -n -r -k 2,2
 ) | QMAIL/bin/columnt | tr _ ' '
