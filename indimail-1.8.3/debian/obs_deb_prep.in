@@ -68,9 +68,11 @@ do
 		echo "no source archive for $i"
 		exit 1
 	fi
+	# skip bogofilter and fetchmail patch for obs
 	if [ " $i" = " bogofilter-"$bogofilter_version"" -o " $i" = " fetchmail-"$fetchmail_version"" ] ; then
 		continue
 	fi
+	# indimail patch
 	if [ " $i" = " indimail-"$version"" ] ; then
 		if [ -f ../SOURCES/$i.patch.gz ] ; then
 			echo "applying patch for $i"
@@ -78,6 +80,7 @@ do
 			continue
 		fi
 	fi
+	# courier-imap patch
 	if [ " $i" = " courier-imap-"$courier_version"" ] ; then
 		if [ -f ../SOURCES/$i.patch.gz ] ; then
 			echo "applying patch for $i"
@@ -85,6 +88,15 @@ do
 			continue
 		fi
 	fi
+	# clamav patch
+	if [ " $i" = " clamav-"$clamav_version"" ] ; then
+		if [ -f ../SOURCES/$i.patch.gz ] ; then
+			echo "applying patch for $i"
+			gunzip -c ../SOURCES/$i.patch.gz | patch -p0 > /dev/null
+			continue
+		fi
+	fi
+	# qmail patch
 	if [ " $i" = " qmail-1.03" ] ; then
 		if [ -f ../SOURCES/$i.patch.gz ] ; then
 			echo "applying patch for $i"
@@ -101,8 +113,8 @@ do
 	fi
 done
 # Local Stuff
-if [ -f ../SOURCES/debian_qmail.patch ] ; then
-	echo "applying debian_qmail.patch"
-	patch -p0 < ../SOURCES/debian_qmail.patch
+if [ -f ../SOURCES/debian_extra.patch ] ; then
+	echo "applying debian_extra.patch"
+	patch -p0 < ../SOURCES/debian_extra.patch
 fi
 exit 0
