@@ -27,7 +27,7 @@ mail_acl(stralloc *acclist, int qregex, char *sender, char *recipient, char verb
 	{
 		if (verb)
 		{
-			out("access alowed for bounces\n");
+			out("access allowed for bounces\n");
 			flush();
 		}
 		return(0);
