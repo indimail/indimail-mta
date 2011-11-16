@@ -1,5 +1,8 @@
 /*
  * $Log: smtpd.c,v $
+ * Revision 1.160  2011-11-16 16:19:49+05:30  Cprogrammer
+ * fix errStr, errstr variables
+ *
  * Revision 1.159  2011-11-07 09:32:17+05:30  Cprogrammer
  * removed unused variable qop
  *
@@ -627,7 +630,7 @@ int             wildmat_internal(char *, char *);
 int             ssl_rfd = -1, ssl_wfd = -1;	/*- SSL_get_Xfd() are broken */
 char           *servercert, *clientca, *clientcrl;
 #endif
-char           *revision = "$Revision: 1.159 $";
+char           *revision = "$Revision: 1.160 $";
 char           *protocol = "SMTP";
 stralloc        proto = { 0 };
 static stralloc Revision = { 0 };
@@ -1020,16 +1023,16 @@ die_logfilter()
 }
 
 void
-die_addressmatch(char *errStr)
+die_addressmatch(char *errstr)
 {
 	logerr("qmail-smtpd: ");
 	logerrpid();
 	logerr(remoteip);
 	logerr(" address_match: ");
-	logerr(errStr);
+	logerr(errstr);
 	logerrf("\n");
 	out("451 Requested action aborted: ");
-	out(errStr);
+	out(errstr);
 	out(" (#4.3.0)\r\n");
 	flush();
 	_exit (1);
@@ -1042,7 +1045,7 @@ err_addressmatch(char *errstr)
 	logerrpid();
 	logerr(remoteip);
 	logerr(" address_match: ");
-	logerr(errStr);
+	logerr(errstr);
 	logerrf("\n");
 	out("451 Requested action aborted: local system failure (#4.3.0)\r\n");
 }
@@ -4190,7 +4193,7 @@ smtp_rcpt(char *arg)
 			logerrpid();
 			logerr(remoteip);
 			logerr(" accesslist: ");
-			logerr(errStr);
+			logerr(error_str(errno));
 			logerrf("\n");
 			return;
 		}
@@ -6543,7 +6546,7 @@ addrrelay() /*- Rejection of relay probes. */
 void
 getversion_smtpd_c()
 {
-	static char    *x = "$Id: smtpd.c,v 1.159 2011-11-07 09:32:17+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: smtpd.c,v 1.160 2011-11-16 16:19:49+05:30 Cprogrammer Stab mbhangui $";
 
 #ifdef INDIMAIL
 	if (x)
