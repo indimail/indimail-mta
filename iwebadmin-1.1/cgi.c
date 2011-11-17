@@ -1,5 +1,5 @@
 /*
- * $Id: cgi.c,v 1.1 2010-04-26 11:24:51+05:30 Cprogrammer Exp mbhangui $
+ * $Id: cgi.c,v 1.2 2011-11-17 22:10:11+05:30 Cprogrammer Exp mbhangui $
  * Copyright (C) 1999-2004 Inter7 Internet Technologies, Inc. 
  *
  * This program is free software; you can redistribute it and/or modify
@@ -27,8 +27,8 @@
 #include <pwd.h>
 #include <dirent.h>
 #include <ctype.h>
-#include "qmailadmin.h"
-#include "qmailadminx.h"
+#include "iwebadmin.h"
+#include "iwebadminx.h"
 #include "cgi.h"
 #include "util.h"
 

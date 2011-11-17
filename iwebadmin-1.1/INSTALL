@@ -1,17 +1,17 @@
 Install guide 
 
-QmailAdmin 1.2.0 and later requires indimail 1.7 or later.
+IwebAdmin 1.2.0 and later requires indimail 1.7 or later.
 
 If you are installing on x86_64 platform (64-bit Intel/AMD processor),
 or if configure exits with an "Invalid configuration" error,
-you will need to run `libtoolize --force` in the QmailAdmin source
+you will need to run `libtoolize --force` in the IwebAdmin source
 directory before following any other instructions in this guide.
 
-qmailadmin needs to install into indimail directories
-/var/indimail/share/qmailadmin, the web server's cgi-bin directory
+iwebadmin needs to install into indimail directories
+/var/indimail/share/iwebadmin, the web server's cgi-bin directory
 and the web server's html directory. Hence root.
 
-Since qmailadmin is a suid binary, make sure it's installed on
+Since iwebadmin is a suid binary, make sure it's installed on
 a volume that isn't mounted with the 'nosuid' option in /etc/fstab.
 
 Be root before you follow the rest of the instructions or
@@ -32,8 +32,8 @@ the above information then starting from scratch.
         --enable-mysqllibdir=/usr/lib/mysql \
         --enable-htmldir=/var/www/html \
         --enable-cgibindir=/var/www/cgi-bin \
-        --enable-imagedir=/var/www/html/images/qmailadmin \
-        --enable-htmllibdir=/var/indimail/share/qmailadmin
+        --enable-imagedir=/var/www/html/images/iwebadmin \
+        --enable-htmllibdir=/var/indimail/share/iwebadmin
     # make
     # make install-strip
 
@@ -57,18 +57,18 @@ the above information then starting from scratch.
 *Use this if your cgi bin is not in a standard location
 	 --enable-cgibindir={dir}   HTTP server's cgi-bin directory.
 
-Since qmailadmin is a suid binary, make sure the cgi-bin directory is
+Since iwebadmin is a suid binary, make sure the cgi-bin directory is
 on a volume that isn't mounted with the 'nosuid' option in /etc/fstab.
 
 *Use this if your don't want the HTML templates to be 
- in /var/indimail/share/qmailadmin
-	--enable-htmllibdir={dir}  qmailadmin HTML library directory.
+ in /var/indimail/share/iwebadmin
+	--enable-htmllibdir={dir}  iwebadmin HTML library directory.
 
 *Use this if your qmail directory is not in /var/qmail  
 	--enable-qmaildir={dir}   directory where qmail is installed.
 
 *Use this if your URL PATH for cgi-bin is elsewhere   
-	--enable-cgipath={/cgi-bin/qmailadmin}   URL path for cgi.
+	--enable-cgipath={/cgi-bin/iwebadmin}   URL path for cgi.
 
 *use this to set the indimail user if it is not indimail.
 	--enable-indimailuser={indimail}   user indimail was installed as.
@@ -82,20 +82,20 @@ on a volume that isn't mounted with the 'nosuid' option in /etc/fstab.
 *Use this if ezmlm is not in /var/indimail/bin/ezmlm
 	--enable-ezmlmdir={dir}  Directory that holds the ezmlm package.
 
-*If you have different domains accessing the same qmailadmin, you 
+*If you have different domains accessing the same iwebadmin, you 
  may want to automatically fill the domain field with the domain the 
- user accessed the qmailadmin cgi with:
+ user accessed the iwebadmin cgi with:
    --enable-domain-autofill
 
-  With autofill enabled, qmailadmin will search the file
+  With autofill enabled, iwebadmin will search the file
   /var/indimail/control/virtualdomains for an entry that matches the
   hostname of the HTTP request.  So, if test.com appears in your
-  virtualdomains file, <http://www.test.com/cgi-bin/qmailadmin>
+  virtualdomains file, <http://www.test.com/cgi-bin/iwebadmin>
   will pre-fill the domain field with "test.com".
 
   Note that with or without autofill enabled, you can pass parameters
-  to qmailadmin to pre-fill the "User Account" and "Domain" fields.
-  <http://www.test.com/cgi-bin/qmailadmin?dom=xyz.net&user=john> will
+  to iwebadmin to pre-fill the "User Account" and "Domain" fields.
+  <http://www.test.com/cgi-bin/iwebadmin?dom=xyz.net&user=john> will
   prefill "Domain" with xyz.net and "User Account" with john.
 
 3. Ok, now configure, using any options that you need to. For example:
@@ -108,7 +108,7 @@ on a volume that isn't mounted with the 'nosuid' option in /etc/fstab.
 	make install-strip (for a smaller binary)
 
 To run it, type into your webrowser:
-	http://yourdomain/cgi-bin/qmailadmin
+	http://yourdomain/cgi-bin/iwebadmin
 
 Now.. some fine tuning..
 
@@ -120,8 +120,8 @@ Now.. some fine tuning..
         d) mailing lists 
         e) autoresponders
 
- Then create a .qmailadmin-limits file in the virtual domain directory
- for the domain you wish to limit. The syntax of the .qmailadmin-limits
+ Then create a .iwebadmin-limits file in the virtual domain directory
+ for the domain you wish to limit. The syntax of the .iwebadmin-limits
  file is as follows:
 
 maxpopaccounts          X
@@ -136,7 +136,7 @@ has read permissions to this file. The default is unlimited.
 If you set any of the above values to 0 it will effectually disable
 that part of the menu and that feature.
 
-In addition, you can use qmailadmin-limits to disable services on a per 
+In addition, you can use iwebadmin-limits to disable services on a per 
 domain basis for the creation of new users.  If you choose to disable
 services on a domain that has existing user accounts, you will need to
 modify the existing user accounts manually with vmoduser.
@@ -150,7 +150,7 @@ You may disable these services:
 	e) Dialup Access
 	f) Password Changing
 
-The syntax of the .qmailadmin-limits file for disabling the above 
+The syntax of the .iwebadmin-limits file for disabling the above 
 services, respectively, is:
 
 disable_pop
@@ -164,7 +164,7 @@ These services are enabled by default, unless manually changed
 via vmoduser.
 
 Lastly, you can set default quotas on a per domain basis.  Just include this
-line in your .qmailadmin-limits file:
+line in your .iwebadmin-limits file:
 
 default_quota <quota>
 
@@ -175,7 +175,7 @@ users will need to me manually changed via vmoduser.
 
 7. If you want to modify the "look" of qmail admin:
    
-   Edit the html template files in /var/indimail/share/qmailadmin/
+   Edit the html template files in /var/indimail/share/iwebadmin/
    or if you changed the location with the --enable-htmllibdir={dir}
    then edit the files in that directory. The HTML elements for some
    not-very-often used features are included in comments in the
@@ -183,7 +183,7 @@ users will need to me manually changed via vmoduser.
 
 8. If you want more than one administrator of a domain:
 
-   You can issue 'vmoduser -a <user@domain>' to grant qmailadmin administrator
+   You can issue 'vmoduser -a <user@domain>' to grant iwebadmin administrator
    privileges to non-postmaster users for a domain.  To remove the these
    privileges, just clear the gid flags for that user with 
    'vmoduser -x <user@domain>'
@@ -193,10 +193,10 @@ users will need to me manually changed via vmoduser.
 
    sudo /var/indimail/bin/vadddomain "your new domain name" "pick a postmaster password"
 
-   Then you can log into qmailadmin with "your new domain name" and
+   Then you can log into iwebadmin with "your new domain name" and
    the password you set with the vadddomain command.
 
-10. There are a number of things you can pass to qmailadmin when you run
+10. There are a number of things you can pass to iwebadmin when you run
 it.  I believe they can be sent via either post or get. 
 
    domain = set the domain name in the login page.
@@ -204,7 +204,7 @@ it.  I believe they can be sent via either post or get.
    user = set the user name in the login page.
 
    returnhttp and returntext (both must be used) = create a link to 
-   returnhttp on all qmailadmin pages with returntext for its label.
+   returnhttp on all iwebadmin pages with returntext for its label.
 
 
 11. Enjoy

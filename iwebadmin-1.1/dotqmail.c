@@ -1,5 +1,5 @@
 /*
- * $Id: dotqmail.c,v 1.2 2010-10-09 13:53:54+05:30 Cprogrammer Exp mbhangui $
+ * $Id: dotqmail.c,v 1.3 2011-11-17 22:10:27+05:30 Cprogrammer Exp mbhangui $
  * Copyright (C) 1999-2004 Inter7 Internet Technologies 
  *
  * This program is free software; you can redistribute it and/or modify
@@ -43,8 +43,8 @@
 #include <unistd.h>
 #include <sys/stat.h>
 #include "dotqmail.h"
-#include "qmailadmin.h"
-#include "qmailadminx.h"
+#include "iwebadmin.h"
+#include "iwebadminx.h"
 
 #ifdef VALIAS
 int

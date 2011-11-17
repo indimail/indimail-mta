@@ -1,5 +1,5 @@
 /*
- * $Id: limits.c,v 1.2 2010-10-09 13:54:13+05:30 Cprogrammer Exp mbhangui $
+ * $Id: limits.c,v 1.3 2011-11-17 22:10:48+05:30 Cprogrammer Exp mbhangui $
  * Copyright (C) 1999-2004 Inter7 Internet Technologies, Inc. 
  *
  * This program is free software; you can redistribute it and/or modify
@@ -36,8 +36,8 @@
 #undef PACKAGE_URL
 #include "config.h"
 
-#include "qmailadmin.h"
-#include "qmailadminx.h"
+#include "iwebadmin.h"
+#include "iwebadminx.h"
 #include "limits.h"
 
 void

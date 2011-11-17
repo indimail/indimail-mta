@@ -1,5 +1,5 @@
 /*
- * $Id: command.c,v 1.2 2010-10-09 13:53:22+05:30 Cprogrammer Exp mbhangui $
+ * $Id: command.c,v 1.3 2011-11-17 22:11:17+05:30 Cprogrammer Exp mbhangui $
  * Copyright (C) 1999-2004 Inter7 Internet Technologies, Inc. 
  *
  * This program is free software; you can redistribute it and/or modify
@@ -52,8 +52,8 @@
 #include "forward.h"
 #include "mailinglist.h"
 #include "printh.h"
-#include "qmailadmin.h"
-#include "qmailadminx.h"
+#include "iwebadmin.h"
+#include "iwebadminx.h"
 #include "show.h"
 #include "user.h"
 #include "util.h"
