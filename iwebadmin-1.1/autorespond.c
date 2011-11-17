@@ -1,5 +1,5 @@
 /*
- * $Id: autorespond.c,v 1.3 2011-11-06 17:51:14+05:30 Cprogrammer Exp mbhangui $
+ * $Id: autorespond.c,v 1.4 2011-11-17 22:10:07+05:30 Cprogrammer Exp mbhangui $
  * Copyright (C) 1999-2004 Inter7 Internet Technologies, Inc. 
  *
  * This program is free software; you can redistribute it and/or modify
@@ -49,8 +49,8 @@
 #include "autorespond.h"
 #include "limits.h"
 #include "printh.h"
-#include "qmailadmin.h"
-#include "qmailadminx.h"
+#include "iwebadmin.h"
+#include "iwebadminx.h"
 #include "show.h"
 #include "template.h"
 #include "util.h"

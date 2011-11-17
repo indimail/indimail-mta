@@ -8,28 +8,28 @@ htmldir=@htmldir@
 imagedir=@imagedir@
 
 #
-# Install qmailadmin setuid to @indimailuser@
+# Install iwebadmin setuid to @indimailuser@
 #
 INSTALL_PROGRAM = ${INSTALL}          -c
 INSTALL_STRIP_PROGRAM=${INSTALL_PROGRAM} -s
 
 bindir=@cgibindir@
 bin_PROGRAMS=@CGIBINTARGETS@
-EXTRA_PROGRAMS=qmailadmin
+EXTRA_PROGRAMS=iwebadmin
 
 SYSCONFDIR = @sysconfdir@
 sysconf_DATA = iwebadmin_perm_list
 
-qmailadmin_DEPENDENCIES=$(COMMONDEPENDENCIES)
+iwebadmin_DEPENDENCIES=$(COMMONDEPENDENCIES)
 
-COMMONSOURCES=qmailadmin.c alias.c autorespond.c forward.c mailinglist.c \
+COMMONSOURCES=iwebadmin.c alias.c autorespond.c forward.c mailinglist.c \
 	      user.c util.c printh.c auth.c template.c \
 	      command.c show.c cgi.c limits.c dotqmail.c \
-	      qmailadmin.h qmailadminx.h
+	      iwebadmin.h iwebadminx.h
 
-qmailadmin_SOURCES=$(COMMONSOURCES) 
-qmailadmin_LDADD=@auth_libs@
-qmailadmin_CFLAGS = -I@auth_inc@
+iwebadmin_SOURCES=$(COMMONSOURCES) 
+iwebadmin_LDADD=@auth_libs@
+iwebadmin_CFLAGS = -I@auth_inc@
 
 noinst_SCRIPTS = iwebadmin.spec iwebadmin-@VERSION@-rpmlintrc
 
@@ -47,21 +47,21 @@ edit = sed \
 	-e 's,@version\@,$(VERSION),g' \
 	-e 's,@prefix\@,$(prefix),g'
 
-qmailadmin.o: config.h qmailadmin.h 
-alias.o: config.h qmailadmin.h qmailadminx.h 
-autorespond.o: config.h qmailadmin.h qmailadminx.h 
-forward.o: config.h qmailadmin.h qmailadminx.h 
-mailinglist.o: config.h qmailadmin.h qmailadminx.h 
-user.o: config.h qmailadmin.h qmailadminx.h 
-util.o: config.h qmailadmin.h qmailadminx.h 
+iwebadmin.o: config.h iwebadmin.h 
+alias.o: config.h iwebadmin.h iwebadmin.h 
+autorespond.o: config.h iwebadmin.h iwebadmin.h 
+forward.o: config.h iwebadmin.h iwebadminx.h 
+mailinglist.o: config.h iwebadmin.h iwebadminx.h 
+user.o: config.h iwebadmin.h iwebadminx.h 
+util.o: config.h iwebadmin.h iwebadminx.h 
 printh.o: printh.h
-auth.o: config.h qmailadmin.h qmailadminx.h 
-template.o: config.h qmailadmin.h qmailadminx.h 
-command.o: qmailadmin.h qmailadminx.h 
-show.o: config.h qmailadmin.h qmailadminx.h 
-cgi.o: config.h qmailadmin.h qmailadminx.h 
-limits.o: config.h qmailadmin.h qmailadminx.h 
-dotqmail.o: config.h qmailadmin.h qmailadminx.h 
+auth.o: config.h iwebadmin.h iwebadminx.h 
+template.o: config.h iwebadmin.h iwebadminx.h 
+command.o: iwebadmin.h iwebadminx.h 
+show.o: config.h iwebadmin.h iwebadminx.h 
+cgi.o: config.h iwebadmin.h iwebadminx.h 
+limits.o: config.h iwebadmin.h iwebadminx.h 
+dotqmail.o: config.h iwebadmin.h iwebadminx.h 
 
 iwebadmin.spec: iwebadmin.spec.in
 	($(edit) $@.in;cat doc/ChangeLog) > $@
@@ -97,10 +97,10 @@ install-data-local:
 	cp $(srcdir)/images/*.png $(DESTDIR)@imagedir@
 
 	if test `@idcommand@` = "0" ; then \
-		echo "chown root $(DESTDIR)$(bindir)/qmailadmin"; \
-		chown root $(DESTDIR)$(bindir)/qmailadmin; \
-		echo "chmod 4555 $(DESTDIR)$(bindir)/qmailadmin"; \
-		chmod 4555 $(DESTDIR)$(bindir)/qmailadmin; \
+		echo "chown root $(DESTDIR)$(bindir)/iwebadmin"; \
+		chown root $(DESTDIR)$(bindir)/iwebadmin; \
+		echo "chmod 4555 $(DESTDIR)$(bindir)/iwebadmin"; \
+		chmod 4555 $(DESTDIR)$(bindir)/iwebadmin; \
 	fi
 install-data-hook:
 	$(mkinstalldirs)         $(DESTDIR)@indimaildir@/etc

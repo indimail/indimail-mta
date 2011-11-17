@@ -1,5 +1,5 @@
 /*
- * $Id: mailinglist.c,v 1.3 2011-05-13 10:35:56+05:30 Cprogrammer Exp mbhangui $
+ * $Id: mailinglist.c,v 1.4 2011-11-17 22:10:53+05:30 Cprogrammer Exp mbhangui $
  * Copyright (C) 1999-2004 Inter7 Internet Technologies, Inc. 
  *
  * This program is free software; you can redistribute it and/or modify
@@ -53,8 +53,8 @@
 #include "limits.h"
 #include "mailinglist.h"
 #include "printh.h"
-#include "qmailadmin.h"
-#include "qmailadminx.h"
+#include "iwebadmin.h"
+#include "iwebadminx.h"
 #include "show.h"
 #include "template.h"
 #include "util.h"
@@ -1401,7 +1401,7 @@ show_current_list_values()
 
 /*
  * IMPORTANT: If you change the behavior of the checkboxes, you need
- * * to update the default settings in modmailinglistnow so qmailadmin
+ * * to update the default settings in modmailinglistnow so iwebadmin
  * * will use the proper settings when a checkbox isn't checked.
  */
 

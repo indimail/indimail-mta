@@ -1,5 +1,5 @@
 /*
- * $Id: template.c,v 1.4 2011-11-06 17:57:33+05:30 Cprogrammer Exp mbhangui $
+ * $Id: template.c,v 1.5 2011-11-17 22:11:04+05:30 Cprogrammer Exp mbhangui $
  * Copyright (C) 1999-2004 Inter7 Internet Technologies, Inc. 
  *
  * This program is free software; you can redistribute it and/or modify
@@ -52,8 +52,8 @@
 #include "limits.h"
 #include "mailinglist.h"
 #include "printh.h"
-#include "qmailadmin.h"
-#include "qmailadminx.h"
+#include "iwebadmin.h"
+#include "iwebadminx.h"
 #include "template.h"
 #include "user.h"
 #include "util.h"

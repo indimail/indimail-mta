@@ -1,5 +1,5 @@
 /*
- * $Id: user.c,v 1.4 2011-10-25 10:41:10+05:30 Cprogrammer Exp mbhangui $
+ * $Id: user.c,v 1.5 2011-11-17 22:11:07+05:30 Cprogrammer Exp mbhangui $
  * Copyright (C) 1999-2004 Inter7 Internet Technologies, Inc. 
  *
  * This program is free software; you can redistribute it and/or modify
@@ -61,8 +61,8 @@
 #include "config.h"
 #include "limits.h"
 #include "printh.h"
-#include "qmailadmin.h"
-#include "qmailadminx.h"
+#include "iwebadmin.h"
+#include "iwebadminx.h"
 #include "show.h"
 #include "template.h"
 #include "user.h"
@@ -559,12 +559,12 @@ call_hooks(char *hook_type, char *p1, char *p2, char *p3, char *p4)
 /*
  * first look in directory for domain 
  */
-	sprintf(hooks_path, "%s/.qmailadmin-hooks", RealDir);
+	sprintf(hooks_path, "%s/.iwebadmin-hooks", RealDir);
 	if ((fs = fopen(hooks_path, "r")) == NULL) {
 	/*
 	 * then try ~vpopmail/etc 
 	 */
-		sprintf(hooks_path, "%s/etc/.qmailadmin-hooks", INDIMAILDIR);
+		sprintf(hooks_path, "%s/etc/.iwebadmin-hooks", INDIMAILDIR);
 		if ((fs = fopen(hooks_path, "r")) == NULL) {
 			return (0);
 		}

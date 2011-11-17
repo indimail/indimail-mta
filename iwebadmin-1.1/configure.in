@@ -76,7 +76,7 @@ case "$host" in
 	;;
 esac
 
-CGIBINTARGETS=qmailadmin
+CGIBINTARGETS=iwebadmin
 AC_SUBST(CGIBINTARGETS)
 
 indimaildir="/var/indimail"
@@ -233,8 +233,8 @@ AC_ARG_ENABLE(cgibindir, [  --enable-cgibindir=DIR    HTTP server's cgi-bin dire
     ] )
 AC_SUBST(cgibindir)
 
-imageurl="/images/qmailadmin"
-AC_ARG_ENABLE(imageurl, [  --enable-imageurl=URL     URL to image files [/images/qmailadmin].],
+imageurl="/images/iwebadmin"
+AC_ARG_ENABLE(imageurl, [  --enable-imageurl=URL     URL to image files [/images/iwebadmin].],
     imageurl="$enableval",
     [
         if test "$imageurl" = ""
@@ -253,7 +253,7 @@ do
         imagedir=$f$imageurl
     fi
 done
-AC_ARG_ENABLE(imagedir, [  --enable-imagedir=DIR     Where to put the image files [DocumentRoot/images/qmailadmin].],
+AC_ARG_ENABLE(imagedir, [  --enable-imagedir=DIR     Where to put the image files [DocumentRoot/images/iwebadmin].],
     imagedir="$enableval",
     [
         if test "$imagedir" = ""
@@ -263,9 +263,9 @@ AC_ARG_ENABLE(imagedir, [  --enable-imagedir=DIR     Where to put the image file
     ] )
 AC_SUBST(imagedir)
 
-htmllibdir="/var/indimail/share/qmailadmin"
+htmllibdir="/var/indimail/share/iwebadmin"
 
-AC_ARG_ENABLE(htmllibdir, [  --enable-htmllibdir=DIR   qmailadmin HTML library directory.],
+AC_ARG_ENABLE(htmllibdir, [  --enable-htmllibdir=DIR   iwebadmin HTML library directory.],
     htmllibdir="$enableval",
     [
         if test "$htmllibdir" = ""
@@ -296,9 +296,9 @@ AC_ARG_ENABLE(ezmlmdir, [  --enable-ezmlmdir=PATH    Path to ezmlm binaries or =
     ] )
 AC_DEFINE_UNQUOTED(EZMLMDIR,"$ezmlmdir","")
 
-cgipath="/cgi-bin/qmailadmin"
+cgipath="/cgi-bin/iwebadmin"
 
-AC_ARG_ENABLE(cgipath, [  --enable-cgipath=PATH     URL path for cgi [/cgi-bin/qmailadmin].],
+AC_ARG_ENABLE(cgipath, [  --enable-cgipath=PATH     URL path for cgi [/cgi-bin/iwebadmin].],
     cgipath="$enableval",
     [
         if test "$cgipath" = ""
@@ -415,7 +415,7 @@ case $MODIFY_QUOTA in
         ;;
 esac
 
-AC_ARG_ENABLE(domain-autofill, [  --enable-domain-autofill  Autofill the domain on login page based on the hostname that accesses qmailadmin.],
+AC_ARG_ENABLE(domain-autofill, [  --enable-domain-autofill  Autofill the domain on login page based on the hostname that accesses iwebadmin.],
    DOMAIN_AUTOFILL="$enableval",)
 
 case $DOMAIN_AUTOFILL in
