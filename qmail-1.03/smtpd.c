@@ -1,5 +1,8 @@
 /*
  * $Log: smtpd.c,v $
+ * Revision 1.161  2011-11-17 20:31:09+05:30  Cprogrammer
+ * handle the case when recipients.cdb is not present
+ *
  * Revision 1.160  2011-11-16 16:19:49+05:30  Cprogrammer
  * fix errStr, errstr variables
  *
@@ -630,7 +633,7 @@ int             wildmat_internal(char *, char *);
 int             ssl_rfd = -1, ssl_wfd = -1;	/*- SSL_get_Xfd() are broken */
 char           *servercert, *clientca, *clientcrl;
 #endif
-char           *revision = "$Revision: 1.160 $";
+char           *revision = "$Revision: 1.161 $";
 char           *protocol = "SMTP";
 stralloc        proto = { 0 };
 static stralloc Revision = { 0 };
@@ -2230,6 +2233,11 @@ sigscheck(stralloc *line, char **desc, int in_header)
 }
 
 #ifdef INDIMAIL
+/*
+ * This function returns
+ *  0: If user not found
+ * >0: if user is found
+ */
 int
 check_recipient_cdb(char *rcpt)
 {
@@ -2244,6 +2252,8 @@ check_recipient_cdb(char *rcpt)
 	case -2:
 		die_nomem();
 		break;
+	case 10: /*- recipient cdb does not exist */
+		return 0:
 	case -3:
 	case 111:
 		out("451 unable to check recipients (#4.3.2)\r\n");
@@ -2257,6 +2267,14 @@ check_recipient_cdb(char *rcpt)
 	return r;
 }
 
+/*
+ * This function returns
+ *  0: User is fine
+ *  1: User is not present
+ *  2: User is Inactive
+ *  3: User is overquota
+ * -1: System Error
+ */
 int
 check_recipient_sql(char *rcpt)
 {
@@ -4261,7 +4279,7 @@ smtp_rcpt(char *arg)
 					result = check_recipient_sql(addr.s);
 					break;
 				case 2: /* reject if user not in both recipient.cdb and sql db */
-					if (!check_recipient_cdb(addr.s))
+					if ((result = !check_recipient_cdb(addr.s)))
 						result = check_recipient_sql(addr.s);
 					break;
 				case 4:
@@ -6546,7 +6564,7 @@ addrrelay() /*- Rejection of relay probes. */
 void
 getversion_smtpd_c()
 {
-	static char    *x = "$Id: smtpd.c,v 1.160 2011-11-16 16:19:49+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: smtpd.c,v 1.161 2011-11-17 20:31:09+05:30 Cprogrammer Exp mbhangui $";
 
 #ifdef INDIMAIL
 	if (x)
