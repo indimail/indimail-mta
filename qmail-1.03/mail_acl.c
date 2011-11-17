@@ -1,5 +1,8 @@
 /*
  * $Log: mail_acl.c,v $
+ * Revision 1.2  2011-11-17 20:03:58+05:30  Cprogrammer
+ * fixed diag message getting printed without verbose flag
+ *
  * Revision 1.1  2010-11-05 01:06:10+05:30  Cprogrammer
  * Initial revision
  *
@@ -269,9 +272,12 @@ mail_acl(stralloc *acclist, int qregex, char *sender, char *recipient, char verb
 				}
 				return (0);
 			}
-			out("\trecipient not matched [ ");
-			out(recipient);
-			out("] --> access denied\n");
+			if (verb)
+			{
+				out("\trecipient not matched [ ");
+				out(recipient);
+				out("] --> access denied\n");
+			}
 		}
 		*cptr = ':';
 		ptr = acclist->s + len; /*- go to the next rule */
@@ -282,7 +288,7 @@ mail_acl(stralloc *acclist, int qregex, char *sender, char *recipient, char verb
 void
 getversion_mail_acl_c()
 {
-	static char    *x = "$Id: mail_acl.c,v 1.1 2010-11-05 01:06:10+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: mail_acl.c,v 1.2 2011-11-17 20:03:58+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
