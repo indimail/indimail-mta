@@ -34,7 +34,7 @@ iwebadmin_CFLAGS = -I@auth_inc@
 noinst_SCRIPTS = iwebadmin.spec iwebadmin-@VERSION@-rpmlintrc
 
 MOSTLYCLEANFILES = iwebadmin.spec iwebadmin-@VERSION@-rpmlintrc \
-				   iwebadmin_perm_list
+				   iwebadmin_perm_list obs.mk
 
 edit = sed \
 	-e 's,@indimaildir\@,$(indimaildir),g' \
