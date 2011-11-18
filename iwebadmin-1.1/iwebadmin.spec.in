@@ -250,70 +250,70 @@ done
 
 # copy files here
 if [ -x /usr/bin/chrpath ] ; then
-	/usr/bin/chrpath -d %{buildroot}@cgibindir@/qmailadmin
+	/usr/bin/chrpath -d %{buildroot}@cgibindir@/iwebadmin
 fi
 
 %files
 %defattr(-,root,root,-)
 %dir %attr(555,root,qmail)              %{_prefix}
 
-%attr(6755,indimail,indimail)       @cgibindir@/qmailadmin
+%attr(6755,indimail,indimail)       @cgibindir@/iwebadmin
 
-%attr(444,root,root)                %{_prefix}/share/qmailadmin/html/add_autorespond.html
-%attr(444,root,root)                %{_prefix}/share/qmailadmin/html/add_forward.html
-%attr(444,root,root)                %{_prefix}/share/qmailadmin/html/add_listdig.html
-%attr(444,root,root)                %{_prefix}/share/qmailadmin/html/add_listmod.html
-%attr(444,root,root)                %{_prefix}/share/qmailadmin/html/add_listuser.html
-%attr(444,root,root)                %{_prefix}/share/qmailadmin/html/add_mailinglist-idx.html
-%attr(444,root,root)                %{_prefix}/share/qmailadmin/html/add_mailinglist-no-idx.html
-%attr(444,root,root)                %{_prefix}/share/qmailadmin/html/add_user.html
-%attr(444,root,root)                %{_prefix}/share/qmailadmin/html/change_password.html
-%attr(444,root,root)                %{_prefix}/share/qmailadmin/html/change_password_success.html
-%attr(444,root,root)                %{_prefix}/share/qmailadmin/html/colortable
-%attr(444,root,root)                %{_prefix}/share/qmailadmin/html/del_autorespond_confirm.html
-%attr(444,root,root)                %{_prefix}/share/qmailadmin/html/del_forward_confirm.html
-%attr(444,root,root)                %{_prefix}/share/qmailadmin/html/del_listdig.html
-%attr(444,root,root)                %{_prefix}/share/qmailadmin/html/del_listmod.html
-%attr(444,root,root)                %{_prefix}/share/qmailadmin/html/del_listuser.html
-%attr(444,root,root)                %{_prefix}/share/qmailadmin/html/del_mailinglist_confirm.html
-%attr(444,root,root)                %{_prefix}/share/qmailadmin/html/del_user_confirm.html
-%attr(444,root,root)                %{_prefix}/share/qmailadmin/html/footer.html
-%attr(444,root,root)                %{_prefix}/share/qmailadmin/html/header.html
-%attr(444,root,root)                %{_prefix}/share/qmailadmin/html/main_menu.html
-%attr(444,root,root)                %{_prefix}/share/qmailadmin/html/mod_autorespond.html
-%attr(444,root,root)                %{_prefix}/share/qmailadmin/html/mod_dotqmail.html
-%attr(444,root,root)                %{_prefix}/share/qmailadmin/html/mod_mailinglist-idx.html
-%attr(444,root,root)                %{_prefix}/share/qmailadmin/html/mod_user.html
-%attr(444,root,root)                %{_prefix}/share/qmailadmin/html/setremotecatchall.html
-%attr(444,root,root)                %{_prefix}/share/qmailadmin/html/show_autorespond.html
-%attr(444,root,root)                %{_prefix}/share/qmailadmin/html/show_digest_subscribers.html
-%attr(444,root,root)                %{_prefix}/share/qmailadmin/html/show_forwards.html
-%attr(444,root,root)                %{_prefix}/share/qmailadmin/html/show_login.html
-%attr(444,root,root)                %{_prefix}/share/qmailadmin/html/show_mailinglist.html
-%attr(444,root,root)                %{_prefix}/share/qmailadmin/html/show_moderators.html
-%attr(444,root,root)                %{_prefix}/share/qmailadmin/html/show_subscribers.html
-%attr(444,root,root)                %{_prefix}/share/qmailadmin/html/show_users.html
-%attr(444,root,root)                %{_prefix}/share/qmailadmin/lang/bg
-%attr(444,root,root)                %{_prefix}/share/qmailadmin/lang/cs
-%attr(444,root,root)                %{_prefix}/share/qmailadmin/lang/da
-%attr(444,root,root)                %{_prefix}/share/qmailadmin/lang/de
-%attr(444,root,root)                %{_prefix}/share/qmailadmin/lang/en
-%attr(444,root,root)                %{_prefix}/share/qmailadmin/lang/es
-%attr(444,root,root)                %{_prefix}/share/qmailadmin/lang/fi
-%attr(444,root,root)                %{_prefix}/share/qmailadmin/lang/fr
-%attr(444,root,root)                %{_prefix}/share/qmailadmin/lang/hu
-%attr(444,root,root)                %{_prefix}/share/qmailadmin/lang/it
-%attr(444,root,root)                %{_prefix}/share/qmailadmin/lang/ja
-%attr(444,root,root)                %{_prefix}/share/qmailadmin/lang/lt
-%attr(444,root,root)                %{_prefix}/share/qmailadmin/lang/nl
-%attr(444,root,root)                %{_prefix}/share/qmailadmin/lang/no
-%attr(444,root,root)                %{_prefix}/share/qmailadmin/lang/pl
-%attr(444,root,root)                %{_prefix}/share/qmailadmin/lang/pt-br
-%attr(444,root,root)                %{_prefix}/share/qmailadmin/lang/ru
-%attr(444,root,root)                %{_prefix}/share/qmailadmin/lang/sk
-%attr(444,root,root)                %{_prefix}/share/qmailadmin/lang/sv
-%attr(444,root,root)                %{_prefix}/share/qmailadmin/lang/tr
-%attr(444,root,root)                %{_prefix}/share/qmailadmin/lang/zh-cn
+%attr(444,root,root)                @htmllibdir@/html/add_autorespond.html
+%attr(444,root,root)                @htmllibdir@/html/add_forward.html
+%attr(444,root,root)                @htmllibdir@/html/add_listdig.html
+%attr(444,root,root)                @htmllibdir@/html/add_listmod.html
+%attr(444,root,root)                @htmllibdir@/html/add_listuser.html
+%attr(444,root,root)                @htmllibdir@/html/add_mailinglist-idx.html
+%attr(444,root,root)                @htmllibdir@/html/add_mailinglist-no-idx.html
+%attr(444,root,root)                @htmllibdir@/html/add_user.html
+%attr(444,root,root)                @htmllibdir@/html/change_password.html
+%attr(444,root,root)                @htmllibdir@/html/change_password_success.html
+%attr(444,root,root)                @htmllibdir@/html/colortable
+%attr(444,root,root)                @htmllibdir@/html/del_autorespond_confirm.html
+%attr(444,root,root)                @htmllibdir@/html/del_forward_confirm.html
+%attr(444,root,root)                @htmllibdir@/html/del_listdig.html
+%attr(444,root,root)                @htmllibdir@/html/del_listmod.html
+%attr(444,root,root)                @htmllibdir@/html/del_listuser.html
+%attr(444,root,root)                @htmllibdir@/html/del_mailinglist_confirm.html
+%attr(444,root,root)                @htmllibdir@/html/del_user_confirm.html
+%attr(444,root,root)                @htmllibdir@/html/footer.html
+%attr(444,root,root)                @htmllibdir@/html/header.html
+%attr(444,root,root)                @htmllibdir@/html/main_menu.html
+%attr(444,root,root)                @htmllibdir@/html/mod_autorespond.html
+%attr(444,root,root)                @htmllibdir@/html/mod_dotqmail.html
+%attr(444,root,root)                @htmllibdir@/html/mod_mailinglist-idx.html
+%attr(444,root,root)                @htmllibdir@/html/mod_user.html
+%attr(444,root,root)                @htmllibdir@/html/setremotecatchall.html
+%attr(444,root,root)                @htmllibdir@/html/show_autorespond.html
+%attr(444,root,root)                @htmllibdir@/html/show_digest_subscribers.html
+%attr(444,root,root)                @htmllibdir@/html/show_forwards.html
+%attr(444,root,root)                @htmllibdir@/html/show_login.html
+%attr(444,root,root)                @htmllibdir@/html/show_mailinglist.html
+%attr(444,root,root)                @htmllibdir@/html/show_moderators.html
+%attr(444,root,root)                @htmllibdir@/html/show_subscribers.html
+%attr(444,root,root)                @htmllibdir@/html/show_users.html
+%attr(444,root,root)                @htmllibdir@/lang/bg
+%attr(444,root,root)                @htmllibdir@/lang/cs
+%attr(444,root,root)                @htmllibdir@/lang/da
+%attr(444,root,root)                @htmllibdir@/lang/de
+%attr(444,root,root)                @htmllibdir@/lang/en
+%attr(444,root,root)                @htmllibdir@/lang/es
+%attr(444,root,root)                @htmllibdir@/lang/fi
+%attr(444,root,root)                @htmllibdir@/lang/fr
+%attr(444,root,root)                @htmllibdir@/lang/hu
+%attr(444,root,root)                @htmllibdir@/lang/it
+%attr(444,root,root)                @htmllibdir@/lang/ja
+%attr(444,root,root)                @htmllibdir@/lang/lt
+%attr(444,root,root)                @htmllibdir@/lang/nl
+%attr(444,root,root)                @htmllibdir@/lang/no
+%attr(444,root,root)                @htmllibdir@/lang/pl
+%attr(444,root,root)                @htmllibdir@/lang/pt-br
+%attr(444,root,root)                @htmllibdir@/lang/ru
+%attr(444,root,root)                @htmllibdir@/lang/sk
+%attr(444,root,root)                @htmllibdir@/lang/sv
+%attr(444,root,root)                @htmllibdir@/lang/tr
+%attr(444,root,root)                @htmllibdir@/lang/zh-cn
 %attr(444,root,root)                %{_prefix}/etc/iwebadmin_perm_list
 
 %attr(444,root,root)                @imagedir@/delete.png
