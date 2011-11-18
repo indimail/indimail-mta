@@ -2253,7 +2253,7 @@ check_recipient_cdb(char *rcpt)
 		die_nomem();
 		break;
 	case 10: /*- recipient cdb does not exist */
-		return 0:
+		return 0;
 	case -3:
 	case 111:
 		out("451 unable to check recipients (#4.3.2)\r\n");
