@@ -172,7 +172,7 @@ indimail-@VERSION@-rpmlintrc indimail-epm.list tls-cert-check mailzipper \
 perm_list dbinfo.8 inlookup.8 vadddomain.1 vdeldomain.1 vadduser.1 \
 vdeluser.1 vdelivermail.8 vrenamedomain.1 vrenameuser.1 vpasswd.1 vmoveuser.1 \
 vcfilter.1 indimail.7 svctool.8 indisub.c indimail.mrtg.cfg overquota.sh \
-vadddomain_handle vadduser_handle login_tasks.3 authgeneric
+vadddomain_handle vadduser_handle login_tasks.3 authgeneric obs.mk
 
 DISTCLEANFILES=.gitignore
 
