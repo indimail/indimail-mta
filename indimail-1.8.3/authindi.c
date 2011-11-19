@@ -173,15 +173,17 @@ int
 main(int argc, char **argv)
 {
 	char           *buf, *tmpbuf, *login, *challenge, *response, *crypt_pass, *ptr,
-				   *real_domain, *prog_name, *service, *service_type, *auth_data;
+				   *real_domain, *prog_name, *service, *auth_type, *auth_data;
 	char            user[AUTH_SIZE], domain[AUTH_SIZE], Email[MAX_BUFF];
-	int             count, offset, cram_md5 = 0;
+	int             count, offset, auth_method;
 	size_t          cram_md5_len, out_len;
 	uid_t           uid;
 	gid_t           gid;
 	struct passwd  *pw;
-	char           *(indiargs[]) = { INDIMAILDIR"/sbin/imaplogin", INDIMAILDIR"/libexec/authlib/authindi",
+	char           *(imapargs[]) = { INDIMAILDIR"/sbin/imaplogin", INDIMAILDIR"/libexec/authlib/authindi",
 					INDIMAILDIR"/bin/imapd", "Maildir", 0 };
+	char           *(pop3args[]) = { INDIMAILDIR"/sbin/pop3login", INDIMAILDIR"/libexec/authlib/authindi",
+					INDIMAILDIR"/bin/pop3d", "Maildir", 0 };
 #ifdef ENABLE_DOMAIN_LIMITS
 	time_t          curtime;
 	struct vlimits  limits;
@@ -253,7 +255,7 @@ main(int argc, char **argv)
 	}
 	tmpbuf[count++] = 0;
 
-	service_type = tmpbuf + count; /* type (login, pass or cram-md5) */
+	auth_type = tmpbuf + count; /* type (login, plain, cram-md5, cram-sha1 or pass) */
 	for (;tmpbuf[count] != '\n' && count < offset;count++);
 	if (count == offset || (count + 1) == offset)
 	{
@@ -261,8 +263,22 @@ main(int argc, char **argv)
 		return(2);
 	}
 	tmpbuf[count++] = 0;
-	if (!strncmp(service_type, "cram-md5", 9))
-		cram_md5 = 1;
+	if (!strncmp(auth_type, "pass", 5))
+		auth_method = -1;
+	else
+	if (!strncmp(auth_type, "login", 6))
+		auth_method = 1;
+	else
+	if (!strncmp(auth_type, "plain", 6))
+		auth_method = 2;
+	else
+	if (!strncmp(auth_type, "cram-md5", 9))
+		auth_method = 3;
+	else
+	if (!strncmp(auth_type, "cram-sha1", 10))
+		auth_method = 4;
+	else
+		auth_method = 0;
 
 	login = tmpbuf + count; /*- username or challenge */
 	for (cram_md5_len = 0;tmpbuf[count] != '\n' && count < offset;count++, cram_md5_len++);
@@ -272,7 +288,7 @@ main(int argc, char **argv)
 		return(2);
 	}
 	tmpbuf[count++] = 0;
-	if (cram_md5) {
+	if (auth_method > 2) {
 		if (!(ptr = b64_decode((unsigned char *) login, cram_md5_len, &out_len)))
 		{
 			fprintf(stderr, "b64_decode: %s\n", strerror(errno));
@@ -283,10 +299,10 @@ main(int argc, char **argv)
 	} else
 		challenge = 0;
 
-	auth_data = tmpbuf + count; /*- (plain text or cram-md5 response) */
+	auth_data = tmpbuf + count; /*- (plain text password or cram-md5 response) */
 	for (cram_md5_len = 0;tmpbuf[count] != '\n' && count < offset;count++, cram_md5_len++);
 	tmpbuf[count++] = 0;
-	if (cram_md5) {
+	if (auth_method > 2) {
 		if (!(ptr = b64_decode((unsigned char *) auth_data, cram_md5_len, &out_len)))
 		{
 			if (challenge)
@@ -305,10 +321,10 @@ main(int argc, char **argv)
 		for (;tmpbuf[count] != '\n' && count < offset;count++);
 		tmpbuf[count++] = 0;
 	}
-	if (!strncmp(service_type, "pass", 5))
+	if (!strncmp(auth_type, "pass", 5))
 	{
 		fprintf(stderr, "%s: Password Change not supported\n", prog_name);
-		if (cram_md5)
+		if (auth_method > 2)
 		{
 			if (challenge)
 				free (challenge);
@@ -320,7 +336,7 @@ main(int argc, char **argv)
 	if (parse_email(login, user, domain, MAX_BUFF))
 	{
 		fprintf(stderr, "%s: could not parse email [%s]\n", prog_name, login);
-		if (cram_md5)
+		if (auth_method > 2)
 		{
 			if (challenge)
 				free (challenge);
@@ -332,7 +348,7 @@ main(int argc, char **argv)
 	if (!vget_assign(domain, 0, 0, &uid, &gid)) 
 	{
 		fprintf(stderr, "%s: domain %s does not exist\n", prog_name, domain);
-		if (cram_md5)
+		if (auth_method > 2)
 		{
 			if (challenge)
 				free (challenge);
@@ -348,7 +364,7 @@ main(int argc, char **argv)
 	if ((count = is_distributed_domain(real_domain)) == -1)
 	{
 		fprintf(stderr, "%s: is_distributed_domain failed\n", real_domain);
-		if (cram_md5)
+		if (auth_method > 2)
 		{
 			if (challenge)
 				free (challenge);
@@ -372,7 +388,7 @@ main(int argc, char **argv)
 		{
 			if (!userNotFound)
 				fprintf(stderr, "No mailstore for %s\n", Email);
-			if (cram_md5)
+			if (auth_method > 2)
 			{
 				if (challenge)
 					free (challenge);
@@ -388,7 +404,7 @@ main(int argc, char **argv)
 		if (!islocalif(mailstore))
 		{
 			fprintf(stderr, "%s not on local (mailstore %s)\n", Email, mailstore);
-			if (cram_md5)
+			if (auth_method > 2)
 			{
 				if (challenge)
 					free (challenge);
@@ -407,7 +423,7 @@ main(int argc, char **argv)
 		{
 			if(!userNotFound)
 				fprintf(stderr, "%s: inquery: %s\n", prog_name, strerror(errno));
-			if (cram_md5)
+			if (auth_method > 2)
 			{
 				if (challenge)
 					free (challenge);
@@ -423,7 +439,7 @@ main(int argc, char **argv)
 	{
 		if(!userNotFound)
 			fprintf(stderr, "%s: inquery: %s\n", prog_name, strerror(errno));
-		if (cram_md5)
+		if (auth_method > 2)
 		{
 			if (challenge)
 				free (challenge);
@@ -438,7 +454,7 @@ main(int argc, char **argv)
 	{
 		if(!userNotFound)
 			fprintf(stderr, "%s: inquery: %s\n", prog_name, strerror(errno));
-		if (cram_md5)
+		if (auth_method > 2)
 		{
 			if (challenge)
 				free (challenge);
@@ -460,14 +476,15 @@ main(int argc, char **argv)
 			fprintf(stderr, "%s: webmail disabled for this account", prog_name);
 			if (write(2, "AUTHFAILURE\n", 12) == -1) ;
 			close_connection();
-			if (cram_md5)
+			if (auth_method > 2)
 			{
 				if (challenge)
 					free (challenge);
 				free (login);
 			}
-			execv(*indiargs, argv);
-			fprintf(stderr, "execv %s: %s", *indiargs, strerror(errno));
+			execv(!strcmp("pop3", service) ? *pop3args : *imapargs, argv);
+			fprintf(stderr, "execv %s: %s", !strcmp("pop3", service) ? *pop3args : *imapargs,
+				strerror(errno));
 			return (1);
 		}
 	} else
@@ -478,14 +495,15 @@ main(int argc, char **argv)
 			fprintf(stderr, "%s: pop3 disabled for this account", prog_name);
 			if (write(2, "AUTHFAILURE\n", 12) == -1) ;
 			close_connection();
-			if (cram_md5)
+			if (auth_method > 2)
 			{
 				if (challenge)
 					free (challenge);
 				free (login);
 			}
-			execv(*indiargs, argv);
-			fprintf(stderr, "execv %s: %s", *indiargs, strerror(errno));
+			execv(!strcmp("pop3", service) ? *pop3args : *imapargs, argv);
+			fprintf(stderr, "execv %s: %s", !strcmp("pop3", service) ? *pop3args : *imapargs,
+				strerror(errno));
 			return (1);
 		}
 	} else
@@ -496,42 +514,44 @@ main(int argc, char **argv)
 			fprintf(stderr, "%s: imap disabled for this account", prog_name);
 			if (write(2, "AUTHFAILURE\n", 12) == -1) ;
 			close_connection();
-			if (cram_md5)
+			if (auth_method > 2)
 			{
 				if (challenge)
 					free (challenge);
 				free (login);
 			}
-			execv(*indiargs, argv);
-			fprintf(stderr, "execv %s: %s", *indiargs, strerror(errno));
+			execv(!strcmp("pop3", service) ? *pop3args : *imapargs, argv);
+			fprintf(stderr, "execv %s: %s", !strcmp("pop3", service) ? *pop3args : *imapargs,
+				strerror(errno));
 			return (1);
 		}
 	}
 	crypt_pass = pw->pw_passwd;
 	if ((ptr = getenv("DEBUG_LOGIN")) && *ptr > '0')
 	{
-		if (cram_md5)
-			fprintf(stderr, "service[%s] type [%s] login [%s] challenge [%s] response [%s]\n", 
-				service, service_type, login, challenge, response);
+		if (response)
+			fprintf(stderr, "service[%s] authmeth [%d] login [%s] challenge [%s] response [%s] pw_passwd [%s]\n", 
+				service, auth_method, login, challenge, response, crypt_pass);
 		else
-			fprintf(stderr, "service[%s] type [%s] login [%s] auth [%s] pw_passwd [%s]\n", 
-				service, service_type, login, auth_data, crypt_pass);
+			fprintf(stderr, "service[%s] authmeth [%d] login [%s] auth [%s] pw_passwd [%s]\n", 
+				service, auth_method, login, auth_data, crypt_pass);
 	}
 	if (pw_comp((unsigned char *) login, (unsigned char *) crypt_pass,
-		(unsigned char *) (cram_md5 ? challenge : 0),
-		(unsigned char *) (cram_md5 ? response : auth_data), cram_md5 ? 3 : 0))
+		(unsigned char *) (auth_method > 2 ? challenge : 0),
+		(unsigned char *) (auth_method > 2 ? response : auth_data), auth_method))
 	{
 		if (argc == 3)
 		{
 			fprintf(stderr, "%s: no more modules will be tried\n", prog_name);
 			if (write(2, "AUTHFAILURE\n", 12) == -1) ;
 			close_connection();
-			execv(*indiargs, indiargs);
-			fprintf(stderr, "execv %s: %s", *indiargs, strerror(errno));
+			execv(!strcmp("pop3", service) ? *pop3args : *imapargs, argv);
+			fprintf(stderr, "execv %s: %s", !strcmp("pop3", service) ? *pop3args : *imapargs,
+				strerror(errno));
 			return (1);
 		}
 		close_connection();
-		if (cram_md5)
+		if (auth_method > 2)
 		{
 			if (challenge)
 				free (challenge);
@@ -540,7 +560,7 @@ main(int argc, char **argv)
 		pipe_exec(argv, buf, offset);
 		return (1);
 	}
-	if (cram_md5)
+	if (auth_method > 2)
 	{
 		if (challenge)
 			free (challenge);
@@ -556,7 +576,7 @@ main(int argc, char **argv)
 			{
 				fprintf(stderr, "%s: unable to get domain limits for for %s\n", prog_name, real_domain);
 				close_connection();
-				if (cram_md5)
+				if (auth_method > 2)
 					free (login);
 				pipe_exec(argv, buf, offset);
 				return (1);
@@ -569,7 +589,7 @@ main(int argc, char **argv)
 		{
 			fprintf(stderr, "%s: unable to get domain limits for for %s\n", prog_name, real_domain);
 			close_connection();
-			if (cram_md5)
+			if (auth_method > 2)
 				free (login);
 			pipe_exec(argv, buf, offset);
 			return (1);
@@ -582,9 +602,11 @@ main(int argc, char **argv)
 			fprintf(stderr, "%s: Sorry, your domain has expired\n", prog_name);
 			if (write(2, "AUTHFAILURE\n", 12) == -1) ;
 			close_connection();
-			if (cram_md5)
+			if (auth_method > 2)
 				free (login);
-			execv(*indiargs, indiargs);
+			execv(!strcmp("pop3", service) ? *pop3args : *imapargs, argv);
+			fprintf(stderr, "execv %s: %s", !strcmp("pop3", service) ? *pop3args : *imapargs,
+				strerror(errno));
 			return (1);
 		} else
 		if (lmt->passwd_expiry > -1 && curtime > lmt->passwd_expiry)
@@ -592,14 +614,16 @@ main(int argc, char **argv)
 			fprintf(stderr, "%s: Sorry, your password has expired\n", prog_name);
 			if (write(2, "AUTHFAILURE\n", 12) == -1) ;
 			close_connection();
-			if (cram_md5)
+			if (auth_method > 2)
 				free (login);
-			execv(*indiargs, indiargs);
+			execv(!strcmp("pop3", service) ? *pop3args : *imapargs, argv);
+			fprintf(stderr, "execv %s: %s", !strcmp("pop3", service) ? *pop3args : *imapargs,
+				strerror(errno));
 		} 
 	}
 #endif
 	exec_local(argv + argc - 2, login, real_domain, pw, service);
-	if (cram_md5)
+	if (auth_method > 2)
 		free (login);
 	return(0);
 }
