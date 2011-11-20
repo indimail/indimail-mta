@@ -390,7 +390,7 @@ displaytop_SOURCES = displaytop.c
 displaytop_LDADD = @LIB_CURSES@ @LIB_TERMCAP@
 
 osh_SOURCES = osh.c
-osh_LDADD = @LIB_CURSES@
+osh_LDADD = @LIB_CURSES@ @LIB_TERMCAP@
 osh_DEPENDENCIES = exp.lo handlers.lo getEnvConfig.lo
 
 hashtable_SOURCES = hashtable.c
