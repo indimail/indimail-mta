@@ -195,7 +195,7 @@ main(int argc, char **argv)
 		_exit(2);
 
 	count++;
-	response = tmpbuf + count; /*- cram-md5 response */
+	response = tmpbuf + count; /*- response (cram-md5, cram-sha1) */
 	for (;tmpbuf[count] && count < offset;count++);
 	if (count == offset || (count + 1) == offset)
 		auth_method = 0;
