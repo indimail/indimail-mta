@@ -1,5 +1,9 @@
 /*
  * $Log: authindi.c,v $
+ * Revision 2.22  2011-11-19 21:58:29+05:30  Cprogrammer
+ * fix imapd getting executed for pop3 service on auth failure
+ * use auth_method variable for cram-md5, cram-sha1
+ *
  * Revision 2.21  2011-10-30 09:01:41+05:30  Cprogrammer
  * free base64 decoded strings
  *
@@ -76,7 +80,7 @@
 #include <stdint.h>
 
 #ifndef lint
-static char     sccsid[] = "$Id: authindi.c,v 2.21 2011-10-30 09:01:41+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: authindi.c,v 2.22 2011-11-19 21:58:29+05:30 Cprogrammer Exp mbhangui $";
 #endif
 #ifdef AUTH_SIZE
 #undef AUTH_SIZE
@@ -207,9 +211,9 @@ main(int argc, char **argv)
 	 * Courier-IMAP authmodules Protocol (authindi /var/indimail/bin/imapd Maildir < /tmp/input 3<&0)
 	 * imap\n
 	 * login\n
-	 * postmaster@test.com\n
-	 * pass\n
-	 * newpass\n
+	 * postmaster@test.com\n ---> username or challenge
+	 * pass\n                ---> plain text / response
+	 * newpass\n             ---> auth_data
 	 * argv[0]=/var/indimail/libexec/authlib/try
 	 * argv[1]=/var/indimail/libexec/authlib/authpam
 	 * argv[2]=/var/indimail/bin/imapd
