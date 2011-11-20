@@ -301,20 +301,25 @@ FILE *f;
 AC_CHECK_LIB(socket, socket,echo -lsocket > socket.lib,,)
 AC_CHECK_LIB(ssl, SSL_CTX_new, [AC_SUBST([LIB_SSL], ["-lssl -lcrypto"]) AC_DEFINE([HAVE_SSL], [1],[OpenSSL Library])],,-lssl -lcrypto)
 AC_CHECK_LIB(crypt, crypt, [AC_SUBST([LIB_CRYPT], ["-lcrypt"]) AC_DEFINE([HAVE_CRYPT], [1],[crypt Library])],,)
-AC_CHECK_LIB(ncurses, tgetstr, [AC_SUBST([LIB_TERMCAP], ["-lncurses"]) AC_DEFINE([HAVE_TERMCAP_IN_NCURSES], [1],[ncurses Library])],nocurses=t,)
-if  test " $nocurses" = " t"
+AC_CHECK_LIB(ncurses, tgetstr, [AC_SUBST([LIB_TERMCAP], ["-lncurses"]) AC_DEFINE([HAVE_TERMCAP_IN_NCURSES], [1],[ncurses Library])],notermcap=t,)
+if  test " $notermcap" = " t"
 then
-	nocurses=""
-	AC_CHECK_LIB(ncurses5, tgetstr, [AC_SUBST([LIB_TERMCAP], ["-lncurses5"]) AC_DEFINE([HAVE_TERMCAP_IN_NCURSES], [1],[ncurses Library])],nocurses=t,)
-	if test " $nocurses" = " t"
-	then
-		nocurses=""
-		AC_CHECK_LIB(termcap, tgetstr, [AC_SUBST([LIB_TERMCAP], ["-ltermcap"]) AC_DEFINE([HAVE_TERMCAP], [1],[termcap Library])],,)
-	fi
-	if test " $nocurses" = " t"
-	then
-    	AC_MSG_ERROR(Could not find termcap library.)
-	fi
+	notermcap=""
+	AC_CHECK_LIB(ncurses5, tgetstr, [AC_SUBST([LIB_TERMCAP], ["-lncurses5"]) AC_DEFINE([HAVE_TERMCAP_IN_NCURSES], [1],[ncurses Library])],notermcap=t,)
+fi
+if test " $notermcap" = " t"
+then
+	notermcap=""
+	AC_CHECK_LIB(tinfo, tgetstr, [AC_SUBST([LIB_TERMCAP], ["-ltinfo"]) AC_DEFINE([HAVE_TERMCAP], [1],[termcap Library])],notermcap=t,)
+fi
+if test " $notermcap" = " t"
+then
+	notermcap=""
+	AC_CHECK_LIB(termcap, tgetstr, [AC_SUBST([LIB_TERMCAP], ["-ltermcap"]) AC_DEFINE([HAVE_TERMCAP], [1],[termcap Library])],notermcap=t,)
+fi
+if test " $notermcap" = " t"
+then
+   	AC_MSG_ERROR(Could not find termcap library.)
 fi
 AC_CHECK_LIB(ncurses, initscr, [AC_SUBST([LIB_CURSES], ["-lncurses"]) AC_DEFINE([HAVE_NCURSES], [1],[ncurses Library])],nocurses=t,)
 if test " $nocurses" = " t"
