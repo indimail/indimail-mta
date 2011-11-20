@@ -3831,7 +3831,7 @@ echo "exec 2>&1"
 
 echo "ans=\`grep \"^AllowSupplementaryGroups\" $indimaildir/etc/freshclam.conf | awk '{print \$2}'\`"
 echo "if [ \" \$ans\" = \" yes\" -o \" \$ans\" = \" Yes\" ] ; then"
-echo "	$indimaildir/bin/freshclam -v --stdout --datadir=$indimaildir/share/clamd -f -d -c 2"
+echo "	exec $indimaildir/bin/freshclam -v --stdout --datadir=$indimaildir/share/clamd -f -d -c 2"
 echo "else"
 echo "	exec $QmailHOME/bin/setuidgid qscand \\"
 echo "	$indimaildir/bin/freshclam -v --stdout --datadir=$indimaildir/share/clamd -f -d -c 2"
