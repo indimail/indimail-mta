@@ -12,13 +12,13 @@ vcfilter \- create, modify, delete vfilters
 .SH DESCRIPTION
 \fBvcfilter\fR is a utility for creating, modifying, deleting IndiMail's powerful filter
 called as vfilter. There are two options; one for administration of filters and another for
-administration of mailing lists subscribed by the user. For mailing lists special action needs
-to be performed by \fBvfilter\fR, so that valid mails do not get rejected. Currently, 
+administration of mailing lists subscribed by the user. For mailing lists special action
+needs to be performed by \fBvfilter\fR, so that valid mails do not get rejected. Currently, 
 \fBvcfilter\fR
 allows maximum of 255 filters to be created.
 
-The first form of usage is primarily for creating filters (though some amount of mailing list
-updation is also possible). The second form of usage is for mailing list updation only.
+The first form of usage is primarily for creating filters (though some amount of mailing
+list updation is also possible). The second form of usage is for mailing list updation only.
 
 \fBvcfilter\fR has the setuid bit set to root and must be run as root or domain user
 
@@ -49,12 +49,12 @@ Textual name for the filter
 \fB\-h\fR
 header value. A number denoting the following
 
- -1 - If comparision (-c option) is 5 or 6
-  0 - Return-Path                       1 - From
-  2 - Subject                           3 - To
-  4 - Cc                                5 - Bcc
-  6 - Reply-To                          7 - Date
-  8 - Sender                            9 - User-Agent
+ -1  - If comparision (-c option) is 5 or 6
+  0  - Return-Path                       1 - From
+  2  - Subject                           3 - To
+  4  - Cc                                5 - Bcc
+  6  - Reply-To                          7 - Date
+  8  - Sender                            9 - User-Agent
   10 - Message-Id                       11 - MIME-Version
   12 - Content-Type                     13 - Content-Transfer-Encoding
   14 - Precedence                       15 - Organization
@@ -70,6 +70,9 @@ header value. A number denoting the following
   34 - Received                         35 - X-Quarantine
   36 - Domainkey-Signature              37 - DKIM-Signature
   38 - DKIM-Status                      39 - Domainkey-Status
+  40 - X-Forwarded-To                   41 - X-Forwarded-For
+  42 - Return-Receipt-To                43 - Dispostion-Notification-To
+  44 - Disposition-Notification-Options 45 - Original-Recipient
 
 You can add your own headers by appending headers to INDIMAIL/etc/headerlist.
 .TP 
@@ -90,10 +93,16 @@ Comparison with the headers to make. This could be one of the following number.
 
 .TP
 \fB\-k\fR \fIkeyword\fR
-A keyword or string which will be used in comparison with the header value (depending on -c option). The string should be a NULL "" string if -c option is either 5 or 6. The keyword can also be any Regular Expression (i.e. *, ? [], etc) if comparison equals 7.
+A keyword or string which will be used in comparison with the header value
+(depending on -c option). The string should be a NULL "" string if -c option is either
+5 or 6. The keyword can also be any Regular Expression (i.e. *, ? [], etc) if comparison
+equals 7.
 .TP
 \fB\-f\fR \fIFolder\fR
-Folder to which the mail should be delivered if a filter match occurs. This can be the Trash folder in case the mail needs to be rejected. It can be /NoDeliver if the mail needs to be discarded completely.
+Folder to which the mail should be delivered if a filter match occurs. This can be the
+keyword Inbox to have the email delivered to the inbox (as it was originally). This can be
+the Trash folder in case the mail needs to be rejected. It can be /NoDeliver if the mail
+needs to be discarded completely.
 
 .TP
 \fB\-b\fR \fIbounce_action\fR
@@ -135,8 +144,8 @@ delete mailing lists
 Change name of an existing mailing list to another name.
 .TP
 \fB\-o\fR \fIoption\fR (used only for comparison 5 or 6)
-Change behavior when figuring out mailing lists for comparison 5 or 6. Following are the valid
-options
+Change behavior when figuring out mailing lists for comparison 5 or 6. Following are the
+valid options
 
  0 - Do not consider mailing lists in filtering
  1 - Consider mailing lists while filtering intelligently
