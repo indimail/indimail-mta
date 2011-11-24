@@ -40,3 +40,7 @@ DKIM-Status
 Domainkey-Status
 X-Forwarded-To
 X-Forwarded-For
+Return-Receipt-To
+Dispostion-Notification-To
+Disposition-Notification-Options
+Original-Recipient
