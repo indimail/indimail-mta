@@ -1,5 +1,5 @@
 /*
- * $Id: iwebadmin.c,v 1.5 2011-11-17 22:10:36+05:30 Cprogrammer Exp mbhangui $
+ * $Id: iwebadmin.c,v 1.6 2011-11-26 09:08:10+05:30 Cprogrammer Exp mbhangui $
  * Copyright (C) 1999-2004 Inter7 Internet Technologies, Inc. 
  *
  * This program is free software; you can redistribute it and/or modify
@@ -42,9 +42,9 @@
 #include <stdlib.h>
 #include <string.h>
 #define _USE_XOPEN
+#define _XOPEN_SOURCE
 #include <unistd.h>
 #include <sys/stat.h>
-#include <unistd.h>
 #include <pwd.h>
 #include <dirent.h>
 #include "alias.h"
@@ -112,6 +112,8 @@ gid_t           Gid;
 char            RealDir[156];
 char            Lang[40];
 
+extern char *crypt(const char *, const char *);
+
 void
 iwebadmin_suid(gid_t Gid, uid_t Uid)
 {
@@ -132,6 +134,21 @@ iwebadmin_suid(gid_t Gid, uid_t Uid)
 }
 
 int
+auth_user(struct passwd *pw, char *password)
+{
+	if (!strcmp(pw->pw_passwd, (char *) crypt(password, pw->pw_passwd)))
+		return (0);
+	/*- 
+	 * Authtenticate case where you have CRAM-MD5 but clients do
+	 * not have cram-md5 authentication mechanism 
+	 */
+	if  (!access(".trivial_passwords", F_OK) && !strcmp(pw->pw_passwd, password))
+		return (0);
+	snprintf(StatusMessage, sizeof (StatusMessage), "%s", html_text[198]);
+	return (1);
+}
+
+int
 main(argc, argv)
 	int             argc;
 	char           *argv[];
@@ -144,7 +161,6 @@ main(argc, argv)
 	char            returntext[MAX_BUFF];
 	int             i;
 	struct passwd  *pw;
-	extern char    *crypt(char *, char *);
 
 	init_globals();
 
@@ -224,12 +240,14 @@ main(argc, argv)
 			} else {
 				(void) chdir(RealDir);
 				load_limits();
-				pw = vauth_getpw(User, Domain);
-				if (pw == NULL) {
+				if (!(pw = vauth_getpw(User, Domain)))
 					snprintf(StatusMessage, sizeof (StatusMessage), "%s", html_text[198]);
-				} else
+				else
 				if (pw->pw_gid & NO_PASSWD_CHNG) {
 					strcpy(StatusMessage, "You don't have permission to change your password.");
+				} else
+				if (auth_user(pw, Password)) {
+					snprintf(StatusMessage, sizeof (StatusMessage), "%s", html_text[198]);
 				} else
 				if (strcmp(Password1, Password2) != 0) {
 					snprintf(StatusMessage, sizeof (StatusMessage), "%s", html_text[200]);
@@ -249,7 +267,6 @@ main(argc, argv)
 					snprintf(StatusMessage, sizeof (StatusMessage), "%s", html_text[139]);
 					*Password = '\0';
 					send_template("change_password_success.html");
-
 					return 0;
 				}
 			}
@@ -274,37 +291,18 @@ main(argc, argv)
 		if (strlen(Domain) > 0) {
 			(void) chdir(RealDir);
 			load_limits();
-
-			pw = vauth_getpw(Username, Domain);
-			if (pw == NULL) {
+			if (!(pw = vauth_getpw(Username, Domain))) {
 				snprintf(StatusMessage, sizeof (StatusMessage), "%s\n", html_text[198]);
 				show_login();
 				vclose();
 				exit(0);
 			}
-			if (strcmp(pw->pw_passwd, (char *) crypt(Password, pw->pw_passwd)))
-			{
-				/*- 
-				 * Authtenticate case where you have CRAM-MD5 but clients do
-				 * not have cram-md5 authentication mechanism 
-				 */
-				if  (!access(".trivial_passwords", F_OK))
-				{
-					if (strcmp(pw->pw_passwd, Password))
-					{
-						snprintf(StatusMessage, sizeof (StatusMessage), "%s", html_text[198]);
-						show_login();
-						vclose();
-						exit(0);
-					}
-				} else {
-					snprintf(StatusMessage, sizeof (StatusMessage), "%s", html_text[198]);
-					show_login();
-					vclose();
-					exit(0);
-				}
+			if (auth_user(pw, Password)) {
+				snprintf(StatusMessage, sizeof (StatusMessage), "%s", html_text[198]);
+				show_login();
+				vclose();
+				exit(0);
 			}
-
 			snprintf(TmpBuf, sizeof (TmpBuf), "%s/" MAILDIR, pw->pw_dir);
 			del_id_files(TmpBuf);
 			Mytime = time(NULL);
