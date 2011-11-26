@@ -1,5 +1,8 @@
 /*
  * $Log: qarf.c,v $
+ * Revision 1.5  2011-11-26 15:35:32+05:30  Cprogrammer
+ * removed useless statements
+ *
  * Revision 1.4  2011-02-12 12:36:10+05:30  Cprogrammer
  * set copy_subj, copy_rpath automatically
  *
@@ -360,10 +363,6 @@ main(int argc, char **argv)
 		my_error("sender not specified", 0, USAGE_ERR);
 	if (!subject)
 		copy_subj = 1;
-	if (subject && copy_subj)
-		my_error("you cannot specify -s & -S option together", 0, USAGE_ERR);
-	if (!subject && !copy_subj)
-		my_error("missing subject", 0, USAGE_ERR);
 	birth = now();
 	id = getpid();
 	datetime_tai(&dt, birth);
@@ -408,7 +407,7 @@ main(int argc, char **argv)
 	my_putb("\"; ", 3);
 	my_puts(
 			"report-type=\"feedback-report\"\n"
-			"X-Mailer: qarf $Revision: 1.4 $\n");
+			"X-Mailer: qarf $Revision: 1.5 $\n");
 
 	/*- Body */
 	my_puts("\nThis is a multi-part message in MIME format\n\n");
@@ -452,7 +451,7 @@ main(int argc, char **argv)
 
 	my_puts(
 			"Feedback-Type: abuse\n"
-			"User-Agent: $Id: qarf.c,v 1.4 2011-02-12 12:36:10+05:30 Cprogrammer Stab mbhangui $\n"
+			"User-Agent: $Id: qarf.c,v 1.5 2011-11-26 15:35:32+05:30 Cprogrammer Exp mbhangui $\n"
 			"Version: 0.1\n");
 	if (email_from.len) {
 		my_putb("Original-Mail-From: ", 20);
@@ -512,7 +511,7 @@ main(int argc, char **argv)
 void
 getversion_qarf_c()
 {
-	static char    *x = "$Id: qarf.c,v 1.4 2011-02-12 12:36:10+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: qarf.c,v 1.5 2011-11-26 15:35:32+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
