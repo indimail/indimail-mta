@@ -1,5 +1,5 @@
 /*
- * $Id: user.c,v 1.5 2011-11-17 22:11:07+05:30 Cprogrammer Exp mbhangui $
+ * $Id: user.c,v 1.6 2011-11-26 09:35:04+05:30 Cprogrammer Exp mbhangui $
  * Copyright (C) 1999-2004 Inter7 Internet Technologies, Inc. 
  *
  * This program is free software; you can redistribute it and/or modify
@@ -217,8 +217,8 @@ show_user_lines(char *user, char *dom, time_t mytime, char *dir)
 				   || (AdminType != DOMAIN_ADMIN || AdminType != DOMAIN_ADMIN
 					   || (AdminType == USER_ADMIN && strcmp(pw->pw_name, Username) == 0)))) {
 			if (AdminType == DOMAIN_ADMIN || (AdminType == USER_ADMIN && strcmp(pw->pw_name, Username) == 0)) {
-				long            diskquota = 0;
-				int             maxmsg = 0;
+				mdir_t          diskquota = 0;
+				mdir_t          maxmsg = 0;
 
 			/*
 			 * display account name and user name 
@@ -231,7 +231,7 @@ show_user_lines(char *user, char *dom, time_t mytime, char *dir)
 			 * display user's quota 
 			 */
 				snprintf(path, sizeof (path), "%s/" MAILDIR, pw->pw_dir);
-				diskquota = check_quota(path, (mdir_t *) &maxmsg);
+				diskquota = check_quota(path, &maxmsg);
 				printf("<td align=\"right\">%-2.2lf&nbsp;/&nbsp;</td>", ((double) diskquota) / 1048576.0);	/* Convert to MB */
 				if (strncmp(pw->pw_shell, "NOQUOTA", 2) != 0) {
 					if (quota_to_megabytes(qconvert, pw->pw_shell)) {
