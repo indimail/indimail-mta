@@ -1,5 +1,5 @@
 /*
- * $Id: template.c,v 1.5 2011-11-17 22:11:04+05:30 Cprogrammer Exp mbhangui $
+ * $Id: template.c,v 1.6 2011-11-26 09:34:44+05:30 Cprogrammer Exp mbhangui $
  * Copyright (C) 1999-2004 Inter7 Internet Technologies, Inc. 
  *
  * This program is free software; you can redistribute it and/or modify
@@ -398,13 +398,13 @@ send_template_now(char *filename)
 				case 'Q': /* show quota usage */
 					vpw = vauth_getpw(ActionUser, Domain);
 					if (strncmp(vpw->pw_shell, "NOQUOTA", 2) != 0) {
-						long            diskquota = 0;
-						int             maxmsg = 0;
+						mdir_t          diskquota = 0;
+						mdir_t          maxmsg = 0;
 						char            path[256];
 
 						quota_to_megabytes(qconvert, vpw->pw_shell);
 						snprintf(path, sizeof (path), "%s/" MAILDIR, vpw->pw_dir);
-						diskquota = check_quota(path, (mdir_t *) &maxmsg);
+						diskquota = check_quota(path, &maxmsg);
 						printf("%-2.2lf /", ((double) diskquota) / 1048576.0);	/* Convert to MB */
 					}
 					break;
@@ -495,8 +495,8 @@ send_template_now(char *filename)
 						 * then again, with recent changes, the non-admin shouldn't
 						 * even get to this page.
 						 */
-						long            diskquota = 0;
-						int             maxmsg = 0;
+						mdir_t          diskquota = 0;
+						mdir_t          maxmsg = 0;
 						char            path[256];
 						vpw = vauth_getpw(Username, Domain);
 
@@ -512,7 +512,7 @@ send_template_now(char *filename)
 							   qconvert, qnote);
 						printf("<br>%s ", html_text[254]);
 						snprintf(path, sizeof (path), "%s/" MAILDIR, vpw->pw_dir);
-						diskquota = check_quota(path, (mdir_t *) &maxmsg);
+						diskquota = check_quota(path, &maxmsg);
 						printf("%-2.2lf MB</font><br>", ((double) diskquota) / 1048576.0);	/* Convert to MB */
 					}
 
