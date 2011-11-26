@@ -1,5 +1,8 @@
 /*
  * $Log: deliver_mail.c,v $
+ * Revision 2.59  2011-11-26 15:30:48+05:30  Cprogrammer
+ * use a variable list for list of programs where DTLINE, RPLINE should not be unset
+ *
  * Revision 2.58  2011-11-06 17:48:04+05:30  Cprogrammer
  * added command autoresponder for preserving DTLINE env variable
  *
@@ -201,7 +204,7 @@
 #include <sys/wait.h>
 
 #ifndef	lint
-static char     sccsid[] = "$Id: deliver_mail.c,v 2.58 2011-11-06 17:48:04+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: deliver_mail.c,v 2.59 2011-11-26 15:30:48+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 /*- Function Prototypes */
@@ -292,7 +295,6 @@ qmail_inject_open(char *address, int *write_fd)
 		close(pim[1]);
 		return (-1);
 	case 0:
-		/*- Our responsibility on QQEH ends here */
 		if (getenv("QHPSI"))
 			unsetenv("QQEH");
 		close(pim[1]);
@@ -1033,13 +1035,31 @@ get_message_size()
  * open a pipe to a command 
  * return the pid or -1 if error
  */
+
 static int
 open_command(char *command, int *write_fd)
 {
 	int             pim[2];
 	long unsigned   pid;
 	char            cmmd[AUTH_SIZE];
-	char           *binqqargs[4];
+	char           *p, *binqqargs[4];
+	char          **q;
+	char *allowed_programs[] = { 
+		"condredirect",
+		"condtomaildir",
+		"dot-forward",
+		"fastforward",
+		"filterto",
+		"forward",
+		"maildirdeliver",
+		"preline",
+		"qnotify",
+		"qsmhook",
+		"replier",
+		"rrforward",
+		"serialcmd",
+		0
+	};
 
 	/*- skip over an | sign if there */
 	*write_fd = -1;
@@ -1058,8 +1078,15 @@ open_command(char *command, int *write_fd)
 	case 0:
 		if (getenv("QHPSI"))
 			unsetenv("QQEH");
-		if (!strstr(cmmd, "preline") && !strstr(cmmd, "condtomaildir") 
-			&& !strstr(cmmd, "qsmhook") && !strstr(cmmd, "autoresponder"))
+		if ((p = strrchr(cmmd, '/')))
+			p++;
+		else
+			p = cmmd;
+		for (q = allowed_programs;*q;q++) {
+			if (!strcmp(p, *q))
+				break;
+		}
+		if (!*q)
 		{
 			if (getenv("RPLINE"))
 				unsetenv("RPLINE");
