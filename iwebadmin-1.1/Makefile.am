@@ -29,7 +29,7 @@ COMMONSOURCES=iwebadmin.c alias.c autorespond.c forward.c mailinglist.c \
 
 iwebadmin_SOURCES=$(COMMONSOURCES) 
 iwebadmin_LDADD=@auth_libs@
-iwebadmin_CFLAGS = -I@auth_inc@
+iwebadmin_CFLAGS = @auth_incs@
 
 noinst_SCRIPTS = iwebadmin.spec iwebadmin-@VERSION@-rpmlintrc
 
