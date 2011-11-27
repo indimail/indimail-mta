@@ -1,0 +1,35 @@
+.TH qnotify 1
+.SH NAME
+qnotify \- respond to delivery notice requests
+.SH SYNOPSIS
+in
+.BR .qmail :
+.B |qnotify
+[-n]
+
+.SH DESCRIPTION
+\fBqnotify\fR reads an rfc822 email on stdin and generates a MDN as required by
+RFC3798. 
+\fBqnotify\fR uses environment variable SENDER, RPLINE or Return-Path header to compare
+the address with Dispostion-Notification-To header. It also uses the environment
+variable RECIPIENT to generate the MDN. \fBqnotify\fR silently exits with zero return
+status in case it does not get the required information from the environment variables or
+the headers in the email.
+
+\fBqnotify\fR uses environment modified according to files in 
+QMAILHOME/control/defaultqueue directory.
+
+.SH RETURN VALUE
+ 1 for read errors
+ 2 for write erros
+ 3 for memory allocation error
+ 4 for file open errors
+ 5 for failure to dup file descriptors
+ 6 for lseek system call error
+ 7 for usage error
+
+
+.SH "SEE ALSO"
+qreceipt(1),
+dot-qmail(5),
+envelopes(5)
