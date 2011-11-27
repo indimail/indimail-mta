@@ -985,6 +985,8 @@ mail_acl.o
 balance_outgoing
 qarf
 qarf.o
+qnotify
+qnotify.o
 smtp_plugin.o
 smtpd-plugin.so
 plugtest
