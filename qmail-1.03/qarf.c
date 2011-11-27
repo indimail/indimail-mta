@@ -1,5 +1,8 @@
 /*
  * $Log: qarf.c,v $
+ * Revision 1.6  2011-11-27 11:56:53+05:30  Cprogrammer
+ * exit on address parsing error
+ *
  * Revision 1.5  2011-11-26 15:35:32+05:30  Cprogrammer
  * removed useless statements
  *
@@ -67,13 +70,11 @@ my_error(char *s1, char *s2, int exit_val)
 {
 	logerr(s1);
 	logerr(": ");
-	if (s2)
-	{
+	if (s2) {
 		logerr(s2);
 		logerr(": ");
 	}
-	if (exit_val == 7)
-	{
+	if (exit_val == 7) {
 		logerr("\n");
 		logerrf(usage);
 		_exit(exit_val);
@@ -135,22 +136,18 @@ mkTempFile(int seekfd)
 		close(fd);
 		my_error("write error", 0, WRITE_ERR);
 	}
-	if (substdio_flush(&ssout) == -1)
-	{
+	if (substdio_flush(&ssout) == -1) {
 		close(fd);
 		my_error("write error", 0, WRITE_ERR);
 	}
-	if (fd != seekfd)
-	{
-		if (dup2(fd, seekfd) == -1)
-		{
+	if (fd != seekfd) {
+		if (dup2(fd, seekfd) == -1) {
 			close(fd);
 			my_error("dup2 error", 0, DUP_ERR);
 		}
 		close(fd);
 	}
-	if (lseek(seekfd, 0, SEEK_SET) != 0)
-	{
+	if (lseek(seekfd, 0, SEEK_SET) != 0) {
 		close(seekfd);
 		my_error("lseek error", 0, LSEEK_ERR);
 	}
@@ -172,8 +169,7 @@ addrparse(char *arg)
 	i = str_chr(arg, '<');
 	if (arg[i])
 		arg += i + 1;
-	else
-	{	/*- partner should go read rfc 821 */
+	else {	/*- partner should go read rfc 821 */
 		terminator = ' ';
 		arg += str_chr(arg, ':');
 		if (*arg == ':')
@@ -184,10 +180,8 @@ addrparse(char *arg)
 			++arg;
 	}
 	/*- strip source route */
-	if (*arg == '@')
-	{
-		while (*arg)
-		{
+	if (*arg == '@') {
+		while (*arg) {
 			if (*arg++ == ':')
 				break;
 		}
@@ -196,15 +190,12 @@ addrparse(char *arg)
 		my_error("out of memory", 0, MEM_ERR);
 	flagesc = 0;
 	flagquoted = 0;
-	for (i = 0; (ch = arg[i]); ++i)
-	{	/*- copy arg to addr, stripping quotes */
-		if (flagesc)
-		{
+	for (i = 0; (ch = arg[i]); ++i) {	/*- copy arg to addr, stripping quotes */
+		if (flagesc) {
 			if (!stralloc_append(&addr, &ch))
 				my_error("out of memory", 0, MEM_ERR);
 			flagesc = 0;
-		} else
-		{
+		} else {
 			if (!flagquoted && ch == terminator)
 				break;
 			switch (ch)
@@ -237,6 +228,7 @@ stralloc        email_date = { 0 };
 stralloc        email_subj = { 0 };
 stralloc        email_from = { 0 };
 stralloc        email_msgid = { 0 };
+stralloc        email_rpath = { 0 };
 stralloc        email_dkimstat = { 0 };
 stralloc        email_deliveredto = { 0 };
 
@@ -259,48 +251,47 @@ parse_email(int get_subj, int get_rpath)
 			my_error("read error", 0, READ_ERR);
 		if (!match && line.len == 0)
 			break;
-		if (!got_date && !str_diffn(line.s, "Date: ", 6))
-		{
+		if (!got_date && !str_diffn(line.s, "Date: ", 6)) {
 			got_date = 1;
 			if (!stralloc_copyb(&email_date, line.s + 6, line.len - 6))
 				my_error("out of memory", 0, MEM_ERR);
 		} else
-		if (!got_subj && !str_diffn(line.s, "Subject: ", 9))
-		{
+		if (!got_subj && !str_diffn(line.s, "Subject: ", 9)) {
 			got_subj = 1;
 			if (!stralloc_copyb(&email_subj, line.s + 9, line.len - 9))
 				my_error("out of memory", 0, MEM_ERR);
 		} else
-		if (!got_rpath && !str_diffn(line.s, "Return-Path: ", 13))
-		{
+		if (!got_rpath && !str_diffn(line.s, "Return-Path: ", 13)) {
 			got_rpath = 1;
-			addrparse(line.s); /*- sets addr */
-		} else
-		if (!got_from && !str_diffn(line.s, "From: ", 6))
-		{
-			got_from = 1;
-			if (!stralloc_copyb(&email_from, line.s + 6, line.len - 6))
+			if (!addrparse(line.s)) /*- sets addr */
+				my_error ("unable to parse address", line.s, 111);
+			if (!stralloc_copy(&rpath, &addr))
 				my_error("out of memory", 0, MEM_ERR);
 		} else
-		if (!got_msgid && !str_diffn(line.s, "Message-ID: ", 12))
-		{
+		if (!got_from && !str_diffn(line.s, "From: ", 6)) {
+			got_from = 1;
+			if (!addrparse(line.s)) /*- sets addr */
+				my_error ("unable to parse address", line.s, 111);
+			if (!stralloc_copy(&email_from, &addr))
+				my_error("out of memory", 0, MEM_ERR);
+		} else
+		if (!got_msgid && !str_diffn(line.s, "Message-ID: ", 12)) {
 			got_msgid = 1;
 			if (!stralloc_copyb(&email_msgid, line.s + 12, line.len - 12))
 				my_error("out of memory", 0, MEM_ERR);
 		} else
-		if (!got_dkimstat && !str_diffn(line.s, "DKIM-Status: ", 13))
-		{
+		if (!got_dkimstat && !str_diffn(line.s, "DKIM-Status: ", 13)) {
 			got_dkimstat = 1;
-			if (str_diffn(line.s + 13, "good", 4))
-			{
+			if (str_diffn(line.s + 13, "good", 4)) {
 				if (!stralloc_copyb(&email_dkimstat, line.s + 13, line.len - 13))
 					my_error("out of memory", 0, MEM_ERR);
 			}
 		} else
-		if (!got_deliveredto && !str_diffn(line.s, "Delivered-To: ", 14))
-		{
+		if (!got_deliveredto && !str_diffn(line.s, "Delivered-To: ", 14)) {
 			got_deliveredto = 1;
-			if (!stralloc_copyb(&email_deliveredto, line.s + 14, line.len - 14))
+			if (!addrparse(line.s)) /*- sets addr */
+				my_error ("unable to parse address", line.s, 111);
+			if (!stralloc_copy(&email_deliveredto, &addr))
 				my_error("out of memory", 0, MEM_ERR);
 		}
 		if (got_date && got_subj && got_rpath && got_from && got_msgid 
@@ -325,8 +316,7 @@ main(int argc, char **argv)
 
 	to = from = subject = text = 0;
 	reported_ip = 0;
-	while ((ch = getopt(argc, argv, "it:f:s:m:I:")) != sgoptdone)
-	{
+	while ((ch = getopt(argc, argv, "it:f:s:m:I:")) != sgoptdone) {
 		switch (ch)
 		{
 		case 'i':
@@ -348,8 +338,7 @@ main(int argc, char **argv)
 			reported_ip = optarg;
 			break;
 		default:
-			logerrf(usage);
-			_exit(USAGE_ERR);
+			my_error(usage, 0, 7);
 			break;
 		}
 	}
@@ -383,12 +372,12 @@ main(int argc, char **argv)
 	my_putb("To: ", 4);
 	if (copy_rpath)
 	{
-		if (addr.s[at = str_chr(addr.s, '@')])
+		if (rpath.s[at = str_chr(rpath.s, '@')])
 		{
 			my_putb("abuse", 5);
-			my_putb(addr.s + at, addr.len - at);
+			my_putb(rpath.s + at, rpath.len - at);
 		} else
-			my_putb(addr.s, addr.len);
+			my_putb(rpath.s, rpath.len);
 	} else 
 		my_puts(to);
 	my_putb("\n", 1);
@@ -407,7 +396,7 @@ main(int argc, char **argv)
 	my_putb("\"; ", 3);
 	my_puts(
 			"report-type=\"feedback-report\"\n"
-			"X-Mailer: qarf $Revision: 1.5 $\n");
+			"X-Mailer: qarf $Revision: 1.6 $\n");
 
 	/*- Body */
 	my_puts("\nThis is a multi-part message in MIME format\n\n");
@@ -451,7 +440,7 @@ main(int argc, char **argv)
 
 	my_puts(
 			"Feedback-Type: abuse\n"
-			"User-Agent: $Id: qarf.c,v 1.5 2011-11-26 15:35:32+05:30 Cprogrammer Exp mbhangui $\n"
+			"User-Agent: $Id: qarf.c,v 1.6 2011-11-27 11:56:53+05:30 Cprogrammer Stab mbhangui $\n"
 			"Version: 0.1\n");
 	if (email_from.len) {
 		my_putb("Original-Mail-From: ", 20);
@@ -511,7 +500,7 @@ main(int argc, char **argv)
 void
 getversion_qarf_c()
 {
-	static char    *x = "$Id: qarf.c,v 1.5 2011-11-26 15:35:32+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qarf.c,v 1.6 2011-11-27 11:56:53+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
