@@ -3924,22 +3924,23 @@ compile qmail-cat.c substdio.h error.h stralloc.h getln.h
 	./compile qmail-cat.c
 
 qarf: \
-load  qarf.o error.o substdi.o substdo.o stralloc_opys.o stralloc_opyb.o stralloc_pend.o \
-	stralloc_cats.o substdio.o substdio_copy.o str_chr.o subfderr.o \
+load  qarf.o error.o substdi.o substdo.o stralloc_opys.o stralloc_opyb.o \
+	stralloc_pend.o stralloc_cats.o substdio.o substdio_copy.o str_chr.o \
+	subfderr.o fmt_ulong.o now.o str_len.o stralloc_cat.o stralloc_catb.o \
+	stralloc_eady.o alloc_re.o alloc.o byte_copy.o error_str.o date822fmt.o \
+	sgetopt.o subgetopt.o datetime.o fmt_str.o fmt_uint0.o datetime_un.o \
+	fmt_uint.o envread.o byte_chr.o str_diffn.o byte_cr.o getln.o getln2.o \
+	stralloc_copy.o mess822_ok.o
+	./load qarf error.o substdi.o substdo.o stralloc_opys.o stralloc_opyb.o \
+	stralloc_pend.o stralloc_cats.o substdio.o substdio_copy.o str_chr.o subfderr.o \
 	fmt_ulong.o now.o str_len.o stralloc_cat.o stralloc_catb.o stralloc_eady.o \
 	alloc_re.o alloc.o byte_copy.o error_str.o date822fmt.o sgetopt.o subgetopt.o \
 	datetime.o fmt_str.o fmt_uint0.o datetime_un.o fmt_uint.o envread.o \
-	byte_chr.o str_diffn.o byte_cr.o getln.o getln2.o
-	./load qarf error.o substdi.o substdo.o stralloc_opys.o stralloc_opyb.o stralloc_pend.o \
-	stralloc_cats.o substdio.o substdio_copy.o str_chr.o subfderr.o \
-	fmt_ulong.o now.o str_len.o stralloc_cat.o stralloc_catb.o stralloc_eady.o \
-	alloc_re.o alloc.o byte_copy.o error_str.o date822fmt.o sgetopt.o subgetopt.o \
-	datetime.o fmt_str.o fmt_uint0.o datetime_un.o fmt_uint.o envread.o \
-	byte_chr.o str_diffn.o byte_cr.o getln.o getln2.o
+	byte_chr.o str_diffn.o byte_cr.o getln.o getln2.o stralloc_copy.o mess822_ok.o
 
 qarf.o: \
 compile qarf.c substdio.h error.h stralloc.h now.h fmt.h datetime.h date822fmt.h \
-sgetopt.h env.h str.h getln.h
+sgetopt.h env.h str.h mess822.h getln.h
 	./compile qarf.c
 
 qnotify: \
@@ -3954,13 +3955,13 @@ load  qnotify.o error.o substdi.o substdo.o stralloc_opys.o \
 	qmail.o scan_ulong.o fd_move.o fd_copy.o auto_qmail.o \
 	wait_pid.o str_rchr.o case_diffb.o pathexec_env.o \
 	pathexec_run.o envdir_set.o variables.o strerr_die.o \
-	strerr_sys.o open_read.o openreadclose.o
+	strerr_sys.o open_read.o openreadclose.o mess822_ok.o
 	./load qnotify error.o substdi.o substdo.o stralloc_opys.o \
 	stralloc_opyb.o stralloc_copy.o stralloc_pend.o stralloc_cats.o \
 	substdio.o substdio_copy.o str_chr.o subfderr.o fmt_ulong.o \
 	now.o str_len.o stralloc_cat.o stralloc_catb.o stralloc_eady.o \
 	alloc_re.o alloc.o byte_copy.o error_str.o date822fmt.o \
-	sgetopt.o subgetopt.o datetime.o fmt_str.o fmt_uint0.o \
+	sgetopt.o subgetopt.o datetime.o fmt_str.o fmt_uint0.o mess822_ok.o \
 	datetime_un.o fmt_uint.o envread.o byte_chr.o str_diffn.o \
 	byte_cr.o byte_diff.o getln.o getln2.o qmail.o scan_ulong.o \
 	fd_move.o fd_copy.o auto_qmail.o wait_pid.o str_rchr.o \
@@ -3970,7 +3971,7 @@ load  qnotify.o error.o substdi.o substdo.o stralloc_opys.o \
 qnotify.o: \
 compile qnotify.c substdio.h error.h stralloc.h now.h fmt.h \
 datetime.h date822fmt.h sgetopt.h env.h str.h getln.h qmail.h \
-case.h variables.h envdir.h pathexec.h auto_qmail.h \
+case.h variables.h envdir.h pathexec.h auto_qmail.h mess822.h \
 strerr.h
 	./compile qnotify.c
 
