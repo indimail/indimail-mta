@@ -427,7 +427,7 @@ main()
 	{
 		if (getln(subfdin, &line, &match, '\n') == -1)
 			strerr_die2sys(111, FATAL, "unable to read input: ");
-		if (flagheader &&!mess822_ok(&line))
+		if (flagheader && !mess822_ok(&line))
 		{
 			finishheader();
 			flagheader = 0;
