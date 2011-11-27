@@ -1,5 +1,8 @@
 /*
  * $Log: qarf.c,v $
+ * Revision 1.7  2011-11-27 13:43:25+05:30  Cprogrammer
+ * process headers only
+ *
  * Revision 1.6  2011-11-27 11:56:53+05:30  Cprogrammer
  * exit on address parsing error
  *
@@ -28,6 +31,7 @@
 #include "substdio.h"
 #include "datetime.h"
 #include "date822fmt.h"
+#include "mess822.h"
 #include "now.h"
 #include "env.h"
 #include "fmt.h"
@@ -251,6 +255,8 @@ parse_email(int get_subj, int get_rpath)
 			my_error("read error", 0, READ_ERR);
 		if (!match && line.len == 0)
 			break;
+		if (!mess822_ok(&line))
+			break;
 		if (!got_date && !str_diffn(line.s, "Date: ", 6)) {
 			got_date = 1;
 			if (!stralloc_copyb(&email_date, line.s + 6, line.len - 6))
@@ -263,6 +269,7 @@ parse_email(int get_subj, int get_rpath)
 		} else
 		if (!got_rpath && !str_diffn(line.s, "Return-Path: ", 13)) {
 			got_rpath = 1;
+			line.s[line.len - 1] = 0;
 			if (!addrparse(line.s)) /*- sets addr */
 				my_error ("unable to parse address", line.s, 111);
 			if (!stralloc_copy(&rpath, &addr))
@@ -270,6 +277,7 @@ parse_email(int get_subj, int get_rpath)
 		} else
 		if (!got_from && !str_diffn(line.s, "From: ", 6)) {
 			got_from = 1;
+			line.s[line.len - 1] = 0;
 			if (!addrparse(line.s)) /*- sets addr */
 				my_error ("unable to parse address", line.s, 111);
 			if (!stralloc_copy(&email_from, &addr))
@@ -289,6 +297,7 @@ parse_email(int get_subj, int get_rpath)
 		} else
 		if (!got_deliveredto && !str_diffn(line.s, "Delivered-To: ", 14)) {
 			got_deliveredto = 1;
+			line.s[line.len - 1] = 0;
 			if (!addrparse(line.s)) /*- sets addr */
 				my_error ("unable to parse address", line.s, 111);
 			if (!stralloc_copy(&email_deliveredto, &addr))
@@ -396,7 +405,7 @@ main(int argc, char **argv)
 	my_putb("\"; ", 3);
 	my_puts(
 			"report-type=\"feedback-report\"\n"
-			"X-Mailer: qarf $Revision: 1.6 $\n");
+			"X-Mailer: qarf $Revision: 1.7 $\n");
 
 	/*- Body */
 	my_puts("\nThis is a multi-part message in MIME format\n\n");
@@ -440,7 +449,7 @@ main(int argc, char **argv)
 
 	my_puts(
 			"Feedback-Type: abuse\n"
-			"User-Agent: $Id: qarf.c,v 1.6 2011-11-27 11:56:53+05:30 Cprogrammer Stab mbhangui $\n"
+			"User-Agent: $Id: qarf.c,v 1.7 2011-11-27 13:43:25+05:30 Cprogrammer Exp mbhangui $\n"
 			"Version: 0.1\n");
 	if (email_from.len) {
 		my_putb("Original-Mail-From: ", 20);
@@ -500,7 +509,7 @@ main(int argc, char **argv)
 void
 getversion_qarf_c()
 {
-	static char    *x = "$Id: qarf.c,v 1.6 2011-11-27 11:56:53+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: qarf.c,v 1.7 2011-11-27 13:43:25+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

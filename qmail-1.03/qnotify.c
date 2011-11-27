@@ -1,9 +1,13 @@
 /*
  * $Log: qnotify.c,v $
+ * Revision 1.2  2011-11-27 13:43:47+05:30  Cprogrammer
+ * process headers only
+ *
  * Revision 1.1  2011-11-27 11:58:30+05:30  Cprogrammer
  * Initial revision
  *
  */
+#include <stdio.h>
 #include <unistd.h>
 #include <fcntl.h>
 #include <sys/types.h>
@@ -16,6 +20,7 @@
 #include "substdio.h"
 #include "datetime.h"
 #include "date822fmt.h"
+#include "mess822.h"
 #include "now.h"
 #include "env.h"
 #include "fmt.h"
@@ -282,6 +287,7 @@ stralloc        email_subj = { 0 };
 stralloc        email_from = { 0 };
 stralloc        email_msgid = { 0 };
 stralloc        email_disp = { 0 };
+stralloc        disp_hdr = { 0 };
 int             got_date, got_subj, got_rpath, got_msgid,
 				got_from, got_disposition;
 
@@ -291,6 +297,7 @@ parse_email(int get_subj, int get_rpath)
 	struct substdio ssin;
 	static char     ssinbuf[1024];
 	int             match;
+	char           *disposition_hdr;
 
 	/*- original mail on stdin */
 	got_disposition = got_msgid = got_from = got_date = 0;
@@ -298,12 +305,20 @@ parse_email(int get_subj, int get_rpath)
 		got_subj = 0;
 	if (get_rpath)
 		got_rpath = 0;
+	if (!(disposition_hdr = env_get("DISPOSITION_HEADER")))
+		disposition_hdr = "Disposition-Notification-To";
+	if (!stralloc_copys(&disp_hdr, disposition_hdr))
+		my_error("out of memory", 0, MEM_ERR);
+	if (!stralloc_catb(&disp_hdr, ": ", 2))
+		my_error("out of memory", 0, MEM_ERR);
 	mkTempFile(0);
 	substdio_fdbuf(&ssin, read, 0, ssinbuf, sizeof(ssinbuf));
 	for (;;) {
 		if (getln(&ssin, &line, &match, '\n') == -1)
 			my_error("read error", 0, READ_ERR);
 		if (!match && line.len == 0)
+			break;
+		if (!mess822_ok(&line))
 			break;
 		if (!got_date && !str_diffn(line.s, "Date: ", 6)) {
 			got_date = 1;
@@ -317,6 +332,7 @@ parse_email(int get_subj, int get_rpath)
 		} else
 		if (!got_rpath && !str_diffn(line.s, "Return-Path: ", 13)) {
 			got_rpath = 1;
+			line.s[line.len - 1] = 0;
 			if (!addrparse(line.s)) /*- sets addr */
 				_exit (0);
 			if (!stralloc_copy(&rpath, &addr))
@@ -325,20 +341,24 @@ parse_email(int get_subj, int get_rpath)
 		if (!got_from && !str_diffn(line.s, "From: ", 6))
 		{
 			got_from = 1;
+			line.s[line.len - 1] = 0;
 			if (!addrparse(line.s)) /*- sets addr */
 				_exit (0);
 			if (!stralloc_copy(&email_from, &addr))
 				my_error("out of memory", 0, MEM_ERR);
 		} else
-		if (!got_msgid && !str_diffn(line.s, "Message-ID: ", 12)) {
+		if (!got_msgid && !case_diffb(line.s, 12, "Message-ID: ")) {
 			got_msgid = 1;
 			if (!stralloc_copyb(&email_msgid, line.s + 12, line.len - 12))
 				my_error("out of memory", 0, MEM_ERR);
 		} else
-		if (!got_disposition && !str_diffn(line.s, "Disposition-Notification-To: ", 28)) {
+		if (!got_disposition && !case_diffb(line.s, disp_hdr.len, disp_hdr.s)) {
 			got_disposition = 1;
-			if (!addrparse(line.s)) /*- sets addr */
-				_exit (0);
+			line.s[line.len - 1] = 0;
+			if (!addrparse(line.s)) {
+				if (!stralloc_copyb(&email_disp, line.s + disp_hdr.len, line.len - disp_hdr.len))
+					my_error("out of memory", 0, MEM_ERR);
+			} else
 			if (!stralloc_copy(&email_disp, &addr))
 				my_error("out of memory", 0, MEM_ERR);
 		}
@@ -399,20 +419,16 @@ main(int argc, char **argv)
 	parse_email(1, 1);
 	if (!got_disposition || !got_msgid)
 		_exit (0);
-	if ((rpline = env_get("SENDER"))) {
-		if (!addrparse(rpline))
-			_exit (0);
+	if ((rpline = env_get("SENDER"))) { 
+		if (!addrparse(rpline) && !stralloc_copys(&rpath, rpline))
+			my_error("out of memory", 0, MEM_ERR);
 	} else
 	if ((rpline = env_get("RPLINE"))) {
-		if (!addrparse(rpline))
-			_exit (0);
+		if (!addrparse(rpline) && !stralloc_copys(&rpath, rpline))
+			my_error("out of memory", 0, MEM_ERR);
 	} else
 	if (!got_rpath)
 		_exit (0);
-	if (rpline) {
-		if (!stralloc_copy(&rpath, &addr))
-			my_error("out of memory", 0, MEM_ERR);
-	}
 	if (!stralloc_0(&rpath))
 		my_error("out of memory", 0, MEM_ERR);
 	rpath.len--;
@@ -421,7 +437,7 @@ main(int argc, char **argv)
 		_exit (0);
 	}
 	/*-
-	 * compare the dispostion and return path addresses
+	 * compare the disposition and return path addresses
 	 */
 	if (!compare_local(email_disp.s, email_disp.len, rpath.s, rpath.len))
 		_exit (0);
@@ -540,7 +556,7 @@ main(int argc, char **argv)
 void
 getversion_qnotify_c()
 {
-	static char    *x = "$Id: qnotify.c,v 1.1 2011-11-27 11:58:30+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qnotify.c,v 1.2 2011-11-27 13:43:47+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
