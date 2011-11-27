@@ -228,7 +228,7 @@ stralloc        email_date = { 0 };
 stralloc        email_subj = { 0 };
 stralloc        email_from = { 0 };
 stralloc        email_msgid = { 0 };
-stralloc        email_rpath = { 0 };
+stralloc        rpath = { 0 };
 stralloc        email_dkimstat = { 0 };
 stralloc        email_deliveredto = { 0 };
 
@@ -500,7 +500,7 @@ main(int argc, char **argv)
 void
 getversion_qarf_c()
 {
-	static char    *x = "$Id: qarf.c,v 1.6 2011-11-27 11:56:53+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qarf.c,v 1.6 2011-11-27 11:56:53+05:30 Cprogrammer Stab mbhangui $";
 
 	x++;
 }
