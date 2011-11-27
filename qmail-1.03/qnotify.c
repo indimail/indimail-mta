@@ -1,0 +1,546 @@
+/*
+ * $Log: qnotify.c,v $
+ * Revision 1.1  2011-11-27 11:58:30+05:30  Cprogrammer
+ * Initial revision
+ *
+ */
+#include <unistd.h>
+#include <fcntl.h>
+#include <sys/types.h>
+#include "auto_qmail.h"
+#include "stralloc.h"
+#include "qmail.h"
+#include "case.h"
+#include "str.h"
+#include "getln.h"
+#include "substdio.h"
+#include "datetime.h"
+#include "date822fmt.h"
+#include "now.h"
+#include "env.h"
+#include "fmt.h"
+#include "error.h"
+#include "envdir.h"
+#include "pathexec.h"
+#include "variables.h"
+#include "strerr.h"
+#include "sgetopt.h"
+
+#define FATAL "qnotify: fatal: "
+#define READ_ERR  1
+#define WRITE_ERR 2
+#define MEM_ERR   3
+#define OPEN_ERR  4
+#define DUP_ERR   5
+#define LSEEK_ERR 6
+#define USAGE_ERR 7
+
+/*
+ * RFC 3798
+ * The presence of a Disposition-Notification-To header in a message is
+ * merely a request for an MDN.  The recipients' user agents are always
+ * free to silently ignore such a request.  Alternatively, an explicit
+ * denial of the request for information about the disposition of the
+ * message may be sent using the "denied" disposition in an MDN.
+ *
+ * An MDN MUST NOT itself have a Disposition-Notification-To header.  An
+ * MDN MUST NOT be generated in response to an MDN.
+ *
+ * A user agent MUST NOT issue more than one MDN on behalf of each
+ * particular recipient.
+ *
+ * MDNs SHOULD NOT be sent automatically if the address in the
+ * Disposition-Notification-To header differs from the address in the
+ * Return-Path header
+ *
+ * Confirmation from the user SHOULD be obtained (or no MDN sent) if
+ * there is no Return-Path header in the message
+ *
+ * The comparison of the addresses should be done using only the addr-
+ * spec (local-part "@" domain) portion, excluding any phrase and route.
+ * The comparison MUST be case-sensitive for the local-part and case-
+ * insensitive for the domain part.
+ *
+ * A message that contains a Disposition-Notification-To header SHOULD
+ * also contain a Message-ID header
+ *
+ */
+
+char            strnum[FMT_ULONG];
+static char     ssoutbuf[512];
+static substdio ssout = SUBSTDIO_FDBUF(write, 1, ssoutbuf, sizeof ssoutbuf);
+static char     sserrbuf[512];
+static substdio sserr = SUBSTDIO_FDBUF(write, 2, sserrbuf, sizeof(sserrbuf));
+char           *usage = "usage: qnotify [-n]\n";
+struct qmail    qqt;
+int             flagqueue = 1;
+
+void
+die_fork()
+{
+	substdio_putsflush(&sserr, "qnotify: fatal: unable to fork\n");
+	_exit (WRITE_ERR);
+}
+
+void
+die_qqperm()
+{
+	substdio_putsflush(&sserr, "qnotify: fatal: permanent qmail-queue error\n");
+	_exit (100);
+}
+
+void
+die_qqtemp()
+{
+	substdio_putsflush(&sserr, "qnotify: fatal: temporary qmail-queue error\n");
+	_exit (111);
+}
+
+void
+logerr(char *s)
+{
+	if (substdio_puts(&sserr, s) == -1)
+		_exit (WRITE_ERR);
+}
+
+void
+logerrf(char *s)
+{
+	if (substdio_puts(&sserr, s) == -1)
+		_exit (WRITE_ERR);
+	if (substdio_flush(&sserr) == -1)
+		_exit (WRITE_ERR);
+}
+
+void
+my_error(char *s1, char *s2, int exit_val)
+{
+	logerr(s1);
+	logerr(": ");
+	if (s2) {
+		logerr(s2);
+		logerr(": ");
+	}
+	if (exit_val == 7) {
+		logerr("\n");
+		logerrf(usage);
+		_exit (exit_val);
+	}
+	logerr(error_str(errno));
+	logerrf("\n");
+	_exit (exit_val);
+}
+
+void
+my_puts(char *s)
+{
+	if (flagqueue)
+		qmail_puts(&qqt, s);
+	else
+	if (substdio_puts(&ssout, s) == -1)
+		my_error("write", 0, WRITE_ERR);
+}
+
+void
+my_putb(char *s, int len)
+{
+	if (flagqueue)
+		qmail_put(&qqt, s, len);
+	else
+	if (substdio_bput(&ssout, s, len) == -1)
+		my_error("write", 0, WRITE_ERR);
+}
+
+static int
+mkTempFile(int seekfd)
+{
+	char            inbuf[2048], outbuf[2048], strnum[FMT_ULONG];
+	char           *tmpdir;
+	static stralloc tmpFile = {0};
+	struct substdio ssin;
+	struct substdio ssout;
+	int             fd;
+
+	if (lseek(seekfd, 0, SEEK_SET) == 0)
+		return (0);
+	if (errno == EBADF)
+		my_error("read error", 0, READ_ERR);
+	if (!(tmpdir = env_get("TMPDIR")))
+		tmpdir = "/tmp";
+	if (!stralloc_copys(&tmpFile, tmpdir))
+		my_error("out of memory", 0, MEM_ERR);
+	if (!stralloc_cats(&tmpFile, "/qmailFilterXXX"))
+		my_error("out of memory", 0, MEM_ERR);
+	if (!stralloc_catb(&tmpFile, strnum, fmt_ulong(strnum, (unsigned long) getpid())))
+		my_error("out of memory", 0, MEM_ERR);
+	if (!stralloc_0(&tmpFile))
+		my_error("out of memory", 0, MEM_ERR);
+	if ((fd = open(tmpFile.s, O_RDWR | O_EXCL | O_CREAT, 0600)) == -1)
+		my_error("open error", tmpFile.s, OPEN_ERR);
+	unlink(tmpFile.s);
+	substdio_fdbuf(&ssout, write, fd, outbuf, sizeof(outbuf));
+	substdio_fdbuf(&ssin, read, seekfd, inbuf, sizeof(inbuf));
+	switch (substdio_copy(&ssout, &ssin))
+	{
+	case -2: /*- read error */
+		close(fd);
+		my_error("read error", 0, READ_ERR);
+	case -3: /*- write error */
+		close(fd);
+		my_error("write error", 0, WRITE_ERR);
+	}
+	if (substdio_flush(&ssout) == -1) {
+		close(fd);
+		my_error("write error", 0, WRITE_ERR);
+	}
+	if (fd != seekfd) {
+		if (dup2(fd, seekfd) == -1) {
+			close(fd);
+			my_error("dup2 error", 0, DUP_ERR);
+		}
+		close(fd);
+	}
+	if (lseek(seekfd, 0, SEEK_SET) != 0) {
+		close(seekfd);
+		my_error("lseek error", 0, LSEEK_ERR);
+	}
+	return (0);
+}
+
+stralloc        addr = { 0 }, rpath = {0};
+
+int
+addrparse(char *arg)
+{
+	int             i;
+	char            ch;
+	char            terminator;
+	int             flagesc;
+	int             flagquoted;
+
+	terminator = '>';
+	i = str_chr(arg, '<');
+	if (arg[i])
+		arg += i + 1;
+	else {	/*- partner should go read rfc 821 */
+		terminator = ' ';
+		arg += str_chr(arg, ':');
+		if (*arg == ':')
+			++arg;
+		if (!*arg)
+			return (0);
+		while (*arg == ' ')
+			++arg;
+	}
+	/*- strip source route */
+	if (*arg == '@') {
+		while (*arg) {
+			if (*arg++ == ':')
+				break;
+		}
+	}
+	if (!stralloc_copys(&addr, ""))
+		my_error("out of memory", 0, MEM_ERR);
+	flagesc = 0;
+	flagquoted = 0;
+	for (i = 0; (ch = arg[i]); ++i) {	/*- copy arg to addr, stripping quotes */
+		if (flagesc) {
+			if (!stralloc_append(&addr, &ch))
+				my_error("out of memory", 0, MEM_ERR);
+			flagesc = 0;
+		} else {
+			if (!flagquoted && ch == terminator)
+				break;
+			switch (ch)
+			{
+			case '\\':
+				flagesc = 1;
+				break;
+#ifdef STRIPSINGLEQUOTES
+			case '\'':
+				flagquoted = !flagquoted;
+				break;
+#endif
+			case '"':
+				flagquoted = !flagquoted;
+				break;
+			default:
+				if (!stralloc_append(&addr, &ch))
+					my_error("out of memory", 0, MEM_ERR);
+			}
+		}
+	}
+	/*- could check for termination failure here, but why bother? */
+	if (addr.len > 900)
+		return 0;
+	return 1;
+}
+
+stralloc        line = { 0 };
+stralloc        email_date = { 0 };
+stralloc        email_subj = { 0 };
+stralloc        email_from = { 0 };
+stralloc        email_msgid = { 0 };
+stralloc        email_disp = { 0 };
+int             got_date, got_subj, got_rpath, got_msgid,
+				got_from, got_disposition;
+
+void
+parse_email(int get_subj, int get_rpath)
+{
+	struct substdio ssin;
+	static char     ssinbuf[1024];
+	int             match;
+
+	/*- original mail on stdin */
+	got_disposition = got_msgid = got_from = got_date = 0;
+	if (get_subj)
+		got_subj = 0;
+	if (get_rpath)
+		got_rpath = 0;
+	mkTempFile(0);
+	substdio_fdbuf(&ssin, read, 0, ssinbuf, sizeof(ssinbuf));
+	for (;;) {
+		if (getln(&ssin, &line, &match, '\n') == -1)
+			my_error("read error", 0, READ_ERR);
+		if (!match && line.len == 0)
+			break;
+		if (!got_date && !str_diffn(line.s, "Date: ", 6)) {
+			got_date = 1;
+			if (!stralloc_copyb(&email_date, line.s + 6, line.len - 6))
+				my_error("out of memory", 0, MEM_ERR);
+		} else
+		if (!got_subj && !str_diffn(line.s, "Subject: ", 9)) {
+			got_subj = 1;
+			if (!stralloc_copyb(&email_subj, line.s + 9, line.len - 9))
+				my_error("out of memory", 0, MEM_ERR);
+		} else
+		if (!got_rpath && !str_diffn(line.s, "Return-Path: ", 13)) {
+			got_rpath = 1;
+			if (!addrparse(line.s)) /*- sets addr */
+				_exit (0);
+			if (!stralloc_copy(&rpath, &addr))
+				my_error("out of memory", 0, MEM_ERR);
+		} else
+		if (!got_from && !str_diffn(line.s, "From: ", 6))
+		{
+			got_from = 1;
+			if (!addrparse(line.s)) /*- sets addr */
+				_exit (0);
+			if (!stralloc_copy(&email_from, &addr))
+				my_error("out of memory", 0, MEM_ERR);
+		} else
+		if (!got_msgid && !str_diffn(line.s, "Message-ID: ", 12)) {
+			got_msgid = 1;
+			if (!stralloc_copyb(&email_msgid, line.s + 12, line.len - 12))
+				my_error("out of memory", 0, MEM_ERR);
+		} else
+		if (!got_disposition && !str_diffn(line.s, "Disposition-Notification-To: ", 28)) {
+			got_disposition = 1;
+			if (!addrparse(line.s)) /*- sets addr */
+				_exit (0);
+			if (!stralloc_copy(&email_disp, &addr))
+				my_error("out of memory", 0, MEM_ERR);
+		}
+		if (got_date && got_subj && got_rpath && got_msgid && got_from && 
+			got_disposition)
+			break;
+	}
+	if (lseek(0, 0, SEEK_SET) == -1)
+		my_error("lseek error", 0, LSEEK_ERR);
+}
+
+int
+compare_local(char *s1, int i1, char *s2, int i2)
+{
+	int             at1, at2;
+
+	if (s1[at1 = str_chr(s1, '@')] && s2[at2 = str_chr(s2, '@')]) {
+		/*- match domain */
+		if (case_diffb(s1 + at1 + 1, i1 - at1 - 1, s2 + at2 + 1))
+			return (0);
+		else
+		if (str_diffn(s1, s2, at1))
+			return (0);
+		return (1);
+	}
+	return (0);
+}
+
+int
+main(int argc, char **argv)
+{
+	stralloc        boundary = {0};
+	int             ch, match;
+	unsigned long   id;
+	datetime_sec    birth;
+	struct datetime dt;
+	struct substdio ssin;
+	static char     ssinbuf[1024];
+	char            buf[DATE822FMT];
+	char           *rpline, *qqx, *recipient, *qbase;
+	char          **e;
+
+	while ((ch = getopt(argc, argv, "n")) != sgoptdone) {
+		switch (ch)
+		{
+		case 'n':
+			flagqueue = 0;
+			break;
+		default:
+			my_error(usage, 0, 7);
+			break;
+		}
+	}
+	birth = now();
+	id = getpid();
+	datetime_tai(&dt, birth);
+	/*- read the email */
+	parse_email(1, 1);
+	if (!got_disposition || !got_msgid)
+		_exit (0);
+	if ((rpline = env_get("SENDER"))) {
+		if (!addrparse(rpline))
+			_exit (0);
+	} else
+	if ((rpline = env_get("RPLINE"))) {
+		if (!addrparse(rpline))
+			_exit (0);
+	} else
+	if (!got_rpath)
+		_exit (0);
+	if (rpline) {
+		if (!stralloc_copy(&rpath, &addr))
+			my_error("out of memory", 0, MEM_ERR);
+	}
+	if (!stralloc_0(&rpath))
+		my_error("out of memory", 0, MEM_ERR);
+	rpath.len--;
+	if (!(recipient = env_get("RECIPIENT"))) {
+		logerrf("recipient not set\n");
+		_exit (0);
+	}
+	/*-
+	 * compare the dispostion and return path addresses
+	 */
+	if (!compare_local(email_disp.s, email_disp.len, rpath.s, rpath.len))
+		_exit (0);
+	if (chdir(auto_qmail) == -1)
+		strerr_die4sys(111, FATAL, "unable to chdir to ", auto_qmail, ": ");
+	if (flagqueue) {
+		if (!(qbase = env_get("QUEUE_BASE"))) {
+			if (!controldir) {
+				if (!(controldir = env_get("CONTROLDIR")))
+					controldir = "control";
+			}
+			if (chdir(controldir) == -1)
+				strerr_die4sys(111, FATAL, "unable to switch to ", controldir, ": ");
+			if (!access("defaultqueue", X_OK)) {
+				envdir_set("defaultqueue");
+				if ((e = pathexec(0)))
+					environ = e;
+			}
+		}
+		if (qmail_open(&qqt) == -1)
+			die_fork();
+	}
+	my_putb("From: <", 7);
+	my_puts(recipient);
+	my_putb(">\n", 2);
+	my_putb("Date: ", 6);
+	my_putb(buf, date822fmt(buf, &dt));
+	my_putb("Subject: ", 9);
+	my_putb("Disposition Notification - ", 27);
+	my_putb(email_subj.s, email_subj.len);
+	my_putb("To: ", 4);
+	my_putb(email_disp.s, email_disp.len);
+	my_putb("\n", 1);
+	my_puts( "MIME-Version: 1.0\n\n"
+			"Content-Type: multipart/report;  report-type=disposition-notification;\n"
+			" boundary=\"");
+	if (!stralloc_copyb(&boundary, "_----------=_", 13))
+		my_error("out of memory", 0, MEM_ERR);
+	if (!stralloc_catb(&boundary, strnum, fmt_ulong(strnum, birth)))
+		my_error("out of memory", 0, MEM_ERR);
+	if (!stralloc_catb(&boundary, strnum, fmt_ulong(strnum, id)))
+		my_error("out of memory", 0, MEM_ERR);
+	my_putb(boundary.s, boundary.len);
+	my_putb("\"\n", 2);
+
+	/*- Body */
+	my_putb("\n--", 3);
+	my_putb(boundary.s, boundary.len);
+	my_putb("\n\n", 2);
+	my_putb("The message sent on ", 20);
+	my_putb(email_date.s, email_date.len);
+	my_putb("From ", 5);
+	my_putb(email_from.s, email_from.len);
+	my_putb(" to ", 4);
+	my_puts(recipient);
+	my_putb(" with \nsubject ", 15);
+	my_putb(email_subj.s, email_subj.len);
+	my_putb("has been delivered at ", 22);
+	my_putb(buf, date822fmt(buf, &dt));
+	my_putb("There is no guarantee that the message has been read or understood.\n", 68);
+
+	/*- MDN report */
+	my_putb("\n--", 3);
+	my_putb(boundary.s, boundary.len);
+	my_putb("\n", 1);
+	my_putb("Content-Type: message/disposition-notification\n\n", 48);
+	my_putb("Reporting-UA: ", 14);
+	my_putb(email_disp.s, email_disp.len);
+	my_putb("; IndiMail MDA", 14);
+	my_putb("\n", 1);
+	my_putb("Original-Recipient: rfc822; ", 28);
+	my_puts(recipient);
+	my_putb("\n", 1);
+	my_putb("Final-Recipient: rfc822; ", 25);
+	my_puts(recipient);
+	my_putb("\n", 1);
+	my_putb("Disposition: automatic-action/MDN-sent-automatically; displayed\n", 56);
+
+	/*- enclose the original mail as attachment */
+	my_putb("\n--", 3);
+	my_putb(boundary.s, boundary.len);
+	my_putb("\n", 1);
+	my_putb("Content-Disposition: attachment\n", 32);
+	my_putb("Content-Transfer-Encoding: 8bit\n", 32);
+	my_putb("Content-Type: message/rfc822\n\n", 30);
+
+	/* You wanted an MDN and you shall get one - the entire lot back to you */
+	substdio_fdbuf(&ssin, read, 0, ssinbuf, sizeof(ssinbuf));
+	for (;;) {
+		if (getln(&ssin, &line, &match, '\n') == -1)
+			my_error("read error", 0, READ_ERR);
+		if (!match && line.len == 0)
+			break;
+		my_putb(line.s, line.len);
+	}
+	my_putb("--", 2);
+	my_putb(boundary.s, boundary.len);
+	my_putb("--\n", 3);
+	my_putb("\n", 1);
+	if (flagqueue) {
+		qmail_from(&qqt, "");
+		qmail_to(&qqt, rpath.s);
+		qqx = qmail_close(&qqt);
+		if (*qqx) {
+			if (*qqx == 'D')
+				die_qqperm();
+			else
+				die_qqtemp();
+		}
+	} else
+	if (substdio_flush(&ssout) == -1)
+		my_error("write", 0, WRITE_ERR);
+	_exit (0);
+}
+
+void
+getversion_qnotify_c()
+{
+	static char    *x = "$Id: qnotify.c,v 1.1 2011-11-27 11:58:30+05:30 Cprogrammer Exp mbhangui $";
+
+	x++;
+}
