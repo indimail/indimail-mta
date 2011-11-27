@@ -1237,7 +1237,7 @@ tokenize addrlist qquote parsedate qmail-greyd greydaemon \
 analyzer qtools qlog viruscanner update_tmprsadh dknewkey \
 dktest dot-forward batv balance_outgoing qarf plugtest surblfilter \
 fastforward printforward setforward newaliases printmaillist surblqueue \
-setmaillist newinclude sortedtest logselect mbox2maildir \
+setmaillist newinclude sortedtest logselect mbox2maildir qnotify \
 envdir envuidgid fghack multilog pgrphack readproctitle setlock \
 setuidgid softlimit supervise svc svok svscan svstat tai64n tai64nlocal tai64nunix \
 recordio argv0 addcr delcr fixcrio generic.so cdbmake cdbget cdbgetm \
@@ -1382,7 +1382,7 @@ man: \
 qmail-local.0 qmail-lspawn.0 qmail-getpw.0 qmail-remote.0 \
 qmail-rspawn.0 qmail-clean.0 qmail-send.0 qmail-todo.0 qmail-start.0 splogger.0 \
 qmail-queue.0 qmail-dk.0 qmail-dkim.8 dk-filter.8 qmail-inject.0 mailsubj.0 \
-qmail-showctl.0 qmail-newu.0 qarf.1 plugin_init.3 \
+qmail-showctl.0 qmail-newu.0 qarf.1 qnotify.1 plugin_init.3 \
 qmail-pw2u.0 qmail-qread.0 qmail-tcpto.0 qmail-tcpok.0 \
 qmail-pop3d.0 qmail-popbull.0 qmail-popup.0 qmail-qmqpc.0 \
 qmail-qmqpd.0 qmail-qmtpd.0 qmail-smtpd.0 greydaemon.0 qmail-poppass.0 \
@@ -3941,6 +3941,38 @@ qarf.o: \
 compile qarf.c substdio.h error.h stralloc.h now.h fmt.h datetime.h date822fmt.h \
 sgetopt.h env.h str.h getln.h
 	./compile qarf.c
+
+qnotify: \
+load  qnotify.o error.o substdi.o substdo.o stralloc_opys.o \
+	stralloc_opyb.o stralloc_pend.o stralloc_cats.o substdio.o \
+	substdio_copy.o str_chr.o subfderr.o fmt_ulong.o now.o \
+	str_len.o stralloc_cat.o stralloc_catb.o stralloc_eady.o \
+	alloc_re.o alloc.o byte_copy.o error_str.o date822fmt.o \
+	sgetopt.o subgetopt.o datetime.o fmt_str.o fmt_uint0.o \
+	datetime_un.o fmt_uint.o envread.o byte_chr.o str_diffn.o \
+	byte_cr.o byte_diff.o getln.o getln2.o stralloc_copy.o \
+	qmail.o scan_ulong.o fd_move.o fd_copy.o auto_qmail.o \
+	wait_pid.o str_rchr.o case_diffb.o pathexec_env.o \
+	pathexec_run.o envdir_set.o variables.o strerr_die.o \
+	strerr_sys.o open_read.o openreadclose.o
+	./load qnotify error.o substdi.o substdo.o stralloc_opys.o \
+	stralloc_opyb.o stralloc_copy.o stralloc_pend.o stralloc_cats.o \
+	substdio.o substdio_copy.o str_chr.o subfderr.o fmt_ulong.o \
+	now.o str_len.o stralloc_cat.o stralloc_catb.o stralloc_eady.o \
+	alloc_re.o alloc.o byte_copy.o error_str.o date822fmt.o \
+	sgetopt.o subgetopt.o datetime.o fmt_str.o fmt_uint0.o \
+	datetime_un.o fmt_uint.o envread.o byte_chr.o str_diffn.o \
+	byte_cr.o byte_diff.o getln.o getln2.o qmail.o scan_ulong.o \
+	fd_move.o fd_copy.o auto_qmail.o wait_pid.o str_rchr.o \
+	case_diffb.o pathexec_env.o pathexec_run.o envdir_set.o \
+	variables.o strerr_die.o strerr_sys.o open_read.o openreadclose.o
+
+qnotify.o: \
+compile qnotify.c substdio.h error.h stralloc.h now.h fmt.h \
+datetime.h date822fmt.h sgetopt.h env.h str.h getln.h qmail.h \
+case.h variables.h envdir.h pathexec.h auto_qmail.h \
+strerr.h
+	./compile qnotify.c
 
 qmail-poppass: \
 load  qmail-poppass.o error.o error_str.o byte_copy.o str_len.o byte_cr.o \
