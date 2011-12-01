@@ -1,5 +1,8 @@
 /*
  * $Log: autoresponder.c,v $
+ * Revision 1.25  2011-12-01 21:21:50+05:30  Cprogrammer
+ * added option to add Content-Type header
+ *
  * Revision 1.24  2011-11-06 22:54:53+05:30  Cprogrammer
  * fixed checking of strtoul function
  *
@@ -103,7 +106,7 @@ char            ssinbuf[512], ssoutbuf[512];
 char            dbuf[DATE822FMT];
 substdio        ssin, ssout;
 pid_t           inject_pid;
-stralloc        liphost = { 0 };
+stralloc        liphost = { 0 }, content_type = { 0 };
 struct header
 {
 	char           *returnpath;
@@ -452,6 +455,10 @@ get_arguments(int argc, char *argv[])
 			break;
 		case 'f':
 			from_addr = optarg;
+			break;
+		case 'T':
+			if (!stralloc_copy(&content_type, optarg))
+				strerr_die2sys(111, FATAL, "out of memory: ");
 			break;
 		case 't':
 			opt_timelimit = strtoul(optarg, &ptr, 10);
@@ -1183,6 +1190,18 @@ main(int argc, char *argv[])
 			strerr_die2sys(111, FATAL, "unable to write: ");
 		if (substdio_puts(&ssout, "\"\n"))
 			strerr_die2sys(111, FATAL, "unable to write: ");
+	} else
+	if (content_type.len) {
+		if (substdio_put(&ssout, "Mime-Version: 1.0\n", 18))
+			strerr_die2sys(111, FATAL, "unable to write: ");
+		if (substdio_put(&ssout, content_type.s, content_type.len))
+			strerr_die2sys(111, FATAL, "unable to write: ");
+		if (substdio_put(&ssout, "\n", 1))
+			strerr_die2sys(111, FATAL, "unable to write: ");
+	} else {
+		if (substdio_put(&ssout, "Mime-Version: 1.0\n"
+		 	"Content-Type: text/plain; charset=\"utf-8\"\n", 60))
+			strerr_die2sys(111, FATAL, "unable to write: ");
 	}
 	if (substdio_puts(&ssout, "Subject: "))
 		strerr_die2sys(111, FATAL, "unable to write: ");
@@ -1265,7 +1284,7 @@ main(int argc, char *argv[])
 void
 getversion_qmail_autoresponder_c()
 {
-	static char    *x = "$Id: autoresponder.c,v 1.24 2011-11-06 22:54:53+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: autoresponder.c,v 1.25 2011-12-01 21:21:50+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
