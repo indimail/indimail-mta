@@ -457,7 +457,7 @@ get_arguments(int argc, char *argv[])
 			from_addr = optarg;
 			break;
 		case 'T':
-			if (!stralloc_copy(&content_type, optarg))
+			if (!stralloc_copys(&content_type, optarg))
 				strerr_die2sys(111, FATAL, "out of memory: ");
 			break;
 		case 't':
