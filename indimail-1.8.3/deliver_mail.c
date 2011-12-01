@@ -1045,7 +1045,7 @@ open_command(char *command, int *write_fd)
 	char           *p, *binqqargs[4];
 	char          **q;
 	char *allowed_programs[] = { 
-		"condredirect",
+		"autoresponder", "condredirect",
 		"condtomaildir",
 		"dot-forward",
 		"fastforward",
