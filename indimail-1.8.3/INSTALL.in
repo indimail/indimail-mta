@@ -211,7 +211,7 @@ I usually prefer to run privileged commands like this (so that I don't get fond 
                                . fortune-1.1        (8.4  Mb)
                                . courier-imap-4.9.3 (75   Mb)
                                . bogofilter-1.2.2   (11.6 Mb)
-                               . clamav-0.97.2      (600  Mb)
+                               . clamav-0.97.3      (600  Mb)
                                . fetchmail-6.3.21   (10.5 Mb)
                                . iwebadmin-1.0      (3.0  Mb)
                                ------------------------------
@@ -616,14 +616,14 @@ the installation.
     Then do ./configure <same_parameters_as_earlier_install> ; make ; make install-strip
 
     ##### STEP 7  ##### Virus Scanner #########################
-    Install clamav MD5 cb2d78b4790fdfca3b2390d7ce82f0b7
+    Install clamav MD5 f5230da0c03272d3daa4771f19bb06d2
     current working directory /home/local/src
-    Download clamav package. The latest tested clamav package tested is clamav-0.97.2.tar.gz.
+    Download clamav package. The latest tested clamav package tested is clamav-0.97.3.tar.gz.
 
-    % wget http://downloads.sourceforge.net/clamav/clamav-0.97.2.tar.gz
-    % gunzip -c clamav-0.97.2.tar.gz | tar xf -
-    % gunzip -c indimail-@version@/patches/clamav-0.97.2.patch.gz | patch -p0
-    % cd clamav-0.97.2
+    % wget http://downloads.sourceforge.net/clamav/clamav-0.97.3.tar.gz
+    % gunzip -c clamav-0.97.3.tar.gz | tar xf -
+    % gunzip -c indimail-@version@/patches/clamav-0.97.3.patch.gz | patch -p0
+    % cd clamav-0.97.3
     % ./configure --prefix=@indimaildir@ --sysconfdir=@indimaildir@/etc \
         --with-dbdir=@indimaildir@/share/clamd \
         --libexecdir=@indimaildir@/libexec \
