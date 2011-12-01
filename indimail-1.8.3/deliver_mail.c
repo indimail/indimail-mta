@@ -1,5 +1,8 @@
 /*
  * $Log: deliver_mail.c,v $
+ * Revision 2.60  2011-12-01 20:28:59+05:30  Cprogrammer
+ * fixed comparision when command executed in .qmail has multiple arguments
+ *
  * Revision 2.59  2011-11-26 15:30:48+05:30  Cprogrammer
  * use a variable list for list of programs where DTLINE, RPLINE should not be unset
  *
@@ -204,7 +207,7 @@
 #include <sys/wait.h>
 
 #ifndef	lint
-static char     sccsid[] = "$Id: deliver_mail.c,v 2.59 2011-11-26 15:30:48+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: deliver_mail.c,v 2.60 2011-12-01 20:28:59+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 /*- Function Prototypes */
@@ -1041,11 +1044,12 @@ open_command(char *command, int *write_fd)
 {
 	int             pim[2];
 	long unsigned   pid;
-	char            cmmd[AUTH_SIZE];
-	char           *p, *binqqargs[4];
+	char            cmmd[MAX_BUFF], ncmmd[MAX_BUFF];
+	char           *p, *r, *binqqargs[4];
 	char          **q;
 	char *allowed_programs[] = { 
-		"autoresponder", "condredirect",
+		"autoresponder",
+		"condredirect",
 		"condtomaildir",
 		"dot-forward",
 		"fastforward",
@@ -1078,10 +1082,14 @@ open_command(char *command, int *write_fd)
 	case 0:
 		if (getenv("QHPSI"))
 			unsetenv("QQEH");
-		if ((p = strrchr(cmmd, '/')))
+		for (r = cmmd;*r && isspace(*r);r++);
+		/*- copy only the first command argument (i.e. argv[0]) */
+		for (p = ncmmd;*r && !isspace(*r);*p++ = *r++);
+		*p = 0;
+		if ((p = strrchr(ncmmd, '/')))
 			p++;
 		else
-			p = cmmd;
+			p = ncmmd;
 		for (q = allowed_programs;*q;q++) {
 			if (!strcmp(p, *q))
 				break;
