@@ -53,7 +53,7 @@ script
 	if [ -d /var/lock/subsys ] ; then
 		while true
 		do
-			if [ -f /var/lock/subsys/indimail ] ; then
+			if [ -f /var/lock/subsys/svscan ] ; then
 				break;
 			fi
 			sleep 5
