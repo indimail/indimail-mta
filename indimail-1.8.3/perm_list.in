@@ -181,6 +181,7 @@
 %attr(2511,root,qscand) @indimaildir@/bin/run-cleanq
 %attr(0555,root,qmail) @indimaildir@/bin/822bodyfilter
 %attr(0555,root,qmail) @indimaildir@/bin/qreceipt
+%attr(0555,root,qmail) @indimaildir@/bin/qnotify
 %attr(0555,root,qmail) @indimaildir@/bin/proxypop3
 %attr(0555,root,qmail) @indimaildir@/bin/suids
 %attr(0555,root,qmail) @indimaildir@/bin/vcaliasrev
@@ -249,6 +250,8 @@
 %attr(0555,root,qmail) @indimaildir@/bin/qmail-pop3d
 %attr(0555,root,qmail) @indimaildir@/bin/dk-filter
 %attr(0555,root,qmail) @indimaildir@/bin/qpq
+%attr(0555,root,qmail) @indimaildir@/bin/surblfilter
+%attr(0555,root,qmail) @indimaildir@/bin/surblqueue
 %attr(0555,root,qmail) @indimaildir@/bin/zddist
 %attr(0555,root,qmail) @indimaildir@/bin/ofmipname
 %attr(0555,root,qmail) @indimaildir@/bin/testzero
