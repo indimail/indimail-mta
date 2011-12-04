@@ -281,3 +281,8 @@
 313 Na adresu
 314 Špatnì zadaný limit
 315 Uživatel Smazán. Nebylo možné nastavit pøesmìrování na '%s'
+316 cambio de contraseña
+317 No se puede eliminar la cuenta de administrador.
+318 setgid() no, no puede continuar
+319 setuid() no, no puede continuar
+320 Contraseña no válida: que puede ser fácilmente adivinado por el nombre de usuario

@@ -283,3 +283,6 @@
 315 Gebruiker verwijderd. Kon doorstuur niet instellen op '%s'.
 316 Verander wachtwoord
 317 Het postmaster account kan niet verwijderd worden.
+318 setgid () is mislukt, niet in staat om verder te gaan
+319 setuid () is mislukt, niet in staat om verder te gaan
+320 Ongeldig wachtwoord: het gemakkelijk kan worden geraden van de gebruikersnaam

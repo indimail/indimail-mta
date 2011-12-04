@@ -281,3 +281,8 @@
 313 adresa
 314 Zle zadan� limit
 315 U��vate� zmazan�. Nebol mo�n� nastavi� presmerovanie na '%s'.
+316 Zmena hesla
+317 Nemožno zmazať účet postmaster.
+318 setgid () zlyhal, nemôže pokračovať
+319 setuid () zlyhal, nemôže pokračovať
+320 Neplatné heslo: možno ho ľahko uhádnuť jeho užívateľským

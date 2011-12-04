@@ -281,4 +281,8 @@
 313 adres
 314 Kota değeri yanlış
 315 Kullanıcı silindi. Forward adresi '%s' olarak ayarlanamıyor.
-
+316 Ubah Password
+317 Anda tidak dapat menghapus account postmaster.
+318 setgid () gagal, tidak dapat melanjutkan
+319 setuid () gagal, tidak dapat melanjutkan
+320 tidak valid password: dapat dengan mudah ditebak dari username

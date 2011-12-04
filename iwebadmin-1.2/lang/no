@@ -283,3 +283,6 @@
 315 Bruker slettet.  Kunne ikke sette videresending til '%s'.
 316 Endre passord
 317 Du kan ikke slette postmaster-kontoen.
+318 setgid () feilet, ute av stand til å fortsette
+319 setuid () feilet, ute av stand til å fortsette
+320 Ugyldig passord: det kan være lett å gjette fra brukernavnet

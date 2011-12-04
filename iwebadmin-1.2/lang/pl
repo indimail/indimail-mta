@@ -281,3 +281,8 @@
 313 adres
 314 Podano z³± quotê
 315 U¿ytkownik skasowany. Nie moge ustawiæ przekazywania do '%s'.
+316 Change Password
+317 You cannot delete the postmaster account.
+318 setgid() failed, unable to continue
+319 setuid() failed, unable to continue
+320 Invalid password: it can be easily guessed from the username

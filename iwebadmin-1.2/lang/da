@@ -281,3 +281,8 @@
 313 adressen
 314 Den indtastede kvota er invalid
 315 Brugeren er slettet. Kan ikke videresende til '%s'.
+316 Skift adgangskode
+317 Du kan ikke slette postmester konto.
+318 setgid() mislykkedes, ude af stand til at fortsætte
+319 setuid() mislykkedes, ude af stand til at fortsætte
+320 Ugyldig adgangskode: det kan være nemt at gætte fra brugernavnet

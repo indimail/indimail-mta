@@ -283,4 +283,6 @@
 315 Utilisateur supprim&eacute;. Impossible de redirig&eacute; vers '%s'.
 316 Modifier le mot de passe
 317 Suppression du compte Postmaster impossible.
-
+318 setgid() a échoué, incapable de continuer
+319 setuid() a échoué, incapable de continuer
+320 Mot de passe invalide: il peut être facilement deviné par le nom d'utilisateur

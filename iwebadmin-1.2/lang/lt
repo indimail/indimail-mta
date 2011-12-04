@@ -283,3 +283,6 @@
 315 Vartotojas ištrintas. Negalima nustatyti persiuntimo į '%s'.
 316 Pakeisti slaptažodį
 317 Negalima ištrinti postmaster vartotojo.
+318 setgid () nepavyko, negali tęsti
+319 setuid () nepavyko, negali tęsti
+320 Neteisingas slaptažodis: ji gali būti lengvai atspėti iš vardo
