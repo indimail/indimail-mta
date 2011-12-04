@@ -1,5 +1,8 @@
 /*
  * $Log: vacation.c,v $
+ * Revision 2.12  2011-12-04 21:04:14+05:30  Cprogrammer
+ * added option to specify charset
+ *
  * Revision 2.11  2011-07-29 09:26:29+05:30  Cprogrammer
  * fixed gcc 4.6 warnings
  *
@@ -61,7 +64,7 @@
 #include <sys/stat.h>
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vacation.c,v 2.11 2011-07-29 09:26:29+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: vacation.c,v 2.12 2011-12-04 21:04:14+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 char           *getuserinfo(char *);
@@ -180,6 +183,11 @@ main(int argc, char **argv)
 			fprintf(inject_fp, "Subject: %s\n", Subject);
 		else
 			fprintf(inject_fp, "Subject: Auto Response from %s\n", FromId);
+		if ((ptr = getenv("CHARSET")))
+		{
+			fprintf(inject_fp, "Mime-Version: 1.0\n");
+			fprintf(inject_fp, "Content-Type: text/plain; charset=\"%s\"\n", ptr);
+		}
 		if((fp = fopen(VacationFname, "r")) != (FILE *) 0)
 		{
 			for (;;)
