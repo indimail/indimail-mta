@@ -282,3 +282,7 @@
 314 Ogiltig quota inmatning
 315 Användaren borttagen. Kunde inte sätta eftersändningsadressen till '%s'.
 316 Nödvändigt fält saknas.
+317 Du kan inte ta bort postmästare kontot.
+318 setgid () misslyckades, oförmögen att fortsätta
+319 setuid () misslyckades, oförmögen att fortsätta
+320 Ogiltigt lösenord: den lätt kan gissa från användarnamn

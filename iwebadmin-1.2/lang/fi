@@ -282,3 +282,7 @@
 314 Annettu kiinti&ouml; ei kelpaa
 315 K&auml;ytt&auml;j&auml; poistettu.  Edelleenl&auml;hetyst&auml; osoitteeseen '%s' ei asetettu.
 316 Vaihda salasana
+317 Et voi poistaa postmaster tilille.
+318 setgid() epäonnistui, voi jatkaa
+319 setuid() epäonnistui, voi jatkaa
+320 Virheellinen salasana: se voidaan helposti arvata mistä käyttäjätunnuksen

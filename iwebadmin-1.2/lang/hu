@@ -281,3 +281,8 @@
 313 cím
 314 Hibás a megadott kvóta
 315 Felhasználó törölve.  Nem tudom a továbbítást beállítani ('%s').
+316 Jelszó megváltoztatása
+317 Nem lehet törölni a postmaster fiókot.
+318 setgid () nem, nem tudja folytatni
+319 setuid () nem, nem tudja folytatni
+320 Érvénytelen jelszó: könnyen kitalálható a felhasználóneveddel

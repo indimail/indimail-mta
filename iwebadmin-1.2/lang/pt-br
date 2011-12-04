@@ -281,3 +281,8 @@
 313 o endereço
 314 Quota inválida informada
 315 Usuário excluído. Não foi possível definir o encaminhamento para '%s'.
+316 Alterar senha
+317 Você não pode excluir a conta postmaster.
+318 setgid () falhou, incapaz de continuar
+319 setuid () falhou, incapaz de continuar
+320 de senha inválida: ele pode ser facilmente adivinhado a partir do nome de usuário

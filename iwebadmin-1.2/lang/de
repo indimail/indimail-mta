@@ -283,3 +283,6 @@
 315 Benutzer gelöscht. Kann keine Weiterleitung an '%s' erstellen.
 316 Passwort ändern
 317 Der Postmaster-Account kann nicht gelöscht werden.
+318 setgid() gescheitert, nicht weiter
+319 setuid() gescheitert, nicht weiter
+320 Invalid password: es kann leicht aus dem Benutzernamen erraten werden

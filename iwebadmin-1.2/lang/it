@@ -281,4 +281,8 @@
 313 l'indirizzo
 314 Quota non valida
 315 Utente cancellato. Impossibile impostare forward a '%s'.
+316 Modifica della password
+317 Non è possibile eliminare l'account postmaster.
+318 setgid() non riuscito, in grado di continuare
+319 setuid() non riuscito, in grado di continuare
 320 Password non accettata. Pu&ograve; essere facilmente indovinata sapendo il nome utente
