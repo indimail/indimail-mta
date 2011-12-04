@@ -1,5 +1,5 @@
 /*
- * $Id: user.c,v 1.6 2011-11-26 09:35:04+05:30 Cprogrammer Exp mbhangui $
+ * $Id: user.c,v 1.7 2011-12-04 21:10:38+05:30 Cprogrammer Exp mbhangui $
  * Copyright (C) 1999-2004 Inter7 Internet Technologies, Inc. 
  *
  * This program is free software; you can redistribute it and/or modify
@@ -794,8 +794,13 @@ makevacation(FILE * d, char *dir)
 	/*- make the vacation directory */
 	snprintf(fn, sizeof (fn), "%s/vacation/%s", dir, ActionUser);
 	r_mkdir(fn, 0750, Uid, Gid);
-	fprintf(d, "| %s/bin/autoresponder -q %s/vacation/%s/.vacation.msg %s/vacation/%s\n",
-		INDIMAILDIR, dir, ActionUser, dir, ActionUser);
+	snprintf(fn, sizeof (fn), "%s/content-type", dir);
+	if (access(fn, R_OK))
+		fprintf(d, "| %s/bin/autoresponder -q %s/vacation/%s/.vacation.msg %s/vacation/%s\n",
+			INDIMAILDIR, dir, ActionUser, dir, ActionUser);
+	else
+		fprintf(d, "| %s/bin/autoresponder -q %s/vacation/%s/.vacation.msg %s/vacation/%s\n -T %s/content-type",
+			INDIMAILDIR, dir, ActionUser, dir, ActionUser, RealDir);
 	/*- set up the message file */
 	snprintf(fn, sizeof (fn), "%s/vacation/%s/.vacation.msg", dir, ActionUser);
 	GetValue(TmpCGI, Message, "vmessage=", sizeof (Message));
@@ -803,8 +808,8 @@ makevacation(FILE * d, char *dir)
 		snprintf(StatusMessage, sizeof (StatusMessage), "%s %s\n", html_text[150], fn);
 		return 1;
 	}
-	fprintf(f, "From: %s@%s\n", ActionUser, Domain);
-	fprintf(f, "Subject: %s\n\n%s", subject, Message);
+	fprintf(f, "This is an autoresponse From: %s@%s Re: %s\n", ActionUser, Domain, subject);
+	fprintf(f, "\n%s\n", Message);
 	fclose(f);
 	return 0;
 }

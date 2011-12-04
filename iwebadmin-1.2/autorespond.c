@@ -1,5 +1,5 @@
 /*
- * $Id: autorespond.c,v 1.4 2011-11-17 22:10:07+05:30 Cprogrammer Exp mbhangui $
+ * $Id: autorespond.c,v 1.5 2011-12-04 21:10:07+05:30 Cprogrammer Exp mbhangui $
  * Copyright (C) 1999-2004 Inter7 Internet Technologies, Inc. 
  *
  * This program is free software; you can redistribute it and/or modify
@@ -186,9 +186,8 @@ addautorespondnow()
 	sprintf(TmpBuf, "%s/vacation/%s/.vacation.msg", RealDir, ActionUser);
 	if ((fs = fopen(TmpBuf, "w")) == NULL)
 		ack("150", TmpBuf);
-	fprintf(fs, "From: %s@%s\n", ActionUser, Domain);
-	fprintf(fs, "Subject: %s\n\n", Alias);
-	fprintf(fs, "%s", Message);
+	fprintf(fs, "This is an autoresponse From: %s@%s Re: %s\n", ActionUser, Domain, Alias);
+	fprintf(fs, "\n%s\n", Message);
 	fclose(fs);
 	/*- Make the autoresponder .qmail file */
 	valias_delete(ActionUser, Domain, 0);
@@ -196,8 +195,13 @@ addautorespondnow()
 		sprintf(TmpBuf, "&%s", Newu);
 		valias_insert(ActionUser, Domain, TmpBuf, 1);
 	}
-	sprintf(TmpBuf, "|%s/bin/autoresponder -q %s/vacation/%s/.vacation.msg %s/vacation/%s", INDIMAILDIR,
-		RealDir, ActionUser, RealDir, ActionUser);
+	sprintf(TmpBuf, "%s/content-type", RealDir);
+	if (access(TmpBuf, R_OK))
+		sprintf(TmpBuf, "|%s/bin/autoresponder -q %s/vacation/%s/.vacation.msg %s/vacation/%s", INDIMAILDIR,
+			RealDir, ActionUser, RealDir, ActionUser);
+	else
+		sprintf(TmpBuf, "|%s/bin/autoresponder -q %s/vacation/%s/.vacation.msg %s/vacation/%s -T %s/content-type", INDIMAILDIR,
+			RealDir, ActionUser, RealDir, ActionUser, RealDir);
 	valias_insert(ActionUser, Domain, TmpBuf, 1);
 	/*- Report success */
 	snprinth(StatusMessage, sizeof (StatusMessage), "%s %H@%H\n", html_text[180], ActionUser, Domain);
@@ -289,9 +293,8 @@ modautorespondnow()
 	sprintf(TmpBuf, "%s/vacation/%s/.vacation.msg", RealDir, ActionUser);
 	if ((fs = fopen(TmpBuf, "w")) == NULL)
 		ack("150", TmpBuf);
-	fprintf(fs, "From: %s@%s\n", ActionUser, Domain);
-	fprintf(fs, "Subject: %s\n\n", Alias);
-	fprintf(fs, "%s", Message);
+	fprintf(fs, "This is an autoresponse From: %s@%s Re: %s\n", ActionUser, Domain, Alias);
+	fprintf(fs, "\n%s\n", Message);
 	fclose(fs);
 	/*- Make the autoresponder .qmail file */
 	valias_delete(ActionUser, Domain, 0);
@@ -299,8 +302,13 @@ modautorespondnow()
 		sprintf(TmpBuf, "&%s", Newu);
 		valias_insert(ActionUser, Domain, TmpBuf, 1);
 	}
-	sprintf(TmpBuf, "|%s/bin/autoresponder -q %s/vacation/%s/.vacation.msg %s/vacation/%s",
-		INDIMAILDIR, RealDir, ActionUser, RealDir, ActionUser);
+	sprintf(TmpBuf, "%s/content-type", RealDir);
+	if (access(TmpBuf, R_OK))
+		sprintf(TmpBuf, "|%s/bin/autoresponder -q %s/vacation/%s/.vacation.msg %s/vacation/%s",
+			INDIMAILDIR, RealDir, ActionUser, RealDir, ActionUser);
+	else
+		sprintf(TmpBuf, "|%s/bin/autoresponder -q %s/vacation/%s/.vacation.msg %s/vacation/%s -T %s/content-type",
+			INDIMAILDIR, RealDir, ActionUser, RealDir, ActionUser, RealDir);
 	valias_insert(ActionUser, Domain, TmpBuf, 1);
 	/*- Report success */
 	snprinth(StatusMessage, sizeof (StatusMessage), "%s %H@%H\n", html_text[183], ActionUser, Domain);
