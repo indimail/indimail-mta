@@ -18,7 +18,8 @@ autoresponder \- Rate and time limited autoresponder for qmail/indimail
   -t TIME  Set the time interval, in seconds (defaults to 1 week,
            -1 for no rate limiting)
   -T STR   Added Content-Type field. This option is valid without
-           the -c option.
+           the -c option. \fISTR\fR can be a path to a file having
+           the content-type. A newline at the end will be removed
   -s STR   Add the subject to the autoresponse, prefixed by STR
   -S STR   The subject in autoresponse (defaults to the subject in
            received mail)
@@ -31,7 +32,7 @@ autoresponder \- Rate and time limited autoresponder for qmail/indimail
 
 .SH DESCRIPTION
 .B autoresponder
-is a RFC 3834 compliant responder to automatically respond to emails.
+is a RFC 3834 compliant email responder.
 .B autoresponder
 creates temporary files in \fIdirectory\fR to track sender's rates. If more than NUM messages are
 received from the same sender within TIME seconds of each other, no response is sent. This

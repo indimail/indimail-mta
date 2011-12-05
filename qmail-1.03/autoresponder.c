@@ -1,5 +1,8 @@
 /*
  * $Log: autoresponder.c,v $
+ * Revision 1.26  2011-12-05 12:13:11+05:30  Cprogrammer
+ * set Content-Type if -T argument is given
+ *
  * Revision 1.25  2011-12-01 21:21:50+05:30  Cprogrammer
  * added option to add Content-Type header
  *
@@ -374,7 +377,7 @@ void
 get_arguments(int argc, char *argv[])
 {
 	char           *ptr;
-	int             ch;
+	int             ch, i;
 	struct tm       tm;
 	struct datetime dt1, dt2;
 
@@ -384,7 +387,7 @@ get_arguments(int argc, char *argv[])
 	else
 		argv0 = argv[0];
 	when = now();
-	while ((ch = getopt(argc, argv, "cn:s:S:t:f:b:e:qlLN")) != opteof)
+	while ((ch = getopt(argc, argv, "cn:s:S:t:T:f:b:e:qlLN")) != opteof)
 	{
 		switch (ch)
 		{
@@ -457,8 +460,15 @@ get_arguments(int argc, char *argv[])
 			from_addr = optarg;
 			break;
 		case 'T':
-			if (!stralloc_copys(&content_type, optarg))
-				strerr_die2sys(111, FATAL, "out of memory: ");
+			if (!optarg[i = str_chr(optarg, '/')]) {
+				if (!stralloc_copys(&content_type, optarg))
+					strerr_die2sys(111, FATAL, "out of memory: ");
+			} else { /*- content-type is in a file */
+				if (control_readnativefile(&content_type, optarg, 0) != 1)
+					strerr_die3sys(111, FATAL, optarg, ": ");
+				if (content_type.s[content_type.len - 1] == '\n')
+					content_type.len--;
+			}
 			break;
 		case 't':
 			opt_timelimit = strtoul(optarg, &ptr, 10);
@@ -1198,11 +1208,7 @@ main(int argc, char *argv[])
 			strerr_die2sys(111, FATAL, "unable to write: ");
 		if (substdio_put(&ssout, "\n", 1))
 			strerr_die2sys(111, FATAL, "unable to write: ");
-	} else {
-		if (substdio_put(&ssout, "Mime-Version: 1.0\n"
-		 	"Content-Type: text/plain; charset=\"utf-8\"\n", 60))
-			strerr_die2sys(111, FATAL, "unable to write: ");
-	}
+	} 
 	if (substdio_puts(&ssout, "Subject: "))
 		strerr_die2sys(111, FATAL, "unable to write: ");
 	if (opt_subject_prefix && substdio_puts(&ssout, opt_subject_prefix))
@@ -1284,7 +1290,7 @@ main(int argc, char *argv[])
 void
 getversion_qmail_autoresponder_c()
 {
-	static char    *x = "$Id: autoresponder.c,v 1.25 2011-12-01 21:21:50+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: autoresponder.c,v 1.26 2011-12-05 12:13:11+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
