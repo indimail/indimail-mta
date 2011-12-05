@@ -803,6 +803,8 @@ void            getversion_mysql_query_c();
 void            getversion_unsetenv_c();
 void            getversion_post_handle_c();
 void            getversion_ismaildup_c();
+void            getversion_md5_crypt_c();
+void            getversion_hmac_md5_c();
 void            getversion_hmac_sha1_c();
 void            getversion_hmac_ripemd_c();
 void            getversion_sha1_c();
@@ -1236,6 +1238,8 @@ getversion(char *id)
 	getversion_in_crypt_c();
 	getversion_mysql_query_c();
 	getversion_unsetenv_c();
+	getversion_md5_crypt_c();
+	getversion_hmac_md5_c();
 	getversion_hmac_sha1_c();
 	getversion_hmac_ripemd_c();
 	getversion_sha1_c();
