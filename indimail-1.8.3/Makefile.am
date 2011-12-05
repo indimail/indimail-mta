@@ -744,6 +744,10 @@ error_stack.lo: error_stack.c error_stack.h config.h
 post_handle.lo: post_handle.c config.h
 randltr.lo: indimail.h config.h
 in_crypt.lo: indimail.h config.h
+hmac_md5.lo: md5.h global.h
+md5c.lo: md5.h global.h
+md5_crypt.lo: md5.h global.h
+
 
 edit = sed \
 	-e 's,@indimaildir\@,$(indimaildir),g' \
