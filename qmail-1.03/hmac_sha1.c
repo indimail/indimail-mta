@@ -1,4 +1,9 @@
 /*
+ * $Log: hmac_sha1.c,v $
+ * Revision 1.1  2011-12-05 19:53:56+05:30  Cprogrammer
+ * Initial revision
+ *
+ *
  * hmac_sha1 routine
  */
 #include <sys/types.h>
@@ -70,7 +75,7 @@ hmac_sha1(text, text_len, key, key_len, digest)
 void
 getversion_hmac_sha1_c()
 {
-	static char    *x = "$Id: $";
+	static char    *x = "$Id: hmac_sha1.c,v 1.1 2011-12-05 19:53:56+05:30 Cprogrammer Stab mbhangui $";
 	x = sccsidsha1h;
 	x=sccsidtypesxh;
 	x++;
