@@ -1,5 +1,8 @@
 /*
  * $Log: qnotify.c,v $
+ * Revision 1.4  2011-12-05 19:44:24+05:30  Cprogrammer
+ * skip host prefix in the RECIPIENT address
+ *
  * Revision 1.3  2011-12-05 17:43:25+05:30  Cprogrammer
  * added option to enclose headers only instead of full email
  *
@@ -400,7 +403,7 @@ main(int argc, char **argv)
 	struct substdio ssin;
 	static char     ssinbuf[1024];
 	char            buf[DATE822FMT];
-	char           *rpline, *qqx, *recipient, *qbase;
+	char           *rpline, *qqx, *recipient, *host, *qbase;
 	char          **e;
 
 	while ((ch = getopt(argc, argv, "nh")) != sgoptdone) {
@@ -441,6 +444,11 @@ main(int argc, char **argv)
 		logerrf("recipient not set\n");
 		_exit (0);
 	}
+	if (!(host = env_get("HOST"))) {
+		logerrf("HOST not set\n");
+		_exit (0);
+	}
+	recipient += str_len(host) + 1; /*- testindi.com-mbhangui@testindi.com */
 	/*-
 	 * compare the disposition and return path addresses
 	 */
@@ -567,7 +575,7 @@ main(int argc, char **argv)
 void
 getversion_qnotify_c()
 {
-	static char    *x = "$Id: qnotify.c,v 1.3 2011-12-05 17:43:25+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qnotify.c,v 1.4 2011-12-05 19:44:24+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
