@@ -1,5 +1,8 @@
 /*
  * $Log: qnotify.c,v $
+ * Revision 1.3  2011-12-05 17:43:25+05:30  Cprogrammer
+ * added option to enclose headers only instead of full email
+ *
  * Revision 1.2  2011-11-27 13:43:47+05:30  Cprogrammer
  * process headers only
  *
@@ -7,7 +10,6 @@
  * Initial revision
  *
  */
-#include <stdio.h>
 #include <unistd.h>
 #include <fcntl.h>
 #include <sys/types.h>
@@ -391,7 +393,7 @@ int
 main(int argc, char **argv)
 {
 	stralloc        boundary = {0};
-	int             ch, match;
+	int             ch, match, headers_only = 0;
 	unsigned long   id;
 	datetime_sec    birth;
 	struct datetime dt;
@@ -401,9 +403,12 @@ main(int argc, char **argv)
 	char           *rpline, *qqx, *recipient, *qbase;
 	char          **e;
 
-	while ((ch = getopt(argc, argv, "n")) != sgoptdone) {
+	while ((ch = getopt(argc, argv, "nh")) != sgoptdone) {
 		switch (ch)
 		{
+		case 'h':
+			headers_only = 1;
+			break;
 		case 'n':
 			flagqueue = 0;
 			break;
@@ -514,15 +519,18 @@ main(int argc, char **argv)
 	my_putb("Final-Recipient: rfc822; ", 25);
 	my_puts(recipient);
 	my_putb("\n", 1);
-	my_putb("Disposition: automatic-action/MDN-sent-automatically; displayed\n", 56);
+	my_putb("Disposition: automatic-action/MDN-sent-automatically; displayed\n", 64);
 
 	/*- enclose the original mail as attachment */
 	my_putb("\n--", 3);
 	my_putb(boundary.s, boundary.len);
 	my_putb("\n", 1);
-	my_putb("Content-Disposition: attachment\n", 32);
 	my_putb("Content-Transfer-Encoding: 8bit\n", 32);
-	my_putb("Content-Type: message/rfc822\n\n", 30);
+	my_putb("Content-Disposition: attachment\n", 32);
+	if (headers_only)
+		my_putb("Content-Type: text/rfc822-headers\n\n", 35);
+	else
+		my_putb("Content-Type: message/rfc822\n\n", 30);
 
 	/* You wanted an MDN and you shall get one - the entire lot back to you */
 	substdio_fdbuf(&ssin, read, 0, ssinbuf, sizeof(ssinbuf));
@@ -531,11 +539,14 @@ main(int argc, char **argv)
 			my_error("read error", 0, READ_ERR);
 		if (!match && line.len == 0)
 			break;
+		if (headers_only && !mess822_ok(&line))
+			break;
 		my_putb(line.s, line.len);
 	}
 	my_putb("--", 2);
 	my_putb(boundary.s, boundary.len);
 	my_putb("--\n", 3);
+
 	my_putb("\n", 1);
 	if (flagqueue) {
 		qmail_from(&qqt, "");
@@ -556,7 +567,7 @@ main(int argc, char **argv)
 void
 getversion_qnotify_c()
 {
-	static char    *x = "$Id: qnotify.c,v 1.2 2011-11-27 13:43:47+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qnotify.c,v 1.3 2011-12-05 17:43:25+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
