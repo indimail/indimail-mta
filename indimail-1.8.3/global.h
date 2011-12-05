@@ -8,6 +8,10 @@
  */
 #ifndef _GLOBAL_H_
 #define _GLOBAL_H_ 1
+
+#ifndef	lint
+static char     sccsidglobalh[] = "$Id: $";
+#endif
 /*-
  * PROTOTYPES should be set to one if and only if the compiler supports
  * function argument prototyping.
@@ -28,7 +32,12 @@ typedef unsigned short int UINT2;
 /*
  * UINT4 defines a four byte word 
  */
+#if defined(__alpha) && (defined(__osf__) || defined(__linux__))
+typedef unsigned int UINT4;
+#else
 typedef unsigned long int UINT4;
+#endif
+
 #ifndef NULL_PTR
 #define NULL_PTR ((POINTER)0)
 #endif
