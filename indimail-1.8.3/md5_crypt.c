@@ -1,12 +1,15 @@
 /*
  * $Log: md5_crypt.c,v $
+ * Revision 2.2  2011-12-05 14:48:18+05:30  Cprogrammer
+ * added version information for global.h
+ *
  * Revision 2.1  2011-12-05 13:43:48+05:30  Cprogrammer
  * md5_crypt() function for systems with missing md5_crypt()
  *
  */
 
 #ifndef	lint
-static char     sccsid[] = "$Id: md5_crypt.c,v 2.1 2011-12-05 13:43:48+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: md5_crypt.c,v 2.2 2011-12-05 14:48:18+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef HAVE_CONFIG_H
@@ -156,6 +159,7 @@ getversion_md5_crypt_c()
 {
 	printf("%s\n", sccsid);
 #ifndef HAVE_MD5_CRYPT
+	printf("%s\n", sccsidglobalh);
 	printf("%s\n", sccsidmd5h);
 #endif
 }

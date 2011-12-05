@@ -1,5 +1,8 @@
 /*
  * $Log: digest_md5.c,v $
+ * Revision 2.3  2011-12-05 14:47:34+05:30  Cprogrammer
+ * added version information for global.h
+ *
  * Revision 2.2  2011-11-09 19:43:38+05:30  Cprogrammer
  * removed DIGEST_MAX, BUFSIZE definition
  *
@@ -9,12 +12,13 @@
  */
 #include <string.h>
 #include <unistd.h>
+#include "global.h"
 #include "md5.h"
 
 static char     hextab[] = "0123456789abcdef";
 
 #ifndef	lint
-static char     sccsid[] = "$Id: digest_md5.c,v 2.2 2011-11-09 19:43:38+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: digest_md5.c,v 2.3 2011-12-05 14:47:34+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 int
@@ -176,5 +180,6 @@ void
 getversion_digest_md5_c()
 {
 	printf("%s\n", sccsid);
+	printf("%s\n", sccsidglobalh);
 	printf("%s\n", sccsidmd5h);
 }

@@ -1,5 +1,8 @@
 /*
  * $Log: hmac_md5.c,v $
+ * Revision 2.3  2011-12-05 14:47:50+05:30  Cprogrammer
+ * added version information for global.h
+ *
  * Revision 2.2  2011-12-05 13:37:27+05:30  Cprogrammer
  * hmac_md5() function
  *
@@ -8,7 +11,7 @@
 #include "md5.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: hmac_md5.c,v 2.2 2011-12-05 13:37:27+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: hmac_md5.c,v 2.3 2011-12-05 14:47:50+05:30 Cprogrammer Exp mbhangui $";
 #endif
 /*-
  * Function: hmac_md5
@@ -81,5 +84,6 @@ void
 getversion_hmac_md5_c()
 {
 	printf("%s\n", sccsid);
+	printf("%s\n", sccsidglobalh);
 	printf("%s\n", sccsidmd5h);
 }

@@ -1,5 +1,8 @@
 /*-
  * $Log: md5c.c,v $
+ * Revision 2.6  2011-12-05 14:48:07+05:30  Cprogrammer
+ * added version information for global.h
+ *
  * Revision 2.5  2011-12-05 13:47:15+05:30  Cprogrammer
  * moved hmac_md5(), md5_crypt() functions to their own c source file
  *
@@ -83,7 +86,11 @@ static unsigned char PADDING[64] = {
 /*
  * ROTATE_LEFT rotates x left n bits.
  */
+#if defined(__alpha) && (defined(__osf__) || defined(__linux__))
+#define ROTATE_LEFT(x, n) ((((x) << (n)) & 0xffffffffU) | ((x) >> (32-(n))))
+#else
 #define ROTATE_LEFT(x, n) (((x) << (n)) | ((x) >> (32-(n))))
+#endif
 
 /*
  * FF, GG, HH, and II transformations for rounds 1, 2, 3, and 4.
@@ -111,7 +118,7 @@ static unsigned char PADDING[64] = {
   }
 
 #ifndef	lint
-static char     sccsid[] = "$Id: md5c.c,v 2.5 2011-12-05 13:47:15+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: md5c.c,v 2.6 2011-12-05 14:48:07+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 /*
@@ -358,5 +365,6 @@ void
 getversion_md5c_c()
 {
 	printf("%s\n", sccsid);
+	printf("%s\n", sccsidglobalh);
 	printf("%s\n", sccsidmd5h);
 }
