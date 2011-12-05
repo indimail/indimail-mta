@@ -183,7 +183,7 @@ char           *mk_hashpath(char *, int);
 char           *mk_newpath(char *, int);
 int             rename(const char *, const char *);
 
-const char      cvsrid[] = "$Id: qmail-rm.c,v 1.12 2011-11-06 22:53:08+05:30 Cprogrammer Exp mbhangui $";
+const char      cvsrid[] = "$Id: qmail-rm.c,v 1.12 2011-11-06 22:53:08+05:30 Cprogrammer Stab mbhangui $";
 
 /*- globals */
 extern const char *__progname;
