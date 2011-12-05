@@ -5,6 +5,7 @@ qnotify \- respond to Message Disposition Notifications
 in
 .BR .qmail :
 .B |qnotify
+[-h]
 [-n]
 
 .SH DESCRIPTION
@@ -20,6 +21,16 @@ the headers in the email.
 
 \fBqnotify\fR uses environment modified according to files in 
 QMAILHOME/control/defaultqueue directory.
+
+.SH OPTIONS
+.PP
+.TP
+\fB-n\fR
+Print the message rather than feeding it to
+.BR qmail-queue .
+.TP
+\fB-h\fR
+enclose the headers rather than the original email
 
 .SH RETURN VALUE
  0 for success
