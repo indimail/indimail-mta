@@ -197,11 +197,11 @@ addautorespondnow()
 	}
 	sprintf(TmpBuf, "%s/content-type", RealDir);
 	if (access(TmpBuf, R_OK))
-		sprintf(TmpBuf, "|%s/bin/autoresponder -q %s/vacation/%s/.vacation.msg %s/vacation/%s", INDIMAILDIR,
-			RealDir, ActionUser, RealDir, ActionUser);
+		sprintf(TmpBuf, "|%s/bin/autoresponder -q %s/vacation/%s/.vacation.msg %s/vacation/%s",
+			INDIMAILDIR, RealDir, ActionUser, RealDir, ActionUser);
 	else
-		sprintf(TmpBuf, "|%s/bin/autoresponder -q %s/vacation/%s/.vacation.msg %s/vacation/%s -T %s/content-type", INDIMAILDIR,
-			RealDir, ActionUser, RealDir, ActionUser, RealDir);
+		sprintf(TmpBuf, "|%s/bin/autoresponder -q -T %s/content-type %s/vacation/%s/.vacation.msg %s/vacation/%s",
+			INDIMAILDIR, RealDir, RealDir, ActionUser, RealDir, ActionUser);
 	valias_insert(ActionUser, Domain, TmpBuf, 1);
 	/*- Report success */
 	snprinth(StatusMessage, sizeof (StatusMessage), "%s %H@%H\n", html_text[180], ActionUser, Domain);
@@ -307,8 +307,8 @@ modautorespondnow()
 		sprintf(TmpBuf, "|%s/bin/autoresponder -q %s/vacation/%s/.vacation.msg %s/vacation/%s",
 			INDIMAILDIR, RealDir, ActionUser, RealDir, ActionUser);
 	else
-		sprintf(TmpBuf, "|%s/bin/autoresponder -q %s/vacation/%s/.vacation.msg %s/vacation/%s -T %s/content-type",
-			INDIMAILDIR, RealDir, ActionUser, RealDir, ActionUser, RealDir);
+		sprintf(TmpBuf, "|%s/bin/autoresponder -q -T %s/content-type %s/vacation/%s/.vacation.msg %s/vacation/%s",
+			INDIMAILDIR, RealDir, RealDir, ActionUser, RealDir, ActionUser);
 	valias_insert(ActionUser, Domain, TmpBuf, 1);
 	/*- Report success */
 	snprinth(StatusMessage, sizeof (StatusMessage), "%s %H@%H\n", html_text[183], ActionUser, Domain);

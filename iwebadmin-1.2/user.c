@@ -799,8 +799,8 @@ makevacation(FILE * d, char *dir)
 		fprintf(d, "| %s/bin/autoresponder -q %s/vacation/%s/.vacation.msg %s/vacation/%s\n",
 			INDIMAILDIR, dir, ActionUser, dir, ActionUser);
 	else
-		fprintf(d, "| %s/bin/autoresponder -q %s/vacation/%s/.vacation.msg %s/vacation/%s\n -T %s/content-type",
-			INDIMAILDIR, dir, ActionUser, dir, ActionUser, RealDir);
+		fprintf(d, "| %s/bin/autoresponder -q -T %s/content-type %s/vacation/%s/.vacation.msg %s/vacation/%s\n",
+			INDIMAILDIR, dir, dir, ActionUser, dir, ActionUser);
 	/*- set up the message file */
 	snprintf(fn, sizeof (fn), "%s/vacation/%s/.vacation.msg", dir, ActionUser);
 	GetValue(TmpCGI, Message, "vmessage=", sizeof (Message));
