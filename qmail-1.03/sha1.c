@@ -1,6 +1,9 @@
 
 /*
  * $Log: sha1.c,v $
+ * Revision 2.2  2011-12-05 15:10:19+05:30  Cprogrammer
+ * added version information
+ *
  * Revision 2.1  2011-10-27 14:30:23+05:30  Cprogrammer
  * sha1 routines
  *
@@ -26,10 +29,6 @@
 /*  define the SHA1 circular left shift macro */
 #define SHA1CircularShift(bits,word) \
 	(((word) << (bits)) | ((word) >> (32-(bits))))
-
-#ifndef	lint
-static char     sccsid[] = "$Id: sha1.c,v 2.1 2011-10-27 14:30:23+05:30 Cprogrammer Stab mbhangui $";
-#endif
 
 static void SHA1PadMessage(SHA1_CTX *);
 static void SHA1ProcessMessageBlock(SHA1_CTX *);
@@ -195,10 +194,11 @@ static void SHA1PadMessage(SHA1_CTX *ctx)
 }
 #undef SHA1CircularShift
 
-#include <stdio.h>
 void
 getversion_sha1_c()
 {
-	printf("%s\n", sccsid);
-	printf("%s\n", sccsidsha1h);
+	static char    *x = "$Id: sha1.c,v 2.2 2011-12-05 15:10:19+05:30 Cprogrammer Exp mbhangui $";
+	x=sccsidsha1h;
+	x=sccsidtypesxh;
+	x++;
 }

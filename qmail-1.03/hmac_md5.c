@@ -1,5 +1,8 @@
 /*
  * $Log: hmac_md5.c,v $
+ * Revision 1.2  2011-12-05 15:08:16+05:30  Cprogrammer
+ * added version information
+ *
  * Revision 1.1  2010-08-05 09:44:40+05:30  Cprogrammer
  * Initial revision
  *
@@ -71,4 +74,13 @@ hmac_md5(text, text_len, key, key_len, digest)
 	MD5Update(&context, k_opad, 64);	/* start with outer pad */
 	MD5Update(&context, digest, 16);	/* then results of 1st hash */
 	MD5Final(digest, &context);			/* finish up 2nd pass */
+}
+
+void
+getversion_hmac_md5_c()
+{
+	static char    *x = "$Id: hmac_md5.c,v 1.2 2011-12-05 15:08:16+05:30 Cprogrammer Exp mbhangui $";
+	x=sccsidmd5h;
+	x=sccsidglobalh;
+	x++;
 }
