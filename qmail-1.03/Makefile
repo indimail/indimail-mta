@@ -225,8 +225,8 @@ hmac_ripemd.o: compile hmac_ripemd.c ripemd.h typesx.h
 ripemd.o: compile ripemd.c ripemd.h
 	./compile ripemd.c
 
-comp_digest_md5.o: compile comp_digest_md5.c global.h md5.h str.h
-	./compile comp_digest_md5.c
+digest_md5.o: compile digest_md5.c global.h md5.h str.h
+	./compile digest_md5.c
 
 binm1: \
 binm1.sh conf-qmail
@@ -2194,7 +2194,7 @@ qmail-remote: \
 load qmail-remote.o control.o constmap.o timeoutread.o timeoutwrite.o base64sub.o \
 timeoutconn.o tcpto.o now.o dns.o ip.o ipalloc.o strsalloc.o ipme.o quote.o variables.o \
 error_str.o socket_ip4loopback.o socket_v6loopback.o socket_v6any.o env.o \
-md5c.o hmac_md5.o hmac_sha1.o hmac_ripemd.o sha1.o ripemd.o comp_digest_md5.o \
+md5c.o hmac_md5.o hmac_sha1.o hmac_ripemd.o sha1.o ripemd.o digest_md5.o \
 ndelay.a case.a sig.a open.a lock.a seek.a getln.a stralloc.a alloc.a \
 socket_v4mappedprefix.o scan_xlong.o socket_tcp.o socket_tcp6.o wait_pid.o \
 substdio.a str.a fs.a cdb.a auto_qmail.o envread.o error.a dns.lib socket.lib \
@@ -2203,7 +2203,7 @@ tls.lib
 	timeoutwrite.o timeoutconn.o tcpto.o now.o dns.o ip.o scan_xlong.o \
 	socket_ip4loopback.o socket_v6loopback.o socket_v6any.o ipalloc.o env.o \
 	error_str.o socket_v4mappedprefix.o strsalloc.o ipme.o quote.o wait_pid.o \
-	md5c.o hmac_md5.o hmac_sha1.o hmac_ripemd.o sha1.o ripemd.o comp_digest_md5.o \
+	md5c.o hmac_md5.o hmac_sha1.o hmac_ripemd.o sha1.o ripemd.o digest_md5.o \
 	variables.o socket_tcp.o socket_tcp6.o ndelay.a case.a sig.a open.a \
 	lock.a seek.a getln.a stralloc.a alloc.a substdio.a \
 	str.a fs.a cdb.a auto_qmail.o envread.o error.a `cat dns.lib socket.lib \
