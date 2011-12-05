@@ -1,14 +1,13 @@
 /*
  * $Log: ripemd.c,v $
+ * Revision 2.2  2011-12-05 15:10:07+05:30  Cprogrammer
+ * added version information
+ *
  * Revision 2.1  2011-10-27 14:29:53+05:30  Cprogrammer
  * ripemd routine
  *
  */
 #include "ripemd.h"
-
-#ifndef	lint
-static char     sccsid[] = "$Id: ripemd.c,v 2.1 2011-10-27 14:29:53+05:30 Cprogrammer Stab mbhangui $";
-#endif
 
 static void compress(RIPEMD160_CTX *ctx);
 
@@ -362,10 +361,11 @@ void RIPEMD160_Final(u8 *result, RIPEMD160_CTX *ctx)
 #undef ROL
 #undef bytes_TO_u32
 
-#include <stdio.h>
 void
 getversion_ripemd_c()
 {
-	printf("%s\n", sccsid);
-	printf("%s\n", sccsidripemdh);
+	static char    *x = "$Id: ripemd.c,v 2.2 2011-12-05 15:10:07+05:30 Cprogrammer Exp mbhangui $";
+	x=sccsidripemdh;
+	x=sccsidtypesxh;
+	x++;
 }

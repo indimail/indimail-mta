@@ -11,10 +11,6 @@
 #define PAD 64
 #define TK  20
 
-#ifndef	lint
-static char     sccsid[] = "$Id: hmac_sha1.c,v 2.2 2011-10-28 14:15:14+05:30 Cprogrammer Stab mbhangui $";
-#endif
-
 void
 hmac_sha1(text, text_len, key, key_len, digest)
 	u8             *text;		/* pointer to data stream */
@@ -71,10 +67,11 @@ hmac_sha1(text, text_len, key, key_len, digest)
 	SHA1_Final(digest, &ctx);	/* finish up 2nd pass */
 }
 
-#include <stdio.h>
 void
 getversion_hmac_sha1_c()
 {
-	printf("%s\n", sccsid);
-	printf("%s\n", sccsidsha1h);
+	static char    *x = "$Id: $";
+	x = sccsidsha1h;
+	x=sccsidtypesxh;
+	x++;
 }

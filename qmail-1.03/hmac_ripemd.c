@@ -17,10 +17,6 @@
 #define PAD 64
 #define TK  20
 
-#ifndef	lint
-static char     sccsid[] = "$Id: hmac_ripemd.c,v 2.2 2011-10-28 14:15:02+05:30 Cprogrammer Stab mbhangui $";
-#endif
-
 void hmac_ripemd(text, text_len, key, key_len, digest)
 	u8 *text;   /* pointer to data stream */
 	size_t text_len;
@@ -68,10 +64,11 @@ void hmac_ripemd(text, text_len, key, key_len, digest)
 	RIPEMD160_Final(digest, &ctx);          /* finish up 2nd pass */
 }
 
-#include <stdio.h>
 void
 getversion_hmac_ripemd_c()
 {
-	printf("%s\n", sccsid);
-	printf("%s\n", sccsidripemdh);
+	static char    *x = "$Id: $";
+	x=sccsidripemdh;
+	x=sccsidtypesxh;
+	x++;
 }

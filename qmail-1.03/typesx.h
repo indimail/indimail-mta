@@ -1,5 +1,15 @@
+/*
+ * $Log: typesx.h,v $
+ * Revision 2.2  2011-12-05 15:10:27+05:30  Cprogrammer
+ * added RCS id
+ *
+ */
 #ifndef MISC_TYPES_H
 #define MISC_TYPES_H
+
+#ifndef	lint
+static char     sccsidtypesxh[] = "$Id: typesx.h,v 2.2 2011-12-05 15:10:27+05:30 Cprogrammer Exp mbhangui $";
+#endif
 
 #include <inttypes.h>
 #include <sys/types.h>

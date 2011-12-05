@@ -1,5 +1,8 @@
 /* 
  * $Log: auth_cram.h,v $
+ * Revision 1.3  2011-12-05 15:07:00+05:30  Cprogrammer
+ * added RCS id
+ *
  * Revision 1.2  2011-10-28 21:28:27+05:30  Cprogrammer
  * added hmac_sha1(), hmac_ripemd()
  *
@@ -10,6 +13,10 @@
 
 #ifndef HMAC_MD5_H
 #define HMAC_MD5_H
+
+#ifndef	lint
+static char     sccsidauthcramh[] = "$Id: auth_cram.h,v 1.3 2011-12-05 15:07:00+05:30 Cprogrammer Exp mbhangui $";
+#endif
 
 /* 
  * pointer to data stream

@@ -1,5 +1,9 @@
 /*
  * $Log: md5c.c,v $
+ * Revision 1.2  2011-12-05 15:09:27+05:30  Cprogrammer
+ * truncate the extra bits generated from the left shift
+ * added version information
+ *
  * Revision 1.1  2010-08-05 09:45:11+05:30  Cprogrammer
  * Initial revision
  *
@@ -75,7 +79,11 @@ static unsigned char PADDING[64] = {
 
 /* ROTATE_LEFT rotates x left n bits.
  */
+#if defined(__alpha) && (defined(__osf__) || defined(__linux__))
+#define ROTATE_LEFT(x, n) ((((x) << (n)) & 0xffffffffU) | ((x) >> (32-(n))))
+#else
 #define ROTATE_LEFT(x, n) (((x) << (n)) | ((x) >> (32-(n))))
+#endif
 
 /* FF, GG, HH, and II transformations for rounds 1, 2, 3, and 4.
    Rotation is separate from addition to prevent recomputation.
@@ -338,4 +346,13 @@ unsigned int len;
   
   for (i = 0; i < len; i++)
     ((char *)output)[i] = (char)value;
+}
+
+void
+getversion_md5c_c()
+{
+	static char    *x = "$Id: md5c.c,v 1.2 2011-12-05 15:09:27+05:30 Cprogrammer Exp mbhangui $";
+	x=sccsidmd5h;
+	x=sccsidglobalh;
+	x++;
 }
