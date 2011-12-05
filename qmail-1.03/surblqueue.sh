@@ -5,7 +5,7 @@
 # Initial revision
 #
 #
-# $Id: surblqueue.sh,v 1.1 2011-07-15 11:48:51+05:30 Cprogrammer Exp mbhangui $
+# $Id: surblqueue.sh,v 1.1 2011-07-15 11:48:51+05:30 Cprogrammer Stab mbhangui $
 #
 # I should be called by qmail-smtpd or anything that calls qmail-queue
 #
