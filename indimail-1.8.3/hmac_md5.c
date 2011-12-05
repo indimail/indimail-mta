@@ -11,7 +11,7 @@
 #include "md5.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: hmac_md5.c,v 2.3 2011-12-05 14:47:50+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: hmac_md5.c,v 2.3 2011-12-05 14:47:50+05:30 Cprogrammer Stab mbhangui $";
 #endif
 /*-
  * Function: hmac_md5

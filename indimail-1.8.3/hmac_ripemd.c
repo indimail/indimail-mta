@@ -18,7 +18,7 @@
 #define TK  20
 
 #ifndef	lint
-static char     sccsid[] = "$Id: hmac_ripemd.c,v 2.2 2011-10-28 14:15:02+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: hmac_ripemd.c,v 2.2 2011-10-28 14:15:02+05:30 Cprogrammer Stab mbhangui $";
 #endif
 
 void hmac_ripemd(text, text_len, key, key_len, digest)

@@ -129,7 +129,7 @@
 #include <errno.h>
 
 #ifndef lint
-static char     sccsid[] = "$Id: vchkpass.c,v 2.37 2011-10-28 14:16:41+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: vchkpass.c,v 2.37 2011-10-28 14:16:41+05:30 Cprogrammer Stab mbhangui $";
 #endif
 #ifdef AUTH_SIZE
 #undef AUTH_SIZE

@@ -9,7 +9,7 @@
  */
 
 #ifndef	lint
-static char     sccsid[] = "$Id: md5_crypt.c,v 2.2 2011-12-05 14:48:18+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: md5_crypt.c,v 2.2 2011-12-05 14:48:18+05:30 Cprogrammer Stab mbhangui $";
 #endif
 
 #ifdef HAVE_CONFIG_H

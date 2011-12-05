@@ -47,7 +47,7 @@
 #endif
 
 #ifndef lint
-static char     sccsid[] = "$Id: systpass.c,v 2.11 2011-10-28 14:16:33+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: systpass.c,v 2.11 2011-10-28 14:16:33+05:30 Cprogrammer Stab mbhangui $";
 #endif
 
 int             authlen = 512;

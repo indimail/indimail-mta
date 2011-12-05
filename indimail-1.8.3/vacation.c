@@ -64,7 +64,7 @@
 #include <sys/stat.h>
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vacation.c,v 2.12 2011-12-04 21:04:14+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: vacation.c,v 2.12 2011-12-04 21:04:14+05:30 Cprogrammer Stab mbhangui $";
 #endif
 
 char           *getuserinfo(char *);
