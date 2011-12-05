@@ -79,7 +79,7 @@ hmac_md5(text, text_len, key, key_len, digest)
 void
 getversion_hmac_md5_c()
 {
-	static char    *x = "$Id: hmac_md5.c,v 1.2 2011-12-05 15:08:16+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: hmac_md5.c,v 1.2 2011-12-05 15:08:16+05:30 Cprogrammer Stab mbhangui $";
 	x=sccsidmd5h;
 	x=sccsidglobalh;
 	x++;
