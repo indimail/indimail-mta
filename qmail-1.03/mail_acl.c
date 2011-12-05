@@ -288,7 +288,7 @@ mail_acl(stralloc *acclist, int qregex, char *sender, char *recipient, char verb
 void
 getversion_mail_acl_c()
 {
-	static char    *x = "$Id: mail_acl.c,v 1.2 2011-11-17 20:03:58+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: mail_acl.c,v 1.2 2011-11-17 20:03:58+05:30 Cprogrammer Stab mbhangui $";
 
 	x++;
 }

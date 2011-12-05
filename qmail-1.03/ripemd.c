@@ -364,7 +364,7 @@ void RIPEMD160_Final(u8 *result, RIPEMD160_CTX *ctx)
 void
 getversion_ripemd_c()
 {
-	static char    *x = "$Id: ripemd.c,v 2.2 2011-12-05 15:10:07+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: ripemd.c,v 2.2 2011-12-05 15:10:07+05:30 Cprogrammer Stab mbhangui $";
 	x=sccsidripemdh;
 	x=sccsidtypesxh;
 	x++;

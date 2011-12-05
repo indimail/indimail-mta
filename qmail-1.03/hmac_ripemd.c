@@ -1,5 +1,8 @@
 /*
  * $Log: hmac_ripemd.c,v $
+ * Revision 1.1  2011-12-05 19:53:27+05:30  Cprogrammer
+ * Initial revision
+ *
  * Revision 2.2  2011-10-28 14:15:02+05:30  Cprogrammer
  * added length arguments to hmac_ripemd()
  *
@@ -67,7 +70,7 @@ void hmac_ripemd(text, text_len, key, key_len, digest)
 void
 getversion_hmac_ripemd_c()
 {
-	static char    *x = "$Id: $";
+	static char    *x = "$Id: hmac_ripemd.c,v 1.1 2011-12-05 19:53:27+05:30 Cprogrammer Stab mbhangui $";
 	x=sccsidripemdh;
 	x=sccsidtypesxh;
 	x++;

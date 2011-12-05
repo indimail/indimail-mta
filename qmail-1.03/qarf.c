@@ -449,7 +449,7 @@ main(int argc, char **argv)
 
 	my_puts(
 			"Feedback-Type: abuse\n"
-			"User-Agent: $Id: qarf.c,v 1.7 2011-11-27 13:43:25+05:30 Cprogrammer Exp mbhangui $\n"
+			"User-Agent: $Id: qarf.c,v 1.7 2011-11-27 13:43:25+05:30 Cprogrammer Stab mbhangui $\n"
 			"Version: 0.1\n");
 	if (email_from.len) {
 		my_putb("Original-Mail-From: ", 20);
@@ -509,7 +509,7 @@ main(int argc, char **argv)
 void
 getversion_qarf_c()
 {
-	static char    *x = "$Id: qarf.c,v 1.7 2011-11-27 13:43:25+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qarf.c,v 1.7 2011-11-27 13:43:25+05:30 Cprogrammer Stab mbhangui $";
 
 	x++;
 }

@@ -197,7 +197,7 @@ static void SHA1PadMessage(SHA1_CTX *ctx)
 void
 getversion_sha1_c()
 {
-	static char    *x = "$Id: sha1.c,v 2.2 2011-12-05 15:10:19+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: sha1.c,v 2.2 2011-12-05 15:10:19+05:30 Cprogrammer Stab mbhangui $";
 	x=sccsidsha1h;
 	x=sccsidtypesxh;
 	x++;
