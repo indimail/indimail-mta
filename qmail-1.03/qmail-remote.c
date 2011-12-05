@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-remote.c,v $
+ * Revision 1.76  2011-12-05 15:10:56+05:30  Cprogrammer
+ * added version information
+ *
  * Revision 1.75  2011-10-29 20:42:53+05:30  Cprogrammer
  * added CRAM-RIPEMD, CRAM-SHA1, DIGEST-MD5 auth methods
  *
@@ -1547,7 +1550,7 @@ auth_digest_md5(int use_size)
 		temp_nomem();
 	if (!stralloc_catb(&slop, "\",response=", 11))
 		temp_nomem();
-	if (!(s = (unsigned char *) comp_digest_md5(user.s, user.len, realm.s, realm.len,
+	if (!(s = (unsigned char *) digest_md5(user.s, user.len, realm.s, realm.len,
 		pass.s, pass.len, 0, nonce.s, nonce.len, digesturi.s, digesturi.len,
 		(char *) cnonce, "00000001", "auth")))
 		quit("ZConnected to ", " but unable to generate response.", -1, -1);
@@ -2795,7 +2798,8 @@ main(int argc, char **argv)
 void
 getversion_qmail_remote_c()
 {
-	static char    *x = "$Id: qmail-remote.c,v 1.75 2011-10-29 20:42:53+05:30 Cprogrammer Stab mbhangui $";
-
+	static char    *x = "$Id: qmail-remote.c,v 1.76 2011-12-05 15:10:56+05:30 Cprogrammer Exp mbhangui $";
+	x=sccsidauthcramh;
+	x=sccsidauthdigestmd5h;
 	x++;
 }
