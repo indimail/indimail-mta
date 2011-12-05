@@ -1001,7 +1001,7 @@ surblfilter
 surblfilter.8
 surblqueue
 systemd
-comp_digest_md5.o
+digest_md5.o
 hmac_ripemd.o
 hmac_sha1.o
 ripemd.o
