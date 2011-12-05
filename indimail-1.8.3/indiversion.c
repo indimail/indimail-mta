@@ -1,5 +1,8 @@
 /*
  * $Log: indiversion.c,v $
+ * Revision 2.135  2011-12-05 13:46:41+05:30  Cprogrammer
+ * added hmac_md5() and md5_crypt() functions
+ *
  * Revision 2.134  2011-11-09 19:44:48+05:30  Cprogrammer
  * remvoed parseAddress(), storeHeader() from libindimail
  *
@@ -522,7 +525,7 @@
 #endif
 
 #ifndef	lint
-static char     sccsid[] = "$Id: indiversion.c,v 2.134 2011-11-09 19:44:48+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: indiversion.c,v 2.135 2011-12-05 13:46:41+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 void            getversion_indimail_settings_c();

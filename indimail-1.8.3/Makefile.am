@@ -87,7 +87,7 @@ RemoteBulkMail.c remove_line.c remove_quotes.c renameuser.c replacestr.c r_mkdir
 runcmmd.c ScanDir.c scat.c scopy.c SendWelcomeMail.c set_mysql_options.c setsockbuf.c \
 setuserquota.c sha256_crypt.c sha512_crypt.c signal_process.c site_size.c \
 skip_relay.c skip_system_files.c slen.c hmac_sha1.c sha1.c hmac_ripemd.c ripemd.c \
-sockread.c sockwrite.c spam.c SqlServer.c strToPw.c tcpbind.c \
+md5_crypt.c hmac_md5.c sockread.c sockwrite.c spam.c SqlServer.c strToPw.c tcpbind.c \
 tcpopen.c timeoutio.c trashpurge.c udpopen.c unsetenv.c update_file.c update_newu.c \
 update_quota.c update_rules.c updusercntrl.c userinfo.c UserInLookup.c user_over_quota.c \
 vadd_atrn_map.c vadd_ip_map.c valiasCount.c valias_delete.c valias_delete_domain.c \

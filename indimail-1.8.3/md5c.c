@@ -1,5 +1,8 @@
 /*-
  * $Log: md5c.c,v $
+ * Revision 2.5  2011-12-05 13:47:15+05:30  Cprogrammer
+ * moved hmac_md5(), md5_crypt() functions to their own c source file
+ *
  * Revision 2.4  2011-04-08 17:26:50+05:30  Cprogrammer
  * added HAVE_CONFIG_H
  *
@@ -108,7 +111,7 @@ static unsigned char PADDING[64] = {
   }
 
 #ifndef	lint
-static char     sccsid[] = "$Id: md5c.c,v 2.4 2011-04-08 17:26:50+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: md5c.c,v 2.5 2011-12-05 13:47:15+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 /*
