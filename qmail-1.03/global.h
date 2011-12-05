@@ -1,14 +1,16 @@
 /*
  * $Log: global.h,v $
+ * Revision 1.2  2011-12-05 15:07:45+05:30  Cprogrammer
+ * added RCS id
+ * use 4 byte word for UINT4
+ *
  * Revision 1.1  2010-08-05 09:44:07+05:30  Cprogrammer
  * Initial revision
  *
  */
 
 /* GLOBAL.H - RSAREF types and constants */
-
 #include <string.h>
-
 /* 
  * Copyright (C) RSA Laboratories, a division of RSA Data Security,
  * Inc., created 1991. All rights reserved.
@@ -16,6 +18,10 @@
 
 #ifndef _GLOBAL_H_
 #define _GLOBAL_H_ 1
+
+#ifndef	lint
+static char     sccsidglobalh[] = "$Id: global.h,v 1.2 2011-12-05 15:07:45+05:30 Cprogrammer Exp mbhangui $";
+#endif
 
 /* 
  * PROTOTYPES should be set to one if and only if the compiler supports
@@ -34,7 +40,11 @@ typedef unsigned char *POINTER;
 typedef unsigned short int UINT2;
 
 /* UINT4 defines a four byte word */
+#if defined(__alpha) && (defined(__osf__) || defined(__linux__))
+typedef unsigned int UINT4;
+#else
 typedef unsigned long int UINT4;
+#endif
 
 #ifndef NULL_PTR
 #define NULL_PTR ((POINTER)0)

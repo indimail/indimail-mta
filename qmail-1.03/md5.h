@@ -1,5 +1,8 @@
 /*
  * $Log: md5.h,v $
+ * Revision 1.2  2011-12-05 15:09:43+05:30  Cprogrammer
+ * added RCS id
+ *
  * Revision 1.1  2010-08-05 09:45:04+05:30  Cprogrammer
  * Initial revision
  *
@@ -32,6 +35,10 @@
 
 #ifndef _MD5_H_
 #define _MD5_H_ 1
+
+#ifndef	lint
+static char     sccsidmd5h[] = "$Id: md5.h,v 1.2 2011-12-05 15:09:43+05:30 Cprogrammer Exp mbhangui $";
+#endif
 
 #ifdef __cplusplus
 extern "C" {
