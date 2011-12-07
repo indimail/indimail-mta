@@ -1086,7 +1086,7 @@ digits(unsigned long num)
 void
 getversion_qmail_rm_c()
 {
-	static char    *x = "$Id: qmail-rm.c,v 1.12 2011-11-06 22:53:08+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-rm.c,v 1.12 2011-11-06 22:53:08+05:30 Cprogrammer Stab mbhangui $";
 
 	x++;
 }
