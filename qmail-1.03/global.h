@@ -1,5 +1,8 @@
 /*
  * $Log: global.h,v $
+ * Revision 1.3  2011-12-07 18:22:09+05:30  Cprogrammer
+ * use uint32 data type (fix for 64 bit system)
+ *
  * Revision 1.2  2011-12-05 15:07:45+05:30  Cprogrammer
  * added RCS id
  * use 4 byte word for UINT4
@@ -20,7 +23,7 @@
 #define _GLOBAL_H_ 1
 
 #ifndef	lint
-static char     sccsidglobalh[] = "$Id: global.h,v 1.2 2011-12-05 15:07:45+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsidglobalh[] = "$Id: global.h,v 1.3 2011-12-07 18:22:09+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 /* 
@@ -38,13 +41,6 @@ typedef unsigned char *POINTER;
 
 /* UINT2 defines a two byte word */
 typedef unsigned short int UINT2;
-
-/* UINT4 defines a four byte word */
-#if defined(__alpha) && (defined(__osf__) || defined(__linux__))
-typedef unsigned int UINT4;
-#else
-typedef unsigned long int UINT4;
-#endif
 
 #ifndef NULL_PTR
 #define NULL_PTR ((POINTER)0)
