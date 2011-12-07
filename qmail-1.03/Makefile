@@ -207,7 +207,7 @@ base64sub.o: \
 compile base64sub.c base64.h stralloc.h substdio.h str.h
 	./compile base64sub.c
 
-md5c.o: compile md5c.c md5.h global.h
+md5c.o: compile md5c.c md5.h global.h uint32.h
 	./compile md5c.c
 
 hmac_md5.o: compile hmac_md5.c auth_cram.h global.h
@@ -225,7 +225,7 @@ hmac_ripemd.o: compile hmac_ripemd.c ripemd.h typesx.h
 ripemd.o: compile ripemd.c ripemd.h
 	./compile ripemd.c
 
-digest_md5.o: compile digest_md5.c global.h md5.h str.h
+digest_md5.o: compile digest_md5.c global.h md5.h uint32.h str.h
 	./compile digest_md5.c
 
 binm1: \
