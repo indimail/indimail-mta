@@ -8,6 +8,9 @@
  */
 #ifndef _GLOBAL_H_
 #define _GLOBAL_H_ 1
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
 
 #ifndef	lint
 static char     sccsidglobalh[] = "$Id: $";
@@ -32,10 +35,15 @@ typedef unsigned short int UINT2;
 /*
  * UINT4 defines a four byte word 
  */
+#ifdef HAVE_INTTYPES_H
+#include <inttypes.h>
+typedef uint32_t UINT4;
+#else
 #if defined(__alpha) && (defined(__osf__) || defined(__linux__))
 typedef unsigned int UINT4;
 #else
 typedef unsigned long int UINT4;
+#endif
 #endif
 
 #ifndef NULL_PTR
