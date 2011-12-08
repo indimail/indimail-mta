@@ -106,7 +106,7 @@ digest_md5(char *user, int ulen, char *realm, int rlen, char *pass, int plen,
 void
 getversion_digest_md5_c()
 {
-	static char    *x = "$Id: digest_md5.c,v 1.2 2011-12-05 15:07:24+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: digest_md5.c,v 1.2 2011-12-05 15:07:24+05:30 Cprogrammer Stab mbhangui $";
 	x=sccsidmd5h;
 	x=sccsidglobalh;
 	x++;
