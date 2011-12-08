@@ -33,7 +33,7 @@
 #define _MD5_H_ 1
 
 #ifndef	lint
-static char     sccsidmd5h[] = "$Id: md5.h,v 2.2 2011-12-05 13:47:41+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsidmd5h[] = "$Id: md5.h,v 2.2 2011-12-05 13:47:41+05:30 Cprogrammer Stab mbhangui $";
 #endif
 
 #ifdef __cplusplus
