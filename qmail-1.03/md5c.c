@@ -355,7 +355,7 @@ unsigned int len;
 void
 getversion_md5c_c()
 {
-	static char    *x = "$Id: md5c.c,v 1.3 2011-12-07 18:23:13+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: md5c.c,v 1.3 2011-12-07 18:23:13+05:30 Cprogrammer Stab mbhangui $";
 	x=sccsidmd5h;
 	x=sccsidglobalh;
 	x++;

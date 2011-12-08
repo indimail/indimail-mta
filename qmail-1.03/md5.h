@@ -41,7 +41,7 @@
 #include "uint32.h"
 
 #ifndef	lint
-static char     sccsidmd5h[] = "$Id: md5.h,v 1.3 2011-12-07 18:23:18+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsidmd5h[] = "$Id: md5.h,v 1.3 2011-12-07 18:23:18+05:30 Cprogrammer Stab mbhangui $";
 #endif
 
 #ifdef __cplusplus
