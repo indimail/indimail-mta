@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-remote.c,v $
+ * Revision 1.77  2011-12-08 14:48:00+05:30  Cprogrammer
+ * added version info for all sub sources
+ *
  * Revision 1.76  2011-12-05 15:10:56+05:30  Cprogrammer
  * added version information
  *
@@ -2798,7 +2801,12 @@ main(int argc, char **argv)
 void
 getversion_qmail_remote_c()
 {
-	static char    *x = "$Id: qmail-remote.c,v 1.76 2011-12-05 15:10:56+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: qmail-remote.c,v 1.77 2011-12-08 14:48:00+05:30 Cprogrammer Stab mbhangui $";
+	x=sccsidmd5h;
+	x=sccsidglobalh;
+	x=sccsidripemdh;
+	x=sccsidsha1h;
+	x=sccsidtypesxh;
 	x=sccsidauthcramh;
 	x=sccsidauthdigestmd5h;
 	x++;
