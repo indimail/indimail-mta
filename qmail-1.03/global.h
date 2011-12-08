@@ -23,7 +23,7 @@
 #define _GLOBAL_H_ 1
 
 #ifndef	lint
-static char     sccsidglobalh[] = "$Id: global.h,v 1.3 2011-12-07 18:22:09+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsidglobalh[] = "$Id: global.h,v 1.3 2011-12-07 18:22:09+05:30 Cprogrammer Stab mbhangui $";
 #endif
 
 /* 
