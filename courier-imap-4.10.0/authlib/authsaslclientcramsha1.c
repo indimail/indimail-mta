@@ -33,6 +33,15 @@ const char *p=(*info->start_conv_func)("CRAM-SHA1", NULL, info->conv_func_arg);
 	return ( authsaslclient_cram(info, p, &hmac_sha1));
 }
 
+int authsaslclient_cramsha256(const struct authsaslclientinfo *info)
+{
+const char *p=(*info->start_conv_func)("CRAM-SHA256", NULL,
+				       info->conv_func_arg);
+
+	if (!p) return (AUTHSASL_CANCELLED);
+	return ( authsaslclient_cram(info, p, &hmac_sha256));
+}
+
 #else
 int authsaslclient_cramsha1(const struct authsaslclientinfo *info)
 {

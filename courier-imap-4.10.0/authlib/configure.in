@@ -144,7 +144,7 @@ AM_CONDITIONAL(HAVE_SHA1, test "$SHA1" = 1)
 
 STATIC_LIST=""
 LIBAUTH=""
-SASL_LIST="SASL(\"PLAIN\", authsasl_plain, authsaslclient_plain) SASL(\"LOGIN\", authsasl_login, authsaslclient_login) SASL(\"CRAM-MD5\", authsasl_cram, authsaslclient_crammd5) SASL(\"CRAM-SHA1\", authsasl_cram, authsaslclient_cramsha1)"
+SASL_LIST="SASL(\"PLAIN\", authsasl_plain, authsaslclient_plain) SASL(\"LOGIN\", authsasl_login, authsaslclient_login) SASL(\"CRAM-MD5\", authsasl_cram, authsaslclient_crammd5) SASL(\"CRAM-SHA1\", authsasl_cram, authsaslclient_cramsha1) SASL(\"CRAM-SHA256\", authsasl_cram, authsaslclient_cramsha256)"
 
 dnl #########################################################################
 

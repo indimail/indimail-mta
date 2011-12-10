@@ -82,6 +82,7 @@ extern int authsaslclient_login(const struct authsaslclientinfo *);
 extern int authsaslclient_plain(const struct authsaslclientinfo *);
 extern int authsaslclient_crammd5(const struct authsaslclientinfo *);
 extern int authsaslclient_cramsha1(const struct authsaslclientinfo *);
+extern int authsaslclient_cramsha256(const struct authsaslclientinfo *);
 
 /* Additional error codes */
 
