@@ -10,7 +10,7 @@
 #include <openssl/hmac.h>
 
 #ifndef	lint
-static char     sccsid[] = "$Id: hmac_sha256.c,v 2.1 2011-12-10 15:13:38+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: hmac_sha256.c,v 2.1 2011-12-10 15:13:38+05:30 Cprogrammer Stab mbhangui $";
 #endif
 
 void
