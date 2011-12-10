@@ -3,6 +3,7 @@
 # distribution information.
 
 
+ACLOCAL_AMFLAGS=-I ../m4
 noinst_LIBRARIES=librfc1035.a
 
 librfc1035_a_SOURCES= \

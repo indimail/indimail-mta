@@ -3,6 +3,7 @@
 # distribution information.
 
 
+ACLOCAL_AMFLAGS=-I ../m4
 noinst_LTLIBRARIES=libmaildir.la
 
 

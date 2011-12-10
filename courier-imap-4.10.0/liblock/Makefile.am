@@ -4,6 +4,7 @@
 #
 
 
+ACLOCAL_AMFLAGS=-I ../m4
 noinst_LTLIBRARIES=liblock.la
 noinst_PROGRAMS=lockmail
 

@@ -3,6 +3,7 @@
 # distribution information.
 
 
+ACLOCAL_AMFLAGS=-I ../m4
 noinst_PROGRAMS=@makedatprog_target@
 
 EXTRA_PROGRAMS=makedatprog

@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail.spec.in,v 2.239 2011-12-10 09:19:22+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 2.240 2011-12-10 09:24:14+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %define _unpackaged_files_terminate_build 1
 
@@ -35,7 +35,7 @@
 
 %define _prefix            @indimaildir@
 %define default_domain     @defaultdomain@
-%define courier_version    4.9.3
+%define courier_version    4.10.0
 %define bogofilter_version 1.2.2
 %define pam_multi_version  1.1
 %define ucspi_version      0.88

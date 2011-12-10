@@ -3,6 +3,7 @@
 # distribution information.
 
 
+ACLOCAL_AMFLAGS=-I ../m4
 LIBGDBMSOURCES=gdbmobj.h gdbmobj.c gdbmobj2.c gdbmobj3.c
 TESTGDBMSOURCES=testgdbm.C
 

@@ -3,6 +3,7 @@
 # distribution information.
 
 
+ACLOCAL_AMFLAGS=-I ../m4
 LIBDBOBJSOURCES=bdbobj.h bdbobj.c bdbobj2.c bdbobj3.c
 TESTBDBSOURCES=testbdb.C
 
