@@ -1,5 +1,8 @@
 /* 
  * $Log: auth_cram.h,v $
+ * Revision 1.4  2011-12-10 15:34:10+05:30  Cprogrammer
+ * added hmac_sha256() function
+ *
  * Revision 1.3  2011-12-05 15:07:00+05:30  Cprogrammer
  * added RCS id
  *
@@ -15,7 +18,7 @@
 #define HMAC_MD5_H
 
 #ifndef	lint
-static char     sccsidauthcramh[] = "$Id: auth_cram.h,v 1.3 2011-12-05 15:07:00+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsidauthcramh[] = "$Id: auth_cram.h,v 1.4 2011-12-10 15:34:10+05:30 Cprogrammer Stab mbhangui $";
 #endif
 
 /* 
@@ -27,6 +30,7 @@ static char     sccsidauthcramh[] = "$Id: auth_cram.h,v 1.3 2011-12-05 15:07:00+
  */
 void            hmac_md5(unsigned char *text, int text_len, unsigned char *key, int key_len, unsigned char *digest);
 void            hmac_sha1(unsigned char *text, int text_len, unsigned char *key, int key_len, unsigned char *digest);
+void            hmac_sha256(const unsigned char *, size_t, const unsigned char *, size_t, void *);
 void            hmac_ripemd(unsigned char *text, int text_len, unsigned char *key, int key_len, unsigned char *digest);
 
 #endif
