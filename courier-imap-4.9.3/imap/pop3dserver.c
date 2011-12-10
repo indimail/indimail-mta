@@ -544,6 +544,8 @@ static void mkupper(char *p)
 static void cleanup()
 {
 	unsigned i;
+	const char *cp=getenv("POP3_LOG_DELETIONS");
+	int log_deletions= cp && *cp != '0';
 
 	int64_t deleted_bytes=0;
 	int64_t deleted_messages=0;
@@ -565,6 +567,12 @@ static void cleanup()
 						un=stat_buf.st_size;
 				}
 			}
+
+			if (log_deletions)
+				fprintf(stderr, "INFO: DELETED, user=%s, ip=[%s], filename=%s\n",
+					getenv("AUTHENTICATED"),
+					getenv("TCPREMOTEIP"),
+					msglist_a[i]->filename);
 
 			if (unlink(msglist_a[i]->filename))
 				un=0;
@@ -1080,12 +1088,14 @@ uid_t  euid, uid;
 		if (chdir(p))
 		{
 			printed(printf("-ERR Maildir: %s\r\n", strerror(errno)));
+			fprintf(stderr, "chdir %s: %s\n", p, strerror(errno));
 			exit(1);
 		}
 	} else
-	if (argc > 1 && chdir(argv[1]))
+	if (argc > 1 && chdir((p = argv[1])))
 	{
-		printed(printf("-ERR Maildir: %s\r\n", strerror(errno)));
+		printed(printf("-ERR chdir Maildir (%s): %s\r\n", p, strerror(errno)));
+		fprintf(stderr, "chdir %s: %s\n", p, strerror(errno));
 		exit(1);
 	}
 	maildir_loginexec();

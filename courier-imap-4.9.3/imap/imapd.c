@@ -1558,6 +1558,8 @@ struct imapflags flags;
 char	*old_name;
 int	move_to_trash=0;
 struct stat stat_buf;
+const char *cp=getenv("IMAP_LOG_DELETIONS");
+int log_deletions= cp && *cp != '0';
 
 	fetch_free_cache();
 
@@ -1644,6 +1646,12 @@ struct stat stat_buf;
 						++q;
 			}
 
+			if (log_deletions)
+				fprintf(stderr, "INFO: EXPUNGED, user=%s, ip=[%s], old_name=%s, new_name=%s: only new_name will be left\n",
+					getenv("AUTHENTICATED"),
+					getenv("TCPREMOTEIP"),
+					old_name, new_name);
+
 			if (rename(old_name, new_name))
 			{
 				mdcreate(dot_trash);
@@ -1675,6 +1683,12 @@ struct stat stat_buf;
 				maildir_quota_deleted(".",-(long)filesize, -1);
 			}
 		}
+
+		if (log_deletions)
+			fprintf(stderr, "INFO: EXPUNGED, user=%s, ip=[%s], old_name=%s\n",
+				getenv("AUTHENTICATED"),
+				getenv("TCPREMOTEIP"),
+				old_name);
 		free(old_name);
 	}
 }
