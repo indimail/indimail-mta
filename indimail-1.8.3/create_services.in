@@ -330,16 +330,16 @@ if [ " $$a_arch" = " x86_64" ] ; then
 	smtp_soft_mem=104857600
 	qmtp_soft_mem=104857600
 	qmqp_soft_mem=104857600
-	imap_pop3_mem=209715200
-	imapspop3_mem=209715200
+	imap_pop3_mem=524288000
+	imapspop3_mem=524288000
 	poppass_mem=52428800
 else
 	fetchmail_mem=72428800
 	smtp_soft_mem=52428800
 	qmtp_soft_mem=52428800
 	qmqp_soft_mem=52428800
-	imap_pop3_mem=20971520
-	imapspop3_mem=20971520
+	imap_pop3_mem=52428800
+	imapspop3_mem=52428800
 	poppass_mem=10485760
 fi
 #
