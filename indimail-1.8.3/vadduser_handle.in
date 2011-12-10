@@ -1,9 +1,0 @@
-#!/bin/sh
-#
-# $Log: vadduser_handle.in,v $
-# Revision 2.1  2010-04-23 09:22:01+05:30  Cprogrammer
-# post handle for vadduser
-#
-#
-# $Id: vadduser_handle.in,v 2.1 2010-04-23 09:22:01+05:30 Cprogrammer Stab mbhangui $
-exec @indimaildir@/bin/vuserinfo $1
