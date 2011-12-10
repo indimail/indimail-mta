@@ -61,6 +61,18 @@
 
 static const char rcsid[]="$Id: imapscanclient.c,v 1.47 2009/06/27 16:32:38 mrsam Exp $";
 
+/*
+** RFC 2060: "A good value to use for the unique identifier validity value is a
+** 32-bit representation of the creation date/time of the mailbox."
+**
+** Well, Y2038k is on the horizon, time to push to reset button.
+**
+*/
+
+#ifndef IMAP_EPOCH
+#define IMAP_EPOCH	1000000000
+#endif
+
 static int do_imapscan_maildir2(struct imapscaninfo *, const char *,
 				int, int, struct uidplus_info *);
 void imapscanfail(const char *p);
@@ -458,13 +470,13 @@ int	dowritecache=0;
 			return (-1);
 			*/
 		}
-		uidv=stat_buf.st_mtime;
+		uidv=stat_buf.st_mtime - IMAP_EPOCH;
 		dowritecache=1;
 	}
 	else
 	{
 		nextuid=1;
-		uidv=time(0);
+		uidv=time(0) - IMAP_EPOCH;
 	}
 
 	while (uidplus)
@@ -528,19 +540,6 @@ int	dowritecache=0;
 		/* bk: ignore error */
 		unlink(newdbfilepath);
 		unlink(dbfilepath);
-		/*
-		free(dbfilepath);
-		unlink(newdbfilepath);
-		free(newdbfilepath);
-		while (tempinfo_list)
-		{
-			tempinfoptr=tempinfo_list;
-			tempinfo_list=tempinfoptr->next;
-			free(tempinfoptr->filename);
-			free(tempinfoptr);
-		}
-		return (-1);
-		*/
 	}
 
 	/*
@@ -809,8 +808,8 @@ int	dowritecache=0;
 				tempinfo_array[i]->filename);
 			if (q)	*q=MDIRSEP[0];
 		}
-		need_fclose = 1;
-		if (fflush(fp) || ferror(fp) || ((need_fclose = 0),fclose(fp)))
+		need_fclose=1;
+		if (fflush(fp) || ferror(fp) || ((need_fclose=0), fclose(fp)))
 		{
 			imapscanfail(dir);
 			if (need_fclose)
