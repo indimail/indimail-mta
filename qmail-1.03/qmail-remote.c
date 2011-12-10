@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-remote.c,v $
+ * Revision 1.79  2011-12-10 15:24:00+05:30  Cprogrammer
+ * added hmac_sha256() function
+ *
  * Revision 1.78  2011-12-08 20:32:06+05:30  Cprogrammer
  * fixed compilation error
  *
@@ -1607,6 +1610,13 @@ auth_cram(int type, int use_size)
 		break;
 	case 5:
 		iter = 20;
+		substdio_puts(&smtpto, "AUTH CRAM-SHA256\r\n");
+		substdio_flush(&smtpto);
+		if ((code = smtpcode()) != 334)
+			quit("ZConnected to ", " but authentication was rejected (AUTH CRAM-SHA256).", code, -1);
+		break;
+	case 6:
+		iter = 20;
 		substdio_puts(&smtpto, "AUTH CRAM-RIPEMD\r\n");
 		substdio_flush(&smtpto);
 		if ((code = smtpcode()) != 334)
@@ -1632,6 +1642,9 @@ auth_cram(int type, int use_size)
 		hmac_sha1((unsigned char *) chal.s, chal.len, (unsigned char *) pass.s, pass.len, digest);
 		break;
 	case 5:
+		hmac_sha256((unsigned char *) chal.s, chal.len, (unsigned char *) pass.s, pass.len, digest);
+		break;
+	case 6:
 		hmac_ripemd((unsigned char *) chal.s, chal.len, (unsigned char *) pass.s, pass.len, digest);
 		break;
 	}
@@ -1725,7 +1738,8 @@ void
 smtp_auth(char *type, int use_size)
 {
 	int             i = 0, j, login_supp = 0, plain_supp = 0, cram_md5_supp = 0,
-					cram_sha1_supp = 0, cram_rmd_supp = 0, digest_md5_supp = 0;
+					cram_sha1_supp = 0, cram_sha256_supp = 0, cram_rmd_supp = 0,
+					digest_md5_supp = 0;
 	char           *ptr;
 
 	if (!type)
@@ -1745,6 +1759,9 @@ smtp_auth(char *type, int use_size)
 			else
 			if (case_starts(ptr - 4, "CRAM-RIPEMD"))
 				cram_rmd_supp = 1;
+			else
+			if (case_starts(ptr - 4, "CRAM-SHA256"))
+				cram_sha256_supp = 1;
 			else
 			if (case_starts(ptr - 4, "CRAM-SHA1"))
 				cram_sha1_supp = 1;
@@ -1774,6 +1791,14 @@ smtp_auth(char *type, int use_size)
 	if (!case_diffs(type, "CRAM-RIPEMD"))
 	{
 		if (cram_rmd_supp)
+		{
+			auth_cram(6, use_size);
+			return;
+		}
+	} else
+	if (!case_diffs(type, "CRAM-SHA256"))
+	{
+		if (cram_sha256_supp)
 		{
 			auth_cram(5, use_size);
 			return;
@@ -1819,6 +1844,11 @@ smtp_auth(char *type, int use_size)
 			return;
 		}
 		if (cram_rmd_supp)
+		{
+			auth_cram(6, use_size);
+			return;
+		}
+		if (cram_sha256_supp)
 		{
 			auth_cram(5, use_size);
 			return;
@@ -2804,7 +2834,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_remote_c()
 {
-	static char    *x = "$Id: qmail-remote.c,v 1.78 2011-12-08 20:32:06+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: qmail-remote.c,v 1.79 2011-12-10 15:24:00+05:30 Cprogrammer Exp mbhangui $";
 	x=sccsidauthcramh;
 	x=sccsidauthdigestmd5h;
 	x++;
