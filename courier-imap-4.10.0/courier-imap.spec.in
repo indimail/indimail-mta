@@ -32,8 +32,13 @@ License: GPL
 Group: Applications/Mail
 Source: %{name}-@VERSION@.tar.bz2
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-buildroot
-Requires: /sbin/chkconfig fileutils textutils sh-utils sed
-Requires: courier-authlib-devel >= 0.60.6.20080629
+Requires: fileutils textutils sh-utils sed
+%if %suse_version
+Requires: /sbin/chkconfig
+%else
+Requires: /bin/systemctl
+%endif
+Requires: courier-authlib >= 0.60.6.20080629
 BuildRequires: textutils fileutils perl
 BuildRequires: courier-authlib-devel >= 0.60.6.20080629
 BuildRequires: libidn-devel
@@ -110,6 +115,9 @@ full Courier mail server.  Install the Courier package instead.
 %{__mkdir_p} $RPM_BUILD_ROOT%{initdir}
 %{__make} install DESTDIR=$RPM_BUILD_ROOT
 
+%{__mkdir_p} $RPM_BUILD_ROOT%{_datadir}
+%{__mkdir_p} $RPM_BUILD_ROOT/lib/systemd/system
+
 #
 # Red Hat or SuSE like init.d file.
 %if %suse_version
@@ -123,7 +131,8 @@ install -Dm 644 %{templdir}/pop3.pam $RPM_BUILD_ROOT%{pamconfdir}/pop3
 install -Dm 644 %{templdir}/imap.pam $RPM_BUILD_ROOT%{pamconfdir}/imap
 %else
 # Copy standard sysvinit file
-install -Dm 744 courier-imap.sysvinit $RPM_BUILD_ROOT/%{initdir}/courier-imap
+install -Dm 755 packaging/systemd/courier-imap.sysvinit $RPM_BUILD_ROOT/%{_datadir}
+install -Dm 644 packaging/systemd/courier-imap.service $RPM_BUILD_ROOT/lib/systemd/system
 %endif
 
 #
@@ -217,7 +226,6 @@ EOF
 ####
 ## Create config files for sysconftool-rpmupgrade (see below)
 
-%{__mkdir_p} $RPM_BUILD_ROOT%{_datadir}
 %{__cp} -f sysconftool $RPM_BUILD_ROOT%{_datadir}/sysconftool
 %{__chmod} 555 $RPM_BUILD_ROOT%{_datadir}/sysconftool
 %{__cat} >$RPM_BUILD_ROOT%{_datadir}/configlist <<EOF
@@ -228,34 +236,6 @@ EOF
 EOF
 
 %{__chmod} 644 $RPM_BUILD_ROOT%{_datadir}/configlist*
-
-######
-##
-## Ok, upgrades are going to get ugly.  Because we install $filename.dist
-## instead of $filename, and the old package has $filename listed as a config,
-## RPM will back up $filename to $filename.rpmsave.  This will happen AFTER
-## we will run the post scripts, effectively blowing away our configurations.
-## PUT THEM BACK BY RUNNING THE FOLLOWING SCRIPT FROM A TRIGGER.
-
-%{__cat} >$RPM_BUILD_ROOT%{_datadir}/sysconftool-rpmupgrade <<EOF
-#!/bin/sh
-
-for f in \$* "."
-do
-	if test \$f = "."
-	then
-		continue
-	fi
-
-	base=\`echo \$f | sed 's/\\.dist\$//'\`
-	if test -f \$base.dist -a ! -f \$base
-	then
-		%{__cp} -pr \$base.dist \$base
-	fi
-done
-EOF
-
-%{__chmod} 555 $RPM_BUILD_ROOT%{_datadir}/sysconftool-rpmupgrade
 
 %{__mkdir_p} $RPM_BUILD_ROOT%{_localstatedir}
 touch $RPM_BUILD_ROOT%{_localstatedir}/imapd.pid
@@ -269,12 +249,24 @@ touch $RPM_BUILD_ROOT%{_localstatedir}/pop3d.pid.lock
 touch $RPM_BUILD_ROOT%{_localstatedir}/pop3d-ssl.pid.lock
 
 %post
+%if %{suse_version}
 /sbin/chkconfig --del courier-imap
 /sbin/chkconfig --add courier-imap
 %{_datadir}/sysconftool `%{__cat} %{_datadir}/configlist` >/dev/null
+%else
+if test -f %{initdir}/courier-imap
+then
+# Update to systemd
 
+	/sbin/chkconfig --del courier-imap || :
+	/bin/systemctl stop courier-imap.service || :
+fi
+%{_datadir}/sysconftool `%{__cat} %{_datadir}/configlist` >/dev/null
+/bin/systemctl daemon-reload &> /dev/null || :
+/bin/systemctl enable courier-imap.service &> /dev/null || :
+%endif	
 %preun
-
+%if %{suse_version}
 if test "$1" = "0"
 then
 	rm -f %{_localstatedir}/couriersslcache
@@ -285,10 +277,23 @@ fi
 %{_libexecdir}/imapd-ssl.rc stop
 %{_libexecdir}/pop3d.rc stop
 %{_libexecdir}/pop3d-ssl.rc stop
-
-%triggerpostun -- courier-imap
-
-test ! -f %{_datadir}/configlist || %{_datadir}/sysconftool-rpmupgrade `%{__cat} %{_datadir}/configlist` >/dev/null
+%else
+if test "$1" = "0"
+then
+	rm -f %{_localstatedir}/couriersslcache
+	/bin/systemctl stop courier-imap.service
+	/bin/systemctl disable courier-imap.service
+fi
+%endif
+%postun
+%if %{suse_version}
+%else
+/bin/systemctl daemon-reload &> /dev/null || :
+if test "$1" != "0"
+then
+   /bin/systemctl try-restart courier-imap.service
+fi
+%endif
 
 %files
 %defattr(-, bin, bin)
@@ -297,9 +302,11 @@ test ! -f %{_datadir}/configlist || %{_datadir}/sysconftool-rpmupgrade `%{__cat}
 
 %attr(755, bin, bin) %config /etc/profile.d/courier-imap.csh
 %attr(755, bin, bin) %config /etc/profile.d/courier-imap.sh
-%attr(755, bin, bin) %{initdir}/courier-imap
 %if %{suse_version}
+%attr(755, bin, bin) %{initdir}/courier-imap
 %attr(740,root,root) %{initlndir}/rccourier-imap
+%else
+%attr(-, root, root) /lib/systemd/system/*
 %endif
 %dir %{_prefix}
 

@@ -57,10 +57,8 @@ char *maildir_shareddir(const char *maildir, const char *sharedname)
 {
 char    *p, *q;
 const char *r;
-size_t  l;
 
 	if (!maildir)   maildir=".";
-        l=strlen(maildir);
 
 	if (strchr(sharedname, '.') == 0 || *sharedname == '.' ||
 		strchr(sharedname, '/'))

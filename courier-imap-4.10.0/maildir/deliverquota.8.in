@@ -3,13 +3,22 @@
 .\"<!-- distribution information. -->
 .\"     Title: deliverquota
 .\"    Author: Sam Varshavchik
-.\" Generator: DocBook XSL Stylesheets v1.75.2 <http://docbook.sf.net/>
-.\"      Date: 04/04/2011
+.\" Generator: DocBook XSL Stylesheets v1.76.1 <http://docbook.sf.net/>
+.\"      Date: 09/29/2011
 .\"    Manual: Double Precision, Inc.
 .\"    Source: Courier Mail Server
 .\"  Language: English
 .\"
-.TH "DELIVERQUOTA" "8" "04/04/2011" "Courier Mail Server" "Double Precision, Inc."
+.TH "DELIVERQUOTA" "8" "09/29/2011" "Courier Mail Server" "Double Precision, Inc\&."
+.\" -----------------------------------------------------------------
+.\" * Define some portability stuff
+.\" -----------------------------------------------------------------
+.\" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.\" http://bugs.debian.org/507673
+.\" http://lists.gnu.org/archive/html/groff/2009-02/msg00013.html
+.\" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.ie \n(.g .ds Aq \(aq
+.el       .ds Aq '
 .\" -----------------------------------------------------------------
 .\" * set default formatting
 .\" -----------------------------------------------------------------
@@ -67,7 +76,7 @@ command\&.
 .PP
 The
 \fB\-c\fR
-option automatically creates the maildir, and all missing parent subdirectories (as \'\fBmkdir \-p\fR\')\&. This option should be used with caution\&.
+option automatically creates the maildir, and all missing parent subdirectories (as \*(Aq\fBmkdir \-p\fR\*(Aq)\&. This option should be used with caution\&.
 .PP
 The
 \fB\-w N\fR

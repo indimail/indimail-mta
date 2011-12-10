@@ -3,13 +3,22 @@
 .\"<!-- distribution information. -->
 .\"     Title: maildirkw
 .\"    Author: Sam Varshavchik
-.\" Generator: DocBook XSL Stylesheets v1.75.2 <http://docbook.sf.net/>
-.\"      Date: 04/04/2011
+.\" Generator: DocBook XSL Stylesheets v1.76.1 <http://docbook.sf.net/>
+.\"      Date: 09/29/2011
 .\"    Manual: Double Precision, Inc.
 .\"    Source: Courier Mail Server
 .\"  Language: English
 .\"
-.TH "MAILDIRKW" "1" "04/04/2011" "Courier Mail Server" "Double Precision, Inc."
+.TH "MAILDIRKW" "1" "09/29/2011" "Courier Mail Server" "Double Precision, Inc\&."
+.\" -----------------------------------------------------------------
+.\" * Define some portability stuff
+.\" -----------------------------------------------------------------
+.\" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.\" http://bugs.debian.org/507673
+.\" http://lists.gnu.org/archive/html/groff/2009-02/msg00013.html
+.\" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.ie \n(.g .ds Aq \(aq
+.el       .ds Aq '
 .\" -----------------------------------------------------------------
 .\" * set default formatting
 .\" -----------------------------------------------------------------
@@ -39,7 +48,7 @@ is the pathname to a maildir, or a maildir folder\&. The
 \fB\-L\fR
 option lists all messages in the maildir, and their associated keywords\&.
 \fImessage\fR
-specified which message\'s keywords should be set\&. One or more
+specified which message\*(Aqs keywords should be set\&. One or more
 \fIkeyword\fRs specifies a list of keywords to be set for this message\&. The specified list of
 \fIkeyword\fRs replaces any keywords presently set for the
 \fImessage\fR, unless the
@@ -63,11 +72,11 @@ The
 \fB\-l\fR
 should be used if the
 Courier
-IMAP server\'s configuration file has the
+IMAP server\*(Aqs configuration file has the
 IMAP_USELOCKS
 option set\&.
 \fB\-l\fR
-enables a compatible locking mechanism to update the message\'s keywords\&.
+enables a compatible locking mechanism to update the message\*(Aqs keywords\&.
 .PP
 
 \fB\-c\fR

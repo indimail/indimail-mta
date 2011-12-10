@@ -3,13 +3,22 @@
 .\"<!-- distribution information. -->
 .\"     Title: maildirmake
 .\"    Author: Sam Varshavchik
-.\" Generator: DocBook XSL Stylesheets v1.75.2 <http://docbook.sf.net/>
-.\"      Date: 04/04/2011
+.\" Generator: DocBook XSL Stylesheets v1.76.1 <http://docbook.sf.net/>
+.\"      Date: 09/29/2011
 .\"    Manual: Double Precision, Inc.
 .\"    Source: Courier Mail Server
 .\"  Language: English
 .\"
-.TH "MAILDIRMAKE" "1" "04/04/2011" "Courier Mail Server" "Double Precision, Inc."
+.TH "MAILDIRMAKE" "1" "09/29/2011" "Courier Mail Server" "Double Precision, Inc\&."
+.\" -----------------------------------------------------------------
+.\" * Define some portability stuff
+.\" -----------------------------------------------------------------
+.\" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.\" http://bugs.debian.org/507673
+.\" http://lists.gnu.org/archive/html/groff/2009-02/msg00013.html
+.\" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.ie \n(.g .ds Aq \(aq
+.el       .ds Aq '
 .\" -----------------------------------------------------------------
 .\" * set default formatting
 .\" -----------------------------------------------------------------
@@ -225,7 +234,7 @@ is a single tab character,
 is the pathname to the sharable maildir\&.
 .SS "ACCESSING SHARED FOLDERS"
 .PP
-You may have read or write access to a shared folder\&. If you have write access, you can add messages to the shared folder\&. You can also delete messages that you\'ve added\&.
+You may have read or write access to a shared folder\&. If you have write access, you can add messages to the shared folder\&. You can also delete messages that you\*(Aqve added\&.
 .PP
 Anyone can create a sharable maildir, so if the sharable maildir is actually created by you, can can delete any message, not just your own\&.
 .SH "SEE ALSO"

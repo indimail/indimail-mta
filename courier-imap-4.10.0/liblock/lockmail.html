@@ -1,10 +1,10 @@
 <?xml version="1.0"?>
-<html xmlns="http://www.w3.org/1999/xhtml"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/><title>lockmail</title><link rel="stylesheet" href="style.css" type="text/css"/><meta name="generator" content="DocBook XSL Stylesheets V1.75.2"/><link rel="home" href="#id339878" title="lockmail"/><link xmlns="" rel="stylesheet" type="text/css" href="manpage.css"/><meta xmlns="" name="MSSmartTagsPreventParsing" content="TRUE"/><link xmlns="" rel="icon" href="icon.gif" type="image/gif"/><!--
+<html xmlns="http://www.w3.org/1999/xhtml"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/><title>lockmail</title><link rel="stylesheet" type="text/css" href="style.css"/><meta name="generator" content="DocBook XSL Stylesheets V1.76.1"/><link rel="home" href="#id325873" title="lockmail"/><link xmlns="" rel="stylesheet" type="text/css" href="manpage.css"/><meta xmlns="" name="MSSmartTagsPreventParsing" content="TRUE"/><link xmlns="" rel="icon" href="icon.gif" type="image/gif"/><!--
 
 Copyright 1998 - 2009 Double Precision, Inc.  See COPYING for distribution
 information.
 
---></head><body><div class="refentry" title="lockmail"><a id="id339878" shape="rect"> </a><div class="titlepage"/><div class="refnamediv"><h2>Name</h2><p>lockmail — create mail lock files</p></div><div class="refsynopsisdiv" title="Synopsis"><h2>Synopsis</h2><div class="cmdsynopsis"><p><code class="command">lockmail</code>  [-r] [-t <em class="replaceable"><code>timeout</code></em>] {<em class="replaceable"><code>lockfile</code></em>} {<em class="replaceable"><code>program</code></em>} [argument...]</p></div></div><div class="refsect1" title="DESCRIPTION"><a id="id339651" shape="rect"> </a><h2>DESCRIPTION</h2><p>
+--></head><body><div class="refentry" title="lockmail"><a id="id325873" shape="rect"> </a><div class="titlepage"/><div class="refnamediv"><h2>Name</h2><p>lockmail — create mail lock files</p></div><div class="refsynopsisdiv" title="Synopsis"><h2>Synopsis</h2><div class="cmdsynopsis"><p><code class="command">lockmail</code>  [-r] [-t <em class="replaceable"><code>timeout</code></em>] {<em class="replaceable"><code>lockfile</code></em>} {<em class="replaceable"><code>program</code></em>} [argument...]</p></div></div><div class="refsect1" title="DESCRIPTION"><a id="id325647" shape="rect"> </a><h2>DESCRIPTION</h2><p>
 <span class="command"><strong>lockmail</strong></span> is a helper utility for working with mailbox
 files.
 Mailbox files must be locked to prevent other applications from modifying the
@@ -21,19 +21,19 @@ After the mailbox is succesfully locked, <span class="command"><strong>lockmail<
 <em class="replaceable"><code>program</code></em> as a child process, with any optional
 <em class="replaceable"><code>argument</code></em>s.
 When <em class="replaceable"><code>program</code></em> terminates, <span class="command"><strong>lockmail</strong></span>
-removes the mailbox lock, and terminates itself.</p></div><div class="refsect1" title="OPTIONS"><a id="id374143" shape="rect"> </a><h2>OPTIONS</h2><div class="variablelist"><dl><dt><span class="term">-r</span></dt><dd><p>
+removes the mailbox lock, and terminates itself.</p></div><div class="refsect1" title="OPTIONS"><a id="id360136" shape="rect"> </a><h2>OPTIONS</h2><div class="variablelist"><dl><dt><span class="term">-r</span></dt><dd><p>
 If a regular lock fails, try a read-only lock.
 Use this option to lock mailbox files in a read-only directory.</p></dd><dt><span class="term">-t <em class="replaceable"><code>timeout</code></em></span></dt><dd><p>
 If the lock attempt fails, try again for up to
 <em class="replaceable"><code>timeout</code></em> seconds.
 The actual timeout is rounded up to the next five second interval
-(a lock attempt is tried every five seconds).</p></dd></dl></div></div><div class="refsect1" title="DESCRIPTION"><a id="id374187" shape="rect"> </a><h2>DESCRIPTION</h2><p>
+(a lock attempt is tried every five seconds).</p></dd></dl></div></div><div class="refsect1" title="DESCRIPTION"><a id="id360180" shape="rect"> </a><h2>DESCRIPTION</h2><p>
 This section briefly describes the locking mechanism used by
 <span class="command"><strong>lockmail</strong></span>.
 <span class="command"><strong>lockmail</strong></span> uses three different locking conventions in
 order to maximize compatibility with other mail software:
 C-Client folder locks, dot-locks, and file locks.
-</p><div class="refsect2" title="C-Client folder locks"><a id="id374210" shape="rect"> </a><h3>C-Client folder locks</h3><p>
+</p><div class="refsect2" title="C-Client folder locks"><a id="id360202" shape="rect"> </a><h3>C-Client folder locks</h3><p>
 Mail software based on the <code class="literal">C-Client</code> library creates
 lock files named
 <code class="filename">/tmp/.<em class="replaceable"><code>dddddd</code></em>.<em class="replaceable"><code>iiiiii</code></em></code>.
@@ -52,7 +52,7 @@ The <code class="literal">C-Client</code> library does not appear to ever clear 
 the lock file.</p><p>
 <span class="command"><strong>lockmail</strong></span>
 attempts to resolve this race condition by deleting zero-length lock files
-that are at least five minutes old.</p></div></div><div class="refsect2" title="dot-locks"><a id="id338789" shape="rect"> </a><h3>dot-locks</h3><p>
+that are at least five minutes old.</p></div></div><div class="refsect2" title="dot-locks"><a id="id324780" shape="rect"> </a><h3>dot-locks</h3><p>
 <span class="command"><strong>lockmail</strong></span>
 also creates, and honors dot-lock files.
 Dot-lock files are first created as temporary files, then linked to
@@ -78,7 +78,7 @@ typically does not have global write permissions, so the attempt to
 create the dot-lock file in the spool directory will fail, and
 <span class="command"><strong>lockmail</strong></span>
 will be content with using file-locking only.
-</p></div></div><div class="refsect2" title="File locks"><a id="id338863" shape="rect"> </a><h3>File locks</h3><p>
+</p></div></div><div class="refsect2" title="File locks"><a id="id324853" shape="rect"> </a><h3>File locks</h3><p>
 The final locking mechanism
 <span class="command"><strong>lockmail</strong></span>
 uses is the operating system's file locking facility.
@@ -103,13 +103,13 @@ releases all locks.
 <em class="replaceable"><code>program</code></em> must terminate before any of the locks
 obtained by <span class="command"><strong>lockmail</strong></span> expire, and are considered stale.
 <span class="command"><strong>lockmail</strong></span> will then terminate with the same exit code
-as <em class="replaceable"><code>program</code></em>.</p></div></div><div class="refsect1" title="EXIT STATUS"><a id="id339084" shape="rect"> </a><h2>EXIT STATUS</h2><p>
+as <em class="replaceable"><code>program</code></em>.</p></div></div><div class="refsect1" title="EXIT STATUS"><a id="id325073" shape="rect"> </a><h2>EXIT STATUS</h2><p>
 <span class="command"><strong>lockmail</strong></span> terminates with the same exit status as
 <em class="replaceable"><code>program</code></em>
 <span class="command"><strong>lockmail</strong></span> terminates with the <code class="literal">EX_TEMPFAIL</code>
 exit status if it was unable to obtain a lock, or if
 <em class="replaceable"><code>program</code></em>
-was killed by a signal.</p></div><div class="refsect1" title="SEE ALSO"><a id="id339118" shape="rect"> </a><h2>SEE ALSO</h2><p>
+was killed by a signal.</p></div><div class="refsect1" title="SEE ALSO"><a id="id325108" shape="rect"> </a><h2>SEE ALSO</h2><p>
 <a class="ulink" href="maildrop.html" target="_top" shape="rect"><span class="citerefentry"><span class="refentrytitle">maildrop</span>(1)</span></a>,
 <span class="citerefentry"><span class="refentrytitle">sendmail</span>(8)</span>.
 </p></div></div></body></html>

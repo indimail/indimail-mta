@@ -1,10 +1,10 @@
 <?xml version="1.0"?>
-<html xmlns="http://www.w3.org/1999/xhtml"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/><title>maildir</title><link rel="stylesheet" href="style.css" type="text/css"/><meta name="generator" content="DocBook XSL Stylesheets V1.75.2"/><link rel="home" href="#id363430" title="maildir"/><link xmlns="" rel="stylesheet" type="text/css" href="manpage.css"/><meta xmlns="" name="MSSmartTagsPreventParsing" content="TRUE"/><link xmlns="" rel="icon" href="icon.gif" type="image/gif"/><!--
+<html xmlns="http://www.w3.org/1999/xhtml"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/><title>maildir</title><link rel="stylesheet" type="text/css" href="style.css"/><meta name="generator" content="DocBook XSL Stylesheets V1.76.1"/><link rel="home" href="#id322562" title="maildir"/><link xmlns="" rel="stylesheet" type="text/css" href="manpage.css"/><meta xmlns="" name="MSSmartTagsPreventParsing" content="TRUE"/><link xmlns="" rel="icon" href="icon.gif" type="image/gif"/><!--
 
 Copyright 1998 - 2009 Double Precision, Inc.  See COPYING for distribution
 information.
 
---></head><body><div class="refentry" title="maildir"><a id="id363430" shape="rect"> </a><div class="titlepage"/><div class="refnamediv"><h2>Name</h2><p>maildir — E-mail directory</p></div><div class="refsynopsisdiv" title="Synopsis"><h2>Synopsis</h2><p>$HOME/Maildir</p></div><div class="refsect1" title="DESCRIPTION"><a id="id363154" shape="rect"> </a><h2>DESCRIPTION</h2><p>
+--></head><body><div class="refentry" title="maildir"><a id="id322562" shape="rect"> </a><div class="titlepage"/><div class="refnamediv"><h2>Name</h2><p>maildir — E-mail directory</p></div><div class="refsynopsisdiv" title="Synopsis"><h2>Synopsis</h2><p>$HOME/Maildir</p></div><div class="refsect1" title="DESCRIPTION"><a id="id322288" shape="rect"> </a><h2>DESCRIPTION</h2><p>
 A <span class="quote">“<span class="quote">Maildir</span>”</span> is a structured directory that holds E-mail
 messages.
 Maildirs were first implemented by the
@@ -43,7 +43,7 @@ mbox.</p><p>
 Maildirs allow multiple concurrent access by different applications.
 Maildirs do not require locking.
 Multiple applications can update a maildir at the same time, without
-stepping on each other's feet.</p><div class="refsect2" title="Maildir contents"><a id="id363221" shape="rect"> </a><h3>Maildir contents</h3><p>
+stepping on each other's feet.</p><div class="refsect2" title="Maildir contents"><a id="id322355" shape="rect"> </a><h3>Maildir contents</h3><p>
 A <span class="quote">“<span class="quote">maildir</span>”</span> is a directory that's created by
 <a class="ulink" href="maildirmake.html" target="_top" shape="rect"><span class="citerefentry"><span class="refentrytitle">maildirmake</span>(1)</span></a>.
 Naturally, maildirs should not have any group or world permissions,
@@ -73,7 +73,7 @@ The main maildir contains a single, flat list of subfolders.
 These folders are logically nested,
 and periods serve to separate folder hierarchies.
 For example, <code class="filename">.Sent.2002</code> is considered to be a subfolder
-called <span class="quote">“<span class="quote">2002</span>”</span> which is a subfolder of <span class="quote">“<span class="quote">Sent</span>”</span>.</p><div class="refsect3" title="Folder name encoding"><a id="id397761" shape="rect"> </a><h4>Folder name encoding</h4><p>
+called <span class="quote">“<span class="quote">2002</span>”</span> which is a subfolder of <span class="quote">“<span class="quote">Sent</span>”</span>.</p><div class="refsect3" title="Folder name encoding"><a id="id356889" shape="rect"> </a><h4>Folder name encoding</h4><p>
 Folder names can contain any Unicode character, except for control characters.
 US-ASCII characters, U+0x0020 - U+0x007F, except for the period,
 forward-slash, and
@@ -100,12 +100,12 @@ e-acute character, U+0x00e9,
 is encoded as
 <span class="quote">“<span class="quote">R&amp;AOk-sum&amp;AOk-</span>”</span>
 (so a folder of that name would be a maildir subdirectory called
-<span class="quote">“<span class="quote">.R&amp;AOk-sum&amp;AOk-</span>”</span>).</p></div><div class="refsect3" title="Other maildir contents"><a id="id362341" shape="rect"> </a><h4>Other maildir contents</h4><p>
+<span class="quote">“<span class="quote">.R&amp;AOk-sum&amp;AOk-</span>”</span>).</p></div><div class="refsect3" title="Other maildir contents"><a id="id321469" shape="rect"> </a><h4>Other maildir contents</h4><p>
 Software that uses maildirs may also create
 additional files besides the
 <code class="filename">tmp</code>, <code class="filename">new</code>, and
 <code class="filename">cur</code> subdirectories -- in the main maildir or a
-subfolder -- for its own purposes.</p></div></div><div class="refsect2" title="Messages"><a id="id362368" shape="rect"> </a><h3>Messages</h3><p>
+subfolder -- for its own purposes.</p></div></div><div class="refsect2" title="Messages"><a id="id321496" shape="rect"> </a><h3>Messages</h3><p>
 E-mail messages are stored in separate, individual files,
 one E-mail message per file.
 The <code class="filename">tmp</code> subdirectory temporarily
@@ -118,7 +118,7 @@ The <code class="filename">new</code> subdirectory stores messages
 that have been delivered to this maildir, but have not yet been seen by any
 mail application.
 The <code class="filename">cur</code> subdirectory stores messages that have
-already been seen by mail applications.</p></div><div class="refsect2" title="Adding new mail to maildirs"><a id="id362410" shape="rect"> </a><h3>Adding new mail to maildirs</h3><p>The following process delivers a new message to the maildir:</p><p>A new unique filename is created using one of two possible forms:
+already been seen by mail applications.</p></div><div class="refsect2" title="Adding new mail to maildirs"><a id="id321537" shape="rect"> </a><h3>Adding new mail to maildirs</h3><p>The following process delivers a new message to the maildir:</p><p>A new unique filename is created using one of two possible forms:
 <span class="quote">“<span class="quote">time.MusecPpid.host</span>”</span>, or
 <span class="quote">“<span class="quote">time.MusecPpid_unique.host</span>”</span>.
 <span class="quote">“<span class="quote">time</span>”</span> and
@@ -194,7 +194,7 @@ the maildir to be added up without issuing the
 <span class="citerefentry"><span class="refentrytitle">stat</span>(2)</span>
 system call
 for each individual message (this can be quite a performance drain with
-certain network filesystems).</p></div><div class="refsect2" title="READING MAIL FROM MAILDIRS"><a id="id362758" shape="rect"> </a><h3>READING MAIL FROM MAILDIRS</h3><p>
+certain network filesystems).</p></div><div class="refsect2" title="READING MAIL FROM MAILDIRS"><a id="id321884" shape="rect"> </a><h3>READING MAIL FROM MAILDIRS</h3><p>
 Applications that read mail from maildirs should do it in the following
 order:</p><p>
 When opening a maildir or a maildir folder, read the <code class="filename">tmp</code>
@@ -241,7 +241,7 @@ resort.  Alternatively, applications can use the
 library to handle all the low-level dirty details for them. The voluntary
 quota enhancement is described in the
 <a class="ulink" href="maildirquota.html" target="_top" shape="rect"><span class="citerefentry"><span class="refentrytitle">maildirquota</span>(7)</span></a>
-man page.</p></div><div class="refsect2" title="Maildir Quotas"><a id="id407148" shape="rect"> </a><h3>Maildir Quotas</h3><p>
+man page.</p></div><div class="refsect2" title="Maildir Quotas"><a id="id366277" shape="rect"> </a><h3>Maildir Quotas</h3><p>
 This is a voluntary mechanism for enforcing "loose" quotas on the maximum
 sizes of maildirs.  This mechanism is enforced in software, and not by the
 operating system.  Therefore it is only effective as long as the maildirs
@@ -289,5 +289,5 @@ A quota of an existing maildir can be changed by rerunning the
 option.
 To delete a quota entirely, delete the
 <code class="filename"><em class="replaceable"><code>Maildir</code></em>/maildirsize</code>
-file.</p></div></div><div class="refsect1" title="SEE ALSO"><a id="id407281" shape="rect"> </a><h2>SEE ALSO</h2><p>
+file.</p></div></div><div class="refsect1" title="SEE ALSO"><a id="id366409" shape="rect"> </a><h2>SEE ALSO</h2><p>
 <a class="ulink" href="maildirmake.html" target="_top" shape="rect"><span class="citerefentry"><span class="refentrytitle">maildirmake</span>(1)</span></a>.</p></div></div></body></html>

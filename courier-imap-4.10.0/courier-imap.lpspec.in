@@ -18,7 +18,7 @@ Release: 1
 Source: %{__name}-@VERSION@.tar.bz2
 Repository(pgpkeys.txt): http://www.lpmtool.com/repositories/courier-imap
 BuildRequires: textutils fileutils perl
-BuildRequires: courier-authlib-devel >= 0.55
+BuildRequires: courier-authlib-devel >= 0.60.6.20080629
 BuildRequires: libidn-devel
 
 %define use_openssl %(rpm -q openssl-devel >/dev/null 2>&1 && echo 1 && exit 0; echo 0)
@@ -61,6 +61,11 @@ BuildRequires: rpm >= 4.0.2 sed /usr/include/fam.h
 
 %package
 Requires: /sbin/chkconfig fileutils textutils sh-utils sed
+Requires: courier-authlib >= 0.60.6.20080629
+%if %suse_version
+%else
+Requires: /bin/systemctl
+%endif
 %if %use_openssl
 %else
 Requires:	  /usr/bin/certtool
@@ -92,6 +97,9 @@ full Courier mail server.  Install the Courier package instead.
 %{__mkdir_p} $__installdir%{initdir}
 %{__make} install DESTDIR=$__installdir
 
+%{__mkdir_p} $__installdir%{_datadir}
+%{__mkdir_p} $__installdir/lib/systemd/system
+
 #
 # Red Hat or SuSE like init.d file.
 %if %suse_version
@@ -105,7 +113,8 @@ install -Dm 644 %{templdir}/pop3.pam $__installdir%{pamconfdir}/pop3
 install -Dm 644 %{templdir}/imap.pam $__installdir%{pamconfdir}/imap
 %else
 # Copy standard sysvinit file
-install -Dm 744 courier-imap.sysvinit $__installdir/%{initdir}/courier-imap
+install -Dm 755 packaging/systemd/courier-imap.sysvinit $__installdir/%{_datadir}
+install -Dm 644 packaging/systemd/courier-imap.service $__installdir/lib/systemd/system
 %endif
 
 #
@@ -200,7 +209,6 @@ EOF
 ####
 ## Create config files for sysconftool-rpmupgrade (see below)
 
-%{__mkdir_p} $__installdir%{_datadir}
 %{__cp} -f sysconftool $__installdir%{_datadir}/sysconftool
 %{__chmod} 555 $__installdir%{_datadir}/sysconftool
 %{__cat} >$__installdir%{_datadir}/configlist <<EOF
@@ -224,12 +232,24 @@ touch $__installdir%{_localstatedir}/pop3d.pid.lock
 touch $__installdir%{_localstatedir}/pop3d-ssl.pid.lock
 
 %post
+%if %{suse_version}
 /sbin/chkconfig --del courier-imap
 /sbin/chkconfig --add courier-imap
 %{_datadir}/sysconftool `%{__cat} %{_datadir}/configlist` >/dev/null
+%else
+if test -f %{initdir}/courier-imap
+then
+# Update to systemd
 
+  	/sbin/chkconfig --del courier-imap || :
+	/bin/systemctl stop courier-imap.service || :
+fi
+%{_datadir}/sysconftool `%{__cat} %{_datadir}/configlist` >/dev/null
+/bin/systemctl daemon-reload &> /dev/null || :
+/bin/systemctl enable courier-imap.service &> /dev/null || :
+%endif 
 %preun
-
+%if %{suse_version}
 if test "$1" = "0"
 then
 	rm -f %{_localstatedir}/couriersslcache
@@ -240,6 +260,23 @@ fi
 %{_libexecdir}/imapd-ssl.rc stop
 %{_libexecdir}/pop3d.rc stop
 %{_libexecdir}/pop3d-ssl.rc stop
+%else
+if test "$1" = "0"
+then
+	rm -f %{_localstatedir}/couriersslcache
+	/bin/systemctl stop courier-imap.service
+	/bin/systemctl disable courier-imap.service
+fi
+%endif
+%postun
+%if %{suse_version}
+%else
+/bin/systemctl daemon-reload &> /dev/null || :
+if test "$1" != "0"
+then
+   /bin/systemctl try-restart courier-imap.service
+fi
+%endif
 
 %files
 %defattr(-, bin, bin)
@@ -248,9 +285,11 @@ fi
 
 %attr(755, bin, bin) %config /etc/profile.d/courier-imap.csh
 %attr(755, bin, bin) %config /etc/profile.d/courier-imap.sh
-%attr(755, bin, bin) %{initdir}/courier-imap
 %if %{suse_version}
+%attr(755, bin, bin) %{initdir}/courier-imap
 %attr(740,root,root) %{initlndir}/rccourier-imap
+%else
+%attr(-, root, root) /lib/systemd/system/*
 %endif
 %dir %{_prefix}
 

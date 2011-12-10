@@ -315,8 +315,8 @@ static void dotlock_exists(const char *dotlock, char *myidbuf,
 
 		if (readid(idbuf, fd) == 0 && (p=getpidid(idbuf, myidbuf)))
 		{
-		 	if (p == getpid() /* Possibly recycled PID */
-				|| kill(p, 0) < 0 && errno == ESRCH)
+			if (p == getpid() /* Possibly recycled PID */
+			    || kill(p, 0) < 0 && errno == ESRCH)
 			{
 				close(fd);
 				if (unlink(dotlock) == 0)

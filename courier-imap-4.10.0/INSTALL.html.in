@@ -12,7 +12,7 @@
 
 <body text="#000000" bgcolor="#FFFFFF" link="#0000EE" vlink=
 "#551A8B" alink="#FF0000">
-  <!-- Copyright 1998 - 2005 Double Precision, Inc.  See COPYING for -->
+  <!-- Copyright 1998 - 2011 Double Precision, Inc.  See COPYING for -->
   <!-- distribution information. -->
 
   <h1>Courier-IMAP</h1>
@@ -85,6 +85,64 @@
   </ul>
 
   <h2><a name="upgrading" id="upgrading">UPGRADING</a></h2>
+
+  <h3>Upgrading from Courier-IMAP 4.9.3, and earlier</h3>
+
+  <p>In 5.0.0, the IMAP server resets the epoch for an internal
+  sequence number generator for new mailboxes. This is an internal
+  attribute of individual IMAP folders, that's defined by the IMAP
+  specification. Each folder in a mailbox carries an individual
+  sequence number, it is defined as a 32 bit integer value, and
+  required to be a monotonically increasing value. and RFC 2060
+  recommended that "... a good value to use for the unique
+  identifier validity value is a 32-bit representation of the
+  creation date/time of the mailbox."</p>
+
+  <p>On modern platforms, the system time is now a 64 bit value
+  (even on the remaining 32 bit platforms). With Y2038K on the
+  horizon, it's time to reset the epoch (the new epoch, for anyone
+  who cares, runs until the year 2069). The upgrade impact on
+  existing systems is as follows.</p>
+
+  <p>There is no impact on existing folders in existing mailboxes.
+  New folders will have their internal sequence number in the new
+  epoch.</p>
+
+  <p>One potential issue exists if a folder gets deleted by the
+  IMAP client, and then recreated later. The new folder will now
+  get a lower sequence number. Although this is technically not
+  allowed, it's unlikely to cause problems with most IMAP clients.
+  If the same IMAP client deletes and recreated the mailbox, the
+  client should be completely up to speed. If, however, there's an
+  IMAP client that accesses the same folder, and some other IMAP
+  client deletes and recreates the same folder, this might cause
+  confusion. Most IMAP clients are likely to recover automatically;
+  most IMAP clients only care that the new sequence number they see
+  is different from the previous one, in order to trigger a full
+  resynchronization with the server. In case an IMAP client fails
+  to resynchronize, the remedy is to remove the IMAP account
+  configuration from the client, and add it back in.</p>
+
+  <p>Copying a mailbox by directly copying the files in maildirs
+  preserves each folder's epoch. However if a mailbox gets migrated
+  by copying its contents over IMAP, the folders on the destination
+  IMAP server will not necessarily have a monotonically higher
+  value -- neither does IMAP guarantee that different IMAP servers
+  must be in agreement with each other on the subject of sequence
+  numbers -- and if IMAP clients are repointed to a new server they
+  may experience problems opening existing mailboxes. To remedy
+  this situation it will be necessary to completely remove and then
+  reconfigure the IMAP account, in the IMAP client. Again, verbatim
+  copying of maildirs has no issues.</p>
+
+  <p>A marginal situation exists where if a server completely runs
+  of disk space, or if there's a hardware failure, and the IMAP
+  server is unable to retrieve or save an existing folder's
+  sequence number, and must now start afresh and generate a new
+  one, the IMAP server running on a new epoch will recover with a
+  lower sequence than the one that existed before. The rememdy is
+  the same: remove the IMAP account configuration from the client,
+  and then recreate it.</p>
 
   <h3>Upgrading from Courier-IMAP 3, and earlier.</h3>
 
