@@ -219,6 +219,11 @@ AC_CONFIG_SUBDIRS(authlib)
 AC_CONFIG_SUBDIRS(imap)
 
 mkdir -p m4
+for i in numlib bdbobj gdbmobj soxwrap unicode rfc822 rfc1035 rfc2045 md5 \
+sha1 random128 liblock maildir makedat libhmac waitlib tcpd authlib imap
+do
+	mkdir -p $i/m4
+done
 
 # Courier-IMAP standalone does not use SOCKSv5
 
