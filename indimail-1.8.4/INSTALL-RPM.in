@@ -1,0 +1,169 @@
+File INSTALL-RPM, Version @version@
+DATE: @DATE@
+
+This section covers installing IndiMail from rpm/deb. This is the easy way to install IndiMail.
+If you are looking for something more simpler, then you need the Install IndiMail for
+dummies - instructions for which are in the file Quick-INSTALL-@version@.
+
+There is also an Installation for Experts. For that read INSTALL-@version@. I would
+recommend you to go through the file INSTALL-@version@ so that you undertand IndiMail
+better. INSTALL-@version@ gives instructions for installing from source and could be
+challenging for those who are not accustomed with compilation, make, GNU autotools process.
+
+PLEASE DON'T HESITATE to join IndiMail group at https://groups.google.com/forum/#!forum/indimail
+
+You will also find this file as 
+http://downloads.sourceforge.net/indimail/INSTALL-RPM-@version@
+
+IndiMail also has yum/apt-get repositories for RPM/Deb of most of the Linux Distros at
+
+http://download.opensuse.org/repositories/home:/indimail/
+
+The latest RPM/Deb (for yet to be released version and can have untested code) can be found at
+
+http://download.opensuse.org/repositories/home:/mbhangui/
+
+You can install indimail using yum by using the following command (depending on
+your architecture)
+
+# yum install indimail.i386
+
+or
+
+# yum install indimail.x86_64
+
+What the RPM/Deb does
+---------------------
+
+It depends on whether you are Installing, upgrading or removing IndiMail using the rpm
+version. Following are the steps carried out during RPM/Deb installation.
+
+A) Package Installation/Upgrade
+   1. Stops IndiMail services (in case the system already has IndiMail installed)
+   2. Add users (indimail, alias, qmaild, qmaill, qmailp, qmailq, qmailr, qmails, qscand)
+      and groups (indimail, nofiles, qmail, qscand)
+   3. Installs files/binaries in @indimaildir@
+   4. Installs services under supervise in /service
+       smtp, smtp - odmr, qmtp, qmqp, qmail-send, imap/pop3, indisrvr, inlookup, pwdlookup,
+       clamav antivirus service, freshclam - virus signature update service,
+       bogofilter spam filter service
+   5. Installs (for installation only) MySQL database for use by IndiMail
+      (database in @indimaildir@/mysqldb/data and logs in @indimaildir@/mysqldb/logs)
+   6. Installs 5 queues in @indimaildir@/queue (queue1, queue2, ... queue5)
+   7. Install MTA as the alterntive MTA. Creates link sendmail in /usr/sbin or
+      /usr/lib to @indimaildir@/bin/sendmail
+   8. Creates directory for supervise logs in @logdir@
+   9. Sets up svscan to be run by init (/etc/inittab) or by upstart (/etc/event.d)
+
+B) Package Removal
+   1. Stops IndiMail services (in case the system already has IndiMail installed)
+   2. Delete users (indimail, alias, qmaild, qmaill, qmailp, qmailq, qmailr, qmails, qscand)
+      and groups (indimail, nofiles, qmail, qscand)
+   3. Removes files/binaries in @indimaildir@
+   4. Removes services under supervise in /service
+       smtp, smtp - odmr, qmtp, qmqp, qmail-send, imap/pop3, indisrvr, inlookup, pwdlookup,
+       clamav antivirus service, freshclam - virus signature update service,
+       bogofilter spam filter service
+   5. removes svscan to be run by init (/etc/inittab) or by upstart (/etc/event.d). removes
+      all startup scripts
+   6. Sets the original sendmail as the MTA.
+   NOTE: MySQL database is not removed, config files in @indimaildir@/etc,
+         @indimaildir@/control, @indimaildir@/users, .qmail files in @indimaildir@/alias,
+         domain information in @indimaildir@/domains are not removed.
+
+What the RPM/Deb does not do
+------------------------
+1. Install and configure MySQL (See How to install MySQL below)
+2. Configure IndiMail
+
+How to INSTALL
+--------------
+You need to have MySQL installed on your system (see below on how to install). You can also use an
+available rpm for MySQL from www.mysql.com
+
+1) Package Install Instruction
+   ---------------------------
+   % sudo rpm -ivh indimail-@version@-1.i386.rpm
+   % sudo dpkg -i indimail_@version@-1_386.deb
+
+2) Package Upgrade Instruction
+   ---------------------------
+   % sudo rpm -Uvh indimail-@version@-1.i386.rpm
+   % sudo dpkg -i indimail_@version@-1_386.deb
+
+3) Package Removal Instrucation
+   ----------------------------
+   % sudo rpm -e indimail-@version@-1.i386.rpm
+   % sudo dpkg -r indimail_@version@-1_386.deb
+
+Start IndiMail Services
+-----------------------
+   Review the email in @indimaildir@/alias/.qmail-postmaster, before starting services
+
+   % sudo service indimail start         # (works on all systems)
+       or
+   % sudo @indimaildir@/sbin/initsvc -on # (works on all systems)
+       or
+   % sudo init q                         # (if your system uses traditional init)
+       or
+   % sudo /sbin/initctl emit qmailstart  # (if your system uses upstart - ubuntu/fedora10
+                                           &above)
+       or
+   % sudo /bin/launchctl load /System/Library/LaunchDaemons/indimail.plist
+   % sudo service indimail start        # (If you are on Mac OSX)
+
+The RPM/Deb installation deliberately installs MySQL and fetchmail services in down state.
+This is for you to review your MySQL installation and configuration. For fetchmail service
+to run, you need to create @indimaildir@/etc/fetchmailrc file. You can use fetchmailconf
+for configuring fetchmail. To have these services started automatically during reboot,
+delete the files /service/mysql.3306/down and /service/fetchmail/down . After deleting
+the file you can use the following to start MySQL
+
+    % sudo @indimaildir@/bin/svc -u /service/mysql.3306
+
+NOTE: Please disable MySQL from getting started up by the system by executing the
+      chkconfig command
+
+      % sudo chkconfig mysqld off
+
+If you want to use the MySQL started by the system, then do not delete the file
+/service/mysql.3306/down and do not issue the above svc command. In such a case
+you will need to tell IndiMail on how to connect to MySQL.
+
+The information for IndiMail to connect to IndiMail is maintained in the file
+
+@indimaildir@/control/host.mysql    # for non-clustered setup
+
+and
+
+@indimaildir@/control/host.cntrl    # for clustered setup
+@indimaildir@/control/host.master   # for clustered setup
+
+The format for this file is
+
+mysql_host:mysql_user:mysql_pass:mysql_socket
+
+or
+
+mysql_host:mysql_user:mysql_pass:mysql_port
+
+Proceed to SECTION 8, STEP 2 in the file INSTALL-@version@ for further instruction on 
+configuration of IndiMail
+
+Log files are creaed in /var/log/indimail/*
+
+
+How to install MySQL
+--------------------
+
+    You can download mysql-5.5.2-m2.tar.gz from dev.mysql.com
+    Install MySQL 5.5.2-m2 with MD5 cd3254f29561953ffb7c023cb1b825d2
+    (You can install MySQL 5.1.x and greater)
+    current working directory /home/local/src
+    % You can download mysql-5.5.2-m2.tar.gz from dev.mysql.com
+    % gunzip -c mysql-5.5.2-m2.tar.gz |tar xf -
+    % cd mysql-5.5.2-m2
+    % ./configure --prefix=@mysql_prefix@ --enable-local-infile
+    % make -s DESTDIR=staging_directory
+    % sudo make install-strip DESTDIR=staging_directory
+    cd ..
