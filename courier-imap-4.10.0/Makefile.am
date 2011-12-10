@@ -78,17 +78,17 @@ maildiracl$(EXEEXT): maildir/maildiracl$(EXEEXT)
 deliverquota$(EXEEXT): maildir/deliverquota$(EXEEXT)
 	cp maildir/deliverquota$(EXEEXT) .
 
-pop3d.dist: authlib/pop3d.dist
-	cp authlib/pop3d.dist .
+pop3d.dist: imap/pop3d.dist
+	cp imap/pop3d.dist .
 
-pop3d-ssl.dist: authlib/pop3d-ssl.dist
-	cp authlib/pop3d-ssl.dist .
+pop3d-ssl.dist: imap/pop3d-ssl.dist
+	cp imap/pop3d-ssl.dist .
 
-imapd.dist: authlib/imapd.dist
-	cp authlib/imapd.dist .
+imapd.dist: imap/imapd.dist
+	cp imap/imapd.dist .
 
-imapd-ssl.dist: authlib/imapd-ssl.dist
-	cp authlib/imapd-ssl.dist .
+imapd-ssl.dist: imap/imapd-ssl.dist
+	cp imap/imapd-ssl.dist .
 
 couriertcpd.1: tcpd/couriertcpd.1
 	cp $(srcdir)/tcpd/couriertcpd.1 .
