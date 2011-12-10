@@ -25,6 +25,7 @@ static struct { const char *name; int num; } typetab[]={
 	{"MX",		15},
 	{"TXT",		16},
 	{"AAAA",	28},
+	{"RRSIG",	46},
 	{"AXFR",	252},
 	{"MAILB",	253},
 	{"MAILA",	254},
@@ -57,13 +58,23 @@ static struct { const char *name; int num; } typetab[]={
 #define	COMPARE(a,b)	stricmp((a), (b))
 #endif
 
-const char *rfc1035_type_itostr(int n)
+void rfc1035_type_itostr(int n, void (*func)(const char *, void *), void *arg)
 {
-unsigned i;
+	unsigned i;
+	char buf[30];
 
 	for (i=0; i<sizeof(typetab)/sizeof(typetab[0]); i++)
-		if (typetab[i].num == n) return (typetab[i].name);
-	return ("unknown");
+		if (typetab[i].num == n)
+		{
+			(*func)(typetab[i].name, arg);
+			return;
+		}
+
+	snprintf(buf, sizeof(buf), "TYPE%d", n);
+
+	buf[sizeof(buf)-1]=0;
+
+	(*func)(buf, arg);
 }
 
 int rfc1035_type_strtoi(const char *n)

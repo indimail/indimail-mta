@@ -1271,23 +1271,29 @@ static void ip2host(const RFC1035_ADDR *addr, const char *env)
 const char *remotehost="softdnserr";
 char	buf[RFC1035_MAXNAMESIZE+1];
 
+#if TCPDUSERFC1035
+struct rfc1035_res res;
+#endif
+
 	if (nodnslookup)	return;
 
 	rfc1035_ntoa(addr, buf);
 
 #if TCPDUSERFC1035
 
-	if (rfc1035_ptr(&rfc1035_default_resolver, addr, buf) != 0)
+	rfc1035_init_resolv(&res);
+
+	if (rfc1035_ptr(&res, addr, buf) != 0)
 	{
 		if (errno == ENOENT)
 			remotehost=0;
 	}
 	else
 	{
-	RFC1035_ADDR *ias;
-	unsigned nias, n;
+		RFC1035_ADDR *ias;
+		unsigned nias, n;
 
-		if (rfc1035_a(&rfc1035_default_resolver, buf, &ias, &nias) != 0)
+		if (rfc1035_a(&res, buf, &ias, &nias) != 0)
 		{
 			if (errno == ENOENT)
 				remotehost=0;
@@ -1310,6 +1316,8 @@ char	buf[RFC1035_MAXNAMESIZE+1];
 			}
 		}
 	}
+	rfc1035_destroy_resolv(&res);
+
 #else
 
 	{
@@ -1408,14 +1416,15 @@ char *r;
 
 static void docheckblocklist(struct blocklist_s *p, const char *nameptr)
 {
-const char *q;
-const char *varname=p->var;
-char	hostname[RFC1035_MAXNAMESIZE+1];
-char	buf[RFC1035_MAXNAMESIZE+1];
-int	hasnotxt;
-struct blocklist_s *pp;
-struct rfc1035_reply *replyp;
-int i;
+	const char *q;
+	const char *varname=p->var;
+	char	hostname[RFC1035_MAXNAMESIZE+1];
+	char	buf[RFC1035_MAXNAMESIZE+1];
+	int	hasnotxt;
+	struct blocklist_s *pp;
+	struct rfc1035_reply *replyp;
+	struct rfc1035_res res;
+	int i;
 
 	hostname[0]=0;
 	strncat(hostname, nameptr, RFC1035_MAXNAMESIZE);
@@ -1424,6 +1433,8 @@ int i;
 
 	if ((q=getenv(varname)) != 0)	return;
 					/* Env var already set */
+
+	rfc1035_init_resolv(&res);
 
 	if (p->ia.s_addr == INADDR_ANY)
 	{
@@ -1435,8 +1446,7 @@ int i;
 			** We don't have a predefined error message, therefore
 			** we expect TXT records.
 			*/
-			if ((i=rfc1035_resolve_cname(&rfc1035_default_resolver,
-					RFC1035_RESOLVE_RECURSIVE,
+			if ((i=rfc1035_resolve_cname(&res,
 					hostname,
 					RFC1035_TYPE_TXT,
 					RFC1035_CLASS_IN, &replyp, 0)) >= 0)
@@ -1455,8 +1465,7 @@ int i;
 			** for A records only.
 			*/
 
-			if ((i=rfc1035_resolve_cname(&rfc1035_default_resolver,
-					RFC1035_RESOLVE_RECURSIVE,
+			if ((i=rfc1035_resolve_cname(&res,
 					hostname,
 					RFC1035_TYPE_A,
 					RFC1035_CLASS_IN, &replyp, 0)) >= 0)
@@ -1466,6 +1475,7 @@ int i;
 		}
 
 		if (replyp)	rfc1035_replyfree(replyp);
+		rfc1035_destroy_resolv(&res);
 		return;
 	}
 
@@ -1489,13 +1499,16 @@ int i;
 	** issue an ANY query, and parse the results.
 	*/
 
-	(void)rfc1035_resolve_cname(&rfc1035_default_resolver,
-			RFC1035_RESOLVE_RECURSIVE,
+	(void)rfc1035_resolve_cname(&res,
 			hostname,
 			hasnotxt ? RFC1035_TYPE_ANY:RFC1035_TYPE_A,
 			RFC1035_CLASS_IN, &replyp, 0);
 
-	if (!replyp)	return;
+	if (!replyp)
+	{
+		rfc1035_destroy_resolv(&res);
+		return;
+	}
 
 	for (i=0; i<replyp->ancount+replyp->nscount+replyp->arcount; i++)
 	{
@@ -1538,7 +1551,7 @@ int i;
 
 			/* No predefined message, look for a TXT record. */
 
-			if ((j=rfc1035_replysearch_all(&rfc1035_default_resolver,
+			if ((j=rfc1035_replysearch_all(&res,
 						       replyp, hostname,
 						       RFC1035_TYPE_TXT,
 						       RFC1035_CLASS_IN, 0)) >= 0)
@@ -1550,6 +1563,7 @@ int i;
 		}
 	}
 	rfc1035_replyfree(replyp);
+	rfc1035_destroy_resolv(&res);
 }
 
 static void check_blocklist_ipv4(struct blocklist_s *p,

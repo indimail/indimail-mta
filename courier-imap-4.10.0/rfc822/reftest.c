@@ -29,12 +29,11 @@ static void test1()
 {
 struct imap_refmsgtable *mt=rfc822_threadalloc();
 char	buf[20];
-struct imap_refmsg *p;
 
         strcpy(buf, "a@b");
-        p=rfc822_threadallocmsg(mt, buf);
+        rfc822_threadallocmsg(mt, buf);
         strcpy(buf, "c@d");
-        p=rfc822_threadallocmsg(mt, buf);
+        rfc822_threadallocmsg(mt, buf);
 
 	printf("%s\n", (rfc822_threadsearchmsg(mt, "a@b")
 			? "found":"not found"));

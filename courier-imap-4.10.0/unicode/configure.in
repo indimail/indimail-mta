@@ -19,7 +19,6 @@ AC_PROG_LN_S
 AC_PROG_CC
 AC_PROG_CXX
 AC_PATH_PROGS(PERL, perl5 perl, perl, $LPATH)
-AC_CONFIG_MACRO_DIR([../m4])
 
 if test "$PERL" = "perl"
 then
@@ -67,12 +66,12 @@ save_LIBS="$LIBS"
 
 LIBS="$LIBS -liconv"
 
-AC_LINK_IFELSE(AC_LANG_PROGRAM([
+AC_LINK_IFELSE([AC_LANG_PROGRAM([
 #include <iconv.h>
 ],[
 
 iconv_open("","");
-]) ,[ : ], [LIBS="$save_LIBS"])
+])] ,[ : ], [LIBS="$save_LIBS"])
 
 if test "$GCC" = "yes"
 then

@@ -4,10 +4,21 @@
 */
 
 #include	"rfc1035.h"
+#include	"rfc822/encode.h"
 #include	<string.h>
 #include	<stdlib.h>
 #include	<sys/types.h>
 #include	<arpa/inet.h>
+#if TIME_WITH_SYS_TIME
+#include	<sys/time.h>
+#include	<time.h>
+#else
+#if HAVE_SYS_TIME_H
+#include	<sys/time.h>
+#else
+#include	<time.h>
+#endif
+#endif
 
 
 static char *dumpsoa(struct rfc1035_reply *r, struct rfc1035_rr *rr)
@@ -74,6 +85,182 @@ const char *cp;
 		}
 	}
 	return (p);
+}
+
+struct fmt_rrsig_info {
+
+	char *buf;
+	size_t n;
+};
+
+
+static void append_str(struct fmt_rrsig_info *info, const char *str, size_t l)
+{
+	if (info->buf)
+	{
+		memcpy(info->buf, str, l);
+
+		info->buf += l;
+	}
+
+	info->n += l;
+}
+
+static void tostr_callback(const char *str, void *vp)
+{
+	append_str( (struct fmt_rrsig_info *)vp, str, strlen(str));
+}
+
+static void append_int32(struct fmt_rrsig_info *info, RFC1035_UINT32 val)
+{
+	char bufp[30];
+	char *q=bufp+sizeof(bufp);
+
+	do
+	{
+		*--q = '0' + (val % 10);
+
+		val /= 10;
+	} while (val);
+
+	append_str(info, q, bufp+sizeof(bufp)-q);
+}
+
+static void append_time_t(struct fmt_rrsig_info *info, time_t timeval)
+{
+	char bufp[30];
+	struct tm result;
+
+	gmtime_r(&timeval, &result);
+
+	strftime(bufp, sizeof(bufp), "%Y%m%d%H%M%S", &result);
+
+	append_str(info, bufp, strlen(bufp));
+}
+
+static int encode_callback_func(const char *p, size_t n,
+				void *vp)
+{
+	struct fmt_rrsig_info *info=(struct fmt_rrsig_info *)vp;
+
+	while (n)
+	{
+		size_t i;
+
+		if (*p == '\n')
+		{
+			append_str(info, " ", 1);
+			++p;
+			--n;
+			continue;
+		}
+
+		for (i=0; i<n; ++i)
+			if (p[i] == '\n')
+				break;
+
+		append_str(info, p, i);
+
+		p += i;
+		n -= i;
+	}
+	return 0;
+
+}
+
+static size_t fmt_rrsig(struct rfc1035_reply *r,
+			struct rfc1035_rr *rr, time_t now, char *buf)
+{
+	char	p[RFC1035_MAXNAMESIZE+1];
+
+	char	timebuf[RFC1035_MAXTIMEBUFSIZE+1];
+
+	time_t signature_inception, signature_expiration;
+
+	struct libmail_encode_info lei;
+
+	struct fmt_rrsig_info fri;
+
+	fri.buf=buf;
+	fri.n=0;
+
+	rfc1035_type_itostr(rr->rr.rrsig.type_covered, tostr_callback, &fri);
+
+	append_str(&fri, " ", 1);
+
+	append_int32(&fri, rr->rr.rrsig.algorithm);
+
+	append_str(&fri, " ", 1);
+
+	append_int32(&fri, rr->rr.rrsig.labels);
+
+	append_str(&fri, " ", 1);
+
+	rfc1035_fmttime(rr->rr.rrsig.original_ttl, timebuf);
+
+	append_str(&fri, timebuf, strlen(timebuf));
+
+	append_str(&fri, " ", 1);
+
+	if (sizeof(time_t) == 4)
+	{
+		signature_inception=rr->rr.rrsig.signature_inception;
+		signature_expiration=rr->rr.rrsig.signature_expiration;
+	}
+	else
+	{
+		time_t now_epoch=(now & ~0xFFFFFFFFLL);
+
+		time_t cur_epoch=now_epoch | rr->rr.rrsig.signature_inception;
+
+		time_t prev_epoch=cur_epoch - 0xFFFFFFFF-1;
+		time_t next_epoch=cur_epoch + 0xFFFFFFFF+1;
+
+
+#define time2diff(a,b) ((a) < (b) ? (b)-(a):(a)-(b))
+
+#define closest2now(now,time1,time2)					\
+		(time2diff((now), (time1)) < time2diff((now), (time2))	\
+		 ? (time1):(time2))
+
+		signature_inception =
+			closest2now(now, closest2now(now,
+						     prev_epoch,
+						     cur_epoch),
+				    next_epoch);
+
+		signature_expiration =
+			signature_inception +
+			((rr->rr.rrsig.signature_expiration -
+			  rr->rr.rrsig.signature_inception)
+			 & 0x7FFFFFFF);
+	}
+
+	append_time_t(&fri, signature_inception);
+
+	append_str(&fri, " ", 1);
+
+	append_time_t(&fri, signature_expiration);
+
+	append_str(&fri, " ", 1);
+
+	append_int32(&fri, rr->rr.rrsig.key_tag);
+
+	append_str(&fri, " ", 1);
+
+	rfc1035_replyhostname(r, rr->rr.rrsig.signer_name, p);
+
+	append_str(&fri, p, strlen(p));
+
+	append_str(&fri, ". ", 2);
+
+	libmail_encode_start(&lei, "base64", encode_callback_func, &fri);
+
+	libmail_encode(&lei, rr->rr.rrsig.signature,
+		       rr->rr.rrsig.signature_len);
+	libmail_encode_end(&lei);
+
+	return fri.n;
 }
 
 char *rfc1035_dumprrdata(struct rfc1035_reply *r, struct rfc1035_rr *rr)
@@ -164,6 +351,22 @@ char *rfc1035_dumprrdata(struct rfc1035_reply *r, struct rfc1035_rr *rr)
 				return (0);
 			strcat(strcat(strcat(strcpy(q, p), ". "), t), ".");
 			return (q);
+		}
+
+	case RFC1035_TYPE_RRSIG:
+		{
+			time_t now=time(NULL);
+
+			size_t n=fmt_rrsig(r, rr, now, NULL);
+			char *p;
+
+			if ((p=malloc(n+1)) == 0)
+				return (0);
+
+			fmt_rrsig(r, rr, now, p);
+
+			p[n]=0;
+			return p;
 		}
 	}
 	return (0);

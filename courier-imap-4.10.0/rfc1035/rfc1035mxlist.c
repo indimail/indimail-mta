@@ -1,5 +1,5 @@
 /*
-** Copyright 1998 - 2006 Double Precision, Inc.
+** Copyright 1998 - 2011 Double Precision, Inc.
 ** See COPYING for distribution information.
 */
 
@@ -9,8 +9,6 @@
 #include	<string.h>
 #include	"rfc1035.h"
 #include	"rfc1035mxlist.h"
-#include	"rfc1035_res.h"
-
 
 void rfc1035_mxlist_free(struct rfc1035_mxlist *p)
 {
@@ -26,15 +24,15 @@ struct rfc1035_mxlist *q;
 }
 
 static int addrecord(struct rfc1035_mxlist **list, const char *mxname,
-	int mxpreference,
+		     int mxpreference,
 
 #if	RFC1035_IPV6
-	struct in6_addr *in,
+		     struct in6_addr *in,
 #else
-	struct in_addr *in,
+		     struct in_addr *in,
 #endif
-	int port
-	)
+		     int ad,
+		     int port)
 {
 #if	RFC1035_IPV6
 struct sockaddr_in6 sin;
@@ -69,6 +67,7 @@ struct rfc1035_mxlist *p;
 
 	p->next=*list;
 	*list=p;
+	p->ad=ad;
 	p->priority=mxpreference;
 	strcpy(p->hostname, mxname);
 	memcpy(&p->address, &sin, sizeof(sin));
@@ -104,7 +103,7 @@ int	rc;
 
 		rfc1035_ntoa(&in, buf);
 
-		if (addrecord(list, buf, mxpreference, &in, port))
+		if (addrecord(list, buf, mxpreference, &in, 0, port))
 			return (RFC1035_MX_INTERNAL);
 
 		return (RFC1035_MX_OK);
@@ -188,8 +187,7 @@ struct in_addr in;
 		&& (flags & HARVEST_AUTOQUERY))
 		)
 	{
-		index=rfc1035_resolve_cname(res,
-			RFC1035_RESOLVE_RECURSIVE, mxname,
+		index=rfc1035_resolve_cname(res, mxname,
 			q_type,
 			RFC1035_CLASS_IN, &areply, RFC1035_X_RANDOMIZE);
 		if (index < 0)
@@ -254,7 +252,8 @@ struct in_addr in;
 		in.s_addr=mxreply->allrrs[index]->rr.inaddr.s_addr;
 #endif
 		*found=1;
-		if (addrecord(list, mxname, mxpreference, &in, port))
+		if (addrecord(list, mxname, mxpreference, &in, mxreply->ad,
+			      port))
 		{
 			if (areply)
 				rfc1035_replyfree(areply);
@@ -293,13 +292,12 @@ int seen_good=0;
 		if (rfc1035_aton(namebuf+1, &in))
 			return (RFC1035_MX_HARDERR);
 
-		if (addrecord(list, q_name, -1, &in, port))
+		if (addrecord(list, q_name, -1, &in, 0, port))
 			return (RFC1035_MX_INTERNAL);
 		return (RFC1035_MX_OK);
 	}
 
-	index=rfc1035_resolve_cname(res,
-		RFC1035_RESOLVE_RECURSIVE, namebuf,
+	index=rfc1035_resolve_cname(res, namebuf,
 		RFC1035_TYPE_MX,
 		RFC1035_CLASS_IN, &replyp, RFC1035_X_RANDOMIZE);
 

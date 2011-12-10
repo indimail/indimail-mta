@@ -3,7 +3,6 @@
 # distribution information.
 
 
-ACLOCAL_AMFLAGS=-I ../m4
 noinst_LTLIBRARIES=libencode.la librfc822.la
 
 librfc822_la_SOURCES=rfc822.c rfc822.h rfc822hdr.c rfc822hdr.h \

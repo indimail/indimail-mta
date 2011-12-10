@@ -1,5 +1,5 @@
 /*
-** Copyright 1998 - 2006 Double Precision, Inc.
+** Copyright 1998 - 2011 Double Precision, Inc.
 ** See COPYING for distribution information.
 */
 
@@ -25,9 +25,6 @@
 #include	<time.h>
 #endif
 #endif
-
-#include	"rfc1035_res.h"
-
 
 int rfc1035_open_udp(int *af)
 {

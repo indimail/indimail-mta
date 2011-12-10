@@ -127,7 +127,7 @@ int	rc;
 	while (j < p->workbuflen)
 		p->workbuf[k++]=p->workbuf[j++];
 	p->workbuflen=k;
-	return (0);
+	return (rc);
 }
 
 static int decode_qp(struct rfc2045 *p, const char *s, size_t l)

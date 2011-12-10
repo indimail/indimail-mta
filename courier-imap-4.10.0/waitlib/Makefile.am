@@ -3,7 +3,6 @@
 # distribution information.
 
 
-ACLOCAL_AMFLAGS=-I ../m4
 noinst_LIBRARIES=libwaitlib.a
 noinst_PROGRAMS=testwait
 

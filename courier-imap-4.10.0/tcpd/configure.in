@@ -17,8 +17,7 @@ AC_PROG_CC
 AC_PROG_INSTALL
 AC_PROG_LN_S
 AC_LIBTOOL_DLOPEN
-AC_PROG_LIBTOOL
-AC_CONFIG_MACRO_DIR([../m4])
+AM_PROG_LIBTOOL
 
 SPATH="$LPATH:/usr/kerberos/bin"
 
@@ -135,7 +134,7 @@ AC_SYS_LARGEFILE
 AC_CACHE_CHECK([for socklen_t],
 	tcpd_cv_hassocklen_t,
  
-AC_COMPILE_IFELSE(
+AC_COMPILE_IFELSE([
 AC_LANG_SOURCE( [
 #include <sys/types.h>
 #include <sys/socket.h>
@@ -143,7 +142,7 @@ AC_LANG_SOURCE( [
 socklen_t sl_t;
 ],[
 	accept(0, 0, &sl_t);
-]),
+])],
 	tcpd_cv_hassocklen_t=yes,
 	tcpd_cv_hassocklen_t=no)
 )

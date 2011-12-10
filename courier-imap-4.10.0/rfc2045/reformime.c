@@ -202,10 +202,12 @@ char *disposition_name, *disposition_filename;
 	if (s->content_disposition && *s->content_disposition)
 		printf("content-disposition: %s\n", s->content_disposition);
 
-	if (rfc2231_udecodeDisposition(s, "name", NULL, &disposition_name) < 0
+	if ((rfc2231_udecodeDisposition(s, "name", NULL, &disposition_name) < 0
+	     && (disposition_name=strdup("")) == NULL)
 	    ||
-	    rfc2231_udecodeDisposition(s, "filename", NULL,
-				       &disposition_filename) < 0)
+	    (rfc2231_udecodeDisposition(s, "filename", NULL,
+					&disposition_filename) < 0
+	     && (disposition_filename=strdup("")) == NULL))
 	{
 		perror("malloc");
 		exit(1);
@@ -354,17 +356,16 @@ char	*dyn_disp_name=0;
 
 const char *disposition_filename_s;
 
-	if (rfc2231_udecodeDisposition(r, "name", NULL, &disposition_name) < 0
-	    ||
-	    rfc2231_udecodeDisposition(r, "filename", NULL,
-				       &disposition_filename) < 0
-	    ||
-	    rfc2231_udecodeType(r, "name", NULL,
+	if (rfc2231_udecodeDisposition(r, "name", NULL, &disposition_name) < 0)
+		disposition_name=NULL;
+
+	if (rfc2231_udecodeDisposition(r, "filename", NULL,
+				       &disposition_filename) < 0)
+		disposition_filename=NULL;
+
+	if (rfc2231_udecodeType(r, "name", NULL,
 				&content_name) < 0)
-	{
-		perror("malloc");
-		exit(1);
-	}
+		content_name=NULL;
 
 	disposition_filename_s=disposition_filename;
 
@@ -373,7 +374,7 @@ const char *disposition_filename_s;
 	if (!disposition_filename_s || !*disposition_filename_s)
 		disposition_filename_s=content_name;
 
-	filename_buf=strdup(disposition_filename_s);
+	filename_buf=strdup(disposition_filename_s ? disposition_filename_s:"");
 
 	if (!filename_buf)
 	{
@@ -381,9 +382,9 @@ const char *disposition_filename_s;
 		exit(1);
 	}
 
-	free(content_name);
-	free(disposition_name);
-	free(disposition_filename);
+	if (content_name)		free(content_name);
+	if (disposition_name)		free(disposition_name);
+	if (disposition_filename)	free(disposition_filename);
 
 	if (strlen(filename_buf) > 32)
 	{

@@ -3,7 +3,6 @@
 # distribution information.
 
 
-ACLOCAL_AMFLAGS=-I ../m4
 DISTCLEANFILES=couriertls.config
 
 noinst_PROGRAMS=@COURIERTCPD@ @STARTTLS@ tlscachetest

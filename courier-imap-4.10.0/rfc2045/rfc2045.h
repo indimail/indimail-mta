@@ -349,6 +349,8 @@ struct rfc2045_mkreplyinfo {
 	** "forwardatt" - forward original message as an RFC822 attachment
 	** "reply" - a standard reply to the original message's sender
 	** "replydsn" - a DSN reply to the original message's sender
+	** "feedback" - generate a feedback report (RFC 5965)
+	** "replyfeedback" - "feedback" to the sender's address.
 	** "replyall" - a "reply to all" response.
 	** "replylist" - "reply to mailing list" response.  This is a reply
 	** that's addressed to the mailing list the original message was sent
@@ -367,6 +369,12 @@ struct rfc2045_mkreplyinfo {
 	** If donotquote is set, the contents of the original message are not
 	** quoted by any of the "reply" modes, and replysalut (below) does not
 	** get emitted.
+	*/
+
+	int fullmsg;
+	/*
+	** For replydsn, feedback, replyfeedback, attach the entire message
+	** instead of just its headers.
 	*/
 
 	const char *replysalut;
@@ -416,6 +424,33 @@ struct rfc2045_mkreplyinfo {
 	** the DSN.
 	*/
 	const char *dsnfrom;
+
+	/*
+	** When reply mode is 'replyfeedback', feedbacktype must be set to
+	** one of the registered feedback types:
+	** "abuse", "fraud", "other", "virus".
+	*/
+	const char *feedbacktype;
+
+	/*
+	** Feedback report headers.
+	**
+	** NOTE: rfc2045_makereply() automatically inserts the
+	** Feedback-Type: (from feedbacktype), User-Agent:, Version:, and
+	** Arrival-Date: headers.
+	**
+	** This is an array of alternating header name and header value
+	** strings. The header name string does not contain a colon,
+	** rfc2045_makereply supplies one. And, basically, generates
+	** "name: value" from this list.
+	**
+	** For convenience-sake, the capitalization of the headers get
+	** adjusted to match the convention in RFC 5965.
+	**
+	** The list, which must contain an even number of strings, is terminated
+	** by a NULL pointer.
+	*/
+	const char * const *feedbackheaders;
 
 	/*
 	** Set the reply/fwd MIME headers. If this is a NULL pointer,

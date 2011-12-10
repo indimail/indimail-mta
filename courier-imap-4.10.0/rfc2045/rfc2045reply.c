@@ -906,6 +906,9 @@ int	i;
 
 static char *mlcheck(struct rfc2045_mkreplyinfo *ri, const char *);
 
+static int replydsn(struct rfc2045_mkreplyinfo *);
+static int replyfeedback(struct rfc2045_mkreplyinfo *);
+
 static int mkreply(struct rfc2045_mkreplyinfo *ri)
 {
 	char	*oldtocc, *oldfrom, *oldreplyto, *oldtolist;
@@ -922,6 +925,8 @@ static int mkreply(struct rfc2045_mkreplyinfo *ri)
 	off_t	start_pos, end_pos, start_body, dummy;
 	int errflag=0;
 	char	*boundary;
+	char	*dsn_report_type;
+	int	(*dsn_report_gen)(struct rfc2045_mkreplyinfo *);
 
 	struct rfc2045headerinfo *hi;
 
@@ -1276,6 +1281,27 @@ static int mkreply(struct rfc2045_mkreplyinfo *ri)
 		if (rfcto) rfc822t_free(rfcto);
 	}
 
+	if (strcmp(ri->replymode, "feedback") == 0)
+	{
+		if (oldtolist)
+		{
+			free(oldtolist);
+			oldtolist=NULL;
+		}
+
+		if (oldfrom)
+		{
+			free(oldfrom);
+			oldfrom=NULL;
+		}
+
+		if (oldtocc)
+		{
+			free(oldtocc);
+			oldtocc=NULL;
+		}
+	}
+
 	if (oldtolist)
 	{
 		writes(ri, "To: ");
@@ -1322,28 +1348,50 @@ static int mkreply(struct rfc2045_mkreplyinfo *ri)
 	}
 	else if (subject)
 	{
-		char	*s=rfc822_coresubj_keepblobs(subject);
+		if (strcmp(ri->replymode, "feedback") == 0 ||
+		    strcmp(ri->replymode, "replyfeedback") == 0)
+		{
+			writes(ri, subject);
+		}
+		else
+		{
+			char	*s=rfc822_coresubj_keepblobs(subject);
 
-		writes(ri, "Re: ");
-		writes(ri, s ? s:"");
-		if (s)	free(s);
+			writes(ri, "Re: ");
+			writes(ri, s ? s:"");
+			if (s)	free(s);
+		}
 		free(subject);
 	}
 
 	writes(ri, "\nMime-Version: 1.0\n");
 
-
 	boundary=NULL;
+	dsn_report_type=NULL;
 
 	if (strcmp(ri->replymode, "replydsn") == 0 && ri->dsnfrom)
+	{
+		dsn_report_type="delivery-status";
+		dsn_report_gen=&replydsn;
+	}
+	else if (strcmp(ri->replymode, "replyfeedback") == 0 ||
+		 strcmp(ri->replymode, "feedback") == 0)
+	{
+		dsn_report_type="feedback-report";
+		dsn_report_gen=&replyfeedback;
+	}
+
+	if (dsn_report_type)
 	{
 		boundary=rfc2045_mk_boundary(ri->rfc2045partp, ri->src);
 		if (!boundary)
 			return (-1);
 
 		writes(ri, "Content-Type: multipart/report;"
-		       " report-type=delivery-status;\n"
-		       "    boundary=\"");
+		       " report-type=");
+
+		writes(ri, dsn_report_type);
+		writes(ri, ";\n    boundary=\"");
 
 		writes(ri, boundary);
 
@@ -1393,51 +1441,74 @@ static int mkreply(struct rfc2045_mkreplyinfo *ri)
 
 	if (boundary)
 	{
+		/* replydsn or replyfeedback */
+
 		char	*header, *value;
 		struct rfc2045headerinfo *hi;
 
-		time_t now;
+		writes(ri, "\n--");
+		writes(ri, boundary);
+		writes(ri, "\nContent-Type: message/");
 
-		time(&now);
+		writes(ri, dsn_report_type);
+		writes(ri, "\n"
+		       "Content-Transfer-Encoding: 7bit\n\n");
+
+		if (errflag == 0)
+			errflag=(*dsn_report_gen)(ri);
 
 		writes(ri, "\n--");
 		writes(ri, boundary);
-		writes(ri, "\nContent-Type: message/delivery-status\n"
-		       "Content-Transfer-Encoding: 7bit\n\n"
-		       "Arrival-Date: ");
 
-		writes(ri, rfc822_mkdate(now));
-		writes(ri,"\n"
-		       "\n"
-		       "Final-Recipient: rfc822; ");
-
-		writes(ri, ri->dsnfrom);
-
-		writes(ri, "\n"
-		       "Action: delivered\n"
-		       "Status: 2.0.0\n"
-		       "\n--");
-		writes(ri, boundary);
-		writes(ri, "\nContent-Type: text/rfc822-headers; charset=\"iso-8859-1\"\n"
-		       "Content-Disposition: attachment\n"
-		       "Content-Transfer-Encoding: 8bit\n\n"
-		       );
-
-		hi=rfc2045header_start(ri->src, ri->rfc2045partp);
-
-		while (hi)
+		if (ri->fullmsg)
 		{
-			if (rfc2045header_get(hi, &header, &value,
-					      RFC2045H_NOLC) || !header)
-			{
-				rfc2045header_end(hi);
-				break;
-			}
+			off_t cnt=end_pos - start_pos;
+			char buf[BUFSIZ];
 
-			writes(ri, header);
-			writes(ri, ": ");
-			writes(ri, value);
-			writes(ri, "\n");
+			writes(ri, "\nContent-Type: message/rfc822\n"
+			       "Content-Disposition: attachment\n\n");
+
+			if (errflag == 0)
+				errflag=SRC_SEEK(ri->src, start_pos);
+
+			while (errflag == 0 && cnt > 0)
+			{
+				int n=cnt > sizeof(BUFSIZ) ? BUFSIZ:(int)cnt;
+
+				n=SRC_READ(ri->src, buf, n);
+
+				if (n <= 0)
+				{
+					errflag= -1;
+					break;
+				}
+				(*ri->write_func)(buf, n, ri->voidarg);
+				cnt -= n;
+			}
+		}
+		else
+		{
+			writes(ri, "\nContent-Type: text/rfc822-headers; charset=\"iso-8859-1\"\n"
+			       "Content-Disposition: attachment\n"
+			       "Content-Transfer-Encoding: 8bit\n\n"
+			       );
+
+			hi=rfc2045header_start(ri->src, ri->rfc2045partp);
+
+			while (hi)
+			{
+				if (rfc2045header_get(hi, &header, &value,
+						      RFC2045H_NOLC) || !header)
+				{
+					rfc2045header_end(hi);
+					break;
+				}
+
+				writes(ri, header);
+				writes(ri, ": ");
+				writes(ri, value);
+				writes(ri, "\n");
+			}
 		}
 		writes(ri, "\n--");
 		writes(ri, boundary);
@@ -1446,6 +1517,75 @@ static int mkreply(struct rfc2045_mkreplyinfo *ri)
 	}
 	return (errflag);
 }
+
+static void dsn_arrival_date(struct rfc2045_mkreplyinfo *ri)
+{
+	writes(ri, "Arrival-Date: ");
+
+	time_t now;
+
+	time(&now);
+
+	writes(ri, rfc822_mkdate(now));
+	writes(ri, "\n");
+}
+
+static int replydsn(struct rfc2045_mkreplyinfo *ri)
+{
+	dsn_arrival_date(ri);
+
+	writes (ri, "\n"
+		"Final-Recipient: rfc822; ");
+
+	writes(ri, ri->dsnfrom);
+
+	writes(ri, "\n"
+	       "Action: delivered\n"
+	       "Status: 2.0.0\n");
+	return 0;
+}
+
+static int replyfeedback(struct rfc2045_mkreplyinfo *ri)
+{
+	size_t i;
+
+	dsn_arrival_date(ri);
+	writes(ri, "User-Agent: librfc2045 "
+	       RFC2045PKG "/" RFC2045VER
+	       "\n"
+	       "Version: 1\n");
+
+	for (i=0; ri->feedbackheaders &&
+		     ri->feedbackheaders[i] && ri->feedbackheaders[i+1];
+	     i += 2)
+	{
+		char *p=strdup(ri->feedbackheaders[i]), *q;
+		char lastch;
+
+		if (!p)
+			return -1;
+
+		lastch='-';
+		for (q=p; *q; q++)
+		{
+			if (*q >= 'A' && *q <= 'Z')
+				*q += 'a'-'A';
+
+			if (lastch == '-' && *q >= 'a' && *q <= 'z')
+				*q += 'A' - 'a';
+			lastch=*q;
+		}
+
+		writes(ri, p);
+		free(p);
+		writes(ri, ": ");
+		writes(ri, ri->feedbackheaders[i+1]);
+		writes(ri, "\n");
+	}
+
+	return 0;
+}
+
 
 /*
 ** Accept a list of recipients, and return a list that contains only those

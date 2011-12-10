@@ -3,13 +3,22 @@
 .\"<!-- distribution information. -->
 .\"     Title: rfc822
 .\"    Author: Sam Varshavchik
-.\" Generator: DocBook XSL Stylesheets v1.75.2 <http://docbook.sf.net/>
-.\"      Date: 04/04/2011
+.\" Generator: DocBook XSL Stylesheets v1.76.1 <http://docbook.sf.net/>
+.\"      Date: 09/29/2011
 .\"    Manual: Double Precision, Inc.
 .\"    Source: Courier Mail Server
 .\"  Language: English
 .\"
-.TH "RFC822" "3" "04/04/2011" "Courier Mail Server" "Double Precision, Inc."
+.TH "RFC822" "3" "09/29/2011" "Courier Mail Server" "Double Precision, Inc\&."
+.\" -----------------------------------------------------------------
+.\" * Define some portability stuff
+.\" -----------------------------------------------------------------
+.\" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.\" http://bugs.debian.org/507673
+.\" http://lists.gnu.org/archive/html/groff/2009-02/msg00013.html
+.\" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.ie \n(.g .ds Aq \(aq
+.el       .ds Aq '
 .\" -----------------------------------------------------------------
 .\" * set default formatting
 .\" -----------------------------------------------------------------
@@ -87,7 +96,7 @@ are subject to change\&. It is recommended to leave this argument as NULL in the
 
 \fBrfc822t_alloc\fR() returns a pointer to a dynamically\-allocated
 rfc822t
-structure\&. A NULL pointer is returned if there\'s insufficient memory to allocate this structure\&. The
+structure\&. A NULL pointer is returned if there\*(Aqs insufficient memory to allocate this structure\&. The
 \fBrfc822t_free\fR() function destroys
 rfc822t
 structure and frees all dynamically allocated memory\&.
@@ -215,7 +224,7 @@ is a null pointer, this structure represents some non\-address portion of the or
 .PP
 
 \fIname\fR
-either points to the tokenized form of a non\-address portion of the original header, or to a tokenized form of the recipient\'s name\&.
+either points to the tokenized form of a non\-address portion of the original header, or to a tokenized form of the recipient\*(Aqs name\&.
 \fIname\fR
 will be NULL if the recipient name was not provided\&. For the following address:
 Tom Jones <tjones@example\&.com>
@@ -260,16 +269,16 @@ This is a simple atom \- a sequence of non\-special characters that is delimited
 The value of the ascii quote \- this is a quoted string\&.
 .RE
 .PP
-Open parenthesis: \'(\'
+Open parenthesis: \*(Aq(\*(Aq
 .RS 4
 This is an old style comment\&. A deprecated form of E\-mail addressing uses \- for example \- "john@example\&.com (John Smith)" instead of "John Smith <john@example\&.com>"\&. This old\-style notation defined parenthesized content as arbitrary comments\&. The
 rfc822token
 with
 \fItoken\fR
-set to \'(\' is created for the contents of the entire comment\&.
+set to \*(Aq(\*(Aq is created for the contents of the entire comment\&.
 .RE
 .PP
-Symbols: \'<\', \'>\', \'@\', and many others
+Symbols: \*(Aq<\*(Aq, \*(Aq>\*(Aq, \*(Aq@\*(Aq, and many others
 .RS 4
 The remaining possible values of
 \fItoken\fR
@@ -290,9 +299,9 @@ are used for the given
 \fItoken\fR\&. Currently
 \fBrfc822_is_atom\fR() returns true if
 \fItoken\fR
-is a zero byte, \'"\', or \'(\'\&.
+is a zero byte, \*(Aq"\*(Aq, or \*(Aq(\*(Aq\&.
 .PP
-Note that it\'s possible that
+Note that it\*(Aqs possible that
 \fIlen\fR
 might be zero\&. This happens with null addresses used as return addresses for delivery status notifications\&.
 .SS "Working with E\-mail addresses"
@@ -480,7 +489,7 @@ char *buffer=rfc2047_encode_header(const struct rfc822a *a,
 These functions provide additional logic to encode or decode 8\-bit content in 7\-bit RFC 822 headers, as specified in RFC 2047\&.
 .PP
 
-\fBrfc2047_decode\fR() is a basic RFC 2047 decoding function\&. It receives a pointer to some 7bit RFC 2047\-encoded text, and a callback function\&. The callback function is repeatedly called\&. Each time it\'s called it receives a piece of decoded text\&. The arguments are: a pointer to a text fragment, number of bytes in the text fragment, followed by a pointer to the character set of the text fragment\&. The character set pointer is NULL for portions of the original text that are not RFC 2047\-encoded\&.
+\fBrfc2047_decode\fR() is a basic RFC 2047 decoding function\&. It receives a pointer to some 7bit RFC 2047\-encoded text, and a callback function\&. The callback function is repeatedly called\&. Each time it\*(Aqs called it receives a piece of decoded text\&. The arguments are: a pointer to a text fragment, number of bytes in the text fragment, followed by a pointer to the character set of the text fragment\&. The character set pointer is NULL for portions of the original text that are not RFC 2047\-encoded\&.
 .PP
 The callback function also receives
 \fIcallback_arg\fR, as its last argument\&. If the callback function returns a non\-zero value,
@@ -504,7 +513,7 @@ The callback function also receives
 The
 \fBrfc2047_print\fR() function is equivalent to
 \fBrfc822_print\fR(), followed by
-\fBrfc2047_decode_enhanced\fR() on the result\&. The callback functions are used in an identical fashion, except that they receive text that\'s already decoded\&.
+\fBrfc2047_decode_enhanced\fR() on the result\&. The callback functions are used in an identical fashion, except that they receive text that\*(Aqs already decoded\&.
 .PP
 The function
 \fBrfc2047_encode_str\fR() takes a
@@ -540,7 +549,7 @@ char *basesubj=rfc822_coresubj_nouc(const char *subj);
 .RE
 .\}
 .PP
-This function takes the contents of the subject header, and returns the "core" subject header that\'s used in the specification of the IMAP THREAD function\&. This function is designed to strip all subject line artifacts that might\'ve been added in the process of forwarding or replying to a message\&. Currently,
+This function takes the contents of the subject header, and returns the "core" subject header that\*(Aqs used in the specification of the IMAP THREAD function\&. This function is designed to strip all subject line artifacts that might\*(Aqve been added in the process of forwarding or replying to a message\&. Currently,
 \fBrfc822_coresubj\fR() performs the following transformations:
 .PP
 Whitespace

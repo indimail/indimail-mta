@@ -3,13 +3,22 @@
 .\"<!-- distribution information. -->
 .\"     Title: makemime
 .\"    Author: Sam Varshavchik
-.\" Generator: DocBook XSL Stylesheets v1.75.2 <http://docbook.sf.net/>
-.\"      Date: 04/04/2011
+.\" Generator: DocBook XSL Stylesheets v1.76.1 <http://docbook.sf.net/>
+.\"      Date: 09/29/2011
 .\"    Manual: Double Precision, Inc.
 .\"    Source: Courier Mail Server
 .\"  Language: English
 .\"
-.TH "MAKEMIME" "1" "04/04/2011" "Courier Mail Server" "Double Precision, Inc."
+.TH "MAKEMIME" "1" "09/29/2011" "Courier Mail Server" "Double Precision, Inc\&."
+.\" -----------------------------------------------------------------
+.\" * Define some portability stuff
+.\" -----------------------------------------------------------------
+.\" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.\" http://bugs.debian.org/507673
+.\" http://lists.gnu.org/archive/html/groff/2009-02/msg00013.html
+.\" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.ie \n(.g .ds Aq \(aq
+.el       .ds Aq '
 .\" -----------------------------------------------------------------
 .\" * set default formatting
 .\" -----------------------------------------------------------------
@@ -46,9 +55,9 @@ reads the options from a file\&. "@&\fIn\fR" reads options from a pipe on file d
 .PP
 When options are read from a file or a pipe, each option must be on a line by itself\&. If an option requires an argument, the argument must follow on the next line\&.
 .PP
-For readability, leading whitespace is deleted when options are read from a file or a pipe\&. Empty lines are also ignored, as well as lines that begin with the \'#\' character\&.
+For readability, leading whitespace is deleted when options are read from a file or a pipe\&. Empty lines are also ignored, as well as lines that begin with the \*(Aq#\*(Aq character\&.
 .PP
-Options and their arguments may contain characters that are special characters to the shell, such as \'(\' and \')\'\&. These characters must be backslashed when specified on the command line, to avoid their special meaning to the shell\&. These characters MUST NOT be backslashed when options are read from a file or a pipe\&. Similarly, the contents of most headers nearly always include spaces\&. Therefore they must be quoted when specified on the command line\&. Header contents MUST NOT be quoted when options come from a file or a pipe\&.
+Options and their arguments may contain characters that are special characters to the shell, such as \*(Aq(\*(Aq and \*(Aq)\*(Aq\&. These characters must be backslashed when specified on the command line, to avoid their special meaning to the shell\&. These characters MUST NOT be backslashed when options are read from a file or a pipe\&. Similarly, the contents of most headers nearly always include spaces\&. Therefore they must be quoted when specified on the command line\&. Header contents MUST NOT be quoted when options come from a file or a pipe\&.
 .PP
 \fBmakemime\fR
 reads the content to be formatted as a MIME message from some other file\&. The files can also be a pipe\&. It is possible to supply both the options and a file from the same pipe, by terminating the options list with a line containing the single character "\-"\&. The remainder of the pipe will be available to be used as an input file (which must be explicitly specified by one of the options)\&. Of course, only one input file can come from a single pipe\&.
@@ -129,7 +138,7 @@ Content\-Type:\&.
 .PP
 
 \fIencoding\fR
-argument should be specified\&. It\'s more efficient to do so\&.
+argument should be specified\&. It\*(Aqs more efficient to do so\&.
 \fIencoding\fR
 must be one of the following:
 7bit,
@@ -179,7 +188,7 @@ does not generate any other headers\&. Particularly, the "Mime\-Version:" header
 \fB\-a\fR
 option, which may be used multiple times to insert multiple headers\&.
 \fBmakemime\fR
-doesn\'t do anything with them except to insert the headers into the generated MIME section\&.
+doesn\*(Aqt do anything with them except to insert the headers into the generated MIME section\&.
 .PP
 Note that "Mime\-Version:" is only required for the top level MIME section\&. This header is not required for individual MIME sections that are later combined into a multipart MIME collection\&.
 .if n \{\
@@ -262,10 +271,10 @@ and
 \fIfile2\fR
 should ideally be created by
 \fBmakemime\fR
-as well\&. It\'s also possible to use MIME\-formatted files created by other software, but with some degree of care\&.
+as well\&. It\*(Aqs also possible to use MIME\-formatted files created by other software, but with some degree of care\&.
 \fBmakemime\fR
 is not intended to be a MIME parser, but a MIME generator\&. However some amount of MIME parsing is necessary to append a MIME section to an existing MIME collection\&.
-\fBmakemime\fR\'s parsing is sufficient for appending a new section to a MIME collection, as long as the MIME headers in the MIME collections are straightforward\&. Very convoluted MIME headers may confuse
+\fBmakemime\fR\*(Aqs parsing is sufficient for appending a new section to a MIME collection, as long as the MIME headers in the MIME collections are straightforward\&. Very convoluted MIME headers may confuse
 \fBmakemime\fR, and it may not be able to handle them\&.
 .SS "Recursive MIME collections"
 .PP
@@ -333,15 +342,15 @@ This can be done manually, by hand\&. It is also possible to have
 \fBmakemime\fR
 do this automatically\&.
 \fBmakemime\fR
-will set up these pipes and run multiple instances of itself to create a single MIME collection, with multiple attachments of complexity limited only by your system\'s limit on the maximum number of open files and pipes\&.
+will set up these pipes and run multiple instances of itself to create a single MIME collection, with multiple attachments of complexity limited only by your system\*(Aqs limit on the maximum number of open files and pipes\&.
 .PP
-Any file that\'s read by the
+Any file that\*(Aqs read by the
 \fB\-c\fR,
 \fB\-m\fR, and
 \fB\-j\fR
 options (
 \fB\-o\fR
-specifies a file to create, and doesn\'t count) may be replaced by a single argument containing a left parenthesis, additional options, then a single argument containing a right parenthesis\&. A single invocation of
+specifies a file to create, and doesn\*(Aqt count) may be replaced by a single argument containing a left parenthesis, additional options, then a single argument containing a right parenthesis\&. A single invocation of
 \fBmakemime\fR
 can only use one
 \fB\-c\fR,

@@ -1,20 +1,20 @@
 <?xml version="1.0"?>
-<html xmlns="http://www.w3.org/1999/xhtml"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/><title>rfc2045</title><link rel="stylesheet" href="style.css" type="text/css"/><meta name="generator" content="DocBook XSL Stylesheets V1.75.2"/><link rel="home" href="#id324075" title="rfc2045"/><link xmlns="" rel="stylesheet" type="text/css" href="manpage.css"/><meta xmlns="" name="MSSmartTagsPreventParsing" content="TRUE"/><link xmlns="" rel="icon" href="icon.gif" type="image/gif"/><!--
+<html xmlns="http://www.w3.org/1999/xhtml"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/><title>rfc2045</title><link rel="stylesheet" type="text/css" href="style.css"/><meta name="generator" content="DocBook XSL Stylesheets V1.76.1"/><link rel="home" href="#id382432" title="rfc2045"/><link xmlns="" rel="stylesheet" type="text/css" href="manpage.css"/><meta xmlns="" name="MSSmartTagsPreventParsing" content="TRUE"/><link xmlns="" rel="icon" href="icon.gif" type="image/gif"/><!--
 
 Copyright 1998 - 2009 Double Precision, Inc.  See COPYING for distribution
 information.
 
---></head><body><div class="refentry" title="rfc2045"><a id="id324075" shape="rect"> </a><div class="titlepage"/><div class="refnamediv"><h2>Name</h2><p>rfc2045 — RFC 2045 (MIME) parsing library</p></div><div class="refsynopsisdiv" title="Synopsis"><h2>Synopsis</h2><div class="informalexample"><pre class="programlisting" xml:space="preserve">
+--></head><body><div class="refentry" title="rfc2045"><a id="id382432" shape="rect"> </a><div class="titlepage"/><div class="refnamediv"><h2>Name</h2><p>rfc2045 — RFC 2045 (MIME) parsing library</p></div><div class="refsynopsisdiv" title="Synopsis"><h2>Synopsis</h2><div class="informalexample"><pre class="programlisting" xml:space="preserve">
 #include &lt;rfc822.h&gt;
 #include &lt;rfc2045.h&gt;
 
 cc ... -lrfc2045 -lrfc822
-</pre></div></div><div class="refsect1" title="DESCRIPTION"><a id="id323805" shape="rect"> </a><h2>DESCRIPTION</h2><p>
+</pre></div></div><div class="refsect1" title="DESCRIPTION"><a id="id382163" shape="rect"> </a><h2>DESCRIPTION</h2><p>
 The rfc2045 library parses MIME-formatted messages.
 The rfc2045 library is used to:</p><p>
 1) Parse the structure of a MIME formatted message</p><p>
 2) Examine the contents of each MIME section</p><p>
-3) Optionally rewrite and reformat the message.</p><div class="refsect2" title="Creating an rfc2045 structure"><a id="id323824" shape="rect"> </a><h3>Creating an rfc2045 structure</h3><div class="informalexample"><pre class="programlisting" xml:space="preserve">
+3) Optionally rewrite and reformat the message.</p><div class="refsect2" title="Creating an rfc2045 structure"><a id="id382182" shape="rect"> </a><h3>Creating an rfc2045 structure</h3><div class="informalexample"><pre class="programlisting" xml:space="preserve">
 #include &lt;rfc2045.h&gt;
 
 struct rfc2045 *ptr=rfc2045_alloc();
@@ -75,7 +75,7 @@ functions described
 below may be used to access and work with the contents of the structure. When
 the <span class="structname">rfc2045</span> structure is no longer needed, the
 function <code class="function">rfc2045_free</code>() deallocates and destroys the
-structure.</p></div><div class="refsect2" title="Structure of a MIME message"><a id="id358442" shape="rect"> </a><h3>Structure of a MIME message</h3><div class="informalexample"><pre class="programlisting" xml:space="preserve">
+structure.</p></div><div class="refsect2" title="Structure of a MIME message"><a id="id416797" shape="rect"> </a><h3>Structure of a MIME message</h3><div class="informalexample"><pre class="programlisting" xml:space="preserve">
 
 struct rfc2045 {
 
@@ -135,7 +135,7 @@ designated by setting the <em class="structfield"><code>isdummy</code></em> fiel
 to a non-zero value.  All <span class="structname">rfc2045</span>
 structures that have <em class="structfield"><code>isdummy</code></em> set should be
 ignored, and skipped over, when traversing the
-<span class="structname">rfc2045</span> tree.</p></div><div class="refsect2" title="Basic MIME information"><a id="id323276" shape="rect"> </a><h3>Basic MIME information</h3><div class="informalexample"><pre class="programlisting" xml:space="preserve">
+<span class="structname">rfc2045</span> tree.</p></div><div class="refsect2" title="Basic MIME information"><a id="id381629" shape="rect"> </a><h3>Basic MIME information</h3><div class="informalexample"><pre class="programlisting" xml:space="preserve">
 
 const char *content_type, *content_transfer_encoding,
            *content_character_set;
@@ -270,7 +270,7 @@ returns an empty string in the event that there are no
 <code class="literal">Content-Base:</code> or
 <code class="literal">Content-Location:</code> headers. Either argument to
 <code class="function">rfc2045_append_url</code>() may be a
-NULL, or an empty string.</p></div><div class="refsect2" title="Decoding a MIME section"><a id="id367931" shape="rect"> </a><h3>Decoding a MIME section</h3><div class="informalexample"><pre class="programlisting" xml:space="preserve">
+NULL, or an empty string.</p></div><div class="refsect2" title="Decoding a MIME section"><a id="id426285" shape="rect"> </a><h3>Decoding a MIME section</h3><div class="informalexample"><pre class="programlisting" xml:space="preserve">
 
 void rfc2045_cdecode_start(struct rfc2045 *ptr,
         int (*callback_func)(const char *, size_t, void *),
@@ -316,7 +316,7 @@ third argument is <em class="parameter"><code>callback_arg</code></em>.</p><p>
 decoding. If
 <code class="function">callback_func</code>() returns non-zero, the decoding
 immediately stops and
-<code class="function">rfc2045_cdecode</code>() or <code class="function">rfc2045_cdecode_end</code>() terminates with <code class="function">callback_func</code>'s return code.</p></div><div class="refsect2" title="Rewriting MIME messages"><a id="id368096" shape="rect"> </a><h3>Rewriting MIME messages</h3><p>
+<code class="function">rfc2045_cdecode</code>() or <code class="function">rfc2045_cdecode_end</code>() terminates with <code class="function">callback_func</code>'s return code.</p></div><div class="refsect2" title="Rewriting MIME messages"><a id="id426450" shape="rect"> </a><h3>Rewriting MIME messages</h3><p>
 This library contains functions that can be used to rewrite a MIME
 message in order to convert 8-bit-encoded data to 7-bit encoding, or to
 convert 7-bit encoded data to full 8-bit data, if possible.</p><div class="informalexample"><pre class="programlisting" xml:space="preserve">
@@ -376,7 +376,7 @@ to a portion of the MIME message, the number of bytes in the specified
 portion, and <em class="parameter"><code>funcout_arg</code></em>. When either function rewrites
 a MIME section,
 an informational header gets appended, noting that the message was converted
-by <em class="parameter"><code>appname</code></em>.</p></div></div><div class="refsect1" title="SEE ALSO"><a id="id368274" shape="rect"> </a><h2>SEE ALSO</h2><p>
+by <em class="parameter"><code>appname</code></em>.</p></div></div><div class="refsect1" title="SEE ALSO"><a id="id400252" shape="rect"> </a><h2>SEE ALSO</h2><p>
 <a class="ulink" href="rfc822.html" target="_top" shape="rect"><span class="citerefentry"><span class="refentrytitle">rfc822</span>(3)</span></a>,
 <a class="ulink" href="reformail.html" target="_top" shape="rect"><span class="citerefentry"><span class="refentrytitle">reformail</span>(1)</span></a>,
 <a class="ulink" href="reformime.html" target="_top" shape="rect"><span class="citerefentry"><span class="refentrytitle">reformime</span>(1)</span></a>.</p></div></div></body></html>

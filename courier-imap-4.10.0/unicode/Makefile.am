@@ -3,7 +3,6 @@
 # distribution information.
 
 
-ACLOCAL_AMFLAGS=-I ../m4
 noinst_SCRIPTS=update.sh \
 	mkultcase.pl unicodefilter.pl \
 	mkeastasianwidth.pl \

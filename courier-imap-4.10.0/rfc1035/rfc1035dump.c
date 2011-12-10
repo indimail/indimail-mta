@@ -27,28 +27,25 @@ static void print_hostname(FILE *f, const char *p)
 	}
 }
 
+static void tostr_callback(const char *ptr, void *vp)
+{
+	FILE *fp=*(FILE **)vp;
+
+	fprintf(fp, "%s", ptr);
+}
+
 void rfc1035_dump(struct rfc1035_reply *r, FILE *f)
 {
 unsigned n;
 char namebuf[RFC1035_MAXNAMESIZE+1];
 char timebuf[RFC1035_MAXTIMEBUFSIZE+1];
-#if	RFC1035_IPV6
-struct sockaddr_in6 *sin;
-#else
-struct sockaddr_in *sin;
-#endif
 char	ipbuf[RFC1035_NTOABUFSIZE];
 struct	rfc1035_reply *qr;
 
 	fprintf(f, ";;HEADER");
 
-#if	RFC1035_IPV6
-	sin=(struct sockaddr_in6 *) &r->server_addr;
-	rfc1035_ntoa(&sin->sin6_addr, ipbuf);
-#else
-	sin=(struct sockaddr_in *) &r->server_addr;
-	rfc1035_ntoa(&sin->sin_addr, ipbuf);
-#endif
+	rfc1035_ntoa((const RFC1035_ADDR *)&r->server_addr, ipbuf);
+
 	fprintf(f, " (server %s)", ipbuf);
 
 	fprintf(f, ":\n;;  Bytes: %ld\n", 
@@ -67,6 +64,10 @@ struct	rfc1035_reply *qr;
 		fprintf(f, " rd");
 	if (r->ra)
 		fprintf(f, " ra");
+	if (r->ad)
+		fprintf(f, " ad");
+	if (r->cd)
+		fprintf(f, " cd");
 	fprintf(f, "\n;;  Status: %s\n", rfc1035_rcode_itostr(r->rcode));
 	fprintf(f, ";;  # questions: %u\n", r->qdcount);
 	fprintf(f, ";;  # answers: %u\n", r->ancount);
@@ -79,9 +80,12 @@ struct	rfc1035_reply *qr;
 		fprintf(f, ";;  ");
 		print_hostname(f, rfc1035_replyhostname(r, r->qdptr[n].name,
 							namebuf));
-		fprintf(f,".\t%s %s\n",
-			rfc1035_class_itostr(r->qdptr[n].qclass),
-			rfc1035_type_itostr(r->qdptr[n].qtype));
+		fprintf(f,".\t%s ",
+			rfc1035_class_itostr(r->qdptr[n].qclass));
+
+		rfc1035_type_itostr(r->qdptr[n].qtype, tostr_callback, &f);
+
+		fprintf(f, "\n");
 	}
 
 	fprintf(f, "\n;;ANSWERS:\n");
@@ -97,10 +101,12 @@ struct	rfc1035_reply *qr;
 							     qr->anptr[n]
 							     .rrname,
 							     namebuf));
-			fprintf(f, ".\t%s\t%s %s",
+			fprintf(f, ".\t%s\t%s ",
 				rfc1035_fmttime(qr->anptr[n].ttl, timebuf),
-				rfc1035_class_itostr(qr->anptr[n].rrclass),
-				rfc1035_type_itostr(qr->anptr[n].rrtype));
+				rfc1035_class_itostr(qr->anptr[n].rrclass));
+
+			rfc1035_type_itostr(qr->anptr[n].rrtype, tostr_callback,
+					    &f);
 
 			c=rfc1035_dumprrdata(qr, qr->anptr+n);
 			if (c)
@@ -120,10 +126,11 @@ struct	rfc1035_reply *qr;
 		print_hostname(f, rfc1035_replyhostname(r,
 							r->nsptr[n].rrname,
 							namebuf));
-		fprintf(f, ".\t%s\t%s %s",
+		fprintf(f, ".\t%s\t%s ",
 			rfc1035_fmttime(r->nsptr[n].ttl, timebuf),
-			rfc1035_class_itostr(r->nsptr[n].rrclass),
-			rfc1035_type_itostr(r->nsptr[n].rrtype));
+			rfc1035_class_itostr(r->nsptr[n].rrclass));
+
+		rfc1035_type_itostr(r->nsptr[n].rrtype, tostr_callback, &f);
 
 		c=rfc1035_dumprrdata(r, r->nsptr+n);
 		if (c)
@@ -137,16 +144,20 @@ struct	rfc1035_reply *qr;
 	fprintf(f, "\n;;ADDITIONAL:\n");
 	for (n=0; n<r->arcount; n++)
 	{
-	char	*c;
+		char	*c;
+
+		if (r->arptr[n].rrtype == RFC1035_TYPE_OPT)
+			continue;
 
 		fprintf(f, " ");
 		print_hostname(f, rfc1035_replyhostname(r,
 							r->arptr[n].rrname,
 							namebuf));
-		fprintf(f, ".\t%s\t%s %s",
+		fprintf(f, ".\t%s\t%s ",
 			rfc1035_fmttime(r->arptr[n].ttl, timebuf),
-			rfc1035_class_itostr(r->arptr[n].rrclass),
-			rfc1035_type_itostr(r->arptr[n].rrtype));
+			rfc1035_class_itostr(r->arptr[n].rrclass));
+
+		rfc1035_type_itostr(r->arptr[n].rrtype, tostr_callback, &f);
 
 		c=rfc1035_dumprrdata(r, r->arptr+n);
 		if (c)

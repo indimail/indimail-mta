@@ -1,12 +1,11 @@
 /*
-** Copyright 1998 - 2002 Double Precision, Inc.
+** Copyright 1998 - 2011 Double Precision, Inc.
 ** See COPYING for distribution information.
 */
 
 #include	"rfc1035.h"
 #include	<string.h>
 #include	<errno.h>
-#include	"rfc1035_res.h"
 
 
 static int ptr(struct rfc1035_res *, const void *, int,
@@ -112,7 +111,7 @@ char	name[256], ptrbuf[256];
 			(int)d, (int)c, (int)b, (int)a);
 	}
 
-	if (rfc1035_resolve_cname(res, RFC1035_RESOLVE_RECURSIVE, name,
+	if (rfc1035_resolve_cname(res, name,
 		RFC1035_TYPE_PTR, RFC1035_CLASS_IN, &reply, 0) < 0 ||
 		reply == 0 ||
 		(n=rfc1035_replysearch_an( res, reply, name, RFC1035_TYPE_PTR,

@@ -120,7 +120,9 @@ int unicode_lb_lookup(unicode_char ch)
 int unicode_lb_next(unicode_lb_info_t i,
 		    unicode_char ch)
 {
-	return (*i->next_handler)(i, unicode_lb_lookup(ch));
+	return (*i->next_handler)(i, (i->opts & UNICODE_LB_OPT_DASHWJ) &&
+				  (ch == 0x2012 || ch == 0x2013)
+				  ? UNICODE_LB_WJ:unicode_lb_lookup(ch));
 }
 
 static int next_def_nolb25(unicode_lb_info_t i,
@@ -427,7 +429,7 @@ static int unwind_lb25_seenophy(unicode_lb_info_t i)
 {
 	int rc;
 
-	uint8_t class=i->savedclass;
+	/*uint8_t class=i->savedclass;*/
 	int nolb25_flag=1;
 
 	i->next_handler=next_def;
@@ -440,7 +442,7 @@ static int unwind_lb25_seenophy(unicode_lb_info_t i)
 		if (rc)
 			return rc;
 
-		class=UNICODE_LB_CM;
+		/*class=UNICODE_LB_CM;*/
 		nolb25_flag=0;
 	} while (i->savedcmcnt--);
 	return 0;

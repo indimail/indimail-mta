@@ -1,5 +1,5 @@
 /*
-** Copyright 1998 - 2000 Double Precision, Inc.
+** Copyright 1998 - 2011 Double Precision, Inc.
 ** See COPYING for distribution information.
 */
 
@@ -26,8 +26,6 @@
 #include	<time.h>
 #endif
 #endif
-
-#include	"rfc1035_res.h"
 
 
 int rfc1035_open_tcp(struct rfc1035_res *res, const RFC1035_ADDR *addr)
@@ -62,7 +60,7 @@ int	fd=rfc1035_mksocket(SOCK_STREAM, 0, &af);
 	{
 	unsigned	w=res->rfc1035_timeout_initial;
 
-		if (!w)	w=DEFAULT_INITIAL_TIMEOUT;
+		if (!w)	w=RFC1035_DEFAULT_INITIAL_TIMEOUT;
 		if (rfc1035_wait_query(fd, w) == 0 &&
 			(sox_connect(fd, addrptr, addrptrlen) == 0
 				|| errno == EISCONN))

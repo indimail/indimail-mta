@@ -1,5 +1,5 @@
 /*
-** Copyright 1998 - 2000 Double Precision, Inc.
+** Copyright 1998 - 2011 Double Precision, Inc.
 ** See COPYING for distribution information.
 */
 
@@ -14,26 +14,29 @@
 #include	<arpa/inet.h>
 
 #include	"soxwrap/soxwrap.h"
-#include	"rfc1035_res.h"
 
 
-static void setns(const char *p)
+static void setns(const char *p, struct rfc1035_res *res)
 {
-#if	RFC1035_IPV6
-struct in6_addr ia[4];
-#else
-struct in_addr ia[4];
-#endif
+RFC1035_ADDR ia[4];
 int	i=0;
 char	*q=malloc(strlen(p)+1), *r;
 
 	strcpy(q, p);
 	for (r=q; (r=strtok(r, ", ")) != 0; r=0)
 		if (i < 4)
+		{
 			if (rfc1035_aton(r, &ia[i]) == 0)
+			{
 				++i;
-
-	rfc1035_init_ns(&rfc1035_default_resolver, ia, i);
+			}
+			else
+			{
+				fprintf(stderr, "%s: invalid IP address\n",
+					r);
+			}
+		}
+	rfc1035_init_ns(res, ia, i);
 }
 
 extern char rfc1035_spf_gettxt(const char *current_domain,
@@ -69,6 +72,7 @@ static void spflookup(const char *current_domain)
 
 int main(int argc, char **argv)
 {
+struct  rfc1035_res res;
 struct	rfc1035_reply *replyp;
 int	argn;
 const char *q_name;
@@ -78,12 +82,14 @@ int	q_xflag=0;
 int	q_rflag=0;
 char	ptrbuf[RFC1035_MAXNAMESIZE+1];
 
+	rfc1035_init_resolv(&res);
+
 	argn=1;
 	while (argn < argc)
 	{
 		if (argv[argn][0] == '@')
 		{
-			setns(argv[argn]+1);
+			setns(argv[argn]+1, &res);
 			++argn;
 			continue;
 		}
@@ -100,6 +106,27 @@ char	ptrbuf[RFC1035_MAXNAMESIZE+1];
 			++argn;
 			continue;
 		}
+
+		if (strcmp(argv[argn], "-dnssec") == 0)
+		{
+			rfc1035_init_dnssec_enable(&res, 1);
+			++argn;
+			continue;
+		}
+
+		if (strcmp(argv[argn], "-udpsize") == 0)
+		{
+			++argn;
+
+			if (argn < argc)
+			{
+				rfc1035_init_edns_payload(&res,
+							  atoi(argv[argn]));
+				++argn;
+			}
+			continue;
+		}
+
 		break;
 	}
 
@@ -169,8 +196,7 @@ char	ptrbuf[RFC1035_MAXNAMESIZE+1];
 
 		if (rfc1035_aton(q_name, &a) == 0)
 		{
-			rc=rfc1035_ptr(&rfc1035_default_resolver,
-				&a, ptrbuf);
+			rc=rfc1035_ptr(&res, &a,ptrbuf);
 			if (rc == 0)
 			{
 				printf("%s\n", ptrbuf);
@@ -182,8 +208,7 @@ char	ptrbuf[RFC1035_MAXNAMESIZE+1];
 		RFC1035_ADDR	*aptr;
 		unsigned alen;
 
-			rc=rfc1035_a(&rfc1035_default_resolver, q_name,
-				&aptr, &alen);
+			rc=rfc1035_a(&res, q_name, &aptr, &alen);
 			if (rc == 0)
 			{
 			unsigned i;
@@ -225,8 +250,8 @@ char	ptrbuf[RFC1035_MAXNAMESIZE+1];
 		exit(0);
 	}
 
-	replyp=rfc1035_resolve(&rfc1035_default_resolver,
-		RFC1035_OPCODE_QUERY, 1, q_name, q_type, q_class);
+	replyp=rfc1035_resolve(&res, RFC1035_OPCODE_QUERY,
+			       q_name, q_type, q_class);
 
 	if (!replyp)
 	{
@@ -236,5 +261,6 @@ char	ptrbuf[RFC1035_MAXNAMESIZE+1];
 
 	rfc1035_dump(replyp, stdout);
 	rfc1035_replyfree(replyp);
+	rfc1035_destroy_resolv(&res);
 	return (0);
 }

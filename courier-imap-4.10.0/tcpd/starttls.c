@@ -428,8 +428,14 @@ int	port_num;
 	}
 	else
 	{
-		if (rfc1035_a(&rfc1035_default_resolver, host, &addrs,
-			      &naddrs))
+		struct rfc1035_res res;
+		int rc;
+
+		rfc1035_init_resolv(&res);
+		rc=rfc1035_a(&res, host, &addrs, &naddrs);
+		rfc1035_destroy_resolv(&res);
+
+		if (rc)
 		{
 			fprintf(errfp, "%s: not found.\n", host);
 			return (-1);

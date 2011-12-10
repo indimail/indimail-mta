@@ -1,10 +1,9 @@
 /*
-** Copyright 1998 - 2002 Double Precision, Inc.
+** Copyright 1998 - 2011 Double Precision, Inc.
 ** See COPYING for distribution information.
 */
 
 #include	"rfc1035.h"
-#include	"rfc1035_res.h"
 #include	<string.h>
 #include	<stdlib.h>
 
@@ -142,7 +141,7 @@ int rfc1035_replysearch_all(const struct rfc1035_res *res,
 	return (-1);
 }
 
-int rfc1035_resolve_cname(struct rfc1035_res *res, int flags, char *namebuf,
+int rfc1035_resolve_cname(struct rfc1035_res *res, char *namebuf,
 			  unsigned qtype,
 			  unsigned qclass,
 			  struct rfc1035_reply **ptr,
@@ -151,7 +150,7 @@ int rfc1035_resolve_cname(struct rfc1035_res *res, int flags, char *namebuf,
 int	n;
 int	recursion_count=10;
 
-	if ( (*ptr=rfc1035_resolve(res, RFC1035_OPCODE_QUERY, flags,
+	if ( (*ptr=rfc1035_resolve(res, RFC1035_OPCODE_QUERY,
 			namebuf, qtype, qclass)) == 0)
 		return (-1);
 
@@ -195,7 +194,7 @@ int	recursion_count=10;
 		}
 
 		rfc1035_replyfree( *ptr );
-		if ( (*ptr=rfc1035_resolve(res, RFC1035_OPCODE_QUERY, flags,
+		if ( (*ptr=rfc1035_resolve(res, RFC1035_OPCODE_QUERY,
 				namebuf, qtype, qclass)) == 0)
 			return (-1);
 

@@ -66,20 +66,6 @@ char rfc1035_spf_lookup(const char *mailfrom,
 			char *errmsg_buf,
 			size_t errmsg_buf_size);
 
-
-struct rfc1035_spf_info {
-	const char *mailfrom;
-	const char *current_domain;
-	const char *tcpremoteip;
-	const char *tcpremotehost;
-	const char *helodomain;
-	const char *mydomain;
-	char *errmsg_buf;
-	size_t errmsg_buf_size;
-
-	size_t *lookup_cnt;
-};
-
 #ifdef  __cplusplus
 }
 #endif

@@ -1,5 +1,5 @@
 /*
-** Copyright 1998 - 2002 Double Precision, Inc.
+** Copyright 1998 - 2011 Double Precision, Inc.
 ** See COPYING for distribution information.
 */
 
@@ -11,6 +11,9 @@
 #if	HAVE_CONFIG_H
 #include "rfc1035/config.h"
 #endif
+
+#include	"random128/random128.h"
+#include	"md5/md5.h"
 
 #include	<stdio.h>
 #include	<sys/types.h>
@@ -57,12 +60,15 @@ extern struct in_addr rfc1035_addr_any;
 #define	RFC1035_TYPE_AAAA	28	/* RFC 1886. Even if we don't have
 					IPv6 */
 
+#define RFC1035_TYPE_OPT	41
+#define RFC1035_TYPE_RRSIG	46
+
 #define	RFC1035_TYPE_AXFR	252
 #define	RFC1035_TYPE_MAILB	253
 #define	RFC1035_TYPE_MAILA	254
 #define	RFC1035_TYPE_ANY	255
 
-const char *rfc1035_type_itostr(int);
+void rfc1035_type_itostr(int, void (*)(const char *, void *), void *);
 int rfc1035_type_strtoi(const char *);
 
 #define	RFC1035_CLASS_IN	1
@@ -103,7 +109,30 @@ struct rfc1035_rr;	/* Defined below */
 ** The init family of functions perform various initializations.  Calling them
 ** is optional, as librfc1035.a will use defaults if not specified.
 */
-struct rfc1035_res;
+
+#define	RFC1035_MAXNS	10
+#define	RFC1035_DEFAULT_INITIAL_TIMEOUT	5
+#define	RFC1035_DEFAULT_MAXIMUM_BACKOFF	3
+
+		/* Resolver state */
+struct rfc1035_res {
+
+	RFC1035_ADDR nameservers[RFC1035_MAXNS];
+	int rfc1035_nnameservers;
+
+	char *rfc1035_defaultdomain;
+	int norecursive; /* Do not set the recursive flag, for specialized apps */
+	int dnssec_payload_size; /* Enable dnssec requests */
+
+	unsigned rfc1035_good_ns;
+	unsigned rfc1035_timeout_initial;	/* Initial timeout */
+	unsigned rfc1035_timeout_backoff;	/* Maximum exponential backoff */
+
+	random128binbuf randseed;
+	MD5_DIGEST	randbuf;
+	unsigned randptr;
+	} ;
+
 extern struct rfc1035_res rfc1035_default_resolver;
 
 void rfc1035_init_timeout(struct rfc1035_res *, unsigned, unsigned);
@@ -114,8 +143,20 @@ void rfc1035_init_timeout(struct rfc1035_res *, unsigned, unsigned);
 void rfc1035_init_ns(struct rfc1035_res *, const RFC1035_ADDR *, unsigned);
 		/* Specify nameservers to query (max 10) */
 
-int rfc1035_init_resolv(struct rfc1035_res *);
+void rfc1035_init_norecursive(struct rfc1035_res *, int);
+	/* Set the no-recursive flag, if you don't want the NS to do recursive queries on your behalf */
+
+void rfc1035_init_dnssec_enable(struct rfc1035_res *, int);
+	/* Enable/disable dnssec/edns0 */
+
+void rfc1035_init_edns_payload(struct rfc1035_res *, int);
+	/* Set edns0 payload size */
+
+void rfc1035_init_resolv(struct rfc1035_res *);
 	/* Read /etc/resolv.conf for nameservers */
+
+void rfc1035_destroy_resolv(struct rfc1035_res *);
+	/* Destroy the resolver object */
 
 	/*
 	** Most people will only need to call rfc1035_resolve or
@@ -132,7 +173,6 @@ int rfc1035_init_resolv(struct rfc1035_res *);
 struct rfc1035_reply *rfc1035_resolve(
 	struct rfc1035_res *,	/* Pointer to a resolver structure */
 	int,		/* Opcode, see above. */
-	int,		/* Options, see mkquery */
 	const char *,	/* Query name */
 	unsigned,	/* Query type, see above. */
 	unsigned);	/* Query class, see above. */
@@ -144,7 +184,6 @@ struct rfc1035_reply *rfc1035_resolve(
 struct rfc1035_reply *rfc1035_resolve_multiple(
 	struct rfc1035_res *,	/* Pointer to a resolver structure */
 	int,	/* opcode */
-	int,	/* options */
 	const struct rfc1035_query *,	/* Array of queries */
 	unsigned);			/* Array size */
 
@@ -180,7 +219,6 @@ struct rfc1035_reply *rfc1035_resolve_multiple(
 
 int rfc1035_resolve_cname(
 		struct rfc1035_res *,	/* Pointer to a resolver structure */
-		int,			/* flags */
 		char *,			/* RFC1035_MAXNAMESIZE buffer with
 					** the name to query */
 		unsigned,		/* Query type */
@@ -285,17 +323,6 @@ int rfc1035_replysearch_all(
 ** Low level functions follow.
 */
 
-
-unsigned rfc1035_init_nscount(struct rfc1035_res *);
-			/*
-			** Return # of initial NSs
-			*/
-
-const RFC1035_ADDR *rfc1035_init_nsget(struct rfc1035_res *);
-			/*
-			** Return list of initial nameservers.
-			*/
-
 	/*
 	** rfc1035_mkquery() constructs a query to be sent.  The query is
 	** composed by REPEATEDLY running the caller-provided function,
@@ -304,7 +331,6 @@ const RFC1035_ADDR *rfc1035_init_nsget(struct rfc1035_res *);
 
 int rfc1035_mkquery(struct rfc1035_res *,	/* resolver structure */
 			unsigned,	/* opcode */
-			int,		/* various options */
 
 #define	RFC1035_RESOLVE_RECURSIVE 1	/* Ask nameserver to do the recursion */
 
@@ -445,6 +471,19 @@ struct rfc1035_rr {
 			RFC1035_UINT32 minimum;
 			} soa;
 
+		struct {
+			RFC1035_UINT16 type_covered;
+			unsigned char algorithm;
+			unsigned char labels;
+			RFC1035_UINT16 original_ttl;
+			RFC1035_UINT32 signature_expiration;
+			RFC1035_UINT32 signature_inception;
+			RFC1035_UINT16 key_tag;
+			const char *signer_name;
+			const char *signature;
+			RFC1035_UINT16 signature_len;
+		} rrsig;
+
 		/* As are just represented by rdata/rdlength */
 		/* TXTs are parsed directly from rdata/rdlength */
 		/* WKS are parsed directly */
@@ -469,6 +508,8 @@ struct rfc1035_reply {
 	unsigned char tc;
 	unsigned char rd;
 	unsigned char ra;
+	unsigned char ad;
+	unsigned char cd;
 	unsigned char rcode;
 	unsigned qdcount;
 	unsigned ancount;

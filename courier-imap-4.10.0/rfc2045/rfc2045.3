@@ -3,13 +3,22 @@
 .\"<!-- distribution information. -->
 .\"     Title: rfc2045
 .\"    Author: Sam Varshavchik
-.\" Generator: DocBook XSL Stylesheets v1.75.2 <http://docbook.sf.net/>
-.\"      Date: 04/04/2011
+.\" Generator: DocBook XSL Stylesheets v1.76.1 <http://docbook.sf.net/>
+.\"      Date: 09/29/2011
 .\"    Manual: Double Precision, Inc.
 .\"    Source: Courier Mail Server
 .\"  Language: English
 .\"
-.TH "RFC2045" "3" "04/04/2011" "Courier Mail Server" "Double Precision, Inc."
+.TH "RFC2045" "3" "09/29/2011" "Courier Mail Server" "Double Precision, Inc\&."
+.\" -----------------------------------------------------------------
+.\" * Define some portability stuff
+.\" -----------------------------------------------------------------
+.\" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.\" http://bugs.debian.org/507673
+.\" http://lists.gnu.org/archive/html/groff/2009-02/msg00013.html
+.\" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.ie \n(.g .ds Aq \(aq
+.el       .ds Aq '
 .\" -----------------------------------------------------------------
 .\" * set default formatting
 .\" -----------------------------------------------------------------
@@ -342,7 +351,7 @@ These functions initialize
 \fIcharset\fR,
 \fIlanguage\fR, and
 \fIvalue\fR
-parameters, allocating memory automatically\&. It is the caller\'s responsibility to use
+parameters, allocating memory automatically\&. It is the caller\*(Aqs responsibility to use
 \fBfree\fR() to return the allocated memory\&. A
 NULL
 may be provided in place of a parameter, indicating that the caller does not require the corresponding information\&.
@@ -442,7 +451,7 @@ return values from
 \fBcallback_func\fR() returns non\-zero, the decoding immediately stops and
 \fBrfc2045_cdecode\fR() or
 \fBrfc2045_cdecode_end\fR() terminates with
-\fBcallback_func\fR\'s return code\&.
+\fBcallback_func\fR\*(Aqs return code\&.
 .SS "Rewriting MIME messages"
 .PP
 This library contains functions that can be used to rewrite a MIME message in order to convert 8\-bit\-encoded data to 7\-bit encoding, or to convert 7\-bit encoded data to full 8\-bit data, if possible\&.
@@ -493,8 +502,8 @@ We want to generate 8\-bit content\&. If the original message contains any 7\-bi
 .RE
 .PP
 The
-\fBrfc2045_ac_check\fR() function returns non\-zero if there\'s any content in the MIME message that should be converted, OR if there are any missing MIME headers\&.
-\fBrfc2045_ac_check\fR() returns zero if there\'s no need to rewrite the message\&. However it might still be worthwhile to rewrite the message anyway\&. There are some instances where it is desirable to provide defaults for some missing MIME headers, but they are too trivial to require the message to be rewritten\&. One such case would be a missing Content\-Transfer\-Encoding: header for a multipart section\&.
+\fBrfc2045_ac_check\fR() function returns non\-zero if there\*(Aqs any content in the MIME message that should be converted, OR if there are any missing MIME headers\&.
+\fBrfc2045_ac_check\fR() returns zero if there\*(Aqs no need to rewrite the message\&. However it might still be worthwhile to rewrite the message anyway\&. There are some instances where it is desirable to provide defaults for some missing MIME headers, but they are too trivial to require the message to be rewritten\&. One such case would be a missing Content\-Transfer\-Encoding: header for a multipart section\&.
 .PP
 Either the
 \fBrfc2045_rewrite\fR() or the

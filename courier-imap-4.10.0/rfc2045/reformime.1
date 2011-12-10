@@ -3,13 +3,22 @@
 .\"<!-- distribution information. -->
 .\"     Title: reformime
 .\"    Author: Sam Varshavchik
-.\" Generator: DocBook XSL Stylesheets v1.75.2 <http://docbook.sf.net/>
-.\"      Date: 04/04/2011
+.\" Generator: DocBook XSL Stylesheets v1.76.1 <http://docbook.sf.net/>
+.\"      Date: 09/29/2011
 .\"    Manual: Double Precision, Inc.
 .\"    Source: Courier Mail Server
 .\"  Language: English
 .\"
-.TH "REFORMIME" "1" "04/04/2011" "Courier Mail Server" "Double Precision, Inc."
+.TH "REFORMIME" "1" "09/29/2011" "Courier Mail Server" "Double Precision, Inc\&."
+.\" -----------------------------------------------------------------
+.\" * Define some portability stuff
+.\" -----------------------------------------------------------------
+.\" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.\" http://bugs.debian.org/507673
+.\" http://lists.gnu.org/archive/html/groff/2009-02/msg00013.html
+.\" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.ie \n(.g .ds Aq \(aq
+.el       .ds Aq '
 .\" -----------------------------------------------------------------
 .\" * set default formatting
 .\" -----------------------------------------------------------------
@@ -77,7 +86,7 @@ prints only "1", that refers to the entire message itself:
 .RE
 .\}
 .PP
-Here\'s the output from
+Here\*(Aqs the output from
 \fBreformime\fR
 when the first part of the message was itself a
 multipart/alternative
@@ -138,7 +147,7 @@ or
 quoted\-printable
 encoding method,
 \fBreformime\fR
-automatically decodes it\&. In this case you\'re better off redirecting the standard output into a file\&.
+automatically decodes it\&. In this case you\*(Aqre better off redirecting the standard output into a file\&.
 .RE
 .PP
 \-i
@@ -231,7 +240,7 @@ encoding are automatically decoded\&.
 .RS 4
 Interactive extraction\&.
 \fBreformime\fR
-prints the MIME content type of each section\&. Answer with \'y\' or \'Y\' to extract the MIME section\&. Specify the filename at the next prompt\&.
+prints the MIME content type of each section\&. Answer with \*(Aqy\*(Aq or \*(AqY\*(Aq to extract the MIME section\&. Specify the filename at the next prompt\&.
 \fBreformime\fR
 prompts with a default filename\&.
 \fBreformime\fR
@@ -246,7 +255,7 @@ attachment2\&.dat, and so on)\&.
 Automatic extraction\&.
 \fBreformime\fR
 automatically extracts one or more MIME sections, and saves them to a file\&. The filename is formed by taking
-\fIPREFIX\fR, and appending the default filename to it\&. Note that there\'s no space between "\-x" and "PREFIX"\&. For example:
+\fIPREFIX\fR, and appending the default filename to it\&. Note that there\*(Aqs no space between "\-x" and "PREFIX"\&. For example:
 .sp
 .if n \{\
 .RS 4
@@ -281,7 +290,7 @@ sets the environment variable
 to the MIME content type\&. The environment variable
 \fBFILENAME\fR
 gets set to the default filename of
-\fBreformime\fR\'s liking\&. If the
+\fBreformime\fR\*(Aqs liking\&. If the
 \fB\-s\fR
 option is not specified, the program runs once for every MIME section in the message\&. The external program,
 \fBprog\fR
@@ -293,7 +302,7 @@ to proceed to the next MIME section in the message (or the next section specifie
 terminates with a non\-zero exit status,
 \fBreformime\fR
 terminates with the exit status of 20 plus
-\fBprog\fR\'s exit status\&.
+\fBprog\fR\*(Aqs exit status\&.
 .RE
 .if n \{\
 .sp
@@ -378,7 +387,7 @@ header\&. Example:
 .RS 4
 .\}
 .nf
-$ reformime \-h \'=?iso\-8859\-1?Q?H=F3la!?=\'
+$ reformime \-h \*(Aq=?iso\-8859\-1?Q?H=F3la!?=\*(Aq
 Hóla!
 .fi
 .if n \{\

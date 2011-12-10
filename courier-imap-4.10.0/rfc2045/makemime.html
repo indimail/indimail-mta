@@ -1,10 +1,10 @@
 <?xml version="1.0"?>
-<html xmlns="http://www.w3.org/1999/xhtml"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/><title>makemime</title><link rel="stylesheet" href="style.css" type="text/css"/><meta name="generator" content="DocBook XSL Stylesheets V1.75.2"/><link rel="home" href="#id516792" title="makemime"/><link xmlns="" rel="stylesheet" type="text/css" href="manpage.css"/><meta xmlns="" name="MSSmartTagsPreventParsing" content="TRUE"/><link xmlns="" rel="icon" href="icon.gif" type="image/gif"/><!--
+<html xmlns="http://www.w3.org/1999/xhtml"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/><title>makemime</title><link rel="stylesheet" type="text/css" href="style.css"/><meta name="generator" content="DocBook XSL Stylesheets V1.76.1"/><link rel="home" href="#id537670" title="makemime"/><link xmlns="" rel="stylesheet" type="text/css" href="manpage.css"/><meta xmlns="" name="MSSmartTagsPreventParsing" content="TRUE"/><link xmlns="" rel="icon" href="icon.gif" type="image/gif"/><!--
 
 Copyright 1998 - 2009 Double Precision, Inc.  See COPYING for distribution
 information.
 
---></head><body><div class="refentry" title="makemime"><a id="id516792" shape="rect"> </a><div class="titlepage"/><div class="refnamediv"><h2>Name</h2><p>makemime — Create MIME-formatted messages</p></div><div class="refsynopsisdiv" title="Synopsis"><h2>Synopsis</h2><div class="cmdsynopsis"><p><code class="command">makemime</code>  [<em class="replaceable"><code>options</code></em>...]</p></div><div class="cmdsynopsis"><p><code class="command">makemime</code>  [@<em class="replaceable"><code>filename</code></em>]</p></div></div><div class="refsect1" title="DESCRIPTION"><a id="id516551" shape="rect"> </a><h2>DESCRIPTION</h2><p>
+--></head><body><div class="refentry" title="makemime"><a id="id537670" shape="rect"> </a><div class="titlepage"/><div class="refnamediv"><h2>Name</h2><p>makemime — Create MIME-formatted messages</p></div><div class="refsynopsisdiv" title="Synopsis"><h2>Synopsis</h2><div class="cmdsynopsis"><p><code class="command">makemime</code>  [<em class="replaceable"><code>options</code></em>...]</p></div><div class="cmdsynopsis"><p><code class="command">makemime</code>  [@<em class="replaceable"><code>filename</code></em>]</p></div></div><div class="refsect1" title="DESCRIPTION"><a id="id537432" shape="rect"> </a><h2>DESCRIPTION</h2><p>
 <span class="command"><strong>makemime</strong></span> creates MIME-formatted messages of arbitrary
 complexity.
 <span class="command"><strong>makemime</strong></span> reads one or more individual files,
@@ -42,7 +42,7 @@ options and a file from the same pipe, by terminating the options list with
 a line containing the single character "-". The remainder of the pipe will be
 available to be used as an input file (which must be explicitly specified
 by one of the options). Of course, only one input file can come from a single
-pipe.</p><div class="refsect2" title="MIME overview"><a id="id551101" shape="rect"> </a><h3>MIME overview</h3><p>
+pipe.</p><div class="refsect2" title="MIME overview"><a id="id571977" shape="rect"> </a><h3>MIME overview</h3><p>
 A MIME-formatted message contains one or several MIME sections. MIME headers
 specify how multiple MIME sections are to be interpreted as a whole (whether
 they are attached together; whether they are alternative representations of
@@ -126,7 +126,7 @@ collection of MIME
 sections which are alternative representations of the same object, such as an
 HTML and a plain text version of the same message. Other "multipart" MIME
 sections also exist, and their usage is defined by their respective
-RFCs.</p></div><div class="refsect2" title="Creating a single MIME section"><a id="id516009" shape="rect"> </a><h3>Creating a single MIME section</h3><div class="cmdsynopsis"><p><code class="command">makemime</code>  {-c "<em class="replaceable"><code>type</code></em>"} [-e "<em class="replaceable"><code>encoding</code></em>"] [-o <em class="replaceable"><code>outputfile</code></em>] [-C "<em class="replaceable"><code>charset</code></em>"] [-N "<em class="replaceable"><code>name"</code></em>] [-a "<em class="replaceable"><code>header: value"</code></em>...] {<em class="replaceable"><code>filename</code></em>}</p></div><p>
+RFCs.</p></div><div class="refsect2" title="Creating a single MIME section"><a id="id536884" shape="rect"> </a><h3>Creating a single MIME section</h3><div class="cmdsynopsis"><p><code class="command">makemime</code>  {-c "<em class="replaceable"><code>type</code></em>"} [-e "<em class="replaceable"><code>encoding</code></em>"] [-o <em class="replaceable"><code>outputfile</code></em>] [-C "<em class="replaceable"><code>charset</code></em>"] [-N "<em class="replaceable"><code>name"</code></em>] [-a "<em class="replaceable"><code>header: value"</code></em>...] {<em class="replaceable"><code>filename</code></em>}</p></div><p>
 The <code class="option">-c</code> option reads <code class="filename">filename</code>,
 encodes it appropriately, adds the
 "<code class="literal">Content-Type: <em class="replaceable"><code>type</code></em></code>" and
@@ -180,7 +180,7 @@ MIME section.
 This header is not required for individual MIME sections that are later
 combined into a multipart MIME collection.</p><div class="note" title="Note" style="margin-left: 0.5in; margin-right: 0.5in;"><h3 class="title">Note</h3><p>
 The <code class="option">-c</code> option must occur listed first, the remaining
-options must follow the <code class="option">-c</code> option.</p></div></div><div class="refsect2" title="Creating a multipart MIME collection"><a id="id560665" shape="rect"> </a><h3>Creating a multipart MIME collection</h3><div class="cmdsynopsis"><p><code class="command">makemime</code>  {-m "multipart/<em class="replaceable"><code>type</code></em>"} [-e "<em class="replaceable"><code>encoding</code></em>"] [-o <em class="replaceable"><code>outputfile</code></em>] [-a "<em class="replaceable"><code>header: value"</code></em>...] {<em class="replaceable"><code>filename</code></em>}</p></div><p>
+options must follow the <code class="option">-c</code> option.</p></div></div><div class="refsect2" title="Creating a multipart MIME collection"><a id="id581541" shape="rect"> </a><h3>Creating a multipart MIME collection</h3><div class="cmdsynopsis"><p><code class="command">makemime</code>  {-m "multipart/<em class="replaceable"><code>type</code></em>"} [-e "<em class="replaceable"><code>encoding</code></em>"] [-o <em class="replaceable"><code>outputfile</code></em>] [-a "<em class="replaceable"><code>header: value"</code></em>...] {<em class="replaceable"><code>filename</code></em>}</p></div><p>
 The <code class="option">-m</code> option is identical to the <code class="option">-c</code> option,
 except for three differences.</p><p>
 <em class="replaceable"><code>type</code></em> must be either
@@ -199,7 +199,7 @@ The <code class="option">-m</code> option creates an initial multipart MIME coll
 that contains
 only one MIME section, taken from <code class="filename">filename</code>.
 The collection is written to standard output, or the pipe or
-to <em class="replaceable"><code>outputfile</code></em>.</p></div><div class="refsect2" title="Creating a multipart MIME section"><a id="id560825" shape="rect"> </a><h3>Creating a multipart MIME section</h3><div class="cmdsynopsis"><p><code class="command">makemime</code>  {-j <em class="replaceable"><code>file1</code></em>"} [-o <em class="replaceable"><code>outputfile</code></em>] {<em class="replaceable"><code>file2</code></em>}</p></div><p>
+to <em class="replaceable"><code>outputfile</code></em>.</p></div><div class="refsect2" title="Creating a multipart MIME section"><a id="id581701" shape="rect"> </a><h3>Creating a multipart MIME section</h3><div class="cmdsynopsis"><p><code class="command">makemime</code>  {-j <em class="replaceable"><code>file1</code></em>"} [-o <em class="replaceable"><code>outputfile</code></em>] {<em class="replaceable"><code>file2</code></em>}</p></div><p>
 This option adds a MIME section to an existing MIME collection.
 <em class="replaceable"><code>file1</code></em> must be a MIME collection that was
 previously created by the <code class="option">-m</code> option.
@@ -226,7 +226,7 @@ necessary to append a MIME section to an existing MIME collection.
 for appending a new section to a MIME collection, as long as the
 MIME headers in the MIME collections are straightforward. Very convoluted MIME
 headers may confuse <span class="command"><strong>makemime</strong></span>, and it may not be able to
-handle them.</p></div><div class="refsect2" title="Recursive MIME collections"><a id="id560970" shape="rect"> </a><h3>Recursive MIME collections</h3><p>
+handle them.</p></div><div class="refsect2" title="Recursive MIME collections"><a id="id581846" shape="rect"> </a><h3>Recursive MIME collections</h3><p>
 MIME collection may contain other MIME collections as well as MIME
 sections. The <code class="option">-m</code> and the <code class="option">-j</code> options may use
 a multipart MIME collection in place of a MIME section automatically
@@ -267,7 +267,7 @@ Just add the
 <code class="literal">Subject:</code>, <code class="literal">From:</code>, and
 <code class="literal">To:</code> headers (can also be done by additional
 <code class="option">-a</code> options, of
-course), and send it on its way.</p></div><div class="refsect2" title="Building complex MIME encodings"><a id="id538459" shape="rect"> </a><h3>Building complex MIME encodings</h3><p>
+course), and send it on its way.</p></div><div class="refsect2" title="Building complex MIME encodings"><a id="id565836" shape="rect"> </a><h3>Building complex MIME encodings</h3><p>
 There are several different ways to build complete MIME encodings from
 multiple MIME sections.  One way is to use temporary files to create MIME
 sections, then combine them together into a single MIME collection. A slightly
@@ -384,7 +384,7 @@ An equivalent argument file would be:</p><div class="blockquote"><blockquote cla
        Content-Disposition: attachment
    attachment.gif
 )
-</pre></div></blockquote></div></div></div><div class="refsect1" title="SEE ALSO"><a id="id561163" shape="rect"> </a><h2>SEE ALSO</h2><p>
+</pre></div></blockquote></div></div></div><div class="refsect1" title="SEE ALSO"><a id="id582030" shape="rect"> </a><h2>SEE ALSO</h2><p>
 <a class="ulink" href="maildrop.html" target="_top" shape="rect"><span class="citerefentry"><span class="refentrytitle">maildrop</span>(1)</span></a>,
 <a class="ulink" href="maildropfilter.html" target="_top" shape="rect"><span class="citerefentry"><span class="refentrytitle">maildropfilter</span>(5)</span></a>,
 <a class="ulink" href="reformail.html" target="_top" shape="rect"><span class="citerefentry"><span class="refentrytitle">reformail</span>(1)</span></a>,

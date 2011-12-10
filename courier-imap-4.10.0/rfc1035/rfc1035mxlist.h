@@ -34,6 +34,7 @@ struct rfc1035_mxlist {
 	struct sockaddr address;
 #endif
 	int priority;	/* -1 for plain old A records */
+	int ad;
 	char *hostname;
 	} ;
 

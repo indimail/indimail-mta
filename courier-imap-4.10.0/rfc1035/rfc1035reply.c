@@ -61,6 +61,10 @@ int	cnt=0;
 			++i;
 		}
 		if (RFC1035_MAXNAMESIZE-i < l)	return (0);
+
+		if (reply->reply + reply->replylen - (*ptr) < l)
+			return (0);
+
 		if (namebuf)
 			memcpy(namebuf+i, *ptr, l);
 		i += l;
@@ -125,6 +129,8 @@ unsigned allcnt;
 	r->qr= c & 1;
 
 	r->ra=(p[3] >> 7) & 1;
+	r->ad=(p[3] >> 5) & 1;
+	r->cd=(p[3] >> 4) & 1;
 	r->rcode=p[3] & 15;
 
 	r->qdcount= ((unsigned)(unsigned char)p[4] << 8) | (unsigned char)p[5];
@@ -380,6 +386,50 @@ static const char error[]="\005error";
 			rr->rr.minfo.emailbx_label=error;
 		}
 		break;
+	case RFC1035_TYPE_RRSIG:
+
+		p=rr->rdata;
+
+		if (rr->rdlength < 18 ||
+
+		    ((rr->rr.rrsig.type_covered=
+		      ((unsigned)(unsigned char)p[0] << 8)
+		      | (unsigned char)p[1]),
+
+		     (rr->rr.rrsig.algorithm=p[2]),
+		     (rr->rr.rrsig.labels=p[3]),
+		     (rr->rr.rrsig.original_ttl=
+		      ((RFC1035_UINT32)(unsigned char)p[4] << 24) |
+		      ((RFC1035_UINT32)(unsigned char)p[5] << 16) |
+		      ((RFC1035_UINT32)(unsigned char)p[6] << 8) |
+		      (unsigned char)p[7]),
+		     (rr->rr.rrsig.signature_expiration=
+		      ((RFC1035_UINT32)(unsigned char)p[8] << 24) |
+		      ((RFC1035_UINT32)(unsigned char)p[9] << 16) |
+		      ((RFC1035_UINT32)(unsigned char)p[10] << 8) |
+		      (unsigned char)p[11]),
+		     (rr->rr.rrsig.signature_inception=
+		      ((RFC1035_UINT32)(unsigned char)p[12] << 24) |
+		      ((RFC1035_UINT32)(unsigned char)p[13] << 16) |
+		      ((RFC1035_UINT32)(unsigned char)p[14] << 8) |
+		      (unsigned char)p[15]),
+ 		     (rr->rr.rrsig.key_tag=
+		      ((RFC1035_UINT16)(unsigned char)p[16] << 8) |
+		      (unsigned char)p[17]),
+		     (rr->rr.rrsig.signer_name=(p += 18)),
+
+		     rfc1035_replyuncompress(&p, r, 0) == 0) ||
+		    p > rr->rdata + rr->rdlength)
+		{
+			memset(&rr->rr.rrsig, 0, sizeof(rr->rr.rrsig));
+			rr->rr.rrsig.signer_name=error;
+			break;
+		}
+
+		rr->rr.rrsig.signature=p;
+		rr->rr.rrsig.signature_len=rr->rdata + rr->rdlength - p;
+		break;
+
 	default:
 		break;
 	}

@@ -1,10 +1,10 @@
 <?xml version="1.0"?>
-<html xmlns="http://www.w3.org/1999/xhtml"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/><title>reformime</title><link rel="stylesheet" href="style.css" type="text/css"/><meta name="generator" content="DocBook XSL Stylesheets V1.75.2"/><link rel="home" href="#id283183" title="reformime"/><link xmlns="" rel="stylesheet" type="text/css" href="manpage.css"/><meta xmlns="" name="MSSmartTagsPreventParsing" content="TRUE"/><link xmlns="" rel="icon" href="icon.gif" type="image/gif"/><!--
+<html xmlns="http://www.w3.org/1999/xhtml"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/><title>reformime</title><link rel="stylesheet" type="text/css" href="style.css"/><meta name="generator" content="DocBook XSL Stylesheets V1.76.1"/><link rel="home" href="#id510500" title="reformime"/><link xmlns="" rel="stylesheet" type="text/css" href="manpage.css"/><meta xmlns="" name="MSSmartTagsPreventParsing" content="TRUE"/><link xmlns="" rel="icon" href="icon.gif" type="image/gif"/><!--
 
 Copyright 1998 - 2009 Double Precision, Inc.  See COPYING for distribution
 information.
 
---></head><body><div class="refentry" title="reformime"><a id="id283183" shape="rect"> </a><div class="titlepage"/><div class="refnamediv"><h2>Name</h2><p>reformime — MIME E-mail reformatting tool</p></div><div class="refsynopsisdiv" title="Synopsis"><h2>Synopsis</h2><div class="cmdsynopsis"><p><code class="command">reformime</code>  [<em class="replaceable"><code>options</code></em>...]</p></div></div><div class="refsect1" title="DESCRIPTION"><a id="id282922" shape="rect"> </a><h2>DESCRIPTION</h2><p>
+--></head><body><div class="refentry" title="reformime"><a id="id510500" shape="rect"> </a><div class="titlepage"/><div class="refnamediv"><h2>Name</h2><p>reformime — MIME E-mail reformatting tool</p></div><div class="refsynopsisdiv" title="Synopsis"><h2>Synopsis</h2><div class="cmdsynopsis"><p><code class="command">reformime</code>  [<em class="replaceable"><code>options</code></em>...]</p></div></div><div class="refsect1" title="DESCRIPTION"><a id="id510240" shape="rect"> </a><h2>DESCRIPTION</h2><p>
 <span class="command"><strong>reformime</strong></span> is a utility for reformatting
 MIME messages.</p><p>
 Generally, <span class="command"><strong>reformime</strong></span> expects to see an
@@ -42,7 +42,7 @@ Here's the output from
 1.1.2
 1.2
 </pre></div></blockquote></div><p>
-Arbitrarily complex MIME constructs are possible.</p></div><div class="refsect1" title="OPTIONS"><a id="id317486" shape="rect"> </a><h2>OPTIONS</h2><div class="variablelist"><dl><dt><span class="term">-d</span></dt><dd><p>
+Arbitrarily complex MIME constructs are possible.</p></div><div class="refsect1" title="OPTIONS"><a id="id544800" shape="rect"> </a><h2>OPTIONS</h2><div class="variablelist"><dl><dt><span class="term">-d</span></dt><dd><p>
 Parse a delivery status notification MIME message
 (<a class="ulink" href="http://www.rfc-editor.org/rfc/rfc1894.txt" target="_top" shape="rect">RFC 1894</a>).
 <span class="command"><strong>reformime</strong></span>
@@ -99,7 +99,7 @@ Multiple sections may be specified by separating them with commas.
 <span class="command"><strong>reformime</strong></span> processes each section using the other options
 that were specified.</p></dd><dt><span class="term">-x</span></dt><dd><p>
 Extract the contents of the indicated MIME section to a file.</p></dd><dt><span class="term">-X</span></dt><dd><p>
-Pipe the contents of the indicated MIME section to a program.</p></dd></dl></div><div class="refsect2" title="Extracting RFC 2045 MIME section(s) to file(s)"><a id="id282442" shape="rect"> </a><h3>Extracting RFC 2045 MIME section(s) to file(s)</h3><p>
+Pipe the contents of the indicated MIME section to a program.</p></dd></dl></div><div class="refsect2" title="Extracting RFC 2045 MIME section(s) to file(s)"><a id="id509753" shape="rect"> </a><h3>Extracting RFC 2045 MIME section(s) to file(s)</h3><p>
 The <code class="option">-x</code> and <code class="option">-X</code> options extract a specific
 MIME section to a file or to a pipe to an external program.
 Use the <code class="option">-s</code> option to identify the MIME section
@@ -151,7 +151,7 @@ status, <span class="command"><strong>reformime</strong></span> terminates with 
 <span class="command"><strong>reformime</strong></span> extracts every MIME section in the message
 unless the <code class="option">-s</code> option is specified.
 This includes even the <code class="literal">text/plain</code> MIME
-content that usually precedes a binary attachment.</p></div></div><div class="refsect2" title="Adding RFC 2045 MIME headers"><a id="id326975" shape="rect"> </a><h3>Adding RFC 2045 MIME headers</h3><p>
+content that usually precedes a binary attachment.</p></div></div><div class="refsect2" title="Adding RFC 2045 MIME headers"><a id="id554290" shape="rect"> </a><h3>Adding RFC 2045 MIME headers</h3><p>
 The <code class="option">-r</code> option performs the following actions:</p><p>
 If there is no <code class="literal">Mime-Version:</code>,
 <code class="literal">Content-Type:</code>, or
@@ -165,13 +165,13 @@ the <code class="literal">Content-Transfer-Encoding</code> header to
 <code class="literal">8bit</code>-encoded content that contains eight-bit characters to
 <code class="literal">quoted-printable</code> encoding.</p><p><code class="option">-r8</code> does the same thing, but also converts
 <code class="literal">quoted-printable</code>-encoded content to
-<code class="literal">8bit</code>, except in some situations.</p></div><div class="refsect2" title="Creating multipart/digest MIME digests"><a id="id327091" shape="rect"> </a><h3>Creating <code class="literal">multipart/digest</code> MIME digests</h3><p>The <code class="option">-m</code> option creates a MIME digest.
+<code class="literal">8bit</code>, except in some situations.</p></div><div class="refsect2" title="Creating multipart/digest MIME digests"><a id="id554405" shape="rect"> </a><h3>Creating <code class="literal">multipart/digest</code> MIME digests</h3><p>The <code class="option">-m</code> option creates a MIME digest.
 <span class="command"><strong>reformime</strong></span> reads a list of filenames on standard input.
 Each line read from standard input contains the name of a file that is
 presumed to contain an RFC 2822-formatted message.
 <span class="command"><strong>reformime</strong></span> splices all files into a
 <span class="command"><strong>multipart/digest</strong></span> MIME section,
-and writes it to standard output.</p></div><div class="refsect2" title="Translating MIME headers"><a id="id327130" shape="rect"> </a><h3>Translating MIME headers</h3><p>
+and writes it to standard output.</p></div><div class="refsect2" title="Translating MIME headers"><a id="id554444" shape="rect"> </a><h3>Translating MIME headers</h3><p>
 The following options do not read a message from standard input.
 These options process MIME headers via the command line, and are designed
 to be conveniently used by mail-handling scripts.</p><div class="variablelist"><dl><dt><span class="term">-h "<em class="replaceable"><code>header</code></em>"</span></dt><dd><p>
@@ -208,7 +208,7 @@ is a structured header with RFC 2822 addresses.</p></dd><dt><span class="term">-
 	      decodes various kinds of header MIME encoding, the
 	      <code class="literal">quoted-printable</code> and <code class="literal">base64</code>
 	      transfer encodings of <span class="quote">“<span class="quote">text</span>”</span> MIME objects.
-	    </p></dd></dl></div></div></div><div class="refsect1" title="SEE ALSO"><a id="id327335" shape="rect"> </a><h2>SEE ALSO</h2><p>
+	    </p></dd></dl></div></div></div><div class="refsect1" title="SEE ALSO"><a id="id554649" shape="rect"> </a><h2>SEE ALSO</h2><p>
 <a class="ulink" href="reformail.html" target="_top" shape="rect"><span class="citerefentry"><span class="refentrytitle">reformail</span>(1)</span></a>,
 <span class="citerefentry"><span class="refentrytitle">sendmail</span>(8)</span>,
 <a class="ulink" href="mailbot.html" target="_top" shape="rect"><span class="citerefentry"><span class="refentrytitle">mailbot</span>(1)</span></a>,

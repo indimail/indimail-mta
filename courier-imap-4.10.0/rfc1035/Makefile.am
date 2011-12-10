@@ -1,13 +1,12 @@
 #
-# Copyright 1998 - 2005 Double Precision, Inc.  See COPYING for
+# Copyright 1998 - 2011 Double Precision, Inc.  See COPYING for
 # distribution information.
 
 
-ACLOCAL_AMFLAGS=-I ../m4
 noinst_LIBRARIES=librfc1035.a
 
 librfc1035_a_SOURCES= \
-		rfc1035.c rfc1035.h rfc1035_res.c rfc1035_res.h rfc1035an.c \
+		rfc1035.c rfc1035.h rfc1035an.c \
 		rfc1035dump.c rfc1035dumprrdata.c rfc1035fmttime.c \
 		rfc1035gettxt.c rfc1035ifconf.c \
 		rfc1035ipv6to4.c rfc1035mkaddress.c \
@@ -21,20 +20,20 @@ librfc1035_a_SOURCES= \
 noinst_PROGRAMS=testlookup testspf
 
 testlookup_SOURCES=testlookup.c
-testlookup_DEPENDENCIES=librfc1035.a ../md5/libmd5.la \
+testlookup_DEPENDENCIES=librfc1035.a ../rfc822/libencode.la ../md5/libmd5.la \
 	../random128/librandom128.la ../soxwrap/libsoxwrap.a \
 	../soxwrap/soxlibs.dep
-testlookup_LDADD=librfc1035.a ../soxwrap/libsoxwrap.a ../md5/libmd5.la \
+testlookup_LDADD=librfc1035.a ../rfc822/libencode.la ../soxwrap/libsoxwrap.a ../md5/libmd5.la \
 	../random128/librandom128.la `cat ../soxwrap/soxlibs.dep`
 testlookup_LDFLAGS=-static
 
 EXTRA_DIST=testsuite.txt
 
 testspf_SOURCES=testspf.c
-testspf_DEPENDENCIES=librfc1035.a ../md5/libmd5.la \
+testspf_DEPENDENCIES=librfc1035.a ../rfc822/libencode.la ../md5/libmd5.la \
 	../random128/librandom128.la ../soxwrap/libsoxwrap.a \
 	../soxwrap/soxlibs.dep
-testspf_LDADD=librfc1035.a ../md5/libmd5.la \
+testspf_LDADD=librfc1035.a ../rfc822/libencode.la ../md5/libmd5.la \
 	../random128/librandom128.la ../soxwrap/libsoxwrap.a \
 	`cat ../soxwrap/soxlibs.dep`
 testspf_LDFLAGS=-static

@@ -1,12 +1,11 @@
 /*
-** Copyright 1998 - 2001 Double Precision, Inc.
+** Copyright 1998 - 2011 Double Precision, Inc.
 ** See COPYING for distribution information.
 */
 
 #include	"config.h"
 #include	<stdio.h>
 #include	"soxwrap/soxwrap.h"
-#include	<ctype.h>
 #include	<stdlib.h>
 #include	<string.h>
 #include	<errno.h>
@@ -26,10 +25,10 @@
 #include	<unistd.h>
 #endif
 
-#include	"rfc1035_res.h"
 #include	"rfc1035.h"
 
 
+#define ISSPACE(c) (strchr(" \t\r\n", (int)(unsigned char)(c)) != NULL)
 
 #if RFC1035_IPV6
 
@@ -56,7 +55,7 @@ unsigned j;
 	md5_digest(&res->randseed, sizeof(res->randseed), res->randbuf);
 	res->randptr=0;
 
-	for (i=0; i == 0 || (i<n && i<MAXNS); i++)
+	for (i=0; i == 0 || (i<n && i<RFC1035_MAXNS); i++)
 	{
 #if RFC1035_IPV6
 	struct in6_addr sin;
@@ -96,7 +95,7 @@ char	*q;
 
 	strcpy(res->rfc1035_defaultdomain, p);
 	for (q=res->rfc1035_defaultdomain; *q; q++)
-		if (isspace((int)(unsigned char)*q))
+		if (ISSPACE(*q))
 		{
 			*q=0;
 			break;
@@ -105,39 +104,60 @@ char	*q;
 	return (0);
 }
 
-int rfc1035_init_resolv(struct rfc1035_res *res)
+void rfc1035_init_dnssec_enable(struct rfc1035_res *res, int flag)
+{
+	rfc1035_init_edns_payload(res, flag ? 1280:0);
+}
+
+
+void rfc1035_init_edns_payload(struct rfc1035_res *res, int payload_size)
+{
+	res->dnssec_payload_size=payload_size;
+}
+
+static char tl(char c)
+{
+	if (c >= 'A' && c <= 'Z')
+		c += 'a' - 'A';
+
+	return c;
+}
+
+void rfc1035_init_resolv(struct rfc1035_res *res)
 {
 FILE	*fp=fopen("/etc/resolv.conf", "r");
 char rfc1035_buf[512];
-RFC1035_ADDR ns[MAXNS];
+RFC1035_ADDR ns[RFC1035_MAXNS];
 int nns=0;
 
-	if (!fp)	return (-1);
-	while (fgets(rfc1035_buf, sizeof(rfc1035_buf), fp))
+	memset(res, 0, sizeof(*res));
+
+	while (fp && fgets(rfc1035_buf, sizeof(rfc1035_buf), fp))
 	{
 	char	*p;
 
 		for (p=rfc1035_buf; *p; p++)
-			*p=tolower(*p);
+			*p=tl(*p);
+
 		for (p=rfc1035_buf; *p; p++)
-			if (isspace((int)(unsigned char)*p))	break;
+			if (ISSPACE(*p))	break;
 		if (*p)	*p++=0;
 
 		if (strcmp(rfc1035_buf, "domain") == 0)
 		{
-			while (p && isspace((int)(unsigned char)*p))
+			while (p && ISSPACE(*p))
 				++p;
 			rfc1035_init_defaultdomain(res, p);
 			continue;
 		}
 
 		if (strcmp(rfc1035_buf, "nameserver"))	continue;
-		while (*p && isspace((int)(unsigned char)*p))	p++;
-		if (nns < MAXNS)
+		while (*p && ISSPACE(*p))	p++;
+		if (nns < RFC1035_MAXNS)
 		{
 		char	*q;
 
-			for (q=p; *q && !isspace((int)(unsigned char)*q); q++)
+			for (q=p; *q && !ISSPACE(*q); q++)
 				;
 			*q=0;
 
@@ -145,9 +165,17 @@ int nns=0;
 				--nns;
 		}
 	}
-	fclose(fp);
+	if (fp) fclose(fp);
+
 	rfc1035_init_ns(res, ns, nns);
-	return (0);
+}
+
+void rfc1035_destroy_resolv(struct rfc1035_res *res)
+{
+	if (res->rfc1035_defaultdomain)
+	{
+		free(res->rfc1035_defaultdomain);
+	}
 }
 
 /************/
@@ -189,7 +217,6 @@ unsigned rfc1035_next_randid(struct rfc1035_res *res)
 
 int rfc1035_mkquery(struct rfc1035_res *res,	/* resolver */
 			unsigned opcode,	/* opcode */
-			int options,		/* various options */
 			const struct rfc1035_query *questions,
 			unsigned nquestions,
 			void (*func)(const char *, unsigned, void *), void *arg)
@@ -210,8 +237,9 @@ unsigned cnt;
 	header.idlo= id;
 
 	header.infohi= (opcode << 3) & 0x78;
-	if (options & RFC1035_RESOLVE_RECURSIVE)
-		header.infohi |= 1;
+
+	if (!res->norecursive)
+		header.infohi |= 1; /* Want a recursive query */
 	header.infolo=0;
 	header.qhi=nquestions >> 8;
 	header.qlo=nquestions;
@@ -221,11 +249,45 @@ unsigned cnt;
 	header.nlo=0;
 	header.auhi=0;
 	header.aulo=0;
+
+	if (res->dnssec_payload_size)
+		header.aulo=1;
+
 	(*func)( (const char *)&header, sizeof(header), arg);
 	cnt=sizeof(header);
 	if (nquestions)
 		if (mkpacketq(func, arg, &cnt, questions, nquestions,
 			questions->name, 0, res))	return (-1);
+
+	if (res->dnssec_payload_size)
+	{
+		/* RFC 2671, section 4.3 */
+
+		struct {
+			char opt_root_domain_name;
+			char opt_type_hi;
+			char opt_type_lo;
+			char opt_class_hi;
+			char opt_class_lo;
+			char opt_extendedrcode;
+			char opt_version;
+			char opt_ttl_zhi;
+			char opt_ttl_zlo;
+			char opt_rdlen_hi;
+			char opt_rdlen_lo;
+		} rfc2671_43;
+
+		memset(&rfc2671_43, 0, sizeof(rfc2671_43));
+
+		rfc2671_43.opt_type_lo=RFC1035_TYPE_OPT;
+
+		rfc2671_43.opt_class_hi= res->dnssec_payload_size >> 8;
+		rfc2671_43.opt_class_lo= res->dnssec_payload_size;
+		rfc2671_43.opt_ttl_zhi |= 0x80; /* RFC 3225 */
+
+		(*func)((char *)&rfc2671_43, sizeof(rfc2671_43), arg);
+	}
+
 	return (0);
 }
 
@@ -242,8 +304,7 @@ int rfc1035_hostnamecmp(const char *p, const char *q)
 			continue;
 		}
 		if (!*p || !*q)	return (1);
-		if ( toupper((int)(unsigned char)*p) !=
-			toupper((int)(unsigned char)*q))	return (1);
+		if ( tl(*p) != tl(*q))	return (1);
 		++p;
 		++q;
 	}
@@ -389,20 +450,6 @@ struct	compresslist *cp;
 }
 
 /*******************************************************/
-
-unsigned rfc1035_init_nscount(struct rfc1035_res *res)
-{
-	if (res->rfc1035_nnameservers <= 0)
-		rfc1035_init_resolv(res);
-	return (res->rfc1035_nnameservers);
-}
-
-const RFC1035_ADDR *rfc1035_init_nsget(struct rfc1035_res *res)
-{
-	if (res->rfc1035_nnameservers <= 0)
-		rfc1035_init_resolv(res);
-	return (res->nameservers);
-}
 
 int rfc1035_wait_reply(int fd, unsigned nsecs)
 {

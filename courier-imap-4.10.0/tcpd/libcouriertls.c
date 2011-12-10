@@ -1520,13 +1520,11 @@ static size_t conv_name_to_rfc2553(const char *p, char *q)
 
 char *tls_cert_name(const char *buf, size_t buf_size)
 {
-	int rc;
 	BIO *certbio;
 	char *p, *q;
 	X509 *x;
 	size_t cnt;
 
-	rc=0;
 	certbio=BIO_new_mem_buf((void *)buf, buf_size);
 
 	if (!certbio)

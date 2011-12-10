@@ -19,7 +19,6 @@ AC_PROG_INSTALL
 AC_PROG_LN_S
 AC_LIBTOOL_DLOPEN
 AC_PROG_LIBTOOL
-AC_CONFIG_MACRO_DIR([../m4])
 
 dnl Checks for libraries.
 
@@ -121,11 +120,61 @@ AC_ARG_WITH(int32,
 )
 UINT32="$int32"
 
+AC_ARG_WITH(int16,
+[  --with-int16='type'     use 'type' for an unsigned 16 bit integer type
+                          ( default is 'unsigned')],
+	int16="$withval", [
+
+		AC_MSG_CHECKING(for uint16_t)
+
+		AC_TRY_COMPILE([
+#if HAVE_SYS_TYPES_H
+#include	<sys/types.h>
+#endif
+		],[
+			uint16_t	i=0;
+		], [ AC_MSG_RESULT(yes) ; int16="uint16_t"], [
+
+		AC_MSG_RESULT(no)
+		AC_MSG_CHECKING(for u_int_16_t)
+
+		AC_TRY_COMPILE([
+#if HAVE_SYS_TYPES_H
+#include	<sys/types.h>
+#endif
+			],[
+				u_int16_t	i=0;
+			], [AC_MSG_RESULT(yes); int16="u_int16_t"],[
+
+			AC_MSG_RESULT(no)
+
+			AC_CHECK_SIZEOF(unsigned, 0)
+			if test "$ac_cv_sizeof_unsigned" != 4
+			then
+				AC_CHECK_SIZEOF(unsigned long, 0)
+				if test "$ac_cv_sizeof_unsigned_long" != 4
+				then
+					AC_CHECK_SIZEOF(unsigned short, 0)
+					if test "$ac_cv_sizeof_unsigned_short" != 4
+					then
+						AC_ERROR(--with-int16 option is required)
+					fi
+					int16="unsigned short"
+				fi
+				int16="unsigned long"
+			else
+				int16="unsigned"
+			fi
+			])
+		])
+	]
+)
+UINT16="$int16"
 
 AC_CACHE_CHECK([for socklen_t],
 	courier_cv_hassocklen_t,
  
-AC_COMPILE_IFELSE(
+AC_COMPILE_IFELSE([
 AC_LANG_SOURCE( [
 #include <sys/types.h>
 #include <sys/socket.h>
@@ -133,7 +182,7 @@ AC_LANG_SOURCE( [
 socklen_t sl_t;
 ],[
 	accept(0, 0, &sl_t);
-]),
+])],
 	courier_cv_hassocklen_t=yes,
 	courier_cv_hassocklen_t=no)
 )
@@ -333,6 +382,7 @@ esac
 RFC1035_IPV6="$ipv6"
 
 AC_DEFINE_UNQUOTED(RFC1035_UINT32, $UINT32, [ 32bit datatype ])
+AC_DEFINE_UNQUOTED(RFC1035_UINT16, $UINT16, [ 16bit datatype ])
 AC_DEFINE_UNQUOTED(RFC1035_IPV6, $RFC1035_IPV6,
 	[ Whether IPv6 support is enabled ])
 

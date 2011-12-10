@@ -1,11 +1,10 @@
 /*
-** Copyright 2004-2006 Double Precision, Inc.
+** Copyright 2004-2011 Double Precision, Inc.
 ** See COPYING for distribution information.
 */
 
 #include	"config.h"
 #include	"spf.h"
-#include	"rfc1035_res.h"
 #include	"rfc1035mxlist.h"
 #include	<stdio.h>
 #include	<ctype.h>
@@ -24,6 +23,20 @@
 #endif
 #endif
 
+struct rfc1035_spf_info {
+	const char *mailfrom;
+	const char *current_domain;
+	const char *tcpremoteip;
+	const char *tcpremotehost;
+	const char *helodomain;
+	const char *mydomain;
+	char *errmsg_buf;
+	size_t errmsg_buf_size;
+
+	size_t *lookup_cnt;
+
+	struct rfc1035_res res;
+};
 
 static void set_err_msg(char *errmsg_buf,
 			size_t errmsg_buf_size,
@@ -96,7 +109,6 @@ char rfc1035_spf_lookup(const char *mailfrom,
 
 	info.mailfrom=mailfrom;
 
-
 	/*
 	** The <current-domain> is initially drawn from the
 	** <responsible-sender>.  Recursive mechanisms such as
@@ -113,6 +125,9 @@ char rfc1035_spf_lookup(const char *mailfrom,
 	info.helodomain=helodomain;
 	info.mydomain=mydomain;
 	info.lookup_cnt=&lookup_cnt;
+
+	rfc1035_init_resolv(&info.res);
+
 	result=lookup(&info);
 
 	if (errmsg_buf[0] == 0)
@@ -128,6 +143,7 @@ char rfc1035_spf_lookup(const char *mailfrom,
 			    p ? p:strerror(errno));
 		if (p) free(p);
 	}
+	rfc1035_destroy_resolv(&info.res);
 	return result;
 }
 
@@ -150,8 +166,9 @@ static int isspf1(struct rfc1035_reply *reply, int n)
 	return 0;
 }
 
-char rfc1035_spf_gettxt(const char *current_domain,
-			char *buf)
+char rfc1035_spf_gettxt_res(const char *current_domain,
+			    char *buf,
+			    struct rfc1035_res *res)
 {
 	struct	rfc1035_reply *reply;
 	char	namebuf[RFC1035_MAXNAMESIZE+1];
@@ -161,13 +178,11 @@ char rfc1035_spf_gettxt(const char *current_domain,
 	namebuf[0]=0;
 	strncat(namebuf, current_domain, RFC1035_MAXNAMESIZE);
 
-	if (rfc1035_resolve_cname(&rfc1035_default_resolver,
-				  RFC1035_RESOLVE_RECURSIVE, namebuf,
+	if (rfc1035_resolve_cname(res, namebuf,
 				  RFC1035_TYPE_TXT, RFC1035_CLASS_IN,
 				  &reply, 0) < 0 ||
 	    reply == 0 ||
-	    (n=rfc1035_replysearch_an(&rfc1035_default_resolver,
-				      reply, namebuf, RFC1035_TYPE_TXT,
+	    (n=rfc1035_replysearch_an(res, reply, namebuf, RFC1035_TYPE_TXT,
 				      RFC1035_CLASS_IN, 0)) < 0)
 	{
 		switch (reply ? reply->rcode:
@@ -191,16 +206,14 @@ char rfc1035_spf_gettxt(const char *current_domain,
 		if (isspf1(reply, n))
 			break;
 
-		n=rfc1035_replysearch_an(&rfc1035_default_resolver,
-					 reply, namebuf,
+		n=rfc1035_replysearch_an(res, reply, namebuf,
 					 RFC1035_TYPE_TXT, RFC1035_CLASS_IN,
 					 n+1);
 	}
 
 	if (n >= 0)
 	{
-		for (o=n; (o=rfc1035_replysearch_an(&rfc1035_default_resolver,
-						    reply, namebuf,
+		for (o=n; (o=rfc1035_replysearch_an(res, reply, namebuf,
 						    RFC1035_TYPE_TXT,
 						    RFC1035_CLASS_IN,
 						    o+1)) >= 0; )
@@ -227,6 +240,21 @@ char rfc1035_spf_gettxt(const char *current_domain,
 	}
 	rfc1035_replyfree(reply);
 	return SPF_UNKNOWN;
+}
+
+char rfc1035_spf_gettxt(const char *current_domain,
+			char *buf)
+{
+	struct rfc1035_res res;
+	char c;
+
+	rfc1035_init_resolv(&res);
+
+	c=rfc1035_spf_gettxt_res(current_domain, buf, &res);
+
+	rfc1035_destroy_resolv(&res);
+
+	return c;
 }
 
 /*
@@ -524,8 +552,7 @@ static void check_ptr(const char *ptr, void *void_arg)
 	if (pinfo->found)
 		return; /* No need */
 
-	rc=rfc1035_a(&rfc1035_default_resolver, ptr,
-		     &addr, &addr_cnt);
+	rc=rfc1035_a(&pinfo->info->res, ptr, &addr, &addr_cnt);
 
 	if (rc > 0)
 		pinfo->error=1;
@@ -597,7 +624,7 @@ static char do_ptr(const char *name,
 		return SPF_FAIL;
 	}
 
-	if (rfc1035_ptr_x(&rfc1035_default_resolver, &pinfo.addr,
+	if (rfc1035_ptr_x(&info->res, &pinfo.addr,
 			  check_ptr, &pinfo) < 0)
 	{
 		if (errno == ENOENT)
@@ -768,7 +795,7 @@ static char mechanism(const char *name,
 			return SPF_FAIL;
 		}
 
-		rc=rfc1035_a(&rfc1035_default_resolver,
+		rc=rfc1035_a(&info->res,
 			     domain_spec,
 			     &iaptr,
 			     &iasize);
@@ -829,7 +856,7 @@ static char mechanism(const char *name,
 			return SPF_FAIL;
 		}
 
-		rc=rfc1035_mxlist_create_x(&rfc1035_default_resolver,
+		rc=rfc1035_mxlist_create_x(&info->res,
 					   domain_spec, 0,
 					   &mxlist);
 		free(domain_spec);
@@ -912,7 +939,7 @@ static char mechanism(const char *name,
 		if (!domain_spec)
 			return SPF_ERROR;
 
-		rc=rfc1035_a(&rfc1035_default_resolver,
+		rc=rfc1035_a(&info->res,
 			     domain_spec,
 			     &iaptr,
 			     &iasize);
@@ -953,12 +980,11 @@ static void setexp(const char *exp,
 	namebuf[0]=0;
 	strncat(namebuf, exp, RFC1035_MAXNAMESIZE);
 
-	if (rfc1035_resolve_cname(&rfc1035_default_resolver,
-				  RFC1035_RESOLVE_RECURSIVE, namebuf,
+	if (rfc1035_resolve_cname(&info->res, namebuf,
 				  RFC1035_TYPE_TXT, RFC1035_CLASS_IN,
 				  &reply, 0) < 0 ||
 	    reply == 0 ||
-	    (n=rfc1035_replysearch_an(&rfc1035_default_resolver,
+	    (n=rfc1035_replysearch_an(&info->res,
 				      reply, namebuf, RFC1035_TYPE_TXT,
 				      RFC1035_CLASS_IN, 0)) < 0)
 	{

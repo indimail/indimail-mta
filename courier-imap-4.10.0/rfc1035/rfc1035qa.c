@@ -1,5 +1,5 @@
 /*
-** Copyright 1998 - 2004 Double Precision, Inc.
+** Copyright 1998 - 2011 Double Precision, Inc.
 ** See COPYING for distribution information.
 */
 
@@ -7,8 +7,7 @@
 #include	<errno.h>
 #include	<string.h>
 #include	<stdlib.h>
-#include	"rfc1035_res.h"
-
+#include	<arpa/inet.h>
 
 /* Convenient function to do forward IP lookup */
 
@@ -29,8 +28,7 @@ char	namebuf[RFC1035_MAXNAMESIZE+1];
 	strncat(namebuf, name, RFC1035_MAXNAMESIZE);
 
 	*iasize=0;
-	if (rfc1035_resolve_cname(res,
-		RFC1035_RESOLVE_RECURSIVE, namebuf,
+	if (rfc1035_resolve_cname(res, namebuf,
 		RFC1035_TYPE_A, RFC1035_CLASS_IN, &reply, 0) < 0 ||
 		reply == 0 ||
 		(n=rfc1035_replysearch_an( res, reply, namebuf, RFC1035_TYPE_A,
@@ -150,8 +148,7 @@ unsigned k;
 	** D) This sux.
 	*/
 
-	if (rfc1035_resolve_cname(res,
-		RFC1035_RESOLVE_RECURSIVE, namebuf,
+	if (rfc1035_resolve_cname(res, namebuf,
 		RFC1035_TYPE_AAAA, RFC1035_CLASS_IN, &reply, 0) < 0 ||
 		reply == 0 ||
 		(n=rfc1035_replysearch_an( res, reply, namebuf,

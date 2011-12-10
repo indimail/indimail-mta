@@ -7,14 +7,12 @@
 #include	<stdio.h>
 #include	"soxwrap/soxwrap.h"
 #include	"rfc1035.h"
-#include	"rfc1035_res.h"
 #include	<errno.h>
 #if	HAVE_UNISTD_H
 #include	<unistd.h>
 #endif
 #include	<stdlib.h>
 #include	<string.h>
-#include	"rfc1035_res.h"
 
 
 struct querybuf {
@@ -34,7 +32,7 @@ struct querybuf *qp=(struct querybuf *)q;
 
 struct rfc1035_reply *rfc1035_resolve_multiple(
 			struct rfc1035_res *res,
-			int opcode, int options,
+			int opcode,
 			const struct rfc1035_query *queries,
 			unsigned nqueries)
 {
@@ -52,15 +50,15 @@ static const char fakereply[]={0, 0, 0, RFC1035_RCODE_SERVFAIL,
 		0, 0,
 		0, 0};
 
-	nscount=rfc1035_init_nscount(res);
-	ns=rfc1035_init_nsget(res);
+	nscount=res->rfc1035_nnameservers;
+	ns=res->nameservers;
 
 	if (res->rfc1035_good_ns >= nscount)
 		res->rfc1035_good_ns=0;
 
 	qbuf.qbuflen=0;
 	if ( rfc1035_mkquery(res,
-		opcode, options, queries, nqueries, &putqbuf, &qbuf))
+		opcode, queries, nqueries, &putqbuf, &qbuf))
 	{
 		errno=EINVAL;
 		return (0);
@@ -74,8 +72,8 @@ static const char fakereply[]={0, 0, 0, RFC1035_RCODE_SERVFAIL,
 
 	current_timeout=res->rfc1035_timeout_initial;
 	nbackoff=res->rfc1035_timeout_backoff;
-	if (!current_timeout)	current_timeout=DEFAULT_INITIAL_TIMEOUT;
-	if (!nbackoff)	nbackoff=DEFAULT_MAXIMUM_BACKOFF;
+	if (!current_timeout)	current_timeout=RFC1035_DEFAULT_INITIAL_TIMEOUT;
+	if (!nbackoff)	nbackoff=RFC1035_DEFAULT_MAXIMUM_BACKOFF;
 
 	timeout_backoff=current_timeout;
     for (backoff_num=0; backoff_num < nbackoff; backoff_num++,
@@ -224,7 +222,7 @@ static const char fakereply[]={0, 0, 0, RFC1035_RCODE_SERVFAIL,
 
 struct rfc1035_reply *rfc1035_resolve(
 	struct rfc1035_res *res,
-	int opcode, int rr,
+	int opcode,
 	const char *name,
 	unsigned qtype,
 	unsigned qclass)
@@ -234,5 +232,5 @@ struct rfc1035_query q;
 	q.name=name;
 	q.qtype=qtype;
 	q.qclass=qclass;
-	return (rfc1035_resolve_multiple(res, opcode, rr, &q, 1));
+	return (rfc1035_resolve_multiple(res, opcode, &q, 1));
 }

@@ -249,6 +249,14 @@ extern void unicode_lbc_set_opts(unicode_lbc_info_t i, int opts);
 #define UNICODE_LB_OPT_SYBREAK 0x0002
 
 /*
+** Tailored / breaking rules.
+**
+** This reclassifies U+2013 and U+2014 as class WJ, prohibiting breaks before
+** and after mdash and ndash.
+*/
+#define UNICODE_LB_OPT_DASHWJ 0x0004
+
+/*
 ** Implemention of word break rules, as per tr29.
 **
 ** Invoke unicode_wb_init() to initialize the wordbreaking algorithm. The
