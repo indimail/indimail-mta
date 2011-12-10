@@ -1,6 +1,9 @@
 #!/bin/sh
 # WARNING: This file was auto-generated. Do not edit!
 # $Log: bogofilter-qfe.in,v $
+# Revision 2.12  2011-12-10 09:22:39+05:30  Cprogrammer
+# use spam_header_name from bogofilter.cf
+#
 # Revision 2.11  2010-07-06 13:26:40+05:30  Cprogrammer
 # use sendmail instead of sendmail.sh
 #
@@ -38,7 +41,7 @@
 # This a qmail specific bogofilter frontend script which allows the use of a 
 # centralized bogofilter running on an smtp mail server
 # Copyright (C) Gyepi Sam <gyepi@praxis-sw.com> 2002
-# $Id: bogofilter-qfe.in,v 2.11 2010-07-06 13:26:40+05:30 Cprogrammer Stab mbhangui $
+# $Id: bogofilter-qfe.in,v 2.12 2011-12-10 09:22:39+05:30 Cprogrammer Exp mbhangui $
  
 domain=$HOST
 #
@@ -91,25 +94,28 @@ if [ -f @indimaildir@/domains/$domain/bogofilter.cf ] ; then
 else
 	config_file=@indimaildir@/etc/bogofilter.cf
 fi
-
+spam_header_name=`grep ^spam_header_name $config_file 2>/dev/null | cut -d= -f2`
+if [ " $spam_header_name" = " " ] ; then
+	PAT="/^X-Spam-Rating/d; /^X-Filter/d; /^X-Bogosity/d; /^Delivered-To/d;"
+else
+	PAT="/^X-Spam-Rating/d; /^X-Filter/d; /^$spam_header_name/d; /^Delivered-To/d;"
+fi
 opt="X"
 case "$EXT" in
 	register-spam)		# register as spam
-	PAT="/^X-Spam-Rating/d; /^X-Filter/d; /^X-Bogosity/d; /^Delivered-To/d; /$domain/d;"
+	PAT="$PAT /$domain/d;"
 	opt="-s"
 ;;
 	register-ham|register-nonspam)	# register as ham
-	PAT="/^X-Spam-Rating/d; /^X-Filter/d; /^X-Bogosity/d; /^Delivered-To/d;"
 	opt="-n"
 ;;
 	spam)		# unregister as ham
 				# register as spam
-	PAT="/^X-Spam-Rating/d; /^X-Filter/d; /^X-Bogosity/d; /^Delivered-To/d; /$domain/d;"
+	PAT="$PAT /$domain/d;"
 	opt="-Ns"
 ;;
 	ham|nonspam)# unregister as spam
 				# register as ham
-	PAT="/^X-Spam-Rating/d; /^X-Filter/d; /^X-Bogosity/d; /^Delivered-To/d;"
 	opt="-Sn"
 ;;
 esac
