@@ -1,5 +1,8 @@
 #!/bin/sh
 # $Log: create_services.in,v $
+# Revision 2.52  2011-12-10 15:14:17+05:30  Cprogrammer
+# increased soft mem
+#
 # Revision 2.51  2011-10-25 20:47:11+05:30  Cprogrammer
 # increased soft memory for imap/pop3 service
 #
@@ -176,7 +179,7 @@ indimaildir=@indimaildir@
 # End USER Configuration OPTIONS
 #
 
-# $Id: create_services.in,v 2.51 2011-10-25 20:47:11+05:30 Cprogrammer Exp mbhangui $
+# $Id: create_services.in,v 2.52 2011-12-10 15:14:17+05:30 Cprogrammer Exp mbhangui $
 
 usage()
 {
