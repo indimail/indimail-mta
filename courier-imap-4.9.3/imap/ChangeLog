@@ -1,3 +1,60 @@
+4.10.0
+
+2011-11-13  Sam Varshavchik  <mrsam@courier-mta.com>
+
+	* imapd.c (main): Open IMAPDEBUGFILE only if it exists already.
+	(do_expunge): Optionally log deletions. Based on a patch by
+	William Yodlowsky <wyodlows@andromeda.rutgers.edu>.
+
+	* pop3dserver.c (cleanup): Optionally log deletions. Based on a patch by
+	William Yodlowsky <wyodlows@andromeda.rutgers.edu>.
+
+	* imapd.dist.in (IMAP_MOVE_EXPUNGE_TO_TRASH): Officially document how
+	IMAPDEBUGFILE works.
+
+2011-10-28  Sam Varshavchik  <mrsam@courier-mta.com>
+
+	* imapscanclient.c: Postpone Y2038K for a while, for uid validities.
+
+2011-10-22  Sam Varshavchik  <mrsam@courier-mta.com>
+
+	* liblock/mail.c (dotlock_exists): Handle getting here because of a
+	recycled pid.
+
+	* unicode/unicode.c (init_default_chset): Handle NULL from setlocale().
+
+2011-09-06  Sam Varshavchik  <mrsam@courier-mta.com>
+
+	* rfc2045/reformime.c (main2): Fixed segfault on some arches from an
+	initial null given to strtok.
+
+2011-08-14  Sam Varshavchik  <mrsam@courier-mta.com>
+
+	* rfc2045/reformime.c (main2): On ia64 and arm, argv is in readonly
+	memory.
+
+2011-08-04  Michiel Boland <michiel@boland.org>
+
+	* pop3dserver.c (openpop3dlist): Try a few times to reopen pop3dsizelist
+	if it fails with ESTALE.
+
+2011-07-11  Sam Varshavchik  <mrsam@courier-mta.com>
+
+	* pop3d.dist.in: Add AUTHSERVICE settings. They've been supported
+	all along.
+
+2011-06-19  Sam Varshavchik  <mrsam@courier-mta.com>
+
+	* Fix gcc 4.6 warnings
+
+	* courier-imap.spec.in: switch to systemd. Remove script used when
+	upgrading from ancient pre-sysconftool versions.
+
+
+2011-05-25  Sam Varshavchik  <mrsam@courier-mta.com>
+
+	* Fix autoconf warnings.
+
 4.9.3
 
 2011-05-22  Sam Varshavchik  <mrsam@courier-mta.com>
