@@ -1004,5 +1004,6 @@ systemd
 digest_md5.o
 hmac_ripemd.o
 hmac_sha1.o
+hmac_sha256.o
 ripemd.o
 sha1.o
