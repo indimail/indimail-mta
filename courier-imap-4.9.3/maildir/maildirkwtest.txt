@@ -1,8 +1,0 @@
-4 flags
-0: apple banana
-1: banana pear
-2: grape pear
-3 flags
-0: apple
-1: banana pear
-2: pear
