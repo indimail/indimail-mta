@@ -70,7 +70,7 @@ filewrt.c findhost.c findmdahost.c fstabChangeCounters.c getactualpath.c \
 getAddressBook.c getDbLock.c getEnvConfig.c getFreeFS.c GetIndiId.c getindimail.c \
 getlastauth.c get_local_hostid.c get_local_ip.c get_localtime.c getmailingList.c \
 get_Mplexdir.c getpeer.c GetPrefix.c GetSmtproute.c get_smtp_service_port.c \
-hostcntrl_select.c host_in_locals.c in_crypt.c inc_dir.c inc_dir_control.c \
+hmac_sha256.c hostcntrl_select.c host_in_locals.c in_crypt.c inc_dir.c inc_dir_control.c \
 init_dir_control.c inquery.c is_alias_domain.c is_already_running.c ismaildup.c \
 is_distributed_domain.c islocalif.c is_mailing_list.c isnum.c is_user_present.c \
 isvalid_domain.c isvirtualdomain.c layout.c limits.c loadbalance.c LoadBMF.c \

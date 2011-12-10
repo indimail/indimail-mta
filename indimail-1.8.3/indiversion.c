@@ -1,5 +1,8 @@
 /*
  * $Log: indiversion.c,v $
+ * Revision 2.136  2011-12-10 14:56:44+05:30  Cprogrammer
+ * added hmac_256()
+ *
  * Revision 2.135  2011-12-05 13:46:41+05:30  Cprogrammer
  * added hmac_md5() and md5_crypt() functions
  *
@@ -525,7 +528,7 @@
 #endif
 
 #ifndef	lint
-static char     sccsid[] = "$Id: indiversion.c,v 2.135 2011-12-05 13:46:41+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: indiversion.c,v 2.136 2011-12-10 14:56:44+05:30 Cprogrammer Stab mbhangui $";
 #endif
 
 void            getversion_indimail_settings_c();
@@ -809,6 +812,7 @@ void            getversion_ismaildup_c();
 void            getversion_md5_crypt_c();
 void            getversion_hmac_md5_c();
 void            getversion_hmac_sha1_c();
+void            getversion_hmac_sha256_c();
 void            getversion_hmac_ripemd_c();
 void            getversion_sha1_c();
 void            getversion_ripemd_c();
@@ -1244,6 +1248,7 @@ getversion(char *id)
 	getversion_md5_crypt_c();
 	getversion_hmac_md5_c();
 	getversion_hmac_sha1_c();
+	getversion_hmac_sha256_c();
 	getversion_hmac_ripemd_c();
 	getversion_sha1_c();
 	getversion_ripemd_c();

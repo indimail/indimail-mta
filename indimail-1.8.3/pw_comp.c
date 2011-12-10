@@ -1,5 +1,8 @@
 /*
  * $Log: pw_comp.c,v $
+ * Revision 2.13  2011-12-10 15:18:37+05:30  Cprogrammer
+ * added hmac_sha256()
+ *
  * Revision 2.12  2011-11-13 15:27:20+05:30  Cprogrammer
  * fixed password comparision for TRIVIAL_PASSWORD case
  *
@@ -45,7 +48,7 @@
 #include <unistd.h>
 
 #ifndef	lint
-static char     sccsid[] = "$Id: pw_comp.c,v 2.12 2011-11-13 15:27:20+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: pw_comp.c,v 2.13 2011-12-10 15:18:37+05:30 Cprogrammer Stab mbhangui $";
 #endif
 
 static char     hextab[] = "0123456789abcdef";
@@ -56,8 +59,9 @@ static char     hextab[] = "0123456789abcdef";
 #define AUTH_PLAIN       2
 #define AUTH_CRAM_MD5    3
 #define AUTH_CRAM_SHA1   4
-#define AUTH_CRAM_RIPEMD 5
-#define AUTH_DIGEST_MD5  6
+#define AUTH_CRAM_SHA256 5
+#define AUTH_CRAM_RIPEMD 6
+#define AUTH_DIGEST_MD5  7
 
 int
 pw_comp(unsigned char *testlogin, unsigned char *localpw, unsigned char *challenge,
@@ -106,6 +110,17 @@ pw_comp(unsigned char *testlogin, unsigned char *localpw, unsigned char *challen
 	}
 	if ((!auth_method && !getenv("DISABLE_CRAM_SHA1")) || auth_method == AUTH_CRAM_SHA1) {
 		hmac_sha1(challenge, (int) strlen((const char *) challenge), localpw,
+			(int) strlen((const char *) localpw), digest);
+		digascii[40] = 0;
+		for (i=0, e = (char *) digascii; i<20; i++) {
+			*e = hextab[digest[i]/16]; ++e;
+			*e = hextab[digest[i]%16]; ++e;
+		} *e = 0;
+		if (!(i = strcmp((const char *) digascii, (const char *) response)))
+			return (i);
+	}
+	if ((!auth_method && !getenv("DISABLE_CRAM_SHA256")) || auth_method == AUTH_CRAM_SHA256) {
+		hmac_sha256(challenge, (int) strlen((const char *) challenge), localpw,
 			(int) strlen((const char *) localpw), digest);
 		digascii[40] = 0;
 		for (i=0, e = (char *) digascii; i<20; i++) {

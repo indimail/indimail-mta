@@ -1,5 +1,8 @@
 /*
  * $Log: indimail.h,v $
+ * Revision 2.204  2011-12-10 14:54:57+05:30  Cprogrammer
+ * added hmac_sha256()
+ *
  * Revision 2.203  2011-10-28 17:50:12+05:30  Cprogrammer
  * added digest_md5() function
  *
@@ -925,7 +928,7 @@
 #define INDIMAILH_H
 
 #ifndef	lint
-static char     sccsidh[] = "$Id: indimail.h,v 2.203 2011-10-28 17:50:12+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsidh[] = "$Id: indimail.h,v 2.204 2011-12-10 14:54:57+05:30 Cprogrammer Stab mbhangui $";
 #endif
 
 #ifdef HAVE_CONFIG_H
@@ -1606,6 +1609,7 @@ int             FifoCreate(char *);
 int             pw_comp(unsigned char *, unsigned char *, unsigned char *, unsigned char *, int);
 void            hmac_md5(u8 *, int, u8 *, int, u8 *);
 void            hmac_sha1(u8 *, size_t, u8 *, size_t, u8 *);
+void            hmac_sha256(const unsigned char *, size_t, const unsigned char *, size_t, void *);
 void            hmac_ripemd(u8 *, size_t, u8 *, size_t, u8 *);
 int             digest_md5(char *, unsigned char *, unsigned char *, unsigned char *);
 char           *in_crypt(const char *, const char *);
