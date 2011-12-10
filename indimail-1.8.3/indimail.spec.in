@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail.spec.in,v 2.238 2011-12-01 22:03:36+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 2.239 2011-12-10 09:19:22+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %define _unpackaged_files_terminate_build 1
 
