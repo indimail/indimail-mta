@@ -44,7 +44,7 @@ parse_email(email, user, domain, buff_size)
 	if (i == (buff_size - 1))
 	{
 		for (;*ptr && !strchr(ATCHARS, *ptr);ptr++);
-		truncate_flag = -1;
+		truncate_flag = -1; /*- user will get truncated */
 	}
 	*cptr = 0;
 	if (*ptr)
@@ -53,7 +53,7 @@ parse_email(email, user, domain, buff_size)
 		getEnvConfigStr(&ptr, "DEFAULT_DOMAIN", DEFAULT_DOMAIN);
 	for (i = 0, cptr = domain;*ptr && i < (buff_size - 1);*cptr++ = *ptr++, i++);
 	if (i == (buff_size - 1))
-		truncate_flag = -1;
+		truncate_flag = -1; /*- domain will get truncated */
 	*cptr = 0;
 	return (truncate_flag);
 }
