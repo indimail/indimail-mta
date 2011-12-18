@@ -10,6 +10,24 @@ Source0: http://downloads.sourceforge.net/indimail/%{name}-%{version}.tar.gz
 Source1: http://downloads.sourceforge.net/indimail/%{name}-%{version}-rpmlintrc
 Packager: Manvendra Bhangui <manvendra@indimail.org>
 BuildRequires: -post-build-checks  
+%if 0%{?opensuse_bs}
+# define to 1 if building on openSUSE build service
+%define build_on_obs       1
+%define fast_mode          1
+%else
+%define build_on_obs       0
+%define fast_mode          0
+%endif
+
+%if %build_on_obs == 1
+%define packager Manvendra Bhangui <manvendra@indimail.org>
+%if 0%{?mandriva_version} == 201100
+BuildRequires: coreutils
+%else
+BuildRequires: coreutils sh-utils
+%endif
+%endif
+
 Requires: coreutils grep /bin/sh glibc openssl
 BuildRoot: %(mktemp -ud %{_tmppath}/%{name}-%{version}-%{release}-XXXXXX)
 
