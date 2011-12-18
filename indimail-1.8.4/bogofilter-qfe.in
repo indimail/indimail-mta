@@ -1,6 +1,9 @@
 #!/bin/sh
 # WARNING: This file was auto-generated. Do not edit!
 # $Log: bogofilter-qfe.in,v $
+# Revision 2.13  2011-12-18 10:59:42+05:30  Cprogrammer
+# use config_file and wordlist argument to bogofilter
+#
 # Revision 2.12  2011-12-10 09:22:39+05:30  Cprogrammer
 # use spam_header_name from bogofilter.cf
 #
@@ -41,7 +44,7 @@
 # This a qmail specific bogofilter frontend script which allows the use of a 
 # centralized bogofilter running on an smtp mail server
 # Copyright (C) Gyepi Sam <gyepi@praxis-sw.com> 2002
-# $Id: bogofilter-qfe.in,v 2.12 2011-12-10 09:22:39+05:30 Cprogrammer Exp mbhangui $
+# $Id: bogofilter-qfe.in,v 2.13 2011-12-18 10:59:42+05:30 Cprogrammer Exp mbhangui $
  
 domain=$HOST
 #
