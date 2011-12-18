@@ -707,6 +707,16 @@ void token_cleanup()
     WFREE(w_ip);
     WFREE(w_url);
     WFREE(nonblank_line);
+	if (subject)
+		WFREE(subject);
+	if (msg_id)
+		WFREE(msg_id);
+	if (queue_id)
+		WFREE(queue_id);
+	if (msg_addr)
+		WFREE(msg_addr);
+	if (ipsave)
+		WFREE(ipsave);
 
     token_clear();
 
@@ -719,8 +729,11 @@ void token_clear()
     if (msg_addr != NULL)
     {
 	*msg_addr->u.text = '\0';
-	*msg_id->u.text   = '\0';
-	*subject->u.text   = '\0';
-	*queue_id->u.text = '\0';
+	if (msg_id)
+		*msg_id->u.text   = '\0';
+	if (subject)
+		*subject->u.text   = '\0';
+	if (queue_id)
+		*queue_id->u.text = '\0';
     }
 }
