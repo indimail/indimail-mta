@@ -575,7 +575,7 @@ main(int argc, char **argv)
 void
 getversion_qnotify_c()
 {
-	static char    *x = "$Id: qnotify.c,v 1.4 2011-12-05 19:44:24+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qnotify.c,v 1.4 2011-12-05 19:44:24+05:30 Cprogrammer Stab mbhangui $";
 
 	x++;
 }
