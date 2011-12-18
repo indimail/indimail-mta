@@ -1,5 +1,8 @@
 #
 # $Log: indium.spec.in,v $
+# Revision 1.9  2011-12-18 11:01:55+05:30  Cprogrammer
+# removed unused images
+#
 # Revision 1.8  2011-05-22 23:40:13+05:30  Cprogrammer
 # *** empty log message ***
 #
@@ -25,7 +28,7 @@
 # Initial revision
 #
 #
-# $Id: indium.spec.in,v 1.8 2011-05-22 23:40:13+05:30 Cprogrammer Exp mbhangui $
+# $Id: indium.spec.in,v 1.9 2011-12-18 11:01:55+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %define _unpackaged_files_terminate_build 1
 
