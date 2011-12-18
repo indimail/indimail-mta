@@ -1,5 +1,8 @@
 /*
  * $Log: vchkpass.c,v $
+ * Revision 2.38  2011-12-18 20:41:19+05:30  Cprogrammer
+ * use username%domain to fix authentication for brain-dead MS outlook
+ *
  * Revision 2.37  2011-10-28 14:16:41+05:30  Cprogrammer
  * added auth_method argument to pw_comp
  *
@@ -129,7 +132,7 @@
 #include <errno.h>
 
 #ifndef lint
-static char     sccsid[] = "$Id: vchkpass.c,v 2.37 2011-10-28 14:16:41+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: vchkpass.c,v 2.38 2011-12-18 20:41:19+05:30 Cprogrammer Stab mbhangui $";
 #endif
 #ifdef AUTH_SIZE
 #undef AUTH_SIZE
@@ -141,8 +144,8 @@ int             authlen = AUTH_SIZE;
 int
 main(int argc, char **argv)
 {
-	char           *tmpbuf, *login, *response, *challenge, *crypt_pass, *ptr, *cptr;
-	char            user[AUTH_SIZE], domain[AUTH_SIZE], buf[MAX_BUFF];
+	char           *tmpbuf, *login, *ologin, *response, *challenge, *crypt_pass, *ptr, *cptr;
+	char            user[AUTH_SIZE], fquser[AUTH_SIZE], domain[AUTH_SIZE], buf[MAX_BUFF];
 	int             count, offset, norelay = 0, status, auth_method;
 	struct passwd  *pw;
 #ifdef ENABLE_DOMAIN_LIMITS
@@ -204,12 +207,22 @@ main(int argc, char **argv)
 
 	for (cptr = user, ptr = login;*ptr && *ptr != '@';*cptr++ = *ptr++);
 	*cptr = 0;
+	ologin = login;
 	if (*ptr)
+	{
 		ptr++;
-	else
-		getEnvConfigStr(&ptr, "DEFAULT_DOMAIN", DEFAULT_DOMAIN);
-	for (cptr = domain;*ptr;*cptr++ = *ptr++);
-	*cptr = 0;
+		for (cptr = domain;*ptr;*cptr++ = *ptr++);
+		*cptr = 0;
+	} else /*- no @ in the login */
+	{
+		if (parse_email(login, user, domain, AUTH_SIZE)) {
+			getEnvConfigStr(&ptr, "DEFAULT_DOMAIN", DEFAULT_DOMAIN);
+			for (cptr = domain;*ptr;*cptr++ = *ptr++);
+			*cptr = 0;
+		}
+		snprintf(fquser, AUTH_SIZE, "%s@%s", user, domain);
+		login = fquser;
+	}
 #ifdef QUERY_CACHE
 	if (!getenv("QUERY_CACHE"))
 	{
@@ -279,7 +292,7 @@ main(int argc, char **argv)
 		fprintf(stderr, "%s: login [%s] challenge [%s] response [%s] pw_passwd [%s] method[%d]\n", 
 			argv[0], login, challenge, response, crypt_pass, auth_method);
 	}
-	if (pw_comp((unsigned char *) login, (unsigned char *) crypt_pass,
+	if (pw_comp((unsigned char *) ologin, (unsigned char *) crypt_pass,
 		(unsigned char *) (*response ? challenge : 0),
 		(unsigned char *) (*response ? response : challenge), auth_method))
 	{
