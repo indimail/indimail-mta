@@ -1,5 +1,8 @@
 /*
  * $Log: smtpd.c,v $
+ * Revision 1.163  2011-12-18 11:17:25+05:30  Cprogrammer
+ * fixed abnormal exit in DIGEST-MD5 for non-existing users
+ *
  * Revision 1.162  2011-12-10 15:23:20+05:30  Cprogrammer
  * added CRAM-SHA256 auth
  *
@@ -637,7 +640,7 @@ int             wildmat_internal(char *, char *);
 int             ssl_rfd = -1, ssl_wfd = -1;	/*- SSL_get_Xfd() are broken */
 char           *servercert, *clientca, *clientcrl;
 #endif
-char           *revision = "$Revision: 1.162 $";
+char           *revision = "$Revision: 1.163 $";
 char           *protocol = "SMTP";
 stralloc        proto = { 0 };
 static stralloc Revision = { 0 };
@@ -939,6 +942,8 @@ die_lcmd()
 void
 die_read()
 {
+	out("451 Requested action aborted: read error (#4.4.2)\r\n");
+	flush();
 	_exit(1);
 }
 
@@ -4423,7 +4428,7 @@ saferead(int fd, char *buf, int len)
 		if (errno == error_timeout)
 			die_alarm();
 	}
-	if (r <= 0)
+	if (r < 0)
 		die_read();
 	return r;
 }
@@ -5136,6 +5141,8 @@ authenticate(int method)
 	if ((i = wait_exitcode(wstat)))
 		return (i);
 	if (method == AUTH_DIGEST_MD5) {
+		if (!n)
+			return (1);
 		if (!stralloc_copys(&slop, "rspauth="))
 			die_nomem();
 		if (!stralloc_catb(&slop, respbuf, n))
@@ -5153,7 +5160,7 @@ authenticate(int method)
 			die_read();
 		if (n)
 			respbuf[n] = 0;
-  		return 0;
+		return (0);
 	} else
 		return (i);
 }
@@ -6586,7 +6593,7 @@ addrrelay() /*- Rejection of relay probes. */
 void
 getversion_smtpd_c()
 {
-	static char    *x = "$Id: smtpd.c,v 1.162 2011-12-10 15:23:20+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: smtpd.c,v 1.163 2011-12-18 11:17:25+05:30 Cprogrammer Exp mbhangui $";
 
 #ifdef INDIMAIL
 	if (x)
