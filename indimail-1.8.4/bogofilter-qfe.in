@@ -51,7 +51,7 @@ domain=$HOST
 #
 REPORT=yes
 REPORT_TO=postmaster
-attach_report=yes
+attach_report=no
 sender_domain=`echo $SENDER | cut -d@ -f2`
 if [ " $sender_domain" = " " -o " $sender_domain" = " #[]" ] ; then
 	echo "$SENDER: Sorry, You are not authorized to email $EXT@$domain"
@@ -128,7 +128,7 @@ fi
 ) | sed -e 's,.\**SPAM.\**,,g' > /tmp/bogofilter.$$
 if [ ! " $REPORT" = " " ] ; then
 	subject="SpamFilter Analysis (mail sent to $EXT@$HOST)"
-	if [ " $attach_report" = " " ] ; then
+	if [ " $attach_report" = " " -o " $attach_report" != " yes" ] ; then
 		(
 		if [ " $REPORT_TO" = " " ] ; then
 			echo "To: $SENDER"
@@ -141,7 +141,7 @@ if [ ! " $REPORT" = " " ] ; then
 		echo
 		echo "Analysis of mail sent by $SENDER to $EXT@$HOST"
 		echo
-		@indimaildir@/bin/bogofilter -vvv < /tmp/bogofilter.$$
+		@indimaildir@/bin/bogofilter -c $config_file -d $wordlist -vvv < /tmp/bogofilter.$$
 		) | @qmaildir@/bin/sendmail -t
 	else
 		(
