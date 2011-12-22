@@ -1,5 +1,8 @@
 /*
  * $Log: indimail.h,v $
+ * Revision 2.205  2011-12-22 08:39:21+05:30  Cprogrammer
+ * added definitions for AUTH methods
+ *
  * Revision 2.204  2011-12-10 14:54:57+05:30  Cprogrammer
  * added hmac_sha256()
  *
@@ -928,7 +931,7 @@
 #define INDIMAILH_H
 
 #ifndef	lint
-static char     sccsidh[] = "$Id: indimail.h,v 2.204 2011-12-10 14:54:57+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsidh[] = "$Id: indimail.h,v 2.205 2011-12-22 08:39:21+05:30 Cprogrammer Stab mbhangui $";
 #endif
 
 #ifdef HAVE_CONFIG_H
@@ -1063,6 +1066,15 @@ extern DBINFO **RelayHosts;
 #define TRUE                 1
 #define FALSE                0
 #define ABORT               -1
+
+#define AUTH_LOGIN       1
+#define AUTH_PLAIN       2
+#define AUTH_CRAM_MD5    3
+#define AUTH_CRAM_SHA1   4
+#define AUTH_CRAM_SHA256 5
+#define AUTH_CRAM_RIPEMD 6
+#define AUTH_DIGEST_MD5  7
+
 /*
  * What character marks an inverted character class? 
  */
