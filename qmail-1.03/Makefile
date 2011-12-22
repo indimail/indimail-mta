@@ -231,6 +231,12 @@ ripemd.o: compile ripemd.c ripemd.h
 digest_md5.o: compile digest_md5.c global.h md5.h uint32.h str.h
 	./compile digest_md5.c
 
+swaks: swaks.pl conf-qmail
+	cat swaks.pl \
+	| sed s}QMAIL}"`head -1 conf-qmail`"}g \
+	> swaks
+	chmod 755 swaks
+
 binm1: \
 binm1.sh conf-qmail
 	cat binm1.sh \
@@ -1231,7 +1237,7 @@ qsmhook forward rrforward preline condredirect bouncesaying except qmail-todo \
 queue-fix idedit setup instcheck rpmattr maildir2mbox qmaildirmake maildirwatch base64 \
 maildirdeliver autoresponder qmail-rm qail elq pinq etrn qmail-sql systemd \
 atrn qmailctl indimail.plist svscanboot upstart qmail-sighup qmail-sigalrm qmail-sigterm \
-home home+df proc proc+df binm1 binm1+df binm2 binm2+df \
+swaks home home+df proc proc+df binm1 binm1+df binm2 binm2+df \
 binm3 binm3+df spfquery multirotate qpq 822header qmail-nullqueue \
 maildirserial serialsmtp serialqmtp maildirsmtp maildirqmtp \
 serialcmd maildircmd rewind relaytest qmail-qfilter sys-checkpwd ldap-checkpwd \
