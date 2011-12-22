@@ -553,7 +553,18 @@ sub do_smtp_auth_digest {
   my $p = shift; # auth password
   my $as = shift; # auth string
   my $r = '';    # will store smtp response
-  my $hostname = get_hostname();
+  my $hostname;
+  my $me;
+  chdir("/var/indimail");
+  if ($ENV{CONTROLDIR}) {
+    $me = "$ENV{CONTROLDIR}/me";
+  } else {
+    $me = "control/me";
+  }
+  open(ME, "<$me")
+    or die "Unable to open $me\n";
+  chop($hostname = <ME>);
+  close(ME);
 
   my $auth_string = "AUTH $as";
   do_smtp_gen($auth_string, '334', \$r, '', '',
