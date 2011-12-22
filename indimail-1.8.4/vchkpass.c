@@ -1,5 +1,8 @@
 /*
  * $Log: vchkpass.c,v $
+ * Revision 2.39  2011-12-22 11:58:30+05:30  Cprogrammer
+ * use domain from realm (fix for outlook)
+ *
  * Revision 2.38  2011-12-18 20:41:19+05:30  Cprogrammer
  * use username%domain to fix authentication for brain-dead MS outlook
  *
@@ -124,6 +127,7 @@
 #include "indimail.h"
 #include <stdlib.h>
 #include <string.h>
+#include <ctype.h>
 #ifdef ENABLE_DOMAIN_LIMITS
 #include <time.h>
 #endif
@@ -132,7 +136,7 @@
 #include <errno.h>
 
 #ifndef lint
-static char     sccsid[] = "$Id: vchkpass.c,v 2.38 2011-12-18 20:41:19+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: vchkpass.c,v 2.39 2011-12-22 11:58:30+05:30 Cprogrammer Stab mbhangui $";
 #endif
 #ifdef AUTH_SIZE
 #undef AUTH_SIZE
@@ -198,7 +202,7 @@ main(int argc, char **argv)
 		_exit(2);
 
 	count++;
-	response = tmpbuf + count; /*- response (cram-md5, cram-sha1) */
+	response = tmpbuf + count; /*- response (cram-md5, cram-sha1, etc) */
 	for (;tmpbuf[count] && count < offset;count++);
 	if (count == offset || (count + 1) == offset)
 		auth_method = 0;
@@ -215,7 +219,37 @@ main(int argc, char **argv)
 		*cptr = 0;
 	} else /*- no @ in the login */
 	{
-		if (parse_email(login, user, domain, AUTH_SIZE)) {
+		if (auth_method == AUTH_DIGEST_MD5) { /*- for handling dumb programs like
+												outlook written by dumb programmers */
+			for (cptr = buf, ptr = response;*ptr;*cptr++ = *ptr++) {
+				if (*ptr == '\n') {
+					*cptr = 0;
+					ptr++;
+					if (!strncmp("realm=", buf, 6)) {
+						ptr = buf + 6;
+						for (cptr = domain;*ptr;ptr++) {
+							if (isspace(*ptr) || *ptr == '\"')
+								continue;
+							*cptr++ = *ptr;
+						}
+						*cptr = 0;
+						break;
+					} else
+						cptr = buf;
+				}
+			}
+			*cptr = 0;
+			if (!strncmp("realm=", buf, 6)) {
+				ptr = buf + 6;
+				for (cptr = domain;*ptr && *ptr != ',';ptr++) {
+					if (isspace(*ptr) || *ptr == '\"')
+						continue;
+					*cptr++ = *ptr;
+				}
+				*cptr = 0;
+			}
+		}
+		if (!*domain && parse_email(login, user, domain, AUTH_SIZE)) {
 			getEnvConfigStr(&ptr, "DEFAULT_DOMAIN", DEFAULT_DOMAIN);
 			for (cptr = domain;*ptr;*cptr++ = *ptr++);
 			*cptr = 0;
