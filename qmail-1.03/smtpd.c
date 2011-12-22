@@ -1,5 +1,8 @@
 /*
  * $Log: smtpd.c,v $
+ * Revision 1.164  2011-12-22 12:02:30+05:30  Cprogrammer
+ * use AUTH methods defines from indimail.h
+ *
  * Revision 1.163  2011-12-18 11:17:25+05:30  Cprogrammer
  * fixed abnormal exit in DIGEST-MD5 for non-existing users
  *
@@ -640,7 +643,7 @@ int             wildmat_internal(char *, char *);
 int             ssl_rfd = -1, ssl_wfd = -1;	/*- SSL_get_Xfd() are broken */
 char           *servercert, *clientca, *clientcrl;
 #endif
-char           *revision = "$Revision: 1.163 $";
+char           *revision = "$Revision: 1.164 $";
 char           *protocol = "SMTP";
 stralloc        proto = { 0 };
 static stralloc Revision = { 0 };
@@ -5057,6 +5060,7 @@ authgetl(void)
 	return (authin.len);
 }
 
+#ifndef INDIMAIL
 #define AUTH_LOGIN       1
 #define AUTH_PLAIN       2
 #define AUTH_CRAM_MD5    3
@@ -5064,6 +5068,7 @@ authgetl(void)
 #define AUTH_CRAM_SHA256 5
 #define AUTH_CRAM_RIPEMD 6
 #define AUTH_DIGEST_MD5  7
+#endif
 
 int             po[2] = {-1, -1};
 stralloc        authmethod = {0};
@@ -6593,7 +6598,7 @@ addrrelay() /*- Rejection of relay probes. */
 void
 getversion_smtpd_c()
 {
-	static char    *x = "$Id: smtpd.c,v 1.163 2011-12-18 11:17:25+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: smtpd.c,v 1.164 2011-12-22 12:02:30+05:30 Cprogrammer Stab mbhangui $";
 
 #ifdef INDIMAIL
 	if (x)
