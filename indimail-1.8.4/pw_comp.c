@@ -1,5 +1,8 @@
 /*
  * $Log: pw_comp.c,v $
+ * Revision 2.14  2011-12-22 11:59:27+05:30  Cprogrammer
+ * moved AUTH methods defines to indimail.h
+ *
  * Revision 2.13  2011-12-10 15:18:37+05:30  Cprogrammer
  * added hmac_sha256()
  *
@@ -48,20 +51,11 @@
 #include <unistd.h>
 
 #ifndef	lint
-static char     sccsid[] = "$Id: pw_comp.c,v 2.13 2011-12-10 15:18:37+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: pw_comp.c,v 2.14 2011-12-22 11:59:27+05:30 Cprogrammer Stab mbhangui $";
 #endif
 
 static char     hextab[] = "0123456789abcdef";
 
-/*- defined in qmail-smtpd.c, duplicated since source are not shared */
-
-#define AUTH_LOGIN       1
-#define AUTH_PLAIN       2
-#define AUTH_CRAM_MD5    3
-#define AUTH_CRAM_SHA1   4
-#define AUTH_CRAM_SHA256 5
-#define AUTH_CRAM_RIPEMD 6
-#define AUTH_DIGEST_MD5  7
 
 int
 pw_comp(unsigned char *testlogin, unsigned char *localpw, unsigned char *challenge,
