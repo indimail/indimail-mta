@@ -1,5 +1,5 @@
 /*
- * $Id: user.c,v 1.7 2011-12-04 21:10:38+05:30 Cprogrammer Exp mbhangui $
+ * $Id: user.c,v 1.8 2011-12-23 07:18:47+05:30 Cprogrammer Exp mbhangui $
  * Copyright (C) 1999-2004 Inter7 Internet Technologies, Inc. 
  *
  * This program is free software; you can redistribute it and/or modify
@@ -550,20 +550,18 @@ call_hooks(char *hook_type, char *p1, char *p2, char *p3, char *p4)
 {
 	FILE           *fs = NULL;
 	int             pid;
-	char           *hooks_path;
+	char            hooks_path[MAX_BUFF];
 	char           *cmd = NULL;
 	char           *tmpstr;
 
-	hooks_path = malloc(MAX_BUFF);
-
-/*
- * first look in directory for domain 
- */
+	/*
+ 	 * first look in directory for domain 
+ 	 */
 	sprintf(hooks_path, "%s/.iwebadmin-hooks", RealDir);
 	if ((fs = fopen(hooks_path, "r")) == NULL) {
-	/*
-	 * then try ~vpopmail/etc 
-	 */
+		/*
+		 * then try ~vpopmail/etc 
+		 */
 		sprintf(hooks_path, "%s/etc/.iwebadmin-hooks", INDIMAILDIR);
 		if ((fs = fopen(hooks_path, "r")) == NULL) {
 			return (0);
@@ -833,18 +831,14 @@ modusergo()
 #if 0
 	int             spam_check = 0;
 #endif
-	int             vacation = 0;
-	int             saveacopy = 0;
-	int             emptydotqmail;
-	char           *olddotqmail = NULL;
-	char           *dotqmailline;
+	int             vacation = 0, saveacopy = 0, emptydotqmail, err, i;
+	char           *olddotqmail = NULL, *dotqmailline;
+	char            triv_pass[MAX_BUFF];
 	struct stat     sb;
-	int             err;
-
+	extern int      encrypt_flag;
 	const char     *flagfields[] = { "zeroflag=", "oneflag=", "twoflag=", "threeflag=" };
 	const gid_t     gidflags[] = { V_USER0, V_USER1, V_USER2, V_USER3 };
 	gid_t           orig_gid;
-	int             i;
 
 	if (!(AdminType == DOMAIN_ADMIN || (AdminType == USER_ADMIN && strcmp(ActionUser, Username) == 0))) {
 		snprintf(StatusMessage, sizeof (StatusMessage), "%s", html_text[142]);
@@ -866,6 +860,9 @@ modusergo()
 			exit(0);
 		}
 #endif
+		snprintf(triv_pass, MAX_BUFF, "%s/.trivial_passwords", RealDir);
+		if (!access(triv_pass, F_OK))
+			encrypt_flag = 1;
 		ret_code = vpasswd(ActionUser, Domain, Password1, USE_POP);
 		if (ret_code != 1) {
 			snprintf(StatusMessage, sizeof (StatusMessage), "%s (error code %d)", html_text[140], ret_code);

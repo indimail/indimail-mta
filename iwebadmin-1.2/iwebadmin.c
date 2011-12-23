@@ -1,5 +1,5 @@
 /*
- * $Id: iwebadmin.c,v 1.6 2011-11-26 09:08:10+05:30 Cprogrammer Exp mbhangui $
+ * $Id: iwebadmin.c,v 1.7 2011-12-23 07:18:22+05:30 Cprogrammer Exp mbhangui $
  * Copyright (C) 1999-2004 Inter7 Internet Technologies, Inc. 
  *
  * This program is free software; you can redistribute it and/or modify
@@ -142,7 +142,7 @@ auth_user(struct passwd *pw, char *password)
 	 * Authtenticate case where you have CRAM-MD5 but clients do
 	 * not have cram-md5 authentication mechanism 
 	 */
-	if  (!access(".trivial_passwords", F_OK) && !strcmp(pw->pw_passwd, password))
+	if (!access(".trivial_passwords", F_OK) && !strcmp(pw->pw_passwd, password))
 		return (0);
 	snprintf(StatusMessage, sizeof (StatusMessage), "%s", html_text[198]);
 	return (1);
@@ -160,6 +160,7 @@ main(argc, argv)
 	char            returnhttp[MAX_BUFF];
 	char            returntext[MAX_BUFF];
 	int             i;
+	extern int      encrypt_flag;
 	struct passwd  *pw;
 
 	init_globals();
@@ -240,6 +241,8 @@ main(argc, argv)
 			} else {
 				(void) chdir(RealDir);
 				load_limits();
+				if (!access(".trivial_passwords", F_OK))
+					encrypt_flag = 1;
 				if (!(pw = vauth_getpw(User, Domain)))
 					snprintf(StatusMessage, sizeof (StatusMessage), "%s", html_text[198]);
 				else
@@ -254,7 +257,7 @@ main(argc, argv)
 				} else
 				if (*Password1 == '\0') {
 					snprintf(StatusMessage, sizeof (StatusMessage), "%s", html_text[234]);
-				} else 
+				} else
 				if ((i = vpasswd(User, Domain, Password1, USE_POP)) != 1) {
 					snprintf(StatusMessage, sizeof (StatusMessage), "%s", html_text[140]);
 #ifndef TRIVIAL_PASSWORD_ENABLED
