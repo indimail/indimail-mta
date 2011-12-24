@@ -1,5 +1,8 @@
 /*-
  * $Log: vfilter.c,v $
+ * Revision 2.48  2011-12-24 09:02:30+05:30  Cprogrammer
+ * set PWSTRUCT for non-existent user
+ *
  * Revision 2.47  2011-11-09 19:46:07+05:30  Cprogrammer
  * removed getversion
  *
@@ -154,7 +157,7 @@
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vfilter.c,v 2.47 2011-11-09 19:46:07+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: vfilter.c,v 2.48 2011-12-24 09:02:30+05:30 Cprogrammer Stab mbhangui $";
 #endif
 
 #ifdef VFILTER
@@ -791,9 +794,20 @@ get_options(int argc, char **argv, char *bounce, char *emailid, char *user, char
 	{
 		if (userNotFound)
 		{
-			fprintf(stderr, "vfilter: %s@%s: No such user\n", user, real_domain);
 			if (interactive)
+			{
+				fprintf(stderr, "vfilter: %s@%s: No such user\n", user, real_domain);
 				return (1);
+			}
+			snprintf(pwstruct, sizeof(pwstruct), "PWSTRUCT=No such user %s@%s",
+				user, real_domain);
+			if (putenv(pwstruct) == -1)
+			{
+				fprintf(stderr, "vfilter: putenv: %s\n", strerror(ENOMEM));
+				if (interactive)
+					return (1);
+				_exit(111);
+			}
 			myExit(argc, argv, -1, 0, 0, 0);
 		} else
 		{
@@ -829,7 +843,7 @@ get_options(int argc, char **argv, char *bounce, char *emailid, char *user, char
 static int
 myExit(int argc, char **argv, int status, int bounce, char *DestFolder, char *forward)
 {
-	char           *revision = "$Revision: 2.47 $";
+	char           *revision = "$Revision: 2.48 $";
 	char           *ptr, *mda;
 	char            MaildirFolder[MAX_BUFF], XFilter[MAX_BUFF];
 	pid_t           pid;
