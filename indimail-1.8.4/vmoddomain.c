@@ -1,5 +1,8 @@
 /*
  * $Log: vmoddomain.c,v $
+ * Revision 2.7  2011-12-24 08:49:17+05:30  Cprogrammer
+ * display a more helpful usage
+ *
  * Revision 2.6  2011-11-09 19:46:21+05:30  Cprogrammer
  * removed getversion
  *
@@ -29,7 +32,7 @@
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vmoddomain.c,v 2.6 2011-11-09 19:46:21+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: vmoddomain.c,v 2.7 2011-12-24 08:49:17+05:30 Cprogrammer Stab mbhangui $";
 #endif
 
 static void     usage();
@@ -98,6 +101,8 @@ set_handler(char *dir, char *handler, uid_t uid, gid_t gid, int use_vfilter)
 	int             lockfd;
 #endif
 
+	if (!handler)
+		return (0);
 	/* Last case: the last parameter is a Maildir, an email address, ipaddress or hostname */
 	if (strncmp(handler, BOUNCE_ALL, AUTH_SIZE) && strncmp(handler, DELETE_ALL, AUTH_SIZE))
 	{
@@ -221,13 +226,14 @@ usage()
 	fprintf(stderr, "options: -V         (print version number)\n");
 	fprintf(stderr, "         -v         (verbose)\n");
 	fprintf(stderr, "         -l 0|1     Enable Domain Limits\n");
-	fprintf(stderr, "         -f         (Sets the Domain with VFILTER capability)\n");
+	fprintf(stderr, "         -f 0|1     Enable VFILTER capability\n");
 	fprintf(stderr, "         -h handler (can be one of the following\n");
  	fprintf(stderr, "                    %s\n", DELETE_ALL);
  	fprintf(stderr, "                    %s\n", BOUNCE_ALL);
 	fprintf(stderr, "                    Maildir    - Maildir Path\n");
 	fprintf(stderr, "                    email      - Email Addres\n");
 	fprintf(stderr, "                    IP Address - SMTPROUTE/QMTPROUTE spec)\n");
+	fprintf(stderr, "you need to specify handler and vfilter option or domain limits\n");
 	return;
 }
 
@@ -261,7 +267,8 @@ get_options(int argc, char **argv, int *use_vfilter, int *domain_limits,
 			return (1);
 		}
 	}
-	if (!*handler && *domain_limits == -1 && *use_vfilter == -1)
+	if ((*use_vfilter != -1 && !*handler) || (*handler && *use_vfilter == -1) ||
+		(!*handler && *domain_limits == -1 && *use_vfilter == -1))
 	{
 		usage();
 		return (1);
