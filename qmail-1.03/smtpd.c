@@ -1,5 +1,8 @@
 /*
  * $Log: smtpd.c,v $
+ * Revision 1.165  2012-01-19 16:40:44+05:30  Cprogrammer
+ * allow restricting of MASQUERADE to the value set by MASQUERADE env variable
+ *
  * Revision 1.164  2011-12-22 12:02:30+05:30  Cprogrammer
  * use AUTH methods defines from indimail.h
  *
@@ -643,7 +646,7 @@ int             wildmat_internal(char *, char *);
 int             ssl_rfd = -1, ssl_wfd = -1;	/*- SSL_get_Xfd() are broken */
 char           *servercert, *clientca, *clientcrl;
 #endif
-char           *revision = "$Revision: 1.164 $";
+char           *revision = "$Revision: 1.165 $";
 char           *protocol = "SMTP";
 stralloc        proto = { 0 };
 static stralloc Revision = { 0 };
@@ -1527,30 +1530,35 @@ err_badhelo(char *arg1, char *arg2, char *arg3)
 void
 err_nogateway(char *arg1, char *arg2, char *arg3, int flag)
 {
+	char           *x;
+
 	logerr("qmail-smtpd: ");
 	logerrpid();
 	logerr(arg1);
 	logerr(" Invalid RELAY client: MAIL from <");
 	logerr(arg2);
-	if (arg3 && *arg3)
-	{
+	if (arg3 && *arg3) {
 		logerr("> RCPT <");
 		logerr(arg3);
 	}
 	logerr(">");
-	if (authd)
-	{
+	if (authd) {
 		logerr(", Auth <");
 		logerr(remoteinfo);
 		logerr(">");
+		x = env_get("MASQUERADE");
+		if (x && *x) {
+			logerr(", MASQUERADE <");
+			logerr(x);
+			logerr(">");
+		}
 	}
 	logerrf("\n");
 	if (flag)
 		out("553 sorry, this MTA does not accept masquerading/forging ");
 	else
 		out("553 sorry, that domain isn't allowed to be relayed thru this MTA without authentication ");
-	if (authd)
-	{
+	if (authd) {
 		out(", auth <");
 		out(remoteinfo);
 		out("> ");
@@ -3946,61 +3954,72 @@ smtp_mail(char *arg)
 			return;
 		}
 	}
-	if (!env_get("MASQUERADE") && authd)
-	{
-		int             at1, at2;
-		char           *dom1, *dom2;
+	x = env_get("MASQUERADE");
+	if ((!x || (x && *x)) && authd) {
+		int             at1, at2, iter_pass, flag;
+		char           *dom1, *dom2, *allowed;
 
-		if (mailfrom.s[at1 = str_chr(mailfrom.s, '@')])
-		{
+		if (mailfrom.s[at1 = str_chr(mailfrom.s, '@')]) {
 			dom1 = mailfrom.s + at1 + 1;
-			if (!addrallowed(mailfrom.s))
-			{
+			if (!addrallowed(mailfrom.s)) {
 				err_nogateway(remoteip, mailfrom.s, 0, 1);
 				return;
 			}
 			mailfrom.s[at1] = 0;
-			if (remoteinfo[at2 = str_chr(remoteinfo, '@')])
-			{
-				dom2 = remoteinfo + at2 + 1;
-				remoteinfo[at2] = 0;
-				if (str_diff(mailfrom.s, remoteinfo))
-				{
+			for (flag = 0, iter_pass = 0;;iter_pass++) {
+				if (x && *x) {
+					allowed = iter_pass ? remoteinfo : x;
+				}
+				else {
+					allowed = remoteinfo;
+					iter_pass++;
+				}
+				if (allowed[at2 = str_chr(allowed, '@')]) {
+					dom2 = allowed + at2 + 1;
+					allowed[at2] = 0;
+					if (str_diff(mailfrom.s, allowed)) {
+						allowed[at2] = '@';
+						flag = 1;
+					}
+					allowed[at2] = '@';
+					/*
+					 * now compare domains 
+					 */
+					if (domain_compare(dom1, dom2) == 1)
+						flag = 1;
+				} else {
+					if (str_diff(mailfrom.s, allowed))
+						flag = 1;
+					/*
+					 * now compare mailfrom domain with $DEFAULT_DOMAIN
+					 */
+					if ((dom2 = env_get("DEFAULT_DOMAIN"))) {
+						if (domain_compare(dom1, dom2) == 1)
+							flag = 1;
+					}
+				}
+				if (!flag) {
 					mailfrom.s[at1] = '@';
-					remoteinfo[at2] = '@';
+					break;
+				}
+				if (iter_pass == 1) {
+					mailfrom.s[at1] = '@';
+					err_nogateway(remoteip, mailfrom.s, 0, 1);
+					break;
+				}
+			} /*- for (;;) */
+		} else {
+			if (x && *x) {
+				if (str_diff(mailfrom.s, x) && str_diff(mailfrom.s, remoteinfo)) {
 					err_nogateway(remoteip, mailfrom.s, 0, 1);
 					return;
 				}
-				mailfrom.s[at1] = '@';
-				remoteinfo[at2] = '@';
-				/*
-				 * now compare domains 
-				 */
-				if (domain_compare(dom1, dom2))
-					return;
-			} else
-			{
-				if (str_diff(mailfrom.s, remoteinfo))
-				{
-					mailfrom.s[at1] = '@';
+			} else {
+				if (str_diff(mailfrom.s, remoteinfo)) {
 					err_nogateway(remoteip, mailfrom.s, 0, 1);
 					return;
-				}
-				mailfrom.s[at1] = '@';
-				/*
-				 * now compare mailfrom domain with $DEFAULT_DOMAIN
-				 */
-				if ((dom2 = env_get("DEFAULT_DOMAIN")))
-				{
-					if (domain_compare(dom1, dom2))
-						return;
 				}
 			}
-		} else
-		if (str_diff(mailfrom.s, remoteinfo))
-		{
-			err_nogateway(remoteip, mailfrom.s, 0, 1);
-			return;
 		}
 	}
 #endif
@@ -6598,7 +6617,7 @@ addrrelay() /*- Rejection of relay probes. */
 void
 getversion_smtpd_c()
 {
-	static char    *x = "$Id: smtpd.c,v 1.164 2011-12-22 12:02:30+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: smtpd.c,v 1.165 2012-01-19 16:40:44+05:30 Cprogrammer Exp mbhangui $";
 
 #ifdef INDIMAIL
 	if (x)
