@@ -1,5 +1,8 @@
 /*
  * $Log: spf.h,v $
+ * Revision 1.3  2012-04-10 20:36:21+05:30  Cprogrammer
+ * added remoteip argument (ipv4) to spfcheck()
+ *
  * Revision 1.2  2004-10-11 14:06:32+05:30  Cprogrammer
  * added function prototypes
  *
@@ -22,7 +25,7 @@
 #define SPF_DEFEXP   "See http://spf.pobox.com/" \
                      "why.html?sender=%{S}&ip=%{I}&receiver=%{xR}"
 
-int             spfcheck(void);
+int             spfcheck(char *);
 int             spfexplanation(stralloc *);
 int             spfinfo(stralloc *);
 
