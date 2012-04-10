@@ -1,5 +1,8 @@
 /*
  * $Log: spfquery.c,v $
+ * Revision 1.4  2012-04-10 20:38:03+05:30  Cprogrammer
+ * added remoteip argument (ipv4) to spfcheck()
+ *
  * Revision 1.3  2009-04-05 12:52:26+05:30  Cprogrammer
  * added preprocessor warning
  *
@@ -164,7 +167,7 @@ main(argc, argv)
 void
 getversion_spfquery_c()
 {
-	static char    *x = "$Id: spfquery.c,v 1.3 2009-04-05 12:52:26+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: spfquery.c,v 1.4 2012-04-10 20:38:03+05:30 Cprogrammer Stab mbhangui $";
 
 	x++;
 }
