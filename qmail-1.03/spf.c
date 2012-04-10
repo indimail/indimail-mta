@@ -1,5 +1,8 @@
 /*
  * $Log: spf.c,v $
+ * Revision 1.7  2012-04-10 20:37:22+05:30  Cprogrammer
+ * added remoteip argument (ipv4) to spfcheck()
+ *
  * Revision 1.6  2005-06-17 21:50:56+05:30  Cprogrammer
  * replaced struct ip_address with a shorter typdef ip_addr
  *
@@ -82,7 +85,6 @@ const static unsigned char urlchr_table[256] = {
 
 extern stralloc addr;
 extern stralloc helohost;
-extern char    *remoteip;
 extern char    *local;
 
 extern stralloc spflocal;
@@ -268,7 +270,7 @@ spfget(stralloc * spf, stralloc * domain)
 static int      spf_ptr(char *spec, char *mask);
 
 int
-spfsubst(stralloc * expand, char *spec, char *domain)
+spfsubst(stralloc *expand, char *spec, char *domain)
 {
 	static char     hexdigits[] = "0123456789abcdef";
 	stralloc        sa = { 0 };
@@ -1250,7 +1252,7 @@ spflookup(stralloc * domain)
 }
 
 int
-spfcheck()
+spfcheck(char *remoteip)
 {
 	stralloc        domain = { 0 };
 	int             pos;
@@ -1333,7 +1335,7 @@ spfinfo(sa)
 void
 getversion_spf_c()
 {
-	static char    *x = "$Id: spf.c,v 1.6 2005-06-17 21:50:56+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: spf.c,v 1.7 2012-04-10 20:37:22+05:30 Cprogrammer Stab mbhangui $";
 
 	x++;
 }
