@@ -104,7 +104,7 @@ main(argc, argv)
 		die_nomem();
 
 	dns_init(0);
-	if ((r = spfcheck()) == SPF_NOMEM)
+	if ((r = spfcheck(remoteip)) == SPF_NOMEM)
 		die_nomem();
 	substdio_puts(subfdout, "result=");
 	switch (r)
