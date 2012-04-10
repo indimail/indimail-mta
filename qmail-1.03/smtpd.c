@@ -1,5 +1,8 @@
 /*
  * $Log: smtpd.c,v $
+ * Revision 1.166  2012-04-10 20:32:39+05:30  Cprogrammer
+ * use ipv4 address for spf
+ *
  * Revision 1.165  2012-01-19 16:40:44+05:30  Cprogrammer
  * allow restricting of MASQUERADE to the value set by MASQUERADE env variable
  *
@@ -646,7 +649,7 @@ int             wildmat_internal(char *, char *);
 int             ssl_rfd = -1, ssl_wfd = -1;	/*- SSL_get_Xfd() are broken */
 char           *servercert, *clientca, *clientcrl;
 #endif
-char           *revision = "$Revision: 1.165 $";
+char           *revision = "$Revision: 1.166 $";
 char           *protocol = "SMTP";
 stralloc        proto = { 0 };
 static stralloc Revision = { 0 };
@@ -4027,7 +4030,11 @@ smtp_mail(char *arg)
 	flagbarfspf = 0;
 	if (spfbehavior && !relayclient)
 	{
-		switch (r = spfcheck())
+#ifdef IPV6
+		switch (r = spfcheck(remoteip4))
+#else
+		switch (r = spfcheck(remoteip))
+#endif
 		{
 		case SPF_OK:
 			if (!env_put2("SPFRESULT", "pass"))
@@ -6617,7 +6624,7 @@ addrrelay() /*- Rejection of relay probes. */
 void
 getversion_smtpd_c()
 {
-	static char    *x = "$Id: smtpd.c,v 1.165 2012-01-19 16:40:44+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: smtpd.c,v 1.166 2012-04-10 20:32:39+05:30 Cprogrammer Stab mbhangui $";
 
 #ifdef INDIMAIL
 	if (x)
