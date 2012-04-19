@@ -89,7 +89,7 @@ changerc(name)
 			goto rerr;
 		}
 		rclose(orc);			/* success! drop the old and */
-		if (dp = incnamed->enext)	/* fixup the name list */
+		if ((dp = incnamed->enext))	/* fixup the name list */
 			incnamed->enext = dp->enext, free(dp);
 	}
 	ifstack.filled = ifdepth;	/* close all the braces */
