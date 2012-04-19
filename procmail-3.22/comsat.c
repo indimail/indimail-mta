@@ -121,7 +121,7 @@ setcomsat(chp)
 		}
 	}
 	onguard();					/* update the address atomically */
-	if (csvalid = newvalid)
+	if ((csvalid = newvalid))
 		tmemmove(&csaddr, &newaddr, sizeof (newaddr));
 	offguard();
 	return newvalid;
