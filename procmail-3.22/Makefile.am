@@ -1,14 +1,16 @@
 ACLOCAL_AMFLAGS = -I m4
 COFLAGS=-z+05:30
+AM_CFLAGS = -g -O4 -fPIC -Wno-parentheses 
 RM	= /bin/rm -f
 DEVNULL = /dev/null
+DIST_COMMON=ChangeLog COPYING AUTHORS
 #AM_CFLAGS=-O2 -pedantic -Wreturn-type -Wunused -Wformat -Wtraditional -Wpointer-arith \
 #	   -Wconversion -Waggregate-return \
 #	   #-Wimplicit -Wshadow -Wid-clash-6 #-Wuninitialized
 #
 MOSTLYCLEANFILES=man/*.1 man/*.5 man/man.sed.* man/man.sed procmail-@VERSION@-rpmlintrc \
 				 procmail_perm_list formail.1 lockfile.1 procmail.1 \
-				 procmailex.5 procmailrc.5 procmailsc.5
+				 procmailex.5 procmailrc.5 procmailsc.5 procmail.spec
 
 noinst_SCRIPTS = procmail.spec procmail-@VERSION@-rpmlintrc
 
