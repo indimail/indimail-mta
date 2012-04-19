@@ -43,7 +43,7 @@ P((void))
 {								/* zorch whitespace before the ':' */
 	struct field  **pp, *p;
 	char           *cp;
-	for (pp = &rdheader; p = *pp; pp = &(*pp)->fld_next)
+	for (pp = &rdheader; (p = *pp); pp = &(*pp)->fld_next)
 		if ((cp = p->fld_text + p->id_len - 1, *cp == HEAD_DELIMITER) &&	/* has : */
 			(*--cp == ' ' || *cp == '\t')) {	/* has ws */
 			char           *q = cp++;
