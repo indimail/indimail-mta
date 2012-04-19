@@ -94,7 +94,7 @@ auth_finduser(user, sock)
 {
 	if (!(authi.pw = cgetpwnam(user, sock))) {	/* /etc/passwd user lookup */
 		char           *p;
-		if (p = strchr(user, '@'))	/* does the username contain an @? */
+		if ((p = strchr(user, '@')))	/* does the username contain an @? */
 			*p = '\0';			/* clueless user using the mailaddress */
 		castlower(user);		/* make it all lowercase (luser problem no. 1) */
 		if (!(authi.pw = cgetpwnam(user, sock)))	/* ok, be nice and try again */
@@ -186,7 +186,7 @@ auth_zeroout(pass)
 	auth_identity  *pass;
 {
 	struct passwd  *p;
-	if (p = (struct passwd *) pass->pw) {
+	if ((p = (struct passwd *) pass->pw)) {
 		bbzero(p->pw_name, strlen(p->pw_name));
 		if (p->pw_passwd)
 			bbzero(p->pw_passwd, strlen(p->pw_passwd));
@@ -206,7 +206,7 @@ auth_freeid(pass)
 {
 	struct passwd  *p;
 	auth_zeroout(pass);
-	if (p = (struct passwd *) pass->pw)
+	if ((p = (struct passwd *) pass->pw))
 		free(p->pw_name), free(p->pw_dir), free(p->pw_shell), free(p);
 	if (pass->mbox)
 		free(pass->mbox);
