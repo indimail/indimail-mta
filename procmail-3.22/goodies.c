@@ -21,6 +21,7 @@ static /*const */ char rcsid[] =
 #include "cstdio.h"
 #include "variables.h"
 #include "goodies.h"
+#include <string.h>
 
 const char      test[] = "test";
 const char     *Tmnate, *All_args;
@@ -350,7 +351,7 @@ readparse(p, fpgetc, sarg, skipping)
 				char           *q;
 				if (sarg)
 					goto copyit;
-				if (q = simplesplit(p, startb, fencepost, &got))	/* simply split */
+				if ((q = simplesplit(p, startb, fencepost, &got)))	/* simply split */
 					p = q;		/* it up in arguments */
 				else
 					skipping |= 1, p = fencepost;
@@ -448,7 +449,7 @@ void
 metaparse(p)
 	const char     *p;			/* result in buf */
 {
-	if (sh = ! !strpbrk(p, shellmetas))
+	if ((sh = ! !strpbrk(p, shellmetas)))
 		strcpy(buf, p);			/* copy literally, shell will parse */
 	else {
 		sgetcp = p = tstrdup(p);
