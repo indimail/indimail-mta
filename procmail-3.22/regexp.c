@@ -545,7 +545,7 @@ cleantail(start, thiss, th1)
 	const unsigned  th1;
 {
 	register struct eps **reg, *save = Ceps & tswitch, *oldthis;
-	while (thiss = *(reg = &PC(oldthis = thiss, th1)))	/* wipe out list till you */
+	while ((thiss = *(reg = &PC(oldthis = thiss, th1))))	/* wipe out list till you */
 		if (start < (char *) PcP(reg))
 			*reg = 0;			/* reach tswitch */
 		else
@@ -715,14 +715,18 @@ bregexec(code, text, str, len, ign_case)
 								goto Yep;	/* character in class */
 							break;
 						case OPC_DOT - OPB:	/* dot-wildcard */
-							if (i != '\n')
-							  Yep:if (!PC(reg, ot1)) {	/* state not yet pushed */
+							if (i != '\n') {
+Yep:
+								if (!PC(reg, ot1)) {	/* state not yet pushed */
 									PC(reg, ot1) = other;
 									other = reg;	/* push location */
-								  earlier:PCp(reg, ot1) = start;
+earlier:
+									PCp(reg, ot1) = start;
 															/* onto other pc-stack */
-								} else if (start < (char *) PCp(reg, ot1))
+								} else
+								if (start < (char *) PCp(reg, ot1))
 									goto earlier;
+							}
 						}
 						break;
 					}
