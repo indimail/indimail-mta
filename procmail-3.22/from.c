@@ -154,11 +154,13 @@ makeFrom(from, invoker)
 					if (tstamp)
 						lfr = findtstamp(themail.p + STRLEN(From_), rstart)
 							- themail.p + tstamp;
-					else if (!from)	/* leave the From_ line alone */
+					else
+					if (!from) {	/* leave the From_ line alone */
 						if (linv)	/* fake alert? */
 							lfr = tfrl;	/* yes, so separate From_ from the rest */
 						else
 							lfr = 0, extra += tfrl;	/* no, tack it onto the rest */
+					}
 					goto got_from;
 				}
 			}
@@ -178,11 +180,13 @@ makeFrom(from, invoker)
 			if (!tstamp)		/* no timestamp, so generate it all */
 				strcat(strcpy(themail.p, From_), fwhom);	/* From user */
 		} else {
-			if (lfr)			/* did we skip a From_ line? */
+			if (lfr) {			/* did we skip a From_ line? */
 				if (tstamp)		/* copy the timestamp over the tail */
 					strcpy(rstart - tstamp, buf2);
-				else if (from)	/* whole new From_? */
+				else
+				if (from)	/* whole new From_? */
 					strcat(strcat(strcpy(themail.p, From_), fwhom), buf2);
+			}
 			strcat(strcpy(rstart, Fakefield), invoker);	/* fake alert */
 		}						/* overwrite the trailing \0 again */
 		strcat(themail.p, buf2);
@@ -205,7 +209,7 @@ checkprivFrom_(euid, logname, override)
 			for (kp = trusted_ids; *kp; kp++)
 				if (!strcmp(logname, *kp))	/* is it amongst the privileged? */
 					goto privileged;
-		if (grp = getgrgid(gid))	/* check out the invoker's gid */
+		if ((grp = getgrgid(gid)))	/* check out the invoker's gid */
 			for (logname = grp->gr_name, kp = trusted_ids; *kp; kp++)
 				if (!strcmp(logname, *kp))	/* is it among the privileged? */
 					goto privileged;
