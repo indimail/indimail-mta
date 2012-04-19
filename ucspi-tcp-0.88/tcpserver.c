@@ -1,5 +1,8 @@
 /*
  * $Log: tcpserver.c,v $
+ * Revision 1.47  2012-04-19 21:11:31+05:30  Cprogrammer
+ * undefine MYSQL_CONFIG for IPV6
+ *
  * Revision 1.46  2010-04-16 13:13:13+05:30  Cprogrammer
  * fixed passing parameter for MYSQL_OPT_CONNECT_TIMEOUT
  *
@@ -159,7 +162,7 @@
 #include "auto_home.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: tcpserver.c,v 1.46 2010-04-16 13:13:13+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: tcpserver.c,v 1.47 2012-04-19 21:11:31+05:30 Cprogrammer Stab mbhangui $";
 #endif
 
 #ifdef IPV6
@@ -658,6 +661,11 @@ matchinet(char *ip, char *token)
 		return (1);
 	return (0);
 }
+
+#ifdef IPV6
+#undef MYSQL_CONFIG
+#endif
+
 #if defined(MYSQL_CONFIG) && defined(HAS_MYSQL)
 #include <mysql.h>
 #include <mysqld_error.h>
@@ -1583,7 +1591,7 @@ main(int argc, char **argv)
 		{
 		case 0:
 			close(s);
-#if defined(MYSQL_CONFIG) && defined(HAS_MYSQL)
+#if defined(MYSQL_CONFIG) && defined(HAS_MYSQL) && IPV6
 			if (conn)
 				check_db(conn);
 #endif
