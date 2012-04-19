@@ -18,7 +18,7 @@ char           *sstrstr P((const char *const phaystack, const char *const pneedl
 void bbzero     Q((void *s, size_t n));
 #endif
 
-#ifdef NOstrlcat
+#ifndef HAVE_STRLCAT
 size_t sstrlcat Q((char *dst, const char *src, size_t size));
 size_t sstrlcpy Q((char *dst, const char *src, size_t size));
 #endif
