@@ -176,7 +176,7 @@ main(argc, argv)
 				{
 					auth_identity  *pass;
 					static char    *ma;
-					if (*cp && cp[1] || ma && sleepsec >= 0)	/* second pass? */
+					if ((*cp && cp[1]) || (ma && sleepsec >= 0))	/* second pass? */
 						goto eusg;
 					if (!ma) {	/* ma initialised last time? */
 						if (!
