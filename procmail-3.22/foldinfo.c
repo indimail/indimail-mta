@@ -18,6 +18,7 @@ static /*const */ char rcsid[] =
 #include "goodies.h"
 #include "locking.h"
 #include "foldinfo.h"
+#include "acommon.h"
 
 static const char
                 maildirtmp[] = MAILDIRtmp, maildircur[] = MAILDIRcur;
@@ -108,7 +109,7 @@ trymkdir(dir, paranoid, i)
 			break;
 		else if (!mkdir(dir, NORMdirperm)) {	/* it's not there, can we make it? */
 			if (!paranoid)		/* do we need to double check the permissions? */
-				return S_IFDIR | NORMdirperm & ~cumask;	/* nope */
+				return (S_IFDIR | NORMdirperm & ~cumask);	/* nope */
 			tries++;			/* the mkdir succeeded, so take another shot */
 		}
 	} while (tries-- > 0);
@@ -121,7 +122,7 @@ mkmaildir(buffer, chp, paranoid)
 	const int       paranoid;
 {
 	mode_t          mode;
-	int             i;
+	int             i = 0;
 	if (paranoid)
 		memcpy(buf2, buffer, i = chp - buffer + 1), buf2[i - 1] = *MCDIRSEP_, buf2[i] = '\0';
 	return (strcpy(chp, maildirnew), mode = trymkdir(buffer, paranoid, i), S_ISDIR(mode))
@@ -136,7 +137,7 @@ foldertype(type, forcedir, modep, paranoid)
 	struct stat    *const paranoid;
 {
 	struct stat     stbuf;
-	mode_t          mode;
+	mode_t          mode = 0;
 	int             i;
 	char           *chp;
 	if (!type)
@@ -190,10 +191,12 @@ foldertype(type, forcedir, modep, paranoid)
 			goto ret;
 		}
 		if (!mode)
-		  newfile:mode = S_IFREG | NORMperm & ~cumask;
-	  file:type = ft_FILE;
+newfile:
+			mode = S_IFREG | NORMperm & ~cumask;
+file:
+			type = ft_FILE;
 	}
-  done:
+done:
 	if (paranoid)
 		*paranoid = stbuf;
 	else
