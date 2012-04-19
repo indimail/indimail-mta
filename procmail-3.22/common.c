@@ -33,7 +33,7 @@ shexec(argv)
 	execvp(*argv, (char *const *) argv);
 	for (p = (const char **) argv, i = 1; i++, *p++;);	/* count the arguments */
 	newargv = malloc(i * sizeof *p);	/* no shell script? -> trouble */
-	for (*(p = (const char **) newargv) = binsh; *++p = *argv++;);
+	for (*(p = (const char **) newargv) = binsh; (*++p = *argv++););
 	execv(*newargv, newargv);
 	free(newargv);
 	nlog("Failed to execute");
@@ -45,7 +45,7 @@ void
 detab(p)
 	char           *p;
 {
-	while (p = strpbrk(p, "\t\n\v\f\r"))
+	while ((p = strpbrk(p, "\t\n\v\f\r")))
 		*p = ' ';				/* take out all tabs and other specials */
 }
 
