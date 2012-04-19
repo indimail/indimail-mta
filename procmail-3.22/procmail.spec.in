@@ -1,15 +1,15 @@
 %define _prefix            @prefix@
 
-Summary: procmail mail delivery agent
+Summary: The Mail processing/filtering program
 Name: procmail
 Version: @VERSION@
 Release: 1
 License: GPLv3
-Group: Daemons
+Group: Productivity/Networking/Email/Utilities
 Source0: http://downloads.sourceforge.net/indimail/%{name}-%{version}.tar.gz
 Source1: http://downloads.sourceforge.net/indimail/%{name}-%{version}-rpmlintrc
-Packager: Manvendra Bhangui <manvendra@indimail.org>
 BuildRequires: -post-build-checks  
+URL: http://www.indimail.org
 %if 0%{?opensuse_bs}
 # define to 1 if building on openSUSE build service
 %define build_on_obs       1
@@ -61,6 +61,7 @@ incoming mail automatically.  SmartList also needs procmail to operate.
 [ "$RPM_BUILD_ROOT" != "/" ] && %{__rm} -fr $RPM_BUILD_ROOT
 %{__make} -s DESTDIR=%{buildroot}
 %{__make} -s DESTDIR=%{buildroot} install-strip
+find %{buildroot}%{_prefix}/man -type f -exec gzip -q {} \;
 
 %files
 %dir %attr(555,root,qmail)        %{_prefix}
@@ -75,7 +76,7 @@ incoming mail automatically.  SmartList also needs procmail to operate.
 %attr(555,root,root)               %{_prefix}/bin/formail
 %attr(444,root,root)               %{_prefix}/etc/procmail_perm_list
 %defattr(-,root,root)
-%doc %{_prefix}/man/*/*
+%doc %attr(444,root,qmail)         %{_prefix}/man/*/*
 %doc [A-Z]* examples
 
 %changelog
