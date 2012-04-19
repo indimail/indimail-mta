@@ -57,7 +57,7 @@ elog(newt)
 			if (MINlogbuf > newmax)	/* ...or that would be too small */
 				newmax = MINlogbuf;
 			lcking |= lck_LOGGING;	/* about to change old or lmax */
-			if (p = lmax ? frealloc(old, newmax) : fmalloc(newmax))	/* fragile allocation */
+			if ((p = lmax ? frealloc(old, newmax) : fmalloc(newmax)))	/* fragile allocation */
 				lmax = newmax, old = p;	/* update the values */
 			lcking &= ~lck_LOGGING;	/* okay, they're stable again */
 			if (!p)				/* couldn't expand the buffer? */
@@ -299,7 +299,7 @@ P((void))
 {								/* next rcfile specified on the command line */
 	const char     *p;
 	int             rval = 2;
-	while (p = *gargv) {
+	while ((p = *gargv)) {
 		gargv++;
 		if (!strchr(p, '=')) {
 			if (strlen(p) > linebuf - 1) {
@@ -361,7 +361,7 @@ P((void))
 		nlog("Terminating prematurely");
 		if (!(lcking & lck_DELAYSIG)) {
 			register unsigned i, j;
-			if (i = (lcking & ~lck__NOMSG) >> 1) {
+			if ((i = (lcking & ~lck__NOMSG) >> 1)) {
 				elog(whilstwfor);
 				for (j = 0; !((i >>= 1) & 1); j++);
 				elog(msg[j]);
@@ -542,7 +542,7 @@ conditions(flags, prevcond, lastsucc, lastcond, skipping, nrcond)
 		nrcond = !flags[ALSO_NEXT_RECIPE] && !flags[ALSO_N_IF_SUCC] && !flags[ELSE_DO] && !flags[ERROR_DO];
 	startchar = themail.p;
 	tobesent = thebody - themail.p;
-	if (flags[BODY_GREP])		/* what needs to be egrepped? */
+	if (flags[BODY_GREP]) {		/* what needs to be egrepped? */
 		if (flags[HEAD_GREP])
 			tobesent = filled;
 		else {
@@ -550,6 +550,7 @@ conditions(flags, prevcond, lastsucc, lastcond, skipping, nrcond)
 			tobesent = filled - tobesent;
 			goto noconcat;
 		}
+	}
 	if (!skipping)
 		concon(' ');
   noconcat:
@@ -592,7 +593,7 @@ conditions(flags, prevcond, lastsucc, lastcond, skipping, nrcond)
 			i = 0;				/* assume failure on overflow */
 		if (i) {				/* check out all conditions */
 			int             negate, scoreany;
-			double          weight, xponent, lscore;
+			double          weight = 0.0, xponent = 0.0, lscore;
 			char           *lstartchar = startchar;
 			long            ltobesent = tobesent, sizecheck = filled;
 			for (chp = strchr(buf2, '\0'); --chp >= buf2;) {
