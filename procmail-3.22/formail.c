@@ -144,12 +144,12 @@ renfield(pointer, oldl, newname, newl)
 	p = *pointer;
 	(chp = p->fld_text)[p->Tot_len - 1] = '\0';
 	if (eqFrom_(chp))			/* continued From_ to */
-		for (; chp = strstr(chp, "\n>"); *++chp = ' ');	/* continued regular field */
+		for (; (chp = strstr(chp, "\n>")); *++chp = ' ');	/* continued regular field */
 	if (newl == STRLEN(From_) && eqFrom_(newname)) {
-		for (chp = p->fld_text; chp = strchr(chp, '\n');)	/* continued regular */
+		for (chp = p->fld_text; (chp = strchr(chp, '\n'));)	/* continued regular */
 			if (*++chp == ' ' || *chp == '\t')	/* to continued From_ field */
 				*chp = '>';
-		for (chp = p->fld_text; chp = strstr(chp, "\n "); *++chp = '>');
+		for (chp = p->fld_text; (chp = strstr(chp, "\n ")); *++chp = '>');
 		goto replaceall;
 	}
 	if (newname[newl - 1] == HEAD_DELIMITER)	/* completely new field */
@@ -180,7 +180,7 @@ procfields(sareply)
 		if ((fp2 = findf(fldp, &Iheader)) &&	/* delete fields */
 			!(sareply && fldp->id_len < fp2->Tot_len - 1))	/* empty replacement? */
 			goto delfld;
-		if (fp2 = findf(fldp, &Rheader)) {	/* explicitly rename field */
+		if ((fp2 = findf(fldp, &Rheader))) {	/* explicitly rename field */
 			renfield(afldp, fp2->id_len, (char *) fp2->fld_text + fp2->id_len, fp2->Tot_len - fp2->id_len);
 		  fixfldp:
 			fldp = *afldp;
@@ -188,7 +188,7 @@ procfields(sareply)
 			struct field   *uf;
 			if ((uf = findf(fldp, &uheader)) && !uf->fld_ref)
 				uf->fld_ref = afldp;	/* first uheader, keep it */
-			else if (fp2 = findf(fldp, &Uheader)) {
+			else if ((fp2 = findf(fldp, &Uheader))) {
 				if (fp2->fld_ref) {
 					struct field  **ch_afldp;
 					if (afldp == (ch_afldp = &(*fp2->fld_ref)->fld_next))
@@ -275,7 +275,7 @@ getsender(namep, fldp, headreply)
 			chp = saddr;
 			while ((pastad = strchr(chp, '\n')) && (pastad = strchr(pastad, ' ')))
 				chp = pastad + 1;	/* skip to the last uucp >From */
-			if (pastad = strchr(chp, ' ')) {	/* found an address? */
+			if ((pastad = strchr(chp, ' '))) {	/* found an address? */
 				char           *savetmp;	/* lift it out */
 				savetmp = malloc(1 + (j = pastad - chp) + 1 + 1);
 				tmemmove(savetmp, chp, j);
@@ -444,7 +444,7 @@ main(lastm, argv)
 	struct field   *fldp, *fp2, **afldp, *fdate, *fcntlength, *fsubject, *fFrom_;
 	if (lastm)					/* sanity check, any argument at all? */
 #define Qnext_arg()	if(!*chp&&!(chp=(char*)*++argv))goto usg
-		while (chp = (char *) *++argv) {
+		while ((chp = (char *) *++argv)) {
 			if ((lastm = *chp++) == FM_SKIP)
 				goto number;
 			else if (lastm != FM_TOTAL)
@@ -597,11 +597,12 @@ main(lastm, argv)
 							break;
 						}		/* second field attached? */
 						lastm = i;
-						if ((i = breakfield(chp, (size_t) (namep - chp))) < 0)	/* partial */
+						if ((i = breakfield(chp, (size_t) (namep - chp))) < 0) {	/* partial */
 							if (lastm > 0)	/* complete first field */
 								goto invfield;	/* impossible combination */
 							else
 								i = -i;
+						}
 						if (i)
 							tmemmove((char *) fldp->fld_text + lnl, chp, i), copied = 1;
 						else if (namep > chp ||	/* garbage? */
@@ -609,7 +610,8 @@ main(lastm, argv)
 								 (!(i = breakfield(chp, strlen(chp))) &&	/* fieldish? */
 								  *chp) ||	/* but "" is fine */
 								 i <= 0 && (i = -i, lastm > 0))	/* impossible combination */
-					  invfield:{
+invfield:
+						{
 							nlog("Invalid field-name:");
 							logqnl(chp ? chp : "");
 							goto usg;
@@ -743,7 +745,7 @@ main(lastm, argv)
 		for (fldp = *(afldp = &rdheader); fldp;) {
 			if (zap) {			/* go through the linked list of header-fields */
 				chp = fldp->fld_text + (j = fldp->id_len);
-				if (chp[-1] == HEAD_DELIMITER)
+				if (chp[-1] == HEAD_DELIMITER) {
 					if ((*chp != ' ' && *chp != '\t') && fldp->Tot_len > j + 1) {
 						chp = j + (*afldp = fldp = realloc(fldp, FLD_HEADSIZ + (i = fldp->Tot_len++) + 1))->fld_text;
 						tmemmove(chp + 1, chp, i - j);
@@ -754,6 +756,7 @@ main(lastm, argv)
 						fldp = *afldp;
 						continue;
 					}
+				}
 			}
 			if (conctenate)
 				concatenate(fldp);	/* save fields for later perusal */
@@ -838,8 +841,8 @@ main(lastm, argv)
 			addbuf();
 			rdheader->fld_next = old;
 		}
-		for (fldp = aheader; fldp; fldp = fldp->fld_next)
-			if (!findf(fldp, &rdheader))	/* only add what didn't exist */
+		for (fldp = aheader; fldp; fldp = fldp->fld_next) {
+			if (!findf(fldp, &rdheader)) {	/* only add what didn't exist */
 				if (fldp->id_len + 1 >= fldp->Tot_len &&	/* field name only */
 					(fldp->id_len == STRLEN(messageid) && !strncasecmp(fldp->fld_text, messageid, STRLEN(messageid))
 					 || fldp->id_len == STRLEN(res_messageid) && !strncasecmp(fldp->fld_text, res_messageid, STRLEN(res_messageid))
@@ -867,10 +870,12 @@ main(lastm, argv)
 					h4++;		/* put it in */
 				} else
 					addfield(&nheader, fldp->fld_text, fldp->Tot_len);
+			}
+		}
 		if (logsummary) {
 			if (eqFrom_(rdheader->fld_text))
 				putssn(rdheader->fld_text, rdheader->Tot_len);
-			if (fldp = findf(fsubject, &rdheader)) {
+			if ((fldp = findf(fsubject, &rdheader))) {
 				concatenate(fldp);
 				(chp = fldp->fld_text)[i = fldp->Tot_len - 1] = '\0';
 				detab(chp);
@@ -995,7 +1000,7 @@ main(lastm, argv)
 		if (babyl && *buf == BABYL_SEP1)
 			babylstart = 1, closemine(), opensink();	/* discard the rest */
 		if (areply && bogus)	/* escape the body */
-			if (fldp = rdheader) {	/* we already read some "valid" fields */
+			if ((fldp = rdheader)) {	/* we already read some "valid" fields */
 				register char  *p;
 				rdheader = 0;
 				do {			/* careful, they can contain newlines */
@@ -1003,7 +1008,7 @@ main(lastm, argv)
 					chp = fldp->fld_text;
 					do {
 						lputssn(escap, escaplen);
-						if (p = memchr(chp, '\n', fldp->Tot_len))
+						if ((p = memchr(chp, '\n', fldp->Tot_len)))
 							p++;
 						else
 							p = (char *) fldp->fld_text + fldp->Tot_len;
@@ -1012,7 +1017,7 @@ main(lastm, argv)
 					while ((chp = p) < (char *) fldp->fld_text + fldp->Tot_len);
 					free(fldp);	/* delete it */
 				}
-				while (fldp = fp2);	/* escape all fields we found */
+				while ((fldp = fp2));	/* escape all fields we found */
 			} else {
 				if (buffilled > 1)	/* we don't escape empty lines, looks neat */
 					lputssn(escap, escaplen);
