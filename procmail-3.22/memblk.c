@@ -168,7 +168,7 @@ static void mmapfailed P((const long len)) __attribute__ ((noreturn));
 		  jumpin:
 			; {
 				char           *newlast;
-				if (newlast = (*read_func) (mb->p + filled, mb->len - filled, data)) {
+				if ((newlast = (*read_func) (mb->p + filled, mb->len - filled, data))) {
 					filled = newlast - mb->p;
 					break;
 				}
