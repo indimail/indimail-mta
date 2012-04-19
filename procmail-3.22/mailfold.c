@@ -168,8 +168,8 @@ dirfile(chp, linkonly, type)
 		DIR            *dirp;
 		struct dirent  *dp;
 		char           *chp2;
-		if (dirp = opendir(buf)) {
-			while (dp = readdir(dirp))	/* there still are directory entries */
+		if ((dirp = opendir(buf))) {
+			while ((dp = readdir(dirp)))	/* there still are directory entries */
 				if ((j = strtol(dp->d_name, &chp2, 10)) > i && !*chp2)
 					i = j;		/* yep, we found a higher number */
 			closedir(dirp);		/* aren't we neat today */
@@ -217,9 +217,12 @@ dirfile(chp, linkonly, type)
 		goto ret;
 	}
 	if (!rlink(buf2, buf, 0))	/* try rename-via-link */
-	  opn:unlink(buf2);		/* success; remove the original */
-	else if (errno = EEXIST || !stat(buf, &stbuf) || errno != ENOENT || rename(buf2, buf))
-	  ret:return -1;			/* rename it, but only if it won't replace an existing file */
+opn:
+		unlink(buf2);		/* success; remove the original */
+	else
+	if (errno == EEXIST || !stat(buf, &stbuf) || errno != ENOENT || rename(buf2, buf))
+ret:
+		return -1;	/* rename it, but only if it won't replace an existing file */
 	setlastfolder(buf);
 	return opena(buf);
 }
@@ -244,7 +247,7 @@ writefolder(boxname, linkfolder, source, len, ignwerr, dolock)
 		strcpy(buf, boxname);	/* boxname can be found back in buf */
 	if (linkfolder) {			/* any additional directories specified? */
 		size_t          blen;
-		if (blen = Tmnate - linkfolder)	/* copy the names into safety */
+		if ((blen = Tmnate - linkfolder))	/* copy the names into safety */
 			Tmnate = (linkfolder = tmemmove(malloc(blen), linkfolder, blen)) + blen;
 		else
 			linkfolder = 0;
@@ -391,7 +394,7 @@ logabstract(lstfolder)
 			i = *thebody;
 			*thebody = '\0';	/* terminate the header, just in case */
 			if (eqFrom_(chp = themail.p)) {	/* any "From " header */
-				if (chp = strchr(themail.p, '\n'))
+				if ((chp = strchr(themail.p, '\n')))
 					*chp = '\0';
 				else
 					chp = thebody;	/* preserve mailbox format */
@@ -467,7 +470,7 @@ readmail(rhead, tobesent)
 				tmemmove(new.p + dfilled, thebody, filled -= tobesent);
 				freeblock(&themail);
 				themail = new;
-				private(1);
+				(void) private(1);
 				filled += dfilled;
 			}
 		} else {
@@ -482,7 +485,7 @@ readmail(rhead, tobesent)
 					tmemmove(new.p, themail.p, filled);
 				freeblock(&themail);
 				themail = new;
-				private(1);
+				(void) private(1);
 			}
 			readdyn(&themail, &filled, filled + tobesent);
 		}
@@ -492,7 +495,7 @@ readmail(rhead, tobesent)
 		if (rhead) {			/* did we read in a new header anyway? */
 			confield.filled = 0;
 			concnd = '\n';
-			while (thebody = strchr(thebody, '\n'))
+			while ((thebody = strchr(thebody, '\n')))
 				switch (*++thebody) {	/* mark continued fields */
 				case '\t':
 				case ' ':
