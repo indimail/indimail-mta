@@ -70,7 +70,7 @@ savepass(spass, uid)
 	const auth_identity *tpass;
 	if (auth_filledid(spass) && auth_whatuid(spass) == uid)
 		goto ret;
-	if (tpass = auth_finduid(uid, 0)) {	/* save by copying */
+	if ((tpass = auth_finduid(uid, 0))) {	/* save by copying */
 		auth_copyid(spass, tpass);
 	  ret:return spass;
 	}
@@ -95,7 +95,7 @@ main(argc, argv)
 	int             argc;
 	const char     *const argv[];
 {
-	register char  *chp, *chp2;
+	register char  *chp, *chp2 = (char *) 0;
 #if 0							/* enable this if you want to trace procmail */
 	kill(getpid(), SIGSTOP);	/*raise(SIGSTOP); */
 #endif
@@ -141,7 +141,7 @@ main(argc, argv)
 					case ALTFROMWHOPT:
 						if (*++chp2)
 							fromwhom = chp2;
-						else if (chp2 = (char *) argv[argc + 1])
+						else if ((chp2 = (char *) argv[argc + 1]))
 							argc++, fromwhom = chp2;
 						else
 							nlog("Missing name\n");
@@ -151,7 +151,7 @@ main(argc, argv)
 						static struct dyna_array newargv;
 						if (*++chp2)
 							goto setarg;
-						else if (chp2 = (char *) argv[argc + 1]) {
+						else if ((chp2 = (char *) argv[argc + 1])) {
 							argc++;
 						  setarg:app_valp(newargv, (const char *) chp2);
 							restargv = &(acc_valp(newargv, 0));
@@ -213,7 +213,8 @@ main(argc, argv)
 #endif
 		case 1:
 			if (presenviron || mailfilter)
-		  confldopt:{
+confldopt:
+			{
 				presenviron = mailfilter = 0;	/* -d disables -p and -m */
 				goto conflopt;
 			}
@@ -313,14 +314,14 @@ main(argc, argv)
 			readmail(0, 0L);	/* read in the mail completely */
 			if (Deliverymode) {
 				if (argv[argc + 1]) {	/* more than one recipient? */
-					private(0);	/* time to share */
+					(void) private(0);	/* time to share */
 					lockblock(&themail);
 				} else
-					private(1);
+					(void) private(1);
 				do {			/* chp should point to the first recipient */
 					chp2 = chp;
-					if (argv[++argc])	/* more than one recipient */
-						if (pidchild = sfork()) {
+					if (argv[++argc]) { /* more than one recipient */
+						if ((pidchild = sfork())) {
 							if (forkerr(pidchild, procmailn) || waitfor(pidchild) != EXIT_SUCCESS)
 								retvl2 = retval;
 							pidchild = 0;	/* loop for the next recipient */
@@ -329,8 +330,9 @@ main(argc, argv)
 							while (argv[++argc]);	/* skip till end of command line */
 							break;
 						}
+					}
 				}
-				while (chp = (char *) argv[argc]);
+				while ((chp = (char *) argv[argc]));
 			}
 			gargv = argv + argc;	/* save it for nextrcfile() */
 			if (Deliverymode) {	/* try recipient without changing case first */
@@ -341,7 +343,8 @@ main(argc, argv)
 					syslog(LOG_ERR, slogstr, unkuser, chp2);
 					return EX_NOUSER;	/* we don't handle strangers */
 				}
-			  dorcpt:if (enoughprivs(passinvk, euid, egid, auth_whatuid(pass), auth_whatgid(pass)))
+dorcpt:
+				if (enoughprivs(passinvk, euid, egid, auth_whatuid(pass), auth_whatgid(pass)))
 					goto Setuser;
 				nlog(insufprivs);
 				syslog(LOG_CRIT, "Insufficient privileges to deliver to \"%s\"\n", chp2);
@@ -419,7 +422,8 @@ main(argc, argv)
 				}
 			}
 			if (pass)			/* set preferred uid to the intended recipient */
-		  Setuser:{
+Setuser:
+			{
 				gid = auth_whatgid(pass);
 				uid = auth_whatuid(pass);
 				if (euid == ROOT_uid && (chp = (char *) auth_username(pass)) && *chp)
@@ -452,7 +456,7 @@ main(argc, argv)
 		}						/* bad news, be conservative */
 	}
 	doumask(INIT_UMASK);
-	while (chp = (char *) argv[argc]) {	/* interpret command line specs first */
+	while ((chp = (char *) argv[argc])) {	/* interpret command line specs first */
 		argc++;
 		if (!asenvcpy(chp) && mailfilter) {
 			gargv = &nullp;		/* stop at the first rcfile */
@@ -783,7 +787,7 @@ P((void))
 				  forward:if (locknext) {
 						if (!tolock) {	/* an explicit lockfile specified already */
 							*buf2 = '\0';	/* find the implicit lockfile ('>>name') */
-							for (chp = buf; i = *chp++;)
+							for (chp = buf; (i = *chp++);)
 								if (i == '>' && *chp == '>') {
 									chp = skpspace(chp + 1);
 									tmemmove(buf2, chp, i = strcspn(chp, EOFName));
@@ -840,9 +844,9 @@ P((void))
 			else {				/* dump the mail into a mailbox file or directory */
 				int             ofiltflag;
 				char           *end = buf + linebuf - 4;	/* reserve some room */
-				if (ofiltflag = flags[FILTER])
+				if ((ofiltflag = flags[FILTER]))
 					flags[FILTER] = 0, nlog(extrns), elog("filter-flag"), elog(ignrd);
-				if (chp = gobenv(buf, end)) {	/* can it be an environment name? */
+				if ((chp = gobenv(buf, end))) {	/* can it be an environment name? */
 					if (chp == end) {
 						getlline(buf, buf + linebuf);
 						goto fail;
@@ -890,7 +894,7 @@ P((void))
 						succeed = 1;
 						if (flags[CONTINUE]) {
 							yell("Forking", procmailn);
-							private(0);	/* can't share anymore */
+							(void) private(0);	/* can't share anymore */
 							inittmout(procmailn);
 							onguard();
 							if (!(pidchild = sfork())) {	/* clone yourself */
