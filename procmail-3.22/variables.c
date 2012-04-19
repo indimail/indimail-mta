@@ -81,7 +81,7 @@ sputenv(a)
 		if (!strncmp(a, *preenv, eq) && (*preenv)[eq] == '=')	/* environment? */
 		  wipenv:
 		{
-			while (*preenv = preenv[1])	/* wipe this entry out of the environment */
+			while ((*preenv = preenv[1]))	/* wipe this entry out of the environment */
 				preenv++;
 			break;
 		}
@@ -208,7 +208,7 @@ cleanupenv(preserve)
 	if (!preserve) {			/* drop the environment */
 		for (pp = keepenv; *pp; pp++) {	/* preserve a happy few */
 			len = strlen(*pp);
-			for (ep = emax; p = *ep; ep++)	/* scan for this keeper */
+			for (ep = emax; (p = *ep); ep++)	/* scan for this keeper */
 				if (!strncmp(*pp, p, len) && (p[len] == '=' || p[len - 1] == '_')) {
 					*ep = *emax;	/* it's fine, swap 'em */
 					*emax++ = p;
@@ -234,7 +234,7 @@ cleanupenv(preserve)
 		for (pp = (const char *const *) environ; pp != ep; pp++)	/* duplicate entry? */
 			if (!strncmp(*ep, *pp, len))
 				goto drop;
-		for (pp = ld_; p = *pp; pp++)	/* does it start with LD_ or similar? */
+		for (pp = ld_; (p = *pp); pp++)	/* does it start with LD_ or similar? */
 			if (!strncmp(*ep, p, strlen(p)))
 				goto drop;
 		ep++;
@@ -438,7 +438,7 @@ asenvcpy(src)
 	char           *src;
 {
 	const char     *chp;
-	if (chp = strchr(src, '='))
+	if ((chp = strchr(src, '=')))
 	{							/* is it an assignment? */
 	/*
 	 *    really change the uid now, since it would not be safe to
@@ -453,7 +453,7 @@ asenvcpy(src)
 		} else {
 			memcpy(buf, src, len);
 			src = buf + len;
-			if (chp = eputenv(chp, src)) {
+			if ((chp = eputenv(chp, src))) {
 				src[-1] = '\0';
 				asenv(chp);
 			}
