@@ -50,7 +50,7 @@ P((void))
 {
 	register void  *p;
 	lcking |= lck_MEMORY;
-	if (p = malloc(1))
+	if ((p = malloc(1)))
 		free(p);				/* works on some systems with latent free */
 }
 
@@ -61,14 +61,15 @@ tmalloc(len)
 	void           *p;
 	int             i;			/* "out of swap space" condition */
 	lcking |= lck_ALLOCLIB;
-	if (p = malloc(len))
+	if ((p = malloc(len)))
 		goto ret;
 	heapdefrag();
 	heapdefrag();				/* try some magic */
 	for (i = nomemretry; i < 0 || i--;) {
 		suspend();				/* problems?  don't panic, wait a few secs till */
-		if (p = malloc(len))	/* some other process has paniced (and died 8-) */
-	  ret:{
+		if ((p = malloc(len)))	/* some other process has paniced (and died 8-) */
+ret:
+		{
 			lcking &= ~(lck_MEMORY | lck_ALLOCLIB);
 			return p;
 		}
@@ -84,14 +85,15 @@ trealloc(old, len)
 	void           *p;
 	int             i;
 	lcking |= lck_ALLOCLIB;
-	if (p = realloc(old, len))
+	if ((p = realloc(old, len)))
 		goto ret;				/* for comment see tmalloc above */
 	heapdefrag();
 	heapdefrag();
 	for (i = nomemretry; i < 0 || i--;) {
 		suspend();
-		if (p = realloc(old, len))
-	  ret:{
+		if ((p = realloc(old, len)))
+ret:
+		{
 			lcking &= ~(lck_MEMORY | lck_ALLOCLIB);
 			return p;
 		}
@@ -259,11 +261,12 @@ ssleep(seconds)
 {
 	long            t;
 	sleep(seconds);
-	if (alrmtime)
+	if (alrmtime) {
 		if ((t = alrmtime - time((time_t *) 0)) <= 1)	/* if less than 1s timeout */
 			ftimeout();			/* activate it by hand now */
 		else					/* set it manually again, to avoid problems with */
 			alarm((unsigned) t);	/* badly implemented sleep library functions */
+	}
 }
 
 void
