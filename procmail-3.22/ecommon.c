@@ -21,7 +21,7 @@ tmalloc(len)
 	const size_t    len;
 {
 	void           *p;
-	if (p = malloc(len))
+	if ((p = malloc(len)))
 		return p;
 	nlog(outofmem);
 	exit(EX_OSERR);
@@ -32,7 +32,7 @@ trealloc(old, len)
 	void           *old;
 	const size_t    len;
 {
-	if (old = realloc(old, len))
+	if ((old = realloc(old, len)))
 		return old;
 	nlog(outofmem);
 	exit(EX_OSERR);
