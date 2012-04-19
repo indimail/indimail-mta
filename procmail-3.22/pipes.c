@@ -168,7 +168,7 @@ callnewprog(newname)
 				if (p - 1 == All_args && crestarg) {
 					const char     *const *walkargs = restargv;	/* expand "$@" */
 					argc--;
-					while (newargv[argc] = *walkargs++)
+					while ((newargv[argc] = *walkargs++))
 						argc++;
 				}
 			}
@@ -185,7 +185,7 @@ pipthrough(line, source, len)
 	const long      len;
 {
 	int             pinfd[2], poutfd[2];
-	char           *eq;
+	char           *eq = (char *) 0;
 	if (Stdout) {
 		*(eq = strchr(Stdout, '\0') - 1) = '\0';	/* chop the '=' */
 		if (!(backblock = getenv(Stdout)))	/* no current value? */
@@ -322,7 +322,7 @@ pipin(line, source, len, asgnlastf)
 			}
 		}
 		pidchild = 0;
-	  builtin:
+builtin:
 		if (!sh)
 			concatenate(line);
 		if (asgnlastf)
