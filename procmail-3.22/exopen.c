@@ -72,7 +72,7 @@ unique(full, p, len, mode, verbos, flags)
 	static time_t   t;
 	char           *dot, *end, *host;
 	struct stat     filebuf;
-	int             nicediff, i, didnice, retry = RETRYunique;
+	int             nicediff = -1, i, didnice = -1, retry = RETRYunique;
 	if (flags & doCHOWN) {		/* semi-critical, try raising the priority */
 		nicediff = nice(0);
 		SETerrno(0);
