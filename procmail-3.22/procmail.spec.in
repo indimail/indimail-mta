@@ -4,7 +4,7 @@ Summary: The Mail processing/filtering program
 Name: procmail
 Version: @VERSION@
 Release: 1
-License: GPLv3
+License: GPL-3.0+
 Group: Productivity/Networking/Email/Utilities
 Source0: http://downloads.sourceforge.net/indimail/%{name}-%{version}.tar.gz
 Source1: http://downloads.sourceforge.net/indimail/%{name}-%{version}-rpmlintrc
