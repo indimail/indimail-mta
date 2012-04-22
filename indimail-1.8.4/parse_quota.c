@@ -82,7 +82,7 @@ parse_quota(char *quota, mdir_t *count)
 		}
 		if (quota[i] == 'g' || quota[i] == 'G')
 		{
-			per_user_limit = per_user_limit * 1048576 * 1048576;
+			per_user_limit = per_user_limit * 1073741824;
 			break;
 		}
 	}

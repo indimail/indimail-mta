@@ -130,7 +130,7 @@ user_over_quota(char *Maildir, char *quota, int cur_msgsize)
 		}
 		if (quota[i] == 'g' || quota[i] == 'G')
 		{
-			mail_size_limit = mail_size_limit * 1048576 * 1048576;
+			mail_size_limit = mail_size_limit * 1073741824;
 			break;
 		}
 	}
