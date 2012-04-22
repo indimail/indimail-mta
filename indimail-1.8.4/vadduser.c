@@ -1,5 +1,8 @@
 /*
  * $Log: vadduser.c,v $
+ * Revision 2.36  2012-04-22 13:59:03+05:30  Cprogrammer
+ * use 64bit integer for quota calculation
+ *
  * Revision 2.35  2011-11-09 19:45:49+05:30  Cprogrammer
  * removed getversion
  *
@@ -159,7 +162,7 @@
 #include <signal.h>
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vadduser.c,v 2.35 2011-11-09 19:45:49+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: vadduser.c,v 2.36 2012-04-22 13:59:03+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 char            Email[MAX_BUFF], User[MAX_BUFF], Domain[MAX_BUFF], Passwd[MAX_BUFF],
@@ -180,7 +183,8 @@ main(argc, argv)
 	int             argc;
 	char           *argv[];
 {
-	int             i, quota, pass_len = 8, users_per_level = 0;
+	int             i, pass_len = 8, users_per_level = 0;
+	mdir_t          quota = 0;
 	char           *real_domain, *ptr, *base_argv0, *base_path, *domain_dir;
 	char            tmpbuf[MAX_BUFF], buffer[MAX_BUFF];
 	FILE           *fp;

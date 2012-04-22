@@ -1,5 +1,8 @@
 /*
  * $Log: adduser.c,v $
+ * Revision 2.23  2012-04-22 13:56:44+05:30  Cprogrammer
+ * use 64bit integer for quota
+ *
  * Revision 2.22  2010-08-08 20:39:41+05:30  Cprogrammer
  * take users_per_level from domain directory
  *
@@ -118,7 +121,7 @@
 #define ALLOWCHARS              " .!#$%&'*+-/=?^_`{|}~\""
 
 #ifndef	lint
-static char     sccsid[] = "$Id: adduser.c,v 2.22 2010-08-08 20:39:41+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: adduser.c,v 2.23 2012-04-22 13:56:44+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 /*
@@ -157,7 +160,7 @@ static char     sccsid[] = "$Id: adduser.c,v 2.22 2010-08-08 20:39:41+05:30 Cpro
  */
 int
 vadduser(char *username, char *domain, char *mdahost, char *password,
-		 char *gecos, int quota, int max_users_per_level, int apop, int actFlag)
+		 char *gecos, mdir_t quota, int max_users_per_level, int apop, int actFlag)
 {
 	char            Dir[MAX_BUFF], Crypted[MAX_BUFF], tmpbuf[MAX_BUFF];
 	char           *tmpstr, *dir, *ptr, *allow_chars;

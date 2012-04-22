@@ -1,5 +1,8 @@
 /*
  * $Log: vauth_adduser.c,v $
+ * Revision 2.14  2012-04-22 13:59:23+05:30  Cprogrammer
+ * use 64bit intiger for quota calculation
+ *
  * Revision 2.13  2008-08-02 09:09:44+05:30  Cprogrammer
  * use new function error_stack
  *
@@ -88,7 +91,7 @@
 #include <string.h>
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vauth_adduser.c,v 2.13 2008-08-02 09:09:44+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: vauth_adduser.c,v 2.14 2012-04-22 13:59:23+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #define QUOTA_BUFLEN 20
@@ -96,7 +99,7 @@ static char     sccsid[] = "$Id: vauth_adduser.c,v 2.13 2008-08-02 09:09:44+05:3
 #include <mysqld_error.h>
 
 char           *
-vauth_adduser(char *user, char *domain, char *pass, char *gecos, char *dir, int Quota, int apop, int actFlag)
+vauth_adduser(char *user, char *domain, char *pass, char *gecos, char *dir, mdir_t Quota, int apop, int actFlag)
 {
 	static char     dirbuf[MAX_BUFF];
 	char            quota[QUOTA_BUFLEN], dom_dir[MAX_BUFF];
@@ -115,7 +118,7 @@ vauth_adduser(char *user, char *domain, char *pass, char *gecos, char *dir, int 
 		strncpy(quota, "NOQUOTA", 8);
 	else
 	if(Quota)
-		snprintf(quota, QUOTA_BUFLEN, "%d", Quota);
+		snprintf(quota, QUOTA_BUFLEN, "%"PRIu64"", Quota);
 	else
 	{
 #ifdef HARD_QUOTA
