@@ -1,5 +1,8 @@
 /*
  * $Log: parse_quota.c,v $
+ * Revision 2.6  2012-04-22 13:58:14+05:30  Cprogrammer
+ * added case for specifying quota in gigabytes
+ *
  * Revision 2.5  2011-02-11 23:00:08+05:30  Cprogrammer
  * corrected mathematical calculation for 'k', 'K', 'm', 'M' modifier for quota
  *
@@ -30,7 +33,7 @@
 #endif
 
 #ifndef	lint
-static char     sccsid[] = "$Id: parse_quota.c,v 2.5 2011-02-11 23:00:08+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: parse_quota.c,v 2.6 2012-04-22 13:58:14+05:30 Cprogrammer Stab mbhangui $";
 #endif
 
 mdir_t
@@ -75,6 +78,11 @@ parse_quota(char *quota, mdir_t *count)
 		if (quota[i] == 'm' || quota[i] == 'M')
 		{
 			per_user_limit = per_user_limit * 1048576;
+			break;
+		}
+		if (quota[i] == 'g' || quota[i] == 'G')
+		{
+			per_user_limit = per_user_limit * 1048576 * 1048576;
 			break;
 		}
 	}

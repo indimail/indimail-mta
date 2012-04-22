@@ -1,5 +1,8 @@
 /*
  * $Log: user_over_quota.c,v $
+ * Revision 2.13  2012-04-22 13:58:43+05:30  Cprogrammer
+ * added case for specification of quota in gigabytes
+ *
  * Revision 2.12  2009-10-14 20:45:54+05:30  Cprogrammer
  * check return status of parse_quota()
  *
@@ -58,7 +61,7 @@
 #endif
 
 #ifndef	lint
-static char     sccsid[] = "$Id: user_over_quota.c,v 2.12 2009-10-14 20:45:54+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: user_over_quota.c,v 2.13 2012-04-22 13:58:43+05:30 Cprogrammer Stab mbhangui $";
 #endif
 
 /* 
@@ -117,12 +120,17 @@ user_over_quota(char *Maildir, char *quota, int cur_msgsize)
 	{
 		if (quota[i] == 'k' || quota[i] == 'K')
 		{
-			mail_size_limit = mail_size_limit * 1000;
+			mail_size_limit = mail_size_limit * 1024;
 			break;
 		}
 		if (quota[i] == 'm' || quota[i] == 'M')
 		{
-			mail_size_limit = mail_size_limit * 1000000;
+			mail_size_limit = mail_size_limit * 1048576;
+			break;
+		}
+		if (quota[i] == 'g' || quota[i] == 'G')
+		{
+			mail_size_limit = mail_size_limit * 1048576 * 1048576;
 			break;
 		}
 	}
