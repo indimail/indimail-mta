@@ -1,5 +1,8 @@
 /*
  * $Log: indimail.h,v $
+ * Revision 2.206  2012-04-22 13:57:07+05:30  Cprogrammer
+ * use 64bit integer for quota
+ *
  * Revision 2.205  2011-12-22 08:39:21+05:30  Cprogrammer
  * added definitions for AUTH methods
  *
@@ -931,7 +934,7 @@
 #define INDIMAILH_H
 
 #ifndef	lint
-static char     sccsidh[] = "$Id: indimail.h,v 2.205 2011-12-22 08:39:21+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsidh[] = "$Id: indimail.h,v 2.206 2012-04-22 13:57:07+05:30 Cprogrammer Stab mbhangui $";
 #endif
 
 #ifdef HAVE_CONFIG_H
@@ -1563,7 +1566,7 @@ int             vadddomain(char *, char *, char *, uid_t, gid_t, int);
 int             vaddaliasdomain(char *, char *);
 int             is_alias_domain(char *);
 int             vdeldomain(char *);
-int             vadduser(char *, char *, char *, char *, char *, int, int, int, int);
+int             vadduser(char *, char *, char *, char *, char *, mdir_t, int, int, int);
 int             vdeluser(char *, char *, int);
 int             vrenameuser(char *, char *, char *, char *);
 int             parse_email(char *, char *, char *, int);
@@ -1657,7 +1660,7 @@ char           *dc_filename(char *, char *, char *);
 char           *dc_filename_cdb(char *, char *);
 void            SetSiteSize(int);
 int             vauth_adddomain(char *);
-char           *vauth_adduser(char *, char *, char *, char *, char *, int, int, int);
+char           *vauth_adduser(char *, char *, char *, char *, char *, mdir_t, int, int);
 struct passwd  *vauth_getpw(char *, char *);
 int             vauth_deldomain(char *);
 int             vauth_deluser(char *, char *);
