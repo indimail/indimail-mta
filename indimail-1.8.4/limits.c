@@ -1,5 +1,8 @@
 /*
  * $Log: limits.c,v $
+ * Revision 2.13  2012-04-22 13:57:57+05:30  Cprogrammer
+ * formatted sql statement
+ *
  * Revision 2.12  2011-02-11 22:59:39+05:30  Cprogrammer
  * fix for specifing > 2GB quota
  *
@@ -43,7 +46,7 @@
  */
 
 #ifndef	lint
-static char     sccsid[] = "$Id: limits.c,v 2.12 2011-02-11 22:59:39+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: limits.c,v 2.13 2012-04-22 13:57:57+05:30 Cprogrammer Stab mbhangui $";
 #endif
 
 #include "indimail.h"
@@ -69,12 +72,12 @@ vget_limits(char *domain, struct vlimits *limits)
 	if ((err = vauth_open((char *) 0)) != 0)
 		return (err);
 	snprintf(SqlBuf, SQL_BUF_SIZE,
-			 "SELECT domain_expiry, passwd_expiry, maxpopaccounts, maxaliases, maxforwards, maxautoresponders,"
-			 "maxmailinglists, diskquota, maxmsgcount, defaultquota, defaultmaxmsgcount,"
-			 "disable_pop, disable_imap, disable_dialup, disable_passwordchanging,"
-			 "disable_webmail, disable_relay, disable_smtp, perm_account, perm_alias,"
-			 "perm_forward, perm_autoresponder, perm_maillist, perm_quota, perm_defaultquota \n"
-			 "FROM vlimits WHERE domain = \"%s\"", domain);
+		"SELECT domain_expiry, passwd_expiry, maxpopaccounts, maxaliases, maxforwards,"
+		"maxautoresponders, maxmailinglists, diskquota, maxmsgcount, defaultquota,"
+		"defaultmaxmsgcount, disable_pop, disable_imap, disable_dialup,"
+		"disable_passwordchanging, disable_webmail, disable_relay, disable_smtp,"
+		"perm_account, perm_alias, perm_forward, perm_autoresponder, perm_maillist,"
+		"perm_quota, perm_defaultquota FROM vlimits WHERE domain = \"%s\"", domain);
 	if (mysql_query(&mysql[1], SqlBuf))
 	{
 		if (mysql_errno(&mysql[1]) == ER_NO_SUCH_TABLE)

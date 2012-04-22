@@ -128,7 +128,7 @@ main(int argc, char *argv[])
 	}
 	if (vget_limits(Domain, &limits))
 	{
-		fprintf(stderr, "vget_limits: Failed to vget_limits\n");
+		fprintf(stderr, "vget_limits: Failed to get limits\n");
 		return (-1);
 	}
 	if (DeleteLimits)
@@ -438,7 +438,7 @@ main(int argc, char *argv[])
 	}
 	if (!ShowLimits && vset_limits(Domain, &limits) != 0)
 	{
-		fprintf(stderr, "vset_limits: Failed to vset_limits\n");
+		fprintf(stderr, "vset_limits: Failed to set limits\n");
 		return (-1);
 	}
 	if (ShowLimits)
