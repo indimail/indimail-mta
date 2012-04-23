@@ -1,5 +1,8 @@
 /*
  * $Log: tcpserver.c,v $
+ * Revision 1.48  2012-04-23 18:49:42+05:30  Cprogrammer
+ * use ipv4 addresses if fakev4 detected for if -4 option is passed
+ *
  * Revision 1.47  2012-04-19 21:11:31+05:30  Cprogrammer
  * undefine MYSQL_CONFIG for IPV6
  *
@@ -162,7 +165,7 @@
 #include "auto_home.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: tcpserver.c,v 1.47 2012-04-19 21:11:31+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: tcpserver.c,v 1.48 2012-04-23 18:49:42+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef IPV6
@@ -193,8 +196,10 @@ char            localportstr[FMT_ULONG];
 #ifdef IPV6
 char            localip[16];
 char            localipstr[IP6_FMT];
+char            localipstr6[IP6_FMT];
 char            remoteip[16];
 char            remoteipstr[IP6_FMT];
+char            remoteipstr6[IP6_FMT];
 #else
 char            localip[4];
 char            localipstr[IP4_FMT];
@@ -355,6 +360,9 @@ doit(int t)
 	if (fakev4)
 		remoteipstr[ip4_fmt(remoteipstr, remoteip + 12)] = 0;
 	else
+	if (noipv6 && !forcev6)
+		remoteipstr[ip4_fmt(remoteipstr, remoteip)] = 0;
+	else
 		remoteipstr[ip6_fmt(remoteipstr, remoteip)] = 0;
 #else
 	remoteipstr[ip4_fmt(remoteipstr, remoteip)] = 0;
@@ -384,6 +392,9 @@ doit(int t)
 	if (fakev4)
 		localipstr[ip4_fmt(localipstr, localip + 12)] = 0;
 	else
+	if (noipv6 && !forcev6)
+		localipstr[ip4_fmt(localipstr, localip)] = 0;
+	else
 		localipstr[ip6_fmt(localipstr, localip)] = 0;
 #else
 	localipstr[ip4_fmt(localipstr, localip)] = 0;
@@ -403,7 +414,10 @@ doit(int t)
 		}
 	}
 #ifdef IPV6
-	env("PROTO", fakev4 ? "TCP" : "TCP6");
+	if (noipv6 && !forcev6)
+		env("PROTO", "TCP");
+	else
+		env("PROTO", fakev4 ? "TCP" : "TCP6");
 #else
 	env("PROTO", "TCP");
 #endif
@@ -411,10 +425,12 @@ doit(int t)
 	env("TCPLOCALPORT", localportstr);
 	env("TCPLOCALHOST", localhost);
 #ifdef IPV6
-	localipstr[ip6_fmt(localipstr, localip)] = 0;
-	env("TCP6LOCALIP", localipstr);
-	env("TCP6LOCALPORT", localportstr);
-	env("TCP6LOCALHOST", localhost);
+	if (!noipv6) {
+		localipstr6[ip6_fmt(localipstr6, localip)] = 0;
+		env("TCP6LOCALIP", localipstr6);
+		env("TCP6LOCALPORT", localportstr);
+		env("TCP6LOCALHOST", localhost);
+	}
 	if (!fakev4 && scope_id)
 		env("TCP6INTERFACE", (char *) socket_getifname(scope_id));
 	if (flagremotehost && !dns_name6(&remotehostsa, remoteip))
@@ -460,10 +476,12 @@ doit(int t)
 	env("TCPREMOTEPORT", remoteportstr);
 	env("TCPREMOTEHOST", remotehost);
 #ifdef IPV6
-	remoteipstr[ip6_fmt(remoteipstr, remoteip)] = 0;
-	env("TCP6REMOTEIP", remoteipstr);
-	env("TCP6REMOTEPORT", remoteportstr);
-	env("TCP6REMOTEHOST", remotehost);
+	if (!noipv6) {
+		remoteipstr6[ip6_fmt(remoteipstr6, remoteip)] = 0;
+		env("TCP6REMOTEIP", remoteipstr6);
+		env("TCP6REMOTEPORT", remoteportstr);
+		env("TCP6REMOTEHOST", remotehost);
+	}
 #endif
 	if (flagremoteinfo)
 	{
@@ -495,9 +513,12 @@ doit(int t)
 			char           *temp;
 #ifdef IPV6
 			if (fakev4)
-				temp = remoteipstr + 7;
+				temp = remoteipstr6 + 7;
 			else
+			if (noipv6 && !forcev6)
 				temp = remoteipstr;
+			else
+				temp = remoteipstr6;
 #else
 			temp = remoteipstr;
 #endif
@@ -518,14 +539,14 @@ doit(int t)
 		if (localhost)
 			safecats(localhost);
 		cats("[");
-		safecats(localipstr);
+		safecats((fakev4 || (noipv6 && !forcev6)) ? localipstr : localipstr6);
 		cats("]");
 		safecats(localportstr);
 		cats(" ");
 		if (remotehost)
 			safecats(remotehost);
 		cats("[");
-		safecats(remoteipstr);
+		safecats((fakev4 || (noipv6 && !forcev6)) ? remoteipstr : remoteipstr6);
 		cats("]");
 		if (flagremoteinfo)
 			safecats(tcpremoteinfo.s);
@@ -1076,6 +1097,9 @@ add_ip(pid)
 	if (fakev4)
 		remoteipstr[ip4_fmt(remoteipstr, remoteip + 12)] = 0;
 	else
+	if (noipv6 && !forcev6)
+		remoteipstr[ip4_fmt(remoteipstr, remoteip)] = 0;
+	else
 		remoteipstr[ip6_fmt(remoteipstr, remoteip)] = 0;
 #else
 	remoteipstr[ip4_fmt(remoteipstr, remoteip)] = 0;
@@ -1169,6 +1193,9 @@ print_ip()
 				fakev4 = 1;
 			if (fakev4)
 				remoteipstr[ip4_fmt(remoteipstr, (*iptable)->ipaddr + 12)] = 0;
+			else
+			if (noipv6 && !forcev6)
+				remoteipstr[ip4_fmt(remoteipstr, (*iptable)->ipaddr)] = 0;
 			else
 				remoteipstr[ip6_fmt(remoteipstr, (*iptable)->ipaddr)] = 0;
 #else
@@ -1573,6 +1600,9 @@ main(int argc, char **argv)
 			fakev4 = 1;
 		if (fakev4)
 			remoteipstr[ip4_fmt(remoteipstr, remoteip + 12)] = 0;
+		else
+		if (noipv6 && !forcev6)
+			remoteipstr[ip4_fmt(remoteipstr, remoteip)] = 0;
 		else
 			remoteipstr[ip6_fmt(remoteipstr, remoteip)] = 0;
 #else
