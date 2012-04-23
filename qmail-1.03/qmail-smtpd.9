@@ -108,7 +108,11 @@ variable MASQUERADE is set,
 .LP
 .nr step 1 1
 .IP \n[step] 2
-after successful authentication, relaying to outside domains will be allowed with any sender address.
+after successful authentication, relaying to outside domains will be allowed with
+any sender address (if MASQUERADE is set but empty).
+.IP \n+[step]
+after successful authentication, relaying to outside domains will be allowed with
+the sender address equal to the value of MASQUERADE environment variable
 .IP \n+[step]
 mails to local domain will be allowed without authentication
 .LP
