@@ -1,5 +1,8 @@
 /*
  * $Log: dns.c,v $
+ * Revision 1.24  2012-04-26 18:04:30+05:30  Cprogrammer
+ * fix SIGSEGV in dns_txt() function
+ *
  * Revision 1.23  2011-07-29 09:28:15+05:30  Cprogrammer
  * fixed gcc 4.6 warnings
  *
@@ -150,6 +153,7 @@ static ip6_addr ip6;
 unsigned short  pref;
 
 static stralloc glue = { 0 };
+static stralloc tmpsa = { 0 };
 
 static int      (*lookup) () = res_query;
 #ifdef IPV6
@@ -542,14 +546,13 @@ dns_txt(ssa, domain)
 	stralloc       *domain;
 {
 	int             r;
-	static stralloc sa = { 0 };
 
 	if (!strsalloc_readyplus(ssa, 0))
 		return DNS_MEM;
 	ssa->len = 0;
-	if ((r = findtxt(&sa, domain)) < 0)
+	if ((r = findtxt(&tmpsa, domain)) < 0)
 		return r;
-	if (!strsalloc_append(ssa, &sa))
+	if (!strsalloc_append(ssa, &tmpsa))
 		return DNS_MEM;
 	return (0);
 }
@@ -559,17 +562,13 @@ dns_ptr(ssa, ip)
 	strsalloc      *ssa;
 	ip_addr        *ip;
 {
-	int             r, j;
+	int             r;
 
 	if (!strsalloc_readyplus(ssa, 0))
 		return DNS_MEM;
 	ssa->len = 0;
 	if ((r = dns_ptrplus(ssa, ip)) < 0)
-	{
-		for (j = 0; j < ssa->len; ++j)
-			alloc_free(ssa->sa[j].s);
 		ssa->len = 0;
-	}
 	return r;
 }
 
@@ -578,15 +577,12 @@ dns_ptrplus(ssa, ip)
 	strsalloc      *ssa;
 	ip_addr        *ip;
 {
-	stralloc        sa = { 0 };
 	int             r;
 
-	if (!stralloc_ready(&sa, iaafmt((char *) 0, ip, ".in-addr.arpa.")))
+	if (!stralloc_ready(&tmpsa, iaafmt((char *) 0, ip, ".in-addr.arpa.")))
 		return DNS_MEM;
-	sa.len = iaafmt(sa.s, ip, ".in-addr.arpa.");
-	r = resolve(&sa, T_PTR);
-	alloc_free(sa.s);
-	switch (r)
+	tmpsa.len = iaafmt(tmpsa.s, ip, ".in-addr.arpa.");
+	switch ((r = resolve(&tmpsa, T_PTR)))
 	{
 	case DNS_MEM:
 		return DNS_MEM;
@@ -601,12 +597,10 @@ dns_ptrplus(ssa, ip)
 			return DNS_SOFT;
 		if (r == 1)
 		{
-			stralloc        satmp = { 0 };
-			if (!stralloc_copys(&satmp, name))
+			if (!stralloc_copys(&tmpsa, name))
 				return DNS_MEM;
-			if (!strsalloc_append(ssa, &satmp))
+			if (!strsalloc_append(ssa, &tmpsa))
 				return DNS_MEM;
-			alloc_free(satmp.s);
 		}
 	}
 	if (ssa->len)
@@ -685,12 +679,11 @@ dns_ptr6(ssa, ip)
 	ip6_addr       *ip;
 {
 	int             r;
-	stralloc        sa = { 0 };
 
-	if (!stralloc_ready(&sa, iaafmt6((char *) 0, ip, "ip6.int")))
+	if (!stralloc_ready(&tmpsa, iaafmt6((char *) 0, ip, "ip6.int")))
 		return DNS_MEM;
-	sa.len = iaafmt6(sa.s, ip, "ip6.int");
-	switch (resolve(sa, T_PTR))
+	tmpsa.len = iaafmt6(tmpsa.s, ip, "ip6.int");
+	switch (resolve(tmpsa, T_PTR))
 	{
 	case DNS_MEM:
 		return DNS_MEM;
@@ -706,12 +699,10 @@ dns_ptr6(ssa, ip)
 		if (r == 1)
 		{
 #ifdef USE_SPF
-			stralloc        satmp = { 0 };
-			if (!stralloc_copys(&satmp, name))
+			if (!stralloc_copys(&tmpsa, name))
 				return DNS_MEM;
-			if (!strsalloc_append(ssa, &satmp))
+			if (!strsalloc_append(ssa, &tmpsa))
 				return DNS_MEM;
-			alloc_free(satmp.s);
 #else
 			if (!stralloc_copys(&ssa, name))
 				return DNS_MEM;
@@ -1141,7 +1132,7 @@ dns_maps(sa, ip, suffix)
 void
 getversion_dns_c()
 {
-	static char    *x = "$Id: dns.c,v 1.23 2011-07-29 09:28:15+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: dns.c,v 1.24 2012-04-26 18:04:30+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
