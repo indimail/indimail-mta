@@ -1,5 +1,8 @@
 /*
  * $Log: smtpd.c,v $
+ * Revision 1.167  2012-04-26 18:06:35+05:30  Cprogrammer
+ * removed memory leaks
+ *
  * Revision 1.166  2012-04-10 20:32:39+05:30  Cprogrammer
  * use ipv4 address for spf
  *
@@ -649,7 +652,7 @@ int             wildmat_internal(char *, char *);
 int             ssl_rfd = -1, ssl_wfd = -1;	/*- SSL_get_Xfd() are broken */
 char           *servercert, *clientca, *clientcrl;
 #endif
-char           *revision = "$Revision: 1.166 $";
+char           *revision = "$Revision: 1.167 $";
 char           *protocol = "SMTP";
 stralloc        proto = { 0 };
 static stralloc Revision = { 0 };
@@ -5918,9 +5921,11 @@ tmp_rsa_cb(SSL *ssl, int export, int keylen)
 		{
 			RSA            *rsa = PEM_read_RSAPrivateKey(in, NULL, NULL, NULL);
 			fclose(in);
-			alloc_free(filename.s);
 			if (rsa)
+			{
+				alloc_free(filename.s);
 				return rsa;
+			}
 		}
 		alloc_free(filename.s);
 	}
@@ -5952,9 +5957,11 @@ tmp_dh_cb(SSL *ssl, int export, int keylen)
 		{
 			DH             *dh = PEM_read_DHparams(in, NULL, NULL, NULL);
 			fclose(in);
-			alloc_free(filename.s);
 			if (dh)
+			{
+				alloc_free(filename.s);
 				return dh;
+			}
 		}
 	}
 	if (keylen == 1024)
@@ -5975,9 +5982,11 @@ tmp_dh_cb(SSL *ssl, int export, int keylen)
 		{
 			DH             *dh = PEM_read_DHparams(in, NULL, NULL, NULL);
 			fclose(in);
-			alloc_free(filename.s);
 			if (dh)
+			{
+				alloc_free(filename.s);
 				return dh;
+			}
 		}
 	}
 	alloc_free(filename.s);
@@ -6624,7 +6633,7 @@ addrrelay() /*- Rejection of relay probes. */
 void
 getversion_smtpd_c()
 {
-	static char    *x = "$Id: smtpd.c,v 1.166 2012-04-10 20:32:39+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: smtpd.c,v 1.167 2012-04-26 18:06:35+05:30 Cprogrammer Exp mbhangui $";
 
 #ifdef INDIMAIL
 	if (x)
