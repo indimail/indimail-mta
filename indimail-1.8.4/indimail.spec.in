@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail.spec.in,v 2.243 2012-04-22 16:53:56+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 2.244 2012-04-26 18:09:26+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %define _unpackaged_files_terminate_build 1
 
@@ -291,7 +291,7 @@ locations) and tools to manage virtual domains ?
 
 %package devel
 Summary: IndiMail - Development header files and libraries
-Group: Applications/Databases
+Group: Development/Libraries/Other
 
 %description devel
 This package contains the development header files and libraries
@@ -301,7 +301,7 @@ necessary to develop IndiMail client applications.
 
 %package shared
 Summary: IndiMail - Shared libraries
-Group: Applications/Databases
+Group: Development/Libraries/Other
 
 %description shared
 This package contains the shared libraries (*.so*) which certain
@@ -311,7 +311,7 @@ languages and applications need to dynamically load and use IndiMail.
 
 %package mini
 Summary: IndiMail - Mini Client Installation
-Group: Applications/Databases
+Group: Productivity/Networking/Email/Clients
 Conflicts: %{name}
 
 %description mini
