@@ -1,15 +1,5 @@
 %define _prefix            @prefix@
 
-Summary: The Mail processing/filtering program
-Name: procmail
-Version: @VERSION@
-Release: 1
-License: GPL-3.0+
-Group: Productivity/Networking/Email/Utilities
-Source0: http://downloads.sourceforge.net/indimail/%{name}-%{version}.tar.gz
-Source1: http://downloads.sourceforge.net/indimail/%{name}-%{version}-rpmlintrc
-BuildRequires: -post-build-checks  
-URL: http://www.indimail.org
 %if 0%{?opensuse_bs}
 # define to 1 if building on openSUSE build service
 %define build_on_obs       1
@@ -18,6 +8,21 @@ URL: http://www.indimail.org
 %define build_on_obs       0
 %define fast_mode          0
 %endif
+
+Summary: The Mail processing/filtering program
+Name: procmail
+Version: @VERSION@
+Release: 1
+%if %build_on_obs == 1
+License: GPL-3.0+
+%else
+License: GPLv3
+%endif
+Group: Productivity/Networking/Email/Utilities
+Source0: http://downloads.sourceforge.net/indimail/%{name}-%{version}.tar.gz
+Source1: http://downloads.sourceforge.net/indimail/%{name}-%{version}-rpmlintrc
+BuildRequires: -post-build-checks  
+URL: http://www.indimail.org
 
 %if %build_on_obs == 1
 %define packager Manvendra Bhangui <manvendra@indimail.org>
