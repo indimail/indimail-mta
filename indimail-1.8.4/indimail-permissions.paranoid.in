@@ -32,7 +32,6 @@
 @indimaildir@/bin/qmail-queue            qmailq:qmail   6511
 @indimaildir@/bin/bogofilter             root:indimail  6511
 @indimaildir@/bin/qscanq                 qscand:qscand  4555
-@indimaildir@/libexec/sq_vacation        root:qmail     4555
 @indimaildir@/libexec/authlib/authshadow root:root      4555
 
 #
