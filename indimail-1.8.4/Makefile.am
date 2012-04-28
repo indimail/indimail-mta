@@ -34,7 +34,9 @@ iauthdir=@libdir@
 
 SYSCONFDIR = @sysconfdir@
 sysconf_DATA = indimail.settings controlfiles headerlist osh.table cronlist perm_list \
-			   indimail.mrtg.cfg
+			   indimail.mrtg.cfg indimail-permissions.easy indimail-permissions.paranoid \
+			   indimail-permissions.secure
+
 man_MANS=vadduser.1 adminclient.8 chowkidar.8 clearopensmtp.8 dbinfo.8 hostcntrl.8 hostsync.8 \
 	initsvc.1 indisrvr.8 indiversion.8 inlookup.8 InLookup.8 inquerytest.8 ipchange.8 \
 	logmonitor.8 mgmtpass.8 postdel.8 printdir.1 proxyimap.8 proxypop3.8 resetquota.8 \
@@ -159,7 +161,7 @@ indimailbin_SCRIPTS = versioninfo vcaliasrev logmonitor bogofilter-qfe mailzippe
 
 indimailsbin_SCRIPTS = myslave controlsync svctool cputime tls-cert-check create_services
 
-noinst_SCRIPTS = indimail.spec indimail-@VERSION@-rpmlintrc indimail-epm.list \
+noinst_SCRIPTS = indimail.spec indimail-@VERSION@-rpmlintrc \
 	INSTALL INSTALL-RPM INSTALL-MYSQL README-CLUSTER RELEASE-Notes Quick-INSTALL \
 	README INSTALL-MINI vadddomain_handle vadduser_handle
 
@@ -168,11 +170,12 @@ post_handle_list = vadddomain vadduser
 MOSTLYCLEANFILES=versioninfo vcaliasrev myslave logmonitor controlsync bogofilter-qfe \
 svctool indimail_settings.c cronlist crypt create_services \
 indimail.spec cscope.* *.dSYM inc_deps lib_deps socket.lib \
-indimail-@VERSION@-rpmlintrc indimail-epm.list tls-cert-check mailzipper \
+indimail-@VERSION@-rpmlintrc tls-cert-check mailzipper \
 perm_list dbinfo.8 inlookup.8 vadddomain.1 vdeldomain.1 vadduser.1 \
 vdeluser.1 vdelivermail.8 vrenamedomain.1 vrenameuser.1 vpasswd.1 vmoveuser.1 \
 vcfilter.1 indimail.7 svctool.8 indisub.c indimail.mrtg.cfg overquota.sh \
-vadddomain_handle vadduser_handle login_tasks.3 authgeneric obs.mk
+vadddomain_handle vadduser_handle login_tasks.3 authgeneric obs.mk \
+indimail-permissions.easy indimail-permissions.paranoid indimail-permissions.secure
 
 DISTCLEANFILES=.gitignore
 
@@ -782,8 +785,8 @@ myslave: myslave.in
 	$(edit) $@.in > $@
 logmonitor: logmonitor.in
 	$(edit) $@.in > $@
-indimail.mrtg.cfg: indimail.mrtg.in
-	$(edit) indimail.mrtg.in > $@
+indimail.mrtg.cfg: indimail.mrtg.cfg.in
+	$(edit) $@.in > $@
 svctool: svctool.in /etc/passwd
 	$(edit) $@.in > $@
 tls-cert-check: tls-cert-check.in /etc/passwd
@@ -796,8 +799,15 @@ bogofilter-qfe: bogofilter-qfe.in
 	$(edit) $@.in > $@
 cronlist: cronlist.in
 	$(edit) $@.in > $@
+indimail-permissions.easy: indimail-permissions.easy.in
+	$(edit) $@.in > $@
+indimail-permissions.secure: indimail-permissions.secure.in
+	$(edit) $@.in > $@
+indimail-permissions.paranoid: indimail-permissions.paranoid.in
+	$(edit) $@.in > $@
 perm_list: perm_list.in
 	$(edit) $@.in > $@
+
 obs.mk: debian/obs.mk.in
 	$(edit) debian/$@.in > debian/$@;/bin/rm -f $@ debian/Makefile; \
 		ln -s debian/$@ $@;ln -s $@ debian/Makefile
@@ -828,8 +838,6 @@ indimail.spec: indimail.spec.in
 	($(edit) $@.in;cat doc/ChangeLog) > $@
 indimail-@VERSION@-rpmlintrc: indimail-rpmlintrc.in
 	$(edit) indimail-rpmlintrc.in > $@
-indimail-epm.list: indimail-epm.list.in
-	$(edit) $@.in > $@
 login_tasks.3: login_tasks.9
 	cat $^ | sed s}INDIMAIL}$(indimaildir)}g > $@
 svctool.8: svctool.9
@@ -897,7 +905,7 @@ hashtable.$(OBJEXT): hashtable.c
 initsvc$(EXEEXT): $(initsvc_OBJECTS) $(initsvc_DEPENDENCIES)
 	$(LINK) $(initsvc_LDFLAGS) $(initsvc_OBJECTS) fappend.$(OBJEXT) getEnvConfig.$(OBJEXT) $(initsvc_LDADD)
 
-install-data-local: initsvc libindimail.la indimail-epm.list indimail-@VERSION@-rpmlintrc \
+install-data-local: initsvc libindimail.la indimail-@VERSION@-rpmlintrc \
 indimail.spec iauth.la
 	if [ " $(DESTDIR)" = " " ] ; then \
 		if test `@idcommand@` != "0" ; then \
