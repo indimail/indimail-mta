@@ -67,7 +67,6 @@
 %define nobogofilter       0
 %define nopam_multi        0
 %define nodksignatures     0
-%define noepm              1
 
 %define _verbose           0
 %define qcount             5
@@ -137,6 +136,9 @@ Source13: http://downloads.sourceforge.net/%{name}/pam-multi-%{pam_multi_version
 %endif
 Source14: http://downloads.sourceforge.net/%{name}/logalert-0.3.tar.gz
 Source15: http://downloads.sourceforge.net/%{name}/%{name}-%{version}-rpmlintrc
+Source16:indimail-permissions.easy
+Source17:indimail-permissions.secure
+Source18:indimail-permissions.paranoid
 
 Patch1:  http://downloads.sourceforge.net/%{name}/Patches/qmail-%{qmail_version}.patch.gz
 Patch2:  http://downloads.sourceforge.net/%{name}/Patches/ucspi-tcp-%{ucspi_version}.patch.gz
@@ -223,6 +225,9 @@ BuildRequires: chrpath
 %endif
 %if 0%{?suse_version} > 1110 || 0%{?suse_version} == 1110 || 0%{?suse_version} == 1100 || 0%{?suse_version} == 1030 || 0%{?suse_version} == 1020
 BuildRequires: chrpath
+%endif
+%if 0%{?suse_version} >= 1120
+PreReq: permissions
 %endif
 %if 0%{?suse_version}
 BuildRequires: db-devel
@@ -702,6 +707,13 @@ if [ %noclamav -eq 0 ] ; then
 		/bin/rmdir %{buildroot}%{_prefix}/var
 	fi
 fi
+
+%if 0%{?suse_version} >= 1120
+mkdir -p {buildroot}%{_sysconfdir}/permissions.d/
+install -m 644 %{S:17} %{buildroot}%{_sysconfdir}/permissions.d/%{name}-permissions
+install -m 644 %{S:16} %{buildroot}%{_sysconfdir}/permissions.d/%{name}-permissions.easy
+%endif
+
 if [ -x /usr/bin/chrpath ] ; then
 /usr/bin/chrpath -d %{buildroot}%{_libdir}/*.so
 for i in clambc clamconf clamscan dbinfo flash freshclam hostcntrl indiversion printdir \
@@ -749,24 +761,6 @@ if [ %nopam_multi -eq 0 ] ; then
 	fi
 fi
 
-
-if [ -x /usr/bin/epm -a %noepm -eq 0 ] ; then
-	#/bin/chmod +x %{buildroot}%{_prefix}/bin/rpmattr
-	#find %{buildroot}%{_prefix} -exec %{buildroot}%{_prefix}/bin/rpmattr {} \; | \
-	#	sed -e 's,%{buildroot}%{_prefix},%{_prefix},g' > \
-	#	%{buildroot}%{_prefix}/etc/perm.list.tmp
-	#(
-	#grep "^%dir" %{buildroot}%{_prefix}/etc/perm.list.tmp
-	#grep -v "^%dir" %{buildroot}%{_prefix}/etc/perm.list.tmp
-	#) > %{buildroot}%{_prefix}/etc/perm_list
-	#%{__rm} -f %{buildroot}%{_prefix}/etc/perm.list.tmp
-	%{__sed} 's}BUILDROOT}%{buildroot}}' %{name}-%{version}/indimail-epm.list > indimail-epm.list
-	if [ -x /usr/bin/fakeroot -a -x /usr/bin/epm ] ;  then
-		/usr/bin/fakeroot epm -a intel -f deb indimail indimail-epm.list
-	else
-		/usr/bin/epm -a intel -f deb indimail indimail-epm.list
-	fi
-fi
 
 if [ -x /bin/touch ] ; then
 	TOUCH=/bin/touch
@@ -963,6 +957,34 @@ fi
 %attr(4555,root,root)                   %{_prefix}/bin/vdeldomain
 %attr(2511,root,qscand)                 %{_prefix}/bin/run-cleanq
 %attr(4555,root,root)                   %{_prefix}/sbin/systpass
+
+%if 0%{?suse_version} >= 1120
+%verify (not mode user) %attr(4555, root, root)      %{_prefix}/bin/vdeluser
+%verify (not mode user) %attr(4555, root, root)      %{_prefix}/bin/vadduser
+%verify (not mode user) %attr(4555, root, root)      %{_prefix}/bin/vaddaliasdomain
+%verify (not mode user) %attr(4555, root, root)      %{_prefix}/bin/vrenamedomain
+%verify (not mode user) %attr(4555, root, root)      %{_prefix}/bin/vsetuserquota
+%verify (not mode user) %attr(4555, root, root)      %{_prefix}/bin/vmoveuser
+%verify (not mode user) %attr(6511, qscand, qmail)   %{_prefix}/bin/qhpsi
+%verify (not mode user) %attr(2511, root, qscand)    %{_prefix}/bin/run-cleanq
+%verify (not mode user) %attr(4555, root, root)      %{_prefix}/bin/vuserinfo
+%verify (not mode user) %attr(6511, qmailq, qmail)   %{_prefix}/bin/qmail-queue
+%verify (not mode user) %attr(4555, root, root)      %{_prefix}/bin/vdeldomain
+%verify (not mode user) %attr(4555, root, root)      %{_prefix}/bin/vadddomain
+%verify (not mode user) %attr(6511, root, indimail)  %{_prefix}/bin/bogofilter
+%verify (not mode user) %attr(4555, qscand, qscand)  %{_prefix}/bin/qscanq
+%verify (not mode user) %attr(4511, root, root)      %{_prefix}/bin/vdominfo
+%verify (not mode user) %attr(4555, root, root)      %{_prefix}/bin/vrenameuser
+%verify (not mode user) %attr(4555, root, root)      %{_prefix}/bin/printdir
+%verify (not mode user) %attr(4555, root, root)      %{_prefix}/bin/vmoduser
+%verify (not mode user) %attr(4555, root, root)      %{_prefix}/bin/vcfilter
+%verify (not mode user) %attr(4555, root, root)      %{_prefix}/bin/vbulletin
+%verify (not mode user) %attr(4555, root, qmail)     %{_prefix}/libexec/sq_vacation
+%verify (not mode user) %attr(4555, root, root)      %{_prefix}/libexec/authlib/authshadow
+%verify (not mode user) %attr(4555, root, root)      %{_prefix}/sbin/systpass
+%verify (not mode user) %attr(2555, alias, qmail)    %{_prefix}/alias
+%verify (not mode user) %attr(2755, indimail, qmail) %{_prefix}/autoturn
+%endif
 
 %attr(555,root,qmail)                   %{_prefix}/bin/qmail-popbull
 %attr(555,root,qmail)                   %{_prefix}/sbin/vserverinfo
@@ -1841,6 +1863,34 @@ fi
 %{_prefix}/sbin/svctool --check-install --servicedir=%{servicedir} \
 	--qbase=%{qbase} --qcount=%{qcount} --qstart=1
 
+%if 0%{?suse_version} >= 1120
+%verify_permissions -e %{_prefix}/bin/vdeluser
+%verify_permissions -e %{_prefix}/bin/vadduser
+%verify_permissions -e %{_prefix}/bin/vaddaliasdomain
+%verify_permissions -e %{_prefix}/bin/vrenamedomain
+%verify_permissions -e %{_prefix}/bin/vsetuserquota
+%verify_permissions -e %{_prefix}/bin/vmoveuser
+%verify_permissions -e %{_prefix}/bin/qhpsi
+%verify_permissions -e %{_prefix}/bin/run-cleanq
+%verify_permissions -e %{_prefix}/bin/vuserinfo
+%verify_permissions -e %{_prefix}/bin/qmail-queue
+%verify_permissions -e %{_prefix}/bin/vdeldomain
+%verify_permissions -e %{_prefix}/bin/vadddomain
+%verify_permissions -e %{_prefix}/bin/bogofilter
+%verify_permissions -e %{_prefix}/bin/qscanq
+%verify_permissions -e %{_prefix}/bin/vdominfo
+%verify_permissions -e %{_prefix}/bin/vrenameuser
+%verify_permissions -e %{_prefix}/bin/printdir
+%verify_permissions -e %{_prefix}/bin/vmoduser
+%verify_permissions -e %{_prefix}/bin/vcfilter
+%verify_permissions -e %{_prefix}/bin/vbulletin
+%verify_permissions -e %{_prefix}/libexec/sq_vacation
+%verify_permissions -e %{_prefix}/libexec/authlib/authshadow
+%verify_permissions -e %{_prefix}/sbin/systpass
+%verify_permissions -e %{_prefix}/alias
+%verify_permissions -e %{_prefix}/autoturn
+%endif
+
 ### SCRIPTLET ###############################################################################
 %pretrans
 argv1=$1
@@ -2063,6 +2113,19 @@ else
 	ver_opt="none"
 	sign_opt="none"
 fi
+
+%if 0%{?suse_version} >= 1120
+%if 0%{?set_permissions:1} > 0
+	if [ ! -f /tmp/no_permissions ] ; then
+    	%set_permissions %{name}.easy
+	fi
+%else
+	if [ ! -f /tmp/no_permissions ] ; then
+    	%run_permissions
+	fi
+%endif
+%endif
+
 # SMTP
 %ifarch x86_64
 %define fetchmail_mem 144857600
