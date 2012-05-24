@@ -577,7 +577,6 @@
 %attr(0600,root,root) @indimaildir@/etc/imapd.cnf
 %attr(0644,root,root) @indimaildir@/etc/backup.conf
 %attr(0644,root,root) @indimaildir@/etc/indimail.lic
-%attr(0444,root,root) @indimaildir@/etc/quotawarnmsg.example
 %attr(0444,root,root) @indimaildir@/etc/qmailprog.list
 %attr(0644,root,root) @indimaildir@/etc/tcp.pop3
 %attr(0644,root,root) @indimaildir@/etc/bogofilter.cf

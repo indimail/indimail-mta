@@ -136,9 +136,11 @@ Source13: http://downloads.sourceforge.net/%{name}/pam-multi-%{pam_multi_version
 %endif
 Source14: http://downloads.sourceforge.net/%{name}/logalert-0.3.tar.gz
 Source15: http://downloads.sourceforge.net/%{name}/%{name}-%{version}-rpmlintrc
+%if 0%{?suse_version} >= 1120
 Source16:indimail-permissions.easy
 Source17:indimail-permissions.secure
 Source18:indimail-permissions.paranoid
+%endif
 
 Patch1:  http://downloads.sourceforge.net/%{name}/Patches/qmail-%{qmail_version}.patch.gz
 Patch2:  http://downloads.sourceforge.net/%{name}/Patches/ucspi-tcp-%{ucspi_version}.patch.gz
@@ -923,7 +925,6 @@ fi
 %endif
 
 %if %nocourierimap == 0
-%attr(444,root,root)                              %{_prefix}/etc/quotawarnmsg.example
 %attr(600,root,root)                              %{_prefix}/etc/pop3d-ssl.dist
 %attr(600,root,root)                              %{_prefix}/etc/imapd-ssl.dist
 %attr(600,root,root)                              %{_prefix}/etc/pop3d.cnf
