@@ -1,5 +1,8 @@
 /*
  * $Log: pw_comp.c,v $
+ * Revision 2.15  2012-06-12 15:36:13+05:30  Cprogrammer
+ * added DISABLE_CRYPT to disable crypt method
+ *
  * Revision 2.14  2011-12-22 11:59:27+05:30  Cprogrammer
  * moved AUTH methods defines to indimail.h
  *
@@ -51,7 +54,7 @@
 #include <unistd.h>
 
 #ifndef	lint
-static char     sccsid[] = "$Id: pw_comp.c,v 2.14 2011-12-22 11:59:27+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: pw_comp.c,v 2.15 2012-06-12 15:36:13+05:30 Cprogrammer Stab mbhangui $";
 #endif
 
 static char     hextab[] = "0123456789abcdef";
@@ -66,7 +69,7 @@ pw_comp(unsigned char *testlogin, unsigned char *localpw, unsigned char *challen
 	char           *crypt_pass, *e;
 	int             i, len;
 
-	if (!challenge || (challenge && !*challenge))
+	if (!getenv("DISABLE_CRYPT") && (!challenge || (challenge && !*challenge)))
 	{
 		if (!(crypt_pass = in_crypt((char *) response, (char *) localpw)))
 		{
