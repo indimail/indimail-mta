@@ -1,5 +1,8 @@
 /*
  * $Log: indimail.h,v $
+ * Revision 2.207  2012-06-12 15:39:10+05:30  Cprogrammer
+ * increased max password length definition to 128
+ *
  * Revision 2.206  2012-04-22 13:57:07+05:30  Cprogrammer
  * use 64bit integer for quota
  *
@@ -934,7 +937,7 @@
 #define INDIMAILH_H
 
 #ifndef	lint
-static char     sccsidh[] = "$Id: indimail.h,v 2.206 2012-04-22 13:57:07+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsidh[] = "$Id: indimail.h,v 2.207 2012-06-12 15:39:10+05:30 Cprogrammer Stab mbhangui $";
 #endif
 
 #ifdef HAVE_CONFIG_H
@@ -989,7 +992,7 @@ typedef long long mdir_t;
 #define MAX_PW_NAME             40
 #define MAX_PW_DOMAIN           67
 #define MAX_PW_HOST             32
-#define MAX_PW_PASS             28
+#define MAX_PW_PASS             128
 #define MAX_PW_GECOS            48
 #define MAX_PW_DIR              156
 #define MAX_PW_QUOTA            30
