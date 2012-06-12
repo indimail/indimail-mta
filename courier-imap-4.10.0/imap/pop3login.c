@@ -140,12 +140,13 @@ authresp(const char *s)
 int
 main(int argc, char **argv)
 {
-	int             c;
+	int             c, disable_pass;
 	char            buf[BUFSIZ], authservice[40];
 	char           *user = 0, *p, *ptr, *q;
 	const char     *ip = getenv("TCPREMOTEIP");
 	const char     *port = getenv("TCPREMOTEPORT");
 
+	disable_pass = (getenv("DISABLE_PASS") ? 1 : 0);
 #ifdef HAVE_SETVBUF_IOLBF
 	setvbuf(stderr, NULL, _IOLBF, BUFSIZ);
 #endif
@@ -208,7 +209,7 @@ main(int argc, char **argv)
 				fflush(stderr);
 				break;
 			}
-			if (strcmp(p, "USER") == 0)
+			if (!disable_pass && strcmp(p, "USER") == 0)
 			{
 				if (tls_required())
 				{
@@ -295,7 +296,7 @@ main(int argc, char **argv)
 					continue;
 				}
 			} else
-			if (strcmp(p, "PASS") == 0)
+			if (!disable_pass && strcmp(p, "PASS") == 0)
 			{
 				p = strtok(0, "\r\n");
 
