@@ -1,5 +1,8 @@
 /*
  * $Log: dns.c,v $
+ * Revision 1.25  2012-06-20 18:38:46+05:30  Cprogrammer
+ * moved strsalloc_readyplus() to spf.c
+ *
  * Revision 1.24  2012-04-26 18:04:30+05:30  Cprogrammer
  * fix SIGSEGV in dns_txt() function
  *
@@ -547,8 +550,6 @@ dns_txt(ssa, domain)
 {
 	int             r;
 
-	if (!strsalloc_readyplus(ssa, 0))
-		return DNS_MEM;
 	ssa->len = 0;
 	if ((r = findtxt(&tmpsa, domain)) < 0)
 		return r;
@@ -564,8 +565,6 @@ dns_ptr(ssa, ip)
 {
 	int             r;
 
-	if (!strsalloc_readyplus(ssa, 0))
-		return DNS_MEM;
 	ssa->len = 0;
 	if ((r = dns_ptrplus(ssa, ip)) < 0)
 		ssa->len = 0;
@@ -1132,7 +1131,7 @@ dns_maps(sa, ip, suffix)
 void
 getversion_dns_c()
 {
-	static char    *x = "$Id: dns.c,v 1.24 2012-04-26 18:04:30+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: dns.c,v 1.25 2012-06-20 18:38:46+05:30 Cprogrammer Stab mbhangui $";
 
 	x++;
 }
