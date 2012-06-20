@@ -1,6 +1,9 @@
 #!/bin/sh
 # WARNING: This file was auto-generated. Do not edit!
 # $Log: bogofilter-qfe.in,v $
+# Revision 2.14  2012-06-20 19:03:31+05:30  Cprogrammer
+# fix for recursive emails when email sent to training ids
+#
 # Revision 2.13  2011-12-18 10:59:42+05:30  Cprogrammer
 # use config_file and wordlist argument to bogofilter
 #
@@ -44,7 +47,7 @@
 # This a qmail specific bogofilter frontend script which allows the use of a 
 # centralized bogofilter running on an smtp mail server
 # Copyright (C) Gyepi Sam <gyepi@praxis-sw.com> 2002
-# $Id: bogofilter-qfe.in,v 2.13 2011-12-18 10:59:42+05:30 Cprogrammer Stab mbhangui $
+# $Id: bogofilter-qfe.in,v 2.14 2012-06-20 19:03:31+05:30 Cprogrammer Exp mbhangui $
  
 domain=$HOST
 #
@@ -105,20 +108,18 @@ else
 fi
 opt="X"
 case "$EXT" in
-	register-spam)		# register as spam
+	Bregister-spam|register-spam)		# register as spam
 	PAT="$PAT /$domain/d;"
 	opt="-s"
 ;;
-	register-ham|register-nonspam)	# register as ham
+	Bregister-ham|register-ham|Bregister-nonspam|register-nonspam)	# register as ham
 	opt="-n"
 ;;
-	spam)		# unregister as ham
-				# register as spam
+	Bspam|spam)	# unregister as ham + register as spam
 	PAT="$PAT /$domain/d;"
 	opt="-Ns"
 ;;
-	ham|nonspam)# unregister as spam
-				# register as ham
+	Bham|ham|Bnonspam|nonspam)	# unregister as spam + register as ham
 	opt="-Sn"
 ;;
 esac
