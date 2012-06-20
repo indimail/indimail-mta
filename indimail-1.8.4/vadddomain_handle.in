@@ -1,6 +1,9 @@
 #!/bin/sh
 #
 # $Log: vadddomain_handle.in,v $
+# Revision 2.5  2012-06-20 19:04:47+05:30  Cprogrammer
+# fix for recursive emails when email sent to training ids
+#
 # Revision 2.4  2011-06-01 18:49:30+05:30  Cprogrammer
 # added rule for filtering virus infected mails & putting them in quarantine folder
 #
@@ -15,11 +18,11 @@
 # post handle for vadddomain
 #
 #
-# $Id: vadddomain_handle.in,v 2.4 2011-06-01 18:49:30+05:30 Cprogrammer Exp mbhangui $
+# $Id: vadddomain_handle.in,v 2.5 2012-06-20 19:04:47+05:30 Cprogrammer Exp mbhangui $
 @indimaildir@/bin/vdominfo $1
 for i in ham spam register-ham register-spam
 do
-	@indimaildir@/bin/valias -i '&'$i $i@$1
+	@indimaildir@/bin/valias -i '&'"B"$i $i@$1
 done
 for i in prefilt postfilt
 do
