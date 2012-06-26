@@ -1,5 +1,8 @@
 /*
  * $Log: smtpd.c,v $
+ * Revision 1.168  2012-06-26 19:17:21+05:30  Cprogrammer
+ * fix infinite loop in blast() function on EOF
+ *
  * Revision 1.167  2012-04-26 18:06:35+05:30  Cprogrammer
  * removed memory leaks
  *
@@ -652,7 +655,7 @@ int             wildmat_internal(char *, char *);
 int             ssl_rfd = -1, ssl_wfd = -1;	/*- SSL_get_Xfd() are broken */
 char           *servercert, *clientca, *clientcrl;
 #endif
-char           *revision = "$Revision: 1.167 $";
+char           *revision = "$Revision: 1.168 $";
 char           *protocol = "SMTP";
 stralloc        proto = { 0 };
 static stralloc Revision = { 0 };
@@ -2313,11 +2316,11 @@ check_recipient_sql(char *rcpt)
 	if ((ptr = inquery(USER_QUERY, rcpt, 0)))
 	{
 		if (*ptr == 4) /*- allow aliases */
-			return(0);
+			return (0);
 		return (*ptr);
 	} 
 	if (userNotFound)
-		return(1);
+		return (1);
 	out("451 Requested action aborted: database error (#4.3.2)\r\n");
 	logerr("qmail-smtpd: ");
 	logerrpid();
@@ -4687,11 +4690,11 @@ put(char *ch)
 	qmail_put(&qqt, ch, 1);
 }
 
-void
+int
 blast(int *hops)
 {
 	char            ch;
-	int             state;
+	int             state, err;
 	int             flaginheader;
 	unsigned int    pos;		/*- number of bytes since most recent \n, if fih */
 	int             flagmaybew;	/*- 1 if this line might match RETURN-RECEIPT, if fih */
@@ -4709,7 +4712,8 @@ blast(int *hops)
 	seencr = 0;	/*- qmail-smtpd-newline patch */
 	for (;;)
 	{
-		substdio_get(&ssin, &ch, 1);
+		if ((err = substdio_get(&ssin, &ch, 1)) <= 0)
+			return (1);
 		if (ch == '\n')
 		{
 			if (seencr == 0)
@@ -4796,7 +4800,7 @@ blast(int *hops)
 			break;
 		case 3:/*- \r\n + .\r */
 			if (ch == '\n')
-				return;
+				return (0);
 			put(".");
 			put("\r");
 			if (ch == '\r')
@@ -4820,6 +4824,7 @@ blast(int *hops)
 		}
 		put(&ch);
 	} /*- for (;;) */
+	return (0);
 }
 
 #ifdef USE_SPF
@@ -4984,30 +4989,34 @@ smtp_data(char *arg)
 #ifdef USE_SPF
 	spfreceived();
 #endif
-	blast(&hops); 
-	hops = (hops >= maxhops);
-	if (hops)
-		qmail_fail(&qqt);
+	/*- write the body */
+	if (!blast(&hops)) {
+		hops = (hops >= maxhops);
+		if (hops)
+			qmail_fail(&qqt);
 #ifdef SMTP_PLUGIN
-	for (i = 0;i < plugin_count;i++)
-	{
-		if (!plug[i] || !plug[i]->data_func)
-			continue;
-		if (plug[i]->data_func(local, remoteip, remotehost, remoteinfo, &mesg))
+		for (i = 0;i < plugin_count;i++)
 		{
-			out(mesg);
-			logerr("qmail-smtpd: ");
-			logerrpid();
-			logerr("plugin(data)[");
-			strnum[fmt_ulong(strnum, i)] = 0;
-			logerr(strnum);
-			logerr("]: ");
-			logerr(mesg);
-			logerrf("\n");
-			return;
+			if (!plug[i] || !plug[i]->data_func)
+				continue;
+			if (plug[i]->data_func(local, remoteip, remotehost, remoteinfo, &mesg))
+			{
+				out(mesg);
+				logerr("qmail-smtpd: ");
+				logerrpid();
+				logerr("plugin(data)[");
+				strnum[fmt_ulong(strnum, i)] = 0;
+				logerr(strnum);
+				logerr("]: ");
+				logerr(mesg);
+				logerrf("\n");
+				return;
+			}
 		}
-	}
 #endif
+	} else
+		qmail_fail(&qqt);
+	/*- write the envelope */
 	qmail_from(&qqt, mailfrom.s);
 	qmail_put(&qqt, rcptto.s, rcptto.len);
 	/* 
@@ -6633,7 +6642,7 @@ addrrelay() /*- Rejection of relay probes. */
 void
 getversion_smtpd_c()
 {
-	static char    *x = "$Id: smtpd.c,v 1.167 2012-04-26 18:06:35+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: smtpd.c,v 1.168 2012-06-26 19:17:21+05:30 Cprogrammer Exp mbhangui $";
 
 #ifdef INDIMAIL
 	if (x)
