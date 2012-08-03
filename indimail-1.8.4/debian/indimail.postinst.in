@@ -385,6 +385,9 @@ ${prefix}/sbin/svctool --poppass=106 --localip=0 --maxdaemons=40 --maxperip=25 \
 # virus/spam filtering
 if [ $noclamav -eq 0 ] ; then
 	${prefix}/sbin/svctool --config=clamd
+	if [ ! -d ${prefix}/share/clamd ] ; then
+		mkdir -p ${prefix}/share/clamd
+	fi
 	${prefix}/sbin/svctool --qscanq --servicedir=$servicedir \
 		--clamdPrefix=${prefix} --scanint=200
 fi
