@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail.spec.in,v 2.246 2012-08-03 07:44:35+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 2.247 2012-08-03 13:18:45+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %define _unpackaged_files_terminate_build 1
 
@@ -41,7 +41,7 @@
 %define ucspi_version      0.88
 %define qmail_version      1.03
 %define fetchmail_version  6.3.21
-%define clamav_version     0.97.4
+%define clamav_version     0.97.5
 %define fortune_version    1.1
 %define nssd_version       1.1
 %define flash_version      0.9.4
@@ -931,6 +931,7 @@ fi
 %attr(600,root,root)                              %{_prefix}/etc/imapd.cnf
 %attr(600,root,root)                              %{_prefix}/etc/pop3d.dist
 %attr(600,root,root)                              %{_prefix}/etc/imapd.dist
+%attr(644,root,root)                              %{_prefix}/etc/quotawarnmsg.example
 %attr(644,root,root) %config(noreplace)           %{pam_confdir}/pop3
 %attr(644,root,root) %config(noreplace)           %{pam_confdir}/imap
 %endif
