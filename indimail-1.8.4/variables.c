@@ -1,5 +1,8 @@
 /*
  * $Log: variables.c,v $
+ * Revision 2.53  2012-08-03 08:25:51+05:30  Cprogrammer
+ * removed duplicate X-Mailer
+ *
  * Revision 2.52  2011-05-18 12:54:19+05:30  Cprogrammer
  * added vserverinfo
  *
@@ -204,7 +207,7 @@
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: variables.c,v 2.52 2011-05-18 12:54:19+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: variables.c,v 2.53 2012-08-03 08:25:51+05:30 Cprogrammer Stab mbhangui $";
 #endif
 
 vdir_type       vdir;
@@ -294,7 +297,6 @@ char           *vfilter_header[] = {
 	"X-Mailer",
 	"Importance",
 	"X-Priority",
-	"X-Mailer",
 	"X-Spam-Status",
 	"X-Spam-Rating",
 	"Received",
