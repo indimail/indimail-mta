@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail.spec.in,v 2.245 2012-05-24 12:39:17+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 2.246 2012-08-03 07:44:35+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %define _unpackaged_files_terminate_build 1
 
@@ -2629,12 +2629,7 @@ fi
 /bin/rmdir --ignore-fail-on-non-empty %{_prefix}/control/domainkeys 2>/dev/null
 /bin/rmdir --ignore-fail-on-non-empty %{_prefix}/control 2>/dev/null
 
-for i in .qmail-nonspam .qmail-register-nonspam .qmail-register-spam .qmail-spam .qmail-default
-do
-	%{__rm} -f %{_prefix}/domains/%{default_domain}/$i
-done
-/bin/rmdir --ignore-fail-on-non-empty %{_prefix}/domains/%{default_domain} 2>/dev/null
-for i in postmaster mailer-daemon root
+for i in postmaster mailer-daemon root ham spam register-ham register-spam
 do
 	%{__rm} -f %{_prefix}/alias/.qmail-"$i"
 done
