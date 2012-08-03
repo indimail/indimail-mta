@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail.spec.in,v 2.247 2012-08-03 13:18:45+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 2.248 2012-08-03 22:44:36+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %define _unpackaged_files_terminate_build 1
 
@@ -41,6 +41,7 @@
 %define ucspi_version      0.88
 %define qmail_version      1.03
 %define fetchmail_version  6.3.21
+%define built_in_clamavdb  0
 %define clamav_version     0.97.5
 %define fortune_version    1.1
 %define nssd_version       1.1
@@ -796,9 +797,13 @@ fi
 if [ %nofetchmail -eq 0 ] ; then
 	$TOUCH %{buildroot}%{_prefix}/etc/fetchmailrc
 fi
-if [ %noclamav -eq 0 ] ; then
-	$TOUCH %{buildroot}%{_prefix}/share/clamd/clamav
-	$TOUCH %{buildroot}%{_prefix}/share/clamd/mirrors.dat
+if [ %noclamav -eq 0 ] ; then # clamav >= 0.97.5, without clamav-db
+	if [ ! -d %{buildroot}%{_prefix/share/clamd ] ; then
+		%{__mkdir_p} %{buildroot}%{_prefix}/share/clamd
+	else # with built-in clamav signatures
+		$TOUCH %{buildroot}%{_prefix}/share/clamd/clamav
+		$TOUCH %{buildroot}%{_prefix}/share/clamd/mirrors.dat
+	fi
 fi
 
 %files -f config_files.list
@@ -1532,10 +1537,12 @@ fi
 %attr(644,root,root)                    %{_prefix}/share/fortunes/vedas-2.dat
 
 %if %noclamav == 0
+%if %built_in_clamavdb == 1
 %ghost                   %config(noreplace) %{_prefix}/share/clamd/clamav*
 %ghost                   %config(noreplace) %{_prefix}/share/clamd/mirrors.dat
 %attr(664,qscand,qscand) %config(noreplace) %{_prefix}/share/clamd/main.cvd
 %attr(664,qscand,qscand) %config(noreplace) %{_prefix}/share/clamd/daily.cvd
+%endif
 %attr(644,root,root)                        %{_libdir}/pkgconfig/libclamav.pc
 %endif
 
