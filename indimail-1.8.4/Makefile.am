@@ -34,8 +34,7 @@ iauthdir=@libdir@
 
 SYSCONFDIR = @sysconfdir@
 sysconf_DATA = indimail.settings controlfiles headerlist osh.table cronlist perm_list \
-			   indimail.mrtg.cfg indimail-permissions.easy indimail-permissions.paranoid \
-			   indimail-permissions.secure
+			   indimail.mrtg.cfg
 
 man_MANS=vadduser.1 adminclient.8 chowkidar.8 clearopensmtp.8 dbinfo.8 hostcntrl.8 hostsync.8 \
 	initsvc.1 indisrvr.8 indiversion.8 inlookup.8 InLookup.8 inquerytest.8 ipchange.8 \
@@ -164,8 +163,6 @@ indimailsbin_SCRIPTS = myslave controlsync svctool cputime tls-cert-check create
 noinst_SCRIPTS = indimail.spec indimail-@VERSION@-rpmlintrc \
 	INSTALL INSTALL-RPM INSTALL-MYSQL README-CLUSTER RELEASE-Notes Quick-INSTALL \
 	README INSTALL-MINI vadddomain_handle vadduser_handle
-
-noinst_CONFIG = indimail-permissions.easy indimail-permissions.paranoid indimail-permissions.secure
 
 post_handle_list = vadddomain vadduser
 
