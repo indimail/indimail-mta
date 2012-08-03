@@ -1,0 +1,44 @@
+#
+# Copyright (c) 2001 SuSE GmbH Nuernberg, Germany.  All rights reserved.
+#
+# Author: Roman Drahtmueller <draht@suse.de>, 2001
+#
+# 
+# See /etc/permissions for general hints on how to use this file.
+#
+# /etc/permissions.easy is set up for the use in a standalone and single-user
+# installation to make things "work" out-of-the box.
+# Some of the settings might be considered somewhat lax from the security
+# standpoint. These aspects are handled differently in the permissions.secure
+# file.
+# 
+#
+/var/indimail/bin/vdeluser               root:root      4555
+/var/indimail/bin/vadduser               root:root      4555
+/var/indimail/bin/vaddaliasdomain        root:root      4555
+/var/indimail/bin/vrenamedomain          root:root      4555
+/var/indimail/bin/vsetuserquota          root:root      4555
+/var/indimail/bin/vmoveuser              root:root      4555
+/var/indimail/bin/qhpsi                  qscand:qmail   6511
+/var/indimail/bin/run-cleanq             root:qscand    2511
+/var/indimail/bin/vuserinfo              root:root      4555
+/var/indimail/bin/qmail-queue            qmailq:qmail   6511
+/var/indimail/bin/vdeldomain             root:root      4555
+/var/indimail/bin/vadddomain             root:root      4555
+/var/indimail/bin/bogofilter             root:indimail  6511
+/var/indimail/bin/qscanq                 qscand:qscand  4555
+/var/indimail/bin/vdominfo               root:root      4511
+/var/indimail/bin/vrenameuser            root:root      4555
+/var/indimail/bin/printdir               root:root      4555
+/var/indimail/bin/vmoduser               root:root      4555
+/var/indimail/bin/vcfilter               root:root      4555
+/var/indimail/bin/vbulletin              root:root      4555
+/var/indimail/libexec/sq_vacation        root:qmail     4555
+/var/indimail/libexec/authlib/authshadow root:root      4555
+/var/indimail/sbin/systpass              root:root      4555
+
+#
+# Directories
+#
+/var/indimail/alias                      alias:qmail    2555
+/var/indimail/autoturn                   indimail:qmail 2755
