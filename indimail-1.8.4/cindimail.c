@@ -1,5 +1,8 @@
 /*
  * $Log: cindimail.c,v $
+ * Revision 2.8  2012-08-04 08:28:48+05:30  Cprogrammer
+ * replaced dupstr() with strdup()
+ *
  * Revision 2.7  2008-07-25 16:46:55+05:30  Cprogrammer
  * fixes for Darwin
  *
@@ -29,7 +32,7 @@
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: cindimail.c,v 2.7 2008-07-25 16:46:55+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: cindimail.c,v 2.8 2012-08-04 08:28:48+05:30 Cprogrammer Stab mbhangui $";
 #endif
 
 #include <stdlib.h>
@@ -62,7 +65,6 @@ int             valid_argument(char *, char *);
 void            too_dangerous(char *);
 
 extern char    *getwd();
-extern char    *xmalloc();
 extern char   **completion_matches PARAMS((char *, rl_compentry_func_t *));
 
 /*
@@ -113,20 +115,6 @@ char           *progname, *cmdPtr;
  * * When non-zero, this global means the user is done using this program. 
  */
 int             done;
-
-char           *
-dupstr(char *s)
-{
-	char           *r;
-
-#ifdef DARWIN
-	r = malloc(strlen(s) + 1);
-#else
-	r = xmalloc(strlen(s) + 1);
-#endif
-	strcpy(r, s);
-	return (r);
-}
 
 int
 main(argc, argv)
@@ -335,7 +323,7 @@ command_generator(text, state)
 	{
 		list_index++;
 		if (strncmp(name, text, len) == 0)
-			return (dupstr(name));
+			return (strdup(name));
 	}
 	/*- If no names matched, then return NULL.  */
 	return ((char *) NULL);
