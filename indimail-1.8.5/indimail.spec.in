@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail.spec.in,v 2.249 2012-08-05 10:33:01+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 2.250 2012-08-16 07:50:29+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %define _unpackaged_files_terminate_build 1
 
@@ -226,7 +226,7 @@ BuildRequires: mysql-devel
 %if %{undefined centos_version} && %{undefined rhel_version} && %{undefined sles_version}
 BuildRequires: chrpath
 %endif
-%if 0%{?suse_version} == 1220 || 0%{?suse_version} == 1110 || 0%{?suse_version} == 1100 || 0%{?suse_version} == 1030 || 0%{?suse_version} == 1020
+%if 0%{?suse_version} == 1220 || 0%{?suse_version} == 1210 || 0%{?suse_version} == 1140 || 0%{?suse_version} > 1110 || 0%{?suse_version} == 1100 || 0%{?suse_version} == 1030 || 0%{?suse_version} == 1020
 BuildRequires: chrpath
 %endif
 %if 0%{?suse_version} >= 1120
@@ -396,6 +396,9 @@ do
 			continue
 		fi
 		if [ " $i" = " qmail-%{qmail_version}" ] ; then
+			continue
+		fi
+		if [ " $i" = " ucspi-tcp-%{ucspi_version}" ] ; then
 			continue
 		fi
 %endif
@@ -2464,7 +2467,8 @@ echo "$count. You can optionally run the following command to verify installatio
 echo "   sudo rpm -V indimail"
 if [ ! -f %{_prefix}/control/servercert.pem ] ; then
 count=`expr $count + 1`
-echo "$count. You also need to create CERTS for IMAP/POP3. run the following command to create cert"
+echo "$count. You also need to create CERTS for SSL enabled IMAP/POP3. Run the following command"
+echo "   to create the Certificate"
 echo "   %{_prefix}/sbin/svctool --postmaster=postmaster@indimail.org --config=cert"
 fi
 
