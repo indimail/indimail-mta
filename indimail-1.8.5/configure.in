@@ -1322,7 +1322,7 @@ esac
 
 case $FILE_LOCKING in
 1*|y*|Y*|c*|C*)
-	echo "      file locking = ON  --enable-file-locking=y default (use flock)"
+	echo "     fcntl locking = ON  --enable-file-locking=y default (use fcntl)"
 	;;
 f*|F*)
 	echo "     flock locking = ON  --enable-file-locking=f (use flock)"
