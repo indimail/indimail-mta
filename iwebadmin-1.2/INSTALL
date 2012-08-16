@@ -28,8 +28,7 @@ the above information then starting from scratch.
     # ./configure --enable-indimaildir=/var/indimail \
         --enable-ezmlmdir=/var/indimail \
         --disable-ipauth --disable-trivial-password --enable-modify-quota \
-        --enable-mysqlincdir=/usr/include/mysql \
-        --enable-mysqllibdir=/usr/lib/mysql \
+        --enable-mysqlprefix=/usr/local/mysql \
         --enable-htmldir=/var/www/html \
         --enable-cgibindir=/var/www/cgi-bin \
         --enable-imagedir=/var/www/html/images/iwebadmin \
