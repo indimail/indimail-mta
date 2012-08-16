@@ -1,5 +1,8 @@
 /*
  * $Log: lockfile.c,v $
+ * Revision 2.6  2012-08-16 07:53:16+05:30  Cprogrammer
+ * removed spurios return statement
+ *
  * Revision 2.5  2009-11-17 20:15:01+05:30  Cprogrammer
  * struct flock members have different order on Mac OS X
  *
@@ -60,7 +63,7 @@
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: lockfile.c,v 2.5 2009-11-17 20:15:01+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: lockfile.c,v 2.6 2012-08-16 07:53:16+05:30 Cprogrammer Stab mbhangui $";
 #endif
 
 #ifdef FILE_LOCKING
@@ -107,13 +110,13 @@ lockcreate(char *filename, char proj)
 		} else
 			break;
 	}
-	return(semid);
+	return (semid);
 }
 
 int
 lockremove(int semid)
 {
-	return(semctl(semid, 0, IPC_RMID, 0));
+	return (semctl(semid, 0, IPC_RMID, 0));
 }
 
 int             GotAlarm;
@@ -139,7 +142,7 @@ get_write_lock(int semid)
 				(void) signal(SIGALRM, pstat);
 				GotAlarm = 0;
 				errno = EAGAIN;
-				return(-1);
+				return (-1);
 			} else
 #ifdef ERESTART
 			if (errno == EINTR || errno == ERESTART)
@@ -165,7 +168,7 @@ ReleaseLock(int fd)
 int
 RemoveLock(char *filename, char proj)
 {
-	return(0);
+	return (0);
 }
 
 static void
@@ -197,7 +200,7 @@ lockcreate(char *filename, char proj)
 	start_time = time(0);
 	snprintf(TmpFil, sizeof(TmpFil), "%s.pre.%d", filename, proj);
 	if ((fd = open(TmpFil, O_CREAT, 0666)) == -1)
-		return(-1);
+		return (-1);
 	close(fd);
 	snprintf(NewFil, sizeof(NewFil), "%s.lck.%d", filename, proj);
 	for(mypid = getpid();;)
@@ -213,13 +216,13 @@ lockcreate(char *filename, char proj)
 				else
 				{
 					errno = tmperrno;
-					return(-1);
+					return (-1);
 				}
 			}
 			secs = time(0) - start_time;
 			if (secs)
 				fprintf(stderr, "%d: lockfile %ld\n", getpid(), secs);
-			return(fd);
+			return (fd);
 		} else
 		if (errno == EEXIST)
 		{
@@ -233,17 +236,17 @@ lockcreate(char *filename, char proj)
 				if (file_age > 5)
 				{
 					if ((fd = open(NewFil, O_RDWR, 0)) == -1)
-						return(-1);
+						return (-1);
 					if (read(fd, (char *) &pid, sizeof(pid_t)) == -1)
 					{
 						close(fd);
-						return(-1);
+						return (-1);
 					}
 					if (pid == mypid)
 					{
 						close(fd);
 						errno = EDEADLK;
-						return(-1);
+						return (-1);
 					} else
 					if (!pid || kill(pid, 0))
 					{
@@ -263,7 +266,7 @@ lockcreate(char *filename, char proj)
 									fprintf(stderr, "%d: lockfile %ld\n", getpid(), secs);
 								close(fd);
 								errno = EAGAIN;
-								return(-1);
+								return (-1);
 							}
 							break;
 						}
@@ -272,12 +275,12 @@ lockcreate(char *filename, char proj)
 						{
 							if (fcntl(fd, F_SETLK, &fl) == -1);
 							close(fd);
-							return(-1);
+							return (-1);
 						}
 						if (fcntl(fd, F_SETLK, &fl) == -1)
 						{
 							close(fd);
-							return(-1);
+							return (-1);
 						}
 						close(fd);
 						continue;
@@ -288,7 +291,7 @@ lockcreate(char *filename, char proj)
 							fprintf(stderr, "%d: lockfile %ld\n", getpid(), secs);
 						close(fd);
 						errno = EAGAIN;
-						/*- return(-1); -*/
+						/*- return (-1); -*/
 					}
 				} /*- if (file_age > 5) */
 			} /* if (!stat(NewFil, &statbuf)) */
@@ -297,10 +300,10 @@ lockcreate(char *filename, char proj)
 		if (errno == ENOENT)
 		{
 			if ((fd = open(TmpFil, O_CREAT, 0666)) == -1)
-				return(-1);
+				return (-1);
 			close(fd);
 		} else	
-			return(-1);
+			return (-1);
 	}
 }
 
@@ -313,15 +316,15 @@ get_write_lock(int fd)
 	if (write(fd, (char *) &pid, sizeof(pid_t)) == -1)
 	{
 		close(fd);
-		return(-1);
+		return (-1);
 	}
-	return(fd);
+	return (fd);
 }
 
 int
 ReleaseLock(int fd)
 {
-	return(close(fd));
+	return (close(fd));
 }
 
 int
@@ -330,8 +333,7 @@ RemoveLock(char *filename, char proj)
 	char            NewFil[MAX_BUFF];
 
 	snprintf(NewFil, sizeof(NewFil), "%s.lck.%d", filename, proj);
-	return(access(NewFil, F_OK) ? 0 : unlink(NewFil));
-	return(0);
+	return (access(NewFil, F_OK) ? 0 : unlink(NewFil));
 }
 #elif defined(USE_FCNTLLOCK)
 int
@@ -347,7 +349,7 @@ lockcreate(char *filename, char proj)
 
 	snprintf(TmpFil, sizeof(TmpFil), "%s.pre.%d", filename, proj);
 	if ((fd = open(TmpFil, O_CREAT|O_WRONLY, 0644)) == -1)
-		return(-1);
+		return (-1);
 	fl.l_pid = getpid();
 	for (;;)
 	{
@@ -359,17 +361,17 @@ lockcreate(char *filename, char proj)
 			if (errno == EINTR)
 #endif
 				continue;
-			return(-1);
+			return (-1);
 		}
 		break;
 	}
-	return(fd);
+	return (fd);
 }
 
 int
 get_write_lock(int fd)
 {
-	return(fd);
+	return (fd);
 }
 
 int
@@ -382,10 +384,10 @@ ReleaseLock(int fd)
 #endif
 
 	if (fd == -1)
-		return(-1);
+		return (-1);
 	fl.l_pid = getpid();
 	if (fcntl(fd, F_SETLK, &fl) == -1);
-	return(close(fd));
+	return (close(fd));
 }
 
 int
@@ -395,9 +397,9 @@ RemoveLock(char *filename, char proj)
 
 	snprintf(TmpFil, sizeof(TmpFil), "%s.pre.%d", filename, proj);
 	if (!access(TmpFil, F_OK))
-		return(unlink(TmpFil));
+		return (unlink(TmpFil));
 	else
-		return(0);
+		return (0);
 }
 #elif defined(USE_FLOCK)
 int
@@ -408,29 +410,29 @@ lockcreate(char *filename, char proj)
 
 	snprintf(TmpFil, sizeof(TmpFil), "%s.pre.%d", filename, proj);
 	if ((fd = open(TmpFil, O_CREAT|O_WRONLY, 0644)) == -1)
-		return(-1);
+		return (-1);
 	if (lockf(fd, F_LOCK, 0))
 	{
 		close(fd);
-		return(-1);
+		return (-1);
 	}
-	return(fd);
+	return (fd);
 }
 
 int
 get_write_lock(int fd)
 {
-	return(fd);
+	return (fd);
 }
 
 int
 ReleaseLock(int fd)
 {
 	if (fd == -1)
-		return(-1);
+		return (-1);
 	if (!lockf(fd, F_ULOCK, 0))
-		return(close(fd));
-	return(close(fd));
+		return (close(fd));
+	return (close(fd));
 }
 
 int
@@ -440,9 +442,9 @@ RemoveLock(char *filename, char proj)
 
 	snprintf(TmpFil, sizeof(TmpFil), "%s.pre.%d", filename, proj);
 	if (!access(TmpFil, F_OK))
-		return(unlink(TmpFil));
+		return (unlink(TmpFil));
 	else
-		return(0);
+		return (0);
 }
 #endif /*- #ifdef USE_FLOCK */
 #endif /*- #ifdef FILE_LOCKING */
