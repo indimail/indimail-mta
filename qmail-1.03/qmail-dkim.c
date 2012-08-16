@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-dkim.c,v $
+ * Revision 1.36  2012-08-16 08:01:46+05:30  Cprogrammer
+ * do not skip X-Mailer headers
+ *
  * Revision 1.35  2011-11-10 14:32:08+05:30  Cprogrammer
  * BUG ssout to be assigned only after pidopen()
  *
@@ -226,7 +229,8 @@ custom_error(char *flag, char *status, char *code)
 int DKIM_CALL
 SignThisHeader(const char *szHeader)
 {
-	if (strncasecmp((char *) szHeader, "X-", 2) == 0
+	if ((!strncasecmp((char *) szHeader, "X-", 2) 
+			&& strncasecmp((char *) szHeader, "X-Mailer", 8))
 		|| strncasecmp((char *) szHeader, "Received:", 9) == 0
 		|| strncasecmp((char *) szHeader, "Authentication-Results:", 23) == 0
 		|| strncasecmp((char *) szHeader, "Return-Path:", 12) == 0)
@@ -1426,7 +1430,7 @@ main(argc, argv)
 void
 getversion_qmail_dkim_c()
 {
-	static char    *x = "$Id: qmail-dkim.c,v 1.35 2011-11-10 14:32:08+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: qmail-dkim.c,v 1.36 2012-08-16 08:01:46+05:30 Cprogrammer Stab mbhangui $";
 
 	x++;
 }

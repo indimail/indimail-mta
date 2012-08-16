@@ -1,5 +1,8 @@
 /*
  * $Log: dkim.c,v $
+ * Revision 1.16  2012-08-16 08:01:19+05:30  Cprogrammer
+ * do not skip X-Mailer headers
+ *
  * Revision 1.15  2011-06-04 13:55:50+05:30  Cprogrammer
  * set AllowUnsignedFromHeaders
  *
@@ -90,7 +93,7 @@
 int DKIM_CALL
 SignThisHeader(const char *szHeader)
 {
-	if (!strncasecmp(szHeader, "X-", 2)
+	if ((!strncasecmp(szHeader, "X-", 2) && strncasecmp(szHeader, "X-Mailer", 8))
 		|| !strncasecmp(szHeader, "Received:", 9)
 		|| !strncasecmp(szHeader, "DKIM-Signature:", 15)
 		|| !strncasecmp(szHeader, "Authentication-Results:", 23)
@@ -864,7 +867,7 @@ main(int argc, char **argv)
 void
 getversion_dkim_c()
 {
-	static char    *x = (char *) "$Id: dkim.c,v 1.15 2011-06-04 13:55:50+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = (char *) "$Id: dkim.c,v 1.16 2012-08-16 08:01:19+05:30 Cprogrammer Stab mbhangui $";
 
 	x++;
 }
