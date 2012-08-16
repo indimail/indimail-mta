@@ -1,5 +1,8 @@
 /*
  * $Log: autoresponder.c,v $
+ * Revision 1.27  2012-08-16 07:58:56+05:30  Cprogrammer
+ * added description for -T option
+ *
  * Revision 1.26  2011-12-05 12:13:11+05:30  Cprogrammer
  * set Content-Type if -T argument is given
  *
@@ -159,6 +162,9 @@ char           *usage_str =
 	" -l       Lax Mode, allow even if RECIPIENT is not in to, cc and bcc\n"
 	" -n NUM   Set the maximum number of replies to be sent in TIME secs (defaults to 1)\n"
 	" -t TIME  Set the time interval, in seconds (defaults to 1 week, -1 for no rate limiting)\n"
+	" -T STR   Added Content-Type field. This option is valid without\n"
+	"          the -c option. STR can be a path to a file having\n"
+	"          the content-type. A newline at the end will be removed\n"
 	" -s STR   Prefix subject by STR (defaults to \"Autoreply: Re:\"\n"
 	" -S STR   The subject in autoresponse (defaults to the subject in received mail)\n"
 	" -b SDate Date (YYYY-mm-dd HH:MM:SS) from which the autoresponder should start functioning\n"
@@ -1290,7 +1296,7 @@ main(int argc, char *argv[])
 void
 getversion_qmail_autoresponder_c()
 {
-	static char    *x = "$Id: autoresponder.c,v 1.26 2011-12-05 12:13:11+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: autoresponder.c,v 1.27 2012-08-16 07:58:56+05:30 Cprogrammer Stab mbhangui $";
 
 	x++;
 }
