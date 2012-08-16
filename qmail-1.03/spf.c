@@ -1339,7 +1339,7 @@ spfinfo(sa)
 void
 getversion_spf_c()
 {
-	static char    *x = "$Id: spf.c,v 1.9 2012-06-20 18:47:26+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: spf.c,v 1.9 2012-06-20 18:47:26+05:30 Cprogrammer Stab mbhangui $";
 
 	x++;
 }
