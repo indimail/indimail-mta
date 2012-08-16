@@ -91,7 +91,7 @@
 #include <string.h>
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vauth_adduser.c,v 2.14 2012-04-22 13:59:23+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: vauth_adduser.c,v 2.14 2012-04-22 13:59:23+05:30 Cprogrammer Stab mbhangui $";
 #endif
 
 #define QUOTA_BUFLEN 20
