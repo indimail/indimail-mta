@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-multi.c,v $
+ * Revision 1.47  2012-08-16 11:36:21+05:30  Cprogrammer
+ * added case 88 for surblfilter
+ *
  * Revision 1.46  2011-06-09 21:27:40+05:30  Cprogrammer
  * blackhole mails if filter program exits 2
  *
@@ -439,6 +442,8 @@ run_mailfilter(int argc, char **argv)
 		return (qmail_multi(argc, argv));
 	case 2:
 		return (0); /*- Blackhole */
+	case 88:
+		_exit(88);
 	case 100:
 		_exit(31);
 	default:
@@ -670,6 +675,6 @@ discard_envelope()
 void
 getversion_qmail_multi_c()
 {
-	static char    *x = "$Id: qmail-multi.c,v 1.46 2011-06-09 21:27:40+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: qmail-multi.c,v 1.47 2012-08-16 11:36:21+05:30 Cprogrammer Stab mbhangui $";
 	x++;
 }
