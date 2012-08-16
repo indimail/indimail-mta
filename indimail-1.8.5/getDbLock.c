@@ -39,12 +39,12 @@ getDbLock(char *filename, char proj)
 #ifdef FILE_LOCKING
 	int             lockfd;
 
-	if((lockfd = lockcreate(filename, proj)) == -1)
+	if ((lockfd = lockcreate(filename, proj)) == -1)
 	{
 		fprintf(stderr, "lockcreate: %s.%d: %s\n", filename, proj, strerror(errno));
 		return(-1);
 	} else
-	if(get_write_lock(lockfd) == -1)
+	if (get_write_lock(lockfd) == -1)
 	{
 		fprintf(stderr, "get_write_lock: %s.%d: %s\n", filename, proj, strerror(errno));
 		delDbLock(lockfd, filename, proj);
@@ -60,12 +60,12 @@ int
 delDbLock(int lockfd, char *filename, char proj)
 {
 #ifdef FILE_LOCKING
-	if(RemoveLock(filename, proj) == -1)
+	if (RemoveLock(filename, proj) == -1)
 	{
 		ReleaseLock(lockfd);
 		return(-1);
 	}
-	if(ReleaseLock(lockfd) == -1)
+	if (ReleaseLock(lockfd) == -1)
 		return(-1);
 #endif
 	return(0);
@@ -79,9 +79,9 @@ readPidLock(char *filename, char proj)
 	pid_t           pid;
 
 	snprintf(TmpFil, sizeof(TmpFil), "%s.pre.%d", filename, proj);
-	if((fd = open(TmpFil, O_RDONLY, 0)) == -1)
+	if ((fd = open(TmpFil, O_RDONLY, 0)) == -1)
 		return(-1);
-	if(read(fd, (char *) &pid, sizeof(pid_t)) == -1)
+	if (read(fd, (char *) &pid, sizeof(pid_t)) == -1)
 	{
 		close(fd);
 		return(-1);
