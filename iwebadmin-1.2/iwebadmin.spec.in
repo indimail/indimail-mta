@@ -132,7 +132,7 @@ BuildRoot: %(mktemp -ud %{_tmppath}/%{name}-%{version}-%{release}-XXXXXX)
 Excludeos: windows 
 
 %description
-iwebadmin provides a Web frontent for administering IndiMail Users
+iwebadmin provides a Web frontend for administering IndiMail Users
 
 %{see_base}
 
@@ -146,28 +146,24 @@ echo target_vendor %_target_vendor
 echo Building %{name}-%{version}-%{release} Build %{_build} OS %{_os} Dist %dist disttag %disttag libs %{_lib} %{_libdir}
 echo "------------------------------------------------------"
 
-for i in %{name}-%{version}
-do
-(
-if [ -d $i ] ; then
-	/bin/rm -rf $i
+proj=%{name}-%{version}
+if [ -d $proj ] ; then
+	/bin/rm -rf $proj
 fi
-if [ -f ../SOURCES/$i.tar.gz ] ; then
-	gunzip -c ../SOURCES/$i.tar.gz |tar xf -
-elif [ -f ../SOURCES/$i.tar.bz2 ] ; then
-	bzip2 -d -c ../SOURCES/$i.tar.bz2 |tar xf -
+if [ -f ../SOURCES/$proj.tar.gz ] ; then
+	gunzip -c ../SOURCES/$proj.tar.gz |tar xf -
+elif [ -f ../SOURCES/$proj.tar.bz2 ] ; then
+	bzip2 -d -c ../SOURCES/$proj.tar.bz2 |tar xf -
 else
-	echo "No Source Archive for $i"
+	echo "No Source Archive for $proj"
 	exit 1
 fi
-if [ -d $i ] ; then
-	if [ -f %{name}-%{version}/patches/$i.patch ] ; then
+if [ -d $proj ] ; then
+	if [ -f %{name}-%{version}/patches/$proj.patch ] ; then
 	    # Copy for the SRPM
-		/bin/cp %{name}-%{version}/patches/$i.patch ../SOURCES
+		/bin/cp %{name}-%{version}/patches/$proj.patch ../SOURCES
 	fi
 fi
-)
-done
 
 %build
 ID=$(id -u)
