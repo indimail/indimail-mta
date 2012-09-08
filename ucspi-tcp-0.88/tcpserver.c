@@ -1,5 +1,8 @@
 /*
  * $Log: tcpserver.c,v $
+ * Revision 1.49  2012-09-08 16:35:11+05:30  Cprogrammer
+ * BUG - wrong variable used for ip address causing fnrules to fail in ip address matching
+ *
  * Revision 1.48  2012-04-23 18:49:42+05:30  Cprogrammer
  * use ipv4 addresses if fakev4 detected for if -4 option is passed
  *
@@ -165,7 +168,7 @@
 #include "auto_home.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: tcpserver.c,v 1.48 2012-04-23 18:49:42+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: tcpserver.c,v 1.49 2012-09-08 16:35:11+05:30 Cprogrammer Stab mbhangui $";
 #endif
 
 #ifdef IPV6
@@ -512,10 +515,7 @@ doit(int t)
 		{
 			char           *temp;
 #ifdef IPV6
-			if (fakev4)
-				temp = remoteipstr6 + 7;
-			else
-			if (noipv6 && !forcev6)
+			if (fakev4 || (noipv6 && !forcev6))
 				temp = remoteipstr;
 			else
 				temp = remoteipstr6;
@@ -539,14 +539,22 @@ doit(int t)
 		if (localhost)
 			safecats(localhost);
 		cats("[");
+#ifdef IPV6
 		safecats((fakev4 || (noipv6 && !forcev6)) ? localipstr : localipstr6);
+#else
+		safecats(localipstr);
+#endif
 		cats("]");
 		safecats(localportstr);
 		cats(" ");
 		if (remotehost)
 			safecats(remotehost);
 		cats("[");
+#ifdef IPV6
 		safecats((fakev4 || (noipv6 && !forcev6)) ? remoteipstr : remoteipstr6);
+#else
+		safecats(remoteipstr);
+#endif
 		cats("]");
 		if (flagremoteinfo)
 			safecats(tcpremoteinfo.s);
