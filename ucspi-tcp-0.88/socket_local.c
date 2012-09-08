@@ -22,9 +22,9 @@ int
 socket_local4(int s, char ip[4], uint16 * port)
 {
 	struct sockaddr_in sa;
-	int             dummy = sizeof sa;
+	unsigned int    dummy = sizeof sa;
 
-	if (getsockname(s, (struct sockaddr *) &sa, &dummy) == -1)
+	if (getsockname(s, (struct sockaddr *) &sa, (socklen_t *) &dummy) == -1)
 		return -1;
 	byte_copy(ip, 4, (char *) &sa.sin_addr);
 	uint16_unpack_big((char *) &sa.sin_port, port);

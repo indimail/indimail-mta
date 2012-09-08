@@ -35,7 +35,7 @@ dns_resolve(char *q, char qtype[2])
 #ifdef IPV6
 	if (dns_transmit_start(&dns_resolve_tx, servers, 1, q, qtype, V6any) == -1)
 #else
-	if (dns_transmit_start(&dns_resolve_tx, servers, 1, q, qtype, "\0\0\0\0") == -1)
+	if (dns_transmit_start(&dns_resolve_tx, servers, 1, q, qtype, (unsigned char *) "\0\0\0\0") == -1)
 #endif
 		return -1;
 	for (;;)
