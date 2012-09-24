@@ -1,5 +1,8 @@
 /*
  * $Log: limits.c,v $
+ * Revision 2.14  2012-09-24 19:16:29+05:30  Cprogrammer
+ * BUG - Fixed diskquota, maxmsgcount, defaultquota, defaultmaxmsgcount initialization
+ *
  * Revision 2.13  2012-04-22 13:57:57+05:30  Cprogrammer
  * formatted sql statement
  *
@@ -46,7 +49,7 @@
  */
 
 #ifndef	lint
-static char     sccsid[] = "$Id: limits.c,v 2.13 2012-04-22 13:57:57+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: limits.c,v 2.14 2012-09-24 19:16:29+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #include "indimail.h"
@@ -300,10 +303,10 @@ vdefault_limits(struct vlimits *limits)
 	limits->maxforwards = -1;
 	limits->maxautoresponders = -1;
 	limits->maxmailinglists = -1;
-	limits->diskquota = -1;
-	limits->maxmsgcount = -1;
-	limits->defaultquota = -1;
-	limits->defaultmaxmsgcount = -1;
+	limits->diskquota = 0;
+	limits->maxmsgcount = 0;
+	limits->defaultquota = 0;
+	limits->defaultmaxmsgcount = 0;
 
 	limits->disable_pop = 0;
 	limits->disable_imap = 0;
