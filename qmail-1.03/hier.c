@@ -1555,7 +1555,7 @@ _hier(inst_dir)
 	ci(auto_qmail_home, "etc", "pop3d.cnf", auto_uido, auto_gido, 0600);
 	ci(auto_qmail_home, "etc", "pop3d.dist", auto_uido, auto_gido, 0600);
 	ci(auto_qmail_home, "etc", "pop3d-ssl.dist", auto_uido, auto_gido, 0600);
-	ci(auto_qmail_home, "etc", "quotawarnmsg.example", auto_uido, auto_gido, 0444);
+	ci(auto_qmail_home, "etc", "quotawarnmsg.example", auto_uido, auto_gido, 0644);
 	/*- */
 	ci(auto_qmail_home, "libexec", "couriertcpd", auto_uido, auto_gido, 0555);
 	ci(auto_qmail_home, "libexec", "imapd.rc", auto_uido, auto_gido, 0555);
