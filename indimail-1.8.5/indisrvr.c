@@ -1,5 +1,8 @@
 /*
  * $Log: indisrvr.c,v $
+ * Revision 2.48  2012-09-24 19:21:18+05:30  Cprogrammer
+ * removed pidfile
+ *
  * Revision 2.47  2011-11-09 19:44:41+05:30  Cprogrammer
  * removed getversion
  *
@@ -171,7 +174,7 @@
 #include "indimail.h"
 
 #ifndef lint
-static char     sccsid[] = "$Id: indisrvr.c,v 2.47 2011-11-09 19:44:41+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: indisrvr.c,v 2.48 2012-09-24 19:21:18+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef CLUSTERED_SITE
@@ -231,8 +234,6 @@ static int      get_options(int argc, char **argv, char **, char **, int *);
 static void     SigHup();
 int             translate(SSL *, int, int, int, unsigned int);
 #endif
-
-static char     pidFile[MAX_BUFF];
 
 #ifdef HAVE_SSL
 static int      usessl = 0;
@@ -428,7 +429,6 @@ main(argc, argv)
 	if (get_options(argc, argv, &ipaddr, &port, &backlog))
 		return(1);
 	dup2(2, 3);
-	snprintf(pidFile, MAX_BUFF, "/tmp/indiserver.%s%s.PID", ipaddr, port);
 	snprintf(pgname, MAX_BUFF, "indiserver.%s%s", ipaddr, port);
 	signal(SIGTERM, SigTerm);
 	signal(SIGUSR2, SigUsr);
@@ -871,7 +871,6 @@ static void
 SigTerm()
 {
 	filewrt(3, "%d: IndiServer going down on SIGTERM\n", getpid());
-	unlink(pidFile);
 	exit(0);
 }
 
