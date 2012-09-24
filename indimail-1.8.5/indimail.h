@@ -1,5 +1,8 @@
 /*
  * $Log: indimail.h,v $
+ * Revision 2.208  2012-09-24 19:15:14+05:30  Cprogrammer
+ * made diskquota, maxmsgcount, defaultquota, defaultmaxmsgcount in vlimits unsigned
+ *
  * Revision 2.207  2012-06-12 15:39:10+05:30  Cprogrammer
  * increased max password length definition to 128
  *
@@ -937,7 +940,7 @@
 #define INDIMAILH_H
 
 #ifndef	lint
-static char     sccsidh[] = "$Id: indimail.h,v 2.207 2012-06-12 15:39:10+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsidh[] = "$Id: indimail.h,v 2.208 2012-09-24 19:15:14+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef HAVE_CONFIG_H
@@ -965,8 +968,10 @@ static char     sccsidh[] = "$Id: indimail.h,v 2.207 2012-06-12 15:39:10+05:30 C
 #ifdef HAVE_INTTYPES_H
 #include <inttypes.h>
 typedef int64_t mdir_t;
+typedef uint64_t umdir_t;
 #else
 typedef long long mdir_t;
+typedef unsigned long long umdir_t;
 #define PRId64 "lld"
 #define PRIu64 "llu"
 #define SCNd64 "lld"
@@ -1522,10 +1527,10 @@ struct vlimits {
       int       maxmailinglists;
 
       /* quota & message count limits */
-      mdir_t    diskquota;
-      mdir_t    maxmsgcount;
-      mdir_t    defaultquota;
-      mdir_t    defaultmaxmsgcount;
+      umdir_t   diskquota;
+      umdir_t   maxmsgcount;
+      umdir_t   defaultquota;
+      umdir_t   defaultmaxmsgcount;
 
       /* the following are 0 (false) or 1 (true) */
       short     disable_pop;
