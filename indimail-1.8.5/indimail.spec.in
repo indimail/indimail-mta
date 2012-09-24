@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail.spec.in,v 2.250 2012-08-16 07:50:29+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 2.251 2012-09-24 19:24:53+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %define _unpackaged_files_terminate_build 1
 
@@ -2595,20 +2595,45 @@ fi
 	done
 %endif
 
-echo "removing binaries, libraries, queues, man pages"
-for i in %{_prefix}/bin %{_prefix}/sbin %{_prefix}/lib %{_prefix}/queue \
-	%{_prefix}/man/man1 %{_prefix}/man/cat1 %{_prefix}/man/man5 %{_prefix}/man/cat5 \
-	%{_prefix}/man/man7 %{_prefix}/man/cat7 %{_prefix}/man/man8 %{_prefix}/man/cat8
-do
-	%{__rm} -rf $i || true
-done
-/bin/rmdir --ignore-fail-on-non-empty %{_prefix}/man 2>/dev/null
+if [ ! %{_prefix} = "/usr" ] ; then
+	echo "removing binaries, libraries, queues, man pages"
+	for i in %{_prefix}/bin %{_prefix}/sbin %{_prefix}/lib %{_prefix}/queue \
+		%{_prefix}/man/man1 %{_prefix}/man/cat1 %{_prefix}/man/man5 %{_prefix}/man/cat5 \
+		%{_prefix}/man/man7 %{_prefix}/man/cat7 %{_prefix}/man/man8 %{_prefix}/man/cat8
+	do
+		%{__rm} -rf $i || true
+	done
+	/bin/rmdir --ignore-fail-on-non-empty %{_prefix}/man 2>/dev/null
+	for i in `/bin/ls %{_prefix}/share 2>/dev/null`
+	do
+		if [ " $i" = " clamd" ] ; then # leave the signatures
+			continue;
+		fi
+		%{__rm} -rf %{_prefix}/share/$i || true
+	done
+	/bin/rmdir --ignore-fail-on-non-empty %{_prefix}/share 2>/dev/null
+fi
 
 echo "removing configuration"
-for i in indimail.cnf clamd.conf freshclam.conf
+for i in indimail.cnf backup.conf cronlist headerlist \
+		imapd.cnf imapd.dist imapd-ssl.dist inc_deps indimail.mrtg.cfg \
+		indimail.settings lib_deps osh.table perm_list pop3d.cnf \
+		pop3d.dist pop3d-ssl.dist qmailprog.list quotawarnmsg.example \
+		services.log system.flashlogin system.menu system.module system.rc
 do
 	%{__rm} -f %{_prefix}/etc/$i
 done
+
+if [ %nofetchmail -eq 0 ] ; then
+	%{__rm} -f %{_prefix}/etc/fetchmailrc
+fi
+if [ %nobogofilter -eq 0 ] ; then
+	%{__rm} -f %{_prefix}/etc/bogofilter.cf
+fi
+%if %nonssd == 0
+	%{__rm} -f %{_prefix}/etc/nssd.conf
+%endif
+
 for i in smtp qmtp qmqp imap pop3 poppass
 do
 	for j in `/bin/ls %{_prefix}/etc/tcp*.$i 2>/dev/null`
@@ -2616,10 +2641,11 @@ do
 			%{_rm} -f $j.cdb
 	done
 done
-%if %nonssd == 0
-	%{__rm} -f %{_prefix}/etc/nssd.conf
-%endif
-
+/bin/rmdir --ignore-fail-on-non-empty %{_prefix}/etc 2>/dev/null
+for i in assign cdb
+do
+		%{__rm} -f %{_prefix}/users/$i
+done
 /bin/rmdir --ignore-fail-on-non-empty %{_prefix}/users 2>/dev/null
 
 if [ -f %{_prefix}/etc/controlfiles ] ; then
@@ -2646,22 +2672,6 @@ do
 	%{__rm} -f %{_prefix}/alias/.qmail-"$i"
 done
 /bin/rmdir --ignore-fail-on-non-empty %{_prefix}/alias 2>/dev/null
-
-if [ %nofetchmail -eq 0 ] ; then
-	%{__rm} -f %{_prefix}/etc/fetchmailrc
-fi
-if [ %nobogofilter -eq 0 ] ; then
-	%{__rm} -f %{_prefix}/etc/bogofilter.cf
-fi
-/bin/rmdir --ignore-fail-on-non-empty %{_prefix}/etc 2>/dev/null
-for i in `/bin/ls %{_prefix}/share 2>/dev/null`
-do
-	if [ " $i" = " clamd" ] ; then # leave the signatures
-		continue;
-	fi
-	%{__rm} -rf %{_prefix}/share/$i || true
-done
-/bin/rmdir --ignore-fail-on-non-empty %{_prefix}/share 2>/dev/null
 
 echo "removing startup services"
 for i in clamd fetchmail freshclam indisrvr.4000 inlookup.infifo mysql.3306 \
