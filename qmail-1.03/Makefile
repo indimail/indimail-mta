@@ -522,28 +522,27 @@ compile trydrent.c direntry.h1 direntry.h2
 
 dns.lib: \
 tryrsolv.c compile load socket.lib dns.o scan_xlong.o socket_v6any.o \
-envread.o socket_v4mappedprefix.o \
-ipalloc.o ip.o strsalloc.o socket.lib \
+socket_v4mappedprefix.o ipalloc.o ip.o strsalloc.o socket.lib \
 stralloc.a alloc.a error.a fs.a str.a
 	( ( ./compile tryrsolv.c && ./load tryrsolv dns.o \
-	envread.o scan_xlong.o socket_v6any.o socket_v4mappedprefix.o \
+	scan_xlong.o socket_v6any.o socket_v4mappedprefix.o \
 	ipalloc.o ip.o strsalloc.o stralloc.a alloc.a error.a fs.a str.a \
-	-lresolv `cat socket.lib`) 2>/dev/null \
+	-lresolv `cat socket.lib` ) 2>/dev/null \
 	&& echo -lresolv || exit 0 ) > dns.lib
 	rm -f tryrsolv.o tryrsolv
 
 dns.o: \
 compile dns.c ip.h ipalloc.h gen_alloc.h fmt.h alloc.h str.h \
-strsalloc.h stralloc.h gen_alloc.h dns.h case.h byte.h dns.h conf-tls \
+strsalloc.h stralloc.h gen_alloc.h dns.h case.h byte.h conf-tls \
 conf-spf conf-domainkeys conf-ip
 	./compile `grep -h -v "^#" conf-tls conf-spf conf-domainkeys conf-ip` dns.c
 
 dnscname: \
 load dnscname.o dns.o dnsdoe.o ip.o ipalloc.o strsalloc.o \
-envread.o scan_xlong.o socket_v4mappedprefix.o socket_v6any.o stralloc.a alloc.a \
+scan_xlong.o socket_v4mappedprefix.o socket_v6any.o stralloc.a alloc.a \
 substdio.a error.a str.a fs.a dns.lib socket.lib
 	./load dnscname dns.o dnsdoe.o ip.o ipalloc.o strsalloc.o \
-	envread.o scan_xlong.o socket_v4mappedprefix.o socket_v6any.o stralloc.a \
+	scan_xlong.o socket_v4mappedprefix.o socket_v6any.o stralloc.a \
 	alloc.a substdio.a error.a str.a fs.a  `cat dns.lib socket.lib`
 
 dnscname.o: \
@@ -557,10 +556,10 @@ compile dnsdoe.c substdio.h subfd.h exit.h dns.h dnsdoe.h
 
 dnsfq: \
 load dnsfq.o dns.o dnsdoe.o ip.o ipalloc.o strsalloc.o \
-envread.o scan_xlong.o socket_v4mappedprefix.o socket_v6any.o stralloc.a alloc.a \
+scan_xlong.o socket_v4mappedprefix.o socket_v6any.o stralloc.a alloc.a \
 substdio.a error.a str.a fs.a dns.lib socket.lib
 	./load dnsfq dns.o dnsdoe.o ip.o ipalloc.o strsalloc.o \
-	envread.o scan_xlong.o socket_v4mappedprefix.o socket_v6any.o stralloc.a \
+	scan_xlong.o socket_v4mappedprefix.o socket_v6any.o stralloc.a \
 	alloc.a substdio.a error.a str.a fs.a  `cat dns.lib socket.lib`
 
 dnsfq.o: \
@@ -571,10 +570,10 @@ conf-tls conf-spf conf-ip
 
 dnsip: \
 load dnsip.o dns.o dnsdoe.o ip.o ipalloc.o strsalloc.o \
-envread.o scan_xlong.o socket_v4mappedprefix.o socket_v6any.o stralloc.a alloc.a \
+scan_xlong.o socket_v4mappedprefix.o socket_v6any.o stralloc.a alloc.a \
 substdio.a error.a str.a fs.a dns.lib socket.lib
 	./load dnsip dns.o dnsdoe.o ip.o ipalloc.o strsalloc.o \
-	envread.o scan_xlong.o socket_v4mappedprefix.o socket_v6any.o stralloc.a \
+	scan_xlong.o socket_v4mappedprefix.o socket_v6any.o stralloc.a \
 	alloc.a substdio.a error.a str.a fs.a  `cat dns.lib socket.lib`
 
 dnsip.o: \
@@ -584,10 +583,10 @@ dns.h dnsdoe.h ip.h ipalloc.h gen_alloc.h exit.h fmt.h conf-tls conf-ip
 
 dnsmxip: \
 load dnsmxip.o dns.o dnsdoe.o ip.o ipalloc.o strsalloc.o now.o \
-envread.o scan_xlong.o socket_v4mappedprefix.o socket_v6any.o stralloc.a alloc.a \
+scan_xlong.o socket_v4mappedprefix.o socket_v6any.o stralloc.a alloc.a \
 substdio.a error.a str.a fs.a dns.lib socket.lib
 	./load dnsmxip dns.o dnsdoe.o ip.o ipalloc.o strsalloc.o now.o \
-	envread.o scan_xlong.o socket_v4mappedprefix.o socket_v6any.o \
+	scan_xlong.o socket_v4mappedprefix.o socket_v6any.o \
 	stralloc.a alloc.a substdio.a error.a str.a fs.a  `cat dns.lib socket.lib`
 
 dnsmxip.o: \
@@ -598,10 +597,10 @@ now.h datetime.h exit.h conf-tls conf-ip
 
 dnsptr: \
 load dnsptr.o dns.o dnsdoe.o ip.o ipalloc.o strsalloc.o \
-envread.o scan_xlong.o socket_v4mappedprefix.o socket_v6any.o stralloc.a alloc.a \
+scan_xlong.o socket_v4mappedprefix.o socket_v6any.o stralloc.a alloc.a \
 substdio.a error.a str.a fs.a dns.lib socket.lib
 	./load dnsptr dns.o dnsdoe.o ip.o ipalloc.o strsalloc.o \
-	envread.o scan_xlong.o socket_v4mappedprefix.o socket_v6any.o stralloc.a \
+	scan_xlong.o socket_v4mappedprefix.o socket_v6any.o stralloc.a \
 	alloc.a substdio.a error.a str.a fs.a  `cat dns.lib socket.lib`
 
 dnsptr.o: \
@@ -612,11 +611,11 @@ str.h scan.h dns.h dnsdoe.h ip.h exit.h conf-spf
 dnstxt: \
 load dnstxt.o dns.o dnsdoe.o ip.o ipalloc.o strsalloc.o \
 case_diffb.o case_diffs.o scan_xlong.o socket_v4mappedprefix.o socket_v6any.o \
-envread.o dns_text.o dktrace.o domainkeys.o stralloc.a alloc.a \
+dns_text.o dktrace.o domainkeys.o stralloc.a alloc.a \
 substdio.a error.a str.a fs.a dns.lib socket.lib
 	./load dnstxt dns.o dnsdoe.o ip.o ipalloc.o strsalloc.o \
 	case_diffb.o case_diffs.o scan_xlong.o socket_v4mappedprefix.o \
-	envread.o socket_v6any.o dns_text.o dktrace.o domainkeys.o stralloc.a \
+	socket_v6any.o dns_text.o dktrace.o domainkeys.o stralloc.a \
 	alloc.a substdio.a error.a str.a fs.a `cat dns.lib socket.lib` -lcrypto
 
 dnstxt.o: \
@@ -2068,11 +2067,11 @@ dktrace.o: compile dktrace.c dktrace.h str.h case.h conf-domainkeys
 
 dktest: load dktest.o scan_ulong.o domainkeys.o dktrace.o \
 dns.o ip.o strsalloc.o error.o ipalloc.o fmt_ulong.o \
-envread.o scan_xlong.o socket_v4mappedprefix.o socket_v6any.o \
+scan_xlong.o socket_v4mappedprefix.o socket_v6any.o \
 dns_text.o case_diffs.o case_diffb.o fmt_str.o stralloc.a alloc.a str.a \
 dns.lib
 	./load dktest scan_ulong.o domainkeys.o dktrace.o \
-	envread.o dns.o ip.o strsalloc.o error.o ipalloc.o fmt_ulong.o \
+	dns.o ip.o strsalloc.o error.o ipalloc.o fmt_ulong.o \
 	scan_xlong.o socket_v4mappedprefix.o socket_v6any.o \
 	dns_text.o case_diffs.o case_diffb.o fmt_str.o stralloc.a alloc.a str.a \
 	-lcrypto `cat dns.lib`
@@ -2382,7 +2381,7 @@ load qmail-smtpd.o smtpd.o rcpthosts.o recipients.o commands.o timeoutread.o \
 timeoutwrite.o ip.o ipme.o ipalloc.o strsalloc.o control.o etrn.o atrn.o constmap.o \
 received.o date822fmt.o wildmat.o now.o qmail.o variables.o cdb.a fd.a \
 wait.a datetime.a getln.a envrules.o bodycheck.o sqlmatch.o matchregex.o \
-scan_xlong.o socket_v4mappedprefix.o socket_v6any.o mail_acl.o hmac_sha1.o \
+scan_xlong.o socket_v4mappedprefix.o socket_v6any.o mail_acl.o \
 open.a sig.a case.a spf.o dns.o auto_qmail.o auto_uids.o base64sub.o qregex_smtpd.o \
 tablematch.o ndelay.o ndelay_off.o greylist.o auto_break.o \
 env.a stralloc.a alloc.a substdio.a error.a str.a fs.a lock.a \
@@ -2393,7 +2392,7 @@ socket.lib tai.lib dns.lib indimail.lib tls.lib
 	envrules.o bodycheck.o spf.o dns.o auto_qmail.o sqlmatch.o matchregex.o \
 	scan_xlong.o socket_v4mappedprefix.o socket_v6any.o mail_acl.o \
 	auto_uids.o base64sub.o qregex_smtpd.o tablematch.o ndelay.o ndelay_off.o \
-	cdb.a fd.a wait.a datetime.a greylist.o auto_break.o hmac_sha1.o \
+	cdb.a fd.a wait.a datetime.a greylist.o auto_break.o \
 	getln.a open.a sig.a case.a env.a stralloc.a alloc.a substdio.a error.a \
 	str.a fs.a lock.a `cat socket.lib tai.lib dns.lib indimail.lib tls.lib` -ldl
 

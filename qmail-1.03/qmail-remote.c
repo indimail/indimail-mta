@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-remote.c,v $
+ * Revision 1.80  2012-10-09 18:09:45+05:30  Cprogrammer
+ * added DISABLE_CNAME_LOOKUP to bypass dns cname resolution
+ *
  * Revision 1.79  2011-12-10 15:24:00+05:30  Cprogrammer
  * added hmac_sha256() function
  *
@@ -2694,12 +2697,13 @@ main(int argc, char **argv)
 	if (ipme_init() != 1)
 		temp_oserr();
 	flagallaliases = 1;
+	i = (env_get("DISABLE_CNAME_LOOKUP") ? 0 : !relayhost);
 	while (*recips)
 	{
 		if (!saa_readyplus(&reciplist, 1))
 			temp_nomem();
 		reciplist.sa[reciplist.len] = sauninit;
-		addrmangle(reciplist.sa + reciplist.len, *recips, &flagalias, !relayhost);
+		addrmangle(reciplist.sa + reciplist.len, *recips, &flagalias, i);
 		if (!flagalias)
 			flagallaliases = 0;
 		++reciplist.len;
@@ -2834,7 +2838,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_remote_c()
 {
-	static char    *x = "$Id: qmail-remote.c,v 1.79 2011-12-10 15:24:00+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: qmail-remote.c,v 1.80 2012-10-09 18:09:45+05:30 Cprogrammer Stab mbhangui $";
 	x=sccsidauthcramh;
 	x=sccsidauthdigestmd5h;
 	x++;
