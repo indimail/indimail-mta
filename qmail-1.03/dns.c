@@ -1,5 +1,8 @@
 /*
  * $Log: dns.c,v $
+ * Revision 1.27  2012-10-09 18:09:20+05:30  Cprogrammer
+ * removed DISABLE_CNAME_LOOKUP
+ *
  * Revision 1.26  2012-10-08 19:34:11+05:30  Cprogrammer
  * added DISABLE_CNAME_LOOKUP to bypass cname lookup
  *
@@ -84,7 +87,6 @@
 #include "stralloc.h"
 #include "dns.h"
 #include "case.h"
-#include "env.h"
 
 /*-
  * As of a little while ago (it is around 7:45 PM US Eastern on Mon 15 Sep 2003 as I write this),
@@ -387,8 +389,6 @@ dns_cname(sa)
 	int             r;
 	int             loop;
 
-	if (env_get("DISABLE_CNAME_LOOKUP"))
-		return (0);
 	for (loop = 0; loop < 10; ++loop)
 	{
 		if (!sa->len)
@@ -1138,7 +1138,7 @@ dns_maps(sa, ip, suffix)
 void
 getversion_dns_c()
 {
-	static char    *x = "$Id: dns.c,v 1.26 2012-10-08 19:34:11+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: dns.c,v 1.27 2012-10-09 18:09:20+05:30 Cprogrammer Stab mbhangui $";
 
 	x++;
 }
