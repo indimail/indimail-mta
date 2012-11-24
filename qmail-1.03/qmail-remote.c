@@ -1,5 +1,10 @@
 /*
  * $Log: qmail-remote.c,v $
+ * Revision 1.81  2012-11-24 07:50:45+05:30  Cprogrammer
+ * set [S|Q]MTPTEXT and [S|Q]MTPCODE for transient errors
+ * unset ONSUCCESS_REMOTE, ONFAILURE_REMOTE, ONTRANSIENT_REMOTE selectively
+ * fix SIGSEGV setting SMTPTEXT environment variable
+ *
  * Revision 1.80  2012-10-09 18:09:45+05:30  Cprogrammer
  * added DISABLE_CNAME_LOOKUP to bypass dns cname resolution
  *
@@ -416,17 +421,17 @@ run_script(int succ, char *s1, char *s2, char *s3)
 
 	switch (succ)
 	{
-		case 1: /*- success */
-			str = "ONSUCCESS_REMOTE";
-			break;
-		case 0: /*- failure */
-			str = "ONFAILURE_REMOTE";
-			break;
-		case -1: /*- transient error */
-			str = "ONTRANSIENT_REMOTE";
-			break;
-		default:
-			return 0;
+	case 1: /*- success */
+		str = "ONSUCCESS_REMOTE";
+		break;
+	case 0: /*- failure */
+		str = "ONFAILURE_REMOTE";
+		break;
+	case -1: /*- transient error */
+		str = "ONTRANSIENT_REMOTE";
+		break;
+	default:
+		return 0;
 	}
 	if (!(prog = env_get(str)))
 		return (0);
@@ -442,6 +447,38 @@ run_script(int succ, char *s1, char *s2, char *s3)
 		_exit(0);
 		return (1);
 	case 0:
+		switch (succ)
+		{
+		case 1: /*- success */
+			if (!env_unset("onfailure_remote")) {
+				my_error("alert: out of memory", 0, 0);
+				_exit (1);
+			}
+			if (!env_unset("ontransient_remote")) {
+				my_error("alert: out of memory", 0, 0);
+				_exit (1);
+			}
+			break;
+		case 0: /*- failure */
+			if (!env_unset("ONSUCCESS_REMOTE")) {
+				my_error("alert: Out of memory", 0, 0);
+				_exit (1);
+			}
+			if (!env_unset("ONTRANSIENT_REMOTE")) {
+				my_error("alert: Out of memory", 0, 0);
+				_exit (1);
+			}
+		case -1:
+			if (!env_unset("ONSUCCESS_REMOTE")) {
+				my_error("alert: Out of memory", 0, 0);
+				_exit (1);
+			}
+			if (!env_unset("ONFAILURE_REMOTE")) {
+				my_error("alert: Out of memory", 0, 0);
+				_exit (1);
+			}
+			break;
+		}
 		if (!stralloc_0(&host))
 		{
 			my_error("alert: Out of memory", 0, 0);
@@ -468,6 +505,11 @@ run_script(int succ, char *s1, char *s2, char *s3)
 			_exit (1);
 		}
 		if (s1 && s2 && s3 && !stralloc_cats(&smtptext, s3))
+		{
+			my_error("alert: Out of memory", 0, 0);
+			_exit (1);
+		}
+		if (!stralloc_0(&smtptext))
 		{
 			my_error("alert: Out of memory", 0, 0);
 			_exit (1);
@@ -709,27 +751,72 @@ dropped()
 }
 
 void
+temp_noconn_out(char *s)
+{
+	out(s);
+	if (!stralloc_cats(&smtptext, s))
+		temp_nomem();
+	return;
+}
+
+int
+setsmtptext(int code)
+{
+	if (env_get("ONFAILURE_REMOTE") || env_get("ONSUCCESS_REMOTE")
+			||env_get("ONTRANSIENT_REMOTE"))
+	{
+		char            strnum[FMT_ULONG];
+
+		if (smtptext.s[smtptext.len - 1] == '\n')
+			smtptext.s[smtptext.len - 1] = 0;
+		else
+		if (!stralloc_0(&smtptext))
+			return (1);
+		smtptext.len--;
+		if (!env_put2("SMTPTEXT", smtptext.s))
+			return (1);
+		if (code > 0)
+		{
+			strnum[fmt_ulong(strnum, code)] = 0;
+			if (!env_put2("SMTPCODE", strnum))
+				return (1);
+		}
+	}
+	return (0);
+}
+
+void
 temp_noconn(stralloc *h, char *ip, int port)
 {
 	char            strnum[FMT_ULONG];
 
-	out("ZSorry, I wasn't able to establish an ");
-	out((type == 's' || mxps) ? "QMTP connection for " : "SMTP connection for ");
+	if (!stralloc_copys(&smtptext, ""))
+		temp_nomem();
+	temp_noconn_out("ZSorry, I wasn't able to establish an ");
+	temp_noconn_out((type == 's' || mxps) ? "QMTP connection for " : "SMTP connection for ");
 	if (substdio_put(subfdoutsmall, h->s, h->len) == -1)
 		_exit(0);
+	if (!stralloc_catb(&smtptext, h->s, h->len))
+		temp_nomem();
 	if (ip)
 	{
-		out(" to ");
-		out(ip);
-		out(" port ");
+		temp_noconn_out(" to ");
+		temp_noconn_out(ip);
+		temp_noconn_out(" port ");
 		strnum[fmt_ulong(strnum, port)] = 0;
-		out(strnum);
-		out(" bind IP [");
+		temp_noconn_out(strnum);
+		temp_noconn_out(" bind IP [");
 		substdio_put(subfdoutsmall, outgoingip.s, outgoingip.len);
-		out("]");
+		if (!stralloc_catb(&smtptext, outgoingip.s, outgoingip.len))
+			temp_nomem();
+		temp_noconn_out("]");
 		alloc_free(ip);
 	}
-	out(". (#4.4.1)\n");
+	temp_noconn_out(". (#4.4.1)\n");
+	if (!env_put2((type == 's' || mxps) ? "QMTPTEXT" : "SMTPTEXT", "4.4.1"))
+		temp_nomem();
+	if (setsmtptext(0))
+		smtptext.len = 0;
 	zerodie(0, 0, 0, -1);
 }
 
@@ -970,25 +1057,8 @@ quit(char *prepend, char *append, int code, int die)
 	outhost();
 	out(append);
 	out(".\n");
-	if (env_get("ONFAILURE_REMOTE") || env_get("ONSUCCESS_REMOTE"))
-	{
-		char            strnum[FMT_ULONG];
-
-		if (smtptext.s[smtptext.len - 1] == '\n')
-			smtptext.s[smtptext.len - 1] = 0;
-		else
-		if (!stralloc_0(&smtptext))
-			goto quit_now;
-		if (!env_put2("SMTPTEXT", smtptext.s))
-			goto quit_now;
-		smtptext.len--;
-		if (code > 0)
-		{
-			strnum[fmt_ulong(strnum, code)] = 0;
-			if (!env_put2("SMTPCODE", strnum))
-				goto quit_now;
-		}
-	}
+	if (setsmtptext(code))
+		goto quit_now;
 quit_now:
 	outsmtptext();
 #if defined(TLS) && defined(DEBUG)
@@ -2838,7 +2908,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_remote_c()
 {
-	static char    *x = "$Id: qmail-remote.c,v 1.80 2012-10-09 18:09:45+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: qmail-remote.c,v 1.81 2012-11-24 07:50:45+05:30 Cprogrammer Exp mbhangui $";
 	x=sccsidauthcramh;
 	x=sccsidauthdigestmd5h;
 	x++;
