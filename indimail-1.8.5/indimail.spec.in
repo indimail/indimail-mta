@@ -1159,6 +1159,7 @@ fi
 %attr(555,root,qmail)                   %{_prefix}/bin/qmail-smtpd
 %attr(555,root,qmail)                   %{_prefix}/bin/qarf
 %attr(555,root,qmail)                   %{_prefix}/bin/qnotify
+%attr(555,root,qmail)                   %{_prefix}/bin/rrt
 %attr(555,root,qmail)                   %{_prefix}/sbin/hostname
 %attr(555,root,qmail)                   %{_prefix}/sbin/config-fast
 %attr(555,root,qmail)                   %{_prefix}/sbin/qmailconfig
