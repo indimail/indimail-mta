@@ -1,5 +1,8 @@
 /*
  * $Log: qnotify.c,v $
+ * Revision 1.5  2012-11-24 08:01:36+05:30  Cprogrammer
+ * fixed display of usage
+ *
  * Revision 1.4  2011-12-05 19:44:24+05:30  Cprogrammer
  * skip host prefix in the RECIPIENT address
  *
@@ -81,7 +84,7 @@ static char     ssoutbuf[512];
 static substdio ssout = SUBSTDIO_FDBUF(write, 1, ssoutbuf, sizeof ssoutbuf);
 static char     sserrbuf[512];
 static substdio sserr = SUBSTDIO_FDBUF(write, 2, sserrbuf, sizeof(sserrbuf));
-char           *usage = "usage: qnotify [-n]\n";
+char           *usage = "usage: qnotify [-n][-h]\n";
 struct qmail    qqt;
 int             flagqueue = 1;
 
@@ -416,8 +419,8 @@ main(int argc, char **argv)
 			flagqueue = 0;
 			break;
 		default:
-			my_error(usage, 0, 7);
-			break;
+			logerrf(usage);
+			_exit(1);
 		}
 	}
 	birth = now();
@@ -553,9 +556,7 @@ main(int argc, char **argv)
 	}
 	my_putb("--", 2);
 	my_putb(boundary.s, boundary.len);
-	my_putb("--\n", 3);
-
-	my_putb("\n", 1);
+	my_putb("--\n\n", 4);
 	if (flagqueue) {
 		qmail_from(&qqt, "");
 		qmail_to(&qqt, rpath.s);
@@ -575,7 +576,7 @@ main(int argc, char **argv)
 void
 getversion_qnotify_c()
 {
-	static char    *x = "$Id: qnotify.c,v 1.4 2011-12-05 19:44:24+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: qnotify.c,v 1.5 2012-11-24 08:01:36+05:30 Cprogrammer Stab mbhangui $";
 
 	x++;
 }
