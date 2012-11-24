@@ -487,4 +487,7 @@ surblfilter.8
 surblqueue
 systemd
 qnotify
+qnotify.1
 swaks
+rrt
+rrt.1
