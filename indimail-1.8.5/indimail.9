@@ -449,7 +449,7 @@ ENVRULES          |qmail-smtpd  |used    |Any environment variable(s) can be set
                   |             |        |SPAMREDIRECT, SPAMIGNORE,
                   |             |        |SPAMIGNOREPATTERNS, QREGEX, DATABYTES,
                   |             |        |SMTPROUTE, ONSUCCESS_REMOTE
-                  |             |        |ONFAILURE_REMOTE
+                  |             |        |ONFAILURE_REMOTE, ONTRANSIENT_REMOTE
 ------------------|-------------|--------|----------------------------------------
 QREGEX            |qmail-smtpd  |used    |If set, regex is used to evaluate
                   |spawn-filter |        |patterns in
@@ -585,12 +585,22 @@ QMAILREMOTE       |spawn-filter |used    |The smtp client to call for remote
 ------------------|-------------|--------|----------------------------------------
 ONSUCCESS_REMOTE  |qmail-remote |used    |if set, program defined by
 ONFAILURE_REMOTE  |             |        |ONSUCCESS_REMOTE gets called on
-                  |             |        |successful remote deliveries. similarly
-                  |             |        |program defined by ONFAILURE_REMOET gets
-                  |             |        |called on failed remote deliveries.
+ONTRANSIENT_REMOTE|             |        |successful remote deliveries. similarly
+                  |             |        |program defined by ONFAILURE_REMOTE gets
+                  |             |        |called on failed remote deliveries and
+                  |             |        |program defined by ONTRANSIENT_REMOTE 
+                  |             |        |gets called on deferrals.
                   |             |        |Arguments passed to this program are same
                   |             |        |as that for qmail-remote. These programs
                   |             |        |runs as uid qmailr.
+------------------|-------------|--------|----------------------------------------
+SMTPTEXT          |qmail-remote |set     |Contains the conversation during SMTP or
+QMTPTEXT          |             |        |QMTP transaction with a remote SMTP/QMTP
+                  |             |        |server.
+------------------|-------------|--------|----------------------------------------
+SMTPCODE          |qmail-remote |set     |Contains the 3 digit code returned by
+QMTPCODE          |             |        |remote SMTP/QMTP server during an
+                  |             |        |SMTP/QMTP transaction.
 ------------------|-------------|--------|----------------------------------------
 DEFAULT           |qmail-command|set     |Portion of address matching "-default"
                   |             |        |in a .qmail file name.
@@ -1986,6 +1996,12 @@ base64          - base64 encoding/decoding utility
 qarf            - Abuse Report Format Generator
 .sp -1
 .IP \n+[step]
+qnotify         - generate Message Dispostion Notification
+.sp -1
+.IP \n+[step]
+rrt             - Respond to Return-Receipt-To request
+.sp -1
+.IP \n+[step]
 plugtest        - SMTP Plugin tester
 .sp -1
 .IP \n+[step]
@@ -2173,29 +2189,34 @@ IndiMail uses openSUSE Build service to build the RPM whenever there is a new re
 Currently, the list of supported distributions for IndiMail RPM (for both 32 and 64 bit) are
 
     * SUSE
+          o openSUSE 12.2
+          o openSUSE 12.1
           o openSUSE 11.4
           o openSUSE 11.3
           o openSUSE Tumbleweed
+          o SUSE Linux Enterprise 11 SP2
           o SUSE Linux Enterprise 11 SP1
           o SUSE Linux Enterprise 11
           o SUSE Linux Enterprise 10
           o openSUSE Factory
 
     * Red Hat
-          o Fedora 14
-          o Fedora 13
-          o Fedora 12
-          o Red Hat Enterprise Linux 5
+          o Fedora 17
+          o Fedora 16
+          o Fedora 15
           o Red Hat Enterprise Linux 6
-          o CentOS 5
+          o Red Hat Enterprise Linux 5
           o CentOS 6
+          o CentOS 5
 
     * Mandriva Linux
-          o Mandriva 2010.1
+          o Mandriva_2011
 
     * Debian
           o Debian 6.0
           o Debian 5.0
+          o Ubuntu 12.04
+          o Ubuntu 11.10
           o Ubuntu 11.04
           o Ubuntu 10.10
           o Ubuntu 10.04
