@@ -1,5 +1,8 @@
 /*
  * $Log: hier.c,v $
+ * Revision 1.174  2012-11-24 08:20:16+05:30  Cprogrammer
+ * added rrt
+ *
  * Revision 1.173  2011-11-27 12:00:43+05:30  Cprogrammer
  * added qnotify
  *
@@ -674,6 +677,7 @@ hier(inst_dir)
 	c(auto_qmail_home, "bin", "maildirserial", auto_uido, auto_gidq, 0555);
 	c(auto_qmail_home, "bin", "qarf", auto_uido, auto_gidq, 0555);
 	c(auto_qmail_home, "bin", "qnotify", auto_uido, auto_gidq, 0555);
+	c(auto_qmail_home, "bin", "rrt", auto_uido, auto_gidq, 0555);
 
 #ifdef USE_SPF
 	c(auto_qmail_home, "bin", "spfquery", auto_uido, auto_gidq, 0555);
@@ -963,6 +967,7 @@ hier(inst_dir)
 	c(auto_qmail_home, "man/man1", "cdbdump.1", auto_uido, auto_gidq, 0444);
 	c(auto_qmail_home, "man/man1", "qarf.1", auto_uido, auto_gidq, 0444);
 	c(auto_qmail_home, "man/man1", "qnotify.1", auto_uido, auto_gidq, 0444);
+	c(auto_qmail_home, "man/man1", "rrt.1", auto_uido, auto_gidq, 0444);
 	c(auto_qmail_home, "man/man1", "qmail-rm.1", auto_uido, auto_gidq, 0444);
 	c(auto_qmail_home, "man/cat1", "qmail-rm.0", auto_uido, auto_gidq, 0444);
 
@@ -1643,7 +1648,7 @@ _hier(inst_dir)
 void
 getversion_install_big_c()
 {
-	static char    *x = "$Id: hier.c,v 1.173 2011-11-27 12:00:43+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: hier.c,v 1.174 2012-11-24 08:20:16+05:30 Cprogrammer Stab mbhangui $";
 
 #ifdef INDIMAIL
 	if (x)
