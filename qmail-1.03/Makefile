@@ -1246,7 +1246,7 @@ tokenize addrlist qquote parsedate qmail-greyd greydaemon \
 analyzer qtools qlog viruscanner update_tmprsadh dknewkey \
 dktest dot-forward batv balance_outgoing qarf plugtest surblfilter \
 fastforward printforward setforward newaliases printmaillist surblqueue \
-setmaillist newinclude sortedtest logselect mbox2maildir qnotify rr \
+setmaillist newinclude sortedtest logselect mbox2maildir qnotify rrt \
 envdir envuidgid fghack multilog pgrphack readproctitle setlock \
 setuidgid softlimit supervise svc svok svscan svstat tai64n tai64nlocal tai64nunix \
 recordio argv0 addcr delcr fixcrio generic.so cdbmake cdbget cdbgetm \
@@ -1391,7 +1391,7 @@ man: \
 qmail-local.0 qmail-lspawn.0 qmail-getpw.0 qmail-remote.0 \
 qmail-rspawn.0 qmail-clean.0 qmail-send.0 qmail-todo.0 qmail-start.0 splogger.0 \
 qmail-queue.0 qmail-dk.0 qmail-dkim.8 dk-filter.8 qmail-inject.0 mailsubj.0 \
-qmail-showctl.0 qmail-newu.0 qarf.1 qnotify.1 rr.1 plugin_init.3 \
+qmail-showctl.0 qmail-newu.0 qarf.1 qnotify.1 rrt.1 plugin_init.3 \
 qmail-pw2u.0 qmail-qread.0 qmail-tcpto.0 qmail-tcpok.0 \
 qmail-pop3d.0 qmail-popbull.0 qmail-popup.0 qmail-qmqpc.0 \
 qmail-qmqpd.0 qmail-qmtpd.0 qmail-smtpd.0 greydaemon.0 qmail-poppass.0 \
@@ -2204,10 +2204,10 @@ qnotify.1: qnotify.9
 	| sed s}QMAILHOME}"`head -1 conf-qmail`"}g \
 	> qnotify.1
 
-rr.1: rr.9
-	cat rr.9 \
+rrt.1: rrt.9
+	cat rrt.9 \
 	| sed s}QMAILHOME}"`head -1 conf-qmail`"}g \
-	> rr.1
+	> rrt.1
 
 qmail-remote: \
 load qmail-remote.o control.o constmap.o timeoutread.o timeoutwrite.o base64sub.o \
@@ -3994,15 +3994,15 @@ case.h variables.h envdir.h pathexec.h auto_qmail.h mess822.h \
 strerr.h
 	./compile qnotify.c
 
-rr.o: \
-compile rr.c auto_qmail.h control.h qmail.h case.h fmt.h \
+rrt.o: \
+compile rrt.c auto_qmail.h control.h qmail.h case.h fmt.h \
 str.h now.h datetime.h mess822.h date822fmt.h getln.h \
 stralloc.h error.h sgetopt.h variables.h envdir.h env.h \
 strerr.h pathexec.h
-	./compile rr.c
+	./compile rrt.c
 
-rr: \
-load rr.o auto_qmail.o qmail.o control.o variables.o error.o \
+rrt: \
+load rrt.o auto_qmail.o qmail.o control.o variables.o error.o \
 substdi.o byte_copy.o open_read.o str_chr.o fmt_str.o fmt_uint0.o \
 fmt_uint.o fmt_ulong.o strerr_sys.o strerr_die.o error_str.o \
 str_len.o str_diffn.o getln.o getln2.o byte_chr.o wait_pid.o \
@@ -4010,7 +4010,7 @@ byte_diff.o byte_cr.o scan_ulong.o envread.o fd_copy.o now.o \
 case_diffb.o mess822_ok.o fd_move.o sgetopt.o date822fmt.o \
 envdir_set.o pathexec_env.o pathexec_run.o datetime.o subgetopt.o \
 datetime_un.o openreadclose.o substdio.a stralloc.a alloc.a
-	./load rr auto_qmail.o qmail.o control.o variables.o error.o \
+	./load rrt auto_qmail.o qmail.o control.o variables.o error.o \
 	substdi.o byte_copy.o open_read.o str_chr.o fmt_str.o fmt_uint0.o \
 	fmt_uint.o fmt_ulong.o strerr_sys.o strerr_die.o error_str.o \
 	str_len.o str_diffn.o getln.o getln2.o byte_chr.o wait_pid.o \
