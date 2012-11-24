@@ -9,18 +9,18 @@ in
 [-n]
 
 .SH DESCRIPTION
-\fBqnotify\fR reads an rfc822 email on stdin and generates a MDN as required by
+\fBqnotify\fR(1) reads an rfc822 email on stdin and generates a MDN as required by
 RFC3798. 
-\fBqnotify\fR uses environment variable \fBSENDER\fR, \fBRPLINE\fR or \fBReturn-Path\fR
+\fBqnotify\fR(1) uses environment variable \fBSENDER\fR, \fBRPLINE\fR or \fBReturn-Path\fR
 header to compare the address with Disposition header. By default, \fBqnotify\fR uses 
 \fBDisposition-Notification-To\fR header. You can use a different header by setting
-the environment variable \fBDISPOSITION_HEADER\fR. \fBqnotify\fR also uses the environment
-variable \fBRECIPIENT\fR to generate the MDN. \fBqnotify\fR silently exits with zero return
+the environment variable \fBDISPOSITION_HEADER\fR. \fBqnotify\fR(1) also uses the environment
+variable \fBRECIPIENT\fR to generate the MDN. \fBqnotify\fR(1) silently exits with zero return
 status in case it does not get the required information from the environment variables or
 the headers in the email.
 
-\fBqnotify\fR uses environment modified according to files in 
-QMAILHOME/control/defaultqueue directory.
+\fBqnotify\fR(1) uses \fBqmail-queue\fR(8) to queue the Return Receipt and uses environment
+variables according to files in QMAILHOME/control/defaultqueue directory.
 
 .SH OPTIONS
 .PP
