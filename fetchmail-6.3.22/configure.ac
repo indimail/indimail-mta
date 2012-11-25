@@ -813,6 +813,25 @@ case "$LIBS" in *-lssl*)
 	;;
 esac
 
+indimaildir=""
+for f in /var/indimail
+do
+	if test -d $f
+	then
+		indimaildir=$f
+	fi
+done
+
+AC_ARG_ENABLE(indimaildir, [  --enable-indimaildir=dir   directory where IndiMail is installed.],
+	indimaildir="$enableval",
+	[
+		if test "$indimaildir" = ""
+		then
+			AC_MSG_ERROR([Unable to find your indimaildir directory, specify --enable-indimaildir.])
+		fi
+	])
+AC_DEFINE_UNQUOTED(INDIMAILDIR,"$indimaildir", directory for IndiMail installation)
+AC_SUBST(indimaildir)
 ###	use option --with-socks=DIR to point at SOCKS library
 AC_ARG_WITH(socks,
 	[  --with-socks[=DIR]      add built-in SOCKS firewall access],
