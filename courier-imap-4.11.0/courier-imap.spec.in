@@ -1,5 +1,5 @@
 #
-# Copyright 1998 - 2008 Double Precision, Inc.  See COPYING for
+# Copyright 1998 - 2012 Double Precision, Inc.  See COPYING for
 # distribution information.
 #
 #  Need to version-upgrade RH builds due to different directory locations.
@@ -21,6 +21,8 @@
 %endif
 %endif
 
+%define using_systemd %(test -d /etc/systemd && echo 1 || echo 0)
+
 %define _missing_doc_files_terminate_build 1
 %define _unpackaged_files_terminate_build 1
 
@@ -34,9 +36,13 @@ Source: %{name}-@VERSION@.tar.bz2
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-buildroot
 Requires: fileutils textutils sh-utils sed
 %if %suse_version
-Requires: /sbin/chkconfig
+Requires(post): /sbin/chkconfig
+Requires(preun): /sbin/chkconfig
+Requires(postun): /sbin/chkconfig
 %else
+%if %using_systemd
 Requires: /bin/systemctl
+%endif
 %endif
 Requires: courier-authlib >= 0.60.6.20080629
 BuildRequires: textutils fileutils perl
@@ -100,7 +106,7 @@ full Courier mail server.  Install the Courier package instead.
 %define xflags %{nil}
 %endif
 
-%configure \
+PATH=/usr/bin:$PATH %configure \
 	--with-redhat \
 	%{?xflags: %{xflags}}
 
@@ -115,8 +121,10 @@ full Courier mail server.  Install the Courier package instead.
 %{__mkdir_p} $RPM_BUILD_ROOT%{initdir}
 %{__make} install DESTDIR=$RPM_BUILD_ROOT
 
+%if %using_systemd
 %{__mkdir_p} $RPM_BUILD_ROOT%{_datadir}
 %{__mkdir_p} $RPM_BUILD_ROOT/lib/systemd/system
+%endif
 
 #
 # Red Hat or SuSE like init.d file.
@@ -131,8 +139,12 @@ install -Dm 644 %{templdir}/pop3.pam $RPM_BUILD_ROOT%{pamconfdir}/pop3
 install -Dm 644 %{templdir}/imap.pam $RPM_BUILD_ROOT%{pamconfdir}/imap
 %else
 # Copy standard sysvinit file
+%if %using_systemd
 install -Dm 755 packaging/systemd/courier-imap.sysvinit $RPM_BUILD_ROOT/%{_datadir}
 install -Dm 644 packaging/systemd/courier-imap.service $RPM_BUILD_ROOT/lib/systemd/system
+%else
+install -Dm 744 packaging/systemd/courier-imap.sysvinit $RPM_BUILD_ROOT/%{initdir}/courier-imap
+%endif
 %endif
 
 #
@@ -226,6 +238,7 @@ EOF
 ####
 ## Create config files for sysconftool-rpmupgrade (see below)
 
+mkdir -p $RPM_BUILD_ROOT%{_datadir}
 %{__cp} -f sysconftool $RPM_BUILD_ROOT%{_datadir}/sysconftool
 %{__chmod} 555 $RPM_BUILD_ROOT%{_datadir}/sysconftool
 %{__cat} >$RPM_BUILD_ROOT%{_datadir}/configlist <<EOF
@@ -249,11 +262,7 @@ touch $RPM_BUILD_ROOT%{_localstatedir}/pop3d.pid.lock
 touch $RPM_BUILD_ROOT%{_localstatedir}/pop3d-ssl.pid.lock
 
 %post
-%if %{suse_version}
-/sbin/chkconfig --del courier-imap
-/sbin/chkconfig --add courier-imap
-%{_datadir}/sysconftool `%{__cat} %{_datadir}/configlist` >/dev/null
-%else
+%if %using_systemd
 if test -f %{initdir}/courier-imap
 then
 # Update to systemd
@@ -264,9 +273,20 @@ fi
 %{_datadir}/sysconftool `%{__cat} %{_datadir}/configlist` >/dev/null
 /bin/systemctl daemon-reload &> /dev/null || :
 /bin/systemctl enable courier-imap.service &> /dev/null || :
+%else
+/sbin/chkconfig --del courier-imap
+/sbin/chkconfig --add courier-imap
+%{_datadir}/sysconftool `%{__cat} %{_datadir}/configlist` >/dev/null
 %endif	
 %preun
-%if %{suse_version}
+%if %using_systemd
+if test "$1" = "0"
+then
+	rm -f %{_localstatedir}/couriersslcache
+	/bin/systemctl stop courier-imap.service
+	/bin/systemctl disable courier-imap.service
+fi
+%else
 if test "$1" = "0"
 then
 	rm -f %{_localstatedir}/couriersslcache
@@ -277,17 +297,9 @@ fi
 %{_libexecdir}/imapd-ssl.rc stop
 %{_libexecdir}/pop3d.rc stop
 %{_libexecdir}/pop3d-ssl.rc stop
-%else
-if test "$1" = "0"
-then
-	rm -f %{_localstatedir}/couriersslcache
-	/bin/systemctl stop courier-imap.service
-	/bin/systemctl disable courier-imap.service
-fi
 %endif
 %postun
-%if %{suse_version}
-%else
+%if %using_systemd
 /bin/systemctl daemon-reload &> /dev/null || :
 if test "$1" != "0"
 then
@@ -302,11 +314,13 @@ fi
 
 %attr(755, bin, bin) %config /etc/profile.d/courier-imap.csh
 %attr(755, bin, bin) %config /etc/profile.d/courier-imap.sh
-%if %{suse_version}
-%attr(755, bin, bin) %{initdir}/courier-imap
-%attr(740,root,root) %{initlndir}/rccourier-imap
-%else
+%if %using_systemd
 %attr(-, root, root) /lib/systemd/system/*
+%else
+%attr(755, bin, bin) %{initdir}/courier-imap
+%if %{suse_version}
+%attr(740,root,root) %{initlndir}/rccourier-imap
+%endif
 %endif
 %dir %{_prefix}
 
