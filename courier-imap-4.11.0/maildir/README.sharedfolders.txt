@@ -135,11 +135,11 @@ Technical Overview
 
    "name" SHOULD be the account's login name (which in some rare
    configurations may not actually match the IMAP login used by the client;
-   this is the name that's logged to syslog when the account succesfully logs
-   in, which is usually the same as the IMAP login id). In most situations
-   all accounts will have the same system userid and groupid. The server
-   doesn't actually do anything with these fields at this time, but may do so
-   in the future.
+   this is the name that's logged to syslog when the account successfully
+   logs in, which is usually the same as the IMAP login id). In most
+   situations all accounts will have the same system userid and groupid. The
+   server doesn't actually do anything with these fields at this time, but
+   may do so in the future.
 
    The virtual account's home directory is taken verbatim from the
    authentication database. The maildir path field is optional. If missing,

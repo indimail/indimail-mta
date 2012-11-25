@@ -1,5 +1,5 @@
 /*
-** Copyright 2003-2004 Double Precision, Inc.
+** Copyright 2003-2012 Double Precision, Inc.
 ** See COPYING for distribution information.
 */
 
@@ -629,7 +629,6 @@ int maildir_acl_delete(const char *maildir,
 		 strlen(path));
 	if (!q)
 	{
-		free(p);
 		return -1;
 	}
 	strcat(strcat(strcpy(q, maildir), "/" ACLHIERDIR "/"),
