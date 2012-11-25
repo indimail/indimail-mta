@@ -1,5 +1,5 @@
 /*
-** Copyright 1998 - 2000 Double Precision, Inc.
+** Copyright 1998 - 2011 Double Precision, Inc.
 ** See COPYING for distribution information.
 */
 #include	"config.h"
@@ -27,9 +27,8 @@ int	rfc1035_mksocket(int sock_type, int sock_protocol, int *af)
 	{
 #ifdef IPV6_V6ONLY
 
-		if (setsockopt(s, IPPROTO_IPV6, IPV6_V6ONLY,
-			       (char *)&on, sizeof(on)) < 0)
-			perror("setsockopt IPV6_V6ONLY");
+		setsockopt(s, IPPROTO_IPV6, IPV6_V6ONLY,
+			   (char *)&on, sizeof(on));
 #endif
 
 		return (s);

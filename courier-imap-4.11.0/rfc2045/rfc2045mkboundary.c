@@ -60,7 +60,7 @@ int	rc;
 			return (NULL);
 		}
 
-		sprintf(p, "=_%s-%s-%s-%s", hostnamebuf,
+		sprintf(p, "=_%-1.30s-%s-%s-%s", hostnamebuf,
 			pidbuf, timebuf, cntbuf);
 		if ((rc=rfc2045_try_boundary(s, src, p)) == 0)
 			break;
