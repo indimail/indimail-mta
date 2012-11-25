@@ -1,0 +1,100 @@
+Tokenize: nobody@example.com (Nobody (is) here\) right)
+Atom: nobody
+Token: @
+Atom: example
+Token: .
+Atom: com
+Comment: (Nobody (is) here\) right)
+Tokenize: Distribution  list: nobody@example.com daemon@example.com
+Atom: Distribution
+Atom: list
+Token: :
+Atom: nobody
+Token: @
+Atom: example
+Token: .
+Atom: com
+Atom: daemon
+Token: @
+Atom: example
+Token: .
+Atom: com
+Tokenize: Mr Nobody <nobody@example.com>, Mr. Nobody <nobody@example.com>
+Atom: Mr
+Atom: Nobody
+Token: <
+Atom: nobody
+Token: @
+Atom: example
+Token: .
+Atom: com
+Token: >
+Token: ,
+Atom: Mr
+Token: .
+Atom: Nobody
+Token: <
+Atom: nobody
+Token: @
+Atom: example
+Token: .
+Atom: com
+Token: >
+Tokenize: nobody@example.com, <nobody@example.com>, Mr. Nobody <nobody@example.com>
+Atom: nobody
+Token: @
+Atom: example
+Token: .
+Atom: com
+Token: ,
+Token: <
+Atom: nobody
+Token: @
+Atom: example
+Token: .
+Atom: com
+Token: >
+Token: ,
+Atom: Mr
+Token: .
+Atom: Nobody
+Token: <
+Atom: nobody
+Token: @
+Atom: example
+Token: .
+Atom: com
+Token: >
+Tokenize: =?UTF-8?Q?Test?= <nobody@example.com>, foo=bar <nobody@example.com>
+Atom: =?UTF-8?Q?Test?=
+Token: <
+Atom: nobody
+Token: @
+Atom: example
+Token: .
+Atom: com
+Token: >
+Token: ,
+Atom: foo
+Token: =
+Atom: bar
+Token: <
+Atom: nobody
+Token: @
+Atom: example
+Token: .
+Atom: com
+Token: >
+----
+nobody@example.com (Nobody (is) here\) right)
+----
+Distribution list: nobody@example.com, daemon@example.com
+----
+Mr Nobody <nobody@example.com>, "Mr. Nobody" <nobody@example.com>
+----
+nobody@example.com, nobody@example.com, "Mr. Nobody" <nobody@example.com>
+----
+=?UTF-8?Q?Test?= <nobody@example.com>, "foo=bar" <nobody@example.com>
+=?utf-8?B?4oWk4oWk4oWk4oWk4oWk4oWk4oWk4oWk4oWk4oWk4oWk4oWk4oWk4oWk4oWk4oWk4oWk4oWk4oWk4oWk4oWk4oWk4oWk4oWk?=
+=?utf-8?B?4oWk4oWk4oWk4oWk4oWk4oWk4oWk4oWk4oWk4oWk4oWk4oWk4oWk4oWk4oWk4oWk4oWk4oWk4oWk4oWk4oWk4oWk4oWk4oWk?= =?utf-8?B?4oWk?=
+=?utf-8?B?4oWk4oWk4oWk4oWk4oWk4oWk4oWk4oWk4oWk4oWk4oWk4oWk4oWk4oWk4oWk4oWk4oWk4oWk4oWk4oWk4oWk4oWk4oWk?= =?utf-8?B?4oWkzIA=?=

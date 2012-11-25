@@ -1,0 +1,205 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+       "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+  <meta name="Author" content="Sam Varshavchik" />
+  <title>Maildir filter access</title>
+  <meta name="MSSmartTagsPreventParsing" content="TRUE" />
+</head>
+
+<!-- Copyright 1998 - 1999 Double Precision, Inc.  See COPYING for -->
+<!-- distribution information. -->
+<body text="#000000" bgcolor="#FFFFFF" link="#0000EE" vlink="#551A8B"
+alink="#FF0000">
+<h1>Maildir filter implementation</h1>
+
+<p>Implementing mail filtering requires a couple of dominos to fall in the
+right order. This is not difficult to do, but is a bit tricky. Here's how it
+works, in general. Specifics follow.</p>
+
+<p>Some people would probably have a difficult time setting it up. That's to
+be expected. The implementation allows only selected accounts to be set up
+for mail filtering, so the suggested way is to attempt to set up mail
+filtering for one account only, test it to make sure it works, then roll it
+out globally.</p>
+
+<h2>The big picture</h2>
+
+<p>The <em>maildrop</em> mail filter is used to do the actual mail filter.
+The first thing you need to do is to download and install <em>maildrop</em>.
+Download <em>maildrop</em> from <a
+href="http://www.courier-mta.org/maildrop/"
+target="_top">http://www.courier-mta.org/maildrop/</a>. Follow the
+instruction in the <em>maildrop</em> package to configure it and install it.
+<em>maildrop</em> must be installed as your mail server's mail delivery
+agent. <em>maildrop</em> must be used to deliver mail to the maildir,
+obviously, since that's how filtering takes place. You need to follow the
+instructions for your mail server in order to install <em>maildrop</em> as
+the mail delivery agent. <em>maildrop</em> must be configured to locate the
+recipient's maildir, and dump mail there by default. Review
+<em>maildrop</em>'s and the mail server's documentation. This can't be any
+more specific. Different mail servers are configured in different way.</p>
+
+<p>For example, with Qmail the usual thing to do is to initialize
+$HOME/.qmail with "| /usr/local/bin/maildrop". <em>maildrop</em> is also
+included as part of the <a href="http://www.courier-mta.org/">Courier mail
+server</a>. If you're running Courier already, you don't need to do actually
+download and install <em>maildrop</em>. You already have everything you need,
+all you need to do is to flip the switch that uses <em>maildrop</em> for
+local mail delivery. This is done by editing the <code>courierd</code>
+configuration file (usually installed in the
+<code>/usr/lib/courier/etc</code> directory), and setting
+<code>DEFAULTDELIVERY</code> according to the instructions in that
+configuration file.</p>
+
+<p>The next thing to do is to actually learn how <em>maildrop</em> works, and
+learn its filtering language. Although the mail filter will be automaticaly
+generated here, you still need to become familiar with the filtering language
+in order to troubleshoot any installation problems. <em>maildrop</em> comes
+with manual pages documenting the filtering language, as well as some
+example. Read them.</p>
+
+<h2>The little picture</h2>
+
+<p>Here's what's going to happen. The webmail server will automatically
+generate a <em>maildrop</em> filtering recipe. <em>maildrop</em> reads the
+recipe, and does its thing. Sounds simple enough, right?</p>
+
+<p>Well, it's not. There are a few little details that need to be
+resolved.</p>
+
+<p>For starters, the default <em>maildrop</em> filtering recipe is
+<code>$HOME/.mailfilter</code>. That's how things usually are when actual
+physical system accounts are used. When virtual mailboxes are installed,
+things are less murky. There is no standard way to do virtual mail
+arrangement, so the actual implementation varies from system to system.
+Somehow or other all or some portion of virtual mailboxes share the same
+physical account, and have the same $HOME. In that case the usual thing to do
+is for each virtual mailbox, the corresponding mail filtering recipe is
+manually specified to <em>maildrop</em>, as an extra command line argument.
+Review the <em>maildrop</em> documentation for more information.</p>
+
+<p>Now, on the other hand, the webmail server doesn't really know anything
+about physical and virtual accounts. The mapping between a login ID and the
+maildir is completely encapsulated in a black box-type authentication layer.
+The login ID and password are validated by the authentication layer, which
+obtains the maildir corresponding to the login ID, and the webmail server is
+started for that maildir. Whether or not a login ID corresponds to an actual
+system account or to virtual account, that's something the webmail server
+doesn't really know, or care. All it cares about is the maildir where all the
+mail is, and that's the end of the story.</p>
+
+<p>So, the issue is that the webmail server needs to find the corresponding
+<em>maildrop</em> filtering recipe, so it knows where to write the mail
+delivery instructions. This is how it works.</p>
+
+<p>In order for mail filtering to be enabled, it is necessary to initialize
+the file named <code>maildirfilterconfig</code> in the maildir itself. This
+is where the webmail server runs, so it will simply look for the file of this
+name. The contents of this file should be as follows:</p>
+<pre>MAILDIRFILTER=<em>pathtomailfilter</em>
+MAILDIR=<em>pathtomaildir</em></pre>
+
+<p>The <em>pathtomailfilter</em> specifies the location of the
+<em>maildrop</em> filtering recipe for this maildir, relative to the
+<em>maildir</em> itself. Set the current directory to the maildir directory,
+now ask yourself, where's my <em>maildrop</em> filtering recipe.</p>
+
+<p>In most cases, where virtual mailboxes are not used, everyone's maildir is
+<code>$HOME/Maildir</code>, and <em>maildrop</em> uses
+<code>$HOME/.mailfilter</code> by default. In this case,
+<em>pathtomailfilter</em> must be set to <code>../.mailfilter</code>.</p>
+
+<p>When virtual mail accounts are used, this will obviously be something
+else. The only restriction is that the <em>maildrop</em> filtering recipe and
+the maildir <strong>must be on the same filesystem or partition</strong>.</p>
+
+<p><em>pathtomaildir</em> is the other half of the story. When
+<em>maildrop</em> gets a message to deliver, <em>maildrop</em> needs to know
+where the mailboxes and folders are. <em>Maildrop</em> begins running in what
+it considers to be the recipient's home directory, reading either
+<code>.mailfilter</code>, by default, or the file specified on the command
+line.</p>
+
+<p>The webmail server needs to generate filtering instruction that deliver
+messages to its maildir. By default, the maildir for non-virtual accounts is
+$HOME/Maildir, so <em>pathtomaildir</em> needs to be set to
+<code>./Maildir</code>.</p>
+
+<h2>Summary for virtual accounts</h2>
+
+<p>Basically, 99% of the time <code>MAILDIRFILTER</code> will be
+<code>../.mailfilter</code> and <code>MAILDIR</code> will be
+<code>./Maildir</code>. When virtual mail accounts are used,
+<em>maildrop</em> still must be used as a mail delivery agent, somethow,
+specifying the correct maildir that corresponds to the recipient's mail
+account. Usually all or most virtual accounts are set up inside a single
+physical account. In that case it is necessary to set up a different
+<em>maildrop</em> filtering recipe file for each virtual mail account (since
+everyone's <code>$HOME/.mailfilter</code> will be the same file), and in each
+maildir specify the relative path to its corresponding filtering recipe, and
+the relative path to the maildir from the default home directory. Then, for
+each virtual mail account, the mail server must run <em>maildrop</em> to do
+the actual mail delivery, explicitly specifying the filtering recipe to be
+used.</p>
+
+<h2>The global <code>maildirfilterconfig</code> file</h2>
+
+<p>In most cases where virtual mail accounts are not used, every maildir's
+<code>maildirfilterconfig</code> should be the same. As an alternative to
+installing the same <code>maildirfilterconfig</code> in each maildir, it is
+possible to install a single <code>maildirfilterconfig</code> systemwide.</p>
+
+<p>For SqWebMail, install <code>maildirfilterconfig</code> in
+<code>/usr/local/share/sqwebmail</code> (the default installation directory).
+For Courier, install <code>maildirfilterconfig</code> in Courier's
+configuration directory (<code>/usr/lib/courier/etc</code> by default).</p>
+
+<p>The global <code>maildirfilterconfig</code> will be used unless
+<code>maildirfilterconfig</code> exists in the maildir directory. Therefore,
+the global <code>maildirfilterconfig</code> can be used to provide a default
+for the majority of the mail accounts, and any exceptions are handled by
+installing <code>maildirfilterconfig</code> in the maildir directory, whose
+contents will override the global file.</p>
+
+<h2>Happy filtering.</h2>
+
+<p>If everything is set up correctly, SqWebMail will now display a new link
+to a screen where mail filtering rules are defined and installed. A mail
+filter consists of a condition, and an action. A condition is usually based
+on the contents of some header, or the message body. Regular expressions are
+allowed. Which means that certain special characters must be quoted. For
+example, to search for the string "[announce]" verbatim in the subject
+header, it must be entered as "\[announce\]". Pattern matching, for now, is
+case-insensitive. The regular expression syntax uses pretty much the same
+syntax as Perl. See the maildropfilter manual page for more information.</p>
+
+<p>Multiple mail filtering rules can be installed. Their relative order can
+be rearranged by selecting a filtering rule, then selecting either the "Up"
+or the "Down" button. It is necessary to select "Save all changes" for any
+changes to the filtering rules to take effect. Leaving that page in any other
+way will throw away all changes made.</p>
+
+<h2>BUGS</h2>
+
+<p>Known bug:</p>
+<ul>
+  <li>Create a filter that delivers mail to folder X.<br />
+    <br />
+  </li>
+  <li>Delete folder X.<br />
+    <br />
+  </li>
+  <li>What's going to happen now with mail grabbed by this filter? In the
+    current implementation this results with a deferred error. The message is
+    not bounced immediately, but will stay in the queue until the mail server
+    times it out. If this condition is caught quickly enough, and the folder
+    is recreated, all pent up mail will be redelivered.<br />
+    <br />
+  </li>
+  <li>There's some school of thought that says that this should result in
+    mail bouncing immediately. No decision has been made at this point.</li>
+</ul>
+</body>
+</html>
