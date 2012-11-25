@@ -16,6 +16,11 @@ bin_PROGRAMS=		fetchmail
 sbin_PROGRAMS=      slemsPrivate writefifo fixwvdialconf
 sbin_SCRIPTS=       fetchmail.up fetchmail.down ip-down.local ip-up.local ppp-off fetchmail.cron
 
+MOSTLYCLEANFILES=fetchmail.up fetchmail.down fetchmail.cron ip-up.local ip-down.local
+
+mandir=@prefix@/man
+#endif
+
 dist_noinst_SCRIPTS=	specgen.sh
 dist_man1_MANS=		fetchmail.man
 
