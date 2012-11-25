@@ -1,5 +1,11 @@
 /*
  * $Log: qmail-remote.c,v $
+ * Revision 1.83  2012-11-25 07:57:25+05:30  Cprogrammer
+ * set smtptext for qmtp
+ *
+ * Revision 1.82  2012-11-24 11:06:04+05:30  Cprogrammer
+ * fixed typo (SMTPCODE instead of SMTPTEXT)
+ *
  * Revision 1.81  2012-11-24 07:50:45+05:30  Cprogrammer
  * set [S|Q]MTPTEXT and [S|Q]MTPCODE for transient errors
  * unset ONSUCCESS_REMOTE, ONFAILURE_REMOTE, ONTRANSIENT_REMOTE selectively
@@ -760,7 +766,7 @@ temp_noconn_out(char *s)
 }
 
 int
-setsmtptext(int code)
+setsmtptext(int code, int type)
 {
 	if (env_get("ONFAILURE_REMOTE") || env_get("ONSUCCESS_REMOTE")
 			||env_get("ONTRANSIENT_REMOTE"))
@@ -773,14 +779,16 @@ setsmtptext(int code)
 		if (!stralloc_0(&smtptext))
 			return (1);
 		smtptext.len--;
-		if (!env_put2("SMTPTEXT", smtptext.s))
+		if (!env_put2((type == 's' || mxps) ? "QMTPTEXT" : "SMTPTEXT", smtptext.s))
 			return (1);
 		if (code > 0)
 		{
 			strnum[fmt_ulong(strnum, code)] = 0;
 			if (!env_put2("SMTPCODE", strnum))
 				return (1);
-		}
+		} else
+		if (!env_put2((type == 's' || mxps) ? "QMTPCODE" : "SMTPCODE", "4.4.1"))
+			temp_nomem();
 	}
 	return (0);
 }
@@ -813,9 +821,7 @@ temp_noconn(stralloc *h, char *ip, int port)
 		alloc_free(ip);
 	}
 	temp_noconn_out(". (#4.4.1)\n");
-	if (!env_put2((type == 's' || mxps) ? "QMTPTEXT" : "SMTPTEXT", "4.4.1"))
-		temp_nomem();
-	if (setsmtptext(0))
+	if (setsmtptext(0, type))
 		smtptext.len = 0;
 	zerodie(0, 0, 0, -1);
 }
@@ -825,19 +831,21 @@ temp_qmtp_noconn(stralloc *h, char *ip, int port)
 {
 	char            strnum[FMT_ULONG];
 
-	out("ZSorry, I wasn't able to establish an QMTP connection for ");
+	temp_noconn_out("ZSorry, I wasn't able to establish an QMTP connection for ");
 	if (substdio_put(subfdoutsmall, h->s, h->len) == -1)
 		_exit(0);
 	if (ip)
 	{
-		out(" to ");
-		out(ip);
-		out(" port ");
+		temp_noconn_out(" to ");
+		temp_noconn_out(ip);
+		temp_noconn_out(" port ");
 		strnum[fmt_ulong(strnum, port)] = 0;
-		out(strnum);
+		temp_noconn_out(strnum);
 		alloc_free(ip);
 	}
-	out(". (#4.4.1)\n");
+	temp_noconn_out(". (#4.4.1)\n");
+	if (setsmtptext(0, type))
+		smtptext.len = 0;
 	zerodie(0, 0, 0, -1);
 }
 
@@ -1057,7 +1065,7 @@ quit(char *prepend, char *append, int code, int die)
 	outhost();
 	out(append);
 	out(".\n");
-	if (setsmtptext(code))
+	if (setsmtptext(code, 0))
 		goto quit_now;
 quit_now:
 	outsmtptext();
@@ -2908,7 +2916,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_remote_c()
 {
-	static char    *x = "$Id: qmail-remote.c,v 1.81 2012-11-24 07:50:45+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-remote.c,v 1.83 2012-11-25 07:57:25+05:30 Cprogrammer Exp mbhangui $";
 	x=sccsidauthcramh;
 	x=sccsidauthdigestmd5h;
 	x++;
