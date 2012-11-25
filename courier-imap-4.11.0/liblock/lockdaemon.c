@@ -55,7 +55,7 @@ int	i;
 	/*
 	** We fork, and set up a pipe from the child process.  If we read
 	** a single 0 byte from the pipe, it means that the child has
-	** succesfully initialized, and will return to main, so we exit(0).
+	** successfully initialized, and will return to main, so we exit(0).
 	** If we do not read a single 0 byte from the pipe, it means that
 	** there was an initialization error, so we return -1 to main.
 	*/
