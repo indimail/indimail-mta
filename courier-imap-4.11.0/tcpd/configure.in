@@ -356,7 +356,7 @@ then
 
 		CPPFLAGS="$save_CPPFLAGS"
 	else
-		have_gnutls="no: pkgconfig --modeversion gnutls failed"
+		have_gnutls="no: pkgconfig --modversion gnutls failed"
 	fi
 else
 	have_gnutls="no: pkg-config not found"
@@ -368,7 +368,15 @@ if test "$have_gnutls" = "yes"
 then
 	LIBCOURIERTLSGNUTLS="libcouriertlsgnutls.la"
 	CPPFLAGS="$CPPFLAGS `$PKGCONFIG --cflags gnutls`"
-	gnutlsdep="`$PKGCONFIG --libs gnutls` -lgnutls-extra"
+	have_gnutls3=no
+	PKG_CHECK_EXISTS([gnutls >= 3.0], [have_gnutls3=yes])
+	if test "x$have_gnutls3" = "xno"
+	then
+		gnutlsdep="`$PKGCONFIG --libs gnutls` -lgnutls-extra"
+	else
+		gnutlsdep="`$PKGCONFIG --libs gnutls`"
+		AC_DEFINE([HAVE_GNUTLS3], [1], [Use GnuTLS3])
+	fi
 fi
 
 AC_CHECK_SIZEOF(gnutls_transport_ptr_t,0, [

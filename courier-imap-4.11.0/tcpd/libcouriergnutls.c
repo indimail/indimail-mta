@@ -9,7 +9,9 @@
 #include	"tlscache.h"
 #include	"soxwrap/soxwrap.h"
 #include	<gnutls/gnutls.h>
+#ifndef HAVE_GNUTLS3
 #include	<gnutls/extra.h>
+#endif
 #include	<gnutls/x509.h>
 #include	<gnutls/openpgp.h>
 #include	<stdio.h>
@@ -118,51 +120,11 @@ static struct oid_name oid_name_list[]={
 	{"1.2.840.113549.1.9.1","emailaddress"},
 };
 
-static const struct intmap {
-	const char *name;
-	int algo;
-} all_ciphers[]={
-	{ "AES256", GNUTLS_CIPHER_AES_256_CBC},
-	{ "3DES", GNUTLS_CIPHER_3DES_CBC },
-	{ "AES128", GNUTLS_CIPHER_AES_128_CBC},
-	{ "ARC128", GNUTLS_CIPHER_ARCFOUR_128 },
-	{ "ARC40", GNUTLS_CIPHER_ARCFOUR_40},
-	{ "RC2", GNUTLS_CIPHER_RC2_40_CBC},
-	{ "DES", GNUTLS_CIPHER_DES_CBC},
-	{ "NULL", GNUTLS_CIPHER_NULL },
-	{ NULL, 0},
-},
-	all_kxs[]={
-		{ "DHERSA", GNUTLS_KX_DHE_RSA},
-		{ "DHEDSS", GNUTLS_KX_DHE_DSS},
-		{ "RSA", GNUTLS_KX_RSA},
-		{ "SRP", GNUTLS_KX_SRP},
-		{ "SRPRSA", GNUTLS_KX_SRP_RSA},
-		{ "SRPDSS", GNUTLS_KX_SRP_DSS},
-		{ "PSK", GNUTLS_KX_PSK},
-		{ "DHEPSK", GNUTLS_KX_DHE_PSK},
-		{ "ANONDH", GNUTLS_KX_ANON_DH},
-		{ "RSAEXPORT", GNUTLS_KX_RSA_EXPORT},
-		{ NULL, 0}
-	}, all_comps[]={
-		{ "DEFLATE", GNUTLS_COMP_DEFLATE},
-		{ "LZO", GNUTLS_COMP_LZO},
-		{ "NULL", GNUTLS_COMP_NULL},
-		{ NULL, 0}
-	}, all_certs[]={
-		{ "X509", GNUTLS_CRT_X509},
-		{ "OPENPGP", GNUTLS_CRT_OPENPGP},
-		{ NULL, 0}
-	};
 
 struct ssl_context_t {
 	int isserver;
 	struct tls_info info_cpy;
-	int *protocol_list;
-	int cipher_list[sizeof(all_ciphers)/sizeof(all_ciphers[0])];
-	int kx_list[sizeof(all_kxs)/sizeof(all_kxs[0])];
-	int comp_list[sizeof(all_comps)/sizeof(all_comps[0])];
-	int cert_list[sizeof(all_certs)/sizeof(all_certs[0])];
+	const char *priority_list;
 
 	char *certfile;
 	int certfiledh;
@@ -213,171 +175,18 @@ static const char *safe_getenv(ssl_context context, const char *n,
 	return (v);
 }
 
-static char **splitwords(const char *var, size_t *nwords)
+static void log_2stderr( int level, const char *s)
 {
-	char *buf=strdup(var);
-	char **ptrbuf;
-
-	char *p;
-	size_t cnt;
-
-	char *saveptr;
-
-	if (!buf)
-		return NULL;
-
-	cnt=1;
-
-	for (p=buf; (p=strtok_r(p, ":", &saveptr)) != NULL; p=NULL)
-		++cnt;
-
-	ptrbuf=malloc(cnt*sizeof(char *));
-
-	if (!ptrbuf)
-	{
-		free(buf);
-		return NULL;
-	}
-
-	cnt=0;
-	strcpy(buf, var);
-
-	for (p=buf; (p=strtok_r(p, ":", &saveptr)) != NULL; p=NULL)
-	{
-		ptrbuf[cnt++]=p;
-
-		while (*p)
-		{
-			if (*p == '-')
-				*p=' ';
-			++p;
-		}
-	}
-
-	ptrbuf[cnt]=0;
-	if (cnt == 0)
-		free(buf);
-	*nwords=cnt;
-
-	return ptrbuf;
-}
-
-static void splitwords_free(char **words)
-{
-	if (words[0])
-		free(words[0]);
-	free(words);
-}
-
-static void addremove(int *cipher_list_out,
-		      int removeit,
-		      int n)
-{
-	if (removeit)
-	{
-		int *p=cipher_list_out;
-
-		while (*cipher_list_out)
-		{
-			if (*cipher_list_out != n)
-				*p++ = *cipher_list_out;
-			++cipher_list_out;
-		}
-		*p=0;
-		return;
-	}
-
-	while (*cipher_list_out)
-	{
-		if (*cipher_list_out == n)
-			return;
-		++cipher_list_out;
-	}
-
-	*cipher_list_out++ =n;
-	*cipher_list_out=0;
-}
-
-static void parse_map(const struct intmap *mapptr,
-		      char **tokens,
-		      int *tokens_out,
-		      int is_ciphers)
-{
-	size_t i;
-
-	*tokens_out=0;
-
-	for (i=0; tokens[i]; i++)
-	{
-		size_t j;
-		int removeit=0;
-		const char *name=tokens[i];
-
-		if (*name == '-')
-		{
-			++name;
-			removeit=1;
-		}
-
-		for (j=0; mapptr[j].name; j++)
-		{
-			if (strcmp(name, mapptr[j].name) == 0)
-			{
-				addremove(tokens_out, removeit,
-					  mapptr[j].algo);
-				continue;
-			}
-
-			if (is_ciphers && strcmp(name, "HIGH") == 0 &&
-			    gnutls_cipher_get_key_size(mapptr[j].algo)
-				    > 128 / 8)
-			{
-				addremove(tokens_out, removeit,
-					  mapptr[j].algo);
-				continue;
-			}
-
-			if (is_ciphers && strcmp(name, "MEDIUM") == 0 &&
-			    gnutls_cipher_get_key_size(mapptr[j].algo)
-				    == 128 / 8)
-			{
-				addremove(tokens_out, removeit,
-					  mapptr[j].algo);
-				continue;
-			}
-
-			if (is_ciphers && strcmp(name, "LOW") == 0 &&
-			    gnutls_cipher_get_key_size(mapptr[j].algo)
-				    < 128 / 8 &&
-			    gnutls_cipher_get_key_size(mapptr[j].algo)
-			    > 0)
-			{
-				addremove(tokens_out, removeit,
-					  mapptr[j].algo);
-				continue;
-			}
-
-			if (strcmp(name, "ALL") == 0 &&
-			    (!is_ciphers ||
-			     gnutls_cipher_get_key_size(mapptr[j].algo)
-			     > 0))
-			{
-				addremove(tokens_out, removeit,
-					  mapptr[j].algo);
-				continue;
-			}
-		}
-	}
+	fprintf(stderr, "%s", s);
 }
 
 ssl_context tls_create(int isserver, const struct tls_info *info)
 {
 	static int first=1;
 
-	char **words;
-	size_t n, i;
 	ssl_context p=malloc(sizeof(struct ssl_context_t));
 	char *certfile=NULL, *dhcertfile=NULL;
+	char debug_flag;
 
 	if (!p)
 		return NULL;
@@ -387,6 +196,8 @@ ssl_context tls_create(int isserver, const struct tls_info *info)
 	p->isserver=isserver;
 	p->info_cpy=*info;
 	p->info_cpy.certificate_verified=0;
+
+	debug_flag=*safe_getenv(p, "TLS_DEBUG", "");
 
 	if (first)
 	{
@@ -400,6 +211,12 @@ ssl_context tls_create(int isserver, const struct tls_info *info)
 
 		first=0;
 
+		if (debug_flag)
+		{
+			gnutls_global_set_log_function(log_2stderr);
+			gnutls_global_set_log_level(9);
+		}
+
 		if (gnutls_global_init() < 0)
 		{
 			fprintf(stderr, "gnutls_global_init() failed\n");
@@ -408,6 +225,7 @@ ssl_context tls_create(int isserver, const struct tls_info *info)
 			return (NULL);
 		}
 
+#ifndef HAVE_GNUTLS3
 		if (gnutls_global_init_extra() < 0)
 		{
 			gnutls_global_deinit();
@@ -416,79 +234,11 @@ ssl_context tls_create(int isserver, const struct tls_info *info)
 			errno=EINVAL;
 			return (NULL);
 		}
+#endif
 	}
 
-	if (!(words=splitwords(safe_getenv(p, "TLS_PROTOCOL",
-					   "TLS1_1:TLS1:SSL3"), &n)))
-	{
-		tls_destroy(p);
-		return NULL;
-	}
-
-	if ((p->protocol_list=malloc((n+1)*sizeof(int))) == NULL)
-	{
-		splitwords_free(words);
-
-		tls_destroy(p);
-		return NULL;
-	}
-
-	for (n=i=0; words[i]; ++i)
-	{
-		if (strcmp(words[i], "SSL3") == 0)
-		{
-			p->protocol_list[n++]=GNUTLS_SSL3;
-		}
-		else if (strcmp(words[i], "TLS1") == 0)
-		{
-			p->protocol_list[n++]=GNUTLS_TLS1_0;
-		}
-		else if (strcmp(words[i], "TLS1_1") == 0)
-		{
-			p->protocol_list[n++]=GNUTLS_TLS1_1;
-		}
-	}
-	p->protocol_list[n]=0;
-
-	splitwords_free(words);
-
-	if (!(words=splitwords(safe_getenv(p, "TLS_CIPHER_LIST",
-					   "HIGH:MEDIUM"), &n)))
-	{
-		tls_destroy(p);
-		return NULL;
-	}
-
-	parse_map(all_ciphers, words, p->cipher_list, 1);
-	splitwords_free(words);
-
-	if (!(words=splitwords(safe_getenv(p, "TLS_KX_LIST", "ALL"), &n)))
-	{
-		tls_destroy(p);
-		return NULL;
-	}
-
-	parse_map(all_kxs, words, p->kx_list, 0);
-	splitwords_free(words);
-
-	if (!(words=splitwords(safe_getenv(p, "TLS_COMPRESSION", "ALL"), &n)))
-	{
-		tls_destroy(p);
-		return NULL;
-	}
-
-	parse_map(all_comps, words, p->comp_list, 0);
-	splitwords_free(words);
-
-	if (!(words=splitwords(safe_getenv(p, "TLS_CERTS", "X509"), &n)))
-	{
-		tls_destroy(p);
-		return NULL;
-	}
-
-	parse_map(all_certs, words, p->cert_list, 0);
-	splitwords_free(words);
-
+	p->priority_list=safe_getenv(p, "TLS_PRIORITY",
+				     "NORMAL:-CTYPE-OPENPGP");
 
 	if ((certfile=strdup(safe_getenv(p, "TLS_CERTFILE", ""))) == NULL ||
 	    (dhcertfile=strdup(safe_getenv(p, "TLS_DHCERTFILE", "")))
@@ -573,9 +323,6 @@ ssl_context tls_create(int isserver, const struct tls_info *info)
 
 void tls_destroy(ssl_context p)
 {
-	if (p->protocol_list)
-		free(p->protocol_list);
-
 	if (p->certfile)
 		free(p->certfile);
 
@@ -1141,7 +888,7 @@ static void release_file(gnutls_datum *filebuf)
 
 static int set_cert(ssl_handle ssl,
 		    gnutls_session_t session,
-		    gnutls_retr_st *st,
+		    gnutls_retr2_st *st,
 		    const char *certfilename)
 {
 	int rc;
@@ -1155,7 +902,7 @@ static int set_cert(ssl_handle ssl,
 	if ((rc=read_file(certfilename, &filebuf)) < 0)
 		return rc;
 
-	switch (st->type) {
+	switch (st->cert_type) {
 	case GNUTLS_CRT_X509:
 
 		cert_cnt=0;
@@ -1216,7 +963,10 @@ static int set_cert(ssl_handle ssl,
 }
 
 static int get_server_cert(gnutls_session_t session,
-			   gnutls_retr_st *st)
+			   const gnutls_datum_t * req_ca_rdn, int nreqs,
+			   const gnutls_pk_algorithm_t * sign_algos,
+			   int sign_algos_length, gnutls_retr2_st *st)
+
 {
 	ssl_handle ssl=(ssl_handle)gnutls_session_get_ptr(session);
 	int vhost_idx;
@@ -1227,7 +977,7 @@ static int get_server_cert(gnutls_session_t session,
 	char *certfilename=NULL;
 	int rc;
 
-	st->type=gnutls_certificate_type_get(session);
+	st->cert_type=gnutls_certificate_type_get(session);
 
 	for (vhost_idx=0; vhost_size=0,
 		     gnutls_server_name_get(session, NULL, &vhost_size, &type,
@@ -1251,7 +1001,7 @@ static int get_server_cert(gnutls_session_t session,
 	{
 		if (ssl->ctx->certfile)
 			certfilename=check_cert(ssl->ctx->certfile,
-						st->type,
+						st->cert_type,
 						vhost_buf, 1);
 
 		if (certfilename)
@@ -1262,7 +1012,7 @@ static int get_server_cert(gnutls_session_t session,
 	{
 		if (ssl->ctx->certfile)
 			certfilename=check_cert(ssl->ctx->certfile,
-						st->type,
+						st->cert_type,
 						safe_getenv(ssl->ctx,
 							    "TCPLOCALIP", ""),
 						0);
@@ -1280,7 +1030,7 @@ static int get_server_cert(gnutls_session_t session,
 static int pick_client_cert(gnutls_session_t session,
 			    const gnutls_datum_t * req_ca_rdn, int nreqs,
 			    const gnutls_pk_algorithm_t * sign_algos,
-			    int sign_algos_length, gnutls_retr_st *st)
+			    int sign_algos_length, gnutls_retr2_st *st)
 {
 	ssl_handle ssl=(ssl_handle)gnutls_session_get_ptr(session);
 	int i, j;
@@ -1291,7 +1041,7 @@ static int pick_client_cert(gnutls_session_t session,
 	if (ssl->info_cpy.getpemclientcert4ca == NULL)
 		return 0;
 
-	if (st->type != GNUTLS_CRT_X509)
+	if (st->cert_type != GNUTLS_CRT_X509)
 		return 0;
 
 	if (ssl->info_cpy.loadpemclientcert4ca)
@@ -1420,19 +1170,18 @@ static int pick_client_cert(gnutls_session_t session,
 static int get_client_cert(gnutls_session_t session,
 			   const gnutls_datum_t * req_ca_rdn, int nreqs,
 			   const gnutls_pk_algorithm_t * sign_algos,
-			   int sign_algos_length, gnutls_retr_st *st)
-
+			   int sign_algos_length, gnutls_retr2_st *st)
 {
 	ssl_handle ssl=(ssl_handle)gnutls_session_get_ptr(session);
 	int rc;
 	char *certfilename=NULL;
 
 	rc= 0;
-	st->type=gnutls_certificate_type_get(session);
+	st->cert_type=gnutls_certificate_type_get(session);
 
 	if (ssl->ctx->certfile)
 		certfilename=check_cert(ssl->ctx->certfile,
-					st->type, "", 0);
+					st->cert_type, "", 0);
 
 	st->ncerts=0;
 	st->deinit_all=0;
@@ -1696,11 +1445,8 @@ RT |
 
         gnutls_certificate_set_verify_limits(ssl->xcred, 16384, 10);
 
-	if (gnutls_set_default_priority (ssl->session) < 0 ||
-	    gnutls_kx_set_priority (ssl->session, ctx->kx_list) < 0 ||
-	    gnutls_cipher_set_priority(ssl->session, ctx->cipher_list) < 0 ||
-	    gnutls_compression_set_priority(ssl->session, ctx->comp_list) < 0 ||
-	    gnutls_protocol_set_priority(ssl->session, ctx->protocol_list) < 0||
+	if (gnutls_priority_set_direct(ssl->session, ctx->priority_list,
+				       NULL) < 0 ||
 	    (ctx->certfiledh && read_dh_params(ssl->dhparams,
 					       ctx->certfile) < 0) ||
 	    add_certificates(ssl->xcred, ctx->trustcerts) < 0 ||
@@ -1716,8 +1462,6 @@ RT |
 	    gnutls_credentials_set(ssl->session, GNUTLS_CRD_CERTIFICATE,
 				   ssl->xcred) < 0 ||
 
-	    gnutls_certificate_type_set_priority(ssl->session,
-						 ctx->cert_list) < 0 ||
 	    (ctx->info_cpy.peer_verify_domain &&
 	     gnutls_server_name_set(ssl->session, GNUTLS_NAME_DNS,
 				    ctx->info_cpy.peer_verify_domain,
@@ -1744,12 +1488,11 @@ RT |
 							      ctx->fail_if_no_cert ?
 							      GNUTLS_CERT_REQUIRE:
 							      GNUTLS_CERT_REQUEST);
-		gnutls_certificate_server_set_retrieve_function(ssl->xcred,
-								get_server_cert
-								);
+		gnutls_certificate_set_retrieve_function(ssl->xcred,
+							 get_server_cert);
 	}
-	else gnutls_certificate_client_set_retrieve_function(ssl->xcred,
-							     get_client_cert);
+	else gnutls_certificate_set_retrieve_function(ssl->xcred,
+						      get_client_cert);
 
 	gnutls_transport_set_ptr(ssl->session,(gnutls_transport_ptr_t)
 				 GNUTLS_CAST_PTR_T fd);
