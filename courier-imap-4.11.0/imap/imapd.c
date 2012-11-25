@@ -6478,7 +6478,8 @@ int main(int argc, char **argv)
 	mdcreate("." DRAFTS);
 #endif
 
-	if ((p=getenv("IMAPDEBUGFILE")) != 0 && *p)
+	if ((p=getenv("IMAPDEBUGFILE")) != 0 && *p &&
+	    access(p, 0) == 0)
 	{
 		oldumask = umask(027);
 		debugfile=fopen(p, "a");
