@@ -1,5 +1,11 @@
 /*
  * $Log: rrt.c,v $
+ * Revision 1.3  2012-11-25 07:56:34+05:30  Cprogrammer
+ * modify subject according to type
+ *
+ * Revision 1.2  2012-11-24 11:06:37+05:30  Cprogrammer
+ * improved readability
+ *
  * Revision 1.1  2012-11-24 08:19:15+05:30  Cprogrammer
  * Initial revision
  *
@@ -313,6 +319,8 @@ main(int argc, char **argv)
 	else
 	if (env_get("ONTRANSIENT_REMOTE"))
 		type = TRANSIENT;
+	else
+		_exit (0);
 	/*- no need of processing bounce */
 	if (type == FAILURE) {
 		if (rpath.len == email_rr.len && !str_diffn(rpath.s, email_rr.s, rpath.len))
@@ -343,7 +351,14 @@ main(int argc, char **argv)
 	my_putb("Date: ", 6);
 	my_putb(buf, date822fmt(buf, &dt));
 	my_putb("Subject: ", 9);
-	my_putb("Successful Mail Delivery Report- ", 33);
+	if (type == SUCCESS)
+		my_putb("Successful Mail Delivery Report: ", 33);
+	else
+	if (type == FAILURE)
+		my_putb("Permanent Failure: Mail Delivery Report: ", 41);
+	else
+	if (type == TRANSIENT)
+		my_putb("Temporary Failure: Mail Delivery Report: ", 41);
 	my_putb(email_subj.s, email_subj.len);
 	my_putb("To: ", 4);
 	my_putb(email_rr.s, email_rr.len);
@@ -365,14 +380,14 @@ main(int argc, char **argv)
 	my_putb(boundary.s, boundary.len);
 	my_putb("\n", 1);
 	my_putb("Content-Type: message/delivery-status\n\n", 39);
-	my_putb("This is the indimail rr generator at host ", 42);
+	my_putb("This is the indimail rrt generator at host ", 43);
 	my_putb(bouncehost.s, bouncehost.len);
 	my_putb(".\n\n", 3);
-	my_putb("The original message was received at ", 37);
+	my_putb("This message was received for a delivery attempt at ", 52);
 	my_putb(buf, date822fmt(buf, &dt));
 	my_putb("from ", 5);
 	my_puts(rpline);
-	my_putb("\n", 1);
+	my_putb("\n\n", 2);
 	if (type == SUCCESS) {
 		my_puts("Your message was successfully delivered to the destination(s)\n"
 				"listed below. If the message was delivered to mailbox you will\n"
@@ -388,9 +403,9 @@ main(int argc, char **argv)
 	my_putb("\n\n", 2);
 	if ((smtptext = env_get("SMTPTEXT")) || (qmtptext = env_get("QMTPTEXT"))) {
 		my_puts(smtptext ? "SMTP Text: " : "QMTP Text: ");
-		my_puts(smtptext ? smtptext : qmtptext);
+		my_puts(smtptext ? smtptext + 1 : qmtptext + 1);
 	}
-	my_putb("\n", 1);
+	my_putb("\n\n", 2);
 
 	if (type == SUCCESS) {
 		my_putb("There is no guarantee that the message has been read or understood.\n", 68);
@@ -419,10 +434,10 @@ main(int argc, char **argv)
 	my_putb("Action: ", 8);
 	my_puts(type == SUCCESS ? "relayed\n" : "failed\n");
 	if ((ptr = env_get("SMTPCODE")) || (ptr = env_get("QMTPCODE"))) {
-		my_putb("Status: ", 5);
+		my_putb("Status: ", 8);
 		my_puts(ptr);
-		my_putb("Diagnostic code: smtp; ", 23);
-		my_puts(smtptext ? smtptext : qmtptext);
+		my_putb("\nDiagnostic code: smtp; ", 24);
+		my_puts(smtptext ? smtptext + 1 : qmtptext + 1);
 	}
 	/*- enclose the original mail header as attachment */
 	my_putb("\n--", 3);
@@ -469,7 +484,7 @@ main(int argc, char **argv)
 void
 getversion_rr_c()
 {
-	static char    *x = "$Id: rrt.c,v 1.1 2012-11-24 08:19:15+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: rrt.c,v 1.3 2012-11-25 07:56:34+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
