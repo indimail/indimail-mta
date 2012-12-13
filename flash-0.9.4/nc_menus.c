@@ -1,5 +1,8 @@
 /*
  * $Log: nc_menus.c,v $
+ * Revision 1.5  2012-12-13 09:28:39+05:30  Cprogrammer
+ * fixed indentation
+ *
  * Revision 1.4  2011-07-29 09:24:13+05:30  Cprogrammer
  * fixed gcc warnings
  *
@@ -891,173 +894,147 @@ do_menu(struct menu *firstmenu)
 			errno = 0;
 			gotch = getch();
 			if (errno == EIO)
-				GRAB_BACK_TTY} while (errno != 0 && errno != ENOTTY);
+				GRAB_BACK_TTY
+		} while (errno != 0 && errno != ENOTTY);
 
-			switch (gotch)
+		switch (gotch)
+		{
+		case ERR: /*- fprintf(stderr,"%d\n",errno); */
+			if (checktty() == 0)
+				return;
+			handle_timeout(1);
+			break;
+		case ESCAPEKEY:
+		case KEY_LEFT:
+		case 2:	/*- Ctrl B */
+			if (mi_c->prev)
 			{
-			case ERR:
-				/*
-				 * fprintf(stderr,"%d\n",errno);
-				 */
-				if (checktty() == 0)
-					return;
-				handle_timeout(1);
-				break;
-
-			case ESCAPEKEY:
-			case KEY_LEFT:
-			case 2:			/*
-								 * Ctrl B 
-								 */
-				if (mi_c->prev)
-				{
-					mi_c = rubout_menu_instance(mi_c);
+				mi_c = rubout_menu_instance(mi_c);
+				display_screen(1);
+			} else
+			if (!noclobber)
+			{
+				if (nc_runnable_jobs())
 					display_screen(1);
-				} else
-				if (!noclobber)
+				else
+					mi_c = rubout_menu_instance(mi_c);
+			}
+			break;
+		case '\n':
+		case KEY_RIGHT:
+			if (CANCLICK(mi_c))
+			{
+				switch (mi_c->mi_highlighted->type)
 				{
+				case MENU_SUB:
+					menu = find_menu(mi_c->mi_highlighted->args);
+					if (menu != NULL)
+					{
+						if (menu != mi_c->menu)
+						{
+							if (has_menu_access(menu))
+							{
+								if (mi_c->menu->flags & MF_OVERLAY)
+									rubout_menu_instance(mi_c);
+								mi_c = add_menu_instance(menu);
+								render_instance(mi_c);
+							}
+							display_screen(1);
+						}
+					} else
+						fprintf(stderr, "No menu named %s\n", mi_c->mi_highlighted->name);
+					break;
+				case MENU_EXIT:
+					mi_c = rubout_menu_instance(mi_c);
+					if (mi_c)
+						display_screen(1);
+					break;
+				case MENU_QUIT:
 					if (nc_runnable_jobs())
 						display_screen(1);
 					else
-						mi_c = rubout_menu_instance(mi_c);
-				}
-
-				break;
-
-			case '\n':
-			case KEY_RIGHT:
-				if (CANCLICK(mi_c))
-				{
-					switch (mi_c->mi_highlighted->type)
 					{
-					case MENU_SUB:
-						menu = find_menu(mi_c->mi_highlighted->args);
-						if (menu != NULL)
-						{
-							if (menu != mi_c->menu)
-							{
-								if (has_menu_access(menu))
-								{
-									if (mi_c->menu->flags & MF_OVERLAY)
-										rubout_menu_instance(mi_c);
-									mi_c = add_menu_instance(menu);
-									render_instance(mi_c);
-								}
-								display_screen(1);
-							}
-						} else
-							fprintf(stderr, "No menu named %s\n", mi_c->mi_highlighted->name);
-						break;
-
-					case MENU_EXIT:
+						while (mi_c)
+							mi_c = rubout_menu_instance(mi_c);
+					}
+					break;
+				default:
+					timeout(-1);
+					exec_item(mi_c->mi_highlighted);
+					timeout(Timeout);
+					if (mi_c->menu->flags & MF_OVERLAY)
+					{
 						mi_c = rubout_menu_instance(mi_c);
 						if (mi_c)
 							display_screen(1);
-						break;
-
-					case MENU_QUIT:
-						if (nc_runnable_jobs())
-							display_screen(1);
-						else
-						{
-							while (mi_c)
-								mi_c = rubout_menu_instance(mi_c);
-						}
-						break;
-
-					default:
-						timeout(-1);
-						exec_item(mi_c->mi_highlighted);
-						timeout(Timeout);
-						if (mi_c->menu->flags & MF_OVERLAY)
-						{
-							mi_c = rubout_menu_instance(mi_c);
-							if (mi_c)
-								display_screen(1);
-						} else
-							display_screen(1);
-						break;
-					}
+					} else
+					display_screen(1);
 					break;
-				}
-
-			case KEY_NEXT:
-			case '\t':
-				task_switch();
+				} /*- switch (mi_c->mi_highlighted->type) */
+				break;
+			}
+		case KEY_NEXT:
+		case '\t':
+			task_switch();
+			display_screen(1);
+			break;
+		case KEY_DOWN:
+		case 14: /*- Ctrl N */
+			if ((mi_c->menu->flags & MF_NOCURSOR) == 0)
+			{
+				down_hilite(mi_c);
 				display_screen(1);
-				break;
-
-			case KEY_DOWN:
-			case 14:			/*
-								 * Ctrl N 
-								 */
-				if ((mi_c->menu->flags & MF_NOCURSOR) == 0)
-				{
-					down_hilite(mi_c);
-					display_screen(1);
-				}
-				break;
-
-			case KEY_UP:
-			case 16:			/*
-								 * Ctrl P 
-								 */
-				if ((mi_c->menu->flags & MF_NOCURSOR) == 0)
-				{
-					up_hilite(mi_c);
-					display_screen(1);
-				}
-				break;
-
-			case KEY_NPAGE:
-			case 5:
-				pagedown(mi_c, 0);
-				display_menu(mi_c);
-				break;
-
-			case KEY_PPAGE:
-			case 23:
-				pageup(mi_c, 0);
-				display_menu(mi_c);
-				break;
-				/*
-				 * case 7:
-				 * timeout(-1);
-				 * display_file (PATH_TO_GPL);
-				 * timeout(Timeout);
-				 * display_screen(1);
-				 * break;
-				 */
-
-			case 8:
-			case KEY_BACKSPACE:	/*
-									 * Ug 
-									 */
-			case '?':
-				timeout(-1);
-				nc_menu_help();
-				timeout(Timeout);
+			}
+			break;
+		case KEY_UP:
+		case 16: /*- Ctrl P */
+			if ((mi_c->menu->flags & MF_NOCURSOR) == 0)
+			{
+				up_hilite(mi_c);
 				display_screen(1);
-				break;
-
-			case 'A':
-				timeout(-1);
-				nc_about();
-				timeout(Timeout);
-				display_screen(1);
-				break;
-
-			case 'L':
-				timeout(-1);
-				nc_lock_screen();
-				timeout(Timeout);
-				display_screen(1);
-				break;
-
-			case 4:
-				/*
-				 * if(!noclobber)
-				 */
+			}
+			break;
+		case KEY_NPAGE:
+		case 5:
+			pagedown(mi_c, 0);
+			display_menu(mi_c);
+			break;
+		case KEY_PPAGE:
+		case 23:
+			pageup(mi_c, 0);
+			display_menu(mi_c);
+			break;
+		/*-
+		case 7:
+			timeout(-1);
+			display_file (PATH_TO_GPL);
+			timeout(Timeout);
+			display_screen(1);
+			break;
+		*/
+		case 8:
+		case KEY_BACKSPACE:	/*- Ug */
+		case '?':
+			timeout(-1);
+			nc_menu_help();
+			timeout(Timeout);
+			display_screen(1);
+			break;
+		/*-
+		case 'A':
+			timeout(-1);
+			nc_about();
+			timeout(Timeout);
+			display_screen(1);
+			break;
+		*/
+		case 'L':
+			timeout(-1);
+			nc_lock_screen();
+			timeout(Timeout);
+			display_screen(1);
+			break;
+		case 4: /*- if(!noclobber) */
 			{
 				if (nc_runnable_jobs())
 					display_screen(1);
@@ -1067,119 +1044,118 @@ do_menu(struct menu *firstmenu)
 						mi_c = rubout_menu_instance(mi_c);
 				}
 			}
-				break;
+			break;
 
-			case 12:
-				display_screen(1);
-				wrefresh(curscr);
-				break;
-
-			case 11:
-				menu = find_menu("HotKeys");
-				if (menu != NULL)
+		case 12:
+			display_screen(1);
+			wrefresh(curscr);
+			break;
+		case 11:
+			menu = find_menu("HotKeys");
+			if (menu != NULL)
+			{
+				if (menu != mi_c->menu)
 				{
-					if (menu != mi_c->menu)
-					{
-						mi_c = add_menu_instance(menu);
-						render_instance(mi_c);
-						display_screen(1);
-					}
+					mi_c = add_menu_instance(menu);
+					render_instance(mi_c);
+					display_screen(1);
 				}
-				break;
-
-			default:
-				if ((mi_c->HotKeys != NULL) && ((int) gotch >= 0) && ((int) gotch <= 255))
-				{
-					HK = *(mi_c->HotKeys + (int) gotch);
-					if (HK != NULL)
-					{
-						switch (HK->type)
-						{
-						case MENU_SUB:
-							menu = find_menu(HK->args);
-							if (menu != NULL)
-							{
-								if (menu != mi_c->menu)
-								{
-									if (has_menu_access(menu))
-									{
-										mi_c = add_menu_instance(menu);
-										render_instance(mi_c);
-									}
-									display_screen(1);
-								}
-							} else
-								fprintf(stderr, "No menu named %s\n", HK->name);
-							break;
-
-						case MENU_EXIT:
-							mi_c = rubout_menu_instance(mi_c);
-							if (mi_c)
-								display_screen(1);
-							break;
-
-						case MENU_QUIT:
-							while (mi_c)
-								mi_c = rubout_menu_instance(mi_c);
-							break;
-
-						default:
-							timeout(-1);
-							exec_item(HK);
-							timeout(Timeout);
-							display_screen(1);
-							break;
-						}
-					}
-				}
-				break;
 			}
+			break;
+		default:
+			if ((mi_c->HotKeys != NULL) && ((int) gotch >= 0) && ((int) gotch <= 255))
+			{
+				HK = *(mi_c->HotKeys + (int) gotch);
+				if (HK != NULL)
+				{
+					switch (HK->type)
+					{
+					case MENU_SUB:
+						menu = find_menu(HK->args);
+						if (menu != NULL)
+						{
+							if (menu != mi_c->menu)
+							{
+								if (has_menu_access(menu))
+								{
+									mi_c = add_menu_instance(menu);
+									render_instance(mi_c);
+								}
+								display_screen(1);
+							}
+						} else
+							fprintf(stderr, "No menu named %s\n", HK->name);
+						break;
+
+					case MENU_EXIT:
+						mi_c = rubout_menu_instance(mi_c);
+						if (mi_c)
+							display_screen(1);
+						break;
+
+					case MENU_QUIT:
+						while (mi_c)
+							mi_c = rubout_menu_instance(mi_c);
+						break;
+
+					default:
+						timeout(-1);
+						exec_item(HK);
+						timeout(Timeout);
+						display_screen(1);
+						break;
+					}
+				}
+			}
+			break;
 		}
-		timeout(-1);
-		}
+	}
+	timeout(-1);
+}
 
-		int             has_menu_access(struct menu *menu)
-		{
-			WINDOW         *b_win, *f_win;
-			char            password[26];
-			char           *cpassword;
-			int             hasaccess = 0;
-			chtype          ch;
+int
+has_menu_access(struct menu *menu)
+{
+	WINDOW         *b_win, *f_win;
+	char            password[26];
+	char           *cpassword;
+	int             hasaccess = 0;
+	chtype          ch;
 
-			if              ((menu->flags & MF_PASSWORD) == 0)
-				                return 1;
+	if ((menu->flags & MF_PASSWORD) == 0)
+		return 1;
 
-			                b_win = newwin(7, 40, (LINES - 4) / 2, (COLS - 40) / 2);
-			                werase(b_win);
-			                box(b_win, 0, 0);
-			                wnoutrefresh(b_win);
+	b_win = newwin(7, 40, (LINES - 4) / 2, (COLS - 40) / 2);
+	werase(b_win);
+	box(b_win, 0, 0);
+	wnoutrefresh(b_win);
 
-			                f_win = derwin(b_win, 5, 38, 1, 1);
-			                ch = ' ' | A_BOLD;
-			if              (color == TRUE)
-				                ch |= COLOR_PAIR(PASSWORD_COLOR);
-			                wattrset(f_win, A_BOLD);
-			if              (color)
-				                wattron(f_win, COLOR_PAIR(PASSWORD_COLOR));
+	f_win = derwin(b_win, 5, 38, 1, 1);
+	ch = ' ' | A_BOLD;
+	if (color == TRUE)
+		ch |= COLOR_PAIR(PASSWORD_COLOR);
+	wattrset(f_win, A_BOLD);
+	if (color)
+		wattron(f_win, COLOR_PAIR(PASSWORD_COLOR));
 
-			                werase(f_win);
-			                wbkgd(f_win, ch);
-			                mvwaddstr(f_win, 1, 0, " This menu is protected by a password ");
-			                mvwaddstr(f_win, 3, 0, " Password >                         < ");
-			                wnoutrefresh(f_win);
-			                doupdate();
+	werase(f_win);
+	wbkgd(f_win, ch);
+	mvwaddstr(f_win, 1, 0, " This menu is protected by a password ");
+	mvwaddstr(f_win, 3, 0, " Password >                         < ");
+	wnoutrefresh(f_win);
+	doupdate();
 
-			                get_password(b_win, f_win, 3, 11, password, 25, -1);
+	get_password(b_win, f_win, 3, 11, password, 25, -1);
 
-			                cpassword = shacrypt(password, menu->password);
+	cpassword = shacrypt(password, menu->password);
 
-			                hasaccess = !strcmp(cpassword, menu->password);
+	hasaccess = !strcmp(cpassword, menu->password);
 
-			if              ((hasaccess) && (find_variable("logging", NULL) == 1))
-				                syslog(LOG_LOCAL1 | LOG_INFO, "%d: Access to protected menu %s", getpid(), menu->name);
+	if ((hasaccess) && (find_variable("logging", NULL) == 1))
+		syslog(LOG_LOCAL1 | LOG_INFO, "%d: Access to protected menu %s", getpid(), menu->name);
 
-			                delwin(f_win);
-			                delwin(b_win);
+	delwin(f_win);
+	delwin(b_win);
 
-			                return hasaccess;
-		}
+	return hasaccess;
+}
