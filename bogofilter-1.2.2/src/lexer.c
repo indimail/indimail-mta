@@ -34,6 +34,7 @@
 /* Global Variables */
 
 extern int yylineno;
+extern int yyleng;
 
 bool msg_header = true;
 bool have_body  = false;
