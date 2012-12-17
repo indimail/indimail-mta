@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-remote.c,v $
+ * Revision 1.84  2012-12-17 15:34:37+05:30  Cprogrammer
+ * fix for smtptext during TLS negotiation
+ *
  * Revision 1.83  2012-11-25 07:57:25+05:30  Cprogrammer
  * set smtptext for qmtp
  *
@@ -416,6 +419,7 @@ my_error(char *s1, char *s2, char *s3)
 		_exit(0);
 	if (substdio_puts(subfderr, "\n") == -1)
 		_exit(0);
+	substdio_flush(subfderr);
 }
 
 int
@@ -773,14 +777,16 @@ setsmtptext(int code, int type)
 	{
 		char            strnum[FMT_ULONG];
 
-		if (smtptext.s[smtptext.len - 1] == '\n')
-			smtptext.s[smtptext.len - 1] = 0;
-		else
-		if (!stralloc_0(&smtptext))
-			return (1);
-		smtptext.len--;
-		if (!env_put2((type == 's' || mxps) ? "QMTPTEXT" : "SMTPTEXT", smtptext.s))
-			return (1);
+		if (smtptext.len) {
+			if (smtptext.s[smtptext.len - 1] == '\n')
+				smtptext.s[smtptext.len - 1] = 0;
+			else
+			if (!stralloc_0(&smtptext))
+				return (1);
+			smtptext.len--;
+			if (!env_put2((type == 's' || mxps) ? "QMTPTEXT" : "SMTPTEXT", smtptext.s))
+				return (1);
+		}
 		if (code > 0)
 		{
 			strnum[fmt_ulong(strnum, code)] = 0;
@@ -1029,20 +1035,17 @@ outsmtptext()
 {
 	int             i;
 
-	if (smtptext.s)
+	if (smtptext.s && smtptext.len)
 	{
-		if (smtptext.len)
+		out("Remote host said: ");
+		for (i = 0; i < smtptext.len; ++i)
 		{
-			out("Remote host said: ");
-			for (i = 0; i < smtptext.len; ++i)
-			{
-				if (!smtptext.s[i])
-					smtptext.s[i] = '?';
-			}
-			if (substdio_put(subfdoutsmall, smtptext.s, smtptext.len) == -1)
-				_exit(0);
-			smtptext.len = 0;
+			if (!smtptext.s[i])
+				smtptext.s[i] = '?';
 		}
+		if (substdio_put(subfdoutsmall, smtptext.s, smtptext.len) == -1)
+			_exit(0);
+		smtptext.len = 0;
 	}
 }
 
@@ -1065,9 +1068,7 @@ quit(char *prepend, char *append, int code, int die)
 	outhost();
 	out(append);
 	out(".\n");
-	if (setsmtptext(code, 0))
-		goto quit_now;
-quit_now:
+	setsmtptext(code, 0);
 	outsmtptext();
 #if defined(TLS) && defined(DEBUG)
 	if (ssl)
@@ -1142,9 +1143,6 @@ blast()
 
 #ifdef TLS
 
-#define TLS_QUIT quit(ssl ? "; connected to " : "; connecting to ", "", -1, 1)
-#define tls_quit_error(s) tls_quit(s, ssl_error())
-
 char           *partner_fqdn = 0;
 
 void
@@ -1156,7 +1154,7 @@ tls_quit(const char *s1, const char *s2)
 		out(": ");
 		out((char *) s2);
 	}
-	TLS_QUIT;
+	quit(ssl ? "; connected to " : "; connecting to ", "", -1, 1);
 }
 
 int
@@ -1190,6 +1188,7 @@ tls_init()
 {
 	int             code, i = 0, needtlsauth = 0;
 	const char     *ciphers;
+	char           *t;
 	SSL            *myssl;
 	SSL_CTX        *ctx;
 	stralloc        saciphers = {0}, servercert = {0}, clientcert = {0};
@@ -1261,8 +1260,13 @@ tls_init()
 			out("ZNo TLS achieved while ");
 			out(servercert.s);
 			out(" exists");
-			smtptext.len = 0;
-			TLS_QUIT;
+			if (!stralloc_copyb(&smtptext, "No TLS achieved while ", 22))
+				temp_nomem();
+			if (!stralloc_cats(&smtptext, servercert.s))
+				temp_nomem();
+			if (!stralloc_catb(&smtptext, " exists", 7))
+				temp_nomem();
+			quit(ssl ? "; connected to " : "; connecting to ", "", -1, 1);
 		}
 	}
 	SSL_library_init();
@@ -1274,20 +1278,32 @@ tls_init()
 				alloc_free(servercert.s);
 			return 0;
 		}
-		smtptext.len = 0;
-		tls_quit_error("ZTLS error initializing ctx");
+		t = (char *) ssl_error();
+		if (!stralloc_copyb(&smtptext, "TLS error initializing ctx: ", 28))
+			temp_nomem();
+		if (!stralloc_cats(&smtptext, t))
+			temp_nomem();
+		tls_quit("ZTLS error initializing ctx", t);
 	}
 
 	if (needtlsauth)
 	{
 		if (!SSL_CTX_load_verify_locations(ctx, servercert.s, NULL))
 		{
+			t = (char *) ssl_error();
 			SSL_CTX_free(ctx);
-			smtptext.len = 0;
 			out("ZTLS unable to load ");
+			if (!stralloc_copyb(&smtptext, "TLS unable to load ", 19))
+				temp_nomem();
+			if (!stralloc_cats(&smtptext, servercert.s))
+				temp_nomem();
+			if (!stralloc_catb(&smtptext, ": ", 2))
+				temp_nomem();
+			if (!stralloc_cats(&smtptext, t))
+				temp_nomem();
 			if (servercert.s)
 				alloc_free(servercert.s);
-			tls_quit_error(servercert.s);
+			tls_quit(servercert.s, t);
 		}
 		/*
 		 * set the callback here; SSL_set_verify didn't work before 0.9.6c 
@@ -1308,26 +1324,31 @@ tls_init()
 		SSL_CTX_use_RSAPrivateKey_file(ctx, clientcert.s, SSL_FILETYPE_PEM);
 	alloc_free(clientcert.s);
 	myssl = SSL_new(ctx);
-	SSL_CTX_free(ctx);
 	if (!myssl)
 	{
+		t = (char *) ssl_error();
+		SSL_CTX_free(ctx);
 		if (!smtps && !needtlsauth)
 		{
 			if (servercert.s)
 				alloc_free(servercert.s);
 			return 0;
 		}
-		smtptext.len = 0;
 		if (servercert.s)
 			alloc_free(servercert.s);
-		tls_quit_error("ZTLS error initializing ssl");
-	}
+		if (!stralloc_copyb(&smtptext, "TLS error initializing ssl: ", 28))
+			temp_nomem();
+		if (!stralloc_cats(&smtptext, t))
+			temp_nomem();
+		tls_quit("ZTLS error initializing ssl", t);
+	} else
+		SSL_CTX_free(ctx);
 
 	if (!smtps)
 		substdio_putsflush(&smtpto, "STARTTLS\r\n");
 
 	/*
-	 * while the server is preparing a responce, do something else 
+	 * while the server is preparing a response, do something else 
 	 */
 	if (control_readfile(&saciphers, "tlsclientciphers", 0) == -1)
 	{
@@ -1349,7 +1370,7 @@ tls_init()
 	SSL_set_fd(myssl, smtpfd);
 
 	/*
-	 * read the responce to STARTTLS 
+	 * read the response to STARTTLS 
 	 */
 	if (!smtps)
 	{
@@ -1365,16 +1386,26 @@ tls_init()
 			out("ZSTARTTLS rejected while ");
 			out(servercert.s);
 			out(" exists");
-			TLS_QUIT;
+			if (!stralloc_copyb(&smtptext, "STARTTLS rejected while ", 24))
+				temp_nomem();
+			if (!stralloc_cats(&smtptext, servercert.s))
+				temp_nomem();
+			if (!stralloc_catb(&smtptext, " exists", 7))
+				temp_nomem();
+			quit(ssl ? "; connected to " : "; connecting to ", "", -1, 1);
 		}
-		smtptext.len = 0;
 	}
 	ssl = myssl;
 	if (ssl_timeoutconn(timeout, smtpfd, smtpfd, ssl) <= 0)
 	{
 		if (servercert.s)
 			alloc_free(servercert.s);
-		tls_quit("ZTLS connect failed", ssl_error_str());
+		t = (char *) ssl_error_str();
+		if (!stralloc_copyb(&smtptext, "TLS connect failed: ", 20))
+			temp_nomem();
+		if (!stralloc_cats(&smtptext, t))
+			temp_nomem();
+		tls_quit("ZTLS connect failed", t);
 	}
 	if (needtlsauth)
 	{
@@ -1387,13 +1418,28 @@ tls_init()
 			out("ZTLS unable to verify server with ");
 			if (servercert.s)
 				alloc_free(servercert.s);
-			tls_quit(servercert.s, X509_verify_cert_error_string(r));
+			t = (char *) X509_verify_cert_error_string(r);
+			if (!stralloc_copyb(&smtptext, "TLS unable to verify server with ", 33))
+				temp_nomem();
+			if (!stralloc_cats(&smtptext, servercert.s))
+				temp_nomem();
+			if (!stralloc_catb(&smtptext, ": ", 2))
+				temp_nomem();
+			if (!stralloc_cats(&smtptext, t))
+				temp_nomem();
+			tls_quit(servercert.s, t);
 		}
 		alloc_free(servercert.s);
 		if (!(peercert = SSL_get_peer_certificate(ssl)))
 		{
 			out("ZTLS unable to verify server ");
-			tls_quit(partner_fqdn, "no certificate provided");
+			if (!stralloc_copyb(&smtptext, "TLS unable to verify server ", 28))
+				temp_nomem();
+			if (!stralloc_cats(&smtptext, partner_fqdn))
+				temp_nomem();
+			if (!stralloc_catb(&smtptext, ": no certificate provided", 25))
+				temp_nomem();
+			tls_quit(partner_fqdn, ": no certificate provided");
 		}
 
 		/*
@@ -1432,7 +1478,13 @@ tls_init()
 			if (peer.len <= 0)
 			{
 				out("ZTLS unable to verify server ");
-				tls_quit(partner_fqdn, "certificate contains no valid commonName");
+				if (!stralloc_copyb(&smtptext, "TLS unable to verify server ", 28))
+					temp_nomem();
+				if (!stralloc_cats(&smtptext, partner_fqdn))
+					temp_nomem();
+				if (!stralloc_catb(&smtptext, ": certificate contains no valid commonName", 42))
+					temp_nomem();
+				tls_quit(partner_fqdn, ": certificate contains no valid commonName");
 			}
 			if (!match_partner((char *) peer.s, peer.len))
 			{
@@ -1440,10 +1492,19 @@ tls_init()
 				out(partner_fqdn);
 				out(": received certificate for ");
 				outsafe(&peer);
-				TLS_QUIT;
+				if (!stralloc_copyb(&smtptext, "TLS unable to verify server ", 28))
+					temp_nomem();
+				if (!stralloc_cats(&smtptext, partner_fqdn))
+					temp_nomem();
+				if (!stralloc_catb(&smtptext, ": received certificate for ", 27))
+					temp_nomem();
+				if (!stralloc_cat(&smtptext, &peer))
+					temp_nomem();
+				if (!stralloc_0(&smtptext))
+					temp_nomem();
+				quit(ssl ? "; connected to " : "; connecting to ", "", -1, 1);
 			}
 		}
-
 		X509_free(peercert);
 	}
 	if (smtps && (code = smtpcode()) != 220)
@@ -2916,7 +2977,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_remote_c()
 {
-	static char    *x = "$Id: qmail-remote.c,v 1.83 2012-11-25 07:57:25+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-remote.c,v 1.84 2012-12-17 15:34:37+05:30 Cprogrammer Exp mbhangui $";
 	x=sccsidauthcramh;
 	x=sccsidauthdigestmd5h;
 	x++;
