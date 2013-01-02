@@ -1,5 +1,8 @@
 /*
  * $Log: smtpd.c,v $
+ * Revision 1.169  2013-01-02 08:59:12+05:30  Cprogrammer
+ * use FORCE_TLS env variable to enforce STARTTLS during AUTH
+ *
  * Revision 1.168  2012-06-26 19:17:21+05:30  Cprogrammer
  * fix infinite loop in blast() function on EOF
  *
@@ -655,7 +658,7 @@ int             wildmat_internal(char *, char *);
 int             ssl_rfd = -1, ssl_wfd = -1;	/*- SSL_get_Xfd() are broken */
 char           *servercert, *clientca, *clientcrl;
 #endif
-char           *revision = "$Revision: 1.168 $";
+char           *revision = "$Revision: 1.169 $";
 char           *protocol = "SMTP";
 stralloc        proto = { 0 };
 static stralloc Revision = { 0 };
@@ -5591,6 +5594,18 @@ smtp_auth(char *arg)
 		err_authd();
 		return;
 	}
+
+	/* forcetls patch */
+#ifdef TLS
+	if (env_get("FORCE_TLS"))
+	{
+		if (!ssl)
+		{
+			out("503 auth not available without TLS (#5.7.4)\r\n");
+			return;
+		}
+	}
+#endif
 	if (seenmail)
 	{
 		err_transaction("auth");
@@ -6642,7 +6657,7 @@ addrrelay() /*- Rejection of relay probes. */
 void
 getversion_smtpd_c()
 {
-	static char    *x = "$Id: smtpd.c,v 1.168 2012-06-26 19:17:21+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: smtpd.c,v 1.169 2013-01-02 08:59:12+05:30 Cprogrammer Stab mbhangui $";
 
 #ifdef INDIMAIL
 	if (x)
