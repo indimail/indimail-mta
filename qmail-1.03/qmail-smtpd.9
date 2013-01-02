@@ -45,7 +45,7 @@ If the environment variable
 is non-empty,
 .B qmail-smtpd
 starts a TLS session (to support the deprecated SMTPS protocol,
-normally on port 465). Otherwise,
+normally on port 465). Otherwise, if you set the \fBSTARTTLS\fR environment variable,
 .B qmail-smtpd
 offers the STARTTLS extension to ESMTP.
 
@@ -143,6 +143,9 @@ advertizes AUTH capability only if
 and
 .IR checkprogram
 are passed as the minimum arguments.
+
+For additional security, you may set \fBFORCE_TLS\fR environment variable for authentication
+to be denied if the client does not provide the STARTTLS command.
 
 \fBqmail-smtpd\fR prevents unauthorized relaying and also reject mails addressed to invalid
 mailboxes. To do this, \fBqmail-smtpd\fR employs the following additional checks -
