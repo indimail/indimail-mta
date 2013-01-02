@@ -18,7 +18,8 @@ all: rules postinst postrm debian.tar.gz dummy.tar.gz  \
 	iwebadmin-xUbuntu_10.10.dsc \
 	iwebadmin-xUbuntu_11.04.dsc \
 	iwebadmin-xUbuntu_11.10.dsc \
-	iwebadmin-xUbuntu_12.04.dsc
+	iwebadmin-xUbuntu_12.04.dsc \
+	iwebadmin-xUbuntu_12.10.dsc
 
 clean:
 	/bin/rm -f rules postinst postrm *.dsc debian.tar.gz dummy.tar.gz _service
@@ -57,6 +58,8 @@ iwebadmin-xUbuntu_11.04.dsc: iwebadmin-xUbuntu_11.04.dsc.in
 iwebadmin-xUbuntu_11.10.dsc: iwebadmin-xUbuntu_11.10.dsc.in
 	$(edit) $@.in > $@
 iwebadmin-xUbuntu_12.04.dsc: iwebadmin-xUbuntu_12.04.dsc.in
+	$(edit) $@.in > $@
+iwebadmin-xUbuntu_12.10.dsc: iwebadmin-xUbuntu_12.10.dsc.in
 	$(edit) $@.in > $@
 changelog:changelog.in
 	$(edit) $@.in > $@

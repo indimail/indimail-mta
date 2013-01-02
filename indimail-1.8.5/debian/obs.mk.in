@@ -32,6 +32,7 @@ fortune_version=1.1
 
 all: rules indimail.prerm indimail.preinst indimail.postrm indimail.postinst \
 obs_deb_prep _service indimail-devel.install \
+indimail-xUbuntu_12.04.dsc indimail-xUbuntu_12.10.dsc \
 indimail-Debian_5.0.dsc indimail-Debian_6.0.dsc indimail-xUbuntu_10.04.dsc \
 indimail-xUbuntu_10.10.dsc indimail-xUbuntu_11.04.dsc indimail-xUbuntu_11.10.dsc \
 indimail-xUbuntu_8.04.dsc indimail-xUbuntu_9.10.dsc indimail-devel.postinst \
@@ -133,6 +134,8 @@ changelog: changelog.in obs.mk
 indimail-Debian_5.0.dsc:indimail-Debian_5.0.dsc.in obs.mk
 	$(edit) $@.in > $@;
 indimail-Debian_6.0.dsc: indimail-Debian_6.0.dsc.in obs.mk
+	$(edit) $@.in > $@;
+indimail-xUbuntu_12.10.dsc: indimail-xUbuntu_12.10.dsc.in obs.mk
 	$(edit) $@.in > $@;
 indimail-xUbuntu_12.04.dsc: indimail-xUbuntu_12.04.dsc.in obs.mk
 	$(edit) $@.in > $@;
