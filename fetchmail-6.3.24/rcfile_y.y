@@ -490,7 +490,8 @@ int prc_parse_file (const char *pathname, const flag securecheck)
 
     yyparse();		/* parse entire file */
 
-    fclose(yyin);	/* not checking this should be safe, file mode was r */
+    if (yyin != stdin)
+       fclose(yyin);	/* not checking this should be safe, file mode was r */
 
     if (prc_errflag) 
 	return(PS_SYNTAX);

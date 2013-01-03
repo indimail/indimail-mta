@@ -2532,10 +2532,11 @@ the most secure schemes are tried first.</p>
 
 <p>However, sometimes the server offers a secure authentication scheme
 that is not properly configured, or an authentication scheme such as
-GSSAPI does requires credentials to be acquired externally. In some
-situations, fetchmail cannot know the scheme will fail without trying
-it. In most cases, fetchmail should proceed to the next authentication
-scheme automatically, but this sometimes does not work.</p>
+GSSAPI that requires credentials to be acquired externally. In some
+situations, fetchmail cannot know that the scheme will fail beforehand,
+without trying it. In most cases, fetchmail should proceed to the next
+authentication scheme automatically, but this sometimes does not
+work.</p>
 
 <p><strong>Solution:</strong> Configure the right authentication scheme
 explicitly, for instance, with <kbd>--auth cram-md5</kbd> or <kbd>--auth

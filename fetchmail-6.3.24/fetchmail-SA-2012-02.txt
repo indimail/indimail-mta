@@ -6,7 +6,7 @@ fetchmail-SA-2012-02: DoS/data theft possible in NTLM authentication
 Topics:		fetchmail denial of service/data theft in NTLM protocol phase
 
 Author:		Matthias Andree
-Version:	draft
+Version:	1.0
 Announced:	2012-08-13
 Type:		reading from bad memory locations
 Impact:		fetchmail segfaults and aborts, stalling inbound mail,
@@ -111,7 +111,7 @@ END of fetchmail-SA-2012-02
 -----BEGIN PGP SIGNATURE-----
 Version: GnuPG v1.4.11 (GNU/Linux)
 
-iEYEARECAAYFAlA+h8oACgkQvmGDOQUufZW+ZgCeIQ8r3kU3kFgVGNj9WzZfX1Lk
-xggAoI3C0sbh8Si/HQrT1yHSV/+af0Ad
-=lQpP
+iEYEARECAAYFAlA+n3kACgkQvmGDOQUufZWzKwCfcOJF35eJ/bOio0VRfFFOiBsq
+dNwAnicBBiqQOq9i7atwBr4gdZ5x+SUM
+=+hqO
 -----END PGP SIGNATURE-----

@@ -2081,10 +2081,10 @@ R15. Help, I'm getting Authorization failure!
 
    However, sometimes the server offers a secure authentication scheme
    that is not properly configured, or an authentication scheme such as
-   GSSAPI does requires credentials to be acquired externally. In some
-   situations, fetchmail cannot know the scheme will fail without trying
-   it. In most cases, fetchmail should proceed to the next authentication
-   scheme automatically, but this sometimes does not work.
+   GSSAPI that requires credentials to be acquired externally. In some
+   situations, fetchmail cannot know that the scheme will fail beforehand,
+   without trying it. In most cases, fetchmail should proceed to the next
+   authentication scheme automatically, but this sometimes does not work.
 
    Solution: Configure the right authentication scheme explicitly, for
    instance, with --auth cram-md5 or --auth password on the command line

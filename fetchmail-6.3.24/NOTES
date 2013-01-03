@@ -46,7 +46,7 @@ Server-side vs. client-side state.
   Why we need client-side tracking
 
    ESR asserted that server-side state were essential and those persons
-   repsonsible for removing the LAST command from POP3 deserved to suffer.
+   responsible for removing the LAST command from POP3 deserved to suffer.
    ESR is right in stating that the POP3 UID tracks which messages have
    been read by this client – and that is exactly what we need to do.
 

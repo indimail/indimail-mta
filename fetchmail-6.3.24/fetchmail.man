@@ -10,7 +10,7 @@
 .\" Load www macros to process .URL requests, this requires groff:
 .mso www.tmac
 .\"
-.TH fetchmail 1 "fetchmail 6.3.22" "fetchmail" "fetchmail reference manual"
+.TH fetchmail 1 "fetchmail 6.3.24" "fetchmail" "fetchmail reference manual"
 
 .SH NAME
 fetchmail \- fetch mail from a POP, IMAP, ETRN, or ODMR-capable server
@@ -295,7 +295,7 @@ All these alternatives work in basically the same way (communicating
 with standard server daemons to fetch mail already delivered to a
 mailbox on the server) except ETRN and ODMR.  The ETRN mode
 allows you to ask a compliant ESMTP server (such as BSD sendmail at
-release 8.8.0 or higher or IndiMail) to immediately open a sender-SMTP connection
+release 8.8.0 or higher) to immediately open a sender-SMTP connection
 to your client machine and begin forwarding any items addressed to
 your client machine in the server's queue of undelivered mail.   The
 ODMR mode requires an ODMR-capable server and works similarly to
@@ -1032,10 +1032,6 @@ identify the original envelope recipient, but you have to strip the
 \&'mbox\-userstr\-' prefix to deliver to the correct user.
 This is what this option is for.
 .TP
-.B \-O <type> | \-\-authmethod <type>
-(Keyword: authmethod; ODMR only)
-set authentication to AUTH, LOGIN or PLAIN for ODMR.
-.TP
 .B \-\-configdump
 Parse the \fI~/.fetchmailrc\fP file, interpret any command-line options
 specified, and dump a configuration report to standard output.  The
@@ -1370,6 +1366,8 @@ The
 option turns off use of
 .BR syslog (3),
 assuming it's turned on in the \fI~/.fetchmailrc\fP file.
+This option is overridden, in certain situations, by \fB\-\-logfile\fP (which
+see).
 .PP
 The
 .B \-N
@@ -1381,8 +1379,7 @@ fetchmail runs as the child of a supervisor process such as
 .BR init (8)
 or Gerrit Pape's
 .BR runit (8).
-Note that this also causes the logfile option to be ignored (though
-perhaps it shouldn't).
+Note that this also causes the logfile option to be ignored.
 .PP
 Note that while running in daemon mode polling a POP2 or IMAP2bis server,
 transient errors (such as DNS failures or sendmail delivery refusals)
@@ -1706,13 +1703,16 @@ Keep permanently undeliverable mail as though a temporary error had
 occurred (default).
 T}
 set logfile  	\-L	\&	T{
-Name of a file to append error and status messages to.
+Name of a file to append error and status messages to.  Only effective
+in daemon mode and if fetchmail detaches.  If effective, overrides \fBset
+syslog\fP.
 T}
 set idfile  	\-i	\&	T{
 Name of the file to store UID lists in.
 T}
 set    syslog	\&	\&	T{
-Do error logging through syslog(3).
+Do error logging through syslog(3). May be overriden by \fBset
+logfile\fP.
 T}
 set no syslog  	\&	\&	T{
 Turn off error logging through syslog(3). (default)
@@ -1760,9 +1760,6 @@ Disable looking for envelope address
 T}
 qvirtual	\-Q	m	T{
 Qmail virtual domain prefix to remove from user name
-T}
-authmeth   \-O \&  T{
-Set AUTH, LOGIN or PLAIN for ODMR authentication
 T}
 aka      	\&	m	T{
 Specify alternate DNS names of mailserver

@@ -56,6 +56,86 @@ removed from a 6.4.0 or newer release.)
 
 --------------------------------------------------------------------------------
 
+fetchmail-6.3.24 (released 2012-12-23, 26108 LoC):
+
+# NOTE THAT THE RELEASE OF FUTURE FETCHMAIL 6.3.X VERSIONS IS UNCLEAR.
+Should a 7.0 release be made earlier, chances are that the 6.3.X branch
+is abandoned and its changes be folded into the 7.0 release, with changes
+after 6.3.24 not available on their own in a newer 6.3.X release.
+
+# NOTE THAT FETCHMAIL IS NO LONGER PUBLISHED THROUGH IBIBLIO.
+  They have stopped accepting submissions and consider themselves an archive.
+
+# CRITICAL AND REGRESSION FIXES
+* Plug a memory leak in OpenSSL's certificate verification callback.
+  This would affect fetchmail configurations running with SSL in daemon mode
+  more than one-shot runs.
+  Reported by Erik Thiele, and pinned by Dominik Heeg,
+  fixes Debian Bug #688015.
+  This bug was introduced into fetchmail 6.3.0 (committed 2005-10-29)
+  when support for subjectAltName was added through a patch by Roland
+  Stigge, submitted as Debian Bug#201113.
+
+* The --logfile option now works again outside daemon mode, reported by Heinz
+  Diehl. The documentation that I had been reading was inconsistent with the
+  code, and only parts of the manual page claimed that --logfile was only
+  effective in daemon mode.
+
+# KNOWN BUGS AND WORKAROUNDS
+  (This section floats upwards through the NEWS file so it stays with the
+  current release information)
+* Fetchmail does not handle messages without Message-ID header well
+  (See sourceforge.net bug #780933)
+* BSMTP is mostly untested and errors can cause corrupt output.
+* Sun Workshop 6 (SPARC) is known to miscompile the configuration file lexer in
+  64-bit mode.  Either compile 32-bit code or use GCC to compile 64-bit
+  fetchmail.  Note that fetchmail doesn't take advantage of 64-bit code,
+  so compiling 32-bit SPARC code should not cause any difficulties.
+* Fetchmail does not track pending deletes across crashes.
+* The command line interface is sometimes a bit stubborn, for instance,
+  fetchmail -s doesn't work with a daemon running.
+* Linux systems may return duplicates of an IP address in some circumstances if
+  no or no global IPv6 addresses are configured.
+  (No workaround. Ubuntu Bug#582585, Novell Bug#606980.)
+* Kerberos 5 may be broken, particularly on Heimdal, and provide bogus error
+  messages. This will not be fixed, because the maintainer has no Kerberos 5
+  server to test against. Use GSSAPI.
+
+
+fetchmail-6.3.23 (released 2012-12-10, 26106 LoC):
+
+# REGRESSION FIXES
+* Fix compilation with OpenSSL implementations before 0.9.8m that lack
+  SSL_CTX_clear_options. Patch by Earl Chew.
+  Note that the use of older OpenSSL versions with fetchmail is unsupported and
+  *not* recommended.
+
+# BUG FIXES
+* Fix combination of --plugin and -f -. Patch by Alexander Zangerl,
+  to fix Debian Bug#671294.
+* Clean up logfile vs. syslog handling, and in case logfile overrides
+  syslog, send a message to the latter stating where logging goes.
+
+# CHANGES
+* The build process can now be made a bit more silent and concise through
+  ./configure --enable-silent-rules, or by adding "V=0" to the make command.
+
+# WORKAROUNDS
+* Make Maillennium POP3 workarounds less specific, to encompass
+  Maillennium POP3/UNIBOX (Maillennium V05.00c++). Reported by Eddie
+  via fetchmail-users mailing list, 2012-10-13.
+
+# TRANSLATION UPDATES
+[cs] Czech, by Petr Pisar
+[da] Danish, by Joe Hansen
+[de] German
+[fr] French, Frédéric Marchal
+[ja] Japanese, Takeshi Hamasaki
+[pl] Polish, by Jakub Bogusz
+[sv] Swedish, by Göran Uddeborg
+[vi] Vietnamese, Trần Ngọc Quân
+
+
 fetchmail-6.3.22 (released 2012-08-29, 26077 LoC):
 
 # SECURITY FIXES
@@ -134,26 +214,6 @@ fetchmail-6.3.22 (released 2012-08-29, 26077 LoC):
 * [pl]    Polish, by Jakub Bogusz
 * [sv]    Swedish, by Göran Uddeborg --- NEW TRANSLATION - Thank you!
 * [vi]    Vietnamese, by Trần Ngọc Quân
-
-# KNOWN BUGS AND WORKAROUNDS
-  (This section floats upwards through the NEWS file so it stays with the
-  current release information)
-* Fetchmail does not handle messages without Message-ID header well
-  (See sourceforge.net bug #780933)
-* BSMTP is mostly untested and errors can cause corrupt output.
-* Sun Workshop 6 (SPARC) is known to miscompile the configuration file lexer in
-  64-bit mode.  Either compile 32-bit code or use GCC to compile 64-bit
-  fetchmail.  Note that fetchmail doesn't take advantage of 64-bit code,
-  so compiling 32-bit SPARC code should not cause any difficulties.
-* Fetchmail does not track pending deletes across crashes.
-* The command line interface is sometimes a bit stubborn, for instance,
-  fetchmail -s doesn't work with a daemon running.
-* Linux systems may return duplicates of an IP address in some circumstances if
-  no or no global IPv6 addresses are configured.
-  (No workaround. Ubuntu Bug#582585, Novell Bug#606980.)
-* Kerberos 5 may be broken, particularly on Heimdal, and provide bogus error
-  messages. This will not be fixed, because the maintainer has no Kerberos 5
-  server to test against. Use GSSAPI.
 
 
 fetchmail-6.3.21 (released 2011-08-21, 26011 LoC):

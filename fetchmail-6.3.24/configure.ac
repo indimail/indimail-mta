@@ -9,7 +9,7 @@ dnl Process this file with autoconf to produce a configure script.
 dnl
 
 dnl XXX - if bumping version here, check fetchmail.man, too!
-AC_INIT([fetchmail],[6.3.22],[fetchmail-users@lists.berlios.de])
+AC_INIT([fetchmail],[6.3.24],[fetchmail-users@lists.berlios.de])
 AC_CONFIG_SRCDIR([fetchmail.h])
 AC_CONFIG_HEADERS([config.h])
 AC_CONFIG_LIBOBJ_DIR([.])
@@ -19,7 +19,8 @@ AC_CANONICAL_HOST
 dnl automake options are in Makefile.am
 AC_PREREQ(2.60)
 dnl 2.60 required for AC_USE_SYSTEM_EXTENSIONS
-AM_INIT_AUTOMAKE
+AM_INIT_AUTOMAKE([silent-rules -Wall])
+AM_SILENT_RULES
 
 dnl python is optional
 #
@@ -832,6 +833,7 @@ AC_ARG_ENABLE(indimaildir, [  --enable-indimaildir=dir   directory where IndiMai
 	])
 AC_DEFINE_UNQUOTED(INDIMAILDIR,"$indimaildir", directory for IndiMail installation)
 AC_SUBST(indimaildir)
+
 ###	use option --with-socks=DIR to point at SOCKS library
 AC_ARG_WITH(socks,
 	[  --with-socks[=DIR]      add built-in SOCKS firewall access],
@@ -994,7 +996,7 @@ if test "$needtrio" = 1 ; then
 fi
 dnl ----------------------------------------------------------------'
 
-AC_CONFIG_FILES([Makefile po/Makefile.in genlsm.sh])
+AC_CONFIG_FILES([Makefile po/Makefile.in])
 AC_OUTPUT
 
 dnl Local Variables:

@@ -689,7 +689,7 @@ static int SSL_verify_callback( int ok_return, X509_STORE_CTX *ctx, int strict )
 							}
 						}
 					}
-					sk_GENERAL_NAME_free(gens);
+					GENERAL_NAMES_free(gens);
 				}
 				if (name_match(p1, p2)) {
 					matched = 1;
@@ -844,7 +844,7 @@ int SSLOpen(int sock, char *mycert, char *mykey, const char *myproto, int certck
 {
         struct stat randstat;
         int i;
-		long sslopts = SSL_OP_ALL;
+	long sslopts = SSL_OP_ALL;
 
 	SSL_load_error_strings();
 	SSL_library_init();

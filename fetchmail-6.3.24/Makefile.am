@@ -13,7 +13,7 @@ BUILT_SOURCES=		rcfile_y.h
 
 bin_PROGRAMS=		fetchmail
 #ifdef INDIMAIL
-sbin_PROGRAMS=      slemsPrivate writefifo fixwvdialconf
+sbin_PROGRAMS=      slemsPrivate$(EXEEXT) writefifo$(EXEEXT) fixwvdialconf$(EXEEXT)
 sbin_SCRIPTS=       fetchmail.up fetchmail.down ip-down.local ip-up.local ppp-off fetchmail.cron
 
 MOSTLYCLEANFILES=fetchmail.up fetchmail.down fetchmail.cron ip-up.local ip-down.local
@@ -238,10 +238,6 @@ dist-hook:
 	cd $(distdir) && find $(distdirs) po -name .git -type d -prune -exec rm -rf '{}' ';'
 	cd $(distdir) && find $(distdirs) po -name '*~' -exec rm -f '{}' ';'
 
-.PHONY: lsm
-lsm: genlsm.sh dist
-	$(SHELL) genlsm.sh >$(PACKAGE)-$(VERSION).lsm
-
 # this target expects a .rsyncs file with lines of this format:
 # host:directory/
 # it will call rsync from its source directory to the destination for
@@ -249,19 +245,6 @@ lsm: genlsm.sh dist
 rsync:  distdir $(srcdir)/.rsyncs
 	@( cat $(srcdir)/.rsyncs | sed -e 's}^}rsync -aH --delete-after $(PACKAGE)-$(VERSION)/ }; s/\($$\)/ \&/;' ; echo "wait" ) | $(SHELL) -x
 
-#ifdef INDIMAIL
-slemsPrivate: slemsPrivate.o
-	$(CC) -o $@ $@.o
-slemsPrivate.o: slemsPrivate.c config.h
-	$(CC) $(CFLAGS) -c slemsPrivate.c
-fixwvdialconf: fixwvdialconf.o
-	$(CC) -o $@ $@.o
-fixwvdialconf.o: fixwvdialconf.c config.h
-	$(CC) $(CFLAGS) -c fixwvdialconf.c
-writefifo: writefifo.o
-	$(CC) -o $@ $@.o
-writefifo.o: writefifo.c
-	$(CC) -c writefifo.c
 fetchmail.up: fetchmail.up.in
 	$(edit) $@.in > $@
 fetchmail.down: fetchmail.down.in
