@@ -5601,7 +5601,7 @@ smtp_auth(char *arg)
 	{
 		if (!ssl)
 		{
-			out("503 auth not available without TLS (#5.7.4)\r\n");
+			out("530 must issue STARTTLS first (#5.7.0)\r\n");
 			return;
 		}
 	}
