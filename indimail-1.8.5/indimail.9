@@ -443,7 +443,7 @@ ENVRULES          |qmail-smtpd  |used    |Any environment variable(s) can be set
                   |             |        |QMAILQUEUE, QMAILREMOTE, QMAILLOCAL,
                   |             |        |RELAYCLIENT, QQEH, BADEXT,
                   |             |        |BADEXTPATTERNS, ACCESSLIST, QHPSI,
-                  |             |        |REJECTSPAM, REJECTVIRUS
+                  |             |        |REJECTSPAM, REJECTVIRUS, FORCE_TLS
                   |spawn-filter |        |SPAMFILTER, LOGFILTER, SPAMFILTERARGS,
                   |             |        |FILTERARGS, SPAMEXITCODE, REJECTSPAM,
                   |             |        |SPAMREDIRECT, SPAMIGNORE,
@@ -820,6 +820,8 @@ CLIENTCRL         |             |        |File having a list of Revocation Lists
 TLSCIPHERS        |             |        |A  set  of OpenSSL cipher strings.
                   |             |        |Multiple ciphers contained in a string
                   |             |        |should be separated by a colon.
+FORCE_TLS         |             |used    |If set enforces use of STARTTLS during
+                  |             |        |SMTP authentication.
 ------------------|-------------|--------|----------------------------------------
 NODNSCHECK        |qmail-smtpd  |used    |If set, the domain part of an email
                   |             |        |address is not verified.
