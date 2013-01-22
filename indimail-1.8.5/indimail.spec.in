@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail.spec.in,v 2.253 2012-12-13 09:50:56+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 2.254 2013-01-22 18:30:40+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %define _unpackaged_files_terminate_build 1
 
@@ -40,8 +40,8 @@
 %define pam_multi_version  1.1
 %define ucspi_version      0.88
 %define qmail_version      1.03
-%define fetchmail_version  6.3.22
-%define built_in_clamavdb  0
+%define fetchmail_version  6.3.24
+%define nosignatures       1
 %define clamav_version     0.97.6
 %define fortune_version    1.1
 %define nssd_version       1.1
@@ -50,6 +50,7 @@
 %define cdb_version        1.0
 %define libdkim_version    1.4
 %define mysql_version      6.0.9-alpha
+%define noperms            1
 %define host               @HOST@
 %define see_base           For a description of IndiMail visit http://www.indimail.org
 %define i_m_on_mac         0
@@ -66,7 +67,6 @@
 %define nolibdkim          0
 %define nofetchmail        0
 %define nobogofilter       0
-%define nopam_multi        0
 %define nodksignatures     0
 
 %define _verbose           0
@@ -132,15 +132,15 @@ Source11: http://prdownload.berlios.de/fetchmail/fetchmail-%{fetchmail_version}.
 %if %noclamav == 0
 Source12: http://downloads.sourceforge.net/clamav/clamav-%{clamav_version}.tar.gz
 %endif
-%if %nopam_multi == 0
 Source13: http://downloads.sourceforge.net/%{name}/pam-multi-%{pam_multi_version}.tar.gz
-%endif
 Source14: http://downloads.sourceforge.net/%{name}/logalert-0.3.tar.gz
 Source15: http://downloads.sourceforge.net/%{name}/%{name}-%{version}-rpmlintrc
+%if %noperms == 0
 %if 0%{?suse_version} >= 1120
-Source16:indimail-permissions.easy
-Source17:indimail-permissions.secure
-Source18:indimail-permissions.paranoid
+Source16:%{name}-permissions.easy
+Source17:%{name}-permissions.secure
+Source18:%{name}-permissions.paranoid
+%endif
 %endif
 
 Patch1:  http://downloads.sourceforge.net/%{name}/Patches/qmail-%{qmail_version}.patch.gz
@@ -194,9 +194,7 @@ NoSource: 11
 %if %noclamav == 0
 NoSource: 12
 %endif
-%if %nopam_multi == 0
 NoSource: 13
-%endif
 
 URL: http://www.indimail.org
 #AutoReqProv: No
@@ -224,14 +222,16 @@ BuildRequires: openldap-devel
 %if %build_on_obs == 1
 BuildRequires: mysql-devel
 %endif
-%if %{undefined centos_version} && %{undefined rhel_version} && %{undefined sles_version}
+%if %{undefined centos_version} && %{undefined rhel_version}
 BuildRequires: chrpath
 %endif
-%if 0%{?suse_version} == 1220 || 0%{?suse_version} == 1210 || 0%{?suse_version} == 1140 || 0%{?suse_version} > 1110 || 0%{?suse_version} == 1100 || 0%{?suse_version} == 1030 || 0%{?suse_version} == 1020
+%if 0%{?suse_version} == 1220 || 0%{?suse_version} == 1210 || 0%{?suse_version} == 1140 || 0%{?suse_version} == 1100 || 0%{?suse_version} == 1030 || 0%{?suse_version} == 1020
 BuildRequires: chrpath
 %endif
+%if %noperms == 0
 %if 0%{?suse_version} >= 1120
 PreReq: permissions
+%endif
 %endif
 %if 0%{?suse_version}
 BuildRequires: db-devel
@@ -248,10 +248,8 @@ BuildRequires: db4-devel
 %endif
 %endif
 %endif
-%if %nopam_multi == 0
 BuildRequires: pam-devel
 Requires: pam
-%endif
 
 # rpm -qf /bin/ls
 # rpm -qp --queryformat '%{arch}\n' some-file.rpm
@@ -353,9 +351,6 @@ do
 	if [ -d $i ] ; then
 		%{__rm} -rf $i
 	fi
-	if [ " $i" = " pam-multi-%{pam-multi_version}" -a %nopam_multi -ne 0 ] ; then
-		continue
-	fi
 	if [ " $i" = " fetchmail-%{fetchmail_version}" -a %nofetchmail -ne 0 ] ; then
 		continue
 	fi
@@ -381,6 +376,9 @@ do
 	fi
 	if [ -d $i ] ; then
 %if %build_on_obs == 1
+		#
+		# Apply IndiMail Patch
+		#
 		if [ " $i" = " %{name}-%{version}" ] ; then
 			if [ -f ../SOURCES/%{name}-%{version}.patch ] ; then
 				patch -p0 < ../SOURCES/%{name}-%{version}.patch
@@ -519,6 +517,7 @@ else
 fi
 
 #### nssd ######################
+%if %nonssd == 0
 if [ -d ../nssd-%{nssd_version} ] ; then
 	cd ../nssd-%{nssd_version}
 
@@ -552,13 +551,15 @@ else
 	`%{__cat} ../%{name}-%{version}/config/nssd.opts` > $DEVICE
 fi
 fi
+%endif
 #sed -i 's|^hardcode_libdir_flag_spec=.*|hardcode_libdir_flag_spec=""|g' libtool
 #sed -i 's|^runpath_var=LD_RUN_PATH|runpath_var=DIE_RPATH_DIE|g' libtool
 
 #### courier-imap ######################
+%if %nocourierimap == 0
 if [ -d ../courier-imap-%{courier_version} ] ; then
 	cd ../courier-imap-%{courier_version}
-	mkdir -p m4
+	%{__mkdir_p} m4
 if [ " %dist" = " mandrake" ] ; then
 	%configure --prefix=%{_prefix} --exec-prefix=%{_prefix}/ --bindir=%{_prefix}/bin \
 	--sbindir=%{_prefix}/sbin --datadir=%{_prefix}/share --includedir=%{_prefix}/include \
@@ -570,8 +571,10 @@ else
 	`%{__cat} ../%{name}-%{version}/config/courier-imap.opts` > $DEVICE
 fi
 fi
+%endif
 
 #### bogofilter ######################
+%if %nobogofilter == 0
 if [ -d ../bogofilter-%{bogofilter_version} ] ; then
 	cd ../bogofilter-%{bogofilter_version}
 	if [ %{build_on_obs} -eq 0 ] ; then
@@ -588,8 +591,10 @@ if [ -d ../bogofilter-%{bogofilter_version} ] ; then
 %endif
 	fi
 fi
+%endif
 
 #### clamav ######################
+%if %noclamav == 0
 if [ -d ../clamav-%{clamav_version} ] ; then
 	cd ../clamav-%{clamav_version}
 	if [ %{build_on_obs} -eq 0 ] ; then
@@ -603,8 +608,10 @@ if [ -d ../clamav-%{clamav_version} ] ; then
 	`%{__cat} ../%{name}-%{version}/config/clamav.opts` > $DEVICE
 	fi
 fi
+%endif
 
 #### fetchmail ######################
+%if %nofetchmail == 0
 if [ -d ../fetchmail-%{fetchmail_version} ] ; then
 	cd ../fetchmail-%{fetchmail_version}
 	if [ %{build_on_obs} -eq 0 ] ; then
@@ -634,6 +641,7 @@ if [ -d ../fetchmail-%{fetchmail_version} ] ; then
 		`%{__cat} ../%{name}-%{version}/config/fetchmail.opts` > $DEVICE
 	fi
 fi
+%endif
 cd ..
 #### ucspi-tcp ######################
 if [ -d ucspi-tcp-%{ucspi_version} ] ; then
@@ -656,6 +664,21 @@ nssd-%{nssd_version} bogofilter-%{bogofilter_version} \
 fetchmail-%{fetchmail_version} courier-imap-%{courier_version} \
 clamav-%{clamav_version}
 do
+	if [ " $i" = " fetchmail-%{fetchmail_version}" -a %nofetchmail -ne 0 ] ; then
+		continue
+	fi
+	if [ " $i" = " bogofilter-%{bogofilter_version}" -a %nobogofilter -ne 0 ] ; then
+		continue
+	fi
+	if [ " $i" = " courier-imap-%{courier_version}" -a %nocourierimap -ne 0 ] ; then
+		continue
+	fi
+	if [ " $i" = " libdkim-%{libdkim_version}" -a %nolibdkim -ne 0 ] ; then
+		continue
+	fi
+	if [ " $i" = " clamav-%{clamav_version}" -a %noclamav -ne 0 ] ; then
+		continue
+	fi
 	if [ -d $i ] ; then
 		cd $i
 		if [ %{_verbose} -eq 0 ] ; then
@@ -715,10 +738,12 @@ if [ %noclamav -eq 0 ] ; then
 	fi
 fi
 
+%if %noperms == 0
 %if 0%{?suse_version} >= 1120
-mkdir -p {buildroot}%{_sysconfdir}/permissions.d/
-install -m 644 %{S:17} %{buildroot}%{_sysconfdir}/permissions.d/%{name}-permissions
-install -m 644 %{S:16} %{buildroot}%{_sysconfdir}/permissions.d/%{name}-permissions.easy
+%{__mkdir_p} %{buildroot}%{_sysconfdir}/permissions.d/
+install -m 644 %{S:16} %{buildroot}%{_sysconfdir}/permissions.d/%{name}-permissions
+install -m 644 %{S:17} %{buildroot}%{_sysconfdir}/permissions.d/%{name}-permissions.secure
+%endif
 %endif
 
 if [ -x /usr/bin/chrpath ] ; then
@@ -759,13 +784,12 @@ if [ -f %{buildroot}%{_prefix}/man/man7/authlib.7.gz ] ; then
 		ln -sf %{_prefix}/man/man7/authlib.7.gz %{buildroot}%{_prefix}/man/man7/$i.gz
 	done
 fi
-if [ %nopam_multi -eq 0 ] ; then
-	%{__rm} -f %{buildroot}%{module_dir}/pam-multi.la
-	%{__rm} -f %{buildroot}%{module_dir}/pam-multi.a
-	if [ -x /usr/bin/chrpath ] ; then
-		/usr/bin/chrpath -d %{buildroot}%{module_dir}/pam-multi.so
-		/usr/bin/chrpath -d %{buildroot}%{_prefix}/sbin/pam-checkpwd
-	fi
+# pam-multi
+%{__rm} -f %{buildroot}%{module_dir}/pam-multi.la
+%{__rm} -f %{buildroot}%{module_dir}/pam-multi.a
+if [ -x /usr/bin/chrpath ] ; then
+	/usr/bin/chrpath -d %{buildroot}%{module_dir}/pam-multi.so
+	/usr/bin/chrpath -d %{buildroot}%{_prefix}/sbin/pam-checkpwd
 fi
 
 
@@ -928,6 +952,14 @@ fi
 %attr(444,root,root)                              %{_prefix}/etc/indimail.settings
 %attr(444,root,root)                              %{_prefix}/etc/perm_list
 %attr(444,root,root)                              %{_prefix}/etc/yum.repos.d/*.repo
+
+%if %noperms == 0
+%if 0%{?suse_version} >= 1120
+%attr(644,root,root)                              %{_sysconfdir}/permissions.d/%{name}-permissions
+%attr(644,root,root)                              %{_sysconfdir}/permissions.d/%{name}-permissions.secure
+%endif
+%endif
+
 %if %nobogofilter == 0
 %attr(644,root,root)                              %{_prefix}/etc/bogofilter.cf.example
 %attr(0644,indimail,indimail) %config(noreplace)  %{_prefix}/etc/wordlist.db
@@ -941,8 +973,6 @@ fi
 %attr(600,root,root)                              %{_prefix}/etc/pop3d.dist
 %attr(600,root,root)                              %{_prefix}/etc/imapd.dist
 %attr(644,root,root)                              %{_prefix}/etc/quotawarnmsg.example
-%attr(644,root,root) %config(noreplace)           %{pam_confdir}/pop3
-%attr(644,root,root) %config(noreplace)           %{pam_confdir}/imap
 %endif
 
 #
@@ -969,32 +999,36 @@ fi
 %attr(2511,root,qscand)                 %{_prefix}/bin/run-cleanq
 %attr(4555,root,root)                   %{_prefix}/sbin/systpass
 
+%if %noperms == 0
 %if 0%{?suse_version} >= 1120
-%verify (not mode user) %attr(4555, root, root)      %{_prefix}/bin/vdeluser
-%verify (not mode user) %attr(4555, root, root)      %{_prefix}/bin/vadduser
-%verify (not mode user) %attr(4555, root, root)      %{_prefix}/bin/vaddaliasdomain
-%verify (not mode user) %attr(4555, root, root)      %{_prefix}/bin/vrenamedomain
-%verify (not mode user) %attr(4555, root, root)      %{_prefix}/bin/vsetuserquota
-%verify (not mode user) %attr(4555, root, root)      %{_prefix}/bin/vmoveuser
-%verify (not mode user) %attr(6511, qscand, qmail)   %{_prefix}/bin/qhpsi
-%verify (not mode user) %attr(2511, root, qscand)    %{_prefix}/bin/run-cleanq
-%verify (not mode user) %attr(4555, root, root)      %{_prefix}/bin/vuserinfo
-%verify (not mode user) %attr(6511, qmailq, qmail)   %{_prefix}/bin/qmail-queue
-%verify (not mode user) %attr(4555, root, root)      %{_prefix}/bin/vdeldomain
-%verify (not mode user) %attr(4555, root, root)      %{_prefix}/bin/vadddomain
-%verify (not mode user) %attr(6511, root, indimail)  %{_prefix}/bin/bogofilter
-%verify (not mode user) %attr(4555, qscand, qscand)  %{_prefix}/bin/qscanq
-%verify (not mode user) %attr(4511, root, root)      %{_prefix}/bin/vdominfo
-%verify (not mode user) %attr(4555, root, root)      %{_prefix}/bin/vrenameuser
-%verify (not mode user) %attr(4555, root, root)      %{_prefix}/bin/printdir
-%verify (not mode user) %attr(4555, root, root)      %{_prefix}/bin/vmoduser
-%verify (not mode user) %attr(4555, root, root)      %{_prefix}/bin/vcfilter
-%verify (not mode user) %attr(4555, root, root)      %{_prefix}/bin/vbulletin
-%verify (not mode user) %attr(4555, root, qmail)     %{_prefix}/libexec/sq_vacation
-%verify (not mode user) %attr(4555, root, root)      %{_prefix}/libexec/authlib/authshadow
-%verify (not mode user) %attr(4555, root, root)      %{_prefix}/sbin/systpass
-%verify (not mode user) %attr(2555, alias, qmail)    %{_prefix}/alias
-%verify (not mode user) %attr(2755, indimail, qmail) %{_prefix}/autoturn
+%verify (not user group mode) %attr(4555, root, root)      %{_prefix}/bin/vdeluser
+%verify (not user group mode) %attr(4555, root, root)      %{_prefix}/bin/vadduser
+%verify (not user group mode) %attr(4555, root, root)      %{_prefix}/bin/vaddaliasdomain
+%verify (not user group mode) %attr(4555, root, root)      %{_prefix}/bin/vrenamedomain
+%verify (not user group mode) %attr(4555, root, root)      %{_prefix}/bin/vsetuserquota
+%verify (not user group mode) %attr(4555, root, root)      %{_prefix}/bin/vmoveuser
+%verify (not user group mode) %attr(6511, qscand, qmail)   %{_prefix}/bin/qhpsi
+%verify (not user group mode) %attr(2511, root, qscand)    %{_prefix}/bin/run-cleanq
+%verify (not user group mode) %attr(4555, root, root)      %{_prefix}/bin/vuserinfo
+%verify (not user group mode) %attr(6511, qmailq, qmail)   %{_prefix}/bin/qmail-queue
+%verify (not user group mode) %attr(4555, root, root)      %{_prefix}/bin/vdeldomain
+%verify (not user group mode) %attr(4555, root, root)      %{_prefix}/bin/vadddomain
+%if %nobogofilter == 0
+%verify (not user group mode) %attr(6511, root, indimail)  %{_prefix}/bin/bogofilter
+%endif
+%verify (not user group mode) %attr(4555, qscand, qscand)  %{_prefix}/bin/qscanq
+%verify (not user group mode) %attr(4511, root, root)      %{_prefix}/bin/vdominfo
+%verify (not user group mode) %attr(4555, root, root)      %{_prefix}/bin/vrenameuser
+%verify (not user group mode) %attr(4555, root, root)      %{_prefix}/bin/printdir
+%verify (not user group mode) %attr(4555, root, root)      %{_prefix}/bin/vmoduser
+%verify (not user group mode) %attr(4555, root, root)      %{_prefix}/bin/vcfilter
+%verify (not user group mode) %attr(4555, root, root)      %{_prefix}/bin/vbulletin
+%verify (not user group mode) %attr(4555, root, qmail)     %{_prefix}/libexec/sq_vacation
+%verify (not user group mode) %attr(4555, root, root)      %{_prefix}/libexec/authlib/authshadow
+%verify (not user group mode) %attr(4555, root, root)      %{_prefix}/sbin/systpass
+%verify (not user group mode) %attr(2555, alias, qmail)    %{_prefix}/alias
+%verify (not user group mode) %attr(2755, indimail, qmail) %{_prefix}/autoturn
+%endif
 %endif
 
 %attr(555,root,qmail)                   %{_prefix}/bin/qmail-popbull
@@ -1152,7 +1186,6 @@ fi
 %attr(555,root,qmail)                   %{_prefix}/bin/tai64n
 %attr(555,root,qmail)                   %{_prefix}/bin/822header
 %attr(555,root,qmail)                   %{_prefix}/bin/vgroup
-%attr(555,root,qmail)                   %{_prefix}/bin/maildirmake
 %attr(555,root,qmail)                   %{_prefix}/bin/qmaildirmake
 %attr(555,root,qmail)                   %{_prefix}/bin/maildir2mbox
 %attr(555,root,qmail)                   %{_prefix}/bin/columnt
@@ -1318,6 +1351,7 @@ fi
 %attr(4555,root,qmail)                  %{_prefix}/libexec/sq_vacation
 %if %nocourierimap == 0
 # courier imap
+%attr(555,root,root)                    %{_prefix}/bin/maildirmake
 %attr(555,root,root)                    %{_prefix}/bin/maildirkw
 %attr(555,root,root)                    %{_prefix}/bin/deliverquota
 %attr(555,root,root)                    %{_prefix}/bin/couriertls
@@ -1392,10 +1426,10 @@ fi
 %endif
 
 # pam-multi
-%if %nopam_multi == 0
 %attr(555,root,root)                    %{_prefix}/sbin/pam-checkpwd
 %attr(644,root,root) %config(noreplace) %{pam_confdir}/pam-multi
-%endif
+%attr(644,root,root) %config(noreplace) %{pam_confdir}/pop3
+%attr(644,root,root) %config(noreplace) %{pam_confdir}/imap
 
 %attr(555,root,qmail)                   %{_prefix}/boot/binm2
 %attr(555,root,qmail)                   %{_prefix}/boot/proc+df
@@ -1542,7 +1576,7 @@ fi
 %attr(644,root,root)                    %{_prefix}/share/fortunes/vedas-2.dat
 
 %if %noclamav == 0
-%if %built_in_clamavdb == 1
+%if %nosignatures == 0
 %ghost                   %config(noreplace) %{_prefix}/share/clamd/clamav*
 %ghost                   %config(noreplace) %{_prefix}/share/clamd/mirrors.dat
 %attr(664,qscand,qscand) %config(noreplace) %{_prefix}/share/clamd/main.cvd
@@ -1607,9 +1641,7 @@ fi
 %attr(444,root,qmail)                   %{_prefix}/doc/PIC.local2local
 %attr(444,root,qmail)                   %{_prefix}/doc/INSTALL.ids
 %attr(444,root,qmail)                   %{_prefix}/doc/INSTALL.qmail
-%if %nobogofilter == 0
 %attr(444,root,qmail)                   %{_prefix}/doc/HOWTO.bogofilter
-%endif
 %attr(444,root,qmail)                   %{_prefix}/doc/PIC.nullclient
 %attr(444,root,qmail)                   %{_prefix}/doc/PIC.rem2local
 %attr(444,root,qmail)                   %{_prefix}/doc/PIC.relaybad
@@ -1640,9 +1672,7 @@ fi
 # Shared libraries (omit for architectures that don't support them)
 
 # pam-multi
-%if %nopam_multi == 0
 %attr(755,root,root)                    /%{module_dir}/pam-multi.so
-%endif
 
 %if %noclamav == 0
 %if %i_m_on_mac == 1
@@ -1877,6 +1907,7 @@ fi
 %{_prefix}/sbin/svctool --check-install --servicedir=%{servicedir} \
 	--qbase=%{qbase} --qcount=%{qcount} --qstart=1
 
+%if %noperms == 0
 %if 0%{?suse_version} >= 1120
 %verify_permissions -e %{_prefix}/bin/vdeluser
 %verify_permissions -e %{_prefix}/bin/vadduser
@@ -1890,7 +1921,9 @@ fi
 %verify_permissions -e %{_prefix}/bin/qmail-queue
 %verify_permissions -e %{_prefix}/bin/vdeldomain
 %verify_permissions -e %{_prefix}/bin/vadddomain
+%if %nobogofilter == 0
 %verify_permissions -e %{_prefix}/bin/bogofilter
+%endif
 %verify_permissions -e %{_prefix}/bin/qscanq
 %verify_permissions -e %{_prefix}/bin/vdominfo
 %verify_permissions -e %{_prefix}/bin/vrenameuser
@@ -1903,6 +1936,7 @@ fi
 %verify_permissions -e %{_prefix}/sbin/systpass
 %verify_permissions -e %{_prefix}/alias
 %verify_permissions -e %{_prefix}/autoturn
+%endif
 %endif
 
 ### SCRIPTLET ###############################################################################
@@ -2128,15 +2162,17 @@ else
 	sign_opt="none"
 fi
 
+%if %noperms == 0
 %if 0%{?suse_version} >= 1120
 %if 0%{?set_permissions:1} > 0
 	if [ ! -f /tmp/no_permissions ] ; then
-    	%set_permissions %{name}.easy
+    	%set_permissions %{name}
 	fi
 %else
 	if [ ! -f /tmp/no_permissions ] ; then
     	%run_permissions
 	fi
+%endif
 %endif
 %endif
 
