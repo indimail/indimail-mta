@@ -1,5 +1,9 @@
 /*
  * $Log: qmail-dkim.c,v $
+ * Revision 1.37  2013-01-24 22:37:22+05:30  Cprogrammer
+ * BUG (fix by Piotr Gronek) - DKIM_FREE(results) called before call to ParseTagValues()
+ * alternate code for DKIMSIGN selector file name
+ *
  * Revision 1.36  2012-08-16 08:01:46+05:30  Cprogrammer
  * do not skip X-Mailer headers
  *
@@ -375,23 +379,11 @@ write_signature(char *domain, char *keyfn)
 			die(51, 1);
 		if (!stralloc_cats(&keyfnfrom, keyfn + i + 1))
 			die(51, 1);
-	} else
-	{
-		if (keyfn[0] == '/')
-		{
-			if (!stralloc_copys(&keyfnfrom, keyfn))
-				die(51, 1);
-		} else
-		if (!stralloc_cats(&keyfnfrom, keyfn))
+		if (!stralloc_0(&keyfnfrom))
 			die(51, 1);
-	}
-	if (!stralloc_0(&keyfnfrom))
-		die(51, 1);
-	if (keyfn[i])
-	{
+		/*- check if file does not exists remove '%' sign */
 		if (access(keyfnfrom.s, F_OK))
 		{
-			/*- since file is not found remove '%' sign */
 			if (keyfn[0] == '/')
 			{
 				if (!stralloc_copyb(&keyfnfrom, keyfn, i))
@@ -403,16 +395,18 @@ write_signature(char *domain, char *keyfn)
 				i++;
 			if (!stralloc_cats(&keyfnfrom, keyfn + i + 1))
 				die(51, 1);
-		} else
-		{
-			if (keyfn[0] == '/')
-			{
-				if (!stralloc_copys(&keyfnfrom, keyfn))
-					die(51, 1);
-			} else
-			if (!stralloc_cats(&keyfnfrom, keyfn))
+			if (!stralloc_0(&keyfnfrom))
 				die(51, 1);
-		}
+		} 
+	} else
+	{
+		if (keyfn[0] == '/')
+		{
+			if (!stralloc_copys(&keyfnfrom, keyfn))
+				die(51, 1);
+		} else
+		if (!stralloc_cats(&keyfnfrom, keyfn))
+			die(51, 1);
 		if (!stralloc_0(&keyfnfrom))
 			die(51, 1);
 	}
@@ -420,6 +414,11 @@ write_signature(char *domain, char *keyfn)
 	{
 	case 0: /*- missing signature file */
 		DKIMSignFree(&ctxt);
+		/*
+		 * You may have multiple domains, but may chose to sign
+		 * only for few domains which have the key present. Do not
+		 * treat domains with missing key as an error.
+		 */
 		if (keyfn[i])
 			return;
 		die(35, 0);
@@ -532,7 +531,6 @@ checkSSP(char *domain, int *bTesting)
 	} else
 	if (!str_diff(results, "e=perm;"))
 	{
-		DKIM_MFREE(results);
 		results = dns_text(domain);
 		if (!str_diff(results, "e=temp;"))
 		{
@@ -546,8 +544,18 @@ checkSSP(char *domain, int *bTesting)
 		}
 		bIsParentSSP = 1;
 	}
+	/* 
+	 * PG.1 2013-01-03
+	 * Bug fix by Piotr Gronek, Faculy of Physics & Applied Computer Science, Poland 2013-01-03
+	 * Deallocating storage for 'results' here is premature - moved beyond last reference to it.
+	 *
+	 */
 	if (!ParseTagValues(results, tags, values))
+	{
+		DKIM_MFREE(results);
 		return DKIM_SSP_UNKNOWN;
+	}
+	DKIM_MFREE(results);
 	if (values[0] != NULL) {
 		if (strcasecmp(values[0], "all") == 0)
 			iSSP = DKIM_SSP_ALL;
@@ -617,9 +625,19 @@ checkADSP(char *domain)
 		DKIM_MFREE(results);
 		return DKIM_ADSP_TEMPFAIL;
 	}
-	DKIM_MFREE(results);
+	/* 
+	 * PG.1 2013-01-03
+	 * Bug fix by Piotr Gronek, Faculy of Physics & Applied Computer Science, Poland 2013-01-03
+	 *
+	 * Deallocating storage for 'results' here is premature - moved beyond last reference to it.
+	 *
+	 */
 	if (!ParseTagValues(results, tags, values))
+	{
+		DKIM_MFREE(results);
 		return DKIM_SSP_UNKNOWN;
+	}
+	DKIM_MFREE(results);
 	if (values[0] != NULL) {
 		if (strcasecmp(values[0], "all") == 0)
 			return (DKIM_ADSP_ALL);
@@ -745,7 +763,7 @@ writeHeaderNexit(int ret, int origRet, int resDKIMSSP, int resDKIMADSP, int useS
 		code = "X.7.5";
 		break;
 	case DKIM_BODY_HASH_MISMATCH:
-		dkimStatus = "sigature verify error: message body does not hash to bh value";
+		dkimStatus = "signature verify error: message body does not hash to bh value";
 		code = "X.7.7";
 		break;
 	case DKIM_SELECTOR_ALGORITHM_MISMATCH:
@@ -1112,10 +1130,8 @@ main(int argc, char *argv[])
 	substdio_fdbuf(&sserr, write, errfd, errbuf, sizeof(errbuf));
 	if (chdir(auto_qmail) == -1)
 		die(61, 0);
-	if (!dkimsign)
-		dkimsign = env_get("DKIMSIGN");
-	if (!dkimverify)
-		dkimverify = env_get("DKIMVERIFY");
+	dkimsign = env_get("DKIMSIGN");
+	dkimverify = env_get("DKIMVERIFY");
 	if (!dkimsign && !dkimverify && (p = env_get("RELAYCLIENT")))
 	{
 		if (!(dkimsign = env_get("DKIMKEY")))
@@ -1430,7 +1446,7 @@ main(argc, argv)
 void
 getversion_qmail_dkim_c()
 {
-	static char    *x = "$Id: qmail-dkim.c,v 1.36 2012-08-16 08:01:46+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: qmail-dkim.c,v 1.37 2013-01-24 22:37:22+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

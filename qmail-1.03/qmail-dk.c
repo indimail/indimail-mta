@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-dk.c,v $
+ * Revision 1.37  2013-01-24 22:42:07+05:30  Cprogrammer
+ * alternate code for chosing DKSIGN selector filename
+ *
  * Revision 1.36  2011-11-10 14:31:42+05:30  Cprogrammer
  * BUG ssout to be assigned only after pidopen()
  *
@@ -368,20 +371,8 @@ write_signature(DK *dk, char *dk_selector, char *keyfn,
 			die(51);
 		if (!stralloc_cats(&keyfnfrom, keyfn + i + 1))
 			die(51);
-	} else
-	{
-		if (keyfn[0] == '/')
-		{
-			if (!stralloc_copys(&keyfnfrom, keyfn))
-				die(51);
-		} else
-		if (!stralloc_cats(&keyfnfrom, keyfn))
+		if (!stralloc_0(&keyfnfrom))
 			die(51);
-	}
-	if (!stralloc_0(&keyfnfrom))
-		die(51);
-	if (keyfn[i])
-	{
 		if (access(keyfnfrom.s, F_OK))
 		{
 			/*- since file is not found remove '%' sign */
@@ -396,22 +387,29 @@ write_signature(DK *dk, char *dk_selector, char *keyfn,
 				i++;
 			if (!stralloc_cats(&keyfnfrom, keyfn + i + 1))
 				die(51);
-		} else
-		{
-			if (keyfn[0] == '/')
-			{
-				if (!stralloc_copys(&keyfnfrom, keyfn))
-					die(51);
-			} else
-			if (!stralloc_cats(&keyfnfrom, keyfn))
+			if (!stralloc_0(&keyfnfrom))
 				die(51);
-		}
+		} 
+	} else
+	{
+		if (keyfn[0] == '/')
+		{
+			if (!stralloc_copys(&keyfnfrom, keyfn))
+				die(51);
+		} else
+		if (!stralloc_cats(&keyfnfrom, keyfn))
+			die(51);
 		if (!stralloc_0(&keyfnfrom))
 			die(51);
 	}
 	switch (control_readnativefile(&dksignature, keyfnfrom.s, 1))
 	{
 	case 0: /*- file not present */
+		/*
+		 * You may have multiple domains, but may chose to sign
+		 * only for few domains which have the key present. Do not
+		 * treat domains with missing key as an error.
+		 */
 		if (keyfn[i])
 			return;
 		die(35);
@@ -606,10 +604,8 @@ main(int argc, char *argv[])
 	substdio_fdbuf(&sserr, write, errfd, errbuf, sizeof(errbuf));
 	if (chdir(auto_qmail) == -1)
 		die(61);
-	if (!dksign)
-		dksign = env_get("DKSIGN");
-	if (!dkverify)
-		dkverify = env_get("DKVERIFY");
+	dksign = env_get("DKSIGN");
+	dkverify = env_get("DKVERIFY");
 	if (!dksign && !dkverify && (relayclient = env_get("RELAYCLIENT")))
 	{
 		if (!(dksign = env_get("DKKEY")))
@@ -885,7 +881,7 @@ main(argc, argv)
 void
 getversion_qmail_dk_c()
 {
-	static char    *x = "$Id: qmail-dk.c,v 1.36 2011-11-10 14:31:42+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: qmail-dk.c,v 1.37 2013-01-24 22:42:07+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
