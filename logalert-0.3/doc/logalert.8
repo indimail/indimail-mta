@@ -176,10 +176,10 @@ Create a configuration file like this:
           match           = /[Ee][Rr]{2}or: VPN lost connection/
           exec            = /etc/init.d/vpn restart
           match_sleep     = 10
-		  match_count     = 2
+          match_count     = 2
           retry           = 3
           user            = vpnuser
-		  verbose
+          verbose
   }
   
   filename /var/log/mail
