@@ -1,0 +1,7 @@
+%attr(0644,root,root) @prefix@/share/man/man8/logalert.8
+%attr(0644,root,root) @prefix@/etc/logalert_perm_list
+%attr(0511,root,root) @prefix@/sbin/rpclog
+%attr(0511,root,root) @prefix@/sbin/logsrv
+%attr(0511,root,root) @prefix@/bin/logclient
+%attr(0511,root,root) @prefix@/bin/logalert
+
