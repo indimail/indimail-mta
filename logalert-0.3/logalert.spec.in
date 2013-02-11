@@ -1,0 +1,93 @@
+%define _prefix            @prefix@
+
+%if 0%{?opensuse_bs}
+# define to 1 if building on openSUSE build service
+%define build_on_obs       1
+%define fast_mode          1
+%else
+%define build_on_obs       0
+%define fast_mode          0
+%endif
+
+Summary: Watch files for specific patterns
+Name: logalert
+Version: @VERSION@
+Release: 1
+%if %build_on_obs == 1
+License: GPL-3.0+
+%else
+License: GPLv3
+%endif
+Group: Productivity/Networking/Email/Utilities
+Source0: http://downloads.sourceforge.net/indimail/%{name}-%{version}.tar.gz
+#Source1: http://downloads.sourceforge.net/indimail/%{name}-%{version}-rpmlintrc
+BuildRequires: flex  
+%if %build_on_obs == 1
+BuildRequires: -post-build-checks  
+%endif
+URL: http://www.indimail.org
+
+%if %build_on_obs == 1
+%define packager Manvendra Bhangui <manvendra@indimail.org>
+%if 0%{?mandriva_version} == 201100
+BuildRequires: coreutils
+%else
+BuildRequires: coreutils sh-utils
+%endif
+%endif
+
+Requires: coreutils grep /bin/sh glibc
+BuildRoot: %(mktemp -ud %{_tmppath}/%{name}-%{version}-%{release}-XXXXXX)
+
+%description
+logalert is a logfile monitoring tool which executes a specific action whenever it
+matches a string (pattern) occurrence.
+
+It reads an entire file (or starts at the end, just like tail -f), keeps track  of
+any changes, waiting for a specific pattern (a syslog process error, a user login,
+...) and fires an action you define when that happens.
+
+logalert uses regular expression to match the pattern occurrence and executes com‐
+mands  via shell interaction. It deals fine with logrotation and temporary removal
+normally used by sysadmins.
+
+%prep
+%setup
+
+%build
+%if 0%{?mandriva_version} > 2009
+	/bin/rm -f m4/*
+	aclocal
+	libtoolize --force
+	autoheader
+	autoconf
+	automake
+./configure --prefix=%{_prefix} --sysconfdir=%{_prefix}/etc --mandir=%{_prefix}/man
+%else
+%configure --prefix=%{_prefix} --sysconfdir=%{_prefix}/etc --mandir=%{_prefix}/man
+%endif
+
+%install
+[ "$RPM_BUILD_ROOT" != "/" ] && %{__rm} -fr $RPM_BUILD_ROOT
+%{__make} -s DESTDIR=%{buildroot}
+%{__make} -s DESTDIR=%{buildroot} install-strip
+find %{buildroot}%{_prefix}/man -type f -exec gzip -q {} \;
+
+%files
+%dir %attr(555,root,root)        %{_prefix}
+%dir %attr(555,root,root)        %{_prefix}/bin
+%dir %attr(555,root,root)        %{_prefix}/man
+%dir %attr(555,root,root)        %{_prefix}/man/man1
+%dir %attr(555,root,root)        %{_prefix}/man/man8
+
+%attr(0511,root,root)            %{_prefix}/bin/logalert
+%attr(0511,root,root)            %{_prefix}/bin/logclient
+%attr(0511,root,root)            %{_prefix}/bin/incrmesg
+%attr(0511,root,root)            %{_prefix}/sbin/rpclog
+%attr(0511,root,root)            %{_prefix}/sbin/logsrv
+%attr(444,root,root)             %{_prefix}/etc/logalert_perm_list
+%defattr(-,root,root)
+%doc %attr(444,root,root)        %{_prefix}/man/*/*
+
+%changelog
+
