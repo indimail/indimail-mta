@@ -3,8 +3,9 @@
 
 AC_PREREQ(2.59)
 AC_INIT(src/action.c)
+AC_CONFIG_MACRO_DIR([m4])
 #AM_INIT_AUTOMAKE
-AM_INIT_AUTOMAKE(logalert, 0.1)
+AM_INIT_AUTOMAKE(logalert, 0.3)
 AM_CONFIG_HEADER(src/config.h)
 AC_CONFIG_SRCDIR([src/action.c])
 #AC_CONFIG_HEADER([config.h])
@@ -21,7 +22,8 @@ AC_PROG_YACC
 # Checks for header files.
 AC_HEADER_DIRENT
 AC_HEADER_STDC
-AC_CHECK_HEADERS([fcntl.h stdlib.h string.h sys/time.h unistd.h getopt.h])
+AC_CHECK_HEADERS([fcntl.h stdarg.h stdlib.h string.h sys/time.h unistd.h getopt.h \
+				  inttypes.h sys/param.h])
 
 have_pcre=no
 LIBPCREDIR=libpcre
@@ -130,7 +132,25 @@ AC_TYPE_SIGNAL
 AC_FUNC_STAT
 AC_CHECK_FUNCS([alarm getcwd strchr strrchr])
 
+AC_DEFINE_UNQUOTED(PREFIX, "$prefix", installation directory)
+
+AC_ARG_ENABLE(indimaildir, [  --enable-indimaildir=dir         directory where indimail is installed.],
+	indimaildir="$enableval", [])
+AC_DEFINE_UNQUOTED(INDIMAILDIR,"$indimaildir",indimaildir's home directory)
+#'
+
+if test -d $indimaildir/lib64
+then
+	RPATH_LIB=$indimaildir/lib64
+else
+	RPATH_LIB=$indimaildir/lib
+fi
+AC_SUBST(RPATH_LIB)
+AC_CHECK_LIB(indimail -L$RPATH_LIB, filewrt, [AC_SUBST([LIB_INDIMAIL], ["-L/var/indimail/lib -lindimail"]) AC_DEFINE([HAVE_INDIMAIL], [1],[indimail Library])],,)
+
+AC_SUBST(indimaildir)
 AC_CONFIG_FILES([Makefile src/Makefile])
 AC_OUTPUT
 
-
+echo "    system lib dir = $acl_libdirstem $acl_libdirstem2 RPATH=$RPATH_LIB"
+echo "LIB_INDIMAIL=$LIB_INDIMAIL"
