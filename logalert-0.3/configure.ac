@@ -2,12 +2,11 @@
 # Process this file with autoconf to produce a configure script.
 
 AC_PREREQ(2.59)
-AC_INIT(src/action.c)
+AC_INIT(action.c)
 AC_CONFIG_MACRO_DIR([m4])
 #AM_INIT_AUTOMAKE
 AM_INIT_AUTOMAKE(logalert, 0.3)
-AM_CONFIG_HEADER(src/config.h)
-AC_CONFIG_SRCDIR([src/action.c])
+AM_CONFIG_HEADER(config.h)
 #AC_CONFIG_HEADER([config.h])
 
 AC_PREFIX_DEFAULT(/usr/local/bin)
@@ -149,7 +148,7 @@ AC_SUBST(RPATH_LIB)
 AC_CHECK_LIB(indimail -L$RPATH_LIB, filewrt, [AC_SUBST([LIB_INDIMAIL], ["-L/var/indimail/lib -lindimail"]) AC_DEFINE([HAVE_INDIMAIL], [1],[indimail Library])],,)
 
 AC_SUBST(indimaildir)
-AC_CONFIG_FILES([Makefile src/Makefile])
+AC_CONFIG_FILES([Makefile])
 AC_OUTPUT
 
 echo "    system lib dir = $acl_libdirstem $acl_libdirstem2 RPATH=$RPATH_LIB"
