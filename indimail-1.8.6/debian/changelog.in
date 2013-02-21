@@ -1,16 +1,18 @@
 indimail (@version@-1) unstable; urgency=low
 
-  * token.c (bogofilter). Clear tokens only when allocated
-  * fixed recursive loop when email is sent to register-spam, register-ham, ham and spam
-  * bogofilter-qfe.in - use config file and wordlist argument to bogofilter
-  * fixed abormal exit in DIGEST-MD5 for non existing users
-  * vchkpass - figure out domain for user for brain dead clients like MS Outlook
-  * swaks - when using AUTH DIGEST-MD5, use realm from control/me
-  * iwebadmin - user.c, util.c - .trivial_password sets password change to clear text
-  * vmoddomain.c - display a more helpful usage option
-  * vfilter.c - set PWSTRUCT for non-existent user. This will eliminate one database lookup in vdelivermail
-  * smtpd.c - allow restricting of MASQUERADE to the value set by MASQUERADE env variable
-  * added remoteip argument (ipv4) to spfcheck(). Fixed problem in smtpd, spfquery, parsing ipv4 mapped ipv6 addresses.
-  * upgraded to clamav-0.97.4
+  * autoresponder.c - Added description for -T option
+  * dkim.c - do not skip X-Mailer headers
+  * qmail-dkim.c - do not skip X-Mailer headers
+  * BUG - tcpserver.c - wrong variable used for ip address causing fnrules to fail in ip address matching
+  * made diskquota, maxmsgcount, defaultquota, defaultmaxmsgcount in vlimits unsigned
+  * indisrvr.c - removed pidfile
+  * dns.c - added DISABLE_CNAME_LOOKUP for qmail-remote
+  * new program rrt for handling Return Receipts
+  * qmail-remote - set ONSUCCESS_REMOTE, ONFAILURE_REMOTE, ONTRANSIENT_REMOTE selectively in run_script
+  * qmail-remote - fix SIGSEGV in run_script
+  * qmail-remote - set [S|Q]MTPTEXT, [S|Q]MTPCODE for transient errors
+  * qmail-remote - fix smtptext during TLS
+  * FORCE_TLS functionality in qmail-smtpd
+  * Upgraded to fetchmail 6.3.24
 
- -- Manvendra Bhangui <manvendra@indimail.org>  Thu, 19 Apr 2012 17:00:19 +0530
+ -- Manvendra Bhangui <manvendra@indimail.org>  Thu, 22 Jan 2013 18:38:40 +0530
