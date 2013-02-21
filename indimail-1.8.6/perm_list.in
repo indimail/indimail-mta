@@ -208,6 +208,10 @@
 %attr(0555,root,qmail) @indimaildir@/bin/maildirserial
 %attr(0555,root,qmail) @indimaildir@/bin/qarf
 %attr(0555,root,root)  @indimaildir@/bin/logalert
+%attr(0511,root,root)  @indimaildir@/sbin/rpclog
+%attr(0511,root,root)  @indimaildir@/sbin/logsrv
+%attr(0511,root,root)  @indimaildir@/bin/logclient
+%attr(0511,root,root)  @indimaildir@/bin/logalert
 %attr(4555,root,root)  @indimaildir@/bin/vrenameuser
 %attr(0555,root,qmail) @indimaildir@/bin/822header
 %attr(0555,root,qmail) @indimaildir@/bin/xrecipient
@@ -737,6 +741,9 @@
 %attr(0444,root,qmail) @indimaildir@/man/man8/svscanboot.8.gz
 %attr(0444,root,qmail) @indimaildir@/man/man8/nssd.8.gz
 %attr(0444,root,qmail) @indimaildir@/man/man8/rmail.8.gz
+%attr(0444,root,root)  @indimaildir@/man/man8/logalert.8
+%attr(0444,root,root)  @indimaildir@//man/man8/logsrv.8
+%attr(0444,root,root)  @indimaildir@/man/man8/rpclog.8
 %attr(0444,root,qmail) @indimaildir@/man/cat8/run-cleanq.0.gz
 %attr(0444,root,qmail) @indimaildir@/man/cat8/qmail-smtpd.0.gz
 %attr(0444,root,qmail) @indimaildir@/man/cat8/qmail-getpw.0.gz
@@ -1043,6 +1050,8 @@
 %attr(0444,root,qmail) @indimaildir@/man/man1/serialcmd.1.gz
 %attr(0444,root,qmail) @indimaildir@/man/man1/mpack.1.gz
 %attr(0444,root,qmail) @indimaildir@/man/man1/datemail.1.gz
+%attr(0444,root,root)  @indimaildir@/man/man1/incrmesg.1
+%attr(0444,root,root)  @indimaildir@/man/man1/logclient.1
 %attr(0444,root,qmail) @indimaildir@/man/cat5/qmail-control.0.gz
 %attr(0444,root,qmail) @indimaildir@/man/cat5/mbox.0.gz
 %attr(0444,root,qmail) @indimaildir@/man/cat5/dot-qmail.0.gz
