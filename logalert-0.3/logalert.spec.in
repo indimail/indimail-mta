@@ -64,7 +64,7 @@ normally used by sysadmins.
 	automake
 ./configure --prefix=%{_prefix} --sysconfdir=%{_prefix}/etc --mandir=%{_prefix}/man
 %else
-%configure --prefix=%{_prefix} --sysconfdir=%{_prefix}/etc --mandir=%{_prefix}/man
+%configure --prefix=%{_prefix}  --sysconfdir=%{_prefix}/etc --mandir=%{_prefix}/man
 %endif
 
 %install
