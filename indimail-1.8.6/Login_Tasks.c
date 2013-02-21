@@ -1,5 +1,8 @@
 /*
  * $Log: Login_Tasks.c,v $
+ * Revision 2.30  2013-02-21 22:39:14+05:30  Cprogrammer
+ * fixed typo (postauth->migrateuser) in error message
+ *
  * Revision 2.29  2010-07-04 14:36:40+05:30  Cprogrammer
  * replaced open_smtp_relay() with vopen_smtp_relay()
  *
@@ -137,7 +140,7 @@
 #include <fcntl.h>
 
 #ifndef	lint
-static char     sccsid[] = "$Id: Login_Tasks.c,v 2.29 2010-07-04 14:36:40+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: Login_Tasks.c,v 2.30 2013-02-21 22:39:14+05:30 Cprogrammer Stab mbhangui $";
 #endif
 
 int
@@ -283,7 +286,7 @@ Login_Tasks(pw, User, ServiceType)
 		snprintf(tmpbuf, MAX_BUFF, "%s %s %s", migrateuser, fqemail, pw->pw_dir);
 		if ((status = runcmmd(tmpbuf, 0)))
 		{
-			fprintf(stderr, "%s %s %s [status=%d]\n", postauth, fqemail, pw->pw_dir, status);
+			fprintf(stderr, "%s %s %s [status=%d]\n", migrateuser, fqemail, pw->pw_dir, status);
 			return (status);
 		}
 	}
