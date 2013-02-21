@@ -1,5 +1,8 @@
 /*
  * $Log: logclient.c,v $
+ * Revision 1.6  2013-02-21 22:45:39+05:30  Cprogrammer
+ * fold long line for readability
+ *
  * Revision 1.5  2012-09-19 11:06:49+05:30  Cprogrammer
  * use environment variable SEEKDIR for the checkpoint files
  *
@@ -48,7 +51,7 @@
 #define SEEKDIR PREFIX"/tmp/"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: logclient.c,v 1.5 2012-09-19 11:06:49+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: logclient.c,v 1.6 2013-02-21 22:45:39+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 
