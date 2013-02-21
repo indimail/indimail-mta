@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail.spec.in,v 2.254 2013-01-22 18:30:40+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 2.255 2013-02-21 22:41:49+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %define _unpackaged_files_terminate_build 1
 
@@ -1409,6 +1409,10 @@ fi
 %endif
 # logalert
 %attr(555,root,root)                    %{_prefix}/bin/logalert
+%attr(0511,root,root)                   %{_prefix}/bin/logclient
+%attr(0511,root,root)                   %{_prefix}/bin/incrmesg
+%attr(0511,root,root)                   %{_prefix}/sbin/rpclog
+%attr(0511,root,root)                   %{_prefix}/sbin/logsrv
 
 # fetchmail
 %if %nofetchmail == 0
