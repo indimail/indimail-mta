@@ -1,5 +1,8 @@
 /*
  * $Log: logsrv.c,v $
+ * Revision 1.6  2013-02-21 22:46:05+05:30  Cprogrammer
+ * use 0 as IP address for localhost
+ *
  * Revision 1.5  2013-02-11 23:03:10+05:30  Cprogrammer
  * added bytes read to statusfile
  *
@@ -65,7 +68,7 @@ program RPCLOG
 #define STATUSDIR PREFIX"/tmp/"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: logsrv.c,v 1.5 2013-02-11 23:03:10+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: logsrv.c,v 1.6 2013-02-21 22:46:05+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 char           *loghost;
@@ -181,7 +184,7 @@ main(int argc, char **argv)
 		logsrvpid = getpid();
 	if (!(ptr = getenv("PORT")))
 		ptr = PORT;
-	if ((bindfd = tcpbind(INADDR_ANY, ptr, 5)) == -1) {
+	if ((bindfd = tcpbind("0", ptr, 5)) == -1) {
 		(void) filewrt(2, "tcpsockbind failed for port %s\n", ptr);
 		_exit (1);
 	}
@@ -236,13 +239,13 @@ write_bytes(int fd, umdir_t *Bytes)
 int
 server(int sfd, int silent)
 {
-	int             fd, retval;
+	int             fd, retval, count;
 	umdir_t         bytes;
 	ssize_t         n;
 	pid_t           pid;
 	FILE           *socketfp;
 	char            buffer[MAXBUF], hostname[56];
-	char           *(parm[1]);
+	char           *ptr, *(parm[1]);
 
 	if ((retval = sockread(sfd, hostname, sizeof(hostname) - 1)) == -1) {
 		(void) filewrt(2, "read: %s\n", strerror(errno));
@@ -268,7 +271,7 @@ server(int sfd, int silent)
 			(void) filewrt(2, "readpid: %s: %s\n", statusfile, strerror(errno));
 			return(1);
 		}
-		if (n == sizeof(ssize_t)) {
+		if (n == sizeof(pid_t)) {
 			if ((n = read(fd, (char *) &bytes, sizeof(umdir_t))) == -1) {
 				(void) filewrt(2, "readbytes: %s: %s\n", statusfile, strerror(errno));
 				return(1);
@@ -280,6 +283,10 @@ server(int sfd, int silent)
 			return(1);
 		}
 		bytes = 0;
+	}
+	if (lseek(fd, 0, SEEK_SET) == -1) {
+		(void) filewrt(2, "lseek: %s\n", strerror(errno));
+		return (-1);
 	}
 	pid = getpid();
 	if (write(fd, (char *) &pid, sizeof(pid_t)) != sizeof(pid_t)) {
@@ -312,7 +319,19 @@ server(int sfd, int silent)
 				shutdown(sfd, 0);
 				return(1);
 			}
-			bytes += slen(buffer);
+			for (count = 0,ptr = buffer;*ptr;ptr++) {
+				if (*ptr == ' ')
+					count++;
+				if (count == 2)
+					break;
+			}
+			if (*ptr)
+			{
+				bytes += slen(ptr + 1);
+				filewrt(2, "%s", ptr+1);
+			}
+			else
+				bytes += slen(buffer);
 			if (write_bytes(fd, &bytes) == -1) {
 				(void) filewrt(2, "write_bytes: %s\n", strerror(errno));
 				shutdown(sfd, 0);

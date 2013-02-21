@@ -1,5 +1,8 @@
 /*
  * $Log: common.c,v $
+ * Revision 1.2  2013-02-21 22:44:45+05:30  Cprogrammer
+ * use AF_INET for localhost
+ *
  * Revision 1.1  2013-02-11 22:07:42+05:30  Cprogrammer
  * Initial revision
  *
@@ -35,7 +38,7 @@
 #endif
 
 #ifndef	lint
-static char     sccsid[] = "$Id: common.c,v 1.1 2013-02-11 22:07:42+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: common.c,v 1.2 2013-02-21 22:44:45+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 static unsigned sleeptime = MAXSLEEP + 1; /*- 0 for infinite connect */
@@ -482,6 +485,9 @@ tcpbind(hostname, servicename, backlog)
 	int             idx, socket_type;
 	struct linger cflinger;
 
+	if (!hostname)
+		socket_type = AF_INET;
+	else
 	if ((dir = Dirname(hostname)) && !access(dir, F_OK))
 		socket_type = AF_UNIX;
 	else
@@ -557,6 +563,8 @@ tcpbind(hostname, servicename, backlog)
 	(void) memset((char *) &localinaddr, 0, sizeof(struct sockaddr_in));
 	localinaddr.sin_family = AF_INET;
 	/*- It's a dotted decimal */
+	if (!hostname)
+		hostname = "127.0.0.1";
 	if ((inaddr = inet_addr(hostname)) != INADDR_NONE)
 		localinaddr.sin_addr.s_addr = inaddr;
 	else
