@@ -1,5 +1,5 @@
 /*
- * $Id: user.c,v 1.8 2011-12-23 07:18:47+05:30 Cprogrammer Exp mbhangui $
+ * $Id: user.c,v 1.9 2013-03-10 23:09:28+05:30 Cprogrammer Exp mbhangui $
  * Copyright (C) 1999-2004 Inter7 Internet Technologies, Inc. 
  *
  * This program is free software; you can redistribute it and/or modify
@@ -673,11 +673,19 @@ void
 set_qmaildefault(char *opt)
 {
 	FILE           *fs;
+	int             use_vfilter = 0;
+	char            buffer[MAX_BUFF];
 
+	if ((fs = fopen(".qmail-default", "r"))) {
+		fscanf(fs, "%s", buffer);
+		use_vfilter = strstr(buffer, "vfilter") ? 1: 0;
+		fclose(fs);
+	}
 	if ((fs = fopen(".qmail-default", "w")) == NULL) {
 		printf("%s %s<br>\n", html_text[144], ".qmail-default");
 	} else {
-		fprintf(fs, "| %s/sbin/vdelivermail '' %s\n", INDIMAILDIR, opt);
+		fprintf(fs, "| %s/sbin/%s '' %s\n", INDIMAILDIR,
+			use_vfilter ? "vfilter" : "vdelivermail", opt);
 		fclose(fs);
 	}
 	show_users(Username, Domain, Mytime);
