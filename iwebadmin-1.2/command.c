@@ -1,5 +1,5 @@
 /*
- * $Id: command.c,v 1.3 2011-11-17 22:11:17+05:30 Cprogrammer Exp mbhangui $
+ * $Id: command.c,v 1.4 2013-03-10 23:09:19+05:30 Cprogrammer Exp mbhangui $
  * Copyright (C) 1999-2004 Inter7 Internet Technologies, Inc. 
  *
  * This program is free software; you can redistribute it and/or modify
@@ -318,6 +318,14 @@ setdefaultaccount()
 {
 	struct passwd  *pw;
 	FILE           *fs;
+	int             use_vfilter = 0;
+	char            buffer[MAX_BUFF];
+
+	if ((fs = fopen(".qmail-default", "r"))) {
+		fscanf(fs, "%s", buffer);
+		use_vfilter = strstr(buffer, "vfilter") ? 1: 0;
+		fclose(fs);
+	}
 
 	if ((pw = vauth_getpw(ActionUser, Domain)) == NULL) {
 		snprinth(StatusMessage, sizeof (StatusMessage), "%s %H@%H", html_text[223], ActionUser, Domain);
@@ -325,7 +333,8 @@ setdefaultaccount()
 		if ((fs = fopen(".qmail-default", "w")) == NULL) {
 			snprintf(StatusMessage, sizeof (StatusMessage), "%s", html_text[82]);
 		} else {
-			fprintf(fs, "| %s/sbin/vdelivermail '' %s@%s\n", INDIMAILDIR, ActionUser, Domain);
+			fprintf(fs, "| %s/sbin/%s '' %s@%s\n", INDIMAILDIR, 
+				use_vfilter ? "vfilter" : "vdelivermail", ActionUser, Domain);
 			fclose(fs);
 		}
 	}
