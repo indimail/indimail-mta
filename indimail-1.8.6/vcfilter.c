@@ -493,7 +493,7 @@ get_options(int argc, char **argv, int *raw, int *cluster_conn)
 	{
 		for (i = 0;rfc_ids[i];i++)
 		{
-			if (!strncmp(emailid, rfc_ids[i], slen(rfc_ids[i]) + 1))
+			if (!strncmp(emailid, rfc_ids[i], slen(rfc_ids[i])))
 			{
 				fprintf(stderr, "vcfilter: email %s not allowed for filtering\n", emailid);
 				usage();
