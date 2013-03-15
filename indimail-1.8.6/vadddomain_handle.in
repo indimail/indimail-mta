@@ -1,6 +1,9 @@
 #!/bin/sh
 #
 # $Log: vadddomain_handle.in,v $
+# Revision 2.6  2013-03-05 23:40:27+05:30  Cprogrammer
+# corrected header to X-Bogosity instead of received for spam filter rule
+#
 # Revision 2.5  2012-06-20 19:04:47+05:30  Cprogrammer
 # fix for recursive emails when email sent to training ids
 #
@@ -18,7 +21,7 @@
 # post handle for vadddomain
 #
 #
-# $Id: vadddomain_handle.in,v 2.5 2012-06-20 19:04:47+05:30 Cprogrammer Exp mbhangui $
+# $Id: vadddomain_handle.in,v 2.6 2013-03-05 23:40:27+05:30 Cprogrammer Exp mbhangui $
 @indimaildir@/bin/vdominfo $1
 for i in ham spam register-ham register-spam
 do
@@ -28,7 +31,7 @@ for i in prefilt postfilt
 do
 	@indimaildir@/bin/vadduser -d -e $i@$1  xxxxxxxx
 done
-@indimaildir@/bin/vcfilter -i -t  spamFilter -c 3 -k "Yes, spamicity=" -f Spam   -b 0 -h 33 \
+@indimaildir@/bin/vcfilter -i -t  spamFilter -c 3 -k "Yes, spamicity=" -f Spam   -b 0 -h 32 \
 	prefilt@$1 > /dev/null 2>&1
 @indimaildir@/bin/vcfilter -i -t virusFilter -c 0 -k "virus found" -f Quarantine -b 0 -h 28 \
 	prefilt@$1 > /dev/null 2>&1
