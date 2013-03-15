@@ -1,5 +1,8 @@
 /*
  * $Log: incrmesg.c,v $
+ * Revision 1.4  2013-03-03 23:36:12+05:30  Cprogrammer
+ * create the directory with owner of incrmesg process
+ *
  * Revision 1.3  2012-12-13 08:36:45+05:30  Cprogrammer
  * use SEEKDIR env variable
  *
@@ -40,7 +43,7 @@
 #define SEEKDIR "/var/tmp/incrmesg"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: incrmesg.c,v 1.3 2012-12-13 08:36:45+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: incrmesg.c,v 1.4 2013-03-03 23:36:12+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 struct msgtable
@@ -102,8 +105,7 @@ incrmesg(fname)
 
 	if (!(seekdir = getenv("SEEKDIR")))
 		seekdir = SEEKDIR;
-	(void) sprintf(seekfile, "%s/%s.seek", seekdir, ptr);
-	if (access(seekdir, F_OK) && r_mkdir(seekdir, 0700, 0, 0))
+	if (access(seekdir, F_OK) && r_mkdir(seekdir, 0700, getuid(), getgid()))
 	{
 		perror(seekdir);
 		return(1);
