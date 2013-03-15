@@ -1,5 +1,8 @@
 /*
- * $Log: $
+ * $Log: showbytes.c,v $
+ * Revision 1.1  2013-03-15 09:30:20+05:30  Cprogrammer
+ * Initial revision
+ *
  */
 #include <stdio.h>
 #include <unistd.h>
@@ -7,6 +10,10 @@
 #include <fcntl.h>
 #include <sys/types.h>
 #include "common.h"
+
+#ifndef	lint
+static char     sccsid[] = "$Id: showbytes.c,v 1.1 2013-03-15 09:30:20+05:30 Cprogrammer Exp mbhangui $";
+#endif
 
 int
 main(int argc, char **argv)
