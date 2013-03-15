@@ -2,12 +2,11 @@
 ChangeLog
 doc/CREDITS
 doc/ChangeLog
-post_handle
-post_handle/*
 indisub.c
 Makefile
 Makefile.in
 configure
+post_handle
 INSTALL
 INSTALL-MINI
 INSTALL-MYSQL
