@@ -1,5 +1,11 @@
 /*
  * $Log: qmailmrtg7.c,v $
+ * Revision 2.10  2013-03-15 09:56:52+05:30  Cprogrammer
+ * fixed option 't'
+ *
+ * Revision 2.9  2013-03-04 23:13:09+05:30  Cprogrammer
+ * fixed concurrency graphs
+ *
  * Revision 2.8  2011-07-29 09:26:17+05:30  Cprogrammer
  * fixed gcc 4.6 warnings
  *
@@ -60,13 +66,14 @@
 #include <dirent.h>
 
 #ifndef lint
-static char     sccsid[] = "$Id: qmailmrtg7.c,v 2.8 2011-07-29 09:26:17+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: qmailmrtg7.c,v 2.10 2013-03-15 09:56:52+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #define MAX_BUFF 1000
 int             BigTodo=1;
 int             ConfSplit=151;
 char            TmpBuf[MAX_BUFF];
+int             cconcurrency;
 int             tconcurrency;
 int             tallow;
 int             tdeny;
@@ -139,7 +146,7 @@ main(int argc, char **argv)
 	}
 	end_time = time(NULL);
 	start_time = end_time - 300;
-	tconcurrency = 0;
+	cconcurrency = tconcurrency = 0;
 	tallow = 0;
 	tdeny = 0;
 	ttotal = 0;
@@ -211,8 +218,7 @@ main(int argc, char **argv)
 		printf("%i\n%i\n\n\n", cfound * 12, cerror * 12);
 		break;
 	case 't': /*- tcpserver concurrency */
-		printf("%d\n", tconcurrency);
-		printf("%d\n", tconcurrency);
+		printf("%d\n%d\n\n\n", cconcurrency, tconcurrency);
 		break;
 	case 'a': /*- tcpserver allow/deny */
 		printf("%d\n%d\n\n\n", tallow * 12, tdeny * 12);
@@ -236,8 +242,7 @@ main(int argc, char **argv)
 		printf("%i\n%i\n\n\n", unsub * 12, unsub * 12);
 		break;
 	case 'b': /*- bits */
-		printf("%.0f\n", (bytes * 8.0) / 300.0);
-		printf("%.0f\n", (bytes * 8.0) / 300.0);
+		printf("%.0f\n%.0f\n\n\n", (bytes * 8.0) / 300.0, (bytes * 8.0) / 300.0);
 		break;
 	case 'd': /*- dnscache */
 		printf("%i\n%i\n\n\n", tcached * 12, tquery * 12);
@@ -289,6 +294,9 @@ process_file(char *file_name)
 				for (tmpstr2 = tmpstr1 + 1; *tmpstr2 != '/'; ++tmpstr2);
 				*tmpstr2 = 0;
 				tmpint = atoi(tmpstr1);
+				if (tmpint > cconcurrency)
+					cconcurrency = tmpint;
+				tmpint = atoi(tmpstr2 + 1);
 				if (tmpint > tconcurrency)
 					tconcurrency = tmpint;
 			}
