@@ -4,6 +4,7 @@
 *.BAK
 *.a
 *.org
+post_handle
 configure.lineno
 autom4te.cache
 m4
@@ -48,7 +49,6 @@ config.sub
 config.status
 aclocal.m4
 ltmain.sh
-*/post_handle
 config.log
 stamp-h1
 libtool
