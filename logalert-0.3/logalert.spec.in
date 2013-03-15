@@ -83,6 +83,7 @@ find %{buildroot}%{_prefix}/man -type f -exec gzip -q {} \;
 %attr(0511,root,root)            %{_prefix}/bin/logalert
 %attr(0511,root,root)            %{_prefix}/bin/logclient
 %attr(0511,root,root)            %{_prefix}/bin/incrmesg
+%attr(0511,root,root)            %{_prefix}/bin/showbytes
 %attr(0511,root,root)            %{_prefix}/sbin/rpclog
 %attr(0511,root,root)            %{_prefix}/sbin/logsrv
 %attr(444,root,root)             %{_prefix}/etc/logalert_perm_list
