@@ -1,5 +1,8 @@
 /*
  * $Log: vmoduser.c,v $
+ * Revision 2.26  2013-04-29 22:52:48+05:30  Cprogrammer
+ * fixed setting quota = NOQUOTA
+ *
  * Revision 2.25  2011-11-09 19:46:24+05:30  Cprogrammer
  * removed getversion
  *
@@ -144,7 +147,7 @@
 #include <signal.h>
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vmoduser.c,v 2.25 2011-11-09 19:46:24+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: vmoduser.c,v 2.26 2013-04-29 22:52:48+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 char            Email[MAX_BUFF];
@@ -290,16 +293,20 @@ main(argc, argv)
 	}
 	if (QuotaFlag == 1)
 	{
-		if ((*Quota == '+') || (*Quota == '-'))
-			snprintf(tmpQuota, sizeof(tmpQuota), "%"PRId64"", parse_quota(pw->pw_shell, 0) + parse_quota(Quota, 0));
-		else
-			snprintf(tmpQuota, sizeof(tmpQuota), "%"PRId64"", parse_quota(Quota, 0));
-		if (!(ptr = strchr(tmpQuota, ',')))
-		{
-			if ((ptr = strchr(pw->pw_shell, ',')))
-				scat(tmpQuota, ptr, sizeof(tmpQuota));
+		if (!strncmp(Quota, "NOQUOTA", 8))
+			pw->pw_shell = "NOQUOTA";
+		else {
+			if ((*Quota == '+') || (*Quota == '-'))
+				snprintf(tmpQuota, sizeof(tmpQuota), "%"PRId64"", parse_quota(pw->pw_shell, 0) + parse_quota(Quota, 0));
+			else
+				snprintf(tmpQuota, sizeof(tmpQuota), "%"PRId64"", parse_quota(Quota, 0));
+			if (!(ptr = strchr(tmpQuota, ',')))
+			{
+				if ((ptr = strchr(pw->pw_shell, ',')))
+					scat(tmpQuota, ptr, sizeof(tmpQuota));
+			}
+			pw->pw_shell = tmpQuota;
 		}
-		pw->pw_shell = tmpQuota;
 	}
 	err = 0;
 #ifdef ENABLE_AUTH_LOGGING

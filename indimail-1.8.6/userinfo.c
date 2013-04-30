@@ -1,5 +1,8 @@
 /*
  * $Log: userinfo.c,v $
+ * Revision 2.35  2013-04-29 22:50:44+05:30  Cprogrammer
+ * fixed display of users with quota = NOQUOTA
+ *
  * Revision 2.34  2012-04-22 17:17:17+05:30  Cprogrammer
  * display quota in Gb if quota > 1 Gb
  *
@@ -196,7 +199,7 @@
 #include <errno.h>
 
 #ifndef	lint
-static char     sccsid[] = "$Id: userinfo.c,v 2.34 2012-04-22 17:17:17+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: userinfo.c,v 2.35 2013-04-29 22:50:44+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 extern char *strptime(const char *, const char *, struct tm *);
@@ -403,10 +406,14 @@ vuserinfo(Email, User, Domain, DisplayName, DisplayPasswd, DisplayUid, DisplayGi
 		mdir_t          size_limit, count_limit;
 #endif
 
-		dquota = parse_quota(mypw->pw_shell, 0)/1048576;
-		snprintf(maildir, MAX_BUFF, "%s/Maildir", mypw->pw_dir);
-		printf("quota         : %s [%-4.2f %s]\n", mypw->pw_shell,
-			dquota < 1024 ? (float) dquota : (float) (dquota/1024), dquota < 1024 ? "Mb" : "Gb");
+		if (!strncmp(mypw->pw_shell, "NOQUOTA", 8)) {
+			printf("quota         : unlimited\n");
+		} else {
+			dquota = parse_quota(mypw->pw_shell, 0)/1048576;
+			snprintf(maildir, MAX_BUFF, "%s/Maildir", mypw->pw_dir);
+			printf("quota         : %s [%-4.2f %s]\n", mypw->pw_shell,
+				dquota < 1024 ? (float) dquota : (float) (dquota/1024), dquota < 1024 ? "Mb" : "Gb");
+		}
 		if (islocal)
 		{
 #ifdef USE_MAILDIRQUOTA	
