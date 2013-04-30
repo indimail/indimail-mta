@@ -480,13 +480,17 @@ struct imaptoken *nexttoken_noparseliteral(void)
 
 void read_string(char **ptr, unsigned long *left, unsigned long cnt)
 {
+	char *cp;
+
 	if (imap_readptrleft == 0)
 	{
 		/* Keep reading until we fill the buffer or until we've
 		** read the entire string.
 		*/
-
-		read_timeout(SOCKET_TIMEOUT);
+		if (!(cp = getenv("SOCKET_TIMEOUT")))
+			read_timeout(SOCKET_TIMEOUT);
+		else
+			read_timeout(atoi(cp));
 		imap_readptr=readbuf;
 		while (imap_readptrleft < sizeof(readbuf) && imap_readptrleft < cnt)
 			imap_readptrleft += doread(readbuf+imap_readptrleft,
