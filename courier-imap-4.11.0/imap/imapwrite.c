@@ -40,7 +40,7 @@ extern void disconnected();
 
 void writeflush()
 {
-const char *p=outbuf;
+const char *p=outbuf, *cp;
 unsigned s=outbuf_cnt;
 time_t	t, tend;
 fd_set	fds;
@@ -49,7 +49,10 @@ int	n;
 
 	if (s == 0)	return;
 	time(&t);
-	tend=t+SOCKET_TIMEOUT;
+	if (!(cp = getenv("SOCKET_TIMEOUT")))
+		tend=t+SOCKET_TIMEOUT;
+	else
+		tend=t+atoi(cp);
 	if (debugfile)
 	{
 		fprintf(debugfile, "WRITE: ");
