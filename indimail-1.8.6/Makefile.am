@@ -146,7 +146,7 @@ indimailsbin_PROGRAMS = adminclient chowkidar cindimail clearopensmtp config_set
 	copyemail execmysql hostsync indisrvr initsvc inlookup inquerytest install_tables \
 	ipchange mail_report mgmtpass osh postdel systpass testmra updatefile updaterules \
 	vserverinfo vchkpass vsetpass vdelivermail vdeloldusers vfilter vfstab \
-	vmoddomain vreorg vtable
+	vmoddomain vreorg vtable authpgsql
 
 indimaillibexec_PROGRAMS = sq_vacation qmailmrtg7
 
@@ -354,6 +354,9 @@ crc_LDADD=
 
 crcdiff_SOURCES=crcdiff.c
 crcdiff_LDADD=
+
+authpgsql_SOURCES=authpgsql.c
+authpgsql_LDADD=@auth_pg_libs@ @auth_libs@
 
 crypt_SOURCES = crypt.c
 crypt_LDADD = @LIB_CRYPT@

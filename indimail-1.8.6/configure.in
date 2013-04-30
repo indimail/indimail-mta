@@ -946,6 +946,34 @@ then
 	AC_DEFINE_UNQUOTED(HAS_SHADOW,$HAS_SHADOW,/etc/shadow present)
 fi
 
+#
+# pgconfig
+#
+
+AC_MSG_CHECKING(for pgconfig)
+
+pgconfig=""
+
+for f in /usr/local/pgsql/bin/pg_config /usr/local/bin/pg_config /usr/bin/pg_config
+do
+   if test -x $f; then
+	  pgconfig=$f
+	  AC_MSG_RESULT($pgconfig)
+	  break
+   fi
+done
+
+if test "$pgconfig" != ""; then
+	AC_DEFINE_UNQUOTED(HAVE_PGSQL,$HAVE_PGSQL,Use PGSQL for authentication)
+	HAVE_PGSQL=1
+	auth_pg_libs="-L`$pgconfig --libdir` -lpq "
+	AC_MSG_RESULT($auth_pg_libs)
+	AC_SUBST(auth_pg_libs)
+	auth_pg_inc="-I`$pgconfig --includedir`"
+	AC_MSG_RESULT($auth_pg_inc)
+	AC_SUBST(auth_pg_inc)
+fi
+
 ###	use option --enable-mysql-escape to include the mysql-escape-string support
 AC_ARG_ENABLE(mysql_escape,   [  --enable-mysql-escape=yes|no Turn on (y, default) or off (n) mysql escape string],
 	mysql_escape=$enableval,
