@@ -27,10 +27,10 @@ extern char **main_argv;
 static char *send_auth_reply(const char *q)
 {
 	struct imaptoken *tok;
-	char	*p;
+	char	*p, *cp;
 
 #if SMAP
-	const char *cp=getenv("PROTOCOL");
+	*cp=getenv("PROTOCOL");
 
 	if (cp && strcmp(cp, "SMAP1") == 0)
 		writes("> ");
@@ -43,7 +43,10 @@ static char *send_auth_reply(const char *q)
 	writes(q);
 	writes("\r\n");
 	writeflush();
-	read_timeout(SOCKET_TIMEOUT);
+	if (!(cp = getenv("SOCKET_TIMEOUT")))
+		read_timeout(SOCKET_TIMEOUT);
+	else
+		read_timeout(atoi(cp));
 	tok=nexttoken_nouc();
 
 	switch (tok->tokentype)	{
