@@ -2386,6 +2386,13 @@ compile plugtest.c sgetopt.h alloc.h str.h strerr.h env.h stralloc.h \
 fmt.h auto_qmail.h subfd.h smtp_plugin.h
 	./compile plugtest.c
 
+hmac_sha1.obj: \
+tryindimail.c compile load indimail.lib conf-indi
+	( ( ./compile `grep -h -v "^#" conf-indi` tryindimail.c && \
+	./load tryindimail `cat indimail.lib`) >/dev/null 2>&1 \
+	&& echo || echo hmac_sha1.o) > hmac_sha1.obj
+	rm -f tryindimail.o tryindimail;echo "----- indimail.h -----";/bin/cat hasindimail.h 1>&2
+
 qmail-smtpd: \
 load qmail-smtpd.o smtpd.o rcpthosts.o recipients.o commands.o timeoutread.o \
 timeoutwrite.o ip.o ipme.o ipalloc.o strsalloc.o control.o etrn.o atrn.o constmap.o \
@@ -2395,15 +2402,15 @@ scan_xlong.o socket_v4mappedprefix.o socket_v6any.o mail_acl.o \
 open.a sig.a case.a spf.o dns.o auto_qmail.o auto_uids.o base64sub.o qregex_smtpd.o \
 tablematch.o ndelay.o ndelay_off.o greylist.o auto_break.o \
 env.a stralloc.a alloc.a substdio.a error.a str.a fs.a lock.a \
-socket.lib tai.lib dns.lib indimail.lib tls.lib
+socket.lib tai.lib dns.lib indimail.lib tls.lib hmac_sha1.obj
 	./load qmail-smtpd smtpd.o rcpthosts.o recipients.o commands.o timeoutread.o \
 	timeoutwrite.o ip.o ipme.o ipalloc.o strsalloc.o control.o etrn.o atrn.o constmap.o \
-	received.o date822fmt.o wildmat.o now.o qmail.o variables.o \
-	envrules.o bodycheck.o spf.o dns.o auto_qmail.o sqlmatch.o matchregex.o \
-	scan_xlong.o socket_v4mappedprefix.o socket_v6any.o mail_acl.o \
-	auto_uids.o base64sub.o qregex_smtpd.o tablematch.o ndelay.o ndelay_off.o \
-	cdb.a fd.a wait.a datetime.a greylist.o auto_break.o \
-	getln.a open.a sig.a case.a env.a stralloc.a alloc.a substdio.a error.a \
+	received.o date822fmt.o wildmat.o now.o qmail.o variables.o envrules.o bodycheck.o \
+	spf.o dns.o auto_qmail.o sqlmatch.o matchregex.o scan_xlong.o socket_v4mappedprefix.o \
+	socket_v6any.o mail_acl.o auto_uids.o base64sub.o qregex_smtpd.o \
+	tablematch.o ndelay.o ndelay_off.o cdb.a fd.a wait.a datetime.a \
+	greylist.o auto_break.o `cat hmac_sha1.obj 2>/dev/null` getln.a open.a sig.a \
+	case.a env.a stralloc.a alloc.a substdio.a error.a \
 	str.a fs.a lock.a `cat socket.lib tai.lib dns.lib indimail.lib tls.lib` -ldl
 
 mail_acl.o: \
