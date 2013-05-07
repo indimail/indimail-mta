@@ -1,7 +1,0 @@
-X-WARNING-1: DO NOT MODIFY THIS FILE
-X-WARNING-2: CHECK THIS FILE INTO CVS AS BINARY
-Subject: the next line only contains a TAB
-	
-Summary: This line belongs in the header.
-
-If the body contains any lines prior to this one, the software is b0rked.
