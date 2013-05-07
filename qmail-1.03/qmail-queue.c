@@ -330,7 +330,7 @@ receivedfmt(char *s)
 #ifdef INDIMAIL
 	i = fmt_str(s, "Received: (indimail ");
 #else
-	i = fmt_str(s, "Received: (qmail ");
+	i = fmt_str(s, "Received: (indimail-smtp ");
 #endif
 	len += i;
 	if (s)
