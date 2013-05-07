@@ -102,7 +102,7 @@ int main(int argc, char **argv) {
 
 		if (l > base - i + st.st_size) l = base - i + st.st_size;
 		printf("%ld:", (long)(i - base));
-		fwrite(i, 1, strcspn((const char *)i, "\n"), stdout);
+		(void) fwrite(i, 1, strcspn((const char *)i, "\n"), stdout);
 		if (EOF == puts("")) {
 		    perror("stdout");
 		    exit(2);

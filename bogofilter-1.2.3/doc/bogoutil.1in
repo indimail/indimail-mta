@@ -1,13 +1,22 @@
 '\" t
 .\"     Title: bogoutil
 .\"    Author: [see the "AUTHOR" section]
-.\" Generator: DocBook XSL Stylesheets v1.75.2 <http://docbook.sf.net/>
-.\"      Date: 03/15/2010
+.\" Generator: DocBook XSL Stylesheets v1.77.1 <http://docbook.sf.net/>
+.\"      Date: 10/22/2012
 .\"    Manual: Bogofilter Reference Manual
 .\"    Source: Bogofilter
 .\"  Language: English
 .\"
-.TH "BOGOUTIL" "1" "03/15/2010" "Bogofilter" "Bogofilter Reference Manual"
+.TH "BOGOUTIL" "1" "10/22/2012" "Bogofilter" "Bogofilter Reference Manual"
+.\" -----------------------------------------------------------------
+.\" * Define some portability stuff
+.\" -----------------------------------------------------------------
+.\" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.\" http://bugs.debian.org/507673
+.\" http://lists.gnu.org/archive/html/groff/2009-02/msg00013.html
+.\" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.ie \n(.g .ds Aq \(aq
+.el       .ds Aq '
 .\" -----------------------------------------------------------------
 .\" * set default formatting
 .\" -----------------------------------------------------------------
@@ -43,7 +52,7 @@ bogofilter
 Bayesian spam filter package\&.
 .PP
 It is used to dump and load
-bogofilter\'s Berkeley DB databases to and from text files, perform database maintenance functions, and to display the values for specific words\&.
+bogofilter\*(Aqs Berkeley DB databases to and from text files, perform database maintenance functions, and to display the values for specific words\&.
 .SH "OPTIONS"
 .PP
 The
@@ -93,8 +102,8 @@ The
 \fB\-p \fR\fB\fIfile\fR\fR
 option tells
 bogoutil
-to display the database information for one or more tokens\&. The display includes a probability column with the token\'s spam score (computed using
-bogofilter\'s default values)\&. Option
+to display the database information for one or more tokens\&. The display includes a probability column with the token\*(Aqs spam score (computed using
+bogofilter\*(Aqs default values)\&. Option
 \fB\-p\fR
 takes the same arguments as option
 \fB\-w\fR
@@ -109,7 +118,7 @@ to recalculate the ROBX value and print it as a six\-digit fraction\&.
 The
 \fB\-R \fR\fB\fIfile\fR\fR
 option does the same as
-\fB\-r\fR, but prints more information and saves the result in the training database\&.
+\fB\-r\fR, but saves the result in the training database without printing it\&.
 .PP
 The
 \fB\-I \fR\fB\fIfile\fR\fR
@@ -184,7 +193,7 @@ will be discarded\&.
 .PP
 Option
 \fB\-y date\fR
-is specifies the date to give to tokens that don\'t have dates\&. The format is YYYYMMDD\&.
+is specifies the date to give to tokens that don\*(Aqt have dates\&. The format is YYYYMMDD\&.
 .PP
 The
 \fB\-h\fR

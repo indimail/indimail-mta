@@ -1,4 +1,4 @@
-/* $Id: bogoutil.c 6920 2010-07-05 20:05:57Z relson $ */
+/* $Id: bogoutil.c 6940 2010-12-21 01:20:22Z relson $ */
 
 /*****************************************************************************
 
@@ -50,8 +50,8 @@ const char *progname = "bogoutil";
 
 static int token_count = 0;
 
-bool  maintain = false;
-bool  onlyprint = false;
+static bool maintain = false;
+static bool onlyprint = false;
 
 /* Function Definitions */
 

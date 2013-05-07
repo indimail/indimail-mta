@@ -1,4 +1,4 @@
-# $Id: Makefile.am 6905 2010-07-03 08:37:55Z m-a $
+# $Id: Makefile.am 6975 2012-11-06 02:18:15Z m-a $
 
 check_PROGRAMS=dehex spam_header_name dumbhead deqp deb64 escnp abortme \
 	       u_fpe wantcore leakmem ctype
@@ -45,6 +45,7 @@ PARSING_TESTS = \
 	t.multiple.tokens.head t.multiple.tokens.body t.multiple.tokens.min.mul \
 	$(ENCODING_TESTS) \
 	t.rfc2047_broken t.rfc2047_folded \
+	t.crash-invalid-base64 \
 	t.message_addr t.message_id t.queue_id
 
 WORDLIST_TESTS = t.dump.load t.nonascii.replace t.maint t.robx t.regtest t.upgrade.subnet.prefix t.multiple.wordlists t.probe t.bf_compact

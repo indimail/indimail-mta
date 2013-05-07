@@ -15,7 +15,29 @@
 
 -------------------------------------------------------------------------------
 
-1.2.2	2010-10-08 (released)
+1.2.3	2012-12-02 (released)
+
+	2012-10-24
+	* Update configure.ac to avoid autoconf 2.68 warnings, by 
+	  (a) quoting the first AC_RUN_IFELSE argument, an
+	      AC_LANG_PROGRAM(), with [ ], and
+	  (b) providing an explicit "true" assumption for Berkeley DB
+	      capabilities to avoid cross-compilation warnings.
+
+	2012-10-22
+	* Security bugfix,
+	  Fix a heap corruption in base64 decoder on invalid input.
+	  Analysis and patch by Julius Plenz <plenz@cis.fu-berlin.de>.
+
+	2011-01-02
+	* Added bogofilter-faq-bg.html, a Bulgarian translation of the FAQ.
+	  (thanks to Albert Ward)
+
+	2010-10-29
+	* Mark "Berkeley DB 5.1.19: (August 27, 2010)" supported.
+
+
+1.2.2	2010-07-08 (released)
 
 	2010-07-05
 	* Use a better PRNG for random sleeps. That is arc4random() where
@@ -612,7 +634,7 @@
 
 	Release history prior to 1.0.0 is in file NEWS.0
 
-$Id: NEWS 6927 2010-07-09 00:28:15Z relson $
+$Id: NEWS 6976 2012-12-02 20:49:49Z relson $
 
  vim:tw=79 com=bf\:* ts=8 sts=8 sw=8 ai:
 

@@ -57,7 +57,7 @@ extern lexer_t	msg_count_lexer;
 
 /* in lexer_v3.l */
 extern token_t	yylex(void);
-/*- extern int	yyleng;*/
+/*- extern int	yyleng; */
 extern char   * yytext;
 extern void	lexer_v3_init(FILE *fp);
 

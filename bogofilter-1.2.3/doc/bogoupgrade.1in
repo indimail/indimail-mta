@@ -1,13 +1,22 @@
 '\" t
 .\"     Title: bogoupgrade
 .\"    Author: [see the "AUTHOR" section]
-.\" Generator: DocBook XSL Stylesheets v1.75.2 <http://docbook.sf.net/>
-.\"      Date: 03/15/2010
+.\" Generator: DocBook XSL Stylesheets v1.77.1 <http://docbook.sf.net/>
+.\"      Date: 10/22/2012
 .\"    Manual: Bogofilter Reference Manual
 .\"    Source: Bogofilter
 .\"  Language: English
 .\"
-.TH "BOGOUPGRADE" "1" "03/15/2010" "Bogofilter" "Bogofilter Reference Manual"
+.TH "BOGOUPGRADE" "1" "10/22/2012" "Bogofilter" "Bogofilter Reference Manual"
+.\" -----------------------------------------------------------------
+.\" * Define some portability stuff
+.\" -----------------------------------------------------------------
+.\" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.\" http://bugs.debian.org/507673
+.\" http://lists.gnu.org/archive/html/groff/2009-02/msg00013.html
+.\" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.ie \n(.g .ds Aq \(aq
+.el       .ds Aq '
 .\" -----------------------------------------------------------------
 .\" * set default formatting
 .\" -----------------------------------------------------------------
@@ -27,7 +36,7 @@ bogoupgrade \- upgrades bogofilter database to current version
 .PP
 \fBbogoupgrade\fR
 is a command to upgrade
-bogofilter\'s databases from an old format to the current format\&. Since the format of the database changes once in a while, the utility is designed to make the upgrade easy\&.
+bogofilter\*(Aqs databases from an old format to the current format\&. Since the format of the database changes once in a while, the utility is designed to make the upgrade easy\&.
 .SH "OPTIONS"
 .PP
 The
@@ -50,11 +59,11 @@ The
 \fB\-b\fR
 gives the path to the
 \fBbogoutil\fR
-command\&. It defaults to \'bogoutil\', in the hopes that your shell will find it\&.
+command\&. It defaults to \*(Aqbogoutil\*(Aq, in the hopes that your shell will find it\&.
 .SH "UPGRADING"
 .PP
 Follow these instructions to upgrade
-bogofilter\'s databases to the latest version\&.
+bogofilter\*(Aqs databases to the latest version\&.
 .sp
 .RS 4
 .ie n \{\
@@ -65,7 +74,7 @@ bogofilter\'s databases to the latest version\&.
 .IP "  1." 4.2
 .\}
 Stop all instances of
-bogofilter\&. While the upgrade tools lock the database files, the upgrade may take a long time if you have a busy site\&. Don\'t forget to stop cron jobs or daemons that fetch and process mail and could fire off
+bogofilter\&. While the upgrade tools lock the database files, the upgrade may take a long time if you have a busy site\&. Don\*(Aqt forget to stop cron jobs or daemons that fetch and process mail and could fire off
 bogofilter\&.
 .RE
 .sp
@@ -77,7 +86,7 @@ bogofilter\&.
 .sp -1
 .IP "  2." 4.2
 .\}
-Backup your data\&. Let\'s assume that you said:
+Backup your data\&. Let\*(Aqs assume that you said:
 .sp
 .if n \{\
 .RS 4
@@ -140,7 +149,7 @@ $ \fBbogoupgrade \-i ~/\&.bogofilter\&.safe/spamlist\&.count \-o ~/\&.bogofilter
 .\}
 Current versions of
 bogofilter
-use a combined wordlist that holds both spam and non\-spam tokens\&. It is named wordlist\&.db\&. If you\'re updating from a version older than 0\&.14\&.0 that has separate wordlists (named goodlist\&.db and spamlist\&.db), use:
+use a combined wordlist that holds both spam and non\-spam tokens\&. It is named wordlist\&.db\&. If you\*(Aqre updating from a version older than 0\&.14\&.0 that has separate wordlists (named goodlist\&.db and spamlist\&.db), use:
 .sp
 .if n \{\
 .RS 4

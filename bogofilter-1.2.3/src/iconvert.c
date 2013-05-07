@@ -1,4 +1,4 @@
-/* $Id: iconvert.c 6888 2010-03-14 16:24:40Z m-a $ */
+/* $Id: iconvert.c 6973 2012-10-18 03:15:18Z relson $ */
 
 /*****************************************************************************
 
@@ -76,7 +76,7 @@ static void convert(iconv_t xd, buff_t *restrict src, buff_t *restrict dst)
 	outbuf = (char *)dst->t.u.text + dst->t.leng;
 	outbytesleft = dst->size - dst->read - dst->t.leng;
 
-	if (outbytesleft == 0)
+	if (outbytesleft <= 0)
 	    break;
 
 	/*
@@ -141,6 +141,10 @@ static void convert(iconv_t xd, buff_t *restrict src, buff_t *restrict dst)
 	    switch (err) {
 	    case EILSEQ:		/* invalid multibyte sequence */
 	    case EINVAL:		/* incomplete multibyte sequence */
+		if(outbytesleft <= 0) {
+                    done = true;
+                    break;
+		}
 		/* copy 1 byte (or substitute a '?') */
 		if (!replace_nonascii_characters)
 		    *outbuf = *inbuf;

@@ -226,9 +226,6 @@ rc_t bogofilter(int argc, char **argv)
 
     if (logflag && register_opt)
 	write_log_message(status);
-#ifdef INDIMAIL
-	write_fifolog(status);
-#endif
 
     wordhash_free(words);
 

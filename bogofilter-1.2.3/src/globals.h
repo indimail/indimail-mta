@@ -1,4 +1,4 @@
-/* $Id: globals.h 6925 2010-07-06 21:49:00Z m-a $ */
+/* $Id: globals.h 6940 2010-12-21 01:20:22Z relson $ */
 
 #ifndef GLOBALS_H
 #define GLOBALS_H
@@ -76,9 +76,6 @@ extern	uint		 msgs_bad;
 /* for passthrough.c */
 extern size_t msg_register_size;
 extern char msg_register[256];
-
-extern bool maintain;
-extern bool onlyprint;
 
 /*		    old     new
 **  robs            0.010   0.0178

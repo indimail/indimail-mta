@@ -1,7 +1,7 @@
 BERKELEY DB ENVIRONMENT CODE
 ============================
 
-$Id: README.db 6898 2010-04-01 15:11:23Z m-a $
+$Id: README.db 6934 2010-09-15 20:23:59Z m-a $
 
 This document does not apply when you are installing a bogofilter
 version that has been configured to use the QDBM or SQLite3
@@ -65,6 +65,7 @@ applied the patches, check your vendor's update site regularly):
   Berkeley DB 4.8.24: (August 14, 2009)
   Berkeley DB 4.8.26: (December 18, 2009)
   Berkeley DB 5.0.21: (March 30, 2010)
+  Berkeley DB 5.1.19: (August 27, 2010)
 
 Other versions of Berkeley DB between the first and last listed above
 may or may not work but usually they will.

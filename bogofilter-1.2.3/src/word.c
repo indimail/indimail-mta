@@ -1,4 +1,4 @@
-/* $Id: word.c 6766 2009-01-12 04:27:36Z relson $ */
+/* $Id: word.c 6976 2012-12-02 20:49:49Z relson $ */
 
 /** \file word.c
  * support for strings of arbitrary content, implementation
@@ -75,7 +75,7 @@ void word_puts(const word_t *word, uint width, FILE *fp)
     **		   blank fill if 'width' < length
     */
     uint l = (width == 0) ? word->leng : min(width, word->leng);
-    (void)fwrite(word->u.text, 1, l, fp);
+    (void) fwrite(word->u.text, 1, l, fp);
     if (l < width)
 	(void) fprintf(fp, "%*s", (int)(width - l), " ");
 }

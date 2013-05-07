@@ -48,7 +48,8 @@
     <p>Official Versions: In
     <a href="http://bogofilter.sourceforge.net/faq.shtml">English</a> or
     <a href="http://bogofilter.sourceforge.net/faq_fr.shtml">French</a> or
-    <a href="http://bogofilter.sourceforge.net/faq_it.shtml">Italian</a><br>
+    <a href="http://bogofilter.sourceforge.net/faq_it.shtml">Italian</a> or
+    <a href="http://bogofilter.sourceforge.net/faq_bg.shtml">Bulgarian</a><br>
     Maintainer: David Relson &lt;relson@osagesoftware.com&gt;</p>
 
     <p>This document is intended to answer frequently asked
@@ -114,22 +115,22 @@
           non-transaction to transaction mode?</a></li>
           <li><a href="#disable-transactions">How can I switch from
           transaction to non-transaction mode?</a></li>
-	  <li><a href="#locksize">Why does bogofilter die after printing<br>
-	      "Lock table is out of available locks" or<br>
-	      "Lock table is out of available object entries"?</a></li>
+          <li><a href="#locksize">Why does bogofilter die after printing<br>
+              "Lock table is out of available locks" or<br>
+              "Lock table is out of available object entries"?</a></li>
           <li><a href="#page-notfound">Why am I getting DB_PAGE_NOTFOUND messages?</a></li>
-	  <li><a href="#db-private">Why am I getting &quot;Berkeley DB
-	      library configured to support only DB_PRIVATE
-	      environments&quot; or<br>
-	      &quot;Berkeley DB library configured to support only
-	      private environments&quot;?</a>
+          <li><a href="#db-private">Why am I getting &quot;Berkeley DB
+              library configured to support only DB_PRIVATE
+              environments&quot; or<br>
+              &quot;Berkeley DB library configured to support only
+              private environments&quot;?</a>
         </ul>
       </li>
 
       <li>
         Technical problems
         <ul>
-	  <li><a href="#multi-user">Can bogofilter be used in a multi-user environment?</a></li>
+          <li><a href="#multi-user">Can bogofilter be used in a multi-user environment?</a></li>
           <li><a href="#nfs">Can I share wordlists over NFS?</a></li>
           <li><a href="#return-codes">Why does bogofilter give return codes like 0 and
           256 when it's run from inside a program?</a></li>
@@ -145,10 +146,10 @@
           <li><a href="#port-notes">How do I get bogofilter working on Solaris, BSD, etc.?</a></li>
           <li><a href="#make-notes">Can I use the make command on my operating system?</a></li>
           <li><a href="#build">How do I build bogofilter as non-root
-	  user or for a non-standard installation prefix?</a></li>
+          user or for a non-standard installation prefix?</a></li>
           <li><a href="#patch">How do I build bogofilter with patches?</a></li>
           <li><a href="#smaller">How do I make the executables smaller?</a></li>
-	  <li><a href="#relativepath">datastore_db.c does not compile!</a></li>
+          <li><a href="#relativepath">datastore_db.c does not compile!</a></li>
         </ul>
       </li>
 
@@ -183,7 +184,7 @@
     in his article
     <a href="http://www.paulgraham.com/spam.html">A Plan For Spam</a>.
     bogofilter uses
-    <a href="http://radio.weblogs.com/0101454/stories/2002/09/16/spamDetection.html">Gary Robinson</a>'s
+    <a href="http://radio-weblogs.com/0101454/stories/2002/09/16/spamDetection.html">Gary Robinson</a>'s
     geometric-mean algorithm with the
     <a href="http://www.linuxjournal.com/article/6467">Fisher's method modification</a>
     to classify email as spam or non-spam.</p>
@@ -275,7 +276,7 @@
     <p>There are currently four mailing lists for bogofilter:</p>
 
     <table border="1" width="100%" summary="[You need a table-capable
-	browser to read this overview of mailing lists]">
+        browser to read this overview of mailing lists]">
       <tr>
         <th>List Address</th>
         <th>Links</th>
@@ -288,7 +289,7 @@
         [archives: <a
         href="http://www.bogofilter.org/pipermail/bogofilter-announce/">mailman</a>, <a
         href="http://news.gmane.org/gmane.mail.bogofilter.announce">gmane</a>]
-	</td>
+        </td>
         <td>An announcement-only list where new versions are
         announced.</td>
       </tr>
@@ -299,7 +300,7 @@
         [archives: <a
         href="http://www.bogofilter.org/pipermail/bogofilter/">mailman</a>, <a
         href="http://news.gmane.org/gmane.mail.bogofilter.general">gmane</a>]
-	</td>
+        </td>
         <td>A discussion list where any conversation about
         bogofilter may take place.</td>
       </tr>
@@ -310,7 +311,7 @@
         [archives: <a
         href="http://www.bogofilter.org/pipermail/bogofilter-dev/">mailman</a>, <a
         href="http://news.gmane.org/gmane.mail.bogofilter.devel">gmane</a>]
-	</td>
+        </td>
         <td>A list for sharing patches, development, and technical
         discussions.</td>
       </tr>
@@ -320,8 +321,8 @@
         <td><a href="https://lists.sourceforge.net/lists/listinfo/bogofilter-cvs">[subscribe]</a>
         <a href="http://sourceforge.net/mailarchive/forum.php?forum=bogofilter-cvs">[archive]</a></td>
         <td>Mailing list for announcing code changes to the SVN
-	archive. (The CVS name is a leftover from before the migration 
-	for our users' convenience.)</td>
+        archive. (The CVS name is a leftover from before the migration 
+        for our users' convenience.)</td>
       </tr>
     </table>
 
@@ -660,7 +661,7 @@
         <p>The "-R" output is formatted for use with the R language
         for statistical computing. More information is available at
         <a href="http://www.r-project.org/">The R Project for
-	Statistical Computing</a>.</p>
+        Statistical Computing</a>.</p>
       </li>
     </ul>
 
@@ -1212,7 +1213,7 @@
 
     <ul>
         <li>Having a bogofilter administrator who maintains a global
-	    wordlist that everybody uses.</li>
+            wordlist that everybody uses.</li>
         <li>Having each user maintain his/her own wordlist.</li>
     </ul>
 
@@ -1315,7 +1316,7 @@
     <p>If you don't already have a v3.0+ version of
     <a href="http://www.sleepycat.com/">BerkeleyDB</a>, then
     <a href="http://www.sleepycat.com/download/db/">download it (take
-	one of the 4.4.X, 4.3.X or 4.2.X versions)</a>,
+        one of the 4.4.X, 4.3.X or 4.2.X versions)</a>,
     unpack it, and do these commands in the db directory:</p>
     <pre>    $ cd build_unix
     $ sh ../dist/configure
@@ -1323,7 +1324,7 @@
     # make install</pre>
 
     <p>Next, download a
-    <a href="http://sourceforge.net/project/showfiles.php?group_id=62265">portable version</a>
+    <a href="http://sourceforge.net/projects/bogofilter/files/">portable version</a>
     of bogofilter.</p>
 
     <h3>On Solaris</h3>
@@ -1371,8 +1372,8 @@
 
     <p>To install or upgrade bogofilter, just
     <a
-	href="http://www.freebsd.org/doc/en_US.ISO8859-1/books/handbook/portsnap.html">upgrade
-	your portstree using portsnap</a>,
+        href="http://www.freebsd.org/doc/en_US.ISO8859-1/books/handbook/portsnap.html">upgrade
+        your portstree using portsnap</a>,
     then type, as root:</p>
     <pre>    # portupgrade -N bogofilter</pre>
 
@@ -1393,14 +1394,14 @@
 
     <p>pkgsrc should be offering a reasonably recent stable bogofilter
     release. See <a
-	href="http://www.pkgsrc.org/">http://www.pkgsrc.org/</a> for
+        href="http://www.pkgsrc.org/">http://www.pkgsrc.org/</a> for
     information on pkgsrc.</p>
 
     <h3>On HP-UX</h3>
 
     <p>See the file
     <a
-	href="http://bogofilter.cvs.sourceforge.net/*checkout*/bogofilter/bogofilter/doc/programmer/README.hp-ux?content-type=text%2Fplain&amp;revision=HEAD">doc/programmer/README.hp-ux</a>
+        href="http://bogofilter.cvs.sourceforge.net/*checkout*/bogofilter/bogofilter/doc/programmer/README.hp-ux?content-type=text%2Fplain&amp;revision=HEAD">doc/programmer/README.hp-ux</a>
     in the source distribution.</p>
 
     <hr>
@@ -1429,7 +1430,7 @@
     provide the installation prefix when you run <code>./configure</code>.
 
     <p> After downloading and unpacking the <a
-    href="http://sourceforge.net/project/showfiles.php?group_id=62265">
+    href="http://sourceforge.net/projects/bogofilter/files/">
     source code</a>, run <code>./configure --prefix=PATH</code> where
     PATH is the installation prefix for the generated files (binaries,
     man pages etc.).  Then run the usual build commands &#8212;
@@ -1441,7 +1442,7 @@
     <h2 id="patch">How do I build bogofilter with patches?</h2>
 
     <p>If you need to apply patches, get the <a
-    href="http://sourceforge.net/project/showfiles.php?group_id=62265">source
+    href="http://sourceforge.net/projects/bogofilter/files/">source
     code</a> and unpack it using <code>tar -xzf</code> or <code>gunzip
     | tar -xf -</code> (as appropriate). Change to the
     source directory and run <code>./configure --prefix=PATH</code>
@@ -1643,7 +1644,7 @@
     <hr>
 
     <!--
-    $Id: bogofilter-faq.html 6739 2008-08-12 08:05:31Z m-a $
+    $Id: bogofilter-faq.html 6970 2012-04-22 15:26:25Z relson $
     -->
-</body>
+  </body>
 </html>

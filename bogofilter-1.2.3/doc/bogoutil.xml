@@ -145,9 +145,8 @@
 	</para>
 
 	<para>The <option>-R <replaceable>file</replaceable></option>
-	    option does the same as <option>-r</option>, but prints
-	    more information and saves the result in the training
-	    database.
+	    option does the same as <option>-r</option>, but saves the
+	    result in the training database without printing it.
 	</para>
 
 	<para>The <option>-I <replaceable>file</replaceable></option> option tells
