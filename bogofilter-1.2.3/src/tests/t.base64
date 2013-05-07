@@ -1,0 +1,19 @@
+#! /bin/sh -x
+
+. ${srcdir:=.}/t.frame
+
+#
+# test base64 decoder functions
+#
+
+cat <<_EOF | $BOGOLEXER -C -q >/dev/null
+Content-Type: multipart/mixed;boundary="----bound"
+
+------bound
+Content-Transfer-Encoding: base64
+
+
+=C7ET=DDNERSAVA=DE=20
+------bound
+Content-Type: text/plain; charset="iso-8859-9"
+_EOF
