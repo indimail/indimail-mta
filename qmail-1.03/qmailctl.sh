@@ -11,6 +11,9 @@
 ### END INIT INFO
 
 # $Log: qmailctl.sh,v $
+# Revision 1.38  2013-05-07 15:51:52+05:30  Cprogrammer
+# startup/shutdown script for non-indimail system
+#
 # Revision 1.37  2011-10-23 08:56:40+05:30  Cprogrammer
 # qmail-qstat removed as qmail-qread has the functionality
 #
@@ -280,7 +283,13 @@ stop()
 	done
 	if [ ! -f /bin/systemctl ] ; then
 		$ECHO -n $"Stopping svscan: "
-		QMAIL/sbin/initsvc -off > /dev/null 2>>/tmp/sv.err && $succ || $fail
+		if [ -f QMAIL/sbin/initsvc ] ; then
+			QMAIL/sbin/initsvc -off > /dev/null 2>>/tmp/sv.err && $succ || $fail
+		elif [ -f /sbin/initctl ] ; then
+			/sbin/initctl stop svscan >/dev/null 2>>/tmp/sv.err && $succ || $fail
+		else
+			killall -e -w svscan && $succ || $fail
+		fi
 		RETVAL=$?
 		echo
 		if [ -s /tmp/sv.err ] ; then
@@ -303,7 +312,18 @@ start()
 	QMAIL/bin/svstat $SERVICE/.svscan/log > /dev/null
 	if [ $? -ne 0 ] ; then
 		$ECHO -n $"Starting svscan: "
-		QMAIL/sbin/initsvc -on > /dev/null 2>/tmp/sv.err && $succ || $fail
+		if [ -f QMAIL/sbin/initsvc ] ; then
+			QMAIL/sbin/initsvc -on > /dev/null 2>/tmp/sv.err && $succ || $fail
+		elif [ -f /sbin/initctl ] ; then
+			/sbin/initctl start svscan >/dev/null 2>>/tmp/sv.err && $succ || $fail
+		else
+			if [ -w /dev/console ] ; then
+				device=/dev/console
+			else
+				device=/dev/null
+			fi
+			QMAIL/bin/svscanboot <>$device 2<>$device
+		fi
 		RETVAL=$?
 		echo
 		let ret+=$RETVAL
@@ -379,7 +399,13 @@ case "$1" in
 	;;
   shut)
 	$ECHO -n $"shutdown svscan: "
-	QMAIL/sbin/initsvc -off > /dev/null && $succ || $fail
+	if [ -f QMAIL/sbin/initsvc ] ; then
+		QMAIL/sbin/initsvc -off > /dev/null && $succ || $fail
+	elif [ -f /sbin/initctl ] ; then
+		/sbin/initctl stop svscan >/dev/null && $succ || $fail
+	else
+		killall -e -w svscan && $succ || $fail
+	fi
 	ret=$?
 	echo
 	[ $ret -eq 0 ] && exit 0 || exit 1
