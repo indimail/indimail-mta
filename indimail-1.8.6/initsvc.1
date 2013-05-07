@@ -8,9 +8,12 @@ initsvc \- Enable / Disable IndiMail services
 
 .SH DESCRIPTION
 The \fBinitsvc\fR command installs all indimail services to be automatically started up on
-system startup. Depending on the OS, \fBinitsvc\fR installs \fBsvscan(8)\fR to be started up by
-\fBinit(8)\fR (entry in /etc/inittab) or \fBupstart(8)\fR (job definition in
-/etc/init/svscan.conf). \fBinitsvc\fR needs to be run by the \fIroot\fR user.
+system startup. Depending on the OS, \fBinitsvc\fR installs \fBsvscan(8)\fR to be started
+up by
+\fBinit(8)\fR (entry in /etc/inittab), \fBupstart(8)\fR (job definition in
+/etc/init/svscan.conf) or \fBsystemd(1)\fR (job definition in
+/lib/systemd/system/indimail.service). \fBinitsvc\fR needs to be run by the
+\fIroot\fR user.
 
 .SH OPTIONS
 .PP
@@ -25,7 +28,8 @@ Disables all services to be started automatically on boot or reboot
 Displays the status of svscan service
 .TP
 \fB-print\fR
-Displays the entry for svscan in /etc/inittab or /etc/event.d
+Displays the entry for svscan in /etc/inittab, /etc/event.d or
+/lib/systemd/system
 
 .SH RETURN VALUE
 0 in case of success, 1 in case of any failure.
