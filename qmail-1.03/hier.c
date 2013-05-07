@@ -1,5 +1,8 @@
 /*
  * $Log: hier.c,v $
+ * Revision 1.175  2013-05-07 16:51:35+05:30  Cprogrammer
+ * skip qmail-sql for non-indimail installation
+ *
  * Revision 1.174  2012-11-24 08:20:16+05:30  Cprogrammer
  * added rrt
  *
@@ -521,7 +524,9 @@ hier(inst_dir)
 	c(auto_qmail_home, "bin", "qmail-newmrh", auto_uido, auto_gidq, 0500);
 	c(auto_qmail_home, "bin", "recipient-cdb", auto_uido, auto_gidq, 0500);
 	c(auto_qmail_home, "bin", "qmail-cdb", auto_uido, auto_gidq, 0500);
+#ifdef INDIMAIL
 	c(auto_qmail_home, "bin", "qmail-sql", auto_uido, auto_gidq, 0500);
+#endif
 	c(auto_qmail_home, "bin", "qmail-pw2u", auto_uido, auto_gidq, 0511);
 	c(auto_qmail_home, "bin", "qmail-inject", auto_uido, auto_gidq, 0555);
 	c(auto_qmail_home, "bin", "predate", auto_uido, auto_gidq, 0555);
@@ -1648,7 +1653,7 @@ _hier(inst_dir)
 void
 getversion_install_big_c()
 {
-	static char    *x = "$Id: hier.c,v 1.174 2012-11-24 08:20:16+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: hier.c,v 1.175 2013-05-07 16:51:35+05:30 Cprogrammer Stab mbhangui $";
 
 #ifdef INDIMAIL
 	if (x)
