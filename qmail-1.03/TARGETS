@@ -979,6 +979,7 @@ condredirect.1
 rrforward.1
 qreceipt.1
 hmac_md5.o
+hmac_sha1.obj
 md5c.o
 trywaitp.o
 mail_acl.o
