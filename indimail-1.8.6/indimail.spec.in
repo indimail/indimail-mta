@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail.spec.in,v 2.256 2013-03-15 09:56:38+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 2.259 2013-05-10 13:05:02+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %define _unpackaged_files_terminate_build 1
 
@@ -36,7 +36,7 @@
 %define _prefix            @indimaildir@
 %define default_domain     @defaultdomain@
 %define courier_version    4.11.0
-%define bogofilter_version 1.2.2
+%define bogofilter_version 1.2.3
 %define pam_multi_version  1.1
 %define ucspi_version      0.88
 %define qmail_version      1.03
@@ -128,7 +128,9 @@ Source9:  http://downloads.sourceforge.net/%{name}/nssd-%{nssd_version}.tar.gz
 %if %nobogofilter == 0
 Source10: http://downloads.sourceforge.net/bogofilter/bogofilter-%{bogofilter_version}.tar.bz2
 %endif
+%if %nofetchmail == 0
 Source11: http://prdownload.berlios.de/fetchmail/fetchmail-%{fetchmail_version}.tar.bz2 
+%endif
 %if %noclamav == 0
 Source12: http://downloads.sourceforge.net/clamav/clamav-%{clamav_version}.tar.gz
 %endif
@@ -172,7 +174,7 @@ Patch12: http://downloads.sourceforge.net/%{name}/Patches/clamav-%{clamav_versio
 Patch13: http://downloads.sourceforge.net/%{name}/Patches/courier-imap-%{courier_version}-1.2.mac_supplement.patch.gz
 %endif
 
-NoSource: 1
+NoSource: 0
 NoSource: 2
 %if %nocourierimap == 0
 NoSource: 3
@@ -195,6 +197,7 @@ NoSource: 11
 NoSource: 12
 %endif
 NoSource: 13
+NoSource: 14
 
 URL: http://www.indimail.org
 #AutoReqProv: No
@@ -244,7 +247,11 @@ BuildRequires: db5.1-devel
 %if 0%{?mandriva_version} == 201010
 BuildRequires: db4.7-devel
 %else
+%if 0%{?fedora_version} > 17
+BuildRequires: libdb-devel
+%else
 BuildRequires: db4-devel
+%endif
 %endif
 %endif
 %endif
@@ -267,7 +274,7 @@ BuildRoot: %(mktemp -ud %{_tmppath}/%{name}-%{version}-%{release}-XXXXXXX)
 Excludeos: windows 
 
 %description
-IndiMail is a mailing solution built using following packages
+IndiMail is a messaging platform built using following packages
 
 qmail,
 serialmail,
@@ -760,6 +767,7 @@ do
 done
 
 /usr/bin/chrpath -d %{buildroot}%{_prefix}/libexec/authlib/authindi
+/usr/bin/chrpath -d %{buildroot}%{_prefix}/libexec/authlib/authpgsql
 /usr/bin/chrpath -d %{buildroot}%{_prefix}/libexec/sq_vacation
 /usr/bin/chrpath -d %{buildroot}%{_prefix}/libexec/qmailmrtg7
 /usr/bin/chrpath -d %{buildroot}%{_prefix}/modules/iauth.so
@@ -952,6 +960,8 @@ fi
 %attr(444,root,root)                              %{_prefix}/etc/indimail.settings
 %attr(444,root,root)                              %{_prefix}/etc/perm_list
 %attr(444,root,root)                              %{_prefix}/etc/yum.repos.d/*.repo
+# logalert
+%attr(444,root,root)                              %{_prefix}/etc/logalert_perm_list
 
 %if %noperms == 0
 %if 0%{?suse_version} >= 1120
@@ -1031,255 +1041,33 @@ fi
 %endif
 %endif
 
-%attr(555,root,qmail)                   %{_prefix}/bin/qmail-popbull
-%attr(555,root,qmail)                   %{_prefix}/sbin/vserverinfo
-%attr(555,root,qmail)                   %{_prefix}/bin/cleanq
 %attr(555,root,qmail)                   %{_prefix}/bin/logmonitor
-%attr(555,root,qmail)                   %{_prefix}/bin/zsuccesses
-%attr(555,root,qmail)                   %{_prefix}/bin/ofmipd
-%attr(555,root,qmail)                   %{_prefix}/bin/qmail-queue-print
-%attr(555,root,qmail)                   %{_prefix}/bin/qmail-lagcheck
-%attr(555,root,qmail)                   %{_prefix}/bin/mbox2maildir.pl
-%attr(555,root,qmail)                   %{_prefix}/bin/deferrals
-%attr(555,root,qmail)                   %{_prefix}/bin/maildirwatch
-%attr(555,root,qmail)                   %{_prefix}/bin/bouncesaying
 %attr(555,root,qmail)                   %{_prefix}/bin/hostcntrl
-%attr(511,root,qmail)                   %{_prefix}/bin/relaytest
-%attr(555,root,qmail)                   %{_prefix}/bin/checkaddr
-%attr(555,root,qmail)                   %{_prefix}/bin/rsmtprecipients
-%attr(555,root,qmail)                   %{_prefix}/bin/autoresponder
-%attr(555,root,qmail)                   %{_prefix}/bin/idedit
-%attr(555,root,qmail)                   %{_prefix}/bin/svstat
-%attr(555,root,qmail)                   %{_prefix}/bin/ddist
-%attr(555,root,qmail)                   %{_prefix}/bin/822headerfilter
-%attr(555,root,qmail)                   %{_prefix}/bin/smtp-matchup
-%attr(500,root,qmail)                   %{_prefix}/bin/qmail-newu
-%attr(511,root,qmail)                   %{_prefix}/bin/qmail-pw2u
 %attr(555,root,qmail)                   %{_prefix}/bin/bogofilter-qfe
-%attr(555,root,qmail)                   %{_prefix}/bin/qfilelog
-%attr(555,root,qmail)                   %{_prefix}/bin/checkdomain
-%attr(555,root,qmail)                   %{_prefix}/bin/svok
-%attr(555,root,qmail)                   %{_prefix}/bin/maildirqmtp
-%attr(555,root,qmail)                   %{_prefix}/bin/qmailctl
-%attr(555,root,qmail)                   %{_prefix}/bin/mpack
-%attr(555,root,qmail)                   %{_prefix}/bin/munpack
-%attr(500,root,qmail)                   %{_prefix}/bin/qmail-lspawn
-%attr(555,root,qmail)                   %{_prefix}/bin/dnstxt
-%attr(555,root,qmail)                   %{_prefix}/bin/printmaillist
 %attr(555,root,qmail)                   %{_prefix}/bin/vpasswd
 %attr(555,root,qmail)                   %{_prefix}/bin/displaytop
-%attr(511,root,qmail)                   %{_prefix}/bin/qmail-todo
 %attr(555,root,qmail)                   %{_prefix}/bin/resetquota
-%attr(555,root,qmail)                   %{_prefix}/bin/tai64nunix
-%attr(555,root,qmail)                   %{_prefix}/bin/qmail-tcpto
-%attr(555,root,qmail)                   %{_prefix}/bin/newinclude
-%attr(555,root,qmail)                   %{_prefix}/bin/recordio
-%attr(555,root,qmail)                   %{_prefix}/bin/logselect
-%attr(555,root,qmail)                   %{_prefix}/bin/teepipe
-%attr(555,root,qmail)                   %{_prefix}/bin/ipmeprint
-%attr(555,root,qmail)                   %{_prefix}/bin/uacl
-%attr(555,root,qmail)                   %{_prefix}/bin/envdir
 %attr(555,root,qmail)                   %{_prefix}/bin/vcalias
-%attr(555,root,qmail)                   %{_prefix}/bin/dnsmxip
-%attr(555,root,qmail)                   %{_prefix}/bin/zrecipients
-%attr(555,root,qmail)                   %{_prefix}/bin/xsender
-%attr(555,root,qmail)                   %{_prefix}/bin/rxdelay
-%attr(555,root,qmail)                   %{_prefix}/bin/cdbmake
-%attr(511,root,qmail)                   %{_prefix}/bin/qmail-remote
-%attr(555,root,qmail)                   %{_prefix}/bin/fortune
-%attr(555,root,qmail)                   %{_prefix}/bin/pinq
-%attr(555,root,qmail)                   %{_prefix}/bin/mlmatchup
-%attr(555,root,qmail)                   %{_prefix}/bin/822print
-%attr(511,root,qmail)                   %{_prefix}/bin/qmail-send
-%attr(555,root,qmail)                   %{_prefix}/bin/sendmail
-%attr(555,root,qmail)                   %{_prefix}/bin/rmail
-%attr(555,root,qmail)                   %{_prefix}/bin/dbinfo
-%attr(555,root,qmail)                   %{_prefix}/bin/sslerator
-%attr(555,root,qmail)                   %{_prefix}/bin/ifaddr
-%attr(555,root,qmail)                   %{_prefix}/bin/svscan
-%attr(555,root,qmail)                   %{_prefix}/bin/matchup
-%attr(555,root,qmail)                   %{_prefix}/bin/zspam
-%attr(555,root,qmail)                   %{_prefix}/bin/recipients
-%attr(555,root,qmail)                   %{_prefix}/bin/update_tmprsadh
-%attr(555,root,qmail)                   %{_prefix}/bin/softlimit
-%attr(555,root,qmail)                   %{_prefix}/bin/setforward
-%attr(555,root,qmail)                   %{_prefix}/bin/822date
-%attr(555,root,qmail)                   %{_prefix}/bin/cdbdump
-%attr(555,root,qmail)                   %{_prefix}/bin/iftocc
-%attr(555,root,qmail)                   %{_prefix}/bin/qmail-qmqpc
-%attr(555,root,qmail)                   %{_prefix}/bin/serialqmtp
-%attr(555,root,qmail)                   %{_prefix}/bin/altermime
-%attr(555,root,qmail)                   %{_prefix}/bin/rsmtprdomains
 %attr(555,root,qmail)                   %{_prefix}/bin/vhostid
-%attr(511,root,qmail)                   %{_prefix}/bin/qmail-getpw
 %attr(555,root,qmail)                   %{_prefix}/bin/vatrn
-%attr(555,root,qmail)                   %{_prefix}/bin/balance_outgoing
 %attr(555,root,qmail)                   %{_prefix}/bin/indiversion
-%attr(555,root,qmail)                   %{_prefix}/bin/rsmtpfailures
-%attr(555,root,qmail)                   %{_prefix}/bin/fghack
-%attr(555,root,qmail)                   %{_prefix}/bin/cdbmake-sv
-%attr(555,root,qmail)                   %{_prefix}/bin/svscanboot
-%attr(555,root,qmail)                   %{_prefix}/bin/successes
-%attr(555,root,qmail)                   %{_prefix}/bin/qmail-sigterm
-%attr(555,root,qmail)                   %{_prefix}/bin/spipe
 %attr(555,root,qmail)                   %{_prefix}/bin/vlimit
-%attr(555,root,qmail)                   %{_prefix}/bin/delcr
-%attr(555,root,qmail)                   %{_prefix}/bin/svc
 %attr(555,root,qmail)                   %{_prefix}/bin/crypt
-%attr(555,root,qmail)                   %{_prefix}/bin/setmaillist
-%attr(555,root,qmail)                   %{_prefix}/bin/zrxdelay
-%attr(555,root,qmail)                   %{_prefix}/bin/maildirdeliver
-%attr(555,root,qmail)                   %{_prefix}/bin/qmail-showctl
 %attr(555,root,qmail)                   %{_prefix}/bin/vpriv
-%attr(555,root,qmail)                   %{_prefix}/bin/envmigrate
-%attr(555,root,qmail)                   %{_prefix}/bin/rspamrdomain
-%attr(555,root,qmail)                   %{_prefix}/bin/qmail-sighup
-%attr(555,root,qmail)                   %{_prefix}/bin/multilog-matchup
-%attr(555,root,qmail)                   %{_prefix}/bin/822headerok
-%attr(511,root,qmail)                   %{_prefix}/bin/splogger
-%attr(555,root,qmail)                   %{_prefix}/bin/mbox2maildir
-%attr(555,root,qmail)                   %{_prefix}/bin/printforward
-%attr(555,root,qmail)                   %{_prefix}/bin/zddist
-%attr(555,root,qmail)                   %{_prefix}/bin/elq
-%attr(500,root,qmail)                   %{_prefix}/bin/qmail-newmrh
-%attr(555,root,qmail)                   %{_prefix}/bin/supervise
-%attr(555,root,qmail)                   %{_prefix}/bin/preline
-%attr(555,root,qmail)                   %{_prefix}/bin/cdbget
-%attr(555,root,qmail)                   %{_prefix}/bin/cdbgetm
-%attr(555,root,qmail)                   %{_prefix}/bin/822addr
-%attr(555,root,qmail)                   %{_prefix}/bin/atrn
-%attr(555,root,qmail)                   %{_prefix}/bin/cdbstats
-%attr(555,root,qmail)                   %{_prefix}/bin/zsenders
-%attr(500,root,qmail)                   %{_prefix}/bin/instcheck
-%attr(555,root,qmail)                   %{_prefix}/bin/suids
-%attr(555,root,qmail)                   %{_prefix}/bin/maildirserial
-%attr(500,root,qmail)                   %{_prefix}/bin/qmail-start
-%attr(555,root,qmail)                   %{_prefix}/bin/822fields
-%attr(511,root,qmail)                   %{_prefix}/bin/qmail-popup
 %attr(555,root,qmail)                   %{_prefix}/bin/vipmap
-%attr(555,root,qmail)                   %{_prefix}/bin/ofmipname
-%attr(555,root,qmail)                   %{_prefix}/bin/822bodyfilter
-%attr(511,root,qmail)                   %{_prefix}/bin/qmail-local
-%attr(555,root,qmail)                   %{_prefix}/bin/serialsmtp
-%attr(555,root,qmail)                   %{_prefix}/bin/predate
 %attr(555,root,qmail)                   %{_prefix}/bin/vsmtp
-%attr(555,root,qmail)                   %{_prefix}/bin/condredirect
-%attr(555,root,qmail)                   %{_prefix}/bin/fastforward
-%attr(555,root,qmail)                   %{_prefix}/bin/rspamsdomain
-%attr(555,root,qmail)                   %{_prefix}/bin/newaliases
-%attr(555,root,qmail)                   %{_prefix}/bin/qmail-rm
-%attr(555,root,qmail)                   %{_prefix}/bin/zsmtp
-%attr(555,root,qmail)                   %{_prefix}/bin/qmail-pop3d
-%attr(555,root,qmail)                   %{_prefix}/bin/zoverall
-%attr(555,root,qmail)                   %{_prefix}/bin/randstr
-%attr(555,root,qmail)                   %{_prefix}/bin/xqp
-%attr(555,root,qmail)                   %{_prefix}/bin/dot-forward
-%attr(555,root,qmail)                   %{_prefix}/bin/datemail
-%attr(555,root,qmail)                   %{_prefix}/bin/base64
-%attr(555,root,qmail)                   %{_prefix}/bin/swaks
-%attr(555,root,qmail)                   %{_prefix}/bin/rhosts
-%attr(555,root,qmail)                   %{_prefix}/bin/replier
-%attr(500,root,qmail)                   %{_prefix}/bin/qmail-cdb
-%attr(500,root,qmail)                   %{_prefix}/bin/qmail-sql
-%attr(555,root,qmail)                   %{_prefix}/bin/cdbtest
-%attr(555,root,qmail)                   %{_prefix}/bin/dnsfq
-%attr(555,root,qmail)                   %{_prefix}/bin/tai64n
-%attr(555,root,qmail)                   %{_prefix}/bin/822header
 %attr(555,root,qmail)                   %{_prefix}/bin/vgroup
-%attr(555,root,qmail)                   %{_prefix}/bin/qmaildirmake
-%attr(555,root,qmail)                   %{_prefix}/bin/maildir2mbox
-%attr(555,root,qmail)                   %{_prefix}/bin/columnt
-%attr(555,root,qmail)                   %{_prefix}/bin/zrhosts
-%attr(555,root,qmail)                   %{_prefix}/bin/qmail-smtpd
-%attr(555,root,qmail)                   %{_prefix}/bin/qarf
-%attr(555,root,qmail)                   %{_prefix}/bin/qnotify
-%attr(555,root,qmail)                   %{_prefix}/bin/rrt
-%attr(555,root,qmail)                   %{_prefix}/sbin/hostname
-%attr(555,root,qmail)                   %{_prefix}/sbin/config-fast
-%attr(555,root,qmail)                   %{_prefix}/sbin/qmailconfig
-%attr(555,root,qmail)                   %{_prefix}/sbin/batv
-%attr(555,root,qmail)                   %{_prefix}/sbin/plugtest
-%attr(555,root,qmail)                   %{_prefix}/sbin/sys-checkpwd
-%attr(555,root,qmail)                   %{_prefix}/sbin/ldap-checkpwd
-%attr(555,root,qmail)                   %{_prefix}/bin/greydaemon
-%attr(555,root,qmail)                   %{_prefix}/bin/qmail-greyd
-%attr(555,root,qmail)                   %{_prefix}/bin/spawn-filter
-%attr(555,root,qmail)                   %{_prefix}/bin/tcp-env
-%attr(555,root,qmail)                   %{_prefix}/bin/qmail-lint
-%attr(555,root,qmail)                   %{_prefix}/bin/rrforward
-%attr(555,root,qmail)                   %{_prefix}/bin/qmail-dk
-%attr(555,root,qmail)                   %{_prefix}/bin/qmail-dkim
-%attr(555,root,qmail)                   %{_prefix}/bin/dk-filter
-%attr(555,root,qmail)                   %{_prefix}/bin/mailsubj
-%attr(555,root,qmail)                   %{_prefix}/bin/condtomaildir
-%attr(555,root,qmail)                   %{_prefix}/bin/crcdiff
-%attr(555,root,qmail)                   %{_prefix}/bin/multirotate
-%attr(555,root,qmail)                   %{_prefix}/bin/822field
-%attr(555,root,qmail)                   %{_prefix}/bin/testzero
-%attr(555,root,qmail)                   %{_prefix}/bin/qmail-cat
-%attr(555,root,qmail)                   %{_prefix}/bin/qmail-poppass
-%attr(555,root,qmail)                   %{_prefix}/bin/failures
 %attr(555,root,qmail)                   %{_prefix}/bin/vadduserl
-%attr(555,root,qmail)                   %{_prefix}/bin/rsmtp
-%attr(555,root,qmail)                   %{_prefix}/bin/qail
-%attr(555,root,qmail)                   %{_prefix}/bin/qmail-tcpok
-%attr(555,root,qmail)                   %{_prefix}/bin/qpq
-%attr(555,root,qmail)                   %{_prefix}/bin/replier-config
-%attr(555,root,qmail)                   %{_prefix}/bin/etrn
-%attr(555,root,qmail)                   %{_prefix}/bin/forward
-%attr(555,root,qmail)                   %{_prefix}/bin/new-inject
-%attr(555,root,qmail)                   %{_prefix}/bin/filterto
-%attr(555,root,qmail)                   %{_prefix}/bin/ripmime
-%attr(555,root,qmail)                   %{_prefix}/bin/stripmime.pl
-%attr(555,root,qmail)                   %{_prefix}/bin/fixcrio
-%attr(555,root,qmail)                   %{_prefix}/bin/qscanq-stdin
-%attr(555,root,qmail)                   %{_prefix}/bin/rsmtpsenders
-%attr(555,root,qmail)                   %{_prefix}/bin/queue-fix
-%attr(555,root,qmail)                   %{_prefix}/bin/822body
-%attr(555,root,qmail)                   %{_prefix}/bin/readproctitle
-%attr(555,root,qmail)                   %{_prefix}/bin/zdeferrals
 %attr(555,root,qmail)                   %{_prefix}/bin/vcaliasrev
-%attr(555,root,qmail)                   %{_prefix}/bin/dktest
-%attr(555,root,qmail)                   %{_prefix}/bin/qmail-scanner-queue.pl
-%attr(555,root,qmail)                   %{_prefix}/bin/rspamstat
-%attr(555,root,qmail)                   %{_prefix}/bin/iftoccfrom
 %attr(555,root,qmail)                   %{_prefix}/bin/hashtable
-%attr(555,root,qmail)                   %{_prefix}/bin/dnsptr
-%attr(555,root,qmail)                   %{_prefix}/bin/zsuids
-%attr(555,root,qmail)                   %{_prefix}/bin/setlock
-%attr(555,root,qmail)                   %{_prefix}/bin/qreceipt
-%attr(555,root,qmail)                   %{_prefix}/bin/qmail-qmqpd
-%attr(555,root,qmail)                   %{_prefix}/bin/multitail
-%attr(555,root,qmail)                   %{_prefix}/bin/except
-%attr(555,root,qmail)                   %{_prefix}/bin/dknewkey
-%attr(555,root,qmail)                   %{_prefix}/bin/maildirsmtp
-%attr(511,root,qmail)                   %{_prefix}/bin/qmail-clean
 %attr(555,root,qmail)                   %{_prefix}/bin/vacation
-%attr(511,root,qmail)                   %{_prefix}/bin/qmail-rspawn
-%attr(555,root,qmail)                   %{_prefix}/bin/pgrphack
-%attr(555,root,qmail)                   %{_prefix}/bin/xrecipient
-%attr(555,root,qmail)                   %{_prefix}/bin/argv0
-%attr(555,root,qmail)                   %{_prefix}/bin/qmail-qmtpd
-%attr(555,root,qmail)                   %{_prefix}/bin/addcr
 %attr(555,root,qmail)                   %{_prefix}/bin/proxyimap
 %attr(555,root,qmail)                   %{_prefix}/bin/proxypop3
-%attr(555,root,qmail)                   %{_prefix}/bin/dnsip
 %attr(555,root,qmail)                   %{_prefix}/bin/crc
 %attr(555,root,qmail)                   %{_prefix}/bin/echo
-%attr(555,root,qmail)                   %{_prefix}/bin/qsmhook
-%attr(555,root,qmail)                   %{_prefix}/bin/rspamhist
 %attr(555,root,qmail)                   %{_prefix}/bin/versioninfo
 %attr(555,root,qmail)                   %{_prefix}/bin/mailzipper
-%attr(500,root,qmail)                   %{_prefix}/bin/recipient-cdb
-%attr(555,root,qmail)                   %{_prefix}/bin/rsmtpsdomains
-%attr(555,root,qmail)                   %{_prefix}/bin/qmail-inject
-%attr(555,root,qmail)                   %{_prefix}/bin/serialcmd
-%attr(555,root,qmail)                   %{_prefix}/bin/qmail-qread
-%attr(555,root,qmail)                   %{_prefix}/bin/zfailures
-%attr(555,root,qmail)                   %{_prefix}/bin/qmail-nullqueue
-%attr(500,root,qmail)                   %{_prefix}/bin/qmail-daemon
-%attr(555,root,qmail)                   %{_prefix}/bin/zsendmail
-%attr(555,root,qmail)                   %{_prefix}/bin/multipipe
+%attr(555,root,qmail)                   %{_prefix}/sbin/vserverinfo
 %attr(555,root,qmail)                   %{_prefix}/sbin/adminclient
 %attr(555,root,qmail)                   %{_prefix}/sbin/chowkidar
 %attr(555,root,qmail)                   %{_prefix}/sbin/cindimail
@@ -1300,19 +1088,10 @@ fi
 %attr(555,root,qmail)                   %{_prefix}/sbin/mail_report
 %attr(555,root,qmail)                   %{_prefix}/sbin/mgmtpass
 %attr(555,root,qmail)                   %{_prefix}/sbin/myslave
-%if %nonssd == 0
-%attr(555,root,qmail)                   %{_prefix}/sbin/nssd
-%attr(555,root,qmail)                   %{_prefix}/sbin/check_getpw
-%endif
-%attr(555,root,qmail)                   %{_prefix}/sbin/osh
-%attr(555,root,qmail)                   %{_prefix}/sbin/postdel
-%attr(555,root,qmail)                   %{_prefix}/sbin/rot
-%attr(555,root,qmail)                   %{_prefix}/sbin/strfile
 %attr(555,root,qmail)                   %{_prefix}/sbin/svctool
 %attr(555,root,qmail)                   %{_prefix}/sbin/create_services
 %attr(555,root,qmail)                   %{_prefix}/sbin/tls-cert-check
 %attr(555,root,qmail)                   %{_prefix}/sbin/testmra
-%attr(555,root,qmail)                   %{_prefix}/sbin/unstr
 %attr(555,root,qmail)                   %{_prefix}/sbin/updatefile
 %attr(555,root,qmail)                   %{_prefix}/sbin/updaterules
 %attr(555,root,qmail)                   %{_prefix}/sbin/vchkpass
@@ -1323,25 +1102,262 @@ fi
 %attr(555,root,qmail)                   %{_prefix}/sbin/vfstab
 %attr(555,root,qmail)                   %{_prefix}/sbin/vmoddomain
 %attr(555,root,qmail)                   %{_prefix}/sbin/vreorg
-%attr(555,root,qmail)                   %{_prefix}/bin/ismaildup
-%attr(555,root,qmail)                   %{_prefix}/bin/822received
-%attr(555,root,qmail)                   %{_prefix}/bin/cdbmake-12
+%attr(555,root,qmail)                   %{_prefix}/sbin/osh
+%attr(555,root,qmail)                   %{_prefix}/sbin/postdel
+
+%attr(555,root,qmail)                   %{_prefix}/bin/qmail-popbull
+%attr(555,root,qmail)                   %{_prefix}/bin/cleanq
+%attr(555,root,qmail)                   %{_prefix}/bin/zsuccesses
+%attr(555,root,qmail)                   %{_prefix}/bin/ofmipd
+%attr(555,root,qmail)                   %{_prefix}/bin/qmail-queue-print
+%attr(555,root,qmail)                   %{_prefix}/bin/qmail-lagcheck
+%attr(555,root,qmail)                   %{_prefix}/bin/mbox2maildir.pl
+%attr(555,root,qmail)                   %{_prefix}/bin/deferrals
+%attr(555,root,qmail)                   %{_prefix}/bin/maildirwatch
+%attr(555,root,qmail)                   %{_prefix}/bin/bouncesaying
+%attr(511,root,qmail)                   %{_prefix}/bin/relaytest
+%attr(555,root,qmail)                   %{_prefix}/bin/checkaddr
+%attr(555,root,qmail)                   %{_prefix}/bin/rsmtprecipients
+%attr(555,root,qmail)                   %{_prefix}/bin/autoresponder
+%attr(555,root,qmail)                   %{_prefix}/bin/idedit
+%attr(555,root,qmail)                   %{_prefix}/bin/svstat
+%attr(555,root,qmail)                   %{_prefix}/bin/ddist
+%attr(555,root,qmail)                   %{_prefix}/bin/smtp-matchup
+%attr(500,root,qmail)                   %{_prefix}/bin/qmail-newu
+%attr(511,root,qmail)                   %{_prefix}/bin/qmail-pw2u
+%attr(555,root,qmail)                   %{_prefix}/bin/qfilelog
+%attr(555,root,qmail)                   %{_prefix}/bin/checkdomain
+%attr(555,root,qmail)                   %{_prefix}/bin/svok
+%attr(555,root,qmail)                   %{_prefix}/bin/maildirqmtp
+%attr(555,root,qmail)                   %{_prefix}/bin/qmailctl
+%attr(500,root,qmail)                   %{_prefix}/bin/qmail-lspawn
+%attr(555,root,qmail)                   %{_prefix}/bin/dnstxt
+%attr(555,root,qmail)                   %{_prefix}/bin/dnsmxip
+%attr(555,root,qmail)                   %{_prefix}/bin/dnsfq
+%attr(555,root,qmail)                   %{_prefix}/bin/dnsptr
+%attr(555,root,qmail)                   %{_prefix}/bin/dnsip
 %attr(555,root,qmail)                   %{_prefix}/bin/dnscname
-%attr(555,root,qmail)                   %{_prefix}/bin/envuidgid
-%attr(555,root,qmail)                   %{_prefix}/bin/flash
-%attr(555,root,qmail)                   %{_prefix}/bin/maildircmd
+%attr(555,root,qmail)                   %{_prefix}/bin/printmaillist
+%attr(511,root,qmail)                   %{_prefix}/bin/qmail-todo
+%attr(555,root,qmail)                   %{_prefix}/bin/tai64nunix
+%attr(555,root,qmail)                   %{_prefix}/bin/qmail-tcpto
+%attr(555,root,qmail)                   %{_prefix}/bin/newinclude
+%attr(555,root,qmail)                   %{_prefix}/bin/recordio
+%attr(555,root,qmail)                   %{_prefix}/bin/logselect
+%attr(555,root,qmail)                   %{_prefix}/bin/teepipe
+%attr(555,root,qmail)                   %{_prefix}/bin/ipmeprint
+%attr(555,root,qmail)                   %{_prefix}/bin/uacl
+%attr(555,root,qmail)                   %{_prefix}/bin/envdir
+%attr(555,root,qmail)                   %{_prefix}/bin/zrecipients
+%attr(555,root,qmail)                   %{_prefix}/bin/xsender
+%attr(555,root,qmail)                   %{_prefix}/bin/rxdelay
+%attr(555,root,qmail)                   %{_prefix}/bin/cdbmake
+%attr(511,root,qmail)                   %{_prefix}/bin/qmail-remote
+%attr(555,root,qmail)                   %{_prefix}/bin/pinq
+%attr(555,root,qmail)                   %{_prefix}/bin/mlmatchup
+%attr(511,root,qmail)                   %{_prefix}/bin/qmail-send
+%attr(555,root,qmail)                   %{_prefix}/bin/sendmail
+%attr(555,root,qmail)                   %{_prefix}/bin/rmail
+%attr(555,root,qmail)                   %{_prefix}/bin/dbinfo
+%attr(555,root,qmail)                   %{_prefix}/bin/sslerator
+%attr(555,root,qmail)                   %{_prefix}/bin/ifaddr
+%attr(555,root,qmail)                   %{_prefix}/bin/svscan
+%attr(555,root,qmail)                   %{_prefix}/bin/matchup
+%attr(555,root,qmail)                   %{_prefix}/bin/zspam
+%attr(555,root,qmail)                   %{_prefix}/bin/recipients
+%attr(555,root,qmail)                   %{_prefix}/bin/update_tmprsadh
+%attr(555,root,qmail)                   %{_prefix}/bin/softlimit
+%attr(555,root,qmail)                   %{_prefix}/bin/setforward
+%attr(555,root,qmail)                   %{_prefix}/bin/cdbdump
+%attr(555,root,qmail)                   %{_prefix}/bin/iftocc
+%attr(555,root,qmail)                   %{_prefix}/bin/qmail-qmqpc
+%attr(555,root,qmail)                   %{_prefix}/bin/serialqmtp
+%attr(555,root,qmail)                   %{_prefix}/bin/altermime
+%attr(555,root,qmail)                   %{_prefix}/bin/rsmtprdomains
+%attr(511,root,qmail)                   %{_prefix}/bin/qmail-getpw
+%attr(555,root,qmail)                   %{_prefix}/bin/balance_outgoing
+%attr(555,root,qmail)                   %{_prefix}/bin/rsmtpfailures
+%attr(555,root,qmail)                   %{_prefix}/bin/fghack
+%attr(555,root,qmail)                   %{_prefix}/bin/cdbmake-sv
+%attr(555,root,qmail)                   %{_prefix}/bin/svscanboot
+%attr(555,root,qmail)                   %{_prefix}/bin/successes
+%attr(555,root,qmail)                   %{_prefix}/bin/qmail-sigterm
+%attr(555,root,qmail)                   %{_prefix}/bin/spipe
+%attr(555,root,qmail)                   %{_prefix}/bin/delcr
+%attr(555,root,qmail)                   %{_prefix}/bin/svc
+%attr(555,root,qmail)                   %{_prefix}/bin/setmaillist
+%attr(555,root,qmail)                   %{_prefix}/bin/zrxdelay
+%attr(555,root,qmail)                   %{_prefix}/bin/maildirdeliver
+%attr(555,root,qmail)                   %{_prefix}/bin/qmail-showctl
+%attr(555,root,qmail)                   %{_prefix}/bin/envmigrate
+%attr(555,root,qmail)                   %{_prefix}/bin/rspamrdomain
+%attr(555,root,qmail)                   %{_prefix}/bin/qmail-sighup
+%attr(555,root,qmail)                   %{_prefix}/bin/multilog-matchup
+%attr(511,root,qmail)                   %{_prefix}/bin/splogger
+%attr(555,root,qmail)                   %{_prefix}/bin/mbox2maildir
+%attr(555,root,qmail)                   %{_prefix}/bin/printforward
+%attr(555,root,qmail)                   %{_prefix}/bin/zddist
+%attr(555,root,qmail)                   %{_prefix}/bin/elq
+%attr(500,root,qmail)                   %{_prefix}/bin/qmail-newmrh
+%attr(555,root,qmail)                   %{_prefix}/bin/supervise
+%attr(555,root,qmail)                   %{_prefix}/bin/preline
+%attr(555,root,qmail)                   %{_prefix}/bin/cdbget
+%attr(555,root,qmail)                   %{_prefix}/bin/cdbgetm
+%attr(555,root,qmail)                   %{_prefix}/bin/atrn
+%attr(555,root,qmail)                   %{_prefix}/bin/cdbstats
+%attr(555,root,qmail)                   %{_prefix}/bin/zsenders
+%attr(500,root,qmail)                   %{_prefix}/bin/instcheck
+%attr(555,root,qmail)                   %{_prefix}/bin/suids
+%attr(555,root,qmail)                   %{_prefix}/bin/maildirserial
+%attr(500,root,qmail)                   %{_prefix}/bin/qmail-start
+%attr(511,root,qmail)                   %{_prefix}/bin/qmail-popup
+%attr(555,root,qmail)                   %{_prefix}/bin/ofmipname
+%attr(511,root,qmail)                   %{_prefix}/bin/qmail-local
+%attr(555,root,qmail)                   %{_prefix}/bin/serialsmtp
+%attr(555,root,qmail)                   %{_prefix}/bin/predate
+%attr(555,root,qmail)                   %{_prefix}/bin/condredirect
+%attr(555,root,qmail)                   %{_prefix}/bin/fastforward
+%attr(555,root,qmail)                   %{_prefix}/bin/rspamsdomain
+%attr(555,root,qmail)                   %{_prefix}/bin/newaliases
+%attr(555,root,qmail)                   %{_prefix}/bin/qmail-rm
+%attr(555,root,qmail)                   %{_prefix}/bin/zsmtp
+%attr(555,root,qmail)                   %{_prefix}/bin/qmail-pop3d
+%attr(555,root,qmail)                   %{_prefix}/bin/zoverall
+%attr(555,root,qmail)                   %{_prefix}/bin/randstr
+%attr(555,root,qmail)                   %{_prefix}/bin/xqp
+%attr(555,root,qmail)                   %{_prefix}/bin/dot-forward
+%attr(555,root,qmail)                   %{_prefix}/bin/datemail
+%attr(555,root,qmail)                   %{_prefix}/bin/base64
+%attr(555,root,qmail)                   %{_prefix}/bin/swaks
+%attr(555,root,qmail)                   %{_prefix}/bin/rhosts
+%attr(555,root,qmail)                   %{_prefix}/bin/replier
+%attr(500,root,qmail)                   %{_prefix}/bin/qmail-cdb
+%attr(500,root,qmail)                   %{_prefix}/bin/qmail-sql
+%attr(555,root,qmail)                   %{_prefix}/bin/cdbtest
+%attr(555,root,qmail)                   %{_prefix}/bin/tai64n
+%attr(555,root,qmail)                   %{_prefix}/bin/qmaildirmake
+%attr(555,root,qmail)                   %{_prefix}/bin/maildir2mbox
+%attr(555,root,qmail)                   %{_prefix}/bin/columnt
+%attr(555,root,qmail)                   %{_prefix}/bin/zrhosts
+%attr(555,root,qmail)                   %{_prefix}/bin/qmail-smtpd
+%attr(555,root,qmail)                   %{_prefix}/bin/qarf
+%attr(555,root,qmail)                   %{_prefix}/bin/qnotify
+%attr(555,root,qmail)                   %{_prefix}/bin/rrt
+%attr(555,root,qmail)                   %{_prefix}/bin/greydaemon
+%attr(555,root,qmail)                   %{_prefix}/bin/qmail-greyd
+%attr(555,root,qmail)                   %{_prefix}/bin/spawn-filter
+%attr(555,root,qmail)                   %{_prefix}/bin/tcp-env
+%attr(555,root,qmail)                   %{_prefix}/bin/qmail-lint
+%attr(555,root,qmail)                   %{_prefix}/bin/rrforward
+%attr(555,root,qmail)                   %{_prefix}/bin/qmail-dk
+%attr(555,root,qmail)                   %{_prefix}/bin/qmail-dkim
+%attr(555,root,qmail)                   %{_prefix}/bin/dktest
+%attr(555,root,qmail)                   %{_prefix}/bin/dk-filter
+%attr(555,root,qmail)                   %{_prefix}/bin/dknewkey
+%attr(555,root,qmail)                   %{_prefix}/bin/mailsubj
+%attr(555,root,qmail)                   %{_prefix}/bin/condtomaildir
+%attr(555,root,qmail)                   %{_prefix}/bin/crcdiff
+%attr(555,root,qmail)                   %{_prefix}/bin/multirotate
+%attr(555,root,qmail)                   %{_prefix}/bin/testzero
+%attr(555,root,qmail)                   %{_prefix}/bin/qmail-cat
+%attr(555,root,qmail)                   %{_prefix}/bin/qmail-poppass
+%attr(555,root,qmail)                   %{_prefix}/bin/failures
+%attr(555,root,qmail)                   %{_prefix}/bin/rsmtp
+%attr(555,root,qmail)                   %{_prefix}/bin/qail
+%attr(555,root,qmail)                   %{_prefix}/bin/qmail-tcpok
+%attr(555,root,qmail)                   %{_prefix}/bin/qpq
+%attr(555,root,qmail)                   %{_prefix}/bin/replier-config
+%attr(555,root,qmail)                   %{_prefix}/bin/etrn
+%attr(555,root,qmail)                   %{_prefix}/bin/forward
+%attr(555,root,qmail)                   %{_prefix}/bin/new-inject
+%attr(555,root,qmail)                   %{_prefix}/bin/filterto
+%attr(555,root,qmail)                   %{_prefix}/bin/ripmime
+%attr(555,root,qmail)                   %{_prefix}/bin/stripmime.pl
+%attr(555,root,qmail)                   %{_prefix}/bin/fixcrio
+%attr(555,root,qmail)                   %{_prefix}/bin/qscanq-stdin
+%attr(555,root,qmail)                   %{_prefix}/bin/rsmtpsenders
+%attr(555,root,qmail)                   %{_prefix}/bin/queue-fix
+%attr(555,root,qmail)                   %{_prefix}/bin/readproctitle
+%attr(555,root,qmail)                   %{_prefix}/bin/zdeferrals
+%attr(555,root,qmail)                   %{_prefix}/bin/qmail-scanner-queue.pl
+%attr(555,root,qmail)                   %{_prefix}/bin/rspamstat
+%attr(555,root,qmail)                   %{_prefix}/bin/iftoccfrom
+%attr(555,root,qmail)                   %{_prefix}/bin/zsuids
+%attr(555,root,qmail)                   %{_prefix}/bin/setlock
+%attr(555,root,qmail)                   %{_prefix}/bin/qreceipt
+%attr(555,root,qmail)                   %{_prefix}/bin/qmail-qmqpd
+%attr(555,root,qmail)                   %{_prefix}/bin/multitail
+%attr(555,root,qmail)                   %{_prefix}/bin/except
+%attr(555,root,qmail)                   %{_prefix}/bin/maildirsmtp
+%attr(511,root,qmail)                   %{_prefix}/bin/qmail-clean
+%attr(511,root,qmail)                   %{_prefix}/bin/qmail-rspawn
+%attr(555,root,qmail)                   %{_prefix}/bin/pgrphack
+%attr(555,root,qmail)                   %{_prefix}/bin/xrecipient
+%attr(555,root,qmail)                   %{_prefix}/bin/argv0
+%attr(555,root,qmail)                   %{_prefix}/bin/qmail-qmtpd
+%attr(555,root,qmail)                   %{_prefix}/bin/addcr
+%attr(555,root,qmail)                   %{_prefix}/bin/qsmhook
+%attr(555,root,qmail)                   %{_prefix}/bin/rspamhist
+%attr(500,root,qmail)                   %{_prefix}/bin/recipient-cdb
+%attr(555,root,qmail)                   %{_prefix}/bin/rsmtpsdomains
+%attr(555,root,qmail)                   %{_prefix}/bin/qmail-inject
+%attr(555,root,qmail)                   %{_prefix}/bin/serialcmd
+%attr(555,root,qmail)                   %{_prefix}/bin/qmail-qread
+%attr(555,root,qmail)                   %{_prefix}/bin/zfailures
+%attr(555,root,qmail)                   %{_prefix}/bin/qmail-nullqueue
+%attr(500,root,qmail)                   %{_prefix}/bin/qmail-daemon
+%attr(555,root,qmail)                   %{_prefix}/bin/zsendmail
+%attr(555,root,qmail)                   %{_prefix}/bin/multipipe
+%attr(555,root,qmail)                   %{_prefix}/bin/cdbmake-12
 %attr(555,root,qmail)                   %{_prefix}/bin/multilog
 %attr(555,root,qmail)                   %{_prefix}/bin/qmail-multi
 %attr(555,root,qmail)                   %{_prefix}/bin/qmail-qfilter
 %attr(555,root,qmail)                   %{_prefix}/bin/surblfilter
 %attr(555,root,qmail)                   %{_prefix}/bin/surblqueue
 %attr(555,root,qmail)                   %{_prefix}/bin/qmail-sigalrm
-%attr(555,root,qmail)                   %{_prefix}/bin/ripole
 %attr(555,root,qmail)                   %{_prefix}/bin/rpmattr
 %attr(555,root,qmail)                   %{_prefix}/bin/senders
 %attr(555,root,qmail)                   %{_prefix}/bin/setuidgid
 %attr(555,root,qmail)                   %{_prefix}/bin/spfquery
 %attr(555,root,qmail)                   %{_prefix}/bin/tai64nlocal
+%attr(555,root,qmail)                   %{_prefix}/bin/envuidgid
+%attr(555,root,qmail)                   %{_prefix}/bin/maildircmd
+
+%attr(555,root,qmail)                   %{_prefix}/bin/822headerfilter
+%attr(555,root,qmail)                   %{_prefix}/bin/822print
+%attr(555,root,qmail)                   %{_prefix}/bin/822date
+%attr(555,root,qmail)                   %{_prefix}/bin/822headerok
+%attr(555,root,qmail)                   %{_prefix}/bin/822addr
+%attr(555,root,qmail)                   %{_prefix}/bin/822fields
+%attr(555,root,qmail)                   %{_prefix}/bin/822bodyfilter
+%attr(555,root,qmail)                   %{_prefix}/bin/822header
+%attr(555,root,qmail)                   %{_prefix}/bin/822field
+%attr(555,root,qmail)                   %{_prefix}/bin/822body
+%attr(555,root,qmail)                   %{_prefix}/bin/822received
+
+%attr(555,root,qmail)                   %{_prefix}/sbin/hostname
+%attr(555,root,qmail)                   %{_prefix}/sbin/config-fast
+%attr(555,root,qmail)                   %{_prefix}/sbin/qmailconfig
+%attr(555,root,qmail)                   %{_prefix}/sbin/batv
+%attr(555,root,qmail)                   %{_prefix}/sbin/plugtest
+%attr(555,root,qmail)                   %{_prefix}/sbin/sys-checkpwd
+%attr(555,root,qmail)                   %{_prefix}/sbin/ldap-checkpwd
+
+%if %nonssd == 0
+%attr(555,root,qmail)                   %{_prefix}/sbin/nssd
+%attr(555,root,qmail)                   %{_prefix}/sbin/check_getpw
+%endif
+
+%attr(555,root,qmail)                   %{_prefix}/bin/mpack
+%attr(555,root,qmail)                   %{_prefix}/bin/munpack
+%attr(555,root,qmail)                   %{_prefix}/bin/fortune
+%attr(555,root,qmail)                   %{_prefix}/sbin/rot
+%attr(555,root,qmail)                   %{_prefix}/sbin/strfile
+%attr(555,root,qmail)                   %{_prefix}/sbin/unstr
+
+%attr(555,root,qmail)                   %{_prefix}/bin/ismaildup
+%attr(555,root,qmail)                   %{_prefix}/bin/flash
+%attr(555,root,qmail)                   %{_prefix}/bin/ripole
 %attr(555,root,qmail)                   %{_prefix}/bin/valias
 %attr(555,root,qmail)                   %{_prefix}/bin/vproxy
 %attr(555,root,qmail)                   %{_prefix}/libexec/vadddomain
@@ -1349,6 +1365,7 @@ fi
 %attr(555,root,qmail)                   %{_prefix}/libexec/overquota.sh
 %attr(555,root,qmail)                   %{_prefix}/libexec/qmailmrtg7
 %attr(4555,root,qmail)                  %{_prefix}/libexec/sq_vacation
+
 %if %nocourierimap == 0
 # courier imap
 %attr(555,root,root)                    %{_prefix}/bin/maildirmake
@@ -1392,9 +1409,11 @@ fi
 %attr(555,root,root)                    %{_prefix}/sbin/bf_copy
 %attr(555,root,root)                    %{_prefix}/sbin/bf_tar
 %endif
+
 %if %nolibdkim == 0
 %attr(555,root,root)                    %{_prefix}/bin/dkim
 %endif
+
 # clamav
 %if %noclamav == 0
 %attr(555,root,root)                    %{_prefix}/bin/sigtool
@@ -1464,6 +1483,7 @@ fi
 %attr(555,root,root)                    %{_prefix}/share/mkpop3dcert
 %endif
 %attr(555,root,root)                    %{_prefix}/libexec/authlib/authindi
+%attr(555,root,root)                    %{_prefix}/libexec/authlib/authpgsql
 %attr(555,root,root)                    %{_prefix}/libexec/authlib/authgeneric
 
 %attr(555,root,qmail)                   %{_prefix}/plugins/generic.so
@@ -1956,27 +1976,21 @@ if [ -f %{_prefix}/sbin/initsvc ] ; then
 	%{_prefix}/sbin/initsvc -status
 fi
 
+echo "Giving IndiMail exactly 5 seconds to exit nicely"
 if test -f %{_sysconfdir}/init/svscan.conf
 then
 	/sbin/initctl emit qmailstop > /dev/null 2>&1
-	echo "Giving IndiMail exactly 5 seconds to exit nicely"
-	sleep 5
 elif test -f %{_sysconfdir}/event.d/svscan
 then
 	/sbin/initctl emit qmailstop > /dev/null 2>&1
-	echo "Giving IndiMail exactly 5 seconds to exit nicely"
-	sleep 5
 elif test -f %{_sysconfdir}/systemd/system/multi-user.target.wants/indimail.service
 then
 	/bin/systemctl stop indimail.service > /dev/null 2>&1
-	echo "Giving IndiMail exactly 5 seconds to exit nicely"
-	sleep 5
 elif test -x %{_prefix}/sbin/initsvc
 then
 	%{_prefix}/sbin/initsvc -off
-	echo "Giving IndiMail exactly 5 seconds to exit nicely"
-	sleep 5
 fi
+sleep 5
 
 ### SCRIPTLET ###############################################################################
 %pre 
@@ -2234,7 +2248,7 @@ do
 				--query-cache --password-cache \
 				--cntrldir=control --localip=0 --maxdaemons=75 --maxperip=25 --persistdb \
 				--starttls --fsync --syncdir --memory=%{smtp_soft_mem} --chkrecipient --chkrelay --masquerade \
-				--min-free=52428800 --content-filter --virus-filter \
+				--min-free=52428800 --content-filter \
 				--spamfilter="%{_prefix}/bin/bogofilter -p -d %{_prefix}/etc" \
 				--logfilter=/tmp/spamfifo --rejectspam=0 --spamexitcode=0 \
 				--qhpsi="%{_prefix}/bin/clamdscan %s --fdpass --quiet --no-summary" \
@@ -2263,7 +2277,7 @@ do
 				--query-cache --password-cache \
 				--cntrldir=control --localip=0 --maxdaemons=75 --maxperip=25 --persistdb \
 				--starttls --fsync --syncdir --memory=%{smtp_soft_mem} --chkrecipient --chkrelay --masquerade \
-				--min-free=52428800 --content-filter --virus-filter \
+				--min-free=52428800 --content-filter \
 				--qhpsi="%{_prefix}/bin/clamdscan %s --fdpass --quiet --no-summary" \
 				--dmasquerade \
 				--dkverify=both \
@@ -2287,7 +2301,7 @@ done
 if [ %noclamav -eq 0 ] ; then
 	%{_prefix}/sbin/svctool --queueParam=defaultqueue \
 		--qbase=%{qbase} --qcount=%{qcount} --qstart=1 \
-		--min-free=52428800 --fsync --syncdir --virus-filter \
+		--min-free=52428800 --fsync --syncdir \
 		--qhpsi="%{_prefix}/bin/clamdscan %s --fdpass --quiet --no-summary" \
 		--dkverify="none" --dksign=$sign_opt \
 		--private_key=%{_prefix}/control/domainkeys/indimail \
@@ -2436,10 +2450,12 @@ TVoIARMAA
 TVouARsAA
 TVrQAT8AA
 # .ZIPfile signature seen in SoBig.E and mydoom:
-UEsDBBQAA:SoBig.e Virus
-UEsDBAoAAA:mydoom Virus
+#UEsDBBQAA:SoBig.e Virus
+#UEsDBAoAAA:mydoom Virus
 # .GIF file found in a previous Microsoft virus making the rounds.
 R0lGODlhaAA7APcAAP///+rp6puSp6GZrDUjUUc6Zn53mFJMdbGvvVtXh2xre8bF1x8cU4yLprOy:Virus in .gif files
+# http://www.gossamer-threads.com/lists/qmail/users/114447
+UEsDBAoAAQAAAEBHYzCf4kJRDDAAAAAwAAAKAAAAc3ZtaXhlLmV4ZcuI1rOkjfn48VwCkMYHRTfM
 EOF
 %{__chown} qscand:qscand %{_prefix}/control/signatures
 
@@ -2510,10 +2526,19 @@ echo "$count. You can optionally run the following command to verify installatio
 echo "   sudo rpm -V indimail"
 if [ ! -f %{_prefix}/control/servercert.pem ] ; then
 count=`expr $count + 1`
-echo "$count. You also need to create CERTS for SSL enabled IMAP/POP3. Run the following command"
-echo "   to create the Certificate"
+%if %nocourierimap == 0
+echo "$count. You need to create CERTS for STARTTLS / SSL enabled IMAP/POP3."
+%else
+echo "$count. You need to create CERTS for STARTTLS."
+%endif
+echo "   Run the following command to create the Certificate"
 echo "   %{_prefix}/sbin/svctool --postmaster=postmaster@indimail.org --config=cert"
 fi
+%if %noclamav == 0
+count=`expr $count + 1`
+echo "$count. You need to ensure that clamav signatures download have completed so that"
+echo "   you can start sending emails. Look at %{logdir}/freshclam/current"
+%endif
 
 ### SCRIPTLET ###############################################################################
 %preun
