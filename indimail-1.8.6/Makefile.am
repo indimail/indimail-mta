@@ -830,9 +830,9 @@ README-CLUSTER: README-CLUSTER.in configure.in
 README: README.in configure.in
 	$(edit) $@.in > doc/$@; rm -f $@;ln -sf doc/$@ $@
 vadddomain_handle: vadddomain_handle.in
-	$(edit) $@.in > post_handle/vadddomain; ln -s post_handle/vadddomain $@
+	$(edit) $@.in > post_handle/vadddomain; ln -sf post_handle/vadddomain $@
 vadduser_handle: vadduser_handle.in
-	$(edit) $@.in > post_handle/vadduser; ln -s post_handle/vadduser $@
+	$(edit) $@.in > post_handle/vadduser; ln -sf post_handle/vadduser $@
 create_services: create_services.in
 	$(edit) $@.in > $@
 indimail.spec: indimail.spec.in
