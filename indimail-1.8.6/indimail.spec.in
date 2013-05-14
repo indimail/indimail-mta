@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail.spec.in,v 2.260 2013-05-13 08:56:31+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 2.261 2013-05-14 15:29:53+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %define _unpackaged_files_terminate_build 1
 
@@ -2490,6 +2490,13 @@ done
 if [ -f %{_prefix}/boot/rpm.init ] ; then
 	echo "Running Custom Installation Script for post"
 	/bin/sh %{_prefix}/boot/rpm.init post
+fi
+# selinux
+if [ -x /usr/sbin/selinuxenabled ] ; then
+	/usr/sbin/selinuxenabled
+	if [ $? -ne 0 ] ; then
+		/usr/sbin/semanage fcontext -a -t mysqld_db_t "%{_prefix}/mysqldb(/.*)?"
+	fi
 fi
 
 #
