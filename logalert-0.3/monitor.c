@@ -1,5 +1,13 @@
+/*
+ * $Log: monitor.c,v $
+ * Revision 1.1  2013-05-15 00:31:35+05:30  Cprogrammer
+ * Initial revision
+ *
+ */
 
 #include "monitor.h"
+
+int             shell_exec(struct entry_conf *cur_cfg, char *, int);
 
 // tail logic comes from core-utils - tail.c
 #define IS_TAILABLE_FILE_TYPE(Mode) \
@@ -30,8 +38,10 @@ void
 recompile(struct entry_conf *p)
 {
 
+#ifdef HAVE_PCRE_H
 	const char     *error;
-	int             erroroff;
+	int            erroroff;
+#endif
 
 #ifdef HAVE_PCRE_H
 	p->regex = pcre_compile(p->pattern, 0, &error, &erroroff, NULL);
@@ -137,7 +147,6 @@ read_data(int fd, struct entry_conf *cur_cfg)
 	return all;
 }
 
-
 int
 monitor_file(struct entry_conf *cur_cfg)
 {
@@ -189,4 +198,5 @@ monitor_file(struct entry_conf *cur_cfg)
 		}
 	}
 	fprintf(stderr, "[!] MAXRETRY[%d] reached while trying to monitor %s - sorry, exiting\n", cur_cfg->retry, cur_cfg->watchfile);
+	return (0);
 }

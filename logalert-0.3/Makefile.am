@@ -17,7 +17,7 @@ sbin_PROGRAMS=logsrv rpclog
 man_MANS = logalert.8 logsrv.8 rpclog.8 incrmesg.1 logclient.1
 
 MOSTLYCLEANFILES=logalert.spec logalert-@VERSION@-rpmlintrc \
-				lex.c logalert_perm_list obs.mk
+				lex.c parser.h parser.c logalert_perm_list obs.mk
 
 noinst_SCRIPTS = logalert.spec logalert-@VERSION@-rpmlintrc
 
@@ -41,11 +41,11 @@ edit = sed \
 logalert_SOURCES = lex.c utils.c log.c parser.y process.c monitor.c action.c sig.c user.c main.c 
 logalert_LDADD = @LIBS@
 
-logclient_SOURCES=logclient.c common.c
-logclient_LDADD = @LIB_INDIMAIL@
+logclient_SOURCES=logclient.c common.c tls.c
+logclient_LDADD = @LIB_INDIMAIL@ @LIB_SSL@
 
-logsrv_SOURCES=logsrv.c common.c
-logsrv_LDADD = @LIB_INDIMAIL@
+logsrv_SOURCES=logsrv.c common.c tls.c
+logsrv_LDADD = @LIB_INDIMAIL@ @LIB_SSL@
 
 incrmesg_SOURCES=incrmesg.c common.c
 incrmesg_LDADD = @LIB_INDIMAIL@

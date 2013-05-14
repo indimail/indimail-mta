@@ -1,5 +1,11 @@
 /*
  * $Log: common.c,v $
+ * Revision 1.4  2013-05-15 00:30:01+05:30  Cprogrammer
+ * added timeoutio functions
+ *
+ * Revision 1.3  2013-05-15 00:18:11+05:30  Cprogrammer
+ * fixed warnings
+ *
  * Revision 1.2  2013-02-21 22:44:45+05:30  Cprogrammer
  * use AF_INET for localhost
  *
@@ -11,8 +17,9 @@
 #include "config.h"
 #endif
 
-#ifndef HAVE_INDIMAIL
+#include <stdio.h>
 #include <stdlib.h>
+#include <ctype.h>
 #include <netdb.h>
 #include <unistd.h>
 #include <netinet/in.h>
@@ -21,6 +28,7 @@
 #include <errno.h>
 #include <sys/param.h>
 #include <sys/types.h>
+#include <sys/stat.h>
 #include <sys/socket.h>
 #include <sys/un.h>
 #ifdef sun
@@ -38,7 +46,7 @@
 #endif
 
 #ifndef	lint
-static char     sccsid[] = "$Id: common.c,v 1.2 2013-02-21 22:44:45+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: common.c,v 1.4 2013-05-15 00:30:01+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 static unsigned sleeptime = MAXSLEEP + 1; /*- 0 for infinite connect */
@@ -65,6 +73,7 @@ va_dcl
 #endif
 #ifndef HAVE_STDARG_H
 	int             fout;
+	int             timeout;
 	char           *fmt;
 #endif
 
@@ -79,6 +88,18 @@ va_dcl
 	va_end(ap);
 	for (len = 0, ptr = buf; *ptr++; len++);
 	return(write(fout, buf, len) != len ? -1 : len);
+}
+
+void
+getEnvConfigInt(long *source, char *envname, long defaultValue)
+{
+	char           *value;
+
+	if (!(value = getenv(envname)))
+		*source = defaultValue;
+	else
+		*source = atol(value);
+	return;
 }
 
 /* set the socket buffer sizes */
@@ -104,6 +125,25 @@ setsockbuf(fd, option, size)
 		break;
 	}
 	return (errno = 0);
+}
+
+int
+scopy(char *dest, const char *src, const int bound)
+{
+	register int    i;
+
+	if (!src)
+	{
+		for(i = 0;i < bound;i++)
+			dest[i] = 0;
+		return 0;
+	}
+	for (i = 0; src[i] && (i < (bound - 1)); i++)
+		dest[i] = src[i];
+	dest[i] = 0;
+	if(i == (bound - 1) && src[i])
+		return(-1);
+	return 0;
 }
 
 char    *
@@ -611,25 +651,6 @@ tcpbind(hostname, servicename, backlog)
 }
 
 int
-scopy(char *dest, const char *src, const int bound)
-{
-	register int    i;
-
-	if (!src)
-	{
-		for(i = 0;i < bound;i++)
-			dest[i] = 0;
-		return 0;
-	}
-	for (i = 0; src[i] && (i < (bound - 1)); i++)
-		dest[i] = src[i];
-	dest[i] = 0;
-	if(i == (bound - 1) && src[i])
-		return(-1);
-	return 0;
-}
-
-int
 slen(const char *dest)
 {
 	register int    i;
@@ -680,4 +701,119 @@ r_mkdir(dir, perm, uid, gid)
 		return(1);
 	return(0);
 }
+
+int
+timeoutread(t, fd, buf, len)
+	int             t;
+	int             fd;
+	char           *buf;
+	int             len;
+{
+	fd_set          rfds;
+	int             ret;
+	struct timeval  tv;
+	struct timeval *tvptr;
+
+	if(t)
+	{
+		tv.tv_sec = t;
+		tv.tv_usec = 0;
+		tvptr = &tv;
+	} else
+		tvptr = (struct timeval *) 0;
+	for(;;)
+	{
+		FD_ZERO(&rfds);
+		FD_SET(fd, &rfds);
+		if (select(fd + 1, &rfds, (fd_set *) 0, (fd_set *) 0, tvptr) == -1)
+		{
+#ifdef ERESTART
+			if(errno == EINTR || errno == ERESTART)
+#else
+			if(errno == EINTR)
 #endif
+				continue;
+			return -1;
+		}
+		break;
+	}
+	if (FD_ISSET(fd, &rfds))
+	{
+		for(;;)
+		{
+			if((ret = read(fd, buf, len)) == -1)
+			{
+#ifdef ERESTART
+				if(errno == EINTR || errno == ERESTART)
+#else
+				if(errno == EINTR)
+#endif
+					continue;
+			}
+			return(ret);
+		}
+	}
+	errno = ETIMEDOUT;
+	return -1;
+}
+
+int
+timeoutwrite(t, fd, buf, len)
+	int             t;
+	int             fd;
+	char           *buf;
+	int             len;
+{
+	fd_set          wfds;
+	int             ret;
+	struct timeval  tv;
+	struct timeval *tvptr;
+
+	if(t)
+	{
+		tv.tv_sec = t;
+		tv.tv_usec = 0;
+		tvptr = &tv;
+	} else
+		tvptr = (struct timeval *) 0;
+	FD_ZERO(&wfds);
+	FD_SET(fd, &wfds);
+	for(;;)
+	{
+		if (select(fd + 1, (fd_set *) 0, &wfds, (fd_set *) 0, tvptr) == -1)
+		{
+#ifdef ERESTART
+			if(errno == EINTR || errno == ERESTART)
+#else
+			if(errno == EINTR)
+#endif
+				continue;
+			return -1;
+		}
+		break;
+	}
+	if (FD_ISSET(fd, &wfds))
+	{
+		for(;;)
+		{
+			if((ret = write(fd, buf, len)) == -1)
+			{
+#ifdef ERESTART
+				if(errno == EINTR || errno == ERESTART)
+#else
+				if(errno == EINTR)
+#endif
+					continue;
+			}
+			return(ret);
+		}
+	}
+	errno = ETIMEDOUT;
+	return -1;
+}
+
+void
+getversion_common_c()
+{
+	printf("%s\n", sccsid);
+}

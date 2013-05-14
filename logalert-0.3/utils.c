@@ -1,3 +1,10 @@
+/*
+ * $Log: utils.c,v $
+ * Revision 1.1  2013-05-15 00:35:21+05:30  Cprogrammer
+ * Initial revision
+ *
+ */
+#include <ctype.h>
 #include "utils.h"
 
 void           *
@@ -46,99 +53,6 @@ mywrite(int fd, char const *buffer, size_t n_bytes)
 {
 	if (n_bytes > 0 && fwrite(buffer, 1, n_bytes, stdout) == 0)
 		fatal("could not write to stdout");
-}
-
-
-int
-getwords(char *line, char **vec)
-{
-
-	char           *p, *q;
-	char           *key = NULL;
-	char           *value = NULL;
-	p = line;
-
-	while ((*p) != '\0') {
-
-		if (isspace(*p)) {
-			if (key)
-				break;
-			p++;
-		} else {
-			if (!key)
-				key = p;
-			p++;
-		}
-	}
-
-	vec[0] = key;
-	if ((*p) == '\0')
-		if (!key)
-			return 0;
-		else
-			return 1;
-
-	(*p++) = '\0';
-
-	while ((*p) != '\0') {
-
-		if (isspace(*p) || (*p) == '=') {
-			p++;
-		} else {
-			value = p;
-			break;
-		}
-	}
-
-	vec[1] = value;
-	if (value)
-		return 2;
-}
-
-
-
-
-/*
- * mygetline(int fd)
- * reads fd until it finds '\n' char. 
- * Allocates buffer as needed, returning the line.
- * Caller must free it after use.
- */
-
-int
-mygetline(int fd, char **buff)
-{
-	ssize_t         r = 0;
-	char            c;
-	ssize_t         buffsize = 0;
-	int             ccount = 0;
-	char           *p;
-
-REFILLME:
-
-	buffsize = buffsize + MALLOC_UNIT;
-	if (*buff == NULL) {
-		p = (char *) xmalloc(buffsize * sizeof (char *));
-		*buff = p;
-	} else {
-		xrealloc(*buff, buffsize * sizeof (char *));
-	}
-	for (;;) {
-		if (ccount > buffsize - 1)
-			goto REFILLME;
-		r = read(fd, &c, 1);
-		if (r < 0) {
-			perror("read");
-			goto OUT;
-		}
-		if ((r == 0) || (c == '\n'))
-			goto OUT;
-		ccount++;
-		*p++ = c;
-	}
-OUT:
-	*p = '\0';
-	return r;
 }
 
 /*

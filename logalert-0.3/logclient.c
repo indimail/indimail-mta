@@ -1,5 +1,8 @@
 /*
  * $Log: logclient.c,v $
+ * Revision 1.7  2013-05-15 00:38:47+05:30  Cprogrammer
+ * added SSL encryption
+ *
  * Revision 1.6  2013-02-21 22:45:39+05:30  Cprogrammer
  * fold long line for readability
  *
@@ -46,12 +49,14 @@
 #ifdef SOLARIS
 #include <sys/systeminfo.h>
 #endif
+#include "common.h"
+#include "tls.h"
 
 #define MAXBUF 8192
 #define SEEKDIR PREFIX"/tmp/"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: logclient.c,v 1.6 2013-02-21 22:45:39+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: logclient.c,v 1.7 2013-05-15 00:38:47+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 
@@ -65,6 +70,7 @@ struct msgtable
 };
 
 struct msgtable *msghd;
+int             log_timeout;
 
 #ifndef MAXHOSTNAMELEN
 #define MAXHOSTNAMELEN 64
@@ -72,7 +78,7 @@ struct msgtable *msghd;
 
 #ifdef __STDC__
 int             main(int, char **);
-int             consclnt(char *, char **);
+int             consclnt(char *, char **, char *);
 static int      IOplex(char *, int);
 static int      checkfiles(char *, FILE *, long *, int);
 #else
@@ -83,26 +89,35 @@ static int      checkfiles();
 #endif
 
 void
-usage(pname)
+usage(char *pname)
 {
+#ifdef HAVE_SSL
+	fprintf(stderr, "USAGE: %s [-n certfile] [-f] hostname logfile(s)\n", pname);
+#else
 	fprintf(stderr, "USAGE: %s [-f] hostname logfile(s)\n", pname);
+#endif
 	return;
 }
 
 int
-get_options(int argc, char **argv, char **hostname, int *foreground)
+get_options(int argc, char **argv, char **hostname, char **certfile, int *foreground)
 {
 	int             c, errflag = 0;
 
-	while (!errflag && (c = getopt(argc, argv, "f")) != -1)
+	while (!errflag && (c = getopt(argc, argv, "fn:")) != -1)
 	{
 		switch (c)
 		{
 		case 'f':
 			*foreground = 1;
 			break;
+#ifdef HAVE_SSL
+		case 'n':
+			*certfile = optarg;
+			break;
+#endif
 		default:
-			fprintf(stderr, "%d\n", __LINE__);
+			fprintf(stderr, "[%c] %d\n", c, __LINE__);
 			errflag = 1;
 			break;
 		}
@@ -121,15 +136,17 @@ main(argc, argv)
 	int             argc;
 	char          **argv;
 {
+#ifdef HOSTVALIDATE	
 	struct hostent *hostptr;
+#endif
 	int             foreground;
-	char           *ptr, *hostname;
+	char           *ptr, *hostname, *certfile = (char *) 0;
 
-	if (ptr = strrchr(argv[0], '/'))
+	if ((ptr = strrchr(argv[0], '/')))
 		ptr++;
 	else
 		ptr = argv[0];
-	if (get_options(argc, argv, &hostname, &foreground)) {
+	if (get_options(argc, argv, &hostname, &certfile, &foreground)) {
 		usage(ptr);
 		return (1);
 	}
@@ -141,18 +158,19 @@ main(argc, argv)
 	}
 	endhostent();
 #endif	
-	if(!(msghd = (struct msgtable *) malloc(sizeof(struct msgtable) * (argc - 1))))
+	if (!(msghd = (struct msgtable *) malloc(sizeof(struct msgtable) * (argc - 1))))
 	{
 		perror("malloc");
 		return(1);
 	}
-	return(consclnt(hostname, argv + optind));
+	return(consclnt(hostname, argv + optind, certfile));
 }
 
 int
-consclnt(hostname, fname)
+consclnt(hostname, fname, clientcert)
 	char          *hostname;
 	char         **fname;
+	char          *clientcert;
 {
 	char            lhost[MAXHOSTNAMELEN], seekfile[MAXBUF];
 	int             sockfd, idx, fcount;
@@ -193,7 +211,7 @@ consclnt(hostname, fname)
 			perror(*fptr);
 			continue;
 		} else
-		if(!(msgptr->fp = fdopen(msgptr->fd, "r")))
+		if (!(msgptr->fp = fdopen(msgptr->fd, "r")))
 		{
 			perror(*fptr);
 			close(msgptr->fd);
@@ -201,7 +219,7 @@ consclnt(hostname, fname)
 		}
 		fcount++;
 		(void) strcpy(msgptr->fname, *fptr);
-		if(ptr = strrchr(*fptr, '/'))
+		if ((ptr = strrchr(*fptr, '/')))
 			ptr++;
 		else
 			ptr = *fptr;
@@ -250,17 +268,30 @@ consclnt(hostname, fname)
 	{
 		for (;;)
 		{
-			if ((sockfd = tcpopen(hostname, "consmon", 6340)) == -1)
+			if ((sockfd = tcpopen(hostname, "logsrv", 6340)) == -1)
 			{
-				if(errno == EINVAL)
+				if (errno == EINVAL)
 					return(1);
 				(void) sleep(5);
 				continue;
 			}
 			break;
 		}
+#ifdef HAVE_SSL
+	if (clientcert && tls_init(sockfd, clientcert))
+		return (-1);
+#endif
 		/*- send my hostname */
-		write(sockfd, lhost, strlen(lhost) + 1);
+		idx = strlen(lhost) + 1;
+		getEnvConfigInt((long *) &log_timeout, "LOGSRV_TIMEOUT", 120);
+		if (safewrite(sockfd, lhost, idx, log_timeout) != idx)
+		{
+			filewrt(2, "unable to send hostname to %s\n", lhost);
+#ifdef HAVE_SSL
+			ssl_free();
+#endif
+			exit (1);
+		}
 		IOplex(lhost, sockfd);
 		(void) close(sockfd);
 	} /* for(;;) */
@@ -273,12 +304,17 @@ IOplex(lhost, sockfd)
 	int             sockfd;
 {
 	register int    Bytes;
+	int             sleepinterval;
 	char            Buffer[MAXBUF];
 	fd_set          FdSet;
 	long            seekval[2];
 	struct msgtable *msgptr;
 	register char  *Ptr;
 
+	if (!(Ptr = getenv("SLEEPINTERVAL")))
+		sleepinterval = 5;
+	else
+		sleepinterval = atoi(Ptr);
 	for (;;)
 	{
 		/* include message files and sockfd in file descriptor set */
@@ -291,17 +327,18 @@ IOplex(lhost, sockfd)
 		{
 			if (errno == EINTR)
 				continue;
-			(void) filewrt(sockfd, "select: %s\n", strerror(errno));
+			(void) filewrt(2, "select: %s\n", strerror(errno));
+			(void) sslwrt(sockfd, log_timeout, "select: %s\n", strerror(errno));
 			return (-1);
 		}
-		if(!Bytes)
+		if (!Bytes)
 			continue;
 		if (FD_ISSET(sockfd, &FdSet))
 		{
 			for (;;)
 			{
 				errno = 0;
-				if ((Bytes = read(sockfd, Buffer, MAXBUF)) == -1)
+				if ((Bytes = saferead(sockfd, Buffer, MAXBUF, log_timeout)) == -1)
 				{
 					if (errno == EINTR)
 						continue;
@@ -331,9 +368,9 @@ IOplex(lhost, sockfd)
 						 * seekfile
 						 */
 						(void) clearerr(msgptr->fp);
-						if(checkfiles(msgptr->fname, msgptr->fp, seekval, msgptr->seekfd))
+						if (checkfiles(msgptr->fname, msgptr->fp, seekval, msgptr->seekfd))
 						{
-							if(filewrt(sockfd, "%s %d Update after EOF or File changed\n", lhost, (msgptr->machcnt)++) == -1)
+							if (sslwrt(sockfd, log_timeout, "%s %d Update after EOF or File changed\n", lhost, (msgptr->machcnt)++) == -1)
 								return(-1);
 							continue;
 						}
@@ -341,7 +378,7 @@ IOplex(lhost, sockfd)
 							break;
 					} else
 					{
-						if (filewrt(sockfd, "%s %ld %s", lhost, (msgptr->machcnt)++, Buffer) == -1)
+						if (sslwrt(sockfd, log_timeout, "%s %ld %s", lhost, (msgptr->machcnt)++, Buffer) == -1)
 							return (-1);
 						seekval[1] = msgptr->machcnt;
 						(void) lseek(msgptr->seekfd, 0, SEEK_SET);
@@ -350,7 +387,7 @@ IOplex(lhost, sockfd)
 				} /* end of for(;;) */
 			}	/* End of FD_ISSET(masterfd) */
 		} /* end of for(msgptr = msghd;;) */
-		sleep(30);
+		sleep(sleepinterval);
 	}	/* end of for(;;) */
 }
 
@@ -392,7 +429,7 @@ checkfiles(fname, msgfp, seekval, seekfd)
 		(void) close(fd);
 		return (0);
 	} else
-	if(tmpseekval > seekval[0]) /* update happened after EOF */
+	if (tmpseekval > seekval[0]) /* update happened after EOF */
 	{
 		close(fd);
 		return(1);
@@ -408,4 +445,10 @@ checkfiles(fname, msgfp, seekval, seekfd)
 		(void) write(seekfd, &seekval, sizeof(seekval));
 		return (1);
 	}
+}
+
+void
+getversion_logclient_c()
+{
+	printf("%s\n", sccsid);
 }

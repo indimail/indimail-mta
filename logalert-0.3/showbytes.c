@@ -1,5 +1,8 @@
 /*
  * $Log: showbytes.c,v $
+ * Revision 1.2  2013-05-15 00:16:21+05:30  Cprogrammer
+ * fixed warnings
+ *
  * Revision 1.1  2013-03-15 09:30:20+05:30  Cprogrammer
  * Initial revision
  *
@@ -12,7 +15,7 @@
 #include "common.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: showbytes.c,v 1.1 2013-03-15 09:30:20+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: showbytes.c,v 1.2 2013-05-15 00:16:21+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 int
@@ -38,7 +41,13 @@ main(int argc, char **argv)
 		_exit (1);
 	}
 	close(fd);
-	printf("%d\n", bytes);
+	printf("%d\n", (int) bytes);
 	fflush(stdout);
 	_exit (0);
+}
+
+void
+getversion_showbytes_c()
+{
+	printf("%s\n", sccsid);
 }

@@ -1,5 +1,8 @@
 /*
  * $Log: rpclog.c,v $
+ * Revision 1.3  2013-05-15 00:18:45+05:30  Cprogrammer
+ * fixed warnings
+ *
  * Revision 1.2  2012-09-19 11:07:26+05:30  Cprogrammer
  * rearranged functions
  *
@@ -23,8 +26,13 @@
 #ifdef HAVE_SYS_SOCKET_H
 #include <sys/socket.h>
 #endif
+#ifdef HAVE_SYS_TYPES_H
+#include <sys/types.h>
+#endif
 #include <sys/ioctl.h>
+#ifdef HAVE_RPC_RPC_H
 #include <rpc/rpc.h>
+#endif
 
 #ifdef DEBUG
 #define RPC_SVC_FG
@@ -37,7 +45,7 @@
 #define SEND_MESSAGE ((u_long)1)
 
 #ifndef	lint
-static char     sccsid[] = "$Id: rpclog.c,v 1.2 2012-09-19 11:07:26+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: rpclog.c,v 1.3 2013-05-15 00:18:45+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 struct CONSOLE_MSG
@@ -51,12 +59,14 @@ struct CONSOLE_MSG
 	char            text[256];
 };
 
+bool_t          pmap_unset(unsigned long, unsigned long);
 static void     rpclog_1();
 static int     *send_message_1();
 
 static int      _rpcpmstart;	/*- Started by a port monitor ? */
 static int      _rpcfdtype;		/*- Whether Stream or Datagram ? */
 static int      _rpcsvcdirty;	/*- Still serving ? */
+
 
 int
 get_options(int argc, char **argv, int *foreground)
@@ -80,7 +90,7 @@ get_options(int argc, char **argv, int *foreground)
 	return (0);
 }
 
-static
+static void
 _msgout(char *msg)
 {
 #ifdef RPC_SVC_FG
@@ -193,16 +203,16 @@ send_message_1(msg)
 int
 main(int argc, char **argv)
 {
-	register SVCXPRT *transp;
+	register SVCXPRT *transp = (SVCXPRT *) 0;
 	struct sockaddr_in saddr;
 	int             sock, fcount, proto, foreground, asize = sizeof(saddr);
 
-	if (getsockname(0, (struct sockaddr *) & saddr, &asize) == 0) {
+	if (getsockname(0, (struct sockaddr *) & saddr, (socklen_t *) &asize) == 0) {
 		int             ssize = sizeof(int);
 
 		if (saddr.sin_family != AF_INET)
 			exit(1);
-		if (getsockopt(0, SOL_SOCKET, SO_TYPE, (char *) &_rpcfdtype, &ssize) == -1)
+		if (getsockopt(0, SOL_SOCKET, SO_TYPE, (char *) &_rpcfdtype, (socklen_t *) &ssize) == -1)
 			exit(1);
 		sock = 0;
 		_rpcpmstart = 1;
@@ -285,4 +295,10 @@ main(int argc, char **argv)
 	_msgout("svc_run returned");
 	exit(1);
 	/* NOTREACHED */
+}
+
+void
+getversion_rpclog_c()
+{
+	printf("%s\n", sccsid);
 }

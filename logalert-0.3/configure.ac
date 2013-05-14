@@ -11,6 +11,11 @@ AM_CONFIG_HEADER(config.h)
 
 AC_PREFIX_DEFAULT(/usr/local/bin)
 
+if test "$GCC" = yes ; then
+	CXXFLAGS="$CXXFLAGS -Wall"
+fi
+CFLAGS="$CFLAGS -O4 -Wall"
+
 # Checks for programs.
 AC_PROG_CC
 AC_PROG_LEX
@@ -22,7 +27,8 @@ AC_PROG_YACC
 AC_HEADER_DIRENT
 AC_HEADER_STDC
 AC_CHECK_HEADERS([fcntl.h stdarg.h stdlib.h string.h sys/time.h unistd.h getopt.h \
-				  inttypes.h sys/param.h])
+				  pwd.h inttypes.h sys/param.h sys/wait.h rpc/rpc.h])
+AC_CHECK_LIB(ssl, SSL_CTX_new, [AC_SUBST([LIB_SSL], ["-lssl -lcrypto"]) AC_DEFINE([HAVE_SSL], [1],[OpenSSL Library])],,-lssl -lcrypto)
 
 have_pcre=no
 LIBPCREDIR=libpcre

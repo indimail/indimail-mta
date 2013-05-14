@@ -1,18 +1,20 @@
-
+/*
+ * $Log: process.c,v $
+ * Revision 1.1  2013-05-15 00:33:54+05:30  Cprogrammer
+ * Initial revision
+ *
+ */
 #include "process.h"
 
 #define SET_PROCHDR_DEFAULT(ph) \
 		(ph)->pid = 0; \
 		(ph)->status = FREE;
 
-
-
 int
 start_process(struct process_hdr *p)
 {
 
 	pid_t           ppid;
-	uint            i;
 
 	ppid = fork();
 	if (ppid < 0) {
@@ -28,7 +30,7 @@ start_process(struct process_hdr *p)
 		uint            i, j;
 
 		i = 0;
-		if (!getcwd(pwd, PATH_MAX) || !pwd) {
+		if (!getcwd(pwd, PATH_MAX)) {
 			perror("getcwd");
 			fatal("getcwd failed");
 		}

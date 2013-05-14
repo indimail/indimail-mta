@@ -1,3 +1,9 @@
+/*
+ * $Log: log.c,v $
+ * Revision 1.1  2013-05-15 00:30:41+05:30  Cprogrammer
+ * Initial revision
+ *
+ */
 #include "log.h"
 
 void

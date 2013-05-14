@@ -1,4 +1,8 @@
 /*
+ * $Log: main.c,v $
+ * Revision 1.1  2013-05-15 00:29:21+05:30  Cprogrammer
+ * Initial revision
+ *
  * Copyright (C) 1998-2002 Martin Roesch <roesch@sourcefire.com>
  *
  * This program is free software; you can redistribute it and/or modify
@@ -18,23 +22,23 @@
 
 // For further information about licensing please refer to the LICENSE file
 
-
 #include<stdio.h>
 
 #include "config.h"
 
 #ifdef HAVE_GETOPT_H
-#include<getopt.h>
+#include <getopt.h>
 #define HAVE_GETOPTLONG 1
 #else
 #ifdef SOLARIS
-#include<unistd.h>
+#include <unistd.h>
 #endif
 #endif
 
 #include "parser.h"
 #include "process.h"
 #include "user.h"
+#include "sig.h"
 
 #define READ_STDIN "-"
 
@@ -207,6 +211,7 @@ main(int argc, char **argv)
 		create_proc_table((struct entry_conf **) conf_table);
 	} else {
 		debug("Monitoring %s...", def_conf.watchfile);
-		monitor_file(&def_conf);
+		return (monitor_file(&def_conf));
 	}
+	return (0);
 }

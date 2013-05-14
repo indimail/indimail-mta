@@ -1,5 +1,8 @@
 /*
  * $Log: incrmesg.c,v $
+ * Revision 1.5  2013-05-15 00:19:32+05:30  Cprogrammer
+ * fixed warnings
+ *
  * Revision 1.4  2013-03-03 23:36:12+05:30  Cprogrammer
  * create the directory with owner of incrmesg process
  *
@@ -38,12 +41,13 @@
 #ifdef SOLARIS
 #include <sys/systeminfo.h>
 #endif
+#include "common.h"
 
 #define MAXBUF  8192
 #define SEEKDIR "/var/tmp/incrmesg"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: incrmesg.c,v 1.4 2013-03-03 23:36:12+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: incrmesg.c,v 1.5 2013-05-15 00:19:32+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 struct msgtable
@@ -76,7 +80,7 @@ main(argc, argv)
 {
 	char           *ptr;
 
-	if (ptr = strrchr(argv[0], '/'))
+	if ((ptr = strrchr(argv[0], '/')))
 		ptr++;
 	else
 		ptr = argv[0];
@@ -88,9 +92,9 @@ main(argc, argv)
 	if (!(msghd = (struct msgtable *) malloc(sizeof(struct msgtable) * argc)))
 	{
 		perror("malloc");
-		return(1);
+		return (1);
 	}
-	return(incrmesg(argv + 1));
+	return (incrmesg(argv + 1));
 }
 
 int
@@ -108,11 +112,11 @@ incrmesg(fname)
 	if (access(seekdir, F_OK) && r_mkdir(seekdir, 0700, getuid(), getgid()))
 	{
 		perror(seekdir);
-		return(1);
+		return (1);
 	}
 	for(fptr = fname, msgptr = msghd;*fptr;msgptr++, fptr++)
 	{
-		if (ptr = strrchr(*fptr, '/'))
+		if ((ptr = strrchr(*fptr, '/')))
 			ptr++;
 		else
 			ptr = *fptr;
@@ -161,7 +165,7 @@ incrmesg(fname)
 		printf("%d\n", msgptr->seekfd);
 	}
 #endif
-	IOplex();
+	return (IOplex());
 }
 
 /* function for I/O multiplexing */
@@ -228,7 +232,7 @@ IOplex()
 				if (fflush(stdout) == EOF)
 				{
 					perror("fflush");
-					return(-1);
+					return (-1);
 				}
 				seekval[1] = msgptr->machcnt;
 				(void) lseek(msgptr->seekfd, 0, SEEK_SET);
@@ -236,6 +240,7 @@ IOplex()
 			}
 		} /* end of for(dflag = 0;;) */
 	} /* end of for(msgptr = msghd;;) */
+	return (0);
 }
 
 static int
@@ -279,7 +284,7 @@ checkfiles(fname, msgfp, seekval, seekfd)
 	if (tmpseekval > seekval[0]) /* update happened after EOF */
 	{
 		close(fd);
-		return(1);
+		return (1);
 	} else	/* new message file has been created */
 	{
 		(void) close(msgfd);
@@ -292,4 +297,10 @@ checkfiles(fname, msgfp, seekval, seekfd)
 		(void) write(seekfd, &seekval, sizeof(seekval));
 		return (1);
 	}
+}
+
+void
+getversion_incrmesg_c()
+{
+	printf("%s\n", sccsid);
 }

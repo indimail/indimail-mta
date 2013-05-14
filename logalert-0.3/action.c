@@ -1,3 +1,9 @@
+/*
+ * $Log: action.c,v $
+ * Revision 1.1  2013-05-15 00:29:40+05:30  Cprogrammer
+ * Initial revision
+ *
+ */
 #include "config.h"
 #ifdef HAVE_SYS_TYPES_H
 #include <sys/types.h>
@@ -65,7 +71,6 @@ shell_exec(struct entry_conf *cur_cfg, char *line, int nmatch)
 
 	int             fd;
 	char           *cmd;
-	int             cmdsize;
 
 	switch (fork()) {
 	case -1:
@@ -108,4 +113,5 @@ shell_exec(struct entry_conf *cur_cfg, char *line, int nmatch)
 		exit(1);
 	}
 	/*- does not return */
+	exit (1);
 }
