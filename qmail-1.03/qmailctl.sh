@@ -11,6 +11,9 @@
 ### END INIT INFO
 
 # $Log: qmailctl.sh,v $
+# Revision 1.39  2013-05-15 00:44:07+05:30  Cprogrammer
+# fix for systems having inittab
+#
 # Revision 1.38  2013-05-07 15:51:52+05:30  Cprogrammer
 # startup/shutdown script for non-indimail system
 #
@@ -251,7 +254,7 @@ PATH=$PATH:QMAIL/bin:QMAIL/sbin:/usr/local/bin:/usr/bin:/bin
 export PATH
 myhelp()
 {
-    cat <<HELP
+    /bin/cat <<HELP
   start -- starts mail service (smtp connection accepted, mail can go out)
    stop -- stops mail service (smtp connections refused, nothing goes out)
 restart -- stops and restarts smtp, sends qmail-send a TERM & restarts it
@@ -288,12 +291,17 @@ stop()
 		elif [ -f /sbin/initctl ] ; then
 			/sbin/initctl stop svscan >/dev/null 2>>/tmp/sv.err && $succ || $fail
 		else
-			killall -e -w svscan && $succ || $fail
+  			/bin/grep "^SV:" /etc/inittab |/bin/grep svscan |/bin/grep respawn >/dev/null
+			if [ $? -ne 0 ]; then
+				/usr/bin/killall -e -w svscan && $succ || $fail
+			else
+				RETVAL=0
+			fi
 		fi
 		RETVAL=$?
 		echo
 		if [ -s /tmp/sv.err ] ; then
-			cat /tmp/sv.err
+			/bin/cat /tmp/sv.err
 		fi
 		/bin/rm -f /tmp/sv.err
 	fi
@@ -322,7 +330,16 @@ start()
 			else
 				device=/dev/null
 			fi
-			QMAIL/bin/svscanboot <>$device 2<>$device
+  			/bin/grep "^SV:" /etc/inittab |/bin/grep svscan |/bin/grep respawn >/dev/null
+			if [ $? -ne 0 ]; then
+				/bin/grep -v "svscan" /etc/inittab > /etc/inittab.svctool.$$
+				echo "SV:345:respawn:QMAIL/bin/svscanboot $servicedir <>$device 2<>$device" >> /etc/inittab.svctool.$$
+				if [ $? -eq 0 ] ; then
+					/bin/mv /etc/inittab.svctool.$$ /etc/inittab
+				fi
+				create_svscan $servicedir
+				/sbin/init q
+			fi
 		fi
 		RETVAL=$?
 		echo
@@ -340,7 +357,7 @@ start()
 		done
 	fi
 	if [ -s /tmp/sv.err ] ; then
-		cat /tmp/sv.err
+		/bin/cat /tmp/sv.err
 	fi
 	/bin/rm -f /tmp/sv.err
 	if [ -d /var/lock/subsys ] ; then
@@ -404,7 +421,7 @@ case "$1" in
 	elif [ -f /sbin/initctl ] ; then
 		/sbin/initctl stop svscan >/dev/null && $succ || $fail
 	else
-		killall -e -w svscan && $succ || $fail
+		/usr/bin/killall -e -w svscan && $succ || $fail
 	fi
 	ret=$?
 	echo
@@ -412,7 +429,7 @@ case "$1" in
 	;;
   kill)
 	$ECHO -n $"killing tcpserver,supervise,qmail-send: "
-	kill `ps -ef|egrep "tcpserver|supervise|qmail-send" | grep -v grep | awk '{print $2}'` && $succ || $fail
+	kill `ps -ef|/bin/egrep "tcpserver|supervise|qmail-send" | /bin/grep -v grep | awk '{print $2}'` && $succ || $fail
 	ret=$?
 	echo
 	[ $ret -eq 0 ] && exit 0 || exit 1
@@ -436,7 +453,7 @@ case "$1" in
 	if [ -x /sbin/initctl ] ; then
 		/sbin/initctl status svscan
 	else
-		ps -ef|grep svscanboot|grep -v grep
+		ps -ef|/bin/grep svscanboot|/bin/grep -v grep
 	fi
 	RETVAL=$?
 	QMAIL/bin/svstat $SERVICE/.svscan/log $SERVICE/* $SERVICE/*/log
@@ -487,10 +504,10 @@ case "$1" in
   cdb)
 	case "$SYSTEM" in
 		DARWIN*)
-		INDIMAILDIR=`dscl . -read /Users/indimail|grep NFSHomeDi|awk '{print $2}'`
+		INDIMAILDIR=`dscl . -read /Users/indimail|/bin/grep NFSHomeDi|awk '{print $2}'`
 		;;
 		*)
-		INDIMAILDIR=`grep -w "^indimail" /etc/passwd | cut -d: -f6|head -1`
+		INDIMAILDIR=`/bin/grep -w "^indimail" /etc/passwd | cut -d: -f6|head -1`
 		;;
 	esac
     ret=0
@@ -511,7 +528,7 @@ case "$1" in
 		do
 			$ECHO -n $"building $j.cdb: "
 			QMAIL/bin/tcprules $j.cdb $j.tmp < $j && /bin/chmod 664 $j.cdb \
-				&& chown indimail:indimail $j.cdb && $succ || $fail
+				&& /bin/chown indimail:indimail $j.cdb && $succ || $fail
 			RETVAL=$?
 			echo
 			let ret+=$RETVAL
