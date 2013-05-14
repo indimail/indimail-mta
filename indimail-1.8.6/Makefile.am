@@ -146,11 +146,11 @@ indimailsbin_PROGRAMS = adminclient chowkidar cindimail clearopensmtp config_set
 	copyemail execmysql hostsync indisrvr initsvc inlookup inquerytest install_tables \
 	ipchange mail_report mgmtpass osh postdel systpass testmra updatefile updaterules \
 	vserverinfo vchkpass vsetpass vdelivermail vdeloldusers vfilter vfstab \
-	vmoddomain vreorg vtable authpgsql
+	vmoddomain vreorg vtable
 
 indimaillibexec_PROGRAMS = sq_vacation qmailmrtg7
 
-indimailauthlib_PROGRAMS = authindi
+indimailauthlib_PROGRAMS = authindi authpgsql
 
 indimailauthlib_SCRIPTS = authgeneric
 
