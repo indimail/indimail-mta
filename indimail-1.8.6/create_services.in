@@ -1,5 +1,8 @@
 #!/bin/sh
 # $Log: create_services.in,v $
+# Revision 2.53  2013-05-14 15:31:06+05:30  Cprogrammer
+# use the same softlimit for port 366 as configured for port 25
+#
 # Revision 2.52  2011-12-10 15:14:17+05:30  Cprogrammer
 # increased soft mem
 #
@@ -179,7 +182,7 @@ indimaildir=@indimaildir@
 # End USER Configuration OPTIONS
 #
 
-# $Id: create_services.in,v 2.52 2011-12-10 15:14:17+05:30 Cprogrammer Exp mbhangui $
+# $Id: create_services.in,v 2.53 2013-05-14 15:31:06+05:30 Cprogrammer Stab mbhangui $
 
 usage()
 {
@@ -452,7 +455,7 @@ else
 fi
 
 $dir_prefix$indimaildir/sbin/svctool --smtp=366 --odmr --servicedir=$servicedir \
-	--query-cache --password-cache $extra_opt
+	--query-cache --password-cache --memory=$smtp_soft_mem $extra_opt
 echo "1" > $dir_prefix$servicedir/qmail-smtpd.366/variables/DISABLE_PLUGIN
 #
 # Greylist
