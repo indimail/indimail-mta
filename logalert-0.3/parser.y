@@ -267,9 +267,6 @@ regex_parser(struct entry_conf *p, char *value)
 {
 
 	char           *s, *e;
-	const char     *error;
-	int             erroroff;
-
 /*
  * our regex pattern starts and ends with /
  */
