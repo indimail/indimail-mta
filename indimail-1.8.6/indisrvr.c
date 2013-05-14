@@ -1,5 +1,8 @@
 /*
  * $Log: indisrvr.c,v $
+ * Revision 2.49  2013-05-15 00:43:01+05:30  Cprogrammer
+ * fixed compilation warnings
+ *
  * Revision 2.48  2012-09-24 19:21:18+05:30  Cprogrammer
  * removed pidfile
  *
@@ -174,7 +177,7 @@
 #include "indimail.h"
 
 #ifndef lint
-static char     sccsid[] = "$Id: indisrvr.c,v 2.48 2012-09-24 19:21:18+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: indisrvr.c,v 2.49 2013-05-15 00:43:01+05:30 Cprogrammer Stab mbhangui $";
 #endif
 
 #ifdef CLUSTERED_SITE
@@ -334,7 +337,7 @@ translate(SSL *ssl, int out, int clearout, int clearerr, unsigned int iotimeout)
 			/*- data on clearout */
 			if ((n = read(clearout, tbuf, sizeof(tbuf))) < 0)
 			{
-				filewrt(3, "translate: unable to read form client: %s\n", strerror(errno));
+				filewrt(3, "translate: unable to read from client: %s\n", strerror(errno));
 				return (-1);
 			} else
 			if (n == 0)
@@ -350,7 +353,7 @@ translate(SSL *ssl, int out, int clearout, int clearerr, unsigned int iotimeout)
 			/*- data on clearerr */
 			if ((n = read(clearerr, tbuf, sizeof(tbuf))) < 0)
 			{
-				filewrt(3, "translate: unable to read form client: %s\n", strerror(errno));
+				filewrt(3, "translate: unable to read from client: %s\n", strerror(errno));
 				return (-1);
 			} else
 			if (n == 0)
@@ -430,8 +433,8 @@ main(argc, argv)
 		return(1);
 	dup2(2, 3);
 	snprintf(pgname, MAX_BUFF, "indiserver.%s%s", ipaddr, port);
-	signal(SIGTERM, SigTerm);
-	signal(SIGUSR2, SigUsr);
+	(void) signal(SIGTERM, SigTerm);
+	(void) signal(SIGUSR2, SigUsr);
 #ifdef HAVE_SSL
 	if (usessl == 1)
 	{
@@ -440,7 +443,7 @@ main(argc, argv)
 			fprintf(stderr, "missing certficate: %s: %s\n", certfile, strerror(errno));
 			return (1);
 		}
-		signal(SIGHUP, SigHup);
+		(void) signal(SIGHUP, SigHup);
 		SSL_library_init();
 		if (!(ctx = load_certificate(certfile)))
 			return (1);
@@ -495,10 +498,10 @@ main(argc, argv)
 			close(new);
 			continue;
 		case 0:
-			signal(SIGTERM, SIG_DFL);
-			signal(SIGCHLD, SIG_IGN);
-			close(socket_desc);
+			(void) signal(SIGTERM, SIG_DFL);
+			(void) signal(SIGCHLD, SIG_IGN);
 			(void) signal(SIGHUP, SIG_IGN);
+			close(socket_desc);
 			if (setsockopt(new, SOL_SOCKET, SO_LINGER, (char *) &linger, sizeof(linger)) == -1)
 			{
 				close(new);
@@ -899,7 +902,7 @@ SigUsr(void)
 {
 	filewrt(3, "%d Resetting Verbose flag to %d\n", (int) getpid(), verbose ? 0 : 1);
 	verbose = (verbose ? 0 : 1);
-	signal(SIGUSR2, (void(*)()) SigUsr);
+	(void) signal(SIGUSR2, (void(*)()) SigUsr);
 	errno = EINTR;
 	return;
 }
@@ -910,7 +913,7 @@ SigHup(void)
 {
 	filewrt(3, "%d: IndiServer received SIGHUP\n", getpid());
 	ctx = load_certificate(certfile);
-	signal(SIGHUP, (void(*)()) SigHup);
+	(void) signal(SIGHUP, (void(*)()) SigHup);
 	errno = EINTR;
 	return;
 }
