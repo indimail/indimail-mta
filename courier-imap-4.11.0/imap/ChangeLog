@@ -1,3 +1,55 @@
+4.13.0
+
+2013-03-09  Sam Varshavchik  <mrsam@courier-mta.com>
+
+	* imap: add explicit mkdirs on PIDFILE directories to startup scripts.
+
+2013-02-20  Sam Varshavchik  <mrsam@courier-mta.com>
+
+	* rfc822: workaround for invalid utf-8 input making libidn go off the
+	rails.
+
+4.12.0
+
+2013-01-12 Gordon Messmer <yinyang@eburg.com>
+
+	* tcpd/libcouriergnutls.c (get_server_cert): Fix size of malloced
+	buffer.
+
+2012-12-20  Sam Varshavchik  <mrsam@courier-mta.com>
+
+	* configure.in: Fix typo in configure check for setvbuf().
+
+4.11.0
+
+2012-09-05  Sam Varshavchik  <mrsam@courier-mta.com>
+
+	* maildir/maildiraclt.c (maildir_acl_delete): Fix double-free on error
+	path of an ENOMEM.
+
+2012-06-22  Sam Varshavchik  <mrsam@courier-mta.com>
+
+	* courier.spec.in: Fix the RPM spec to work around /bin symlink
+	breakage in F17.
+
+	* tcpd/tcpd.c: Update libgnutls API, replace obsoleted functions
+	with current API. Obsoletes most TLS_* variables that set protocol
+	priorities, replaced with Gnutls-specific single TLS_PRIORITY
+	setting (existing TLS_* variables are still used by the OpenSSL
+	alternative). Updated *-ssl configuration files accordingly.
+
+2012-06-21  Eray Aslan <eray.aslan@caf.com.tr>
+
+	* tcpd: Compilation changes for gnutls 3
+
+2012-04-22  Sam Varshavchik  <mrsam@courier-mta.com>
+
+	* liblock/mail.c (dotlock_exists): Quell a compiler warning.
+
+2012-02-23  Osamu Aoki <osamu@debian.org>
+
+	* Miscellaneous spelling fixes.
+
 4.10.0
 
 2011-11-13  Sam Varshavchik  <mrsam@courier-mta.com>
