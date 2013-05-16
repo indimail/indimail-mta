@@ -30,9 +30,9 @@ static char *send_auth_reply(const char *q)
 	char	*p, *cp;
 
 #if SMAP
-	*cp=getenv("PROTOCOL");
+	cp=getenv("PROTOCOL");
 
-	if (cp && strcmp(cp, "SMAP1") == 0)
+	if ((cp && !strcmp(cp, "SMAP1")))
 		writes("> ");
 	else
 #endif
