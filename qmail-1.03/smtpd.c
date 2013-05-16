@@ -1,5 +1,8 @@
 /*
  * $Log: smtpd.c,v $
+ * Revision 1.170  2013-05-16 23:33:16+05:30  Cprogrammer
+ * added checkrecipient as part of non-indimail code
+ *
  * Revision 1.169  2013-01-02 08:59:12+05:30  Cprogrammer
  * use FORCE_TLS env variable to enforce STARTTLS during AUTH
  *
@@ -617,6 +620,9 @@
 #ifdef USE_SPF
 #include "spf.h"
 #endif
+#ifndef INDIMAIL
+#include "auth_cram.h"
+#endif
 
 #ifdef BATV
 #include "cdb.h"
@@ -658,7 +664,7 @@ int             wildmat_internal(char *, char *);
 int             ssl_rfd = -1, ssl_wfd = -1;	/*- SSL_get_Xfd() are broken */
 char           *servercert, *clientca, *clientcrl;
 #endif
-char           *revision = "$Revision: 1.169 $";
+char           *revision = "$Revision: 1.170 $";
 char           *protocol = "SMTP";
 stralloc        proto = { 0 };
 static stralloc Revision = { 0 };
@@ -819,7 +825,6 @@ struct constmap mapspf;
 int             sppok = 0;
 static stralloc spp = { 0 };
 char           *spfFn = 0;
-#ifdef INDIMAIL 
 /*-
  * check recipients using inquery
  * chkrcptdomains
@@ -827,7 +832,6 @@ char           *spfFn = 0;
 int             chkrcptok = 0;
 static stralloc chkrcpt = { 0 };
 struct constmap mapchkrcpt;
-#endif
 /*- TARPIT Check Variables */
 int             tarpitcount = 0;
 int             tarpitdelay = 5;
@@ -2268,7 +2272,6 @@ sigscheck(stralloc *line, char **desc, int in_header)
 	return 0;
 }
 
-#ifdef INDIMAIL
 /*
  * This function returns
  *  0: If user not found
@@ -2303,6 +2306,7 @@ check_recipient_cdb(char *rcpt)
 	return r;
 }
 
+#ifdef INDIMAIL
 /*
  * This function returns
  *  0: User is fine
@@ -2519,9 +2523,11 @@ smtp_help(char *arg)
 	out("214-This server supports the following commands:\r\n");
 	switch (smtp_port)
 	{
+#ifdef INDIMAIL
 	case ODMR_PORT: /*- RFC 2645 */
 		out("214 HELO EHLO AUTH ATRN HELP QUIT\r\n");
 		break;
+#endif
 	case SUBM_PORT: /*- RFC 2476 */
 		if (hostname && *hostname && childargs && *childargs)
 			out("214 HELO EHLO RSET NOOP MAIL RCPT DATA AUTH VRFY HELP QUIT\r\n");
@@ -2530,9 +2536,21 @@ smtp_help(char *arg)
 		break;
 	default:
 		if (hostname && *hostname && childargs && *childargs)
-			out("214 HELO EHLO RSET NOOP MAIL RCPT DATA AUTH VRFY ETRN ATRN HELP QUIT\r\n");
+		{
+			out("214 HELO EHLO RSET NOOP MAIL RCPT DATA AUTH VRFY ETRN ");
+#ifdef INDIMAIL
+			out("ATRN ");
+#endif
+			out("HELP QUIT\r\n");
+		}
 		else
-			out("214 HELO EHLO RSET NOOP MAIL RCPT DATA VRFY ETRN ATRN HELP QUIT\r\n");
+		{
+			out("214 HELO EHLO RSET NOOP MAIL RCPT DATA VRFY ETRN ");
+#ifdef INDIMAIL
+			out("ATRN ");
+#endif
+			out("HELP QUIT\r\n");
+		}
 		break;
 	}
 }
@@ -3360,10 +3378,7 @@ smtp_ehlo(char *arg)
 			out("\r\n");
 		}
 		if (smtp_port != SUBM_PORT)
-		{
 			out("250-ETRN\r\n");
-			out("250-ATRN\r\n");
-		}
 	} else
 		out("250-ATRN\r\n");
 #else
@@ -3376,7 +3391,8 @@ smtp_ehlo(char *arg)
 		out(size_buf);
 		out("\r\n");
 	}
-	out("250-ETRN\r\n");
+	if (smtp_port != SUBM_PORT)
+		out("250-ETRN\r\n");
 #endif
 #ifdef TLS
 	if (!ssl && env_get("STARTTLS"))
@@ -4168,11 +4184,8 @@ smtp_mail(char *arg)
 void
 smtp_rcpt(char *arg)
 {
-	int             allowed_rcpthosts = 0, isgoodrcpt = 0;
-#ifdef INDIMAIL
+	int             allowed_rcpthosts = 0, isgoodrcpt = 0, result = 0;
 	char           *tmp;
-	int             result = 0;
-#endif
 #if BATV
 	int             ws = -1;
 #endif
@@ -4302,7 +4315,6 @@ smtp_rcpt(char *arg)
 		return;
 #endif /*- #ifdef INDIMAIL */
 	}	  /*- if (!allowed_rcpthosts) */
-#ifdef INDIMAIL
 	/*
 	 * If rcptto is local, check status of recipients
 	 * (do not allow mail to be sent to invalid users)
@@ -4326,13 +4338,16 @@ smtp_rcpt(char *arg)
 		{
 			if (isgoodrcpt != 4)
 			{
+#ifdef INDIMAIL
 				if (*tmp)
 					scan_int(tmp, &isgoodrcpt);
 				else
+#endif
 					isgoodrcpt = 3; /*- default is cdb */
 			}
 			switch (isgoodrcpt)
 			{
+#ifdef INDIMAIL
 				case 1: /* reject if user not in sql db */
 					result = check_recipient_sql(addr.s);
 					break;
@@ -4340,6 +4355,7 @@ smtp_rcpt(char *arg)
 					if ((result = !check_recipient_cdb(addr.s)))
 						result = check_recipient_sql(addr.s);
 					break;
+#endif
 				case 4:
 					result = 0;
 					break;
@@ -4367,7 +4383,6 @@ smtp_rcpt(char *arg)
 			}
 		} 
 	}
-#endif
 	if (max_rcpt_errcount != -1 && rcpt_errcount >= max_rcpt_errcount)
 	{
 		err_rcpt_errcount(mailfrom.s, rcpt_errcount);
@@ -6517,11 +6532,7 @@ qmail_smtpd(int argc, char **argv, char **envp)
 	switch (smtp_port)
 	{
 	case ODMR_PORT: /*- RFC 2645 */
-#ifdef INDIMAIL
 		cmdptr = odmrcommands;
-#else
-		cmdptr = smtpcommands;
-#endif
 		break;
 	case SUBM_PORT: /*- RFC 2476 */
 		cmdptr = submcommands;
@@ -6657,7 +6668,7 @@ addrrelay() /*- Rejection of relay probes. */
 void
 getversion_smtpd_c()
 {
-	static char    *x = "$Id: smtpd.c,v 1.169 2013-01-02 08:59:12+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: smtpd.c,v 1.170 2013-05-16 23:33:16+05:30 Cprogrammer Exp mbhangui $";
 
 #ifdef INDIMAIL
 	if (x)
@@ -6665,5 +6676,6 @@ getversion_smtpd_c()
 #else
 	if (x)
 		x++;
+	x=sccsidauthcramh;
 #endif
 }
