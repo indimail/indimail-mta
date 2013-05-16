@@ -5,7 +5,7 @@ dnl
 dnl Copyright 1998 - 2010 Double Precision, Inc.  See COPYING for
 dnl distribution information.
 
-AC_INIT(courier-imap, 4.9.0, [courier-users@lists.sourceforge.net])
+AC_INIT(courier-imap, 4.13.0, [courier-users@lists.sourceforge.net])
 
 >confdefs.h  # Kill PACKAGE_ macros
 
@@ -115,7 +115,7 @@ AC_SYS_LARGEFILE
 AC_CACHE_CHECK([for socklen_t],
 	sox_cv_hassocklen_t,
  
-AC_COMPILE_IFELSE(
+AC_COMPILE_IFELSE([
 AC_LANG_SOURCE( [
 #include <sys/types.h>
 #include <sys/socket.h>
@@ -123,7 +123,7 @@ AC_LANG_SOURCE( [
 socklen_t sl_t;
 ],[
 	accept(0, 0, &sl_t);
-]),
+])],
 	sox_cv_hassocklen_t=yes,
 	sox_cv_hassocklen_t=no)
 )
@@ -340,7 +340,7 @@ then
 fi
 AC_SUBST(ssllib)
 
-AC_COMPILE_IFELSE([
+AC_COMPILE_IFELSE([AC_LANG_SOURCE([
 
 #include <stdio.h>
 
@@ -348,7 +348,7 @@ int main()
 {
    setvbuf(stderr, NULL, _IOLBF, BUFSIZ);
 }
-],
+])],
 	AC_DEFINE_UNQUOTED(HAVE_SETVBUF_IOLBF,1,[Whether setvbuf(..._IOLBF) works])
 )
 
