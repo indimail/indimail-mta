@@ -25,8 +25,6 @@ libcouriertls_la_DEPENDENCIES=@TLSLIBRARY@
 couriertcpd_SOURCES=argparse.c argparse.h \
 	tcpd.c tcpdaccess.c tcpremoteinfo.c tcpremoteinfo.h
 
-CONFIG_STATUS_DEPENDENCIES = ../soxwrap/soxlibs.dep
-
 couriertcpd_DEPENDENCIES= libspipe.la \
 	../rfc1035/librfc1035.a \
 	@dblibrary@ \

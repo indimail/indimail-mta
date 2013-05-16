@@ -35,6 +35,7 @@ start)
 		. @sysconfdir@/pop3d ; \
 		PROXY_HOSTNAME=$PROXY_HOSTNAME ; \
 		TLS_PROTOCOL=$TLS_STARTTLS_PROTOCOL ; \
+		@MKDIR_P@ `dirname $PIDFILE` ; \
 		@courierlogger@ -pid=$PIDFILE -start $LOGGEROPTS \
 		@libexecdir@/couriertcpd -address=$ADDRESS \
 			-maxprocs=$MAXDAEMONS -maxperip=$MAXPERIP \

@@ -1,3 +1,8 @@
+2013-02-20  Sam Varshavchik  <mrsam@courier-mta.com>
+
+	* rfc2047.c, rfc2047u.c: workaround for invalid utf-8 input making
+	libidn go off the rails.
+
 2011-02-12  Sam Varshavchik  <mrsam@courier-mta.com>
 
 	* rfc2047.c (do_encode_words_method): Avoid splitting RFC 2047-encoded

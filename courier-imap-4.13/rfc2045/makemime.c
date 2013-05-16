@@ -48,21 +48,56 @@ struct arg_list {
 
 /******************************************************************************
 
+Check if a file is a regular file.
+
+******************************************************************************/
+
+static int isreg(int fd)
+{
+	struct stat st;
+	if (fstat(fd, &st))
+	{
+		perror("fstat");
+		exit(1);
+	}
+	return S_ISREG(st.st_mode);
+}
+
+/******************************************************************************
+
+Determine the file descriptor wanted, if any.
+
+******************************************************************************/
+
+static int fd_wanted(const char *filename, const char *mode)
+{
+	if (strcmp(filename, "-") == 0)		/* stdin or stdout */
+		return strcmp(mode, "r") ? 1:0;
+	if (*filename == '&')
+		return atoi(filename+1);	/* file descriptor */
+	return -1;				/* or a file */
+}
+
+/******************************************************************************
+
 Open some file or a pipe for reading and writing.
 
 ******************************************************************************/
 
 static FILE *openfile_or_pipe(const char *filename, const char *mode)
 {
-int	fd;
+int	fd, fd_to_dup = fd_wanted(filename, mode);
 FILE	*fp;
 
-	if (strcmp(filename, "-") == 0)	/* stdin or stdout */
-		fd=dup( strcmp(mode, "r") ? 1:0);
-	else if (*filename == '&')
-		fd=dup( atoi(filename+1));	/* file descriptor */
-	else fd=open(filename, (strcmp(mode, "r") ? O_WRONLY|O_CREAT|O_TRUNC:
-			O_RDONLY), 0666);	/* or a file */
+	if (fd_to_dup == 0)
+		return stdin;
+
+	if (fd_to_dup >= 0)
+		fd = dup(fd_to_dup);
+	else
+		fd=open(filename, (strcmp(mode, "r") ?
+			O_WRONLY|O_CREAT|O_TRUNC:O_RDONLY), 0666);
+
 	if (fd < 0)
 	{
 		perror(filename);
@@ -88,12 +123,8 @@ static FILE *openfile(const char *filename)
 {
 FILE	*fp=openfile_or_pipe(filename, "r");
 int	fd=fileno(fp);
-off_t	orig_pos;
 
-	if ((orig_pos=lseek(fd, 0L, SEEK_CUR)) == -1 ||
-		lseek(fd, 0L, SEEK_END) == -1 ||
-		lseek(fd, 0L, SEEK_CUR) == -1 ||
-		lseek(fd, orig_pos, SEEK_SET) == -1)	/* Must be a pipe */
+	if (!isreg(fd))	/* Must be a pipe */
 	{
 	FILE *t=tmpfile();
 	int	c;
@@ -114,6 +145,17 @@ off_t	orig_pos;
 		}
 		fclose(fp);
 		fp=t;
+	}
+	else
+	{
+	off_t	orig_pos = lseek(fd, 0L, SEEK_CUR);
+
+		if (orig_pos == -1 ||
+			fseek(fp, orig_pos, SEEK_SET) == -1)
+		{
+			perror("fseek");
+			exit(1);
+		}
 	}
 	return (fp);
 }
@@ -149,7 +191,20 @@ int	c;
 			++q;
 		if (!*q)	continue;
 		if (*q == '#')	continue;
-		if (strcmp(buffer, "-") == 0)	break;
+		if (strcmp(buffer, "-") == 0)
+		{
+			if (isreg(fileno(fp)))
+			{
+				long orig_pos = ftell(fp);
+				if (orig_pos == -1 ||
+					lseek(fileno(fp), orig_pos, SEEK_SET) == -1)
+				{
+					perror("seek");
+					exit(1);
+				}
+			}
+			break;
+		}
 
 		argp=(struct arg_list *)malloc(sizeof(struct arg_list)+1+
 			strlen(q));

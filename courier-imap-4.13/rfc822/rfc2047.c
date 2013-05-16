@@ -47,8 +47,22 @@ static char *rfc822_encode_domain_int(const char *pfix,
 #if LIBIDN
 	int err;
 	char *p;
+	size_t s=strlen(domain)+16;
+	char *cpy=malloc(s);
 
-	err=idna_to_ascii_8z(domain, &p, 0);
+	if (!cpy)
+		return NULL;
+
+	/*
+	** Invalid UTF-8 can make libidn go off the deep end. Add
+	** padding as a workaround.
+	*/
+
+	memset(cpy, 0, s);
+	strcpy(cpy, domain);
+
+	err=idna_to_ascii_8z(cpy, &p, 0);
+	free(cpy);
 
 	if (err != IDNA_SUCCESS)
 	{

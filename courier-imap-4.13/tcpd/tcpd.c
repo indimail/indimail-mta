@@ -1,5 +1,5 @@
 /*
-** Copyright 1998 - 2012 Double Precision, Inc.
+** Copyright 1998 - 2013 Double Precision, Inc.
 ** See COPYING for distribution information.
 */
 
@@ -78,6 +78,7 @@ static const char *stderrloggername=0;
 static char *lockfilename;
 
 static void setup_block(const char *);
+static void setup_allow(const char *);
 
 static struct args arginfo[]={
 	{"access", &accessarg},
@@ -86,6 +87,7 @@ static struct args arginfo[]={
 	{"drop", &droparg},
 	{"address", &ipaddrarg},
 	{"block", 0, setup_block},
+	{"allow", 0, setup_allow},
 	{"group", &grouparg},
 	{"listen", &listenarg},
 	{"maxperc", &maxpercarg},
@@ -125,21 +127,27 @@ static int sighup_received=0;
 
 struct blocklist_s {
 	struct blocklist_s *next;
-	char *zone;
+	char *zone;             /* zone to lookup */
+	char *display_zone;     /* zone for var_ZONE */
 	char *var;
 	struct in_addr ia;	/* 0, anything */
 	char *msg;		/* NULL, query for TXT record */
+	int allow;		/* This is an -allow entry */
 	} *blocklist=0;
 
 extern int openaccess(const char *);
 extern void closeaccess();
 extern char *chkaccess(const char *);
 
-static void setup_block(const char *blockinfo)
+/*
+** Process -block and -allow parameters
+*/
+static void setup_block_allow(const char *blockinfo, int isallow)
 {
 struct blocklist_s *newbl=(struct blocklist_s *)malloc(sizeof(*blocklist));
 char	*p;
 struct blocklist_s **blptr;
+const char *ip;
 
 	for (blptr= &blocklist; *blptr; blptr=&(*blptr)->next)
 		;
@@ -152,22 +160,79 @@ struct blocklist_s **blptr;
 
 	*blptr=newbl;
 	newbl->next=0;
+	newbl->allow=isallow;
+
 	strcpy(newbl->zone, blockinfo);
-	newbl->var=strchr(newbl->zone, ',');
+
+	newbl->var=0;
 	newbl->msg=0;
+	newbl->display_zone=0;
 	newbl->ia.s_addr=INADDR_ANY;
 
-	if (newbl->var)
-		*newbl->var++=0;
-	if (newbl->var && *newbl->var)
-		newbl->msg=strchr(newbl->var, ',');
-	if (newbl->msg)
-		*newbl->msg++=0;
-	if (newbl->var && (p=strchr(newbl->var, '/')) != 0)
+	/* Look for var or IP address */
+
+	for (p=newbl->zone; *p; ++p)
 	{
-		*p++=0;
-		rfc1035_aton_ipv4(p, &newbl->ia);
+		if (*p == '=')
+		{
+			*p++=0;
+			newbl->display_zone=p;
+			continue;
+		}
+
+		if (*p == '/')
+			break;
+
+		if (*p == ',')
+		{
+			*p++=0;
+			newbl->var=p;
+			break;
+		}
 	}
+
+	if (newbl->display_zone == 0)
+		newbl->display_zone = newbl->zone;
+
+	ip=0;
+
+	for (; *p; p++)
+	{
+		if (*p == ',')
+			break;
+
+		if (*p == '/')
+		{
+			*p++=0;
+			ip=p;
+			break;
+		}
+	}
+
+	for (; *p; p++)
+	{
+		if (*p == ',')
+		{
+			*p++=0;
+			newbl->msg=p;
+			break;
+		}
+	}
+
+	if (ip)
+	{
+		rfc1035_aton_ipv4(ip, &newbl->ia);
+	}
+}
+
+static void setup_block(const char *blockinfo)
+{
+	setup_block_allow(blockinfo, 0);
+}
+
+static void setup_allow(const char *blockinfo)
+{
+	setup_block_allow(blockinfo, 1);
 }
 
 static int isid(const char *p)
@@ -1410,6 +1475,107 @@ char *r;
 	free(q);
 }
 
+static void set_allow_variable(const char *varname, const char *msg)
+{
+	static int found = 0;
+	char buf[32];
+	mysetenv(varname, ""); /* Whitelist */
+
+	sprintf(buf, "ALLOW_%d", found++);
+	mysetenv(buf, varname);
+
+	(void)msg; /* not used, could tweak behavior of -allow */
+}
+
+static void set_txt_response(const char *varname,
+		      const char *txt)
+{
+	char *p=malloc(strlen(varname)+20);
+
+	strcat(strcpy(p, varname), "_TXT");
+	mysetenv(p, txt);
+	free(p);
+
+}
+
+static void set_zone(const char *varname,
+	      const char *zone)
+{
+	char *p=malloc(strlen(varname)+20);
+
+	strcat(strcpy(p, varname), "_ZONE");
+	mysetenv(p, zone);
+	free(p);
+
+}
+
+
+static void set_a_response(const char *varname,
+		    const struct in_addr *in)
+{
+	char	buf[RFC1035_NTOABUFSIZE+6];
+	char *p;
+
+	rfc1035_ntoa_ipv4(in, buf);
+
+	p=malloc(strlen(varname)+20);
+
+	strcat(strcpy(p, varname), "_IP");
+	mysetenv(p, buf);
+	free(p);
+}
+
+static int is_a_rr(struct rfc1035_reply *replyp,
+		   const struct rfc1035_rr *rrptr,
+		   const char *wanted_hostname)
+{
+	char	buf[RFC1035_MAXNAMESIZE+1];
+
+	/*
+	** Go through the DNS response, and check every A record
+	** in there.
+	*/
+
+	rfc1035_replyhostname(replyp, rrptr->rrname, buf);
+	if (rfc1035_hostnamecmp(buf, wanted_hostname))	return 0;
+
+	if (rrptr->rrtype != RFC1035_TYPE_A)
+		return 0;
+
+	return 1;
+}
+
+/*
+** Process TXT records in DNSBL lookup response.
+*/
+
+static int search_txt_records(struct rfc1035_res *res,
+			       int allow,
+			       const char *varname,
+			       struct rfc1035_reply *replyp,
+			       const char *wanted_hostname)
+{
+	char	buf[RFC1035_MAXNAMESIZE+1];
+	int j;
+
+	if ((j=rfc1035_replysearch_all(res,
+				       replyp, wanted_hostname,
+				       RFC1035_TYPE_TXT,
+				       RFC1035_CLASS_IN, 0)) >= 0)
+	{
+		rfc1035_rr_gettxt(replyp->allrrs[j], 0, buf);
+
+		if (buf[0]) /* is this necessary? */
+		{
+			if (!allow)
+				mysetenv(varname, buf);
+			set_txt_response(varname, buf);
+			return 1;
+		}
+	}
+	return 0;
+}
+
 /*
 ** check_blocklist is called once for each blocklist query to process.
 */
@@ -1419,12 +1585,11 @@ static void docheckblocklist(struct blocklist_s *p, const char *nameptr)
 	const char *q;
 	const char *varname=p->var;
 	char	hostname[RFC1035_MAXNAMESIZE+1];
-	char	buf[RFC1035_MAXNAMESIZE+1];
-	int	hasnotxt;
-	struct blocklist_s *pp;
+	int	wanttxt;
 	struct rfc1035_reply *replyp;
 	struct rfc1035_res res;
-	int i;
+	unsigned int i;
+	int found;
 
 	hostname[0]=0;
 	strncat(hostname, nameptr, RFC1035_MAXNAMESIZE);
@@ -1436,72 +1601,21 @@ static void docheckblocklist(struct blocklist_s *p, const char *nameptr)
 
 	rfc1035_init_resolv(&res);
 
-	if (p->ia.s_addr == INADDR_ANY)
-	{
-		/* We're not looking for a particular token IP address */
-
-		if (p->msg == 0 || *p->msg == 0)
-		{
-			/*
-			** We don't have a predefined error message, therefore
-			** we expect TXT records.
-			*/
-			if ((i=rfc1035_resolve_cname(&res,
-					hostname,
-					RFC1035_TYPE_TXT,
-					RFC1035_CLASS_IN, &replyp, 0)) >= 0)
-			{
-				rfc1035_rr_gettxt(replyp->allrrs[i], 0,
-					hostname);
-				mysetenv(varname, hostname);
-			}
-		}
-		else
-		{
-			/*
-			** A predefined error message has been supplied, so
-			** just look for the IP address.  Perhaps the
-			** blacklist does not provide TXT records, so query
-			** for A records only.
-			*/
-
-			if ((i=rfc1035_resolve_cname(&res,
-					hostname,
-					RFC1035_TYPE_A,
-					RFC1035_CLASS_IN, &replyp, 0)) >= 0)
-			{
-				mkmymsg(varname, p->msg);
-			}
-		}
-
-		if (replyp)	rfc1035_replyfree(replyp);
-		rfc1035_destroy_resolv(&res);
-		return;
-	}
-
 	/*
-	** Looking for a specific A record in the blacklist.  Possibly due
-	** to different messages for different A records.
-	** See if all -block options for the same zone have predefined
-	** error messages, so we can be satisfied with an A query only.
+	** The third parameter has opposite meanings.  For -block, the last
+	** component specifies a custom message that overrides any TXT record
+	** in the DNS access list.  For -allow, it simply asks for TXT records
+	** to be fetched, for use by external software.
 	*/
 
-	hasnotxt=0;
-
-	for (pp=p; pp; pp=pp->next)
-	{
-		if (strcmp(pp->zone, p->zone))	continue;
-		if (pp->msg == 0 || *pp->msg == 0)	hasnotxt=1;
-	}
-
-	/*
-	** If no text were provided, we need both A and TXT records, so
-	** issue an ANY query, and parse the results.
-	*/
+	if (p->allow)
+		wanttxt = p->msg != 0;
+	else
+		wanttxt = (p->msg == 0 || *p->msg == 0);
 
 	(void)rfc1035_resolve_cname(&res,
 			hostname,
-			hasnotxt ? RFC1035_TYPE_ANY:RFC1035_TYPE_A,
+			wanttxt ? RFC1035_TYPE_ANY:RFC1035_TYPE_A,
 			RFC1035_CLASS_IN, &replyp, 0);
 
 	if (!replyp)
@@ -1510,58 +1624,74 @@ static void docheckblocklist(struct blocklist_s *p, const char *nameptr)
 		return;
 	}
 
+	found=0;
+
 	for (i=0; i<replyp->ancount+replyp->nscount+replyp->arcount; i++)
 	{
-	int	j;
-
-		/*
-		** Go through the DNS response, and check every A record
-		** in there.
-		*/
-		rfc1035_replyhostname(replyp, replyp->allrrs[i]->rrname, buf);
-		if (rfc1035_hostnamecmp(buf, hostname))	continue;
-		if (replyp->allrrs[i]->rrtype != RFC1035_TYPE_A)
+		if (!is_a_rr(replyp, replyp->allrrs[i], hostname))
 			continue;
 
+		if (p->ia.s_addr != INADDR_ANY &&
+		    p->ia.s_addr != replyp->allrrs[i]->rr.inaddr.s_addr)
+			continue;
+
+		set_zone(varname, p->display_zone);
+		set_a_response(varname, &replyp->allrrs[i]->rr.inaddr);
+
 		/*
-		** Go through the remaining blocklist, and set the environment
-		** variable for each block entry for this zone and IP address.
+		** The -block option was kind enough to supply the
+		** error message.
 		*/
-		for (pp=p; pp; pp=pp->next)
+
+		if (!p->allow && p->msg && *p->msg)
 		{
-		const char *vvarname=pp->var;
+			mkmymsg(varname, p->msg);
+			continue;
+		}
 
-			if (strcmp(pp->zone, p->zone))	continue;
+		/*
+		** search_txt_records takes care of setting varname for
+		** -blocks, and we must set it for -allows.
+		*/
 
-			if (pp->ia.s_addr != replyp->allrrs[i]->rr.inaddr.s_addr)
-				continue;
+		if (p->allow)
+			set_allow_variable(varname, p->msg);
 
-			if (!vvarname)	vvarname="BLOCK";
-
+		if (!search_txt_records(&res, p->allow, varname, replyp,
+					hostname) && !p->allow)
+		{
 			/*
-			** The -block option was kind enough to supply the
-			** error message.
+			** Even though we did not find a TXT record, we're here
+			** because of an A record, so for -blocks, we must
+			** set varname to something.
 			*/
+			mysetenv(varname, "Access denied.");
+		}
 
-			if (pp->msg && *pp->msg)
-			{
-				mkmymsg(vvarname, pp->msg);
-				continue;
-			}
+		found=1;
+		break;
+	}
 
-			/* No predefined message, look for a TXT record. */
+	/*
+	** Last chance: if all we got is a TXT record, and we were not looking
+	** for a specific IP address, then take what we've got.
+	*/
 
-			if ((j=rfc1035_replysearch_all(&res,
-						       replyp, hostname,
-						       RFC1035_TYPE_TXT,
-						       RFC1035_CLASS_IN, 0)) >= 0)
-			{
-				rfc1035_rr_gettxt(replyp->allrrs[j], 0, buf);
-				mysetenv(vvarname, buf);
-			}
-			else	mysetenv(vvarname, "Access denied.");
+	if (p->ia.s_addr == INADDR_ANY && !found)
+	{
+		if (search_txt_records(&res, p->allow, varname, replyp,
+				       hostname))
+		{
+			/*
+			** search_txt_record takes care of setting varname
+			** for -blocks, and we must do it for -allows
+			*/
+			if (p->allow)
+				mysetenv(varname, ""); /* Whitelist */
+			set_zone(varname, p->display_zone);
 		}
 	}
+
 	rfc1035_replyfree(replyp);
 	rfc1035_destroy_resolv(&res);
 }
@@ -1580,14 +1710,27 @@ const unsigned char *q=(const unsigned char *)ia;
 	c=q[2];
 	d=q[3];
 
-	sprintf(hostname, "%u.%u.%u.%u.%s", d, c, b, a, p->zone);
-	docheckblocklist(p, hostname);
+	/* Silently ignore exceedingly long zones */
+	if (snprintf(hostname, sizeof hostname,
+		"%u.%u.%u.%u.%s", d, c, b, a, p->zone) <= RFC1035_MAXNAMESIZE)
+			docheckblocklist(p, hostname);
 }
 
 #if	RFC1035_IPV6
 
 static void check_blocklist(struct blocklist_s *p, const RFC1035_ADDR *ia)
 {
+	char	hostname[RFC1035_MAXNAMESIZE+1];
+
+	/*
+	** 16 byte IPv6 address. 32 nybbles. Each nybble followed by a dot:
+	** 64 characters.
+	*/
+
+	char	decimal_address[65];
+	char	bytebuf[5];
+	int i;
+
 	if (IN6_IS_ADDR_V4MAPPED(ia))
 	{
 	struct in_addr ia4;
@@ -1595,6 +1738,21 @@ static void check_blocklist(struct blocklist_s *p, const RFC1035_ADDR *ia)
 		memcpy(&ia4, (const char *)ia + 12, 4);
 		check_blocklist_ipv4(p, &ia4);
 	}
+
+	decimal_address[0]=0;
+
+	for (i=0; i<16; ++i)
+	{
+		unsigned char byte=((struct in6_addr *)ia)->s6_addr[15-i];
+
+		sprintf(bytebuf, "%x.%x.",(byte & 0x0F), ((byte >> 4) & 0x0F));
+		strcat(decimal_address, bytebuf);
+	}
+
+	/* Silently ignore exceedingly long zones */
+	if (snprintf(hostname, sizeof hostname,
+		     "%s%s", decimal_address, p->zone) <= RFC1035_MAXNAMESIZE)
+		docheckblocklist(p, hostname);
 }
 
 #else

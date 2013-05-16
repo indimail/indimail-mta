@@ -43,6 +43,7 @@ start)
 		. @sysconfdir@/imapd-ssl ; \
 		PROXY_HOSTNAME=$PROXY_HOSTNAME ; \
 		IMAP_TLS=1; \
+		@MKDIR_P@ `dirname $SSLPIDFILE` ; \
 		@courierlogger@ -pid=$SSLPIDFILE -start $SSLLOGGEROPTS \
 		@libexecdir@/couriertcpd -address=$SSLADDRESS \
 			-maxprocs=$MAXDAEMONS -maxperip=$MAXPERIP \

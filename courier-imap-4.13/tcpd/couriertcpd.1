@@ -3,13 +3,22 @@
 .\"<!-- distribution information. -->
 .\"     Title: couriertcpd
 .\"    Author: Sam Varshavchik
-.\" Generator: DocBook XSL Stylesheets v1.75.2 <http://docbook.sf.net/>
-.\"      Date: 04/04/2011
+.\" Generator: DocBook XSL Stylesheets v1.78.1 <http://docbook.sf.net/>
+.\"      Date: 04/14/2013
 .\"    Manual: Double Precision, Inc.
 .\"    Source: Courier Mail Server
 .\"  Language: English
 .\"
-.TH "COURIERTCPD" "1" "04/04/2011" "Courier Mail Server" "Double Precision, Inc."
+.TH "COURIERTCPD" "1" "04/14/2013" "Courier Mail Server" "Double Precision, Inc."
+.\" -----------------------------------------------------------------
+.\" * Define some portability stuff
+.\" -----------------------------------------------------------------
+.\" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.\" http://bugs.debian.org/507673
+.\" http://lists.gnu.org/archive/html/groff/2009-02/msg00013.html
+.\" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.ie \n(.g .ds Aq \(aq
+.el       .ds Aq '
 .\" -----------------------------------------------------------------
 .\" * set default formatting
 .\" -----------------------------------------------------------------
@@ -31,14 +40,12 @@ couriertcpd \- the Courier mail server TCP server daemon
 \fBcouriertcpd\fR {\-pid=\fIpidfile\fR} {\-restart}
 .SH "DESCRIPTION"
 .PP
-
 \fBcouriertcpd\fR
 accepts incoming network connections, and runs
 \fBprogram\fR
 after establishing each network connection\&. The
-\fBprogram\fR\'s standard input and output are set to the network connection\&.
+\fBprogram\fR\*(Aqs standard input and output are set to the network connection\&.
 .PP
-
 \fIlist\fR
 is a comma\-separated list of TCP port numbers where incoming connections are created\&.
 \fBprogram\fR
@@ -62,7 +69,7 @@ will be the environment inherited by
 .RS 4
 Specifies an optional access file\&. The access file lists the IP addresses from which connections should be accepted or rejected\&. The access file is also used to initialize environment variables based on the IP address of the connection\&.
 \fIfilename\fR
-is a GDBM or DB database file that\'s usually created by a script from one or more text files\&. See "ACCESS FILE" below for more information\&.
+is a GDBM or DB database file that\*(Aqs usually created by a script from one or more text files\&. See "ACCESS FILE" below for more information\&.
 .RE
 .PP
 \-accesslocal
@@ -84,15 +91,25 @@ accepts connections only from the local system\&. When multiple port numbers are
 specifies more than one port number\&. See "\m[blue]\fBMultiple port list\fR\m[]\&\s-2\u[1]\d\s+2" below for more information\&.
 .RE
 .PP
-\-block=\fIzone\fR[,\fIvar\fR[/\fIn\&.n\&.n\&.n\fR][,\fImsg\fR]]
+\-block=\fIzone\fR[,\fIvar\fR[/\fIn\&.n\&.n\&.n\fR][,\fImsg\fR]] or \-allow=\fIzone\fR[,\fIvar\fR[/\fIn\&.n\&.n\&.n\fR[,]]]
 .RS 4
 Initialize the environment variable
 \fIvar\fR
 if both of the following conditions are true:
 \fIvar\fR
-is not already initialized; the connecting IP address can be found in a DNS\-based list\&. See DNS ACCESS LISTS, below\&. Multiple
+is not already initialized; the connecting IP address can be found in a DNS\-based access list\&. See DNS ACCESS LISTS, below\&. Multiple
 \fB\-block\fR
-options can be used\&.
+and
+\fB\-allow\fR
+options can be specified\&.
+.sp
+\fB\-block\fR
+and
+\fB\-allow\fR
+are very similar, differing only in minor semantics\&.
+\fB\-block\fR\*(Aqs semantics are more appropriate for using DNS access list to block access, and
+\fB\-allow\fR\*(Aqs semantics are more appropriate for using DNS access list to whitelist IP addresses and exempt them even if they appear in other
+\fB\-block\fRed zones\&.
 .RE
 .PP
 \-denymsg=\fItext\fR
@@ -117,7 +134,7 @@ defaults to
 \-group=\fIgroup\fR
 .RS 4
 Set
-\fBcouriertcpd\fR\'s its group ID\&.
+\fBcouriertcpd\fR\*(Aqs its group ID\&.
 \fIgroup\fR
 may be specified numerically, or by its name\&. Only the superuser may use
 \fB\-group\fR\&.
@@ -217,20 +234,20 @@ receives a SIGHUP signal\&.
 \-stderr=socket
 .RS 4
 Set
-\fBprogram\fR\'s standard error to the network connection, just like its standard input and output\&.
+\fBprogram\fR\*(Aqs standard error to the network connection, just like its standard input and output\&.
 .RE
 .PP
 \-stderr=\fIlogfile\fR
 .RS 4
 Set
-\fBprogram\fR\'s standard error to the specified file,
+\fBprogram\fR\*(Aqs standard error to the specified file,
 logfile\&. The file is created, if necessary, and is opened in append mode\&.
 .RE
 .PP
 \-stderrlogger=\fIlogprogram\fR
 .RS 4
 Set
-\fBprogram\fR\'s standard error to a pipe, which is read by
+\fBprogram\fR\*(Aqs standard error to a pipe, which is read by
 \fBlogprogram\fR\&. Only one instance of
 \fIlogger\fR
 is started, which receives standard error from every instance of
@@ -239,7 +256,7 @@ is started, which receives standard error from every instance of
 is executed with the output end of the stderr pipe connected as standard input\&.
 \fIlogprogram\fR
 is executed with one argument \-
-\fBprogram\fR\'s name\&.
+\fBprogram\fR\*(Aqs name\&.
 .RE
 .PP
 \-stderrloggername=name
@@ -248,7 +265,7 @@ Use
 \fIname\fR
 as the argument to
 \fIlogprogram\fR, instead of the
-\fBprogram\fR\'s name\&.
+\fBprogram\fR\*(Aqs name\&.
 .RE
 .PP
 \-stop
@@ -270,7 +287,7 @@ will receive a SIGTERM signal\&.
 \-user=\fIuser\fR
 .RS 4
 Set
-\fBcouriertcpd\fR\'s user ID\&. Also, the group ID is set to the user\'s group ID\&. Using both
+\fBcouriertcpd\fR\*(Aqs user ID\&. Also, the group ID is set to the user\*(Aqs group ID\&. Using both
 \fB\-group\fR
 and
 \fB\-user\fR
@@ -340,7 +357,7 @@ accepts a connection from any IP address\&.
 .PP
 Both IPv4 and IPv6 addresses can be specified, if IPv6 support is available\&. A non\-standard syntax is currently used to specify IPv6 addresses\&. This is subject to change in the near future\&. IPv6 support is currently considered to be experimental\&.
 .PP
-The access file is a binary database file that\'s usually created by a script, such as
+The access file is a binary database file that\*(Aqs usually created by a script, such as
 \m[blue]\fB\fBmakesmtpaccess\fR(8)\fR\m[]\&\s-2\u[2]\d\s+2, from one or more plain text files\&. Blank lines in the text file are ignored\&. Lines that start with the # character are also ignored\&.
 .SS "Rejecting and accepting connections by IP address"
 .PP
@@ -484,7 +501,6 @@ This will deny entire 3ffe::/16 (6bone network, which is phased out)\&.
 This will deny 2002:c0a8::/32 (6to4 addresses derived from private address space)\&.
 .SS "Setting environment variables"
 .PP
-
 allow
 can be optionally followed by a list of environment variable assignments, separated by commas\&. The environment variables are set before executing
 \fBprogram\fR
@@ -520,138 +536,272 @@ must be explicitly specified for the IP address
 only reads one entry from the access file, the entry for the most specific IP address\&.
 .SS "DNS ACCESS LISTS"
 .PP
-An alternative to listing banned IP addresses is to use an external DNS\-based IP access list\&.
+An alternative to listing banned IP addresses in access files is to use an external DNS\-based IP access list\&.
 .PP
 There is no provision to support IPv6\-based lists, because none yet exist\&. IPv6\-based access list support will be added in the future\&.
 .PP
-
-\fBcouriertcpd\fR\'s default configuration does not automatically reject connections from any IP address listed on a DNS\-based list\&. If the connecting IP address is listed couriertcpd simply sets an environment variable\&. It\'s up to the
-\fBprogram\fR, run by
-\fBcouriertcpd\fR, to read the environment variable and choose what to do if the environment variable is set\&.
-.PP
-Please note that if the environment variable is already set,
+\fBcouriertcpd\fR\*(Aqs default configuration does not automatically reject connections from banned IP address unless the
+\fB\-drop\fR
+option is present\&. Instead,
 \fBcouriertcpd\fR
-will NOT search the access list\&. This can be used to override the access list where
-\fBprogram\fR
-only recognizes the access list if the environment variable is not empty\&. By setting the environment variable to an empty string in the access file (see above), you can override access lists for selected IP addresses\&.
-.PP
-The
-\fB\-block\fR
-option queries a DNS list for each connecting IP address\&. The only required argument to
-\fB\-block\fR
-is the DNS zone that is used to publish thelist\&. The name of the zone can optionally be followed by a comma and the name of the environment variable to set if the DNS list includes the IP address\&.
-\fBcouriertcpd\fR
-sets the environment variable
+sets an environment variable if the connecting address has a hit in the DNS access list\&. The
+Courier
+mail server rejects all mail if the connection\*(Aqs environment has the environment variable
 \fBBLOCK\fR
-if you do not specify the name yourself\&.
-.PP
-The name of the environment variable can be optionally followed by a slash and an IP address\&. Normally
-\fBcouriertcpd\fR
-sets the environment variable if the access list includes any A record entry for the specified IP address\&. Some access lists may offer additional information by returning one of several possible A records\&. If the name of the environment variable is followed by a slash and an IP address, the environment variable will be initialized only if the access list includes an A record containing the indicated IP address\&.
-.PP
-The contents of the environment variable will be the contents of any TXT record for the listed IP address\&.
-\fIvar\fR[/\fIn\&.n\&.n\&.n\fR] can be optionally followed by a comma and a text message, which will be used instead of the TXT record\&. The text message may include a single @ character somewhere in it, which will be replaced by the listed IP address\&.
-.PP
-When the
-\fB\-drop\fR
-option is given in addition to
-\fB\-block\fR,
-\fBcouriertcpd\fR
-drops the connection, rather than running the
-\fBprogram\fR\&. First, all
+set to a non\-empty string, and it just so happens that
 \fB\-block\fR
-options are processed and the environment variables are set, based on the results of any matching DNS lookups\&. The
-\fB\-drop\fR
-gets processed after all DNS lookups\&.
-\fB\-drop\fR
-takes a list of comma\-separated environment variables (if not specified,
+and
+\fB\-allow\fR
+set the
 \fBBLOCK\fR
-is the default list)\&. If any environment variable named by the
-\fB\-drop\fR
-option is set to a non\-empty string,
-\fBcouriertcpd\fR
-drops the connection instead of executing the
-\fBprogram\fR\&.
-.SS "MULTIPLE DNS LISTS"
-.PP
-Multiple
-\fB\-block\fR
-options can be used\&. The connecting IP address gets looked up in multiple access lists\&. This is implemented as follows\&.
-.PP
-
-\fBcouriertcpd\fR
-processes all
-\fB\-block\fR
-options one at a time\&. If the indicated environment variable is already set,
-\fBcouriertcpd\fR
-skips the DNS list lookup (this is also true if only one
-\fB\-block\fR
-option is specified)\&. Therefore, if multiple
-\fB\-block\fR
-options are used, and an IP address is found in the first access list, the remaining lists that use the same environment variable will not be checked\&. But other lists that use a different environment variable WILL be checked\&.
-.PP
-The same
-\fIzone\fR
-can be specified more than once, with different environment variables and different IP addresses\&. For example:
+environment variable by default\&.
 .sp
 .if n \{\
 .RS 4
 .\}
 .nf
-couriertcpd \-block=block\&.example\&.org,BLOCK1/127\&.0\&.0\&.2 \e
-            \-block=block\&.example\&.org,BLOCK2/127\&.0\&.0\&.3
+\-allow=dnswl\&.example\&.com \-block=dnsbl\&.example\&.com
 .fi
 .if n \{\
 .RE
 .\}
 .PP
-If the specified access list contains an A record for the listed address, and the A record contains the IP address 127\&.0\&.0\&.2,
+\fB\-allow\fR
+and
+\fB\-block\fR\*(Aqs parameter gives the DNS zone where the access list query gets performed\&. In this example,
 \fBcouriertcpd\fR
-initializes the
-\fBBLOCK1\fR
-environment variable\&. If the A record contains the IP address 127\&.0\&.0\&.3,
-\fBcouriertcpd\fR
-initializes
-\fBBLOCK2\fR\&. If both records are present, both variables are initialized\&.
+makes a DNS query for
+\(lqd\&.c\&.b\&.a\&.dnswl\&.example\&.com\(rq, then, if necessary, for
+\(lqd\&.c\&.b\&.a\&.dnsbl\&.example\&.com\(rq, for a connection from the IP address
+\fIa\&.b\&.c\&.d\fR\&.
 .PP
-
-\fBcouriertcpd\fR
-uses the following logic to determine what kind of DNS query to issue:
-.PP
-If neither the IP address, nor
-\fImsg\fR
-is specified,
-\fBcouriertcpd\fR
-will query for existence of TXT records, for the IP address\&.
-.PP
-If only
-\fImsg\fR
-is specified,
-\fBcouriertcpd\fR
-looks up the existence of A records, for the IP address\&.
-.PP
-If
-\fI/n\&.n\&.n\&.n\fR
-is used, and
-\fImsg\fR
-is not specified for at least one
+If the DNS query succeeds (more details below),
+\fB\-allow\fR
+sets the environment variable to an empty string, and
 \fB\-block\fR
-option for this same zone,
+sets the environment variable from the
+TXT
+record in the DNS response, or to
+\(lqAccess denied\&.\(rq
+if the DNS access list did not return a
+TXT
+record\&. It should be possible to use
 \fBcouriertcpd\fR
-will query for existence of ANY records, which should return both TXT and all the A records for this IP address\&.
+with DNS access lists that use either
+A
+or
+TXT
+records\&.
 .PP
-If
-\fI/n\&.n\&.n\&.n\fR
-is used, and
-\fImsg\fR
-is specified for every
+The DNS zone parameter to
+\fB\-allow\fR
+and
 \fB\-block\fR
-option for this same zone,
+has up to three additional components, which must be given in the following order, if more than one optional component gets specified:
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+\-allow=dnswl\&.example\&.com,BLOCK2
+.fi
+.if n \{\
+.RE
+.\}
+.PP
+The environment variable that gets set by the DNS access list query can be changed from the default of
+\fBBLOCK\fR
+to something else,
+\fBBLOCK2\fR
+in this example\&. The
+Courier
+mail server pays attention only to
+\fBBLOCK\fR, this is for the benefit of local or custom hacks, which want to leverage
+\fBcouriertcpd\fR\*(Aqs DNS access list lookup facilities, but want it for other purposes\&.
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+\-block=dnsbl\&.example\&.com/127\&.0\&.0\&.2
+.fi
+.if n \{\
+.RE
+.\}
+.PP
+\fBcouriertcpd\fR\*(Aqs DNS access list lookup normally ignores the contents of the actual
+A
+record in the DNS access list, however some DNS access lists may use different
+A
+record to indicate different kinds of records\&. Given an explicit IP address to
 \fBcouriertcpd\fR
-will query for existence of A records only\&.
+results in the environment variable getting set only if the lookup returned the matching
+A
+record\&. An
+A
+record must exist in the DNS access list, in addition to any
+TXT
+record\&. If an explicit IP address is not given, any
+A
+or
+TXT
+record sets
+\fB\-allow\fR
+and
+\fB\-block\fR\*(Aqs environment variable\&.
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+\-block=dnsbl\&.example\&.com,BLOCK,Go away
+.fi
+.if n \{\
+.RE
+.\}
+.PP
+The last component specifies a custom message that overrides any
+TXT
+record in the DNS access list\&. Note that this is a single parameter to
+couriertcpd, so the parameter must be quoted if it contains any spaces or special shell metacharacters\&.
+.PP
+The custom message parameter gets specified for the
+\fB\-block\fR, option\&.
+\fB\-allow\fR
+also allows takes this parameter, but it has a different meaning\&. If its set, even if it\*(Aqs an empty string,
+\fBcouriertcpd\fR
+looks for
+TXT
+records in the DNS access list that\*(Aqs used as a whitelist, in addition to the
+A
+records (using the
+\(lqany\(rq
+query):
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+\-allow=dnswl\&.example\&.com,BLOCK,
+.fi
+.if n \{\
+.RE
+.\}
+.PP
+Without this parameter
+\fBcouriertcpd\fR
+queries for
+A
+records only\&.
+.PP
+Finally, a literal IP address, if given, must always follow the variable name:
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+\-block=dnsbl\&.example\&.com,BLOCK/127\&.0\&.0\&.2,Go away
+.fi
+.if n \{\
+.RE
+.\}
+.PP
+\fB\-block\fR
+normally searches the DNS access list for either
+A
+or
+TXT
+records using the
+\(lqany\(rq
+DNS query\&. Sometimes this can cause problems, or not work at all, with older DNS servers\&. Specifying a custom message results in
+\fB\-block\fR
+executing an ordinary
+A
+DNS query\&.
+\fB\-allow\fR
+always uses an
+A
+query\&.
+.SS "MULTIPLE DNS LISTS"
+.PP
+Multiple
+\fB\-block\fR
+and
+\fB\-allow\fR
+options can be given\&. The connecting IP address gets looked up in multiple access lists\&. This is implemented as follows\&.
+.PP
+\fBcouriertcpd\fR
+processes all
+\fB\-block\fR
+and
+\fB\-allow\fR
+options in list order\&. If each option\*(Aqs environment variable (\fBBLOCK\fR
+or something else) is already set,
+\fBcouriertcpd\fR
+skips the DNS access list lookup\&. Therefore, when multiple options use the same environment variable, the first DNS access list it exists in will set the environment variable, and the remaining ones get ignored, but any remaining
+\fB\-block\fRs and
+\fB\-allow\fRs for different environment variables still get processed\&.
+.PP
+It follows that, in general,
+\fB\-allow\fR
+options should always be listed first, before any
+\fB\-block\fRs; but it\*(Aqs also possible to implement a complicated policy with some
+\fB\-allow\fRs, then some
+\fB\-block\fRs, then more
+\fB\-allow\fRs and
+\fB\-block\fRs\&.
+.SS "ADDITIONAL DNS ACCESS LIST VARIABLES"
+.PP
+Three additional environment variables may get set in conjunction with a successful DNS access list lookup:
+.PP
+BLOCK_IP
+.RS 4
+.PP
+The contents of the
+A
+record in the DNS access list, if one exists (this is not set for DNS access lists that use TXT record)\&.
+.RE
+.PP
+BLOCK_TXT
+.RS 4
+.PP
+The contents of the
+TXT
+record in the DNS access list, if one exists\&. This will generally be the same as
+\fBBLOCK\fR
+for
+\fB\-block\fRs, but will also provide the contents of the
+TXT
+record for
+\fB\-allow\fRs (if it has a dummy custom message portion) which always set
+\fBBLOCK\fR
+to an empty string\&.
+.RE
+.PP
+BLOCK_ZONE
+.RS 4
+.PP
+The DNS zone of the succesfull access list lookup, like
+\(lqdnsbl\&.example\&.com\(rq\&.
+.RE
+.PP
+\fB\-block\fR
+and
+\fB\-allow\fR
+options that specify a custom environment variable name follow the same naming convention, of appending
+\(lq_IP\(rq,
+\(lq_TXT\(rq, and
+\(lq_ZONE\(rq
+suffix to the name of the custom environment variable\&.
+.SS "USING DNS WHITELISTS WITH SPF"
+.PP
+Including
+\(lqallowok\(rq
+keyword in an SPF setting automatically passes the SPF check for senders whose IP address is found in an
+\fB\-allow\fR\-ed access list\&. See
+\m[blue]\fB\fBcourier\fR(8)\fR\m[]\&\s-2\u[3]\d\s+2\&.
 .SH "ENVIRONMENT VARIABLES"
 .PP
-
 \fBcouriertcpd\fR
 also initializes the following environment variables prior to running
 \fBprogram\fR:
@@ -660,7 +810,7 @@ TCPLOCALHOST
 .RS 4
 The name of the host on the local end of the network connection, looked up in DNS\&.
 \fBTCPLOCALHOST\fR
-will not be set if the IP address of the network connection\'s local end cannot be found in DNS, or if
+will not be set if the IP address of the network connection\*(Aqs local end cannot be found in DNS, or if
 \fB\-nodnslookup\fR
 option is specified\&.
 \fBTCPLOCALHOST\fR
@@ -705,7 +855,6 @@ TCP port of the remote end of the network connection\&.
 .RE
 .SH "SEE ALSO"
 .PP
-
 \m[blue]\fB\fBcourier\fR(8)\fR\m[]\&\s-2\u[3]\d\s+2\&.
 .SH "AUTHOR"
 .PP
@@ -726,6 +875,7 @@ Multiple port list
 .RE
 .IP " 3." 4
 \fBcourier\fR(8)
+	
 .RS 4
 \%[set $man.base.url.for.relative.links]/courier.html
 .RE

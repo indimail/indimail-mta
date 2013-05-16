@@ -1,11 +1,11 @@
 <?xml version="1.0"?>
-<html xmlns="http://www.w3.org/1999/xhtml"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/><title>couriertcpd</title><link rel="stylesheet" href="style.css" type="text/css"/><meta name="generator" content="DocBook XSL Stylesheets V1.75.2"/><link rel="home" href="#id331174" title="couriertcpd"/><link xmlns="" rel="stylesheet" type="text/css" href="manpage.css"/><meta xmlns="" name="MSSmartTagsPreventParsing" content="TRUE"/><link xmlns="" rel="icon" href="icon.gif" type="image/gif"/><!--
+<html xmlns="http://www.w3.org/1999/xhtml"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/><title>couriertcpd</title><link rel="stylesheet" type="text/css" href="style.css"/><meta name="generator" content="DocBook XSL Stylesheets V1.78.1"/><link rel="home" href="#idp405424" title="couriertcpd"/><link xmlns="" rel="stylesheet" type="text/css" href="manpage.css"/><meta xmlns="" name="MSSmartTagsPreventParsing" content="TRUE"/><link xmlns="" rel="icon" href="icon.gif" type="image/gif"/><!--
 
 Copyright 1998 - 2009 Double Precision, Inc.  See COPYING for distribution
 information.
 
---></head><body><div class="refentry" title="couriertcpd"><a id="id331174" shape="rect"> </a><div class="titlepage"/><div class="refnamediv"><h2>Name</h2><p>couriertcpd — the <span class="application">Courier</span> mail server
-TCP server daemon</p></div><div class="refsynopsisdiv" title="Synopsis"><h2>Synopsis</h2><div class="cmdsynopsis"><p><code class="command">couriertcpd</code>  [-pid=<em class="replaceable"><code>pidfile</code></em>] [<em class="replaceable"><code>option</code></em>...] {<em class="replaceable"><code>list</code></em>} {<em class="replaceable"><code>program</code></em>} {<em class="replaceable"><code>arg</code></em>...}</p></div><div class="cmdsynopsis"><p><code class="command">couriertcpd</code>  {-pid=<em class="replaceable"><code>pidfile</code></em>} {-stop}</p></div><div class="cmdsynopsis"><p><code class="command">couriertcpd</code>  {-pid=<em class="replaceable"><code>pidfile</code></em>} {-restart}</p></div></div><div class="refsect1" title="DESCRIPTION"><a id="id365444" shape="rect"> </a><h2>DESCRIPTION</h2><p>
+--></head><body><div class="refentry"><a id="idp405424" shape="rect"> </a><div class="titlepage"/><div class="refnamediv"><h2>Name</h2><p>couriertcpd — the <span class="application">Courier</span> mail server
+TCP server daemon</p></div><div class="refsynopsisdiv"><h2>Synopsis</h2><div class="cmdsynopsis"><p><code class="command">couriertcpd</code>  [-pid=<em class="replaceable"><code>pidfile</code></em>] [<em class="replaceable"><code>option</code></em>...] {<em class="replaceable"><code>list</code></em>} {<em class="replaceable"><code>program</code></em>} {<em class="replaceable"><code>arg</code></em>...}</p></div><div class="cmdsynopsis"><p><code class="command">couriertcpd</code>  {-pid=<em class="replaceable"><code>pidfile</code></em>} {-stop}</p></div><div class="cmdsynopsis"><p><code class="command">couriertcpd</code>  {-pid=<em class="replaceable"><code>pidfile</code></em>} {-restart}</p></div></div><div class="refsect1"><a id="idp559616" shape="rect"> </a><h2>DESCRIPTION</h2><p>
 <span class="command"><strong>couriertcpd</strong></span> accepts incoming network connections, and runs
 <span class="command"><strong>program</strong></span> after establishing each network connection. The
 <span class="command"><strong>program</strong></span>'s standard input and output are set to the network
@@ -23,7 +23,7 @@ environment inherited by <span class="command"><strong>program</strong></span> w
 inherited by <span class="command"><strong>couriertcpd</strong></span>, plus any additional environment
 variables initialized by <span class="command"><strong>couriertcpd</strong></span>. It is also possible to
 reject certain network connections. Several options are available to specify
-which network connections will be rejected.</p></div><div class="refsect1" title="OPTIONS"><a id="id365531" shape="rect"> </a><h2>OPTIONS</h2><div class="variablelist"><dl><dt><span class="term">-access=<em class="replaceable"><code>filename</code></em></span></dt><dd><p>
+which network connections will be rejected.</p></div><div class="refsect1"><a id="idp419584" shape="rect"> </a><h2>OPTIONS</h2><div class="variablelist"><dl class="variablelist"><dt><span class="term">-access=<em class="replaceable"><code>filename</code></em></span></dt><dd><p>
 Specifies an optional access
 file. The access file lists the IP addresses from which connections
 should be accepted or rejected. The access file is also used to
@@ -51,13 +51,25 @@ local system. When multiple port numbers are specified, it is also
 possible to selectively bind different network addresses to each port
 number when <em class="replaceable"><code>list</code></em> specifies more than one port
 number. See "<a class="ulink" href="#list" target="_top" shape="rect">Multiple port list</a>" below for more
-information.</p></dd><dt><span class="term">-block=<em class="replaceable"><code>zone</code></em>[,<em class="replaceable"><code>var</code></em>[/<em class="replaceable"><code>n.n.n.n</code></em>][,<em class="replaceable"><code>msg</code></em>]]</span></dt><dd><p>
+information.</p></dd><dt><span class="term">-block=<em class="replaceable"><code>zone</code></em>[,<em class="replaceable"><code>var</code></em>[/<em class="replaceable"><code>n.n.n.n</code></em>][,<em class="replaceable"><code>msg</code></em>]]
+	  or
+	-allow=<em class="replaceable"><code>zone</code></em>[,<em class="replaceable"><code>var</code></em>[/<em class="replaceable"><code>n.n.n.n</code></em>[,]]]</span></dt><dd><p>
 Initialize the environment variable <em class="replaceable"><code>var</code></em> if both of
 the following
 conditions are true: <em class="replaceable"><code>var</code></em> is not already initialized;
-the connecting IP address can be found in a DNS-based list. See
+the connecting IP address can be found in a DNS-based access list. See
 DNS ACCESS LISTS, below.
-Multiple <code class="option">-block</code> options can be used.</p></dd><dt><span class="term">-denymsg=<em class="replaceable"><code>text</code></em></span></dt><dd><p>
+Multiple <code class="option">-block</code> and
+<code class="option">-allow</code> options can be specified.</p><p>
+	    <code class="option">-block</code> and <code class="option">-allow</code> are very
+	    similar, differing only in minor semantics.
+	    <code class="option">-block</code>'s semantics are more appropriate for
+	    using DNS access list to block access, and
+	    <code class="option">-allow</code>'s semantics are more appropriate for
+	    using DNS access list to whitelist IP addresses and exempt them
+	    even if they appear in other
+	    <code class="option">-block</code>ed zones.
+	  </p></dd><dt><span class="term">-denymsg=<em class="replaceable"><code>text</code></em></span></dt><dd><p>
 Specifies an optional message to be returned to the client if the
 <em class="parameter"><code>-access</code></em> option rejects them.
 The default is to drop the TCP
@@ -148,7 +160,7 @@ SIGTERM signal.</p></dd><dt><span class="term">-user=<em class="replaceable"><co
 Set <span class="command"><strong>couriertcpd</strong></span>'s user
 ID. Also, the group ID is set to the user's group ID. Using both
 <code class="option">-group</code> and <code class="option">-user</code> is not necessary. Only the
-superuser can specify <code class="option">-user</code>.</p></dd></dl></div></div><div class="refsect1" title="MULTIPLE PORT LIST"><a id="id375114" shape="rect"> </a><h2>MULTIPLE PORT LIST</h2><a id="list" shape="rect"> </a><p>
+superuser can specify <code class="option">-user</code>.</p></dd></dl></div></div><div class="refsect1"><a id="idp5815472" shape="rect"> </a><h2>MULTIPLE PORT LIST</h2><a id="list" shape="rect"> </a><p>
 The <em class="replaceable"><code>list</code></em> argument can be a comma-separated list of
 multiple port
 numbers. <span class="command"><strong>couriertcpd</strong></span> will create network connections on any
@@ -178,7 +190,7 @@ and</p><div class="informalexample"><pre class="programlisting" xml:space="prese
 couriertcpd -pid=/var/run/smtp.pid -address=127.0.0.1 25,999 <em class="replaceable"><code>program</code></em>
 </pre></div><p>
 will create network connections on ports 25 and 999 of the IP address
-127.0.0.1.</p></div><div class="refsect1" title="ACCESS FILE"><a id="id375248" shape="rect"> </a><h2>ACCESS FILE</h2><p>
+127.0.0.1.</p></div><div class="refsect1"><a id="idp4014000" shape="rect"> </a><h2>ACCESS FILE</h2><p>
 The access file lists IP addresses that <span class="command"><strong>couriertcpd</strong></span> will
 accept or reject connections from. An access file is optional. Without an
 access file <span class="command"><strong>couriertcpd</strong></span> accepts a connection from any IP
@@ -192,7 +204,7 @@ script, such as
 <a class="ulink" href="makesmtpaccess.html" target="_top" shape="rect"><span class="citerefentry"><span class="refentrytitle">makesmtpaccess</span>(8)</span></a>,
 from one or more plain text
 files. Blank lines in the text file are ignored. Lines that start with the #
-character are also ignored.</p><div class="refsect2" title="Rejecting and accepting connections by IP address"><a id="id375288" shape="rect"> </a><h3>Rejecting and accepting connections by IP address</h3><p>
+character are also ignored.</p><div class="refsect2"><a id="idp5833056" shape="rect"> </a><h3>Rejecting and accepting connections by IP address</h3><p>
 The following line instructs <span class="command"><strong>couriertcpd</strong></span> to reject all
 connections from an IP address range:</p><div class="informalexample"><pre class="programlisting" xml:space="preserve">
 netblock&lt;tab&gt;deny
@@ -221,7 +233,7 @@ If the IP address of the connection is not found in the access file the
 connection is accepted by default. The following line causes unlisted
 connections to be rejected:</p><div class="informalexample"><pre class="programlisting" xml:space="preserve">
 *&lt;tab&gt;deny
-</pre></div></div><div class="refsect2" title="IPv6 addresses"><a id="id375414" shape="rect"> </a><h3>IPv6 addresses</h3><div class="note" title="Note" style="margin-left: 0.5in; margin-right: 0.5in;"><h3 class="title">Note</h3><p>
+</pre></div></div><div class="refsect2"><a id="idp5848192" shape="rect"> </a><h3>IPv6 addresses</h3><div class="note" style="margin-left: 0.5in; margin-right: 0.5in;"><h3 class="title">Note</h3><p>
 IPv6 support in the access file is experimental, and is subject to
 change in a future release.  The following syntax is subject to change at any
 time.</p></div><p>
@@ -248,7 +260,7 @@ This will deny entire 3ffe::/16 (6bone network, which is phased out).
 :2002:c0a8&lt;tab&gt;deny
 </pre></div><p>
 This will deny 2002:c0a8::/32 (6to4 addresses derived from private
-address space).</p></div><div class="refsect2" title="Setting environment variables"><a id="id375492" shape="rect"> </a><h3>Setting environment variables</h3><p>
+address space).</p></div><div class="refsect2"><a id="idp5857648" shape="rect"> </a><h3>Setting environment variables</h3><p>
 <code class="literal">allow</code> can be optionally followed by a list of environment
 variable
 assignments, separated by commas. The environment variables are set before
@@ -265,103 +277,154 @@ Note that <code class="envar">RELAYCLIENT</code> must be explicitly specified fo
 address <code class="literal">192.68.0.10</code>. The first line is NOT used for
 connections from this IP
 address. <span class="command"><strong>couriertcpd</strong></span> only reads one entry from the access
-file, the entry for the most specific IP address.</p></div><div class="refsect2" title="DNS ACCESS LISTS"><a id="id375567" shape="rect"> </a><h3>DNS ACCESS LISTS</h3><p>An alternative to listing banned IP addresses is to use an external
-DNS-based IP access list.</p><p>
-There is no provision to support IPv6-based lists, because none yet
-exist. IPv6-based access list support will be added in the future.</p><p>
-<span class="command"><strong>couriertcpd</strong></span>'s default configuration
-does not automatically reject connections from
-any IP address listed on a DNS-based list. If the connecting IP address is
-listed couriertcpd simply sets an environment variable. It's up to the
-<span class="command"><strong>program</strong></span>, run by <span class="command"><strong>couriertcpd</strong></span>,
-to read the environment
-variable and choose what to do if the environment variable is set.</p><p>Please note that if the environment variable is already set,
-<span class="command"><strong>couriertcpd</strong></span> will NOT search the access list. This can be used
-to override the access list where <span class="command"><strong>program</strong></span> only recognizes the
-access list if the environment variable is not empty. By setting the
-environment variable to an empty string in the access file (see above), you
-can override access lists for selected IP addresses.</p><p>
-The <code class="option">-block</code> option queries a DNS list for each connecting IP
-address. The only required argument to <code class="option">-block</code> is the DNS zone
-that is used to publish thelist. The name of the zone can optionally be
-followed by a comma and the name of the environment variable to set if the
-DNS list includes the IP address.  <span class="command"><strong>couriertcpd</strong></span> sets the
-environment variable <code class="envar">BLOCK</code> if you do not specify the name
-yourself.</p><p>
-The name of the environment variable can be optionally followed by a slash
-and an IP address. Normally <span class="command"><strong>couriertcpd</strong></span> sets the environment
-variable if the access list includes any A record entry for the specified IP
-address. Some access lists may offer additional information by returning one of
-several possible A records. If the name of the environment variable is
-followed by a slash and an IP address, the environment variable will be
-initialized only if the access list includes an A record containing the
-indicated IP address.</p><p>
-The contents of the environment variable will be the contents of any TXT
-record for the listed IP address. <em class="replaceable"><code>var</code></em>[/<em class="replaceable"><code>n.n.n.n</code></em>] can be
-optionally followed by a comma and a text message, which will be used instead
-of the TXT record. The text message may include a single @ character
-somewhere in it, which will be replaced by the listed IP address.</p><p>
-	When the <code class="option">-drop</code> option is given in addition to
-	<code class="option">-block</code>,
-	<span class="command"><strong>couriertcpd</strong></span> drops the connection, rather than
-	running the <span class="command"><strong>program</strong></span>.
-	First, all <code class="option">-block</code> options are processed and the
-	environment variables are set, based on the results of any matching
-	DNS lookups. The <code class="option">-drop</code> gets processed after all
-	DNS lookups. <code class="option">-drop</code> takes a list of comma-separated
-	environment variables (if not specified, <code class="envar">BLOCK</code> is the
-	default list). If any environment variable named by the
-	<code class="option">-drop</code> option is set to a non-empty string,
-	<span class="command"><strong>couriertcpd</strong></span> drops the connection instead of
-	executing the <span class="command"><strong>program</strong></span>.
-      </p></div><div class="refsect2" title="MULTIPLE DNS LISTS"><a id="id375716" shape="rect"> </a><h3>MULTIPLE DNS LISTS</h3><p>
-Multiple <code class="option">-block</code> options can be used. The connecting IP address
-gets looked up in multiple access lists. This is implemented as
-follows.</p><p>
-<span class="command"><strong>couriertcpd</strong></span> processes all <code class="option">-block</code> options
-one at
-a time. If the indicated environment variable is already set,
-<span class="command"><strong>couriertcpd</strong></span> skips the DNS list lookup (this is also true if
-only one <code class="option">-block</code> option is specified). Therefore, if multiple
-<code class="option">-block</code> options are used, and an IP address is found in the
-first
-access list, the remaining lists that use the same environment variable
-will not be checked. But other lists that use a different environment
-variable WILL be checked.</p><p>
-The same <em class="replaceable"><code>zone</code></em> can be specified more than once,
-with different
-environment variables and different IP addresses. For example:</p><div class="informalexample"><pre class="programlisting" xml:space="preserve">
-couriertcpd -block=block.example.org,BLOCK1/127.0.0.2 \
-            -block=block.example.org,BLOCK2/127.0.0.3
-</pre></div><p>
-If the specified access list contains an A record for the listed address,
-and the A record contains the IP address 127.0.0.2,
-<span class="command"><strong>couriertcpd</strong></span>
-initializes the <code class="envar">BLOCK1</code> environment variable. If the A record
-contains the IP address 127.0.0.3, <span class="command"><strong>couriertcpd</strong></span> initializes
-<code class="envar">BLOCK2</code>. If both records are present, both variables are
-initialized.</p><p>
-<span class="command"><strong>couriertcpd</strong></span> uses the following logic to determine what kind
-of DNS query to issue:</p><p>
-If neither the IP address, nor <em class="replaceable"><code>msg</code></em> is specified,
-<span class="command"><strong>couriertcpd</strong></span> will query for existence of TXT records, for the
-IP address.</p><p>
-If only <em class="replaceable"><code>msg</code></em> is specified,
-<span class="command"><strong>couriertcpd</strong></span> looks up the
-existence of A records, for the IP address.</p><p>
-If <em class="replaceable"><code>/n.n.n.n</code></em> is used, and
-<em class="replaceable"><code>msg</code></em> is not specified for at least
-one <code class="option">-block</code> option for this same zone,
-<span class="command"><strong>couriertcpd</strong></span>
-will query for existence of ANY records, which should return both TXT and all
-the A records for this IP address.</p><p>
-If <em class="replaceable"><code>/n.n.n.n</code></em> is used, and
-<em class="replaceable"><code>msg</code></em> is specified for every
-<code class="option">-block</code> option for this same zone,
-<span class="command"><strong>couriertcpd</strong></span> will
-query for existence of A records only.</p></div></div><div class="refsect1" title="ENVIRONMENT VARIABLES"><a id="id375868" shape="rect"> </a><h2>ENVIRONMENT VARIABLES</h2><p>
+file, the entry for the most specific IP address.</p></div><div class="refsect2"><a id="idp5866544" shape="rect"> </a><h3>DNS ACCESS LISTS</h3><p>
+	An alternative to listing banned IP addresses in access files
+	is to use an external DNS-based IP access list.
+      </p><p>
+	There is no provision to support IPv6-based lists, because none yet
+	exist. IPv6-based access list support will be added in the
+	future.
+      </p><p>
+	<span class="command"><strong>couriertcpd</strong></span>'s default configuration
+	does not automatically reject connections from banned IP address
+	unless the <code class="option">-drop</code> option is present.
+	Instead,
+	<span class="command"><strong>couriertcpd</strong></span> sets an environment variable
+	if the connecting address has a hit in the DNS access list.
+	The
+	<span class="application">Courier</span>
+	mail server rejects all mail if the connection's environment has
+	the environment variable <code class="envar">BLOCK</code> set to a non-empty
+	string, and it just so happens that
+	<code class="option">-block</code> and <code class="option">-allow</code> set the
+	<code class="envar">BLOCK</code> environment variable by default.
+      </p><div class="blockquote"><blockquote class="blockquote"><div class="informalexample"><pre class="programlisting" xml:space="preserve">
+-allow=dnswl.example.com -block=dnsbl.example.com</pre></div></blockquote></div><p>
+	<code class="option">-allow</code> and <code class="option">-block</code>'s parameter gives
+	the DNS zone where the access list query gets performed.
+	In this example,
+	<span class="command"><strong>couriertcpd</strong></span> makes a DNS query for
+	<span class="quote">“<span class="quote">d.c.b.a.dnswl.example.com</span>”</span>, then, if necessary, for
+	<span class="quote">“<span class="quote">d.c.b.a.dnsbl.example.com</span>”</span>, for a connection from the
+	IP address <em class="replaceable"><code>a.b.c.d</code></em>.
+      </p><p>
+	If the DNS query succeeds (more details below),
+	<code class="option">-allow</code> sets the environment variable to an empty
+	string, and <code class="option">-block</code> sets the environment variable
+	from the <code class="literal">TXT</code> record in the DNS response, or to
+	<span class="quote">“<span class="quote">Access denied.</span>”</span> if the DNS access list did not return
+	a <code class="literal">TXT</code> record. It should be possible to use
+	<span class="command"><strong>couriertcpd</strong></span> with DNS access lists that use either
+	<code class="literal">A</code> or <code class="literal">TXT</code> records.
+      </p><p>
+	The DNS zone parameter to <code class="option">-allow</code> and
+	<code class="option">-block</code> has up to three additional components,
+	which must be given in the following order, if more than one optional
+	component gets specified:
+      </p><div class="blockquote"><blockquote class="blockquote"><div class="informalexample"><pre class="programlisting" xml:space="preserve">
+-allow=dnswl.example.com,BLOCK2</pre></div></blockquote></div><p>
+	The environment variable that gets set by the DNS access list query
+	can be changed from the default of <code class="envar">BLOCK</code> to something
+	else, <code class="envar">BLOCK2</code> in this example.
+	The <span class="application">Courier</span> mail server pays attention
+	only to <code class="envar">BLOCK</code>, this is for the benefit of local or
+	custom hacks, which want to leverage <span class="command"><strong>couriertcpd</strong></span>'s
+	DNS access list lookup facilities, but want it for other purposes.
+      </p><div class="blockquote"><blockquote class="blockquote"><div class="informalexample"><pre class="programlisting" xml:space="preserve">
+-block=dnsbl.example.com/127.0.0.2</pre></div></blockquote></div><p>
+	<span class="command"><strong>couriertcpd</strong></span>'s DNS access list lookup normally
+	ignores the contents of the actual <code class="literal">A</code> record in
+	the DNS access list, however some DNS access lists may use different
+	<code class="literal">A</code> record to indicate different kinds of records.
+	Given an explicit IP address to <span class="command"><strong>couriertcpd</strong></span>
+	results in the environment variable getting set only if the
+	lookup returned the matching <code class="literal">A</code> record.
+	An <code class="literal">A</code> record must exist in the DNS access list, in
+	addition to any <code class="literal">TXT</code> record. If an explicit IP
+	address is not given, any <code class="literal">A</code> or <code class="literal">TXT</code>
+	record sets
+	<code class="option">-allow</code>
+	and
+	<code class="option">-block</code>'s
+	environment variable.
+      </p><div class="blockquote"><blockquote class="blockquote"><div class="informalexample"><pre class="programlisting" xml:space="preserve">
+-block=dnsbl.example.com,BLOCK,Go away</pre></div></blockquote></div><p>
+	The last component specifies a custom message that overrides any
+	<code class="literal">TXT</code> record in the DNS access list.
+	Note that this is a single parameter to
+	<span class="application">couriertcpd</span>, so the parameter must be
+	quoted if it contains any spaces or special
+	shell metacharacters.
+      </p><p>
+	The custom message parameter gets specified for the
+	<code class="option">-block</code>, option.
+	<code class="option">-allow</code> also allows takes this parameter, but it
+	has a different meaning. If its set, even if it's an empty string,
+	<span class="command"><strong>couriertcpd</strong></span> looks for
+	<code class="literal">TXT</code> records in the DNS access list that's
+	used as a whitelist, in addition to the <code class="literal">A</code>
+	records (using the <span class="quote">“<span class="quote">any</span>”</span> query):
+      </p><div class="blockquote"><blockquote class="blockquote"><div class="informalexample"><pre class="programlisting" xml:space="preserve">
+-allow=dnswl.example.com,BLOCK,</pre></div></blockquote></div><p>
+	Without this parameter <span class="command"><strong>couriertcpd</strong></span>
+	queries for <code class="literal">A</code> records only.
+      </p><p>
+	Finally,
+	a literal IP address, if given, must always follow the variable name:
+      </p><div class="blockquote"><blockquote class="blockquote"><div class="informalexample"><pre class="programlisting" xml:space="preserve">
+-block=dnsbl.example.com,BLOCK/127.0.0.2,Go away</pre></div></blockquote></div><p>
+	<code class="option">-block</code> normally searches the DNS access list for either
+	<code class="literal">A</code> or <code class="literal">TXT</code> records using the
+	<span class="quote">“<span class="quote">any</span>”</span> DNS query. Sometimes this can cause problems, or
+	not work at all, with older DNS servers. Specifying a custom message
+	results in <code class="option">-block</code> executing an ordinary
+	<code class="literal">A</code> DNS query.
+	<code class="option">-allow</code> always uses an <code class="literal">A</code> query.
+      </p></div><div class="refsect2"><a id="idp5912976" shape="rect"> </a><h3>MULTIPLE DNS LISTS</h3><p>
+	Multiple <code class="option">-block</code>
+	and <code class="option">-allow</code>
+	options can be given. The connecting IP address
+	gets looked up in multiple access lists. This is implemented as
+	follows.</p><p>
+	<span class="command"><strong>couriertcpd</strong></span> processes all
+	<code class="option">-block</code>
+	and <code class="option">-allow</code> options in list order.
+	If each option's environment variable
+	(<code class="envar">BLOCK</code> or something else) is already set,
+	<span class="command"><strong>couriertcpd</strong></span> skips the DNS access list lookup.
+	Therefore, when multiple options use the same environment variable,
+	the first DNS access list it exists in will set the environment
+	variable, and the remaining ones get ignored, but any remaining
+	<code class="option">-block</code>s
+	and <code class="option">-allow</code>s for different environment variables still
+	get processed.
+      </p><p>
+	It follows that, in general, <code class="option">-allow</code> options should
+	always be listed first, before any <code class="option">-block</code>s; but it's
+	also possible to implement a complicated policy with some
+	<code class="option">-allow</code>s, then some
+	<code class="option">-block</code>s, then more
+	<code class="option">-allow</code>s and
+	<code class="option">-block</code>s.
+      </p></div><div class="refsect2"><a id="idp5921792" shape="rect"> </a><h3>ADDITIONAL DNS ACCESS LIST VARIABLES</h3><p>
+	Three additional environment variables may get set in conjunction with
+	a successful DNS access list lookup:
+      </p><div class="variablelist"><dl class="variablelist"><dt><span class="term">BLOCK_IP</span></dt><dd/><dt><span class="term">BLOCK_TXT</span></dt><dd/><dt><span class="term">BLOCK_ZONE</span></dt><dd/></dl></div><p>
+	<code class="option">-block</code> and
+	<code class="option">-allow</code> options that specify a custom environment
+	variable name follow the same naming convention, of appending
+	<span class="quote">“<span class="quote">_IP</span>”</span>, <span class="quote">“<span class="quote">_TXT</span>”</span>, and <span class="quote">“<span class="quote">_ZONE</span>”</span>
+	suffix to the name of the custom environment variable.
+      </p></div><div class="refsect2"><a id="idp5933632" shape="rect"> </a><h3>USING DNS WHITELISTS WITH SPF</h3><p>
+	Including <span class="quote">“<span class="quote">allowok</span>”</span> keyword in an SPF setting automatically
+	passes the SPF check for senders whose IP address is found in
+	an <code class="option">-allow</code>-ed access list.
+	See
+	<a class="ulink" href="courier.html" target="_top" shape="rect"><span class="citerefentry"><span class="refentrytitle">courier</span>(8)</span>
+	</a>.
+      </p></div></div><div class="refsect1"><a id="idp5937456" shape="rect"> </a><h2>ENVIRONMENT VARIABLES</h2><p>
 <span class="command"><strong>couriertcpd</strong></span> also initializes the following environment
-variables prior to running <span class="command"><strong>program</strong></span>:</p><div class="variablelist"><dl><dt><span class="term">TCPLOCALHOST</span></dt><dd><p>
+variables prior to running <span class="command"><strong>program</strong></span>:</p><div class="variablelist"><dl class="variablelist"><dt><span class="term">TCPLOCALHOST</span></dt><dd><p>
 The name of the host on the local end of
 the network connection, looked up in DNS. <code class="envar">TCPLOCALHOST</code> will
 not be set if the IP address of the network connection's local end cannot
@@ -382,5 +445,5 @@ Identification string received from the
 IDENT server on the remote IP address. Not set if the IDENT server
 returned an error, or if the <code class="option">-noidentlookup</code> option was
 specified.</p></dd><dt><span class="term">TCPREMOTEPORT</span></dt><dd><p>
-TCP port of the remote end of the network connection.</p></dd></dl></div></div><div class="refsect1" title="SEE ALSO"><a id="id376012" shape="rect"> </a><h2>SEE ALSO</h2><p>
+TCP port of the remote end of the network connection.</p></dd></dl></div></div><div class="refsect1"><a id="idp5954816" shape="rect"> </a><h2>SEE ALSO</h2><p>
 <a class="ulink" href="courier.html" target="_top" shape="rect"><span class="citerefentry"><span class="refentrytitle">courier</span>(8)</span></a>.</p></div></div></body></html>

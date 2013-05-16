@@ -38,6 +38,7 @@ start)
 		POP3_TLS=1; \
 		POP3_STARTTLS=NO; \
 		POP3_TLS_REQUIRED=0; \
+		@MKDIR_P@ `dirname $SSLPIDFILE` ; \
 		@courierlogger@ -pid=$SSLPIDFILE -start $SSLLOGGEROPTS \
 		@libexecdir@/couriertcpd -address=$SSLADDRESS \
 			-maxprocs=$MAXDAEMONS -maxperip=$MAXPERIP \

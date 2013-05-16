@@ -988,7 +988,7 @@ static int get_server_cert(gnutls_session_t session,
 			vhost_max_size=vhost_size;
 	}
 
-	vhost_buf=malloc(vhost_size);
+	vhost_buf=malloc(vhost_max_size);
 
 	if (!vhost_buf)
 		return GNUTLS_E_MEMORY_ERROR;

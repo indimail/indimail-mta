@@ -329,7 +329,23 @@ int rfc822_display_addr_str(const char *tok,
 			(*print_func)(tok, p-tok, ptr);
 
 #if LIBIDN
-		err=idna_to_unicode_8z8z(p, &utf8_ptr, 0);
+		/*
+		** Invalid UTF-8 can make libidn go off the deep end. Add
+		** padding as a workaround.
+		*/
+		{
+			size_t s=strlen(p)+16;
+			char *cpy=malloc(s);
+
+			if (!cpy)
+				return 0;
+			memset(cpy, 0, s);
+			strcpy(cpy, p);
+
+			err=idna_to_unicode_8z8z(cpy, &utf8_ptr, 0);
+			free(cpy);
+		}
+
 		if (err != IDNA_SUCCESS)
 			utf8_ptr=0;
 #else
