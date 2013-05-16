@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-todo.c,v $
+ * Revision 1.31  2013-05-16 23:32:53+05:30  Cprogrammer
+ * added log_stat() part of non-indimail code
+ *
  * Revision 1.30  2011-07-29 09:29:54+05:30  Cprogrammer
  * fixed gcc 4.6 warnings
  *
@@ -606,7 +609,6 @@ todo_selprep(int *nfds, fd_set * rfds, datetime_sec * wakeup)
 		*wakeup = nexttodorun;
 }
 
-#ifdef INDIMAIL
 unsigned long   Bytes;
 stralloc        mailfrom = { 0 };
 stralloc        mailto = { 0 };
@@ -624,7 +626,6 @@ log_stat(long bytes)
 	}
 	mailfrom.len = mailto.len = 0;
 }
-#endif
 
 void
 todo_do(fd_set * rfds)
@@ -680,9 +681,7 @@ todo_do(fd_set * rfds)
 		log3("warning: qmail-todo: unable to stat ", fn.s, "\n");
 		goto fail;
 	}
-#ifdef INDIMAIL
 	Bytes = st.st_size;
-#endif
 	for (c = 0; c < CHANNELS; ++c)
 	{
 		fnmake_chanaddr(id, c);
@@ -746,13 +745,11 @@ todo_do(fd_set * rfds)
 				log3("warning: qmail-todo: trouble writing to ", fn.s, "\n");
 				goto fail;
 			}
-#ifdef INDIMAIL
 			if (!stralloc_copy(&mailfrom, &todoline) || !stralloc_0(&mailfrom))
 			{
 				nomem();
 				goto fail;
 			}
-#endif
 			comm_info(id, (unsigned long) st.st_size, todoline.s + 1, pid, uid);
 			break;
 		case 'T':
@@ -762,23 +759,19 @@ todo_do(fd_set * rfds)
 				nomem();
 				goto fail;
 			case 2: /* Sea */
-#ifdef INDIMAIL
 				if (!stralloc_cats(&mailto, "R") || !stralloc_cat(&mailto, &todoline))
 				{
 					nomem();
 					goto fail;
 				}
-#endif
 				c = 1;
 				break;
 			default: /* Land */
-#ifdef INDIMAIL
 				if (!stralloc_cats(&mailto, "L") || !stralloc_cat(&mailto, &todoline))
 				{
 					nomem();
 					goto fail;
 				}
-#endif
 				c = 0;
 				break;
 			}
@@ -868,9 +861,7 @@ todo_do(fd_set * rfds)
 		return;
 	}
 	comm_write(id, flagchan[0], flagchan[1]);
-#ifdef INDIMAIL
 	log_stat(Bytes);
-#endif
 	return;
 
 fail:
@@ -1113,7 +1104,7 @@ main()
 void
 getversion_qmail_todo_c()
 {
-	static char    *x = "$Id: qmail-todo.c,v 1.30 2011-07-29 09:29:54+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: qmail-todo.c,v 1.31 2013-05-16 23:32:53+05:30 Cprogrammer Stab mbhangui $";
 
 #ifdef INDIMAIL
 	if (x)

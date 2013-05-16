@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-send.c,v $
+ * Revision 1.52  2013-05-16 23:32:33+05:30  Cprogrammer
+ * added log_stat as part of non-indimail code
+ *
  * Revision 1.51  2011-07-29 09:29:48+05:30  Cprogrammer
  * fixed gcc 4.6 warnings
  *
@@ -1970,7 +1973,6 @@ todo_selprep(nfds, rfds, wakeup)
 		*wakeup = nexttodorun;
 }
 
-#ifdef INDIMAIL
 unsigned long   Bytes;
 stralloc        mailfrom = { 0 };
 stralloc        mailto = { 0 };
@@ -1989,7 +1991,6 @@ log_stat(long bytes)
 	}
 	mailfrom.len = mailto.len = 0;
 }
-#endif
 
 void
 todo_do(rfds)
@@ -2053,9 +2054,7 @@ todo_do(rfds)
 		log3("warning: unable to stat ", fn.s, "\n");
 		goto fail;
 	}
-#ifdef INDIMAIL
 	Bytes = st.st_size;
-#endif
 	for (c = 0; c < CHANNELS; ++c)
 	{
 		fnmake_chanaddr(id, c);
@@ -2137,13 +2136,11 @@ todo_do(rfds)
 			strnum2[fmt_ulong(strnum2, uid)] = 0;
 			my_log2(" uid ", strnum2);
 			log1("\n");
-#ifdef INDIMAIL
 			if (!stralloc_copy(&mailfrom, &todoline) || !stralloc_0(&mailfrom))
 			{
 				nomem();
 				goto fail;
 			}
-#endif
 			break;
 		case 'T':
 			switch (rewrite(todoline.s + 1))
@@ -2152,23 +2149,19 @@ todo_do(rfds)
 				nomem();
 				goto fail;
 			case 2: /*- Sea */
-#ifdef INDIMAIL
 				if (!stralloc_cats(&mailto, "R") || !stralloc_cat(&mailto, &todoline))
 				{
 					nomem();
 					goto fail;
 				}
-#endif
 				c = 1;
 				break;
 			default: /*- Land */
-#ifdef INDIMAIL
 				if (!stralloc_cats(&mailto, "L") || !stralloc_cat(&mailto, &todoline))
 				{
 					nomem();
 					goto fail;
 				}
-#endif
 				c = 0;
 				break;
 			}
@@ -2275,9 +2268,7 @@ todo_do(rfds)
 		while (!prioq_insert(&pqdone, &pe))
 			nomem();
 	}
-#ifdef INDIMAIL
 	log_stat(Bytes);
-#endif
 	return;
 
 fail:
@@ -2910,7 +2901,7 @@ main()
 void
 getversion_qmail_send_c()
 {
-	static char    *x = "$Id: qmail-send.c,v 1.51 2011-07-29 09:29:48+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: qmail-send.c,v 1.52 2013-05-16 23:32:33+05:30 Cprogrammer Stab mbhangui $";
 
 #ifdef INDIMAIL
 	if (x)
