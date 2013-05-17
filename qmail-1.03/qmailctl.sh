@@ -11,6 +11,9 @@
 ### END INIT INFO
 
 # $Log: qmailctl.sh,v $
+# Revision 1.40  2013-05-18 00:07:11+05:30  Cprogrammer
+# removed create_svscan command
+#
 # Revision 1.39  2013-05-15 00:44:07+05:30  Cprogrammer
 # fix for systems having inittab
 #
@@ -337,7 +340,6 @@ start()
 				if [ $? -eq 0 ] ; then
 					/bin/mv /etc/inittab.svctool.$$ /etc/inittab
 				fi
-				create_svscan $servicedir
 				/sbin/init q
 			fi
 		fi
