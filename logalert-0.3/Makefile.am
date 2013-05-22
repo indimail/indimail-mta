@@ -53,9 +53,10 @@ incrmesg_LDADD = @LIB_INDIMAIL@
 showbytes_SOURCES=showbytes.c
 
 #$(am__skiplex) $(SHELL) $(YLWRAP) $< $(LEX_OUTPUT_ROOT).c $@ -- flex
-lex.c: lex.l
+lex.c: lex.l parser.h
 	 $(LEX) $(LFLAGS) -o$@ $^
 
+parser.h: parser.c
 logalert-@VERSION@-rpmlintrc: logalert-rpmlintrc.in
 	$(edit) logalert-rpmlintrc.in > $@
 logalert.spec: logalert.spec.in
