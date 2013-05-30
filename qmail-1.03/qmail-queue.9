@@ -36,10 +36,13 @@ hack forces directory syncing.
 
 .TP
 .B extraqueue
-If this control file exists, its content is added to recipient list. The environment variable
+If this control file exists, each line in the content is added as a recipient to the 
+recipient list. The environment variable
 .B EXTRAQUEUE
 also does the same thing. The value of the environment variable overrides the value in the
-control file.
+control file. Also the environment variable can be just one recipient. There is a potential
+for loops in case the recipient is local and the local delivery has any kind of forwarding
+rule which results in qmail-queue being invoked.
 
 .TP
 .B mailarchive
