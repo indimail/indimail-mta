@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-queue.c,v $
+ * Revision 1.56  2013-05-30 11:10:32+05:30  Cprogrammer
+ * extraqueue can have multiple lines as extra recipients
+ *
  * Revision 1.55  2011-07-29 09:29:43+05:30  Cprogrammer
  * fixed gcc 4.6 warnings
  *
@@ -214,13 +217,11 @@ stralloc        envheaders = { 0 };
 void
 cleanup()
 {
-	if (flagmadeintd)
-	{
+	if (flagmadeintd) {
 		seek_trunc(intdfd, 0);
 		unlink(intdfn);
 	}
-	if (flagmademess)
-	{
+	if (flagmademess) {
 		seek_trunc(messfd, 0);
 		unlink(messfn);
 	}
@@ -278,20 +279,16 @@ tcpgetremoteip()
 	int             i, status, dummy = sizeof(sa);
 
 	memset(&sa, 0, sizeof(struct sockaddr));
-	for (tcpremoteip = (char *) 0, errno = i = 0; i < 3; i++)
-	{
+	for (tcpremoteip = (char *) 0, errno = i = 0; i < 3; i++) {
 		errno = 0;
-		if (!(status = getpeername(i, (struct sockaddr *) &sa, (socklen_t *) &dummy)))
-		{
+		if (!(status = getpeername(i, (struct sockaddr *) &sa, (socklen_t *) &dummy))) {
 #ifdef IPV6
-			if (((struct sockaddr *) &sa)->sa_family == AF_INET)
-			{
+			if (((struct sockaddr *) &sa)->sa_family == AF_INET) {
 				tcpremoteip = (char *) inet_ntop(AF_INET,
 					(void *) &((struct sockaddr_in *) &sa)->sin_addr, addrBuf,
 					INET_ADDRSTRLEN);
 			} else
-			if (((struct sockaddr *)&sa)->sa_family == AF_INET6)
-			{
+			if (((struct sockaddr *)&sa)->sa_family == AF_INET6) {
 				tcpremoteip = (char *) inet_ntop(AF_INET6,
 					(void *) &((struct sockaddr_in6 *) &sa)->sin6_addr, addrBuf,
 					INET6_ADDRSTRLEN);
@@ -343,34 +340,29 @@ receivedfmt(char *s)
 	len += i;
 	if (s)
 		s += i;
-	if (uid == auto_uida)
-	{
+	if (uid == auto_uida) {
 		i = fmt_str(s, " by alias");
 		len += i;
 		if (s)
 			s += i;
 	} else
-	if (uid == auto_uidd)
-	{
+	if (uid == auto_uidd) {
 		i = fmt_str(s, " from network");
 		len += i;
 		if (s)
 			s += i;
 	} else
-	if (uid == auto_uids)
-	{
+	if (uid == auto_uids) {
 		i = fmt_str(s, " for bounce");
 		len += i;
 		if (s)
 			s += i;
-	} else
-	{
+	} else {
 		if (!tcpremoteip)
 			tcpremoteip = env_get("TCPREMOTEIP");
 		if (!tcpremoteip)
 			tcpgetremoteip();
-		if (tcpremoteip)
-		{
+		if (tcpremoteip) {
 			char            Hostname[128];
 			char           *host_name;
 
@@ -386,8 +378,7 @@ receivedfmt(char *s)
 			len += i;
 			if (s)
 				s += i;
-			if (!(host_name = env_get("HOSTNAME")))
-			{
+			if (!(host_name = env_get("HOSTNAME"))) {
 				if (gethostname(Hostname, sizeof(Hostname)) == -1)
 					str_copy(Hostname, "unknown");
 				host_name = Hostname;
@@ -516,8 +507,7 @@ pidopen()
 	len = pidfmt((char *) 0, seq);
 	if (!(pidfn = alloc(len)))
 		die(51);
-	for (seq = 1; seq < 10; ++seq)
-	{
+	for (seq = 1; seq < 10; ++seq) {
 		if (pidfmt((char *) 0, seq) > len)
 			die(81);			/*- paranoia */
 		pidfmt(pidfn, seq);
@@ -552,21 +542,18 @@ qhpsiprog(char *program)
 	stralloc        plugin = { 0 };
 	struct stat     st;
 
-	if (stat(messfn, &st) == -1)
-	{
+	if (stat(messfn, &st) == -1) {
 		cleanup();
 		die(62);
 	}
 	size = (unsigned int) st.st_size;
-	if ((x = env_get("QHPSIMINSIZE")))
-	{
+	if ((x = env_get("QHPSIMINSIZE"))) {
 		scan_ulong(x, &u);
 		qhpsiminsize = (int) u;
 	}
 	if (qhpsiminsize && size < qhpsiminsize)
 		return;
-	if ((x = env_get("QHPSIMAXSIZE")))
-	{
+	if ((x = env_get("QHPSIMAXSIZE"))) {
 		scan_ulong(x, &u);
 		qhpsimaxsize = (int) u;
 	}
@@ -584,8 +571,7 @@ qhpsiprog(char *program)
 		 */
 		if (setregid(auto_gidq, auto_gidq) || setreuid(auto_uidq, auto_uidq))
 			_exit(50);
-		if (!str_diffn(program, "plugin:", 7))
-		{
+		if (!str_diffn(program, "plugin:", 7)) {
 			if (!stralloc_copys(&plugin, "plugin:"))
 				die(51);
 			if (!stralloc_cats(&plugin, messfn))
@@ -598,18 +584,15 @@ qhpsiprog(char *program)
 				die(51);
 			if (!(argv = MakeArgs(plugin.s)))
 				die(51);
-		} else
-		{
+		} else {
 			if (!(argv = MakeArgs(program)))
 				die(51);
-			if (!argv[1])
-			{
+			if (!argv[1]) {
 				scancmd[0] = argv[0];
 				scancmd[1] = messfn;
 				argv = scancmd;
 			} else
-			for (u = 1; argv[u]; u++)
-			{
+			for (u = 1; argv[u]; u++) {
 				if (!str_diffn(argv[u], "%s", 2))
 					argv[u] = messfn;
 			}
@@ -623,43 +606,34 @@ qhpsiprog(char *program)
 		execv(line.s, argv);
 		_exit(75);
 	} /*- switch (child = fork()) */
-	if (wait_pid(&wstat, child) == -1)
-	{
+	if (wait_pid(&wstat, child) == -1) {
 		cleanup();
 		die(122);
 	}
-	if (wait_crashed(wstat))
-	{
+	if (wait_crashed(wstat)) {
 		cleanup();
 		die(123);
 	}
 	childrc = wait_exitcode(wstat);
-	if ((x = env_get("REJECTVIRUS")))
-	{
+	if ((x = env_get("REJECTVIRUS"))) {
 		scan_ulong(x, &u);
 		rejectvirus = (int) u;
 	}
-	if ((x = env_get("QHPSIRC")))
-	{
+	if ((x = env_get("QHPSIRC"))) {
 		scan_ulong(x, &u);
 		qhpsirc = (int) u;
 	}
-	if ((x = env_get("QHPSIRN")))
-	{
+	if ((x = env_get("QHPSIRN"))) {
 		scan_ulong(x, &u);
 		qhpsirn = (int) u;
 	}
-	if (childrc == qhpsirc) /*- Virus Infected */
-	{
-		if (!stralloc_copys(&qqehextra, "X-QHPSI: Virus found\n"))
-		{
+	if (childrc == qhpsirc) { /*- Virus Infected */
+		if (!stralloc_copys(&qqehextra, "X-QHPSI: Virus found\n")) {
 			cleanup();
 			die(51);
 		}
-		if ((x = env_get("VIRUSFORWARD")))
-		{
-			if (!stralloc_copys(&quarantine, x))
-			{
+		if ((x = env_get("VIRUSFORWARD"))) {
+			if (!stralloc_copys(&quarantine, x)) {
 				cleanup();
 				die(51);
 			}
@@ -680,15 +654,12 @@ qhpsiprog(char *program)
 				break;
 		}
 	} else
-	if (childrc == qhpsirn) /*- Clean Mail */
-	{
-		if (!stralloc_copys(&qqehextra, "X-QHPSI: clean\n"))
-		{
+	if (childrc == qhpsirn) { /*- Clean Mail */
+		if (!stralloc_copys(&qqehextra, "X-QHPSI: clean\n")) {
 			cleanup();
 			die(51);
 		}
-	} else
-	{
+	} else {
 		cleanup();
 		die(77); /*- QHPSI error in qmail.c */
 	}
@@ -719,26 +690,22 @@ set_archive(char *eaddr)
 
 	addr = eaddr + 1;
 	type = *eaddr;
-	for (rule_ptr = ar_rules.s, len = 0;len < ar_rules.len;len++)
-	{
+	for (rule_ptr = ar_rules.s, len = 0;len < ar_rules.len;len++) {
 		if (((*rule_ptr == ':' || *rule_ptr == '*') && type == 'F')
-			|| ((*rule_ptr == 'F' || *rule_ptr == 'T') && *rule_ptr != type))
-		{
+			|| ((*rule_ptr == 'F' || *rule_ptr == 'T') && *rule_ptr != type)) {
 			len += (str_len(rule_ptr) + 1);
 			rule_ptr = ar_rules.s + len;
 			continue; /*- type does not match */
 		}
 		for (addr_ptr = rule_ptr;*addr_ptr && *addr_ptr != ':';addr_ptr++);
-		if (*addr_ptr != ':') /*- invalid line in control file */
-		{
+		if (*addr_ptr != ':') { /*- invalid line in control file */
 			len += (str_len(rule_ptr) + 1);
 			rule_ptr = ar_rules.s + len;
 			continue;
 		}
 		addr_ptr++; /*- address field in rule */
 		for (dest = addr_ptr;*dest && *dest != ':';dest++);
-		if (*dest != ':') /*- invalid line in control file */
-		{
+		if (*dest != ':') { /*- invalid line in control file */
 			len += (str_len(rule_ptr) + 1);
 			rule_ptr = ar_rules.s + len;
 			continue;
@@ -749,15 +716,12 @@ set_archive(char *eaddr)
 		else
 		if (matchregex(addr, addr_ptr, &errStr))
 			addr_ptr = 0;
-		if (*dest && !addr_ptr) /*- rule matched */
-		{
+		if (*dest && !addr_ptr) { /*- rule matched */
 			*(dest - 1) = ':';
 			if (!stralloc_copys(&tmpe, "T"))
 				return (1);
-			for (ptr = dest;*ptr;)
-			{
-				if (*ptr == '%' && *(ptr + 1))
-				{
+			for (ptr = dest;*ptr;) {
+				if (*ptr == '%' && *(ptr + 1)) {
 					switch (*(ptr + 1))
 					{
 					case 'u':
@@ -790,10 +754,8 @@ set_archive(char *eaddr)
 			if (!stralloc_0(&tmpe))
 				return (1);
 			/*- avoid duplicates */
-			for (found = 0, ptr = arch_email.s;arch_email.len && *ptr;)
-			{
-				if (!str_diffn(ptr, tmpe.s, tmpe.len))
-				{
+			for (found = 0, ptr = arch_email.s;arch_email.len && *ptr;) {
+				if (!str_diffn(ptr, tmpe.s, tmpe.len)) {
 					found = 1;
 					break;
 				}
@@ -832,20 +794,17 @@ main()
 		die(61);
 	if (control_readint((int *) &originipfield, "originipfield") == -1)
 		die(55);
-	if ((ptr = env_get("ORIGINIPFIELD")))
-	{
+	if ((ptr = env_get("ORIGINIPFIELD"))) {
 		scan_ulong(ptr, (unsigned long *) &x);
 		originipfield = x;
 	}
-	if (!(ptr = env_get("EXTRAQUEUE")))
-	{
-		if (control_readline(&extraqueue, "extraqueue") == -1)
+	if (!(ptr = env_get("EXTRAQUEUE"))) {
+		if (control_readfile(&extraqueue, "extraqueue", 0) == -1)
 			die(55);
 	} else
 	if (!stralloc_copys(&extraqueue, ptr))
 		die(51);
-	if (!(ptr = env_get("QUARANTINE")))
-	{
+	if (!(ptr = env_get("QUARANTINE"))) {
 		if (control_readline(&quarantine, "quarantine") == -1)
 			die(55);
 	} else
@@ -897,13 +856,11 @@ main()
 	messfn = fnnum("mess/", 1);
 	todofn = fnnum("todo/", 1);
 	intdfn = fnnum("intd/", 1);
-	if (link(pidfn, messfn) == -1)
-	{
+	if (link(pidfn, messfn) == -1) {
 		unlink(pidfn);
 		die(64);
 	}
-	if (unlink(pidfn) == -1)
-	{
+	if (unlink(pidfn) == -1) {
 		unlink(messfn);
 		die(63);
 	}
@@ -911,10 +868,8 @@ main()
 	substdio_fdbuf(&ssout, write, messfd, outbuf, sizeof(outbuf));
 	/*- read the message body */
 	substdio_fdbuf(&ssin, read, 0, inbuf, sizeof(inbuf));
-	if (logh.len)
-	{
-		if ((ptr = env_get("LOGHEADERFD")))
-		{
+	if (logh.len) {
+		if ((ptr = env_get("LOGHEADERFD"))) {
 			scan_int(ptr, &logfd);
 			if (!fstat(logfd, &st))
 				substdio_fdbuf(&sslog, write, logfd, logbuf, sizeof(logbuf));
@@ -925,15 +880,13 @@ main()
 	if (substdio_bput(&ssout, received, receivedlen) == -1)
 		die_write();
 	if (originipfield && (tcpremoteip = env_get("TCPREMOTEIP"))
-		&& (env_get("RELAYCLIENT") || env_get("TCPREMOTEINFO")))
-	{
+		&& (env_get("RELAYCLIENT") || env_get("TCPREMOTEINFO"))) {
 		origin_setup();
 		if (substdio_bput(&ssout, origin, originlen) == -1)
 			die_write();
 	}
 
-	if (!excl.len && !incl.len && !logh.len)
-	{
+	if (!excl.len && !incl.len && !logh.len) {
 		switch (substdio_copy(&ssout, &ssin))
 		{
 		case -2:
@@ -942,16 +895,14 @@ main()
 			die_write();
 		}
 	} else
-	for (;;) /*- Line Processing */
-	{
+	for (;;) { /*- Line Processing */
 		if (getln(&ssin, &line, &match, '\n') == -1)
 			die_read();
 		if (!match && line.len == 0)
 			break;
 		if (in_header && !mess822_ok(&line))
 			in_header = 0;
-		if (!in_header)
-		{
+		if (!in_header) {
 			if (substdio_put(&ssout, line.s, line.len))
 				die_write();
 			continue;
@@ -960,53 +911,44 @@ main()
 		include = 0;
 		if (logfd > 0)
 			loghead = 0;
-		if (line.s[0] == ' ' || line.s[0] == '\t') /*- RFC 822 LWSP char */
-		{
+		if (line.s[0] == ' ' || line.s[0] == '\t') { /*- RFC 822 LWSP char */
 			if (!line_brk_excl) /*- Not a continuation line */
 				exclude = 1;
 			if (!line_brk_incl)
 				include = 1;
 			if (logfd > 0 && !line_brk_log)
 				loghead = 1;
-		} else
-		{
+		} else {
 			line_brk_excl = 1;
 			line_brk_incl = 1;
 			if (logfd > 0)
 				line_brk_log = 1;
-			for (len = 0, ptr = excl.s;len < excl.len;)
-			{
+			for (len = 0, ptr = excl.s;len < excl.len;) {
 				len += ((token_len = str_len(ptr)) + 1);
-				if (!case_diffb(ptr, token_len, line.s))
-				{
+				if (!case_diffb(ptr, token_len, line.s)) {
 					exclude = 1;
 					line_brk_excl = 0; /*- Skip next line starting with LWSP */
 					break;
 				}
 				ptr = excl.s + len;
 			}
-			for (len = 0, ptr = incl.s;len < incl.len;)
-			{
+			for (len = 0, ptr = incl.s;len < incl.len;) {
 				for (tmp_ptr = ptr;*tmp_ptr && *tmp_ptr != ':';tmp_ptr++);
-				if (*tmp_ptr == ':')
-				{
+				if (*tmp_ptr == ':') {
 					*tmp_ptr = 0;
 					scan_uint(tmp_ptr + 1, &x);
 				}
 				len += ((token_len = str_len(ptr)) + 1);
-				if (token_len <= x && !case_diffb(ptr, token_len, line.s))
-				{
+				if (token_len <= x && !case_diffb(ptr, token_len, line.s)) {
 					include = 1;
 					line_brk_incl = 0; /*- Include next line starting with LWSP */
 					break;
 				}
 				ptr = incl.s + len;
 			}
-			for (len = 0, ptr = logh.s;logfd > 0 && len < logh.len;)
-			{
+			for (len = 0, ptr = logh.s;logfd > 0 && len < logh.len;) {
 				len += ((token_len = str_len(ptr)) + 1);
-				if (!case_diffb(ptr, token_len, line.s))
-				{
+				if (!case_diffb(ptr, token_len, line.s)) {
 					loghead = 1;
 					line_brk_log = 0;
 					break;
@@ -1060,24 +1002,21 @@ main()
 	if (substdio_get(&ssin, &ch, 1) < 1)
 		die_read();
 	/*- Get the Sender */
-	if (ch != 'F')
-	{
+	if (ch != 'F') {
 		cleanup();
 		die(91);
 	}
 	if (substdio_bput(&ssout, &ch, 1) == -1)
 		die_write();
 #if defined(MAILARCHIVE)
-	if (flagarchive)
-	{
+	if (flagarchive) {
 		if (!stralloc_copys(&line, ""))
 			die(51);
 		if (!stralloc_catb(&line, &ch, 1))
 			die(51);
 	}
 #endif
-	for (len = 0; len < ADDR; ++len)
-	{
+	for (len = 0; len < ADDR; ++len) {
 		if (substdio_get(&ssin, &ch, 1) < 1)
 			die_read();
 		if (substdio_put(&ssout, &ch, 1) == -1)
@@ -1089,22 +1028,23 @@ main()
 		if (!ch)
 			break;
 	}
-	if (len >= ADDR)
-	{
+	if (len >= ADDR) {
 		cleanup();
 		die(11);
 	}
-	if (extraqueue.s && extraqueue.len)
-	{
-		if (substdio_bput(&ssout, "T", 1) == -1)
-			die_write();
-		if (substdio_bput(&ssout, extraqueue.s, extraqueue.len) == -1)
-			die_write();
-		if (substdio_bput(&ssout, "\0", 1) == -1)
-			die_write();
+	if (extraqueue.s && extraqueue.len) {
+		for (len = 0, ptr = extraqueue.s;len < extraqueue.len;) {
+			len += ((token_len = str_len(ptr)) + 1);
+			if (substdio_bput(&ssout, "T", 1) == -1)
+				die_write();
+			if (substdio_bput(&ssout, ptr, token_len) == -1)
+				die_write();
+			if (substdio_bput(&ssout, "\0", 1) == -1)
+				die_write();
+			ptr = extraqueue.s + len;
+		}
 	}
-	if (flagquarantine)
-	{
+	if (flagquarantine) {
 		if (substdio_bput(&ssout, "T", 1) == -1)
 			die_write();
 		if (substdio_bput(&ssout, quarantine.s, quarantine.len) == -1)
@@ -1112,24 +1052,19 @@ main()
 		if (substdio_bput(&ssout, "\0", 1) == -1)
 			die_write();
 	}
-	if (flagquarantine)
-	{
-		if (!stralloc_cats(&qqehextra, "X-Quarantine-ID: "))
-		{
+	if (flagquarantine) {
+		if (!stralloc_cats(&qqehextra, "X-Quarantine-ID: ")) {
 			cleanup();
 			die(51);
 		}
-		if (!stralloc_cat(&qqehextra, &quarantine))
-		{
+		if (!stralloc_cat(&qqehextra, &quarantine)) {
 			cleanup();
 			die(51);
 		}
 	}
 	/*- Get the recipients */
-	if (flagblackhole)
-	{
-		for (;;) /*- empty the pipe created by qmail_open() */
-		{
+	if (flagblackhole) {
+		for (;;) { /*- empty the pipe created by qmail_open() */
 			if (substdio_get(&ssin, &ch, 1) < 1)
 				die_read();
 			if (!ch)
@@ -1138,29 +1073,24 @@ main()
 		cleanup();
 		die(0);
 	} else /*- write all recipients */
-	for (;;)
-	{
+	for (;;) {
 		/*- get one recipient at a time */
 		if (substdio_get(&ssin, &ch, 1) < 1)
 			die_read();
 		if (!ch)
 			break;
 #if defined(QHPSI)
-		if (ch == 'Q')
-		{
+		if (ch == 'Q') {
 			qhpsi = 0;
 			break;
 		}
 #endif
-		if (ch != 'T')
-		{
+		if (ch != 'T') {
 			cleanup();
 			die(91);
 		}
-		if (flagquarantine)
-		{
-			if (!stralloc_append(&qqehextra, ","))
-			{
+		if (flagquarantine) {
+			if (!stralloc_append(&qqehextra, ",")) {
 				cleanup();
 				die(51);
 			}
@@ -1171,14 +1101,11 @@ main()
 		if (flagarchive && !stralloc_catb(&line, &ch, 1))
 			die(51);
 #endif
-		for (len = 0; len < ADDR; ++len)
-		{
+		for (len = 0; len < ADDR; ++len) {
 			if (substdio_get(&ssin, &ch, 1) < 1)
 				die_read();
-			if (flagquarantine)
-			{
-				if (ch && !stralloc_append(&qqehextra, &ch))
-				{
+			if (flagquarantine) {
+				if (ch && !stralloc_append(&qqehextra, &ch)) {
 					cleanup();
 					die(51);
 				}
@@ -1192,64 +1119,54 @@ main()
 			if (!ch) /* this completes one recipient */
 				break;
 		}
-		if (len >= ADDR)
-		{
+		if (len >= ADDR) {
 			cleanup();
 			die(11);
 		}
 	} /*- for (;;) */
 #if defined(MAILARCHIVE)
-	if (flagarchive)
-	{
+	if (flagarchive) {
 		/*
 		 * cycle through all the sender/recipients addresses
 		 * assign special address F<> for bounces
 		 */
 		if (!stralloc_0(&line))
 			die(51);
-		for (ptr = line.s;*ptr;)
-		{
+		for (ptr = line.s;*ptr;) {
 			if (set_archive(*(ptr + 1) ? ptr : "F<>"))
 				die(51);
 			ptr += str_len(ptr) + 1;
 		}
 	}
-	if (arch_email.s && arch_email.len)
-	{
+	if (arch_email.s && arch_email.len) {
 		if (substdio_bput(&ssout, arch_email.s, arch_email.len) == -1)
 			die_write();
 	}
 #endif
-	if (flagquarantine && !stralloc_append(&qqehextra, "\n"))
-	{
+	if (flagquarantine && !stralloc_append(&qqehextra, "\n")) {
 		cleanup();
 		die(51);
 	}
-	if ((qqeh && *qqeh) || (qqehextra.s && qqehextra.len))
-	{
+	if ((qqeh && *qqeh) || (qqehextra.s && qqehextra.len)) {
 		if (substdio_bput(&ssout, "e", 1) == -1)
 			die_write();
 	}
-	if (qqehextra.s && qqehextra.len)
-	{
+	if (qqehextra.s && qqehextra.len) {
 		if (substdio_bput(&ssout, qqehextra.s, qqehextra.len) == -1)
 			die_write();
 	}
-	if (qqeh && *qqeh)
-	{
+	if (qqeh && *qqeh) {
 		if (substdio_bputs(&ssout, qqeh) == -1)
 			die_write();
 		len = str_len(qqeh);
 		if (qqeh[len - 1] != '\n' && substdio_bput(&ssout, "\n", 1) == -1)
 			die_write();
 	}
-	if ((qqeh && *qqeh) || (qqehextra.s && qqehextra.len))
-	{
+	if ((qqeh && *qqeh) || (qqehextra.s && qqehextra.len)) {
 		if (substdio_bput(&ssout, "\0", 1) == -1)
 			die_write();
 	}
-	if (envheaders.s && envheaders.len)
-	{
+	if (envheaders.s && envheaders.len) {
 		if (substdio_bput(&ssout, "h", 1) == -1)
 			die_write();
 		if (substdio_bput(&ssout, envheaders.s, envheaders.len) == -1)
@@ -1260,24 +1177,20 @@ main()
 	if (substdio_flush(&ssout) == -1)
 		die_write();
 #ifdef USE_FSYNC
-	if (use_fsync)
-	{
+	if (use_fsync) {
 		if (fsync(messfd) == -1)
 			die_write();
 		if (fsync(intdfd) == -1)
 			die_write();
 	}
 #endif
-	if (link(intdfn, todofn) == -1)
-	{
+	if (link(intdfn, todofn) == -1) {
 		cleanup();
 		die(66);
 	}
 #ifdef USE_FSYNC
-	if (!env_get("USE_SYNCDIR") && use_fsync)
-	{
-		if ((fd = open(todofn, O_RDONLY)) < 0 || fsync(fd) < 0 || close(fd) < 0)
-		{
+	if (!env_get("USE_SYNCDIR") && use_fsync) {
+		if ((fd = open(todofn, O_RDONLY)) < 0 || fsync(fd) < 0 || close(fd) < 0) {
 			cleanup();
 			die(66);
 		}
@@ -1292,7 +1205,7 @@ main()
 void
 getversion_qmail_queue_c()
 {
-	static char    *x = "$Id: qmail-queue.c,v 1.55 2011-07-29 09:29:43+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: qmail-queue.c,v 1.56 2013-05-30 11:10:32+05:30 Cprogrammer Exp mbhangui $";
 
 #ifdef INDIMAIL
 	if (x)
