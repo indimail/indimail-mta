@@ -1,5 +1,8 @@
 /*
  * $Log: smtpd.c,v $
+ * Revision 1.171  2013-06-09 17:03:49+05:30  Cprogrammer
+ * shortened variable declartion in addrparse() function
+ *
  * Revision 1.170  2013-05-16 23:33:16+05:30  Cprogrammer
  * added checkrecipient as part of non-indimail code
  *
@@ -664,7 +667,7 @@ int             wildmat_internal(char *, char *);
 int             ssl_rfd = -1, ssl_wfd = -1;	/*- SSL_get_Xfd() are broken */
 char           *servercert, *clientca, *clientcrl;
 #endif
-char           *revision = "$Revision: 1.170 $";
+char           *revision = "$Revision: 1.171 $";
 char           *protocol = "SMTP";
 stralloc        proto = { 0 };
 static stralloc Revision = { 0 };
@@ -3122,19 +3125,15 @@ setup()
 int
 addrparse(char *arg)
 {
-	int             i;
-	char            ch;
-	char            terminator;
+	int             i, flagesc, flagquoted;
+	char            ch, terminator;
 	ip_addr         ip;
-	int             flagesc;
-	int             flagquoted;
 
 	terminator = '>';
 	i = str_chr(arg, '<');
 	if (arg[i])
 		arg += i + 1;
-	else
-	{	/*- partner should go read rfc 821 */
+	else {	/*- partner should go read rfc 821 */
 		terminator = ' ';
 		arg += str_chr(arg, ':');
 		if (*arg == ':')
@@ -3145,10 +3144,8 @@ addrparse(char *arg)
 			++arg;
 	}
 	/*- strip source route */
-	if (*arg == '@')
-	{
-		while (*arg)
-		{
+	if (*arg == '@') {
+		while (*arg) {
 			if (*arg++ == ':')
 				break;
 		}
@@ -3157,15 +3154,12 @@ addrparse(char *arg)
 		die_nomem();
 	flagesc = 0;
 	flagquoted = 0;
-	for (i = 0; (ch = arg[i]); ++i)
-	{	/*- copy arg to addr, stripping quotes */
-		if (flagesc)
-		{
+	for (i = 0; (ch = arg[i]); ++i) { /*- copy arg to addr, stripping quotes */
+		if (flagesc) {
 			if (!stralloc_append(&addr, &ch))
 				die_nomem();
 			flagesc = 0;
-		} else
-		{
+		} else {
 			if (!flagquoted && ch == terminator)
 				break;
 			switch (ch)
@@ -3190,17 +3184,12 @@ addrparse(char *arg)
 	/*- could check for termination failure here, but why bother? */
 	if (!stralloc_append(&addr, ""))
 		die_nomem();
-	if (liphostok)
-	{
-		if ((i = byte_rchr(addr.s, addr.len, '@')) < addr.len)
-		{
+	if (liphostok) {
+		if ((i = byte_rchr(addr.s, addr.len, '@')) < addr.len) {
 			/*- if not, partner should go read rfc 821 */
-			if (addr.s[i + 1] == '[')
-			{
-				if (!addr.s[i + 1 + ip_scanbracket(addr.s + i + 1, &ip)])
-				{
-					if (ipme_is(&ip))
-					{
+			if (addr.s[i + 1] == '[') {
+				if (!addr.s[i + 1 + ip_scanbracket(addr.s + i + 1, &ip)]) {
+					if (ipme_is(&ip)) {
 						addr.len = i + 1;
 						if (!stralloc_cat(&addr, &liphost))
 							die_nomem();
@@ -6668,7 +6657,7 @@ addrrelay() /*- Rejection of relay probes. */
 void
 getversion_smtpd_c()
 {
-	static char    *x = "$Id: smtpd.c,v 1.170 2013-05-16 23:33:16+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: smtpd.c,v 1.171 2013-06-09 17:03:49+05:30 Cprogrammer Stab mbhangui $";
 
 #ifdef INDIMAIL
 	if (x)

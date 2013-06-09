@@ -1,5 +1,8 @@
 /*
  * $Log: qnotify.c,v $
+ * Revision 1.6  2013-06-09 17:03:36+05:30  Cprogrammer
+ * shortened variable declartion in addrparse() function
+ *
  * Revision 1.5  2012-11-24 08:01:36+05:30  Cprogrammer
  * fixed display of usage
  *
@@ -225,11 +228,8 @@ stralloc        addr = { 0 }, rpath = {0};
 int
 addrparse(char *arg)
 {
-	int             i;
-	char            ch;
-	char            terminator;
-	int             flagesc;
-	int             flagquoted;
+	int             i, flagesc, flagquoted;
+	char            ch, terminator;
 
 	terminator = '>';
 	i = str_chr(arg, '<');
@@ -576,7 +576,7 @@ main(int argc, char **argv)
 void
 getversion_qnotify_c()
 {
-	static char    *x = "$Id: qnotify.c,v 1.5 2012-11-24 08:01:36+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: qnotify.c,v 1.6 2013-06-09 17:03:36+05:30 Cprogrammer Stab mbhangui $";
 
 	x++;
 }
