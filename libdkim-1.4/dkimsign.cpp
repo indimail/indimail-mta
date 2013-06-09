@@ -1,5 +1,8 @@
 /*
  * $Log: dkimsign.cpp,v $
+ * Revision 1.6  2013-06-09 16:41:28+05:30  Cprogrammer
+ * parse address properly from From and Sender header
+ *
  * Revision 1.5  2009-04-16 10:32:38+05:30  Cprogrammer
  * added DKIMDOMAIN env variable
  *
@@ -43,6 +46,7 @@
 #define LOWORD(l) ((unsigned)(l) & 0xffff)
 #define HIWORD(l) ((unsigned)(l) >> 16)
 
+#include <iostream>
 #include <string.h>
 #include <map>
 #include "dkim.h"
@@ -205,12 +209,24 @@ ConvertHeaderToQuotedPrintable(const char *source, char *dest)
 void
 CDKIMSign::GetHeaderParams(const string & sHdr)
 {
+	string::size_type pos1, pos2;
+
 	if (_strnicmp(sHdr.c_str(), "X", 1) == 0)
 		return;
-	if (_strnicmp(sHdr.c_str(), "From:", 5) == 0)
+	if (_strnicmp(sHdr.c_str(), "From:", 5) == 0) {
 		sFrom.assign(sHdr.c_str() + 5);
-	if (_strnicmp(sHdr.c_str(), "Sender:", 7) == 0)
+		pos1 = sFrom.find('(');
+		pos2 = sFrom.find(')');
+		if (pos1 != 0 && pos1 != string::npos && pos2 != 0 && pos2 != string::npos)
+			sFrom.erase(pos1, pos2);
+	}
+	if (_strnicmp(sHdr.c_str(), "Sender:", 7) == 0) {
 		sSender.assign(sHdr.c_str() + 7);
+		pos1 = sSender.find('(');
+		pos2 = sSender.find(')');
+		if (pos1 != 0 && pos1 != string::npos && pos2 != 0 && pos2 != string::npos)
+			sSender.erase(pos1, pos2);
+	}
 	if (_strnicmp(sHdr.c_str(), "Return-Path:", 12) == 0)
 		sReturnPath.assign(sHdr.c_str() + 12);
 	if (m_nIncludeCopiedHeaders) {
@@ -898,7 +914,7 @@ int CDKIMSign::AssembleReturnedSig(char *szPrivKey)
 void
 getversion_dkimsign_cpp()
 {
-	static char    *x = (char *) "$Id: dkimsign.cpp,v 1.5 2009-04-16 10:32:38+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = (char *) "$Id: dkimsign.cpp,v 1.6 2013-06-09 16:41:28+05:30 Cprogrammer Stab mbhangui $";
 
 	x++;
 }
