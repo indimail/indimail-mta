@@ -1,5 +1,8 @@
 /*
  * $Log: rrt.c,v $
+ * Revision 1.4  2013-06-09 17:03:41+05:30  Cprogrammer
+ * shortened variable declartion in addrparse() function
+ *
  * Revision 1.3  2012-11-25 07:56:34+05:30  Cprogrammer
  * modify subject according to type
  *
@@ -131,11 +134,8 @@ stralloc        addr = { 0 }, rpath = {0};
 int
 addrparse(char *arg)
 {
-	int             i;
-	char            ch;
-	char            terminator;
-	int             flagesc;
-	int             flagquoted;
+	int             i, flagesc, flagquoted;
+	char            ch, terminator;
 
 	terminator = '>';
 	i = str_chr(arg, '<');
@@ -484,7 +484,7 @@ main(int argc, char **argv)
 void
 getversion_rr_c()
 {
-	static char    *x = "$Id: rrt.c,v 1.3 2012-11-25 07:56:34+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: rrt.c,v 1.4 2013-06-09 17:03:41+05:30 Cprogrammer Stab mbhangui $";
 
 	x++;
 }

@@ -270,7 +270,7 @@ addrparse(arg)
 			flagesc = 0;
 		} else
 		{
-			if (!flagquoted && (ch == terminator))
+			if (!flagquoted && ch == terminator)
 				break;
 			switch (ch)
 			{

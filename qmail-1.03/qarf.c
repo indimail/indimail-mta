@@ -1,5 +1,8 @@
 /*
  * $Log: qarf.c,v $
+ * Revision 1.9  2013-06-09 17:02:52+05:30  Cprogrammer
+ * shortened variable declartion in addrparse() function
+ *
  * Revision 1.8  2012-11-24 08:01:22+05:30  Cprogrammer
  * fixed display of usage
  *
@@ -161,11 +164,8 @@ stralloc        addr = { 0 };
 int
 addrparse(char *arg)
 {
-	int             i;
-	char            ch;
-	char            terminator;
-	int             flagesc;
-	int             flagquoted;
+	int             i, flagesc, flagquoted;
+	char            ch, terminator;
 
 	terminator = '>';
 	i = str_chr(arg, '<');
@@ -403,7 +403,7 @@ main(int argc, char **argv)
 	my_putb("\"; ", 3);
 	my_puts(
 			"report-type=\"feedback-report\"\n"
-			"X-Mailer: qarf $Revision: 1.8 $\n");
+			"X-Mailer: qarf $Revision: 1.9 $\n");
 
 	/*- Body */
 	my_puts("\nThis is a multi-part message in MIME format\n\n");
@@ -447,7 +447,7 @@ main(int argc, char **argv)
 
 	my_puts(
 			"Feedback-Type: abuse\n"
-			"User-Agent: $Id: qarf.c,v 1.8 2012-11-24 08:01:22+05:30 Cprogrammer Stab mbhangui $\n"
+			"User-Agent: $Id: qarf.c,v 1.9 2013-06-09 17:02:52+05:30 Cprogrammer Stab mbhangui $\n"
 			"Version: 0.1\n");
 	if (email_from.len) {
 		my_putb("Original-Mail-From: ", 20);
@@ -507,7 +507,7 @@ main(int argc, char **argv)
 void
 getversion_qarf_c()
 {
-	static char    *x = "$Id: qarf.c,v 1.8 2012-11-24 08:01:22+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: qarf.c,v 1.9 2013-06-09 17:02:52+05:30 Cprogrammer Stab mbhangui $";
 
 	x++;
 }
