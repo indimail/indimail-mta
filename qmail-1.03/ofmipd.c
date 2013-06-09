@@ -1,5 +1,8 @@
 /*
  * $Log: ofmipd.c,v $
+ * Revision 1.11  2013-06-09 17:02:22+05:30  Cprogrammer
+ * fixed addrparse function
+ *
  * Revision 1.10  2010-07-27 09:50:46+05:30  Cprogrammer
  * added logging of senders and recipients
  *
@@ -431,44 +434,38 @@ int
 addrparse(arg)
 	char           *arg;
 {
-	int             i;
-	char            ch;
-	char            terminator;
-	int             flagesc;
-	int             flagquoted;
+	int             i, flagesc, flagquoted;
+	char            ch, terminator;
 
 	terminator = '>';
 	i = str_chr(arg, '<');
 	if (arg[i])
 		arg += i + 1;
-	else
-	{	/*- partner should go read rfc 821 */
+	else { /*- partner should go read rfc 821 */
 		terminator = ' ';
 		arg += str_chr(arg, ':');
 		if (*arg == ':')
 			++arg;
+		if (!*arg)
+			return (0);
 		while (*arg == ' ')
 			++arg;
 	}
-
-	if (*arg == '@')
+	if (*arg == '@') {
 		while (*arg)
 			if (*arg++ == ':')
 				break;
-
+	}
 	if (!stralloc_copys(&addr, ""))
 		nomem();
 	flagesc = 0;
 	flagquoted = 0;
-	for (i = 0; (ch = arg[i]); ++i)
-	{							/*- copy arg to addr, stripping quotes */
-		if (flagesc)
-		{
+	for (i = 0; (ch = arg[i]); ++i) { /*- copy arg to addr, stripping quotes */
+		if (flagesc) {
 			if (!stralloc_append(&addr, &ch))
 				nomem();
 			flagesc = 0;
-		} else
-		{
+		} else {
 			if (!flagquoted && (ch == terminator))
 				break;
 			switch (ch)
@@ -485,10 +482,8 @@ addrparse(arg)
 			}
 		}
 	}
-
 	if (!rewritehost_addr(&rwaddr, addr.s, addr.len, config_data(&rewrite)))
 		nomem();
-
 	return rwaddr.len < 900;
 }
 
@@ -1291,7 +1286,7 @@ main(argc, argv)
 void
 getversion_ofmipd_c()
 {
-	static char    *x = "$Id: ofmipd.c,v 1.10 2010-07-27 09:50:46+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: ofmipd.c,v 1.11 2013-06-09 17:02:22+05:30 Cprogrammer Stab mbhangui $";
 
 	x++;
 }
