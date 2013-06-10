@@ -1,5 +1,8 @@
 /*
  * $Log: limits.c,v $
+ * Revision 2.15  2013-06-10 15:44:28+05:30  Cprogrammer
+ * changed defaultquota to signed int64
+ *
  * Revision 2.14  2012-09-24 19:16:29+05:30  Cprogrammer
  * BUG - Fixed diskquota, maxmsgcount, defaultquota, defaultmaxmsgcount initialization
  *
@@ -49,7 +52,7 @@
  */
 
 #ifndef	lint
-static char     sccsid[] = "$Id: limits.c,v 2.14 2012-09-24 19:16:29+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: limits.c,v 2.15 2013-06-10 15:44:28+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #include "indimail.h"
@@ -228,7 +231,7 @@ vset_limits(char *domain, struct vlimits *limits)
 		"perm_alias, perm_forward, perm_autoresponder, perm_maillist, perm_quota, "
 		"perm_defaultquota) \n"
 		"VALUES \n"
-		"(\"%s\", %ld, %ld, %d, %d, %d, %d, %d, %"PRIu64", %"PRIu64", %"PRIu64", %"PRIu64", %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d)",
+		"(\"%s\", %ld, %ld, %d, %d, %d, %d, %d, %"PRIu64", %"PRIu64", %"PRId64", %"PRIu64", %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d)",
 		domain, limits->domain_expiry, limits->passwd_expiry, limits->maxpopaccounts,
 		limits->maxaliases, limits->maxforwards, limits->maxautoresponders, limits->maxmailinglists,
 		limits->diskquota, limits->maxmsgcount, limits->defaultquota, limits->defaultmaxmsgcount,
