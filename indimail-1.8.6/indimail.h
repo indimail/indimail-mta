@@ -1,5 +1,8 @@
 /*
  * $Log: indimail.h,v $
+ * Revision 2.209  2013-06-10 15:44:07+05:30  Cprogrammer
+ * changed defaultquota to signed BIGINT
+ *
  * Revision 2.208  2012-09-24 19:15:14+05:30  Cprogrammer
  * made diskquota, maxmsgcount, defaultquota, defaultmaxmsgcount in vlimits unsigned
  *
@@ -940,7 +943,7 @@
 #define INDIMAILH_H
 
 #ifndef	lint
-static char     sccsidh[] = "$Id: indimail.h,v 2.208 2012-09-24 19:15:14+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsidh[] = "$Id: indimail.h,v 2.209 2013-06-10 15:44:07+05:30 Cprogrammer Stab mbhangui $";
 #endif
 
 #ifdef HAVE_CONFIG_H
@@ -1394,7 +1397,7 @@ primary key(emailid, mailing_list), index emailid (emailid, filter_no)"
 	maxmailinglists          INT(10) NOT NULL DEFAULT -1, \
 	diskquota                BIGINT UNSIGNED NOT NULL DEFAULT 0, \
 	maxmsgcount              BIGINT UNSIGNED NOT NULL DEFAULT 0, \
-	defaultquota             BIGINT UNSIGNED NOT NULL DEFAULT 0, \
+	defaultquota             BIGINT NOT NULL DEFAULT 0, \
 	defaultmaxmsgcount       BIGINT UNSIGNED NOT NULL DEFAULT 0, \
 	disable_pop              TINYINT(1) NOT NULL DEFAULT 0, \
 	disable_imap             TINYINT(1) NOT NULL DEFAULT 0, \
@@ -1529,7 +1532,7 @@ struct vlimits {
       /* quota & message count limits */
       umdir_t   diskquota;
       umdir_t   maxmsgcount;
-      umdir_t   defaultquota;
+      mdir_t    defaultquota;
       umdir_t   defaultmaxmsgcount;
 
       /* the following are 0 (false) or 1 (true) */
