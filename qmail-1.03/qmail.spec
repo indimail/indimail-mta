@@ -58,7 +58,7 @@
 %endif
 
 Summary: A Flexible SMTP server
-Name: indimail-smtp
+Name: indimail-mta
 Version: 1.8.6
 %if %build_on_obs == 1
 Release: 1.<B_CNT>
@@ -174,7 +174,7 @@ BuildRoot: %(mktemp -ud %{_tmppath}/%{name}-%{version}-%{release}-XXXXXXX)
 Excludeos: windows 
 
 %description
-indimail-smtp provides a standalone SMTP server that is part of the IndiMail
+indimail-mta provides a standalone SMTP server that is part of the IndiMail
 messaging platform. It comprises of the following packages
 
 qmail,
