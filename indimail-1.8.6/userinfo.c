@@ -1,5 +1,8 @@
 /*
  * $Log: userinfo.c,v $
+ * Revision 2.36  2013-06-10 16:06:09+05:30  Cprogrammer
+ * set maildir in the correct block
+ *
  * Revision 2.35  2013-04-29 22:50:44+05:30  Cprogrammer
  * fixed display of users with quota = NOQUOTA
  *
@@ -199,7 +202,7 @@
 #include <errno.h>
 
 #ifndef	lint
-static char     sccsid[] = "$Id: userinfo.c,v 2.35 2013-04-29 22:50:44+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: userinfo.c,v 2.36 2013-06-10 16:06:09+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 extern char *strptime(const char *, const char *, struct tm *);
@@ -410,12 +413,12 @@ vuserinfo(Email, User, Domain, DisplayName, DisplayPasswd, DisplayUid, DisplayGi
 			printf("quota         : unlimited\n");
 		} else {
 			dquota = parse_quota(mypw->pw_shell, 0)/1048576;
-			snprintf(maildir, MAX_BUFF, "%s/Maildir", mypw->pw_dir);
 			printf("quota         : %s [%-4.2f %s]\n", mypw->pw_shell,
 				dquota < 1024 ? (float) dquota : (float) (dquota/1024), dquota < 1024 ? "Mb" : "Gb");
 		}
 		if (islocal)
 		{
+			snprintf(maildir, MAX_BUFF, "%s/Maildir", mypw->pw_dir);
 #ifdef USE_MAILDIRQUOTA	
 			if ((size_limit = parse_quota(mypw->pw_shell, &count_limit)) == -1)
 				cur_size = mcount = -1;
