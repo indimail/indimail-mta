@@ -1556,7 +1556,7 @@ _hier(inst_dir)
 	ci(auto_qmail_home, "bin", "imapd", auto_uido, auto_gido, 0555);
 	ci(auto_qmail_home, "bin", "maildiracl", auto_uido, auto_gido, 0555);
 	ci(auto_qmail_home, "bin", "maildirkw", auto_uido, auto_gido, 0555);
-	ci(auto_qmail_home, "bin", "maildirmake", auto_uido, auto_gidq, 0555);
+	ci(auto_qmail_home, "bin", "maildirmake", auto_uido, auto_gido, 0555);
 	ci(auto_qmail_home, "bin", "pop3d", auto_uido, auto_gido, 0555);
 	/*- */
 	ci(auto_qmail_home, "etc", "imapd.cnf", auto_uido, auto_gido, 0600);
