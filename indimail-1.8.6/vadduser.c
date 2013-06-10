@@ -1,5 +1,8 @@
 /*
  * $Log: vadduser.c,v $
+ * Revision 2.37  2013-06-10 16:06:39+05:30  Cprogrammer
+ * allow setting of NOQUOTA from vlimits
+ *
  * Revision 2.36  2012-04-22 13:59:03+05:30  Cprogrammer
  * use 64bit integer for quota calculation
  *
@@ -162,7 +165,7 @@
 #include <signal.h>
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vadduser.c,v 2.36 2012-04-22 13:59:03+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: vadduser.c,v 2.37 2013-06-10 16:06:39+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 char            Email[MAX_BUFF], User[MAX_BUFF], Domain[MAX_BUFF], Passwd[MAX_BUFF],
@@ -271,7 +274,7 @@ main(argc, argv)
 			quota = strtoll(Quota, 0, 0);
 	} else
 #ifdef ENABLE_DOMAIN_LIMITS
-	if (domain_limits && limits.defaultquota != -1)
+	if (domain_limits)
 		quota = limits.defaultquota;
 	else
 		quota = 0;

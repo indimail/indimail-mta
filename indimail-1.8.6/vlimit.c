@@ -1,5 +1,8 @@
 /*
  * $Log: vlimit.c,v $
+ * Revision 2.12  2013-06-10 16:06:58+05:30  Cprogrammer
+ * allow setting of NOQUOTA for default user quota
+ *
  * Revision 2.11  2011-07-29 09:26:34+05:30  Cprogrammer
  * fixed gcc 4.6 warnings
  *
@@ -55,7 +58,7 @@
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vlimit.c,v 2.11 2011-07-29 09:26:34+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: vlimit.c,v 2.12 2013-06-10 16:06:58+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef ENABLE_DOMAIN_LIMITS
@@ -128,7 +131,7 @@ main(int argc, char *argv[])
 	}
 	if (vget_limits(Domain, &limits))
 	{
-		fprintf(stderr, "vget_limits: Failed to get limits\n");
+		fprintf(stderr, "vget_limits: Failed to get limits: %s\n", strerror(errno));
 		return (-1);
 	}
 	if (DeleteLimits)
@@ -178,7 +181,16 @@ main(int argc, char *argv[])
 	}
 
 	if (DefaultUserQuota[0] != 0)
-		limits.defaultquota = parse_quota(DefaultUserQuota, 0);
+	{
+		if (!strncmp(DefaultUserQuota, "NOQUOTA", 8))
+			limits.defaultquota = -1;
+		else
+		if ((limits.defaultquota = parse_quota(DefaultUserQuota, 0)) == -1)
+		{
+			fprintf(stderr, "defaultquota: %s\n", strerror(errno));
+			return (-1);
+		}
+	}
 	if (DefaultUserMaxMsgCount[0] != 0 &&
 			(limits.defaultmaxmsgcount = strtoll(DefaultUserMaxMsgCount, 0, 0)) == -1)
 	{
@@ -447,7 +459,10 @@ main(int argc, char *argv[])
 		printf("Password Expiry Date : %s", limits.passwd_expiry == -1 ? "Never Expires\n" : ctime(&limits.passwd_expiry));
 		printf("Max Domain Quota     : %"PRIu64"\n", limits.diskquota);
 		printf("Max Domain Messages  : %"PRIu64"\n", limits.maxmsgcount);
-		printf("Default User Quota   : %"PRIu64"\n", limits.defaultquota);
+		if (limits.defaultquota == -1)
+			printf("Default User Quota   : unlimited\n");
+		else
+			printf("Default User Quota   : %"PRId64"\n", limits.defaultquota);
 		printf("Default User Messages: %"PRIu64"\n", limits.defaultmaxmsgcount);
 		printf("Max Pop Accounts     : %d\n", limits.maxpopaccounts);
 		printf("Max Aliases          : %d\n", limits.maxaliases);
