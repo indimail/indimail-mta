@@ -1,5 +1,8 @@
 /*
  * $Log: proxylogin.c,v $
+ * Revision 2.45  2013-06-10 15:46:48+05:30  Cprogrammer
+ * set MAILDIRQUOTA=0S if quota is NOQUOTA
+ *
  * Revision 2.44  2011-10-28 14:16:10+05:30  Cprogrammer
  * added auth_method argument to pw_comp
  *
@@ -153,7 +156,7 @@
 #include <unistd.h>
 
 #ifndef	lint
-static char     sccsid[] = "$Id: proxylogin.c,v 2.44 2011-10-28 14:16:10+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: proxylogin.c,v 2.45 2013-06-10 15:46:48+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef CLUSTERED_SITE
@@ -461,7 +464,8 @@ ExecImapd(char **argv, char *userid, char *TheDomain, struct passwd *pw, char *s
 	}
 	snprintf(authenv4, MAX_BUFF, "MAILDIRQUOTA=%"PRIu64"S,%"PRIu64"C", size_limit, count_limit);
 #else
-	snprintf(authenv4, MAX_BUFF, "MAILDIRQUOTA=%sS", pw->pw_shell);
+	snprintf(authenv4, MAX_BUFF, "MAILDIRQUOTA=%sS", 
+		strncmp(pw->pw_shell, "NOQUOTA", 8) ? pw->pw_shell : "0");
 #endif
 	snprintf(authenv5, MAX_BUFF, "HOME=%s", pw->pw_dir);
 	snprintf(authenv6, MAX_BUFF, "AUTHSERVICE=%s", service);

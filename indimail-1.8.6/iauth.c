@@ -1,5 +1,8 @@
 /*
  * $Log: iauth.c,v $
+ * Revision 2.13  2013-06-10 15:43:40+05:30  Cprogrammer
+ * set MAILDIRQUOTA=0S if quota is NOQUOTA
+ *
  * Revision 2.12  2010-05-06 13:23:37+05:30  Cprogrammer
  * added debug argument to defaultTask
  * added debug statements in defaultTask()
@@ -89,7 +92,7 @@
 static int      defaultTask(char *, char *, struct passwd *, char *, int);
 
 #ifndef lint
-static char     sccsid[] = "$Id: iauth.c,v 2.12 2010-05-06 13:23:37+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: iauth.c,v 2.13 2013-06-10 15:43:40+05:30 Cprogrammer Exp mbhangui $";
 #endif
 /*
 #define iauth ltdl_module_LTX_iauth
@@ -446,7 +449,8 @@ defaultTask(char *userid, char *TheDomain, struct passwd *pw, char *service, int
 	}
 	snprintf(authenv4, MAX_BUFF, "MAILDIRQUOTA=%"PRIu64"S,%"PRIu64"C", size_limit, count_limit);
 #else
-	snprintf(authenv4, MAX_BUFF, "MAILDIRQUOTA=%sS", pw->pw_shell);
+	snprintf(authenv4, MAX_BUFF, "MAILDIRQUOTA=%sS", 
+		strncmp(pw->pw_shell, "NOQUOTA", 8) ? pw->pw_shell : "0");
 #endif
 	snprintf(authenv5, MAX_BUFF, "HOME=%s", pw->pw_dir);
 	snprintf(authenv6, MAX_BUFF, "AUTHSERVICE=%s", service);
