@@ -104,6 +104,8 @@ class Server:
 	self.principal = None		# Kerberos principal
 	self.esmtpname = None		# ESMTP 2554 name
 	self.esmtppassword = None	# ESMTP 2554 password
+#INDIMAIL
+	self.authmeth = "PLAIN"	    # OMDR Authentication
 	self.tracepolls = FALSE		# Add trace-poll info to headers
 	self.badheader = FALSE		# Pass messages with bad headers on?
 	self.users = []			# List of user entries for site
