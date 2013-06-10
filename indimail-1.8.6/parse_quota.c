@@ -1,5 +1,8 @@
 /*
  * $Log: parse_quota.c,v $
+ * Revision 2.7  2013-06-10 15:45:07+05:30  Cprogrammer
+ * return 0 for quota=NOQUOTA
+ *
  * Revision 2.6  2012-04-22 13:58:14+05:30  Cprogrammer
  * added case for specifying quota in gigabytes
  *
@@ -33,7 +36,7 @@
 #endif
 
 #ifndef	lint
-static char     sccsid[] = "$Id: parse_quota.c,v 2.6 2012-04-22 13:58:14+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: parse_quota.c,v 2.7 2013-06-10 15:45:07+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 mdir_t
@@ -61,6 +64,8 @@ parse_quota(char *quota, mdir_t *count)
 	} else
 	if(count)	
 		*count = 0;
+	if (!strncmp(tmpbuf, "NOQUOTA", 8))
+		return (0); /*- NOQUOTA */
 	per_user_limit = strtoll(tmpbuf, 0, 0);
 #if defined(LLONG_MIN) && defined(LLONG_MAX)
 	if (per_user_limit == LLONG_MIN || per_user_limit == LLONG_MAX)
