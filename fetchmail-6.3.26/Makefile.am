@@ -245,6 +245,7 @@ dist-hook:
 rsync:  distdir $(srcdir)/.rsyncs
 	@( cat $(srcdir)/.rsyncs | sed -e 's}^}rsync -aH --delete-after $(PACKAGE)-$(VERSION)/ }; s/\($$\)/ \&/;' ; echo "wait" ) | $(SHELL) -x
 
+#ifdef INDIMAIL
 fetchmail.up: fetchmail.up.in
 	$(edit) $@.in > $@
 fetchmail.down: fetchmail.down.in
@@ -265,6 +266,9 @@ import-translations:
 SUFFIXES = .html .txt
 .txt.html:
 	asciidoc --unsafe -a toc -a data-uri -o $@ $< || { rm -f $@ ; exit 1 ; }
+
+# default to some non-default options when using "make distcheck"
+AM_DISTCHECK_CONFIGURE_FLAGS=--with-ssl
 
 # The following sets edit modes for GNU EMACS.
 # Local Variables:

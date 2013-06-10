@@ -56,11 +56,9 @@ enum {
     LA_NOSOFTBOUNCE,
     LA_SOFTBOUNCE,
 #ifdef INDIMAIL
-    LA_BADHEADER,
-    LA_AUTHMETH
-#else
-    LA_BADHEADER
+    LA_AUTHMETH,
 #endif
+    LA_BADHEADER
 };
 
 /* options still left: CgGhHjJoORTWxXYz */
@@ -100,10 +98,10 @@ static const struct option longoptions[] = {
   {"timeout",	required_argument, (int *) 0, 't' },
   {"envelope",	required_argument, (int *) 0, 'E' },
   {"qvirtual",	required_argument, (int *) 0, 'Q' },
-  {"bad-header",required_argument, (int *) 0, LA_BADHEADER},
 #ifdef INDIMAIL
   {"authmeth",	required_argument, (int *) 0, 'O' },
 #endif
+  {"bad-header",required_argument, (int *) 0, LA_BADHEADER},
 
   {"user",	required_argument, (int *) 0, 'u' },
   {"username",	required_argument, (int *) 0, 'u' },

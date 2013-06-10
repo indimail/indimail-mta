@@ -133,6 +133,7 @@ static char *const *parse_plugin(const char *plugin, const char *host, const cha
 	argvec = (char **)malloc(s);
 	if (!argvec)
 	{
+		free(plugin_copy);
 		report(stderr, GT_("fetchmail: malloc failed\n"));
 		return NULL;
 	}
@@ -186,6 +187,8 @@ static int handle_plugin(const char *host,
 		if (outlevel >= O_VERBOSE)
 		    report(stderr, GT_("running %s (host %s service %s)\n"), plugin, host, service);
 		argvec = parse_plugin(plugin,host,service);
+		if (argvec == NULL)
+			_exit(EXIT_FAILURE);
 		execvp(*argvec, argvec);
 		report(stderr, GT_("execvp(%s) failed\n"), *argvec);
 		_exit(EXIT_FAILURE);
@@ -374,6 +377,20 @@ va_dcl {
 #include <openssl/pem.h>
 #include <openssl/x509v3.h>
 #include <openssl/rand.h>
+
+static void report_SSL_errors(FILE *stream)
+{
+    unsigned long err;
+
+    while (0ul != (err = ERR_get_error())) {
+	char *errstr = ERR_error_string(err, NULL);
+	report(stream, GT_("OpenSSL reported: %s\n"), errstr);
+    }
+}
+
+/* override ERR_print_errors_fp to our own implementation */
+#undef ERR_print_errors_fp
+#define ERR_print_errors_fp(stream) report_SSL_errors((stream))
 
 static	SSL_CTX *_ctx[FD_SETSIZE];
 static	SSL *_ssl_context[FD_SETSIZE];
@@ -755,29 +772,44 @@ static int SSL_verify_callback( int ok_return, X509_STORE_CTX *ctx, int strict )
 	} /* if (depth == 0 && !_depth0ck) */
 
 	if (err != X509_V_OK && err != _prev_err && !(_check_fp != 0 && _check_digest && !strict)) {
+		char *tmp;
+		int did_rep_err = 0;
 		_prev_err = err;
-					
+
                 report(stderr, GT_("Server certificate verification error: %s\n"), X509_verify_cert_error_string(err));
                 /* We gave the error code, but maybe we can add some more details for debugging */
 
 		switch (err) {
+		/* actually we do not want to lump these together, but
+		 * since OpenSSL flipped the meaning of these error
+		 * codes in the past, and they do hardly make a
+		 * practical difference because servers need not provide
+		 * the root signing certificate, we don't bother telling
+		 * users the difference:
+		 */
+		case X509_V_ERR_UNABLE_TO_GET_ISSUER_CERT_LOCALLY:
 		case X509_V_ERR_UNABLE_TO_GET_ISSUER_CERT:
 			X509_NAME_oneline(issuer, buf, sizeof(buf));
 			buf[sizeof(buf) - 1] = '\0';
-			report(stderr, GT_("unknown issuer (first %d characters): %s\n"), (int)(sizeof(buf)-1), buf);
-			report(stderr, GT_("This error usually happens when the server provides an incomplete certificate "
-						"chain, which is nothing fetchmail could do anything about.  For details, "
-						"please see the README.SSL-SERVER document that comes with fetchmail.\n"));
-			break;
+			report(stderr, GT_("Broken certification chain at: %s\n"), (tmp = sdump(buf, strlen(buf))));
+			xfree(tmp);
+			report(stderr, GT_(	"This could mean that the server did not provide the intermediate CA's certificate(s), "
+						"which is nothing fetchmail could do anything about.  For details, "
+						"please see the README.SSL-SERVER document that ships with fetchmail.\n"));
+			did_rep_err = 1;
+			/* FALLTHROUGH */
 		case X509_V_ERR_DEPTH_ZERO_SELF_SIGNED_CERT:
-		case X509_V_ERR_UNABLE_TO_GET_ISSUER_CERT_LOCALLY:
 		case X509_V_ERR_SELF_SIGNED_CERT_IN_CHAIN:
-			X509_NAME_oneline(subj, buf, sizeof(buf));
-			buf[sizeof(buf) - 1] = '\0';
-			report(stderr, GT_("This means that the root signing certificate (issued for %s) is not in the "
-						"trusted CA certificate locations, or that c_rehash needs to be run "
+			if (!did_rep_err) {
+			    X509_NAME_oneline(issuer, buf, sizeof(buf));
+			    buf[sizeof(buf) - 1] = '\0';
+			    report(stderr, GT_("Missing trust anchor certificate: %s\n"), (tmp = sdump(buf, strlen(buf))));
+			    xfree(tmp);
+			}
+			report(stderr, GT_(	"This could mean that the root CA's signing certificate is not in the "
+						"trusted CA certificate location, or that c_rehash needs to be run "
 						"on the certificate directory. For details, please "
-						"see the documentation of --sslcertpath and --sslcertfile in the manual page.\n"), buf);
+						"see the documentation of --sslcertpath and --sslcertfile in the manual page.\n"));
 			break;
 		default:
 			break;
@@ -888,7 +920,7 @@ int SSLOpen(int sock, char *mycert, char *mykey, const char *myproto, int certck
 		} else if (!strcasecmp("ssl23",myproto)) {
 			myproto = NULL;
 		} else {
-			fprintf(stderr,GT_("Invalid SSL protocol '%s' specified, using default (SSLv23).\n"), myproto);
+			report(stderr,GT_("Invalid SSL protocol '%s' specified, using default (SSLv23).\n"), myproto);
 			myproto = NULL;
 		}
 	}

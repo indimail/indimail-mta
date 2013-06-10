@@ -194,6 +194,15 @@ int is_host_alias(const char *name, struct query *ctl, struct addrinfo **res)
 	switch (e)
 	{
 	    case EAI_NONAME:	/* specified host is unknown */
+#ifdef EAI_NODATA
+	    /* EAI_NODATA was in the older RFC-2553, but that got
+	     * obsoleted by RFC-3493 - there, EAI_NODATA is no longer
+	     * valid, and modern operating systems no longer issue this
+	     * error code. libesmtp/getaddrinfo.?, however, still does.
+	     * (This was reported to Brian Stafford 2013-02-03.)
+	     */
+	    case EAI_NODATA:	/* specified host is unknown */
+#endif
 		break;
 
 	    default:

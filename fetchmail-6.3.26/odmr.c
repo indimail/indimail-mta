@@ -84,8 +84,8 @@ static int odmr_getrange(int sock, struct query *ctl, const char *id,
 		return (1);
 #else
     /* authenticate via CRAM-MD5 */
-    ok = do_cram_md5(sock, "AUTH", ctl, "334 ");
-    if (ok)
+	ok = do_cram_md5(sock, "AUTH", ctl, "334 ");
+	if (ok)
 		return(ok);
 #endif
 

@@ -10,7 +10,7 @@
 .\" Load www macros to process .URL requests, this requires groff:
 .mso www.tmac
 .\"
-.TH fetchmail 1 "fetchmail 6.3.24" "fetchmail" "fetchmail reference manual"
+.TH fetchmail 1 "fetchmail 6.3.26" "fetchmail" "fetchmail reference manual"
 
 .SH NAME
 fetchmail \- fetch mail from a POP, IMAP, ETRN, or ODMR-capable server
@@ -203,9 +203,9 @@ deleted from the upstream server, see "no softbounce" below.
 (since v6.3.10, Keyword: set softbounce, since v6.3.10)
 .br
 Soft bounce mode. All permanent delivery errors cause messages to be
-left on the upstream server if the protocol supports that. Default to
-match historic fetchmail documentation, to be changed to hard bounce
-mode in the next fetchmail release.
+left on the upstream server if the protocol supports that.
+.B This option is on by default to match historic fetchmail documentation,
+and will be changed to hard bounce mode in the next fetchmail release.
 .SS Disposal Options
 .TP
 .B \-a | \-\-all | (since v6.3.3) \-\-fetchall
@@ -562,11 +562,11 @@ the upstream server can't be made to use proper certificates.
 .br
 Specify the fingerprint of the server key (an MD5 hash of the key) in
 hexadecimal notation with colons separating groups of two digits. The letter
-hex digits must be in upper case. This is the default format OpenSSL uses,
-and the one fetchmail uses to report the fingerprint when an SSL connection
+hex digits must be in upper case. This is the format
+that fetchmail uses to report the fingerprint when an SSL connection
 is established. When this is specified, fetchmail will compare the server key
 fingerprint with the given one, and the connection will fail if they do not
-match regardless of the \fBsslcertck\fP setting. The connection will
+match, regardless of the \fBsslcertck\fP setting. The connection will
 also fail if fetchmail cannot obtain an SSL certificate from the server.
 This can be used to prevent man-in-the-middle attacks, but the finger
 print from the server needs to be obtained or verified over a secure
@@ -1208,7 +1208,7 @@ severely underdocumented, so failures may occur just because the
 programmers are not aware of OpenSSL's requirement of the day.
 For instance, since v6.3.16, fetchmail calls
 OpenSSL_add_all_algorithms(), which is necessary to support certificates
-with SHA256 on OpenSSL 0.9.8 -- this information is deeply hidden in the
+using SHA256 on OpenSSL 0.9.8 -- this information is deeply hidden in the
 documentation and not at all obvious.  Please do not hesitate to report
 subtle SSL failures.
 .PP
@@ -1568,7 +1568,8 @@ we do not accept mail from it. See also BUGS.
 
 .SH SMTP/ESMTP ERROR HANDLING
 Besides the spam-blocking described above, fetchmail takes special
-actions on the following SMTP/ESMTP error responses
+actions \(em that may be modified by the \-\-softbounce option \(em on
+the following SMTP/ESMTP error response codes
 .TP 5
 452 (insufficient system storage)
 Leave the message in the server mailbox for later retrieval.
@@ -1581,7 +1582,8 @@ originator.
 Delete the message from the server.  Don't even try to send
 bounce-mail to the originator.
 .PP
-Other errors trigger bounce mail back to the originator. See also BUGS.
+Other errors greater or equal to 500 trigger bounce mail back to the
+originator, unless suppressed by \-\-softbounce. See also BUGS.
 
 .SH THE RUN CONTROL FILE
 The preferred way to set up fetchmail is to write a

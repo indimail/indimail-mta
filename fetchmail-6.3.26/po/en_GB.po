@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: fetchmail 6.3.5\n"
 "Report-Msgid-Bugs-To: fetchmail-devel@lists.berlios.de\n"
-"POT-Creation-Date: 2012-12-23 16:30+0100\n"
+"POT-Creation-Date: 2013-04-23 23:24+0200\n"
 "PO-Revision-Date: 2006-11-02 06:58-0000\n"
 "Last-Translator: David Lodge <dave@cirt.net>\n"
 "Language-Team: English (British) <en_gb@li.org>\n"
@@ -30,12 +30,12 @@ msgstr "Yes, their IP addresses match\n"
 msgid "No, their IP addresses don't match\n"
 msgstr "No, their IP addresses don't match\n"
 
-#: checkalias.c:203
+#: checkalias.c:212
 #, c-format
 msgid "nameserver failure while looking for '%s' during poll of %s: %s\n"
 msgstr "nameserver failure while looking for '%s' during poll of %s: %s\n"
 
-#: checkalias.c:228
+#: checkalias.c:237
 #, c-format
 msgid "nameserver failure while looking for `%s' during poll of %s.\n"
 msgstr "nameserver failure while looking for `%s' during poll of %s.\n"
@@ -639,8 +639,8 @@ msgid ""
 "Copyright (C) 2002, 2003 Eric S. Raymond\n"
 "Copyright (C) 2004 Matthias Andree, Eric S. Raymond,\n"
 "                   Robert M. Funk, Graham Wilson\n"
-"Copyright (C) 2005 - 2006, 2010 - 2012 Sunil Shetye\n"
-"Copyright (C) 2005 - 2012 Matthias Andree\n"
+"Copyright (C) 2005 - 2012 Sunil Shetye\n"
+"Copyright (C) 2005 - 2013 Matthias Andree\n"
 msgstr ""
 "Copyright (C) 2002, 2003 Eric S. Raymond\n"
 "Copyright (C) 2004 Matthias Andree, Eric S. Raymond, Rob F. Funk, Graham "
@@ -2864,250 +2864,259 @@ msgstr "ESMTP LOGIN Authentication...\n"
 msgid "smtp listener protocol error\n"
 msgstr "smtp listener protocol error\n"
 
-#: socket.c:110 socket.c:136
+#: socket.c:110 socket.c:137
 msgid "fetchmail: malloc failed\n"
 msgstr "fetchmail: malloc failed\n"
 
-#: socket.c:168
+#: socket.c:169
 msgid "fetchmail: socketpair failed\n"
 msgstr "fetchmail: socketpair failed\n"
 
-#: socket.c:174
+#: socket.c:175
 msgid "fetchmail: fork failed\n"
 msgstr "fetchmail: fork failed\n"
 
-#: socket.c:181
+#: socket.c:182
 msgid "dup2 failed\n"
 msgstr "dup2 failed\n"
 
-#: socket.c:187
+#: socket.c:188
 #, c-format
 msgid "running %s (host %s service %s)\n"
 msgstr "running %s (host %s service %s)\n"
 
-#: socket.c:190
+#: socket.c:193
 #, c-format
 msgid "execvp(%s) failed\n"
 msgstr "execvp(%s) failed\n"
 
-#: socket.c:265
+#: socket.c:268
 #, c-format
 msgid "getaddrinfo(\"%s\",\"%s\") error: %s\n"
 msgstr "getaddrinfo(\"%s\",\"%s\") error: %s\n"
 
-#: socket.c:268
+#: socket.c:271
 msgid "Try adding the --service option (see also FAQ item R12).\n"
 msgstr "Try adding the --service option (see also FAQ item R12).\n"
 
-#: socket.c:282 socket.c:285
+#: socket.c:285 socket.c:288
 #, c-format
 msgid "unknown (%s)"
 msgstr "unknown (%s)"
 
-#: socket.c:288
+#: socket.c:291
 #, c-format
 msgid "Trying to connect to %s/%s..."
 msgstr "Trying to connect to %s/%s..."
 
-#: socket.c:297
+#: socket.c:300
 #, c-format
 msgid "cannot create socket: %s\n"
 msgstr "cannot create socket: %s\n"
 
-#: socket.c:299
+#: socket.c:302
 #, fuzzy, c-format
 msgid "name %d: cannot create socket family %d type %d: %s\n"
 msgstr "cannot create socket: %s\n"
 
-#: socket.c:317
+#: socket.c:320
 msgid "connection failed.\n"
 msgstr "connection failed.\n"
 
-#: socket.c:319
+#: socket.c:322
 #, c-format
 msgid "connection to %s:%s [%s/%s] failed: %s.\n"
 msgstr "connection to %s:%s [%s/%s] failed: %s.\n"
 
-#: socket.c:320
+#: socket.c:323
 #, fuzzy, c-format
 msgid "name %d: connection to %s:%s [%s/%s] failed: %s.\n"
 msgstr "connection to %s:%s [%s/%s] failed: %s.\n"
 
-#: socket.c:326
+#: socket.c:329
 msgid "connected.\n"
 msgstr "connected.\n"
 
-#: socket.c:339
+#: socket.c:342
 #, c-format
 msgid ""
 "Connection errors for this poll:\n"
 "%s"
 msgstr ""
 
-#: socket.c:605
+#: socket.c:387
+#, c-format
+msgid "OpenSSL reported: %s\n"
+msgstr ""
+
+#: socket.c:622
 #, fuzzy
 msgid "Server certificate:\n"
 msgstr "Server certificate verification error: %s\n"
 
-#: socket.c:610
+#: socket.c:627
 #, c-format
 msgid "Certificate chain, from root to peer, starting at depth %d:\n"
 msgstr ""
 
-#: socket.c:613
+#: socket.c:630
 #, c-format
 msgid "Certificate at depth %d:\n"
 msgstr ""
 
-#: socket.c:619
+#: socket.c:636
 #, c-format
 msgid "Issuer Organization: %s\n"
 msgstr "Issuer Organisation: %s\n"
 
-#: socket.c:622
+#: socket.c:639
 msgid "Warning: Issuer Organization Name too long (possibly truncated).\n"
 msgstr "Warning: Issuer Organsation Name too long (possibly truncated).\n"
 
-#: socket.c:624
+#: socket.c:641
 msgid "Unknown Organization\n"
 msgstr "Unknown Organisation\n"
 
-#: socket.c:626
+#: socket.c:643
 #, c-format
 msgid "Issuer CommonName: %s\n"
 msgstr "Issuer CommonName: %s\n"
 
-#: socket.c:629
+#: socket.c:646
 msgid "Warning: Issuer CommonName too long (possibly truncated).\n"
 msgstr "Warning: Issuer CommonName too long (possibly truncated).\n"
 
-#: socket.c:631
+#: socket.c:648
 msgid "Unknown Issuer CommonName\n"
 msgstr "Unknown Issuer CommonName\n"
 
-#: socket.c:637
+#: socket.c:654
 #, fuzzy, c-format
 msgid "Subject CommonName: %s\n"
 msgstr "Issuer CommonName: %s\n"
 
-#: socket.c:643
+#: socket.c:660
 msgid "Bad certificate: Subject CommonName too long!\n"
 msgstr "Bad certificate: Subject CommonName too long!\n"
 
-#: socket.c:649
+#: socket.c:666
 #, fuzzy
 msgid "Bad certificate: Subject CommonName contains NUL, aborting!\n"
 msgstr "Bad certificate: Subject CommonName too long!\n"
 
-#: socket.c:677
+#: socket.c:694
 #, c-format
 msgid "Subject Alternative Name: %s\n"
 msgstr ""
 
-#: socket.c:683
+#: socket.c:700
 #, fuzzy
 msgid "Bad certificate: Subject Alternative Name contains NUL, aborting!\n"
 msgstr "Bad certificate: Subject CommonName too long!\n"
 
-#: socket.c:700
+#: socket.c:717
 #, c-format
 msgid "Server CommonName mismatch: %s != %s\n"
 msgstr "Server CommonName mismatch: %s != %s\n"
 
-#: socket.c:707
+#: socket.c:724
 msgid "Server name not set, could not verify certificate!\n"
 msgstr "Server name not set, could not verify certificate!\n"
 
-#: socket.c:712
+#: socket.c:729
 msgid "Unknown Server CommonName\n"
 msgstr "Unknown Server CommonName\n"
 
-#: socket.c:714
+#: socket.c:731
 msgid "Server name not specified in certificate!\n"
 msgstr "Server name not specified in certificate!\n"
 
-#: socket.c:726
+#: socket.c:743
 msgid "EVP_md5() failed!\n"
 msgstr "EVP_md5() failed!\n"
 
-#: socket.c:730
+#: socket.c:747
 msgid "Out of memory!\n"
 msgstr "Out of memory!\n"
 
-#: socket.c:738
+#: socket.c:755
 msgid "Digest text buffer too small!\n"
 msgstr "Digest text buffer too small!\n"
 
-#: socket.c:744
+#: socket.c:761
 #, c-format
 msgid "%s key fingerprint: %s\n"
 msgstr "%s key fingerprint: %s\n"
 
-#: socket.c:748
+#: socket.c:765
 #, c-format
 msgid "%s fingerprints match.\n"
 msgstr "%s fingerprints match.\n"
 
-#: socket.c:750
+#: socket.c:767
 #, c-format
 msgid "%s fingerprints do not match!\n"
 msgstr "%s fingerprints do not match!\n"
 
-#: socket.c:760
+#: socket.c:779
 #, c-format
 msgid "Server certificate verification error: %s\n"
 msgstr "Server certificate verification error: %s\n"
 
-#: socket.c:767
-#, c-format
-msgid "unknown issuer (first %d characters): %s\n"
-msgstr "unknown issuer (first %d characters): %s\n"
+#: socket.c:794
+#, fuzzy, c-format
+msgid "Broken certification chain at: %s\n"
+msgstr "Server certificate verification error: %s\n"
 
-#: socket.c:768
+#: socket.c:796
 msgid ""
-"This error usually happens when the server provides an incomplete "
-"certificate chain, which is nothing fetchmail could do anything about.  For "
-"details, please see the README.SSL-SERVER document that comes with "
+"This could mean that the server did not provide the intermediate CA's "
+"certificate(s), which is nothing fetchmail could do anything about.  For "
+"details, please see the README.SSL-SERVER document that ships with "
 "fetchmail.\n"
 msgstr ""
 
-#: socket.c:777
+#: socket.c:806
 #, c-format
-msgid ""
-"This means that the root signing certificate (issued for %s) is not in the "
-"trusted CA certificate locations, or that c_rehash needs to be run on the "
-"certificate directory. For details, please see the documentation of --"
-"sslcertpath and --sslcertfile in the manual page.\n"
+msgid "Missing trust anchor certificate: %s\n"
 msgstr ""
 
-#: socket.c:870
+#: socket.c:809
+msgid ""
+"This could mean that the root CA's signing certificate is not in the trusted "
+"CA certificate location, or that c_rehash needs to be run on the certificate "
+"directory. For details, please see the documentation of --sslcertpath and --"
+"sslcertfile in the manual page.\n"
+msgstr ""
+
+#: socket.c:902
 msgid "File descriptor out of range for SSL"
 msgstr "File descriptor out of range for SSL"
 
-#: socket.c:881
+#: socket.c:913
 msgid "Your operating system does not support SSLv2.\n"
 msgstr ""
 
-#: socket.c:891
+#: socket.c:923
 #, c-format
 msgid "Invalid SSL protocol '%s' specified, using default (SSLv23).\n"
 msgstr "Invalid SSL protocol '%s' specified, using default (SSLv23).\n"
 
-#: socket.c:990
+#: socket.c:1022
 msgid "Certificate/fingerprint verification was somehow skipped!\n"
 msgstr "Certificate/fingerprint verification was somehow skipped!\n"
 
-#: socket.c:1007
+#: socket.c:1039
 msgid ""
 "Warning: the connection is insecure, continuing anyways. (Better use --"
 "sslcertck!)\n"
 msgstr ""
 
-#: socket.c:1049
+#: socket.c:1081
 msgid "Cygwin socket read retry\n"
 msgstr "Cygwin socket read retry\n"
 
-#: socket.c:1052
+#: socket.c:1084
 msgid "Cygwin socket read retry failed!\n"
 msgstr "Cygwin socket read retry failed!\n"
 
@@ -3215,11 +3224,11 @@ msgstr "message has embedded NULs"
 msgid "SMTP listener rejected local recipient addresses: "
 msgstr "SMTP listener rejected local recipient addresses: "
 
-#: transact.c:1493
+#: transact.c:1396
 msgid "error writing message text\n"
 msgstr "error writing message text\n"
 
-#: transact.c:1641
+#: transact.c:1672
 #, c-format
 msgid "Buffer too small. This is a bug in the caller of %s:%lu.\n"
 msgstr ""
@@ -3310,6 +3319,9 @@ msgstr "realloc failed\n"
 #~ "fetchmail: Warning: syslog and logfile are set. Check both for logs!\n"
 #~ msgstr ""
 #~ "fetchmail: Warning: syslog and logfile are set. Check both for logs!\n"
+
+#~ msgid "unknown issuer (first %d characters): %s\n"
+#~ msgstr "unknown issuer (first %d characters): %s\n"
 
 #~ msgid "message delimiter found while scanning headers\n"
 #~ msgstr "message delimiter found while scanning headers\n"
