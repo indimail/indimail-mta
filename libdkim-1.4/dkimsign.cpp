@@ -1,5 +1,8 @@
 /*
  * $Log: dkimsign.cpp,v $
+ * Revision 1.7  2013-06-11 00:02:39+05:30  Cprogrammer
+ * removed header iostream
+ *
  * Revision 1.6  2013-06-09 16:41:28+05:30  Cprogrammer
  * parse address properly from From and Sender header
  *
@@ -46,7 +49,6 @@
 #define LOWORD(l) ((unsigned)(l) & 0xffff)
 #define HIWORD(l) ((unsigned)(l) >> 16)
 
-#include <iostream>
 #include <string.h>
 #include <map>
 #include "dkim.h"
@@ -914,7 +916,7 @@ int CDKIMSign::AssembleReturnedSig(char *szPrivKey)
 void
 getversion_dkimsign_cpp()
 {
-	static char    *x = (char *) "$Id: dkimsign.cpp,v 1.6 2013-06-09 16:41:28+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = (char *) "$Id: dkimsign.cpp,v 1.7 2013-06-11 00:02:39+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
