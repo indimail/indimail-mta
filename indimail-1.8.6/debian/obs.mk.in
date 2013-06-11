@@ -15,11 +15,11 @@ acl_libdirstem := $(shell basename @libdir@ 2>/dev/null|| echo "lib")
 version=@version@
 prefix=@prefix@
 #
-clamav_version=0.97.6
+clamav_version=0.97.8
 libdkim_version=1.4
-courier_version=4.10.0
-bogofilter_version=1.2.2
-fetchmail_version=6.3.24
+courier_version=4.13
+bogofilter_version=1.2.3
+fetchmail_version=6.3.26
 nssd_version=1.1
 #
 pam_multi_version=1.1

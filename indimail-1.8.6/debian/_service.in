@@ -49,9 +49,9 @@
    <param name="path">/indimail/courier-imap-@courier_version@.patch.gz</param>
    <param name="host">downloads.sourceforge.net</param></service>
 <service name="download_url">
-   <param name="path">/clamav/clamav-0.97.tar.gz</param>
+   <param name="path">/clamav/clamav-@clamav_version@.tar.gz</param>
    <param name="host">downloads.sourceforge.net</param>
 <service name="download_url">
-   <param name="path">/indimail/clamav-0.97.patch.gz</param>
+   <param name="path">/indimail/clamav-@clamav_version@.patch.gz</param>
    <param name="host">downloads.sourceforge.net</param></service>
 </services>
