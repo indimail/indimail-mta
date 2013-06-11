@@ -1,3 +1,4 @@
+#!/var/indimail/bin/vtable
 hostcntrl
 (pw_name char(40) not null,
 pw_domain char(67) not null,

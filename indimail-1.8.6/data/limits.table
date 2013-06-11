@@ -1,4 +1,5 @@
-limits
+#!/var/indimail/bin/vtable
+vlimits
 (domain                   CHAR(67) NOT NULL,
 domain_expiry            INT(10) NOT NULL DEFAULT -1,
 passwd_expiry            INT(10) NOT NULL DEFAULT -1,
@@ -9,7 +10,7 @@ maxautoresponders        INT(10) NOT NULL DEFAULT -1,
 maxmailinglists          INT(10) NOT NULL DEFAULT -1,
 diskquota                BIGINT UNSIGNED NOT NULL DEFAULT 0,
 maxmsgcount              BIGINT UNSIGNED NOT NULL DEFAULT 0,
-defaultquota             BIGINT UNSIGNED NOT NULL DEFAULT 0,
+defaultquota             BIGINT NOT NULL DEFAULT 0,
 defaultmaxmsgcount       BIGINT UNSIGNED NOT NULL DEFAULT 0,
 disable_pop              TINYINT(1) NOT NULL DEFAULT 0,
 disable_imap             TINYINT(1) NOT NULL DEFAULT 0,

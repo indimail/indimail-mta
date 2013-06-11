@@ -1,3 +1,4 @@
+#!/var/indimail/bin/vtable
 userquota
 (user char(40) not null,
 domain char(67) not null,

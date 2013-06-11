@@ -1,3 +1,4 @@
+#!/var/indimail/bin/vtable
 mailing_list
 (emailid char(107) not null,
 filter_no smallint not null,
