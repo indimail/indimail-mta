@@ -5,7 +5,7 @@
 COFLAGS=-z+05:30
 ACLOCAL_AMFLAGS=-I m4
 
-DEFS=-I. -I/usr/include/tcl8.4 @auth_inc@ 
+DEFS=-I. -I/usr/include/tcl8.5 -I/usr/include/tcl8.4 @auth_inc@ 
 
 libfbsql_LTLIBRARIES = libfbsql.la
 libfbsql_la_SOURCES = fbsql.c
