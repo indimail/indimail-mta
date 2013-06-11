@@ -18,14 +18,18 @@ License: GPL-3.0+
 %else
 License: GPLv3
 %endif
+URL: http://www.indimail.org
 Group: Productivity/Networking/Email/Utilities
 Source0: http://downloads.sourceforge.net/indimail/%{name}-%{version}.tar.gz
 #Source1: http://downloads.sourceforge.net/indimail/%{name}-%{version}-rpmlintrc
+
+%if %{defined suse_version} || %{defined sles_version}
+BuildRequires: bison
+%endif
 BuildRequires: flex  
 %if %build_on_obs == 1
 BuildRequires: -post-build-checks  
 %endif
-URL: http://www.indimail.org
 
 %if %build_on_obs == 1
 %define packager Manvendra Bhangui <manvendra@indimail.org>
