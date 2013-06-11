@@ -211,9 +211,9 @@ I usually prefer to run privileged commands like this (so that I don't get fond 
                                . fortune-1.1         (8.4  Mb)
                                . courier-imap-4.10.0 (75   Mb)
                                . bogofilter-1.2.2    (11.6 Mb)
-                               . clamav-0.97.3      (600  Mb)
-                               . fetchmail-6.3.21   (10.5 Mb)
-                               . iwebadmin-1.0      (3.0  Mb)
+                               . clamav-0.97.8      (600  Mb)
+                               . fetchmail-6.3.26   (10.5 Mb)
+                               . iwebadmin-1.2      (3.0  Mb)
                                ------------------------------
                                  Total              (800  Mb)
 
@@ -341,7 +341,7 @@ the installation.
     % wget http://downloads.sourceforge.net/indimail/nssd-1.1.tar.gz
     % wget http://downloads.sourceforge.net/indimail/pam-multi-1.1.tar.gz
     % wget http://downloads.sourceforge.net/indimail/logalert-0.3.tar.gz
-    % wget http://downloads.sourceforge.net/indimail/iwebadmin-1.0.tar.gz
+    % wget http://downloads.sourceforge.net/indimail/iwebadmin-1.2.tar.gz
 
     You may omit STEP 1 if you already have a working installation of MySQL and would want to use
     the existing MySQL installation with IndiMail. You may also omit STEP 2 in cause you do not
@@ -373,7 +373,7 @@ the installation.
     http://forge.mysql.com/wiki/Autotools_to_CMake_Transition_Guide
 
     ##### STEP 2  ##### Install libdkim-1.4 ###################
-    Install libdkim-1.4 (libdkim-1.4.tar.bz2) MD5 31839d7d90d3759d330cda6c9f4bad9c
+    Install libdkim-1.4 (libdkim-1.4.tar.bz2) MD5 3871d9e0c211bea2aaefbcb96971682e
     current working directory /home/local/src
     Download the libdkim package. The latest tested libdkim package is
     libdkim-1.4.tar.bz2
@@ -616,14 +616,14 @@ the installation.
     Then do ./configure <same_parameters_as_earlier_install> ; make ; make install-strip
 
     ##### STEP 7  ##### Virus Scanner #########################
-    Install clamav MD5 f5230da0c03272d3daa4771f19bb06d2
+    Install clamav MD5 ac52bcbad3ea72eac08fedb9772f648b
     current working directory /home/local/src
-    Download clamav package. The latest tested clamav package tested is clamav-0.97.3.tar.gz.
+    Download clamav package. The latest tested clamav package tested is clamav-0.97.8.tar.gz.
 
-    % wget http://downloads.sourceforge.net/clamav/clamav-0.97.3.tar.gz
-    % gunzip -c clamav-0.97.3.tar.gz | tar xf -
-    % gunzip -c indimail-@version@/patches/clamav-0.97.3.patch.gz | patch -p0
-    % cd clamav-0.97.3
+    % wget http://downloads.sourceforge.net/clamav/clamav-0.97.8.tar.gz
+    % gunzip -c clamav-0.97.8.tar.gz | tar xf -
+    % gunzip -c indimail-@version@/patches/clamav-0.97.8.patch.gz | patch -p0
+    % cd clamav-0.97.8
     % ./configure --prefix=@indimaildir@ --sysconfdir=@indimaildir@/etc \
         --with-dbdir=@indimaildir@/share/clamd \
         --libexecdir=@indimaildir@/libexec \
@@ -639,15 +639,15 @@ the installation.
     Then do ./configure <same_parameters_as_earlier_install> ; make ; make install-strip
  
     ##### STEP 8  ## Optional STEP ##### Fetchmail ############
-    Install fetchmail MD5 0ad8eac47e85bd0ae63870daa09992af  
+    Install fetchmail MD5 61b66faad044afa26e142bb1791aa2b3  
     current working directory /home/local/src
     Download the fetchmail package. The latest tested fetchmail package tested is
-    fetchmail-6.3.21.tar.bz2.
+    fetchmail-6.3.26.tar.bz2.
 
-    % wget http://download.berlios.de/fetchmail/fetchmail-6.3.21.tar.bz2
-    % bzip2 -d -c fetchmail-6.3.21.tar.bz2 | tar xf -
-    % gunzip -c indimail-@version@/patches/fetchmail-6.3.21.patch.gz | patch -p0
-    % cd fetchmail-6.3.21
+    % wget http://downloads.sourceforge.net/fetchmail/fetchmail-6.3.26.tar.bz2
+    % xz -d -c fetchmail-6.3.26.tar.bz2 | tar xf -
+    % gunzip -c indimail-@version@/patches/fetchmail-6.3.26.patch.gz | patch -p0
+    % cd fetchmail-6.3.26
     % autoreconf -fi
     % ./configure --prefix=@indimaildir@ --enable-indimail \
         --enable-indimaildir=@indimaildir@ \
@@ -685,10 +685,10 @@ the installation.
     Then do ./configure <same_parameters_as_earlier_install> ; make ; make install-strip
 
     ##### STEP 10 ## Optional STEP ## iwebadmin ###############
-    Install iwebadmin MD5 de91befa14e72352b5230c7a16fb7f3d
-    % wget http://downloads.sourceforge.net/indimail/iwebadmin-1.0.tar.gz
-    % gunzip -c iwebadmin-1.0.tar.gz | tar xf -
-    % cd iwebadmin-1.0
+    Install iwebadmin MD5 c4a98f4907825969d5f69f7c73b7a0f5
+    % wget http://downloads.sourceforge.net/indimail/iwebadmin-1.2.tar.gz
+    % gunzip -c iwebadmin-1.2.tar.gz | tar xf -
+    % cd iwebadmin-1.2
     % ./configure --prefix=@indimaildir@ --enable-indimaildir=@indimaildir@ \
         --enable-ezmlmdir=@indimaildir@ \
         --disable-ipauth --disable-trivial-password \
@@ -696,8 +696,8 @@ the installation.
         --enable-mysqlprefix=@mysql_prefix@ \
         --enable-htmldir=/var/www/html \
         --enable-cgibindir=/var/www/cgi-bin \
-        --enable-imagedir=/var/www/html/images/qmailadmin \
-        --enable-htmllibdir=@indimaildir@/share/qmailadmin
+        --enable-imagedir=/var/www/html/images/iwebadmin \
+        --enable-htmllibdir=@indimaildir@/share/iwebadmin
     % make -s [DESTDIR=staging_directory]
     % sudo make -s install-strip [DESTDIR=staging_directory]
     % cd ..
