@@ -12,6 +12,7 @@ version=@version@
 all: rules postrm postinst debian.tar.gz dummy.tar.gz  \
 	indium-Debian_5.0.dsc \
 	indium-Debian_6.0.dsc \
+	indium-Debian_7.0.dsc \
 	indium-xUbuntu_8.04.dsc \
 	indium-xUbuntu_9.10.dsc \
 	indium-xUbuntu_10.04.dsc \
@@ -19,7 +20,8 @@ all: rules postrm postinst debian.tar.gz dummy.tar.gz  \
 	indium-xUbuntu_11.04.dsc \
 	indium-xUbuntu_11.10.dsc \
 	indium-xUbuntu_12.04.dsc \
-	indium-xUbuntu_12.10.dsc
+	indium-xUbuntu_12.10.dsc \
+	indium-xUbuntu_13.04.dsc
 
 clean:
 	/bin/rm -f rules postrm postinst *.dsc debian.tar.gz dummy.tar.gz
@@ -45,6 +47,8 @@ indium-Debian_5.0.dsc: indium-Debian_5.0.dsc.in
 	$(edit) $@.in > $@
 indium-Debian_6.0.dsc: indium-Debian_6.0.dsc.in
 	$(edit) $@.in > $@
+indium-Debian_7.0.dsc: indium-Debian_7.0.dsc.in
+	$(edit) $@.in > $@
 indium-xUbuntu_8.04.dsc: indium-xUbuntu_8.04.dsc.in
 	$(edit) $@.in > $@
 indium-xUbuntu_9.10.dsc: indium-xUbuntu_9.10.dsc.in
@@ -60,6 +64,8 @@ indium-xUbuntu_11.10.dsc: indium-xUbuntu_11.10.dsc.in
 indium-xUbuntu_12.04.dsc: indium-xUbuntu_12.04.dsc.in
 	$(edit) $@.in > $@
 indium-xUbuntu_12.10.dsc: indium-xUbuntu_12.10.dsc.in
+	$(edit) $@.in > $@
+indium-xUbuntu_13.04.dsc: indium-xUbuntu_13.04.dsc.in
 	$(edit) $@.in > $@
 changelog:changelog.in
 	$(edit) $@.in > $@
