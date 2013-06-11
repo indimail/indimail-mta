@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail.spec.in,v 2.262 2013-06-09 16:44:04+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 2.264 2013-06-11 16:49:06+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %define _unpackaged_files_terminate_build 1
 
@@ -40,9 +40,9 @@
 %define pam_multi_version  1.1
 %define ucspi_version      0.88
 %define qmail_version      1.03
-%define fetchmail_version  6.3.24
+%define fetchmail_version  6.3.26
 %define nosignatures       1
-%define clamav_version     0.97.6
+%define clamav_version     0.97.8
 %define fortune_version    1.1
 %define nssd_version       1.1
 %define flash_version      0.9.4
@@ -129,7 +129,7 @@ Source9:  http://downloads.sourceforge.net/%{name}/nssd-%{nssd_version}.tar.gz
 Source10: http://downloads.sourceforge.net/bogofilter/bogofilter-%{bogofilter_version}.tar.bz2
 %endif
 %if %nofetchmail == 0
-Source11: http://prdownload.berlios.de/fetchmail/fetchmail-%{fetchmail_version}.tar.bz2 
+Source11: http://downloads.sourceforge.net/fetchmail/fetchmail-%{fetchmail_version}.tar.xz 
 %endif
 %if %noclamav == 0
 Source12: http://downloads.sourceforge.net/clamav/clamav-%{clamav_version}.tar.gz
@@ -374,9 +374,11 @@ do
 		continue
 	fi
 	if [ -f ../SOURCES/$i.tar.bz2 ] ; then
-		%{__bzip2} -d -c ../SOURCES/$i.tar.bz2 |tar xf -
+		%{__bzip2} -d -c ../SOURCES/$i.tar.bz2 | tar xf -
+	elif [ -f ../SOURCES/$i.tar.xz ] ; then
+		xz -d -c ../SOURCES/$i.tar.xz |tar xf -
 	elif [ -f ../SOURCES/$i.tar.gz ] ; then
-		gunzip -c ../SOURCES/$i.tar.gz |tar xf -
+		gunzip -c ../SOURCES/$i.tar.gz | tar xf -
 	else
 		echo "No Source Archive for $i"
 		exit 1
@@ -1864,7 +1866,7 @@ fi
 %attr(555,root,qmail)             %{_prefix}/bin/datemail
 %attr(555,root,qmail)             %{_prefix}/bin/mailsubj
 %attr(555,root,qmail)             %{_prefix}/bin/qmail-showctl
-%attr(555,root,qmail)             %{_prefix}/bin/maildirmake
+%attr(555,root,root)              %{_prefix}/bin/maildirmake
 %attr(555,root,qmail)             %{_prefix}/bin/qmaildirmake
 %attr(555,root,qmail)             %{_prefix}/bin/maildir2mbox
 %attr(555,root,qmail)             %{_prefix}/bin/maildirwatch
