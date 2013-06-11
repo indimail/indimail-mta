@@ -1,4 +1,4 @@
-#!/var/indimail/bin/vtable
+#!/var/indimail/sbin/vtable
 aliasdomain
 (alias char(64) not null,
 domain char(67),

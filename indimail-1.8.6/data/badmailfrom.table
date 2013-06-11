@@ -1,4 +1,4 @@
-#!/var/indimail/bin/vtable
+#!/var/indimail/sbin/vtable
 badmailfrom
 (email char(64) not null,
 timestamp TIMESTAMP not null,
