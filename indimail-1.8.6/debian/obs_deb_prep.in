@@ -61,6 +61,9 @@ do
 	if [ -f ../SOURCES/$i.tar.gz ] ; then
 		echo "extracting $i.tar.gz"
 		gunzip -c ../SOURCES/$i.tar.gz |tar xf -
+	elif [ -f ../SOURCES/$i.tar.xz ] ; then
+		echo "extracting $i.tar.xz"
+		xz -d -c ../SOURCES/$i.tar.xz|tar xf -
 	elif [ -f ../SOURCES/$i.tar.bz2 ] ; then
 		echo "extracting $i.tar.bz2"
 		bzip2 -d -c ../SOURCES/$i.tar.bz2|tar xf -
