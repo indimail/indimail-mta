@@ -1,5 +1,8 @@
 /*
  * $Log: dkimsign.cpp,v $
+ * Revision 1.8  2013-07-16 20:18:03+05:30  Cprogrammer
+ * replace '%' with domain name in selector
+ *
  * Revision 1.7  2013-06-11 00:02:39+05:30  Cprogrammer
  * removed header iostream
  *
@@ -670,10 +673,9 @@ int CDKIMSign::ConstructSignature(char *szPrivKey, bool bUseIetfBodyHash, bool b
 	EVP_PKEY       *pkey;
 	BIO            *bio, *b64;
 	unsigned int    siglen;
-	int             size;
-	int             len;
-	char           *buf;
-	int             pos = 0;
+	int             size, len, pos = 0;
+	char           *buf, *cptr; 
+	const char     *ptr, *dptr, *sptr;
 
 // construct the DKIM-Signature: header and add to hash
 	InitSig();
@@ -700,6 +702,31 @@ int CDKIMSign::ConstructSignature(char *szPrivKey, bool bUseIetfBodyHash, bool b
 		break;
 	}
 	AddTagToSig((char *) "d", sDomain, 0, false);
+	/*- replace % with domain name */
+	ptr = sSelector.c_str();
+	if ((sptr = strchr(ptr, '%'))) {
+		dptr = sDomain.c_str();
+		for (sptr = ptr, len = 0;*sptr;sptr++) {
+			if (*sptr == '%')
+				len += (int) strlen(dptr);
+			else
+				len++;
+		}
+		if (!(buf = new char[len])) {
+			return DKIM_OUT_OF_MEMORY;
+		}
+		for (cptr = buf, sptr = ptr; *sptr; sptr++) {
+			if (*sptr == '%') {
+				strncpy(cptr, dptr, (len = strlen(dptr)));
+				cptr += len;
+			} else {
+				*cptr++ = *sptr;
+			}
+		}
+		*cptr = 0;
+		sSelector.assign(buf);
+		delete[]buf;
+	}
 	AddTagToSig((char *) "s", sSelector, 0, false);
 	if (m_IncludeBodyLengthTag) {
 		AddTagToSig((char *) "l", m_nBodyLength);
@@ -916,7 +943,7 @@ int CDKIMSign::AssembleReturnedSig(char *szPrivKey)
 void
 getversion_dkimsign_cpp()
 {
-	static char    *x = (char *) "$Id: dkimsign.cpp,v 1.7 2013-06-11 00:02:39+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = (char *) "$Id: dkimsign.cpp,v 1.8 2013-07-16 20:18:03+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
