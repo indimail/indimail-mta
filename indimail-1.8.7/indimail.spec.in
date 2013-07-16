@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail.spec.in,v 2.264 2013-06-11 16:49:06+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 2.265 2013-07-16 20:25:20+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %define _unpackaged_files_terminate_build 1
 
@@ -209,7 +209,7 @@ BuildRequires: sed ncurses-devel gettext-devel
 BuildRequires: python-devel flex findutils
 BuildRequires: readline gzip autoconf pkgconfig
 BuildRequires: libidn-devel
-BuildRequires: groff
+BuildRequires: groff xz
 %if %{undefined rhel_version}
 BuildRequires: gdbm-devel sharutils
 %else
