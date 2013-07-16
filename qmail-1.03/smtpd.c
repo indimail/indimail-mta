@@ -1,5 +1,8 @@
 /*
  * $Log: smtpd.c,v $
+ * Revision 1.172  2013-07-16 20:27:14+05:30  Cprogrammer
+ * fix size getting clobbered by strnum in log_spam() function
+ *
  * Revision 1.171  2013-06-09 17:03:49+05:30  Cprogrammer
  * shortened variable declartion in addrparse() function
  *
@@ -667,7 +670,7 @@ int             wildmat_internal(char *, char *);
 int             ssl_rfd = -1, ssl_wfd = -1;	/*- SSL_get_Xfd() are broken */
 char           *servercert, *clientca, *clientcrl;
 #endif
-char           *revision = "$Revision: 1.171 $";
+char           *revision = "$Revision: 1.172 $";
 char           *protocol = "SMTP";
 stralloc        proto = { 0 };
 static stralloc Revision = { 0 };
@@ -1337,9 +1340,10 @@ err_queue(char *arg1, char *arg2, char *arg3, int len, char *arg4, char *qqx,
 	char           *ptr;
 	int             idx;
 	stralloc        tmpLine = { 0 };
+	char            size[FMT_ULONG];
 
 	accept_buf[fmt_ulong(accept_buf, qp)] = 0;
-	strnum[fmt_ulong(strnum, msg_size)] = 0;
+	size[fmt_ulong(size, msg_size)] = 0;
 	for (ptr = arg3 + 1, idx = 0; idx < len; idx++)
 	{
 		if (!arg3[idx])
@@ -1403,7 +1407,7 @@ err_queue(char *arg1, char *arg2, char *arg3, int len, char *arg4, char *qqx,
 			if (!arg4 || !*arg4)
 				logerr("pop-bef-smtp");
 			logerr("> Size: ");
-			logerr(strnum);
+			logerr(size);
 			if (tmpLine.len)
 			{
 				logerr(" ");
@@ -6657,7 +6661,7 @@ addrrelay() /*- Rejection of relay probes. */
 void
 getversion_smtpd_c()
 {
-	static char    *x = "$Id: smtpd.c,v 1.171 2013-06-09 17:03:49+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: smtpd.c,v 1.172 2013-07-16 20:27:14+05:30 Cprogrammer Exp mbhangui $";
 
 #ifdef INDIMAIL
 	if (x)
