@@ -1,6 +1,9 @@
 #!/bin/sh
 #
 # $Log: vadddomain_handle.in,v $
+# Revision 2.9  2013-07-21 16:08:49+05:30  Cprogrammer
+# fix permission of spamignore
+#
 # Revision 2.8  2013-05-13 08:57:20+05:30  Cprogrammer
 # use ./configure setting for indimail directory
 #
@@ -27,7 +30,7 @@
 # post handle for vadddomain
 #
 #
-# $Id: vadddomain_handle.in,v 2.8 2013-05-13 08:57:20+05:30 Cprogrammer Stab mbhangui $
+# $Id: vadddomain_handle.in,v 2.9 2013-07-21 16:08:49+05:30 Cprogrammer Exp mbhangui $
 @indimaildir@/bin/vdominfo $1
 for i in ham spam register-ham register-spam
 do
@@ -48,4 +51,5 @@ if [ $? -ne 0 ] ; then
 	echo @"$1" >> @indimaildir@/control/spamignore
 	/bin/sort -u @indimaildir@/control/spamignore -o @indimaildir@/control/spamignore
 fi
+/bin/chmod 644 @indimaildir@/control/spamignore
 exit 0
