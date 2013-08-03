@@ -1,0 +1,9 @@
+#!/var/indimail/sbin/vtable
+temp_email
+(email char(64) not null,
+temp_email char(64) not null,
+activation_code char(5) not null,
+status tinyint,
+timestamp TIMESTAMP not null,
+unique index temp_email (temp_email),
+index (email))
