@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail.spec.in,v 2.265 2013-07-16 20:25:20+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 2.266 2013-08-03 16:17:38+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %define _unpackaged_files_terminate_build 1
 
@@ -2496,7 +2496,7 @@ fi
 # selinux
 if [ -x /usr/sbin/selinuxenabled ] ; then
 	/usr/sbin/selinuxenabled
-	if [ $? -ne 0 ] ; then
+	if [ $? -eq 0 ] ; then
 		/usr/sbin/semanage fcontext -a -t mysqld_db_t "%{_prefix}/mysqldb(/.*)?"
 	fi
 fi
