@@ -1,5 +1,8 @@
 /*
  * $Log: rblsmtpd.c,v $
+ * Revision 1.11  2013-08-06 11:02:30+05:30  Cprogrammer
+ * support for IPv4-mapped IPv6 addresses and supports the inverse IPv6 nibble format for rblsmtpd RBL and anti-RBL lookups.
+ *
  * Revision 1.10  2010-02-22 20:48:16+05:30  Cprogrammer
  * fixed SIGSEGV when RBLSMTPD was set and empty
  *
@@ -57,7 +60,7 @@
 #define FATAL "rblsmtpd: fatal: "
 
 #ifndef	lint
-static char     sccsid[] = "$Id: rblsmtpd.c,v 1.10 2010-02-22 20:48:16+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: rblsmtpd.c,v 1.11 2013-08-06 11:02:30+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 void
@@ -114,6 +117,7 @@ ip_init(void)
 {
 	unsigned int    i;
 	unsigned int    j;
+	int             flagip6;
 #ifdef IPV6
 	unsigned char   remoteip[16];
 	char            hexval;
@@ -127,13 +131,32 @@ ip_init(void)
 		ip_env = "";
 	if (!stralloc_copys(&ip_reverse, ""))
 		nomem();
-	i = str_len(ip_env);
 #ifdef IPV6
-	if (str_diff(tcp_proto, "TCP6") != 0)
-	{
-		/*- IPV4 */
-		while (i)
-		{
+	if (str_diff(tcp_proto, "TCP6") == 0) {
+		if (byte_equal(ip_env, 7, V4MAPPREFIX))
+			ip_env = ip_env + 7;
+		else
+			flagip6 = 1;
+	}
+	if (flagip6) {
+		if ((ip6_scan(ip_env, (char *) remoteip)) == 0)
+			return;
+		for (j = 16; j > 0; j--) {
+			hexval = tohex(remoteip[j - 1] & 15);
+			if (!stralloc_catb(&ip_reverse, &hexval, 1))
+				nomem();
+			if (!stralloc_cats(&ip_reverse, "."))
+				nomem();
+
+			hexval = tohex(remoteip[j - 1] >> 4);
+			if (!stralloc_catb(&ip_reverse, &hexval, 1))
+				nomem();
+			if (!stralloc_cats(&ip_reverse, "."))
+				nomem();
+		}
+	} else {
+		i = str_len(ip_env);
+		while (i) {
 			for (j = i; j > 0; --j)
 				if (ip_env[j - 1] == '.')
 					break;
@@ -145,27 +168,9 @@ ip_init(void)
 				break;
 			i = j - 1;
 		}
-	} else
-	{
-		if (!(i = ip6_scan(ip_env, (char *) remoteip)))
-			return;
-		for (j = 16; j < 0;j--)
-		{
-			hexval = tohex(remoteip[j - 1] & 15);
-			if (!stralloc_catb(&ip_reverse, &hexval, 1))
-				nomem();
-			if (!stralloc_cats(&ip_reverse, "."))
-				nomem();
-			hexval = tohex(remoteip[j - 1] >> 4);
-			if (!stralloc_catb(&ip_reverse, &hexval, 1))
-				nomem();
-			if (!stralloc_cats(&ip_reverse, "."))
-				nomem();
-		}
-		if (!stralloc_cats(&ip_reverse, "ipv6."))
-			nomem();
 	}
 #else
+	i = str_len(ip_env);
 	while (i)
 	{
 		for (j = i; j > 0; --j)
@@ -187,8 +192,8 @@ int             flagrblbounce = 0;
 int             flagfailclosed = 0;
 int             flagmustnotbounce = 0;
 
-int             decision = 0;	/*- 0 undecided, 1 accept, 2 reject, 3 bounce */
-static stralloc text;			/*- defined if decision is 2 or 3 */
+int             decision = 0;	/*- 0 undecided, 1 accept, 2 reject */
+static stralloc text;			/*- 3 bounce defined if decision is 2 or 3 */
 static stralloc tmp;
 
 void
