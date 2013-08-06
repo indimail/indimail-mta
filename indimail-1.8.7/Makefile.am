@@ -162,7 +162,8 @@ indimailsbin_SCRIPTS = myslave controlsync svctool cputime tls-cert-check create
 
 noinst_SCRIPTS = indimail.spec indimail-@VERSION@-rpmlintrc \
 	INSTALL INSTALL-RPM INSTALL-MYSQL README-CLUSTER RELEASE-Notes Quick-INSTALL \
-	README INSTALL-MINI vadddomain_handle vadduser_handle
+	README INSTALL-MINI vadddomain_handle vadduser_handle vdeldomain_handle \
+	vaddaliasdomain_handle vrenamedomain_handle
 
 post_handle_list = vadddomain vadduser
 
@@ -173,7 +174,8 @@ indimail-@VERSION@-rpmlintrc tls-cert-check mailzipper \
 perm_list dbinfo.8 inlookup.8 vadddomain.1 vdeldomain.1 vadduser.1 \
 vdeluser.1 vdelivermail.8 vrenamedomain.1 vrenameuser.1 vpasswd.1 vmoveuser.1 \
 vcfilter.1 indimail.7 svctool.8 indisub.c indimail.mrtg.cfg overquota.sh \
-vadddomain_handle vadduser_handle login_tasks.3 authgeneric obs.mk
+vadddomain_handle vadduser_handle vdeldomain_handle vaddaliasdomain_handle \
+vrenamedomain_handle login_tasks.3 authgeneric obs.mk
 
 DISTCLEANFILES=.gitignore
 
@@ -831,6 +833,12 @@ README: README.in configure.in
 	$(edit) $@.in > doc/$@; rm -f $@;ln -sf doc/$@ $@
 vadddomain_handle: vadddomain_handle.in
 	$(edit) $@.in > post_handle/vadddomain; ln -sf post_handle/vadddomain $@
+vaddaliasdomain_handle: vaddaliasdomain_handle.in
+	$(edit) $@.in > post_handle/vaddaliasdomain; ln -sf post_handle/vaddaliasdomain $@
+vrenamedomain_handle: vrenamedomain_handle.in
+	$(edit) $@.in > post_handle/vrenamedomain; ln -sf post_handle/vrenamedomain $@
+vdeldomain_handle: vdeldomain_handle.in
+	$(edit) $@.in > post_handle/vdeldomain; ln -sf post_handle/vdeldomain $@
 vadduser_handle: vadduser_handle.in
 	$(edit) $@.in > post_handle/vadduser; ln -sf post_handle/vadduser $@
 create_services: create_services.in
