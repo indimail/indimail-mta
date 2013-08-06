@@ -1,5 +1,8 @@
 /*
  * $Log: spf.c,v $
+ * Revision 1.10  2013-08-06 11:15:51+05:30  Cprogrammer
+ * added ipv6 support
+ *
  * Revision 1.9  2012-06-20 18:47:26+05:30  Cprogrammer
  * fixed memory leak after calling strsalloc()
  *
@@ -31,6 +34,7 @@
 #ifdef USE_SPF
 #include <sys/types.h>
 #include <unistd.h>
+#include <netinet/in.h>
 #include "stralloc.h"
 #include "strsalloc.h"
 #include "alloc.h"
@@ -105,6 +109,10 @@ static char    *received;
 
 static int      recursion;
 static ip_addr  ip;
+#ifdef INET6
+static ip6_addr ip6;
+static int      ipv6use;
+#endif
 
 static void
 hdr_pass()
@@ -179,26 +187,85 @@ hdr_dns()
 }
 
 
+#ifdef IPV6
 static int
-matchip(ip_addr *net, int mask, ip_addr *ip)
+matchip6(ip6_addr *net, int mask, ip6_addr *ip6)
 {
 	int             j;
 	int             bytemask;
 
-	for (j = 0; j < 4 && mask > 0; ++j)
-	{
+	for (j = 0; j < 16 && mask > 0; ++j) {
 		if (mask > 8)
 			bytemask = 8;
 		else
 			bytemask = mask;
 		mask -= bytemask;
-
-		if ((net->d[j] ^ ip->d[j]) & (0x100 - (1 << (8 - bytemask))))
+		if ((net->d[j] ^ ip6->d[j]) & (0x100 - (1 << (8 - bytemask))))
 			return 0;
 	}
 	return 1;
 }
 
+static int
+getipmask(char *mask, int *ip4mask, int *ip6mask)
+{
+	unsigned long   r;
+	int             pos;
+
+	if (!mask) {
+		*ip4mask = 32;
+		*ip6mask = 128;
+		return 0;
+	}
+	pos = scan_ulong(mask, &r);
+	if (!pos || (mask[pos] && !(mask[pos] == '/')))
+		return -1;
+	if (r > 32)
+		return -1;
+	*ip4mask = r;
+	if (mask[pos] && mask[pos] == '/') {
+		pos = scan_ulong(mask + pos + 1, &r);
+		if (!pos)
+			return -1;
+		if (r > 128)
+			return -1;
+		*ip6mask = r;
+	}
+	return r;
+}
+
+static int
+getip4mask(char *mask)
+{
+	unsigned long   r;
+	int             pos;
+
+	if (!mask)
+		return 32;
+	pos = scan_ulong(mask, &r);
+	if (!pos)
+		return -1;
+	if (r > 32)
+		return -1;
+	return r;
+}
+
+static int
+getip6mask(char *mask)
+{
+	unsigned long   r;
+	int             pos;
+
+	if (!mask)
+		return 128;
+	pos = scan_ulong(mask, &r);
+	if (!pos)
+		return -1;
+	if (r > 128)
+		return -1;
+	return r;
+}
+#else
 static int
 getipmask(char *mask, int ipv6)
 {
@@ -216,20 +283,36 @@ getipmask(char *mask, int ipv6)
 
 	return r;
 }
+#endif
 
-strsalloc       ssa = { 0 };
+static int
+matchip(ip_addr *net, int mask, ip_addr *ip)
+{
+	int             j;
+	int             bytemask;
+
+	for (j = 0; j < 4 && mask > 0; ++j) {
+		if (mask > 8)
+			bytemask = 8;
+		else
+			bytemask = mask;
+		mask -= bytemask;
+		if ((net->d[j] ^ ip->d[j]) & (0x100 - (1 << (8 - bytemask))))
+			return 0;
+	}
+	return 1;
+}
 
 int
 spfget(stralloc *spf, stralloc *domain)
 {
+	strsalloc       ssa = { 0 };
 	int             j;
 	int             begin, pos, i;
 	int             r = SPF_NONE;
 
-	if (!strsalloc_readyplus(&ssa, 0))
-		return SPF_NOMEM;
-	switch (dns_txt(&ssa, domain))
-	{
+	spf->len = 0;
+	switch (dns_txt(&ssa, domain)) {
 	case DNS_MEM:
 		return SPF_NOMEM;
 	case DNS_SOFT:
@@ -238,19 +321,15 @@ spfget(stralloc *spf, stralloc *domain)
 	case DNS_HARD:
 		return SPF_NONE;
 	}
-	for (j = 0; j < ssa.len; ++j)
-	{
+	for (j = 0; j < ssa.len; ++j) {
 		pos = 0;
 		NXTOK(begin, pos, &ssa.sa[j]);
 		if (str_len(ssa.sa[j].s + begin) < 6)
 			continue;
 		if (!byte_equal(ssa.sa[j].s + begin, 6, "v=spf1"))
 			continue;
-		if (ssa.sa[j].s[begin + 6])
-		{
-			/*
-			 * check for subversion 
-			 */
+		if (ssa.sa[j].s[begin + 6]) {
+			/*- check for subversion */
 			if (ssa.sa[j].s[begin + 6] != '.')
 				continue;
 			for (i = begin + 7;; ++i)
@@ -261,8 +340,7 @@ spfget(stralloc *spf, stralloc *domain)
 			if (ssa.sa[j].s[i])
 				continue;
 		}
-		if (spf->len > 0)
-		{
+		if (spf->len > 0) {
 			spf->len = 0;
 			hdr_unknown_msg("Multiple SPF records returned");
 			r = SPF_UNKNOWN;
@@ -277,8 +355,8 @@ spfget(stralloc *spf, stralloc *domain)
 #if 0 /*- memory leak */
 	for (j = 0; j < ssa.len; ++j)
 		alloc_free(ssa.sa[j].s);
-	alloc_free((char *) ssa.sa);
 #endif
+	alloc_free((char *) ssa.sa);
 	return r;
 }
 
@@ -299,51 +377,43 @@ spfsubst(stralloc *expand, char *spec, char *domain)
 
 	if (!stralloc_readyplus(&sa, 0))
 		return 0;
-	if (*spec == 'x')
-	{
+	if (*spec == 'x') {
 		i = 1;
 		++spec;
 	} else
 		i = 0;
 	ch = *spec++;
-	if (!ch)
-	{
+	if (!ch) {
 		alloc_free(sa.s);
 		return 1;
 	}
-	if (ch >= 'A' && ch <= 'Z')
-	{
+	if (ch >= 'A' && ch <= 'Z') {
 		ch += 32;
 		urlencode = 1;
 	}
 	if (i)
 		ch -= 32;
-	while (*spec >= '0' && *spec <= '9')
-	{
+	while (*spec >= '0' && *spec <= '9') {
 		if (digits < 0)
 			digits = 0;
-		if (digits >= 1000000)
-		{
+		if (digits >= 1000000) {
 			digits = 10000000;
 			continue;
 		}
 		digits = (digits * 10) + (*spec - '0');
 		spec++;
 	}
-	while ((*spec >= 'a' && *spec <= 'z') || (*spec >= 'A' && *spec <= 'Z'))
-	{
+	while ((*spec >= 'a' && *spec <= 'z') || (*spec >= 'A' && *spec <= 'Z')) {
 		if (*spec == 'r')
 			reverse = 1;
 		spec++;
 	}
 	if (*spec)
 		split = spec;
-	switch (ch)
-	{
+	switch (ch) {
 	case 'l':
 		pos = byte_rchr(addr.s, addr.len, '@');
-		if (pos < addr.len)
-		{
+		if (pos < addr.len) {
 			if (!stralloc_copyb(&sa, addr.s, pos))
 				return 0;
 		} else
@@ -368,7 +438,14 @@ spfsubst(stralloc *expand, char *spec, char *domain)
 	case 'i':
 		if (!stralloc_ready(&sa, IPFMT))
 			return 0;
+#ifdef IPV6
+		if (ipv6use)
+			sa.len = ip6_fmt(sa.s, &ip6);
+		else
+			sa.len = ip_fmt(sa.s, &ip);
+#else
 		sa.len = ip_fmt(sa.s, &ip);
+#endif
 		break;
 	case 't':
 		if (!stralloc_ready(&sa, FMT_ULONG))
@@ -378,8 +455,7 @@ spfsubst(stralloc *expand, char *spec, char *domain)
 	case 'p':
 		if (!sender_fqdn.len)
 			spf_ptr(domain, 0);
-		if (sender_fqdn.len)
-		{
+		if (sender_fqdn.len) {
 			if (!stralloc_copy(&sa, &sender_fqdn))
 				return 0;
 		} else
@@ -403,31 +479,26 @@ spfsubst(stralloc *expand, char *spec, char *domain)
 			return 0;
 		break;
 	case 'S':
-		if (expdomain.len > 0)
-		{
+		if (expdomain.len > 0) {
 			if (!stralloc_copys(&sa, "SPF record at "))
 				return 0;
 			if (!stralloc_cats(&sa, expdomain.s))
 				return 0;
-		} else
-		{
+		} else {
 			if (!stralloc_copys(&sa, "local policy"))
 				return 0;
 		}
 		break;
 	}
-	if (reverse)
-	{
-		for (pos = 0; digits; ++pos)
-		{
+	if (reverse) {
+		for (pos = 0; digits; ++pos) {
 			pos += byte_cspn(sa.s + pos, sa.len - pos, split);
 			if (pos >= sa.len)
 				break;
 			if (!--digits)
 				break;
 		}
-		for (; pos > 0; pos = i - 1)
-		{
+		for (; pos > 0; pos = i - 1) {
 			i = byte_rcspn(sa.s, pos, split) + 1;
 			if (i > pos)
 				i = 0;
@@ -436,13 +507,10 @@ spfsubst(stralloc *expand, char *spec, char *domain)
 			if (i > 0 && !stralloc_append(expand, "."))
 				return 0;
 		}
-	} else
-	{
-		for (pos = sa.len; digits; --pos)
-		{
+	} else {
+		for (pos = sa.len; digits; --pos) {
 			i = byte_rcspn(sa.s, pos, split) + 1;
-			if (i > pos)
-			{
+			if (i > pos) {
 				pos = 0;
 				break;
 			}
@@ -453,23 +521,19 @@ spfsubst(stralloc *expand, char *spec, char *domain)
 		if (!stralloc_catb(expand, sa.s + pos, sa.len - pos))
 			return 0;
 		if (split[0] != '.' || split[1])
-			for (pos = 0; pos < expand->len; pos++)
-			{
+			for (pos = 0; pos < expand->len; pos++) {
 				pos += byte_cspn(expand->s + pos, expand->len - pos, split);
 				if (pos < expand->len)
 					expand->s[pos] = '.';
 			}
 	}
-	if (urlencode)
-	{
+	if (urlencode) {
 		stralloc_copyb(&sa, expand->s + start, expand->len - start);
 		expand->len = start;
 
-		for (pos = 0; pos < sa.len; ++pos)
-		{
+		for (pos = 0; pos < sa.len; ++pos) {
 			ch = sa.s[pos];
-			if (urlchr_table[(unsigned char) ch])
-			{
+			if (urlchr_table[(unsigned char) ch]) {
 				if (!stralloc_readyplus(expand, 3))
 					return 0;
 				expand->s[expand->len++] = '%';
@@ -495,14 +559,11 @@ spfexpand(stralloc *sa, char *spec, char *domain)
 		return 0;
 	sa->len = 0;
 
-	for (p = spec; *p; p++)
-	{
+	for (p = spec; *p; p++) {
 		append = *p;
-		if (*p == '%')
-		{
+		if (*p == '%') {
 			p++;
-			switch (*p)
-			{
+			switch (*p) {
 			case '%':
 				break;
 			case '_':
@@ -514,8 +575,7 @@ spfexpand(stralloc *sa, char *spec, char *domain)
 				continue;
 			case '{':
 				pos = str_chr(p, '}');
-				if (p[pos] != '}')
-				{
+				if (p[pos] != '}') {
 					p--;
 					break;
 				}
@@ -547,8 +607,7 @@ spf_include(char *spec, char *mask)
 		return SPF_NOMEM;
 	r = spflookup(&sa);
 	alloc_free(sa.s);
-	switch (r)
-	{
+	switch (r) {
 	case SPF_NONE:
 		hdr_unknown();
 		r = SPF_UNKNOWN;
@@ -570,18 +629,27 @@ spf_a(char *spec, char *mask)
 {
 	stralloc        sa = { 0 };
 	ipalloc         ia = { 0 };
+#ifdef IPV6
+	int             ip4mask;
+	int             ip6mask;
+#else
 	int             ipmask = getipmask(mask, 1);
+#endif
 	int             r;
 	int             j;
 
+#ifdef IPV6
+	if ((r = getipmask(mask, &ip4mask, &ip6mask)) < 0)
+		return SPF_SYNTAX;
+#else
 	if (ipmask < 0)
 		return SPF_SYNTAX;
+#endif
 	if (!stralloc_copys(&sa, spec))
 		return SPF_NOMEM;
 	if (!ipalloc_readyplus(&ia, 0))
 		return SPF_NOMEM;
-	switch (dns_ip(&ia, &sa))
-	{
+	switch (dns_ip(&ia, &sa)) {
 	case DNS_MEM:
 		return SPF_NOMEM;
 	case DNS_SOFT:
@@ -593,13 +661,26 @@ spf_a(char *spec, char *mask)
 		break;
 	default:
 		r = SPF_NONE;
-		for (j = 0; j < ia.len; ++j)
-		{
-			if (matchip(&ia.ix[j].addr.ip, ipmask, &ip))
-			{
+		for (j = 0; j < ia.len; ++j) {
+#ifdef IPV6
+			if (ia.ix[j].af == AF_INET) {
+				if (matchip(&ia.ix[j].addr.ip, ip4mask, &ip)) {
+					r = SPF_OK;
+					break;
+				}
+			} else
+			if (ia.ix[j].af == AF_INET6) {
+				if (matchip6(&ia.ix[j].addr.ip6, ip6mask, &ip6)) {
+					r = SPF_OK;
+					break;
+				}
+			} /* else unknown address family */
+#else
+			if (matchip(&ia.ix[j].addr.ip, ipmask, &ip)) {
 				r = SPF_OK;
 				break;
 			}
+#endif
 		}
 	}
 	alloc_free(sa.s);
@@ -612,20 +693,28 @@ spf_mx(char *spec, char *mask)
 {
 	stralloc        sa = { 0 };
 	ipalloc         ia = { 0 };
+#ifdef IPV6
+	int             ip4mask;
+	int             ip6mask;
+#else
 	int             ipmask = getipmask(mask, 1);
+#endif
 	int             random = now() + (getpid() << 16);
 	int             r;
 	int             j;
 
+#ifdef IPV6
+	if ((r = getipmask(mask, &ip4mask, &ip6mask)) < 0)
+		return SPF_SYNTAX;
+#else
 	if (ipmask < 0)
 		return SPF_SYNTAX;
-
+#endif
 	if (!stralloc_copys(&sa, spec))
 		return SPF_NOMEM;
 	if (!ipalloc_readyplus(&ia, 0))
 		return SPF_NOMEM;
-	switch (dns_mxip(&ia, &sa, random))
-	{
+	switch (dns_mxip(&ia, &sa, random)) {
 	case DNS_MEM:
 		return SPF_NOMEM;
 	case DNS_SOFT:
@@ -637,13 +726,26 @@ spf_mx(char *spec, char *mask)
 		break;
 	default:
 		r = SPF_NONE;
-		for (j = 0; j < ia.len; ++j)
-		{
-			if (matchip(&ia.ix[j].addr.ip, ipmask, &ip))
-			{
+		for (j = 0; j < ia.len; ++j) {
+#ifdef IPV6
+			if (ia.ix[j].af == AF_INET) {
+				if (matchip(&ia.ix[j].addr.ip, ip4mask, &ip)) {
+					r = SPF_OK;
+					break;
+				}
+			} else
+			if (ia.ix[j].af == AF_INET6) {
+				if (matchip6(&ia.ix[j].addr.ip6, ip6mask, &ip6)) {
+					r = SPF_OK;
+					break;
+				}
+			}
+#else
+			if (matchip(&ia.ix[j].addr.ip, ipmask, &ip)) {
 				r = SPF_OK;
 				break;
 			}
+#endif
 		}
 	}
 	alloc_free(sa.s);
@@ -654,6 +756,7 @@ spf_mx(char *spec, char *mask)
 static int
 spf_ptr(char *spec, char *mask)
 {
+	strsalloc       ssa = { 0 };
 	ipalloc         ia = { 0 };
 	int             len = str_len(spec);
 	int             r;
@@ -669,8 +772,7 @@ spf_ptr(char *spec, char *mask)
 	/*
 	 * the hostname found will probably be the same as before 
 	 */
-	while (sender_fqdn.len)
-	{
+	while (sender_fqdn.len) {
 		pos = sender_fqdn.len - len;
 		if (pos < 0)
 			break;
@@ -686,12 +788,11 @@ spf_ptr(char *spec, char *mask)
 	 * ok, either it's the first test or it's a very weird setup 
 	 */
 
-	if (!ipalloc_readyplus(&ia, 0))
-		return SPF_NOMEM;
 	if (!strsalloc_readyplus(&ssa, 0))
 		return SPF_NOMEM;
-	switch (dns_ptr(&ssa, &ip))
-	{
+	if (!ipalloc_readyplus(&ia, 0))
+		return SPF_NOMEM;
+	switch (dns_ptr(&ssa, &ip)) {
 	case DNS_MEM:
 #if 0 /*- memory leak */
 		for (j = 0; j < ssa.len; ++j)
@@ -707,10 +808,8 @@ spf_ptr(char *spec, char *mask)
 		break;
 	default:
 		r = SPF_NONE;
-		for (j = 0; j < ssa.len; ++j)
-		{
-			switch (dns_ip(&ia, &ssa.sa[j]))
-			{
+		for (j = 0; j < ssa.len; ++j) {
+			switch (dns_ip(&ia, &ssa.sa[j])) {
 			case DNS_MEM:
 				return SPF_NOMEM;
 			case DNS_SOFT:
@@ -720,12 +819,46 @@ spf_ptr(char *spec, char *mask)
 			case DNS_HARD:
 				break;
 			default:
-				for (k = 0; k < ia.len; ++k)
-				{
-					if (matchip(&ia.ix[k].addr.ip, 32, &ip))
-					{
-						if (!sender_fqdn.len && !stralloc_copy(&sender_fqdn, &ssa.sa[j]))
+				for (k = 0; k < ia.len; ++k) {
+#ifdef IPV6
+					if (ia.ix[k].af == AF_INET) {
+						if (matchip(&ia.ix[k].addr.ip, 32, &ip)) {
+							if (!sender_fqdn.len && !stralloc_copy(&sender_fqdn, &ssa.sa[j]))
+									return SPF_NOMEM;
+							pos = ssa.sa[j].len - len;
+							if (pos < 0)
+								continue;
+							if (pos > 0 && ssa.sa[j].s[pos - 1] != '.')
+								continue;
+							if (case_diffb(ssa.sa[j].s + pos, len, spec))
+								continue;
+							if (!stralloc_copy(&sender_fqdn, &ssa.sa[j]))
 								return SPF_NOMEM;
+							r = SPF_OK;
+							break;
+						}
+					} else
+					if (ia.ix[k].af == AF_INET6 ) {
+						if (matchip6(&ia.ix[k].addr.ip6, 128, &ip6)) {
+							if (!sender_fqdn.len && !stralloc_copy(&sender_fqdn, &ssa.sa[j]))
+								return SPF_NOMEM;
+							pos = ssa.sa[j].len - len;
+							if (pos < 0)
+								continue;
+							if (pos > 0 && ssa.sa[j].s[pos - 1] != '.')
+								continue;
+							if (case_diffb(ssa.sa[j].s + pos, len, spec))
+								continue;
+							if (!stralloc_copy(&sender_fqdn, &ssa.sa[j]))
+								return SPF_NOMEM;
+							r = SPF_OK;
+							break;
+						}
+					}
+#else
+					if (matchip(&ia.ix[k].addr.ip, 32, &ip)) {
+						if (!sender_fqdn.len && !stralloc_copy(&sender_fqdn, &ssa.sa[j]))
+							return SPF_NOMEM;
 						pos = ssa.sa[j].len - len;
 						if (pos < 0)
 							continue;
@@ -733,10 +866,12 @@ spf_ptr(char *spec, char *mask)
 							continue;
 						if (case_diffb(ssa.sa[j].s + pos, len, spec))
 							continue;
-						stralloc_copy(&sender_fqdn, &ssa.sa[j]);
+						if (!stralloc_copy(&sender_fqdn, &ssa.sa[j]))
+							return SPF_NOMEM;
 						r = SPF_OK;
 						break;
 					}
+#endif
 				}
 			}
 			if (r == SPF_ERROR)
@@ -746,14 +881,45 @@ spf_ptr(char *spec, char *mask)
 #if 0 /*- memory leak */
 	for (j = 0; j < ssa.len; ++j)
 		alloc_free(ssa.sa[j].s);
-	alloc_free((char *) ssa.sa);
 #endif
+	alloc_free((char *) ssa.sa);
 	alloc_free((char *) ia.ix);
 	if (!sender_fqdn.len && !stralloc_copys(&sender_fqdn, "unknown"))
 		return SPF_NOMEM;
 	return r;
 }
 
+#ifdef IPV6
+static int
+spf_ip6(char *spec, char *mask)
+{
+	ip6_addr        net;
+	int             ipmask;
+
+	if ((ipmask = getip6mask(mask)) < 0)
+		return SPF_SYNTAX;
+	if (!ip6_scan(spec, &net))
+		return SPF_SYNTAX;
+	if (matchip6(&net, ipmask, &ip6))
+		return SPF_OK;
+	return SPF_NONE;
+}
+
+static int
+spf_ip(char *spec, char *mask)
+{
+	ip_addr         net;
+	int             ipmask;
+
+	if ((ipmask = getip4mask(mask)) < 0)
+		return SPF_SYNTAX;
+	if (!ip_scan(spec, &net))
+		return SPF_SYNTAX;
+	if (matchip(&net, ipmask, &ip))
+		return SPF_OK;
+	return SPF_NONE;
+}
+#else
 static int
 spf_ip(char *spec, char *mask)
 {
@@ -764,12 +930,11 @@ spf_ip(char *spec, char *mask)
 		return SPF_SYNTAX;
 	if (!ip_scan(spec, &net))
 		return SPF_SYNTAX;
-
 	if (matchip(&net, ipmask, &ip))
 		return SPF_OK;
-
 	return SPF_NONE;
 }
+#endif
 
 static int
 spf_exists(char *spec, char *mask)
@@ -783,8 +948,7 @@ spf_exists(char *spec, char *mask)
 	if (!ipalloc_readyplus(&ia, 0))
 		return SPF_NOMEM;
 
-	switch (dns_ip(&ia, &sa))
-	{
+	switch (dns_ip(&ia, &sa)) {
 	case DNS_MEM:
 		return SPF_NOMEM;
 	case DNS_SOFT:
@@ -815,11 +979,15 @@ static struct mechanisms
 {
 	{"all", 0, 0, 0, 0, 0, SPF_OK},
 	{"include", spf_include, 1, 0, 1, 0, 0},
-	{"a", spf_a, 1, 1, 1, 1, 0} ,
+	{"a", spf_a, 1, 1, 1, 1, 0},
 	{"mx", spf_mx, 1, 1, 1, 1, 0},
 	{"ptr", spf_ptr, 1, 0, 1, 1, 0},
 	{"ip4", spf_ip, 1, 1, 0, 0, 0},
+#ifdef INET6
+	{"ip6", spf_ip6, 1, 1, 0, 0, 0},
+#else
 	{"ip6", 0, 1, 1, 0, 0, SPF_NONE},
+#endif
 	{"exists", spf_exists, 1, 0, 1, 0, 0},
 	{"extension", 0, 1, 1, 0, 0, SPF_EXT},
 	{ 0, 0, 1, 1, 0, 0, SPF_EXT}
@@ -833,8 +1001,7 @@ spfmech(char *mechanism, char *spec, char *mask, char *domain)
 	int             r;
 	int             pos;
 
-	for (mech = mechanisms; mech->mechanism; mech++)
-	{
+	for (mech = mechanisms; mech->mechanism; mech++) {
 		if (str_equal(mech->mechanism, mechanism))
 			break;
 	}
@@ -848,12 +1015,10 @@ spfmech(char *mechanism, char *spec, char *mask, char *domain)
 		return mech->defresult;
 	if (!stralloc_readyplus(&sa, 0))
 		return SPF_NOMEM;
-	if (mech->expands && spec != domain)
-	{
+	if (mech->expands && spec != domain) {
 		if (!spfexpand(&sa, spec, domain))
 			return SPF_NOMEM;
-		for (pos = 0; (sa.len - pos) > 255;)
-		{
+		for (pos = 0; (sa.len - pos) > 255;) {
 			pos += byte_chr(sa.s + pos, sa.len - pos, '.');
 			if (pos < sa.len)
 				pos++;
@@ -882,7 +1047,7 @@ static struct default_aliases
 	{"fail", SPF_FAIL},
 	{"softfail", SPF_SOFTFAIL},
 	{"unknown", SPF_NEUTRAL},
-	{ 0, SPF_UNKNOWN}
+	{0, SPF_UNKNOWN}
 };
 
 static int
@@ -911,49 +1076,41 @@ spflookup(stralloc *domain)
 	if (!stralloc_readyplus(&sa, 0))
 		return SPF_NOMEM;
 redirect:
-	if (++recursion > 20)
-	{
+	if (++recursion > 20) {
 		alloc_free(spf.s);
 		alloc_free(sa.s);
 		hdr_unknown_msg("Maximum nesting level exceeded, possible loop");
 		return SPF_SYNTAX;
 	}
 
-	if (!stralloc_0(domain))
-	{
+	if (!stralloc_0(domain)) {
 		alloc_free(spf.s);
 		alloc_free(sa.s);
 		return SPF_NOMEM;
 	}
-	if (!stralloc_copy(&expdomain, domain))
-	{
+	if (!stralloc_copy(&expdomain, domain)) {
 		alloc_free(spf.s);
 		alloc_free(sa.s);
 		return SPF_NOMEM;
 	}
-	if ((r = spfget(&spf, domain)) == SPF_NONE)
-	{
-		if (!Main)
-		{
+	if ((r = spfget(&spf, domain)) == SPF_NONE) {
+		if (!Main) {
 			alloc_free(spf.s);
 			alloc_free(sa.s);
 			return r;
 		}
 
-		if (spfguess.len)
-		{
+		if (spfguess.len) {
 			/*
 			 * try to guess 
 			 */
 			guessing = 1;
-			if (!stralloc_copys(&spf, spfguess.s))
-			{
+			if (!stralloc_copys(&spf, spfguess.s)) {
 				alloc_free(spf.s);
 				alloc_free(sa.s);
 				return SPF_NOMEM;
 			}
-			if (!stralloc_append(&spf, " "))
-			{
+			if (!stralloc_append(&spf, " ")) {
 				alloc_free(spf.s);
 				alloc_free(sa.s);
 				return SPF_NOMEM;
@@ -964,28 +1121,23 @@ redirect:
 		/*
 		 * append local rulest 
 		 */
-		if (spflocal.len)
-		{
+		if (spflocal.len) {
 			local_pos = spf.len;
-			if (!stralloc_cats(&spf, spflocal.s))
-			{
+			if (!stralloc_cats(&spf, spflocal.s)) {
 				alloc_free(spf.s);
 				alloc_free(sa.s);
 				return SPF_NOMEM;
 			}
 		}
-		if (!stralloc_0(&spf))
-		{
+		if (!stralloc_0(&spf)) {
 			alloc_free(spf.s);
 			alloc_free(sa.s);
 			return SPF_NOMEM;
 		}
 		expdomain.len = 0;
 	} else
-	if (r == SPF_OK)
-	{
-		if (!stralloc_0(&spf))
-		{
+	if (r == SPF_OK) {
+		if (!stralloc_0(&spf)) {
 			alloc_free(spf.s);
 			alloc_free(sa.s);
 			return SPF_NOMEM;
@@ -997,12 +1149,10 @@ redirect:
 		/*
 		 * try to add local rules before fail all mechs 
 		 */
-		if (Main && spflocal.len)
-		{
+		if (Main && spflocal.len) {
 			pos = 0;
 			p = (char *) 0;
-			while (pos < spf.len)
-			{
+			while (pos < spf.len) {
 				NXTOK(begin, pos, &spf);
 				if (!spf.s[begin])
 					continue;
@@ -1012,8 +1162,7 @@ redirect:
 				if (!p && (spf.s[begin] == '-' || spf.s[begin] == '~' || spf.s[begin] == '?'))
 					p = &spf.s[begin];
 
-				if (p && p > spf.s && str_equal(spf.s + begin + 1, "all"))
-				{
+				if (p && p > spf.s && str_equal(spf.s + begin + 1, "all")) {
 					/*
 					 * ok, we can insert the local rules at p 
 					 */
@@ -1036,16 +1185,14 @@ redirect:
 				if (!spf.s[i])
 					spf.s[i] = ' ';
 		}
-	} else
-	{
+	} else {
 		alloc_free(spf.s);
 		alloc_free(sa.s);
 		return r;
 	}
 	pos = 0;
 	done = 0;
-	while (pos < spf.len)
-	{
+	while (pos < spf.len) {
 		NXTOK(begin, pos, &spf);
 		if (!spf.s[begin])
 			continue;
@@ -1053,13 +1200,11 @@ redirect:
 		/*
 		 * in local ruleset? 
 		 */
-		if (!done && local_pos >= 0 && begin >= local_pos)
-		{
+		if (!done && local_pos >= 0 && begin >= local_pos) {
 			if (begin < (local_pos + spflocal.len))
 				expdomain.len = 0;
 			else
-			if (!stralloc_copy(&expdomain, domain))
-			{
+			if (!stralloc_copy(&expdomain, domain)) {
 				alloc_free(spf.s);
 				alloc_free(sa.s);
 				return SPF_NOMEM;
@@ -1070,19 +1215,16 @@ redirect:
 			if (*p == ':' || *p == '/' || *p == '=')
 				break;
 
-		if (*p == '=')
-		{
+		if (*p == '=') {
 			*p++ = 0;
 
 			/*
 			 * modifiers are simply handled here 
 			 */
-			if (str_equal(spf.s + begin, "redirect"))
-			{
+			if (str_equal(spf.s + begin, "redirect")) {
 				if (done)
 					continue;
-				if (!spfexpand(&sa, p, domain->s))
-				{
+				if (!spfexpand(&sa, p, domain->s)) {
 					alloc_free(spf.s);
 					alloc_free(sa.s);
 					return SPF_NOMEM;
@@ -1092,8 +1234,7 @@ redirect:
 				r = SPF_UNKNOWN;
 				goto redirect;
 			} else
-			if (str_equal(spf.s + begin, "default"))
-			{
+			if (str_equal(spf.s + begin, "default")) {
 				if (done)
 					continue;
 
@@ -1103,21 +1244,18 @@ redirect:
 
 				r = da->defret;
 			} else
-			if (str_equal(spf.s + begin, "exp"))
-			{
+			if (str_equal(spf.s + begin, "exp")) {
 				strsalloc       ssa = { 0 };
 
 				if (!Main)
 					continue;
 
-				if (!stralloc_copys(&sa, p))
-				{
+				if (!stralloc_copys(&sa, p)) {
 					alloc_free(spf.s);
 					alloc_free(sa.s);
 					return SPF_NOMEM;
 				}
-				switch (dns_txt(&ssa, &sa))
-				{
+				switch (dns_txt(&ssa, &sa)) {
 				case DNS_MEM:
 					alloc_free(spf.s);
 					alloc_free(sa.s);
@@ -1129,47 +1267,39 @@ redirect:
 				}
 
 				explanation.len = 0;
-				for (i = 0; i < ssa.len; i++)
-				{
-					if (!stralloc_cat(&explanation, &ssa.sa[i]))
-					{
+				for (i = 0; i < ssa.len; i++) {
+					if (!stralloc_cat(&explanation, &ssa.sa[i])) {
 						alloc_free(spf.s);
 						alloc_free(sa.s);
 						return SPF_NOMEM;
 					}
-					if (i < (ssa.len - 1) && !stralloc_append(&explanation, "\n"))
-					{
+					if (i < (ssa.len - 1) && !stralloc_append(&explanation, "\n")) {
 						alloc_free(spf.s);
 						alloc_free(sa.s);
 						return SPF_NOMEM;
 					}
 					alloc_free(ssa.sa[i].s);
 				}
-				if (!stralloc_0(&explanation))
-				{
+				if (!stralloc_0(&explanation)) {
 					alloc_free(spf.s);
 					alloc_free(sa.s);
 					return SPF_NOMEM;
 				}
 			}	/*- and unknown modifiers are ignored */
 		} else
-		if (!done)
-		{
-			if (!stralloc_copys(&sa, spf.s + begin))
-			{
+		if (!done) {
+			if (!stralloc_copys(&sa, spf.s + begin)) {
 				alloc_free(spf.s);
 				alloc_free(sa.s);
 				return SPF_NOMEM;
 			}
-			if (!stralloc_0(&sa))
-			{
+			if (!stralloc_0(&sa)) {
 				alloc_free(spf.s);
 				alloc_free(sa.s);
 				return SPF_NOMEM;
 			}
 
-			switch (spf.s[begin])
-			{
+			switch (spf.s[begin]) {
 			case '-':
 				begin++;
 				prefix = SPF_FAIL;
@@ -1190,17 +1320,14 @@ redirect:
 				prefix = SPF_OK;
 			}
 
-			if (*p == '/')
-			{
+			if (*p == '/') {
 				*p++ = 0;
 				q = spfmech(spf.s + begin, 0, p, domain->s);
-			} else
-			{
+			} else {
 				if (*p)
 					*p++ = 0;
 				i = str_chr(p, '/');
-				if (p[i] == '/')
-				{
+				if (p[i] == '/') {
 					p[i++] = 0;
 					q = spfmech(spf.s + begin, p, p + i, domain->s);
 				} else
@@ -1211,8 +1338,7 @@ redirect:
 			}
 			if (q == SPF_OK)
 				q = prefix;
-			switch (q)
-			{
+			switch (q) {
 			case SPF_OK:
 				hdr_pass();
 				break;
@@ -1249,8 +1375,7 @@ redirect:
 	/*
 	 * we fell through, no local rule applied 
 	 */
-	if (!done && !stralloc_copy(&expdomain, domain))
-	{
+	if (!done && !stralloc_copy(&expdomain, domain)) {
 		alloc_free(spf.s);
 		alloc_free(sa.s);
 		return SPF_NOMEM;
@@ -1268,15 +1393,12 @@ spfcheck(char *remoteip)
 	int             r;
 
 	pos = byte_rchr(addr.s, addr.len, '@') + 1;
-	if (pos < addr.len)
-	{
+	if (pos < addr.len) {
 		if (!stralloc_copys(&domain, addr.s + pos))
 			return SPF_NOMEM;
-	} else
-	{
+	} else {
 		pos = str_rchr(helohost.s, '@');
-		if (helohost.s[pos])
-		{
+		if (helohost.s[pos]) {
 			if (!stralloc_copys(&domain, helohost.s + pos + 1))
 				return SPF_NOMEM;
 		} else
@@ -1288,11 +1410,25 @@ spfcheck(char *remoteip)
 	if (!stralloc_0(&explanation))
 		return SPF_NOMEM;
 	recursion = 0;
-	if (!remoteip || !ip_scan(remoteip, &ip))
-	{
+#ifdef IPV6
+	if (!remoteip) {
 		hdr_unknown_msg("No IP address in conversation");
 		return SPF_UNKNOWN;
 	}
+	ipv6use = 0;
+	if (!ip_scan(remoteip, &ip)) {
+		ipv6use = 1;
+		if (!ip6_scan(remoteip, &ip6)) {
+			hdr_unknown_msg("No IP address in conversation");
+			return SPF_UNKNOWN;
+		}
+	}
+#else
+	if (!remoteip || !ip_scan(remoteip, &ip)) {
+		hdr_unknown_msg("No IP address in conversation");
+		return SPF_UNKNOWN;
+	}
+#endif
 	if (!stralloc_readyplus(&expdomain, 0))
 		return SPF_NOMEM;
 	if (!stralloc_readyplus(&errormsg, 0))
@@ -1301,12 +1437,27 @@ spfcheck(char *remoteip)
 	errormsg.len = 0;
 	sender_fqdn.len = 0;
 	received = (char *) 0;
-	if ((ip.d[0] == 127 && ip.d[1] == 0 && ip.d[2] == 0 && ip.d[3] == 1) || ipme_is(&ip))
-	{
+#ifdef INET6
+	if (ipv6use) {
+		if (byte_equal((char *) ip6.d, 16, (char *) V6loopback) || ipme_is6(&ip6)) {
+			hdr_pass();
+			r = SPF_OK;
+		} else
+			r = spflookup(&domain);
+	} else {
+		if (byte_equal((char *) ip.d, 4, ip4loopback) || ipme_is(&ip)) {
+			hdr_pass();
+			r = SPF_OK;
+		} else
+			r = spflookup(&domain);
+	}
+#else
+	if ((ip.d[0] == 127 && ip.d[1] == 0 && ip.d[2] == 0 && ip.d[3] == 1) || ipme_is(&ip)) {
 		hdr_pass();
 		r = SPF_OK;
 	} else
 		r = spflookup(&domain);
+#endif
 	if (r < 0)
 		r = SPF_UNKNOWN;
 	alloc_free(domain.s);
@@ -1339,7 +1490,7 @@ spfinfo(sa)
 void
 getversion_spf_c()
 {
-	static char    *x = "$Id: spf.c,v 1.9 2012-06-20 18:47:26+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: spf.c,v 1.10 2013-08-06 11:15:51+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
