@@ -1,0 +1,13 @@
+#!/bin/sh
+#
+# $Log: vrenamedomain_handle.in,v $
+# Revision 2.1  2013-08-03 20:25:26+05:30  Cprogrammer
+# send sighup to qmail-send after renaming domain
+#
+#
+#
+# $Id: vrenamedomain_handle.in,v 2.1 2013-08-03 20:25:26+05:30 Cprogrammer Exp mbhangui $
+
+# send sighup to qmail-send
+@indimaildir@/bin/svc -h /service*/qmail-send* 2>/dev/null
+exit 0

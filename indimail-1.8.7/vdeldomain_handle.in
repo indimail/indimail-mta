@@ -1,0 +1,10 @@
+#!/bin/sh
+#
+# $Log: $
+#
+#
+# $Id: $
+
+# send sighup to qmail-send
+@indimaildir@/bin/svc -h /service*/qmail-send* 2>/dev/null
+exit 0
