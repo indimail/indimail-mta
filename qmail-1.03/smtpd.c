@@ -1,5 +1,8 @@
 /*
  * $Log: smtpd.c,v $
+ * Revision 1.173  2013-08-06 11:15:25+05:30  Cprogrammer
+ * use SPFIPV6 env variable to use spf ipv6 code
+ *
  * Revision 1.172  2013-07-16 20:27:14+05:30  Cprogrammer
  * fix size getting clobbered by strnum in log_spam() function
  *
@@ -670,7 +673,7 @@ int             wildmat_internal(char *, char *);
 int             ssl_rfd = -1, ssl_wfd = -1;	/*- SSL_get_Xfd() are broken */
 char           *servercert, *clientca, *clientcrl;
 #endif
-char           *revision = "$Revision: 1.172 $";
+char           *revision = "$Revision: 1.173 $";
 char           *protocol = "SMTP";
 stralloc        proto = { 0 };
 static stralloc Revision = { 0 };
@@ -681,6 +684,7 @@ stralloc        spfguess = { 0 };
 stralloc        spfexp = { 0 };
 int             flagbarfspf;
 unsigned int    spfbehavior = 0;
+unsigned int    spfipv6 = 0;
 static stralloc spfbarfmsg = { 0 };
 #endif
 stralloc        helohost = { 0 };
@@ -2864,6 +2868,11 @@ post_setup()
 	else
 	if (control_readint((int *) &spfbehavior, "spfbehavior") == -1)
 		die_control();
+	if ((x = env_get("SPFIPV6")))
+		scan_int(x, (int *) &spfipv6);
+	else
+	if (control_readint((int *) &spfipv6, "spfipv6") == -1)
+		die_control();
 #endif
 	/*
 	 * TARPIT Patch - include Control Files 
@@ -4049,7 +4058,7 @@ smtp_mail(char *arg)
 	if (spfbehavior && !relayclient)
 	{
 #ifdef IPV6
-		switch (r = spfcheck(remoteip4))
+		switch (r = spfcheck(spfipv6 ? remoteip : remoteip4))
 #else
 		switch (r = spfcheck(remoteip))
 #endif
@@ -6661,7 +6670,7 @@ addrrelay() /*- Rejection of relay probes. */
 void
 getversion_smtpd_c()
 {
-	static char    *x = "$Id: smtpd.c,v 1.172 2013-07-16 20:27:14+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: smtpd.c,v 1.173 2013-08-06 11:15:25+05:30 Cprogrammer Exp mbhangui $";
 
 #ifdef INDIMAIL
 	if (x)

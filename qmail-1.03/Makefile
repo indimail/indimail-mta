@@ -2398,18 +2398,19 @@ load qmail-smtpd.o smtpd.o rcpthosts.o recipients.o commands.o timeoutread.o \
 timeoutwrite.o ip.o ipme.o ipalloc.o strsalloc.o control.o etrn.o atrn.o constmap.o \
 received.o date822fmt.o wildmat.o now.o qmail.o variables.o cdb.a fd.a \
 wait.a datetime.a getln.a envrules.o bodycheck.o sqlmatch.o matchregex.o \
-scan_xlong.o socket_v4mappedprefix.o socket_v6any.o mail_acl.o \
-open.a sig.a case.a spf.o dns.o auto_qmail.o auto_uids.o base64sub.o qregex_smtpd.o \
-tablematch.o ndelay.o ndelay_off.o greylist.o auto_break.o \
-env.a stralloc.a alloc.a substdio.a error.a str.a fs.a lock.a \
+scan_xlong.o socket_ip4loopback.o socket_v6loopback.o socket_v4mappedprefix.o \
+socket_v6any.o mail_acl.o open.a sig.a case.a spf.o dns.o auto_qmail.o auto_uids.o \
+base64sub.o qregex_smtpd.o tablematch.o ndelay.o ndelay_off.o greylist.o \
+auto_break.o env.a stralloc.a alloc.a substdio.a error.a str.a fs.a lock.a \
 socket.lib tai.lib dns.lib indimail.lib tls.lib hmac_sha1.obj
 	./load qmail-smtpd smtpd.o rcpthosts.o recipients.o commands.o timeoutread.o \
 	timeoutwrite.o ip.o ipme.o ipalloc.o strsalloc.o control.o etrn.o atrn.o constmap.o \
 	received.o date822fmt.o wildmat.o now.o qmail.o variables.o envrules.o bodycheck.o \
 	spf.o dns.o auto_qmail.o sqlmatch.o matchregex.o scan_xlong.o socket_v4mappedprefix.o \
-	socket_v6any.o mail_acl.o auto_uids.o base64sub.o qregex_smtpd.o \
-	tablematch.o ndelay.o ndelay_off.o cdb.a fd.a wait.a datetime.a \
-	greylist.o auto_break.o `cat hmac_sha1.obj 2>/dev/null` getln.a open.a sig.a \
+	socket_ip4loopback.o socket_v6loopback.o socket_v6any.o mail_acl.o auto_uids.o \
+	base64sub.o qregex_smtpd.o tablematch.o ndelay.o ndelay_off.o cdb.a fd.a \
+	wait.a datetime.a greylist.o auto_break.o \
+	`cat hmac_sha1.obj 2>/dev/null` getln.a open.a sig.a \
 	case.a env.a stralloc.a alloc.a substdio.a error.a \
 	str.a fs.a lock.a `cat socket.lib tai.lib dns.lib indimail.lib tls.lib` -ldl
 
@@ -2984,10 +2985,12 @@ strsalloc.h str.h fmt.h scan.h byte.h now.h case.h conf-spf conf-tls conf-ip
 
 spfquery: \
 load spfquery.o spf.o ip.o ipme.o ipalloc.o strsalloc.o now.o dns.o variables.o \
-scan_xlong.o socket_v4mappedprefix.o socket_v6any.o byte_cr.o open_read.o envread.o getln.a \
+scan_xlong.o socket_ip4loopback.o socket_v6loopback.o socket_v4mappedprefix.o \
+socket_v6any.o byte_cr.o open_read.o envread.o getln.a \
 datetime.a stralloc.a alloc.a str.a substdio.a error.a fs.a case.a dns.lib
 	./load spfquery spf.o ip.o ipme.o ipalloc.o strsalloc.o \
-	scan_xlong.o socket_v4mappedprefix.o socket_v6any.o now.o dns.o variables.o byte_cr.o \
+	scan_xlong.o socket_ip4loopback.o socket_v6loopback.o \
+	socket_v4mappedprefix.o socket_v6any.o now.o dns.o variables.o byte_cr.o \
 	open_read.o envread.o getln.a datetime.a stralloc.a alloc.a str.a substdio.a \
 	case.a error.a fs.a `cat dns.lib`
 
