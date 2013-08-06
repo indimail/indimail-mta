@@ -68,14 +68,14 @@ byte.a: \
 makelib byte_chr.o byte_copy.o byte_cr.o byte_diff.o byte_rchr.o \
 byte_zero.o case_diffb.o case_diffs.o fmt_ulong.o ip4_fmt.o \
 ip4_scan.o ip6_scan.o scan_ulong.o str_chr.o str_diff.o str_len.o str_start.o \
-uint16_pack.o uint16_unpack.o uint32_pack.o uint32_unpack.o \
-ip6_fmt.o scan_xlong.o fmt_xlong.o
+uint16_pack.o uint16_unpack.o uint32_pack.o uint32_unpack.o ip6_compactaddr.o \
+ip6_fmt.o scan_xlong.o fmt_xlong.o ip6_expandaddr.o hexconversion.o
 	./makelib byte.a byte_chr.o byte_copy.o byte_cr.o \
 	byte_diff.o byte_rchr.o byte_zero.o case_diffb.o \
 	case_diffs.o fmt_ulong.o ip4_fmt.o ip4_scan.o ip6_scan.o scan_ulong.o \
 	str_chr.o str_diff.o str_len.o str_start.o uint16_pack.o \
-	uint16_unpack.o uint32_pack.o uint32_unpack.o \
-	ip6_fmt.o scan_xlong.o fmt_xlong.o
+	uint16_unpack.o uint32_pack.o uint32_unpack.o ip6_compactaddr.o \
+	ip6_fmt.o scan_xlong.o fmt_xlong.o ip6_expandaddr.o hexconversion.o
 
 byte_chr.o: \
 compile byte_chr.c byte.h
@@ -361,6 +361,10 @@ iopause.o: \
 compile iopause.c taia.h tai.h uint64.h select.h iopause.h taia.h
 	./compile iopause.c
 
+ip4_bit.o: \
+compile ip4_bit.c ip4_bit.h strerr.h ip4.h byte.h
+	./compile ip4_bit.c
+
 ip4_fmt.o: \
 compile ip4_fmt.c fmt.h ip4.h
 	./compile ip4_fmt.c
@@ -495,7 +499,7 @@ warn-auto.sh rts.sh conf-home
 
 rules.o: \
 compile rules.c alloc.h stralloc.h gen_alloc.h open.h cdb.h uint32.h \
-rules.h stralloc.h conf-ip
+rules.h stralloc.h str.h byte.h ip4_bit.h ip6.h conf-ip
 	./compile `grep -h -v "^#" conf-ip` rules.c
 
 scan_ulong.o: \
@@ -571,6 +575,10 @@ compile socket_local.c byte.h socket.h uint16.h conf-ip
 socket_opts.o: \
 compile socket_opts.c socket.h uint16.h
 	./compile socket_opts.c
+
+socket_opts6.o: \
+compile socket_opts6.c socket.h
+	./compile socket_opts6.c
 
 socket_remote.o: \
 compile socket_remote.c byte.h socket.h uint16.h uint32.h ip6.h haveip6.h conf-ip
@@ -728,8 +736,10 @@ open.h scan.h conf-ip
 	./compile `grep -h -v "^#" conf-ip` tcprules.c
 
 tcprulescheck: \
-load tcprulescheck.o rules.o cdb.a unix.a byte.a
-	./load tcprulescheck rules.o cdb.a unix.a byte.a 
+load tcprulescheck.o rules.o stralloc_pend.o \
+socket_v4mappedprefix.o socket_v6any.o cdb.a unix.a byte.a
+	./load tcprulescheck rules.o stralloc_pend.o \
+	socket_v4mappedprefix.o socket_v6any.o cdb.a unix.a byte.a
 
 tcprulescheck.o: \
 compile tcprulescheck.c byte.h buffer.h strerr.h env.h rules.h \
@@ -814,12 +824,12 @@ open_read.o open_trunc.o open_write.o openreadclose.o pathexec_env.o \
 pathexec_run.o prot.o readclose.o seek_set.o sgetopt.o sig.o \
 sig_block.o sig_catch.o sig_pause.o socket_accept.o socket_bind.o \
 socket_conn.o socket_delay.o socket_listen.o socket_local.o \
-socket_opts.o socket_remote.o socket_tcp.o socket_udp.o \
+socket_opts.o socket_opts6.o socket_remote.o socket_tcp.o socket_udp.o \
 stralloc_cat.o stralloc_catb.o stralloc_cats.o stralloc_copy.o \
 stralloc_eady.o stralloc_opyb.o stralloc_opys.o stralloc_pend.o \
 strerr_die.o strerr_sys.o subgetopt.o wait_nohang.o wait_pid.o \
 socket_conn6.o socket_bind6.o socket_accept6.o socket_recv6.o \
-socket_send6.o socket_local6.o socket_tcp6.o \
+socket_send6.o socket_local6.o socket_tcp6.o ip4_bit.o ip6_bit.o \
 socket_getifname.o socket_getifidx.o socket_v4mappedprefix.o \
 socket_ip4loopback.o socket_v6any.o socket_v6loopback.o
 	./makelib unix.a alloc.o alloc_re.o buffer.o buffer_0.o \
@@ -830,13 +840,13 @@ socket_ip4loopback.o socket_v6any.o socket_v6loopback.o
 	pathexec_run.o prot.o readclose.o seek_set.o sgetopt.o \
 	sig.o sig_block.o sig_catch.o sig_pause.o socket_accept.o \
 	socket_bind.o socket_conn.o socket_delay.o socket_listen.o \
-	socket_local.o socket_opts.o socket_remote.o socket_tcp.o \
+	socket_local.o socket_opts.o socket_opts6.o socket_remote.o socket_tcp.o \
 	socket_udp.o stralloc_cat.o stralloc_catb.o stralloc_cats.o \
 	stralloc_copy.o stralloc_eady.o stralloc_opyb.o \
 	stralloc_opys.o stralloc_pend.o strerr_die.o strerr_sys.o \
 	subgetopt.o wait_nohang.o wait_pid.o socket_conn6.o \
 	socket_bind6.o socket_accept6.o socket_recv6.o socket_send6.o \
-	socket_local6.o socket_tcp6.o \
+	socket_local6.o socket_tcp6.o ip4_bit.o ip6_bit.o \
 	socket_getifname.o socket_getifidx.o socket_v4mappedprefix.o \
 	socket_ip4loopback.o socket_v6any.o socket_v6loopback.o
 
@@ -879,12 +889,20 @@ ip6.h haveip6.h conf-ip
 	./compile `grep -h -v "^#" conf-ip` socket_local6.c
 
 fmt_xlong.o: \
-compile fmt_xlong.c scan.h
+compile fmt_xlong.c scan.h hexconversion.h
 	./compile fmt_xlong.c
 
 scan_xlong.o: \
 compile scan_xlong.c scan.h
 	./compile scan_xlong.c
+
+ip6_compactaddr.o: \
+compile ip6_compactaddr.c fmt.h ip6.h 
+	./compile ip6_compactaddr.c
+
+ip6_expandaddr.o: \
+compile ip6_expandaddr.c byte.h stralloc.h str.h ip6.h hexconversion.h
+	./compile ip6_expandaddr.c
 
 ip6_fmt.o: \
 compile ip6_fmt.c byte.h fmt.h ip4.h ip6.h conf-ip
@@ -893,6 +911,10 @@ compile ip6_fmt.c byte.h fmt.h ip4.h ip6.h conf-ip
 ip6_scan.o: \
 compile ip6_scan.c scan.h ip4.h ip6.h conf-ip
 	./compile `grep -h -v "^#" conf-ip` ip6_scan.c
+
+ip6_bit.o: \
+compile ip6_bit.c ip6.h strerr.h ip6.h byte.h str.h fmt.h hexconversion.h
+	./compile ip6_bit.c
 
 socket_tcp6.o: \
 compile socket_tcp6.c ndelay.h socket.h uint16.h uint32.h haveip6.h conf-ip
