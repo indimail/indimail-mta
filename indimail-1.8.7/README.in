@@ -280,6 +280,8 @@ Some of the features available in this package
 62. Return Receipt Responder - rrt
 63. Enforce STARTTLS before AUTH using FORCE_TLS environment variable
 62. Updated man pages.
+63. Jens Wehrenbrecht's IPv4 CIDR extension
+64. Li Minh Bui's IPv6 support for compact IPv6 addresses and CIDR notation support
 
 You can take a detailed look at the feature list at
 
