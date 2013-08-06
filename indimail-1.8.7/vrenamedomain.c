@@ -1,5 +1,8 @@
 /*
  * $Log: vrenamedomain.c,v $
+ * Revision 2.15  2013-08-03 20:23:02+05:30  Cprogrammer
+ * send sighup through post_handle
+ *
  * Revision 2.14  2010-04-30 14:44:12+05:30  Cprogrammer
  * free pointer returned by replacestr()
  *
@@ -53,7 +56,7 @@
 #include <sys/stat.h>
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vrenamedomain.c,v 2.14 2010-04-30 14:44:12+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: vrenamedomain.c,v 2.15 2013-08-03 20:23:02+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 int
@@ -63,7 +66,7 @@ main(int argc, char **argv)
 	gid_t           gid;
 	FILE           *fp;
 	char            OldDir[MAX_BUFF], NewDir[MAX_BUFF], TmpBuf[MAX_BUFF], DomDir[MAX_BUFF];
-	char           *real_domain, *ptr, *qmaildir, *tmpstr, *base_argv0;
+	char           *real_domain, *ptr, *tmpstr, *base_argv0;
 	struct passwd  *pw;
 	struct stat     statbuf;
 
@@ -156,15 +159,6 @@ main(int argc, char **argv)
 		return (1);
 	}
 	CreateDomainDirs(argv[2], uid, gid);
-	if (!OptimizeAddDomain)
-	{
-		getEnvConfigStr(&qmaildir, "QMAILDIR", QMAILDIR);
-		snprintf(TmpBuf, MAX_BUFF, "%s/bin/qmail-sighup", qmaildir);
-		if (!access(TmpBuf, X_OK))
-			runcmmd(TmpBuf, 0);
-		else
-			error_stack(stderr, "system: %s: %s\n", TmpBuf, strerror(errno));
-	}
 	snprintf(TmpBuf, MAX_BUFF, "%s/.aliasdomains", ptr);
 	/*- Relink Alias Domains */
 	if((fp = fopen(TmpBuf, "r")))

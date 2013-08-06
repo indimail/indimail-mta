@@ -1,5 +1,8 @@
 /*
  * $Log: vdeldomain.c,v $
+ * Revision 2.13  2013-08-03 20:22:33+05:30  Cprogrammer
+ * check for host.master to check if domain is distributed
+ *
  * Revision 2.12  2011-11-09 19:45:57+05:30  Cprogrammer
  * removed getversion
  *
@@ -93,7 +96,7 @@
 #include <pwd.h>
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vdeldomain.c,v 2.12 2011-11-09 19:45:57+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: vdeldomain.c,v 2.13 2013-08-03 20:22:33+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 char            Domain[MAX_BUFF];
@@ -134,6 +137,11 @@ main(argc, argv)
 	if ((err = vdeldomain(Domain)) != VA_SUCCESS)
 		error_stack(stderr, 0);
 #ifdef CLUSTERED_SITE
+	getEnvConfigStr(&qmaildir, "QMAILDIR", QMAILDIR);
+	getEnvConfigStr(&controldir, "CONTROLDIR", "control");
+	snprintf(mcdFile, MAX_BUFF, "%s/%s/host.master", qmaildir, controldir);
+	if (access(mcdFile, F_OK))
+		err = 1;
 	if (!err)
 	{
 		if (is_alias_domain(Domain) == 1)

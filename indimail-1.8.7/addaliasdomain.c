@@ -1,5 +1,8 @@
 /*
  * $Log: addaliasdomain.c,v $
+ * Revision 2.7  2013-08-03 20:21:18+05:30  Cprogrammer
+ * send sighup through post_handle
+ *
  * Revision 2.6  2010-03-07 09:27:58+05:30  Cprogrammer
  * check return value of is_distributed_domain for error
  *
@@ -43,14 +46,14 @@
 #include <sys/stat.h>
 
 #ifndef	lint
-static char     sccsid[] = "$Id: addaliasdomain.c,v 2.6 2010-03-07 09:27:58+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: addaliasdomain.c,v 2.7 2013-08-03 20:21:18+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 int
 vaddaliasdomain(char *old_domain, char *new_domain)
 {
 	char            Dir[MAX_BUFF], TmpBuf1[MAX_BUFF], TmpBuf2[MAX_BUFF];
-	char           *tmpstr, *qmaildir;
+	char           *tmpstr;
 	int             i;
 	uid_t           uid;
 	gid_t           gid;
@@ -103,12 +106,6 @@ vaddaliasdomain(char *old_domain, char *new_domain)
 		return(-1);
 	if (add_control(new_domain, 0))
 		return(-1);
-	getEnvConfigStr(&qmaildir, "QMAILDIR", QMAILDIR);
-	snprintf(TmpBuf1, MAX_BUFF, "%s/bin/qmail-sighup", qmaildir);
-	if (!access(TmpBuf1, X_OK))
-		runcmmd(TmpBuf1, 0);
-	else
-		signal_process("qmail-send", SIGHUP);
 	if (snprintf(TmpBuf1, MAX_BUFF, "%s/domains/%s/.aliasdomains", Dir, old_domain) == -1)
 	{
 		error_stack(stderr, "string %s/domains/%s/.aliasdomains too long\n",

@@ -1,5 +1,8 @@
 /*
  * $Log: deldomain.c,v $
+ * Revision 2.16  2013-08-03 20:21:51+05:30  Cprogrammer
+ * send sighup through post_handle
+ *
  * Revision 2.15  2010-08-12 18:55:28+05:30  Cprogrammer
  * remove filters prefilt and postfilt when removing a domain
  *
@@ -81,14 +84,14 @@
 #include <signal.h>
 
 #ifndef	lint
-static char     sccsid[] = "$Id: deldomain.c,v 2.15 2010-08-12 18:55:28+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: deldomain.c,v 2.16 2013-08-03 20:21:51+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 int
 vdeldomain(char *domain)
 {
 	char            Dir[MAX_BUFF], TmpBuf[MAX_BUFF], BasePath[MAX_BUFF];
-	char           *ptr, *tmpstr, *qmaildir, *base_path;
+	char           *ptr, *tmpstr, *base_path;
 	int             is_alias, i;
 	FILE           *fp;
 	uid_t           uid;
@@ -144,12 +147,6 @@ vdeldomain(char *domain)
 			}
 		}
 		del_control(domain);
-		getEnvConfigStr(&qmaildir, "QMAILDIR", QMAILDIR);
-		snprintf(TmpBuf, MAX_BUFF, "%s/bin/qmail-sighup", qmaildir);
-		if (!access(TmpBuf, X_OK))
-			runcmmd(TmpBuf, 0);
-		else
-			signal_process("qmail-send", SIGHUP);
 		return(0);
 	}
 	if (!vget_assign(domain, Dir, MAX_BUFF, &uid, &gid))
@@ -271,15 +268,6 @@ vdeldomain(char *domain)
 	 */
 	if (del_control(domain))
 		return (-1);
-	/*
-	 * send a HUP signal to qmail-send process to reread control files 
-	 */
-	getEnvConfigStr(&qmaildir, "QMAILDIR", QMAILDIR);
-	snprintf(TmpBuf, MAX_BUFF, "%s/bin/qmail-sighup", qmaildir);
-	if (!access(TmpBuf, X_OK))
-		runcmmd(TmpBuf, 0);
-	else
-		signal_process("qmail-send", SIGHUP);
 	/*
 	 * return back to the callers directory 
 	 */

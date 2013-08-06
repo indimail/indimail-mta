@@ -1,5 +1,8 @@
 /*
  * $Log: adddomain.c,v $
+ * Revision 2.16  2013-08-03 20:21:40+05:30  Cprogrammer
+ * send sighup through post_handle
+ *
  * Revision 2.15  2009-09-28 13:53:29+05:30  Cprogrammer
  * added option chk_rcpt to selectively add domains to chkrcptdomains
  *
@@ -78,7 +81,7 @@
 #include <sys/stat.h>
 
 #ifndef	lint
-static char     sccsid[] = "$Id: adddomain.c,v 2.15 2009-09-28 13:53:29+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: adddomain.c,v 2.16 2013-08-03 20:21:40+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 int
@@ -87,7 +90,6 @@ vadddomain(char *domain, char *ipaddr, char *dir, uid_t uid, gid_t gid, int chk_
 	FILE           *fs;
 	char           *ptr;
 	char            tmpbuf[MAX_BUFF];
-	char           *qmaildir;
 	int             i;
 
 	if (!domain || !*domain || *domain == '-')
@@ -249,18 +251,6 @@ vadddomain(char *domain, char *ipaddr, char *dir, uid_t uid, gid_t gid, int chk_
 			}
 		}
 		CreateDomainDirs(domain, uid, gid);
-	}
-	if (!OptimizeAddDomain)
-	{
-		getEnvConfigStr(&qmaildir, "QMAILDIR", QMAILDIR);
-		snprintf(tmpbuf, MAX_BUFF, "%s/bin/qmail-sighup", qmaildir);
-		if (!access(tmpbuf, X_OK))
-			runcmmd(tmpbuf, 0);
-		else
-		{
-			error_stack(stderr, "system: %s: %s\n", tmpbuf, strerror(errno));
-			return(-1);
-		}
 	}
 	return (0);
 }

@@ -1,6 +1,9 @@
 #!/bin/sh
 #
 # $Log: vadddomain_handle.in,v $
+# Revision 2.10  2013-08-03 20:22:25+05:30  Cprogrammer
+# send sighup to qmail-send
+#
 # Revision 2.9  2013-07-21 16:08:49+05:30  Cprogrammer
 # fix permission of spamignore
 #
@@ -30,8 +33,14 @@
 # post handle for vadddomain
 #
 #
-# $Id: vadddomain_handle.in,v 2.9 2013-07-21 16:08:49+05:30 Cprogrammer Exp mbhangui $
+# $Id: vadddomain_handle.in,v 2.10 2013-08-03 20:22:25+05:30 Cprogrammer Exp mbhangui $
+
+# send sighup to inlookup service to reload domains
+@indimaildir@/bin/svc -h /service*/inlookup* 2>/dev/null
+# print domain information
 @indimaildir@/bin/vdominfo $1
+
+# create user for bogofilter
 for i in ham spam register-ham register-spam
 do
 	@indimaildir@/bin/valias -i '&'"B"$i $i@$1
@@ -40,12 +49,18 @@ for i in prefilt postfilt
 do
 	@indimaildir@/bin/vadduser -d -e $i@$1  xxxxxxxx
 done
+
+# create rule for moving spam, virus emails to folders
 @indimaildir@/bin/vcfilter -i -t  spamFilter -c 3 -k "Yes, spamicity=" -f Spam   -b 0 -h 32 \
 	prefilt@$1 > /dev/null 2>&1
 @indimaildir@/bin/vcfilter -i -t virusFilter -c 0 -k "virus found" -f Quarantine -b 0 -h 28 \
 	prefilt@$1 > /dev/null 2>&1
+
+# display domain directory
 /bin/ls -dl @indimaildir@/domains/$1
 /bin/ls -al @indimaildir@/domains/$1
+
+# add the domain to spamignore
 grep -w @"$1" @indimaildir@/control/spamignore > /dev/null
 if [ $? -ne 0 ] ; then
 	echo @"$1" >> @indimaildir@/control/spamignore
