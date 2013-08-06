@@ -1,22 +1,14 @@
 /*
  * $Log: fmt_xlong.c,v $
+ * Revision 1.2  2013-08-06 00:49:29+05:30  Cprogrammer
+ * added tohex() function
+ *
  * Revision 1.1  2005-06-10 09:04:19+05:30  Cprogrammer
  * Initial revision
  *
  */
 #include "fmt.h"
-
-char
-tohex(char num)
-{
-	if (num < 10)
-		return num + '0';
-	else
-	if (num < 16)
-		return num - 10 + 'a';
-	else
-		return -1;
-}
+#include "hexconversion.h"
 
 unsigned int
 fmt_xlong(register char *s, register unsigned long u)
