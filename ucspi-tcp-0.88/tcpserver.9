@@ -191,7 +191,7 @@ IP dynamically.
 .B \-6
 Force IPv6 mode in UCSPI environment variables, even for
 IPv4 connections.  This will set \fB$PROTO\fR to \fBTCP6\fR and put
-IPv4-mapped IPv6 addresses in \fBTCPLOCALIP\fR and \fBTCPREMOTEIP\fR.
+IPv4-mapped IPv6 addresses in \fBTCP6LOCALIP\fR and \fBTCP6REMOTEIP\fR.
 .TP
 .B \-I\fIinterface
 Bind to the network interface
@@ -264,6 +264,20 @@ seconds. Default: 26.
 .B \-n \fIcertfile
 Instead of the default servercert.pem certificate use the specified
 .IR certfile .
+
+.SH IPv4-mapped IPv6 addresses
+Setting up tcpserver with simultaneous bindings to IPv4 and IPv6 addresses, the Unix
+kernel employs the mapping
+
+.EX
+::ffff:a.b.c.d
+for the IPv4 address
+a.b.c.d
+.EE
+
+Setting up tcpserver in IPv4 mode only -4 or in compatibility mode, IPv4 addresses are
+considered in their native format without the IPv6 prefix. Thus, usual IPv4 addresses
+can be entered in rules.cdb even in common IPv4/IPv6 bindings.
 
 .SH ENVIRONMENT
 .TP
