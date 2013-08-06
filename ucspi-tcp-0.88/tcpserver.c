@@ -1,5 +1,8 @@
 /*
  * $Log: tcpserver.c,v $
+ * Revision 1.50  2013-08-06 07:57:11+05:30  Cprogrammer
+ * added socket_ip6optionskill for IPV6 socket
+ *
  * Revision 1.49  2012-09-08 16:35:11+05:30  Cprogrammer
  * BUG - wrong variable used for ip address causing fnrules to fail in ip address matching
  *
@@ -168,7 +171,7 @@
 #include "auto_home.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: tcpserver.c,v 1.49 2012-09-08 16:35:11+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: tcpserver.c,v 1.50 2013-08-06 07:57:11+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef IPV6
@@ -244,6 +247,7 @@ void            print_ip();
 unsigned long   check_ip();
 void            remove_ip(pid_t);
 int             socket_ipoptionskill(int);
+int             socket_ip6optionskill(int);
 int             socket_tcpnodelay(int);
 #ifdef TLS
 void            translate(SSL*, int, int, unsigned int);
@@ -375,8 +379,10 @@ doit(int t)
 		strnum[fmt_ulong(strnum, getpid())] = 0;
 		strerr_warn4("tcpserver: pid ", strnum, " from ", remoteipstr, 0);
 	}
-	if (flagkillopts)
+	if (flagkillopts) {
 		socket_ipoptionskill(t);
+		socket_ip6optionskill(t);
+	}
 	if (!flagdelay)
 		socket_tcpnodelay(t);
 	if (*banner)
