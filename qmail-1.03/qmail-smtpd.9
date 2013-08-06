@@ -1347,6 +1347,11 @@ rules would fail.  This can be used to always allow certain machines to
 send certain mails.
 
 .TP 5
+.I spfipv6
+You can turn on spf for ipv6 connections by setting to  value 1; 0 to disable.
+You can override this control file with environment variable USE_SPFIPV6
+
+.TP 5
 .I bouncesubject
 .TP 5
 .I doublebouncesubject
@@ -1451,6 +1456,7 @@ The following list of environment variables can be modified using envrules
 .IR SIGNKEY ,
 .IR SIGNKEYSTALE ,
 .IR SPFBEHAVIOR ,
+.IR USE_SPFIPV6,
 .IR TMPDIR ,
 .IR TARPITCOUNT ,
 .IR TARPITDELAY ,
