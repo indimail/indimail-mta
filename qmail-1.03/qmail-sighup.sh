@@ -1,4 +1,7 @@
 # $Log: qmail-sighup.sh,v $
+# Revision 1.5  2013-08-06 11:15:09+05:30  Cprogrammer
+# removed sighup to inlookup
+#
 # Revision 1.4  2013-05-07 15:52:10+05:30  Cprogrammer
 # suppress error for non-indimail system
 #
@@ -11,7 +14,7 @@
 # Revision 1.1  2002-09-26 20:48:02+05:30  Cprogrammer
 # Initial revision
 #
-# $Id: qmail-sighup.sh,v 1.4 2013-05-07 15:52:10+05:30 Cprogrammer Stab mbhangui $
+# $Id: qmail-sighup.sh,v 1.5 2013-08-06 11:15:09+05:30 Cprogrammer Exp mbhangui $
 if [ " $SERVICEDIR" = " " ] ; then
 	SERVICEDIR=`/bin/ls /service*`
 	if [ " $SERVICEDIR" = " " ] ; then
@@ -19,9 +22,7 @@ if [ " $SERVICEDIR" = " " ] ; then
 		exit 1
 	else
 		QMAIL/bin/svc -h /service*/qmail-send* &&
-		QMAIL/bin/svc -h /service*/inlookup* 2>/dev/null
 	fi
 else
 	QMAIL/bin/svc -h $SERVICEDIR/qmail-send* &&
-	QMAIL/bin/svc -h /service*/inlookup* 2>/dev/null
 fi
