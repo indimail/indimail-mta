@@ -1,5 +1,8 @@
 /*
  * $Log: ProcessInFifo.c,v $
+ * Revision 2.35  2013-08-03 17:18:49+05:30  Cprogrammer
+ * close database on sighup so that we reload all domains
+ *
  * Revision 2.34  2011-04-03 21:51:52+05:30  Cprogrammer
  * added enterprise support code
  *
@@ -117,7 +120,7 @@
  */
 
 #ifndef	lint
-static char     sccsid[] = "$Id: ProcessInFifo.c,v 2.34 2011-04-03 21:51:52+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: ProcessInFifo.c,v 2.35 2013-08-03 17:18:49+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #include <fcntl.h>
@@ -687,6 +690,7 @@ sig_hup()
 {
 	char           *fifo_name;
 
+	signal(SIGHUP, (void(*)()) SIG_IGN);
 	fifo_name = getFifo_name();
 	printf("%d INFIFO %s, Got SIGHUP\n", (int) getpid(), fifo_name);
 	printf("%d %s Reconfiguring\n", (int) getpid(), fifo_name);
@@ -807,6 +811,7 @@ sig_hand(sig, code, scp, addr)
 		break;
 		case SIGHUP:
 			printf("%d %s Reconfiguring\n", (int) getpid(), fifo_name);
+			close_db();
 #ifdef QUERY_CACHE
 			findhost_cache(0);
 			is_user_present_cache(0);
