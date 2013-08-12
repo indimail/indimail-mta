@@ -55,6 +55,7 @@ If $RBLSMTPD is not set,
 looks up $TCPREMOTEIP in the RBL, and blocks mail if $TCPREMOTEIP is listed.
 .B tcpserver
 sets up $TCPREMOTEIP as the IP address of the remote host.
+
 .TP
 .B \-r \fIbase
 Use
@@ -127,6 +128,18 @@ for adding a delay after the SMTP client has initiated the SMTP session and befo
 The delay is control via the environment variable GREETDELAY, which is typically set by means of tcpserver's rule-set file.
 
 .SH NOTES
+
+\fBrblsmtpd\fR constructs address scheme, from the incoming IP address TCPREMOTEIP, in
+inverse nibble format, depending on the setting of PROTO. If PROTO=TCP the standard
+inverse IPv4 address scheme is used, whereas in case of PROTO=TCP6 the IPv6 inverse
+nibble format is computed based on the expanded IPv6 address:
+
+.EX
+fe80::1 => 1.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.8.e.f.(tld)
+.EE
+
+\fBrblsmtpd\fR recognizes IPv4-mapped IPv6 addresses and strips the IPv6 prefix piror to
+build the IPv4 inverse address for the RBL lookup.
 
 The following rbl sites can be typically used
 bl.spamcop.net, zen.spamhaus.org, cbl.abuseat.org, dnsbl.njabl.org and list.dsbl.org

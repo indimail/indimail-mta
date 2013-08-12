@@ -112,15 +112,74 @@ If $TCPREMOTEIP is 127.0.0.1 and $TCPREMOTEINFO is joe,
 .BR tcpserver (1)
 will follow the first instructions. 
 
+.IP \[bu] 2
+Compact IPv6 host addresses in the format:
+
+.EX
+fe80::a:b:cd:1234
+.EE
+
+.IP \[bu]
+Classless IPv4/IPv6 net addresses declared in the common CIDR /prefix notation:
+
+.EX
+127.0/8:allow
+fe80::/64:allow
+.EE
+
+Note: You have to declare (implicitly) that many address bytes as required by the prefix.
+Longer addresses are automatically truncated.
+
+.IP \[bu]
+Evaluation of the CIDR addresses considers the longest matching prefix. Thus, you can
+specify:
+
+.EX
+2001:a::/48:deny
+2001:a:b:c::/64:allow
+.EE
+
 You can use
 .BR tcprulescheck (1)
 to see how tcpserver will interpret rules in
 .IR cdb .
+
 .SH ADDRESS RANGES
 .B tcprules
 treats 1.2.3.37-53:ins as an abbreviation for the rules 1.2.3.37:ins,
 1.2.3.38:ins, and so on up through 1.2.3.53:ins. Similarly, 10.2-3.:ins is an
 abbreviation for 10.2.:ins and 10.3.:ins.
+
+.SH CIDR Notation
+.B tcprules
+understands CIDR notation. The rule
+
+.EX
+127.0/8:allow
+.EE
+
+accepts any connections from the loopback net.
+Note: Always IP addresses with the longest matching prefix are considered.
+
+.SH IPv6 ADDRESSES
+\fBtcprules\fR understands compact IPv6 addresses in standard CIDR notation. The rule
+
+.EX
+2001:de01:2:3:4:a:b:c:deny
+.EE
+
+rejects any IPv6 packet from a single host while
+
+.EX
+2002::/48:deny
+.EE
+
+can be used to block an entire IPv6 (sub-)net, in case the net-prefix (here: /48) is
+provided.
+Note: Since the IPv6 address on input is evaluated in it's compacted format, simply
+include the final '::' for convenience. The resulting address is truncated to the number
+of provided prefix bits.
+
 .SH INSTRUCTIONS
 The instructions in a rule must begin with either allow or deny. deny tells
 .BR tcpserver (1)
