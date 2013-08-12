@@ -1,5 +1,8 @@
 /*
  * $Log: dns_text.c,v $
+ * Revision 1.6  2013-08-12 11:55:52+05:30  Cprogrammer
+ * made dk_strdup() visible for both dk and dkim
+ *
  * Revision 1.5  2009-06-11 15:20:57+05:30  Cprogrammer
  * port for DARWIN
  *
@@ -25,23 +28,17 @@
 #include <arpa/nameser.h>
 #include <resolv.h>
 #include "byte.h"
-#ifdef DOMAIN_KEYS
-#include "domainkeys.h"
-#else
 #include "str.h"
 #include <openssl/evp.h>
-
-#define DKIM_MALLOC(s)     OPENSSL_malloc(s)
 
 char           *
 dk_strdup(const char *s)
 {
-	char           *new = DKIM_MALLOC(str_len((char *) s) + 1);
+	char           *new = OPENSSL_malloc(str_len((char *) s) + 1);
 	if (new != 0)
 		str_copy(new, (char *) s);
 	return new;
 }
-#endif
 
 static unsigned short
 getshort(unsigned char *cp)
@@ -124,7 +121,7 @@ dns_text(char *dn)
 void
 getversion_dns_text_c()
 {
-	static char    *x = "$Id: dns_text.c,v 1.5 2009-06-11 15:20:57+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: dns_text.c,v 1.6 2013-08-12 11:55:52+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
