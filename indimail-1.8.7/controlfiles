@@ -88,6 +88,7 @@ smtproutes
 spamignore
 spamignorepatterns
 spamredirect
+spfipv6
 spfbehavior
 spfexp
 spfguess
