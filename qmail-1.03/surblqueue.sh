@@ -1,6 +1,9 @@
 #!/bin/sh
 #
 # $Log: surblqueue.sh,v $
+# Revision 1.3  2013-08-12 18:56:37+05:30  Cprogrammer
+# added error message if mktemp fails
+#
 # Revision 1.2  2013-08-12 15:00:54+05:30  Cprogrammer
 # figure out mktemp path
 #
@@ -8,7 +11,7 @@
 # Initial revision
 #
 #
-# $Id: surblqueue.sh,v 1.2 2013-08-12 15:00:54+05:30 Cprogrammer Exp mbhangui $
+# $Id: surblqueue.sh,v 1.3 2013-08-12 18:56:37+05:30 Cprogrammer Exp mbhangui $
 #
 # I should be called by qmail-smtpd or anything that calls qmail-queue
 #
@@ -21,10 +24,11 @@ else
 fi
 out=`$MKTEMP -t surblXXXXXXXXXX`
 if [ $? -ne 0 ] ; then
+	echo "mktemp: unable to create temp files" 1>&2
 	exit 111
 fi
 #
-# Redirect standard error to 4 so that qmail_open() will pick up the error
+# run surblfilter and feed output to qmail-queue
 #
 QMAIL/bin/surblfilter > $out
 status=$?
