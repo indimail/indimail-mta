@@ -1,5 +1,8 @@
 /*
  * $Log: domainkeys.c,v $
+ * Revision 1.15  2013-08-12 11:55:29+05:30  Cprogrammer
+ * moved dk_strdup() to dns_text.c
+ *
  * Revision 1.14  2011-07-29 09:28:18+05:30  Cprogrammer
  * fixed gcc 4.6 warnings
  *
@@ -96,6 +99,7 @@
 %}
 #endif
 char           *dns_text(char *);
+char           *dk_strdup(const char *);
 
 /* Performance/Debug options.
  * Uncomment below or use -D switch in gcc
@@ -236,16 +240,6 @@ static char    *errors[] = {
 char           *dk_from(DK *);
 int             dk_headers(DK *, char *);
 static char    *strncasestr(const char *, const char *, size_t slen);
-
-/* HEADER */
-char           *
-dk_strdup(const char *s)
-{
-	char           *new = DK_MALLOC(str_len((char *) s) + 1);
-	if (new != 0)
-		str_copy(new, (char *) s);
-	return new;
-}
 
 /* HEADER */
 /*- returns the source file from which an error was returned.  */
@@ -2075,7 +2069,7 @@ strncasestr(const char *s, const char *find, size_t slen)
 void
 getversion_domainkeys_c()
 {
-	static char    *x = "$Id: domainkeys.c,v 1.14 2011-07-29 09:28:18+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: domainkeys.c,v 1.15 2013-08-12 11:55:29+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
