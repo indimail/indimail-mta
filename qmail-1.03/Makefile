@@ -2088,8 +2088,6 @@ socket_v4mappedprefix.o socket_v6any.o str.a stralloc.a alloc.a dns.lib
 
 dns_text.o: compile dns_text.c domainkeys.h byte.h
 	./compile -DDOMAIN_KEYS dns_text.c
-dns_text_dkim.o: compile dns_text.c byte.h domainkeys.h
-	./compile dns_text.c -o dns_text_dkim.o
 
 testtrace.o: compile testtrace.c dktrace.h
 	./compile testtrace.c
@@ -2159,7 +2157,7 @@ stralloc_pend.o fmt_str.o byte_cr.o byte_copy.o \
 fmt_uint.o fmt_uint0.o fmt_ulong.o alloc.o alloc_re.o \
 auto_qmail.o variables.o case_diffb.o fd_copy.o control.o \
 MakeArgs.o envread.o fd_move.o wait_pid.o open_excl.o open_read.o \
-scan_ulong.o getln.o getln2.o case_diffs.o dns_text_dkim.o \
+scan_ulong.o getln.o getln2.o case_diffs.o dns_text.o \
 getopt.a sig.a stralloc.a substdio.a str.a dns.lib dkim.lib
 	if test $(SYSTEM) = Darwin ; then \
 	g++ -s -o qmail-dkim qmail-dkim.o now.o error.o \
@@ -2168,7 +2166,7 @@ getopt.a sig.a stralloc.a substdio.a str.a dns.lib dkim.lib
 	fmt_uint.o fmt_uint0.o fmt_ulong.o alloc.o alloc_re.o \
 	auto_qmail.o variables.o case_diffb.o fd_copy.o control.o \
 	MakeArgs.o envread.o fd_move.o wait_pid.o open_excl.o open_read.o \
-	scan_ulong.o getln.o getln2.o case_diffs.o dns_text_dkim.o \
+	scan_ulong.o getln.o getln2.o case_diffs.o dns_text.o \
 	getopt.a sig.a stralloc.a substdio.a str.a \
 	-L$(DESTDIR)$(INDIDIR)/lib `cat dns.lib dkim.lib` -lcrypto ; \
 	else \
@@ -2178,7 +2176,7 @@ getopt.a sig.a stralloc.a substdio.a str.a dns.lib dkim.lib
 	fmt_uint.o fmt_uint0.o fmt_ulong.o alloc.o alloc_re.o \
 	auto_qmail.o variables.o case_diffb.o fd_copy.o control.o \
 	MakeArgs.o envread.o fd_move.o wait_pid.o open_excl.o open_read.o \
-	scan_ulong.o getln.o getln2.o case_diffs.o dns_text_dkim.o \
+	scan_ulong.o getln.o getln2.o case_diffs.o dns_text.o \
 	getopt.a sig.a stralloc.a substdio.a str.a \
 	-L$(DESTDIR)$(INDIDIR)/lib `cat dns.lib dkim.lib` -lcrypto ; \
 	fi
