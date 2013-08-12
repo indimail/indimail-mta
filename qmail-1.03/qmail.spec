@@ -1,6 +1,6 @@
 #
 #
-# $Id: qmail.spec,v 1.1 2013-08-12 11:58:39+05:30 Cprogrammer Exp mbhangui $
+# $Id: qmail.spec,v 1.2 2013-08-12 18:56:17+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %define _unpackaged_files_terminate_build 1
 
@@ -166,7 +166,7 @@ BuildRequires: db4-devel
 # rpm -qlp some-file.rpm
 Requires: /usr/sbin/useradd /usr/sbin/groupadd
 Requires: /sbin/chkconfig /usr/sbin/userdel /usr/sbin/groupdel procps /usr/bin/awk
-Requires: coreutils grep /bin/sh glibc openssl
+Requires: coreutils grep /bin/sh glibc openssl mysql-libs
 BuildRoot: %(mktemp -ud %{_tmppath}/%{name}-%{version}-%{release}-XXXXXXX)
 #
 # IndiMail is choosy and runs on reliable OS only
