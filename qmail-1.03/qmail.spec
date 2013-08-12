@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail.spec.in,v 2.258 2013-04-29 22:58:23+05:30 Cprogrammer Exp mbhangui $
+# $Id: qmail.spec,v 1.1 2013-08-12 11:58:39+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %define _unpackaged_files_terminate_build 1
 
@@ -111,7 +111,7 @@ URL: http://www.indimail.org
 #AutoReqProv: No
 Conflicts: indimail
 BuildRequires: openssl-devel rpm gcc gcc-c++ make bison binutils coreutils grep
-BuildRequires: glibc glibc-devel openssl procps readline-devel
+BuildRequires: glibc glibc-devel openssl procps readline-devel mysql-devel
 BuildRequires: sed ncurses-devel gettext-devel
 BuildRequires: python-devel flex findutils
 BuildRequires: readline gzip autoconf pkgconfig
@@ -166,7 +166,7 @@ BuildRequires: db4-devel
 # rpm -qlp some-file.rpm
 Requires: /usr/sbin/useradd /usr/sbin/groupadd
 Requires: /sbin/chkconfig /usr/sbin/userdel /usr/sbin/groupdel procps /usr/bin/awk
-Requires: coreutils grep /bin/sh glibc openssl mysql-server
+Requires: coreutils grep /bin/sh glibc openssl
 BuildRoot: %(mktemp -ud %{_tmppath}/%{name}-%{version}-%{release}-XXXXXXX)
 #
 # IndiMail is choosy and runs on reliable OS only
@@ -442,14 +442,13 @@ concurrencylocal concurrencyremote databytes defaultdelivery defaultdomain defau
 dh1024.pem dh512.pem disclaimer domainbindings doublebouncehost doublebouncemessage \
 doublebouncesubject doublebounceto earlytalkerdroptime envnoathost etrnhosts extraqueue \
 filterargs from.envrules globalspamredirect helohost holdlocal holdremote \
-hostaccess hostid hostip host.ldap host.master host.cntrl \
-host.mysql idhost localdomains localiphost locals maxhops \
+hostaccess hostid hostip idhost localdomains localiphost locals maxhops \
 maxrecipients me moreipme morercpthosts morercpthosts.cdb nodnscheck \
 notipme outgoingip percenthack plusdomain qmqpservers qregex \
 quarantine queueforward queuelifetime rcptdomains rcpt.envrules rcpthosts \
 recipients rejectspam relayclients relaydomains relayhosts relaymailfrom \
 rsa512.pem servercert.pem signatures smtpgreeting smtproutes spamignore \
-spamignorepatterns spamredirect spfbehavior spfexp spfguess spfrules \
+spamignorepatterns spamredirect spfipv6 spfbehavior spfexp spfguess spfrules \
 tarpitcount tarpitdelay timeoutconnect timeoutread timeoutremote timeoutsmtpd \
 timeoutwrite tlsclientciphers tlsclients tlsserverciphers todointerval virtualdomains \
 signaturedomains nosignaturedomains goodrcptto goodrcptpatterns qbase greylist.white
