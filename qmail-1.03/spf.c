@@ -1,5 +1,8 @@
 /*
  * $Log: spf.c,v $
+ * Revision 1.11  2013-08-13 21:48:56+05:30  Cprogrammer
+ * added error message for unknown address family
+ *
  * Revision 1.10  2013-08-06 11:15:51+05:30  Cprogrammer
  * added ipv6 support
  *
@@ -109,7 +112,7 @@ static char    *received;
 
 static int      recursion;
 static ip_addr  ip;
-#ifdef INET6
+#ifdef IPV6
 static ip6_addr ip6;
 static int      ipv6use;
 #endif
@@ -184,6 +187,12 @@ static void
 hdr_dns()
 {
 	hdr_error("DNS problem");
+}
+
+static void
+hdr_addr_family()
+{
+	hdr_error("unknown address family");
 }
 
 
@@ -633,7 +642,7 @@ spf_a(char *spec, char *mask)
 	int             ip4mask;
 	int             ip6mask;
 #else
-	int             ipmask = getipmask(mask, 1);
+	int             ipmask;
 #endif
 	int             r;
 	int             j;
@@ -642,7 +651,7 @@ spf_a(char *spec, char *mask)
 	if ((r = getipmask(mask, &ip4mask, &ip6mask)) < 0)
 		return SPF_SYNTAX;
 #else
-	if (ipmask < 0)
+	if ((ipmask = getipmask(mask, 1)) < 0)
 		return SPF_SYNTAX;
 #endif
 	if (!stralloc_copys(&sa, spec))
@@ -674,7 +683,10 @@ spf_a(char *spec, char *mask)
 					r = SPF_OK;
 					break;
 				}
-			} /* else unknown address family */
+			} else  { /* else unknown address family */
+				hdr_addr_family();
+				r = SPF_NONE;
+			}
 #else
 			if (matchip(&ia.ix[j].addr.ip, ipmask, &ip)) {
 				r = SPF_OK;
@@ -983,7 +995,7 @@ static struct mechanisms
 	{"mx", spf_mx, 1, 1, 1, 1, 0},
 	{"ptr", spf_ptr, 1, 0, 1, 1, 0},
 	{"ip4", spf_ip, 1, 1, 0, 0, 0},
-#ifdef INET6
+#ifdef IPV6
 	{"ip6", spf_ip6, 1, 1, 0, 0, 0},
 #else
 	{"ip6", 0, 1, 1, 0, 0, SPF_NONE},
@@ -1437,7 +1449,7 @@ spfcheck(char *remoteip)
 	errormsg.len = 0;
 	sender_fqdn.len = 0;
 	received = (char *) 0;
-#ifdef INET6
+#ifdef IPV6
 	if (ipv6use) {
 		if (byte_equal((char *) ip6.d, 16, (char *) V6loopback) || ipme_is6(&ip6)) {
 			hdr_pass();
@@ -1490,7 +1502,7 @@ spfinfo(sa)
 void
 getversion_spf_c()
 {
-	static char    *x = "$Id: spf.c,v 1.10 2013-08-06 11:15:51+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: spf.c,v 1.11 2013-08-13 21:48:56+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
