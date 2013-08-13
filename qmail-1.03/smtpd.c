@@ -1,5 +1,8 @@
 /*
  * $Log: smtpd.c,v $
+ * Revision 1.174  2013-08-13 10:43:06+05:30  Cprogrammer
+ * fixed STARTTLS plaintext command injection vulnerability
+ *
  * Revision 1.173  2013-08-06 11:15:25+05:30  Cprogrammer
  * use SPFIPV6 env variable to use spf ipv6 code
  *
@@ -673,7 +676,7 @@ int             wildmat_internal(char *, char *);
 int             ssl_rfd = -1, ssl_wfd = -1;	/*- SSL_get_Xfd() are broken */
 char           *servercert, *clientca, *clientcrl;
 #endif
-char           *revision = "$Revision: 1.173 $";
+char           *revision = "$Revision: 1.174 $";
 char           *protocol = "SMTP";
 stralloc        proto = { 0 };
 static stralloc Revision = { 0 };
@@ -936,6 +939,13 @@ safewrite(int fd, char *buf, int len)
 void
 flush()
 {
+	substdio_flush(&ssout);
+}
+
+void
+flush_io()
+{
+	ssin.p = 0;
 	substdio_flush(&ssout);
 }
 
@@ -6369,7 +6379,7 @@ struct commands smtpcommands[] = {
 	{"atrn", smtp_atrn, flush},
 #endif
 #ifdef TLS
-	{"starttls", smtp_tls, flush},
+	{"starttls", smtp_tls, flush_io},
 #endif
 	{0, err_unimpl, flush}
 };
@@ -6400,7 +6410,7 @@ struct commands submcommands[] = {
 	{"noop", smtp_noop, flush},
 	{"vrfy", smtp_vrfy, flush},
 #ifdef TLS
-	{"starttls", smtp_tls, flush},
+	{"starttls", smtp_tls, flush_io},
 #endif
 	{0, err_unimpl, flush}
 };
@@ -6670,7 +6680,7 @@ addrrelay() /*- Rejection of relay probes. */
 void
 getversion_smtpd_c()
 {
-	static char    *x = "$Id: smtpd.c,v 1.173 2013-08-06 11:15:25+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: smtpd.c,v 1.174 2013-08-13 10:43:06+05:30 Cprogrammer Exp mbhangui $";
 
 #ifdef INDIMAIL
 	if (x)
