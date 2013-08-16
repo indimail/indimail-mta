@@ -51,26 +51,45 @@ if [ -z "$QMAILREMOTE" -a -z "$QMAILLOCAL" ]; then
 	echo "dk-filter should be run by spawn-filter" 1>&2
 	exit 1
 fi
-if [ -z "$DKSIGN" -a -z "$DKIMSIGN" -a -z "$DKVERIFY" -a -z "$DKIMVERIFY" ] ; then
-	echo "Must provide at least one of DKSIGN, DKIMSIGN, DKVERIFY, DKIMVERIFY" 1>&2
-	exit 1
-fi
 dksign=0
 dkimsign=0
 dkverify=0
 dkimverify=0
+if [ -z $DKSIGN -a -z $DKVERIFY ] ; then
+	DKSIGN=QMAILHOME/control/domainkeys/%/default
+	dksign=2
+fi
+if [ -z $DKIMSIGN -a -z $DKIMVERIFY ] ; then
+	DKIMSIGN=QMAILHOME/control/domainkeys/%/default
+	dkimsign=2
+fi
 if [ ! -z $DKSIGN ] ; then
 	if [ ! -f QMAILHOME/bin/dktest ] ; then
 		echo "QMAILHOME/bin/dktest: No such file or directory" 1>&2
 		exit 1
 	fi
-	dksign=1
+	percent_found=0
+	echo $DKSIGN|grep "%" 2>/dev/null
+	if [ $? -eq 0 ] ; then
+		percent_found=1
+	fi
 	if [ ! " $_SENDER" = " " ] ; then
-		domain=`echo $_SENDER | cut -d@ -f2`
 		# replace '%' in filename with domain
+		domain=`echo $_SENDER | cut -d@ -f2`
 		dkkeyfn=`echo $DKSIGN | sed s{%{$domain{g`
 	else
 		dkkeyfn=$DKSIGN
+	fi
+	if [ dksign -eq 2 -a ! -f $dkkeyfn ] ; then
+		dkkeyfn=QMAILHOME/control/domainkeys/default
+	fi
+	if [ -f $dkkeyfn ] ; then
+		dksign=1
+	else
+		dksign=0
+	fi
+	if [ $dksign -eq 0 -a $percent_found -ne 1 ] ; then
+		exit 35
 	fi
 	dkselector=`basename $dkkeyfn`
 fi
@@ -79,13 +98,28 @@ if [ ! -z $DKIMSIGN ] ; then
 		echo "QMAILHOME/bin/dkim: No such file or directory" 1>&2
 		exit 1
 	fi
-	dkimsign=1
+	percent_found=0
+	echo $DKIMSIGN|grep "%" 2>/dev/null
+	if [ $? -eq 0 ] ; then
+		percent_found=1
+	fi
 	if [ ! " $_SENDER" = " " ] ; then
 		# replace '%' in filename with domain
 		domain=`echo $_SENDER | cut -d@ -f2`
 		dkimkeyfn=`echo $DKIMSIGN | sed s{%{$domain{g`
 	else
 		dkimkeyfn=$DKIMSIGN
+	fi
+	if [ dkimsign -eq 2 -a ! -f $dkimkeyfn ] ; then
+		dkimkeyfn=QMAILHOME/control/domainkeys/default
+	fi
+	if [ -f $dkimkeyfn ] ; then
+		dkimsign=1
+	else
+		dkimsign=0
+	fi
+	if [ $dkimsign -eq 0 -a $percent_found -ne 1 ] ; then
+		exit 35
 	fi
 	dkimselector=`basename $dkimkeyfn`
 fi
