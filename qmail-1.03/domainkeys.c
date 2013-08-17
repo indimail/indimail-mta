@@ -1,5 +1,8 @@
 /*
  * $Log: domainkeys.c,v $
+ * Revision 1.16  2013-08-17 16:00:19+05:30  Cprogrammer
+ * added case for duplicate DomainKey-Signature header
+ *
  * Revision 1.15  2013-08-12 11:55:29+05:30  Cprogrammer
  * moved dk_strdup() to dns_text.c
  *
@@ -147,6 +150,7 @@ typedef enum
 	DK_STAT_REVOKED,			/*- Key has been revoked.  */
 	DK_STAT_INTERNAL,			/*- cannot call this routine in this context.  Internal error.  */
 	DK_STAT_GRANULARITY,		/*- Granularity mismatch: sender doesn't match g= option. */
+	DK_STAT_DUPLICATE,          /*- Duplicate DomainKey-Header */
 } DK_STAT;
 
 typedef enum
@@ -233,6 +237,7 @@ static char    *errors[] = {
 	"DK_STAT_REVOKED: Key has been revoked.",
 	"DK_STAT_INTERNAL: cannot call this routine in this context.  Internal error.",
 	"DK_STAT_GRANULARITY: Granularity mismatch: sender doesn't match g= option.",
+	"DK_STAT_DUPLICATE: duplicate Domainkey-Signature in message",
 };
 /* STOPPRIV */
 /* STOPHEAD */
@@ -1153,15 +1158,18 @@ dkheaders(DK *dk)
 				int             thisheaderlen = str_len(dk->header + i);
 
 				/*
-				 * Do not sign email that already has a dksign unless the Sender was found first, 3.5.2 TC41, TC41-1
+				 * Do not sign email that already has a dksign unless the
+				 * Sender was found first, 3.5.2 TC41, TC41-1
 				 */
 				if (dk->signing == DK_SIGNING_SIGN && !dk->sender)
-					return DKERR(DK_STAT_SYNTAX);
+					return DKERR(DK_STAT_DUPLICATE);
 				/*
-				 * check the outermost (first encountered) signature (need to fix when multiple sigs are present)
-				 * ONLY if we are verifying, if we are signing then ignore it (sender before dk-sig) -Tim
+				 * check the outermost (first encountered) signature
+				 * (need to fix when multiple sigs are present)
+				 * ONLY if we are verifying, if we are signing then ignore it
+				 * (sender before dk-sig) -Tim
 				 */
-				if ((!dk->dksign) && (dk->signing != DK_SIGNING_SIGN)) {
+				if (!dk->dksign && dk->signing != DK_SIGNING_SIGN) {
 					char           *values[7];	/* dsbchqa */
 					dk->dksign = dk->header + i;
 					/*- parse the dksign header .  */
@@ -1203,15 +1211,15 @@ dkheaders(DK *dk)
 			} /* end trace */
 		}
 	}
-	if ((!dk->from) || (!dk_from(dk))) /*- No From:, 3.1 says that it's no good..  TC11/TC16 */
+	if (!dk->from || !dk_from(dk)) /*- No From:, 3.1 says that it's no good..  TC11/TC16 */
 		return DKERR(DK_STAT_SYNTAX);
 	if (dk->signing == DK_SIGNING_NOVERIFY) /*- No DK-Sig: should return No Signature. */
 		return DKERR(DK_STAT_NOSIG);
 	if (dk->headers && dk->signing == DK_SIGNING_VERIFY)
 		return dkheaders_header(dk);
-	if ((dk->signing == DK_SIGNING_SIGN) && ((dk->opts & DKOPT_RDUPE) 
-		  || (dk->opts & DKOPT_SELHEAD))) /*- remove dupe headers for sig */
-	{
+	if (dk->signing == DK_SIGNING_SIGN && 
+		((dk->opts & DKOPT_RDUPE) || (dk->opts & DKOPT_SELHEAD)))
+	{ /*- remove dupe headers for sig */
 		DK_STAT         ret;
 		dk->headers = DK_MALLOC(dk->headermax);
 		dk_headers(dk, dk->headers);
@@ -2069,7 +2077,7 @@ strncasestr(const char *s, const char *find, size_t slen)
 void
 getversion_domainkeys_c()
 {
-	static char    *x = "$Id: domainkeys.c,v 1.15 2013-08-12 11:55:29+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: domainkeys.c,v 1.16 2013-08-17 16:00:19+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

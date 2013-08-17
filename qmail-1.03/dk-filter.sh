@@ -1,5 +1,8 @@
 #
 # $Log: dk-filter.sh,v $
+# Revision 1.16  2013-08-17 15:59:21+05:30  Cprogrammer
+# do not treat duplicate DomainKey-Signature as an error
+#
 # Revision 1.15  2013-08-17 15:02:06+05:30  Cprogrammer
 # fixed syntax errors and private key lookup
 #
@@ -48,7 +51,7 @@
 # Revision 1.1  2009-04-02 14:52:27+05:30  Cprogrammer
 # Initial revision
 #
-# $Id: dk-filter.sh,v 1.15 2013-08-17 15:02:06+05:30 Cprogrammer Exp mbhangui $
+# $Id: dk-filter.sh,v 1.16 2013-08-17 15:59:21+05:30 Cprogrammer Exp mbhangui $
 #
 if [ -z "$QMAILREMOTE" -a -z "$QMAILLOCAL" ]; then
 	echo "dk-filter should be run by spawn-filter" 1>&2
@@ -271,14 +274,8 @@ if [ $dksign -eq 1 ] ; then
 	#QMAILHOME/bin/dktest -h -s $dkkeyfn
 	eval $dkopts
 	exit_val=$?
-	if [ $exit_val -ne 0 ] ; then
-		# allow SYNTAX error due to duplicate DomainKey-Header
-		if [ $exit_val -eq 6 ] ; then
-			exec 0</tmp/dk.$$
-			/bin/rm -f /tmp/dk.$$
-			cat
-			exit $?
-		fi
+	# allow error due to duplicate DomainKey-Header
+	if [ $exit_val -ne 0 -a $exit_val -ne 12 ] ; then
 		/bin/rm -f /tmp/dk.$$
 		exit $exit_val
 	fi

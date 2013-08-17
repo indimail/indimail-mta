@@ -1,5 +1,8 @@
 /*
  * $Log: dktest.c,v $
+ * Revision 1.16  2013-08-17 16:01:08+05:30  Cprogrammer
+ * added case for duplicate DomainKey-Signature header
+ *
  * Revision 1.15  2011-07-29 09:28:09+05:30  Cprogrammer
  * fixed gcc 4.6 warnings
  *
@@ -396,6 +399,9 @@ main(int argc, char *argv[])
 		case DK_STAT_GRANULARITY:
 			status = "bad sender (g=)";
 			break;
+		case DK_STAT_DUPLICATE:
+			status = "duplicate signature";
+			break;
 		}
 #if 0
 		printf("Comment: DomainKeys? See http://antispam.yahoo.com/domainkeys\n");
@@ -422,7 +428,7 @@ main(int argc, char *argv[])
 void
 getversion_dktest_c()
 {
-	static char    *x = "$Id: dktest.c,v 1.15 2011-07-29 09:28:09+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: dktest.c,v 1.16 2013-08-17 16:01:08+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
