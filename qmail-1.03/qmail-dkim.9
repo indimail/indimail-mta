@@ -86,8 +86,9 @@ environment variable to a desired set of letters.  Precisely, if you
 want a libdkim return status to generate an error, include that
 letter, where A is the first return status (DKIM_SUCCESS), B is the
 second (DKIM_FINISHED_BODY), etc.  The letter should be uppercase if you
-want a permanent error to be returned (exit code 13), and lowercase if
-you want a temporary error to be returned (exit code 88).
+want a permanent error to be returned, and lowercase if you want a temporary
+error to be returned (exit code 88).
+
 The complete set of letters with the corresponding return status is given below
 
  A - DKIM_SUCCESS                        - Function executed successfully
