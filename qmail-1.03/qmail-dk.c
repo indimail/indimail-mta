@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-dk.c,v $
+ * Revision 1.38  2013-08-17 14:59:29+05:30  Cprogrammer
+ * BUG - corrected location of private key when % sign is removed
+ *
  * Revision 1.37  2013-01-24 22:42:07+05:30  Cprogrammer
  * alternate code for chosing DKSIGN selector filename
  *
@@ -114,6 +117,7 @@
  *
  */
 #ifdef DOMAIN_KEYS
+#include <stdio.h>
 #include <unistd.h>
 #include <stdlib.h>
 #include <sys/types.h>
@@ -376,6 +380,7 @@ write_signature(DK *dk, char *dk_selector, char *keyfn,
 		if (access(keyfnfrom.s, F_OK))
 		{
 			/*- since file is not found remove '%' sign */
+			keyfnfrom.len = 8;
 			if (keyfn[0] == '/')
 			{
 				if (!stralloc_copyb(&keyfnfrom, keyfn, i))
@@ -402,7 +407,7 @@ write_signature(DK *dk, char *dk_selector, char *keyfn,
 		if (!stralloc_0(&keyfnfrom))
 			die(51);
 	}
-	switch (control_readnativefile(&dksignature, keyfnfrom.s, 1))
+	switch (control_readnativefile(&dksignature, keyfn[0] == '/' ? keyfnfrom.s : keyfnfrom.s + 8, 1))
 	{
 	case 0: /*- file not present */
 		/*
@@ -620,14 +625,15 @@ main(int argc, char *argv[])
 	dkqueue = env_get("DKQUEUE");
 	if (dkqueue && *dkqueue)
 		binqqargs[0] = dkqueue;
-	if (dksign || dkverify)
+	if (!dksign && !dkverify) {
+		execv(*binqqargs, binqqargs);
+		die(120, 0);
+	} else
+	if (!(dklib = dk_init(&st)))
 	{
-		if (!(dklib = dk_init(&st)))
-		{
-			maybe_die_dk(st);
-			custom_error("Z", "dk initialization failed (#4.3.0)", 0);
-			_exit(88);
-		}
+		maybe_die_dk(st);
+		custom_error("Z", "dk initialization failed (#4.3.0)", 0);
+		_exit(88);
 	}
 	/*- Initialization */
 	if (dksign)
@@ -881,7 +887,7 @@ main(argc, argv)
 void
 getversion_qmail_dk_c()
 {
-	static char    *x = "$Id: qmail-dk.c,v 1.37 2013-01-24 22:42:07+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-dk.c,v 1.38 2013-08-17 14:59:29+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

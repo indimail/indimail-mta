@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-dkim.c,v $
+ * Revision 1.38  2013-08-17 15:00:33+05:30  Cprogrammer
+ * BUG - corrected location of private key when % sign is removed
+ *
  * Revision 1.37  2013-01-24 22:37:22+05:30  Cprogrammer
  * BUG (fix by Piotr Gronek) - DKIM_FREE(results) called before call to ParseTagValues()
  * alternate code for DKIMSIGN selector file name
@@ -381,9 +384,10 @@ write_signature(char *domain, char *keyfn)
 			die(51, 1);
 		if (!stralloc_0(&keyfnfrom))
 			die(51, 1);
-		/*- check if file does not exists remove '%' sign */
 		if (access(keyfnfrom.s, F_OK))
 		{
+			/*- since file does not exists remove '%' sign */
+			keyfnfrom.len = 8;
 			if (keyfn[0] == '/')
 			{
 				if (!stralloc_copyb(&keyfnfrom, keyfn, i))
@@ -410,7 +414,7 @@ write_signature(char *domain, char *keyfn)
 		if (!stralloc_0(&keyfnfrom))
 			die(51, 1);
 	}
-	switch (control_readnativefile(&dksignature, keyfnfrom.s, 1))
+	switch (control_readnativefile(&dksignature, keyfn[0] == '/' ? keyfnfrom.s : keyfnfrom.s + 8, 1))
 	{
 	case 0: /*- missing signature file */
 		DKIMSignFree(&ctxt);
@@ -1146,6 +1150,10 @@ main(int argc, char *argv[])
 	dkimqueue = env_get("DKIMQUEUE");
 	if (dkimqueue && *dkimqueue)
 		binqqargs[0] = dkimqueue;
+	if (!dkimsign && !dkimverify) {
+		execv(*binqqargs, binqqargs);
+		die(120, 0);
+	}
 	if (dkimsign)
 	{
 		/* selector */
@@ -1446,7 +1454,7 @@ main(argc, argv)
 void
 getversion_qmail_dkim_c()
 {
-	static char    *x = "$Id: qmail-dkim.c,v 1.37 2013-01-24 22:37:22+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-dkim.c,v 1.38 2013-08-17 15:00:33+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
