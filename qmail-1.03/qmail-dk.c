@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-dk.c,v $
+ * Revision 1.39  2013-08-17 16:00:40+05:30  Cprogrammer
+ * added case for duplicate DomainKey-Signature header
+ *
  * Revision 1.38  2013-08-17 14:59:29+05:30  Cprogrammer
  * BUG - corrected location of private key when % sign is removed
  *
@@ -809,6 +812,10 @@ main(int argc, char *argv[])
 				status = "bad sender  ";
 				code = "X.7.5";
 				break;
+			case DK_STAT_DUPLICATE:
+				status = "dup sig     ";
+				code = "X.6.0";
+				break;
 			}
 			if (!stralloc_cats(&dkoutput, status))
 				die(51);
@@ -887,7 +894,7 @@ main(argc, argv)
 void
 getversion_qmail_dk_c()
 {
-	static char    *x = "$Id: qmail-dk.c,v 1.38 2013-08-17 14:59:29+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-dk.c,v 1.39 2013-08-17 16:00:40+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
