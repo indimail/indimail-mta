@@ -1,6 +1,9 @@
 #!/bin/sh
 #
 # $Log: surblqueue.sh,v $
+# Revision 1.4  2013-08-18 15:53:37+05:30  Cprogrammer
+# use SURBQUEUE to execute qmail-queue program
+#
 # Revision 1.3  2013-08-12 18:56:37+05:30  Cprogrammer
 # added error message if mktemp fails
 #
@@ -11,7 +14,7 @@
 # Initial revision
 #
 #
-# $Id: surblqueue.sh,v 1.3 2013-08-12 18:56:37+05:30 Cprogrammer Exp mbhangui $
+# $Id: surblqueue.sh,v 1.4 2013-08-18 15:53:37+05:30 Cprogrammer Exp mbhangui $
 #
 # I should be called by qmail-smtpd or anything that calls qmail-queue
 #
@@ -28,14 +31,19 @@ if [ $? -ne 0 ] ; then
 	exit 111
 fi
 #
-# run surblfilter and feed output to qmail-queue
+# run surblfilter and feed output to qmail-multi
 #
 QMAIL/bin/surblfilter > $out
 status=$?
 if [ $status -eq 0 ] ; then
 	exec 0<$out
 	/bin/rm -f $out
-	exec QMAIL/bin/qmail-queue
+	# use SURBLQUEUE to execute queue program (thanks Roberto Puzzanghera)
+	if [ $SURBLQUEUE != '' && -x $SURBLQUEUE ]; then
+		exec $SURBLQUEUE
+	else
+		exec QMAIL/bin/qmail-multi
+	fi
 else
 	/bin/rm -f $out
 	exit $status
