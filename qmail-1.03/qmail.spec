@@ -1,6 +1,6 @@
 #
 #
-# $Id: qmail.spec,v 1.2 2013-08-12 18:56:17+05:30 Cprogrammer Exp mbhangui $
+# $Id: qmail.spec,v 1.3 2013-08-16 00:11:36+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %define _unpackaged_files_terminate_build 1
 
@@ -1100,7 +1100,7 @@ if [ %nodksignatures -eq 0 ] ; then
 	if [ -x %{_prefix}/bin/dknewkey ] ; then
 		ver_opt="both"
 		sign_opt="both"
-		%{_prefix}/bin/dknewkey %{_prefix}/control/domainkeys/indimail 1024
+		%{_prefix}/bin/dknewkey %{_prefix}/control/domainkeys/default 1024
 	else
 		ver_opt="none"
 		sign_opt="none"
@@ -1176,7 +1176,7 @@ do
 				--qhpsi="%{_prefix}/bin/clamdscan %s --fdpass --quiet --no-summary" \
 				--dmasquerade \
 				--dkverify=$ver_opt \
-				--dksign=$sign_opt --private_key=%{_prefix}/control/domainkeys/indimail \
+				--dksign=$sign_opt --private_key=%{_prefix}/control/domainkeys/%/default \
 				$extra_opt
 		else
 			%{_prefix}/sbin/svctool --smtp=$port --servicedir=%{servicedir} \
@@ -1189,7 +1189,7 @@ do
 				--logfilter=/tmp/spamfifo --rejectspam=0 --spamexitcode=0 \
 				--dmasquerade \
 				--dkverify=both \
-				--dksign=both --private_key=%{_prefix}/control/domainkeys/indimail \
+				--dksign=both --private_key=%{_prefix}/control/domainkeys/%/default \
 				$extra_opt
 		fi
 	else
@@ -1203,7 +1203,7 @@ do
 				--qhpsi="%{_prefix}/bin/clamdscan %s --fdpass --quiet --no-summary" \
 				--dmasquerade \
 				--dkverify=both \
-				--dksign=both --private_key=%{_prefix}/control/domainkeys/indimail \
+				--dksign=both --private_key=%{_prefix}/control/domainkeys/%/default \
 				$extra_opt
 		else
 			%{_prefix}/sbin/svctool --smtp=$port --servicedir=%{servicedir} \
@@ -1214,7 +1214,7 @@ do
 				--min-free=52428800 --content-filter --virus-filter \
 				--dmasquerade \
 				--dkverify=both \
-				--dksign=both --private_key=%{_prefix}/control/domainkeys/indimail \
+				--dksign=both --private_key=%{_prefix}/control/domainkeys/%/default \
 				$extra_opt
 		fi
 	fi
@@ -1226,14 +1226,14 @@ if [ %noclamav -eq 0 ] ; then
 		--min-free=52428800 --fsync --syncdir \
 		--qhpsi="%{_prefix}/bin/clamdscan %s --fdpass --quiet --no-summary" \
 		--dkverify="none" --dksign=$sign_opt \
-		--private_key=%{_prefix}/control/domainkeys/indimail \
+		--private_key=%{_prefix}/control/domainkeys/%/default \
 		$extra_opt
 else
 	%{_prefix}/sbin/svctool --queueParam=defaultqueue \
 		--qbase=%{qbase} --qcount=%{qcount} --qstart=1 \
 		--min-free=52428800 --fsync --syncdir --virus-filter \
 		--dkverify="none" --dksign=$sign_opt \
-		--private_key=%{_prefix}/control/domainkeys/indimail \
+		--private_key=%{_prefix}/control/domainkeys/%/default \
 		$extra_opt
 fi
 %{_prefix}/sbin/svctool --smtp=366 --odmr --servicedir=%{servicedir} \
@@ -1521,7 +1521,7 @@ else
 	done
 fi
 %{__rm} -f %{_prefix}/control/controlfiles
-%{__rm} -f %{_prefix}/control/domainkeys/indimail.pub %{_prefix}/control/domainkeys/indimail
+%{__rm} -f %{_prefix}/control/domainkeys/default.pub %{_prefix}/control/domainkeys/default
 /bin/rmdir --ignore-fail-on-non-empty %{_prefix}/control/domainkeys 2>/dev/null
 /bin/rmdir --ignore-fail-on-non-empty %{_prefix}/control 2>/dev/null
 
