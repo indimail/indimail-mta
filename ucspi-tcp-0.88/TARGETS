@@ -202,3 +202,9 @@ haslic.h
 mysql_config.o
 hasmysql.h
 mysql_config
+hexconversion.o
+ip4_bit.o
+ip6_bit.o
+ip6_compactaddr.o
+ip6_expandaddr.o
+socket_opts6.o
