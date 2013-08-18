@@ -24,7 +24,10 @@ or
 environment variables to the pathname of the private key that will be
 used to sign the message. If there is a % character in the environment
 variable, it is removed and replaced by the domain name in the From: header.
-If, after substituting the %, that file does not exist, the message will not be signed.
+If, after substituting the %, that file does not exist, /var/indimail/control/domainkeys/%/default
+will be used as the key. If again, after substituting the % sign, the file does not exist,
+/var/indimail/control/domainkeys/default will be used as the key.
+After all substitutions, if the key file does not exist, the message will not be signed.
 If there is no % and the file does not exist, the message will be rejected with error 35.
 The selector (s=) will be taken from the basename of the file.
 The private key should be created by 
