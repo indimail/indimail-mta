@@ -177,3 +177,4 @@ obs.mk
 */debian/*.install
 */debian/obs_deb_prep
 */debian/_service
+README.vmware
