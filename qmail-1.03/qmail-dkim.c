@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-dkim.c,v $
+ * Revision 1.39  2013-08-18 15:53:30+05:30  Cprogrammer
+ * revert back to default verification mode if both dksign, dkverify are not set
+ *
  * Revision 1.38  2013-08-17 15:00:33+05:30  Cprogrammer
  * BUG - corrected location of private key when % sign is removed
  *
@@ -1150,10 +1153,6 @@ main(int argc, char *argv[])
 	dkimqueue = env_get("DKIMQUEUE");
 	if (dkimqueue && *dkimqueue)
 		binqqargs[0] = dkimqueue;
-	if (!dkimsign && !dkimverify) {
-		execv(*binqqargs, binqqargs);
-		die(120, 0);
-	}
 	if (dkimsign)
 	{
 		/* selector */
@@ -1454,7 +1453,7 @@ main(argc, argv)
 void
 getversion_qmail_dkim_c()
 {
-	static char    *x = "$Id: qmail-dkim.c,v 1.38 2013-08-17 15:00:33+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-dkim.c,v 1.39 2013-08-18 15:53:30+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

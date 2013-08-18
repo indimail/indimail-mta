@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-dk.c,v $
+ * Revision 1.40  2013-08-18 15:52:51+05:30  Cprogrammer
+ * revert back to default verification mode if both dksign, dkverify are not set
+ *
  * Revision 1.39  2013-08-17 16:00:40+05:30  Cprogrammer
  * added case for duplicate DomainKey-Signature header
  *
@@ -120,7 +123,6 @@
  *
  */
 #ifdef DOMAIN_KEYS
-#include <stdio.h>
 #include <unistd.h>
 #include <stdlib.h>
 #include <sys/types.h>
@@ -628,10 +630,6 @@ main(int argc, char *argv[])
 	dkqueue = env_get("DKQUEUE");
 	if (dkqueue && *dkqueue)
 		binqqargs[0] = dkqueue;
-	if (!dksign && !dkverify) {
-		execv(*binqqargs, binqqargs);
-		die(120, 0);
-	} else
 	if (!(dklib = dk_init(&st)))
 	{
 		maybe_die_dk(st);
@@ -894,7 +892,7 @@ main(argc, argv)
 void
 getversion_qmail_dk_c()
 {
-	static char    *x = "$Id: qmail-dk.c,v 1.39 2013-08-17 16:00:40+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-dk.c,v 1.40 2013-08-18 15:52:51+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
