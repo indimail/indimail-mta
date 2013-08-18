@@ -39,7 +39,7 @@ if [ $status -eq 0 ] ; then
 	exec 0<$out
 	/bin/rm -f $out
 	# use SURBLQUEUE to execute queue program (thanks Roberto Puzzanghera)
-	if [ $SURBLQUEUE != '' && -x $SURBLQUEUE ]; then
+	if [ "$SURBLQUEUE" != "" -a -x "$SURBLQUEUE" ]; then
 		exec $SURBLQUEUE
 	else
 		exec QMAIL/bin/qmail-multi
