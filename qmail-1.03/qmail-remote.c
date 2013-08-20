@@ -460,11 +460,11 @@ run_script(int succ, char *s1, char *s2, char *s3)
 		switch (succ)
 		{
 		case 1: /*- success */
-			if (!env_unset("onfailure_remote")) {
+			if (!env_unset("ONFAILURE_REMOTE")) {
 				my_error("alert: out of memory", 0, 0);
 				_exit (1);
 			}
-			if (!env_unset("ontransient_remote")) {
+			if (!env_unset("ONTRANSIENT_REMOTE")) {
 				my_error("alert: out of memory", 0, 0);
 				_exit (1);
 			}
