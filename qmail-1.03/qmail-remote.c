@@ -1,5 +1,12 @@
 /*
  * $Log: qmail-remote.c,v $
+ * Revision 1.86  2013-08-22 11:10:14+05:30  Cprogrammer
+ * set env variable SMTPSTATUS as 'D' or 'Z' indicating permanent or temporary failure
+ *
+ * Revision 1.85  2013-08-21 18:59:06+05:30  Cprogrammer
+ * fixed setting of SMTPTEXT env variable for success and failures
+ * bypass tls if clientcert.pem is missing
+ *
  * Revision 1.84  2012-12-17 15:34:37+05:30  Cprogrammer
  * fix for smtptext during TLS negotiation
  *
@@ -373,6 +380,7 @@ int             flagtcpto = 1;
 int             min_penalty = MIN_PENALTY;
 unsigned long   max_tolerance = MAX_TOLERANCE;
 stralloc        smtptext = { 0 };
+stralloc        smtpenv = { 0 };
 
 /*- http://mipassoc.org/pipermail/batv-tech/2007q4/000032.html */
 #ifdef BATV 
@@ -423,9 +431,10 @@ my_error(char *s1, char *s2, char *s3)
 }
 
 int
-run_script(int succ, char *s1, char *s2, char *s3)
+run_script(int succ, char code)
 {
 	char           *prog, *str;
+	char            remote_code[2] = "\0\0";
 	char          **args;
 	int             child, wstat, i;
 
@@ -436,6 +445,11 @@ run_script(int succ, char *s1, char *s2, char *s3)
 		break;
 	case 0: /*- failure */
 		str = "ONFAILURE_REMOTE";
+		remote_code[0] = code;
+		if (!env_put2("SMTPSTATUS", remote_code)) {
+			my_error("alert: Out of memory", 0, 0);
+			_exit (1);
+		}
 		break;
 	case -1: /*- transient error */
 		str = "ONTRANSIENT_REMOTE";
@@ -478,6 +492,7 @@ run_script(int succ, char *s1, char *s2, char *s3)
 				my_error("alert: Out of memory", 0, 0);
 				_exit (1);
 			}
+			break;
 		case -1:
 			if (!env_unset("ONSUCCESS_REMOTE")) {
 				my_error("alert: Out of memory", 0, 0);
@@ -488,46 +503,6 @@ run_script(int succ, char *s1, char *s2, char *s3)
 				_exit (1);
 			}
 			break;
-		}
-		if (!stralloc_0(&host))
-		{
-			my_error("alert: Out of memory", 0, 0);
-			_exit (1);
-		} else
-		if (!stralloc_0(&sender))
-		{
-			my_error("alert: Out of memory", 0, 0);
-			_exit (1);
-		} else
-		if (!stralloc_0(&qqeh))
-		{
-			my_error("alert: Out of memory", 0, 0);
-			_exit (1);
-		}
-		if (s1 && !stralloc_copys(&smtptext, s1))
-		{
-			my_error("alert: Out of memory", 0, 0);
-			_exit (1);
-		}
-		if (s1 && s2 && !stralloc_cats(&smtptext, s2))
-		{
-			my_error("alert: Out of memory", 0, 0);
-			_exit (1);
-		}
-		if (s1 && s2 && s3 && !stralloc_cats(&smtptext, s3))
-		{
-			my_error("alert: Out of memory", 0, 0);
-			_exit (1);
-		}
-		if (!stralloc_0(&smtptext))
-		{
-			my_error("alert: Out of memory", 0, 0);
-			_exit (1);
-		}
-		if (!env_put2("ERRTEXT", smtptext.s))
-		{
-			my_error("alert: Out of memory", 0, 0);
-			_exit (1);
 		}
 		/*- copy all arguments */
 		for (i = 0;i < my_argc;i++)
@@ -558,7 +533,7 @@ zerodie(char *s1, char *s2, char *s3, int succ)
 {
 	zero();
 	substdio_flush(subfdoutsmall);
-	_exit(run_script(succ, s1, s2, s3));
+	_exit(run_script(succ, s1[0]));
 }
 
 void
@@ -777,15 +752,18 @@ setsmtptext(int code, int type)
 	{
 		char            strnum[FMT_ULONG];
 
-		if (smtptext.len) {
-			if (smtptext.s[smtptext.len - 1] == '\n')
-				smtptext.s[smtptext.len - 1] = 0;
+		if (!smtpenv.len && smtptext.len && !stralloc_copy(&smtpenv, &smtptext))
+			return (1);
+		if (smtpenv.len) {
+			if (smtpenv.s[smtpenv.len - 1] == '\n')
+				smtpenv.s[smtpenv.len - 1] = 0;
 			else
-			if (!stralloc_0(&smtptext))
+			if (!stralloc_0(&smtpenv))
 				return (1);
-			smtptext.len--;
-			if (!env_put2((type == 's' || mxps) ? "QMTPTEXT" : "SMTPTEXT", smtptext.s))
+			smtpenv.len--;
+			if (!env_put2((type == 's' || mxps) ? "QMTPTEXT" : "SMTPTEXT", smtpenv.s)) {
 				return (1);
+			}
 		}
 		if (code > 0)
 		{
@@ -828,7 +806,7 @@ temp_noconn(stralloc *h, char *ip, int port)
 	}
 	temp_noconn_out(". (#4.4.1)\n");
 	if (setsmtptext(0, type))
-		smtptext.len = 0;
+		smtpenv.len = 0;
 	zerodie(0, 0, 0, -1);
 }
 
@@ -851,7 +829,7 @@ temp_qmtp_noconn(stralloc *h, char *ip, int port)
 	}
 	temp_noconn_out(". (#4.4.1)\n");
 	if (setsmtptext(0, type))
-		smtptext.len = 0;
+		smtpenv.len = 0;
 	zerodie(0, 0, 0, -1);
 }
 
@@ -1045,6 +1023,8 @@ outsmtptext()
 		}
 		if (substdio_put(subfdoutsmall, smtptext.s, smtptext.len) == -1)
 			_exit(0);
+		if (!stralloc_copy(&smtpenv, &smtptext))
+			smtpenv.len = 0;
 		smtptext.len = 0;
 	}
 }
@@ -1198,6 +1178,14 @@ tls_init()
 		if (!(controldir = env_get("CONTROLDIR")))
 			controldir = "control";
 	}
+	if (!stralloc_copys(&servercert, controldir))
+		temp_nomem();
+	if (!stralloc_catb(&servercert, "/clientcert.pem", 15))
+		temp_nomem();
+	if (!stralloc_0(&servercert))
+		temp_nomem();
+	if (access(servercert.s, F_OK))
+		return (0);
 	if (partner_fqdn)
 	{
 		struct stat     st;
@@ -2977,7 +2965,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_remote_c()
 {
-	static char    *x = "$Id: qmail-remote.c,v 1.84 2012-12-17 15:34:37+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-remote.c,v 1.86 2013-08-22 11:10:14+05:30 Cprogrammer Exp mbhangui $";
 	x=sccsidauthcramh;
 	x=sccsidauthdigestmd5h;
 	x++;
