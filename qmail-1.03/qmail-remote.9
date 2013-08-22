@@ -213,16 +213,19 @@ If neither of these variables \fBONSUCCESS_REMOTE\fR, \fBONFAILURE_REMOTE\fR and
 are defined, \fBqmail-remote\fR will always return zero exit status.
 
 When these two variables are set, \fBqmail-remote\fR will also set the environment variables
+
 .TP
 .B SMTPTEXT
-This will contain last SMTP conversion with the remote host.
+This will contain last SMTP conversion with the remote SMTP server. In case of any error,
+this will contain the latest local error that happened while conversing with the remote
+SMTP server.
 .TP
 .B SMTPCODE
-This will contain last SMTP code returned by the remote host.
+This will contain the 3 digit SMTP code returned by the remote SMTP server.
 .TP
-.B ERRTEXT
-This will contain the latest local error that happened while conversing with the remote
-SMTP client
+.B SMTPSTATUS
+This will be either 'D' or 'Z' indicating permanent or temporary failure response from
+the remote SMTP server.
 
 .PP
 \fBqmail-remote\fR uses many environment variables. These environment variables can be recipient
@@ -563,7 +566,8 @@ Exclusions of domains you host for Bounce Address Tag Validation (BATV).
 .TP 5
 .I clientcert.pem
 SSL certificate that is used to authenticate with the remote server
-during a TLS session.
+during a TLS session. If clientcert.pem does not exist, \fBqmail-remote\fR
+will not negotiate TLS.
 
 .TP 5
 .I tlsclientciphers
