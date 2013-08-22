@@ -1,5 +1,8 @@
 /*
  * $Log: smtpd.c,v $
+ * Revision 1.175  2013-08-22 11:12:45+05:30  Cprogrammer
+ * fix compilation warning with sqlmatch
+ *
  * Revision 1.174  2013-08-13 10:43:06+05:30  Cprogrammer
  * fixed STARTTLS plaintext command injection vulnerability
  *
@@ -634,6 +637,8 @@
 #endif
 #ifndef INDIMAIL
 #include "auth_cram.h"
+#else
+#include "sqlmatch.h"
 #endif
 
 #ifdef BATV
@@ -676,7 +681,7 @@ int             wildmat_internal(char *, char *);
 int             ssl_rfd = -1, ssl_wfd = -1;	/*- SSL_get_Xfd() are broken */
 char           *servercert, *clientca, *clientcrl;
 #endif
-char           *revision = "$Revision: 1.174 $";
+char           *revision = "$Revision: 1.175 $";
 char           *protocol = "SMTP";
 stralloc        proto = { 0 };
 static stralloc Revision = { 0 };
@@ -6680,7 +6685,7 @@ addrrelay() /*- Rejection of relay probes. */
 void
 getversion_smtpd_c()
 {
-	static char    *x = "$Id: smtpd.c,v 1.174 2013-08-13 10:43:06+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: smtpd.c,v 1.175 2013-08-22 11:12:45+05:30 Cprogrammer Exp mbhangui $";
 
 #ifdef INDIMAIL
 	if (x)
