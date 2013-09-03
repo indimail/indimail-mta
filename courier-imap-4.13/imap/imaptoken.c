@@ -221,7 +221,8 @@ void smap_readline(char *buffer, size_t bufsize)
 static struct imaptoken *do_readtoken(int touc)
 {
 int	c=0;
-unsigned l;
+unsigned l, max_atom_size;
+char *ptr;
 
 #define	appendch(c)	alloc_tokenbuf(l+1); curtoken.tokenbuf[l++]=(c);
 
@@ -340,7 +341,8 @@ unsigned l;
 		&& c != '{' && c != '}' && c != LBRACKET_CHAR && c != RBRACKET_CHAR)
 	{
 		curtoken.tokentype=IT_ATOM;
-		if (l < IT_MAX_ATOM_SIZE)
+		max_atom_size = (ptr = getenv("MAX_ATOM_SIZE")) ? atoi(ptr) : IT_MAX_ATOM_SIZE;
+		if (l < max_atom_size)
 		{
 			if (touc)
 				c=toupper(c);

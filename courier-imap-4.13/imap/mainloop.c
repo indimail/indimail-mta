@@ -103,14 +103,19 @@ void cmdsuccess(const char *tag, const char *msg)
 void mainloop(void)
 {
 	int noerril = 0;
+	unsigned max_atom_size;
+	char *tag, ptr;
 
+	max_atom_size = (ptr = getenv("MAX_ATOM_SIZE")) ? atoi(ptr) : IT_MAX_ATOM_SIZE;
 	signal(SIGTERM, sigexit);
 	signal(SIGHUP, sigexit);
 	signal(SIGINT, sigexit);
 
+	if (!(tag = (char *) malloc(max_atom_size + 1))) {
+		write_error_exit("error allocating atom");
+	}
 	for (;;)
 	{
-	char	tag[IT_MAX_ATOM_SIZE+1];
 	struct	imaptoken *curtoken;
 
 		read_timeout(30 * 60);
