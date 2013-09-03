@@ -57,7 +57,7 @@ static char     ssoutbuf[512];
 static substdio ssout = SUBSTDIO_FDBUF(write, 1, ssoutbuf, sizeof ssoutbuf);
 static char     sserrbuf[512];
 static substdio sserr = SUBSTDIO_FDBUF(write, 2, sserrbuf, sizeof(sserrbuf));
-char           *usage = "usage: qarf [i] -t recipient -s subject -f sender [-m filename]\n";
+char           *usage = "usage: qarf [-i] -t recipient -s subject -f sender [-m filename]\n";
 
 void
 logerr(char *s)
