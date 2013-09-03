@@ -1,3 +1,9 @@
+/*
+ * $Log: cdbget.c,v $
+ * Revision 1.1  2013-09-03 22:54:54+05:30  Cprogrammer
+ * Initial revision
+ *
+ */
 #include "exit.h"
 #include "scan.h"
 #include "str.h"
@@ -79,4 +85,10 @@ main(int argc, char **argv)
 	if (substdio_flush(subfdoutsmall) == -1)
 		die_write();
 	_exit(0);
+}
+
+void
+getversion_cdbget_c()
+{
+	static char    *x = "$Id: cdbget.c,v 1.1 2013-09-03 22:54:54+05:30 Cprogrammer Exp mbhangui $";
 }
