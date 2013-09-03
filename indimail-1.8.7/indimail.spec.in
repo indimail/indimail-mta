@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail.spec.in,v 2.268 2013-08-16 00:11:07+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 2.269 2013-09-03 23:14:24+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %define _unpackaged_files_terminate_build 1
 
@@ -49,6 +49,7 @@
 %define eps_version        1.2
 %define cdb_version        1.0
 %define libdkim_version    1.4
+%define libsrs2_version    1.0.18
 %define mysql_version      6.0.9-alpha
 %define noperms            1
 %define host               @HOST@
@@ -65,6 +66,7 @@
 %define noproxy            0
 %define nocourierimap      0
 %define nolibdkim          0
+%define nolibsrs2          0
 %define nofetchmail        0
 %define nobogofilter       0
 %define nodksignatures     0
@@ -144,6 +146,12 @@ Source17:%{name}-permissions.secure
 Source18:%{name}-permissions.paranoid
 %endif
 %endif
+%if %nolibdkim == 0
+Source19:  http://downloads.sourceforge.net/%{name}/libdkim-%{libdkim_version}.tar.gz
+%endif
+%if %nolibsrs2 == 0
+Source20:  http://downloads.sourceforge.net/%{name}/libsrs2-%{libsrs2_version}.tar.gz
+%endif
 
 Patch1:  http://downloads.sourceforge.net/%{name}/Patches/qmail-%{qmail_version}.patch.gz
 Patch2:  http://downloads.sourceforge.net/%{name}/Patches/ucspi-tcp-%{ucspi_version}.patch.gz
@@ -198,6 +206,8 @@ NoSource: 12
 %endif
 NoSource: 13
 NoSource: 14
+NoSource: 19
+NoSource: 20
 
 URL: http://www.indimail.org
 #AutoReqProv: No
@@ -352,7 +362,7 @@ mpack-1.6 fortune-%{fortune_version} pam-multi-%{pam_multi_version} \
 qmail-%{qmail_version} ucspi-tcp-%{ucspi_version} nssd-%{nssd_version} \
 bogofilter-%{bogofilter_version} fetchmail-%{fetchmail_version} \
 courier-imap-%{courier_version} clamav-%{clamav_version} \
-libdkim-%{libdkim_version} logalert-0.3
+libdkim-%{libdkim_version} libsrs2-%{libsrs2_version} logalert-0.3
 do
 	(
 	if [ -d $i ] ; then
@@ -368,6 +378,9 @@ do
 		continue
 	fi
 	if [ " $i" = " libdkim-%{libdkim_version}" -a %nolibdkim -ne 0 ] ; then
+		continue
+	fi
+	if [ " $i" = " libsrs2-%{libsrs2_version}" -a %nolibsrs2 -ne 0 ] ; then
 		continue
 	fi
 	if [ " $i" = " clamav-%{clamav_version}" -a %noclamav -ne 0 ] ; then
@@ -465,6 +478,32 @@ echo "Will send output to $DEVICE"
 #### LIBDKIM ######################
 if [ -d libdkim-%{libdkim_version} ] ; then
 cd libdkim-%{libdkim_version}
+
+if [ %{fast_mode} -eq 0 ] ; then
+if [ %{build_on_obs} -eq 0 ] ; then
+	echo "reconfiguring..."
+	autoreconf -fi
+else
+	echo "reconfiguring..."
+%if %{undefined centos_version} && %{undefined rhel_version} && %{undefined sles_version}
+%if 0%{?fedora_version} > 10 || 0%{?suse_version} || 0%{?mandriva_version} > 2009
+	autoreconf -fi
+%endif
+%endif
+fi
+fi
+
+if [ " %dist" = " mandrake" ] ; then
+./configure --prefix=%{_prefix} --libdir=%{_libdir} --libexecdir=%{_prefix}/libexec \
+	--x-libraries=%{_libdir} --mandir=%{_prefix}/man > $DEVICE
+else
+%configure --prefix=%{_prefix} --mandir=%{_prefix}/man > $DEVICE
+fi
+cd ..
+fi
+#### LIBSRS2 ######################
+if [ -d libsrs2-%{libsrs2_version} ] ; then
+cd libsrs2-%{libsrs2_version}
 
 if [ %{fast_mode} -eq 0 ] ; then
 if [ %{build_on_obs} -eq 0 ] ; then
@@ -668,8 +707,8 @@ fi
 [ "$RPM_BUILD_ROOT" != "/" ] && %{__rm} -fr $RPM_BUILD_ROOT
 ID=$(id -u)
 %{__mkdir_p} $RPM_BUILD_ROOT%{_prefix}
-for i in libdkim-%{libdkim_version} %{name}-%{version} ucspi-tcp-%{ucspi_version} \
-nssd-%{nssd_version} bogofilter-%{bogofilter_version} \
+for i in libdkim-%{libdkim_version} libsrs2-%{libsrs2_version} %{name}-%{version} \
+ucspi-tcp-%{ucspi_version} nssd-%{nssd_version} bogofilter-%{bogofilter_version} \
 fetchmail-%{fetchmail_version} courier-imap-%{courier_version} \
 clamav-%{clamav_version}
 do
@@ -683,6 +722,9 @@ do
 		continue
 	fi
 	if [ " $i" = " libdkim-%{libdkim_version}" -a %nolibdkim -ne 0 ] ; then
+		continue
+	fi
+	if [ " $i" = " libsrs2-%{libsrs2_version}" -a %nolibsrs2 -ne 0 ] ; then
 		continue
 	fi
 	if [ " $i" = " clamav-%{clamav_version}" -a %noclamav -ne 0 ] ; then
@@ -724,6 +766,13 @@ if [ %nolibdkim -eq 0 ] ; then
 	%{__rm} -f %{buildroot}%{_libdir}/libdkim.la
 	if [ -x /usr/bin/chrpath ] ; then
     	/usr/bin/chrpath -d %{buildroot}%{_prefix}/bin/dkim
+	fi
+fi
+if [ %nolibsrs2 -eq 0 ] ; then
+	%{__rm} -f %{buildroot}%{_libdir}/libsrs2.la
+	if [ -x /usr/bin/chrpath ] ; then
+    	/usr/bin/chrpath -d %{buildroot}%{_prefix}/bin/srsfilter
+    	/usr/bin/chrpath -d %{buildroot}%{_prefix}/bin/srs
 	fi
 fi
 
@@ -1247,6 +1296,8 @@ fi
 %attr(555,root,qmail)                   %{_prefix}/bin/rrt
 %attr(555,root,qmail)                   %{_prefix}/bin/greydaemon
 %attr(555,root,qmail)                   %{_prefix}/bin/qmail-greyd
+%attr(555,root,qmail)                   %{_prefix}/bin/drate
+%attr(555,root,qmail)                   %{_prefix}/bin/cidr
 %attr(555,root,qmail)                   %{_prefix}/bin/spawn-filter
 %attr(555,root,qmail)                   %{_prefix}/bin/tcp-env
 %attr(555,root,qmail)                   %{_prefix}/bin/qmail-lint
@@ -1314,6 +1365,7 @@ fi
 %attr(555,root,qmail)                   %{_prefix}/bin/multilog
 %attr(555,root,qmail)                   %{_prefix}/bin/qmail-multi
 %attr(555,root,qmail)                   %{_prefix}/bin/qmail-qfilter
+%attr(555,root,qmail)                   %{_prefix}/bin/srsfilter
 %attr(555,root,qmail)                   %{_prefix}/bin/surblfilter
 %attr(555,root,qmail)                   %{_prefix}/bin/surblqueue
 %attr(555,root,qmail)                   %{_prefix}/bin/qmail-sigalrm
@@ -1417,6 +1469,10 @@ fi
 
 %if %nolibdkim == 0
 %attr(555,root,root)                    %{_prefix}/bin/dkim
+%endif
+
+%if %nolibsrs2 == 0
+%attr(555,root,root)                    %{_prefix}/bin/srs
 %endif
 
 # clamav
@@ -1630,27 +1686,28 @@ fi
 %attr(444,root,qmail)                   %{_prefix}/man/cat[1,4,5,7,8]/*
 
 %attr(444,root,qmail)                   %{_prefix}/doc/HOWTO.sharedmaildir
-%attr(444,root,qmail)                   %{_prefix}/doc/README.indimail
-%attr(444,root,qmail)                   %{_prefix}/doc/README.filters
-%attr(444,root,qmail)                   %{_prefix}/doc/README.qmail
 %attr(444,root,qmail)                   %{_prefix}/doc/README.auth
 %attr(444,root,qmail)                   %{_prefix}/doc/README.clamav
+%attr(444,root,qmail)                   %{_prefix}/doc/README.cdb
+%attr(444,root,qmail)                   %{_prefix}/doc/README.filters
+%attr(444,root,qmail)                   %{_prefix}/doc/README.greylist
+%attr(444,root,qmail)                   %{_prefix}/doc/README.indimail
 %attr(444,root,qmail)                   %{_prefix}/doc/README.logselect
 %attr(444,root,qmail)                   %{_prefix}/doc/README.moreipme
 %attr(444,root,qmail)                   %{_prefix}/doc/README.newline
 %attr(444,root,qmail)                   %{_prefix}/doc/README.qhpsi
 %attr(444,root,qmail)                   %{_prefix}/doc/README.qregex
 %attr(444,root,qmail)                   %{_prefix}/doc/README.queue-fix
-%attr(444,root,qmail)                   %{_prefix}/doc/README.greylist
+%attr(444,root,qmail)                   %{_prefix}/doc/README.qmail
 %attr(444,root,qmail)                   %{_prefix}/doc/README.recipients
 %attr(444,root,qmail)                   %{_prefix}/doc/README.remote-auth
 %attr(444,root,qmail)                   %{_prefix}/doc/README.spamcontrol
+%attr(444,root,qmail)                   %{_prefix}/doc/README.srs
 %attr(444,root,qmail)                   %{_prefix}/doc/README.starttls
 %attr(444,root,qmail)                   %{_prefix}/doc/README.status
+%attr(444,root,qmail)                   %{_prefix}/doc/README.surbl
 %attr(444,root,qmail)                   %{_prefix}/doc/README.tls
 %attr(444,root,qmail)                   %{_prefix}/doc/README.wildmat
-%attr(444,root,qmail)                   %{_prefix}/doc/README.cdb
-%attr(444,root,qmail)                   %{_prefix}/doc/README.surbl
 %attr(444,root,qmail)                   %{_prefix}/doc/INSTALL.maildir
 %attr(444,root,qmail)                   %{_prefix}/doc/TEST.receive
 %attr(444,root,qmail)                   %{_prefix}/doc/README-CLUSTER
@@ -1720,6 +1777,17 @@ fi
 %{_libdir}/libdkim.so
 %{_libdir}/libdkim-%{libdkim_version}.so.0
 %{_libdir}/libdkim-%{libdkim_version}.so.0.0.0
+%endif
+%endif
+
+%if %nolibsrs2 == 0
+%if %i_m_on_mac == 1
+%{_libdir}/libsrs2.dylib
+%{_libdir}/libsrs2-%{libsrs2_version}.0.dylib
+%else
+%{_libdir}/libsrs2.so
+%{_libdir}/libsrs2-%{libsrs2_version}.so.0
+%{_libdir}/libsrs2-%{libsrs2_version}.so.0.0.0
 %endif
 %endif
 
@@ -1797,6 +1865,11 @@ fi
 %attr(644,root,qmail)                   %{_libdir}/libdkim.a
 %endif
 
+%if %nolibsrs2 == 0
+%attr(644,root,qmail)                   %{_prefix}/include/srs2.h
+%attr(644,root,qmail)                   %{_libdir}/libsrs2.a
+%endif
+
 %{_libdir}/libeps.a
 %{_libdir}/libcdb.a
 %{_libdir}/libflash.a
@@ -1821,6 +1894,17 @@ fi
 %{_libdir}/libdkim.so
 %{_libdir}/libdkim-%{libdkim_version}.so.0
 %{_libdir}/libdkim-%{libdkim_version}.so.0.0.0
+%endif
+%endif
+
+%if %nolibsrs2 == 0
+%if %i_m_on_mac == 1
+%{_libdir}/libsrs2.dylib
+%{_libdir}/libsrs2-%{libsrs2_version}.0.dylib
+%else
+%{_libdir}/libsrs2.so
+%{_libdir}/libsrs2-%{libsrs2_version}.so.0
+%{_libdir}/libsrs2-%{libsrs2_version}.so.0.0.0
 %endif
 %endif
 
@@ -2843,6 +2927,17 @@ echo "removing shared libraries"
 %endif
 %endif
 
+%if %nolibsrs2 == 0
+%if %i_m_on_mac == 1
+%{__rm} -f %{_libdir}/libsrs2*.dylib
+%{__rm} -f %{_libdir}/libsrs2-%{libsrs2_version}.0.dylib
+%else
+%{__rm} -f %{_libdir}/libsrs2.so
+%{__rm} -f %{_libdir}/libsrs2-%{libsrs2_version}.so.0
+%{__rm} -f %{_libdir}/libsrs2-%{libsrs2_version}.so.0.0.0
+%endif
+%endif
+
 %if %i_m_on_mac == 1
 %{__rm} -f %{_libdir}/libeps.dylib
 %{__rm} -f %{_libdir}/libeps-%{eps_version}.0.dylib
@@ -2887,6 +2982,9 @@ echo "removing static libraries"
 %{__rm} -f %{_libdir}/libindimail.a
 %if %nolibdkim == 0
 %{__rm} -f %{_libdir}/libdkim.a
+%endif
+%if %nolibsrs2 == 0
+%{__rm} -f %{_libdir}/libsrs2.a
 %endif
 
 %post mini
