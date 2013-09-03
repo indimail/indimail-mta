@@ -1,5 +1,8 @@
 /*
  * $Log: cleanq.c,v $
+ * Revision 1.4  2013-08-27 08:19:10+05:30  Cprogrammer
+ * use sticky bit definition from header file
+ *
  * Revision 1.3  2004-10-22 20:23:55+05:30  Cprogrammer
  * added RCS id
  *
@@ -163,7 +166,7 @@ tryclean(const char *d)
 		return;
 	}
 	/*- 4 */
-	if (!(st.st_mode & 01000)) /*- not sticky */
+	if (!(st.st_mode & S_ISVTX)) /*- not sticky */
 	{
 		log_file("deleting: ", d, "not sticky");
 		remove(d);
@@ -233,7 +236,7 @@ main(int argc, char **argv)
 void
 getversion_cleanq_c()
 {
-	static char    *x = "$Id: cleanq.c,v 1.3 2004-10-22 20:23:55+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: cleanq.c,v 1.4 2013-08-27 08:19:10+05:30 Cprogrammer Stab mbhangui $";
 
 	x++;
 }
