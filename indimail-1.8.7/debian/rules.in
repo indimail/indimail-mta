@@ -23,6 +23,7 @@ prefix=@indimaildir@
 version=@version@
 clamav_version=@clamav_version@
 libdkim_version=@libdkim_version@
+libsrs2_version=@libsrs2_version@
 courier_version=@courier_version@
 bogofilter_version=@bogofilter_version@
 fetchmail_version=@fetchmail_version@
@@ -49,6 +50,7 @@ build-stamp:
 	# run configure script
 	#
 	if [ -d libdkim-$(libdkim_version) ] ; then cd libdkim-$(libdkim_version) ; ./configure --prefix=$(prefix) --mandir=$(prefix)/man ; cd ..; fi
+	if [ -d libsrs2-$(libsrs2_version) ] ; then cd libsrs2-$(libsrs2_version) ; ./configure --prefix=$(prefix) --mandir=$(prefix)/man ; cd ..; fi
 	if [ -d indimail-$(version) ] ; then FAKED_MODE=1;export FAKED_MODE;cd indimail-$(version);autoreconf -fi;./configure --prefix=$(prefix) --libexecdir=$(prefix)/libexec --mandir=$(prefix)/man --sysconfdir=$(prefix)/etc --enable-qmaildir=$(prefix) --enable-tcprules-prog=$(prefix)/bin/tcprules --enable-tcpserver-file=$(prefix)/etc/tcp.smtp --enable-mysqlprefix=/usr --enable-moduledir=/lib/security `cat config/indimail.opts`;cd ..;unset FAKED_MODE; fi
 	if [ -d courier-imap-$(courier_version) ] ; then cd courier-imap-$(courier_version) ; ./configure --prefix=$(prefix) --mandir=$(prefix)/man `cat ../indimail-$(version)/config/courier-imap.opts`; cd ..; fi
 	if [ -d bogofilter-$(bogofilter_version) ] ; then cd bogofilter-$(bogofilter_version) ; ./configure --prefix=$(prefix) --sysconfdir=$(prefix)/etc --libexecdir=$(prefix)/libexec --mandir=$(prefix)/man `cat ../indimail-$(version)/config/bogofilter.opts`; cd ..; fi
@@ -59,6 +61,7 @@ build-stamp:
 	# run make
 	#
 	if [ -d libdkim-$(libdkim_version) ] ; then       $(MAKE) -s -C libdkim-$(libdkim_version) DESTDIR=$(DESTDIR); fi
+	if [ -d libsrs2-$(libsrs2_version) ] ; then       $(MAKE) -s -C libsrs2-$(libsrs2_version) DESTDIR=$(DESTDIR); fi
 	if [ -d indimail-$(version) ] ; then FAKED_MODE=1;export FAKED_MODE; $(MAKE) -s -C indimail-$(version) DESTDIR=$(DESTDIR);cd ..;unset FAKED_MODE; fi
 	if [ -d ucspi-tcp-0.88 ] ; then                   $(MAKE) -s -C ucspi-tcp-0.88 DESTDIR=$(DESTDIR); fi
 	if [ -d courier-imap-$(courier_version) ] ; then  $(MAKE) -s -C courier-imap-$(courier_version) DESTDIR=$(DESTDIR); fi
@@ -81,6 +84,7 @@ install: build
 	dh_prep || dh_clean -k
 	dh_installdirs
 	if [ -d libdkim-$(libdkim_version) ] ; then       $(MAKE) -s install -C libdkim-$(libdkim_version) DESTDIR=$(DESTDIR); fi
+	if [ -d libsrs2-$(libsrs2_version) ] ; then       $(MAKE) -s install -C libsrs2-$(libsrs2_version) DESTDIR=$(DESTDIR); fi
 	if [ -d ucspi-tcp-0.88 ] ; then                   $(MAKE) -s install -C ucspi-tcp-0.88 DESTDIR=$(DESTDIR); fi
 	if [ -d courier-imap-$(courier_version) ] ; then  $(MAKE) -s install -C courier-imap-$(courier_version) DESTDIR=$(DESTDIR); fi
 	if [ -d bogofilter-$(bogofilter_version) ] ; then $(MAKE) -s install -C bogofilter-$(bogofilter_version) DESTDIR=$(DESTDIR); fi
