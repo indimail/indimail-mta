@@ -196,7 +196,7 @@ myfailure() {
 # Check that we're a privileged user
 [ `id -u` = 0 ] || exit 4
 if [ -x /bin/systemctl ] ; then
-	/bin/systemctl is-enabled indimail.service
+	/bin/systemctl is-enabled indimail.service > /dev/null
 	if [ $? -ne 0 ] ; then
 		SYSTEMCTL_SKIP_REDIRECT=1
 		if [ -f /etc/rc.d/init.d/functions ] ; then
