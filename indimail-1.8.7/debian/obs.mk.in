@@ -17,6 +17,7 @@ prefix=@prefix@
 #
 clamav_version=0.97.8
 libdkim_version=1.4
+libsrs2_version=1.0.18
 courier_version=4.13
 bogofilter_version=1.2.3
 fetchmail_version=6.3.26
@@ -84,6 +85,7 @@ edit = sed \
 	-e 's,@DATE\@,$(DATE),g' \
 	-e 's,@clamav_version\@,$(clamav_version),g' \
 	-e 's,@libdkim_version\@,$(libdkim_version),g' \
+	-e 's,@libsrs2_version\@,$(libsrs2_version),g' \
 	-e 's,@courier_version\@,$(courier_version),g' \
 	-e 's,@bogofilter_version\@,$(bogofilter_version),g' \
 	-e 's,@fetchmail_version\@,$(fetchmail_version),g' \
