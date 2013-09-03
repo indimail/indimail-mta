@@ -1,3 +1,4 @@
+cidr
 822addr
 822addr.0
 822addr.o
@@ -324,6 +325,7 @@ hasshsgr.h
 hastai.h
 haswaitp.h
 haveip6.h
+hassrs.h
 headerbody.o
 help.t
 hfield.o
@@ -1012,3 +1014,11 @@ swaks
 rrt
 rrt.o
 rrt.1
+srsfilter
+srsfilter.o
+srs
+srs.o
+cidr.o
+drate.o
+evaluate.o
+fmt_double.o
