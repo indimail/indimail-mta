@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-showctl.c,v $
+ * Revision 1.54  2013-08-25 18:38:09+05:30  Cprogrammer
+ * added SRS
+ *
  * Revision 1.53  2011-07-29 09:29:51+05:30  Cprogrammer
  * fixed gcc 4.6 warnings
  *
@@ -443,6 +446,13 @@ main(int argc, char **argv)
 
 	do_str("smtpgreeting", 1, "smtpgreeting", "SMTP greeting: 220 ");
 	do_lst("smtproutes", "No artificial SMTP routes.", "SMTP route: ", "");
+#ifdef HAVESRS
+	do_str("srs_domain", 0, "", "SRS domain name is ");
+	do_lst("srs_secrets", "No secrets", "", "");
+	do_int("srs_maxage", "21", "SRS maxage is ", "");
+	do_int("srs_hashlength", "4", "SRS hashlength is ", "");
+	do_int("srs_hashmin", "4", "SRS hashmin is ", "");
+#endif
 	do_lst("qmtproutes", "No artificial QMTP routes.", "QMTP route: ", "");
 	do_int("timeoutconnect", "60", "SMTP client connection timeout is ", " seconds");
 	do_int("timeoutremote", "1200", "SMTP client data timeout is ", " seconds");
@@ -602,6 +612,18 @@ main(int argc, char **argv)
 			continue;
 		if (str_equal(d->d_name, "smtproutes"))
 			continue;
+#ifdef HAVESRS
+		if (str_equal(d->d_name, "srs_domain"))
+			continue;
+		if (str_equal(d->d_name, "srs_secrets"))
+			continue;
+		if (str_equal(d->d_name, "srs_maxage"))
+			continue;
+		if (str_equal(d->d_name, "srs_hashlength"))
+			continue;
+		if (str_equal(d->d_name, "srs_hashmin"))
+			continue;
+#endif
 		if (str_equal(d->d_name, "qmtproutes"))
 			continue;
 		if (str_equal(d->d_name, "queue_base"))
@@ -722,7 +744,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_showctl_c()
 {
-	static char    *x = "$Id: qmail-showctl.c,v 1.53 2011-07-29 09:29:51+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: qmail-showctl.c,v 1.54 2013-08-25 18:38:09+05:30 Cprogrammer Exp mbhangui $";
 
 #ifdef INDIMAIL
 	if (x)

@@ -1,5 +1,8 @@
 /*
  * $Log: forward.c,v $
+ * Revision 1.8  2013-08-25 18:38:31+05:30  Cprogrammer
+ * added SRS
+ *
  * Revision 1.7  2010-06-08 21:59:24+05:30  Cprogrammer
  * use envdir_set() on queuedefault to set default queue parameters
  *
@@ -27,6 +30,10 @@
 #include "strerr.h"
 #include "substdio.h"
 #include "fmt.h"
+#ifdef HAVESRS
+#include "stralloc.h"
+#include "srs.h"
+#endif
 #include "variables.h"
 
 #define FATAL "forward: fatal: "
@@ -87,6 +94,27 @@ main(argc, argv)
 				environ = e;
 		}
 	}
+#ifdef HAVESRS
+	if (*sender) {
+		switch(srsforward(sender))
+		{
+		case -3:
+			strerr_die2x(100, FATAL, srs_error.s);
+			break;
+		case -2:
+			strerr_die2x(111, FATAL, "out of memory");
+			break;
+		case -1:
+			strerr_die2x(111, FATAL, "unable to read controls");
+			break;
+		case 0:
+			break; // nothing
+		case 1:
+			sender = srs_result.s;
+			break;
+		}
+  }
+#endif
 	if (qmail_open(&qqt) == -1)
 		strerr_die2sys(111, FATAL, "unable to fork: ");
 	qmail_puts(&qqt, dtline);
@@ -110,7 +138,7 @@ main(argc, argv)
 void
 getversion_forward_c()
 {
-	static char    *x = "$Id: forward.c,v 1.7 2010-06-08 21:59:24+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: forward.c,v 1.8 2013-08-25 18:38:31+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

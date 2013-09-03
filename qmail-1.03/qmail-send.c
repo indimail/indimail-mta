@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-send.c,v $
+ * Revision 1.53  2013-08-25 18:38:05+05:30  Cprogrammer
+ * added SRS
+ *
  * Revision 1.52  2013-05-16 23:32:33+05:30  Cprogrammer
  * added log_stat as part of non-indimail code
  *
@@ -157,6 +160,9 @@
 #include "envrules.h"
 #include "variables.h"
 #include "readsubdir.h"
+#ifdef HAVESRS
+#include "srs.h"
+#endif
 #include "wait.h"
 #include "hasindimail.h"
 
@@ -184,6 +190,9 @@ stralloc        bouncemessage = { 0 };
 stralloc        bouncesubject = { 0 };
 stralloc        doublebouncemessage = { 0 };
 stralloc        doublebouncesubject = { 0 };
+#ifdef HAVESRS
+stralloc srs_domain = {0};
+#endif
 struct constmap maplocals;
 stralloc        vdoms = { 0 };
 struct constmap mapvdoms;
@@ -1102,7 +1111,7 @@ injectbounce(id)
 	datetime_sec    birth;
 	substdio        ssread;
 	char            buf[128], inbuf[128];
-	char           *bouncesender, *bouncerecip, *brep = "?", *p;
+	char           *bouncesender, *bouncerecip = "", *brep = "?", *p;
 	int             r = -1;
 	int             fd, ret;
 	unsigned long   qp;
@@ -1219,15 +1228,60 @@ injectbounce(id)
 		}
 		restore_env();
 		qp = qmail_qp(&qqt);
+#ifdef HAVESRS
+		if (*sender.s) {
+			if (srs_domain.len) {
+				int j = 0;
+
+				j = byte_rchr(sender.s, sender.len, '@');
+				if (j < sender.len) {
+					if (srs_domain.len == sender.len - j - 1 && 
+						stralloc_starts(&srs_domain, sender.s + j + 1)) {
+						switch(srsreverse(sender.s))
+						{
+						case -3:
+							log1(srs_error.s);
+							log1("\n");
+							_exit(111);
+						case -2:
+							nomem();
+							break;
+						case -1:
+							log1("alert: unable to read controls\n");
+							_exit(111);
+						case 0:
+							break;
+						case 1:
+							if (!stralloc_copy(&sender, &srs_result))
+								nomem();
+							break;
+						}
+						if (chdir(auto_qmail) == -1) {
+							log1("alert: unable to switch to home directory\n");
+							_exit(111);
+						}
+						chdir_toqueue();
+					}
+				}
+			}
+			bouncesender = "";
+			bouncerecip = sender.s;
+		} else
 		if (*sender.s)
 		{
 			bouncesender = "";
 			bouncerecip = sender.s;
-		} else
+		}
+#else
+		if (*sender.s)
 		{
+			bouncesender = "";
+			bouncerecip = sender.s;
+		} else {
 			bouncesender = "#@[]";
 			bouncerecip = doublebounceto.s;
 		}
+#endif
 		while (!newfield_datemake(now()))
 			nomem();
 		qmail_put(&qqt, newfield_date.s, newfield_date.len);
@@ -2489,6 +2543,12 @@ getcontrols()
 		return 0;
 	if (control_rldef(&doublebouncehost, "doublebouncehost", 1, "doublebouncehost") != 1)
 		return 0;
+#ifdef HAVESRS
+	if (control_readline(&srs_domain, "srs_domain") == -1)
+		return 0;
+	if (srs_domain.len && !stralloc_0(&srs_domain))
+		return 0;
+#endif
 	if (control_rldef(&doublebounceto, "doublebounceto", 0, "postmaster") != 1)
 		return 0;
 	if (!stralloc_cats(&doublebounceto, "@"))
@@ -2901,7 +2961,7 @@ main()
 void
 getversion_qmail_send_c()
 {
-	static char    *x = "$Id: qmail-send.c,v 1.52 2013-05-16 23:32:33+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: qmail-send.c,v 1.53 2013-08-25 18:38:05+05:30 Cprogrammer Exp mbhangui $";
 
 #ifdef INDIMAIL
 	if (x)
