@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-qmtpd.c,v $
+ * Revision 1.13  2013-08-23 15:32:49+05:30  Cprogrammer
+ * validity checks to ensure that input actually conforms to the netstring protocol.
+ *
  * Revision 1.12  2008-07-15 19:52:51+05:30  Cprogrammer
  * porting for Mac OS X
  *
@@ -89,6 +92,9 @@ getlen()
 		substdio_get(&ssin, &ch, 1);
 		if (ch == ':')
 			return len;
+		/* trap non-numeric input in netstring: */
+		if ((ch < '0') || (ch > '9'))
+			badproto();
 		len = 10 * len + (ch - '0');
 		if (len > 200000000 || ch < '0' || ch > '9')
 			resources();
@@ -270,6 +276,9 @@ main()
 				--biglen;
 				if (ch == ':')
 					break;
+				/* trap non-numeric input in netstring: */
+				if ((ch < '0') || (ch > '9'))
+					badproto();
 				len = 10 * len + (ch - '0');
 				if (len > 200000000 || ch < '0' || ch > '9')
 					resources();
@@ -364,7 +373,7 @@ main()
 void
 getversion_qmail_qmtpd_c()
 {
-	static char    *x = "$Id: qmail-qmtpd.c,v 1.12 2008-07-15 19:52:51+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: qmail-qmtpd.c,v 1.13 2013-08-23 15:32:49+05:30 Cprogrammer Stab mbhangui $";
 
 	x++;
 }
