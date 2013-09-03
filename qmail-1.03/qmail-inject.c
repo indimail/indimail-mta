@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-inject.c,v $
+ * Revision 1.24  2013-08-25 18:37:55+05:30  Cprogrammer
+ * added SRS
+ *
  * Revision 1.23  2011-07-28 19:39:08+05:30  Cprogrammer
  * chdir to home after envdir_set()
  *
@@ -98,6 +101,9 @@
 #include "envrules.h"
 #include "case.h"
 #include "byte.h"
+#ifdef HAVESRS
+#include "srs.h"
+#endif
 #include "variables.h"
 
 int             wildmat_internal(char *, char *);
@@ -188,6 +194,16 @@ die_nomem()
 	substdio_putsflush(subfderr, "qmail-inject: fatal: out of memory\n");
 	temp();
 }
+
+#ifdef HAVESRS
+void die_srs()
+{
+	substdio_puts(subfderr, "qmail-inject: fatal: ");
+	substdio_puts(subfderr, srs_error.s);
+	substdio_putsflush(subfderr, "\n");
+	perm();
+}
+#endif
 
 void
 die_regex()
@@ -344,6 +360,29 @@ exitnicely()
 
 		if (!stralloc_0(&sender))
 			die_nomem();
+#ifdef HAVESRS
+	if (!env_get("QMAILINJECT_SKIP_SRS") && 
+		(env_get("QMAILINJECT_FORCE_SRS") || (env_get("EXT") && env_get("HOST")))) {
+		switch(srsforward(sender.s))
+		{
+		case -3:
+			die_srs();
+			break;
+		case -2:
+			die_nomem();
+			break;
+		case -1:
+			die_read();
+			break;
+		case 0:
+			break;
+		case 1:
+			if (!stralloc_copy(&sender, &srs_result))
+				die_nomem();
+			break;
+		}
+	}
+#endif
 		qmail_from(&qqt, sender.s);
 		for (i = 0; i < reciplist.len; ++i)
 		{
@@ -1263,7 +1302,7 @@ main(argc, argv)
 void
 getversion_qmail_inject_c()
 {
-	static char    *x = "$Id: qmail-inject.c,v 1.23 2011-07-28 19:39:08+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: qmail-inject.c,v 1.24 2013-08-25 18:37:55+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
