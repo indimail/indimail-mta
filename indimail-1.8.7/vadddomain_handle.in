@@ -36,7 +36,7 @@
 # $Id: vadddomain_handle.in,v 2.10 2013-08-03 20:22:25+05:30 Cprogrammer Exp mbhangui $
 
 # send sighup to inlookup service to reload domains
-@indimaildir@/bin/svc -h /service*/inlookup* 2>/dev/null
+@indimaildir@/bin/svc -h /service*/inlookup.* /service*/qmail-send.* 2>/dev/null
 # print domain information
 @indimaildir@/bin/vdominfo $1
 
