@@ -1,5 +1,8 @@
 /*
  * $Log: hier.c,v $
+ * Revision 1.179  2013-09-03 22:58:04+05:30  Cprogrammer
+ * added drate man page and cidr
+ *
  * Revision 1.178  2013-08-29 18:27:49+05:30  Cprogrammer
  * added drate
  *
@@ -1669,7 +1672,7 @@ _hier(inst_dir)
 void
 getversion_install_big_c()
 {
-	static char    *x = "$Id: hier.c,v 1.178 2013-08-29 18:27:49+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: hier.c,v 1.179 2013-09-03 22:58:04+05:30 Cprogrammer Exp mbhangui $";
 
 #ifdef INDIMAIL
 	if (x)
