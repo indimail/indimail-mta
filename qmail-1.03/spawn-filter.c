@@ -1,5 +1,11 @@
 /*
  * $Log: spawn-filter.c,v $
+ * Revision 1.57  2013-08-29 18:27:15+05:30  Cprogrammer
+ * switched to switch statement
+ *
+ * Revision 1.56  2013-08-27 09:42:18+05:30  Cprogrammer
+ * added rate limiting by domain
+ *
  * Revision 1.55  2011-06-09 21:28:11+05:30  Cprogrammer
  * blackhole mails if filter program exits 2
  *
@@ -202,6 +208,11 @@
 #include <unistd.h>
 #include <stdlib.h>
 #include <fcntl.h>
+#include "lock.h"
+#include "open.h"
+#include "evaluate.h"
+#include "now.h"
+#include "scan.h"
 
 #define REGCOMP(X,Y)    regcomp(&X, Y, REG_EXTENDED|REG_ICASE)
 #define REGEXEC(X,Y)    regexec(&X, Y, (size_t) 0, (regmatch_t *) 0, (int) 0)
@@ -698,6 +709,146 @@ check_size(char *size)
 }
 
 int
+get_rate(char *expression, float *rate)
+{
+	struct val      result;
+	struct vartable *vt;
+
+	/*
+	 * replace all occurences of %p in expression
+	 * with the value of data
+	 */
+	if (!(vt = create_vartable()))
+		return (-1);
+	switch (evaluate(expression, &result, vt))
+	{
+	case ERROR_SYNTAX:
+		free_vartable(vt);
+		report(111, "spawn-filter: syntax error: ", expression, ". (#4.3.0)", 0, 0, 0);
+		return (-1);
+	case ERROR_VARNOTFOUND:
+		free_vartable(vt);
+		report(111, "spawn-filter: variable not found: ", expression, ". (#4.3.0)", 0, 0, 0);
+		return (-1);
+	case ERROR_NOMEM:
+		free_vartable(vt);
+		report(111, "spawn-filter: out of mem: ", error_str(errno), ". (#4.3.0)", 0, 0, 0);
+		return (-1);
+	case ERROR_DIV0:
+		free_vartable(vt);
+		report(111, "spawn-filter: division by zero: ", expression, ". (#4.3.0)", 0, 0, 0);
+		return (-1);
+	case RESULT_OK:
+		if (result.type == T_INT)
+			*rate = (float) result.ival;
+		else
+			*rate = (float) result.rval;
+		free_vartable(vt);
+		return (0);
+	}
+	free_vartable(vt);
+	return (0);
+}
+
+stralloc        fline = { 0 }, rate_expr = { 0 };
+
+int
+is_rate_ok(char *rate_dir, char *file)
+{
+	int             wfd, rfd, match, line_no, rate_int;
+	unsigned long   email_count = 0;
+	char            reset, stime[FMT_ULONG], etime[FMT_ULONG], ecount[FMT_ULONG];
+	float           conf_rate, cur_rate = 0;
+	char            inbuf[2048], outbuf[1024];
+	char           *ptr;
+	struct substdio ssin, ssout;
+	datetime_sec    starttime, endtime;
+	struct stat     statbuf;
+
+	starttime = endtime = now();
+	if (!(ptr = env_get("RATELIMIT_INTERVAL")))
+		rate_int = 86400;
+	else
+		scan_int(ptr, &rate_int);
+	reset = ((stat(file, &statbuf) ? starttime : starttime - statbuf.st_mtime) > rate_int);
+	stime[fmt_ulong(stime, starttime)] = 0;
+	etime[fmt_ulong(etime, endtime)] = 0;
+	ecount[0] = '1';
+	ecount[1] = 0;
+	if ((wfd = open_write(file)) == -1)
+		report(111, "spawn-filter: unable to write: ", file, ": ", error_str(errno), ". (#4.3.0)", 0);
+	if (lock_ex(wfd) == -1)
+		report(111, "spawn-filter: unable to lock: ", file, ": ", error_str(errno), ". (#4.3.0)", 0);
+	if ((rfd = open_read(file)) == -1)
+		report(111, "spawn-filter: unable to read: ", file, ": ", error_str(errno), ". (#4.3.0)", 0);
+	substdio_fdbuf(&ssin, read, rfd, inbuf, sizeof(inbuf));
+	for (line_no = 1;;line_no++) { /*- Line Processing */
+		if (getln(&ssin, &fline, &match, '\n') == -1)
+			report(111, "spawn-filter: unable to read: ", file, ": ", error_str(errno), ". (#4.3.0)", 0);
+		if (!match && fline.len == 0)
+			break;
+		switch (line_no)
+		{
+		case 1:
+			if (!stralloc_copy(&rate_expr, &fline))
+				report(111, "spawn-filter: out of mem: ", error_str(errno), ". (#4.3.0)", 0, 0, 0);
+			fline.len--;
+			if (!stralloc_0(&fline))
+				report(111, "spawn-filter: out of mem: ", error_str(errno), ". (#4.3.0)", 0, 0, 0);
+			get_rate(fline.s, &conf_rate);
+			break;
+		case 2:
+			if (reset)
+				continue;
+			scan_ulong(fline.s, (unsigned long *) &email_count);
+			break;
+		case 3:
+			if (reset)
+				continue;
+			scan_ulong(fline.s, (unsigned long *) &starttime);
+			stime[fmt_ulong(stime, starttime)] = 0;
+			break;
+		case 4:
+			if (reset)
+				continue;
+			/* do not divide by zero */
+			cur_rate = (endtime == starttime) ? 0 : ((float) email_count / (float) (endtime - starttime));
+			break;
+		}
+	}
+	close(rfd);
+	/* 
+	 * line_no   < 1 - no point in messing with invalid data
+	 * conf_rate < 0 - update the email count, timestamps
+	 * conf_rate = 0 - defer emails
+	 */
+	if (line_no < 1 || (conf_rate >= 0 && cur_rate > conf_rate)) {
+		close(wfd);
+		return ((line_no < 1 || conf_rate < 0) ? 1 : 0);
+	}
+	ecount[fmt_ulong(ecount, ++email_count)] = 0;
+	substdio_fdbuf(&ssout, write, wfd, outbuf, sizeof(outbuf));
+	if (substdio_bput(&ssout, rate_expr.s, rate_expr.len) == -1)
+		report(111, "spawn-filter: unable to write: ", file, ": ", error_str(errno), ". (#4.3.0)", 0);
+	if (substdio_bputs(&ssout, ecount) == -1)
+		report(111, "spawn-filter: unable to write: ", file, ": ", error_str(errno), ". (#4.3.0)", 0);
+	if (substdio_bput(&ssout, "\n", 1) == -1)
+		report(111, "spawn-filter: unable to write: ", file, ": ", error_str(errno), ". (#4.3.0)", 0);
+	if (substdio_bputs(&ssout, stime) == -1)
+		report(111, "spawn-filter: unable to write: ", file, ": ", error_str(errno), ". (#4.3.0)", 0);
+	if (substdio_bput(&ssout, "\n", 1) == -1)
+		report(111, "spawn-filter: unable to write: ", file, ": ", error_str(errno), ". (#4.3.0)", 0);
+	if (substdio_bputs(&ssout, etime) == -1)
+		report(111, "spawn-filter: unable to write: ", file, ": ", error_str(errno), ". (#4.3.0)", 0);
+	if (substdio_bput(&ssout, "\n", 1) == -1)
+		report(111, "spawn-filter: unable to write: ", file, ": ", error_str(errno), ". (#4.3.0)", 0);
+	if (substdio_flush(&ssout) == -1)
+		report(111, "spawn-filter: unable to write: ", file, ": ", error_str(errno), ". (#4.3.0)", 0);
+	close(wfd);
+	return (1);
+}
+
+int
 main(int argc, char **argv)
 {
 	char           *ptr, *mailprog, *domain, *errStr = 0, *size = "0", *qqeh, *ext;
@@ -707,7 +858,7 @@ main(int argc, char **argv)
 	int             wstat, filt_exitcode;
 	pid_t           filt_pid;
 	int             pipefd[2], ret;
-	char           *spamfilterprog, *notifyaddress, *rejectspam, *spf_fn;
+	char           *spamfilterprog, *notifyaddress, *rejectspam, *spf_fn, *rate_dir;
 	char          **Argv;
 	stralloc        spamfilterargs = { 0 };
 	stralloc        spamfilterdefs = { 0 };
@@ -721,6 +872,7 @@ main(int argc, char **argv)
 	if (*ptr && *ptr == '/')
 		ptr++;
 	ptr += 6;
+	rate_dir = env_get("RATELIMIT_DIR");
 	if (*ptr == 'l') /*- qmail-local Filter */
 	{
 		mailprog = "bin/qmail-local";
@@ -780,6 +932,12 @@ main(int argc, char **argv)
 	{
 		report(111, "spawn-filter: Incorrect usage. ", argv[0], " (#4.3.0)", 0, 0, 0);
 		_exit(111);
+	}
+	if (rate_dir) {
+		if (chdir(rate_dir))
+			report(111, "spawn-filter: Unable to switch to ", rate_dir, ": ", error_str(errno), ". (#4.3.0)", 0);
+		if (!access(domain, W_OK) && !is_rate_ok(rate_dir, domain))
+			report(111, "spawn-filter: high email rate for ", domain, ". (#4.3.0)", 0, 0, 0);
 	}
 	if (chdir(auto_qmail) == -1)
 		report(111, "spawn-filter: Unable to switch to ", auto_qmail, ": ", error_str(errno), ". (#4.3.0)", 0);
@@ -943,7 +1101,9 @@ main(int argc, char **argv)
 void
 getversion_qmail_spawn_filter_c()
 {
-	static char    *x = "$Id: spawn-filter.c,v 1.55 2011-06-09 21:28:11+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: spawn-filter.c,v 1.57 2013-08-29 18:27:15+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
+	if (x)
+		x = sccsidevalh;
 }
