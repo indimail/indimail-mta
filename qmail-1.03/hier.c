@@ -1,5 +1,14 @@
 /*
  * $Log: hier.c,v $
+ * Revision 1.178  2013-08-29 18:27:49+05:30  Cprogrammer
+ * added drate
+ *
+ * Revision 1.177  2013-08-25 19:44:22+05:30  Cprogrammer
+ * added README.srs
+ *
+ * Revision 1.176  2013-08-25 18:38:34+05:30  Cprogrammer
+ * added srsfilter
+ *
  * Revision 1.175  2013-05-07 16:51:35+05:30  Cprogrammer
  * skip qmail-sql for non-indimail installation
  *
@@ -539,6 +548,8 @@ hier(inst_dir)
 	c(auto_qmail_home, "bin", "qmail-qfilter", auto_uido, auto_gidq, 0555);
 	c(auto_qmail_home, "bin", "surblfilter", auto_uido, auto_gidq, 0555);
 	c(auto_qmail_home, "bin", "surblqueue", auto_uido, auto_gidq, 0555);
+	c(auto_qmail_home, "bin", "drate", auto_uido, auto_gidq, 0555);
+	c(auto_qmail_home, "bin", "cidr", auto_uido, auto_gidq, 0555);
 	c(auto_qmail_home, "bin", "spawn-filter", auto_uido, auto_gidq, 0555);
 	c(auto_qmail_home, "bin", "qmail-cat", auto_uido, auto_gidq, 0555);
 	c(auto_qmail_home, "bin", "qmail-poppass", auto_uido, auto_gidq, 0555);
@@ -688,6 +699,9 @@ hier(inst_dir)
 	c(auto_qmail_home, "bin", "spfquery", auto_uido, auto_gidq, 0555);
 	c(auto_qmail_home, "bin", "dnstxt", auto_uido, auto_gidq, 0555);
 #endif
+#ifdef HAVESRS
+	c(auto_qmail_home ,"bin", "srsfilter", auto_uido, auto_gidq, 0555);
+#endif
 #ifdef DOMAIN_KEYS
 	c(auto_qmail_home, "bin", "dknewkey", auto_uido, auto_gidq, 0555);
 	c(auto_qmail_home, "bin", "dktest", auto_uido, auto_gidq, 0555);
@@ -827,6 +841,7 @@ hier(inst_dir)
 	c(auto_qmail_home, "doc", "README.tls", auto_uido, auto_gidq, 0444);
 	c(auto_qmail_home, "doc", "README.wildmat", auto_uido, auto_gidq, 0444);
 	c(auto_qmail_home, "doc", "README.filters", auto_uido, auto_gidq, 0444);
+	c(auto_qmail_home, "doc", "README.srs", auto_uido, auto_gidq, 0444);
 	c(auto_qmail_home, "doc", "README.surbl", auto_uido, auto_gidq, 0444);
 
 	c(auto_qmail_home, "man/man1", "qmail-cat.1", auto_uido, auto_gidq, 0444);
@@ -1107,6 +1122,7 @@ hier(inst_dir)
 	c(auto_qmail_home, "man/man8", "qmail-multi.8", auto_uido, auto_gidq, 0444);
 	c(auto_qmail_home, "man/cat8", "qmail-multi.0", auto_uido, auto_gidq, 0444);
 	c(auto_qmail_home, "man/man8", "surblfilter.8", auto_uido, auto_gidq, 0444);
+	c(auto_qmail_home, "man/man1", "drate.1", auto_uido, auto_gidq, 0444);
 	c(auto_qmail_home, "man/man1", "plugtest.1", auto_uido, auto_gidq, 0444);
 	c(auto_qmail_home, "man/man1", "qmail-qfilter.1", auto_uido, auto_gidq, 0444);
 	c(auto_qmail_home, "man/cat1", "qmail-qfilter.0", auto_uido, auto_gidq, 0444);
@@ -1653,7 +1669,7 @@ _hier(inst_dir)
 void
 getversion_install_big_c()
 {
-	static char    *x = "$Id: hier.c,v 1.175 2013-05-07 16:51:35+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: hier.c,v 1.178 2013-08-29 18:27:49+05:30 Cprogrammer Exp mbhangui $";
 
 #ifdef INDIMAIL
 	if (x)
