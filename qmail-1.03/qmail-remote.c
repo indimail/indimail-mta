@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-remote.c,v $
+ * Revision 1.87  2013-08-27 08:09:12+05:30  Cprogrammer
+ * set SMTPTEXT for local failures
+ *
  * Revision 1.86  2013-08-22 11:10:14+05:30  Cprogrammer
  * set env variable SMTPSTATUS as 'D' or 'Z' indicating permanent or temporary failure
  *
@@ -394,6 +397,7 @@ stralloc        nosigndoms = {0};
 struct constmap mapnosign;
 struct constmap mapnosigndoms;
 #endif
+void            temp_nomem();
 
 void
 out(char *s)
@@ -431,7 +435,7 @@ my_error(char *s1, char *s2, char *s3)
 }
 
 int
-run_script(int succ, char code)
+run_script(char code, int succ)
 {
 	char           *prog, *str;
 	char            remote_code[2] = "\0\0";
@@ -453,6 +457,11 @@ run_script(int succ, char code)
 		break;
 	case -1: /*- transient error */
 		str = "ONTRANSIENT_REMOTE";
+		remote_code[0] = code;
+		if (!env_put2("SMTPSTATUS", remote_code)) {
+			my_error("alert: Out of memory", 0, 0);
+			_exit (1);
+		}
 		break;
 	default:
 		return 0;
@@ -529,11 +538,11 @@ zero()
 }
 
 void
-zerodie(char *s1, char *s2, char *s3, int succ)
+zerodie(char *s1, int succ)
 {
 	zero();
 	substdio_flush(subfdoutsmall);
-	_exit(run_script(succ, s1[0]));
+	_exit(run_script(s1 ? s1[0] : 'Z', succ));
 }
 
 void
@@ -554,6 +563,54 @@ outsafe(stralloc *sa)
 	}
 }
 
+/*
+ * set smtpenv variable which gets used for SMTPTEXT environment variable
+ */
+int
+setsmtptext(int code, int type)
+{
+	if (env_get("ONFAILURE_REMOTE") || env_get("ONSUCCESS_REMOTE")
+			||env_get("ONTRANSIENT_REMOTE"))
+	{
+		char            strnum[FMT_ULONG];
+
+		/*- copy smtptext to smtpenv */
+		if (!smtpenv.len && smtptext.len && !stralloc_copy(&smtpenv, &smtptext))
+			return (1);
+		if (smtpenv.len) {
+			if (smtpenv.s[smtpenv.len - 1] == '\n')
+				smtpenv.s[smtpenv.len - 1] = 0;
+			else
+			if (!stralloc_0(&smtpenv))
+				return (1);
+			smtpenv.len--;
+			if (!env_put2((type == 's' || mxps) ? "QMTPTEXT" : "SMTPTEXT", smtpenv.s)) {
+				return (1);
+			}
+		}
+		if (code > 0)
+		{
+			strnum[fmt_ulong(strnum, code)] = 0;
+			if (!env_put2("SMTPCODE", strnum))
+				return (1);
+		} else
+		if (!env_put2((type == 's' || mxps) ? "QMTPCODE" : "SMTPCODE", "4.4.1"))
+			temp_nomem();
+	}
+	return (0);
+}
+
+void
+temp_nomem()
+{
+	out("ZOut of memory. (#4.3.0)\n");
+	if (!stralloc_copys(&smtptext, "Out of memory. (#4.3.0)"))
+		temp_nomem();
+	if (setsmtptext(0, type))
+		smtpenv.len = 0;
+	zerodie("Z", -1);
+}
+
 void
 temp_noip()
 {
@@ -565,56 +622,81 @@ temp_noip()
 	out("Zinvalid ipaddr in ");
 	out(controldir);
 	out("/outgoingip (#4.3.0)\n");
-	zerodie(0, 0, 0, -1);
-}
-
-void
-temp_nomem()
-{
-	out("ZOut of memory. (#4.3.0)\n");
-	zerodie(0, 0, 0, -1);
+	if (!stralloc_copys(&smtptext, "invalid ipaddr in "))
+		temp_nomem();
+	if (!stralloc_cats(&smtptext, controldir))
+		temp_nomem();
+	if (!stralloc_cats(&smtptext, "/outgoingip (#4.3.0)"))
+		temp_nomem();
+	if (setsmtptext(0, type))
+		smtpenv.len = 0;
+	zerodie("Z", -1);
 }
 
 void
 temp_oserr()
 {
 	out("ZSystem resources temporarily unavailable. (#4.3.0)\n");
-	zerodie(0, 0, 0, -1);
+	if (!stralloc_copys(&smtptext, "System resources temporarily unavailable. (#4.3.0)"))
+		temp_nomem();
+	if (setsmtptext(0, type))
+		smtpenv.len = 0;
+	zerodie("Z", -1);
 }
 
 void
 temp_read()
 {
 	out("ZUnable to read message. (#4.3.0)\n");
-	zerodie(0, 0, 0, -1);
+	if (!stralloc_copys(&smtptext, "Unable to read message. (#4.3.0)"))
+		temp_nomem();
+	if (setsmtptext(0, type))
+		smtpenv.len = 0;
+	zerodie("Z", -1);
 }
 
 void
 temp_dnscanon()
 {
 	out("ZCNAME lookup failed temporarily. (#4.4.3)\n");
-	zerodie(0, 0, 0, -1);
+	if (!stralloc_copys(&smtptext, "CNAME lookup failed temporarily. (#4.4.3)"))
+		temp_nomem();
+	if (setsmtptext(0, type))
+		smtpenv.len = 0;
+	zerodie("Z", -1);
 }
 
 void
 temp_dns()
 {
 	out("ZSorry, I couldn't find any host by that name. (#4.1.2)\n");
-	zerodie(0, 0, 0, -1);
+	if (!stralloc_copys(&smtptext, "Sorry, I couldn't find any host by that name. (#4.1.2)"))
+		temp_nomem();
+	if (setsmtptext(0, type))
+		smtpenv.len = 0;
+	zerodie("Z", -1);
 }
 
 void
 temp_chdir()
 {
 	out("ZUnable to switch to home directory. (#4.3.0)\n");
-	zerodie(0, 0, 0, -1);
+	if (!stralloc_copys(&smtptext, "Unable to switch to home directory. (#4.3.0)"))
+		temp_nomem();
+	if (setsmtptext(0, type))
+		smtpenv.len = 0;
+	zerodie("Z", -1);
 }
 
 void
 temp_control()
 {
 	out("ZUnable to read control files. (#4.3.0)\n");
-	zerodie(0, 0, 0, -1);
+	if (!stralloc_copys(&smtptext, "Unable to read control files. (#4.3.0)"))
+		temp_nomem();
+	if (setsmtptext(0, type))
+		smtpenv.len = 0;
+	zerodie("Z", -1);
 }
 
 void
@@ -623,7 +705,12 @@ perm_partialline()
 	char           *r = "DSMTP cannot transfer messages with partial final lines. (#5.6.2)\n";
 
 	out(r);
-	zerodie(r, 0, 0, 0);
+	if (!stralloc_copys(&smtptext, r + 1))
+		temp_nomem();
+	smtptext.len--;
+	if (setsmtptext(0, type))
+		smtpenv.len = 0;
+	zerodie(r, 0);
 }
 
 void
@@ -632,7 +719,12 @@ perm_usage()
 	char           *r = "DI (qmail-remote) was invoked improperly. (#5.3.5)\n";
 
 	out(r);
-	zerodie(r, 0, 0, 0);
+	if (!stralloc_copys(&smtptext, r + 3))
+		temp_nomem();
+	smtptext.len--;
+	if (setsmtptext(0, type))
+		smtpenv.len = 0;
+	zerodie(r, 0);
 }
 
 void
@@ -643,7 +735,15 @@ perm_dns()
 	out(r);
 	outsafe(&host);
 	out(". (#5.1.2)\n");
-	zerodie(r, !stralloc_0(&host) ? 0 : host.s, 0, 0);
+	if (!stralloc_copys(&smtptext, r + 1))
+		temp_nomem();
+	if (!stralloc_copy(&smtptext, &host))
+		temp_nomem();
+	if (!stralloc_cats(&smtptext, ". (#5.1.2)"))
+		temp_nomem();
+	if (setsmtptext(0, type))
+		smtpenv.len = 0;
+	zerodie(r, 0);
 }
 
 void
@@ -652,7 +752,12 @@ perm_nomx()
 	char           *r = "DSorry, I couldn't find a mail exchanger or IP address. (#5.4.4)\n";
 
 	out(r);
-	zerodie(r, 0, 0, 0);
+	if (!stralloc_copys(&smtptext, r + 1))
+		temp_nomem();
+	smtptext.len--;
+	if (setsmtptext(0, type))
+		smtpenv.len = 0;
+	zerodie(r, 0);
 }
 
 void
@@ -668,7 +773,15 @@ perm_ambigmx()
 	out(r);
 	out(controldir);
 	out("/locals file, so I don't treat it as local. (#5.4.6)\n");
-	zerodie(r, controldir, "/locals file, so I don't treat it as local. (#5.4.6)\n", 0);
+	if (!stralloc_copys(&smtptext, r + 1))
+		temp_nomem();
+	if (!stralloc_cats(&smtptext, controldir))
+		temp_nomem();
+	if (!stralloc_cats(&smtptext, "/locals file, so I don't treat it as local. (#5.4.6)"))
+		temp_nomem();
+	if (setsmtptext(0, type))
+		smtpenv.len = 0;
+	zerodie(r, 0);
 }
 
 void
@@ -709,18 +822,35 @@ dropped()
 	out("ZConnected to ");
 	outhost();
 	out(" but connection died. ");
-	if (flagcritical)
+	if (!stralloc_copys(&smtptext, "Connected to "))
+		temp_nomem();
+	if (!stralloc_copyb(&smtptext, rhost.s, rhost.len - 1))
+		temp_nomem();
+	if (!stralloc_cats(&smtptext, " but connection died. "))
+		temp_nomem();
+	if (flagcritical) {
 		out("Possible duplicate! ");
+		if (!stralloc_cats(&smtptext, "Possible duplicate! "))
+		temp_nomem();
+	}
 	else
 	if (inside_greeting) /*- RFC 2821 - client should treat connection failures as temporary error */
 	{
 		out("Will try alternate MX. ");
+		if (!stralloc_cats(&smtptext, "Will try alternate MX. "))
+			temp_nomem();
 		if (flagtcpto)
 		{
 			out("tcpto interval ");
 			strnum[fmt_ulong(strnum, max_tolerance)] = 0;
 			out(strnum);
 			out(" ");
+			if (!stralloc_cats(&smtptext, "tcpto interval "))
+				temp_nomem();
+			if (!stralloc_cats(&smtptext, strnum))
+				temp_nomem();
+			if (!stralloc_catb(&smtptext, " ", 1))
+				temp_nomem();
 			tcpto_err(&partner, 1, max_tolerance);
 		}
 	}
@@ -729,52 +859,27 @@ dropped()
 	{
 		out((char *) ssl_err_str);
 		out(" ");
+		if (!stralloc_cats(&smtptext, (char *) ssl_err_str))
+			temp_nomem();
+		if (!stralloc_catb(&smtptext, " ", 1))
+			temp_nomem();
 	}
 #endif
 	out("(#4.4.2)\n");
-	zerodie(0, 0, 0, -1);
+	if (!stralloc_cats(&smtptext, "(#4.4.2)"))
+		temp_nomem();
+	if (setsmtptext(0, type))
+		smtpenv.len = 0;
+	zerodie("Z", -1);
 }
 
 void
 temp_noconn_out(char *s)
 {
 	out(s);
-	if (!stralloc_cats(&smtptext, s))
+	if (!stralloc_cats(&smtptext, smtptext.len ? s : s + 1))
 		temp_nomem();
 	return;
-}
-
-int
-setsmtptext(int code, int type)
-{
-	if (env_get("ONFAILURE_REMOTE") || env_get("ONSUCCESS_REMOTE")
-			||env_get("ONTRANSIENT_REMOTE"))
-	{
-		char            strnum[FMT_ULONG];
-
-		if (!smtpenv.len && smtptext.len && !stralloc_copy(&smtpenv, &smtptext))
-			return (1);
-		if (smtpenv.len) {
-			if (smtpenv.s[smtpenv.len - 1] == '\n')
-				smtpenv.s[smtpenv.len - 1] = 0;
-			else
-			if (!stralloc_0(&smtpenv))
-				return (1);
-			smtpenv.len--;
-			if (!env_put2((type == 's' || mxps) ? "QMTPTEXT" : "SMTPTEXT", smtpenv.s)) {
-				return (1);
-			}
-		}
-		if (code > 0)
-		{
-			strnum[fmt_ulong(strnum, code)] = 0;
-			if (!env_put2("SMTPCODE", strnum))
-				return (1);
-		} else
-		if (!env_put2((type == 's' || mxps) ? "QMTPCODE" : "SMTPCODE", "4.4.1"))
-			temp_nomem();
-	}
-	return (0);
 }
 
 void
@@ -807,7 +912,7 @@ temp_noconn(stralloc *h, char *ip, int port)
 	temp_noconn_out(". (#4.4.1)\n");
 	if (setsmtptext(0, type))
 		smtpenv.len = 0;
-	zerodie(0, 0, 0, -1);
+	zerodie("Z", -1);
 }
 
 void
@@ -830,7 +935,7 @@ temp_qmtp_noconn(stralloc *h, char *ip, int port)
 	temp_noconn_out(". (#4.4.1)\n");
 	if (setsmtptext(0, type))
 		smtpenv.len = 0;
-	zerodie(0, 0, 0, -1);
+	zerodie("Z", -1);
 }
 
 void
@@ -1023,6 +1128,7 @@ outsmtptext()
 		}
 		if (substdio_put(subfdoutsmall, smtptext.s, smtptext.len) == -1)
 			_exit(0);
+		/*- copy smtptext to smtpenv since we are going to truncate smtptext */
 		if (!stralloc_copy(&smtpenv, &smtptext))
 			smtpenv.len = 0;
 		smtptext.len = 0;
@@ -1082,7 +1188,7 @@ quit(char *prepend, char *append, int code, int die)
 		out(";\n");
 	}
 #endif
-	zerodie(prepend, rhost.s, append, !die);
+	zerodie(prepend, !die);
 }
 
 void
@@ -2012,7 +2118,11 @@ smtp_auth(char *type, int use_size)
 void temp_proto()
 {
 	out("Zrecipient did not talk proper QMTP (#4.3.0)\n");
-	zerodie(0, 0, 0, -1);
+	if (!stralloc_copys(&smtptext, "recipient did not talk proper QMTP (#4.3.0)"))
+		temp_nomem();
+	if (setsmtptext(0, type))
+		smtpenv.len = 0;
+	zerodie("Z", -1);
 }
 
 #ifdef MXPS
@@ -2136,12 +2246,12 @@ qmtp(stralloc *h, char *ip, int port)
 		out("DGiving up on ");
 		outhost();
 		out(" - Protocol QMTP\n");
-		zerodie("DGiving up on ", rhost.s, " - Protocol QMTP\n", flagallok);
+		zerodie("DGiving up on ", flagallok);
 	} else {
 		out("K");
 		outhost();
 		out(" accepted message - Protocol QMTP\n");
-		zerodie("K", rhost.s, " accepted message - Protocol QMTP\n", flagallok);
+		zerodie("K", flagallok);
 	}
 }
 
@@ -2965,7 +3075,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_remote_c()
 {
-	static char    *x = "$Id: qmail-remote.c,v 1.86 2013-08-22 11:10:14+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-remote.c,v 1.87 2013-08-27 08:09:12+05:30 Cprogrammer Exp mbhangui $";
 	x=sccsidauthcramh;
 	x=sccsidauthdigestmd5h;
 	x++;
