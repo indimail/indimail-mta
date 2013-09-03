@@ -1,6 +1,6 @@
 #
 #
-# $Id: qmail.spec,v 1.3 2013-08-16 00:11:36+05:30 Cprogrammer Exp mbhangui $
+# $Id: qmail.spec,v 1.7 2013-09-03 22:58:25+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %define _unpackaged_files_terminate_build 1
 
@@ -37,11 +37,13 @@
 %define ucspi_version      0.88
 %define qmail_version      1.03
 %define libdkim_version    1.4
+%define libsrs2_version    1.0.18
 %define bogofilter_version 1.2.3
 %define clamav_version     0.97.6
 %define noperms            1
 %define see_base           For a description of IndiMail visit http://www.indimail.org
 %define nolibdkim          0
+%define nolibsrs2          0
 %define nobogofilter       1
 %define noclamav           1
 %define nosignatures       1
@@ -83,12 +85,19 @@ Source3:  http://downloads.sourceforge.net/bogofilter/bogofilter-%{bogofilter_ve
 %if %noclamav == 0
 Source4:  http://downloads.sourceforge.net/clamav/clamav-%{clamav_version}.tar.gz
 %endif
-Source5:  http://downloads.sourceforge.net/indimail/qmail-rpmlintrc
+%if %nolibdkim == 0
+Source5:  http://downloads.sourceforge.net/indimail/libdkim-%{libdkim_version}
+%endif
+%if %nolibsrs2 == 0
+Source6:  http://downloads.sourceforge.net/indimail/libsrs2-%{libsrs2_version}
+%endif
+Source7:  http://downloads.sourceforge.net/indimail/qmail-rpmlintrc
+
 %if %noperms == 0
 %if 0%{?suse_version} >= 1120
-Source6:%{name}-permissions.easy
-Source7:%{name}-permissions.secure
-Source8:%{name}-permissions.paranoid
+Source8:%{name}-permissions.easy
+Source9:%{name}-permissions.secure
+Source10:%{name}-permissions.paranoid
 %endif
 %endif
 
@@ -106,12 +115,18 @@ NoSource: 3
 %if %noclamav == 0
 NoSource: 4
 %endif
+%if %nolibdkim == 0
+NoSource: 5
+%endif
+%if %nolibsrs2 == 0
+NoSource: 6
+%endif
 
 URL: http://www.indimail.org
 #AutoReqProv: No
 Conflicts: indimail
 BuildRequires: openssl-devel rpm gcc gcc-c++ make bison binutils coreutils grep
-BuildRequires: glibc glibc-devel openssl procps readline-devel mysql-devel
+BuildRequires: glibc glibc-devel openssl procps readline-devel
 BuildRequires: sed ncurses-devel gettext-devel
 BuildRequires: python-devel flex findutils
 BuildRequires: readline gzip autoconf pkgconfig
@@ -166,7 +181,7 @@ BuildRequires: db4-devel
 # rpm -qlp some-file.rpm
 Requires: /usr/sbin/useradd /usr/sbin/groupadd
 Requires: /sbin/chkconfig /usr/sbin/userdel /usr/sbin/groupdel procps /usr/bin/awk
-Requires: coreutils grep /bin/sh glibc openssl mysql-libs
+Requires: coreutils grep /bin/sh glibc openssl
 BuildRoot: %(mktemp -ud %{_tmppath}/%{name}-%{version}-%{release}-XXXXXXX)
 #
 # IndiMail is choosy and runs on reliable OS only
@@ -205,7 +220,7 @@ echo "------------------------------------------------------"
 
 for i in qmail-%{qmail_version} ucspi-tcp-%{ucspi_version} \
 bogofilter-%{bogofilter_version} clamav-%{clamav_version} \
-libdkim-%{libdkim_version}
+libdkim-%{libdkim_version} libsrs2-%{libsrs2_version}
 do
 	(
 	if [ -d $i ] ; then
@@ -215,6 +230,9 @@ do
 		continue
 	fi
 	if [ " $i" = " libdkim-%{libdkim_version}" -a %nolibdkim -ne 0 ] ; then
+		continue
+	fi
+	if [ " $i" = " libsrs2-%{libsrs2_version}" -a %nolibsrs2 -ne 0 ] ; then
 		continue
 	fi
 	if [ " $i" = " clamav-%{clamav_version}" -a %noclamav -ne 0 ] ; then
@@ -282,6 +300,34 @@ else
 fi
 cd ..
 fi
+
+#### LIBSRS2 ######################
+if [ -d libsrs2-%{libsrs2_version} ] ; then
+cd libsrs2-%{libsrs2_version}
+
+if [ %{fast_mode} -eq 0 ] ; then
+if [ %{build_on_obs} -eq 0 ] ; then
+	echo "reconfiguring..."
+	autoreconf -fi
+else
+	echo "reconfiguring..."
+%if %{undefined centos_version} && %{undefined rhel_version} && %{undefined sles_version}
+%if 0%{?fedora_version} > 10 || 0%{?suse_version} || 0%{?mandriva_version} > 2009
+	autoreconf -fi
+%endif
+%endif
+fi
+fi
+
+if [ " %dist" = " mandrake" ] ; then
+./configure --prefix=%{_prefix} --libdir=%{_libdir} --libexecdir=%{_prefix}/libexec \
+	--x-libraries=%{_libdir} --mandir=%{_prefix}/man > $DEVICE
+else
+%configure --prefix=%{_prefix} --mandir=%{_prefix}/man > $DEVICE
+fi
+cd ..
+fi
+
 #### qmail ######################
 if [ -d qmail-%{qmail_version} ] ; then
 	%{__sed} 's{QMAIL{%{_prefix}{' qmail-%{qmail_version}/conf-qmail.in > qmail-%{qmail_version}/conf-qmail
@@ -334,7 +380,8 @@ fi
 [ "$RPM_BUILD_ROOT" != "/" ] && %{__rm} -fr $RPM_BUILD_ROOT
 ID=$(id -u)
 %{__mkdir_p} $RPM_BUILD_ROOT%{_prefix}
-for i in libdkim-%{libdkim_version} qmail-%{qmail_version} ucspi-tcp-%{ucspi_version} \
+for i in libdkim-%{libdkim_version} libsrs2-%{libsrs2_version} \
+qmail-%{qmail_version} ucspi-tcp-%{ucspi_version} \
 bogofilter-%{bogofilter_version} \
 clamav-%{clamav_version}
 do
@@ -342,6 +389,9 @@ do
 		continue
 	fi
 	if [ " $i" = " libdkim-%{libdkim_version}" -a %nolibdkim -ne 0 ] ; then
+		continue
+	fi
+	if [ " $i" = " libsrs2-%{libsrs2_version}" -a %nolibsrs2 -ne 0 ] ; then
 		continue
 	fi
 	if [ " $i" = " clamav-%{clamav_version}" -a %noclamav -ne 0 ] ; then
@@ -369,6 +419,13 @@ if [ %nolibdkim -eq 0 ] ; then
 	%{__rm} -f %{buildroot}%{_libdir}/libdkim.la
 	if [ -x /usr/bin/chrpath ] ; then
     	/usr/bin/chrpath -d %{buildroot}%{_prefix}/bin/dkim
+	fi
+fi
+if [ %nolibsrs2 -eq 0 ] ; then
+	%{__rm} -f %{buildroot}%{_libdir}/libsrs2.la
+	if [ -x /usr/bin/chrpath ] ; then
+    	/usr/bin/chrpath -d %{buildroot}%{_prefix}/bin/srsfilter
+    	/usr/bin/chrpath -d %{buildroot}%{_prefix}/bin/srs
 	fi
 fi
 
@@ -409,7 +466,10 @@ fi
 %{__rm} -rf %{buildroot}%{_prefix}/include
 %{__rm} -rf %{buildroot}%{_prefix}/lib/libdkim.a
 %{__rm} -rf %{buildroot}%{_prefix}/lib64/libdkim.a
+%{__rm} -rf %{buildroot}%{_prefix}/lib/libsrs2.a
+%{__rm} -rf %{buildroot}%{_prefix}/lib64/libsrs2.a
 %{__rm} -rf %{buildroot}%{_prefix}/queue
+
 
 if [ -f ../SOURCES/svctool ] ; then
 %{__cp} ../SOURCES/svctool %{buildroot}%{_prefix}/sbin
@@ -703,6 +763,8 @@ fi
 %attr(555,root,qmail)                   %{_prefix}/bin/rrt
 %attr(555,root,qmail)                   %{_prefix}/bin/greydaemon
 %attr(555,root,qmail)                   %{_prefix}/bin/qmail-greyd
+%attr(555,root,qmail)                   %{_prefix}/bin/drate
+%attr(555,root,qmail)                   %{_prefix}/bin/cidr
 %attr(555,root,qmail)                   %{_prefix}/bin/spawn-filter
 %attr(555,root,qmail)                   %{_prefix}/bin/tcp-env
 %attr(555,root,qmail)                   %{_prefix}/bin/qmail-lint
@@ -783,6 +845,7 @@ fi
 %attr(555,root,qmail)                   %{_prefix}/bin/senders
 %attr(555,root,qmail)                   %{_prefix}/bin/setuidgid
 %attr(555,root,qmail)                   %{_prefix}/bin/spfquery
+%attr(555,root,qmail)                   %{_prefix}/bin/srsfilter
 %attr(555,root,qmail)                   %{_prefix}/bin/tai64nlocal
 %attr(555,root,qmail)                   %{_prefix}/sbin/hostname
 %attr(555,root,qmail)                   %{_prefix}/sbin/config-fast
@@ -819,6 +882,10 @@ fi
 %endif
 %if %nolibdkim == 0
 %attr(555,root,root)                    %{_prefix}/bin/dkim
+%endif
+
+%if %nolibsrs2 == 0
+%attr(555,root,root)                    %{_prefix}/bin/srs
 %endif
 # clamav
 %if %noclamav == 0
@@ -880,6 +947,7 @@ fi
 %attr(444,root,qmail)                   %{_prefix}/doc/README.recipients
 %attr(444,root,qmail)                   %{_prefix}/doc/README.remote-auth
 %attr(444,root,qmail)                   %{_prefix}/doc/README.spamcontrol
+%attr(444,root,qmail)                   %{_prefix}/doc/README.srs
 %attr(444,root,qmail)                   %{_prefix}/doc/README.starttls
 %attr(444,root,qmail)                   %{_prefix}/doc/README.status
 %attr(444,root,qmail)                   %{_prefix}/doc/README.tls
@@ -925,6 +993,12 @@ fi
 %{_libdir}/libdkim.so
 %{_libdir}/libdkim-%{libdkim_version}.so.0
 %{_libdir}/libdkim-%{libdkim_version}.so.0.0.0
+%endif
+
+%if %nolibsrs2 == 0
+%{_libdir}/libsrs2.so
+%{_libdir}/libsrs2-%{libsrs2_version}.so.0
+%{_libdir}/libsrs2-%{libsrs2_version}.so.0.0.0
 %endif
 
 # a copy of /var/qmail/control/me, /var/qmail/control/defaultdomain,
