@@ -1,5 +1,8 @@
 #
 # $Log: dk-filter.sh,v $
+# Revision 1.17  2013-09-03 23:04:30+05:30  Cprogrammer
+# set signing as default if both DKSIGN and DKIMSIGN are not defined
+#
 # Revision 1.16  2013-08-17 15:59:21+05:30  Cprogrammer
 # do not treat duplicate DomainKey-Signature as an error
 #
@@ -51,7 +54,7 @@
 # Revision 1.1  2009-04-02 14:52:27+05:30  Cprogrammer
 # Initial revision
 #
-# $Id: dk-filter.sh,v 1.16 2013-08-17 15:59:21+05:30 Cprogrammer Exp mbhangui $
+# $Id: dk-filter.sh,v 1.17 2013-09-03 23:04:30+05:30 Cprogrammer Exp mbhangui $
 #
 if [ -z "$QMAILREMOTE" -a -z "$QMAILLOCAL" ]; then
 	echo "dk-filter should be run by spawn-filter" 1>&2
@@ -62,12 +65,16 @@ dkimsign=0
 dkverify=0
 dkimverify=0
 if [ -z "$DKSIGN" -a -z "$DKVERIFY" ] ; then
-	DKSIGN=QMAILHOME/control/domainkeys/%/default
-	dksign=2
+	if [ -x QMAILHOME/bin/dktest ] ; then
+		DKSIGN=QMAILHOME/control/domainkeys/%/default
+		dksign=2
+	fi
 fi
 if [ -z "$DKIMSIGN" -a -z "$DKIMVERIFY" ] ; then
-	DKIMSIGN=QMAILHOME/control/domainkeys/%/default
-	dkimsign=2
+	if [ -x QMAILHOME/bin/dkim ] ; then
+		DKIMSIGN=QMAILHOME/control/domainkeys/%/default
+		dkimsign=2
+	fi
 fi
 if [ ! -z "$DKSIGN" ] ; then
 	if [ ! -f QMAILHOME/bin/dktest ] ; then
