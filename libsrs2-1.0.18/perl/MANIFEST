@@ -1,0 +1,12 @@
+Makefile.PL
+MANIFEST			This list of files
+MANIFEST.SKIP
+SRS_XS.pm
+SRS_XS.xs
+t/01load.t
+t/02constants.t
+t/03basic.t
+t/05forward.t
+t/06reverse.t
+t/10regression.t
+typemap

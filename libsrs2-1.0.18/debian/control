@@ -1,0 +1,29 @@
+Source: libsrs2
+Priority: optional
+Maintainer: Shevek <srs@anarres.org>
+Build-Depends: debhelper (>> 3.0.0), autoconf (>= 2.53-2 ), gcc, perl, perl-modules, file, fileutils
+Standards-Version: 3.5.2
+
+Package: libsrs2-dev
+Section: devel
+Architecture: any
+Depends: libsrs2 (= ${Source-Version})
+Description: Development tools for the libsrs2
+ libsrs2 is the next generation SRS library. SPF verifies that the
+ Sender address of a mail matches (according to some policy) the
+ client IP address which submits the mail. When a mail is forwarded,
+ the sender address must be rewritten to comply with SPF policy. The
+ Sender Rewriting Scheme, or SRS, provides a standard for this
+ rewriting which is not vulnerable to attacks by spammers.
+
+Package: libsrs2
+Section: libs
+Architecture: any
+Depends: ${shlibs:Depends}
+Description: SRS email address rewriting engine
+ libsrs2 is the next generation SRS library. SPF verifies that the
+ Sender address of a mail matches (according to some policy) the
+ client IP address which submits the mail. When a mail is forwarded,
+ the sender address must be rewritten to comply with SPF policy. The
+ Sender Rewriting Scheme, or SRS, provides a standard for this
+ rewriting which is not vulnerable to attacks by spammers.
