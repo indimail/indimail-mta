@@ -1,6 +1,6 @@
 /*
- * $Log: socket_v6loopback.c,v $
- * Revision 1.1  2005-06-15 22:13:07+05:30  Cprogrammer
+ * $Log: socket_v6any.c,v $
+ * Revision 1.1  2013-08-28 23:29:58+05:30  Cprogrammer
  * Initial revision
  *
  */
