@@ -1,5 +1,11 @@
 /*
  * $Log: qmail-local.c,v $
+ * Revision 1.25  2013-08-27 08:19:48+05:30  Cprogrammer
+ * use sticky bit definition from header file
+ *
+ * Revision 1.24  2013-08-25 18:38:00+05:30  Cprogrammer
+ * added SRS
+ *
  * Revision 1.23  2011-07-07 19:55:08+05:30  Cprogrammer
  * added branch logic
  *
@@ -79,6 +85,9 @@
 #include "auto_qmail.h"
 #include "control.h"
 #include "variables.h"
+#ifdef HAVESRS
+#include "srs.h"
+#endif
 #include "auto_patrn.h"
 
 void
@@ -151,6 +160,24 @@ stralloc        hostname = { 0 };
 /*- child process */
 stralloc        fntmptph = { 0 };
 stralloc        fnnewtph = { 0 };
+
+#ifdef HAVESRS
+void die_control()
+{
+	strerr_die1x(111, "Unable to read controls (#4.3.0)");
+}
+
+void die_srs()
+{
+	if (!stralloc_copys(&foo, srs_error.s))
+		temp_nomem();
+	if (!stralloc_cats(&foo, " (#4.3.0)"))
+		temp_nomem();
+	if (!stralloc_0(&foo))
+		temp_nomem();
+	strerr_die1x(111,foo.s);
+}
+#endif
 
 void
 tryunlinktmp()
@@ -601,6 +628,26 @@ mailforward(char **recips)
 		qmail_put(&qqt, messline.s, messline.len);
 	}
 	while (match);
+#ifdef HAVESRS 
+	switch(srsforward(ueo.s))
+	{
+	case -3:
+		die_srs();
+		break;
+	case -2:
+		temp_nomem();
+		break;
+	case -1:
+		die_control();
+		break;
+	case 0:
+		break;
+	case 1:
+		if (!stralloc_copy(&ueo, &srs_result))
+			temp_nomem();
+		break;
+	} 
+#endif 
 	qmail_from(&qqt, ueo.s);
 	while (*recips)
 		qmail_to(&qqt, *recips++);
@@ -647,7 +694,7 @@ checkhome(char *homedir)
 		strerr_die3x(111, "Unable to stat home directory: ", error_str(errno), ". (#4.3.0)");
 	if (st.st_mode & auto_patrn)
 		strerr_die1x(111, "Uh-oh: home directory is writable. (#4.7.0)");
-	if (st.st_mode & 01000)
+	if (st.st_mode & S_ISVTX)
 	{
 		if (flagdoit)
 			strerr_die1x(111, "Home directory is sticky: user is editing his .qmail file. (#4.2.1)");
@@ -1238,7 +1285,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_local_c()
 {
-	static char    *x = "$Id: qmail-local.c,v 1.23 2011-07-07 19:55:08+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: qmail-local.c,v 1.25 2013-08-27 08:19:48+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
