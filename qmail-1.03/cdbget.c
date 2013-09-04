@@ -1,5 +1,8 @@
 /*
  * $Log: cdbget.c,v $
+ * Revision 1.2  2013-09-04 12:51:01+05:30  Cprogrammer
+ * fixed compilation warning
+ *
  * Revision 1.1  2013-09-03 22:54:54+05:30  Cprogrammer
  * Initial revision
  *
@@ -90,5 +93,7 @@ main(int argc, char **argv)
 void
 getversion_cdbget_c()
 {
-	static char    *x = "$Id: cdbget.c,v 1.1 2013-09-03 22:54:54+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: cdbget.c,v 1.2 2013-09-04 12:51:01+05:30 Cprogrammer Exp mbhangui $";
+	if (x)
+		x++;
 }
