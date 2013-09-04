@@ -1,5 +1,8 @@
 /*
  * $Log: smtpd.c,v $
+ * Revision 1.176  2013-09-04 12:52:12+05:30  Cprogrammer
+ * added CRAM-SHA512
+ *
  * Revision 1.175  2013-08-22 11:12:45+05:30  Cprogrammer
  * fix compilation warning with sqlmatch
  *
@@ -669,6 +672,7 @@ int             auth_plain(char *);
 int             auth_cram_md5();
 int             auth_cram_sha1();
 int             auth_cram_sha256();
+int             auth_cram_sha512();
 int             auth_cram_ripemd();
 int             auth_digest_md5();
 int             err_noauth();
@@ -681,7 +685,7 @@ int             wildmat_internal(char *, char *);
 int             ssl_rfd = -1, ssl_wfd = -1;	/*- SSL_get_Xfd() are broken */
 char           *servercert, *clientca, *clientcrl;
 #endif
-char           *revision = "$Revision: 1.175 $";
+char           *revision = "$Revision: 1.176 $";
 char           *protocol = "SMTP";
 stralloc        proto = { 0 };
 static stralloc Revision = { 0 };
@@ -882,6 +886,7 @@ struct authcmd
 	{"cram-md5", auth_cram_md5},
 	{"cram-sha1", auth_cram_sha1},
 	{"cram-sha256", auth_cram_sha256},
+	{"cram-sha512", auth_cram_sha512},
 	{"cram-ripemd", auth_cram_ripemd},
 	{"digest-md5", auth_digest_md5},
 	{0, err_noauth}
@@ -3314,7 +3319,7 @@ smtp_ehlo(char *arg)
 	if (hostname && *hostname && childargs && *childargs)
 	{
 		char *no_auth_login, *no_auth_plain, *no_cram_md5,
-			 *no_cram_sha1, *no_cram_sha256, *no_cram_ripemd,
+			 *no_cram_sha1, *no_cram_sha256, *no_cram_sha512, *no_cram_ripemd,
 			 *no_digest_md5;
 
 		no_auth_login = env_get("DISABLE_AUTH_LOGIN");
@@ -3322,17 +3327,18 @@ smtp_ehlo(char *arg)
 		no_cram_md5 = env_get("DISABLE_CRAM_MD5");
 		no_cram_sha1= env_get("DISABLE_CRAM_SHA1");
 		no_cram_sha256= env_get("DISABLE_CRAM_SHA256");
+		no_cram_sha512= env_get("DISABLE_CRAM_SHA512");
 		no_cram_ripemd= env_get("DISABLE_CRAM_RIPEMD");
 		no_digest_md5= env_get("DISABLE_DIGEST_MD5");
 
 		if (!no_auth_login && !no_auth_plain && !no_cram_md5 && !no_cram_sha1
-			&& !no_cram_sha256 && !no_cram_ripemd && !no_digest_md5)
+			&& !no_cram_sha256 && !no_cram_sha512 && !no_cram_ripemd && !no_digest_md5)
 		{
-			out("250-AUTH LOGIN PLAIN CRAM-MD5 CRAM-SHA1 CRAM-SHA256 CRAM-RIPEMD DIGEST-MD5\r\n");
-			out("250-AUTH=LOGIN PLAIN CRAM-MD5 CRAM-SHA1 CRAM-SHA256 CRAM-RIPEMD DIGEST-MD5\r\n");
+			out("250-AUTH LOGIN PLAIN CRAM-MD5 CRAM-SHA1 CRAM-SHA256 CRAM-SHA512 CRAM-RIPEMD DIGEST-MD5\r\n");
+			out("250-AUTH=LOGIN PLAIN CRAM-MD5 CRAM-SHA1 CRAM-SHA256 CRAM-SHA512 CRAM-RIPEMD DIGEST-MD5\r\n");
 		} else 
 		if (!no_auth_login || !no_auth_plain || !no_cram_md5 || !no_cram_sha1 ||
-			!no_cram_sha256 || !no_cram_ripemd)
+			!no_cram_sha256 || !no_cram_sha512 || !no_cram_ripemd)
 		{
 			int flag = 0;
 
@@ -3368,6 +3374,11 @@ smtp_ehlo(char *arg)
 			{
 				out(flag++ == 0 ? "250-AUTH=" : " ");
 				out("CRAM-SHA256");
+			}
+			if (!no_cram_sha512)
+			{
+				out(flag++ == 0 ? "250-AUTH=" : " ");
+				out("CRAM-SHA512");
 			}
 			if (!no_cram_ripemd)
 			{
@@ -5139,8 +5150,9 @@ authgetl(void)
 #define AUTH_CRAM_MD5    3
 #define AUTH_CRAM_SHA1   4
 #define AUTH_CRAM_SHA256 5
-#define AUTH_CRAM_RIPEMD 6
-#define AUTH_DIGEST_MD5  7
+#define AUTH_CRAM_SHA512 6
+#define AUTH_CRAM_RIPEMD 7
+#define AUTH_DIGEST_MD5  8
 #endif
 
 int             po[2] = {-1, -1};
@@ -5385,6 +5397,12 @@ int
 auth_cram_sha256()
 {
 	return (auth_cram(AUTH_CRAM_SHA256));
+}
+
+int
+auth_cram_sha512()
+{
+	return (auth_cram(AUTH_CRAM_SHA512));
 }
 
 int
@@ -6685,7 +6703,7 @@ addrrelay() /*- Rejection of relay probes. */
 void
 getversion_smtpd_c()
 {
-	static char    *x = "$Id: smtpd.c,v 1.175 2013-08-22 11:12:45+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: smtpd.c,v 1.176 2013-09-04 12:52:12+05:30 Cprogrammer Exp mbhangui $";
 
 #ifdef INDIMAIL
 	if (x)
