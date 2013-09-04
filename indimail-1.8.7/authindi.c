@@ -1,5 +1,8 @@
 /*
  * $Log: authindi.c,v $
+ * Revision 2.23  2013-09-04 12:49:37+05:30  Cprogrammer
+ * added cases for cram_sha256, cram_sha512 and cram_ripemd
+ *
  * Revision 2.22  2011-11-19 21:58:29+05:30  Cprogrammer
  * fix imapd getting executed for pop3 service on auth failure
  * use auth_method variable for cram-md5, cram-sha1
@@ -80,7 +83,7 @@
 #include <stdint.h>
 
 #ifndef lint
-static char     sccsid[] = "$Id: authindi.c,v 2.22 2011-11-19 21:58:29+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: authindi.c,v 2.23 2013-09-04 12:49:37+05:30 Cprogrammer Exp mbhangui $";
 #endif
 #ifdef AUTH_SIZE
 #undef AUTH_SIZE
@@ -271,16 +274,25 @@ main(int argc, char **argv)
 		auth_method = -1;
 	else
 	if (!strncmp(auth_type, "login", 6))
-		auth_method = 1;
+		auth_method = AUTH_LOGIN;
 	else
 	if (!strncmp(auth_type, "plain", 6))
-		auth_method = 2;
+		auth_method = AUTH_PLAIN;
 	else
 	if (!strncmp(auth_type, "cram-md5", 9))
-		auth_method = 3;
+		auth_method = AUTH_CRAM_MD5;
 	else
 	if (!strncmp(auth_type, "cram-sha1", 10))
-		auth_method = 4;
+		auth_method = AUTH_CRAM_SHA1;
+	else
+	if (!strncmp(auth_type, "cram-sha256", 12))
+		auth_method = AUTH_CRAM_SHA256;
+	else
+	if (!strncmp(auth_type, "cram-sha512", 12))
+		auth_method = AUTH_CRAM_SHA512;
+	else
+	if (!strncmp(auth_type, "cram-ripemd", 12))
+		auth_method = AUTH_CRAM_RIPEMD;
 	else
 		auth_method = 0;
 

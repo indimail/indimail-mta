@@ -80,7 +80,7 @@ maildir_to_domain.c maildir_to_email.c MailQuotaWarn.c MakeArgs.c makeseekable.c
 make_user_dir.c makesalt.c md5c.c mdaMysqlConnect.c mgmtpassfuncs.c mkpasswd3.c \
 mlist_delete.c mlist_filterno.c mlist_filterupdate.c mlist_insert.c mlist_update.c \
 monkey.c MoveFile.c mysql_perror.c mysql_query.c next_big_dir.c no_of_days.c \
-open_big_dir.c open_master.c parse_email.c \
+open_big_dir.c open_master.c parse_email.c hmac_sha512.c \
 parse_quota.c passwd.c passwd_policy.c pathToFilesystem.c pipe_exec.c post_handle.c \
 print_control.c ProcessInFifo.c purge_files.c pw_comp.c pwcomp.c \
 PwdInLookup.c qmail_remote.c r_chown.c recalc_quota.c RelayInLookup.c relay_select.c \

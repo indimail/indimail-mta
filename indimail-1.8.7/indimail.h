@@ -1,5 +1,8 @@
 /*
  * $Log: indimail.h,v $
+ * Revision 2.210  2013-09-04 12:14:12+05:30  Cprogrammer
+ * added definition for AUTH_CRAM_SHA512
+ *
  * Revision 2.209  2013-06-10 15:44:07+05:30  Cprogrammer
  * changed defaultquota to signed BIGINT
  *
@@ -943,7 +946,7 @@
 #define INDIMAILH_H
 
 #ifndef	lint
-static char     sccsidh[] = "$Id: indimail.h,v 2.209 2013-06-10 15:44:07+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsidh[] = "$Id: indimail.h,v 2.210 2013-09-04 12:14:12+05:30 Cprogrammer Stab mbhangui $";
 #endif
 
 #ifdef HAVE_CONFIG_H
@@ -1086,8 +1089,9 @@ extern DBINFO **RelayHosts;
 #define AUTH_CRAM_MD5    3
 #define AUTH_CRAM_SHA1   4
 #define AUTH_CRAM_SHA256 5
-#define AUTH_CRAM_RIPEMD 6
-#define AUTH_DIGEST_MD5  7
+#define AUTH_CRAM_SHA512 6
+#define AUTH_CRAM_RIPEMD 7
+#define AUTH_DIGEST_MD5  8
 
 /*
  * What character marks an inverted character class? 
