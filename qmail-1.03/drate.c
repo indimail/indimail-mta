@@ -1,5 +1,8 @@
 /*
  * $Log: drate.c,v $
+ * Revision 1.2  2013-09-05 09:25:36+05:30  Cprogrammer
+ * added consolidate and reset option
+ *
  * Revision 1.1  2013-08-29 18:27:32+05:30  Cprogrammer
  * Initial revision
  *
@@ -29,7 +32,7 @@ static char     ssoutbuf[512];
 static substdio ssout = SUBSTDIO_FDBUF(write, 1, ssoutbuf, sizeof ssoutbuf);
 static char     sserrbuf[512];
 static substdio sserr = SUBSTDIO_FDBUF(write, 2, sserrbuf, sizeof(sserrbuf));
-char           *usage = "usage: drate [-s] -d domain -r deliveryRate -f filename\n";
+char           *usage = "usage: drate [-scR] -d domain -r deliveryRate -f filename\n";
 
 void
 logerr(char *s)
@@ -48,19 +51,11 @@ logerrf(char *s)
 }
 
 void
-my_error(char *s1, char *s2, int exit_val)
+my_error(char *s1, int exit_val)
 {
 	logerr(s1);
-	if (s2) {
-		logerr(": ");
-		logerr(s2);
-	}
-	if (exit_val > 0) {
-		logerr(": ");
-		logerr(error_str(errno));
-	}
 	logerrf("\n");
-	_exit(exit_val > 0 ? exit_val: 0 - exit_val);
+	_exit(exit_val);
 }
 
 void
@@ -74,24 +69,24 @@ check_rate(char *expression, double *rate)
 	 * with the value of data
 	 */
 	if (!(vt = create_vartable()))
-		my_error("evaluate lib failed", 0, -111);
+		my_error("evaluate lib failed", 111);
 	switch (evaluate(expression, &result, vt))
 	{
 	case ERROR_SYNTAX:
 		free_vartable(vt);
-		my_error("syntax error", 0, -111);
+		my_error("syntax error", 111);
 		break;
 	case ERROR_VARNOTFOUND:
 		free_vartable(vt);
-		my_error("variable not found", 0, -111);
+		my_error("variable not found", 111);
 		break;
 	case ERROR_NOMEM:
 		free_vartable(vt);
-		my_error("out of memory", 0, -111);
+		my_error("out of memory", 111);
 		break;
 	case ERROR_DIV0:
 		free_vartable(vt);
-		my_error("division by zero", 0, -111);
+		my_error("division by zero", 111);
 		break;
 	case RESULT_OK:
 		*rate = (double) ((result.type == T_INT) ? result.ival : result.rval);
@@ -99,7 +94,7 @@ check_rate(char *expression, double *rate)
 		return;
 	default:
 		free_vartable(vt);
-		my_error("unknown error evaluating expression", 0, -111);
+		my_error("unknown error evaluating expression", 111);
 		break;
 	}
 	/*- does not return */
@@ -109,7 +104,8 @@ check_rate(char *expression, double *rate)
 int
 main(int argc, char **argv)
 {
-	int             ch, rfd, wfd, match, line_no, display = 0, incr = 0;
+	int             ch, rfd, wfd, match, line_no, display = 0, incr = 0,
+					consolidate = 0, reset = 0;
 	unsigned long   email_count = 0;
 	double          rate;
 	char           *domain = 0, *rate_expr = 0, *filename = 0;
@@ -120,14 +116,20 @@ main(int argc, char **argv)
 	datetime_sec    starttime = 0, endtime = 0;
 	stralloc        line = { 0 }, rexpr = { 0 };
 
-	while ((ch = getopt(argc, argv, "sd:r:f:")) != sgoptdone) {
+	while ((ch = getopt(argc, argv, "scRd:r:f:")) != sgoptdone) {
 		switch (ch)
 		{
 		case 's':
 			display = 1;
 			break;
+		case 'R':
+			reset = 1;
+			break;
 		case 'd': /*- domain */
 			domain = optarg;
+			break;
+		case 'c':
+			consolidate = 1;
 			break;
 		case 'r': /*- delivery rate */
 			rate_expr = optarg;
@@ -160,10 +162,12 @@ main(int argc, char **argv)
 		strerr_die4sys(111, FATAL, "unable to switch to ", controldir, ": ");
 	if (!domain) {
 		logerrf("domain not specified\n");
+		logerrf(usage);
 		_exit (111);
 	}
 	if (!filename) {
 		logerrf("rate file not specified\n");
+		logerrf(usage);
 		_exit(111);
 	}
 	if (display) {
@@ -237,6 +241,12 @@ main(int argc, char **argv)
 		if ((rfd = open_read(filename)) == -1 && errno != error_noent)
 			strerr_die3sys(111, "unable to read: ", filename, ": ");
 		else {
+			if (rfd == -1 || reset) {
+				if (!stralloc_cats(&rexpr, rate_expr))
+					strerr_die1sys(111, "out of mem: ");
+				consolidate = 0;
+				goto new;
+			}
 			substdio_fdbuf(&ssfin, read, rfd, inbuf, sizeof(inbuf));
 			for (line_no = 1;;line_no++) { /*- Line Processing */
 				if (getln(&ssfin, &line, &match, '\n') == -1)
@@ -286,6 +296,7 @@ main(int argc, char **argv)
 				}
 			}
 		}
+new:
 		if ((wfd = open_write(filename)) == -1)
 			strerr_die4sys(111, FATAL, "unable to write: ", filename, ": ");
 		if (lock_ex(wfd) == -1)
@@ -293,6 +304,15 @@ main(int argc, char **argv)
 		if (ftruncate(wfd, 0) == -1)
 			strerr_die3sys(111, "unable to truncate: ", filename, ": ");
 		substdio_fdbuf(&ssfout, write, wfd, outbuf, sizeof(outbuf));
+		if (consolidate) {
+			if (!stralloc_0(&rexpr))
+				strerr_die1sys(111, "out of mem: ");
+			rexpr.len--;
+			check_rate(rexpr.s, &rate);
+			strdouble[fmt_double(strdouble, rate, 10)] = 0;
+			if (substdio_puts(&ssfout, strdouble))
+				strerr_die1sys(111, "unable to write: ");
+		} else
 		if (substdio_bput(&ssfout, rexpr.s, rexpr.len) == -1)
 			strerr_die3sys(111, "unable to write: ", filename, ": ");
 		if (substdio_bput(&ssfout, "\n", 1) == -1)
@@ -324,7 +344,7 @@ main(int argc, char **argv)
 void
 getversion_drate_c()
 {
-	static char    *x = "$Id: drate.c,v 1.1 2013-08-29 18:27:32+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: drate.c,v 1.2 2013-09-05 09:25:36+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 	if (x)
