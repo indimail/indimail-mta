@@ -1,5 +1,8 @@
 /*
  * $Log: spawn-filter.c,v $
+ * Revision 1.58  2013-09-05 09:20:05+05:30  Cprogrammer
+ * changed variables to double
+ *
  * Revision 1.57  2013-08-29 18:27:15+05:30  Cprogrammer
  * switched to switch statement
  *
@@ -709,7 +712,7 @@ check_size(char *size)
 }
 
 int
-get_rate(char *expression, float *rate)
+get_rate(char *expression, double *rate)
 {
 	struct val      result;
 	struct vartable *vt;
@@ -739,10 +742,7 @@ get_rate(char *expression, float *rate)
 		report(111, "spawn-filter: division by zero: ", expression, ". (#4.3.0)", 0, 0, 0);
 		return (-1);
 	case RESULT_OK:
-		if (result.type == T_INT)
-			*rate = (float) result.ival;
-		else
-			*rate = (float) result.rval;
+		*rate = (double) ((result.type == T_INT) ? result.ival : result.rval);
 		free_vartable(vt);
 		return (0);
 	}
@@ -758,7 +758,7 @@ is_rate_ok(char *rate_dir, char *file)
 	int             wfd, rfd, match, line_no, rate_int;
 	unsigned long   email_count = 0;
 	char            reset, stime[FMT_ULONG], etime[FMT_ULONG], ecount[FMT_ULONG];
-	float           conf_rate, cur_rate = 0;
+	double          conf_rate, cur_rate = 0.0;
 	char            inbuf[2048], outbuf[1024];
 	char           *ptr;
 	struct substdio ssin, ssout;
@@ -1101,7 +1101,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_spawn_filter_c()
 {
-	static char    *x = "$Id: spawn-filter.c,v 1.57 2013-08-29 18:27:15+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: spawn-filter.c,v 1.58 2013-09-05 09:20:05+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 	if (x)
