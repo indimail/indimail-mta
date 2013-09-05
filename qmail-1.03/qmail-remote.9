@@ -61,6 +61,10 @@ attempt fails, the client tries a SMTP connection to port 25 as usual. \fBqmail-
 does not try SMTP if the QMTP connection attempt succeeds but mail delivery through that
 connection fails.
 
+\fBqmail-remote\fR normally gets called by qmail-rspawn but can be called by \fBspawn-filter\fR
+when you set the \fBQMAILREMOTE\fR environment variable. \fBspawn-filter\fR can do tasks
+like filtering, delivey rate control, running custom scripts, etc.
+
 Note that \fBqmail-remote\fR does not take options and does not follow the \fBgetopt\fR
 standard.
 
