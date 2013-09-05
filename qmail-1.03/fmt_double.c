@@ -1,10 +1,14 @@
 /*
  * $Log: fmt_double.c,v $
+ * Revision 1.2  2013-09-04 13:57:37+05:30  Cprogrammer
+ * changed unsigned long to uint64
+ *
  * Revision 1.1  2013-08-29 18:26:46+05:30  Cprogrammer
  * Initial revision
  *
  */
 #include "fmt.h"
+#include "uint64.h"
 
 unsigned int
 fmt_double(register char *s, double d, unsigned long precision)
@@ -46,7 +50,7 @@ fmt_double(register char *s, double d, unsigned long precision)
 	for (r = 0; r < (precision < 20 ? precision : FMT_DOUBLE - (FMT_ULONG + 3));r++) {
 		p *= 10;
 		if (s) {
-			*s++ = '0' + ((unsigned long) p % 10);
+			*s++ = '0' + ((uint64) p % 10);
 		}
 		len++;
 	}
@@ -57,7 +61,7 @@ fmt_double(register char *s, double d, unsigned long precision)
 void
 getversion_fmt_double_c()
 {
-	static char    *x = "$Id: fmt_double.c,v 1.1 2013-08-29 18:26:46+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: fmt_double.c,v 1.2 2013-09-04 13:57:37+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
