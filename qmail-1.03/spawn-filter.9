@@ -317,6 +317,11 @@ can be overriden by the environment variable
 \fIspamignorepatterns\fR uses simple shell-style pattern matching unlike regular
 expressions used by setting \fBQREGEX\fR environment variable.
 
+.SH Delivery Rate Control
+\fBspawn-filter\fR turns on delivery rate control if the environment variable
+\fBRATELIMIT_DIR\fR is set and a rate control definition file, with the same name
+as the domain to which email is being delivered, exists. For details check \fBdrate\fR(1).
+
 .SH Environment Variables
 \fBspawn-filter\fR sets few environment variables. The following environment variables
 are set for both local and remote deliveries
