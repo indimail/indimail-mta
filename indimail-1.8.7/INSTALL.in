@@ -388,7 +388,20 @@ the installation.
     NOTE: UPGRADE Information. You can always upgrade to the latest version of libdkim
     by doing ./configure <same_parameters_as_earlier_install> ; make ; make install-strip
 
-    ##### STEP 3  ##### MOST IMPORTANT STEP ###################
+    ##### STEP 3  ##### Install libsrs2-1.0.18 ################
+	Install libsrs2-1.0.18 (libsrs2-1.0.18.tar.gz MD5 5a70a83818781551a7bfba31ffc97f8b
+    current working directory /home/local/src
+    Download the libsrs2 package. The latest tested libsrs2 package is
+    libsrs2-1.0.18.tar.gz
+
+    % gunzip -c libsrs2-1.0.18.tar.gz | tar xf -
+    % cd libsrs2-1.0.18
+    % ./configure --prefix=@indimaildir@ --mandir=@indimaildir@/man
+    % make -s [DESTDIR=staging_directory]
+    % sudo make -s install-strip [DESTDIR=staging_directory]
+    % cd ..
+
+    ##### STEP 4  ##### MOST IMPORTANT STEP ###################
     Install IndiMail. This step involves extracting both indimail-@version@.tar.gz and
     qmail-1.03.tar.gz. It is important that the extracted qmail source directory (qmail-1.03)
     is present for ./configure to detect qmail. You can also extract optional
@@ -491,7 +504,7 @@ the installation.
     You can always upgrade to the latest version of IndiMail by doing extracting IndiMail and
     ./configure <same_parameters_as_earlier_install> ; make ; make install-strip
 
-    ##### STEP 4  ##### UCSPI TCP #############################
+    ##### STEP 5  ##### UCSPI TCP #############################
     Install ucspi-tcp MD5 39b619147db54687c4a583a7a94c9163
     current working directory /home/local/src
     Download the ucspi-tcp package. The latest published ucspi-tcp package is ucspi-tcp-0.88.tar.gz.
@@ -514,7 +527,7 @@ the installation.
     to the orignal ucspi-tcp package.
     Then do ./configure <same_parameters_as_earlier_install> ; make ; make install-strip
 
-    ##### STEP 5  ##### Courier IMAP/POP3 #####################
+    ##### STEP 6  ##### Courier IMAP/POP3 #####################
     Install courier-imap (courier-imap-4.10.0.tar.bz2) MD5 2f95c99b9ad1380b9f3ac733ccd741a2
     current working directory /home/local/src
     Download the courier-imap package. The latest tested courier-imap package is
@@ -555,7 +568,7 @@ the installation.
     using PAM or getpwnam(3), getspnam(3). This happens transparently by using pam-multi(8) in
     conjunction with nssd(8)
 
-    ##### STEP 6  ##### SPAM Filter ###########################
+    ##### STEP 7  ##### SPAM Filter ###########################
     Install Bogofilter (http://www.bogofilter.org) MD5 4bcabdf8c5e7efefcb508eda7e80eebc
     current working directory /home/local/src
     Download the bogofilter package. The latest tested bogofilter package is
@@ -615,7 +628,7 @@ the installation.
     to the orignal latest available bogofilter package.
     Then do ./configure <same_parameters_as_earlier_install> ; make ; make install-strip
 
-    ##### STEP 7  ##### Virus Scanner #########################
+    ##### STEP 8  ##### Virus Scanner #########################
     Install clamav MD5 ac52bcbad3ea72eac08fedb9772f648b
     current working directory /home/local/src
     Download clamav package. The latest tested clamav package tested is clamav-0.97.8.tar.gz.
@@ -638,7 +651,7 @@ the installation.
     to the orignal latest available clamav package.
     Then do ./configure <same_parameters_as_earlier_install> ; make ; make install-strip
  
-    ##### STEP 8  ## Optional STEP ##### Fetchmail ############
+    ##### STEP 9  ## Optional STEP ##### Fetchmail ############
     Install fetchmail MD5 61b66faad044afa26e142bb1791aa2b3  
     current working directory /home/local/src
     Download the fetchmail package. The latest tested fetchmail package tested is
@@ -663,7 +676,7 @@ the installation.
     to the orignal latest available fetchmail package.
     Then do ./configure <same_parameters_as_earlier_install> ; make ; make install-strip
 
-    ##### STEP 9  ## Optional STEP ## nssd ####################
+    ##### STEP 10 ## Optional STEP ## nssd ####################
     Install nssd MD5 cbb373d0cd43c96aa12dd76608a3af09
     current working directory /home/local/src
     Download the nssd package from http://www.indimail.org
@@ -684,7 +697,7 @@ the installation.
     by downloading the latest nssd package
     Then do ./configure <same_parameters_as_earlier_install> ; make ; make install-strip
 
-    ##### STEP 10 ## Optional STEP ## iwebadmin ###############
+    ##### STEP 11 ## Optional STEP ## iwebadmin ###############
     Install iwebadmin MD5 c4a98f4907825969d5f69f7c73b7a0f5
     % wget http://downloads.sourceforge.net/indimail/iwebadmin-1.2.tar.gz
     % gunzip -c iwebadmin-1.2.tar.gz | tar xf -
