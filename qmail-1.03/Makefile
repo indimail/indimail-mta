@@ -826,7 +826,7 @@ compile fmt_ulong.c fmt.h
 	./compile fmt_ulong.c
 
 fmt_double.o: \
-compile fmt_double.c fmt.h
+compile fmt_double.c fmt.h uint64.h
 	./compile fmt_double.c
 
 fmtqfn.o: \
@@ -1396,7 +1396,7 @@ make-makelib warn-auto.sh systype
 	chmod 755 makelib
 
 man: \
-qmail-local.0 qmail-lspawn.0 qmail-getpw.0 qmail-remote.0 \
+qmail-local.0 qmail-lspawn.0 qmail-getpw.0 qmail-remote.0 drate.1 \
 qmail-rspawn.0 qmail-clean.0 qmail-send.0 qmail-todo.0 qmail-start.0 splogger.0 \
 qmail-queue.0 qmail-dk.0 qmail-dkim.8 dk-filter.8 qmail-inject.0 mailsubj.0 \
 qmail-showctl.0 qmail-newu.0 qarf.1 drate.1 qnotify.1 rrt.1 plugin_init.3 \
@@ -2044,6 +2044,12 @@ spawn-filter.9
 	cat spawn-filter.9 \
 	| sed s}QMAILHOME}"`head -1 conf-qmail`"}g \
 	> spawn-filter.8
+
+drate.1: \
+drate.9
+	cat drate.9 \
+	| sed s}QMAILHOME}"`head -1 conf-qmail`"}g \
+	> drate.1
 
 qmail-queue: \
 load qmail-queue.o triggerpull.o fmtqfn.o now.o date822fmt.o get_uid.o MakeArgs.o \
