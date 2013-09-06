@@ -1,5 +1,9 @@
 /*
  * $Log: qmail-remote.c,v $
+ * Revision 1.88  2013-09-06 13:53:23+05:30  Cprogrammer
+ * set SMTPHOST env variable for ONSUCCESS, ONFAILURE scripts
+ * try next mx on helo temp failure
+ *
  * Revision 1.87  2013-08-27 08:09:12+05:30  Cprogrammer
  * set SMTPTEXT for local failures
  *
@@ -810,6 +814,9 @@ outhost()
 		_exit(0);
 	if (!stralloc_0(&rhost))
 		temp_nomem();
+	if (!env_put2("SMTPHOST", rhost.s)) {
+		temp_nomem();
+	}
 }
 
 int             flagcritical = 0;
@@ -907,6 +914,13 @@ temp_noconn(stralloc *h, char *ip, int port)
 		if (!stralloc_catb(&smtptext, outgoingip.s, outgoingip.len))
 			temp_nomem();
 		temp_noconn_out("]");
+		if (!stralloc_copys(&rhost, ip))
+			temp_nomem();
+		if (!stralloc_0(&rhost))
+			temp_nomem();
+		if (!env_put2("SMTPHOST", rhost.s)) {
+			temp_nomem();
+		}
 		alloc_free(ip);
 	}
 	temp_noconn_out(". (#4.4.1)\n");
@@ -930,6 +944,13 @@ temp_qmtp_noconn(stralloc *h, char *ip, int port)
 		temp_noconn_out(" port ");
 		strnum[fmt_ulong(strnum, port)] = 0;
 		temp_noconn_out(strnum);
+		if (!stralloc_copys(&rhost, ip))
+			temp_nomem();
+		if (!stralloc_0(&rhost))
+			temp_nomem();
+		if (!env_put2("SMTPHOST", rhost.s)) {
+			temp_nomem();
+		}
 		alloc_free(ip);
 	}
 	temp_noconn_out(". (#4.4.1)\n");
@@ -2312,6 +2333,9 @@ smtp()
 			code = smtpcode();
 		}
 	}
+	/* for broken servers like yahoo */
+	if (env_get("TRY_NEXT_MX_HELO_FAIL") && code >= 400 && code < 500)
+		return;
 	if (code != 250)
 	{
 		if (!stralloc_copys(&helo_str, " but my name -->"))
@@ -3015,7 +3039,7 @@ main(int argc, char **argv)
 			{
 				if (!timeoutconn46(smtpfd, &ip.ix[i], &outip, (unsigned int) port, timeoutconnect))
 				{
-					if (flagtcpto)
+					if (flagtcpto) /*- clear the error */
 						tcpto_err(&ip.ix[i], 0, max_tolerance);
 					partner = ip.ix[i];
 #ifdef TLS
@@ -3075,7 +3099,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_remote_c()
 {
-	static char    *x = "$Id: qmail-remote.c,v 1.87 2013-08-27 08:09:12+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-remote.c,v 1.88 2013-09-06 13:53:23+05:30 Cprogrammer Exp mbhangui $";
 	x=sccsidauthcramh;
 	x=sccsidauthdigestmd5h;
 	x++;
