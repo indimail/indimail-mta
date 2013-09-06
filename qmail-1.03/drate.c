@@ -1,5 +1,8 @@
 /*
  * $Log: drate.c,v $
+ * Revision 1.3  2013-09-06 20:08:20+05:30  Cprogrammer
+ * use the current time for calculating rate
+ *
  * Revision 1.2  2013-09-05 09:25:36+05:30  Cprogrammer
  * added consolidate and reset option
  *
@@ -219,7 +222,7 @@ main(int argc, char **argv)
 				if (substdio_puts(&ssout, myctime(endtime)))
 					strerr_die1sys(111, "unable to write: ");
 				rate = 
-					(starttime == endtime) ? 0 : (double) email_count / (double) (endtime - starttime);
+					(starttime == endtime) ? 0 : (double) email_count / (double) (now() - starttime);
 				strdouble[fmt_double(strdouble, rate, 10)] = 0;
 				if (substdio_put(&ssout, "CurrentRate: ", 13))
 					strerr_die1sys(111, "unable to write: ");
@@ -344,7 +347,7 @@ new:
 void
 getversion_drate_c()
 {
-	static char    *x = "$Id: drate.c,v 1.2 2013-09-05 09:25:36+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: drate.c,v 1.3 2013-09-06 20:08:20+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 	if (x)
