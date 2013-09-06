@@ -5487,7 +5487,7 @@ open_read.o getln.o getln2.o stralloc_catb.o stralloc_eady.o \
 stralloc_opyb.o byte_chr.o alloc.o alloc_re.o scan_ulong.o \
 fmt_ulong.o stralloc_pend.o auto_qmail.o fmt_double.o myctime.o \
 datetime.o fmt_str.o fmt_uint.o fmt_uint0.o stralloc_cat.o \
-stralloc_cats.o
+stralloc_cats.o now.o
 	./load drate substdi.o substdo.o error_str.o error.o \
 	byte_copy.o byte_cr.o str_len.o sgetopt.o subgetopt.o \
 	subfderr.o evaluate.o variables.o strerr_die.o strerr_sys.o \
@@ -5496,7 +5496,7 @@ stralloc_cats.o
 	stralloc_opyb.o byte_chr.o alloc.o alloc_re.o scan_ulong.o \
 	fmt_ulong.o stralloc_pend.o auto_qmail.o fmt_double.o myctime.o \
 	datetime.o fmt_str.o fmt_uint.o fmt_uint0.o stralloc_cat.o \
-	stralloc_cats.o \
+	stralloc_cats.o now.o \
 	-lm
 
 drate.o: \
