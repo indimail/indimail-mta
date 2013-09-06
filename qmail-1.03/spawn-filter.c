@@ -1,5 +1,8 @@
 /*
  * $Log: spawn-filter.c,v $
+ * Revision 1.59  2013-09-06 13:58:23+05:30  Cprogrammer
+ * added comments
+ *
  * Revision 1.58  2013-09-05 09:20:05+05:30  Cprogrammer
  * changed variables to double
  *
@@ -818,13 +821,14 @@ is_rate_ok(char *rate_dir, char *file)
 	}
 	close(rfd);
 	/* 
-	 * line_no   < 1 - no point in messing with invalid data
-	 * conf_rate < 0 - update the email count, timestamps
-	 * conf_rate = 0 - defer emails
+	 * line_no   < 1        - no point in messing with invalid data
+	 * conf_rate < 0        - update the email count, timestamps
+	 * conf_rate = 0        - defer emails
+	 * cur_rate > conf_rate - defer emails
 	 */
 	if (line_no < 1 || (conf_rate >= 0 && cur_rate > conf_rate)) {
 		close(wfd);
-		return ((line_no < 1 || conf_rate < 0) ? 1 : 0);
+		return (line_no < 1 ? 1 : 0);
 	}
 	ecount[fmt_ulong(ecount, ++email_count)] = 0;
 	substdio_fdbuf(&ssout, write, wfd, outbuf, sizeof(outbuf));
@@ -1101,7 +1105,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_spawn_filter_c()
 {
-	static char    *x = "$Id: spawn-filter.c,v 1.58 2013-09-05 09:20:05+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: spawn-filter.c,v 1.59 2013-09-06 13:58:23+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 	if (x)
