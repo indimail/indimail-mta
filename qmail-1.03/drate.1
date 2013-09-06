@@ -16,8 +16,8 @@ drate \- indimail domain rate control
 .SH DESCRIPTION
 \fBdrate\fR(1) displays or sets delivery rate for \fBqmail-remote\fR(8). The actual rate
 limiting happens in \fBspawn-filter\fR(8). Hence, QMAILREMOTE should be set to
-/var/indimail/bin/spawn-filter. You must also set the environment variable \fBRATELIMIT_DIR\fR to
-the full path of the directory where you will keep the rate definition files created by
+/var/indimail/bin/spawn-filter. You must also set the environment variable \fBRATELIMIT_DIR\fR
+to the full path of the directory where you will keep the rate definition files created by
 \fBdrate\fR(1). \fBdrate\fR(1) locks \fIfilename\fR before writing the following four lines.
 
 .EX
@@ -27,9 +27,10 @@ the full path of the directory where you will keep the rate definition files cre
  line 4 - End   Time of the last sample
 .EE
 
-By default, sampling gets reset 1 day after the first sample. You can change the default
-by setting \fBRATELIMIT_INTERVAL\fR environment variable to the desired number of seconds.
-You can manually reset the interval by setting the sticky bit on \fIfilename\fR.
+By default, \fBspawn-filter\fR(8) resets statistics one day after the first sample. You can
+change the default by setting \fBRATELIMIT_INTERVAL\fR environment variable to the desired
+number of seconds. You can manually reset the interval using \fB-R\fR option of
+\fBdrate\fR(1).
 
 .SH OPTIONS
 .PP
@@ -44,9 +45,9 @@ Use this argument to set the domain name
 
 .TP
 \fB-r\fR
-Use this argument to set the rate expression in terms of deliveries/sec. To set a delivery rate of 500 emails / hr,
-you can use 500/3600 for the rate expression. You can also give the prefix '+' or '-' to
-increase or decrease the existing rate
+Use this argument to set the rate expression in terms of deliveries/sec. To set a delivery
+rate of 500 emails / hr, you can use 500/3600 for the rate expression. You can also give
+the prefix '+' or '-' to increase or decrease the existing rate
 
 .TP
 \fB-f\fR
@@ -54,9 +55,10 @@ The filename to store or retrieve delivery rate parameters and statistics
 
 .TP
 \fB-c\fR
-Consolidate all rate expressions. When you give the '+' or '-' prefix in the \fIrate_expression\fR,
-the expressions are simply appended without any mathematical computation. It is valid
-to have an expression 1790/3600+10/3600. This option will collapse the expression to 0.5
+Consolidate all rate expressions. When you give the '+' or '-' prefix in the
+\fIrate_expression\fR, the expressions are simply appended without any mathematical
+computation. It is valid to have an expression 1790/3600+10/3600. This option will
+collapse the expression to 0.5
 
 .TP
 \fB-R\fR
