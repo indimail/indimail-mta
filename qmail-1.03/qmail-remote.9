@@ -43,9 +43,11 @@ next MX (as per \fBrfc-2821(5)\fR) under the following conditions
 
 1. connection to remote host gets dropped without a greeting from the remote host
 
-2. greeting code >= 400 and < 600
+2. greeting  code >= 400 and < 500
 
-3. connection to the remote host times out.
+3. ehlo/helo code >= 400 and < 500 (enabled by setting TRY_NEXT_MX_HELO_FAIL environment variable)
+
+4. connection to the remote host times out.
 
 In these cases, the remote host's IP address is recorded in the timeout table QMAIL/queue/lock/tcpto, which causes
 subsequent deliveries to back off from the IP address and try the next MX (if it exists).
