@@ -6474,8 +6474,10 @@ int main(int argc, char **argv)
 	}
 	mdcreate(dot_trash);
 	
-#if 0
+#if 1
 	mdcreate("." DRAFTS);
+	mdcreate("." SENT);
+	mdcreate("." "Spam");
 #endif
 
 	if ((p=getenv("IMAPDEBUGFILE")) != 0 && *p &&
