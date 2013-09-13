@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-dk.c,v $
+ * Revision 1.41  2013-09-13 16:33:59+05:30  Cprogrammer
+ * turn off verification if RELAYCLIENT, DKIVERIFY and RELAYCLIENT_NODKVERIFY is set
+ *
  * Revision 1.40  2013-08-18 15:52:51+05:30  Cprogrammer
  * revert back to default verification mode if both dksign, dkverify are not set
  *
@@ -616,6 +619,10 @@ main(int argc, char *argv[])
 		die(61);
 	dksign = env_get("DKSIGN");
 	dkverify = env_get("DKVERIFY");
+	if (dkverify && env_get("RELAYCLIENT_NODKVERIFY")) {
+		execv(*binqqargs, binqqargs);
+		die(120, 0);
+	}
 	if (!dksign && !dkverify && (relayclient = env_get("RELAYCLIENT")))
 	{
 		if (!(dksign = env_get("DKKEY")))
@@ -892,7 +899,7 @@ main(argc, argv)
 void
 getversion_qmail_dk_c()
 {
-	static char    *x = "$Id: qmail-dk.c,v 1.40 2013-08-18 15:52:51+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-dk.c,v 1.41 2013-09-13 16:33:59+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
