@@ -32,7 +32,8 @@ The private key should be created by
 
 In the absense of DKSIGN and DKVERIFY environment variable, qmail-dk will sign the
 message if RELAYCLIENT environment variable is set and verify the message if RELAYCLIENT
-environment variable is not set.
+environment variable is not set. If DKVERIFY is set, you can disable dk verification, if
+RELAYCLIENT is set by setting RELAYCLIENT_NODKVERIFY environment variable.
 
 You can set various DK options in getopt style, by setting the environment variable DKSIGNOPTIONS
  b <advice_length>    Length of Advice
