@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-dkim.c,v $
+ * Revision 1.40  2013-09-13 16:34:35+05:30  Cprogrammer
+ * turn off verification if RELAYCLIENT, DKIMVERIFY and RELAYCLIENT_NODKIMVERIFY is set
+ *
  * Revision 1.39  2013-08-18 15:53:30+05:30  Cprogrammer
  * revert back to default verification mode if both dksign, dkverify are not set
  *
@@ -1139,6 +1142,10 @@ main(int argc, char *argv[])
 		die(61, 0);
 	dkimsign = env_get("DKIMSIGN");
 	dkimverify = env_get("DKIMVERIFY");
+	if (dkimverify && env_get("RELAYCLIENT_NODKIMVERIFY")) {
+		execv(*binqqargs, binqqargs);
+		die(120, 0);
+	}
 	if (!dkimsign && !dkimverify && (p = env_get("RELAYCLIENT")))
 	{
 		if (!(dkimsign = env_get("DKIMKEY")))
@@ -1453,7 +1460,7 @@ main(argc, argv)
 void
 getversion_qmail_dkim_c()
 {
-	static char    *x = "$Id: qmail-dkim.c,v 1.39 2013-08-18 15:53:30+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-dkim.c,v 1.40 2013-09-13 16:34:35+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
