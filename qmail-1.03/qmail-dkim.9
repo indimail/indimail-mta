@@ -35,7 +35,8 @@ the basename of the file. The private key should be created by
 
 In the absense of DKIMSIGN and DKIMVERIFY environment variable, qmail-dkim will sign the
 message if RELAYCLIENT environment variable is set and verify the message if RELAYCLIENT
-environment variable is not set.
+environment variable is not set. If DKIMVERIFY is set, you can disable dkim verification, if
+RELAYCLIENT is set by setting RELAYCLIENT_NODKIMVERIFY environment variable.
 
 You can set various DKIM options in getopt style, by setting the environment variable
 .B DKIMSIGNOPTIONS
