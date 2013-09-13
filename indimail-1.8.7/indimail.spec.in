@@ -2334,7 +2334,7 @@ do
 		if [ %noclamav -eq 0 ] ; then
 			%{_prefix}/sbin/svctool --smtp=$port --servicedir=%{servicedir} \
 				--qbase=%{qbase} --qcount=%{qcount} --qstart=1 \
-				--query-cache --password-cache \
+				--query-cache --dnscheck --password-cache \
 				--cntrldir=control --localip=0 --maxdaemons=75 --maxperip=25 --persistdb \
 				--starttls --fsync --syncdir --memory=%{smtp_soft_mem} --chkrecipient --chkrelay --masquerade \
 				--min-free=52428800 --content-filter \
@@ -2348,7 +2348,7 @@ do
 		else
 			%{_prefix}/sbin/svctool --smtp=$port --servicedir=%{servicedir} \
 				--qbase=%{qbase} --qcount=%{qcount} --qstart=1 \
-				--query-cache --password-cache \
+				--query-cache --dnscheck --password-cache \
 				--cntrldir=control --localip=0 --maxdaemons=75 --maxperip=25 --persistdb \
 				--starttls --fsync --syncdir --memory=%{smtp_soft_mem} --chkrecipient --chkrelay --masquerade \
 				--min-free=52428800 --content-filter --virus-filter \
@@ -2363,7 +2363,7 @@ do
 		if [ %noclamav -eq 0 ] ; then
 			%{_prefix}/sbin/svctool --smtp=$port --servicedir=%{servicedir} \
 				--qbase=%{qbase} --qcount=%{qcount} --qstart=1 \
-				--query-cache --password-cache \
+				--query-cache --dnscheck --password-cache \
 				--cntrldir=control --localip=0 --maxdaemons=75 --maxperip=25 --persistdb \
 				--starttls --fsync --syncdir --memory=%{smtp_soft_mem} --chkrecipient --chkrelay --masquerade \
 				--min-free=52428800 --content-filter \
@@ -2375,7 +2375,7 @@ do
 		else
 			%{_prefix}/sbin/svctool --smtp=$port --servicedir=%{servicedir} \
 				--qbase=%{qbase} --qcount=%{qcount} --qstart=1 \
-				--query-cache --password-cache \
+				--query-cache --dnscheck --password-cache \
 				--cntrldir=control --localip=0 --maxdaemons=75 --maxperip=25 --persistdb \
 				--starttls --fsync --syncdir --memory=%{smtp_soft_mem} --chkrecipient --chkrelay --masquerade \
 				--min-free=52428800 --content-filter --virus-filter \
