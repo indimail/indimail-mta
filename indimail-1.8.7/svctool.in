@@ -2402,7 +2402,7 @@ if [ " $odmr" = " " ] ; then
 	else
 		> $conf_dir/CUGMAIL
 	fi
-	if [ " $dnscheck" = " " ] ; then
+	if [ ! " $dnscheck" = " " ] ; then
 		> $conf_dir/NODNSCHECK
 	else
 		echo > $conf_dir/NODNSCHECK
