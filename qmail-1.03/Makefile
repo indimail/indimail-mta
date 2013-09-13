@@ -3059,7 +3059,7 @@ hassrs.h:  trysrs.c compile load srs.lib conf-indi
 
 srs.o: \
 compile srs.c hassrs.h srs.h auto_qmail.h stralloc.h control.h rcpthosts.h str.h
-	./compile $(inc_deps) srs.c
+	./compile $(inc_deps) -I../libsrs2-$(SRS_VERSION)/libsrs2 srs.c
 
 
 srsfilter: \
