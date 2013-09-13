@@ -1,3 +1,5 @@
+drate
+drate.1
 cidr
 822addr
 822addr.0
@@ -1022,3 +1024,5 @@ cidr.o
 drate.o
 evaluate.o
 fmt_double.o
+hmac_sha512.o
+srs.lib
