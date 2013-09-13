@@ -1,6 +1,6 @@
 #
 #
-# $Id: qmail.spec,v 1.7 2013-09-03 22:58:25+05:30 Cprogrammer Exp mbhangui $
+# $Id: qmail.spec,v 1.8 2013-09-13 17:37:48+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %define _unpackaged_files_terminate_build 1
 
@@ -1248,7 +1248,7 @@ do
 				--spamfilter="%{_prefix}/bin/bogofilter -p -d %{_prefix}/etc" \
 				--logfilter=/tmp/spamfifo --rejectspam=0 --spamexitcode=0 \
 				--qhpsi="%{_prefix}/bin/clamdscan %s --fdpass --quiet --no-summary" \
-				--dmasquerade \
+				--dmasquerade --dnscheck \
 				--dkverify=$ver_opt \
 				--dksign=$sign_opt --private_key=%{_prefix}/control/domainkeys/%/default \
 				$extra_opt
@@ -1261,7 +1261,7 @@ do
 				--min-free=52428800 --content-filter --virus-filter \
 				--spamfilter="%{_prefix}/bin/bogofilter -p -d %{_prefix}/etc" \
 				--logfilter=/tmp/spamfifo --rejectspam=0 --spamexitcode=0 \
-				--dmasquerade \
+				--dmasquerade --dnscheck \
 				--dkverify=both \
 				--dksign=both --private_key=%{_prefix}/control/domainkeys/%/default \
 				$extra_opt
@@ -1275,7 +1275,7 @@ do
 				--starttls --fsync --syncdir --memory=%{smtp_soft_mem} --masquerade \
 				--min-free=52428800 --content-filter \
 				--qhpsi="%{_prefix}/bin/clamdscan %s --fdpass --quiet --no-summary" \
-				--dmasquerade \
+				--dmasquerade --dnscheck \
 				--dkverify=both \
 				--dksign=both --private_key=%{_prefix}/control/domainkeys/%/default \
 				$extra_opt
@@ -1286,7 +1286,7 @@ do
 				--cntrldir=control --localip=0 --maxdaemons=75 --maxperip=25 --persistdb \
 				--starttls --fsync --syncdir --memory=%{smtp_soft_mem} --masquerade \
 				--min-free=52428800 --content-filter --virus-filter \
-				--dmasquerade \
+				--dmasquerade --dnscheck \
 				--dkverify=both \
 				--dksign=both --private_key=%{_prefix}/control/domainkeys/%/default \
 				$extra_opt
