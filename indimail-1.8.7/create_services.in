@@ -355,7 +355,7 @@ if [ $nodksignatures -eq 0 ] ; then
 	if [ -x $dir_prefix$indimaildir/bin/dknewkey ] ; then
 		ver_opt="both"
 		sign_opt="both"
-		$dir_prefix$indimaildir/bin/dknewkey $dir_prefix$indimaildir/control/domainkeys/indimail
+		$dir_prefix$indimaildir/bin/dknewkey $dir_prefix$indimaildir/control/domainkeys/default 1024
 	else
 		ver_opt="none"
 		sign_opt="none"
@@ -382,7 +382,7 @@ do
 		if [ $noclamav -eq 0 ] ; then
 			$dir_prefix$indimaildir/sbin/svctool --smtp=$port --servicedir=$servicedir \
 				--qbase=$qbase --qcount=$qcount --qstart=1 \
-				--query-cache --password-cache \
+				--query-cache --dnscheck --password-cache \
 				--cntrldir=control --localip=0 --maxdaemons=75 --maxperip=25 --persistdb \
 				--starttls --fsync --syncdir --memory=$smtp_soft_mem --chkrecipient --chkrelay --masquerade \
 				--min-free=52428800 --content-filter --virus-filter \
@@ -391,12 +391,12 @@ do
 				--logfilter=/tmp/spamfifo --rejectspam=0 --spamexitcode=0 \
 				--dmasquerade \
 				--dkverify=$ver_opt \
-				--dksign=$sign_opt --private_key=$indimaildir/control/domainkeys/indimail \
+				--dksign=$sign_opt --private_key=$indimaildir/control/domainkeys/%/default \
 				$e_opt $extra_opt
 		else
 			$dir_prefix$indimaildir/sbin/svctool --smtp=$port --servicedir=$servicedir \
 				--qbase=$qbase --qcount=$qcount --qstart=1 \
-				--query-cache --password-cache \
+				--query-cache --dnscheck --password-cache \
 				--cntrldir=control --localip=0 --maxdaemons=75 --maxperip=25 --persistdb \
 				--starttls --fsync --syncdir --memory=$smtp_soft_mem --chkrecipient --chkrelay --masquerade \
 				--min-free=52428800 --content-filter --virus-filter \
@@ -404,32 +404,32 @@ do
 				--logfilter=/tmp/spamfifo --rejectspam=0 --spamexitcode=0 \
 				--dmasquerade \
 				--dkverify=$ver_opt \
-				--dksign=$sign_opt --private_key=$indimaildir/control/domainkeys/indimail \
+				--dksign=$sign_opt --private_key=$indimaildir/control/domainkeys/%/default \
 				$e_opt $extra_opt
 		fi
 	else
 		if [ $noclamav -eq 0 ] ; then
 			$dir_prefix$indimaildir/sbin/svctool --smtp=$port --servicedir=$servicedir \
 				--qbase=$qbase --qcount=$qcount --qstart=1 \
-				--query-cache --password-cache \
+				--query-cache --dnscheck --password-cache \
 				--cntrldir=control --localip=0 --maxdaemons=75 --maxperip=25 --persistdb \
 				--starttls --fsync --syncdir --memory=$smtp_soft_mem --chkrecipient --chkrelay --masquerade \
 				--min-free=52428800 --content-filter --virus-filter \
 				--qhpsi="$indimaildir/bin/clamdscan %s --fdpass --quiet --no-summary" \
 				--dmasquerade \
 				--dkverify=$ver_opt \
-				--dksign=$sign_opt --private_key=$indimaildir/control/domainkeys/indimail \
+				--dksign=$sign_opt --private_key=$indimaildir/control/domainkeys/%/default \
 				$e_opt $extra_opt
 		else
 			$dir_prefix$indimaildir/sbin/svctool --smtp=$port --servicedir=$servicedir \
 				--qbase=$qbase --qcount=$qcount --qstart=1 \
-				--query-cache --password-cache \
+				--query-cache --dnscheck --password-cache \
 				--cntrldir=control --localip=0 --maxdaemons=75 --maxperip=25 --persistdb \
 				--starttls --fsync --syncdir --memory=$smtp_soft_mem --chkrecipient --chkrelay --masquerade \
 				--min-free=52428800 --content-filter --virus-filter \
 				--dmasquerade \
 				--dkverify=$ver_opt \
-				--dksign=$sign_opt --private_key=$indimaildir/control/domainkeys/indimail \
+				--dksign=$sign_opt --private_key=$indimaildir/control/domainkeys/%/default \
 				$e_opt $extra_opt
 		fi
 	fi
@@ -443,14 +443,14 @@ if [ $noclamav -eq 0 ] ; then
 		--min-free=52428800 --fsync --syncdir --virus-filter \
 		--qhpsi="$indimaildir/bin/clamdscan %s --fdpass --quiet --no-summary" \
 		--dkverify="none" --dksign=$sign_opt \
-		--private_key=$indimaildir/control/domainkeys/indimail \
+		--private_key=$indimaildir/control/domainkeys/%/default \
 		$e_opt $extra_opt
 else
 	$dir_prefix$indimaildir/sbin/svctool --queueParam=defaultqueue \
 		--qbase=$qbase --qcount=$qcount --qstart=1 \
 		--min-free=52428800 --fsync --syncdir --virus-filter \
 		--dkverify="none" --dksign=$sign_opt \
-		--private_key=$indimaildir/control/domainkeys/indimail \
+		--private_key=$indimaildir/control/domainkeys/%/default \
 		$e_opt $extra_opt
 fi
 
