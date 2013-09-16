@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-dkim.c,v $
+ * Revision 1.41  2013-09-16 22:16:35+05:30  Cprogrammer
+ * corrected logic for RELAYCLIENT_NODKIMVERIFY
+ *
  * Revision 1.40  2013-09-13 16:34:35+05:30  Cprogrammer
  * turn off verification if RELAYCLIENT, DKIMVERIFY and RELAYCLIENT_NODKIMVERIFY is set
  *
@@ -989,7 +992,7 @@ checkPractice(int dkimRet)
 	return (0);
 }
 
-static char    *binqqargs[2] = { "bin/qmail-multi", 0 };
+static char *binqqargs[2] = { 0, 0 } ;
 
 int
 dkim_setoptions(DKIMSignOptions *opts, char *signOptions)
@@ -1140,13 +1143,21 @@ main(int argc, char *argv[])
 	substdio_fdbuf(&sserr, write, errfd, errbuf, sizeof(errbuf));
 	if (chdir(auto_qmail) == -1)
 		die(61, 0);
+	dkimqueue = env_get("DKIMQUEUE");
+	if (dkimqueue && *dkimqueue)
+		binqqargs[0] = dkimqueue;
+  	if(!binqqargs[0])
+		binqqargs[0] = env_get("QMAILQUEUE");
+	if(!binqqargs[0])
+		binqqargs[0] = "bin/qmail-queue";
 	dkimsign = env_get("DKIMSIGN");
 	dkimverify = env_get("DKIMVERIFY");
-	if (dkimverify && env_get("RELAYCLIENT_NODKIMVERIFY")) {
+	p = env_get("RELAYCLIENT");
+	if (dkimverify && p && env_get("RELAYCLIENT_NODKIMVERIFY")) {
 		execv(*binqqargs, binqqargs);
 		die(120, 0);
 	}
-	if (!dkimsign && !dkimverify && (p = env_get("RELAYCLIENT")))
+	if (!dkimsign && !dkimverify && p)
 	{
 		if (!(dkimsign = env_get("DKIMKEY")))
 		{
@@ -1157,9 +1168,6 @@ main(int argc, char *argv[])
 			dkimsign = dkimfn.s;
 		}
 	}
-	dkimqueue = env_get("DKIMQUEUE");
-	if (dkimqueue && *dkimqueue)
-		binqqargs[0] = dkimqueue;
 	if (dkimsign)
 	{
 		/* selector */
@@ -1460,7 +1468,7 @@ main(argc, argv)
 void
 getversion_qmail_dkim_c()
 {
-	static char    *x = "$Id: qmail-dkim.c,v 1.40 2013-09-13 16:34:35+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-dkim.c,v 1.41 2013-09-16 22:16:35+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
