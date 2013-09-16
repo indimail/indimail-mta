@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-dk.c,v $
+ * Revision 1.42  2013-09-16 22:16:10+05:30  Cprogrammer
+ * corrected logic for RELAYCLIENT_NODKVERIFY
+ *
  * Revision 1.41  2013-09-13 16:33:59+05:30  Cprogrammer
  * turn off verification if RELAYCLIENT, DKIVERIFY and RELAYCLIENT_NODKVERIFY is set
  *
@@ -597,7 +600,8 @@ dk_setoptions(char **selector, int *advicelen, int *opth, int *optr, int *optc,
 	return (0);
 }
 
-static char    *binqqargs[2] = { "bin/qmail-multi", 0 };
+static char *binqqargs[2] = { 0, 0 } ;
+
 int
 main(int argc, char *argv[])
 {
@@ -617,13 +621,21 @@ main(int argc, char *argv[])
 	substdio_fdbuf(&sserr, write, errfd, errbuf, sizeof(errbuf));
 	if (chdir(auto_qmail) == -1)
 		die(61);
+	dkqueue = env_get("DKQUEUE");
+	if (dkqueue && *dkqueue)
+		binqqargs[0] = dkqueue;
+  	if(!binqqargs[0])
+		binqqargs[0] = env_get("QMAILQUEUE");
+	if(!binqqargs[0])
+		binqqargs[0] = "bin/qmail-queue";
 	dksign = env_get("DKSIGN");
 	dkverify = env_get("DKVERIFY");
-	if (dkverify && env_get("RELAYCLIENT_NODKVERIFY")) {
+	relayclient = env_get("RELAYCLIENT");
+	if (dkverify && relayclient && env_get("RELAYCLIENT_NODKVERIFY")) {
 		execv(*binqqargs, binqqargs);
 		die(120, 0);
 	}
-	if (!dksign && !dkverify && (relayclient = env_get("RELAYCLIENT")))
+	if (!dksign && !dkverify && relayclient)
 	{
 		if (!(dksign = env_get("DKKEY")))
 		{
@@ -634,9 +646,6 @@ main(int argc, char *argv[])
 			dksign = dkfn.s;
 		}
 	}
-	dkqueue = env_get("DKQUEUE");
-	if (dkqueue && *dkqueue)
-		binqqargs[0] = dkqueue;
 	if (!(dklib = dk_init(&st)))
 	{
 		maybe_die_dk(st);
@@ -899,7 +908,7 @@ main(argc, argv)
 void
 getversion_qmail_dk_c()
 {
-	static char    *x = "$Id: qmail-dk.c,v 1.41 2013-09-13 16:33:59+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-dk.c,v 1.42 2013-09-16 22:16:10+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
