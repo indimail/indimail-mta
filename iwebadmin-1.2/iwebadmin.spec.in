@@ -1,5 +1,8 @@
 #
 # $Log: iwebadmin.spec.in,v $
+# Revision 1.10  2013-09-20 14:45:39+05:30  Cprogrammer
+# fix patch application
+#
 # Revision 1.9  2011-11-26 09:08:31+05:30  Cprogrammer
 # use htmllibdir
 #
@@ -43,7 +46,7 @@
 # Initial revision
 #
 #
-# $Id: iwebadmin.spec.in,v 1.9 2011-11-26 09:08:31+05:30 Cprogrammer Exp mbhangui $
+# $Id: iwebadmin.spec.in,v 1.10 2013-09-20 14:45:39+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %define _unpackaged_files_terminate_build 1
 
