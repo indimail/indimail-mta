@@ -1,5 +1,8 @@
 /*
  * $Log: qsutil.c,v $
+ * Revision 1.10  2013-09-23 22:14:42+05:30  Cprogrammer
+ * added noflush log functions
+ *
  * Revision 1.9  2010-06-27 09:04:38+05:30  Cprogrammer
  * added log7() function
  *
@@ -37,10 +40,33 @@ static char     errbuf[1];
 static struct substdio sserr = SUBSTDIO_FDBUF(write, 0, errbuf, 1);
 
 void
+logsa_noflush(sa)
+	stralloc       *sa;
+{
+	substdio_put(&sserr, sa->s, sa->len);
+}
+
+void
 logsa(sa)
 	stralloc       *sa;
 {
 	substdio_putflush(&sserr, sa->s, sa->len);
+}
+
+void
+log1_noflush(s1)
+	char           *s1;
+{
+	substdio_puts(&sserr, s1);
+}
+
+void
+log2_noflush(s1, s2)
+	char           *s1;
+	char           *s2;
+{
+	substdio_puts(&sserr, s1);
+	substdio_puts(&sserr, s2);
 }
 
 void
@@ -140,6 +166,22 @@ issafe(ch)
 }
 
 void
+logsafe_noflush(s)
+	char           *s;
+{
+	int             i;
+	while (!stralloc_copys(&foo, s))
+		nomem();
+	for (i = 0; i < foo.len; ++i)
+		if (foo.s[i] == '\n')
+			foo.s[i] = '/';
+		else
+		if (!issafe(foo.s[i]))
+			foo.s[i] = '_';
+	logsa_noflush(&foo);
+}
+
+void
 logsafe(s)
 	char           *s;
 {
@@ -158,7 +200,7 @@ logsafe(s)
 void
 getversion_qsutil_c()
 {
-	static char    *x = "$Id: qsutil.c,v 1.9 2010-06-27 09:04:38+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: qsutil.c,v 1.10 2013-09-23 22:14:42+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
