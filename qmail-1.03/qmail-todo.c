@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-todo.c,v $
+ * Revision 1.32  2013-09-23 22:14:20+05:30  Cprogrammer
+ * display queue directory for qmail-todo process
+ *
  * Revision 1.31  2013-05-16 23:32:53+05:30  Cprogrammer
  * added log_stat() part of non-indimail code
  *
@@ -118,8 +121,13 @@ int             flagstopasap = 0;
 void
 sigterm(void)
 {
-	if(!flagstopasap)
-		log1("status: qmail-todo stop processing asap\n");
+	char           *ptr;
+
+	if(!flagstopasap) {
+		for (ptr = queuedir;*ptr;ptr++);
+		for (;ptr != queuedir && *ptr != '/';ptr--);
+		log3("status: ", *ptr == '/' ? ptr + 1 : ptr, " qmail-todo stop processing asap\n");
+	}
 	flagstopasap = 1;
 }
 
@@ -1001,17 +1009,20 @@ main()
 		log1("alert: qmail-todo: cannot start: unable to switch to home directory\n");
 		_exit(111);
 	}
+	if(!queuedir)
+	{
+		if(!(queuedir = env_get("QUEUEDIR")))
+#ifdef INDIMAIL
+			queuedir = "queue1";
+#else
+			queuedir = "queue";
+#endif
+	}
 	if (!getcontrols())
 	{
 		log1("alert: qmail-todo: cannot start: unable to read controls\n");
 		_exit(111);
 	}
-	if(!(queuedir = env_get("QUEUEDIR")))
-#ifdef INDIMAIL
-		queuedir = "queue1";
-#else
-		queuedir = "queue";
-#endif
 	if (chdir(queuedir) == -1)
 	{
 		log1("alert: qmail-todo: cannot start: unable to switch to queue directory\n");
@@ -1063,7 +1074,9 @@ main()
 			if (flagstopasap)
 				_exit(0);
 	 		/*- qmail-send died. We can not log and we can not work therefor _exit(1). */
-			log1("status: qmail-todo exiting\n");
+			for (ptr = queuedir;*ptr;ptr++);
+			for (;ptr != queuedir && *ptr != '/';ptr--);
+			log3("status: ", *ptr == '/' ? ptr + 1 : ptr, " qmail-todo exiting\n");
 			_exit(1);
 		}
 		wakeup = recent + SLEEP_FOREVER;
@@ -1090,7 +1103,9 @@ main()
 			comm_do(&wfds, &rfds);
 		}
 	}
-	log1("status: qmail-todo exiting\n");
+	for (ptr = queuedir;*ptr;ptr++);
+	for (;ptr != queuedir && *ptr != '/';ptr--);
+	log3("status: ", *ptr == '/' ? ptr + 1 : ptr, " qmail-todo exiting\n");
 	_exit(0);
 }
 #else
@@ -1104,7 +1119,7 @@ main()
 void
 getversion_qmail_todo_c()
 {
-	static char    *x = "$Id: qmail-todo.c,v 1.31 2013-05-16 23:32:53+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: qmail-todo.c,v 1.32 2013-09-23 22:14:20+05:30 Cprogrammer Exp mbhangui $";
 
 #ifdef INDIMAIL
 	if (x)
