@@ -111,8 +111,6 @@ AC_ARG_ENABLE(mysqlprefix, [  --enable-mysqlprefix=""       MySQL Prefix Directo
 
 if test "$mysql_prefix" = ""
 then
-	echo "hello high"
-	sleep 10
 mysql_incdir=""
 for f in /usr/include/mysql /usr/local/mysql/include/mysql /usr/local/mysql/include
 do
