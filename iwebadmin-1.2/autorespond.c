@@ -1,5 +1,5 @@
 /*
- * $Id: autorespond.c,v 1.5 2011-12-04 21:10:07+05:30 Cprogrammer Exp mbhangui $
+ * $Id: autorespond.c,v 1.6 2013-09-20 14:44:22+05:30 Cprogrammer Exp mbhangui $
  * Copyright (C) 1999-2004 Inter7 Internet Technologies, Inc. 
  *
  * This program is free software; you can redistribute it and/or modify
@@ -186,7 +186,8 @@ addautorespondnow()
 	sprintf(TmpBuf, "%s/vacation/%s/.vacation.msg", RealDir, ActionUser);
 	if ((fs = fopen(TmpBuf, "w")) == NULL)
 		ack("150", TmpBuf);
-	fprintf(fs, "This is an autoresponse From: %s@%s Re: %s\n", ActionUser, Domain, Alias);
+	fprintf(fs, "Subject: This is an autoresponse From: %s@%s Re: %s\n", 
+		ActionUser, Domain, Alias);
 	fprintf(fs, "\n%s\n", Message);
 	fclose(fs);
 	/*- Make the autoresponder .qmail file */
@@ -207,7 +208,6 @@ addautorespondnow()
 	snprinth(StatusMessage, sizeof (StatusMessage), "%s %H@%H\n", html_text[180], ActionUser, Domain);
 	show_autoresponders(Username, Domain, Mytime);
 }
-
 
 void
 delautorespond()
@@ -293,7 +293,8 @@ modautorespondnow()
 	sprintf(TmpBuf, "%s/vacation/%s/.vacation.msg", RealDir, ActionUser);
 	if ((fs = fopen(TmpBuf, "w")) == NULL)
 		ack("150", TmpBuf);
-	fprintf(fs, "This is an autoresponse From: %s@%s Re: %s\n", ActionUser, Domain, Alias);
+	fprintf(fs, "Subject: This is an autoresponse From: %s@%s Re: %s\n",
+		ActionUser, Domain, Alias);
 	fprintf(fs, "\n%s\n", Message);
 	fclose(fs);
 	/*- Make the autoresponder .qmail file */
