@@ -1,5 +1,5 @@
 /*
- * $Id: user.c,v 1.9 2013-03-10 23:09:28+05:30 Cprogrammer Exp mbhangui $
+ * $Id: user.c,v 1.10 2013-09-20 14:45:55+05:30 Cprogrammer Exp mbhangui $
  * Copyright (C) 1999-2004 Inter7 Internet Technologies, Inc. 
  *
  * This program is free software; you can redistribute it and/or modify
@@ -814,7 +814,8 @@ makevacation(FILE * d, char *dir)
 		snprintf(StatusMessage, sizeof (StatusMessage), "%s %s\n", html_text[150], fn);
 		return 1;
 	}
-	fprintf(f, "This is an autoresponse From: %s@%s Re: %s\n", ActionUser, Domain, subject);
+	fprintf(f, "Subject: This is an autoresponse From: %s@%s Re: %s\n", 
+		ActionUser, Domain, subject);
 	fprintf(f, "\n%s\n", Message);
 	fclose(f);
 	return 0;
@@ -1080,8 +1081,8 @@ parse_users_dotqmail(char newchar)
 	static FILE    *fs1 = NULL;	/* for the .qmail file */
 	static FILE    *fs2 = NULL;	/* for the vacation message file */
 	int             i, j;
-	char            fn[500];
-	char            linebuf[256];
+	char            fn[500], linebuf[256];
+	char           *ptr;
 	int             inheader;
 
 	static unsigned int dotqmail_flags = 0;
@@ -1257,8 +1258,16 @@ parse_users_dotqmail(char newchar)
 			while (fgets(linebuf, sizeof (linebuf), fs2) != NULL) {
 				if (*linebuf == '\n')
 					break;
-				if (strncasecmp(linebuf, "Subject: ", 9) == 0)
-					printh("%H", &linebuf[9]);
+				if (strncasecmp(linebuf, "Subject: ", 9) == 0) {
+					if ((ptr = strstr(linebuf, "Subject: This is an autoresponse From:"))) {
+						if ((ptr = strstr(linebuf, "Re: ")))
+							ptr += 4;
+						else
+							ptr += 39;
+						printh("%H", ptr);
+					} else
+						printh("%H", &linebuf[9]);
+				}
 			}
 		}
 		break;
