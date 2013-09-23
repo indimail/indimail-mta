@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-send.c,v $
+ * Revision 1.54  2013-09-23 22:13:56+05:30  Cprogrammer
+ * added queue specific concurrency
+ *
  * Revision 1.53  2013-08-25 18:38:05+05:30  Cprogrammer
  * added SRS
  *
@@ -1449,6 +1452,7 @@ unsigned int    concurrency[CHANNELS] = { 10, 20 };
 unsigned int    concurrencyused[CHANNELS] = { 0, 0 };
 unsigned int    holdjobs[CHANNELS] = { 0, 0 }; /* Booleans: hold deliveries NJL 1998/05/03 */
 struct del     *d[CHANNELS];
+stralloc        concurrencyf = { 0 };
 stralloc        dline[CHANNELS];
 char            delbuf[2048];
 
@@ -1456,8 +1460,9 @@ void
 del_status()
 {
 	int             c;
+	char           *ptr;
 
-	log1("status:");
+	log1_noflush("status:");
 	for (c = 0; c < CHANNELS; ++c)
 	{
 		strnum2[fmt_ulong(strnum2, (unsigned long) concurrencyused[c])] = 0;
@@ -1465,10 +1470,13 @@ del_status()
 		my_log2(chanstatusmsg[c], strnum2);
 		my_log2("/", strnum3);
 		if (holdjobs[c])	/*NJL*/
-			log1(" (held)");	/*NJL*/
+			log1_noflush(" (held)");	/*NJL*/
 	}
+	for (ptr = queuedir;*ptr;ptr++);
+	for (;ptr != queuedir && *ptr != '/';ptr--);
+	log2_noflush(" ", *ptr == '/' ? ptr + 1 : ptr);
 	if (flagexitasap)
-		log1(" exitasap");
+		log1_noflush(" exitasap");
 	log1("\n");
 }
 
@@ -2180,15 +2188,15 @@ todo_do(rfds)
 				log3("warning: trouble writing to ", fn.s, "\n");
 				goto fail;
 			}
-			my_log2("info msg ", strnum3);
+			log2_noflush("info msg ", strnum3);
 			strnum2[fmt_ulong(strnum2, (unsigned long) st.st_size)] = 0;
-			my_log2(": bytes ", strnum2);
-			log1(" from <");
-			logsafe(todoline.s + 1);
+			log2_noflush(": bytes ", strnum2);
+			log1_noflush(" from <");
+			logsafe_noflush(todoline.s + 1);
 			strnum2[fmt_ulong(strnum2, pid)] = 0;
-			my_log2("> qp ", strnum2);
+			log2_noflush("> qp ", strnum2);
 			strnum2[fmt_ulong(strnum2, uid)] = 0;
-			my_log2(" uid ", strnum2);
+			log2_noflush(" uid ", strnum2);
 			log1("\n");
 			if (!stralloc_copy(&mailfrom, &todoline) || !stralloc_0(&mailfrom))
 			{
@@ -2515,6 +2523,8 @@ todo_do(rfds)
 int
 getcontrols()
 {
+	char           *ptr;
+
 	if (control_init() == -1)
 		return 0;
 	if (control_readint(&bouncemaxbytes, "bouncemaxbytes") == -1)
@@ -2527,10 +2537,34 @@ getcontrols()
 	if (bouncelifetime > lifetime)
 		bouncelifetime = lifetime;
 #endif
+	/* read concurrencylocal and concurrencylocal.queue[n] */
 	if (control_readint((int *) &concurrency[0], "concurrencylocal") == -1)
 		return 0;
+	if (!stralloc_copys(&concurrencyf, "concurrencyl."))
+		return 0;
+	for (ptr = queuedir;*ptr;ptr++);
+	for (;ptr != queuedir && *ptr != '/';ptr--);
+	if (!stralloc_cats(&concurrencyf, *ptr == '/' ? ptr + 1 : ptr))
+		return 0;
+	if (!stralloc_0(&concurrencyf))
+		return 0;
+	if (control_readint((int *) &concurrency[0], concurrencyf.s) == -1)
+		return 0;
+
+	/* read concurrencyremote and concurrencyremote.queue[n] */
 	if (control_readint((int *) &concurrency[1], "concurrencyremote") == -1)
 		return 0;
+	if (!stralloc_copys(&concurrencyf, "concurrencyr."))
+		return 0;
+	for (ptr = queuedir;*ptr;ptr++);
+	for (;ptr != queuedir && *ptr != '/';ptr--);
+	if (!stralloc_cats(&concurrencyf, *ptr == '/' ? ptr + 1 : ptr))
+		return 0;
+	if (!stralloc_0(&concurrencyf))
+		return 0;
+	if (control_readint((int *) &concurrency[1], concurrencyf.s) == -1)
+		return 0;
+
 	if (control_readint((int *) &holdjobs[0],"holdlocal") == -1)
 		return 0; /*NJL*/
 	if (control_readint((int *) &holdjobs[1],"holdremote") == -1)
@@ -2725,9 +2759,6 @@ main()
 	datetime_sec    wakeup;
 	fd_set          rfds, wfds;
 	struct timeval  tv;
-#ifndef EXTERNAL_TODO
-	char           *ptr;
-#endif
 	/*- startup plugins */
 	void           *handle;
 	int             i, status = 0, len;
@@ -2753,6 +2784,12 @@ main()
 		if (todo_interval <= 0)
 			todo_interval = ONCEEVERY;
 	}
+#endif
+	if (!(queuedir = env_get("QUEUEDIR")))
+#ifdef INDIMAIL
+		queuedir = "queue1";
+#else
+		queuedir = "queue";
 #endif
 	if (!getcontrols())
 	{
@@ -2832,12 +2869,6 @@ main()
 	}
 	if (status)
 		_exit(status);
-	if (!(queuedir = env_get("QUEUEDIR")))
-#ifdef INDIMAIL
-		queuedir = "queue1";
-#else
-		queuedir = "queue";
-#endif
 	if (chdir(queuedir) == -1)
 	{
 		log3("alert: cannot start: unable to switch to queue directory: ", error_str(errno), "\n");
@@ -2954,14 +2985,16 @@ main()
 		}
 	} /*- while (!flagexitasap || !del_canexit() || flagtodoalive) */
 	pqfinish();
-	log1("status: qmail-send exiting\n");
+	for (ptr = queuedir;*ptr;ptr++);
+	for (;ptr != queuedir && *ptr != '/';ptr--);
+	log3("status: ", *ptr == '/' ? ptr + 1 : ptr, " qmail-send exiting\n");
 	return (0);
 }
 
 void
 getversion_qmail_send_c()
 {
-	static char    *x = "$Id: qmail-send.c,v 1.53 2013-08-25 18:38:05+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-send.c,v 1.54 2013-09-23 22:13:56+05:30 Cprogrammer Exp mbhangui $";
 
 #ifdef INDIMAIL
 	if (x)
