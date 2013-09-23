@@ -1,5 +1,5 @@
 /*
- * $Id: command.c,v 1.4 2013-03-10 23:09:19+05:30 Cprogrammer Exp mbhangui $
+ * $Id: command.c,v 1.5 2013-09-20 14:44:30+05:30 Cprogrammer Exp mbhangui $
  * Copyright (C) 1999-2004 Inter7 Internet Technologies, Inc. 
  *
  * This program is free software; you can redistribute it and/or modify
@@ -277,14 +277,14 @@ process_commands()
 	} else
 	if (strcmp(TmpBuf2, "addautorespondnow") == 0) {
 		GetValue(TmpCGI, ActionUser, "newu=", sizeof (ActionUser));
-		GetValue(TmpCGI, Alias, "alias=", sizeof (Alias));
+		GetValue(TmpCGI, Alias, "alias=", sizeof (Alias)); /* subject */
 		GetValue(TmpCGI, Message, "message=", sizeof (Message));
 		GetValue(TmpCGI, Newu, "owner=", sizeof (Newu));
 		addautorespondnow();
 	} else
 	if (strcmp(TmpBuf2, "modautorespondnow") == 0) {
 		GetValue(TmpCGI, ActionUser, "newu=", sizeof (ActionUser));
-		GetValue(TmpCGI, Alias, "alias=", sizeof (Alias));
+		GetValue(TmpCGI, Alias, "alias=", sizeof (Alias)); /* subject */
 		GetValue(TmpCGI, Message, "message=", sizeof (Message));
 		GetValue(TmpCGI, Newu, "owner=", sizeof (Newu));
 		modautorespondnow();
