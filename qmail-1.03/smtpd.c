@@ -1,5 +1,8 @@
 /*
  * $Log: smtpd.c,v $
+ * Revision 1.177  2013-09-24 19:04:27+05:30  Cprogrammer
+ * reload control files if envrules was used in previous smtp session
+ *
  * Revision 1.176  2013-09-04 12:52:12+05:30  Cprogrammer
  * added CRAM-SHA512
  *
@@ -685,7 +688,7 @@ int             wildmat_internal(char *, char *);
 int             ssl_rfd = -1, ssl_wfd = -1;	/*- SSL_get_Xfd() are broken */
 char           *servercert, *clientca, *clientcrl;
 #endif
-char           *revision = "$Revision: 1.176 $";
+char           *revision = "$Revision: 1.177 $";
 char           *protocol = "SMTP";
 stralloc        proto = { 0 };
 static stralloc Revision = { 0 };
@@ -3726,7 +3729,8 @@ smtp_mail(char *arg)
 	struct passwd  *pw;
 #endif
 	char           *x;
-	int             ret, envret = 0;
+	int             ret;
+	static int      envret = 0;
 #ifdef SMTP_PLUGIN
 	char           *mesg;
 	int             i;
@@ -3743,7 +3747,7 @@ smtp_mail(char *arg)
 	 * in the previous session
 	 */
 	restore_env();
-	if (envret)
+	if (envret) /* reload control files if in an earlier session, envrules was used */
 	{
 		post_setup();
 		envret = 0;
@@ -6703,7 +6707,7 @@ addrrelay() /*- Rejection of relay probes. */
 void
 getversion_smtpd_c()
 {
-	static char    *x = "$Id: smtpd.c,v 1.176 2013-09-04 12:52:12+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: smtpd.c,v 1.177 2013-09-24 19:04:27+05:30 Cprogrammer Exp mbhangui $";
 
 #ifdef INDIMAIL
 	if (x)
