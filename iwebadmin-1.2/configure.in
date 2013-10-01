@@ -34,7 +34,7 @@ AC_TYPE_UID_T
 
 # Checks for library functions.
 AC_FUNC_CLOSEDIR_VOID
-AC_CHECK_FUNCS([dup2 memset mkdir strcasecmp strchr strdup strncasecmp strrchr strstr])
+AC_CHECK_FUNCS([dup2 memset mkdir strcasecmp strchr strdup strncasecmp strrchr strstr setreuid setregid])
 
 if test "$GCC" = yes ; then
   CFLAGS="$CFLAGS -Wall"
