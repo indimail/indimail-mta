@@ -117,19 +117,27 @@ extern char *crypt(const char *, const char *);
 void
 iwebadmin_suid(gid_t Gid, uid_t Uid)
 {
-	if (geteuid() == 0) {
-		if (setgid(Gid) != 0) {
-			printf("%s", html_text[318]);
-			perror("setgid");
-			vclose();
-			exit(EXIT_FAILURE);
-		}
-		if (setuid(Uid) != 0) {
-			printf("%s", html_text[319]);
-			perror("setuid");
-			vclose();
-			exit(EXIT_FAILURE);
-		}
+#ifdef HAVE_SETREGID
+	if (setregid(Gid, Gid) != 0)
+#else
+	if (setgid(Gid) != 0)
+#endif
+	{
+		printf("%s", html_text[318]);
+		perror("setregid");
+		vclose();
+		exit(EXIT_FAILURE);
+	}
+#ifdef HAVE_SETREGID
+	if (setreuid(Uid, Uid) != 0)
+#else
+	if (setuid(Uid) != 0)
+#endif
+	{
+		printf("%s", html_text[319]);
+		perror("setreuid");
+		vclose();
+		exit(EXIT_FAILURE);
 	}
 }
 
