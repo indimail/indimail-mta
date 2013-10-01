@@ -8,8 +8,10 @@ qmail-send \- deliver mail messages from the queue
 handles messages placed into the outgoing queue by
 .BR qmail-queue .
 .B qmail-send
-by default looks at QMAILHOME/queue for messages. This path can be changed by defining the QUEUEDIR
-environment variable.
+by default looks at QMAILHOME/queue for messages. This path can be changed by defining the
+QUEUEDIR environment variable. If you are using \fBqmail-daemon\fR(8) to invoke qmail-send, then
+\fBqmail-daemon\fR will use QUEUE_COUNT, QUEUE_START to invoke multiple qmail-send processes, with
+each having its own queue defined by the \fBQUEUEDIR\fR environment variable.
 
 \fBqmail-send\fR can load startup plugins from QMAILHOME/plugins directory. This directory can
 be changed by defining the \fBPLUGINDIR\fR environment variable. By default, qmail-send will
@@ -76,7 +78,9 @@ If
 receives a HUP signal,
 it will reread
 .IR concurrencylocal ,
+.IR concurrencylocal.queue ,
 .IR concurrencyremote ,
+.IR concurrencyremote.queue ,
 .IR locals ,
 .IR virtualdomains ,
 .IR holdlocal ,
@@ -170,8 +174,28 @@ is limited at compile time to
 SPAWN.
 
 .TP 5
+.I concurrencylocal.queue
+Maximum number of simultaneous local delivery attempts for the queue \fIqueue\fR. A queue
+can be defined by setting \fBQUEUEDIR\fR environment variable.
+Default: 10.
+If 0, local deliveries will be put on hold.
+.I concurrencylocal
+is limited at compile time to
+SPAWN.
+
+.TP 5
 .I concurrencyremote
 Maximum number of simultaneous remote delivery attempts.
+Default: 20.
+If 0, remote deliveries will be put on hold.
+.I concurrencyremote
+is limited at compile time to
+SPAWN.
+
+.TP 5
+.I concurrencyremote.queue
+Maximum number of simultaneous remote delivery attempts for the queue \fIqueue\fR. A queue
+can be defined by setting \fBQUEUEDIR\fR environment variable.
 Default: 20.
 If 0, remote deliveries will be put on hold.
 .I concurrencyremote
