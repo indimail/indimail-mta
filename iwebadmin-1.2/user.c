@@ -1,5 +1,5 @@
 /*
- * $Id: user.c,v 1.10 2013-09-20 14:45:55+05:30 Cprogrammer Exp mbhangui $
+ * $Id: user.c,v 1.11 2013-10-01 17:14:23+05:30 Cprogrammer Exp mbhangui $
  * Copyright (C) 1999-2004 Inter7 Internet Technologies, Inc. 
  *
  * This program is free software; you can redistribute it and/or modify
@@ -799,7 +799,11 @@ makevacation(FILE * d, char *dir)
 	}
 	/*- make the vacation directory */
 	snprintf(fn, sizeof (fn), "%s/vacation/%s", dir, ActionUser);
-	r_mkdir(fn, 0750, Uid, Gid);
+	if (r_mkdir(fn, 0750, Uid, Gid)) {
+		snprintf(StatusMessage, sizeof (StatusMessage), "%s", html_text[143]);
+		fprintf(stderr, "%s: uid=%d, gid=%d: %s\n", TmpBuf, getuid(), getgid(), strerror(errno));
+		return (1);
+	}
 	snprintf(fn, sizeof (fn), "%s/content-type", dir);
 	if (access(fn, R_OK))
 		fprintf(d, "| %s/bin/autoresponder -q %s/vacation/%s/.vacation.msg %s/vacation/%s\n",
@@ -814,8 +818,7 @@ makevacation(FILE * d, char *dir)
 		snprintf(StatusMessage, sizeof (StatusMessage), "%s %s\n", html_text[150], fn);
 		return 1;
 	}
-	fprintf(f, "Subject: This is an autoresponse From: %s@%s Re: %s\n", 
-		ActionUser, Domain, subject);
+	fprintf(f, "Reference: %s\n", subject);
 	fprintf(f, "\n%s\n", Message);
 	fclose(f);
 	return 0;
@@ -1082,7 +1085,6 @@ parse_users_dotqmail(char newchar)
 	static FILE    *fs2 = NULL;	/* for the vacation message file */
 	int             i, j;
 	char            fn[500], linebuf[256];
-	char           *ptr;
 	int             inheader;
 
 	static unsigned int dotqmail_flags = 0;
@@ -1258,16 +1260,8 @@ parse_users_dotqmail(char newchar)
 			while (fgets(linebuf, sizeof (linebuf), fs2) != NULL) {
 				if (*linebuf == '\n')
 					break;
-				if (strncasecmp(linebuf, "Subject: ", 9) == 0) {
-					if ((ptr = strstr(linebuf, "Subject: This is an autoresponse From:"))) {
-						if ((ptr = strstr(linebuf, "Re: ")))
-							ptr += 4;
-						else
-							ptr += 39;
-						printh("%H", ptr);
-					} else
-						printh("%H", &linebuf[9]);
-				}
+				if (strncasecmp(linebuf, "Reference: ", 11) == 0)
+					printh("%H", &linebuf[11]);
 			}
 		}
 		break;
