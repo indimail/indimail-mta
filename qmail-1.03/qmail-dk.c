@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-dk.c,v $
+ * Revision 1.43  2013-10-01 17:12:07+05:30  Cprogrammer
+ * fixed QMAILQUEUE recursion
+ *
  * Revision 1.42  2013-09-16 22:16:10+05:30  Cprogrammer
  * corrected logic for RELAYCLIENT_NODKVERIFY
  *
@@ -600,7 +603,7 @@ dk_setoptions(char **selector, int *advicelen, int *opth, int *optr, int *optc,
 	return (0);
 }
 
-static char *binqqargs[2] = { 0, 0 } ;
+static char    *binqqargs[2] = { "bin/qmail-multi", 0 };
 
 int
 main(int argc, char *argv[])
@@ -624,10 +627,6 @@ main(int argc, char *argv[])
 	dkqueue = env_get("DKQUEUE");
 	if (dkqueue && *dkqueue)
 		binqqargs[0] = dkqueue;
-  	if(!binqqargs[0])
-		binqqargs[0] = env_get("QMAILQUEUE");
-	if(!binqqargs[0])
-		binqqargs[0] = "bin/qmail-queue";
 	dksign = env_get("DKSIGN");
 	dkverify = env_get("DKVERIFY");
 	relayclient = env_get("RELAYCLIENT");
@@ -908,7 +907,7 @@ main(argc, argv)
 void
 getversion_qmail_dk_c()
 {
-	static char    *x = "$Id: qmail-dk.c,v 1.42 2013-09-16 22:16:10+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-dk.c,v 1.43 2013-10-01 17:12:07+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

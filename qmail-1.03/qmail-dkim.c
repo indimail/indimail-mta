@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-dkim.c,v $
+ * Revision 1.42  2013-10-01 17:11:24+05:30  Cprogrammer
+ * fixed QMAILQUEUE recursion
+ *
  * Revision 1.41  2013-09-16 22:16:35+05:30  Cprogrammer
  * corrected logic for RELAYCLIENT_NODKIMVERIFY
  *
@@ -992,7 +995,7 @@ checkPractice(int dkimRet)
 	return (0);
 }
 
-static char *binqqargs[2] = { 0, 0 } ;
+static char    *binqqargs[2] = { "bin/qmail-multi", 0 };
 
 int
 dkim_setoptions(DKIMSignOptions *opts, char *signOptions)
@@ -1146,10 +1149,6 @@ main(int argc, char *argv[])
 	dkimqueue = env_get("DKIMQUEUE");
 	if (dkimqueue && *dkimqueue)
 		binqqargs[0] = dkimqueue;
-  	if(!binqqargs[0])
-		binqqargs[0] = env_get("QMAILQUEUE");
-	if(!binqqargs[0])
-		binqqargs[0] = "bin/qmail-queue";
 	dkimsign = env_get("DKIMSIGN");
 	dkimverify = env_get("DKIMVERIFY");
 	p = env_get("RELAYCLIENT");
@@ -1468,7 +1467,7 @@ main(argc, argv)
 void
 getversion_qmail_dkim_c()
 {
-	static char    *x = "$Id: qmail-dkim.c,v 1.41 2013-09-16 22:16:35+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-dkim.c,v 1.42 2013-10-01 17:11:24+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
