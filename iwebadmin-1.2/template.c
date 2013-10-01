@@ -1,5 +1,5 @@
 /*
- * $Id: template.c,v 1.6 2011-11-26 09:34:44+05:30 Cprogrammer Exp mbhangui $
+ * $Id: template.c,v 1.7 2013-10-01 17:14:01+05:30 Cprogrammer Exp mbhangui $
  * Copyright (C) 1999-2004 Inter7 Internet Technologies, Inc. 
  *
  * This program is free software; you can redistribute it and/or modify
@@ -45,6 +45,7 @@
 #include <unistd.h>
 #include <pwd.h>
 #include <dirent.h>
+#include <errno.h>
 #include "alias.h"
 #include "autorespond.h"
 #include "cgi.h"
@@ -219,9 +220,10 @@ send_template_now(char *filename)
 						}
 					}
 					sprintf(TmpBuf, "vacation/%s/.vacation.msg", ActionUser);
-
-					if ((fs = fopen(TmpBuf, "r")) == NULL)
+					if ((fs = fopen(TmpBuf, "r")) == NULL) {
+						fprintf(stderr, "%s: uid=%d, gid=%d: %s\n", TmpBuf, getuid(), getgid(), strerror(errno));
 						ack("150", TmpBuf);
+					}
 
 					fgets(TmpBuf2, sizeof (TmpBuf2), fs);
 					fgets(TmpBuf2, sizeof (TmpBuf2), fs);

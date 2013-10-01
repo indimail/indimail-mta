@@ -1,5 +1,5 @@
 /*
- * $Id: autorespond.c,v 1.6 2013-09-20 14:44:22+05:30 Cprogrammer Exp mbhangui $
+ * $Id: autorespond.c,v 1.7 2013-10-01 17:13:32+05:30 Cprogrammer Exp mbhangui $
  * Copyright (C) 1999-2004 Inter7 Internet Technologies, Inc. 
  *
  * This program is free software; you can redistribute it and/or modify
@@ -46,6 +46,7 @@
 #include <unistd.h>
 #include <pwd.h>
 #include <dirent.h>
+#include <errno.h>
 #include "autorespond.h"
 #include "limits.h"
 #include "printh.h"
@@ -181,13 +182,18 @@ addautorespondnow()
 	}
 	/*- Make the autoresponder directory */
 	sprintf(TmpBuf, "%s/vacation/%s", RealDir, ActionUser);
-	r_mkdir(TmpBuf, 0750, Uid, Gid);
+	if (r_mkdir(TmpBuf, 0750, Uid, Gid)) {
+		fprintf(stderr, "%s: uid=%d, gid=%d: %s\n", TmpBuf, getuid(), getgid(), strerror(errno));
+		ack("143", TmpBuf);
+	}
 	/*- Make the autoresponder message file */
 	sprintf(TmpBuf, "%s/vacation/%s/.vacation.msg", RealDir, ActionUser);
-	if ((fs = fopen(TmpBuf, "w")) == NULL)
+	if ((fs = fopen(TmpBuf, "w")) == NULL) {
+		fprintf(stderr, "%s: uid=%d, gid=%d: %s\n", TmpBuf, getuid(), getgid(), strerror(errno));
 		ack("150", TmpBuf);
-	fprintf(fs, "Subject: This is an autoresponse From: %s@%s Re: %s\n", 
-		ActionUser, Domain, Alias);
+	}
+	/*- subject in iwebadmin autoresponder panel */
+	fprintf(fs, "Reference: %s\n", Alias);
 	fprintf(fs, "\n%s\n", Message);
 	fclose(fs);
 	/*- Make the autoresponder .qmail file */
@@ -288,13 +294,18 @@ modautorespondnow()
 	}
 	/*- Make the autoresponder directory */
 	sprintf(TmpBuf, "%s/vacation/%s", RealDir, ActionUser);
-	r_mkdir(TmpBuf, 0750, Uid, Gid);
+	if (r_mkdir(TmpBuf, 0750, Uid, Gid)) {
+		ack("143", TmpBuf);
+		fprintf(stderr, "%s: uid=%d, gid=%d: %s\n", TmpBuf, getuid(), getgid(), strerror(errno));
+	}
 	/*- Make the autoresponder message file */
 	sprintf(TmpBuf, "%s/vacation/%s/.vacation.msg", RealDir, ActionUser);
-	if ((fs = fopen(TmpBuf, "w")) == NULL)
+	if ((fs = fopen(TmpBuf, "w")) == NULL) {
+		fprintf(stderr, "%s: uid=%d, gid=%d: %s\n", TmpBuf, getuid(), getgid(), strerror(errno));
 		ack("150", TmpBuf);
-	fprintf(fs, "Subject: This is an autoresponse From: %s@%s Re: %s\n",
-		ActionUser, Domain, Alias);
+	}
+	/*- subject in iwebadmin autoresponder panel */
+	fprintf(fs, "Reference: %s\n", Alias);
 	fprintf(fs, "\n%s\n", Message);
 	fclose(fs);
 	/*- Make the autoresponder .qmail file */
