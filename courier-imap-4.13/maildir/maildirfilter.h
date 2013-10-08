@@ -26,7 +26,7 @@ enum maildirfiltertype {
 
 struct maildirfilterrule {
 	struct maildirfilterrule *next, *prev;
-	char *rulename;
+	char *rulename_utf8;
 	enum maildirfiltertype type;
 	int flags;
 
@@ -37,8 +37,8 @@ struct maildirfilterrule {
 #define	MFR_CONTINUE	4	/* Continue filtering (cc instead of to) */
 #define MFR_PLAINSTRING	8	/* Pattern is a plain string, not a regex */
 
-	char *fieldname;	/* Match this header */
-	char *fieldvalue;	/* Match/search value */
+	char *fieldname_utf8;	/* Match this header */
+	char *fieldvalue_utf8;	/* Match/search value */
 	char *tofolder;		/* Destination folder, fwd address, err msg */
 	char *fromhdr;		/* From: header on autoreplies. */
 	} ;
@@ -62,6 +62,7 @@ struct maildirfilterrule *maildir_filter_appendrule(struct maildirfilter *r,
 					const char *value,
 					const char *folder,
 					const char *fromhdr,
+					const char *rulecharset,
 					int *errcode);	/* Append a new rule */
 
 int maildir_filter_setautoreplyfrom(struct maildirfilter *, const char *);
@@ -81,6 +82,7 @@ int maildir_filter_ruleupdate(struct maildirfilter *, struct maildirfilterrule *
 		  const char *,
 		  enum maildirfiltertype,
 		  int,
+		  const char *,
 		  const char *,
 		  const char *,
 		  const char *,

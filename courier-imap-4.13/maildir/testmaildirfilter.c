@@ -1,5 +1,5 @@
 /*
-** Copyright 2000 Double Precision, Inc.
+** Copyright 2000-2013 Double Precision, Inc.
 ** See COPYING for distribution information.
 */
 
@@ -8,7 +8,7 @@
 #include	<stdio.h>
 #include	<string.h>
 #include	<unistd.h>
-
+#include	<stdlib.h>
 
 int main(int argc, char **argv)
 {
@@ -21,6 +21,7 @@ int errcode, i;
 struct maildirfilter mf;
 struct maildirfilterrule *r;
 int flags=0;
+const char *charset=getenv("CHARSET");
 
 	if (argc < 6)
 	{
@@ -64,8 +65,12 @@ int flags=0;
 		return (1);
 	}
 
+	if (!charset)
+		charset="utf-8";
+
 	r=maildir_filter_appendrule(&mf, name, type, flags,
-		header, value, folder, "", &errcode);
+				    header, value, folder, "", charset,
+				    &errcode);
 
 	if (!r)
 	{
@@ -81,6 +86,6 @@ int flags=0;
 		return (1);
 	}
 	rename("testrules2", "testrules");
-	printf("Added %s\n", name);
+	printf("Added %s\n", r->rulename_utf8);
 	return (0);
 }

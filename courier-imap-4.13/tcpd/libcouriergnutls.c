@@ -1,5 +1,5 @@
 /*
-** Copyright 2007-2009 Double Precision, Inc.
+** Copyright 2007-2013 Double Precision, Inc.
 ** See COPYING for distribution information.
 */
 #include	"config.h"
@@ -144,9 +144,9 @@ struct ssl_handle_t {
 	gnutls_dh_params_t dhparams;
 	gnutls_session_t session;
 
-	gnutls_x509_privkey x509_key;
+	gnutls_x509_privkey_t x509_key;
 
-	gnutls_openpgp_key_t pgp_crt;
+	gnutls_openpgp_crt_t pgp_crt;
 	gnutls_openpgp_privkey_t pgp_key;
 };
 
@@ -674,7 +674,7 @@ static int verify_client(ssl_handle ssl, int fd)
 	}
 	else if (gnutls_certificate_type_get(ssl->session)==GNUTLS_CRT_OPENPGP)
 	{
-		gnutls_openpgp_key_t cert;
+		gnutls_openpgp_crt_t cert;
 
 		if (gnutls_openpgp_key_init(&cert) < 0)
 		{
@@ -849,7 +849,7 @@ static char *check_cert(const char *filename,
 }
 
 static int read_file(const char *file,
-		     gnutls_datum *filebuf)
+		     gnutls_datum_t *filebuf)
 {
 	FILE *fp;
 	struct stat stat_buf;
@@ -879,7 +879,7 @@ static int read_file(const char *file,
 	return 0;
 }
 
-static void release_file(gnutls_datum *filebuf)
+static void release_file(gnutls_datum_t *filebuf)
 {
 	if (filebuf->data)
 		free(filebuf->data);
@@ -892,7 +892,7 @@ static int set_cert(ssl_handle ssl,
 		    const char *certfilename)
 {
 	int rc;
-	gnutls_datum filebuf;
+	gnutls_datum_t filebuf;
 	unsigned int cert_cnt;
 
 	st->ncerts=0;
@@ -1057,7 +1057,7 @@ static int pick_client_cert(gnutls_session_t session,
 		gnutls_x509_crt_t *certbuf;
 		size_t issuer_buf_size=0;
 		char *issuer_rdn;
-		gnutls_x509_privkey pk;
+		gnutls_x509_privkey_t pk;
 
 		data.data=(unsigned char *)cert_array;
 		data.size=cert_array_size;

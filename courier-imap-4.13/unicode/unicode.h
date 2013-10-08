@@ -905,7 +905,7 @@ namespace mail {
 
 	public:
 		iconvert();
-		~iconvert();
+		virtual ~iconvert();
 
 		/* Start conversion.
 		** Returns false if the requested conversion cannot be done.
@@ -1277,7 +1277,7 @@ namespace mail {
 
 	public:
 		linebreak_callback_base();
-		~linebreak_callback_base();
+		virtual ~linebreak_callback_base();
 
 		void finish();
 
@@ -1455,7 +1455,7 @@ namespace mail {
 
 	public:
 		linebreakc_callback_base();
-		~linebreakc_callback_base();
+		virtual ~linebreakc_callback_base();
 
 		void finish();
 
@@ -1636,7 +1636,7 @@ namespace mail {
 
 	public:
 		wordbreak_callback_base();
-		~wordbreak_callback_base();
+		virtual ~wordbreak_callback_base();
 
 		void finish();
 

@@ -883,7 +883,14 @@ struct	dirent *de;
 
 int mddelete(const char *s)
 {
-int	rc;
+	int	rc;
+	struct stat stat_buf;
+
+	/* If the top level maildir is a sym link, don't delete it */
+
+	if (stat(s, &stat_buf) < 0 &&
+	    S_ISLNK(stat_buf.st_mode))
+		return -1;
 
 	trap_signals();
 	rc=maildir_del(s);
@@ -1380,6 +1387,109 @@ char	*p=malloc(strlen(mbox)+strlen(name)+sizeof("/cur/"));
 
 	strcat(strcat(strcpy(p, mbox), "/cur/"), name);
 	return (p);
+}
+
+/****************************************************************************/
+
+/* Do the ID stuff                                                        */
+
+/****************************************************************************/
+static int doId()
+{
+	const char *ev = getenv("IMAP_ID_FIELDS");
+	unsigned int flags=0;
+	struct	imaptoken *curtoken;
+
+	if (!ev)
+		return -1;
+
+	flags = atoi(ev);
+
+	/* The data sent by the client isn't used for anything, but make sure
+	 * it is syntactically correct. */
+	curtoken = nexttoken();
+	switch (curtoken->tokentype) {
+	case IT_NIL:
+		break;
+	case IT_LPAREN:
+		{
+		unsigned int k = 0;
+
+		curtoken = nexttoken();
+
+		fprintf(stderr, "INFO: ID, user=%s, ip=[%s]",
+			getenv("AUTHENTICATED"),
+			getenv("TCPREMOTEIP"));
+
+		while ((k < 30) && (curtoken->tokentype != IT_RPAREN)) {
+			k++;
+			if (curtoken->tokentype != IT_QUOTED_STRING)
+			{
+				fprintf(stderr, "\n");
+				fflush(stderr);
+				return -1;
+			}
+			fprintf(stderr, ", %s=", curtoken->tokenbuf);
+
+			curtoken = nexttoken();
+			if ((curtoken->tokentype != IT_QUOTED_STRING) &&
+					(curtoken->tokentype != IT_NIL))
+			{
+				fprintf(stderr, "\n");
+				fflush(stderr);
+				return -1;
+			}
+			fprintf(stderr, "%s",
+				curtoken->tokentype == IT_QUOTED_STRING
+				? curtoken->tokenbuf:"(nil)");
+			curtoken = nexttoken();
+		}
+		fprintf(stderr, "\n");
+		fflush(stderr);
+
+		/* no strings sent */
+		if (k == 0)
+			return -1;
+
+		/* at most 30 pairs allowed */
+		if ((k >= 30) && (curtoken->tokentype != IT_RPAREN))
+			return -1;
+
+		break;
+		}
+	default:
+		return -1;
+	}
+
+	writes("* ID (\"name\" \"Courier-IMAP");
+
+	if (flags & 1) {
+		const char *sp = strchr(PROGRAMVERSION, ' ') + 1;
+		writes("\" \"version\" \"");
+		writemem(sp, strchr(sp, '/') - sp);
+	}
+
+#if HAVE_SYS_UTSNAME_H
+	if (flags & 6) {
+		struct utsname uts;
+		if (uname(&uts) == 0)
+		{
+			if (flags & 2) {
+				writes("\" \"os\" \"");
+				writeqs(uts.sysname);
+			}
+			if (flags & 4) {
+				writes("\" \"os-version\" \"");
+				writeqs(uts.release);
+			}
+			
+		}
+	}
+#endif
+
+	writes("\" \"vendor\" \"Double Precision, Inc.\")\r\n");
+
+	return 0;
 }
 
 /****************************************************************************/
@@ -4051,29 +4161,38 @@ int	uid=0;
 		writes(" OK NOOP completed\r\n");
 		return (0);
 	}
-       if (strcmp(curtoken->tokenbuf, "IDLE") == 0)
-       {
-	       const char *p;
+	if (strcmp(curtoken->tokenbuf, "ID") == 0)
+	{
+		if (doId() < 0)
+			return (-1);
+		writes(tag);
+		writes(" OK ID completed\r\n");
+		return (0);
+	}
+    if (strcmp(curtoken->tokenbuf, "IDLE") == 0)
+    {
+	     const char *p;
 
-               if (nexttoken()->tokentype != IT_EOL)   return (-1);
+        if (nexttoken()->tokentype != IT_EOL)
+			return (-1);
 
-	       read_eol();
+      read_eol();
 
-	       if ((p=getenv("IMAP_ENHANCEDIDLE")) == NULL
+      if ((p=getenv("IMAP_ENHANCEDIDLE")) == NULL
 		   || !atoi(p)
 		   || imapenhancedidle())
 		       imapidle();
-	       curtoken=nexttoken();
-	       if (strcmp(curtoken->tokenbuf, "DONE") == 0)
-	       {
-		       if (current_mailbox)
-			       doNoop(0);
-		       writes(tag);
-		       writes(" OK IDLE completed\r\n");
-		       return (0);
-               }
-               return (-1);
+      curtoken=nexttoken();
+      if (strcmp(curtoken->tokenbuf, "DONE") == 0)
+      {
+	       if (current_mailbox)
+		       doNoop(0);
+	       writes(tag);
+	       writes(" OK IDLE completed\r\n");
+	       return (0);
        }
+       return (-1);
+    }
 	if (strcmp(curtoken->tokenbuf, "LOGOUT") == 0)
 	{
 		if (nexttoken()->tokentype != IT_EOL)	return (-1);

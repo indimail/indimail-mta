@@ -11,6 +11,7 @@
 
 #include	"autoresponse.h"
 #include	"numlib/numlib.h"
+#include	"unicode/unicode.h"
 #include	<stdlib.h>
 #include	<string.h>
 #include	<stdio.h>
@@ -50,6 +51,7 @@ struct maildirfilterrule *maildir_filter_appendrule(struct maildirfilter *r,
 					const char *value,
 					const char *folder,
 					const char *fromhdr,
+					const char *charset,
 					int *errcode)
 {
 struct maildirfilterrule *p=malloc(sizeof(struct maildirfilterrule));
@@ -66,7 +68,8 @@ struct maildirfilterrule *p=malloc(sizeof(struct maildirfilterrule));
 	r->last=p;
 
 	if (maildir_filter_ruleupdate(r, p, name, type, flags,
-			  header, value, folder, fromhdr, errcode))
+				      header, value, folder, fromhdr, charset,
+				      errcode))
 	{
 		maildir_filter_ruledel(r, p);
 		return (0);
@@ -74,16 +77,82 @@ struct maildirfilterrule *p=malloc(sizeof(struct maildirfilterrule));
 	return (p);
 }
 
+static int maildir_filter_ruleupdate_utf8(struct maildirfilter *r,
+					  struct maildirfilterrule *p,
+					  const char *name,
+					  enum maildirfiltertype type,
+					  int flags,
+					  const char *header,
+					  const char *value,
+					  const char *folder,
+					  const char *fromhdr,
+					  int *errcode);
+
 int maildir_filter_ruleupdate(struct maildirfilter *r,
-		  struct maildirfilterrule *p,
-		  const char *name,
-		  enum maildirfiltertype type,
-		  int flags,
-		  const char *header,
-		  const char *value,
-		  const char *folder,
-		  const char *fromhdr,
-		  int *errcode)
+			      struct maildirfilterrule *p,
+			      const char *name,
+			      enum maildirfiltertype type,
+			      int flags,
+			      const char *header,
+			      const char *value,
+			      const char *folder,
+			      const char *fromhdr,
+			      const char *charset,
+			      int *errcode)
+{
+	char *name_utf8;
+	char *header_utf8;
+	char *value_utf8;
+	int rc;
+
+	name_utf8=libmail_u_convert_toutf8(name ? name:"", charset, NULL);
+
+	if (!name_utf8)
+	{
+		*errcode=MF_ERR_BADRULENAME;
+		return -1;
+	}
+
+	header_utf8=libmail_u_convert_toutf8(header ? header:"", charset, NULL);
+
+	if (!header_utf8)
+	{
+		free(name_utf8);
+		*errcode=MF_ERR_BADRULEHEADER;
+		return -1;
+	}
+
+	value_utf8=libmail_u_convert_toutf8(value ? value:"", charset, NULL);
+
+	if (!value_utf8)
+	{
+		free(name_utf8);
+		free(header_utf8);
+		*errcode=MF_ERR_BADRULEVALUE;
+		return -1;
+	}
+	rc=maildir_filter_ruleupdate_utf8(r, p, name_utf8, type, flags,
+					  header_utf8,
+					  value_utf8,
+					  folder,
+					  fromhdr,
+					  errcode);
+	free(name_utf8);
+	free(value_utf8);
+	free(header_utf8);
+	return rc;
+}
+
+static int maildir_filter_ruleupdate_utf8(struct maildirfilter *r,
+					  struct maildirfilterrule *p,
+					  const char *name,
+					  enum maildirfiltertype type,
+					  int flags,
+					  const char *header,
+					  const char *value,
+					  const char *folder,
+					  const char *fromhdr,
+					  int *errcode)
 {
 	const char *c;
 	struct maildirfilterrule *pom;
@@ -96,7 +165,7 @@ int maildir_filter_ruleupdate(struct maildirfilter *r,
 
 	/* rule name: may not contain quotes or control characters. */
 	*errcode=MF_ERR_BADRULENAME;
-	if (!name || !*name || strlen(name) > 200)
+	if (!*name || strlen(name) > 200)
 		return (-1);
 
 	for (c=name; *c; c++)
@@ -108,7 +177,7 @@ int maildir_filter_ruleupdate(struct maildirfilter *r,
 	*errcode=MF_ERR_EXISTS;
 	
 	for (pom=r->first; pom->next; pom=pom->next) {
-	    if (p!=pom && !strcmp(name, pom->rulename))
+	    if (p!=pom && !strcmp(name, pom->rulename_utf8))
 		return (-1);
 	}
 
@@ -134,8 +203,8 @@ int maildir_filter_ruleupdate(struct maildirfilter *r,
 	*errcode=MF_ERR_BADRULEHEADER;
 
 	c=header;
-	if (c && strlen(c) > 200)	return (-1);
-	if (c == 0 || *c == 0)
+	if (strlen(c) > 200)	return (-1);
+	if (*c == 0)
 	{
 		switch (type)	{
 		case hasrecipient:
@@ -159,8 +228,9 @@ int maildir_filter_ruleupdate(struct maildirfilter *r,
 	else for ( ; *c; c++)
 	{
 		/* no control characters */
-		if (*c <= ' ' || *c == MDIRSEP[0] || *c >= 127 || *c == '\'' ||
-			*c == '\\' || *c == '"' || *c == '`' || *c == '/')
+		if ((unsigned char)*c <= ' ' || *c == MDIRSEP[0] ||
+		    *c == '\'' ||
+		    *c == '\\' || *c == '"' || *c == '`' || *c == '/')
 			return (-1);
 	}
 
@@ -169,8 +239,8 @@ int maildir_filter_ruleupdate(struct maildirfilter *r,
 	*errcode=MF_ERR_BADRULEVALUE;
 
 	c=value;
-	if (c && strlen(c) > 200)	return (-1);
-	if (c == 0 || *c == 0)
+	if (strlen(c) > 200)	return (-1);
+	if (*c == 0)
 	{
 		switch (type)	{
 		case mimemultipart:
@@ -270,7 +340,7 @@ int maildir_filter_ruleupdate(struct maildirfilter *r,
 				const char *errptr;
 				int errindex;
 
-				pcre *p=pcre_compile(value, 0,
+				pcre *p=pcre_compile(value, PCRE_UTF8,
 						     &errptr,
 						     &errindex,
 						     0);
@@ -349,13 +419,13 @@ int maildir_filter_ruleupdate(struct maildirfilter *r,
 
 	*errcode=MF_ERR_INTERNAL;
 
-	if (p->rulename)	free(p->rulename);
-	if ((p->rulename=strdup(name)) == 0)	return (-1);
+	if (p->rulename_utf8)	free(p->rulename_utf8);
+	if ((p->rulename_utf8=strdup(name)) == 0)	return (-1);
 	p->type=type;
-	if (p->fieldname)	free(p->fieldname);
-	if ((p->fieldname=strdup(header ? header:"")) == 0)	return (-1);
-	if (p->fieldvalue)	free(p->fieldvalue);
-	if ((p->fieldvalue=strdup(value ? value:"")) == 0)	return (-1);
+	if (p->fieldname_utf8)	free(p->fieldname_utf8);
+	if ((p->fieldname_utf8=strdup(header ? header:"")) == 0)	return (-1);
+	if (p->fieldvalue_utf8)	free(p->fieldvalue_utf8);
+	if ((p->fieldvalue_utf8=strdup(value ? value:"")) == 0)	return (-1);
 	if (p->tofolder)	free(p->tofolder);
 	if ((p->tofolder=malloc(strlen(folder)+1)) == 0)	return (-1);
 	strcpy(p->tofolder, folder);
@@ -376,9 +446,9 @@ void maildir_filter_ruledel(struct maildirfilter *r, struct maildirfilterrule *p
 	if (p->next)	p->next->prev=p->prev;
 	else		r->last=p->prev;
 
-	if (p->rulename)	free(p->rulename);
-	if (p->fieldname)	free(p->fieldname);
-	if (p->fieldvalue)	free(p->fieldvalue);
+	if (p->rulename_utf8)	free(p->rulename_utf8);
+	if (p->fieldname_utf8)	free(p->fieldname_utf8);
+	if (p->fieldvalue_utf8)	free(p->fieldvalue_utf8);
 	if (p->tofolder)	free(p->tofolder);
 	if (p->fromhdr)		free(p->fromhdr);
 	free(p);
@@ -429,7 +499,8 @@ static void print_pattern(FILE *f, int flags, const char *v)
 
 	while (*v)
 	{
-		if (!isalnum((int)(unsigned char)*v))
+		if (((int)(unsigned char)*v) <= 0x80 &&
+		    !isalnum((int)(unsigned char)*v))
 			putc('\\', f);
 		putc((int)(unsigned char)*v, f);
 		++v;
@@ -461,8 +532,8 @@ struct maildirfilterrule *p;
 
 	for (p=r->first; p; p=p->next)
 	{
-	const char *fieldname=p->fieldname ? p->fieldname:"";
-	const char *fieldvalue=p->fieldvalue ? p->fieldvalue:"";
+	const char *fieldname=p->fieldname_utf8 ? p->fieldname_utf8:"";
+	const char *fieldvalue=p->fieldvalue_utf8 ? p->fieldvalue_utf8:"";
 	const char *tofolder=p->tofolder ? p->tofolder:"";
 
 		fprintf(f, "##Op:%s\n",
@@ -484,7 +555,7 @@ struct maildirfilterrule *p;
 		if (p->flags & MFR_CONTINUE)
 			fprintf(f, "##Continue\n");
 
-		fprintf(f, "##Name:%s\n\n", p->rulename ? p->rulename:"");
+		fprintf(f, "##Name:%s\n\n", p->rulename_utf8 ? p->rulename_utf8:"");
 
 		fprintf(f, "\nif (");
 
@@ -786,7 +857,8 @@ int	flags;
 			maildir_filter_appendrule(r, p, new_type, flags,
 						  new_header,
 						  new_value, new_folder,
-						  new_autoreplyfrom, &dummy);
+						  new_autoreplyfrom,
+						  "utf-8", &dummy);
 			new_type=contains;
 			new_header[0]=0;
 			new_value[0]=0;

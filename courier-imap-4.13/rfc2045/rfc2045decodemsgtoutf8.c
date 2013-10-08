@@ -29,6 +29,30 @@ static void doconvtoutf8_write(const char *p, size_t n,
 			(p, n, ptr->callback->arg);
 }
 
+static void doconvtoutf8_write_noeol(const char *p, size_t n,
+				     void *void_arg)
+{
+	while (n)
+	{
+		size_t i;
+
+		if (*p == '\n')
+		{
+			doconvtoutf8_write(" ", 1, void_arg);
+			++p;
+			--n;
+			continue;
+		}
+
+		for (i=0; i<n; ++i)
+			if (p[i] == '\n')
+				break;
+		doconvtoutf8_write(p, i, void_arg);
+		p += i;
+		n -= i;
+	}
+}
+
 static void doconvtoutf8_error(const char *p, int n,
 			       void *void_arg)
 {
@@ -56,7 +80,7 @@ static int doconvtoutf8_rfc822hdr(const char *header,
 		doconvtoutf8_write(": ", 2, &info);
 	}
 	rfc822_display_hdrvalue(header, value, "utf-8", 
-				doconvtoutf8_write,
+				doconvtoutf8_write_noeol,
 				doconvtoutf8_error,
 				&info);
 	doconvtoutf8_write("\n", 1, &info);

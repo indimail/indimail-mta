@@ -1,3 +1,15 @@
+4.14.0
+
+2013-07-04  Sam Varshavchik  <mrsam@courier-mta.com>
+
+	* Autotool chain update.
+
+	* imapd.c (mddelete): Reject DELETE folder if the maildir is a symlink.
+
+2013-04-27  Rolf Eike Beer <dakon@users.sf.net>
+
+	* imapd.c (doId): Implement the IMAP ID EXTENSION.
+
 4.13.0
 
 2013-03-09  Sam Varshavchik  <mrsam@courier-mta.com>

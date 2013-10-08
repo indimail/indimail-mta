@@ -107,6 +107,8 @@ char	*p ;
 			return (0);
 		}
 		initreply=my_strdup(tok->tokenbuf);
+		if (strcmp(initreply, "=") == 0)
+			*initreply=0;
 		tok=nexttoken_nouc();
 	}
 

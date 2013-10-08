@@ -58,15 +58,19 @@ deliverquota_LDADD=libmaildir.la ../rfc822/librfc822.la ../numlib/libnumlib.la
 deliverquota_LDFLAGS=-static
 
 maildirmake_SOURCES=maildirmake.c
-maildirmake_DEPENDENCIES=libmaildir.la ../numlib/libnumlib.la \
+maildirmake_DEPENDENCIES=libmaildir.la ../unicode/libunicode.la \
+			../numlib/libnumlib.la \
 			../rfc822/librfc822.la
-maildirmake_LDADD=libmaildir.la ../numlib/libnumlib.la \
+maildirmake_LDADD=libmaildir.la ../unicode/libunicode.la \
+			../numlib/libnumlib.la \
 			../rfc822/librfc822.la
 maildirmake_LDFLAGS=-static
 
 testmaildirfilter_SOURCES=maildirfiltertypelist.h testmaildirfilter.c
-testmaildirfilter_DEPENDENCIES=libmaildir.la ../numlib/libnumlib.la
-testmaildirfilter_LDADD=libmaildir.la ../numlib/libnumlib.la @LIBPCRE@
+testmaildirfilter_DEPENDENCIES=libmaildir.la ../unicode/libunicode.la \
+				../numlib/libnumlib.la
+testmaildirfilter_LDADD=libmaildir.la ../unicode/libunicode.la \
+				../numlib/libnumlib.la @LIBPCRE@
 testmaildirfilter_LDFLAGS=-static
 
 maildirkwtest_SOURCES=maildirkwtest.c

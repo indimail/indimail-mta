@@ -14,7 +14,6 @@
 #endif
 #include	"imapwrite.h"
 
-static const char rcsid[]="$Id: capability.c,v 1.13 2008/06/29 20:18:36 mrsam Exp $";
 
 static int capa_keywords=0;
 
@@ -108,6 +107,9 @@ void imapcapability()
 
 	if ((p=getenv("IMAP_ACL")) && atoi(p))
 		writes(" ACL ACL2=UNION");
+
+	if (getenv("IMAP_ID_FIELDS"))
+		writes(" ID");
 
 	if (have_starttls())
 	{

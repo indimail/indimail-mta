@@ -227,7 +227,7 @@ unsigned k;
 		strcpy(buf, "::ffff:");
 		rfc1035_ntoa_ipv4( &ia4ptr[k], buf+sizeof("::ffff:")-1);
 		if (inet_pton( AF_INET6, buf, (*iaptr)+ *iasize) <= 0)
-			memset( (*iaptr)+ *iasize, 0, sizeof(*iaptr));
+			memset( (*iaptr)+ *iasize, 0, sizeof(**iaptr));
 		++*iasize;
 	}
 	if (ia4len)
