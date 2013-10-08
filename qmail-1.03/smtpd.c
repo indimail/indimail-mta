@@ -1342,7 +1342,7 @@ log_trans(char *arg1, char *arg2, char *arg3, int len, char *arg4, int notify)
 					logerr("local-rcpt");
 				} else
 				if (!arg4 || !*arg4)
-					logerr("pop-bef-smtp");
+					logerr("auth-ip/pop");
 			}
 			logerr("> Size: ");
 			strnum[fmt_ulong(strnum, msg_size)] = 0;
@@ -1432,7 +1432,7 @@ err_queue(char *arg1, char *arg2, char *arg3, int len, char *arg4, char *qqx,
 				logerr("local-rcpt");
 			} else
 			if (!arg4 || !*arg4)
-				logerr("pop-bef-smtp");
+				logerr("auth-ip/pop");
 			logerr("> Size: ");
 			logerr(size);
 			if (tmpLine.len)
