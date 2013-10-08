@@ -39,6 +39,7 @@ clamav-0.97.3
 clamav-0.97.4
 clamav-0.97.5
 clamav-0.97.?
+clamav-0.98
 private
 install-sh
 missing
@@ -178,3 +179,5 @@ obs.mk
 */debian/obs_deb_prep
 */debian/_service
 README.vmware
+*/depcomp
+*/install-sh
