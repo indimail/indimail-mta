@@ -15,7 +15,7 @@ acl_libdirstem := $(shell basename @libdir@ 2>/dev/null|| echo "lib")
 version=@version@
 prefix=@prefix@
 #
-clamav_version=0.97.8
+clamav_version=0.98
 libdkim_version=1.4
 libsrs2_version=1.0.18
 courier_version=4.13

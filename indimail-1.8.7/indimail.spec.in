@@ -42,7 +42,7 @@
 %define qmail_version      1.03
 %define fetchmail_version  6.3.26
 %define nosignatures       1
-%define clamav_version     0.97.8
+%define clamav_version     0.98
 %define fortune_version    1.1
 %define nssd_version       1.1
 %define flash_version      0.9.4
@@ -787,9 +787,11 @@ fi
 if [ %noclamav -eq 0 ] ; then
 	if [ -f %{buildroot}%{_prefix}/etc/clamd.conf ] ; then
 		%{__rm} -f %{buildroot}%{_prefix}/etc/clamd.conf
+		%{__rm} -f %{buildroot}%{_prefix}/etc/clamd.conf.sample
 	fi
 	if [ -f %{buildroot}%{_prefix}/etc/freshclam.conf ] ; then
 		%{__rm} -f %{buildroot}%{_prefix}/etc/freshclam.conf
+		%{__rm} -f %{buildroot}%{_prefix}/etc/freshclam.conf.sample
 	fi
 	if [ -d %{buildroot}%{_prefix}/var ] ; then
 		/bin/rmdir %{buildroot}%{_prefix}/var
