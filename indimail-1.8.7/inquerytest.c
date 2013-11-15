@@ -1,5 +1,8 @@
 /*
  * $Log: inquerytest.c,v $
+ * Revision 2.20  2013-11-15 19:13:15+05:30  Cprogrammer
+ * define INFIFO environment variable to select a specific fifo
+ *
  * Revision 2.19  2011-04-04 23:04:21+05:30  Cprogrammer
  * added instance number to ProcessInFifo()
  *
@@ -74,7 +77,7 @@
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: inquerytest.c,v 2.19 2011-04-04 23:04:21+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: inquerytest.c,v 2.20 2013-11-15 19:13:15+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 void            print_limits(struct vlimits *);
@@ -134,7 +137,7 @@ main(int argc, char **argv)
 		return (1);
 	}
 	verbose = 1;
-	if(*argv[2])
+	if (*argv[2])
 	{
 		infifo = argv[2];
 		if (*infifo == '/' || *infifo == '.')
@@ -145,7 +148,7 @@ main(int argc, char **argv)
 			getEnvConfigStr(&controldir, "CONTROLDIR", "control");
 			snprintf(InFifo, MAX_BUFF, "%s/%s/inquery/%s", qmaildir, controldir, infifo);
 		}
-		if(access(InFifo, F_OK) || (fd = open(InFifo, O_WRONLY|O_NONBLOCK)) == -1)
+		if (access(InFifo, F_OK) || (fd = open(InFifo, O_WRONLY|O_NONBLOCK)) == -1)
 		{
 			if (FifoCreate(InFifo) == -1)
 			{
@@ -167,6 +170,8 @@ main(int argc, char **argv)
 			}
 		} else /*- Fifo is present and open by inlookup */
 		{
+			snprintf(InFifoEnv, MAX_BUFF, "INFIFO=%s", InFifo);
+			putenv(InFifoEnv);
 			pid = -1;
 			close(fd);
 		}
@@ -187,28 +192,28 @@ main(int argc, char **argv)
 	getEnvConfigStr(&inactive_table, "MYSQL_INACTIVE_TABLE", MYSQL_INACTIVE_TABLE);
 	if (!(dbptr = inquery(*argv[1] - '0', argv[3], argc == 5 ? argv[4] : 0)))
 	{
-		if(userNotFound)
+		if (userNotFound)
 			printf("%s: No such user\n", argv[3]);
 		else
 		{
-			if(errno)
+			if (errno)
 				printf("%s: inquery failure: %s\n", argv[3], strerror(errno));
 			else
 				printf("%s: inquery failure\n", argv[3]);
 		}
 		signal(SIGCHLD, SIG_IGN);
-		if(pid != -1)
+		if (pid != -1)
 		{
 			kill(pid, SIGTERM);
 			unlink(argv[2]);
 		}
-		if(fd != -1)
+		if (fd != -1)
 			close(fd);
 		return (1);
 	}
-	if(fd != -1)
+	if (fd != -1)
 		close(fd);
-	if(pid != -1)
+	if (pid != -1)
 		unlink(argv[2]);
 	switch (*argv[1] - '0')
 	{
@@ -259,19 +264,19 @@ main(int argc, char **argv)
 		break;
 #endif
 	case ALIAS_QUERY:
-		if(!*((char *) dbptr))
+		if (!*((char *) dbptr))
 		{
 			fprintf(stderr, "%s: No aliases\n", argv[3]);
 			break;
 		}
-		if(!(ptr = strtok((char *) dbptr, "\n")))
+		if (!(ptr = strtok((char *) dbptr, "\n")))
 		{
 			fprintf(stderr, "%s: Invalid Packet\n", argv[3]);
 			break;
 		}
 		printf("Alias List for %s\n", argv[3]);
 		printf("%s\n", ptr);
-		for(;(ptr = strtok(0, "\n"));)
+		for (;(ptr = strtok(0, "\n"));)
 			printf("%s\n", ptr);
 		break;
 	case DOMAIN_QUERY:
@@ -280,12 +285,12 @@ main(int argc, char **argv)
 	default:
 		fprintf(stderr, "%s query_type email [ipaddr]\n", ptr);
 		signal(SIGCHLD, SIG_IGN);
-		if(pid != -1)
+		if (pid != -1)
 			kill(pid, SIGTERM);
 		return (1);
 	}
 	signal(SIGCHLD, SIG_IGN);
-	if(pid != -1)
+	if (pid != -1)
 		kill(pid, SIGTERM);
 	wait(&status);
 	return (0);
