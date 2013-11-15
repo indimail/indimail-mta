@@ -1,5 +1,8 @@
 #!/bin/sh
 # $Log: create_services.in,v $
+# Revision 2.54  2013-11-15 19:12:25+05:30  Cprogrammer
+# added --dnscheck
+#
 # Revision 2.53  2013-05-14 15:31:06+05:30  Cprogrammer
 # use the same softlimit for port 366 as configured for port 25
 #
@@ -182,7 +185,7 @@ indimaildir=@indimaildir@
 # End USER Configuration OPTIONS
 #
 
-# $Id: create_services.in,v 2.53 2013-05-14 15:31:06+05:30 Cprogrammer Stab mbhangui $
+# $Id: create_services.in,v 2.54 2013-11-15 19:12:25+05:30 Cprogrammer Exp mbhangui $
 
 usage()
 {

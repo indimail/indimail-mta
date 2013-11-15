@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail.spec.in,v 2.269 2013-09-03 23:14:24+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 2.270 2013-11-15 19:12:40+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %define _unpackaged_files_terminate_build 1
 
@@ -277,6 +277,9 @@ Requires: /usr/sbin/useradd /usr/sbin/groupadd
 Requires: /sbin/chkconfig /usr/sbin/userdel /usr/sbin/groupdel procps /usr/bin/awk
 %endif
 Requires: coreutils grep /bin/sh glibc openssl mysql-server
+%if %{defined centos_version} || %{defined rhel_version}
+Requires: policycoreutils-python
+%endif
 BuildRoot: %(mktemp -ud %{_tmppath}/%{name}-%{version}-%{release}-XXXXXXX)
 #
 # IndiMail is choosy and runs on reliable OS only
