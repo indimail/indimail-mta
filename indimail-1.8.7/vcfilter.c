@@ -1,5 +1,8 @@
 /*
  * $Log: vcfilter.c,v $
+ * Revision 2.28  2013-10-11 01:14:40+05:30  Cprogrammer
+ * BUG - fixed not able to create filters for prefilt and postfilt
+ *
  * Revision 2.27  2011-06-20 21:27:47+05:30  Cprogrammer
  * added description on |program
  *
@@ -90,7 +93,7 @@
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vcfilter.c,v 2.27 2011-06-20 21:27:47+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: vcfilter.c,v 2.28 2013-10-11 01:14:40+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef VFILTER
@@ -493,6 +496,8 @@ get_options(int argc, char **argv, int *raw, int *cluster_conn)
 	{
 		for (i = 0;rfc_ids[i];i++)
 		{
+			if (!strncmp(emailid, "prefilt", 7) || !strncmp(emailid, "postfilt", 8))
+				continue;
 			if (!strncmp(emailid, rfc_ids[i], slen(rfc_ids[i])))
 			{
 				fprintf(stderr, "vcfilter: email %s not allowed for filtering\n", emailid);
