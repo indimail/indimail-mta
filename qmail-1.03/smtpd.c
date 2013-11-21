@@ -1,5 +1,8 @@
 /*
  * $Log: smtpd.c,v $
+ * Revision 1.178  2013-11-21 15:41:05+05:30  Cprogrammer
+ * added domainqueue functionality
+ *
  * Revision 1.177  2013-09-24 19:04:27+05:30  Cprogrammer
  * reload control files if envrules was used in previous smtp session
  *
@@ -688,7 +691,7 @@ int             wildmat_internal(char *, char *);
 int             ssl_rfd = -1, ssl_wfd = -1;	/*- SSL_get_Xfd() are broken */
 char           *servercert, *clientca, *clientcrl;
 #endif
-char           *revision = "$Revision: 1.177 $";
+char           *revision = "$Revision: 1.178 $";
 char           *protocol = "SMTP";
 stralloc        proto = { 0 };
 static stralloc Revision = { 0 };
@@ -1837,12 +1840,12 @@ smtp_ptr(char *arg)
 }
 
 void
-log_rules(char *arg1, char *arg2, char *arg3, int arg4)
+log_rules(char *arg1, char *arg2, char *arg3, int arg4, int arg5)
 {
 	logerr("qmail-smtpd: ");
 	logerrpid();
 	logerr(arg1);
-	logerr(" Setting Rule No ");
+	logerr(arg5 == 0 ? " Setting EnvRule No " : " Setting DomainQueue Rule No ");
 	strnum[fmt_ulong(strnum, arg4)] = 0;
 	logerr(strnum);
 	logerr(": MAIL from <");
@@ -3742,7 +3745,7 @@ smtp_mail(char *arg)
 	/*
 	 * If this is the second session
 	 * restore original environment.
-	 * This is because envrules() could
+	 * This is because envrules(), domainqueues could
 	 * have modified the environmnent
 	 * in the previous session
 	 */
@@ -3820,7 +3823,7 @@ smtp_mail(char *arg)
 			 */
 			databytes_setup(); /*- so that it is possible to set DATABYTES again using envrules */
 			post_setup();
-			log_rules(remoteip, addr.s, authd ? remoteinfo : 0, envret);
+			log_rules(remoteip, addr.s, authd ? remoteinfo : 0, envret, 0);
 		}
 		break;
 	}
@@ -4216,7 +4219,7 @@ smtp_mail(char *arg)
 void
 smtp_rcpt(char *arg)
 {
-	int             allowed_rcpthosts = 0, isgoodrcpt = 0, result = 0;
+	int             allowed_rcpthosts = 0, isgoodrcpt = 0, result = 0, denvret;
 	char           *tmp;
 #if BATV
 	int             ws = -1;
@@ -4483,6 +4486,21 @@ smtp_rcpt(char *arg)
 	{
 		err_badbounce();
 		return;
+	}
+	/* domain based queue */
+	switch ((denvret = domainqueue(addr.s, "domainqueue", &errStr)))
+	{
+	case AM_MEMORY_ERR:
+		die_nomem();
+	case AM_FILE_ERR:
+		die_control();
+	case AM_REGEX_ERR:
+		die_regex();
+	case 0:
+		break;
+	default:
+		if (denvret > 0)
+			log_rules(remoteip, addr.s, authd ? remoteinfo : 0, denvret, 1);
 	}
 	rcptcount++;
 	if (!stralloc_cats(&rcptto, "T"))
@@ -6707,7 +6725,7 @@ addrrelay() /*- Rejection of relay probes. */
 void
 getversion_smtpd_c()
 {
-	static char    *x = "$Id: smtpd.c,v 1.177 2013-09-24 19:04:27+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: smtpd.c,v 1.178 2013-11-21 15:41:05+05:30 Cprogrammer Exp mbhangui $";
 
 #ifdef INDIMAIL
 	if (x)

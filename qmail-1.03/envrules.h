@@ -1,5 +1,8 @@
 /*
  * $Log: envrules.h,v $
+ * Revision 1.6  2013-11-21 15:40:24+05:30  Cprogrammer
+ * added domainqueue functionality
+ *
  * Revision 1.5  2010-07-23 13:58:35+05:30  Cprogrammer
  * added error definition constants
  *
@@ -19,6 +22,7 @@
 #ifndef _ENVRULES_H
 #define _ENVRULES_H
 int             envrules(char *, char *, char *, char **);
+int             domainqueue(char *, char *, char **);
 
 #ifndef AM_MEMORY_ERR
 #define  AM_MEMORY_ERR -1
