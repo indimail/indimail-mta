@@ -1,5 +1,8 @@
 /*
  * $Log: envrules.c,v $
+ * Revision 1.14  2013-11-21 15:40:12+05:30  Cprogrammer
+ * added domainqueue functionality
+ *
  * Revision 1.13  2010-06-18 19:37:58+05:30  Cprogrammer
  * initialize errStr
  *
@@ -114,11 +117,48 @@ envrules(char *email, char *envrules_f, char *rulesfile, char **errStr)
 			*cptr = 0;
 		else
 			continue;
-#ifdef FNM_CASEFOLD
 		if (nullflag || do_match(use_regex, email, ptr, errStr))
-#else
-		if (nullflag || do_match(use_regex, email, ptr, errStr))
-#endif
+		{
+			if (parse_env(cptr + 1))
+				return(AM_MEMORY_ERR);
+			count++;
+		}
+		ptr = rules.s + len;
+	}
+	return(count);
+}
+
+int
+domainqueue(char *email, char *domainqueue_f, char **errStr)
+{
+	int             len, count;
+	char           *ptr, *cptr, *domain;
+	static stralloc rules = { 0 };
+
+	if (errStr)
+		*errStr = 0;
+	if ((count = control_readfile(&rules, domainqueue_f, 0)) == -1)
+	{
+		if (errStr)
+			*errStr = error_str(errno);
+		return (AM_FILE_ERR);
+	}
+	if (!count)
+		return(0);
+	for (domain = email;*domain && *domain != '@';domain++);
+	if (!*domain)
+		return (0);
+	else
+		domain++;
+	for (count = len = 0, ptr = rules.s;len < rules.len;)
+	{
+		len += (str_len(ptr) + 1);
+		for (cptr = ptr;*cptr && *cptr != ':';cptr++);
+		if (*cptr == ':')
+			*cptr = 0;
+		else
+			continue;
+		if (do_match(0, domain, ptr, errStr))
 		{
 			if (parse_env(cptr + 1))
 				return(AM_MEMORY_ERR);
@@ -175,7 +215,7 @@ parse_env(char *envStrings)
 void
 getversion_envrules_c()
 {
-	static char    *x = "$Id: envrules.c,v 1.13 2010-06-18 19:37:58+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: envrules.c,v 1.14 2013-11-21 15:40:12+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
