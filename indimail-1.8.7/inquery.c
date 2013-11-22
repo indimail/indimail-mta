@@ -1,7 +1,7 @@
 /*
  * $Log: inquery.c,v $
- * Revision 2.17  2013-11-15 19:12:55+05:30  Cprogrammer
- * do not use balancing if INFIFO is defined
+ * Revision 2.18  2013-11-22 14:33:09+05:30  Cprogrammer
+ * reverting to 2.16
  *
  * Revision 2.16  2010-04-11 22:21:19+05:30  Cprogrammer
  * replaced LPWD_QUERY with LIMIT_QUERY for domain limits
@@ -63,7 +63,7 @@
  */
 
 #ifndef	lint
-static char     sccsid[] = "$Id: inquery.c,v 2.17 2013-11-15 19:12:55+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: inquery.c,v 2.18 2013-11-22 14:33:09+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #include <stdlib.h>
@@ -134,35 +134,32 @@ inquery(char query_type, char *email, char *ip)
 
 	getEnvConfigStr(&qmaildir, "QMAILDIR", QMAILDIR);
 	getEnvConfigStr(&controldir, "CONTROLDIR", "control");
-	if (!(infifo = getenv("INFIFO"))) {
-		getEnvConfigStr(&infifo, "INFIFO", INFIFO);
-		/*- Open the Fifos */
-		if (*infifo == '/' || *infifo == '.')
-			snprintf(TmpBuf, MAX_BUFF, "%s", infifo);
-		else
-			snprintf(TmpBuf, MAX_BUFF, "%s/%s/inquery/%s", qmaildir, controldir, infifo);
-		for (idx = 1;;idx++)
-		{
-			snprintf(InFifo, MAX_BUFF, "%s.%d", TmpBuf, idx);
-			if(access(InFifo, F_OK))
-				break;
-		}
+	getEnvConfigStr(&infifo, "INFIFO", INFIFO);
+	/*- Open the Fifos */
+	if (*infifo == '/' || *infifo == '.')
+		snprintf(TmpBuf, MAX_BUFF, "%s", infifo);
+	else
+		snprintf(TmpBuf, MAX_BUFF, "%s/%s/inquery/%s", qmaildir, controldir, infifo);
+	for (idx = 1;;idx++)
+	{
+		snprintf(InFifo, MAX_BUFF, "%s.%d", TmpBuf, idx);
+		if(access(InFifo, F_OK))
+			break;
+	}
 #ifdef RANDOM_BALANCING
-		srand(getpid() + time(0));
+	srand(getpid() + time(0));
 #endif
-		if(idx == 1)
-			scopy(InFifo, TmpBuf, MAX_BUFF);
-		else
-		{
-			idx--;
+	if(idx == 1)
+		scopy(InFifo, TmpBuf, MAX_BUFF);
+	else
+	{
+		idx--;
 #ifdef RANDOM_BALANCING
-			snprintf(InFifo, MAX_BUFF, "%s.%d", TmpBuf, 1 + (int) ((float) idx * rand()/(RAND_MAX + 1.0)));
+		snprintf(InFifo, MAX_BUFF, "%s.%d", TmpBuf, 1 + (int) ((float) idx * rand()/(RAND_MAX + 1.0)));
 #else
-			snprintf(InFifo, MAX_BUFF, "%s.%ld", TmpBuf, (time(0) % idx) + 1);
+		snprintf(InFifo, MAX_BUFF, "%s.%ld", TmpBuf, (time(0) % idx) + 1);
 #endif
-		}
-	} else
-		scopy(InFifo, infifo, MAX_BUFF);
+	}
 	if(verbose)
 		printf("Using INFIFO=%s\n", InFifo);
 	if ((wfd = open(InFifo, O_WRONLY | O_NDELAY, 0)) == -1)
