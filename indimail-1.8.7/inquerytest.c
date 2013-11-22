@@ -1,5 +1,8 @@
 /*
  * $Log: inquerytest.c,v $
+ * Revision 2.21  2013-11-22 16:41:39+05:30  Cprogrammer
+ * added getopt style arguments for options
+ *
  * Revision 2.20  2013-11-15 19:13:15+05:30  Cprogrammer
  * define INFIFO environment variable to select a specific fifo
  *
@@ -77,11 +80,24 @@
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: inquerytest.c,v 2.20 2013-11-15 19:13:15+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: inquerytest.c,v 2.21 2013-11-22 16:41:39+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 void            print_limits(struct vlimits *);
 void            SigChild();
+
+void usage(char *ptr)
+{
+	(void) fprintf(stderr, "%s: [-v] -q query_type -i infifo email [ipaddr]\n", ptr);
+	(void) fprintf(stderr, "1   - User         Status Query\n");
+	(void) fprintf(stderr, "2   - Relay        Status Query\n");
+	(void) fprintf(stderr, "3   - Passwd       Query\n");
+	(void) fprintf(stderr, "4   - SmtpRoute    Query\n");
+	(void) fprintf(stderr, "5   - Valias       Query\n");
+	(void) fprintf(stderr, "6   - Domain Limit Query\n");
+	(void) fprintf(stderr, "7   - Domain       Query\n");
+	exit(1);
+}
 
 int
 main(int argc, char **argv)
@@ -91,28 +107,40 @@ main(int argc, char **argv)
 	struct vlimits *lmt;
 #endif
 	void           *dbptr;
-	char           *ptr, *infifo, *qmaildir, *controldir;
+	char           *ptr, *infifo = 0, *qmaildir, *controldir, *email = 0, *ipaddr = 0;
 	char            InFifo[MAX_BUFF], InFifoEnv[MAX_BUFF];
-	int             fd = -1, status;
+	int             c, query_type = -1, fd = -1, status;
 	pid_t           pid;
 
 	if ((ptr = strrchr(argv[0], '/')))
 		ptr++;
 	else
 		ptr = argv[0];
-	if (argc != 4 && argc != 5)
+	while ((c = getopt(argc, argv, "vq:i:")) != EOF)
 	{
-		fprintf(stderr, "%s query_type infifo email [ipaddr]\n", ptr);
-		fprintf(stderr, "1   - User         Status Query\n");
-		fprintf(stderr, "2   - Relay        Status Query\n");
-		fprintf(stderr, "3   - Passwd       Query\n");
-		fprintf(stderr, "4   - SmtpRoute    Query\n");
-		fprintf(stderr, "5   - Valias       Query\n");
-		fprintf(stderr, "6   - Domain Limit Query\n");
-		fprintf(stderr, "7   - Domain       Query\n");
-		return (1);
+		switch (c)
+		{
+		case 'v':
+			verbose = 1;
+			break;
+		case 'q':
+			query_type = *optarg - '0';
+			break;
+		case 'i':
+			infifo = optarg;
+			break;
+		default:
+			usage(ptr);
+		}
 	}
-	switch (*argv[1] - '0')
+	if (query_type == -1)
+		usage(ptr);
+	if (optind < argc) {
+		email = argv[optind++];
+	}
+	if (optind < argc)
+		ipaddr = argv[optind++];
+	switch (query_type)
 	{
 	case USER_QUERY:
 	case RELAY_QUERY:
@@ -125,21 +153,11 @@ main(int argc, char **argv)
 	case DOMAIN_QUERY:
 		break;
 	default:
-		fprintf(stderr, "%s: Invalid query type %d\n", ptr, *argv[1] - '0');
-		fprintf(stderr, "%s query_type infifo email [ipaddr]\n", ptr);
-		fprintf(stderr, "1   - User         Status Query\n");
-		fprintf(stderr, "2   - Relay        Status Query\n");
-		fprintf(stderr, "3   - Passwd       Query\n");
-		fprintf(stderr, "4   - SmtpRoute    Query\n");
-		fprintf(stderr, "5   - Valias       Query\n");
-		fprintf(stderr, "6   - Domain Limit Query\n");
-		fprintf(stderr, "7   - Domain       Query\n");
-		return (1);
+		fprintf(stderr, "%s: Invalid query type %d\n", ptr, query_type);
+		usage(ptr);
 	}
-	verbose = 1;
-	if (*argv[2])
+	if (infifo)
 	{
-		infifo = argv[2];
 		if (*infifo == '/' || *infifo == '.')
 			snprintf(InFifo, MAX_BUFF, "%s", infifo);
 		else
@@ -155,14 +173,14 @@ main(int argc, char **argv)
 				fprintf(stderr, "%s: FifoCreate: %s: %s\n", ptr, InFifo, strerror(errno));
 				return (1);
 			}
+			snprintf(InFifoEnv, MAX_BUFF, "INFIFO=%s", InFifo);
+			putenv(InFifoEnv);
 			switch (pid = fork())
 			{
 			case -1:
 				perror("fork");
 				return (1);
 			case 0:
-				snprintf(InFifoEnv, MAX_BUFF, "INFIFO=%s", InFifo);
-				putenv(InFifoEnv);
 				return (ProcessInFifo(0));
 			default:
 				signal(SIGCHLD, SigChild);
@@ -188,24 +206,25 @@ main(int argc, char **argv)
 		}
 		pid = -1;
 	}
+	sleep (1);
 	getEnvConfigStr(&default_table, "MYSQL_TABLE", MYSQL_DEFAULT_TABLE);
 	getEnvConfigStr(&inactive_table, "MYSQL_INACTIVE_TABLE", MYSQL_INACTIVE_TABLE);
-	if (!(dbptr = inquery(*argv[1] - '0', argv[3], argc == 5 ? argv[4] : 0)))
+	if (!(dbptr = inquery(query_type, email, ipaddr)))
 	{
 		if (userNotFound)
-			printf("%s: No such user\n", argv[3]);
+			printf("%s: No such user\n", email);
 		else
 		{
 			if (errno)
-				printf("%s: inquery failure: %s\n", argv[3], strerror(errno));
+				printf("%s: inquery failure: %s\n", email, strerror(errno));
 			else
-				printf("%s: inquery failure\n", argv[3]);
+				printf("%s: inquery failure\n", email);
 		}
 		signal(SIGCHLD, SIG_IGN);
 		if (pid != -1)
 		{
 			kill(pid, SIGTERM);
-			unlink(argv[2]);
+			unlink(infifo);
 		}
 		if (fd != -1)
 			close(fd);
@@ -214,34 +233,34 @@ main(int argc, char **argv)
 	if (fd != -1)
 		close(fd);
 	if (pid != -1)
-		unlink(argv[2]);
-	switch (*argv[1] - '0')
+		unlink(infifo);
+	switch (query_type)
 	{
 	case USER_QUERY:
 		switch ((int) *((int *) dbptr))
 		{
 		case 0:
-			fprintf(stdout, "%s has all services enabled \n", argv[3]);
+			fprintf(stdout, "%s has all services enabled \n", email);
 			break;
 		case 1:
-			fprintf(stdout, "%s is Absent on this domain (#5.1.1)\n", argv[3]);
+			fprintf(stdout, "%s is Absent on this domain (#5.1.1)\n", email);
 			break;
 		case 2:
-			fprintf(stdout, "%s is Inactive on this domain (#5.2.1)\n", argv[3]);
+			fprintf(stdout, "%s is Inactive on this domain (#5.2.1)\n", email);
 			break;
 		case 3:
-			fprintf(stdout, "%s is Overquota on this domain (#5.2.2)\n", argv[3]);
+			fprintf(stdout, "%s is Overquota on this domain (#5.2.2)\n", email);
 			break;
 		case 4:
-			fprintf(stdout, "%s is an alias\n", argv[3]);
+			fprintf(stdout, "%s is an alias\n", email);
 			break;
 		default:
-			fprintf(stdout, "%s has unknown status %d\n", argv[3], (int) *((int *) dbptr));
+			fprintf(stdout, "%s has unknown status %d\n", email, (int) *((int *) dbptr));
 			break;
 		}
 		break;
 	case RELAY_QUERY:
-		fprintf(stdout, "%s is %s\n", argv[3], (int) *((int *) dbptr) == 1 ? "authenticated" : "not authenticated");
+		fprintf(stdout, "%s is %s\n", email, (int) *((int *) dbptr) == 1 ? "authenticated" : "not authenticated");
 		break;
 	case PWD_QUERY:
 		pw = (struct passwd *) dbptr;
@@ -260,27 +279,27 @@ main(int argc, char **argv)
 		break;
 #ifdef CLUSTERED_SITE
 	case HOST_QUERY:
-		fprintf(stdout, "%s: SMTPROUTE is %s\n", argv[3], (char *) dbptr);
+		fprintf(stdout, "%s: SMTPROUTE is %s\n", email, (char *) dbptr);
 		break;
 #endif
 	case ALIAS_QUERY:
 		if (!*((char *) dbptr))
 		{
-			fprintf(stderr, "%s: No aliases\n", argv[3]);
+			fprintf(stderr, "%s: No aliases\n", email);
 			break;
 		}
 		if (!(ptr = strtok((char *) dbptr, "\n")))
 		{
-			fprintf(stderr, "%s: Invalid Packet\n", argv[3]);
+			fprintf(stderr, "%s: Invalid Packet\n", email);
 			break;
 		}
-		printf("Alias List for %s\n", argv[3]);
+		printf("Alias List for %s\n", email);
 		printf("%s\n", ptr);
 		for (;(ptr = strtok(0, "\n"));)
 			printf("%s\n", ptr);
 		break;
 	case DOMAIN_QUERY:
-		fprintf(stdout, "%s: Real Domain is %s\n", argv[3], (char *) dbptr);
+		fprintf(stdout, "%s: Real Domain is %s\n", email, (char *) dbptr);
 		break;
 	default:
 		fprintf(stderr, "%s query_type email [ipaddr]\n", ptr);

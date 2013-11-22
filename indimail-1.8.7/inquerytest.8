@@ -4,21 +4,20 @@
 inquerytest \- Test InLookup Queries
 
 .SH SYNOPSYS
-.B inquerytest
-.I query_type
-.I infifo
-.I email
-[
-.I ip_address
-]
+\fBinquerytest\fR [\fIoptions\fR] \fIemail\fR [\fIdomain_name\fR]
 
 .SH DESCRIPTION
 \fBinquerytest\fR is a utility to test the inquery() function and its interaction with
 \fBInLookup(8)\fR. This function is meant to be used by qualified IndiMail administrators.
 
 .SH OPTIONS
+.PP
 .TP
-\fIquery_type\fR
+\fB\-v\fR
+Set Verbose mode
+
+.TP
+\fB\-q\fR \fIquery_type\fR
 Type of query to be tested as given below
 
  1 – User Query
@@ -39,14 +38,17 @@ Type of query to be tested as given below
  7 – Local Password Query
      Similar to (3) except that the email address is checked only
      on the local MDA..
+
 .TP
-\fIinfifo\fR
+\fB\-i\fR \fIinfifo\fR
 Path of the fifo to be used for communication with InLookup. A null
 string (“”) makes inquerytest to use INFIFO environment variable
 if defined or the default INFIFO file and use an existing running InLookup. If a fifo path is given, inquerytest will invoke a new InLookup on the given fifo, run the test, terminate InLookup and delete the fifo after the test. Hence, do not give a path to a fifo on which an existing InLookup is running.
+
 .TP
 \fIemail\fR
 Fully qualified email address.
+
 .TP
 \fIip_address\fR
 IP address (TCPREMOTEIP) recorded in relay table after successful authentication through IMAP/POP3 for the email address email. This option is valid for the Host Query type.
