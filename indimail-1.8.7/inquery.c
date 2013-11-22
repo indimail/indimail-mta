@@ -1,8 +1,5 @@
 /*
  * $Log: inquery.c,v $
- * Revision 2.18  2013-11-22 14:33:09+05:30  Cprogrammer
- * reverting to 2.16
- *
  * Revision 2.16  2010-04-11 22:21:19+05:30  Cprogrammer
  * replaced LPWD_QUERY with LIMIT_QUERY for domain limits
  *
@@ -63,7 +60,7 @@
  */
 
 #ifndef	lint
-static char     sccsid[] = "$Id: inquery.c,v 2.18 2013-11-22 14:33:09+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: inquery.c,v 2.16 2010-04-11 22:21:19+05:30 Cprogrammer Stab mbhangui $";
 #endif
 
 #include <stdlib.h>
