@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-showctl.c,v $
+ * Revision 1.55  2013-11-22 11:31:37+05:30  Cprogrammer
+ * added concurrencyr, concurrencyl and domainqueue control files
+ *
  * Revision 1.54  2013-08-25 18:38:09+05:30  Cprogrammer
  * added SRS
  *
@@ -250,6 +253,17 @@ do_lst(fn, def, pre, post)
 	}
 }
 
+void print_concurrency()
+{
+	static char     d = 0;
+
+	if (!d++) {
+		do_int("concurrencylocal",    "10", "Local  concurrency is ", "");
+		do_int("concurrencyremote",   "20", "Remote concurrency is ", "");
+		do_int("concurrencyincoming", "10", "SMTP   concurrency is ", "");
+	}
+}
+
 int
 main(int argc, char **argv)
 {
@@ -390,9 +404,6 @@ main(int argc, char **argv)
 	do_lst("doublebouncemessage", "No doublebouncemessage defined", "", "");
 	do_lst("bouncemaxbytes", "No bouncemaxbytes defined.", "Actual Bouncemaxbytes: ", "");
 
-	do_int("concurrencylocal", "10", "Local concurrency is ", "");
-	do_int("concurrencyremote", "20", "Remote concurrency is ", "");
-	do_int("concurrencyincoming", "10", "SMTP concurrency is ", "");
 	do_int("databytes", "0", "SMTP DATA limit is ", " bytes");
 	do_int("maxhops", "100", "MAX Hops is ", " hops");
 	do_str("defaultdomain", 1, "defaultdomain", "Default domain name is ");
@@ -483,6 +494,9 @@ main(int argc, char **argv)
 	do_int("maxcmdlen", "0", "Max SMTP Command Length is ", "");
 	do_lst("signatures", "No virus signatures defined.", "virus signatures: ", "");
 	do_lst("bodycheck", "No Content-filters.", "Content-filters: ", "");
+	do_lst("from.envrules", "No Sender Envrules defined.", "Sender Envrules: ", "");
+	do_lst("rcpt.envrules", "No Recipient Envrules defined.", "Recipient Envrules: ", "");
+	do_lst("domainqueue", "No Domain Queues defined.", "Domain Queues: ", "");
 #ifdef USE_SPF
 	do_int("spfbehavior","0","The SPF behavior is ","");
 	do_str("spfexp",0, SPF_DEFEXP,"The SPF default explanation is: 550 ");
@@ -554,7 +568,25 @@ main(int argc, char **argv)
 			continue;
 		if (str_equal(d->d_name, "concurrencyremote"))
 			continue;
-		if (str_equal(d->d_name, "concurrencyincoming"))
+		if (str_start(d->d_name, "concurrencyr")) {
+			print_concurrency();
+			do_int(d->d_name, "20", "Remote Queue concurrency is ", "");
+			continue;
+		}
+		if (str_start(d->d_name, "concurrencyl")) {
+			print_concurrency();
+			do_int(d->d_name, "10", "Local Queue concurrency is ", "");
+			continue;
+		}
+		if (str_equal(d->d_name, "concurrencyincoming")) {
+			print_concurrency();
+			continue;
+		}
+		if (str_equal(d->d_name, "domainqueue"))
+			continue;
+		if (str_equal(d->d_name, "from.envrules"))
+			continue;
+		if (str_equal(d->d_name, "rcpt.envrules"))
 			continue;
 		if (str_equal(d->d_name, "databytes"))
 			continue;
@@ -735,6 +767,7 @@ main(int argc, char **argv)
 			substdio_puts(subfdout, ": I have no idea what this file does.\n");
 		}
 	}
+	print_concurrency();
 	substdio_flush(subfdout);
 	_exit(0);
 	/*- Not reached */
@@ -744,7 +777,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_showctl_c()
 {
-	static char    *x = "$Id: qmail-showctl.c,v 1.54 2013-08-25 18:38:09+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-showctl.c,v 1.55 2013-11-22 11:31:37+05:30 Cprogrammer Exp mbhangui $";
 
 #ifdef INDIMAIL
 	if (x)
