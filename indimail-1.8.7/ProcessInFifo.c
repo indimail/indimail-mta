@@ -1,5 +1,8 @@
 /*
  * $Log: ProcessInFifo.c,v $
+ * Revision 2.36  2013-11-22 16:16:50+05:30  Cprogrammer
+ * Display SigTerm message only if verbose or debug is enabled
+ *
  * Revision 2.35  2013-08-03 17:18:49+05:30  Cprogrammer
  * close database on sighup so that we reload all domains
  *
@@ -120,7 +123,7 @@
  */
 
 #ifndef	lint
-static char     sccsid[] = "$Id: ProcessInFifo.c,v 2.35 2013-08-03 17:18:49+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: ProcessInFifo.c,v 2.36 2013-11-22 16:16:50+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #include <fcntl.h>
@@ -735,8 +738,10 @@ sig_term()
 
 	sig_block(SIGTERM);
 	fifo_name = getFifo_name();
-	printf("%d %s ARGH!! Committing suicide on SIGTERM\n", (int) getpid(), fifo_name);
-	printf("%d INFIFO %s, Got SIGTERM\n", (int) getpid(), fifo_name);
+	if (verbose || _debug) {
+		printf("%d %s ARGH!! Committing suicide on SIGTERM\n", (int) getpid(), fifo_name);
+		printf("%d INFIFO %s, Got SIGTERM\n", (int) getpid(), fifo_name);
+	}
 	cur_time = time(0);
 #ifdef CLUSTERED_SITE
 	printf("User Query %d, Relay Query %d, Password Query %d:%d, Alias Query %d, Host Query %d, Domain Query %d\n", 
@@ -773,9 +778,11 @@ sig_hand(sig, code, scp, addr)
 	if (sig == SIGTERM)
 	{
 		sig_block(sig);
-		printf("%d %s ARGH!! Committing suicide on SIGTERM\n", (int) getpid(), fifo_name);
+		if (verbose || _debug) 
+			printf("%d %s ARGH!! Committing suicide on SIGTERM\n", (int) getpid(), fifo_name);
 	}
-	printf("%d INFIFO %s, Got %s\n", (int) getpid(), fifo_name, sys_siglist[sig]);
+	if (sig != SIGTERM || verbose || _debug)
+		printf("%d INFIFO %s, Got %s\n", (int) getpid(), fifo_name, sys_siglist[sig]);
 	switch (sig)
 	{
 		case SIGUSR1:
