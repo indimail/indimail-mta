@@ -1,6 +1,9 @@
 #!/bin/sh
 # WARNING: This file was auto-generated. Do not edit!
 # $Log: svctool.in,v $
+# Revision 2.226  2013-11-22 14:15:26+05:30  Cprogrammer
+# updated clamd.conf, freshclam.conf creation
+#
 # Revision 2.225  2013-11-22 11:31:13+05:30  Cprogrammer
 # fixed no_multi option
 #
@@ -869,7 +872,7 @@
 # Initial revision
 #
 #
-# $Id: svctool.in,v 2.225 2013-11-22 11:31:13+05:30 Cprogrammer Exp mbhangui $
+# $Id: svctool.in,v 2.226 2013-11-22 14:15:26+05:30 Cprogrammer Exp mbhangui $
 #
 
 #
@@ -2489,7 +2492,7 @@ case "$dkverify_option" in
 esac
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.225 2013-11-22 11:31:13+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.226 2013-11-22 14:15:26+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -2540,7 +2543,7 @@ if [ " $odmr" = " " ] ; then
 		/bin/mkdir -p "$DESTDIR"$SERVICEDIR/qmail-spamlog/log
 		(
 		echo "#!/bin/sh"
-		echo "# \$Id: svctool.in,v 2.225 2013-11-22 11:31:13+05:30 Cprogrammer Exp mbhangui $"
+		echo "# \$Id: svctool.in,v 2.226 2013-11-22 14:15:26+05:30 Cprogrammer Exp mbhangui $"
 		echo "# $prog_args"
 		echo ""
 		echo "LOGFILTER=\`cat $SERVICEDIR/qmail-smtpd.$tag/variables/LOGFILTER\`"
@@ -2561,7 +2564,7 @@ if [ " $odmr" = " " ] ; then
 		#qmail-spamlog log script
 		(
 		echo "#!/bin/sh"
-		echo "# \$Id: svctool.in,v 2.225 2013-11-22 11:31:13+05:30 Cprogrammer Exp mbhangui $"
+		echo "# \$Id: svctool.in,v 2.226 2013-11-22 14:15:26+05:30 Cprogrammer Exp mbhangui $"
 		echo "# generated on $host on `date`"
 		echo "# $prog_args"
 		echo ""
@@ -2579,7 +2582,7 @@ if [ ! -d $LOGDIR ] ; then
 fi
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.225 2013-11-22 11:31:13+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.226 2013-11-22 14:15:26+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -2840,7 +2843,7 @@ else
 fi
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.225 2013-11-22 11:31:13+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.226 2013-11-22 14:15:26+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -2878,7 +2881,7 @@ if [ ! " $logfilter" = " " -a ! -d "$DESTDIR"$SERVICEDIR/qmail-spamlog/run ] ; t
 	/bin/mkdir -p "$DESTDIR"$SERVICEDIR/qmail-spamlog/log
 	(
 	echo "#!/bin/sh"
-	echo "# \$Id: svctool.in,v 2.225 2013-11-22 11:31:13+05:30 Cprogrammer Exp mbhangui $"
+	echo "# \$Id: svctool.in,v 2.226 2013-11-22 14:15:26+05:30 Cprogrammer Exp mbhangui $"
 	echo "# $prog_args"
 	echo ""
 	echo "LOGFILTER=\`cat $SERVICEDIR/qmail-$type.$tag/variables/LOGFILTER\`"
@@ -2899,7 +2902,7 @@ if [ ! " $logfilter" = " " -a ! -d "$DESTDIR"$SERVICEDIR/qmail-spamlog/run ] ; t
 	#qmail-spamlog log script
 	(
 	echo "#!/bin/sh"
-	echo "# \$Id: svctool.in,v 2.225 2013-11-22 11:31:13+05:30 Cprogrammer Exp mbhangui $"
+	echo "# \$Id: svctool.in,v 2.226 2013-11-22 14:15:26+05:30 Cprogrammer Exp mbhangui $"
 	echo "# generated on $host on `date`"
 	echo "# $prog_args"
 	echo ""
@@ -2916,7 +2919,7 @@ if [ ! -d $LOGDIR ] ; then
 fi
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.225 2013-11-22 11:31:13+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.226 2013-11-22 14:15:26+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -2987,7 +2990,7 @@ fi
 
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.225 2013-11-22 11:31:13+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.226 2013-11-22 14:15:26+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -3010,7 +3013,7 @@ if [ ! -d $LOGDIR ] ; then
 fi
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.225 2013-11-22 11:31:13+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.226 2013-11-22 14:15:26+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -3095,7 +3098,7 @@ else
 fi
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.225 2013-11-22 11:31:13+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.226 2013-11-22 14:15:26+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -3150,7 +3153,7 @@ fi
 # qmail-imapd log script
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.225 2013-11-22 11:31:13+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.226 2013-11-22 14:15:26+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -3452,7 +3455,7 @@ else
 fi
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.225 2013-11-22 11:31:13+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.226 2013-11-22 14:15:26+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -3506,7 +3509,7 @@ fi
 # qmail-pop3d log script
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.225 2013-11-22 11:31:13+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.226 2013-11-22 14:15:26+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -3716,7 +3719,7 @@ fi
 echo 1 > $conf_dir/MYSQL_OPT_RECONNECT
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.225 2013-11-22 11:31:13+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.226 2013-11-22 14:15:26+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -3744,7 +3747,7 @@ fi
 # indisrvr log script
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.225 2013-11-22 11:31:13+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.226 2013-11-22 14:15:26+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -3771,7 +3774,7 @@ conf_dir="$DESTDIR"$SERVICEDIR/qscanq/variables
 # qscanq script
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.225 2013-11-22 11:31:13+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.226 2013-11-22 14:15:26+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -3793,7 +3796,7 @@ fi
 # qscanq log script
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.225 2013-11-22 11:31:13+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.226 2013-11-22 14:15:26+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -3810,7 +3813,7 @@ conf_dir="$DESTDIR"$SERVICEDIR/clamd/variables
 # clamd script
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.225 2013-11-22 11:31:13+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.226 2013-11-22 14:15:26+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -3847,7 +3850,7 @@ fi
 # clamd log script
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.225 2013-11-22 11:31:13+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.226 2013-11-22 14:15:26+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -3862,7 +3865,7 @@ conf_dir="$DESTDIR"$SERVICEDIR/freshclam/variables
 # freshclam script
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.225 2013-11-22 11:31:13+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.226 2013-11-22 14:15:26+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -3890,7 +3893,7 @@ fi
 # freshclam log script
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.225 2013-11-22 11:31:13+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.226 2013-11-22 14:15:26+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -3919,7 +3922,7 @@ conf_dir="$DESTDIR"$SERVICEDIR/pwdlookup/variables
 mkdir -p $conf_dir
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.225 2013-11-22 11:31:13+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.226 2013-11-22 14:15:26+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -3935,7 +3938,7 @@ fi
 # pwdlookup log script
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.225 2013-11-22 11:31:13+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.226 2013-11-22 14:15:26+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -4038,7 +4041,7 @@ echo "inlookup" > $conf_dir/MYSQL_READ_DEFAULT_GROUP
 echo 1 > $conf_dir/MYSQL_OPT_RECONNECT
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.225 2013-11-22 11:31:13+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.226 2013-11-22 14:15:26+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -4054,7 +4057,7 @@ fi
 # inlookup log script
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.225 2013-11-22 11:31:13+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.226 2013-11-22 14:15:26+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -4097,7 +4100,7 @@ fi
 if [ ! -d "$DESTDIR"$databasedir/data ] ; then
 	if ( mkdir -p "$DESTDIR"$databasedir/data && mkdir -p "$DESTDIR"$databasedir/logs ) ; then
 		(
-		echo "# \$Id: svctool.in,v 2.225 2013-11-22 11:31:13+05:30 Cprogrammer Exp mbhangui $"
+		echo "# \$Id: svctool.in,v 2.226 2013-11-22 14:15:26+05:30 Cprogrammer Exp mbhangui $"
 		echo "# generated on $host on `date`"
 		echo ""
 		if [ $use_stdout -eq 1 ] ; then
@@ -4173,7 +4176,7 @@ mkdir -p "$DESTDIR"$SERVICEDIR/mysql.$port/variables
 (
 mysql_version=`$mysqlPrefix/bin/mysql_config --version`
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.225 2013-11-22 11:31:13+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.226 2013-11-22 14:15:26+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -4230,7 +4233,7 @@ echo "--pid-file=\$PIDFILE 2>&1"
 
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.225 2013-11-22 11:31:13+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.226 2013-11-22 14:15:26+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -4247,7 +4250,7 @@ fi
 # mysql log script
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.225 2013-11-22 11:31:13+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.226 2013-11-22 14:15:26+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -4863,7 +4866,7 @@ fi
 # svscan log script
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.225 2013-11-22 11:31:13+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.226 2013-11-22 14:15:26+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -4988,7 +4991,7 @@ case "$dkverify_option" in
 esac
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.225 2013-11-22 11:31:13+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.226 2013-11-22 14:15:26+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -5010,7 +5013,7 @@ fi
 # fetchmail log script
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.225 2013-11-22 11:31:13+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.226 2013-11-22 14:15:26+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -5085,7 +5088,7 @@ else
 fi
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.225 2013-11-22 11:31:13+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.226 2013-11-22 14:15:26+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -5126,7 +5129,7 @@ fi
 # qmail-poppass log script
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.225 2013-11-22 11:31:13+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.226 2013-11-22 14:15:26+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -5331,7 +5334,7 @@ case "$dksign_option" in
 esac
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.225 2013-11-22 11:31:13+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.226 2013-11-22 14:15:26+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -5348,7 +5351,7 @@ fi
 mkdir -p "$DESTDIR"$SERVICEDIR/qmail-send."$tag"/log
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.225 2013-11-22 11:31:13+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.226 2013-11-22 14:15:26+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -5983,7 +5986,8 @@ echo "# Maximum size of the log file."
 echo "# Value of 0 disables the limit."
 echo "# You may use 'M' or 'm' for megabytes (1M = 1m = 1048576 bytes)"
 echo "# and 'K' or 'k' for kilobytes (1K = 1k = 1024 bytes). To specify the size"
-echo "# in bytes just don't use modifiers."
+echo "# in bytes just don't use modifiers. If LogFileMaxSize is enabled, log"
+echo "# rotation (the LogRotate option) will always be enabled."
 echo "# Default: 1M"
 echo "#LogFileMaxSize 2M"
 echo ""
@@ -6005,9 +6009,21 @@ echo "# for facility names."
 echo "# Default: LOG_LOCAL6"
 echo "#LogFacility LOG_MAIL"
 echo ""
+echo "# Enable log rotation. Always enabled when LogFileMaxSize is enabled."
+echo "# Default: no"
+echo "#LogRotate yes"
+echo ""
 echo "# Enable verbose logging."
 echo "# Default: no"
 echo "#LogVerbose yes"
+echo ""
+echo "# Enable log rotation. Always enabled when LogFileMaxSize is enabled."
+echo "# Default: no"
+echo "#LogRotate yes"
+echo ""
+echo "# Log additional information about the infected file, such as its"
+echo "# size and hash, together with the virus name."
+echo "#ExtendedDetectionInfo yes"
 echo ""
 echo "# This option allows you to save a process identifier of the listening"
 echo "# daemon (main thread)."
@@ -6057,7 +6073,7 @@ echo "# Default: no"
 echo "#TCPAddr 127.0.0.1"
 echo ""
 echo "# Maximum length the queue of pending connections may grow to."
-echo "# Default: 15"
+echo "# Default: 200"
 echo "#MaxConnectionQueueLength 30"
 echo ""
 echo "# Clamd uses FTP-like protocol to receive data from remote clients."
@@ -6158,6 +6174,11 @@ echo "# Enable debug messages in libclamav."
 echo "# Default: no"
 echo "#Debug yes"
 echo ""
+echo "# Permit use of the ALLMATCHSCAN command. If set to no, clamd will reject"
+echo "# any ALLMATCHSCAN command as invalid."
+echo "# Default: yes"
+echo "#AllowAllMatchScan no"
+echo ""
 echo "# Do not remove temporary files (for debug purposes)."
 echo "# Default: no"
 echo "#LeaveTemporaryFiles yes"
@@ -6195,12 +6216,25 @@ echo "# PE stands for Portable Executable - it's an executable file format used"
 echo "# in all 32 and 64-bit versions of Windows operating systems. This option allows"
 echo "# ClamAV to perform a deeper analysis of executable files and it's also"
 echo "# required for decompression of popular executable packers such as UPX, FSG,"
-echo "# and Petite."
+echo "# and Petite. If you turn off this option, the original files will still be"
+echo "# scanned, but without additional processing."
 echo "# Default: yes"
 echo "#ScanPE yes"
 echo ""
+echo "# Certain PE files contain an authenticode signature. By default, we check"
+echo "# the signature chain in the PE file against a database of trusted and"
+echo "# revoked certificates if the file being scanned is marked as a virus."
+echo "# If any certificate in the chain validates against any trusted root, but"
+echo "# does not match any revoked certificate, the file is marked as whitelisted."
+echo "# If the file does match a revoked certificate, the file is marked as virus."
+echo "# The following setting completely turns off authenticode verification."
+echo "# Default: no"
+echo "#DisableCertCheck yes"
+echo ""
 echo "# Executable and Linking Format is a standard format for UN*X executables."
 echo "# This option allows you to control the scanning of ELF files."
+echo "# If you turn off this option, the original files will still be scanned, but"
+echo "# without additional processing."
 echo "# Default: yes"
 echo "#ScanELF yes"
 echo ""
@@ -6216,12 +6250,28 @@ echo "##"
 echo ""
 echo "# This option enables scanning of OLE2 files, such as Microsoft Office"
 echo "# documents and .msi files."
+echo "# If you turn off this option, the original files will still be scanned, but"
+echo "# without additional processing."
 echo "# Default: yes"
 echo "#ScanOLE2 yes"
 echo ""
+echo ""
+echo "# With this option enabled OLE2 files with VBA macros, which were not"
+echo "# detected by signatures will be marked as \"Heuristics.OLE2.ContainsMacros\"."
+echo "# Default: no"
+echo "#OLE2BlockMacros no"
+echo ""
 echo "# This option enables scanning within PDF files."
+echo "# If you turn off this option, the original files will still be scanned, but"
+echo "# without decoding and additional processing."
 echo "# Default: yes"
 echo "ScanPDF yes"
+echo ""
+echo "# This option enables scanning within SWF files."
+echo "# If you turn off this option, the original files will still be scanned, but"
+echo "# without decoding and additional processing."
+echo "# Default: yes"
+echo "#ScanSWF yes"
 echo ""
 echo ""
 echo "##"
@@ -6229,6 +6279,8 @@ echo "## Mail files"
 echo "##"
 echo ""
 echo "# Enable internal e-mail scanner."
+echo "# If you turn off this option, the original files will still be scanned, but"
+echo "# without parsing individual messages/attachments."
 echo "# Default: yes"
 echo "#ScanMail yes"
 echo ""
@@ -6311,6 +6363,8 @@ echo "## HTML"
 echo "##"
 echo ""
 echo "# Perform HTML normalisation and decryption of MS Script Encoder code."
+echo "# If you turn off this option, the original files will still be scanned, but"
+echo "# without additional processing."
 echo "# Default: yes"
 echo "#ScanHTML yes"
 echo ""
@@ -6320,6 +6374,8 @@ echo "## Archives"
 echo "##"
 echo ""
 echo "# ClamAV can scan within archives and compressed files."
+echo "# If you turn off this option, the original files will still be scanned, but"
+echo "# without unpacking and additional processing."
 echo "# Default: yes"
 echo "#ScanArchive yes"
 echo ""
@@ -6356,9 +6412,7 @@ echo ""
 echo "# Nested archives are scanned recursively, e.g. if a Zip archive contains a RAR"
 echo "# file, all files within it will also be scanned. This options specifies how"
 echo "# deeply the process should be continued."
-echo "# Note: disabling this limit or setting it too high may result in severe damage"
-echo "# to the system."
-echo "# Value of 0 disables the limit."
+echo "# Note: setting this limit too high may result in severe damage to the system."
 echo "# Default: 16"
 echo "#MaxRecursion 10"
 echo ""
@@ -6369,6 +6423,41 @@ echo "# Note: disabling this limit or setting it too high may result in severe d
 echo "# to the system."
 echo "# Default: 10000"
 echo "#MaxFiles 15000"
+echo ""
+echo "# Maximum size of a file to check for embedded PE. Files larger than this value"
+echo "# will skip the additional analysis step."
+echo "# Note: disabling this limit or setting it too high may result in severe damage"
+echo "# to the system."
+echo "# Default: 10M"
+echo "#MaxEmbeddedPE 10M"
+echo ""
+echo "# Maximum size of a HTML file to normalize. HTML files larger than this value"
+echo "# will not be normalized or scanned."
+echo "# Note: disabling this limit or setting it too high may result in severe damage"
+echo "# to the system."
+echo "# Default: 10M"
+echo "#MaxHTMLNormalize 10M"
+echo ""
+echo "# Maximum size of a normalized HTML file to scan. HTML files larger than this"
+echo "# value after normalization will not be scanned."
+echo "# Note: disabling this limit or setting it too high may result in severe damage"
+echo "# to the system."
+echo "# Default: 2M"
+echo "#MaxHTMLNoTags 2M"
+echo ""
+echo "# Maximum size of a script file to normalize. Script content larger than this"
+echo "# value will not be normalized or scanned."
+echo "# Note: disabling this limit or setting it too high may result in severe damage"
+echo "# to the system."
+echo "# Default: 5M"
+echo "#MaxScriptNormalize 5M"
+echo ""
+echo "# Maximum size of a ZIP file to reanalyze type recognition. ZIP files larger"
+echo "# than this value will skip the step to potentially reanalyze as PE."
+echo "# Note: disabling this limit or setting it too high may result in severe damage"
+echo "# to the system."
+echo "# Default: 1M"
+echo "#MaxZipTypeRcg 1M"
 echo ""
 echo ""
 echo "##"
@@ -6409,6 +6498,17 @@ echo "# Set the exclude paths. All subdirectories are also excluded. (Dazuko onl
 echo "# Default: disabled"
 echo "#ClamukoExcludePath /home/bofh"
 echo ""
+echo "# With this option you can whitelist specific UIDs. Processes with these UIDs"
+echo "# will be able to access all files."
+echo "# This option can be used multiple times (one per line)."
+echo "# Default: disabled"
+echo "#ClamukoExcludeUID 0"
+echo ""
+echo "# With this option enabled ClamAV will load bytecode from the database. "
+echo "# It is highly recommended you keep this option on, otherwise you'll miss detections for many new viruses."
+echo "# Default: yes"
+echo "#Bytecode yes"
+echo ""
 echo "# Set bytecode security level."
 echo "# Possible values:"
 echo "#       None - no security at all, meant for debugging. DO NOT USE THIS ON PRODUCTION SYSTEMS"
@@ -6422,6 +6522,11 @@ echo "# load unsigned bytecode in --enable-debug mode."
 echo "#"
 echo "# Default: TrustSigned"
 echo "#BytecodeSecurity TrustSigned"
+echo ""
+echo "# Set bytecode timeout in miliseconds."
+echo "# "
+echo "# Default: 5000"
+echo "# BytecodeTimeout 1000"
 }
 
 create_freshclam_conf()
@@ -6439,7 +6544,8 @@ echo "# Maximum size of the log file."
 echo "# Value of 0 disables the limit."
 echo "# You may use 'M' or 'm' for megabytes (1M = 1m = 1048576 bytes)"
 echo "# and 'K' or 'k' for kilobytes (1K = 1k = 1024 bytes)."
-echo "# in bytes just don't use modifiers."
+echo "# in bytes just don't use modifiers. If LogFileMaxSize is enabled,"
+echo "# log rotation (the LogRotate option) will always be enabled."
 echo "# Default: 1M"
 echo "#LogFileMaxSize 2M"
 echo ""
@@ -6459,6 +6565,10 @@ echo "# Specify the type of syslog messages - please refer to 'man syslog'"
 echo "# for facility names."
 echo "# Default: LOG_LOCAL6"
 echo "#LogFacility LOG_MAIL"
+echo ""
+echo "# Enable log rotation. Always enabled when LogFileMaxSize is enabled."
+echo "# Default: no"
+echo "#LogRotate yes"
 echo ""
 echo "# This option allows you to save the process identifier of the daemon"
 echo "# Default: disabled"
@@ -6483,6 +6593,7 @@ echo "#DNSDatabaseInfo current.cvd.clamav.net"
 echo ""
 echo "# Uncomment the following line and replace XY with your country"
 echo "# code. See http://www.iana.org/cctld/cctld-whois.htm for the full list."
+echo "# You can use db.XY.ipv6.clamav.net for IPv6 connections."
 echo "#DatabaseMirror db.XY.clamav.net"
 echo ""
 echo "# database.clamav.net is a round-robin record which points to our most "
@@ -6505,6 +6616,25 @@ echo "# make their handling faster. With this option you can enable the compress
 echo "# the change will take effect with the next database update."
 echo "# Default: no"
 echo "#CompressLocalDatabase no"
+echo ""
+echo "# With this option you can provide custom sources (http:// or file://) for"
+echo "# database files. This option can be used multiple times."
+echo "# Default: no custom URLs"
+echo "#DatabaseCustomURL http://myserver.com/mysigs.ndb"
+echo "#DatabaseCustomURL file:///mnt/nfs/local.hdb"
+echo ""
+echo "# This option allows you to easily point freshclam to private mirrors."
+echo "# If PrivateMirror is set, freshclam does not attempt to use DNS"
+echo "# to determine whether its databases are out-of-date, instead it will"
+echo "# use the If-Modified-Since request or directly check the headers of the"
+echo "# remote database files. For each database, freshclam first attempts"
+echo "# to download the CLD file. If that fails, it tries to download the"
+echo "# CVD file. This option overrides DatabaseMirror, DNSDatabaseInfo"
+echo "# and ScriptedUpdates. It can be used multiple times to provide"
+echo "# fall-back mirrors."
+echo "# Default: disabled"
+echo "#PrivateMirror mirror1.mynetwork.com"
+echo "#PrivateMirror mirror2.mynetwork.com"
 echo ""
 echo "# Number of database checks per day."
 echo "# Default: 12 (every two hours)"
@@ -6561,11 +6691,17 @@ echo "# Timeout in seconds when reading from database server."
 echo "# Default: 30"
 echo "#ReceiveTimeout 60"
 echo ""
+echo "# With this option enabled, freshclam will attempt to load new"
+echo "# databases into memory to make sure they are properly handled"
+echo "# by libclamav before replacing the old ones."
+echo "# Default: yes"
+echo "#TestDatabases yes"
+echo ""
 echo "# When enabled freshclam will submit statistics to the ClamAV Project about"
 echo "# the latest virus detections in your environment. The ClamAV maintainers"
 echo "# will then use this data to determine what types of malware are the most"
 echo "# detected in the field and in what geographic area they are."
-echo "# This feature requires LogTime and LogFile to be enabled in clamd.conf."
+echo "# Freshclam will connect to clamd in order to get recent statistics."
 echo "# Default: no"
 echo "#SubmitDetectionStats /path/to/clamd.conf"
 echo ""
@@ -6612,6 +6748,13 @@ echo "# This option enables downloading of bytecode.cvd, which includes addition
 echo "# detection mechanisms and improvements to the ClamAV engine."
 echo "# Default: enabled"
 echo "#Bytecode yes"
+echo ""
+echo "# Download an additional 3rd party signature database distributed through"
+echo "# the ClamAV mirrors. Here you can find a list of available databases:"
+echo "# http://www.clamav.net/download/cvd/3rdparty"
+echo "# This option can be used multiple times."
+echo "#ExtraDatabase dbname1"
+echo "#ExtraDatabase dbname2"
 }
 
 create_bogofilter_conf()
@@ -7481,7 +7624,7 @@ while test $# -gt 0; do
 	;;
 
     --version)
-	echo "\$Id: svctool.in,v 2.225 2013-11-22 11:31:13+05:30 Cprogrammer Exp mbhangui $"
+	echo "\$Id: svctool.in,v 2.226 2013-11-22 14:15:26+05:30 Cprogrammer Exp mbhangui $"
 	prog_args=""
 	exit 0
 	;;
