@@ -1404,6 +1404,30 @@ can also be in cdb format. If
 is present, it will be searched first.
 
 .TP 5
+.I domainqueue
+Specific queue can be assigned to recipient domains. The format of this file is of the
+form
+
+domain:QUEUEDIR=queue_dir
+
+where domain is the recipient domain and queue_dir is any queue which is part of
+indimail's queue collection. You could also specify a set of queues for a domain.
+
+domain:QUEUE_COUNT=5,QUEUE_START=6,QUEUE_BASE=/var/indimail/queue
+
+specifies that any emails to *@domain be queued in /var/indimail/queue/queue[6,7,8,9,10]
+You can use \fIdomainqueue\fR to queue mails for certain domains into specific domains and
+specify individual concurrencies for these queues (see qmail-send(8)). e.g. having
+
+yahoo.com:QUEUEDIR=/var/indimail/queue/queue6
+in QMAILHOME/control/domainqueue and
+
+10
+in QMAILHOME/control/concurrencyr.queue6
+
+will set 10 as the remote concurrency for all emails sent to yahoo.com
+
+.TP 5
 .I from.envrules
 Specific environment variables can be set for specific senders.
 The format of this file is of the form                                       
