@@ -22,6 +22,7 @@ Known values for options are:
 --smtp=Port --qbase=queue_path --qcount=N --qstart=I
     --servicedir=service_path --cntrldir=cntrl_path
     --localip=a --maxdaemons=m --maxperip=i
+    [--no-multi]
     [--mysqlhost=mysqlhost --mysqluser=mysqluser --mysqlpass=mysqlpass]
     [--persistdb]
     [--dnscheck]
@@ -41,7 +42,7 @@ Known values for options are:
     [--virus-filter=v]
     [--qhpsi=q]
     [--spamfilter=spamfilter_args]
-    [--logfilter=filter_fifo]
+    [--logfilter=spam_fifo]
     [--rejectspam=r --spamexitcode=e --localfilter --remotefilter]
     [--paranoid --dmasquerade]
     [--remote-authsmtp=b]
@@ -57,8 +58,8 @@ Known values for options are:
                    single ip address
   a              - IP Address to listen
   N              - No of Queues
-  I              - Numeral Prefix of first queue (i.e 1 for
-                   INDIMAIL/queue1)
+  I              - Numeral Prefix of first queue
+                   (i.e 1 for INDIMAIL/queue/queue1)
   M              - Minimum Disk Space to maintain in queue after which
                    Temporary error will be returned
   b              - Max Memory that SMTP can allocate
@@ -97,8 +98,8 @@ Known values for options are:
                    file or the filename given as argument to content-filter
   c              - Optional filename passed to content-filter argument
   spamfilter     - Spamfilter program along with arguments
-  filter_fifo    - Capture additional status message from spamfilter in 
-                   smtpd logfile via filter_fifo
+  spam_fifo      - Capture additional status message from spamfilter in 
+                   spamlogger logfile via spam_fifo
   r              - Mails get rejected as spam if exit status of spamfilter
                    equals the value of spamexitcode
                    0 - Do not reject SPAM mails
@@ -132,47 +133,47 @@ Known values for options are:
   ssl            - Use SSL encrypted communication
 
 --delivery=ident --qbase=queue_path --qcount=N --qstart=I
-	--servicedir=service_path
-	[--cntrldir=cntrl_path]
-	[--mysqlhost=mysqlhost --mysqluser=mysqluser --mysqlpass=mysqlpass]
-	[--persistdb]
-	[--fsync --syncdir]
-	[--qregex]
-	[--memory=b]
-	[--overquota_mailsize=o]
-	[--domainlimits]
-	[--routes=smtp|qmtp|static]
-	[--min-free=M --deliverylimit-count=D --deliverylimit-size=S]
-	[--qhpsi=q]
-	[--logfilter=filter_fifo]
-	[--rejectspam=r --spamexitcode=e --localfilter --remotefilter]
-	[--dkverify=dk|dkim|both|none]
-	[--dksign=dk|dkim|both|none --private_key=private_key]
-	[--remote-authsmtp=b]
-	--default-domain=domain
+    --servicedir=service_path
+    [--cntrldir=cntrl_path]
+    [--no-multi]
+    [--mysqlhost=mysqlhost --mysqluser=mysqluser --mysqlpass=mysqlpass]
+    [--persistdb]
+    [--fsync --syncdir]
+    [--qregex]
+    [--memory=b]
+    [--overquota_mailsize=o]
+    [--domainlimits]
+    [--routes=smtp|qmtp|static]
+    [--min-free=M --deliverylimit-count=D --deliverylimit-size=S]
+    [--logfilter=spam_fifo]
+    [--rejectspam=r --spamexitcode=e --localfilter --remotefilter]
+    [--dkverify=dk|dkim|both|none]
+    [--dksign=dk|dkim|both|none --private_key=private_key]
+    [--remote-authsmtp=b]
+    --default-domain=domain
 
  Installs a new queue without a SMTP listener
   N              - No of Queues
-  I              - Numeral Prefix of first queue (i.e 1 for $QmailHOME/queue1)
+  I              - Numeral Prefix of first queue
+                   (i.e 1 for INDIMAIL/queue/queue1)
   M              - Minimum Disk Space to maintain in queue after which
                    Temporary error will be returned
   D              - Max deliveries allowed per day for a user
   S              - Max sum total size of mails allowed per day for a user
   o              - Max size of mails to accept after user is overquota
-  no-multi       - Do not set QMAILQUEUE to qmail-multi
+  no-multi       - Do not use multiple queues.
+                   Use INDIMAIL/queue/queue1 as the fixed queue
   service_path   - Path where supervise scripts will be installed
   queue_path     - Path where the queues are installed. If this is different from
                    $QmailHOME appropriate links will be created in
                    $QmailHOME
   cntrl_path     - Path where Qmail control files are stored
   domainlimits   - Apply Domain Limits configured by vmoddomlimits(1)
-  qregex         - Use regular expressions for matching entries in
-                   badmailfrom, badrcptto, blackholedsenders, spamignore
-                   relaymailfrom, authdomains, chkuserdomains
-  q              - Full path to an external virus scanner (like clamdscan)
+  qregex         - Use regular expressions for matching entries
+                   when using envrules (--localfilter or --remotefilter)
   spamfilter     - Spamfilter program along with arguments
-  filter_fifo    - Capture additional status message from spamfilter in 
-                   smtpd logfile via filter_fifo
+  spam_fifo      - Capture additional status message from spamfilter in 
+                   spamlogger logfile via spam_fifo
   r              - Mails get rejected as spam if exit status of spamfilter
                    equals the value of spamexitcode. r can have following values
                    0 - Do not reject SPAM mails
@@ -191,26 +192,26 @@ Known values for options are:
   mysqluser      - Username for connecting to mysql
   mysqlpass      - Passwd for connecting to mysql
   private_key    - Path to Private key created by dknewkey
-  persistdb      - Enables qmail-lspawn to have persisten MySQL connection and set
+  persistdb      - Enables qmail-lspawn to have persistent MySQL connection and set
                    PWSTRUCT environment variable. This eliminates the need for
                    vdelivermail to make a MySQL connection and hence improves
                    delivery times.
   b              - Authenticated SMTP method to use by qmail-remote (plain, login, cram-md5)
 
 --queueParam=dir --qbase=queue_path --qcount=N --qstart=I
-	--cntrldir=cntrl_path
-	[--min-free=M]
-	[--no-multi]
-	[--fsync --syncdir]
-	[--qregex]
-	[--content-filter=c]
-	[--virus-filter=v]
-	[--qhpsi=q]
-	[--spamfilter=spamfilter_args]
-	[--logfilter=filter_fifo]
-	[--rejectspam=r --spamexitcode=e --localfilter --remotefilter]
-	[--dkverify=dk|dkim|both|none]
-	[--dksign=dk|dkim|both|none --private_key=private_key]
+    --cntrldir=cntrl_path
+    [--min-free=M]
+    [--no-multi]
+    [--fsync --syncdir]
+    [--qregex]
+    [--content-filter=c]
+    [--virus-filter=v]
+    [--qhpsi=q]
+    [--spamfilter=spamfilter_args]
+    [--logfilter=spam_fifo]
+    [--rejectspam=r --spamexitcode=e --localfilter --remotefilter]
+    [--dkverify=dk|dkim|both|none]
+    [--dksign=dk|dkim|both|none --private_key=private_key]
 
  Installs a new queue with a SMTP Listener
   dir            - dir where to install queuedef environment variable directory
@@ -218,7 +219,8 @@ Known values for options are:
                    $QmailHOME appropriate links will be created in
                    $QmailHOME
   N              - No of Queues
-  I              - Numeral Prefix of first queue (i.e 1 for $QmailHOME/queue1)
+  I              - Numeral Prefix of first queue
+                   (i.e 1 for INDIMAIL/queue/queue1)
   cntrl_path     - Path where Qmail control files are stored
   M              - Minimum Disk Space to maintain in queue after which
                    Temporary error will be returned
@@ -238,8 +240,8 @@ Known values for options are:
                    file or the filename given as argument to content-filter
   c              - Optional filename passed to content-filter argument
   spamfilter     - Spamfilter program along with arguments
-  filter_fifo    - Capture additional status message from spamfilter in 
-                   smtpd logfile via filter_fifo
+  spam_fifo      - Capture additional status message from spamfilter in 
+                   spamlogger logfile via spam_fifo
   r              - Mails get rejected as spam if exit status of spamfilter
                    equals the value of spamexitcode. r can have following values
                    0 - Do not reject SPAM mails
@@ -251,8 +253,8 @@ Known values for options are:
   private_key    - Path to Private key created by dknewkey
 
 --greylist=port --min-resend-min=m --resend-win-hr=g --timeout-days=t
-		--context-file=f --save_interval=s --whitelist=w --hash-size=s
-		--use-greydaemon
+    --context-file=f --save_interval=s --whitelist=w --hash-size=s
+    --use-greydaemon
 
   Installs a new Greylist Daemon
   Port           - Bind on this port for qmail-greyd
@@ -274,7 +276,7 @@ Known values for options are:
     [--memory=b --min-free=M]
     [--qhpsi=q]
     [--spamfilter=spamfilter_args]
-    [--logfilter=filter_fifo]
+    [--logfilter=spam_fifo]
     [--rejectspam=r --spamexitcode=e]
     [--dkverify=dk|dkim|both|none]
     [--dksign=dk|dkim|both|none --private_key=private_key]
@@ -285,7 +287,8 @@ Known values for options are:
                    single ip address
   a              - IP Address to listen
   N              - No of Queues
-  I              - Numeral Prefix of first queue (i.e 1 for INDIMAIL/queue/queue1)
+  I              - Numeral Prefix of first queue
+                   (i.e 1 for INDIMAIL/queue/queue1)
   M              - Minimum Disk Space to maintain in queue after which
                    Temporary error will be returned
   b              - Max Memory that QMTP can allocate
@@ -300,8 +303,8 @@ Known values for options are:
   q              - Full path to an external virus scanner (like clamdscan)
   spamfilter     - Spamfilter program along with arguments
 
-  filter_fifo    - Capture additional status message from spamfilter in 
-                   smtpd logfile via filter_fifo
+  spam_fifo      - Capture additional status message from spamfilter in 
+                   spamlogger logfile via spam_fifo
   r              - Mails get rejected as spam if exit status of spamfilter
                    equals the value of spamexitcode. r can have following values
                    0 - Do not reject SPAM mails
@@ -317,7 +320,7 @@ Known values for options are:
     [--memory=b --min-free=M]
     [--qhpsi=q]
     [--spamfilter=spamfilter_args]
-    [--logfilter=filter_fifo]
+    [--logfilter=spam_fifo]
     [--rejectspam=r --spamexitcode=e]
     [--dkverify=dk|dkim|both|none]
     [--dksign=dk|dkim|both|none --private_key=private_key]
@@ -328,7 +331,8 @@ Known values for options are:
                    single ip address
   a              - IP Address to listen
   N              - No of Queues
-  I              - Numeral Prefix of first queue (i.e 1 for INDIMAIL/queue/queue1)
+  I              - Numeral Prefix of first queue
+                   (i.e 1 for INDIMAIL/queue/queue1)
   M              - Minimum Disk Space to maintain in queue after which
                    Temporary error will be returned
   b              - Max Memory that QMTP can allocate
@@ -343,8 +347,8 @@ Known values for options are:
   q              - Full path to an external virus scanner (like clamdscan)
   spamfilter     - Spamfilter program along with arguments
 
-  filter_fifo    - Capture additional status message from spamfilter in 
-                   smtpd logfile via filter_fifo
+  spam_fifo      - Capture additional status message from spamfilter in 
+                   spamlogger logfile via spam_fifo
   r              - Mails get rejected as spam if exit status of spamfilter
                    equals the value of spamexitcode. r can have following values
                    0 - Do not reject SPAM mails
@@ -517,7 +521,7 @@ Known values for options are:
                    INDIMAIL
   N              - No of Queues
   I              - Numeral Prefix of first queue
-                   (i.e 1 for INDIMAIL/queue1)
+                   (i.e 1 for INDIMAIL/queue/queue1)
   M              - Minimum Disk Space to maintain in queue after which
                    Temporary error will be returned
   b              - Max Memory that Fetchmail can allocate
@@ -529,8 +533,8 @@ Known values for options are:
   domainlimits   - Apply Domain Limits configured by vmoddomlimits(1)
   q              - Full path to an external virus scanner (like clamdscan)
   spamfilter     - Spamfilter program along with arguments
-  filter_fifo    - Capture additional status message from spamfilter in 
-                   spam logfile via filter_fifo
+  spam_fifo      - Capture additional status message from spamfilter in 
+                   spamlogger logfile via spam_fifo
   r              - Mails get rejected as spam if exit status of spamfilter
                    equals the value of spamexitcode
                    0 - Do not reject SPAM mails
@@ -628,7 +632,8 @@ Known values for options are:
   service_path - Path where supervise scripts have been installed
   queue_path   - Path where the queues are installed.
   N            - No of Queues
-  I            - Numeral Prefix of first queue (i.e 1 for INDIMAIL/queue1)
+  I            - Numeral Prefix of first queue
+                 (i.e 1 for INDIMAIL/queue/queue1)
 
 --showctl=DIR
 

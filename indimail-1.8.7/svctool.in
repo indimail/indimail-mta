@@ -1,6 +1,9 @@
 #!/bin/sh
 # WARNING: This file was auto-generated. Do not edit!
 # $Log: svctool.in,v $
+# Revision 2.225  2013-11-22 11:31:13+05:30  Cprogrammer
+# fixed no_multi option
+#
 # Revision 2.224  2013-11-15 19:13:59+05:30  Cprogrammer
 # fixed meaning of dnscheck
 #
@@ -866,7 +869,7 @@
 # Initial revision
 #
 #
-# $Id: svctool.in,v 2.224 2013-11-15 19:13:59+05:30 Cprogrammer Exp mbhangui $
+# $Id: svctool.in,v 2.225 2013-11-22 11:31:13+05:30 Cprogrammer Exp mbhangui $
 #
 
 #
@@ -930,7 +933,7 @@ Known values for OPTION are:
 	[--virus-filter=v]
 	[--qhpsi=q]
 	[--spamfilter=spamfilter_args]
-	[--logfilter=filter_fifo]
+	[--logfilter=spam_fifo]
 	[--rejectspam=r --spamexitcode=e --localfilter --remotefilter]
 	[--paranoid --dmasquerade]
 	[--remote-authsmtp=b]
@@ -947,7 +950,7 @@ Known values for OPTION are:
                    single ip address
   a              - IP Address to listen
   N              - No of Queues
-  I              - Numeral Prefix of first queue (i.e 1 for $QmailHOME/queue1)
+  I              - Numeral Prefix of first queue (i.e 1 for $QmailHOME/queue/queue1)
   M              - Minimum Disk Space to maintain in queue after which
                    Temporary error will be returned
   b              - Max Memory that SMTP can allocate
@@ -987,8 +990,8 @@ Known values for OPTION are:
                    file or the filename given as argument to content-filter
   c              - Optional filename passed to content-filter argument
   spamfilter     - Spamfilter program along with arguments
-  filter_fifo    - Capture additional status message from spamfilter in 
-                   smtpd logfile via filter_fifo
+  spam_fifo      - Capture additional status message from spamfilter in 
+                   spamlogger logfile via spam_fifo
   r              - Mails get rejected as spam if exit status of spamfilter
                    equals the value of spamexitcode. r can have following values
                    0 - Do not reject SPAM mails
@@ -1018,7 +1021,7 @@ Known values for OPTION are:
   odmr           - Setup SMTP for ODMR (On Demand Mail Relay)
   private_key    - Path to Private key created by dknewkey
   ssl            - Use SSL encrypted communication
-  persistdb      - Enables qmail-lspawn to have persisten MySQL connection and set
+  persistdb      - Enables qmail-lspawn to have persistent MySQL connection and set
                    PWSTRUCT environment variable. This eliminates the need for
                    vdelivermail to make a MySQL connection and hence improves
                    delivery times.
@@ -1028,6 +1031,7 @@ Known values for OPTION are:
 --delivery=ident --qbase=queue_path --qcount=N --qstart=I
 	--servicedir=service_path
 	[--cntrldir=cntrl_path]
+	[--no-multi]
 	[--mysqlhost=mysqlhost --mysqluser=mysqluser --mysqlpass=mysqlpass]
 	[--persistdb]
 	[--fsync --syncdir]
@@ -1037,8 +1041,7 @@ Known values for OPTION are:
 	[--domainlimits]
 	[--routes=smtp|qmtp|static]
 	[--min-free=M --deliverylimit-count=D --deliverylimit-size=S]
-	[--qhpsi=q]
-	[--logfilter=filter_fifo]
+	[--logfilter=spam_fifo]
 	[--rejectspam=r --spamexitcode=e --localfilter --remotefilter]
 	[--dkverify=dk|dkim|both|none]
 	[--dksign=dk|dkim|both|none --private_key=private_key]
@@ -1047,7 +1050,7 @@ Known values for OPTION are:
 
  Installs a new queue without a SMTP listener
   N              - No of Queues
-  I              - Numeral Prefix of first queue (i.e 1 for $QmailHOME/queue1)
+  I              - Numeral Prefix of first queue (i.e 1 for $QmailHOME/queue/queue1)
   M              - Minimum Disk Space to maintain in queue after which
                    Temporary error will be returned
   D              - Max deliveries allowed per day for a user
@@ -1063,10 +1066,9 @@ Known values for OPTION are:
   qregex         - Use regular expressions for matching entries in
                    badmailfrom, badrcptto, blackholedsenders, spamignore
                    relaymailfrom, authdomains, chkuserdomains
-  q              - Full path to an external virus scanner (like clamdscan)
   spamfilter     - Spamfilter program along with arguments
-  filter_fifo    - Capture additional status message from spamfilter in 
-                   smtpd logfile via filter_fifo
+  spam_fifo      - Capture additional status message from spamfilter in 
+                   spamlogger logfile via spam_fifo
   r              - Mails get rejected as spam if exit status of spamfilter
                    equals the value of spamexitcode. r can have following values
                    0 - Do not reject SPAM mails
@@ -1101,7 +1103,7 @@ Known values for OPTION are:
 	[--virus-filter=v]
 	[--qhpsi=q]
 	[--spamfilter=spamfilter_args]
-	[--logfilter=filter_fifo]
+	[--logfilter=spam_fifo]
 	[--rejectspam=r --spamexitcode=e --localfilter --remotefilter]
 	[--dkverify=dk|dkim|both|none]
 	[--dksign=dk|dkim|both|none --private_key=private_key]
@@ -1112,7 +1114,7 @@ Known values for OPTION are:
                    $QmailHOME appropriate links will be created in
                    $QmailHOME
   N              - No of Queues
-  I              - Numeral Prefix of first queue (i.e 1 for $QmailHOME/queue1)
+  I              - Numeral Prefix of first queue (i.e 1 for $QmailHOME/queue/queue1)
   cntrl_path     - Path where Qmail control files are stored
   M              - Minimum Disk Space to maintain in queue after which
                    Temporary error will be returned
@@ -1132,8 +1134,8 @@ Known values for OPTION are:
                    file or the filename given as argument to content-filter
   c              - Optional filename passed to content-filter argument
   spamfilter     - Spamfilter program along with arguments
-  filter_fifo    - Capture additional status message from spamfilter in 
-                   smtpd logfile via filter_fifo
+  spam_fifo      - Capture additional status message from spamfilter in 
+                   spamlogger logfile via spam_fifo
   r              - Mails get rejected as spam if exit status of spamfilter
                    equals the value of spamexitcode. r can have following values
                    0 - Do not reject SPAM mails
@@ -1169,7 +1171,7 @@ Known values for OPTION are:
 	[--memory=b --min-free=M]
 	[--qhpsi=q]
 	[--spamfilter=spamfilter_args]
-	[--logfilter=filter_fifo]
+	[--logfilter=spam_fifo]
 	[--rejectspam=r --spamexitcode=e]
 	[--dkverify=dk|dkim|both|none]
 	[--dksign=dk|dkim|both|none --private_key=private_key]
@@ -1180,7 +1182,7 @@ Known values for OPTION are:
                    single ip address
   a              - IP Address to listen
   N              - No of Queues
-  I              - Numeral Prefix of first queue (i.e 1 for $QmailHOME/queue1)
+  I              - Numeral Prefix of first queue (i.e 1 for $QmailHOME/queue/queue1)
   M              - Minimum Disk Space to maintain in queue after which
                    Temporary error will be returned
   b              - Max Memory that QMTP can allocate
@@ -1195,8 +1197,8 @@ Known values for OPTION are:
   q              - Full path to an external virus scanner (like clamdscan)
   spamfilter     - Spamfilter program along with arguments
 
-  filter_fifo    - Capture additional status message from spamfilter in 
-                   smtpd logfile via filter_fifo
+  spam_fifo      - Capture additional status message from spamfilter in 
+                   spamlogger logfile via spam_fifo
   r              - Mails get rejected as spam if exit status of spamfilter
                    equals the value of spamexitcode. r can have following values
                    0 - Do not reject SPAM mails
@@ -1213,7 +1215,7 @@ Known values for OPTION are:
 	[--memory=b --min-free=M]
 	[--qhpsi=q]
 	[--spamfilter=spamfilter_args]
-	[--logfilter=filter_fifo]
+	[--logfilter=spam_fifo]
 	[--rejectspam=r --spamexitcode=e]
 	[--dkverify=dk|dkim|both|none]
 	[--dksign=dk|dkim|both|none --private_key=private_key]
@@ -1224,7 +1226,7 @@ Known values for OPTION are:
                    single ip address
   a              - IP Address to listen
   N              - No of Queues
-  I              - Numeral Prefix of first queue (i.e 1 for $QmailHOME/queue1)
+  I              - Numeral Prefix of first queue (i.e 1 for $QmailHOME/queue/queue1)
   M              - Minimum Disk Space to maintain in queue after which
                    Temporary error will be returned
   b              - Max Memory that QMTP can allocate
@@ -1239,8 +1241,8 @@ Known values for OPTION are:
   q              - Full path to an external virus scanner (like clamdscan)
   spamfilter     - Spamfilter program along with arguments
 
-  filter_fifo    - Capture additional status message from spamfilter in 
-                   smtpd logfile via filter_fifo
+  spam_fifo      - Capture additional status message from spamfilter in 
+                   spamlogger logfile via spam_fifo
   r              - Mails get rejected as spam if exit status of spamfilter
                    equals the value of spamexitcode. r can have following values
                    0 - Do not reject SPAM mails
@@ -1417,7 +1419,7 @@ Known values for OPTION are:
 	[--domainlimits]
 	[--memory=b --min-free=M]
 	[--spamfilter=spamfilter_args]
-	[--logfilter=filter_fifo]
+	[--logfilter=spam_fifo]
 	[--rejectspam=r --spamexitcode=e]
 	[--qhpsi=q]
 	[--dkverify=dk|dkim|both|none]
@@ -1427,7 +1429,7 @@ Known values for OPTION are:
                    $QmailHOME appropriate links will be created in
                    $QmailHOME
   N              - No of Queues
-  I              - Numeral Prefix of first queue (i.e 1 for $QmailHOME/queue1)
+  I              - Numeral Prefix of first queue (i.e 1 for $QmailHOME/queue/queue1)
   M              - Minimum Disk Space to maintain in queue after which
                    Temporary error will be returned
   b              - Max Memory that Fetchmail can allocate
@@ -1439,8 +1441,8 @@ Known values for OPTION are:
   domainlimits   - Apply Domain Limits configured by vmoddomlimits(1)
   q              - Full path to an external virus scanner (like clamdscan)
   spamfilter     - Spamfilter program along with arguments
-  filter_fifo    - Capture additional status message from spamfilter in 
-                   spam logfile via filter_fifo
+  spam_fifo      - Capture additional status message from spamfilter in 
+                   spamlogger logfile via spam_fifo  
   r              - Mails get rejected as spam if exit status of spamfilter
                    equals the value of spamexitcode. r can have following values
                    0 - Do not reject SPAM mails
@@ -1519,7 +1521,7 @@ Known values for OPTION are:
   service_path - Path where supervise scripts have been installed
   queue_path   - Path where the queues are installed.
   N            - No of Queues
-  I            - Numeral Prefix of first queue (i.e 1 for $QmailHOME/queue1)
+  I            - Numeral Prefix of first queue (i.e 1 for $QmailHOME/queue/queue1)
 
 --inittab --servicedir=service_path
 
@@ -2449,11 +2451,19 @@ case "$dkverify_option" in
 	/bin/rm -f $conf_dir/DKSIGN $conf_dir/DKIMSIGN $conf_dir/DKVERIFY $conf_dir/DKIMVERIFY $conf_dir/DKQUEUE $conf_dir/DKIMQUEUE
 	echo > $conf_dir/DKIMVERIFY
 	echo "$QmailHOME/bin/qmail-dkim" > $conf_dir/QMAILQUEUE
+	if [ $no_multi -eq 1 ] ; then
+		echo "$QUEUE_BASE"/queue1 > $conf_dir/QUEUEDIR
+		echo "$QmailHOME/bin/qmail-queue" > $conf_dir/DKIMQUEUE
+	fi
 	;;
 	dk)
 	echo > $conf_dir/DKVERIFY
 	/bin/rm -f $conf_dir/DKSIGN $conf_dir/DKIMSIGN $conf_dir/DKVERIFY $conf_dir/DKIMVERIFY $conf_dir/DKQUEUE $conf_dir/DKIMQUEUE
 	echo "$QmailHOME/bin/qmail-dk" > $conf_dir/QMAILQUEUE
+	if [ $no_multi -eq 1 ] ; then
+		echo "$QUEUE_BASE"/queue1 > $conf_dir/QUEUEDIR
+		echo "$QmailHOME/bin/qmail-queue" > $conf_dir/DKQUEUE
+	fi
 	;;
 	both)
 	/bin/rm -f $conf_dir/DKSIGN $conf_dir/DKIMSIGN $conf_dir/DKVERIFY $conf_dir/DKIMVERIFY $conf_dir/DKQUEUE $conf_dir/DKIMQUEUE
@@ -2461,6 +2471,10 @@ case "$dkverify_option" in
 	echo > $conf_dir/DKVERIFY
 	echo "$QmailHOME/bin/qmail-dk" > $conf_dir/QMAILQUEUE
 	echo "$QmailHOME/bin/qmail-dkim" > $conf_dir/DKQUEUE
+	if [ $no_multi -eq 1 ] ; then
+		echo "$QUEUE_BASE"/queue1 > $conf_dir/QUEUEDIR
+		echo "$QmailHOME/bin/qmail-queue" > $conf_dir/DKIMQUEUE
+	fi
 	;;
 	none|*)
 	/bin/rm -f $conf_dir/DKSIGN $conf_dir/DKIMSIGN $conf_dir/DKVERIFY $conf_dir/DKIMVERIFY $conf_dir/DKQUEUE $conf_dir/DKIMQUEUE
@@ -2475,7 +2489,7 @@ case "$dkverify_option" in
 esac
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.224 2013-11-15 19:13:59+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.225 2013-11-22 11:31:13+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -2526,7 +2540,7 @@ if [ " $odmr" = " " ] ; then
 		/bin/mkdir -p "$DESTDIR"$SERVICEDIR/qmail-spamlog/log
 		(
 		echo "#!/bin/sh"
-		echo "# \$Id: svctool.in,v 2.224 2013-11-15 19:13:59+05:30 Cprogrammer Exp mbhangui $"
+		echo "# \$Id: svctool.in,v 2.225 2013-11-22 11:31:13+05:30 Cprogrammer Exp mbhangui $"
 		echo "# $prog_args"
 		echo ""
 		echo "LOGFILTER=\`cat $SERVICEDIR/qmail-smtpd.$tag/variables/LOGFILTER\`"
@@ -2547,7 +2561,7 @@ if [ " $odmr" = " " ] ; then
 		#qmail-spamlog log script
 		(
 		echo "#!/bin/sh"
-		echo "# \$Id: svctool.in,v 2.224 2013-11-15 19:13:59+05:30 Cprogrammer Exp mbhangui $"
+		echo "# \$Id: svctool.in,v 2.225 2013-11-22 11:31:13+05:30 Cprogrammer Exp mbhangui $"
 		echo "# generated on $host on `date`"
 		echo "# $prog_args"
 		echo ""
@@ -2565,7 +2579,7 @@ if [ ! -d $LOGDIR ] ; then
 fi
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.224 2013-11-15 19:13:59+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.225 2013-11-22 11:31:13+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -2826,7 +2840,7 @@ else
 fi
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.224 2013-11-15 19:13:59+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.225 2013-11-22 11:31:13+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -2864,7 +2878,7 @@ if [ ! " $logfilter" = " " -a ! -d "$DESTDIR"$SERVICEDIR/qmail-spamlog/run ] ; t
 	/bin/mkdir -p "$DESTDIR"$SERVICEDIR/qmail-spamlog/log
 	(
 	echo "#!/bin/sh"
-	echo "# \$Id: svctool.in,v 2.224 2013-11-15 19:13:59+05:30 Cprogrammer Exp mbhangui $"
+	echo "# \$Id: svctool.in,v 2.225 2013-11-22 11:31:13+05:30 Cprogrammer Exp mbhangui $"
 	echo "# $prog_args"
 	echo ""
 	echo "LOGFILTER=\`cat $SERVICEDIR/qmail-$type.$tag/variables/LOGFILTER\`"
@@ -2885,7 +2899,7 @@ if [ ! " $logfilter" = " " -a ! -d "$DESTDIR"$SERVICEDIR/qmail-spamlog/run ] ; t
 	#qmail-spamlog log script
 	(
 	echo "#!/bin/sh"
-	echo "# \$Id: svctool.in,v 2.224 2013-11-15 19:13:59+05:30 Cprogrammer Exp mbhangui $"
+	echo "# \$Id: svctool.in,v 2.225 2013-11-22 11:31:13+05:30 Cprogrammer Exp mbhangui $"
 	echo "# generated on $host on `date`"
 	echo "# $prog_args"
 	echo ""
@@ -2902,7 +2916,7 @@ if [ ! -d $LOGDIR ] ; then
 fi
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.224 2013-11-15 19:13:59+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.225 2013-11-22 11:31:13+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -2973,7 +2987,7 @@ fi
 
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.224 2013-11-15 19:13:59+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.225 2013-11-22 11:31:13+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -2996,7 +3010,7 @@ if [ ! -d $LOGDIR ] ; then
 fi
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.224 2013-11-15 19:13:59+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.225 2013-11-22 11:31:13+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -3081,7 +3095,7 @@ else
 fi
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.224 2013-11-15 19:13:59+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.225 2013-11-22 11:31:13+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -3136,7 +3150,7 @@ fi
 # qmail-imapd log script
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.224 2013-11-15 19:13:59+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.225 2013-11-22 11:31:13+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -3438,7 +3452,7 @@ else
 fi
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.224 2013-11-15 19:13:59+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.225 2013-11-22 11:31:13+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -3492,7 +3506,7 @@ fi
 # qmail-pop3d log script
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.224 2013-11-15 19:13:59+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.225 2013-11-22 11:31:13+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -3702,7 +3716,7 @@ fi
 echo 1 > $conf_dir/MYSQL_OPT_RECONNECT
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.224 2013-11-15 19:13:59+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.225 2013-11-22 11:31:13+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -3730,7 +3744,7 @@ fi
 # indisrvr log script
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.224 2013-11-15 19:13:59+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.225 2013-11-22 11:31:13+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -3757,7 +3771,7 @@ conf_dir="$DESTDIR"$SERVICEDIR/qscanq/variables
 # qscanq script
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.224 2013-11-15 19:13:59+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.225 2013-11-22 11:31:13+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -3779,7 +3793,7 @@ fi
 # qscanq log script
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.224 2013-11-15 19:13:59+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.225 2013-11-22 11:31:13+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -3796,7 +3810,7 @@ conf_dir="$DESTDIR"$SERVICEDIR/clamd/variables
 # clamd script
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.224 2013-11-15 19:13:59+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.225 2013-11-22 11:31:13+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -3833,7 +3847,7 @@ fi
 # clamd log script
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.224 2013-11-15 19:13:59+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.225 2013-11-22 11:31:13+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -3848,7 +3862,7 @@ conf_dir="$DESTDIR"$SERVICEDIR/freshclam/variables
 # freshclam script
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.224 2013-11-15 19:13:59+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.225 2013-11-22 11:31:13+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -3876,7 +3890,7 @@ fi
 # freshclam log script
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.224 2013-11-15 19:13:59+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.225 2013-11-22 11:31:13+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -3905,7 +3919,7 @@ conf_dir="$DESTDIR"$SERVICEDIR/pwdlookup/variables
 mkdir -p $conf_dir
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.224 2013-11-15 19:13:59+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.225 2013-11-22 11:31:13+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -3921,7 +3935,7 @@ fi
 # pwdlookup log script
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.224 2013-11-15 19:13:59+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.225 2013-11-22 11:31:13+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -4024,7 +4038,7 @@ echo "inlookup" > $conf_dir/MYSQL_READ_DEFAULT_GROUP
 echo 1 > $conf_dir/MYSQL_OPT_RECONNECT
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.224 2013-11-15 19:13:59+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.225 2013-11-22 11:31:13+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -4040,7 +4054,7 @@ fi
 # inlookup log script
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.224 2013-11-15 19:13:59+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.225 2013-11-22 11:31:13+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -4083,7 +4097,7 @@ fi
 if [ ! -d "$DESTDIR"$databasedir/data ] ; then
 	if ( mkdir -p "$DESTDIR"$databasedir/data && mkdir -p "$DESTDIR"$databasedir/logs ) ; then
 		(
-		echo "# \$Id: svctool.in,v 2.224 2013-11-15 19:13:59+05:30 Cprogrammer Exp mbhangui $"
+		echo "# \$Id: svctool.in,v 2.225 2013-11-22 11:31:13+05:30 Cprogrammer Exp mbhangui $"
 		echo "# generated on $host on `date`"
 		echo ""
 		if [ $use_stdout -eq 1 ] ; then
@@ -4159,7 +4173,7 @@ mkdir -p "$DESTDIR"$SERVICEDIR/mysql.$port/variables
 (
 mysql_version=`$mysqlPrefix/bin/mysql_config --version`
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.224 2013-11-15 19:13:59+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.225 2013-11-22 11:31:13+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -4216,7 +4230,7 @@ echo "--pid-file=\$PIDFILE 2>&1"
 
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.224 2013-11-15 19:13:59+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.225 2013-11-22 11:31:13+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -4233,7 +4247,7 @@ fi
 # mysql log script
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.224 2013-11-15 19:13:59+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.225 2013-11-22 11:31:13+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -4849,7 +4863,7 @@ fi
 # svscan log script
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.224 2013-11-15 19:13:59+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.225 2013-11-22 11:31:13+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -4974,7 +4988,7 @@ case "$dkverify_option" in
 esac
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.224 2013-11-15 19:13:59+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.225 2013-11-22 11:31:13+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -4996,7 +5010,7 @@ fi
 # fetchmail log script
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.224 2013-11-15 19:13:59+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.225 2013-11-22 11:31:13+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -5071,7 +5085,7 @@ else
 fi
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.224 2013-11-15 19:13:59+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.225 2013-11-22 11:31:13+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -5112,7 +5126,7 @@ fi
 # qmail-poppass log script
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.224 2013-11-15 19:13:59+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.225 2013-11-22 11:31:13+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -5238,11 +5252,6 @@ if [ ! " $overquota_mailsize" = " " ] ; then
 else
 	> $conf_dir/OVERQUOTA_MAILSIZE
 fi
-if [ ! " $logfilter" = " " ] ; then
-	echo  $logfilter > $conf_dir/LOGFILTER
-else
-	> $conf_dir/LOGFILTER
-fi
 if [ " $usefsync" = " " ] ; then
 	> $conf_dir/USE_FSYNC
 else
@@ -5289,6 +5298,11 @@ echo "startup.so" > $conf_dir/START_PLUGIN
 > $conf_dir/SPAMFILTER
 > $conf_dir/REJECTSPAM
 > $conf_dir/SPAMEXITCODE
+if [ ! " $logfilter" = " " ] ; then
+	echo  $logfilter > $conf_dir/LOGFILTER
+else
+	> $conf_dir/LOGFILTER
+fi
 case "$dksign_option" in
 	dkim)
 	/bin/rm -f $conf_dir/DKSIGN $conf_dir/DKIMSIGN $conf_dir/DKVERIFY $conf_dir/DKIMVERIFY $conf_dir/DKQUEUE $conf_dir/DKIMQUEUE
@@ -5317,7 +5331,7 @@ case "$dksign_option" in
 esac
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.224 2013-11-15 19:13:59+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.225 2013-11-22 11:31:13+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -5334,7 +5348,7 @@ fi
 mkdir -p "$DESTDIR"$SERVICEDIR/qmail-send."$tag"/log
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.224 2013-11-15 19:13:59+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.225 2013-11-22 11:31:13+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -7467,7 +7481,7 @@ while test $# -gt 0; do
 	;;
 
     --version)
-	echo "\$Id: svctool.in,v 2.224 2013-11-15 19:13:59+05:30 Cprogrammer Exp mbhangui $"
+	echo "\$Id: svctool.in,v 2.225 2013-11-22 11:31:13+05:30 Cprogrammer Exp mbhangui $"
 	prog_args=""
 	exit 0
 	;;
