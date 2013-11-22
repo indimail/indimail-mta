@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail.spec.in,v 2.270 2013-11-15 19:12:40+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 2.271 2013-11-22 16:42:01+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %define _unpackaged_files_terminate_build 1
 
@@ -790,11 +790,9 @@ fi
 if [ %noclamav -eq 0 ] ; then
 	if [ -f %{buildroot}%{_prefix}/etc/clamd.conf ] ; then
 		%{__rm} -f %{buildroot}%{_prefix}/etc/clamd.conf
-		%{__rm} -f %{buildroot}%{_prefix}/etc/clamd.conf.sample
 	fi
-	if [ -f %{buildroot}%{_prefix}/etc/freshclam.conf ] ; then
+	if [ -f %{buildroot}%{_prefix}/etc/freshclam ] ; then
 		%{__rm} -f %{buildroot}%{_prefix}/etc/freshclam.conf
-		%{__rm} -f %{buildroot}%{_prefix}/etc/freshclam.conf.sample
 	fi
 	if [ -d %{buildroot}%{_prefix}/var ] ; then
 		/bin/rmdir %{buildroot}%{_prefix}/var
@@ -1673,6 +1671,8 @@ fi
 %attr(664,qscand,qscand) %config(noreplace) %{_prefix}/share/clamd/main.cvd
 %attr(664,qscand,qscand) %config(noreplace) %{_prefix}/share/clamd/daily.cvd
 %endif
+%attr(644,root,root)                        %{_prefix}/etc/clamd.conf.sample
+%attr(644,root,root)                        %{_prefix}/etc/freshclam.conf.sample
 %attr(644,root,root)                        %{_libdir}/pkgconfig/libclamav.pc
 %endif
 
