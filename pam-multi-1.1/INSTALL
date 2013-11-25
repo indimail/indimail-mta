@@ -13,7 +13,7 @@ Basic Installation
 ==================
 
 The most common option would be
- ./configure --with-moduledir=/lib/security --enable-default-domain=indimail.org \
+ ./configure --enable-moduledir=/lib/security --enable-default-domain=indimail.org \
    --prefix=/var/indimail
 
 To INSTALL carry out the following steps
