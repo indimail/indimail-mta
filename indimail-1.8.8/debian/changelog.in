@@ -1,18 +1,25 @@
 indimail (@version@-1) unstable; urgency=low
 
-  * autoresponder.c - Added description for -T option
-  * dkim.c - do not skip X-Mailer headers
-  * qmail-dkim.c - do not skip X-Mailer headers
-  * BUG - tcpserver.c - wrong variable used for ip address causing fnrules to fail in ip address matching
-  * made diskquota, maxmsgcount, defaultquota, defaultmaxmsgcount in vlimits unsigned
-  * indisrvr.c - removed pidfile
-  * dns.c - added DISABLE_CNAME_LOOKUP for qmail-remote
-  * new program rrt for handling Return Receipts
-  * qmail-remote - set ONSUCCESS_REMOTE, ONFAILURE_REMOTE, ONTRANSIENT_REMOTE selectively in run_script
-  * qmail-remote - fix SIGSEGV in run_script
-  * qmail-remote - set [S|Q]MTPTEXT, [S|Q]MTPCODE for transient errors
-  * qmail-remote - fix smtptext during TLS
-  * FORCE_TLS functionality in qmail-smtpd
-  * Upgraded to fetchmail 6.3.24
+  * inlookup - Issue sighup to reload database
+  * send sighup to qmail-send through post handle for vdeldomain, vaddaliasdomain, vrenamedomain
+  * compact ipv6 and CIDR notation support in tcpserver rules file
+  * inverse IPv6 nibble format for RBL and anti-RBL lookups in rblsmtpd
+  * ipv6 support for spf
+  * fixed STARTTLS plaintext command injection vulnerability in qmail-smtpd
+  * BUG - corrected location of private key when % sign is removed in qmail-dk, qmail-dkim
+  * fixed syntax errors and private key lookup in dk-filter
+  * Use SURBLQUEUE in surblqueue to change default queue program from qmail-multi 
+  * Make IT_MAX_ATOM_SIZE configurable using env variable in courier-imap
+  * bypass tls if clientcert.pem is missing in qmail-remote
+  * fix setting of SMTPTEXT for success and failures in qmail-remote
+  * validity checks in qmail-qmtpd to ensure that input actually conforms to the netstring protocol.
+  * domain based delivery rate limit code in spawn-filter. New command drate to control delivery rate to specific domains
+  * dk-filter - sign as default if both DKSIGN and DKIMSIGN are not defined
+  * qmail-remote - try next mx on helo failure (problem with broken yahoo mx servers) by setting env variable TRY_NEXT_MX_HELO_FAIL
+  * qmail-dk, qmail-dkim - Use RELAYCLIENT_NODKVERIFY, RELAYCLIENT_NODKIMVERIFY to turn off verification when both DK[IM]VERIFY and RELAYCLIENT are set
+  * concurrencylocal, concurrencyremote can be configured queue specific
+  * display the associated queue directory in logs during startup of qmail-send, qmail-todo
+  * domainqueue control files to provide ability to specify specific queues for specific domains
+  * added getopt style arguments to inquerytest
 
- -- Manvendra Bhangui <manvendra@indimail.org>  Thu, 22 Jan 2013 18:38:40 +0530
+ -- Manvendra Bhangui <manvendra@indimail.org>  Fri, 22 Nov 2013 21:10:19 +0530
