@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail.spec.in,v 2.271 2013-11-22 16:42:01+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 2.272 2013-11-25 14:48:38+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %define _unpackaged_files_terminate_build 1
 
@@ -2297,7 +2297,7 @@ fi
 %define qmqp_soft_mem 104857600
 %define imap_pop3_mem 524288000
 %define imapspop3_mem 524288000
-%define poppass_mem   52428800
+%define poppass_mem   104857600
 %else
 %define fetchmail_mem 72428800
 %define smtp_soft_mem 52428800
@@ -2305,7 +2305,7 @@ fi
 %define qmqp_soft_mem 52428800
 %define imap_pop3_mem 52428800
 %define imapspop3_mem 52428800
-%define poppass_mem   10485760
+%define poppass_mem   52428800
 %endif
 for port in 465 25 587
 do
@@ -2590,6 +2590,7 @@ if [ -x /usr/sbin/selinuxenabled ] ; then
 	/usr/sbin/selinuxenabled
 	if [ $? -eq 0 ] ; then
 		/usr/sbin/semanage fcontext -a -t mysqld_db_t "%{_prefix}/mysqldb(/.*)?"
+		/usr/sbin/restorecon -Rv %{_prefix}/mysqldb/data
 	fi
 fi
 
