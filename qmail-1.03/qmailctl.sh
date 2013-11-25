@@ -1,16 +1,19 @@
 # chkconfig: 345 14 91
-# description: Starts qmail system and associated services
+# description: Starts indimail system and associated services
 ### BEGIN INIT INFO
 # Provides:          indimail
 # Required-Start:    $network
 # Required-Stop:
-# Default-Start:     3 4 5
+# Default-Start:     2 3 4 5
 # Default-Stop:      0 1 6
 # Description:       Starts indimail system and associated services
 # Short-Description: Start/Stop indimail
 ### END INIT INFO
 
 # $Log: qmailctl.sh,v $
+# Revision 1.41  2013-11-25 17:09:54+05:30  Cprogrammer
+# updated for Debian runlevel 2
+#
 # Revision 1.40  2013-05-18 00:07:11+05:30  Cprogrammer
 # removed create_svscan command
 #
