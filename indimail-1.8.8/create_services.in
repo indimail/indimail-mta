@@ -1,5 +1,8 @@
 #!/bin/sh
 # $Log: create_services.in,v $
+# Revision 2.55  2013-11-25 14:48:12+05:30  Cprogrammer
+# increased soft mem for poppass service
+#
 # Revision 2.54  2013-11-15 19:12:25+05:30  Cprogrammer
 # added --dnscheck
 #
@@ -185,7 +188,7 @@ indimaildir=@indimaildir@
 # End USER Configuration OPTIONS
 #
 
-# $Id: create_services.in,v 2.54 2013-11-15 19:12:25+05:30 Cprogrammer Exp mbhangui $
+# $Id: create_services.in,v 2.55 2013-11-25 14:48:12+05:30 Cprogrammer Exp mbhangui $
 
 usage()
 {
@@ -341,7 +344,7 @@ if [ " $$a_arch" = " x86_64" ] ; then
 	qmqp_soft_mem=104857600
 	imap_pop3_mem=524288000
 	imapspop3_mem=524288000
-	poppass_mem=52428800
+	poppass_mem=104857600
 else
 	fetchmail_mem=72428800
 	smtp_soft_mem=52428800
@@ -349,7 +352,7 @@ else
 	qmqp_soft_mem=52428800
 	imap_pop3_mem=52428800
 	imapspop3_mem=52428800
-	poppass_mem=10485760
+	poppass_mem =52428800
 fi
 #
 # SMTP
