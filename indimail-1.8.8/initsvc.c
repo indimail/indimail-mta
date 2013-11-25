@@ -1,5 +1,8 @@
 /*
  * $Log: initsvc.c,v $
+ * Revision 2.18  2013-11-25 14:48:58+05:30  Cprogrammer
+ * run indimail at runlevel 2 on debian
+ *
  * Revision 2.17  2011-08-05 14:41:21+05:30  Cprogrammer
  * another attempt to fix problem with virtual machines
  *
@@ -63,7 +66,7 @@
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: initsvc.c,v 2.17 2011-08-05 14:41:21+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: initsvc.c,v 2.18 2013-11-25 14:48:58+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #define SV_ON    1
@@ -178,7 +181,7 @@ main(int argc, char **argv)
 	char           *device = "/dev/console";
 	char           *qmaildir, *ptr, *jobfile = 0, *print_cmd = 0, *jobdir;
 	char            buffer[2048];
-	int             flag, found, colonCount, fd;
+	int             flag, found, colonCount, fd, debian_version;
 	long            pos;
 	static char    *initargs[3] = { "/sbin/init", "q", 0 };
 
@@ -354,6 +357,7 @@ main(int argc, char **argv)
 		return (1);
 	} /*- if (!access("/bin/launchctl", X_OK)) */
 #endif
+	debian_version = !access("/etc/debian_release", F_OK);
 	if (!(fp = fopen("/etc/inittab", "r")))
 	{
 		perror("/etc/inittab");
@@ -366,7 +370,8 @@ main(int argc, char **argv)
 	{
 		if (!fgets(buffer, sizeof(buffer) - 2, fp))
 			break;
-		if ((ptr = strstr(buffer, "SV:345:")) && strstr(buffer, "svscanboot"))
+		if ((ptr = strstr(buffer, debian_version ? "SV:2345:" : "SV:345:")) 
+			&& strstr(buffer, "svscanboot"))
 		{
 			if(flag == SV_STAT)
 			{
@@ -415,7 +420,8 @@ main(int argc, char **argv)
 		}
 		if (!fgets(buffer, sizeof(buffer) - 2, fp))
 			break;
-		if (strstr(buffer, "SV:345:") && strstr(buffer, "svscanboot"))
+		if (strstr(buffer, debian_version ? "SV:2345:" : "SV:345:")
+				&& strstr(buffer, "svscanboot"))
 			break;
 	}
 	if (fseek(fp, pos, SEEK_SET) == -1)
@@ -439,7 +445,8 @@ main(int argc, char **argv)
 	/*
 	 * SV:345:respawn:/var/qmail/bin/svscanboot <>/dev/console 2<>/dev/console
 	 */
-	snprintf(buffer, sizeof(buffer), "SV:345:%s:%s/bin/svscanboot <>%s 2<>%s",
+	snprintf(buffer, sizeof(buffer), debian_version ?  
+			"SV:2345:%s:%s/bin/svscanboot <>%s 2<>%s" : "SV:345:%s:%s/bin/svscanboot <>%s 2<>%s",
 			 flag == SV_ON ? "respawn" : "off", qmaildir, device, device);
 	fprintf(fp, "%s\n", buffer);
 	if (fclose(fp))
