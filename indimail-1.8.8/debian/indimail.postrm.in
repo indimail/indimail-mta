@@ -162,6 +162,7 @@ if [ " $1" = " purge" ] ; then
 
 	if [ $noclamav -eq 0 ] ; then
 		${rm} -f ${prefix}/etc/clamd.conf ${prefix}/etc/freshclam.conf
+		${rm} -f ${prefix}/etc/clamd.conf.sample ${prefix}/etc/freshclam.conf.sample
 	fi
 	if [ $nonssd -eq 0 ] ; then
 		${rm} -f ${prefix}/etc/nssd.conf
