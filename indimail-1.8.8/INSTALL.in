@@ -211,7 +211,7 @@ I usually prefer to run privileged commands like this (so that I don't get fond 
                                . fortune-1.1         (8.4  Mb)
                                . courier-imap-4.10.0 (75   Mb)
                                . bogofilter-1.2.2    (11.6 Mb)
-                               . clamav-0.97.8      (600  Mb)
+                               . clamav-0.98         (600  Mb)
                                . fetchmail-6.3.26   (10.5 Mb)
                                . iwebadmin-1.2      (3.0  Mb)
                                ------------------------------
@@ -389,7 +389,7 @@ the installation.
     by doing ./configure <same_parameters_as_earlier_install> ; make ; make install-strip
 
     ##### STEP 3  ##### Install libsrs2-1.0.18 ################
-	Install libsrs2-1.0.18 (libsrs2-1.0.18.tar.gz MD5 5a70a83818781551a7bfba31ffc97f8b
+    Install libsrs2-1.0.18 (libsrs2-1.0.18.tar.gz MD5 5a70a83818781551a7bfba31ffc97f8b
     current working directory /home/local/src
     Download the libsrs2 package. The latest tested libsrs2 package is
     libsrs2-1.0.18.tar.gz
@@ -629,14 +629,14 @@ the installation.
     Then do ./configure <same_parameters_as_earlier_install> ; make ; make install-strip
 
     ##### STEP 8  ##### Virus Scanner #########################
-    Install clamav MD5 ac52bcbad3ea72eac08fedb9772f648b
+    Install clamav MD5 ca0b8c930efcb8be1d47592d268006c5
     current working directory /home/local/src
-    Download clamav package. The latest tested clamav package tested is clamav-0.97.8.tar.gz.
+    Download clamav package. The latest tested clamav package tested is clamav-0.98.tar.gz.
 
-    % wget http://downloads.sourceforge.net/clamav/clamav-0.97.8.tar.gz
-    % gunzip -c clamav-0.97.8.tar.gz | tar xf -
-    % gunzip -c indimail-@version@/patches/clamav-0.97.8.patch.gz | patch -p0
-    % cd clamav-0.97.8
+    % wget http://downloads.sourceforge.net/clamav/clamav-0.98.tar.gz
+    % gunzip -c clamav-0.98.tar.gz | tar xf -
+    % gunzip -c indimail-1.8.8/patches/clamav-0.98.patch.gz | patch -p0
+    % cd clamav-0.98
     % ./configure --prefix=@indimaildir@ --sysconfdir=@indimaildir@/etc \
         --with-dbdir=@indimaildir@/share/clamd \
         --libexecdir=@indimaildir@/libexec \
