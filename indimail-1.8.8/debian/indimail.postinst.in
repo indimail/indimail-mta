@@ -217,22 +217,22 @@ do
 		if [ $noclamav -eq 0 ] ; then
 			${prefix}/sbin/svctool --smtp=$port --servicedir=$servicedir \
 				--qbase=${qbase} --qcount=${qcount} --qstart=1 \
-				--query-cache --password-cache \
+				--query-cache --dnscheck --password-cache \
 				--cntrldir=control --localip=0 --maxdaemons=75 --maxperip=25 --persistdb \
 				--starttls --fsync --syncdir --memory=$smtp_soft_mem \
 				--chkrecipient --chkrelay --masquerade \
-				--min-free=52428800 --content-filter --virus-filter \
+				--min-free=52428800 --content-filter \
 				--qhpsi="${prefix}/bin/clamdscan %s --quiet --no-summary" \
 				--spamfilter="${prefix}/bin/bogofilter -p -d ${prefix}/etc" \
 				--logfilter=/tmp/spamfifo --rejectspam=0 --spamexitcode=0 \
 				--dmasquerade \
 				--dkverify=$ver_opt \
-				--dksign=$sign_opt --private_key=${prefix}/control/domainkeys/indimail \
+				--dksign=$sign_opt --private_key=${prefix}/control/domainkeys/%/default \
 				$extra_opt
 		else
 			${prefix}/sbin/svctool --smtp=$port --servicedir=$servicedir \
 				--qbase=${qbase} --qcount=${qcount} --qstart=1 \
-				--query-cache --password-cache \
+				--query-cache --dnscheck --password-cache \
 				--cntrldir=control --localip=0 --maxdaemons=75 --maxperip=25 --persistdb \
 				--starttls --fsync --syncdir --memory=$smtp_soft_mem \
 				--chkrecipient --chkrelay --masquerade \
@@ -241,34 +241,34 @@ do
 				--logfilter=/tmp/spamfifo --rejectspam=0 --spamexitcode=0 \
 				--dmasquerade \
 				--dkverify=both \
-				--dksign=both --private_key=${prefix}/control/domainkeys/indimail \
+				--dksign=both --private_key=${prefix}/control/domainkeys/%/default \
 				$extra_opt
 		fi
 	else
 		if [ $noclamav -eq 0 ] ; then
 			${prefix}/sbin/svctool --smtp=$port --servicedir=$servicedir \
 				--qbase=${qbase} --qcount=${qcount} --qstart=1 \
-				--query-cache --password-cache \
+				--query-cache --dnscheck --password-cache \
 				--cntrldir=control --localip=0 --maxdaemons=75 --maxperip=25 --persistdb \
 				--starttls --fsync --syncdir --memory=$smtp_soft_mem \
 				--chkrecipient --chkrelay --masquerade \
-				--min-free=52428800 --content-filter --virus-filter \
+				--min-free=52428800 --content-filter \
 				--qhpsi="${prefix}/bin/clamdscan %s --quiet --no-summary" \
 				--dmasquerade \
 				--dkverify=both \
-				--dksign=both --private_key=${prefix}/control/domainkeys/indimail \
+				--dksign=both --private_key=${prefix}/control/domainkeys/%/default \
 				$extra_opt
 		else
 			${prefix}/sbin/svctool --smtp=$port --servicedir=$servicedir \
 				--qbase=${qbase} --qcount=${qcount} --qstart=1 \
-				--query-cache --password-cache \
+				--query-cache --dnscheck --password-cache \
 				--cntrldir=control --localip=0 --maxdaemons=75 --maxperip=25 --persistdb \
 				--starttls --fsync --syncdir --memory=$smtp_soft_mem \
 				--chkrecipient --chkrelay --masquerade \
 				--min-free=52428800 --content-filter --virus-filter \
 				--dmasquerade \
 				--dkverify=both \
-				--dksign=both --private_key=${prefix}/control/domainkeys/indimail \
+				--dksign=both --private_key=${prefix}/control/domainkeys/%/default \
 				$extra_opt
 		fi
 	fi
@@ -410,8 +410,8 @@ TVoIARMAA
 TVouARsAA
 TVrQAT8AA
 # .ZIPfile signature seen in SoBig.E and mydoom:
-UEsDBBQAA
-UEsDBAoAAA
+#UEsDBBQAA
+#UEsDBAoAAA
 # .GIF file found in a previous Microsoft virus making the rounds.
 R0lGODlhaAA7APcAAP///+rp6puSp6GZrDUjUUc6Zn53mFJMdbGvvVtXh2xre8bF1x8cU4yLprOy
 EOFUU
