@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-rm.c,v $
+ * Revision 1.13  2013-12-04 15:45:47+05:30  Cprogrammer
+ * added q option in getopt
+ *
  * Revision 1.12  2011-11-06 22:53:08+05:30  Cprogrammer
  * corrected usage of strtoul()
  *
@@ -183,7 +186,7 @@ char           *mk_hashpath(char *, int);
 char           *mk_newpath(char *, int);
 int             rename(const char *, const char *);
 
-const char      cvsrid[] = "$Id: qmail-rm.c,v 1.12 2011-11-06 22:53:08+05:30 Cprogrammer Stab mbhangui $";
+const char      cvsrid[] = "$Id: qmail-rm.c,v 1.13 2013-12-04 15:45:47+05:30 Cprogrammer Exp mbhangui $";
 
 /*- globals */
 extern const char *__progname;
@@ -328,7 +331,7 @@ main(int argc, char **argv)
 	if (argc < 2)
 		usage();
 	conf_split = auto_split;
-	while ((ch = getopt(argc, argv, "eirvh?n:p:s:y:X:x:")) != -1)
+	while ((ch = getopt(argc, argv, "eirvh?n:p:q:s:y:X:x:")) != -1)
 	{
 		switch (ch)
 		{
@@ -1086,7 +1089,7 @@ digits(unsigned long num)
 void
 getversion_qmail_rm_c()
 {
-	static char    *x = "$Id: qmail-rm.c,v 1.12 2011-11-06 22:53:08+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: qmail-rm.c,v 1.13 2013-12-04 15:45:47+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
