@@ -1,5 +1,8 @@
 /*
  * $Log: base64sub.c,v $
+ * Revision 1.7  2013-12-05 18:10:11+05:30  Cprogrammer
+ * removed substdio.h header
+ *
  * Revision 1.6  2010-03-03 09:33:16+05:30  Cprogrammer
  * renamed base64 to base64sub
  *
@@ -18,7 +21,6 @@
  */
 #include "base64.h"
 #include "stralloc.h"
-#include "substdio.h"
 #include "str.h"
 
 static char    *b64alpha = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
@@ -164,7 +166,7 @@ b64encode(in, out)
 void
 getversion_base64sub_c()
 {
-	static char    *x = "$Id: base64sub.c,v 1.6 2010-03-03 09:33:16+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: base64sub.c,v 1.7 2013-12-05 18:10:11+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
