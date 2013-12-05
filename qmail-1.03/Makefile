@@ -205,7 +205,7 @@ compile auto_usera.c
 	./compile auto_usera.c
 
 base64sub.o: \
-compile base64sub.c base64.h stralloc.h substdio.h str.h
+compile base64sub.c base64.h stralloc.h str.h
 	./compile base64sub.c
 
 md5c.o: compile md5c.c md5.h global.h uint32.h
@@ -1234,7 +1234,7 @@ run-cleanq.9
 	> run-cleanq.8
 
 it: \
-qmail-local qmail-lspawn qmail-getpw qmail-remote qmail-rspawn \
+qaes qmail-local qmail-lspawn qmail-getpw qmail-remote qmail-rspawn \
 qmail-clean qmail-send qmail-start qmail-daemon splogger qmail-multi qmail-queue qmail-inject \
 qmail-dk qmail-dkim predate datemail mailsubj qmail-upq qmail-showctl qmail-newu spawn-filter \
 qmail-pw2u qmail-qread qmail-tcpto qmail-tcpok qmail-cat qmail-poppass srsfilter \
@@ -4016,6 +4016,21 @@ byte_chr.o getln.o getln2.o alloc.o alloc_re.o stralloc.a substdio.a
 qmail-cat.o: \
 compile qmail-cat.c substdio.h error.h stralloc.h getln.h
 	./compile qmail-cat.c
+qaes: \
+load qaes.o str_len.o str_diffn.o base64sub.o \
+stralloc_opyb.o stralloc_eady.o byte_copy.o stralloc_opys.o \
+stralloc_catb.o alloc.o alloc_re.o byte_chr.o byte_cr.o \
+substdio.o substdo.o substdi.o subfderr.o fmt_ulong.o scan_ulong.o \
+sgetopt.o subgetopt.o getln.o getln2.o error.o error_str.o
+	./load qaes str_len.o str_diffn.o base64sub.o \
+	stralloc_opyb.o stralloc_eady.o byte_copy.o stralloc_opys.o \
+	stralloc_catb.o alloc.o alloc_re.o byte_chr.o byte_cr.o \
+	substdio.o substdo.o substdi.o subfderr.o fmt_ulong.o scan_ulong.o \
+	sgetopt.o subgetopt.o getln.o getln2.o error.o error_str.o -lcrypto
+
+qaes.o: \
+compile qaes.c substdio.h str.h stralloc.h base64.h \
+getln.h sgetopt.h error.h fmt.h
 
 qarf: \
 load  qarf.o error.o substdi.o substdo.o stralloc_opys.o stralloc_opyb.o \
