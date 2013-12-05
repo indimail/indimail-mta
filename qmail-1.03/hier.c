@@ -1,5 +1,8 @@
 /*
  * $Log: hier.c,v $
+ * Revision 1.180  2013-12-05 18:09:02+05:30  Cprogrammer
+ * added qaes
+ *
  * Revision 1.179  2013-09-03 22:58:04+05:30  Cprogrammer
  * added drate man page and cidr
  *
@@ -695,6 +698,7 @@ hier(inst_dir)
 	c(auto_qmail_home, "bin", "maildirsmtp", auto_uido, auto_gidq, 0555);
 	c(auto_qmail_home, "bin", "maildirserial", auto_uido, auto_gidq, 0555);
 	c(auto_qmail_home, "bin", "qarf", auto_uido, auto_gidq, 0555);
+	c(auto_qmail_home, "bin", "qaes", auto_uido, auto_gidq, 0555);
 	c(auto_qmail_home, "bin", "qnotify", auto_uido, auto_gidq, 0555);
 	c(auto_qmail_home, "bin", "rrt", auto_uido, auto_gidq, 0555);
 
@@ -989,6 +993,7 @@ hier(inst_dir)
 	c(auto_qmail_home, "man/man1", "cdbmake.1", auto_uido, auto_gidq, 0444);
 	c(auto_qmail_home, "man/man1", "cdbdump.1", auto_uido, auto_gidq, 0444);
 	c(auto_qmail_home, "man/man1", "qarf.1", auto_uido, auto_gidq, 0444);
+	c(auto_qmail_home, "man/man1", "qaes.1", auto_uido, auto_gidq, 0444);
 	c(auto_qmail_home, "man/man1", "qnotify.1", auto_uido, auto_gidq, 0444);
 	c(auto_qmail_home, "man/man1", "rrt.1", auto_uido, auto_gidq, 0444);
 	c(auto_qmail_home, "man/man1", "qmail-rm.1", auto_uido, auto_gidq, 0444);
@@ -1672,7 +1677,7 @@ _hier(inst_dir)
 void
 getversion_install_big_c()
 {
-	static char    *x = "$Id: hier.c,v 1.179 2013-09-03 22:58:04+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: hier.c,v 1.180 2013-12-05 18:09:02+05:30 Cprogrammer Exp mbhangui $";
 
 #ifdef INDIMAIL
 	if (x)
