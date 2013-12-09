@@ -1,5 +1,8 @@
 /*
  * $Log: drate.c,v $
+ * Revision 1.4  2013-12-09 13:08:38+05:30  Cprogrammer
+ * make the domain name as the file for storing delivery rate information
+ *
  * Revision 1.3  2013-09-06 20:08:20+05:30  Cprogrammer
  * use the current time for calculating rate
  *
@@ -352,7 +355,7 @@ new:
 void
 getversion_drate_c()
 {
-	static char    *x = "$Id: drate.c,v 1.3 2013-09-06 20:08:20+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: drate.c,v 1.4 2013-12-09 13:08:38+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 	if (x)
