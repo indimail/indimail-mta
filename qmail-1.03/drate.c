@@ -11,6 +11,7 @@
  *
  */
 #include <unistd.h>
+#include <fcntl.h>
 #include "substdio.h"
 #include "error.h"
 #include "fmt.h"
@@ -26,7 +27,7 @@
 #include "scan.h"
 #include "str.h"
 #include "myctime.h"
-#include "auto_qmail.h"
+#include "auto_uids.h"
 
 #define FATAL     "drate: fatal: "
 
@@ -35,7 +36,9 @@ static char     ssoutbuf[512];
 static substdio ssout = SUBSTDIO_FDBUF(write, 1, ssoutbuf, sizeof ssoutbuf);
 static char     sserrbuf[512];
 static substdio sserr = SUBSTDIO_FDBUF(write, 2, sserrbuf, sizeof(sserrbuf));
-char           *usage = "usage: drate [-scR] -d domain -r deliveryRate -f filename\n";
+int             qmailr_uid;
+int             qmail_gid;
+char           *usage = "usage: drate [-scR] -d domain -r deliveryRate -D ratelimit_dir\n";
 
 void
 logerr(char *s)
@@ -111,7 +114,7 @@ main(int argc, char **argv)
 					consolidate = 0, reset = 0;
 	unsigned long   email_count = 0;
 	double          rate;
-	char           *domain = 0, *rate_expr = 0, *filename = 0;
+	char           *domain = 0, *rate_expr = 0, *directory = 0;
 	char            stime[FMT_ULONG], etime[FMT_ULONG], ecount[FMT_ULONG];
 	char            strdouble[FMT_DOUBLE];
 	char            inbuf[2048], outbuf[1024];
@@ -119,7 +122,7 @@ main(int argc, char **argv)
 	datetime_sec    starttime = 0, endtime = 0;
 	stralloc        line = { 0 }, rexpr = { 0 };
 
-	while ((ch = getopt(argc, argv, "scRd:r:f:")) != sgoptdone) {
+	while ((ch = getopt(argc, argv, "scRd:r:D:")) != sgoptdone) {
 		switch (ch)
 		{
 		case 's':
@@ -146,8 +149,8 @@ main(int argc, char **argv)
 				break;
 			}
 			break;
-		case 'f': /*- filename */
-			filename = optarg;
+		case 'D': /*- directory */
+			directory = optarg;
 			break;
 		default:
 			logerrf(usage);
@@ -159,27 +162,25 @@ main(int argc, char **argv)
 		if (!(controldir = env_get("CONTROLDIR")))
 			controldir = "control";
 	}
-	if (chdir(auto_qmail) == -1)
-		strerr_die4sys(111, FATAL, "unable to switch to ", auto_qmail, ": ");
-	if (chdir(controldir) == -1)
-		strerr_die4sys(111, FATAL, "unable to switch to ", controldir, ": ");
 	if (!domain) {
 		logerrf("domain not specified\n");
 		logerrf(usage);
 		_exit (111);
 	}
-	if (!filename) {
-		logerrf("rate file not specified\n");
+	if (!directory) {
+		logerrf("rate limit directory not specified\n");
 		logerrf(usage);
 		_exit(111);
 	}
+	if (chdir(directory))
+		strerr_die4sys(111, FATAL, "unable to switch to ", directory, ": ");
 	if (display) {
-		if ((rfd = open_read(filename)) == -1)
-			strerr_die3sys(111, "unable to read: ", filename, ": ");
+		if ((rfd = open_read(domain)) == -1)
+			strerr_die3sys(111, "unable to read: ", domain, ": ");
 		substdio_fdbuf(&ssfin, read, rfd, inbuf, sizeof(inbuf));
 		for (line_no = 1;;line_no++) { /*- Line Processing */
 			if (getln(&ssfin, &line, &match, '\n') == -1)
-				strerr_die3sys(111, "unable to read: ", filename, ": ");
+				strerr_die3sys(111, "unable to read: ", domain, ": ");
 			if (!match && line.len == 0)
 				break;
 			switch (line_no)
@@ -241,8 +242,8 @@ main(int argc, char **argv)
 			_exit(111);
 		}
 		check_rate(incr ? rate_expr + 1 : rate_expr, &rate);
-		if ((rfd = open_read(filename)) == -1 && errno != error_noent)
-			strerr_die3sys(111, "unable to read: ", filename, ": ");
+		if ((rfd = open_read(domain)) == -1 && errno != error_noent)
+			strerr_die3sys(111, "unable to read: ", domain, ": ");
 		else {
 			if (rfd == -1 || reset) {
 				if (!stralloc_cats(&rexpr, rate_expr))
@@ -253,7 +254,7 @@ main(int argc, char **argv)
 			substdio_fdbuf(&ssfin, read, rfd, inbuf, sizeof(inbuf));
 			for (line_no = 1;;line_no++) { /*- Line Processing */
 				if (getln(&ssfin, &line, &match, '\n') == -1)
-					strerr_die3sys(111, "unable to read: ", filename, ": ");
+					strerr_die3sys(111, "unable to read: ", domain, ": ");
 				if (!match && line.len == 0)
 					break;
 				switch (line_no)
@@ -300,12 +301,16 @@ main(int argc, char **argv)
 			}
 		}
 new:
-		if ((wfd = open_write(filename)) == -1)
-			strerr_die4sys(111, FATAL, "unable to write: ", filename, ": ");
+		qmailr_uid = auto_uidr;
+		qmail_gid = auto_gidq;
+		if ((wfd = open(domain, O_WRONLY|O_CREAT, 0644)) == -1)
+			strerr_die4sys(111, FATAL, "unable to write: ", domain, ": ");
 		if (lock_ex(wfd) == -1)
-			strerr_die3sys(111, "unable to lock: ", filename, ": ");
+			strerr_die3sys(111, "unable to lock: ", domain, ": ");
+		if (chown(domain, auto_uidr, auto_gidq))
+			strerr_die4sys(111, FATAL, "unable to chown: ", domain, ": ");
 		if (ftruncate(wfd, 0) == -1)
-			strerr_die3sys(111, "unable to truncate: ", filename, ": ");
+			strerr_die3sys(111, "unable to truncate: ", domain, ": ");
 		substdio_fdbuf(&ssfout, write, wfd, outbuf, sizeof(outbuf));
 		if (consolidate) {
 			if (!stralloc_0(&rexpr))
@@ -317,28 +322,28 @@ new:
 				strerr_die1sys(111, "unable to write: ");
 		} else
 		if (substdio_bput(&ssfout, rexpr.s, rexpr.len) == -1)
-			strerr_die3sys(111, "unable to write: ", filename, ": ");
+			strerr_die3sys(111, "unable to write: ", domain, ": ");
 		if (substdio_bput(&ssfout, "\n", 1) == -1)
-			strerr_die3sys(111, "unable to write: ", filename, ": ");
+			strerr_die3sys(111, "unable to write: ", domain, ": ");
 		if (!email_count || !starttime || !endtime) {
 			if (substdio_flush(&ssfout) == -1)
-				strerr_die3sys(111, "unable to write: ", filename, ": ");
+				strerr_die3sys(111, "unable to write: ", domain, ": ");
 		} else {
 			if (substdio_bputs(&ssfout, ecount) == -1)
-				strerr_die3sys(111, "unable to write: ", filename, ": ");
+				strerr_die3sys(111, "unable to write: ", domain, ": ");
 			if (substdio_bput(&ssfout, "\n", 1) == -1)
-				strerr_die3sys(111, "unable to write: ", filename, ": ");
+				strerr_die3sys(111, "unable to write: ", domain, ": ");
 			if (substdio_bputs(&ssfout, stime) == -1)
-				strerr_die3sys(111, "unable to write: ", filename, ": ");
+				strerr_die3sys(111, "unable to write: ", domain, ": ");
 			if (substdio_bput(&ssfout, "\n", 1) == -1)
-				strerr_die3sys(111, "unable to write: ", filename, ": ");
+				strerr_die3sys(111, "unable to write: ", domain, ": ");
 			if (substdio_bputs(&ssfout, etime) == -1)
-				strerr_die3sys(111, "unable to write: ", filename, ": ");
+				strerr_die3sys(111, "unable to write: ", domain, ": ");
 			if (substdio_bput(&ssfout, "\n", 1) == -1)
-				strerr_die3sys(111, "unable to write: ", filename, ": ");
+				strerr_die3sys(111, "unable to write: ", domain, ": ");
 		}
 		if (substdio_flush(&ssfout) == -1)
-			strerr_die3sys(111, "unable to write: ", filename, ": ");
+			strerr_die3sys(111, "unable to write: ", domain, ": ");
 		close(wfd);
 	}
 	return (0);
