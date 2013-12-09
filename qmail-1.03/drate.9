@@ -4,21 +4,30 @@ drate \- indimail domain rate control
 
 .SH SYNOPSIS
 .B drate
+.B \-d \fIdomain
+.B \-D \fIratelimit_dir
+.B \-r \fIrate_expression
+[
+.B \-c
+.B \-R
+]
+
+or
+
+.B drate
+.B \-d \fIdomain
+.B \-D \fIratelimit_dir
 [
 .B \-s
 ]
-.B \-d \fIdomain
-.B \-r \fIrate_expression
-.B \-f \fIfilename
-.B \-c
-.B \-R
 
 .SH DESCRIPTION
 \fBdrate\fR(1) displays or sets delivery rate for \fBqmail-remote\fR(8). The actual rate
 limiting happens in \fBspawn-filter\fR(8). Hence, QMAILREMOTE should be set to
 QMAILHOME/bin/spawn-filter. You must also set the environment variable \fBRATELIMIT_DIR\fR
 to the full path of the directory where you will keep the rate definition files created by
-\fBdrate\fR(1). \fBdrate\fR(1) locks \fIfilename\fR before writing the following four lines.
+\fBdrate\fR(1). \fBdrate\fR(1) locks the file \fIdomain\fR in \fIratelimit_dir\fR before
+writing the following four lines.
 
 .EX
  line 1 - Rate Expression
@@ -50,8 +59,8 @@ rate of 500 emails / hr, you can use 500/3600 for the rate expression. You can a
 the prefix '+' or '-' to increase or decrease the existing rate
 
 .TP
-\fB-f\fR
-The filename to store or retrieve delivery rate parameters and statistics
+\fB-D\fR
+The directory to store or retrieve delivery rate parameters and statistics. 
 
 .TP
 \fB-c\fR
@@ -62,7 +71,7 @@ collapse the expression to 0.5
 
 .TP
 \fB-R\fR
-Reset all statistics in \fIfilename\fR. This will cause \fBqmail-remote\fR(8) to start
+Reset all statistics in \fIratelimit_dir/domain\fR. This will cause \fBqmail-remote\fR(8) to start
 counting from start.
 
 .SH "SEE ALSO"
