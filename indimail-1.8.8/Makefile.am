@@ -815,21 +815,21 @@ obs.mk: debian/obs.mk.in
 	$(edit) debian/$@.in > debian/$@;/bin/rm -f $@ debian/Makefile; \
 		ln -s debian/$@ $@;ln -s $@ debian/Makefile
 
-INSTALL: INSTALL.in configure.in
+INSTALL: INSTALL.in configure.ac
 	$(edit) $@.in > doc/$@.indimail; rm -f $@;ln -sf doc/$@.indimail $@
-Quick-INSTALL: Quick-INSTALL.in configure.in
+Quick-INSTALL: Quick-INSTALL.in configure.ac
 	$(edit) $@.in > doc/$@; rm -f $@;ln -sf doc/$@ $@
-INSTALL-RPM: INSTALL-RPM.in configure.in
+INSTALL-RPM: INSTALL-RPM.in configure.ac
 	$(edit) $@.in > doc/$@; rm -f $@;ln -sf doc/$@ $@
-INSTALL-MINI: INSTALL-MINI.in configure.in
+INSTALL-MINI: INSTALL-MINI.in configure.ac
 	$(edit) $@.in > doc/$@; rm -f $@;ln -sf doc/$@ $@
-INSTALL-MYSQL: INSTALL-MYSQL.in configure.in
+INSTALL-MYSQL: INSTALL-MYSQL.in configure.ac
 	$(edit) $@.in > doc/$@; rm -f $@;ln -sf doc/$@ $@
-RELEASE-Notes: RELEASE-Notes.in configure.in
+RELEASE-Notes: RELEASE-Notes.in configure.ac
 	$(edit) $@.in > doc/$@; rm -f $@;ln -sf doc/$@ $@
-README-CLUSTER: README-CLUSTER.in configure.in
+README-CLUSTER: README-CLUSTER.in configure.ac
 	$(edit) $@.in > doc/$@; rm -f $@;ln -sf doc/$@ $@
-README: README.in configure.in
+README: README.in configure.ac
 	$(edit) $@.in > doc/$@; rm -f $@;ln -sf doc/$@ $@
 vadddomain_handle: vadddomain_handle.in
 	$(edit) $@.in > post_handle/vadddomain; ln -sf post_handle/vadddomain $@
