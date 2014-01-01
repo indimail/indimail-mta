@@ -6,6 +6,8 @@ int main()
 {
 #ifdef HAVESRS
 	srs_t          *srs;
+
+	srs_new();
 #else
   :
 #endif
