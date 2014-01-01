@@ -181,3 +181,4 @@ obs.mk
 README.vmware
 */depcomp
 */install-sh
+config.h.in~
