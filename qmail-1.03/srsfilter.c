@@ -1,5 +1,8 @@
 /*
- * $Log: $
+ * $Log: srsfilter.c,v $
+ * Revision 1.1  2014-01-01 19:27:49+05:30  Cprogrammer
+ * Initial revision
+ *
  */
 #include "hassrs.h"
 #ifdef HAVESRS
@@ -59,7 +62,7 @@ printheader()
 		die_nomem();
 }
 
-int
+ssize_t
 mywrite(fd, buf, len)
 	int             fd;
 	char           *buf;
@@ -199,7 +202,7 @@ main(argc, argv)
 void
 getversion_srsfilter_c()
 {
-	static char    *x = "$Id: $";
+	static char    *x = "$Id: srsfilter.c,v 1.1 2014-01-01 19:27:49+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
