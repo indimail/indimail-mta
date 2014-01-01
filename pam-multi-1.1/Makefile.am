@@ -17,13 +17,13 @@ pam_multi_la_LDFLAGS=-module -avoid-version -version-info @LIBVER@:0:0
 pam_multi_la_LIBADD=@LIB_CRYPT@ @LIB_SSL@ @auth_libs@ @LIB_PAM@
 pam_multi_la_CPPFLAGS=$(DEFS) @auth_inc@
 
-pamsbin_PROGRAMS = pam-checkpwd
+pamsbin_PROGRAMS = pam-checkpwd$(EXEEXT)
 
 man_MANS=pam-multi.8
 
 all-local: pam-multi.spec
 
-pam-checkpwd: pam-checkpwd.o pam-support.o 
+pam-checkpwd$(EXEEXT): pam-checkpwd.o pam-support.o 
 	$(LINK) $@.o pam-support.o @LIB_PAM@
 pam-checkpwd.o: pam-checkpwd.c pam-support.h config.h
 	$(COMPILE) $(DEFS) @auth_inc@ -c $^
