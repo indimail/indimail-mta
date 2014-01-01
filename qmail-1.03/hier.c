@@ -412,6 +412,7 @@
 #include "fifo.h"
 #include "tcpto.h"
 #include "hasindimail.h"
+#include "hassrs.h"
 
 void            d(char *, char *, int, int, int);
 void            h(char *, int, int, int);
