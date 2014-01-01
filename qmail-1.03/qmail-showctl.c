@@ -108,6 +108,7 @@
 #include "env.h"
 #include "variables.h"
 #include "hasindimail.h"
+#include "hassrs.h"
 #ifdef USE_SPF
 #include "spf.h"
 #endif

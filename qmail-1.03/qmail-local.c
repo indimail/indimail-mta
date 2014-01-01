@@ -85,6 +85,7 @@
 #include "auto_qmail.h"
 #include "control.h"
 #include "variables.h"
+#include "hassrs.h"
 #ifdef HAVESRS
 #include "srs.h"
 #endif

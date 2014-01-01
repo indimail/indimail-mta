@@ -104,6 +104,7 @@
 #include "envrules.h"
 #include "case.h"
 #include "byte.h"
+#include "hassrs.h"
 #ifdef HAVESRS
 #include "srs.h"
 #endif
