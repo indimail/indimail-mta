@@ -7,7 +7,9 @@
 #include	"config.h"
 #endif
 #include	<stdio.h>
+#if HAVE_STDLIB_H
 #include	<stdlib.h>
+#endif
 #include	<string.h>
 #include	<errno.h>
 #include	<ctype.h>
@@ -103,17 +105,20 @@ void cmdsuccess(const char *tag, const char *msg)
 void mainloop(void)
 {
 	int noerril = 0;
-	unsigned max_atom_size;
-	char *tag, ptr;
+	uint64_t max_atom_size = 0;
+	char *tag, *ptr;
 
-	max_atom_size = (ptr = getenv("MAX_ATOM_SIZE")) ? atoi(ptr) : IT_MAX_ATOM_SIZE;
+	if (!max_atom_size) {
+		max_atom_size = (ptr = getenv("MAX_ATOM_SIZE")) ? strtoull(ptr, 0, 0) : IT_MAX_ATOM_SIZE;
+		fprintf(stderr, "setting MAX ATOM SIZE to %lld\n", max_atom_size);
+		if (!(tag = (char *) malloc(max_atom_size + 1))) {
+			write_error_exit("error allocating atom");
+		}
+	}
 	signal(SIGTERM, sigexit);
 	signal(SIGHUP, sigexit);
 	signal(SIGINT, sigexit);
 
-	if (!(tag = (char *) malloc(max_atom_size + 1))) {
-		write_error_exit("error allocating atom");
-	}
 	for (;;)
 	{
 	struct	imaptoken *curtoken;
@@ -126,10 +131,10 @@ void mainloop(void)
 		{
 		int	rc;
 
-			if (strlen(tag)+strlen(curtoken->tokenbuf) > IT_MAX_ATOM_SIZE)
+			if (strlen(tag)+strlen(curtoken->tokenbuf) > max_atom_size)
 				write_error_exit("max atom size too small");
 		  		
-			strncat(tag, curtoken->tokenbuf, IT_MAX_ATOM_SIZE);
+			strncat(tag, curtoken->tokenbuf, max_atom_size);
 			rc=do_imap_command(tag);
 
 			if (rc == 0)
