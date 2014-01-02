@@ -1,5 +1,8 @@
 /*
  * $Log: vopen_smtp_relay.c,v $
+ * Revision 2.9  2014-01-02 23:55:19+05:30  Cprogrammer
+ * set delayed MySQL inserts if delayed_insert variable is non-zero
+ *
  * Revision 2.8  2008-09-08 09:58:15+05:30  Cprogrammer
  * removed mysql_escape
  *
@@ -58,7 +61,7 @@
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vopen_smtp_relay.c,v 2.8 2008-09-08 09:58:15+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: vopen_smtp_relay.c,v 2.9 2014-01-02 23:55:19+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #include <time.h>
@@ -98,8 +101,9 @@ vopen_smtp_relay(char *user, char *domain)
 	getEnvConfigStr(&relay_table, "RELAY_TABLE", RELAY_DEFAULT_TABLE);
 	if (!(real_domain = vget_real_domain(domain)))
 		real_domain = domain;
-	snprintf(SqlBuf, SQL_BUF_SIZE,
-		"replace delayed into %s ( email, ipaddr, timestamp ) values ( \"%s@%s\", \"%s\", %ld )", 
+	snprintf(SqlBuf, SQL_BUF_SIZE, delayed_insert ?
+		"replace delayed into %s ( email, ipaddr, timestamp ) values ( \"%s@%s\", \"%s\", %ld )" :
+		"replace into %s ( email, ipaddr, timestamp ) values ( \"%s@%s\", \"%s\", %ld )",
 		relay_table, user, real_domain, ipaddr, mytime);
 	if (mysql_query(&mysql[1], SqlBuf))
 	{

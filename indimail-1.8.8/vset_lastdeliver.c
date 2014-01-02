@@ -1,5 +1,8 @@
 /*
  * $Log: vset_lastdeliver.c,v $
+ * Revision 2.11  2014-01-02 23:56:17+05:30  Cprogrammer
+ * set delayed MySQL inserts if delayed_insert variable is non-zero
+ *
  * Revision 2.10  2008-11-06 15:07:16+05:30  Cprogrammer
  * fix for mysql_real_escape_string()
  *
@@ -61,7 +64,7 @@
 #endif
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vset_lastdeliver.c,v 2.10 2008-11-06 15:07:16+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: vset_lastdeliver.c,v 2.11 2014-01-02 23:56:17+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 int
@@ -77,10 +80,13 @@ vset_lastdeliver(char *user, char *domain, int quota)
 #ifdef ENABLE_AUTH_LOGGING
 	if ((err = vauth_open((char *) 0)) != 0)
 		return (err);
-	snprintf(SqlBuf, SQL_BUF_SIZE, "replace delayed into userquota set user=\"%s\", \
+	snprintf(SqlBuf, SQL_BUF_SIZE, delayed_insert ?
+		"replace delayed into userquota set user=\"%s\", \
 		domain=\"%s\",  quota=%d, \
-		timestamp=FROM_UNIXTIME(%lu)", 
-		user, domain, quota, time(0));
+		timestamp=FROM_UNIXTIME(%lu)" :
+		"replace into userquota set user=\"%s\", \
+		domain=\"%s\",  quota=%d, \
+		timestamp=FROM_UNIXTIME(%lu)", user, domain, quota, time(0));
 	if (mysql_query(&mysql[1], SqlBuf))
 	{
 		if(mysql_errno(&mysql[1]) == ER_NO_SUCH_TABLE)

@@ -1,5 +1,8 @@
 /*
  * $Log: set_mysql_options.c,v $
+ * Revision 2.9  2014-01-02 23:54:03+05:30  Cprogrammer
+ * set delayed_insert variable for MYSQL delayed insert
+ *
  * Revision 2.8  2010-04-15 14:14:25+05:30  Cprogrammer
  * set client flags for mysql_real_connect()
  *
@@ -29,7 +32,7 @@
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: set_mysql_options.c,v 2.8 2010-04-15 14:14:25+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: set_mysql_options.c,v 2.9 2014-01-02 23:54:03+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 int
@@ -69,6 +72,7 @@ set_mysql_options(MYSQL *mysql, char *file, char *group, unsigned int *flags)
 	getEnvConfigStr(&opt_reconnect, "MYSQL_OPT_RECONNECT", "0");
 	snprintf(temp, sizeof(temp) - 1, "%d", MYSQL_PROTOCOL_DEFAULT);
 	getEnvConfigStr(&opt_protocol, "MYSQL_OPT_PROTOCOL", temp);
+	delayed_insert = ((char *) getenv("DELAYED_INSERT") ? 1 : 0);
 	protocol = atoi(opt_protocol);
 	o_reconnect = atoi(opt_reconnect);
 	connect_timeout = atoi(c_timeout);

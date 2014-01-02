@@ -1,5 +1,8 @@
 /*
  * $Log: indimail.h,v $
+ * Revision 2.211  2014-01-02 22:29:52+05:30  Cprogrammer
+ * added variable delayed_insert for mysql
+ *
  * Revision 2.210  2013-09-04 12:14:12+05:30  Cprogrammer
  * added definition for AUTH_CRAM_SHA512
  *
@@ -946,7 +949,7 @@
 #define INDIMAILH_H
 
 #ifndef	lint
-static char     sccsidh[] = "$Id: indimail.h,v 2.210 2013-09-04 12:14:12+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsidh[] = "$Id: indimail.h,v 2.211 2014-01-02 22:29:52+05:30 Cprogrammer Stab mbhangui $";
 #endif
 
 #ifdef HAVE_CONFIG_H
@@ -1986,6 +1989,7 @@ extern int      site_size;
 extern int      encrypt_flag;
 extern int      fdm;
 extern int      is_open;
+extern int      delayed_insert;
 extern char     mysql_host[];
 extern char    *indi_port;
 extern int      OptimizeAddDomain;
