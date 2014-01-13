@@ -18,7 +18,10 @@ user and the domain component of the email address. For postfix, these two envir
 variables are set by postdel. If the username is quoted, the quotes are removed. The
 user@domain is then searched in the authentication database. If there are any system problems
 due to which \fBvdelivermail\fR is unable to locate the user, it exits 111 and the mail gets
-deferred. If the domain is a clustered domain, \fBvdelivermail\fR attempts
+deferred. \fBvdelivermail\fR will exit 100 in case the user is not found, locked/overquota,
+address is looping, or if vdelivermail is not called correctly. Bounces can be discarded if
+you set the environment variable \fBDISCARD_BOUNCE\fR.
+If the domain is a clustered domain, \fBvdelivermail\fR attempts
 to find the mailstore for the user. If the mailstore is local, it delivers the mail locally.
 If the mailstore is a remote server, it invokes \fBqmail-remote(8)\fR to deliver the mail.
 If the environment variable QMAIL_EXT is defined, \fBvdelivermail\fR attempts to locate the

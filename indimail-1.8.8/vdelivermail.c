@@ -1,5 +1,8 @@
 /*
  * $Log: vdelivermail.c,v $
+ * Revision 2.59  2014-01-13 08:04:58+05:30  Cprogrammer
+ * discard bounces if DISCARD_BOUNCE env variable is set
+ *
  * Revision 2.58  2011-06-23 20:01:57+05:30  Cprogrammer
  * fixed setting of NOALIAS
  *
@@ -258,7 +261,7 @@
 #include <sys/wait.h>
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vdelivermail.c,v 2.58 2011-06-23 20:01:57+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: vdelivermail.c,v 2.59 2014-01-13 08:04:58+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 /*- Globals */
@@ -275,6 +278,16 @@ static int      process_valias(char *, char *, mdir_t);
 static char    *process_dir(char *, uid_t, gid_t);
 static int      bhfcheck(char *);
 static void     vdl_exit(int);
+
+void
+vdl_exit(int err)
+{
+	vclose();
+	fflush(stdout);
+	if (getenv("DISCARD_BOUNCE") && err == 100)
+		_exit (0);
+	_exit(err);
+}
 
 /* 
  * The email message comes in on file descriptor 0 - stanard in
@@ -1002,14 +1015,6 @@ static char *process_dir(char *dir, uid_t uid, gid_t gid)
 	else
 		scopy(tmpdir, dir, AUTH_SIZE);
 	return tmpdir;
-}
-
-void
-vdl_exit(int err)
-{
-	vclose();
-	fflush(stdout);
-	_exit(err);
 }
 
 #ifdef VALIAS
