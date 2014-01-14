@@ -1,5 +1,8 @@
 /*
  * $Log: smtpd.c,v $
+ * Revision 1.179  2014-01-13 08:06:53+05:30  Cprogrammer
+ * log authentication failures to stderr
+ *
  * Revision 1.178  2013-11-21 15:41:05+05:30  Cprogrammer
  * added domainqueue functionality
  *
@@ -691,7 +694,7 @@ int             wildmat_internal(char *, char *);
 int             ssl_rfd = -1, ssl_wfd = -1;	/*- SSL_get_Xfd() are broken */
 char           *servercert, *clientca, *clientcrl;
 #endif
-char           *revision = "$Revision: 1.178 $";
+char           *revision = "$Revision: 1.179 $";
 char           *protocol = "SMTP";
 stralloc        proto = { 0 };
 static stralloc Revision = { 0 };
@@ -1166,6 +1169,8 @@ log_spam(char *arg1, char *arg2, unsigned long size, stralloc *line)
 			return;
 		logerr("qmail-smtpd: ");
 		logerrpid();
+		logerr(remoteip);
+		logerr(" fifo ");
 		logerr(fifo_name);
 		logerr(": ");
 		logerr(error_str(errno));
@@ -2081,6 +2086,22 @@ err_write()
 {
 	out("451 Requested action aborted: unable to write pipe and I can't auth (#4.3.0)\r\n");
 	return -1;
+}
+
+void
+err_authfailure(char *arg1, char *arg2, int ret)
+{
+	static char     retstr[FMT_ULONG];
+
+	strnum[fmt_ulong(retstr, ret > 0 ? ret : 0 - ret)] = 0;
+	logerr("qmail-smtpd: ");
+	logerrpid();
+	logerr(arg1);
+	logerr(" AUTH ");
+	logerr(arg2);
+	logerr(" status=[");
+	logerr(ret > 0 ? retstr : "-1");
+	logerrf("] auth failure\n");
 }
 
 void
@@ -5630,7 +5651,7 @@ auth_digest_md5()
 void
 smtp_auth(char *arg)
 {
-	int             i;
+	int             i, j;
 	char           *cmd = arg;
 
 	switch (setup_state)
@@ -5699,7 +5720,7 @@ smtp_auth(char *arg)
 		if (case_equals(authcmds[i].text, cmd))
 			break;
 	}
-	switch (authcmds[i].fun(arg))
+	switch ((j = authcmds[i].fun(arg)))
 	{
 	case 0:
 		relayclient = "";
@@ -5711,10 +5732,12 @@ smtp_auth(char *arg)
 		break;
 	case 1: /*- auth fail */
 	case 2: /*- misuse */
+		err_authfailure(remoteip, user.s, j);
 		sleep(5);
 		out("535 authorization failed (#5.7.1)\r\n");
 		break;
 	case -1:
+		err_authfailure(remoteip, user.s, j);
 		out("454 temporary authentication failure (#4.3.0)\r\n");
 		break;
 	default:
@@ -6725,7 +6748,7 @@ addrrelay() /*- Rejection of relay probes. */
 void
 getversion_smtpd_c()
 {
-	static char    *x = "$Id: smtpd.c,v 1.178 2013-11-21 15:41:05+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: smtpd.c,v 1.179 2014-01-13 08:06:53+05:30 Cprogrammer Exp mbhangui $";
 
 #ifdef INDIMAIL
 	if (x)
