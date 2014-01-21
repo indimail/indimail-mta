@@ -82,10 +82,11 @@ mpack-*/munpack
 ripmime-*/ripmime
 ripmime-*/ripole
 indimail-*/ChangeLog
-indimail-*/RELEASE-Notes.in
+indimail-*/doc/RELEASE-Notes.in
 indimail-*/doc/ChangeLog
 indimail-*/INSTALL
 indimail-*/RELEASE-Notes
+indimail-*/RELEASE-Notes.in
 indimail-*/doc/INSTALL-RPM
 indimail-*/doc/INSTALL-MINI
 indimail-*/doc/INSTALL.indimail
@@ -181,3 +182,5 @@ obs.mk
 README.vmware
 */depcomp
 */install-sh
+config.h.in~
+mkinstalldirs

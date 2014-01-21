@@ -163,6 +163,7 @@
 #include "envrules.h"
 #include "variables.h"
 #include "readsubdir.h"
+#include "hassrs.h"
 #ifdef HAVESRS
 #include "srs.h"
 #endif

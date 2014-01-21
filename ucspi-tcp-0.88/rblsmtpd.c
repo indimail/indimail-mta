@@ -1,5 +1,8 @@
 /*
  * $Log: rblsmtpd.c,v $
+ * Revision 1.12  2014-01-10 00:06:57+05:30  Cprogrammer
+ * BUG - flagip6 was not initialized
+ *
  * Revision 1.11  2013-08-06 11:02:30+05:30  Cprogrammer
  * support for IPv4-mapped IPv6 addresses and supports the inverse IPv6 nibble format for rblsmtpd RBL and anti-RBL lookups.
  *
@@ -60,7 +63,7 @@
 #define FATAL "rblsmtpd: fatal: "
 
 #ifndef	lint
-static char     sccsid[] = "$Id: rblsmtpd.c,v 1.11 2013-08-06 11:02:30+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: rblsmtpd.c,v 1.12 2014-01-10 00:06:57+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 void
@@ -117,7 +120,7 @@ ip_init(void)
 {
 	unsigned int    i;
 	unsigned int    j;
-	int             flagip6;
+	int             flagip6 = 0;
 #ifdef IPV6
 	unsigned char   remoteip[16];
 	char            hexval;
@@ -147,7 +150,6 @@ ip_init(void)
 				nomem();
 			if (!stralloc_cats(&ip_reverse, "."))
 				nomem();
-
 			hexval = tohex(remoteip[j - 1] >> 4);
 			if (!stralloc_catb(&ip_reverse, &hexval, 1))
 				nomem();
@@ -155,6 +157,7 @@ ip_init(void)
 				nomem();
 		}
 	} else {
+		/*- IPV4 */
 		i = str_len(ip_env);
 		while (i) {
 			for (j = i; j > 0; --j)
@@ -171,8 +174,7 @@ ip_init(void)
 	}
 #else
 	i = str_len(ip_env);
-	while (i)
-	{
+	while (i) {
 		for (j = i; j > 0; --j)
 			if (ip_env[j - 1] == '.')
 				break;

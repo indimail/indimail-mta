@@ -962,11 +962,12 @@ compile hfield.c hfield.h
 
 hier.o: \
 compile hier.c auto_qmail.h auto_split.h auto_uids.h fmt.h fifo.h \
-qmail-todo.h hasindimail.h tcpto.h ip.h ipalloc.h \
-conf-domainkeys conf-spf conf-ip conf-dkim conf-batv conf-plugin
+qmail-todo.h hasindimail.h tcpto.h ip.h ipalloc.h hassrs.h \
+conf-domainkeys conf-srs conf-spf conf-ip conf-dkim conf-batv \
+conf-plugin
 	./compile $(inc_deps) \
 	`grep -h -v "^#" conf-tls conf-spf conf-ip conf-domainkeys conf-dkim \
-	conf-batv conf-plugin conf-srs` hier.c
+	conf-batv conf-plugin` hier.c
 
 home: \
 home.sh conf-qmail
@@ -1637,8 +1638,8 @@ subfd.h sgetopt.h subgetopt.h getln.h alloc.h str.h fmt.h \
 hfield.h token822.h control.h env.h gen_allocdefs.h error.h \
 qmail.h now.h datetime.h exit.h quote.h headerbody.h envdir.h \
 auto_qmail.h newfield.h constmap.h envrules.h scan.h pathexec.h \
-variables.h
-	./compile `grep -h -v "^#" conf-srs` qmail-inject.c
+variables.h conf-srs
+	./compile qmail-inject.c
 
 envrules.o: \
 compile envrules.c envrules.h env.h stralloc.h str.h \
@@ -1689,9 +1690,9 @@ open.h wait.h lock.h seek.h getln.h strerr.h subfd.h \
 sgetopt.h subgetopt.h alloc.h error.h stralloc.h \
 gen_alloc.h fmt.h str.h now.h datetime.h case.h quote.h qmail.h \
 substdio.h slurpclose.h myctime.h gfrom.h auto_patrn.h \
-constmap.h control.h auto_qmail.h variables.h \
+constmap.h control.h auto_qmail.h variables.h hassrs.h \
 conf-sync conf-mailarch
-	./compile `grep -h -v "^#" conf-srs conf-sync conf-mailarch` qmail-local.c
+	./compile `grep -h -v "^#" conf-sync conf-mailarch` qmail-local.c
 
 qmail-log.0: \
 qmail-log.5
@@ -2333,8 +2334,8 @@ substdio.h alloc.h error.h stralloc.h gen_alloc.h str.h byte.h fmt.h \
 scan.h case.h auto_qmail.h trigger.h newfield.h stralloc.h quote.h \
 qmail.h qsutil.h prioq.h datetime.h gen_alloc.h constmap.h envrules.h \
 fmtqfn.h readsubdir.h direntry.h variables.h env.h qmail-todo.h \
-hasindimail.h conf-mime conf-sync conf-batv
-	./compile $(inc_deps) `grep -h -v "^#" conf-srs conf-mime \
+hasindimail.h conf-mime conf-sync conf-batv conf-srs
+	./compile $(inc_deps) `grep -h -v "^#" conf-mime \
 		conf-sync conf-batv` qmail-send.c
 
 qmail-daemon: \
@@ -2383,9 +2384,10 @@ qmail-showctl.o: \
 compile qmail-showctl.c substdio.h subfd.h exit.h fmt.h \
 str.h control.h constmap.h stralloc.h gen_alloc.h direntry.h \
 auto_uids.h auto_qmail.h auto_break.h auto_patrn.h auto_spawn.h \
-auto_split.h spf.h env.h variables.h hasindimail.h conf-spf conf-batv
-	./compile $(inc_deps) `grep -h -v "^#" conf-spf conf-batv \
-		conf-srs` qmail-showctl.c
+auto_split.h spf.h env.h variables.h hasindimail.h \
+conf-srs conf-spf conf-batv
+	./compile $(inc_deps) `grep -h -v "^#" conf-spf conf-batv` \
+	qmail-showctl.c
 
 plugtest: \
 load plugtest.o timeoutwrite.o strsalloc.o control.o constmap.o \
