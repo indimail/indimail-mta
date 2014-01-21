@@ -1,5 +1,8 @@
 /*
  * $Log: vset_lastauth.c,v $
+ * Revision 2.7  2014-01-02 23:56:12+05:30  Cprogrammer
+ * set delayed MySQL inserts if delayed_insert variable is non-zero
+ *
  * Revision 2.6  2008-09-08 09:58:50+05:30  Cprogrammer
  * removed mysql_escape
  *
@@ -44,7 +47,7 @@
 #include <time.h>
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vset_lastauth.c,v 2.6 2008-09-08 09:58:50+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: vset_lastauth.c,v 2.7 2014-01-02 23:56:12+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef ENABLE_AUTH_LOGGING
@@ -60,9 +63,14 @@ vset_lastauth(char *user, char *domain, char *service, char *remoteip, char *gec
 
 	if ((err = vauth_open((char *) 0)) != 0)
 		return (err);
-	snprintf(SqlBuf, SQL_BUF_SIZE, "replace delayed into lastauth set user=\"%s\", \
+	snprintf(SqlBuf, SQL_BUF_SIZE, delayed_insert ? 
+		"replace delayed into lastauth set user=\"%s\", \
 		domain=\"%s\",  service=\"%s\", remote_ip=\"%s\", quota=%d, gecos=\"%s\", \
-		timestamp=FROM_UNIXTIME(%lu)", user, domain, service, remoteip, quota, gecos, time(0));
+		timestamp=FROM_UNIXTIME(%lu)" :
+		"replace into lastauth set user=\"%s\", \
+		domain=\"%s\",  service=\"%s\", remote_ip=\"%s\", quota=%d, gecos=\"%s\", \
+		timestamp=FROM_UNIXTIME(%lu)" ,
+		user, domain, service, remoteip, quota, gecos, time(0));
 	if (mysql_query(&mysql[1], SqlBuf))
 	{
 		if(mysql_errno(&mysql[1]) == ER_NO_SUCH_TABLE)

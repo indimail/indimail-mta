@@ -1,5 +1,8 @@
 /*
  * $Log: variables.c,v $
+ * Revision 2.54  2014-01-02 23:54:50+05:30  Cprogrammer
+ * set delayed insert to off for MySQL delayed inserts
+ *
  * Revision 2.53  2012-08-03 08:25:51+05:30  Cprogrammer
  * removed duplicate X-Mailer
  *
@@ -207,7 +210,7 @@
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: variables.c,v 2.53 2012-08-03 08:25:51+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: variables.c,v 2.54 2014-01-02 23:54:50+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 vdir_type       vdir;
@@ -337,6 +340,7 @@ char           *h_mailinglist[] = {
 #endif
 #ifdef CLUSTERED_SITE
 int             isopen_cntrl = 0;
+int             delayed_insert = 0;
 int             isopen_vauthinit[2] = {0, 0};
 char            cntrl_host[MAX_BUFF];
 char           *cntrl_port;

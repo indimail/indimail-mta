@@ -2,13 +2,13 @@
 # Process this file with autoconf to produce a configure script.
 
 AC_PREREQ([2.63])
-AC_INIT(indium, 1.0,[Manvendra Bhangui manvendra@indimail.org],Indium)
+AC_INIT([indium],1.0,[Manvendra Bhangui manvendra@indimail.org],indium, [http://www.indimail.org])
 AC_CANONICAL_TARGET
 PACKAGE=$PACKAGE_NAME
 VERSION=$PACKAGE_VERSION
 AC_CONFIG_HEADERS([config.h])
 AC_DEFINE_UNQUOTED(PACKAGE_BUGREPORT, "indimail-support@lists.sourceforge.net")
-AM_INIT_AUTOMAKE($PACKAGE,$VERSION)
+AM_INIT_AUTOMAKE([silent-rules])
 
 AC_LIB_PREPARE_MULTILIB
 AC_CONFIG_MACRO_DIR([m4])

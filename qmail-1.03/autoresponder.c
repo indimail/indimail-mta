@@ -397,7 +397,7 @@ get_arguments(int argc, char *argv[])
 	{
 		switch (ch)
 		{
-		case '0':
+		case 'b':
 			/*- YYYY-mm-dd HH:MM:SS */
 			ptr = strptime(optarg, "%Y-%m-%d %H:%M:%S", &tm);
 			if (!ptr || (ptr && *ptr))
@@ -413,7 +413,7 @@ get_arguments(int argc, char *argv[])
 			if (when < datetime_untai(&dt1))
 				ignore("autoresponder yet to mature");
 			break;
-		case '1':
+		case 'e':
 			/*- YYYY-mm-dd HH:MM:SS */
 			ptr = strptime(optarg, "%Y-%m-%d %H:%M:%S", &tm);
 			if (!ptr || (ptr && *ptr))

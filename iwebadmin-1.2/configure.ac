@@ -1,12 +1,12 @@
 dnl Process this file with autoconf to produce a configure script.
 
-AC_INIT(iwebadmin, 1.2, [Manvendra Bhangui manvendra@indimail.org],iwebadmin)
+AC_INIT([iwebadmin],1.2,[Manvendra Bhangui manvendra@indimail.org],iwebadmin, [http://www.indimail.org])
 AC_CANONICAL_TARGET
 VERSION=$PACKAGE_VERSION
 PACKAGE=$PACKAGE_NAME
 VERSION=$PACKAGE_VERSION
 LT_INIT
-AM_INIT_AUTOMAKE($PACKAGE,$VERSION)
+AM_INIT_AUTOMAKE([silent-rules])
 AM_CONFIG_HEADER(config.h)
 AC_DEFINE_UNQUOTED(PACKAGE_BUGREPORT, "indimail-support@lists.sourceforge.net")
 

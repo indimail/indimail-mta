@@ -3,6 +3,7 @@ Makefile.in
 pam-multi.settings
 missing
 configure
+depcomp
 config.h.gch
 pam-checkpwd
 pam-multi.8
