@@ -3,7 +3,7 @@
  * Revision 1.180  2014-01-22 22:46:46+05:30  Cprogrammer
  * fixed DISABLE_AUTH_LOGIN, DISABLE_AUTH_PLAIN, DISABLE_CRAM_MD5,
  * DISABLE_CRAM_SHA1, DISABLE_CRAM_SHA256, DISABLE_CRAM_SHA512, CRAM_RIPEMD,
- * DISABLE_RIPEMD5
+ * DISABLE_RIPEMD5. set env variables on RELAYCLIENT/AUTH SMTP using auth.envrules
  * Added SECURE_AUTH to allow AUTH PLAIN, LOGIN only if TLS is enabled
  * set AUTHINFO environment variable for successful SMTP AUTH
  *
