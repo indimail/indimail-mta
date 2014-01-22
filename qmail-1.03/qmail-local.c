@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-local.c,v $
+ * Revision 1.26  2014-01-22 20:38:24+05:30  Cprogrammer
+ * added hassrs.h
+ *
  * Revision 1.25  2013-08-27 08:19:48+05:30  Cprogrammer
  * use sticky bit definition from header file
  *
@@ -1286,7 +1289,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_local_c()
 {
-	static char    *x = "$Id: qmail-local.c,v 1.25 2013-08-27 08:19:48+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-local.c,v 1.26 2014-01-22 20:38:24+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

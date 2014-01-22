@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-inject.c,v $
+ * Revision 1.26  2014-01-22 20:38:19+05:30  Cprogrammer
+ * added hassrs.h
+ *
  * Revision 1.25  2013-11-21 15:40:52+05:30  Cprogrammer
  * added domainqueue functionality
  *
@@ -1314,7 +1317,7 @@ main(argc, argv)
 void
 getversion_qmail_inject_c()
 {
-	static char    *x = "$Id: qmail-inject.c,v 1.25 2013-11-21 15:40:52+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-inject.c,v 1.26 2014-01-22 20:38:19+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
