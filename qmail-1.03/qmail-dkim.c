@@ -1108,7 +1108,7 @@ main(int argc, char *argv[])
 		binqqargs[0] = dkimqueue;
 	dkimsign = env_get("DKIMSIGN");
 	dkimverify = env_get("DKIMVERIFY");
-	p = env_get("RELAYCLIENT") || env_get("AUTHINFO");
+	p = (env_get("RELAYCLIENT") || env_get("AUTHINFO")) ? "" : 0;
 	if (dkimverify && p && env_get("RELAYCLIENT_NODKIMVERIFY")) {
 		execv(*binqqargs, binqqargs);
 		die(120, 0);
