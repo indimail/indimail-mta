@@ -1,5 +1,8 @@
 /*
  * $Log: spawn-filter.c,v $
+ * Revision 1.60  2014-01-22 15:43:29+05:30  Cprogrammer
+ * apply envrules for RATELIMIT_DIR
+ *
  * Revision 1.59  2013-09-06 13:58:23+05:30  Cprogrammer
  * added comments
  *
@@ -876,7 +879,6 @@ main(int argc, char **argv)
 	if (*ptr && *ptr == '/')
 		ptr++;
 	ptr += 6;
-	rate_dir = env_get("RATELIMIT_DIR");
 	if (*ptr == 'l') /*- qmail-local Filter */
 	{
 		mailprog = "bin/qmail-local";
@@ -937,12 +939,6 @@ main(int argc, char **argv)
 		report(111, "spawn-filter: Incorrect usage. ", argv[0], " (#4.3.0)", 0, 0, 0);
 		_exit(111);
 	}
-	if (rate_dir) {
-		if (chdir(rate_dir))
-			report(111, "spawn-filter: Unable to switch to ", rate_dir, ": ", error_str(errno), ". (#4.3.0)", 0);
-		if (!access(domain, W_OK) && !is_rate_ok(rate_dir, domain))
-			report(111, "spawn-filter: high email rate for ", domain, ". (#4.3.0)", 0, 0, 0);
-	}
 	if (chdir(auto_qmail) == -1)
 		report(111, "spawn-filter: Unable to switch to ", auto_qmail, ": ", error_str(errno), ". (#4.3.0)", 0);
 	if ((ret = envrules(sender.s, "fromd.envrules", "FROMRULES", 0)) == -1)
@@ -959,6 +955,12 @@ main(int argc, char **argv)
 		report(111, "spawn-filter: Unable to read rcpt envrules: ", error_str(errno), ". (#4.3.0)", 0, 0, 0);
 	if (ret == -4)
 		report(111, "spawn-filter: regex compilation failed: ", error_str(errno), ". (#4.3.0)", 0, 0, 0);
+	if ((rate_dir = env_get("RATELIMIT_DIR"))) {
+		if (chdir(rate_dir))
+			report(111, "spawn-filter: Unable to switch to ", rate_dir, ": ", error_str(errno), ". (#4.3.0)", 0);
+		if (!access(domain, W_OK) && !is_rate_ok(rate_dir, domain))
+			report(111, "spawn-filter: high email rate for ", domain, ". (#4.3.0)", 0, 0, 0);
+	}
 	/*- DATABYTES Check */
 	if (check_size(size))
 		report(100, "sorry, that message size exceeds my databytes limit (#5.3.4)", 0, 0, 0, 0, 0);
@@ -1105,7 +1107,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_spawn_filter_c()
 {
-	static char    *x = "$Id: spawn-filter.c,v 1.59 2013-09-06 13:58:23+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: spawn-filter.c,v 1.60 2014-01-22 15:43:29+05:30 Cprogrammer Stab mbhangui $";
 
 	x++;
 	if (x)
