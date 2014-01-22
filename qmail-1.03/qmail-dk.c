@@ -610,7 +610,7 @@ main(int argc, char *argv[])
 		binqqargs[0] = dkqueue;
 	dksign = env_get("DKSIGN");
 	dkverify = env_get("DKVERIFY");
-	relayclient = env_get("RELAYCLIENT") || env_get("AUTHINFO");
+	relayclient = (env_get("RELAYCLIENT") || env_get("AUTHINFO")) ? "" : 0;
 	if (dkverify && relayclient && env_get("RELAYCLIENT_NODKVERIFY")) {
 		execv(*binqqargs, binqqargs);
 		die(120, 0);
