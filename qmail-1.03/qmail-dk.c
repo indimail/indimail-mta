@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-dk.c,v $
+ * Revision 1.44  2014-01-22 22:44:04+05:30  Cprogrammer
+ * treat AUTHINFO environment like RELAYCLIENT environment variable
+ *
  * Revision 1.43  2013-10-01 17:12:07+05:30  Cprogrammer
  * fixed QMAILQUEUE recursion
  *
@@ -226,8 +229,7 @@ custom_error(char *flag, char *status, char *code)
 		die_write();
 	if (substdio_puts(&sserr, status) == -1)
 		die_write();
-	if (code)
-	{
+	if (code) {
 		if (substdio_put(&sserr, " (#", 3) == -1)
 			die_write();
 		c = (*flag == 'Z') ? "4" : "5";
@@ -332,8 +334,7 @@ pidopen()
 	len = pidfmt((char *) 0, seq);
 	if (!(pidfn = alloc(len)))
 		die(51);
-	for (seq = 1; seq < 10; ++seq)
-	{
+	for (seq = 1; seq < 10; ++seq) {
 		if (pidfmt((char *) 0, seq) > len)
 			die(81); /*- paranoia */
 		pidfmt(pidfn, seq);
@@ -363,10 +364,8 @@ write_signature(DK *dk, char *dk_selector, char *keyfn,
 	int             i;
 
 	from = dk_from(dk);
-	if (keyfn[0] != '/')
-	{
-		if (!controldir)
-		{
+	if (keyfn[0] != '/') {
+		if (!controldir) {
 			if (!(controldir = env_get("CONTROLDIR")))
 				controldir = "control";
 		}
@@ -376,10 +375,8 @@ write_signature(DK *dk, char *dk_selector, char *keyfn,
 			die(51);
 	}
 	i = str_chr(keyfn, '%');
-	if (keyfn[i])
-	{
-		if (keyfn[0] == '/')
-		{
+	if (keyfn[i]) {
+		if (keyfn[0] == '/') {
 			if (!stralloc_copyb(&keyfnfrom, keyfn, i))
 				die(51);
 		} else
@@ -391,12 +388,10 @@ write_signature(DK *dk, char *dk_selector, char *keyfn,
 			die(51);
 		if (!stralloc_0(&keyfnfrom))
 			die(51);
-		if (access(keyfnfrom.s, F_OK))
-		{
+		if (access(keyfnfrom.s, F_OK)) {
 			/*- since file is not found remove '%' sign */
 			keyfnfrom.len = 8;
-			if (keyfn[0] == '/')
-			{
+			if (keyfn[0] == '/') {
 				if (!stralloc_copyb(&keyfnfrom, keyfn, i))
 					die(51);
 			} else
@@ -409,10 +404,8 @@ write_signature(DK *dk, char *dk_selector, char *keyfn,
 			if (!stralloc_0(&keyfnfrom))
 				die(51);
 		} 
-	} else
-	{
-		if (keyfn[0] == '/')
-		{
+	} else {
+		if (keyfn[0] == '/') {
 			if (!stralloc_copys(&keyfnfrom, keyfn))
 				die(51);
 		} else
@@ -438,8 +431,7 @@ write_signature(DK *dk, char *dk_selector, char *keyfn,
 		custom_error("Z", "Unable to read private key. (#4.3.0)", 0);
 		_exit(88);
 	}
-	for (i = 0; i < dksignature.len; i++)
-	{
+	for (i = 0; i < dksignature.len; i++) {
 		if (dksignature.s[i] == '\0')
 			dksignature.s[i] = '\n';
 	}
@@ -447,11 +439,9 @@ write_signature(DK *dk, char *dk_selector, char *keyfn,
 		die(51);
 	st = dk_getsig(dk, dksignature.s, advice, advicelen);
 	maybe_die_dk(st);
-	if (!dk_selector)
-	{
+	if (!dk_selector) {
 		selector = keyfn;
-		while (*keyfn)
-		{
+		while (*keyfn) {
 			if (*keyfn == '/')
 				selector = keyfn + 1;
 			keyfn++;
@@ -475,8 +465,7 @@ write_signature(DK *dk, char *dk_selector, char *keyfn,
 	if (!stralloc_cats(&dkoutput, "; d="))
 		die(51);
 	tmp = env_get("DKDOMAIN");
-	if (from || tmp)
-	{
+	if (from || tmp) {
 		if (!stralloc_cats(&dkoutput, tmp ? tmp : from))
 			die(51);
 	} else
@@ -488,10 +477,8 @@ write_signature(DK *dk, char *dk_selector, char *keyfn,
 		die(51);
 	if (!stralloc_cats(&dkoutput, (char *) advice))
 		die(51);
-	if (dkexcludeheaders || opth)
-	{
-		if ((i = dk_headers(dk, NULL)) > 0)
-		{
+	if (dkexcludeheaders || opth) {
+		if ((i = dk_headers(dk, NULL)) > 0) {
 			if (!(tmp = alloc(i)))
 				die(51);
 			if (!dk_headers(dk, tmp))
@@ -513,19 +500,16 @@ find_header(stralloc *line)
 	static stralloc headers = { 0 };
 	int             n, i, j;
 
-	for (n = 0; n < line->len; ++n)
-	{
+	for (n = 0; n < line->len; ++n) {
 		if (line->s[n] == ':')
 			break;
 	}
 	if (n == line->len)
 		return -1;
-	if (!headers.len)
-	{
+	if (!headers.len) {
 		if (!stralloc_copys(&headers, ""))
 			die(51);
-		if (dkexcludeheaders)
-		{
+		if (dkexcludeheaders) {
 			if (!stralloc_cats(&headers, dkexcludeheaders))
 				die(51);
 			if (!stralloc_append(&headers, ":"))
@@ -534,8 +518,7 @@ find_header(stralloc *line)
 	}
 	if (!headers.len)
 		return 0;
-	for (i = j = 0; i < headers.len; ++i)
-	{
+	for (i = j = 0; i < headers.len; ++i) {
 		if (headers.s[i] != ':')
 			continue;
 		if (i - j == n && !case_diffb(headers.s + j, n, line->s))
@@ -568,8 +551,7 @@ dk_setoptions(char **selector, int *advicelen, int *opth, int *optr, int *optc,
 	if (!(argv = MakeArgs(dkopts.s)))
 		die(51);
 	for (argc = 0;argv[argc];argc++);
-	while ((ch = sgopt(argc, argv, "hrb:c:s:")) != sgoptdone)
-	{
+	while ((ch = sgopt(argc, argv, "hrb:c:s:")) != sgoptdone) {
 		switch (ch)
 		{
 		case 'h':
@@ -585,8 +567,7 @@ dk_setoptions(char **selector, int *advicelen, int *opth, int *optr, int *optc,
 				*advicelen = ADVICE_BUF;
 			break;
 		case 'c':
-			if (!str_diffn("simple\0", optarg, 7))
-			{
+			if (!str_diffn("simple\0", optarg, 7)) {
 				*optc = DK_CANON_SIMPLE;
 				*canon = "simple";
 			}
@@ -629,15 +610,13 @@ main(int argc, char *argv[])
 		binqqargs[0] = dkqueue;
 	dksign = env_get("DKSIGN");
 	dkverify = env_get("DKVERIFY");
-	relayclient = env_get("RELAYCLIENT");
+	relayclient = env_get("RELAYCLIENT") || env_get("AUTHINFO");
 	if (dkverify && relayclient && env_get("RELAYCLIENT_NODKVERIFY")) {
 		execv(*binqqargs, binqqargs);
 		die(120, 0);
 	}
-	if (!dksign && !dkverify && relayclient)
-	{
-		if (!(dksign = env_get("DKKEY")))
-		{
+	if (!dksign && !dkverify && relayclient) {
+		if (!(dksign = env_get("DKKEY"))) {
 			if (!stralloc_copys(&dkfn, "domainkeys/%/default"))
 				die(51);
 			if (!stralloc_0(&dkfn))
@@ -645,36 +624,29 @@ main(int argc, char *argv[])
 			dksign = dkfn.s;
 		}
 	}
-	if (!(dklib = dk_init(&st)))
-	{
+	if (!(dklib = dk_init(&st))) {
 		maybe_die_dk(st);
 		custom_error("Z", "dk initialization failed (#4.3.0)", 0);
 		_exit(88);
 	}
 	/*- Initialization */
-	if (dksign)
-	{
-		if (dk_setoptions(&selector, &advicelen, &opth, &optr, &optc, &canon, env_get("DKSIGNOPTIONS")))
-		{
+	if (dksign) {
+		if (dk_setoptions(&selector, &advicelen, &opth, &optr, &optc, &canon, env_get("DKSIGNOPTIONS"))) {
 			custom_error("Z", "Invalid DKSIGNOPTIONS (#4.3.0)", 0);
 			_exit(88);
 		}
-		if (!(dk = dk_sign(dklib, &st, optc)))
-		{
+		if (!(dk = dk_sign(dklib, &st, optc))) {
 			maybe_die_dk(st);
 			custom_error("Z", "dk_sign failed (#4.3.0)", 0);
 			_exit(88);
 		}
-		if (optr && dk_setopts(dk, DKOPT_RDUPE) != DK_STAT_OK)
-		{
+		if (optr && dk_setopts(dk, DKOPT_RDUPE) != DK_STAT_OK) {
 			custom_error("Z", "DKOPT_RDUPE failed (#4.3.0)", 0);
 			_exit(88);
 		}
 	} else
-	if (dkverify)
-	{
-		if (!(dk = dk_verify(dklib, &st)))
-		{
+	if (dkverify) {
+		if (!(dk = dk_verify(dklib, &st))) {
 			maybe_die_dk(st);
 			custom_error("Z", "dk_verify failed (#4.3.0)", 0);
 			_exit(88);
@@ -697,13 +669,11 @@ main(int argc, char *argv[])
 	substdio_fdbuf(&ssin, read, 0, inbuf, sizeof(inbuf));
 	substdio_fdbuf(&ssout, write, messfd, outbuf, sizeof(outbuf));
 	dkexcludeheaders = env_get("DKEXCLUDEHEADERS");
-	if (dkexcludeheaders)
-	{
+	if (dkexcludeheaders) {
 		int             hdr_continue, in_header = 1;
 
 		hdr_continue = 0;
-		for (;;)
-		{
+		for (;;) {
 	
 			if (getln(&ssin, &line, &match, '\n') == -1)
 				die_read();
@@ -715,10 +685,8 @@ main(int argc, char *argv[])
 				continue;
 			if (in_header && !mess822_ok(&line))
 				in_header = 0;
-			if (in_header)
-			{
-				if (line.s[0] == ' ' || line.s[0] == '\t')
-				{
+			if (in_header) {
+				if (line.s[0] == ' ' || line.s[0] == '\t') {
 					if (hdr_continue)
 						continue;
 				} else
@@ -728,8 +696,7 @@ main(int argc, char *argv[])
 				} else
 					hdr_continue = 0;
 			}
-			if (match)
-			{
+			if (match) {
 				st = dk_message(dk, (unsigned char *) line.s, line.len - 1);
 				maybe_die_dk(st);
 				st = dk_message(dk, (unsigned char *) "\r\n", 2);
@@ -738,8 +705,7 @@ main(int argc, char *argv[])
 			maybe_die_dk(st);
 		}
 	} else
-	for (;;)
-	{
+	for (;;) {
 		register int    n;
 		register char  *x;
 		int             i;
@@ -749,10 +715,8 @@ main(int argc, char *argv[])
 		if (!n)
 			break;
 		x = substdio_PEEK(&ssin);
-		if (dksign || dkverify)
-		{
-			for (i = 0; i < n; i++)
-			{
+		if (dksign || dkverify) {
+			for (i = 0; i < n; i++) {
 				if (x[i] == '\n')
 					st = dk_message(dk, (unsigned char *) "\r\n", 2);
 				else
@@ -766,15 +730,13 @@ main(int argc, char *argv[])
 	}
 	if (substdio_flush(&ssout) == -1)
 		die_write();
-	if (dksign || dkverify)
-	{
+	if (dksign || dkverify) {
 		st = dk_eom(dk, (void *) 0);
 		maybe_die_dk(st);
 		if (dksign)
 			write_signature(dk, selector, dksign, advicelen, opth, canon);
 		else
-		if (dkverify)
-		{
+		if (dkverify) {
 			char           *status = 0, *code = 0;
 
 			if (!stralloc_copys(&dkoutput, "DomainKey-Status: "))
@@ -834,13 +796,11 @@ main(int argc, char *argv[])
 				die(51);
 			if (!stralloc_cats(&dkoutput, "\n"))
 				die(51);
-			if (dkverify[str_chr(dkverify, 'A' + st)])
-			{
+			if (dkverify[str_chr(dkverify, 'A' + st)]) {
 				custom_error("D", status, code); /*- return permanent error */
 				die(88);
 			}
-			if (dkverify[str_chr(dkverify, 'a' + st)])
-			{
+			if (dkverify[str_chr(dkverify, 'a' + st)]) {
 				custom_error("Z", status, code); /*- return temporary error */
 				die(88);
 			}
@@ -907,7 +867,7 @@ main(argc, argv)
 void
 getversion_qmail_dk_c()
 {
-	static char    *x = "$Id: qmail-dk.c,v 1.43 2013-10-01 17:12:07+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-dk.c,v 1.44 2014-01-22 22:44:04+05:30 Cprogrammer Stab mbhangui $";
 
 	x++;
 }

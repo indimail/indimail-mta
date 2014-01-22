@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-dkim.c,v $
+ * Revision 1.43  2014-01-22 22:45:01+05:30  Cprogrammer
+ * treat AUTHINFO environment like RELAYCLIENT environment variable
+ *
  * Revision 1.42  2013-10-01 17:11:24+05:30  Cprogrammer
  * fixed QMAILQUEUE recursion
  *
@@ -228,8 +231,7 @@ custom_error(char *flag, char *status, char *code)
 		die_write();
 	if (substdio_puts(&sserr, status) == -1)
 		die_write();
-	if (code)
-	{
+	if (code) {
 		if (substdio_put(&sserr, " (#", 3) == -1)
 			die_write();
 		c = (*flag == 'Z') ? "4" : "5";
@@ -252,8 +254,7 @@ SignThisHeader(const char *szHeader)
 			&& strncasecmp((char *) szHeader, "X-Mailer", 8))
 		|| strncasecmp((char *) szHeader, "Received:", 9) == 0
 		|| strncasecmp((char *) szHeader, "Authentication-Results:", 23) == 0
-		|| strncasecmp((char *) szHeader, "Return-Path:", 12) == 0)
-	{
+		|| strncasecmp((char *) szHeader, "Return-Path:", 12) == 0) {
 		return 0;
 	}
 	return 1;
@@ -339,8 +340,7 @@ pidopen()
 	len = pidfmt((char *) 0, seq);
 	if (!(pidfn = alloc(len)))
 		die(51, 0);
-	for (seq = 1; seq < 10; ++seq)
-	{
+	for (seq = 1; seq < 10; ++seq) {
 		if (pidfmt((char *) 0, seq) > len)
 			die(81, 0); /*- paranoia */
 		pidfmt(pidfn, seq);
@@ -368,10 +368,8 @@ write_signature(char *domain, char *keyfn)
 	int             i;
 	static stralloc keyfnfrom = { 0 };
 
-	if (keyfn[0] != '/')
-	{
-		if (!controldir)
-		{
+	if (keyfn[0] != '/') {
+		if (!controldir) {
 			if (!(controldir = env_get("CONTROLDIR")))
 				controldir = "control";
 		}
@@ -381,10 +379,8 @@ write_signature(char *domain, char *keyfn)
 			die(51, 1);
 	}
 	i = str_chr(keyfn, '%');
-	if (keyfn[i])
-	{
-		if (keyfn[0] == '/')
-		{
+	if (keyfn[i]) {
+		if (keyfn[0] == '/') {
 			if (!stralloc_copyb(&keyfnfrom, keyfn, i))
 				die(51, 1);
 		} else
@@ -396,12 +392,10 @@ write_signature(char *domain, char *keyfn)
 			die(51, 1);
 		if (!stralloc_0(&keyfnfrom))
 			die(51, 1);
-		if (access(keyfnfrom.s, F_OK))
-		{
+		if (access(keyfnfrom.s, F_OK)) {
 			/*- since file does not exists remove '%' sign */
 			keyfnfrom.len = 8;
-			if (keyfn[0] == '/')
-			{
+			if (keyfn[0] == '/') {
 				if (!stralloc_copyb(&keyfnfrom, keyfn, i))
 					die(51, 1);
 			} else
@@ -414,10 +408,8 @@ write_signature(char *domain, char *keyfn)
 			if (!stralloc_0(&keyfnfrom))
 				die(51, 1);
 		} 
-	} else
-	{
-		if (keyfn[0] == '/')
-		{
+	} else {
+		if (keyfn[0] == '/') {
 			if (!stralloc_copys(&keyfnfrom, keyfn))
 				die(51, 1);
 		} else
@@ -445,8 +437,7 @@ write_signature(char *domain, char *keyfn)
 		DKIMSignFree(&ctxt);
 		_exit(88);
 	}
-	for (i = 0; i < dksignature.len; i++)
-	{
+	for (i = 0; i < dksignature.len; i++) {
 		if (dksignature.s[i] == '\0')
 			dksignature.s[i] = '\n';
 	}
@@ -454,8 +445,7 @@ write_signature(char *domain, char *keyfn)
 		die(51, 1);
 	i = DKIMSignGetSig2(&ctxt, dksignature.s, &pSig);
 	maybe_die_dkim(i);
-	if (pSig)
-	{
+	if (pSig) {
 		if (!stralloc_catb(&dkimoutput, pSig, str_len(pSig)))
 			die(51, 1);
 		if (!stralloc_cats(&dkimoutput, "\n"))
@@ -479,24 +469,18 @@ ParseTagValues(char *list, char *letters[], char *values[])
 	for (i = 0; letters[i]; i++)
 		values[i] = 0;
 	key = 0;
-	for(ptr = list;*ptr;)
-	{
+	for(ptr = list;*ptr;) {
 		if ((*ptr == ' ') || (*ptr == '\t') || (*ptr == '\r') || (*ptr == '\n')) /*- FWS */
 			*ptr++ = 0;
 		if (!key)
 			key = ptr;
-		if (*ptr == '=')
-		{
+		if (*ptr == '=') {
 			*ptr = 0;
-			for (i = 0;letters[i];i++)
-			{
-				if (!str_diff(letters[i], key))
-				{
+			for (i = 0;letters[i];i++) {
+				if (!str_diff(letters[i], key)) {
 					ptr++;
-					for (;*ptr;)
-					{
-						if ((*ptr == ' ') || (*ptr == '\t') || (*ptr == '\r') || (*ptr == '\n'))
-						{
+					for (;*ptr;) {
+						if ((*ptr == ' ') || (*ptr == '\t') || (*ptr == '\r') || (*ptr == '\n')) {
 							ptr++;
 							continue;
 						}
@@ -507,10 +491,8 @@ ParseTagValues(char *list, char *letters[], char *values[])
 					tmp = ptr;
 					if (*ptr)
 						*ptr++ = 0;
-					for(;tmp != values[i];tmp--) /*- RFC 4871 3.2 */
-					{
-						if ((*tmp == ' ') || (*tmp == '\t') || (*tmp == '\r') || (*tmp == '\n'))
-						{
+					for(;tmp != values[i];tmp--) { /*- RFC 4871 3.2 */
+						if ((*tmp == ' ') || (*tmp == '\t') || (*tmp == '\r') || (*tmp == '\n')) {
 							*tmp = 0;
 							continue;
 						}
@@ -540,21 +522,17 @@ checkSSP(char *domain, int *bTesting)
 	sprintf(query, "_ssp._domainkey.%s", domain);
 	results = dns_text(query);
 	DKIM_MFREE(query);
-	if (!str_diff(results, "e=temp;"))
-	{
+	if (!str_diff(results, "e=temp;")) {
 		DKIM_MFREE(results);
 		return DKIM_SSP_TEMPFAIL;
 	} else
-	if (!str_diff(results, "e=perm;"))
-	{
+	if (!str_diff(results, "e=perm;")) {
 		results = dns_text(domain);
-		if (!str_diff(results, "e=temp;"))
-		{
+		if (!str_diff(results, "e=temp;")) {
 			DKIM_MFREE(results);
 			return DKIM_SSP_TEMPFAIL;
 		} else
-		if (!str_diff(results, "e=perm;"))
-		{
+		if (!str_diff(results, "e=perm;")) {
 			DKIM_MFREE(results);
 			return DKIM_SSP_SCOPE;
 		}
@@ -566,8 +544,7 @@ checkSSP(char *domain, int *bTesting)
 	 * Deallocating storage for 'results' here is premature - moved beyond last reference to it.
 	 *
 	 */
-	if (!ParseTagValues(results, tags, values))
-	{
+	if (!ParseTagValues(results, tags, values)) {
 		DKIM_MFREE(results);
 		return DKIM_SSP_UNKNOWN;
 	}
@@ -582,8 +559,7 @@ checkSSP(char *domain, int *bTesting)
 	// flags
 	if (values[1] != NULL) {
 		char           *s, *p;
-		for (p = values[1], s = values[1]; *p; p++)
-		{
+		for (p = values[1], s = values[1]; *p; p++) {
 			if (*p == '|')
 				*p = 0;
 			else
@@ -615,14 +591,12 @@ checkADSP(char *domain)
 	char           *values[1];
 
 	results = dns_text(domain);
-	if (!str_diff(results, "e=perm;"))
-	{
+	if (!str_diff(results, "e=perm;")) {
 		DKIM_MFREE(results);
 		return DKIM_ADSP_SCOPE;
 	}
 	else
-	if (!str_diff(results, "e=temp;"))
-	{
+	if (!str_diff(results, "e=temp;")) {
 		DKIM_MFREE(results);
 		return DKIM_ADSP_TEMPFAIL;
 	}
@@ -631,13 +605,11 @@ checkADSP(char *domain)
 	sprintf(query, "_adsp._domainkey.%s", domain);
 	results = dns_text(query);
 	DKIM_MFREE(query);
-	if (!str_diff(results, "e=perm;"))
-	{
+	if (!str_diff(results, "e=perm;")) {
 		DKIM_MFREE(results);
 		return DKIM_ADSP_SCOPE;
 	} else
-	if (!str_diff(results, "e=temp;"))
-	{
+	if (!str_diff(results, "e=temp;")) {
 		DKIM_MFREE(results);
 		return DKIM_ADSP_TEMPFAIL;
 	}
@@ -648,8 +620,7 @@ checkADSP(char *domain)
 	 * Deallocating storage for 'results' here is premature - moved beyond last reference to it.
 	 *
 	 */
-	if (!ParseTagValues(results, tags, values))
-	{
+	if (!ParseTagValues(results, tags, values)) {
 		DKIM_MFREE(results);
 		return DKIM_SSP_UNKNOWN;
 	}
@@ -667,27 +638,21 @@ checkADSP(char *domain)
 void
 dkimverify_exit(int dkimRet, char *status, char *code)
 {
-	if (dkimRet < 0)
-	{
-		if (dkimverify[str_chr(dkimverify, 'F' - dkimRet)])
-		{
+	if (dkimRet < 0) {
+		if (dkimverify[str_chr(dkimverify, 'F' - dkimRet)]) {
 			custom_error("D", status, code);
 			die(88, 0);
 		}
-		if (dkimverify[str_chr(dkimverify, 'f' - dkimRet)])
-		{
+		if (dkimverify[str_chr(dkimverify, 'f' - dkimRet)]) {
 			custom_error("Z", status, code);
 			die(88, 0);
 		}
-	} else
-	{
-		if (dkimverify[str_chr(dkimverify, 'A' + dkimRet)])
-		{
+	} else {
+		if (dkimverify[str_chr(dkimverify, 'A' + dkimRet)]) {
 			custom_error("D", status, code);
 			die(88, 0);
 		}
-		if (dkimverify[str_chr(dkimverify, 'a' + dkimRet)])
-		{
+		if (dkimverify[str_chr(dkimverify, 'a' + dkimRet)]) {
 			custom_error("Z", status, code);
 			die(88, 0);
 		}
@@ -799,8 +764,7 @@ writeHeaderNexit(int ret, int origRet, int resDKIMSSP, int resDKIMADSP, int useS
 		code = "X.3.0";
 		break;
 	}
-	if (useSSP && resDKIMSSP != -1)
-	{
+	if (useSSP && resDKIMSSP != -1) {
 		switch(resDKIMSSP)
 		{
 			case DKIM_SSP_ALL:
@@ -821,8 +785,7 @@ writeHeaderNexit(int ret, int origRet, int resDKIMSSP, int resDKIMADSP, int useS
 				break;
 		}
 	}
-	if (useADSP && resDKIMADSP != -1)
-	{
+	if (useADSP && resDKIMADSP != -1) {
 		switch(resDKIMADSP)
 		{
 			case DKIM_ADSP_ALL:
@@ -847,8 +810,7 @@ writeHeaderNexit(int ret, int origRet, int resDKIMSSP, int resDKIMADSP, int useS
 		die(51, 0);
 	if (!stralloc_cats(&dkimoutput, dkimStatus))
 		die(51, 0);
-	if (origRet != DKIM_MAX_ERROR && ret != origRet)
-	{
+	if (origRet != DKIM_MAX_ERROR && ret != origRet) {
 		if (!stralloc_cats(&dkimoutput, "\n\t(old="))
 			die(51, 0);
 		switch (origRet)
@@ -930,8 +892,7 @@ writeHeaderNexit(int ret, int origRet, int resDKIMSSP, int resDKIMADSP, int useS
 			die(51, 0);
 		if (!stralloc_cats(&dkimoutput, ":"))
 			die(51, 0);
-		if (origRet < 0)
-		{
+		if (origRet < 0) {
 			if (!stralloc_cats(&dkimoutput, "-"))
 				die(51, 0);
 			strnum[fmt_ulong(strnum, 0 - origRet)] = 0;
@@ -973,20 +934,17 @@ checkPractice(int dkimRet)
 		return (0);
 	else
 		dkimpractice = ptr;
-	if (!*ptr)
-	{
+	if (!*ptr) {
 		if (dkimRet < 0 || dkimRet == DKIM_3PS_SIGNATURE)
 			return (1);
 		return (0);
 	}
-	if (dkimRet < 0)
-	{
+	if (dkimRet < 0) {
 		if (dkimpractice[str_chr(dkimpractice, 'F' - dkimRet)])
 			return (1);
 		if (dkimpractice[str_chr(dkimpractice, 'f' - dkimRet)])
 			return (1);
-	} else
-	{
+	} else {
 		if (dkimpractice[str_chr(dkimpractice, 'A' + dkimRet)])
 			return (1);
 		if (dkimpractice[str_chr(dkimpractice, 'a' + dkimRet)])
@@ -1025,11 +983,10 @@ dkim_setoptions(DKIMSignOptions *opts, char *signOptions)
 		die(51, 0);
 	for (argc = 0;argv[argc];argc++);
 #ifdef HAVE_EVP_SHA256
-	while ((ch = sgopt(argc, argv, "b:c:li:qthx:z:")) != sgoptdone)
+	while ((ch = sgopt(argc, argv, "b:c:li:qthx:z:")) != sgoptdone) {
 #else
-	while ((ch = sgopt(argc, argv, "b:c:li:qthx:")) != sgoptdone)
+	while ((ch = sgopt(argc, argv, "b:c:li:qthx:")) != sgoptdone) {
 #endif
-	{
 		switch (ch)
 		{
 		case 'b':
@@ -1151,15 +1108,13 @@ main(int argc, char *argv[])
 		binqqargs[0] = dkimqueue;
 	dkimsign = env_get("DKIMSIGN");
 	dkimverify = env_get("DKIMVERIFY");
-	p = env_get("RELAYCLIENT");
+	p = env_get("RELAYCLIENT") || env_get("AUTHINFO");
 	if (dkimverify && p && env_get("RELAYCLIENT_NODKIMVERIFY")) {
 		execv(*binqqargs, binqqargs);
 		die(120, 0);
 	}
-	if (!dkimsign && !dkimverify && p)
-	{
-		if (!(dkimsign = env_get("DKIMKEY")))
-		{
+	if (!dkimsign && !dkimverify && p) {
+		if (!(dkimsign = env_get("DKIMKEY"))) {
 			if (!stralloc_copys(&dkimfn, "domainkeys/%/default"))
 				die(51, 0);
 			if (!stralloc_0(&dkimfn))
@@ -1167,21 +1122,18 @@ main(int argc, char *argv[])
 			dkimsign = dkimfn.s;
 		}
 	}
-	if (dkimsign)
-	{
+	if (dkimsign) {
 		/* selector */
 		p = dkimsign;
 		selector = p;
-		while (*p)
-		{
+		while (*p) {
 			if (*p == '/' && *(p + 1))
 				selector = p + 1;
 			p++;
 		}
 		str_copyb(opts.szSelector, selector, sizeof(opts.szSelector) - 1);
 
-		if (dkim_setoptions(&opts, env_get("DKIMSIGNOPTIONS")))
-		{
+		if (dkim_setoptions(&opts, env_get("DKIMSIGNOPTIONS"))) {
 			custom_error("Z", "Invalid DKIMSIGNOPTIONS (#4.3.0)", 0);
 			_exit(88);
 		}
@@ -1195,32 +1147,27 @@ main(int argc, char *argv[])
 		if (p)
 			opts.expireTime = 0;
 		opts.pfnHeaderCallback = SignThisHeader;
-		if (DKIMSignInit(&ctxt, &opts) != DKIM_SUCCESS) /*- failed to initialize signature */
-		{
+		if (DKIMSignInit(&ctxt, &opts) != DKIM_SUCCESS) { /*- failed to initialize signature */
 			custom_error("Z", "dkim initialization failed (#4.3.0)", 0);
 			_exit(88);
 		}
-	} else
-	{
+	} else {
 		char           *x;
 
 		if (!dkimverify)
 			dkimverify = "";
 		if (!(x = env_get("SIGN_PRACTICE")))
 			x = "adsp";
-		if (!str_diffn("adsp", x, 4))
-		{
+		if (!str_diffn("adsp", x, 4)) {
 			useADSP = 1;
 			accept3ps = 1;
 		}
 		else
-		if (!str_diffn("ssp", x, 3))
-		{
+		if (!str_diffn("ssp", x, 3)) {
 			useSSP = 1;
 			accept3ps = 1;
 		} else
-		if (!str_diffn("local", x, 5))
-		{
+		if (!str_diffn("local", x, 5)) {
 			useSSP = 0;
 			useADSP = 0;
 			accept3ps = 1;
@@ -1254,64 +1201,53 @@ main(int argc, char *argv[])
 		die(63, dkimsign ? 1 : 2);
 	substdio_fdbuf(&ssout, write, messfd, outbuf, sizeof(outbuf));
 	substdio_fdbuf(&ssin, read, 0, inbuf, sizeof(inbuf));
-	for (ret = 0;;)
-	{
+	for (ret = 0;;) {
 		register int    n;
 		register char  *x;
 
-		if ((n = substdio_feed(&ssin)) < 0)
-		{
+		if ((n = substdio_feed(&ssin)) < 0) {
 			(dkimsign ? DKIMSignFree : DKIMVerifyFree) (&ctxt);
 			die_read();
 		}
 		if (!n)
 			break;
 		x = substdio_PEEK(&ssin);
-		if (!ret)
-		{
+		if (!ret) {
 			if ((ret = (dkimsign ? DKIMSignProcess : DKIMVerifyProcess) (&ctxt, x, n)) == DKIM_INVALID_CONTEXT)
 				(dkimsign ? DKIMSignFree : DKIMVerifyFree) (&ctxt);
 			maybe_die_dkim(ret);
 		}
-		if (substdio_put(&ssout, x, n) == -1)
-		{
+		if (substdio_put(&ssout, x, n) == -1) {
 			(dkimsign ? DKIMSignFree : DKIMVerifyFree) (&ctxt);
 			die_write();
 		}
 		substdio_SEEK(&ssin, n);
 	}
-	if (substdio_flush(&ssout) == -1)
-	{
+	if (substdio_flush(&ssout) == -1) {
 		(dkimsign ? DKIMSignFree : DKIMVerifyFree) (&ctxt);
 		die_write();
 	}
-	if (dkimsign || dkimverify)
-	{
-		if (dkimsign)
-		{
+	if (dkimsign || dkimverify) {
+		if (dkimsign) {
 			char           *p;
 
-			if (!(p = DKIMSignGetDomain(&ctxt)))
-			{
+			if (!(p = DKIMSignGetDomain(&ctxt))) {
 				DKIMSignFree(&ctxt);
 				maybe_die_dkim(DKIM_INVALID_CONTEXT);
 			}
 			write_signature(p, dkimsign); /*- calls DKIMSignFree(&ctxt) */
 		} else
-		if (dkimverify)
-		{
+		if (dkimverify) {
 			char            szPolicy[512];
 
-			if (!ret)
-			{
+			if (!ret) {
 				if ((ret = DKIMVerifyResults(&ctxt, &sCount, &sSize)) != DKIM_SUCCESS)
 					maybe_die_dkim(ret);
 				if ((ret = DKIMVerifyGetDetails(&ctxt, &nSigCount, &pDetails, szPolicy)) != DKIM_SUCCESS)
 					maybe_die_dkim(ret);
 				else
 				for (ret = DKIM_SUCCESS,i = 0; i < nSigCount; i++) {
-					if (pDetails[i].nResult < 0)
-					{
+					if (pDetails[i].nResult < 0) {
 						ret = pDetails[i].nResult;
 						break; /*- don't know if it is right to break */
 					}
@@ -1324,20 +1260,16 @@ main(int argc, char *argv[])
 				char           *domain;
 
 				origRet = ret;
-				if ((domain = DKIMVerifyGetDomain(&ctxt)))
-				{
-					if (!(p = env_get("SIGNATUREDOMAINS")))
-					{
+				if ((domain = DKIMVerifyGetDomain(&ctxt))) {
+					if (!(p = env_get("SIGNATUREDOMAINS"))) {
 						if (control_readfile(&sigdomains, "signaturedomains", 0) == -1)
 							die(55, 2);
 					} else
 					if (!stralloc_copys(&sigdomains, p))
 						die(51, 2);
-					for (len = 0, p = sigdomains.s;len < sigdomains.len;)
-					{
+					for (len = 0, p = sigdomains.s;len < sigdomains.len;) {
 						len += ((token_len = str_len(p)) + 1); /*- next domain */
-						if (!case_diffb(p, token_len, domain))
-						{
+						if (!case_diffb(p, token_len, domain)) {
 							ret = DKIM_FAIL;
 							useADSP = 0;
 							useSSP = 0;
@@ -1345,18 +1277,15 @@ main(int argc, char *argv[])
 						}
 						p = sigdomains.s + len;
 					}
-					if (!(p = env_get("NOSIGNATUREDOMAINS")))
-					{
+					if (!(p = env_get("NOSIGNATUREDOMAINS"))) {
 						if (control_readfile(&nsigdomains, "nosignaturedomains", 0) == -1)
 							die(55, 2);
 					} else
 					if (!stralloc_copys(&nsigdomains, p))
 						die(51, 2);
-					for (len = 0, p = nsigdomains.s;len < nsigdomains.len;)
-					{
+					for (len = 0, p = nsigdomains.s;len < nsigdomains.len;) {
 						len += ((token_len = str_len(p)) + 1); /*- next domain */
-						if (*p == '*' || !case_diffb(p, token_len, domain))
-						{
+						if (*p == '*' || !case_diffb(p, token_len, domain)) {
 							ret = DKIM_NEUTRAL;
 							useADSP = 0;
 							useSSP = 0;
@@ -1368,8 +1297,7 @@ main(int argc, char *argv[])
 				if (!domain || !*domain)
 					; /*- do nothing ? */
 				else
-				if (useADSP)
-				{
+				if (useADSP) {
 					resDKIMADSP = checkADSP(domain);
 					if (sCount > 0) {
 						if (resDKIMADSP == DKIM_ADSP_UNKNOWN || resDKIMADSP == DKIM_ADSP_ALL)
@@ -1381,8 +1309,7 @@ main(int argc, char *argv[])
 					else
 						ret = DKIM_NEUTRAL;
 				} else
-				if (useSSP)
-				{
+				if (useSSP) {
 					int             bTestingPractices = 0;
 					char           *domain;
 	
@@ -1467,7 +1394,7 @@ main(argc, argv)
 void
 getversion_qmail_dkim_c()
 {
-	static char    *x = "$Id: qmail-dkim.c,v 1.42 2013-10-01 17:11:24+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-dkim.c,v 1.43 2014-01-22 22:45:01+05:30 Cprogrammer Stab mbhangui $";
 
 	x++;
 }
