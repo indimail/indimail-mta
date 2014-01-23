@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-send.c,v $
+ * Revision 1.55  2014-01-22 20:38:42+05:30  Cprogrammer
+ * added hassrs.h
+ *
  * Revision 1.54  2013-09-23 22:13:56+05:30  Cprogrammer
  * added queue specific concurrency
  *
@@ -2995,7 +2998,7 @@ main()
 void
 getversion_qmail_send_c()
 {
-	static char    *x = "$Id: qmail-send.c,v 1.54 2013-09-23 22:13:56+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-send.c,v 1.55 2014-01-22 20:38:42+05:30 Cprogrammer Exp mbhangui $";
 
 #ifdef INDIMAIL
 	if (x)

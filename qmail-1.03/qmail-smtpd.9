@@ -102,9 +102,14 @@ as the write end and file descriptor 3 as the read end.
 .I subprogram
 should read file descriptor 3 and should in turn return 0 to
 .BR qmail-smtpd ,
-effectively setting the environment variables RELAYCLIENT and TCPREMOTEINFO
-(any supplied value replaced with the authenticated username). If the environment
-variable MASQUERADE is set,
+effectively setting the environment variables TCPREMOTEINFO and AUTHINFO
+(any supplied value replaced with the authenticated username). One can specifically disable the AUTH
+methods by setting DISABLE_AUTH_LOGIN, DISABLE_AUTH_PLAIN, DISABLE_CRAM_MD5, DISABLE_CRAM_SHA1,
+DISABLE_CRAM_SHA256, DISABLE_CRAM_SHA512, DISABLE_CRAM_RIPEMD, DISABLE_DIGEST_MD5 environment variable. If you set
+the environment variable \fBSECURE_AUTH\fR, AUTH LOGIN and AUTH PLAIN gets disabled unless STARTTLS is issued or you
+run qmail-smtpd under SSL (port 465).
+
+If the environment variable MASQUERADE is set,
 .LP
 .nr step 1 1
 .IP \n[step] 2
