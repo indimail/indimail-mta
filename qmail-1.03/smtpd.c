@@ -1,5 +1,12 @@
 /*
  * $Log: smtpd.c,v $
+ * Revision 1.180  2014-01-22 22:46:46+05:30  Cprogrammer
+ * fixed DISABLE_AUTH_LOGIN, DISABLE_AUTH_PLAIN, DISABLE_CRAM_MD5,
+ * DISABLE_CRAM_SHA1, DISABLE_CRAM_SHA256, DISABLE_CRAM_SHA512, CRAM_RIPEMD,
+ * DISABLE_RIPEMD5. set env variables on RELAYCLIENT/AUTH SMTP using auth.envrules
+ * Added SECURE_AUTH to allow AUTH PLAIN, LOGIN only if TLS is enabled
+ * set AUTHINFO environment variable for successful SMTP AUTH
+ *
  * Revision 1.179  2014-01-13 08:06:53+05:30  Cprogrammer
  * log authentication failures to stderr
  *
@@ -685,16 +692,18 @@ int             auth_cram_sha512();
 int             auth_cram_ripemd();
 int             auth_digest_md5();
 int             err_noauth();
+int             err_noauthallowed();
 int             addrrelay();
 void            smtp_greet(char *);
 int             atrn_queue(char *, char *);
 int             wildmat_internal(char *, char *);
 
 #ifdef TLS
+int             secure_auth = 0;
 int             ssl_rfd = -1, ssl_wfd = -1;	/*- SSL_get_Xfd() are broken */
 char           *servercert, *clientca, *clientcrl;
 #endif
-char           *revision = "$Revision: 1.179 $";
+char           *revision = "$Revision: 1.180 $";
 char           *protocol = "SMTP";
 stralloc        proto = { 0 };
 static stralloc Revision = { 0 };
@@ -2100,7 +2109,25 @@ err_authfailure(char *arg1, char *arg2, int ret)
 	logerr(" AUTH ");
 	logerr(arg2);
 	logerr(" status=[");
-	logerr(ret > 0 ? retstr : "-1");
+	if (ret < 0)
+		logerr("-");
+	logerr(retstr);
+	logerrf("] auth failure\n");
+}
+
+void
+err_authinsecure(char *arg1, int ret)
+{
+	static char     retstr[FMT_ULONG];
+
+	strnum[fmt_ulong(retstr, ret > 0 ? ret : 0 - ret)] = 0;
+	logerr("qmail-smtpd: ");
+	logerrpid();
+	logerr(arg1);
+	logerr(" status=[");
+	if (ret < 0)
+		logerr("-");
+	logerr(retstr);
 	logerrf("] auth failure\n");
 }
 
@@ -2129,6 +2156,13 @@ err_noauth()
 {
 	out("504 auth type unimplemented (#5.5.1)\r\n");
 	return -1;
+}
+
+int
+err_noauthallowed()
+{
+	out("530 auth type prohibited (#5.7.0)\r\n");
+	return -2;
 }
 
 int
@@ -3348,9 +3382,8 @@ smtp_ehlo(char *arg)
 		char *no_auth_login, *no_auth_plain, *no_cram_md5,
 			 *no_cram_sha1, *no_cram_sha256, *no_cram_sha512, *no_cram_ripemd,
 			 *no_digest_md5;
-
-		no_auth_login = env_get("DISABLE_AUTH_LOGIN");
-		no_auth_plain = env_get("DISABLE_AUTH_PLAIN");
+		no_auth_login = secure_auth && !ssl ? "" : env_get("DISABLE_AUTH_LOGIN");
+		no_auth_plain = secure_auth && !ssl ? "" : env_get("DISABLE_AUTH_PLAIN");
 		no_cram_md5 = env_get("DISABLE_CRAM_MD5");
 		no_cram_sha1= env_get("DISABLE_CRAM_SHA1");
 		no_cram_sha256= env_get("DISABLE_CRAM_SHA256");
@@ -3375,7 +3408,17 @@ smtp_ehlo(char *arg)
 			if (!no_auth_plain)
 				out(" PLAIN");
 			if (!no_cram_md5)
-				out(" CRAM_MD5");
+				out(" CRAM-MD5");
+			if (!no_cram_sha1)
+				out(" CRAM-SHA1");
+			if (!no_cram_sha256)
+				out(" CRAM-SHA256");
+			if (!no_cram_sha512)
+				out(" CRAM-SHA512");
+			if (!no_cram_ripemd)
+				out(" CRAM-RIPEMD");
+			if (!no_digest_md5)
+				out(" DIGEST-MD5");
 			out("\r\n");
 			if (!no_auth_login)
 			{
@@ -3415,7 +3458,7 @@ smtp_ehlo(char *arg)
 			if (!no_digest_md5)
 			{
 				out(flag++ == 0 ? "250-AUTH=" : " ");
-				out("DIGEST_MD5");
+				out("DIGEST-MD5");
 			}
 			out("\r\n");
 		}
@@ -3709,6 +3752,8 @@ mailfrom_auth(char *arg, int len)
 			die_nomem();
 		if (!env_put2("TCPREMOTEINFO", remoteinfo))
 			die_nomem();
+		if (!env_put2("AUTHINFO", remoteinfo))
+			die_nomem();
 	}
 }
 
@@ -3746,6 +3791,8 @@ mailfrom_parms(char *arg)
 	}
 }
 
+static int      f_envret = 0, d_envret = 0, a_envret = 0;
+
 void
 smtp_mail(char *arg)
 {
@@ -3754,7 +3801,6 @@ smtp_mail(char *arg)
 #endif
 	char           *x;
 	int             ret;
-	static int      envret = 0;
 #ifdef SMTP_PLUGIN
 	char           *mesg;
 	int             i;
@@ -3771,10 +3817,10 @@ smtp_mail(char *arg)
 	 * in the previous session
 	 */
 	restore_env();
-	if (envret) /* reload control files if in an earlier session, envrules was used */
+	if (f_envret || d_envret || a_envret) /* reload control files if in an earlier session, envrules was used */
 	{
 		post_setup();
-		envret = 0;
+		f_envret = 0;
 	}
 	switch (setup_state)
 	{
@@ -3823,7 +3869,7 @@ smtp_mail(char *arg)
 	if (batvok)
 		(void) check_batv_sig(); /*- unwrap in case it's ours */
 #endif
-	switch ((envret = envrules(addr.s, "from.envrules", "FROMRULES", &errStr)))
+	switch ((f_envret = envrules(addr.s, "from.envrules", "FROMRULES", &errStr)))
 	{
 	case AM_MEMORY_ERR:
 		die_nomem();
@@ -3834,7 +3880,7 @@ smtp_mail(char *arg)
 	case 0:
 		break;
 	default:
-		if (envret > 0)
+		if (f_envret > 0)
 		{
 			/*
 			 * No point in setting Following environment variables as they have been
@@ -3844,7 +3890,7 @@ smtp_mail(char *arg)
 			 */
 			databytes_setup(); /*- so that it is possible to set DATABYTES again using envrules */
 			post_setup();
-			log_rules(remoteip, addr.s, authd ? remoteinfo : 0, envret, 0);
+			log_rules(remoteip, addr.s, authd ? remoteinfo : 0, f_envret, 0);
 		}
 		break;
 	}
@@ -4240,7 +4286,7 @@ smtp_mail(char *arg)
 void
 smtp_rcpt(char *arg)
 {
-	int             allowed_rcpthosts = 0, isgoodrcpt = 0, result = 0, denvret;
+	int             allowed_rcpthosts = 0, isgoodrcpt = 0, result = 0;
 	char           *tmp;
 #if BATV
 	int             ws = -1;
@@ -4509,7 +4555,7 @@ smtp_rcpt(char *arg)
 		return;
 	}
 	/* domain based queue */
-	switch ((denvret = domainqueue(addr.s, "domainqueue", &errStr)))
+	switch ((d_envret = domainqueue(addr.s, "domainqueue", &errStr)))
 	{
 	case AM_MEMORY_ERR:
 		die_nomem();
@@ -4520,8 +4566,8 @@ smtp_rcpt(char *arg)
 	case 0:
 		break;
 	default:
-		if (denvret > 0)
-			log_rules(remoteip, addr.s, authd ? remoteinfo : 0, denvret, 1);
+		if (d_envret > 0)
+			log_rules(remoteip, addr.s, authd ? remoteinfo : 0, d_envret, 1);
 	}
 	rcptcount++;
 	if (!stralloc_cats(&rcptto, "T"))
@@ -5061,6 +5107,24 @@ smtp_data(char *arg)
 		virus_desc = "";
 	}
 	create_logfilter();
+	if (relayclient || authd) {
+		switch ((a_envret = envrules("", "auth.envrules", "AUTHRULES", &errStr)))
+		{
+		case AM_MEMORY_ERR:
+			die_nomem();
+		case AM_FILE_ERR:
+			die_control();
+		case AM_REGEX_ERR:
+			die_regex();
+		case 0:
+			break;
+		default:
+			if (a_envret > 0) {
+				log_rules(remoteip, "authorized", authd ? remoteinfo : 0, a_envret, 0);
+			}
+			break;
+		}
+	}
 	if (qmail_open(&qqt) == -1)
 	{
 		err_qqt(remoteip);
@@ -5303,6 +5367,8 @@ auth_login(char *arg)
 {
 	int             r;
 
+	if (secure_auth && !ssl)
+		return err_noauthallowed();
 	if (*arg)
 	{
 		if ((r = b64decode((const unsigned char *) arg, str_len(arg), &user)) == 1)
@@ -5339,6 +5405,8 @@ auth_plain(char *arg)
 {
 	int             r, id = 0;
 
+	if (secure_auth && !ssl)
+		return err_noauthallowed();
 	if (*arg)
 	{
 		if ((r = b64decode((const unsigned char *) arg, str_len(arg), &slop)) == 1)
@@ -5726,7 +5794,11 @@ smtp_auth(char *arg)
 		relayclient = "";
 	case 3: /*- relayclient is not set, relaying is denied */
 		remoteinfo = user.s;
+		if (!env_unset("TCPREMOTEINFO"))
+			die_nomem();
 		if (!env_put2("TCPREMOTEINFO", remoteinfo))
+			die_nomem();
+		if (!env_put2("AUTHINFO", remoteinfo))
 			die_nomem();
 		out("235 ok, go ahead (#2.0.0)\r\n");
 		break;
@@ -5739,6 +5811,9 @@ smtp_auth(char *arg)
 	case -1:
 		err_authfailure(remoteip, user.s, j);
 		out("454 temporary authentication failure (#4.3.0)\r\n");
+		break;
+	case -2:
+		err_authinsecure(remoteip, j);
 		break;
 	default:
 		err_child();
@@ -6717,6 +6792,9 @@ qmail_smtpd(int argc, char **argv, char **envp)
 	}
 command:
 #endif
+#ifdef TLS
+	secure_auth = env_get("SECURE_AUTH") ? 1 : 0;
+#endif
 	if (commands(&ssin, cmdptr) == 0)
 		die_read();
 	die_nomem();
@@ -6748,7 +6826,7 @@ addrrelay() /*- Rejection of relay probes. */
 void
 getversion_smtpd_c()
 {
-	static char    *x = "$Id: smtpd.c,v 1.179 2014-01-13 08:06:53+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: smtpd.c,v 1.180 2014-01-22 22:46:46+05:30 Cprogrammer Exp mbhangui $";
 
 #ifdef INDIMAIL
 	if (x)

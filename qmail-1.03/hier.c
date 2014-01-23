@@ -1,5 +1,8 @@
 /*
  * $Log: hier.c,v $
+ * Revision 1.181  2014-01-22 20:37:12+05:30  Cprogrammer
+ * added hassrs.h
+ *
  * Revision 1.180  2013-12-05 18:09:02+05:30  Cprogrammer
  * added qaes
  *
@@ -1678,7 +1681,7 @@ _hier(inst_dir)
 void
 getversion_install_big_c()
 {
-	static char    *x = "$Id: hier.c,v 1.180 2013-12-05 18:09:02+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: hier.c,v 1.181 2014-01-22 20:37:12+05:30 Cprogrammer Exp mbhangui $";
 
 #ifdef INDIMAIL
 	if (x)

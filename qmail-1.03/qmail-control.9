@@ -69,6 +69,8 @@ in
 .IR from.envrules ,
 .IR fromd.envrules ,
 .IR rcpt.envrules ,
+.IR auth.envrules ,
+.IR domainqueue ,
 .IR signaturedomains ,
 .IR nosignaturedomains ,
 .IR badhost ,
@@ -156,7 +158,10 @@ control	default	used by
 .I badmailpatterns	\fR(none)	\fRqmail-smtpd
 .I goodrcptto	\fR(none)	\fRqmail-smtpd
 .I goodrcpttpatterns	\fR(none)	\fRqmail-smtpd
+.I domainqueue	\fR(none)	\fRqmail-smtpd
+.I auth.envrules	\fR(none)	\fRqmail-smtpd
 .I from.envrules	\fR(none)	\fRqmail-smptd
+.I fromd.envrules	\fR(none)	\fRspawn-filter
 .I rcpt.envrules	\fR(none)	\fRspawn-fliter
 .I badext	\fR(none)	\fRqscanq-stdin
 .I badextpatterns	\fR(none)	\fRqscanq-stdin

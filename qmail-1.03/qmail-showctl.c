@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-showctl.c,v $
+ * Revision 1.56  2014-01-22 20:38:48+05:30  Cprogrammer
+ * added hassrs.h
+ *
  * Revision 1.55  2013-11-22 11:31:37+05:30  Cprogrammer
  * added concurrencyr, concurrencyl and domainqueue control files
  *
@@ -778,7 +781,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_showctl_c()
 {
-	static char    *x = "$Id: qmail-showctl.c,v 1.55 2013-11-22 11:31:37+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-showctl.c,v 1.56 2014-01-22 20:38:48+05:30 Cprogrammer Exp mbhangui $";
 
 #ifdef INDIMAIL
 	if (x)
