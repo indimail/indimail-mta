@@ -1553,6 +1553,35 @@ Example:
 .EE
 
 DATABYTES gets set to 4 MB in for any email matching answerme@save*
+
+.TP 5
+.I rcpt.envrules
+Specific environment variables can be set for specific recipients.
+The format of this file is of the form                                       
+pat:envar1=val,envar2=val,...]
+where \fIpat\fR is a regular expression which matches a sender. envar1, envar2
+are list of environment variables to be set. If
+.I val
+is omitted, the environment variable is unset.
+
+The name of the control file can be overriden by the environment
+variable
+.BR RCPTRULES .
+
+.TP 5
+.I auth.envrules
+Specific environment variables can be set for clients who have RELAYCLIENT set or authenticate
+using SMTP AUTH. These environment variables are available for \fBqmail-queue(8)\fR.
+The format of this file is of the form                                       
+<>:envar1=val,envar2=val,...]
+envar1, envar2 are list of environment variables to be set. If
+.I val
+is omitted, the environment variable is unset.
+
+The name of the control file can be overriden by the environment
+variable
+.BR AUTHRULES .
+
 .SH SMTP PLUGINS
 \fBqmail-smtpd\fR has ability to load plugins from the plugins directory. This is done by
 using dlopen(3) on smtpd-plugin.so. The plugin file can be changed by setting environment
