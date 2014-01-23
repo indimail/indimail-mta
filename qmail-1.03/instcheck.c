@@ -1,5 +1,8 @@
 /*
  * $Log: instcheck.c,v $
+ * Revision 1.17  2014-01-23 19:03:18+05:30  Cprogrammer
+ * fixed locating files in lib64
+ *
  * Revision 1.16  2011-07-29 09:28:28+05:30  Cprogrammer
  * fixed gcc 4.6 warnings
  *
@@ -97,9 +100,22 @@ perm(prefix1, prefix2, prefix3, file, type, uid, gid, mode, should_exit)
 			} else
 			if (!str_diffn(file, "lib", 3))
 			{
-				if (stat("lib64", &st) == -1)
+				if (stat("../lib64", &st) == -1)
 				{
 					strerr_warn4(WARNING, "unable to stat .../", file, ": ", &strerr_sys);
+					return;
+				} else {
+					if (chdir("../lib64") == -1) {
+						strerr_warn4(WARNING, "unable to chdir", "../lib64", ": ", &strerr_sys);
+						return;
+					}
+				}
+				if (stat(file, &st) == -1)
+				{
+					if (errno == error_noent)
+						strerr_warn6(WARNING, prefix1, prefix2, prefix3, file, " does not exist", 0);
+					else
+						strerr_warn4(WARNING, "unable to stat .../", file, ": ", &strerr_sys);
 					return;
 				}
 				tfile = file;
@@ -290,7 +306,7 @@ main(int argc, char **argv)
 void
 getversion_instcheck_c()
 {
-	static char    *x = "$Id: instcheck.c,v 1.16 2011-07-29 09:28:28+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: instcheck.c,v 1.17 2014-01-23 19:03:18+05:30 Cprogrammer Exp mbhangui $";
 #ifdef INDIMAIL
 	if (x)
 		x = sccsidh;
