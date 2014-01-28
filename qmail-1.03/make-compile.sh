@@ -1,2 +1,6 @@
 DEFS=`uname -s | tr "[:lower:]" "[:upper:]"`
-echo exec "$CC" -D$DEFS -c '${1+"$@"}'
+if [ " $DEFS" = " DARWIN" ] ; then
+	echo exec "$CC" -Wno-deprecated-declarations -D$DEFS -c '${1+"$@"}'
+else
+	echo exec "$CC" -D$DEFS -c '${1+"$@"}'
+fi
