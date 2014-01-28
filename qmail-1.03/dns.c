@@ -69,9 +69,6 @@
 #include <netdb.h>
 #include <sys/types.h>
 #include <netinet/in.h>
-#ifdef DARWIN
-#include <nameser8_compat.h>
-#endif
 #include <arpa/nameser.h>
 #include <resolv.h>
 #include <errno.h>
@@ -689,7 +686,7 @@ dns_ptr6(ssa, ip)
 	if (!stralloc_ready(&tmpsa, iaafmt6((char *) 0, ip, "ip6.int")))
 		return DNS_MEM;
 	tmpsa.len = iaafmt6(tmpsa.s, ip, "ip6.int");
-	switch (resolve(tmpsa, T_PTR))
+	switch (resolve(&tmpsa, T_PTR))
 	{
 	case DNS_MEM:
 		return DNS_MEM;

@@ -22,13 +22,11 @@
 #include <netdb.h>
 #include <sys/types.h>
 #include <netinet/in.h>
-#ifdef DARWIN
-#include <nameser8_compat.h>
-#endif
 #include <arpa/nameser.h>
 #include <resolv.h>
 #include "byte.h"
 #include "str.h"
+#include "dns.h"
 #include <openssl/evp.h>
 
 char           *
