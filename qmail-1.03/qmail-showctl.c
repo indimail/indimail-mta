@@ -510,7 +510,7 @@ main(int argc, char **argv)
 	do_lst("signaturedomains", "No DKIM signature domains.", "DKIM signature domain(s): ", "");
 	do_str("queue_base", 0, (qbase = env_get("QUEUE_BASE")) ? qbase : auto_qmail, "Base queue directory: ");
 #ifdef BATV
-	do_str("signkey","0","No BATV sign key","BATV sign key: ");
+	do_str("signkey", 0, "No BATV sign key", "BATV sign key: ");
 	do_int("signkeystale","7","BATV sign key stale is set to ","");
 	do_lst("nosignhosts","Nothing defined.",""," will be excluded for BATV signing (remote hosts).");
 	do_lst("nosignmydoms","Nothing defined.",""," will be excluded for BATV signing (local domain).");
