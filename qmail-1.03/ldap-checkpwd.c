@@ -273,7 +273,7 @@ ldap_lookup(char *login, char *password, char **error, uid_t *userId, gid_t *gro
 			switch (*(ptr + 1))
 			{
 			case '%':
-				if (!stralloc_catb(&filter, "%", 1)); {
+				if (!stralloc_catb(&filter, "%", 1)) {
 					if (error)
 						*error = "out of memory";
 					return(-1);
