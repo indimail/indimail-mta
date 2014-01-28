@@ -13,7 +13,7 @@
 
 static int
 oneread(op, fd, buf, len)
-	register int    (*op) ();
+	register ssize_t (*op) ();
 	register int    fd;
 	register char  *buf;
 	register int    len;
