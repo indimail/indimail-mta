@@ -255,7 +255,7 @@ die_nomem()
 }
 
 void
-die_chdir(dir)
+die_chdir(char *dir)
 {
 	logerr("chdir: ");
 	logerr(dir);
@@ -535,7 +535,7 @@ main(int argc, char **argv)
 void
 usage(void)
 {
-	logerr(__progname);
+	logerr((char *) __progname);
 	logerr(" [options]\n");
 	logerr("  -e            use extended POSIX regular expressions\n");
 	logerr("  -h, -?        this help message\n");
@@ -579,7 +579,7 @@ read_file(const char *filename)
 	if ((fd = open(filename, (O_RDONLY | O_NOFOLLOW), 0)) == -1)
 	{
 		logerr("open: ");
-		logerr(filename);
+		logerr((char *) filename);
 		logerr(": ");
 		logerr(error_str(errno));
 		logerrf("\n");
@@ -588,7 +588,7 @@ read_file(const char *filename)
 	if (fstat(fd, &fd_stat))
 	{
 		logerr("fstat: ");
-		logerr(filename);
+		logerr((char *) filename);
 		logerr(": ");
 		logerr(error_str(errno));
 		logerrf("\n");
@@ -609,7 +609,7 @@ read_file(const char *filename)
 	{
 		free(buff);
 		close(fd);
-		logerr(__progname);
+		logerr((char *) __progname);
 		logerrf(": read too short\n");
 		return NULL;
 	}
