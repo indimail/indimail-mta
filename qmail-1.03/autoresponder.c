@@ -104,7 +104,7 @@
 
 int             opt_quiet, opt_copyinput, opt_nosend, opt_nolinks, msgfilefd, fixed_subject;
 int             liphostok, dtline_len, opt_laxmode;
-unsigned int    opt_maxmsgs = 1;
+unsigned long   opt_maxmsgs = 1;
 time_t          when, opt_timelimit = 86400 * 7; /*- RFC 3834 */
 char           *opt_subject_prefix = "Autoreply: Re: ";
 char           *argv0, *dtline, *recipient, *from_addr = 0;

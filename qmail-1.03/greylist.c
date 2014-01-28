@@ -135,7 +135,7 @@ greylist(gip, connectingip, from, tolist, tolen, timeoutfn, errfn)
 	}
 	if (sockfd == -1)
 	{
-		if (scan_ip_port(gip, DEFAULTGREYIP, DEFAULTGREYPORT, &ip, &port) == -1)
+		if (scan_ip_port(gip, DEFAULTGREYIP, DEFAULTGREYPORT, &ip, (unsigned int *) &port) == -1)
 			return (errfn ? fn_handler(errfn, 0, 0) : -1);
 		if ((sockfd = connect_udp(ip, port, errfn)) == -1)
 			return (errfn ? fn_handler(errfn, 0, 0) : -1);

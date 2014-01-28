@@ -587,7 +587,7 @@ log_quit()
 	char            strnum[FMT_ULONG];
 
 	my_log("acct:");
-	my_log(logs_pidhostinfo);
+	my_log(logs_pidhostinfo.s);
 	my_log("logout ");
 	strnum[fmt_ulong(strnum, log_bytes)] = 0;
 	my_log(strnum);
@@ -677,7 +677,7 @@ main(argc, argv)
 #ifdef __mLOGGING
 	log_init();
 	my_log("acct:");
-	my_log(logs_pidhostinfo);
+	my_log(logs_pidhostinfo.s);
 	my_logf("login\n");
 #endif /* __mLOGGING */
 	if (!argv[1])

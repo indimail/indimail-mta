@@ -51,10 +51,10 @@ log_file(const char *h, const char *d, const char *m)
 {
 	if (!flaglog)
 		return;
-	my_puts(h);
-	my_puts(d);
+	my_puts((char *) h);
+	my_puts((char *) d);
 	my_puts(": ");
-	my_puts(m);
+	my_puts((char *) m);
 	my_puts("\n");
 	if (substdio_flush(&ss1) == -1)
 		_exit(111);
