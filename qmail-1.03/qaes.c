@@ -24,6 +24,7 @@
 #include "stralloc.h"
 #include "base64.h"
 #include "getln.h"
+#include "scan.h"
 #include "sgetopt.h"
 #include "error.h"
 
@@ -180,7 +181,7 @@ main(int argc, char **argv)
 	char           *plaintext;
 	unsigned char  *key_data = 0, *ciphertext;
 	unsigned int    salt[] = { 12345, 54321 };
-	int             key_data_len, i, opt, len, encode = 1, match,
+	int             key_data_len, opt, len, encode = 1, match,
 					ignore_newline = 0, error_count = 0;
 	/*
 	 * "opaque" encryption, decryption ctx structures that libcrypto uses to record
@@ -203,7 +204,7 @@ main(int argc, char **argv)
 			key_data_len = str_len(optarg);
 			break;
 		case 's':
-			scan_int(optarg, &salt[0]);
+			scan_int(optarg, (int *) &salt[0]);
 			salt[1] = reversDigits(salt[0]);
 			break;
 		case 'd':
@@ -242,7 +243,7 @@ main(int argc, char **argv)
 			len = user.len;
 			ciphertext = aes_encrypt(&en, (unsigned char *) user.s, &len);
 			if (len) {
-				if (!stralloc_copyb(&temp, ciphertext, len))
+				if (!stralloc_copyb(&temp, (char *) ciphertext, len))
 					my_error("qaes: out of memory", 0, MEM_ERR);
 				if ((opt = b64encode(&temp, &userout))) {
 					logerrf("qaes: base64 encode failed");
@@ -263,7 +264,7 @@ main(int argc, char **argv)
 				len = 0;
 			} else {
 				len = userout.len;
-				plaintext = (char *) aes_decrypt(&de, userout.s, &len);
+				plaintext = (char *) aes_decrypt(&de, (unsigned char *) userout.s, &len);
 			}
 			if (len) {
 				if (substdio_bput(&ssout, plaintext, len) == -1)
