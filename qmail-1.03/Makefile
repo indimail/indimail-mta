@@ -524,6 +524,10 @@ compile trydrent.c direntry.h1 direntry.h2
 	&& cat direntry.h2 || cat direntry.h1 ) > direntry.h
 	rm -f trydrent.o
 
+dns.h: \
+compile dns.h1 trynameser.sh
+	(sh ./trynameser.sh) > dns.h
+
 dns.lib: \
 tryrsolv.c compile load socket.lib dns.o scan_xlong.o socket_v6any.o \
 socket_v4mappedprefix.o ipalloc.o ip.o strsalloc.o socket.lib \
@@ -2110,7 +2114,7 @@ socket_v4mappedprefix.o socket_v6any.o str.a stralloc.a alloc.a dns.lib
 	scan_xlong.o scan_ulong.o ip.o ipalloc.o error.o strsalloc.o fmt_str.o \
 	socket_v4mappedprefix.o socket_v6any.o str.a stralloc.a alloc.a `cat dns.lib` -lcrypto
 
-dns_text.o: compile dns_text.c domainkeys.h byte.h
+dns_text.o: compile dns_text.c domainkeys.h byte.h dns.h
 	./compile -DDOMAIN_KEYS dns_text.c
 
 testtrace.o: compile testtrace.c dktrace.h
@@ -4032,7 +4036,8 @@ sgetopt.o subgetopt.o getln.o getln2.o error.o error_str.o
 
 qaes.o: \
 compile qaes.c substdio.h str.h stralloc.h base64.h \
-getln.h sgetopt.h error.h fmt.h
+getln.h sgetopt.h error.h fmt.h scan.h
+	./compile qaes.c
 
 qarf: \
 load  qarf.o error.o substdi.o substdo.o stralloc_opys.o stralloc_opyb.o \
