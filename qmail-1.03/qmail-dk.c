@@ -613,7 +613,7 @@ main(int argc, char *argv[])
 	relayclient = (env_get("RELAYCLIENT") || env_get("AUTHINFO")) ? "" : 0;
 	if (dkverify && relayclient && env_get("RELAYCLIENT_NODKVERIFY")) {
 		execv(*binqqargs, binqqargs);
-		die(120, 0);
+		die(120);
 	}
 	if (!dksign && !dkverify && relayclient) {
 		if (!(dksign = env_get("DKKEY"))) {
