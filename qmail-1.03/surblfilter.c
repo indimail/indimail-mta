@@ -29,9 +29,6 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
-#ifdef DARWIN
-#include <nameser8_compat.h>
-#endif
 #include <arpa/nameser.h>
 #include <resolv.h>
 #include <netdb.h>
