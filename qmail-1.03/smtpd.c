@@ -1,5 +1,8 @@
 /*
  * $Log: smtpd.c,v $
+ * Revision 1.181  2014-01-29 14:04:06+05:30  Cprogrammer
+ * made domainqueue file configurable through env variable DOMAINQUEUE
+ *
  * Revision 1.180  2014-01-22 22:46:46+05:30  Cprogrammer
  * fixed DISABLE_AUTH_LOGIN, DISABLE_AUTH_PLAIN, DISABLE_CRAM_MD5,
  * DISABLE_CRAM_SHA1, DISABLE_CRAM_SHA256, DISABLE_CRAM_SHA512, CRAM_RIPEMD,
@@ -703,7 +706,7 @@ int             secure_auth = 0;
 int             ssl_rfd = -1, ssl_wfd = -1;	/*- SSL_get_Xfd() are broken */
 char           *servercert, *clientca, *clientcrl;
 #endif
-char           *revision = "$Revision: 1.180 $";
+char           *revision = "$Revision: 1.181 $";
 char           *protocol = "SMTP";
 stralloc        proto = { 0 };
 static stralloc Revision = { 0 };
@@ -4555,7 +4558,7 @@ smtp_rcpt(char *arg)
 		return;
 	}
 	/* domain based queue */
-	switch ((d_envret = domainqueue(addr.s, "domainqueue", &errStr)))
+	switch ((d_envret = domainqueue(addr.s, "domainqueue", "DOMAINQUEUE", &errStr)))
 	{
 	case AM_MEMORY_ERR:
 		die_nomem();
@@ -6826,7 +6829,7 @@ addrrelay() /*- Rejection of relay probes. */
 void
 getversion_smtpd_c()
 {
-	static char    *x = "$Id: smtpd.c,v 1.180 2014-01-22 22:46:46+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: smtpd.c,v 1.181 2014-01-29 14:04:06+05:30 Cprogrammer Exp mbhangui $";
 
 #ifdef INDIMAIL
 	if (x)

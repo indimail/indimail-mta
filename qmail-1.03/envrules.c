@@ -1,5 +1,8 @@
 /*
  * $Log: envrules.c,v $
+ * Revision 1.15  2014-01-29 14:06:00+05:30  Cprogrammer
+ * made domainqueue file configurable through env variable DOMAINQUEUE
+ *
  * Revision 1.14  2013-11-21 15:40:12+05:30  Cprogrammer
  * added domainqueue functionality
  *
@@ -129,7 +132,7 @@ envrules(char *email, char *envrules_f, char *rulesfile, char **errStr)
 }
 
 int
-domainqueue(char *email, char *domainqueue_f, char **errStr)
+domainqueue(char *email, char *domainqueue_f, char *domainqueue, char **errStr)
 {
 	int             len, count;
 	char           *ptr, *cptr, *domain;
@@ -137,7 +140,9 @@ domainqueue(char *email, char *domainqueue_f, char **errStr)
 
 	if (errStr)
 		*errStr = 0;
-	if ((count = control_readfile(&rules, domainqueue_f, 0)) == -1)
+	if (!(ptr = env_get(domainqueue)))
+		ptr = domainqueue_f;
+	if ((count = control_readfile(&rules, ptr, 0)) == -1)
 	{
 		if (errStr)
 			*errStr = error_str(errno);
@@ -215,7 +220,7 @@ parse_env(char *envStrings)
 void
 getversion_envrules_c()
 {
-	static char    *x = "$Id: envrules.c,v 1.14 2013-11-21 15:40:12+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: envrules.c,v 1.15 2014-01-29 14:06:00+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
