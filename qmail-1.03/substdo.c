@@ -1,5 +1,8 @@
 /*
  * $Log: substdo.c,v $
+ * Revision 1.5  2014-01-29 14:04:26+05:30  Cprogrammer
+ * fixed compilation warnings
+ *
  * Revision 1.4  2008-09-16 08:27:09+05:30  Cprogrammer
  * added substdio_putalign
  *
@@ -171,7 +174,7 @@ substdio_putsflush(s, buf)
 void
 getversion_substdo_c()
 {
-	static char    *x = "$Id: substdo.c,v 1.4 2008-09-16 08:27:09+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: substdo.c,v 1.5 2014-01-29 14:04:26+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-pop3d.c,v $
+ * Revision 1.11  2014-01-29 14:03:26+05:30  Cprogrammer
+ * BUG - use logs_pidhostinfo.s instead of logs_pidhostinfo
+ *
  * Revision 1.10  2009-04-11 19:46:40+05:30  Cprogrammer
  * added logging information to fd 5
  *
@@ -695,7 +698,7 @@ main(argc, argv)
 void
 getversion_qmail_pop3d_c()
 {
-	static char    *x = "$Id: qmail-pop3d.c,v 1.10 2009-04-11 19:46:40+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: qmail-pop3d.c,v 1.11 2014-01-29 14:03:26+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

@@ -1,5 +1,8 @@
 /*
  * $Log: cleanq.c,v $
+ * Revision 1.5  2014-01-29 13:59:37+05:30  Cprogrammer
+ * fixed compilation warnings
+ *
  * Revision 1.4  2013-08-27 08:19:10+05:30  Cprogrammer
  * use sticky bit definition from header file
  *
@@ -236,7 +239,7 @@ main(int argc, char **argv)
 void
 getversion_cleanq_c()
 {
-	static char    *x = "$Id: cleanq.c,v 1.4 2013-08-27 08:19:10+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: cleanq.c,v 1.5 2014-01-29 13:59:37+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

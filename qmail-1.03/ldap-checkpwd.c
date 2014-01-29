@@ -1,5 +1,8 @@
 /*-
  * $Log: ldap-checkpwd.c,v $
+ * Revision 1.6  2014-01-29 14:00:56+05:30  Cprogrammer
+ * BUG - removed extra semicolon
+ *
  * Revision 1.5  2011-01-18 21:16:33+05:30  Cprogrammer
  * conditional compilation of ldap code in ldap-checkpwd.c
  *
@@ -483,7 +486,7 @@ main(argc, argv)
 void
 getversion_ldap_checkpwd_c()
 {
-	static char    *x = "$Id: ldap-checkpwd.c,v 1.5 2011-01-18 21:16:33+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: ldap-checkpwd.c,v 1.6 2014-01-29 14:00:56+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

@@ -1,5 +1,8 @@
 /*
  * $Log: substdi.c,v $
+ * Revision 1.4  2014-01-29 14:04:20+05:30  Cprogrammer
+ * fixed compilation warnings
+ *
  * Revision 1.3  2004-10-22 20:31:08+05:30  Cprogrammer
  * added RCS id
  *
@@ -129,7 +132,7 @@ substdio_seek(s, len)
 void
 getversion_substdi_c()
 {
-	static char    *x = "$Id: substdi.c,v 1.3 2004-10-22 20:31:08+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: substdi.c,v 1.4 2014-01-29 14:04:20+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
