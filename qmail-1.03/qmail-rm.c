@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-rm.c,v $
+ * Revision 1.14  2014-01-29 14:03:50+05:30  Cprogrammer
+ * fixed compilation warnings
+ *
  * Revision 1.13  2013-12-04 15:45:47+05:30  Cprogrammer
  * added q option in getopt
  *
@@ -186,7 +189,7 @@ char           *mk_hashpath(char *, int);
 char           *mk_newpath(char *, int);
 int             rename(const char *, const char *);
 
-const char      cvsrid[] = "$Id: qmail-rm.c,v 1.13 2013-12-04 15:45:47+05:30 Cprogrammer Exp mbhangui $";
+const char      cvsrid[] = "$Id: qmail-rm.c,v 1.14 2014-01-29 14:03:50+05:30 Cprogrammer Exp mbhangui $";
 
 /*- globals */
 extern const char *__progname;
@@ -1089,7 +1092,7 @@ digits(unsigned long num)
 void
 getversion_qmail_rm_c()
 {
-	static char    *x = "$Id: qmail-rm.c,v 1.13 2013-12-04 15:45:47+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-rm.c,v 1.14 2014-01-29 14:03:50+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

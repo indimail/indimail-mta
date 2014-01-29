@@ -7,6 +7,9 @@
  * Saju Pillai (saju.pillai@gmail.com)
  *
  * $Log: qaes.c,v $
+ * Revision 1.3  2014-01-29 14:01:58+05:30  Cprogrammer
+ * fixed compilation warnings
+ *
  * Revision 1.2  2013-12-05 18:07:36+05:30  Cprogrammer
  * salt can now be specified on command line
  *
@@ -297,7 +300,7 @@ main(int argc, char **argv)
 void
 getversion_qaes_c()
 {
-	static char    *x = "$Id: qaes.c,v 1.2 2013-12-05 18:07:36+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qaes.c,v 1.3 2014-01-29 14:01:58+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

@@ -1,5 +1,8 @@
 /*
  * $Log: greylist.c,v $
+ * Revision 1.4  2014-01-29 14:00:42+05:30  Cprogrammer
+ * fixed compilation warnings
+ *
  * Revision 1.3  2009-10-28 13:34:29+05:30  Cprogrammer
  * fix scan_ip_port()
  * remove newline as delimiter
@@ -168,7 +171,7 @@ greylist(gip, connectingip, from, tolist, tolen, timeoutfn, errfn)
 void
 getversion_greylist_c()
 {
-	static char    *x = "$Id: greylist.c,v 1.3 2009-10-28 13:34:29+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: greylist.c,v 1.4 2014-01-29 14:00:42+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
