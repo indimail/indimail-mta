@@ -184,7 +184,7 @@ main(int argc, char **argv)
 	char           *plaintext;
 	unsigned char  *key_data = 0, *ciphertext;
 	unsigned int    salt[] = { 12345, 54321 };
-	int             key_data_len, opt, len, encode = 1, match,
+	int             key_data_len = 0, opt, len, encode = 1, match,
 					ignore_newline = 0, error_count = 0;
 	/*
 	 * "opaque" encryption, decryption ctx structures that libcrypto uses to record
