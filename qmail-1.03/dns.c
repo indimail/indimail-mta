@@ -1,5 +1,9 @@
 /*
  * $Log: dns.c,v $
+ * Revision 1.28  2014-01-29 13:56:22+05:30  Cprogrammer
+ * fix for OS X
+ * fixed wrong address passed to resolve()
+ *
  * Revision 1.27  2012-10-09 18:09:20+05:30  Cprogrammer
  * removed DISABLE_CNAME_LOOKUP
  *
@@ -1135,7 +1139,7 @@ dns_maps(sa, ip, suffix)
 void
 getversion_dns_c()
 {
-	static char    *x = "$Id: dns.c,v 1.27 2012-10-09 18:09:20+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: dns.c,v 1.28 2014-01-29 13:56:22+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
