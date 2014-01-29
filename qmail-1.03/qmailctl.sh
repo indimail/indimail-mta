@@ -11,6 +11,9 @@
 ### END INIT INFO
 
 # $Log: qmailctl.sh,v $
+# Revision 1.42  2014-01-29 14:02:13+05:30  Cprogrammer
+# fix for Fedora where /etc/sysconfig/network is missing or does not have NETWORKING defined
+#
 # Revision 1.41  2013-11-25 17:09:54+05:30  Cprogrammer
 # updated for Debian runlevel 2
 #
@@ -248,6 +251,8 @@ case "$SYSTEM" in
 		if [ ${NETWORKING} = "no" ] ; then
 			exit 0
 		fi
+	else # FC19, FC20, ...
+		NETWORKING=yes
 	fi
 	;;
 	*)
