@@ -1,5 +1,8 @@
 /*
  * $Log: autoresponder.c,v $
+ * Revision 1.28  2014-01-29 13:57:54+05:30  Cprogrammer
+ * changed data type for opt_maxmsgs to unsigned long
+ *
  * Revision 1.27  2012-08-16 07:58:56+05:30  Cprogrammer
  * added description for -T option
  *
@@ -1296,7 +1299,7 @@ main(int argc, char *argv[])
 void
 getversion_qmail_autoresponder_c()
 {
-	static char    *x = "$Id: autoresponder.c,v 1.27 2012-08-16 07:58:56+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: autoresponder.c,v 1.28 2014-01-29 13:57:54+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
