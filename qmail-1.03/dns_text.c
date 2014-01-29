@@ -1,5 +1,8 @@
 /*
  * $Log: dns_text.c,v $
+ * Revision 1.7  2014-01-29 14:00:24+05:30  Cprogrammer
+ * fix for OS x
+ *
  * Revision 1.6  2013-08-12 11:55:52+05:30  Cprogrammer
  * made dk_strdup() visible for both dk and dkim
  *
@@ -119,7 +122,7 @@ dns_text(char *dn)
 void
 getversion_dns_text_c()
 {
-	static char    *x = "$Id: dns_text.c,v 1.6 2013-08-12 11:55:52+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: dns_text.c,v 1.7 2014-01-29 14:00:24+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

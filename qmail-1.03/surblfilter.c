@@ -1,5 +1,8 @@
 /*
  * $Log: surblfilter.c,v $
+ * Revision 1.7  2014-01-29 14:06:21+05:30  Cprogrammer
+ * fix for nameser_commpat.h on OS X
+ *
  * Revision 1.6  2011-11-07 09:36:14+05:30  Cprogrammer
  * use ERROR_FD, CUSTOM_ERR_FD for standard error
  *
@@ -887,7 +890,7 @@ main(int argc, char **argv)
 void
 getversion_surblfilter_c()
 {
-	static char    *x = "$Id: surblfilter.c,v 1.6 2011-11-07 09:36:14+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: surblfilter.c,v 1.7 2014-01-29 14:06:21+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
