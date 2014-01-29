@@ -1,5 +1,8 @@
 /*
  * $Log: envrules.h,v $
+ * Revision 1.7  2014-01-29 14:06:10+05:30  Cprogrammer
+ * made domainqueue file configurable through env variable DOMAINQUEUE
+ *
  * Revision 1.6  2013-11-21 15:40:24+05:30  Cprogrammer
  * added domainqueue functionality
  *
@@ -22,7 +25,7 @@
 #ifndef _ENVRULES_H
 #define _ENVRULES_H
 int             envrules(char *, char *, char *, char **);
-int             domainqueue(char *, char *, char **);
+int             domainqueue(char *, char *, char *, char **);
 
 #ifndef AM_MEMORY_ERR
 #define  AM_MEMORY_ERR -1
