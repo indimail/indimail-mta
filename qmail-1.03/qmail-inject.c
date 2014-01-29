@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-inject.c,v $
+ * Revision 1.27  2014-01-29 14:02:54+05:30  Cprogrammer
+ * made domainqueue file configurable through env variable DOMAINQUEUE
+ *
  * Revision 1.26  2014-01-22 20:38:19+05:30  Cprogrammer
  * added hassrs.h
  *
@@ -1006,7 +1009,7 @@ finishheader()
 		else
 		if (ret == -4)
 			die_regex();
-		if ((ret = domainqueue(satmp.s, "domainqueue", 0)) == -1)
+		if ((ret = domainqueue(satmp.s, "domainqueue", "DOMAINQUEUE", 0)) == -1)
 			die_nomem();
 		else
 		if (ret == -2)
@@ -1317,7 +1320,7 @@ main(argc, argv)
 void
 getversion_qmail_inject_c()
 {
-	static char    *x = "$Id: qmail-inject.c,v 1.26 2014-01-22 20:38:19+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-inject.c,v 1.27 2014-01-29 14:02:54+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
