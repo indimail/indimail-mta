@@ -1,5 +1,8 @@
 /*
  * $Log: action.c,v $
+ * Revision 1.2  2014-01-30 00:25:18+05:30  Cprogrammer
+ * fixed compilation warnings
+ *
  * Revision 1.1  2013-05-15 00:29:40+05:30  Cprogrammer
  * Initial revision
  *
@@ -92,13 +95,9 @@ shell_exec(struct entry_conf *cur_cfg, char *line, int nmatch)
 #ifdef HAVE_PCRE_H
 	if (nmatch > 1) {
 
-		int             i;
-		char           *aux;
-		char           *arg;
-		int             argsize;
 		char          **args_list;
 
-		pcre_get_substring_list(line, cur_cfg->rg_sub, nmatch, &args_list);
+		pcre_get_substring_list(line, cur_cfg->rg_sub, nmatch, (const char ***) &args_list);
 		cmd = substitute_args(cur_cfg->cmd, args_list, nmatch);
 		if (!cmd) {
 			printf("[!] Error while creating match command\n");
