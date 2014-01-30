@@ -1,5 +1,8 @@
 /*
  * $Log: authpgsql.c,v $
+ * Revision 2.2  2014-01-30 13:59:55+05:30  Cprogrammer
+ * fixed compilation warnings
+ *
  * Revision 2.1  2013-05-15 01:09:57+05:30  Cprogrammer
  * pgsql authmodule
  *
@@ -16,7 +19,7 @@
 #include <errno.h>
 
 #ifndef lint
-static char     sccsid[] = "$Id: authpgsql.c,v 2.1 2013-05-15 01:09:57+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: authpgsql.c,v 2.2 2014-01-30 13:59:55+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef HAVE_PGSQL
@@ -279,10 +282,11 @@ main(int argc, char **argv)
 }
 
 #else
-#warning "not compiled with -DINDIMAIL"
+#include <string.h>
+#warning "not compiled with -DHAVE_PGSQL"
 
 int
-main(int argc, char *argv)
+main(int argc, char **argv)
 {
 	execvp(argv[1], argv + 1);
 	printf("454-%s (#4.3.0)\r\n", strerror(errno));
