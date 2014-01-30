@@ -381,7 +381,7 @@ com_stat(arg)
 		return (1);
 	}
 	printf("Statistics for `%s':\n", arg);
-	printf("%s has %d link%s, and is %ld byte%s in length.\n", arg, finfo.st_nlink,
+	printf("%s has %ld link%s, and is %ld byte%s in length.\n", arg, finfo.st_nlink,
 	 (finfo.st_nlink == 1) ? "" : "s", (long) finfo.st_size, (finfo.st_size == 1) ? "" : "s");
 	printf("Inode Last Change at: %s", ctime(&finfo.st_ctime));
 	printf("      Last access at: %s", ctime(&finfo.st_atime));
