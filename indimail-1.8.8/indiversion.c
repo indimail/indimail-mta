@@ -1,5 +1,9 @@
 /*
  * $Log: indiversion.c,v $
+ * Revision 2.137  2014-01-30 14:55:25+05:30  Cprogrammer
+ * added getversion_setuserid_c()
+ * workaround for git cloberring $Id: field
+ *
  * Revision 2.136  2011-12-10 14:56:44+05:30  Cprogrammer
  * added hmac_256()
  *
@@ -528,7 +532,7 @@
 #endif
 
 #ifndef	lint
-static char     sccsid[] = "$Id: indiversion.c,v 2.136 2011-12-10 14:56:44+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: indiversion.c,v 2.137 2014-01-30 14:55:25+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 void            getversion_indimail_settings_c();
@@ -817,6 +821,7 @@ void            getversion_hmac_ripemd_c();
 void            getversion_sha1_c();
 void            getversion_ripemd_c();
 void            getversion_digest_md5_c();
+void            getversion_setuserid_c();
 
 void            getversion();
 
@@ -1253,6 +1258,7 @@ getversion(char *id)
 	getversion_sha1_c();
 	getversion_ripemd_c();
 	getversion_digest_md5_c();
+	getversion_setuserid_c();
 	if(id)
 		printf("%s\nIndiMail Version %s\n", id, VERSION);
 	else
@@ -1275,6 +1281,7 @@ Ident(char *pgname, int mode)
 {
 	FILE           *fp;
 	char            buffer[MAX_BUFF];
+	char            idbuf[] = "# %Id: "; /*- workaround for git bug */
 
 	if (mode == 1)
 		snprintf(buffer, MAX_BUFF, "strings %s/bin/%s", INDIMAILDIR, pgname);
@@ -1291,14 +1298,14 @@ Ident(char *pgname, int mode)
 		perror(buffer);
 		return;
 	}
-	for(;;)
+	for(idbuf[2] = '$';;)
 	{
 		if(!fgets(buffer, MAX_BUFF - 2, fp))
 			break;
-		if(!strncmp(buffer, "$Id:", 4))
+		if(!strncmp(buffer, idbuf + 2, 4))
 			printf("%s", buffer);
 		else
-		if (!strncmp(buffer, "# $Id: ", 7))
+		if (!strncmp(buffer, idbuf, 7))
 			printf("%s", buffer + 2);
 	}
 	pclose(fp);
