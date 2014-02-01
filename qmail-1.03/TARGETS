@@ -1,3 +1,4 @@
+dns.h
 drate
 drate.1
 cidr
