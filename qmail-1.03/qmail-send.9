@@ -374,19 +374,21 @@ Default:
 
 .SH "External BOUNCE Processor"
 .B qmail-send
-will execuate an external program defined by the environment variable
+will execute an external program defined by the environment variable
 .I BOUNCEPROCESSOR
 when delivery to a recipient fails. The external program will be called with the following
 arguments
 
+.I original_message_file
 .I bounce_file
 .I bounce_report
 .I bounce_sender
 .I original_recipient
 .I bounce_recipient
 
-The external program runs with uid of \fIqmails\fR. You should be very careful in writing
-your own bounce processor. If the bounce processor program returns non-zero exit status,
+The external program runs with uid of \fIqmails\fR. If the bounce script exits 1, the bounce is
+discarded. You should be very careful in writing your own bounce processor. If the bounce
+processor program returns non-zero exit status (other than an exit value of 1),
 \fBqmail-send\fR will continue to retry the script. Also just like bounces, bounce processor
 is not crash-proof. In case your bounce processor genuinely returns non-zero exit status and
 you shut qmail-send, you will not be able to again get back to retry the bounce that the processor
