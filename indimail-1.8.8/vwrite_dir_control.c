@@ -105,7 +105,7 @@ vwrite_dir_control(char *table_name, vdir_type * vdir, char *domain, uid_t dummy
 	if (ptr)
 	{
 		snprintf(tmpbuf, MAX_BUFF, "%s/.filesystems", ptr);
-		if (update_file(tmpbuf, table_name, 0600))
+		if (update_file(tmpbuf, table_name, 0640))
 		{
 			perror(tmpbuf);
 			if (chown(tmpbuf, uid, gid) == -1);

@@ -94,7 +94,7 @@ vcreate_dir_control(char *filename, char *domain)
 	if (ptr)
 	{
 		snprintf(tmpbuf, MAX_BUFF, "%s/.filesystems", ptr);
-		if (update_file(tmpbuf, filename, 0600))
+		if (update_file(tmpbuf, filename, 0640))
 		{
 			if (!getuid() || !geteuid())
 				if (chown(tmpbuf, uid, gid) == -1)

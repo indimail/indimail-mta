@@ -80,7 +80,7 @@ vdel_dir_control(char *domain)
 			mysql_perror("vdel_dir_control: dir_control%s: %s", ptr, SqlBuf);
 			continue;
 		}
-		remove_line(buffer, tmpbuf, 0, 0600);
+		remove_line(buffer, tmpbuf, 0, 0640);
 	}
 	fclose(fp);
 	return (0);
