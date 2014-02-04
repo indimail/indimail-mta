@@ -1,3 +1,4 @@
+#include <arpa/nameser_compat.h>
 /*
  * $Log: dns.h1,v $
  * Revision 1.8  2005-06-15 20:28:08+05:30  Cprogrammer
