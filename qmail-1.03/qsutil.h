@@ -1,5 +1,8 @@
 /*
  * $Log: qsutil.h,v $
+ * Revision 1.8  2014-02-05 01:05:08+05:30  Cprogrammer
+ * added prototype for log7()
+ *
  * Revision 1.7  2013-09-23 22:13:25+05:30  Cprogrammer
  * added log functions which do not flush
  *
