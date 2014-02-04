@@ -26,6 +26,7 @@ void            log2_noflush(char *, char *);
 void            log3(char *, char *, char *);
 void            log4(char *, char *, char *, char *);
 void            log5(char *, char *, char *, char *, char *);
+void            log7(char *, char *, char *, char *, char *, char *, char *);
 void            logsa(stralloc *);
 void            logsa_noflush(stralloc *);
 void            nomem(void);
