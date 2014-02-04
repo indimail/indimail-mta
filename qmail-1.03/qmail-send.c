@@ -1045,44 +1045,44 @@ addbounce(id, recip, report)
 }
 
 int
-bounce_process(struct qmail *qq, char *bouncefn, char *bounce_report, char *origrecip,
+bounce_processor(struct qmail *qq, char *messfn, char *bouncefn, char *bounce_report, char *origrecip,
 	char *sender, char *recipient)
 {
-	char           *prog, *(args[7]);
-	int             child, wstat;
+	char           *prog, *(args[8]);
+	int             i, child, wstat;
 
-	if (!qq->flagerr)
+	if (qq->flagerr)
+		return (0);
+	if (!(prog = env_get("BOUNCEPROCESSOR")))
+		return (0);
+	switch (child = fork())
 	{
-		log5("bounce <", sender, "> <", recipient, ">\n");
-		if (!(prog = env_get("BOUNCEPROCESSOR")))
-			return (0);
-		switch (child = fork())
-		{
-		case -1:
-			log3("alert: Unable to fork: ", error_str(errno), "\n");
-			return (1);
-		case 0:
-			args[0] = prog;
-			args[1] = bouncefn;
-			args[2] = bounce_report;
-			args[3] = sender;
-			args[4] = origrecip; /*- original recipient */
-			args[5] = recipient; /*- original sender */
-			args[6] = 0;
-			execv(*args, args);
-			log5("alert: Unable to run: ", prog, ": ", error_str(errno), "\n");
-			_exit (1);
-		}
-		wait_pid(&wstat, child);
-		if (wait_crashed(wstat))
-		{
-			log5("alert: ", prog, " crashed: ", error_str(errno), "\n");
-			return (1);
-		}
-		return (wait_exitcode(wstat));
-	} 
-	qq->flagerr = 1;
-	return (1);
+	case -1:
+		log3("alert: Unable to fork: ", error_str(errno), "\n");
+		return (111);
+	case 0:
+		args[0] = prog;
+		args[1] = messfn; /*- message filename */
+		args[2] = bouncefn; /*- bounce message filename */
+		args[3] = bounce_report; /*- bounce report */
+		args[4] = sender; /*- bounce sender */
+		args[5] = origrecip; /*- original recipient */
+		args[6] = recipient; /*- original sender */
+		args[7] = 0;
+		execv(*args, args);
+		log5("alert: Unable to run: ", prog, ": ", error_str(errno), "\n");
+		_exit (111);
+	}
+	wait_pid(&wstat, child);
+	if (wait_crashed(wstat))
+	{
+		log5("alert: ", prog, " crashed: ", error_str(errno), "\n");
+		return (111);
+	}
+	i = wait_exitcode(wstat);
+	strnum2[fmt_ulong(strnum2, i)] = 0;
+	log7("bounce processor <", sender, "> <", recipient, "> exit status ", strnum2, "\n");
+	return (i);
 }
 
 void
@@ -1413,10 +1413,26 @@ I tried to deliver a bounce message to this address, but the bounce bounced!\n\
 		qmail_put(&qqt,boundary.s,boundary.len);
 		qmail_puts(&qqt,"--\n");
 #endif
-		if (bounce_process(&qqt, fn2.s, brep, orig_recip.s, bouncesender, bouncerecip)) /*- hook for processing bounce */
+ 		/*- hook for external bounce processor */
+		switch (bounce_processor(&qqt, fn.s, fn2.s, brep, orig_recip.s, bouncesender, bouncerecip))
 		{
-			log1("warning: trouble running bounce processor, will try later\n");
+		case 0:
+			break;
+		case 1: /*- discard bounce */
 			qmail_fail(&qqt);
+			qmail_close(&qqt);
+			if (unlink(fn2.s) == -1)
+			{
+				log3("warning: unable to unlink ", fn2.s, ". Will try later\n");
+				return 0;
+			}
+			log3("delete bounce: discarding ", fn2.s, "\n");
+			return 1;
+		default:
+			qmail_fail(&qqt);
+			qmail_close(&qqt);
+			log1("warning: trouble running bounce processor, will try later\n");
+			return 0;
 		}
 		qmail_from(&qqt, bouncesender);
 		qmail_to(&qqt, bouncerecip);
