@@ -42,6 +42,8 @@ clamav-0.97.?
 clamav-0.98
 private
 install-sh
+compile
+ylwrap
 missing
 configure
 config.guess
