@@ -22,6 +22,12 @@
 #ifdef HAVE_UNISTD_H
 #include <unistd.h>
 #endif
+#ifdef HAVE_STDLIB_H
+#include <stdlib.h>
+#endif
+#ifdef HAVE_STRING_H
+#include <string.h>
+#endif
 #include <signal.h>
 #ifdef HAVE_SYS_SOCKET_H
 #include <sys/socket.h>

@@ -27,7 +27,7 @@ AC_PROG_YACC
 AC_HEADER_DIRENT
 AC_HEADER_STDC
 AC_CHECK_HEADERS([fcntl.h stdarg.h stdlib.h string.h sys/time.h unistd.h getopt.h \
-				  pwd.h inttypes.h sys/param.h sys/wait.h rpc/rpc.h])
+				  pwd.h inttypes.h limits.h sys/syslimits.h sys/param.h sys/wait.h rpc/rpc.h])
 AC_CHECK_LIB(ssl, SSL_CTX_new, [AC_SUBST([LIB_SSL], ["-lssl -lcrypto"]) AC_DEFINE([HAVE_SSL], [1],[OpenSSL Library])],,-lssl -lcrypto)
 
 have_pcre=no

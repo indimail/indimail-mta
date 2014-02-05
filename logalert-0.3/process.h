@@ -24,10 +24,7 @@
 #ifdef HAVE_DIRENT_H
 #include <dirent.h>
 #endif
-#ifdef SOLARIS
-#include <limits.h>
-#endif
-#ifdef NETBSD
+#ifdef HAVE_LIMITS_H 
 #include <limits.h>
 #endif
 #ifdef HAVE_STRING_H
