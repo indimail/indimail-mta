@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-send.c,v $
+ * Revision 1.56  2014-02-10 16:49:05+05:30  Cprogrammer
+ * added discard bounce feature
+ *
  * Revision 1.55  2014-01-22 20:38:42+05:30  Cprogrammer
  * added hassrs.h
  *
@@ -3014,7 +3017,7 @@ main()
 void
 getversion_qmail_send_c()
 {
-	static char    *x = "$Id: qmail-send.c,v 1.55 2014-01-22 20:38:42+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-send.c,v 1.56 2014-02-10 16:49:05+05:30 Cprogrammer Exp mbhangui $";
 
 #ifdef INDIMAIL
 	if (x)
