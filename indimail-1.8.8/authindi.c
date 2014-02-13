@@ -1,5 +1,8 @@
 /*
  * $Log: authindi.c,v $
+ * Revision 2.24  2014-02-05 01:49:18+05:30  Cprogrammer
+ * changes to error messages if inquery/vauth_open fails
+ *
  * Revision 2.23  2013-09-04 12:49:37+05:30  Cprogrammer
  * added cases for cram_sha256, cram_sha512 and cram_ripemd
  *
@@ -83,7 +86,7 @@
 #include <stdint.h>
 
 #ifndef lint
-static char     sccsid[] = "$Id: authindi.c,v 2.23 2013-09-04 12:49:37+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: authindi.c,v 2.24 2014-02-05 01:49:18+05:30 Cprogrammer Exp mbhangui $";
 #endif
 #ifdef AUTH_SIZE
 #undef AUTH_SIZE
@@ -438,7 +441,8 @@ main(int argc, char **argv)
 		if (vauth_open((char *) 0))
 		{
 			if(!userNotFound)
-				fprintf(stderr, "%s: inquery: %s\n", prog_name, strerror(errno));
+				fprintf(stderr, "%s: %s: %s: %s\n", prog_name, Email, 
+					getenv("QUERY_CACHE") ? "inquery" : "vauth_open", errno ? strerror(errno) : "AUTHFAILURE");
 			if (auth_method > 2)
 			{
 				if (challenge)
@@ -454,7 +458,7 @@ main(int argc, char **argv)
 	if (vauth_open((char *) 0))
 	{
 		if(!userNotFound)
-			fprintf(stderr, "%s: inquery: %s\n", prog_name, strerror(errno));
+			fprintf(stderr, "%s: vauth_open: %s\n", prog_name, errno ? strerror(errno) : "AUTHFAILURE");
 		if (auth_method > 2)
 		{
 			if (challenge)
@@ -469,7 +473,13 @@ main(int argc, char **argv)
 	if (!pw)
 	{
 		if(!userNotFound)
-			fprintf(stderr, "%s: inquery: %s\n", prog_name, strerror(errno));
+#ifdef QUERY_CACHE
+			fprintf(stderr, "%s: %s: %s: %s\n", prog_name, Email, 
+				getenv("QUERY_CACHE") ? "inquery" : "vauth_open", errno ? strerror(errno) : "AUTHFAILURE");
+#else
+			fprintf(stderr, "%s: vauth_open: %s@%s: %s\n", prog_name, user, real_domain,
+				errno ? strerror(errno) : "");
+#endif
 		if (auth_method > 2)
 		{
 			if (challenge)
