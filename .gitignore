@@ -83,6 +83,8 @@ mpack-*/mpack
 mpack-*/munpack
 ripmime-*/ripmime
 ripmime-*/ripole
+logalert-*/ChangeLog
+logalert-*/NEWS
 indimail-*/ChangeLog
 indimail-*/doc/RELEASE-Notes.in
 indimail-*/doc/ChangeLog
