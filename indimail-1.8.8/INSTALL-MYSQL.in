@@ -21,11 +21,12 @@
           o mysql-5.1.40
           o mysql-5.1.44
           o mysql-5.1.48
-          o MariaDB 5.1.42
-          o MariaDB 5.1.44
-          o MariaDB 5.1.47
-          o MariaDB 5.2.4
-          o MariaDB 5.2.6
+          o mariadb 5.1.42
+          o mariadb 5.1.44
+          o mariadb 5.1.47
+          o mariadb 5.2.4
+          o mariadb 5.2.6
+          o mariadb-5.5.32
           o mysql-5.4.3-beta
           o mysql-5.5.0-m2
           o mysql-5.5.2-m2
