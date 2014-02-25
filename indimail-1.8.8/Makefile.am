@@ -158,7 +158,7 @@ indimaillibexec_SCRIPTS = overquota.sh
 
 indimailbin_SCRIPTS = versioninfo vcaliasrev logmonitor bogofilter-qfe mailzipper
 
-indimailsbin_SCRIPTS = myslave controlsync svctool cputime tls-cert-check create_services
+indimailsbin_SCRIPTS = myslave controlsync svctool cputime tls-cert-check create_services get-cert
 
 noinst_SCRIPTS = indimail.spec indimail-@VERSION@-rpmlintrc \
 	INSTALL INSTALL-RPM INSTALL-MYSQL README-CLUSTER RELEASE-Notes Quick-INSTALL \
