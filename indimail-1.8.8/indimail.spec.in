@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail.spec.in,v 2.273 2013-12-05 18:10:50+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 2.274 2014-02-25 13:07:06+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %define _unpackaged_files_terminate_build 1
 
@@ -1143,6 +1143,7 @@ fi
 %attr(555,root,qmail)                   %{_prefix}/sbin/mgmtpass
 %attr(555,root,qmail)                   %{_prefix}/sbin/myslave
 %attr(555,root,qmail)                   %{_prefix}/sbin/svctool
+%attr(555,root,qmail)                   %{_prefix}/sbin/get-cert
 %attr(555,root,qmail)                   %{_prefix}/sbin/create_services
 %attr(555,root,qmail)                   %{_prefix}/sbin/tls-cert-check
 %attr(555,root,qmail)                   %{_prefix}/sbin/testmra
