@@ -1,5 +1,10 @@
 /*
  * $Log: spawn-filter.c,v $
+ * Revision 1.61  2014-03-04 02:41:38+05:30  Cprogrammer
+ * fix BUG by doing chdir back to auto_qmail
+ * ability to have regular expressions on rate control
+ * ability to have global definition for rate control
+ *
  * Revision 1.60  2014-01-22 15:43:29+05:30  Cprogrammer
  * apply envrules for RATELIMIT_DIR
  *
@@ -759,9 +764,9 @@ get_rate(char *expression, double *rate)
 stralloc        fline = { 0 }, rate_expr = { 0 };
 
 int
-is_rate_ok(char *rate_dir, char *file)
+is_rate_ok(char *rate_dir, char *file, char *rate_exp)
 {
-	int             wfd, rfd, match, line_no, rate_int;
+	int             wfd, rfd, match, line_no, rate_int, access_flag = 0;
 	unsigned long   email_count = 0;
 	char            reset, stime[FMT_ULONG], etime[FMT_ULONG], ecount[FMT_ULONG];
 	double          conf_rate, cur_rate = 0.0;
@@ -779,51 +784,68 @@ is_rate_ok(char *rate_dir, char *file)
 	reset = ((stat(file, &statbuf) ? starttime : starttime - statbuf.st_mtime) > rate_int);
 	stime[fmt_ulong(stime, starttime)] = 0;
 	etime[fmt_ulong(etime, endtime)] = 0;
-	ecount[0] = '1';
+	ecount[0] = '1'; /*- we are delivering the first email since rate control has been imposed */
 	ecount[1] = 0;
-	if ((wfd = open_write(file)) == -1)
-		report(111, "spawn-filter: unable to write: ", file, ": ", error_str(errno), ". (#4.3.0)", 0);
-	if (lock_ex(wfd) == -1)
-		report(111, "spawn-filter: unable to lock: ", file, ": ", error_str(errno), ". (#4.3.0)", 0);
-	if ((rfd = open_read(file)) == -1)
-		report(111, "spawn-filter: unable to read: ", file, ": ", error_str(errno), ". (#4.3.0)", 0);
-	substdio_fdbuf(&ssin, read, rfd, inbuf, sizeof(inbuf));
-	for (line_no = 1;;line_no++) { /*- Line Processing */
-		if (getln(&ssin, &fline, &match, '\n') == -1)
-			report(111, "spawn-filter: unable to read: ", file, ": ", error_str(errno), ". (#4.3.0)", 0);
-		if (!match && fline.len == 0)
-			break;
-		switch (line_no)
-		{
-		case 1:
-			if (!stralloc_copy(&rate_expr, &fline))
-				report(111, "spawn-filter: out of mem: ", error_str(errno), ". (#4.3.0)", 0, 0, 0);
-			fline.len--;
-			if (!stralloc_0(&fline))
-				report(111, "spawn-filter: out of mem: ", error_str(errno), ". (#4.3.0)", 0, 0, 0);
-			get_rate(fline.s, &conf_rate);
-			break;
-		case 2:
-			if (reset)
-				continue;
-			scan_ulong(fline.s, (unsigned long *) &email_count);
-			break;
-		case 3:
-			if (reset)
-				continue;
-			scan_ulong(fline.s, (unsigned long *) &starttime);
-			stime[fmt_ulong(stime, starttime)] = 0;
-			break;
-		case 4:
-			if (reset)
-				continue;
-			/* do not divide by zero */
-			cur_rate = (endtime == starttime) ? 0 : ((float) email_count / (float) (endtime - starttime));
-			break;
-		}
+	if (rate_exp) {
+		access_flag = access(file, F_OK);
+		if ((wfd = (access_flag ? open_excl : open_write) (file)) == -1)
+			report(111, "spawn-filter: unable to write_excl: ", file, ": ", error_str(errno), ". (#4.3.0)", 0);
+		if (lock_ex(wfd) == -1)
+			report(111, "spawn-filter: unable to lock: ", file, ": ", error_str(errno), ". (#4.3.0)", 0);
+		if (!stralloc_copys(&rate_expr, rate_exp))
+			report(111, "spawn-filter: out of mem: ", error_str(errno), ". (#4.3.0)", 0, 0, 0);
+		else
+		if (!stralloc_catb(&rate_expr, "\n", 1))
+			report(111, "spawn-filter: out of mem: ", error_str(errno), ". (#4.3.0)", 0, 0, 0);
+		get_rate(rate_exp, &conf_rate);
+	} else {
+		if ((wfd = open_write(file)) == -1)
+			report(111, "spawn-filter: unable to write: ", file, ": ", error_str(errno), ". (#4.3.0)", 0);
+		if (lock_ex(wfd) == -1)
+			report(111, "spawn-filter: unable to lock: ", file, ": ", error_str(errno), ". (#4.3.0)", 0);
 	}
-	close(rfd);
-	/* 
+	if (!access_flag) /*- only if rate definition exists */
+	{
+		if ((rfd = open_read(file)) == -1)
+			report(111, "spawn-filter: unable to read: ", file, ": ", error_str(errno), ". (#4.3.0)", 0);
+		substdio_fdbuf(&ssin, read, rfd, inbuf, sizeof(inbuf));
+		for (line_no = 1;;line_no++) { /*- Line Processing */
+			if (getln(&ssin, &fline, &match, '\n') == -1)
+				report(111, "spawn-filter: unable to read: ", file, ": ", error_str(errno), ". (#4.3.0)", 0);
+			if (!match && fline.len == 0)
+				break;
+			switch (line_no)
+			{
+			case 1: /*- rate expression */
+				if (!stralloc_copy(&rate_expr, &fline))
+					report(111, "spawn-filter: out of mem: ", error_str(errno), ". (#4.3.0)", 0, 0, 0);
+				fline.len--;
+				if (!stralloc_0(&fline))
+					report(111, "spawn-filter: out of mem: ", error_str(errno), ". (#4.3.0)", 0, 0, 0);
+				get_rate(fline.s, &conf_rate);
+				break;
+			case 2: /*- email count */
+				if (reset)
+					continue;
+				scan_ulong(fline.s, (unsigned long *) &email_count);
+				break;
+			case 3: /*- start time */
+				if (reset)
+					continue;
+				scan_ulong(fline.s, (unsigned long *) &starttime);
+				stime[fmt_ulong(stime, starttime)] = 0;
+				break;
+			case 4: /*- current rate */
+				if (reset)
+					continue;
+				/* do not divide by zero */
+				cur_rate = (endtime == starttime) ? 0 : ((float) email_count / (float) (endtime - starttime));
+				break;
+			}
+		}
+		close(rfd);
+	}
+	/*-
 	 * line_no   < 1        - no point in messing with invalid data
 	 * conf_rate < 0        - update the email count, timestamps
 	 * conf_rate = 0        - defer emails
@@ -865,12 +887,13 @@ main(int argc, char **argv)
 	int             wstat, filt_exitcode;
 	pid_t           filt_pid;
 	int             pipefd[2], ret;
-	char           *spamfilterprog, *notifyaddress, *rejectspam, *spf_fn, *rate_dir;
+	char           *spamfilterprog, *notifyaddress, *rejectspam, *spf_fn, *rate_dir, *rate_exp;
 	char          **Argv;
 	stralloc        spamfilterargs = { 0 };
 	stralloc        spamfilterdefs = { 0 };
 	stralloc        rejectspamlist = { 0 };
 	stralloc        addresslist = { 0 };
+	stralloc        ratedefs = { 0 };
 	stralloc        line = { 0 };
 	int             spamcode = 0, hamcode = 1, unsurecode = 2;
 
@@ -958,8 +981,22 @@ main(int argc, char **argv)
 	if ((rate_dir = env_get("RATELIMIT_DIR"))) {
 		if (chdir(rate_dir))
 			report(111, "spawn-filter: Unable to switch to ", rate_dir, ": ", error_str(errno), ". (#4.3.0)", 0);
-		if (!access(domain, W_OK) && !is_rate_ok(rate_dir, domain))
+		if (!access(domain, W_OK)) {
+			if (!is_rate_ok(rate_dir, domain, 0))
+				report(111, "spawn-filter: high email rate for ", domain, ". (#4.3.0)", 0, 0, 0);
+		} else
+		if (!access("ratecontrol", R_OK))
+		{
+			if (control_readfile(&ratedefs, "./ratecontrol", 0) == -1)
+				report(111, "spawn-filter: Unable to read ratecontrol: ", error_str(errno), ". (#4.3.0)", 0, 0, 0);
+			rate_exp = getDomainToken(domain, &ratedefs);
+			if (!is_rate_ok(rate_dir, domain, rate_exp))
+				report(111, "spawn-filter: high email rate for ", domain, ". (#4.3.0)", 0, 0, 0);
+		} else
+		if (!access(".global", W_OK) && !is_rate_ok(rate_dir, ".global", 0))
 			report(111, "spawn-filter: high email rate for ", domain, ". (#4.3.0)", 0, 0, 0);
+		if (chdir(auto_qmail) == -1)
+			report(111, "spawn-filter: Unable to switch to ", auto_qmail, ": ", error_str(errno), ". (#4.3.0)", 0);
 	}
 	/*- DATABYTES Check */
 	if (check_size(size))
@@ -1107,7 +1144,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_spawn_filter_c()
 {
-	static char    *x = "$Id: spawn-filter.c,v 1.60 2014-01-22 15:43:29+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: spawn-filter.c,v 1.61 2014-03-04 02:41:38+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 	if (x)
