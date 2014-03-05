@@ -2016,7 +2016,8 @@ spawn-filter: \
 load spawn-filter.o variables.o evaluate.o \
 fmt_ulong.o auto_qmail.o timeoutwrite.o byte_cr.o \
 case_lowerb.o case_diffb.o now.o scan_ulong.o constmap.o \
-control.o open_read.o open_write.o wildmat.o qregex.o MakeArgs.o \
+control.o open_read.o open_write.o open_excl.o wildmat.o \
+qregex.o MakeArgs.o \
 matchregex.o cdb_seek.o cdb_unpack.o cdb_hash.o \
 envrules.o error.a getln.a env.a stralloc.a wait.a \
 strerr.a str.a substdio.a alloc.a socket.lib dns.lib
@@ -2024,7 +2025,8 @@ strerr.a str.a substdio.a alloc.a socket.lib dns.lib
 	fmt_ulong.o auto_qmail.o timeoutwrite.o \
 	byte_cr.o case_lowerb.o case_diffb.o \
 	scan_ulong.o constmap.o control.o \
-	open_read.o open_write.o wildmat.o qregex.o MakeArgs.o \
+	open_read.o open_write.o open_excl.o wildmat.o \
+	qregex.o MakeArgs.o \
 	matchregex.o cdb_seek.o cdb_unpack.o lock_ex.o \
 	cdb_hash.o envrules.o error.a getln.a \
 	env.a stralloc.a wait.a strerr.a str.a substdio.a \
