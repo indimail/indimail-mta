@@ -1,5 +1,8 @@
 /*
  * $Log: spawn-filter.c,v $
+ * Revision 1.62  2014-03-07 02:07:42+05:30  Cprogrammer
+ * do not abort if regcomp() fails
+ *
  * Revision 1.61  2014-03-04 02:41:38+05:30  Cprogrammer
  * fix BUG by doing chdir back to auto_qmail
  * ability to have regular expressions on rate control
@@ -497,7 +500,6 @@ getDomainToken(char *domain, stralloc *sa)
 	regex_t         qreg;
 	int             len, n, retval;
 	char           *ptr, *p;
-	char            errbuf[512];
 
 	for (len = 0, ptr = sa->s;len < sa->len;)
 	{
@@ -511,13 +513,8 @@ getDomainToken(char *domain, stralloc *sa)
 			{
 				if (env_get("QREGEX"))
 				{
-					if ((retval = REGCOMP(qreg, ptr)) != 0)
-					{
-						regerror(retval, &qreg, errbuf, sizeof(errbuf));
-						regfree(&qreg);
-						report(111, "spawn-filter: ", ptr, ": ", errbuf, ". (#4.3.0)", 0);
-					}
-					retval = REGEXEC(qreg, domain);
+					if ((retval = REGCOMP(qreg, ptr)) == 0)
+						retval = (REGEXEC(qreg, domain) == REG_NOMATCH ? 1 : REG_NOERROR);
 					regfree(&qreg);
 				} else
 					retval = !wildmat_internal(domain, ptr);
@@ -969,6 +966,7 @@ main(int argc, char **argv)
 	else
 	if (ret == -2)
 		report(111, "spawn-filter: Unable to read from envrules: ", error_str(errno), ". (#4.3.0)", 0, 0, 0);
+	else
 	if (ret == -4)
 		report(111, "spawn-filter: regex compilation failed: ", error_str(errno), ". (#4.3.0)", 0, 0, 0);
 	if ((ret = envrules(recipient.s, "rcpt.envrules", "RCPTRULES", 0)) == -1)
@@ -976,6 +974,7 @@ main(int argc, char **argv)
 	else
 	if (ret == -2)
 		report(111, "spawn-filter: Unable to read rcpt envrules: ", error_str(errno), ". (#4.3.0)", 0, 0, 0);
+	else
 	if (ret == -4)
 		report(111, "spawn-filter: regex compilation failed: ", error_str(errno), ". (#4.3.0)", 0, 0, 0);
 	if ((rate_dir = env_get("RATELIMIT_DIR"))) {
@@ -1144,7 +1143,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_spawn_filter_c()
 {
-	static char    *x = "$Id: spawn-filter.c,v 1.61 2014-03-04 02:41:38+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: spawn-filter.c,v 1.62 2014-03-07 02:07:42+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 	if (x)
