@@ -1,5 +1,8 @@
 /*
  * $Log: mail_acl.c,v $
+ * Revision 1.3  2014-03-07 02:09:22+05:30  Cprogrammer
+ * fix regex match
+ *
  * Revision 1.2  2011-11-17 20:03:58+05:30  Cprogrammer
  * fixed diag message getting printed without verbose flag
  *
@@ -83,6 +86,7 @@ mail_acl(stralloc *acclist, int qregex, char *sender, char *recipient, char verb
 					*cptr = 0;
 					return (err);
 				} else
+				if (err == 1)
 				{
 					rcpt_found = 1;
 					rcpt_match = cptr + 1;
@@ -288,7 +292,7 @@ mail_acl(stralloc *acclist, int qregex, char *sender, char *recipient, char verb
 void
 getversion_mail_acl_c()
 {
-	static char    *x = "$Id: mail_acl.c,v 1.2 2011-11-17 20:03:58+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: mail_acl.c,v 1.3 2014-03-07 02:09:22+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
