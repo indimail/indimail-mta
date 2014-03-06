@@ -1,5 +1,8 @@
 /*
  * $Log: envrules.c,v $
+ * Revision 1.16  2014-03-07 02:07:16+05:30  Cprogrammer
+ * use env variable USE_FNMATCH to use fnmatch() for pattern matching
+ *
  * Revision 1.15  2014-01-29 14:06:00+05:30  Cprogrammer
  * made domainqueue file configurable through env variable DOMAINQUEUE
  *
@@ -47,7 +50,6 @@
  * Initial revision
  *
  */
-#include <fnmatch.h>
 #include "qregex.h"
 #include "error.h"
 #include "matchregex.h"
@@ -56,7 +58,9 @@
 #include "str.h"
 #include "control.h"
 #include "envrules.h"
+#include <fnmatch.h>
 
+int             wildmat_internal(char *, char *);
 static int      parse_env(char *);
 
 int
@@ -69,6 +73,7 @@ do_match(int use_regex, char *text, char *regex, char **errStr)
 	if (use_regex)
 		return (matchregex(text, regex, errStr));
 	else
+	if (env_get("USE_FNMATCH"))
 	{
 #ifdef FNM_CASEFOLD
 		i = FNM_PATHNAME|FNM_CASEFOLD;
@@ -84,7 +89,8 @@ do_match(int use_regex, char *text, char *regex, char **errStr)
 		default:
 			return (AM_REGEX_ERR);
 		}
-	}
+	} else
+		return (wildmat_internal(text, regex));
 }
 
 int
@@ -220,7 +226,7 @@ parse_env(char *envStrings)
 void
 getversion_envrules_c()
 {
-	static char    *x = "$Id: envrules.c,v 1.15 2014-01-29 14:06:00+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: envrules.c,v 1.16 2014-03-07 02:07:16+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
