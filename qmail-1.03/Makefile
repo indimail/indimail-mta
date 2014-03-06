@@ -2397,7 +2397,7 @@ conf-srs conf-spf conf-batv
 
 plugtest: \
 load plugtest.o timeoutwrite.o strsalloc.o control.o constmap.o \
-date822fmt.o now.o qmail.o variables.o cdb.a fd.a \
+date822fmt.o now.o qmail.o variables.o cdb.a fd.a wildmat.o \
 wait.a datetime.a getln.a envrules.o bodycheck.o \
 sqlmatch.o matchregex.o scan_xlong.o sgetopt.o subgetopt.o \
 ipalloc.o ip.o socket_v4mappedprefix.o socket_v6any.o \
@@ -2405,7 +2405,7 @@ open.a sig.a case.a dns.o auto_qmail.o auto_uids.o base64sub.o \
 auto_break.o strerr_die.o strerr_sys.o ndelay.o ndelay_off.o \
 env.a stralloc.a alloc.a substdio.a error.a str.a fs.a lock.a \
 socket.lib tai.lib dns.lib indimail.lib tls.lib
-	./load plugtest strsalloc.o control.o constmap.o \
+	./load plugtest strsalloc.o control.o constmap.o wildmat.o \
 	date822fmt.o now.o qmail.o variables.o ndelay.o ndelay_off.o \
 	envrules.o bodycheck.o dns.o auto_qmail.o sqlmatch.o \
 	matchregex.o scan_xlong.o sgetopt.o subgetopt.o ipalloc.o \
