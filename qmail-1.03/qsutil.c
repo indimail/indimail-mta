@@ -1,5 +1,8 @@
 /*
  * $Log: qsutil.c,v $
+ * Revision 1.11  2014-03-07 19:15:24+05:30  Cprogrammer
+ * added log9(), log11()
+ *
  * Revision 1.10  2013-09-23 22:14:42+05:30  Cprogrammer
  * added noflush log functions
  *
@@ -144,6 +147,56 @@ log7(s1, s2, s3, s4, s5, s6, s7)
 }
 
 void
+log9(s1, s2, s3, s4, s5, s6, s7, s8, s9)
+	char           *s1;
+	char           *s2;
+	char           *s3;
+	char           *s4;
+	char           *s5;
+	char           *s6;
+	char           *s7;
+	char           *s8;
+	char           *s9;
+{
+	substdio_puts(&sserr, s1);
+	substdio_puts(&sserr, s2);
+	substdio_puts(&sserr, s3);
+	substdio_puts(&sserr, s4);
+	substdio_puts(&sserr, s5);
+	substdio_puts(&sserr, s6);
+	substdio_puts(&sserr, s7);
+	substdio_puts(&sserr, s8);
+	substdio_putsflush(&sserr, s9);
+}
+
+void
+log11(s1, s2, s3, s4, s5, s6, s7, s8, s9, s10, s11)
+	char           *s1;
+	char           *s2;
+	char           *s3;
+	char           *s4;
+	char           *s5;
+	char           *s6;
+	char           *s7;
+	char           *s8;
+	char           *s9;
+	char           *s10;
+	char           *s11;
+{
+	substdio_puts(&sserr, s1);
+	substdio_puts(&sserr, s2);
+	substdio_puts(&sserr, s3);
+	substdio_puts(&sserr, s4);
+	substdio_puts(&sserr, s5);
+	substdio_puts(&sserr, s6);
+	substdio_puts(&sserr, s7);
+	substdio_puts(&sserr, s8);
+	substdio_puts(&sserr, s9);
+	substdio_puts(&sserr, s10);
+	substdio_putsflush(&sserr, s11);
+}
+
+void
 nomem()
 {
 	log1("alert: out of memory, sleeping...\n");
@@ -200,7 +253,7 @@ logsafe(s)
 void
 getversion_qsutil_c()
 {
-	static char    *x = "$Id: qsutil.c,v 1.10 2013-09-23 22:14:42+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qsutil.c,v 1.11 2014-03-07 19:15:24+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
