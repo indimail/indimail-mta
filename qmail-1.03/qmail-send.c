@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-send.c,v $
+ * Revision 1.57  2014-03-07 19:46:01+05:30  Cprogrammer
+ * fixed issue with bounce processor returning non-zero exit status
+ *
  * Revision 1.56  2014-02-10 16:49:05+05:30  Cprogrammer
  * added discard bounce feature
  *
@@ -1084,7 +1087,8 @@ bounce_processor(struct qmail *qq, char *messfn, char *bouncefn, char *bounce_re
 	}
 	i = wait_exitcode(wstat);
 	strnum2[fmt_ulong(strnum2, i)] = 0;
-	log7("bounce processor <", sender, "> <", recipient, "> exit status ", strnum2, "\n");
+	log11("bounce processor sender <", sender, "> recipient <", recipient, "> messfn <",
+		messfn, "> bouncefn <", bouncefn, "> exit=", strnum2, "\n");
 	return (i);
 }
 
@@ -1423,9 +1427,10 @@ I tried to deliver a bounce message to this address, but the bounce bounced!\n\
 			break;
 		case 1: /*- discard bounce */
 			qmail_fail(&qqt);
+			qmail_from(&qqt, bouncesender);
+			qmail_to(&qqt, bouncerecip);
 			qmail_close(&qqt);
-			if (unlink(fn2.s) == -1)
-			{
+			if (unlink(fn2.s) == -1) {
 				log3("warning: unable to unlink ", fn2.s, ". Will try later\n");
 				return 0;
 			}
@@ -1433,9 +1438,7 @@ I tried to deliver a bounce message to this address, but the bounce bounced!\n\
 			return 1;
 		default:
 			qmail_fail(&qqt);
-			qmail_close(&qqt);
-			log1("warning: trouble running bounce processor, will try later\n");
-			return 0;
+			break;
 		}
 		qmail_from(&qqt, bouncesender);
 		qmail_to(&qqt, bouncerecip);
@@ -3017,7 +3020,7 @@ main()
 void
 getversion_qmail_send_c()
 {
-	static char    *x = "$Id: qmail-send.c,v 1.56 2014-02-10 16:49:05+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-send.c,v 1.57 2014-03-07 19:46:01+05:30 Cprogrammer Exp mbhangui $";
 
 #ifdef INDIMAIL
 	if (x)
