@@ -1,25 +1,32 @@
 indimail (@version@-1) unstable; urgency=low
 
-  * inlookup - Issue sighup to reload database
-  * send sighup to qmail-send through post handle for vdeldomain, vaddaliasdomain, vrenamedomain
-  * compact ipv6 and CIDR notation support in tcpserver rules file
-  * inverse IPv6 nibble format for RBL and anti-RBL lookups in rblsmtpd
-  * ipv6 support for spf
-  * fixed STARTTLS plaintext command injection vulnerability in qmail-smtpd
-  * BUG - corrected location of private key when % sign is removed in qmail-dk, qmail-dkim
-  * fixed syntax errors and private key lookup in dk-filter
-  * Use SURBLQUEUE in surblqueue to change default queue program from qmail-multi 
-  * Make IT_MAX_ATOM_SIZE configurable using env variable in courier-imap
-  * bypass tls if clientcert.pem is missing in qmail-remote
-  * fix setting of SMTPTEXT for success and failures in qmail-remote
-  * validity checks in qmail-qmtpd to ensure that input actually conforms to the netstring protocol.
-  * domain based delivery rate limit code in spawn-filter. New command drate to control delivery rate to specific domains
-  * dk-filter - sign as default if both DKSIGN and DKIMSIGN are not defined
-  * qmail-remote - try next mx on helo failure (problem with broken yahoo mx servers) by setting env variable TRY_NEXT_MX_HELO_FAIL
-  * qmail-dk, qmail-dkim - Use RELAYCLIENT_NODKVERIFY, RELAYCLIENT_NODKIMVERIFY to turn off verification when both DK[IM]VERIFY and RELAYCLIENT are set
-  * concurrencylocal, concurrencyremote can be configured queue specific
-  * display the associated queue directory in logs during startup of qmail-send, qmail-todo
-  * domainqueue control files to provide ability to specify specific queues for specific domains
-  * added getopt style arguments to inquerytest
+  * fix for debian to make indimail run at runlevel 2
+  * fixed -q option in qmail-rm
+  * qaes - qmail encryption utility which uses AES
+  * set delayed inserts for lastauth, relay tables if DELAYED_INSERT environment variable is set
+  * courier-imap - Fixed bug with setting of MAX_ATOM_SIZE in mainloop.c, imaptoken.c
+  * BUG fix rblsmtpd.c - flagip6 was not initialized
+  * vdelivermail - Discard bounce if environment variable DISCARD_BOUNCE is set
+  * qmail-smtpd - fixed DISABLE_AUTH_LOGIN, DISABLE_AUTH_PLAIN, DISABLE_CRAM_MD5, DISABLE_CRAM_SHA1, DISABLE_CRAM_SHA256, DISABLE_CRAM_SHA512, CRAM_RIPEMD, DISABLE_RIPEMD5
+  * qmail-smtpd - Added SECURE_AUTH to allow AUTH PLAIN, LOGIN only if TLS is enabled.
+  * qmail-smtpd - set AUTHINFO for successful SMTP AUTH
+  * qmail-dk, qmail-dkim - Treat AUTHINFO environment variable exactly like RELAYCLIENT
+  * Set environment variables from control/auth.envrules if RELAYCLIENT is set or on successful SMTP AUTH
+  * spawn-filter.c - made RATELIMIT_DIR configurable through envrules
+  * instcheck.c - Fix locating files in lib64
+  * made domainqueue file configurable through env variable DOMAINQUEUE
+  * fixed DNS functions compilation on OS X systems (dns.c, dns_text.c, surblfilter.c)
+  * qmailctl - fix for Fedora where /etc/sysconfig/network is missing or does not have NETWORKING defined
+  * fixed BUG in ldap-checkpwd.c - extra semicolon removed
+  * dns.c - fixed call to resolve() function
+  * qmail-send.c - discard bounce if bounce processor exits 1
+  * vcreate_dir_control.c, vwrite_dir_control.c, vdel_dir_control.c changed mode of .filesystems to 640
+  * authindi - changes to error messages for inquery/vauth_open failures
+  * spawn-filter - allow wildcards for rate control using ratecontrol file and default ratelimit using .global file
+  * envrules - use env variable USE_FNMATCH to use fnmatch() for pattern matching instead
+    of wildmat_internal
+  * spawn-filter - do not exit for regex compilation failures
+  * mail_acl.c - fix regex match
+  * added option --cname-lookup in svctool to Perform CNAME lookup for recipient host in qmail-remote
 
- -- Manvendra Bhangui <manvendra@indimail.org>  Fri, 22 Nov 2013 21:10:19 +0530
+ -- Manvendra Bhangui <manvendra@indimail.org>  Tue, 11 Mar 2014 08:40:32 +0530
