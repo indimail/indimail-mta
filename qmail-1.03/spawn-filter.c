@@ -1,5 +1,8 @@
 /*
  * $Log: spawn-filter.c,v $
+ * Revision 1.63  2014-03-12 15:36:37+05:30  Cprogrammer
+ * define REG_NOERROR for OSX / Systems with REG_NOERROR undefined
+ *
  * Revision 1.62  2014-03-07 02:07:42+05:30  Cprogrammer
  * do not abort if regcomp() fails
  *
@@ -233,6 +236,9 @@
 
 #define REGCOMP(X,Y)    regcomp(&X, Y, REG_EXTENDED|REG_ICASE)
 #define REGEXEC(X,Y)    regexec(&X, Y, (size_t) 0, (regmatch_t *) 0, (int) 0)
+#ifndef REG_NOERROR
+#define REG_NOERROR 0
+#endif
 
 static int      mkTempFile(int);
 static void     report(int, char *, char *, char *, char *, char *, char *);
@@ -1143,7 +1149,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_spawn_filter_c()
 {
-	static char    *x = "$Id: spawn-filter.c,v 1.62 2014-03-07 02:07:42+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: spawn-filter.c,v 1.63 2014-03-12 15:36:37+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 	if (x)
