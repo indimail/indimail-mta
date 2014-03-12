@@ -1,5 +1,8 @@
 #
 # $Log: dk-filter.sh,v $
+# Revision 1.18  2014-03-12 08:50:48+05:30  Cprogrammer
+# bug - fixed signing when env variables DKSIGN or DKIMSIGN were set
+#
 # Revision 1.17  2013-09-03 23:04:30+05:30  Cprogrammer
 # set signing as default if both DKSIGN and DKIMSIGN are not defined
 #
@@ -54,7 +57,7 @@
 # Revision 1.1  2009-04-02 14:52:27+05:30  Cprogrammer
 # Initial revision
 #
-# $Id: dk-filter.sh,v 1.17 2013-09-03 23:04:30+05:30 Cprogrammer Exp mbhangui $
+# $Id: dk-filter.sh,v 1.18 2014-03-12 08:50:48+05:30 Cprogrammer Exp mbhangui $
 #
 if [ -z "$QMAILREMOTE" -a -z "$QMAILLOCAL" ]; then
 	echo "dk-filter should be run by spawn-filter" 1>&2
@@ -64,15 +67,19 @@ dksign=0
 dkimsign=0
 dkverify=0
 dkimverify=0
-if [ -z "$DKSIGN" -a -z "$DKVERIFY" ] ; then
-	if [ -x QMAILHOME/bin/dktest ] ; then
+if [ -x QMAILHOME/bin/dktest -a -z "$DKVERIFY" ] ; then
+	if [ -z "$DKSIGN" ] ; then
 		DKSIGN=QMAILHOME/control/domainkeys/%/default
+		dksign=2
+	elif [ " $DKSIGN" = " QMAILHOME/control/domainkeys/%/default" ] ; then
 		dksign=2
 	fi
 fi
-if [ -z "$DKIMSIGN" -a -z "$DKIMVERIFY" ] ; then
-	if [ -x QMAILHOME/bin/dkim ] ; then
+if [ -x QMAILHOME/bin/dkim -a -z "$DKIMVERIFY" ] ; then
+	if [ -z "$DKIMSIGN" ] ; then
 		DKIMSIGN=QMAILHOME/control/domainkeys/%/default
+		dkimsign=2
+	elif [ " $DKIMSIGN" = " QMAILHOME/control/domainkeys/%/default" ] ; then
 		dkimsign=2
 	fi
 fi
