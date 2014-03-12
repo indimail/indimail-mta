@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail.spec.in,v 2.274 2014-02-25 13:07:06+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 2.275 2014-03-12 08:53:16+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %define _unpackaged_files_terminate_build 1
 
@@ -52,7 +52,6 @@
 %define libsrs2_version    1.0.18
 %define mysql_version      6.0.9-alpha
 %define noperms            1
-%define host               @HOST@
 %define see_base           For a description of IndiMail visit http://www.indimail.org
 %define i_m_on_mac         0
 %if %i_m_on_mac == 1
