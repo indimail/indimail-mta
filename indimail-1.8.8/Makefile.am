@@ -843,8 +843,8 @@ vadduser_handle: vadduser_handle.in
 	$(edit) $@.in > post_handle/vadduser; ln -sf post_handle/vadduser $@
 create_services: create_services.in
 	$(edit) $@.in > $@
-indimail.spec: indimail.spec.in
-	($(edit) $@.in;cat doc/ChangeLog) > $@
+indimail.spec: indimail.spec.in catChangeLog
+	($(edit) $@.in;./catChangeLog) > $@
 indimail-@VERSION@-rpmlintrc: indimail-rpmlintrc.in
 	$(edit) indimail-rpmlintrc.in > $@
 login_tasks.3: login_tasks.9
