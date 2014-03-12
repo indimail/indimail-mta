@@ -9,7 +9,7 @@
  */
 
 #ifndef _EXITCODES_H_
-#define _EXITCOES_H_
+#define _EXITCODES_H_
 /*- Exit codes for qmail-queue */
 #define QQ_XPERM  31
 #define QQ_VIRUS  33
