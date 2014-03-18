@@ -1,5 +1,8 @@
 /*
  * $Log: tai64nunix.c,v $
+ * Revision 1.4  2014-03-18 17:37:56+05:30  Cprogrammer
+ * fixed issue with tai timestamp with non-whitespace after 25 characters
+ *
  * Revision 1.3  2004-10-22 20:31:26+05:30  Cprogrammer
  * added RCS id
  *
@@ -45,7 +48,7 @@ unsigned long   u;
 int
 main()
 {
-	char            ch;
+	char            ch, count;
 
 	for (;;)
 	{
@@ -54,14 +57,14 @@ main()
 		{
 			secs = 0;
 			nanosecs = 0;
-			for (;;)
+			for (count = 0;;count++)
 			{
 				get(&ch);
 				u = ch - '0';
 				if (u >= 10)
 				{
 					u = ch - 'a';
-					if (u >= 6)
+					if (u >= 6 || count == 24)
 						break;
 					u += 10;
 				}
@@ -91,7 +94,7 @@ main()
 void
 getversion_tai64nunix_c()
 {
-	static char    *x = "$Id: tai64nunix.c,v 1.3 2004-10-22 20:31:26+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: tai64nunix.c,v 1.4 2014-03-18 17:37:56+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

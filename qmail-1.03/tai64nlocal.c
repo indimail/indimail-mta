@@ -1,5 +1,8 @@
 /*
  * $Log: tai64nlocal.c,v $
+ * Revision 1.4  2014-03-18 17:37:46+05:30  Cprogrammer
+ * fixed SIGSEGV
+ *
  * Revision 1.3  2004-10-22 20:31:25+05:30  Cprogrammer
  * added RCS id
  *
@@ -48,7 +51,7 @@ struct tm      *t;
 int
 main()
 {
-	char            ch;
+	char            ch, count;
 
 	for (;;)
 	{
@@ -57,14 +60,14 @@ main()
 		{
 			secs = 0;
 			nanosecs = 0;
-			for (;;)
+			for (count = 0;;count++)
 			{
 				get(&ch);
 				u = ch - '0';
 				if (u >= 10)
 				{
 					u = ch - 'a';
-					if (u >= 6)
+					if (u >= 6 || count == 24)
 						break;
 					u += 10;
 				}
@@ -98,12 +101,13 @@ main()
 			get(&ch);
 		}
 	}
+	return 0;
 }
 
 void
 getversion_tai64nlocal_c()
 {
-	static char    *x = "$Id: tai64nlocal.c,v 1.3 2004-10-22 20:31:25+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: tai64nlocal.c,v 1.4 2014-03-18 17:37:46+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
