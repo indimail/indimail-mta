@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-remote.c,v $
+ * Revision 1.89  2014-03-18 14:39:33+05:30  Cprogrammer
+ * set environment variable OUTGOINGIP
+ *
  * Revision 1.88  2013-09-06 13:53:23+05:30  Cprogrammer
  * set SMTPHOST env variable for ONSUCCESS, ONFAILURE scripts
  * try next mx on helo temp failure
@@ -2606,6 +2609,10 @@ getcontrols()
 			if (errno == error_nomem)
 				temp_nomem();
 			temp_control();
+		} else 
+		if (r && !env_put2("OUTGOINGIP", outgoingip.s)) {
+			my_error("alert: Out of memory", 0, 0);
+			_exit (1);
 		}
 	}
 #ifdef IPV6
@@ -3099,7 +3106,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_remote_c()
 {
-	static char    *x = "$Id: qmail-remote.c,v 1.88 2013-09-06 13:53:23+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-remote.c,v 1.89 2014-03-18 14:39:33+05:30 Cprogrammer Exp mbhangui $";
 	x=sccsidauthcramh;
 	x=sccsidauthdigestmd5h;
 	x++;
