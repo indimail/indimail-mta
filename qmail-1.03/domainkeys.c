@@ -1,5 +1,8 @@
 /*
  * $Log: domainkeys.c,v $
+ * Revision 1.17  2014-03-24 12:29:35+05:30  Cprogrammer
+ * fixed dkparse822()
+ *
  * Revision 1.16  2013-08-17 16:00:19+05:30  Cprogrammer
  * added case for duplicate DomainKey-Signature header
  *
@@ -698,7 +701,7 @@ dkparse822(char *address, unsigned int offset)
 		{
 			break;
 		} else
-		if (*from == ';')
+		if (foundat && *from == ';')
 		{
 			break;
 		} else
@@ -2077,7 +2080,7 @@ strncasestr(const char *s, const char *find, size_t slen)
 void
 getversion_domainkeys_c()
 {
-	static char    *x = "$Id: domainkeys.c,v 1.16 2013-08-17 16:00:19+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: domainkeys.c,v 1.17 2014-03-24 12:29:35+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
