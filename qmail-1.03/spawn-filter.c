@@ -1,5 +1,8 @@
 /*
  * $Log: spawn-filter.c,v $
+ * Revision 1.64  2014-03-26 15:32:26+05:30  Cprogrammer
+ * report deliveries blackholed by filters in delivery log
+ *
  * Revision 1.63  2014-03-12 15:36:37+05:30  Cprogrammer
  * define REG_NOERROR for OSX / Systems with REG_NOERROR undefined
  *
@@ -485,7 +488,7 @@ run_mailfilter(char *domain, char *ext, char *qqeh, char *mailprog, char **argv)
 		execv(mailprog, argv); /*- do the delivery (qmail-local/qmail-remote) */
 		report(111, "spawn-filter: could not exec ", mailprog, ": ", error_str(errno), ". (#4.3.0)", 0);
 	case 2:
-		report(0, 0, 0, 0, 0, 0, 0); /*- Blackhole */
+		report(0, "blackholed: ", filterargs, 0, 0, 0, 0); /*- Blackhole */
 	case 100:
 		report(100, "Mail Rejected (#5.7.1)", 0, 0, 0, 0, 0);
 	default:
@@ -1149,7 +1152,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_spawn_filter_c()
 {
-	static char    *x = "$Id: spawn-filter.c,v 1.63 2014-03-12 15:36:37+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: spawn-filter.c,v 1.64 2014-03-26 15:32:26+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 	if (x)
