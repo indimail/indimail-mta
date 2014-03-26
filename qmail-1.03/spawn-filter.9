@@ -51,7 +51,9 @@ See the section on \fBEnvironment Variables\fR below.
 .I filterargs
 The format of this file is of the form
 \fBdomain:args\fR for both local and remote mails. \fBdomain:remote:args\fR
-for remote mails and \fBdomain:local:args\fR for local mails. This control
+for remote mails and \fBdomain:local:args\fR for local mails. Here \fIdomain\fR
+refers to the recipient domain. If there are multiple lines which match \fIdomain\fR,
+the first line that matches \fIdomain\fR will be used.  This control
 file can be used to setup additional filters after running
 the SPAM filters (See Section on Spam Filtering).
 
