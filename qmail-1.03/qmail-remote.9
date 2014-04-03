@@ -472,9 +472,22 @@ and
 .B password
 to relay out mails through server 
 .B relay
-using authenticated SMTP. <sp> is a single space character. AUTH_SMTP can have the values
+using authenticated SMTP. <sp> is a single space character. AUTH_SMTP can also have the values
 DIGEST-MD5, CRAM-RIPEMD, CRAM-SHA1, CRAM-SHA256, CRAM-MD5, LOGIN or PLAIN to use
-the desired authentication method. If all connections to the 
+the desired authentication method. You can disable specific AUTH methods by defining any one more more
+of the following environment variables
+
+.EX
+	DISABLE_AUTH_LOGIN
+	DISABLE_AUTH_PLAIN
+	DISABLE_CRAM_MD5
+	DISABLE_CRAM_SHA1
+	DISABLE_CRAM_SHA256
+	DISABLE_CRAM_RIPEMD
+	DISABLE_DIGEST_MD5
+.EE
+
+If all connections to the 
 .I relay
 server fail for a 
 .I max_tolerance
