@@ -358,7 +358,6 @@
 %attr(0555,root,root) @indimaildir@/bin/tcpserver
 %attr(0555,root,root) @indimaildir@/bin/who@
 %attr(0755,root,root) @indimaildir@/bin/qaes
-%attr(0755,root,root) @indimaildir@/bin/get-cert
 
 %attr(0555,root,qmail) @indimaildir@/sbin/adminclient
 %attr(0555,root,qmail) @indimaildir@/sbin/batv
@@ -373,6 +372,7 @@
 %attr(0555,root,qmail) @indimaildir@/sbin/cputime
 %attr(0555,root,qmail) @indimaildir@/sbin/create_services
 %attr(0555,root,qmail) @indimaildir@/sbin/execmysql
+%attr(0555,root,qmail) @indimaildir@/sbin/get-cert
 %attr(0555,root,qmail) @indimaildir@/sbin/hostname
 %attr(0555,root,qmail) @indimaildir@/sbin/hostsync
 %attr(0555,root,qmail) @indimaildir@/sbin/indisrvr
@@ -479,13 +479,16 @@
 %attr(0555,root,qmail) @indimaildir@/boot/proc
 %attr(0555,root,qmail) @indimaildir@/boot/proc+df
 #
+# Plugins
+#
+%attr(0555,root,qmail) @indimaildir@/plugins/generic.so
+%attr(0555,root,qmail) @indimaildir@/plugins/smtpd-plugin0.so
+%attr(0555,root,qmail) @indimaildir@/plugins/smtpd-plugin.so
+#
 # libexec
 #
 %attr(0555,root,qmail) @indimaildir@/libexec/overquota.sh
 %attr(0555,root,qmail) @indimaildir@/libexec/qmailmrtg7
-%attr(0555,root,qmail) @indimaildir@/plugins/generic.so
-%attr(0555,root,qmail) @indimaildir@/plugins/smtpd-plugin0.so
-%attr(0555,root,qmail) @indimaildir@/plugins/smtpd-plugin.so
 %attr(0555,root,root) @indimaildir@/libexec/authlib/authgeneric
 %attr(0555,root,root) @indimaildir@/libexec/authlib/authindi
 %attr(0555,root,root) @indimaildir@/libexec/couriertcpd
@@ -547,18 +550,23 @@
 %attr(0444,root,root) @indimaildir@/etc/yum.repos.d/IndiMail-Fedora_16.repo
 %attr(0444,root,root) @indimaildir@/etc/yum.repos.d/IndiMail-Fedora_17.repo
 %attr(0444,root,root) @indimaildir@/etc/yum.repos.d/IndiMail-Fedora_18.repo
+%attr(0444,root,root) @indimaildir@/etc/yum.repos.d/IndiMail-Fedora_19.repo
+%attr(0444,root,root) @indimaildir@/etc/yum.repos.d/IndiMail-Fedora_20.repo
 %attr(0444,root,root) @indimaildir@/etc/yum.repos.d/IndiMail-Mandriva_2010.1.repo
 %attr(0444,root,root) @indimaildir@/etc/yum.repos.d/IndiMail-openSUSE_11.2.repo
 %attr(0444,root,root) @indimaildir@/etc/yum.repos.d/IndiMail-openSUSE_11.3.repo
 %attr(0444,root,root) @indimaildir@/etc/yum.repos.d/IndiMail-openSUSE_11.4.repo
 %attr(0444,root,root) @indimaildir@/etc/yum.repos.d/IndiMail-openSUSE_12.1.repo
 %attr(0444,root,root) @indimaildir@/etc/yum.repos.d/IndiMail-openSUSE_12.2.repo
+%attr(0444,root,root) @indimaildir@/etc/yum.repos.d/IndiMail-openSUSE_12.3.repo
+%attr(0444,root,root) @indimaildir@/etc/yum.repos.d/IndiMail-openSUSE_13.1.repo
 %attr(0444,root,root) @indimaildir@/etc/yum.repos.d/IndiMail-RedHat_RHEL-5.repo
 %attr(0444,root,root) @indimaildir@/etc/yum.repos.d/IndiMail-RedHat_RHEL-6.repo
 %attr(0444,root,root) @indimaildir@/etc/yum.repos.d/IndiMail-SLE_10.repo
 %attr(0444,root,root) @indimaildir@/etc/yum.repos.d/IndiMail-SLE_11.repo
 %attr(0444,root,root) @indimaildir@/etc/yum.repos.d/IndiMail-SLE_11_SP1.repo
 %attr(0444,root,root) @indimaildir@/etc/yum.repos.d/IndiMail-SLE_11_SP2.repo
+%attr(0444,root,root) @indimaildir@/etc/yum.repos.d/IndiMail-SLE_11_SP3.repo
 %attr(0444,root,root) @indimaildir@/etc/yum.repos.d/README.repo
 #
 # Documents
