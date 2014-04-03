@@ -1,5 +1,10 @@
 /*
  * $Log: qmail-remote.c,v $
+ * Revision 1.90  2014-04-03 21:35:39+05:30  Cprogrammer
+ * added ability to disable specific AUTH methods - PLAIN, LOGIN, CRAM-MD5, CRAM-SHA1, CRAM-SHA256
+ * CRAM-RIPEMD, DIGEST-MD5
+ * use secure authentication methods if SECURE_AUTH env variable is defined
+ *
  * Revision 1.89  2014-03-18 14:39:33+05:30  Cprogrammer
  * set environment variable OUTGOINGIP
  *
@@ -1999,8 +2004,10 @@ smtp_auth(char *type, int use_size)
 {
 	int             i = 0, j, login_supp = 0, plain_supp = 0, cram_md5_supp = 0,
 					cram_sha1_supp = 0, cram_sha256_supp = 0, cram_rmd_supp = 0,
-					digest_md5_supp = 0;
-	char           *ptr;
+					digest_md5_supp = 0, secure_auth;
+	char           *ptr, *no_auth_login, *no_auth_plain, *no_cram_md5,
+		           *no_cram_sha1, *no_cram_sha256, *no_cram_ripemd,
+		           *no_digest_md5;
 
 	if (!type)
 	{
@@ -2040,6 +2047,19 @@ smtp_auth(char *type, int use_size)
 		if (case_starts(smtptext.s + i + 8 + j, "PLAIN"))
 			plain_supp = 1;
 	}
+#ifdef TLS
+	secure_auth = env_get("SECURE_AUTH") ? 1 : 0;
+	no_auth_login = secure_auth && !ssl ? "" : env_get("DISABLE_AUTH_LOGIN");
+	no_auth_plain = secure_auth && !ssl ? "" : env_get("DISABLE_AUTH_PLAIN");
+#else
+	no_auth_login = env_get("DISABLE_AUTH_LOGIN");
+	no_auth_plain = env_get("DISABLE_AUTH_PLAIN");
+#endif
+	no_cram_md5 = env_get("DISABLE_CRAM_MD5");
+	no_cram_sha1= env_get("DISABLE_CRAM_SHA1");
+	no_cram_sha256= env_get("DISABLE_CRAM_SHA256");
+	no_cram_ripemd= env_get("DISABLE_CRAM_RIPEMD");
+	no_digest_md5= env_get("DISABLE_DIGEST_MD5");
 	if (!case_diffs(type, "DIGEST-MD5"))
 	{
 		if (digest_md5_supp)
@@ -2098,37 +2118,37 @@ smtp_auth(char *type, int use_size)
 	} else
 	if (!*type)
 	{
-		if (digest_md5_supp)
+		if (!no_digest_md5 && digest_md5_supp)
 		{
 			auth_digest_md5(use_size);
 			return;
 		}
-		if (cram_rmd_supp)
+		if (!no_cram_ripemd && cram_rmd_supp)
 		{
 			auth_cram(6, use_size);
 			return;
 		}
-		if (cram_sha256_supp)
+		if (!no_cram_sha256 && cram_sha256_supp)
 		{
 			auth_cram(5, use_size);
 			return;
 		}
-		if (cram_sha1_supp)
+		if (!no_cram_sha1 && cram_sha1_supp)
 		{
 			auth_cram(4, use_size);
 			return;
 		}
-		if (cram_md5_supp)
+		if (!no_cram_md5 && cram_md5_supp)
 		{
 			auth_cram(3, use_size);
 			return;
 		}
-		if (login_supp)
+		if (!no_auth_login && login_supp)
 		{
 			auth_login(use_size);
 			return;
 		}
-		if (plain_supp)
+		if (!no_auth_plain && plain_supp)
 		{
 			auth_plain(use_size);
 			return;
@@ -2899,16 +2919,20 @@ main(int argc, char **argv)
 	{
 		if (use_auth_smtp)
 		{
-			/*- test.com:x.x.x.x:x user pass */
+			/*- 
+			 * test.com:x.x.x.x:x user pass 
+			 *         or
+			 * domain:relay:port:penalty:max_tolerance username password
+			 */
 			i = str_chr(relayhost, ' ');
 			if (relayhost[i])
 			{
 				relayhost[i] = 0;
 				j = str_chr(relayhost + i + 1, ' ');
-				if (relayhost[i + j + 1])
+				if (relayhost[i + j + 1]) /*- if password is present */
 				{
 					relayhost[i + j + 1] = 0;
-					if (relayhost[i + 1] && relayhost[i + j + 2])
+					if (relayhost[i + 1] && relayhost[i + j + 2]) /* both user and password are present */
 					{
 						if (!stralloc_copys(&user, relayhost + i + 1))
 							temp_nomem();
@@ -2920,22 +2944,27 @@ main(int argc, char **argv)
 			} else
 				use_auth_smtp = 0;
 		}
+		/*- 
+		 * test.com:x.x.x.x:x user pass 
+		 *         or
+		 * domain:relay:port:penalty:max_tolerance
+		 */
 		i = str_chr(relayhost, ':');
 		if (relayhost[i])
 		{
 			scan_ulong(relayhost + i + 1, &port);
 			relayhost[i] = 0;
-			x = relayhost + i + 1;
-			i = str_chr(x, ':');
+			x = relayhost + i + 1; /* port */
+			i = str_chr(x, ':'); /*- : before min_penalty */
 			if (x[i])
 			{
-				if (x[i + 1] != ':')
+				if (x[i + 1] != ':') /*- if penalty figure is present */
 					scan_int(x + i + 1, &min_penalty);
-				x = relayhost + i + 1;
+				x = relayhost + i + 1; /*- min_penalty */
 				i = str_chr(x, ':');
 				if (x[i])
 				{
-					if (x[i + 1] != ':')
+					if (x[i + 1] != ':') /*- if tolerance figure is present */
 						scan_ulong(x + i + 1, &max_tolerance);
 				}
 				if (!min_penalty)
@@ -3106,7 +3135,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_remote_c()
 {
-	static char    *x = "$Id: qmail-remote.c,v 1.89 2014-03-18 14:39:33+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-remote.c,v 1.90 2014-04-03 21:35:39+05:30 Cprogrammer Exp mbhangui $";
 	x=sccsidauthcramh;
 	x=sccsidauthdigestmd5h;
 	x++;
