@@ -23,8 +23,7 @@ indimail (@version@-1) unstable; urgency=low
   * vcreate_dir_control.c, vwrite_dir_control.c, vdel_dir_control.c changed mode of .filesystems to 640
   * authindi - changes to error messages for inquery/vauth_open failures
   * spawn-filter - allow wildcards for rate control using ratecontrol file and default ratelimit using .global file
-  * envrules - use env variable USE_FNMATCH to use fnmatch() for pattern matching instead
-    of wildmat_internal
+  * envrules - use env variable USE_FNMATCH to use fnmatch() for pattern matching instead of wildmat_internal
   * spawn-filter - do not exit for regex compilation failures
   * mail_acl.c - fix regex match
   * added option --cname-lookup in svctool to Perform CNAME lookup for recipient host in qmail-remote
