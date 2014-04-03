@@ -1,5 +1,8 @@
 /*
  * $Log: smtpd.c,v $
+ * Revision 1.182  2014-04-03 21:39:09+05:30  Cprogrammer
+ * conditional compilation of secure auth code
+ *
  * Revision 1.181  2014-01-29 14:04:06+05:30  Cprogrammer
  * made domainqueue file configurable through env variable DOMAINQUEUE
  *
@@ -706,7 +709,7 @@ int             secure_auth = 0;
 int             ssl_rfd = -1, ssl_wfd = -1;	/*- SSL_get_Xfd() are broken */
 char           *servercert, *clientca, *clientcrl;
 #endif
-char           *revision = "$Revision: 1.181 $";
+char           *revision = "$Revision: 1.182 $";
 char           *protocol = "SMTP";
 stralloc        proto = { 0 };
 static stralloc Revision = { 0 };
@@ -3385,8 +3388,13 @@ smtp_ehlo(char *arg)
 		char *no_auth_login, *no_auth_plain, *no_cram_md5,
 			 *no_cram_sha1, *no_cram_sha256, *no_cram_sha512, *no_cram_ripemd,
 			 *no_digest_md5;
+#ifdef TLS
 		no_auth_login = secure_auth && !ssl ? "" : env_get("DISABLE_AUTH_LOGIN");
 		no_auth_plain = secure_auth && !ssl ? "" : env_get("DISABLE_AUTH_PLAIN");
+#else
+		no_auth_login = env_get("DISABLE_AUTH_LOGIN");
+		no_auth_plain = env_get("DISABLE_AUTH_PLAIN");
+#endif
 		no_cram_md5 = env_get("DISABLE_CRAM_MD5");
 		no_cram_sha1= env_get("DISABLE_CRAM_SHA1");
 		no_cram_sha256= env_get("DISABLE_CRAM_SHA256");
@@ -6829,7 +6837,7 @@ addrrelay() /*- Rejection of relay probes. */
 void
 getversion_smtpd_c()
 {
-	static char    *x = "$Id: smtpd.c,v 1.181 2014-01-29 14:04:06+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: smtpd.c,v 1.182 2014-04-03 21:39:09+05:30 Cprogrammer Exp mbhangui $";
 
 #ifdef INDIMAIL
 	if (x)
