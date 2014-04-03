@@ -284,6 +284,9 @@ Some of the features available in this package
 64. Li Minh Bui's IPv6 support for compact IPv6 addresses and CIDR notation support
 65. SRS support
 66. domain based delivery rate control using drate
+67. domain based queue using domainqueue control file
+68. Ability to drop bounces
+69. Ability to discard emails if filter exits 2
 
 You can take a detailed look at the feature list at
 
@@ -342,11 +345,12 @@ Currently, the list of supported distributions for IndiMail is (for
 both 32 and 64 bit) are
 
     * SUSE
+          o openSUSE 13.1
           o openSUSE 12.3
           o openSUSE 12.2
-          o openSUSE 12.1
           o openSUSE 11.4
           o openSUSE Tumbleweed
+          o SUSE Linux Enterprise 11 SP3
           o SUSE Linux Enterprise 11 SP2
           o SUSE Linux Enterprise 11 SP1
           o SUSE Linux Enterprise 11
@@ -354,26 +358,24 @@ both 32 and 64 bit) are
           o openSUSE Factory
 
     * Red Hat
+          o Fedora 20
+          o Fedora 19
           o Fedora 18
-          o Fedora 17
           o Red Hat Enterprise Linux 6
           o Red Hat Enterprise Linux 5
           o CentOS 6
           o CentOS 5
-          o Mandriva_2011
 
     * Debian
           o Debian 7.0
           o Debian 6.0
-          o Debian 5.0
+          o Ubuntu 13.10
           o Ubuntu 13.04
           o Ubuntu 12.10
           o Ubuntu 12.04
           o Ubuntu 11.10
           o Ubuntu 11.04
-          o Ubuntu 10.10
           o Ubuntu 10.04
-          o Ubuntu  9.10
 
 
 Enterprise Support
@@ -423,6 +425,8 @@ MariaDB 5.1.44
 MariaDB 5.1.47
 MariaDB 5.2.4
 MariaDB 5.2.6
+MariaDB 5.5.32
+MariaDB 5.5.36
 mysql-5.4.3-beta
 mysql-5.5.0-m2
 mysql-5.5.2-m2
