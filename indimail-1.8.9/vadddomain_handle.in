@@ -1,0 +1,70 @@
+#!/bin/sh
+#
+# $Log: vadddomain_handle.in,v $
+# Revision 2.10  2013-08-03 20:22:25+05:30  Cprogrammer
+# send sighup to qmail-send
+#
+# Revision 2.9  2013-07-21 16:08:49+05:30  Cprogrammer
+# fix permission of spamignore
+#
+# Revision 2.8  2013-05-13 08:57:20+05:30  Cprogrammer
+# use ./configure setting for indimail directory
+#
+# Revision 2.7  2013-04-29 22:52:31+05:30  Cprogrammer
+# added domain to spamignore control file
+#
+# Revision 2.6  2013-03-05 23:40:27+05:30  Cprogrammer
+# corrected header to X-Bogosity instead of received for spam filter rule
+#
+# Revision 2.5  2012-06-20 19:04:47+05:30  Cprogrammer
+# fix for recursive emails when email sent to training ids
+#
+# Revision 2.4  2011-06-01 18:49:30+05:30  Cprogrammer
+# added rule for filtering virus infected mails & putting them in quarantine folder
+#
+# Revision 2.3  2010-05-17 14:24:59+05:30  Cprogrammer
+# create home directory for prefilt, postfilt
+#
+# Revision 2.2  2010-05-01 15:13:19+05:30  Cprogrammer
+# added users prefilt, postfilt for pre & post filters
+# added rule for moving spam mails to Spam folder
+#
+# Revision 2.1  2010-04-23 09:21:51+05:30  Cprogrammer
+# post handle for vadddomain
+#
+#
+# $Id: vadddomain_handle.in,v 2.10 2013-08-03 20:22:25+05:30 Cprogrammer Exp mbhangui $
+
+# send sighup to inlookup service to reload domains
+@indimaildir@/bin/svc -h /service*/inlookup.* /service*/qmail-send.* 2>/dev/null
+# print domain information
+@indimaildir@/bin/vdominfo $1
+
+# create user for bogofilter
+for i in ham spam register-ham register-spam
+do
+	@indimaildir@/bin/valias -i '&'"B"$i $i@$1
+done
+for i in prefilt postfilt
+do
+	@indimaildir@/bin/vadduser -d -e $i@$1  xxxxxxxx
+done
+
+# create rule for moving spam, virus emails to folders
+@indimaildir@/bin/vcfilter -i -t  spamFilter -c 3 -k "Yes, spamicity=" -f Spam   -b 0 -h 32 \
+	prefilt@$1 > /dev/null 2>&1
+@indimaildir@/bin/vcfilter -i -t virusFilter -c 0 -k "virus found" -f Quarantine -b 0 -h 28 \
+	prefilt@$1 > /dev/null 2>&1
+
+# display domain directory
+/bin/ls -dl @indimaildir@/domains/$1
+/bin/ls -al @indimaildir@/domains/$1
+
+# add the domain to spamignore
+grep -w @"$1" @indimaildir@/control/spamignore > /dev/null
+if [ $? -ne 0 ] ; then
+	echo @"$1" >> @indimaildir@/control/spamignore
+	/bin/sort -u @indimaildir@/control/spamignore -o @indimaildir@/control/spamignore
+fi
+/bin/chmod 644 @indimaildir@/control/spamignore
+exit 0

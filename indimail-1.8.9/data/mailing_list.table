@@ -1,0 +1,6 @@
+#!/var/indimail/sbin/vtable
+mailing_list
+(emailid char(107) not null,
+filter_no smallint not null,
+mailing_list char(64) not null,
+primary key(emailid, mailing_list), index emailid (emailid, filter_no))

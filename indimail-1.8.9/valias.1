@@ -1,0 +1,50 @@
+.LL 8i
+.TH valias 1
+.SH NAME
+valias \- add/modify/delete alias for virtual users
+
+.SH SYNOPSYS
+\fBvalias\fR [\fIoptions\fR] [\fIalias\fR | \fIdomain_name\fR]
+
+.SH DESCRIPTION
+.PP
+\fBvalias\fR adds valias entries for virtual users in the table valias. valias entries are
+equivalent to .qmail files. valias is useful in cases where large number of forwarding/aliases
+are to be maintained and having numerous physical files on the file system could prove to be
+cumbersome/inefficient or impossible (i.e. > 32768 on some filesystems).
+
+.SH OPTIONS
+.PP
+.TP
+\fB\-v\fR
+Set Verbose mode
+.TP
+\fB\-s\fR
+Show aliases (domain_name needs to be given)
+.TP
+\fB\-d\fR \fIaddress\fR
+Delete alias \fIalias\fR corresponding to address \fIaddress\fR
+.TP
+\fB\-i\fR \fIaddress\fR
+Insert new address for an alias. An address has one of the 3 forms. See \fBdot-qmail(5)\fR for more details.
+
+.EX
+ 1. &\fIuser@domain\fR  - Forward mails to \fIuser@domain\fR
+ 2. \fIMaildir\fR       - copy mails to a Maildir with path \fIMaildir\fR
+ 3. | \fICommand\fR     - pipe the mail through command \fICommand\fR
+.EE
+.TP
+\fB\-u\fR \fIold_address\fR \fB\-i\fR \fInew_address\fR
+Change address for an existing alias
+.TP
+\fB\-m\fR
+Ignore requirement of \fIalias\fR to be local (option for clustered domain only)
+.TP
+\fIalias\fR
+Should point to an existing deliverable address on the host where \fBvalias\fR is executed.
+
+.SH RETURN VALUE
+0 in   case of success, 1 in case of any failure.
+
+.SH "SEE ALSO"
+dot-qmail(5), vcalias(8), vgroup(1), vdelivermail(8), vrenamedomain(1), vreorg(8)

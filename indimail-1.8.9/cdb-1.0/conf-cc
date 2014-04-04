@@ -1,0 +1,3 @@
+cc -O4 -fPIC -Wall
+
+This will be used to compile .c files.

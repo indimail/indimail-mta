@@ -1,0 +1,13 @@
+#!/bin/sh
+#
+# $Log: vdeldomain_handle.in,v $
+# Revision 2.1  2013-08-26 15:23:25+05:30  Cprogrammer
+# script to issue sighup to inlookup, qmail-send on domain deletion
+#
+#
+#
+# $Id: vdeldomain_handle.in,v 2.1 2013-08-26 15:23:25+05:30 Cprogrammer Exp mbhangui $
+
+# send sighup to qmail-send
+@indimaildir@/bin/svc -h /service/inlookup.* /service*/qmail-send.* 2>/dev/null
+exit 0

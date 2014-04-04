@@ -1,0 +1,83 @@
+.LL 8i
+.TH InLookup 8
+.SH NAME
+InLookup \- Connection Pooling server for Name Lookups
+
+.SH SYNOPSYS
+\fBInLookup\fR [\fB\-f\fR \fIinfifo\fR \fB\-i\fR \fIinstance\fR \fB\-v\fR]
+
+.SH DESCRIPTION
+.PP
+\fBInLookup\fR is a connection pooling server to serve requests for inquery() function. It is
+implemented over two FIFOs. One fixed FIFO for reading the query and reading the path of a
+randomly generated FIFO. The other FIFO is the randomly generated FIFO used for writing result
+of the query back.
+.PP
+\fBInLookup\fR creates a read FIFO determined by the environment variable INFIFO. If INFIFO is
+not defined, the default FIFO used is INDIMAIL/control/inquery/infifo. \fBInLookup\fR then goes
+into an infinite loop reading this FIFO.
+.PP
+Clients use the API function \fBinquery()\fR to use the InLookup service. The write FIFO is
+generated and created by the client when using the inquery() function. The path of this FIFO is
+passed along with the query to \fBInLookup\fR.
+.PP
+InLookup helps in optimizing connection to MySQL(1), by keeping the connections persistent.
+Clients send requests for MySQL(1) queries to InLookup through the function \fBinquery()\fR using
+FIFO. Clients which are currently using inquery are \fBqmail-smtpd(1)\fR, \fBproxyimap(8)\fR,
+\fBproxypop3(8)\fR, \fBvchkpass(8)\fR and \fBauthindi(8)\fR. \fBInLookup\fR uses the MCD
+(Mail Cluster Definition File) defined by the MCDFILE environment variable to load all
+databases. The MCDFILE defaults to INDIMAIL/control/mcdinfo. On start up \fBInLookup\fR can be
+setup into debug mode by giving '-v' argument on the command line. If debugging is desired to
+be changed during execution of the server, set the environment variable DEBUG instead. Debugging
+can then be turned off/on anytime by giving the SIGUSR2 signal to the pid of the \fBInLookup\fR
+or pid of the parent \fBInLookup\fR (in case of multiple instance). \fBinlookup\fR uses
+\fIhost.cntrl\fR to getting the parameters to connect to MySQL. If \fIhost.cntrl\fR is not
+present, \fIhost.mysql\fR will be used. If both the files are not present, \fBinlookup\fR will
+use localhost to connect to MySQL. Other defaults will be taken from the file
+INDIMAIL/etc/indimail.cnf. \fBInLookup\fR logs all messages and diagnostics to
+LOGDIR/inlookup.infifo/current
+
+.PP
+The program \fBinquerytest(8)\fR simulates all the queries which InLookup supports and can be used as a
+test/diagnostic tool for submitting queries to InLookup.
+
+.SH OPTIONS
+.TP
+\fB\-v\fR
+Sets verbose option.
+.TP
+[\fB\-f\fR \fIinfifo\fR]
+Name of a FIFO to read query requests for back end database like MySQL(1). This overrides the
+environment variable INFIFO.
+.TP
+[\fB\-i\fR \fIinstance\fR]
+Start multiple instances of InLookup (as given by 'instance') for load balancing purpose. The
+default is one instance. If you find that your queries are taking a long time, you can increase
+this value.
+
+.SH SIGNALS
+InLookup reacts to a set of signals.
+
+.TP
+\fBSIGHUP\fR
+This lets InLookup clear all cache.
+.TP
+\fBSIGINT\fR
+This lets InLookup to close all current connections to MySQL(1) and reread the MCD Control
+file.
+.TP
+\fBSIGUSR1\fR
+This causes InLookup to dump all current statistics on stdout
+.TP
+\fBSIGUSR2\fR
+This causes InLookup to toggle the debugging flag. If debugging is off, it is set to on and
+if it is on it is set to off.
+.TP
+\fBSIGTERM\fR
+This causes InLookup to terminate.
+
+.SH RETURN VALUE
+Returns on SIGTERM with exit status = 1.
+
+.SH "SEE ALSO"
+inquerytest(8), proxyimap(8), proxypop3(8), vchkpass(8), authindi(8)
