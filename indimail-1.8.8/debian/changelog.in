@@ -32,5 +32,6 @@ indimail (@version@-1) unstable; urgency=low
   * qmail-remote - Set environment variable OUTGOINGIP
   * tai64nunix.c, tai64nlocal.c - fixed issue with tai timestamp with non-whitespace after 25 characters
   * spawn-filter. Report Blackholed: filter_script_path in delivery log when filters exits 2
+  * qmail-remote - ability to disable AUTH PLAIN, LOGIN, CRAM-MD5, CRAM-SHA1, CRAM-256, CRAM-RIPEMD, DIGEST-MD5
 
  -- Manvendra Bhangui <manvendra@indimail.org>  Tue, 11 Mar 2014 08:40:32 +0530
