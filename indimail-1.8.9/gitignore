@@ -80,6 +80,7 @@ login_tasks.3
 authgeneric
 debian/*.ex
 debian/changelog
+debian/changelog.in
 debian/files
 debian/indimail.cron.d
 debian/indimail.debhelper.log
