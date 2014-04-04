@@ -1,5 +1,0 @@
-#!/var/indimail/sbin/vtable
-ip_alias_map
-(ipaddr char(18) not null,
-domain char(67),
-primary key(ipaddr))
