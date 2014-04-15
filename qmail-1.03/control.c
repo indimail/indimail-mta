@@ -1,5 +1,8 @@
 /*
  * $Log: control.c,v $
+ * Revision 1.19  2014-04-15 13:06:44+05:30  Cprogrammer
+ * control_readrandom - copy to sa without \0
+ *
  * Revision 1.18  2011-07-03 16:58:41+05:30  Cprogrammer
  * new function control_readrandom to pick up a random line from control file
  *
@@ -354,6 +357,9 @@ control_readfile(sa, fn, flagme)
 	return -1;
 }
 
+/*-
+ * pick a random file from fn and copy it to sa
+ */
 int
 control_readrandom(sa, fn)
 	stralloc       *sa;
@@ -412,7 +418,7 @@ control_readrandom(sa, fn)
 		len += ((ilen = str_len(ptr)) + 1);
 		if (count == random)
 		{
-			if (!stralloc_copyb(sa, ptr, ilen + 1))
+			if (!stralloc_copyb(sa, ptr, ilen)) /*- copy without the \0 */
 				break;
 			return (1);
 		}
@@ -511,7 +517,7 @@ control_readcmd(stralloc *sa, char *fn)
 void
 getversion_control_c()
 {
-	static char    *x = "$Id: control.c,v 1.18 2011-07-03 16:58:41+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: control.c,v 1.19 2014-04-15 13:06:44+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
