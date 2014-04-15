@@ -1,6 +1,9 @@
 #!/bin/sh
 #
 # $Log: vadddomain_handle.in,v $
+# Revision 2.11  2014-04-15 23:17:29+05:30  Cprogrammer
+# avoid grep if spamignore does not exist
+#
 # Revision 2.10  2013-08-03 20:22:25+05:30  Cprogrammer
 # send sighup to qmail-send
 #
@@ -33,7 +36,7 @@
 # post handle for vadddomain
 #
 #
-# $Id: vadddomain_handle.in,v 2.10 2013-08-03 20:22:25+05:30 Cprogrammer Exp mbhangui $
+# $Id: vadddomain_handle.in,v 2.11 2014-04-15 23:17:29+05:30 Cprogrammer Exp mbhangui $
 
 # send sighup to inlookup service to reload domains
 @indimaildir@/bin/svc -h /service*/inlookup.* /service*/qmail-send.* 2>/dev/null
@@ -61,10 +64,14 @@ done
 /bin/ls -al @indimaildir@/domains/$1
 
 # add the domain to spamignore
-grep -w @"$1" @indimaildir@/control/spamignore > /dev/null
-if [ $? -ne 0 ] ; then
-	echo @"$1" >> @indimaildir@/control/spamignore
-	/bin/sort -u @indimaildir@/control/spamignore -o @indimaildir@/control/spamignore
+if [ -f @indimaildir@/control/spamignore ] ; then
+	grep -w @"$1" @indimaildir@/control/spamignore > /dev/null
+	if [ $? -ne 0 ] ; then
+		echo @"$1" >> @indimaildir@/control/spamignore
+		/bin/sort -u @indimaildir@/control/spamignore -o @indimaildir@/control/spamignore
+	fi
+else
+	echo @"$1" > @indimaildir@/control/spamignore
 fi
 /bin/chmod 644 @indimaildir@/control/spamignore
 exit 0
