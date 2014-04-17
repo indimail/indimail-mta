@@ -1,5 +1,8 @@
 /*
  * $Log: instcheck.c,v $
+ * Revision 1.18  2014-04-17 12:01:40+05:30  Cprogrammer
+ * ignore man pages error
+ *
  * Revision 1.17  2014-01-23 19:03:18+05:30  Cprogrammer
  * fixed locating files in lib64
  *
@@ -61,6 +64,9 @@ int             uidinit(int);
 
 #define FATAL "instcheck: fatal: "
 #define WARNING "instcheck: warning: "
+#ifdef INDIMAIL
+extern int      ignore_man_error;
+#endif
 void
 perm(prefix1, prefix2, prefix3, file, type, uid, gid, mode, should_exit)
 	char           *prefix1;
@@ -89,10 +95,13 @@ perm(prefix1, prefix2, prefix3, file, type, uid, gid, mode, should_exit)
 				str_copy(tfile + len, ".gz");
 				if (stat(tfile, &st) == -1)
 				{
-					if (errno == error_noent)
-						strerr_warn6(WARNING, prefix1, prefix2, prefix3, file, " does not exist", 0);
-					else
+					if (errno != error_noent)
 						strerr_warn4(WARNING, "unable to stat .../", tfile, ": ", &strerr_sys);
+					else
+#ifdef INDIMAIL
+					if (!ignore_man_error)
+#endif
+						strerr_warn6(WARNING, prefix1, prefix2, prefix3, file, " does not exist", 0);*/
 					if (tfile != file)
 						alloc_free(tfile);
 					return;
@@ -306,7 +315,7 @@ main(int argc, char **argv)
 void
 getversion_instcheck_c()
 {
-	static char    *x = "$Id: instcheck.c,v 1.17 2014-01-23 19:03:18+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: instcheck.c,v 1.18 2014-04-17 12:01:40+05:30 Cprogrammer Exp mbhangui $";
 #ifdef INDIMAIL
 	if (x)
 		x = sccsidh;
