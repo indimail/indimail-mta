@@ -1,5 +1,8 @@
 /*
  * $Log: islocalif.c,v $
+ * Revision 2.5  2014-04-17 11:39:45+05:30  Cprogrammer
+ * display hostname in error message
+ *
  * Revision 2.4  2011-04-08 17:26:42+05:30  Cprogrammer
  * added HAVE_CONFIG_H
  *
@@ -51,7 +54,7 @@
 #endif
 
 #ifndef	lint
-static char     sccsid[] = "$Id: islocalif.c,v 2.4 2011-04-08 17:26:42+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: islocalif.c,v 2.5 2014-04-17 11:39:45+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 /*
@@ -118,7 +121,7 @@ islocalif(char *hostptr)
 	hints.ai_family = PF_UNSPEC;
 	if ((error = getaddrinfo(hostptr, NULL, &hints, &res0)))
 	{
-		fprintf(stderr, "islocalif: getaddrinfo: %s\n", gai_strerror(error));
+		fprintf(stderr, "islocalif: getaddrinfo: %s: %s\n", hostptr, gai_strerror(error));
 		return (-1);
 	}
 #else
