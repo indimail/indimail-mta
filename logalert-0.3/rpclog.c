@@ -1,5 +1,8 @@
 /*
  * $Log: rpclog.c,v $
+ * Revision 1.4  2014-04-17 11:29:15+05:30  Cprogrammer
+ * added conditional inclusion of stdlib.h, string.h
+ *
  * Revision 1.3  2013-05-15 00:18:45+05:30  Cprogrammer
  * fixed warnings
  *
@@ -51,7 +54,7 @@
 #define SEND_MESSAGE ((u_long)1)
 
 #ifndef	lint
-static char     sccsid[] = "$Id: rpclog.c,v 1.3 2013-05-15 00:18:45+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: rpclog.c,v 1.4 2014-04-17 11:29:15+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 struct CONSOLE_MSG
