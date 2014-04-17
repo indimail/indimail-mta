@@ -1,5 +1,8 @@
 /*
  * $Log: logsrv.c,v $
+ * Revision 1.9  2014-04-17 11:27:43+05:30  Cprogrammer
+ * added sys/param.h
+ *
  * Revision 1.8  2013-05-15 00:39:03+05:30  Cprogrammer
  * added SSL encryption
  *
@@ -85,7 +88,7 @@ program RPCLOG
 #define STATUSDIR PREFIX"/tmp/"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: logsrv.c,v 1.8 2013-05-15 00:39:03+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: logsrv.c,v 1.9 2014-04-17 11:27:43+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef __STDC__
