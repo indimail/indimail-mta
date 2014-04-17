@@ -101,7 +101,7 @@ perm(prefix1, prefix2, prefix3, file, type, uid, gid, mode, should_exit)
 #ifdef INDIMAIL
 					if (!ignore_man_error)
 #endif
-						strerr_warn6(WARNING, prefix1, prefix2, prefix3, file, " does not exist", 0);*/
+						strerr_warn6(WARNING, prefix1, prefix2, prefix3, file, " does not exist", 0);
 					if (tfile != file)
 						alloc_free(tfile);
 					return;
