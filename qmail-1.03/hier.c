@@ -1,5 +1,8 @@
 /*
  * $Log: hier.c,v $
+ * Revision 1.182  2014-04-17 12:01:30+05:30  Cprogrammer
+ * ignore man pages error
+ *
  * Revision 1.181  2014-01-22 20:37:12+05:30  Cprogrammer
  * added hassrs.h
  *
@@ -1220,6 +1223,8 @@ hier(inst_dir)
  * written for debian shortsightedness / stupidity
  * why can't the debian community learn from others?
  */
+int             ignore_man_error = 0;
+
 void
 _hier(inst_dir)
 	char           *inst_dir;
@@ -1228,6 +1233,7 @@ _hier(inst_dir)
 
 	if (inst_dir && *inst_dir)
 		auto_qmail_home = inst_dir;
+	ignore_man_error = 1;
 	/* Directories */
 	h(auto_qmail_home, auto_uido, auto_gidq, 0555);
 	d(auto_qmail_home, "lib", auto_uido, auto_gido, 0555);
@@ -1681,7 +1687,7 @@ _hier(inst_dir)
 void
 getversion_install_big_c()
 {
-	static char    *x = "$Id: hier.c,v 1.181 2014-01-22 20:37:12+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: hier.c,v 1.182 2014-04-17 12:01:30+05:30 Cprogrammer Exp mbhangui $";
 
 #ifdef INDIMAIL
 	if (x)
