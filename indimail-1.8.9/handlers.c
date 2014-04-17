@@ -1,5 +1,8 @@
 /*
  * $Log: handlers.c,v $
+ * Revision 2.8  2014-04-17 12:08:12+05:30  Cprogrammer
+ * added error check for setuid() failure
+ *
  * Revision 2.7  2014-04-17 11:38:30+05:30  Cprogrammer
  * added error message for setuid() failure
  *
@@ -45,7 +48,7 @@
  * MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
-static char    *rcsid = "@(#) $Id: handlers.c,v 2.7 2014-04-17 11:38:30+05:30 Cprogrammer Exp mbhangui $";
+static char    *rcsid = "@(#) $Id: handlers.c,v 2.8 2014-04-17 12:08:12+05:30 Cprogrammer Exp mbhangui $";
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -834,8 +837,8 @@ execute(argc, argv)
 
 	av2 = (char **) malloc(argc + 1);
 	x = getuid();
-	if (geteuid() == 0)
-		setuid(0);
+	if (geteuid() == 0 && setuid(0))
+		fatal("setuid");
 #ifdef HAVE_XCOFF_H	/*- AIX */
 	execv(argv[0], argv);
 	fatal("exec");
@@ -868,7 +871,8 @@ execute(argc, argv)
 		fatal("exec");
 	}
 #endif /*- HAVE_XCOFF_H */
-	setuid(x);
+	if (setuid(x))
+		fatal("setuid");
 	return(0);
 }	/*- of execute routine */
 #endif
