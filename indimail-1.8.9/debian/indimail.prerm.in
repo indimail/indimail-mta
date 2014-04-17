@@ -35,23 +35,25 @@ case "$1" in
 	fi
 	if test -f ${sysconfdir}/init/svscan.conf
 	then
-		/sbin/initctl emit qmailstop > /dev/null 2>&1 || true
 		echo "Giving IndiMail exactly 5 seconds to exit nicely" 1>&2
-		sleep 5
+		/sbin/initctl emit qmailstop > /dev/null 2>&1 || true
 		if [ " $1" != " upgrade" ] ; then
 			${rm} -f ${sysconfdir}/event.d/svscan
 		fi
+		sleep 5
 	elif test -f ${sysconfdir}/event.d/svscan
 	then
-		/sbin/initctl emit qmailstop > /dev/null 2>&1
 		echo "Giving IndiMail exactly 5 seconds to exit nicely" 1>&2
-		sleep 5
+		/sbin/initctl emit qmailstop > /dev/null 2>&1
 		if [ " $1" != " upgrade" ] ; then
 			${rm} -f ${sysconfdir}/event.d/svscan || true
 		fi
+		sleep 5
 	elif test -x ${prefix}/sbin/initsvc
 	then
+		echo "Giving IndiMail exactly 5 seconds to exit nicely" 1>&2
 		${prefix}/sbin/initsvc -off
+		sleep 5
 	fi
 	if [ -f ${prefix}/boot/rpm.init ] ; then
 		echo "Running Custom Un-Installation Script for preun" 1>&2
