@@ -1,5 +1,8 @@
 /*
  * $Log: main.c,v $
+ * Revision 1.2  2014-04-17 11:27:49+05:30  Cprogrammer
+ * added username argument to set_user()
+ *
  * Revision 1.1  2013-05-15 00:29:21+05:30  Cprogrammer
  * Initial revision
  *
@@ -200,7 +203,7 @@ main(int argc, char **argv)
 		usage(1);
 	}
 	if (def_conf.user)
-		set_user(get_user_id(def_conf.user), get_guser_id(def_conf.user));
+		set_user(get_user_id(def_conf.user), get_guser_id(def_conf.user), def_conf.user);
 	if (PARENT_MODE(&def_conf)) {
 
 		handle_conf_file(def_conf.parent_conffile);
