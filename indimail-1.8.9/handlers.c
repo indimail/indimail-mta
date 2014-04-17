@@ -1,5 +1,8 @@
 /*
  * $Log: handlers.c,v $
+ * Revision 2.7  2014-04-17 11:38:30+05:30  Cprogrammer
+ * added error message for setuid() failure
+ *
  * Revision 2.6  2011-07-29 09:26:02+05:30  Cprogrammer
  * fixed gcc 4.6 warnings
  *
@@ -42,7 +45,7 @@
  * MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
-static char    *rcsid = "@(#) $Id: handlers.c,v 2.6 2011-07-29 09:26:02+05:30 Cprogrammer Stab mbhangui $";
+static char    *rcsid = "@(#) $Id: handlers.c,v 2.7 2014-04-17 11:38:30+05:30 Cprogrammer Exp mbhangui $";
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -700,7 +703,7 @@ i_more(argc, argv)
 			fprintf(stderr, "more: %s\n", strerror(errno));
 			return(0);
 		}
-		fopen("/dev/tty", "r");
+		(void) open("/dev/tty", O_RDONLY);
 
 		initscr();
 		noecho();
@@ -797,11 +800,12 @@ execute(argc, argv)
 	int             x;
 
 	x = getuid();
-	if (geteuid() == 0)
-		setuid(0);
+	if (geteuid() == 0 && setuid(0))
+		fatal("setuid");
 	execv(argv[0], argv);
 	fatal("exec");
-	setuid(x);
+	if (setuid(x))
+		fatal("setuid");
 	return(0);
 }
 #else
