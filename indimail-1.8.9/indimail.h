@@ -1,5 +1,8 @@
 /*
  * $Log: indimail.h,v $
+ * Revision 2.212  2014-04-17 11:39:15+05:30  Cprogrammer
+ * added prototype for grpscan(), setuserid(), setuser_privileges()
+ *
  * Revision 2.211  2014-01-02 22:29:52+05:30  Cprogrammer
  * added variable delayed_insert for mysql
  *
@@ -949,7 +952,7 @@
 #define INDIMAILH_H
 
 #ifndef	lint
-static char     sccsidh[] = "$Id: indimail.h,v 2.211 2014-01-02 22:29:52+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsidh[] = "$Id: indimail.h,v 2.212 2014-04-17 11:39:15+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef HAVE_CONFIG_H
@@ -1927,6 +1930,9 @@ int             vpriv_insert(char *, char *, char *);
 int             vpriv_delete(char *, char *);
 int             vpriv_update(char *, char *, char *);
 int             checkPerm(char *, char *, char **);
+gid_t          *grpscan(char *, int *);
+int             setuserid(char *);
+int             setuser_privileges(uid_t, gid_t, char *);
 #ifdef QUERY_CACHE
 void            findhost_cache(char);
 void            is_user_present_cache(char);
