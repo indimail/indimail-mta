@@ -4,6 +4,7 @@
 *.BAK
 *.a
 *.org
+*/debian/changelog.in
 post_handle
 configure.lineno
 autom4te.cache
