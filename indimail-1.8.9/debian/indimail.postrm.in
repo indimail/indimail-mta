@@ -127,6 +127,8 @@ if [ " $1" = " purge" ] ; then
 	if [ -d ${prefix}/alias ] ; then
 		${rmdir} --ignore-fail-on-non-empty ${prefix}/alias 2>/dev/null
 	fi
+	${rm} -f ${prefix}/share/imapd.pem
+	${rm} -f ${prefix}/share/pop3d.pem
 
 	if [ ${prefix} != "/usr" ] ; then
 		echo "removing binaries, libraries, queues"
@@ -208,6 +210,8 @@ if [ " $1" = " purge" ] ; then
 		fi
 	done
 	fi
+	${prefix}/sbin/svctool --config=rm-boot
+
 	echo "removing logs"
 	${rm} -f ${prefix}/mysqldb/logs/logisam.log
 	${rm} -f ${prefix}/mysqldb/logs/logquery
