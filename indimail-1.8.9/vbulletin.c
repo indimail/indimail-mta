@@ -1,5 +1,8 @@
 /*
  * $Log: vbulletin.c,v $
+ * Revision 2.16  2014-04-17 12:19:10+05:30  Cprogrammer
+ * use setuser_privilege() to set uid, gid and supplementary group ids.
+ *
  * Revision 2.15  2014-04-17 11:42:27+05:30  Cprogrammer
  * set supplementary group ids for indimail
  *
@@ -71,7 +74,7 @@
 #include <signal.h>
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vbulletin.c,v 2.15 2014-04-17 11:42:27+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: vbulletin.c,v 2.16 2014-04-17 12:19:10+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #define COPY_IT          0
@@ -467,8 +470,9 @@ spost(char *EmailOrDomain, char *Filename, int bulk)
 	}
 	if (bulk)
 		return(0);
-	if (setgid(gid) || setuid(uid))
+	if (setuser_privileges(uid, gid, "indimail"))
 	{
+		error_stack(stderr, "setuser_privilege: (%d/%d): %s", uid, gid, strerror(errno));
 		fprintf(stderr, "setuid/setgid (%d/%d): %s\n", uid, gid, strerror(errno));
 		return (-1);
 	}
