@@ -1,5 +1,8 @@
 /*
  * $Log: setuserid.c,v $
+ * Revision 2.2  2014-04-17 11:41:18+05:30  Cprogrammer
+ * added setuser_privileges() for setting uid, gid and supplementary group ids
+ *
  * Revision 2.1  2014-01-30 13:23:55+05:30  Cprogrammer
  * setuid, setgid and supplementary groups
  *
@@ -12,7 +15,7 @@
 #include <string.h>
 
 #ifndef	lint
-static char     sccsid[] = "$Id: setuserid.c,v 2.1 2014-01-30 13:23:55+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: setuserid.c,v 2.2 2014-04-17 11:41:18+05:30 Cprogrammer Exp mbhangui $";
 #endif
 /*-
  * scan the group file for all supplementary groups.
@@ -70,6 +73,33 @@ setuserid(user)
 	uid = pwdent->pw_uid;
 	gid = pwdent->pw_gid;
 	endpwent();
+	if (!(gidset = grpscan(user, &ngroups)))
+		return (-1);
+	if (setgroups(ngroups, gidset)) {
+		free(gidset);
+		return (-1);
+	} else
+	if (setgid(gid)) {
+		free(gidset);
+		return (-1);
+	} else
+	if (setuid(uid)) {
+		free(gidset);
+		return (-1);
+	}
+	free(gidset);
+	return (0);
+}
+
+int
+setuser_privileges(uid, gid, user)
+	uid_t           uid;
+	gid_t           gid;
+	char           *user;
+{
+	gid_t          *gidset;
+	int             ngroups;
+
 	if (!(gidset = grpscan(user, &ngroups)))
 		return (-1);
 	if (setgroups(ngroups, gidset)) {
