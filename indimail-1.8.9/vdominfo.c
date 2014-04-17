@@ -1,5 +1,8 @@
 /*
  * $Log: vdominfo.c,v $
+ * Revision 2.15  2014-04-17 11:42:59+05:30  Cprogrammer
+ * set supplementary group ids for indimail
+ *
  * Revision 2.14  2011-11-09 19:46:05+05:30  Cprogrammer
  * removed getversion
  *
@@ -118,7 +121,7 @@
 #include <memory.h>
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vdominfo.c,v 2.14 2011-11-09 19:46:05+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: vdominfo.c,v 2.15 2014-04-17 11:42:59+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 char            Domain[MAX_BUFF];
@@ -162,7 +165,7 @@ main(argc, argv)
 	{
 		if (vget_assign(Domain, Dir, MAX_BUFF, &Uid, &Gid) == NULL)
 		{
-			printf("domain %s does not exist\n", Domain);
+			error_stack(stderr, "domain %s does not exist\n", Domain);
 			return(1);
 		}
 		if (myuid != Uid && myuid != 0)
@@ -170,22 +173,22 @@ main(argc, argv)
 			error_stack(stderr, "you must be root or domain user (uid=%d) to run this program\n", Uid);
 			return(1);
 		}
-		if (setgid(Gid) || setuid(Uid))
+		if (setuser_privileges(Uid, Gid, "indimail"))
 		{
-			fprintf(stderr, "setuid/setgid (%d/%d): %s", Uid, Gid, strerror(errno));
+			error_stack(stderr, "setuser_privilege: (%d/%d): %s\n", Uid, Gid, strerror(errno));
 			return (1);
 		}
 		if (isvirtualdomain(Domain) == 1)
 			display_domain(Domain, Dir, Uid, Gid);
 		else
-			printf("domain %s does not exist\n", Domain);
+			error_stack(stderr, "domain %s does not exist\n", Domain);
 	} else
 	{
 		if (indimailuid == -1 || indimailgid == -1)
 			GetIndiId(&indimailuid, &indimailgid);
-		if (setgid(indimailgid) || setuid(0))
+		if (setuser_privileges(0, indimailgid, "indimail"))
 		{
-			fprintf(stderr, "setuid/setgid (%d/%d): %s", Uid, Gid, strerror(errno));
+			error_stack(stderr, "setuser_privilege: (0/%d): %s\n", indimailgid, strerror(errno));
 			return (1);
 		}
 		display_all_domains();

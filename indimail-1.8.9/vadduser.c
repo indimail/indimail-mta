@@ -1,5 +1,8 @@
 /*
  * $Log: vadduser.c,v $
+ * Revision 2.38  2014-04-17 11:42:18+05:30  Cprogrammer
+ * set supplementary group ids for indimail
+ *
  * Revision 2.37  2013-06-10 16:06:39+05:30  Cprogrammer
  * allow setting of NOQUOTA from vlimits
  *
@@ -165,7 +168,7 @@
 #include <signal.h>
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vadduser.c,v 2.37 2013-06-10 16:06:39+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: vadduser.c,v 2.38 2014-04-17 11:42:18+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 char            Email[MAX_BUFF], User[MAX_BUFF], Domain[MAX_BUFF], Passwd[MAX_BUFF],
@@ -260,9 +263,9 @@ main(argc, argv)
 		error_stack(stderr, "you must be root or domain user (uid=%d) to run this program\n", uid);
 		return(1);
 	}
-	if (setgid(gid) || setuid(uid))
+	if (setuser_privileges(uid, gid, "indimail"))
 	{
-		error_stack(stderr, "setuid/setgid (%d/%d): %s", uid, gid, strerror(errno));
+		error_stack(stderr, "setuser_privilege: (%d/%d): %s", uid, gid, strerror(errno));
 		return(1);
 	}
 	/* set the users quota if set on the command line */

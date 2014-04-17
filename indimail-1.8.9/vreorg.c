@@ -1,5 +1,8 @@
 /*
  * $Log: vreorg.c,v $
+ * Revision 2.14  2014-04-17 11:43:09+05:30  Cprogrammer
+ * set supplementary group ids for indimail
+ *
  * Revision 2.13  2010-08-08 13:03:35+05:30  Cprogrammer
  * made users_per_level configurable
  *
@@ -93,7 +96,7 @@
 #include <sys/stat.h>
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vreorg.c,v 2.13 2010-08-08 13:03:35+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: vreorg.c,v 2.14 2014-04-17 11:43:09+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 int             get_options(int argc, char **argv, char *, char *, int *, int *, int *);
@@ -123,9 +126,9 @@ main(int argc, char **argv)
 	}
 	if ((myuid = getuid()) != uid)
 	{
-		if (setgid(gid) || setuid(uid))
+		if (setuser_privileges(uid, gid, "indimail"))
 		{
-			perror("setuid");
+			fprintf(stderr, "setuser_privilege: (%d/%d): %s\n", uid, gid, strerror(errno));
 			return(1);
 		}
 	}

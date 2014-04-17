@@ -1,5 +1,8 @@
 /*
  * $Log: vcfilter.c,v $
+ * Revision 2.29  2014-04-17 11:42:30+05:30  Cprogrammer
+ * set supplementary group ids for indimail
+ *
  * Revision 2.28  2013-10-11 01:14:40+05:30  Cprogrammer
  * BUG - fixed not able to create filters for prefilt and postfilt
  *
@@ -93,7 +96,7 @@
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vcfilter.c,v 2.28 2013-10-11 01:14:40+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: vcfilter.c,v 2.29 2014-04-17 11:42:30+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef VFILTER
@@ -179,9 +182,9 @@ main(int argc, char **argv)
 				vclose();
 			return(1);
 		}
-		if (setgid(gid) || setuid(uid))
+		if (setuser_privileges(uid, gid, "indimail"))
 		{
-			error_stack(stderr, "setuid/setgid (%d/%d): %s", uid, gid, strerror(errno));
+			error_stack(stderr, "setuser_privileges: (%d/%d): %s", uid, gid, strerror(errno));
 			if (cluster_conn)
 				vclose();
 			return(1);

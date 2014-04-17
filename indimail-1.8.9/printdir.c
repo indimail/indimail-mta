@@ -1,5 +1,8 @@
 /*
  * $Log: printdir.c,v $
+ * Revision 2.5  2014-04-17 11:40:37+05:30  Cprogrammer
+ * set supplementary group ids for indimail
+ *
  * Revision 2.4  2010-08-15 15:54:12+05:30  Cprogrammer
  * display max users per level
  *
@@ -29,7 +32,7 @@
 #include <string.h>
 
 #ifndef	lint
-static char     sccsid[] = "$Id: printdir.c,v 2.4 2010-08-15 15:54:12+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: printdir.c,v 2.5 2014-04-17 11:40:37+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 int
@@ -60,9 +63,9 @@ main(int argc, char **argv)
 	}
 	if ((myuid = getuid()) != uid)
 	{
-		if (setgid(gid) || setuid(uid))
+		if (setuser_privileges(uid, gid, "indimail"))
 		{
-			error_stack(stderr, "setuid/setgid (%d/%d): %s", uid, gid, strerror(errno));
+			error_stack(stderr, "setuser_privileges: (%d/%d): %s", uid, gid, strerror(errno));
 			return (1);
 		}
 	}

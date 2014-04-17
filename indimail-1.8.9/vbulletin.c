@@ -1,5 +1,8 @@
 /*
  * $Log: vbulletin.c,v $
+ * Revision 2.15  2014-04-17 11:42:27+05:30  Cprogrammer
+ * set supplementary group ids for indimail
+ *
  * Revision 2.14  2009-12-30 13:11:18+05:30  Cprogrammer
  * run vbulletin with uid,gid of domain
  *
@@ -68,7 +71,7 @@
 #include <signal.h>
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vbulletin.c,v 2.14 2009-12-30 13:11:18+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: vbulletin.c,v 2.15 2014-04-17 11:42:27+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #define COPY_IT          0
@@ -293,9 +296,9 @@ process_domain(EmailFile, ExcludeFile, domain)
 		error_stack(stderr, "you must be root or domain user (uid=%d) to run this program\n", uid);
 		return(1);
 	}
-	if (setgid(gid) || setuid(uid))
+	if (setuser_privileges(uid, gid, "indimail"))
 	{
-		fprintf(stderr, "setuid/setgid (%d/%d): %s", uid, gid, strerror(errno));
+		error_stack(stderr, "setuser_privileges: (%d/%d): %s", uid, gid, strerror(errno));
 		return (1);
 	}
 	snprintf(filename, MAX_BUFF, "%lu.%d.%s", tm, pid, hostname);

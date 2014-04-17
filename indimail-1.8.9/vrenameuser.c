@@ -1,5 +1,8 @@
 /*
  * $Log: vrenameuser.c,v $
+ * Revision 2.12  2014-04-17 11:43:04+05:30  Cprogrammer
+ * set supplementary group ids for indimail
+ *
  * Revision 2.11  2011-11-09 19:46:32+05:30  Cprogrammer
  * removed getversion
  *
@@ -47,7 +50,7 @@
 #include <signal.h>
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vrenameuser.c,v 2.11 2011-11-09 19:46:32+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: vrenameuser.c,v 2.12 2014-04-17 11:43:04+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 char            oldEmail[MAX_BUFF];
@@ -111,9 +114,9 @@ main(argc, argv)
 		if(indimailuid == -1 || indimailgid == -1)
 			GetIndiId(&indimailuid, &indimailgid);
 		myuid = geteuid();
-		if (setgid(gid1) || setuid(uid1))
+		if (setuser_privileges(uid1, gid1, "indimail"))
 		{
-			error_stack(stderr, "setuid/setgid (%d/%d): %s", uid1, gid1, strerror(errno));
+			error_stack(stderr, "setuser_privileges: (%d/%d): %s", uid1, gid1, strerror(errno));
 			return (1);
 		}
 	}
