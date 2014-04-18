@@ -1,5 +1,8 @@
 /*
  * $Log: skip_system_files.c,v $
+ * Revision 2.5  2014-04-18 17:27:47+05:30  Cprogrammer
+ * added folder.dateformat
+ *
  * Revision 2.4  2004-07-02 18:16:45+05:30  Cprogrammer
  * removed '.' from control files
  *
@@ -17,7 +20,7 @@
 #include <string.h>
 
 #ifndef	lint
-static char     sccsid[] = "$Id: skip_system_files.c,v 2.4 2004-07-02 18:16:45+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: skip_system_files.c,v 2.5 2014-04-18 17:27:47+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 int
@@ -29,6 +32,7 @@ skip_system_files(char *filename)
 		"domain",
 		"QuotaWarn",
 		"vfilter",
+		"folder.dateformat",
 		"noprefilt",
 		"nopostfilt",
 		"BulkMail",
