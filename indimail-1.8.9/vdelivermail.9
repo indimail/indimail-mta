@@ -117,6 +117,14 @@ variable \fBMAILCOUNT_LIMIT\fR. This can be set in the qmail-send run file. If t
 deliveries for a user exceeds this number, the mail is bounced back to the sender with over
 quota message.
 
+.SH Date Folder Delivery
+.PP
+One can use vmoduser(1) to turn on delivery to a date folder. If this option is turned on, emails
+can be delivered to a folder based on the current timestamp. This option is useful if you want
+to deliver mails based on the year, month, week, etc. vdelivermail(8) uses strftime(3) to process
+the date format for the folder. The file folder.dateformat in user's Maildir is used for storing
+the date format for the folder.
+
 .SH dot-qmail processing
 
 .PP
@@ -212,4 +220,4 @@ for all temporary error occurs during mail delivery and without the error, the m
 .SH "SEE ALSO"
 vmoduser(1), vsetuserquota(1), vmoddomlimits(1),
 qmail-lspawn(8), spawn-filter(8), qmail-local(8),
-qmail-remote(8), maildirdeliver(1), ismaildup(1)
+qmail-remote(8), maildirdeliver(1), ismaildup(1), strftime(3)
