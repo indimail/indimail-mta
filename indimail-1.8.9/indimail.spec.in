@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail.spec.in,v 2.275 2014-03-12 08:53:16+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 2.276 2014-04-18 17:36:52+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %define _unpackaged_files_terminate_build 1
 
@@ -30,7 +30,7 @@
 %define fast_mode          1
 %else
 %define build_on_obs       0
-%define fast_mode          0
+%define fast_mode          1
 %endif
 
 %define _prefix            @indimaildir@
@@ -60,7 +60,7 @@
 %define noclamav           1
 %else
 %define nonssd             0
-%define noclamav           0
+%define noclamav           1
 %endif
 %define noproxy            0
 %define nocourierimap      0
@@ -77,6 +77,7 @@
 %define logdir             @logdir@
 %define servicedir         /service
 %define pam_confdir        /etc/pam.d
+%define dkimkeyfn          default
 %if %i_m_on_mac == 0
 %define module_dir         /%{_lib}/security
 %else
@@ -807,34 +808,45 @@ install -m 644 %{S:17} %{buildroot}%{_sysconfdir}/permissions.d/%{name}-permissi
 %endif
 
 if [ -x /usr/bin/chrpath ] ; then
-/usr/bin/chrpath -d %{buildroot}%{_libdir}/*.so
-for i in clambc clamconf clamscan dbinfo flash freshclam hostcntrl indiversion printdir \
-proxyimap proxypop3 resetquota sigtool vacation vaddaliasdomain vadddomain vadduser \
-vadduserl valias vatrn vbulletin vcalias vcfilter vdeldomain vdeluser vdominfo \
-vgroup vhostid vipmap vlimit vmoduser vmoveuser vpasswd vpriv sslerator \
-vproxy vrenamedomain vrenameuser vsetuserquota vsmtp vuserinfo tcpserver ismaildup
-do
-	if [ -f %{buildroot}%{_prefix}/bin/$i ] ; then
-    	/usr/bin/chrpath -d %{buildroot}%{_prefix}/bin/$i
+	/usr/bin/chrpath -d %{buildroot}%{_libdir}/*.so
+	for i in dbinfo flash freshhostcntrl indiversion printdir \
+	proxyimap proxypop3 resetquota sigtool vacation vaddaliasdomain vadddomain vadduser \
+	vadduserl valias vatrn vbulletin vcalias vcfilter vdeldomain vdeluser vdominfo \
+	vgroup vhostid vipmap vlimit vmoduser vmoveuser vpasswd vpriv sslerator \
+	vproxy vrenamedomain vrenameuser vsetuserquota vsmtp vuserinfo tcpserver ismaildup
+	do
+		if [ -f %{buildroot}%{_prefix}/bin/$i ] ; then
+    		/usr/bin/chrpath -d %{buildroot}%{_prefix}/bin/$i
+		fi
+	done
+	if [ %noclamav -eq 0 ] ; then
+		for i in clambc clamconf clamscan freshclam
+		do
+			if [ -f %{buildroot}%{_prefix}/bin/$i ] ; then
+    			/usr/bin/chrpath -d %{buildroot}%{_prefix}/bin/$i
+			fi
+		done
 	fi
-done
 
-/usr/bin/chrpath -d %{buildroot}%{_prefix}/libexec/authlib/authindi
-/usr/bin/chrpath -d %{buildroot}%{_prefix}/libexec/authlib/authpgsql
-/usr/bin/chrpath -d %{buildroot}%{_prefix}/libexec/sq_vacation
-/usr/bin/chrpath -d %{buildroot}%{_prefix}/libexec/qmailmrtg7
-/usr/bin/chrpath -d %{buildroot}%{_prefix}/modules/iauth.so
+	/usr/bin/chrpath -d %{buildroot}%{_prefix}/libexec/authlib/authindi
+	/usr/bin/chrpath -d %{buildroot}%{_prefix}/libexec/authlib/authpgsql
+	/usr/bin/chrpath -d %{buildroot}%{_prefix}/libexec/sq_vacation
+	/usr/bin/chrpath -d %{buildroot}%{_prefix}/libexec/qmailmrtg7
+	/usr/bin/chrpath -d %{buildroot}%{_prefix}/modules/iauth.so
 
-for i in adminclient chowkidar cindimail clamd clearopensmtp copyemail execmysql \
-hostsync indisrvr inlookup inquerytest install_tables ipchange mail_report \
-mgmtpass postdel systpass testmra updatefile updaterules vchkpass vdelivermail \
-vdeloldusers vfilter vfstab vmoddomain vreorg vsetpass nssd vserverinfo check_getpw \
-vtable
-do
-	if [ -f %{buildroot}%{_prefix}/sbin/$i ] ; then
-    	/usr/bin/chrpath -d %{buildroot}%{_prefix}/sbin/$i
+	for i in adminclient chowkidar cindimail clearopensmtp copyemail execmysql \
+	hostsync indisrvr inlookup inquerytest install_tables ipchange mail_report \
+	mgmtpass postdel systpass testmra updatefile updaterules vchkpass vdelivermail \
+	vdeloldusers vfilter vfstab vmoddomain vreorg vsetpass nssd vserverinfo check_getpw \
+	vtable
+	do
+		if [ -f %{buildroot}%{_prefix}/sbin/$i ] ; then
+    		/usr/bin/chrpath -d %{buildroot}%{_prefix}/sbin/$i
+		fi
+	done
+	if [ %noclamav -eq 0 ] ; then
+    	/usr/bin/chrpath -d %{buildroot}%{_prefix}/bin/clamd
 	fi
-done
 fi
 # Compress the man pages
 find %{buildroot}%{_prefix}/man -type f -exec gzip -q {} \;
@@ -881,6 +893,7 @@ do
 done
 ) > config_files.list
 if [ %nobogofilter -eq 0 ] ; then
+	%{__rm} -f %{buildroot}%{_prefix}/etc/bogofilter.cf.example
 	$TOUCH %{buildroot}%{_prefix}/etc/bogofilter.cf
 fi
 if [ %nofetchmail -eq 0 ] ; then
@@ -892,6 +905,12 @@ if [ %noclamav -eq 0 ] ; then # clamav >= 0.97.5, without clamav-db
 	else # with built-in clamav signatures
 		$TOUCH %{buildroot}%{_prefix}/share/clamd/clamav
 		$TOUCH %{buildroot}%{_prefix}/share/clamd/mirrors.dat
+	fi
+else
+	if [ -f /usr/bin/freshclam ] ; then
+		if [ ! -d %{buildroot}%{_prefix}/share/clamd ] ; then
+			%{__mkdir_p} %{buildroot}%{_prefix}/share/clamd
+		fi
 	fi
 fi
 
@@ -907,6 +926,7 @@ fi
 %dir %attr(750,qscand,qscand)     %{_prefix}/qscanq
 %dir %attr(750,qscand,qscand)     %{_prefix}/qscanq/root
 %dir %attr(750,qscand,qscand)     %{_prefix}/qscanq/root/scanq
+%dir %attr(555,root,root)         %{_prefix}/lib
 %dir %attr(555,root,root)         %{_prefix}/libexec
 %dir %attr(555,root,root)         %{_prefix}/libexec/authlib
 %dir %attr(755,indimail,indimail) %{_prefix}/control
@@ -1024,7 +1044,6 @@ fi
 %endif
 
 %if %nobogofilter == 0
-%attr(644,root,root)                              %{_prefix}/etc/bogofilter.cf.example
 %attr(0644,indimail,indimail) %config(noreplace)  %{_prefix}/etc/wordlist.db
 %endif
 
@@ -1440,8 +1459,10 @@ fi
 %attr(555,root,root)                    %{_prefix}/sbin/pop3login
 %attr(555,root,root)                    %{_prefix}/sbin/sharedindexinstall
 %attr(555,root,root)                    %{_prefix}/sbin/sharedindexsplit
-%attr(777,root,root)                    %{_prefix}/sbin/mkimapdcert
-%attr(777,root,root)                    %{_prefix}/sbin/mkpop3dcert
+#
+                                        %{_prefix}/sbin/mkimapdcert
+                                        %{_prefix}/sbin/mkpop3dcert
+#
 %if %i_m_on_mac == 0
 %attr(4555,root,root)                   %{_prefix}/libexec/authlib/authshadow
 %endif
@@ -1688,8 +1709,21 @@ fi
 
 %docdir %{_prefix}/doc
 %docdir %{_prefix}/man
-%attr(444,root,qmail)                   %{_prefix}/man/man[1,4,5,7,8]/*
-%attr(444,root,qmail)                   %{_prefix}/man/cat[1,4,5,7,8]/*
+%attr(444,root,qmail)                   %{_prefix}/man/man[1,4,5,8]/*
+%attr(444,root,qmail)                   %{_prefix}/man/cat[1,4,5,8]/*
+%attr(444,root,qmail)                   %{_prefix}/man/cat7/forgeries.0.gz
+%attr(444,root,qmail)                   %{_prefix}/man/cat7/qmail-limits.0.gz
+%attr(444,root,qmail)                   %{_prefix}/man/cat7/qmail.0.gz
+%attr(444,root,qmail)                   %{_prefix}/man/man7/IndiMail.7.gz
+%attr(444,root,qmail)                   %{_prefix}/man/man7/forgeries.7.gz
+%attr(444,root,qmail)                   %{_prefix}/man/man7/indimail.7.gz
+%attr(444,root,qmail)                   %{_prefix}/man/man7/qmail-limits.7.gz
+%attr(444,root,qmail)                   %{_prefix}/man/man7/qmail.7.gz
+%attr(444,root,qmail)                   %{_prefix}/man/man7/authlib.7.gz
+                                        %{_prefix}/man/man7/authcustom.7.gz
+                                        %{_prefix}/man/man7/authpam.7.gz
+                                        %{_prefix}/man/man7/authpwd.7.gz
+                                        %{_prefix}/man/man7/authshadow.7.gz
 
 %attr(444,root,qmail)                   %{_prefix}/doc/HOWTO.sharedmaildir
 %attr(444,root,qmail)                   %{_prefix}/doc/README.auth
@@ -1822,8 +1856,8 @@ fi
 %endif
 
 %if %nonssd == 0
-%attr(777,root,root)                    /usr/%{_lib}/libnss_nssd.so
-%attr(777,root,root)                    /usr/%{_lib}/libnss_nssd.so.2
+                                        /usr/%{_lib}/libnss_nssd.so
+                                        /usr/%{_lib}/libnss_nssd.so.2
 %attr(755,root,root)                    /usr/%{_lib}/libnss_nssd.so.2.0.0
 %endif
 
@@ -2067,25 +2101,30 @@ if [ $ID -ne 0 ] ; then
 	echo "You are not root" 1>&2
 	exit 1
 fi
-if [ -f %{_prefix}/sbin/initsvc ] ; then
-	%{_prefix}/sbin/initsvc -status
-fi
+if [ -d %{_prefix} -a -d /service ] ; then
+	if [ -f %{_prefix}/sbin/initsvc ] ; then
+		%{_prefix}/sbin/initsvc -status
+	fi
 
-echo "Giving IndiMail exactly 5 seconds to exit nicely"
-if test -f %{_sysconfdir}/init/svscan.conf
-then
-	/sbin/initctl emit qmailstop > /dev/null 2>&1
-elif test -f %{_sysconfdir}/event.d/svscan
-then
-	/sbin/initctl emit qmailstop > /dev/null 2>&1
-elif test -f %{_sysconfdir}/systemd/system/multi-user.target.wants/indimail.service
-then
-	/bin/systemctl stop indimail.service > /dev/null 2>&1
-elif test -x %{_prefix}/sbin/initsvc
-then
-	%{_prefix}/sbin/initsvc -off
+	if test -f %{_sysconfdir}/init/svscan.conf
+	then
+		echo "Giving IndiMail exactly 5 seconds to exit nicely"
+		/sbin/initctl emit qmailstop > /dev/null 2>&1
+	elif test -f %{_sysconfdir}/event.d/svscan
+	then
+		echo "Giving IndiMail exactly 5 seconds to exit nicely"
+		/sbin/initctl emit qmailstop > /dev/null 2>&1
+	elif test -f %{_sysconfdir}/systemd/system/multi-user.target.wants/indimail.service
+	then
+		echo "Giving IndiMail exactly 5 seconds to exit nicely"
+		/bin/systemctl stop indimail.service > /dev/null 2>&1
+	elif test -x %{_prefix}/sbin/initsvc
+	then
+		echo "Giving IndiMail exactly 5 seconds to exit nicely"
+		%{_prefix}/sbin/initsvc -off
+	fi
+	sleep 5
 fi
-sleep 5
 
 ### SCRIPTLET ###############################################################################
 %pre 
@@ -2099,6 +2138,7 @@ fi
 if [ $argv1 -eq 2 ] ; then
 	exit 0
 fi
+(
 echo "Checking for mandatory user/group mysql.."
 case "%host" in
 	*-*-darwin*)
@@ -2208,6 +2248,7 @@ if [ $nscd_up -ge 1 ] ; then
 	fi
 fi
 %endif
+) > /tmp/indimail-install.log 2>&1
 
 ### SCRIPTLET ###############################################################################
 %post
@@ -2235,6 +2276,7 @@ else
 	TOUCH=/bin/touch
 fi
 
+(
 # MySQL
 echo "Creating %{logdir}"
 if [ ! -d %{logdir} ] ; then
@@ -2308,6 +2350,7 @@ fi
 %define imapspop3_mem 52428800
 %define poppass_mem   52428800
 %endif
+
 for port in 465 25 587
 do
 	if [ $port -eq 465 ] ; then
@@ -2336,8 +2379,24 @@ do
 		extra_opt="$extra_opt --deliverylimit-count=-1 --deliverylimit-size=-1"
 		extra_opt="$extra_opt --rbl=-rzen.spamhaus.org --rbl=-rdnsbl-1.uceprotect.net"
 	fi
+	if [ %noclamav -eq 0 ] ; then
+		echo "Checking if clamav is installed"
+		clamav_os=0
+		clamdPrefix=%{_prefix}
+		qhpsi="%{_prefix}/bin/clamdscan %s --fdpass --quiet --no-summary"
+		mysysconfdir=%{_prefix}/etc
+	else
+		if [ -f /usr/sbin/clamd -a -f /usr/bin/clamdscan ] ; then
+			clamav_os=1
+			clamdPrefix="/usr"
+			qhpsi="/usr/bin/clamdscan %s --fdpass --quiet --no-summary"
+			mysysconfdir=%{_sysconfdir}
+		else
+			clamav_os=0
+		fi
+	fi
 	if [ $spamfilter -eq 1 ] ; then
-		if [ %noclamav -eq 0 ] ; then
+		if [ %noclamav -eq 0 -o $clamav_os -eq 1 ] ; then
 			%{_prefix}/sbin/svctool --smtp=$port --servicedir=%{servicedir} \
 				--qbase=%{qbase} --qcount=%{qcount} --qstart=1 \
 				--query-cache --dnscheck --password-cache \
@@ -2346,10 +2405,10 @@ do
 				--min-free=52428800 --content-filter \
 				--spamfilter="%{_prefix}/bin/bogofilter -p -d %{_prefix}/etc" \
 				--logfilter=/tmp/spamfifo --rejectspam=0 --spamexitcode=0 \
-				--qhpsi="%{_prefix}/bin/clamdscan %s --fdpass --quiet --no-summary" \
+				--qhpsi="$qhpsi" \
 				--dmasquerade \
 				--dkverify=$ver_opt \
-				--dksign=$sign_opt --private_key=%{_prefix}/control/domainkeys/%/default \
+				--dksign=$sign_opt --private_key=%{_prefix}/control/domainkeys/%/%dkimkeyfn \
 				$extra_opt
 		else
 			%{_prefix}/sbin/svctool --smtp=$port --servicedir=%{servicedir} \
@@ -2362,21 +2421,21 @@ do
 				--logfilter=/tmp/spamfifo --rejectspam=0 --spamexitcode=0 \
 				--dmasquerade \
 				--dkverify=both \
-				--dksign=both --private_key=%{_prefix}/control/domainkeys/%/default \
+				--dksign=both --private_key=%{_prefix}/control/domainkeys/%/%dkimkeyfn \
 				$extra_opt
 		fi
 	else
-		if [ %noclamav -eq 0 ] ; then
+		if [ %noclamav -eq 0 -o $clamav_os -eq 1 ] ; then
 			%{_prefix}/sbin/svctool --smtp=$port --servicedir=%{servicedir} \
 				--qbase=%{qbase} --qcount=%{qcount} --qstart=1 \
 				--query-cache --dnscheck --password-cache \
 				--cntrldir=control --localip=0 --maxdaemons=75 --maxperip=25 --persistdb \
 				--starttls --fsync --syncdir --memory=%{smtp_soft_mem} --chkrecipient --chkrelay --masquerade \
 				--min-free=52428800 --content-filter \
-				--qhpsi="%{_prefix}/bin/clamdscan %s --fdpass --quiet --no-summary" \
+				--qhpsi="$qhpsi" \
 				--dmasquerade \
 				--dkverify=both \
-				--dksign=both --private_key=%{_prefix}/control/domainkeys/%/default \
+				--dksign=both --private_key=%{_prefix}/control/domainkeys/%/%dkimkeyfn \
 				$extra_opt
 		else
 			%{_prefix}/sbin/svctool --smtp=$port --servicedir=%{servicedir} \
@@ -2387,26 +2446,26 @@ do
 				--min-free=52428800 --content-filter --virus-filter \
 				--dmasquerade \
 				--dkverify=both \
-				--dksign=both --private_key=%{_prefix}/control/domainkeys/%/default \
+				--dksign=both --private_key=%{_prefix}/control/domainkeys/%/%dkimkeyfn \
 				$extra_opt
 		fi
 	fi
 	echo "1" > %{servicedir}/qmail-smtpd.$port/variables/DISABLE_PLUGIN
 done
-if [ %noclamav -eq 0 ] ; then
+if [ %noclamav -eq 0 -o $clamav_os -eq 1 ] ; then
 	%{_prefix}/sbin/svctool --queueParam=defaultqueue \
 		--qbase=%{qbase} --qcount=%{qcount} --qstart=1 \
 		--min-free=52428800 --fsync --syncdir \
-		--qhpsi="%{_prefix}/bin/clamdscan %s --fdpass --quiet --no-summary" \
+		--qhpsi="$qhpsi" \
 		--dkverify="none" --dksign=$sign_opt \
-		--private_key=%{_prefix}/control/domainkeys/%/default \
+		--private_key=%{_prefix}/control/domainkeys/%/%dkimkeyfn \
 		$extra_opt
 else
 	%{_prefix}/sbin/svctool --queueParam=defaultqueue \
 		--qbase=%{qbase} --qcount=%{qcount} --qstart=1 \
 		--min-free=52428800 --fsync --syncdir --virus-filter \
 		--dkverify="none" --dksign=$sign_opt \
-		--private_key=%{_prefix}/control/domainkeys/%/default \
+		--private_key=%{_prefix}/control/domainkeys/%/%dkimkeyfn \
 		$extra_opt
 fi
 %{_prefix}/sbin/svctool --smtp=366 --odmr --servicedir=%{servicedir} \
@@ -2429,11 +2488,11 @@ $TOUCH %{servicedir}/qmail-qmqpd.628/down
 if [ %nofetchmail -eq 0 ] ; then
 # fetchmail
 	if [ %nobogofilter -eq 0 ] ; then
-		if [ %noclamav -eq 0 ] ; then
+		if [ %noclamav -eq 0 -o $clamav_os -eq 1 ] ; then
 			%{_prefix}/sbin/svctool --fetchmail --servicedir=%{servicedir} \
 				--qbase=%{qbase} --qcount=%{qcount} --qstart=1 \
 				--cntrldir=control --default-domain=%{default_domain} \
-				--qhpsi="%{_prefix}/bin/clamdscan %s --fdpass --quiet --no-summary" \
+				--qhpsi="$qhpsi" \
 				--spamfilter="%{_prefix}/bin/bogofilter -p -d %{_prefix}/etc" \
 				--logfilter=/tmp/spamfifo --rejectspam=0 --spamexitcode=0 \
 				--memory=%{fetchmail_mem} --fsync --syncdir \
@@ -2448,11 +2507,11 @@ if [ %nofetchmail -eq 0 ] ; then
 				--dkverify=$ver_opt
 		fi
 	else
-		if [ %noclamav -eq 0 ] ; then
+		if [ %noclamav -eq 0 -o $clamav_os -eq 1 ] ; then
 			%{_prefix}/sbin/svctool --fetchmail --servicedir=%{servicedir} \
 				--qbase=%{qbase} --qcount=%{qcount} --qstart=1 \
 				--cntrldir=control --default-domain=%{default_domain} \
-				--qhpsi="%{_prefix}/bin/clamdscan %s --fdpass --quiet --no-summary" \
+				--qhpsi="$qhpsi" \
 				--memory=%{fetchmail_mem} --fsync --syncdir \
 				--dkverify=$ver_opt
 		else
@@ -2517,13 +2576,12 @@ fi
 	--setpassword=%{_prefix}/sbin/vsetpass --servicedir=%{servicedir}
 
 # virus/spam filtering
-if [ %noclamav -eq 0 ] ; then
+%{_prefix}/sbin/svctool --qscanq --servicedir=%{servicedir} --scanint=200
+if [ %noclamav -eq 0 -o $clamav_os -eq 1 ] ; then
 	%{_prefix}/sbin/svctool --config=clamd
-	%{_prefix}/sbin/svctool --qscanq --servicedir=%{servicedir} --clamdPrefix=%{_prefix} --scanint=200
-	$TOUCH %{servicedir}/freshclam/down
-fi
-if [ %nobogofilter -eq 0 ] ; then
-	%{_prefix}/sbin/svctool --config=bogofilter
+	# create clamd, freshclam service
+	%{_prefix}/sbin/svctool --clamd --servicedir=%{servicedir} --clamdPrefix=$clamdPrefix \
+		--sysconfdir=$mysysconfdir
 fi
 
 %{_prefix}/sbin/svctool --config=qmail --postmaster=%{_prefix}/alias/Maildir/ \
@@ -2553,6 +2611,10 @@ R0lGODlhaAA7APcAAP///+rp6puSp6GZrDUjUUc6Zn53mFJMdbGvvVtXh2xre8bF1x8cU4yLprOy:Vir
 UEsDBAoAAQAAAEBHYzCf4kJRDDAAAAAwAAAKAAAAc3ZtaXhlLmV4ZcuI1rOkjfn48VwCkMYHRTfM
 EOF
 %{__chown} qscand:qscand %{_prefix}/control/signatures
+
+if [ %nobogofilter -eq 0 ] ; then
+	%{_prefix}/sbin/svctool --config=bogofilter
+fi
 
 %if %i_m_on_mac == 0
 # Recreate ld.so links and cache
@@ -2602,9 +2664,7 @@ fi
 echo "adding indimail startup"
 %{_prefix}/sbin/svctool --config=add-boot
 
-if [ %noclamav -eq 0 ] ; then
-	%{__rm} -f %{servicedir}/freshclam/down
-fi
+) >> /tmp/indimail-installation.log 2>&1
 
 if [ -f %{_sysconfdir}/init/svscan.conf -o -f %{_sysconfdir}/event.d/svscan ] ; then
 	echo "1. Issue /sbin/initctl emit qmailstart to start services"
@@ -2627,6 +2687,11 @@ echo "$count. Change your default domain in %{_prefix}/control/defaultdomain"
 count=`expr $count + 1`
 echo "$count. You can optionally run the following command to verify installation"
 echo "   sudo rpm -V indimail"
+%if %noclamav == 0
+count=`expr $count + 1`
+echo "$count. You need to ensure that clamav signatures download have completed so that"
+echo "   you can start sending emails. Look at %{logdir}/freshclam/current"
+%endif
 if [ ! -f %{_prefix}/control/servercert.pem ] ; then
 count=`expr $count + 1`
 %if %nocourierimap == 0
@@ -2637,11 +2702,9 @@ echo "$count. You need to create CERTS for STARTTLS."
 echo "   Run the following command to create the Certificate"
 echo "   %{_prefix}/sbin/svctool --postmaster=postmaster@indimail.org --config=cert"
 fi
-%if %noclamav == 0
-count=`expr $count + 1`
-echo "$count. You need to ensure that clamav signatures download have completed so that"
-echo "   you can start sending emails. Look at %{logdir}/freshclam/current"
-%endif
+
+echo
+echo "Look at /tmp/indimail-install.log for the installation log"
 
 ### SCRIPTLET ###############################################################################
 %preun
@@ -2703,8 +2766,9 @@ if [ -f /etc/init.d/sendmail ] ; then
 	fi
 fi
 if [ -x /usr/sbin/alternatives ] ; then
+	echo "removing indimail as alternatives mta"
 	/usr/sbin/alternatives --remove mta %{_prefix}/bin/sendmail
-	/usr/sbin/alternatives --auto mta
+	/usr/sbin/alternatives --auto mta || true
 else
 	for i in /usr/lib/sendmail /usr/sbin/sendmail; do
 		if [ -f $i.old -o -L $i.old ]; then
@@ -2714,6 +2778,7 @@ else
 		fi
 	done
 fi
+%{_prefix}/sbin/svctool --config=rm-boot
 
 ### SCRIPTLET ###############################################################################
 %postun
@@ -2742,12 +2807,12 @@ fi
 %if %i_m_on_mac == 0
 for i in alias qmaild qmaill qmailp qmailq qmailr qmails qscand indimail
 do
-	echo "Removing user $i"
+	echo "removing user $i"
 	/usr/bin/getent passwd $i > /dev/null && /usr/sbin/userdel $i >/dev/null || true
 done
 for i in nofiles qmail qscand indimail
 do
-	echo "Removing group $i"
+	echo "removing group $i"
 	/usr/bin/getent group $i > /dev/null && /usr/sbin/groupdel $i  >/dev/null || true
 done
 if [ $nscd_up -ge 1 ] ; then
@@ -2757,11 +2822,11 @@ if [ $nscd_up -ge 1 ] ; then
 fi
 %else
 	for i in indimail qmail nofiles qscand; do
-		echo "Removing group $i"
+		echo "removing group $i"
 		dscl . -delete /Groups/$i
 	done
 	for i in indimail alias qmaild qmaill qmailp qmailq qmailr qmails qscand; do
-		echo "Removing user $i"
+		echo "removing user $i"
 		dscl . -delete /Users/$i
 	done
 %endif
@@ -2809,7 +2874,7 @@ for i in smtp qmtp qmqp imap pop3 poppass
 do
 	for j in `/bin/ls %{_prefix}/etc/tcp*.$i 2>/dev/null`
 	do
-			%{_rm} -f $j.cdb
+			%{__rm} -f $j.cdb
 	done
 done
 /bin/rmdir --ignore-fail-on-non-empty %{_prefix}/etc 2>/dev/null
@@ -2834,7 +2899,7 @@ else
 	done
 fi
 %{__rm} -f %{_prefix}/control/controlfiles
-%{__rm} -f %{_prefix}/control/domainkeys/default.pub %{_prefix}/control/domainkeys/default
+%{__rm} -f %{_prefix}/control/domainkeys/%{dkimkeyfn}.pub %{_prefix}/control/domainkeys/%dkimkeyfn
 /bin/rmdir --ignore-fail-on-non-empty %{_prefix}/control/domainkeys 2>/dev/null
 /bin/rmdir --ignore-fail-on-non-empty %{_prefix}/control 2>/dev/null
 
@@ -2843,6 +2908,8 @@ do
 	%{__rm} -f %{_prefix}/alias/.qmail-"$i"
 done
 /bin/rmdir --ignore-fail-on-non-empty %{_prefix}/alias 2>/dev/null
+%{__rm} -f %{_prefix}/share/imapd.pem
+%{__rm} -f %{_prefix}/share/pop3d.pem
 
 echo "removing startup services"
 for i in clamd fetchmail freshclam indisrvr.4000 inlookup.infifo mysql.3306 \
