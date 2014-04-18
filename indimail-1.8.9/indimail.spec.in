@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail.spec.in,v 2.276 2014-04-18 17:36:52+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 2.277 2014-04-18 21:49:23+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %define _unpackaged_files_terminate_build 1
 
@@ -809,11 +809,11 @@ install -m 644 %{S:17} %{buildroot}%{_sysconfdir}/permissions.d/%{name}-permissi
 
 if [ -x /usr/bin/chrpath ] ; then
 	/usr/bin/chrpath -d %{buildroot}%{_libdir}/*.so
-	for i in dbinfo flash freshhostcntrl indiversion printdir \
-	proxyimap proxypop3 resetquota sigtool vacation vaddaliasdomain vadddomain vadduser \
-	vadduserl valias vatrn vbulletin vcalias vcfilter vdeldomain vdeluser vdominfo \
-	vgroup vhostid vipmap vlimit vmoduser vmoveuser vpasswd vpriv sslerator \
-	vproxy vrenamedomain vrenameuser vsetuserquota vsmtp vuserinfo tcpserver ismaildup
+	for i in dbinfo flash hostcntrl indiversion printdir \
+		proxyimap proxypop3 resetquota sigtool vacation vaddaliasdomain vadddomain vadduser \
+		vadduserl valias vatrn vbulletin vcalias vcfilter vdeldomain vdeluser vdominfo \
+		vgroup vhostid vipmap vlimit vmoduser vmoveuser vpasswd vpriv sslerator \
+		vproxy vrenamedomain vrenameuser vsetuserquota vsmtp vuserinfo tcpserver ismaildup
 	do
 		if [ -f %{buildroot}%{_prefix}/bin/$i ] ; then
     		/usr/bin/chrpath -d %{buildroot}%{_prefix}/bin/$i
@@ -893,7 +893,6 @@ do
 done
 ) > config_files.list
 if [ %nobogofilter -eq 0 ] ; then
-	%{__rm} -f %{buildroot}%{_prefix}/etc/bogofilter.cf.example
 	$TOUCH %{buildroot}%{_prefix}/etc/bogofilter.cf
 fi
 if [ %nofetchmail -eq 0 ] ; then
@@ -1044,6 +1043,7 @@ fi
 %endif
 
 %if %nobogofilter == 0
+%attr(644,root,root)                              %{_prefix}/etc/bogofilter.cf.example
 %attr(0644,indimail,indimail) %config(noreplace)  %{_prefix}/etc/wordlist.db
 %endif
 
@@ -2664,7 +2664,7 @@ fi
 echo "adding indimail startup"
 %{_prefix}/sbin/svctool --config=add-boot
 
-) >> /tmp/indimail-installation.log 2>&1
+) >> /tmp/indimail-install.log 2>&1
 
 if [ -f %{_sysconfdir}/init/svscan.conf -o -f %{_sysconfdir}/event.d/svscan ] ; then
 	echo "1. Issue /sbin/initctl emit qmailstart to start services"
