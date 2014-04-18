@@ -7,6 +7,8 @@ install_sh_PROGRAM = $(install_sh) -c
 INSTALL_SCRIPT = ${INSTALL}
 install_sh_SCRIPT = $(install_sh) -c
 
+DEFS=@DEFS@ -fno-strict-aliasing
+
 pamsbindir=@prefix@/sbin
 pam_multidir=$(moduledir)
 noinst_FILES=pam-multi.la pam-multi.a
