@@ -1,8 +1,7 @@
 @SET_MAKE@
 ACLOCAL_AMFLAGS = -I m4
 COFLAGS=-z+05:30
-DEFS = @DEFS@
-
+DEFS = @DEFS@ -fno-strict-aliasing -Wno-implicit-function-declaration -Wno-unused-function -Wno-return-type
 INSTALL_PROGRAM = ${INSTALL}          -c
 install_sh_PROGRAM = $(install_sh)    -c
 INSTALL_SCRIPT = ${INSTALL}           -c
