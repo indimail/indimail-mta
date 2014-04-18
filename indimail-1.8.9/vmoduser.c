@@ -1,5 +1,8 @@
 /*
  * $Log: vmoduser.c,v $
+ * Revision 2.27  2014-04-18 17:33:19+05:30  Cprogrammer
+ * added option -D to create folder.dateformat in user's Maildir
+ *
  * Revision 2.26  2013-04-29 22:52:48+05:30  Cprogrammer
  * fixed setting quota = NOQUOTA
  *
@@ -147,7 +150,7 @@
 #include <signal.h>
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vmoduser.c,v 2.26 2013-04-29 22:52:48+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: vmoduser.c,v 2.27 2014-04-18 17:33:19+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 char            Email[MAX_BUFF];
@@ -155,6 +158,7 @@ char            User[MAX_BUFF];
 char            Domain[MAX_BUFF];
 char            Gecos[MAX_BUFF];
 char            Passwd[MAX_BUFF];
+char            DateFormat[MAX_BUFF];
 char            Quota[MAX_BUFF];
 char            vacation_file[MAX_BUFF];
 
@@ -175,7 +179,7 @@ main(argc, argv)
 	int             argc;
 	char           *argv[];
 {
-	int             err;
+	int             err, fd;
 	uid_t           uid;
 #ifdef ENABLE_AUTH_LOGGING
 	gid_t           gid;
@@ -358,6 +362,31 @@ main(argc, argv)
 		vset_lastauth(pw->pw_name, real_domain, "pass", GetIpaddr(), pw->pw_gecos, quota);
 #endif
 	}
+	if (*DateFormat) {
+		snprintf(tmpbuf, MAX_BUFF, "%s/Maildir/folder.dateformat", pw->pw_dir);
+		if ((fd = open(tmpbuf, O_CREAT|O_TRUNC|O_WRONLY, INDIMAIL_QMAIL_MODE)) == -1) {
+			error_stack(stderr, "%s: %s\n", tmpbuf, strerror(errno));
+			return (1);
+		}
+		if (!vget_assign(real_domain, 0, 0, &uid, &gid)) {
+			if (indimailuid == -1 || indimailgid == -1)
+				GetIndiId(&indimailuid, &indimailgid);
+			uid = indimailuid;
+			gid = indimailgid;
+		}
+		if (fchown(fd, uid, gid))
+		{
+			error_stack(stderr, "fchown: %s: (uid %d: gid %d): %s\n", tmpbuf, uid, gid, strerror(errno));
+			vdeldomain(Domain);
+			vclose();
+			return(1);
+		}
+		if (filewrt(fd, "%s\n", DateFormat) == -1) {
+			error_stack(stderr, "write: %s: %s\n", tmpbuf, strerror(errno));
+			return (1);
+		}
+		close(fd);
+	}
 	vclose();
 	return(err);
 }
@@ -375,6 +404,7 @@ usage()
 	fprintf(stderr, "         -c comment               (set the comment/gecos field)\n");
 	fprintf(stderr, "         -P passwd                (set the password field)\n");
 	fprintf(stderr, "         -e encrypted_passwd      (set the encrypted password field)\n");
+	fprintf(stderr, "         -D date format           (Delivery to a Date Folder)\n");
 	fprintf(stderr, "         -l vacation_message_file (sets up Auto Responder)\n");
 	fprintf(stderr, "                                  (some special values for vacation_message_file)\n");
 	fprintf(stderr, "                                  ('-' to remove vacation, '+' to take mesage from stdin)\n");
@@ -407,14 +437,15 @@ get_options(int argc, char **argv)
 	memset(Domain, 0, MAX_BUFF);
 	memset(Gecos, 0, MAX_BUFF);
 	memset(Passwd, 0, MAX_BUFF);
+	memset(DateFormat, 0, MAX_BUFF);
 	memset(Quota, 0, MAX_BUFF);
 	toggle = ClearFlags = 0;
 	QuotaFlag = 0;
 	errflag = 0;
 #ifdef ENABLE_AUTH_LOGGING
-	while ((c = getopt(argc, argv, "avutnxc:q:dpwisobr0123he:l:P:")) != -1) 
+	while ((c = getopt(argc, argv, "avutnxD:c:q:dpwisobr0123he:l:P:")) != -1) 
 #else
-	while ((c = getopt(argc, argv, "avuxc:q:dpwisobr0123he:l:P:")) != -1) 
+	while ((c = getopt(argc, argv, "avuxD:c:q:dpwisobr0123he:l:P:")) != -1) 
 #endif
 	{
 		switch (c)
@@ -438,6 +469,9 @@ get_options(int argc, char **argv)
 			/*- flow through */
 		case 'P':
 			mkpasswd3(optarg, Passwd, MAX_BUFF);
+			break;
+		case 'D':
+			scopy(DateFormat, optarg, MAX_BUFF);
 			break;
 		case 'l':
 			scopy(vacation_file, optarg, MAX_BUFF);
