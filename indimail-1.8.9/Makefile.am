@@ -4,7 +4,7 @@ SUBDIRS=@subdir_list@
 COFLAGS=-z+05:30
 ACLOCAL_AMFLAGS=-I m4
 
-DEFS=@DEFS@ -I. -Ieps-1.2 @auth_inc@
+DEFS=@DEFS@ -fno-strict-aliasing -I. -Ieps-1.2 @auth_inc@
 
 INSTALL_PROGRAM = ${INSTALL}          -c
 install_sh_PROGRAM = $(install_sh)    -c
@@ -909,7 +909,7 @@ hashtable$(EXEEXT): $(hashtable_DEPENDENCIES) $(hashtable_OBJECTS)
 	$(LINK) $@.$(OBJEXT) makeseekable.$(OBJEXT) sockwrite.$(OBJEXT)
 
 hashtable.$(OBJEXT): hashtable.c
-	$(COMPILE) $(DEFS) -DMAIN -c hashtable.c
+	$(COMPILE) -Wno-pointer-to-int-cast -Wno-int-to-pointer-cast $(DEFS) -DMAIN -c hashtable.c
 
 initsvc$(EXEEXT): $(initsvc_OBJECTS) $(initsvc_DEPENDENCIES)
 	$(LINK) $(initsvc_LDFLAGS) $(initsvc_OBJECTS) fappend.$(OBJEXT) getEnvConfig.$(OBJEXT) $(initsvc_LDADD)
