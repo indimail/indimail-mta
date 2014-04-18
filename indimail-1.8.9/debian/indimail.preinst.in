@@ -28,7 +28,7 @@ echo "Checking for mandatory user/group mysql.."
 
 case "$1" in
     install|upgrade)
-	/bin/rm -f /tmp/indimail.install /tmp/indimail.upgrade
+	${rm} -f /tmp/indimail.install /tmp/indimail.upgrade
 	touch /tmp/indimail.$1
 	nscd_up=`ps -ef |grep nscd |grep -v grep|wc -l`
 	if [ $nscd_up -ge 1 ] ; then
