@@ -1,0 +1,60 @@
+
+module indimail 1.0;
+
+require {
+	type semanage_t;
+	type mysqld_t;
+	type httpd_t;
+	type user_home_t;
+	type initrc_t;
+	type tmp_t;
+	type nscd_t;
+	type var_t;
+	type pop_port_t;
+	type antivirus_t;
+	type crond_tmp_t;
+	type mandb_t;
+	class unix_stream_socket connectto;
+	class capability fowner;
+	class tcp_socket name_connect;
+	class file { execute getattr setattr read create rename execute_no_trans write unlink open append };
+	class sock_file write;
+	class lnk_file read;
+	class dir { setattr read create write rmdir remove_name open add_name };
+}
+
+#============= httpd_t ==============
+allow httpd_t initrc_t:unix_stream_socket connectto;
+allow httpd_t pop_port_t:tcp_socket name_connect;
+allow httpd_t self:capability fowner;
+allow httpd_t tmp_t:sock_file write;
+allow httpd_t user_home_t:dir { setattr read create write rmdir remove_name open add_name };
+allow httpd_t user_home_t:file { read write create unlink setattr };
+allow httpd_t var_t:dir { write remove_name add_name };
+allow httpd_t var_t:file { execute setattr read create execute_no_trans write getattr unlink open };
+allow httpd_t var_t:lnk_file read;
+
+#============= mysqld_t ==============
+allow mysqld_t var_t:file write;
+
+#============= nscd_t ==============
+allow nscd_t initrc_t:unix_stream_socket connectto;
+allow nscd_t tmp_t:sock_file write;
+
+#============= semanage_t ==============
+allow semanage_t initrc_t:unix_stream_socket connectto;
+allow semanage_t tmp_t:sock_file write;
+
+#============= antivirus_t ==============
+
+#!!!! This avc can be allowed using the boolean 'antivirus_can_scan_system'
+allow antivirus_t var_t:dir read;
+allow antivirus_t var_t:dir { write rmdir setattr read remove_name create add_name };
+allow antivirus_t var_t:file { create write rename unlink append };
+allow antivirus_t crond_tmp_t:file write;
+
+#!!!! This avc can be allowed using the boolean 'antivirus_can_scan_system'
+allow antivirus_t var_t:file { read write getattr open };
+
+#============= mandb_t ==============
+allow mandb_t var_t:file getattr;
