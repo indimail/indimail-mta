@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail.spec.in,v 2.277 2014-04-18 21:49:23+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 2.278 2014-04-19 11:58:59+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %define _unpackaged_files_terminate_build 1
 
@@ -1026,6 +1026,7 @@ fi
 %ghost %attr(0644,root,root)                      %{_prefix}/etc/services.log
 
 %attr(444,root,root)                              %{_prefix}/etc/cronlist
+%attr(444,root,root)                              %{_prefix}/etc/indimail.te
 %attr(444,root,root)                              %{_prefix}/etc/indimail.mrtg.cfg
 %attr(444,root,root)                              %{_prefix}/etc/qmailprog.list
 %attr(444,root,root)                              %{_prefix}/etc/headerlist
@@ -2258,16 +2259,6 @@ if [ $ID -ne 0 ] ; then
 	echo "You are not root" 1>&2
 	exit 1
 fi
-if [ $argv1 -eq 2 ] ; then # upgrade
-	if [ -f %{_prefix}/boot/rpm.init ] ; then
-%if %i_m_on_mac == 0
-		/sbin/ldconfig
-%endif
-		echo "Running Custom Upgrade Script for post"
-		/bin/sh %{_prefix}/boot/rpm.init upgrade
-	fi
-	exit 0
-fi
 if [ -x /bin/touch ] ; then
 	TOUCH=/bin/touch
 elif [ -x /usr/bin/touch ] ; then
@@ -2276,6 +2267,23 @@ else
 	TOUCH=/bin/touch
 fi
 
+if [ $argv1 -eq 2 ] ; then # upgrade
+	if [ -f %{_prefix}/boot/rpm.init ] ; then
+%if %i_m_on_mac == 0
+		/sbin/ldconfig
+%endif
+		echo "Running Custom Upgrade Script for post"
+		/bin/sh %{_prefix}/boot/rpm.init upgrade
+	fi
+	echo "doing post upgrade activities"
+	(
+	# selinux
+	%{_prefix}/sbin/svctool --config=selinux
+	) >> /tmp/indimail-install.log 2>&1
+	exit 0
+fi
+
+echo "doing post installation activities"
 (
 # MySQL
 echo "Creating %{logdir}"
@@ -2644,18 +2652,9 @@ done
 
 # Misc/Configuration
 %{_prefix}/sbin/svctool --svscanlog --servicedir=%{servicedir}
-if [ -f %{_prefix}/boot/rpm.init ] ; then
-	echo "Running Custom Installation Script for post"
-	/bin/sh %{_prefix}/boot/rpm.init post
-fi
+
 # selinux
-if [ -x /usr/sbin/selinuxenabled ] ; then
-	/usr/sbin/selinuxenabled
-	if [ $? -eq 0 ] ; then
-		/usr/sbin/semanage fcontext -a -t mysqld_db_t "%{_prefix}/mysqldb(/.*)?"
-		/usr/sbin/restorecon -Rv %{_prefix}/mysqldb/data
-	fi
-fi
+%{_prefix}/sbin/svctool --config=selinux
 
 #
 # Install IndiMail to be started on system boot
@@ -2665,6 +2664,11 @@ echo "adding indimail startup"
 %{_prefix}/sbin/svctool --config=add-boot
 
 ) >> /tmp/indimail-install.log 2>&1
+
+if [ -f %{_prefix}/boot/rpm.init ] ; then
+	echo "Running Custom Installation Script for post"
+	/bin/sh %{_prefix}/boot/rpm.init post
+fi
 
 if [ -f %{_sysconfdir}/init/svscan.conf -o -f %{_sysconfdir}/event.d/svscan ] ; then
 	echo "1. Issue /sbin/initctl emit qmailstart to start services"
@@ -2742,6 +2746,7 @@ then
 	echo "Giving IndiMail exactly 5 seconds to exit nicely"
 	sleep 5
 fi
+
 if [ -f %{_prefix}/boot/rpm.init ] ; then
 	echo "Running Custom Un-Installation Script for preun"
 	/bin/sh %{_prefix}/boot/rpm.init preun "$argv1"
@@ -2851,7 +2856,7 @@ if [ ! %{_prefix} = "/usr" ] ; then
 fi
 
 echo "removing configuration"
-for i in indimail.cnf backup.conf cronlist headerlist \
+for i in indimail.cnf backup.conf cronlist indimail.te headerlist \
 		imapd.cnf imapd.dist imapd-ssl.dist inc_deps indimail.mrtg.cfg \
 		indimail.settings lib_deps osh.table perm_list pop3d.cnf \
 		pop3d.dist pop3d-ssl.dist qmailprog.list quotawarnmsg.example \
@@ -2930,6 +2935,10 @@ do
 	fi
 done
 fi
+
+#selinux
+%{__rm} -f %{_prefix}/etc/indimail.te %{_prefix}/etc/indimail.mod %{_prefix}/etc/indimail.pp
+
 echo "removing logs"
 %{__rm} -f %{_prefix}/mysqldb/logs/logisam.log
 %{__rm} -f %{_prefix}/mysqldb/logs/logquery
@@ -2948,6 +2957,7 @@ fi
 echo "recreating ld.so cache"
 /sbin/ldconfig
 %endif
+
 if [ -f %{_prefix}/boot/rpm.init ] ; then
 	echo "Running Custom Un-Installation Script for postun"
 	/bin/sh %{_prefix}/boot/rpm.init postun
