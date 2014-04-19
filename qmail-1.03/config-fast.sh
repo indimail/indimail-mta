@@ -27,7 +27,7 @@ chmod 644 "$DESTDIR"QMAIL/control/me
 	)
 )
 
-grep $fqdn "$DESTDIR"QMAIL/control/virtualdomains > /dev/null
+grep $fqdn "$DESTDIR"QMAIL/control/virtualdomains > /dev/null 2>&1
 if [ $? -ne 0 ] ; then
 	echo Putting "$fqdn" into "$DESTDIR"QMAIL/control/locals...
 	echo "$fqdn" >> "$DESTDIR"QMAIL/control/locals
