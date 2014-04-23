@@ -534,12 +534,6 @@
 %attr(0644,root,root) @indimaildir@/etc/indimail.lic
 %attr(0644,root,root) @indimaildir@/etc/nssd.conf
 %attr(0644,root,root) @indimaildir@/etc/procmailrc
-%attr(0644,root,root) @indimaildir@/etc/tcp.imap
-%attr(0644,root,root) @indimaildir@/etc/tcp.pop3
-%attr(0644,root,root) @indimaildir@/etc/tcp.poppass
-%attr(0644,root,root) @indimaildir@/etc/tcp.qmqp
-%attr(0644,root,root) @indimaildir@/etc/tcp.qmtp
-%attr(0644,root,root) @indimaildir@/etc/tcp.smtp
 
 %attr(0444,root,root) @indimaildir@/etc/yum.repos.d/IndiMail-CentOS_5.repo
 %attr(0444,root,root) @indimaildir@/etc/yum.repos.d/IndiMail-CentOS_6.repo
