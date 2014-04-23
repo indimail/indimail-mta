@@ -357,7 +357,7 @@ main(int argc, char **argv)
 		return (1);
 	} /*- if (!access("/bin/launchctl", X_OK)) */
 #endif
-	debian_version = !access("/etc/debian_release", F_OK);
+	debian_version = !access("/etc/debian_version", F_OK);
 	if (!(fp = fopen("/etc/inittab", "r")))
 	{
 		perror("/etc/inittab");
