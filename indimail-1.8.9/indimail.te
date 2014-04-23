@@ -1,4 +1,10 @@
-
+#
+# $Log: indimail.te,v $
+# Revision 2.1  2014-04-23 13:53:51+05:30  Cprogrammer
+# selinux module configuration
+#
+#
+# $ Id: $
 module indimail 1.0;
 
 require {
@@ -36,6 +42,7 @@ allow httpd_t var_t:lnk_file read;
 
 #============= mysqld_t ==============
 allow mysqld_t var_t:file write;
+allow mysqld_t tmp_t:sock_file write;
 
 #============= nscd_t ==============
 allow nscd_t initrc_t:unix_stream_socket connectto;
@@ -57,4 +64,4 @@ allow antivirus_t crond_tmp_t:file write;
 allow antivirus_t var_t:file { read write getattr open };
 
 #============= mandb_t ==============
-allow mandb_t var_t:file getattr;
+allow mandb_t var_t:file read getattr;
