@@ -71,7 +71,25 @@ case "$1" in
 			${sysconfdir}/init.d/nscd start
 		fi
 	fi
-    ;;
+
+	if [ -x /usr/sbin/update-rc.d ] ; then
+		for i in mysql exim4 postfix
+		do
+			if [ -f /etc/init.d/$i ] ; then
+				(
+				update-rc.d $i stop
+				update-rc.d -f $i disable
+				) > /dev/null 2>&1
+			fi
+		done
+	fi
+	for i in lib sbin
+	do
+		if [ -f /usr/$i/sendmail ] ; then
+			mv /usr/$i/sendmail /usr/$i/sendmail.old
+		fi
+	done
+	;;
 
     abort-upgrade)
     ;;

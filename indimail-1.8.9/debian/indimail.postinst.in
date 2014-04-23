@@ -30,7 +30,7 @@ rm=/bin/rm
 noproxy=0
 nonssd=0
 nocourierimap=0
-noclamav=0
+noclamav=1
 nofetchmail=0
 nobogofilter=0
 nodksignature=0
@@ -49,6 +49,7 @@ setperm()
 
 fixperms()
 {
+#%attr(0555,root,qmail) @indimaildir@/bin/rsmtp
 	if [ $# -eq 3 ] ; then # directory
 		lin=$2
 		file=$3
@@ -66,16 +67,18 @@ fixperms()
 	perm_f1=`echo $perm | cut -c1`
 	own=`echo $lin|cut -d\( -f2 | cut -d, -f2`
 	grp=`echo $lin|cut -d\( -f2 | cut -d, -f3|cut -d\) -f1`
-	if [ $perm_f1 -eq 0 ] ; then
-		/bin/chown $own:$grp $file
-		/bin/chmod $perm $file
-	else
-		echo $file
-		if [ -f /usr/sbin/dpkg-statoverride ] ; then
-			setperm $own $grp $perm $file
-		else
+	if [ -f $file ] ; then
+		if [ $perm_f1 -eq 0 ] ; then # 4755, 0644
 			/bin/chown $own:$grp $file
 			/bin/chmod $perm $file
+		else
+			echo $file
+			if [ -f /usr/sbin/dpkg-statoverride ] ; then
+				setperm $own $grp $perm $file
+			else
+				/bin/chown $own:$grp $file
+				/bin/chmod $perm $file
+			fi
 		fi
 	fi
 }
@@ -118,6 +121,9 @@ if [ -f ${prefix}/etc/perm_list ] ; then
 (
 /bin/grep -v "^#" ${prefix}/etc/perm_list | while read line
 do
+	if [ " $line" = " " ] ; then
+		continue
+	fi
 	fixperms $line
 done
 ) > ${prefix}/etc/stat.override
@@ -143,6 +149,8 @@ if [ -d ${sysconfdir}/ld.so.conf.d ] ; then
 fi
 /sbin/ldconfig
 
+echo "doing post installation activities"
+(
 # MySQL
 echo "Creating ${logdir}"
 if [ ! -d ${logdir} ] ; then
@@ -294,7 +302,7 @@ if [ $noclamav -eq 0 -o $clamav_os -eq 1 ] ; then
 	${prefix}/sbin/svctool --queueParam=defaultqueue \
 		--qbase=${qbase} --qcount=${qcount} --qstart=1 \
 		--min-free=52428800 --fsync --syncdir \
-		--qhpsi=$qhpsi \
+		--qhpsi="$qhpsi" \
 		--dkverify="none" --dksign=$sign_opt \
 		--private_key=${prefix}/control/domainkeys/%/$dkimkeyfn \
 		$extra_opt
@@ -454,13 +462,14 @@ EOFUU
 # rebuild cdb
 for i in smtp qmtp qmqp imap pop3 poppass
 do
-	for j in `/bin/ls ${prefix}/etc/tcp*.$i 2>/dev/null`
+	for j in `/bin/ls ${prefix}/etc/tcp.$i 2>/dev/null`
 	do
 		echo "Creating CDB $j.cdb"
    		${prefix}/bin/tcprules $j.cdb $j.tmp < $j && /bin/chmod 664 $j.cdb \
 			&& chown indimail:indimail $j.cdb
 	done
 done
+
 echo "compressing man pages"
 find ${prefix}/man -type f -exec gzip -q {} \;
 if [ -f ${prefix}/man/man7/authlib.7.gz ] ; then
@@ -491,15 +500,11 @@ ${prefix}/sbin/svctool --config=add-boot
 if [ -f ${prefix}/bin/instcheck ] ; then
 	${prefix}/bin/instcheck > /dev/null 2>&1
 fi
-LD_LIBRARY_PATH=${prefix}/lib:${prefix}/lib64
-export LD_LIBRARY_PATH
 #
 # create /tmp/skip-install_tables so that svctool does not run sbin/install_tables
 #
-touch /tmp/skip-install_tables
-${prefix}/sbin/svctool --check-install --servicedir=${servicedir} \
-	--qbase=${qbase} --qcount=${qcount} --qstart=1
-${rm} -f /tmp/skip-install_tables
+) >> /tmp/indimail-install.log 2>&1
+
 if [ -f /etc/init/svscan.conf -o -f /etc/event.d/svscan ] ; then
 	echo "1. Issue /sbin/initctl emit qmailstart to start services"
 	count=1
@@ -522,7 +527,7 @@ echo "       --qbase=${qbase} --qcount=${qcount} --qstart=1"
 if [ $noclamav -eq 0 ] ; then
 count=`expr $count + 1`
 echo "$count. You need to ensure that clamav signatures download have completed so that"
-echo "   you can start sending emails. Look at %{logdir}/freshclam/current"
+echo "   you can start sending emails. Look at ${logdir}/freshclam/current"
 fi
 if [ ! -f ${prefix}/control/servercert.pem ] ; then
 count=`expr $count + 1`

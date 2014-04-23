@@ -28,7 +28,7 @@ rmdir=/bin/rmdir
 ####################################
 noproxy=0
 nocourierimap=0
-noclamav=0
+noclamav=1
 nofetchmail=0
 nobogofilter=0
 nonssd=0
@@ -77,13 +77,7 @@ if [ " $1" = " purge" ] ; then
 			${sysconfdir}/init.d/nscd stop
 		fi
 	fi
-	echo "reverting permissions"
-	if [ -s ${prefix}/etc/stat.override -a -f /usr/sbin/dpkg-statoverride ] ; then
-		/bin/cat ${prefix}/etc/stat.override | while read line
-		do
-			/usr/sbin/dpkg-statoverride --remove $line
-		done
-	fi
+
 	echo "purging configuration"
 	for i in alias qmaild qmaill qmailp qmailq qmailr qmails qscand indimail
 	do
@@ -176,12 +170,12 @@ if [ " $1" = " purge" ] ; then
 	echo "removing tcp configuration"
 	for i in imap pop3 smtp qmtp qmqp poppass
 	do
-		${rm} -f ${prefix}/etc/tcp.$i.cdb
+		${rm} -f ${prefix}/etc/tcp.$i.cdb ${prefix}/etc/tcp.$i
 	done
 	${rm} -f ${prefix}/control/controlfiles
 	for i in indimail.cnf stat.override backup.conf cronlist headerlist \
 		imapd.cnf imapd.dist imapd-ssl.dist inc_deps indimail.mrtg.cfg \
-		indimail.settings lib_deps osh.table perm_list pop3d.cnf \
+		procmailrc indimail.settings lib_deps osh.table perm_list pop3d.cnf \
 		pop3d.dist pop3d-ssl.dist qmailprog.list quotawarnmsg.example \
 		services.log system.flashlogin system.menu system.module system.rc
 	do
@@ -199,18 +193,17 @@ if [ " $1" = " purge" ] ; then
 	qmail-poppass.106 greylist.1999 .svscan
 	do
 		if [ -d ${servicedir}/$i ] ; then
-			${rm} -rf ${servicedir}/$i || true
+			${rm} -rf ${servicedir}/$i >/dev/null 2>&1 || true
 		fi
 	done
 	if [ $noproxy -eq 0 ] ; then
-	for i in proxy-imapd.4143 proxy-imapd-ssl.9143 proxy-pop3d.4110 proxy-pop3d-ssl.9110
-	do
-		if [ -d ${servicedir}/$i ] ; then
-			${rm} -rf ${servicedir}/$i || true
-		fi
-	done
+		for i in proxy-imapd.4143 proxy-imapd-ssl.9143 proxy-pop3d.4110 proxy-pop3d-ssl.9110
+		do
+			if [ -d ${servicedir}/$i ] ; then
+				${rm} -rf ${servicedir}/$i >/dev/null 2>&1 || true
+			fi
+		done
 	fi
-	${prefix}/sbin/svctool --config=rm-boot
 
 	echo "removing logs"
 	${rm} -f ${prefix}/mysqldb/logs/logisam.log
@@ -232,13 +225,6 @@ else
 	if [ -f ${prefix}/boot/rpm.init ] ; then
 		echo "Running Custom Un-Installation Script for postun"
 		/bin/sh ${prefix}/boot/rpm.init postun
-	fi
-	echo "reverting permissions"
-	if [ -s ${prefix}/etc/stat.override -a -f /usr/sbin/dpkg-statoverride ] ; then
-		/bin/cat ${prefix}/etc/stat.override | while read line
-		do
-			/usr/sbin/dpkg-statoverride --remove $line
-		done
 	fi
 fi
 exit 0
