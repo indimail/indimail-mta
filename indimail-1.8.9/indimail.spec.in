@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail.spec.in,v 2.278 2014-04-19 11:58:59+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 2.279 2014-04-23 13:58:09+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %define _unpackaged_files_terminate_build 1
 
@@ -2283,6 +2283,21 @@ if [ $argv1 -eq 2 ] ; then # upgrade
 	exit 0
 fi
 
+%if %i_m_on_mac == 0
+# Recreate ld.so links and cache
+if [ -d %{_sysconfdir}/ld.so.conf.d ] ; then
+	(
+		echo %{_libdir}
+		if [ -f %{mysqlPrefix}/%{_lib}/mysql/libmysqlclient.so ] ; then
+			echo %{mysqlPrefix}/%{_lib}/mysql 
+		elif [ -f %{mysqlPrefix}/%{_lib}/libmysqlclient.so ] ; then
+			echo %{mysqlPrefix}/%{_lib}
+		fi
+	) > %{_sysconfdir}/ld.so.conf.d/indimail-%{_arch}.conf
+fi
+/sbin/ldconfig
+%endif
+
 echo "doing post installation activities"
 (
 # MySQL
@@ -2624,21 +2639,6 @@ if [ %nobogofilter -eq 0 ] ; then
 	%{_prefix}/sbin/svctool --config=bogofilter
 fi
 
-%if %i_m_on_mac == 0
-# Recreate ld.so links and cache
-if [ -d %{_sysconfdir}/ld.so.conf.d ] ; then
-	(
-		echo %{_libdir}
-		if [ -f %{mysqlPrefix}/%{_lib}/mysql/libmysqlclient.so ] ; then
-			echo %{mysqlPrefix}/%{_lib}/mysql 
-		elif [ -f %{mysqlPrefix}/%{_lib}/libmysqlclient.so ] ; then
-			echo %{mysqlPrefix}/%{_lib}
-		fi
-	) > %{_sysconfdir}/ld.so.conf.d/indimail-%{_arch}.conf
-fi
-/sbin/ldconfig
-%endif
-
 # rebuild cdb
 for i in smtp qmtp qmqp imap pop3 poppass
 do
@@ -2759,30 +2759,6 @@ fi
 
 # Remove IndiMail being started on system boot
 echo "removing indimail startup"
-if [ -f /etc/init.d/indimail ] ; then
-	if [ -f /sbin/chkconfig ] ; then
-		/sbin/chkconfig --del indimail
-	fi
-	%{__rm} -f /etc/init.d/indimail
-fi
-if [ -f /etc/init.d/sendmail ] ; then
-	if [ -f /sbin/chkconfig ] ; then
-		/sbin/chkconfig --add sendmail
-	fi
-fi
-if [ -x /usr/sbin/alternatives ] ; then
-	echo "removing indimail as alternatives mta"
-	/usr/sbin/alternatives --remove mta %{_prefix}/bin/sendmail
-	/usr/sbin/alternatives --auto mta || true
-else
-	for i in /usr/lib/sendmail /usr/sbin/sendmail; do
-		if [ -f $i.old -o -L $i.old ]; then
-			echo "restoring sendmail"
-			%{__rm} -f $i
-			%{__mv} $i.old $i
-		fi
-	done
-fi
 %{_prefix}/sbin/svctool --config=rm-boot
 
 ### SCRIPTLET ###############################################################################
