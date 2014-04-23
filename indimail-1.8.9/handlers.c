@@ -48,7 +48,7 @@
  * MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
-static char    *rcsid = "@(#) $Id: handlers.c,v 2.8 2014-04-17 12:08:12+05:30 Cprogrammer Exp mbhangui $";
+static char    *rcsid = "@(#) $Id: handlers.c,v 2.8 2014-04-17 12:08:12+05:30 Cprogrammer Stab mbhangui $";
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
