@@ -21,6 +21,7 @@ if [ $ID -ne 0 ] ; then
 	echo "You are not root" >&2
 	exit 1
 fi
+echo $*
 
 echo "Checking for mandatory user/group mysql.."
 /usr/bin/getent group  mysql > /dev/null || (echo "group mysql does not exist. Aborting..." && false)
@@ -40,6 +41,7 @@ case "$1" in
 	# Create a users and groups. Do not report any problems if they already
 	# exists.
 	#
+	(
 	echo "Adding IndiMail users/groups"
 	/usr/bin/getent group indimail  > /dev/null || /usr/sbin/groupadd -r -g 555 indimail || true
 	if [ $? = 4 ] ; then
@@ -76,9 +78,10 @@ case "$1" in
 		for i in mysql exim4 postfix
 		do
 			if [ -f /etc/init.d/$i ] ; then
+				echo "removing startup for $i"
 				(
-				update-rc.d $i stop
-				update-rc.d -f $i disable
+				/usr/sbin/update-rc.d -f $i disable || true
+				/usr/sbin/update-rc.d -f $i remove  || true
 				) > /dev/null 2>&1
 			fi
 		done
@@ -89,6 +92,7 @@ case "$1" in
 			mv /usr/$i/sendmail /usr/$i/sendmail.old
 		fi
 	done
+	) > /tmp/indimail-install.log 2>&1
 	;;
 
     abort-upgrade)

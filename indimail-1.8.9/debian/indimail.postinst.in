@@ -88,6 +88,7 @@ if [ $ID -ne 0 ] ; then
 	echo "You are not root" >&2
 	exit 1
 fi
+echo $*
 
 case "$1" in
     configure)
