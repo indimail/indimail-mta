@@ -5913,7 +5913,7 @@ create_startup()
 		fi
 	fi
 	if [ -z "$SERVICE_LIST" ] ; then
-		SERVICE_LIST="sendmail exim"
+		SERVICE_LIST="sendmail exim4"
 	fi
 	for i in $SERVICE_LIST
 	do
@@ -6017,7 +6017,7 @@ remove_startup()
 		/bin/rm -f /etc/init.d/indimail
 	fi
 	if [ -z "$SERVICE_LIST" ] ; then
-		SERVICE_LIST="sendmail exim"
+		SERVICE_LIST="sendmail exim4"
 	fi
 	for i in $SERVICE_LIST
 	do
