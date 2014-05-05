@@ -5,6 +5,7 @@
 *.a
 *.org
 */debian/changelog.in
+*/debian/README.substvars
 post_handle
 configure.lineno
 autom4te.cache
