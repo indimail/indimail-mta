@@ -6,6 +6,8 @@ all: rules postinst postrm debian.tar.gz dummy.tar.gz  \
 	procmail-Debian_5.0.dsc \
 	procmail-Debian_6.0.dsc \
 	procmail-Debian_7.0.dsc \
+	procmail-xUbuntu_14.04.dsc \
+	procmail-xUbuntu_13.10.dsc \
 	procmail-xUbuntu_13.04.dsc \
 	procmail-xUbuntu_12.10.dsc \
 	procmail-xUbuntu_12.04.dsc \
@@ -34,6 +36,10 @@ procmail-Debian_5.0.dsc: procmail-Debian_5.0.dsc.in
 procmail-Debian_6.0.dsc: procmail-Debian_6.0.dsc.in
 	$(edit) $@.in > $@
 procmail-Debian_7.0.dsc: procmail-Debian_7.0.dsc.in
+	$(edit) $@.in > $@
+procmail-xUbuntu_14.04.dsc: procmail-xUbuntu_14.04.dsc.in
+	$(edit) $@.in > $@
+procmail-xUbuntu_13.10.dsc: procmail-xUbuntu_13.10.dsc.in
 	$(edit) $@.in > $@
 procmail-xUbuntu_13.04.dsc: procmail-xUbuntu_13.04.dsc.in
 	$(edit) $@.in > $@
