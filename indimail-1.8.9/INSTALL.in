@@ -187,10 +187,10 @@ I usually prefer to run privileged commands like this (so that I don't get fond 
     depending on whether you require them. Most probably you have downloaded
     indimail-@version@.tar.gz only. You require to additionally download the
     following sources mentioned below. Except for qmail, ucspi-tcp, bogofilter,
-    clamav & fetchmail, all the sources are available at indimail.sourceforge.net.
+    fetchmail, all the sources are available at indimail.sourceforge.net.
     The link from which you can download the sources are mentioned in SECTION 3
     below. Also remember that IndiMail requires patch to be applied to qmail,
-    ucspi-tcp, courier-imap, bogofilter, clamav and fetchmail to make all
+    ucspi-tcp, courier-imap, bogofilter and fetchmail to make all
     components work seamlessly with each other.
 
     NOTE: nssd does not compile on Mac OS X
@@ -211,11 +211,10 @@ I usually prefer to run privileged commands like this (so that I don't get fond 
                                . fortune-1.1         (8.4  Mb)
                                . courier-imap-4.10.0 (75   Mb)
                                . bogofilter-1.2.2    (11.6 Mb)
-                               . clamav-0.98         (600  Mb)
                                . fetchmail-6.3.26   (10.5 Mb)
                                . iwebadmin-1.2      (3.0  Mb)
                                ------------------------------
-                                 Total              (800  Mb)
+                                 Total              (200  Mb)
 
 ########### SECTION 2  ##### USER/GROUP Creation ########################
 1. add groups and users and home directory
@@ -628,30 +627,7 @@ the installation.
     to the orignal latest available bogofilter package.
     Then do ./configure <same_parameters_as_earlier_install> ; make ; make install-strip
 
-    ##### STEP 8  ##### Virus Scanner #########################
-    Install clamav MD5 ca0b8c930efcb8be1d47592d268006c5
-    current working directory /home/local/src
-    Download clamav package. The latest tested clamav package tested is clamav-0.98.tar.gz.
-
-    % wget http://downloads.sourceforge.net/clamav/clamav-0.98.tar.gz
-    % gunzip -c clamav-0.98.tar.gz | tar xf -
-    % gunzip -c indimail-1.8.8/patches/clamav-0.98.patch.gz | patch -p0
-    % cd clamav-0.98
-    % ./configure --prefix=@indimaildir@ --sysconfdir=@indimaildir@/etc \
-        --with-dbdir=@indimaildir@/share/clamd \
-        --libexecdir=@indimaildir@/libexec \
-        --mandir=@indimaildir@/man --with-user=qscand --with-group=qscand --disable-clamav
-    % make -s [DESTDIR=staging_directory]
-    % sudo make -s install-strip [DESTDIR=staging_directory]
-    % sudo chown -R qscand:qscand /var/indimail/share/clamd
-    % cd ..
-
-    NOTE: UPGRADE Information. You can always upgrade to the latest version of clamav
-    by applying the latest patch available in the indimail source patch subdirectory
-    to the orignal latest available clamav package.
-    Then do ./configure <same_parameters_as_earlier_install> ; make ; make install-strip
- 
-    ##### STEP 9  ## Optional STEP ##### Fetchmail ############
+    ##### STEP 8  ## Optional STEP ##### Fetchmail ############
     Install fetchmail MD5 61b66faad044afa26e142bb1791aa2b3  
     current working directory /home/local/src
     Download the fetchmail package. The latest tested fetchmail package tested is
@@ -676,7 +652,7 @@ the installation.
     to the orignal latest available fetchmail package.
     Then do ./configure <same_parameters_as_earlier_install> ; make ; make install-strip
 
-    ##### STEP 10 ## Optional STEP ## nssd ####################
+    ##### STEP 9 ## Optional STEP ## nssd ####################
     Install nssd MD5 cbb373d0cd43c96aa12dd76608a3af09
     current working directory /home/local/src
     Download the nssd package from http://www.indimail.org
@@ -697,7 +673,7 @@ the installation.
     by downloading the latest nssd package
     Then do ./configure <same_parameters_as_earlier_install> ; make ; make install-strip
 
-    ##### STEP 11 ## Optional STEP ## iwebadmin ###############
+    ##### STEP 10 ## Optional STEP ## iwebadmin ###############
     Install iwebadmin MD5 c4a98f4907825969d5f69f7c73b7a0f5
     % wget http://downloads.sourceforge.net/indimail/iwebadmin-1.2.tar.gz
     % gunzip -c iwebadmin-1.2.tar.gz | tar xf -
@@ -722,8 +698,8 @@ the installation.
 ########### SECTION 4  ### Configuration and SETUP ######################
 4. run svctool
 
-    The steps in SECTION 3 above would have installed indimail, qmail, courier-imap, bogofilter,
-    clamav (optionally fetchmail, nssd, iwebadmin)
+    The steps in SECTION 3 above would have installed indimail, qmail, courier-imap, bogofilter
+    (optionally fetchmail, nssd, iwebadmin)
 
     The steps below will help you to install a fresh MySQL database, configure MySQL and have a
     service installed under supervise which will start MySQL along with all other IndiMail services.
@@ -774,6 +750,7 @@ the installation.
     Stop sendmail and remove from the startup.
     % sudo chkconfig sendmail off
     % sudo /etc/init.d/sendmail stop
+	if you don't have clamav installed, don't give the --qhpsi command below
 
     The commands below will create service for the MTA (both smtp and delivery process). The
     number of queues can be adjusted by you. The commands below create 5 queues.
@@ -783,7 +760,7 @@ the installation.
         --cntrldir=control --localip=0 --maxdaemons=150 --maxperip=25 --persistdb \
         --starttls --fsync --syncdir --memory=104857600 --chkrecipient --chkrelay --masquerade \
         --min-free=52428800 --content-filter --virus-filter \
-        --qhpsi="@indimaildir@/bin/clamdscan %s --fdpass --quiet --no-summary" \
+        --qhpsi="/usr/bin/clamdscan %s --fdpass --quiet --no-summary" \
         --spamfilter="@indimaildir@/bin/bogofilter -p -d @indimaildir@/etc" \
         --logfilter=/tmp/spamfifo --rejectspam=0 --spamexitcode=0 --localfilter --remotefilter \
         --remote-authsmtp=plain --dmasquerade \
@@ -806,7 +783,7 @@ the installation.
         --cntrldir=control --localip=0 --maxdaemons=150 --maxperip=25 --persistdb \
         --starttls --fsync --syncdir --memory=104857600 --chkrecipient --chkrelay --masquerade \
         --min-free=52428800 --content-filter --virus-filter \
-        --qhpsi="@indimaildir@/bin/clamdscan %s --fdpass --quiet --no-summary" \
+        --qhpsi="/usr/bin/clamdscan %s --fdpass --quiet --no-summary" \
         --dmasquerade --skipsend \
         --dkverify=both --dksign=both --private_key=@indimaildir@/control/domainkeys/indimail
 
@@ -821,7 +798,7 @@ the installation.
     % sudo @indimaildir@/sbin/svctool --queueParam=defaultqueue \
         --qbase=@indimaildir@/queue --qcount=5 --qstart=1 \
         --min-free=52428800 --fsync --syncdir --virus-filter \
-        --qhpsi="@indimaildir@/bin/clamdscan %s --fdpass --quiet --no-summary" \
+        --qhpsi="/usr/bin/clamdscan %s --fdpass --quiet --no-summary" \
         --dkverify="both" --dksign=both \
         --private_key=@indimaildir@/control/domainkeys/indimail
 
@@ -915,9 +892,25 @@ the installation.
         --password-cache --query-cache
 
     ##### STEP 7  ## SPAM/VIRUS Filtering Service ##################
+	Install clamav (see instructions for your OS)
+    # check your clamav installation for your OS distribution. e.g
+
+    # fedora
+	% sudo yum install clamav-data clamav-server clamav-filesystem clamav-lib clamav-update clamav
+
+    # for Ubuntu
+	% sudo apt-get install clamav clamav-daemon
+	% sudo update-rc.d -f clamav-daemon disable
+	% sudo update-rc.d -f clamav-daemon remove
+
+    # CentOS 6
+	% sudo rpm -Uvh http://download.fedoraproject.org/pub/epel/6/x86_64/epel-release-6-8.noarch.rpm
+	% sudo yum install clamav clamd
+    % sudo chkconfig clamd off
+
     The commands below will create services for virus scanning and spam filter.
 
-    % sudo @indimaildir@/sbin/svctool --qscanq --servicedir=/service --clamdPrefix=@indimaildir@ \
+    % sudo @indimaildir@/sbin/svctool --qscanq --servicedir=/service --clamdPrefix=/usr \
         --scanint=200
     % sudo @indimaildir@/sbin/svctool --config=clamd
     % sudo @indimaildir@/sbin/svctool --config=bogofilter
@@ -988,7 +981,7 @@ the installation.
         --query-cache --password-cache \
         --qbase=@indimaildir@/queue --qcount=5 --qstart=1 \
         --cntrldir=control --default-domain=indimail.org \
-        --qhpsi="@indimaildir@/bin/clamdscan %s --fdpass --quiet --no-summary" \
+        --qhpsi="/usr/bin/clamdscan %s --fdpass --quiet --no-summary" \
         --spamfilter="@indimaildir@/bin/bogofilter -p -d @indimaildir@/etc" --spamexitcode=0 \
         --memory=72428800 --fsync --syncdir \
         --dkverify=both
@@ -1315,9 +1308,12 @@ of most of the packages
 % sudo apt-get install libncurses5-dev
 % sudo apt-get install libpam0g-dev
 % sudo apt-get install libreadline-dev
-% sudo apt-get install libdb4.8-dev
-% sudo apt-get install ldap2-dev
-% sudo apt-get install automake autopoint libtool
+% sudo apt-get install libdb4.8-dev (or libdb-dev)
+% sudo apt-get install libldap2-dev
+% sudo apt-get install libmysqlclient-dev
+% sudo apt-get install libgsl0-dev
+% sudo apt-get install byacc
+% sudo apt-get install automake autopoint libtool debhelper
 
 # for qmailmrtg you will additionally require
 % sudo apt-get install mrtg
@@ -1333,7 +1329,7 @@ of most of the packages
 # update-rc.d -f mysql remove
 
 # To enable indimail at startup
-# update-rc.d indimail start 345 stop 016
+# update-rc.d indimail start 2345 stop 016
 
 ---------- * -------------- * ------------ * -------------- * ------------ * -------------- * ------------
 OS X NOTES
