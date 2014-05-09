@@ -2165,18 +2165,23 @@ dktest.8: dktest.9
 	| sed s}QMAILHOME}"`head -1 conf-qmail`"}g \
 	> dktest.8
 
-dkim.lib: trydkim.c compile load conf-dkim dns.lib
+dkim.lib: \
+trydkim.c str_len.o str_cpy.o byte_copy.o dns_text.o compile load conf-dkim dns.lib
 	( ( ./compile -I$(DESTDIR)$(INDIDIR)/include -I../libdkim-$(DKIM_VERSION) \
 		`grep -h -v "^#" conf-dkim` trydkim.c && \
-	g++ -o trydkim trydkim.o  -L../libdkim-$(DKIM_VERSION)/.libs \
+	g++ -o trydkim trydkim.o str_len.o str_cpy.o byte_copy.o dns_text.o \
+	-L../libdkim-$(DKIM_VERSION)/.libs \
 	-L../libdkim-$(DKIM_VERSION) -L$(DESTDIR)$(INDIDIR)/lib \
 	`cat dns.lib` -ldkim -lcrypto ) >/dev/null 2>&1 \
 	&& echo "-L../libdkim-$(DKIM_VERSION)/.libs -L../libdkim-$(DKIM_VERSION) -L$(DESTDIR)$(INDIDIR)/lib -ldkim" || exit 0 ) > dkim.lib
 	rm -f trydkim.o trydkim
 
-hasdkim.h:  trydkim.c compile load dns.lib dkim.lib conf-indi
+hasdkim.h:  \
+str_len.o str_cpy.o byte_copy.o dns_text.o \
+trydkim.c compile load dns.lib dkim.lib conf-indi
 	( ( ./compile -I$(DESTDIR)$(INDIDIR)/include -I../libdkim-$(DKIM_VERSION) `grep -h -v "^#" conf-dkim` trydkim.c && \
-	g++ -o trydkim trydkim.o  -L../libdkim-$(DKIM_VERSION)/.libs \
+	g++ -o trydkim trydkim.o str_len.o str_cpy.o byte_copy.o dns_text.o \
+	-L../libdkim-$(DKIM_VERSION)/.libs \
 	-L../libdkim-$(DKIM_VERSION) `cat dkim.lib dns.lib` -lcrypto ) >/dev/null 2>&1 \
 	&& (echo \#define HASDKIM 1) || exit 0 ) > hasdkim.h
 	rm -f trydkim.o trydkim
