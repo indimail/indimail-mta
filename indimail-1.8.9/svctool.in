@@ -4176,20 +4176,35 @@ if [ ! -d "$DESTDIR"$databasedir/data ] ; then
 		echo "# svctool --config=mysqldb --mysqlPrefix=$mysqlPrefix --databasedir=$databasedir --nolog"
 		fi
 		) > "$DESTDIR"$databasedir/README
-		echo "Creating MySQL database in "$DESTDIR"$databasedir/data" 1>&2
 		$chown -R mysql:mysql "$DESTDIR"$databasedir
-		$install_db --user=mysql --basedir=$mysqlPrefix --datadir="$DESTDIR"$databasedir/data --force 1>&2
+		if [ -f "$DESTDIR"$conf_file ] ; then
+			if [ $use_stdout -eq 1 ] ; then
+			echo "Creating MySQL Database in "$DESTDIR"$databasedir/data with defaults file $conf_file" 1>&2
+			else
+			echo "Creating MySQL Database in "$DESTDIR"$databasedir/data with defaults file $conf_file"
+			fi
+			$install_db --user=mysql --basedir=$mysqlPrefix --datadir="$DESTDIR"$databasedir/data \
+				--defaults-file="$DESTDIR"$conf_file --force 1>&2
+		else
+			if [ $use_stdout -eq 1 ] ; then
+			echo "Creating MySQL database in "$DESTDIR"$databasedir/data" 1>&2
+			else
+			echo "Creating MySQL database in "$DESTDIR"$databasedir/data"
+			fi
+			$install_db --user=mysql --basedir=$mysqlPrefix --datadir="$DESTDIR"$databasedir/data --force 1>&2
+		fi
 		$chown -R mysql:mysql "$DESTDIR"$databasedir
 		if [ $use_stdout -eq 1 ] ; then
-			echo "Generating MySQL statements for Database in "$DESTDIR"$databasedir/data" 1>&2
+			echo "Creating Default Users for Database in "$DESTDIR"$databasedir/data" 1>&2
 			create_mysql_user 
 		else
-			echo "Creating MySQL Database in "$DESTDIR"$databasedir/data with defaults file $conf_file"
 			if [ $bootstrap -eq 1 ] ; then
+				echo "Creating Default Users for Database in "$DESTDIR"$databasedir/data"
 				create_mysql_user | eval "$mysqlPrefix/$mysqld \
 					--defaults-file="$DESTDIR"$conf_file --bootstrap --user=mysql \
 					--datadir="$DESTDIR"$databasedir/data --skip-grant-tables"
 			else
+				echo "Creating Default Users for Database in "$DESTDIR"$databasedir/data" 1>&2
 				create_mysql_user 
 			fi
 		fi
@@ -4198,6 +4213,7 @@ if [ ! -d "$DESTDIR"$databasedir/data ] ; then
 	fi
 else
 	if [ $use_stdout -eq 1 -o $bootstrap -eq 0 ] ; then
+		echo "Creating Default Users for Database in "$DESTDIR"$databasedir/data" 1>&2
 		create_mysql_user 
 	fi
 fi
@@ -4265,27 +4281,12 @@ case $mysql_version in
 	echo "--log=\$DATABASE/logs/logquery \\"
 	echo "--log-slow-queries=\$DATABASE/logs/logslow \\"
 	;;
-	5.1.12|5.1.44|5.2*|5.3*|5.4*|5.5.1|5.5.2|6.0.9*)
-	echo "--skip-safemalloc \\"
+	5.1*|5.2*|5.3*|5.4*|5.5.[0-9]|5.5.1[0-9]|5.5.2[0-9]|5.5.3[0-9]|6.0.9*)
 	echo "--general-log=1 \\"
 	echo "--general-log-file=\$DATABASE/logs/logquery \\"
 	echo "--slow-query-log \\"
 	echo "--slow-query-log-file=\$DATABASE/logs/logslow \\"
 	echo "--log-output=FILE \\"
-	;;
-	5.5.[3-9]|5.5.1[0-9])
-	echo "--general-log=1 \\"
-	echo "--general-log-file=\$DATABASE/logs/logquery \\"
-	echo "--slow-query-log \\"
-	echo "--slow-query-log-file=\$DATABASE/logs/logslow \\"
-	echo "--log-output=FILE \\"
-	;;
-	5.1*)
-	echo "--skip-safemalloc \\"
-	echo "--general-log=1 \\"
-	echo "--general-log-file=\$DATABASE/logs/logquery \\"
-	echo "--slow-query-log \\"
-	echo "--slow-query-log-file=\$DATABASE/logs/logslow \\"
 	;;
 	*)
 	echo "--log=\$DATABASE/logs/logquery \\"
@@ -4606,7 +4607,17 @@ echo "datadir  = @indimaildir@/mysqldb"
 echo "tmpdir   = /tmp"
 echo "skip-external-locking"
 if [ $# -eq 1 ] ; then
-echo "thread_concurrency=$1"
+	if [ -s "$1" ] ; then
+		echo "thread_concurrency=$1"
+	fi
+	key_buffer_name="key_buffer"
+elif [ $# -eq 2 ] ; then
+	if [ -s "$1" ] ; then
+		echo "thread_concurrency=$1"
+	fi
+	key_buffer_name=$2
+else
+	key_buffer_name="key_buffer_size"
 fi
 echo "#"
 echo "# Instead of skip-networking the default is now to listen only on"
@@ -4615,7 +4626,7 @@ echo "bind-address = 127.0.0.1"
 echo "#"
 echo "# * Fine Tuning"
 echo "#"
-echo "key_buffer              = 16M"
+echo "$key_buffer_name        = 16M"
 echo "max_allowed_packet      = 16M"
 echo "thread_stack            = 192K"
 echo "thread_cache_size       = 8"
@@ -4695,6 +4706,14 @@ echo "!includedir /etc/mysql/conf.d/"
 create_mysql_config()
 {
 mysql_version=`$mysqlPrefix/bin/mysql_config --version`
+case $mysql_version in
+	5.1*|5.2*|5.3*|5.4*|5.5.[0-9]|5.5.1[0-9]|5.5.2[0-9]|5.5.3[0-9]|6.0.9*)
+	key_buffer_name="key_buffer_size"
+	;;
+	*)
+	key_buffer_name="key_buffer"
+	;;
+esac
 if [ " $model" = " small" ] ; then
 	case $mysql_version in
 	6.0.9-alpha)
@@ -4721,7 +4740,7 @@ if [ " $model" = " small" ] ; then
 			-e "s{port		= 3306{port		= $mysql_port{g" \
 			-e "s{socket		= .*\${socket		= $mysql_socket{g"
 	else
-		default_mysql_config
+		default_mysql_config "" $key_buffer_name
 	fi
 	;;
 	esac
@@ -4751,7 +4770,7 @@ elif [ " $model" = " medium" ] ; then
 			-e "s{port		= 3306{port		= $mysql_port{g" \
 			-e "s{socket		= .*\${socket		= $mysql_socket{g"
 	else
-		default_mysql_config
+		default_mysql_config "" $key_buffer_name
 	fi
 	;;
 	esac
@@ -4782,7 +4801,7 @@ elif [ " $model" = " large" ] ; then
 				-e "s{port		= 3306{port		= $mysql_port{g" \
 				-e "s{socket		= .*\${socket		= $mysql_socket{g"
 		else
-			default_mysql_config
+			default_mysql_config "" $key_buffer_name
 		fi
 		;;
 		esac
@@ -4816,7 +4835,7 @@ elif [ " $model" = " large" ] ; then
 				-e "s{port		= 3306{port		= $mysql_port{g" \
 				-e "s{socket		= .*\${socket		= $mysql_socket{g"
 		else
-			default_mysql_config $thr_con
+			default_mysql_config $thr_con $key_buffer_name
 		fi
 		;;
 		esac
@@ -4848,7 +4867,7 @@ elif [ " $model" = " huge" ] ; then
 				-e "s{port		= 3306{port		= $mysql_port{g" \
 				-e "s{socket		= .*\${socket		= $mysql_socket{g"
 		else
-			default_mysql_config
+			default_mysql_config "" $key_buffer_name
 		fi
 		;;
 		esac
@@ -4882,7 +4901,7 @@ elif [ " $model" = " huge" ] ; then
 				-e "s{port		= 3306{port		= $mysql_port{g" \
 				-e "s{socket		= .*\${socket		= $mysql_socket{g"
 		else
-			default_mysql_config $thr_con
+			default_mysql_config $thr_con $key_buffer_name
 		fi
 		;;
 		esac
@@ -5917,6 +5936,25 @@ create_startup()
 	fi
 	for i in $SERVICE_LIST
 	do
+		#
+		# upstart/systemd
+		#
+		if [ -f /sbin/initctl -a -d /etc/init ] ; then
+			/sbin/initctl stop $i
+			if [ -f /etc/init/$i.conf ] ; then
+				echo "manual" > /etc/init/$i.override
+			fi
+		elif [ -d /etc/event.d ] ; then
+			/sbin/initctl stop $i
+			echo "manual" > /etc/event.d/$i.override
+		elif [ -d /lib/systemd/system ] ; then
+			/usr/bin/systemctl disable "$i".service
+		else
+			/usr/sbin/service $i stop
+		fi
+		#
+		# traditional sys v
+		#
 		if [ -f /etc/init.d/$i ] ; then
 			/etc/init.d/$i stop
 			if [ -f /sbin/chkconfig ] ; then
@@ -6007,9 +6045,9 @@ remove_startup()
 	if [ -f /etc/init.d/indimail ] ; then
 		if [ -f /sbin/chkconfig ] ; then
 			if [ -f /etc/debian_version ] ; then
-			/sbin/chkconfig --del indimail 2>/dev/null
+				/sbin/chkconfig --del indimail 2>/dev/null
 			else
-			/sbin/chkconfig --del indimail
+				/sbin/chkconfig --del indimail
 			fi
 		elif [ -f /usr/sbin/update-rc.d ] ; then
 			/usr/sbin/update-rc.d -f indimail remove
@@ -6031,8 +6069,21 @@ remove_startup()
 			elif [ -f /usr/sbin/update-rc.d ] ; then
 				/usr/sbin/update-rc.d $i defaults
 				/usr/sbin/update-rc.d $i enable
-				#/usr/sbin/update-rc.d sendmail start 90 2 3 4 5 . stop 10 0 6 .
 			fi
+		fi
+		#
+		# upstart/systemd
+		#
+		if [ -f /sbin/initctl -a -d /etc/init ] ; then
+			if [ -f /etc/init/$i.override ] ; then
+				/bin/rm -f /etc/init/$i.override
+			fi
+		elif [ -d /etc/event.d ] ; then
+			if [ -f /etc/event.d/$i.override ] ; then
+				/bin/rm -f /etc/event.d/$i.override
+			fi
+		elif [ -d /lib/systemd/system ] ; then
+			/usr/bin/systemctl enable "$i".service
 		fi
 	done
 	if [ -x /usr/sbin/alternatives ] ; then
@@ -8294,10 +8345,17 @@ case $option in
 		if [ -f "$DESTDIR"$indimaildir/sbin/clamd ] ; then
 			conf_file="$DESTDIR"$indimaildir/etc/clamd.conf
 		else
-			conf_file="$DESTDIR"/etc/clamd.conf
+			if [ -d /etc/clamav ] ; then
+				conf_file="$DESTDIR"/etc/clamav/clamd.conf
+			else
+				conf_file="$DESTDIR"/etc/clamd.conf
+			fi
 		fi
 		if [ ! -d "$DESTDIR"/etc ] ; then
 			/bin/mkdir -p "$DESTDIR"/etc
+		fi
+		if [ ! -d "$DESTDIR"/etc/clamav ] ; then
+			/bin/mkdir -p "$DESTDIR"/etc/clamav
 		fi
 		create_clamd_conf > /tmp/config.cnf.$$
 		if [ $? -eq 0 ] ; then
@@ -8309,7 +8367,11 @@ case $option in
 		if [ -f "$DESTDIR"$indimaildir/bin/freshclam ] ; then
 			conf_file="$DESTDIR"$indimaildir/etc/freshclam.conf
 		else
-			conf_file="$DESTDIR"/etc/freshclam.conf
+			if [ -d /etc/clamav ] ; then
+				conf_file="$DESTDIR"/etc/clamav/freshclam.conf
+			else
+				conf_file="$DESTDIR"/etc/freshclam.conf
+			fi
 		fi
 		create_freshclam_conf > /tmp/config.cnf.$$
 		if [ $? -eq 0 ] ; then
