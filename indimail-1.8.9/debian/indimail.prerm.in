@@ -92,6 +92,8 @@ if [ -s ${prefix}/etc/stat.override -a -f /usr/sbin/dpkg-statoverride ] ; then
 fi
 # Remove IndiMail being started on system boot
 echo "removing indimail startup"
+SERVICE_LIST="sendmail exim4 mysql"
+export SERVICE_LIST
 $prefix/sbin/svctool --config=rm-boot
 
 if [ $nocourierimap -eq 0 ] ; then
