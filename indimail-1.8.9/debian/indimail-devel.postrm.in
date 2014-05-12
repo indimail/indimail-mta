@@ -45,6 +45,7 @@ esac
 
 #DEBHELPER#
 if [ "$1" = "remove" ]; then
+	echo "recreating ld.so cache"
 	/sbin/ldconfig
 	echo "removing man pages, include files"
 	for i in ${prefix}/include ${prefix}/man/man3

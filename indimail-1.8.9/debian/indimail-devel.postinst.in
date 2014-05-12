@@ -37,7 +37,7 @@ if [ -d ${prefix}/man/man3 ] ; then
 	echo "compressing man pages"
 	find ${prefix}/man/man3 -type f -exec gzip -q {} \;
 fi
-echo "ldconfig..."
+echo "recreating ld.so cache"
 if [ -d ${sysconfdir}/ld.so.conf.d ] ; then
 	(
 		echo /var/indimail/@acl_libdirstem@

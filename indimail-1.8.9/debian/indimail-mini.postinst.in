@@ -40,6 +40,7 @@ esac
 
 if [ -f /tmp/indimail-devel.upgrade ] ; then # upgrade
 	if [ -f ${prefix}/boot/rpm.init ] ; then
+		echo "recreating ld.so cache"
 		/sbin/ldconfig
 		echo "Running Custom Upgrade Script"
 		/bin/sh ${prefix}/boot/rpm.init upgrade
