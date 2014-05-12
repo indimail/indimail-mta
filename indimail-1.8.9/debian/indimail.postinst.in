@@ -132,6 +132,7 @@ fi
 
 if [ -f /tmp/indimail.upgrade ] ; then # upgrade
 	if [ -f ${prefix}/boot/rpm.init ] ; then
+		echo "recreating ld.so cache"
 		/sbin/ldconfig
 		echo "Running Custom Upgrade Script"
 		/bin/sh ${prefix}/boot/rpm.init upgrade
@@ -141,7 +142,7 @@ if [ -f /tmp/indimail.upgrade ] ; then # upgrade
 fi
 ${rm} -f /tmp/indimail.install /tmp/indimail.upgrade
 # Recreate ld.so links and cache
-echo "ldconfig..."
+echo "recreating ld.so cache"
 if [ -d ${sysconfdir}/ld.so.conf.d ] ; then
 	(
 		echo @mysql_libdir@
@@ -150,9 +151,20 @@ if [ -d ${sysconfdir}/ld.so.conf.d ] ; then
 fi
 /sbin/ldconfig
 
-echo "doing post installation activities"
+echo "Post Installation..."
 (
 # MySQL
+if [ -x /etc/init.d/apparmor ] ; then
+	if [ -f /etc/apparmor.d/local/usr.sbin/mysqld ] ; then
+		echo "Reloading apparmor profiles..."
+		/usr/sbin/service apparmor reload
+	else
+		echo "Shutting down apparmor..."
+		/usr/sbin/service apparmor stop
+		/usr/sbin/service apparmor teardown
+	fi
+fi
+
 echo "Creating ${logdir}"
 if [ ! -d ${logdir} ] ; then
 	/bin/mkdir ${logdir}
@@ -496,6 +508,8 @@ if [ /usr/lib/sm.bin/sendmail ] ; then
 	/usr/sbin/update-alternatives --remove-all sendmail-mta || true
 	/usr/sbin/update-alternatives --remove-all sendmail-msp || true
 fi
+SERVICE_LIST="sendmail exim4 mysql"
+export SERVICE_LIST
 ${prefix}/sbin/svctool --config=add-boot
 
 if [ -f ${prefix}/bin/instcheck ] ; then
@@ -536,5 +550,7 @@ echo "$count. You also need to create CERTS for IMAP/POP3. run the following"
 echo "   command to create cert"
 echo "   ${prefix}/sbin/svctool --postmaster=postmaster@indimail.org --config=cert"
 fi
+echo
+echo "Check /tmp/indimail-install.log for the detailed installation log!!!"
 
 exit 0
