@@ -78,7 +78,6 @@ if [ " $1" = " purge" ] ; then
 		fi
 	fi
 
-	echo "purging configuration"
 	for i in alias qmaild qmaill qmailp qmailq qmailr qmails qscand indimail
 	do
 		echo "removing user $i"
@@ -100,6 +99,9 @@ if [ " $1" = " purge" ] ; then
 	do
 		${rm} -rf ${prefix}/$i || true
 	done
+	if [ -f /etc/mysql/indimail.cnf ] ; then
+		${rm} -f /etc/mysql/indimail.cnf
+	fi
 	if [ -d ${prefix}/control/domainkeys ] ; then
 		${rmdir} --ignore-fail-on-non-empty ${prefix}/control/domainkeys 2>/dev/null
 	fi
