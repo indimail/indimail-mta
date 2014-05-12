@@ -21,7 +21,6 @@ if [ $ID -ne 0 ] ; then
 	echo "You are not root" >&2
 	exit 1
 fi
-echo $*
 
 echo "Checking for mandatory user/group mysql.."
 /usr/bin/getent group  mysql > /dev/null || (echo "group mysql does not exist. Aborting..." && false)
@@ -74,18 +73,6 @@ case "$1" in
 		fi
 	fi
 
-	if [ -x /usr/sbin/update-rc.d ] ; then
-		for i in mysql exim4 postfix
-		do
-			if [ -f /etc/init.d/$i ] ; then
-				echo "removing startup for $i"
-				(
-				/usr/sbin/update-rc.d -f $i disable || true
-				/usr/sbin/update-rc.d -f $i remove  || true
-				) > /dev/null 2>&1
-			fi
-		done
-	fi
 	for i in lib sbin
 	do
 		if [ -f /usr/$i/sendmail ] ; then
