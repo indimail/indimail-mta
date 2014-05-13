@@ -50,6 +50,7 @@ build-stamp:
 	# Extract source archives
 	#
 	if [ -f ../BUILD/debian/obs_deb_prep ] ; then sh ../BUILD/debian/obs_deb_prep; fi
+	chmod +x ../BUILD/debian/gen_control
 	#
 	# run configure script
 	#
