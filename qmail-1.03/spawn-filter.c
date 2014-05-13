@@ -772,7 +772,7 @@ stralloc        fline = { 0 }, rate_expr = { 0 };
 int
 is_rate_ok(char *rate_dir, char *file, char *rate_exp)
 {
-	int             wfd, rfd, match, line_no, rate_int, access_flag = 0;
+	int             wfd, rfd, match, line_no = -1, rate_int, access_flag = 0;
 	unsigned long   email_count = 0;
 	char            reset, stime[FMT_ULONG], etime[FMT_ULONG], ecount[FMT_ULONG];
 	double          conf_rate, cur_rate = 0.0;
