@@ -698,7 +698,7 @@ main(argc, argv)
 void
 getversion_qmail_pop3d_c()
 {
-	static char    *x = "$Id: qmail-pop3d.c,v 1.11 2014-01-29 14:03:26+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-pop3d.c,v 1.11 2014-01-29 14:03:26+05:30 Cprogrammer Stab mbhangui $";
 
 	x++;
 }

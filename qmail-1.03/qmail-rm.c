@@ -189,7 +189,7 @@ char           *mk_hashpath(char *, int);
 char           *mk_newpath(char *, int);
 int             rename(const char *, const char *);
 
-const char      cvsrid[] = "$Id: qmail-rm.c,v 1.14 2014-01-29 14:03:50+05:30 Cprogrammer Exp mbhangui $";
+const char      cvsrid[] = "$Id: qmail-rm.c,v 1.14 2014-01-29 14:03:50+05:30 Cprogrammer Stab mbhangui $";
 
 /*- globals */
 extern const char *__progname;
@@ -1092,7 +1092,7 @@ digits(unsigned long num)
 void
 getversion_qmail_rm_c()
 {
-	static char    *x = "$Id: qmail-rm.c,v 1.14 2014-01-29 14:03:50+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-rm.c,v 1.14 2014-01-29 14:03:50+05:30 Cprogrammer Stab mbhangui $";
 
 	x++;
 }

@@ -2080,7 +2080,7 @@ strncasestr(const char *s, const char *find, size_t slen)
 void
 getversion_domainkeys_c()
 {
-	static char    *x = "$Id: domainkeys.c,v 1.17 2014-03-24 12:29:35+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: domainkeys.c,v 1.17 2014-03-24 12:29:35+05:30 Cprogrammer Stab mbhangui $";
 
 	x++;
 }

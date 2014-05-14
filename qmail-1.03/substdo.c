@@ -174,7 +174,7 @@ substdio_putsflush(s, buf)
 void
 getversion_substdo_c()
 {
-	static char    *x = "$Id: substdo.c,v 1.5 2014-01-29 14:04:26+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: substdo.c,v 1.5 2014-01-29 14:04:26+05:30 Cprogrammer Stab mbhangui $";
 
 	x++;
 }

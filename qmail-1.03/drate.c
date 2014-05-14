@@ -355,7 +355,7 @@ new:
 void
 getversion_drate_c()
 {
-	static char    *x = "$Id: drate.c,v 1.4 2013-12-09 13:08:38+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: drate.c,v 1.4 2013-12-09 13:08:38+05:30 Cprogrammer Stab mbhangui $";
 
 	x++;
 	if (x)

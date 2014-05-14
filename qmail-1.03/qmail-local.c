@@ -1289,7 +1289,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_local_c()
 {
-	static char    *x = "$Id: qmail-local.c,v 1.26 2014-01-22 20:38:24+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-local.c,v 1.26 2014-01-22 20:38:24+05:30 Cprogrammer Stab mbhangui $";
 
 	x++;
 }

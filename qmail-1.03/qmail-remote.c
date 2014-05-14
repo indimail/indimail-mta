@@ -919,9 +919,9 @@ temp_noconn(stralloc *h, char *ip, int port)
 		temp_noconn_out(strnum);
 		temp_noconn_out(" bind IP [");
 		substdio_put(subfdoutsmall, outgoingip.s, outgoingip.len);
+		temp_noconn_out("]");
 		if (!stralloc_catb(&smtptext, outgoingip.s, outgoingip.len))
 			temp_nomem();
-		temp_noconn_out("]");
 		if (!stralloc_copys(&rhost, ip))
 			temp_nomem();
 		if (!stralloc_0(&rhost))
@@ -3135,7 +3135,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_remote_c()
 {
-	static char    *x = "$Id: qmail-remote.c,v 1.90 2014-04-03 21:35:39+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-remote.c,v 1.90 2014-04-03 21:35:39+05:30 Cprogrammer Stab mbhangui $";
 	x=sccsidauthcramh;
 	x=sccsidauthdigestmd5h;
 	x++;

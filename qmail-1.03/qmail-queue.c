@@ -1205,7 +1205,7 @@ main()
 void
 getversion_qmail_queue_c()
 {
-	static char    *x = "$Id: qmail-queue.c,v 1.56 2013-05-30 11:10:32+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-queue.c,v 1.56 2013-05-30 11:10:32+05:30 Cprogrammer Stab mbhangui $";
 
 #ifdef INDIMAIL
 	if (x)

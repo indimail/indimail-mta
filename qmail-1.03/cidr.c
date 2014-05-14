@@ -195,7 +195,7 @@ error:
 void
 getversion_cidr_c()
 {
-	static char    *x = "$Id: cidr.c,v 1.1 2013-09-03 17:05:04+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: cidr.c,v 1.1 2013-09-03 17:05:04+05:30 Cprogrammer Stab mbhangui $";
 	if (x)
 		x++;
 }

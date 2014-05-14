@@ -1299,7 +1299,7 @@ main(int argc, char *argv[])
 void
 getversion_qmail_autoresponder_c()
 {
-	static char    *x = "$Id: autoresponder.c,v 1.28 2014-01-29 13:57:54+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: autoresponder.c,v 1.28 2014-01-29 13:57:54+05:30 Cprogrammer Stab mbhangui $";
 
 	x++;
 }

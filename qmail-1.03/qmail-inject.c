@@ -1320,7 +1320,7 @@ main(argc, argv)
 void
 getversion_qmail_inject_c()
 {
-	static char    *x = "$Id: qmail-inject.c,v 1.27 2014-01-29 14:02:54+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-inject.c,v 1.27 2014-01-29 14:02:54+05:30 Cprogrammer Stab mbhangui $";
 
 	x++;
 }
