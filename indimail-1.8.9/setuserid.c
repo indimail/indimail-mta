@@ -1,5 +1,8 @@
 /*
  * $Log: setuserid.c,v $
+ * Revision 2.3  2014-05-14 17:34:43+05:30  Cprogrammer
+ * removed compiler warning
+ *
  * Revision 2.2  2014-04-17 11:41:18+05:30  Cprogrammer
  * added setuser_privileges() for setting uid, gid and supplementary group ids
  *
@@ -15,7 +18,7 @@
 #include <string.h>
 
 #ifndef	lint
-static char     sccsid[] = "$Id: setuserid.c,v 2.2 2014-04-17 11:41:18+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: setuserid.c,v 2.3 2014-05-14 17:34:43+05:30 Cprogrammer Exp mbhangui $";
 #endif
 /*-
  * scan the group file for all supplementary groups.
@@ -118,9 +121,10 @@ setuser_privileges(uid, gid, user)
 	return (0);
 }
 
+#include <stdio.h>
 void
 getversion_setuserid_c()
 {
 	char *x = sccsid;
-	x++;
+	printf("%s\n", x++);
 }
