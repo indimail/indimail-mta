@@ -66,7 +66,7 @@ case "$host" in
 		idcommand="/usr/bin/id -u mail"
 	fi
 	CPPFLAGS="$CPPFLAGS -DLINUX"
-	CFLAGS="$CFLAGS -O4 -Wall -fPIC -fno-strict-aliasing -Wno-unused-result"
+	CFLAGS="$CFLAGS -O4 -Wall -fPIC -fno-strict-aliasing"
 	MODFLAGS="-O4 -fPIC -shared -Wall"
 	STRIP_OPT=-s
 	;;
@@ -88,7 +88,16 @@ case "$host" in
 esac
 dnl Does not work on RHEL 5, CentOS 5 64 bit systems
 RPATH_LIB="$acl_libdirstem"
-
+if test -f /usr/bin/lsb_release
+then
+DISTRIB_ID=$(lsb_release -si)
+DISTRIB_VERSION=$(lsb_release -sr)
+else
+DISTRIB_ID=$(sh ./lsb_release -si)
+DISTRIB_VERSION=$(sh ./lsb_release -sr)
+fi
+AC_SUBST(DISTRIB_ID)
+AC_SUBST(DISTRIB_VERSION)
 defaultprefix="/var/indimail"
 LIBVER=0
 AC_SUBST([LIBTOOL_DEPS])
@@ -243,6 +252,47 @@ AC_ARG_ENABLE(indigroup,[  --enable-indigroup=indimail   group IndiMail was inst
 AC_DEFINE_UNQUOTED(INDIGROUP,"$indigroup",IndiMail Group)
 AC_SUBST(indigroup)
 
+AC_CHECK_LIB(socket, socket,echo -lsocket > socket.lib,,)
+AC_CHECK_LIB(ssl, SSL_CTX_new, [AC_SUBST([LIB_SSL], ["-lssl -lcrypto"]) AC_DEFINE([HAVE_SSL], [1],[OpenSSL Library])],,-lssl -lcrypto)
+AC_CHECK_LIB(crypt, crypt, [AC_SUBST([LIB_CRYPT], ["-lcrypt"]) AC_DEFINE([HAVE_CRYPT], [1],[crypt Library])],,)
+AC_CHECK_LIB(ncurses, tgetstr, [AC_SUBST([LIB_TERMCAP], ["-lncurses"]) AC_DEFINE([HAVE_TERMCAP_IN_NCURSES], [1],[ncurses Library])],notermcap=t,)
+if  test " $notermcap" = " t"
+then
+	notermcap=""
+	AC_CHECK_LIB(ncurses5, tgetstr, [AC_SUBST([LIB_TERMCAP], ["-lncurses5"]) AC_DEFINE([HAVE_TERMCAP_IN_NCURSES], [1],[ncurses Library])],notermcap=t,)
+fi
+if test " $notermcap" = " t"
+then
+	notermcap=""
+	AC_CHECK_LIB(tinfo, tgetstr, [AC_SUBST([LIB_TERMCAP], ["-ltinfo"]) AC_DEFINE([HAVE_TERMCAP], [1],[termcap Library])],notermcap=t,)
+fi
+if test " $notermcap" = " t"
+then
+	notermcap=""
+	AC_CHECK_LIB(termcap, tgetstr, [AC_SUBST([LIB_TERMCAP], ["-ltermcap"]) AC_DEFINE([HAVE_TERMCAP], [1],[termcap Library])],notermcap=t,)
+fi
+if test " $notermcap" = " t"
+then
+   	AC_MSG_ERROR(Could not find termcap library.)
+fi
+AC_CHECK_LIB(ncurses, initscr, [AC_SUBST([LIB_CURSES], ["-lncurses"]) AC_DEFINE([HAVE_NCURSES], [1],[ncurses Library])],nocurses=t,)
+if test " $nocurses" = " t"
+then
+	nocurses=""
+	AC_CHECK_LIB(ncurses5, initscr, [AC_SUBST([LIB_CURSES], ["-lncurses5"]) AC_DEFINE([HAVE_CURSES], [1],[curses Library])],nocurses=t,)
+	if test " $nocurses" = " t"
+	then
+		nocurses=""
+		AC_CHECK_LIB(curses, initscr, [AC_SUBST([LIB_CURSES], ["-lcurses"]) AC_DEFINE([HAVE_CURSES], [1],[curses Library])],nocurses=t,)
+	fi
+	if test " $nocurses" = " t"
+	then
+    	AC_MSG_ERROR(Could not find curses/ncurses library.)
+	fi
+fi
+
+AC_MSG_CHECKING(for indimail user!!!)
+
 AC_TRY_RUN( [
 
 #include <stdio.h>
@@ -291,51 +341,7 @@ FILE *f;
 	}
 	return(0);
 }
-],
-    AC_MSG_RESULT(yes),
-    AC_MSG_RESULT(no)
-    AC_MSG_ERROR(Could not find indimail user.),
-    AC_MSG_ERROR(Could not compile and run even a trivial ANSI C program - check CC.))
-
-> socket.lib
-AC_CHECK_LIB(socket, socket,echo -lsocket > socket.lib,,)
-AC_CHECK_LIB(ssl, SSL_CTX_new, [AC_SUBST([LIB_SSL], ["-lssl -lcrypto"]) AC_DEFINE([HAVE_SSL], [1],[OpenSSL Library])],,-lssl -lcrypto)
-AC_CHECK_LIB(crypt, crypt, [AC_SUBST([LIB_CRYPT], ["-lcrypt"]) AC_DEFINE([HAVE_CRYPT], [1],[crypt Library])],,)
-AC_CHECK_LIB(ncurses, tgetstr, [AC_SUBST([LIB_TERMCAP], ["-lncurses"]) AC_DEFINE([HAVE_TERMCAP_IN_NCURSES], [1],[ncurses Library])],notermcap=t,)
-if  test " $notermcap" = " t"
-then
-	notermcap=""
-	AC_CHECK_LIB(ncurses5, tgetstr, [AC_SUBST([LIB_TERMCAP], ["-lncurses5"]) AC_DEFINE([HAVE_TERMCAP_IN_NCURSES], [1],[ncurses Library])],notermcap=t,)
-fi
-if test " $notermcap" = " t"
-then
-	notermcap=""
-	AC_CHECK_LIB(tinfo, tgetstr, [AC_SUBST([LIB_TERMCAP], ["-ltinfo"]) AC_DEFINE([HAVE_TERMCAP], [1],[termcap Library])],notermcap=t,)
-fi
-if test " $notermcap" = " t"
-then
-	notermcap=""
-	AC_CHECK_LIB(termcap, tgetstr, [AC_SUBST([LIB_TERMCAP], ["-ltermcap"]) AC_DEFINE([HAVE_TERMCAP], [1],[termcap Library])],notermcap=t,)
-fi
-if test " $notermcap" = " t"
-then
-   	AC_MSG_ERROR(Could not find termcap library.)
-fi
-AC_CHECK_LIB(ncurses, initscr, [AC_SUBST([LIB_CURSES], ["-lncurses"]) AC_DEFINE([HAVE_NCURSES], [1],[ncurses Library])],nocurses=t,)
-if test " $nocurses" = " t"
-then
-	nocurses=""
-	AC_CHECK_LIB(ncurses5, initscr, [AC_SUBST([LIB_CURSES], ["-lncurses5"]) AC_DEFINE([HAVE_CURSES], [1],[curses Library])],nocurses=t,)
-	if test " $nocurses" = " t"
-	then
-		nocurses=""
-		AC_CHECK_LIB(curses, initscr, [AC_SUBST([LIB_CURSES], ["-lcurses"]) AC_DEFINE([HAVE_CURSES], [1],[curses Library])],nocurses=t,)
-	fi
-	if test " $nocurses" = " t"
-	then
-    	AC_MSG_ERROR(Could not find curses/ncurses library.)
-	fi
-fi
+], [AC_MSG_RESULT(yes)],[AC_MSG_RESULT(no)])
 
 if test ! -f indimail.uid
 then
@@ -1186,6 +1192,8 @@ echo "Target CPU           = $target_cpu"
 echo "Target Vendor        = $target_vendor"
 echo "Target OS            = $target_os"
 echo "Host                 = $host"
+echo "DISTRIB_ID           = $DISTRIB_ID"
+echo "DISTRIB_VERSION      = $DISTRIB_VERSION"
 echo "ID command           = $idcommand"
 echo "CPPFLAGS             = $CPPFLAGS"
 echo "CXXFLAGS             = $CXXFLAGS"

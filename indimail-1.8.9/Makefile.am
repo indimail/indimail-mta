@@ -963,11 +963,11 @@ install-data-hook:
 		done; \
 		chown indimail:indimail $(DESTDIR)@prefix@/etc/wordlist.db || true; \
 	fi
-	if [ -d /etc/apparmor.d ] ; then \
+	if test " $(DISTRIB_ID)" = " Ubuntu" ; then \
 		$(mkinstalldirs) $(DESTDIR)/etc/apparmor.d/local || exit 1; \
 		$(INSTALL_DATA) usr.sbin.mysqld $(DESTDIR)/etc/apparmor.d/local/usr.sbin.mysqld  || exit 1; \
 	fi
-	if [ -d /etc/selinux/targeted/modules ] ; then \
+	if test " $(DISTRIB_ID)" != " Ubuntu" -a " $(DISTRIB_ID)" != " Debian" ; then \
 		$(INSTALL_DATA) indimail.te $(DESTDIR)@prefix@/etc/indimail.te  || exit 1; \
 	fi
 

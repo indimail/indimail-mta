@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail.spec.in,v 2.279 2014-04-23 13:58:09+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 2.280 2014-05-14 15:01:25+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %define _unpackaged_files_terminate_build 1
 
@@ -220,6 +220,19 @@ BuildRequires: python-devel flex findutils
 BuildRequires: readline gzip autoconf pkgconfig
 BuildRequires: libidn-devel
 BuildRequires: groff xz
+
+%if %{defined fedora_version}
+BuildRequires: redhat-lsb-core
+%endif
+%if %{defined centos_version} || %{defined rhel_version}
+BuildRequires: redhat-lsb
+%endif
+%if %{defined suse_version}
+%if 0%{?suse_version} > 1110 || 0%{?suse_version} == 1310 || 0%{?suse_version} == 1230 || 0%{?suse_version} == 1220 || 0%{?suse_version} == 1210 || 0%{?suse_version} == 1140
+BuildRequires: lsb-release
+%endif
+%endif
+
 %if %{undefined rhel_version}
 BuildRequires: gdbm-devel sharutils
 %else
@@ -496,12 +509,7 @@ else
 fi
 fi
 
-if [ " %dist" = " mandrake" ] ; then
-./configure --prefix=%{_prefix} --libdir=%{_libdir} --libexecdir=%{_prefix}/libexec \
-	--x-libraries=%{_libdir} --mandir=%{_prefix}/man > $DEVICE
-else
 %configure --prefix=%{_prefix} --mandir=%{_prefix}/man > $DEVICE
-fi
 cd ..
 fi
 #### LIBSRS2 ######################
@@ -522,12 +530,11 @@ else
 fi
 fi
 
-if [ " %dist" = " mandrake" ] ; then
-./configure --prefix=%{_prefix} --libdir=%{_libdir} --libexecdir=%{_prefix}/libexec \
-	--x-libraries=%{_libdir} --mandir=%{_prefix}/man > $DEVICE
-else
+# for mandrake use --x-libraries
+#./configure --prefix=%{_prefix} --libdir=%{_libdir} --libexecdir=%{_prefix}/libexec \
+#	--x-libraries=%{_libdir} --mandir=%{_prefix}/man > $DEVICE
+#
 %configure --prefix=%{_prefix} --mandir=%{_prefix}/man > $DEVICE
-fi
 cd ..
 fi
 
@@ -548,16 +555,6 @@ echo "reconfiguring..."
 fi
 fi
 
-if [ " %dist" = " mandrake" ] ; then
-./configure --prefix=%{_prefix} --libexecdir=%{_prefix}/libexec --sysconfdir=%{_prefix}/etc \
-	--enable-mysqlbindir=%{mysqlPrefix}/bin --enable-mysqlprefix=%{mysqlPrefix} \
-	--libdir=%{_libdir} --x-libraries=%{_libdir} \
-	--mandir=%{_prefix}/man --sysconfdir=%{_prefix}/etc --enable-qmaildir=%{_prefix} \
-	--enable-basepath=@basepath@ --enable-logdir=@logdir@ \
-	--enable-tcprules-prog=%{_prefix}/bin/tcprules --enable-tcpserver-file=%{_prefix}/etc/tcp.smtp \
-	--enable-moduledir=%module_dir \
-	`%{__cat} config/indimail.opts` > $DEVICE
-else
 %configure --prefix=%{_prefix} --libexecdir=%{_prefix}/libexec --sysconfdir=%{_prefix}/etc \
 	--enable-mysqlbindir=%{mysqlPrefix}/bin --enable-mysqlprefix=%{mysqlPrefix} \
 	--mandir=%{_prefix}/man --sysconfdir=%{_prefix}/etc --enable-qmaildir=%{_prefix} \
@@ -565,7 +562,6 @@ else
 	--enable-tcprules-prog=%{_prefix}/bin/tcprules --enable-tcpserver-file=%{_prefix}/etc/tcp.smtp \
 	--enable-moduledir=%module_dir \
 	`%{__cat} config/indimail.opts` > $DEVICE
-fi
 
 #### nssd ######################
 %if %nonssd == 0
@@ -586,21 +582,10 @@ else
 fi
 fi
 
-if [ " %dist" = " mandrake" ] ; then
-	if [ %{build_on_obs} -eq 1 ] ; then
-		echo "reconfiguring..."
-		autoreconf -fi
-	fi
-	./configure --prefix=%{_prefix} --libexecdir=%{_prefix}/libexec --sysconfdir=%{_prefix}/etc \
-	--mandir=%{_prefix}/man --libdir=/usr/%{_lib} --x-libraries=/usr/%{_lib} \
-	--enable-mysqlprefix=%{mysqlPrefix} --enable-mysqllibdir=%{mysqlPrefix}/%{_lib}/mysql \
-	`%{__cat} ../%{name}-%{version}/config/nssd.opts` > $DEVICE
-else
 	%configure --prefix=%{_prefix} --libexecdir=%{_prefix}/libexec --sysconfdir=%{_prefix}/etc \
 	--mandir=%{_prefix}/man --libdir=/usr/%{_lib} \
 	--enable-mysqlprefix=%{mysqlPrefix} --enable-mysqllibdir=%{mysqlPrefix}/%{_lib}/mysql \
 	`%{__cat} ../%{name}-%{version}/config/nssd.opts` > $DEVICE
-fi
 fi
 %endif
 #sed -i 's|^hardcode_libdir_flag_spec=.*|hardcode_libdir_flag_spec=""|g' libtool
@@ -611,16 +596,9 @@ fi
 if [ -d ../courier-imap-%{courier_version} ] ; then
 	cd ../courier-imap-%{courier_version}
 	%{__mkdir_p} m4
-if [ " %dist" = " mandrake" ] ; then
-	%configure --prefix=%{_prefix} --exec-prefix=%{_prefix}/ --bindir=%{_prefix}/bin \
-	--sbindir=%{_prefix}/sbin --datadir=%{_prefix}/share --includedir=%{_prefix}/include \
-	--libexecdir=%{_prefix}/libexec --mandir=%{_prefix}/man --sysconfdir=%{_prefix}/etc \
-	`%{__cat} ../%{name}-%{version}/config/courier-imap.opts` > $DEVICE
-else
 	%configure --prefix=%{_prefix} --libexecdir=%{_prefix}/libexec --bindir=%{_prefix}/bin \
 	--mandir=%{_prefix}/man --sysconfdir=%{_prefix}/etc \
 	`%{__cat} ../%{name}-%{version}/config/courier-imap.opts` > $DEVICE
-fi
 fi
 %endif
 
