@@ -86,7 +86,7 @@
 #include <stdint.h>
 
 #ifndef lint
-static char     sccsid[] = "$Id: authindi.c,v 2.24 2014-02-05 01:49:18+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: authindi.c,v 2.24 2014-02-05 01:49:18+05:30 Cprogrammer Stab mbhangui $";
 #endif
 #ifdef AUTH_SIZE
 #undef AUTH_SIZE

@@ -121,7 +121,7 @@
 #include <memory.h>
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vdominfo.c,v 2.15 2014-04-17 11:42:59+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: vdominfo.c,v 2.15 2014-04-17 11:42:59+05:30 Cprogrammer Stab mbhangui $";
 #endif
 
 char            Domain[MAX_BUFF];

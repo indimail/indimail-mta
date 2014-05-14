@@ -96,7 +96,7 @@
 #include <pwd.h>
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vdeldomain.c,v 2.13 2013-08-03 20:22:33+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: vdeldomain.c,v 2.13 2013-08-03 20:22:33+05:30 Cprogrammer Stab mbhangui $";
 #endif
 
 char            Domain[MAX_BUFF];

@@ -202,7 +202,7 @@
 #include <errno.h>
 
 #ifndef	lint
-static char     sccsid[] = "$Id: userinfo.c,v 2.36 2013-06-10 16:06:09+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: userinfo.c,v 2.36 2013-06-10 16:06:09+05:30 Cprogrammer Stab mbhangui $";
 #endif
 
 extern char *strptime(const char *, const char *, struct tm *);

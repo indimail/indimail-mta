@@ -32,7 +32,7 @@
 #include <string.h>
 
 #ifndef	lint
-static char     sccsid[] = "$Id: printdir.c,v 2.5 2014-04-17 11:40:37+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: printdir.c,v 2.5 2014-04-17 11:40:37+05:30 Cprogrammer Stab mbhangui $";
 #endif
 
 int

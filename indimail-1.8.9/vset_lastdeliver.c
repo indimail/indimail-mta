@@ -64,7 +64,7 @@
 #endif
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vset_lastdeliver.c,v 2.11 2014-01-02 23:56:17+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: vset_lastdeliver.c,v 2.11 2014-01-02 23:56:17+05:30 Cprogrammer Stab mbhangui $";
 #endif
 
 int

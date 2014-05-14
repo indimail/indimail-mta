@@ -47,7 +47,7 @@
 # This a qmail specific bogofilter frontend script which allows the use of a 
 # centralized bogofilter running on an smtp mail server
 # Copyright (C) Gyepi Sam <gyepi@praxis-sw.com> 2002
-# $Id: bogofilter-qfe.in,v 2.14 2012-06-20 19:03:31+05:30 Cprogrammer Exp mbhangui $
+# $Id: bogofilter-qfe.in,v 2.14 2012-06-20 19:03:31+05:30 Cprogrammer Stab mbhangui $
  
 domain=$HOST
 #

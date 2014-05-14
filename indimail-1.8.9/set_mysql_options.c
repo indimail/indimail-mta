@@ -32,7 +32,7 @@
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: set_mysql_options.c,v 2.9 2014-01-02 23:54:03+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: set_mysql_options.c,v 2.9 2014-01-02 23:54:03+05:30 Cprogrammer Stab mbhangui $";
 #endif
 
 int

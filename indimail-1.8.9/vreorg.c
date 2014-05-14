@@ -96,7 +96,7 @@
 #include <sys/stat.h>
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vreorg.c,v 2.14 2014-04-17 11:43:09+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: vreorg.c,v 2.14 2014-04-17 11:43:09+05:30 Cprogrammer Stab mbhangui $";
 #endif
 
 int             get_options(int argc, char **argv, char *, char *, int *, int *, int *);

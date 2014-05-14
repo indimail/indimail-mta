@@ -47,7 +47,7 @@
 #include <time.h>
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vset_lastauth.c,v 2.7 2014-01-02 23:56:12+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: vset_lastauth.c,v 2.7 2014-01-02 23:56:12+05:30 Cprogrammer Stab mbhangui $";
 #endif
 
 #ifdef ENABLE_AUTH_LOGGING

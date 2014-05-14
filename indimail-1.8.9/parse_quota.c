@@ -36,7 +36,7 @@
 #endif
 
 #ifndef	lint
-static char     sccsid[] = "$Id: parse_quota.c,v 2.7 2013-06-10 15:45:07+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: parse_quota.c,v 2.7 2013-06-10 15:45:07+05:30 Cprogrammer Stab mbhangui $";
 #endif
 
 mdir_t
