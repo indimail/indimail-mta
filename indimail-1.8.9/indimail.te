@@ -1,10 +1,11 @@
 #
 # $Log: indimail.te,v $
-# Revision 2.1  2014-04-23 13:53:51+05:30  Cprogrammer
-# selinux module configuration
+# Revision 2.1  2014-05-14 18:25:19+05:30  Cprogrammer
+# selinux module config
 #
 #
-# $ Id: $
+# $Id: indimail.te,v 2.1 2014-05-14 18:25:19+05:30 Cprogrammer Exp mbhangui $
+# 
 module indimail 1.0;
 
 require {
@@ -64,4 +65,4 @@ allow antivirus_t crond_tmp_t:file write;
 allow antivirus_t var_t:file { read write getattr open };
 
 #============= mandb_t ==============
-allow mandb_t var_t:file read getattr;
+allow mandb_t var_t:file { read getattr };
