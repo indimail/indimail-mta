@@ -13,7 +13,7 @@
 #endif
 
 #ifndef	lint
-static char     sccsidglobalh[] = "$Id: $";
+static char     sccsidglobalh[] = "$Id: global.h,v 2.1 2014-05-14 16:36:13+05:30 Cprogrammer Stab mbhangui $";
 #endif
 /*-
  * PROTOTYPES should be set to one if and only if the compiler supports
