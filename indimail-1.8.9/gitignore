@@ -65,6 +65,7 @@ patches/courier-imap-4.9.1.patch.gz
 patches/courier-imap-4.9.2.patch.gz
 patches/fetchmail-6.3.9.patch.gz
 patches/qmail-1.03.patch.gz
+patches/ucspi-tcp-0.88.patch.gz
 vadduser.1
 vdeldomain.1
 vdeluser.1
