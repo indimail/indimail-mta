@@ -61,7 +61,7 @@ fmt_double(register char *s, double d, unsigned long precision)
 void
 getversion_fmt_double_c()
 {
-	static char    *x = "$Id: fmt_double.c,v 1.2 2013-09-04 13:57:37+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: fmt_double.c,v 1.2 2013-09-04 13:57:37+05:30 Cprogrammer Stab mbhangui $";
 
 	x++;
 }

@@ -1139,7 +1139,7 @@ dns_maps(sa, ip, suffix)
 void
 getversion_dns_c()
 {
-	static char    *x = "$Id: dns.c,v 1.28 2014-01-29 13:56:22+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: dns.c,v 1.28 2014-01-29 13:56:22+05:30 Cprogrammer Stab mbhangui $";
 
 	x++;
 }

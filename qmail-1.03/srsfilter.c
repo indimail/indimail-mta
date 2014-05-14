@@ -202,7 +202,7 @@ main(argc, argv)
 void
 getversion_srsfilter_c()
 {
-	static char    *x = "$Id: srsfilter.c,v 1.1 2014-01-01 19:27:49+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: srsfilter.c,v 1.1 2014-01-01 19:27:49+05:30 Cprogrammer Stab mbhangui $";
 
 	x++;
 }

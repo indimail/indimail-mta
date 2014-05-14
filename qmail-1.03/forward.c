@@ -138,7 +138,7 @@ main(argc, argv)
 void
 getversion_forward_c()
 {
-	static char    *x = "$Id: forward.c,v 1.8 2013-08-25 18:38:31+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: forward.c,v 1.8 2013-08-25 18:38:31+05:30 Cprogrammer Stab mbhangui $";
 
 	x++;
 }

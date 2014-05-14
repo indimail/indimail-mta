@@ -107,7 +107,7 @@ main()
 void
 getversion_tai64nlocal_c()
 {
-	static char    *x = "$Id: tai64nlocal.c,v 1.4 2014-03-18 17:37:46+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: tai64nlocal.c,v 1.4 2014-03-18 17:37:46+05:30 Cprogrammer Stab mbhangui $";
 
 	x++;
 }

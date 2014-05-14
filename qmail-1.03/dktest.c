@@ -428,7 +428,7 @@ main(int argc, char *argv[])
 void
 getversion_dktest_c()
 {
-	static char    *x = "$Id: dktest.c,v 1.16 2013-08-17 16:01:08+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: dktest.c,v 1.16 2013-08-17 16:01:08+05:30 Cprogrammer Stab mbhangui $";
 
 	x++;
 }

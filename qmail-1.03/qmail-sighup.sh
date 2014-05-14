@@ -14,7 +14,7 @@
 # Revision 1.1  2002-09-26 20:48:02+05:30  Cprogrammer
 # Initial revision
 #
-# $Id: qmail-sighup.sh,v 1.5 2013-08-06 11:15:09+05:30 Cprogrammer Exp mbhangui $
+# $Id: qmail-sighup.sh,v 1.5 2013-08-06 11:15:09+05:30 Cprogrammer Stab mbhangui $
 if [ " $SERVICEDIR" = " " ] ; then
 	SERVICEDIR=`/bin/ls /service*`
 	if [ " $SERVICEDIR" = " " ] ; then

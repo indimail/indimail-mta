@@ -1502,7 +1502,7 @@ spfinfo(sa)
 void
 getversion_spf_c()
 {
-	static char    *x = "$Id: spf.c,v 1.11 2013-08-13 21:48:56+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: spf.c,v 1.11 2013-08-13 21:48:56+05:30 Cprogrammer Stab mbhangui $";
 
 	x++;
 }

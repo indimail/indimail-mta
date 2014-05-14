@@ -93,7 +93,7 @@ main(int argc, char **argv)
 void
 getversion_cdbget_c()
 {
-	static char    *x = "$Id: cdbget.c,v 1.2 2013-09-04 12:51:01+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: cdbget.c,v 1.2 2013-09-04 12:51:01+05:30 Cprogrammer Stab mbhangui $";
 	if (x)
 		x++;
 }

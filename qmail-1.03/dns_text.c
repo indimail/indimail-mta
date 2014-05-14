@@ -122,7 +122,7 @@ dns_text(char *dn)
 void
 getversion_dns_text_c()
 {
-	static char    *x = "$Id: dns_text.c,v 1.7 2014-01-29 14:00:24+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: dns_text.c,v 1.7 2014-01-29 14:00:24+05:30 Cprogrammer Stab mbhangui $";
 
 	x++;
 }

@@ -226,7 +226,7 @@ parse_env(char *envStrings)
 void
 getversion_envrules_c()
 {
-	static char    *x = "$Id: envrules.c,v 1.16 2014-03-07 02:07:16+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: envrules.c,v 1.16 2014-03-07 02:07:16+05:30 Cprogrammer Stab mbhangui $";
 
 	x++;
 }

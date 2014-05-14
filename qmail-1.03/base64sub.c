@@ -166,7 +166,7 @@ b64encode(in, out)
 void
 getversion_base64sub_c()
 {
-	static char    *x = "$Id: base64sub.c,v 1.7 2013-12-05 18:10:11+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: base64sub.c,v 1.7 2013-12-05 18:10:11+05:30 Cprogrammer Stab mbhangui $";
 
 	x++;
 }

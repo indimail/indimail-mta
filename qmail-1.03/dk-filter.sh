@@ -57,7 +57,7 @@
 # Revision 1.1  2009-04-02 14:52:27+05:30  Cprogrammer
 # Initial revision
 #
-# $Id: dk-filter.sh,v 1.18 2014-03-12 08:50:48+05:30 Cprogrammer Exp mbhangui $
+# $Id: dk-filter.sh,v 1.18 2014-03-12 08:50:48+05:30 Cprogrammer Stab mbhangui $
 #
 if [ -z "$QMAILREMOTE" -a -z "$QMAILLOCAL" ]; then
 	echo "dk-filter should be run by spawn-filter" 1>&2

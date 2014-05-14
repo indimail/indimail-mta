@@ -239,7 +239,7 @@ main(int argc, char **argv)
 void
 getversion_cleanq_c()
 {
-	static char    *x = "$Id: cleanq.c,v 1.5 2014-01-29 13:59:37+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: cleanq.c,v 1.5 2014-01-29 13:59:37+05:30 Cprogrammer Stab mbhangui $";
 
 	x++;
 }

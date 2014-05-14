@@ -315,7 +315,7 @@ main(int argc, char **argv)
 void
 getversion_instcheck_c()
 {
-	static char    *x = "$Id: instcheck.c,v 1.18 2014-04-17 12:01:40+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: instcheck.c,v 1.18 2014-04-17 12:01:40+05:30 Cprogrammer Stab mbhangui $";
 #ifdef INDIMAIL
 	if (x)
 		x = sccsidh;

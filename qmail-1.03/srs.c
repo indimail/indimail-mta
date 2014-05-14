@@ -193,7 +193,7 @@ srsreverse(char *srsaddress)
 void
 getversion_srs_c()
 {
-	static char    *x = "$Id: srs.c,v 1.1 2013-08-23 15:34:22+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: srs.c,v 1.1 2013-08-23 15:34:22+05:30 Cprogrammer Stab mbhangui $";
 
 	x++;
 }
