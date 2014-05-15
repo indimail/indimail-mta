@@ -12,6 +12,7 @@ mysql_incdir=@mysql_incdir@
 mysql_libdir=@mysql_libdir@
 defaultdomain=@defaultdomain@
 acl_libdirstem := $(shell basename @libdir@ 2>/dev/null|| echo "lib")
+release := $(shell head -1 changelog.in | awk '{print $2}' | cut -d'-' -f2 | cut -c-1)
 version=@version@
 prefix=@prefix@
 #
@@ -136,30 +137,41 @@ obs_deb_prep: obs_deb_prep.in obs.mk
 changelog: changelog.in obs.mk
 	$(edit) $@.in > $@;
 
-indimail-Debian_5.0.dsc:indimail-Debian_5.0.dsc.in obs.mk
+indimail-Debian_5.0.dsc:indimail-Debian_5.0.dsc.in obs.mk changelog.in
 	$(edit) $@.in > $@;
-indimail-Debian_6.0.dsc: indimail-Debian_6.0.dsc.in obs.mk
-	$(edit) $@.in > $@;
-indimail-Debian_7.0.dsc: indimail-Debian_7.0.dsc.in obs.mk
-	$(edit) $@.in > $@;
-indimail-xUbuntu_14.04.dsc: indimail-xUbuntu_14.04.dsc.in obs.mk
-	$(edit) $@.in > $@;
-indimail-xUbuntu_13.10.dsc: indimail-xUbuntu_13.10.dsc.in obs.mk
-	$(edit) $@.in > $@;
-indimail-xUbuntu_13.04.dsc: indimail-xUbuntu_13.04.dsc.in obs.mk
-	$(edit) $@.in > $@;
-indimail-xUbuntu_12.10.dsc: indimail-xUbuntu_12.10.dsc.in obs.mk
-	$(edit) $@.in > $@;
-indimail-xUbuntu_12.04.dsc: indimail-xUbuntu_12.04.dsc.in obs.mk
-	$(edit) $@.in > $@;
-indimail-xUbuntu_11.10.dsc: indimail-xUbuntu_11.10.dsc.in obs.mk
-	$(edit) $@.in > $@;
-indimail-xUbuntu_11.04.dsc: indimail-xUbuntu_11.04.dsc.in obs.mk
-	$(edit) $@.in > $@;
-indimail-xUbuntu_10.10.dsc: indimail-xUbuntu_10.10.dsc.in obs.mk
-	$(edit) $@.in > $@;
-indimail-xUbuntu_10.04.dsc: indimail-xUbuntu_10.04.dsc.in obs.mk
-	$(edit) $@.in > $@;
+indimail-Debian_6.0.dsc: indimail-Debian_6.0.dsc.in obs.mk changelog.in
+	$(edit) $@.in > $@.tmp; \
+	sed -e 's,@release@,$(release),g' $@.tmp > $@; /bin/rm -f $@.tmp
+indimail-Debian_7.0.dsc: indimail-Debian_7.0.dsc.in obs.mk changelog.in
+	$(edit) $@.in > $@.tmp; \
+	sed -e 's,@release@,$(release),g' $@.tmp > $@; /bin/rm -f $@.tmp
+indimail-xUbuntu_14.04.dsc: indimail-xUbuntu_14.04.dsc.in obs.mk changelog.in
+	$(edit) $@.in > $@.tmp; \
+	sed -e 's,@release@,$(release),g' $@.tmp > $@; /bin/rm -f $@.tmp
+indimail-xUbuntu_13.10.dsc: indimail-xUbuntu_13.10.dsc.in obs.mk changelog.in
+	$(edit) $@.in > $@.tmp; \
+	sed -e 's,@release@,$(release),g' $@.tmp > $@; /bin/rm -f $@.tmp
+indimail-xUbuntu_13.04.dsc: indimail-xUbuntu_13.04.dsc.in obs.mk changelog.in
+	$(edit) $@.in > $@.tmp; \
+	sed -e 's,@release@,$(release),g' $@.tmp > $@; /bin/rm -f $@.tmp
+indimail-xUbuntu_12.10.dsc: indimail-xUbuntu_12.10.dsc.in obs.mk changelog.in
+	$(edit) $@.in > $@.tmp; \
+	sed -e 's,@release@,$(release),g' $@.tmp > $@; /bin/rm -f $@.tmp
+indimail-xUbuntu_12.04.dsc: indimail-xUbuntu_12.04.dsc.in obs.mk changelog.in
+	$(edit) $@.in > $@.tmp; \
+	sed -e 's,@release@,$(release),g' $@.tmp > $@; /bin/rm -f $@.tmp
+indimail-xUbuntu_11.10.dsc: indimail-xUbuntu_11.10.dsc.in obs.mk changelog.in
+	$(edit) $@.in > $@.tmp; \
+	sed -e 's,@release@,$(release),g' $@.tmp > $@; /bin/rm -f $@.tmp
+indimail-xUbuntu_11.04.dsc: indimail-xUbuntu_11.04.dsc.in obs.mk changelog.in
+	$(edit) $@.in > $@.tmp; \
+	sed -e 's,@release@,$(release),g' $@.tmp > $@; /bin/rm -f $@.tmp
+indimail-xUbuntu_10.10.dsc: indimail-xUbuntu_10.10.dsc.in obs.mk changelog.in
+	$(edit) $@.in > $@.tmp; \
+	sed -e 's,@release@,$(release),g' $@.tmp > $@; /bin/rm -f $@.tmp
+indimail-xUbuntu_10.04.dsc: indimail-xUbuntu_10.04.dsc.in obs.mk changelog.in
+	$(edit) $@.in > $@.tmp; \
+	sed -e 's,@release@,$(release),g' $@.tmp > $@; /bin/rm -f $@.tmp
 
 dummy.tar.gz: README
 	tar cf - README |gzip > $@
