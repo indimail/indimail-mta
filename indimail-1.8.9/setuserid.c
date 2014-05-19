@@ -18,7 +18,7 @@
 #include <string.h>
 
 #ifndef	lint
-static char     sccsid[] = "$Id: setuserid.c,v 2.3 2014-05-14 17:34:43+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: setuserid.c,v 2.3 2014-05-14 17:34:43+05:30 Cprogrammer Stab mbhangui $";
 #endif
 /*-
  * scan the group file for all supplementary groups.
