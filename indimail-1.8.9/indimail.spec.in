@@ -51,7 +51,11 @@
 %define libdkim_version    1.4
 %define libsrs2_version    1.0.18
 %define mysql_version      6.0.9-alpha
+%if 0%{?suse_version}
+%define noperms            0
+%else
 %define noperms            1
+%endif
 %define see_base           For a description of IndiMail visit http://www.indimail.org
 %define i_m_on_mac         0
 %if %i_m_on_mac == 1
@@ -261,8 +265,10 @@ PreReq: permissions
 %endif
 %if 0%{?suse_version}
 BuildRequires: db-devel
+%if 0%{?opensuse_bs}
 BuildRequires: -post-build-checks  
 #!BuildIgnore: post-build-checks  
+%endif
 %else
 %if 0%{?mandriva_version} == 201100
 BuildRequires: db5.1-devel
@@ -289,7 +295,12 @@ Requires: pam
 Requires: /usr/sbin/useradd /usr/sbin/groupadd
 Requires: /sbin/chkconfig /usr/sbin/userdel /usr/sbin/groupdel procps /usr/bin/awk
 %endif
-Requires: coreutils grep /bin/sh glibc openssl mysql-server
+%if 0%{?suse_version}
+Requires: mysql-community-server
+%else
+Requires: mysql-server
+%endif
+Requires: coreutils grep /bin/sh glibc openssl
 %if %{defined centos_version} || %{defined rhel_version}
 Requires: policycoreutils-python
 %endif
@@ -616,7 +627,7 @@ if [ -d ../bogofilter-%{bogofilter_version} ] ; then
 	--mandir=%{_prefix}/man `%{__cat} ../%{name}-%{version}/config/bogofilter.opts` > $DEVICE
 %if 0%{?sles_version} == 10
         sed 's{extern int yylineno;{int yylineno = 1;{' < src/lexer.c > src/lexer.c.tmp
-        mv src/lexer.c.tmp src/lexer.c
+        %{__mv} src/lexer.c.tmp src/lexer.c
 %endif
 	fi
 fi
@@ -720,10 +731,17 @@ do
 			%{__make} DESTDIR=%{buildroot}
 			%{__make} DESTDIR=%{buildroot} install-strip
 		fi
+%if %noperms == 0
+		if [ " $i" = " %{name}-%{version}" ] ; then
+			%{__cp} %{name}-permissions.easy   ../../SOURCES/%{name}-permissions.easy
+			%{__cp} %{name}-permissions.secure ../../SOURCES/%{name}-permissions.secure
+			%{__cp} %{name}-permissions.paranoid ../../SOURCES/%{name}-permissions.paranoid
+		fi
+%endif
 		# courier-imap installations misses out on this
 		if [ %nocourierimap -eq 0 -a " $i" = " courier-imap-%{courier_version}" ] ; then
 			%{__mkdir_p} %{buildroot}%{_prefix}/man/man1
-			cp tcpd/couriertls.1 %{buildroot}%{_prefix}/man/man1/couriertls.1
+			%{__cp} tcpd/couriertls.1 %{buildroot}%{_prefix}/man/man1/couriertls.1
 		fi
 		cd ..
 	fi
@@ -882,12 +900,6 @@ if [ %noclamav -eq 0 ] ; then # clamav >= 0.97.5, without clamav-db
 	else # with built-in clamav signatures
 		$TOUCH %{buildroot}%{_prefix}/share/clamd/clamav
 		$TOUCH %{buildroot}%{_prefix}/share/clamd/mirrors.dat
-	fi
-else
-	if [ -f /usr/bin/freshclam ] ; then
-		if [ ! -d %{buildroot}%{_prefix}/share/clamd ] ; then
-			%{__mkdir_p} %{buildroot}%{_prefix}/share/clamd
-		fi
 	fi
 fi
 
@@ -3091,6 +3103,23 @@ if [ -f %{_sysconfdir}/init.d/sendmail ] ; then
 	fi
 fi
 if [ -x /usr/sbin/alternatives ] ; then
+	alternatives_cmd=/usr/sbin/alternatives
+elif [ -x /usr/sbin/update-alternatives ] ; then
+	alternatives_cmd=/usr/sbin/update-alternatives
+else
+	alternatives_cmd=""
+fi
+if [ -n $alternatives_cmd ] ; then
+	for i in /usr/lib/sendmail /usr/sbin/sendmail; do
+		if [ -f $i -a ! -L $i ]; then
+			echo "! $i is a file, should be a link" 1>&2
+			%{__mv} $i $i.old
+		fi
+	done
+	if [ -f /etc/pam.d/smtp -a ! -L /etc/pam.d/smtp ] ; then
+		echo "! /etc/pam.d/smtp is a file, should be a link" 1>&2
+		%{__mv} /etc/pam.d/smtp /etc/pam.d/smtp.old
+	fi
 	/usr/sbin/alternatives --install \
 		/usr/sbin/sendmail mta %{_prefix}/bin/sendmail 120 \
 		--slave /usr/share/man/man8/sendmail.8.gz mta-sendmailman \
@@ -3101,7 +3130,7 @@ if [ -x /usr/sbin/alternatives ] ; then
 else
 	for i in /usr/lib/sendmail /usr/sbin/sendmail; do
 		if [ -f $i -a ! -L $i ]; then
-			echo "! $i is a file, should be a link"
+			echo "! $i is a file, should be a link" 1>&2
 			%{__mv} $i $i.old
 			/bin/ln -s %{_prefix}/bin/sendmail $i
 		elif [ -L $i ];then
@@ -3112,6 +3141,11 @@ else
 			/bin/ln -s %{_prefix}/bin/sendmail $i
 		fi
 	done
+	if [ -f /etc/pam.d/smtp -a ! -L /etc/pam.d/smtp ] ; then
+		echo "! /etc/pam.d/smtp is a file, should be a link" 1>&2
+		%{__mv} /etc/pam.d/smtp /etc/pam.d/smtp.old
+		/bin/ln -s /etc/pam.d/pam.multi /etc/pam.d/smtp
+	fi
 fi
 if [ ! -f %{_prefix}/control/idhost ] ; then
 	uname -n > %{_prefix}/control/idhost
@@ -3124,8 +3158,22 @@ if [ $argv1 -eq 1 ] ; then
 	exit 0
 fi
 if [ -x /usr/sbin/alternatives ] ; then
-	/usr/sbin/alternatives --remove mta %{_prefix}/bin/sendmail
-	/usr/sbin/alternatives --auto mta
+	alternatives_cmd=/usr/sbin/alternatives
+elif [ -x /usr/sbin/update-alternatives ] ; then
+	alternatives_cmd=/usr/sbin/update-alternatives
+else
+	alternatives_cmd=""
+fi
+if [ -n $alternatives_cmd ] ; then
+	$alternatives_cmd --remove mta %{_prefix}/bin/sendmail
+	$alternatives_cmd --auto mta
+	for i in /usr/lib/sendmail /usr/sbin/sendmail /etc/pam.d/smtp; do
+		if [ -f $i.old -o -L $i.old ]; then
+			echo "restoring $i"
+			%{__rm} -f $i
+			%{__mv} $i.old $i
+		fi
+	done
 else
 	if [ -f %{_sysconfdir}/init.d/sendmail ] ; then
 		if [ -f /sbin/chkconfig ] ; then
@@ -3134,9 +3182,9 @@ else
 			echo "%{_sysconfdir}/init.d/sendmail start"
 		fi
 	fi
-	for i in /usr/lib/sendmail /usr/sbin/sendmail; do
+	for i in /usr/lib/sendmail /usr/sbin/sendmail /etc/pam.d/smtp; do
 		if [ -f $i.old -o -L $i.old ]; then
-			echo "restoring sendmail"
+			echo "restoring $i"
 			%{__rm} -f $i
 			%{__mv} $i.old $i
 		fi
