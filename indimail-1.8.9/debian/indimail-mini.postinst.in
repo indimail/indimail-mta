@@ -67,6 +67,16 @@ if [ -x /usr/sbin/update-alternatives ] ; then
 	if [ /usr/lib/sm.bin/sendmail ] ; then
 		/usr/sbin/update-alternatives --remove-all sendmail-msp || true
 	fi
+	for i in /usr/lib/sendmail /usr/sbin/sendmail; do
+		if [ -f $i -a ! -L $i ]; then
+			echo "! $i is a file, should be a link" 1>&2
+			${mv} $i $i.old
+		fi
+	done
+	if [ -f /etc/pam.d/smtp -a ! -L /etc/pam.d/smtp ] ; then
+		echo "! /etc/pam.d/smtp is a file, should be a link" 1>&2
+		${mv} /etc/pam.d/smtp /etc/pam.d/smtp.old
+	fi
 	/usr/sbin/update-alternatives --install \
 		/usr/sbin/sendmail-msp sendmail-msp ${prefix}/bin/sendmail 120 \
 		--slave /usr/share/man/man8/sendmail.8.gz sendmail.8.gz \
@@ -89,6 +99,11 @@ else
 			/bin/ln -s ${prefix}/bin/sendmail $i
 		fi
 	done
+	if [ -f /etc/pam.d/smtp -a ! -L /etc/pam.d/smtp ] ; then
+		echo "! /etc/pam.d/smtp is a file, should be a link" 1>&2
+		${mv} /etc/pam.d/smtp /etc/pam.d/smtp.old
+		/bin/ln -s /etc/pam.d/pam.multi /etc/pam.d/smtp
+	fi
 fi
 if [ ! -f ${prefix}/control/idhost ] ; then
 	uname -n > ${prefix}/control/idhost
