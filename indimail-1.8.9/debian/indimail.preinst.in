@@ -72,13 +72,6 @@ case "$1" in
 			${sysconfdir}/init.d/nscd start
 		fi
 	fi
-
-	for i in lib sbin
-	do
-		if [ -f /usr/$i/sendmail ] ; then
-			mv /usr/$i/sendmail /usr/$i/sendmail.old
-		fi
-	done
 	) > /tmp/indimail-install.log 2>&1
 	;;
 
