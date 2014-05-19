@@ -1331,6 +1331,40 @@ of most of the packages
 # To enable indimail at startup
 # update-rc.d indimail start 2345 stop 016
 
+openSUSE Notes
+==============
+# install the following packages
+mysql-community-server
+libmysqlclient-devel
+pam-devel
+ncurses-devel readline-devel 
+gdbm-devel libdb-4_8-devel 
+gcc
+gcc-c++
+make
+bison  
+byacc
+flex
+update-alternatives
+libmysqlclient18
+libncurses6
+libreadline6
+lsb-release
+openssl
+readline-devel
+gettext-runtime-mini
+autoconf
+automake
+libtool
+gettext-tools-mini
+libdb-4_8-devel
+libidn-devel
+libldap
+openldap2-devel
+libopenssl-devel
+pam
+pam-modules
+
 ---------- * -------------- * ------------ * -------------- * ------------ * -------------- * ------------
 OS X NOTES
 
