@@ -74,9 +74,9 @@ elif [ -x /usr/sbin/update-alternatives ] ; then
 		/usr/sbin/update-alternatives --auto sendmail-msp || true
 	fi
 else
-	for i in /usr/lib/sendmail /usr/sbin/sendmail; do
+	for i in /usr/lib/sendmail /usr/sbin/sendmail /etc/pam.d/smtp; do
 		if [ -f $i.old -o -L $i.old ]; then
-			echo "restoring sendmail"
+			echo "restoring $i"
 			${rm} -f $i
 			${mv} $i.old $i
 		fi
