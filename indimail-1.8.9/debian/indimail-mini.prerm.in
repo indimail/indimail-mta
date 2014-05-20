@@ -73,13 +73,18 @@ elif [ -x /usr/sbin/update-alternatives ] ; then
 		echo "adding default alternative for sendmail"
 		/usr/sbin/update-alternatives --auto sendmail-msp || true
 	fi
-else
-	for i in /usr/lib/sendmail /usr/sbin/sendmail /etc/pam.d/smtp; do
-		if [ -f $i.old -o -L $i.old ]; then
-			echo "restoring $i"
-			${rm} -f $i
-			${mv} $i.old $i
-		fi
-	done
 fi
+for i in /usr/lib/sendmail /usr/sbin/sendmail /etc/pam.d/smtp; do
+	if [ -f $i.old -o -L $i.old ]; then
+		echo "restoring $i"
+		${rm} -f $i
+		${mv} $i.old $i
+	fi
+done
+for i in mailq newaliases; do
+	if [ -f /usr/share/man/man1/$i.old.1.gz ] ; then
+		echo "restoring /usr/share/man/man1/$i.1.gz"
+		${mv} /usr/share/man/man1/$i.old.1.gz /usr/share/man/man1/$i.1.gz
+	fi
+done
 exit 0

@@ -104,6 +104,12 @@ else
 		${mv} /etc/pam.d/smtp /etc/pam.d/smtp.old
 		/bin/ln -s /etc/pam.d/pam.multi /etc/pam.d/smtp
 	fi
+	for i in mailq newaliases; do
+		if [ -f /usr/share/man/man1/$i.1.gz -a ! -L /usr/share/man/man1/$i.1.gz ] ; then
+			echo "! /usr/share/man/man1/$i.1.gz is a file, should be a link" 1>&2
+			${mv} /usr/share/man/man1/$i.1.gz /usr/share/man/man1/$i.old.1.gz
+		fi
+	done
 fi
 if [ ! -f ${prefix}/control/idhost ] ; then
 	uname -n > ${prefix}/control/idhost
