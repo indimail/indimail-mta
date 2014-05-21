@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail.spec.in,v 2.280 2014-05-14 15:01:25+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 2.281 2014-05-21 09:09:12+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %define _unpackaged_files_terminate_build 1
 
@@ -3116,6 +3116,12 @@ if [ -n $alternatives_cmd ] ; then
 			%{__mv} $i $i.old
 		fi
 	done
+	for i in mailq newaliases; do
+		if [ -f /usr/share/man/man1/$i.1.gz -a ! -L /usr/share/man/man1/$i.1.gz ] ; then
+			echo "! /usr/share/man/man1/$i.1.gz is a file, should be a link" 1>&2
+			%{__mv} /usr/share/man/man1/$i.1.gz /usr/share/man/man1/$i.old.1.gz
+		fi
+	done
 	if [ -f /etc/pam.d/smtp -a ! -L /etc/pam.d/smtp ] ; then
 		echo "! /etc/pam.d/smtp is a file, should be a link" 1>&2
 		%{__mv} /etc/pam.d/smtp /etc/pam.d/smtp.old
@@ -3146,6 +3152,12 @@ else
 		%{__mv} /etc/pam.d/smtp /etc/pam.d/smtp.old
 		/bin/ln -s /etc/pam.d/pam.multi /etc/pam.d/smtp
 	fi
+	for i in mailq newaliases; do
+		if [ -f /usr/share/man/man1/$i.1.gz -a ! -L /usr/share/man/man1/$i.1.gz ] ; then
+			echo "! /usr/share/man/man1/$i.1.gz is a file, should be a link" 1>&2
+			%{__mv} /usr/share/man/man1/$i.1.gz /usr/share/man/man1/$i.old.1.gz
+		fi
+	done
 fi
 if [ ! -f %{_prefix}/control/idhost ] ; then
 	uname -n > %{_prefix}/control/idhost
@@ -3182,14 +3194,20 @@ else
 			echo "%{_sysconfdir}/init.d/sendmail start"
 		fi
 	fi
-	for i in /usr/lib/sendmail /usr/sbin/sendmail /etc/pam.d/smtp; do
-		if [ -f $i.old -o -L $i.old ]; then
-			echo "restoring $i"
-			%{__rm} -f $i
-			%{__mv} $i.old $i
-		fi
-	done
 fi
+for i in /usr/lib/sendmail /usr/sbin/sendmail /etc/pam.d/smtp; do
+	if [ -f $i.old -o -L $i.old ]; then
+		echo "restoring $i"
+		%{__rm} -f $i
+		%{__mv} $i.old $i
+	fi
+done
+for i in mailq newaliases; do
+	if [ -f /usr/share/man/man1/$i.old.1.gz ] ; then
+		echo "restoring /usr/share/man/man1/$i.1.gz"
+		%{__mv} /usr/share/man/man1/$i.old.1.gz /usr/share/man/man1/$i.1.gz
+	fi
+done
 
 # fix changelog for openSUSE buildservice
 %changelog
