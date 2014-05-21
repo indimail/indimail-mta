@@ -1364,6 +1364,9 @@ openldap2-devel
 libopenssl-devel
 pam
 pam-modules
+python-devel
+sharutils
+chrpath
 
 ---------- * -------------- * ------------ * -------------- * ------------ * -------------- * ------------
 OS X NOTES
