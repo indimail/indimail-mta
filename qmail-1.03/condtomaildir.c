@@ -1,5 +1,8 @@
 /*
  * $Log: condtomaildir.c,v $
+ * Revision 1.4  2014-05-22 14:44:34+05:30  Cprogrammer
+ * removed duplicate sig.h
+ *
  * Revision 1.3  2004-10-22 20:24:04+05:30  Cprogrammer
  * added RCS id
  *
@@ -13,7 +16,6 @@
 #include <unistd.h>
 #include <sys/stat.h>
 #include <signal.h>
-#include "sig.h"
 #include "sig.h"
 #include "byte.h"
 #include "exit.h"
@@ -207,7 +209,7 @@ main(int argc, char **argv, char **envp)
 void
 getversion_condtomaildir_c()
 {
-	static char    *x = "$Id: condtomaildir.c,v 1.3 2004-10-22 20:24:04+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: condtomaildir.c,v 1.4 2014-05-22 14:44:34+05:30 Cprogrammer Stab mbhangui $";
 
 	x++;
 }
