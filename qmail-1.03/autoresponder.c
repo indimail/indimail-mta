@@ -1,5 +1,10 @@
 /*
  * $Log: autoresponder.c,v $
+ * Revision 1.29  2014-05-22 14:45:38+05:30  Cprogrammer
+ * fixed issue with Date field
+ * fixed SIGPIPE resulting in duplicate emails
+ * use mktime to use local time
+ *
  * Revision 1.28  2014-01-29 13:57:54+05:30  Cprogrammer
  * changed data type for opt_maxmsgs to unsigned long
  *
@@ -388,10 +393,12 @@ get_arguments(int argc, char *argv[])
 	char           *ptr;
 	int             ch, i;
 	struct tm       tm;
-	struct datetime dt1, dt2;
 
-	ch = str_chr(argv[0], '/');
-	if (argv[0][ch])
+	for (ch = 0, i = 0, ptr = argv[0];*ptr;i++, ptr++) {
+		if (*ptr == '/')
+			ch = i;
+	}
+	if (i)
 		argv0 = argv[0] + ch + 1;
 	else
 		argv0 = argv[0];
@@ -412,8 +419,7 @@ get_arguments(int argc, char *argv[])
 				substdio_puts(subfderr, "in SDATE\n");
 				usage(0);
 			}
-			assign_datetime(&dt1, &tm);
-			if (when < datetime_untai(&dt1))
+			if (when < mktime(&tm))
 				ignore("autoresponder yet to mature");
 			break;
 		case 'e':
@@ -428,8 +434,7 @@ get_arguments(int argc, char *argv[])
 				substdio_puts(subfderr, "in EDATE\n");
 				usage(0);
 			}
-			assign_datetime(&dt2, &tm);
-			if (when > datetime_untai(&dt2))
+			if (when > mktime(&tm))
 				ignore("autoresponder expired");
 			break;
 		case 'c':
@@ -1049,9 +1054,9 @@ main(int argc, char *argv[])
 		strerr_die2sys(111, FATAL, "unable to read bouncehost controls: ");
 	if ((liphostok = control_rldef(&liphost, "localiphost", 1, (char *) 0)) == -1)
 		strerr_die2sys(111, FATAL, "unable to read localiphost controls: ");
-	get_arguments(argc, argv);
 	if (env_get("MAKE_SEEKABLE") && mkTempFile(0))
 		strerr_die2sys(111, FATAL, "makeseekable: ");
+	get_arguments(argc, argv);
 	/*- Fail if SENDER or DTLINE are not set */
 	if (!(sender = env_get("SENDER")))
 		usage("SENDER is not set, must be run from qmail.");
@@ -1109,10 +1114,6 @@ main(int argc, char *argv[])
 	datetime_tai(&dt, when);
 	dbuf[date822fmt(dbuf, &dt)] = 0;
 	if (substdio_put(&ssout, "Date: ", 6))
-		strerr_die2sys(111, FATAL, "unable to write: ");
-	if (substdio_puts(&ssout, daytab[dt.wday]))
-		strerr_die2sys(111, FATAL, "unable to write: ");
-	if (substdio_put(&ssout, ", ", 2))
 		strerr_die2sys(111, FATAL, "unable to write: ");
 	if (substdio_puts(&ssout, dbuf))
 		strerr_die2sys(111, FATAL, "unable to write: ");
@@ -1299,7 +1300,7 @@ main(int argc, char *argv[])
 void
 getversion_qmail_autoresponder_c()
 {
-	static char    *x = "$Id: autoresponder.c,v 1.28 2014-01-29 13:57:54+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: autoresponder.c,v 1.29 2014-05-22 14:45:38+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
