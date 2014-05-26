@@ -183,8 +183,7 @@ indimail-mini.postinst indimail-mini.install gen_control obs.mk \
 control control.Debian.6.0 control.Debian.7.0 control.Ubuntu.10.04 \
 control.Ubuntu.10.10 control.Ubuntu.11.04 control.Ubuntu.11.10 \
 control.Ubuntu.12.04 control.Ubuntu.12.10 control.Ubuntu.13.04 \
-control.Ubuntu.13.10 control.Ubuntu.14.04 \
-
+control.Ubuntu.13.10 control.Ubuntu.14.04 
 	tar cf - copyright indimail.preinst indimail.postinst indimail.prerm \
 		indimail.postrm rules changelog compat obs_deb_prep \
 		indimail-devel.install indimail-devel.postinst gen_control \
