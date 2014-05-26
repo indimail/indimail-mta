@@ -188,7 +188,7 @@ if [ $nodksignature -eq 0 ] ; then
 	if [ -x ${prefix}/bin/dknewkey ] ; then
 		ver_opt="both"
 		sign_opt="both"
-		${prefix}/bin/dknewkey ${prefix}/control/domainkeys/$dkimkeyfn
+		${prefix}/bin/dknewkey ${prefix}/control/domainkeys/$dkimkeyfn 1024
 	else
 		ver_opt="none"
 		sign_opt="none"
