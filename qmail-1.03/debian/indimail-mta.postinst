@@ -295,9 +295,6 @@ SERVICE_LIST="sendmail exim4"
 export SERVICE_LIST
 ${prefix}/sbin/svctool --config=add-boot
 
-if [ -f ${prefix}/bin/instcheck ] ; then
-	${prefix}/bin/instcheck > /dev/null 2>&1 || true
-fi
 #
 # create /tmp/skip-install_tables so that svctool does not run sbin/install_tables
 #
