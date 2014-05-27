@@ -103,7 +103,7 @@ install: build
 binary-indep: build install
 	dh_testdir
 	dh_testroot
-	find $(CURDIR)/debian/indimail/$(prefix)/man -name '*'.? -type f -exec gzip {} \;
+	find $(CURDIR)/debian/indimail/$(prefix)/man -name '*'.? -type f -exec gzip -q {} \;
 	dh_install --sourcedir=$(CURDIR)/debian/indimail -pindimail-devel
 	dh_install --sourcedir=$(CURDIR)/debian/indimail -pindimail-mini
 	dh_installchangelogs
