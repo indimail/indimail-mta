@@ -23,6 +23,7 @@ prefix=/var/indimail
 libdkim_version=1.4
 libsrs2_version=1.0.18
 cp=/bin/cp
+rm=/bin/rm
 
 DESTDIR=$(CURDIR)/debian/indimail-mta
 
@@ -65,6 +66,13 @@ install: build
 	if [ -d libsrs2-$(libsrs2_version) ] ; then       $(MAKE) -s install -C libsrs2-$(libsrs2_version) DESTDIR=$(DESTDIR); fi
 	if [ -d ucspi-tcp-0.88 ]             ; then       $(MAKE) -s install -C ucspi-tcp-0.88 DESTDIR=$(DESTDIR); fi
 	if [ -d qmail-1.03 ]                 ; then       $(MAKE) -s install -C qmail-1.03 DESTDIR=$(DESTDIR); fi
+	${rm} -rf $(DESTDIR)/${prefix}/man/man3
+	${rm} -rf $(DESTDIR)/${prefix}/include
+	${rm} -rf $(DESTDIR)/${prefix}/lib/libdkim.a
+	${rm} -rf $(DESTDIR)/${prefix}/lib64/libdkim.a
+	${rm} -rf $(DESTDIR)/${prefix}/lib/libsrs2.a
+	${rm} -rf $(DESTDIR)/${prefix}/lib64/libsrs2.a
+	${rm} -rf $(DESTDIR)/${prefix}/queue
 	if [ -f ../SOURCES/svctool ] ; then ${cp} ../SOURCES/svctool $(DESTDIR)/$(prefix)/sbin; fi
 	if [ -f ../SOURCES/perm_list ] ; then ${cp} ../SOURCES/perm_list $(DESTDIR)/$(prefix)/etc; fi
 
