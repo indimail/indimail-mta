@@ -1,5 +1,8 @@
 /*
  * $Log: hier.c,v $
+ * Revision 1.183  2014-05-28 16:06:35+05:30  Cprogrammer
+ * removed /var/indimail/queue directory
+ *
  * Revision 1.182  2014-04-17 12:01:30+05:30  Cprogrammer
  * ignore man pages error
  *
@@ -1670,7 +1673,7 @@ _hier(inst_dir)
 void
 getversion_install_big_c()
 {
-	static char    *x = "$Id: hier.c,v 1.182 2014-04-17 12:01:30+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: hier.c,v 1.183 2014-05-28 16:06:35+05:30 Cprogrammer Exp mbhangui $";
 
 #ifdef INDIMAIL
 	if (x)
