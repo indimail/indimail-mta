@@ -52,6 +52,12 @@ build-stamp:
 
 clean:
 	rm -f build-stamp configure-stamp
+	if [ -d libdkim-$(libdkim_version) ] ; then $(MAKE) -s -C libdkim-$(libdkim_version) clean||true; fi
+	if [ -d libdkim-$(libdkim_version) ] ; then $(MAKE) -s -C libdkim-$(libdkim_version) distclean||true; fi
+	if [ -d libsrs2-$(libsrs2_version) ] ; then $(MAKE) -s -C libsrs2-$(libsrs2_version) clean||true; fi
+	if [ -d libsrs2-$(libsrs2_version) ] ; then $(MAKE) -s -C libsrs2-$(libsrs2_version) distclean||true; fi
+	if [ -d ucspi-tcp-0.88 ]             ; then $(MAKE) -s -C ucspi-tcp-0.88 clean||true; fi
+	if [ -d qmail-1.03 ]                 ; then $(MAKE) -s -C qmail-1.03 clean||true; fi
 	#$(MAKE) -s clean; $(MAKE) -s distclean || true
 	dh_testdir
 	dh_testroot
