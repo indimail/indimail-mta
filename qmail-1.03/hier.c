@@ -491,23 +491,6 @@ hier(inst_dir)
 	d(auto_qmail_home, "man/man7", auto_uido, auto_gidq, 0555);
 	d(auto_qmail_home, "man/man8", auto_uido, auto_gidq, 0555);
 	d(auto_qmail_home, "alias", auto_uida, auto_gidq, 02555);
-#ifndef INDIMAIL
-	d(auto_qmail_home, "queue", auto_uidq, auto_gidq, 0750);
-	d(auto_qmail_home, "queue/pid", auto_uidq, auto_gidq, 0700);
-	d(auto_qmail_home, "queue/intd", auto_uidq, auto_gidq, 0700);
-	d(auto_qmail_home, "queue/todo", auto_uidq, auto_gidq, 0750);
-	d(auto_qmail_home, "queue/bounce", auto_uids, auto_gidq, 0700);
-	dsplit("queue/mess", auto_uidq, 0750);
-	dsplit("queue/todo", auto_uidq, 0750);
-	dsplit("queue/intd", auto_uidq, 0700);
-	dsplit("queue/info", auto_uids, 0700);
-	dsplit("queue/local", auto_uids, 0700);
-	dsplit("queue/remote", auto_uids, 0700);
-	d(auto_qmail_home, "queue/lock", auto_uidq, auto_gidq, 0750);
-	z(auto_qmail_home, "queue/lock/tcpto", TCPTO_BUFSIZ, auto_uidr, auto_gidq, 0644);
-	z(auto_qmail_home, "queue/lock/sendmutex", 0, auto_uids, auto_gidq, 0600);
-	p(auto_qmail_home, "queue/lock/trigger", auto_uids, auto_gidq, 0622);
-#endif /*- #ifndef INDIMAIL */
 
 	/* Boot files */
 	c(auto_qmail_home, "boot", "home", auto_uido, auto_gidq, 0555);
