@@ -245,7 +245,11 @@ do
 			clamav_os=1
 			clamdPrefix="/usr"
 			qhpsi="/usr/bin/clamdscan %s --fdpass --quiet --no-summary"
-			mysysconfdir=${sysconfdir}
+			if [ -d /etc/clamav ] ; then
+				mysysconfdir=/etc/clamav
+			else
+				mysysconfdir=${sysconfdir}
+			fi
 		else
 			clamav_os=0
 		fi
@@ -443,6 +447,10 @@ if [ $noclamav -eq 0 -o $clamav_os -eq 1 ] ; then
 	# create clamd, freshclam service
 	${prefix}/sbin/svctool --clamd --servicedir=${servicedir} --clamdPrefix=$clamdPrefix \
 		--sysconfdir=$mysysconfdir
+	if [ $clamav_os -eq 1 ] ; then
+		/bin/touch $servicedir/freshclam/down
+		/bin/touch $servicedir/clamd/down
+	fi
 fi
 if [ $nobogofilter -eq 0 ] ; then
 	${prefix}/sbin/svctool --config=bogofilter
