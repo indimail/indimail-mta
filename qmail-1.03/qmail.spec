@@ -105,7 +105,7 @@ NoSource: 4
 
 URL: http://www.indimail.org
 #AutoReqProv: No
-Conflicts: indimail
+Conflicts: indimail, indimail-mini
 BuildRequires: openssl-devel rpm gcc gcc-c++ make bison binutils coreutils grep
 BuildRequires: glibc glibc-devel openssl procps readline-devel
 BuildRequires: sed ncurses-devel gettext-devel
