@@ -13,35 +13,20 @@
 %dir %attr(0555,root,qmail) /var/indimail/man/cat7
 %dir %attr(0555,root,qmail) /var/indimail/man/cat8
 %dir %attr(0555,root,qmail) /var/indimail/man/man1
-%dir %attr(0555,root,qmail) /var/indimail/man/man3
 %dir %attr(0555,root,qmail) /var/indimail/man/man5
 %dir %attr(0555,root,qmail) /var/indimail/man/man7
 %dir %attr(0555,root,qmail) /var/indimail/man/man8
 %dir %attr(0555,root,qmail) /var/indimail/plugins
 %dir %attr(0555,root,qmail) /var/indimail/users
-%dir %attr(0555,root,root) /var/indimail/include
 %dir %attr(0555,root,root) /var/indimail/lib
-%dir %attr(0555,root,root) /var/indimail/libexec
-%dir %attr(0555,root,root) /var/indimail/libexec/authlib
-%dir %attr(0555,root,root) /var/indimail/modules
 %dir %attr(0555,root,root) /var/indimail/share
-%dir %attr(0755,root,root) /var/indimail/share/locale
 %dir %attr(0750,qscand,qscand) /var/indimail/qscanq
-%dir %attr(0750,qscand,qscand) /var/indimail/qscanq/root
-%dir %attr(0750,qscand,qscand) /var/indimail/qscanq/root/scanq
 %dir %attr(0755,indimail,indimail) /var/indimail/control
-%dir %attr(0755,indimail,indimail) /var/indimail/control/cache
 %dir %attr(0755,indimail,indimail) /var/indimail/control/domainkeys
-%dir %attr(0755,root,root) /var/indimail/control/bulk_mail
 %dir %attr(0755,root,root) /var/indimail/control/defaultqueue
 %dir %attr(0755,root,qmail) /var/indimail/queue
-%dir %attr(0755,root,root) /var/indimail/etc/shared
-%dir %attr(0755,root,root) /var/indimail/etc/yum.repos.d
-%dir %attr(0755,root,root) /var/indimail/share/doc
-%dir %attr(0755,root,root) /var/indimail/var
 %dir %attr(0775,root,indimail) /var/indimail/domains
 %dir %attr(0775,root,indimail) /var/indimail/etc
-%dir %attr(2755,indimail,qmail) /var/indimail/autoturn
 #
 # Binaries
 #
@@ -51,7 +36,6 @@
 %attr(0500,root,qmail) /var/indimail/bin/qmail-lspawn
 %attr(0500,root,qmail) /var/indimail/bin/qmail-newmrh
 %attr(0500,root,qmail) /var/indimail/bin/qmail-newu
-%attr(0500,root,qmail) /var/indimail/bin/qmail-sql
 %attr(0500,root,qmail) /var/indimail/bin/qmail-start
 %attr(0500,root,qmail) /var/indimail/bin/recipient-cdb
 %attr(0511,root,qmail) /var/indimail/bin/qmail-clean
@@ -65,11 +49,6 @@
 %attr(0511,root,qmail) /var/indimail/bin/qmail-todo
 %attr(0511,root,qmail) /var/indimail/bin/relaytest
 %attr(0511,root,qmail) /var/indimail/bin/splogger
-%attr(0511,root,root) /var/indimail/bin/incrmesg
-%attr(0511,root,root) /var/indimail/bin/logclient
-%attr(0511,root,root) /var/indimail/bin/showbytes
-%attr(0511,root,root) /var/indimail/sbin/logsrv
-%attr(0511,root,root) /var/indimail/sbin/rpclog
 %attr(0555,root,qmail) /var/indimail/bin/822addr
 %attr(0555,root,qmail) /var/indimail/bin/822body
 %attr(0555,root,qmail) /var/indimail/bin/822bodyfilter
@@ -82,13 +61,11 @@
 %attr(0555,root,qmail) /var/indimail/bin/822print
 %attr(0555,root,qmail) /var/indimail/bin/822received
 %attr(0555,root,qmail) /var/indimail/bin/addcr
-%attr(0555,root,qmail) /var/indimail/bin/altermime
 %attr(0555,root,qmail) /var/indimail/bin/argv0
 %attr(0555,root,qmail) /var/indimail/bin/atrn
 %attr(0555,root,qmail) /var/indimail/bin/autoresponder
 %attr(0555,root,qmail) /var/indimail/bin/balance_outgoing
 %attr(0555,root,qmail) /var/indimail/bin/base64
-%attr(0555,root,qmail) /var/indimail/bin/bogofilter-qfe
 %attr(0555,root,qmail) /var/indimail/bin/bouncesaying
 %attr(0555,root,qmail) /var/indimail/bin/cdbdump
 %attr(0555,root,qmail) /var/indimail/bin/cdbget
@@ -105,15 +82,10 @@
 %attr(0555,root,qmail) /var/indimail/bin/columnt
 %attr(0555,root,qmail) /var/indimail/bin/condredirect
 %attr(0555,root,qmail) /var/indimail/bin/condtomaildir
-%attr(0555,root,qmail) /var/indimail/bin/crc
-%attr(0555,root,qmail) /var/indimail/bin/crcdiff
-%attr(0555,root,qmail) /var/indimail/bin/crypt
 %attr(0555,root,qmail) /var/indimail/bin/datemail
-%attr(0555,root,qmail) /var/indimail/bin/dbinfo
 %attr(0555,root,qmail) /var/indimail/bin/ddist
 %attr(0555,root,qmail) /var/indimail/bin/deferrals
 %attr(0555,root,qmail) /var/indimail/bin/delcr
-%attr(0555,root,qmail) /var/indimail/bin/displaytop
 %attr(0555,root,qmail) /var/indimail/bin/dk-filter
 %attr(0555,root,qmail) /var/indimail/bin/dknewkey
 %attr(0555,root,qmail) /var/indimail/bin/dktest
@@ -125,7 +97,6 @@
 %attr(0555,root,qmail) /var/indimail/bin/dnstxt
 %attr(0555,root,qmail) /var/indimail/bin/dot-forward
 %attr(0555,root,qmail) /var/indimail/bin/drate
-%attr(0555,root,qmail) /var/indimail/bin/echo
 %attr(0555,root,qmail) /var/indimail/bin/elq
 %attr(0555,root,qmail) /var/indimail/bin/envdir
 %attr(0555,root,qmail) /var/indimail/bin/envmigrate
@@ -137,20 +108,13 @@
 %attr(0555,root,qmail) /var/indimail/bin/fghack
 %attr(0555,root,qmail) /var/indimail/bin/filterto
 %attr(0555,root,qmail) /var/indimail/bin/fixcrio
-%attr(0555,root,qmail) /var/indimail/bin/flash
-%attr(0555,root,qmail) /var/indimail/bin/fortune
 %attr(0555,root,qmail) /var/indimail/bin/forward
 %attr(0555,root,qmail) /var/indimail/bin/greydaemon
-%attr(0555,root,qmail) /var/indimail/bin/hashtable
-%attr(0555,root,qmail) /var/indimail/bin/hostcntrl
 %attr(0555,root,qmail) /var/indimail/bin/idedit
 %attr(0555,root,qmail) /var/indimail/bin/ifaddr
 %attr(0555,root,qmail) /var/indimail/bin/iftocc
 %attr(0555,root,qmail) /var/indimail/bin/iftoccfrom
-%attr(0555,root,qmail) /var/indimail/bin/indiversion
 %attr(0555,root,qmail) /var/indimail/bin/ipmeprint
-%attr(0555,root,qmail) /var/indimail/bin/ismaildup
-%attr(0555,root,qmail) /var/indimail/bin/logmonitor
 %attr(0555,root,qmail) /var/indimail/bin/logselect
 %attr(0555,root,qmail) /var/indimail/bin/maildir2mbox
 %attr(0555,root,qmail) /var/indimail/bin/maildircmd
@@ -160,18 +124,15 @@
 %attr(0555,root,qmail) /var/indimail/bin/maildirsmtp
 %attr(0555,root,qmail) /var/indimail/bin/maildirwatch
 %attr(0555,root,qmail) /var/indimail/bin/mailsubj
-%attr(0555,root,qmail) /var/indimail/bin/mailzipper
 %attr(0555,root,qmail) /var/indimail/bin/matchup
 %attr(0555,root,qmail) /var/indimail/bin/mbox2maildir
 %attr(0555,root,qmail) /var/indimail/bin/mbox2maildir.pl
 %attr(0555,root,qmail) /var/indimail/bin/mlmatchup
-%attr(0555,root,qmail) /var/indimail/bin/mpack
 %attr(0555,root,qmail) /var/indimail/bin/multilog
 %attr(0555,root,qmail) /var/indimail/bin/multilog-matchup
 %attr(0555,root,qmail) /var/indimail/bin/multipipe
 %attr(0555,root,qmail) /var/indimail/bin/multirotate
 %attr(0555,root,qmail) /var/indimail/bin/multitail
-%attr(0555,root,qmail) /var/indimail/bin/munpack
 %attr(0555,root,qmail) /var/indimail/bin/newaliases
 %attr(0555,root,qmail) /var/indimail/bin/newinclude
 %attr(0555,root,qmail) /var/indimail/bin/new-inject
@@ -221,16 +182,12 @@
 %attr(0555,root,qmail) /var/indimail/bin/qscanq-stdin
 %attr(0555,root,qmail) /var/indimail/bin/qsmhook
 %attr(0555,root,qmail) /var/indimail/bin/queue-fix
-%attr(0555,root,qmail) /var/indimail/bin/randstr
 %attr(0555,root,qmail) /var/indimail/bin/readproctitle
 %attr(0555,root,qmail) /var/indimail/bin/recipients
 %attr(0555,root,qmail) /var/indimail/bin/recordio
 %attr(0555,root,qmail) /var/indimail/bin/replier
 %attr(0555,root,qmail) /var/indimail/bin/replier-config
-%attr(0555,root,qmail) /var/indimail/bin/resetquota
 %attr(0555,root,qmail) /var/indimail/bin/rhosts
-%attr(0555,root,qmail) /var/indimail/bin/ripmime
-%attr(0555,root,qmail) /var/indimail/bin/ripole
 %attr(0555,root,qmail) /var/indimail/bin/rmail
 %attr(0555,root,qmail) /var/indimail/bin/rpmattr
 %attr(0555,root,qmail) /var/indimail/bin/rrforward
@@ -255,14 +212,12 @@
 %attr(0555,root,qmail) /var/indimail/bin/setlock
 %attr(0555,root,qmail) /var/indimail/bin/setmaillist
 %attr(0555,root,qmail) /var/indimail/bin/setuidgid
-%attr(0555,root,qmail) /var/indimail/bin/smtpd
 %attr(0555,root,qmail) /var/indimail/bin/smtp-matchup
 %attr(0555,root,qmail) /var/indimail/bin/softlimit
 %attr(0555,root,qmail) /var/indimail/bin/spawn-filter
 %attr(0555,root,qmail) /var/indimail/bin/spfquery
 %attr(0555,root,qmail) /var/indimail/bin/spipe
 %attr(0555,root,qmail) /var/indimail/bin/srsfilter
-%attr(0555,root,qmail) /var/indimail/bin/sslerator
 %attr(0555,root,qmail) /var/indimail/bin/stripmime.pl
 %attr(0555,root,qmail) /var/indimail/bin/successes
 %attr(0555,root,qmail) /var/indimail/bin/suids
@@ -283,21 +238,6 @@
 %attr(0555,root,qmail) /var/indimail/bin/testzero
 %attr(0555,root,qmail) /var/indimail/bin/uacl
 %attr(0555,root,qmail) /var/indimail/bin/update_tmprsadh
-%attr(0555,root,qmail) /var/indimail/bin/vacation
-%attr(0555,root,qmail) /var/indimail/bin/vadduserl
-%attr(0555,root,qmail) /var/indimail/bin/valias
-%attr(0555,root,qmail) /var/indimail/bin/vatrn
-%attr(0555,root,qmail) /var/indimail/bin/vcalias
-%attr(0555,root,qmail) /var/indimail/bin/vcaliasrev
-%attr(0555,root,qmail) /var/indimail/bin/versioninfo
-%attr(0555,root,qmail) /var/indimail/bin/vgroup
-%attr(0555,root,qmail) /var/indimail/bin/vhostid
-%attr(0555,root,qmail) /var/indimail/bin/vipmap
-%attr(0555,root,qmail) /var/indimail/bin/vlimit
-%attr(0555,root,qmail) /var/indimail/bin/vpasswd
-%attr(0555,root,qmail) /var/indimail/bin/vpriv
-%attr(0555,root,qmail) /var/indimail/bin/vproxy
-%attr(0555,root,qmail) /var/indimail/bin/vsmtp
 %attr(0555,root,qmail) /var/indimail/bin/xqp
 %attr(0555,root,qmail) /var/indimail/bin/xrecipient
 %attr(0555,root,qmail) /var/indimail/bin/xsender
@@ -314,50 +254,18 @@
 %attr(0555,root,qmail) /var/indimail/bin/zspam
 %attr(0555,root,qmail) /var/indimail/bin/zsuccesses
 %attr(0555,root,qmail) /var/indimail/bin/zsuids
-
-%attr(0555,root,root) /var/indimail/bin/bogolexer
-%attr(0555,root,root) /var/indimail/bin/bogotune
-%attr(0555,root,root) /var/indimail/bin/bogoupgrade
-%attr(0555,root,root) /var/indimail/bin/bogoutil
-%attr(0555,root,root) /var/indimail/bin/clamav-config
-%attr(0555,root,root) /var/indimail/bin/clambc
-%attr(0555,root,root) /var/indimail/bin/clamconf
-%attr(0555,root,root) /var/indimail/bin/clamdscan
-%attr(0555,root,root) /var/indimail/bin/clamdtop
-%attr(0555,root,root) /var/indimail/bin/clamscan
-%attr(0555,root,root) /var/indimail/bin/couriertls
-%attr(0555,root,root) /var/indimail/bin/date@
-%attr(0555,root,root) /var/indimail/bin/deliverquota
-%attr(0555,root,root) /var/indimail/bin/dkim
-%attr(0555,root,root) /var/indimail/bin/fetchmail
-%attr(0555,root,root) /var/indimail/bin/fetchmailconf
-%attr(0555,root,root) /var/indimail/bin/finger@
-%attr(0555,root,root) /var/indimail/bin/freshclam
-%attr(0555,root,root) /var/indimail/bin/http@
-%attr(0555,root,root) /var/indimail/bin/imapd
-%attr(0555,root,root) /var/indimail/bin/logalert
-%attr(0555,root,root) /var/indimail/bin/maildiracl
-%attr(0555,root,root) /var/indimail/bin/maildirkw
-%attr(0555,root,root) /var/indimail/bin/maildirmake
-%attr(0555,root,root) /var/indimail/bin/mconnect
-%attr(0555,root,root) /var/indimail/bin/mconnect-io
-%attr(0555,root,root) /var/indimail/bin/pop3d
-%attr(0555,root,root) /var/indimail/bin/rblsmtpd
-%attr(0555,root,root) /var/indimail/bin/sigtool
-%attr(0555,root,root) /var/indimail/bin/srs
-%attr(0555,root,root) /var/indimail/bin/tcpcat
-%attr(0555,root,root) /var/indimail/bin/tcpclient
-%attr(0555,root,root) /var/indimail/bin/tcprules
-%attr(0555,root,root) /var/indimail/bin/tcprulescheck
-%attr(0555,root,root) /var/indimail/bin/tcpserver
-%attr(0555,root,root) /var/indimail/bin/who@
-%attr(0755,root,root) /var/indimail/bin/qaes
-
-%attr(0555,root,qmail) /var/indimail/libexec/vdeldomain
-%attr(0555,root,qmail) /var/indimail/libexec/vaddaliasdomain
-%attr(0555,root,qmail) /var/indimail/libexec/vrenamedomain
-%attr(0555,root,qmail) /var/indimail/libexec/vadddomain
-%attr(0555,root,qmail) /var/indimail/libexec/vadduser
+%attr(0555,root,qmail) /var/indimail/bin/qaes
+#
+# sbin
+#
+%attr(0555,root,qmail) /var/indimail/sbin/batv
+%attr(0555,root,qmail) /var/indimail/sbin/config-fast
+%attr(0555,root,qmail) /var/indimail/sbin/hostname
+%attr(0555,root,qmail) /var/indimail/sbin/ldap-checkpwd
+%attr(0555,root,qmail) /var/indimail/sbin/plugtest
+%attr(0555,root,qmail) /var/indimail/sbin/qmailconfig
+%attr(0555,root,qmail) /var/indimail/sbin/svctool
+%attr(0555,root,qmail) /var/indimail/sbin/sys-checkpwd
 #
 # Setuid
 #
@@ -365,7 +273,19 @@
 %attr(4511,qscand,qscand) /var/indimail/bin/qscanq
 %attr(6511,qmailq,qmail) /var/indimail/bin/qmail-queue
 %attr(6511,qscand,qmail) /var/indimail/bin/qhpsi
-
+#
+# ucspi-tcp
+#
+%attr(0555,root,root)  /var/indimail/bin/mconnect
+%attr(0555,root,root)  /var/indimail/bin/mconnect-io
+%attr(0555,root,root)  /var/indimail/bin/rblsmtpd
+%attr(0555,root,root)  /var/indimail/bin/srs
+%attr(0555,root,root)  /var/indimail/bin/tcpcat
+%attr(0555,root,root)  /var/indimail/bin/tcpclient
+%attr(0555,root,root)  /var/indimail/bin/tcprules
+%attr(0555,root,root)  /var/indimail/bin/tcprulescheck
+%attr(0555,root,root)  /var/indimail/bin/tcpserver
+%attr(0555,root,root)  /var/indimail/bin/who@
 #
 # Boot
 #
@@ -382,60 +302,31 @@
 %attr(0555,root,qmail) /var/indimail/boot/proc
 %attr(0555,root,qmail) /var/indimail/boot/proc+df
 #
-# Plugins
+# plugins
 #
 %attr(0555,root,qmail) /var/indimail/plugins/generic.so
 %attr(0555,root,qmail) /var/indimail/plugins/smtpd-plugin0.so
 %attr(0555,root,qmail) /var/indimail/plugins/smtpd-plugin.so
 #
-# libexec
-#
-%attr(0555,root,root) /var/indimail/modules/iauth.so
-#
 # Config files
 #
-%attr(0444,root,root) /var/indimail/etc/controlfiles
-%attr(0444,root,root) /var/indimail/etc/cronlist
-%attr(0444,root,root) /var/indimail/etc/headerlist
-%attr(0444,root,root) /var/indimail/etc/indimail.mrtg.cfg
-%attr(0444,root,root) /var/indimail/etc/indimail.settings
-%attr(0444,root,root) /var/indimail/etc/osh.table
-%attr(0444,root,root) /var/indimail/etc/perm_list
-%attr(0444,root,root) /var/indimail/etc/qmailprog.list
-%attr(0644,root,qmail) /var/indimail/etc/inc_deps
-%attr(0644,root,qmail) /var/indimail/etc/lib_deps
-%attr(0644,root,root) /var/indimail/etc/backup.conf
-%attr(0644,root,root) /var/indimail/etc/indimail.lic
-%attr(0644,root,root) /var/indimail/etc/nssd.conf
-%attr(0644,root,root) /var/indimail/etc/procmailrc
+%attr(0444,root,root)  /var/indimail/etc/perm_list
+%attr(0444,root,root)  /var/indimail/etc/qmailprog.list
+%attr(0644,root,root)  /var/indimail/etc/procmailrc
 #
-# Documents
+# docs
 #
-%attr(0444,root,qmail) /var/indimail/doc/37rules.pdf
 %attr(0444,root,qmail) /var/indimail/doc/AUTOTURN
-%attr(0444,root,qmail) /var/indimail/doc/ChangeLog
-%attr(0444,root,qmail) /var/indimail/doc/COPYING
-%attr(0444,root,qmail) /var/indimail/doc/CREDITS
 %attr(0444,root,qmail) /var/indimail/doc/EXTTODO
-%attr(0444,root,qmail) /var/indimail/doc/FAQ.pdf
 %attr(0444,root,qmail) /var/indimail/doc/FROMISP
-%attr(0444,root,qmail) /var/indimail/doc/HOWTO.bogofilter
-%attr(0444,root,qmail) /var/indimail/doc/HOWTO.sharedmaildir
-%attr(0444,root,qmail) /var/indimail/doc/indimail_arch.png
-%attr(0444,root,qmail) /var/indimail/doc/indimail_queue.png
 %attr(0444,root,qmail) /var/indimail/doc/INSTALL.alias
 %attr(0444,root,qmail) /var/indimail/doc/INSTALL.ctl
 %attr(0444,root,qmail) /var/indimail/doc/INSTALL.ids
-%attr(0444,root,qmail) /var/indimail/doc/INSTALL.indimail
 %attr(0444,root,qmail) /var/indimail/doc/INSTALL.maildir
 %attr(0444,root,qmail) /var/indimail/doc/INSTALL.mbox
-%attr(0444,root,qmail) /var/indimail/doc/INSTALL-MINI
-%attr(0444,root,qmail) /var/indimail/doc/INSTALL-MYSQL
 %attr(0444,root,qmail) /var/indimail/doc/INSTALL.qmail
-%attr(0444,root,qmail) /var/indimail/doc/INSTALL-RPM
 %attr(0444,root,qmail) /var/indimail/doc/INSTALL.vsm
 %attr(0444,root,qmail) /var/indimail/doc/INTERNALS
-%attr(0444,root,qmail) /var/indimail/doc/percenthack.shtml
 %attr(0444,root,qmail) /var/indimail/doc/PIC.local2alias
 %attr(0444,root,qmail) /var/indimail/doc/PIC.local2ext
 %attr(0444,root,qmail) /var/indimail/doc/PIC.local2local
@@ -446,18 +337,13 @@
 %attr(0444,root,qmail) /var/indimail/doc/PIC.relaygood
 %attr(0444,root,qmail) /var/indimail/doc/PIC.rem2local
 %attr(0444,root,qmail) /var/indimail/doc/QMAILFAQ
-%attr(0444,root,qmail) /var/indimail/doc/Quick-INSTALL
-%attr(0444,root,qmail) /var/indimail/doc/README
 %attr(0444,root,qmail) /var/indimail/doc/README.auth
-%attr(0444,root,qmail) /var/indimail/doc/README.cdb
 %attr(0444,root,qmail) /var/indimail/doc/README.clamav
-%attr(0444,root,qmail) /var/indimail/doc/README-CLUSTER
 %attr(0444,root,qmail) /var/indimail/doc/README.filters
 %attr(0444,root,qmail) /var/indimail/doc/README.greylist
 %attr(0444,root,qmail) /var/indimail/doc/README.indimail
 %attr(0444,root,qmail) /var/indimail/doc/README.logselect
 %attr(0444,root,qmail) /var/indimail/doc/README.moreipme
-%attr(0444,root,qmail) /var/indimail/doc/README.mpack
 %attr(0444,root,qmail) /var/indimail/doc/README.newline
 %attr(0444,root,qmail) /var/indimail/doc/README.qhpsi
 %attr(0444,root,qmail) /var/indimail/doc/README.qmail
@@ -471,9 +357,7 @@
 %attr(0444,root,qmail) /var/indimail/doc/README.status
 %attr(0444,root,qmail) /var/indimail/doc/README.surbl
 %attr(0444,root,qmail) /var/indimail/doc/README.tls
-%attr(0444,root,qmail) /var/indimail/doc/README.vlimits
 %attr(0444,root,qmail) /var/indimail/doc/README.wildmat
-%attr(0444,root,qmail) /var/indimail/doc/RELEASE-Notes
 %attr(0444,root,qmail) /var/indimail/doc/REMOVE.binmail
 %attr(0444,root,qmail) /var/indimail/doc/REMOVE.sendmail
 %attr(0444,root,qmail) /var/indimail/doc/SENDMAIL
@@ -607,18 +491,9 @@
 %attr(0444,root,qmail) /var/indimail/man/man1/822print.1.gz
 %attr(0444,root,qmail) /var/indimail/man/man1/822received.1.gz
 %attr(0444,root,qmail) /var/indimail/man/man1/addcr.1.gz
-%attr(0444,root,qmail) /var/indimail/man/man1/altermime.1.gz
 %attr(0444,root,qmail) /var/indimail/man/man1/argv0.1.gz
 %attr(0444,root,qmail) /var/indimail/man/man1/autoresponder.1.gz
 %attr(0444,root,qmail) /var/indimail/man/man1/base64.1.gz
-%attr(0444,root,qmail) /var/indimail/man/man1/bf_compact.1.gz
-%attr(0444,root,qmail) /var/indimail/man/man1/bf_copy.1.gz
-%attr(0444,root,qmail) /var/indimail/man/man1/bf_tar.1.gz
-%attr(0444,root,qmail) /var/indimail/man/man1/bogofilter.1.gz
-%attr(0444,root,qmail) /var/indimail/man/man1/bogolexer.1.gz
-%attr(0444,root,qmail) /var/indimail/man/man1/bogotune.1.gz
-%attr(0444,root,qmail) /var/indimail/man/man1/bogoupgrade.1.gz
-%attr(0444,root,qmail) /var/indimail/man/man1/bogoutil.1.gz
 %attr(0444,root,qmail) /var/indimail/man/man1/bouncesaying.1.gz
 %attr(0444,root,qmail) /var/indimail/man/man1/cdbdump.1.gz
 %attr(0444,root,qmail) /var/indimail/man/man1/cdbget.1.gz
@@ -628,47 +503,27 @@
 %attr(0444,root,qmail) /var/indimail/man/man1/cdbtest.1.gz
 %attr(0444,root,qmail) /var/indimail/man/man1/checkaddr.1.gz
 %attr(0444,root,qmail) /var/indimail/man/man1/checkdomain.1.gz
-%attr(0444,root,qmail) /var/indimail/man/man1/clambc.1.gz
-%attr(0444,root,qmail) /var/indimail/man/man1/clamconf.1.gz
-%attr(0444,root,qmail) /var/indimail/man/man1/clamdscan.1.gz
-%attr(0444,root,qmail) /var/indimail/man/man1/clamdtop.1.gz
-%attr(0444,root,qmail) /var/indimail/man/man1/clamscan.1.gz
 %attr(0444,root,qmail) /var/indimail/man/man1/columnt.1.gz
 %attr(0444,root,qmail) /var/indimail/man/man1/condredirect.1.gz
 %attr(0444,root,qmail) /var/indimail/man/man1/condtomaildir.1.gz
-%attr(0444,root,qmail) /var/indimail/man/man1/couriertcpd.1.gz
-%attr(0444,root,qmail) /var/indimail/man/man1/couriertls.1.gz
 %attr(0444,root,qmail) /var/indimail/man/man1/date@.1.gz
 %attr(0444,root,qmail) /var/indimail/man/man1/datemail.1.gz
 %attr(0444,root,qmail) /var/indimail/man/man1/delcr.1.gz
 %attr(0444,root,qmail) /var/indimail/man/man1/dot-forward.1.gz
 %attr(0444,root,qmail) /var/indimail/man/man1/drate.1.gz
-%attr(0444,root,qmail) /var/indimail/man/man1/echo.1.gz
 %attr(0444,root,qmail) /var/indimail/man/man1/except.1.gz
 %attr(0444,root,qmail) /var/indimail/man/man1/fastforward.1.gz
-%attr(0444,root,qmail) /var/indimail/man/man1/fetchmail.1.gz
-%attr(0444,root,qmail) /var/indimail/man/man1/fetchmailconf.1.gz
 %attr(0444,root,qmail) /var/indimail/man/man1/filterto.1.gz
 %attr(0444,root,qmail) /var/indimail/man/man1/finger@.1.gz
 %attr(0444,root,qmail) /var/indimail/man/man1/fixcrio.1.gz
-%attr(0444,root,qmail) /var/indimail/man/man1/flash.1.gz
-%attr(0444,root,qmail) /var/indimail/man/man1/fortune.1.gz
 %attr(0444,root,qmail) /var/indimail/man/man1/forward.1.gz
-%attr(0444,root,qmail) /var/indimail/man/man1/freshclam.1.gz
 %attr(0444,root,qmail) /var/indimail/man/man1/http@.1.gz
 %attr(0444,root,qmail) /var/indimail/man/man1/ifaddr.1.gz
 %attr(0444,root,qmail) /var/indimail/man/man1/iftocc.1.gz
 %attr(0444,root,qmail) /var/indimail/man/man1/iftoccfrom.1.gz
-%attr(0444,root,qmail) /var/indimail/man/man1/incrmesg.1.gz
-%attr(0444,root,qmail) /var/indimail/man/man1/initsvc.1.gz
-%attr(0444,root,qmail) /var/indimail/man/man1/ismaildup.1.gz
-%attr(0444,root,qmail) /var/indimail/man/man1/logclient.1.gz
 %attr(0444,root,qmail) /var/indimail/man/man1/maildir2mbox.1.gz
-%attr(0444,root,qmail) /var/indimail/man/man1/maildiracl.1.gz
 %attr(0444,root,qmail) /var/indimail/man/man1/maildircmd.1.gz
 %attr(0444,root,qmail) /var/indimail/man/man1/maildirdeliver.1.gz
-%attr(0444,root,qmail) /var/indimail/man/man1/maildirkw.1.gz
-%attr(0444,root,qmail) /var/indimail/man/man1/maildirmake.1.gz
 %attr(0444,root,qmail) /var/indimail/man/man1/maildirqmtp.1.gz
 %attr(0444,root,qmail) /var/indimail/man/man1/maildirserial.1.gz
 %attr(0444,root,qmail) /var/indimail/man/man1/maildirsmtp.1.gz
@@ -676,19 +531,17 @@
 %attr(0444,root,qmail) /var/indimail/man/man1/mailsubj.1.gz
 %attr(0444,root,qmail) /var/indimail/man/man1/matchup.1.gz
 %attr(0444,root,qmail) /var/indimail/man/man1/mconnect.1.gz
-%attr(0444,root,qmail) /var/indimail/man/man1/mpack.1.gz
 %attr(0444,root,qmail) /var/indimail/man/man1/multipipe.1.gz
 %attr(0444,root,qmail) /var/indimail/man/man1/multitail.1.gz
-%attr(0444,root,qmail) /var/indimail/man/man1/munpack.1.gz
 %attr(0444,root,qmail) /var/indimail/man/man1/newaliases.1.gz
 %attr(0444,root,qmail) /var/indimail/man/man1/newinclude.1.gz
 %attr(0444,root,qmail) /var/indimail/man/man1/new-inject.1.gz
 %attr(0444,root,qmail) /var/indimail/man/man1/plugtest.1.gz
 %attr(0444,root,qmail) /var/indimail/man/man1/predate.1.gz
 %attr(0444,root,qmail) /var/indimail/man/man1/preline.1.gz
-%attr(0444,root,qmail) /var/indimail/man/man1/printdir.1.gz
 %attr(0444,root,qmail) /var/indimail/man/man1/printforward.1.gz
 %attr(0444,root,qmail) /var/indimail/man/man1/printmaillist.1.gz
+%attr(0444,root,qmail) /var/indimail/man/man1/qaes.1.gz
 %attr(0444,root,qmail) /var/indimail/man/man1/qarf.1.gz
 %attr(0444,root,qmail) /var/indimail/man/man1/qfilelog.1.gz
 %attr(0444,root,qmail) /var/indimail/man/man1/qlogselect.1.gz
@@ -698,12 +551,10 @@
 %attr(0444,root,qmail) /var/indimail/man/man1/qmail-rm.1.gz
 %attr(0444,root,qmail) /var/indimail/man/man1/qnotify.1.gz
 %attr(0444,root,qmail) /var/indimail/man/man1/qreceipt.1.gz
-%attr(0444,root,qmail) /var/indimail/man/man1/randstr.1.gz
 %attr(0444,root,qmail) /var/indimail/man/man1/rblsmtpd.1.gz
 %attr(0444,root,qmail) /var/indimail/man/man1/recordio.1.gz
 %attr(0444,root,qmail) /var/indimail/man/man1/replier.1.gz
 %attr(0444,root,qmail) /var/indimail/man/man1/replier-config.1.gz
-%attr(0444,root,qmail) /var/indimail/man/man1/ripmime.1.gz
 %attr(0444,root,qmail) /var/indimail/man/man1/rrforward.1.gz
 %attr(0444,root,qmail) /var/indimail/man/man1/rrt.1.gz
 %attr(0444,root,qmail) /var/indimail/man/man1/serialcmd.0.gz
@@ -712,10 +563,7 @@
 %attr(0444,root,qmail) /var/indimail/man/man1/serialsmtp.1.gz
 %attr(0444,root,qmail) /var/indimail/man/man1/setforward.1.gz
 %attr(0444,root,qmail) /var/indimail/man/man1/setmaillist.1.gz
-%attr(0444,root,qmail) /var/indimail/man/man1/sigtool.1.gz
 %attr(0444,root,qmail) /var/indimail/man/man1/spipe.1.gz
-%attr(0444,root,qmail) /var/indimail/man/man1/sslerator.1.gz
-%attr(0444,root,qmail) /var/indimail/man/man1/strfile.1.gz
 %attr(0444,root,qmail) /var/indimail/man/man1/swaks.1.gz
 %attr(0444,root,qmail) /var/indimail/man/man1/tai2tai64n.1.gz
 %attr(0444,root,qmail) /var/indimail/man/man1/tai64n2tai.1.gz
@@ -727,87 +575,15 @@
 %attr(0444,root,qmail) /var/indimail/man/man1/tcpserver.1.gz
 %attr(0444,root,qmail) /var/indimail/man/man1/teepipe.1.gz
 %attr(0444,root,qmail) /var/indimail/man/man1/uacl.1.gz
-%attr(0444,root,qmail) /var/indimail/man/man1/unstr.1.gz
-%attr(0444,root,qmail) /var/indimail/man/man1/vaddaliasdomain.1.gz
-%attr(0444,root,qmail) /var/indimail/man/man1/vadddomain.1.gz
-%attr(0444,root,qmail) /var/indimail/man/man1/vadduser.1.gz
-%attr(0444,root,qmail) /var/indimail/man/man1/valias.1.gz
-%attr(0444,root,qmail) /var/indimail/man/man1/vatrn.1.gz
-%attr(0444,root,qmail) /var/indimail/man/man1/vbulletin.1.gz
-%attr(0444,root,qmail) /var/indimail/man/man1/vcfilter.1.gz
-%attr(0444,root,qmail) /var/indimail/man/man1/vdeldomain.1.gz
-%attr(0444,root,qmail) /var/indimail/man/man1/vdeluser.1.gz
-%attr(0444,root,qmail) /var/indimail/man/man1/vdominfo.1.gz
-%attr(0444,root,qmail) /var/indimail/man/man1/vgroup.1.gz
-%attr(0444,root,qmail) /var/indimail/man/man1/vipmap.1.gz
-%attr(0444,root,qmail) /var/indimail/man/man1/vlimit.1.gz
-%attr(0444,root,qmail) /var/indimail/man/man1/vmoddomain.1.gz
-%attr(0444,root,qmail) /var/indimail/man/man1/vmoduser.1.gz
-%attr(0444,root,qmail) /var/indimail/man/man1/vmoveuser.1.gz
-%attr(0444,root,qmail) /var/indimail/man/man1/vpasswd.1.gz
-%attr(0444,root,qmail) /var/indimail/man/man1/vrenamedomain.1.gz
-%attr(0444,root,qmail) /var/indimail/man/man1/vrenameuser.1.gz
-%attr(0444,root,qmail) /var/indimail/man/man1/vserverinfo.1.gz
-%attr(0444,root,qmail) /var/indimail/man/man1/vsetuserquota.1.gz
-%attr(0444,root,qmail) /var/indimail/man/man1/vtable.1.gz
-%attr(0444,root,qmail) /var/indimail/man/man1/vuserinfo.1.gz
 %attr(0444,root,qmail) /var/indimail/man/man1/who@.1.gz
 %attr(0444,root,qmail) /var/indimail/man/man1/xqp.1.gz
 %attr(0444,root,qmail) /var/indimail/man/man1/xrecipient.1.gz
 %attr(0444,root,qmail) /var/indimail/man/man1/xsender.1.gz
-%attr(0444,root,qmail) /var/indimail/man/man3/alloc.3.gz
-%attr(0444,root,qmail) /var/indimail/man/man3/byte.3.gz
-%attr(0444,root,qmail) /var/indimail/man/man3/caldate.3.gz
-%attr(0444,root,qmail) /var/indimail/man/man3/caldate_mjd.3.gz
-%attr(0444,root,qmail) /var/indimail/man/man3/caltime.3.gz
-%attr(0444,root,qmail) /var/indimail/man/man3/caltime_tai.3.gz
-%attr(0444,root,qmail) /var/indimail/man/man3/case.3.gz
-%attr(0444,root,qmail) /var/indimail/man/man3/cdb.3.gz
-%attr(0444,root,qmail) /var/indimail/man/man3/coe.3.gz
-%attr(0444,root,qmail) /var/indimail/man/man3/config.3.gz
-%attr(0444,root,qmail) /var/indimail/man/man3/datetime.3.gz
-%attr(0444,root,qmail) /var/indimail/man/man3/direntry.3.gz
-%attr(0444,root,qmail) /var/indimail/man/man3/env.3.gz
-%attr(0444,root,qmail) /var/indimail/man/man3/error.3.gz
-%attr(0444,root,qmail) /var/indimail/man/man3/error_str.3.gz
-%attr(0444,root,qmail) /var/indimail/man/man3/error_temp.3.gz
-%attr(0444,root,qmail) /var/indimail/man/man3/fd_copy.3.gz
-%attr(0444,root,qmail) /var/indimail/man/man3/fd_move.3.gz
-%attr(0444,root,qmail) /var/indimail/man/man3/fifo_make.3.gz
-%attr(0444,root,qmail) /var/indimail/man/man3/getln2.3.gz
-%attr(0444,root,qmail) /var/indimail/man/man3/getln.3.gz
-%attr(0444,root,qmail) /var/indimail/man/man3/leapsecs.3.gz
-%attr(0444,root,qmail) /var/indimail/man/man3/login_tasks.3.gz
-%attr(0444,root,qmail) /var/indimail/man/man3/mess822.3.gz
-%attr(0444,root,qmail) /var/indimail/man/man3/mess822_addr.3.gz
-%attr(0444,root,qmail) /var/indimail/man/man3/mess822_date.3.gz
-%attr(0444,root,qmail) /var/indimail/man/man3/mess822_fold.3.gz
-%attr(0444,root,qmail) /var/indimail/man/man3/mess822_quote.3.gz
-%attr(0444,root,qmail) /var/indimail/man/man3/mess822_token.3.gz
-%attr(0444,root,qmail) /var/indimail/man/man3/mess822_when.3.gz
-%attr(0444,root,qmail) /var/indimail/man/man3/now.3.gz
-%attr(0444,root,qmail) /var/indimail/man/man3/plugin_init.3.gz
-%attr(0444,root,qmail) /var/indimail/man/man3/rewritehost.3.gz
-%attr(0444,root,qmail) /var/indimail/man/man3/sgetopt.3.gz
-%attr(0444,root,qmail) /var/indimail/man/man3/stralloc.3.gz
-%attr(0444,root,qmail) /var/indimail/man/man3/subgetopt.3.gz
-%attr(0444,root,qmail) /var/indimail/man/man3/substdio.3.gz
-%attr(0444,root,qmail) /var/indimail/man/man3/substdio_copy.3.gz
-%attr(0444,root,qmail) /var/indimail/man/man3/substdio_in.3.gz
-%attr(0444,root,qmail) /var/indimail/man/man3/substdio_out.3.gz
-%attr(0444,root,qmail) /var/indimail/man/man3/tai.3.gz
-%attr(0444,root,qmail) /var/indimail/man/man3/tai_now.3.gz
-%attr(0444,root,qmail) /var/indimail/man/man3/tai_pack.3.gz
-%attr(0444,root,qmail) /var/indimail/man/man3/wait.3.gz
 %attr(0444,root,qmail) /var/indimail/man/man5/addresses.5.gz
-%attr(0444,root,qmail) /var/indimail/man/man5/clamav-milter.conf.5.gz
-%attr(0444,root,qmail) /var/indimail/man/man5/clamd.conf.5.gz
 %attr(0444,root,qmail) /var/indimail/man/man5/dot-qmail.5.gz
 %attr(0444,root,qmail) /var/indimail/man/man5/envelopes.5.gz
-%attr(0444,root,qmail) /var/indimail/man/man5/freshclam.conf.5.gz
 %attr(0444,root,qmail) /var/indimail/man/man5/maildir.5.gz
 %attr(0444,root,qmail) /var/indimail/man/man5/mbox.5.gz
-%attr(0444,root,qmail) /var/indimail/man/man5/nssd.conf.5.gz
 %attr(0444,root,qmail) /var/indimail/man/man5/qmail-control.5.gz
 %attr(0444,root,qmail) /var/indimail/man/man5/qmail-header.5.gz
 %attr(0444,root,qmail) /var/indimail/man/man5/qmail-log.5.gz
@@ -835,7 +611,7 @@
 %attr(0444,root,qmail) /var/indimail/man/man7/forgeries.7.gz
 %attr(0444,root,qmail) /var/indimail/man/man7/qmail.7.gz
 %attr(0444,root,qmail) /var/indimail/man/man7/qmail-limits.7.gz
-%attr(0444,root,qmail) /var/indimail/man/man8/deliverquota.8.gz
+%attr(0444,root,qmail) /var/indimail/man/man8/cleanq.8.gz
 %attr(0444,root,qmail) /var/indimail/man/man8/dk-filter.8.gz
 %attr(0444,root,qmail) /var/indimail/man/man8/dkim.8.gz
 %attr(0444,root,qmail) /var/indimail/man/man8/dknewkey.8.gz
@@ -845,13 +621,12 @@
 %attr(0444,root,qmail) /var/indimail/man/man8/fghack.8.gz
 %attr(0444,root,qmail) /var/indimail/man/man8/greydaemon.8.gz
 %attr(0444,root,qmail) /var/indimail/man/man8/ldap-checkpwd.8.gz
+%attr(0444,root,qmail) /var/indimail/man/man8/logselect.8.gz
 %attr(0444,root,qmail) /var/indimail/man/man8/mlmatchup.8.gz
 %attr(0444,root,qmail) /var/indimail/man/man8/multilog.8.gz
 %attr(0444,root,qmail) /var/indimail/man/man8/ofmipd.8.gz
 %attr(0444,root,qmail) /var/indimail/man/man8/ofmipname.8.gz
-%attr(0444,root,qmail) /var/indimail/man/man8/pam-checkpwd.8.gz
 %attr(0444,root,qmail) /var/indimail/man/man8/pgrphack.8.gz
-%attr(0444,root,qmail) /var/indimail/man/man8/postdel.8.gz
 %attr(0444,root,qmail) /var/indimail/man/man8/qmail-cdb.8.gz
 %attr(0444,root,qmail) /var/indimail/man/man8/qmail-clean.8.gz
 %attr(0444,root,qmail) /var/indimail/man/man8/qmail-command.8.gz
@@ -894,9 +669,7 @@
 %attr(0444,root,qmail) /var/indimail/man/man8/queue-fix.8.gz
 %attr(0444,root,qmail) /var/indimail/man/man8/readproctitle.8.gz
 %attr(0444,root,qmail) /var/indimail/man/man8/recipient-cdb.8.gz
-%attr(0444,root,qmail) /var/indimail/man/man8/resetquota.8.gz
 %attr(0444,root,qmail) /var/indimail/man/man8/rmail.8.gz
-%attr(0444,root,qmail) /var/indimail/man/man8/rpclog.8.gz
 %attr(0444,root,qmail) /var/indimail/man/man8/run-cleanq.8.gz
 %attr(0444,root,qmail) /var/indimail/man/man8/sendmail.8.gz
 %attr(0444,root,qmail) /var/indimail/man/man8/setlock.8.gz
@@ -907,24 +680,11 @@
 %attr(0444,root,qmail) /var/indimail/man/man8/supervise.8.gz
 %attr(0444,root,qmail) /var/indimail/man/man8/surblfilter.8.gz
 %attr(0444,root,qmail) /var/indimail/man/man8/svc.8.gz
-%attr(0444,root,qmail) /var/indimail/man/man8/svctool.8.gz
 %attr(0444,root,qmail) /var/indimail/man/man8/svok.8.gz
 %attr(0444,root,qmail) /var/indimail/man/man8/svscan.8.gz
 %attr(0444,root,qmail) /var/indimail/man/man8/svscanboot.8.gz
 %attr(0444,root,qmail) /var/indimail/man/man8/svstat.8.gz
 %attr(0444,root,qmail) /var/indimail/man/man8/sys-checkpwd.8.gz
-%attr(0444,root,qmail) /var/indimail/man/man8/systpass.8.gz
 %attr(0444,root,qmail) /var/indimail/man/man8/tai64n.8.gz
 %attr(0444,root,qmail) /var/indimail/man/man8/tai64nlocal.8.gz
 %attr(0444,root,qmail) /var/indimail/man/man8/tai64nunix.8.gz
-%attr(0444,root,qmail) /var/indimail/man/man8/updaterules.8.gz
-
-#
-# Libs
-# 
-# header files
-#
-%attr(0644,root,root) /var/indimail/include/dkim.h
-%attr(0644,root,qmail) /var/indimail/include/uint32.h
-%attr(0644,root,root) /var/indimail/include/macros.h
-%attr(0644,root,qmail) /var/indimail/include/cdb.h
