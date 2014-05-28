@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail.spec.in,v 2.281 2014-05-21 09:09:12+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 2.282 2014-05-28 16:09:44+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %define _unpackaged_files_terminate_build 1
 
@@ -215,7 +215,7 @@ NoSource: 20
 
 URL: http://www.indimail.org
 #AutoReqProv: No
-Conflicts: %{name}-mini
+Conflicts: %{name}-mini, %{name}-mta
 Provides: %{name}-shared
 BuildRequires: openssl-devel rpm gcc gcc-c++ make bison binutils coreutils grep
 BuildRequires: glibc glibc-devel openssl procps readline-devel
