@@ -1,0 +1,5 @@
+# Site-specific additions and overrides for usr.bin.freshclam.
+# For more details, please see /etc/apparmor.d/local/README.
+
+  @indimaildir@/share/clamd/ r,
+  @indimaildir@/share/clamd/** krw,
