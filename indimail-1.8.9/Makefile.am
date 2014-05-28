@@ -175,7 +175,8 @@ perm_list dbinfo.8 inlookup.8 vadddomain.1 vdeldomain.1 vadduser.1 \
 vdeluser.1 vdelivermail.8 vrenamedomain.1 vrenameuser.1 vpasswd.1 vmoveuser.1 \
 vcfilter.1 indimail.7 svctool.8 indisub.c indimail.mrtg.cfg overquota.sh \
 vadddomain_handle vadduser_handle vdeldomain_handle vaddaliasdomain_handle \
-vrenamedomain_handle login_tasks.3 authgeneric obs.mk usr.sbin.mysqld
+vrenamedomain_handle login_tasks.3 authgeneric obs.mk usr.sbin.mysqld usr.sbin.clamd \
+usr.bin.freshclam
 
 DISTCLEANFILES=.gitignore
 
@@ -812,6 +813,10 @@ perm_list: perm_list.in
 	$(edit) $@.in > $@
 usr.sbin.mysqld: usr.sbin.mysqld.in
 	$(edit) $@.in > $@
+usr.sbin.clamd: usr.sbin.clamd.in
+	$(edit) $@.in > $@
+usr.bin.freshclam: usr.bin.freshclam.in
+	$(edit) $@.in > $@
 
 obs.mk: debian/obs.mk.in
 	$(edit) debian/$@.in > debian/$@;/bin/rm -f $@ debian/Makefile; \
@@ -917,7 +922,7 @@ initsvc$(EXEEXT): $(initsvc_OBJECTS) $(initsvc_DEPENDENCIES)
 	$(LINK) $(initsvc_LDFLAGS) $(initsvc_OBJECTS) fappend.$(OBJEXT) getEnvConfig.$(OBJEXT) $(initsvc_LDADD)
 
 install-data-local: initsvc libindimail.la indimail-@VERSION@-rpmlintrc \
-indimail.spec iauth.la indimail.te usr.sbin.mysqld
+indimail.spec iauth.la indimail.te usr.sbin.mysqld usr.sbin.clamd usr.bin.freshclam
 	if [ " $(DESTDIR)" = " " ] ; then \
 		if test `@idcommand@` != "0" ; then \
 			echo "you are not root"; \
@@ -966,6 +971,8 @@ install-data-hook:
 	if test " $(DISTRIB_ID)" = " Ubuntu" ; then \
 		$(mkinstalldirs) $(DESTDIR)/etc/apparmor.d/local || exit 1; \
 		$(INSTALL_DATA) usr.sbin.mysqld $(DESTDIR)/etc/apparmor.d/local/usr.sbin.mysqld  || exit 1; \
+		$(INSTALL_DATA) usr.sbin.clamd $(DESTDIR)/etc/apparmor.d/local/usr.sbin.clamd  || exit 1; \
+		$(INSTALL_DATA) usr.bin.freshclam $(DESTDIR)/etc/apparmor.d/local/usr.bin.freshclam  || exit 1; \
 	fi
 	if test " $(DISTRIB_ID)" != " Ubuntu" -a " $(DISTRIB_ID)" != " Debian" ; then \
 		$(INSTALL_DATA) indimail.te $(DESTDIR)@prefix@/etc/indimail.te  || exit 1; \
