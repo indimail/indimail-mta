@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail.spec.in,v 2.282 2014-05-28 16:09:44+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 2.283 2014-05-28 18:50:36+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %define _unpackaged_files_terminate_build 1
 
@@ -2595,6 +2595,10 @@ if [ %noclamav -eq 0 -o $clamav_os -eq 1 ] ; then
 	# create clamd, freshclam service
 	%{_prefix}/sbin/svctool --clamd --servicedir=%{servicedir} --clamdPrefix=$clamdPrefix \
 		--sysconfdir=$mysysconfdir
+	if [ $clamav_os -eq 1 ] ; then
+		$TOUCH %{servicedir}/clamd/down
+		$TOUCH %{servicedir}/freshclam/down
+	fi
 fi
 
 %{_prefix}/sbin/svctool --config=qmail --postmaster=%{_prefix}/alias/Maildir/ \
