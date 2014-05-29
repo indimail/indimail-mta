@@ -27,6 +27,7 @@ sysconfdir=/etc
 rm=/bin/rm
 ####################################
 nodksignature=0
+noclamav=1
 default_domain=indimail.org
 dkimkeyfn=default
 
@@ -147,6 +148,23 @@ fi
 /sbin/ldconfig
 
 echo "Post Installation..."
+if [ -x /etc/init.d/apparmor ] ; then
+	if [ -f ${prefix}/etc/apparmor.d/local/usr.sbin.clamd -a -d /etc/apparmor.d/local ] ; then
+		cp ${prefix}/etc/apparmor.d/local/usr.sbin.clamd /etc/apparmor.d/local
+	fi
+	if [ -f ${prefix}/etc/apparmor.d/local/usr.bin.freshclam -a -d /etc/apparmor.d/local ] ; then
+		cp ${prefix}/etc/apparmor.d/local/usr.bin.freshclam /etc/apparmor.d/local
+	fi
+	if [ -f /etc/apparmor.d/local/usr.sbin.clamd -o -f /etc/apparmor.d/local/usr.bin.freshclam ] ; then
+		echo "Reloading apparmor profiles..."
+		/usr/sbin/service apparmor reload
+	else
+		echo "Shutting down apparmor..."
+		/usr/sbin/service apparmor stop
+		/usr/sbin/service apparmor teardown
+	fi
+fi
+
 (
 echo "Creating ${logdir}"
 if [ ! -d ${logdir} ] ; then
@@ -176,14 +194,26 @@ if [ " $a_arch" = " x86_64" ] ; then
 	smtp_soft_mem=104857600
 	qmtp_soft_mem=104857600
 	qmqp_soft_mem=104857600
-	imap_pop3_mem=209715200
-	poppass_mem=52428800
 else
 	smtp_soft_mem=52428800
 	qmtp_soft_mem=52428800
 	qmqp_soft_mem=52428800
-	imap_pop3_mem=10485760
-	poppass_mem=10485760
+fi
+echo "Checking if clamav is installed"
+if [ $noclamav -eq 0 ] ; then
+	clamav_os=0
+	clamdPrefix=${prefix}
+	qhpsi="${prefix}/bin/clamdscan %s --fdpass --quiet --no-summary"
+	mysysconfdir=${prefix}/etc
+else
+	if [ -f /usr/sbin/clamd -a -f /usr/bin/clamdscan ] ; then
+		clamav_os=1
+		clamdPrefix="/usr"
+		qhpsi="/usr/bin/clamdscan %s --fdpass --quiet --no-summary"
+		mysysconfdir=${sysconfdir}
+	else
+		clamav_os=0
+	fi
 fi
 # SMTP
 for port in 465 25 587
@@ -203,24 +233,49 @@ do
 		extra_opt="$extra_opt --deliverylimit-count=-1 --deliverylimit-size=-1"
 		extra_opt="$extra_opt --rbl=-rzen.spamhaus.org --rbl=-rdnsbl-1.uceprotect.net"
 	fi
-	${prefix}/sbin/svctool --smtp=$port --servicedir=$servicedir \
-		--qbase=${qbase} --qcount=${qcount} --qstart=1 \
-		--query-cache --dnscheck --password-cache \
-		--cntrldir=control --localip=0 --maxdaemons=75 --maxperip=25 --persistdb \
-		--starttls --fsync --syncdir --memory=$smtp_soft_mem \
-		--chkrecipient --chkrelay --masquerade \
-		--min-free=52428800 --content-filter --virus-filter \
-		--dmasquerade \
-		--dkverify=both \
-		--dksign=both --private_key=${prefix}/control/domainkeys/%/$dkimkeyfn \
-		$extra_opt
+	if [ $noclamav -eq 0 -o $clamav_os -eq 1 ] ; then
+		${prefix}/sbin/svctool --smtp=$port --servicedir=$servicedir \
+			--qbase=${qbase} --qcount=${qcount} --qstart=1 \
+			--query-cache --dnscheck --password-cache \
+			--cntrldir=control --localip=0 --maxdaemons=75 --maxperip=25 --persistdb \
+			--starttls --fsync --syncdir --memory=$smtp_soft_mem \
+			--chkrecipient --chkrelay --masquerade \
+			--min-free=52428800 --content-filter \
+			--qhpsi="$qhpsi" \
+			--dmasquerade \
+			--dkverify=both \
+			--dksign=both --private_key=${prefix}/control/domainkeys/%/$dkimkeyfn \
+			$extra_opt
+	else
+		${prefix}/sbin/svctool --smtp=$port --servicedir=$servicedir \
+			--qbase=${qbase} --qcount=${qcount} --qstart=1 \
+			--query-cache --dnscheck --password-cache \
+			--cntrldir=control --localip=0 --maxdaemons=75 --maxperip=25 --persistdb \
+			--starttls --fsync --syncdir --memory=$smtp_soft_mem \
+			--chkrecipient --chkrelay --masquerade \
+			--min-free=52428800 --content-filter --virus-filter \
+			--dmasquerade \
+			--dkverify=both \
+			--dksign=both --private_key=${prefix}/control/domainkeys/%/$dkimkeyfn \
+			$extra_opt
+	fi
 done
-${prefix}/sbin/svctool --queueParam=defaultqueue \
-	--qbase=${qbase} --qcount=${qcount} --qstart=1 \
-	--min-free=52428800 --fsync --syncdir --virus-filter \
-	--dkverify="none" --dksign=$sign_opt \
-	--private_key=${prefix}/control/domainkeys/%/$dkimkeyfn \
-	$extra_opt
+if [ $noclamav -eq 0 -o $clamav_os -eq 1 ] ; then
+	${prefix}/sbin/svctool --queueParam=defaultqueue \
+		--qbase=${qbase} --qcount=${qcount} --qstart=1 \
+		--min-free=52428800 --fsync --syncdir \
+		--qhpsi="$qhpsi" \
+		--dkverify="none" --dksign=$sign_opt \
+		--private_key=${prefix}/control/domainkeys/%/$dkimkeyfn \
+		$extra_opt
+else
+	${prefix}/sbin/svctool --queueParam=defaultqueue \
+		--qbase=${qbase} --qcount=${qcount} --qstart=1 \
+		--min-free=52428800 --fsync --syncdir --virus-filter \
+		--dkverify="none" --dksign=$sign_opt \
+		--private_key=${prefix}/control/domainkeys/%/$dkimkeyfn \
+		$extra_opt
+fi
 # Greylist daemon
 ${prefix}/sbin/svctool --greylist=1999 --servicedir=$servicedir --min-resend-min=2 \
     --resend-win-hr=24 --timeout-days=30 --context-file=greylist.context \
@@ -236,6 +291,14 @@ ${prefix}/sbin/svctool --qmqp=628 --servicedir=$servicedir --qbase=${qbase} \
 	--maxdaemons=75 --maxperip=25 \
 	--fsync --syncdir --memory=$qmqp_soft_mem --min-free=52428800
 /bin/touch $servicedir/qmail-qmqpd.628/down
+# virus/spam filtering
+${prefix}/sbin/svctool --qscanq --servicedir=${servicedir} --scanint=200
+if [ $noclamav -eq 0 -o $clamav_os -eq 1 ] ; then
+	${prefix}/sbin/svctool --config=clamd
+	# create clamd, freshclam service
+	${prefix}/sbin/svctool --clamd --servicedir=${servicedir} --clamdPrefix=$clamdPrefix \
+		--sysconfdir=$mysysconfdir
+fi
 
 /bin/cat <<EOFUU > ${prefix}/control/signatures
 # Windows executables seen in active virii
@@ -260,7 +323,7 @@ EOFUU
 /bin/chown qscand:qscand ${prefix}/control/signatures
 
 # rebuild cdb
-for i in smtp qmtp qmqp imap pop3 poppass
+for i in smtp qmtp qmqp
 do
 	for j in `/bin/ls ${prefix}/etc/tcp.$i 2>/dev/null`
 	do
