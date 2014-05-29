@@ -72,15 +72,22 @@ install: build
 	if [ -d libsrs2-$(libsrs2_version) ] ; then       $(MAKE) -s install -C libsrs2-$(libsrs2_version) DESTDIR=$(DESTDIR); fi
 	if [ -d ucspi-tcp-0.88 ]             ; then       $(MAKE) -s install -C ucspi-tcp-0.88 DESTDIR=$(DESTDIR); fi
 	if [ -d qmail-1.03 ]                 ; then       $(MAKE) -s install -C qmail-1.03 DESTDIR=$(DESTDIR); fi
-	${rm} -rf $(DESTDIR)/${prefix}/man/man3
-	${rm} -rf $(DESTDIR)/${prefix}/include
-	${rm} -rf $(DESTDIR)/${prefix}/lib/libdkim.a
-	${rm} -rf $(DESTDIR)/${prefix}/lib64/libdkim.a
-	${rm} -rf $(DESTDIR)/${prefix}/lib/libsrs2.a
-	${rm} -rf $(DESTDIR)/${prefix}/lib64/libsrs2.a
-	${rm} -rf $(DESTDIR)/${prefix}/queue
+	${rm} -rf $(DESTDIR)/$(prefix)/man/man3
+	${rm} -rf $(DESTDIR)/$(prefix)/include
+	${rm} -rf $(DESTDIR)/$(prefix)/lib/libdkim.a
+	${rm} -rf $(DESTDIR)/$(prefix)/lib64/libdkim.a
+	${rm} -rf $(DESTDIR)/$(prefix)/lib/libsrs2.a
+	${rm} -rf $(DESTDIR)/$(prefix)/lib64/libsrs2.a
+	${rm} -rf $(DESTDIR)/$(prefix)/queue
+	if [ ! -d $(DESTDIR)/$(prefix)/etc/apparmor.d/local ] ; then mkdir -p $(DESTDIR)/$(prefix)/etc/apparmor.d/local; fi
 	if [ -f ../SOURCES/svctool ] ; then ${cp} ../SOURCES/svctool $(DESTDIR)/$(prefix)/sbin; fi
 	if [ -f ../SOURCES/perm_list ] ; then ${cp} ../SOURCES/perm_list $(DESTDIR)/$(prefix)/etc; fi
+	if [ -f ../SOURCES/usr.sbin.clamd ] ; then ${cp} ../SOURCES/usr.sbin.clamd $(DESTDIR)/$(prefix)/etc/apparmor.d/local; fi
+	if [ -f ../SOURCES/usr.bin.freshclam ] ; then ${cp} ../SOURCES/usr.bin.freshclam $(DESTDIR)/$(prefix)/etc/apparmor.d/local; fi
+	if [ -f ../BUILD/debian/svctool ] ; then ${cp} ../BUILD/debian/svctool $(DESTDIR)/$(prefix)/sbin; fi
+	if [ -f ../BUILD/debian/perm_list ] ; then ${cp} ../BUILD/debian/perm_list $(DESTDIR)/$(prefix)/etc; fi
+	if [ -f ../BUILD/debian/usr.sbin.clamd ] ; then ${cp} ../BUILD/debian/usr.sbin.clamd $(DESTDIR)/$(prefix)/etc/apparmor.d/local; fi
+	if [ -f ../BUILD/debian/usr.bin.freshclam ] ; then ${cp} ../BUILD/debian/usr.bin.freshclam $(DESTDIR)/$(prefix)/etc/apparmor.d/local; fi
 
 binary-indep: build install
 	dh_testdir
