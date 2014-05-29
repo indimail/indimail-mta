@@ -21,6 +21,8 @@
 %dir %attr(0555,root,root) /var/indimail/lib
 %dir %attr(0555,root,root) /var/indimail/share
 %dir %attr(0750,qscand,qscand) /var/indimail/qscanq
+%dir %attr(0750,qscand,qscand) /var/indimail/qscanq/root
+%dir %attr(0750,qscand,qscand) /var/indimail/qscanq/root/scanq
 %dir %attr(0755,indimail,indimail) /var/indimail/control
 %dir %attr(0755,indimail,indimail) /var/indimail/control/domainkeys
 %dir %attr(0755,root,root) /var/indimail/control/defaultqueue
