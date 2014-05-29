@@ -27,6 +27,7 @@
 %dir %attr(0755,indimail,indimail) /var/indimail/control/domainkeys
 %dir %attr(0755,root,root) /var/indimail/control/defaultqueue
 %dir %attr(0755,root,qmail) /var/indimail/queue
+%dir %attr(0775,qscand,qscand) /var/indimail/share/clamd
 %dir %attr(0775,root,indimail) /var/indimail/domains
 %dir %attr(0775,root,indimail) /var/indimail/etc
 #
