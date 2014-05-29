@@ -24,7 +24,8 @@ MOSTLYCLEANFILES= indimail-mta.prerm indimail-mta.preinst indimail-mta.postrm \
 dummy.tar.gz: README
 	tar cf - README |gzip > $@
 debian.tar.gz: copyright indimail-mta.preinst indimail-mta.postinst indimail-mta.prerm \
-indimail-mta.postrm rules changelog compat obs_deb_prep control 
+indimail-mta.postrm rules changelog compat obs_deb_prep control perm_list usr.bin.freshclam \
+usr.sbin.clamd
 	tar cf - copyright indimail-mta.preinst indimail-mta.postinst indimail-mta.prerm \
 		indimail-mta.postrm rules changelog compat obs_deb_prep \
-		control | gzip > $@
+		control perm_list usr.bin.freshclam usr.sbin.clamd | gzip > $@
