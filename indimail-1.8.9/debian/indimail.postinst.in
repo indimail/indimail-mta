@@ -213,6 +213,26 @@ else
 	imap_pop3_mem=10485760
 	poppass_mem=10485760
 fi
+echo "Checking if clamav is installed"
+if [ $noclamav -eq 0 ] ; then
+	clamav_os=0
+	clamdPrefix=${prefix}
+	qhpsi="${prefix}/bin/clamdscan %s --fdpass --quiet --no-summary"
+	mysysconfdir=${prefix}/etc
+else
+	if [ -f /usr/sbin/clamd -a -f /usr/bin/clamdscan ] ; then
+		clamav_os=1
+		clamdPrefix="/usr"
+		qhpsi="/usr/bin/clamdscan %s --fdpass --quiet --no-summary"
+		if [ -d /etc/clamav ] ; then
+			mysysconfdir=/etc/clamav
+		else
+			mysysconfdir=${sysconfdir}
+		fi
+	else
+		clamav_os=0
+	fi
+fi
 # SMTP
 for port in 465 25 587
 do
@@ -233,26 +253,6 @@ do
 		extra_opt="--remote-authsmtp=plain --localfilter --remotefilter"
 		extra_opt="$extra_opt --deliverylimit-count=-1 --deliverylimit-size=-1"
 		extra_opt="$extra_opt --rbl=-rzen.spamhaus.org --rbl=-rdnsbl-1.uceprotect.net"
-	fi
-	echo "Checking if clamav is installed"
-	if [ $noclamav -eq 0 ] ; then
-		clamav_os=0
-		clamdPrefix=${prefix}
-		qhpsi="${prefix}/bin/clamdscan %s --fdpass --quiet --no-summary"
-		mysysconfdir=${prefix}/etc
-	else
-		if [ -f /usr/sbin/clamd -a -f /usr/bin/clamdscan ] ; then
-			clamav_os=1
-			clamdPrefix="/usr"
-			qhpsi="/usr/bin/clamdscan %s --fdpass --quiet --no-summary"
-			if [ -d /etc/clamav ] ; then
-				mysysconfdir=/etc/clamav
-			else
-				mysysconfdir=${sysconfdir}
-			fi
-		else
-			clamav_os=0
-		fi
 	fi
 	if [ $spamfilter -eq 1 ] ; then
 		if [ $noclamav -eq 0 -o $clamav_os -eq 1 ] ; then
@@ -313,6 +313,7 @@ do
 				$extra_opt
 		fi
 	fi
+	echo "1" > ${servicedir}/qmail-smtpd.$port/variables/DISABLE_PLUGIN
 done
 if [ $noclamav -eq 0 -o $clamav_os -eq 1 ] ; then
 	${prefix}/sbin/svctool --queueParam=defaultqueue \
