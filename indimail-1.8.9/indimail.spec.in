@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail.spec.in,v 2.283 2014-05-28 18:50:36+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 2.284 2014-05-29 18:56:43+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %define _unpackaged_files_terminate_build 1
 
@@ -2364,6 +2364,22 @@ fi
 %define poppass_mem   52428800
 %endif
 
+if [ %noclamav -eq 0 ] ; then
+	echo "Checking if clamav is installed"
+	clamav_os=0
+	clamdPrefix=%{_prefix}
+	qhpsi="%{_prefix}/bin/clamdscan %s --fdpass --quiet --no-summary"
+	mysysconfdir=%{_prefix}/etc
+else
+	if [ -f /usr/sbin/clamd -a -f /usr/bin/clamdscan ] ; then
+		clamav_os=1
+		clamdPrefix="/usr"
+		qhpsi="/usr/bin/clamdscan %s --fdpass --quiet --no-summary"
+		mysysconfdir=%{_sysconfdir}
+	else
+		clamav_os=0
+	fi
+fi
 for port in 465 25 587
 do
 	if [ $port -eq 465 ] ; then
@@ -2391,22 +2407,6 @@ do
 		extra_opt="--remote-authsmtp=plain --localfilter --remotefilter"
 		extra_opt="$extra_opt --deliverylimit-count=-1 --deliverylimit-size=-1"
 		extra_opt="$extra_opt --rbl=-rzen.spamhaus.org --rbl=-rdnsbl-1.uceprotect.net"
-	fi
-	if [ %noclamav -eq 0 ] ; then
-		echo "Checking if clamav is installed"
-		clamav_os=0
-		clamdPrefix=%{_prefix}
-		qhpsi="%{_prefix}/bin/clamdscan %s --fdpass --quiet --no-summary"
-		mysysconfdir=%{_prefix}/etc
-	else
-		if [ -f /usr/sbin/clamd -a -f /usr/bin/clamdscan ] ; then
-			clamav_os=1
-			clamdPrefix="/usr"
-			qhpsi="/usr/bin/clamdscan %s --fdpass --quiet --no-summary"
-			mysysconfdir=%{_sysconfdir}
-		else
-			clamav_os=0
-		fi
 	fi
 	if [ $spamfilter -eq 1 ] ; then
 		if [ %noclamav -eq 0 -o $clamav_os -eq 1 ] ; then
