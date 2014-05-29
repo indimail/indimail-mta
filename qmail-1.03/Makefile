@@ -2430,7 +2430,7 @@ tryindimail.c compile load indimail.lib conf-indi
 	( ( ./compile `grep -h -v "^#" conf-indi` tryindimail.c && \
 	./load tryindimail `cat indimail.lib`) >/dev/null 2>&1 \
 	&& echo || echo hmac_sha1.o) > hmac_sha1.obj
-	rm -f tryindimail.o tryindimail;echo "----- indimail.h -----";/bin/cat hasindimail.h 1>&2
+	rm -f tryindimail.o tryindimail 1>&2
 
 qmail-smtpd: \
 load qmail-smtpd.o smtpd.o rcpthosts.o recipients.o commands.o timeoutread.o \
@@ -3002,13 +3002,13 @@ tryindimail.c compile load indimail.lib conf-indi
 	&& (echo \#define INDIMAIL 1;echo \#ifdef INDIMAIL; \
 	echo \#include \"indimail.h\"; \
 	echo \#endif) || exit 0 ) > hasindimail.h
-	rm -f tryindimail.o tryindimail;echo "----- indimail.h -----";/bin/cat hasindimail.h 1>&2
+	rm -f tryindimail.o tryindimail 1>&2
 
 indimail.lib: tryindimail.c compile load conf-indi
 	( ( ./compile `grep -h -v "^#" conf-indi` tryindimail.c && \
 	./load tryindimail $(lib_deps) ) >/dev/null 2>&1 \
 	&& echo "$(lib_deps) -L$(DESTDIR)/usr/lib" || exit 0 ) > indimail.lib
-	rm -f tryindimail.o tryindimail;echo "----- indimail.lib -----";/bin/cat indimail.lib 1>&2
+	rm -f tryindimail.o tryindimail 1>&2
 
 spawn.o: \
 compile chkspawn spawn.c sig.h wait.h substdio.h byte.h str.h \
