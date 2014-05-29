@@ -1,6 +1,6 @@
 #
 #
-# $Id: qmail.spec,v 1.9 2014-05-28 16:11:21+05:30 Cprogrammer Exp mbhangui $
+# $Id: qmail.spec,v 1.10 2014-05-29 18:58:33+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %define _unpackaged_files_terminate_build 1
 
@@ -42,7 +42,7 @@
 %define see_base           For a description of IndiMail visit http://www.indimail.org
 %define nolibdkim          0
 %define nolibsrs2          0
-%define nosignatures       1
+%define noclamav           1
 %define nodksignatures     0
 
 %define _verbose           0
@@ -385,7 +385,7 @@ else
 fi
 # Create these files so that %ghost does not complain
 for i in tcp.smtp tcp.smtp.cdb tcp.qmtp tcp.qmtp.cdb tcp.qmqp tcp.qmqp.cdb \
-tcp.poppass tcp.poppass.cdb services.log
+services.log
 do
 	if [ ! -f %{buildroot}%{_prefix}/etc/$i ] ; then
 		$TOUCH %{buildroot}%{_prefix}/etc/$i
@@ -454,14 +454,12 @@ done
 %ghost %config(noreplace,missingok)               %{_prefix}/etc/tcp.smtp
 %ghost %config(noreplace,missingok)               %{_prefix}/etc/tcp.qmtp
 %ghost %config(noreplace,missingok)               %{_prefix}/etc/tcp.qmqp
-%ghost %config(noreplace,missingok)               %{_prefix}/etc/tcp.poppass
 #
 # These files will get removed during uninstallation
 #
 %ghost %attr(0644,indimail,indimail)              %{_prefix}/etc/tcp.smtp.cdb
 %ghost %attr(0644,indimail,indimail)              %{_prefix}/etc/tcp.qmtp.cdb
 %ghost %attr(0644,indimail,indimail)              %{_prefix}/etc/tcp.qmqp.cdb
-%ghost %attr(0644,indimail,indimail)              %{_prefix}/etc/tcp.poppass.cdb
 %ghost %attr(0644,root,root)                      %{_prefix}/etc/services.log
 
 %attr(444,root,root)                              %{_prefix}/etc/qmailprog.list
@@ -1032,49 +1030,82 @@ fi
 %define smtp_soft_mem 104857600
 %define qmtp_soft_mem 104857600
 %define qmqp_soft_mem 104857600
-%define poppass_mem   52428800
 %else
 %define smtp_soft_mem 52428800
 %define qmtp_soft_mem 52428800
 %define qmqp_soft_mem 52428800
-%define poppass_mem   10485760
 %endif
+if [ %noclamav -eq 0 ] ; then
+	echo "Checking if clamav is installed"
+	clamav_os=0
+	clamdPrefix=%{_prefix}
+	qhpsi="%{_prefix}/bin/clamdscan %s --fdpass --quiet --no-summary"
+	mysysconfdir=%{_prefix}/etc
+else
+	if [ -f /usr/sbin/clamd -a -f /usr/bin/clamdscan ] ; then
+		clamav_os=1
+		clamdPrefix="/usr"
+		qhpsi="/usr/bin/clamdscan %s --fdpass --quiet --no-summary"
+		mysysconfdir=%{_sysconfdir}
+	else
+		clamav_os=0
+	fi
+fi
 for port in 465 25 587
 do
 	if [ $port -eq 465 ] ; then
 		extra_opt="--skipsend --ssl"
 		extra_opt="$extra_opt --rbl=-rzen.spamhaus.org --rbl=-rdnsbl-1.uceprotect.net"
 	elif [ $port -eq 587 ] ; then
-		# local authenticated users
-		# why bother with spamfilter
-		# if you do, then you have a serious
-		# problem with your organization, not 
-		# with IndiMail
-		spamfilter=0
 		extra_opt="--skipsend --authsmtp --antispoof"
 	else
 		extra_opt="--remote-authsmtp=plain --localfilter --remotefilter"
 		extra_opt="$extra_opt --deliverylimit-count=-1 --deliverylimit-size=-1"
 		extra_opt="$extra_opt --rbl=-rzen.spamhaus.org --rbl=-rdnsbl-1.uceprotect.net"
 	fi
-	%{_prefix}/sbin/svctool --smtp=$port --servicedir=%{servicedir} \
-		--qbase=%{qbase} --qcount=%{qcount} --qstart=1 \
-		--query-cache --password-cache \
-		--cntrldir=control --localip=0 --maxdaemons=75 --maxperip=25 --persistdb \
-		--starttls --fsync --syncdir --memory=%{smtp_soft_mem} --masquerade \
-		--min-free=52428800 --content-filter --virus-filter \
-		--dmasquerade --dnscheck \
-		--dkverify=both \
-		--dksign=both --private_key=%{_prefix}/control/domainkeys/%/default \
-		$extra_opt
+	if [ %noclamav -eq 0 -o $clamav_os -eq 1 ] ; then
+		%{_prefix}/sbin/svctool --smtp=$port --servicedir=%{servicedir} \
+			--qbase=%{qbase} --qcount=%{qcount} --qstart=1 \
+			--query-cache --dnscheck --password-cache \
+			--cntrldir=control --localip=0 --maxdaemons=75 --maxperip=25 --persistdb \
+			--starttls --fsync --syncdir --memory=%{smtp_soft_mem} --chkrecipient --chkrelay --masquerade \
+			--min-free=52428800 --content-filter \
+			--qhpsi="$qhpsi" \
+			--dmasquerade \
+			--dkverify=both \
+			--dksign=both --private_key=%{_prefix}/control/domainkeys/%/%dkimkeyfn \
+			$extra_opt
+	else
+		%{_prefix}/sbin/svctool --smtp=$port --servicedir=%{servicedir} \
+			--qbase=%{qbase} --qcount=%{qcount} --qstart=1 \
+			--query-cache --dnscheck --password-cache \
+			--cntrldir=control --localip=0 --maxdaemons=75 --maxperip=25 --persistdb \
+			--starttls --fsync --syncdir --memory=%{smtp_soft_mem} --chkrecipient --chkrelay --masquerade \
+			--min-free=52428800 --content-filter --virus-filter \
+			--dmasquerade \
+			--dkverify=both \
+			--dksign=both --private_key=%{_prefix}/control/domainkeys/%/%dkimkeyfn \
+			$extra_opt
+	fi
 	echo "1" > %{servicedir}/qmail-smtpd.$port/variables/DISABLE_PLUGIN
 done
-%{_prefix}/sbin/svctool --queueParam=defaultqueue \
-	--qbase=%{qbase} --qcount=%{qcount} --qstart=1 \
-	--min-free=52428800 --fsync --syncdir --virus-filter \
-	--dkverify="none" --dksign=$sign_opt \
-	--private_key=%{_prefix}/control/domainkeys/%/default \
-	$extra_opt
+if [ %noclamav -eq 0 -o $clamav_os -eq 1 ] ; then
+	%{_prefix}/sbin/svctool --queueParam=defaultqueue \
+		--qbase=%{qbase} --qcount=%{qcount} --qstart=1 \
+		--min-free=52428800 --fsync --syncdir \
+		--qhpsi="$qhpsi" \
+		--dkverify="none" --dksign=$sign_opt \
+		--private_key=%{_prefix}/control/domainkeys/%/%dkimkeyfn \
+		$extra_opt
+else
+	%{_prefix}/sbin/svctool --queueParam=defaultqueue \
+		--qbase=%{qbase} --qcount=%{qcount} --qstart=1 \
+		--min-free=52428800 --fsync --syncdir --virus-filter \
+		--dkverify="none" --dksign=$sign_opt \
+		--private_key=%{_prefix}/control/domainkeys/%/%dkimkeyfn \
+		$extra_opt
+fi
+
 %{_prefix}/sbin/svctool --smtp=366 --odmr --servicedir=%{servicedir} \
 	--query-cache --password-cache
 echo "1" > %{servicedir}/qmail-smtpd.366/variables/DISABLE_PLUGIN
@@ -1091,11 +1122,6 @@ echo "1" > %{servicedir}/qmail-smtpd.366/variables/DISABLE_PLUGIN
 	--qcount=%{qcount} --qstart=1 --cntrldir=control --localip=0 --maxdaemons=75 --maxperip=25 \
 	--fsync --syncdir --memory=%{qmqp_soft_mem} --min-free=52428800
 $TOUCH %{servicedir}/qmail-qmqpd.628/down
-
-%{_prefix}/sbin/svctool --poppass=106 --localip=0 --maxdaemons=40 --maxperip=25 \
-	--memory=%{poppass_mem} \
-    --certfile=%{_prefix}/control/servercert.pem --ssl \
-	--setpassword=%{_prefix}/sbin/vsetpass --servicedir=%{servicedir}
 
 %{_prefix}/sbin/svctool --config=qmail --postmaster=%{_prefix}/alias/Maildir/ \
 	--default-domain=indimail.org
@@ -1133,7 +1159,7 @@ fi
 /sbin/ldconfig
 
 # rebuild cdb
-for i in smtp qmtp qmqp poppass
+for i in smtp qmtp qmqp
 do
 	for j in `/bin/ls %{_prefix}/etc/tcp*.$i 2>/dev/null`
 	do
@@ -1310,7 +1336,7 @@ if [ ! %{_prefix} = "/usr" ] ; then
 fi
 
 echo "removing configuration"
-for i in smtp qmtp qmqp poppass
+for i in smtp qmtp qmqp
 do
 	for j in `/bin/ls %{_prefix}/etc/tcp*.$i 2>/dev/null`
 	do
@@ -1352,7 +1378,7 @@ done
 echo "removing startup services"
 for i in qmail-send.25 qmail-smtpd.25 qmail-smtpd.366 \
 qmail-spamlog qscanq qmail-smtpd.465 qmail-smtpd.587 qmail-qmtpd.209 \
-qmail-qmqpd.628 qmail-poppass.106 greylist.1999 .svscan
+qmail-qmqpd.628 greylist.1999 .svscan
 do
 	if [ -d %{servicedir}/$i ] ; then
 		%{__rm} -rf %{servicedir}/$i || true
