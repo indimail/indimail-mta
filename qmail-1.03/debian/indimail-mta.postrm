@@ -26,12 +26,6 @@ logdir=/var/log/indimail
 rm=/bin/rm
 rmdir=/bin/rmdir
 ####################################
-noproxy=0
-nocourierimap=0
-noclamav=1
-nofetchmail=0
-nobogofilter=0
-nonssd=0
 default_domain=indimail.org
 
 ID=`id -u`
@@ -120,8 +114,6 @@ if [ " $1" = " purge" ] ; then
 	if [ -d ${prefix}/alias ] ; then
 		${rmdir} --ignore-fail-on-non-empty ${prefix}/alias 2>/dev/null
 	fi
-	${rm} -f ${prefix}/share/imapd.pem
-	${rm} -f ${prefix}/share/pop3d.pem
 
 	if [ ${prefix} != "/usr" ] ; then
 		echo "removing binaries, libraries, queues"
@@ -151,32 +143,16 @@ if [ " $1" = " purge" ] ; then
 		fi
 	fi
 
-	if [ $nobogofilter -eq 0 ] ; then
-		${rm} -f ${prefix}/etc/bogofilter.cf ${prefix}/etc/bogofilter.cf.example
-	fi
-
-	if [ $noclamav -eq 0 ] ; then
-		${rm} -f ${prefix}/etc/clamd.conf ${prefix}/etc/freshclam.conf
-		${rm} -f ${prefix}/etc/clamd.conf.sample ${prefix}/etc/freshclam.conf.sample
-	fi
-	if [ $nonssd -eq 0 ] ; then
-		${rm} -f ${prefix}/etc/nssd.conf
-	fi
-	if [ $nofetchmail -eq 0 ] ; then
-		${rm} -f ${prefix}/etc/fetchmailrc
-	fi
-
 	echo "removing tcp configuration"
-	for i in imap pop3 smtp qmtp qmqp poppass
+	for i in smtp qmtp qmqp
 	do
 		${rm} -f ${prefix}/etc/tcp.$i.cdb ${prefix}/etc/tcp.$i
 	done
 	${rm} -f ${prefix}/control/controlfiles
 	for i in indimail.cnf stat.override backup.conf cronlist headerlist \
-		imapd.cnf imapd.dist imapd-ssl.dist inc_deps indimail.mrtg.cfg \
-		procmailrc indimail.settings lib_deps osh.table perm_list pop3d.cnf \
-		pop3d.dist pop3d-ssl.dist qmailprog.list quotawarnmsg.example \
-		services.log system.flashlogin system.menu system.module system.rc
+		inc_deps indimail.mrtg.cfg \
+		procmailrc indimail.settings lib_deps osh.table perm_list \
+		qmailprog.list quotawarnmsg.example services.log
 	do
 		${rm} -f ${prefix}/etc/$i
 	done
@@ -187,7 +163,7 @@ if [ " $1" = " purge" ] ; then
 	echo "removing startup services"
 	for i in qmail-send.25 qmail-smtpd.25 qmail-smtpd.366 qmail-spamlog qscanq \
 	qmail-smtpd.465 qmail-smtpd.587 qmail-qmtpd.209 qmail-qmqpd.628 \
-	qmail-poppass.106 greylist.1999 .svscan
+	greylist.1999 .svscan
 	do
 		if [ -d ${servicedir}/$i ] ; then
 			${rm} -rf ${servicedir}/$i >/dev/null 2>&1 || true
