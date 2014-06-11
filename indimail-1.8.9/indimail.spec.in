@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail.spec.in,v 2.285 2014-06-11 12:29:27+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 2.286 2014-06-11 19:32:38+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %define _unpackaged_files_terminate_build 1
 
@@ -221,7 +221,7 @@ BuildRequires: openssl-devel rpm gcc gcc-c++ make bison binutils coreutils grep
 BuildRequires: glibc glibc-devel openssl procps readline-devel
 BuildRequires: sed ncurses-devel gettext-devel
 BuildRequires: python-devel flex findutils
-BuildRequires: readline gzip autoconf pkgconfig
+BuildRequires: readline gzip autoconf aclocal automake libtool pkgconfig
 BuildRequires: libidn-devel
 BuildRequires: groff xz
 
@@ -249,9 +249,7 @@ BuildRequires: openldap2-devel
 %else
 BuildRequires: openldap-devel
 %endif
-%if %build_on_obs == 1
 BuildRequires: mysql-devel
-%endif
 %if %{undefined centos_version} && %{undefined rhel_version}
 BuildRequires: chrpath
 %endif
