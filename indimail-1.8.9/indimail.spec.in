@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail.spec.in,v 2.284 2014-05-29 18:56:43+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 2.285 2014-06-11 12:29:27+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %define _unpackaged_files_terminate_build 1
 
@@ -2659,6 +2659,10 @@ echo "adding indimail startup"
 
 ) >> /tmp/indimail-install.log 2>&1
 
+if [ -f ${_prefix}/etc/cronlist ] ; then
+	echo "adding cron entries"
+	/usr/bin/crontab -u root ${_prefix}/etc/cronlist
+fi
 if [ -f %{_prefix}/boot/rpm.init ] ; then
 	echo "Running Custom Installation Script for post"
 	/bin/sh %{_prefix}/boot/rpm.init post
