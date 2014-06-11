@@ -1,0 +1,40 @@
+#
+# Regular cron jobs for the indimail package
+#
+#2,32 * * * * @indimaildir@/sbin/hostsync -d indimail.org
+5,35 * * * * @indimaildir@/sbin/clearopensmtp
+# Rotate the logs at midnight
+5    0 * * * @indimaildir@/bin/svc -a /service*/*/log > /dev/null 2>&1
+0    0 * * * @indimaildir@/sbin/svctool --report=all --attach --postmaster=postmaster
+#0    5 * * * @indimaildir@/sbin/vdeloldusers -d indimail.org -u -1 -t 2 >/dev/null 2>&1
+#7    * * * * @indimaildir@/sbin/vfstab -b
+#
+# qmail-smtpd TLS
+#
+01 01 * * * @indimaildir@/bin/update_tmprsadh > /dev/null 2>&1
+#
+# fetchmail
+#
+#5,35 * * * * @indimaildir@/bin/fetchmail.cron dialup
+#5,35 * * * * @indimaildir@/bin/fetchmail.cron ethernet
+#
+# Clean Temp directories created by qscanq
+#
+12 * * * *	@indimaildir@/bin/run-cleanq
+#
+#chowkidar
+#
+#24 0,4,8,12,16,20 * * * @indimaildir@/sbin/chowkidar -f /var/log/indimail/deliver.25/current -o @indimaildir@/control/badmailfrom -n 300 -B > /dev/null 2>&1
+#0 0 * * * @indimaildir@/sbin/chowkidar -r -B -q > /dev/null 2>&1
+#24 0,4,8,12,16,20 * * * @indimaildir@/sbin/chowkidar -f /var/log/indimail/deliver.25/current -o @indimaildir@/control/badrcptto -n 300 -T > /dev/null 2>&1
+#0 0 * * * @indimaildir@/sbin/chowkidar -r -T -q > /dev/null 2>&1
+#
+# Build fast CDB spam database
+#
+#24 0,4,8,12,16,20 * * * @indimaildir@/sbin/chowkidar -f /var/log/indimail/smtpd.25/current -o @indimaildir@/control/spamdb -n 1 -S > /dev/null 2>&1
+#0 0 * * * @indimaildir@/sbin/chowkidar -r -S -q > /dev/null 2>&1
+#10 0 * * * @indimaildir@/sbin/svctool --backup=/home/mail/backup --servicedir=/service --mysqlPrefix=/usr/local/mysql
+#
+# MRTG
+#
+*/5 * * * * /usr/bin/mrtg /var/www/html/mailmrtg/indimail.mrtg.cfg 2>&1 > /dev/null
