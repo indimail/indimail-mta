@@ -115,8 +115,8 @@ binary-indep: build install
 	dh_installdeb
 	dh_makeshlibs -V
 	dh_shlibdeps
-	#dh_gencontrol -- -Vdist:Depends="`$(CURDIR)/debian/gen_control`"
 	$(genControl)
+	dh_installcron
 	dh_md5sums
 	dh_builddeb
 
