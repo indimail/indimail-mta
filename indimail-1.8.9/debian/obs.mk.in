@@ -131,13 +131,16 @@ indimail-mini.postrm: indimail-mini.postrm.in
 indimail-mini.postinst: indimail-mini.postinst.in
 	$(edit) $@.in > $@;
 
+indimail.cron.d: indimail.cron.d.in
+	$(edit) $@.in > $@
+
 obs_deb_prep: obs_deb_prep.in obs.mk
 	$(edit) $@.in > $@;
 
 changelog: changelog.in obs.mk
 	$(edit) $@.in > $@;
 
-indimail-Debian_5.0.dsc:indimail-Debian_5.0.dsc.in obs.mk changelog.in
+indimail-Debian_5.0.dsc: indimail-Debian_5.0.dsc.in obs.mk changelog.in
 	$(edit) $@.in > $@;
 indimail-Debian_6.0.dsc: indimail-Debian_6.0.dsc.in obs.mk changelog.in
 	$(edit) $@.in > $@.tmp; \
@@ -183,7 +186,7 @@ indimail-mini.postinst indimail-mini.install gen_control obs.mk \
 control control.Debian.6.0 control.Debian.7.0 control.Ubuntu.10.04 \
 control.Ubuntu.10.10 control.Ubuntu.11.04 control.Ubuntu.11.10 \
 control.Ubuntu.12.04 control.Ubuntu.12.10 control.Ubuntu.13.04 \
-control.Ubuntu.13.10 control.Ubuntu.14.04 
+control.Ubuntu.13.10 control.Ubuntu.14.04 indimail.cron.d
 	tar cf - copyright indimail.preinst indimail.postinst indimail.prerm \
 		indimail.postrm rules changelog compat obs_deb_prep \
 		indimail-devel.install indimail-devel.postinst gen_control \
@@ -192,4 +195,4 @@ control.Ubuntu.13.10 control.Ubuntu.14.04
 		control control.Debian.6.0 control.Debian.7.0 control.Ubuntu.10.04 \
 		control.Ubuntu.10.10 control.Ubuntu.11.04 control.Ubuntu.11.10 \
 		control.Ubuntu.12.04 control.Ubuntu.12.10 control.Ubuntu.13.04 \
-		control.Ubuntu.13.10 control.Ubuntu.14.04 |gzip > $@
+		control.Ubuntu.13.10 control.Ubuntu.14.04 indimail.cron.d |gzip > $@
