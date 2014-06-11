@@ -123,7 +123,7 @@ IndiMail will install and run on most UNIX and UNIX-like systems, but there are 
   * A filesystem for the user's home directories where mail will be delivered.
   * A compatible operating system. Most flavors of UNIX are acceptable which have GNU Compilation
     tools (autoconf/automake/libtool/texinfo/emacs).
-    NOTE: autoconf 2.6 and above is required.
+    NOTE: autoconf 2.69 and above is required.
   * A complete, functioning C development system including a compiler, system header files, and
     libraries. The installation steps will guide you through the installation process.
   * Commands like gzip, bzip2, tar, vi, etc. If you can't find a compiler installed, you'll have to
@@ -1298,6 +1298,12 @@ http://download.opensuse.org/repositories/home:/indimail/
 http://download.opensuse.org/repositories/home:/mbhangui/
 
 ---------- * -------------- * ------------ * -------------- * ------------ * -------------- * ------------
+CentOS/Fedora/openSUSE/RedHat NOTES
+
+Install the following for making a build (source build or rpm build)
+openssl-devel gcc gcc-c++ bison readline-devel ncurses-devel gettext-devel python-devel
+flex autoconf libidn-devel sharutils openldap-devel chrpath pam-devel mysql-devel automake libtool
+         
 Ubuntu NOTES
 
 You may need to install the following additional packages before you can start the compilation
