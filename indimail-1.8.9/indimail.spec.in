@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail.spec.in,v 2.286 2014-06-11 19:32:38+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 2.287 2014-06-13 15:51:49+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %define _unpackaged_files_terminate_build 1
 
@@ -221,7 +221,7 @@ BuildRequires: openssl-devel rpm gcc gcc-c++ make bison binutils coreutils grep
 BuildRequires: glibc glibc-devel openssl procps readline-devel
 BuildRequires: sed ncurses-devel gettext-devel
 BuildRequires: python-devel flex findutils
-BuildRequires: readline gzip autoconf aclocal automake libtool pkgconfig
+BuildRequires: readline gzip autoconf automake libtool pkgconfig
 BuildRequires: libidn-devel
 BuildRequires: groff xz
 
@@ -1171,7 +1171,6 @@ fi
 %attr(555,root,qmail)                   %{_prefix}/bin/cleanq
 %attr(555,root,qmail)                   %{_prefix}/bin/zsuccesses
 %attr(555,root,qmail)                   %{_prefix}/bin/ofmipd
-%attr(555,root,qmail)                   %{_prefix}/bin/qmail-queue-print
 %attr(555,root,qmail)                   %{_prefix}/bin/qmail-lagcheck
 %attr(555,root,qmail)                   %{_prefix}/bin/mbox2maildir.pl
 %attr(555,root,qmail)                   %{_prefix}/bin/deferrals
