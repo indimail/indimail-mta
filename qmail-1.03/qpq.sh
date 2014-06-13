@@ -1,10 +1,13 @@
 #
-# $Log: $
+# $Log: qpq.sh,v $
+# Revision 1.5  2014-06-13 17:57:44+05:30  Cprogrammer
+# replaced qmail-queue-print with 822header
+#
 #
 # This script locates all messages currently in qmail's queue and 
 # calls the 822header program.
 #
-# $Id: dk-filter.sh,v 1.18 2014-03-12 08:50:48+05:30 Cprogrammer Stab mbhangui $
+# $Id: qpq.sh,v 1.5 2014-06-13 17:57:44+05:30 Cprogrammer Exp mbhangui $
 #
 
 usage ()

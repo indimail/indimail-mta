@@ -1,5 +1,8 @@
 /*
  * $Log: hier.c,v $
+ * Revision 1.184  2014-06-13 17:58:01+05:30  Cprogrammer
+ * removed qmail-queue-print
+ *
  * Revision 1.183  2014-05-28 16:06:35+05:30  Cprogrammer
  * removed /var/indimail/queue directory
  *
@@ -1672,7 +1675,7 @@ _hier(inst_dir)
 void
 getversion_install_big_c()
 {
-	static char    *x = "$Id: hier.c,v 1.183 2014-05-28 16:06:35+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: hier.c,v 1.184 2014-06-13 17:58:01+05:30 Cprogrammer Exp mbhangui $";
 
 #ifdef INDIMAIL
 	if (x)
