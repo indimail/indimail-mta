@@ -494,7 +494,6 @@ done
 %attr(555,root,qmail)                   %{_prefix}/bin/cleanq
 %attr(555,root,qmail)                   %{_prefix}/bin/zsuccesses
 %attr(555,root,qmail)                   %{_prefix}/bin/ofmipd
-%attr(555,root,qmail)                   %{_prefix}/bin/qmail-queue-print
 %attr(555,root,qmail)                   %{_prefix}/bin/qmail-lagcheck
 %attr(555,root,qmail)                   %{_prefix}/bin/mbox2maildir.pl
 %attr(555,root,qmail)                   %{_prefix}/bin/deferrals

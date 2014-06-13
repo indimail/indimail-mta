@@ -554,7 +554,6 @@ hier(inst_dir)
 	c(auto_qmail_home, "bin", "qmail-poppass", auto_uido, auto_gidq, 0555);
 	c(auto_qmail_home, "bin", "qmail-lagcheck", auto_uido, auto_gidq, 0555);
 	c(auto_qmail_home, "bin", "qpq", auto_uido, auto_gidq, 0555);
-	c(auto_qmail_home, "bin", "qmail-queue-print", auto_uido, auto_gidq, 0555);
 	c(auto_qmail_home, "bin", "qmail-tcpto", auto_uido, auto_gidq, 0555);
 	c(auto_qmail_home, "bin", "qmail-tcpok", auto_uido, auto_gidq, 0555);
 	c(auto_qmail_home, "bin", "qmail-pop3d", auto_uido, auto_gidq, 0555);
