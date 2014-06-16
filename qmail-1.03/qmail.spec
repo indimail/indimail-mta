@@ -985,6 +985,27 @@ else
 	TOUCH=/bin/touch
 fi
 
+echo "Doing post installation activities for the following"
+echo ""
+echo " 1. Configure %{logdir} for multilog"
+echo " 2. Configure %{servicedir}. Move existing services to %{servicedir}.org"
+echo " 3. Configure svscanlog service"
+echo " 4. Configure standard catch-all accounts, default qmail configuration"
+echo " 5. Configure DKIM, Domainkeys signature"
+echo " 6. Configure QHPSI for inline virus scanning"
+echo " 7. Configure SMTP services on port in 465 25 587"
+echo " 8. Configure default queue configuration for sendmail, qmail-inject"
+echo " 9. Configure ODMR service"
+echo "10. Configure greylisting service"
+echo "11. Configure QMTP service"
+echo "12. Configure QMQP service"
+echo "13. Configure qscanq/clamd/freshclam service"
+echo "14. Configure %{_prefix}/control/signatures"
+echo "15. Configure tcprules database for SMTP, IMAP, POP3, popass"
+echo "16. Configure indimail startup"
+echo ""
+
+(
 echo "Creating %{logdir}"
 if [ ! -d %{logdir} ] ; then
 	%{__mkdir_p} %{logdir}
@@ -994,6 +1015,17 @@ fi
 if [ -d /service ] ; then
 	echo "UFO found in /service. Moving it to /service.org"
 	%{__mv} -f %{servicedir} %{servicedir}.org
+fi
+
+# svscanlog service
+%{_prefix}/sbin/svctool --svscanlog --servicedir=%{servicedir}
+
+%{_prefix}/sbin/svctool --config=qmail --postmaster=%{_prefix}/alias/Maildir/ \
+	--default-domain=indimail.org
+
+if [ -f %{_prefix}/boot/rpm.init ] ; then
+	echo "Running Custom Installation Script for post"
+	/bin/sh %{_prefix}/boot/rpm.init post
 fi
 
 if [ %nodksignatures -eq 0 ] ; then
@@ -1108,6 +1140,7 @@ fi
 %{_prefix}/sbin/svctool --smtp=366 --odmr --servicedir=%{servicedir} \
 	--query-cache --password-cache
 echo "1" > %{servicedir}/qmail-smtpd.366/variables/DISABLE_PLUGIN
+
 # Greylist daemon
 %{_prefix}/sbin/svctool --greylist=1999 --servicedir=%{servicedir} --min-resend-min=2 \
     --resend-win-hr=24 --timeout-days=30 --context-file=greylist.context \
@@ -1122,8 +1155,27 @@ echo "1" > %{servicedir}/qmail-smtpd.366/variables/DISABLE_PLUGIN
 	--fsync --syncdir --memory=%{qmqp_soft_mem} --min-free=52428800
 $TOUCH %{servicedir}/qmail-qmqpd.628/down
 
-%{_prefix}/sbin/svctool --config=qmail --postmaster=%{_prefix}/alias/Maildir/ \
-	--default-domain=indimail.org
+# virus/spam filtering
+%{_prefix}/sbin/svctool --qscanq --servicedir=%{servicedir} --scanint=200
+if [ %noclamav -eq 0 -o $clamav_os -eq 1 ] ; then
+	%{_prefix}/sbin/svctool --config=clamd
+	# create clamd, freshclam service
+	%{_prefix}/sbin/svctool --clamd --servicedir=%{servicedir} --clamdPrefix=$clamdPrefix \
+		--sysconfdir=$mysysconfdir
+	if [ $clamav_os -eq 1 ] ; then
+		echo "Checking if clamd/freshclam is running"
+		count=`ps -e|grep clamd|wc -l`
+		if [ $count -gt 0 ] ; then
+			echo "Disabling clamd service"
+			$TOUCH %{servicedir}/clamd/down
+		fi
+		count=`ps -e|grep freshclam|wc -l`
+		if [ $count -gt 0 ] ; then
+			echo "Disabling freshclam service"
+			$TOUCH %{servicedir}/freshclam/down
+		fi
+	fi
+fi
 
 %{__cat} <<EOF > %{_prefix}/control/signatures
 # Windows executables seen in active virii
@@ -1168,19 +1220,13 @@ do
 	done
 done
 
-# Misc/Configuration
-%{_prefix}/sbin/svctool --svscanlog --servicedir=%{servicedir}
-if [ -f %{_prefix}/boot/rpm.init ] ; then
-	echo "Running Custom Installation Script for post"
-	/bin/sh %{_prefix}/boot/rpm.init post
-fi
-
 #
 # Install IndiMail to be started on system boot
 # The add-boot command installs svscan to be started by init, upstart or launchctl
 #
 echo "adding indimail startup"
 %{_prefix}/sbin/svctool --config=add-boot
+) >> /tmp/indimail-mta.install.log 2>&1
 
 if [ -f %{_sysconfdir}/init/svscan.conf -o -f %{_sysconfdir}/event.d/svscan ] ; then
 	echo "1. Issue /sbin/initctl emit qmailstart to start services"
