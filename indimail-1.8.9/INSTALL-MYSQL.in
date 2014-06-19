@@ -58,6 +58,14 @@
     # chkconfig mysqld off (for Ubuntu : update-rc.d -f mysql remove)
     # /etc/init.d/mysqld stop
 
+    For systems using systemctl
+    # /bin/systemctl stop mysqld.service
+    # /bin/systemctl disable mysqld.service
+
+    For systems using upstart
+    # echo "manual" > /etc/init/mysqld.override
+    # /sbin/initctl stop mysqld
+
     Some operating systems also use '/etc/rc.local' or '/etc/init.d/boot.local' to start
     additional services on startup. You must remove any invocation of mysqld_safe from
     these scripts.
