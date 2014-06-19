@@ -1303,6 +1303,7 @@ CentOS/Fedora/openSUSE/RedHat NOTES
 Install the following for making a build (source build or rpm build)
 openssl-devel gcc gcc-c++ bison readline-devel ncurses-devel gettext-devel python-devel
 flex autoconf libidn-devel sharutils openldap-devel chrpath pam-devel mysql-devel automake libtool
+groff libdb4-devel expect
          
 Ubuntu NOTES
 
