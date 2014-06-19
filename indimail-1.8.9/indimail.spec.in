@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail.spec.in,v 2.288 2014-06-16 15:25:55+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 2.289 2014-06-19 08:32:34+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %define _unpackaged_files_terminate_build 1
 
@@ -263,9 +263,10 @@ PreReq: permissions
 %endif
 %if 0%{?suse_version}
 BuildRequires: db-devel
-%if 0%{?opensuse_bs}
+%if %build_on_obs == 1
 BuildRequires: -post-build-checks  
 #!BuildIgnore: post-build-checks  
+#!BuildIgnore: brp-check-suse
 %endif
 %else
 %if 0%{?mandriva_version} == 201100
