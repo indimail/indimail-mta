@@ -181,6 +181,13 @@ echo "25. Configure indimail startup"
 echo "26. Configure default cron entries"
 echo ""
 
+if [ -x /bin/touch ] ; then
+	TOUCH=/bin/touch
+elif [ -x /usr/bin/touch ] ; then
+	TOUCH=/usr/bin/touch
+else
+	TOUCH=/bin/touch
+fi
 (
 echo "Creating ${logdir}"
 if [ ! -d ${logdir} ] ; then
@@ -223,6 +230,11 @@ if [ -f $mysqlPrefix/bin/mysql_config ] ; then
 	${prefix}/sbin/svctool --mysql=3306 --servicedir=$servicedir --mysqlPrefix=${mysqlPrefix} \
 		--databasedir=${prefix}/mysqldb --config=${prefix}/etc/indimail.cnf --default-domain=${default_domain} \
 		--model=small --no-of-cpu=2
+	count=`ps -e|grep mysqld|wc -l`
+	if [ $count -gt 0 ] ; then
+		echo "Disabling mysqld service"
+		$TOUCH ${servicedir}/mysql.3306/down
+	fi
 else
 	echo "WARNING!!! Did not find mysql_config in ${mysqlPrefix}. Skipping MySQL configuration" 1>&2
 fi
@@ -437,7 +449,6 @@ if [ $nofetchmail -eq 0 ] ; then
 	/bin/touch $servicedir/fetchmail/down
 fi
 
-/bin/touch $servicedir/mysql.3306/down
 if [ $nocourierimap -eq 0 ] ; then
 # IMAP/POP3
 ${prefix}/sbin/svctool --imap=143 --servicedir=$servicedir --localip=0 \
@@ -499,12 +510,12 @@ if [ $noclamav -eq 0 -o $clamav_os -eq 1 ] ; then
 		count=`ps -e|grep clamd|wc -l`
 		if [ $count -gt 0 ] ; then
 			echo "Disabling clamd service"
-			$TOUCH %{servicedir}/clamd/down
+			$TOUCH ${servicedir}/clamd/down
 		fi
 		count=`ps -e|grep freshclam|wc -l`
 		if [ $count -gt 0 ] ; then
 			echo "Disabling freshclam service"
-			$TOUCH %{servicedir}/freshclam/down
+			$TOUCH ${servicedir}/freshclam/down
 		fi
 	fi
 fi
