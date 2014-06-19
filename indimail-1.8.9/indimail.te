@@ -1,5 +1,8 @@
 #
 # $Log: indimail.te,v $
+# Revision 2.3  2014-06-19 08:31:57+05:30  Cprogrammer
+# added usr_tmp_t privilege for mysqld
+#
 # Revision 2.2  2014-05-15 11:08:15+05:30  Cprogrammer
 # added open access for mandb
 #
@@ -7,7 +10,7 @@
 # selinux module config
 #
 #
-# $Id: indimail.te,v 2.2 2014-05-15 11:08:15+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.te,v 2.3 2014-06-19 08:31:57+05:30 Cprogrammer Exp mbhangui $
 # 
 module indimail 1.0;
 
@@ -17,6 +20,7 @@ require {
 	type httpd_t;
 	type user_home_t;
 	type initrc_t;
+	type user_tmp_t;
 	type tmp_t;
 	type nscd_t;
 	type var_t;
@@ -47,6 +51,8 @@ allow httpd_t var_t:lnk_file read;
 
 #============= mysqld_t ==============
 allow mysqld_t var_t:file write;
+allow mysqld_t var_t:dir create;
+allow mysqld_t user_tmp_t:file open;
 allow mysqld_t tmp_t:sock_file write;
 
 #============= nscd_t ==============
