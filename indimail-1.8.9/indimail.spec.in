@@ -2348,7 +2348,11 @@ if [ -f %{mysqlPrefix}/bin/mysql_config ] ; then
 	%{_prefix}/sbin/svctool --mysql=3306 --servicedir=%{servicedir} --mysqlPrefix=%{mysqlPrefix} \
 		--databasedir=%{_prefix}/mysqldb --config=%{_prefix}/etc/indimail.cnf --default-domain=%{default_domain} \
 		--model=small --no-of-cpu=2
-	$TOUCH %{servicedir}/mysql.3306/down
+	count=`ps -e|grep mysqld|wc -l`
+	if [ $count -gt 0 ] ; then
+		echo "Disabling mysqld service"
+		$TOUCH %{servicedir}/mysql.3306/down
+	fi
 else
 	echo "WARNING!!! Did not find mysql_config in %{mysqlPrefix}. Skipping MySQL configuration" 1>&2
 fi
