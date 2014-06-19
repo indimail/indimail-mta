@@ -1,6 +1,6 @@
 #
 #
-# $Id: qmail.spec,v 1.11 2014-06-13 17:58:13+05:30 Cprogrammer Exp mbhangui $
+# $Id: qmail.spec,v 1.12 2014-06-19 12:20:44+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %define _unpackaged_files_terminate_build 1
 
@@ -1002,7 +1002,7 @@ echo "12. Configure QMQP service"
 echo "13. Configure qscanq/clamd/freshclam service"
 echo "14. Configure %{_prefix}/control/signatures"
 echo "15. Configure tcprules database for SMTP, IMAP, POP3, popass"
-echo "16. Configure indimail startup"
+echo "16. Configure indimail-mta startup"
 echo ""
 
 (
