@@ -1248,7 +1248,7 @@ log_spam(char *arg1, char *arg2, unsigned long size, stralloc *line)
 	}
 	/*
 	 * Read X-Bogosity line from bogofilter on spamfd. spamfd would have already
-	 * been opened before qmail_open() by create_logfiler() function
+	 * been opened before qmail_open() by create_logfilter() function
 	 */
 	if (!fstat(spamfd, &statbuf) && statbuf.st_size > 0 && !lseek(spamfd, 0, SEEK_SET))
 	{
