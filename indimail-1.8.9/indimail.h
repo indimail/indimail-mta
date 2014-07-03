@@ -1,5 +1,8 @@
 /*
  * $Log: indimail.h,v $
+ * Revision 2.213  2014-07-03 00:04:05+05:30  Cprogrammer
+ * added function valias_track()
+ *
  * Revision 2.212  2014-04-17 11:39:15+05:30  Cprogrammer
  * added prototype for grpscan(), setuserid(), setuser_privileges()
  *
@@ -952,7 +955,7 @@
 #define INDIMAILH_H
 
 #ifndef	lint
-static char     sccsidh[] = "$Id: indimail.h,v 2.212 2014-04-17 11:39:15+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsidh[] = "$Id: indimail.h,v 2.213 2014-07-03 00:04:05+05:30 Cprogrammer Stab mbhangui $";
 #endif
 
 #ifdef HAVE_CONFIG_H
@@ -1961,6 +1964,7 @@ int             logmysql(int, char *, char *, char *, char *, char *, char *);
 #ifdef VALIAS
 long            valiasCount(char *, char *);
 char           *valias_select(char *, char *);
+char           *valias_track(char *, char *, char *, int);
 char           *valias_select_all(char *, char *, int);
 int             valias_insert(char *, char *, char *, int);
 int             valias_update(char *, char *, char *, char *);
