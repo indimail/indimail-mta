@@ -1,5 +1,8 @@
 /*
  * $Log: valias.c,v $
+ * Revision 2.8  2014-07-03 00:08:40+05:30  Cprogrammer
+ * added option to track all alias which deliver to an address
+ *
  * Revision 2.7  2011-11-09 19:45:51+05:30  Cprogrammer
  * removed getversion
  *
@@ -72,7 +75,7 @@
 
 #include "indimail.h"
 #ifndef	lint
-static char     sccsid[] = "$Id: valias.c,v 2.7 2011-11-09 19:45:51+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: valias.c,v 2.8 2014-07-03 00:08:40+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef VALIAS
@@ -95,6 +98,7 @@ char            OAliasLine[MAX_BUFF];
 #define VALIAS_INSERT 1
 #define VALIAS_DELETE 2
 #define VALIAS_UPDATE 3
+#define VALIAS_TRACK  4
 
 int             AliasAction, ignore_mailstore;
 
@@ -119,9 +123,9 @@ main(argc, argv)
 		{
 			for(;;)
 			{
-				if(!(tmpalias_line = valias_select_all(Alias, Email, MAX_BUFF)))
+				if(!(tmpalias_line = valias_select_all(Alias, Domain, MAX_BUFF)))
 					break;
-				printf("%s@%s -> %s\n", Alias, Email, tmpalias_line);
+				printf("%s@%s -> %s\n", Alias, Domain, tmpalias_line);
 			}
 		} else
 		{
@@ -142,6 +146,14 @@ main(argc, argv)
 	case VALIAS_UPDATE:
 			valias_update(Alias, Domain, OAliasLine, AliasLine);
 		break;
+	case VALIAS_TRACK:
+			for(;;)
+			{
+				if(!(tmpalias_line = valias_track(Alias, Domain, Email, MAX_BUFF)))
+					break;
+				printf("%s@%s -> %s\n", Alias, Domain, Email);
+			}
+		break;
 	default:
 		fprintf(stderr, "error, Alias Action is invalid %d\n", AliasAction);
 		break;
@@ -156,6 +168,7 @@ usage()
 	fprintf(stderr, "options: -V ( print version number )\n");
 	fprintf(stderr, "         -v ( verbose )\n");
 	fprintf(stderr, "         -s ( show aliases )\n");
+	fprintf(stderr, "         -S ( track aliases )\n");
 	fprintf(stderr, "         -d alias_line (delete alias line)\n");
 	fprintf(stderr, "         -i alias_line (insert alias line)\n");
 	fprintf(stderr, "         -u old_alias_line -i new_alias_line (update alias line)\n");
@@ -176,7 +189,7 @@ get_options(int argc, char **argv)
 	memset(Domain, 0, MAX_BUFF);
 	memset(AliasLine, 0, MAX_BUFF);
 	AliasAction = VALIAS_SELECT;
-	while ((c = getopt(argc, argv, "vmsu:d:i:")) != -1)
+	while ((c = getopt(argc, argv, "vmsSu:d:i:")) != -1)
 	{
 		switch (c)
 		{
@@ -186,6 +199,9 @@ get_options(int argc, char **argv)
 #endif
 		case 'v':
 			verbose = 1;
+			break;
+		case 'S':
+			AliasAction = VALIAS_TRACK;
 			break;
 		case 's':
 			AliasAction = VALIAS_SELECT;
@@ -219,6 +235,8 @@ get_options(int argc, char **argv)
 			usage();
 			return(1);
 		}
+		if (c == 's')
+			break;
 	}
 	if (optind < argc)
 	{
@@ -229,7 +247,7 @@ get_options(int argc, char **argv)
 			return(1);
 		}
 	}
-	if (!*Email)
+	if (AliasAction != VALIAS_SELECT && !*Email)
 	{
 		usage();
 		fprintf(stderr, "must supply alias email address or a domain name\n");

@@ -1,5 +1,8 @@
 /*
  * $Log: valias_select.c,v $
+ * Revision 2.9  2014-07-03 00:09:13+05:30  Cprogrammer
+ * added option to track all alias which deliver to an address using valias_track()
+ *
  * Revision 2.8  2008-09-08 09:55:08+05:30  Cprogrammer
  * removed mysql_escape
  *
@@ -59,7 +62,7 @@
 #include <string.h>
 
 #ifndef	lint
-static char     sccsid[] = "$Id: valias_select.c,v 2.8 2008-09-08 09:55:08+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: valias_select.c,v 2.9 2014-07-03 00:09:13+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef VALIAS
@@ -102,6 +105,47 @@ valias_select(char *alias, char *domain)
 		return (row[0]);
 	mysql_free_result(select_res);
 	select_res = (MYSQL_RES *) 0;
+	return ((char *) 0);
+}
+
+char           *
+valias_track(char *alias, char *domain, char *valias_line, int len)
+{
+	int             err;
+	char            SqlBuf[SQL_BUF_SIZE];
+	MYSQL_ROW       row;
+	static MYSQL_RES *res;
+
+	if(!res)
+	{
+		if ((err = vauth_open((char *) 0)) != 0)
+			return ((char *) 0);
+		snprintf(SqlBuf, SQL_BUF_SIZE,
+			"select high_priority alias, domain from valias where valias_line = \"%s\"",
+			valias_line);
+		if (mysql_query(&mysql[1], SqlBuf))
+		{
+			if(mysql_errno(&mysql[1]) == ER_NO_SUCH_TABLE)
+			{
+				create_table(ON_LOCAL, "valias", VALIAS_TABLE_LAYOUT);
+				return ((char *) 0);
+			}
+			mysql_perror("valias_track: %s", SqlBuf);
+			return ((char *) 0);
+		}
+		if(!(res = mysql_store_result(&mysql[1])))
+			return ((char *) 0);
+	}
+	if ((row = mysql_fetch_row(res)))
+	{
+		if(alias)
+			scopy(alias, (row[0]), len);
+		if(domain && !*domain)
+			scopy(domain, (row[1]), len);
+		return (row[1]);
+	}
+	mysql_free_result(res);
+	res = (MYSQL_RES *) 0;
 	return ((char *) 0);
 }
 #endif /*- #ifdef VALIAS */
