@@ -1,6 +1,6 @@
 #
 #
-# $Id: qmail.spec,v 1.12 2014-06-19 12:20:44+05:30 Cprogrammer Exp mbhangui $
+# $Id: qmail.spec,v 1.13 2014-07-03 16:22:13+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %define _unpackaged_files_terminate_build 1
 
@@ -76,10 +76,10 @@ Group: Productivity/Networking/Email/Servers
 Source1:  http://cr.yp.to/software/qmail-%{qmail_version}.tar.gz
 Source2:  http://cr.yp.to/ucspi-tcp/ucspi-tcp-%{ucspi_version}.tar.gz
 %if %nolibdkim == 0
-Source3:  http://downloads.sourceforge.net/indimail/libdkim-%{libdkim_version}
+Source3:  http://downloads.sourceforge.net/indimail/libdkim-%{libdkim_version}.tar.gz
 %endif
 %if %nolibsrs2 == 0
-Source4:  http://downloads.sourceforge.net/indimail/libsrs2-%{libsrs2_version}
+Source4:  http://downloads.sourceforge.net/indimail/libsrs2-%{libsrs2_version}.tar.gz
 %endif
 Source5:  http://downloads.sourceforge.net/indimail/qmail-rpmlintrc
 
