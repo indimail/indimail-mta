@@ -147,7 +147,29 @@ if [ -d ${sysconfdir}/ld.so.conf.d ] ; then
 fi
 /sbin/ldconfig
 
+echo "Doing post installation activities for the following"
+echo ""
+echo " 1. Creating apparmor profile"
+echo " 2. Configure ${logdir} for multilog"
+echo " 3. Configure ${servicedir}. Move existing services to %{servicedir}.org"
+echo " 4. Configure svscanlog service"
+echo " 5. Configure standard catch-all accounts, default qmail configuration"
+echo " 6. Configure DKIM, Domainkeys signature"
+echo " 7. Configure QHPSI for inline virus scanning"
+echo " 8. Configure SMTP services on port in 465 25 587"
+echo " 9. Configure default queue configuration for sendmail, qmail-inject"
+echo "10. Configure ODMR service"
+echo "11. Configure greylisting service"
+echo "12. Configure QMTP service"
+echo "13. Configure QMQP service"
+echo "14. Configure qscanq/clamd/freshclam service"
+echo "15. Configure ${prefix}/control/signatures"
+echo "16. Configure tcprules database for SMTP, QMTP, QMQP"
+echo "17. Configure indimail-mta startup"
+echo ""
+
 echo "Post Installation..."
+(
 if [ -x /etc/init.d/apparmor ] ; then
 	if [ -f ${prefix}/etc/apparmor.d/local/usr.sbin.clamd -a -d /etc/apparmor.d/local ] ; then
 		cp ${prefix}/etc/apparmor.d/local/usr.sbin.clamd /etc/apparmor.d/local
@@ -165,14 +187,25 @@ if [ -x /etc/init.d/apparmor ] ; then
 	fi
 fi
 
-(
 echo "Creating ${logdir}"
 if [ ! -d ${logdir} ] ; then
 	/bin/mkdir ${logdir}
 fi
 /bin/chown -R qmaill:nofiles ${logdir}
 
-echo "Creating catch-all alias (${prefix}/alias/Maildir) for all system users"
+if [ -d /service ] ; then
+	echo "UFO found in /service. Moving it to /service.org" 1>&2
+	${mv} -f $servicedir "$servicedir".org
+fi
+
+# Misc/Configuration
+${prefix}/sbin/svctool --svscanlog --servicedir=$servicedir
+if [ -f ${prefix}/boot/rpm.init ] ; then
+	echo "Running Custom Installation Script"
+	/bin/sh ${prefix}/boot/rpm.init post
+fi
+
+echo "Creating default qmail configuraton and catch-all alias (${prefix}/alias/Maildir) for all system users"
 ${prefix}/sbin/svctool --config=qmail --postmaster=${prefix}/alias/Maildir/ \
 	--default-domain=${default_domain}
 
@@ -351,20 +384,19 @@ if [ -f ${prefix}/man/man7/authlib.7.gz ] ; then
 	done
 fi
 
-# Misc/Configuration
-${prefix}/sbin/svctool --svscanlog --servicedir=$servicedir
-if [ -f ${prefix}/boot/rpm.init ] ; then
-	echo "Running Custom Installation Script"
-	/bin/sh ${prefix}/boot/rpm.init post
-fi
 #
 # Install IndiMail to be started on system boot
 # The add-boot command installs svscan to be started by init, upstart or launchctl
 #
 echo "adding indimail-mta startup"
 if [ /usr/lib/sm.bin/sendmail ] ; then
+	if [ -x /usr/sbin/update-alternatives ] ; then
 	/usr/sbin/update-alternatives --remove-all sendmail-mta || true
 	/usr/sbin/update-alternatives --remove-all sendmail-msp || true
+	elif [ -x /usr/bin/update-alternatives ] ; then
+	/usr/bin/update-alternatives --remove-all sendmail-mta || true
+	/usr/bin/update-alternatives --remove-all sendmail-msp || true
+	fi
 fi
 SERVICE_LIST="sendmail exim4"
 export SERVICE_LIST
