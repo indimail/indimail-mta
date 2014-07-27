@@ -159,7 +159,7 @@ echo " 3. Configure svscanlog service"
 echo " 4. Configure standard catch-all accounts, default qmail configuration"
 echo " 5. Configure apparmor for MySQL"
 echo " 6. Configure ${prefix}/etc/indimail.cnf for MySQL service"
-echo " 7. Configure MySQL DB in %{_prefix}/mysqldb/data"
+echo " 7. Configure MySQL DB in ${prefix}/mysqldb/data"
 echo " 8. Configure DKIM, Domainkeys signature"
 echo " 9. Configure QHPSI for inline virus scanning"
 echo "10. Configure SMTP services on port in 465 25 587"
@@ -174,7 +174,7 @@ echo "18. Configure indisrvr service"
 echo "19. Configure nssd service"
 echo "20. Configure inlookup service"
 echo "21. Configure qscanq/clamd/freshclam service"
-echo "22. Configure %{_prefix}/control/signatures"
+echo "22. Configure ${prefix}/control/signatures"
 echo "23. Configure SPAM filter configuration"
 echo "24. Configure tcprules database for SMTP, IMAP, POP3, popass"
 echo "25. Configure indimail startup"
@@ -197,13 +197,13 @@ fi
 
 if [ -d /service ] ; then
 	echo "UFO found in /service. Moving it to /service.org" 1>&2
-	%{mv} -f $servicedir "$servicedir".org
+	${mv} -f $servicedir "$servicedir".org
 fi
 
 # create svscanlog service
 ${prefix}/sbin/svctool --svscanlog --servicedir=$servicedir
 
-echo "Creating catch-all alias (${prefix}/alias/Maildir) for all system users"
+echo "Creating default qmail configuraton and catch-all alias (${prefix}/alias/Maildir) for all system users"
 ${prefix}/sbin/svctool --config=qmail --postmaster=${prefix}/alias/Maildir/ \
 	--default-domain=${default_domain}
 
@@ -577,13 +577,19 @@ fi
 #
 echo "adding indimail startup"
 if [ /usr/lib/sm.bin/sendmail ] ; then
+	if [ -x /usr/sbin/update-alternatives ] ; then
 	/usr/sbin/update-alternatives --remove-all sendmail-mta || true
 	/usr/sbin/update-alternatives --remove-all sendmail-msp || true
+	elif [ -x /usr/bin/update-alternatives] ; then
+	/usr/bin/update-alternatives --remove-all sendmail-mta || true
+	/usr/bin/update-alternatives --remove-all sendmail-msp || true
+	fi
 fi
 SERVICE_LIST="sendmail exim4 mysql"
 export SERVICE_LIST
 ${prefix}/sbin/svctool --config=add-boot
 
+echo "Checking Installed Permissions"
 if [ -f ${prefix}/bin/instcheck ] ; then
 	${prefix}/bin/instcheck > /dev/null 2>&1
 fi
