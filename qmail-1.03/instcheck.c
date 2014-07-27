@@ -1,5 +1,8 @@
 /*
  * $Log: instcheck.c,v $
+ * Revision 1.19  2014-07-27 12:50:53+05:30  Cprogrammer
+ * fixed check for executables in sbin or bin directory
+ *
  * Revision 1.18  2014-04-17 12:01:40+05:30  Cprogrammer
  * ignore man pages error
  *
@@ -336,7 +339,7 @@ main(int argc, char **argv)
 void
 getversion_instcheck_c()
 {
-	static char    *x = "$Id: instcheck.c,v 1.18 2014-04-17 12:01:40+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: instcheck.c,v 1.19 2014-07-27 12:50:53+05:30 Cprogrammer Exp mbhangui $";
 #ifdef INDIMAIL
 	if (x)
 		x = sccsidh;
