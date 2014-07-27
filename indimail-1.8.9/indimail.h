@@ -1245,7 +1245,7 @@ unique index (email, ipaddr), index(ipaddr), index(timestamp)"
 #define IP_ALIAS_TABLE_LAYOUT "\
 ipaddr char(18) not null, \
 domain char(67), \
-timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP NOT NULL,
+timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP NOT NULL, \
 primary key(ipaddr)"
 #endif
 
@@ -1303,7 +1303,7 @@ level_index0, level_index1, level_index2, the_dir"
 alias  char(40) not null, \
 domain char(67) not null, \
 valias_line char(254) not null, \
-timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP NOT NULL,
+timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP NOT NULL, \
 unique index(alias, domain, valias_line), index (alias, domain)"
 #endif
 
@@ -1383,7 +1383,7 @@ max_users bigint not null, \
 cur_users bigint not null, \
 max_size bigint not null, \
 cur_size bigint not null, \
-timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP NOT NULL,
+timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP NOT NULL, \
 primary key (filesystem, host), index status (status)"
 
 #ifdef VFILTER
@@ -1397,7 +1397,7 @@ keyword char(64) not null, \
 destination char(156) not null, \
 bounce_action char(64) not null, \
 mailing_list tinyint not null, \
-timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP NOT NULL,
+timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP NOT NULL, \
 primary key(emailid, filter_no), unique index (emailid, header_name, comparision, keyword, destination)"
 #endif
 
@@ -1405,7 +1405,7 @@ primary key(emailid, filter_no), unique index (emailid, header_name, comparision
 emailid char(107) not null, \
 filter_no smallint not null, \
 mailing_list char(64) not null, \
-timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP NOT NULL,
+timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP NOT NULL, \
 primary key(emailid, mailing_list), index emailid (emailid, filter_no)"
 
 #ifdef ENABLE_DOMAIN_LIMITS
@@ -1443,14 +1443,14 @@ primary key(emailid, mailing_list), index emailid (emailid, filter_no)"
 pw_name char(40) not null, \
 pw_domain char(67) not null, \
 domain_list char(67), \
-timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP NOT NULL,
+timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP NOT NULL, \
 unique index atrnmap (pw_name, pw_domain, domain_list)"
 
 #define PRIV_CMD_LAYOUT "\
 user        char(32) not null, \
 program     char(64) not null, \
 cmdswitches char(128), \
-timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP NOT NULL,
+timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP NOT NULL, \
 primary key(user, program)"
 
 #endif /*- #ifdef USE_MYSQL */
