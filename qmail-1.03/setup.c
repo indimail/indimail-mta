@@ -1,5 +1,8 @@
 /*
  * $Log: setup.c,v $
+ * Revision 1.22  2014-07-27 12:16:27+05:30  Cprogrammer
+ * added comment for ci()
+ *
  * Revision 1.21  2011-07-29 09:30:02+05:30  Cprogrammer
  * fixed gcc 4.6 warnings
  *
@@ -312,6 +315,7 @@ c(home, subdir, file, uid, gid, mode)
 }
 
 #ifdef INDIMAIL
+/* dummy function for setup. It works only in instcheck. */
 void
 ci(char *home, char *subdir, char *file, int uid, int gid, int mode)
 {
@@ -391,7 +395,7 @@ main(int argc, char **argv)
 void
 getversion_setup_c()
 {
-	static char    *x = "$Id: setup.c,v 1.21 2011-07-29 09:30:02+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: setup.c,v 1.22 2014-07-27 12:16:27+05:30 Cprogrammer Stab mbhangui $";
 #ifdef INDIMAIL
 	if (x)
 		x = sccsidh;
