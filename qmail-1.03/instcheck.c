@@ -83,66 +83,87 @@ perm(prefix1, prefix2, prefix3, file, type, uid, gid, mode, should_exit)
 	int             len, err = 0;
 	char           *tfile = 0;
 
-	if (stat(file, &st) == -1)
+	if (stat(file, &st) != -1)
+		tfile = file;
+	else
 	{
-		if (errno == error_noent)
-		{
-			if (!str_diffn(prefix2, "man/", 4)) /*- check for .gz extension */
-			{
-				if (!(tfile = (char *) alloc((len = str_len(file)) + 4)))
-					strerr_die2sys(111, FATAL, "unable to allocate mem: ");
-				str_copy(tfile, file);
-				str_copy(tfile + len, ".gz");
-				if (stat(tfile, &st) == -1)
-				{
-					if (errno != error_noent)
-						strerr_warn4(WARNING, "unable to stat .../", tfile, ": ", &strerr_sys);
-					else
-#ifdef INDIMAIL
-					if (!ignore_man_error)
-#endif
-						strerr_warn6(WARNING, prefix1, prefix2, prefix3, file, " does not exist", 0);
-					if (tfile != file)
-						alloc_free(tfile);
-					return;
-				}
-			} else
-			if (!str_diffn(file, "lib", 3))
-			{
-				if (stat("../lib64", &st) == -1)
-				{
-					strerr_warn4(WARNING, "unable to stat .../", file, ": ", &strerr_sys);
-					return;
-				} else {
-					if (chdir("../lib64") == -1) {
-						strerr_warn4(WARNING, "unable to chdir", "../lib64", ": ", &strerr_sys);
-						return;
-					}
-				}
-				if (stat(file, &st) == -1)
-				{
-					if (errno == error_noent)
-						strerr_warn6(WARNING, prefix1, prefix2, prefix3, file, " does not exist", 0);
-					else
-						strerr_warn4(WARNING, "unable to stat .../", file, ": ", &strerr_sys);
-					return;
-				}
-				tfile = file;
-			} else
-			{
-				if (!str_diffn(file, "man/", 4))
-					strerr_warn6(WARNING, prefix1, prefix2, prefix3, file, " does not exist", 0);
-				else
-					strerr_die6sys(111, FATAL, prefix1, prefix2, prefix3, file, ": ");
-				return;
-			}
-		} else
+		if (errno != error_noent)
 		{
 			strerr_warn4(WARNING, "unable to stat .../", file, ": ", &strerr_sys);
 			return;
 		}
-	} else
-		tfile = file;
+		if (!str_diffn(prefix2, "man/", 4)) /*- check for .gz extension */
+		{
+			if (!(tfile = (char *) alloc((len = str_len(file)) + 4)))
+				strerr_die2sys(111, FATAL, "unable to allocate mem: ");
+			str_copy(tfile, file);
+			str_copy(tfile + len, ".gz");
+			if (stat(tfile, &st) == -1)
+			{
+				if (errno != error_noent)
+					strerr_warn4(WARNING, "unable to stat .../", tfile, ": ", &strerr_sys);
+				else
+#ifdef INDIMAIL
+				if (!ignore_man_error)
+#endif
+					strerr_warn6(WARNING, prefix1, prefix2, prefix3, file, " does not exist", 0);
+				if (tfile != file)
+					alloc_free(tfile);
+				return;
+			}
+		} else
+		if (!str_diffn(file, "lib", 3))
+		{
+			if (stat("../lib64", &st) == -1)
+			{
+				strerr_warn4(WARNING, "unable to stat .../", file, ": ", &strerr_sys);
+				return;
+			} else {
+				if (chdir("../lib64") == -1) {
+					strerr_warn4(WARNING, "unable to chdir", "../lib64", ": ", &strerr_sys);
+					return;
+				}
+			}
+			if (stat(file, &st) == -1)
+			{
+				if (errno == error_noent)
+					strerr_warn6(WARNING, prefix1, prefix2, prefix3, file, " does not exist", 0);
+				else
+					strerr_warn4(WARNING, "unable to stat .../", file, ": ", &strerr_sys);
+				return;
+			}
+			tfile = file;
+		} else
+		if (!str_diffn(file, "sbin", 4))
+		{
+			if (stat("../sbin", &st) == -1)
+			{
+				strerr_warn4(WARNING, "unable to stat .../", file, ": ", &strerr_sys);
+				return;
+			} else {
+				if (chdir("../sbin") == -1) {
+					strerr_warn4(WARNING, "unable to chdir", "../sbin", ": ", &strerr_sys);
+					return;
+				}
+			}
+			if (stat(file, &st) == -1)
+			{
+				if (errno == error_noent)
+					strerr_warn6(WARNING, prefix1, prefix2, prefix3, file, " does not exist", 0);
+				else
+					strerr_warn4(WARNING, "unable to stat .../", file, ": ", &strerr_sys);
+				return;
+			}
+			tfile = file;
+		} else
+		{
+			if (!str_diffn(file, "man/", 4))
+				strerr_warn6(WARNING, prefix1, prefix2, prefix3, file, " does not exist", 0);
+			else
+				strerr_die6sys(111, FATAL, prefix1, prefix2, prefix3, file, ": ");
+			return;
+		}
+	}
 	if ((uid != -1) && (st.st_uid != uid))
 	{
 		err = 1;
