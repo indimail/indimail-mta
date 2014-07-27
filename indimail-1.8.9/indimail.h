@@ -1,5 +1,8 @@
 /*
  * $Log: indimail.h,v $
+ * Revision 2.214  2014-07-27 12:30:03+05:30  Cprogrammer
+ * added timestamp column to indimail tables
+ *
  * Revision 2.213  2014-07-03 00:04:05+05:30  Cprogrammer
  * added function valias_track()
  *
@@ -955,7 +958,7 @@
 #define INDIMAILH_H
 
 #ifndef	lint
-static char     sccsidh[] = "$Id: indimail.h,v 2.213 2014-07-03 00:04:05+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsidh[] = "$Id: indimail.h,v 2.214 2014-07-27 12:30:03+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef HAVE_CONFIG_H
@@ -1036,7 +1039,7 @@ port     int not null, \
 dbname   char(28) not null, \
 user     char(28) not null, \
 passwd   char(28) not null, \
-timestamp timestamp not null, \
+timestamp TIMESTAMP not null, \
 unique index (filename, domain, server, mdahost, port, dbname, user, passwd), \
 index (domain)"
 
@@ -1156,7 +1159,7 @@ pw_name char(40) not null, \
 pw_domain char(67) not null, \
 pw_passwd char(128) not null, \
 host char(64) not null, \
-timestamp datetime DEFAULT \"0000-00-00 00:00:00\" NOT NULL, \
+timestamp DATETIME DEFAULT \"0000-00-00 00:00:00\" NOT NULL, \
 primary key (pw_name, pw_domain)"
 
 #define HOST_TABLE_LAYOUT "\
@@ -1217,6 +1220,7 @@ pw_gid int, \
 pw_gecos char(48) not null, \
 pw_dir char(156), \
 pw_shell char(30), \
+timestamp TIMESTAMP not null, \
 primary key (pw_name, pw_domain), index pw_gecos (pw_gecos(25)), index pw_uid (pw_uid) "
 
 /* large site table layout */
@@ -1228,6 +1232,7 @@ pw_gid int, \
 pw_gecos char(48), \
 pw_dir char(156), \
 pw_shell char(30), \
+timestamp TIMESTAMP not null, \
 primary key(pw_name)"
 
 #define RELAY_TABLE_LAYOUT "\
@@ -1240,6 +1245,7 @@ unique index (email, ipaddr), index(ipaddr), index(timestamp)"
 #define IP_ALIAS_TABLE_LAYOUT "\
 ipaddr char(18) not null, \
 domain char(67), \
+timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP NOT NULL,
 primary key(ipaddr)"
 #endif
 
@@ -1262,7 +1268,7 @@ service char(10) not null, \
 remote_ip char(16) not null,  \
 quota int not null, \
 gecos char(48) not null, \
-timestamp datetime DEFAULT \"0000-00-00 00:00:00\" NOT NULL, \
+timestamp DATETIME DEFAULT \"0000-00-00 00:00:00\" NOT NULL, \
 primary key (user, domain, service), index gecos (gecos), index quota (quota), \
 index timestamp (timestamp)"
 
@@ -1270,7 +1276,7 @@ index timestamp (timestamp)"
 user char(40) not null, \
 domain char(67) not null,\
 quota bigint unsigned not null, \
-timestamp datetime DEFAULT \"0000-00-00 00:00:00\" NOT NULL, \
+timestamp DATETIME DEFAULT \"0000-00-00 00:00:00\" NOT NULL, \
 primary key(user, domain), index quota (quota)"
 #endif
 
@@ -1297,6 +1303,7 @@ level_index0, level_index1, level_index2, the_dir"
 alias  char(40) not null, \
 domain char(67) not null, \
 valias_line char(254) not null, \
+timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP NOT NULL,
 unique index(alias, domain, valias_line), index (alias, domain)"
 #endif
 
@@ -1322,7 +1329,7 @@ domain char(67), \
 logon char(32), \
 remoteip char(18), \
 message varchar(254), \
-timestamp timestamp, \
+timestamp TIMESTAMP, \
 error int, \
 index user_idx (user), \
 index domain_idx (domain), \
@@ -1376,6 +1383,7 @@ max_users bigint not null, \
 cur_users bigint not null, \
 max_size bigint not null, \
 cur_size bigint not null, \
+timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP NOT NULL,
 primary key (filesystem, host), index status (status)"
 
 #ifdef VFILTER
@@ -1389,6 +1397,7 @@ keyword char(64) not null, \
 destination char(156) not null, \
 bounce_action char(64) not null, \
 mailing_list tinyint not null, \
+timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP NOT NULL,
 primary key(emailid, filter_no), unique index (emailid, header_name, comparision, keyword, destination)"
 #endif
 
@@ -1396,6 +1405,7 @@ primary key(emailid, filter_no), unique index (emailid, header_name, comparision
 emailid char(107) not null, \
 filter_no smallint not null, \
 mailing_list char(64) not null, \
+timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP NOT NULL,
 primary key(emailid, mailing_list), index emailid (emailid, filter_no)"
 
 #ifdef ENABLE_DOMAIN_LIMITS
@@ -1433,12 +1443,14 @@ primary key(emailid, mailing_list), index emailid (emailid, filter_no)"
 pw_name char(40) not null, \
 pw_domain char(67) not null, \
 domain_list char(67), \
+timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP NOT NULL,
 unique index atrnmap (pw_name, pw_domain, domain_list)"
 
 #define PRIV_CMD_LAYOUT "\
 user        char(32) not null, \
 program     char(64) not null, \
 cmdswitches char(128), \
+timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP NOT NULL,
 primary key(user, program)"
 
 #endif /*- #ifdef USE_MYSQL */
