@@ -1,5 +1,8 @@
 /*
  * $Log: qscanq.c,v $
+ * Revision 1.5  2014-07-27 15:16:57+05:30  Cprogrammer
+ * change to qscand uid if run through non qscand user
+ *
  * Revision 1.4  2005-04-25 22:53:49+05:30  Cprogrammer
  * added error check for setreuid()
  *
@@ -18,6 +21,7 @@
 #include <sys/stat.h>
 #include "substdio.h"
 #include "auto_spool.h"
+#include "auto_uids.h"
 #include "auto_fnlen.h"
 #include "mkfn.h"
 #include "auto_retries.h"
@@ -72,14 +76,24 @@ int
 main(int argc, char *argv[])
 {
 	int             c = 1, qstat = -1;
+	uid_t           uid;
 	pid_t           pid = 0;
 	char           *ptr;
 
+	if (uidinit(0) == -1)
+		_exit(67);
 	/*- Check whether we should be logging errors */
 	if (env_get("DEBUG"))
 		flaglog = 1;
 	umask(0);
 
+	uid = getuid();
+	if (uid != auto_uidc && setreuid(auto_uidc, auto_uidc))
+	{
+		if (flaglog)
+			strerr_die2sys(111, FATAL, "setreuid failed: ");
+		_exit(111);
+	}
 	if (!(ptr = env_get("SCANDIR")))
 		ptr = (char *) auto_spool;
 	/*- [ cwd := spool folder ] */
@@ -170,7 +184,7 @@ main(int argc, char *argv[])
 void
 getversion_qscanq_c()
 {
-	static char    *x = "$Id: qscanq.c,v 1.4 2005-04-25 22:53:49+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: qscanq.c,v 1.5 2014-07-27 15:16:57+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
