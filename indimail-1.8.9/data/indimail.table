@@ -8,4 +8,5 @@ pw_gid int,
 pw_gecos char(48) not null,
 pw_dir char(156),
 pw_shell char(30),
+timestamp TIMESTAMP not null,
 primary key (pw_name, pw_domain), index pw_gecos (pw_gecos(25)), index pw_uid (pw_uid))
