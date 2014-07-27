@@ -1,5 +1,8 @@
 /*
  * $Log: cleanq.c,v $
+ * Revision 1.6  2014-07-27 15:16:18+05:30  Cprogrammer
+ * change to qscand uid if run through non qscand user
+ *
  * Revision 1.5  2014-01-29 13:59:37+05:30  Cprogrammer
  * fixed compilation warnings
  *
@@ -24,6 +27,7 @@
 #include "strerr.h"
 #include "direntry.h"
 #include "auto_ageout.h"
+#include "auto_uids.h"
 #include "wait.h"
 #include "str.h"
 #include <time.h>
@@ -158,7 +162,7 @@ tryclean(const char *d)
 	}
 	if ((st.st_mode & S_IFMT) != S_IFDIR)
 	{
-		warn_file(d, "not a directory");
+		warn_file(d, "not a directory. Deleting...");
 		unlink(d); /*- If it fails, oh well.  */
 		return;
 	}
@@ -192,7 +196,10 @@ main(int argc, char **argv)
 	DIR            *dir;
 	direntry       *d;
 	int             opt;
+	uid_t           uid;
 
+	if (uidinit(0) == -1)
+		_exit(67);
 	while ((opt = getopt(argc, argv, "l")) != -1)
 	{
 		switch (opt)
@@ -209,6 +216,13 @@ main(int argc, char **argv)
 		my_puts("cleanq starting\n");
 		if (substdio_flush(&ss1) == -1)
 			_exit(111);
+	}
+	uid = getuid();
+	if (uid != auto_uidc && setreuid(auto_uidc, auto_uidc))
+	{
+		if (flaglog)
+			strerr_die2sys(111, FATAL, "setreuid failed: ");
+		_exit(111);
 	}
 	/*- Open the current directory */
 	dir = opendir(".");
@@ -239,7 +253,7 @@ main(int argc, char **argv)
 void
 getversion_cleanq_c()
 {
-	static char    *x = "$Id: cleanq.c,v 1.5 2014-01-29 13:59:37+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: cleanq.c,v 1.6 2014-07-27 15:16:18+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
