@@ -1,4 +1,4 @@
-/var/qmail/qscanq
+/var/indimail/qscanq
 
 The path to the folder in which virus scanning takes place. The folder
 named here is created as a daemontools service, and the actual scanning
