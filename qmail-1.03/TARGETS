@@ -836,9 +836,6 @@ supervise.o
 svc
 svcfns.o
 svc.o
-svctool
-svctool.0
-svctool.8
 svok
 svok.o
 svscan
