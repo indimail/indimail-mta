@@ -580,7 +580,7 @@ if [ /usr/lib/sm.bin/sendmail ] ; then
 	if [ -x /usr/sbin/update-alternatives ] ; then
 	/usr/sbin/update-alternatives --remove-all sendmail-mta || true
 	/usr/sbin/update-alternatives --remove-all sendmail-msp || true
-	elif [ -x /usr/bin/update-alternatives] ; then
+	elif [ -x /usr/bin/update-alternatives ] ; then
 	/usr/bin/update-alternatives --remove-all sendmail-mta || true
 	/usr/bin/update-alternatives --remove-all sendmail-msp || true
 	fi
