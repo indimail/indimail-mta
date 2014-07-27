@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail.spec.in,v 2.290 2014-06-19 16:46:10+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 2.291 2014-07-27 12:31:45+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %define _unpackaged_files_terminate_build 1
 
@@ -2331,7 +2331,7 @@ fi
 # svscanlog service
 %{_prefix}/sbin/svctool --svscanlog --servicedir=%{servicedir}
 
-echo "Creating catch-all alias (%{_prefix}/alias/Maildir) for all system users"
+echo "Creating default qmail configuraton and catch-all alias (${_prefix}/alias/Maildir) for all system users"
 %{_prefix}/sbin/svctool --config=qmail --postmaster=%{_prefix}/alias/Maildir/ \
 	--default-domain=%{default_domain} --mysqlhost=localhost --mysqluser=indimail \
 	--mysqlpass=ssh-1.5- --mysqlsocket=/tmp/mysql.sock
