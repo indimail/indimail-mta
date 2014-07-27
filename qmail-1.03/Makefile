@@ -172,6 +172,8 @@ auto_uids.h: conf-users conf-groups
 	echo "extern int auto_gidv;" ;\
 	echo "extern int auto_gidc;" ;\
 	echo ""; \
+	echo "int             uidinit(int);"; \
+	echo ""; \
 	echo "#endif"; \
 	) > auto_uids.h
 auto_uids.c: \
@@ -1068,15 +1070,16 @@ qhpsi.o: compile qhpsi.c strerr.h env.h str.h auto_qmail.h \
 stralloc.h auto_uids.h
 	./compile $(inc_deps) qhpsi.c
 
-qscanq: load qscanq.o substdio.a strerr.a env.a str.a wait.a error.a \
+qscanq: load qscanq.o auto_uids.o get_uid.o substdio.a strerr.a env.a str.a wait.a error.a \
 timestamp.o tai.a fd.a auto_spool.o mkfn.o fmt_xpid.o do_cleanq.o \
 auto_cleaner.o auto_qstdin.o sig.a alloc.a
-	./load qscanq strerr.a env.a str.a wait.a error.a timestamp.o \
+	./load qscanq auto_uids.o get_uid.o strerr.a env.a str.a wait.a error.a timestamp.o \
 	tai.a fd.a auto_spool.o mkfn.o fmt_xpid.o do_cleanq.o auto_cleaner.o \
 	auto_qstdin.o byte_copy.o sig.a substdio.a alloc.a
 
 qscanq.o: compile qscanq.c auto_spool.h auto_fnlen.h mkfn.h \
-auto_retries.h wait.h sig.h substdio.h strerr.h env.h exitcodes.h
+auto_uids.h auto_retries.h wait.h sig.h substdio.h strerr.h \
+env.h exitcodes.h
 	./compile qscanq.c
 
 timestamp.o: compile timestamp.c taia.h timestamp.h tai.h uint64.h
@@ -1148,8 +1151,8 @@ auto-strarr: load auto-strarr.o substdio.a error.a str.a
 auto-strarr.o: compile auto-strarr.c substdio.h exit.h
 	./compile auto-strarr.c
 
-cleanq: load cleanq.o strerr.a error.a substdio.a str.a wait.a getopt.a
-	./load cleanq strerr.a error.a substdio.a str.a wait.a getopt.a 
+cleanq: load cleanq.o get_uid.o auto_uids.o strerr.a error.a substdio.a str.a wait.a getopt.a
+	./load cleanq get_uid.o auto_uids.o strerr.a error.a substdio.a str.a wait.a getopt.a 
 
 cleanq.o: compile cleanq.c substdio.h error.h strerr.h direntry.h \
 auto_ageout.h wait.h sgetopt.h str.h subgetopt.h
