@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail.spec.in,v 2.291 2014-07-27 12:31:45+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 2.292 2014-08-08 13:24:14+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %define _unpackaged_files_terminate_build 1
 
@@ -2505,6 +2505,9 @@ do
 	fi
 	echo "1" > %{servicedir}/qmail-smtpd.$port/variables/DISABLE_PLUGIN
 done
+#
+# qmail-inject, sendmail default configuration
+#
 if [ %noclamav -eq 0 -o $clamav_os -eq 1 ] ; then
 	%{_prefix}/sbin/svctool --queueParam=defaultqueue \
 		--qbase=%{qbase} --qcount=%{qcount} --qstart=1 \
@@ -2521,6 +2524,9 @@ else
 		--private_key=%{_prefix}/control/domainkeys/%/%dkimkeyfn \
 		$extra_opt
 fi
+#
+# ODMR Service
+#
 %{_prefix}/sbin/svctool --smtp=366 --odmr --servicedir=%{servicedir} \
 	--query-cache --password-cache --memory=%{smtp_soft_mem}
 echo "1" > %{servicedir}/qmail-smtpd.366/variables/DISABLE_PLUGIN
@@ -2674,6 +2680,9 @@ UEsDBAoAAQAAAEBHYzCf4kJRDDAAAAAwAAAKAAAAc3ZtaXhlLmV4ZcuI1rOkjfn48VwCkMYHRTfM
 EOF
 %{__chown} qscand:qscand %{_prefix}/control/signatures
 
+#
+# bogofilter configuration
+#
 if [ %nobogofilter -eq 0 ] ; then
 	%{_prefix}/sbin/svctool --config=bogofilter
 fi
