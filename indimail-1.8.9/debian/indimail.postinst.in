@@ -370,6 +370,9 @@ do
 	fi
 	echo "1" > ${servicedir}/qmail-smtpd.$port/variables/DISABLE_PLUGIN
 done
+#
+# qmail-inject, sendmail default configuration
+#
 if [ $noclamav -eq 0 -o $clamav_os -eq 1 ] ; then
 	${prefix}/sbin/svctool --queueParam=defaultqueue \
 		--qbase=${qbase} --qcount=${qcount} --qstart=1 \
@@ -386,6 +389,9 @@ else
 		--private_key=${prefix}/control/domainkeys/%/$dkimkeyfn \
 		$extra_opt
 fi
+#
+# ODMR Service
+#
 ${prefix}/sbin/svctool --smtp=366 --odmr --servicedir=$servicedir \
 	--query-cache --password-cache
 echo "1" > ${servicedir}/qmail-smtpd.366/variables/DISABLE_PLUGIN
@@ -501,6 +507,7 @@ ${prefix}/sbin/svctool --poppass=106 --localip=0 --maxdaemons=40 --maxperip=25 \
 # virus/spam filtering
 ${prefix}/sbin/svctool --qscanq --servicedir=${servicedir} --scanint=200
 if [ $noclamav -eq 0 -o $clamav_os -eq 1 ] ; then
+	# create clamd.conf, freshclam.conf
 	${prefix}/sbin/svctool --config=clamd
 	# create clamd, freshclam service
 	${prefix}/sbin/svctool --clamd --servicedir=${servicedir} --clamdPrefix=$clamdPrefix \
@@ -518,10 +525,6 @@ if [ $noclamav -eq 0 -o $clamav_os -eq 1 ] ; then
 			$TOUCH ${servicedir}/freshclam/down
 		fi
 	fi
-fi
-if [ $nobogofilter -eq 0 ] ; then
-	${prefix}/sbin/svctool --config=bogofilter
-	${rm} -f ${prefix}/etc/bogofilter.cf.example
 fi
 
 /bin/cat <<EOFUU > ${prefix}/control/signatures
@@ -546,6 +549,13 @@ R0lGODlhaAA7APcAAP///+rp6puSp6GZrDUjUUc6Zn53mFJMdbGvvVtXh2xre8bF1x8cU4yLprOy
 EOFUU
 /bin/chown qscand:qscand ${prefix}/control/signatures
 
+#
+# bogofilter configuration
+#
+if [ $nobogofilter -eq 0 ] ; then
+	${prefix}/sbin/svctool --config=bogofilter
+	${rm} -f ${prefix}/etc/bogofilter.cf.example
+fi
 # rebuild cdb
 for i in smtp qmtp qmqp imap pop3 poppass
 do
