@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-lspawn.c,v $
+ * Revision 1.20  2014-11-04 23:12:54+05:30  Cprogrammer
+ * BUG - fixed incorrect parsing of users with hyphen in username
+ *
  * Revision 1.19  2011-07-29 09:29:34+05:30  Cprogrammer
  * fixed gcc 4.6 warnings
  *
@@ -286,11 +289,11 @@ spawn(fdmess, fdout, msgsize, sender, qqeh, recip, at)
 
 #ifdef INDIMAIL
 /*
- * saldo-biuro.com.pl-test1@saldo-biuro.com.pl
+ * saldo-biuro.com.pl-david-goliath@saldo-biuro.com.pl
  */
 	if (env_get("AUTHSELF") && isvirtualdomain(recip + at + 1) && !vauth_open((char *) 0))
 	{
-		for (f = at - 1;f && recip[f] != '-';f--);
+		f = str_len(recip + at + 1);
 		if (!env_unset("PWSTRUCT"))
 			return (-1);
 		for(cptr = user, ptr = recip + f + 1;*ptr && *ptr != '@';*cptr++ = *ptr++);
@@ -415,7 +418,7 @@ spawn(fdmess, fdout, msgsize, sender, qqeh, recip, at)
 void
 getversion_qmail_lspawn_c()
 {
-	static char    *x = "$Id: qmail-lspawn.c,v 1.19 2011-07-29 09:29:34+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: qmail-lspawn.c,v 1.20 2014-11-04 23:12:54+05:30 Cprogrammer Exp mbhangui $";
 
 #ifdef INDIMAIL
 	if (x)
