@@ -379,6 +379,19 @@ refuses to run.  If the envelope sender address matches a domain in the
 control file, the envelope sender domain will be used instead of this value.
 
 .TP 5
+.I helohostbyip
+Map helohost for specific outgoing IPs.s,
+for use solely in saying hello to the remote SMTP server.
+Default:
+.IR me ,
+if that is supplied;
+otherwise
+.B qmail-remote
+refuses to run.  If the envelope sender address matches a domain in the
+.IR domainbindings
+control file, the envelope sender domain will be used instead of this value.
+
+.TP 5
 .I smtproutes
 Artificial SMTP routes.
 Each route has the form
