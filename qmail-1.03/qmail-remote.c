@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-remote.c,v $
+ * Revision 1.91  2014-12-18 11:18:41+05:30  Cprogrammer
+ * added helohostbyip
+ *
  * Revision 1.90  2014-04-03 21:35:39+05:30  Cprogrammer
  * added ability to disable specific AUTH methods - PLAIN, LOGIN, CRAM-MD5, CRAM-SHA1, CRAM-SHA256
  * CRAM-RIPEMD, DIGEST-MD5
@@ -360,6 +363,7 @@ static stralloc sauninit = { 0 };
 stralloc        helohost = { 0 };
 stralloc        senderbind = { 0 };
 stralloc        localips = { 0 };
+stralloc        helohosts = { 0 };
 stralloc        outgoingip = { 0 };
 int             cntrl_stat1, cntrl_stat2;
 stralloc        smtproutes = { 0 };
@@ -372,6 +376,7 @@ int             type = 0;
 int             mxps = 0;
 #endif
 struct constmap maplocalips;
+struct constmap maphelohosts;
 stralloc        host = { 0 };
 stralloc        rhost = { 0 }; /*- host to which qmail-remote ultimately connects */
 stralloc        sender = { 0 };
@@ -1191,14 +1196,14 @@ quit(char *prepend, char *append, int code, int die)
 		X509           *peercert;
 
 		out("STARTTLS proto=");
-		out(SSL_get_version(ssl));
+		out((char *) SSL_get_version(ssl));
 		out("; cipher=");
-		out(SSL_get_cipher(ssl));
+		out((char *) SSL_get_cipher(ssl));
 
 		/*
 		 * we want certificate details 
 		 */
-		if (peercert = SSL_get_peer_certificate(ssl))
+		if ((peercert = SSL_get_peer_certificate(ssl)))
 		{
 			char           *str;
 
@@ -2499,7 +2504,7 @@ void
 getcontrols()
 {
 	int             r;
-	char           *ip, *senderdomain, *x;
+	char           *routes, *senderdomain, *ip, *x;
 	static stralloc controlfile, outgoingipfn;
 
 	if (control_init() == -1)
@@ -2510,9 +2515,9 @@ getcontrols()
 		temp_control();
 	if (control_rldef(&helohost, "helohost", 1, (char *) 0) != 1)
 		temp_control();
-	if ((ip = env_get("QMTPROUTE"))) /* mysql */
+	if ((routes = env_get("QMTPROUTE"))) /* mysql */
 	{
-		if (!stralloc_copyb(&qmtproutes, ip, str_len(ip) + 1))
+		if (!stralloc_copyb(&qmtproutes, routes, str_len(routes) + 1))
 			temp_nomem();
 		cntrl_stat2 = 2;
 	} else
@@ -2531,9 +2536,9 @@ getcontrols()
 			temp_nomem();
 		break;
 	}
-	if ((ip = env_get("SMTPROUTE"))) /* mysql */
+	if ((routes = env_get("SMTPROUTE"))) /* mysql */
 	{
-		if (!stralloc_copyb(&smtproutes, ip, str_len(ip) + 1))
+		if (!stralloc_copyb(&smtproutes, routes, str_len(routes) + 1))
 			temp_nomem();
 		cntrl_stat1 = 2;
 	} else
@@ -2683,37 +2688,55 @@ getcontrols()
 
 		if ((i = str_rchr(sender.s, '@')))
 			senderdomain = sender.s + i + 1;
-		stralloc_copyb(&senderbind, senderdomain, sender.len - i - 1);
-		senderdomain = constmap(&maplocalips, sender.s, sender.len);
-		if (senderdomain && !*senderdomain)
-			senderdomain = 0;
-		for (i = 0;!senderdomain && i <= senderbind.len;++i)
+		if (!stralloc_copyb(&senderbind, senderdomain, sender.len - i - 1))
+			temp_nomem();
+		ip = constmap(&maplocalips, sender.s, sender.len);
+		if (ip && !*ip)
+			ip = 0;
+		for (i = 0;!ip && i <= senderbind.len;++i)
 		{
 			if (!i || i == senderbind.len || senderbind.s[i] == '.')
 			{
-				if ((senderdomain = constmap(&maplocalips, senderbind.s + i, senderbind.len - i)))
+				if ((ip = constmap(&maplocalips, senderbind.s + i, senderbind.len - i)))
 					break;
 			}
 		}
-		if (senderdomain && !*senderdomain)
-			senderdomain = 0;
-		if (senderdomain)
+		if (ip && !*ip)
+			ip = 0;
+		if (ip)
 		{ 
-			if (!stralloc_copys(&outgoingip, senderdomain))
+			if (!stralloc_copys(&outgoingip, ip))
 				temp_nomem();
 #ifdef IPV6
-			if (!ip6_scan(senderdomain, &outip.ip6))
+			if (!ip6_scan(ip, &outip.ip6))
 				temp_noip();
-			if (ip6_isv4mapped(&outip.ip6.d) && !ip_scan(senderdomain, &outip.ip))
+			if (ip6_isv4mapped(&outip.ip6.d) && !ip_scan(ip, &outip.ip))
 				temp_noip();
 #else
-			if (!ip_scan(senderdomain, &outip.ip))
+			if (!ip_scan(ip, &outip.ip))
 				temp_noip();
 #endif
 			helohost = senderbind;
 		}
 	}
 	/*- ---------------- END DOMAIN BINDING PATCH */
+	/*- helohostbyip */
+	switch (control_readfile(&helohosts, (x = env_get("HELOHOSTBYIP")) ? x : "helohostbyip", 0))
+	{
+	case -1:
+		temp_control();
+	case 0:
+		if (!constmap_init(&maphelohosts, "", 0, 1))
+			temp_nomem();
+		break;
+	case 1:
+		if (!constmap_init(&maphelohosts, helohosts.s, helohosts.len, 1))
+			temp_nomem();
+		break;
+	}
+	x = constmap(&maphelohosts, outgoingip.s, outgoingip.len);
+	if (x && *x && !stralloc_copys(&helohost, x))
+		temp_nomem();
 }
 
 #if BATV
@@ -3135,7 +3158,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_remote_c()
 {
-	static char    *x = "$Id: qmail-remote.c,v 1.90 2014-04-03 21:35:39+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: qmail-remote.c,v 1.91 2014-12-18 11:18:41+05:30 Cprogrammer Exp mbhangui $";
 	x=sccsidauthcramh;
 	x=sccsidauthdigestmd5h;
 	x++;
