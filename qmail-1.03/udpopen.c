@@ -1,5 +1,8 @@
 /*
  * $Log: udpopen.c,v $
+ * Revision 1.2  2015-04-10 19:43:19+05:30  Cprogrammer
+ * fixed compiler warning
+ *
  * Revision 1.1  2015-04-10 19:38:13+05:30  Cprogrammer
  * Initial revision
  *
@@ -7,7 +10,7 @@
  */
 
 #ifndef	lint
-static char     sccsid[] = "$Id: udpopen.c,v 1.1 2015-04-10 19:38:13+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: udpopen.c,v 1.2 2015-04-10 19:43:19+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #include "hasindimail.h"
@@ -146,6 +149,12 @@ void
 getversion_udpopen_c()
 {
 	char *x = sccsid;
+#ifdef INDIMAIL
+	if (x)
+		x = sccsidh;
+#else
 	if (x)
 		x++;
+	x=sccsidauthcramh;
+#endif
 }
