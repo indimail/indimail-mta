@@ -1,5 +1,8 @@
 /*
  * $Log: udpopen.c,v $
+ * Revision 2.3  2015-04-10 19:01:17+05:30  Cprogrammer
+ * use SOCK_DRAM for UDP
+ *
  * Revision 2.2  2011-04-03 09:38:29+05:30  Cprogrammer
  * ported for ipv6
  *
@@ -9,7 +12,7 @@
  */
 
 #ifndef	lint
-static char     sccsid[] = "$Id: udpopen.c,v 2.2 2011-04-03 09:38:29+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: udpopen.c,v 2.3 2015-04-10 19:01:17+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #include "indimail.h"
@@ -47,7 +50,7 @@ udpopen(rhost, servicename)
 #ifdef ENABLE_IPV6
 	bzero(&hints, sizeof(struct addrinfo));
 	hints.ai_family = AF_UNSPEC;
-	hints.ai_socktype = SOCK_STREAM;
+	hints.ai_socktype = SOCK_DGRAM;
 	if (!servicename)
 	{
 		errno = EINVAL;
