@@ -1,0 +1,35 @@
+.TH udpclient 1
+.SH NAME
+udpclient \- log messages via udplogger(8)
+
+.SH SYNOPSIS
+.B udpclient
+.B \-h \fIhost
+.B \-p \fIport
+message1 message2 ...
+
+.SH DESCRIPTION
+.PP
+\fBudpclient\fR communicates with udplogger(8) using UDP. It simply sends \fImessage1\fR, \fImessage2\fR separated
+by white space in a single line.
+
+.SH OPTIONS
+.PP
+
+.TP
+\fB\-h\fR \fIhost\fR
+Connect to host \fIhost\fR
+
+.TP
+\fB\-p\fR \fIport\fR
+Connect to port \fIport\fR
+
+.SH RETURN VALUE
+0 if all steps were successful, non-zero otherwise. If any of the steps fail, a diagnostic
+message is printed.
+
+.SH AUTHORS
+\fBudpclient(1)\fR has been written by Manvendra Bhangui for \fBTagrem Technologies Pvt. Ltd.\fR. - https://www.tagrem.com
+
+.SH "SEE ALSO"
+udplogger(8), multilog(8)
