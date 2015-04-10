@@ -1,5 +1,8 @@
 /*
  * $Log: hier.c,v $
+ * Revision 1.185  2015-04-10 19:41:41+05:30  Cprogrammer
+ * added udplogger, udpclient
+ *
  * Revision 1.184  2014-06-13 17:58:01+05:30  Cprogrammer
  * removed qmail-queue-print
  *
@@ -607,6 +610,8 @@ hier(inst_dir)
 	c(auto_qmail_home, "bin", "qmail-sigalrm", auto_uido, auto_gidq, 0555);
 	c(auto_qmail_home, "bin", "qmail-sigterm", auto_uido, auto_gidq, 0555);
 	c(auto_qmail_home, "bin", "instcheck", auto_uido, auto_gidq, 0500);
+	c(auto_qmail_home, "bin", "udplogger", auto_uido, auto_gidq, 0555);
+	c(auto_qmail_home, "bin", "udpclient", auto_uido, auto_gidq, 0555);
 
 	/* mess822 */
 	c(auto_qmail_home, "bin", "ofmipd", auto_uido, auto_gidq, 0555);
@@ -993,6 +998,11 @@ hier(inst_dir)
 	c(auto_qmail_home, "man/man1", "rrt.1", auto_uido, auto_gidq, 0444);
 	c(auto_qmail_home, "man/man1", "qmail-rm.1", auto_uido, auto_gidq, 0444);
 	c(auto_qmail_home, "man/cat1", "qmail-rm.0", auto_uido, auto_gidq, 0444);
+	c(auto_qmail_home, "man/man1", "udpclient.1", auto_uido, auto_gidq, 0444);
+	c(auto_qmail_home, "man/man1", "drate.1", auto_uido, auto_gidq, 0444);
+	c(auto_qmail_home, "man/man1", "plugtest.1", auto_uido, auto_gidq, 0444);
+	c(auto_qmail_home, "man/man1", "qmail-qfilter.1", auto_uido, auto_gidq, 0444);
+	c(auto_qmail_home, "man/cat1", "qmail-qfilter.0", auto_uido, auto_gidq, 0444);
 
 	c(auto_qmail_home, "man/man3", "alloc.3", auto_uido, auto_gidq, 0444);
 	c(auto_qmail_home, "man/man3", "case.3", auto_uido, auto_gidq, 0444);
@@ -1125,10 +1135,6 @@ hier(inst_dir)
 	c(auto_qmail_home, "man/man8", "qmail-multi.8", auto_uido, auto_gidq, 0444);
 	c(auto_qmail_home, "man/cat8", "qmail-multi.0", auto_uido, auto_gidq, 0444);
 	c(auto_qmail_home, "man/man8", "surblfilter.8", auto_uido, auto_gidq, 0444);
-	c(auto_qmail_home, "man/man1", "drate.1", auto_uido, auto_gidq, 0444);
-	c(auto_qmail_home, "man/man1", "plugtest.1", auto_uido, auto_gidq, 0444);
-	c(auto_qmail_home, "man/man1", "qmail-qfilter.1", auto_uido, auto_gidq, 0444);
-	c(auto_qmail_home, "man/cat1", "qmail-qfilter.0", auto_uido, auto_gidq, 0444);
 	c(auto_qmail_home, "man/man8", "spawn-filter.8", auto_uido, auto_gidq, 0444);
 	c(auto_qmail_home, "man/cat8", "spawn-filter.0", auto_uido, auto_gidq, 0444);
 	c(auto_qmail_home, "man/man8", "qmail-inject.8", auto_uido, auto_gidq, 0444);
@@ -1204,6 +1210,7 @@ hier(inst_dir)
 	c(auto_qmail_home, "man/cat8", "run-cleanq.0", auto_uido, auto_gidq, 0444);
 	c(auto_qmail_home, "man/man8", "sys-checkpwd.8", auto_uido, auto_gidq, 0444);
 	c(auto_qmail_home, "man/man8", "ldap-checkpwd.8", auto_uido, auto_gidq, 0444);
+	c(auto_qmail_home, "man/man8", "udplogger.8", auto_uido, auto_gidq, 0444);
 }
 
 #ifdef INDIMAIL
@@ -1675,7 +1682,7 @@ _hier(inst_dir)
 void
 getversion_install_big_c()
 {
-	static char    *x = "$Id: hier.c,v 1.184 2014-06-13 17:58:01+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: hier.c,v 1.185 2015-04-10 19:41:41+05:30 Cprogrammer Exp mbhangui $";
 
 #ifdef INDIMAIL
 	if (x)
