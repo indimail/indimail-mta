@@ -1026,3 +1026,8 @@ hmac_sha512.o
 srs.lib
 qaes
 qaes.o
+udplogger.o
+udplogger
+udpclient.o
+udpclient
+udpopen.o

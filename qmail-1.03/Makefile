@@ -1267,7 +1267,7 @@ envdir envuidgid fghack multilog pgrphack readproctitle setlock \
 setuidgid softlimit supervise svc svok svscan svstat tai64n tai64nlocal tai64nunix \
 recordio argv0 addcr delcr fixcrio generic.so cdbmake cdbget cdbgetm \
 cdbdump cdbstats cdbtest cdbmake-12 cdbmake-sv testzero dk-filter \
-uacl smtpd-plugin.so smtpd-plugin0.so
+uacl udplogger udpclient smtpd-plugin.so smtpd-plugin0.so
 
 analyzer: \
 mlmatchup matchup columnt zoverall zsendmail xqp xsender xrecipient ddist \
@@ -5544,6 +5544,26 @@ load cidr.o
 cidr.o: \
 compile cidr.c
 	./compile cidr.c
+
+udplogger: \
+load udplogger.o fmt_ulong.o sgetopt.o subgetopt.o scan_ulong.o strerr.a substdio.a str.a sig.a error.a
+	./load udplogger fmt_ulong.o sgetopt.o subgetopt.o scan_ulong.o strerr.a substdio.a str.a sig.a error.a
+
+udplogger.o: \
+compile udplogger.c sgetopt.h subfd.h strerr.h sig.h fmt.h scan.h byte.h error.h
+	./compile udplogger.c
+
+udpclient: \
+load udpclient.o udpopen.o sgetopt.o subgetopt.o fmt_ulong.o strerr.a substdio.a str.a error.a indimail.lib
+	./load udpclient udpopen.o sgetopt.o subgetopt.o fmt_ulong.o strerr.a substdio.a str.a error.a `cat indimail.lib`
+
+udpopen.o: \
+compile udpopen.c subfd.h udpopen.h strerr.h fmt.h hasindimail.h
+	./compile $(inc_deps) `grep -h -v "^#" conf-ip` udpopen.c
+
+udpclient.o: \
+compile udpclient.c subfd.h strerr.h
+	./compile udpclient.c
 
 ################### PLUGINS ########################################
 smtpd-plugin0.so: dnsbl.o
