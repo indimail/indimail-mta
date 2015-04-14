@@ -1,5 +1,8 @@
 /*
  * $Log: envrules.c,v $
+ * Revision 1.17  2015-04-14 20:01:15+05:30  Cprogrammer
+ * fixed matching of null address
+ *
  * Revision 1.16  2014-03-07 02:07:16+05:30  Cprogrammer
  * use env variable USE_FNMATCH to use fnmatch() for pattern matching
  *
@@ -117,15 +120,15 @@ envrules(char *email, char *envrules_f, char *rulesfile, char **errStr)
 	for (count = len = 0, ptr = rules.s;len < rules.len;)
 	{
 		len += (str_len(ptr) + 1);
-		if (!*email && !str_diff(ptr, "<>"))
-			nullflag = 1;
-		else
-			nullflag = 0;
 		for (cptr = ptr;*cptr && *cptr != ':';cptr++);
 		if (*cptr == ':')
 			*cptr = 0;
 		else
 			continue;
+		if (!*email && (!*ptr || !str_diffn(ptr, "<>", 3)))
+			nullflag = 1;
+		else
+			nullflag = 0;
 		if (nullflag || do_match(use_regex, email, ptr, errStr))
 		{
 			if (parse_env(cptr + 1))
@@ -226,7 +229,7 @@ parse_env(char *envStrings)
 void
 getversion_envrules_c()
 {
-	static char    *x = "$Id: envrules.c,v 1.16 2014-03-07 02:07:16+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: envrules.c,v 1.17 2015-04-14 20:01:15+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
