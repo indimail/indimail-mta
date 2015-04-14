@@ -1,5 +1,8 @@
 /*
  * $Log: udpopen.c,v $
+ * Revision 1.3  2015-04-14 20:02:48+05:30  Cprogrammer
+ * use udp and htons for port
+ *
  * Revision 1.2  2015-04-10 19:43:19+05:30  Cprogrammer
  * fixed compiler warning
  *
@@ -10,7 +13,7 @@
  */
 
 #ifndef	lint
-static char     sccsid[] = "$Id: udpopen.c,v 1.2 2015-04-10 19:43:19+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: udpopen.c,v 1.3 2015-04-14 20:02:48+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #include "hasindimail.h"
@@ -77,12 +80,12 @@ udpopen(char *rhost, char *servicename)
 		memcpy(serv, servicename, FMT_ULONG);
 	else
 	{
-		if ((sp = getservbyname(servicename, "tcp")) == NULL)
+		if ((sp = getservbyname(servicename, "udp")) == NULL)
 		{
 			errno = EINVAL;
 			return (-1);
 		}
-		serv[fmt_ulong(serv, sp->s_port)] = 0;
+		serv[fmt_ulong(serv, htons(sp->s_port))] = 0;
 	}
 	if ((retval = getaddrinfo(rhost, serv, &hints, &res0)))
 	{
