@@ -1,5 +1,8 @@
 /*
  * $Log: udpopen.c,v $
+ * Revision 2.4  2015-04-14 20:05:21+05:30  Cprogrammer
+ * use udp service and htons for port
+ *
  * Revision 2.3  2015-04-10 19:01:17+05:30  Cprogrammer
  * use SOCK_DRAM for UDP
  *
@@ -12,7 +15,7 @@
  */
 
 #ifndef	lint
-static char     sccsid[] = "$Id: udpopen.c,v 2.3 2015-04-10 19:01:17+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: udpopen.c,v 2.4 2015-04-14 20:05:21+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #include "indimail.h"
@@ -60,12 +63,12 @@ udpopen(rhost, servicename)
 		scopy(serv, servicename, FMT_ULONG);
 	else
 	{
-		if ((sp = getservbyname(servicename, "tcp")) == NULL)
+		if ((sp = getservbyname(servicename, "udp")) == NULL)
 		{
 			errno = EINVAL;
 			return (-1);
 		}
-		snprintf(serv, FMT_ULONG, "%d", sp->s_port);
+		snprintf(serv, FMT_ULONG, "%d", htons(sp->s_port));
 	}
 	if ((retval = getaddrinfo(rhost, serv, &hints, &res0)))
 	{
