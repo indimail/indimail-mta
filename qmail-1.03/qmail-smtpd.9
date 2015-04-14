@@ -1448,27 +1448,15 @@ variable
 
 Example:
   answerme@save*:DATABYTES=2000000, MAXRECIPIENT=2,QMAILQUEUE=
+  :BADRCPTTO=mybadrcptto
 
-sets databytes 2000000 bytes, max no of recipients in
+first line sets databytes 2000000 bytes, max no of recipients in
 rcptto to two for the sender answerme@saveme.com and unsets QMAILQUEUE environment variable.
 If there are multiple lines for a pattern, all lines are applied. However if an environment
 variable is being set in multiple lines, the last rule takes precedence. The environment
 variable QREGEX can be set to use regular expressions for matching \fIpat\fR instead
 of the internal \fIwildmat\fR function.
-
-.TP 5
-.I rcpt.envrules
-Specific environment variables can be set for specific recipients.
-The format of this file is of the form                                       
-pat:envar1=val,envar2=val,...]
-where \fIpat\fR is a regular expression which matches a sender. envar1, envar2
-are list of environment variables to be set. If
-.I val
-is omitted, the environment variable is unset.
-
-The name of the control file can be overriden by the environment
-variable
-.BR RCPTRULES .
+The second line gets applied for null senders
 
 .TP 5
 .I auth.envrules
