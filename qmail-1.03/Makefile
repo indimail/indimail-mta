@@ -5572,7 +5572,7 @@ smtpd-plugin0.so: dnsbl.o
 	else \
 	$(CC) -shared -rdynamic -nostartfiles -fPIC -s -O4 -o smtpd-plugin0.so dnsbl.o; \
 	fi
-dnsbl.o: compile dnsbl.c smtp_plugin.h stralloc.h dns.h env.h control.h
+dnsbl.o: compile dnsbl.c smtp_plugin.h stralloc.h dns.h env.h control.h str.h
 	./compile dnsbl.c
 
 smtpd-plugin.so:smtp_plugin.o
