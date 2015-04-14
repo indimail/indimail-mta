@@ -1,5 +1,8 @@
 /*
  * $Log: dnsbl.c,v $
+ * Revision 1.3  2015-04-14 20:02:01+05:30  Cprogrammer
+ * skip dnsbl if ip address is unknown
+ *
  * Revision 1.2  2011-07-29 09:28:12+05:30  Cprogrammer
  * fixed gcc 4.6 warnings
  *
@@ -12,6 +15,7 @@
 #include "stralloc.h"
 #include "dns.h"
 #include "env.h"
+#include "str.h"
 #include "control.h"
 
 extern int      authenticated;
@@ -128,6 +132,8 @@ mailfrom_hook(char *remoteip, char *from, char **mesg)
 		skipdnsbl = 1;
 		return (0);
 	}
+	if (!str_diffn(remoteip, "unknown", 7))
+		return (0);
 	if ((dnsblok = control_readfile(&dnsbllist,
 			dnsblFn = ((x = env_get("DNSBLLIST")) && *x ? x : "dnsbllist"), 0)) == -1) {
 		*mesg = "451 Requested action aborted: unable to read controls (#4.3.0)\r\n";
