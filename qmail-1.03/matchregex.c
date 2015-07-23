@@ -1,5 +1,8 @@
 /*
  * $Log: matchregex.c,v $
+ * Revision 1.2  2015-07-23 15:01:42+05:30  Cprogrammer
+ * fixed comparision of constant '-1' with 0
+ *
  * Revision 1.1  2009-05-01 10:34:29+05:30  Cprogrammer
  * Initial revision
  *
@@ -28,13 +31,13 @@ matchregex(char *text, char *regex, char **errStr)
 		regfree(&qreg);
 		if (!stralloc_copys(&err_str, text))
 			return(AM_MEMORY_ERR);
-		if (!stralloc_cats(&err_str, ": ") == -1)
+		if (!stralloc_cats(&err_str, ": "))
 			return (AM_MEMORY_ERR);
-		if (!stralloc_cats(&err_str, regex) == -1)
+		if (!stralloc_cats(&err_str, regex))
 			return (AM_MEMORY_ERR);
-		if (!stralloc_cats(&err_str, ": ") == -1)
+		if (!stralloc_cats(&err_str, ": "))
 			return (AM_MEMORY_ERR);
-		if (!stralloc_cats(&err_str, errbuf) == -1)
+		if (!stralloc_cats(&err_str, errbuf))
 			return (AM_MEMORY_ERR);
 		if (!stralloc_0(&err_str) == -1)
 			return (AM_MEMORY_ERR);
@@ -52,7 +55,7 @@ matchregex(char *text, char *regex, char **errStr)
 void
 getversion_matchregex_c()
 {
-	static char    *x = "$Id: matchregex.c,v 1.1 2009-05-01 10:34:29+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: matchregex.c,v 1.2 2015-07-23 15:01:42+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
