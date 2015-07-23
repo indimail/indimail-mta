@@ -1,5 +1,8 @@
 /*
  * $Log: udpopen.c,v $
+ * Revision 1.4  2015-07-23 16:19:10+05:30  Cprogrammer
+ * fixed compilation error for non-indimail install
+ *
  * Revision 1.3  2015-04-14 20:02:48+05:30  Cprogrammer
  * use udp and htons for port
  *
@@ -13,7 +16,7 @@
  */
 
 #ifndef	lint
-static char     sccsid[] = "$Id: udpopen.c,v 1.3 2015-04-14 20:02:48+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: udpopen.c,v 1.4 2015-07-23 16:19:10+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #include "hasindimail.h"
@@ -158,6 +161,5 @@ getversion_udpopen_c()
 #else
 	if (x)
 		x++;
-	x=sccsidauthcramh;
 #endif
 }
