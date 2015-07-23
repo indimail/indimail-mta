@@ -165,7 +165,7 @@ noinst_SCRIPTS = indimail.spec indimail-@VERSION@-rpmlintrc \
 	README INSTALL-MINI vadddomain_handle vadduser_handle vdeldomain_handle \
 	vaddaliasdomain_handle vrenamedomain_handle
 
-post_handle_list = vadddomain vadduser
+post_handle_list = vadddomain vadduser vdeldomain vaddaliasdomain vrenamedomain
 
 MOSTLYCLEANFILES=versioninfo vcaliasrev myslave logmonitor controlsync bogofilter-qfe \
 svctool indimail_settings.c cronlist crypt create_services \
