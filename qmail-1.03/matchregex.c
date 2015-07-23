@@ -39,7 +39,7 @@ matchregex(char *text, char *regex, char **errStr)
 			return (AM_MEMORY_ERR);
 		if (!stralloc_cats(&err_str, errbuf))
 			return (AM_MEMORY_ERR);
-		if (!stralloc_0(&err_str) == -1)
+		if (!stralloc_0(&err_str))
 			return (AM_MEMORY_ERR);
 		if (errStr)
 			*errStr = err_str.s;
