@@ -1,6 +1,6 @@
 #
 #
-# $Id: qmail.spec,v 1.14 2014-07-27 12:50:27+05:30 Cprogrammer Exp mbhangui $
+# $Id: qmail.spec,v 1.15 2015-07-23 16:44:10+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %define _unpackaged_files_terminate_build 1
 
@@ -714,6 +714,8 @@ done
 %attr(555,root,qmail)                   %{_prefix}/bin/spfquery
 %attr(555,root,qmail)                   %{_prefix}/bin/srsfilter
 %attr(555,root,qmail)                   %{_prefix}/bin/tai64nlocal
+%attr(555,root,qmail)                   %{_prefix}/bin/udplogger
+%attr(555,root,qmail)                   %{_prefix}/bin/udpclient
 %attr(555,root,qmail)                   %{_prefix}/sbin/hostname
 %attr(555,root,qmail)                   %{_prefix}/sbin/config-fast
 %attr(555,root,qmail)                   %{_prefix}/sbin/qmailconfig
