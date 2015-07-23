@@ -1,5 +1,9 @@
 /*
  * $Log: batv.c,v $
+ * Revision 1.3  2015-07-23 13:51:00+05:30  Cprogrammer
+ * added option to pass key validity period in days
+ * fixed bug with passing email address without @ sign
+ *
  * Revision 1.2  2009-12-07 08:21:02+05:30  Cprogrammer
  * corrected usage
  *
@@ -75,9 +79,11 @@ checkbatv(char *recipient)
 	len = str_len(recipient);
 	if (len >= (11 + 2 * BATVLEN) && !str_diffn(recipient, "prvs=", 5)) {
 		atpos = str_rchr(recipient, '@');
-		recipient[atpos] = 0;	/*- just for a moment */
+		if (atpos < len)
+			recipient[atpos] = 0;	/*- just for a moment */
 		slpos = str_rchr(recipient, '='); /*- prefer an = sign */
-		recipient[atpos] = '@';
+		if (atpos < len)
+			recipient[atpos] = '@';
 		byte_copy(kdate, 4, recipient + 5);
 		md5pos = 9;
 	} else
@@ -182,6 +188,7 @@ char           *usage =
 				"usage: batv -k key [-s sender | -v recipient]\n"
 				"        -k key       (signing key)\n"
 				"        -s sender    (batv signing)\n"
+				"        -t stale     (batv signing key validity period in days\n"
 				"        -v recipient (batv  verify)";
 
 int
@@ -191,11 +198,14 @@ main(int argc, char **argv)
 	int             opt, signing;
 
 	signing = 0;
-	while ((opt = getopt(argc, argv, "svk:")) != opteof) {
+	while ((opt = getopt(argc, argv, "svk:t:")) != opteof) {
 		switch (opt) {
 		case 'k':
 			if (!stralloc_copys(&signkey, optarg))
 				die_nomem();
+			break;
+		case 't':
+			scan_int(optarg, &signkeystale);
 			break;
 		case 's':
 			signing = 1;
@@ -254,7 +264,7 @@ main(argc, argv)
 void
 getversion_batv_c()
 {
-	static char    *x = "$Id: batv.c,v 1.2 2009-12-07 08:21:02+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: batv.c,v 1.3 2015-07-23 13:51:00+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
