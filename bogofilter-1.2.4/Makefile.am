@@ -120,8 +120,8 @@ rsynconly: .rsyncs
 	@( cat $(srcdir)/.rsyncs | sed -e 's}^}rsync -av -e ssh --delete $(PACKAGE)-$(VERSION)/ }; s/\($$\)/ \&/;' ; echo "wait" ) | $(SHELL) -x
 
 install-data-hook:
-   chown root:indimail $(DESTDIR)$(bindir)/bogofilter || true
-   chmod 6511 $(DESTDIR)$(bindir)/bogofilter || true
+	chown root:indimail $(DESTDIR)$(bindir)/bogofilter || true
+	chmod 6511 $(DESTDIR)$(bindir)/bogofilter || true
 
 dist-hook:
 	cd $(distdir) && find doc gnugetopt gsl '(' -name .svn -o -name CVS ')' -type d -prune -exec rm -rf '{}' +
