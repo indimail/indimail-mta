@@ -1,5 +1,5 @@
 dnl Process this file with autoconf to produce a configure script.
-AC_PREREQ([2.64])
+AC_PREREQ([2.63])
 AC_INIT([IndiMail],1.9.0,[Manvendra Bhangui manvendra@indimail.org],indimail, [http://www.indimail.org])
 AC_CANONICAL_TARGET
 PACKAGE=$PACKAGE_NAME
