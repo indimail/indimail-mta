@@ -111,6 +111,9 @@ BuildRequires: glibc glibc-devel openssl procps readline-devel
 BuildRequires: sed ncurses-devel gettext-devel
 BuildRequires: python-devel flex findutils
 BuildRequires: readline gzip autoconf pkgconfig
+
+%if %build_on_obs == 1
+##################################### OBS ####################################
 %if 0%{?rhel_version} == 700
 BuildRequires: groff-doc
 %else
@@ -118,12 +121,22 @@ BuildRequires: groff
 %endif
 
 %if %{undefined rhel_version}
-BuildRequires: gdbm-devel sharutils
+BuildRequires: sharutils
 %else
 %if 0%{?rhel_version} != 600 && 0%{?rhel_version} != 700
-BuildRequires: gdbm-devel sharutils
+BuildRequires: sharutils
 %endif
 %endif
+
+%if 0%{?suse_version}
+BuildRequires: -post-build-checks  
+#!BuildIgnore: post-build-checks  
+%endif
+##############################################################################
+%else
+BuildRequires: groff sharutils
+%endif
+
 
 %if 0%{?suse_version}
 BuildRequires: openldap2-devel
@@ -141,11 +154,6 @@ BuildRequires: chrpath
 %if 0%{?suse_version} >= 1120
 PreReq: permissions
 %endif
-%endif
-
-%if 0%{?suse_version}
-BuildRequires: -post-build-checks  
-#!BuildIgnore: post-build-checks  
 %endif
 
 %if 0%{?suse_version}
@@ -227,12 +235,6 @@ done
 
 %build
 ID=$(id -u)
-if [ %{_verbose} -eq 0 ] ; then
-	DEVICE=/dev/null
-else
-	DEVICE=/dev/tty
-fi
-echo "Will send output to $DEVICE"
 #### Stupid Mandriva ######################
 %if 0%{?mandriva_version} > 2009
 %ifarch x86_64
@@ -263,9 +265,9 @@ fi
 
 if [ " %dist" = " mandrake" ] ; then
 ./configure --prefix=%{_prefix} --libdir=%{_libdir} --libexecdir=%{_prefix}/libexec \
-	--x-libraries=%{_libdir} --mandir=%{_prefix}/man > $DEVICE
+	--x-libraries=%{_libdir} --mandir=%{_prefix}/man
 else
-%configure --prefix=%{_prefix} --mandir=%{_prefix}/man > $DEVICE
+%configure --prefix=%{_prefix} --mandir=%{_prefix}/man
 fi
 cd ..
 fi
@@ -290,9 +292,9 @@ fi
 
 if [ " %dist" = " mandrake" ] ; then
 ./configure --prefix=%{_prefix} --libdir=%{_libdir} --libexecdir=%{_prefix}/libexec \
-	--x-libraries=%{_libdir} --mandir=%{_prefix}/man > $DEVICE
+	--x-libraries=%{_libdir} --mandir=%{_prefix}/man
 else
-%configure --prefix=%{_prefix} --mandir=%{_prefix}/man > $DEVICE
+%configure --prefix=%{_prefix} --mandir=%{_prefix}/man
 fi
 cd ..
 fi
