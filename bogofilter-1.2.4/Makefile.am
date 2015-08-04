@@ -2,7 +2,6 @@
 
 # search path for m4 macros
 ACLOCAL_AMFLAGS = -I m4
-
 SUBDIRS = trio src . doc
 SYSCONFDIR = @sysconfdir@
 
