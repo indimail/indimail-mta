@@ -116,7 +116,7 @@ BuildRequires: gzip autoconf indimail-devel
 %if %{undefined rhel_version}
 BuildRequires: sharutils
 %else
-%if 0%{?rhel_version} != 600
+%if 0%{?rhel_version} != 600 && 0%{?rhel_version} != 700
 BuildRequires: sharutils
 %endif
 %endif
