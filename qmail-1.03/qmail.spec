@@ -1,6 +1,6 @@
 #
 #
-# $Id: qmail.spec,v 1.15 2015-07-23 16:44:10+05:30 Cprogrammer Exp mbhangui $
+# $Id: qmail.spec,v 1.16 2015-08-04 21:18:50+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %define _unpackaged_files_terminate_build 1
 
@@ -111,15 +111,20 @@ BuildRequires: glibc glibc-devel openssl procps readline-devel
 BuildRequires: sed ncurses-devel gettext-devel
 BuildRequires: python-devel flex findutils
 BuildRequires: readline gzip autoconf pkgconfig
-BuildRequires: libidn-devel
+%if 0%{?rhel_version} == 700
+BuildRequires: groff-doc
+%else
 BuildRequires: groff
+%endif
+
 %if %{undefined rhel_version}
 BuildRequires: gdbm-devel sharutils
 %else
-%if 0%{?rhel_version} != 600
+%if 0%{?rhel_version} != 600 && 0%{?rhel_version} != 700
 BuildRequires: gdbm-devel sharutils
 %endif
 %endif
+
 %if 0%{?suse_version}
 BuildRequires: openldap2-devel
 %else
@@ -131,28 +136,25 @@ BuildRequires: chrpath
 %if 0%{?suse_version} == 1220 || 0%{?suse_version} == 1210 || 0%{?suse_version} == 1140 || 0%{?suse_version} == 1100 || 0%{?suse_version} == 1030 || 0%{?suse_version} == 1020
 BuildRequires: chrpath
 %endif
+
 %if %noperms == 0
 %if 0%{?suse_version} >= 1120
 PreReq: permissions
 %endif
 %endif
+
 %if 0%{?suse_version}
-BuildRequires: db-devel
 BuildRequires: -post-build-checks  
 #!BuildIgnore: post-build-checks  
+%endif
+
+%if 0%{?suse_version}
+BuildRequires: db-devel
 %else
-%if 0%{?mandriva_version} == 201100
-BuildRequires: db5.1-devel
-%else
-%if 0%{?mandriva_version} == 201010
-BuildRequires: db4.7-devel
-%else
-%if 0%{?fedora_version} > 17
+%if 0%{?fedora_version} > 17 || 0%{?centos_version} > 600 || 0%{?rhel_version} > 600
 BuildRequires: libdb-devel
 %else
 BuildRequires: db4-devel
-%endif
-%endif
 %endif
 %endif
 
@@ -338,16 +340,16 @@ fi
 if [ %nolibsrs2 -eq 0 ] ; then
 	%{__rm} -f %{buildroot}%{_libdir}/libsrs2.la
 	if [ -x /usr/bin/chrpath ] ; then
-    	/usr/bin/chrpath -d %{buildroot}%{_prefix}/bin/srsfilter
-    	/usr/bin/chrpath -d %{buildroot}%{_prefix}/bin/srs
+		/usr/bin/chrpath -d %{buildroot}%{_prefix}/bin/srsfilter
+		/usr/bin/chrpath -d %{buildroot}%{_prefix}/bin/srs
 	fi
 fi
 
 %if %noperms == 0
 %if 0%{?suse_version} >= 1120
 %{__mkdir_p} %{buildroot}%{_sysconfdir}/permissions.d/
-install -m 644 %{S:16} %{buildroot}%{_sysconfdir}/permissions.d/%{name}-permissions
-install -m 644 %{S:17} %{buildroot}%{_sysconfdir}/permissions.d/%{name}-permissions.secure
+install -m 644 %{S:6} %{buildroot}%{_sysconfdir}/permissions.d/%{name}-permissions
+install -m 644 %{S:7} %{buildroot}%{_sysconfdir}/permissions.d/%{name}-permissions.secure
 %endif
 %endif
 
@@ -1412,7 +1414,7 @@ else
 	done
 fi
 %{__rm} -f %{_prefix}/control/controlfiles
-%{__rm} -f %{_prefix}/control/domainkeys/default.pub %{_prefix}/control/domainkeys/default 1024
+%{__rm} -f %{_prefix}/control/domainkeys/default.pub %{_prefix}/control/domainkeys/default
 /bin/rmdir --ignore-fail-on-non-empty %{_prefix}/control/domainkeys 2>/dev/null
 /bin/rmdir --ignore-fail-on-non-empty %{_prefix}/control 2>/dev/null
 
