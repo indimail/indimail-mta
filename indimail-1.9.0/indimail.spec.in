@@ -27,16 +27,16 @@
 %if 0%{?opensuse_bs}
 # define to 1 if building on openSUSE build service
 %define build_on_obs       1
-%define fast_mode          1
+%define reconfigure_mode   1
 %else
 %define build_on_obs       0
-%define fast_mode          1
+%define reconfigure_mode   0
 %endif
 
 %define _prefix            @indimaildir@
 %define default_domain     @defaultdomain@
 %define courier_version    4.13
-%define bogofilter_version 1.2.3
+%define bogofilter_version 1.2.4
 %define pam_multi_version  1.1
 %define ucspi_version      0.88
 %define qmail_version      1.03
@@ -60,7 +60,7 @@
 %define i_m_on_mac         0
 %if %i_m_on_mac == 1
 %define nonssd             1
-%define fast_mode          1
+%define reconfigure_mode   1
 %define noclamav           1
 %else
 %define nonssd             0
@@ -160,11 +160,13 @@ Source20:  http://downloads.sourceforge.net/%{name}/libsrs2-%{libsrs2_version}.t
 Patch1:  http://downloads.sourceforge.net/%{name}/Patches/qmail-%{qmail_version}.patch.gz
 Patch2:  http://downloads.sourceforge.net/%{name}/Patches/ucspi-tcp-%{ucspi_version}.patch.gz
 
+%if %build_on_obs == 0
 %if %nocourierimap == 0
 %if %i_m_on_mac == 1
 Patch3:  http://downloads.sourceforge.net/%{name}/Patches/courier-imap-%{courier_version}-1.2.patch.gz
 %else
 Patch3:  http://downloads.sourceforge.net/%{name}/Patches/courier-imap-%{courier_version}.patch.gz
+%endif
 %endif
 %endif
 
@@ -222,8 +224,11 @@ BuildRequires: glibc glibc-devel openssl procps readline-devel
 BuildRequires: sed ncurses-devel gettext-devel
 BuildRequires: python-devel flex findutils
 BuildRequires: readline gzip autoconf automake libtool pkgconfig
-BuildRequires: libidn-devel
-BuildRequires: groff xz
+BuildRequires: xz
+
+%if %nocourierimap == 0
+BuildRequires: libidn-devel gdbm-devel
+%endif
 
 %if %{defined fedora_version}
 BuildRequires: redhat-lsb-core
@@ -237,54 +242,67 @@ BuildRequires: lsb-release
 %endif
 %endif
 
+%if %build_on_obs == 0
+################################# OBS ###############################
+%if 0%{?rhel_version} == 700
+BuildRequires: groff-doc
+%else
+BuildRequires: groff
+%endif
+
 %if %{undefined rhel_version}
-BuildRequires: gdbm-devel sharutils
+BuildRequires: sharutils
 %else
 %if 0%{?rhel_version} != 600
-BuildRequires: gdbm-devel sharutils
+BuildRequires: sharutils
 %endif
 %endif
+
+%if 0%{?suse_version}
+BuildRequires: -post-build-checks  
+#!BuildIgnore: post-build-checks  
+#!BuildIgnore: brp-check-suse
+%endif
+################################# OBS ###############################
+%else
+BuildRequires: groff sharutils
+%endif
+
 %if 0%{?suse_version}
 BuildRequires: openldap2-devel
 %else
 BuildRequires: openldap-devel
 %endif
+
 BuildRequires: mysql-devel
 %if %{undefined centos_version} && %{undefined rhel_version}
 BuildRequires: chrpath
 %endif
+
 %if 0%{?suse_version} == 1220 || 0%{?suse_version} == 1210 || 0%{?suse_version} == 1140 || 0%{?suse_version} == 1100 || 0%{?suse_version} == 1030 || 0%{?suse_version} == 1020
 BuildRequires: chrpath
 %endif
+
 %if %noperms == 0
 %if 0%{?suse_version} >= 1120
 PreReq: permissions
 %endif
 %endif
+
 %if 0%{?suse_version}
 BuildRequires: db-devel
-%if %build_on_obs == 1
-BuildRequires: -post-build-checks  
-#!BuildIgnore: post-build-checks  
-#!BuildIgnore: brp-check-suse
-%endif
 %else
-%if 0%{?mandriva_version} == 201100
-BuildRequires: db5.1-devel
-%else
-%if 0%{?mandriva_version} == 201010
-BuildRequires: db4.7-devel
-%else
-%if 0%{?fedora_version} > 17
+%if 0%{?fedora_version} > 17 || 0%{?centos_version} > 600 || 0%{?rhel_version} > 600
 BuildRequires: libdb-devel
 %else
 BuildRequires: db4-devel
 %endif
 %endif
-%endif
-%endif
+
 BuildRequires: pam-devel
+
 Requires: pam
+Requires: coreutils grep /bin/sh glibc openssl
 
 # rpm -qf /bin/ls
 # rpm -qp --queryformat '%{arch}\n' some-file.rpm
@@ -294,15 +312,17 @@ Requires: pam
 Requires: /usr/sbin/useradd /usr/sbin/groupadd
 Requires: /sbin/chkconfig /usr/sbin/userdel /usr/sbin/groupdel procps /usr/bin/awk
 %endif
+
 %if 0%{?suse_version}
 Requires: mysql-community-server
 %else
 Requires: mysql-server
 %endif
-Requires: coreutils grep /bin/sh glibc openssl
+
 %if %{defined centos_version} || %{defined rhel_version}
 Requires: policycoreutils-python
 %endif
+
 BuildRoot: %(mktemp -ud %{_tmppath}/%{name}-%{version}-%{release}-XXXXXXX)
 #
 # IndiMail is choosy and runs on reliable OS only
@@ -462,10 +482,12 @@ done
 %patch1  -p0
 %patch2  -p0
 
+%if %build_on_obs == 0
 %if %nocourierimap == 0
 %patch3  -p0
 %if %i_m_on_mac == 1
 %patch13  -p0
+%endif
 %endif
 %endif
 
@@ -491,32 +513,14 @@ else
 	DEVICE=/dev/tty
 fi
 echo "Will send output to $DEVICE"
-#### Stupid Mandriva ######################
-%if 0%{?mandriva_version} > 2009
-%ifarch x86_64
-%define _libdir %{_prefix}/lib64
-%define _lib lib64
-%else
-%define _libdir %{_prefix}/lib
-%define _lib lib
-%endif
-%endif
 #### LIBDKIM ######################
 if [ -d libdkim-%{libdkim_version} ] ; then
-cd libdkim-%{libdkim_version}
-
-if [ %{fast_mode} -eq 0 ] ; then
-if [ %{build_on_obs} -eq 0 ] ; then
-	echo "reconfiguring..."
-	autoreconf -fi
-else
-	echo "reconfiguring..."
-%if %{undefined centos_version} && %{undefined rhel_version} && %{undefined sles_version}
-%if 0%{?fedora_version} > 10 || 0%{?suse_version} || 0%{?mandriva_version} > 2009
-	autoreconf -fi
-%endif
-%endif
-fi
+	cd libdkim-%{libdkim_version}
+	if [ %{reconfigure_mode} -eq 1 ] ; then
+		echo "reconfiguring..."
+		%{__mkdir_p} m4
+		autoreconf -fi
+	fi
 fi
 
 %configure --prefix=%{_prefix} --mandir=%{_prefix}/man > $DEVICE
@@ -524,45 +528,28 @@ cd ..
 fi
 #### LIBSRS2 ######################
 if [ -d libsrs2-%{libsrs2_version} ] ; then
-cd libsrs2-%{libsrs2_version}
-
-if [ %{fast_mode} -eq 0 ] ; then
-if [ %{build_on_obs} -eq 0 ] ; then
-	echo "reconfiguring..."
-	autoreconf -fi
-else
-	echo "reconfiguring..."
-%if %{undefined centos_version} && %{undefined rhel_version} && %{undefined sles_version}
-%if 0%{?fedora_version} > 10 || 0%{?suse_version} || 0%{?mandriva_version} > 2009
-	autoreconf -fi
-%endif
-%endif
-fi
-fi
+	cd libsrs2-%{libsrs2_version}
+	if [ %{reconfigure_mode} -eq 1 ] ; then
+		echo "reconfiguring..."
+		%{__mkdir_p} m4
+		autoreconf -fi
+	fi
 
 # for mandrake use --x-libraries
 #./configure --prefix=%{_prefix} --libdir=%{_libdir} --libexecdir=%{_prefix}/libexec \
 #	--x-libraries=%{_libdir} --mandir=%{_prefix}/man > $DEVICE
 #
-%configure --prefix=%{_prefix} --mandir=%{_prefix}/man > $DEVICE
-cd ..
+	%configure --prefix=%{_prefix} --mandir=%{_prefix}/man > $DEVICE
+	cd ..
 fi
 
 #### IndiMail ######################
 cd %{name}-%{version}
 
-if [ %{fast_mode} -eq 0 ] ; then
-if [ %{build_on_obs} -eq 0 ] ; then
+if [ %{reconfigure_mode} -eq 1 ] ; then
 	echo "reconfiguring..."
+	%{__mkdir_p} m4
 	autoreconf -fi
-else
-echo "reconfiguring..."
-%if %{undefined centos_version} && %{undefined rhel_version} && %{undefined sles_version}
-%if 0%{?fedora_version} > 10 || 0%{?suse_version} || 0%{?mandriva_version} > 2009
-	autoreconf -fi
-%endif
-%endif
-fi
 fi
 
 %configure --prefix=%{_prefix} --libexecdir=%{_prefix}/libexec --sysconfdir=%{_prefix}/etc \
@@ -577,20 +564,11 @@ fi
 %if %nonssd == 0
 if [ -d ../nssd-%{nssd_version} ] ; then
 	cd ../nssd-%{nssd_version}
-
-if [ %{fast_mode} -eq 0 ] ; then
-if [ %{build_on_obs} -eq 0 ] ; then
-	echo "reconfiguring..."
-	autoreconf -fi
-else
-	echo "reconfiguring..."
-%if %{undefined centos_version} && %{undefined rhel_version} && %{undefined sles_version}
-%if 0%{?fedora_version} > 10 || 0%{?suse_version} || 0%{?mandriva_version} > 2009
-	autoreconf -fi
-%endif
-%endif
-fi
-fi
+	if [ %{reconfigure_mode} -eq 1 ] ; then
+		echo "reconfiguring..."
+		%{__mkdir_p} m4
+		autoreconf -fi
+	fi
 
 	%configure --prefix=%{_prefix} --libexecdir=%{_prefix}/libexec --sysconfdir=%{_prefix}/etc \
 	--mandir=%{_prefix}/man --libdir=/usr/%{_lib} \
@@ -605,7 +583,11 @@ fi
 %if %nocourierimap == 0
 if [ -d ../courier-imap-%{courier_version} ] ; then
 	cd ../courier-imap-%{courier_version}
-	%{__mkdir_p} m4
+	if [ %{reconfigure_mode} -eq 1 ] ; then
+		echo "reconfiguring..."
+		%{__mkdir_p} m4
+		autoreconf -fi
+	fi
 	%configure --prefix=%{_prefix} --libexecdir=%{_prefix}/libexec --bindir=%{_prefix}/bin \
 	--mandir=%{_prefix}/man --sysconfdir=%{_prefix}/etc \
 	`%{__cat} ../%{name}-%{version}/config/courier-imap.opts` > $DEVICE
@@ -616,19 +598,20 @@ fi
 %if %nobogofilter == 0
 if [ -d ../bogofilter-%{bogofilter_version} ] ; then
 	cd ../bogofilter-%{bogofilter_version}
-	if [ %{build_on_obs} -eq 0 ] ; then
-	autoreconf -fi
-	%configure --prefix=%{_prefix} --libexecdir=%{_prefix}/libexec --sysconfdir=%{_prefix}/etc \
-	--mandir=%{_prefix}/man `%{__cat} ../%{name}-%{version}/config/bogofilter.opts` > $DEVICE
-	else
-	# change to ./configure for openSUSE buildservice
+	if [ %{reconfigure_mode} -eq 1 ] ; then
+		echo "reconfiguring..."
+		%{__mkdir_p} m4
+		autoreconf -fi
+	fi
+	(
+	HOME='.';export HOME
 	./configure --prefix=%{_prefix} --libexecdir=%{_prefix}/libexec --sysconfdir=%{_prefix}/etc \
 	--mandir=%{_prefix}/man `%{__cat} ../%{name}-%{version}/config/bogofilter.opts` > $DEVICE
-%if 0%{?sles_version} == 10
-        sed 's{extern int yylineno;{int yylineno = 1;{' < src/lexer.c > src/lexer.c.tmp
-        %{__mv} src/lexer.c.tmp src/lexer.c
-%endif
-	fi
+#%if 0%{?sles_version} == 10
+#        sed 's{extern int yylineno;{int yylineno = 1;{' < src/lexer.c > src/lexer.c.tmp
+#        %{__mv} src/lexer.c.tmp src/lexer.c
+#%endif
+	)
 fi
 %endif
 
@@ -636,6 +619,11 @@ fi
 %if %noclamav == 0
 if [ -d ../clamav-%{clamav_version} ] ; then
 	cd ../clamav-%{clamav_version}
+	if [ %{reconfigure_mode} -eq 1 ] ; then
+		echo "reconfiguring..."
+		%{__mkdir_p} m4
+		autoreconf -fi
+	fi
 	if [ %{build_on_obs} -eq 0 ] ; then
 	%configure --prefix=%{_prefix} --libexecdir=%{_prefix}/libexec --sysconfdir=%{_prefix}/etc \
 	--with-dbdir=%{_prefix}/share/clamd --mandir=%{_prefix}/man \
@@ -653,34 +641,21 @@ fi
 %if %nofetchmail == 0
 if [ -d ../fetchmail-%{fetchmail_version} ] ; then
 	cd ../fetchmail-%{fetchmail_version}
-	if [ %{build_on_obs} -eq 0 ] ; then
+	if [ %{reconfigure_mode} -eq 1 ] ; then
 		echo "reconfiguring..."
-		if [ %{fast_mode} -eq 0 ] ; then
-			autoreconf -fi
-		fi
-	%configure --prefix=%{_prefix} --libexecdir=%{_prefix}/libexec --sysconfdir=%{_prefix}/etc \
+		%{__mkdir_p} m4
+		autoreconf -fi
+	fi
+	if [ %{build_on_obs} -eq 0 ] ; then
+	./configure --prefix=%{_prefix} --libexecdir=%{_prefix}/libexec --sysconfdir=%{_prefix}/etc \
 		--enable-indimaildir=%{_prefix} --mandir=%{_prefix}/man \
 		`%{__cat} ../%{name}-%{version}/config/fetchmail.opts` > $DEVICE
 	else
-		echo "reconfiguring..."
-%if %{undefined centos_version} && %{undefined rhel_version} && %{undefined sles_version}
-%if 0%{?fedora_version} || 0%{?suse_version}
-		if [ %{fast_mode} -eq 0 ] ; then
-			autoreconf -fi
-		fi
-%else
-		if [ %{fast_mode} -eq 0 ] ; then
-			%{__autoheader}
-			%{__autoconf}
-		fi
-%endif
-%endif
-	./configure --prefix=%{_prefix} --libexecdir=%{_prefix}/libexec --sysconfdir=%{_prefix}/etc \
+	%configure --prefix=%{_prefix} --libexecdir=%{_prefix}/libexec --sysconfdir=%{_prefix}/etc \
 		--enable-indimaildir=%{_prefix} --mandir=%{_prefix}/man \
 		`%{__cat} ../%{name}-%{version}/config/fetchmail.opts` > $DEVICE
 	fi
 fi
-%endif
 cd ..
 #### ucspi-tcp ######################
 if [ -d ucspi-tcp-%{ucspi_version} ] ; then
@@ -1400,6 +1375,8 @@ fi
 %attr(555,root,qmail)                   %{_prefix}/bin/822field
 %attr(555,root,qmail)                   %{_prefix}/bin/822body
 %attr(555,root,qmail)                   %{_prefix}/bin/822received
+%attr(555,root,qmail)                   %{_prefix}/bin/udplogger
+%attr(555,root,qmail)                   %{_prefix}/bin/udpclient
 
 %attr(555,root,qmail)                   %{_prefix}/sbin/hostname
 %attr(555,root,qmail)                   %{_prefix}/sbin/config-fast
