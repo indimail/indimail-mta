@@ -17,7 +17,7 @@ AC_CONFIG_LIBOBJ_DIR([.])
 AC_CANONICAL_HOST
 
 dnl automake options are in Makefile.am
-AC_PREREQ(2.60)
+AC_PREREQ(2.59)
 dnl 2.60 required for AC_USE_SYSTEM_EXTENSIONS
 AM_INIT_AUTOMAKE([silent-rules -Wall])
 AM_SILENT_RULES

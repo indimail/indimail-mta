@@ -1,7 +1,7 @@
 #                                               -*- Autoconf -*-
 # Process this file with autoconf to produce a configure script.
 
-AC_PREREQ([2.65])
+AC_PREREQ([2.59])
 AC_INIT([courier-authlib], [1.0], [manvendra@indimail.org],indimail, [http://www.indimail.org])
 AC_CONFIG_SRCDIR(authoption.c)
 AC_CANONICAL_TARGET

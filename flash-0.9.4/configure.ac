@@ -1,5 +1,5 @@
 dnl Process this file with autoconf to produce a configure script.
-AC_PREREQ([2.63])
+AC_PREREQ([2.59])
 AC_INIT([flash],0.9.4,[Manvendra Bhangui manvendra@indimail.org],indimail, [http://www.indimail.org])
 PACKAGE=$PACKAGE_NAME
 VERSION=$PACKAGE_VERSION

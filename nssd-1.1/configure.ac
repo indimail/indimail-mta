@@ -1,5 +1,5 @@
 dnl Process this file with autoconf to produce a configure script.
-AC_PREREQ([2.60])
+AC_PREREQ([2.59])
 AC_INIT([nssd], 1.1,[Manvendra Bhangui manvendra@indimail.org],nssd, [http://www.indimail.org])
 AC_CANONICAL_TARGET
 PACKAGE=$PACKAGE_NAME
