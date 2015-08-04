@@ -1,10 +1,11 @@
 indimaildir=/var/indimail
 all: rules indimail-mta.prerm indimail-mta.preinst indimail-mta.postrm indimail-mta.postinst \
 obs_deb_prep \
+indimail-mta-xUbuntu_15.04.dsc indimail-mta-xUbuntu_14.10.dsc \
 indimail-mta-xUbuntu_14.04.dsc indimail-mta-xUbuntu_13.10.dsc indimail-mta-xUbuntu_13.04.dsc \
 indimail-mta-xUbuntu_12.10.dsc indimail-mta-xUbuntu_12.04.dsc indimail-mta-xUbuntu_11.10.dsc \
 indimail-mta-xUbuntu_11.04.dsc indimail-mta-xUbuntu_10.10.dsc indimail-mta-xUbuntu_10.04.dsc \
-indimail-mta-Debian_7.0.dsc indimail-mta-Debian_6.0.dsc \
+indimail-mta-Debian_8.0.dsc indimail-mta-Debian_7.0.dsc indimail-mta-Debian_6.0.dsc \
 debian.tar.gz dummy.tar.gz
 
 install: all
