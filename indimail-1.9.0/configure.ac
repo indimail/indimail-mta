@@ -17,6 +17,8 @@ AC_PROG_CC
 AC_PROG_INSTALL
 AC_CONFIG_MACRO_DIR([m4])
 AC_PROG_MAKE_SET
+PKG_PROG_PKG_CONFIG
+PKG_INSTALLDIR
 
 dnl Checks for header files.
 AC_ISC_POSIX
@@ -98,12 +100,13 @@ DISTRIB_VERSION=$(sh ./lsb_release -sr)
 fi
 AC_SUBST(DISTRIB_ID)
 AC_SUBST(DISTRIB_VERSION)
+libdir=$prefix/$acl_libdirstem
 defaultprefix="/var/indimail"
 LIBVER=0
 AC_SUBST([LIBTOOL_DEPS])
 AC_SUBST(LIBVER)
 AC_SUBST(STRIP_OPT)
-AC_SUBST(RPATH_LIB)
+dnl AC_SUBST(RPATH_LIB)
 AC_SUBST(defaultprefix)
 
 if test x$prefix = xNONE
@@ -381,7 +384,7 @@ AC_SUBST(defaultdomain)
 AC_DEFINE_UNQUOTED(DEFAULT_DOMAIN,"$defaultdomain",Default Domain)
 
 moduledir=""
-for f in "$acl_libdirstem"/security
+for f in /usr/lib64/security /usr/lib/security /usr/lib/pam
 do
 	if test -d $f
 	then
@@ -913,6 +916,7 @@ AC_SUBST(mysql_incdir)
 AC_SUBST(mysql_libdir)
 AC_SUBST(mysqlbindir)
 AC_SUBST(auth_inc)
+AC_SUBST(CFLAGS)
 AC_SUBST(auth_libs)
 AC_SUBST(idcommand)
 AC_SUBST(MODFLAGS)
@@ -1175,6 +1179,11 @@ PS_COMMAND="ps -ef"
 ;;
 esac
 AC_DEFINE_UNQUOTED(PS_COMMAND,"$PS_COMMAND",ps command)
+
+# Output files
+# Rename the template .pc file to include the API version on configure
+AC_SUBST(libdir)
+AC_CONFIG_FILES([indimail.pc:indimail.pc.in],[], [])
 
 AC_OUTPUT(Makefile)
 
