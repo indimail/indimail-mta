@@ -1255,7 +1255,7 @@ maildirdeliver autoresponder qmail-rm qail elq pinq etrn qmail-sql systemd \
 atrn qmailctl indimail.plist svscanboot upstart qmail-sighup qmail-sigalrm qmail-sigterm \
 swaks home home+df proc proc+df binm1 binm1+df binm2 binm2+df cidr \
 binm3 binm3+df spfquery multirotate qpq 822header qmail-nullqueue \
-maildirserial serialsmtp serialqmtp maildirsmtp maildirqmtp \
+maildirserial serialsmtp serialqmtp maildirsmtp maildirqmtp whois \
 serialcmd maildircmd rewind relaytest qmail-qfilter sys-checkpwd ldap-checkpwd \
 iftocc ofmipd ofmipname 822field new-inject 822date 822received 822print \
 tokenize addrlist qquote parsedate qmail-greyd greydaemon drate \
@@ -5554,16 +5554,28 @@ compile udplogger.c sgetopt.h subfd.h strerr.h sig.h fmt.h scan.h byte.h error.h
 	./compile udplogger.c
 
 udpclient: \
-load udpclient.o udpopen.o sgetopt.o subgetopt.o fmt_ulong.o strerr.a substdio.a str.a error.a indimail.lib
-	./load udpclient udpopen.o sgetopt.o subgetopt.o fmt_ulong.o strerr.a substdio.a str.a error.a `cat indimail.lib`
+load udpclient.o udpopen.o sgetopt.o subgetopt.o fmt_ulong.o strerr.a substdio.a str.a error.a
+	./load udpclient udpopen.o sgetopt.o subgetopt.o fmt_ulong.o strerr.a substdio.a str.a error.a
 
 udpopen.o: \
-compile udpopen.c subfd.h udpopen.h strerr.h fmt.h hasindimail.h
-	./compile $(inc_deps) `grep -h -v "^#" conf-ip` udpopen.c
+compile udpopen.c subfd.h udpopen.h strerr.h fmt.h hasindimail.h byte.h
+	./compile -DQMAIL_INTERNAL `grep -h -v "^#" conf-ip` udpopen.c
+
+tcpopen.o: \
+compile tcpopen.c subfd.h tcpopen.h strerr.h fmt.h hasindimail.h fmt.h byte.h strerr.h
+	./compile -DQMAIL_INTERNAL `grep -h -v "^#" conf-ip` tcpopen.c
 
 udpclient.o: \
 compile udpclient.c subfd.h strerr.h
 	./compile udpclient.c
+
+whois: \
+load whois.o tcpopen.o error.o error_str.o alloc.o alloc_re.o fmt_ulong.o stralloc.a strerr.a substdio.a str.a
+	./load whois tcpopen.o error.o error_str.o alloc.o alloc_re.o fmt_ulong.o stralloc.a strerr.a substdio.a str.a
+
+whois.o:\
+compile whois.c subfd.h str.h strerr.h stralloc.h byte.h tcpopen.h
+	./compile `grep -h -v "^#" conf-ip` whois.c
 
 ################### PLUGINS ########################################
 smtpd-plugin0.so: dnsbl.o
