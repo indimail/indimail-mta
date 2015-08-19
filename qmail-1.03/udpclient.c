@@ -1,5 +1,8 @@
 /*
  * $Log: udpclient.c,v $
+ * Revision 1.2  2015-08-19 16:25:39+05:30  Cprogrammer
+ * fixed typo
+ *
  * Revision 1.1  2015-04-10 19:37:18+05:30  Cprogrammer
  * Initial revision
  *
@@ -58,7 +61,7 @@ main(int argc, char **argv)
 		if (substdio_puts(subfderr, strerror(errno)) == -1)
 			strerr_die2sys(111, FATAL, "write: ");
 		if (substdio_put(subfderr, "\n", 1) == -1)
-			strerr_die2sys(111, "tcpopen", "write: ");
+			strerr_die2sys(111, "udpopen", "write: ");
 		if (substdio_flush(subfderr) == -1)
 			strerr_die2sys(111, FATAL, "write: ");
 		_exit(1);
@@ -79,7 +82,7 @@ main(int argc, char **argv)
 void
 getversion_udpclient_c()
 {
-	static char    *x = "$Id: udpclient.c,v 1.1 2015-04-10 19:37:18+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: udpclient.c,v 1.2 2015-08-19 16:25:39+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
