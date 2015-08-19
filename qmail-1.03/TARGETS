@@ -1031,3 +1031,6 @@ udplogger
 udpclient.o
 udpclient
 udpopen.o
+tcpopen.o
+whois
+whois.o
