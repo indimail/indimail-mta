@@ -1,5 +1,8 @@
 /*
  * $Log: tcpbind.c,v $
+ * Revision 2.5  2015-08-19 16:32:00+05:30  Cprogrammer
+ * fixed errno getting clobbered
+ *
  * Revision 2.4  2011-04-08 17:27:12+05:30  Cprogrammer
  * added HAVE_CONFIG_H
  *
@@ -30,7 +33,7 @@
  */
 
 #ifndef	lint
-static char     sccsid[] = "$Id: tcpbind.c,v 2.4 2011-04-08 17:27:12+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: tcpbind.c,v 2.5 2015-08-19 16:32:00+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef HAVE_CONFIG_H
@@ -55,6 +58,7 @@ tcpbind(hostname, servicename, backlog)
 	int             listenfd;	/*- listen socket descriptor */
 #ifdef ENABLE_IPV6
 	struct addrinfo hints, *res, *res0;
+	int             bind_fail = -1;
 #else
 #ifdef HAVE_IN_ADDR_T
 	in_addr_t       inaddr;
@@ -136,10 +140,16 @@ tcpbind(hostname, servicename, backlog)
 			freeaddrinfo(res0);
 			return (-1);
 		}
-		if (bind(listenfd, res->ai_addr, res->ai_addrlen) == 0)
+		if ((bind_fail = bind(listenfd, res->ai_addr, res->ai_addrlen)) == 0)
 			break;
 		close(listenfd);
 	} /*- for (res = res0; res; res = res->ai_next) */
+	if (bind_fail == -1) {
+		bind_fail = errno;
+		freeaddrinfo(res0);
+		errno = bind_fail;
+		return (-1);
+	}
 	freeaddrinfo(res0);
 #else
 	(void) memset((char *) &localinaddr, 0, sizeof(struct sockaddr_in));
