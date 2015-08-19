@@ -1,5 +1,8 @@
 /*
  * $Log: hier.c,v $
+ * Revision 1.186  2015-08-19 16:38:01+05:30  Cprogrammer
+ * added whois program
+ *
  * Revision 1.185  2015-04-10 19:41:41+05:30  Cprogrammer
  * added udplogger, udpclient
  *
@@ -642,6 +645,7 @@ hier(inst_dir)
 	c(auto_qmail_home, "bin", "dnsptr", auto_uido, auto_gidq, 0555);
 	c(auto_qmail_home, "bin", "dnsip", auto_uido, auto_gidq, 0555);
 	c(auto_qmail_home, "bin", "dnsmxip", auto_uido, auto_gidq, 0555);
+	c(auto_qmail_home, "bin", "whois", auto_uido, auto_gidq, 0555);
 	c(auto_qmail_home, "bin", "dnsfq", auto_uido, auto_gidq, 0555);
 	c(auto_qmail_home, "bin", "ipmeprint", auto_uido, auto_gidq, 0555);
 	c(auto_qmail_home, "bin", "idedit", auto_uido, auto_gidq, 0555);
@@ -1682,7 +1686,7 @@ _hier(inst_dir)
 void
 getversion_install_big_c()
 {
-	static char    *x = "$Id: hier.c,v 1.185 2015-04-10 19:41:41+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: hier.c,v 1.186 2015-08-19 16:38:01+05:30 Cprogrammer Exp mbhangui $";
 
 #ifdef INDIMAIL
 	if (x)
