@@ -1,5 +1,8 @@
 /*
  * $Log: tcpopen.c,v $
+ * Revision 2.10  2015-08-19 16:32:59+05:30  Cprogrammer
+ * added missing call to getservbyname()
+ *
  * Revision 2.9  2011-04-08 17:27:15+05:30  Cprogrammer
  * added HAVE_CONFIG_H
  *
@@ -45,7 +48,7 @@
  */
 
 #ifndef	lint
-static char     sccsid[] = "$Id: tcpopen.c,v 2.9 2011-04-08 17:27:15+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: tcpopen.c,v 2.10 2015-08-19 16:32:59+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef HAVE_CONFIG_H
@@ -144,6 +147,15 @@ tcpopen(host, service, port) /*- Thanks to Richard's Steven */
 	{
 		if (port > 0)
 			snprintf(serv, FMT_ULONG, "%d", port);
+		else
+		{
+			if ((sp = getservbyname(service, "tcp")) == NULL)
+			{
+				errno = EINVAL;
+				return (-1);
+			}
+			tcp_srv_addr.sin_port = htons(sp->s_port);	/*- service's value */
+		}
 	} else
 	if (port <= 0)
 	{
@@ -239,7 +251,7 @@ tcpopen(host, service, port) /*- Thanks to Richard's Steven */
 				errno = EINVAL;
 				return (-1);
 			}
-			tcp_srv_addr.sin_port = sp->s_port;	/*- service's value */
+			tcp_srv_addr.sin_port = htons(sp->s_port);	/*- service's value */
 		}
 	} else
 	if (port <= 0)
