@@ -533,6 +533,7 @@ done
 %attr(555,root,qmail)                   %{_prefix}/bin/uacl
 %attr(555,root,qmail)                   %{_prefix}/bin/envdir
 %attr(555,root,qmail)                   %{_prefix}/bin/dnsmxip
+%attr(555,root,qmail)                   %{_prefix}/bin/whois
 %attr(555,root,qmail)                   %{_prefix}/bin/zrecipients
 %attr(555,root,qmail)                   %{_prefix}/bin/xsender
 %attr(555,root,qmail)                   %{_prefix}/bin/rxdelay
