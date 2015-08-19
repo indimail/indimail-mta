@@ -500,3 +500,6 @@ rrt
 rrt.1
 hmac_sha1.obj
 qaes
+whois
+whois.o
+tcpopen.o
