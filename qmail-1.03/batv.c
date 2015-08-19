@@ -1,5 +1,8 @@
 /*
  * $Log: batv.c,v $
+ * Revision 1.4  2015-08-19 16:26:16+05:30  Cprogrammer
+ * exit 111 for ENOMEM
+ *
  * Revision 1.3  2015-07-23 13:51:00+05:30  Cprogrammer
  * added option to pass key validity period in days
  * fixed bug with passing email address without @ sign
@@ -60,7 +63,7 @@ die_nomem()
 	substdio_flush(subfdout);
 	substdio_puts(subfderr, "batv: out of memory\n");
 	substdio_flush(subfderr);
-	_exit(1);
+	_exit(111);
 }
 
 stralloc        newsender = { 0 };
@@ -264,7 +267,7 @@ main(argc, argv)
 void
 getversion_batv_c()
 {
-	static char    *x = "$Id: batv.c,v 1.3 2015-07-23 13:51:00+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: batv.c,v 1.4 2015-08-19 16:26:16+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
