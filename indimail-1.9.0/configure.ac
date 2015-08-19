@@ -254,6 +254,8 @@ AC_ARG_ENABLE(indigroup,[  --enable-indigroup=indimail   group IndiMail was inst
 	])
 AC_DEFINE_UNQUOTED(INDIGROUP,"$indigroup",IndiMail Group)
 AC_SUBST(indigroup)
+AC_SUBST(indimailuid)
+AC_SUBST(indimailgid)
 
 AC_CHECK_LIB(socket, socket,echo -lsocket > socket.lib,,)
 AC_CHECK_LIB(ssl, SSL_CTX_new, [AC_SUBST([LIB_SSL], ["-lssl -lcrypto"]) AC_DEFINE([HAVE_SSL], [1],[OpenSSL Library])],,-lssl -lcrypto)
