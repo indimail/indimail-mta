@@ -18,6 +18,7 @@
 #include <sys/types.h>
 #include <sys/socket.h>
 #include "subfd.h"
+#include "sgetopt.h"
 #include "strerr.h"
 #include "str.h"
 #include "tcpopen.h"
@@ -78,36 +79,44 @@ logerrf(char *s)
 int
 main(int argc, char **argv)
 {
-	if (argc == 2)
-		return (get_whois_data(argv[1]));
-	strerr_die2x(100, FATAL, "usage: whois domain");
-	/*- not reached */
-	return (0);
+	char           *arg;
+	int             opt;
+
+	while ((opt = getopt(argc, argv, "v")) != opteof) {
+		switch (opt) {
+		case 'v':
+			verbose = 0;
+			break;
+		default:
+			strerr_die2x(100, FATAL, "usage: whois [-v] domain");
+		}
+	}
+	if (optind + 1 != argc)
+		strerr_die2x(100, FATAL, "usage: whois [-v] domain");
+	arg = argv[optind++];
+	return (get_whois_data(arg));
 }
+
+stralloc whois_server = {0};
 
 char *
 str_whois(char *resp, int resp_len)
 {
-	char		*pch, *wch, *tmp;
-	int          len, found;
+	char		*pch, *wch;
+	int          len;
 
-	for (found = len = 0, wch = 0, pch = resp;!found && len < resp_len;) {
-		for (found = 0, wch = pch;*wch; wch++, len++) {
+	if ((pch = strstr(resp, "whois."))) {
+		for (len = 0, wch = pch; *wch; len++, wch++) {
 			if (*wch == '\n') {
-				*wch = 0;
-				if ((tmp = strstr(pch, "whois."))) {
-					found = 1;
-					wch = tmp;
-				}
-				else {
-					*wch = '\n';
-					pch = wch + 1;
-				}
+				if (!stralloc_copyb(&whois_server, pch, len))
+					die_nomem();
+				if (!stralloc_0(&whois_server))
+					die_nomem();
 				break;
 			}
 		}
 	}
-	return (found ? wch : 0);
+	return (pch ? whois_server.s : 0);
 }
 
 /*
@@ -236,6 +245,7 @@ whois_query(char *server, char *query, stralloc *response)
 	}
 	if (!stralloc_0(response))
 		die_nomem();
+	response->len--;
 	close(sock);
 	return 0;
 }
