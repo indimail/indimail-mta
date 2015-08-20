@@ -88,7 +88,7 @@ main(int argc, char **argv)
 	while ((opt = getopt(argc, argv, "v")) != opteof) {
 		switch (opt) {
 		case 'v':
-			verbose = 0;
+			verbose = 1;
 			break;
 		default:
 			strerr_die2x(100, FATAL, "usage: whois [-v] domain");
