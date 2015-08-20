@@ -1,9 +1,6 @@
 /*
  * $Log: tcpopen.c,v $
- * Revision 1.2  2015-08-20 18:56:55+05:30  Cprogrammer
- * removed compiler warning
- *
- * Revision 1.1  2015-08-20 18:36:55+05:30  Cprogrammer
+ * Revision 1.1  2015-08-20 19:03:05+05:30  Cprogrammer
  * Initial revision
  *
  *
@@ -417,13 +414,11 @@ tcpopen(host, service, port) /*- Thanks to Richard's Steven */
 void
 getversion_tcpopen_c()
 {
-	static char    *x = "$Id: tcpopen.c,v 1.2 2015-08-20 18:56:55+05:30 Cprogrammer Exp mbhangui $";
-	char *y = sccsid;
+	static char    *x = "$Id: tcpopen.c,v 1.1 2015-08-20 19:03:05+05:30 Cprogrammer Exp mbhangui $";
 #ifdef INDIMAIL
+	char *y = sccsid;
 	if (y)
 		y = sccsidh;
-#else
-	if (y)
-		y++;
 #endif
+	x++;
 }
