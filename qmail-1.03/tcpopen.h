@@ -1,5 +1,8 @@
 /*
- * $Log: $
+ * $Log: tcpopen.h,v $
+ * Revision 1.1  2015-08-20 18:30:40+05:30  Cprogrammer
+ * Initial revision
+ *
  *
  */
 #ifndef _TCPOPEN_H
