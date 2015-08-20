@@ -1,5 +1,8 @@
 /*
  * $Log: batv.c,v $
+ * Revision 1.5  2015-08-20 18:34:28+05:30  Cprogrammer
+ * added usage for invalid option
+ *
  * Revision 1.4  2015-08-19 16:26:16+05:30  Cprogrammer
  * exit 111 for ENOMEM
  *
@@ -216,6 +219,8 @@ main(int argc, char **argv)
 		case 'v':
 			signing = 0;
 			break;
+		default:
+			strerr_die1x(100, usage);
 		}
 	}
 	if (optind + 1 != argc)
@@ -267,7 +272,7 @@ main(argc, argv)
 void
 getversion_batv_c()
 {
-	static char    *x = "$Id: batv.c,v 1.4 2015-08-19 16:26:16+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: batv.c,v 1.5 2015-08-20 18:34:28+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
