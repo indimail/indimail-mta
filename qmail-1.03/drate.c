@@ -1,5 +1,8 @@
 /*
  * $Log: drate.c,v $
+ * Revision 1.5  2015-08-20 18:34:42+05:30  Cprogrammer
+ * exit 100 for invalid option
+ *
  * Revision 1.4  2013-12-09 13:08:38+05:30  Cprogrammer
  * make the domain name as the file for storing delivery rate information
  *
@@ -157,7 +160,7 @@ main(int argc, char **argv)
 			break;
 		default:
 			logerrf(usage);
-			_exit (111);
+			_exit (100);
 			break;
 		}
 	}
@@ -355,7 +358,7 @@ new:
 void
 getversion_drate_c()
 {
-	static char    *x = "$Id: drate.c,v 1.4 2013-12-09 13:08:38+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: drate.c,v 1.5 2015-08-20 18:34:42+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 	if (x)
