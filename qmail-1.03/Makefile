@@ -5570,11 +5570,13 @@ compile udpclient.c subfd.h strerr.h
 	./compile udpclient.c
 
 whois: \
-load whois.o tcpopen.o error.o error_str.o alloc.o alloc_re.o fmt_ulong.o stralloc.a strerr.a substdio.a str.a
-	./load whois tcpopen.o error.o error_str.o alloc.o alloc_re.o fmt_ulong.o stralloc.a strerr.a substdio.a str.a
+load whois.o tcpopen.o error.o error_str.o alloc.o alloc_re.o fmt_ulong.o sgetopt.o subgetopt.o \
+stralloc.a strerr.a substdio.a str.a
+	./load whois tcpopen.o error.o error_str.o alloc.o alloc_re.o fmt_ulong.o sgetopt.o subgetopt.o \
+	stralloc.a strerr.a substdio.a str.a
 
 whois.o:\
-compile whois.c subfd.h str.h strerr.h stralloc.h byte.h tcpopen.h
+compile whois.c subfd.h str.h strerr.h stralloc.h byte.h tcpopen.h sgetopt.h
 	./compile `grep -h -v "^#" conf-ip` whois.c
 
 ################### PLUGINS ########################################
