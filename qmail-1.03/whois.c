@@ -1,5 +1,8 @@
 /*
  * $Log: whois.c,v $
+ * Revision 1.2  2015-08-20 18:49:34+05:30  Cprogrammer
+ * modified str_whois function
+ *
  * Revision 1.1  2015-08-19 16:30:30+05:30  Cprogrammer
  * Initial revision
  *
@@ -253,7 +256,7 @@ whois_query(char *server, char *query, stralloc *response)
 void
 getversion_whois_c()
 {
-	static char    *x = "$Id: whois.c,v 1.1 2015-08-19 16:30:30+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: whois.c,v 1.2 2015-08-20 18:49:34+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
