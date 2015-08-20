@@ -1,8 +1,12 @@
 /*
- * $Log: $
+ * $Log: tcpopen.c,v $
+ * Revision 1.1  2015-08-20 18:36:55+05:30  Cprogrammer
+ * Initial revision
+ *
+ *
  */
 #ifndef	lint
-static char     sccsid[] = "$Id: $";
+static char     sccsid[] = "$Id: tcpopen.c,v 1.1 2015-08-20 18:36:55+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifndef QMAIL_INTERNAL
@@ -414,12 +418,5 @@ tcpopen(host, service, port) /*- Thanks to Richard's Steven */
 void
 getversion_tcpopen_c()
 {
-	char *x = sccsid;
-#ifdef INDIMAIL
-	if (x)
-		x = sccsidh;
-#else
-	if (x)
-		x++;
-#endif
+	static char    *x = "$Id: tcpopen.c,v 1.1 2015-08-20 18:36:55+05:30 Cprogrammer Exp mbhangui $";
 }
