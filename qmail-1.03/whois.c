@@ -256,7 +256,7 @@ whois_query(char *server, char *query, stralloc *response)
 void
 getversion_whois_c()
 {
-	static char    *x = "$Id: whois.c,v 1.2 2015-08-20 18:49:34+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: whois.c,v 1.2 2015-08-20 18:49:34+05:30 Cprogrammer Exp $";
 
 	x++;
 }
