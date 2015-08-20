@@ -12,7 +12,7 @@ my $noclobber;
 my $force;
 my $require;
 
-my $myversion="0.16";
+my $myversion="0.17";
 
 exit 1 unless GetOptions("v" => \$ver, "n" => \$noclobber,
 			 "f" => \$force, "r=s" => \$require);

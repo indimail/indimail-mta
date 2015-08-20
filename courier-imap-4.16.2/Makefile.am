@@ -3,23 +3,28 @@
 # distribution information.
 
 @SET_MAKE@
-COFLAGS=-z+05:30
-ACLOCAL_AMFLAGS=-I m4
 
 TEMPLFILES=packaging/suse/courier-imap.init.in \
 	packaging/suse/imap.pam \
 	packaging/suse/pop3.pam
 
-SUBDIRS=numlib md5 sha1 bdbobj gdbmobj soxwrap unicode rfc822 random128 \
-	rfc1035 rfc2045 liblock maildir makedat libhmac authlib \
-	waitlib tcpd rootcerts imap
+SUBDIRS=libs/numlib libs/bdbobj libs/gdbmobj libs/soxwrap \
+	libs/unicode libs/rfc822 libs/rfc2045 \
+	libs/md5 libs/sha1 libs/random128 libs/rfc1035 libs/liblock \
+	libs/maildir libs/makedat libs/libhmac libs/authlib \
+	libs/waitlib libs/tcpd libs/rootcerts libs/imap
 
 sbin_SCRIPTS=sharedindexinstall sharedindexsplit
+DISTCLEANFILES=stamp-h1 config.h config.log packaging/systemd/courier-imap.sysvinit packaging/systemd/courier-imap.service \
+	packaging/suse/courier-imap.init pop3d.rc dbobj.h imapd-ssl.rc pop3d-ssl.rc imapd.rc dbobj.config
+
+
 CLEANFILES=$(databin_SCRIPTS) $(man_MANS) $(sysconf_DATA) $(sbin_SCRIPTS)
 databindir=$(datadir)
-databin_SCRIPTS=mkimapdcert mkpop3dcert
+databin_SCRIPTS=mkimapdcert mkpop3dcert mkdhparams
 
-binPROGRAMS=imapd pop3d maildirmake maildiracl deliverquota maildirkw
+binPROGRAMS=imapd pop3d maildirmake maildiracl deliverquota maildirkw \
+	makeimapaccess makedat
 sbinPROGRAMS=imaplogin pop3login
 libexecPROGRAMS=makedatprog couriertcpd
 
@@ -29,7 +34,7 @@ libexec_PROGRAMS=@libexecPROGRAMS_exec@
 
 EXTRA_PROGRAMS=
 
-man_MANS=couriertcpd.1 deliverquota.8 maildirmake.1 maildiracl.1 imapd.8 mkimapdcert.8 mkpop3dcert.8 maildirkw.1
+man_MANS=couriertcpd.1 deliverquota.8 maildirmake.1 maildiracl.1 imapd.8 mkdhparams.8 mkimapdcert.8 mkpop3dcert.8 maildirkw.1 makeimapaccess.8
 EXTRA_DIST=README README.cygwin\
 	COPYING.GPL NEWS.html $(TEMPLFILES) pgpkeys.txt
 
@@ -41,106 +46,115 @@ HTML2TXT=links -dump -no-numbering -no-references
 
 NEWS: NEWS.html
 	$(HTML2TXT) NEWS.html >NEWS
+distclean-local:
+	-rm -rf .deps libs/*/.deps autom4te.cache libs/*/autom4te.cache
 
-imaplogin$(EXEEXT): imap/imaplogin$(EXEEXT)
-	cp imap/imaplogin$(EXEEXT) .
+imaplogin: libs/imap/imaplogin
+	cp libs/imap/imaplogin .
 
-maildirkw$(EXEEXT): maildir/maildirkw$(EXEEXT)
-	cp maildir/maildirkw$(EXEEXT) .
+maildirkw: libs/maildir/maildirkw
+	cp libs/maildir/maildirkw .
 
-imapd$(EXEEXT): imap/imapd$(EXEEXT)
-	cp imap/imapd$(EXEEXT) .
+imapd: libs/imap/imapd
+	cp libs/imap/imapd .
 
-sharedindexinstall: maildir/sharedindexinstall
-	cp maildir/sharedindexinstall .
+sharedindexinstall: libs/maildir/sharedindexinstall
+	cp libs/maildir/sharedindexinstall .
 
-sharedindexsplit: maildir/sharedindexsplit
-	cp maildir/sharedindexsplit .
+sharedindexsplit: libs/maildir/sharedindexsplit
+	cp libs/maildir/sharedindexsplit .
 
-pop3login$(EXEEXT): imap/pop3login$(EXEEXT)
-	cp imap/pop3login$(EXEEXT) .
+pop3login: libs/imap/pop3login
+	cp libs/imap/pop3login .
 
-pop3d$(EXEEXT): imap/pop3d$(EXEEXT)
-	cp imap/pop3d$(EXEEXT) .
+pop3d: libs/imap/pop3d
+	cp libs/imap/pop3d .
 
-makedatprog$(EXEEXT): makedat/makedatprog$(EXEEXT)
-	cp makedat/makedatprog$(EXEEXT) .
+makedat: libs/makedat/makedat
+	cp libs/makedat/makedat .
 
-couriertcpd$(EXEEXT): tcpd/couriertcpd$(EXEEXT)
-	cp tcpd/couriertcpd$(EXEEXT) .
+makedatprog: libs/makedat/makedatprog
+	cp libs/makedat/makedatprog .
 
-maildirmake$(EXEEXT): maildir/maildirmake$(EXEEXT)
-	cp maildir/maildirmake$(EXEEXT) .
+couriertcpd: libs/tcpd/couriertcpd
+	cp libs/tcpd/couriertcpd .
 
-maildiracl$(EXEEXT): maildir/maildiracl$(EXEEXT)
-	cp maildir/maildiracl$(EXEEXT) .
+maildirmake: libs/maildir/maildirmake
+	cp libs/maildir/maildirmake .
 
-deliverquota$(EXEEXT): maildir/deliverquota$(EXEEXT)
-	cp maildir/deliverquota$(EXEEXT) .
+maildiracl: libs/maildir/maildiracl
+	cp libs/maildir/maildiracl .
 
-pop3d.dist: imap/pop3d.dist
-	cp imap/pop3d.dist .
+deliverquota: libs/maildir/deliverquota
+	cp libs/maildir/deliverquota .
 
-pop3d-ssl.dist: imap/pop3d-ssl.dist
-	cp imap/pop3d-ssl.dist .
+pop3d.dist: libs/imap/pop3d.dist
+	cp libs/imap/pop3d.dist .
 
-imapd.dist: imap/imapd.dist
-	cp imap/imapd.dist .
+pop3d-ssl.dist: libs/imap/pop3d-ssl.dist
+	cp libs/imap/pop3d-ssl.dist .
 
-imapd-ssl.dist: imap/imapd-ssl.dist
-	cp imap/imapd-ssl.dist .
+imapd.dist: libs/imap/imapd.dist
+	cp libs/imap/imapd.dist .
 
-couriertcpd.1: tcpd/couriertcpd.1
-	cp $(srcdir)/tcpd/couriertcpd.1 .
+imapd-ssl.dist: libs/imap/imapd-ssl.dist
+	cp libs/imap/imapd-ssl.dist .
 
-deliverquota.8: maildir/deliverquota.8
-	cp maildir/deliverquota.8 .
+couriertcpd.1: libs/tcpd/couriertcpd.1
+	cp $(srcdir)/libs/tcpd/couriertcpd.1 .
 
-maildirmake.1: maildir/maildirmake.1
-	cp maildir/maildirmake.1 .
+deliverquota.8: libs/maildir/deliverquota.8
+	cp libs/maildir/deliverquota.8 .
 
-maildiracl.1: maildir/maildiracl.1
-	cp maildir/maildiracl.1 .
+maildirmake.1: libs/maildir/maildirmake.1
+	cp libs/maildir/maildirmake.1 .
 
-maildirkw.1: maildir/maildirkw.1
-	cp $(srcdir)/maildir/maildirkw.1 .
+maildiracl.1: libs/maildir/maildiracl.1
+	cp libs/maildir/maildiracl.1 .
 
-imapd.8: imap/imapd.8
-	cp imap/imapd.8 .
+maildirkw.1: libs/maildir/maildirkw.1
+	cp $(srcdir)/libs/maildir/maildirkw.1 .
 
-mkimapdcert: imap/mkimapdcert
-	cp imap/mkimapdcert .
+imapd.8: libs/imap/imapd.8
+	cp libs/imap/imapd.8 .
 
-mkpop3dcert: imap/mkpop3dcert
-	cp imap/mkpop3dcert .
+mkdhparams: libs/imap/mkdhparams
+	cp libs/imap/mkdhparams .
 
-mkimapdcert.8: imap/mkimapdcert.8
-	cp -f imap/mkimapdcert.8 .
+mkimapdcert: libs/imap/mkimapdcert
+	cp libs/imap/mkimapdcert .
 
-mkpop3dcert.8: imap/mkpop3dcert.8
-	cp -f imap/mkpop3dcert.8 .
+mkpop3dcert: libs/imap/mkpop3dcert
+	cp libs/imap/mkpop3dcert .
 
-imapd.cnf: imap/imapd.cnf
-	cp imap/imapd.cnf .
+mkdhparams.8: libs/imap/mkdhparams.8
+	cp -f libs/imap/mkdhparams.8 .
 
-pop3d.cnf: imap/pop3d.cnf
-	cp imap/pop3d.cnf .
+mkimapdcert.8: libs/imap/mkimapdcert.8
+	cp -f libs/imap/mkimapdcert.8 .
 
-quotawarnmsg.example: maildir/quotawarnmsg
-	cp -f $(srcdir)/maildir/quotawarnmsg quotawarnmsg.example
+makeimapaccess.8: libs/imap/makeimapaccess.8
+	cp -f libs/imap/makeimapaccess.8 .
+
+mkpop3dcert.8: libs/imap/mkpop3dcert.8
+	cp -f libs/imap/mkpop3dcert.8 .
+
+imapd.cnf: libs/imap/imapd.cnf
+	cp libs/imap/imapd.cnf .
+
+pop3d.cnf: libs/imap/pop3d.cnf
+	cp libs/imap/pop3d.cnf .
+
+quotawarnmsg.example: libs/maildir/quotawarnmsg
+	cp -f $(srcdir)/libs/maildir/quotawarnmsg quotawarnmsg.example
 
 install-exec-local:
-	$(mkinstalldirs) $(DESTDIR)$(libexecdir)/authlib
-	for f in `cat authlib/installlist` dummy ; do \
-		test "$$f" = "dummy" && continue ; \
-		$(INSTALL_PROGRAM) $(INSTALL_STRIP_FLAG) authlib/$$f \
-			$(DESTDIR)$(libexecdir)/authlib/$$f ; done
 	$(mkinstalldirs) $(DESTDIR)$(databindir)
 	$(mkinstalldirs) $(DESTDIR)$(bindir)
-	test ! -x tcpd/couriertls || $(INSTALL_PROGRAM) $(INSTALL_STRIP_FLAG) \
-		tcpd/couriertls $(DESTDIR)$(bindir)/couriertls
+	test ! -x libs/tcpd/couriertls || $(INSTALL_PROGRAM) $(INSTALL_STRIP_FLAG) \
+		libs/tcpd/couriertls $(DESTDIR)$(bindir)/couriertls
 	$(mkinstalldirs) $(DESTDIR)$(sbindir)
-	for f in mkimapdcert mkpop3dcert ; \
+	for f in mkimapdcert mkpop3dcert mkdhparams; \
 		do rm -f $(DESTDIR)$(sbindir)/$$f ; \
 		$(LN_S) $(databindir)/$$f $(DESTDIR)$(sbindir)/$$f ; done
 	$(mkinstalldirs) $(DESTDIR)$(localstatedir)
@@ -151,25 +165,23 @@ install-exec-hook:
 	chmod 755 $(DESTDIR)$(sysconfdir)/shared
 	mkdir -p $(DESTDIR)$(sysconfdir)/shared.tmp
 	chmod 755 $(DESTDIR)$(sysconfdir)/shared.tmp
+	mkdir -p $(DESTDIR)$(sysconfdir)/imapaccess
+	chmod 755 $(DESTDIR)$(sysconfdir)/shared.tmp
 
 install-data-local: install-man
-	for f in `cat authlib/modulelist ; echo $$authmodulelist ` ; do \
-		test "$$f" = "authpam" || test "$$f" = "authshadow" || continue ; \
-		chmod 4555 $(DESTDIR)/$(prefix)/libexec/authlib/$$f || exit 1; \
-	done
 	test -d $(DESTDIR)/etc/pam.d || exit 0 ; \
 	test -w $(DESTDIR)/etc/pam.d || exit 0 ; \
 	test -f $(DESTDIR)/etc/pam.d/imap || \
-		$(INSTALL_DATA) $(srcdir)/imap/imapd.pam \
+		$(INSTALL_DATA) $(srcdir)/libs/imap/imapd.pam \
 		$(DESTDIR)/etc/pam.d/imap || exit 1 ;\
 	test -f $(DESTDIR)/etc/pam.d/pop3 || \
-		$(INSTALL_DATA) $(srcdir)/imap/pop3d.pam \
+		$(INSTALL_DATA) $(srcdir)/libs/imap/pop3d.pam \
 		$(DESTDIR)/etc/pam.d/pop3 || exit 1
 	for f in $(man_MANS); do chmod a+r $(DESTDIR)$(mandir)/*/$$f; done
 	@echo "Do not forget to run make install-configure"
 
 uninstall-local:
-	for f in mkimapdcert mkpop3dcert ; \
+	for f in mkimapdcert mkpop3dcert mkdhparams; \
 		do rm -f $(DESTDIR)$(sbindir)/$$f ; done
 	rm -f $(DESTDIR)$(bindir)/couriertls
 
@@ -180,17 +192,17 @@ INSTALL.txt: INSTALL.html
 # For maintainer's use only
 #
 
-dist-hook: courier-imap.spec courier-imap.lpspec
+dist-hook: courier-imap.spec
 	test -f $(srcdir)/rpm.release && cp $(srcdir)/rpm.release $(distdir) \
 		; exit 0
 	rm -f $(distdir)/INSTALL
 	$(HTML2TXT) INSTALL.html >$(distdir)/INSTALL
-	cp $(srcdir)/courier-imap.spec $(srcdir)/courier-imap.lpspec $(distdir)
+	cp $(srcdir)/courier-imap.spec $(distdir)
 
 if HAVE_HTML
 
 README: html/main.html
-	$(HTML2TXT) $(srcdir)/html/index2.html >README
+	$(HTML2TXT) $(srcdir)/html/index.html >README
 endif
 
 distrelease:
@@ -205,7 +217,7 @@ release: dist
 rpm: build-rpm
 
 build-rpm:
-	$(MAKE) courier-imap.spec courier-imap.lpspec
+	$(MAKE) courier-imap.spec
 	$(MAKE) bump.rpm.release
 	$(MAKE) dist
 	rm -rf rpm/BUILD/*
@@ -244,7 +256,7 @@ publish:
 	rm -rf lpmtmp
 	lpm --sync repository && rsync -a -v --delete-after repository/. headache:lpmtool.com/www/repositories/courier-imap
 
-bump.rpm.release: @PACKAGE@.spec @PACKAGE@.lpspec
+bump.rpm.release: @PACKAGE@.spec
 	VERSION="x"; \
 	test -f $(srcdir)/rpm.release && . $(srcdir)/rpm.release; \
 	NEXT_RELEASE=0; \
@@ -254,10 +266,7 @@ bump.rpm.release: @PACKAGE@.spec @PACKAGE@.lpspec
 	echo "RELEASE=$$RELEASE" >>$(srcdir)/rpm.release; \
 	sed 's/^Release: .*/Release: '$$RELEASE'%{courier_release}/' \
 		courier-imap.spec >courier-imap.spec.new ; \
-	mv courier-imap.spec.new courier-imap.spec ; \
-	sed 's/^Release: .*/Release: '$$RELEASE'/' \
-		courier-imap.lpspec >courier-imap.lpspec.new
-	mv courier-imap.lpspec.new courier-imap.lpspec
+	mv courier-imap.spec.new courier-imap.spec
 
 all-recursive: all-make-check
 
@@ -310,27 +319,24 @@ install-configure-local:
 upload-beta:
 	test -z "$(SFPASSWD)" && exit 1; exit 0
 	rm -f @PACKAGE@-@VERSION@.tar.bz2.sig; gpg --detach-sign --default-key mrsam@courier-mta.com @PACKAGE@-@VERSION@.tar.bz2; test -f @PACKAGE@-@VERSION@.tar.bz2.sig || exit 1
-	../sftools/release.pl mrsam $(SFPASSWD) courier imap-devel `echo @VERSION@|sed 's/.*\(........\)/\1/'` @PACKAGE@-@VERSION@.tar.bz2 @PACKAGE@-@VERSION@.tar.bz2.sig
+	~/src/sftools/release.pl mrsam $(SFPASSWD) courier imap-devel `echo @VERSION@|sed 's/.*\(........\)/\1/'` @PACKAGE@-@VERSION@.tar.bz2 @PACKAGE@-@VERSION@.tar.bz2.sig
 
 upload-dist:
 	test -z "$(SFPASSWD)" && exit 1; exit 0
 	rm -f @PACKAGE@-@VERSION@.tar.bz2.sig; gpg --detach-sign --default-key mrsam@courier-mta.com @PACKAGE@-@VERSION@.tar.bz2; test -f @PACKAGE@-@VERSION@.tar.bz2.sig || exit 1
-	r="`svn info . | sed -n '/Repository Root:/p' | cut -d: -f2-`"; \
-	  svn rm -m 'Remove previous tag' $$r/tags/@PACKAGE@/@VERSION@ 2>/dev/null; \
-	  svn cp -m 'Tag @PACKAGE@' $$r/trunk $$r/tags/@PACKAGE@/@VERSION@
-	socksify ../sftools/release.pl mrsam $(SFPASSWD) courier imap @VERSION@ @PACKAGE@-@VERSION@.tar.bz2 @PACKAGE@-@VERSION@.tar.bz2.sig
+	set -e; v="@PACKAGE@/@VERSION@/`date +%Y%m%d%H%M%S`"; git tag -s $$v -m 'Tag version @VERSION@'; cd libs; git tag -s $$v -m 'Tag version @VERSION@'
+	socksify ~/src/sftools/release.pl mrsam $(SFPASSWD) courier imap @VERSION@ @PACKAGE@-@VERSION@.tar.bz2 @PACKAGE@-@VERSION@.tar.bz2.sig
 
 dollar=$$
 id=$(dollar)Id
 
 WWW=$$HOME/www/www.courier-mta.org
 
-htmldoc: INSTALL.html imap/README.html maildir/README.maildirquota.html maildir/README.sharedfolders.html maildir/README.imapkeywords.html imap/BUGS.html imap/README.proxy.html imap/README.html
-	for f in $^; do xsltproc --nonet $(WWW)/xsl/imap.xsl $$f | perl -ne 's~\$(id):.*\$$~\$(id):'"$$h"'\$$~; print' >$(WWW)/imap/`basename $$f`; done
+htmldoc: INSTALL.html libs/imap/README.html libs/maildir/README.maildirquota.html libs/maildir/README.sharedfolders.html libs/maildir/README.imapkeywords.html libs/imap/BUGS.html libs/imap/README.proxy.html libs/imap/README.html
+	for f in $^; do xsltproc --nonet $(srcdir)/imap-format.xsl $$f | perl -ne 's~\$(id):.*\$$~\$(id):'"$$h"'\$$~; print' >$(WWW)/imap/`basename $$f`; done
 	rm -rf doc
 	mkdir doc
 	xsltproc -o doc/ $(srcdir)/imap.xsl $(srcdir)/imap.xml
-	mv doc/index.html doc/index2.html
 	for f in doc/*.html; do \
 		echo $$f; \
 		tidy -i -asxml --doctype transitional \
@@ -338,10 +344,11 @@ htmldoc: INSTALL.html imap/README.html maildir/README.maildirquota.html maildir/
 			-q --tidy-mark no $$f >$$f.tmp; \
 		xsltproc --nonet $(WWW)/xsl/postproc.xsl \
 			$$f.tmp > $$f.tmp2; \
-		xsltproc --nonet $(WWW)/xsl/imap.xsl \
+		xsltproc --nonet $(srcdir)/imap-format.xsl \
 			 $$f.tmp2 >$$f; \
 		rm -f $$f.tmp*; done
 	mv -f doc/*.html $(WWW)/imap
+	cp -f courier-imap.png bg.png $(WWW)/imap
 	rm -rf doc
 
 AUTOMAKE_OPTIONS=dist-bzip2

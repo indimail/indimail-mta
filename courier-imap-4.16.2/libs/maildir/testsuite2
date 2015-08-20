@@ -1,0 +1,36 @@
+LC_ALL=C
+export LC_ALL
+
+rm -f testrules
+./testmaildirfilter "rule1" "startswith" "subject" "important" "INBOX"
+./testmaildirfilter "rule2" "-endswith" "subject" "notimportant" "INBOX.folder1"
+./testmaildirfilter "rule3" "contains" "subject" "everything" "INBOX.everything"
+./testmaildirfilter "rule4" "hasrecipient" "" "nobody@example.com" "INBOX.junk1"
+./testmaildirfilter "rule5" "mimemultipart" "" "" "INBOX.attachments"
+./testmaildirfilter "rule6" "-textplain" "" "" "INBOX.nottext"
+./testmaildirfilter "err1" "startswith" "subject" "no/good" "INBOX"
+./testmaildirfilter "rule7" "startswith" "subject" "no\/\'\"good" "INBOX"
+./testmaildirfilter "err2" "startswith" "subject" "no$good" "INBOX"
+./testmaildirfilter "err3" "startswith" "subject" "no!good" "INBOX"
+./testmaildirfilter "err4" "startswith" "subject" "no'good" "INBOX"
+./testmaildirfilter "err5" "startswith" "subject" "no(good" "INBOX"
+./testmaildirfilter "err6" "startswith" "subject" "no()good" "INBOX"
+./testmaildirfilter "err7" "startswith" "subject" "no)good" "INBOX"
+./testmaildirfilter "rule8" "startswith" "subject" "(good)" "INBOX"
+./testmaildirfilter "err8" "startswith" "subject:" "nogood" "INBOX"
+./testmaildirfilter "err9" "startswith" "subject:" "nogood" "INBOX"
+./testmaildirfilter "err10" "startswith" "subject:" "nogood" "INBOX"
+./testmaildirfilter "rule9" "startswith" "subject" "x" "!john@example.com mary@example.com"
+./testmaildirfilter "err11" "startswith" "subject" "x" "!john@example.com; foo"
+./testmaildirfilter "err12" "startswith" "subject" "x" '!john@example.com `foo`'
+./testmaildirfilter "rule9b" "/startswith" "" "x" "INBOX.Sent"
+./testmaildirfilter "rule10" "startswith" "subject" "x" "*bounce"
+./testmaildirfilter "err13" "startswith" "/subject" "x" "*bounce"
+./testmaildirfilter "rule11" "islargerthan" "" "100000" "*bounce"
+./testmaildirfilter "err14" "islargerthan" "" "x100000" "*bounce"
+./testmaildirfilter "rule12" "-islargerthan" "" "100000" "*bounce"
+./testmaildirfilter "ruleauto1" "islargerthan" "" 0 "+dummy dsn=1 days=7"
+./testmaildirfilter "ruleauto2" "islargerthan" "" 0 "+dummy2"
+CHARSET=iso-8859-1 ./testmaildirfilter "`echo -n utf8rule | tr 'e' '\351'`" "contains" "`echo -n subject | tr 'e' '\351'`" "`echo -n test | tr 'e' '\351'`" "INBOX"
+cat testrules | sed 's:/.*mailbot:mailbot:'
+rm -f testrules

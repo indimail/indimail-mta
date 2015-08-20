@@ -12,7 +12,7 @@
 
 <body text="#000000" bgcolor="#FFFFFF" link="#0000EE" vlink=
 "#551A8B" alink="#FF0000">
-  <!-- Copyright 1998 - 2011 Double Precision, Inc.  See COPYING for -->
+  <!-- Copyright 1998 - 2014 Double Precision, Inc.  See COPYING for -->
   <!-- distribution information. -->
 
   <h1>Courier-IMAP</h1>
@@ -29,6 +29,8 @@
     <li><a href="#upgrading">Upgrading</a></li>
 
     <li><a href="#install">Installation</a></li>
+
+    <li><a href="#imapconfig">IMAP configuration file</a></li>
 
     <li><a href="#loginexec">Account initialization hook</a></li>
 
@@ -86,9 +88,19 @@
 
   <h2><a name="upgrading" id="upgrading">UPGRADING</a></h2>
 
+  <h3>Upgrading from Courier-IMAP 4.14, and earlier</h3>
+
+  <p>Version 4.15 removes the TLS_DHCERTFILE parameter from imap,
+  and pop3d configuration files. DH parameters, and DH parameters
+  only, get read from the new TLS_DHPARAMS file (and the other
+  functionaly of TLS_DHCERTFILE, for DSA certificates, is merged
+  into TLS_CERTFILE). After upgrading, run the
+  <code>mkdhparams</code> script to create a new TLS_DHPARAMS
+  file.</p>
+
   <h3>Upgrading from Courier-IMAP 4.9.3, and earlier</h3>
 
-  <p>In 5.0.0, the IMAP server resets the epoch for an internal
+  <p>In 4.10.0, the IMAP server resets the epoch for an internal
   sequence number generator for new mailboxes. This is an internal
   attribute of individual IMAP folders, that's defined by the IMAP
   specification. Each folder in a mailbox carries an individual
@@ -275,7 +287,7 @@ pop3d-ssl.config    pop3d-ssl
   <p>To compile and install the Courier-IMAP server (this is the
   short version, a longer version follows):</p>
   <pre>
- 
+
 $ ./configure [ options, see below ]
 $ make
 $ make check       # Note - the --enable-workarounds-for-imap-client-bugs
@@ -365,7 +377,7 @@ $ su root
   <p>Use the following command to start the Courier-IMAP
   server:</p>
   <pre>
- 
+
 $ @defaultprefix@/libexec/imapd.rc start
 </pre>
 
@@ -373,7 +385,7 @@ $ @defaultprefix@/libexec/imapd.rc start
   <code>@defaultprefix@</code>. Use the following command to stop
   Courier-IMAP:</p>
   <pre>
- 
+
 $ @defaultprefix@/libexec/imapd.rc stop
 </pre>
 
@@ -389,10 +401,8 @@ $ @defaultprefix@/libexec/imapd.rc stop
   or GnuTLS from <a target="_blank" href=
   "http://www.gnutls.org"><code>http://www.gnutls.org</code></a>.</p>
 
-  <p>OpenSSL's support is well-tested, the GnuTLS version is a
-  relatively new addition, and is considered experimental. Follow
-  OpenSSL's or GnuTLS's installation instructions, then build
-  Courier-IMAP.</p>
+  <p>Follow OpenSSL's or GnuTLS's installation instructions, then
+  build Courier-IMAP.</p>
 
   <blockquote>
     <p><b>NOTE:</b> Most systems already have an available OpenSSL
@@ -445,6 +455,17 @@ $ @defaultprefix@/libexec/imapd.rc stop
   existing <code>imapd.pem</code> certificate, in order to allow
   precompiled packages to simply call <code>mkimapdcert</code>
   after installation, without worry.</p>
+
+  <h4>Initial parameters, and a monthly cron job to generate DH
+  parameters</h4>
+
+  <p>Run the <code>mkdhparams</code> script to create a DH
+  parameter file. A monthly cron job should be created to run the
+  <code>mkdhparams</code> script, in order to periodically generate
+  a new set of DH parameters. <code>mkdhparams</code> checks if the
+  DH parameter file's timestamp is older than 25 days, and creates
+  a new file if it is. DH parameters are used to set up encrypted
+  connections.</p>
 
   <h4>The bundled POP3 server</h4>
 
@@ -631,6 +652,28 @@ $ @defaultprefix@/libexec/imapd.rc stop
   <code>--sysconfdir</code> and <code>--datadir</code> work too,
   for those who know how to properly use them.</p>
 
+  <h2><a name="imapconfig" id="imapconfig">Configuration
+  file</a></h2>
+
+  <p>The <code>@defaultprefix@/etc/imapd</code> configuration file
+  sets some configurable options. Each setting has a brief
+  description. Review each setting, and make any necessary
+  adjustments.</p>
+
+  <p>The <code>@defaultprefix@/etc/imapd-ssl</code> configuration
+  file sets additional configuration setting for the server running
+  IMAP over TLS or SSL on port 993. Note that, by default, the
+  regular IMAP server on port 143 also supports encrypted
+  connections, and the default startup script for the port 143
+  server reads both configuration files.</p>
+
+  <p>The <code>@defaultprefix@/etc/pop3d</code> and the
+  <code>@defaultprefix@/etc/pop3d-ssl</code> configuration files
+  set options of the POP3 server.</p>
+
+  <p>NOTE: the actual location of the configuration file directory
+  is itself configured at compilation time.</p>
+
   <h2><a name="loginexec" id="loginexec">ACCOUNT INITIALIZATION
   HOOK</a></h2>
 
@@ -695,7 +738,7 @@ $ @defaultprefix@/libexec/imapd.rc stop
     password:
       <pre>
 userdbpw -hmac-md5 | userdb <i>userdb</i> set hmac-md5pw
-    
+
 </pre>Then run the <code>makeuserdb</code> command, as always.
     </li>
 
