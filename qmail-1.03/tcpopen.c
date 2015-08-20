@@ -1,14 +1,13 @@
 /*
  * $Log: tcpopen.c,v $
+ * Revision 1.2  2015-08-20 18:56:55+05:30  Cprogrammer
+ * removed compiler warning
+ *
  * Revision 1.1  2015-08-20 18:36:55+05:30  Cprogrammer
  * Initial revision
  *
  *
  */
-#ifndef	lint
-static char     sccsid[] = "$Id: tcpopen.c,v 1.1 2015-08-20 18:36:55+05:30 Cprogrammer Exp mbhangui $";
-#endif
-
 #ifndef QMAIL_INTERNAL
 #include "hasindimail.h"
 #endif
@@ -418,5 +417,13 @@ tcpopen(host, service, port) /*- Thanks to Richard's Steven */
 void
 getversion_tcpopen_c()
 {
-	static char    *x = "$Id: tcpopen.c,v 1.1 2015-08-20 18:36:55+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: tcpopen.c,v 1.2 2015-08-20 18:56:55+05:30 Cprogrammer Exp mbhangui $";
+	char *y = sccsid;
+#ifdef INDIMAIL
+	if (y)
+		y = sccsidh;
+#else
+	if (y)
+		y++;
+#endif
 }
