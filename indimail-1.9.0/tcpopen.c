@@ -1,5 +1,8 @@
 /*
  * $Log: tcpopen.c,v $
+ * Revision 2.11  2015-08-21 10:47:49+05:30  Cprogrammer
+ * fixed compilation error
+ *
  * Revision 2.10  2015-08-19 16:32:59+05:30  Cprogrammer
  * added missing call to getservbyname()
  *
@@ -48,7 +51,7 @@
  */
 
 #ifndef	lint
-static char     sccsid[] = "$Id: tcpopen.c,v 2.10 2015-08-19 16:32:59+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: tcpopen.c,v 2.11 2015-08-21 10:47:49+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef HAVE_CONFIG_H
@@ -91,6 +94,7 @@ tcpopen(host, service, port) /*- Thanks to Richard's Steven */
 {
 	int             resvport, fd = -1, optval, retval;
 	char           *ptr, *hostptr;
+	struct servent *sp;
 #ifdef ENABLE_IPV6
 	struct addrinfo hints, *res, *res0;
 	char            serv[FMT_ULONG];
@@ -100,7 +104,6 @@ tcpopen(host, service, port) /*- Thanks to Richard's Steven */
 #else
 	unsigned long   inaddr;
 #endif
-	struct servent *sp;
 	struct hostent *hp;
 	struct sockaddr_in tcp_srv_addr;/*- server's Internet socket address */
 #endif
@@ -154,7 +157,7 @@ tcpopen(host, service, port) /*- Thanks to Richard's Steven */
 				errno = EINVAL;
 				return (-1);
 			}
-			tcp_srv_addr.sin_port = htons(sp->s_port);	/*- service's value */
+			snprintf(serv, FMT_ULONG, "%d", htons(sp->s_port));	/*- service's value */
 		}
 	} else
 	if (port <= 0)
