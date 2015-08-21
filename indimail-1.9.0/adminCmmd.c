@@ -1,5 +1,8 @@
 /*
  * $Log: adminCmmd.c,v $
+ * Revision 2.11  2015-08-21 10:44:34+05:30  Cprogrammer
+ * fix for 'stack smashing detected' when compiled with -fstack-protector
+ *
  * Revision 2.10  2009-09-16 09:04:12+05:30  Cprogrammer
  * fixed error when SSL was not defined
  *
@@ -51,7 +54,7 @@ void            ssl_free();
 #endif
 
 #ifndef lint
-static char     sccsid[] = "$Id: adminCmmd.c,v 2.10 2009-09-16 09:04:12+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: adminCmmd.c,v 2.11 2015-08-21 10:44:34+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 static int      IOPlex(int, int);
@@ -63,7 +66,7 @@ adminCmmd(int sfd, int inputRead, char *cmdbuf, int len)
 	char            buffer[MAX_BUFF];
 	char           *ptr;
 
-	getEnvConfigInt((long *) &admin_timeout, "ADMIN_TIMEOUT", 120);
+	getEnvConfigInt(&admin_timeout, "ADMIN_TIMEOUT", 120);
 	if ((n = safewrite(sfd, cmdbuf, len, admin_timeout)) != len)
 	{
 		fprintf(stderr, "safewrite: %d bytes: %s\n", n, strerror(errno));

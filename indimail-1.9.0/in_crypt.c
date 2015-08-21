@@ -1,5 +1,8 @@
 /*
  * $Log: in_crypt.c,v $
+ * Revision 2.2  2015-08-21 10:46:40+05:30  Cprogrammer
+ * fix for 'stack smashing detected' when compiled with -fstack-protector
+ *
  * Revision 2.1  2008-09-12 09:56:29+05:30  Cprogrammer
  * use internal crypt funcations if not present
  *
@@ -16,7 +19,7 @@ char           *crypt(const char *, const char *);
 #endif
 
 #ifndef	lint
-static char     sccsid[] = "$Id: in_crypt.c,v 2.1 2008-09-12 09:56:29+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: in_crypt.c,v 2.2 2015-08-21 10:46:40+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 /*
@@ -27,7 +30,7 @@ in_crypt(const char *pw, const char *salt)
 {
 	int             passwd_hash;
 
-	getEnvConfigInt((long *) &passwd_hash, "PASSWORD_HASH", PASSWORD_HASH);
+	getEnvConfigInt(&passwd_hash, "PASSWORD_HASH", PASSWORD_HASH);
 	switch (passwd_hash)
 	{
 	case DES_HASH:

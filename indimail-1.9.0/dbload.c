@@ -1,5 +1,8 @@
 /*
  * $Log: dbload.c,v $
+ * Revision 2.17  2015-08-21 10:45:48+05:30  Cprogrammer
+ * use integer for getEnvConfigInt
+ *
  * Revision 2.16  2010-05-01 12:27:49+05:30  Cprogrammer
  * print error only if verbose is set
  *
@@ -62,7 +65,7 @@
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: dbload.c,v 2.16 2010-05-01 12:27:49+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: dbload.c,v 2.17 2015-08-21 10:45:48+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #include <unistd.h>
@@ -201,7 +204,7 @@ connect_db(DBINFO **ptr, MYSQL **mysqlptr)
 {
 	char            mcdFile[MAX_BUFF];
 	char           *qmaildir, *controldir, *mcdfile, *server;
-	long            maxattempts, retry_interval;
+	int             maxattempts, retry_interval;
 	unsigned int    flags;
 
 	if ((*ptr)->failed_attempts)

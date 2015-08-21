@@ -1,5 +1,8 @@
 /*
  * $Log: ProcessInFifo.c,v $
+ * Revision 2.37  2015-08-21 10:47:09+05:30  Cprogrammer
+ * replaced getEnvConfigInit with getEnvConfigLong
+ *
  * Revision 2.36  2013-11-22 16:16:50+05:30  Cprogrammer
  * Display SigTerm message only if verbose or debug is enabled
  *
@@ -123,7 +126,7 @@
  */
 
 #ifndef	lint
-static char     sccsid[] = "$Id: ProcessInFifo.c,v 2.36 2013-11-22 16:16:50+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: ProcessInFifo.c,v 2.37 2015-08-21 10:47:09+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #include <fcntl.h>
@@ -260,7 +263,7 @@ ProcessInFifo(int instNum)
 			continue;
 		}
 		vclose();
-		getEnvConfigInt(&ucount, "MAXUSERS", 10000);
+		getEnvConfigLong(&ucount, "MAXUSERS", 10000);
 		if (count > ucount && (idx = do_startup(instNum)))
 		{
 			printf("enterprise version requires plugin\n");

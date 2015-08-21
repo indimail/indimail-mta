@@ -206,12 +206,12 @@ main(int argc, char **argv)
 	if (argc < 3)
 	{
 		fprintf(stderr, "%s: no more modules will be tried\n", prog_name);
-		return(1);
+		return (1);
 	}
 	if (!(tmpbuf = calloc(1, (authlen + 1) * sizeof(char))))
 	{
 		fprintf(stderr, "%s: malloc-%d: %s\n", prog_name, authlen + 1, strerror(errno));
-		return(1);
+		return (1);
 	}
 	/*-
 	 * Courier-IMAP authmodules Protocol (authindi /var/indimail/bin/imapd Maildir < /tmp/input 3<&0)
@@ -238,7 +238,7 @@ main(int argc, char **argv)
 		if (count == -1)
 		{
 			fprintf(stderr, "read: %s\n", strerror(errno));
-			return(1);
+			return (1);
 		} else
 		if (!count)
 			break;
@@ -246,13 +246,13 @@ main(int argc, char **argv)
 		if (offset >= (authlen + 1))
 		{
 			fprintf(stderr, "%s: auth data too long\n", prog_name);
-			return(2);
+			return (2);
 		}
 	}
 	if (!(buf = calloc(1, (offset + 1) * sizeof(char))))
 	{
 		fprintf(stderr, "%s: malloc-%d: %s\n", prog_name, authlen + 1, strerror(errno));
-		return(1);
+		return (1);
 	}
 	memcpy(buf, tmpbuf, offset);
 	count = 0;
@@ -261,7 +261,7 @@ main(int argc, char **argv)
 	if (count == offset || (count + 1) == offset)
 	{
 		fprintf(stderr, "%s: auth data too short\n", prog_name);
-		return(2);
+		return (2);
 	}
 	tmpbuf[count++] = 0;
 
@@ -270,7 +270,7 @@ main(int argc, char **argv)
 	if (count == offset || (count + 1) == offset)
 	{
 		fprintf(stderr, "%s: auth data too short\n", prog_name);
-		return(2);
+		return (2);
 	}
 	tmpbuf[count++] = 0;
 	if (!strncmp(auth_type, "pass", 5))
@@ -304,7 +304,7 @@ main(int argc, char **argv)
 	if (count == offset || (count + 1) == offset)
 	{
 		fprintf(stderr, "%s: auth data too short\n", prog_name);
-		return(2);
+		return (2);
 	}
 	tmpbuf[count++] = 0;
 	if (auth_method > 2) {
@@ -312,7 +312,7 @@ main(int argc, char **argv)
 		{
 			fprintf(stderr, "b64_decode: %s\n", strerror(errno));
 			pipe_exec(argv, buf, offset);
-			return(1);
+			return (1);
 		}
 		challenge = ptr;
 	} else
@@ -328,7 +328,7 @@ main(int argc, char **argv)
 				free (challenge);
 			fprintf(stderr, "b64_decode: %s\n", strerror(errno));
 			pipe_exec(argv, buf, offset);
-			return(1);
+			return (1);
 		}
 		for (login = ptr;*ptr && !isspace(*ptr);ptr++);
 		*ptr = 0;
@@ -350,7 +350,7 @@ main(int argc, char **argv)
 			free (login);
 		}
 		pipe_exec(argv, buf, offset);
-		return(1);
+		return (1);
 	}
 	if (parse_email(login, user, domain, MAX_BUFF))
 	{
@@ -414,7 +414,7 @@ main(int argc, char **argv)
 				free (login);
 			}
 			pipe_exec(argv, buf, offset);
-			return(1);
+			return (1);
 		}
 		if ((ptr = strrchr(mailstore, ':')) != (char *) 0)
 			*ptr = 0;
@@ -429,7 +429,7 @@ main(int argc, char **argv)
 					free (challenge);
 				free (login);
 			}
-			return(1);
+			return (1);
 		}
 	}
 #endif /*- CLUSTERED_SITE */
@@ -651,7 +651,7 @@ main(int argc, char **argv)
 	exec_local(argv + argc - 2, login, real_domain, pw, service);
 	if (auth_method > 2)
 		free (login);
-	return(0);
+	return (0);
 }
 
 static int
@@ -728,7 +728,7 @@ exec_local(char **argv, char *userid, char *TheDomain, struct passwd *pw, char *
 				}
 				fprintf(stderr, "POSTAUTH: Error on Exit\n");
 				close_connection();
-				return(1);
+				return (1);
 			}
 			if (!(ptr = getenv("TMP_MAILDIR")))
 				snprintf(Maildir, MAX_BUFF, "%s", pw->pw_dir);
@@ -743,12 +743,12 @@ exec_local(char **argv, char *userid, char *TheDomain, struct passwd *pw, char *
 	if (chdir(Maildir))
 	{
 		fprintf(stderr, "authindi: chdir: %s: %s\n", Maildir, strerror(errno));
-		return(1);
+		return (1);
 	}
 	snprintf(authenv7, MAX_BUFF, "MAILDIR=%s/Maildir", Maildir);
 	putenv(authenv7);
 	execv(argv[0], argv);
-	return(1);
+	return (1);
 }
 
 void

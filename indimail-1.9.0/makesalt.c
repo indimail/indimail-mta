@@ -1,5 +1,8 @@
 /*
  * $Log: makesalt.c,v $
+ * Revision 2.2  2015-08-21 10:46:58+05:30  Cprogrammer
+ * fix for 'stack smashing detected' when compiled with -fstack-protector
+ *
  * Revision 2.1  2008-09-11 14:07:35+05:30  Cprogrammer
  * generate salt for encryption
  *
@@ -12,7 +15,7 @@
 #include <sys/types.h>
 
 #ifndef	lint
-static char     sccsid[] = "$Id: makesalt.c,v 2.1 2008-09-11 14:07:35+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: makesalt.c,v 2.2 2015-08-21 10:46:58+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 int        Arc4random(int, int);
@@ -70,7 +73,7 @@ makesalt(char *salt, int n)
 		seeded = 1;
 		srand(time(0)^(getpid()<<15));
 	}
-	getEnvConfigInt((long *) &passwd_hash, "PASSWORD_HASH", PASSWORD_HASH);
+	getEnvConfigInt(&passwd_hash, "PASSWORD_HASH", PASSWORD_HASH);
 	i = 0;
 	switch (passwd_hash)
 	{

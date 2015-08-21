@@ -1,5 +1,8 @@
 /*
  * $Log: indimail.h,v $
+ * Revision 2.215  2015-08-21 10:32:21+05:30  Cprogrammer
+ * added getEnvConfigLong()
+ *
  * Revision 2.214  2014-07-27 12:30:03+05:30  Cprogrammer
  * added timestamp column to indimail tables
  *
@@ -958,7 +961,7 @@
 #define INDIMAILH_H
 
 #ifndef	lint
-static char     sccsidh[] = "$Id: indimail.h,v 2.214 2014-07-27 12:30:03+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsidh[] = "$Id: indimail.h,v 2.215 2015-08-21 10:32:21+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef HAVE_CONFIG_H
@@ -1768,7 +1771,8 @@ int             wildmat(char *, char *);
 int             atrn_access(char *, char *);
 int             loadbalance(int);
 void            getEnvConfigStr(char **, char *, char *);
-void            getEnvConfigInt(long *, char *, long);
+void            getEnvConfigInt(int *, char *, long);
+void            getEnvConfigLong(long *, char *, long);
 #ifdef HAVE_STDARG_H
 int             filewrt     __P((int, char *, ...));
 int             post_handle __P((const char *, ...));

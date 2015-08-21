@@ -1,5 +1,8 @@
 /*
  * $Log: auth_admin.c,v $
+ * Revision 2.8  2015-08-21 10:45:40+05:30  Cprogrammer
+ * fix for 'stack smashing detected' when compiled with -fstack-protector
+ *
  * Revision 2.7  2009-09-17 10:33:22+05:30  Cprogrammer
  * fixed errno getting clobbered by ssl_free
  * display error from the server
@@ -40,7 +43,7 @@ void            ssl_free();
 #endif
 
 #ifndef lint
-static char     sccsid[] = "$Id: auth_admin.c,v 2.7 2009-09-17 10:33:22+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: auth_admin.c,v 2.8 2015-08-21 10:45:40+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 int
@@ -54,7 +57,7 @@ auth_admin(char *admin_user, char *admin_pass, char *admin_host, char *admin_por
 		fprintf(stderr, "tcpopen: %s:%s: %s\n", admin_host, admin_port, strerror(errno));
 		return (-1);
 	}
-	getEnvConfigInt((long *) &admin_timeout, "ADMIN_TIMEOUT", 120);
+	getEnvConfigInt(&admin_timeout, "ADMIN_TIMEOUT", 120);
 #ifdef HAVE_SSL
 	if (clientcert && tls_init(sfd, clientcert))
 		return (-1);
