@@ -1048,7 +1048,7 @@ gen_alloc.h conf-tls conf-ip
 
 ipme.o: \
 compile ipme.c hassalen.h byte.h ip.h ipalloc.h gen_alloc.h \
-open.h getln.h alloc.h stralloc.h gen_alloc.h ipme.h \
+open.h getln.h alloc.h stralloc.h gen_alloc.h ipme.h hasifaddr.h \
 ipalloc.h substdio.h variables.h conf-tls conf-ip conf-ipme
 	./compile `grep -h -v "^#" conf-tls conf-ip conf-ipme` ipme.c
 
@@ -5408,6 +5408,13 @@ sys-checkpwd.o: \
 compile sys-checkpwd.c error.h pathexec.h hasspnam.h \
 hasuserpw.h str.h subfd.h substdio.h env.h
 	./compile sys-checkpwd.c
+
+hasifaddr.h: \
+tryifaddr.c compile load
+	( ( ./compile tryifaddr.c && ./load tryifaddr ) >/dev/null \
+	2>&1 \
+	&& echo \#define HASIFADDR 1 || exit 0 ) > hasifaddr.h
+	rm -f tryifaddr.o tryifaddr
 
 hasspnam.h: \
 tryspnam.c compile load
