@@ -1,5 +1,8 @@
 /*
  * $Log: ipmeprint.c,v $
+ * Revision 1.11  2015-08-24 19:06:55+05:30  Cprogrammer
+ * replace ip_fmt() with ip4_fmt()
+ *
  * Revision 1.10  2008-09-16 16:10:32+05:30  Cprogrammer
  * BUG - Fixed control files not getting opened
  *
@@ -77,7 +80,7 @@ main()
 void
 getversion_ipmeprint_c()
 {
-	static char    *x = "$Id: ipmeprint.c,v 1.10 2008-09-16 16:10:32+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: ipmeprint.c,v 1.11 2015-08-24 19:06:55+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

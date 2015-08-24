@@ -1,5 +1,8 @@
 /*
  * $Log: greylist.c,v $
+ * Revision 1.5  2015-08-24 19:06:05+05:30  Cprogrammer
+ * replace ip_scan() with ip4_scan()
+ *
  * Revision 1.4  2014-01-29 14:00:42+05:30  Cprogrammer
  * fixed compilation warnings
  *
@@ -171,7 +174,7 @@ greylist(gip, connectingip, from, tolist, tolen, timeoutfn, errfn)
 void
 getversion_greylist_c()
 {
-	static char    *x = "$Id: greylist.c,v 1.4 2014-01-29 14:00:42+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: greylist.c,v 1.5 2015-08-24 19:06:05+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

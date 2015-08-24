@@ -1,5 +1,8 @@
 /*
  * $Log: ipme.c,v $
+ * Revision 1.19  2015-08-24 19:06:46+05:30  Cprogrammer
+ * replaced ip_scan() with ip4_scan()
+ *
  * Revision 1.18  2008-09-16 20:12:54+05:30  Cprogrammer
  * represent ipv4 addresses as ipv4 and not as IPV4 mapped addresses
  *
@@ -408,7 +411,7 @@ ipme_init()
 void
 getversion_ipme_c()
 {
-	static char    *x = "$Id: ipme.c,v 1.18 2008-09-16 20:12:54+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: ipme.c,v 1.19 2015-08-24 19:06:46+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

@@ -1,5 +1,8 @@
 /*
  * $Log: surblfilter.c,v $
+ * Revision 1.8  2015-08-24 19:09:25+05:30  Cprogrammer
+ * replace ip_fmt() with ip4_fmt()
+ *
  * Revision 1.7  2014-01-29 14:06:21+05:30  Cprogrammer
  * fix for nameser_commpat.h on OS X
  *
@@ -890,7 +893,7 @@ main(int argc, char **argv)
 void
 getversion_surblfilter_c()
 {
-	static char    *x = "$Id: surblfilter.c,v 1.7 2014-01-29 14:06:21+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: surblfilter.c,v 1.8 2015-08-24 19:09:25+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

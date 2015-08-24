@@ -1,5 +1,8 @@
 /*
  * $Log: timeoutconn.c,v $
+ * Revision 1.13  2015-08-24 19:09:38+05:30  Cprogrammer
+ * replace ip_scan() with ip4_scan(), replace ip_fmt() with ip4_fmt()
+ *
  * Revision 1.12  2011-07-29 10:20:53+05:30  Cprogrammer
  * fixed array subscript is above array bounds [-Warray-bounds] warning
  *
@@ -404,7 +407,7 @@ timeoutconn4(s, ipr, ipl, port, timeout)
 void
 getversion_timeoutconn_c()
 {
-	static char    *x = "$Id: timeoutconn.c,v 1.12 2011-07-29 10:20:53+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: timeoutconn.c,v 1.13 2015-08-24 19:09:38+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

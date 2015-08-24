@@ -1,5 +1,8 @@
 /*
  * $Log: ip.h,v $
+ * Revision 1.9  2015-08-24 19:06:36+05:30  Cprogrammer
+ * use compressed ip6 address
+ *
  * Revision 1.8  2005-08-23 17:30:55+05:30  Cprogrammer
  * gcc 4 compliance
  *

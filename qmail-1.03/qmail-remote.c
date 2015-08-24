@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-remote.c,v $
+ * Revision 1.92  2015-08-24 19:08:34+05:30  Cprogrammer
+ * replaced ip_scan() with ip4_scan(), replace ip_fmt() with ip4_fmt()
+ *
  * Revision 1.91  2014-12-18 11:18:41+05:30  Cprogrammer
  * added helohostbyip
  *
@@ -3158,7 +3161,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_remote_c()
 {
-	static char    *x = "$Id: qmail-remote.c,v 1.91 2014-12-18 11:18:41+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-remote.c,v 1.92 2015-08-24 19:08:34+05:30 Cprogrammer Exp mbhangui $";
 	x=sccsidauthcramh;
 	x=sccsidauthdigestmd5h;
 	x++;

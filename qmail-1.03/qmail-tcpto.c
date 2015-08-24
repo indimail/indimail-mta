@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-tcpto.c,v $
+ * Revision 1.21  2015-08-24 19:08:47+05:30  Cprogrammer
+ * replace ip_fmt() with ip4_fmt()
+ *
  * Revision 1.20  2010-02-10 08:59:23+05:30  Cprogrammer
  * use -DMULTI_QUEUE for using multiple queues
  *
@@ -355,7 +358,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_tcpto_c()
 {
-	static char    *x = "$Id: qmail-tcpto.c,v 1.20 2010-02-10 08:59:23+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: qmail-tcpto.c,v 1.21 2015-08-24 19:08:47+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
