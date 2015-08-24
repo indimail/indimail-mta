@@ -193,7 +193,7 @@ cidr2IPrange(char *ipaddr, int mask, struct netspec *spec)
 {
 	ip_addr         ip;
 
-	if (!ip_scan(ipaddr, &ip))
+	if (!ip4_scan(ipaddr, &ip))
 	{
 		logerr("failed to scan ip");
 		logerr("[");
@@ -310,7 +310,7 @@ ip_match(char *fn, stralloc *ipaddr, stralloc *content, struct constmap *ptrmap,
 				return (-1);
 			}
 			ptr[x] = '/';
-			if (!ip_scan(ipaddr->s, &ip)) /*- record contains invalid IP */
+			if (!ip4_scan(ipaddr->s, &ip)) /*- record contains invalid IP */
 			{
 				logerr("failed to scan ip");
 				logerr("[");
@@ -363,7 +363,7 @@ copy_grey(struct greylst *ptr, char *ipaddr, char *rpath, char *rcpt, int rcptle
 {
 	int             len;
 
-	if (!ip_scan(ipaddr, &ptr->ip))
+	if (!ip4_scan(ipaddr, &ptr->ip))
 	{
 		logerr("failed to scan ip");
 		logerr("[");
@@ -507,7 +507,7 @@ expire_records(time_t cur_time)
 	/*- find the first record that is not expired */
 	start = cur_time - timeout;
 	for (ptr = head;ptr && ptr->timestamp < start;ptr = ptr->next) {
-		ip_str[ip_fmt(ip_str, &ptr->ip)] = 0;
+		ip_str[ip4_fmt(ip_str, &ptr->ip)] = 0;
 		print_record(ip_str, ptr->rpath, ptr->rcpt, ptr->rcptlen, ptr->timestamp,
 			ptr->status, 1);
 		grey_count--;
@@ -641,7 +641,7 @@ search_record(char *remoteip, char *rpath, char *rcpt, int rcptlen, int min_rese
 		}
 	} else
 		ptr = head;
-	if (!ip_scan(remoteip, &r_ip))
+	if (!ip4_scan(remoteip, &r_ip))
 	{
 		logerr("failed to scan ip");
 		logerr("[");
@@ -835,7 +835,7 @@ save_context()
 	{
 		rcptlen[fmt_ulong(rcptlen, ptr->rcptlen)] = 0;
 		timestamp[fmt_ulong(timestamp, ptr->timestamp)] = 0;
-		if (write_file(context_fd, ip_str, ip_fmt(ip_str, &ptr->ip)) == -1
+		if (write_file(context_fd, ip_str, ip4_fmt(ip_str, &ptr->ip)) == -1
 			|| write_0(context_fd) == -1
 			|| write_file(context_fd, ptr->rpath, str_len(ptr->rpath)) == -1
 			|| write_0(context_fd) == -1

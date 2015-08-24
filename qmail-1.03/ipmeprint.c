@@ -56,7 +56,7 @@ main()
 		{
 		case AF_INET:
 			substdio_puts(subfdout, "ipv4 -> ");
-			substdio_put(subfdout, temp, ip_fmt(temp, &ipme.ix[j].addr.ip));
+			substdio_put(subfdout, temp, ip4_fmt(temp, &ipme.ix[j].addr.ip));
 		break;
 #ifdef IPV6
 		case AF_INET6:

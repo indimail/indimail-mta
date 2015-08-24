@@ -308,7 +308,7 @@ addrparse(arg)
 			/*- if not, partner should go read rfc 821 */
 			if (addr.s[i + 1] == '[')
 			{
-				if (!addr.s[i + 1 + ip_scanbracket(addr.s + i + 1, &ip)])
+				if (!addr.s[i + 1 + ip4_scanbracket(addr.s + i + 1, &ip)])
 				{
 					if (ipme_is(&ip))
 					{

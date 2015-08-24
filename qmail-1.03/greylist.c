@@ -56,11 +56,11 @@ scan_ip_port(s, defaultip, defaultport, ipp, portp)
 
 	if (!s)
 	{
-		ip_scan(defaultip, ipp);
+		ip4_scan(defaultip, ipp);
 		port = defaultport;
 	} else {
-		if (!(n = ip_scan(s, ipp)))
-			ip_scan(defaultip, ipp);
+		if (!(n = ip4_scan(s, ipp)))
+			ip4_scan(defaultip, ipp);
 		if (!(*(s + n) == ':' && scan_ulong(s + n + 1, &port)))
 			port = defaultport;
 	}

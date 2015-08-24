@@ -160,12 +160,12 @@ ipme_readipfile(ipa, fn)
 			if (ip6_isv4mapped(&ix.addr.ip6.d))
 			{
 				ix.af = AF_INET;
-				if (!ip_scan(l.s, &ix.addr.ip))
+				if (!ip4_scan(l.s, &ix.addr.ip))
 					continue;
 			}
 #else
 			ix.af = AF_INET;
-			if (!ip_scan(l.s, &ix.addr.ip))
+			if (!ip4_scan(l.s, &ix.addr.ip))
 				continue;
 #endif
 			if (!ipalloc_append(ipa, &ix))
