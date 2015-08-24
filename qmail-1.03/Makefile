@@ -831,6 +831,14 @@ fmt_ulong.o: \
 compile fmt_ulong.c fmt.h
 	./compile fmt_ulong.c
 
+fmt_xlong.o: \
+compile fmt_xlong.c fmt.h
+	./compile fmt_xlong.c
+
+fmt_hexbytes.o: \
+compile fmt_hexbytes.c fmt.h
+	./compile fmt_hexbytes.c
+
 fmt_double.o: \
 compile fmt_double.c fmt.h uint64.h
 	./compile fmt_double.c
@@ -863,11 +871,11 @@ strerr.h substdio.h fmt.h envdir.h pathexec.h auto_qmail.h
 	./compile `grep -h -v "^#" conf-spf` forward.c
 
 fs.a: \
-makelib fmt_str.o fmt_strn.o fmt_uint.o fmt_uint0.o fmt_ulong.o \
-scan_ulong.o scan_8long.o scan_ushort.o scan_uint.o fmt_ushort.o
-	./makelib fs.a fmt_str.o fmt_strn.o fmt_uint.o fmt_uint0.o \
+makelib fmt_str.o fmt_strn.o fmt_uint.o fmt_uint0.o fmt_ulong.o fmt_hexbytes.o \
+fmt_xlong.o scan_ulong.o scan_8long.o scan_ushort.o scan_uint.o fmt_ushort.o
+	./makelib fs.a fmt_str.o fmt_strn.o fmt_uint.o fmt_uint0.o fmt_hexbytes.o \
 	fmt_ulong.o scan_ulong.o scan_8long.o scan_ushort.o scan_uint.o \
-	fmt_ushort.o
+	fmt_xlong.o fmt_ushort.o
 
 getln.a: \
 makelib getln.o getln2.o
@@ -2099,13 +2107,13 @@ dktrace.o: compile dktrace.c dktrace.h str.h case.h conf-domainkeys
 	./compile `grep -h -v "^#" conf-domainkeys` dktrace.c
 
 dktest: load dktest.o scan_ulong.o domainkeys.o dktrace.o \
-dns.o ip.o strsalloc.o error.o ipalloc.o fmt_ulong.o \
-scan_xlong.o socket_v4mappedprefix.o socket_v6any.o \
+dns.o ip.o strsalloc.o error.o ipalloc.o fmt_ulong.o fmt_xlong.o \
+scan_xlong.o socket_v4mappedprefix.o socket_v6any.o fmt_hexbytes.o \
 dns_text.o case_diffs.o case_diffb.o fmt_str.o stralloc.a alloc.a str.a \
 dns.lib
 	./load dktest scan_ulong.o domainkeys.o dktrace.o \
-	dns.o ip.o strsalloc.o error.o ipalloc.o fmt_ulong.o \
-	scan_xlong.o socket_v4mappedprefix.o socket_v6any.o \
+	dns.o ip.o strsalloc.o error.o ipalloc.o fmt_ulong.o fmt_xlong.o \
+	scan_xlong.o socket_v4mappedprefix.o socket_v6any.o fmt_hexbytes.o \
 	dns_text.o case_diffs.o case_diffb.o fmt_str.o stralloc.a alloc.a str.a \
 	-lcrypto `cat dns.lib`
 
@@ -2134,18 +2142,18 @@ compile mess822_ok.c mess822.h byte.h uint64.h
 	./compile mess822_ok.c
 
 qmail-dk: \
-load qmail-dk.o triggerpull.o fmtqfn.o now.o date822fmt.o \
+load qmail-dk.o triggerpull.o fmtqfn.o now.o date822fmt.o fmt_hexbytes.o \
 datetime.a seek.a ndelay.a open.a sig.a alloc.a substdio.a error.a \
 str.a fs.a auto_qmail.o auto_split.o variables.o fd.a wait.a \
 case_diffb.o case_diffs.o dns.o strsalloc.o scan_xlong.o ip.o ipalloc.o \
-MakeArgs.o socket_v4mappedprefix.o socket_v6any.o mess822_ok.o \
+MakeArgs.o socket_v4mappedprefix.o socket_v6any.o mess822_ok.o fmt_xlong.o \
 domainkeys.o dktrace.o getopt.a env.a getln.a control.o dns_text.o stralloc.a dns.lib
-	./load qmail-dk triggerpull.o fmtqfn.o now.o \
+	./load qmail-dk triggerpull.o fmtqfn.o now.o fmt_hexbytes.o \
 	date822fmt.o datetime.a seek.a ndelay.a open.a sig.a \
 	fs.a auto_qmail.o auto_split.o variables.o mess822_ok.o \
 	socket_v4mappedprefix.o socket_v6any.o scan_xlong.o \
 	case_diffb.o case_diffs.o dns.o strsalloc.o ip.o ipalloc.o \
-	fd.a wait.a domainkeys.o dktrace.o control.o dns_text.o \
+	fd.a wait.a domainkeys.o dktrace.o control.o dns_text.o fmt_xlong.o \
 	MakeArgs.o getopt.a env.a open.a getln.a substdio.a error.a \
 	stralloc.a alloc.a str.a `cat dns.lib` -lcrypto
 
@@ -2898,7 +2906,7 @@ stralloc.3 stralloc.h stralloc_eady.c stralloc_pend.c stralloc_copy.c \
 stralloc_opyb.c stralloc_opys.c stralloc_cat.c stralloc_catb.c \
 stralloc_cats.c stralloc_arts.c strerr.h strerr_sys.c strerr_die.c \
 substdio.h substdio.c substdi.c substdo.c substdio_copy.c subfd.h \
-subfderr.c subfdouts.c subfdout.c subfdins.c subfdin.c \
+subfderr.c subfdouts.c subfdout.c subfdins.c subfdin.c fmt_hexbytes.c \
 exit.h timeoutconn.h timeoutconn.c timeoutread.h timeoutread.c \
 timeoutwrite.h timeoutwrite.c remoteinfo.h remoteinfo.c uint32.h1 \
 uint32.h2 tryulong32.c wait.3 wait.h wait_pid.c wait_nohang.c \
@@ -2911,7 +2919,7 @@ str_start.c lock.h lock_ex.c lock_exnb.c lock_un.c tryflock.c getln.3 \
 getln.h getln.c getln2.3 getln2.c sgetopt.3 sgetopt.h sgetopt.c \
 subgetopt.3 subgetopt.h subgetopt.c error.3 error_str.3 error_temp.3 \
 error.h error.c error_str.c error_temp.c fmt.h fmt_str.c fmt_strn.c \
-fmt_uint.c fmt_uint0.c fmt_ulong.c scan.h scan_ulong.c scan_8long.c \
+fmt_uint.c fmt_uint0.c fmt_ulong.c fmt_xlong.c scan.h scan_ulong.c scan_8long.c \
 slurpclose.h slurpclose.c quote.h quote.c hfield.h hfield.c \
 headerbody.h headerbody.c token822.h token822.c control.h control.c \
 datetime.3 datetime.h datetime.c datetime_un.c prioq.h prioq.c \
@@ -3445,15 +3453,15 @@ qmail-rm.1: qmail-rm.9
 autoresponder: load autoresponder.o alloc.o error.o error_str.o \
 alloc_re.o case_diffs.o case_diffb.o case_lowers.o env.o envread.o auto_qmail.o subgetopt.o \
 open_read.o scan_ulong.o variables.o control.o quote.o tai_now.o fmt_ulong.o \
-ip.o ipme.o ipalloc.o scan_xlong.o socket_v4mappedprefix.o socket_v6any.o \
-datetime.o date822fmt.o datetime_un.o fmt_uint.o fmt_uint0.o now.o \
+ip.o ipme.o ipalloc.o scan_xlong.o socket_v4mappedprefix.o socket_v6any.o fmt_hexbytes.o \
+datetime.o date822fmt.o datetime_un.o fmt_uint.o fmt_uint0.o now.o fmt_xlong.o \
 fmt_str.o myctime.o sgetopt.o getln.a mess822.a strerr.a substdio.a stralloc.a \
 str.a
 	./load autoresponder alloc.o error.o error_str.o alloc_re.o \
 	case_diffs.o case_diffb.o case_lowers.o env.o envread.o auto_qmail.o now.o \
-	open_read.o scan_ulong.o variables.o control.o subgetopt.o \
+	open_read.o scan_ulong.o variables.o control.o subgetopt.o fmt_hexbytes.o \
 	quote.o tai_now.o fmt_ulong.o fmt_str.o myctime.o sgetopt.o \
-	datetime.o date822fmt.o datetime_un.o fmt_uint.o fmt_uint0.o \
+	datetime.o date822fmt.o datetime_un.o fmt_uint.o fmt_uint0.o fmt_xlong.o \
 	ip.o ipme.o ipalloc.o scan_xlong.o socket_v4mappedprefix.o socket_v6any.o \
 	getln.a mess822.a strerr.a substdio.a stralloc.a \
 	str.a
@@ -5292,9 +5300,9 @@ qmail-greyd: \
 load qmail-greyd.o sgetopt.o subgetopt.o \
 error.o error_str.o strerr_die.o strerr_sys.o scan_ulong.o \
 str_len.o str_cpy.o str_chr.o str_diff.o str_diffn.o \
-ip.o socket_v6any.o socket_v4mappedprefix.o \
+ip.o socket_v6any.o socket_v4mappedprefix.o fmt_hexbytes.o \
 envread.o open_read.o constmap.o variables.o \
-case_diffb.o getln.o getln2.o fmt_ulong.o \
+case_diffb.o getln.o getln2.o fmt_ulong.o fmt_xlong.o \
 byte_rchr.o byte_copy.o byte_cr.o byte_chr.o byte_diff.o \
 alloc_re.o alloc.o control.o scan_xlong.o fmt_str.o \
 cdb_seek.o cdb_hash.o cdb_unpack.o auto_qmail.o \
@@ -5303,9 +5311,9 @@ tablematch.o substdio.a stralloc.a
 	./load qmail-greyd sgetopt.o subgetopt.o \
 	error.o error_str.o strerr_die.o strerr_sys.o scan_ulong.o \
 	str_len.o str_cpy.o str_chr.o str_diff.o str_diffn.o \
-	ip.o socket_v6any.o socket_v4mappedprefix.o \
+	ip.o socket_v6any.o socket_v4mappedprefix.o fmt_hexbytes.o \
 	envread.o open_read.o constmap.o variables.o \
-	case_diffb.o getln.o getln2.o fmt_ulong.o \
+	case_diffb.o getln.o getln2.o fmt_ulong.o fmt_xlong.o \
 	byte_rchr.o byte_copy.o byte_cr.o byte_chr.o byte_diff.o \
 	alloc_re.o alloc.o control.o scan_xlong.o fmt_str.o \
 	cdb_seek.o cdb_hash.o cdb_unpack.o auto_qmail.o \
@@ -5473,24 +5481,24 @@ surblfilter: \
 load surblfilter.o envread.o strerr_die.o strerr_sys.o \
 control.o alloc.o alloc_re.o error.o \
 error_str.o variables.o auto_qmail.o \
-case_startb.o byte_diff.o str_cspn.o \
+case_startb.o byte_diff.o str_cspn.o fmt_hexbytes.o \
 byte_copy.o byte_chr.o byte_rchr.o byte_cr.o \
 getln.o getln2.o open_read.o str_len.o str_diffn.o \
 str_cpy.o str_chr.o scan_xlong.o strsalloc.o \
 now.o scan_ulong.o mess822_ok.o constmap.o \
-ip.o dns.o ipalloc.o fmt_str.o fmt_ulong.o \
+ip.o dns.o ipalloc.o fmt_str.o fmt_ulong.o fmt_xlong.o \
 socket_v6any.o socket_v4mappedprefix.o \
 sgetopt.o subgetopt.o base64sub.o \
 case_diffb.o stralloc.a substdio.a
 	./load surblfilter envread.o strerr_die.o strerr_sys.o \
 	control.o alloc.o alloc_re.o error.o \
 	error_str.o variables.o auto_qmail.o \
-	case_startb.o byte_diff.o str_cspn.o \
+	case_startb.o byte_diff.o str_cspn.o fmt_hexbytes.o \
 	byte_copy.o byte_chr.o byte_rchr.o byte_cr.o \
 	getln.o getln2.o open_read.o str_len.o str_diffn.o \
 	str_cpy.o str_chr.o scan_xlong.o strsalloc.o \
 	now.o scan_ulong.o mess822_ok.o constmap.o \
-	ip.o dns.o ipalloc.o fmt_str.o fmt_ulong.o \
+	ip.o dns.o ipalloc.o fmt_str.o fmt_ulong.o fmt_xlong.o \
 	socket_v6any.o socket_v4mappedprefix.o \
 	sgetopt.o subgetopt.o base64sub.o \
 	case_diffb.o stralloc.a substdio.a -lresolv

@@ -815,10 +815,10 @@ outhost()
 		break;
 #endif
 	case AF_INET:
-		len = ip_fmt(x, &partner.addr.ip);
+		len = ip4_fmt(x, &partner.addr.ip);
 		break;
 	default:
-		len = ip_fmt(x, &partner.addr.ip);
+		len = ip4_fmt(x, &partner.addr.ip);
 		break;
 	}
 	if (!stralloc_copyb(&rhost, x, len))
@@ -1806,10 +1806,10 @@ auth_digest_md5(int use_size)
 		break;
 #endif
 	case AF_INET:
-		len = ip_fmt(z, &partner.addr.ip);
+		len = ip4_fmt(z, &partner.addr.ip);
 		break;
 	default:
-		len = ip_fmt(z, &partner.addr.ip);
+		len = ip4_fmt(z, &partner.addr.ip);
 		break;
 	}
 	if (!stralloc_catb(&digesturi, z, len))
@@ -2652,7 +2652,7 @@ getcontrols()
 	{
 		if (!ip6_scan(outgoingip.s, &outip.ip6))
 			temp_noip();
-		if (ip6_isv4mapped(&outip.ip6.d) && !ip_scan(outgoingip.s, &outip.ip))
+		if (ip6_isv4mapped(&outip.ip6.d) && !ip4_scan(outgoingip.s, &outip.ip))
 			temp_noip();
 	}
 #else
@@ -2664,7 +2664,7 @@ getcontrols()
 		for (i = 0;i < 4;i++)
 			outip.ip.d[i] = 0;
 	} else
-	if (!ip_scan(outgoingip.s, &outip.ip))
+	if (!ip4_scan(outgoingip.s, &outip.ip))
 		temp_noip();
 #endif
 	/*- domainbinding patch */
@@ -2710,10 +2710,10 @@ getcontrols()
 #ifdef IPV6
 			if (!ip6_scan(ip, &outip.ip6))
 				temp_noip();
-			if (ip6_isv4mapped(&outip.ip6.d) && !ip_scan(ip, &outip.ip))
+			if (ip6_isv4mapped(&outip.ip6.d) && !ip4_scan(ip, &outip.ip))
 				temp_noip();
 #else
-			if (!ip_scan(ip, &outip.ip))
+			if (!ip4_scan(ip, &outip.ip))
 				temp_noip();
 #endif
 			helohost = senderbind;
@@ -3091,7 +3091,7 @@ main(int argc, char **argv)
 			} else
 			if (!alloc_re((char *) &x, j, j + IPFMT + 1))
 				temp_nomem();
-			j += ip_fmt(x + j, &ip.ix[i].addr.ip);
+			j += ip4_fmt(x + j, &ip.ix[i].addr.ip);
 			x[j++] = ',';
 			x[j] = 0;
 			for (;;)

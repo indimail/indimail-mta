@@ -49,7 +49,7 @@ main(argc, argv)
 		switch(ia.ix[j].af)
 		{
 		case AF_INET:
-			substdio_put(subfdout, temp, ip_fmt(temp, &ia.ix[j].addr.ip));
+			substdio_put(subfdout, temp, ip4_fmt(temp, &ia.ix[j].addr.ip));
 		break;
 #ifdef IPV6
 		case AF_INET6:

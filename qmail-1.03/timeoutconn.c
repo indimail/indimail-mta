@@ -75,7 +75,7 @@ socket_bind4(int s, char *bound, ip_addr *ipr)
 	}
 	ipstring[0] = '.';	/*- "cheating", but makes the loop check easier below!  */
 	ipstr = ipstring + 1;
-	iplen = ip_fmt(ipstr, ipr);	/*- Well, Dan seems to trust its output!  */
+	iplen = ip4_fmt(ipstr, ipr);	/*- Well, Dan seems to trust its output!  */
 	/*- check d.d.d.d, d.d.d., d.d., d., none */
 	if (!(bindroute = constmap(&bindroutes, ipstr, iplen)))
 	{
@@ -87,7 +87,7 @@ socket_bind4(int s, char *bound, ip_addr *ipr)
 	}
 	if (!bindroute || !*bindroute)
 		return 0;	/*- no bind required */
-	if (!ip_scan(bindroute, &iplocal))
+	if (!ip4_scan(bindroute, &iplocal))
 		return -4;	/*- wasn't an ip returned */
 	byte_zero((char *) &salocal, sizeof(salocal));
 	salocal.sin_family = AF_INET;

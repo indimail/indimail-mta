@@ -26,6 +26,7 @@ unsigned int    fmt_xshort(char *, unsigned short);
 unsigned int    fmt_nbbshort(char *, unsigned int, unsigned int, unsigned int, unsigned short);
 unsigned int    fmt_ulong(char *, unsigned long);
 unsigned int    fmt_xlong(char *, unsigned long);
+unsigned int    fmt_hexbyte(char *, unsigned char);
 unsigned int    fmt_nbblong(char *, unsigned int, unsigned int, unsigned int, unsigned long);
 unsigned int    fmt_double(char *s, double, unsigned long);
 

@@ -757,7 +757,7 @@ dns_ipplus(ia, sa, pref)
 	{
 		ix.pref = 0;
 		ix.af = AF_INET;
-		if (!glue.s[ip_scan(glue.s, &ix.addr.ip)] || !glue.s[ip_scanbracket(glue.s, &ix.addr.ip)])
+		if (!glue.s[ip4_scan(glue.s, &ix.addr.ip)] || !glue.s[ip4_scanbracket(glue.s, &ix.addr.ip)])
 		{
 			if (!ipalloc_append(ia, &ix))
 				return DNS_MEM;
@@ -939,7 +939,7 @@ dns_mxip(ia, sa, random)
 	{
 		ix.af = AF_INET;
 		ix.pref = 0;
-		if (!glue.s[ip_scan(glue.s, &ix.addr.ip)] || !glue.s[ip_scanbracket(glue.s, &ix.addr.ip)])
+		if (!glue.s[ip4_scan(glue.s, &ix.addr.ip)] || !glue.s[ip4_scanbracket(glue.s, &ix.addr.ip)])
 		{
 			if (!ipalloc_append(ia, &ix))
 				return DNS_MEM;

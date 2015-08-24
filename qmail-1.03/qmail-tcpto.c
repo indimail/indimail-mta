@@ -238,7 +238,7 @@ main()
 			when = (when << 8) + (unsigned long) (unsigned char ) record[9];
 			when = (when << 8) + (unsigned long) (unsigned char ) record[8];
 			if (af == AF_INET)
-				substdio_put(subfderr, tmp, ip_fmt(tmp, &ip.ip));
+				substdio_put(subfderr, tmp, ip4_fmt(tmp, &ip.ip));
 #ifdef IPV6
 			else
 			if (af == AF_INET6)

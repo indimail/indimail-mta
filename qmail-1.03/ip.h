@@ -50,7 +50,7 @@ extern int      noipv6;
 struct ip6_address
 {
 	unsigned char d[16];
-};
+};    /* 16 hex pieces */
 typedef struct  ip6_address ip6_addr;
 
 extern unsigned char V4mappedprefix[12]; /*- ={0,0,0,0,0,0,0,0,0,0,0xff,0xff}; */
@@ -69,11 +69,12 @@ union v46addr
 
 #ifdef IPV6
 unsigned int    ip6_fmt(char *, struct ip6_address *);
+unsigned int    ip6_fmtfull(char *, struct ip6_address *);
 unsigned int    ip6_scan(char *, struct ip6_address *);
+unsigned int    ip6_scanbracket(char *, struct ip6_address *);
 #endif
-unsigned int    ip_fmt(char *, struct ip_address *);
-unsigned int    ip4_scan(char *, char *);
-unsigned int    ip_scan(char *, struct ip_address *);
-unsigned int    ip_scanbracket(char *, struct ip_address *);
+unsigned int    ip4_fmt(char *, struct ip_address *);
+unsigned int    ip4_scan(char *, struct ip_address *);
+unsigned int    ip4_scanbracket(char *, struct ip_address *);
 
 #endif

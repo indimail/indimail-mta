@@ -34,6 +34,7 @@
  * Initial revision
  *
  */
+#include <stdio.h>
 #ifdef USE_SPF
 #include <sys/types.h>
 #include <unistd.h>
@@ -189,11 +190,13 @@ hdr_dns()
 	hdr_error("DNS problem");
 }
 
+#ifdef IPV6
 static void
 hdr_addr_family()
 {
 	hdr_error("unknown address family");
 }
+#endif
 
 
 #ifdef IPV6
@@ -451,9 +454,9 @@ spfsubst(stralloc *expand, char *spec, char *domain)
 		if (ipv6use)
 			sa.len = ip6_fmt(sa.s, &ip6);
 		else
-			sa.len = ip_fmt(sa.s, &ip);
+			sa.len = ip4_fmt(sa.s, &ip);
 #else
-		sa.len = ip_fmt(sa.s, &ip);
+		sa.len = ip4_fmt(sa.s, &ip);
 #endif
 		break;
 	case 't':
@@ -925,7 +928,7 @@ spf_ip(char *spec, char *mask)
 
 	if ((ipmask = getip4mask(mask)) < 0)
 		return SPF_SYNTAX;
-	if (!ip_scan(spec, &net))
+	if (!ip4_scan(spec, &net))
 		return SPF_SYNTAX;
 	if (matchip(&net, ipmask, &ip))
 		return SPF_OK;
@@ -940,7 +943,7 @@ spf_ip(char *spec, char *mask)
 
 	if (ipmask < 0)
 		return SPF_SYNTAX;
-	if (!ip_scan(spec, &net))
+	if (!ip4_scan(spec, &net))
 		return SPF_SYNTAX;
 	if (matchip(&net, ipmask, &ip))
 		return SPF_OK;
@@ -1428,15 +1431,22 @@ spfcheck(char *remoteip)
 		return SPF_UNKNOWN;
 	}
 	ipv6use = 0;
-	if (!ip_scan(remoteip, &ip)) {
+	if (!ip4_scan(remoteip, &ip)) {
+		char buffer[80];
+		int len;
 		ipv6use = 1;
 		if (!ip6_scan(remoteip, &ip6)) {
 			hdr_unknown_msg("No IP address in conversation");
 			return SPF_UNKNOWN;
 		}
+		len = ip6_fmt(buffer, &ip6);
+		printf("ip=[%s]%d %s\n", buffer, len, __FILE__);
+		len = ip6_fmtfull(buffer, &ip6);
+		printf("ip=[%s]%d %s\n", buffer, len, __FILE__);
+		fflush(stdout);
 	}
 #else
-	if (!remoteip || !ip_scan(remoteip, &ip)) {
+	if (!remoteip || !ip4_scan(remoteip, &ip)) {
 		hdr_unknown_msg("No IP address in conversation");
 		return SPF_UNKNOWN;
 	}

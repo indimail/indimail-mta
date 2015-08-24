@@ -41,7 +41,7 @@ main(argc, argv)
 
 	if (!argv[1])
 		_exit(100);
-	ip_scan(argv[1], &ip);
+	ip4_scan(argv[1], &ip);
 	dns_init(0);
 #ifdef USE_SPF
 	dnsdoe(dns_ptr(&ssa, &ip));

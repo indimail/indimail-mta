@@ -241,7 +241,7 @@ doit(char *server, union v46addr *outip)
 		return;
 	qmqpfd = socket_tcp6();
 #else
-	if (!ip_scan(server, &ip))
+	if (!ip4_scan(server, &ip))
 		return;
 	qmqpfd = socket_tcp4();
 #endif
@@ -339,7 +339,7 @@ main()
 		for (i = 0;i < 4;i++)
 			outip.ip.d[i] = 0;
 	} else
-	if (!ip_scan(outgoingip.s, &outip.ip))
+	if (!ip4_scan(outgoingip.s, &outip.ip))
 		die_format();
 #endif
 	if (!controldir)

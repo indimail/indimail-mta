@@ -148,7 +148,7 @@ main(argc, argv)
 			temp[fmt_ulong(temp, localport)] = 0;
 			if (!env_put2("TCPLOCALPORT", temp))
 				die();
-			temp[ip_fmt(temp, (ip_addr *) &salocal.sa4.sin_addr)] = 0;
+			temp[ip4_fmt(temp, (ip_addr *) &salocal.sa4.sin_addr)] = 0;
 			if (!env_put2("TCPLOCALIP", temp))
 				die();
 #ifdef USE_SPF
@@ -235,7 +235,7 @@ main(argc, argv)
 			temp[fmt_ulong(temp, remoteport)] = 0;
 			if (!env_put2("TCPREMOTEPORT", temp))
 				die();
-			temp[ip_fmt(temp, (ip_addr *) &saremote.sa4.sin_addr)] = 0;
+			temp[ip4_fmt(temp, (ip_addr *) &saremote.sa4.sin_addr)] = 0;
 			if (!env_put2("TCPREMOTEIP", temp))
 				die();
 #ifdef USE_SPF

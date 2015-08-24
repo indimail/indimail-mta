@@ -445,7 +445,7 @@ getdnsip(stralloc *ip, stralloc *domain, int *code)
 	}
 	if (code)
 		*code = *(&ia.ix->addr.ip.d[3]);
-	len = ip_fmt(x, &ia.ix->addr.ip);
+	len = ip4_fmt(x, &ia.ix->addr.ip);
 	if (!stralloc_copyb(ip, x, len))
 		die_nomem();
 	return 0;
@@ -633,8 +633,8 @@ checkuri(char **ouri, char **text, size_t textlen)
 	if (uri[i = str_chr(uri, '@')])
 		uri += (i + 1);
 	uri[i = str_chr(uri, ':')] = 0;
-	if (ip_scan(uri, &ip)) {
-		ip_fmt(ipuri, &ip);
+	if (ip4_scan(uri, &ip)) {
+		ip4_fmt(ipuri, &ip);
 		uri = ipuri;
 		print_debug("Proper IP: ", uri, 0);
 	} else {
