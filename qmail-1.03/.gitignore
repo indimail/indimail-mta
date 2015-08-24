@@ -3,6 +3,7 @@ udpclient
 dns.h
 drate.1
 hassrs.h
+hasifaddr.h
 srsfilter
 cidr
 drate

@@ -1,5 +1,8 @@
 /*
  * $Log: ipme.c,v $
+ * Revision 1.20  2015-08-24 21:30:20+05:30  Cprogrammer
+ * use getifaddrs() to get interface addresses
+ *
  * Revision 1.19  2015-08-24 19:06:46+05:30  Cprogrammer
  * replaced ip_scan() with ip4_scan()
  *
@@ -48,13 +51,28 @@
 #include <sys/types.h>
 #include <unistd.h>
 #include <sys/time.h>
-#include <sys/ioctl.h>
+#include "hasifaddr.h"
+#ifdef HASIFADDR
+#define _GNU_SOURCE
+#include <arpa/inet.h>
 #include <sys/socket.h>
-#include <net/if.h>
-#include <netinet/in.h>
+#include <netdb.h>
+#include <ifaddrs.h>
+#include <stdio.h>
+#include <string.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <linux/if_link.h>
+#else
+#include <sys/ioctl.h>
 #ifndef SIOCGIFCONF	/*- whatever works */
 #include <sys/sockio.h>
 #endif
+#endif
+
+#include <net/if.h>
+#include <netinet/in.h>
+#include <sys/socket.h>
 #include "hassalen.h"
 #include "byte.h"
 #include "alloc.h"
@@ -213,19 +231,26 @@ ipme_append_unless(ix, notip)
 int
 ipme_init()
 {
-	struct ifconf   ifc;
-	char           *x;
-	struct ifreq   *ifr;
+	int             family, s;
 	sockaddr_in    *sin;
+#ifdef HASIFADDR
 #ifdef IPV6
 	sockaddr_in6   *sin6;
 #endif
+	struct ifaddrs *ifaddr, *ifa;
+	int             n;
+	char            host[NI_MAXHOST];
+#else
+	struct ifconf   ifc;
+	char           *x;
+	struct ifreq   *ifr;
+	int             len;
+#endif /*- #ifdef HASIFADDR */
 #ifdef MOREIPME
 	ipalloc         notipme = { 0 };
 	ipalloc         moreipme = { 0 };
 	int             i;
 #endif
-	int             len, s, dom;
 	struct ip_mx    ix;
 
 #ifdef MOREIPME
@@ -264,15 +289,79 @@ ipme_init()
 	byte_copy((char *) &ix.addr.ip, 4, "\0\0\0\0");
 	ix.af = AF_INET;
 #endif
-#ifdef IPV6
-	dom = AF_INET6;
+
+#ifdef HASIFADDR
+	if (getifaddrs(&ifaddr) == -1)
+#ifdef MOREIPME
+		ipme_init_retclean(-1);
 #else
-	dom = AF_INET;
+		return 0;
+#endif
+	/*-
+	 * walk through linked list, maintaining head pointer so we
+	 * can free list later 
+	 */
+	for (ifa = ifaddr, n = 0; ifa != NULL; ifa = ifa->ifa_next, n++) {
+		if (ifa->ifa_addr == NULL)
+			continue;
+		family = ifa->ifa_addr->sa_family;
+		if (family == AF_PACKET)
+			continue;
+		if (!(ifa->ifa_flags & IFF_UP))
+			continue;
+		/*-
+		 * For an AF_INET* interface address, display the address 
+		 */
+		s = getnameinfo(ifa->ifa_addr, (family == AF_INET) ? sizeof (struct sockaddr_in) : sizeof (struct sockaddr_in6), host,
+					NI_MAXHOST, NULL, 0, NI_NUMERICHOST);
+		if (s != 0) {
+			freeifaddrs(ifaddr);
+#ifdef MOREIPME
+			ipme_init_retclean(-1);
+#else
+			return 0;
+#endif
+		}
+		if (strstr(host, ifa->ifa_name))
+			continue;
+		ix.af = family;
+		if (family == AF_INET) {
+			sin = (sockaddr_in *) ifa->ifa_addr;
+			byte_copy((char *) &ix.addr.ip, 4, (char *) &sin->sin_addr);
+		}
+#ifdef IPV6
+		else
+		if (family == AF_INET6) {
+			sin6 = (sockaddr_in6 *) ifa->ifa_addr;
+			byte_copy((char *) &ix.addr.ip6, 16, (char *) &sin6->sin6_addr);
+		}
+#else
+		if (family != AF_INET)
+			continue;
+#endif
+#ifdef MOREIPME
+		if (!ipme_append_unless(&ix, &notipme)) {
+			freeifaddrs(ifaddr);
+			ipme_init_retclean(0);
+		}
+#else
+		if (!ipalloc_append(&ipme, &ix)) {
+			freeifaddrs(ifaddr);
+			return 0;
+		}
+#endif
+	}
+	freeifaddrs(ifaddr);
+#else
+#ifdef IPV6
+	family = AF_INET6;
+#else
+	family = AF_INET;
 #endif
 #ifdef MOREIPME
 	if (!ipme_append_unless(&ix, &notipme))
 		ipme_init_retclean(0);
-	s = socket(dom, SOCK_STREAM, 0);
+	s = socket(family, SOCK_STREAM, 0);
 #ifdef IPV6
 	if (s == -1 && (errno == EINVAL || errno == EAFNOSUPPORT))
 		s = socket(AF_INET, SOCK_STREAM, 0);
@@ -282,7 +371,7 @@ ipme_init()
 #else /*- #ifdef MOREIPME */
 	if (!ipalloc_append(&ipme, &ix))
 		return 0;
-	s = socket(dom, SOCK_STREAM, 0);
+	s = socket(family, SOCK_STREAM, 0);
 #ifdef IPV6
 	if (s == -1 && (errno == EINVAL || errno == EAFNOSUPPORT))
 		s = socket(AF_INET, SOCK_STREAM, 0);
@@ -361,37 +450,11 @@ ipme_init()
 				}
 			}
 		}
-#ifdef IPV6
-		else
-		if (ifr->ifr_addr.sa_family == AF_INET6)
-		{
-			sin6 = (sockaddr_in6 *) &ifr->ifr_addr;
-			byte_copy((char *) &ix.addr.ip6, 16, (char *) &sin6->sin6_addr);
-			ix.af = AF_INET6;
-			if (ioctl(s, SIOCGIFFLAGS, x) == 0)
-			{
-				if (ifr->ifr_flags & IFF_UP)
-				{
-#ifdef MOREIPME
-					if (!ipme_append_unless(&ix, &notipme))
-					{
-						close(s);
-						ipme_init_retclean(0);
-					}
-#else
-					if (!ipalloc_append(&ipme, &ix))
-					{
-						close(s);
-						return 0;
-					}
-#endif
-				}
-			}
-		}
-#endif
 		x += len;
 	}
 	close(s);
+#endif /*- #ifdef HASIFADDR */
+
 #ifdef MOREIPME
 	if (!ipme_readipfile(&moreipme, "moreipme"))
 		ipme_init_retclean(0);
@@ -411,7 +474,7 @@ ipme_init()
 void
 getversion_ipme_c()
 {
-	static char    *x = "$Id: ipme.c,v 1.19 2015-08-24 19:06:46+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: ipme.c,v 1.20 2015-08-24 21:30:20+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
