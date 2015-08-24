@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-qmqpc.c,v $
+ * Revision 1.16  2015-08-24 19:08:14+05:30  Cprogrammer
+ * replaced ip_scan() with ip4_scan()
+ *
  * Revision 1.15  2011-07-04 17:45:05+05:30  Cprogrammer
  * use control_readrandom to pickup up a single IP from outgoingip
  *
@@ -398,7 +401,7 @@ again:
 void
 getversion_qmail_qmqpc_c()
 {
-	static char    *x = "$Id: qmail-qmqpc.c,v 1.15 2011-07-04 17:45:05+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: qmail-qmqpc.c,v 1.16 2015-08-24 19:08:14+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

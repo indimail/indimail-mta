@@ -1,5 +1,8 @@
 /*
  * $Log: spf.c,v $
+ * Revision 1.12  2015-08-24 19:09:10+05:30  Cprogrammer
+ * replaced ip_scan() with ip4_scan(), replace ip_fmt() with ip4_fmt()
+ *
  * Revision 1.11  2013-08-13 21:48:56+05:30  Cprogrammer
  * added error message for unknown address family
  *
@@ -1512,7 +1515,7 @@ spfinfo(sa)
 void
 getversion_spf_c()
 {
-	static char    *x = "$Id: spf.c,v 1.11 2013-08-13 21:48:56+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: spf.c,v 1.12 2015-08-24 19:09:10+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

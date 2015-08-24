@@ -1,5 +1,8 @@
 /*
  * $Log: tcp-env.c,v $
+ * Revision 1.11  2015-08-24 19:09:31+05:30  Cprogrammer
+ * replace ip_fmt() with ip4_fmt()
+ *
  * Revision 1.10  2005-08-23 17:39:24+05:30  Cprogrammer
  * gcc 4 compliance
  *
@@ -433,7 +436,7 @@ warn_mail(stralloc * msg, char *source)
 void
 getversion_tcp_env_c()
 {
-	static char    *x = "$Id: tcp-env.c,v 1.10 2005-08-23 17:39:24+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: tcp-env.c,v 1.11 2015-08-24 19:09:31+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

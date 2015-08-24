@@ -1,5 +1,8 @@
 /*
  * $Log: dns.c,v $
+ * Revision 1.29  2015-08-24 19:05:12+05:30  Cprogrammer
+ * replaced ip_scan() with ip4_scan()
+ *
  * Revision 1.28  2014-01-29 13:56:22+05:30  Cprogrammer
  * fix for OS X
  * fixed wrong address passed to resolve()
@@ -1139,7 +1142,7 @@ dns_maps(sa, ip, suffix)
 void
 getversion_dns_c()
 {
-	static char    *x = "$Id: dns.c,v 1.28 2014-01-29 13:56:22+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: dns.c,v 1.29 2015-08-24 19:05:12+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

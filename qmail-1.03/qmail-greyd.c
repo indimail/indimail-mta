@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-greyd.c,v $
+ * Revision 1.11  2015-08-24 19:07:18+05:30  Cprogrammer
+ * replace ip_scan() with ip4_scan(), replace ip_fmt() with ip4_fmt()
+ *
  * Revision 1.10  2011-07-29 09:29:30+05:30  Cprogrammer
  * fixed gcc 4.6 warnings
  *
@@ -1324,7 +1327,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_greyd_c()
 {
-	static char    *x = "$Id: qmail-greyd.c,v 1.10 2011-07-29 09:29:30+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: qmail-greyd.c,v 1.11 2015-08-24 19:07:18+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

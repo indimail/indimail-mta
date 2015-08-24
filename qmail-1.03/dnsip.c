@@ -1,5 +1,8 @@
 /*
  * $Log: dnsip.c,v $
+ * Revision 1.7  2015-08-24 19:05:24+05:30  Cprogrammer
+ * replace ip_fmt() with ip4_fmt()
+ *
  * Revision 1.6  2005-06-11 21:29:25+05:30  Cprogrammer
  * added ipv6 support
  *
@@ -68,7 +71,7 @@ main(argc, argv)
 void
 getversion_dnsip_c()
 {
-	static char    *x = "$Id: dnsip.c,v 1.6 2005-06-11 21:29:25+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: dnsip.c,v 1.7 2015-08-24 19:05:24+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

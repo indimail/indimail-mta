@@ -1,5 +1,8 @@
 /*
  * $Log: autoresponder.c,v $
+ * Revision 1.30  2015-08-24 19:04:55+05:30  Cprogrammer
+ * changed ip_scanbracket to ip4_scanbracket
+ *
  * Revision 1.29  2014-05-22 14:45:38+05:30  Cprogrammer
  * fixed issue with Date field
  * fixed SIGPIPE resulting in duplicate emails
@@ -1300,7 +1303,7 @@ main(int argc, char *argv[])
 void
 getversion_qmail_autoresponder_c()
 {
-	static char    *x = "$Id: autoresponder.c,v 1.29 2014-05-22 14:45:38+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: autoresponder.c,v 1.30 2015-08-24 19:04:55+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

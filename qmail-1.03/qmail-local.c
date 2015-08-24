@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-local.c,v $
+ * Revision 1.27  2015-08-24 19:07:43+05:30  Cprogrammer
+ * moved fmt_xlong() to separate source fmt_xlong.c
+ *
  * Revision 1.26  2014-01-22 20:38:24+05:30  Cprogrammer
  * added hassrs.h
  *
@@ -1257,7 +1260,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_local_c()
 {
-	static char    *x = "$Id: qmail-local.c,v 1.26 2014-01-22 20:38:24+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: qmail-local.c,v 1.27 2015-08-24 19:07:43+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

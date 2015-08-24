@@ -1,5 +1,8 @@
 /*
  * $Log: dnsptr.c,v $
+ * Revision 1.8  2015-08-24 19:05:47+05:30  Cprogrammer
+ * replace ip_scan() with ip4_scan()
+ *
  * Revision 1.7  2005-06-17 21:53:00+05:30  Cprogrammer
  * replaced struct ip_address with a shorter typedef ip_addr
  *
@@ -61,7 +64,7 @@ main(argc, argv)
 void
 getversion_dnsptr_c()
 {
-	static char    *x = "$Id: dnsptr.c,v 1.7 2005-06-17 21:53:00+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: dnsptr.c,v 1.8 2015-08-24 19:05:47+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
