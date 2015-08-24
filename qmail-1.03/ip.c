@@ -1,5 +1,8 @@
 /*
  * $Log: ip.c,v $
+ * Revision 1.8  2015-08-24 19:13:36+05:30  Cprogrammer
+ * use compressed ipv6 address
+ *
  * Revision 1.7  2008-09-16 16:28:27+05:30  Cprogrammer
  * BUG - ip4_scan was wrong
  *
@@ -350,7 +353,7 @@ ip6_scanbracket(char *s, struct ip6_address *ip6)
 void
 getversion_ip_c()
 {
-	static char    *x = "$Id: ip.c,v 1.7 2008-09-16 16:28:27+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: ip.c,v 1.8 2015-08-24 19:13:36+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
