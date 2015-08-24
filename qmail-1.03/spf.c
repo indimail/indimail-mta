@@ -1,5 +1,8 @@
 /*
  * $Log: spf.c,v $
+ * Revision 1.13  2015-08-24 19:12:04+05:30  Cprogrammer
+ * removed debugging statement
+ *
  * Revision 1.12  2015-08-24 19:09:10+05:30  Cprogrammer
  * replaced ip_scan() with ip4_scan(), replace ip_fmt() with ip4_fmt()
  *
@@ -37,7 +40,6 @@
  * Initial revision
  *
  */
-#include <stdio.h>
 #ifdef USE_SPF
 #include <sys/types.h>
 #include <unistd.h>
@@ -1435,18 +1437,11 @@ spfcheck(char *remoteip)
 	}
 	ipv6use = 0;
 	if (!ip4_scan(remoteip, &ip)) {
-		char buffer[80];
-		int len;
 		ipv6use = 1;
 		if (!ip6_scan(remoteip, &ip6)) {
 			hdr_unknown_msg("No IP address in conversation");
 			return SPF_UNKNOWN;
 		}
-		len = ip6_fmt(buffer, &ip6);
-		printf("ip=[%s]%d %s\n", buffer, len, __FILE__);
-		len = ip6_fmtfull(buffer, &ip6);
-		printf("ip=[%s]%d %s\n", buffer, len, __FILE__);
-		fflush(stdout);
 	}
 #else
 	if (!remoteip || !ip4_scan(remoteip, &ip)) {
@@ -1515,7 +1510,7 @@ spfinfo(sa)
 void
 getversion_spf_c()
 {
-	static char    *x = "$Id: spf.c,v 1.12 2015-08-24 19:09:10+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: spf.c,v 1.13 2015-08-24 19:12:04+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
