@@ -1,5 +1,8 @@
 /*
  * $Log: ipme.c,v $
+ * Revision 1.21  2015-08-24 21:48:48+05:30  Cprogrammer
+ * added :: and 0.0.0.0 as valid ip addresses for me
+ *
  * Revision 1.20  2015-08-24 21:30:20+05:30  Cprogrammer
  * use getifaddrs() to get interface addresses
  *
@@ -279,8 +282,10 @@ ipme_init()
 	 * "this host, this network", according to RFC 1122, Sec. 3.2.1.3a.
 	 */
 #ifdef IPV6
+	s = 0;
 	if (!ip6_scan("::", &ix.addr.ip6))
 	{
+		s = -1;
 		byte_copy((char *) &ix.addr.ip, 4, "\0\0\0\0");
 		ix.af = AF_INET;
 	} else
@@ -288,6 +293,26 @@ ipme_init()
 #else
 	byte_copy((char *) &ix.addr.ip, 4, "\0\0\0\0");
 	ix.af = AF_INET;
+#endif
+#ifdef MOREIPME
+	if (!ipme_append_unless(&ix, &notipme))
+		ipme_init_retclean(0);
+#else
+	if (!ipalloc_append(&ipme, &ix))
+		return 0;
+#endif
+#ifdef IPV6
+	if (!s) {
+		byte_copy((char *) &ix.addr.ip, 4, "\0\0\0\0");
+		ix.af = AF_INET;
+#ifdef MOREIPME
+		if (!ipme_append_unless(&ix, &notipme))
+			ipme_init_retclean(0);
+#else
+		if (!ipalloc_append(&ipme, &ix))
+			return 0;
+#endif
+	}
 #endif
 
 #ifdef HASIFADDR
@@ -359,8 +384,6 @@ ipme_init()
 	family = AF_INET;
 #endif
 #ifdef MOREIPME
-	if (!ipme_append_unless(&ix, &notipme))
-		ipme_init_retclean(0);
 	s = socket(family, SOCK_STREAM, 0);
 #ifdef IPV6
 	if (s == -1 && (errno == EINVAL || errno == EAFNOSUPPORT))
@@ -369,8 +392,6 @@ ipme_init()
 	if (s == -1)
 		ipme_init_retclean(-1);
 #else /*- #ifdef MOREIPME */
-	if (!ipalloc_append(&ipme, &ix))
-		return 0;
 	s = socket(family, SOCK_STREAM, 0);
 #ifdef IPV6
 	if (s == -1 && (errno == EINVAL || errno == EAFNOSUPPORT))
@@ -474,7 +495,7 @@ ipme_init()
 void
 getversion_ipme_c()
 {
-	static char    *x = "$Id: ipme.c,v 1.20 2015-08-24 21:30:20+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: ipme.c,v 1.21 2015-08-24 21:48:48+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
