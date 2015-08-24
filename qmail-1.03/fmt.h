@@ -1,5 +1,8 @@
 /*
  * $Log: fmt.h,v $
+ * Revision 1.5  2015-08-24 19:14:27+05:30  Cprogrammer
+ * added fmt_hexbyte() function
+ *
  * Revision 1.4  2013-08-29 18:26:57+05:30  Cprogrammer
  * added fmt_double()
  *
