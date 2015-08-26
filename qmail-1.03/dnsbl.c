@@ -1,5 +1,8 @@
 /*
  * $Log: dnsbl.c,v $
+ * Revision 1.4  2015-08-26 14:11:52+05:30  Cprogrammer
+ * replaced ip_fmt() with ip4_fm()
+ *
  * Revision 1.3  2015-04-14 20:02:01+05:30  Cprogrammer
  * skip dnsbl if ip address is unknown
  *
@@ -114,7 +117,7 @@ dnsblcheck(char **mesg, char *remoteip)
 			return (1);
 		}
 		if (!dns_ip(&dnsblip, &dnsblhost)) {
-			ip_fmt(x, &dnsblip.ix->addr.ip);
+			ip4_fmt(x, &dnsblip.ix->addr.ip);
 			skipdnsbl = 1;
 			return 1;
 		} while (*ch++);
