@@ -1185,7 +1185,7 @@ AC_DEFINE_UNQUOTED(PS_COMMAND,"$PS_COMMAND",ps command)
 # Output files
 # Rename the template .pc file to include the API version on configure
 AC_SUBST(libdir)
-AC_CONFIG_FILES([indimail.pc:indimail.pc.in],[], [])
+AC_CONFIG_FILES([libindimail.pc:libindimail.pc.in],[], [])
 
 AC_OUTPUT(Makefile)
 

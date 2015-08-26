@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail.spec.in,v 2.293 2015-08-13 01:14:32+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 2.294 2015-08-26 17:43:50+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %define _unpackaged_files_terminate_build 1
 
@@ -35,7 +35,7 @@
 
 %define _prefix            @indimaildir@
 %define default_domain     @defaultdomain@
-%define courier_version    4.13
+%define courier_version    4.16.2
 %define bogofilter_version 1.2.4
 %define pam_multi_version  1.1
 %define ucspi_version      0.88
@@ -507,12 +507,6 @@ done
 
 %build
 ID=$(id -u)
-if [ %{_verbose} -eq 0 ] ; then
-	DEVICE=/dev/null
-else
-	DEVICE=/dev/tty
-fi
-echo "Will send output to $DEVICE"
 #### LIBDKIM ######################
 if [ -d libdkim-%{libdkim_version} ] ; then
 	cd libdkim-%{libdkim_version}
@@ -523,9 +517,8 @@ if [ -d libdkim-%{libdkim_version} ] ; then
 	fi
 fi
 
-%configure --prefix=%{_prefix} --mandir=%{_prefix}/man > $DEVICE
+%configure --prefix=%{_prefix} --mandir=%{_prefix}/man
 cd ..
-fi
 #### LIBSRS2 ######################
 if [ -d libsrs2-%{libsrs2_version} ] ; then
 	cd libsrs2-%{libsrs2_version}
@@ -537,9 +530,9 @@ if [ -d libsrs2-%{libsrs2_version} ] ; then
 
 # for mandrake use --x-libraries
 #./configure --prefix=%{_prefix} --libdir=%{_libdir} --libexecdir=%{_prefix}/libexec \
-#	--x-libraries=%{_libdir} --mandir=%{_prefix}/man > $DEVICE
+#	--x-libraries=%{_libdir} --mandir=%{_prefix}/man
 #
-	%configure --prefix=%{_prefix} --mandir=%{_prefix}/man > $DEVICE
+	%configure --prefix=%{_prefix} --mandir=%{_prefix}/man
 	cd ..
 fi
 
@@ -553,12 +546,13 @@ if [ %{reconfigure_mode} -eq 1 ] ; then
 fi
 
 %configure --prefix=%{_prefix} --libexecdir=%{_prefix}/libexec --sysconfdir=%{_prefix}/etc \
+	--with-pkgconfigdir=@pkgconfigdir@ \
 	--enable-mysqlbindir=%{mysqlPrefix}/bin --enable-mysqlprefix=%{mysqlPrefix} \
 	--mandir=%{_prefix}/man --sysconfdir=%{_prefix}/etc --enable-qmaildir=%{_prefix} \
 	--enable-basepath=@basepath@ --enable-logdir=@logdir@ \
 	--enable-tcprules-prog=%{_prefix}/bin/tcprules --enable-tcpserver-file=%{_prefix}/etc/tcp.smtp \
 	--enable-moduledir=%module_dir \
-	`%{__cat} config/indimail.opts` > $DEVICE
+	`%{__cat} config/indimail.opts`
 
 #### nssd ######################
 %if %nonssd == 0
@@ -573,7 +567,7 @@ if [ -d ../nssd-%{nssd_version} ] ; then
 	%configure --prefix=%{_prefix} --libexecdir=%{_prefix}/libexec --sysconfdir=%{_prefix}/etc \
 	--mandir=%{_prefix}/man --libdir=/usr/%{_lib} \
 	--enable-mysqlprefix=%{mysqlPrefix} --enable-mysqllibdir=%{mysqlPrefix}/%{_lib}/mysql \
-	`%{__cat} ../%{name}-%{version}/config/nssd.opts` > $DEVICE
+	`%{__cat} ../%{name}-%{version}/config/nssd.opts`
 fi
 %endif
 #sed -i 's|^hardcode_libdir_flag_spec=.*|hardcode_libdir_flag_spec=""|g' libtool
@@ -589,8 +583,8 @@ if [ -d ../courier-imap-%{courier_version} ] ; then
 		autoreconf -fi
 	fi
 	%configure --prefix=%{_prefix} --libexecdir=%{_prefix}/libexec --bindir=%{_prefix}/bin \
-	--mandir=%{_prefix}/man --sysconfdir=%{_prefix}/etc \
-	`%{__cat} ../%{name}-%{version}/config/courier-imap.opts` > $DEVICE
+	--mandir=%{_prefix}/man --sysconfdir=%{_prefix}/etc --libdir=%{_libdir} \
+	`%{__cat} ../%{name}-%{version}/config/courier-imap.opts`
 fi
 %endif
 
@@ -606,7 +600,7 @@ if [ -d ../bogofilter-%{bogofilter_version} ] ; then
 	(
 	HOME='.';export HOME
 	./configure --prefix=%{_prefix} --libexecdir=%{_prefix}/libexec --sysconfdir=%{_prefix}/etc \
-	--mandir=%{_prefix}/man `%{__cat} ../%{name}-%{version}/config/bogofilter.opts` > $DEVICE
+	--mandir=%{_prefix}/man `%{__cat} ../%{name}-%{version}/config/bogofilter.opts`
 #%if 0%{?sles_version} == 10
 #        sed 's{extern int yylineno;{int yylineno = 1;{' < src/lexer.c > src/lexer.c.tmp
 #        %{__mv} src/lexer.c.tmp src/lexer.c
@@ -626,13 +620,14 @@ if [ -d ../clamav-%{clamav_version} ] ; then
 	fi
 	if [ %{build_on_obs} -eq 0 ] ; then
 	%configure --prefix=%{_prefix} --libexecdir=%{_prefix}/libexec --sysconfdir=%{_prefix}/etc \
+	--with-pkgconfigdir=@pkgconfigdir@ \
 	--with-dbdir=%{_prefix}/share/clamd --mandir=%{_prefix}/man \
-	`%{__cat} ../%{name}-%{version}/config/clamav.opts` > $DEVICE
+	`%{__cat} ../%{name}-%{version}/config/clamav.opts`
 	else
 	# change to ./configure for openSUSE buildservice
 	./configure --prefix=%{_prefix} --libexecdir=%{_prefix}/libexec --sysconfdir=%{_prefix}/etc \
 	--with-dbdir=%{_prefix}/share/clamd --mandir=%{_prefix}/man \
-	`%{__cat} ../%{name}-%{version}/config/clamav.opts` > $DEVICE
+	`%{__cat} ../%{name}-%{version}/config/clamav.opts`
 	fi
 fi
 %endif
@@ -649,13 +644,14 @@ if [ -d ../fetchmail-%{fetchmail_version} ] ; then
 	if [ %{build_on_obs} -eq 0 ] ; then
 	./configure --prefix=%{_prefix} --libexecdir=%{_prefix}/libexec --sysconfdir=%{_prefix}/etc \
 		--enable-indimaildir=%{_prefix} --mandir=%{_prefix}/man \
-		`%{__cat} ../%{name}-%{version}/config/fetchmail.opts` > $DEVICE
+		`%{__cat} ../%{name}-%{version}/config/fetchmail.opts`
 	else
 	%configure --prefix=%{_prefix} --libexecdir=%{_prefix}/libexec --sysconfdir=%{_prefix}/etc \
 		--enable-indimaildir=%{_prefix} --mandir=%{_prefix}/man \
-		`%{__cat} ../%{name}-%{version}/config/fetchmail.opts` > $DEVICE
+		`%{__cat} ../%{name}-%{version}/config/fetchmail.opts`
 	fi
 fi
+%endif
 cd ..
 #### ucspi-tcp ######################
 if [ -d ucspi-tcp-%{ucspi_version} ] ; then
@@ -713,10 +709,10 @@ do
 		fi
 %endif
 		# courier-imap installations misses out on this
-		if [ %nocourierimap -eq 0 -a " $i" = " courier-imap-%{courier_version}" ] ; then
-			%{__mkdir_p} %{buildroot}%{_prefix}/man/man1
-			%{__cp} tcpd/couriertls.1 %{buildroot}%{_prefix}/man/man1/couriertls.1
-		fi
+#		if [ %nocourierimap -eq 0 -a " $i" = " courier-imap-%{courier_version}" ] ; then
+#			%{__mkdir_p} %{buildroot}%{_prefix}/man/man1
+#			%{__cp} tcpd/couriertls.1 %{buildroot}%{_prefix}/man/man1/couriertls.1
+#		fi
 		cd ..
 	fi
 done
@@ -734,6 +730,9 @@ if [ %noclamav -eq 0 ] ; then
 fi
 if [ %nonssd -eq 0 ] ; then
 	%{__rm} -f %{buildroot}/usr/%{_lib}/libnss_nssd.la
+fi
+if [ %nocourierimap -eq 0 ] ; then
+	%{__rm} -f %{buildroot}/%{_libdir}/libunicode.la
 fi
 if [ %nolibdkim -eq 0 ] ; then
 	%{__rm} -f %{buildroot}%{_libdir}/libdkim.la
@@ -1170,6 +1169,7 @@ fi
 %attr(500,root,qmail)                   %{_prefix}/bin/qmail-lspawn
 %attr(555,root,qmail)                   %{_prefix}/bin/dnstxt
 %attr(555,root,qmail)                   %{_prefix}/bin/dnsmxip
+%attr(555,root,qmail)                   %{_prefix}/bin/whois
 %attr(555,root,qmail)                   %{_prefix}/bin/dnsfq
 %attr(555,root,qmail)                   %{_prefix}/bin/dnsptr
 %attr(555,root,qmail)                   %{_prefix}/bin/dnsip
@@ -1428,11 +1428,13 @@ fi
 #
                                         %{_prefix}/sbin/mkimapdcert
                                         %{_prefix}/sbin/mkpop3dcert
+                                        %{_prefix}/sbin/mkdhparams
 #
 %if %i_m_on_mac == 0
 %attr(4555,root,root)                   %{_prefix}/libexec/authlib/authshadow
 %endif
 %endif
+
 # ucspi-tcp
 %attr(555,root,root)                    %{_prefix}/bin/mconnect-io
 %attr(555,root,root)                    %{_prefix}/bin/rblsmtpd
@@ -1453,9 +1455,9 @@ fi
 %attr(555,root,root)                    %{_prefix}/bin/bogotune
 %attr(555,root,root)                    %{_prefix}/bin/bogoutil
 %attr(555,root,root)                    %{_prefix}/bin/bogoupgrade
-%attr(555,root,root)                    %{_prefix}/sbin/bf_compact
-%attr(555,root,root)                    %{_prefix}/sbin/bf_copy
-%attr(555,root,root)                    %{_prefix}/sbin/bf_tar
+%attr(555,root,root)                    %{_prefix}/bin/bf_compact
+%attr(555,root,root)                    %{_prefix}/bin/bf_copy
+%attr(555,root,root)                    %{_prefix}/bin/bf_tar
 %endif
 
 %if %nolibdkim == 0
@@ -1533,6 +1535,7 @@ fi
 %attr(555,root,root)                    %{_prefix}/libexec/pop3d.rc
 %attr(555,root,root)                    %{_prefix}/share/mkimapdcert
 %attr(555,root,root)                    %{_prefix}/share/mkpop3dcert
+%attr(555,root,root)                    %{_prefix}/share/mkdhparams
 %endif
 %attr(555,root,root)                    %{_prefix}/libexec/authlib/authindi
 %attr(555,root,root)                    %{_prefix}/libexec/authlib/authpgsql
@@ -1661,7 +1664,7 @@ fi
 %endif
 %attr(644,root,root)                        %{_prefix}/etc/clamd.conf.sample
 %attr(644,root,root)                        %{_prefix}/etc/freshclam.conf.sample
-%attr(644,root,root)                        %{_libdir}/pkgconfig/libclamav.pc
+%attr(644,root,root)                        @pkgconfigdir@/libclamav.pc
 %endif
 
 %if %nofetchmail == 0
@@ -1685,11 +1688,15 @@ fi
 %attr(444,root,qmail)                   %{_prefix}/man/man7/indimail.7.gz
 %attr(444,root,qmail)                   %{_prefix}/man/man7/qmail-limits.7.gz
 %attr(444,root,qmail)                   %{_prefix}/man/man7/qmail.7.gz
+
+%if %nocourierimap == 0
 %attr(444,root,qmail)                   %{_prefix}/man/man7/authlib.7.gz
                                         %{_prefix}/man/man7/authcustom.7.gz
                                         %{_prefix}/man/man7/authpam.7.gz
                                         %{_prefix}/man/man7/authpwd.7.gz
                                         %{_prefix}/man/man7/authshadow.7.gz
+                                        %{_prefix}/man/man7/courier-unicode.7.gz
+%endif
 
 %attr(444,root,qmail)                   %{_prefix}/doc/HOWTO.sharedmaildir
 %attr(444,root,qmail)                   %{_prefix}/doc/README.auth
@@ -1797,6 +1804,16 @@ fi
 %endif
 %endif
 
+%if %nocourierimap == 0
+%if %i_m_on_mac == 1
+%{_libdir}/libunicode.dylib
+%else
+%{_libdir}/libunicode.so
+%{_libdir}/libunicode.so.1
+%{_libdir}/libunicode.so.1.1.0
+%endif
+%endif
+
 %if %i_m_on_mac == 1
 %{_libdir}/libeps.dylib
 %{_libdir}/libeps-%{eps_version}.0.dylib
@@ -1820,6 +1837,7 @@ fi
 %{_libdir}/libindimail-%{version}.so.0
 %{_libdir}/libindimail-%{version}.so.0.0.0
 %endif
+@pkgconfigdir@/libindimail.pc
 
 %if %nonssd == 0
                                         /usr/%{_lib}/libnss_nssd.so
@@ -1871,6 +1889,11 @@ fi
 %attr(644,root,qmail)                   %{_libdir}/libdkim.a
 %endif
 
+%if %nocourierimap == 0
+%attr(644,root,qmail)                   %{_prefix}/include/unicode.h
+%attr(644,root,qmail)                   %{_libdir}/libunicode.a
+%endif
+
 %if %nolibsrs2 == 0
 %attr(644,root,qmail)                   %{_prefix}/include/srs2.h
 %attr(644,root,qmail)                   %{_libdir}/libsrs2.a
@@ -1880,6 +1903,7 @@ fi
 %{_libdir}/libcdb.a
 %{_libdir}/libflash.a
 %{_libdir}/libindimail.a
+@pkgconfigdir@/libindimail.pc
 
 %files shared
 %defattr(-, root, root, 0755)
@@ -1937,6 +1961,7 @@ fi
 %{_libdir}/libindimail.dylib
 %{_libdir}/libindimail-%{version}.0.dylib
 %endif
+@pkgconfigdir@/libindimail.pc
 
 %files mini
 %defattr(-, root, root, 0555)

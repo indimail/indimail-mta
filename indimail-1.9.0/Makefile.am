@@ -35,7 +35,8 @@ iauthdir=@libdir@
 SYSCONFDIR = @sysconfdir@
 sysconf_DATA = indimail.settings controlfiles headerlist osh.table cronlist perm_list \
 			   indimail.mrtg.cfg
-pkgconfig_DATA = indimail.pc
+pkgconfigdir=@pkgconfigdir@
+pkgconfig_DATA = libindimail.pc
 
 man_MANS=vadduser.1 adminclient.8 chowkidar.8 clearopensmtp.8 dbinfo.8 hostcntrl.8 hostsync.8 \
 	initsvc.1 indisrvr.8 indiversion.8 inlookup.8 InLookup.8 inquerytest.8 ipchange.8 \
@@ -774,6 +775,7 @@ edit = sed \
 	-e 's,@PACKAGE\@,$(PACKAGE),g' \
 	-e 's,@PACKAGE_VERSION\@,$(PACKAGE_VERSION),g' \
 	-e 's,@version\@,$(VERSION),g' \
+	-e 's,@pkgconfigdir\@,$(pkgconfigdir),g' \
 	-e 's,@VERSION\@,$(VERSION),g' \
 	-e 's,@DESTDIR\@,$(DESTDIR),g' \
 	-e 's,@HOST\@,$(host),g' \
