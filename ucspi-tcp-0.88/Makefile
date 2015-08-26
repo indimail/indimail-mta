@@ -905,7 +905,7 @@ compile ip6_expandaddr.c byte.h stralloc.h str.h ip6.h hexconversion.h
 	./compile ip6_expandaddr.c
 
 ip6_fmt.o: \
-compile ip6_fmt.c byte.h fmt.h ip4.h ip6.h conf-ip
+compile ip6_fmt.c byte.h fmt.h ip4.h ip6.h hexconversion.h conf-ip
 	./compile `grep -h -v "^#" conf-ip` ip6_fmt.c
 
 ip6_scan.o: \
