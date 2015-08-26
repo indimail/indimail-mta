@@ -1,5 +1,8 @@
 /*
  * $Log: ip.h,v $
+ * Revision 1.10  2015-08-27 00:29:09+05:30  Cprogrammer
+ * added ip6_fmt_flat(), ip6_fmt_exp() functions
+ *
  * Revision 1.9  2015-08-24 19:06:36+05:30  Cprogrammer
  * use compressed ip6 address
  *
@@ -48,7 +51,7 @@ extern int      noipv6;
  * ip6 address syntax: (h = hex digit), no leading '0' required
  * 1. hhhh:hhhh:hhhh:hhhh:hhhh:hhhh:hhhh:hhhh
  * 2. any number of 0000 may be abbreviated as "::", but only once
- * flat ip6 address syntax: hhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh
+ * 3. flat ip6 address syntax: hhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh
  */
 struct ip6_address
 {
@@ -71,13 +74,14 @@ union v46addr
 };
 
 #ifdef IPV6
-unsigned int    ip6_fmt(char *, struct ip6_address *);
-unsigned int    ip6_fmtfull(char *, struct ip6_address *);
-unsigned int    ip6_scan(char *, struct ip6_address *);
-unsigned int    ip6_scanbracket(char *, struct ip6_address *);
+unsigned int    ip6_fmt(char *, ip6_addr *);
+unsigned int    ip6_fmt_exp(char *, ip6_addr *);
+unsigned int    ip6_fmt_flat(char *, ip6_addr *);
+unsigned int    ip6_scan(char *, ip6_addr *);
+unsigned int    ip6_scanbracket(char *, ip6_addr *);
 #endif
-unsigned int    ip4_fmt(char *, struct ip_address *);
-unsigned int    ip4_scan(char *, struct ip_address *);
-unsigned int    ip4_scanbracket(char *, struct ip_address *);
+unsigned int    ip4_fmt(char *, ip_addr *);
+unsigned int    ip4_scan(char *, ip_addr *);
+unsigned int    ip4_scanbracket(char *, ip_addr *);
 
 #endif
