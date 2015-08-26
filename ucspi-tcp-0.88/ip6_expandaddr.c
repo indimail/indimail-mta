@@ -1,5 +1,8 @@
 /*
  * $Log: ip6_expandaddr.c,v $
+ * Revision 1.2  2015-08-27 00:20:30+05:30  Cprogrammer
+ * check for stralloc failure
+ *
  * Revision 1.1  2013-08-06 00:49:18+05:30  Cprogrammer
  * Initial revision
  *
@@ -19,7 +22,7 @@
  */
 
 unsigned int
-ip6_expandaddr(char *src, stralloc * destination)
+ip6_expandaddr(char *src, stralloc *destination)
 {
 	stralloc        addresstemp = { 0 };
 	char            ip6[16] = { 0 };
@@ -37,7 +40,8 @@ ip6_expandaddr(char *src, stralloc * destination)
 		return -1;
 	for (i = 0; i < 16; i++) {
 		bytetohex((unsigned char) ip6[i], hexvalue);
-		stralloc_catb(destination, hexvalue, 2);
+		if (!stralloc_catb(destination, hexvalue, 2))
+			return -1;
 		if (!((i + 1) % 2) && (i + 1) < 16 && !stralloc_cats(destination, ":"))
 			return -1; /*- Append ':' after every two bytes. */
 	}
