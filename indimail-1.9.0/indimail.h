@@ -1,5 +1,8 @@
 /*
  * $Log: indimail.h,v $
+ * Revision 2.216  2015-08-26 11:07:24+05:30  Cprogrammer
+ * added isPrime() function
+ *
  * Revision 2.215  2015-08-21 10:32:21+05:30  Cprogrammer
  * added getEnvConfigLong()
  *
@@ -961,7 +964,7 @@
 #define INDIMAILH_H
 
 #ifndef	lint
-static char     sccsidh[] = "$Id: indimail.h,v 2.215 2015-08-21 10:32:21+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsidh[] = "$Id: indimail.h,v 2.216 2015-08-26 11:07:24+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef HAVE_CONFIG_H
@@ -1754,6 +1757,7 @@ char           *memstore(char *, int, int *);
 int             add_vacation(char *, char *);
 void            SendWelcomeMail(char *, char *, char *, int, char *);
 int             isnum(char *);
+int             IsPrime(unsigned int);
 int             setsockbuf(int, int, int);
 int             tcpopen(char *, char *, int);
 int             udpopen(char *, char *);

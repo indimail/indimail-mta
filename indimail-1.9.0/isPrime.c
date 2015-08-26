@@ -1,5 +1,8 @@
 /*
- * $Log: $
+ * $Log: isPrime.c,v $
+ * Revision 2.1  2015-08-26 11:07:33+05:30  Cprogrammer
+ * function to check if number is a prime number
+ *
  */
 
 #include <math.h>
@@ -16,4 +19,11 @@ IsPrime(unsigned int number)
 			return (0);
 	}
 	return (1);
+}
+
+void
+getversion_isPrime_c()
+{
+	printf("%s\n", sccsid);
+	return;
 }

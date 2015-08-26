@@ -1,8 +1,11 @@
 /*
  * $Log: indiversion.c,v $
+ * Revision 2.138  2015-08-26 11:08:06+05:30  Cprogrammer
+ * added isPrime() function
+ *
  * Revision 2.137  2014-01-30 14:55:25+05:30  Cprogrammer
  * added getversion_setuserid_c()
- * workaround for git cloberring $Id: field
+ * workaround for git cloberring  field
  *
  * Revision 2.136  2011-12-10 14:56:44+05:30  Cprogrammer
  * added hmac_256()
@@ -532,7 +535,7 @@
 #endif
 
 #ifndef	lint
-static char     sccsid[] = "$Id: indiversion.c,v 2.137 2014-01-30 14:55:25+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: indiversion.c,v 2.138 2015-08-26 11:08:06+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 void            getversion_indimail_settings_c();
@@ -822,6 +825,7 @@ void            getversion_sha1_c();
 void            getversion_ripemd_c();
 void            getversion_digest_md5_c();
 void            getversion_setuserid_c();
+void            getversion_isPrime_c();
 
 void            getversion();
 
