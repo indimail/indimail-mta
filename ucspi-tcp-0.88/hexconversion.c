@@ -1,5 +1,8 @@
 /*
  * $Log: hexconversion.c,v $
+ * Revision 1.2  2015-08-27 00:20:17+05:30  Cprogrammer
+ * shortened tohex() function
+ *
  * Revision 1.1  2013-08-06 07:55:30+05:30  Cprogrammer
  * Initial revision
  *
@@ -29,13 +32,7 @@ bytetohex(unsigned char decimal, char hex[3])
 char
 tohex(char num)
 {
-	if (num < 10)
-		return num + '0';
-	else
-	if (num < 16)
-		return num - 10 + 'a';
-	else
-		return -1;
+	return (num < 10 ?  num + '0' : (num < 16 ?  num - 10 + 'a': -1));
 }
 
 int
