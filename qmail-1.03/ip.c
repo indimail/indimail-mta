@@ -1,5 +1,8 @@
 /*
  * $Log: ip.c,v $
+ * Revision 1.9  2015-08-27 00:28:51+05:30  Cprogrammer
+ * added ip6_fmt_flat(), ip6_fmt_exp() functions
+ *
  * Revision 1.8  2015-08-24 19:13:36+05:30  Cprogrammer
  * use compressed ipv6 address
  *
@@ -30,7 +33,9 @@
 #include "fmt.h"
 
 unsigned int
-ip4_fmt(char *s, struct ip_address *ip)
+ip4_fmt(s, ip)
+	char           *s;
+	ip_addr       *ip;
 {
 	unsigned int    len;
 	unsigned int    i;
@@ -68,15 +73,16 @@ ip4_fmt(char *s, struct ip_address *ip)
 }
 
 unsigned int
-ip4_scan(char *s, struct ip_address *ip)
+ip4_scan(s, ip)
+	char           *s;
+	ip_addr       *ip;
 {
 	unsigned int    i;
 	unsigned int    len;
 	unsigned long   u;
 
 	len = 0;
-	i = scan_ulong(s, &u);
-	if (!i)
+	if (!(i = scan_ulong(s, &u)))
 		return 0;
 	if (u > 255)
 		return 0;
@@ -87,8 +93,7 @@ ip4_scan(char *s, struct ip_address *ip)
 		return 0;
 	++s;
 	++len;
-	i = scan_ulong(s, &u);
-	if (!i)
+	if (!(i = scan_ulong(s, &u)))
 		return 0;
 	if (u > 255)
 		return 0;
@@ -99,8 +104,7 @@ ip4_scan(char *s, struct ip_address *ip)
 		return 0;
 	++s;
 	++len;
-	i = scan_ulong(s, &u);
-	if (!i)
+	if (!(i = scan_ulong(s, &u)))
 		return 0;
 	if (u > 255)
 		return 0;
@@ -111,8 +115,7 @@ ip4_scan(char *s, struct ip_address *ip)
 		return 0;
 	++s;
 	++len;
-	i = scan_ulong(s, &u);
-	if (!i)
+	if (!(i = scan_ulong(s, &u)))
 		return 0;
 	if (u > 255)
 		return 0;
@@ -123,14 +126,15 @@ ip4_scan(char *s, struct ip_address *ip)
 }
 
 unsigned int
-ip4_scanbracket(char *s, struct ip_address *ip)
+ip4_scanbracket(s, ip)
+	char           *s;
+	ip_addr       *ip;
 {
 	unsigned int    len;
 
 	if (*s != '[')
 		return 0;
-	len = ip4_scan(s + 1, ip);
-	if (!len)
+	if (!(len = ip4_scan(s + 1, ip)))
 		return 0;
 	if (s[len + 1] != ']')
 		return 0;
@@ -139,15 +143,36 @@ ip4_scanbracket(char *s, struct ip_address *ip)
 
 #ifdef IPV6
 unsigned int
-ip6_fmtfull(s, ip6)
+ip6_fmt_flat(s, ip6)
 	char           *s;
 	ip6_addr       *ip6;
 {
 	unsigned int    len;
 	unsigned int    i, j, k;
 
-	len = 0;
-	for (j = 0, len = 0, k = 0; j < 8; j++)
+	for (j = len = k = 0; j < 8; j++)
+	{
+		i = fmt_hexbyte(s, ip6->d[k++]);
+		len += i;
+		if (s)
+			s += i;
+		i = fmt_hexbyte(s, ip6->d[k++]);
+		len += i;
+		if (s)
+			s += i;
+	}
+	return len - 1;
+}
+
+unsigned int
+ip6_fmt_exp(s, ip6)
+	char           *s;
+	ip6_addr       *ip6;
+{
+	unsigned int    len;
+	unsigned int    i, j, k;
+
+	for (j = len = k = 0; j < 8; j++)
 	{
 		i = fmt_hexbyte(s, ip6->d[k++]);
 		len += i;
@@ -166,31 +191,23 @@ ip6_fmtfull(s, ip6)
 }
 
 unsigned int
-ip6_fmt(char *s, struct ip6_address *ip)
+ip6_fmt(s, ip6)
+	char           *s;
+	ip6_addr       *ip6;
 {
-	unsigned int    len;
-	unsigned int    i;
-	unsigned int    temp;
-	unsigned int    compressing;
-	unsigned int    compressed;
+	unsigned int    len, i, temp, compressing, compressed;
 	int             j;
-	struct ip_address ip4;
+	ip_addr         ip4;
 
-	len = 0;
-	compressing = 0;
-	compressed = 0;
-
+	len = compressing = compressed = 0;
 	for (j = 0; j < 16; j += 2) {
-		if (j == 12 && byte_equal((char *) ip, 12, (char *) V4mappedprefix)) {
-			for (i = 0; i < 4; i++) {
-				ip4.d[i] = ip->d[i + 12];
-			}
+		if (j == 12 && byte_equal((char *) ip6, 12, (char *) V4mappedprefix)) {
+			for (i = 0; i < 4; i++)
+				ip4.d[i] = ip6->d[i + 12];
 			len += ip4_fmt(s, &ip4);
 			break;
 		}
-
-		temp = ((unsigned long) (unsigned char) ip->d[j] << 8) + (unsigned long) (unsigned char) ip->d[j + 1];
-
+		temp = ((unsigned long) (unsigned char) ip6->d[j] << 8) + (unsigned long) (unsigned char) ip6->d[j + 1];
 		if (temp == 0 && !compressed) {
 			if (!compressing) {
 				compressing = 1;
@@ -220,43 +237,37 @@ ip6_fmt(char *s, struct ip6_address *ip)
 		}
 	}
 	if (compressing) {
-		*s++ = ':';
+		if (s)
+			*s++ = ':';
 		++len;
 	}
-//  if (s) *s = 0; 
 	return len;
 }
 
 unsigned int
-ip6_scan(char *s, struct ip6_address *ip)
+ip6_scan(s, ip6)
+	char           *s;
+	ip6_addr       *ip6;
 {
-	unsigned int    i;
-	unsigned int    len = 0;
-	unsigned long   u;
-
 	char            suffix[16];
-	int             prefixlen = 0;
-	int             suffixlen = 0;
-
-	unsigned int    x;
-	struct ip_address ip4;
+	unsigned int    i, x, len = 0;
+	unsigned long   u;
+	int             prefixlen = 0, suffixlen = 0;
+	ip_addr         ip4;
 
 	for (x = 0; x < 4; x++) {	/* Mapped IPv4 addresses */
-		ip4.d[x] = ip->d[x + 12];
+		ip4.d[x] = ip6->d[x + 12];
 	}
-
 	if ((i = ip4_scan(s, &ip4))) {
 		const char     *c = (const char *) V4mappedprefix;
 		if (byte_equal((char *) ip4.d, 4, (char *) V6any))
 			c = (const char *) V6any;
 		for (len = 0; len < 12; ++len)
-			ip->d[len] = c[len];
+			ip6->d[len] = c[len];
 		return i;
 	}
-
 	for (i = 0; i < 16; i++)
-		ip->d[i] = 0;
-
+		ip6->d[i] = 0;
 	for (;;) {
 		if (*s == ':') {
 			len++;
@@ -267,47 +278,36 @@ ip6_scan(char *s, struct ip6_address *ip)
 			}
 			s++;
 		}
-		i = scan_xlong(s, &u);
-		if (!i)
+		if (!(i = scan_xlong(s, &u)))
 			return 0;
-
 		if (prefixlen == 12 && s[i] == '.') {
-		/*
-		 * the last 4 bytes may be written as IPv4 address 
-		 */
-			i = ip4_scan(s, &ip4);
-			if (i) {
-			/*
-			 * copy into ip->d+12 from ip4 
-			 */
-				for (x = 0; x < 4; x++) {
-					ip->d[x + 12] = ip4.d[x];
-				}
+			/*- the last 4 bytes may be written as IPv4 address */
+			if ((i = ip4_scan(s, &ip4))) {
+				for (x = 0; x < 4; x++)
+					ip6->d[x + 12] = ip4.d[x]; /*- copy into ip6->d+12 from ip4 */
 				return i + len;
 			} else
 				return 0;
 		}
-		ip->d[prefixlen++] = (u >> 8);
-		ip->d[prefixlen++] = (u & 255);
+		ip6->d[prefixlen++] = (u >> 8);
+		ip6->d[prefixlen++] = (u & 255);
 		s += i;
 		len += i;
 		if (prefixlen == 16)
 			return len;
 	}
 
-/*
- * part 2, after "::" 
- */
+	/*- part 2, after "::" */
 	for (;;) {
 		if (*s == ':') {
 			if (suffixlen == 0)
 				break;
 			s++;
 			len++;
-		} else if (suffixlen != 0)
+		} else
+		if (suffixlen != 0)
 			break;
-		i = scan_xlong(s, &u);
-		if (!i) {
+		if (!(i = scan_xlong(s, &u))) {
 			len--;
 			break;
 		}
@@ -329,13 +329,14 @@ ip6_scan(char *s, struct ip6_address *ip)
 			break;
 	}
 	for (i = 0; i < suffixlen; i++)
-		ip->d[16 - suffixlen + i] = suffix[i];
-
+		ip6->d[16 - suffixlen + i] = suffix[i];
 	return len;
 }
 
 unsigned int
-ip6_scanbracket(char *s, struct ip6_address *ip6)
+ip6_scanbracket(s, ip6)
+	char           *s;
+	ip6_addr       *ip6;
 {
 	unsigned int    len;
 
@@ -353,7 +354,7 @@ ip6_scanbracket(char *s, struct ip6_address *ip6)
 void
 getversion_ip_c()
 {
-	static char    *x = "$Id: ip.c,v 1.8 2015-08-24 19:13:36+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: ip.c,v 1.9 2015-08-27 00:28:51+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
