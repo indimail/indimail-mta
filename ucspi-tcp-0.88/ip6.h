@@ -1,5 +1,8 @@
 /*
  * $Log: ip6.h,v $
+ * Revision 1.4  2015-08-27 00:22:20+05:30  Cprogrammer
+ * added ip6_fmt_exp() function to format expanded ipv6 address
+ *
  * Revision 1.3  2013-08-06 07:56:26+05:30  Cprogrammer
  * added V4MAPPREFIX
  *
@@ -18,8 +21,8 @@
 
 unsigned int    ip6_scan(char *, char *);
 unsigned int    ip6_fmt(char *, char *);
-unsigned int    scan_ip6_flat(char *src, char *);
-unsigned int    fmt_ip6_flat(char *dest, char *);
+unsigned int    ip6_fmt_exp(char *, char *);
+unsigned int    ip6_fmt_flat(char *, char *);
 int             ip6tobitstring(char *, stralloc *, unsigned int);
 unsigned int    ip6_expandaddr(char *src, stralloc *destination);
 unsigned int    ip6_compactaddr(char *s, char ip[16]);
@@ -28,8 +31,7 @@ unsigned int    ip6_compactaddr(char *s, char ip[16]);
  * ip6 address syntax: (h = hex digit), no leading '0' required
  * 1. hhhh:hhhh:hhhh:hhhh:hhhh:hhhh:hhhh:hhhh
  * 2. any number of 0000 may be abbreviated as "::", but only once
- * flat ip6 address syntax:
- * hhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh
+ * 3. flat ip6 address syntax: hhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh
  */
 
 #define IP6_FMT 40
