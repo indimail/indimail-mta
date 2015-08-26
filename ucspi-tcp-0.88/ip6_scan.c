@@ -1,5 +1,8 @@
 /*
  * $Log: ip6_scan.c,v $
+ * Revision 1.3  2015-08-27 00:23:23+05:30  Cprogrammer
+ * code beautified
+ *
  * Revision 1.2  2008-09-17 09:32:49+05:30  Cprogrammer
  * corrections for ip4_scan()
  *
@@ -47,10 +50,7 @@ ip6_scan(char *s, char ip[16])
 		if (*s == ':')
 		{
 			len++;
-			if (s[1] == ':')
-			{					/*
-								 * Found "::", skip to part 2 
-								 */
+			if (s[1] == ':') {	/*- Found "::", skip to part 2 */
 				s += 2;
 				len++;
 				break;
@@ -59,11 +59,7 @@ ip6_scan(char *s, char ip[16])
 		}
 		if (!(i = scan_xlong((char *) s, &u)))
 			return 0;
-		if (prefixlen == 12 && s[i] == '.')
-		{
-			/*
-			 * the last 4 bytes may be written as IPv4 address 
-			 */
+		if (prefixlen == 12 && s[i] == '.') { /*- the last 4 bytes may be written as IPv4 address */
 			if ((i = ip4_scan((char *) s, ip + 12)))
 				return i + len;
 			else
@@ -76,9 +72,7 @@ ip6_scan(char *s, char ip[16])
 		if (prefixlen == 16)
 			return len;
 	}
-	/*
-	 * part 2, after "::" 
-	 */
+	/*- part 2, after "::" */
 	for (;;)
 	{
 		if (*s == ':')
