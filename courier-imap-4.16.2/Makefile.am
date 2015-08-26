@@ -23,8 +23,8 @@ CLEANFILES=$(databin_SCRIPTS) $(man_MANS) $(sysconf_DATA) $(sbin_SCRIPTS)
 databindir=$(datadir)
 databin_SCRIPTS=mkimapdcert mkpop3dcert mkdhparams
 
-binPROGRAMS=imapd pop3d maildirmake maildiracl deliverquota maildirkw \
-	makeimapaccess makedat
+binPROGRAMS=imapd pop3d maildirmake maildiracl deliverquota maildirkw
+binSCRIPTS=makeimapaccess makedat
 sbinPROGRAMS=imaplogin pop3login
 libexecPROGRAMS=makedatprog couriertcpd
 
@@ -50,13 +50,17 @@ distclean-local:
 	-rm -rf .deps libs/*/.deps autom4te.cache libs/*/autom4te.cache
 
 imaplogin: libs/imap/imaplogin
+	mkdir -p .libs
 	cp libs/imap/imaplogin .
+	cp libs/imap/.libs/imaplogin .libs
 
 maildirkw: libs/maildir/maildirkw
 	cp libs/maildir/maildirkw .
 
 imapd: libs/imap/imapd
+	mkdir -p .libs
 	cp libs/imap/imapd .
+	cp libs/imap/.libs/imapd .libs
 
 sharedindexinstall: libs/maildir/sharedindexinstall
 	cp libs/maildir/sharedindexinstall .
@@ -149,6 +153,12 @@ quotawarnmsg.example: libs/maildir/quotawarnmsg
 	cp -f $(srcdir)/libs/maildir/quotawarnmsg quotawarnmsg.example
 
 install-exec-local:
+	$(mkinstalldirs) $(DESTDIR)$(libexecdir)/authlib
+	for f in `cat libs/authlib/installlist` dummy ; do \
+		test "$$f" = "dummy" && continue ; \
+		echo $$f; \
+		$(INSTALL_PROGRAM) $(INSTALL_STRIP_FLAG) libs/authlib/$$f \
+			$(DESTDIR)$(libexecdir)/authlib/$$f ; done
 	$(mkinstalldirs) $(DESTDIR)$(databindir)
 	$(mkinstalldirs) $(DESTDIR)$(bindir)
 	test ! -x libs/tcpd/couriertls || $(INSTALL_PROGRAM) $(INSTALL_STRIP_FLAG) \
@@ -169,6 +179,11 @@ install-exec-hook:
 	chmod 755 $(DESTDIR)$(sysconfdir)/shared.tmp
 
 install-data-local: install-man
+	for f in `cat libs/authlib/modulelist ; echo $$authmodulelist ` ; do \
+		echo $$f; \
+		test "$$f" = "authpam" || test "$$f" = "authshadow" || continue ; \
+		chmod 4555 $(DESTDIR)/$(prefix)/libexec/authlib/$$f || exit 1; \
+	done
 	test -d $(DESTDIR)/etc/pam.d || exit 0 ; \
 	test -w $(DESTDIR)/etc/pam.d || exit 0 ; \
 	test -f $(DESTDIR)/etc/pam.d/imap || \
