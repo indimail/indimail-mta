@@ -1034,3 +1034,6 @@ udpopen.o
 tcpopen.o
 whois
 whois.o
+fmt_hexbytes.o
+fmt_xlong.o
+hasifaddr.h
