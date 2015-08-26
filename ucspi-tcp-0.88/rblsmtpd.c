@@ -1,5 +1,8 @@
 /*
  * $Log: rblsmtpd.c,v $
+ * Revision 1.13  2015-08-27 00:25:28+05:30  Cprogrammer
+ * removed tohex() function
+ *
  * Revision 1.12  2014-01-10 00:06:57+05:30  Cprogrammer
  * BUG - flagip6 was not initialized
  *
@@ -58,12 +61,13 @@
 #include "dns.h"
 #ifdef IPV6
 #include "ip6.h"
+#include "hexconversion.h"
 #endif
 
 #define FATAL "rblsmtpd: fatal: "
 
 #ifndef	lint
-static char     sccsid[] = "$Id: rblsmtpd.c,v 1.12 2014-01-10 00:06:57+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: rblsmtpd.c,v 1.13 2015-08-27 00:25:28+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 void
@@ -107,12 +111,6 @@ rbl_out(int should_flush, char *arg)
 
 #ifdef IPV6
 char           *tcp_proto;
-
-static inline char
-tohex(char c)
-{
-	return (c >= 10 ? c - 10 + 'a' : c + '0');
-}
 #endif
 
 void
