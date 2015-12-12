@@ -1,5 +1,8 @@
 /*
  * $Log: autoresponder.c,v $
+ * Revision 1.31  2015-12-12 15:01:41+05:30  Cprogrammer
+ * fix for deliver to email alias
+ *
  * Revision 1.30  2015-08-24 19:04:55+05:30  Cprogrammer
  * changed ip_scanbracket to ip4_scanbracket
  *
@@ -1032,7 +1035,7 @@ int
 main(int argc, char *argv[])
 {
 	int             fdout, match;
-	char           *sender, *host, *ptr;
+	char           *sender, *dtrecip, *host, *ptr;
 #ifdef MIME
 	char            num[FMT_ULONG];
 	struct tai      datetai;
@@ -1063,7 +1066,7 @@ main(int argc, char *argv[])
 	/*- Fail if SENDER or DTLINE are not set */
 	if (!(sender = env_get("SENDER")))
 		usage("SENDER is not set, must be run from qmail.");
-	if (!(dtline = env_get("DTLINE")))
+	if (!(dtrecip = dtline = env_get("DTLINE")))
 		usage("DTLINE is not set; must be run from qmail.");
 	dtline_len = str_len(dtline);
 
@@ -1071,7 +1074,10 @@ main(int argc, char *argv[])
 		usage("RECIPIENT is not set; must be run from qmail.");
 	if (!(host = env_get("HOST")))
 		usage("HOST is not set; must be run from qmail.");
-	recipient += str_len(host) + 1; /*- testindi.com-mbhangui@testindi.com */
+	recipient += (match = str_len(host)) + 1; /*- example.com-mbhangui@example.com */
+	dtrecip += match + 15; /*- Delivered-To: example.com-mbhangui@example.com */
+	if (!str_diffn(recipient, dtrecip, str_len(recipient)))
+		opt_laxmode = 1;
 
 	if (!stralloc_copys(&mailfrom, sender))
 		strerr_die2sys(111, FATAL, "out of memory: ");
@@ -1303,7 +1309,7 @@ main(int argc, char *argv[])
 void
 getversion_qmail_autoresponder_c()
 {
-	static char    *x = "$Id: autoresponder.c,v 1.30 2015-08-24 19:04:55+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: autoresponder.c,v 1.31 2015-12-12 15:01:41+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
