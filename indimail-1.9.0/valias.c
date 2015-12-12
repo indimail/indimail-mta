@@ -1,5 +1,8 @@
 /*
  * $Log: valias.c,v $
+ * Revision 2.9  2015-12-12 14:36:55+05:30  Cprogrammer
+ * display aliases for a domain if Email is specified as @domain
+ *
  * Revision 2.8  2014-07-03 00:08:40+05:30  Cprogrammer
  * added option to track all alias which deliver to an address
  *
@@ -75,7 +78,7 @@
 
 #include "indimail.h"
 #ifndef	lint
-static char     sccsid[] = "$Id: valias.c,v 2.8 2014-07-03 00:08:40+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: valias.c,v 2.9 2015-12-12 14:36:55+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef VALIAS
@@ -119,7 +122,7 @@ main(argc, argv)
 	switch (AliasAction)
 	{
 	case VALIAS_SELECT:
-		if (!strstr(Email, "@"))
+		if (!*Alias)
 		{
 			for(;;)
 			{
