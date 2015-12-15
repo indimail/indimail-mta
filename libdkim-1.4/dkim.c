@@ -1,5 +1,9 @@
 /*
  * $Log: dkim.c,v $
+ * Revision 1.17  2015-12-15 15:36:01+05:30  Cprogrammer
+ * added case 3 for 3rd party signature without SSP and ADSP
+ * increased buffer size for Apple mail with X-BrightMail-Tracker header issue
+ *
  * Revision 1.16  2012-08-16 08:01:19+05:30  Cprogrammer
  * do not skip X-Mailer headers
  *
@@ -523,7 +527,7 @@ main(int argc, char **argv)
 	int             bSign = 1, nSigCount = 0, useSSP = 0, useADSP = 0, accept3ps = 0;
 	int             sCount = 0, sSize = 0, resDKIMSSP = -1, resDKIMADSP = -1;
 	int             nAllowUnsignedFromHeaders = 0;
-	char            Buffer[1024], szPolicy[512];
+	char            Buffer[4096], szPolicy[512];
 	time_t          t;
 	struct stat     statbuf;
 	DKIMContext     ctxt;
@@ -592,6 +596,11 @@ main(int argc, char **argv)
 				accept3ps = 1;
 				useSSP = 0;
 				useADSP = 1;
+				break;
+			case '3':
+				accept3ps = 1;
+				useSSP = 0;
+				useADSP = 0;
 				break;
 			case '0':
 				accept3ps = 0;
@@ -867,7 +876,7 @@ main(int argc, char **argv)
 void
 getversion_dkim_c()
 {
-	static char    *x = (char *) "$Id: dkim.c,v 1.16 2012-08-16 08:01:19+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = (char *) "$Id: dkim.c,v 1.17 2015-12-15 15:36:01+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
