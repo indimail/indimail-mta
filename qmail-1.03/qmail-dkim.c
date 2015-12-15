@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-dkim.c,v $
+ * Revision 1.44  2015-12-15 16:05:58+05:30  Cprogrammer
+ * increased buffer size for long header issue
+ *
  * Revision 1.43  2014-01-22 22:45:01+05:30  Cprogrammer
  * treat AUTHINFO environment like RELAYCLIENT environment variable
  *
@@ -166,7 +169,7 @@
 #define strncasecmp(x,y,z) case_diffb((x), (z), (y))
 #define strcasecmp(x,y)    case_diffs((x), (y))
 
-char            inbuf[2048];
+char            inbuf[4096];
 char            outbuf[256];
 char            errbuf[256];
 struct substdio ssin;
@@ -1394,7 +1397,7 @@ main(argc, argv)
 void
 getversion_qmail_dkim_c()
 {
-	static char    *x = "$Id: qmail-dkim.c,v 1.43 2014-01-22 22:45:01+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: qmail-dkim.c,v 1.44 2015-12-15 16:05:58+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
