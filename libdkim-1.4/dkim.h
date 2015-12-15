@@ -1,5 +1,8 @@
 /*
  * $Log: dkim.h,v $
+ * Revision 1.8  2015-12-15 16:03:18+05:30  Cprogrammer
+ * use time_t for expireTime
+ *
  * Revision 1.7  2011-06-04 13:56:06+05:30  Cprogrammer
  * corrected return codes
  *
@@ -50,6 +53,7 @@
 extern          "C" {
 #endif
 
+#include <time.h>
 // DKIM Body hash versions
 #define DKIM_BODYHASH_ALLMAN_1	1
 #define DKIM_BODYHASH_IETF_1	2
@@ -139,7 +143,7 @@ typedef struct DKIMSignOptions_t {
 	char            szSelector[80];	// selector - required
 	char            szDomain[256];	// domain - optional - if empty, domain is computed from sender
 	char            szIdentity[256];	// for i= tag, if empty tag will not be included in sig
-	unsigned long   expireTime;	// for x= tag, if 0 tag will not be included in sig
+	time_t          expireTime;	// for x= tag, if 0 tag will not be included in sig
 	DKIMHEADERCALLBACK pfnHeaderCallback;	// header callback
 	char            szRequiredHeaders[256];	// colon-separated list of headers that must be signed
 	int             nHash;	// use one of the DKIM_HASH_xx constants here
