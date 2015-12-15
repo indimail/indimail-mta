@@ -1,5 +1,8 @@
 /*
  * $Log: dkimverify.cpp,v $
+ * Revision 1.10  2015-12-15 16:05:00+05:30  Cprogrammer
+ * fixed issue with time comparision. Use time_t for time variables
+ *
  * Revision 1.9  2011-06-04 10:05:01+05:30  Cprogrammer
  * added signature and identity domain information to
  *     DKIMVerifyDetails structure
@@ -637,15 +640,13 @@ CDKIMVerify::ProcessHeaders(void)
 			if (i != HeaderList.rend()) {
 				used.push_back(i);
 				// hash this header
-				if (sig.HeaderCanonicalization == DKIM_CANON_SIMPLE) {
+				if (sig.HeaderCanonicalization == DKIM_CANON_SIMPLE)
 					sig.Hash(i->c_str(), i->length());
-				}
 				else
 				if (sig.HeaderCanonicalization == DKIM_CANON_RELAXED) {
 					string          sTemp = RelaxHeader(*i);
 					sig.Hash(sTemp.c_str(), sTemp.length());
-				}
-				else
+				} else
 				if (sig.HeaderCanonicalization == DKIM_CANON_NOWSP) {
 					string          sTemp = *i;
 					RemoveSWSP(sTemp);
@@ -701,7 +702,7 @@ CDKIMVerify::ProcessHeaders(void)
 //
 ////////////////////////////////////////////////////////////////////////////////
 bool
-ParseUnsigned(const char *s, int *result)
+ParseUnsigned(const char *s, unsigned long *result)
 {
 	unsigned        temp = 0, last = 0;
 	bool            overflowed = false;
@@ -858,7 +859,7 @@ CDKIMVerify::ParseDKIMSignature(const string & sHeader, SignatureInfo & sig)
 	if (values[8] == NULL || !m_HonorBodyLengthTag) {
 		sig.BodyLength = -1;
 	} else {
-		if (!ParseUnsigned(values[8], &sig.BodyLength))
+		if (!ParseUnsigned(values[8], (unsigned long *) &sig.BodyLength))
 			return DKIM_BAD_SYNTAX;
 	}
 	// query methods
@@ -878,23 +879,23 @@ CDKIMVerify::ParseDKIMSignature(const string & sHeader, SignatureInfo & sig)
 			return DKIM_BAD_SYNTAX;	// todo: maybe create a new error code for unknown query method
 	}
 	// signature time
-	int             SignedTime = -1;
+	time_t          SignedTime = -1;
 	if (values[10] != NULL) {
-		if (!ParseUnsigned(values[10], &SignedTime))
+		if (!ParseUnsigned(values[10], (unsigned long *) &SignedTime))
 			return DKIM_BAD_SYNTAX;
 	}
 	// expiration time
 	if (values[11] == NULL) {
 		sig.ExpireTime = -1;
 	} else {
-		if (!ParseUnsigned(values[11], &sig.ExpireTime))
+		if (!ParseUnsigned(values[11], (unsigned long *) &sig.ExpireTime))
 			return DKIM_BAD_SYNTAX;
 		if (sig.ExpireTime != -1) {
 			// the value of x= MUST be greater than the value of t= if both are present
 			if (SignedTime != -1 && sig.ExpireTime <= SignedTime)
 				return DKIM_BAD_SYNTAX;
 			// todo: if possible, use the received date/time instead of the current time
-			unsigned curtime = time(NULL);
+			time_t curtime = time(NULL);
 			if (curtime > sig.ExpireTime)
 				return DKIM_SIGNATURE_EXPIRED;
 		}
@@ -1190,7 +1191,7 @@ CDKIMVerify::GetDomain(void)
 void
 getversion_dkimverify_cpp()
 {
-	static char    *x = (char *) "$Id: dkimverify.cpp,v 1.9 2011-06-04 10:05:01+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = (char *) "$Id: dkimverify.cpp,v 1.10 2015-12-15 16:05:00+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
