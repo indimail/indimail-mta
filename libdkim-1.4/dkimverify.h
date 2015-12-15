@@ -1,5 +1,8 @@
 /*
  * $Log: dkimverify.h,v $
+ * Revision 1.4  2015-12-15 16:03:09+05:30  Cprogrammer
+ * use time_t for ExpireTime
+ *
  * Revision 1.3  2011-06-04 09:37:25+05:30  Cprogrammer
  * added AllowUnsignedFromHeaders
  *
@@ -74,7 +77,7 @@ public:
 	int             BodyLength;
 	unsigned        HeaderCanonicalization;
 	unsigned        BodyCanonicalization;
-	int             ExpireTime;
+	time_t          ExpireTime;
 	unsigned        VerifiedBodyCount;
 	unsigned        UnverifiedBodyCount;
 	EVP_MD_CTX      m_Hdr_ctx;
