@@ -1,5 +1,8 @@
 /*
  * $Log: vdelivermail.c,v $
+ * Revision 2.60  2015-12-17 17:14:32+05:30  Cprogrammer
+ * mimic behaviour of dot-qmail. skip valias lines if program exits 99
+ *
  * Revision 2.59  2014-01-13 08:04:58+05:30  Cprogrammer
  * discard bounces if DISCARD_BOUNCE env variable is set
  *
@@ -261,7 +264,7 @@
 #include <sys/wait.h>
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vdelivermail.c,v 2.59 2014-01-13 08:04:58+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: vdelivermail.c,v 2.60 2015-12-17 17:14:32+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 /*- Globals */
@@ -738,6 +741,8 @@ doAlias(char *dir, char *user, char *domain, mdir_t MsgSize)
 		ret = deliver_mail(ptr, MsgSize, "AUTO", indimailgid, indimailgid, domain,
 			&MailQuotaSize, &MailQuotaCount);
 		unsetenv("NOALIAS");
+		if (ret == 99)
+			break;
 		if (ret == -1 || ret == -4)
 		{
 			if (ret == -1)
