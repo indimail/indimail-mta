@@ -180,6 +180,18 @@ fi
 AC_CHECK_LIB(mysqlclient -L${mysql_libdir}, mysql_real_connect,libs="$libs -lmysqlclient",
 	AC_MSG_ERROR([could not find libmysqlclient which is needed for MySQL support]),)
 auth_incs="-I$indimaildir/include -I$mysql_incdir"
+RPATH_LIB="$acl_libdirstem"
+if test -f /usr/bin/lsb_release
+then
+DISTRIB_ID=$(lsb_release -si)
+DISTRIB_VERSION=$(lsb_release -sr)
+else
+DISTRIB_ID=$(sh ./lsb_release -si)
+DISTRIB_VERSION=$(sh ./lsb_release -sr)
+fi
+AC_SUBST(DISTRIB_ID)
+AC_SUBST(DISTRIB_VERSION)
+libdir=$prefix/$acl_libdirstem
 case "$host" in
 	*-*-darwin*)
 	auth_libs="-L. -L$libdir -L$indimaildir/lib -lindimail -lcdb $LIB_CRYPT -L$mysql_libdir -lmysqlclient $LIB_SSL"
