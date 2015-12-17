@@ -1,5 +1,8 @@
 #
 # $Log: iwebadmin.spec.in,v $
+# Revision 1.12  2015-12-17 17:21:46+05:30  Cprogrammer
+# use root perm for iwebadmin
+#
 # Revision 1.11  2013-10-01 13:33:38+05:30  Cprogrammer
 # changed permission of iwebadmin
 #
@@ -49,7 +52,7 @@
 # Initial revision
 #
 #
-# $Id: iwebadmin.spec.in,v 1.11 2013-10-01 13:33:38+05:30 Cprogrammer Exp mbhangui $
+# $Id: iwebadmin.spec.in,v 1.12 2015-12-17 17:21:46+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %define _unpackaged_files_terminate_build 1
 
@@ -262,7 +265,7 @@ fi
 %defattr(-,root,root,-)
 %dir %attr(555,root,qmail)              %{_prefix}
 
-%attr(6555,indimail,indimail)       @cgibindir@/iwebadmin
+%attr(6555,root,indimail)           @cgibindir@/iwebadmin
 
 %attr(444,root,root)                @htmllibdir@/html/add_autorespond.html
 %attr(444,root,root)                @htmllibdir@/html/add_forward.html
