@@ -34,6 +34,7 @@ fortune_version=1.1
 
 all: rules indimail.prerm indimail.preinst indimail.postrm indimail.postinst \
 obs_deb_prep gen_control _service \
+indimail-xUbuntu_15.10.dsc \
 indimail-xUbuntu_15.04.dsc indimail-xUbuntu_14.10.dsc \
 indimail-xUbuntu_14.04.dsc indimail-xUbuntu_13.10.dsc indimail-xUbuntu_13.04.dsc \
 indimail-xUbuntu_12.10.dsc indimail-xUbuntu_12.04.dsc indimail-xUbuntu_11.10.dsc \
@@ -155,6 +156,9 @@ indimail-Debian_8.0.dsc: indimail-Debian_8.0.dsc.in obs.mk changelog.in
 indimail-xUbuntu_15.04.dsc: indimail-xUbuntu_15.04.dsc.in obs.mk changelog.in
 	$(edit) $@.in > $@.tmp; \
 	sed -e 's,@release@,$(release),g' $@.tmp > $@; /bin/rm -f $@.tmp
+indimail-xUbuntu_15.10.dsc: indimail-xUbuntu_15.10.dsc.in obs.mk changelog.in
+	$(edit) $@.in > $@.tmp; \
+	sed -e 's,@release@,$(release),g' $@.tmp > $@; /bin/rm -f $@.tmp
 indimail-xUbuntu_14.10.dsc: indimail-xUbuntu_14.10.dsc.in obs.mk changelog.in
 	$(edit) $@.in > $@.tmp; \
 	sed -e 's,@release@,$(release),g' $@.tmp > $@; /bin/rm -f $@.tmp
@@ -197,7 +201,7 @@ control control.Debian.6.0 control.Debian.7.0 control.Debian.8.0 \
 control.Ubuntu.10.04 control.Ubuntu.10.10 control.Ubuntu.11.04 \
 control.Ubuntu.11.10 control.Ubuntu.12.04 control.Ubuntu.12.10 \
 control.Ubuntu.13.04 control.Ubuntu.13.10 control.Ubuntu.14.04 \
-control.Ubuntu.14.10 control.Ubuntu.15.04 \
+control.Ubuntu.14.10 control.Ubuntu.15.04 control.Ubuntu.15.10 \
 indimail.cron.d
 	tar cf - copyright indimail.preinst indimail.postinst indimail.prerm \
 		indimail.postrm rules changelog compat obs_deb_prep \
@@ -208,5 +212,5 @@ indimail.cron.d
 		control.Ubuntu.10.04 control.Ubuntu.10.10 control.Ubuntu.11.04 \
 		control.Ubuntu.11.10 control.Ubuntu.12.04 control.Ubuntu.12.10 \
 		control.Ubuntu.13.04 control.Ubuntu.13.10 control.Ubuntu.14.04 \
-		control.Ubuntu.14.10 control.Ubuntu.15.04 \
+		control.Ubuntu.14.10 control.Ubuntu.15.04 control.Ubuntu.15.10 \
 		indimail.cron.d |gzip > $@

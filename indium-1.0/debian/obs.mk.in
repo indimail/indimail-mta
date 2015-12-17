@@ -23,7 +23,8 @@ all: rules postrm postinst debian.tar.gz dummy.tar.gz  \
 	indium-xUbuntu_13.10.dsc \
 	indium-xUbuntu_14.04.dsc \
 	indium-xUbuntu_14.10.dsc \
-	indium-xUbuntu_15.04.dsc
+	indium-xUbuntu_15.04.dsc \
+	indium-xUbuntu_15.10.dsc
 
 clean:
 	/bin/rm -f rules postrm postinst *.dsc debian.tar.gz dummy.tar.gz
@@ -78,6 +79,8 @@ indium-xUbuntu_14.04.dsc: indium-xUbuntu_14.04.dsc.in
 indium-xUbuntu_14.10.dsc: indium-xUbuntu_14.10.dsc.in
 	$(edit) $@.in > $@
 indium-xUbuntu_15.04.dsc: indium-xUbuntu_15.04.dsc.in
+	$(edit) $@.in > $@
+indium-xUbuntu_15.10.dsc: indium-xUbuntu_15.10.dsc.in
 	$(edit) $@.in > $@
 changelog:changelog.in
 	$(edit) $@.in > $@
