@@ -25,7 +25,7 @@
 %attr(0644,root,root) @imagedir@/modify.png
 %attr(0644,root,root) @imagedir@/upperright.png
 %attr(0644,root,root) @imagedir@/delete.png
-%attr(4555,root,root) @cgibindir@/qmailadmin
+%attr(4555,root,root) @cgibindir@/iwebadmin
 %attr(0644,root,root) @htmllibdir@/lang/ja
 %attr(0644,root,root) @htmllibdir@/lang/fi
 %attr(0644,root,root) @htmllibdir@/lang/tr
