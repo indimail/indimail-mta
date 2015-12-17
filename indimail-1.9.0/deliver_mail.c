@@ -1,5 +1,12 @@
 /*
  * $Log: deliver_mail.c,v $
+ * Revision 2.63  2015-12-17 17:39:57+05:30  Cprogrammer
+ * Fixed X-Forwarded-For, X-Forwarded-To headers for valias delivery
+ * use fork() instead of vfork for makeseekable to work
+ *
+ * Revision 2.62  2015-12-15 16:18:46+05:30  Cprogrammer
+ * make pipe seekable
+ *
  * Revision 2.61  2014-04-18 17:30:45+05:30  Cprogrammer
  * dateFolder() function to deliver emails to a date formatted folder
  *
@@ -210,7 +217,7 @@
 #include <sys/wait.h>
 
 #ifndef	lint
-static char     sccsid[] = "$Id: deliver_mail.c,v 2.61 2014-04-18 17:30:45+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: deliver_mail.c,v 2.63 2015-12-17 17:39:57+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 /*- Function Prototypes */
@@ -353,21 +360,21 @@ read_quota(char *Maildir)
 	for(count = 0;;count++)
 	{
 		if (!(fp = fopen(tmpbuf, "r")))
-			return("NOQUOTA");
+			return ("NOQUOTA");
 		if (!fgets(tmpbuf, MAX_BUFF - 2, fp))
 		{
 			fclose(fp);
 #ifdef USE_MAILDIRQUOTA	
 			if (recalc_quota(maildir, 0, 0, 0, 2) == -1)
-				return((char *) 0);
+				return ((char *) 0);
 #else
 			if (recalc_quota(maildir, 2) == -1)
-				return((char *) 0);
+				return ((char *) 0);
 #endif
 			if (!count)
 				continue;
 			fprintf(stderr, "invalid maildirquota specification");
-			return((char *) 0);
+			return ((char *) 0);
 		}
 		fclose(fp);
 		break;
@@ -379,12 +386,12 @@ read_quota(char *Maildir)
 #else
 		(void) recalc_quota(maildir, 2);
 #endif
-		return("NOQUOTA");
+		return ("NOQUOTA");
 	} else
 	if ((ptr = strchr(tmpbuf, '\n')))
 		*ptr = 0;
 	if (!strncmp(tmpbuf, "0S", 2))
-		return("NOQUOTA");
+		return ("NOQUOTA");
 	return (tmpbuf);
 }
 #endif
@@ -489,7 +496,7 @@ recordMailcount(char *maildir, mdir_t curmsgsize, mdir_t *dailyMsgSize, mdir_t *
 #ifdef FILE_LOCKING
 	delDbLock(fd, fileName, 1);
 #endif
-	return(0);
+	return (0);
 }
 
 int
@@ -774,7 +781,7 @@ deliver_mail(char *address, mdir_t MsgSize, char *quota, uid_t uid, gid_t gid,
 		if (getenv("ELIMINATE_DUPS") && ismaildup(address))
 		{
 			fprintf(stderr, "discarding duplicate msg ");
-			return(0);
+			return (0);
 		}
 #endif
 		/*- Format the email file name */
@@ -889,10 +896,8 @@ deliver_mail(char *address, mdir_t MsgSize, char *quota, uid_t uid, gid_t gid,
 	if (is_injected)
 	{
 		char           *tstr = 0;
-		getEnvConfigStr(&rpline, "RPLINE", "Return-Path: <>\n");
 		if ((dtline = getenv("DTLINE"))) /*- original address */
 		{
-
 			for (;*dtline && *dtline != ':';dtline++);
 			if (*dtline)
 				dtline++;
@@ -901,31 +906,24 @@ deliver_mail(char *address, mdir_t MsgSize, char *quota, uid_t uid, gid_t gid,
 			if (*tstr == '\n')
 				*tstr = 0;
 			if (!*dtline)
-			{
-				if (*address == '&')
-					++address;
-				dtline = address;
-			}
+				dtline = (*address == '&') ? address + 1: address;
 		} else
-		{
-			if (*address == '&' || *address == '|')
-				++address;
-			dtline = address;
-		}
-		faddr = (*address == '&' || *address == '|') ? address + 1 : address;
+		if (!(dtline = getenv("RECIPIENT")))
+			dtline = "pipe";
+		faddr = *address == '&' ? address + 1 : address;
 		xfilter = getenv("XFILTER");
 		qqeh = getenv("QQEH");
 		if (qqeh && *qqeh)
 			snprintf(DeliveredTo, AUTH_SIZE, 
-				"%sX-Forwarded-To: %s\nX-Forwarded-For: %s\n%s%s\n"
+				"X-Forwarded-To: %s\nX-Forwarded-For: %s\n%s%s\n"
 				"Received: (indimail %d invoked by uid %d); %s\n",
-				rpline, faddr, dtline, qqeh, xfilter ? xfilter : "X-Filter: None",
+				faddr, dtline, qqeh, xfilter ? xfilter : "X-Filter: None",
 				getpid(), getuid(), get_localtime());
 		else
 			snprintf(DeliveredTo, AUTH_SIZE, 
-				"%sX-Forwarded-To: %s\nX-Forwarded-For: %s\n%s\n"
+				"X-Forwarded-To: %s\nX-Forwarded-For: %s\n%s\n"
 				"Received: (indimail %d invoked by uid %d); %s\n",
-				rpline, faddr, dtline, xfilter ? xfilter : "X-Filter: None",
+				faddr, dtline, xfilter ? xfilter : "X-Filter: None",
 				getpid(), getuid(), get_localtime());
 		if (tstr) /*- replace the newline in DTLINE environment variable */
 			*tstr = '\n';
@@ -1054,22 +1052,23 @@ deliver_mail(char *address, mdir_t MsgSize, char *quota, uid_t uid, gid_t gid,
 			if (pid == -1)
 			{
 				fprintf(stderr, "qmail-inject crashed. indimail bug ");
-				return(111);
+				return (111);
 			}
 			break;
 		}
 		if (WIFSTOPPED(wait_status) || WIFSIGNALED(wait_status))
 		{
 			fprintf(stderr, "qmail-inject crashed. ");
-			return(111);
+			return (111);
 		} else
 		if (WIFEXITED(wait_status))
 		{
 			switch (code = WEXITSTATUS(wait_status))
 			{
 			case 0:
+				return (0);
 			case 99:
-				return(0);
+				return (99);
 			case 64:
 			case 65:
 			case 70:
@@ -1145,7 +1144,7 @@ open_command(char *command, int *write_fd)
 		return (-1);
 	scopy(cmmd, command, AUTH_SIZE);
 	cmmd[AUTH_SIZE - 1] = 0;
-	switch (pid = vfork())
+	switch (pid = fork())
 	{
 	case -1:
 		close(pim[0]);
@@ -1176,6 +1175,13 @@ open_command(char *command, int *write_fd)
 		close(pim[1]);
 		if (dup2(pim[0], 0) == -1)
 			_exit(-1);
+#ifdef MAKE_SEEKABLE
+		if ((p = getenv("MAKE_SEEKABLE")) && *p != '0' && makeseekable(stdin))
+		{
+			fprintf(stderr, "makeseekable: system error: %s\n", strerror(errno));
+			_exit(111);
+		}
+#endif
 		binqqargs[0] = "/bin/sh";
 		binqqargs[1] = "-c";
 		binqqargs[2] = cmmd;
@@ -1221,7 +1227,7 @@ is_looping(char *address)
 	if (lseek(0, 0L, SEEK_SET) < 0)
 	{
 		fprintf(stderr, "is_looping: lseek: %s\n", strerror(errno));
-		return(-1);
+		return (-1);
 	}
 	while (fgets(loop_buf, sizeof(loop_buf), stdin) != NULL)
 	{
