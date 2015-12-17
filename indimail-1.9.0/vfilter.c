@@ -1,5 +1,8 @@
 /*-
  * $Log: vfilter.c,v $
+ * Revision 2.49  2015-12-17 17:36:46+05:30  Cprogrammer
+ * fixed issue of indimail.org string in X-Filter header
+ *
  * Revision 2.48  2011-12-24 09:02:30+05:30  Cprogrammer
  * set PWSTRUCT for non-existent user
  *
@@ -157,7 +160,7 @@
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vfilter.c,v 2.48 2011-12-24 09:02:30+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: vfilter.c,v 2.49 2015-12-17 17:36:46+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef VFILTER
@@ -843,7 +846,7 @@ get_options(int argc, char **argv, char *bounce, char *emailid, char *user, char
 static int
 myExit(int argc, char **argv, int status, int bounce, char *DestFolder, char *forward)
 {
-	char           *revision = "$Revision: 2.48 $";
+	char           *revision = "$Revision: 2.49 $";
 	char           *ptr, *mda;
 	char            MaildirFolder[MAX_BUFF], XFilter[MAX_BUFF];
 	pid_t           pid;
@@ -853,10 +856,10 @@ myExit(int argc, char **argv, int status, int bounce, char *DestFolder, char *fo
 	_status = status;
 	if (interactive)
 		_exit(_status ? 1 : 0);
-	snprintf(XFilter, sizeof(XFilter), "XFILTER=X-Filter: xFilter/IndiMail Revision %s", revision + 11);
+	snprintf(XFilter, sizeof(XFilter) - 26, "XFILTER=X-Filter: xFilter/IndiMail Revision %s", revision + 11);
 	if ((ptr = strrchr(XFilter, '$')))
 		*ptr = 0;
-	strncat(XFilter, "(http://www.indimail.org)", 22);
+	strncat(XFilter, "(http://www.indimail.org)", 25);
 	if (putenv(XFilter) == -1)
 	{
 		fprintf(stderr, "vfilter: putenv: %s\n", strerror(ENOMEM));
