@@ -6,7 +6,7 @@ moduledir=@prefix@/modules
 pam_moduledir=@moduledir@
 
 Name: @PACKAGE@
-Description: $PACKAGE_NAME - Development header files and libraries
+Description: @PACKAGE_NAME@ - Development header files and libraries
 Version: @VERSION@
 Cflags: @CFLAGS@ @auth_inc@
 Libs: @auth_libs@
