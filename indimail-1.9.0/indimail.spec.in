@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail.spec.in,v 2.294 2015-08-26 17:43:50+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 2.295 2015-12-24 14:40:24+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %define _unpackaged_files_terminate_build 1
 
@@ -22,6 +22,7 @@
 %if %{is_fedora} != 0
 %define dist fedora
 %define disttag rhfc
+%define fedora_version %(cat /etc/fedora-release | awk '{print $3}')
 %endif
 
 %if 0%{?opensuse_bs}
@@ -581,6 +582,12 @@ if [ -d ../courier-imap-%{courier_version} ] ; then
 		echo "reconfiguring..."
 		%{__mkdir_p} m4
 		autoreconf -fi
+		%{__cp} libs/unicode/depcomp .
+	else
+		echo "reconfiguring..."
+		%{__mkdir_p} m4
+		autoreconf -fi
+		%{__cp} libs/unicode/depcomp .
 	fi
 	%configure --prefix=%{_prefix} --libexecdir=%{_prefix}/libexec --bindir=%{_prefix}/bin \
 	--mandir=%{_prefix}/man --sysconfdir=%{_prefix}/etc --libdir=%{_libdir} \
@@ -733,6 +740,8 @@ if [ %nonssd -eq 0 ] ; then
 fi
 if [ %nocourierimap -eq 0 ] ; then
 	%{__rm} -f %{buildroot}/%{_libdir}/libunicode.la
+   	/usr/bin/chrpath -d %{buildroot}%{_prefix}/bin/imapd
+   	/usr/bin/chrpath -d %{buildroot}%{_prefix}/sbin/imaplogin
 fi
 if [ %nolibdkim -eq 0 ] ; then
 	%{__rm} -f %{buildroot}%{_libdir}/libdkim.la
@@ -2515,16 +2524,12 @@ if [ %noclamav -eq 0 -o $clamav_os -eq 1 ] ; then
 		--qbase=%{qbase} --qcount=%{qcount} --qstart=1 \
 		--min-free=52428800 --fsync --syncdir \
 		--qhpsi="$qhpsi" \
-		--dkverify="none" --dksign=$sign_opt \
-		--private_key=%{_prefix}/control/domainkeys/%/%dkimkeyfn \
-		$extra_opt
+		--dkverify="none" --dksign="none"
 else
 	%{_prefix}/sbin/svctool --queueParam=defaultqueue \
 		--qbase=%{qbase} --qcount=%{qcount} --qstart=1 \
 		--min-free=52428800 --fsync --syncdir --virus-filter \
-		--dkverify="none" --dksign=$sign_opt \
-		--private_key=%{_prefix}/control/domainkeys/%/%dkimkeyfn \
-		$extra_opt
+		--dkverify="none" --dksign="none"
 fi
 #
 # ODMR Service
