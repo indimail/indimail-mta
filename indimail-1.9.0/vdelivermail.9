@@ -142,7 +142,8 @@ not find the user. See the section on \fBOptions\fR below.
 .PP
 In addition to .qmail files, IndiMail has its dot-qmail processing called valias. valias can
 be either the file .qmail in the user's home directory or an entry made in MySQL(1) using the
-\fBvalias(1)\fR program.
+\fBvalias(1)\fR program. You can have multiple delivery lines in .qmail or valias entries in MySQL(1).
+vdelivermail will skip processing valias lines, if a line causes exit code of 99 to be returned.
 
 .SH Mail Alerts
 \fBvdelivermail\fR sends alerts in the form of UDP packets to a host and port which can be
