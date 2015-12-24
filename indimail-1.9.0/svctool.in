@@ -1,6 +1,10 @@
 #!/bin/sh
 # WARNING: This file was auto-generated. Do not edit!
 # $Log: svctool.in,v $
+# Revision 2.251  2015-12-24 14:42:18+05:30  Cprogrammer
+# handle MySQL-community-server & MariaDB-server installation
+# removed dependency on mysql_config for getting mysql version
+#
 # Revision 2.250  2015-08-01 11:05:02+05:30  Cprogrammer
 # removed dummpy xpg4 link
 #
@@ -949,7 +953,7 @@
 # Initial revision
 #
 #
-# $Id: svctool.in,v 2.250 2015-08-01 11:05:02+05:30 Cprogrammer Exp mbhangui $
+# $Id: svctool.in,v 2.251 2015-12-24 14:42:18+05:30 Cprogrammer Exp mbhangui $
 #
 
 #
@@ -2629,7 +2633,7 @@ case "$dkverify_option" in
 esac
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.250 2015-08-01 11:05:02+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.251 2015-12-24 14:42:18+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -2680,7 +2684,7 @@ if [ " $odmr" = " " ] ; then
 		/bin/mkdir -p "$DESTDIR"$SERVICEDIR/qmail-spamlog/log
 		(
 		echo "#!/bin/sh"
-		echo "# \$Id: svctool.in,v 2.250 2015-08-01 11:05:02+05:30 Cprogrammer Exp mbhangui $"
+		echo "# \$Id: svctool.in,v 2.251 2015-12-24 14:42:18+05:30 Cprogrammer Exp mbhangui $"
 		echo "# $prog_args"
 		echo ""
 		echo "LOGFILTER=\`cat $SERVICEDIR/qmail-smtpd.$tag/variables/LOGFILTER\`"
@@ -2701,7 +2705,7 @@ if [ " $odmr" = " " ] ; then
 		#qmail-spamlog log script
 		(
 		echo "#!/bin/sh"
-		echo "# \$Id: svctool.in,v 2.250 2015-08-01 11:05:02+05:30 Cprogrammer Exp mbhangui $"
+		echo "# \$Id: svctool.in,v 2.251 2015-12-24 14:42:18+05:30 Cprogrammer Exp mbhangui $"
 		echo "# generated on $host on `date`"
 		echo "# $prog_args"
 		echo ""
@@ -2719,7 +2723,7 @@ if [ ! -d $LOGDIR ] ; then
 fi
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.250 2015-08-01 11:05:02+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.251 2015-12-24 14:42:18+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -2732,7 +2736,7 @@ echo "$QmailHOME/bin/multilog t $LOGDIR/smtpd.$tag"
 create_queuedef()
 {
 if [ $# -ne 4 ] ; then
-	echo "USAGE: create_smtp qbase queue_count first_queue_no queue_def" 1>&2
+	echo "USAGE: create_queuedef qbase queue_count first_queue_no queue_def" 1>&2
 	return 1
 fi
 QUEUE_BASE=$1
@@ -2976,7 +2980,7 @@ else
 fi
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.250 2015-08-01 11:05:02+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.251 2015-12-24 14:42:18+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -3014,7 +3018,7 @@ if [ ! " $logfilter" = " " -a ! -d "$DESTDIR"$SERVICEDIR/qmail-spamlog/run ] ; t
 	/bin/mkdir -p "$DESTDIR"$SERVICEDIR/qmail-spamlog/log
 	(
 	echo "#!/bin/sh"
-	echo "# \$Id: svctool.in,v 2.250 2015-08-01 11:05:02+05:30 Cprogrammer Exp mbhangui $"
+	echo "# \$Id: svctool.in,v 2.251 2015-12-24 14:42:18+05:30 Cprogrammer Exp mbhangui $"
 	echo "# $prog_args"
 	echo ""
 	echo "LOGFILTER=\`cat $SERVICEDIR/qmail-$type.$tag/variables/LOGFILTER\`"
@@ -3035,7 +3039,7 @@ if [ ! " $logfilter" = " " -a ! -d "$DESTDIR"$SERVICEDIR/qmail-spamlog/run ] ; t
 	#qmail-spamlog log script
 	(
 	echo "#!/bin/sh"
-	echo "# \$Id: svctool.in,v 2.250 2015-08-01 11:05:02+05:30 Cprogrammer Exp mbhangui $"
+	echo "# \$Id: svctool.in,v 2.251 2015-12-24 14:42:18+05:30 Cprogrammer Exp mbhangui $"
 	echo "# generated on $host on `date`"
 	echo "# $prog_args"
 	echo ""
@@ -3052,7 +3056,7 @@ if [ ! -d $LOGDIR ] ; then
 fi
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.250 2015-08-01 11:05:02+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.251 2015-12-24 14:42:18+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -3119,7 +3123,7 @@ fi
 
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.250 2015-08-01 11:05:02+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.251 2015-12-24 14:42:18+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -3142,7 +3146,7 @@ if [ ! -d $LOGDIR ] ; then
 fi
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.250 2015-08-01 11:05:02+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.251 2015-12-24 14:42:18+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -3223,7 +3227,7 @@ else
 fi
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.250 2015-08-01 11:05:02+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.251 2015-12-24 14:42:18+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -3278,7 +3282,7 @@ fi
 # qmail-imapd log script
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.250 2015-08-01 11:05:02+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.251 2015-12-24 14:42:18+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -3576,7 +3580,7 @@ else
 fi
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.250 2015-08-01 11:05:02+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.251 2015-12-24 14:42:18+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -3630,7 +3634,7 @@ fi
 # qmail-pop3d log script
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.250 2015-08-01 11:05:02+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.251 2015-12-24 14:42:18+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -3840,7 +3844,7 @@ fi
 echo 1 > $conf_dir/MYSQL_OPT_RECONNECT
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.250 2015-08-01 11:05:02+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.251 2015-12-24 14:42:18+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -3868,7 +3872,7 @@ fi
 # indisrvr log script
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.250 2015-08-01 11:05:02+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.251 2015-12-24 14:42:18+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -3894,7 +3898,7 @@ conf_dir="$DESTDIR"$SERVICEDIR/qscanq/variables
 # qscanq script
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.250 2015-08-01 11:05:02+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.251 2015-12-24 14:42:18+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -3916,7 +3920,7 @@ fi
 # qscanq log script
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.250 2015-08-01 11:05:02+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.251 2015-12-24 14:42:18+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -3947,7 +3951,7 @@ conf_dir="$DESTDIR"$SERVICEDIR/clamd/variables
 # clamd script
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.250 2015-08-01 11:05:02+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.251 2015-12-24 14:42:18+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -3991,7 +3995,7 @@ fi
 # clamd log script
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.250 2015-08-01 11:05:02+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.251 2015-12-24 14:42:18+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -4006,7 +4010,7 @@ conf_dir="$DESTDIR"$SERVICEDIR/freshclam/variables
 # freshclam script
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.250 2015-08-01 11:05:02+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.251 2015-12-24 14:42:18+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -4044,7 +4048,7 @@ fi
 # freshclam log script
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.250 2015-08-01 11:05:02+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.251 2015-12-24 14:42:18+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -4073,7 +4077,7 @@ conf_dir="$DESTDIR"$SERVICEDIR/pwdlookup/variables
 mkdir -p $conf_dir
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.250 2015-08-01 11:05:02+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.251 2015-12-24 14:42:18+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -4089,7 +4093,7 @@ fi
 # pwdlookup log script
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.250 2015-08-01 11:05:02+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.251 2015-12-24 14:42:18+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -4192,7 +4196,7 @@ echo "inlookup" > $conf_dir/MYSQL_READ_DEFAULT_GROUP
 echo 1 > $conf_dir/MYSQL_OPT_RECONNECT
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.250 2015-08-01 11:05:02+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.251 2015-12-24 14:42:18+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -4208,7 +4212,7 @@ fi
 # inlookup log script
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.250 2015-08-01 11:05:02+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.251 2015-12-24 14:42:18+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -4235,6 +4239,14 @@ elif [ -x $mysqlPrefix/bin/mysqld ] ; then
 else
 	mysqld=libexec/mysqld
 fi
+mysql_version=`$mysqlPrefix/$mysqld --version 2>&1 | grep Ver | awk '{print $3}'`
+echo $mysql_version |grep MariaDB > /dev/null 2>&1
+if [ $? -eq 0 ] ; then
+	mysql_version=`echo $mysql_version|cut -d- -f1`
+	mariadb=1
+else
+	mariadb=0
+fi
 if [ -x $mysqlPrefix/bin/mysql_install_db ] ; then
 	install_db=$mysqlPrefix/bin/mysql_install_db
 elif [ -x $mysqlPrefix/scripts/mysql_install_db ] ; then
@@ -4243,7 +4255,7 @@ else
 	install_db=$mysqlPrefix/bin/mysql_install_db
 fi
 
-if [ ! -f "$DESTDIR"$conf_file -a $use_stdout -ne 1 ] ; then
+if [ ! -f "$DESTDIR"$conf_file ] ; then
 	echo ""$DESTDIR"$conf_file: No such File or directory" 1>&2
 	return 1
 fi
@@ -4254,31 +4266,28 @@ if [ ! -d "$DESTDIR"$databasedir/data -o $force -eq 1 ] ; then
 	fi
 	if ( mkdir -p "$DESTDIR"$databasedir/data && mkdir -p "$DESTDIR"$databasedir/logs ) ; then
 		(
-		echo "# \$Id: svctool.in,v 2.250 2015-08-01 11:05:02+05:30 Cprogrammer Exp mbhangui $"
+		echo "# \$Id: svctool.in,v 2.251 2015-12-24 14:42:18+05:30 Cprogrammer Exp mbhangui $"
 		echo "# generated on $host on `date`"
 		echo ""
-		if [ $use_stdout -eq 1 ] ; then
-		echo "# svctool --config=mysqldb --mysqlPrefix=$mysqlPrefix --databasedir=$databasedir --stdout --nolog"
-		else
 		echo "# svctool --config=mysqldb --mysqlPrefix=$mysqlPrefix --databasedir=$databasedir --nolog"
-		fi
 		) > "$DESTDIR"$databasedir/README
 		$chown -R mysql:mysql "$DESTDIR"$databasedir
 		if [ -f "$DESTDIR"$conf_file ] ; then
-			if [ $use_stdout -eq 1 ] ; then
-			echo "Creating MySQL Database in "$DESTDIR"$databasedir/data with defaults file $conf_file" 1>&2
-			else
 			echo "Creating MySQL Database in "$DESTDIR"$databasedir/data with defaults file $conf_file"
-			fi
-			$install_db --user=mysql --basedir=$mysqlPrefix --datadir="$DESTDIR"$databasedir/data \
-				--defaults-file="$DESTDIR"$conf_file --force 1>&2
-		else
-			if [ $use_stdout -eq 1 ] ; then
-			echo "Creating MySQL database in "$DESTDIR"$databasedir/data" 1>&2
+			if [ $mariadb -eq 1 ] ; then
+			$install_db --user=mysql --basedir=$mysqlPrefix --datadir="$DESTDIR"$databasedir/data 1>&2
 			else
-			echo "Creating MySQL database in "$DESTDIR"$databasedir/data"
+			echo "$mysqlPrefix/$mysqld --initialize-insecure --console --user=mysql --datadir="$DESTDIR"$databasedir/data"
+			$mysqlPrefix/$mysqld --initialize-insecure --console --user=mysql --datadir="$DESTDIR"$databasedir/data 1>&2
 			fi
+		else
+			echo "Creating MySQL database in "$DESTDIR"$databasedir/data"
+			if [ $mariadb -eq 1 ] ; then
 			$install_db --user=mysql --basedir=$mysqlPrefix --datadir="$DESTDIR"$databasedir/data --force 1>&2
+			else
+			echo "$mysqlPrefix/$mysqld --initialize-insecure --console --user=mysql --datadir="$DESTDIR"$databasedir/data"
+			$mysqld --initialize-insecure --console --user=mysql --datadir="$DESTDIR"$databasedir/data 1>&2
+			fi
 		fi
 		#
 		# Pretty Dumb stuff by Oracle
@@ -4287,27 +4296,24 @@ if [ ! -d "$DESTDIR"$databasedir/data -o $force -eq 1 ] ; then
 			/bin/rm /usr/my.cnf
 		fi
 		$chown -R mysql:mysql "$DESTDIR"$databasedir
-		if [ $use_stdout -eq 1 ] ; then
-			echo "Creating Default Users for Database in "$DESTDIR"$databasedir/data" 1>&2
-			create_mysql_user 
+		echo "Creating Default Users for Database in "$DESTDIR"$databasedir/data"
+		create_mysql_rootuser $mysql_version $mariadb | eval "$mysqlPrefix/$mysqld \
+			--bootstrap --user=mysql \
+			--datadir="$DESTDIR"$databasedir/data --skip-grant-tables"
+		if [ $mariadb -eq 1 ] ; then
+			$mysqlPrefix/$mysqld --datadir="$DESTDIR"$databasedir/data --user=mysql --socket=/tmp/mysql.sock >/dev/null 2>&1 &
+			pid=`jobs -p`
+			sleep 10
+			create_mysql_user $mysql_version $mariadb | $mysqlPrefix/bin/mysql -sN -u mysql -p"$PRIV_PASS" mysql -S /tmp/mysql.sock
 		else
-			if [ $bootstrap -eq 1 ] ; then
-				echo "Creating Default Users for Database in "$DESTDIR"$databasedir/data"
-				create_mysql_user | eval "$mysqlPrefix/$mysqld \
-					--defaults-file="$DESTDIR"$conf_file --bootstrap --user=mysql \
-					--datadir="$DESTDIR"$databasedir/data --skip-grant-tables"
-			else
-				echo "Creating Default Users for Database in "$DESTDIR"$databasedir/data" 1>&2
-				create_mysql_user 
-			fi
+			$mysqlPrefix/$mysqld --datadir="$DESTDIR"$databasedir/data --user=mysql --socket=/tmp/mysql.sock >/dev/null 2>&1 &
+			pid=`jobs -p`
+			sleep 10
+			create_mysql_user $mysql_version $mariadb | $mysqlPrefix/bin/mysql -sN -u mysql -p"$PRIV_PASS" mysql -S /tmp/mysql.sock
 		fi
+		kill -QUIT $pid
 	else
 		return 1
-	fi
-else
-	if [ $use_stdout -eq 1 -o $bootstrap -eq 0 ] ; then
-		echo "Creating Default Users for Database in "$DESTDIR"$databasedir/data" 1>&2
-		create_mysql_user 
 	fi
 fi
 }
@@ -4335,7 +4341,14 @@ elif [ -x $mysqlPrefix/bin/mysqld ] ; then
 else
 	mysqld=libexec/mysqld
 fi
-
+mysql_version=`$mysqlPrefix/$mysqld --version 2>&1 | grep Ver | awk '{print $3}'`
+echo $mysql_version |grep MariaDB > /dev/null 2>&1
+if [ $? -eq 0 ] ; then
+	mysql_version=`echo $mysql_version|cut -d- -f1`
+	mariadb=1
+else
+	mariadb=0
+fi
 if [ ! -f "$DESTDIR"$conf_file ] ; then
 	echo ""$DESTDIR"$conf_file: No such File or directory" 1>&2
 	return 1
@@ -4350,9 +4363,8 @@ fi
 mkdir -p "$DESTDIR"$SERVICEDIR/mysql.$port/log
 mkdir -p "$DESTDIR"$SERVICEDIR/mysql.$port/variables
 (
-mysql_version=`$mysqlPrefix/bin/mysql_config --version`
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.250 2015-08-01 11:05:02+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.251 2015-12-24 14:42:18+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -4366,7 +4378,12 @@ echo "--datadir=\$DATABASE/data \\"
 echo "--memlock \\"
 echo "--skip-external-locking \\"
 echo "--delay-key-write=all \\"
+if [ $mariadb -eq 0 ] ; then
+echo "--sql-mode=\"NO_BACKSLASH_ESCAPES,NO_ENGINE_SUBSTITUTION,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_AUTO_CREATE_USER,STRICT_TRANS_TABLES\" \\"
+echo "--explicit-defaults-for-timestamp  \\"
+else
 echo "--sql-mode=\"NO_BACKSLASH_ESCAPES,NO_ENGINE_SUBSTITUTION,STRICT_TRANS_TABLES\" \\"
+fi
 case $mysql_version in
 	5.0*|5.1.[0-5])
 	echo "--myisam-recover=backup,force \\"
@@ -4410,14 +4427,25 @@ case $mysql_version in
 	;;
 esac
 echo "--log-queries-not-using-indexes \\"
+if [ $mariadb -eq 0 ] ; then
+case $mysql_version in
+5.7*)
+echo "--log_error_verbosity=2 \\"
+;;
+*)
 echo "--log-warnings=2 \\"
+;;
+esac
+else
+echo "--log-warnings=2 \\"
+fi
 echo "--pid-file=\$PIDFILE 2>&1"
 ) > "$DESTDIR"$SERVICEDIR/mysql.$port/run
 /bin/chmod +x "$DESTDIR"$SERVICEDIR/mysql.$port/run
 
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.250 2015-08-01 11:05:02+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.251 2015-12-24 14:42:18+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -4434,7 +4462,7 @@ fi
 # mysql log script
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.250 2015-08-01 11:05:02+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.251 2015-12-24 14:42:18+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -4444,260 +4472,59 @@ echo "$QmailHOME/bin/multilog t $LOGDIR/mysql.$port"
 /bin/chmod +x "$DESTDIR"$SERVICEDIR/mysql.$port/log/run
 }
 
+create_mysql_rootuser()
+{
+	mysql_version=$1
+	mariadb=$2
+	echo "use mysql;"
+	# Create mysql user my replacing auto created user root
+	echo "delete from user where user='';" 1>&2
+	echo "delete from user where user='';"
+	echo "drop database if exists test;" 1>&2
+	echo "drop database if exists test;"
+	echo "delete from db where db like 'test%';" 1>&2
+	echo "delete from db where db like 'test%';"
+	c_d=""
+	if [ $mariadb -eq 1 ] ; then
+	c_d="$c_d update user set host='%', Password=Password('$PRIV_PASS'), user='mysql' "
+	else
+	c_d="$c_d update user set host='%', authentication_string=Password('$PRIV_PASS'), user='mysql' "
+	fi
+	c_d="$c_d where host='localhost' and user='root';"
+	echo $c_d 1>&2
+	echo $c_d
+	c_d=""
+	c_d="$c_d delete from user where host != '%';"
+	echo $c_d 1>&2
+	echo $c_d
+}
+
 create_mysql_user()
 {
-mysql_version=`$mysqlPrefix/bin/mysql_config --version`
-echo "use mysql;"
-if [ $use_stdout -eq 1 ] ; then
-    echo "CREATE USER 'mysql'    identified by '$PRIV_PASS';"
-    echo "CREATE USER 'indimail' identified by '$MYSQL_PASS';"
-    echo "CREATE USER 'admin'    identified by '$ADMIN_PASS';"
-    echo "CREATE USER 'repl'     identified by 'slaveserver';"
-    echo "GRANT ALL on *.* to mysql;"
-    echo "GRANT SELECT,CREATE,ALTER,INDEX,INSERT,UPDATE,DELETE,CREATE TEMPORARY TABLES,LOCK TABLES ON indimail.* to indimail;"
-    echo "GRANT RELOAD,SHUTDOWN,PROCESS,SUPER on *.* to admin;"
-    echo "GRANT REPLICATION SLAVE on *.* to repl;"
-else
-	if [ $use_stdout -ne 1 ] ; then
-	echo "delete from user where user='';" 1>&2
-	fi
-	echo "delete from user where user='';"
-	if [ $use_stdout -ne 1 ] ; then
-	echo "delete from user where user='root';" 1>&2
-	fi
-	echo "delete from user where user='root';"
-	if [ $use_stdout -ne 1 ] ; then
-	echo "drop database if exists test;" 1>&2
-	fi
-	echo "drop database if exists test;"
-	if [ $use_stdout -ne 1 ] ; then
-	echo "delete from db where db like 'test%';" 1>&2
-	fi
-	echo "delete from db where db like 'test%';"
-	# Super User
-	c_d=""
-	c_d="$c_d INSERT INTO user (Host, User, Password, Select_priv, Insert_priv,"
-	c_d="$c_d Update_priv, Delete_priv, Create_priv, Drop_priv, Reload_Priv,"
-	c_d="$c_d Shutdown_priv, Process_priv, File_priv, Grant_priv, References_priv,"
-	c_d="$c_d Index_priv, Alter_priv, Show_db_priv, Super_priv, Create_tmp_table_priv,"
-	c_d="$c_d Lock_Tables_priv, Execute_priv, Repl_slave_priv, Repl_client_priv, Create_view_priv, Show_view_priv,"
-	case $mysql_version in
-		5.0*|5.1.1|5.1.2|5.1.3|5.1.4|5.1.5)
-		c_d="$c_d Create_routine_priv, Alter_routine_priv, Create_user_priv)"
-		;;
-		5.1.*)
-		c_d="$c_d Create_routine_priv, Alter_routine_priv, Create_user_priv, Event_priv, Trigger_priv)"
-		;;
-		5.1*|5.2*|5.3*|5.4*|5.5*|5.6*|6.*)
-		c_d="$c_d Create_routine_priv, Alter_routine_priv, Create_user_priv, Event_priv, Trigger_priv, Create_tablespace_priv)"
-		;;
-	esac
-	c_d="$c_d  VALUES ('%','mysql',PASSWORD('$PRIV_PASS'), 'Y','Y',"
-	c_d="$c_d 'Y','Y','Y','Y','Y',"
-	c_d="$c_d 'Y','Y','Y','Y','Y',"
-	c_d="$c_d 'Y','Y','Y','Y','Y',"
-	c_d="$c_d 'Y','Y','Y','Y','Y','Y',"
-	case $mysql_version in
-		5.0*|5.1.1|5.1.2|5.1.3|5.1.4|5.1.5)
-		c_d="$c_d 'Y','Y','Y');"
-		;;
-		5.1.*)
-		c_d="$c_d 'Y','Y','Y','Y','Y');"
-		;;
-		5.1*|5.2*|5.3*|5.4*|5.5*|5.6*|6.*)
-		c_d="$c_d 'Y','Y','Y','Y','Y','Y');"
-		;;
-	esac
-	if [ $use_stdout -ne 1 ] ; then
-	echo $c_d 1>&2
-	fi
-	echo $c_d
-	# Indimail User - File_priv,
-	c_d=""
-	c_d="$c_d INSERT INTO user (Host, User, Password, Select_priv, Insert_priv,"
-	c_d="$c_d Update_priv, Delete_priv, Create_priv, Drop_priv, Reload_Priv,"
-	c_d="$c_d Shutdown_priv, Process_priv, File_priv, Grant_priv, References_priv,"
-	c_d="$c_d Index_priv, Alter_priv, Show_db_priv, Super_priv, Create_tmp_table_priv,"
-	c_d="$c_d Lock_Tables_priv, Execute_priv, Repl_slave_priv, Repl_client_priv, Create_view_priv, Show_view_priv,"
-	case $mysql_version in
-		5.0*|5.1.1|5.1.2|5.1.3|5.1.4|5.1.5)
-		c_d="$c_d Create_routine_priv, Alter_routine_priv, Create_user_priv)"
-		;;
-		5.1.*)
-		c_d="$c_d Create_routine_priv, Alter_routine_priv, Create_user_priv, Event_priv, Trigger_priv)"
-		;;
-		5.1*|5.2*|5.3*|5.4*|5.5*|5.6*|6.*)
-		c_d="$c_d Create_routine_priv, Alter_routine_priv, Create_user_priv, Event_priv, Trigger_priv, Create_tablespace_priv)"
-		;;
-	esac
-	c_d="$c_d  VALUES ('%','indimail',PASSWORD('$MYSQL_PASS'), 'N','N',"
-	c_d="$c_d 'N','N','N','N','N',"
-	c_d="$c_d 'N','N','Y','N','N',"
-	c_d="$c_d 'N','N','N','N','N',"
-	c_d="$c_d 'N','N','N','N','N','N',"
-	case $mysql_version in
-		5.0*|5.1.1|5.1.2|5.1.3|5.1.4|5.1.5)
-		c_d="$c_d 'N','N','N');"
-		;;
-		5.1.*)
-		c_d="$c_d 'N','N','N','N','N');"
-		;;
-		5.1*|5.2*|5.3*|5.4*|5.5*|5.6*|6.*)
-		c_d="$c_d 'N','N','N','N','N','N');"
-		;;
-	esac
-	if [ $use_stdout -ne 1 ] ; then
-	echo $c_d 1>&2
-	fi
-	echo $c_d
-	# mysql
-	c_d=""
-	c_d="$c_d INSERT INTO db (Host, Db, User, Select_priv, Insert_priv,"
-	c_d="$c_d Update_priv, Delete_priv, Create_priv, Drop_priv, Grant_priv,"
-	c_d="$c_d References_priv, Index_priv, Alter_priv, Create_tmp_table_priv, Lock_tables_priv,"
-	c_d="$c_d Create_view_priv, Show_view_priv, Create_routine_priv, Alter_routine_priv,"
-	case $mysql_version in
-		5.0*|5.1.1|5.1.2|5.1.3|5.1.4|5.1.5)
-		c_d="$c_d Execute_priv)"
-		;;
-		5.1.*|5.1*|5.2*|5.3*|5.4*|5.5*|5.6*|6.*)
-		c_d="$c_d Execute_priv, Event_priv, Trigger_priv)"
-		;;
-	esac
-	c_d="$c_d  VALUES ('%', '%','mysql','Y','Y',"
-	c_d="$c_d 'Y','Y','Y','Y','Y',"
-	c_d="$c_d 'Y','Y','Y','Y','Y',"
-	c_d="$c_d 'Y','Y','Y','Y',"
-	case $mysql_version in
-		5.0*|5.1.1|5.1.2|5.1.3|5.1.4|5.1.5)
-		c_d="$c_d 'Y');"
-		;;
-		5.1.*|5.1*|5.2*|5.3*|5.4*|5.5*|5.6*|6.*)
-		c_d="$c_d 'Y','Y','Y');"
-		;;
-	esac
-	if [ $use_stdout -ne 1 ] ; then
-	echo $c_d 1>&2
-	fi
-	echo $c_d
-
-	# Indimail
-	c_d=""
-	c_d="$c_d INSERT INTO db (Host, Db, User, Select_priv, Insert_priv,"
-	c_d="$c_d Update_priv, Delete_priv, Create_priv, Drop_priv, Grant_priv,"
-	c_d="$c_d References_priv, Index_priv, Alter_priv, Create_tmp_table_priv, Lock_tables_priv,"
-	c_d="$c_d Create_view_priv, Show_view_priv, Create_routine_priv, Alter_routine_priv,"
-	case $mysql_version in
-		5.0*|5.1.1|5.1.2|5.1.3|5.1.4|5.1.5)
-		c_d="$c_d Execute_priv)"
-		;;
-		5.1.*|5.1*|5.2*|5.3*|5.4*|5.5*|5.6*|6.*)
-		c_d="$c_d Execute_priv, Event_priv, Trigger_priv)"
-		;;
-	esac
-	c_d="$c_d  VALUES ('%', 'indimail','indimail','Y','Y',"
-	c_d="$c_d 'Y','Y','Y','N','N',"
-	c_d="$c_d 'N','Y','Y','Y','Y',"
-	c_d="$c_d 'N','N','N','N',"
-	case $mysql_version in
-		5.0*|5.1.1|5.1.2|5.1.3|5.1.4|5.1.5)
-		c_d="$c_d 'N');"
-		;;
-		5.1.*|5.1*|5.2*|5.3*|5.4*|5.5*|5.6*|6.*)
-		c_d="$c_d 'N','N','N');"
-		;;
-	esac
-	if [ $use_stdout -ne 1 ] ; then
-	echo $c_d 1>&2
-	fi
-	echo $c_d
-	# admin User - Reload_priv, Shutdown_priv, Process_priv, Super_priv
-	c_d=""
-	c_d="$c_d INSERT INTO user (Host, User, Password, Select_priv, Insert_priv,"
-	c_d="$c_d Update_priv, Delete_priv, Create_priv, Drop_priv, Reload_Priv,"
-	c_d="$c_d Shutdown_priv, Process_priv, File_priv, Grant_priv, References_priv,"
-	c_d="$c_d Index_priv, Alter_priv, Show_db_priv, Super_priv, Create_tmp_table_priv,"
-	c_d="$c_d Lock_Tables_priv, Execute_priv, Repl_slave_priv, Repl_client_priv, Create_view_priv, Show_view_priv,"
-	case $mysql_version in
-		5.0*|5.1.1|5.1.2|5.1.3|5.1.4|5.1.5)
-		c_d="$c_d Create_routine_priv, Alter_routine_priv, Create_user_priv)"
-		;;
-		5.1.*)
-		c_d="$c_d Create_routine_priv, Alter_routine_priv, Create_user_priv, Event_priv, Trigger_priv)"
-		;;
-		5.1*|5.2*|5.3*|5.4*|5.5*|5.6*|6.*)
-		c_d="$c_d Create_routine_priv, Alter_routine_priv, Create_user_priv, Event_priv, Trigger_priv, Create_tablespace_priv)"
-		;;
-	esac
-	c_d="$c_d  VALUES ('%','admin',PASSWORD('$ADMIN_PASS'), 'N','N',"
-	c_d="$c_d 'N','N','N','N','Y',"
-	c_d="$c_d 'Y','Y','N','N','N',"
-	c_d="$c_d 'N','N','N','Y','N',"
-	c_d="$c_d 'N','N','N','N','N','N',"
-	case $mysql_version in
-		5.0*|5.1.1|5.1.2|5.1.3|5.1.4|5.1.5)
-		c_d="$c_d 'N','N','N');"
-		;;
-		5.1.*)
-		c_d="$c_d 'N','N','N','N','N');"
-		;;
-		5.1*|5.2*|5.3*|5.4*|5.5*|5.6*|6.*)
-		c_d="$c_d 'N','N','N','N','N','N');"
-		;;
-	esac
-	if [ $use_stdout -ne 1 ] ; then
-	echo $c_d 1>&2
-	fi
-	echo $c_d
-	# replication User - Repl_slave_priv
-	c_d=""
-	c_d="$c_d INSERT INTO user (Host, User, Password, Select_priv, Insert_priv,"
-	c_d="$c_d Update_priv, Delete_priv, Create_priv, Drop_priv, Reload_Priv,"
-	c_d="$c_d Shutdown_priv, Process_priv, File_priv, Grant_priv, References_priv,"
-	c_d="$c_d Index_priv, Alter_priv, Show_db_priv, Super_priv, Create_tmp_table_priv,"
-	c_d="$c_d Lock_Tables_priv, Execute_priv, Repl_slave_priv, Repl_client_priv, Create_view_priv, Show_view_priv,"
-	case $mysql_version in
-		5.0*|5.1.1|5.1.2|5.1.3|5.1.4|5.1.5)
-		c_d="$c_d Create_routine_priv, Alter_routine_priv, Create_user_priv)"
-		;;
-		5.1.*)
-		c_d="$c_d Create_routine_priv, Alter_routine_priv, Create_user_priv, Event_priv, Trigger_priv)"
-		;;
-		5.1*|5.2*|5.3*|5.4*|5.5*|5.6*|6.*)
-		c_d="$c_d Create_routine_priv, Alter_routine_priv, Create_user_priv, Event_priv, Trigger_priv, Create_tablespace_priv)"
-		;;
-	esac
-	c_d="$c_d  VALUES ('%','repl',PASSWORD('slaveserver'), 'N','N',"
-	c_d="$c_d 'N','N','N','N','N',"
-	c_d="$c_d 'N','N','N','N','N',"
-	c_d="$c_d 'N','N','N','N','N',"
-	c_d="$c_d 'N','N','Y','N','N','N',"
-	case $mysql_version in
-		5.0*|5.1.1|5.1.2|5.1.3|5.1.4|5.1.5)
-		c_d="$c_d 'N','N','N');"
-		;;
-		5.1.*)
-		c_d="$c_d 'N','N','N','N','N');"
-		;;
-		5.1*|5.2*|5.3*|5.4*|5.5*|5.6*|6.*)
-		c_d="$c_d 'N','N','N','N','N','N');"
-		;;
-	esac
-	if [ $use_stdout -ne 1 ] ; then
-	echo $c_d 1>&2
-	fi
-	echo $c_d
-fi
-
-if [ $use_stdout -ne 1 ] ; then
+mysql_version=$1
+mariadb=$2
 echo "create database indimail;" 1>&2
-fi
 echo "create database indimail;"
-if [ $use_stdout -ne 1 ] ; then
-echo "use indimail;" 1>&2
-fi
-echo "use indimail;"
+echo "use mysql;" 1>&2
+echo "use mysql;"
+echo "CREATE USER 'indimail' identified by '$MYSQL_PASS';" 1>&2
+echo "CREATE USER 'indimail' identified by '$MYSQL_PASS';"
+echo "CREATE USER 'admin'    identified by '$ADMIN_PASS';" 1>&2
+echo "CREATE USER 'admin'    identified by '$ADMIN_PASS';"
+echo "CREATE USER 'repl'     identified by 'slaveserver';" 1>&2
+echo "CREATE USER 'repl'     identified by 'slaveserver';"
+echo "GRANT ALL on *.* to mysql;" 1>&2
+echo "GRANT ALL on *.* to mysql;"
+echo "GRANT SELECT,CREATE,ALTER,INDEX,INSERT,UPDATE,DELETE,CREATE TEMPORARY TABLES,LOCK TABLES ON indimail.* to indimail;" 1>&2
+echo "GRANT SELECT,CREATE,ALTER,INDEX,INSERT,UPDATE,DELETE,CREATE TEMPORARY TABLES,LOCK TABLES ON indimail.* to indimail;"
+echo "GRANT RELOAD,SHUTDOWN,PROCESS,SUPER on *.* to admin;" 1>&2
+echo "GRANT RELOAD,SHUTDOWN,PROCESS,SUPER on *.* to admin;"
+echo "GRANT REPLICATION SLAVE on *.* to repl;" 1>&2
+echo "GRANT REPLICATION SLAVE on *.* to repl;"
+
 # Bootstrap Indimail tables
+echo "use indimail;" 1>&2
+echo "use indimail;"
 c_d=""
 c_d="$c_d CREATE TABLE mgmtaccess ("
 c_d="$c_d user  char(32) not null,"
@@ -4711,9 +4538,7 @@ c_d="$c_d attempts int not null,"
 c_d="$c_d status char(2) not null,"
 c_d="$c_d zztimestamp TIMESTAMP not null,"
 c_d="$c_d unique index(user));"
-if [ $use_stdout -ne 1 ] ; then
 echo $c_d 1>&2
-fi
 echo $c_d
 TMVAL=`date +'%s'`
 DAY=`date +'%d'`
@@ -4732,9 +4557,7 @@ c_d="$c_d pw_gecos char(48) not null,"
 c_d="$c_d pw_dir char(156),"
 c_d="$c_d pw_shell char(30),"
 c_d="$c_d primary key (pw_name, pw_domain), index pw_gecos (pw_gecos(25)), index pw_uid (pw_uid));"
-if [ $use_stdout -ne 1 ] ; then
 echo $c_d 1>&2
-fi
 echo $c_d
 c_d=""
 c_d="$c_d CREATE TABLE indibak ("
@@ -4747,9 +4570,7 @@ c_d="$c_d pw_gecos char(48) not null,"
 c_d="$c_d pw_dir char(156),"
 c_d="$c_d pw_shell char(30),"
 c_d="$c_d primary key (pw_name, pw_domain), index pw_gecos (pw_gecos(25)), index pw_uid (pw_uid));"
-if [ $use_stdout -ne 1 ] ; then
 echo $c_d 1>&2
-fi
 echo $c_d
 c_d=""
 c_d="$c_d CREATE TABLE vfilter ("
@@ -4763,10 +4584,8 @@ c_d="$c_d destination char(156) not null,"
 c_d="$c_d bounce_action char(64) not null,"
 c_d="$c_d mailing_list tinyint not null,"
 c_d="$c_d primary key(emailid, filter_no), unique index (emailid, header_name, comparision, keyword, destination));"
-if [ $use_stdout -ne 1 ] ; then
 echo $c_d 1>&2
 echo "flush privileges;" 1>&2
-fi
 echo $c_d
 echo "flush privileges;"
 }
@@ -4774,16 +4593,20 @@ echo "flush privileges;"
 default_mysql_config()
 {
 version=$1
-if [ $# -gt 1 ] ; then
-	if [ -s "$2" ] ; then
-		thr_con=$2
+mariadb=$2
+if [ $mariadb -eq 0 ] ; then
+	return 0
+fi
+if [ $# -gt 2 ] ; then
+	if [ -s "$3" ] ; then
+		thr_con=$3
 	else
 		thr_con=""
 	fi
 fi
-if [ $# -gt 2 ] ; then
-	if [ -s "$3" ] ; then
-		key_buffer_name=$3
+if [ $# -gt 3 ] ; then
+	if [ -s "$4" ] ; then
+		key_buffer_name=$4
 	else
 		key_buffer_name="key_buffer"
 	fi
@@ -4807,7 +4630,7 @@ echo
 echo "user     = mysql"
 echo "socket   = $mysql_socket"
 echo "port     = $mysql_port"
-echo "basedir  = @mysql_prefix@"
+echo "basedir  = /usr"
 echo "datadir  = @indimaildir@/mysqldb"
 
 case $version in
@@ -4862,7 +4685,7 @@ case $version in
 	echo "#general_log_file        = /var/log/mysql/mysql.log"
 	echo "#general_log             = 1"
 	echo 
-	echo "log_error                = /var/log/mysql/error.log"
+	echo "#log_error                = /var/log/mysql/error.log"
 	echo 
 	echo "# Here you can see queries with especially long duration"
 	echo "#log_slow_queries	= /var/log/mysql/mysql-slow.log"
@@ -4917,16 +4740,83 @@ case $version in
 	echo "# * IMPORTANT: Additional settings that can override those from this file!"
 	echo "#   The files must end with '.cnf', otherwise they'll be ignored."
 	echo "#"
+	if [ -d /etc/mysql/conf.d ] ; then
 	echo "!includedir /etc/mysql/conf.d/"
+	fi
 	;;
 esac
 }
 
 create_mysql_config()
 {
-mysql_version=`$mysqlPrefix/bin/mysql_config --version`
+if [ -x $mysqlPrefix/libexec/mysqld ] ; then
+	mysqld=libexec/mysqld
+elif [ -x $mysqlPrefix/sbin/mysqld ] ; then
+	mysqld=sbin/mysqld
+elif [ -x $mysqlPrefix/bin/mysqld ] ; then
+	mysqld=bin/mysqld
+else
+	mysqld=libexec/mysqld
+fi
+mysql_version=`$mysqlPrefix/$mysqld --version 2>&1 | grep Ver | awk '{print $3}'`
+echo $mysql_version |grep MariaDB > /dev/null 2>&1
+if [ $? -eq 0 ] ; then
+	mysql_version=`echo $mysql_version|cut -d- -f1`
+	mariadb=1
+else
+	mariadb=0
+fi
+echo "creating mysql config mariadb $mariadb version $mysql_version" 1>&2
+if [ $mariadb -eq 0 ] ; then
+	case $mysql_version in
+	5.7*)
+	cat /etc/my.cnf | sed \
+		-e "s{datadir=/var/lib/mysql{datadir=@indimaildir@/mysqldb/data{g" \
+		-e "s{socket=/var/lib/mysql/mysql.sock{socket=$mysql_socket{g" \
+		-e "s{log-error=/var/log/mysqld.log{#log-error=/var/log/mysqld.log{g"
+	echo "port=$mysql_port"
+	;;
+	*)
+	cat /etc/my.cnf | sed \
+		-e "s{datadir=/var/lib/mysql{datadir=@indimaildir@/mysqldb/data{g" \
+		-e "s{socket=/var/lib/mysql/mysql.sock{socket=$mysql_socket{g" \
+		-e "s{log-error=/var/log/mysqld.log{#log-error=/var/log/mysqld.log{g"
+	echo "port=$mysql_port"
+	;;
+	esac
+fi
+echo
+sql_mode=NO_ENGINE_SUBSTITUTION,STRICT_TRANS_TABLES 
+echo
+echo "[inlookup]"
+echo "#The number of seconds the server waits for activity on an"
+echo "#interactive connection before closing it. An interactive client is"
+echo "#defined as a client that uses the 'CLIENT_INTERACTIVE' option to connect"
+echo "interactive_timeout=28880"
+echo
+echo "#The number of seconds to wait for more data from a connection"
+echo "#before aborting the read. This timeout applies only to TCP/IP"
+echo "#connections, not to connections made via Unix socket files, named"
+echo "#pipes, or shared memory."
+echo "net_read_timeout=5"
+echo
+echo "#The number of seconds to wait for a block to be written to a"
+echo "#connection before aborting the write. This timeout applies only to"
+echo "#TCP/IP connections, not to connections made via Unix socket files,"
+echo "#named pipes, or shared memory."
+echo "net_write_timeout=5"
+echo
+echo "#The number of seconds the server waits for activity on a"
+echo "#non-interactive connection before closing it. This timeout applies"
+echo "#only to TCP/IP and Unix socket file connections, not to"
+echo "#connections made via named pipes, or shared memory."
+echo "wait_timeout=28800"
+if [ $mariadb -eq 0 ] ; then
+	return 0
+fi
+echo
 case $mysql_version in
-	5.1*|5.2*|5.3*|5.4*|5.5.[0-9]|5.5.1[0-9]|5.5.2[0-9]|5.5.3[0-9]|5.6*|6.0.9*)
+	5.1*|5.2*|5.3*|5.4*|5.5.[0-9]|5.5.1[0-9]|5.5.2[0-9]|5.5.3[0-9]|5.6*|6.0.9*|10.*)
 	key_buffer_name="key_buffer_size"
 	;;
 	*)
@@ -4959,7 +4849,7 @@ if [ " $model" = " small" ] ; then
 			-e "s{port		= 3306{port		= $mysql_port{g" \
 			-e "s{socket		= .*\${socket		= $mysql_socket{g"
 	else
-		default_mysql_config $mysql_version "" $key_buffer_name
+		default_mysql_config $mysql_version $mariadb "" $key_buffer_name
 	fi
 	;;
 	esac
@@ -4989,7 +4879,7 @@ elif [ " $model" = " medium" ] ; then
 			-e "s{port		= 3306{port		= $mysql_port{g" \
 			-e "s{socket		= .*\${socket		= $mysql_socket{g"
 	else
-		default_mysql_config $mysql_version "" $key_buffer_name
+		default_mysql_config $mysql_version $mariadb "" $key_buffer_name
 	fi
 	;;
 	esac
@@ -5020,7 +4910,7 @@ elif [ " $model" = " large" ] ; then
 				-e "s{port		= 3306{port		= $mysql_port{g" \
 				-e "s{socket		= .*\${socket		= $mysql_socket{g"
 		else
-			default_mysql_config $mysql_version "" $key_buffer_name
+			default_mysql_config $mysql_version $mariadb "" $key_buffer_name
 		fi
 		;;
 		esac
@@ -5054,7 +4944,7 @@ elif [ " $model" = " large" ] ; then
 				-e "s{port		= 3306{port		= $mysql_port{g" \
 				-e "s{socket		= .*\${socket		= $mysql_socket{g"
 		else
-			default_mysql_config $mysql_version $thr_con $key_buffer_name
+			default_mysql_config $mysql_version $mariadb $thr_con $key_buffer_name
 		fi
 		;;
 		esac
@@ -5086,7 +4976,7 @@ elif [ " $model" = " huge" ] ; then
 				-e "s{port		= 3306{port		= $mysql_port{g" \
 				-e "s{socket		= .*\${socket		= $mysql_socket{g"
 		else
-			default_mysql_config $mysql_version "" $key_buffer_name
+			default_mysql_config $mysql_version $mariadb "" $key_buffer_name
 		fi
 		;;
 		esac
@@ -5120,36 +5010,12 @@ elif [ " $model" = " huge" ] ; then
 				-e "s{port		= 3306{port		= $mysql_port{g" \
 				-e "s{socket		= .*\${socket		= $mysql_socket{g"
 		else
-			default_mysql_config $mysql_version $thr_con $key_buffer_name
+			default_mysql_config $mysql_version $mariadb $thr_con $key_buffer_name
 		fi
 		;;
 		esac
 	fi
 fi
-echo
-echo "[inlookup]"
-echo "#The number of seconds the server waits for activity on an"
-echo "#interactive connection before closing it. An interactive client is"
-echo "#defined as a client that uses the 'CLIENT_INTERACTIVE' option to connect"
-echo "interactive_timeout=28880"
-echo
-echo "#The number of seconds to wait for more data from a connection"
-echo "#before aborting the read. This timeout applies only to TCP/IP"
-echo "#connections, not to connections made via Unix socket files, named"
-echo "#pipes, or shared memory."
-echo "net_read_timeout=5"
-echo
-echo "#The number of seconds to wait for a block to be written to a"
-echo "#connection before aborting the write. This timeout applies only to"
-echo "#TCP/IP connections, not to connections made via Unix socket files,"
-echo "#named pipes, or shared memory."
-echo "net_write_timeout=5"
-echo
-echo "#The number of seconds the server waits for activity on a"
-echo "#non-interactive connection before closing it. This timeout applies"
-echo "#only to TCP/IP and Unix socket file connections, not to"
-echo "#connections made via named pipes, or shared memory."
-echo "wait_timeout=28800"
 }
 
 create_svscan()
@@ -5171,7 +5037,7 @@ fi
 # svscan log script
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.250 2015-08-01 11:05:02+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.251 2015-12-24 14:42:18+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -5296,7 +5162,7 @@ case "$dkverify_option" in
 esac
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.250 2015-08-01 11:05:02+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.251 2015-12-24 14:42:18+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -5318,7 +5184,7 @@ fi
 # fetchmail log script
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.250 2015-08-01 11:05:02+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.251 2015-12-24 14:42:18+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -5388,7 +5254,7 @@ else
 fi
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.250 2015-08-01 11:05:02+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.251 2015-12-24 14:42:18+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -5429,7 +5295,7 @@ fi
 # qmail-poppass log script
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.250 2015-08-01 11:05:02+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.251 2015-12-24 14:42:18+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -5639,7 +5505,7 @@ case "$dksign_option" in
 esac
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.250 2015-08-01 11:05:02+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.251 2015-12-24 14:42:18+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -5656,7 +5522,7 @@ fi
 mkdir -p "$DESTDIR"$SERVICEDIR/qmail-send."$tag"/log
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.250 2015-08-01 11:05:02+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.251 2015-12-24 14:42:18+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -7633,13 +7499,11 @@ if test $# -eq 0; then
 fi
 
 prog_args="$0 $*"
-use_stdout=0
 force=0
 no_multi=0
 silent=0
 use_ssl=0
 use_starttls=0
-bootstrap=1
 nooverwrite=0
 if [ -x /bin/chown ] ; then
 	chown=/bin/chown
@@ -7853,14 +7717,8 @@ while test $# -gt 0; do
 	--dmasquerade)
 	dmasquerade=1
 	;;
-	--stdout)
-	use_stdout=1
-	;;
 	--force)
 	force=1
-	;;
-	--no-bootstrap)
-	bootstrap=0
 	;;
 	--routes=*)
 	routes=$optarg
@@ -8038,7 +7896,7 @@ while test $# -gt 0; do
 	;;
 
 	--version)
-	echo "\$Id: svctool.in,v 2.250 2015-08-01 11:05:02+05:30 Cprogrammer Exp mbhangui $"
+	echo "\$Id: svctool.in,v 2.251 2015-12-24 14:42:18+05:30 Cprogrammer Exp mbhangui $"
 	prog_args=""
 	exit 0
 	;;
@@ -8488,10 +8346,6 @@ case $option in
 			echo "Model not selected" 1>&2
 			exit 1
 		fi
-		if [ ! -x $mysqlPrefix/bin/mysql_config ] ; then
-			echo "svctool: $mysqlPrefix/bin/mysql_config not found" 1>&2
-			return 1
-		fi
 		if [ " $mysql_port" = " " ]; then
 			mysql_port=3306
 		fi
@@ -8518,10 +8372,6 @@ case $option in
 		elif [ " $default_domain" = " " ] ; then
 			echo "default domain not specified" 1>&2
 			exit 1
-		fi
-		if [ ! -x $mysqlPrefix/bin/mysql_config ] ; then
-			echo "svctool: $mysqlPrefix/bin/mysql_config not found" 1>&2
-			return 1
 		fi
 		create_mysql_db "$databasedir" "$indimaildir/etc/indimail.cnf"
 		;;
