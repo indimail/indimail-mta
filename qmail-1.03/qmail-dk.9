@@ -75,10 +75,10 @@ The complete set of letters with the corresponding return status is given below
  M - DK_STAT_DUPLICATE    - duplicate Domainkey-Signature in message.
 
 For example, if you want to permanently reject messages that have a
-signature that has been revoked, include the letter 'K' in the
+signature that has been revoked, include the letter 'J' in the
 .B DKVERIFY
 environment variable.  A conservative set of letters is
-.BR DEGIJKfh .
+.BR BDEGIJKfh .
 Reject permanently BADSIG, NOKEY, BADKEY, SYNTAX, ARGS, REVOKED, and
 INTERNAL errors, and temporarily CANTVRFY and NORESOURCE. Add in
 .B B
