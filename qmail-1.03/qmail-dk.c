@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-dk.c,v $
+ * Revision 1.45  2015-12-24 14:36:56+05:30  Cprogrammer
+ * fixed qmail-dk quitting during verfication without writing DomainKey-Status header
+ *
  * Revision 1.44  2014-01-22 22:44:04+05:30  Cprogrammer
  * treat AUTHINFO environment like RELAYCLIENT environment variable
  *
@@ -731,8 +734,6 @@ main(int argc, char *argv[])
 	if (substdio_flush(&ssout) == -1)
 		die_write();
 	if (dksign || dkverify) {
-		st = dk_eom(dk, (void *) 0);
-		maybe_die_dk(st);
 		if (dksign)
 			write_signature(dk, selector, dksign, advicelen, opth, canon);
 		else
@@ -741,7 +742,7 @@ main(int argc, char *argv[])
 
 			if (!stralloc_copys(&dkoutput, "DomainKey-Status: "))
 				die(51);
-			switch (st)
+			switch ((st = dk_eom(dk, (void *) 0)))
 			{
 			case DK_STAT_OK:
 				status = "good        ";
@@ -755,8 +756,11 @@ main(int argc, char *argv[])
 				code = "X.7.5";
 				break;
 			case DK_STAT_NOKEY:
-			case DK_STAT_CANTVRFY:
 				status = "no key      ";
+				code = "X.7.0";
+				break;
+			case DK_STAT_CANTVRFY:
+				status = "DK_STAT_CANTVRFY: Cannot get domain key to verify signature";
 				code = "X.7.0";
 				break;
 			case DK_STAT_BADKEY:
@@ -867,7 +871,7 @@ main(argc, argv)
 void
 getversion_qmail_dk_c()
 {
-	static char    *x = "$Id: qmail-dk.c,v 1.44 2014-01-22 22:44:04+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: qmail-dk.c,v 1.45 2015-12-24 14:36:56+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
