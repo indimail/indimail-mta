@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail.spec.in,v 2.295 2015-12-24 14:40:24+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 2.296 2015-12-29 00:49:39+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %define _unpackaged_files_terminate_build 1
 
@@ -2348,7 +2348,7 @@ echo "Creating default qmail configuraton and catch-all alias (${_prefix}/alias/
 	--mysqlpass=ssh-1.5- --mysqlsocket=/tmp/mysql.sock
 
 # MySQL
-if [ -f %{mysqlPrefix}/bin/mysql_config ] ; then
+if [ -x $mysqlPrefix/libexec/mysqld -o -x $mysqlPrefix/sbin/mysqld ] ; then
 	echo "Creating Database/Service for MySQL"
 	# MySQL Config Creation
 	%{_prefix}/sbin/svctool --config=mysql   --mysqlPrefix=%{mysqlPrefix} --model=medium --no-of-cpu=2
@@ -2365,7 +2365,7 @@ if [ -f %{mysqlPrefix}/bin/mysql_config ] ; then
 		$TOUCH %{servicedir}/mysql.3306/down
 	fi
 else
-	echo "WARNING!!! Did not find mysql_config in %{mysqlPrefix}. Skipping MySQL configuration" 1>&2
+	echo "WARNING!!! Did not find mysqld in %{mysqlPrefix}/{bin,sbin}. Skipping MySQL configuration" 1>&2
 fi
 
 if [ %nodksignatures -eq 0 ] ; then
