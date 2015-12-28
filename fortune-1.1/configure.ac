@@ -3,7 +3,7 @@ AC_PREREQ([2.59])
 AC_INIT([fortune],1.1,[Manvendra Bhangui manvendra@indimail.org],indimail, [http://www.indimail.org])
 PACKAGE=$PACKAGE_NAME
 VERSION=$PACKAGE_VERSION
-AM_INIT_AUTOMAKE([silent-rules])
+AM_INIT_AUTOMAKE
 AM_CONFIG_HEADER(config.h)
 AC_CANONICAL_HOST
 
