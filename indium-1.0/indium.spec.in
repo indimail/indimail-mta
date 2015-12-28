@@ -1,5 +1,8 @@
 #
 # $Log: indium.spec.in,v $
+# Revision 1.10  2015-12-29 00:38:42+05:30  Cprogrammer
+# added rhel version 7
+#
 # Revision 1.9  2011-12-18 11:01:55+05:30  Cprogrammer
 # removed unused images
 #
@@ -28,7 +31,7 @@
 # Initial revision
 #
 #
-# $Id: indium.spec.in,v 1.9 2011-12-18 11:01:55+05:30 Cprogrammer Exp mbhangui $
+# $Id: indium.spec.in,v 1.10 2015-12-29 00:38:42+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %define _unpackaged_files_terminate_build 1
 
