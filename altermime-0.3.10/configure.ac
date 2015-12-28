@@ -1,9 +1,9 @@
 dnl Process this file with autoconf to produce a configure script.
 AC_INIT([altermime],0.3.10,[Manvendra Bhangui manvendra@indimail.org],indimail, [http://www.indimail.org])
-AM_INIT_AUTOMAKE([silent-rules])
 AM_CONFIG_HEADER(config.h)
 PACKAGE=$PACKAGE_NAME
 VERSION=$PACKAGE_VERSION
+AM_INIT_AUTOMAKE
 AC_CANONICAL_HOST
 
 dnl Checks for programs.
