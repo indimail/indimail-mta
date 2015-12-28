@@ -1,11 +1,11 @@
 dnl Process this file with autoconf to produce a configure script.
-AC_PREREQ([2.63])
+AC_PREREQ([2.59])
 AC_INIT([eps],1.2,[Manvendra Bhangui manvendra@indimail.org],indimail, [http://www.indimail.org])
 AC_CANONICAL_HOST
 LT_INIT
 PACKAGE=$PACKAGE_NAME
 VERSION=$PACKAGE_VERSION
-AM_INIT_AUTOMAKE([silent-rules])
+AM_INIT_AUTOMAKE
 AM_CONFIG_HEADER(config.h)
 
 dnl Checks for programs.
