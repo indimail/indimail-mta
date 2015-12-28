@@ -10,7 +10,7 @@ AC_CONFIG_HEADERS([config.h])
 AC_DEFINE_UNQUOTED(PACKAGE_BUGREPORT, "indimail-support@lists.sourceforge.net")
 AC_CANONICAL_HOST
 LT_INIT
-AM_INIT_AUTOMAKE()
+AM_INIT_AUTOMAKE
 
 # Checks for programs.
 AC_PROG_LIBTOOL
