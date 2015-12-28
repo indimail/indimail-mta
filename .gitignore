@@ -89,6 +89,7 @@ ripmime-*/ripole
 logalert-*/ChangeLog
 logalert-*/NEWS
 indimail-*/ChangeLog
+indimail-*/libindimail.pc
 indimail-*/doc/RELEASE-Notes.in
 indimail-*/doc/ChangeLog
 indimail-*/INSTALL
