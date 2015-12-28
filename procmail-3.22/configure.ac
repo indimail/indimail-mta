@@ -6,7 +6,7 @@ AC_INIT([procmail], [3.22], [manvendra@indimail.org])
 LT_INIT
 AC_CONFIG_SRCDIR([patchlevel.h])
 AC_CONFIG_HEADERS([config.h])
-AM_INIT_AUTOMAKE($PACKAGE_NAME,$PACKAGE_VERSION)
+AM_INIT_AUTOMAKE
 AC_DEFINE_UNQUOTED(PM_VERSION, $PACKAGE_VERSION, "Procmail Version")
 
 # Checks for programs.
