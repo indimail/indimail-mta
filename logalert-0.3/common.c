@@ -1,5 +1,8 @@
 /*
  * $Log: common.c,v $
+ * Revision 1.5  2015-12-29 00:05:52+05:30  Cprogrammer
+ * conditional compilation #ifndef INDIMAIL
+ *
  * Revision 1.4  2013-05-15 00:30:01+05:30  Cprogrammer
  * added timeoutio functions
  *
@@ -17,6 +20,11 @@
 #include "config.h"
 #endif
 
+#ifndef	lint
+static char     sccsid[] = "$Id: common.c,v 1.5 2015-12-29 00:05:52+05:30 Cprogrammer Exp mbhangui $";
+#endif
+
+#ifndef HAVE_INDIMAIL
 #include <stdio.h>
 #include <stdlib.h>
 #include <ctype.h>
@@ -43,10 +51,6 @@
 #define SELECTTIMEOUT           30 /*- secs after which select will timeout -*/
 #if !defined(INADDR_NONE) && defined(sun)
 #define INADDR_NONE             0xffffffff /*- should be in <netinet/in.h> -*/
-#endif
-
-#ifndef	lint
-static char     sccsid[] = "$Id: common.c,v 1.4 2013-05-15 00:30:01+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 static unsigned sleeptime = MAXSLEEP + 1; /*- 0 for infinite connect */
@@ -811,9 +815,10 @@ timeoutwrite(t, fd, buf, len)
 	errno = ETIMEDOUT;
 	return -1;
 }
+#endif
 
 void
 getversion_common_c()
 {
-	printf("%s\n", sccsid);
+	(void) filewrt(1, "%s\n", sccsid);
 }
