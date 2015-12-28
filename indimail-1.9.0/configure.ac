@@ -5,7 +5,7 @@ AC_CANONICAL_TARGET
 PACKAGE=$PACKAGE_NAME
 VERSION=$PACKAGE_VERSION
 LT_INIT
-AM_INIT_AUTOMAKE([silent-rules])
+AM_INIT_AUTOMAKE
 AM_CONFIG_HEADER(config.h)
 AC_DEFINE_UNQUOTED(PACKAGE_BUGREPORT, "indimail-support@lists.sourceforge.net")
 
@@ -88,7 +88,24 @@ case "$host" in
 	STRIP_OPT=-s
 	;;
 esac
-dnl Does not work on RHEL 5, CentOS 5 64 bit systems
+defaultprefix="/var/indimail"
+if test x$prefix = xNONE
+then
+	prefix="$defaultprefix"
+	ac_configure_args="$ac_configure_args --prefix=$prefix"
+fi
+tlib='${exec_prefix}/lib'
+if test x$libdir = x$tlib
+then
+	dnl Does not work on RHEL 5, CentOS 5 64 bit systems
+	if test -d /lib64 -a "$acl_libdirstem" = "lib"
+	then
+		acl_libdirstem=lib64
+	fi
+	ilibdir=$prefix/$acl_libdirstem
+else
+	ilibdir=$libdir
+fi
 RPATH_LIB="$acl_libdirstem"
 if test -f /usr/bin/lsb_release
 then
@@ -100,20 +117,12 @@ DISTRIB_VERSION=$(sh ./lsb_release -sr)
 fi
 AC_SUBST(DISTRIB_ID)
 AC_SUBST(DISTRIB_VERSION)
-libdir=$prefix/$acl_libdirstem
-defaultprefix="/var/indimail"
 LIBVER=0
 AC_SUBST([LIBTOOL_DEPS])
 AC_SUBST(LIBVER)
 AC_SUBST(STRIP_OPT)
 dnl AC_SUBST(RPATH_LIB)
 AC_SUBST(defaultprefix)
-
-if test x$prefix = xNONE
-then
-	prefix="$defaultprefix"
-	ac_configure_args="$ac_configure_args -prefix=$prefix"
-fi
 
 dnl configure only packages for whom the subdirectories which are present
 subdir_list=""
@@ -884,7 +893,7 @@ case "$host" in
 	auth_libs="-L. -L$prefix/lib -lindimail $LIB_CRYPT -L$mysql_libdir -lmysqlclient $LIB_SSL -lm"
 	;;
 	*)
-	auth_libs="-L. -L$libdir -lindimail $LIB_CRYPT -L$mysql_libdir -lmysqlclient $LIB_SSL -lm"
+	auth_libs="-L. -L$ilibdir -lindimail $LIB_CRYPT -L$mysql_libdir -lmysqlclient $LIB_SSL -lm"
 	;;
 esac
 
