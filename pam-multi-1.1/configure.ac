@@ -2,7 +2,7 @@ AC_PREREQ([2.52])
 AC_INIT([pam-multi],1.1,[Manvendra Bhangui manvendra@indimail.org],pam-multi,[http://www.indimail.org])
 PACKAGE=$PACKAGE_NAME
 VERSION=$PACKAGE_VERSION
-AM_INIT_AUTOMAKE([silent-rules])
+AM_INIT_AUTOMAKE
 LT_INIT
 AM_CONFIG_HEADER(config.h)
 AC_CANONICAL_HOST
