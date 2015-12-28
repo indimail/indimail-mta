@@ -7,13 +7,14 @@ PACKAGE=$PACKAGE_NAME
 VERSION=$PACKAGE_VERSION
 LT_INIT
 AC_CANONICAL_HOST
-AM_INIT_AUTOMAKE([silent-rules])
+AM_INIT_AUTOMAKE
 AM_CONFIG_HEADER(config.h)
 AC_CONFIG_MACRO_DIR([m4])
 AC_PROG_CC
 AC_PROG_LIBTOOL
+AC_LIB_PREPARE_MULTILIB
 
-AC_PREFIX_DEFAULT(/usr/local/bin)
+AC_PREFIX_DEFAULT(/var/indimail)
 
 if test "$GCC" = yes ; then
 	CXXFLAGS="$CXXFLAGS -Wall"
@@ -89,9 +90,6 @@ AC_TYPE_PID_T
 AC_TYPE_SIZE_T
 AC_TYPE_UID_T
 
-AC_CANONICAL_HOST
-
-
 case "$host" in
 
     *-openbsd*)
@@ -124,7 +122,7 @@ case "$host" in
 
 esac
 
-test "$prefix" = "NONE" && prefix=/usr/local
+test "$prefix" = "NONE" && prefix=/var/indimail
 test "$exec_prefix" = "NONE" && exec_prefix='${prefix}'
 test "$program_prefix" = "NONE" && program_prefix=
 test "$program_suffix" = "NONE" && program_suffix=
@@ -145,21 +143,36 @@ AC_DEFINE_UNQUOTED(PREFIX, "$prefix", installation directory)
 
 AC_ARG_ENABLE(indimaildir, [  --enable-indimaildir=dir         directory where indimail is installed.],
 	indimaildir="$enableval", [])
+
+if test -z "$indimaildir"
+then
+	indimaildir=$prefix
+fi
 AC_DEFINE_UNQUOTED(INDIMAILDIR,"$indimaildir",indimaildir's home directory)
 #'
 
-if test -d $indimaildir/lib64
+if test -d /lib64 -a "$acl_libdirstem" = "lib"
 then
-	RPATH_LIB=$indimaildir/lib64
-else
-	RPATH_LIB=$indimaildir/lib
+	acl_libdirstem=lib64
 fi
-AC_SUBST(RPATH_LIB)
-AC_CHECK_LIB(indimail -L$RPATH_LIB, filewrt, [AC_SUBST([LIB_INDIMAIL], ["-L/var/indimail/lib -lindimail"]) AC_DEFINE([HAVE_INDIMAIL], [1],[indimail Library])],,)
+tlib='${exec_prefix}/lib'
+if test x$libdir = x$tlib
+then
+	dnl Does not work on RHEL 5, CentOS 5 64 bit systems
+	if test -d /lib64 -a "$acl_libdirstem" = "lib"
+	then
+		acl_libdirstem=lib64
+	fi
+	ilibdir=$prefix/$acl_libdirstem
+else
+	ilibdir=$libdir
+fi
+RPATH_LIB="$acl_libdirstem"
+AC_CHECK_LIB(indimail -L$ilibdir, filewrt, [AC_SUBST([LIB_INDIMAIL], ["-L$ilibdir -lindimail"]) AC_DEFINE([HAVE_INDIMAIL], [1],[indimail Library])],,)
 
 AC_SUBST(indimaildir)
 AC_CONFIG_FILES([Makefile])
 AC_OUTPUT
 
-echo "    system lib dir = $acl_libdirstem $acl_libdirstem2 RPATH=$RPATH_LIB"
-echo "LIB_INDIMAIL=$LIB_INDIMAIL"
+echo "system lib dir = $acl_libdirstem $acl_libdirstem2 RPATH=$ilibdir"
+echo "  LIB_INDIMAIL = $LIB_INDIMAIL"
