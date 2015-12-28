@@ -3,9 +3,8 @@ AC_PREREQ([2.52])
 AC_INIT([ripmime],1.4.0.9,[Manvendra Bhangui manvendra@indimail.org],ripmime, [http://www.indimail.org])
 PACKAGE=$PACKAGE_NAME
 VERSION=$PACKAGE_VERSION
-AM_INIT_AUTOMAKE([silent-rules])
+AM_INIT_AUTOMAKE
 AM_CONFIG_HEADER(config.h)
-dnl AM_INIT_AUTOMAKE
 AC_CANONICAL_HOST
 
 dnl Checks for programs.
