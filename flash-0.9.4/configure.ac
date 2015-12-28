@@ -12,6 +12,7 @@ dnl Checks for programs.
 AC_CONFIG_MACRO_DIR([m4])
 AC_PROG_CC
 AC_PROG_LIBTOOL
+AC_LIB_PREPARE_MULTILIB
 
 LIBVER=0:0:0
 defaultprefix="/var/indimail"
@@ -41,9 +42,24 @@ AC_SUBST(defaultprefix)
 AC_SUBST(LIBVER)
 AC_SUBST(STRIP_OPT)
 AC_SUBST(MODFLAGS)
+if test -d /lib64 -a "$acl_libdirstem" = "lib"
+then
+	acl_libdirstem=lib64
+fi
+tlib='${exec_prefix}/lib'
+if test x$libdir = x$tlib
+then
+	dnl Does not work on RHEL 5, CentOS 5 64 bit systems
+	if test -d /lib64 -a "$acl_libdirstem" = "lib"
+	then
+		acl_libdirstem=lib64
+	fi
+	libdir=$prefix/$acl_libdirstem
+fi
+RPATH_LIB="$acl_libdirstem"
 
 indiuser="indimail"
-AC_ARG_ENABLE(indiuser, [  --enable-indiuser=indimail   user vchkpw was installed as.],
+AC_ARG_ENABLE(indiuser, [  --enable-indiuser=indimail   user indimail was installed as.],
 	indiuser="$enableval",
 	[
 		if test "$indiuser" = ""
@@ -55,8 +71,8 @@ AC_DEFINE_UNQUOTED(INDIUSER,"$indiuser","")
 AC_SUBST(indiuser)
 echo $indiuser > indiusername
 
-indigroup="vchkpw"
-AC_ARG_ENABLE(indigroup, [  --enable-indigroup=vchkpw   group vchkpw was installed as.],
+indigroup="indimail"
+AC_ARG_ENABLE(indigroup, [  --enable-indigroup=indimail   group indimail was installed as.],
 	indigroup="$enableval",
 	[
 		if test "$indigroup" = ""
@@ -187,10 +203,12 @@ fi
 AC_DEFINE_UNQUOTED(PAGER,"$PGR","")
 AC_DEFINE(DELIM,':',"")
 AC_DEFINE(ESCAPE,'\\',"")
+#'
 AC_DEFINE(PATH_TO_GPL,"COPYING","")
 AC_DEFINE(PATH_TO_HELP,"system.help","")
 AC_DEFINE(DEFAULT_MENU,"system.menu","")
 
-auth_libs="-L. -lflash"
+auth_libs="-L. -L$libdir -lflash"
+echo "system lib dir = $acl_libdirstem $acl_libdirstem2 RPATH=$libdir"
 AC_SUBST(auth_libs)
 AC_OUTPUT(Makefile)
