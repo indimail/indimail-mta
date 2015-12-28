@@ -1020,14 +1020,12 @@ do_menu(struct menu *firstmenu)
 			timeout(Timeout);
 			display_screen(1);
 			break;
-		/*-
 		case 'A':
 			timeout(-1);
 			nc_about();
 			timeout(Timeout);
 			display_screen(1);
 			break;
-		*/
 		case 'L':
 			timeout(-1);
 			nc_lock_screen();
