@@ -2437,7 +2437,7 @@ fmt.h auto_qmail.h subfd.h smtp_plugin.h
 	./compile plugtest.c
 
 hmac_sha1.obj: \
-tryindimail.c compile load indimail.lib conf-indi
+tryindimail.c compile load indimail.lib conf-indi hmac_sha1.o
 	( ( ./compile `grep -h -v "^#" conf-indi` tryindimail.c && \
 	./load tryindimail `cat indimail.lib`) >/dev/null 2>&1 \
 	&& echo || echo hmac_sha1.o) > hmac_sha1.obj
@@ -2566,8 +2566,8 @@ sqlmatch.h qregex.h hasindimail.h
 
 greylist.o: \
 compile greylist.c stralloc.h ip.h scan.h byte.h greylist.h error.h \
-timeoutread.h timeoutwrite.h
-	./compile greylist.c
+timeoutread.h timeoutwrite.h conf-ip
+	./compile `grep -h -v "^#" conf-ip` greylist.c
 
 qmail-start: \
 load qmail-start.o prot.o fd.a auto_uids.o get_uid.o \
@@ -5306,7 +5306,7 @@ case_diffb.o getln.o getln2.o fmt_ulong.o fmt_xlong.o \
 byte_rchr.o byte_copy.o byte_cr.o byte_chr.o byte_diff.o \
 alloc_re.o alloc.o control.o scan_xlong.o fmt_str.o \
 cdb_seek.o cdb_hash.o cdb_unpack.o auto_qmail.o \
-sig_block.o sig_catch.o now.o \
+sig_block.o sig_catch.o now.o byte_zero.o \
 tablematch.o substdio.a stralloc.a
 	./load qmail-greyd sgetopt.o subgetopt.o \
 	error.o error_str.o strerr_die.o strerr_sys.o scan_ulong.o \
@@ -5317,7 +5317,7 @@ tablematch.o substdio.a stralloc.a
 	byte_rchr.o byte_copy.o byte_cr.o byte_chr.o byte_diff.o \
 	alloc_re.o alloc.o control.o scan_xlong.o fmt_str.o \
 	cdb_seek.o cdb_hash.o cdb_unpack.o auto_qmail.o \
-	sig_block.o sig_catch.o now.o \
+	sig_block.o sig_catch.o now.o byte_zero.o \
 	tablematch.o substdio.a stralloc.a -lm
 
 qmail-greyd.o: \
@@ -5325,7 +5325,7 @@ compile qmail-greyd.c sgetopt.h auto_qmail.h ip.h \
 fmt.h str.h subfd.h byte.h strerr.h scan.h getln.h \
 env.h stralloc.h constmap.h control.h error.h \
 uint32.h open.h cdb.h variables.h sig.h greylist.h \
-tablematch.h
+tablematch.h socket.h haveip6.h conf-ip
 	./compile -DUSE_HASH -DDYNAMIC_BUF `grep -h -v "^#" conf-ip` qmail-greyd.c
 
 qmail-greyd.0: \

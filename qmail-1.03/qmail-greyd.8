@@ -35,32 +35,33 @@ one or more recipient addresses. \fBqmail-greyd\fR borrows most of the logic fro
 \fBgreydaemon\fR written by \fBJohn Levine\fR and the \fBgreycheck()\fR function written by
 \fBAndrew Richards\fR.
 
-If the IP address was previously successful for a greylisting check and
-was last queried within \fItimeout_days\fR the check succeeds. Alternatively if one of
+If the IP address was previously successful for a greylisting check, and
+was last queried within \fItimeout_days\fR, the check succeeds. Alternatively if one of
 the supplied triplets of IP address / sender / recipient have previously been seen within
-\fIresend_window_hours\fR but at least \fImin_resend_minutes\fR ago, the check succeeds
+\fIresend_window_hours\fR, but at least \fImin_resend_minutes\fR ago, the check succeeds
 and future checks within \fIresend_window_hours\fR for the IP address will succeed.
 Otherwise the triplet(s) supplied are added to the greylisting database to check against
 future queries, and the check fails (meaning \fBqmail-smtpd(8)\fR will reject the message).
-Mails that have an envelope sender of the null sender are considered a special case where
+
+Emails that have an envelope sender of the null sender are considered a special case where
 \fBqmail-greyd\fR will expire the record immediately in order to avoid whitelisting it,
 once we allow the mail to go through. Mails from the null sender are (according to RFC 821)
-only to be used for special administrative mails like bounces. Consequently, they are almost
+are to be used for special administrative mails like bounces only. Consequently, they are almost
 never used for more than one legitimate email. For that reason, there is no need to maintain
 them any longer once an email has been passed.
 
 \fBqmail-greyd\fR maintains its database in memory, thus avoiding complicated schemes to
-manage greylisting data on disk as well as benefitting from being faster than disk-based
+manage greylisting data on disk, thus benefitting from being faster than disk-based
 approaches. Nevertheless periodic backups of the database are made to \fIcontextFile\fR
-on the disk to enable \fBqmail-greyd\fR to start with existing greylisting data in case
+on the disk, to enable \fBqmail-greyd\fR to start with existing greylisting data, in case
 of restart. To keep the in-memory search as efficient as possible, entries older than
 \fItimeout_days\fR are expired during every request. To keep the in-memory database as
 small as possible, records older than \fItimeout_days\fR are periodically removed. The
 default interval is 5 minutes and can be changed by specifiying the \fB-f\fR option.
 \fBqmail-greyd\fR also backups the in-memory database to \fIcontextFile\fR on receipt
-of \fISIGTERM\fR or \fISIGUSR1\fR signal. The \fIcontextFile\fR and its containing directory should be writeable by the user
-with which \fBqmail-greyd\fR runs. At start-up the file \fIcontextFile\fR is read and all
-records older than \fItimeout\fR days are expired.
+of \fISIGTERM\fR or \fISIGUSR1\fR signal. The \fIcontextFile\fR and its containing directory
+should be writeable by the user with which \fBqmail-greyd\fR process runs. At start-up the file
+\fIcontextFile\fR is read and all records older than \fItimeout\fR days are expired.
 
 \fBqmail-greyd\fR can maintain an internal hash table for fast IP address lookup using the
 \fBhsearch(3)\fR function. The hash gets enabled by specifing \fB-h\fR \fIhash_size\fR option.
@@ -69,10 +70,9 @@ search quicker but inserting the records slower.
 
 A whitelist of IP ranges not subject to greylisting can be specified to \fBqmail-greyd\fR
 by the \fB-w\fR \fIfilename\fR option. The range can be specified in CIDR format, wildcard or range
-notation. If a file with the name \fIfilename\fR.\fIcdb\fR
-exists, \fBqmail-greyd\fR will use \fBcdb(3)\fR lookup in addition to the normal in-memory
-search in a table of whitelisted IPs. \fBqmail-greyd\fR re-reads the whitelist on
-receipt of signal \fISIGHUP\fR.
+notation. If a file with the name \fIfilename\fR.\fIcdb\fR exists, \fBqmail-greyd\fR will use
+\fBcdb(3)\fR lookup in addition to the normal in-memory search in a table of whitelisted IPs.
+\fBqmail-greyd\fR re-reads the whitelist on receipt of signal \fISIGHUP\fR.
 
 Examples of whitelisted IPs
 
@@ -84,9 +84,12 @@ Examples of whitelisted IPs
 
 \fBqmail-greyd\fR listens on IP address \fIipaddr\fR, port 1999 for incoming UDP queries.
 127.0.0.1 (the loopback address) is recommended for \fIipaddr\fR if \fBqmail-greyd\fR is
-to serve queries on the same machine. \fBqmail-greyd\fR uses \fIMSG_PEEK\fR flag in
-\fBrecvfrom(2)\fR to determine the length of the packet and then reads the entire packet
-in one operation.
+to serve queries on the same machine. You can specify :: for \fBqmail-greyd\fR to listen on
+wildcard IPV6 address.  Specifiying * for \fIipaddr\fR causes \fBqmail-greyd\fR to listen on all
+addresses.
+
+\fBqmail-greyd\fR uses \fIMSG_PEEK\fR flag in \fBrecvfrom(2)\fR to determine the length of the
+packet and then reads the entire packet in one operation.
 
 .SH OPTIONS
 .TP
