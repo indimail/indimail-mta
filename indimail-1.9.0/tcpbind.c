@@ -1,5 +1,8 @@
 /*
  * $Log: tcpbind.c,v $
+ * Revision 2.6  2015-12-31 09:07:54+05:30  Cprogrammer
+ * pass hostname parameter to getaddrinfo
+ *
  * Revision 2.5  2015-08-19 16:32:00+05:30  Cprogrammer
  * fixed errno getting clobbered
  *
@@ -33,7 +36,7 @@
  */
 
 #ifndef	lint
-static char     sccsid[] = "$Id: tcpbind.c,v 2.5 2015-08-19 16:32:00+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: tcpbind.c,v 2.6 2015-12-31 09:07:54+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef HAVE_CONFIG_H
@@ -115,7 +118,7 @@ tcpbind(hostname, servicename, backlog)
 	hints.ai_family = AF_UNSPEC;
 	hints.ai_socktype = SOCK_STREAM;
 	hints.ai_flags = AI_PASSIVE;
-	if ((idx = getaddrinfo(NULL, servicename, &hints, &res0)))
+	if ((idx = getaddrinfo(hostname, servicename, &hints, &res0)))
 	{
 		fprintf(stderr, "tcpbind: getaddrinfo: %s\n", gai_strerror(idx));
 		return (-1);
