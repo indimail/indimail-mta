@@ -1,5 +1,8 @@
 /*
  * $Log: udpclient.c,v $
+ * Revision 1.3  2015-12-31 08:33:52+05:30  Cprogrammer
+ * copy data from stdin if message argument not specified on command line
+ *
  * Revision 1.2  2015-08-19 16:25:39+05:30  Cprogrammer
  * fixed typo
  *
@@ -49,7 +52,7 @@ main(int argc, char **argv)
 			break;
 		}
 	} /*- while ((opt = getopt(argc, argv, "dw:s:t:g:m:")) != opteof) */
-	if (!host || optind == argc)
+	if (!host)
 		strerr_die1x(100, usage);
 
 	if ((sfd = udpopen(host, port)) == -1)
@@ -68,6 +71,15 @@ main(int argc, char **argv)
 	}
 	if (dup2(sfd, 1) == -1)
 		strerr_die2sys(111, FATAL, "dup2: ");
+	if (optind == argc) {
+		switch (substdio_copy(subfdout, subfdin))
+		{
+		case -2:
+			strerr_die2sys(111, FATAL, "read: ");
+		case -3:
+			strerr_die2sys(111, FATAL, "write: ");
+		}
+	} else
 	while (optind < argc) {
 		out(argv[optind++]);
 		if (optind < argc)
@@ -82,7 +94,7 @@ main(int argc, char **argv)
 void
 getversion_udpclient_c()
 {
-	static char    *x = "$Id: udpclient.c,v 1.2 2015-08-19 16:25:39+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: udpclient.c,v 1.3 2015-12-31 08:33:52+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
