@@ -1,6 +1,6 @@
 #
 #
-# $Id: qmail.spec,v 1.18 2015-08-20 18:35:06+05:30 Cprogrammer Exp mbhangui $
+# $Id: qmail.spec,v 1.19 2015-12-31 08:36:58+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %define _unpackaged_files_terminate_build 1
 
@@ -120,21 +120,13 @@ BuildRequires: groff-doc
 BuildRequires: groff
 %endif
 
-%if %{undefined rhel_version}
-BuildRequires: sharutils
-%else
-%if 0%{?rhel_version} != 600 && 0%{?rhel_version} != 700
-BuildRequires: sharutils
-%endif
-%endif
-
 %if 0%{?suse_version}
 BuildRequires: -post-build-checks  
 #!BuildIgnore: post-build-checks  
 %endif
 ##############################################################################
 %else
-BuildRequires: groff sharutils
+BuildRequires: groff
 %endif
 
 
