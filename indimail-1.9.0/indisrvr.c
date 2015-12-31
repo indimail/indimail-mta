@@ -1,5 +1,8 @@
 /*
  * $Log: indisrvr.c,v $
+ * Revision 2.50  2015-12-31 09:07:08+05:30  Cprogrammer
+ * fixed issue with getnameinfo() hostname not getting set
+ *
  * Revision 2.49  2013-05-15 00:43:01+05:30  Cprogrammer
  * fixed compilation warnings
  *
@@ -177,7 +180,7 @@
 #include "indimail.h"
 
 #ifndef lint
-static char     sccsid[] = "$Id: indisrvr.c,v 2.49 2013-05-15 00:43:01+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: indisrvr.c,v 2.50 2015-12-31 09:07:08+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef CLUSTERED_SITE
@@ -421,7 +424,7 @@ main(argc, argv)
 	int             addrlen, len, new;
 	struct linger   linger;
 #ifdef ENABLE_IPV6
-	char            hostname[100], servicename[100];
+	char            hostname[256], servicename[100];
 #endif
 #ifdef HAVE_SSL
 	BIO            *sbio;
@@ -485,10 +488,12 @@ main(argc, argv)
 			break;
 		}
 #ifdef ENABLE_IPV6
-		if (getnameinfo((struct sockaddr *) &cliaddress, addrlen, hostname, sizeof(hostname), servicename, sizeof(servicename), 0) != 0)
-			perror("getnameinfo");
+		*hostname = 0;
+		if (!(n = getnameinfo((struct sockaddr *) &cliaddress, addrlen,
+			hostname, sizeof(hostname), servicename, sizeof(servicename), NI_NUMERICHOST|NI_NUMERICSERV)))
+			filewrt(3, "%d: Connection from %s:%s\n", getpid(), hostname, servicename);
 		else
-		filewrt(3, "%d: Connection from %s:%s\n", getpid(), hostname, servicename);
+			fprintf(stderr, "getnameinfo: %s\n", gai_strerror(n));
 #else
 		filewrt(3, "%d: Connection from %s:%d\n", getpid(), inet_ntoa(cliaddress.sin_addr), ntohs(cliaddress.sin_port));
 #endif
