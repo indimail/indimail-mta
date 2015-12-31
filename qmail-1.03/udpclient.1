@@ -6,12 +6,12 @@ udpclient \- log messages via udplogger(8)
 .B udpclient
 .B \-h \fIhost
 .B \-p \fIport
-message1 message2 ...
+[message1] [message2] [...]
 
 .SH DESCRIPTION
 .PP
 \fBudpclient\fR communicates with udplogger(8) using UDP. It simply sends \fImessage1\fR, \fImessage2\fR separated
-by white space in a single line.
+by white space in a single line. If no message arguments are given, udpclient read file descriptor 0 to send messages.
 
 .SH OPTIONS
 .PP
