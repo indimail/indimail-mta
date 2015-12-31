@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-greyd.c,v $
+ * Revision 1.12  2015-12-31 08:35:41+05:30  Cprogrammer
+ * added IPV6 code
+ *
  * Revision 1.11  2015-08-24 19:07:18+05:30  Cprogrammer
  * replace ip_scan() with ip4_scan(), replace ip_fmt() with ip4_fmt()
  *
@@ -44,8 +47,10 @@
 #include <math.h>
 #include <unistd.h>
 #include <sys/socket.h>
+#include <sys/types.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
+#define __USE_GNU
 #include <netdb.h>
 #include <sys/select.h>
 #include "sgetopt.h"
@@ -72,6 +77,7 @@
 #include "variables.h"
 #endif
 #include "greylist.h"
+#include "socket.h"
 
 #define FATAL "qmail-greyd: fatal: "
 #define WARN  "qmail-greyd: warning: "
@@ -93,9 +99,23 @@
 #define BLOCK_SIZE 32768
 #endif
 
+union sockunion
+{
+	struct sockaddr     sa;
+	struct sockaddr_in  sa4;
+#ifdef INET6
+	struct sockaddr_in6 sa6;
+#endif
+};
+#ifdef IPV6
+int             noipv6 = 0;
+#else
+int             noipv6 = 1;
+#endif
+
 struct greylst
 {
-	ip_addr         ip;
+	union v46addr   ip;
 #ifdef USE_HASH
 	char            ip_str[16];
 #endif
@@ -201,7 +221,7 @@ cidr2IPrange(char *ipaddr, int mask, struct netspec *spec)
 		logerr("failed to scan ip");
 		logerr("[");
 		logerr(ipaddr);
-		logerrf("\n");
+		logerrf("]\n");
 		return (-1);
 	}
 	spec->min = BUILD_IP(ip.d) & (~((1 << (32 - mask)) -1) & 0xFFFFFFFF);
@@ -318,7 +338,7 @@ ip_match(char *fn, stralloc *ipaddr, stralloc *content, struct constmap *ptrmap,
 				logerr("failed to scan ip");
 				logerr("[");
 				logerr(ipaddr->s);
-				logerrf("\n");
+				logerrf("]\n");
 				return (0);
 			}
 			tmp_ip = BUILD_IP(ip.d);
@@ -366,12 +386,17 @@ copy_grey(struct greylst *ptr, char *ipaddr, char *rpath, char *rcpt, int rcptle
 {
 	int             len;
 
-	if (!ip4_scan(ipaddr, &ptr->ip))
+#ifdef IPV6
+	byte_zero((char *) &ptr->ip, sizeof(union v46addr));
+	if (!ip6_scan(ipaddr, &ptr->ip.ip6))
+#else
+	if (!ip4_scan(ipaddr, &ptr->ip.ip))
+#endif
 	{
 		logerr("failed to scan ip");
 		logerr("[");
 		logerr(ipaddr);
-		logerrf("\n");
+		logerrf("]\n");
 		return (-1);
 	}
 	len = str_len(rpath);
@@ -437,7 +462,11 @@ compare_ip(unsigned char *ip1, unsigned char *ip2)
 {
 	register int    i;
 
-	for (i = 0;i < 4;i++)
+#ifdef IPV6
+	for (i = 0; i < 16; i++)
+#else
+	for (i = 0; i < 4; i++)
+#endif
 	{
 		if (ip1[i] != ip2[i])
 			return (ip1[i] < ip2[i] ? -1 : 1);
@@ -460,14 +489,13 @@ create_hash(struct greylst *curr)
 		hcount = 0;
 	}
 	if (!(hcount % hash_size)) {
-		if (h_allocated++)
-		{
+		if (h_allocated++) {
 			hdestroy();
 			hcount = 0;
 			curr = 0;
-			logerr("WARNING!! recreating hash, size=");
+			logerr("WARNING!! recreating hash table, size=");
 		} else
-			logerr("creating hash, size=");
+			logerr("creating hash table, size=");
 		strnum[fmt_ulong(strnum, (unsigned long) (2 * hash_size * h_allocated))] = 0;
 		logerr(strnum);
 		logerrf("\n");
@@ -483,7 +511,7 @@ create_hash(struct greylst *curr)
 				return (-1);
 			} else
 				hcount++;
-		} else {
+		} else { /*- add new entry to end of linked list */
 			for (ip_ptr = (struct greylst *) ep->data;ip_ptr && ip_ptr->ip_next;ip_ptr = ip_ptr->ip_next);
 			if (!ip_ptr->ip_next) {
 				ip_ptr->ip_next = ptr;
@@ -503,14 +531,18 @@ expire_records(time_t cur_time)
 {
 	struct greylst *ptr;
 	time_t          start;
-	char            ip_str[16];
+	char            ip_str[IPFMT + 1];
 
 	out("expiring records\n");
 	flush();
 	/*- find the first record that is not expired */
 	start = cur_time - timeout;
 	for (ptr = head;ptr && ptr->timestamp < start;ptr = ptr->next) {
-		ip_str[ip4_fmt(ip_str, &ptr->ip)] = 0;
+#ifdef IPV6
+		ip_str[ip6_fmt(ip_str, &ptr->ip.ip6)] = 0;
+#else
+		ip_str[ip4_fmt(ip_str, &ptr->ip.ip)] = 0;
+#endif
 		print_record(ip_str, ptr->rpath, ptr->rcpt, ptr->rcptlen, ptr->timestamp,
 			ptr->status, 1);
 		grey_count--;
@@ -528,21 +560,25 @@ expire_records(time_t cur_time)
 }
 
 int
-seq_search(ip_addr r_ip, struct greylst *ptr, char *rpath, char *rcpt, int rcptlen,
+seq_search(union v46addr r_ip, struct greylst *ptr, char *rpath, char *rcpt, int rcptlen,
 	int min_resend, int resend_win, time_t cur_time, struct greylst **store)
 {
 	int             rpath_len;
 
 	for (rpath_len = str_len(rpath);;) { /*- sequential search */
-		if (!compare_ip(ptr->ip.d, r_ip.d) && !str_diffn(ptr->rpath, rpath, rpath_len)
+#ifdef IPV6
+		if (!compare_ip(ptr->ip.ip6.d, r_ip.ip6.d) && !str_diffn(ptr->rpath, rpath, rpath_len)
 			&& (rcptlen == ptr->rcptlen && !byte_diff(ptr->rcpt, ptr->rcptlen, rcpt)))
+#else
+		if (!compare_ip(ptr->ip.ip.d, r_ip.ip.d) && !str_diffn(ptr->rpath, rpath, rpath_len)
+			&& (rcptlen == ptr->rcptlen && !byte_diff(ptr->rcpt, ptr->rcptlen, rcpt)))
+#endif
 		{ /*- found */
 			*store = ptr;
 			ptr->attempts++;
 			/*- # not older than timeout days */
 			if ((ptr->status == RECORD_GREY || ptr->status == RECORD_OK)
-				&& (ptr->timestamp > cur_time - timeout))
-			{
+				&& (ptr->timestamp > cur_time - timeout)) {
 				ptr->timestamp = cur_time;
 				ptr->status = RECORD_OK;
 				return (RECORD_OK); /*- "\1\2" */
@@ -615,7 +651,7 @@ search_record(char *remoteip, char *rpath, char *rcpt, int rcptlen, int min_rese
 {
 	struct greylst *ptr;
 	time_t          cur_time, start;
-	ip_addr         r_ip;
+	union v46addr   r_ip;
 #ifdef USE_HASH
 	ENTRY           e, *ep;
 #else
@@ -644,12 +680,17 @@ search_record(char *remoteip, char *rpath, char *rcpt, int rcptlen, int min_rese
 		}
 	} else
 		ptr = head;
-	if (!ip4_scan(remoteip, &r_ip))
+#ifdef IPV6
+	byte_zero((char *) &r_ip, sizeof(union v46addr));
+	if (!ip6_scan(remoteip, &r_ip.ip6))
+#else
+	if (!ip4_scan(remoteip, &r_ip.ip))
+#endif
 	{
 		logerr("failed to scan ip");
 		logerr("[");
 		logerr(remoteip);
-		logerrf("\n");
+		logerrf("]\n");
 		return (0);
 	}
 #ifdef USE_HASH
@@ -659,15 +700,19 @@ search_record(char *remoteip, char *rpath, char *rcpt, int rcptlen, int min_rese
 	if (!(ep = hsearch(e, FIND)))
 		return (RECORD_NEW);
 	ptr = (struct greylst *) ep->data;
-	if (!compare_ip(ptr->ip.d, r_ip.d) && !str_diffn(ptr->rpath, rpath, str_len(rpath))
+#ifdef IPV6
+	if (!compare_ip(ptr->ip.ip6.d, r_ip.ip6.d) && !str_diffn(ptr->rpath, rpath, str_len(rpath))
 		&& (rcptlen == ptr->rcptlen && !byte_diff(ptr->rcpt, ptr->rcptlen, rcpt)))
+#else
+	if (!compare_ip(ptr->ip.ip.d, r_ip.ip.d) && !str_diffn(ptr->rpath, rpath, str_len(rpath))
+		&& (rcptlen == ptr->rcptlen && !byte_diff(ptr->rcpt, ptr->rcptlen, rcpt)))
+#endif
 	{ /*- found */
 		*store = ptr;
 		ptr->attempts++;
 		/*- # not older than timeout days */
 		if ((ptr->status == RECORD_GREY || ptr->status == RECORD_OK)
-			&& (ptr->timestamp > cur_time - timeout))
-		{
+			&& (ptr->timestamp > cur_time - timeout)) {
 			ptr->timestamp = cur_time;
 			ptr->status = RECORD_OK;
 			return (RECORD_OK); /*- "\1\2" */
@@ -737,24 +782,27 @@ add_record(char *ip, char *rpath, char *rcpt, int rcptlen, struct greylst **grey
 }
 
 int
-send_response(int s, struct sockaddr_in *from, int fromlen, char *ip, char *rpath,
+send_response(int s, union sockunion *from, int fromlen, char *ip, char *rpath,
 	char *rcpt, int rcptlen, int min_resend, int resend_win, int fr_int,
 	struct greylst **grey)
 {
 	char           *resp;
 	int             i, n = 0;
+#ifndef IPV6
 	unsigned char   ibuf[sizeof(struct in6_addr)];
+#endif
 
 	*grey = (struct greylst *) 0;
+#ifndef IPV6
 	if ((i = inet_pton(AF_INET6, ip, ibuf)) == 1) {
 		resp = "\1\4";
 		n = -3; /*- inet6 address */
 	} else
-	if (i == -1)
-	{
+	if (i == -1) {
 		resp = "\0\4";
 		n = -1; /*- system error */
 	} else /*- Not in ip6 presentation format */
+#endif
 	switch (search_record(ip, rpath, rcpt, rcptlen, min_resend, resend_win, fr_int, grey))
 	{
 	case RECORD_NEW:
@@ -834,11 +882,14 @@ save_context()
 	flush();
 	if ((context_fd = open(context_file.s, O_WRONLY | O_CREAT | O_TRUNC, 0644)) == -1)
 		strerr_die4sys(111, FATAL, "unable to open file: ", context_file.s, ": ");
-	for (ptr = head;ptr;ptr = ptr->next)
-	{
+	for (ptr = head;ptr;ptr = ptr->next) {
 		rcptlen[fmt_ulong(rcptlen, ptr->rcptlen)] = 0;
 		timestamp[fmt_ulong(timestamp, ptr->timestamp)] = 0;
-		if (write_file(context_fd, ip_str, ip4_fmt(ip_str, &ptr->ip)) == -1
+#ifdef IPV6
+		if (write_file(context_fd, ip_str, ip6_fmt(ip_str, &ptr->ip.ip6)) == -1
+#else
+		if (write_file(context_fd, ip_str, ip4_fmt(ip_str, &ptr->ip.ip)) == -1
+#endif
 			|| write_0(context_fd) == -1
 			|| write_file(context_fd, ptr->rpath, str_len(ptr->rpath)) == -1
 			|| write_0(context_fd) == -1
@@ -1030,12 +1081,15 @@ char           *usage =
 int
 main(int argc, char **argv)
 {
-	int             s, buf_len, rdata_len, n, port, opt, fromlen, rcptlen, len;
-	struct sockaddr_in sin, from;
+	int             s = -1, buf_len, rdata_len, n, port, opt, fromlen, rcptlen, len, state;
+	union sockunion sin, from;
+#if defined(LIBC_HAS_IP6) && defined(IPV6)
+	struct addrinfo hints, *res, *res0;
+#endif
 	struct hostent *hp;
 	struct greylst *grey;
 	unsigned long   resend_window, min_resend, save_interval, free_interval;
-	char           *ptr, *ipaddr = 0, *client_ip = 0, *rpath = 0, *rcpt_head = 0;
+	char           *ptr, *ipaddr = 0, *client_ip = 0, *rpath = 0, *rcpt_head = 0, *a_port = "1999";
 #ifdef DYNAMIC_BUF
 	char           *rdata = 0, *buf = 0;
 	int             bufsize = MAXGREYDATASIZE;
@@ -1055,9 +1109,9 @@ main(int argc, char **argv)
 	free_interval = 5 * 60;    /*- 5 minutes */
 #ifdef USE_HASH
 	hash_size = BLOCK_SIZE;
-	while ((opt = getopt(argc, argv, "w:s:t:g:m:h:")) != opteof) {
+	while ((opt = getopt(argc, argv, "w:s:t:g:m:h:p:")) != opteof) {
 #else
-	while ((opt = getopt(argc, argv, "w:s:t:g:m:")) != opteof) {
+	while ((opt = getopt(argc, argv, "w:s:t:g:m:p:")) != opteof) {
 #endif
 		switch (opt) {
 		case 'w':
@@ -1088,6 +1142,9 @@ main(int argc, char **argv)
 			scan_ulong(optarg, &free_interval);
 			free_interval *= 60; /*- convert to seconds */
 			break;
+		case 'p':
+			a_port = optarg;
+			break;
 		default:
 			strerr_die1x(100, usage);
 			break;
@@ -1097,14 +1154,11 @@ main(int argc, char **argv)
 		strerr_die1x(100, usage);
 	ipaddr = argv[optind++];
 	if (*ipaddr == '*')
+#ifdef IPV6
+		ipaddr = "::";
+#else
 		ipaddr = INADDR_ANY;
-	for (ptr = ipaddr, port = 1999;*ptr;ptr++) {
-		if (*ptr == ':') {
-			*ptr = 0;
-			scan_int(ptr + 1, &port);
-			break;
-		}
-	}
+#endif
 	if (chdir(auto_qmail) == -1)
 		strerr_die4sys(111, FATAL, "unable to chdir: ", auto_qmail, ": ");
 #ifndef NETQMAIL
@@ -1128,23 +1182,68 @@ main(int argc, char **argv)
 	if (!stralloc_0(&context_file))
 		die_nomem();
 	load_context();
-	if ((s = socket(AF_INET, SOCK_DGRAM, 0)) == -1)
-		strerr_die2sys(111, FATAL, "unable to create socket: ");
-	if (dup2(s, 0))
-		strerr_die2sys(111, FATAL, "unable to dup socket: ");
-	sin.sin_family = AF_INET;
-	sin.sin_port = htons(port);
-	if ((inaddr = inet_addr(ipaddr)) != INADDR_NONE)
-		byte_copy((char *) &sin.sin_addr, 4, (char *) &inaddr);
-	else {
-		if (!(hp = gethostbyname(ipaddr))) {
-			errno = EINVAL;
-			strerr_die4sys(111, FATAL, "gethostbyname: ", ipaddr, ": ");
-		} else
-			byte_copy((char *) &sin.sin_addr, hp->h_length, hp->h_addr);
+#if defined(LIBC_HAS_IP6) && defined(IPV6)
+	byte_zero((char *) &hints, sizeof(struct addrinfo));
+	hints.ai_family = AF_UNSPEC;
+	hints.ai_socktype = SOCK_DGRAM;
+	hints.ai_flags = AI_PASSIVE;
+	if ((len = getaddrinfo(ipaddr, a_port, &hints, &res0))) {
+		if (len == EAI_ADDRFAMILY || (len == EAI_SYSTEM && errno == EAFNOSUPPORT))
+			noipv6 = 1;
+		else
+			strerr_die7x(111, FATAL, "getadrinfo: ", ipaddr, ": ", a_port, ":", (char *) gai_strerror(len));
 	}
-	if (bind(s, (struct sockaddr *) &sin, sizeof(sin)) == -1)
-		strerr_die6sys(111, FATAL, "gethostbyname: ", ipaddr, ":", ptr + 1, ": ");
+	close(0);
+	if (!noipv6) {
+		for (res = res0; res; res = res->ai_next) {
+			if ((s = socket(res->ai_family, res->ai_socktype, res->ai_protocol)) == -1) {
+				if (errno == EINVAL || errno == EAFNOSUPPORT) {
+					noipv6 = 1;
+					break;
+				}
+				freeaddrinfo(res0);
+				strerr_die2sys(111, FATAL, "unable to create socket6: ");
+			}
+			if (dup2(s, 0)) {
+				freeaddrinfo(res0);
+				strerr_die2sys(111, FATAL, "unable to dup socket: ");
+			}
+			if (s) {
+				close(s);
+				s = 0;
+			}
+			if (bind(s, res->ai_addr, res->ai_addrlen) == 0)
+				break;
+			freeaddrinfo(res0);
+			strerr_die6sys(111, FATAL, "bind6: ", ipaddr, ":", a_port, ": ");
+		} /*- for (res = res0; res; res = res->ai_next) */
+	}
+	freeaddrinfo(res0);
+#else
+	noipv6 = 1;
+#endif
+	if (noipv6) {
+		if ((s = socket(AF_INET, SOCK_DGRAM, 0)) == -1)
+			strerr_die2sys(111, FATAL, "unable to create socket4: ");
+		if (dup2(s, 0))
+			strerr_die2sys(111, FATAL, "unable to dup socket: ");
+		if (s) {
+			close(s);
+			s = 0;
+		}
+		sin.sa4.sin_port = htons(port);
+		if ((inaddr = inet_addr(ipaddr)) != INADDR_NONE)
+			byte_copy((char *) &sin.sa4.sin_addr, 4, (char *) &inaddr);
+		else {
+			if (!(hp = gethostbyname(ipaddr))) {
+				errno = EINVAL;
+				strerr_die4sys(111, FATAL, "gethostbyname: ", ipaddr, ": ");
+			} else
+				byte_copy((char *) &sin.sa4.sin_addr, hp->h_length, hp->h_addr);
+		}
+		if (bind(s, (struct sockaddr *) &sin.sa4, sizeof(sin)) == -1)
+			strerr_die6sys(111, FATAL, "bind4: ", ipaddr, ":", a_port, ": ");
+	} 
 	sig_catch(SIGTERM, sigterm);
 	sig_catch(SIGUSR1, sigusr1);
 	sig_catch(SIGUSR2, sigusr2);
@@ -1222,14 +1321,34 @@ main(int argc, char **argv)
 		n = MAXGREYDATASIZE;
 #endif
 		fromlen = sizeof(from);
-		if ((n = recvfrom(s, rdata, n, 0, (struct sockaddr *) &from, (socklen_t *)&fromlen)) == -1) {
+		if ((n = recvfrom(s, rdata, n, 0, (struct sockaddr *) &from.sa, (socklen_t *)&fromlen)) == -1) {
 			if (errno == error_intr)
 				continue;
 			strerr_die2sys(111, FATAL, "recvfrom: ");
 		}
 		save = 1;
 		out("qmail-greyd IP: ");
-		out(inet_ntoa(from.sin_addr));
+#if defined(LIBC_HAS_IP6) && defined(IPV6)
+		if (noipv6)
+			out(inet_ntoa(from.sa4.sin_addr));
+		else {
+			static char     addrBuf[INET6_ADDRSTRLEN];
+			if (from.sa.sa_family == AF_INET) {
+				out((char *) inet_ntop(AF_INET,
+					(void *) &from.sa4.sin_addr, addrBuf,
+					INET_ADDRSTRLEN));
+			} else
+			if (from.sa.sa_family == AF_INET6) {
+				out((char *) inet_ntop(AF_INET6,
+					(void *) &from.sa6.sin6_addr, addrBuf,
+					INET6_ADDRSTRLEN));
+			} else
+			if (from.sa.sa_family == AF_UNSPEC)
+				out("::1");
+		}
+#else
+		out(inet_ntoa(from.sa4.sin_addr));
+#endif
 		/*- 
 		 * greylist(3) protocol
 		 * packet structure -
@@ -1239,15 +1358,17 @@ main(int argc, char **argv)
 		{
 		case 'I': /*- process exactly like greydaemon */
 			out(" [");
-			for (ptr = rdata, rcpt_head = (char *) 0, rcptlen = 0;ptr < rdata + n - 1;) {
+			for (state = 0, ptr = rdata, rcpt_head = (char *) 0, rcptlen = 0;ptr < rdata + n - 1;) {
 				switch (*ptr) {
 					case 'I':
 						out("Remote IP: ");
 						client_ip = ptr + 1;
+						state++;
 						break;
 					case 'F':
 						out("FROM: ");
 						rpath = ptr + 1;
+						state++;
 						break;
 					case 'T':
 						out("RCPT: ");
@@ -1262,6 +1383,9 @@ main(int argc, char **argv)
 				ptr += len;
 				if (ptr < (rdata + n - 2))
 					out(" ");
+				if (ptr == rdata + n) {
+					state = 0;
+				}
 			} /*- for (ptr = rdata;ptr < rdata + n - 1;) */
 			out("] bufsiz=");
 			strnum[fmt_ulong(strnum, (unsigned long) n)] = 0;
@@ -1269,6 +1393,10 @@ main(int argc, char **argv)
 			out(", rcptlen=");
 			strnum[fmt_ulong(strnum, (unsigned long) rcptlen)] = 0;
 			out(strnum);
+			if (state != 2 || !rcptlen) {
+				out(", Response: RECORD INVALID\n");
+				break;
+			} else
 			n = send_response(s, &from, fromlen, client_ip, rpath, rcpt_head, rcptlen,
 					min_resend, resend_window, free_interval, &grey);
 			if (n == -2) {
@@ -1327,7 +1455,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_greyd_c()
 {
-	static char    *x = "$Id: qmail-greyd.c,v 1.11 2015-08-24 19:07:18+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-greyd.c,v 1.12 2015-12-31 08:35:41+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
