@@ -1605,7 +1605,7 @@ To enable greylisting the environment variable
 is used. For the default values (loopback address 127.0.0.1, port 1999) use,
 
 .EX
-   GREYIP=":"
+   GREYIP="127.0.0.1@1999"
 .EE
 
 Alternatively a different IP address and/or port can be specified as
@@ -1613,8 +1613,8 @@ in these examples,
 
 .EX
    GREYIP="192.168.1.50"
-   GREYIP=":12345"
-   GREYIP="192.168.1.33:54321"
+   GREYIP="::1@12345"
+   GREYIP="192.168.1.33@54321"
 .EE
 
 Exception:
