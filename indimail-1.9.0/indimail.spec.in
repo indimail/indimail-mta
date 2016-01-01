@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail.spec.in,v 2.296 2015-12-29 00:49:39+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 2.297 2016-01-01 19:22:03+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %define _unpackaged_files_terminate_build 1
 
@@ -2540,7 +2540,7 @@ echo "1" > %{servicedir}/qmail-smtpd.366/variables/DISABLE_PLUGIN
 # Greylist daemon
 %{_prefix}/sbin/svctool --greylist=1999 --servicedir=%{servicedir} --min-resend-min=2 \
     --resend-win-hr=24 --timeout-days=30 --context-file=greylist.context \
-    --hash-size=65536 --save-interval=5 --whitelist=greylist.white --use-greydaemon
+    --hash-size=65536 --save-interval=5 --whitelist=greylist.white
 # qmail-qmtpd service
 %{_prefix}/sbin/svctool --qmtp=209 --servicedir=%{servicedir} --qbase=%{qbase} \
 	--qcount=%{qcount} --qstart=1 --cntrldir=control --localip=0 --maxdaemons=75 --maxperip=25 \
