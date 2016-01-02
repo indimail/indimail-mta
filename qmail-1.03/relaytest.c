@@ -1,5 +1,8 @@
 /*
  * $Log: relaytest.c,v $
+ * Revision 1.5  2016-01-02 19:23:25+05:30  Cprogrammer
+ * use indimail.org
+ *
  * Revision 1.4  2011-07-29 09:29:58+05:30  Cprogrammer
  * fixed gcc 4.6 warnings
  *
@@ -156,14 +159,14 @@ main(argc, argv)
 		strerr_die2x(111, FATAL, "connected but greeting failed");
 	}
 	substdio_puts(&ssout, "client: ");
-	substdio_putsflush(&ssout, "EHLO testindi.com\r\n");
-	if (substdio_putsflush(&ss7, "EHLO testindi.com\r\n"))
+	substdio_putsflush(&ssout, "EHLO indimail.org\r\n");
+	if (substdio_putsflush(&ss7, "EHLO indimail.org\r\n"))
 		die_netwrite();
 	if (smtpcode() != 250)
 	{
 		substdio_puts(&ssout, "client: ");
-		substdio_putsflush(&ssout, "HELO testindi.com\r\n");
-		if (substdio_putsflush(&ss7, "HELO testindi.com\r\n"))
+		substdio_putsflush(&ssout, "HELO indimail.org\r\n");
+		if (substdio_putsflush(&ss7, "HELO indimail.org\r\n"))
 			die_netwrite();
 		if (smtpcode() != 250)
 		{
@@ -172,8 +175,8 @@ main(argc, argv)
 		}
 	}
 	substdio_puts(&ssout, "client: ");
-	substdio_putsflush(&ssout, "MAIL FROM: test@testindi.com\r\n");
-	if (substdio_putsflush(&ss7, "MAIL FROM: test@testindi.com\r\n"))
+	substdio_putsflush(&ssout, "MAIL FROM: test@indimail.org\r\n");
+	if (substdio_putsflush(&ss7, "MAIL FROM: test@indimail.org\r\n"))
 		die_netwrite();
 	if (smtpcode() != 250)
 	{
@@ -207,7 +210,7 @@ main(argc, argv)
 void
 getversion_relaytest_c()
 {
-	static char    *x = "$Id: relaytest.c,v 1.4 2011-07-29 09:29:58+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: relaytest.c,v 1.5 2016-01-02 19:23:25+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
