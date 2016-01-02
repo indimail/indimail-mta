@@ -11,10 +11,6 @@
 %define dist redhat
 %define disttag rh
 
-%if %{is_mandrake} != 0
-%define dist mandrake
-%define disttag mdk
-%endif
 %if %{is_suse} != 0
 %define dist suse
 %define disttag suse
@@ -57,12 +53,13 @@
 
 Summary: A Flexible SMTP server
 Name: indimail-mta
-Version: 1.8.6
+Version: 1.9.0
 %if %build_on_obs == 1
 Release: 1.<B_CNT>
 %else
 Release: 1.1
 %endif
+
 %if %build_on_obs == 1
 License: GPL-3.0+
 %else
@@ -111,6 +108,9 @@ BuildRequires: glibc glibc-devel openssl procps readline-devel
 BuildRequires: sed ncurses-devel gettext-devel
 BuildRequires: python-devel flex findutils
 BuildRequires: readline gzip autoconf pkgconfig
+%if %build_on_obs == 1
+BuildRequires: libidn-devel
+%endif
 
 %if %build_on_obs == 1
 ##################################### OBS ####################################
@@ -135,6 +135,7 @@ BuildRequires: openldap2-devel
 %else
 BuildRequires: openldap-devel
 %endif
+
 %if %{undefined centos_version} && %{undefined rhel_version}
 BuildRequires: chrpath
 %endif
