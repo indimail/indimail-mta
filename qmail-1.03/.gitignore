@@ -504,3 +504,6 @@ qaes
 whois
 whois.o
 tcpopen.o
+qlogselect
+tai2tai64n
+tai64n2tai
