@@ -25,7 +25,7 @@ Description: indimail-mta provides a standalone SMTP server that is part of the 
  .
  The package combines qmail with other packages like libdkim, libsrs2
 
-Package: daemontools
+Package: indimail-mta-daemontools
 Architecture: any
 Depends: ${shlibs:Depends}, ${misc:Depends}
 Conflicts: indimail, indimail-mini, indimail-mta
@@ -41,7 +41,7 @@ Description: daemontools is a collection of tools for managing UNIX services.
  amount of disk space used. If the disk fills up, it pauses and tries
  again, without losing any data.
 
-Package: ucsp-tcp
+Package: indimail-mta-ucsp-tcp
 Architecture: any
 Depends: ${shlibs:Depends}, ${misc:Depends}
 Conflicts: indimail, indimail-mini, indimail-mta
