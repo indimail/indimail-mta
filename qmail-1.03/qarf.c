@@ -1,5 +1,8 @@
 /*
  * $Log: qarf.c,v $
+ * Revision 1.10  2016-01-02 17:45:20+05:30  Cprogrammer
+ * reformatted error strings
+ *
  * Revision 1.9  2013-06-09 17:02:52+05:30  Cprogrammer
  * shortened variable declartion in addrparse() function
  *
@@ -93,14 +96,14 @@ void
 my_puts(char *s)
 {
 	if (substdio_puts(&ssout, s) == -1)
-		my_error("write", 0, WRITE_ERR);
+		my_error("qarf: write", 0, WRITE_ERR);
 }
 
 void
 my_putb(char *s, int len)
 {
 	if (substdio_bput(&ssout, s, len) == -1)
-		my_error("write", 0, WRITE_ERR);
+		my_error("qarf: write", 0, WRITE_ERR);
 }
 
 static int
@@ -116,19 +119,19 @@ mkTempFile(int seekfd)
 	if (lseek(seekfd, 0, SEEK_SET) == 0)
 		return (0);
 	if (errno == EBADF)
-		my_error("read error", 0, READ_ERR);
+		my_error("qarf: read", 0, READ_ERR);
 	if (!(tmpdir = env_get("TMPDIR")))
 		tmpdir = "/tmp";
 	if (!stralloc_copys(&tmpFile, tmpdir))
-		my_error("out of memory", 0, MEM_ERR);
+		my_error("qarf: out of memory", 0, MEM_ERR);
 	if (!stralloc_cats(&tmpFile, "/qmailFilterXXX"))
-		my_error("out of memory", 0, MEM_ERR);
+		my_error("qarf: out of memory", 0, MEM_ERR);
 	if (!stralloc_catb(&tmpFile, strnum, fmt_ulong(strnum, (unsigned long) getpid())))
-		my_error("out of memory", 0, MEM_ERR);
+		my_error("qarf: out of memory", 0, MEM_ERR);
 	if (!stralloc_0(&tmpFile))
-		my_error("out of memory", 0, MEM_ERR);
+		my_error("qarf: out of memory", 0, MEM_ERR);
 	if ((fd = open(tmpFile.s, O_RDWR | O_EXCL | O_CREAT, 0600)) == -1)
-		my_error("open error", tmpFile.s, OPEN_ERR);
+		my_error("qarf: open", tmpFile.s, OPEN_ERR);
 	unlink(tmpFile.s);
 	substdio_fdbuf(&ssout, write, fd, outbuf, sizeof(outbuf));
 	substdio_fdbuf(&ssin, read, seekfd, inbuf, sizeof(inbuf));
@@ -136,25 +139,25 @@ mkTempFile(int seekfd)
 	{
 	case -2: /*- read error */
 		close(fd);
-		my_error("read error", 0, READ_ERR);
+		my_error("qarf: read", 0, READ_ERR);
 	case -3: /*- write error */
 		close(fd);
-		my_error("write error", 0, WRITE_ERR);
+		my_error("qarf: write", 0, WRITE_ERR);
 	}
 	if (substdio_flush(&ssout) == -1) {
 		close(fd);
-		my_error("write error", 0, WRITE_ERR);
+		my_error("qarf: write", 0, WRITE_ERR);
 	}
 	if (fd != seekfd) {
 		if (dup2(fd, seekfd) == -1) {
 			close(fd);
-			my_error("dup2 error", 0, DUP_ERR);
+			my_error("qarf: dup2", 0, DUP_ERR);
 		}
 		close(fd);
 	}
 	if (lseek(seekfd, 0, SEEK_SET) != 0) {
 		close(seekfd);
-		my_error("lseek error", 0, LSEEK_ERR);
+		my_error("qarf: lseek", 0, LSEEK_ERR);
 	}
 	return (0);
 }
@@ -189,13 +192,13 @@ addrparse(char *arg)
 		}
 	}
 	if (!stralloc_copys(&addr, ""))
-		my_error("out of memory", 0, MEM_ERR);
+		my_error("qarf: out of memory", 0, MEM_ERR);
 	flagesc = 0;
 	flagquoted = 0;
 	for (i = 0; (ch = arg[i]); ++i) {	/*- copy arg to addr, stripping quotes */
 		if (flagesc) {
 			if (!stralloc_append(&addr, &ch))
-				my_error("out of memory", 0, MEM_ERR);
+				my_error("qarf: out of memory", 0, MEM_ERR);
 			flagesc = 0;
 		} else {
 			if (!flagquoted && ch == terminator)
@@ -215,7 +218,7 @@ addrparse(char *arg)
 				break;
 			default:
 				if (!stralloc_append(&addr, &ch))
-					my_error("out of memory", 0, MEM_ERR);
+					my_error("qarf: out of memory", 0, MEM_ERR);
 			}
 		}
 	}
@@ -250,7 +253,7 @@ parse_email(int get_subj, int get_rpath)
 	substdio_fdbuf(&ssin, read, 0, ssinbuf, sizeof(ssinbuf));
 	for (;;) {
 		if (getln(&ssin, &line, &match, '\n') == -1)
-			my_error("read error", 0, READ_ERR);
+			my_error("qarf: read", 0, READ_ERR);
 		if (!match && line.len == 0)
 			break;
 		if (!mess822_ok(&line))
@@ -258,55 +261,55 @@ parse_email(int get_subj, int get_rpath)
 		if (!got_date && !str_diffn(line.s, "Date: ", 6)) {
 			got_date = 1;
 			if (!stralloc_copyb(&email_date, line.s + 6, line.len - 6))
-				my_error("out of memory", 0, MEM_ERR);
+				my_error("qarf: out of memory", 0, MEM_ERR);
 		} else
 		if (!got_subj && !str_diffn(line.s, "Subject: ", 9)) {
 			got_subj = 1;
 			if (!stralloc_copyb(&email_subj, line.s + 9, line.len - 9))
-				my_error("out of memory", 0, MEM_ERR);
+				my_error("qarf: out of memory", 0, MEM_ERR);
 		} else
 		if (!got_rpath && !str_diffn(line.s, "Return-Path: ", 13)) {
 			got_rpath = 1;
 			line.s[line.len - 1] = 0;
 			if (!addrparse(line.s)) /*- sets addr */
-				my_error ("unable to parse address", line.s, 111);
+				my_error ("qarf: unable to parse address", line.s, 111);
 			if (!stralloc_copy(&rpath, &addr))
-				my_error("out of memory", 0, MEM_ERR);
+				my_error("qarf: out of memory", 0, MEM_ERR);
 		} else
 		if (!got_from && !str_diffn(line.s, "From: ", 6)) {
 			got_from = 1;
 			line.s[line.len - 1] = 0;
 			if (!addrparse(line.s)) /*- sets addr */
-				my_error ("unable to parse address", line.s, 111);
+				my_error ("qarf: unable to parse address", line.s, 111);
 			if (!stralloc_copy(&email_from, &addr))
-				my_error("out of memory", 0, MEM_ERR);
+				my_error("qarf: out of memory", 0, MEM_ERR);
 		} else
 		if (!got_msgid && !str_diffn(line.s, "Message-ID: ", 12)) {
 			got_msgid = 1;
 			if (!stralloc_copyb(&email_msgid, line.s + 12, line.len - 12))
-				my_error("out of memory", 0, MEM_ERR);
+				my_error("qarf: out of memory", 0, MEM_ERR);
 		} else
 		if (!got_dkimstat && !str_diffn(line.s, "DKIM-Status: ", 13)) {
 			got_dkimstat = 1;
 			if (str_diffn(line.s + 13, "good", 4)) {
 				if (!stralloc_copyb(&email_dkimstat, line.s + 13, line.len - 13))
-					my_error("out of memory", 0, MEM_ERR);
+					my_error("qarf: out of memory", 0, MEM_ERR);
 			}
 		} else
 		if (!got_deliveredto && !str_diffn(line.s, "Delivered-To: ", 14)) {
 			got_deliveredto = 1;
 			line.s[line.len - 1] = 0;
 			if (!addrparse(line.s)) /*- sets addr */
-				my_error ("unable to parse address", line.s, 111);
+				my_error ("qarf: unable to parse address", line.s, 111);
 			if (!stralloc_copy(&email_deliveredto, &addr))
-				my_error("out of memory", 0, MEM_ERR);
+				my_error("qarf: out of memory", 0, MEM_ERR);
 		}
 		if (got_date && got_subj && got_rpath && got_from && got_msgid 
 				&& got_dkimstat && got_deliveredto)
 			break;
 	}
 	if (lseek(0, 0, SEEK_SET) == -1)
-		my_error("lseek error", 0, LSEEK_ERR);
+		my_error("qarf: lseek", 0, LSEEK_ERR);
 }
 int
 main(int argc, char **argv)
@@ -354,9 +357,9 @@ main(int argc, char **argv)
 	if (!to)
 		copy_rpath = 1;
 	if (to && copy_rpath)
-		my_error("you cannot specify -t & -T option together", 0, USAGE_ERR);
+		my_error("qarf: you cannot specify -t & -T option together", 0, USAGE_ERR);
 	if (!from)
-		my_error("sender not specified", 0, USAGE_ERR);
+		my_error("qarf: sender not specified", 0, USAGE_ERR);
 	if (!subject)
 		copy_subj = 1;
 	birth = now();
@@ -394,16 +397,16 @@ main(int argc, char **argv)
 			"Content-Type: multipart/report; "
 			"boundary=\"");
 	if (!stralloc_copyb(&boundary, "_----------=_", 13))
-		my_error("out of memory", 0, MEM_ERR);
+		my_error("qarf: out of memory", 0, MEM_ERR);
 	if (!stralloc_catb(&boundary, strnum, fmt_ulong(strnum, birth)))
-		my_error("out of memory", 0, MEM_ERR);
+		my_error("qarf: out of memory", 0, MEM_ERR);
 	if (!stralloc_catb(&boundary, strnum, fmt_ulong(strnum, id)))
-		my_error("out of memory", 0, MEM_ERR);
+		my_error("qarf: out of memory", 0, MEM_ERR);
 	my_putb(boundary.s, boundary.len);
 	my_putb("\"; ", 3);
 	my_puts(
 			"report-type=\"feedback-report\"\n"
-			"X-Mailer: qarf $Revision: 1.9 $\n");
+			"X-Mailer: qarf $Revision: 1.10 $\n");
 
 	/*- Body */
 	my_puts("\nThis is a multi-part message in MIME format\n\n");
@@ -417,13 +420,13 @@ main(int argc, char **argv)
 	if (text)
 	{
 		if ((fd = open(text, O_RDONLY)) == -1)
-			my_error("open error", text, OPEN_ERR);
+			my_error("qarf: open", text, OPEN_ERR);
 		substdio_fdbuf(&ssin, read, fd, ssinbuf, sizeof(ssinbuf));
 		while ((r = substdio_get(&ssin, inbuf, sizeof(inbuf))) > 0)
 			my_putb(inbuf, r);
 		close(fd);
 		if (r == -1)
-			my_error("read", 0, READ_ERR);
+			my_error("qarf: read", 0, READ_ERR);
 	} else
 	{
 		my_puts("This is an email abuse report for an email received");
@@ -447,7 +450,7 @@ main(int argc, char **argv)
 
 	my_puts(
 			"Feedback-Type: abuse\n"
-			"User-Agent: $Id: qarf.c,v 1.9 2013-06-09 17:02:52+05:30 Cprogrammer Stab mbhangui $\n"
+			"User-Agent: $Id: qarf.c,v 1.10 2016-01-02 17:45:20+05:30 Cprogrammer Exp mbhangui $\n"
 			"Version: 0.1\n");
 	if (email_from.len) {
 		my_putb("Original-Mail-From: ", 20);
@@ -490,7 +493,7 @@ main(int argc, char **argv)
 	substdio_fdbuf(&ssin, read, 0, ssinbuf, sizeof(ssinbuf));
 	for (;;) {
 		if (getln(&ssin, &line, &match, '\n') == -1)
-			my_error("read error", 0, READ_ERR);
+			my_error("qarf: read", 0, READ_ERR);
 		if (!match && line.len == 0)
 			break;
 		my_putb(line.s, line.len);
@@ -500,14 +503,14 @@ main(int argc, char **argv)
 	my_putb("--\n", 3);
 	my_putb("\n", 1);
 	if (substdio_flush(&ssout) == -1)
-		my_error("write", 0, WRITE_ERR);
+		my_error("qarf: write", 0, WRITE_ERR);
 	return(0);
 }
 
 void
 getversion_qarf_c()
 {
-	static char    *x = "$Id: qarf.c,v 1.9 2013-06-09 17:02:52+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: qarf.c,v 1.10 2016-01-02 17:45:20+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
