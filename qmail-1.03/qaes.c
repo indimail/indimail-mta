@@ -7,6 +7,9 @@
  * Saju Pillai (saju.pillai@gmail.com)
  *
  * $Log: qaes.c,v $
+ * Revision 1.4  2016-01-02 17:45:51+05:30  Cprogrammer
+ * fixed usage and reformatted error strings
+ *
  * Revision 1.3  2014-01-29 14:01:58+05:30  Cprogrammer
  * fixed compilation warnings
  *
@@ -43,7 +46,7 @@ static char     ssoutbuf[512];
 static substdio ssout = SUBSTDIO_FDBUF(write, 1, ssoutbuf, sizeof ssoutbuf);
 static char     sserrbuf[512];
 static substdio sserr = SUBSTDIO_FDBUF(write, 2, sserrbuf, sizeof(sserrbuf));
-char           *usage = "usage: qarf [-i] -t recipient -s subject -f sender [-m filename]\n";
+char           *usage = "usage: qaes -k key [ -i -d -e -s salt ]\n";
 char            strnum[FMT_ULONG];
 
 void
@@ -80,7 +83,7 @@ void
 my_puts(char *s)
 {
 	if (substdio_puts(&ssout, s) == -1)
-		my_error("write", 0, WRITE_ERR);
+		my_error("qaes: write", 0, WRITE_ERR);
 }
 
 /* Iterative function to reverse digits of num*/
@@ -237,7 +240,7 @@ main(int argc, char **argv)
 	 */
 	for (opt = -1;;) {
 		if (getln(&ssin, &user, &match, '\n') == -1)
-			my_error("base64: read", 0, 2);
+			my_error("qaes: read", 0, READ_ERR);
 		if (!match && user.len == 0)
 			break;
 		if (match && ignore_newline)
@@ -253,11 +256,11 @@ main(int argc, char **argv)
 					len = 0;
 				} else {
 					if (substdio_bput(&ssout, userout.s, userout.len) == -1)
-						my_error("qaes: write", 0, 3);
+						my_error("qaes: write", 0, WRITE_ERR);
 					if (substdio_bput(&ssout, "\n", 1))
-						my_error("qaes: write", 0, 3);
+						my_error("qaes: write", 0, WRITE_ERR);
 					if (substdio_flush(&ssout) == -1)
-						my_error("qaes: write", 0, 3);
+						my_error("qaes: write", 0, WRITE_ERR);
 				}
 				free(ciphertext);
 			}
@@ -271,28 +274,28 @@ main(int argc, char **argv)
 			}
 			if (len) {
 				if (substdio_bput(&ssout, plaintext, len) == -1)
-					my_error("qaes: write", 0, 3);
+					my_error("qaes: write", 0, WRITE_ERR);
 				if (substdio_bput(&ssout, "\n", 1))
-					my_error("qaes: write", 0, 3);
+					my_error("qaes: write", 0, WRITE_ERR);
 				if (substdio_flush(&ssout) == -1)
-					my_error("qaes: write", 0, 3);
+					my_error("qaes: write", 0, WRITE_ERR);
 				free(plaintext);
 			}
 		}
 		if (!len) {
 			error_count++;
 			if (substdio_bput(&ssout, user.s, user.len) == -1)
-				my_error("qaes: write", 0, 3);
+				my_error("qaes: write", 0, WRITE_ERR);
 			if (substdio_bput(&ssout, "qaes: unable to ", 16))
-				my_error("qaes: write", 0, 3);
+				my_error("qaes: write", 0, WRITE_ERR);
 			if (substdio_bput(&ssout, encode ? "encrypt\n" : "decrypt\n", 8))
-				my_error("qaes: write", 0, 3);
+				my_error("qaes: write", 0, WRITE_ERR);
 		}
 	}
 	EVP_CIPHER_CTX_cleanup(&en);
 	EVP_CIPHER_CTX_cleanup(&de);
 	if (substdio_flush(&ssout) == -1) {
-		my_error("write error", 0, WRITE_ERR);
+		my_error("qaes: write", 0, WRITE_ERR);
 	}
 	return error_count;
 }
@@ -300,7 +303,7 @@ main(int argc, char **argv)
 void
 getversion_qaes_c()
 {
-	static char    *x = "$Id: qaes.c,v 1.3 2014-01-29 14:01:58+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: qaes.c,v 1.4 2016-01-02 17:45:51+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
