@@ -93,6 +93,8 @@ binary-indep: build install
 	dh_testdir
 	dh_testroot
 	find $(DESTDIR)/$(prefix)/man -name '*'.? -type f -exec gzip -q {} \;
+	dh_install --sourcedir=$(CURDIR)/debian/indimail -pdaemontools
+	dh_install --sourcedir=$(CURDIR)/debian/indimail -pucspi-tcp
 	dh_installchangelogs
 	dh_installdocs
 	dh_link
