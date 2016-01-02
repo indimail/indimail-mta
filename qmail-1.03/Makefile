@@ -243,6 +243,12 @@ swaks: swaks.pl conf-qmail
 	> swaks
 	chmod 755 swaks
 
+qlogselect: qlogselect.pl conf-qmail
+	cat qlogselect.pl \
+	| sed s}QMAIL}"`head -1 conf-qmail`"}g \
+	> qlogselect
+	chmod 755 qlogselect
+
 binm1: \
 binm1.sh conf-qmail
 	cat binm1.sh \
@@ -1267,12 +1273,13 @@ maildirserial serialsmtp serialqmtp maildirsmtp maildirqmtp whois \
 serialcmd maildircmd rewind relaytest qmail-qfilter sys-checkpwd ldap-checkpwd \
 iftocc ofmipd ofmipname 822field new-inject 822date 822received 822print \
 tokenize addrlist qquote parsedate qmail-greyd greydaemon drate \
-analyzer qtools qlog viruscanner update_tmprsadh dknewkey \
+analyzer qtools qlog viruscanner update_tmprsadh dknewkey qlogselect \
 dktest dot-forward batv balance_outgoing qarf plugtest surblfilter \
 fastforward printforward setforward newaliases printmaillist surblqueue \
 setmaillist newinclude sortedtest logselect mbox2maildir qnotify rrt \
 envdir envuidgid fghack multilog pgrphack readproctitle setlock \
 setuidgid softlimit supervise svc svok svscan svstat tai64n tai64nlocal tai64nunix \
+tai2tai64n tai64n2tai \
 recordio argv0 addcr delcr fixcrio generic.so cdbmake cdbget cdbgetm \
 cdbdump cdbstats cdbtest cdbmake-12 cdbmake-sv testzero dk-filter \
 uacl udplogger udpclient smtpd-plugin.so smtpd-plugin0.so
@@ -5051,6 +5058,38 @@ substdio.a str.a
 tai64nunix.o: \
 compile tai64nunix.c substdio.h subfd.h fmt.h
 	./compile tai64nunix.c
+
+tai2tai64n: load tai2tai64n.o tai_decode.o tai64n_encode.o error_str.o error.o \
+byte_copy.o byte_chr.o str_len.o stralloc_catb.o alloc.o alloc_re.o stralloc_eady.o \
+stralloc_pend.o byte_cr.o stralloc_opyb.o getln.o getln2.o substdio.a
+	./load tai2tai64n tai_decode.o tai64n_encode.o error_str.o error.o \
+	byte_copy.o byte_chr.o str_len.o stralloc_catb.o alloc.o alloc_re.o stralloc_eady.o \
+	stralloc_pend.o byte_cr.o stralloc_opyb.o getln.o getln2.o substdio.a
+
+tai2tai64n.o: compile tai2tai64n.c tai2.h bool.h
+	./compile tai2tai64n.c
+
+tai64n2tai: load tai64n2tai.o tai64n_decode.o tai_encode.o substdo.o getln.o getln2.o \
+stralloc_pend.o stralloc_opyb.o substdi.o alloc_re.o alloc.o byte_cr.o \
+error_str.o error.o byte_copy.o str_len.o stralloc_catb.o stralloc_eady.o byte_chr.o
+	./load tai64n2tai tai64n_decode.o tai_encode.o substdo.o getln.o getln2.o \
+	stralloc_pend.o stralloc_opyb.o substdi.o alloc_re.o alloc.o byte_cr.o \
+	error_str.o error.o byte_copy.o str_len.o stralloc_catb.o stralloc_eady.o byte_chr.o
+
+tai64n2tai.o: compile tai64n2tai.c tai2.h bool.h
+	./compile tai64n2tai.c
+
+tai_decode.o: compile tai_decode.c tai2.h bool.h
+	./compile tai_decode.c
+
+tai_encode.o: compile tai_encode.c tai2.h bool.h
+	./compile tai_encode.c
+
+tai64n_decode.o: compile tai64n_decode.c tai.h bool.h
+	./compile tai64n_decode.c
+
+tai64n_encode.o: compile tai64n_encode.c tai.h bool.h
+	./compile tai64n_encode.c
 
 recordio.o: \
 compile recordio.c sig.h substdio.h strerr.h str.h byte.h \

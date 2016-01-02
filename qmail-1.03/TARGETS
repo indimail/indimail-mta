@@ -1037,3 +1037,12 @@ whois.o
 fmt_hexbytes.o
 fmt_xlong.o
 hasifaddr.h
+qlogselect
+tai2tai64n
+tai64n2tai
+tai2tai64n.o
+tai64n2tai.o
+tai64n_decode.o
+tai64n_encode.o
+tai_decode.o
+tai_encode.o
