@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail.spec.in,v 2.297 2016-01-01 19:22:03+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 2.298 2016-01-02 19:35:06+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %define _unpackaged_files_terminate_build 1
 
@@ -218,7 +218,7 @@ NoSource: 20
 
 URL: http://www.indimail.org
 #AutoReqProv: No
-Conflicts: %{name}-mini, %{name}-mta
+Conflicts: %{name}-mini, %{name}-mta %{name}-mta-daemontools %{name}-mta-ucspi-tcp
 Provides: %{name}-shared
 BuildRequires: openssl-devel rpm gcc gcc-c++ make bison binutils coreutils grep
 BuildRequires: glibc glibc-devel openssl procps readline-devel
@@ -1186,10 +1186,13 @@ fi
 %attr(555,root,qmail)                   %{_prefix}/bin/printmaillist
 %attr(511,root,qmail)                   %{_prefix}/bin/qmail-todo
 %attr(555,root,qmail)                   %{_prefix}/bin/tai64nunix
+%attr(555,root,qmail)                   %{_prefix}/bin/tai2tai64n
+%attr(555,root,qmail)                   %{_prefix}/bin/tai64n2tai
 %attr(555,root,qmail)                   %{_prefix}/bin/qmail-tcpto
 %attr(555,root,qmail)                   %{_prefix}/bin/newinclude
 %attr(555,root,qmail)                   %{_prefix}/bin/recordio
 %attr(555,root,qmail)                   %{_prefix}/bin/logselect
+%attr(555,root,qmail)                   %{_prefix}/bin/qlogselect
 %attr(555,root,qmail)                   %{_prefix}/bin/teepipe
 %attr(555,root,qmail)                   %{_prefix}/bin/ipmeprint
 %attr(555,root,qmail)                   %{_prefix}/bin/uacl
