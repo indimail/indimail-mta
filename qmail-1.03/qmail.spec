@@ -1,6 +1,6 @@
 #
 #
-# $Id: qmail.spec,v 1.19 2015-12-31 08:36:58+05:30 Cprogrammer Exp mbhangui $
+# $Id: qmail.spec,v 1.20 2016-01-02 19:23:07+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %define _unpackaged_files_terminate_build 1
 
@@ -187,6 +187,71 @@ ucspi-tcp,
 The package combines qmail with other packages like libdkim, libsrs2
 
 %{see_base}
+
+%package daemontools
+Summary: A collection of tools for managing UNIX services
+Conflicts: indimail, indimail-mta
+%if %{undefined suse_version} && %{undefined sles_version}
+Group: System Environment/Base
+%else
+Group: System/Base
+%endif
+
+%description daemontools
+daemontools is a collection of tools for managing UNIX services. 
+
+supervise monitors a service. It starts the service and restarts the
+service if it dies. Setting up a new service is easy: all supervise
+needs is a directory with a run script that runs the service.
+
+multilog saves error messages to one or more logs. It optionally
+timestamps each line and, for each log, includes or excludes lines
+matching specified patterns. It automatically rotates logs to limit the
+amount of disk space used. If the disk fills up, it pauses and tries
+again, without losing any data.
+
+Original Author:
+---------------
+    Dan J. Bernstein <djb@cr.yp.to>
+
+%package ucspi-tcp
+Conflicts: indimail, indimail-mta
+Summary: A collection of tools for building TCP client-server applications
+%if %{undefined suse_version} && %{undefined sles_version}
+Group: System Environment/Base
+%else
+Group: System/Base
+%endif
+
+%description ucspi-tcp
+tcpserver and tcpclient are easy-to-use command-line tools for building
+TCP client-server applications.
+
+tcpserver waits for incoming connections and, for each connection, runs
+a program of your choice. Your program receives environment variables
+showing the local and remote host names, IP addresses, and port numbers.
+
+tcpserver offers a concurrency limit to protect you from running out of
+processes and memory. When you are handling 40 (by default) simultaneous
+connections, tcpserver smoothly defers acceptance of new connections.
+
+tcpserver also provides TCP access control features, similar to
+tcp-wrappers/tcpd\'s hosts.allow but much faster. Its access control
+rules are compiled into a hashed format with cdb, so it can easily deal
+with thousands of different hosts.
+
+This package includes a recordio tool that monitors all the input and
+output of a server.
+
+tcpclient makes a TCP connection and runs a program of your choice. It
+sets up the same environment variables as tcpserver.
+
+This package includes several sample clients built on top of tcpclient:
+who@, date@, finger@, http@, tcpcat, and mconnect.
+
+tcpserver and tcpclient conform to UCSPI, the UNIX Client-Server Program
+Interface, using the TCP protocol. UCSPI tools are available for several
+different networks.
 
 %prep
 echo "---------------- INFORMATION ------------------------"
@@ -500,30 +565,22 @@ done
 %attr(555,root,qmail)                   %{_prefix}/bin/rsmtprecipients
 %attr(555,root,qmail)                   %{_prefix}/bin/autoresponder
 %attr(555,root,qmail)                   %{_prefix}/bin/idedit
-%attr(555,root,qmail)                   %{_prefix}/bin/svstat
 %attr(555,root,qmail)                   %{_prefix}/bin/ddist
 %attr(555,root,qmail)                   %{_prefix}/bin/822headerfilter
 %attr(555,root,qmail)                   %{_prefix}/bin/smtp-matchup
 %attr(500,root,qmail)                   %{_prefix}/bin/qmail-newu
 %attr(511,root,qmail)                   %{_prefix}/bin/qmail-pw2u
-%attr(555,root,qmail)                   %{_prefix}/bin/qfilelog
 %attr(555,root,qmail)                   %{_prefix}/bin/checkdomain
-%attr(555,root,qmail)                   %{_prefix}/bin/svok
 %attr(555,root,qmail)                   %{_prefix}/bin/maildirqmtp
 %attr(555,root,qmail)                   %{_prefix}/bin/qmailctl
 %attr(500,root,qmail)                   %{_prefix}/bin/qmail-lspawn
 %attr(555,root,qmail)                   %{_prefix}/bin/dnstxt
 %attr(555,root,qmail)                   %{_prefix}/bin/printmaillist
 %attr(511,root,qmail)                   %{_prefix}/bin/qmail-todo
-%attr(555,root,qmail)                   %{_prefix}/bin/tai64nunix
 %attr(555,root,qmail)                   %{_prefix}/bin/qmail-tcpto
 %attr(555,root,qmail)                   %{_prefix}/bin/newinclude
 %attr(555,root,qmail)                   %{_prefix}/bin/recordio
-%attr(555,root,qmail)                   %{_prefix}/bin/logselect
-%attr(555,root,qmail)                   %{_prefix}/bin/teepipe
-%attr(555,root,qmail)                   %{_prefix}/bin/ipmeprint
 %attr(555,root,qmail)                   %{_prefix}/bin/uacl
-%attr(555,root,qmail)                   %{_prefix}/bin/envdir
 %attr(555,root,qmail)                   %{_prefix}/bin/dnsmxip
 %attr(555,root,qmail)                   %{_prefix}/bin/whois
 %attr(555,root,qmail)                   %{_prefix}/bin/zrecipients
@@ -538,12 +595,10 @@ done
 %attr(555,root,qmail)                   %{_prefix}/bin/sendmail
 %attr(555,root,qmail)                   %{_prefix}/bin/rmail
 %attr(555,root,qmail)                   %{_prefix}/bin/ifaddr
-%attr(555,root,qmail)                   %{_prefix}/bin/svscan
 %attr(555,root,qmail)                   %{_prefix}/bin/matchup
 %attr(555,root,qmail)                   %{_prefix}/bin/zspam
 %attr(555,root,qmail)                   %{_prefix}/bin/recipients
 %attr(555,root,qmail)                   %{_prefix}/bin/update_tmprsadh
-%attr(555,root,qmail)                   %{_prefix}/bin/softlimit
 %attr(555,root,qmail)                   %{_prefix}/bin/setforward
 %attr(555,root,qmail)                   %{_prefix}/bin/822date
 %attr(555,root,qmail)                   %{_prefix}/bin/cdbdump
@@ -554,14 +609,10 @@ done
 %attr(511,root,qmail)                   %{_prefix}/bin/qmail-getpw
 %attr(555,root,qmail)                   %{_prefix}/bin/balance_outgoing
 %attr(555,root,qmail)                   %{_prefix}/bin/rsmtpfailures
-%attr(555,root,qmail)                   %{_prefix}/bin/fghack
 %attr(555,root,qmail)                   %{_prefix}/bin/cdbmake-sv
-%attr(555,root,qmail)                   %{_prefix}/bin/svscanboot
 %attr(555,root,qmail)                   %{_prefix}/bin/successes
 %attr(555,root,qmail)                   %{_prefix}/bin/qmail-sigterm
-%attr(555,root,qmail)                   %{_prefix}/bin/spipe
 %attr(555,root,qmail)                   %{_prefix}/bin/delcr
-%attr(555,root,qmail)                   %{_prefix}/bin/svc
 %attr(555,root,qmail)                   %{_prefix}/bin/setmaillist
 %attr(555,root,qmail)                   %{_prefix}/bin/zrxdelay
 %attr(555,root,qmail)                   %{_prefix}/bin/maildirdeliver
@@ -577,7 +628,6 @@ done
 %attr(555,root,qmail)                   %{_prefix}/bin/zddist
 %attr(555,root,qmail)                   %{_prefix}/bin/elq
 %attr(500,root,qmail)                   %{_prefix}/bin/qmail-newmrh
-%attr(555,root,qmail)                   %{_prefix}/bin/supervise
 %attr(555,root,qmail)                   %{_prefix}/bin/preline
 %attr(555,root,qmail)                   %{_prefix}/bin/cdbget
 %attr(555,root,qmail)                   %{_prefix}/bin/cdbgetm
@@ -614,7 +664,6 @@ done
 %attr(500,root,qmail)                   %{_prefix}/bin/qmail-cdb
 %attr(555,root,qmail)                   %{_prefix}/bin/cdbtest
 %attr(555,root,qmail)                   %{_prefix}/bin/dnsfq
-%attr(555,root,qmail)                   %{_prefix}/bin/tai64n
 %attr(555,root,qmail)                   %{_prefix}/bin/822header
 %attr(555,root,qmail)                   %{_prefix}/bin/qmaildirmake
 %attr(555,root,qmail)                   %{_prefix}/bin/maildir2mbox
@@ -638,7 +687,6 @@ done
 %attr(555,root,qmail)                   %{_prefix}/bin/dk-filter
 %attr(555,root,qmail)                   %{_prefix}/bin/mailsubj
 %attr(555,root,qmail)                   %{_prefix}/bin/condtomaildir
-%attr(555,root,qmail)                   %{_prefix}/bin/multirotate
 %attr(555,root,qmail)                   %{_prefix}/bin/822field
 %attr(555,root,qmail)                   %{_prefix}/bin/testzero
 %attr(555,root,qmail)                   %{_prefix}/bin/qmail-cat
@@ -659,7 +707,6 @@ done
 %attr(555,root,qmail)                   %{_prefix}/bin/rsmtpsenders
 %attr(555,root,qmail)                   %{_prefix}/bin/queue-fix
 %attr(555,root,qmail)                   %{_prefix}/bin/822body
-%attr(555,root,qmail)                   %{_prefix}/bin/readproctitle
 %attr(555,root,qmail)                   %{_prefix}/bin/zdeferrals
 %attr(555,root,qmail)                   %{_prefix}/bin/dktest
 %attr(555,root,qmail)                   %{_prefix}/bin/qmail-scanner-queue.pl
@@ -667,16 +714,13 @@ done
 %attr(555,root,qmail)                   %{_prefix}/bin/iftoccfrom
 %attr(555,root,qmail)                   %{_prefix}/bin/dnsptr
 %attr(555,root,qmail)                   %{_prefix}/bin/zsuids
-%attr(555,root,qmail)                   %{_prefix}/bin/setlock
 %attr(555,root,qmail)                   %{_prefix}/bin/qreceipt
 %attr(555,root,qmail)                   %{_prefix}/bin/qmail-qmqpd
-%attr(555,root,qmail)                   %{_prefix}/bin/multitail
 %attr(555,root,qmail)                   %{_prefix}/bin/except
 %attr(555,root,qmail)                   %{_prefix}/bin/dknewkey
 %attr(555,root,qmail)                   %{_prefix}/bin/maildirsmtp
 %attr(511,root,qmail)                   %{_prefix}/bin/qmail-clean
 %attr(511,root,qmail)                   %{_prefix}/bin/qmail-rspawn
-%attr(555,root,qmail)                   %{_prefix}/bin/pgrphack
 %attr(555,root,qmail)                   %{_prefix}/bin/xrecipient
 %attr(555,root,qmail)                   %{_prefix}/bin/argv0
 %attr(555,root,qmail)                   %{_prefix}/bin/qmail-qmtpd
@@ -693,26 +737,20 @@ done
 %attr(555,root,qmail)                   %{_prefix}/bin/qmail-nullqueue
 %attr(500,root,qmail)                   %{_prefix}/bin/qmail-daemon
 %attr(555,root,qmail)                   %{_prefix}/bin/zsendmail
-%attr(555,root,qmail)                   %{_prefix}/bin/multipipe
 %attr(555,root,qmail)                   %{_prefix}/bin/822received
 %attr(555,root,qmail)                   %{_prefix}/bin/cdbmake-12
 %attr(555,root,qmail)                   %{_prefix}/bin/dnscname
-%attr(555,root,qmail)                   %{_prefix}/bin/envuidgid
 %attr(555,root,qmail)                   %{_prefix}/bin/maildircmd
-%attr(555,root,qmail)                   %{_prefix}/bin/multilog
 %attr(555,root,qmail)                   %{_prefix}/bin/qmail-multi
 %attr(555,root,qmail)                   %{_prefix}/bin/qmail-qfilter
 %attr(555,root,qmail)                   %{_prefix}/bin/surblfilter
 %attr(555,root,qmail)                   %{_prefix}/bin/surblqueue
 %attr(555,root,qmail)                   %{_prefix}/bin/qmail-sigalrm
+%attr(555,root,qmail)                   %{_prefix}/bin/ipmeprint
 %attr(555,root,qmail)                   %{_prefix}/bin/rpmattr
 %attr(555,root,qmail)                   %{_prefix}/bin/senders
-%attr(555,root,qmail)                   %{_prefix}/bin/setuidgid
 %attr(555,root,qmail)                   %{_prefix}/bin/spfquery
 %attr(555,root,qmail)                   %{_prefix}/bin/srsfilter
-%attr(555,root,qmail)                   %{_prefix}/bin/tai64nlocal
-%attr(555,root,qmail)                   %{_prefix}/bin/udplogger
-%attr(555,root,qmail)                   %{_prefix}/bin/udpclient
 %attr(555,root,qmail)                   %{_prefix}/sbin/hostname
 %attr(555,root,qmail)                   %{_prefix}/sbin/config-fast
 %attr(555,root,qmail)                   %{_prefix}/sbin/qmailconfig
@@ -721,6 +759,38 @@ done
 %attr(555,root,qmail)                   %{_prefix}/sbin/sys-checkpwd
 %attr(555,root,qmail)                   %{_prefix}/sbin/ldap-checkpwd
 %attr(555,root,qmail)                   %{_prefix}/sbin/svctool
+
+# daemontools
+%attr(555,root,qmail)                   %{_prefix}/bin/envdir
+%attr(555,root,qmail)                   %{_prefix}/bin/envuidgid
+%attr(555,root,qmail)                   %{_prefix}/bin/fghack
+%attr(555,root,qmail)                   %{_prefix}/bin/multilog
+%attr(555,root,qmail)                   %{_prefix}/bin/pgrphack
+%attr(555,root,qmail)                   %{_prefix}/bin/readproctitle
+%attr(555,root,qmail)                   %{_prefix}/bin/setlock
+%attr(555,root,qmail)                   %{_prefix}/bin/setuidgid
+%attr(555,root,qmail)                   %{_prefix}/bin/softlimit
+%attr(555,root,qmail)                   %{_prefix}/bin/supervise
+%attr(555,root,qmail)                   %{_prefix}/bin/svc
+%attr(555,root,qmail)                   %{_prefix}/bin/svok
+%attr(555,root,qmail)                   %{_prefix}/bin/svscan
+%attr(555,root,qmail)                   %{_prefix}/bin/svstat
+%attr(555,root,qmail)                   %{_prefix}/bin/tai64n
+%attr(555,root,qmail)                   %{_prefix}/bin/tai64nlocal
+%attr(555,root,qmail)                   %{_prefix}/bin/tai64nunix
+%attr(555,root,qmail)                   %{_prefix}/bin/tai2tai64n
+%attr(555,root,qmail)                   %{_prefix}/bin/tai64n2tai
+%attr(555,root,qmail)                   %{_prefix}/bin/spipe
+%attr(555,root,qmail)                   %{_prefix}/bin/qfilelog
+%attr(555,root,qmail)                   %{_prefix}/bin/multipipe
+%attr(555,root,qmail)                   %{_prefix}/bin/teepipe
+%attr(555,root,qmail)                   %{_prefix}/bin/multitail
+%attr(555,root,qmail)                   %{_prefix}/bin/logselect
+%attr(555,root,qmail)                   %{_prefix}/bin/qlogselect
+%attr(555,root,qmail)                   %{_prefix}/bin/multirotate
+%attr(555,root,qmail)                   %{_prefix}/bin/svscanboot
+%attr(555,root,qmail)                   %{_prefix}/bin/udplogger
+%attr(555,root,qmail)                   %{_prefix}/bin/udpclient
 
 # ucspi-tcp
 %attr(555,root,root)                    %{_prefix}/bin/mconnect-io
@@ -832,6 +902,110 @@ done
 # a copy of /var/qmail/control/me, /var/qmail/control/defaultdomain,
 # and /var/qmail/control/plusdomain from your central server, so that qmail-inject uses appropriate host names in outgoing mail; and
 # this host's name in /var/qmail/control/idhost, so that qmail-inject generates Message-ID without any risk of collision
+
+%files daemontools
+%defattr(-, root, root,-)
+#
+# Directories
+#
+%dir %attr(555,root,qmail)              %{_prefix}
+%dir %attr(555,root,qmail)              %{_prefix}/doc
+%dir %attr(555,root,qmail)              %{_prefix}/man
+%dir %attr(555,root,qmail)              %{_prefix}/man/man1
+%dir %attr(555,root,qmail)              %{_prefix}/man/man8
+
+%dir %attr(555,root,qmail)              %{_prefix}/bin
+
+%attr(555,root,qmail)                   %{_prefix}/bin/envdir
+%attr(555,root,qmail)                   %{_prefix}/bin/envuidgid
+%attr(555,root,qmail)                   %{_prefix}/bin/fghack
+%attr(555,root,qmail)                   %{_prefix}/bin/multilog
+%attr(555,root,qmail)                   %{_prefix}/bin/pgrphack
+%attr(555,root,qmail)                   %{_prefix}/bin/readproctitle
+%attr(555,root,qmail)                   %{_prefix}/bin/setlock
+%attr(555,root,qmail)                   %{_prefix}/bin/setuidgid
+%attr(555,root,qmail)                   %{_prefix}/bin/softlimit
+%attr(555,root,qmail)                   %{_prefix}/bin/supervise
+%attr(555,root,qmail)                   %{_prefix}/bin/svc
+%attr(555,root,qmail)                   %{_prefix}/bin/svok
+%attr(555,root,qmail)                   %{_prefix}/bin/svscan
+%attr(555,root,qmail)                   %{_prefix}/bin/svstat
+%attr(555,root,qmail)                   %{_prefix}/bin/tai64n
+%attr(555,root,qmail)                   %{_prefix}/bin/tai64nlocal
+%attr(555,root,qmail)                   %{_prefix}/bin/tai64nunix
+%attr(555,root,qmail)                   %{_prefix}/bin/tai2tai64n
+%attr(555,root,qmail)                   %{_prefix}/bin/tai64n2tai
+%attr(555,root,qmail)                   %{_prefix}/bin/spipe
+%attr(555,root,qmail)                   %{_prefix}/bin/qfilelog
+%attr(555,root,qmail)                   %{_prefix}/bin/multipipe
+%attr(555,root,qmail)                   %{_prefix}/bin/teepipe
+%attr(555,root,qmail)                   %{_prefix}/bin/multitail
+%attr(555,root,qmail)                   %{_prefix}/bin/logselect
+%attr(555,root,qmail)                   %{_prefix}/bin/qlogselect
+%attr(555,root,qmail)                   %{_prefix}/bin/multirotate
+%attr(555,root,qmail)                   %{_prefix}/bin/svscanboot
+%attr(555,root,qmail)                   %{_prefix}/bin/udplogger
+%attr(555,root,qmail)                   %{_prefix}/bin/udpclient
+
+%docdir %{_prefix}/doc
+%docdir %{_prefix}/man
+
+%attr(444,root,qmail)                   %{_prefix}/doc/README.logselect
+%attr(444,root,qmail)                   %{_prefix}/man/man1/spipe.1.gz
+%attr(444,root,qmail)                   %{_prefix}/man/man1/qfilelog.1.gz
+%attr(444,root,qmail)                   %{_prefix}/man/man1/multipipe.1.gz
+%attr(444,root,qmail)                   %{_prefix}/man/man1/teepipe.1.gz
+%attr(444,root,qmail)                   %{_prefix}/man/man1/multitail.1.gz
+%attr(444,root,qmail)                   %{_prefix}/man/man1/qlogselect.1.gz
+%attr(444,root,qmail)                   %{_prefix}/man/man1/tai2tai64n.1.gz
+%attr(444,root,qmail)                   %{_prefix}/man/man1/tai64n2tai.1.gz
+%attr(444,root,qmail)                   %{_prefix}/man/man1/udpclient.1.gz
+%attr(444,root,qmail)                   %{_prefix}/man/man8/envdir.8.gz
+%attr(444,root,qmail)                   %{_prefix}/man/man8/envuidgid.8.gz
+%attr(444,root,qmail)                   %{_prefix}/man/man8/fghack.8.gz
+%attr(444,root,qmail)                   %{_prefix}/man/man8/multilog.8.gz
+%attr(444,root,qmail)                   %{_prefix}/man/man8/pgrphack.8.gz
+%attr(444,root,qmail)                   %{_prefix}/man/man8/readproctitle.8.gz
+%attr(444,root,qmail)                   %{_prefix}/man/man8/setlock.8.gz
+%attr(444,root,qmail)                   %{_prefix}/man/man8/setuidgid.8.gz
+%attr(444,root,qmail)                   %{_prefix}/man/man8/softlimit.8.gz
+%attr(444,root,qmail)                   %{_prefix}/man/man8/supervise.8.gz
+%attr(444,root,qmail)                   %{_prefix}/man/man8/svc.8.gz
+%attr(444,root,qmail)                   %{_prefix}/man/man8/svok.8.gz
+%attr(444,root,qmail)                   %{_prefix}/man/man8/svscan.8.gz
+%attr(444,root,qmail)                   %{_prefix}/man/man8/svstat.8.gz
+%attr(444,root,qmail)                   %{_prefix}/man/man8/tai64n.8.gz
+%attr(444,root,qmail)                   %{_prefix}/man/man8/tai64nlocal.8.gz
+%attr(444,root,qmail)                   %{_prefix}/man/man8/tai64nunix.8.gz
+%attr(444,root,qmail)                   %{_prefix}/man/man8/logselect.8.gz
+%attr(444,root,qmail)                   %{_prefix}/man/man8/svscanboot.8.gz
+%attr(444,root,qmail)                   %{_prefix}/man/man8/udplogger.8.gz
+
+%files ucspi-tcp
+%attr(555,root,qmail)                   %{_prefix}/bin/tcpserver
+%attr(555,root,qmail)                   %{_prefix}/bin/tcprules
+%attr(555,root,qmail)                   %{_prefix}/bin/tcprulescheck
+%attr(555,root,qmail)                   %{_prefix}/bin/tcpclient
+%attr(555,root,qmail)                   %{_prefix}/bin/who@
+%attr(555,root,qmail)                   %{_prefix}/bin/date@
+%attr(555,root,qmail)                   %{_prefix}/bin/finger@
+%attr(555,root,qmail)                   %{_prefix}/bin/http@
+%attr(555,root,qmail)                   %{_prefix}/bin/tcpcat
+%attr(555,root,qmail)                   %{_prefix}/bin/mconnect
+%attr(555,root,qmail)                   %{_prefix}/bin/mconnect-io
+%attr(555,root,qmail)                   %{_prefix}/bin/rblsmtpd
+
+%attr(444,root,qmail)                   %{_prefix}/man/man1/tcpserver.1.gz
+%attr(444,root,qmail)                   %{_prefix}/man/man1/tcprules.1.gz
+%attr(444,root,qmail)                   %{_prefix}/man/man1/tcprulescheck.1.gz
+%attr(444,root,qmail)                   %{_prefix}/man/man1/tcpclient.1.gz
+%attr(444,root,qmail)                   %{_prefix}/man/man1/who@.1.gz
+%attr(444,root,qmail)                   %{_prefix}/man/man1/date@.1.gz
+%attr(444,root,qmail)                   %{_prefix}/man/man1/finger@.1.gz
+%attr(444,root,qmail)                   %{_prefix}/man/man1/http@.1.gz
+%attr(444,root,qmail)                   %{_prefix}/man/man1/tcpcat.1.gz
+%attr(444,root,qmail)                   %{_prefix}/man/man1/mconnect.1.gz
+%attr(444,root,qmail)                   %{_prefix}/man/man1/rblsmtpd.1.gz
 
 %clean
 %{__rm} -rf %{buildroot}
