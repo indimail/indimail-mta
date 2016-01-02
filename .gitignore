@@ -184,7 +184,6 @@ obs.mk
 */debian/*.postrm
 */debian/*.preinst
 */debian/*.prerm
-*/debian/*.install
 */debian/obs_deb_prep
 */debian/_service
 README.vmware
