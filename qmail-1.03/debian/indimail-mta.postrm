@@ -161,7 +161,7 @@ if [ " $1" = " purge" ] ; then
 	fi
 
 	echo "removing startup services"
-	for i in qmail-send.25 qmail-smtpd.25 qmail-smtpd.366 qmail-spamlog qscanq \
+	for i in clamd freshclam qmail-send.25 qmail-smtpd.25 qmail-smtpd.366 qmail-spamlog qscanq \
 	qmail-smtpd.465 qmail-smtpd.587 qmail-qmtpd.209 qmail-qmqpd.628 \
 	greylist.1999 .svscan
 	do
