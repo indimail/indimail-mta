@@ -1,6 +1,6 @@
 #
 #
-# $Id: qmail.spec,v 1.20 2016-01-02 19:23:07+05:30 Cprogrammer Exp mbhangui $
+# $Id: qmail.spec,v 1.21 2016-01-04 19:47:12+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %define _unpackaged_files_terminate_build 1
 
@@ -128,7 +128,6 @@ BuildRequires: -post-build-checks
 %else
 BuildRequires: groff
 %endif
-
 
 %if 0%{?suse_version}
 BuildRequires: openldap2-devel
@@ -1240,6 +1239,8 @@ fi
 %define qmtp_soft_mem 52428800
 %define qmqp_soft_mem 52428800
 %endif
+
+# Define QHPSI for inline virus scanning by qmail-queue
 if [ %noclamav -eq 0 ] ; then
 	echo "Checking if clamav is installed"
 	clamav_os=0
@@ -1256,6 +1257,8 @@ else
 		clamav_os=0
 	fi
 fi
+
+# SMTP ports
 for port in 465 25 587
 do
 	if [ $port -eq 465 ] ; then
@@ -1294,6 +1297,8 @@ do
 	fi
 	echo "1" > %{servicedir}/qmail-smtpd.$port/variables/DISABLE_PLUGIN
 done
+
+# queue parameters in control/defaultqueue for qmail-inject, sendmail
 if [ %noclamav -eq 0 -o $clamav_os -eq 1 ] ; then
 	%{_prefix}/sbin/svctool --queueParam=defaultqueue \
 		--qbase=%{qbase} --qcount=%{qcount} --qstart=1 \
@@ -1311,6 +1316,7 @@ else
 		$extra_opt
 fi
 
+# ODMR service
 %{_prefix}/sbin/svctool --smtp=366 --odmr --servicedir=%{servicedir} \
 	--query-cache --password-cache
 echo "1" > %{servicedir}/qmail-smtpd.366/variables/DISABLE_PLUGIN
@@ -1318,7 +1324,7 @@ echo "1" > %{servicedir}/qmail-smtpd.366/variables/DISABLE_PLUGIN
 # Greylist daemon
 %{_prefix}/sbin/svctool --greylist=1999 --servicedir=%{servicedir} --min-resend-min=2 \
     --resend-win-hr=24 --timeout-days=30 --context-file=greylist.context \
-    --hash-size=65536 --save-interval=5 --whitelist=greylist.white --use-greydaemon
+    --hash-size=65536 --save-interval=5 --whitelist=greylist.white 
 # qmail-qmtpd service
 %{_prefix}/sbin/svctool --qmtp=209 --servicedir=%{servicedir} --qbase=%{qbase} \
 	--qcount=%{qcount} --qstart=1 --cntrldir=control --localip=0 --maxdaemons=75 --maxperip=25 \
@@ -1595,6 +1601,14 @@ done
 /bin/rmdir --ignore-fail-on-non-empty %{_prefix}/alias 2>/dev/null
 
 echo "removing startup services"
+if [ %noclamav -eq 0 -o $clamav_os -eq 1 ] ; then
+for i in clamd freshclam
+do
+	if [ -d %{servicedir}/$i ] ; then
+		%{__rm} -rf %{servicedir}/$i || true
+	fi
+done
+fi
 for i in qmail-send.25 qmail-smtpd.25 qmail-smtpd.366 \
 qmail-spamlog qscanq qmail-smtpd.465 qmail-smtpd.587 qmail-qmtpd.209 \
 qmail-qmqpd.628 greylist.1999 .svscan
