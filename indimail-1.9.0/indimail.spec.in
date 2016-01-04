@@ -1,24 +1,20 @@
 #
 #
-# $Id: indimail.spec.in,v 2.298 2016-01-02 19:35:06+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 2.299 2016-01-04 19:49:31+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %define _unpackaged_files_terminate_build 1
 
-%define is_mandrake %(test -e /etc/mandrake-release && echo 1 || echo 0)
 %define is_suse %(test -e /etc/SuSE-release && echo 1 || echo 0)
 %define is_fedora %(test -e /etc/fedora-release && echo 1 || echo 0)
 
 %define dist redhat
 %define disttag rh
 
-%if %{is_mandrake} != 0
-%define dist mandrake
-%define disttag mdk
-%endif
 %if %{is_suse} != 0
 %define dist suse
 %define disttag suse
 %endif
+
 %if %{is_fedora} != 0
 %define dist fedora
 %define disttag rhfc
@@ -31,7 +27,7 @@
 %define reconfigure_mode   1
 %else
 %define build_on_obs       0
-%define reconfigure_mode   0
+%define reconfigure_mode   1
 %endif
 
 %define _prefix            @indimaildir@
@@ -88,6 +84,7 @@
 %else
 %define module_dir         /usr/%{_lib}/pam
 %endif
+%define _pkg_config_path   /usr/%{_lib}/pkgconfig
 
 %if %build_on_obs == 1
 %define packager Manvendra Bhangui <manvendra@indimail.org>
@@ -226,6 +223,7 @@ BuildRequires: sed ncurses-devel gettext-devel
 BuildRequires: python-devel flex findutils
 BuildRequires: readline gzip autoconf automake libtool pkgconfig
 BuildRequires: xz
+BuildRequires: mysql-devel pam-devel
 
 %if %nocourierimap == 0
 BuildRequires: libidn-devel gdbm-devel
@@ -234,17 +232,15 @@ BuildRequires: libidn-devel gdbm-devel
 %if %{defined fedora_version}
 BuildRequires: redhat-lsb-core
 %endif
+
 %if %{defined centos_version} || %{defined rhel_version}
 BuildRequires: redhat-lsb
 %endif
-%if %{defined suse_version}
-%if 0%{?suse_version} > 1110 || 0%{?suse_version} == 1310 || 0%{?suse_version} == 1230 || 0%{?suse_version} == 1220 || 0%{?suse_version} == 1210 || 0%{?suse_version} == 1140
-BuildRequires: lsb-release
-%endif
+
+%if %{undefined centos_version} && %{undefined rhel_version}
+BuildRequires: chrpath
 %endif
 
-%if %build_on_obs == 0
-################################# OBS ###############################
 %if 0%{?rhel_version} == 700
 BuildRequires: groff-doc
 %else
@@ -253,35 +249,22 @@ BuildRequires: groff
 
 %if %{undefined rhel_version}
 BuildRequires: sharutils
-%else
-%if 0%{?rhel_version} != 600
-BuildRequires: sharutils
+%endif
+
+%if %{defined suse_version}
+%if 0%{?suse_version} > 1110 || 0%{?suse_version} == 1310 || 0%{?suse_version} == 1230 || 0%{?suse_version} == 1220 || 0%{?suse_version} == 1210 || 0%{?suse_version} == 1140
+BuildRequires: lsb-release
 %endif
 %endif
 
-%if 0%{?suse_version}
-BuildRequires: -post-build-checks  
-#!BuildIgnore: post-build-checks  
-#!BuildIgnore: brp-check-suse
-%endif
-################################# OBS ###############################
-%else
-BuildRequires: groff sharutils
+%if 0%{?suse_version} == 1220 || 0%{?suse_version} == 1210 || 0%{?suse_version} == 1140 || 0%{?suse_version} == 1100 || 0%{?suse_version} == 1030 || 0%{?suse_version} == 1020
+BuildRequires: chrpath
 %endif
 
 %if 0%{?suse_version}
 BuildRequires: openldap2-devel
 %else
 BuildRequires: openldap-devel
-%endif
-
-BuildRequires: mysql-devel
-%if %{undefined centos_version} && %{undefined rhel_version}
-BuildRequires: chrpath
-%endif
-
-%if 0%{?suse_version} == 1220 || 0%{?suse_version} == 1210 || 0%{?suse_version} == 1140 || 0%{?suse_version} == 1100 || 0%{?suse_version} == 1030 || 0%{?suse_version} == 1020
-BuildRequires: chrpath
 %endif
 
 %if %noperms == 0
@@ -300,7 +283,19 @@ BuildRequires: db4-devel
 %endif
 %endif
 
-BuildRequires: pam-devel
+################################# OBS ###############################
+%if %build_on_obs == 1
+%if 0%{?rhel_version} != 600 && 0%{?rhel_version} != 700
+BuildRequires: sharutils
+%endif
+
+%if 0%{?suse_version}
+BuildRequires: -post-build-checks  
+#!BuildIgnore: post-build-checks  
+#!BuildIgnore: brp-check-suse
+%endif
+%endif
+################################# OBS ###############################
 
 Requires: pam
 Requires: coreutils grep /bin/sh glibc openssl
@@ -401,7 +396,7 @@ echo target_alias  %_target_alias
 echo target_cpu    %_target_cpu
 echo target_os     %_target_os
 echo target_vendor %_target_vendor
-echo Building %{name}-%{version}-%{release} Build %{_build} OS %{_os} Dist %dist disttag %disttag libs %{_lib} %{_libdir}
+echo Building %{name}-%{version}-%{release} Build %{_build} OS %{_os} Dist %dist disttag %disttag lib=%{_lib} libdir=%{_libdir}
 echo "------------------------------------------------------"
 
 for i in %{name}-%{version} altermime-0.3.10 ripmime-1.4.0.9 flash-0.9.4 \
@@ -514,7 +509,8 @@ if [ -d libdkim-%{libdkim_version} ] ; then
 	if [ %{reconfigure_mode} -eq 1 ] ; then
 		echo "reconfiguring..."
 		%{__mkdir_p} m4
-		autoreconf -fi
+		aclocal -I m4
+		autoreconf -fiv
 	fi
 fi
 
@@ -526,7 +522,8 @@ if [ -d libsrs2-%{libsrs2_version} ] ; then
 	if [ %{reconfigure_mode} -eq 1 ] ; then
 		echo "reconfiguring..."
 		%{__mkdir_p} m4
-		autoreconf -fi
+		aclocal -I m4
+		autoreconf -fiv
 	fi
 
 # for mandrake use --x-libraries
@@ -543,7 +540,8 @@ cd %{name}-%{version}
 if [ %{reconfigure_mode} -eq 1 ] ; then
 	echo "reconfiguring..."
 	%{__mkdir_p} m4
-	autoreconf -fi
+	aclocal -I m4
+	autoreconf -fiv
 fi
 
 %configure --prefix=%{_prefix} --libexecdir=%{_prefix}/libexec --sysconfdir=%{_prefix}/etc \
@@ -552,8 +550,7 @@ fi
 	--mandir=%{_prefix}/man --sysconfdir=%{_prefix}/etc --enable-qmaildir=%{_prefix} \
 	--enable-basepath=@basepath@ --enable-logdir=@logdir@ \
 	--enable-tcprules-prog=%{_prefix}/bin/tcprules --enable-tcpserver-file=%{_prefix}/etc/tcp.smtp \
-	--enable-moduledir=%module_dir \
-	`%{__cat} config/indimail.opts`
+	--enable-moduledir=%module_dir `%{__cat} config/indimail.opts`
 
 #### nssd ######################
 %if %nonssd == 0
@@ -562,7 +559,8 @@ if [ -d ../nssd-%{nssd_version} ] ; then
 	if [ %{reconfigure_mode} -eq 1 ] ; then
 		echo "reconfiguring..."
 		%{__mkdir_p} m4
-		autoreconf -fi
+		aclocal -I m4
+		autoreconf -fiv
 	fi
 
 	%configure --prefix=%{_prefix} --libexecdir=%{_prefix}/libexec --sysconfdir=%{_prefix}/etc \
@@ -581,12 +579,8 @@ if [ -d ../courier-imap-%{courier_version} ] ; then
 	if [ %{reconfigure_mode} -eq 1 ] ; then
 		echo "reconfiguring..."
 		%{__mkdir_p} m4
-		autoreconf -fi
-		%{__cp} libs/unicode/depcomp .
-	else
-		echo "reconfiguring..."
-		%{__mkdir_p} m4
-		autoreconf -fi
+		aclocal -I m4
+		autoreconf -fiv
 		%{__cp} libs/unicode/depcomp .
 	fi
 	%configure --prefix=%{_prefix} --libexecdir=%{_prefix}/libexec --bindir=%{_prefix}/bin \
@@ -602,7 +596,8 @@ if [ -d ../bogofilter-%{bogofilter_version} ] ; then
 	if [ %{reconfigure_mode} -eq 1 ] ; then
 		echo "reconfiguring..."
 		%{__mkdir_p} m4
-		autoreconf -fi
+		aclocal -I m4
+		autoreconf -fiv
 	fi
 	(
 	HOME='.';export HOME
@@ -623,7 +618,8 @@ if [ -d ../clamav-%{clamav_version} ] ; then
 	if [ %{reconfigure_mode} -eq 1 ] ; then
 		echo "reconfiguring..."
 		%{__mkdir_p} m4
-		autoreconf -fi
+		aclocal -I m4
+		autoreconf -fiv
 	fi
 	if [ %{build_on_obs} -eq 0 ] ; then
 	%configure --prefix=%{_prefix} --libexecdir=%{_prefix}/libexec --sysconfdir=%{_prefix}/etc \
@@ -646,7 +642,8 @@ if [ -d ../fetchmail-%{fetchmail_version} ] ; then
 	if [ %{reconfigure_mode} -eq 1 ] ; then
 		echo "reconfiguring..."
 		%{__mkdir_p} m4
-		autoreconf -fi
+		aclocal -I m4
+		autoreconf -fiv
 	fi
 	if [ %{build_on_obs} -eq 0 ] ; then
 	./configure --prefix=%{_prefix} --libexecdir=%{_prefix}/libexec --sysconfdir=%{_prefix}/etc \
@@ -716,10 +713,10 @@ do
 		fi
 %endif
 		# courier-imap installations misses out on this
-#		if [ %nocourierimap -eq 0 -a " $i" = " courier-imap-%{courier_version}" ] ; then
-#			%{__mkdir_p} %{buildroot}%{_prefix}/man/man1
-#			%{__cp} tcpd/couriertls.1 %{buildroot}%{_prefix}/man/man1/couriertls.1
-#		fi
+		if [ %nocourierimap -eq 0 -a " $i" = " courier-imap-%{courier_version}" ] ; then
+			%{__mkdir_p} %{buildroot}%{_prefix}/man/man1
+			%{__cp} libs/tcpd/couriertls.1 %{buildroot}%{_prefix}/man/man1/couriertls.1
+		fi
 		cd ..
 	fi
 done
@@ -740,8 +737,10 @@ if [ %nonssd -eq 0 ] ; then
 fi
 if [ %nocourierimap -eq 0 ] ; then
 	%{__rm} -f %{buildroot}/%{_libdir}/libunicode.la
+	if [ -x /usr/bin/chrpath ] ; then
    	/usr/bin/chrpath -d %{buildroot}%{_prefix}/bin/imapd
    	/usr/bin/chrpath -d %{buildroot}%{_prefix}/sbin/imaplogin
+	fi
 fi
 if [ %nolibdkim -eq 0 ] ; then
 	%{__rm} -f %{buildroot}%{_libdir}/libdkim.la
@@ -1467,9 +1466,9 @@ fi
 %attr(555,root,root)                    %{_prefix}/bin/bogotune
 %attr(555,root,root)                    %{_prefix}/bin/bogoutil
 %attr(555,root,root)                    %{_prefix}/bin/bogoupgrade
-%attr(555,root,root)                    %{_prefix}/bin/bf_compact
-%attr(555,root,root)                    %{_prefix}/bin/bf_copy
-%attr(555,root,root)                    %{_prefix}/bin/bf_tar
+%attr(555,root,root)                    %{_prefix}/sbin/bf_compact
+%attr(555,root,root)                    %{_prefix}/sbin/bf_copy
+%attr(555,root,root)                    %{_prefix}/sbin/bf_tar
 %endif
 
 %if %nolibdkim == 0
@@ -2527,12 +2526,14 @@ if [ %noclamav -eq 0 -o $clamav_os -eq 1 ] ; then
 		--qbase=%{qbase} --qcount=%{qcount} --qstart=1 \
 		--min-free=52428800 --fsync --syncdir \
 		--qhpsi="$qhpsi" \
-		--dkverify="none" --dksign="none"
+		--dkverify="none" --dksign="none" \
+		$extra_opt
 else
 	%{_prefix}/sbin/svctool --queueParam=defaultqueue \
 		--qbase=%{qbase} --qcount=%{qcount} --qstart=1 \
 		--min-free=52428800 --fsync --syncdir --virus-filter \
-		--dkverify="none" --dksign="none"
+		--dkverify="none" --dksign="none" \
+		$extra_opt
 fi
 #
 # ODMR Service
