@@ -100,12 +100,11 @@ doit(void       (*callback) (char *, unsigned int), char *ip, char *host, char *
         	if ((r = dorule(callback)))
         		return r;
     	}
-	} else {
-		if (!stralloc_copys(&rules_name, ip))
-			return -1;
-		if ((r = dorule(callback)))
-			return r;
 	}
+	if (!stralloc_copys(&rules_name, ip))
+		return -1;
+	if ((r = dorule(callback)))
+		return r;
 #else
 	if (!stralloc_copys(&rules_name, ip))
 		return -1;
