@@ -6,14 +6,69 @@ tcprules \- compiles rules for
 .B tcprules
 .I cdb
 .I tmp
+
 .SH DESCRIPTION
 .BR tcpserver (1)
-optionally follows rules to decide whether a TCP connection is acceptable. For
-example, the rule 
+optionally follows rules to decide whether a TCP connection is acceptable.
+
+.SH "IPv4 ADDRESSES"
+For example, the rule 
 .IP
 18.23.0.32:deny
 .P
-prohibits connections from IP address 18.23.0.32. 
+prohibits connections from IP address 18.23.0.32.
+Ranges of IPv4 addresses can defined in a \fIclass-dependend\fR manner
+.IP
+18.:deny
+.P 
+or by means of a range of contiguous addresses
+.IP
+18.23.0.1-22:ins
+.P
+Rather a CIDR notation can be used instead. The rule
+.IP
+127.0/8:allow
+.P
+accepts any connections from the loopback net.
+
+The bit-lenth of the given IP address has
+at least to match number of net-prefix bits. 
+Otherwise, a syntax error is displayed.
+
+\fINote\fR: Always IP addresses with the longest matching prefix
+are considered.
+
+.SH "IPv6 ADDRESSES"
+.B tcprules
+understands \fIcompactified\fR IPv6 addresses in standard
+CIDR notation.
+The rule
+.IP
+2001:de01:2:3:4:a:b:c:deny 
+.P
+rejects any IPv6 packet from a single host while 
+.IP
+2002::/48:deny
+.P
+can be used to block an entire IPv6 (sub-)net
+in case the net-prefix (here: \fI/48\fR) is provided.
+
+\fINote\fR: Since the IPv6 address on input is evaluated
+in it's compactified format, simply include the final '::'
+for convenience. The resulting address is truncated 
+to the number of provided prefix bits. 
+
+.SH "IPv6 MAPPED IPv4 ADDRESSES"
+.B tcprules
+does currently not understand IPv6 mapped IPv4 addresses
+.IP
+::ffff:a.b.c.d
+.P
+where 
+.IP
+a.b.c.d
+.P 
+is the mapped IPv4 addresses.
 
 .B tcprules
 reads rules from its standard input and writes them into
@@ -52,6 +107,7 @@ alone.
 The binary
 .I cdb
 format is portable across machines.
+
 .SH RULE FORMAT
 A rule is one line. A file containing rules may also contain comments: lines
 beginning with # are ignored. 
