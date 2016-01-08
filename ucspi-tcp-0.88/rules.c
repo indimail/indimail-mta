@@ -1,5 +1,8 @@
 /*
  * $Log: rules.c,v $
+ * Revision 1.5  2016-01-08 17:57:16+05:30  Cprogrammer
+ * fix bug with tcprules when compact ipv6 notation was given in tcp.smtp
+ *
  * Revision 1.4  2013-08-06 11:03:48+05:30  Cprogrammer
  * Jens Wehrenbrecht's IPv4 CIDR extension
  * Li Minh Bui's IPv6 support for compactified IPv6 addresses and CIDR notation support.
