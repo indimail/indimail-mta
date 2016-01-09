@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail.spec.in,v 2.299 2016-01-04 19:49:31+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 2.300 2016-01-09 09:24:49+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %define _unpackaged_files_terminate_build 1
 
@@ -2474,7 +2474,7 @@ do
 				--qhpsi="$qhpsi" \
 				--dmasquerade \
 				--dkverify=$ver_opt \
-				--dksign=$sign_opt --private_key=%{_prefix}/control/domainkeys/%/%dkimkeyfn \
+				--dksign=$sign_opt --private_key=%{_prefix}/control/domainkeys/%/%{dkimkeyfn} \
 				$extra_opt
 		else
 			%{_prefix}/sbin/svctool --smtp=$port --servicedir=%{servicedir} \
@@ -2487,7 +2487,7 @@ do
 				--logfilter=/tmp/spamfifo --rejectspam=0 --spamexitcode=0 \
 				--dmasquerade \
 				--dkverify=both \
-				--dksign=both --private_key=%{_prefix}/control/domainkeys/%/%dkimkeyfn \
+				--dksign=both --private_key=%{_prefix}/control/domainkeys/%/%{dkimkeyfn} \
 				$extra_opt
 		fi
 	else
@@ -2501,7 +2501,7 @@ do
 				--qhpsi="$qhpsi" \
 				--dmasquerade \
 				--dkverify=both \
-				--dksign=both --private_key=%{_prefix}/control/domainkeys/%/%dkimkeyfn \
+				--dksign=both --private_key=%{_prefix}/control/domainkeys/%/%{dkimkeyfn} \
 				$extra_opt
 		else
 			%{_prefix}/sbin/svctool --smtp=$port --servicedir=%{servicedir} \
@@ -2512,7 +2512,7 @@ do
 				--min-free=52428800 --content-filter --virus-filter \
 				--dmasquerade \
 				--dkverify=both \
-				--dksign=both --private_key=%{_prefix}/control/domainkeys/%/%dkimkeyfn \
+				--dksign=both --private_key=%{_prefix}/control/domainkeys/%/%{dkimkeyfn} \
 				$extra_opt
 		fi
 	fi
