@@ -11,6 +11,9 @@
 ### END INIT INFO
 
 # $Log: qmailctl.sh,v $
+# Revision 1.43  2016-01-09 09:21:48+05:30  Cprogrammer
+# fix for cases where NETWORKING is not defined
+#
 # Revision 1.42  2014-01-29 14:02:13+05:30  Cprogrammer
 # fix for Fedora where /etc/sysconfig/network is missing or does not have NETWORKING defined
 #
@@ -230,7 +233,7 @@ case "$SYSTEM" in
 	DARWIN*)
 	. /etc/rc.common
 	CheckForNetwork
-	if [ ${NETWORKUP} != "-YES-" ]
+	if [ "${NETWORKUP}" != "-YES-" ]
 	then
 		exit 0
 	fi
@@ -248,7 +251,7 @@ case "$SYSTEM" in
 	if [ -f /etc/sysconfig/network ] ; then
 		. /etc/sysconfig/network
 		# Check that networking is up.
-		if [ ${NETWORKING} = "no" ] ; then
+		if [ "${NETWORKING}" = "no" ] ; then
 			exit 0
 		fi
 	else # FC19, FC20, ...
