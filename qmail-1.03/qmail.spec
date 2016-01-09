@@ -1,6 +1,6 @@
 #
 #
-# $Id: qmail.spec,v 1.21 2016-01-04 19:47:12+05:30 Cprogrammer Exp mbhangui $
+# $Id: qmail.spec,v 1.22 2016-01-09 09:22:28+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %define _unpackaged_files_terminate_build 1
 
@@ -46,6 +46,7 @@
 %define qbase              %{_prefix}/queue
 %define logdir             /var/log/indimail
 %define servicedir         /service
+%define dkimkeyfn          default
 
 %if %build_on_obs == 1
 %define packager Manvendra Bhangui <manvendra@indimail.org>
@@ -1281,7 +1282,7 @@ do
 			--qhpsi="$qhpsi" \
 			--dmasquerade \
 			--dkverify=both \
-			--dksign=both --private_key=%{_prefix}/control/domainkeys/%/%dkimkeyfn \
+			--dksign=both --private_key=%{_prefix}/control/domainkeys/%/%{dkimkeyfn} \
 			$extra_opt
 	else
 		%{_prefix}/sbin/svctool --smtp=$port --servicedir=%{servicedir} \
@@ -1292,7 +1293,7 @@ do
 			--min-free=52428800 --content-filter --virus-filter \
 			--dmasquerade \
 			--dkverify=both \
-			--dksign=both --private_key=%{_prefix}/control/domainkeys/%/%dkimkeyfn \
+			--dksign=both --private_key=%{_prefix}/control/domainkeys/%/%{dkimkeyfn} \
 			$extra_opt
 	fi
 	echo "1" > %{servicedir}/qmail-smtpd.$port/variables/DISABLE_PLUGIN
@@ -1305,14 +1306,14 @@ if [ %noclamav -eq 0 -o $clamav_os -eq 1 ] ; then
 		--min-free=52428800 --fsync --syncdir \
 		--qhpsi="$qhpsi" \
 		--dkverify="none" --dksign=$sign_opt \
-		--private_key=%{_prefix}/control/domainkeys/%/%dkimkeyfn \
+		--private_key=%{_prefix}/control/domainkeys/%/%{dkimkeyfn} \
 		$extra_opt
 else
 	%{_prefix}/sbin/svctool --queueParam=defaultqueue \
 		--qbase=%{qbase} --qcount=%{qcount} --qstart=1 \
 		--min-free=52428800 --fsync --syncdir --virus-filter \
 		--dkverify="none" --dksign=$sign_opt \
-		--private_key=%{_prefix}/control/domainkeys/%/%dkimkeyfn \
+		--private_key=%{_prefix}/control/domainkeys/%/%{dkimkeyfn} \
 		$extra_opt
 fi
 
@@ -1324,7 +1325,7 @@ echo "1" > %{servicedir}/qmail-smtpd.366/variables/DISABLE_PLUGIN
 # Greylist daemon
 %{_prefix}/sbin/svctool --greylist=1999 --servicedir=%{servicedir} --min-resend-min=2 \
     --resend-win-hr=24 --timeout-days=30 --context-file=greylist.context \
-    --hash-size=65536 --save-interval=5 --whitelist=greylist.white 
+    --hash-size=65536 --save-interval=5 --whitelist=greylist.white
 # qmail-qmtpd service
 %{_prefix}/sbin/svctool --qmtp=209 --servicedir=%{servicedir} --qbase=%{qbase} \
 	--qcount=%{qcount} --qstart=1 --cntrldir=control --localip=0 --maxdaemons=75 --maxperip=25 \
