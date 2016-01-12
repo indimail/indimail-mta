@@ -1,5 +1,8 @@
 /*
  * $Log: LoadDbinfo.c,v $
+ * Revision 2.41  2016-01-12 14:21:11+05:30  Cprogrammer
+ * set variable _total for dbcount
+ *
  * Revision 2.40  2011-07-02 15:13:03+05:30  Cprogrammer
  * fix null dbinfo being returned with no entries in assign file
  *
@@ -134,7 +137,7 @@
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: LoadDbinfo.c,v 2.40 2011-07-02 15:13:03+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: LoadDbinfo.c,v 2.41 2016-01-12 14:21:11+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #include <sys/types.h>
@@ -147,6 +150,7 @@ static char     sccsid[] = "$Id: LoadDbinfo.c,v 2.40 2011-07-02 15:13:03+05:30 C
 #include <unistd.h>
 #include <stdlib.h>
 #include <utime.h>
+#include <sys/socket.h>
 #include <mysqld_error.h>
 
 static DBINFO **LoadDbInfo_TXT_internal(int *);
@@ -793,7 +797,7 @@ localDbinfo(int *total, DBINFO ***rhosts)
 		(*rhostsptr)->fd = -1;
 		(*rhostsptr)->last_error = 0;
 		(*rhostsptr)->failed_attempts = 0;
-		if (!(localhost = get_local_ip()))
+		if (!(localhost = get_local_ip(AF_INET)))
 			localhost = "localhost";
 		scopy((*rhostsptr)->mdahost, localhost, DBINFO_BUFF);
 		scopy((*rhostsptr)->server, mysqlhost, DBINFO_BUFF);
@@ -814,7 +818,7 @@ localDbinfo(int *total, DBINFO ***rhosts)
 		rhostsptr = relayhosts + *total;
 		for (tmpPtr = rhostsptr;tmpPtr < relayhosts + *total + count + 1;tmpPtr++)
 			*tmpPtr = (DBINFO *) 0;
-		(*total) += count;
+		_total = (*total) += count;
 	} else
 	{
 		relayhosts = (DBINFO **) calloc(1, sizeof(DBINFO *) * (count + 1));
@@ -868,7 +872,7 @@ localDbinfo(int *total, DBINFO ***rhosts)
 		(*rhostsptr)->fd = -1;
 		(*rhostsptr)->last_error = 0;
 		(*rhostsptr)->failed_attempts = 0;
-		if (!(localhost = get_local_ip()))
+		if (!(localhost = get_local_ip(AF_INET)))
 			localhost = "localhost";
 		scopy((*rhostsptr)->mdahost, localhost, DBINFO_BUFF);
 		scopy((*rhostsptr)->server, mysqlhost, DBINFO_BUFF);
