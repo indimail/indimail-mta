@@ -1,5 +1,8 @@
 /*
  * $Log: inquerytest.c,v $
+ * Revision 2.23  2016-01-12 23:45:56+05:30  Cprogrammer
+ * removed leftover sleep() call
+ *
  * Revision 2.22  2016-01-12 14:28:01+05:30  Cprogrammer
  * fix for fifo balancing not happening when infifo=""
  *
@@ -83,7 +86,7 @@
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: inquerytest.c,v 2.22 2016-01-12 14:28:01+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: inquerytest.c,v 2.23 2016-01-12 23:45:56+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 void            print_limits(struct vlimits *);
@@ -209,7 +212,6 @@ main(int argc, char **argv)
 		}
 		pid = -1;
 	}
-	sleep (1);
 	getEnvConfigStr(&default_table, "MYSQL_TABLE", MYSQL_DEFAULT_TABLE);
 	getEnvConfigStr(&inactive_table, "MYSQL_INACTIVE_TABLE", MYSQL_INACTIVE_TABLE);
 	if (!(dbptr = inquery(query_type, email, ipaddr)))
