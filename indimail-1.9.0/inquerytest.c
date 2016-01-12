@@ -1,5 +1,8 @@
 /*
  * $Log: inquerytest.c,v $
+ * Revision 2.22  2016-01-12 14:28:01+05:30  Cprogrammer
+ * fix for fifo balancing not happening when infifo=""
+ *
  * Revision 2.21  2013-11-22 16:41:39+05:30  Cprogrammer
  * added getopt style arguments for options
  *
@@ -80,7 +83,7 @@
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: inquerytest.c,v 2.21 2013-11-22 16:41:39+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: inquerytest.c,v 2.22 2016-01-12 14:28:01+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 void            print_limits(struct vlimits *);
@@ -156,7 +159,7 @@ main(int argc, char **argv)
 		fprintf(stderr, "%s: Invalid query type %d\n", ptr, query_type);
 		usage(ptr);
 	}
-	if (infifo)
+	if (infifo && *infifo)
 	{
 		if (*infifo == '/' || *infifo == '.')
 			snprintf(InFifo, MAX_BUFF, "%s", infifo);
