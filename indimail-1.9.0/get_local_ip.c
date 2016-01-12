@@ -1,5 +1,8 @@
 /*
  * $Log: get_local_ip.c,v $
+ * Revision 2.7  2016-01-12 14:26:41+05:30  Cprogrammer
+ * pass address family as argument to get_local_ip()
+ *
  * Revision 2.6  2010-03-28 16:53:26+05:30  Cprogrammer
  * set other hints flag (ai_socktype, ai_flags, ai_protocol)
  *
@@ -38,11 +41,11 @@
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: get_local_ip.c,v 2.6 2010-03-28 16:53:26+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: get_local_ip.c,v 2.7 2016-01-12 14:26:41+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 char           *
-get_local_ip()
+get_local_ip(int family)
 {
 	static char     hostbuf[MAX_BUFF]; /*- hostname or ip address */
 	char            TmpBuf[MAX_BUFF];
@@ -78,7 +81,7 @@ get_local_ip()
 #ifdef ENABLE_IPV6
 	memset(&hints, 0, sizeof(hints));
 	/* set-up hints structure */
-	hints.ai_family = PF_UNSPEC; /*- Allow IPv4 or IPv6 */
+	hints.ai_family = family > 0 ? family : PF_UNSPEC; /*- Allow IPv4 or IPv6 */
 	hints.ai_socktype = SOCK_DGRAM; /*- Datagram socket */
 	hints.ai_flags = 0;
 	hints.ai_protocol = 0; /*- Any protocol */
