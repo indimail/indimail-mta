@@ -1,5 +1,8 @@
 /*
  * $Log: vdeldomain.c,v $
+ * Revision 2.14  2016-01-12 14:27:11+05:30  Cprogrammer
+ * use AF_INET for get_local_ip()
+ *
  * Revision 2.13  2013-08-03 20:22:33+05:30  Cprogrammer
  * check for host.master to check if domain is distributed
  *
@@ -94,9 +97,10 @@
 #include <signal.h>
 #include <errno.h>
 #include <pwd.h>
+#include <sys/socket.h>
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vdeldomain.c,v 2.13 2013-08-03 20:22:33+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: vdeldomain.c,v 2.14 2016-01-12 14:27:11+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 char            Domain[MAX_BUFF];
@@ -157,7 +161,7 @@ main(argc, argv)
 		} else
 		if (is_dist || mcd_remove)
 		{
-			if (!(ipaddr = get_local_ip()))
+			if (!(ipaddr = get_local_ip(PF_INET)))
 			{
 				fprintf(stderr, "vdeldomain: failed to get local ipaddr\n");
 				vclose();

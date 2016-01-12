@@ -1,5 +1,8 @@
 /*
  * $Log: vauth_active.c,v $
+ * Revision 2.10  2016-01-12 14:27:08+05:30  Cprogrammer
+ * use AF_INET for get_local_ip()
+ *
  * Revision 2.9  2009-10-14 20:46:19+05:30  Cprogrammer
  * check return status of parse_quota()
  *
@@ -50,7 +53,7 @@
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vauth_active.c,v 2.9 2009-10-14 20:46:19+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: vauth_active.c,v 2.10 2016-01-12 14:27:08+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 
@@ -59,6 +62,7 @@ static char     sccsid[] = "$Id: vauth_active.c,v 2.9 2009-10-14 20:46:19+05:30 
 #include <string.h>
 #include <pwd.h>
 #include <errno.h>
+#include <sys/socket.h>
 
 int
 vauth_active(struct passwd *pw, char *domain, int type)
@@ -143,7 +147,7 @@ vauth_active(struct passwd *pw, char *domain, int type)
 	vset_lastauth(pw->pw_name, domain, ((type == FROM_ACTIVE_TO_INACTIVE) ? "INAC" : "ACTI"), GetIpaddr(), 
 			pw->pw_gecos, (type == FROM_ACTIVE_TO_INACTIVE) ? 0 : check_quota(Dir));
 #endif
-	if(!(local_ip = get_local_ip()))
+	if(!(local_ip = get_local_ip(PF_INET)))
 	{
 		fprintf(stderr, "vauth_active: get_local_ip: %s\n", strerror(errno));
 		return(-1);

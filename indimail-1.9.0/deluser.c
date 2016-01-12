@@ -1,5 +1,8 @@
 /*
  * $Log: deluser.c,v $
+ * Revision 2.27  2016-01-12 14:26:36+05:30  Cprogrammer
+ * use AF_INET for get_local_ip()
+ *
  * Revision 2.26  2010-03-02 08:17:32+05:30  Cprogrammer
  * changed Username xxx@yyy does not exist to xxx@yyy: No such user
  *
@@ -128,13 +131,14 @@
 #include <errno.h>
 #include <unistd.h>
 #include <sys/stat.h>
+#include <sys/socket.h>
 #include <mysqld_error.h>
 #ifndef USE_MAILDIRQUOTA
 #include <stdlib.h>
 #endif
 
 #ifndef	lint
-static char     sccsid[] = "$Id: deluser.c,v 2.26 2010-03-02 08:17:32+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: deluser.c,v 2.27 2016-01-12 14:26:36+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 /*-
@@ -268,7 +272,7 @@ vdeluser(char *user, char *domain, int remove_db)
 					fprintf(stderr, "vdeluser: parse_quota: %s: %s\n", passent->pw_shell, strerror(errno));
 					return (-1);
 				}
-				if (!(local_ip = get_local_ip()))
+				if (!(local_ip = get_local_ip(PF_INET)))
 				{
 					fprintf(stderr, "vdeluser: get_local_ip: %s\n", strerror(errno));
 					return(-1);

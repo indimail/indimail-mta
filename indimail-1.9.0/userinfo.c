@@ -1,5 +1,8 @@
 /*
  * $Log: userinfo.c,v $
+ * Revision 2.37  2016-01-12 14:27:02+05:30  Cprogrammer
+ * use AF_INET for get_local_ip()
+ *
  * Revision 2.36  2013-06-10 16:06:09+05:30  Cprogrammer
  * set maildir in the correct block
  *
@@ -200,9 +203,10 @@
 #include <pwd.h>
 #include <ctype.h>
 #include <errno.h>
+#include <sys/socket.h>
 
 #ifndef	lint
-static char     sccsid[] = "$Id: userinfo.c,v 2.36 2013-06-10 16:06:09+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: userinfo.c,v 2.37 2016-01-12 14:27:02+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 extern char *strptime(const char *, const char *, struct tm *);
@@ -303,7 +307,7 @@ vuserinfo(Email, User, Domain, DisplayName, DisplayPasswd, DisplayUid, DisplayGi
 			mailstore = MdaServer(mysql_host, real_domain);
 			if (!mailstore && (!strncmp(mysql_host, "localhost", 10) || !strncmp(mysql_host, "127.0.0.1", 10)))
 			{
-				if ((ptr = get_local_ip()))
+				if ((ptr = get_local_ip(PF_INET)))
 					mailstore = MdaServer(ptr, real_domain);
 			}
 			if (!mailstore)

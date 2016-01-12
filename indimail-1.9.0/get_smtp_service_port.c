@@ -1,5 +1,8 @@
 /*
  * $Log: get_smtp_service_port.c,v $
+ * Revision 2.6  2016-01-12 14:26:56+05:30  Cprogrammer
+ * use AF_INET for get_local_ip()
+ *
  * Revision 2.5  2010-05-28 14:11:12+05:30  Cprogrammer
  * use QMTP as default
  *
@@ -44,12 +47,13 @@
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: get_smtp_service_port.c,v 2.5 2010-05-28 14:11:12+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: get_smtp_service_port.c,v 2.6 2016-01-12 14:26:56+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef CLUSTERED_SITE
 #include <stdlib.h>
 #include <string.h>
+#include <sys/socket.h>
 #include <mysqld_error.h>
 
 int
@@ -76,7 +80,7 @@ get_smtp_service_port(char *SrcHost, char *domain, char *hostid)
 		scopy(Domain, domain, MAX_BUFF);
 	if(!SrcHost || !*SrcHost)
 	{
-		if(!(src_host = get_local_ip()))
+		if(!(src_host = get_local_ip(PF_INET)))
 			return(default_port);
 	} else
 		src_host = SrcHost;

@@ -89,7 +89,7 @@ is_distributed_domain(char *Domain)
 		fprintf(stderr, "is_distributed_domain: LoadDbInfo_TXT: %s\n", strerror(errno));
 		dist_flag = -1;
 		return (-1);
-	} 
+	}
 	for (dist_flag = 0, rhostsptr = RelayHosts;*rhostsptr;rhostsptr++)
 	{
 		if (!strncmp((*rhostsptr)->domain, Domain, DBINFO_BUFF))

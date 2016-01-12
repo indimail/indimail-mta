@@ -1,5 +1,8 @@
 /*
  * $Log: vadddomain.c,v $
+ * Revision 2.33  2016-01-12 14:27:05+05:30  Cprogrammer
+ * use AF_INET for get_local_ip()
+ *
  * Revision 2.32  2011-11-09 19:45:44+05:30  Cprogrammer
  * removed getversion
  *
@@ -158,10 +161,11 @@
 #include <fcntl.h>
 #include <signal.h>
 #include <errno.h>
+#include <sys/socket.h>
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vadddomain.c,v 2.32 2011-11-09 19:45:44+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: vadddomain.c,v 2.33 2016-01-12 14:27:05+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 
@@ -339,7 +343,7 @@ main(argc, argv)
 	 */
 	if (distributed >= 0)
 	{
-		if (!(localIP = get_local_ip()))
+		if (!(localIP = get_local_ip(PF_INET)))
 		{
 			error_stack(stderr, "vadddomain: failed to get local ipaddr\n");
 			vclose();

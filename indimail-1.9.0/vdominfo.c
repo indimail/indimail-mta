@@ -1,5 +1,8 @@
 /*
  * $Log: vdominfo.c,v $
+ * Revision 2.16  2016-01-12 14:27:15+05:30  Cprogrammer
+ * use AF_INET for get_local_ip()
+ *
  * Revision 2.15  2014-04-17 11:42:59+05:30  Cprogrammer
  * set supplementary group ids for indimail
  *
@@ -119,9 +122,10 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <memory.h>
+#include <sys/socket.h>
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vdominfo.c,v 2.15 2014-04-17 11:42:59+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: vdominfo.c,v 2.16 2016-01-12 14:27:15+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 char            Domain[MAX_BUFF];
@@ -328,7 +332,7 @@ display_domain(char *domain, char *dir, uid_t uid, gid_t gid)
 				printf("   host ID: %s\n", hostid);
 			else
 				printf("   host ID: ???\n");
-			if ((ptr = get_local_ip()))
+			if ((ptr = get_local_ip(PF_INET)))
 				printf("   IP Addr: %s\n", ptr);
 			else
 				printf("   IP Addr: ??\n");
@@ -397,7 +401,7 @@ display_domain(char *domain, char *dir, uid_t uid, gid_t gid)
 					printf("   host ID: %s\n", hostid);
 				else
 					printf("   host ID: ??\n");
-				if ((ptr = get_local_ip()))
+				if ((ptr = get_local_ip(AF_INET)))
 					printf("   IP Addr: %s\n", ptr);
 				else
 					printf("   IP Addr: ??\n");

@@ -1,5 +1,8 @@
 /*
  * $Log: vfstabNew.c,v $
+ * Revision 2.8  2016-01-12 14:27:18+05:30  Cprogrammer
+ * use AF_INET for get_local_ip()
+ *
  * Revision 2.7  2009-10-14 20:47:24+05:30  Cprogrammer
  * use strtoll() instead of atol()
  *
@@ -25,7 +28,7 @@
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vfstabNew.c,v 2.7 2009-10-14 20:47:24+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: vfstabNew.c,v 2.8 2016-01-12 14:27:18+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #include <mysqld_error.h>
@@ -42,6 +45,7 @@ static char     sccsid[] = "$Id: vfstabNew.c,v 2.7 2009-10-14 20:47:24+05:30 Cpr
 #include <sys/vfs.h>
 #endif
 
+#include <sys/socket.h>
 #include <string.h>
 #include <errno.h>
 
@@ -83,7 +87,7 @@ vfstabNew(char *filesystem, long max_user, long max_size)
 		quota_size = max_size;
 		quota_user = max_user;
 	}
-	if(!(local_ip = get_local_ip()))
+	if(!(local_ip = get_local_ip(PF_INET)))
 	{
 		fprintf(stderr, "vfstabNew: get_local_ip: %s\n", strerror(errno));
 		return(-1);
