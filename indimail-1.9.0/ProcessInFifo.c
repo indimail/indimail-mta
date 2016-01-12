@@ -1,5 +1,8 @@
 /*
  * $Log: ProcessInFifo.c,v $
+ * Revision 2.38  2016-01-12 14:25:15+05:30  Cprogrammer
+ * use AF_INET for get_local_ip()
+ *
  * Revision 2.37  2015-08-21 10:47:09+05:30  Cprogrammer
  * replaced getEnvConfigInit with getEnvConfigLong
  *
@@ -126,7 +129,7 @@
  */
 
 #ifndef	lint
-static char     sccsid[] = "$Id: ProcessInFifo.c,v 2.37 2015-08-21 10:47:09+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: ProcessInFifo.c,v 2.38 2016-01-12 14:25:15+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #include <fcntl.h>
@@ -136,6 +139,7 @@ static char     sccsid[] = "$Id: ProcessInFifo.c,v 2.37 2015-08-21 10:47:09+05:3
 #include <unistd.h>
 #include <signal.h>
 #include <time.h>
+#include <sys/socket.h>
 #include "indimail.h"
 #include "error_stack.h"
 #ifdef ENABLE_ENTERPRISE
@@ -312,7 +316,7 @@ ProcessInFifo(int instNum)
 #ifdef CLUSTERED_SITE
 	host_query_count = 0;
 #endif
-	if (!(local_ip = get_local_ip()))
+	if (!(local_ip = get_local_ip(PF_INET)))
 	{
 		local_ip = "127.0.0.1";
 		fprintf(stderr, "ProcessInFifo: get_local_ip failed. using localhost\n");
