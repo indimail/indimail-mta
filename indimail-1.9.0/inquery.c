@@ -1,5 +1,8 @@
 /*
  * $Log: inquery.c,v $
+ * Revision 2.18  2016-01-12 23:46:38+05:30  Cprogrammer
+ * fixed setting of InFifo file
+ *
  * Revision 2.17  2016-01-12 14:20:31+05:30  Cprogrammer
  * new logic for selecting fifo
  *
@@ -63,7 +66,7 @@
  */
 
 #ifndef	lint
-static char     sccsid[] = "$Id: inquery.c,v 2.17 2016-01-12 14:20:31+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: inquery.c,v 2.18 2016-01-12 23:46:38+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #include <stdlib.h>
@@ -139,11 +142,9 @@ inquery(char query_type, char *email, char *ip)
 	if (*infifo == '/' || *infifo == '.') {
 		snprintf(TmpBuf, MAX_BUFF, "%s", infifo);
 		scopy(InFifo, TmpBuf, MAX_BUFF);
-		idx = -1;
 	} else {
 		snprintf(TmpBuf, MAX_BUFF, "%s/%s/inquery/%s", qmaildir, controldir, infifo);
-		for (idx = -1;;idx++)
-		{
+		for (idx = 1;;idx++) {
 			snprintf(InFifo, MAX_BUFF, "%s.%d", TmpBuf, idx);
 			if(access(InFifo, F_OK))
 				break;
@@ -152,9 +153,9 @@ inquery(char query_type, char *email, char *ip)
 		srand(getpid() + time(0));
 #endif
 #ifdef RANDOM_BALANCING
-		snprintf(InFifo, MAX_BUFF, "%s.%d", TmpBuf, 1 + (int) ((float) idx * rand()/(RAND_MAX + 1.0)));
+		snprintf(InFifo, MAX_BUFF, "%s.%d", TmpBuf, 1 + (int) ((float) (idx - 1) * rand()/(RAND_MAX + 1.0)));
 #else
-		snprintf(InFifo, MAX_BUFF, "%s.%ld", TmpBuf, (time(0) % idx) + 1);
+		snprintf(InFifo, MAX_BUFF, "%s.%ld", TmpBuf, 1 + (time(0) % (idx - 1)));
 #endif
 	}
 	if(verbose)
