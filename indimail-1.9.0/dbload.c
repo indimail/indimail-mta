@@ -1,5 +1,8 @@
 /*
  * $Log: dbload.c,v $
+ * Revision 2.18  2016-01-12 13:12:55+05:30  Cprogrammer
+ * total was not correctly assigned if RelayHosts was already obtained
+ *
  * Revision 2.17  2015-08-21 10:45:48+05:30  Cprogrammer
  * use integer for getEnvConfigInt
  *
@@ -65,7 +68,7 @@
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: dbload.c,v 2.17 2015-08-21 10:45:48+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: dbload.c,v 2.18 2016-01-12 13:12:55+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #include <unistd.h>
@@ -87,7 +90,10 @@ OpenDatabases()
 	int             fd[3];
 	extern int      loadDbinfoTotal();
 
-	if (!RelayHosts && !(RelayHosts = LoadDbInfo_TXT(&total)))
+	if (RelayHosts)
+		total = loadDbinfoTotal();
+	else
+	if (!(RelayHosts = LoadDbInfo_TXT(&total)))
 	{
 		perror("OpenDatabases: LoadDbInfo_TXT");
 		return(-1);
