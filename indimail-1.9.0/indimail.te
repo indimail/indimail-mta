@@ -1,5 +1,8 @@
 #
 # $Log: indimail.te,v $
+# Revision 2.4  2016-01-13 13:04:31+05:30  Cprogrammer
+# added new selinux definition for clamav
+#
 # Revision 2.3  2014-06-19 08:31:57+05:30  Cprogrammer
 # added usr_tmp_t privilege for mysqld
 #
@@ -10,7 +13,7 @@
 # selinux module config
 #
 #
-# $Id: indimail.te,v 2.3 2014-06-19 08:31:57+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.te,v 2.4 2016-01-13 13:04:31+05:30 Cprogrammer Exp mbhangui $
 # 
 module indimail 1.0;
 
@@ -24,6 +27,7 @@ require {
 	type tmp_t;
 	type nscd_t;
 	type var_t;
+	type var_run_t;
 	type pop_port_t;
 	type antivirus_t;
 	type crond_tmp_t;
@@ -33,7 +37,7 @@ require {
 	class capability fowner;
 	class tcp_socket name_connect;
 	class file { execute getattr setattr read create rename execute_no_trans write unlink open append };
-	class sock_file write;
+	class sock_file { create write unlink setattr };
 	class lnk_file read;
 	class dir { setattr read create write rmdir remove_name open add_name };
 }
@@ -70,6 +74,8 @@ allow antivirus_t var_t:dir read;
 allow antivirus_t var_t:dir { write rmdir setattr read remove_name create add_name };
 allow antivirus_t var_t:file { create write rename unlink append };
 allow antivirus_t crond_tmp_t:file write;
+allow antivirus_t var_run_t:sock_file create;
+allow antivirus_t var_run_t:sock_file { unlink setattr };
 
 #!!!! This avc can be allowed using the boolean 'antivirus_can_scan_system'
 allow antivirus_t var_t:file { read write getattr open };
