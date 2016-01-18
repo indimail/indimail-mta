@@ -1,5 +1,8 @@
 /*
  * $Log: vrenamedomain.c,v $
+ * Revision 2.16  2016-01-19 00:35:46+05:30  Cprogrammer
+ * fixed bogus comparision.
+ *
  * Revision 2.15  2013-08-03 20:23:02+05:30  Cprogrammer
  * send sighup through post_handle
  *
@@ -56,7 +59,7 @@
 #include <sys/stat.h>
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vrenamedomain.c,v 2.15 2013-08-03 20:23:02+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: vrenamedomain.c,v 2.16 2016-01-19 00:35:46+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 int
@@ -170,7 +173,7 @@ main(int argc, char **argv)
 				break;
 			if((tmpstr = strchr(TmpBuf, '\n')))
 				*tmpstr = 0;
-			if(!is_alias_domain(TmpBuf) == 1)
+			if(!is_alias_domain(TmpBuf))
 			{
 				error_stack(stderr, "%s: Not an alias domain\n", TmpBuf);
 				continue;
