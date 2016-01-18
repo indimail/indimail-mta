@@ -1,5 +1,8 @@
 /*
  * $Log: vdeloldusers.c,v $
+ * Revision 2.18  2016-01-19 00:35:07+05:30  Cprogrammer
+ * missing datatype for init_flag
+ *
  * Revision 2.17  2011-11-09 19:46:00+05:30  Cprogrammer
  * removed getversion
  *
@@ -135,7 +138,7 @@
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vdeloldusers.c,v 2.17 2011-11-09 19:46:00+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: vdeloldusers.c,v 2.18 2016-01-19 00:35:07+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifndef ENABLE_AUTH_LOGGING
@@ -558,6 +561,7 @@ int
 LocateUser(Table, username, init_flag)
 	char          **Table;
 	char           *username;
+	int             init_flag;
 {
 	static char   **Table_ptr, **ptr;
 	int             ret;
