@@ -1,5 +1,8 @@
 /*
  * $Log: vauth_adddomain.c,v $
+ * Revision 2.5  2016-01-19 00:34:20+05:30  Cprogrammer
+ * missing call to create table indimail
+ *
  * Revision 2.4  2008-05-28 16:38:47+05:30  Cprogrammer
  * removed USE_MYSQL
  *
@@ -31,7 +34,7 @@
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vauth_adddomain.c,v 2.4 2008-05-28 16:38:47+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: vauth_adddomain.c,v 2.5 2016-01-19 00:34:20+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 int
@@ -52,7 +55,7 @@ vauth_adddomain(char *domain)
 		snprintf(SqlBuf, SQL_BUF_SIZE, "CREATE TABLE %s ( %s )", tmpstr, LARGE_TABLE_LAYOUT);
 	} else
 		snprintf(SqlBuf, SQL_BUF_SIZE, "CREATE TABLE IF NOT EXISTS %s ( %s )", default_table, SMALL_TABLE_LAYOUT);
-	if (mysql_query(&mysql[1], SqlBuf) && site_size == LARGE_SITE)
+	if (mysql_query(&mysql[1], SqlBuf))
 	{
 		mysql_perror("vauth_adddomain: %s", SqlBuf);
 		return (1);
