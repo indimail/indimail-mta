@@ -1,5 +1,8 @@
 /*
  * $Log: userinfo.c,v $
+ * Revision 2.38  2016-01-19 00:33:23+05:30  Cprogrammer
+ * datatype for DisplayFilter was missing
+ *
  * Revision 2.37  2016-01-12 14:27:02+05:30  Cprogrammer
  * use AF_INET for get_local_ip()
  *
@@ -206,7 +209,7 @@
 #include <sys/socket.h>
 
 #ifndef	lint
-static char     sccsid[] = "$Id: userinfo.c,v 2.37 2016-01-12 14:27:02+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: userinfo.c,v 2.38 2016-01-19 00:33:23+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 extern char *strptime(const char *, const char *, struct tm *);
@@ -216,7 +219,7 @@ vuserinfo(Email, User, Domain, DisplayName, DisplayPasswd, DisplayUid, DisplayGi
 		  DisplayQuota, DisplayLastAuth, DisplayMail, DisplayFilter, DisplayAll)
 	char           *Email, *User, *Domain;
 	int             DisplayName, DisplayPasswd, DisplayUid, DisplayGid, DisplayComment, DisplayDir, DisplayQuota, 
-	                DisplayLastAuth, DisplayMail, DisplayAll;
+	                DisplayLastAuth, DisplayMail, DisplayFilter, DisplayAll;
 {
 	struct passwd  *mypw;
 	char           *ptr, *real_domain, *mailstore, *qmaildir, *controldir, *passwd_hash;
