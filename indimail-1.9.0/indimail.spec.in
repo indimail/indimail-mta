@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail.spec.in,v 2.302 2016-01-20 20:11:36+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 2.303 2016-01-21 00:13:57+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %define _unpackaged_files_terminate_build 1
 
@@ -2899,7 +2899,10 @@ for i in indimail.cnf backup.conf cronlist indimail.te headerlist \
 do
 	%{__rm} -f %{_prefix}/etc/$i
 done
-%{__rm} -f /etc/indimail.cnf
+for i in /etc /etc/my.cnf.d /etc/mysql
+do
+	%{__rm} -f $i/indimail.cnf 
+done
 
 if [ %nofetchmail -eq 0 ] ; then
 	%{__rm} -f %{_prefix}/etc/fetchmailrc
