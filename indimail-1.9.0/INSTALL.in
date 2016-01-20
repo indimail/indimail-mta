@@ -711,7 +711,7 @@ the installation.
     ##### STEP 1  ## MySQL Configuration and Database Creation ##################
     a) Create MySQL configuration (@indimaildir@/etc/indimail.cnf)
     % sudo @indimaildir@/sbin/svctool --config=mysql --mysqlPrefix=@mysql_prefix@ \
-     --model=medium --no-of-cpu=2 --mysqlport=3306 --mysqlsocket=/tmp/mysql.sock
+     --mysqlport=3306 --mysqlsocket=/tmp/mysql.sock
     You can have a section [indimail] in @indimaildir@/etc/indimail.cnf for parameters specific
     to indimail
 
@@ -736,8 +736,7 @@ the installation.
     Create service in supervise to start mysqld
     % sudo @indimaildir@/sbin/svctool --mysql=3306 --servicedir=/service \
         --mysqlPrefix=@mysql_prefix@ --databasedir=@indimaildir@/mysqldb \
-        --config=@indimaildir@/etc/indimail.cnf --default-domain=indimail.org \
-        --model=small --no-of-cpu=2
+        --config=@indimaildir@/etc/indimail.cnf --default-domain=indimail.org
 
     ##### STEP 3  ## Default Control Files ##################
     The command below creates all necessary configuration for running a domain 'indimail.org' on

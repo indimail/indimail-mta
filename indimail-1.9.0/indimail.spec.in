@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail.spec.in,v 2.301 2016-01-19 00:30:29+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 2.302 2016-01-20 20:11:36+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %define _unpackaged_files_terminate_build 1
 
@@ -2353,14 +2353,13 @@ echo "Creating default qmail configuraton and catch-all alias (${_prefix}/alias/
 if [ -x %{mysqlPrefix}/libexec/mysqld -o -x %{mysqlPrefix}/sbin/mysqld ] ; then
 	echo "Creating Database/Service for MySQL"
 	# MySQL Config Creation
-	%{_prefix}/sbin/svctool --config=mysql   --mysqlPrefix=%{mysqlPrefix} --model=medium --no-of-cpu=2
+	%{_prefix}/sbin/svctool --config=mysql   --mysqlPrefix=%{mysqlPrefix}
 	# MySQL Database Creation
 	%{_prefix}/sbin/svctool --config=mysqldb --mysqlPrefix=%{mysqlPrefix} \
     	--databasedir=%{_prefix}/mysqldb --base_path=%{mbase}
 	# MySQL Supervise creation
 	%{_prefix}/sbin/svctool --mysql=3306 --servicedir=%{servicedir} --mysqlPrefix=%{mysqlPrefix} \
-		--databasedir=%{_prefix}/mysqldb --config=%{_prefix}/etc/indimail.cnf --default-domain=%{default_domain} \
-		--model=small --no-of-cpu=2
+		--databasedir=%{_prefix}/mysqldb --config=%{_prefix}/etc/indimail.cnf --default-domain=%{default_domain}
 	count=`ps -e|grep mysqld|wc -l`
 	if [ $count -gt 0 ] ; then
 		echo "Disabling mysqld service"
@@ -2900,6 +2899,7 @@ for i in indimail.cnf backup.conf cronlist indimail.te headerlist \
 do
 	%{__rm} -f %{_prefix}/etc/$i
 done
+%{__rm} -f /etc/indimail.cnf
 
 if [ %nofetchmail -eq 0 ] ; then
 	%{__rm} -f %{_prefix}/etc/fetchmailrc

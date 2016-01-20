@@ -1,5 +1,8 @@
 #!/bin/sh
 # $Log: create_services.in,v $
+# Revision 2.57  2016-01-20 20:11:44+05:30  Cprogrammer
+# removed --model option for mysql
+#
 # Revision 2.56  2014-04-23 13:48:54+05:30  Cprogrammer
 # removed clamav
 # use $dkimkeyfn for dkim signature filename
@@ -192,7 +195,7 @@ indimaildir=@indimaildir@
 # End USER Configuration OPTIONS
 #
 
-# $Id: create_services.in,v 2.56 2014-04-23 13:48:54+05:30 Cprogrammer Exp mbhangui $
+# $Id: create_services.in,v 2.57 2016-01-20 20:11:44+05:30 Cprogrammer Exp mbhangui $
 
 usage()
 {
@@ -326,14 +329,12 @@ $chown -R qmaill:nofiles @logdir@
 #
 # MySQL
 #
-$dir_prefix$indimaildir/sbin/svctool --config=mysql   --mysqlPrefix=$mysql_base --model=medium \
-    --no-of-cpu=2 $extra_opt
+$dir_prefix$indimaildir/sbin/svctool --config=mysql   --mysqlPrefix=$mysql_base $extra_opt
 $dir_prefix$indimaildir/sbin/svctool --config=mysqldb --mysqlPrefix=$mysql_base \
     --databasedir=$indimaildir/mysqldb --base_path=$mail_path $extra_opt
 $dir_prefix$indimaildir/sbin/svctool --mysql=3306 --servicedir=$servicedir \
     --mysqlPrefix=$mysql_base \
-	--databasedir=$indimaildir/mysqldb --config=$indimaildir/etc/indimail.cnf --default-domain=indimail.org \
-	--model=small --no-of-cpu=2 $extra_opt
+	--databasedir=$indimaildir/mysqldb --config=$indimaildir/etc/indimail.cnf --default-domain=indimail.org
 
 $dir_prefix$indimaildir/sbin/svctool --config=qmail --postmaster=postmaster@indimail.org \
 	--default-domain=indimail.org $extra_opt

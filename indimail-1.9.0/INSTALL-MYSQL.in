@@ -28,6 +28,7 @@
           o mariadb 5.2.6
           o mariadb-5.5.32
           o mariadb-5.5.36
+          o mariadb-10.0.21
           o mysql-5.4.3-beta
           o mysql-5.5.0-m2
           o mysql-5.5.2-m2
@@ -36,6 +37,7 @@
           o mysql-5.5.13
           o mysql-5.5.14
           o mysql-5.6.19
+          o mysql-5.7.10
 
     2. If you have /etc/my.conf, replace socket=/var/lib/mysql/mysql.sock with
        socket=/tmp/mysql.sock 
@@ -59,8 +61,14 @@
     # /etc/init.d/mysqld stop
 
     For systems using systemctl
+
+    a) For mysql-community-server (oracle)
     # /bin/systemctl stop mysqld.service
     # /bin/systemctl disable mysqld.service
+
+    b) For mariadb-server
+    # /bin/systemctl stop mariadb.service
+    # /bin/systemctl disable mariadb.service
 
     For systems using upstart
     # echo "manual" > /etc/init/mysqld.override
@@ -73,8 +81,7 @@
     Create service in supervise to start mysqld
     # @indimaildir@/sbin/svctool --mysql=3306 --servicedir=/service \
         --mysqlPrefix=@mysql_prefix@ --databasedir=@indimaildir@/mysqldb \
-        --config=@indimaildir@/etc/indimail.cnf --default-domain=indimail.org \
-        --model=small --no-of-cpu=2 
+        --config=@indimaildir@/etc/indimail.cnf --default-domain=indimail.org
 
     ##### STEP 2  ## MySQL Database Creation ##################
     Create MySQL Database. You have to either run option a) or option b) depending on whether
@@ -89,7 +96,7 @@
        file (@indimaildir@/etc/indimail.cnf)
 
        # @indimaildir@/sbin/svctool --config=mysql --mysqlPrefix=@mysql_prefix@ \
-           --model=medium --no-of-cpu=2 --mysqlport=3306 --mysqlsocket=/tmp/mysql.sock
+           --mysqlport=3306 --mysqlsocket=/tmp/mysql.sock
 
        Create a new MySQL database
        # @indimaildir@/sbin/svctool --config=mysqldb --mysqlPrefix=@mysql_prefix@ \
@@ -128,11 +135,8 @@
        mysql> GRANT RELOAD,SHUTDOWN,PROCESS on *.* to admin;
        mysql> GRANT REPLICATION SLAVE on *.* to repl;
 
-       also have 'sql-mode=NO_BACKSLASH_ESCAPES' in the server option
-       file (my.cnf or wherever your my.cnf lies)
-
        Create a link to existing MySQL config file
-       # ln -sf /etc/my.cnf /etc/indimail.cnf
+       # ln -sf /var/indimail/etc/indimail.cnf /etc/indimail.cnf
 
        NOTE: user and password are the userid and password of a privileged user in your
        existing MySQL Database)
