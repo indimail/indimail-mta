@@ -1,6 +1,9 @@
 #!/bin/sh
 # WARNING: This file was auto-generated. Do not edit!
 # $Log: svctool.in,v $
+# Revision 2.255  2016-01-20 20:12:37+05:30  Cprogrammer
+# removed --model option for mysql
+#
 # Revision 2.254  2016-01-20 16:43:31+05:30  Cprogrammer
 # fixed for clamd, mysql-community-server
 #
@@ -962,7 +965,7 @@
 # Initial revision
 #
 #
-# $Id: svctool.in,v 2.254 2016-01-20 16:43:31+05:30 Cprogrammer Exp mbhangui $
+# $Id: svctool.in,v 2.255 2016-01-20 20:12:37+05:30 Cprogrammer Exp mbhangui $
 #
 
 #
@@ -1494,8 +1497,6 @@ Known values for OPTION are:
 	--config=conf_file --servicedir=service_path
 	[--mysqlsocket=socket]
 	[--default-domain=domain]
-	[--model=small|medium|large|huge]
-	[--no-of-cpu=n]
 
   Installs a new MySQL Server
   mysqlport      - Install MySQL to listen on this port
@@ -1505,8 +1506,6 @@ Known values for OPTION are:
   config         - MySQL Configuration file (e.g. $indimaildir/etc/indimail.cnf)
   service_path   - Path where supervise scripts will be installed
   default-domain - default domain name for which this host will handle mails
-  model          - Your Server model
-  n              - No of CPU's on your server
 
 --fetchmail --qbase=queue_path --qcount=N --qstart=I --servicedir=service_path
 	[--cntrldir=cntrl_path]
@@ -1582,8 +1581,6 @@ Known values for OPTION are:
 	[--mysqlhost=mysqlhost --mysqluser=mysqluser --mysqlpass=mysqlpass]
 	[--mysqlport=port | --mysqlsocket=socket]
 	[--databasedir=databasedir]
-	[--model=small|medium|large|huge]
-	[--no-of-cpu=n]
 	[--use-grant]
 	[--stdout]
 	[--wipe]
@@ -1613,8 +1610,6 @@ Known values for OPTION are:
   mysqlport      - Port for connecting to mysql
   mysqlsocket    - Unix Domain Socket for connecting to mysql
   databasedir    - Directory containing the Database and Logs
-  model          - Your Server model
-  n              - No of CPU's on your server
   use-grant      - Use the usual create user and grant statements for creating users
                    (implies --stdout)
   stdout         - Dump on the screen. Will not create a configuration
@@ -2646,7 +2641,7 @@ case "$dkverify_option" in
 esac
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.254 2016-01-20 16:43:31+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.255 2016-01-20 20:12:37+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -2697,7 +2692,7 @@ if [ " $odmr" = " " ] ; then
 		/bin/mkdir -p "$DESTDIR"$SERVICEDIR/qmail-spamlog/log
 		(
 		echo "#!/bin/sh"
-		echo "# \$Id: svctool.in,v 2.254 2016-01-20 16:43:31+05:30 Cprogrammer Exp mbhangui $"
+		echo "# \$Id: svctool.in,v 2.255 2016-01-20 20:12:37+05:30 Cprogrammer Exp mbhangui $"
 		echo "# $prog_args"
 		echo ""
 		echo "LOGFILTER=\`cat $SERVICEDIR/qmail-smtpd.$tag/variables/LOGFILTER\`"
@@ -2718,7 +2713,7 @@ if [ " $odmr" = " " ] ; then
 		#qmail-spamlog log script
 		(
 		echo "#!/bin/sh"
-		echo "# \$Id: svctool.in,v 2.254 2016-01-20 16:43:31+05:30 Cprogrammer Exp mbhangui $"
+		echo "# \$Id: svctool.in,v 2.255 2016-01-20 20:12:37+05:30 Cprogrammer Exp mbhangui $"
 		echo "# generated on $host on `date`"
 		echo "# $prog_args"
 		echo ""
@@ -2736,7 +2731,7 @@ if [ ! -d $LOGDIR ] ; then
 fi
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.254 2016-01-20 16:43:31+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.255 2016-01-20 20:12:37+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -2994,7 +2989,7 @@ else
 fi
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.254 2016-01-20 16:43:31+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.255 2016-01-20 20:12:37+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -3032,7 +3027,7 @@ if [ ! " $logfilter" = " " -a ! -d "$DESTDIR"$SERVICEDIR/qmail-spamlog/run ] ; t
 	/bin/mkdir -p "$DESTDIR"$SERVICEDIR/qmail-spamlog/log
 	(
 	echo "#!/bin/sh"
-	echo "# \$Id: svctool.in,v 2.254 2016-01-20 16:43:31+05:30 Cprogrammer Exp mbhangui $"
+	echo "# \$Id: svctool.in,v 2.255 2016-01-20 20:12:37+05:30 Cprogrammer Exp mbhangui $"
 	echo "# $prog_args"
 	echo ""
 	echo "LOGFILTER=\`cat $SERVICEDIR/qmail-$type.$tag/variables/LOGFILTER\`"
@@ -3053,7 +3048,7 @@ if [ ! " $logfilter" = " " -a ! -d "$DESTDIR"$SERVICEDIR/qmail-spamlog/run ] ; t
 	#qmail-spamlog log script
 	(
 	echo "#!/bin/sh"
-	echo "# \$Id: svctool.in,v 2.254 2016-01-20 16:43:31+05:30 Cprogrammer Exp mbhangui $"
+	echo "# \$Id: svctool.in,v 2.255 2016-01-20 20:12:37+05:30 Cprogrammer Exp mbhangui $"
 	echo "# generated on $host on `date`"
 	echo "# $prog_args"
 	echo ""
@@ -3070,7 +3065,7 @@ if [ ! -d $LOGDIR ] ; then
 fi
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.254 2016-01-20 16:43:31+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.255 2016-01-20 20:12:37+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -3138,7 +3133,7 @@ CONTEXT_FILE=$QmailHOME/control/$CONTEXT_FILE
 
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.254 2016-01-20 16:43:31+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.255 2016-01-20 20:12:37+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -3161,7 +3156,7 @@ if [ ! -d $LOGDIR ] ; then
 fi
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.254 2016-01-20 16:43:31+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.255 2016-01-20 20:12:37+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -3242,7 +3237,7 @@ else
 fi
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.254 2016-01-20 16:43:31+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.255 2016-01-20 20:12:37+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -3297,7 +3292,7 @@ fi
 # qmail-imapd log script
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.254 2016-01-20 16:43:31+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.255 2016-01-20 20:12:37+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -3595,7 +3590,7 @@ else
 fi
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.254 2016-01-20 16:43:31+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.255 2016-01-20 20:12:37+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -3649,7 +3644,7 @@ fi
 # qmail-pop3d log script
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.254 2016-01-20 16:43:31+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.255 2016-01-20 20:12:37+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -3860,7 +3855,7 @@ fi
 echo 1 > $conf_dir/MYSQL_OPT_RECONNECT
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.254 2016-01-20 16:43:31+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.255 2016-01-20 20:12:37+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -3888,7 +3883,7 @@ fi
 # indisrvr log script
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.254 2016-01-20 16:43:31+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.255 2016-01-20 20:12:37+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -3914,7 +3909,7 @@ conf_dir="$DESTDIR"$SERVICEDIR/qscanq/variables
 # qscanq script
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.254 2016-01-20 16:43:31+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.255 2016-01-20 20:12:37+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -3936,7 +3931,7 @@ fi
 # qscanq log script
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.254 2016-01-20 16:43:31+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.255 2016-01-20 20:12:37+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -3968,7 +3963,7 @@ conf_dir="$DESTDIR"$SERVICEDIR/clamd/variables
 # clamd script
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.254 2016-01-20 16:43:31+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.255 2016-01-20 20:12:37+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -4035,7 +4030,7 @@ fi
 # clamd log script
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.254 2016-01-20 16:43:31+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.255 2016-01-20 20:12:37+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -4051,7 +4046,7 @@ conf_dir="$DESTDIR"$SERVICEDIR/freshclam/variables
 # freshclam script
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.254 2016-01-20 16:43:31+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.255 2016-01-20 20:12:37+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -4099,7 +4094,7 @@ fi
 # freshclam log script
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.254 2016-01-20 16:43:31+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.255 2016-01-20 20:12:37+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -4123,13 +4118,13 @@ base_socket=`basename $SOCKET_PATH`
 if [ $nooverwrite -eq 1 -a -d "$DESTDIR"$SERVICEDIR/pwdlookup/variables ] ; then
 	return 0
 fi
-mkdir -p "$DESTDIR"$SERVICEDIR/pwdlookup/log
+/bin/mkdir -p "$DESTDIR"$SERVICEDIR/pwdlookup/log
 conf_dir="$DESTDIR"$SERVICEDIR/pwdlookup/variables
-mkdir -p $conf_dir
+/bin/mkdir -p $conf_dir
 /bin/chmod 500 $conf_dir
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.254 2016-01-20 16:43:31+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.255 2016-01-20 20:12:37+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -4145,7 +4140,7 @@ fi
 # pwdlookup log script
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.254 2016-01-20 16:43:31+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.255 2016-01-20 20:12:37+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -4218,9 +4213,9 @@ base_fifo_name=`basename $INFIFO_PATH`
 if [ $nooverwrite -eq 1 -a -d "$DESTDIR"$SERVICEDIR/inlookup.$base_fifo_name/variables ] ; then
 	return 0
 fi
-mkdir -p "$DESTDIR"$SERVICEDIR/inlookup.$base_fifo_name/log
+/bin/mkdir -p "$DESTDIR"$SERVICEDIR/inlookup.$base_fifo_name/log
 conf_dir="$DESTDIR"$SERVICEDIR/inlookup.$base_fifo_name/variables
-mkdir -p $conf_dir
+/bin/mkdir -p $conf_dir
 /bin/chmod 500 $conf_dir
 echo "$INFIFO_PATH" > $conf_dir/INFIFO
 echo $THREAD_COUNT > $conf_dir/THREAD_COUNT
@@ -4249,7 +4244,7 @@ echo "inlookup" > $conf_dir/MYSQL_READ_DEFAULT_GROUP
 echo 1 > $conf_dir/MYSQL_OPT_RECONNECT
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.254 2016-01-20 16:43:31+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.255 2016-01-20 20:12:37+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -4265,7 +4260,7 @@ fi
 # inlookup log script
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.254 2016-01-20 16:43:31+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.255 2016-01-20 20:12:37+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -4317,9 +4312,9 @@ if [ ! -d "$DESTDIR"$databasedir/data -o $force -eq 1 ] ; then
 	if [ $force -eq 1 ] ; then
 		/bin/rm -r "$DESTDIR"$databasedir/data
 	fi
-	if ( mkdir -p "$DESTDIR"$databasedir/data && mkdir -p "$DESTDIR"$databasedir/logs ) ; then
+	if ( /bin/mkdir -p "$DESTDIR"$databasedir/data && /bin/mkdir -p "$DESTDIR"$databasedir/logs ) ; then
 		(
-		echo "# \$Id: svctool.in,v 2.254 2016-01-20 16:43:31+05:30 Cprogrammer Exp mbhangui $"
+		echo "# \$Id: svctool.in,v 2.255 2016-01-20 20:12:37+05:30 Cprogrammer Exp mbhangui $"
 		echo "# generated on $host on `date`"
 		echo ""
 		echo "# svctool --config=mysqldb --mysqlPrefix=$mysqlPrefix --databasedir=$databasedir --nolog"
@@ -4327,6 +4322,9 @@ if [ ! -d "$DESTDIR"$databasedir/data -o $force -eq 1 ] ; then
 		$chown -R mysql:mysql "$DESTDIR"$databasedir
 		echo "Creating MySQL Database in "$DESTDIR"$databasedir/data with defaults file $conf_file"
 		if [ $mariadb -eq 1 ] ; then
+			/bin/mkdir -p /var/run/mysqld
+			$chown mysql:mysql /var/run/mysqld
+			echo "$install_db --user=mysql --basedir=$mysqlPrefix --datadir="$DESTDIR"$databasedir/data"
 			$install_db --user=mysql --basedir=$mysqlPrefix --datadir="$DESTDIR"$databasedir/data 1>&2
 		else
 			echo "$mysqlPrefix/$mysqld --initialize-insecure --console --user=mysql --datadir="$DESTDIR"$databasedir/data"
@@ -4347,7 +4345,8 @@ if [ ! -d "$DESTDIR"$databasedir/data -o $force -eq 1 ] ; then
 		create_mysql_rootuser $mysql_version $mariadb | eval "$mysqlPrefix/$mysqld \
 			--bootstrap --user=mysql \
 			--datadir="$DESTDIR"$databasedir/data --skip-grant-tables"
-		$mysqlPrefix/$mysqld --datadir="$DESTDIR"$databasedir/data --user=mysql --socket=/tmp/mysql.sock >/dev/null 2>&1 &
+		$mysqlPrefix/$mysqld --pid-file=/tmp/mysqld.pid --datadir="$DESTDIR"$databasedir/data \
+			--user=mysql --socket=/tmp/mysql.sock >/dev/null 2>&1 &
 		pid=`jobs -p`
 		sleep 10
 		create_mysql_user $mysql_version | $mysqlPrefix/bin/mysql -sN -u mysql -p"$PRIV_PASS" mysql -S /tmp/mysql.sock
@@ -4400,12 +4399,12 @@ else
 	fi
 fi
 
-mkdir -p "$DESTDIR"$SERVICEDIR/mysql.$port/log
-mkdir -p "$DESTDIR"$SERVICEDIR/mysql.$port/variables
+/bin/mkdir -p "$DESTDIR"$SERVICEDIR/mysql.$port/log
+/bin/mkdir -p "$DESTDIR"$SERVICEDIR/mysql.$port/variables
 /bin/chmod 500 "$DESTDIR"$SERVICEDIR/mysql.$port/variables
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.254 2016-01-20 16:43:31+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.255 2016-01-20 20:12:37+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -4486,7 +4485,7 @@ echo "--pid-file=\$PIDFILE 2>&1"
 
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.254 2016-01-20 16:43:31+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.255 2016-01-20 20:12:37+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -4503,7 +4502,7 @@ fi
 # mysql log script
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.254 2016-01-20 16:43:31+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.255 2016-01-20 20:12:37+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -4630,28 +4629,20 @@ echo $c_d
 echo "flush privileges;"
 }
 
-default_mysql_config()
+create_mysql_config()
 {
-version=$1
-mariadb=$2
-if [ $mariadb -eq 0 ] ; then
-	return 0
+if [ -x $mysqlPrefix/libexec/mysqld ] ; then
+	mysqld=libexec/mysqld
+elif [ -x $mysqlPrefix/sbin/mysqld ] ; then
+	mysqld=sbin/mysqld
+elif [ -x $mysqlPrefix/bin/mysqld ] ; then
+	mysqld=bin/mysqld
+else
+	mysqld=libexec/mysqld
 fi
-if [ $# -gt 2 ] ; then
-	if [ -s "$3" ] ; then
-		thr_con=$3
-	else
-		thr_con=""
-	fi
-fi
-if [ $# -gt 3 ] ; then
-	if [ -s "$4" ] ; then
-		key_buffer_name=$4
-	else
-		key_buffer_name="key_buffer"
-	fi
-fi
-#/usr/share/doc/mysql-server-5.1/examples/my-small.cnf
+mysql_version=`$mysqlPrefix/$mysqld --version 2>&1 | grep Ver | awk '{print $3}'`
+echo "creating mysql config MySQL version $mysql_version" 1>&2
+sql_mode=NO_ENGINE_SUBSTITUTION,STRICT_TRANS_TABLES 
 echo "[client]"
 echo "port      = $mysql_port"
 echo "socket    = $mysql_socket"
@@ -4672,161 +4663,6 @@ echo "socket   = $mysql_socket"
 echo "port     = $mysql_port"
 echo "basedir  = /usr"
 echo "datadir  = @indimaildir@/mysqldb"
-
-case $version in
-	5.6.[8-9]|5.6.9|5.6.[1-9][0-9])
-	echo "# Remove leading # and set to the amount of RAM for the most important data"
-	echo "# cache in MySQL. Start at 70% of total RAM for dedicated server, else 10%."
-	echo "# innodb_buffer_pool_size = 128M"
-	echo ""
-	echo "# Remove leading # to turn on a very important data integrity option: logging"
-	echo "# changes to the binary log between backups."
-	echo "# log_bin"
-	echo ""
-	echo "# Remove leading # to set options mainly useful for reporting servers."
-	echo "# The server defaults are faster for transactions and fast SELECTs."
-	echo "# Adjust sizes as needed, experiment to find the optimal values."
-	echo "# join_buffer_size = 128M"
-	echo "# sort_buffer_size = 2M"
-	echo "# read_rnd_buffer_size = 2M "
-	echo ""
-	echo "#sql_mode=NO_ENGINE_SUBSTITUTION,STRICT_TRANS_TABLES"
-	;;
-
-	*)
-	echo "#"
-	echo "# Instead of skip-networking the default is now to listen only on"
-	echo "# localhost which is more compatible and is not less secure."
-	echo "bind-address = 127.0.0.1"
-	echo "#"
-	echo "# * Fine Tuning"
-	echo "#"
-	echo "$key_buffer_name        = 16M"
-	echo "max_allowed_packet      = 16M"
-	echo "thread_stack            = 192K"
-	echo "thread_cache_size       = 8"
-	echo "# This replaces the startup script and checks MyISAM tables if needed"
-	echo "# the first time they are touched"
-	echo "myisam-recover          = BACKUP"
-	echo "#max_connections        = 100"
-	echo "#table_cache            = 64"
-	echo "#thread_concurrency     = 10"
-	echo "#"
-	echo "# * Query Cache Configuration"
-	echo "#"
-	echo "query_cache_limit       = 1M"
-	echo "query_cache_size        = 16M"
-	echo "#"
-	echo "# * Logging and Replication"
-	echo "#"
-	echo "# Both location gets rotated by the cronjob."
-	echo "# Be aware that this log type is a performance killer."
-	echo "# As of 5.1 you can enable the log at runtime!"
-	echo "#general_log_file        = /var/log/mysql/mysql.log"
-	echo "#general_log             = 1"
-	echo 
-	echo "#log_error                = /var/log/mysql/error.log"
-	echo 
-	echo "# Here you can see queries with especially long duration"
-	echo "#log_slow_queries	= /var/log/mysql/mysql-slow.log"
-	echo "#long_query_time = 2"
-	echo "#log-queries-not-using-indexes"
-	echo "#"
-	echo "# The following can be used as easy to replay backup logs or for replication."
-	echo "# note: if you are setting up a replication slave, see README.Debian about"
-	echo "#       other settings you may need to change."
-	echo "#server-id              = 1"
-	echo "#log_bin                = /var/log/mysql/mysql-bin.log"
-	echo "expire_logs_days        = 10"
-	echo "max_binlog_size         = 100M"
-	echo "#binlog_do_db           = include_database_name"
-	echo "#binlog_ignore_db       = include_database_name"
-	echo "#"
-	echo "# * InnoDB"
-	echo "#"
-	echo "# InnoDB is enabled by default with a 10MB datafile in /var/lib/mysql/."
-	echo "# Read the manual for more InnoDB related options. There are many!"
-	echo "#"
-	echo "# * Security Features"
-	echo "#"
-	echo "# Read the manual, too, if you want chroot!"
-	echo "# chroot = /var/lib/mysql/"
-	echo "#"
-	echo "# For generating SSL certificates I recommend the OpenSSL GUI "tinyca"."
-	echo "#"
-	echo "# ssl-ca=/etc/mysql/cacert.pem"
-	echo "# ssl-cert=/etc/mysql/server-cert.pem"
-	echo "# ssl-key=/etc/mysql/server-key.pem"
-	echo 
-	echo 
-	echo "tmpdir   = /tmp"
-	echo "skip-external-locking"
-	if [ -s "$thr_con" ] ; then
-		echo "thread_concurrency=$thr_con"
-	fi
-	echo 
-	echo "[mysqldump]"
-	echo "quick"
-	echo "quote-names"
-	echo "max_allowed_packet      = 16M"
-	echo 
-	echo "[mysql]"
-	echo "#no-auto-rehash	# faster start of mysql but no tab completition"
-	echo 
-	echo "[isamchk]"
-	echo "$key_buffer_name        = 16M"
-	echo 
-	echo "#"
-	echo "# * IMPORTANT: Additional settings that can override those from this file!"
-	echo "#   The files must end with '.cnf', otherwise they'll be ignored."
-	echo "#"
-	if [ -d /etc/mysql/conf.d ] ; then
-	echo "!includedir /etc/mysql/conf.d/"
-	fi
-	;;
-esac
-}
-
-create_mysql_config()
-{
-if [ -x $mysqlPrefix/libexec/mysqld ] ; then
-	mysqld=libexec/mysqld
-elif [ -x $mysqlPrefix/sbin/mysqld ] ; then
-	mysqld=sbin/mysqld
-elif [ -x $mysqlPrefix/bin/mysqld ] ; then
-	mysqld=bin/mysqld
-else
-	mysqld=libexec/mysqld
-fi
-mysql_version=`$mysqlPrefix/$mysqld --version 2>&1 | grep Ver | awk '{print $3}'`
-echo $mysql_version |grep MariaDB > /dev/null 2>&1
-if [ $? -eq 0 ] ; then
-	mysql_version=`echo $mysql_version|cut -d- -f1`
-	mariadb=1
-else
-	mariadb=0
-fi
-echo "creating mysql config mariadb $mariadb version $mysql_version" 1>&2
-if [ $mariadb -eq 0 ] ; then
-	case $mysql_version in
-	5.7*)
-	cat /etc/my.cnf | sed \
-		-e "s{datadir=/var/lib/mysql{datadir=@indimaildir@/mysqldb/data{g" \
-		-e "s{socket=/var/lib/mysql/mysql.sock{socket=$mysql_socket{g" \
-		-e "s{log-error=/var/log/mysqld.log{#log-error=/var/log/mysqld.log{g"
-	echo "port=$mysql_port"
-	;;
-	*)
-	cat /etc/my.cnf | sed \
-		-e "s{datadir=/var/lib/mysql{datadir=@indimaildir@/mysqldb/data{g" \
-		-e "s{socket=/var/lib/mysql/mysql.sock{socket=$mysql_socket{g" \
-		-e "s{log-error=/var/log/mysqld.log{#log-error=/var/log/mysqld.log{g"
-	echo "port=$mysql_port"
-	;;
-	esac
-fi
-echo
-sql_mode=NO_ENGINE_SUBSTITUTION,STRICT_TRANS_TABLES 
 echo
 echo "[inlookup]"
 echo "#The number of seconds the server waits for activity on an"
@@ -4851,211 +4687,6 @@ echo "#non-interactive connection before closing it. This timeout applies"
 echo "#only to TCP/IP and Unix socket file connections, not to"
 echo "#connections made via named pipes, or shared memory."
 echo "wait_timeout=28800"
-if [ $mariadb -eq 0 ] ; then
-	return 0
-fi
-echo
-case $mysql_version in
-	5.1*|5.2*|5.3*|5.4*|5.5.[0-9]|5.5.1[0-9]|5.5.2[0-9]|5.5.3[0-9]|5.6*|6.0.9*|10.*)
-	key_buffer_name="key_buffer_size"
-	;;
-	*)
-	key_buffer_name="key_buffer"
-	;;
-esac
-if [ " $model" = " small" ] ; then
-	case $mysql_version in
-	6.0.9-alpha)
-	cat $mysqlPrefix/share/mysql/my-small.cnf | sed \
-		-e "s{#log-bin=mysql-bin{log-bin=@indimaildir@/mysqldb/logs/mysql-bin{g" \
-		-e "s{skip-federated{#skip-federated{g" \
-		-e "s{skip-locking{skip-external-locking{g" \
-		-e "s{port		= 3306{port		= $mysql_port{g" \
-		-e "s{socket		= .*\${socket		= $mysql_socket{g"
-	;;
-	*)
-	if [ -f /usr/share/doc/mysql-server-"$mysql_version"/examples/my-small.cnf ] ; then
-		cat /usr/share/doc/mysql-server-"$mysql_version"/examples/my-small.cnf | sed \
-			-e "s{#log-bin=mysql-bin{log-bin=@indimaildir@/mysqldb/logs/mysql-bin{g" \
-			-e "s{skip-federated{#skip-federated{g" \
-			-e "s{skip-locking{skip-external-locking{g" \
-			-e "s{port		= 3306{port		= $mysql_port{g" \
-			-e "s{socket		= .*\${socket		= $mysql_socket{g"
-	elif [ -f $mysqlPrefix/share/mysql/my-small.cnf ] ; then
-		cat $mysqlPrefix/share/mysql/my-small.cnf | sed \
-			-e "s{#log-bin=mysql-bin{log-bin=@indimaildir@/mysqldb/logs/mysql-bin{g" \
-			-e "s{skip-federated{#skip-federated{g" \
-			-e "s{skip-locking{skip-external-locking{g" \
-			-e "s{port		= 3306{port		= $mysql_port{g" \
-			-e "s{socket		= .*\${socket		= $mysql_socket{g"
-	else
-		default_mysql_config $mysql_version $mariadb "" $key_buffer_name
-	fi
-	;;
-	esac
-elif [ " $model" = " medium" ] ; then
-	case $mysql_version in
-	6.0.9-alpha)
-	cat $mysqlPrefix/share/mysql/my-medium.cnf | sed \
-		-e "s{log-bin=mysql-bin{log-bin=@indimaildir@/mysqldb/logs/mysql-bin{g" \
-		-e "s{skip-federated{#skip-federated{g" \
-		-e "s{skip-locking{skip-external-locking{g" \
-		-e "s{port		= 3306{port		= $mysql_port{g" \
-		-e "s{socket		= .*\${socket		= $mysql_socket{g"
-	;;
-	*)
-	if [ -f /usr/share/doc/mysql-server-"$mysql_version"/examples/my-medium.cnf.gz ] ; then
-		gunzip -c /usr/share/doc/mysql-server-"$mysql_version"/examples/my-medium.cnf.gz | sed \
-			-e "s{log-bin=mysql-bin{log-bin=@indimaildir@/mysqldb/logs/mysql-bin{g" \
-			-e "s{skip-federated{#skip-federated{g" \
-			-e "s{skip-locking{skip-external-locking{g" \
-			-e "s{port		= 3306{port		= $mysql_port{g" \
-			-e "s{socket		= .*\${socket		= $mysql_socket{g"
-	elif [ -f $mysqlPrefix/share/mysql/my-medium.cnf ] ; then
-		cat $mysqlPrefix/share/mysql/my-medium.cnf | sed \
-			-e "s{log-bin=mysql-bin{log-bin=@indimaildir@/mysqldb/logs/mysql-bin{g" \
-			-e "s{skip-federated{#skip-federated{g" \
-			-e "s{skip-locking{skip-external-locking{g" \
-			-e "s{port		= 3306{port		= $mysql_port{g" \
-			-e "s{socket		= .*\${socket		= $mysql_socket{g"
-	else
-		default_mysql_config $mysql_version $mariadb "" $key_buffer_name
-	fi
-	;;
-	esac
-elif [ " $model" = " large" ] ; then
-	if [ " $no_of_cpu" = " " ] ; then
-		case $mysql_version in
-		6.0.9-alpha)
-		cat $mysqlPrefix/share/mysql/my-large.cnf | sed \
-			-e "s{log-bin=mysql-bin{log-bin=@indimaildir@/mysqldb/logs/mysql-bin{g" \
-			-e "s{skip-federated{#skip-federated{g" \
-			-e "s{skip-locking{skip-external-locking{g" \
-			-e "s{port		= 3306{port		= $mysql_port{g" \
-			-e "s{socket		= .*\${socket		= $mysql_socket{g"
-		;;
-		*)
-		if [ -f /usr/share/doc/mysql-server-"$mysql_version"/examples/my-large.cnf.gz ] ; then
-			gunzip -c /usr/share/doc/mysql-server-"$mysql_version"/examples/my-large.cnf.gz | sed \
-				-e "s{log-bin=mysql-bin{log-bin=@indimaildir@/mysqldb/logs/mysql-bin{g" \
-				-e "s{skip-federated{#skip-federated{g" \
-				-e "s{skip-locking{skip-external-locking{g" \
-				-e "s{port		= 3306{port		= $mysql_port{g" \
-				-e "s{socket		= .*\${socket		= $mysql_socket{g"
-		elif [ -f $mysqlPrefix/share/mysql/my-large.cnf ] ; then
-			cat $mysqlPrefix/share/mysql/my-large.cnf | sed \
-				-e "s{log-bin=mysql-bin{log-bin=@indimaildir@/mysqldb/logs/mysql-bin{g" \
-				-e "s{skip-federated{#skip-federated{g" \
-				-e "s{skip-locking{skip-external-locking{g" \
-				-e "s{port		= 3306{port		= $mysql_port{g" \
-				-e "s{socket		= .*\${socket		= $mysql_socket{g"
-		else
-			default_mysql_config $mysql_version $mariadb "" $key_buffer_name
-		fi
-		;;
-		esac
-	else
-		thr_con=`expr $no_of_cpu * 2`
-		case $mysql_version in
-		6.0.9-alpha)
-		cat $mysqlPrefix/share/mysql/my-large.cnf | sed \
-			-e "s{log-bin=mysql-bin{log-bin=@indimaildir@/mysqldb/logs/mysql-bin{g" \
-			-e "s/thread_concurrency = 8/thread_concurrency=$thr_con/g" \
-			-e "s{skip-federated{#skip-federated{g" \
-			-e "s{skip-locking{skip-external-locking{g" \
-			-e "s{port		= 3306{port		= $mysql_port{g" \
-			-e "s{socket		= .*\${socket		= $mysql_socket{g"
-		;;
-		*)
-		if [ -f /usr/share/doc/mysql-server-"$mysql_version"/examples/my-large.cnf.gz ] ; then
-			gunzip -c /usr/share/doc/mysql-server-"$mysql_version"/examples/my-large.cnf.gz | sed \
-				-e "s{log-bin=mysql-bin{log-bin=@indimaildir@/mysqldb/logs/mysql-bin{g" \
-				-e "s/thread_concurrency = 8/thread_concurrency=$thr_con/g" \
-				-e "s{skip-federated{#skip-federated{g" \
-				-e "s{skip-locking{skip-external-locking{g" \
-				-e "s{port		= 3306{port		= $mysql_port{g" \
-				-e "s{socket		= .*\${socket		= $mysql_socket{g"
-		elif [ -f $mysqlPrefix/share/mysql/my-large.cnf ] ; then
-			cat $mysqlPrefix/share/mysql/my-large.cnf | sed \
-				-e "s{log-bin=mysql-bin{log-bin=@indimaildir@/mysqldb/logs/mysql-bin{g" \
-				-e "s/thread_concurrency = 8/thread_concurrency=$thr_con/g" \
-				-e "s{skip-federated{#skip-federated{g" \
-				-e "s{skip-locking{skip-external-locking{g" \
-				-e "s{port		= 3306{port		= $mysql_port{g" \
-				-e "s{socket		= .*\${socket		= $mysql_socket{g"
-		else
-			default_mysql_config $mysql_version $mariadb $thr_con $key_buffer_name
-		fi
-		;;
-		esac
-	fi
-elif [ " $model" = " huge" ] ; then
-	if [ " $no_of_cpu" = " " ] ; then
-		case $mysql_version in
-		6.0.9-alpha)
-		cat $mysqlPrefix/share/mysql/my-huge.cnf | sed \
-			-e "s{log-bin=mysql-bin{log-bin=@indimaildir@/mysqldb/logs/mysql-bin{g" \
-			-e "s{skip-federated{#skip-federated{g" \
-			-e "s{skip-locking{skip-external-locking{g" \
-			-e "s{port		= 3306{port		= $mysql_port{g" \
-			-e "s{socket		= .*\${socket		= $mysql_socket{g"
-		;;
-		*)
-		if [ -f /usr/share/doc/mysql-server-"$mysql_version"/examples/my-huge.cnf.gz ] ; then
-			gunzip -c /usr/share/doc/mysql-server-"$mysql_version"/examples/my-huge.cnf.gz | sed \
-				-e "s{log-bin=mysql-bin{log-bin=@indimaildir@/mysqldb/logs/mysql-bin{g" \
-				-e "s{skip-federated{#skip-federated{g" \
-				-e "s{skip-locking{skip-external-locking{g" \
-				-e "s{port		= 3306{port		= $mysql_port{g" \
-				-e "s{socket		= .*\${socket		= $mysql_socket{g"
-		elif [ -f $mysqlPrefix/share/mysql/my-huge.cnf ] ; then
-			cat $mysqlPrefix/share/mysql/my-huge.cnf | sed \
-				-e "s{log-bin=mysql-bin{log-bin=@indimaildir@/mysqldb/logs/mysql-bin{g" \
-				-e "s{skip-federated{#skip-federated{g" \
-				-e "s{skip-locking{skip-external-locking{g" \
-				-e "s{port		= 3306{port		= $mysql_port{g" \
-				-e "s{socket		= .*\${socket		= $mysql_socket{g"
-		else
-			default_mysql_config $mysql_version $mariadb "" $key_buffer_name
-		fi
-		;;
-		esac
-	else
-		thr_con=`expr $no_of_cpu * 2`
-		case $mysql_version in
-		6.0.9-alpha)
-		cat $mysqlPrefix/share/mysql/my-huge.cnf | sed \
-			-e "s{log-bin=mysql-bin{log-bin=@indimaildir@/mysqldb/logs/mysql-bin{g" \
-			-e "s/thread_concurrency = 8/thread_concurrency=$thr_con/g" \
-			-e "s{skip-federated{#skip-federated{g" \
-			-e "s{skip-locking{skip-external-locking{g" \
-			-e "s{port		= 3306{port		= $mysql_port{g" \
-			-e "s{socket		= .*\${socket		= $mysql_socket{g"
-		;;
-		*)
-		if [ -f /usr/share/doc/mysql-server-"$mysql_version"/examples/my-huge.cnf.gz ] ; then
-			gunzip -c /usr/share/doc/mysql-server-"$mysql_version"/examples/my-huge.cnf.gz | sed \
-				-e "s{log-bin=mysql-bin{log-bin=@indimaildir@/mysqldb/logs/mysql-bin{g" \
-				-e "s/thread_concurrency = 8/thread_concurrency=$thr_con/g" \
-				-e "s{skip-federated{#skip-federated{g" \
-				-e "s{skip-locking{skip-external-locking{g" \
-				-e "s{port		= 3306{port		= $mysql_port{g" \
-				-e "s{socket		= .*\${socket		= $mysql_socket{g"
-		elif [ -f $mysqlPrefix/share/mysql/my-huge.cnf ] ; then
-			cat $mysqlPrefix/share/mysql/my-huge.cnf | sed \
-				-e "s{log-bin=mysql-bin{log-bin=@indimaildir@/mysqldb/logs/mysql-bin{g" \
-				-e "s/thread_concurrency = 8/thread_concurrency=$thr_con/g" \
-				-e "s{skip-federated{#skip-federated{g" \
-				-e "s{skip-locking{skip-external-locking{g" \
-				-e "s{port		= 3306{port		= $mysql_port{g" \
-				-e "s{socket		= .*\${socket		= $mysql_socket{g"
-		else
-			default_mysql_config $mysql_version $mariadb $thr_con $key_buffer_name
-		fi
-		;;
-		esac
-	fi
-fi
 }
 
 create_svscan()
@@ -5068,7 +4699,7 @@ SERVICEDIR=$1
 if [ $nooverwrite -eq 1 -a -d "$DESTDIR"$SERVICEDIR/.svscan/log ] ; then
 	return 0
 fi
-mkdir -p "$DESTDIR"$SERVICEDIR/.svscan/log
+/bin/mkdir -p "$DESTDIR"$SERVICEDIR/.svscan/log
 
 if [ ! -d $LOGDIR ] ; then
 	/bin/mkdir -p $LOGDIR
@@ -5077,7 +4708,7 @@ fi
 # svscan log script
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.254 2016-01-20 16:43:31+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.255 2016-01-20 20:12:37+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -5101,9 +4732,9 @@ SERVICEDIR=$4
 if [ $nooverwrite -eq 1 -a -d "$DESTDIR"$SERVICEDIR/fetchmail/variables ] ; then
 	return 0
 fi
-mkdir -p "$DESTDIR"$SERVICEDIR/fetchmail/log
+/bin/mkdir -p "$DESTDIR"$SERVICEDIR/fetchmail/log
 conf_dir="$DESTDIR"$SERVICEDIR/fetchmail/variables
-mkdir -p $conf_dir
+/bin/mkdir -p $conf_dir
 /bin/chmod 500 $conf_dir
 echo $QUEUE_BASE > $conf_dir/QUEUE_BASE
 echo $NO_OF_QUEUES > $conf_dir/QUEUE_COUNT
@@ -5203,7 +4834,7 @@ case "$dkverify_option" in
 esac
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.254 2016-01-20 16:43:31+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.255 2016-01-20 20:12:37+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -5225,7 +4856,7 @@ fi
 # fetchmail log script
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.254 2016-01-20 16:43:31+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.255 2016-01-20 20:12:37+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -5295,7 +4926,7 @@ else
 fi
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.254 2016-01-20 16:43:31+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.255 2016-01-20 20:12:37+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -5336,7 +4967,7 @@ fi
 # qmail-poppass log script
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.254 2016-01-20 16:43:31+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.255 2016-01-20 20:12:37+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -5409,9 +5040,9 @@ done
 echo $QUEUE_BASE > "$DESTDIR"$QmailHOME/control/queue_base
 
 # qmail-send script
-mkdir -p "$DESTDIR"$SERVICEDIR/qmail-send.$tag/log
+/bin/mkdir -p "$DESTDIR"$SERVICEDIR/qmail-send.$tag/log
 conf_dir="$DESTDIR"$SERVICEDIR/qmail-send.$tag/variables
-mkdir -p $conf_dir
+/bin/mkdir -p $conf_dir
 if [ $no_multi -eq 1 ] ; then
 	echo "$QUEUE_BASE"/queue1 > $conf_dir/QUEUEDIR
 	> $conf_dir/QMAILQUEUE
@@ -5546,7 +5177,7 @@ case "$dksign_option" in
 esac
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.254 2016-01-20 16:43:31+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.255 2016-01-20 20:12:37+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -5560,10 +5191,10 @@ if [ ! -d $LOGDIR ] ; then
 	$chown qmaill:nofiles $LOGDIR
 fi
 # qmail-send log script
-mkdir -p "$DESTDIR"$SERVICEDIR/qmail-send."$tag"/log
+/bin/mkdir -p "$DESTDIR"$SERVICEDIR/qmail-send."$tag"/log
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.254 2016-01-20 16:43:31+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.255 2016-01-20 20:12:37+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -7859,20 +7490,6 @@ while test $# -gt 0; do
 	--dbdir=*)
 	dbdir=$optarg
 	;;
-	--model=*)
-		case $optarg in
-		small|medium|large|huge)
-		model=$optarg
-		;;
-		*)
-		echo "Invalid model $optarg" 1>&2
-		exit 1
-		;;
-		esac
-	;;
-	--no-of-cpu=*)
-	no_of_cpu=$optarg
-	;;
 	--postmaster=*)
 	postmaster=$optarg
 	;;
@@ -7937,7 +7554,7 @@ while test $# -gt 0; do
 	;;
 
 	--version)
-	echo "\$Id: svctool.in,v 2.254 2016-01-20 16:43:31+05:30 Cprogrammer Exp mbhangui $"
+	echo "\$Id: svctool.in,v 2.255 2016-01-20 20:12:37+05:30 Cprogrammer Exp mbhangui $"
 	prog_args=""
 	exit 0
 	;;
@@ -8308,9 +7925,6 @@ case $option in
 	elif [ " $default_domain" = " " ] ; then
 		echo "default domain not specified" 1>&2
 		exit 1
-	elif [ " $model" = " " ] ; then
-		echo "Model not selected" 1>&2
-		exit 1
 	elif [ " $databasedir" = " " ] ; then
 		echo "Database directory not specified" 1>&2
 		usage 1
@@ -8383,9 +7997,6 @@ case $option in
 		if [ " $mysqlPrefix" = " " ] ; then
 			echo "MySQL Installation Prefix directory not specified" 1>&2
 			usage 1
-		elif [ " $model" = " " ] ; then
-			echo "Model not selected" 1>&2
-			exit 1
 		fi
 		if [ " $mysql_port" = " " ]; then
 			mysql_port=3306
