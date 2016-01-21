@@ -1,5 +1,8 @@
 /*
  * $Log: vdominfo.c,v $
+ * Revision 2.17  2016-01-21 16:57:57+05:30  Cprogrammer
+ * removed compiler warning for fscanf()
+ *
  * Revision 2.16  2016-01-12 14:27:15+05:30  Cprogrammer
  * use AF_INET for get_local_ip()
  *
@@ -125,7 +128,7 @@
 #include <sys/socket.h>
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vdominfo.c,v 2.16 2016-01-12 14:27:15+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: vdominfo.c,v 2.17 2016-01-21 16:57:57+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 char            Domain[MAX_BUFF];
@@ -345,7 +348,10 @@ display_domain(char *domain, char *dir, uid_t uid, gid_t gid)
 		{
 			snprintf(tmpbuf, MAX_BUFF, "%s/.base_path", dir);
 			if ((fp = fopen(tmpbuf, "r"))) {
-				(void) fscanf(fp, "%s", tmpbuf);
+				if (fscanf(fp, "%s", tmpbuf) != 1) {
+					error_stack(stderr, "invalid domain users per level\n");
+					return;
+				}
 				printf("  Base Dir: %s\n", tmpbuf);
 				fclose(fp);
 			} else {
@@ -426,7 +432,10 @@ display_domain(char *domain, char *dir, uid_t uid, gid_t gid)
 			if (DisplayBaseDir) {
 				snprintf(tmpbuf, MAX_BUFF, "%s/.base_path", dir);
 				if ((fp = fopen(tmpbuf, "r"))) {
-					(void) fscanf(fp, "%s", tmpbuf);
+					if (fscanf(fp, "%s", tmpbuf) != 1) {
+						error_stack(stderr, "invalid domain users per level\n");
+						return;
+					}
 					printf("  Base Dir: %s\n", tmpbuf);
 					fclose(fp);
 				} else {
