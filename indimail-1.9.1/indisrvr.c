@@ -1,5 +1,8 @@
 /*
  * $Log: indisrvr.c,v $
+ * Revision 2.51  2016-01-21 16:44:39+05:30  Cprogrammer
+ * fixed bogus comparision
+ *
  * Revision 2.50  2015-12-31 09:07:08+05:30  Cprogrammer
  * fixed issue with getnameinfo() hostname not getting set
  *
@@ -180,7 +183,7 @@
 #include "indimail.h"
 
 #ifndef lint
-static char     sccsid[] = "$Id: indisrvr.c,v 2.50 2015-12-31 09:07:08+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: indisrvr.c,v 2.51 2016-01-21 16:44:39+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef CLUSTERED_SITE
@@ -863,7 +866,7 @@ get_options(int argc, char **argv, char **ipaddr, char **port, int *backlog)
 			break;
 		}
 	}
-	if (!*ipaddr || !*port || !*backlog == -1)
+	if (!*ipaddr || !*port || *backlog == -1)
 	{
 #ifdef HAVE_SSL
 		fprintf(stderr, "USAGE: indisrvr -i ipaddr -p port -n certfile -b backlog\n");
