@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail.spec.in,v 2.303 2016-01-21 00:13:57+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 2.304 2016-01-21 11:55:26+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %define _unpackaged_files_terminate_build 1
 
@@ -2937,7 +2937,7 @@ else
 	for i in databytes defaultdelivery defaultdomain localiphost locals \
 		me nodnscheck plusdomain queue_base smtpgreeting signatures \
 		chkrcptdomains defaulthost envnoathost filterargs greylist.white \
-		hostip timeoutremote timeoutsmtpd
+		hostip timeoutremote timeoutsmtpd tlsserverciphers dnsbllist
 	do
 		%{__rm} -f %{_prefix}/control/$i
 	done
@@ -2946,6 +2946,7 @@ fi
 %{__rm} -f %{_prefix}/control/domainkeys/%{dkimkeyfn}.pub %{_prefix}/control/domainkeys/%dkimkeyfn
 /bin/rmdir --ignore-fail-on-non-empty %{_prefix}/control/domainkeys 2>/dev/null
 /bin/rmdir --ignore-fail-on-non-empty %{_prefix}/control 2>/dev/null
+%{__rm} -rf %{_prefix}/control/defaultqueue
 
 for i in postmaster mailer-daemon root ham spam register-ham register-spam
 do
