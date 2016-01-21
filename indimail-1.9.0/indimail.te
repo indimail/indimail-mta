@@ -1,5 +1,8 @@
 #
 # $Log: indimail.te,v $
+# Revision 2.5  2016-01-21 11:55:52+05:30  Cprogrammer
+# added new policy definitions for antivirus_t
+#
 # Revision 2.4  2016-01-13 13:04:31+05:30  Cprogrammer
 # added new selinux definition for clamav
 #
@@ -13,7 +16,7 @@
 # selinux module config
 #
 #
-# $Id: indimail.te,v 2.4 2016-01-13 13:04:31+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.te,v 2.5 2016-01-21 11:55:52+05:30 Cprogrammer Exp mbhangui $
 # 
 module indimail 1.0;
 
@@ -70,15 +73,10 @@ allow semanage_t tmp_t:sock_file write;
 #============= antivirus_t ==============
 
 #!!!! This avc can be allowed using the boolean 'antivirus_can_scan_system'
-allow antivirus_t var_t:dir read;
-allow antivirus_t var_t:dir { write rmdir setattr read remove_name create add_name };
-allow antivirus_t var_t:file { create write rename unlink append };
+allow antivirus_t var_t:dir { read write rmdir setattr read remove_name create add_name };
+allow antivirus_t var_t:file { create open getattr read write rename unlink append };
 allow antivirus_t crond_tmp_t:file write;
-allow antivirus_t var_run_t:sock_file create;
-allow antivirus_t var_run_t:sock_file { unlink setattr };
-
-#!!!! This avc can be allowed using the boolean 'antivirus_can_scan_system'
-allow antivirus_t var_t:file { read write getattr open };
+allow antivirus_t var_run_t:sock_file { create write unlink setattr };
 
 #============= mandb_t ==============
 allow mandb_t var_t:file { open read getattr };
