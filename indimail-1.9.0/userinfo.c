@@ -1,5 +1,8 @@
 /*
  * $Log: userinfo.c,v $
+ * Revision 2.39  2016-01-21 12:57:58+05:30  Cprogrammer
+ * use localip if MdaServer returns null
+ *
  * Revision 2.38  2016-01-19 00:33:23+05:30  Cprogrammer
  * datatype for DisplayFilter was missing
  *
@@ -209,7 +212,7 @@
 #include <sys/socket.h>
 
 #ifndef	lint
-static char     sccsid[] = "$Id: userinfo.c,v 2.38 2016-01-19 00:33:23+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: userinfo.c,v 2.39 2016-01-21 12:57:58+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 extern char *strptime(const char *, const char *, struct tm *);
@@ -310,8 +313,10 @@ vuserinfo(Email, User, Domain, DisplayName, DisplayPasswd, DisplayUid, DisplayGi
 			mailstore = MdaServer(mysql_host, real_domain);
 			if (!mailstore && (!strncmp(mysql_host, "localhost", 10) || !strncmp(mysql_host, "127.0.0.1", 10)))
 			{
-				if ((ptr = get_local_ip(PF_INET)))
-					mailstore = MdaServer(ptr, real_domain);
+				if ((ptr = get_local_ip(PF_INET))) {
+					if (!(mailstore = MdaServer(ptr, real_domain)))
+						mailstore = ptr;
+				}
 			}
 			if (!mailstore)
 				mailstore = "unknown";
