@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail.spec.in,v 2.304 2016-01-21 11:55:26+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 2.305 2016-01-22 14:56:04+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %define _unpackaged_files_terminate_build 1
 
@@ -384,8 +384,8 @@ Conflicts: %{name}
 This package contains sendmail, qmail-inject and qmail-qmqpc - Bare minimum
 programs to have a mini-indimail installation.
 
-A mini-indimail installation doesn't have a mail queue. It gives each new message to a
-central server using QMQP.
+A mini-indimail installation doesn't have a mail queue. It gives each
+new message to a central server using QMQP.
 
 %{see_base}
 
@@ -1785,20 +1785,10 @@ fi
 # pam-multi
 %attr(755,root,root)                    /%{module_dir}/pam-multi.so
 
-%if %noclamav == 0
-%if %i_m_on_mac == 1
-%{_libdir}/libclam*.dylib
-%else
-%{_libdir}/libclam*.so*
-%endif
-%endif
-
 %if %nolibdkim == 0
 %if %i_m_on_mac == 1
-%{_libdir}/libdkim.dylib
 %{_libdir}/libdkim-%{libdkim_version}.0.dylib
 %else
-%{_libdir}/libdkim.so
 %{_libdir}/libdkim-%{libdkim_version}.so.0
 %{_libdir}/libdkim-%{libdkim_version}.so.0.0.0
 %endif
@@ -1806,10 +1796,8 @@ fi
 
 %if %nolibsrs2 == 0
 %if %i_m_on_mac == 1
-%{_libdir}/libsrs2.dylib
 %{_libdir}/libsrs2-%{libsrs2_version}.0.dylib
 %else
-%{_libdir}/libsrs2.so
 %{_libdir}/libsrs2-%{libsrs2_version}.so.0
 %{_libdir}/libsrs2-%{libsrs2_version}.so.0.0.0
 %endif
@@ -1817,41 +1805,31 @@ fi
 
 %if %nocourierimap == 0
 %if %i_m_on_mac == 1
-%{_libdir}/libunicode.dylib
+%{_libdir}/libunicode.0.dylib
 %else
-%{_libdir}/libunicode.so
 %{_libdir}/libunicode.so.1
 %{_libdir}/libunicode.so.1.1.0
 %endif
 %endif
 
 %if %i_m_on_mac == 1
-%{_libdir}/libeps.dylib
 %{_libdir}/libeps-%{eps_version}.0.dylib
-%{_libdir}/libcdb.dylib
 %{_libdir}/libcdb-%{cdb_version}.0.dylib
-%{_libdir}/libflash.dylib
 %{_libdir}/libflash-%{flash_version}.0.dylib
-%{_libdir}/libindimail.dylib
 %{_libdir}/libindimail-%{version}.0.dylib
 %else
-%{_libdir}/libeps.so
 %{_libdir}/libeps-%{eps_version}.so.0
 %{_libdir}/libeps-%{eps_version}.so.0.0.0
-%{_libdir}/libcdb.so
 %{_libdir}/libcdb-%{cdb_version}.so.0
 %{_libdir}/libcdb-%{cdb_version}.so.0.0.0
-%{_libdir}/libflash.so
 %{_libdir}/libflash-%{flash_version}.so.0
 %{_libdir}/libflash-%{flash_version}.so.0.0.0
-%{_libdir}/libindimail.so
 %{_libdir}/libindimail-%{version}.so.0
 %{_libdir}/libindimail-%{version}.so.0.0.0
 %endif
 @pkgconfigdir@/libindimail.pc
 
 %if %nonssd == 0
-                                        /usr/%{_lib}/libnss_nssd.so
                                         /usr/%{_lib}/libnss_nssd.so.2
 %attr(755,root,root)                    /usr/%{_lib}/libnss_nssd.so.2.0.0
 %endif
@@ -1914,11 +1892,7 @@ fi
 %{_libdir}/libcdb.a
 %{_libdir}/libflash.a
 %{_libdir}/libindimail.a
-@pkgconfigdir@/libindimail.pc
 
-%files shared
-%defattr(-, root, root, 0755)
-# Shared libraries (omit for architectures that don't support them)
 %if %noclamav == 0
 %if %i_m_on_mac == 1
 %{_libdir}/libclam*.dylib
@@ -1930,9 +1904,59 @@ fi
 %if %nolibdkim == 0
 %if %i_m_on_mac == 1
 %{_libdir}/libdkim.dylib
-%{_libdir}/libdkim-%{libdkim_version}.0.dylib
 %else
 %{_libdir}/libdkim.so
+%endif
+%endif
+
+%if %nolibsrs2 == 0
+%if %i_m_on_mac == 1
+%{_libdir}/libsrs2.dylib
+%else
+%{_libdir}/libsrs2.so
+%endif
+%endif
+
+%if %nocourierimap == 0
+%if %i_m_on_mac == 1
+%{_libdir}/libunicode.dylib
+%else
+%{_libdir}/libunicode.so
+%endif
+%endif
+
+%if %i_m_on_mac == 1
+%{_libdir}/libcdb.dylib
+%{_libdir}/libflash.dylib
+%{_libdir}/libindimail.dylib
+%else
+%{_libdir}/libeps.so
+%{_libdir}/libcdb.so
+%{_libdir}/libflash.so
+%{_libdir}/libindimail.so
+%endif
+
+%if %nonssd == 0
+                                        /usr/%{_lib}/libnss_nssd.so
+%endif
+
+@pkgconfigdir@/libindimail.pc
+
+%files shared
+%defattr(-, root, root, 0755)
+# Shared libraries (omit for architectures that don't support them)
+%if %noclamav == 0
+%if %i_m_on_mac == 1
+%{_libdir}/libclam*.dylib
+%else
+%{_libdir}/libclam*.so.*
+%endif
+%endif
+
+%if %nolibdkim == 0
+%if %i_m_on_mac == 1
+%{_libdir}/libdkim-%{libdkim_version}.0.dylib
+%else
 %{_libdir}/libdkim-%{libdkim_version}.so.0
 %{_libdir}/libdkim-%{libdkim_version}.so.0.0.0
 %endif
@@ -1940,36 +1964,26 @@ fi
 
 %if %nolibsrs2 == 0
 %if %i_m_on_mac == 1
-%{_libdir}/libsrs2.dylib
 %{_libdir}/libsrs2-%{libsrs2_version}.0.dylib
 %else
-%{_libdir}/libsrs2.so
 %{_libdir}/libsrs2-%{libsrs2_version}.so.0
 %{_libdir}/libsrs2-%{libsrs2_version}.so.0.0.0
 %endif
 %endif
 
 %if %i_m_on_mac == 0
-%{_libdir}/libeps.so
 %{_libdir}/libeps-%{eps_version}.so.0
 %{_libdir}/libeps-%{eps_version}.so.0.0.0
-%{_libdir}/libcdb.so
 %{_libdir}/libcdb-%{cdb_version}.so.0
 %{_libdir}/libcdb-%{cdb_version}.so.0.0.0
-%{_libdir}/libflash.so
 %{_libdir}/libflash-%{flash_version}.so.0
 %{_libdir}/libflash-%{flash_version}.so.0.0.0
-%{_libdir}/libindimail.so
 %{_libdir}/libindimail-%{version}.so.0
 %{_libdir}/libindimail-%{version}.so.0.0.0
 %else
-%{_libdir}/libeps.dylib
 %{_libdir}/libeps-%{eps_version}.0.dylib
-%{_libdir}/libcdb.dylib
 %{_libdir}/libcdb-%{cdb_version}.0.dylib
-%{_libdir}/libflash.dylib
 %{_libdir}/libflash-%{flash_version}.0.dylib
-%{_libdir}/libindimail.dylib
 %{_libdir}/libindimail-%{version}.0.dylib
 %endif
 @pkgconfigdir@/libindimail.pc
