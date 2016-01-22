@@ -1,5 +1,8 @@
 #
 # $Log: indimail.te,v $
+# Revision 2.6  2016-01-22 14:56:13+05:30  Cprogrammer
+# added new selinux definitions for mysqld_t
+#
 # Revision 2.5  2016-01-21 11:55:52+05:30  Cprogrammer
 # added new policy definitions for antivirus_t
 #
@@ -16,7 +19,7 @@
 # selinux module config
 #
 #
-# $Id: indimail.te,v 2.5 2016-01-21 11:55:52+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.te,v 2.6 2016-01-22 14:56:13+05:30 Cprogrammer Exp mbhangui $
 # 
 module indimail 1.0;
 
@@ -57,10 +60,10 @@ allow httpd_t var_t:file { execute setattr read create execute_no_trans write ge
 allow httpd_t var_t:lnk_file read;
 
 #============= mysqld_t ==============
-allow mysqld_t var_t:file write;
+allow mysqld_t var_t:file {getattr write};
 allow mysqld_t var_t:dir create;
 allow mysqld_t user_tmp_t:file open;
-allow mysqld_t tmp_t:sock_file write;
+allow mysqld_t tmp_t:sock_file {create write unlink};
 
 #============= nscd_t ==============
 allow nscd_t initrc_t:unix_stream_socket connectto;
