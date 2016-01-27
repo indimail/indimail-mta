@@ -1,5 +1,8 @@
 /*
  * $Log: vauth_adduser.c,v $
+ * Revision 2.15  2016-01-28 00:04:39+05:30  Cprogrammer
+ * maildirquota specification for -q option to vadduser
+ *
  * Revision 2.14  2012-04-22 13:59:23+05:30  Cprogrammer
  * use 64bit intiger for quota calculation
  *
@@ -91,15 +94,13 @@
 #include <string.h>
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vauth_adduser.c,v 2.14 2012-04-22 13:59:23+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: vauth_adduser.c,v 2.15 2016-01-28 00:04:39+05:30 Cprogrammer Exp mbhangui $";
 #endif
-
-#define QUOTA_BUFLEN 20
 
 #include <mysqld_error.h>
 
 char           *
-vauth_adduser(char *user, char *domain, char *pass, char *gecos, char *dir, mdir_t Quota, int apop, int actFlag)
+vauth_adduser(char *user, char *domain, char *pass, char *gecos, char *dir, char *Quota, int apop, int actFlag)
 {
 	static char     dirbuf[MAX_BUFF];
 	char            quota[QUOTA_BUFLEN], dom_dir[MAX_BUFF];
@@ -114,13 +115,10 @@ vauth_adduser(char *user, char *domain, char *pass, char *gecos, char *dir, mdir
 
 	if (vauth_open((char *) 0))
 		return ((char *) 0);
-	if (Quota < 0)
-		strncpy(quota, "NOQUOTA", 8);
-	else
-	if(Quota)
-		snprintf(quota, QUOTA_BUFLEN, "%"PRIu64"", Quota);
-	else
-	{
+	if (Quota && *Quota) {
+		strncpy(quota, Quota, QUOTA_BUFLEN - 1);
+		quota[QUOTA_BUFLEN - 1] = 0;
+	} else {
 #ifdef HARD_QUOTA
 		getEnvConfigStr(&hard_quota, "HARD_QUOTA", HARD_QUOTA);
 		snprintf(quota, QUOTA_BUFLEN, "%s", hard_quota);

@@ -1,5 +1,8 @@
 /*
  * $Log: vadduser.c,v $
+ * Revision 2.39  2016-01-28 00:04:35+05:30  Cprogrammer
+ * maildirquota specification for -q option to vadduser
+ *
  * Revision 2.38  2014-04-17 11:42:18+05:30  Cprogrammer
  * set supplementary group ids for indimail
  *
@@ -168,11 +171,11 @@
 #include <signal.h>
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vadduser.c,v 2.38 2014-04-17 11:42:18+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: vadduser.c,v 2.39 2016-01-28 00:04:35+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 char            Email[MAX_BUFF], User[MAX_BUFF], Domain[MAX_BUFF], Passwd[MAX_BUFF],
-                Quota[MAX_BUFF], Gecos[MAX_BUFF], envbuf[MAX_BUFF];
+                Quota[QUOTA_BUFLEN], Gecos[MAX_BUFF], envbuf[MAX_BUFF];
 #ifdef CLUSTERED_SITE
 char            mdahost[MAX_BUFF], hostid[MAX_BUFF];
 #endif
@@ -190,9 +193,8 @@ main(argc, argv)
 	char           *argv[];
 {
 	int             i, pass_len = 8, users_per_level = 0;
-	mdir_t          quota = 0;
 	char           *real_domain, *ptr, *base_argv0, *base_path, *domain_dir;
-	char            tmpbuf[MAX_BUFF], buffer[MAX_BUFF];
+	char            tmpbuf[MAX_BUFF], buffer[MAX_BUFF], quotaVal[QUOTA_BUFLEN];
 	FILE           *fp;
 	uid_t           uid, uidtmp;
 	gid_t           gid;
@@ -269,20 +271,22 @@ main(argc, argv)
 		return(1);
 	}
 	/* set the users quota if set on the command line */
-	if (*Quota)
-	{
-		if (!strncmp(Quota, "NOQUOTA", 8))
-			quota = -1;
-		else
-			quota = strtoll(Quota, 0, 0);
+	if (*Quota) {
+		if (strncmp(Quota, "NOQUOTA", 8)) {
+			snprintf(quotaVal, sizeof(quotaVal), "%"PRId64"", parse_quota(Quota, 0));
+			if (!(ptr = strchr(quotaVal, ','))) {
+				if ((ptr = strchr(Quota, ',')))
+					scat(quotaVal, ptr, sizeof(quotaVal));
+			}
+		}
 	} else
 #ifdef ENABLE_DOMAIN_LIMITS
 	if (domain_limits)
-		quota = limits.defaultquota;
+		snprintf(quotaVal, sizeof(quotaVal), "%"PRId64"", limits.defaultquota);
 	else
-		quota = 0;
+		*quotaVal = 0;
 #else
-		quota = 0;
+		*quotaVal = 0;
 #endif
 #ifdef CLUSTERED_SITE
 	if (!*mdahost && *hostid)
@@ -348,10 +352,10 @@ main(argc, argv)
 	if (*envbuf)
 		putenv(envbuf);
 #ifdef CLUSTERED_SITE
-	if ((i = vadduser(User, real_domain, mdahost, Passwd, Gecos, quota,
+	if ((i = vadduser(User, real_domain, mdahost, Passwd, Gecos, quotaVal,
 		users_per_level, apop, actFlag)) < 0)
 #else
-	if ((i = vadduser(User, real_domain, 0, Passwd, Gecos, quota,
+	if ((i = vadduser(User, real_domain, 0, Passwd, Gecos, quotaVal,
 		users_per_level, apop, actFlag)) < 0)
 #endif
 	{

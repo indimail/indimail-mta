@@ -1,5 +1,8 @@
 /*
  * $Log: adduser.c,v $
+ * Revision 2.24  2016-01-28 00:04:45+05:30  Cprogrammer
+ * maildirquota specification for -q option to vadduser
+ *
  * Revision 2.23  2012-04-22 13:56:44+05:30  Cprogrammer
  * use 64bit integer for quota
  *
@@ -121,7 +124,7 @@
 #define ALLOWCHARS              " .!#$%&'*+-/=?^_`{|}~\""
 
 #ifndef	lint
-static char     sccsid[] = "$Id: adduser.c,v 2.23 2012-04-22 13:56:44+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: adduser.c,v 2.24 2016-01-28 00:04:45+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 /*
@@ -160,7 +163,7 @@ static char     sccsid[] = "$Id: adduser.c,v 2.23 2012-04-22 13:56:44+05:30 Cpro
  */
 int
 vadduser(char *username, char *domain, char *mdahost, char *password,
-		 char *gecos, mdir_t quota, int max_users_per_level, int apop, int actFlag)
+		 char *gecos, char *quota, int max_users_per_level, int apop, int actFlag)
 {
 	char            Dir[MAX_BUFF], Crypted[MAX_BUFF], tmpbuf[MAX_BUFF];
 	char           *tmpstr, *dir, *ptr, *allow_chars;

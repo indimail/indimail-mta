@@ -1,5 +1,8 @@
 /*
  * $Log: indimail.h,v $
+ * Revision 2.217  2016-01-28 00:03:59+05:30  Cprogrammer
+ * maildirquota specification for -q option to vadduser
+ *
  * Revision 2.216  2015-08-26 11:07:24+05:30  Cprogrammer
  * added isPrime() function
  *
@@ -964,7 +967,7 @@
 #define INDIMAILH_H
 
 #ifndef	lint
-static char     sccsidh[] = "$Id: indimail.h,v 2.216 2015-08-26 11:07:24+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsidh[] = "$Id: indimail.h,v 2.217 2016-01-28 00:03:59+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef HAVE_CONFIG_H
@@ -1467,6 +1470,7 @@ primary key(user, program)"
 #define FILE_SIZE               156
 #define MSG_BUF_SIZE            8192
 #define MAX_BUFF                300
+#define QUOTA_BUFLEN            20
 #define SQL_BUF_SIZE            600
 #define USE_POP                 0x00
 #define USE_APOP                0x01
@@ -1608,7 +1612,7 @@ int             vadddomain(char *, char *, char *, uid_t, gid_t, int);
 int             vaddaliasdomain(char *, char *);
 int             is_alias_domain(char *);
 int             vdeldomain(char *);
-int             vadduser(char *, char *, char *, char *, char *, mdir_t, int, int, int);
+int             vadduser(char *, char *, char *, char *, char *, char *, int, int, int);
 int             vdeluser(char *, char *, int);
 int             vrenameuser(char *, char *, char *, char *);
 int             parse_email(char *, char *, char *, int);
@@ -1702,7 +1706,7 @@ char           *dc_filename(char *, char *, char *);
 char           *dc_filename_cdb(char *, char *);
 void            SetSiteSize(int);
 int             vauth_adddomain(char *);
-char           *vauth_adduser(char *, char *, char *, char *, char *, mdir_t, int, int);
+char           *vauth_adduser(char *, char *, char *, char *, char *, char *, int, int);
 struct passwd  *vauth_getpw(char *, char *);
 int             vauth_deldomain(char *);
 int             vauth_deluser(char *, char *);
