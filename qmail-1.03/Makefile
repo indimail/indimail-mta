@@ -1085,10 +1085,10 @@ stralloc.h auto_uids.h
 	./compile $(inc_deps) qhpsi.c
 
 qscanq: load qscanq.o auto_uids.o get_uid.o substdio.a strerr.a env.a str.a wait.a error.a \
-timestamp.o tai.a fd.a auto_spool.o mkfn.o fmt_xpid.o do_cleanq.o \
+timestamp.o libtaia.a fd.a auto_spool.o mkfn.o fmt_xpid.o do_cleanq.o \
 auto_cleaner.o auto_qstdin.o sig.a alloc.a
 	./load qscanq auto_uids.o get_uid.o strerr.a env.a str.a wait.a error.a timestamp.o \
-	tai.a fd.a auto_spool.o mkfn.o fmt_xpid.o do_cleanq.o auto_cleaner.o \
+	libtaia.a fd.a auto_spool.o mkfn.o fmt_xpid.o do_cleanq.o auto_cleaner.o \
 	auto_qstdin.o byte_copy.o sig.a substdio.a alloc.a
 
 qscanq.o: compile qscanq.c auto_spool.h auto_fnlen.h mkfn.h \
@@ -1136,14 +1136,22 @@ auto_retries.h: conf-retries
 	echo "#define MAX_RETRIES" "`head -1 < conf-retries`" > \
 	auto_retries.h.tmp && mv auto_retries.h.tmp auto_retries.h
 
-tai.a: makelib taia_now.o taia_pack.o tai_pack.o
-	./makelib tai.a taia_now.o taia_pack.o tai_pack.o
+libtaia.a: makelib taia_now.o taia_pack.o tai_pack.o taia_fmtfrac.o taia_tai.o
+	./makelib libtaia.a taia_now.o taia_pack.o tai_pack.o taia_fmtfrac.o taia_tai.o
 
 taia_now.o: compile taia_now.c taia.h tai.h uint64.h
 	./compile taia_now.c
 
 taia_pack.o: compile taia_pack.c taia.h tai.h uint64.h
 	./compile taia_pack.c
+
+taia_fmtfrac.o: \
+compile taia_fmtfrac.c taia.h tai.h uint64.h
+	./compile taia_fmtfrac.c
+
+taia_tai.o: \
+compile taia_tai.c taia.h tai.h uint64.h
+	./compile taia_tai.c
 
 auto_cleaner.c: auto-str conf-qmail
 	./auto-str auto_runcleaner "`head -1 conf-qmail`"/bin/run-cleanq >> \
@@ -1186,7 +1194,7 @@ MakeArgs.o: compile MakeArgs.c alloc.h str.h alloc.h stralloc.h
 	./compile MakeArgs.c
 
 qscanq-stdin: load qscanq-stdin.o auto_qmail.o strerr.a substdio.a env.a str.a \
-timestamp.o tai.a fd.a auto_spool.o mkfn.o fmt_xpid.o open_excl.o MakeArgs.o \
+timestamp.o libtaia.a fd.a auto_spool.o mkfn.o fmt_xpid.o open_excl.o MakeArgs.o \
 open_read.o do_ripmime.o auto_ripmime_cmd.o do_scan.o auto_scancmd.o \
 seek.a do_cleanq.o auto_cleaner.o qregex.o wildmat.o matchregex.o now.o \
 cdb_seek.o cdb_unpack.o cdb_hash.o control.o str_diff.o variables.o \
@@ -1198,7 +1206,7 @@ alloc.a getln.a sig.a wait.a error.a stralloc.a
 	auto_cleaner.o qregex.o wildmat.o control.o str_diff.o variables.o \
 	cdb_seek.o cdb_unpack.o cdb_hash.o now.o \
 	constmap.o case_lowerb.o byte_chr.o byte_rchr.o scan_ulong.o case_diffb.o \
-	env.a strerr.a substdio.a str.a tai.a fd.a \
+	env.a strerr.a substdio.a str.a libtaia.a fd.a \
 	stralloc.a alloc.a getln.a sig.a wait.a error.a
 
 qscanq-stdin.o: compile qscanq-stdin.c substdio.h exit.h open.h fd.h wait.h \
@@ -1260,7 +1268,7 @@ qaes qmail-local qmail-lspawn qmail-getpw qmail-remote qmail-rspawn \
 qmail-clean qmail-send qmail-start qmail-daemon splogger qmail-multi qmail-queue qmail-inject \
 qmail-dk qmail-dkim predate datemail mailsubj qmail-upq qmail-showctl qmail-newu spawn-filter \
 qmail-pw2u qmail-qread qmail-tcpto qmail-tcpok qmail-cat qmail-poppass srsfilter \
-qmail-pop3d qmail-popbull qmail-popup qmail-qmqpc qmail-qmqpd qmail-qmtpd \
+qmail-pop3d qmail-popbull qmail-popup qmail-qmqpc qmail-qmqpd qmail-qmtpd nowutc yearcal \
 qmail-smtpd sendmail rmail tcp-env qmail-newmrh recipient-cdb qmail-cdb qmailconfig \
 config-fast dnscname dnsptr dnsip dnsmxip dnsfq dnstxt hostname ipmeprint qreceipt \
 qsmhook forward rrforward preline condredirect bouncesaying except qmail-todo \
@@ -5620,6 +5628,22 @@ load cidr.o
 cidr.o: \
 compile cidr.c
 	./compile cidr.c
+
+nowutc: \
+load nowutc.o libtai.a libtaia.a auto_qmail.o
+	./load nowutc auto_qmail.o libtai.a libtaia.a
+
+nowutc.o: \
+compile nowutc.c leapsecs.h tai.h uint64.h taia.h caltime.h caldate.h
+	./compile nowutc.c
+
+yearcal: \
+load yearcal.o libtai.a
+	./load yearcal libtai.a 
+
+yearcal.o: \
+compile yearcal.c caldate.h
+	./compile yearcal.c
 
 udplogger: \
 load udplogger.o fmt_ulong.o sgetopt.o subgetopt.o scan_ulong.o strerr.a substdio.a str.a sig.a error.a
