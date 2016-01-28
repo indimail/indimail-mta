@@ -1,5 +1,8 @@
 /*
  * $Log: hier.c,v $
+ * Revision 1.191  2016-01-28 23:56:29+05:30  Cprogrammer
+ * added yearcal, nowutc
+ *
  * Revision 1.190  2016-01-28 10:28:17+05:30  Cprogrammer
  * fixed installation of leapsecs.txt, leapsecs.dat
  *
@@ -750,6 +753,8 @@ hier(inst_dir)
 	c(auto_qmail_home, "bin", "tai2tai64n", auto_uido, auto_gidq, 0555);
 	c(auto_qmail_home, "bin", "tai64n2tai", auto_uido, auto_gidq, 0555);
 	c(auto_qmail_home, "bin", "leapsecs", auto_uido, auto_gidq, 0555);
+	c(auto_qmail_home, "bin", "yearcal", auto_uido, auto_gidq, 0555);
+	c(auto_qmail_home, "bin", "nowutc", auto_uido, auto_gidq, 0555);
 	c(auto_qmail_home, "bin", "spipe", auto_uido, auto_gidq, 0555);
 	c(auto_qmail_home, "bin", "qfilelog", auto_uido, auto_gidq, 0555);
 	c(auto_qmail_home, "bin", "multipipe", auto_uido, auto_gidq, 0555);
@@ -1729,7 +1734,7 @@ _hier(inst_dir)
 void
 getversion_install_big_c()
 {
-	static char    *x = "$Id: hier.c,v 1.190 2016-01-28 10:28:17+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: hier.c,v 1.191 2016-01-28 23:56:29+05:30 Cprogrammer Exp mbhangui $";
 
 #ifdef INDIMAIL
 	if (x)
