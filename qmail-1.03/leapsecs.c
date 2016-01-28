@@ -1,16 +1,23 @@
 /*
  * $Log: leapsecs.c,v $
+ * Revision 1.2  2016-01-28 09:47:55+05:30  Cprogrammer
+ * removed stdio to use substdio
+ *
  * Revision 1.1  2016-01-28 01:42:07+05:30  Cprogrammer
  * Initial revision
  *
  */
-#include <stdio.h>
-#include <stdlib.h>
 #include <unistd.h>
+#include "substdio.h"
+#include "subfd.h"
+#include "getln.h"
+#include "strerr.h"
 #include "tai.h"
 #include "leapsecs.h"
 #include "caldate.h"
 #include "auto_qmail.h"
+
+#define FATAL "leapsecs: fatal: "
 
 /*
  * XXX: breaks tai encapsulation 
@@ -20,7 +27,8 @@
  * XXX: output here has to be binary; DOS redirection uses ASCII 
  */
 
-char            line[100];
+stralloc        line = { 0 };
+int             match;
 
 int
 main()
@@ -31,22 +39,30 @@ main()
 	long            leaps = 0;
 
 	if (chdir(auto_qmail) == -1)
-		exit(1);
-	while (fgets(line, sizeof line, stdin)) {
-		if (line[0] == '+')
-			if (caldate_scan(line + 1, &cd)) {
+		strerr_die3sys(111, FATAL, "chdir: ", auto_qmail);
+	for (;;)
+	{
+		if (getln(subfdinsmall, &line, &match, '\n') == -1)
+			strerr_die2sys(111, FATAL, "unable to read input: ");
+		if (!match)
+			break;
+		if (line.s[0] == '+')
+			if (caldate_scan(line.s + 1, &cd)) {
 				t.x = (caldate_mjd(&cd) + 1) * 86400ULL + 4611686014920671114ULL + leaps++;
 				tai_pack(x, &t);
-				fwrite(x, TAI_PACK, 1, stdout);
+				if (substdio_put(subfdoutsmall, x, TAI_PACK))
+					strerr_die2sys(111, FATAL, "unable to write: ");
 			}
 	}
-	exit(0);
+	if (substdio_flush(subfdoutsmall))
+		strerr_die2sys(111, FATAL, "unable to write: ");
+	_exit(0);
 }
 
 void
 getversion_leapsecs_c()
 {
-	static char    *x = "$Id: leapsecs.c,v 1.1 2016-01-28 01:42:07+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: leapsecs.c,v 1.2 2016-01-28 09:47:55+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
