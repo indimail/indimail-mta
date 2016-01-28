@@ -1,6 +1,6 @@
 #
 #
-# $Id: qmail.spec,v 1.23 2016-01-28 10:31:27+05:30 Cprogrammer Exp mbhangui $
+# $Id: qmail.spec,v 1.24 2016-01-28 23:56:37+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %define _unpackaged_files_terminate_build 1
 
@@ -604,6 +604,8 @@ done
 %attr(555,root,qmail)                   %{_prefix}/bin/setforward
 %attr(555,root,qmail)                   %{_prefix}/bin/822date
 %attr(555,root,qmail)                   %{_prefix}/bin/leapsecs
+%attr(555,root,qmail)                   %{_prefix}/bin/yearcal
+%attr(555,root,qmail)                   %{_prefix}/bin/nowutc
 %attr(555,root,qmail)                   %{_prefix}/bin/cdbdump
 %attr(555,root,qmail)                   %{_prefix}/bin/iftocc
 %attr(555,root,qmail)                   %{_prefix}/bin/qmail-qmqpc
