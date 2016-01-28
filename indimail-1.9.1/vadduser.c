@@ -1,5 +1,8 @@
 /*
  * $Log: vadduser.c,v $
+ * Revision 2.40  2016-01-28 15:04:39+05:30  Cprogrammer
+ * fixed setting of quota using domain limits
+ *
  * Revision 2.39  2016-01-28 00:04:35+05:30  Cprogrammer
  * maildirquota specification for -q option to vadduser
  *
@@ -171,7 +174,7 @@
 #include <signal.h>
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vadduser.c,v 2.39 2016-01-28 00:04:35+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: vadduser.c,v 2.40 2016-01-28 15:04:39+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 char            Email[MAX_BUFF], User[MAX_BUFF], Domain[MAX_BUFF], Passwd[MAX_BUFF],
@@ -281,9 +284,12 @@ main(argc, argv)
 		}
 	} else
 #ifdef ENABLE_DOMAIN_LIMITS
-	if (domain_limits)
-		snprintf(quotaVal, sizeof(quotaVal), "%"PRId64"", limits.defaultquota);
-	else
+	if (domain_limits) {
+		if (limits.defaultquota)
+			snprintf(quotaVal, sizeof(quotaVal), "%"PRId64"", limits.defaultquota);
+		else
+			*quotaVal = 0;
+	} else
 		*quotaVal = 0;
 #else
 		*quotaVal = 0;
