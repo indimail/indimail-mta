@@ -1,5 +1,8 @@
 /*
  * $Log: limits.c,v $
+ * Revision 2.16  2016-01-28 15:05:44+05:30  Cprogrammer
+ * fixed sql syntax error
+ *
  * Revision 2.15  2013-06-10 15:44:28+05:30  Cprogrammer
  * changed defaultquota to signed int64
  *
@@ -52,7 +55,7 @@
  */
 
 #ifndef	lint
-static char     sccsid[] = "$Id: limits.c,v 2.15 2013-06-10 15:44:28+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: limits.c,v 2.16 2016-01-28 15:05:44+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #include "indimail.h"
