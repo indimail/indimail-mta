@@ -1,5 +1,8 @@
 /*
  * $Log: leapsecs.c,v $
+ * Revision 1.3  2016-01-28 15:06:55+05:30  Cprogrammer
+ * removed dependency on home directory
+ *
  * Revision 1.2  2016-01-28 09:47:55+05:30  Cprogrammer
  * removed stdio to use substdio
  *
@@ -15,7 +18,6 @@
 #include "tai.h"
 #include "leapsecs.h"
 #include "caldate.h"
-#include "auto_qmail.h"
 
 #define FATAL "leapsecs: fatal: "
 
@@ -38,8 +40,6 @@ main()
 	char            x[TAI_PACK];
 	long            leaps = 0;
 
-	if (chdir(auto_qmail) == -1)
-		strerr_die3sys(111, FATAL, "chdir: ", auto_qmail);
 	for (;;)
 	{
 		if (getln(subfdinsmall, &line, &match, '\n') == -1)
@@ -62,7 +62,7 @@ main()
 void
 getversion_leapsecs_c()
 {
-	static char    *x = "$Id: leapsecs.c,v 1.2 2016-01-28 09:47:55+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: leapsecs.c,v 1.3 2016-01-28 15:06:55+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
