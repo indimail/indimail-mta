@@ -1,5 +1,8 @@
 /*
  * $Log: 822date.c,v $
+ * Revision 1.6  2016-01-28 10:31:00+05:30  Cprogrammer
+ * removed compiler warning for chdir()
+ *
  * Revision 1.5  2016-01-28 08:59:06+05:30  Cprogrammer
  * chdir qmail_home for opening etc/leapsecs.dat
  *
@@ -18,6 +21,7 @@
  */
 #include <sys/types.h>
 #include <time.h>
+#include <unistd.h>
 #include "substdio.h"
 #include "strerr.h"
 #include "subfd.h"
@@ -113,7 +117,7 @@ main(argc, argv)
 void
 getversion_822date_c()
 {
-	static char    *x = "$Id: 822date.c,v 1.5 2016-01-28 08:59:06+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: 822date.c,v 1.6 2016-01-28 10:31:00+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
