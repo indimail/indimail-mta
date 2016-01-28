@@ -1,6 +1,6 @@
 #
 #
-# $Id: qmail.spec,v 1.22 2016-01-09 09:22:28+05:30 Cprogrammer Exp mbhangui $
+# $Id: qmail.spec,v 1.23 2016-01-28 10:31:27+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %define _unpackaged_files_terminate_build 1
 
@@ -493,7 +493,6 @@ done
 %dir %attr(750,qscand,qscand)     %{_prefix}/qscanq/root/scanq
 %dir %attr(755,indimail,indimail) %{_prefix}/control
 %dir %attr(755,indimail,indimail) %{_prefix}/control/domainkeys
-#%dir %attr(2755,indimail,qmail)   %{_prefix}/autoturn
 %dir %attr(555,root,qmail)        %{_prefix}/man
 %dir %attr(555,root,qmail)        %{_prefix}/man/man1
 %dir %attr(555,root,qmail)        %{_prefix}/man/cat1
@@ -525,6 +524,8 @@ done
 %ghost %attr(0644,root,root)                      %{_prefix}/etc/services.log
 
 %attr(444,root,root)                              %{_prefix}/etc/qmailprog.list
+%attr(444,root,root)                              %{_prefix}/etc/leapsecs.dat
+%attr(444,root,root)                              %{_prefix}/etc/leapsecs.txt
 
 %if %noperms == 0
 %if 0%{?suse_version} >= 1120
@@ -602,6 +603,7 @@ done
 %attr(555,root,qmail)                   %{_prefix}/bin/update_tmprsadh
 %attr(555,root,qmail)                   %{_prefix}/bin/setforward
 %attr(555,root,qmail)                   %{_prefix}/bin/822date
+%attr(555,root,qmail)                   %{_prefix}/bin/leapsecs
 %attr(555,root,qmail)                   %{_prefix}/bin/cdbdump
 %attr(555,root,qmail)                   %{_prefix}/bin/iftocc
 %attr(555,root,qmail)                   %{_prefix}/bin/qmail-qmqpc
