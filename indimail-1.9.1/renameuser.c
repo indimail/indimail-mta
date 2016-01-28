@@ -1,5 +1,8 @@
 /*
  * $Log: renameuser.c,v $
+ * Revision 2.16  2016-01-28 16:11:11+05:30  Cprogrammer
+ * use maildirquota for vadduser argument
+ *
  * Revision 2.15  2010-08-08 20:17:13+05:30  Cprogrammer
  * use configurable users per level
  *
@@ -50,7 +53,7 @@
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: renameuser.c,v 2.15 2010-08-08 20:17:13+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: renameuser.c,v 2.16 2016-01-28 16:11:11+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #include <ctype.h>
@@ -166,7 +169,7 @@ vrenameuser(char *oldUser, char *oldDomain, char *newUser, char *newDomain)
 	}
 	encrypt_flag = 1;
 	if ((err = vadduser(newUser, newDomain, 0, pw->pw_passwd, pw->pw_gecos,
-		strtoll(pw->pw_shell, 0, 0), 0, 1, !inactive_flag)) == -1)
+		pw->pw_shell, 0, 1, !inactive_flag)) == -1)
 	{
 		error_stack(stderr, 0);
 		return (-1);
