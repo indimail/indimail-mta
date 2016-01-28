@@ -1,5 +1,8 @@
 /*
  * $Log: hier.c,v $
+ * Revision 1.190  2016-01-28 10:28:17+05:30  Cprogrammer
+ * fixed installation of leapsecs.txt, leapsecs.dat
+ *
  * Revision 1.189  2016-01-28 09:03:53+05:30  Cprogrammer
  * install leapsecs.txt in etc
  *
@@ -530,6 +533,8 @@ hier(inst_dir)
 	c(auto_qmail_home, "boot", "StartupParameters.plist", auto_uido, auto_gidq, 0444);
 	c(auto_qmail_home, "boot", "indimail.plist", auto_uido, auto_gidq, 0444);
 #endif
+	c(auto_qmail_home, "etc", "leapsecs.dat", auto_uido, auto_gidq, 0644);
+	c(auto_qmail_home, "etc", "leapsecs.txt", auto_uido, auto_gidq, 0644);
 
 	/* Binaries */
 	c(auto_qmail_home, "bin", "qmail-lspawn", auto_uido, auto_gidq, 0500);
@@ -1637,8 +1642,6 @@ _hier(inst_dir)
 	ci(auto_qmail_home, "etc", "pop3d.dist", auto_uido, auto_gido, 0600);
 	ci(auto_qmail_home, "etc", "pop3d-ssl.dist", auto_uido, auto_gido, 0600);
 	ci(auto_qmail_home, "etc", "quotawarnmsg.example", auto_uido, auto_gido, 0644);
-	ci(auto_qmail_home, "etc", "leapsecs.dat", auto_uido, auto_gido, 0644);
-	ci(auto_qmail_home, "etc", "leapsecs.txt", auto_uido, auto_gido, 0644);
 	/*- */
 	ci(auto_qmail_home, "libexec", "couriertcpd", auto_uido, auto_gido, 0555);
 	ci(auto_qmail_home, "libexec", "imapd.rc", auto_uido, auto_gido, 0555);
@@ -1726,7 +1729,7 @@ _hier(inst_dir)
 void
 getversion_install_big_c()
 {
-	static char    *x = "$Id: hier.c,v 1.189 2016-01-28 09:03:53+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: hier.c,v 1.190 2016-01-28 10:28:17+05:30 Cprogrammer Exp mbhangui $";
 
 #ifdef INDIMAIL
 	if (x)
