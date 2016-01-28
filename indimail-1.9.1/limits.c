@@ -229,8 +229,8 @@ vset_limits(char *domain, struct vlimits *limits)
 		"defaultmaxmsgcount, disable_pop, disable_imap, disable_dialup, "
 		"disable_passwordchanging, disable_webmail, disable_relay, disable_smtp, perm_account, "
 		"perm_alias, perm_forward, perm_autoresponder, perm_maillist, perm_quota, "
-		"perm_defaultquota) \n"
-		"VALUES \n"
+		"perm_defaultquota)"
+		"VALUES"
 		"(\"%s\", %ld, %ld, %d, %d, %d, %d, %d, %"PRIu64", %"PRIu64", %"PRId64", %"PRIu64", %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d)",
 		domain, limits->domain_expiry, limits->passwd_expiry, limits->maxpopaccounts,
 		limits->maxaliases, limits->maxforwards, limits->maxautoresponders, limits->maxmailinglists,
