@@ -857,7 +857,7 @@ tai64nlocal.o
 tai64n.o
 tai64nunix
 tai64nunix.o
-tai.a
+libtaia.a
 taia_add.o
 taia_approx.o
 taia_frac.o
@@ -1050,3 +1050,11 @@ leapsecs
 leapsecs.o
 leapsecs.dat
 caldate_scan.o
+nowutc.o
+taia_fmtfrac.o
+taia_tai.o
+nowutc
+yearcal
+yearcal.o
+trysrs
+trysrs.o
