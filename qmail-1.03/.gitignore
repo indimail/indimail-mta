@@ -510,3 +510,9 @@ tai2tai64n
 tai64n2tai
 leapsecs
 leapsecs.o
+nowutc.o
+taia_fmtfrac.o
+taia_tai.o
+nowutc
+yearcal
+yearcal.o
