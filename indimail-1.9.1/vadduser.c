@@ -1,5 +1,8 @@
 /*
  * $Log: vadduser.c,v $
+ * Revision 2.41  2016-01-28 16:34:10+05:30  Cprogrammer
+ * fixed buffer overflow
+ *
  * Revision 2.40  2016-01-28 15:04:39+05:30  Cprogrammer
  * fixed setting of quota using domain limits
  *
@@ -174,7 +177,7 @@
 #include <signal.h>
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vadduser.c,v 2.40 2016-01-28 15:04:39+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: vadduser.c,v 2.41 2016-01-28 16:34:10+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 char            Email[MAX_BUFF], User[MAX_BUFF], Domain[MAX_BUFF], Passwd[MAX_BUFF],
@@ -414,7 +417,7 @@ get_options(int argc, char **argv, char **base_path, int *pass_len, int *users_p
 	memset(Email, 0, MAX_BUFF);
 	memset(Passwd, 0, MAX_BUFF);
 	memset(Domain, 0, MAX_BUFF);
-	memset(Quota, 0, MAX_BUFF);
+	memset(Quota, 0, QUOTA_BUFLEN);
 	apop = USE_POP;
 	errflag = 0;
 	actFlag = 1;
@@ -462,7 +465,7 @@ get_options(int argc, char **argv, char **base_path, int *pass_len, int *users_p
 			*base_path = optarg;
 			break;
 		case 'q':
-			scopy(Quota, optarg, MAX_BUFF);
+			scopy(Quota, optarg, QUOTA_BUFLEN);
 			break;
 		case 'l':
 			*users_per_level = atoi(optarg);
