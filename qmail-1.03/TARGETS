@@ -1048,3 +1048,4 @@ tai_decode.o
 tai_encode.o
 leapsecs
 leapsecs.o
+leapsecs.dat
