@@ -1,5 +1,8 @@
 /*
  * $Log: hier.c,v $
+ * Revision 1.188  2016-01-28 09:00:04+05:30  Cprogrammer
+ * added leapsecs program and leapsecs.dat
+ *
  * Revision 1.187  2016-01-02 19:22:18+05:30  Cprogrammer
  * organized as per package daemontools, ucspi-tcp, etc
  *
@@ -738,6 +741,7 @@ hier(inst_dir)
 	c(auto_qmail_home, "bin", "tai64nunix", auto_uido, auto_gidq, 0555);
 	c(auto_qmail_home, "bin", "tai2tai64n", auto_uido, auto_gidq, 0555);
 	c(auto_qmail_home, "bin", "tai64n2tai", auto_uido, auto_gidq, 0555);
+	c(auto_qmail_home, "bin", "leapsecs", auto_uido, auto_gidq, 0555);
 	c(auto_qmail_home, "bin", "spipe", auto_uido, auto_gidq, 0555);
 	c(auto_qmail_home, "bin", "qfilelog", auto_uido, auto_gidq, 0555);
 	c(auto_qmail_home, "bin", "multipipe", auto_uido, auto_gidq, 0555);
@@ -1358,10 +1362,12 @@ _hier(inst_dir)
 	/*- */
 
 	/*- */
+#if 0
 	ci(auto_qmail_home, "lib", "libcdb.so", auto_uido, auto_gido, 0755);
 	ci(auto_qmail_home, "lib", "libeps.so", auto_uido, auto_gido, 0755);
 	ci(auto_qmail_home, "lib", "libflash.so", auto_uido, auto_gido, 0755);
 	ci(auto_qmail_home, "lib", "libindimail.so", auto_uido, auto_gido, 0755);
+#endif
 	/*- */
 	ci(auto_qmail_home, "libexec", "overquota.sh", auto_uido, auto_gidq, 0555);
 	ci(auto_qmail_home, "libexec", "qmailmrtg7", auto_uido, auto_gidq, 0555);
@@ -1628,6 +1634,7 @@ _hier(inst_dir)
 	ci(auto_qmail_home, "etc", "pop3d.dist", auto_uido, auto_gido, 0600);
 	ci(auto_qmail_home, "etc", "pop3d-ssl.dist", auto_uido, auto_gido, 0600);
 	ci(auto_qmail_home, "etc", "quotawarnmsg.example", auto_uido, auto_gido, 0644);
+	ci(auto_qmail_home, "etc", "leapsecs.dat", auto_uido, auto_gido, 0644);
 	/*- */
 	ci(auto_qmail_home, "libexec", "couriertcpd", auto_uido, auto_gido, 0555);
 	ci(auto_qmail_home, "libexec", "imapd.rc", auto_uido, auto_gido, 0555);
@@ -1715,7 +1722,7 @@ _hier(inst_dir)
 void
 getversion_install_big_c()
 {
-	static char    *x = "$Id: hier.c,v 1.187 2016-01-02 19:22:18+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: hier.c,v 1.188 2016-01-28 09:00:04+05:30 Cprogrammer Exp mbhangui $";
 
 #ifdef INDIMAIL
 	if (x)

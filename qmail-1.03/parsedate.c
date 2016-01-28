@@ -1,5 +1,8 @@
 /*
  * $Log: parsedate.c,v $
+ * Revision 1.3  2016-01-28 09:01:37+05:30  Cprogrammer
+ * chdir qmail_home for opening etc/leapsecs.dat
+ *
  * Revision 1.2  2004-10-22 20:27:53+05:30  Cprogrammer
  * added RCS id
  *
@@ -16,6 +19,7 @@
 #include "leapsecs.h"
 #include "caltime.h"
 #include "tai.h"
+#include "auto_qmail.h"
 
 #define FATAL "parsedate: fatal: "
 
@@ -36,6 +40,8 @@ main()
 {
 	int             i;
 
+	if (chdir(auto_qmail) == -1)
+		strerr_die3sys(111, FATAL, "chdir: ", auto_qmail);
 	if (leapsecs_init() == -1)
 		strerr_die2sys(111, FATAL, "unable to init leapsecs: ");
 
@@ -87,7 +93,7 @@ main()
 void
 getversion_parsedate_c()
 {
-	static char    *x = "$Id: parsedate.c,v 1.2 2004-10-22 20:27:53+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: parsedate.c,v 1.3 2016-01-28 09:01:37+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

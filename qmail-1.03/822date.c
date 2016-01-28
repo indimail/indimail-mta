@@ -1,5 +1,8 @@
 /*
  * $Log: 822date.c,v $
+ * Revision 1.5  2016-01-28 08:59:06+05:30  Cprogrammer
+ * chdir qmail_home for opening etc/leapsecs.dat
+ *
  * Revision 1.4  2005-08-23 17:13:59+05:30  Cprogrammer
  * gcc 4 compliance
  *
@@ -24,6 +27,7 @@
 #include "leapsecs.h"
 #include "caltime.h"
 #include "tai.h"
+#include "auto_qmail.h"
 
 #define FATAL "822date: fatal: "
 
@@ -52,6 +56,8 @@ main(argc, argv)
 	int             argc;
 	char          **argv;
 {
+	if (chdir(auto_qmail) == -1)
+		strerr_die3sys(111, FATAL, "chdir: ", auto_qmail);
 	if (leapsecs_init() == -1)
 		strerr_die2sys(111, FATAL, "unable to init leapsecs: ");
 	if (argv[1])
@@ -107,7 +113,7 @@ main(argc, argv)
 void
 getversion_822date_c()
 {
-	static char    *x = "$Id: 822date.c,v 1.4 2005-08-23 17:13:59+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: 822date.c,v 1.5 2016-01-28 08:59:06+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
