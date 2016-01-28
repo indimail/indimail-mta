@@ -1,5 +1,8 @@
 /*
  * $Log: auth_admin.c,v $
+ * Revision 2.9  2016-01-28 16:11:50+05:30  Cprogrammer
+ * fixed compiler warning
+ *
  * Revision 2.8  2015-08-21 10:45:40+05:30  Cprogrammer
  * fix for 'stack smashing detected' when compiled with -fstack-protector
  *
@@ -43,7 +46,7 @@ void            ssl_free();
 #endif
 
 #ifndef lint
-static char     sccsid[] = "$Id: auth_admin.c,v 2.8 2015-08-21 10:45:40+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: auth_admin.c,v 2.9 2016-01-28 16:11:50+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 int
@@ -64,7 +67,7 @@ auth_admin(char *admin_user, char *admin_pass, char *admin_host, char *admin_por
 #endif
 	if ((len = saferead(sfd, buffer, sizeof(buffer) - 1, admin_timeout)) == -1 || !len)
 	{
-		close(sfd);
+		(void) close(sfd);
 #ifdef HAVE_SSL
 		ssl_free();
 #endif
@@ -73,7 +76,7 @@ auth_admin(char *admin_user, char *admin_pass, char *admin_host, char *admin_por
 	buffer[len] = 0;
 	if (!strstr(buffer, "Login: "))
 	{
-		close(sfd);
+		(void) close(sfd);
 #ifdef HAVE_SSL
 		ssl_free();
 #endif
@@ -83,7 +86,7 @@ auth_admin(char *admin_user, char *admin_pass, char *admin_host, char *admin_por
 	len = strlen(admin_user);
 	if (safewrite(sfd, admin_user, len, admin_timeout) != len || safewrite(sfd, "\n", 1, admin_timeout) != 1)
 	{
-		close(sfd);
+		(void) close(sfd);
 #ifdef HAVE_SSL
 		ssl_free();
 #endif
@@ -92,7 +95,7 @@ auth_admin(char *admin_user, char *admin_pass, char *admin_host, char *admin_por
 	} else
 	if ((len = saferead(sfd, buffer, sizeof(buffer) - 1, admin_timeout)) == -1 || !len)
 	{
-		close(sfd);
+		(void) close(sfd);
 #ifdef HAVE_SSL
 		ssl_free();
 #endif
@@ -102,7 +105,7 @@ auth_admin(char *admin_user, char *admin_pass, char *admin_host, char *admin_por
 	buffer[len] = 0;
 	if (!strstr(buffer, "Password: "))
 	{
-		close(sfd);
+		(void) close(sfd);
 #ifdef HAVE_SSL
 		ssl_free();
 #endif
@@ -112,7 +115,7 @@ auth_admin(char *admin_user, char *admin_pass, char *admin_host, char *admin_por
 	len = strlen(admin_pass);
 	if (safewrite(sfd, admin_pass, len, admin_timeout) != len || safewrite(sfd, "\n", 1, admin_timeout) != 1)
 	{
-		close(sfd);
+		(void) close(sfd);
 #ifdef HAVE_SSL
 		ssl_free();
 #endif
@@ -121,7 +124,7 @@ auth_admin(char *admin_user, char *admin_pass, char *admin_host, char *admin_por
 	} else
 	if ((len = saferead(sfd, buffer, sizeof(buffer) - 1, admin_timeout)) == -1 || !len)
 	{
-		close(sfd);
+		(void) close(sfd);
 #ifdef HAVE_SSL
 		ssl_free();
 #endif
@@ -130,11 +133,11 @@ auth_admin(char *admin_user, char *admin_pass, char *admin_host, char *admin_por
 	} else
 	if (!strstr(buffer, "OK"))
 	{
-		close(sfd);
+		(void) close(sfd);
 #ifdef HAVE_SSL
 		ssl_free();
 #endif
-		write(1, buffer, len);
+		(void) write(1, buffer, len);
 		errno = EPROTO;
 		return (-1);
 	}

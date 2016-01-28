@@ -1,5 +1,8 @@
 /*
  * $Log: adminCmmd.c,v $
+ * Revision 2.12  2016-01-28 16:11:43+05:30  Cprogrammer
+ * fixed compiler warning
+ *
  * Revision 2.11  2015-08-21 10:44:34+05:30  Cprogrammer
  * fix for 'stack smashing detected' when compiled with -fstack-protector
  *
@@ -54,7 +57,7 @@ void            ssl_free();
 #endif
 
 #ifndef lint
-static char     sccsid[] = "$Id: adminCmmd.c,v 2.11 2015-08-21 10:44:34+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: adminCmmd.c,v 2.12 2016-01-28 16:11:43+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 static int      IOPlex(int, int);
@@ -119,7 +122,7 @@ adminCmmd(int sfd, int inputRead, char *cmdbuf, int len)
 			filewrt(1, "%s", buffer);
 			continue;
 		} else
-			write(1, buffer, n);
+			(void) write(1, buffer, n);
 	}
 #ifdef HAVE_SSL
 	ssl_free();
