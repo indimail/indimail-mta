@@ -1,5 +1,8 @@
 /*
  * $Log: ofmipd.c,v $
+ * Revision 1.12  2016-01-28 09:01:21+05:30  Cprogrammer
+ * chdir to qmail_home before leapsecs_init()
+ *
  * Revision 1.11  2013-06-09 17:02:22+05:30  Cprogrammer
  * fixed addrparse function
  *
@@ -1270,9 +1273,9 @@ main(argc, argv)
 	remoteinfo = env_get("REMOTEINFO");
 	relayclient = env_get("RELAYCLIENT");
 	received_init();
-	if (leapsecs_init() == -1)
-		die_config();
 	if (chdir(auto_qmail) == -1)
+		die_config();
+	if (leapsecs_init() == -1)
 		die_config();
 	if (rwhconfig(&rewrite, &idappend) == -1)
 		die_config();
@@ -1286,7 +1289,7 @@ main(argc, argv)
 void
 getversion_ofmipd_c()
 {
-	static char    *x = "$Id: ofmipd.c,v 1.11 2013-06-09 17:02:22+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: ofmipd.c,v 1.12 2016-01-28 09:01:21+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

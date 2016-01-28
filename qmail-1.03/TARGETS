@@ -1046,3 +1046,5 @@ tai64n_decode.o
 tai64n_encode.o
 tai_decode.o
 tai_encode.o
+leapsecs
+leapsecs.o

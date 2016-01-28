@@ -1,5 +1,8 @@
 /*
  * $Log: new-inject.c,v $
+ * Revision 1.7  2016-01-28 09:01:02+05:30  Cprogrammer
+ * chdir to qmail_home before leapsecs_init()
+ *
  * Revision 1.6  2010-06-08 21:59:42+05:30  Cprogrammer
  * use envdir_set() on queuedefault to set default queue parameters
  *
@@ -527,6 +530,8 @@ main(argc, argv)
 		}
 	} /*- while ((opt = getopt(argc, argv, "nNaAhHFIMRSf:")) != opteof) */
 	argv += optind;
+	if (chdir(auto_qmail) == -1)
+		strerr_die4sys(111, FATAL, "unable to switch to ", auto_qmail, ": ");
 	if (leapsecs_init() == -1)
 		strerr_die2sys(111, FATAL, "unable to init leapsecs: ");
 	if (config_env(&fnmft, "QMAILMFTFILE") == -1)
@@ -550,8 +555,6 @@ main(argc, argv)
 		if (config_readfile(&rewrite, config_data(&fnrewrite)->s) == -1)
 			strerr_die2sys(111, FATAL, "unable to read $QMAILREWRITEFILE: ");
 	}
-	if (chdir(auto_qmail) == -1)
-		strerr_die4sys(111, FATAL, "unable to switch to ", auto_qmail, ": ");
 	if (!(qbase = env_get("QUEUE_BASE")))
 	{
 		if (!controldir)
@@ -687,7 +690,7 @@ main(argc, argv)
 void
 getversion_new_inject_c()
 {
-	static char    *x = "$Id: new-inject.c,v 1.6 2010-06-08 21:59:42+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: new-inject.c,v 1.7 2016-01-28 09:01:02+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

@@ -1,5 +1,8 @@
 /*
  * $Log: caldate.h,v $
+ * Revision 1.4  2016-01-28 08:59:46+05:30  Cprogrammer
+ * added caldate_scan() function
+ *
  * Revision 1.3  2004-10-09 23:20:20+05:30  Cprogrammer
  * added function prototypes
  *
@@ -20,5 +23,6 @@ struct caldate
 void            caldate_frommjd(struct caldate *, long, int *, int *);
 long            caldate_mjd(struct caldate *);
 unsigned int    caldate_fmt(char *, struct caldate *);
+unsigned int    caldate_scan(char *,  struct caldate *);
 
 #endif

@@ -8,9 +8,9 @@ SHELL=/bin/sh
 inc_deps := -DHAVE_CONFIG_H -I$(DESTDIR)$(INDIDIR)/include `cat ./inc_deps 2>/dev/null`
 lib_deps := -L$(DESTDIR)$(INDIDIR)/lib `cat ./lib_deps 2>/dev/null`
 
-default: it man
+default: it man leapsecs.dat
 
-all:it man
+all:it man leapsecs.dat
 
 show:
 	echo $(inc_deps);echo ----;echo $(lib_deps)
@@ -1267,7 +1267,7 @@ qsmhook forward rrforward preline condredirect bouncesaying except qmail-todo \
 queue-fix idedit setup instcheck rpmattr maildir2mbox qmaildirmake maildirwatch base64 \
 maildirdeliver autoresponder qmail-rm qail elq pinq etrn qmail-sql systemd \
 atrn qmailctl indimail.plist svscanboot upstart qmail-sighup qmail-sigalrm qmail-sigterm \
-swaks home home+df proc proc+df binm1 binm1+df binm2 binm2+df cidr \
+swaks home home+df proc proc+df binm1 binm1+df binm2 binm2+df cidr leapsecs \
 binm3 binm3+df spfquery multirotate qpq 822header qmail-nullqueue \
 maildirserial serialsmtp serialqmtp maildirsmtp maildirqmtp whois \
 serialcmd maildircmd rewind relaytest qmail-qfilter sys-checkpwd ldap-checkpwd \
@@ -3699,6 +3699,21 @@ compile caltime_utc.c tai.h uint64.h leapsecs.h caldate.h caltime.h \
 caldate.h
 	./compile caltime_utc.c
 
+leapsecs: \
+load leapsecs.o auto_qmail.o libtai.a
+	./load leapsecs auto_qmail.o libtai.a 
+
+leapsecs.o: \
+compile leapsecs.c tai.h uint64.h leapsecs.h caldate.h auto_qmail.h
+	./compile leapsecs.c
+
+leapsecs.dat: leapsecs.txt leapsecs
+	./leapsecs < leapsecs.txt > leapsecs.dat
+
+caldate_scan.o: \
+compile caldate_scan.c caldate.h
+	./compile caldate_scan.c
+
 leapsecs.0: \
 leapsecs.3
 	nroff -man leapsecs.3 > leapsecs.0
@@ -3718,10 +3733,10 @@ compile leapsecs_sub.c leapsecs.h tai.h uint64.h
 libtai.a: \
 makelib tai_now.o tai_unpack.o caldate_fmjd.o leapsecs_read.o \
 leapsecs_init.o leapsecs_sub.o caltime_utc.o tai_pack.o caltime_fmt.o \
-caltime_tai.o caldate_fmt.o caldate_mjd.o leapsecs_add.o
+caltime_tai.o caldate_fmt.o caldate_scan.o caldate_mjd.o leapsecs_add.o
 	./makelib libtai.a tai_now.o tai_unpack.o caldate_fmjd.o \
 	leapsecs_read.o leapsecs_init.o leapsecs_sub.o caltime_utc.o tai_pack.o \
-	caltime_fmt.o caltime_tai.o caldate_fmt.o caldate_mjd.o leapsecs_add.o
+	caltime_fmt.o caltime_tai.o caldate_fmt.o caldate_scan.o caldate_mjd.o leapsecs_add.o
 
 tai.0: \
 tai.3
@@ -4274,8 +4289,8 @@ tai_pack.o: compile tai_pack.c tai.h uint64.h
 	./compile tai_pack.c
 
 822date: load 822date.o libtai.a mess822.a getln.a strerr.a substdio.a \
-stralloc.a alloc.a error.a str.a case.a fs.a
-	./load 822date libtai.a mess822.a getln.a strerr.a \
+auto_qmail.o stralloc.a alloc.a error.a str.a case.a fs.a
+	./load 822date auto_qmail.o libtai.a mess822.a getln.a strerr.a \
 	substdio.a stralloc.a alloc.a error.a str.a case.a fs.a 
 
 822date.0: 822date.1
@@ -4302,9 +4317,9 @@ caldate_mjd.o: compile caldate_mjd.c caldate.h
 leapsecs_add.o: compile leapsecs_add.c leapsecs.h tai.h uint64.h
 	./compile leapsecs_add.c
 
-822received: load 822received.o libtai.a mess822.a getln.a strerr.a substdio.a \
+822received: load 822received.o auto_qmail.o libtai.a mess822.a getln.a strerr.a substdio.a \
 stralloc.a alloc.a error.a str.a case.a fs.a
-	./load 822received libtai.a mess822.a getln.a strerr.a \
+	./load 822received auto_qmail.o libtai.a mess822.a getln.a strerr.a \
 	substdio.a stralloc.a alloc.a error.a str.a case.a fs.a 
 
 822received.0: 822received.1
@@ -4315,9 +4330,9 @@ mess822.h stralloc.h gen_alloc.h caltime.h caldate.h exit.h \
 leapsecs.h caltime.h tai.h uint64.h case.h
 	./compile 822received.c
 
-822print: load 822print.o libtai.a mess822.a getln.a strerr.a substdio.a \
+822print: load 822print.o auto_qmail.o libtai.a mess822.a getln.a strerr.a substdio.a \
 stralloc.a alloc.a error.a str.a case.a fs.a
-	./load 822print libtai.a mess822.a getln.a strerr.a \
+	./load 822print auto_qmail.o libtai.a mess822.a getln.a strerr.a \
 	substdio.a stralloc.a alloc.a error.a str.a case.a fs.a 
 
 822print.0: 822print.1
@@ -4328,9 +4343,9 @@ stralloc.h gen_alloc.h caltime.h caldate.h strerr.h exit.h leapsecs.h \
 caltime.h tai.h uint64.h byte.h str.h
 	./compile 822print.c
 
-parsedate: load parsedate.o libtai.a mess822.a getln.a strerr.a substdio.a \
+parsedate: load parsedate.o auto_qmail.o libtai.a mess822.a getln.a strerr.a substdio.a \
 stralloc.a alloc.a error.a str.a case.a fs.a
-	./load parsedate libtai.a mess822.a getln.a strerr.a \
+	./load parsedate auto_qmail.o libtai.a mess822.a getln.a strerr.a \
 	substdio.a stralloc.a alloc.a error.a str.a case.a fs.a 
 
 parsedate.o: compile parsedate.c strerr.h subfd.h substdio.h getln.h \

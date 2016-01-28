@@ -1,3 +1,4 @@
+leapsecs.dat
 udplogger
 udpclient
 dns.h
@@ -507,3 +508,5 @@ tcpopen.o
 qlogselect
 tai2tai64n
 tai64n2tai
+leapsecs
+leapsecs.o

@@ -1,5 +1,8 @@
 /*
  * $Log: leapsecs_read.c,v $
+ * Revision 1.3  2016-01-28 09:00:17+05:30  Cprogrammer
+ * open leapsecs.dat in qmail home/etc directory
+ *
  * Revision 1.2  2004-10-22 20:26:04+05:30  Cprogrammer
  * added RCS id
  *
@@ -29,7 +32,7 @@ leapsecs_read()
 	int             i;
 	struct tai      u;
 
-	fd = open("/etc/leapsecs.dat", O_RDONLY | O_NDELAY);
+	fd = open("etc/leapsecs.dat", O_RDONLY | O_NDELAY);
 	if (fd == -1)
 	{
 		if (errno != ENOENT)
@@ -81,7 +84,7 @@ leapsecs_read()
 void
 getversion_leapsecs_read_c()
 {
-	static char    *x = "$Id: leapsecs_read.c,v 1.2 2004-10-22 20:26:04+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: leapsecs_read.c,v 1.3 2016-01-28 09:00:17+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
