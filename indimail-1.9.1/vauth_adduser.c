@@ -1,5 +1,8 @@
 /*
  * $Log: vauth_adduser.c,v $
+ * Revision 2.16  2016-01-28 16:12:01+05:30  Cprogrammer
+ * null terminate quota
+ *
  * Revision 2.15  2016-01-28 00:04:39+05:30  Cprogrammer
  * maildirquota specification for -q option to vadduser
  *
@@ -94,7 +97,7 @@
 #include <string.h>
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vauth_adduser.c,v 2.15 2016-01-28 00:04:39+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: vauth_adduser.c,v 2.16 2016-01-28 16:12:01+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #include <mysqld_error.h>
@@ -122,9 +125,9 @@ vauth_adduser(char *user, char *domain, char *pass, char *gecos, char *dir, char
 #ifdef HARD_QUOTA
 		getEnvConfigStr(&hard_quota, "HARD_QUOTA", HARD_QUOTA);
 		snprintf(quota, QUOTA_BUFLEN, "%s", hard_quota);
+		quota[QUOTA_BUFLEN - 1] = 0;
 #else
 		scopy(quota, "NOQUOTA", QUOTA_BUFLEN);
-		quota[QUOTA_BUFLEN - 1] = 0;
 #endif
 	}
 	domstr = (char *) 0;
