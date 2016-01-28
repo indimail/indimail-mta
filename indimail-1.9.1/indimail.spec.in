@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail.spec.in,v 2.306 2016-01-28 15:06:34+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 2.307 2016-01-29 00:14:32+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %define _unpackaged_files_terminate_build 1
 
@@ -1389,6 +1389,8 @@ fi
 %attr(555,root,qmail)                   %{_prefix}/bin/822body
 %attr(555,root,qmail)                   %{_prefix}/bin/822received
 %attr(555,root,qmail)                   %{_prefix}/bin/leapsecs
+%attr(555,root,qmail)                   %{_prefix}/bin/yearcal
+%attr(555,root,qmail)                   %{_prefix}/bin/nowutc
 %attr(555,root,qmail)                   %{_prefix}/bin/udplogger
 %attr(555,root,qmail)                   %{_prefix}/bin/udpclient
 
