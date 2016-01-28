@@ -3700,11 +3700,18 @@ caldate.h
 	./compile caltime_utc.c
 
 leapsecs: \
-load leapsecs.o auto_qmail.o libtai.a
-	./load leapsecs auto_qmail.o libtai.a 
+load leapsecs.o auto_qmail.o str_len.o byte_copy.o byte_cr.o \
+stralloc_catb.o stralloc_eady.o stralloc_opyb.o byte_chr.o \
+error.o error_str.o strerr_sys.o strerr_die.o getln.o getln2.o \
+alloc.o alloc_re.o libtai.a substdio.a
+	./load leapsecs auto_qmail.o str_len.o byte_copy.o byte_cr.o \
+		stralloc_catb.o stralloc_eady.o stralloc_opyb.o byte_chr.o \
+		error.o error_str.o strerr_sys.o strerr_die.o getln.o getln2.o \
+		alloc.o alloc_re.o libtai.a substdio.a
 
 leapsecs.o: \
-compile leapsecs.c tai.h uint64.h leapsecs.h caldate.h auto_qmail.h
+compile leapsecs.c substdio.h subfd.h getln.h strerr.h tai.h leapsecs.h \
+caldate.h auto_qmail.h
 	./compile leapsecs.c
 
 leapsecs.dat: leapsecs.txt leapsecs
