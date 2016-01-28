@@ -1,5 +1,8 @@
 /*
  * $Log: vgroup.c,v $
+ * Revision 2.23  2016-01-28 15:06:07+05:30  Cprogrammer
+ * maildirquota spec for quota
+ *
  * Revision 2.22  2011-11-09 19:46:13+05:30  Cprogrammer
  * removed getversion
  *
@@ -72,7 +75,7 @@
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vgroup.c,v 2.22 2011-11-09 19:46:13+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: vgroup.c,v 2.23 2016-01-28 15:06:07+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef VALIAS
@@ -90,19 +93,19 @@ static char     sccsid[] = "$Id: vgroup.c,v 2.22 2011-11-09 19:46:13+05:30 Cprog
 static int      get_options(int, char **, int *, char **, char **, char **, char **,
 					char **, char **, char **, char **, int *);
 static void     usage();
-int             addGroup(char *, char *, char *, char *, char *, int);
+int             addGroup(char *, char *, char *, char *, char *, char *);
 
 int
 main(int argc, char **argv)
 {
-	char            User[MAX_BUFF], Domain[MAX_BUFF], alias_line[MAX_BUFF], old_alias[MAX_BUFF];
+	char            User[MAX_BUFF], Domain[MAX_BUFF], alias_line[MAX_BUFF], old_alias[MAX_BUFF],
+					quotaVal[QUOTA_BUFLEN];
 	char           *group, *gecos, *member, *old_member, *passwd, *hostid, 
 				   *mdahost, *Quota, *real_domain;
 #ifdef CLUSTERED_SITE
 	char           *ptr;
 #endif
 	int             option, ignore = 0, ret = -1;
-	long            quota;
 
 	if (get_options(argc, argv, &option, &group, &gecos, &member, &old_member, &passwd,
 		&hostid, &mdahost, &Quota, &ignore))
@@ -132,10 +135,16 @@ main(int argc, char **argv)
 	switch (option)
 	{
 		case ADDNEW_GROUP:
-			if (Quota && *Quota)
-				quota = strtoll(Quota, 0, 0);
-			else
-				quota = 0;
+			if (Quota && *Quota) {
+				if (strncmp(Quota, "NOQUOTA", 8)) {
+					snprintf(quotaVal, sizeof(quotaVal), "%"PRId64"", parse_quota(Quota, 0));
+					if (!(ptr = strchr(quotaVal, ','))) {
+						if ((ptr = strchr(Quota, ',')))
+							scat(quotaVal, ptr, sizeof(quotaVal));
+					}
+				}
+			} else
+				*quotaVal = 0;
 #ifdef CLUSTERED_SITE
 			if (!mdahost && hostid)
 			{
@@ -165,7 +174,7 @@ main(int argc, char **argv)
 					printf("Connected to MDAhost %s SqlServer %s\n", mdahost, ptr);
 			} 
 #endif
-			ret = addGroup(User, real_domain, mdahost, gecos, passwd, quota);
+			ret = addGroup(User, real_domain, mdahost, gecos, passwd, quotaVal);
 			break;
 		case INSERT_MEMBER:
 			if (*member == '.')
@@ -222,7 +231,7 @@ main(int argc, char **argv)
 }
 
 int
-addGroup(char *user, char *domain, char *mdahost, char *gecos, char *passwd, int quota)
+addGroup(char *user, char *domain, char *mdahost, char *gecos, char *passwd, char *quota)
 {
 	char            Gecos[MAX_BUFF];
 	struct passwd  *pw;
