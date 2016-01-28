@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail.spec.in,v 2.305 2016-01-22 14:56:04+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 2.306 2016-01-28 15:06:34+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %define _unpackaged_files_terminate_build 1
 
@@ -1028,6 +1028,8 @@ fi
 %attr(600,root,root)                              %{_prefix}/etc/imapd.dist
 %attr(644,root,root)                              %{_prefix}/etc/quotawarnmsg.example
 %endif
+%attr(644,root,root)                              %{_prefix}/etc/leapsecs.dat
+%attr(644,root,root)                              %{_prefix}/etc/leapsecs.txt
 
 #
 # Binaries
@@ -1386,6 +1388,7 @@ fi
 %attr(555,root,qmail)                   %{_prefix}/bin/822field
 %attr(555,root,qmail)                   %{_prefix}/bin/822body
 %attr(555,root,qmail)                   %{_prefix}/bin/822received
+%attr(555,root,qmail)                   %{_prefix}/bin/leapsecs
 %attr(555,root,qmail)                   %{_prefix}/bin/udplogger
 %attr(555,root,qmail)                   %{_prefix}/bin/udpclient
 
