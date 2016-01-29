@@ -1,5 +1,8 @@
 /*
  * $Log: qsutil.c,v $
+ * Revision 1.12  2016-01-29 18:27:48+05:30  Cprogrammer
+ * removed log11() and added log13()
+ *
  * Revision 1.11  2014-03-07 19:15:24+05:30  Cprogrammer
  * added log9(), log11()
  *
@@ -41,6 +44,7 @@ static stralloc foo = { 0 };
 
 static char     errbuf[1];
 static struct substdio sserr = SUBSTDIO_FDBUF(write, 0, errbuf, 1);
+extern char    *queuedesc; /*- defined in qmail-send.c */
 
 void
 logsa_noflush(sa)
@@ -170,7 +174,7 @@ log9(s1, s2, s3, s4, s5, s6, s7, s8, s9)
 }
 
 void
-log11(s1, s2, s3, s4, s5, s6, s7, s8, s9, s10, s11)
+log13(s1, s2, s3, s4, s5, s6, s7, s8, s9, s10, s11, s12, s13)
 	char           *s1;
 	char           *s2;
 	char           *s3;
@@ -182,6 +186,8 @@ log11(s1, s2, s3, s4, s5, s6, s7, s8, s9, s10, s11)
 	char           *s9;
 	char           *s10;
 	char           *s11;
+	char           *s12;
+	char           *s13;
 {
 	substdio_puts(&sserr, s1);
 	substdio_puts(&sserr, s2);
@@ -193,13 +199,18 @@ log11(s1, s2, s3, s4, s5, s6, s7, s8, s9, s10, s11)
 	substdio_puts(&sserr, s8);
 	substdio_puts(&sserr, s9);
 	substdio_puts(&sserr, s10);
-	substdio_putsflush(&sserr, s11);
+	substdio_puts(&sserr, s11);
+	substdio_puts(&sserr, s12);
+	substdio_putsflush(&sserr, s13);
 }
 
 void
 nomem()
 {
-	log1("alert: out of memory, sleeping...\n");
+	if (queuedesc)
+		log3("alert: ", queuedesc, ": out of memory, sleeping...\n");
+	else
+		log1("alert: out of memory, sleeping...\n");
 	sleep(10);
 }
 
@@ -207,7 +218,10 @@ void
 pausedir(dir)
 	char           *dir;
 {
-	log3("alert: unable to opendir ", dir, ", sleeping...\n");
+	if (queuedesc)
+		log5("alert: ", queuedesc, ": unable to opendir ", dir, ", sleeping...\n");
+	else
+		log3("alert: unable to opendir ", dir, ", sleeping...\n");
 	sleep(10);
 }
 
@@ -253,7 +267,7 @@ logsafe(s)
 void
 getversion_qsutil_c()
 {
-	static char    *x = "$Id: qsutil.c,v 1.11 2014-03-07 19:15:24+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: qsutil.c,v 1.12 2016-01-29 18:27:48+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

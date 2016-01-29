@@ -1,5 +1,8 @@
 /*
  * $Log: qsutil.h,v $
+ * Revision 1.10  2016-01-29 18:30:38+05:30  Cprogrammer
+ * removed log11() and added log13()
+ *
  * Revision 1.9  2014-03-07 19:15:11+05:30  Cprogrammer
  * added log9(), log11()
  *
@@ -34,7 +37,7 @@ void            log4(char *, char *, char *, char *);
 void            log5(char *, char *, char *, char *, char *);
 void            log7(char *, char *, char *, char *, char *, char *, char *);
 void            log9(char *, char *, char *, char *, char *, char *, char *, char *, char *);
-void            log11(char *, char *, char *, char *, char *, char *, char *, char *, char *, char *, char *);
+void            log13(char *, char *, char *, char *, char *, char *, char *, char *, char *, char *, char *, char *, char *);
 void            logsa(stralloc *);
 void            logsa_noflush(stralloc *);
 void            nomem(void);
