@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-queue.c,v $
+ * Revision 1.57  2016-01-29 11:31:10+05:30  Cprogrammer
+ * fixed 'Z' getting appended to domain in extraqueue
+ *
  * Revision 1.56  2013-05-30 11:10:32+05:30  Cprogrammer
  * extraqueue can have multiple lines as extra recipients
  *
@@ -804,6 +807,9 @@ main()
 	} else
 	if (!stralloc_copys(&extraqueue, ptr))
 		die(51);
+	if (extraqueue.len && !stralloc_0(&extraqueue))
+		die(51);
+	extraqueue.len--;
 	if (!(ptr = env_get("QUARANTINE"))) {
 		if (control_readline(&quarantine, "quarantine") == -1)
 			die(55);
@@ -1205,7 +1211,7 @@ main()
 void
 getversion_qmail_queue_c()
 {
-	static char    *x = "$Id: qmail-queue.c,v 1.56 2013-05-30 11:10:32+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: qmail-queue.c,v 1.57 2016-01-29 11:31:10+05:30 Cprogrammer Exp mbhangui $";
 
 #ifdef INDIMAIL
 	if (x)
