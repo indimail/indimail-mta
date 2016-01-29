@@ -1994,10 +1994,13 @@ qmail-qread: \
 load qmail-qread.o fmtqfn.o readsubdir.o date822fmt.o datetime.a \
 open.a getln.a stralloc.a alloc.a substdio.a error.a str.a fs.a \
 auto_qmail.o auto_split.o envread.o str_diffn.o variables.o control.o \
-stralloc_copy.o stralloc_cat.o now.o
+stralloc_copy.o stralloc_cat.o now.o envdir_set.o pathexec_env.o \
+pathexec_run.o openreadclose.o strerr_die.o strerr_sys.o
 	./load qmail-qread fmtqfn.o readsubdir.o date822fmt.o \
 	control.o stralloc_copy.o stralloc_cat.o str_diffn.o \
 	auto_qmail.o auto_split.o envread.o variables.o now.o \
+	envdir_set.o pathexec_env.o pathexec_run.o \
+	openreadclose.o strerr_die.o strerr_sys.o \
 	datetime.a open.a getln.a stralloc.a alloc.a substdio.a \
 	error.a str.a fs.a 
 
@@ -2009,7 +2012,8 @@ qmail-qread.o: \
 compile qmail-qread.c stralloc.h gen_alloc.h substdio.h subfd.h \
 fmt.h str.h getln.h fmtqfn.h readsubdir.h direntry.h \
 control.h auto_qmail.h open.h datetime.h date822fmt.h error.h \
-scan.h exit.h env.h variables.h hasindimail.h conf-queue
+scan.h exit.h env.h envdir.h pathexec.h variables.h \
+hasindimail.h conf-queue
 	if test -f conf-queue ; then \
 	./compile $(inc_deps) -DMULTI_QUEUE -DQUEUE_COUNT=`cat conf-queue` qmail-qread.c; \
 	else \
