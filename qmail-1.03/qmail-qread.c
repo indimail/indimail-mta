@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-qread.c,v $
+ * Revision 1.25  2016-01-29 11:55:52+05:30  Cprogrammer
+ * use defaultqueue to set env variables and set QUEUE variables
+ *
  * Revision 1.24  2011-07-29 09:29:40+05:30  Cprogrammer
  * fixed gcc 4.6 warnings
  *
@@ -68,6 +71,8 @@
 #include "control.h"
 #include "variables.h"
 #include "exit.h"
+#include "envdir.h"
+#include "pathexec.h"
 #include "hasindimail.h"
 
 #ifndef QUEUE_COUNT
@@ -131,6 +136,15 @@ void
 die_control()
 {
 	substdio_puts(subfderr, "fatal: unable to read controls\n");
+	die(111);
+}
+
+void
+die_controldir(char *x)
+{
+	substdio_puts(subfderr, "qmail-inject: fatal: unable to chdir to ");
+	substdio_puts(subfderr, x);
+	substdio_puts(subfderr, "\n");
 	die(111);
 }
 
@@ -547,6 +561,7 @@ main(int argc, char **argv)
 {
 	char           *queue_count_ptr, *queue_start_ptr;
 	char            strnum[FMT_ULONG];
+	char          **e;
 	int             idx, count, qcount, qstart, lcount, rcount, bcount, tcount;
 	static stralloc Queuedir = { 0 };
 
@@ -556,6 +571,17 @@ main(int argc, char **argv)
 	}
 	if (chdir(auto_qmail))
 		die_home();
+	if (!controldir) {
+		if (!(controldir = env_get("CONTROLDIR")))
+			controldir = "control";
+	}
+	if (chdir(controldir) == -1)
+		die_controldir(controldir);
+	if (!access("defaultqueue", X_OK)) {
+		envdir_set("defaultqueue");
+		if ((e = pathexec(0)))
+			environ = e;
+	}
 	if (!(qbase = env_get("QUEUE_BASE"))) {
 		switch (control_readfile(&QueueBase, "queue_base", 0))
 		{
@@ -621,7 +647,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_qread_c()
 {
-	static char    *x = "$Id: qmail-qread.c,v 1.24 2011-07-29 09:29:40+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: qmail-qread.c,v 1.25 2016-01-29 11:55:52+05:30 Cprogrammer Exp mbhangui $";
 
 #ifdef INDIMAIL
 	if (x)
