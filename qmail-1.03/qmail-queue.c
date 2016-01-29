@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-queue.c,v $
+ * Revision 1.58  2016-01-29 11:50:48+05:30  Cprogrammer
+ * append null only when copying extraqueue from env variable
+ *
  * Revision 1.57  2016-01-29 11:31:10+05:30  Cprogrammer
  * fixed 'Z' getting appended to domain in extraqueue
  *
@@ -804,12 +807,13 @@ main()
 	if (!(ptr = env_get("EXTRAQUEUE"))) {
 		if (control_readfile(&extraqueue, "extraqueue", 0) == -1)
 			die(55);
-	} else
-	if (!stralloc_copys(&extraqueue, ptr))
-		die(51);
-	if (extraqueue.len && !stralloc_0(&extraqueue))
-		die(51);
-	extraqueue.len--;
+	} else {
+		if (!stralloc_copys(&extraqueue, ptr))
+			die(51);
+		if (!stralloc_0(&extraqueue))
+			die(51);
+		extraqueue.len--;
+	}
 	if (!(ptr = env_get("QUARANTINE"))) {
 		if (control_readline(&quarantine, "quarantine") == -1)
 			die(55);
@@ -1211,7 +1215,7 @@ main()
 void
 getversion_qmail_queue_c()
 {
-	static char    *x = "$Id: qmail-queue.c,v 1.57 2016-01-29 11:31:10+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-queue.c,v 1.58 2016-01-29 11:50:48+05:30 Cprogrammer Exp mbhangui $";
 
 #ifdef INDIMAIL
 	if (x)
