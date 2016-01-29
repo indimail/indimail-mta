@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-todo.c,v $
+ * Revision 1.33  2016-01-29 18:31:23+05:30  Cprogrammer
+ * include queue name in logs
+ *
  * Revision 1.32  2013-09-23 22:14:20+05:30  Cprogrammer
  * display queue directory for qmail-todo process
  *
@@ -115,19 +118,16 @@ datetime_sec    recent;
 void            log1(char *w);
 void            log3(char *w, char *x, char *y);
 void            log4(char *w, char *x, char *y, char *z);
-void            log7(char *t, char *u, char *v, char *w, char *x, char *y, char *z);
+void            log5(char *u, char *w, char *x, char *y, char *z);
+void            log9(char *r, char *s, char *t, char *u, char *v, char *w, char *x, char *y, char *z);
 int             flagstopasap = 0;
+char           *queuedesc;
 
 void
 sigterm(void)
 {
-	char           *ptr;
-
-	if(!flagstopasap) {
-		for (ptr = queuedir;*ptr;ptr++);
-		for (;ptr != queuedir && *ptr != '/';ptr--);
-		log3("status: ", *ptr == '/' ? ptr + 1 : ptr, " qmail-todo stop processing asap\n");
-	}
+	if(!flagstopasap)
+		log3("status: ", queuedesc, " qmail-todo stop processing asap\n");
 	flagstopasap = 1;
 }
 
@@ -148,7 +148,7 @@ senddied(void)
 void
 nomem()
 {
-	log1("alert: out of memory, sleeping...\n");
+	log3("alert: ", queuedesc, ": out of memory, sleeping...\n");
 	sleep(10);
 }
 
@@ -156,14 +156,14 @@ void
 pausedir(dir)
 	char           *dir;
 {
-	log3("alert: unable to opendir ", dir, ", sleeping...\n");
+	log5("alert: ", queuedesc, ": unable to opendir ", dir, ", sleeping...\n");
 	sleep(10);
 }
 
 void
 cleandied()
 {
-	log1("alert: qmail-todo: oh no! lost qmail-clean connection! dying...\n");
+	log3("alert: ", queuedesc, ": qmail-todo: oh no! lost qmail-clean connection! dying...\n");
 	flagstopasap = 1;
 }
 
@@ -380,12 +380,42 @@ fail:
 }
 
 void
-log7(char *t, char *u, char *v, char *w, char *x, char *y, char *z)
+log5(char *v, char *w, char *x, char *y, char *z)
 {
 	int             pos;
 
 	pos = comm_buf.len;
 	if (!stralloc_cats(&comm_buf, "L"))
+		goto fail;
+	if (!stralloc_cats(&comm_buf, v))
+		goto fail;
+	if (!stralloc_cats(&comm_buf, w))
+		goto fail;
+	if (!stralloc_cats(&comm_buf, x))
+		goto fail;
+	if (!stralloc_cats(&comm_buf, y))
+		goto fail;
+	if (!stralloc_cats(&comm_buf, z))
+		goto fail;
+	if (!stralloc_0(&comm_buf))
+		goto fail;
+	return;
+fail:
+	/*- either all or nothing */
+	comm_buf.len = pos;
+}
+
+void
+log9(char *r, char *s, char *t, char *u, char *v, char *w, char *x, char *y, char *z)
+{
+	int             pos;
+
+	pos = comm_buf.len;
+	if (!stralloc_cats(&comm_buf, "L"))
+		goto fail;
+	if (!stralloc_cats(&comm_buf, r))
+		goto fail;
+	if (!stralloc_cats(&comm_buf, s))
 		goto fail;
 	if (!stralloc_cats(&comm_buf, t))
 		goto fail;
@@ -493,6 +523,10 @@ comm_info(unsigned long id, unsigned long size, char *from, unsigned long pid, u
 	strnum[fmt_ulong(strnum, uid)] = 0;
 	if (!stralloc_cats(&comm_buf, strnum))
 		goto fail;
+	if (!stralloc_cats(&comm_buf, " "))
+		goto fail;
+	if (!stralloc_cats(&comm_buf, queuedesc))
+		goto fail;
 	if (!stralloc_cats(&comm_buf, "\n"))
 		goto fail;
 	if (!stralloc_0(&comm_buf))
@@ -579,7 +613,7 @@ comm_do(fd_set * wfds, fd_set * rfds)
 				sigterm();
 				break;
 			default:
-				log1("warning: qmail-todo: qmail-send speaks an obscure dialect\n");
+				log3("warning: ", queuedesc, ": qmail-todo: qmail-send speaks an obscure dialect\n");
 				break;
 			}
 		}
@@ -629,7 +663,7 @@ log_stat(long bytes)
 	strnum[fmt_ulong(strnum, bytes)] = 0;
 	for (ptr = mailto.s;ptr < mailto.s + mailto.len;)
 	{
-		log7(*ptr == 'L' ? "local: " : "remote: ", mailfrom.s + 1, " ", ptr + 2, " ", strnum, "\n");
+		log9(*ptr == 'L' ? "local: " : "remote: ", mailfrom.s + 1, " ", ptr + 2, " ", strnum, " ", queuedesc, "\n");
 		ptr += str_len(ptr) + 1;
 	}
 	mailfrom.len = mailto.len = 0;
@@ -679,14 +713,14 @@ todo_do(fd_set * rfds)
 	fnmake_todo(id);
 	if((fd = open_read(fn.s)) == -1)
 	{
-		log3("warning: qmail-todo: unable to open ", fn.s, "\n");
+		log5("warning: ", queuedesc, ": qmail-todo: unable to open ", fn.s, "\n");
 		return;
 	}
 	fnmake_mess(id);
 	/*- just for the statistics */
 	if (stat(fn.s, &st) == -1)
 	{
-		log3("warning: qmail-todo: unable to stat ", fn.s, "\n");
+		log5("warning: ", queuedesc, ": qmail-todo: unable to stat ", fn.s, "\n");
 		goto fail;
 	}
 	Bytes = st.st_size;
@@ -695,23 +729,23 @@ todo_do(fd_set * rfds)
 		fnmake_chanaddr(id, c);
 		if (unlink(fn.s) == -1 && errno != error_noent)
 		{
-			log3("warning: qmail-todo: unable to unlink ", fn.s, "\n");
+			log5("warning: ", queuedesc, ": qmail-todo: unable to unlink ", fn.s, "\n");
 			goto fail;
 		}
 	}
 	fnmake_info(id);
 	if (unlink(fn.s) == -1 && errno != error_noent)
 	{
-		log3("warning: qmail-todo: unable to unlink ", fn.s, "\n");
+		log5("warning: ", queuedesc, ": qmail-todo: unable to unlink ", fn.s, "\n");
 		goto fail;
 	}
 	if((fdinfo = open_excl(fn.s)) == -1)
 	{
-		log3("warning: qmail-todo: unable to create ", fn.s, "\n");
+		log5("warning: ", queuedesc, ": qmail-todo: unable to create ", fn.s, "\n");
 		goto fail;
 	}
 	strnum[fmt_ulong(strnum, id)] = 0;
-	log3("new msg ", strnum, "\n");
+	log5("new msg ", strnum, " ", queuedesc, "\n");
 	for (c = 0; c < CHANNELS; ++c)
 		flagchan[c] = 0;
 	substdio_fdbuf(&ss, read, fd, todobuf, sizeof(todobuf));
@@ -724,7 +758,7 @@ todo_do(fd_set * rfds)
 		{
 			/*- perhaps we're out of memory, perhaps an I/O error */
 			fnmake_todo(id);
-			log3("warning: qmail-todo: trouble reading ", fn.s, "\n");
+			log5("warning: ", queuedesc, ": qmail-todo: trouble reading ", fn.s, "\n");
 			goto fail;
 		}
 		if (!match)
@@ -742,7 +776,7 @@ todo_do(fd_set * rfds)
 			if (substdio_put(&ssinfo, todoline.s, todoline.len) == -1)
 			{
 				fnmake_info(id);
-				log3("warning: trouble writing to ", fn.s, "\n");
+				log5("warning: ", queuedesc, ": trouble writing to ", fn.s, "\n");
 				goto fail;
 			}
 			break;
@@ -750,7 +784,7 @@ todo_do(fd_set * rfds)
 			if (substdio_put(&ssinfo, todoline.s, todoline.len) == -1)
 			{
 				fnmake_info(id);
-				log3("warning: qmail-todo: trouble writing to ", fn.s, "\n");
+				log5("warning: ", queuedesc, ": qmail-todo: trouble writing to ", fn.s, "\n");
 				goto fail;
 			}
 			if (!stralloc_copy(&mailfrom, &todoline) || !stralloc_0(&mailfrom))
@@ -789,7 +823,7 @@ todo_do(fd_set * rfds)
 				fdchan[c] = open_excl(fn.s);
 				if (fdchan[c] == -1)
 				{
-					log3("warning: qmail-todo: unable to create ", fn.s, "\n");
+					log5("warning: ", queuedesc, ": qmail-todo: unable to create ", fn.s, "\n");
 					goto fail;
 				}
 				substdio_fdbuf(&sschan[c], write, fdchan[c], todobufchan[c], sizeof(todobufchan[c]));
@@ -798,13 +832,13 @@ todo_do(fd_set * rfds)
 			if (substdio_bput(&sschan[c], rwline.s, rwline.len) == -1)
 			{
 				fnmake_chanaddr(id, c);
-				log3("warning: qmail-todo: trouble writing to ", fn.s, "\n");
+				log5("warning: ", queuedesc, ": qmail-todo: trouble writing to ", fn.s, "\n");
 				goto fail;
 			}
 			break;
 		default:
 			fnmake_todo(id);
-			log3("warning: qmail-todo: unknown record type in ", fn.s, "\n");
+			log5("warning: ", queuedesc, ": qmail-todo: unknown record type in ", fn.s, "\n");
 			goto fail;
 		}
 	}
@@ -813,7 +847,7 @@ todo_do(fd_set * rfds)
 	fnmake_info(id);
 	if (substdio_flush(&ssinfo) == -1)
 	{
-		log3("warning: qmail-todo: trouble writing to ", fn.s, "\n");
+		log5("warning: ", queuedesc, ": qmail-todo: trouble writing to ", fn.s, "\n");
 		goto fail;
 	}
 	for (c = 0; c < CHANNELS; ++c)
@@ -823,7 +857,7 @@ todo_do(fd_set * rfds)
 			fnmake_chanaddr(id, c);
 			if (substdio_flush(&sschan[c]) == -1)
 			{
-				log3("warning: qmail-todo: trouble writing to ", fn.s, "\n");
+				log5("warning: ", queuedesc, ": qmail-todo: trouble writing to ", fn.s, "\n");
 				goto fail;
 			}
 		}
@@ -831,7 +865,7 @@ todo_do(fd_set * rfds)
 #ifdef USE_FSYNC
 	if (use_fsync && fsync(fdinfo) == -1)
 	{
-		log3("warning: qmail-todo: trouble fsyncing ", fn.s, "\n");
+		log5("warning: ", queuedesc, ": qmail-todo: trouble fsyncing ", fn.s, "\n");
 		goto fail;
 	}
 #endif
@@ -844,7 +878,7 @@ todo_do(fd_set * rfds)
 #ifdef USE_FSYNC
 			if (use_fsync && fsync(fdchan[c]) == -1)
 			{
-				log3("warning: qmail-todo: trouble fsyncing ", fn.s, "\n");
+				log5("warning: ", queuedesc, ": qmail-todo: trouble fsyncing ", fn.s, "\n");
 				goto fail;
 			}
 #endif
@@ -865,7 +899,7 @@ todo_do(fd_set * rfds)
 	}
 	if (ch != '+')
 	{
-		log3("warning: qmail-clean unable to clean up ", fn.s, "\n");
+		log5("warning: ", queuedesc, ": qmail-clean unable to clean up ", fn.s, "\n");
 		return;
 	}
 	comm_write(id, flagchan[0], flagchan[1]);
@@ -940,17 +974,17 @@ regetcontrols(void)
 		controldir = "control";
 	if (control_readfile(&newlocals, "locals", 1) != 1)
 	{
-		log3("alert: qmail-todo: unable to reread ", controldir, "/locals\n");
+		log5("alert: ", queuedesc, ": qmail-todo: unable to reread ", controldir, "/locals\n");
 		return;
 	}
 	if((r = control_readfile(&newvdoms, "virtualdomains", 0)) == -1)
 	{
-		log3("alert: qmail-todo: unable to reread ", controldir, "/virtualdomains\n");
+		log5("alert: ", queuedesc, ": qmail-todo: unable to reread ", controldir, "/virtualdomains\n");
 		return;
 	}
 	if (control_readint(&todo_interval, "todointerval") == -1)
 	{
-		log3("alert: qmail-todo: unable to reread ", controldir, "/todointerval\n");
+		log5("alert: ", queuedesc, ": qmail-todo: unable to reread ", controldir, "/todointerval\n");
 		return;
 	}
 	constmap_free(&maplocals);
@@ -975,7 +1009,7 @@ reread(void)
 {
 	if (chdir(auto_qmail) == -1)
 	{
-		log1("alert: qmail-todo: unable to reread controls: unable to switch to home directory\n");
+		log3("alert: ", queuedesc, ": qmail-todo: unable to reread controls: unable to switch to home directory\n");
 		return;
 	}
 	regetcontrols();
@@ -990,7 +1024,7 @@ reread(void)
 	}
 	while (chdir(queuedir) == -1)
 	{
-		log1("alert: qmail-todo: unable to switch back to queue directory; HELP! sleeping...\n");
+		log3("alert: ", queuedesc, ": qmail-todo: unable to switch back to queue directory; HELP! sleeping...\n");
 		sleep(10);
 	}
 }
@@ -1004,11 +1038,6 @@ main()
 	char           *ptr;
 	struct timeval  tv;
 
-	if (chdir(auto_qmail) == -1)
-	{
-		log1("alert: qmail-todo: cannot start: unable to switch to home directory\n");
-		_exit(111);
-	}
 	if(!queuedir)
 	{
 		if(!(queuedir = env_get("QUEUEDIR")))
@@ -1018,14 +1047,23 @@ main()
 			queuedir = "queue";
 #endif
 	}
+	for (queuedesc = queuedir;*queuedesc;queuedesc++);
+	for (;queuedesc != queuedir && *queuedesc != '/';queuedesc--);
+	if (*queuedesc == '/')
+		queuedesc++;
+	if (chdir(auto_qmail) == -1)
+	{
+		log3("alert: ", queuedesc, ": qmail-todo: cannot start: unable to switch to home directory\n");
+		_exit(111);
+	}
 	if (!getcontrols())
 	{
-		log1("alert: qmail-todo: cannot start: unable to read controls\n");
+		log3("alert: ", queuedesc, ": qmail-todo: cannot start: unable to read controls\n");
 		_exit(111);
 	}
 	if (chdir(queuedir) == -1)
 	{
-		log1("alert: qmail-todo: cannot start: unable to switch to queue directory\n");
+		log3("alert: ", queuedesc, ": qmail-todo: cannot start: unable to switch to queue directory\n");
 		_exit(111);
 	}
 #ifdef USE_FSYNC
@@ -1074,9 +1112,7 @@ main()
 			if (flagstopasap)
 				_exit(0);
 	 		/*- qmail-send died. We can not log and we can not work therefor _exit(1). */
-			for (ptr = queuedir;*ptr;ptr++);
-			for (;ptr != queuedir && *ptr != '/';ptr--);
-			log3("status: ", *ptr == '/' ? ptr + 1 : ptr, " qmail-todo exiting\n");
+			log3("status: ", queuedesc, " qmail-todo exiting\n");
 			_exit(1);
 		}
 		wakeup = recent + SLEEP_FOREVER;
@@ -1095,7 +1131,7 @@ main()
 			if (errno == error_intr)
 				;
 			else
-				log1("warning: qmail-todo: trouble in select\n");
+				log3("warning: ", queuedesc, ": qmail-todo: trouble in select\n");
 		} else
 		{
 			recent = now();
@@ -1105,7 +1141,7 @@ main()
 	}
 	for (ptr = queuedir;*ptr;ptr++);
 	for (;ptr != queuedir && *ptr != '/';ptr--);
-	log3("status: ", *ptr == '/' ? ptr + 1 : ptr, " qmail-todo exiting\n");
+	log3("status: ", queuedesc, " qmail-todo exiting\n");
 	_exit(0);
 }
 #else
@@ -1119,7 +1155,7 @@ main()
 void
 getversion_qmail_todo_c()
 {
-	static char    *x = "$Id: qmail-todo.c,v 1.32 2013-09-23 22:14:20+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: qmail-todo.c,v 1.33 2016-01-29 18:31:23+05:30 Cprogrammer Exp mbhangui $";
 
 #ifdef INDIMAIL
 	if (x)
