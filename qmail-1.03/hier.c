@@ -1,5 +1,8 @@
 /*
  * $Log: hier.c,v $
+ * Revision 1.192  2016-02-08 21:37:44+05:30  Cprogrammer
+ * added qmail-smtpd.so
+ *
  * Revision 1.191  2016-01-28 23:56:29+05:30  Cprogrammer
  * added yearcal, nowutc
  *
@@ -686,6 +689,7 @@ hier(inst_dir)
 	c(auto_qmail_home, "plugins", "smtpd-plugin0.so", auto_uido, auto_gidq, 0555);
 #endif
 	c(auto_qmail_home, "plugins", "generic.so", auto_uido, auto_gidq, 0555);
+	c(auto_qmail_home, "plugins", "qmail-smtpd.so", auto_uido, auto_gidq, 0555);
 
 	c(auto_qmail_home, "bin", "recordio", auto_uido, auto_gidq, 0555);
 	c(auto_qmail_home, "bin", "argv0", auto_uido, auto_gidq, 0555);
@@ -1734,7 +1738,7 @@ _hier(inst_dir)
 void
 getversion_install_big_c()
 {
-	static char    *x = "$Id: hier.c,v 1.191 2016-01-28 23:56:29+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: hier.c,v 1.192 2016-02-08 21:37:44+05:30 Cprogrammer Exp mbhangui $";
 
 #ifdef INDIMAIL
 	if (x)
