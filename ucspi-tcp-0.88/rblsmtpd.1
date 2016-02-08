@@ -5,12 +5,13 @@ rblsmtpd \- blocks mail from RBL-listed sites. It works with any SMTP server tha
 .SH SYNOPSIS
 .B rblsmtpd
 .I opts
-.I prog
+.I prog[.so]
 .SH DESCRIPTION
 .I opts
 is a series of getopt-style options.
 .I prog
-consists of one or more arguments.
+consists of one or more arguments. \fIprog\fR can have the extension .so in which case, rblsmtpd will use dlopen(3) to load
+the shared object \fIprog.so\fR. When you want to load shared objects, prog.so should be an absolute path.
 
 Normally
 .B rblsmtpd
