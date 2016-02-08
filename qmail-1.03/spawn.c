@@ -1,5 +1,8 @@
 /*
  * $Log: spawn.c,v $
+ * Revision 1.19  2016-02-08 17:29:14+05:30  Cprogrammer
+ * set environment variable MESSID
+ *
  * Revision 1.18  2010-07-21 21:24:57+05:30  Cprogrammer
  * added envheader code
  *
@@ -178,6 +181,8 @@ variables_set()
 			y = z + 1;
 		}
 	}
+	if (!env_put2("MESSID", messid.s))
+		return (1);
 	return (0);
 }
 
@@ -543,7 +548,7 @@ main(argc, argv)
 void
 getversion_spawn_c()
 {
-	static char    *x = "$Id: spawn.c,v 1.18 2010-07-21 21:24:57+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: spawn.c,v 1.19 2016-02-08 17:29:14+05:30 Cprogrammer Exp mbhangui $";
 
 #ifdef INDIMAIL
 	x = sccsidh;
