@@ -21,6 +21,7 @@ Currently, the list of supported distributions for IndiMail is (for
 both 32 and 64 bit) are
 
     * SUSE
+          o openSUSE 13.2
           o openSUSE 13.1
           o openSUSE 12.3
           o openSUSE 12.2
@@ -34,22 +35,21 @@ both 32 and 64 bit) are
           o openSUSE Factory
 
     * Red Hat
-          o Fedora 20
-          o Fedora 19
-          o Fedora 18
+          o Fedora 23
+          o Fedora 22
+          o Fedora 21
+          o Red Hat Enterprise Linux 7
           o Red Hat Enterprise Linux 6
-          o Red Hat Enterprise Linux 5
+          o CentOS 7
           o CentOS 6
-          o CentOS 5
 
     * Debian
+          o Debian 8.0
           o Debian 7.0
           o Debian 6.0
-          o Ubuntu 13.10
-          o Ubuntu 13.04
-          o Ubuntu 12.10
+          o Ubuntu 15.10
+          o Ubuntu 15.04
+          o Ubuntu 14.10
+          o Ubuntu 14.04
           o Ubuntu 12.04
-          o Ubuntu 11.10
-          o Ubuntu 11.04
-          o Ubuntu 10.04
 
