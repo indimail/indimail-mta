@@ -453,9 +453,14 @@ compile pathexec_env.c stralloc.h gen_alloc.h alloc.h str.h byte.h \
 env.h pathexec.h
 	./compile pathexec_env.c
 
+pathexec_rundl.o: \
+compile pathexec_run.c error.h stralloc.h gen_alloc.h str.h env.h \
+pathexec.h conf-shared
+	./compile `grep -h -v "^#" conf-shared` pathexec_run.c -o pathexec_rundl.o
+
 pathexec_run.o: \
 compile pathexec_run.c error.h stralloc.h gen_alloc.h str.h env.h \
-pathexec.h
+pathexec.h conf-shared
 	./compile pathexec_run.c
 
 prog: \
@@ -468,9 +473,11 @@ compile prot.c hasshsgr.h prot.h
 	./compile prot.c
 
 rblsmtpd: \
-load rblsmtpd.o commands.o dns.a time.a unix.a byte.a socket.lib
-	./load rblsmtpd commands.o dns.a time.a unix.a byte.a  \
-	`cat socket.lib`
+load rblsmtpd.o commands.o pathexec_rundl.o load_shared.o \
+dns.a time.a unix.a byte.a socket.lib
+	./load rblsmtpd commands.o pathexec_rundl.o load_shared.o \
+	dns.a time.a unix.a byte.a  \
+	`cat socket.lib` -ldl
 
 rblsmtpd.o: \
 compile rblsmtpd.c byte.h str.h scan.h fmt.h env.h exit.h sig.h \
@@ -713,9 +720,9 @@ warn-auto.sh tcpcat.sh conf-home
 
 tcpclient: \
 load tcpclient.o tcpremoteinfo.o timeoutconn.o \
-dns.a time.a unix.a byte.a socket.lib
+pathexec_run.o dns.a time.a unix.a byte.a socket.lib
 	./load tcpclient tcpremoteinfo.o timeoutconn.o \
-	dns.a time.a unix.a byte.a `cat socket.lib`
+	pathexec_run.o dns.a time.a unix.a byte.a `cat socket.lib`
 
 tcpclient.o: \
 compile tcpclient.c sig.h exit.h sgetopt.h subgetopt.h uint16.h fmt.h \
@@ -747,14 +754,14 @@ stralloc.h gen_alloc.h
 	./compile tcprulescheck.c
 
 tcpserver: \
-load tcpserver.o rules.o tcpremoteinfo.o timeoutconn.o \
-control.o str_diffn.o auto_home.o cdb.a dns.a time.a \
+load tcpserver.o rules.o tcpremoteinfo.o timeoutconn.o pathexec_rundl.o \
+load_shared.o control.o str_diffn.o auto_home.o cdb.a dns.a time.a \
 unix.a byte.a socket.lib mysql_config
 	./load tcpserver rules.o tcpremoteinfo.o timeoutconn.o \
-	control.o str_diffn.o auto_home.o \
+	control.o str_diffn.o auto_home.o load_shared.o pathexec_rundl.o \
 	cdb.a dns.a time.a unix.a byte.a `cat socket.lib` \
 	$(SSLLIBS) \
-	$(mysql_libs)
+	$(mysql_libs) -ldl
 
 tcpserver.o: \
 compile tcpserver.c uint16.h str.h byte.h fmt.h scan.h ip4.h fd.h \
@@ -767,6 +774,11 @@ mysql_config hasmysql.h
 	./compile $(SSLINCS) $(mysql_inc) \
 	`grep -h -v "^#" conf-tls conf-ip conf-mysqlrules` \
 	tcpserver.c
+
+load_shared.o: \
+compile load_shared.c str.h strerr.h
+	./compile `grep -h -v "^#" conf-shared ` \
+	load_shared.c
 
 mysql_config.o: compile mysql_config.c conf-mysqlrules
 	./compile `grep -h -v "^#" conf-mysqlrules` mysql_config.c
@@ -821,7 +833,7 @@ makelib alloc.o alloc_re.o buffer.o buffer_0.o buffer_1.o buffer_2.o \
 buffer_copy.o buffer_get.o buffer_put.o env.o error.o error_str.o \
 fd_copy.o fd_move.o getln.o getln2.o ndelay_off.o ndelay_on.o \
 open_read.o open_trunc.o open_write.o openreadclose.o pathexec_env.o \
-pathexec_run.o prot.o readclose.o seek_set.o sgetopt.o sig.o \
+prot.o readclose.o seek_set.o sgetopt.o sig.o \
 sig_block.o sig_catch.o sig_pause.o socket_accept.o socket_bind.o \
 socket_conn.o socket_delay.o socket_listen.o socket_local.o \
 socket_opts.o socket_opts6.o socket_remote.o socket_tcp.o socket_udp.o \
@@ -837,7 +849,7 @@ socket_ip4loopback.o socket_v6any.o socket_v6loopback.o
 	buffer_put.o env.o error.o error_str.o fd_copy.o fd_move.o \
 	getln.o getln2.o ndelay_off.o ndelay_on.o open_read.o \
 	open_trunc.o open_write.o openreadclose.o pathexec_env.o \
-	pathexec_run.o prot.o readclose.o seek_set.o sgetopt.o \
+	prot.o readclose.o seek_set.o sgetopt.o \
 	sig.o sig_block.o sig_catch.o sig_pause.o socket_accept.o \
 	socket_bind.o socket_conn.o socket_delay.o socket_listen.o \
 	socket_local.o socket_opts.o socket_opts6.o socket_remote.o socket_tcp.o \
