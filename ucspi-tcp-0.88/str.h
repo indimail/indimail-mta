@@ -1,5 +1,8 @@
 /*
  * $Log: str.h,v $
+ * Revision 1.3  2016-02-08 18:30:51+05:30  Cprogrammer
+ * added str_end() function
+ *
  * Revision 1.2  2005-05-13 23:53:41+05:30  Cprogrammer
  * code indentation
  *
