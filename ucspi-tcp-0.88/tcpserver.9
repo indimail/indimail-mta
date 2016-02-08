@@ -8,7 +8,7 @@ tcpserver \- accepts incoming TCP connections.
 ]
 .I host
 .I port
-.I prog
+.I prog[.so]
 .SH DESCRIPTION
 .I opts
 is a series of getopt-style options.
@@ -24,6 +24,8 @@ waits for connections from TCP clients. For each connection, it runs
 .IR prog ,
 with descriptor 0 reading from the network and descriptor 1 writing to the
 network. It also sets up several environment variables.
+if \fIprog.so\fR is specified, it is expected that prog.so points to a shared object, which gets loaded using dlopen(3) call.
+Specifying a shared object can significantly improve performance by loading the object only once.
 
 The server's address is given by
 .I host
@@ -304,6 +306,7 @@ http@(1),
 tcpcat(1),
 mconnect(1),
 openssl(1),
+dlopen(3),
 tcp-environ(5)
 
 http://cr.yp.to/ucspi-tcp.html
