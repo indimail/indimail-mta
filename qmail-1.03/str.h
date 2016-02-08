@@ -1,5 +1,8 @@
 /*
  * $Log: str.h,v $
+ * Revision 1.7  2016-02-08 18:26:41+05:30  Cprogrammer
+ * added str_end() function
+ *
  * Revision 1.6  2011-07-12 20:42:33+05:30  Cprogrammer
  * added str_cspn() function
  *
@@ -27,6 +30,7 @@ unsigned int    str_len(char *);
 unsigned int    str_chr(char *, int);
 unsigned int    str_rchr(char *, int);
 int             str_start(char *, char *);
+int             str_end(char *, char *);
 char           *str_chrn(char *, int, int);
 #include <sys/types.h>
 size_t          str_cspn(const char *, register const char *);
