@@ -3123,10 +3123,10 @@ substdio.h fmt.h stralloc.h srs.h
 
 str.a: \
 makelib str_len.o str_diff.o str_diffn.o str_cpy.o str_cpyb.o str_chr.o \
-str_rchr.o str_chrn.o str_start.o byte_chr.o byte_rchr.o byte_diff.o byte_copy.o \
-byte_cspn.o byte_rcspn.o byte_cr.o byte_zero.o
+str_rchr.o str_chrn.o str_start.o str_end.o byte_chr.o byte_rchr.o byte_diff.o \
+byte_copy.o byte_cspn.o byte_rcspn.o byte_cr.o byte_zero.o
 	./makelib str.a str_len.o str_diff.o str_diffn.o str_cpy.o str_cpyb.o \
-	str_chr.o str_chrn.o str_rchr.o str_start.o byte_chr.o byte_rchr.o \
+	str_chr.o str_chrn.o str_rchr.o str_start.o str_end.o byte_chr.o byte_rchr.o \
 	byte_cspn.o byte_rcspn.o byte_diff.o byte_copy.o byte_cr.o byte_zero.o
 
 str_chr.o: \
@@ -5684,6 +5684,7 @@ compile whois.c subfd.h str.h strerr.h stralloc.h byte.h tcpopen.h sgetopt.h
 	./compile `grep -h -v "^#" conf-ip` whois.c
 
 ################### PLUGINS ########################################
+# dnsblcheck plugin
 smtpd-plugin0.so: dnsbl.o
 	if test $(SYSTEM) = Darwin ; then \
 	$(LD) -bundle -undefined dynamic_lookup -o smtpd-plugin0.so dnsbl.o; \
