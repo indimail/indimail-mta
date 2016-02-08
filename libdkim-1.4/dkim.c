@@ -1,5 +1,8 @@
 /*
  * $Log: dkim.c,v $
+ * Revision 1.18  2016-02-01 10:53:32+05:30  Cprogrammer
+ * use basename of private key as the selector in absense of -y option
+ *
  * Revision 1.17  2015-12-15 15:36:01+05:30  Cprogrammer
  * added case 3 for 3rd party signature without SSP and ADSP
  * increased buffer size for Apple mail with X-BrightMail-Tracker header issue
@@ -552,7 +555,6 @@ main(int argc, char **argv)
 	opts.expireTime = t + 604800;	// expires in 1 week
 	opts.nIncludeCopiedHeaders = 0;
 	opts.nIncludeBodyHash = DKIM_BODYHASH_BOTH;
-	strcpy(opts.szSelector, "private");
 	strcpy(opts.szRequiredHeaders, "NonExistent");
 	opts.pfnHeaderCallback = SignThisHeader;
 	while (1)
@@ -700,6 +702,13 @@ main(int argc, char **argv)
 			fprintf(stderr, "Private Key not provided\n");
 			usage();
 			return (1);
+		}
+		if (!opts.szSelector[0]) {
+			if ((pSig = strrchr(PrivKeyFile, '/'))) {
+				pSig++;
+				strcpy(opts.szSelector, pSig);
+			} else
+				strcpy(opts.szSelector, "private");
 		}
 		if ((PrivKeyFD = open(PrivKeyFile, O_RDONLY)) == -1) {
 			fprintf(stderr, "%s: %s\n", PrivKeyFile, strerror(errno));
@@ -876,7 +885,7 @@ main(int argc, char **argv)
 void
 getversion_dkim_c()
 {
-	static char    *x = (char *) "$Id: dkim.c,v 1.17 2015-12-15 15:36:01+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = (char *) "$Id: dkim.c,v 1.18 2016-02-01 10:53:32+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
