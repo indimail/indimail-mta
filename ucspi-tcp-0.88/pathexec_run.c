@@ -1,5 +1,8 @@
 /*
  * $Log: pathexec_run.c,v $
+ * Revision 1.2  2016-02-08 21:30:19+05:30  Cprogrammer
+ * load shared objects if file has .so extension
+ *
  * Revision 1.1  2003-12-31 19:46:55+05:30  Cprogrammer
  * Initial revision
  *
@@ -22,7 +25,11 @@ pathexec_run(char *file, char **argv, char **envp)
 
 	if (file[str_chr(file, '/')])
 	{
+#ifdef LOAD_SHARED_OBJECTS
+		load_shared(file, argv, envp);
+#else
 		execve(file, argv, envp);
+#endif
 		return;
 	}
 
@@ -45,7 +52,6 @@ pathexec_run(char *file, char **argv, char **envp)
 			return;
 		if (!stralloc_0(&tmp))
 			return;
-
 		execve(tmp.s, argv, envp);
 		if (errno != error_noent)
 		{
