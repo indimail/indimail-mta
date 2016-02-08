@@ -66,12 +66,12 @@ compile buffer_put.c buffer.h str.h byte.h error.h
 
 byte.a: \
 makelib byte_chr.o byte_copy.o byte_cr.o byte_diff.o byte_rchr.o \
-byte_zero.o case_diffb.o case_diffs.o fmt_ulong.o ip4_fmt.o \
+byte_zero.o case_diffb.o case_diffs.o fmt_ulong.o ip4_fmt.o str_end.o \
 ip4_scan.o ip6_scan.o scan_ulong.o str_chr.o str_diff.o str_len.o str_start.o \
 uint16_pack.o uint16_unpack.o uint32_pack.o uint32_unpack.o ip6_compactaddr.o \
 ip6_fmt.o scan_xlong.o fmt_xlong.o ip6_expandaddr.o hexconversion.o
 	./makelib byte.a byte_chr.o byte_copy.o byte_cr.o \
-	byte_diff.o byte_rchr.o byte_zero.o case_diffb.o \
+	byte_diff.o byte_rchr.o byte_zero.o case_diffb.o str_end.o \
 	case_diffs.o fmt_ulong.o ip4_fmt.o ip4_scan.o ip6_scan.o scan_ulong.o \
 	str_chr.o str_diff.o str_len.o str_start.o uint16_pack.o \
 	uint16_unpack.o uint32_pack.o uint32_unpack.o ip6_compactaddr.o \
