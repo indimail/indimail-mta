@@ -1,5 +1,8 @@
 /*
  * $Log: pathexec.h,v $
+ * Revision 1.3  2016-02-08 21:30:55+05:30  Cprogrammer
+ * added function load_shared()
+ *
  * Revision 1.2  2005-05-13 23:46:06+05:30  Cprogrammer
  * code indentation
  *
@@ -13,5 +16,8 @@
 void            pathexec_run(char *, char **, char **);
 int             pathexec_env(char *, char *);
 void            pathexec(char **);
+#ifdef LOAD_SHARED_OBJECTS
+void            load_shared(char *, char **, char **);
+#endif
 
 #endif
