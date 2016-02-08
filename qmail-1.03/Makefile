@@ -1290,7 +1290,7 @@ setuidgid softlimit supervise svc svok svscan svstat tai64n tai64nlocal tai64nun
 tai2tai64n tai64n2tai \
 recordio argv0 addcr delcr fixcrio generic.so cdbmake cdbget cdbgetm \
 cdbdump cdbstats cdbtest cdbmake-12 cdbmake-sv testzero dk-filter \
-uacl udplogger udpclient smtpd-plugin.so smtpd-plugin0.so
+uacl udplogger udpclient smtpd-plugin.so smtpd-plugin0.so qmail-smtpd.so
 
 analyzer: \
 mlmatchup matchup columnt zoverall zsendmail xqp xsender xrecipient ddist \
@@ -2461,6 +2461,42 @@ tryindimail.c compile load indimail.lib conf-indi hmac_sha1.o
 	./load tryindimail `cat indimail.lib`) >/dev/null 2>&1 \
 	&& echo || echo hmac_sha1.o) > hmac_sha1.obj
 	rm -f tryindimail.o tryindimail 1>&2
+
+qmail-smtpd.so: \
+smtpd.o rcpthosts.o recipients.o commands.o timeoutread.o \
+timeoutwrite.o ip.o ipme.o ipalloc.o strsalloc.o control.o etrn.o atrn.o constmap.o \
+received.o date822fmt.o wildmat.o now.o qmail.o variables.o cdb.a fd.a \
+wait.a datetime.a getln.a envrules.o bodycheck.o sqlmatch.o matchregex.o \
+scan_xlong.o socket_ip4loopback.o socket_v6loopback.o socket_v4mappedprefix.o \
+socket_v6any.o mail_acl.o open.a sig.a case.a spf.o dns.o auto_qmail.o auto_uids.o \
+base64sub.o qregex_smtpd.o tablematch.o ndelay.o ndelay_off.o greylist.o \
+auto_break.o env.a stralloc.a alloc.a substdio.a error.a str.a fs.a lock.a \
+socket.lib tai.lib dns.lib indimail.lib tls.lib hmac_sha1.obj
+	if test $(SYSTEM) = Darwin ; then \
+	$(LD) -bundle -undefined dynamic_lookup qmail-smtpd.so smtpd.o rcpthosts.o \
+	recipients.o commands.o timeoutread.o \
+	timeoutwrite.o ip.o ipme.o ipalloc.o strsalloc.o control.o etrn.o atrn.o constmap.o \
+	received.o date822fmt.o wildmat.o now.o qmail.o variables.o envrules.o bodycheck.o \
+	spf.o dns.o auto_qmail.o sqlmatch.o matchregex.o scan_xlong.o socket_v4mappedprefix.o \
+	socket_ip4loopback.o socket_v6loopback.o socket_v6any.o mail_acl.o auto_uids.o \
+	base64sub.o qregex_smtpd.o tablematch.o ndelay.o ndelay_off.o cdb.a fd.a \
+	wait.a datetime.a greylist.o auto_break.o \
+	`cat hmac_sha1.obj 2>/dev/null` getln.a open.a sig.a \
+	case.a env.a stralloc.a alloc.a substdio.a error.a \
+	str.a fs.a lock.a `cat socket.lib tai.lib dns.lib indimail.lib tls.lib`; \
+	else \
+	$(CC) -shared -rdynamic -nostartfiles -fPIC -s -O4 -o qmail-smtpd.so smtpd.o rcpthosts.o \
+	recipients.o commands.o timeoutread.o \
+	timeoutwrite.o ip.o ipme.o ipalloc.o strsalloc.o control.o etrn.o atrn.o constmap.o \
+	received.o date822fmt.o wildmat.o now.o qmail.o variables.o envrules.o bodycheck.o \
+	spf.o dns.o auto_qmail.o sqlmatch.o matchregex.o scan_xlong.o socket_v4mappedprefix.o \
+	socket_ip4loopback.o socket_v6loopback.o socket_v6any.o mail_acl.o auto_uids.o \
+	base64sub.o qregex_smtpd.o tablematch.o ndelay.o ndelay_off.o cdb.a fd.a \
+	wait.a datetime.a greylist.o auto_break.o \
+	`cat hmac_sha1.obj 2>/dev/null` getln.a open.a sig.a \
+	case.a env.a stralloc.a alloc.a substdio.a error.a \
+	str.a fs.a lock.a `cat socket.lib tai.lib dns.lib indimail.lib tls.lib`; \
+	fi
 
 qmail-smtpd: \
 load qmail-smtpd.o smtpd.o rcpthosts.o recipients.o commands.o timeoutread.o \

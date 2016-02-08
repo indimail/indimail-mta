@@ -1,6 +1,6 @@
 #
 #
-# $Id: qmail.spec,v 1.24 2016-01-28 23:56:37+05:30 Cprogrammer Exp mbhangui $
+# $Id: qmail.spec,v 1.25 2016-02-08 21:38:03+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %define _unpackaged_files_terminate_build 1
 
@@ -833,6 +833,7 @@ done
 %attr(555,root,qmail)                   %{_prefix}/plugins/generic.so
 %attr(555,root,qmail)                   %{_prefix}/plugins/smtpd-plugin.so
 %attr(555,root,qmail)                   %{_prefix}/plugins/smtpd-plugin0.so
+%attr(555,root,qmail)                   %{_prefix}/plugins/qmail-smtpd.so
 
 %docdir %{_prefix}/doc
 %docdir %{_prefix}/man
