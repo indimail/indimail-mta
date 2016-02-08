@@ -17,6 +17,7 @@ unsigned int    str_len(char *);
 unsigned int    str_chr(char *, int);
 unsigned int    str_rchr(char *, int);
 int             str_start(char *, char *);
+int             str_end(char *, char *);
 
 #define str_equal(s,t) (!str_diff((s),(t)))
 
