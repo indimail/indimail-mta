@@ -1,5 +1,8 @@
 /*
  * $Log: load_shared.c,v $
+ * Revision 1.2  2016-03-01 18:50:38+05:30  Cprogrammer
+ * changed RTLD_GLOBAL to RTLD_LOCAL
+ *
  * Revision 1.1  2016-02-08 21:27:51+05:30  Cprogrammer
  * Initial revision
  *
@@ -24,7 +27,7 @@ load_shared(char *file, char **argv, char **envp)
 	char          **ptr;
 
 	if (!str_end(file, ".so")) {
-		if (!(handle = dlopen(file, RTLD_NOW|RTLD_GLOBAL)))
+		if (!(handle = dlopen(file, RTLD_NOW|RTLD_LOCAL)))
 			return;
 		dlerror(); /*- man page told me to do this */
 		func = dlsym(handle, "qmail_smtpd");
