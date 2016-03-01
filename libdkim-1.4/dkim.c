@@ -1,5 +1,8 @@
 /*
  * $Log: dkim.c,v $
+ * Revision 1.19  2016-03-01 16:23:38+05:30  Cprogrammer
+ * added -S option to allow email with unsigned subject
+ *
  * Revision 1.18  2016-02-01 10:53:32+05:30  Cprogrammer
  * use basename of private key as the selector in absense of -y option
  *
@@ -530,6 +533,7 @@ main(int argc, char **argv)
 	int             bSign = 1, nSigCount = 0, useSSP = 0, useADSP = 0, accept3ps = 0;
 	int             sCount = 0, sSize = 0, resDKIMSSP = -1, resDKIMADSP = -1;
 	int             nAllowUnsignedFromHeaders = 0;
+	int             nAllowUnsignedSubject = 1;
 	char            Buffer[4096], szPolicy[512];
 	time_t          t;
 	struct stat     statbuf;
@@ -559,7 +563,7 @@ main(int argc, char **argv)
 	opts.pfnHeaderCallback = SignThisHeader;
 	while (1)
 	{
-		if ((ch = getopt(argc, argv, "lqtfhHvVp:b:c:d:i:s:x:y:z:")) == -1)
+		if ((ch = getopt(argc, argv, "lqtfhHSvVp:b:c:d:i:s:x:y:z:")) == -1)
 			break;
 		switch (ch)
 		{
@@ -568,6 +572,9 @@ main(int argc, char **argv)
 			break;
 		case 'q': /*- query method tag */
 			opts.nIncludeQueryMethod = 1;
+			break;
+		case 'S':
+			nAllowUnsignedSubject = 0;
 			break;
 		case 'f':
 			nAllowUnsignedFromHeaders = 1;
@@ -777,6 +784,7 @@ main(int argc, char **argv)
 		vopts.nAccept3ps = accept3ps;
 		vopts.pfnSelectorCallback = NULL;	/*- SelectorCallback; */
 		vopts.nAllowUnsignedFromHeaders = nAllowUnsignedFromHeaders;
+		vopts.nSubjectRequired = nAllowUnsignedSubject;
 		DKIMVerifyInit(&ctxt, &vopts);		/*- this is always successful */
 		for (;;)
 		{
@@ -885,7 +893,7 @@ main(int argc, char **argv)
 void
 getversion_dkim_c()
 {
-	static char    *x = (char *) "$Id: dkim.c,v 1.18 2016-02-01 10:53:32+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = (char *) "$Id: dkim.c,v 1.19 2016-03-01 16:23:38+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
