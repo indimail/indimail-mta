@@ -1,5 +1,8 @@
 /*
  * $Log: dkimverify.cpp,v $
+ * Revision 1.11  2016-03-01 16:24:00+05:30  Cprogrammer
+ * reverse value of m_SubjectIsRequired
+ *
  * Revision 1.10  2015-12-15 16:05:00+05:30  Cprogrammer
  * fixed issue with time comparision. Use time_t for time variables
  *
@@ -402,7 +405,7 @@ CDKIMVerify::Init(DKIMVerifyOptions *pOptions)
 
 	m_HonorBodyLengthTag = pOptions->nHonorBodyLengthTag != 0;
 	m_CheckPractices = pOptions->nCheckPractices != 0;
-	m_SubjectIsRequired = pOptions->nSubjectRequired == 0;
+	m_SubjectIsRequired = pOptions->nSubjectRequired != 0;
 	m_Accept3ps = pOptions->nAccept3ps != 0;		//TBS(Luc)
 	m_SaveCanonicalizedData = pOptions->nSaveCanonicalizedData != 0;
 	m_AllowUnsignedFromHeaders = pOptions->nAllowUnsignedFromHeaders != 0;
@@ -1191,7 +1194,7 @@ CDKIMVerify::GetDomain(void)
 void
 getversion_dkimverify_cpp()
 {
-	static char    *x = (char *) "$Id: dkimverify.cpp,v 1.10 2015-12-15 16:05:00+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = (char *) "$Id: dkimverify.cpp,v 1.11 2016-03-01 16:24:00+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
