@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-dkim.c,v $
+ * Revision 1.45  2016-03-01 18:48:02+05:30  Cprogrammer
+ * added env variable UNSIGNED_SUBJECT to verify dkim without subject field
+ *
  * Revision 1.44  2015-12-15 16:05:58+05:30  Cprogrammer
  * increased buffer size for long header issue
  *
@@ -1186,6 +1189,7 @@ main(int argc, char *argv[])
 		vopts.pfnSelectorCallback = NULL;	/*- SelectorCallback; */
 		if (env_get("UNSIGNED_FROM"))
 			vopts.nAllowUnsignedFromHeaders = 1;
+		vopts.nSubjectRequired = env_get("UNSIGNED_SUBJECT") ? 0 : 1;
 		DKIMVerifyInit(&ctxt, &vopts);		/*- this is always successful */
 	}
 	/*- Initialization */
@@ -1397,7 +1401,7 @@ main(argc, argv)
 void
 getversion_qmail_dkim_c()
 {
-	static char    *x = "$Id: qmail-dkim.c,v 1.44 2015-12-15 16:05:58+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-dkim.c,v 1.45 2016-03-01 18:48:02+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
