@@ -1058,3 +1058,5 @@ yearcal
 yearcal.o
 trysrs
 trysrs.o
+qmail-smtpd.so
+str_end.o
