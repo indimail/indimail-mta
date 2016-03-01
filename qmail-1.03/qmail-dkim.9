@@ -157,7 +157,8 @@ header, so that messages can be
 rejected later at delivery time, or in the mail reader. In that case you may set
 .B DKIMVERIFY
 to an empty string. If you want to check all message's From header in signature set the
-\fBUNSIGNED_FROM\fR environment variable to an empty string.
+\fBUNSIGNED_FROM\fR environment variable to an empty string. If you want to check messages
+without signed subject header, set \fBUNSIGNED_SUBJECT\fR environment variable.
 
 qmail-dkim supports signing practice which can be additonall checked when a signature
 verifcation fails -
