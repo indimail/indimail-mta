@@ -1,5 +1,8 @@
 #
 # $Log: indimail.te,v $
+# Revision 2.8  2016-03-10 12:24:12+05:30  Cprogrammer
+# added new definitions for var_lib, mandb
+#
 # Revision 2.7  2016-03-01 23:15:17+05:30  Cprogrammer
 # added new perms for mysqld and mandb
 #
@@ -22,7 +25,7 @@
 # selinux module config
 #
 #
-# $Id: indimail.te,v 2.7 2016-03-01 23:15:17+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.te,v 2.8 2016-03-10 12:24:12+05:30 Cprogrammer Exp mbhangui $
 # 
 module indimail 1.0;
 
@@ -42,6 +45,8 @@ require {
 	type antivirus_t;
 	type crond_tmp_t;
 	type mandb_t;
+	type mandb_home_t;
+	class dir { search getattr };
 	class unix_stream_socket connectto;
 	class capability fowner;
 	class tcp_socket name_connect;
@@ -63,11 +68,11 @@ allow httpd_t var_t:file { execute setattr read create execute_no_trans write ge
 allow httpd_t var_t:lnk_file read;
 
 #============= mysqld_t ==============
-allow mysqld_t var_t:file {getattr read write};
-allow mysqld_t var_t:dir create;
+allow mysqld_t var_t:file { getattr read write };
+allow mysqld_t var_t:dir { create write };
 allow mysqld_t user_tmp_t:file open;
-allow mysqld_t tmp_t:sock_file {create write unlink};
-allow mysqld_t var_lib_t:file { write read };
+allow mysqld_t tmp_t:sock_file {create write unlink };
+allow mysqld_t var_lib_t:file { open write read };
 
 #============= nscd_t ==============
 allow nscd_t initrc_t:unix_stream_socket connectto;
@@ -87,3 +92,4 @@ allow antivirus_t var_run_t:sock_file { create write unlink setattr };
 
 #============= mandb_t ==============
 allow mandb_t var_t:file { open read getattr ioctl };
+allow mandb_t mandb_home_t:dir { search getattr };
