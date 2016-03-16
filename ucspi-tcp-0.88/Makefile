@@ -619,6 +619,10 @@ str_start.o: \
 compile str_start.c str.h
 	./compile str_start.c
 
+str_end.o: \
+compile str_end.c str.h
+	./compile str_end.c
+
 stralloc_cat.o: \
 compile stralloc_cat.c byte.h stralloc.h gen_alloc.h
 	./compile stralloc_cat.c
