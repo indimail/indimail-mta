@@ -208,3 +208,6 @@ ip6_bit.o
 ip6_compactaddr.o
 ip6_expandaddr.o
 socket_opts6.o
+str_end.o
+pathexec_rundl.o
+load_shared.o
