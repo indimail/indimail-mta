@@ -1,5 +1,8 @@
 /*
  * $Log: qsutil.h,v $
+ * Revision 1.11  2016-03-31 17:02:49+05:30  Cprogrammer
+ * added log3_noflush(), lockerr(), flush() functions
+ *
  * Revision 1.10  2016-01-29 18:30:38+05:30  Cprogrammer
  * removed log11() and added log13()
  *
@@ -32,6 +35,7 @@ void            log1(char *);
 void            log1_noflush(char *);
 void            my_log2(char *, char *);
 void            log2_noflush(char *, char *);
+void            log3_noflush(char *, char *, char *);
 void            log3(char *, char *, char *);
 void            log4(char *, char *, char *, char *);
 void            log5(char *, char *, char *, char *, char *);
@@ -41,8 +45,10 @@ void            log13(char *, char *, char *, char *, char *, char *, char *, ch
 void            logsa(stralloc *);
 void            logsa_noflush(stralloc *);
 void            nomem(void);
+void            lockerr(void);
 void            pausedir(char *);
 void            logsafe(char *);
 void            logsafe_noflush(char *);
+void            flush();
 
 #endif
