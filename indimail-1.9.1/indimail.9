@@ -618,6 +618,8 @@ SMTPCODE           |qmail-remote |set     |Contains the 3 digit code returned by
 QMTPCODE           |             |        |remote SMTP/QMTP server during an
                    |             |        |SMTP/QMTP transaction.
 -------------------|-------------|--------|----------------------------------------
+OUTGOINGIP         |qmail-remote |used    |set the IP for outoing connections
+-------------------|-------------|--------|----------------------------------------
 DEFAULT            |qmail-command|set     |Portion of address matching "-default"
                    |             |        |in a .qmail file name.
 DTLINE             |             |        |Delivered-To header field
@@ -1217,6 +1219,37 @@ PASSWORD_EXPIRY    |(if using    |        |Max days within which the password ha
                    |iauth.so)    |        |to be changed. After this, authentication
                    |             |        |will return failure
 -------------------|-------------|--------|----------------------------------------
+MESSID             |qmail-lspawn |set     |Path of message file in queue
+                   |qmail-rspawn |        |
+-------------------|-------------|--------|----------------------------------------
+DELAYED_INSERT     |authvchkpw   |used    |used delayed insert during inserts, 
+                   |vdelivermail |        |deletes, updates, replace
+                   |vadduser     |        |
+                   |vdeluser     |        |
+                   |vmoduser     |        |
+                   |vmoveuser    |        |
+                   |vpasswd      |        |
+                   |vrenamedomain|        |
+                   |vrenameuser  |        |
+                   |authindi     |        |
+                   |proxyimap    |        |
+                   |proxypop3    |        |
+                   |inlookkup    |        |
+                   |indisrvr     |        |
+                   |vchkpass     |        |
+                   |clearopensmtp|        |
+-------------------|-------------|--------|----------------------------------------
+DISCARD_BOUNCE     |vdelivermail |used    |Discard bounces if set
+-------------------|-------------|--------|----------------------------------------
+AUTHINFO           |qmail-smtpd  |set     |set to the authenticated username
+-------------------|-------------|--------|----------------------------------------
+MYSQL_OPT_RECONNECT       |any indimail   |Reconnect automatically after failure
+MYSQL_OPT_READ_TIMEOUT    |program that   |Read timeout from MySQL
+MYSQL_OPT_WRITE_TIMEOUT   |connects to    |Write timeout writing to MySQL
+MYSQL_OPT_CONNECT_TIMEOUT |MySQL          |Connect timeout for MySQL
+MYSQL_OPT_PROTOCOL        |               |Set unix domain or tcp/ip sockets
+MYSQL_SET_CLIENT_IP       |               |Set the client ip when connecting 
+--------------------------|---------------|----------------------------------------
 .TE
 
 Some of these environment variables have default values. The table below lists some of these.
