@@ -1060,3 +1060,5 @@ trysrs
 trysrs.o
 qmail-smtpd.so
 str_end.o
+lock_sh.o
+sig_int.o
