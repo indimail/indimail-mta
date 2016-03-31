@@ -1,5 +1,8 @@
 /*
  * $Log: sig.h,v $
+ * Revision 1.6  2016-03-31 17:03:30+05:30  Cprogrammer
+ * added functions to handle SIGINT
+ *
  * Revision 1.5  2009-06-04 12:09:02+05:30  Cprogrammer
  * added function prototypes
  *
@@ -44,6 +47,11 @@ void            sig_alarmblock(void);
 void            sig_alarmunblock(void);
 void            sig_alarmcatch(void (*)());
 void            sig_alarmdefault(void);
+
+void            sig_intblock(void);
+void            sig_intunblock(void);
+void            sig_intcatch(void (*)());
+void            sig_intdefault(void);
 
 void            sig_childblock(void);
 void            sig_childunblock(void);
