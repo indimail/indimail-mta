@@ -103,6 +103,7 @@ qmailconfig
 config.0
 config-fast
 conf-qmail
+conf-locklogs
 datemail
 ddist
 deferrals
