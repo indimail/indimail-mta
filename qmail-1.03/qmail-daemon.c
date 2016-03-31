@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-daemon.c,v $
+ * Revision 1.18  2016-03-31 17:02:13+05:30  Cprogrammer
+ * added handler for SIGINT
+ *
  * Revision 1.17  2009-11-09 20:33:24+05:30  Cprogrammer
  * Use control file queue_base to process multiple indimail queues
  *
@@ -145,6 +148,24 @@ sighup()
 		if (pid_table[i].pid == -1)
 			continue;
 		kill(pid_table[i].pid, SIGHUP);
+	}
+}
+
+void
+sigint()
+{
+	int             i, qcount;
+	char           *queue_count_ptr;
+
+	if (!(queue_count_ptr = env_get("QUEUE_COUNT")))
+		qcount = QUEUE_COUNT;
+	else
+		scan_int(queue_count_ptr, &qcount);
+	for (i = 0;i <= qcount;i++)
+	{
+		if (pid_table[i].pid == -1)
+			continue;
+		kill(pid_table[i].pid, SIGINT);
 	}
 }
 
@@ -466,6 +487,7 @@ main(int argc, char **argv)
 	sig_catch(SIGTERM, sigterm);
 	sig_catch(SIGALRM, sigalrm);
 	sig_catch(SIGHUP, sighup);
+	sig_catch(SIGINT, sigint);
 	sig_catch(SIGCHLD, SIG_DFL);
 
 	if (chdir(auto_qmail) == -1)
@@ -504,7 +526,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_daemon_c()
 {
-	static char    *x = "$Id: qmail-daemon.c,v 1.17 2009-11-09 20:33:24+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: qmail-daemon.c,v 1.18 2016-03-31 17:02:13+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
