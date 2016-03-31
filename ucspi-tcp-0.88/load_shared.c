@@ -1,5 +1,8 @@
 /*
  * $Log: load_shared.c,v $
+ * Revision 1.3  2016-03-31 17:47:59+05:30  Cprogrammer
+ * compile load_shared only if LOAD_SHARED_OBJECTS is defined
+ *
  * Revision 1.2  2016-03-01 18:50:38+05:30  Cprogrammer
  * changed RTLD_GLOBAL to RTLD_LOCAL
  *
@@ -8,15 +11,13 @@
  *
  */
 #include <unistd.h>
+#ifdef LOAD_SHARED_OBJECTS
 #include "strerr.h"
 #include "str.h"
-#ifdef LOAD_SHARED_OBJECTS
 #include <dlfcn.h>
-#endif
 
 #define FATAL "tcpserver: fatal: "
 
-#ifdef LOAD_SHARED_OBJECTS
 void
 load_shared(char *file, char **argv, char **envp)
 {
