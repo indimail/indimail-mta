@@ -1264,33 +1264,33 @@ run-cleanq.9
 	> run-cleanq.8
 
 it: \
-qaes qmail-local qmail-lspawn qmail-getpw qmail-remote qmail-rspawn \
-qmail-clean qmail-send qmail-start qmail-daemon splogger qmail-multi qmail-queue qmail-inject \
-qmail-dk qmail-dkim predate datemail mailsubj qmail-upq qmail-showctl qmail-newu spawn-filter \
-qmail-pw2u qmail-qread qmail-tcpto qmail-tcpok qmail-cat qmail-poppass srsfilter \
-qmail-pop3d qmail-popbull qmail-popup qmail-qmqpc qmail-qmqpd qmail-qmtpd nowutc yearcal \
-qmail-smtpd sendmail rmail tcp-env qmail-newmrh recipient-cdb qmail-cdb qmailconfig \
-config-fast dnscname dnsptr dnsip dnsmxip dnsfq dnstxt hostname ipmeprint qreceipt \
-qsmhook forward rrforward preline condredirect bouncesaying except qmail-todo \
-queue-fix idedit setup instcheck rpmattr maildir2mbox qmaildirmake maildirwatch base64 \
-maildirdeliver autoresponder qmail-rm qail elq pinq etrn qmail-sql systemd \
-atrn qmailctl indimail.plist svscanboot upstart qmail-sighup qmail-sigalrm qmail-sigterm \
-swaks home home+df proc proc+df binm1 binm1+df binm2 binm2+df cidr leapsecs \
-binm3 binm3+df spfquery multirotate qpq 822header qmail-nullqueue \
-maildirserial serialsmtp serialqmtp maildirsmtp maildirqmtp whois \
-serialcmd maildircmd rewind relaytest qmail-qfilter sys-checkpwd ldap-checkpwd \
-iftocc ofmipd ofmipname 822field new-inject 822date 822received 822print \
-tokenize addrlist qquote parsedate qmail-greyd greydaemon drate \
-analyzer qtools qlog viruscanner update_tmprsadh dknewkey qlogselect \
-dktest dot-forward batv balance_outgoing qarf plugtest surblfilter \
-fastforward printforward setforward newaliases printmaillist surblqueue \
-setmaillist newinclude sortedtest logselect mbox2maildir qnotify rrt \
-envdir envuidgid fghack multilog pgrphack readproctitle setlock \
-setuidgid softlimit supervise svc svok svscan svstat tai64n tai64nlocal tai64nunix \
-tai2tai64n tai64n2tai \
-recordio argv0 addcr delcr fixcrio generic.so cdbmake cdbget cdbgetm \
-cdbdump cdbstats cdbtest cdbmake-12 cdbmake-sv testzero dk-filter \
-uacl udplogger udpclient smtpd-plugin.so smtpd-plugin0.so qmail-smtpd.so
+822date 822field 822header 822print 822received addcr addrlist \
+argv0 atrn autoresponder balance_outgoing base64 batv binm1 binm1+df \
+binm2 binm2+df binm3 binm3+df bouncesaying cdbdump cdbget cdbgetm \
+cdbmake cdbmake-12 cdbmake-sv cdbstats cdbtest cidr condredirect config-fast \
+datemail delcr dk-filter dknewkey dktest dnscname dnsfq dnsip \
+dnsmxip dnsptr dnstxt dot-forward drate elq envdir envuidgid \
+etrn except fastforward fghack fixcrio forward generic.so greydaemon \
+home home+df hostname idedit iftocc indimail.plist instcheck ipmeprint \
+ldap-checkpwd leapsecs logselect maildir2mbox maildircmd maildirdeliver maildirqmtp maildirserial \
+maildirsmtp maildirwatch mailsubj mbox2maildir multilog multirotate newaliases newinclude \
+new-inject nowutc ofmipd ofmipname parsedate pgrphack pinq plugtest \
+predate preline printforward printmaillist proc proc+df qaes qail \
+qarf qmail-cat qmail-cdb qmail-clean qmailconfig qmailctl \
+qmail-daemon qmaildirmake qmail-dk qmail-dkim qmail-getpw qmail-greyd qmail-inject qmail-local \
+qmail-lspawn qmail-multi qmail-newmrh qmail-newu qmail-nullqueue qmail-pop3d qmail-popbull qmail-poppass \
+qmail-popup qmail-pw2u qmail-qfilter qmail-qmqpc qmail-qmqpd qmail-qmtpd qmail-qread qmail-queue \
+qmail-remote qmail-rm qmail-rspawn qmail-send qmail-showctl qmail-sigalrm qmail-sighup qmail-sigterm \
+qmail-smtpd qmail-smtpd.so qmail-sql qmail-start qmail-tcpok qmail-tcpto qmail-todo qmail-upq \
+qnotify qpq qquote qreceipt qsmhook queue-fix readproctitle \
+recipient-cdb recordio relaytest rewind rmail rpmattr rrforward rrt \
+sendmail serialcmd serialqmtp serialsmtp setforward setlock setmaillist setuidgid \
+setup smtpd-plugin0.so smtpd-plugin.so softlimit sortedtest spawn-filter spfquery splogger \
+srsfilter supervise surblfilter surblqueue svc svok svscan svscanboot \
+svstat swaks sys-checkpwd systemd tai2tai64n tai64n tai64n2tai tai64nlocal \
+tai64nunix tcp-env testzero tokenize uacl udpclient udplogger update_tmprsadh \
+upstart viruscanner whois yearcal \
+analyzer qtools qlog
 
 analyzer: \
 mlmatchup matchup columnt zoverall zsendmail xqp xsender xrecipient ddist \
@@ -1305,7 +1305,7 @@ qtools: \
 822fields checkaddr checkdomain filterto \
 condtomaildir iftoccfrom ifaddr replier replier-config
 
-qlog: spipe qfilelog multipipe teepipe multitail
+qlog: spipe qfilelog multipipe teepipe multitail qlogselect
 
 load: \
 make-load warn-auto.sh systype
@@ -1313,8 +1313,8 @@ make-load warn-auto.sh systype
 	chmod 755 load
 
 lock.a: \
-makelib lock_ex.o lock_exnb.o lock_un.o
-	./makelib lock.a lock_ex.o lock_exnb.o lock_un.o
+makelib lock_ex.o lock_exnb.o lock_sh.o lock_un.o
+	./makelib lock.a lock_ex.o lock_exnb.o lock_sh.o lock_un.o
 
 lock_ex.o: \
 compile lock_ex.c hasflock.h lock.h
@@ -1323,6 +1323,10 @@ compile lock_ex.c hasflock.h lock.h
 lock_exnb.o: \
 compile lock_exnb.c hasflock.h lock.h
 	./compile lock_exnb.c
+
+lock_sh.o: \
+compile lock_sh.c hasflock.h lock.h
+	./compile lock_sh.c
 
 lock_un.o: \
 compile lock_un.c hasflock.h lock.h
@@ -2375,9 +2379,9 @@ substdio.h alloc.h error.h stralloc.h gen_alloc.h str.h byte.h fmt.h \
 scan.h case.h auto_qmail.h trigger.h newfield.h stralloc.h quote.h \
 qmail.h qsutil.h prioq.h datetime.h gen_alloc.h constmap.h envrules.h \
 fmtqfn.h readsubdir.h direntry.h variables.h env.h qmail-todo.h \
-hasindimail.h conf-mime conf-sync conf-batv conf-srs
+hasindimail.h conf-mime conf-sync conf-batv conf-srs conf-locklogs
 	./compile $(inc_deps) `grep -h -v "^#" conf-mime \
-		conf-sync conf-batv` qmail-send.c
+		conf-sync conf-batv conf-locklogs` qmail-send.c
 
 qmail-daemon: \
 load qmail-daemon.o scan_ulong.o envread.o env.o \
@@ -2784,8 +2788,8 @@ subfd.h error.h substdio.h sig.h
 
 qsutil.o: \
 compile qsutil.c stralloc.h gen_alloc.h substdio.h \
-qsutil.h
-	./compile qsutil.c
+qsutil.h conf-locklogs
+	./compile `grep -h -v "^#" conf-locklogs` qsutil.c
 
 quote.o: \
 compile quote.c stralloc.h gen_alloc.h str.h quote.h
@@ -2989,10 +2993,10 @@ tryltai.c trytai.c tryip6.c update_tmprsadh plugin_init.3 plugtest.1
 
 sig.a: \
 makelib sig_alarm.o sig_block.o sig_catch.o sig_pause.o sig_pipe.o \
-sig_child.o sig_hup.o sig_term.o sig_bug.o sig_misc.o
+sig_child.o sig_hup.o sig_term.o sig_int.o sig_bug.o sig_misc.o
 	./makelib sig.a sig_alarm.o sig_block.o sig_catch.o \
 	sig_pause.o sig_pipe.o sig_child.o sig_hup.o sig_term.o \
-	sig_bug.o sig_misc.o
+	sig_int.o sig_bug.o sig_misc.o
 
 sig_alarm.o: \
 compile sig_alarm.c sig.h
