@@ -87,6 +87,15 @@ it will reread
 and
 .IR holdremote .
 
+During startup, \fBqmail-send\fR uses the environment variable \fBLOCK_LOGS\fR and locks the file
+CONTROLDIR/defaultdelivery before writing a line to the log file (or stdout). If multiple qmail-send
+processes are running, all writing to one multilog, lines may get jumbled up in extreme situations.
+This can be avoided by setting LOCK_LOGS environment variable.
+If
+.B qmail-send
+receives a INT signal, it will toggle log lock synchronization. If log locking is set, it will get
+turned off and vice versa.
+
 .B qmail-send
 by default looks at QMAILHOME/control for all control files. This path can be changed by
 defining the CONTROLDIR environment variable.
