@@ -11,7 +11,7 @@
 void
 sig_intblock()
 {
-	sig_block(SIGAINT);
+	sig_block(SIGINT);
 }
 
 void
