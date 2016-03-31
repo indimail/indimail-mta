@@ -15,7 +15,7 @@ sig_intblock()
 }
 
 void
-sig_intblock()
+sig_intunblock()
 {
 	sig_unblock(SIGINT);
 }
