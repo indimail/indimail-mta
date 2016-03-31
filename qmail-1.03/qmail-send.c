@@ -1,5 +1,9 @@
 /*
  * $Log: qmail-send.c,v $
+ * Revision 1.59  2016-03-31 17:38:54+05:30  Cprogrammer
+ * added log lock code to ensure complete lines get written when running as a multi delivery process
+ * flush logs only when line gets completed
+ *
  * Revision 1.58  2016-01-29 18:31:00+05:30  Cprogrammer
  * include queue name in logs
  *
@@ -217,6 +221,10 @@ stralloc        bouncefrom = { 0 };
 stralloc        bouncehost = { 0 };
 stralloc        doublebounceto = { 0 };
 stralloc        doublebouncehost = { 0 };
+#ifdef LOCK_LOGS
+stralloc        lockfn = { 0 };
+int             loglock_fd = -1;
+#endif
 
 char            strnum2[FMT_ULONG];
 char            strnum3[FMT_ULONG];
@@ -244,6 +252,39 @@ void            reread(int);
 void            reread();
 #endif
 
+#ifdef LOCK_LOGS
+void
+lock_logs_open(int preopen)
+{
+	char           *ptr;
+	int             lock_status;
+
+	if (!(ptr = env_get("LOCK_LOGS")))
+		lock_status = 0;
+	else
+		scan_int(ptr, &lock_status);
+	if (!lock_status && preopen)
+		lock_status = preopen;
+	if (lock_status > 0) {
+		if (!(controldir = env_get("CONTROLDIR")))
+			controldir = "control";
+		if (!stralloc_copys(&lockfn, controldir))
+			nomem();
+		if (!stralloc_append(&lockfn, "/"))
+			nomem();
+		if (!stralloc_catb(&lockfn, "/defaultdelivery", 16))
+			nomem();
+		if (!stralloc_0(&lockfn))
+			nomem();
+		if ((loglock_fd = open_read(lockfn.s)) == -1) {
+			log3("alert: ", queuedesc, ": cannot start: unable to open defaultdelivery\n");
+			lockerr();
+		}
+	}
+	log3("loglock: ", queuedesc, loglock_fd == -1 ? ": disabled\n" : ": enabled\n");
+}
+#endif
+
 int             flagexitasap = 0;
 void
 sigterm()
@@ -264,6 +305,45 @@ sighup()
 {
 	flagreadasap = 1;
 }
+
+void
+chdir_toqueue()
+{
+	if (!queuedir)
+	{
+		if (!(queuedir = env_get("QUEUEDIR")))
+#ifdef INDIMAIL
+			queuedir = "queue1";
+#else
+			queuedir = "queue";
+#endif
+	}
+	while (chdir(queuedir) == -1)
+	{
+		log5("alert: ", queuedesc, ": unable to switch back to queue directory; HELP! sleeping...", error_str(errno), "\n");
+		sleep(10);
+	}
+}
+
+#ifdef LOCK_LOGS
+void
+sigint()
+{
+	if (loglock_fd == -1) {
+		if (chdir(auto_qmail) == -1)
+		{
+			log5("alert: ", queuedesc, ": unable to reread controls: unable to switch to home directory", error_str(errno), "\n");
+			return;
+		}
+		lock_logs_open(1);
+		chdir_toqueue();
+	} else {
+		close(loglock_fd);
+		loglock_fd = -1;
+		log3("loglock: ", queuedesc, loglock_fd == -1 ? ": disabled\n" : ": enabled\n");
+	}
+}
+#endif
 
 void
 cleandied()
@@ -1096,25 +1176,6 @@ bounce_processor(struct qmail *qq, char *messfn, char *bouncefn, char *bounce_re
 	return (i);
 }
 
-void
-chdir_toqueue()
-{
-	if (!queuedir)
-	{
-		if (!(queuedir = env_get("QUEUEDIR")))
-#ifdef INDIMAIL
-			queuedir = "queue1";
-#else
-			queuedir = "queue";
-#endif
-	}
-	while (chdir(queuedir) == -1)
-	{
-		log5("alert: ", queuedesc, ": unable to switch back to queue directory; HELP! sleeping...", error_str(errno), "\n");
-		sleep(10);
-	}
-}
-
 int
 injectbounce(id)
 	unsigned long   id;
@@ -1451,7 +1512,7 @@ I tried to deliver a bounce message to this address, but the bounce bounced!\n\
 			return 0;
 		}
 		strnum2[fmt_ulong(strnum2, id)] = 0;
-		my_log2("bounce msg ", strnum2);
+		log2_noflush("bounce msg ", strnum2);
 		strnum2[fmt_ulong(strnum2, qp)] = 0;
 		log5(" qp ", strnum2, " ", queuedesc, "\n");
 	}
@@ -1495,15 +1556,16 @@ del_status()
 	{
 		strnum2[fmt_ulong(strnum2, (unsigned long) concurrencyused[c])] = 0;
 		strnum3[fmt_ulong(strnum3, (unsigned long) concurrency[c])] = 0;
-		my_log2(chanstatusmsg[c], strnum2);
-		my_log2("/", strnum3);
+		log2_noflush(chanstatusmsg[c], strnum2);
+		log2_noflush("/", strnum3);
 		if (holdjobs[c])	/*NJL*/
 			log1_noflush(" (held)");	/*NJL*/
 	}
 	log2_noflush(" ", queuedesc);
 	if (flagexitasap)
 		log1_noflush(" exitasap");
-	log1("\n");
+	log1_noflush("\n");
+	flush();
 }
 
 void
@@ -1590,9 +1652,9 @@ del_start(j, mpos, recip)
 	comm_write(c, i, jo[j].id, jo[j].sender.s, jo[j].qqeh.s, jo[j].envh.s, recip);
 	strnum2[fmt_ulong(strnum2, d[c][i].delid)] = 0;
 	strnum3[fmt_ulong(strnum3, jo[j].id)] = 0;
-	my_log2("starting delivery ", strnum2);
-	log3(": msg ", strnum3, tochan[c]);
-	logsafe(recip);
+	log2_noflush("starting delivery ", strnum2);
+	log3_noflush(": msg ", strnum3, tochan[c]);
+	logsafe_noflush(recip);
 	log3(" ", queuedesc, "\n");
 	del_status();
 }
@@ -1684,20 +1746,20 @@ del_dochan(c)
 				switch (dline[c].s[2])
 				{
 				case 'K':
-					log3("delivery ", strnum3, ": success: ");
-					logsafe(dline[c].s + 3);
+					log3_noflush("delivery ", strnum3, ": success: ");
+					logsafe_noflush(dline[c].s + 3);
 					log3(" ", queuedesc, "\n");
 					markdone(c, jo[d[c][delnum].j].id, d[c][delnum].mpos);
 					--jo[d[c][delnum].j].numtodo;
 					break;
 				case 'Z':
-					log3("delivery ", strnum3, ": deferral: ");
-					logsafe(dline[c].s + 3);
+					log3_noflush("delivery ", strnum3, ": deferral: ");
+					logsafe_noflush(dline[c].s + 3);
 					log3(" ", queuedesc, "\n");
 					break;
 				case 'D':
-					log3("delivery ", strnum3, ": failure: ");
-					logsafe(dline[c].s + 3);
+					log3_noflush("delivery ", strnum3, ": failure: ");
+					logsafe_noflush(dline[c].s + 3);
 					log3(" ", queuedesc, "\n");
 					addbounce(jo[d[c][delnum].j].id, d[c][delnum].recip.s, dline[c].s + 3);
 					markdone(c, jo[d[c][delnum].j].id, d[c][delnum].mpos);
@@ -2223,7 +2285,8 @@ todo_do(rfds)
 			log2_noflush("> qp ", strnum2);
 			strnum2[fmt_ulong(strnum2, uid)] = 0;
 			log2_noflush(" uid ", strnum2);
-			log3(" ", queuedesc, "\n");
+			log3_noflush(" ", queuedesc, "\n");
+			flush();
 			if (!stralloc_copy(&mailfrom, &todoline) || !stralloc_0(&mailfrom))
 			{
 				nomem();
@@ -2682,7 +2745,7 @@ regetcontrols()
 	int             c; /*NJL*/
 	int             newholdjobs[CHANNELS] = { 0, 0 }; /*NJL*/
 
-	if (!(controldir = env_get("CONTROLDIR")))
+	if (!controldir && !(controldir = env_get("CONTROLDIR")))
 		controldir = "control";
 	if (control_readfile(&newlocals, "locals", 1) != 1)
 	{
@@ -2808,6 +2871,9 @@ main()
 		log5("alert: ", queuedesc, ": cannot start: unable to switch to home directory", error_str(errno), "\n");
 		_exit(111);
 	}
+#ifdef LOCK_LOGS
+	lock_logs_open(0);
+#endif
 #ifndef EXTERNAL_TODO
 	if (!(ptr = env_get("TODO_INTERVAL")))
 		todo_interval = -1;
@@ -2919,6 +2985,9 @@ main()
 	sig_alarmcatch(sigalrm);
 	sig_hangupcatch(sighup);
 	sig_childdefault();
+#ifdef LOCK_LOGS
+	sig_intcatch(sigint);
+#endif
 	umask(077);
 	if ((fd = open_write("lock/sendmutex")) == -1)
 	{
@@ -3028,7 +3097,7 @@ main()
 void
 getversion_qmail_send_c()
 {
-	static char    *x = "$Id: qmail-send.c,v 1.58 2016-01-29 18:31:00+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-send.c,v 1.59 2016-03-31 17:38:54+05:30 Cprogrammer Exp mbhangui $";
 
 #ifdef INDIMAIL
 	if (x)
