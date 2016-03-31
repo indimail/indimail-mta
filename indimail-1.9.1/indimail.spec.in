@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail.spec.in,v 2.308 2016-03-01 19:09:45+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 2.309 2016-03-31 17:35:31+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %define _unpackaged_files_terminate_build 1
 
@@ -2393,7 +2393,11 @@ if [ %nodksignatures -eq 0 ] ; then
 	if [ -x %{_prefix}/bin/dknewkey ] ; then
 		ver_opt="both"
 		sign_opt="both"
-		%{_prefix}/bin/dknewkey %{_prefix}/control/domainkeys/default 1024
+		key_bit=$KEYBIT
+		if [ " $key_bit" = " " ] ; then
+			key_bit=1024
+		fi
+		%{_prefix}/bin/dknewkey %{_prefix}/control/domainkeys/default $key_bit
 	else
 		ver_opt="none"
 		sign_opt="none"
@@ -2750,9 +2754,11 @@ if [ -f %{_prefix}/boot/rpm.init ] ; then
 fi
 
 if [ -f %{_sysconfdir}/init/svscan.conf -o -f %{_sysconfdir}/event.d/svscan ] ; then
+	/bin/systemctl enable indimail.service
 	echo "1. Issue /sbin/initctl emit qmailstart to start services"
 	count=1
 elif [ -f %{_sysconfdir}/systemd/system/multi-user.target.wants/indimail.service ] ; then
+	/bin/systemctl enable indimail.service
 	echo "1. Issue /bin/systemctl start indimail.service to start services"
 	count=1
 else
