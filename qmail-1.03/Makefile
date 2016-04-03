@@ -2614,7 +2614,7 @@ matchregex.o str.h fmt.h scan.h byte.h case.h env.h now.h datetime.h \
 variables.h exit.h rcpthosts.h timeoutread.h timeoutwrite.h commands.h \
 wait.h etrn.h date822fmt.h fd.h base64.h envrules.h tablematch.h cdb.h \
 uint32.h matchregex.h qregex.h sqlmatch.h hasindimail.h smtp_plugin.h \
-conf-tls conf-spf conf-ip conf-plugin conf-batv
+dns.h conf-tls conf-spf conf-ip conf-plugin conf-batv
 	./compile $(inc_deps) `grep -h -v "^#" conf-tls conf-spf \
 	conf-ip conf-batv conf-plugin` smtpd.c
 
