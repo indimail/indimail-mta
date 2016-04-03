@@ -1,5 +1,8 @@
 #
 # $Log: indimail.te,v $
+# Revision 2.10  2016-04-03 07:46:24+05:30  Cprogrammer
+# added create permission for mysqld_t in var_t
+#
 # Revision 2.9  2016-03-31 17:35:56+05:30  Cprogrammer
 # added new selinux definitions
 #
@@ -28,7 +31,7 @@
 # selinux module config
 #
 #
-# $Id: indimail.te,v 2.9 2016-03-31 17:35:56+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.te,v 2.10 2016-04-03 07:46:24+05:30 Cprogrammer Exp mbhangui $
 # 
 module indimail 1.0;
 
@@ -70,7 +73,7 @@ allow httpd_t var_t:file { execute setattr read create execute_no_trans write ge
 allow httpd_t var_t:lnk_file read;
 
 #============= mysqld_t ==============
-allow mysqld_t var_t:file { getattr read write };
+allow mysqld_t var_t:file { create getattr read write };
 allow mysqld_t var_t:dir { add_name create write };
 allow mysqld_t user_tmp_t:file open;
 allow mysqld_t tmp_t:sock_file {create write unlink };
