@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-greyd.c,v $
+ * Revision 1.13  2016-04-03 09:38:31+05:30  Cprogrammer
+ * port was being used non-initialized for non-ipv6 code
+ *
  * Revision 1.12  2015-12-31 08:35:41+05:30  Cprogrammer
  * added IPV6 code
  *
@@ -1231,6 +1234,7 @@ main(int argc, char **argv)
 			close(s);
 			s = 0;
 		}
+		port = atoi(a_port);
 		sin.sa4.sin_port = htons(port);
 		if ((inaddr = inet_addr(ipaddr)) != INADDR_NONE)
 			byte_copy((char *) &sin.sa4.sin_addr, 4, (char *) &inaddr);
@@ -1455,7 +1459,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_greyd_c()
 {
-	static char    *x = "$Id: qmail-greyd.c,v 1.12 2015-12-31 08:35:41+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-greyd.c,v 1.13 2016-04-03 09:38:31+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
