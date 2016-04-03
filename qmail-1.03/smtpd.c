@@ -1,5 +1,8 @@
 /*
  * $Log: smtpd.c,v $
+ * Revision 1.184  2016-04-03 09:35:13+05:30  Cprogrammer
+ * fixed useless compilation warning
+ *
  * Revision 1.183  2015-08-24 19:08:53+05:30  Cprogrammer
  * replaced ip_scanbracket() with ip4_scanbracket()
  *
@@ -712,7 +715,7 @@ int             secure_auth = 0;
 int             ssl_rfd = -1, ssl_wfd = -1;	/*- SSL_get_Xfd() are broken */
 char           *servercert, *clientca, *clientcrl;
 #endif
-char           *revision = "$Revision: 1.183 $";
+char           *revision = "$Revision: 1.184 $";
 char           *protocol = "SMTP";
 stralloc        proto = { 0 };
 static stralloc Revision = { 0 };
@@ -5282,7 +5285,7 @@ stralloc        authmethod = {0};
 int
 authenticate(int method)
 {
-	int             child, wstat, i, n;
+	int             child, wstat, i, n = 0;
 	int             pi[2];
 	char            respbuf[1024];
 
@@ -6840,7 +6843,7 @@ addrrelay() /*- Rejection of relay probes. */
 void
 getversion_smtpd_c()
 {
-	static char    *x = "$Id: smtpd.c,v 1.183 2015-08-24 19:08:53+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: smtpd.c,v 1.184 2016-04-03 09:35:13+05:30 Cprogrammer Exp mbhangui $";
 
 #ifdef INDIMAIL
 	if (x)
