@@ -1,5 +1,8 @@
 /*
  * $Log: hier.c,v $
+ * Revision 1.194  2016-04-05 01:17:16+05:30  Cprogrammer
+ * added control/ratelimit directory
+ *
  * Revision 1.193  2016-04-03 18:09:24+05:30  Cprogrammer
  * copy qmail-smtpd.so only if LOAD_SHARED_OBJECTS is defined
  *
@@ -509,6 +512,7 @@ hier(inst_dir)
 	d(auto_qmail_home, "control/inquery", auto_uidv, auto_gidv, 0775);
 #endif
 	d(auto_qmail_home, "control/domainkeys", auto_uidv, auto_gidv, 0755);
+	d(auto_qmail_home, "control/ratelimit", auto_uidr, auto_gidq, 2755);
 	d(auto_qmail_home, "plugins", auto_uido, auto_gidq, 0555);
 	d(auto_qmail_home, "qscanq", auto_uidc, auto_gidc, 0750);
 	d(auto_qmail_home, "qscanq/root", auto_uidc, auto_gidc, 0750);
@@ -1743,7 +1747,7 @@ _hier(inst_dir)
 void
 getversion_install_big_c()
 {
-	static char    *x = "$Id: hier.c,v 1.193 2016-04-03 18:09:24+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: hier.c,v 1.194 2016-04-05 01:17:16+05:30 Cprogrammer Exp mbhangui $";
 
 #ifdef INDIMAIL
 	if (x)
