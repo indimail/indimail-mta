@@ -146,7 +146,11 @@ echo "recreating ld.so cache"
 if [ -d ${sysconfdir}/ld.so.conf.d ] ; then
 	(
 		echo @mysql_libdir@
-		echo @libdir@
+		if [ -d @prefix@/lib64 ] ; then
+			echo @prefix@/lib64
+		else
+			echo @prefix@/lib
+		fi
 	) > ${sysconfdir}/ld.so.conf.d/indimail-`uname -m`.conf
 fi
 /sbin/ldconfig

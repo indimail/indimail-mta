@@ -40,7 +40,11 @@ fi
 echo "recreating ld.so cache"
 if [ -d ${sysconfdir}/ld.so.conf.d ] ; then
 	(
-		echo /var/indimail/@acl_libdirstem@
+		if [ -d @prefix@/lib64 ] ; then
+			echo @prefix@/lib64
+		else
+			echo @prefix@/lib
+		fi
 	) > ${sysconfdir}/ld.so.conf.d/indimail-devel-`uname -m`.conf
 fi
 /sbin/ldconfig
