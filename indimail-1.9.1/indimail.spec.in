@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail.spec.in,v 2.310 2016-04-04 13:01:52+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 2.311 2016-04-05 00:55:02+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %define _unpackaged_files_terminate_build 1
 
@@ -216,7 +216,7 @@ NoSource: 20
 URL: http://www.indimail.org
 #AutoReqProv: No
 Conflicts: %{name}-mini, %{name}-mta %{name}-mta-daemontools %{name}-mta-ucspi-tcp
-Provides: %{name}-shared
+Provides: libindimail
 BuildRequires: openssl-devel rpm gcc gcc-c++ make bison binutils coreutils grep
 BuildRequires: glibc glibc-devel openssl procps readline-devel
 BuildRequires: sed ncurses-devel gettext-devel
@@ -365,11 +365,11 @@ necessary to develop IndiMail client applications.
 
 %{see_base}
 
-%package shared
+%package -n libindimail
 Summary: IndiMail - Shared libraries
 Group: Development/Libraries/Other
 
-%description shared
+%description -n libindimail
 This package contains the shared libraries (*.so*) which certain
 languages and applications need to dynamically load and use IndiMail.
 
@@ -903,6 +903,7 @@ fi
 %dir %attr(775,indimail,indimail) %{_prefix}/control/inquery
 %dir %attr(755,indimail,indimail) %{_prefix}/control/domainkeys
 %dir %attr(2755,indimail,qmail)   %{_prefix}/autoturn
+%dir %attr(2755,qmailr,qmail)     %{_prefix}/ratelimit
 %dir %attr(555,root,root)         %{_prefix}/modules
 %dir %attr(555,root,qmail)        %{_prefix}/man
 %dir %attr(555,root,qmail)        %{_prefix}/man/man1
@@ -1560,7 +1561,7 @@ fi
 %attr(555,root,qmail)                   %{_prefix}/plugins/generic.so
 %attr(555,root,qmail)                   %{_prefix}/plugins/smtpd-plugin.so
 %attr(555,root,qmail)                   %{_prefix}/plugins/smtpd-plugin0.so
-%attr(555,root,qmail)                   %{_prefix}/plugins/qmail-smtpd.so
+#%attr(555,root,qmail)                   %{_prefix}/plugins/qmail-smtpd.so
 
 %attr(555,root,root)                    %{_prefix}/modules/background
 %attr(555,root,root)                    %{_prefix}/modules/alarms
@@ -1948,7 +1949,7 @@ fi
 
 @pkgconfigdir@/libindimail.pc
 
-%files shared
+%files -n libindimail
 %defattr(-, root, root, 0755)
 # Shared libraries (omit for architectures that don't support them)
 %if %noclamav == 0
@@ -3045,16 +3046,16 @@ fi
 echo ""
 
 ### SCRIPTLET ###############################################################################
-%pre shared
+%pre -n libindimail
 
 ### SCRIPTLET ###############################################################################
-%post shared
+%post -n libindimail
 %if %i_m_on_mac == 0
 /sbin/ldconfig
 %endif
 
 ### SCRIPTLET ###############################################################################
-%postun shared
+%postun -n libindimail
 argv1=$1
 # we are doing upgrade
 if [ $argv1 -eq 1 ] ; then
