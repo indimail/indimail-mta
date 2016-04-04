@@ -191,13 +191,13 @@ DISTRIB_VERSION=$(sh ./lsb_release -sr)
 fi
 AC_SUBST(DISTRIB_ID)
 AC_SUBST(DISTRIB_VERSION)
-libdir=$prefix/$acl_libdirstem
+#libdir=$prefix/$acl_libdirstem
 case "$host" in
 	*-*-darwin*)
 	auth_libs="-L. -L$libdir -L$indimaildir/lib -lindimail -lcdb $LIB_CRYPT -L$mysql_libdir -lmysqlclient $LIB_SSL"
 	;;
 	*)
-	auth_libs="-L. -L$libdir -L$indimaildir/lib -lindimail -lcdb $LIB_CRYPT -L$mysql_libdir -lmysqlclient $LIB_SSL"
+	auth_libs="-L. -L$libdir -Xlinker -R -Xlinker $libdir -lindimail -lcdb $LIB_CRYPT -L$mysql_libdir -lmysqlclient $LIB_SSL"
 	;;
 esac
 sys_libdir=${acl_libdirstem}
@@ -521,6 +521,7 @@ echo ""
 echo "            $QA_PACKAGE $QA_VERSION"
 echo "            Current settings"
 echo "---------------------------------------"
+echo "       exec_prefix = "$exec_prefix""
 echo "       cgi-bin dir = "$cgibindir""
 echo "          html dir = "$htmldir""
 echo "         image dir = "$imagedir""
@@ -535,6 +536,7 @@ echo "              help = "$enable_help""
 echo "      mysql prefix = "$mysql_prefix""
 echo "      mysql incdir = "$mysql_incdir""
 echo "      mysql incdir = "$mysql_libdir""
+echo "            libdir = "$libdir""
 echo "          auth_inc = "$auth_incs""
 echo "          auth_lib = "$auth_libs""
 echo "      modify quota = "$MODIFY_QUOTA""
