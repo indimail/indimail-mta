@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail.spec.in,v 2.309 2016-03-31 17:35:31+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 2.310 2016-04-04 13:01:52+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %define _unpackaged_files_terminate_build 1
 
@@ -514,7 +514,7 @@ if [ -d libdkim-%{libdkim_version} ] ; then
 	fi
 fi
 
-%configure --prefix=%{_prefix} --mandir=%{_prefix}/man
+%configure --prefix=%{_prefix} --mandir=%{_prefix}/man --libdir=%{_libdir}
 cd ..
 #### LIBSRS2 ######################
 if [ -d libsrs2-%{libsrs2_version} ] ; then
@@ -530,7 +530,7 @@ if [ -d libsrs2-%{libsrs2_version} ] ; then
 #./configure --prefix=%{_prefix} --libdir=%{_libdir} --libexecdir=%{_prefix}/libexec \
 #	--x-libraries=%{_libdir} --mandir=%{_prefix}/man
 #
-	%configure --prefix=%{_prefix} --mandir=%{_prefix}/man
+	%configure --prefix=%{_prefix} --mandir=%{_prefix}/man --libdir=%{_libdir}
 	cd ..
 fi
 
@@ -545,7 +545,7 @@ if [ %{reconfigure_mode} -eq 1 ] ; then
 fi
 
 %configure --prefix=%{_prefix} --libexecdir=%{_prefix}/libexec --sysconfdir=%{_prefix}/etc \
-	--with-pkgconfigdir=@pkgconfigdir@ \
+	--with-pkgconfigdir=@pkgconfigdir@ --libdir=%{_libdir} \
 	--enable-mysqlbindir=%{mysqlPrefix}/bin --enable-mysqlprefix=%{mysqlPrefix} \
 	--mandir=%{_prefix}/man --sysconfdir=%{_prefix}/etc --enable-qmaildir=%{_prefix} \
 	--enable-basepath=@basepath@ --enable-logdir=@logdir@ \
