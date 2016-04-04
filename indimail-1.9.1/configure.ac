@@ -101,6 +101,7 @@ then
 	if test -d /lib64 -a "$acl_libdirstem" = "lib"
 	then
 		acl_libdirstem=lib64
+		libdir=$prefix/$acl_libdirstem
 	fi
 	ilibdir=$prefix/$acl_libdirstem
 else
