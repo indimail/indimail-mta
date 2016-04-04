@@ -11,8 +11,8 @@ Package: indimail
 Architecture: any
 Depends: ${shlibs:Depends}, ${misc:Depends}
 Breaks: indimail-mini
-Replaces: indimail-mini, indimail-devel
-Provides: indimail-shared, indimail-mini, indimail-devel, indimail-mta
+Replaces: indimail-mini, libindimail
+Provides: libindimail, indimail-mini, indimail-mta
 Description: IndiMail is a messaging platform for Mail Service Providers
  It is built using the following packages
  .
@@ -42,13 +42,20 @@ Description: IndiMail is a messaging platform for Mail Service Providers
  locations) and tools to manage virtual domains ?
 
 Package: indimail-devel
-Depends: ${shlibs:Depends}, ${misc:Depends}
+Depends: ${misc:Depends}
 Section: devel
 Architecture: any
-Provides: indimail-shared
-Conflicts: indimail
 Description: IndiMail - Development header files and libraries
  This package contains the development header files and libraries
+ necessary to develop IndiMail client applications.
+
+Package: libindimail
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Section: libs
+Architecture: any
+Conflicts: indimail
+Description: IndiMail - Development libraries
+ This package contains the development libraries
  necessary to develop IndiMail client applications.
 
 Package: indimail-mini
