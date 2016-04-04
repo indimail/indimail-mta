@@ -1,0 +1,3 @@
+var/indimail/include @prefix@
+var/indimail/lib/*.so @prefix@/lib
+var/indimail/lib/*.so.* @prefix@/lib
