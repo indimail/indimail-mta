@@ -1,3 +1,0 @@
-var/indimail/include /var/indimail
-var/indimail/@acl_libdirstem@/lib*.so.* /var/indimail/@acl_libdirstem@
-var/indimail/@acl_libdirstem@/lib*.so /var/indimail/@acl_libdirstem@

@@ -1,3 +1,0 @@
-var/indimail/include /var/indimail
-var/indimail/lib/lib*.so.* /var/indimail/lib
-var/indimail/lib/lib*.so /var/indimail/lib
