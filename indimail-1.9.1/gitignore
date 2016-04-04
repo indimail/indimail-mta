@@ -98,8 +98,8 @@ debian/*postinst
 debian/*preinst
 debian/*prerm
 debian/*postrm
-debian/indimail-devel64.install
-debian/indimail-devel32.install
+debian/indimail-devel64
+debian/indimail-devel32
 */*.substvars
 */*.debhelper
 debian/indimail-devel

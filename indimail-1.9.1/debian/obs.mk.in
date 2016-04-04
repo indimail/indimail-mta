@@ -40,7 +40,7 @@ indimail-xUbuntu_14.04.dsc indimail-xUbuntu_13.10.dsc indimail-xUbuntu_13.04.dsc
 indimail-xUbuntu_12.10.dsc indimail-xUbuntu_12.04.dsc indimail-xUbuntu_11.10.dsc \
 indimail-xUbuntu_11.04.dsc indimail-xUbuntu_10.10.dsc indimail-xUbuntu_10.04.dsc \
 indimail-Debian_8.0.dsc indimail-Debian_7.0.dsc indimail-Debian_6.0.dsc \
-indimail-devel32.install indimail-devel64.install indimail-devel.postinst \
+indimail-devel32 indimail-devel64 indimail-devel.postinst \
 indimail-devel.postrm indimail-mini.prerm indimail-mini.preinst \
 indimail-mini.postrm indimail-mini.postinst debian.tar.gz dummy.tar.gz
 
@@ -50,20 +50,20 @@ distclean: clean
 
 clean:
 	/bin/rm -f rules indimail.prerm indimail.preinst indimail.postrm \
-	indimail.postinst obs_deb_prep _service indimail-devel32.install \
-	indimail-devel64.install indimail-devel.postinst indimail-devel.postrm \
+	indimail.postinst obs_deb_prep _service indimail-devel32 \
+	indimail-devel64 indimail-devel.postinst indimail-devel.postrm \
 	indimail-mini.prerm indimail-mini.preinst indimail-mini.postrm \
 	indimail-mini.postinst debian.tar.gz dummy.tar.gz *.dsc
 
 noinst_SCRIPTS = indimail.prerm indimail.preinst indimail.postrm \
 				 indimail.postinst rules obs_deb_prep gen_control \
-				 indimail-devel32.install indimail-devel64.install \
+				 indimail-devel32 indimail-devel64 \
 				 indimail-devel.postinst indimail-devel.postrm \
 				 indimail-mini.prerm indimail-mini.preinst \
 				 indimail-mini.postrm indimail-mini.postinst
 MOSTLYCLEANFILES= indimail.prerm indimail.preinst indimail.postrm \
 				  indimail.postinst rules obs_deb_prep gen_control \
-				  indimail-devel32.install indimail-devel64.install \
+				  indimail-devel32 indimail-devel64 \
 				  indimail-devel.postinst indimail-devel.postrm \
 				  indimail-mini.prerm indimail-mini.preinst \
 				  indimail-mini.postrm indimail-mini.postinst \
@@ -121,9 +121,9 @@ indimail-devel.postinst: indimail-devel.postinst.in
 	$(edit) $@.in > $@;
 indimail-devel.postrm: indimail-devel.postrm.in
 	$(edit) $@.in > $@;
-indimail-devel32.install: indimail-devel32.install.in
+indimail-devel32: indimail-devel32.in
 	$(edit) $@.in > $@;
-indimail-devel64.install: indimail-devel64.install.in
+indimail-devel64: indimail-devel64.in
 	$(edit) $@.in > $@;
 
 indimail-mini.prerm: indimail-mini.prerm.in
@@ -195,8 +195,8 @@ indimail-xUbuntu_10.04.dsc: indimail-xUbuntu_10.04.dsc.in obs.mk changelog.in
 dummy.tar.gz: README
 	tar cf - README |gzip > $@
 debian.tar.gz: copyright indimail.preinst indimail.postinst indimail.prerm \
-indimail.postrm rules changelog compat indimail-devel32.install \
-indimail-devel64.install obs_deb_prep indimail-devel.postinst \
+indimail.postrm rules changelog compat indimail-devel32 \
+indimail-devel64 obs_deb_prep indimail-devel.postinst \
 indimail-devel.postrm indimail-mini.prerm indimail-mini.preinst \
 indimail-mini.postrm indimail-mini.postinst indimail-mini.install \
 gen_control obs.mk control control.Debian.6.0 control.Debian.7.0 \
@@ -207,7 +207,7 @@ control.Ubuntu.14.04 control.Ubuntu.14.10 control.Ubuntu.15.04 \
 control.Ubuntu.15.10 indimail.cron.d
 	tar cf - copyright indimail.preinst indimail.postinst indimail.prerm \
 		indimail.postrm rules changelog compat obs_deb_prep \
-		indimail-devel32.install indimail-devel64.install \
+		indimail-devel32 indimail-devel64 \
 		indimail-devel.postinst gen_control \
 		indimail-devel.postrm indimail-mini.prerm indimail-mini.preinst \
 		indimail-mini.postrm indimail-mini.postinst indimail-mini.install \
