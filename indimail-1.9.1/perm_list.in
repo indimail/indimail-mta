@@ -32,6 +32,8 @@
 %dir %attr(0755,indimail,indimail) @indimaildir@/control
 %dir %attr(0755,indimail,indimail) @indimaildir@/control/cache
 %dir %attr(0755,indimail,indimail) @indimaildir@/control/domainkeys
+%dir %attr(2755,qmailr,qmail) @indimaildir@/control/ratelimit
+%dir %attr(0775,indimail,indimail) @indimaildir@/control/inquery
 %dir %attr(0755,root,root) @indimaildir@/control/bulk_mail
 %dir %attr(0755,root,root) @indimaildir@/control/defaultqueue
 %dir %attr(0755,root,qmail) @indimaildir@/queue
@@ -41,7 +43,6 @@
 %dir %attr(0755,root,root) @indimaildir@/share/fortunes
 %dir %attr(0755,root,root) @indimaildir@/share/table_config
 %dir %attr(0755,root,root) @indimaildir@/var
-%dir %attr(0775,indimail,indimail) @indimaildir@/control/inquery
 %dir %attr(0775,qscand,qscand) @indimaildir@/share/clamd
 %dir %attr(0775,root,indimail) @indimaildir@/domains
 %dir %attr(0775,root,indimail) @indimaildir@/etc
@@ -72,8 +73,6 @@
 %attr(0511,root,root) @indimaildir@/bin/incrmesg
 %attr(0511,root,root) @indimaildir@/bin/logclient
 %attr(0511,root,root) @indimaildir@/bin/showbytes
-%attr(0511,root,root) @indimaildir@/sbin/logsrv
-%attr(0511,root,root) @indimaildir@/sbin/rpclog
 %attr(0555,root,qmail) @indimaildir@/bin/822addr
 %attr(0555,root,qmail) @indimaildir@/bin/822body
 %attr(0555,root,qmail) @indimaildir@/bin/822bodyfilter
@@ -211,7 +210,6 @@
 %attr(0555,root,qmail) @indimaildir@/bin/qmail-qmqpd
 %attr(0555,root,qmail) @indimaildir@/bin/qmail-qmtpd
 %attr(0555,root,qmail) @indimaildir@/bin/qmail-qread
-%attr(0555,root,qmail) @indimaildir@/bin/qmail-queue-print
 %attr(0555,root,qmail) @indimaildir@/bin/qmail-rm
 %attr(0555,root,qmail) @indimaildir@/bin/qmail-scanner-queue.pl
 %attr(0555,root,qmail) @indimaildir@/bin/qmail-showctl
@@ -261,7 +259,6 @@
 %attr(0555,root,qmail) @indimaildir@/bin/setlock
 %attr(0555,root,qmail) @indimaildir@/bin/setmaillist
 %attr(0555,root,qmail) @indimaildir@/bin/setuidgid
-%attr(0555,root,qmail) @indimaildir@/bin/smtpd
 %attr(0555,root,qmail) @indimaildir@/bin/smtp-matchup
 %attr(0555,root,qmail) @indimaildir@/bin/softlimit
 %attr(0555,root,qmail) @indimaildir@/bin/spawn-filter
@@ -357,7 +354,16 @@
 %attr(0555,root,root) @indimaildir@/bin/tcprulescheck
 %attr(0555,root,root) @indimaildir@/bin/tcpserver
 %attr(0555,root,root) @indimaildir@/bin/who@
-%attr(0755,root,root) @indimaildir@/bin/qaes
+%attr(0555,root,root) @indimaildir@/bin/qaes
+%attr(0555,root,qmail) @indimaildir@/bin/leapsecs
+%attr(0555,root,qmail) @indimaildir@/bin/nowutc
+%attr(0555,root,qmail) @indimaildir@/bin/qlogselect
+%attr(0555,root,qmail) @indimaildir@/bin/tai2tai64n
+%attr(0555,root,qmail) @indimaildir@/bin/tai64n2tai
+%attr(0555,root,qmail) @indimaildir@/bin/udpclient
+%attr(0555,root,qmail) @indimaildir@/bin/udplogger
+%attr(0555,root,qmail) @indimaildir@/bin/whois
+%attr(0555,root,qmail) @indimaildir@/bin/yearcal
 
 %attr(0555,root,qmail) @indimaildir@/sbin/adminclient
 %attr(0555,root,qmail) @indimaildir@/sbin/batv
@@ -429,6 +435,9 @@
 %attr(0555,root,root) @indimaildir@/sbin/slemsPrivate
 %attr(0555,root,root) @indimaildir@/sbin/writefifo
 
+%attr(0511,root,root) @indimaildir@/sbin/logsrv
+%attr(0511,root,root) @indimaildir@/sbin/rpclog
+
 %attr(0555,root,qmail) @indimaildir@/libexec/vdeldomain
 %attr(0555,root,qmail) @indimaildir@/libexec/vaddaliasdomain
 %attr(0555,root,qmail) @indimaildir@/libexec/vrenamedomain
@@ -463,6 +472,7 @@
 
 %attr(0555,root,root) @indimaildir@/share/mkimapdcert
 %attr(0555,root,root) @indimaildir@/share/mkpop3dcert
+%attr(0555,root,root) @indimaildir@/share/mkdhparams
 #
 # Boot
 #
