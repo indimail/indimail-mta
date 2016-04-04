@@ -100,6 +100,9 @@ debian/*prerm
 debian/*postrm
 debian/indimail-devel64
 debian/indimail-devel32
+debian/libindimail32
+debian/libindimail64
+debian/indimail.install
 */*.substvars
 */*.debhelper
 debian/indimail-devel

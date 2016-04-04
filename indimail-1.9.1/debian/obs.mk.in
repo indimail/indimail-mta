@@ -10,6 +10,7 @@ basepath=@basepath@
 mysql_prefix=@mysql_prefix@
 mysql_incdir=@mysql_incdir@
 mysql_libdir=@mysql_libdir@
+pkgconfigdir=@pkgconfigdir@
 defaultdomain=@defaultdomain@
 acl_libdirstem := $(shell basename @libdir@ 2>/dev/null|| echo "lib")
 release := $(shell head -1 changelog.in | awk '{print $2}' | cut -d'-' -f2 | cut -c-1)
@@ -33,14 +34,14 @@ logalert_version=0.3
 fortune_version=1.1
 
 all: rules indimail.prerm indimail.preinst indimail.postrm indimail.postinst \
-obs_deb_prep gen_control _service \
+obs_deb_prep gen_control indimail.install \
 indimail-xUbuntu_15.10.dsc \
 indimail-xUbuntu_15.04.dsc indimail-xUbuntu_14.10.dsc \
 indimail-xUbuntu_14.04.dsc indimail-xUbuntu_13.10.dsc indimail-xUbuntu_13.04.dsc \
 indimail-xUbuntu_12.10.dsc indimail-xUbuntu_12.04.dsc indimail-xUbuntu_11.10.dsc \
 indimail-xUbuntu_11.04.dsc indimail-xUbuntu_10.10.dsc indimail-xUbuntu_10.04.dsc \
 indimail-Debian_8.0.dsc indimail-Debian_7.0.dsc indimail-Debian_6.0.dsc \
-indimail-devel32 indimail-devel64 indimail-devel.postinst \
+indimail-devel32 indimail-devel64 libindimail32 libindimail64 indimail-devel.postinst \
 indimail-devel.postrm indimail-mini.prerm indimail-mini.preinst \
 indimail-mini.postrm indimail-mini.postinst debian.tar.gz dummy.tar.gz
 
@@ -50,20 +51,23 @@ distclean: clean
 
 clean:
 	/bin/rm -f rules indimail.prerm indimail.preinst indimail.postrm \
-	indimail.postinst obs_deb_prep _service indimail-devel32 \
+	indimail.postinst obs_deb_prep indimail-devel32 \
+	libindimail32 libindimail64 indimail.install \
 	indimail-devel64 indimail-devel.postinst indimail-devel.postrm \
 	indimail-mini.prerm indimail-mini.preinst indimail-mini.postrm \
 	indimail-mini.postinst debian.tar.gz dummy.tar.gz *.dsc
 
 noinst_SCRIPTS = indimail.prerm indimail.preinst indimail.postrm \
 				 indimail.postinst rules obs_deb_prep gen_control \
-				 indimail-devel32 indimail-devel64 \
+				 indimail-devel32 indimail-devel64 indimail.install \
+				 libindimail32 libindimail64 \
 				 indimail-devel.postinst indimail-devel.postrm \
 				 indimail-mini.prerm indimail-mini.preinst \
 				 indimail-mini.postrm indimail-mini.postinst
 MOSTLYCLEANFILES= indimail.prerm indimail.preinst indimail.postrm \
 				  indimail.postinst rules obs_deb_prep gen_control \
-				  indimail-devel32 indimail-devel64 \
+				  indimail-devel32 indimail-devel64 indimail.install \
+				  libindimail32 libindimail64 \
 				  indimail-devel.postinst indimail-devel.postrm \
 				  indimail-mini.prerm indimail-mini.preinst \
 				  indimail-mini.postrm indimail-mini.postinst \
@@ -76,6 +80,7 @@ edit = sed \
 	-e 's,@moduledir\@,$(moduledir),g' \
 	-e 's,@auth_inc\@,$(auth_inc),g' \
 	-e 's,@auth_libs\@,$(auth_libs),g' \
+	-e 's,@pkgconfigdir\@,$(pkgconfigdir),g' \
 	-e 's,@acl_libdirstem\@,$(acl_libdirstem),g' \
 	-e 's,@libdir\@,$(libdir),g' \
 	-e 's,@logdir\@,$(logdir),g' \
@@ -106,8 +111,8 @@ edit = sed \
 
 rules: rules.in obs.mk
 	$(edit) $@.in > $@; chmod +x $@;
-_service: _service.in obs.mk
-	$(edit) $@.in > $@;
+indimail.install: indimail.install.in
+	$(edit) $@.in > $@
 indimail.prerm: indimail.prerm.in
 	$(edit) $@.in > $@;
 indimail.preinst: indimail.preinst.in
@@ -124,6 +129,10 @@ indimail-devel.postrm: indimail-devel.postrm.in
 indimail-devel32: indimail-devel32.in
 	$(edit) $@.in > $@;
 indimail-devel64: indimail-devel64.in
+	$(edit) $@.in > $@;
+libindimail32: libindimail32.in
+	$(edit) $@.in > $@;
+libindimail64: libindimail64.in
 	$(edit) $@.in > $@;
 
 indimail-mini.prerm: indimail-mini.prerm.in
@@ -197,6 +206,7 @@ dummy.tar.gz: README
 debian.tar.gz: copyright indimail.preinst indimail.postinst indimail.prerm \
 indimail.postrm rules changelog compat indimail-devel32 \
 indimail-devel64 obs_deb_prep indimail-devel.postinst \
+libindimail32 libindimail64 indimail.install \
 indimail-devel.postrm indimail-mini.prerm indimail-mini.preinst \
 indimail-mini.postrm indimail-mini.postinst indimail-mini.install \
 gen_control obs.mk control control.Debian.6.0 control.Debian.7.0 \
@@ -207,7 +217,8 @@ control.Ubuntu.14.04 control.Ubuntu.14.10 control.Ubuntu.15.04 \
 control.Ubuntu.15.10 indimail.cron.d
 	tar cf - copyright indimail.preinst indimail.postinst indimail.prerm \
 		indimail.postrm rules changelog compat obs_deb_prep \
-		indimail-devel32 indimail-devel64 \
+		indimail-devel32 indimail-devel64 indimail.install \
+		libindimail32 libindimail64 \
 		indimail-devel.postinst gen_control \
 		indimail-devel.postrm indimail-mini.prerm indimail-mini.preinst \
 		indimail-mini.postrm indimail-mini.postinst indimail-mini.install \

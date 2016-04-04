@@ -1,0 +1,2 @@
+var/indimail/lib64/*.so.* @prefix@/lib64
+usr/lib64/pkgconfig/libindimail.pc /usr/lib64/pkgconfig

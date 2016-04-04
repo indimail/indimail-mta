@@ -37,13 +37,14 @@ mpack_version=@mpack_version@
 logalert_version=@logalert_version@
 fortune_version=@fortune_version@
 
-DESTDIR=$(CURDIR)/debian/indimail
+DESTDIR=$(CURDIR)/debian/tmp
 
 define genControl
 $(shell if [ -d ../BUILD ] ; then ../BUILD/debian/gen_control; else debian/gen_control;fi)
 endef
 bits=$(shell dpkg-architecture -qDEB_BUILD_ARCH_BITS)
 libdir=$(shell if [ $(bits) -eq 64 ] ; then echo $(prefix)/lib64; else echo $(prefix)/lib;fi)
+pkgdir=$(shell if [ $(bits) -eq 64 ] ; then echo /usr/lib64/pkgconfig; else echo /usr/lib/pkgconfig;fi)
 
 build: build-stamp
 build-stamp:
@@ -53,13 +54,15 @@ build-stamp:
 	#
 	if [ -f ../BUILD/debian/obs_deb_prep ] ; then sh ../BUILD/debian/obs_deb_prep; fi
 	if [ -f ../BUILD/debian/gen_control ] ; then chmod +x ../BUILD/debian/gen_control; fi
+	if [ -f ../BUILD/debian/indimail-devel$(bits) ] ; then /bin/mv ../BUILD/debian/indimail-devel$(bits) ../BUILD/debian/indimail-devel.install; fi
+	if [ -f ../BUILD/debian/libindimail$(bits) ] ; then /bin/mv ../BUILD/debian/libindimail$(bits) ../BUILD/debian/libindimail.install; fi
 	#
 	# run configure script
 	#
 	if [ -d libdkim-$(libdkim_version) ] ; then cd libdkim-$(libdkim_version) ; ./configure --prefix=$(prefix) --libdir=$(libdir) --mandir=$(prefix)/man ; cd ..; fi
 	if [ -d libsrs2-$(libsrs2_version) ] ; then cd libsrs2-$(libsrs2_version) ; ./configure --prefix=$(prefix) --libdir=$(libdir) --mandir=$(prefix)/man ; cd ..; fi
-	if [ -d indimail-$(version) ] ; then FAKED_MODE=1;export FAKED_MODE;cd indimail-$(version);./configure --prefix=$(prefix) --libdir=$(libdir) --libexecdir=$(prefix)/libexec --mandir=$(prefix)/man --sysconfdir=$(prefix)/etc --enable-qmaildir=$(prefix) --enable-tcprules-prog=$(prefix)/bin/tcprules --enable-tcpserver-file=$(prefix)/etc/tcp.smtp --enable-mysqlprefix=/usr --enable-moduledir=/lib/security `cat config/indimail.opts`;cd ..;unset FAKED_MODE; fi
-	if [ -d courier-imap-$(courier_version) ] ; then cd courier-imap-$(courier_version) ; ./configure --prefix=$(prefix) --mandir=$(prefix)/man `cat ../indimail-$(version)/config/courier-imap.opts`; cd ..; fi
+	if [ -d indimail-$(version) ] ; then FAKED_MODE=1;export FAKED_MODE;cd indimail-$(version);./configure --prefix=$(prefix) --libdir=$(libdir) --with-pkgconfigdir=$(pkgdir) --libexecdir=$(prefix)/libexec --mandir=$(prefix)/man --sysconfdir=$(prefix)/etc --enable-qmaildir=$(prefix) --enable-tcprules-prog=$(prefix)/bin/tcprules --enable-tcpserver-file=$(prefix)/etc/tcp.smtp --enable-mysqlprefix=/usr --enable-moduledir=/lib/security `cat config/indimail.opts`;cd ..;unset FAKED_MODE; fi
+	if [ -d courier-imap-$(courier_version) ] ; then cd courier-imap-$(courier_version) ; ./configure --prefix=$(prefix) --libdir=$(libdir) --mandir=$(prefix)/man `cat ../indimail-$(version)/config/courier-imap.opts`; cd ..; fi
 	if [ -d bogofilter-$(bogofilter_version) ] ; then cd bogofilter-$(bogofilter_version) ; ./configure --prefix=$(prefix) --sysconfdir=$(prefix)/etc --libexecdir=$(prefix)/libexec --mandir=$(prefix)/man `cat ../indimail-$(version)/config/bogofilter.opts`; cd ..; fi
 	if [ -d fetchmail-$(fetchmail_version) ] ; then cd fetchmail-$(fetchmail_version); ./configure --prefix=$(prefix) --enable-indimail --enable-indimaildir=$(prefix) --libexecdir=$(prefix)/libexec --mandir=$(prefix)/man `cat ../indimail-$(version)/config/fetchmail.opts`; cd ..; fi
 	if [ -d nssd-$(nssd_version) ] ; then cd nssd-$(nssd_version) ; ./configure --prefix=$(prefix) --sysconfdir=$(prefix)/etc --libdir=$(libdir) --mandir=$(prefix)/man --enable-mysqlprefix=/usr `cat ../indimail-$(version)/config/nssd.opts`; cd ..; fi
@@ -77,6 +80,7 @@ build-stamp:
 	if [ -d fetchmail-$(fetchmail_version) ] ; then   $(MAKE) -s -C fetchmail-$(fetchmail_version) DESTDIR=$(DESTDIR); fi
 	if [ -d nssd-$(nssd_version) ] ; then             $(MAKE) -s -C nssd-$(nssd_version) DESTDIR=$(DESTDIR); fi
 	if [ -d clamav-$(clamav_version) ] ; then         $(MAKE) -s -C clamav-$(clamav_version) DESTDIR=$(DESTDIR); fi
+	${rm} -rf $(DESTDIR)/$(prefix)/$(libdir)/*.la
 	touch build-stamp
 
 clean:
@@ -106,11 +110,11 @@ install: build
 binary-indep: build install
 	dh_testdir
 	dh_testroot
-	find $(CURDIR)/debian/indimail/$(prefix)/man -name '*'.? -type f -exec gzip -q {} \;
-	if [ -f ../BUILD/debian/indimail-devel$(bits) ] ; then /bin/mv ../BUILD/debian/indimail-devel$(bits) ../BUILD/debian/indimail-devel.install; fi
-	if [ -f $(CURDIR)/debian/indimail-devel$(bits) ] ; then /bin/mv $(CURDIR)/debian/indimail-devel$(bits) $(CURDIR)/debian/indimail-devel.install; fi
-	dh_install --sourcedir=$(CURDIR)/debian/indimail -pindimail-devel
-	dh_install --sourcedir=$(CURDIR)/debian/indimail -pindimail-mini
+	find $(DESTDIR)$(prefix)/man -name '*'.? -type f -exec gzip -q {} \;
+	dh_install --sourcedir=$(DESTDIR) -pindimail
+	dh_install --sourcedir=$(DESTDIR) -pindimail-devel
+	dh_install --sourcedir=$(DESTDIR) -plibindimail
+	dh_install --sourcedir=$(DESTDIR) -pindimail-mini
 	dh_installchangelogs
 	dh_installdocs
 	dh_link
