@@ -23,6 +23,8 @@ prefix=@indimaildir@
 version=@version@
 #
 DESTDIR=$(CURDIR)/debian/iwebadmin
+bits=$(shell dpkg-architecture -qDEB_BUILD_ARCH_BITS)
+libdir=$(shell if [ $(bits) -eq 64 ] ; then echo $(prefix)/lib64; else echo $(prefix)/lib;fi)
 
 build: build-stamp
 build-stamp:
@@ -34,10 +36,10 @@ build-stamp:
 	# run configure script
 	#
 	./configure --prefix=${prefix} --enable-indimaildir=${prefix} \
+		--libdir=$(libdir) \
 		--enable-ezmlmdir=${prefix}/bin --disable-ipauth \
 		--disable-trivial-password \
 		--enable-mysqlprefix=/usr \
-		--enable-qmaildir=@indimaildir@ \
 		--enable-modify-quota \
 		--enable-htmldir=@htmldir@ \
 		--enable-cgibindir=@cgibindir@ \
