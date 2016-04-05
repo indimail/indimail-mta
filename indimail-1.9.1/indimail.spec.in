@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail.spec.in,v 2.312 2016-04-05 07:05:49+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 2.313 2016-04-05 15:59:17+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %define _unpackaged_files_terminate_build 1
 
@@ -216,7 +216,6 @@ NoSource: 20
 URL: http://www.indimail.org
 #AutoReqProv: No
 Conflicts: %{name}-mini, %{name}-mta %{name}-mta-daemontools %{name}-mta-ucspi-tcp
-Provides: libindimail
 BuildRequires: openssl-devel rpm gcc gcc-c++ make bison binutils coreutils grep
 BuildRequires: glibc glibc-devel openssl procps readline-devel
 BuildRequires: sed ncurses-devel gettext-devel
@@ -358,6 +357,7 @@ locations) and tools to manage virtual domains ?
 %package devel
 Summary: IndiMail - Development header files and libraries
 Group: Development/Libraries/Other
+Requires: libindimail
 
 %description devel
 This package contains the development header files and libraries
@@ -901,9 +901,9 @@ fi
 %dir %attr(555,root,root)         %{_prefix}/libexec/authlib
 %dir %attr(755,indimail,indimail) %{_prefix}/control
 %dir %attr(775,indimail,indimail) %{_prefix}/control/inquery
+%dir %attr(2755,qmailr,qmail)     %{_prefix}/control/ratelimit
 %dir %attr(755,indimail,indimail) %{_prefix}/control/domainkeys
 %dir %attr(2755,indimail,qmail)   %{_prefix}/autoturn
-%dir %attr(2755,qmailr,qmail)     %{_prefix}/ratelimit
 %dir %attr(555,root,root)         %{_prefix}/modules
 %dir %attr(555,root,qmail)        %{_prefix}/man
 %dir %attr(555,root,qmail)        %{_prefix}/man/man1
@@ -1975,6 +1975,15 @@ fi
 %else
 %{_libdir}/libsrs2-%{libsrs2_version}.so.0
 %{_libdir}/libsrs2-%{libsrs2_version}.so.0.0.0
+%endif
+%endif
+
+%if %nocourierimap == 0
+%if %i_m_on_mac == 1
+%{_libdir}/libunicode.0.dylib
+%else
+%{_libdir}/libunicode.so.1
+%{_libdir}/libunicode.so.1.1.0
 %endif
 %endif
 
