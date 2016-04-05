@@ -187,6 +187,11 @@ obs.mk
 */debian/*.prerm
 */debian/obs_deb_prep
 */debian/_service
+*/debian/indimail-devel32
+*/debian/indimail-devel64
+*/debian/indimail.install
+*/debian/libindimail32
+*/debian/libindimail64
 README.vmware
 */depcomp
 */install-sh
