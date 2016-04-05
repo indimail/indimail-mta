@@ -1,5 +1,8 @@
 #
 # $Log: iwebadmin.spec.in,v $
+# Revision 1.13  2016-04-05 07:05:04+05:30  Cprogrammer
+# use chrpath for SLES and openSUSE
+#
 # Revision 1.12  2015-12-17 17:21:46+05:30  Cprogrammer
 # use root perm for iwebadmin
 #
@@ -52,7 +55,7 @@
 # Initial revision
 #
 #
-# $Id: iwebadmin.spec.in,v 1.12 2015-12-17 17:21:46+05:30 Cprogrammer Exp mbhangui $
+# $Id: iwebadmin.spec.in,v 1.13 2016-04-05 07:05:04+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %define _unpackaged_files_terminate_build 1
 
@@ -115,7 +118,7 @@ BuildRequires: rpm gcc make binutils coreutils grep
 BuildRequires: glibc glibc-devel procps cpio
 BuildRequires: sed gettext-devel
 BuildRequires: findutils
-BuildRequires: gzip autoconf indimail-devel
+BuildRequires: gzip autoconf indimail-devel libindimail
 %if %{undefined rhel_version}
 BuildRequires: sharutils
 %else
@@ -127,7 +130,7 @@ BuildRequires: sharutils
 %if %build_on_obs == 1
 BuildRequires: mysql-devel
 %endif
-%if %{undefined centos_version} && %{undefined rhel_version} && %{undefined sles_version}
+%if %{undefined centos_version} && %{undefined rhel_version}
 BuildRequires: chrpath
 %endif
 %if 0%{?suse_version}
