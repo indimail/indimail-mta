@@ -1,5 +1,8 @@
 #
 # $Log: iwebadmin.spec.in,v $
+# Revision 1.14  2016-04-05 15:59:51+05:30  Cprogrammer
+# added BuildConflicts: indimail
+#
 # Revision 1.13  2016-04-05 07:05:04+05:30  Cprogrammer
 # use chrpath for SLES and openSUSE
 #
@@ -55,7 +58,7 @@
 # Initial revision
 #
 #
-# $Id: iwebadmin.spec.in,v 1.13 2016-04-05 07:05:04+05:30 Cprogrammer Exp mbhangui $
+# $Id: iwebadmin.spec.in,v 1.14 2016-04-05 15:59:51+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %define _unpackaged_files_terminate_build 1
 
@@ -114,11 +117,12 @@ Source2: %{name}-%{version}-rpmlintrc
 
 URL: http://www.indimail.org
 AutoReqProv: No
+BuildConflicts: indimail
 BuildRequires: rpm gcc make binutils coreutils grep
 BuildRequires: glibc glibc-devel procps cpio
 BuildRequires: sed gettext-devel
 BuildRequires: findutils
-BuildRequires: gzip autoconf indimail-devel libindimail
+BuildRequires: gzip autoconf indimail-devel
 %if %{undefined rhel_version}
 BuildRequires: sharutils
 %else
@@ -128,6 +132,8 @@ BuildRequires: sharutils
 %endif
 
 %if %build_on_obs == 1
+BuildRequires: mysql-devel libidn-devel
+%else
 BuildRequires: mysql-devel
 %endif
 %if %{undefined centos_version} && %{undefined rhel_version}
