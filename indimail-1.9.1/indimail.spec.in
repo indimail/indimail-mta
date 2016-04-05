@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail.spec.in,v 2.311 2016-04-05 00:55:02+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 2.312 2016-04-05 07:05:49+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %define _unpackaged_files_terminate_build 1
 
@@ -545,7 +545,7 @@ if [ %{reconfigure_mode} -eq 1 ] ; then
 fi
 
 %configure --prefix=%{_prefix} --libexecdir=%{_prefix}/libexec --sysconfdir=%{_prefix}/etc \
-	--with-pkgconfigdir=@pkgconfigdir@ --libdir=%{_libdir} \
+	--with-pkgconfigdir=%{_pkg_config_path} --libdir=%{_libdir} \
 	--enable-mysqlbindir=%{mysqlPrefix}/bin --enable-mysqlprefix=%{mysqlPrefix} \
 	--mandir=%{_prefix}/man --sysconfdir=%{_prefix}/etc --enable-qmaildir=%{_prefix} \
 	--enable-basepath=@basepath@ --enable-logdir=@logdir@ \
@@ -623,7 +623,7 @@ if [ -d ../clamav-%{clamav_version} ] ; then
 	fi
 	if [ %{build_on_obs} -eq 0 ] ; then
 	%configure --prefix=%{_prefix} --libexecdir=%{_prefix}/libexec --sysconfdir=%{_prefix}/etc \
-	--with-pkgconfigdir=@pkgconfigdir@ \
+	--with-pkgconfigdir=%{_pkg_config_path} \
 	--with-dbdir=%{_prefix}/share/clamd --mandir=%{_prefix}/man \
 	`%{__cat} ../%{name}-%{version}/config/clamav.opts`
 	else
@@ -1682,7 +1682,7 @@ fi
 %endif
 %attr(644,root,root)                        %{_prefix}/etc/clamd.conf.sample
 %attr(644,root,root)                        %{_prefix}/etc/freshclam.conf.sample
-%attr(644,root,root)                        @pkgconfigdir@/libclamav.pc
+%attr(644,root,root)                        %{_pkg_config_path}/libclamav.pc
 %endif
 
 %if %nofetchmail == 0
@@ -1834,7 +1834,7 @@ fi
 %{_libdir}/libindimail-%{version}.so.0
 %{_libdir}/libindimail-%{version}.so.0.0.0
 %endif
-@pkgconfigdir@/libindimail.pc
+%{_pkg_config_path}/libindimail.pc
 
 %if %nonssd == 0
                                         /usr/%{_lib}/libnss_nssd.so.2
@@ -1947,7 +1947,7 @@ fi
                                         /usr/%{_lib}/libnss_nssd.so
 %endif
 
-@pkgconfigdir@/libindimail.pc
+%{_pkg_config_path}/libindimail.pc
 
 %files -n libindimail
 %defattr(-, root, root, 0755)
@@ -1993,7 +1993,7 @@ fi
 %{_libdir}/libflash-%{flash_version}.0.dylib
 %{_libdir}/libindimail-%{version}.0.dylib
 %endif
-@pkgconfigdir@/libindimail.pc
+%{_pkg_config_path}/libindimail.pc
 
 %files mini
 %defattr(-, root, root, 0555)
@@ -2754,12 +2754,13 @@ if [ -f %{_prefix}/boot/rpm.init ] ; then
 	/bin/sh %{_prefix}/boot/rpm.init post
 fi
 
-if [ -f %{_sysconfdir}/init/svscan.conf -o -f %{_sysconfdir}/event.d/svscan ] ; then
+if [ -x /bin/systemctl ] ; then
 	/bin/systemctl enable indimail.service
+fi
+if [ -f %{_sysconfdir}/init/svscan.conf -o -f %{_sysconfdir}/event.d/svscan ] ; then
 	echo "1. Issue /sbin/initctl emit qmailstart to start services"
 	count=1
 elif [ -f %{_sysconfdir}/systemd/system/multi-user.target.wants/indimail.service ] ; then
-	/bin/systemctl enable indimail.service
 	echo "1. Issue /bin/systemctl start indimail.service to start services"
 	count=1
 else
