@@ -10,4 +10,4 @@ Vcs-Git: git://indimail.git.sourceforge.net/gitroot/indimail/indimail
 Debtransform-Files-Tar: debian.tar.gz
 Debtransform-Tar: iwebadmin-@version@.tar.gz
 Standards-Version: 3.9.1
-Build-Depends: cdbs, debhelper (>= 7.0.50~), gcc, g++, m4, autotools-dev, libmysqlclient16-dev, libssl-dev, indimail-devel
+Build-Depends: cdbs, debhelper (>= 7.0.50~), gcc, g++, m4, autotools-dev, libmysqlclient16-dev, libssl-dev, indimail-devel, libindimail
