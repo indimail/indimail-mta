@@ -247,7 +247,10 @@ if [ $nodksignature -eq 0 ] ; then
 	if [ -x ${prefix}/bin/dknewkey ] ; then
 		ver_opt="both"
 		sign_opt="both"
-		${prefix}/bin/dknewkey ${prefix}/control/domainkeys/$dkimkeyfn 1024
+		if [ " $key_bit" = " " ] ; then
+			key_bit=1024
+		fi
+		%{_prefix}/bin/dknewkey %{_prefix}/control/domainkeys/default $key_bit
 	else
 		ver_opt="none"
 		sign_opt="none"
