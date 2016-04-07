@@ -1211,7 +1211,10 @@ if [ %nodksignatures -eq 0 ] ; then
 	if [ -x %{_prefix}/bin/dknewkey ] ; then
 		ver_opt="both"
 		sign_opt="both"
-		%{_prefix}/bin/dknewkey %{_prefix}/control/domainkeys/default 1024
+		if [ " $key_bit" = " " ] ; then
+			key_bit=1024
+		fi
+		%{_prefix}/bin/dknewkey %{_prefix}/control/domainkeys/default $key_bit
 	else
 		ver_opt="none"
 		sign_opt="none"
