@@ -1,5 +1,8 @@
 /*
  * $Log: greylist.c,v $
+ * Revision 1.7  2016-04-10 13:27:12+05:30  Cprogrammer
+ * fixed ip6/ip4 address to connect
+ *
  * Revision 1.6  2015-12-31 00:44:18+05:30  Cprogrammer
  * added IPV6 code
  *
@@ -20,6 +23,7 @@
  * Initial revision based on code by Richard Andrews
  *
  */
+#include "haveip6.h"
 #include "stralloc.h"
 #include "ip.h"
 #include "byte.h"
@@ -41,7 +45,11 @@
 typedef struct sockaddr_in  sockaddr_in;
 #ifdef IPV6
 typedef struct sockaddr_in6 sockaddr_in6;
-int               noipv6;
+#endif
+#ifdef LIBC_HAS_IP6
+int             noipv6 = 0;
+#else
+int             noipv6 = 1;
 #endif
 
 
@@ -79,12 +87,10 @@ scan_ip_port(gip, defaultip, defaultport, ipp, portp)
 	if (!gip) {
 		if (!(n = ip6_scan(defaultip, &ipp->ip6)))
 			return (-1);
-		if (ip6_isv4mapped(&ipp->ip6.d) && !(n = ip4_scan(defaultip, &ipp->ip)))
-			return (-1);
 		if (!(*(defaultip + n) == '@' && scan_ulong(defaultip + n + 1, &port)))
 			port = defaultport;
 	} else {
-		ip_a = *gip == '@' && !*(gip + 1) ? "::" : gip;
+		ip_a = (*gip == '@' && !*(gip + 1)) ? defaultip : gip;
 		for (ptr = ip_a;*ptr;ptr++) {
 			if (*ptr == '@' && scan_ulong(ptr + 1, &port)) {
 				*portp = port;
@@ -93,9 +99,9 @@ scan_ip_port(gip, defaultip, defaultport, ipp, portp)
 		}
 		if (!*ptr)
 			*portp = port = defaultport;
+		else
+			*ptr = 0;
 		if (!(n = ip6_scan(ip_a, &ipp->ip6)))
-			return (-1);
-		if (ip6_isv4mapped(&ipp->ip6.d) && !(n = ip4_scan(gip, &ipp->ip)))
 			return (-1);
 	}
 #else
@@ -148,7 +154,12 @@ connect_udp(ip, port, errfn)
 			sin4->sin_family = AF_INET;
 			sin4->sin_port = htons(port);
 			byte_copy((char *) &sin4->sin_addr, 4, ip4loopback);
-		} 
+		} else {
+			sin4 = (sockaddr_in *) &sa;
+			sin4->sin_family = AF_INET;
+			sin4->sin_port = htons(port);
+			byte_copy((char *) &sin4->sin_addr, 4, (char *) ip->ip.d);
+		}
 	} else {
 		sin6 = (sockaddr_in6 *) &sa;
 		sin6->sin6_family = AF_INET6;
@@ -238,6 +249,8 @@ greylist(gip, connectingip, from, tolist, tolen, timeoutfn, errfn)
 		return (-2);
 	if (!stralloc_catb(&chkpacket, tolist, tolen))
 		return (-2);
+	if (!stralloc_0(&chkpacket))
+		return (-2);
 #if 0 /*- causes problem with greydaemon */
 	if (!stralloc_append(&chkpacket, "\n")) /* newline to end a record */
 		return (-2);
@@ -252,7 +265,7 @@ greylist(gip, connectingip, from, tolist, tolen, timeoutfn, errfn)
 void
 getversion_greylist_c()
 {
-	static char    *x = "$Id: greylist.c,v 1.6 2015-12-31 00:44:18+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: greylist.c,v 1.7 2016-04-10 13:27:12+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
