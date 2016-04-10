@@ -2625,7 +2625,7 @@ sqlmatch.h qregex.h hasindimail.h
 
 greylist.o: \
 compile greylist.c stralloc.h ip.h scan.h byte.h greylist.h error.h \
-timeoutread.h timeoutwrite.h conf-ip
+timeoutread.h timeoutwrite.h haveip6.h conf-ip
 	./compile `grep -h -v "^#" conf-ip` greylist.c
 
 qmail-start: \
