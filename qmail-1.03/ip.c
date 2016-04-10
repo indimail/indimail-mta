@@ -1,5 +1,8 @@
 /*
  * $Log: ip.c,v $
+ * Revision 1.10  2016-04-10 13:27:49+05:30  Cprogrammer
+ * fixed mapped ipv4 address in ip6_scan()
+ *
  * Revision 1.9  2015-08-27 00:28:51+05:30  Cprogrammer
  * added ip6_fmt_flat(), ip6_fmt_exp() functions
  *
@@ -255,15 +258,20 @@ ip6_scan(s, ip6)
 	int             prefixlen = 0, suffixlen = 0;
 	ip_addr         ip4;
 
+#if 0
 	for (x = 0; x < 4; x++) {	/* Mapped IPv4 addresses */
 		ip4.d[x] = ip6->d[x + 12];
 	}
+#endif
 	if ((i = ip4_scan(s, &ip4))) {
 		const char     *c = (const char *) V4mappedprefix;
 		if (byte_equal((char *) ip4.d, 4, (char *) V6any))
 			c = (const char *) V6any;
 		for (len = 0; len < 12; ++len)
 			ip6->d[len] = c[len];
+		for (x = 0; x < 4; x++) {	/* Mapped IPv4 addresses */
+			ip6->d[x + 12] = ip4.d[x];
+		}
 		return i;
 	}
 	for (i = 0; i < 16; i++)
@@ -354,7 +362,7 @@ ip6_scanbracket(s, ip6)
 void
 getversion_ip_c()
 {
-	static char    *x = "$Id: ip.c,v 1.9 2015-08-27 00:28:51+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: ip.c,v 1.10 2016-04-10 13:27:49+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
