@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-greyd.c,v $
+ * Revision 1.14  2016-04-10 13:07:56+05:30  Cprogrammer
+ * added missing flush() statement to flush logs
+ *
  * Revision 1.13  2016-04-03 09:38:31+05:30  Cprogrammer
  * port was being used non-initialized for non-ipv6 code
  *
@@ -457,6 +460,7 @@ print_record(char *ip, char *rpath, char *rcpt, int rcptlen, time_t timestamp,
 	strnum[fmt_ulong(strnum, (unsigned long) rcptlen)] = 0;
 	out(strnum);
 	out(operation ? " expired\n" : "\n");
+	flush();
 	return;
 }
 
@@ -1449,6 +1453,7 @@ main(int argc, char **argv)
 		case 'Q': /*- query a whitelist record */
 			break;
 		default:
+			out(", Response: RECORD INVALID\n");
 			break;
 		} /*- switch (rdata[0]) */
 		flush();
@@ -1459,7 +1464,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_greyd_c()
 {
-	static char    *x = "$Id: qmail-greyd.c,v 1.13 2016-04-03 09:38:31+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-greyd.c,v 1.14 2016-04-10 13:07:56+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
