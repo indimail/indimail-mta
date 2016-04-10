@@ -1595,11 +1595,11 @@ being set, greylist checks are made for incoming SMTP connections prior to accep
 
 "Full" greylisting is implemented, meaning that the connecting IP address, envelope sender and envelope recipient form the triplet that is checked.
 
-.B greydaemon
+.B qmail-greyd
 is used by qmail-smtpd to carry out these checks;
 .B qmail-smtpd
-communicates with greydaemon using UDP.
-.B greydaemon
+communicates with qmail-greyd using UDP.
+.B qmail-greyd
 itself is written in Perl.
 To enable greylisting the environment variable
 .B GREYIP
@@ -1632,13 +1632,13 @@ to an empty string,
 .EE
 
 Clearly
-.B greydaemon
+.B qmail-greyd
 must be available to respond to greylisting queries. If the
 GREYIP address/port is unavailable and the system detects
 this - perhaps via an ICMP 'unreachable' type response - the
 SMTP session aborts with a temporary error when the
 greylisting check occurs; the errno string is logged to help
-troubleshooting (typically greydaemon isn't running or is
+troubleshooting (typically qmail-greyd isn't running or is
 blocked by firewall rules). Otherwise if there is no response
 a timeout occurs, producing the same temporary error but without
 further logging detail.
@@ -1756,6 +1756,6 @@ mysqld(1), tcp-env(1), tcp-environ(5), tcpserver(1), tcprules(1), uacl(1),
 qmail-control(5), MCDFILE(5), indimail.patch(5), qmail-inject(8), qmail-newmrh(8),
 qmail-queue(8), qmail-multi(8), qscanq(8), qmail-remote(8), qmail-send(8), qmail-cdb(8),
 recipient-cdb(8), pam-multi(8), pam-checkpwd(8), inlookup(8), vchkpass(8), systpass(8),
-plugin_init(3), dlopen(3), plugtest(1), bogofilter(1), greydaemon(8),
+plugin_init(3), dlopen(3), plugtest(1), bogofilter(1), greydaemon(8), qmail-greyd(8),
 rfc-2821(5), rfc-1893(5), rfc-1894(5), rfc-1985(5), rfc-2645(5), rfc-1321(5), rfc-822(5),
 rfc-2104(5), rfc-2476(5)
