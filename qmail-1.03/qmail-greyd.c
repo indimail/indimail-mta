@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-greyd.c,v $
+ * Revision 1.15  2016-04-10 22:20:14+05:30  Cprogrammer
+ * fixed incorrect formatting of context filename
+ *
  * Revision 1.14  2016-04-10 13:07:56+05:30  Cprogrammer
  * added missing flush() statement to flush logs
  *
@@ -123,7 +126,7 @@ struct greylst
 {
 	union v46addr   ip;
 #ifdef USE_HASH
-	char            ip_str[16];
+	char            ip_str[IPFMT];
 #endif
 	char           *rpath;
 	char           *rcpt; /* Trcpt1\0Trcpt2\0.....Trcptn\0 */
@@ -454,8 +457,30 @@ print_record(char *ip, char *rpath, char *rcpt, int rcptlen, time_t timestamp,
 			out("]");
 	}
 	out(" status=");
-	strnum[fmt_ulong(strnum, (unsigned long) status)] = 0;
-	out(strnum);
+	switch(status)
+	{
+	case RECORD_NEW:
+		out("RECORD_NEW");
+		break;
+	case RECORD_EARLY:
+		out("RECORD_EARLY");
+		break;
+	case RECORD_STALE:
+		out("RECORD_STALE");
+		break;
+	case RECORD_WHITE:
+		out("RECORD_WHITE");
+		break;
+	case RECORD_OK:
+		out("RECORD_OK");
+		break;
+	case RECORD_GREY:
+		out("RECORD_GREY");
+		break;
+	case RECORD_BOUNCE:
+		out("RECORD_BOUNCE");
+		break;
+	}
 	out(" rcptlen=");
 	strnum[fmt_ulong(strnum, (unsigned long) rcptlen)] = 0;
 	out(strnum);
@@ -538,19 +563,13 @@ expire_records(time_t cur_time)
 {
 	struct greylst *ptr;
 	time_t          start;
-	char            ip_str[IPFMT + 1];
 
 	out("expiring records\n");
 	flush();
 	/*- find the first record that is not expired */
 	start = cur_time - timeout;
 	for (ptr = head;ptr && ptr->timestamp < start;ptr = ptr->next) {
-#ifdef IPV6
-		ip_str[ip6_fmt(ip_str, &ptr->ip.ip6)] = 0;
-#else
-		ip_str[ip4_fmt(ip_str, &ptr->ip.ip)] = 0;
-#endif
-		print_record(ip_str, ptr->rpath, ptr->rcpt, ptr->rcptlen, ptr->timestamp,
+		print_record(ptr->ip_str, ptr->rpath, ptr->rcpt, ptr->rcptlen, ptr->timestamp,
 			ptr->status, 1);
 		grey_count--;
 		head = ptr->next;
@@ -880,7 +899,6 @@ save_context()
 {
 	struct greylst *ptr;
 	int             context_fd;
-	char            ip_str[16];
 	char            rcptlen[FMT_ULONG], timestamp[FMT_ULONG];
 
 	if (!grey_count)
@@ -892,11 +910,7 @@ save_context()
 	for (ptr = head;ptr;ptr = ptr->next) {
 		rcptlen[fmt_ulong(rcptlen, ptr->rcptlen)] = 0;
 		timestamp[fmt_ulong(timestamp, ptr->timestamp)] = 0;
-#ifdef IPV6
-		if (write_file(context_fd, ip_str, ip6_fmt(ip_str, &ptr->ip.ip6)) == -1
-#else
-		if (write_file(context_fd, ip_str, ip4_fmt(ip_str, &ptr->ip.ip)) == -1
-#endif
+		if (write_file(context_fd, ptr->ip_str, str_len(ptr->ip_str)) == -1
 			|| write_0(context_fd) == -1
 			|| write_file(context_fd, ptr->rpath, str_len(ptr->rpath)) == -1
 			|| write_0(context_fd) == -1
@@ -1184,7 +1198,14 @@ main(int argc, char **argv)
 		die_nomem();
 	if (!stralloc_cats(&context_file, "/"))
 		die_nomem();
-	if (!stralloc_cats(&context_file, argv[optind++]))
+	for (ptr = argv[optind++]; *ptr;ptr++);
+	for (;ptr != argv[optind -1];ptr--) {
+		if (*ptr == '/') {
+			ptr++;
+			break;
+		}
+	}
+	if (!stralloc_cats(&context_file, ptr))
 		die_nomem();
 	if (!stralloc_0(&context_file))
 		die_nomem();
@@ -1464,7 +1485,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_greyd_c()
 {
-	static char    *x = "$Id: qmail-greyd.c,v 1.14 2016-04-10 13:07:56+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-greyd.c,v 1.15 2016-04-10 22:20:14+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
