@@ -1,5 +1,8 @@
 /*
  * $Log: greylist.c,v $
+ * Revision 1.8  2016-04-10 22:17:32+05:30  Cprogrammer
+ * null terminate packet
+ *
  * Revision 1.7  2016-04-10 13:27:12+05:30  Cprogrammer
  * fixed ip6/ip4 address to connect
  *
@@ -249,10 +252,11 @@ greylist(gip, connectingip, from, tolist, tolen, timeoutfn, errfn)
 		return (-2);
 	if (!stralloc_catb(&chkpacket, tolist, tolen))
 		return (-2);
-	if (!stralloc_0(&chkpacket))
-		return (-2);
 #if 0 /*- causes problem with greydaemon */
 	if (!stralloc_append(&chkpacket, "\n")) /* newline to end a record */
+		return (-2);
+#else
+	if (!stralloc_0(&chkpacket))
 		return (-2);
 #endif
 	if ((r = query_skt(sockfd, &chkpacket, rbuf, sizeof rbuf, GREYTIMEOUT, timeoutfn, errfn)) == -1)
@@ -265,7 +269,7 @@ greylist(gip, connectingip, from, tolist, tolen, timeoutfn, errfn)
 void
 getversion_greylist_c()
 {
-	static char    *x = "$Id: greylist.c,v 1.7 2016-04-10 13:27:12+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: greylist.c,v 1.8 2016-04-10 22:17:32+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
