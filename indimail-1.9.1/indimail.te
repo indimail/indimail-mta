@@ -73,8 +73,8 @@ allow httpd_t var_t:file { execute setattr read create execute_no_trans write ge
 allow httpd_t var_t:lnk_file read;
 
 #============= mysqld_t ==============
-allow mysqld_t var_t:file { create getattr read write };
-allow mysqld_t var_t:dir { add_name create write };
+allow mysqld_t var_t:file { create getattr open read write };
+allow mysqld_t var_t:dir { add_name remove_name create write };
 allow mysqld_t user_tmp_t:file open;
 allow mysqld_t tmp_t:sock_file {create write unlink };
 allow mysqld_t var_lib_t:file { open write read };
