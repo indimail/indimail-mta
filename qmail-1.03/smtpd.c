@@ -1,5 +1,8 @@
 /*
  * $Log: smtpd.c,v $
+ * Revision 1.185  2016-04-10 22:22:21+05:30  Cprogrammer
+ * pass ip6 address to greylist()
+ *
  * Revision 1.184  2016-04-03 09:35:13+05:30  Cprogrammer
  * fixed useless compilation warning
  *
@@ -715,7 +718,7 @@ int             secure_auth = 0;
 int             ssl_rfd = -1, ssl_wfd = -1;	/*- SSL_get_Xfd() are broken */
 char           *servercert, *clientca, *clientcrl;
 #endif
-char           *revision = "$Revision: 1.184 $";
+char           *revision = "$Revision: 1.185 $";
 char           *protocol = "SMTP";
 stralloc        proto = { 0 };
 static stralloc Revision = { 0 };
@@ -5086,11 +5089,7 @@ smtp_data(char *arg)
 	}
 	if (greyip && !relayclient)
 	{
-#ifdef IPV6
-		switch (greylist(greyip, remoteip4, mailfrom.s, rcptto.s, rcptto.len, err_greytimeout, err_grey_tmpfail))
-#else
 		switch (greylist(greyip, remoteip, mailfrom.s, rcptto.s, rcptto.len, err_greytimeout, err_grey_tmpfail))
-#endif
 		{
 		case 1: /*- success */
 			break;
@@ -6843,7 +6842,7 @@ addrrelay() /*- Rejection of relay probes. */
 void
 getversion_smtpd_c()
 {
-	static char    *x = "$Id: smtpd.c,v 1.184 2016-04-03 09:35:13+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: smtpd.c,v 1.185 2016-04-10 22:22:21+05:30 Cprogrammer Exp mbhangui $";
 
 #ifdef INDIMAIL
 	if (x)
