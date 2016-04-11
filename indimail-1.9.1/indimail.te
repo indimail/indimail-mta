@@ -1,5 +1,8 @@
 #
 # $Log: indimail.te,v $
+# Revision 2.11  2016-04-11 12:00:49+05:30  Cprogrammer
+# added new rules for mysql
+#
 # Revision 2.10  2016-04-03 07:46:24+05:30  Cprogrammer
 # added create permission for mysqld_t in var_t
 #
@@ -31,7 +34,7 @@
 # selinux module config
 #
 #
-# $Id: indimail.te,v 2.10 2016-04-03 07:46:24+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.te,v 2.11 2016-04-11 12:00:49+05:30 Cprogrammer Exp mbhangui $
 # 
 module indimail 1.0;
 
@@ -55,7 +58,7 @@ require {
 	class unix_stream_socket connectto;
 	class capability fowner;
 	class tcp_socket name_connect;
-	class file { execute getattr setattr read create rename execute_no_trans write unlink open append ioctl };
+	class file { execute getattr setattr read create lock rename execute_no_trans write unlink open append ioctl };
 	class sock_file { create write unlink setattr };
 	class lnk_file read;
 	class dir { search getattr setattr read create write rmdir remove_name open add_name };
@@ -73,7 +76,7 @@ allow httpd_t var_t:file { execute setattr read create execute_no_trans write ge
 allow httpd_t var_t:lnk_file read;
 
 #============= mysqld_t ==============
-allow mysqld_t var_t:file { create getattr open read write };
+allow mysqld_t var_t:file { create getattr open lock read rename unlink write };
 allow mysqld_t var_t:dir { add_name remove_name create write };
 allow mysqld_t user_tmp_t:file open;
 allow mysqld_t tmp_t:sock_file {create write unlink };
