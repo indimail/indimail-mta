@@ -250,7 +250,7 @@ if [ $nodksignature -eq 0 ] ; then
 		if [ " $key_bit" = " " ] ; then
 			key_bit=1024
 		fi
-		%{_prefix}/bin/dknewkey %{_prefix}/control/domainkeys/default $key_bit
+		${prefix}/bin/dknewkey ${prefix}/control/domainkeys/$dkimkeyfn $key_bit
 	else
 		ver_opt="none"
 		sign_opt="none"
@@ -605,6 +605,9 @@ fi
 SERVICE_LIST="sendmail exim4 mysql"
 export SERVICE_LIST
 ${prefix}/sbin/svctool --config=add-boot
+if [ -x /bin/systemctl ] ; then
+	/bin/systemctl enable indimail.service
+fi
 
 echo "Checking Installed Permissions"
 if [ -f ${prefix}/bin/instcheck ] ; then
