@@ -1,6 +1,6 @@
 #
 #
-# $Id: qmail.spec,v 1.25 2016-02-08 21:38:03+05:30 Cprogrammer Exp mbhangui $
+# $Id: qmail.spec,v 1.26 2016-04-14 15:17:30+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %define _unpackaged_files_terminate_build 1
 
@@ -492,6 +492,7 @@ done
 %dir %attr(750,qscand,qscand)     %{_prefix}/qscanq/root
 %dir %attr(750,qscand,qscand)     %{_prefix}/qscanq/root/scanq
 %dir %attr(755,indimail,indimail) %{_prefix}/control
+%dir %attr(2755,qmailr,qmail)     %{_prefix}/control/ratelimit
 %dir %attr(755,indimail,indimail) %{_prefix}/control/domainkeys
 %dir %attr(555,root,qmail)        %{_prefix}/man
 %dir %attr(555,root,qmail)        %{_prefix}/man/man1
@@ -1214,7 +1215,7 @@ if [ %nodksignatures -eq 0 ] ; then
 		if [ " $key_bit" = " " ] ; then
 			key_bit=1024
 		fi
-		%{_prefix}/bin/dknewkey %{_prefix}/control/domainkeys/default $key_bit
+		%{_prefix}/bin/dknewkey %{_prefix}/control/domainkeys/%{dkimkeyfn} $key_bit
 	else
 		ver_opt="none"
 		sign_opt="none"
@@ -1250,7 +1251,7 @@ fi
 %endif
 
 # Define QHPSI for inline virus scanning by qmail-queue
-if [ %noclamav -eq 0 ] ; then
+if [ %{noclamav} -eq 0 ] ; then
 	echo "Checking if clamav is installed"
 	clamav_os=0
 	clamdPrefix=%{_prefix}
@@ -1280,7 +1281,7 @@ do
 		extra_opt="$extra_opt --deliverylimit-count=-1 --deliverylimit-size=-1"
 		extra_opt="$extra_opt --rbl=-rzen.spamhaus.org --rbl=-rdnsbl-1.uceprotect.net"
 	fi
-	if [ %noclamav -eq 0 -o $clamav_os -eq 1 ] ; then
+	if [ %{noclamav} -eq 0 -o $clamav_os -eq 1 ] ; then
 		%{_prefix}/sbin/svctool --smtp=$port --servicedir=%{servicedir} \
 			--qbase=%{qbase} --qcount=%{qcount} --qstart=1 \
 			--query-cache --dnscheck --password-cache \
@@ -1308,7 +1309,7 @@ do
 done
 
 # queue parameters in control/defaultqueue for qmail-inject, sendmail
-if [ %noclamav -eq 0 -o $clamav_os -eq 1 ] ; then
+if [ %{noclamav} -eq 0 -o $clamav_os -eq 1 ] ; then
 	%{_prefix}/sbin/svctool --queueParam=defaultqueue \
 		--qbase=%{qbase} --qcount=%{qcount} --qstart=1 \
 		--min-free=52428800 --fsync --syncdir \
@@ -1346,7 +1347,7 @@ $TOUCH %{servicedir}/qmail-qmqpd.628/down
 
 # virus/spam filtering
 %{_prefix}/sbin/svctool --qscanq --servicedir=%{servicedir} --scanint=200
-if [ %noclamav -eq 0 -o $clamav_os -eq 1 ] ; then
+if [ %{noclamav} -eq 0 -o $clamav_os -eq 1 ] ; then
 	%{_prefix}/sbin/svctool --config=clamd
 	# create clamd, freshclam service
 	%{_prefix}/sbin/svctool --clamd --servicedir=%{servicedir} --clamdPrefix=$clamdPrefix \
@@ -1486,14 +1487,6 @@ if [ $argv1 -eq 1 ] ; then
 	exit 0
 fi
 
-# Remove IndiMail being started on system boot
-echo "removing indimail startup"
-if [ -f /etc/init.d/indimail ] ; then
-	if [ -f /sbin/chkconfig ] ; then
-		/sbin/chkconfig --del indimail
-	fi
-	%{__rm} -f /etc/init.d/indimail
-fi
 if [ -f /etc/init.d/sendmail ] ; then
 	if [ -f /sbin/chkconfig ] ; then
 		/sbin/chkconfig --add sendmail
@@ -1511,6 +1504,9 @@ else
 		fi
 	done
 fi
+# Remove IndiMail being started on system boot
+echo "removing indimail startup"
+%{_prefix}/sbin/svctool --config=rm-boot
 
 ### SCRIPTLET ###############################################################################
 %postun
@@ -1574,7 +1570,7 @@ for i in smtp qmtp qmqp
 do
 	for j in `/bin/ls %{_prefix}/etc/tcp*.$i 2>/dev/null`
 	do
-			%{_rm} -f $j.cdb
+			%{__rm} -f $j.cdb
 	done
 done
 /bin/rmdir --ignore-fail-on-non-empty %{_prefix}/etc 2>/dev/null
@@ -1598,8 +1594,8 @@ else
 		%{__rm} -f %{_prefix}/control/$i
 	done
 fi
-%{__rm} -f %{_prefix}/control/controlfiles
-%{__rm} -f %{_prefix}/control/domainkeys/default.pub %{_prefix}/control/domainkeys/default
+%{__rm} -f %{_prefix}/etc/controlfiles
+%{__rm} -f %{_prefix}/control/domainkeys/%{dkimkeyfn}.pub %{_prefix}/control/domainkeys/%dkimkeyfn
 /bin/rmdir --ignore-fail-on-non-empty %{_prefix}/control/domainkeys 2>/dev/null
 /bin/rmdir --ignore-fail-on-non-empty %{_prefix}/control 2>/dev/null
 
@@ -1610,7 +1606,7 @@ done
 /bin/rmdir --ignore-fail-on-non-empty %{_prefix}/alias 2>/dev/null
 
 echo "removing startup services"
-if [ %noclamav -eq 0 -o $clamav_os -eq 1 ] ; then
+if [ %{noclamav} -eq 0 -o $clamav_os -eq 1 ] ; then
 for i in clamd freshclam
 do
 	if [ -d %{servicedir}/$i ] ; then
