@@ -1,6 +1,6 @@
 #
 #
-# $Id: qmail.spec,v 1.26 2016-04-14 15:17:30+05:30 Cprogrammer Exp mbhangui $
+# $Id: qmail.spec,v 1.27 2016-04-14 16:55:25+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %define _unpackaged_files_terminate_build 1
 
@@ -54,7 +54,7 @@
 
 Summary: A Flexible SMTP server
 Name: indimail-mta
-Version: 1.9.0
+Version: 1.9.1
 %if %build_on_obs == 1
 Release: 1.<B_CNT>
 %else
@@ -1418,6 +1418,9 @@ echo "adding indimail startup"
 %{_prefix}/sbin/svctool --config=add-boot
 ) >> /tmp/indimail-mta.install.log 2>&1
 
+if [ -x /bin/systemctl ] ; then
+	/bin/systemctl enable indimail.service
+fi
 if [ -f %{_sysconfdir}/init/svscan.conf -o -f %{_sysconfdir}/event.d/svscan ] ; then
 	echo "1. Issue /sbin/initctl emit qmailstart to start services"
 	count=1
@@ -1449,7 +1452,7 @@ if [ $ID -ne 0 ] ; then
 	echo "You are not root" 1>&2
 	exit 1
 fi
-
+(
 if test -f %{_sysconfdir}/init/svscan.conf
 then
 	/sbin/initctl emit qmailstop > /dev/null 2>&1
@@ -1507,6 +1510,7 @@ fi
 # Remove IndiMail being started on system boot
 echo "removing indimail startup"
 %{_prefix}/sbin/svctool --config=rm-boot
+) > /tmp/indimail-mta.uninstall.log 2>&1
 
 ### SCRIPTLET ###############################################################################
 %postun
@@ -1522,7 +1526,7 @@ if [ $argv1 -eq 1 ] ; then
 	/sbin/ldconfig
 	exit 0
 fi
-
+(
 # remove users / groups
 nscd_up=`ps -ef |grep nscd |grep -v grep|wc -l`
 if [ $nscd_up -ge 1 ] ; then
@@ -1606,6 +1610,15 @@ done
 /bin/rmdir --ignore-fail-on-non-empty %{_prefix}/alias 2>/dev/null
 
 echo "removing startup services"
+if [ %{noclamav} -eq 0 ] ; then
+	clamav_os=0
+else
+	if [ -f /usr/sbin/clamd -a -f /usr/bin/clamdscan ] ; then
+		clamav_os=1
+	else
+		clamav_os=0
+	fi
+fi
 if [ %{noclamav} -eq 0 -o $clamav_os -eq 1 ] ; then
 for i in clamd freshclam
 do
@@ -1639,6 +1652,7 @@ if [ -f %{_prefix}/boot/rpm.init ] ; then
 	echo "Running Custom Un-Installation Script for postun"
 	/bin/sh %{_prefix}/boot/rpm.init postun
 fi
+) >> /tmp/indimail-mta.uninstall.log 2>&1
 
 ### SCRIPTLET ###############################################################################
 %posttrans
