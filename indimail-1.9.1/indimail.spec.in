@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail.spec.in,v 2.313 2016-04-05 15:59:17+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 2.314 2016-04-14 15:18:45+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %define _unpackaged_files_terminate_build 1
 
@@ -2979,7 +2979,7 @@ else
 		%{__rm} -f %{_prefix}/control/$i
 	done
 fi
-%{__rm} -f %{_prefix}/control/controlfiles
+%{__rm} -f %{_prefix}/etc/controlfiles
 %{__rm} -f %{_prefix}/control/domainkeys/%{dkimkeyfn}.pub %{_prefix}/control/domainkeys/%dkimkeyfn
 /bin/rmdir --ignore-fail-on-non-empty %{_prefix}/control/domainkeys 2>/dev/null
 /bin/rmdir --ignore-fail-on-non-empty %{_prefix}/control 2>/dev/null
