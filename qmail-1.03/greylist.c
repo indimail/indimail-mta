@@ -1,5 +1,8 @@
 /*
  * $Log: greylist.c,v $
+ * Revision 1.9  2016-04-15 15:44:11+05:30  Cprogrammer
+ * create ipv4 socket if ipv6 stack is disabled
+ *
  * Revision 1.8  2016-04-10 22:17:32+05:30  Cprogrammer
  * null terminate packet
  *
@@ -146,30 +149,32 @@ connect_udp(ip, port, errfn)
 #ifdef IPV6
 	byte_zero((char *) &sa, sizeof(sa));
 	if (noipv6) {
+		sin4 = (sockaddr_in *) &sa;
+		sin4->sin_family = AF_INET;
+		sin4->sin_port = htons(port);
+		byte_copy((char *) &sin4->sin_addr, 4, (char *) ip->ip.d);
+	} else {
 		if (ip6_isv4mapped(ip->ip6.d)) {
 			sin4 = (sockaddr_in *) &sa;
 			sin4->sin_family = AF_INET;
 			sin4->sin_port = htons(port);
 			byte_copy((char *) &sin4->sin_addr, 4, (char *) ip->ip6.d + 12);
+			noipv6 = 1;
 		} else
 		if (byte_equal((char *) ip->ip6.d, 16, (char *) V6loopback)) {
 			sin4 = (sockaddr_in *) &sa;
 			sin4->sin_family = AF_INET;
 			sin4->sin_port = htons(port);
 			byte_copy((char *) &sin4->sin_addr, 4, ip4loopback);
+			noipv6 = 1;
 		} else {
-			sin4 = (sockaddr_in *) &sa;
-			sin4->sin_family = AF_INET;
-			sin4->sin_port = htons(port);
-			byte_copy((char *) &sin4->sin_addr, 4, (char *) ip->ip.d);
+			sin6 = (sockaddr_in6 *) &sa;
+			sin6->sin6_family = AF_INET6;
+			sin6->sin6_port = htons(port);
+			byte_copy((char *) &sin6->sin6_addr, 16, (char *) ip->ip6.d);
 		}
-	} else {
-		sin6 = (sockaddr_in6 *) &sa;
-		sin6->sin6_family = AF_INET6;
-		sin6->sin6_port = htons(port);
-		byte_copy((char *) &sin6->sin6_addr, 16, (char *) ip->ip6.d);
 	}
-	if ((fd = socket(AF_INET6, SOCK_DGRAM, 0)) == -1)
+	if ((fd = socket(noipv6 ? AF_INET : AF_INET6, SOCK_DGRAM, 0)) == -1)
 		return (errfn ? fn_handler(errfn, 0, 0) : -1);
 	if (connect(fd, (struct sockaddr *)&sa, sizeof(sa)) < 0)
 		return (errfn ? fn_handler(errfn, 0, 0) : -1);
@@ -269,7 +274,7 @@ greylist(gip, connectingip, from, tolist, tolen, timeoutfn, errfn)
 void
 getversion_greylist_c()
 {
-	static char    *x = "$Id: greylist.c,v 1.8 2016-04-10 22:17:32+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: greylist.c,v 1.9 2016-04-15 15:44:11+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
