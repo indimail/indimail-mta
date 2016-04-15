@@ -225,22 +225,21 @@ fi
 
 echo "Creating Database/Service for MySQL"
 # MySQL Config Creation
-if [ -f $mysqlPrefix/bin/mysql_config ] ; then
-	${prefix}/sbin/svctool --config=mysql   --mysqlPrefix=${mysqlPrefix} --model=medium --no-of-cpu=2
+if [ -x ${mysqlPrefix}/libexec/mysqld -o -x ${mysqlPrefix}/sbin/mysqld ] ; then
+	${prefix}/sbin/svctool --config=mysql   --mysqlPrefix=%{mysqlPrefix}
 	# MySQL Database Creation
 	${prefix}/sbin/svctool --config=mysqldb --mysqlPrefix=${mysqlPrefix} \
     	--databasedir=${prefix}/mysqldb --base_path=${mbase}
 	# MySQL Supervise creation
-	${prefix}/sbin/svctool --mysql=3306 --servicedir=$servicedir --mysqlPrefix=${mysqlPrefix} \
-		--databasedir=${prefix}/mysqldb --config=${prefix}/etc/indimail.cnf --default-domain=${default_domain} \
-		--model=small --no-of-cpu=2
+	${prefix}/sbin/svctool --mysql=3306 --servicedir=${servicedir} --mysqlPrefix=${mysqlPrefix} \
+		--databasedir=${prefix}/mysqldb --config=${prefix}/etc/indimail.cnf --default-domain=${default_domain}
 	count=`ps -e|grep mysqld|wc -l`
 	if [ $count -gt 0 ] ; then
 		echo "Disabling mysqld service"
 		$TOUCH ${servicedir}/mysql.3306/down
 	fi
 else
-	echo "WARNING!!! Did not find mysql_config in ${mysqlPrefix}. Skipping MySQL configuration" 1>&2
+	echo "WARNING!!! Did not find mysqld in ${mysqlPrefix}/{libexec,sbin}. Skipping MySQL configuration" 1>&2
 fi
 
 if [ $nodksignature -eq 0 ] ; then
