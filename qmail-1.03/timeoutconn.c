@@ -1,5 +1,8 @@
 /*
  * $Log: timeoutconn.c,v $
+ * Revision 1.14  2016-04-15 15:43:35+05:30  Cprogrammer
+ * added comments of #ifdef statements
+ *
  * Revision 1.13  2015-08-24 19:09:38+05:30  Cprogrammer
  * replace ip_scan() with ip4_scan(), replace ip_fmt() with ip4_fmt()
  *
@@ -178,10 +181,10 @@ socket_bind6(int s, char *bound, ip6_addr *ipr)
 		return socket_bind4(s, bound, (ip_addr *) iplocal.d + 12);
 	errno = error_proto;
 	return -1;
-#endif
+#endif /*- #ifdef LIBC_HAS_IP6 */
 }
-#endif
-#endif
+#endif /*- ifdef IPV6 */
+#endif /*- ifdef BIND_SOCKET */
 
 #ifdef IPV6
 int
@@ -338,7 +341,7 @@ timeoutconn6(s, ipr, ipl, port, timeout)
 	errno = error_timeout;	/*- note that connect attempt is continuing */
 	return -1;
 }
-#endif
+#endif /*- #ifdef IPV6 */
 
 int
 timeoutconn4(s, ipr, ipl, port, timeout)
@@ -407,7 +410,7 @@ timeoutconn4(s, ipr, ipl, port, timeout)
 void
 getversion_timeoutconn_c()
 {
-	static char    *x = "$Id: timeoutconn.c,v 1.13 2015-08-24 19:09:38+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: timeoutconn.c,v 1.14 2016-04-15 15:43:35+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
