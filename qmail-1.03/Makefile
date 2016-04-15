@@ -5690,12 +5690,15 @@ compile yearcal.c caldate.h
 	./compile yearcal.c
 
 udplogger: \
-load udplogger.o fmt_ulong.o sgetopt.o subgetopt.o scan_ulong.o strerr.a substdio.a str.a sig.a error.a
-	./load udplogger fmt_ulong.o sgetopt.o subgetopt.o scan_ulong.o strerr.a substdio.a str.a sig.a error.a
+load udplogger.o fmt_ulong.o sgetopt.o subgetopt.o scan_ulong.o strerr.a \
+substdio.a str.a sig.a error.a
+	./load udplogger fmt_ulong.o sgetopt.o subgetopt.o scan_ulong.o strerr.a \
+	substdio.a str.a sig.a error.a
 
 udplogger.o: \
-compile udplogger.c sgetopt.h subfd.h strerr.h sig.h fmt.h scan.h byte.h error.h
-	./compile udplogger.c
+compile udplogger.c sgetopt.h subfd.h strerr.h sig.h fmt.h scan.h \
+byte.h error.h conf-ip haveip6.h
+	./compile -DDYNAMIC_BUF `grep -h -v "^#" conf-ip` udplogger.c
 
 udpclient: \
 load udpclient.o udpopen.o sgetopt.o subgetopt.o fmt_ulong.o strerr.a substdio.a str.a error.a
