@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-greyd.c,v $
+ * Revision 1.16  2016-04-15 15:45:14+05:30  Cprogrammer
+ * set noipv6 if LIBC_HAS_IP6 is not defined
+ *
  * Revision 1.15  2016-04-10 22:20:14+05:30  Cprogrammer
  * fixed incorrect formatting of context filename
  *
@@ -116,7 +119,8 @@ union sockunion
 	struct sockaddr_in6 sa6;
 #endif
 };
-#ifdef IPV6
+
+#if defined(LIBC_HAS_IP6) && defined(IPV6)
 int             noipv6 = 0;
 #else
 int             noipv6 = 1;
@@ -1485,7 +1489,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_greyd_c()
 {
-	static char    *x = "$Id: qmail-greyd.c,v 1.15 2016-04-10 22:20:14+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-greyd.c,v 1.16 2016-04-15 15:45:14+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
