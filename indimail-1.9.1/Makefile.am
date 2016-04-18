@@ -973,7 +973,7 @@ install-data-hook:
 		done; \
 		chown indimail:indimail $(DESTDIR)@prefix@/etc/wordlist.db || true; \
 	fi
-	if test " $(DISTRIB_ID)" = " Ubuntu" ; then \
+	if test " $(DISTRIB_ID)" = " Ubuntu" -o " $(DISTRIB_ID)" = " Debian" ; then \
 		$(mkinstalldirs) $(DESTDIR)/etc/apparmor.d/local || exit 1; \
 		$(INSTALL_DATA) usr.sbin.mysqld $(DESTDIR)/etc/apparmor.d/local/usr.sbin.mysqld  || exit 1; \
 		$(INSTALL_DATA) usr.sbin.clamd $(DESTDIR)/etc/apparmor.d/local/usr.sbin.clamd  || exit 1; \
