@@ -70,6 +70,7 @@ esac
 #
 # Debian silliness
 #
+(
 if [ " $1" = " purge" ] ; then
 	nscd_up=`ps -ef |grep nscd |grep -v grep|wc -l`
 	if [ $nscd_up -ge 1 ] ; then
@@ -229,4 +230,5 @@ else
 		/bin/sh ${prefix}/boot/rpm.init postun
 	fi
 fi
+) >> /tmp/indimail-uinstall.log
 exit 0

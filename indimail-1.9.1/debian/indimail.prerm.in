@@ -30,6 +30,7 @@ fi
 
 case "$1" in
     remove|upgrade|deconfigure)
+	(
 	if [ -f ${prefix}/sbin/initsvc ] ; then
 		${prefix}/sbin/initsvc -status || /etc/init.d/indimail stop
 	fi
@@ -59,6 +60,7 @@ case "$1" in
 		echo "Running Custom Un-Installation Script for preun" 1>&2
 		/bin/sh ${prefix}/boot/rpm.init preun
 	fi
+	) > /tmp/indimail-uinstall.log
     ;;
 
     failed-upgrade)
