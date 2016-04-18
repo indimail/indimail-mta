@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail.spec.in,v 2.315 2016-04-14 16:57:24+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 2.316 2016-04-18 20:19:30+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %define _unpackaged_files_terminate_build 1
 
@@ -2345,18 +2345,19 @@ echo "11. Configure ODMR service"
 echo "12. Configure greylisting service"
 echo "13. Configure QMTP service"
 echo "14. Configure QMQP service"
-echo "15. Configure fetchmail service"
-echo "16. Configure IMAP/POP3/poppass services"
-echo "17. Configure indisrvr service"
-echo "18. Configure nssd service"
-echo "19. Configure inlookup service"
-echo "20. Configure qscanq/clamd/freshclam service"
-echo "21. Configure %{_prefix}/control/signatures"
-echo "22. Configure SPAM filter configuration"
-echo "23. Configure tcprules database for SMTP, IMAP, POP3, popass"
-echo "24. Configure selinux configuration"
-echo "25. Configure indimail startup"
-echo "26. Configure default cron entries"
+echo "15. Configure udplogger service"
+echo "16. Configure fetchmail service"
+echo "17. Configure IMAP/POP3/poppass services"
+echo "18. Configure indisrvr service"
+echo "19. Configure nssd service"
+echo "20. Configure inlookup service"
+echo "21. Configure qscanq/clamd/freshclam service"
+echo "22. Configure %{_prefix}/control/signatures"
+echo "23. Configure SPAM filter configuration"
+echo "24. Configure tcprules database for SMTP, IMAP, POP3, popass"
+echo "25. Configure selinux configuration"
+echo "26. Configure indimail startup"
+echo "27. Configure default cron entries"
 echo ""
 
 (
@@ -2700,6 +2701,9 @@ if [ %noclamav -eq 0 -o $clamav_os -eq 1 ] ; then
 	fi
 fi
 
+# udplogger service
+%{_prefix}/sbin/svctool --udplogger=3000 --localip=0 --timeout=10 --servicedir=%{servicedir}
+
 %{__cat} <<EOF > %{_prefix}/control/signatures
 # Windows executables seen in active virii
 TVqQAAMAA:
@@ -3015,7 +3019,7 @@ for i in fetchmail indisrvr.4000 inlookup.infifo mysql.3306 \
 pwdlookup qmail-imapd.143 qmail-imapd-ssl.993 qmail-pop3d.110 qmail-pop3d-ssl.995 \
 qmail-send.25 qmail-smtpd.25 qmail-smtpd.366 qmail-spamlog qscanq qmail-imapd.4143 \
 qmail-pop3d.4110 qmail-smtpd.465 qmail-smtpd.587 qmail-qmtpd.209 qmail-qmqpd.628 \
-qmail-poppass.106 greylist.1999 .svscan
+qmail-poppass.106 greylist.1999 udplogger.3000 .svscan
 do
 	if [ -d %{servicedir}/$i ] ; then
 		%{__rm} -rf %{servicedir}/$i || true
