@@ -36,6 +36,7 @@ flash_version=@flash_version@
 mpack_version=@mpack_version@
 logalert_version=@logalert_version@
 fortune_version=@fortune_version@
+rm=/bin/rm
 
 DESTDIR=$(CURDIR)/debian/tmp
 
@@ -84,7 +85,7 @@ build-stamp:
 	touch build-stamp
 
 clean:
-	rm -f build-stamp configure-stamp
+	${rm} -f build-stamp configure-stamp
 	#$(MAKE) -s clean; $(MAKE) -s distclean || true
 	dh_testdir
 	dh_testroot
