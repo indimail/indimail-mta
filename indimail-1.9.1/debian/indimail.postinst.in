@@ -155,23 +155,26 @@ if [ -d ${sysconfdir}/ld.so.conf.d ] ; then
 fi
 /sbin/ldconfig
 
+if [ -f /usr/sbin/clamd -a -f /usr/bin/clamdscan ] ; then
+	clamav_os=1
+fi
 echo "Doing post installation activities for the following"
 echo ""
 echo " 1. Configure ${logdir} for multilog"
 echo " 2. Configure ${servicedir}. Move existing services to ${servicedir}.org"
 echo " 3. Configure svscanlog service"
 echo " 4. Configure standard catch-all accounts, default qmail configuration"
-echo " 5. Configure apparmor for MySQL"
-echo " 6. Configure ${prefix}/etc/indimail.cnf for MySQL service"
-echo " 7. Configure MySQL DB in ${prefix}/mysqldb/data"
-echo " 8. Configure DKIM, Domainkeys signature"
-echo " 9. Configure QHPSI for inline virus scanning"
-echo "10. Configure SMTP services on port in 465 25 587"
-echo "11. Configure default queue configuration for sendmail, qmail-inject"
-echo "12. Configure ODMR service"
-echo "13. Configure greylisting service"
-echo "14. Configure QMTP service"
-echo "15. Configure QMQP service"
+echo " 5. Configure ${prefix}/etc/indimail.cnf for MySQL service"
+echo " 6. Configure MySQL DB in ${prefix}/mysqldb/data"
+echo " 7. Configure DKIM, Domainkeys signature"
+echo " 8. Configure QHPSI for inline virus scanning"
+echo " 9. Configure SMTP services on port in 465 25 587"
+echo "10. Configure default queue configuration for sendmail, qmail-inject"
+echo "11. Configure ODMR service"
+echo "12. Configure greylisting service"
+echo "13. Configure QMTP service"
+echo "14. Configure QMQP service"
+echo "15. Configure udplogger service"
 echo "16. Configure fetchmail service"
 echo "17. Configure IMAP/POP3/poppass services"
 echo "18. Configure indisrvr service"
@@ -183,6 +186,11 @@ echo "23. Configure SPAM filter configuration"
 echo "24. Configure tcprules database for SMTP, IMAP, POP3, popass"
 echo "25. Configure indimail startup"
 echo "26. Configure default cron entries"
+if [ -x /etc/init.d/apparmor ] ; then
+if [ $noclamav -eq 0 -o $clamav_os -eq 1 ] ; then
+echo "27. Creating apparmor profile"
+fi
+fi
 echo ""
 
 if [ -x /bin/touch ] ; then
@@ -211,18 +219,6 @@ echo "Creating default qmail configuraton and catch-all alias (${prefix}/alias/M
 ${prefix}/sbin/svctool --config=qmail --postmaster=${prefix}/alias/Maildir/ \
 	--default-domain=${default_domain}
 
-# MySQL
-if [ -x /etc/init.d/apparmor ] ; then
-	if [ -f /etc/apparmor.d/local/usr.sbin/mysqld ] ; then
-		echo "Reloading apparmor profiles..."
-		/usr/sbin/service apparmor reload
-	else
-		echo "Shutting down apparmor..."
-		/usr/sbin/service apparmor stop
-		/usr/sbin/service apparmor teardown
-	fi
-fi
-
 echo "Creating Database/Service for MySQL"
 # MySQL Config Creation
 if [ -x ${mysqlPrefix}/libexec/mysqld -o -x ${mysqlPrefix}/sbin/mysqld ] ; then
@@ -240,6 +236,21 @@ if [ -x ${mysqlPrefix}/libexec/mysqld -o -x ${mysqlPrefix}/sbin/mysqld ] ; then
 	fi
 else
 	echo "WARNING!!! Did not find mysqld in ${mysqlPrefix}/{libexec,sbin}. Skipping MySQL configuration" 1>&2
+fi
+
+# MySQL apparmor
+if [ -x /etc/init.d/apparmor ] ; then
+	if [ -f ${prefix}/etc/apparmor.d/local/usr.sbin.mysqld -a -d /etc/apparmor.d/local ] ; then
+		cp ${prefix}/etc/apparmor.d/local/usr.sbin.mysqld /etc/apparmor.d/local
+	fi
+	if [ -f /etc/apparmor.d/local/usr.sbin.mysqld ] ; then
+		echo "Reloading apparmor profiles..."
+		/usr/sbin/service apparmor reload || true
+	else
+		echo "Shutting down apparmor..."
+		/usr/sbin/service apparmor stop || true
+		/usr/sbin/service apparmor teardown || true
+	fi
 fi
 
 if [ $nodksignature -eq 0 ] ; then
@@ -532,6 +543,27 @@ if [ $noclamav -eq 0 -o $clamav_os -eq 1 ] ; then
 		fi
 	fi
 fi
+if [ -x /etc/init.d/apparmor ] ; then
+if [ $noclamav -eq 0 -o $clamav_os -eq 1 ] ; then
+	if [ -f ${prefix}/etc/apparmor.d/local/usr.sbin.clamd -a -d /etc/apparmor.d/local ] ; then
+		cp ${prefix}/etc/apparmor.d/local/usr.sbin.clamd /etc/apparmor.d/local
+	fi
+	if [ -f ${prefix}/etc/apparmor.d/local/usr.bin.freshclam -a -d /etc/apparmor.d/local ] ; then
+		cp ${prefix}/etc/apparmor.d/local/usr.bin.freshclam /etc/apparmor.d/local
+	fi
+	if [ -f /etc/apparmor.d/local/usr.sbin.clamd -o -f /etc/apparmor.d/local/usr.bin.freshclam ] ; then
+		echo "Reloading apparmor profiles..."
+		/usr/sbin/service apparmor reload || true
+	else
+		echo "Shutting down apparmor..."
+		/usr/sbin/service apparmor stop || true
+		/usr/sbin/service apparmor teardown || true
+	fi
+fi
+fi
+
+# udplogger service
+${prefix}/sbin/svctool --udplogger=3000 --localip=0 --timeout=10 --servicedir=${servicedir}
 
 /bin/cat <<EOFUU > ${prefix}/control/signatures
 # Windows executables seen in active virii
