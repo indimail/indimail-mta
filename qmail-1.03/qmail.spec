@@ -1,6 +1,6 @@
 #
 #
-# $Id: qmail.spec,v 1.27 2016-04-14 16:55:25+05:30 Cprogrammer Exp mbhangui $
+# $Id: qmail.spec,v 1.28 2016-04-18 20:20:16+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %define _unpackaged_files_terminate_build 1
 
@@ -1179,10 +1179,11 @@ echo " 9. Configure ODMR service"
 echo "10. Configure greylisting service"
 echo "11. Configure QMTP service"
 echo "12. Configure QMQP service"
-echo "13. Configure qscanq/clamd/freshclam service"
-echo "14. Configure %{_prefix}/control/signatures"
-echo "15. Configure tcprules database for SMTP, QMTP, QMQP"
-echo "16. Configure indimail-mta startup"
+echo "13. Configure udplogger service"
+echo "14. Configure qscanq/clamd/freshclam service"
+echo "15. Configure %{_prefix}/control/signatures"
+echo "16. Configure tcprules database for SMTP, QMTP, QMQP"
+echo "17. Configure indimail-mta startup"
 echo ""
 
 (
@@ -1366,6 +1367,9 @@ if [ %{noclamav} -eq 0 -o $clamav_os -eq 1 ] ; then
 		fi
 	fi
 fi
+
+# udplogger service
+%{_prefix}/sbin/svctool --udplogger=3000 --localip=0 --timeout=10 --servicedir=%{servicedir}
 
 %{__cat} <<EOF > %{_prefix}/control/signatures
 # Windows executables seen in active virii
@@ -1629,7 +1633,7 @@ done
 fi
 for i in qmail-send.25 qmail-smtpd.25 qmail-smtpd.366 \
 qmail-spamlog qscanq qmail-smtpd.465 qmail-smtpd.587 qmail-qmtpd.209 \
-qmail-qmqpd.628 greylist.1999 .svscan
+qmail-qmqpd.628 greylist.1999 udplogger.3000 .svscan
 do
 	if [ -d %{servicedir}/$i ] ; then
 		%{__rm} -rf %{servicedir}/$i || true
