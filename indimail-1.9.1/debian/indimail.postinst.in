@@ -405,7 +405,7 @@ echo "1" > ${servicedir}/qmail-smtpd.366/variables/DISABLE_PLUGIN
 # Greylist daemon
 ${prefix}/sbin/svctool --greylist=1999 --servicedir=$servicedir --min-resend-min=2 \
     --resend-win-hr=24 --timeout-days=30 --context-file=greylist.context \
-    --hash-size=65536 --save-interval=5 --whitelist=greylist.white --use-greydaemon
+    --hash-size=65536 --save-interval=5 --whitelist=greylist.white
 
 # qmail-qmtpd service
 ${prefix}/sbin/svctool --qmtp=209 --servicedir=$servicedir --qbase=${qbase} \
