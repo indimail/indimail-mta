@@ -147,46 +147,37 @@ if [ -d ${sysconfdir}/ld.so.conf.d ] ; then
 fi
 /sbin/ldconfig
 
+if [ -f /usr/sbin/clamd -a -f /usr/bin/clamdscan ] ; then
+	clamav_os=1
+fi
 echo "Doing post installation activities for the following"
 echo ""
-echo " 1. Creating apparmor profile"
-echo " 2. Configure ${logdir} for multilog"
-echo " 3. Configure ${servicedir}. Move existing services to %{servicedir}.org"
-echo " 4. Configure svscanlog service"
-echo " 5. Configure standard catch-all accounts, default qmail configuration"
-echo " 6. Configure DKIM, Domainkeys signature"
-echo " 7. Configure QHPSI for inline virus scanning"
-echo " 8. Configure SMTP services on port in 465 25 587"
-echo " 9. Configure default queue configuration for sendmail, qmail-inject"
-echo "10. Configure ODMR service"
-echo "11. Configure greylisting service"
-echo "12. Configure QMTP service"
-echo "13. Configure QMQP service"
+echo " 1. Configure ${logdir} for multilog"
+echo " 2. Configure ${servicedir}. Move existing services to %{servicedir}.org"
+echo " 3. Configure svscanlog service"
+echo " 4. Configure standard catch-all accounts, default qmail configuration"
+echo " 5. Configure DKIM, Domainkeys signature"
+echo " 6. Configure QHPSI for inline virus scanning"
+echo " 7. Configure SMTP services on port in 465 25 587"
+echo " 8. Configure default queue configuration for sendmail, qmail-inject"
+echo " 9. Configure ODMR service"
+echo "10. Configure greylisting service"
+echo "11. Configure QMTP service"
+echo "12. Configure QMQP service"
+echo "13. Configure udplogger service"
 echo "14. Configure qscanq/clamd/freshclam service"
 echo "15. Configure ${prefix}/control/signatures"
 echo "16. Configure tcprules database for SMTP, QMTP, QMQP"
 echo "17. Configure indimail-mta startup"
+if [ -x /etc/init.d/apparmor ] ; then
+if [ $noclamav -eq 0 -o $clamav_os -eq 1 ] ; then
+echo "18. Creating apparmor profile for clamav"
+fi
+fi
 echo ""
 
 echo "Post Installation..."
 (
-if [ -x /etc/init.d/apparmor ] ; then
-	if [ -f ${prefix}/etc/apparmor.d/local/usr.sbin.clamd -a -d /etc/apparmor.d/local ] ; then
-		cp ${prefix}/etc/apparmor.d/local/usr.sbin.clamd /etc/apparmor.d/local
-	fi
-	if [ -f ${prefix}/etc/apparmor.d/local/usr.bin.freshclam -a -d /etc/apparmor.d/local ] ; then
-		cp ${prefix}/etc/apparmor.d/local/usr.bin.freshclam /etc/apparmor.d/local
-	fi
-	if [ -f /etc/apparmor.d/local/usr.sbin.clamd -o -f /etc/apparmor.d/local/usr.bin.freshclam ] ; then
-		echo "Reloading apparmor profiles..."
-		/usr/sbin/service apparmor reload
-	else
-		echo "Shutting down apparmor..."
-		/usr/sbin/service apparmor stop
-		/usr/sbin/service apparmor teardown
-	fi
-fi
-
 echo "Creating ${logdir}"
 if [ ! -d ${logdir} ] ; then
 	/bin/mkdir ${logdir}
@@ -235,6 +226,7 @@ else
 	qmtp_soft_mem=52428800
 	qmqp_soft_mem=52428800
 fi
+
 echo "Checking if clamav is installed"
 if [ $noclamav -eq 0 ] ; then
 	clamav_os=0
@@ -255,6 +247,7 @@ else
 		clamav_os=0
 	fi
 fi
+
 # SMTP
 for port in 465 25 587
 do
@@ -344,6 +337,9 @@ if [ $noclamav -eq 0 -o $clamav_os -eq 1 ] ; then
 		--sysconfdir=$mysysconfdir
 fi
 
+# udplogger service
+${prefix}/sbin/svctool --udplogger=3000 --localip=0 --timeout=10 --servicedir=${servicedir}
+
 /bin/cat <<EOFUU > ${prefix}/control/signatures
 # Windows executables seen in active virii
 TVqQAAMAA
@@ -365,6 +361,27 @@ TVrQAT8AA
 R0lGODlhaAA7APcAAP///+rp6puSp6GZrDUjUUc6Zn53mFJMdbGvvVtXh2xre8bF1x8cU4yLprOy
 EOFUU
 /bin/chown qscand:qscand ${prefix}/control/signatures
+
+if [ -x /etc/init.d/apparmor ] ; then
+if [ $noclamav -eq 0 -o $clamav_os -eq 1 ] ; then
+	if [ -d /etc/apparmor.d/local ] ; then
+		(
+		echo "# Site-specific additions and overrides for usr.sbin.clamd."
+		echo "# For more details, please see /etc/apparmor.d/local/README."
+  		echo "${prefix}/share/clamd/ r,"
+  		echo "${prefix/}share/clamd/** krw,"
+		) > /etc/apparmor.d/local/usr.sbin.clamd
+		(
+		echo "# Site-specific additions and overrides for usr.bin.freshclam."
+		echo "# For more details, please see /etc/apparmor.d/local/README."
+  		echo "${prefix}/share/clamd/ r,"
+  		echo "${prefix}/share/clamd/** krw,"
+		) > /etc/apparmor.d/local/usr.bin.freshclam
+		echo "Reloading apparmor profiles..."
+		/usr/sbin/service apparmor reload || true
+	fi
+fi
+fi
 
 # rebuild cdb
 for i in smtp qmtp qmqp
