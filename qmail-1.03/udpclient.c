@@ -1,5 +1,8 @@
 /*
  * $Log: udpclient.c,v $
+ * Revision 1.4  2016-04-18 16:44:33+05:30  Cprogrammer
+ * added option to read from socket
+ *
  * Revision 1.3  2015-12-31 08:33:52+05:30  Cprogrammer
  * copy data from stdin if message argument not specified on command line
  *
@@ -18,8 +21,10 @@
 #include "udpopen.h"
 #include "strerr.h"
 #include "subfd.h"
+#include "scan.h"
+#include "timeoutread.h"
 
-char           *usage = "usage: udpclient [-h host] [-p port] message message ...";
+char           *usage = "usage: udpclient [-h host] [-p port] [-r responsesize] [-t timeout] message message ...";
 
 #define FATAL "udpclient: fatal: "
 
@@ -37,15 +42,24 @@ int
 main(int argc, char **argv)
 {
 	int             sfd, opt;
+	int             timeout = 5;
+	int             maxresponsesize = -1;
+	char            buf[1024];
 	char           *host = 0, *port = 0;
 
-	while ((opt = getopt(argc, argv, "h:p:")) != opteof) {
+	while ((opt = getopt(argc, argv, "h:p:r:t:")) != opteof) {
 		switch (opt) {
 		case 'h':
 			host = optarg;
 			break;
 		case 'p':
 			port = optarg;
+			break;
+		case 't':
+			scan_int(optarg, &timeout);
+			break;
+		case 'r':
+			scan_int(optarg, &maxresponsesize);
 			break;
 		default:
 			strerr_die1x(100, usage);
@@ -87,6 +101,18 @@ main(int argc, char **argv)
 	}
 	if (substdio_flush(subfdout) == -1)
 		strerr_die2sys(111, FATAL, "write: ");
+		int r;
+	if (maxresponsesize > 0) {
+		if ((r = timeoutread(timeout, sfd, buf, maxresponsesize)) == -1)
+			strerr_die2sys(111, FATAL, "read: ");
+		if (r > 0) {
+			if (substdio_bput(subfderr, buf, r) == -1)
+				strerr_die2sys(111, FATAL, "write: ");
+			if (substdio_flush(subfderr) == -1)
+				strerr_die2sys(111, FATAL, "write: ");
+		}
+	}
+	close(1);
 	close(sfd);
 	_exit(0);
 }
@@ -94,7 +120,7 @@ main(int argc, char **argv)
 void
 getversion_udpclient_c()
 {
-	static char    *x = "$Id: udpclient.c,v 1.3 2015-12-31 08:33:52+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: udpclient.c,v 1.4 2016-04-18 16:44:33+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

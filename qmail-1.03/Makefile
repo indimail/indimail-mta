@@ -5701,8 +5701,10 @@ byte.h error.h conf-ip haveip6.h
 	./compile -DDYNAMIC_BUF `grep -h -v "^#" conf-ip` udplogger.c
 
 udpclient: \
-load udpclient.o udpopen.o sgetopt.o subgetopt.o fmt_ulong.o strerr.a substdio.a str.a error.a
-	./load udpclient udpopen.o sgetopt.o subgetopt.o fmt_ulong.o strerr.a substdio.a str.a error.a
+load udpclient.o udpopen.o sgetopt.o subgetopt.o fmt_ulong.o \
+timeoutread.o scan_ulong.o strerr.a substdio.a str.a error.a
+	./load udpclient udpopen.o sgetopt.o subgetopt.o fmt_ulong.o \
+	timeoutread.o scan_ulong.o strerr.a substdio.a str.a error.a
 
 udpopen.o: \
 compile udpopen.c subfd.h udpopen.h strerr.h fmt.h hasindimail.h byte.h
@@ -5713,7 +5715,7 @@ compile tcpopen.c subfd.h tcpopen.h strerr.h fmt.h hasindimail.h fmt.h byte.h st
 	./compile -DQMAIL_INTERNAL `grep -h -v "^#" conf-ip` tcpopen.c
 
 udpclient.o: \
-compile udpclient.c subfd.h strerr.h
+compile udpclient.c subfd.h strerr.h timeoutread.h scan.h
 	./compile udpclient.c
 
 whois: \
