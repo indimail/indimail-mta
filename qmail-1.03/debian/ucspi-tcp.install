@@ -14,7 +14,6 @@ var/indimail/bin/mconnect-io /var/indimail/bin
 var/indimail/bin/rblsmtpd /var/indimail/bin
 var/indimail/man/man1/tcpserver.1.gz /var/indimail/man/man1
 var/indimail/man/man1/udpclient.1.gz /var/indimail/man/man1
-var/indimail/man/man1/udplogger.8.gz /var/indimail/man/man1
 var/indimail/man/man1/tcprules.1.gz /var/indimail/man/man1
 var/indimail/man/man1/tcprulescheck.1.gz /var/indimail/man/man1
 var/indimail/man/man1/tcpclient.1.gz /var/indimail/man/man1
@@ -25,3 +24,4 @@ var/indimail/man/man1/http@.1.gz /var/indimail/man/man1
 var/indimail/man/man1/tcpcat.1.gz /var/indimail/man/man1
 var/indimail/man/man1/mconnect.1.gz /var/indimail/man/man1
 var/indimail/man/man1/rblsmtpd.1.gz /var/indimail/man/man1
+var/indimail/man/man8/udplogger.8.gz /var/indimail/man/man8
