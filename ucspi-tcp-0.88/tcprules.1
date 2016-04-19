@@ -116,6 +116,7 @@ Each rule contains an address, a colon, and a list of instructions, with no
 extra spaces. When
 .BR tcpserver (1)
 receives a connection from that address, it follows the instructions.
+
 .SH ADDRESSES
 .BR tcpserver (1)
 looks for rules with various addresses: 
@@ -150,7 +151,7 @@ For example, here are some rules:
      joe@127.0.0.1:first
      18.23.0.32:second
      :third
-     127.:fourth
+     127.:fourth,!GREYIP
 
 If $TCPREMOTEIP is 10.119.75.38,
 .BR tcpserver (1)
@@ -162,7 +163,7 @@ will follow the second instructions.
 
 If $TCPREMOTEIP is 127.0.0.1 and $TCPREMOTEINFO is bill,
 .BR tcpserver (1)
-will follow the fourth instructions. 
+will follow the fourth instructions and GREYIP will be removed from the environment.
 
 If $TCPREMOTEIP is 127.0.0.1 and $TCPREMOTEINFO is joe,
 .BR tcpserver (1)
@@ -263,6 +264,17 @@ Any number of variables may be listed:
 .IP
  127.0.0.1:allow,RELAYCLIENT="",TCPLOCALHOST="movie.edu"
  ::1:allow,RELAYCLIENT="",TCPLOCALHOST="movie.edu"
+
+.P
+The instructions may continue with removal of environment variables, in the form
+!var.
+.BR tcpserver (1)
+removes an environment variable $var. For example,
+.IP
+10.0.:allow,!RELAYCLIENT=
+.P
+removes an environment variable $RELAYCLIENT.
+
 .SH SEE ALSO
 tcpserver(1),
 tcprulescheck(1),
