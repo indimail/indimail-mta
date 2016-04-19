@@ -1,5 +1,8 @@
 /*
  * $Log: smtpd.c,v $
+ * Revision 1.186  2016-04-19 10:24:37+05:30  Cprogrammer
+ * added argument to err_grey_tmpfail() for additional diagnostic
+ *
  * Revision 1.185  2016-04-10 22:22:21+05:30  Cprogrammer
  * pass ip6 address to greylist()
  *
@@ -718,7 +721,7 @@ int             secure_auth = 0;
 int             ssl_rfd = -1, ssl_wfd = -1;	/*- SSL_get_Xfd() are broken */
 char           *servercert, *clientca, *clientcrl;
 #endif
-char           *revision = "$Revision: 1.185 $";
+char           *revision = "$Revision: 1.186 $";
 char           *protocol = "SMTP";
 stralloc        proto = { 0 };
 static stralloc Revision = { 0 };
@@ -2245,12 +2248,16 @@ err_greytimeout()
 }
 
 void
-err_grey_tmpfail()
+err_grey_tmpfail(char *arg)
 {
 	logerr("qmail-smtpd: ");
 	logerrpid();
 	logerr(remoteip);
 	logerr(" greylisting temporary failure: ");
+	if (arg) {
+		logerr(arg);
+		logerr(": ");
+	}
 	logerr(error_str(errno));
 	logerrf("\n");
 	out("451 greylist temporary failure (#4.3.0)\r\n");
@@ -6842,7 +6849,7 @@ addrrelay() /*- Rejection of relay probes. */
 void
 getversion_smtpd_c()
 {
-	static char    *x = "$Id: smtpd.c,v 1.185 2016-04-10 22:22:21+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: smtpd.c,v 1.186 2016-04-19 10:24:37+05:30 Cprogrammer Exp mbhangui $";
 
 #ifdef INDIMAIL
 	if (x)
