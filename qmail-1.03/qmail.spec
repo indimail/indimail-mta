@@ -1,6 +1,6 @@
 #
 #
-# $Id: qmail.spec,v 1.28 2016-04-18 20:20:16+05:30 Cprogrammer Exp mbhangui $
+# $Id: qmail.spec,v 1.29 2016-04-19 14:23:57+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %define _unpackaged_files_terminate_build 1
 
@@ -189,7 +189,7 @@ The package combines qmail with other packages like libdkim, libsrs2
 
 %{see_base}
 
-%package daemontools
+%package -n daemontools
 Summary: A collection of tools for managing UNIX services
 Conflicts: indimail, indimail-mta
 %if %{undefined suse_version} && %{undefined sles_version}
@@ -198,7 +198,7 @@ Group: System Environment/Base
 Group: System/Base
 %endif
 
-%description daemontools
+%description -n daemontools
 daemontools is a collection of tools for managing UNIX services. 
 
 supervise monitors a service. It starts the service and restarts the
@@ -215,7 +215,7 @@ Original Author:
 ---------------
     Dan J. Bernstein <djb@cr.yp.to>
 
-%package ucspi-tcp
+%package -n ucspi-tcp
 Conflicts: indimail, indimail-mta
 Summary: A collection of tools for building TCP client-server applications
 %if %{undefined suse_version} && %{undefined sles_version}
@@ -224,7 +224,7 @@ Group: System Environment/Base
 Group: System/Base
 %endif
 
-%description ucspi-tcp
+%description -n ucspi-tcp
 tcpserver and tcpclient are easy-to-use command-line tools for building
 TCP client-server applications.
 
@@ -910,7 +910,7 @@ done
 # and /var/qmail/control/plusdomain from your central server, so that qmail-inject uses appropriate host names in outgoing mail; and
 # this host's name in /var/qmail/control/idhost, so that qmail-inject generates Message-ID without any risk of collision
 
-%files daemontools
+%files -n daemontools
 %defattr(-, root, root,-)
 #
 # Directories
@@ -988,7 +988,7 @@ done
 %attr(444,root,qmail)                   %{_prefix}/man/man8/svscanboot.8.gz
 %attr(444,root,qmail)                   %{_prefix}/man/man8/udplogger.8.gz
 
-%files ucspi-tcp
+%files -n ucspi-tcp
 %attr(555,root,qmail)                   %{_prefix}/bin/tcpserver
 %attr(555,root,qmail)                   %{_prefix}/bin/tcprules
 %attr(555,root,qmail)                   %{_prefix}/bin/tcprulescheck
