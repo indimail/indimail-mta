@@ -1,5 +1,8 @@
 /*
  * $Log: greylist.c,v $
+ * Revision 1.10  2016-04-19 10:33:35+05:30  Cprogrammer
+ * added more diagnostics errors
+ *
  * Revision 1.9  2016-04-15 15:44:11+05:30  Cprogrammer
  * create ipv4 socket if ipv6 stack is disabled
  *
@@ -32,6 +35,7 @@
 #include "haveip6.h"
 #include "stralloc.h"
 #include "ip.h"
+#include "fmt.h"
 #include "byte.h"
 #include "scan.h"
 #include "greylist.h"
@@ -60,13 +64,14 @@ int             noipv6 = 1;
 
 
 static int 
-fn_handler(errfn, timeoutfn, option)
+fn_handler(errfn, timeoutfn, option, arg)
 	void              (*errfn)();
 	void              (*timeoutfn)();
 	int               option;
+	char             *arg;
 {
 	if (!option)
-		(*errfn)();
+		(*errfn)(arg);
 	else
 		(*timeoutfn)();
 	return (-1);
@@ -91,8 +96,10 @@ scan_ip_port(gip, defaultip, defaultport, ipp, portp)
 
 #ifdef IPV6
 	if (!gip) {
-		if (!(n = ip6_scan(defaultip, &ipp->ip6)))
+		if (!(n = ip6_scan(defaultip, &ipp->ip6))) {
+			errno = EINVAL;
 			return (-1);
+		}
 		if (!(*(defaultip + n) == '@' && scan_ulong(defaultip + n + 1, &port)))
 			port = defaultport;
 	} else {
@@ -107,8 +114,12 @@ scan_ip_port(gip, defaultip, defaultport, ipp, portp)
 			*portp = port = defaultport;
 		else
 			*ptr = 0;
-		if (!(n = ip6_scan(ip_a, &ipp->ip6)))
+		if (*ip_a == '0' && !*(ip_a + 1))
+			ip_a = "0.0.0.0";
+		if (!(n = ip6_scan(ip_a, &ipp->ip6))) {
+			errno = EINVAL;
 			return (-1);
+		}
 	}
 #else
 	if (!gip) {
@@ -175,25 +186,26 @@ connect_udp(ip, port, errfn)
 		}
 	}
 	if ((fd = socket(noipv6 ? AF_INET : AF_INET6, SOCK_DGRAM, 0)) == -1)
-		return (errfn ? fn_handler(errfn, 0, 0) : -1);
+		return (errfn ? fn_handler(errfn, 0, 0, noipv6 ? "socket(AF_INET)" : "socket(AF_INET6)") : -1);
 	if (connect(fd, (struct sockaddr *)&sa, sizeof(sa)) < 0)
-		return (errfn ? fn_handler(errfn, 0, 0) : -1);
+		return (errfn ? fn_handler(errfn, 0, 0, "connect") : -1);
 #else
 	byte_zero((char *) &sout, sizeof(sout));
 	sout.sin_port = htons(port);
 	sout.sin_family = AF_INET;
 	byte_copy((char *) &sout.sin_addr, 4, (char *) &ip->ip);
 	if ((fd = socket(AF_INET, SOCK_DGRAM, 0)) == -1)
-		return (errfn ? fn_handler(errfn, 0, 0) : -1);
+		return (errfn ? fn_handler(errfn, 0, 0, "socket(AF_INET)") : -1);
 	if (connect(fd, (struct sockaddr *)&sout, sizeof(sout)) < 0)
-		return (errfn ? fn_handler(errfn, 0, 0) : -1);
+		return (errfn ? fn_handler(errfn, 0, 0, "connect") : -1);
 #endif
 	return (fd);
 }
 
 int 
-query_skt(fd, queryp, responsep, maxresponsesize, timeout, timeoutfn, errfn)
+query_skt(fd, ipaddr, queryp, responsep, maxresponsesize, timeout, timeoutfn, errfn)
 	int             fd;
+	char           *ipaddr;
 	stralloc       *queryp;
 	char           *responsep;
 	int             maxresponsesize, timeout;
@@ -202,13 +214,13 @@ query_skt(fd, queryp, responsep, maxresponsesize, timeout, timeoutfn, errfn)
 	int             r = 0;
 
 	if (timeoutwrite(timeout, fd, queryp->s, queryp->len) < 0)
-		return (errfn ? fn_handler(errfn, 0, 0) : -1);
+		return (errfn ? fn_handler(errfn, 0, 0, "write") : -1);
 	if ((r = timeoutread(timeout, fd, responsep, maxresponsesize)) == -1) {
   		if (errno == error_timeout) {
 			responsep[0] = 2;
-			return (errfn ? fn_handler(errfn, timeoutfn, 1) : -1);
+			return (errfn ? fn_handler(errfn, timeoutfn, 1, 0) : -1);
 		}
-		return (errfn ? fn_handler(errfn, 0, 0) : -1);
+		return (errfn ? fn_handler(errfn, 0, 0, ipaddr) : -1);
 	}
 	return (r);
 }
@@ -220,6 +232,7 @@ query_skt(fd, queryp, responsep, maxresponsesize, timeout, timeoutfn, errfn)
  * qmail-smtpd instance).
  */
 stralloc        chkpacket = {0};
+stralloc        ipbuf = {0};
 
 int 
 greylist(gip, connectingip, from, tolist, tolen, timeoutfn, errfn)
@@ -227,7 +240,9 @@ greylist(gip, connectingip, from, tolist, tolen, timeoutfn, errfn)
 	int             tolen;
 	void            (*timeoutfn) (), (*errfn) (); /*- errfn must _exit */
 {
-	int             r;
+	int             r, len = 0;
+	char            strnum[FMT_ULONG];
+	char            z[IPFMT];
 	unsigned long   port;
 	union v46addr   ip;
 	char            rbuf[2];
@@ -235,13 +250,35 @@ greylist(gip, connectingip, from, tolist, tolen, timeoutfn, errfn)
 
 	if (!gip) {
 		errno = EINVAL;
-		return (errfn ? fn_handler(errfn, 0, 0) : -1);
+		return (errfn ? fn_handler(errfn, 0, 0, "Invalid IP") : -1);
 	}
 	if (sockfd == -1) {
 		if (scan_ip_port(gip, DEFAULTGREYIP, DEFAULTGREYPORT, &ip, &port) == -1)
-			return (errfn ? fn_handler(errfn, 0, 0) : -1);
+			return (errfn ? fn_handler(errfn, 0, 0, "ip scan") : -1);
+#ifdef IPV6
+		len = ip6_fmt(z, &ip.ip6);
+#else
+		len = ip4_fmt(z, &ip.ip);
+#endif
+		if (!stralloc_copyb(&ipbuf, "timeoutread: ip[", 16))
+			return (-2);
+		else
+		if (!stralloc_catb(&ipbuf, z, len))
+			return (-2);
+		else
+		if (!stralloc_catb(&ipbuf, "] port[", 7))
+			return (-2);
+		strnum[len = fmt_ulong(strnum, port)] = 0;
+		if (!stralloc_catb(&ipbuf, strnum, len))
+			return (-2);
+		else
+		if (!stralloc_catb(&ipbuf, "]", 1))
+			return (-2);
+		else
+		if (!stralloc_0(&ipbuf))
+			return (-2);
 		if ((sockfd = connect_udp(&ip, port, errfn)) == -1)
-			return (errfn ? fn_handler(errfn, 0, 0) : -1);
+			return (errfn ? fn_handler(errfn, 0, 0, "connect_udp") : -1);
 	}
 	if (!stralloc_copys(&chkpacket, "I"))
 		return (-2); /*- ENOMEM */
@@ -264,7 +301,7 @@ greylist(gip, connectingip, from, tolist, tolen, timeoutfn, errfn)
 	if (!stralloc_0(&chkpacket))
 		return (-2);
 #endif
-	if ((r = query_skt(sockfd, &chkpacket, rbuf, sizeof rbuf, GREYTIMEOUT, timeoutfn, errfn)) == -1)
+	if ((r = query_skt(sockfd, ipbuf.s, &chkpacket, rbuf, sizeof rbuf, GREYTIMEOUT, timeoutfn, errfn)) == -1)
 		return -1;	/*- Permit connection (soft fail) - probably timeout */
 	if (rbuf[0] == 0)
 		return (0);	/* greylist */
@@ -274,7 +311,7 @@ greylist(gip, connectingip, from, tolist, tolen, timeoutfn, errfn)
 void
 getversion_greylist_c()
 {
-	static char    *x = "$Id: greylist.c,v 1.9 2016-04-15 15:44:11+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: greylist.c,v 1.10 2016-04-19 10:33:35+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
