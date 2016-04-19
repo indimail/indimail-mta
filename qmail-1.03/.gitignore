@@ -518,3 +518,5 @@ nowutc
 yearcal
 yearcal.o
 conf-shared
+debian/changelog
+debian/_service

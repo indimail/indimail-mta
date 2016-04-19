@@ -90,6 +90,7 @@ debian/obs_deb_prep
 debian/patches
 debian/source
 debian/conffiles
+debian/rules
 debian/_service
 debian/debian.tar.gz
 debian/dummy.tar.gz
