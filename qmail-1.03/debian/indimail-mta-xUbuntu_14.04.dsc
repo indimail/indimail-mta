@@ -1,5 +1,5 @@
 Format: 1.0
-Source: indimail
+Source: indimail-mta
 Section: Misc
 Priority: extra
 Binary: indimail-mta
