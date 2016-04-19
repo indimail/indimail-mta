@@ -27,8 +27,7 @@ dummy.tar.gz: README
 	tar cf - README |gzip > $@
 debian.tar.gz: copyright indimail-mta.preinst indimail-mta.postinst indimail-mta.prerm \
 indimail-mta.postrm rules changelog compat obs_deb_prep control perm_list usr.bin.freshclam \
-usr.sbin.clamd indimail-mta-daemontools.install indimail-mta-ucspi-tcp.install
+usr.sbin.clamd daemontools.install ucspi-tcp.install
 	tar cf - copyright indimail-mta.preinst indimail-mta.postinst indimail-mta.prerm \
-		indimail-mta.postrm rules changelog compat obs_deb_prep indimail-mta-ucspi-tcp.install \
-		indimail-mta-daemontools.install \
-		control perm_list usr.bin.freshclam usr.sbin.clamd | gzip > $@
+		indimail-mta.postrm rules changelog compat obs_deb_prep ucspi-tcp.install \
+		daemontools.install control perm_list usr.bin.freshclam usr.sbin.clamd | gzip > $@
