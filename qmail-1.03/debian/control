@@ -1,4 +1,4 @@
-Source: qmail
+Source: indimail-mta
 Section: misc
 Priority: extra
 Maintainer: Manvendra Bhangui <manvendra@indimail.org>
