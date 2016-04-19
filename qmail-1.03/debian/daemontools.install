@@ -29,8 +29,6 @@ var/indimail/bin/logselect /var/indimail/bin
 var/indimail/bin/qlogselect /var/indimail/bin
 var/indimail/bin/multirotate /var/indimail/bin
 var/indimail/bin/svscanboot /var/indimail/bin
-var/indimail/bin/udplogger /var/indimail/bin
-var/indimail/bin/udpclient /var/indimail/bin
 var/indimail/man/man1/spipe.1.gz /var/indimail/man/man1
 var/indimail/man/man1/qfilelog.1.gz /var/indimail/man/man1
 var/indimail/man/man1/multipipe.1.gz /var/indimail/man/man1
@@ -39,7 +37,6 @@ var/indimail/man/man1/multitail.1.gz /var/indimail/man/man1
 var/indimail/man/man1/qlogselect.1.gz /var/indimail/man/man1
 var/indimail/man/man1/tai2tai64n.1.gz /var/indimail/man/man1
 var/indimail/man/man1/tai64n2tai.1.gz /var/indimail/man/man1
-var/indimail/man/man1/udpclient.1.gz /var/indimail/man/man1
 var/indimail/man/man8/envdir.8.gz /var/indimail/man/man8
 var/indimail/man/man8/envuidgid.8.gz /var/indimail/man/man8
 var/indimail/man/man8/fghack.8.gz /var/indimail/man/man8
@@ -59,4 +56,3 @@ var/indimail/man/man8/tai64nlocal.8.gz /var/indimail/man/man8
 var/indimail/man/man8/tai64nunix.8.gz /var/indimail/man/man8
 var/indimail/man/man8/logselect.8.gz /var/indimail/man/man8
 var/indimail/man/man8/svscanboot.8.gz /var/indimail/man/man8
-var/indimail/man/man8/udplogger.8.gz /var/indimail/man/man8
