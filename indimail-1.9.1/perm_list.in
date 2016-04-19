@@ -879,6 +879,7 @@
 %attr(0444,root,qmail) @indimaildir@/man/man1/setmaillist.1.gz
 %attr(0444,root,qmail) @indimaildir@/man/man1/sigtool.1.gz
 %attr(0444,root,qmail) @indimaildir@/man/man1/spipe.1.gz
+%attr(0444,root,qmail) @indimaildir@/man/man1/srs.1.gz
 %attr(0444,root,qmail) @indimaildir@/man/man1/sslerator.1.gz
 %attr(0444,root,qmail) @indimaildir@/man/man1/strfile.1.gz
 %attr(0444,root,qmail) @indimaildir@/man/man1/swaks.1.gz
@@ -892,6 +893,7 @@
 %attr(0444,root,qmail) @indimaildir@/man/man1/tcpserver.1.gz
 %attr(0444,root,qmail) @indimaildir@/man/man1/teepipe.1.gz
 %attr(0444,root,qmail) @indimaildir@/man/man1/uacl.1.gz
+%attr(0444,root,qmail) @indimaildir@/man/man1/udpclient.1.gz
 %attr(0444,root,qmail) @indimaildir@/man/man1/unstr.1.gz
 %attr(0444,root,qmail) @indimaildir@/man/man1/vaddaliasdomain.1.gz
 %attr(0444,root,qmail) @indimaildir@/man/man1/vadddomain.1.gz
@@ -1114,6 +1116,7 @@
 %attr(0444,root,qmail) @indimaildir@/man/man8/tai64n.8.gz
 %attr(0444,root,qmail) @indimaildir@/man/man8/tai64nlocal.8.gz
 %attr(0444,root,qmail) @indimaildir@/man/man8/tai64nunix.8.gz
+%attr(0444,root,qmail) @indimaildir@/man/man8/udplogger.8.gz
 %attr(0444,root,qmail) @indimaildir@/man/man8/updaterules.8.gz
 %attr(0444,root,qmail) @indimaildir@/man/man8/vacation.8.gz
 %attr(0444,root,qmail) @indimaildir@/man/man8/vcalias.8.gz
