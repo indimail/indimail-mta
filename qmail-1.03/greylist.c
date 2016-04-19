@@ -1,7 +1,7 @@
 /*
  * $Log: greylist.c,v $
  * Revision 1.10  2016-04-19 10:33:35+05:30  Cprogrammer
- * added more diagnostics errors
+ * added additional diagnostics when logging errors
  *
  * Revision 1.9  2016-04-15 15:44:11+05:30  Cprogrammer
  * create ipv4 socket if ipv6 stack is disabled
