@@ -25,6 +25,7 @@
 %dir %attr(0750,qscand,qscand) /var/indimail/qscanq/root/scanq
 %dir %attr(0755,indimail,indimail) /var/indimail/control
 %dir %attr(0755,indimail,indimail) /var/indimail/control/domainkeys
+%dir %attr(2755,qmailr,qmail) /var/indimail/control/ratelimit
 %dir %attr(0755,root,root) /var/indimail/control/defaultqueue
 %dir %attr(0755,root,qmail) /var/indimail/queue
 %dir %attr(0775,qscand,qscand) /var/indimail/share/clamd
@@ -258,6 +259,16 @@
 %attr(0555,root,qmail) /var/indimail/bin/zsuccesses
 %attr(0555,root,qmail) /var/indimail/bin/zsuids
 %attr(0555,root,qmail) /var/indimail/bin/qaes
+%attr(0555,root,qmail) /var/indimail/bin/qlogselect
+%attr(0555,root,root)  /var/indimail/bin/srs
+%attr(0555,root,qmail) /var/indimail/bin/tai2tai64n
+%attr(0555,root,qmail) /var/indimail/bin/tai64n2tai
+%attr(0555,root,qmail) /var/indimail/bin/udpclient
+%attr(0555,root,qmail) /var/indimail/bin/udplogger
+%attr(0555,root,qmail) /var/indimail/bin/whois
+%attr(0555,root,qmail) /var/indimail/bin/leapsecs
+%attr(0555,root,qmail) /var/indimail/bin/nowutc
+%attr(0555,root,qmail) /var/indimail/bin/yearcal
 #
 # sbin
 #
@@ -282,7 +293,6 @@
 %attr(0555,root,root)  /var/indimail/bin/mconnect
 %attr(0555,root,root)  /var/indimail/bin/mconnect-io
 %attr(0555,root,root)  /var/indimail/bin/rblsmtpd
-%attr(0555,root,root)  /var/indimail/bin/srs
 %attr(0555,root,root)  /var/indimail/bin/tcpcat
 %attr(0555,root,root)  /var/indimail/bin/tcpclient
 %attr(0555,root,root)  /var/indimail/bin/tcprules
@@ -567,6 +577,7 @@
 %attr(0444,root,qmail) /var/indimail/man/man1/setforward.1.gz
 %attr(0444,root,qmail) /var/indimail/man/man1/setmaillist.1.gz
 %attr(0444,root,qmail) /var/indimail/man/man1/spipe.1.gz
+%attr(0444,root,qmail) /var/indimail/man/man1/srs.1.gz
 %attr(0444,root,qmail) /var/indimail/man/man1/swaks.1.gz
 %attr(0444,root,qmail) /var/indimail/man/man1/tai2tai64n.1.gz
 %attr(0444,root,qmail) /var/indimail/man/man1/tai64n2tai.1.gz
@@ -578,6 +589,7 @@
 %attr(0444,root,qmail) /var/indimail/man/man1/tcpserver.1.gz
 %attr(0444,root,qmail) /var/indimail/man/man1/teepipe.1.gz
 %attr(0444,root,qmail) /var/indimail/man/man1/uacl.1.gz
+%attr(0444,root,qmail) /var/indimail/man/man1/udpclient.1.gz
 %attr(0444,root,qmail) /var/indimail/man/man1/who@.1.gz
 %attr(0444,root,qmail) /var/indimail/man/man1/xqp.1.gz
 %attr(0444,root,qmail) /var/indimail/man/man1/xrecipient.1.gz
@@ -691,3 +703,4 @@
 %attr(0444,root,qmail) /var/indimail/man/man8/tai64n.8.gz
 %attr(0444,root,qmail) /var/indimail/man/man8/tai64nlocal.8.gz
 %attr(0444,root,qmail) /var/indimail/man/man8/tai64nunix.8.gz
+%attr(0444,root,qmail) /var/indimail/man/man8/udplogger.8.gz
