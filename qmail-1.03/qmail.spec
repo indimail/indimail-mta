@@ -1,6 +1,6 @@
 #
 #
-# $Id: qmail.spec,v 1.29 2016-04-19 14:23:57+05:30 Cprogrammer Exp mbhangui $
+# $Id: qmail.spec,v 1.30 2016-04-20 19:31:47+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %define _unpackaged_files_terminate_build 1
 
@@ -834,7 +834,7 @@ done
 %attr(555,root,qmail)                   %{_prefix}/plugins/generic.so
 %attr(555,root,qmail)                   %{_prefix}/plugins/smtpd-plugin.so
 %attr(555,root,qmail)                   %{_prefix}/plugins/smtpd-plugin0.so
-%attr(555,root,qmail)                   %{_prefix}/plugins/qmail-smtpd.so
+#%attr(555,root,qmail)                   %{_prefix}/plugins/qmail-smtpd.so
 
 %docdir %{_prefix}/doc
 %docdir %{_prefix}/man
@@ -951,8 +951,6 @@ done
 %attr(555,root,qmail)                   %{_prefix}/bin/qlogselect
 %attr(555,root,qmail)                   %{_prefix}/bin/multirotate
 %attr(555,root,qmail)                   %{_prefix}/bin/svscanboot
-%attr(555,root,qmail)                   %{_prefix}/bin/udplogger
-%attr(555,root,qmail)                   %{_prefix}/bin/udpclient
 
 %docdir %{_prefix}/doc
 %docdir %{_prefix}/man
@@ -966,7 +964,6 @@ done
 %attr(444,root,qmail)                   %{_prefix}/man/man1/qlogselect.1.gz
 %attr(444,root,qmail)                   %{_prefix}/man/man1/tai2tai64n.1.gz
 %attr(444,root,qmail)                   %{_prefix}/man/man1/tai64n2tai.1.gz
-%attr(444,root,qmail)                   %{_prefix}/man/man1/udpclient.1.gz
 %attr(444,root,qmail)                   %{_prefix}/man/man8/envdir.8.gz
 %attr(444,root,qmail)                   %{_prefix}/man/man8/envuidgid.8.gz
 %attr(444,root,qmail)                   %{_prefix}/man/man8/fghack.8.gz
@@ -986,7 +983,6 @@ done
 %attr(444,root,qmail)                   %{_prefix}/man/man8/tai64nunix.8.gz
 %attr(444,root,qmail)                   %{_prefix}/man/man8/logselect.8.gz
 %attr(444,root,qmail)                   %{_prefix}/man/man8/svscanboot.8.gz
-%attr(444,root,qmail)                   %{_prefix}/man/man8/udplogger.8.gz
 
 %files -n ucspi-tcp
 %attr(555,root,qmail)                   %{_prefix}/bin/tcpserver
@@ -1001,6 +997,10 @@ done
 %attr(555,root,qmail)                   %{_prefix}/bin/mconnect
 %attr(555,root,qmail)                   %{_prefix}/bin/mconnect-io
 %attr(555,root,qmail)                   %{_prefix}/bin/rblsmtpd
+%attr(555,root,qmail)                   %{_prefix}/bin/udplogger
+%attr(555,root,qmail)                   %{_prefix}/bin/udpclient
+%attr(555,root,qmail)                   %{_prefix}/bin/qmail-greyd
+%attr(555,root,qmail)                   %{_prefix}/bin/greydaemon
 
 %attr(444,root,qmail)                   %{_prefix}/man/man1/tcpserver.1.gz
 %attr(444,root,qmail)                   %{_prefix}/man/man1/tcprules.1.gz
@@ -1013,6 +1013,10 @@ done
 %attr(444,root,qmail)                   %{_prefix}/man/man1/tcpcat.1.gz
 %attr(444,root,qmail)                   %{_prefix}/man/man1/mconnect.1.gz
 %attr(444,root,qmail)                   %{_prefix}/man/man1/rblsmtpd.1.gz
+%attr(444,root,qmail)                   %{_prefix}/man/man1/udpclient.1.gz
+%attr(444,root,qmail)                   %{_prefix}/man/man8/greydaemon.8.gz
+%attr(444,root,qmail)                   %{_prefix}/man/man8/qmail-greyd.8.gz
+%attr(444,root,qmail)                   %{_prefix}/man/man8/udplogger.8.gz
 
 %clean
 %{__rm} -rf %{buildroot}
