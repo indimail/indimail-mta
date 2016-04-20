@@ -1,5 +1,8 @@
 /*
  * $Log: findhost.c,v $
+ * Revision 2.34  2016-04-20 19:32:55+05:30  Cprogrammer
+ * added comments for explaining code logic
+ *
  * Revision 2.33  2010-08-09 18:28:12+05:30  Cprogrammer
  * use hostid instead of ip address
  *
@@ -192,7 +195,7 @@
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: findhost.c,v 2.33 2010-08-09 18:28:12+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: findhost.c,v 2.34 2016-04-20 19:32:55+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #include <stdio.h>
@@ -248,7 +251,7 @@ findhost(char *email, int connect_primarydb)
 	*user = *domain = 0;
 	real_domain = (char *) 0;
 	userNotFound = 0;
-	if (open_central_db(0))
+	if (open_central_db(0)) /*- open connection to mysql (cntrl_host or assign opened connection to primary db */
 		return ((char *) 0);
 	scopy(user, email, MAX_BUFF);
 	if ((ptr = strchr(user, '@')) != (char *) 0)
@@ -273,6 +276,7 @@ findhost(char *email, int connect_primarydb)
 	}
 	if (!*real_domain)
 		return ((char *) 0);
+	/* get data from hostcntrl */
 	snprintf(SqlBuf, SQL_BUF_SIZE, "select high_priority host from %s where  pw_name=\"%s\" and pw_domain=\"%s\"",
 		cntrl_table, user, real_domain);
 again:
@@ -295,7 +299,8 @@ again:
 			}
 		}
 		return ((char *) 0);
-	}
+	} else
+		attempt = 1;
 	if (!(res = mysql_store_result(&mysql[0])))
 	{
 		(void) fprintf(stderr, "findhost: mysql_store_result: %s\n", mysql_error(&mysql[0]));
@@ -309,9 +314,11 @@ again:
 			mysql_free_result(res);
 			return ((char *) 0);
 		}
+		/*- connect_primarydb == 2 or connect_primarydb == 3 */
 		if (attempt == 1)
 		{
 			mysql_free_result(res);
+			/*- look for default entry (pw_name = '*' */
 			snprintf(SqlBuf, SQL_BUF_SIZE, 
 				"select high_priority host from %s where  pw_name=\"*\" and pw_domain=\"%s\"",
 				cntrl_table, real_domain);
@@ -337,7 +344,7 @@ again:
 			fprintf(stderr, "findhost: SqlServer: Unable to find SqlServer IP for mailstore %s, %s\n", ip_addr, real_domain);
 			return ((char *) 0);
 		}
-		if (vauth_open(ptr))
+		if (vauth_open(ptr)) /*- connect to primary db */
 			return ((char *) 0);
 	}
 	if ((port = get_smtp_service_port(0, real_domain, hostid)) == -1)
@@ -369,7 +376,8 @@ open_central_db(char *dbhost)
 	/*-
 	 * 1. Check Env Variable for CNTRL_HOST
 	 * 2. If CNTRL_HOST is not defined check host.cntrl in /var/indimail/control
-	 * 3. If host.cntrl not present then take the value of CNTRL_HOST 
+	 * 3. If host.cntrl is not present check host.mysql in /var/indimail/control
+	 * 4. If host.cntrl not present then take the value of CNTRL_HOST 
 	 *    defined in indimail.h
 	 */
 	if (dbhost && *dbhost)
@@ -447,6 +455,14 @@ open_central_db(char *dbhost)
 	getEnvConfigStr(&mysql_database, "CNTRL_DATABASE", CNTRL_DATABASE);
 	getEnvConfigStr(&cntrl_table, "CNTRL_TABLE", CNTRL_DEFAULT_TABLE);
 	mysqlport = atoi(cntrl_port);
+	/*
+	 * is_open == 0 &&  cntrl_host == mysql_host && cntrl_port == indi_port -> connect to cntrl_host -> connect cntrl_host
+	 * is_open == 0 &&  cntrl_host != mysql_host && cntrl_port == indi_port -> connect to cntrl_host -> connect cntrl_host
+	 * is_open == 0 &&  cntrl_host == mysql_host && cntrl_port != indi_port -> connect to cntrl_host -> connect cntrl_host
+	 * is_open == 1 &&  cntrl_host == mysql_host && cntrl_port == indi_port -> connect to cntrl_host -> use mysql_host
+	 * is_open == 1 &&  cntrl_host != mysql_host && cntrl_port == indi_port -> connect to cntrl_host -> connect cntrl_host
+	 * is_open == 1 &&  cntrl_host == mysql_host && cntrl_port != indi_port -> connect to cntrl_host -> connect cntrl_host
+	 */
 	if (!is_open || strncmp(cntrl_host, mysql_host, MAX_BUFF) || strncmp(cntrl_port, indi_port, MAX_BUFF))
 	{
 		if (set_mysql_options(&mysql[0], "indimail.cnf", "indimail", &flags))
@@ -484,7 +500,7 @@ open_central_db(char *dbhost)
 	{
 		mysql[0] = mysql[1];
 		mysql[0].affected_rows= ~(my_ulonglong) 0;
-		isopen_cntrl = 2;
+		isopen_cntrl = 2; /*- same connection as from host.mysql */
 	}
 	return (0);
 }
