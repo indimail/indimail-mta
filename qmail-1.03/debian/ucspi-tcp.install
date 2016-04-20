@@ -2,6 +2,8 @@ var/indimail/bin/tcpserver /var/indimail/bin
 var/indimail/bin/tcprules /var/indimail/bin
 var/indimail/bin/tcprulescheck /var/indimail/bin
 var/indimail/bin/tcpclient /var/indimail/bin
+var/indimail/bin/greydaemon /var/indimail/bin
+var/indimail/bin/qmail-greyd /var/indimail/bin
 var/indimail/bin/udpclient /var/indimail/bin
 var/indimail/bin/udplogger /var/indimail/bin
 var/indimail/bin/who@ /var/indimail/bin
@@ -24,4 +26,6 @@ var/indimail/man/man1/http@.1.gz /var/indimail/man/man1
 var/indimail/man/man1/tcpcat.1.gz /var/indimail/man/man1
 var/indimail/man/man1/mconnect.1.gz /var/indimail/man/man1
 var/indimail/man/man1/rblsmtpd.1.gz /var/indimail/man/man1
+var/indimail/man/man8/greydaemon.8.gz /var/indimail/man/man8
+var/indimail/man/man8/qmail-greyd.8.gz /var/indimail/man/man8
 var/indimail/man/man8/udplogger.8.gz /var/indimail/man/man8
