@@ -37,6 +37,7 @@ nobogofilter=0
 nodksignature=0
 default_domain=@defaultdomain@
 dkimkeyfn=default
+mysqlSocket=/var/lib/mysql/mysql.sock
 
 setperm()
 {
@@ -218,11 +219,12 @@ ${prefix}/sbin/svctool --svscanlog --servicedir=$servicedir
 echo "Creating default qmail configuraton and catch-all alias (${prefix}/alias/Maildir) for all system users"
 ${prefix}/sbin/svctool --config=qmail --postmaster=${prefix}/alias/Maildir/ \
 	--default-domain=${default_domain}
+	--mysqlhost=localhost --mysqluser=indimail --mysqlpass=ssh-1.5- --mysqlsocket=${mysqlSocket}
 
 echo "Creating Database/Service for MySQL"
 # MySQL Config Creation
 if [ -x ${mysqlPrefix}/libexec/mysqld -o -x ${mysqlPrefix}/sbin/mysqld ] ; then
-	${prefix}/sbin/svctool --config=mysql   --mysqlPrefix=%{mysqlPrefix}
+	${prefix}/sbin/svctool --config=mysql   --mysqlPrefix=${mysqlPrefix}
 	# MySQL Database Creation
 	${prefix}/sbin/svctool --config=mysqldb --mysqlPrefix=${mysqlPrefix} \
     	--databasedir=${prefix}/mysqldb --base_path=${mbase}
@@ -514,7 +516,7 @@ ${prefix}/sbin/svctool --inlookup=infifo --servicedir=$servicedir \
 if [ $nonssd -eq 0 ] ; then
 ${prefix}/sbin/svctool --pwdlookup=/tmp/nssd.sock --threads=5 --timeout=-1 \
 	--mysqlhost=localhost --mysqluser=indimail \
-	--mysqlpass=ssh-1.5- --mysqlsocket=/tmp/mysql.sock --servicedir=$servicedir
+	--mysqlpass=ssh-1.5- --mysqlsocket=${mysqlSocket} --servicedir=$servicedir
 fi
 ${prefix}/sbin/svctool --poppass=106 --localip=0 --maxdaemons=40 --maxperip=25 \
 	--memory=$poppass_mem \
