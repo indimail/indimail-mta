@@ -81,6 +81,7 @@ install: build
 	${rm} -rf $(DESTDIR)/$(prefix)/queue
 	if [ ! -d $(DESTDIR)/$(prefix)/etc/apparmor.d/local ] ; then mkdir -p $(DESTDIR)/$(prefix)/etc/apparmor.d/local; fi
 	if [ -f ../SOURCES/svctool ] ; then ${cp} ../SOURCES/svctool $(DESTDIR)/$(prefix)/sbin; fi
+	if [ -f ../SOURCES/svctool.gz ] ; then gunzip -c ../SOURCES/svctool.gz > $(DESTDIR)/$(prefix)/sbin/svctool; fi
 	if [ -f ../SOURCES/perm_list ] ; then ${cp} ../SOURCES/perm_list $(DESTDIR)/$(prefix)/etc; fi
 	if [ -f ../SOURCES/usr.sbin.clamd ] ; then ${cp} ../SOURCES/usr.sbin.clamd $(DESTDIR)/$(prefix)/etc/apparmor.d/local; fi
 	if [ -f ../SOURCES/usr.bin.freshclam ] ; then ${cp} ../SOURCES/usr.bin.freshclam $(DESTDIR)/$(prefix)/etc/apparmor.d/local; fi

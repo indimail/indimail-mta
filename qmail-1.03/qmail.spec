@@ -434,6 +434,9 @@ fi
 if [ -f ../SOURCES/svctool ] ; then
 %{__cp} ../SOURCES/svctool %{buildroot}%{_prefix}/sbin
 fi
+if [ -f ../SOURCES/svctool.gz ] ; then
+gunzip -c ../SOURCES/svctool.gz > %{buildroot}%{_prefix}/sbin/svctool
+fi
 
 # Compress the man pages
 find %{buildroot}%{_prefix}/man -type f -exec gzip -q {} \;
