@@ -1,5 +1,11 @@
 #
 # $Log: indimail.te,v $
+# Revision 2.13  2016-04-22 10:38:53+05:30  Cprogrammer
+# added selinux rules for iwebadmin
+#
+# Revision 2.12  2016-04-22 00:55:26+05:30  Cprogrammer
+# added selinux definitions of iwebadmin permission to load shared objects in /var/indimail/lib64
+#
 # Revision 2.11  2016-04-11 12:00:49+05:30  Cprogrammer
 # added new rules for mysql
 #
@@ -34,7 +40,7 @@
 # selinux module config
 #
 #
-# $Id: indimail.te,v 2.11 2016-04-11 12:00:49+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.te,v 2.13 2016-04-22 10:38:53+05:30 Cprogrammer Exp mbhangui $
 # 
 module indimail 1.0;
 
@@ -42,8 +48,10 @@ require {
 	type semanage_t;
 	type mysqld_t;
 	type httpd_t;
+	type httpd_sys_script_t;
 	type user_home_t;
 	type initrc_t;
+	type home_root_t;
 	type user_tmp_t;
 	type tmp_t;
 	type nscd_t;
@@ -57,6 +65,7 @@ require {
 	type mandb_home_t;
 	class unix_stream_socket connectto;
 	class capability fowner;
+	class capability { setuid setgid };
 	class tcp_socket name_connect;
 	class file { execute getattr setattr read create lock rename execute_no_trans write unlink open append ioctl };
 	class sock_file { create write unlink setattr };
@@ -74,6 +83,13 @@ allow httpd_t user_home_t:file { read write create unlink setattr };
 allow httpd_t var_t:dir { write remove_name add_name };
 allow httpd_t var_t:file { execute setattr read create execute_no_trans write getattr unlink open };
 allow httpd_t var_t:lnk_file read;
+
+#============= httpd_sys_script_t ==============
+allow httpd_sys_script_t home_root_t:dir { add_name write read };
+allow httpd_sys_script_t home_root_t:file { open getattr write create read };
+allow httpd_sys_script_t var_t:file { getattr execute open read };
+allow httpd_sys_script_t self:capability setuid;
+allow httpd_sys_script_t self:capability setgid;
 
 #============= mysqld_t ==============
 allow mysqld_t var_t:file { create getattr open lock read rename unlink write };
