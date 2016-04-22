@@ -218,7 +218,7 @@ ${prefix}/sbin/svctool --svscanlog --servicedir=$servicedir
 
 echo "Creating default qmail configuraton and catch-all alias (${prefix}/alias/Maildir) for all system users"
 ${prefix}/sbin/svctool --config=qmail --postmaster=${prefix}/alias/Maildir/ \
-	--default-domain=${default_domain}
+	--default-domain=${default_domain} \
 	--mysqlhost=localhost --mysqluser=indimail --mysqlpass=ssh-1.5- --mysqlsocket=${mysqlSocket}
 
 echo "Creating Database/Service for MySQL"
