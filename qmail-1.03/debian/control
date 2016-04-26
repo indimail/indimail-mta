@@ -9,7 +9,7 @@ Vcs-Browser: http://indimail.git.sourceforge.net/git/gitweb.cgi?p=indimail/indim
 
 Package: indimail-mta
 Architecture: any
-Depends: ${shlibs:Depends}, ${misc:Depends}
+Depends: ${shlibs:Depends}, ${misc:Depends}, net-tools
 Conflicts: indimail, indimail-mini
 Description: indimail-mta provides a standalone SMTP server that is part of the IndiMail
  messaging platform. It comprises of the following packages
