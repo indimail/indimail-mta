@@ -10,7 +10,7 @@ Vcs-Browser: http://indimail.git.sourceforge.net/git/gitweb.cgi?p=indimail/indim
 Package: indimail
 Architecture: any
 Pre-Depends: mysql-server
-Depends: ${shlibs:Depends}, ${misc:Depends}, libmysqlclient18,libmysqlclient-dev
+Depends: ${shlibs:Depends}, ${misc:Depends}, libmysqlclient18, libmysqlclient-dev, net-tools
 Breaks: indimail-mini
 Replaces: indimail-mini, libindimail
 Provides: libindimail, indimail-mini, indimail-mta
