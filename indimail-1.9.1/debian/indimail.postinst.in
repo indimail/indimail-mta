@@ -158,6 +158,8 @@ fi
 
 if [ -f /usr/sbin/clamd -a -f /usr/bin/clamdscan ] ; then
 	clamav_os=1
+else
+	clamav_os=0
 fi
 echo "Doing post installation activities for the following"
 echo ""
