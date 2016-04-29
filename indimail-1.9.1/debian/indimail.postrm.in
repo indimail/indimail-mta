@@ -124,8 +124,8 @@ if [ " $1" = " purge" ] ; then
 	if [ -d ${prefix}/alias ] ; then
 		${rmdir} --ignore-fail-on-non-empty ${prefix}/alias 2>/dev/null
 	fi
-	${rm} -f ${prefix}/share/imapd.pem
-	${rm} -f ${prefix}/share/pop3d.pem
+	${rm} -f ${prefix}/share/imapd.pem ${prefix}/share/pop3d.pem
+	${rm} -f ${prefix}/etc/imapd.cnf.* ${prefix}/etc/pop3d.cnf.*
 
 	if [ ${prefix} != "/usr" ] ; then
 		echo "removing binaries, libraries, queues"
@@ -161,6 +161,7 @@ if [ " $1" = " purge" ] ; then
 
 	if [ $noclamav -eq 0 ] ; then
 		${rm} -f ${prefix}/etc/clamd.conf ${prefix}/etc/freshclam.conf
+		${rm} -f ${prefix}/etc/clamd.conf.disabled ${prefix}/etc/freshclam.conf.disabled
 		${rm} -f ${prefix}/etc/clamd.conf.sample ${prefix}/etc/freshclam.conf.sample
 	fi
 	if [ $nonssd -eq 0 ] ; then
