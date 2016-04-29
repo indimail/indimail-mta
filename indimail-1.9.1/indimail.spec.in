@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail.spec.in,v 2.318 2016-04-26 18:24:17+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 2.319 2016-04-29 14:52:39+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %define _unpackaged_files_terminate_build 1
 
@@ -2995,8 +2995,8 @@ do
 	%{__rm} -f %{_prefix}/alias/.qmail-"$i"
 done
 /bin/rmdir --ignore-fail-on-non-empty %{_prefix}/alias 2>/dev/null
-%{__rm} -f %{_prefix}/share/imapd.pem
-%{__rm} -f %{_prefix}/share/pop3d.pem
+%{__rm} -f %{_prefix}/share/imapd.pem %{_prefix}/share/pop3d.pem
+%{__rm} -f %{_prefix}/etc/pop3d.cnf.* %{_prefix}/etc/imapd.cnf.*
 
 echo "removing startup services"
 if [ %{noclamav} -eq 0 ] ; then
@@ -3014,6 +3014,7 @@ do
 	if [ -d %{servicedir}/$i ] ; then
 		%{__rm} -rf %{servicedir}/$i || true
 	fi
+	%{__rm} -f %{_prefix}/etc/$i.conf %{_prefix}/etc/$i.conf.disabled
 done
 fi
 for i in fetchmail indisrvr.4000 inlookup.infifo mysql.3306 \
