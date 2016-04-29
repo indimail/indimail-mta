@@ -287,6 +287,10 @@ Some of the features available in this package
 67. domain based queue using domainqueue control file
 68. Ability to drop bounces
 69. Ability to discard emails if filter exits 2
+70. goodrcpt, goodrcptpatterns
+71. FORCE_TLS env variable to enforce STARTTLS during AUTH
+72. udplogger service for logging messages through UDP
+73. docker (www.docker.com) images for indimail
 
 You can take a detailed look at the feature list at
 
@@ -345,37 +349,39 @@ Currently, the list of supported distributions for IndiMail is (for
 both 32 and 64 bit) are
 
     * SUSE
+          o openSUSE 13.2
           o openSUSE 13.1
-          o openSUSE 12.3
-          o openSUSE 12.2
           o openSUSE 11.4
           o openSUSE Tumbleweed
+          o SUSE Linux Enterprise 12 SP1
+          o SUSE Linux Enterprise 12
+          o SUSE Linux Enterprise 11 SP4
           o SUSE Linux Enterprise 11 SP3
           o SUSE Linux Enterprise 11 SP2
           o SUSE Linux Enterprise 11 SP1
           o SUSE Linux Enterprise 11
           o SUSE Linux Enterprise 10
-          o openSUSE Factory
 
     * Red Hat
-          o Fedora 20
-          o Fedora 19
-          o Fedora 18
+          o Fedora 23
+          o Fedora 22
+          o Fedora 21
+          o Red Hat Enterprise Linux 7
           o Red Hat Enterprise Linux 6
           o Red Hat Enterprise Linux 5
+          o CentOS 7
           o CentOS 6
           o CentOS 5
 
     * Debian
+          o Debian 8.0
           o Debian 7.0
-          o Debian 6.0
-          o Ubuntu 13.10
-          o Ubuntu 13.04
-          o Ubuntu 12.10
+          o Ubuntu 16.04
+          o Ubuntu 15.10
+          o Ubuntu 15.04
+          o Ubuntu 14.10
+          o Ubuntu 14.04
           o Ubuntu 12.04
-          o Ubuntu 11.10
-          o Ubuntu 11.04
-          o Ubuntu 10.04
 
 
 Enterprise Support
@@ -392,8 +398,8 @@ You can request for a commercial license by writing to
 "License Support" license-support@indimail.org
 
 If you are a student or belong to a charitable organization/trust or a NGO or have an OSS
-project requiring more than 10,000 users, you can obtain a IndiMail Commercial License free
-of cost by writing to the above email address.
+project requiring more than 10,000 users, you can obtain a IndiMail Commercial
+License, free of cost, by writing to the above email address.
 
 To enable IndiMail function for more than 10,000 users, you need to install the
 indimail-enterprise package from
@@ -401,8 +407,8 @@ indimail-enterprise package from
 http://download.opensuse.org/repositories/home:/indimail:/ilmgrd/
 
 Developing IndiMail is my hobby. To continue working on IndiMail, I need people/organization
-who like the project to support me by buying software support from me. If you can afford to
-pay, I would urge you to ask for features and pay me for it. The source code of IndiMail is
+who like the project to support me, by buying software support from me. If you can afford to
+pay, I would urge you to ask for features and pay for it. The source code of IndiMail is
 always available for download free of cost.
 
 
@@ -434,5 +440,6 @@ mysql-5.5.3-m3
 mysql-5.5.8
 mysql-5.5.13
 mysql-5.5.14
+mysql-5.7.12
 
 -- Manvendra Bhangui <manvendra@indimail.org>
