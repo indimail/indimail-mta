@@ -9,7 +9,7 @@ Vcs-Browser: http://indimail.git.sourceforge.net/git/gitweb.cgi?p=indimail/indim
 
 Package: indimail-mta
 Architecture: any
-Depends: ${shlibs:Depends}, ${misc:Depends}, net-tools
+Depends: ${shlibs:Depends}, ${misc:Depends}, net-tools, coreutils, binutils
 Conflicts: indimail, indimail-mini
 Description: indimail-mta provides a standalone SMTP server that is part of the IndiMail
  messaging platform. It comprises of the following packages
@@ -27,7 +27,7 @@ Description: indimail-mta provides a standalone SMTP server that is part of the 
 
 Package: daemontools
 Architecture: any
-Depends: ${shlibs:Depends}, ${misc:Depends}
+Depends: ${shlibs:Depends}, ${misc:Depends}, coreutils, binutils
 Conflicts: indimail, indimail-mini, indimail-mta
 Description: daemontools is a collection of tools for managing UNIX services. 
  .
@@ -43,7 +43,7 @@ Description: daemontools is a collection of tools for managing UNIX services.
 
 Package: ucspi-tcp
 Architecture: any
-Depends: ${shlibs:Depends}, ${misc:Depends}
+Depends: ${shlibs:Depends}, ${misc:Depends}, coreutils, binutils
 Conflicts: indimail, indimail-mini, indimail-mta
 Description: tcpserver and tcpclient are easy-to-use command-line tools for building
  TCP client-server applications.
