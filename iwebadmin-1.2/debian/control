@@ -9,7 +9,7 @@ Vcs-Browser: http://indimail.git.sourceforge.net/git/gitweb.cgi?p=indimail/indim
 
 Package: iwebadmin
 Architecture: any
-Depends: indimail-devel, libindimail, libmysqlclient16 (>= 5.1.21-1), ${misc:Depends}
+Depends: ${misc:Depends} ${shlibs:Depends}
 Pre-Depends: ${misc:Pre-Depends}
 Description: Web Administration GUI for IndiMail User Administration
  .
