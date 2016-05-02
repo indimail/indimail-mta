@@ -125,7 +125,8 @@ binary-indep: build install
 	dh_installdeb
 	dh_makeshlibs -V
 	dh_shlibdeps
-	$(genControl)
+	#$(genControl)
+	dh_gencontrol
 	dh_installcron
 	dh_md5sums
 	dh_builddeb
