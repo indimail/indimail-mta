@@ -10,9 +10,9 @@ Vcs-Browser: http://indimail.git.sourceforge.net/git/gitweb.cgi?p=indimail/indim
 Package: indimail
 Architecture: any
 Pre-Depends: mysql-server
-Depends: ${shlibs:Depends}, ${misc:Depends}, libmysqlclient18, libmysqlclient-dev, net-tools
-Breaks: indimail-mini
-Replaces: indimail-mini, libindimail
+Depends: ${shlibs:Depends}, ${misc:Depends}, net-tools, coreutils, binutils
+Replaces: indimail-mini, libindimail, indimail-mta
+Conflicts: libindimail, indimail-mini, indimail-mta
 Provides: libindimail, indimail-mini, indimail-mta
 Description: IndiMail is a messaging platform for Mail Service Providers
  It is built using the following packages
@@ -54,16 +54,16 @@ Package: libindimail
 Depends: ${shlibs:Depends}, ${misc:Depends}
 Section: libs
 Architecture: any
-Conflicts: indimail
+Breaks: indimail
 Description: IndiMail - Development libraries
  This package contains the development libraries
  necessary to develop IndiMail client applications.
 
 Package: indimail-mini
-Depends: ${shlibs:Depends}, ${misc:Depends}
+Depends: ${shlibs:Depends}, ${misc:Depends}, coreutils, binutils
 Section: misc
 Architecture: any
-Conflicts: indimail
+Breaks: indimail
 Description: IndiMail - Mini Client Installation
  This package contains sendmail, qmail-inject and qmail-qmqpc - Bare minimum
  programs to have a mini-indimail installation.
