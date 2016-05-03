@@ -11,6 +11,9 @@
 ### END INIT INFO
 
 # $Log: qmailctl.sh,v $
+# Revision 1.44  2016-05-03 18:46:26+05:30  Cprogrammer
+# BUG - replaced failure with $fail
+#
 # Revision 1.43  2016-01-09 09:21:48+05:30  Cprogrammer
 # fix for cases where NETWORKING is not defined
 #
@@ -216,7 +219,7 @@ if [ -x /bin/systemctl ] ; then
 			. /lib/lsb/init-functions
 		fi
 		$ECHO -n $"indimail is disabled: "
-		failure
+		$fail
 		$ECHO -ne "\n"
 		exit 1
 	fi
