@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail.spec.in,v 2.320 2016-05-03 20:20:30+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 2.321 2016-05-04 20:06:59+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %define _unpackaged_files_terminate_build 1
 
@@ -85,7 +85,7 @@
 %define module_dir         /usr/%{_lib}/pam
 %endif
 %define _pkg_config_path   /usr/%{_lib}/pkgconfig
-%define mysqlSocket        /var/lib/mysql/mysql.sock
+%define mysqlSocket        /var/run/mysqld/mysqld.sock
 
 %if %build_on_obs == 1
 %define packager Manvendra Bhangui <manvendra@indimail.org>
@@ -2385,10 +2385,10 @@ echo "Creating default qmail configuraton and catch-all alias (${_prefix}/alias/
 if [ -x %{mysqlPrefix}/libexec/mysqld -o -x %{mysqlPrefix}/sbin/mysqld ] ; then
 	echo "Creating Database/Service for MySQL"
 	# MySQL Config Creation
-	%{_prefix}/sbin/svctool --config=mysql   --mysqlPrefix=%{mysqlPrefix}
+	%{_prefix}/sbin/svctool --config=mysql   --mysqlPrefix=%{mysqlPrefix} --mysqlsocket=%{mysqlSocket}
 	# MySQL Database Creation
 	%{_prefix}/sbin/svctool --config=mysqldb --mysqlPrefix=%{mysqlPrefix} \
-    	--databasedir=%{_prefix}/mysqldb --base_path=%{mbase}
+    	--databasedir=%{_prefix}/mysqldb --base_path=%{mbase} --mysqlsocket=%{mysqlSocket}
 	# MySQL Supervise creation
 	%{_prefix}/sbin/svctool --mysql=3306 --servicedir=%{servicedir} --mysqlPrefix=%{mysqlPrefix} \
 		--databasedir=%{_prefix}/mysqldb --config=%{_prefix}/etc/indimail.cnf --default-domain=%{default_domain}
@@ -2752,7 +2752,7 @@ done
 
 #
 # Install IndiMail to be started on system boot
-# The add-boot command installs svscan to be started by init, upstart or launchctl
+# The add-boot command installs svscan to be started by init, systemd, upstart or launchctl
 #
 echo "adding indimail startup"
 %{_prefix}/sbin/svctool --config=add-boot
