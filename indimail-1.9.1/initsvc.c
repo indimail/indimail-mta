@@ -1,5 +1,8 @@
 /*
  * $Log: initsvc.c,v $
+ * Revision 2.19  2016-05-04 20:12:00+05:30  Cprogrammer
+ * fix for systemd on debian/ubuntu
+ *
  * Revision 2.18  2013-11-25 14:48:58+05:30  Cprogrammer
  * run indimail at runlevel 2 on debian
  *
@@ -66,7 +69,7 @@
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: initsvc.c,v 2.18 2013-11-25 14:48:58+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: initsvc.c,v 2.19 2016-05-04 20:12:00+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #define SV_ON    1
@@ -179,7 +182,7 @@ main(int argc, char **argv)
 {
 	FILE           *fp;
 	char           *device = "/dev/console";
-	char           *qmaildir, *ptr, *jobfile = 0, *print_cmd = 0, *jobdir;
+	char           *qmaildir, *ptr, *jobfile = 0, *print_cmd = 0, *jobdir = 0;
 	char            buffer[2048];
 	int             flag, found, colonCount, fd, debian_version;
 	long            pos;
@@ -212,63 +215,9 @@ main(int argc, char **argv)
 		return (1);
 	}
 	getEnvConfigStr(&qmaildir, "QMAILDIR", QMAILDIR);
-	if (!access("/sbin/initctl", F_OK) && !access("/etc/init", F_OK)) /*- Upstart */
-	{
-		jobdir = "/etc/init";
-		jobfile = "/etc/init/svscan.conf";
-		print_cmd = "/bin/cat /etc/init/svscan.conf;/bin/ls -l /etc/init/svscan.conf";
-	} else
-	if (!access("/etc/event.d", F_OK)) /*- Upstart */
-	{
-		jobdir = "/etc/event.d";
-		jobfile = "/etc/event.d/svscan";
-		print_cmd = "/bin/cat /etc/event.d/svscan;/bin/ls -l /etc/event.d/svscan";
-	} else
-		jobdir = (char *) 0;
-	if (jobdir)
-	{
-		/* Install upstart */
-		if (access(jobfile, F_OK))
-		{
-			if (flag == SV_OFF)
-				return (0);
-			printf("Installing upstart service\n");
-			if (chdir(QMAILDIR) || chdir("boot"))
-			{
-				fprintf(stderr, "chdir %s/boot: %s\n", QMAILDIR, strerror(errno));
-				return (1);
-			} else
-			if (fappend("upstart", jobfile, "w", 0644, 0, getgid()))
-			{
-				fprintf(stderr, "fappend %s %s: %s\n", "upstart", jobfile, strerror(errno));
-				return (1);
-			}
-		} 
-		switch(flag)
-		{
-			case SV_ON:
-				execl("/sbin/initctl", "initctl", "start", "svscan", (char *) 0);
-				perror("/sbin/initctl");
-				break;
-			case SV_OFF:
-				execl("/sbin/initctl", "initctl", "stop", "svscan", (char *) 0);
-				perror("/sbin/initctl");
-				break;
-			case SV_STAT:
-				execl("/sbin/initctl", "initctl",  "status", "svscan", (char *) 0);
-				perror("/sbin/initctl");
-				break;
-			case SV_PRINT:
-				if (print_cmd)
-					execl("/bin/sh", "sh", "-c",  print_cmd, (char *) 0);
-				perror("/bin/ls");
-				break;
-		}
-		return (1);
-	} else
 	if (!access("/bin/systemctl", X_OK))
 	{
-		/* Install indimail.plist */
+		/* Install indimail.service */
 		if (access("/lib/systemd/system/indimail.service", F_OK))
 		{
 			if (flag == SV_OFF)
@@ -357,6 +306,61 @@ main(int argc, char **argv)
 		return (1);
 	} /*- if (!access("/bin/launchctl", X_OK)) */
 #endif
+	else /*- ubuntu/debian crap */
+	if (!access("/sbin/initctl", F_OK) && !access("/etc/init", F_OK)) /*- Upstart */
+	{
+		jobdir = "/etc/init";
+		jobfile = "/etc/init/svscan.conf";
+		print_cmd = "/bin/cat /etc/init/svscan.conf;/bin/ls -l /etc/init/svscan.conf";
+	} else
+	if (!access("/etc/event.d", F_OK)) /*- Upstart */
+	{
+		jobdir = "/etc/event.d";
+		jobfile = "/etc/event.d/svscan";
+		print_cmd = "/bin/cat /etc/event.d/svscan;/bin/ls -l /etc/event.d/svscan";
+	} else
+		jobdir = (char *) 0;
+	if (jobdir)
+	{
+		/* Install upstart */
+		if (access(jobfile, F_OK))
+		{
+			if (flag == SV_OFF)
+				return (0);
+			printf("Installing upstart service\n");
+			if (chdir(QMAILDIR) || chdir("boot"))
+			{
+				fprintf(stderr, "chdir %s/boot: %s\n", QMAILDIR, strerror(errno));
+				return (1);
+			} else
+			if (fappend("upstart", jobfile, "w", 0644, 0, getgid()))
+			{
+				fprintf(stderr, "fappend %s %s: %s\n", "upstart", jobfile, strerror(errno));
+				return (1);
+			}
+		} 
+		switch(flag)
+		{
+			case SV_ON:
+				execl("/sbin/initctl", "initctl", "start", "svscan", (char *) 0);
+				perror("/sbin/initctl");
+				break;
+			case SV_OFF:
+				execl("/sbin/initctl", "initctl", "stop", "svscan", (char *) 0);
+				perror("/sbin/initctl");
+				break;
+			case SV_STAT:
+				execl("/sbin/initctl", "initctl",  "status", "svscan", (char *) 0);
+				perror("/sbin/initctl");
+				break;
+			case SV_PRINT:
+				if (print_cmd)
+					execl("/bin/sh", "sh", "-c",  print_cmd, (char *) 0);
+				perror("/bin/ls");
+				break;
+		}
+		return (1);
+	}
 	debian_version = !access("/etc/debian_version", F_OK);
 	if (!(fp = fopen("/etc/inittab", "r")))
 	{
