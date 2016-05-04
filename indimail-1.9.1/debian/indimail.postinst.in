@@ -37,7 +37,7 @@ nobogofilter=0
 nodksignature=0
 default_domain=@defaultdomain@
 dkimkeyfn=default
-mysqlSocket=/var/lib/mysql/mysql.sock
+mysqlSocket=/var/run/mysqld/mysqld.sock
 
 setperm()
 {
@@ -226,10 +226,10 @@ ${prefix}/sbin/svctool --config=qmail --postmaster=${prefix}/alias/Maildir/ \
 echo "Creating Database/Service for MySQL"
 # MySQL Config Creation
 if [ -x ${mysqlPrefix}/libexec/mysqld -o -x ${mysqlPrefix}/sbin/mysqld ] ; then
-	${prefix}/sbin/svctool --config=mysql   --mysqlPrefix=${mysqlPrefix}
+	${prefix}/sbin/svctool --config=mysql --mysqlPrefix=${mysqlPrefix} --mysqlsocket=${mysqlSocket}
 	# MySQL Database Creation
 	${prefix}/sbin/svctool --config=mysqldb --mysqlPrefix=${mysqlPrefix} \
-    	--databasedir=${prefix}/mysqldb --base_path=${mbase}
+    	--databasedir=${prefix}/mysqldb --base_path=${mbase} --mysqlsocket=${mysqlSocket}
 	# MySQL Supervise creation
 	${prefix}/sbin/svctool --mysql=3306 --servicedir=${servicedir} --mysqlPrefix=${mysqlPrefix} \
 		--databasedir=${prefix}/mysqldb --config=${prefix}/etc/indimail.cnf --default-domain=${default_domain}
@@ -625,7 +625,7 @@ if [ -f ${prefix}/boot/rpm.init ] ; then
 fi
 #
 # Install IndiMail to be started on system boot
-# The add-boot command installs svscan to be started by init, upstart or launchctl
+# The add-boot command installs svscan to be started by init, systemd, upstart or launchctl
 #
 echo "adding indimail startup"
 if [ /usr/lib/sm.bin/sendmail ] ; then
@@ -655,6 +655,9 @@ fi
 
 if [ -f /etc/init/svscan.conf -o -f /etc/event.d/svscan ] ; then
 	echo "1. Issue /sbin/initctl emit qmailstart to start services"
+	count=1
+elif [ -f /etc/systemd/system/multi-user.target.wants/indimail.service ] ; then
+	echo "1. Issue /bin/systemctl start indimail.service to start services"
 	count=1
 else
 	echo "1. Issue ${prefix}/sbin/initsvc -on"
