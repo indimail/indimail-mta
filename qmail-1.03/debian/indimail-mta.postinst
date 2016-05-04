@@ -406,7 +406,7 @@ fi
 
 #
 # Install IndiMail to be started on system boot
-# The add-boot command installs svscan to be started by init, upstart or launchctl
+# The add-boot command installs svscan to be started by init, systemd, upstart or launchctl
 #
 echo "adding indimail-mta startup"
 if [ /usr/lib/sm.bin/sendmail ] ; then
@@ -429,6 +429,9 @@ ${prefix}/sbin/svctool --config=add-boot
 
 if [ -f /etc/init/svscan.conf -o -f /etc/event.d/svscan ] ; then
 	echo "1. Issue /sbin/initctl emit qmailstart to start services"
+	count=1
+elif [ -f /etc/systemd/system/multi-user.target.wants/indimail.service ] ; then
+	echo "1. Issue /bin/systemctl start indimail.service to start services"
 	count=1
 else
 	echo "1. Issue ${prefix}/sbin/initsvc -on"
