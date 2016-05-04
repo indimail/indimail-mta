@@ -124,7 +124,7 @@ iauth.la: $(iauth_la_OBJECTS) $(iauth_la_DEPENDENCIES)
 iauth.lo: iauth.c
 	$(LIBTOOL) --mode=compile gcc $(DEFS) @auth_inc@ -c $^
 
-all-local: libindimail.la iauth.la inc_deps lib_deps .gitignore
+all-local: libindimail.la iauth.la inc_deps lib_deps
 
 inc_deps: configure Makefile
 	if test -d ../qmail-1.03 ; then \
