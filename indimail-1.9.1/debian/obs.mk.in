@@ -212,22 +212,12 @@ indimail-devel64 obs_deb_prep indimail-devel.postinst \
 libindimail32 libindimail64 indimail.install \
 indimail-devel.postrm indimail-mini.prerm indimail-mini.preinst \
 indimail-mini.postrm indimail-mini.postinst indimail-mini.install \
-gen_control obs.mk control control.Debian.6.0 control.Debian.7.0 \
-control.Debian.8.0 control.Ubuntu.10.04 control.Ubuntu.10.10 \
-control.Ubuntu.11.04 control.Ubuntu.11.10 control.Ubuntu.12.04 \
-control.Ubuntu.12.10 control.Ubuntu.13.04 control.Ubuntu.13.10 \
-control.Ubuntu.14.04 control.Ubuntu.14.10 control.Ubuntu.15.04 \
-control.Ubuntu.15.10 control.Ubuntu.16.04 indimail.cron.d
+gen_control obs.mk control indimail.cron.d control
 	tar cf - copyright indimail.preinst indimail.postinst indimail.prerm \
 		indimail.postrm rules changelog compat obs_deb_prep \
 		indimail-devel32 indimail-devel64 indimail.install \
-		libindimail32 libindimail64 \
+		libindimail32 libindimail64 control \
 		indimail-devel.postinst gen_control \
 		indimail-devel.postrm indimail-mini.prerm indimail-mini.preinst \
 		indimail-mini.postrm indimail-mini.postinst indimail-mini.install \
-		control control.Debian.6.0 control.Debian.7.0 control.Debian.8.0 \
-		control.Ubuntu.10.04 control.Ubuntu.10.10 control.Ubuntu.11.04 \
-		control.Ubuntu.11.10 control.Ubuntu.12.04 control.Ubuntu.12.10 \
-		control.Ubuntu.13.04 control.Ubuntu.13.10 control.Ubuntu.14.04 \
-		control.Ubuntu.14.10 control.Ubuntu.15.04 control.Ubuntu.15.10 \
-		control.Ubuntu.16.04 indimail.cron.d |gzip > $@
+		indimail.cron.d |gzip > $@
