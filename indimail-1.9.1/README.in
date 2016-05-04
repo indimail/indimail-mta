@@ -290,7 +290,8 @@ Some of the features available in this package
 70. goodrcpt, goodrcptpatterns
 71. FORCE_TLS env variable to enforce STARTTLS during AUTH
 72. udplogger service for logging messages through UDP
-73. docker (www.docker.com) images for indimail
+73. docker (www.docker.com) images for indimail (cprogrammer/indimail,
+    cprogrammer/indimail-mta)
 
 You can take a detailed look at the feature list at
 
@@ -334,13 +335,12 @@ Stable Releases
 http://download.opensuse.org/repositories/home:/indimail/
 
 
-Bleeding Edge Releases
-----------------------
+Experimental Releases
+---------------------
 IndiMail has yum repositories for the latest features being added. You will find
 the bleeding edge rpms at
 
 http://download.opensuse.org/repositories/home:/mbhangui/
-
 
 You will also find the RPMs/Deb for both 32bit and 64bit OS on the above
 repositories
@@ -410,6 +410,14 @@ Developing IndiMail is my hobby. To continue working on IndiMail, I need people/
 who like the project to support me, by buying software support from me. If you can afford to
 pay, I would urge you to ask for features and pay for it. The source code of IndiMail is
 always available for download free of cost.
+
+Docker Repository
+-----------------
+The docker repository for IndiMail and indimail-mta is at
+https://hub.docker.com/u/cprogrammer
+
+indimail-mta - docker pull cprogrammer/indimail-mta
+indimail     - docker pull cprogrammer/indimail
 
 
 GIT Repository
