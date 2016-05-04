@@ -1,7 +1,7 @@
 /*
  * $Log: ip4_bit.c,v $
- * Revision 1.2  2016-05-05 01:11:16+05:30  Cprogrammer
- * fixed stack smashing. unsigned long variable defined as int
+ * Revision 1.2  2016-05-05 01:20:20+05:30  Cprogrammer
+ * fix stack smashing - num defined as int instead of unsigned long
  *
  * Revision 1.1  2013-08-06 07:56:09+05:30  Cprogrammer
  * Initial revision
@@ -16,8 +16,6 @@
 #include "byte.h"
 
 #define BITSUBSTITUTION
-
-stralloc        sanumber = { 0 };
 
 char            strnum[FMT_ULONG];
 
@@ -74,15 +72,13 @@ getaddressasbit(char *ip, int prefix, stralloc *ip4string)
 }
 
 int
-getbitasaddress(stralloc * ip4string)
+getbitasaddress(stralloc *ip4string)
 {
-	stralloc        ipaddr = { 0 };
-	stralloc        buffer = { 0 };
-	int             iplen;
-	int             num = 0;
-	int             value = 256;
-	int             prefix = ip4string->len - 1;
+	static stralloc ipaddr = { 0 };
+	static stralloc buffer = { 0 };
+	int             iplen, prefix, num = 0, value = 256;
 
+	prefix = ip4string->len - 1;
 	if (!stralloc_copys(&buffer, ""))
 		return (-1);
 	if (!stralloc_copys(&ipaddr, ""))
