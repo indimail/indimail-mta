@@ -1,6 +1,6 @@
 #
 #
-# $Id: qmail.spec,v 1.32 2016-05-03 20:20:57+05:30 Cprogrammer Exp mbhangui $
+# $Id: qmail.spec,v 1.33 2016-05-04 20:03:44+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %define _unpackaged_files_terminate_build 1
 
@@ -1423,7 +1423,7 @@ done
 
 #
 # Install IndiMail to be started on system boot
-# The add-boot command installs svscan to be started by init, upstart or launchctl
+# The add-boot command installs svscan to be started by init, systemd, upstart or launchctl
 #
 echo "adding indimail startup"
 %{_prefix}/sbin/svctool --config=add-boot
