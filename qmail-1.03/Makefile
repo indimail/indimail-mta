@@ -984,10 +984,10 @@ hier.o: \
 compile hier.c auto_qmail.h auto_split.h auto_uids.h fmt.h fifo.h \
 qmail-todo.h hasindimail.h tcpto.h ip.h ipalloc.h hassrs.h \
 conf-domainkeys conf-srs conf-spf conf-ip conf-dkim conf-batv \
-conf-plugin
+conf-plugin conf-shared
 	./compile $(inc_deps) \
 	`grep -h -v "^#" conf-tls conf-spf conf-ip conf-domainkeys conf-dkim \
-	conf-batv conf-plugin` hier.c
+	conf-batv conf-plugin conf-shared` hier.c
 
 home: \
 home.sh conf-qmail
@@ -1281,7 +1281,7 @@ qmail-daemon qmaildirmake qmail-dk qmail-dkim qmail-getpw qmail-greyd qmail-inje
 qmail-lspawn qmail-multi qmail-newmrh qmail-newu qmail-nullqueue qmail-pop3d qmail-popbull qmail-poppass \
 qmail-popup qmail-pw2u qmail-qfilter qmail-qmqpc qmail-qmqpd qmail-qmtpd qmail-qread qmail-queue \
 qmail-remote qmail-rm qmail-rspawn qmail-send qmail-showctl qmail-sigalrm qmail-sighup qmail-sigterm \
-qmail-smtpd qmail-smtpd.so qmail-sql qmail-start qmail-tcpok qmail-tcpto qmail-todo qmail-upq \
+qmail-smtpd qmail_smtpd.so qmail-sql qmail-start qmail-tcpok qmail-tcpto qmail-todo qmail-upq \
 qnotify qpq qquote qreceipt qsmhook queue-fix readproctitle \
 recipient-cdb recordio relaytest rewind rmail rpmattr rrforward rrt \
 sendmail serialcmd serialqmtp serialsmtp setforward setlock setmaillist setuidgid \
@@ -2466,7 +2466,7 @@ tryindimail.c compile load indimail.lib conf-indi hmac_sha1.o
 	&& echo || echo hmac_sha1.o) > hmac_sha1.obj
 	rm -f tryindimail.o tryindimail 1>&2
 
-qmail-smtpd.so: \
+qmail_smtpd.so: \
 smtpd.o rcpthosts.o recipients.o commands.o timeoutread.o \
 timeoutwrite.o ip.o ipme.o ipalloc.o strsalloc.o control.o etrn.o atrn.o constmap.o \
 received.o date822fmt.o wildmat.o now.o qmail.o variables.o cdb.a fd.a \
@@ -2477,7 +2477,7 @@ base64sub.o qregex_smtpd.o tablematch.o ndelay.o ndelay_off.o greylist.o \
 auto_break.o env.a stralloc.a alloc.a substdio.a error.a str.a fs.a lock.a \
 socket.lib tai.lib dns.lib indimail.lib tls.lib hmac_sha1.obj
 	if test $(SYSTEM) = Darwin ; then \
-	$(LD) -bundle -undefined dynamic_lookup qmail-smtpd.so smtpd.o rcpthosts.o \
+	$(LD) -bundle -undefined dynamic_lookup -o qmail_smtpd.so smtpd.o rcpthosts.o \
 	recipients.o commands.o timeoutread.o \
 	timeoutwrite.o ip.o ipme.o ipalloc.o strsalloc.o control.o etrn.o atrn.o constmap.o \
 	received.o date822fmt.o wildmat.o now.o qmail.o variables.o envrules.o bodycheck.o \
@@ -2489,7 +2489,7 @@ socket.lib tai.lib dns.lib indimail.lib tls.lib hmac_sha1.obj
 	case.a env.a stralloc.a alloc.a substdio.a error.a \
 	str.a fs.a lock.a `cat socket.lib tai.lib dns.lib indimail.lib tls.lib`; \
 	else \
-	$(CC) -shared -rdynamic -nostartfiles -fPIC -s -O4 -o qmail-smtpd.so smtpd.o rcpthosts.o \
+	$(CC) -shared -rdynamic -nostartfiles -fPIC -s -O4 -o qmail_smtpd.so smtpd.o rcpthosts.o \
 	recipients.o commands.o timeoutread.o \
 	timeoutwrite.o ip.o ipme.o ipalloc.o strsalloc.o control.o etrn.o atrn.o constmap.o \
 	received.o date822fmt.o wildmat.o now.o qmail.o variables.o envrules.o bodycheck.o \
