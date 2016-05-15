@@ -35,3 +35,5 @@ tcpserver.1
 uint32.h
 uint64.h
 who@
+rblsmtpd.so
+tcpserver_plugin.o
