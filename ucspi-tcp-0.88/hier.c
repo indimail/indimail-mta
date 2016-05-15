@@ -1,5 +1,8 @@
 /*
  * $Log: hier.c,v $
+ * Revision 1.6  2016-05-15 22:39:14+05:30  Cprogrammer
+ * added rblsmtpd.so
+ *
  * Revision 1.5  2008-06-30 09:39:14+05:30  Cprogrammer
  * changed auto_home to auto_uspi_home
  *
@@ -32,21 +35,22 @@ hier(inst_dir)
 		auto_ucspi_home = inst_dir;
 	h(auto_ucspi_home, -1, -1, 0555);
 	d(auto_ucspi_home, "bin", -1, -1, 0555);
+	d(auto_ucspi_home, "plugins", -1, -1, 0555);
 	d(auto_ucspi_home, "man", -1, -1, 0555);
 	d(auto_ucspi_home, "man/man1", -1, -1, 0555);
 
-	c(auto_ucspi_home, "bin", "tcpserver", -1, -1, 0755);
-	c(auto_ucspi_home, "bin", "tcprules", -1, -1, 0755);
-	c(auto_ucspi_home, "bin", "tcprulescheck", -1, -1, 0755);
-	c(auto_ucspi_home, "bin", "tcpclient", -1, -1, 0755);
-	c(auto_ucspi_home, "bin", "who@", -1, -1, 0755);
-	c(auto_ucspi_home, "bin", "date@", -1, -1, 0755);
-	c(auto_ucspi_home, "bin", "finger@", -1, -1, 0755);
-	c(auto_ucspi_home, "bin", "http@", -1, -1, 0755);
-	c(auto_ucspi_home, "bin", "tcpcat", -1, -1, 0755);
-	c(auto_ucspi_home, "bin", "mconnect", -1, -1, 0755);
-	c(auto_ucspi_home, "bin", "mconnect-io", -1, -1, 0755);
-	c(auto_ucspi_home, "bin", "rblsmtpd", -1, -1, 0755);
+	c(auto_ucspi_home, "bin", "tcpserver", -1, -1, 0555);
+	c(auto_ucspi_home, "bin", "tcprules", -1, -1, 0555);
+	c(auto_ucspi_home, "bin", "tcprulescheck", -1, -1, 0555);
+	c(auto_ucspi_home, "bin", "tcpclient", -1, -1, 0555);
+	c(auto_ucspi_home, "bin", "who@", -1, -1, 0555);
+	c(auto_ucspi_home, "bin", "date@", -1, -1, 0555);
+	c(auto_ucspi_home, "bin", "finger@", -1, -1, 0555);
+	c(auto_ucspi_home, "bin", "http@", -1, -1, 0555);
+	c(auto_ucspi_home, "bin", "tcpcat", -1, -1, 0555);
+	c(auto_ucspi_home, "bin", "mconnect", -1, -1, 0555);
+	c(auto_ucspi_home, "bin", "mconnect-io", -1, -1, 0555);
+	c(auto_ucspi_home, "bin", "rblsmtpd", -1, -1, 0555);
 	c(auto_ucspi_home, "man/man1", "tcpserver.1", -1, -1, 0644);
 	c(auto_ucspi_home, "man/man1", "tcprules.1", -1, -1, 0644);
 	c(auto_ucspi_home, "man/man1", "tcprulescheck.1", -1, -1, 0644);
@@ -58,4 +62,7 @@ hier(inst_dir)
 	c(auto_ucspi_home, "man/man1", "tcpcat.1", -1, -1, 0644);
 	c(auto_ucspi_home, "man/man1", "mconnect.1", -1, -1, 0644);
 	c(auto_ucspi_home, "man/man1", "rblsmtpd.1", -1, -1, 0644);
+#ifdef LOAD_SHARED_OBJECTS
+	c(auto_ucspi_home, "plugins", "rblsmtpd.so", -1, -1, 0555);
+#endif
 }
