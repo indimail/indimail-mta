@@ -64,18 +64,24 @@ buffer_put.o: \
 compile buffer_put.c buffer.h str.h byte.h error.h
 	./compile buffer_put.c
 
+hexconversion.o: \
+compile hexconversion.c hexconversion.h
+	./compile hexconversion.c
+
 byte.a: \
 makelib byte_chr.o byte_copy.o byte_cr.o byte_diff.o byte_rchr.o \
 byte_zero.o case_diffb.o case_diffs.o fmt_ulong.o ip4_fmt.o str_end.o \
-ip4_scan.o ip6_scan.o scan_ulong.o str_chr.o str_diff.o str_len.o str_start.o \
-uint16_pack.o uint16_unpack.o uint32_pack.o uint32_unpack.o ip6_compactaddr.o \
-ip6_fmt.o scan_xlong.o fmt_xlong.o ip6_expandaddr.o hexconversion.o
+ip4_scan.o ip6_scan.o scan_ulong.o scan_uint.o str_chr.o str_diff.o \
+str_len.o str_start.o uint16_pack.o uint16_unpack.o uint32_pack.o \
+uint32_unpack.o ip6_compactaddr.o ip6_fmt.o scan_xlong.o fmt_xlong.o \
+ip6_expandaddr.o hexconversion.o
 	./makelib byte.a byte_chr.o byte_copy.o byte_cr.o \
 	byte_diff.o byte_rchr.o byte_zero.o case_diffb.o str_end.o \
-	case_diffs.o fmt_ulong.o ip4_fmt.o ip4_scan.o ip6_scan.o scan_ulong.o \
-	str_chr.o str_diff.o str_len.o str_start.o uint16_pack.o \
-	uint16_unpack.o uint32_pack.o uint32_unpack.o ip6_compactaddr.o \
-	ip6_fmt.o scan_xlong.o fmt_xlong.o ip6_expandaddr.o hexconversion.o
+	case_diffs.o fmt_ulong.o ip4_fmt.o ip4_scan.o ip6_scan.o \
+	scan_ulong.o scan_uint.o str_chr.o str_diff.o str_len.o \
+	str_start.o uint16_pack.o uint16_unpack.o uint32_pack.o \
+	uint32_unpack.o ip6_compactaddr.o ip6_fmt.o scan_xlong.o \
+	fmt_xlong.o ip6_expandaddr.o hexconversion.o
 
 byte_chr.o: \
 compile byte_chr.c byte.h
@@ -327,8 +333,8 @@ choose compile load trywaitp.c haswaitp.h1 haswaitp.h2
 	./choose cl trywaitp haswaitp.h1 haswaitp.h2 > haswaitp.h
 
 hier.o: \
-compile hier.c auto_home.h
-	./compile hier.c
+compile hier.c auto_home.h conf-shared
+	./compile `grep -h -v "^#" conf-shared` hier.c
 
 http@: \
 warn-auto.sh http@.sh conf-home
@@ -374,7 +380,7 @@ compile ip4_scan.c scan.h ip4.h
 	./compile ip4_scan.c
 
 it: \
-prog setup instcheck tcpserver.1
+prog setup instcheck tcpserver.1 shared
 
 load: warn-auto.sh conf-ld
 	( cat warn-auto.sh; \
@@ -468,9 +474,25 @@ tcpserver tcprules tcprulescheck tcpclient who@ date@ \
 finger@ http@ tcpcat mconnect mconnect-io \
 rblsmtpd rts
 
+shared: \
+rblsmtpd.so
+
 prot.o: \
 compile prot.c hasshsgr.h prot.h
 	./compile prot.c
+
+rblsmtpd.so: \
+load rbl.o commands.o pathexec_rundl.o load_shared.o \
+dns.a time.a unix.a byte.a socket.lib
+	if test $(SYSTEM) = Darwin ; then \
+	$(LD) -bundle -undefined dynamic_lookup -o rblsmtpd.so \
+	rbl.o commands.o pathexec_rundl.o load_shared.o \
+	dns.a time.a unix.a byte.a  `cat socket.lib`; \
+	else \
+	$(CC) -shared -rdynamic -nostartfiles -fPIC -s -O4 -o rblsmtpd.so \
+	rbl.o commands.o pathexec_rundl.o load_shared.o \
+	dns.a time.a unix.a byte.a  `cat socket.lib`; \
+	fi
 
 rblsmtpd: \
 load rblsmtpd.o commands.o pathexec_rundl.o load_shared.o \
@@ -484,7 +506,14 @@ compile rblsmtpd.c byte.h str.h scan.h fmt.h env.h exit.h sig.h \
 buffer.h sgetopt.h subgetopt.h strerr.h stralloc.h \
 gen_alloc.h commands.h pathexec.h dns.h stralloc.h iopause.h taia.h \
 ip6.h tai.h uint64.h taia.h fd.h conf-ip
-	./compile `grep -h -v "^#" conf-ip` rblsmtpd.c
+	./compile -DMAIN `grep -h -v "^#" conf-ip` rblsmtpd.c
+
+rbl.o: \
+compile rblsmtpd.c byte.h str.h scan.h fmt.h env.h exit.h sig.h \
+buffer.h sgetopt.h subgetopt.h strerr.h stralloc.h \
+gen_alloc.h commands.h pathexec.h dns.h stralloc.h iopause.h taia.h \
+ip6.h tai.h uint64.h taia.h fd.h conf-ip
+	./compile `grep -h -v "^#" conf-ip` rblsmtpd.c -o rbl.o
 
 readclose.o: \
 compile readclose.c error.h readclose.h stralloc.h \
@@ -512,6 +541,10 @@ rules.h stralloc.h str.h byte.h ip4_bit.h ip6.h conf-ip
 scan_ulong.o: \
 compile scan_ulong.c scan.h
 	./compile scan_ulong.c
+
+scan_uint.o: \
+compile scan_uint.c scan.h
+	./compile scan_uint.c
 
 seek_set.o: \
 compile seek_set.c seek.h
@@ -757,15 +790,24 @@ compile tcprulescheck.c byte.h buffer.h strerr.h env.h rules.h \
 stralloc.h gen_alloc.h
 	./compile tcprulescheck.c
 
+load_shared.o: \
+compile load_shared.c str.h strerr.h
+	./compile `grep -h -v "^#" conf-shared` load_shared.c
+
+tcpserver_plugin.o: \
+compile tcpserver_plugin.c str.h stralloc.h strerr.h scan.h fmt.h env.h
+	./compile `grep -h -v "^#" conf-shared` tcpserver_plugin.c
+
 tcpserver: \
 load tcpserver.o rules.o tcpremoteinfo.o timeoutconn.o pathexec_rundl.o \
-load_shared.o control.o str_diffn.o auto_home.o cdb.a dns.a time.a \
-unix.a byte.a socket.lib mysql_config
+tcpserver_plugin.o load_shared.o control.o str_diffn.o auto_home.o \
+fmt_str.o fmt_uint.o scan_uint.o \
+cdb.a dns.a time.a unix.a byte.a socket.lib mysql_config
 	./load tcpserver rules.o tcpremoteinfo.o timeoutconn.o \
-	control.o str_diffn.o auto_home.o load_shared.o pathexec_rundl.o \
-	cdb.a dns.a time.a unix.a byte.a `cat socket.lib` \
-	$(SSLLIBS) \
-	$(mysql_libs) -ldl
+	control.o str_diffn.o auto_home.o tcpserver_plugin.o load_shared.o \
+	fmt_str.o fmt_uint.o scan_uint.o \
+	pathexec_rundl.o cdb.a dns.a time.a unix.a byte.a `cat socket.lib` \
+	$(SSLLIBS) $(mysql_libs) -ldl
 
 tcpserver.o: \
 compile tcpserver.c uint16.h str.h byte.h fmt.h scan.h ip4.h fd.h \
@@ -774,15 +816,10 @@ alloc.h buffer.h error.h strerr.h sgetopt.h subgetopt.h pathexec.h \
 socket.h uint32.h ndelay.h tcpremoteinfo.h stralloc.h rules.h \
 stralloc.h sig.h dns.h stralloc.h iopause.h taia.h tai.h uint64.h \
 ip6.h conf-tls conf-ip haveip6.h conf-mysqlrules \
-mysql_config hasmysql.h
+conf-shared mysql_config hasmysql.h
 	./compile $(SSLINCS) $(mysql_inc) \
-	`grep -h -v "^#" conf-tls conf-ip conf-mysqlrules` \
+	`grep -h -v "^#" conf-tls conf-ip conf-mysqlrules conf-shared` \
 	tcpserver.c
-
-load_shared.o: \
-compile load_shared.c str.h strerr.h
-	./compile `grep -h -v "^#" conf-shared ` \
-	load_shared.c
 
 mysql_config.o: compile mysql_config.c conf-mysqlrules
 	./compile `grep -h -v "^#" conf-mysqlrules` mysql_config.c
@@ -907,6 +944,14 @@ ip6.h haveip6.h conf-ip
 fmt_xlong.o: \
 compile fmt_xlong.c scan.h hexconversion.h
 	./compile fmt_xlong.c
+
+fmt_uint.o: \
+compile fmt_uint.c fmt.h
+	./compile fmt_uint.c
+
+fmt_str.o: \
+compile fmt_str.c fmt.h
+	./compile fmt_str.c
 
 scan_xlong.o: \
 compile scan_xlong.c scan.h
