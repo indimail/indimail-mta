@@ -1,5 +1,8 @@
 /*
  * $Log: rblsmtpd.c,v $
+ * Revision 1.14  2016-05-15 22:41:42+05:30  Cprogrammer
+ * rblsmtpd() function for use as shared object
+ *
  * Revision 1.13  2015-08-27 00:25:28+05:30  Cprogrammer
  * removed tohex() function
  *
@@ -67,7 +70,7 @@
 #define FATAL "rblsmtpd: fatal: "
 
 #ifndef	lint
-static char     sccsid[] = "$Id: rblsmtpd.c,v 1.13 2015-08-27 00:25:28+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: rblsmtpd.c,v 1.14 2016-05-15 22:41:42+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 void
@@ -354,7 +357,7 @@ verify()
 	buffer_putsflush(&out, "252 rblsmtpd.indimail\r\n");
 }
 
-int
+static int
 addrparse(char *arg)
 {
 	int             i;
@@ -493,7 +496,7 @@ struct commands smtpcommands[] = {
 };
 
 void
-rblsmtpd(void)
+rblsmtpd_f(void)
 {
 	int             i;
 
@@ -532,7 +535,7 @@ rblsmtpd(void)
 }
 
 int
-main(int argc, char **argv, char **envp)
+rblsmtpd(int argc, char **argv, char **envp)
 {
 	int             flagwantdefaultrbl = 1;
 	char           *x, *altreply = 0;
@@ -627,12 +630,20 @@ main(int argc, char **argv, char **envp)
 	if (flagwantdefaultrbl)
 		usage();
 	if (decision >= 2)
-		rblsmtpd();
+		rblsmtpd_f();
 	pathexec_run(*argv, argv, envp);
 	strerr_die4sys(111, FATAL, "unable to run ", *argv, ": ");
 	/*- Not reached */
 	return(0);
 }
+
+#ifdef MAIN
+int
+main(int argc, char **argv, char **envp)
+{
+	return(rblsmtpd(argc, argv, envp));
+}
+#endif
 
 void
 getversion_rblsmtpd_c()
