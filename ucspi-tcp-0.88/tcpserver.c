@@ -1,5 +1,8 @@
 /*
  * $Log: tcpserver.c,v $
+ * Revision 1.51  2016-05-15 22:42:48+05:30  Cprogrammer
+ * added tcpserver plugin
+ *
  * Revision 1.50  2013-08-06 07:57:11+05:30  Cprogrammer
  * added socket_ip6optionskill for IPV6 socket
  *
@@ -171,7 +174,7 @@
 #include "auto_home.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: tcpserver.c,v 1.50 2013-08-06 07:57:11+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: tcpserver.c,v 1.51 2016-05-15 22:42:48+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef IPV6
@@ -252,6 +255,7 @@ int             socket_tcpnodelay(int);
 #ifdef TLS
 void            translate(SSL*, int, int, unsigned int);
 #endif
+int             tcpserver_plugin(char **);
 
 /*---------------------------- child */
 
@@ -1297,7 +1301,7 @@ sigchld()
 }
 
 int
-main(int argc, char **argv)
+main(int argc, char **argv, char **envp)
 {
 	char           *x, *hostname;
 #if defined(MYSQL_CONFIG) && defined(HAS_MYSQL)
@@ -1317,7 +1321,7 @@ main(int argc, char **argv)
 	int             pi2c[2], pi4c[2];
 #endif
 	struct stralloc options = {0};
-  
+
 	if ((x = env_get("MAXPERIP"))) /*- '-C' option overrides this */
 	{
 		scan_ulong(x, &PerHostLimit);
@@ -1542,6 +1546,7 @@ main(int argc, char **argv)
 		byte_copy(localip, 4, addresses.s);
 #endif
 	}
+	tcpserver_plugin(envp);
 #ifdef TLS
 	if (flagssl == 1)
 	{
