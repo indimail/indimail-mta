@@ -1,5 +1,8 @@
 /*
  * $Log: ipme.c,v $
+ * Revision 1.22  2016-05-16 21:15:24+05:30  Cprogrammer
+ * removed stdio.h
+ *
  * Revision 1.21  2015-08-24 21:48:48+05:30  Cprogrammer
  * added :: and 0.0.0.0 as valid ip addresses for me
  *
@@ -61,7 +64,6 @@
 #include <sys/socket.h>
 #include <netdb.h>
 #include <ifaddrs.h>
-#include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -495,7 +497,7 @@ ipme_init()
 void
 getversion_ipme_c()
 {
-	static char    *x = "$Id: ipme.c,v 1.21 2015-08-24 21:48:48+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: ipme.c,v 1.22 2016-05-16 21:15:24+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
