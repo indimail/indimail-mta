@@ -1,5 +1,8 @@
 /*
  * $Log: tcpserver.c,v $
+ * Revision 1.52  2016-05-16 21:21:09+05:30  Cprogrammer
+ * call tcpserver_plugin with reload option on sighup
+ *
  * Revision 1.51  2016-05-15 22:42:48+05:30  Cprogrammer
  * added tcpserver plugin
  *
@@ -174,7 +177,7 @@
 #include "auto_home.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: tcpserver.c,v 1.51 2016-05-15 22:42:48+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: tcpserver.c,v 1.52 2016-05-16 21:21:09+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef IPV6
@@ -255,7 +258,8 @@ int             socket_tcpnodelay(int);
 #ifdef TLS
 void            translate(SSL*, int, int, unsigned int);
 #endif
-int             tcpserver_plugin(char **);
+int             tcpserver_plugin(char **, int);
+extern char   **environ;
 
 /*---------------------------- child */
 
@@ -1245,6 +1249,8 @@ sighangup()
 
 	if (!IpTable)
 		init_ip();
+	if (tcpserver_plugin(environ, 0))
+		_exit(111);
 	tmpLimit = limit;
 	if (control_readint(&tmpLimit, limitFile.s) == -1)
 		strerr_die4sys(111, FATAL, "unable to read ", limitFile.s, ": ");
@@ -1546,7 +1552,8 @@ main(int argc, char **argv, char **envp)
 		byte_copy(localip, 4, addresses.s);
 #endif
 	}
-	tcpserver_plugin(envp);
+	if (tcpserver_plugin(envp, 1))
+		_exit(111);
 #ifdef TLS
 	if (flagssl == 1)
 	{
