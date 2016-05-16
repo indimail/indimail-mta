@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail.spec.in,v 2.323 2016-05-16 10:37:01+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 2.324 2016-05-16 21:25:02+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %define _unpackaged_files_terminate_build 1
 
@@ -553,6 +553,11 @@ fi
 	--enable-basepath=@basepath@ --enable-logdir=@logdir@ \
 	--enable-tcprules-prog=%{_prefix}/bin/tcprules --enable-tcpserver-file=%{_prefix}/etc/tcp.smtp \
 	--enable-moduledir=%module_dir `%{__cat} config/indimail.opts`
+%if %{tcpserver_plugin} == 1
+	echo "-DLOAD_SHARED_OBJECTS" > ../qmail-1.03/conf-shared
+%else
+	%{__rm} -f ../qmail-1.03/conf-shared
+%endif
 
 #### nssd ######################
 %if %nonssd == 0
@@ -662,6 +667,11 @@ cd ..
 #### ucspi-tcp ######################
 if [ -d ucspi-tcp-%{ucspi_version} ] ; then
 	%{__sed} 's{HOME{%{_prefix}{' ucspi-tcp-%{ucspi_version}/conf-home.in > ucspi-tcp-%{ucspi_version}/conf-home
+%if %{tcpserver_plugin} == 1
+	echo "-DLOAD_SHARED_OBJECTS" > ucspi-tcp-0.88/conf-shared
+%else
+	%{__rm} -f ucsp-tcp-0.88/conf-shared
+%endif
 fi
 if [ $ID -eq 0 ] ; then
 	if [ $nscd_up -ge 1 ] ; then
