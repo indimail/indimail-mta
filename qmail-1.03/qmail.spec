@@ -1,6 +1,6 @@
 #
 #
-# $Id: qmail.spec,v 1.33 2016-05-04 20:03:44+05:30 Cprogrammer Exp mbhangui $
+# $Id: qmail.spec,v 1.34 2016-05-16 10:38:43+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %define _unpackaged_files_terminate_build 1
 
@@ -34,6 +34,7 @@
 %define qmail_version      1.03
 %define libdkim_version    1.4
 %define libsrs2_version    1.0.18
+%define tcpserver_plugin   1
 %define noperms            1
 %define see_base           For a description of IndiMail visit http://www.indimail.org
 %define nolibdkim          0
@@ -837,7 +838,10 @@ done
 %attr(555,root,qmail)                   %{_prefix}/plugins/generic.so
 %attr(555,root,qmail)                   %{_prefix}/plugins/smtpd-plugin.so
 %attr(555,root,qmail)                   %{_prefix}/plugins/smtpd-plugin0.so
-#%attr(555,root,qmail)                   %{_prefix}/plugins/qmail-smtpd.so
+%if %tcpserver_plugin != 0
+%attr(555,root,qmail)                   %{_prefix}/plugins/qmail_smtpd.so
+%attr(555,root,qmail)                   %{_prefix}/plugins/rblsmtpd.so
+%endif
 
 %docdir %{_prefix}/doc
 %docdir %{_prefix}/man
@@ -1300,6 +1304,7 @@ do
 			--dmasquerade \
 			--dkverify=both \
 			--dksign=both --private_key=%{_prefix}/control/domainkeys/%/%{dkimkeyfn} \
+			--shared-objects=1 \
 			$extra_opt
 	else
 		%{_prefix}/sbin/svctool --smtp=$port --servicedir=%{servicedir} \
@@ -1311,6 +1316,7 @@ do
 			--dmasquerade \
 			--dkverify=both \
 			--dksign=both --private_key=%{_prefix}/control/domainkeys/%/%{dkimkeyfn} \
+			--shared-objects=1 \
 			$extra_opt
 	fi
 	echo "1" > %{servicedir}/qmail-smtpd.$port/variables/DISABLE_PLUGIN
