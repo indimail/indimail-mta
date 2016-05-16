@@ -1,5 +1,8 @@
 #!/bin/sh
 # $Log: create_services.in,v $
+# Revision 2.58  2016-05-16 10:36:34+05:30  Cprogrammer
+# added --shared-objects option for smtp service creation
+#
 # Revision 2.57  2016-01-20 20:11:44+05:30  Cprogrammer
 # removed --model option for mysql
 #
@@ -195,7 +198,7 @@ indimaildir=@indimaildir@
 # End USER Configuration OPTIONS
 #
 
-# $Id: create_services.in,v 2.57 2016-01-20 20:11:44+05:30 Cprogrammer Exp mbhangui $
+# $Id: create_services.in,v 2.58 2016-05-16 10:36:34+05:30 Cprogrammer Exp mbhangui $
 
 usage()
 {
@@ -418,6 +421,7 @@ do
 				--dmasquerade \
 				--dkverify=$ver_opt \
 				--dksign=$sign_opt --private_key=$indimaildir/control/domainkeys/%/$dkimkeyfn \
+				--shared-objects=1 \
 				$e_opt $extra_opt
 		else
 			$dir_prefix$indimaildir/sbin/svctool --smtp=$port --servicedir=$servicedir \
@@ -431,6 +435,7 @@ do
 				--dmasquerade \
 				--dkverify=$ver_opt \
 				--dksign=$sign_opt --private_key=$indimaildir/control/domainkeys/%/$dkimkeyfn \
+				--shared-objects=1 \
 				$e_opt $extra_opt
 		fi
 	else
@@ -445,6 +450,7 @@ do
 				--dmasquerade \
 				--dkverify=$ver_opt \
 				--dksign=$sign_opt --private_key=$indimaildir/control/domainkeys/%/$dkimkeyfn \
+				--shared-objects=1 \
 				$e_opt $extra_opt
 		else
 			$dir_prefix$indimaildir/sbin/svctool --smtp=$port --servicedir=$servicedir \
@@ -456,6 +462,7 @@ do
 				--dmasquerade \
 				--dkverify=$ver_opt \
 				--dksign=$sign_opt --private_key=$indimaildir/control/domainkeys/%/$dkimkeyfn \
+				--shared-objects=1 \
 				$e_opt $extra_opt
 		fi
 	fi

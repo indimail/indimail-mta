@@ -345,6 +345,7 @@ do
 				--dmasquerade \
 				--dkverify=$ver_opt \
 				--dksign=$sign_opt --private_key=${prefix}/control/domainkeys/%/$dkimkeyfn \
+				--shared-objects=1 \
 				$extra_opt
 		else
 			${prefix}/sbin/svctool --smtp=$port --servicedir=$servicedir \
@@ -359,6 +360,7 @@ do
 				--dmasquerade \
 				--dkverify=both \
 				--dksign=both --private_key=${prefix}/control/domainkeys/%/$dkimkeyfn \
+				--shared-objects=1 \
 				$extra_opt
 		fi
 	else
@@ -374,6 +376,7 @@ do
 				--dmasquerade \
 				--dkverify=both \
 				--dksign=both --private_key=${prefix}/control/domainkeys/%/$dkimkeyfn \
+				--shared-objects=1 \
 				$extra_opt
 		else
 			${prefix}/sbin/svctool --smtp=$port --servicedir=$servicedir \
@@ -386,6 +389,7 @@ do
 				--dmasquerade \
 				--dkverify=both \
 				--dksign=both --private_key=${prefix}/control/domainkeys/%/$dkimkeyfn \
+				--shared-objects=1 \
 				$extra_opt
 		fi
 	fi

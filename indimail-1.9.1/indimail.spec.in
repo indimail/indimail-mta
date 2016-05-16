@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail.spec.in,v 2.322 2016-05-06 17:37:57+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 2.323 2016-05-16 10:37:01+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %define _unpackaged_files_terminate_build 1
 
@@ -38,6 +38,7 @@
 %define ucspi_version      0.88
 %define qmail_version      1.03
 %define fetchmail_version  6.3.26
+%define tcpserver_plugin   1
 %define nosignatures       1
 %define clamav_version     0.98
 %define fortune_version    1.1
@@ -1562,7 +1563,10 @@ fi
 %attr(555,root,qmail)                   %{_prefix}/plugins/generic.so
 %attr(555,root,qmail)                   %{_prefix}/plugins/smtpd-plugin.so
 %attr(555,root,qmail)                   %{_prefix}/plugins/smtpd-plugin0.so
-#%attr(555,root,qmail)                   %{_prefix}/plugins/qmail-smtpd.so
+%if %tcpserver_plugin != 0
+%attr(555,root,qmail)                   %{_prefix}/plugins/qmail_smtpd.so
+%attr(555,root,qmail)                   %{_prefix}/plugins/rblsmtpd.so
+%endif
 
 %attr(555,root,root)                    %{_prefix}/modules/background
 %attr(555,root,root)                    %{_prefix}/modules/alarms
@@ -2510,6 +2514,7 @@ do
 				--dmasquerade \
 				--dkverify=$ver_opt \
 				--dksign=$sign_opt --private_key=%{_prefix}/control/domainkeys/%/%{dkimkeyfn} \
+				--shared-objects=1 \
 				$extra_opt
 		else
 			%{_prefix}/sbin/svctool --smtp=$port --servicedir=%{servicedir} \
@@ -2523,6 +2528,7 @@ do
 				--dmasquerade \
 				--dkverify=both \
 				--dksign=both --private_key=%{_prefix}/control/domainkeys/%/%{dkimkeyfn} \
+				--shared-objects=1 \
 				$extra_opt
 		fi
 	else
@@ -2537,6 +2543,7 @@ do
 				--dmasquerade \
 				--dkverify=both \
 				--dksign=both --private_key=%{_prefix}/control/domainkeys/%/%{dkimkeyfn} \
+				--shared-objects=1 \
 				$extra_opt
 		else
 			%{_prefix}/sbin/svctool --smtp=$port --servicedir=%{servicedir} \
@@ -2548,6 +2555,7 @@ do
 				--dmasquerade \
 				--dkverify=both \
 				--dksign=both --private_key=%{_prefix}/control/domainkeys/%/%{dkimkeyfn} \
+				--shared-objects=1 \
 				$extra_opt
 		fi
 	fi
