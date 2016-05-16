@@ -217,3 +217,4 @@ fmt_uint.o
 rbl.o
 scan_uint.o
 tcpserver_plugin.o
+rblsmtpd.so
