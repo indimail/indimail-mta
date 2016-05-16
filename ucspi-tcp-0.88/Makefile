@@ -795,7 +795,7 @@ compile load_shared.c str.h strerr.h
 	./compile `grep -h -v "^#" conf-shared` load_shared.c
 
 tcpserver_plugin.o: \
-compile tcpserver_plugin.c str.h stralloc.h strerr.h scan.h fmt.h env.h
+compile tcpserver_plugin.c str.h stralloc.h strerr.h scan.h fmt.h env.h conf-shared
 	./compile `grep -h -v "^#" conf-shared` tcpserver_plugin.c
 
 tcpserver: \
