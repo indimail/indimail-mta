@@ -1,6 +1,9 @@
 #!/bin/sh
 #
 # $Log: vadddomain_handle.in,v $
+# Revision 2.12  2016-05-16 22:31:19+05:30  Cprogrammer
+# issue sighup to qmail-smtpd if tcpserver plugin has been configured to reload control files
+#
 # Revision 2.11  2014-04-15 23:17:29+05:30  Cprogrammer
 # avoid grep if spamignore does not exist
 #
@@ -36,14 +39,22 @@
 # post handle for vadddomain
 #
 #
-# $Id: vadddomain_handle.in,v 2.11 2014-04-15 23:17:29+05:30 Cprogrammer Exp mbhangui $
+# $Id: vadddomain_handle.in,v 2.12 2016-05-16 22:31:19+05:30 Cprogrammer Exp mbhangui $
 
 # send sighup to inlookup service to reload domains
-@indimaildir@/bin/svc -h /service*/inlookup.* /service*/qmail-send.* 2>/dev/null
+(
+/bin/ls /service*/qmail-smtpd.*/variables/PLUGIN*init | sed s'{/variables/.*{{'g 
+/bin/ls -d /service*/inlookup.* /service*/qmail-send.*
+) | while read line
+do
+	echo "Sending SIGHUP to $line"
+	@indimaildir@/bin/svc -h $line
+done
 # print domain information
 @indimaildir@/bin/vdominfo $1
 
 # create user for bogofilter
+echo "Creating standard users for spam filter (bogofilter)"
 for i in ham spam register-ham register-spam
 do
 	@indimaildir@/bin/valias -i '&'"B"$i $i@$1
@@ -54,6 +65,7 @@ do
 done
 
 # create rule for moving spam, virus emails to folders
+echo "creating rules for spam, virus detected emails"
 @indimaildir@/bin/vcfilter -i -t  spamFilter -c 3 -k "Yes, spamicity=" -f Spam   -b 0 -h 32 \
 	prefilt@$1 > /dev/null 2>&1
 @indimaildir@/bin/vcfilter -i -t virusFilter -c 0 -k "virus found" -f Quarantine -b 0 -h 28 \
@@ -64,6 +76,7 @@ done
 /bin/ls -al @indimaildir@/domains/$1
 
 # add the domain to spamignore
+echo "adding $1 to spamignore control file"
 if [ -f @indimaildir@/control/spamignore ] ; then
 	grep -w @"$1" @indimaildir@/control/spamignore > /dev/null
 	if [ $? -ne 0 ] ; then
@@ -73,5 +86,15 @@ if [ -f @indimaildir@/control/spamignore ] ; then
 else
 	echo @"$1" > @indimaildir@/control/spamignore
 fi
+if [ -x /bin/chown ] ; then
+	chown=/bin/chown
+elif [ -x /usr/sbin/chown ] ; then
+	chown=/usr/sbin/chown
+elif [ -x /usr/bin/chown ] ; then
+	chown=/usr/bin/chown
+else
+	chown=/bin/chown
+fi
+$chown indimail:indimail @indimaildir@/control/spamignore
 /bin/chmod 644 @indimaildir@/control/spamignore
 exit 0
