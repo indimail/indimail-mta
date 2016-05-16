@@ -281,6 +281,22 @@ Setting up tcpserver in IPv4 mode only -4 or in compatibility mode, IPv4 address
 considered in their native format without the IPv6 prefix. Thus, usual IPv4 addresses
 can be entered in rules.cdb even in common IPv4/IPv6 bindings.
 
+.SH Loading Shared Objects
+tcpserver can load shared objects by specifying a shared object on the command line. A special case can be setup
+for qmail-smtpd and rblmstpd by specifying the following environment variables
+
+.EX
+PLUGIN0=/var/indimail/plugins/qmail_smtpd.so
+PLUGIN0_dir=/var/indimail
+PLUGIN0_init=setup
+PLUGIN1=/var/indimail/plugins/rblsmtpd.so
+.EE
+
+The above causes tcpserver to load qmail_smtpd.so and execute the setup() function, after changing directory to HOME, in
+the parent, which loads all qmail-smtpd control files. Additionally, if HOME/plugins/qmail_smtpd.so is specfied in the command
+line argument, instead of HOME/bin/qmail-smtpd, the control files are loaded just once. This improves the perfomance of the smtp
+service. In the above example, rblsmtpd.so is loaded without executing any initialization function and without changing directory.
+
 .SH ENVIRONMENT
 .TP
 .B SSL_CIPHER
