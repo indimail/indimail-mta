@@ -1058,7 +1058,7 @@ yearcal
 yearcal.o
 trysrs
 trysrs.o
-qmail-smtpd.so
+qmail_smtpd.so
 str_end.o
 lock_sh.o
 sig_int.o
