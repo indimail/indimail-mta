@@ -212,3 +212,8 @@ str_end.o
 pathexec_rundl.o
 load_shared.o
 rplsmtpd.so
+fmt_str.o
+fmt_uint.o
+rbl.o
+scan_uint.o
+tcpserver_plugin.o
