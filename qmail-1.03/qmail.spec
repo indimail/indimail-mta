@@ -1,6 +1,6 @@
 #
 #
-# $Id: qmail.spec,v 1.34 2016-05-16 10:38:43+05:30 Cprogrammer Exp mbhangui $
+# $Id: qmail.spec,v 1.35 2016-05-16 21:26:14+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %define _unpackaged_files_terminate_build 1
 
@@ -361,10 +361,20 @@ fi
 #### qmail ######################
 if [ -d qmail-%{qmail_version} ] ; then
 	%{__sed} 's{QMAIL{%{_prefix}{' qmail-%{qmail_version}/conf-qmail.in > qmail-%{qmail_version}/conf-qmail
+%if %{tcpserver_plugin} == 1
+	echo "-DLOAD_SHARED_OBJECTS" > qmail-%{qmail_version}/conf-shared
+%else
+	%{__rm} -f qmail-%{qmail_version}/conf-shared
+%endif
 fi
 #### ucspi-tcp ######################
 if [ -d ucspi-tcp-%{ucspi_version} ] ; then
 	%{__sed} 's{HOME{%{_prefix}{' ucspi-tcp-%{ucspi_version}/conf-home.in > ucspi-tcp-%{ucspi_version}/conf-home
+%if %{tcpserver_plugin} == 1
+	echo "-DLOAD_SHARED_OBJECTS" > ucsp-tcp-%{ucspi_version}/conf-shared
+%else
+	%{__rm} -f ucsp-tcp-%{ucspi_version}/conf-shared
+%endif
 fi
 
 %install
