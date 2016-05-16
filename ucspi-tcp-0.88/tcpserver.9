@@ -286,16 +286,17 @@ tcpserver can load shared objects by specifying a shared object on the command l
 for qmail-smtpd and rblmstpd by specifying the following environment variables
 
 .EX
-PLUGIN0=/var/indimail/plugins/qmail_smtpd.so
-PLUGIN0_dir=/var/indimail
+PLUGIN0=HOME/plugins/qmail_smtpd.so
+PLUGIN0_dir=HOME
 PLUGIN0_init=setup
-PLUGIN1=/var/indimail/plugins/rblsmtpd.so
+PLUGIN1=HOME/plugins/rblsmtpd.so
 .EE
 
-The above causes tcpserver to load qmail_smtpd.so and execute the setup() function, after changing directory to HOME, in
-the parent, which loads all qmail-smtpd control files. Additionally, if HOME/plugins/qmail_smtpd.so is specfied in the command
-line argument, instead of HOME/bin/qmail-smtpd, the control files are loaded just once. This improves the perfomance of the smtp
-service. In the above example, rblsmtpd.so is loaded without executing any initialization function and without changing directory.
+The above causes tcpserver to load qmail_smtpd.so and execute the smtp_init(1) function, after changing directory to HOME,
+in the parent, which loads all qmail-smtpd control files. Additionally, if HOME/plugins/qmail_smtpd.so is specfied in
+the command line argument, instead of HOME/bin/qmail-smtpd, the control files are loaded just once. This improves the
+perfomance of the smtp service. In the above example, rblsmtpd.so is loaded without executing any initialization function and
+without changing directory. On SIGHUP, tcpserver executes the function smtp_init(0).
 
 .SH ENVIRONMENT
 .TP
