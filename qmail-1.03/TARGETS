@@ -1,3 +1,5 @@
+auto_control.o
+auto_control.c
 dns.h
 drate
 drate.1
