@@ -1,5 +1,8 @@
 /*
  * $Log: count_rcpthosts.c,v $
+ * Revision 2.4  2016-05-17 15:39:36+05:30  Cprogrammer
+ * fixed comment
+ *
  * Revision 2.3  2016-05-17 14:42:34+05:30  Cprogrammer
  * replace control directory with CONTROLDIR
  *
@@ -23,11 +26,11 @@
 #include <stdio.h>
 
 #ifndef	lint
-static char     sccsid[] = "$Id: count_rcpthosts.c,v 2.3 2016-05-17 14:42:34+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: count_rcpthosts.c,v 2.4 2016-05-17 15:39:36+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 /*
- * count the lines in /var/qmail/control/rcpthosts
+ * count the lines in rcpthosts
  */
 int
 count_rcpthosts()
