@@ -180,7 +180,7 @@ vadddomain_handle vadduser_handle vdeldomain_handle vaddaliasdomain_handle \
 vrenamedomain_handle login_tasks.3 authgeneric obs.mk usr.sbin.mysqld usr.sbin.clamd \
 usr.bin.freshclam
 
-DISTCLEANFILES=.gitignore
+#DISTCLEANFILES=.gitignore
 
 vuserinfo_SOURCES = vuserinfo.c
 vuserinfo_LDADD = @auth_libs@
