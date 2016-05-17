@@ -1,6 +1,9 @@
 #!/bin/sh
 #
 # $Log: vadddomain_handle.in,v $
+# Revision 2.14  2016-05-17 23:16:42+05:30  Cprogrammer
+# set domain directory as set by configure
+#
 # Revision 2.13  2016-05-17 14:43:59+05:30  Cprogrammer
 # use control directory defined by configure
 #
@@ -42,7 +45,7 @@
 # post handle for vadddomain
 #
 #
-# $Id: vadddomain_handle.in,v 2.13 2016-05-17 14:43:59+05:30 Cprogrammer Exp mbhangui $
+# $Id: vadddomain_handle.in,v 2.14 2016-05-17 23:16:42+05:30 Cprogrammer Exp mbhangui $
 
 # send sighup to inlookup service to reload domains
 (
@@ -75,8 +78,8 @@ echo "creating rules for spam, virus detected emails"
 	prefilt@$1 > /dev/null 2>&1
 
 # display domain directory
-/bin/ls -dl @indimaildir@/domains/$1
-/bin/ls -al @indimaildir@/domains/$1
+/bin/ls -dl @domaindir@/domains/$1
+/bin/ls -al @domaindir@/domains/$1
 
 # add the domain to spamignore
 echo "adding $1 to spamignore control file"
