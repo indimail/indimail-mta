@@ -1,6 +1,6 @@
 #
 #
-# $Id: qmail.spec,v 1.35 2016-05-16 21:26:14+05:30 Cprogrammer Exp mbhangui $
+# $Id: qmail.spec,v 1.36 2016-05-17 19:47:24+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %define _unpackaged_files_terminate_build 1
 
