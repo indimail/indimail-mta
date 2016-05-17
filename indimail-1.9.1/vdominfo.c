@@ -1,5 +1,8 @@
 /*
  * $Log: vdominfo.c,v $
+ * Revision 2.18  2016-05-17 17:09:39+05:30  mbhangui
+ * use control directory set by configure
+ *
  * Revision 2.17  2016-01-21 16:57:57+05:30  Cprogrammer
  * removed compiler warning for fscanf()
  *
@@ -128,7 +131,7 @@
 #include <sys/socket.h>
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vdominfo.c,v 2.17 2016-01-21 16:57:57+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: vdominfo.c,v 2.18 2016-05-17 17:09:39+05:30 mbhangui Exp $";
 #endif
 
 char            Domain[MAX_BUFF];
@@ -325,10 +328,15 @@ display_domain(char *domain, char *dir, uid_t uid, gid_t gid)
 		printf("       uid: %lu\n", (long unsigned) uid);
 		printf("       gid: %lu\n", (long unsigned) gid);
 #ifdef CLUSTERED_SITE
-		getEnvConfigStr(&qmaildir, "QMAILDIR", QMAILDIR);
-		getEnvConfigStr(&controldir, "CONTROLDIR", "control");
-		if (snprintf(host_path, MAX_BUFF, "%s/%s/host.cntrl", qmaildir, controldir) == -1)
-			host_path[MAX_BUFF - 1] = 0;
+		getEnvConfigStr(&controldir, "CONTROLDIR", CONTROLDIR);
+		if (*controldir == '/') {
+			if (snprintf(host_path, MAX_BUFF, "%s/host.cntrl", controldir) == -1)
+				host_path[MAX_BUFF - 1] = 0;
+		} else {
+			getEnvConfigStr(&qmaildir, "QMAILDIR", QMAILDIR);
+			if (snprintf(host_path, MAX_BUFF, "%s/%s/host.cntrl", qmaildir, controldir) == -1)
+				host_path[MAX_BUFF - 1] = 0;
+		}
 		if ((host_cntrl = !access(host_path, F_OK)))
 		{
 			if ((hostid = get_local_hostid()))

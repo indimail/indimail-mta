@@ -1,5 +1,8 @@
 /*
  * $Log: open_master.c,v $
+ * Revision 2.8  2016-05-17 17:09:39+05:30  mbhangui
+ * use control directory set by configure
+ *
  * Revision 2.7  2010-03-07 09:58:51+05:30  Cprogrammer
  * return error of host.master is not present
  *
@@ -10,7 +13,7 @@
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: open_master.c,v 2.7 2010-03-07 09:58:51+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: open_master.c,v 2.8 2016-05-17 17:09:39+05:30 mbhangui Exp $";
 #endif
 
 #ifdef CLUSTERED_SITE
@@ -28,10 +31,15 @@ open_master()
 
 	if ((ptr = (char *) getenv("MASTER_HOST")) != (char *) 0)
 		return (open_central_db(ptr));
-	getEnvConfigStr(&qmaildir, "QMAILDIR", QMAILDIR);
-	getEnvConfigStr(&controldir, "CONTROLDIR", "control");
-	if (snprintf(host_path, MAX_BUFF, "%s/%s/host.master", qmaildir, controldir) == -1)
-		host_path[MAX_BUFF - 1] = 0;
+	getEnvConfigStr(&controldir, "CONTROLDIR", CONTROLDIR);
+	if (*controldir == '/') {
+		if (snprintf(host_path, MAX_BUFF, "%s/host.master", controldir) == -1)
+			host_path[MAX_BUFF - 1] = 0;
+	} else {
+		getEnvConfigStr(&qmaildir, "QMAILDIR", QMAILDIR);
+		if (snprintf(host_path, MAX_BUFF, "%s/%s/host.master", qmaildir, controldir) == -1)
+			host_path[MAX_BUFF - 1] = 0;
+	}
 	if (!(fp = fopen(host_path, "r")))
 	{
 		fprintf(stderr, "%s: %s\n", host_path, strerror(errno));

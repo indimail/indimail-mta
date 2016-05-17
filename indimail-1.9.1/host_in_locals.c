@@ -1,5 +1,8 @@
 /*
  * $Log: host_in_locals.c,v $
+ * Revision 2.4  2016-05-17 17:09:39+05:30  mbhangui
+ * use control directory set by configure
+ *
  * Revision 2.3  2005-12-29 22:45:04+05:30  Cprogrammer
  * use getEnvConfigStr to set variables from environment variables
  *
@@ -24,7 +27,7 @@
 #include <ctype.h>
 
 #ifndef	lint
-static char     sccsid[] = "$Id: host_in_locals.c,v 2.3 2005-12-29 22:45:04+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: host_in_locals.c,v 2.4 2016-05-17 17:09:39+05:30 mbhangui Exp $";
 #endif
 
 #ifdef IP_ALIAS_DOMAINS
@@ -41,9 +44,13 @@ host_in_locals(domain)
 	else
 	if (!strcmp(domain, "localhost"))
 		return (1);
-	getEnvConfigStr(&qmaildir, "QMAILDIR", QMAILDIR);
-	getEnvConfigStr(&controldir, "CONTROLDIR", "control");
-	snprintf(tmpbuf, MAX_BUFF, "%s/%s/locals", qmaildir, controldir);
+	getEnvConfigStr(&controldir, "CONTROLDIR", CONTROLDIR);
+	if (*controldir == '/')
+		snprintf(tmpbuf, MAX_BUFF, "%s/locals", controldir);
+	else {
+		getEnvConfigStr(&qmaildir, "QMAILDIR", QMAILDIR);
+		snprintf(tmpbuf, MAX_BUFF, "%s/%s/locals", qmaildir, controldir);
+	}
 	if(!(fs = fopen(tmpbuf, "r")))
 		return (0);
 	for(;;)

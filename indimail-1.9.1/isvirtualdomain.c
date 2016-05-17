@@ -1,5 +1,8 @@
 /*
  * $Log: isvirtualdomain.c,v $
+ * Revision 2.5  2016-05-17 17:09:39+05:30  mbhangui
+ * use control directory set by configure
+ *
  * Revision 2.4  2009-02-18 09:07:29+05:30  Cprogrammer
  * fixed fgets warning
  *
@@ -28,7 +31,7 @@
 #include <errno.h>
 
 #ifndef	lint
-static char     sccsid[] = "$Id: isvirtualdomain.c,v 2.4 2009-02-18 09:07:29+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: isvirtualdomain.c,v 2.5 2016-05-17 17:09:39+05:30 mbhangui Exp $";
 #endif
 
 int
@@ -38,9 +41,13 @@ isvirtualdomain(char *domain)
 	char           *qmaildir, *controldir, *ptr;
 	char            tmpbuf[MAX_BUFF];
 
-	getEnvConfigStr(&qmaildir, "QMAILDIR", QMAILDIR);
-	getEnvConfigStr(&controldir, "CONTROLDIR", "control");
-	snprintf(tmpbuf, MAX_BUFF, "%s/%s/virtualdomains", qmaildir, controldir);
+	getEnvConfigStr(&controldir, "CONTROLDIR", CONTROLDIR);
+	if (*controldir == '/')
+		snprintf(tmpbuf, MAX_BUFF, "%s/virtualdomains", controldir);
+	else {
+		getEnvConfigStr(&qmaildir, "QMAILDIR", QMAILDIR);
+		snprintf(tmpbuf, MAX_BUFF, "%s/%s/virtualdomains", qmaildir, controldir);
+	}
 	if(!(fp = fopen(tmpbuf, "r")))
 		return(0);
 	for(;;)

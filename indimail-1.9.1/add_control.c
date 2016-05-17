@@ -1,5 +1,8 @@
 /*
  * $Log: add_control.c,v $
+ * Revision 2.6  2016-05-17 17:09:39+05:30  mbhangui
+ * use control directory set by configure
+ *
  * Revision 2.5  2009-01-15 08:54:36+05:30  Cprogrammer
  * change for once_only flag in remove_line
  *
@@ -20,26 +23,35 @@
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: add_control.c,v 2.5 2009-01-15 08:54:36+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: add_control.c,v 2.6 2016-05-17 17:09:39+05:30 mbhangui Exp $";
 #endif
 
 int
 add_control(char *domain, char *target)
 {
-	int             count;
+	int             count, relative;
 	char            filename[MAX_BUFF], tmpstr[MAX_BUFF];
 	char           *qmaildir, *controldir;
 
 	getEnvConfigStr(&qmaildir, "QMAILDIR", QMAILDIR);
-	getEnvConfigStr(&controldir, "CONTROLDIR", "control");
+	getEnvConfigStr(&controldir, "CONTROLDIR", CONTROLDIR);
+	relative = (*controldir == '/' ? 0 : 1);
+
 	/*
 	 * If we have more than 50 domains in rcpthosts
 	 * make a morercpthosts and compile it
 	 */
-	if ((count = count_rcpthosts()) >= 50)
-		snprintf(filename, MAX_BUFF, "%s/%s/morercpthosts", qmaildir, controldir);
-	else
-		snprintf(filename, MAX_BUFF, "%s/%s/rcpthosts", qmaildir, controldir);
+	if (relative) {
+		if ((count = count_rcpthosts()) >= 50)
+			snprintf(filename, MAX_BUFF, "%s/%s/morercpthosts", qmaildir, controldir);
+		else
+			snprintf(filename, MAX_BUFF, "%s/%s/rcpthosts", qmaildir, controldir);
+	} else {
+		if ((count = count_rcpthosts()) >= 50)
+			snprintf(filename, MAX_BUFF, "%s/morercpthosts", controldir);
+		else
+			snprintf(filename, MAX_BUFF, "%s/rcpthosts", controldir);
+	}
 	if(update_file(filename, domain, INDIMAIL_QMAIL_MODE))
 		return (-1);
 	if (count >= 50 && !OptimizeAddDomain && compile_morercpthosts())
@@ -50,7 +62,10 @@ add_control(char *domain, char *target)
 	/*
 	 * Add to virtualdomains file and remove duplicates  and set mode 
 	 */
-	snprintf(filename, MAX_BUFF, "%s/%s/virtualdomains", qmaildir, controldir);
+	if (relative) 
+		snprintf(filename, MAX_BUFF, "%s/%s/virtualdomains", qmaildir, controldir);
+	else
+		snprintf(filename, MAX_BUFF, "%s/virtualdomains", controldir);
 	if(target && *target)
 		snprintf(tmpstr, MAX_BUFF, "%s:%s", domain, target);
 	else
@@ -60,7 +75,10 @@ add_control(char *domain, char *target)
 	/*
 	 * make sure it's not in locals and set mode 
 	 */
-	snprintf(filename, MAX_BUFF, "%s/%s/locals", qmaildir, controldir);
+	if (relative) 
+		snprintf(filename, MAX_BUFF, "%s/%s/locals", qmaildir, controldir);
+	else
+		snprintf(filename, MAX_BUFF, "%s/locals", controldir);
 	if(remove_line(domain, filename, 0, INDIMAIL_QMAIL_MODE) == -1)
 		return (-1);
 	if(use_etrn)
@@ -68,7 +86,10 @@ add_control(char *domain, char *target)
 		/*
 		 * Add to etrndomains file and remove duplicates  and set mode 
 		 */
-		snprintf(filename, MAX_BUFF, "%s/%s/etrnhosts", qmaildir, controldir);
+		if (relative) 
+			snprintf(filename, MAX_BUFF, "%s/%s/etrnhosts", qmaildir, controldir);
+		else
+			snprintf(filename, MAX_BUFF, "%s/etrnhosts", controldir);
 		snprintf(tmpstr, MAX_BUFF, "%s", domain);
 		if(update_file(filename, tmpstr, INDIMAIL_QMAIL_MODE))
 			return (-1);

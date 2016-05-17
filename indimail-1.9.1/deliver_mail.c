@@ -1,5 +1,8 @@
 /*
  * $Log: deliver_mail.c,v $
+ * Revision 2.64  2016-05-17 17:09:39+05:30  mbhangui
+ * use control directory set by configure
+ *
  * Revision 2.63  2015-12-17 17:39:57+05:30  Cprogrammer
  * Fixed X-Forwarded-For, X-Forwarded-To headers for valias delivery
  * use fork() instead of vfork for makeseekable to work
@@ -217,7 +220,7 @@
 #include <sys/wait.h>
 
 #ifndef	lint
-static char     sccsid[] = "$Id: deliver_mail.c,v 2.63 2015-12-17 17:39:57+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: deliver_mail.c,v 2.64 2016-05-17 17:09:39+05:30 mbhangui Exp $";
 #endif
 
 /*- Function Prototypes */
@@ -241,9 +244,13 @@ getAlertConfig(char *mailalert_host, char *mailalert_port)
 	if (*alert_host || *alert_port)
 		return;
 	*mailalert_host = *mailalert_port = 0;
-	getEnvConfigStr(&qmaildir, "QMAILDIR", QMAILDIR);
-	getEnvConfigStr(&controldir, "CONTROLDIR", "control");
-	snprintf(TmpBuf, sizeof(TmpBuf), "%s/%s/mailalert.cfg", qmaildir, controldir);
+	getEnvConfigStr(&controldir, "CONTROLDIR", CONTROLDIR);
+	if (*controldir == '/')
+		snprintf(TmpBuf, sizeof(TmpBuf), "%s/mailalert.cfg", controldir);
+	else {
+		getEnvConfigStr(&qmaildir, "QMAILDIR", QMAILDIR);
+		snprintf(TmpBuf, sizeof(TmpBuf), "%s/%s/mailalert.cfg", qmaildir, controldir);
+	}
 	if ((fp = fopen(TmpBuf, "r")))
 	{
 		for (;;)

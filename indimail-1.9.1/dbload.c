@@ -1,5 +1,8 @@
 /*
  * $Log: dbload.c,v $
+ * Revision 2.19  2016-05-17 17:09:39+05:30  mbhangui
+ * use control directory set by configure
+ *
  * Revision 2.18  2016-01-12 13:12:55+05:30  Cprogrammer
  * total was not correctly assigned if RelayHosts was already obtained
  *
@@ -68,7 +71,7 @@
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: dbload.c,v 2.18 2016-01-12 13:12:55+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: dbload.c,v 2.19 2016-05-17 17:09:39+05:30 mbhangui Exp $";
 #endif
 
 #include <unistd.h>
@@ -230,13 +233,18 @@ connect_db(DBINFO **ptr, MYSQL **mysqlptr)
 			}
 		}
 	}
-	getEnvConfigStr(&qmaildir, "QMAILDIR", QMAILDIR);
-	getEnvConfigStr(&controldir, "CONTROLDIR", "control");
+	getEnvConfigStr(&controldir, "CONTROLDIR", CONTROLDIR);
 	getEnvConfigStr(&mcdfile, "MCDFILE", MCDFILE);
 	if (*mcdfile == '/' || *mcdfile == '.')
 		snprintf(mcdFile, MAX_BUFF, "%s", mcdfile);
-	else
-		snprintf(mcdFile, MAX_BUFF, "%s/%s/%s", qmaildir, controldir, mcdfile);
+	else {
+		if (*controldir == '/')
+			snprintf(mcdFile, MAX_BUFF, "%s/%s", controldir, mcdfile);
+		else {
+			getEnvConfigStr(&qmaildir, "QMAILDIR", QMAILDIR);
+			snprintf(mcdFile, MAX_BUFF, "%s/%s/%s", qmaildir, controldir, mcdfile);
+		}
+	}
 	if (!mysql_init(*mysqlptr))
 	{
 		fprintf(stderr, "MYSQL Init Error: %s@%s\n", (*ptr)->database, (*ptr)->server);

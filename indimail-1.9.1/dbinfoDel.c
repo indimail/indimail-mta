@@ -1,5 +1,8 @@
 /*
  * $Log: dbinfoDel.c,v $
+ * Revision 2.6  2016-05-17 17:09:39+05:30  mbhangui
+ * use control directory set by configure
+ *
  * Revision 2.5  2008-09-08 09:33:50+05:30  Cprogrammer
  * formatting of long line
  *
@@ -21,7 +24,7 @@
 #include <mysqld_error.h>
 
 #ifndef	lint
-static char     sccsid[] = "$Id: dbinfoDel.c,v 2.5 2008-09-08 09:33:50+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: dbinfoDel.c,v 2.6 2016-05-17 17:09:39+05:30 mbhangui Exp $";
 #endif
 
 #ifdef CLUSTERED_SITE
@@ -32,13 +35,18 @@ dbinfoDel(char *domain, char *mdahost)
 	char           *mcdfile, *qmaildir, *controldir;
 	int             err;
 
-	getEnvConfigStr(&qmaildir, "QMAILDIR", QMAILDIR);
-	getEnvConfigStr(&controldir, "CONTROLDIR", "control");
+	getEnvConfigStr(&controldir, "CONTROLDIR", CONTROLDIR);
 	getEnvConfigStr(&mcdfile, "MCDFILE", MCDFILE);
 	if(*mcdfile == '/')
 		scopy(mcdFile, mcdfile, MAX_BUFF);
-	else
-		snprintf(mcdFile, MAX_BUFF, "%s/%s/%s", qmaildir, controldir, mcdfile);
+	else {
+		if (*controldir == '/')
+			snprintf(mcdFile, MAX_BUFF, "%s/%s", controldir, mcdfile);
+		else {
+			getEnvConfigStr(&qmaildir, "QMAILDIR", QMAILDIR);
+			snprintf(mcdFile, MAX_BUFF, "%s/%s/%s", qmaildir, controldir, mcdfile);
+		}
+	}
 	if (open_master())
 	{
 		fprintf(stderr, "dbinfoDel: Failed to open Master Db\n");

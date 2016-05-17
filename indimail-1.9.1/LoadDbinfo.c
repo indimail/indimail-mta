@@ -1,5 +1,8 @@
 /*
  * $Log: LoadDbinfo.c,v $
+ * Revision 2.42  2016-05-17 17:09:39+05:30  mbhangui
+ * use control directory set by configure
+ *
  * Revision 2.41  2016-01-12 14:21:11+05:30  Cprogrammer
  * set variable _total for dbcount
  *
@@ -137,7 +140,7 @@
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: LoadDbinfo.c,v 2.41 2016-01-12 14:21:11+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: LoadDbinfo.c,v 2.42 2016-05-17 17:09:39+05:30 mbhangui Exp $";
 #endif
 
 #include <sys/types.h>
@@ -172,7 +175,7 @@ LoadDbInfo_TXT(int *total)
 {
 	char            SqlBuf[SQL_BUF_SIZE], mcdFile[MAX_BUFF], TmpBuf[MAX_BUFF];
 	struct stat     statbuf;
-	int             num_rows, idx, err = 0, sync_file = 0, sync_mcd = 0;
+	int             num_rows, idx, err = 0, sync_file = 0, sync_mcd = 0, relative;
 	DBINFO        **ptr, **relayhosts;
 	MYSQL_RES      *res;
 	MYSQL_ROW       row;
@@ -180,8 +183,12 @@ LoadDbInfo_TXT(int *total)
 	char           *qmaildir, *mcdfile, *controldir;
 
 	getEnvConfigStr(&qmaildir, "QMAILDIR", QMAILDIR);
-	getEnvConfigStr(&controldir, "CONTROLDIR", "control");
-	snprintf(TmpBuf, MAX_BUFF, "%s/%s/host.master", qmaildir, controldir);
+	getEnvConfigStr(&controldir, "CONTROLDIR", CONTROLDIR);
+	relative = *controldir == '/' ? 0 : 1;
+	if (relative)
+		snprintf(TmpBuf, MAX_BUFF, "%s/%s/host.master", qmaildir, controldir);
+	else
+		snprintf(TmpBuf, MAX_BUFF, "%s/host.master", controldir);
 	if (total)
 		_total = *total = 0;
 	if (access(TmpBuf, F_OK))
@@ -189,8 +196,12 @@ LoadDbInfo_TXT(int *total)
 	getEnvConfigStr(&mcdfile, "MCDFILE", MCDFILE);
 	if (*mcdfile == '/' || *mcdfile == '.')
 		snprintf(mcdFile, MAX_BUFF, "%s", mcdfile);
-	else
-		snprintf(mcdFile, MAX_BUFF, "%s/%s/%s", qmaildir, controldir, mcdfile);
+	else {
+		if (relative)
+			snprintf(mcdFile, MAX_BUFF, "%s/%s/%s", qmaildir, controldir, mcdfile);
+		else
+			snprintf(mcdFile, MAX_BUFF, "%s/%s", controldir, mcdfile);
+	}
 	if (stat(mcdFile, &statbuf))
 	{
 		if (verbose)
@@ -420,13 +431,18 @@ writedbinfo(DBINFO **rhostsptr, time_t mtime)
 	struct utimbuf  ubuf;
 	DBINFO        **ptr;
 
-	getEnvConfigStr(&qmaildir, "QMAILDIR", QMAILDIR);
-	getEnvConfigStr(&controldir, "CONTROLDIR", "control");
+	getEnvConfigStr(&controldir, "CONTROLDIR", CONTROLDIR);
 	getEnvConfigStr(&mcdfile, "MCDFILE", MCDFILE);
 	if (*mcdfile == '/' || *mcdfile == '.')
 		snprintf(mcdFile, MAX_BUFF, "%s", mcdfile);
-	else
-		snprintf(mcdFile, MAX_BUFF, "%s/%s/%s", qmaildir, controldir, mcdfile);
+	else {
+		if (*controldir == '/')
+			snprintf(mcdFile, MAX_BUFF, "%s/%s", controldir, mcdfile);
+		else {
+			getEnvConfigStr(&qmaildir, "QMAILDIR", QMAILDIR);
+			snprintf(mcdFile, MAX_BUFF, "%s/%s/%s", qmaildir, controldir, mcdfile);
+		}
+	}
 	if (!rhostsptr)
 		return (1);
 	if (!(fp = fopen(mcdFile, "w")))
@@ -480,13 +496,18 @@ LoadDbInfo_TXT_internal(int *total)
 	char            buffer[MAX_BUFF], dummy1[MAX_BUFF], dummy2[MAX_BUFF];
 	FILE           *fp;
 
-	getEnvConfigStr(&qmaildir, "QMAILDIR", QMAILDIR);
-	getEnvConfigStr(&controldir, "CONTROLDIR", "control");
+	getEnvConfigStr(&controldir, "CONTROLDIR", CONTROLDIR);
 	getEnvConfigStr(&mcdfile, "MCDFILE", MCDFILE);
 	if (*mcdfile == '/' || *mcdfile == '.')
 		scopy(mcdFile, mcdfile, MAX_BUFF);
-	else
-		snprintf(mcdFile, MAX_BUFF, "%s/%s/%s", qmaildir, controldir, mcdfile);
+	else {
+		if (*controldir == '/')
+			snprintf(mcdFile, MAX_BUFF, "%s/%s", controldir, mcdfile);
+		else {
+			getEnvConfigStr(&qmaildir, "QMAILDIR", QMAILDIR);
+			snprintf(mcdFile, MAX_BUFF, "%s/%s/%s", qmaildir, controldir, mcdfile);
+		}
+	}
 	count = 0;
 	relayhosts = (DBINFO **) 0;
 	if (!(fp = fopen(mcdFile, "r")))
@@ -718,9 +739,15 @@ localDbinfo(int *total, DBINFO ***rhosts)
 	*mysqlhost_buf = 0;
 	if ((mysqlhost = (char *) getenv("MYSQL_HOST")) != (char *) 0)
 		scopy(mysqlhost_buf, mysqlhost, MAX_BUFF);
-	getEnvConfigStr(&controldir, "CONTROLDIR", "control");
-	if (snprintf(host_path, MAX_BUFF, "%s/%s/host.mysql", qmaildir, controldir) == -1)
-		host_path[MAX_BUFF - 1] = 0;
+	getEnvConfigStr(&controldir, "CONTROLDIR", CONTROLDIR);
+	if (*controldir == '/') {
+		if (snprintf(host_path, MAX_BUFF, "%s/host.mysql", controldir) == -1)
+			host_path[MAX_BUFF - 1] = 0;
+	}
+	else {
+		if (snprintf(host_path, MAX_BUFF, "%s/%s/host.mysql", qmaildir, controldir) == -1)
+			host_path[MAX_BUFF - 1] = 0;
+	}
 	if (!*mysqlhost_buf && !access(host_path, F_OK))
 	{
 		if (!(mfp = fopen(host_path, "r")))

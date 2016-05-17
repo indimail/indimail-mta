@@ -1,5 +1,8 @@
 /*
  * $Log: clearopensmtp.c,v $
+ * Revision 2.12  2016-05-17 17:09:39+05:30  mbhangui
+ * use control directory set by configure
+ *
  * Revision 2.11  2011-11-09 19:42:23+05:30  Cprogrammer
  * removed getversion
  *
@@ -49,7 +52,7 @@
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: clearopensmtp.c,v 2.11 2011-11-09 19:42:23+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: clearopensmtp.c,v 2.12 2016-05-17 17:09:39+05:30 mbhangui Exp $";
 #endif
 
 #ifdef POP_AUTH_OPEN_RELAY
@@ -110,13 +113,18 @@ main(int argc, char **argv)
 	}
 	if (job_type == 1 || job_type == 2)
 	{
-		getEnvConfigStr(&tmpstr, "QMAILDIR", QMAILDIR);
-		getEnvConfigStr(&controldir, "CONTROLDIR", "control");
+		getEnvConfigStr(&controldir, "CONTROLDIR", CONTROLDIR);
 		getEnvConfigStr(&mcdfile, "MCDFILE", MCDFILE);
 		if (*mcdfile == '/')
 			scopy(TmpBuf, mcdfile, MAX_BUFF);
-		else
-			snprintf(TmpBuf, MAX_BUFF, "%s/%s/%s", tmpstr, controldir, mcdfile);
+		else {
+			if (*controldir == '/')
+				snprintf(TmpBuf, MAX_BUFF, "%s/%s", controldir, mcdfile);
+			else {
+				getEnvConfigStr(&tmpstr, "QMAILDIR", QMAILDIR);
+				snprintf(TmpBuf, MAX_BUFF, "%s/%s/%s", tmpstr, controldir, mcdfile);
+			}
+		}
 		if (access(TmpBuf, F_OK))
 		{
 			if (job_type == 2 && vauth_open((char *) 0))

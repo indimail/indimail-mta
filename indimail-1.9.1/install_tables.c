@@ -1,5 +1,8 @@
 /*
  * $Log: install_tables.c,v $
+ * Revision 2.8  2016-05-17 17:09:39+05:30  mbhangui
+ * use control directory set by configure
+ *
  * Revision 2.7  2010-04-17 11:43:59+05:30  Cprogrammer
  * disable_mysql_escape() to be used for all MySQL queries
  *
@@ -29,7 +32,7 @@
 #endif
 
 #ifndef	lint
-static char     sccsid[] = "$Id: install_tables.c,v 2.7 2010-04-17 11:43:59+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: install_tables.c,v 2.8 2016-05-17 17:09:39+05:30 mbhangui Exp $";
 #endif
 
 int
@@ -66,10 +69,15 @@ main(int argc, char **argv)
 		printf("created table %s on local\n", relay_table);
 #endif
 #ifdef CLUSTERED_SITE
-	getEnvConfigStr(&qmaildir, "QMAILDIR", QMAILDIR);
-	getEnvConfigStr(&controldir, "CONTROLDIR", "control");
-	if (snprintf(host_path, MAX_BUFF, "%s/%s/host.master", qmaildir, controldir) == -1)
-		host_path[MAX_BUFF - 1] = 0;
+	getEnvConfigStr(&controldir, "CONTROLDIR", CONTROLDIR);
+	if (*controldir == '/') {
+		if (snprintf(host_path, MAX_BUFF, "%s/host.master", controldir) == -1)
+			host_path[MAX_BUFF - 1] = 0;
+	} else {
+		getEnvConfigStr(&qmaildir, "QMAILDIR", QMAILDIR);
+		if (snprintf(host_path, MAX_BUFF, "%s/%s/host.master", qmaildir, controldir) == -1)
+			host_path[MAX_BUFF - 1] = 0;
+	}
 	if (!access(host_path, F_OK) || getenv("MASTER_HOST"))
 		hostmaster_present = open_master() ? 0 : 1;
 	for (i = 0; IndiMailTable[i].table_name; i++)

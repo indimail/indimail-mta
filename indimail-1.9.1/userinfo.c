@@ -1,5 +1,8 @@
 /*
  * $Log: userinfo.c,v $
+ * Revision 2.40  2016-05-17 17:09:39+05:30  mbhangui
+ * use control directory set by configure
+ *
  * Revision 2.39  2016-01-21 12:57:58+05:30  Cprogrammer
  * use localip if MdaServer returns null
  *
@@ -212,7 +215,7 @@
 #include <sys/socket.h>
 
 #ifndef	lint
-static char     sccsid[] = "$Id: userinfo.c,v 2.39 2016-01-21 12:57:58+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: userinfo.c,v 2.40 2016-05-17 17:09:39+05:30 mbhangui Exp $";
 #endif
 
 extern char *strptime(const char *, const char *, struct tm *);
@@ -249,9 +252,13 @@ vuserinfo(Email, User, Domain, DisplayName, DisplayPasswd, DisplayUid, DisplayGi
 	real_domain = (char *) 0;
 	if ((Domain && *Domain) && !(real_domain = vget_real_domain(Domain)))
 	{
-		getEnvConfigStr(&qmaildir, "QMAILDIR", QMAILDIR);
-		getEnvConfigStr(&controldir, "CONTROLDIR", "control");
-		snprintf(tmpbuf, MAX_BUFF, "%s/%s/rcpthosts", qmaildir, controldir);
+		getEnvConfigStr(&controldir, "CONTROLDIR", CONTROLDIR);
+		if (*controldir == '/')
+			snprintf(tmpbuf, MAX_BUFF, "%s/rcpthosts", controldir);
+		else {
+			getEnvConfigStr(&qmaildir, "QMAILDIR", QMAILDIR);
+			snprintf(tmpbuf, MAX_BUFF, "%s/%s/rcpthosts", qmaildir, controldir);
+		}
 		if (!(fp = fopen(tmpbuf, "r")))
 		{
 			fprintf(stderr, "%s: No such domain\n", Domain);

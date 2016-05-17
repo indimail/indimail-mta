@@ -1,5 +1,8 @@
 /*
  * $Log: get_local_hostid.c,v $
+ * Revision 2.4  2016-05-17 17:09:39+05:30  mbhangui
+ * use control directory set by configure
+ *
  * Revision 2.3  2008-06-03 19:42:56+05:30  Cprogrammer
  * padded hostid with leading zeros to avoid problem with user addition
  *
@@ -20,7 +23,7 @@
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: get_local_hostid.c,v 2.3 2008-06-03 19:42:56+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: get_local_hostid.c,v 2.4 2016-05-17 17:09:39+05:30 mbhangui Exp $";
 #endif
 
 
@@ -33,9 +36,13 @@ get_local_hostid()
 	FILE           *fp;
 	long            hostidno;
 
-	getEnvConfigStr(&qmaildir, "QMAILDIR", QMAILDIR);
-	getEnvConfigStr(&controldir, "CONTROLDIR", "control");
-	snprintf(TmpFname, MAX_BUFF, "%s/%s/hostid", qmaildir, controldir);
+	getEnvConfigStr(&controldir, "CONTROLDIR", CONTROLDIR);
+	if (*controldir == '/')
+		snprintf(TmpFname, MAX_BUFF, "%s/hostid", controldir);
+	else {
+		getEnvConfigStr(&qmaildir, "QMAILDIR", QMAILDIR);
+		snprintf(TmpFname, MAX_BUFF, "%s/%s/hostid", qmaildir, controldir);
+	}
 	if ((fp = fopen(TmpFname, "r")))
 	{
 		if (!fgets(hostid, MAX_BUFF - 1, fp))

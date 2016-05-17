@@ -1,5 +1,8 @@
 /*
  * $Log: vdelivermail.c,v $
+ * Revision 2.61  2016-05-17 17:09:39+05:30  mbhangui
+ * use control directory set by configure
+ *
  * Revision 2.60  2015-12-17 17:14:32+05:30  Cprogrammer
  * mimic behaviour of dot-qmail. skip valias lines if program exits 99
  *
@@ -264,7 +267,7 @@
 #include <sys/wait.h>
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vdelivermail.c,v 2.60 2015-12-17 17:14:32+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: vdelivermail.c,v 2.61 2016-05-17 17:09:39+05:30 mbhangui Exp $";
 #endif
 
 /*- Globals */
@@ -884,8 +887,11 @@ bhfcheck(char *addr)
 	char            subvalue;
 
 	getEnvConfigStr(&qmaildir, "QMAILDIR", QMAILDIR);
-	getEnvConfigStr(&controldir, "CONTROLDIR", "control");
-	snprintf(tmpbuf, sizeof(tmpbuf), "%s/%s/blackholedsender", qmaildir, controldir);
+	getEnvConfigStr(&controldir, "CONTROLDIR", CONTROLDIR);
+	if (*controldir == '/')
+		snprintf(tmpbuf, sizeof(tmpbuf), "%s/blackholedsender", controldir);
+	else
+		snprintf(tmpbuf, sizeof(tmpbuf), "%s/%s/blackholedsender", qmaildir, controldir);
 	if (!stat(tmpbuf, &statbuf))
 	{
 		if (!(mapbhf = (char *) malloc(statbuf.st_size)))
@@ -940,7 +946,10 @@ bhfcheck(char *addr)
 		free(mapbhf);
 		return(0);
 	}
-	snprintf(tmpbuf, sizeof(tmpbuf), "%s/%s/blackholedpatterns", qmaildir, controldir);
+	if (*controldir == '/')
+		snprintf(tmpbuf, sizeof(tmpbuf), "%s/blackholedpatterns",  controldir);
+	else
+		snprintf(tmpbuf, sizeof(tmpbuf), "%s/%s/blackholedpatterns", qmaildir, controldir);
 	if (!stat(tmpbuf, &statbuf))
 	{
 		if (!(mapbhf = (char *) malloc(statbuf.st_size)))

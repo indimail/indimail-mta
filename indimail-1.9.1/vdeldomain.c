@@ -1,5 +1,8 @@
 /*
  * $Log: vdeldomain.c,v $
+ * Revision 2.15  2016-05-17 17:09:39+05:30  mbhangui
+ * use control directory set by configure
+ *
  * Revision 2.14  2016-01-12 14:27:11+05:30  Cprogrammer
  * use AF_INET for get_local_ip()
  *
@@ -100,7 +103,7 @@
 #include <sys/socket.h>
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vdeldomain.c,v 2.14 2016-01-12 14:27:11+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: vdeldomain.c,v 2.15 2016-05-17 17:09:39+05:30 mbhangui Exp $";
 #endif
 
 char            Domain[MAX_BUFF];
@@ -142,8 +145,11 @@ main(argc, argv)
 		error_stack(stderr, 0);
 #ifdef CLUSTERED_SITE
 	getEnvConfigStr(&qmaildir, "QMAILDIR", QMAILDIR);
-	getEnvConfigStr(&controldir, "CONTROLDIR", "control");
-	snprintf(mcdFile, MAX_BUFF, "%s/%s/host.master", qmaildir, controldir);
+	getEnvConfigStr(&controldir, "CONTROLDIR", CONTROLDIR);
+	if (*controldir == '/')
+		snprintf(mcdFile, MAX_BUFF, "%s/host.master", controldir);
+	else
+		snprintf(mcdFile, MAX_BUFF, "%s/%s/host.master", qmaildir, controldir);
 	if (access(mcdFile, F_OK))
 		err = 1;
 	if (!err)
@@ -173,13 +179,15 @@ main(argc, argv)
 				vclose();
 				return(1);
 			}
-			getEnvConfigStr(&qmaildir, "QMAILDIR", QMAILDIR);
-			getEnvConfigStr(&controldir, "CONTROLDIR", "control");
 			getEnvConfigStr(&mcdfile, "MCDFILE", MCDFILE);
 			if (*mcdfile == '/')
 				scopy(mcdFile, mcdfile, MAX_BUFF);
-			else
-				snprintf(mcdFile, MAX_BUFF, "%s/%s/%s", qmaildir, controldir, mcdfile);
+			else {
+				if (*controldir == '/')
+					snprintf(mcdFile, MAX_BUFF, "%s/%s", controldir, mcdfile);
+				else
+					snprintf(mcdFile, MAX_BUFF, "%s/%s/%s", qmaildir, controldir, mcdfile);
+			}
 			if (!access(mcdfile, F_OK) && unlink(mcdFile))
 			{
 				fprintf(stderr, "vdeldomain: unlink: %s: %s\n", mcdFile, strerror(errno));

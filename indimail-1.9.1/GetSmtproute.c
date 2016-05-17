@@ -1,5 +1,8 @@
 /*
  * $Log: GetSmtproute.c,v $
+ * Revision 2.7  2016-05-17 17:09:39+05:30  mbhangui
+ * use control directory set by configure
+ *
  * Revision 2.6  2010-05-28 14:11:07+05:30  Cprogrammer
  * use QMTP as default
  *
@@ -28,7 +31,7 @@
 #include <ctype.h>
 
 #ifndef	lint
-static char     sccsid[] = "$Id: GetSmtproute.c,v 2.6 2010-05-28 14:11:07+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: GetSmtproute.c,v 2.7 2016-05-17 17:09:39+05:30 mbhangui Exp $";
 #endif
 
 /*
@@ -42,17 +45,16 @@ int
 GetSmtproute(char *domain)
 {
 	char           *qmaildir, *controldir, *routes;
-	int             default_port;
+	int             default_port, relative;
 	char            smtproute[1024];
 
 	getEnvConfigStr(&qmaildir, "QMAILDIR", QMAILDIR);
-	getEnvConfigStr(&controldir, "CONTROLDIR", "control");
-	if (snprintf(smtproute, sizeof(smtproute) - 1, "%s/%s/qmtproutes",
-		qmaildir, controldir) == -1)
-	{
-		errno = ENAMETOOLONG;
-		return(-1);
-	}
+	getEnvConfigStr(&controldir, "CONTROLDIR", CONTROLDIR);
+	relative = *controldir == '/' ? 0 : 1;
+	if (relative)
+		snprintf(smtproute, sizeof(smtproute) - 1, "%s/%s/qmtproutes", qmaildir, controldir);
+	else
+		snprintf(smtproute, sizeof(smtproute) - 1, "%s/qmtproutes", controldir);
 	default_port = access(smtproute, F_OK) ? PORT_SMTP : PORT_QMTP;
 	if ((routes = getenv("ROUTES")) && *routes)
 	{
@@ -62,12 +64,12 @@ GetSmtproute(char *domain)
 		if (!memcmp(routes, "smtp", 4))
 			default_port = PORT_SMTP;
 	}
-	if (snprintf(smtproute, sizeof(smtproute) - 1, "%s/%s/%s",
-		qmaildir, controldir, default_port == PORT_SMTP ? "smtproutes" : "qmtproutes") == -1)
-	{
-		errno = ENAMETOOLONG;
-		return(-1);
-	}
+	if (relative)
+		snprintf(smtproute, sizeof(smtproute) - 1, "%s/%s/%s",
+			qmaildir, controldir, default_port == PORT_SMTP ? "smtproutes" : "qmtproutes");
+	else
+		snprintf(smtproute, sizeof(smtproute) - 1, "%s/%s",
+			controldir, default_port == PORT_SMTP ? "smtproutes" : "qmtproutes");
 	return (get_smtp_qmtp_port(smtproute, domain, default_port));
 }
 

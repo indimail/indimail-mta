@@ -1,5 +1,8 @@
 /*
  * $Log: vget_real_domain.c,v $
+ * Revision 2.11  2016-05-17 17:09:39+05:30  mbhangui
+ * use control directory set by configure
+ *
  * Revision 2.10  2008-11-06 15:38:53+05:30  Cprogrammer
  * added cache reset option
  *
@@ -61,7 +64,7 @@
 #include <stdlib.h>
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vget_real_domain.c,v 2.10 2008-11-06 15:38:53+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: vget_real_domain.c,v 2.11 2016-05-17 17:09:39+05:30 mbhangui Exp $";
 #endif
 
 #ifdef QUERY_CACHE
@@ -163,11 +166,17 @@ vget_real_domain(char *domain)
 			return(domval);
 		}
 		getEnvConfigStr(&qmaildir, "QMAILDIR", QMAILDIR);
-		getEnvConfigStr(&controldir, "CONTROLDIR", "control");
-		snprintf(TmpBuf, MAX_BUFF, "%s/%s/host.cntrl", qmaildir, controldir);
+		getEnvConfigStr(&controldir, "CONTROLDIR", CONTROLDIR);
+		if (*controldir == '/')
+			snprintf(TmpBuf, MAX_BUFF, "%s/host.cntrl", controldir);
+		else
+			snprintf(TmpBuf, MAX_BUFF, "%s/%s/host.cntrl", qmaildir, controldir);
 		if (access(TmpBuf, F_OK))
 		{
-			snprintf(tmpbuf, MAX_BUFF, "%s/%s/rcpthosts", qmaildir, controldir);
+			if (*controldir == '/')
+				snprintf(tmpbuf, MAX_BUFF, "%s/rcpthosts", controldir);
+			else
+				snprintf(tmpbuf, MAX_BUFF, "%s/%s/rcpthosts", qmaildir, controldir);
 			if (!(fp = fopen(tmpbuf, "r")))
 			{
 				fprintf(stderr, "vget_real_domain: fopen: %s: %s\n", tmpbuf, strerror(errno));
@@ -191,7 +200,10 @@ vget_real_domain(char *domain)
 				}
 			}
 			fclose(fp);
-			snprintf(tmpbuf, MAX_BUFF, "%s/%s/morercpthosts", qmaildir, controldir);
+			if (*controldir == '/')
+				snprintf(tmpbuf, MAX_BUFF, "%s/morercpthosts", controldir);
+			else
+				snprintf(tmpbuf, MAX_BUFF, "%s/%s/morercpthosts", qmaildir, controldir);
 			if (!(fp = fopen(tmpbuf, "r")))
 			{
 				if (errno != ENOENT)

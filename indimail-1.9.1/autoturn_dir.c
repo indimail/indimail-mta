@@ -1,5 +1,8 @@
 /*
  * $Log: autoturn_dir.c,v $
+ * Revision 2.4  2016-05-17 17:09:39+05:30  mbhangui
+ * use control directory set by configure
+ *
  * Revision 2.3  2005-12-29 22:39:39+05:30  Cprogrammer
  * use getEnvConfigStr to set variables from environment variables
  *
@@ -15,7 +18,7 @@
 #include <ctype.h>
 
 #ifndef	lint
-static char     sccsid[] = "$Id: autoturn_dir.c,v 2.3 2005-12-29 22:39:39+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: autoturn_dir.c,v 2.4 2016-05-17 17:09:39+05:30 mbhangui Exp $";
 #endif
 
 char           *
@@ -28,8 +31,11 @@ autoturn_dir(char *domain)
 	FILE           *fp;
 
 	getEnvConfigStr(&qmaildir, "QMAILDIR", QMAILDIR);
-	getEnvConfigStr(&controldir, "CONTROLDIR", "control");
-	snprintf(filename, MAX_BUFF, "%s/%s/virtualdomains", qmaildir, controldir);
+	getEnvConfigStr(&controldir, "CONTROLDIR", CONTROLDIR);
+	if (*controldir == '/')
+		snprintf(filename, MAX_BUFF, "%s/virtualdomains", controldir);
+	else
+		snprintf(filename, MAX_BUFF, "%s/%s/virtualdomains", qmaildir, controldir);
 	if (!(fp = fopen(filename, "r")))
 	{
 		perror(filename);

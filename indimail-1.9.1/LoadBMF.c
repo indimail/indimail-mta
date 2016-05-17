@@ -1,5 +1,8 @@
 /*
  * $Log: LoadBMF.c,v $
+ * Revision 2.16  2016-05-17 17:09:39+05:30  mbhangui
+ * use control directory set by configure
+ *
  * Revision 2.15  2010-03-30 12:55:40+05:30  Cprogrammer
  * fixed Invalid TIMESTAMP: Internal Bug problem
  *
@@ -49,7 +52,7 @@
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: LoadBMF.c,v 2.15 2010-03-30 12:55:40+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: LoadBMF.c,v 2.16 2016-05-17 17:09:39+05:30 mbhangui Exp $";
 #endif
 
 #ifdef CLUSTERED_SITE
@@ -83,11 +86,15 @@ LoadBMF(int *total, char *bmf)
 	struct utimbuf  ubuf;
 	FILE           *fp;
 
-	getEnvConfigStr(&qmaildir, "QMAILDIR", QMAILDIR);
-	getEnvConfigStr(&controldir, "CONTROLDIR", "control");
+	getEnvConfigStr(&controldir, "CONTROLDIR", CONTROLDIR);
 	if (total)
 		*total = 0;
-	snprintf(badmailfrom, MAX_BUFF, "%s/%s/%s", qmaildir, controldir, bmf);
+	if (*controldir == '/')
+		snprintf(badmailfrom, MAX_BUFF, "%s/%s", controldir, bmf);
+	else {
+		getEnvConfigStr(&qmaildir, "QMAILDIR", QMAILDIR);
+		snprintf(badmailfrom, MAX_BUFF, "%s/%s/%s", qmaildir, controldir, bmf);
+	}
 	if (stat(badmailfrom, &statbuf))
 	{
 		sync_file = 1;
@@ -272,9 +279,13 @@ UpdateSpamTable(char *bmf)
 	char           *qmaildir, *controldir;
 	int             badmail_flag, err, es_opt = 0;
 
-	getEnvConfigStr(&qmaildir, "QMAILDIR", QMAILDIR);
-	getEnvConfigStr(&controldir, "CONTROLDIR", "control");
-	snprintf(badmailfrom, MAX_BUFF, "%s/%s/%s", qmaildir, controldir, bmf);
+	getEnvConfigStr(&controldir, "CONTROLDIR", CONTROLDIR);
+	if (*controldir == '/')
+		snprintf(badmailfrom, MAX_BUFF, "%s/%s", controldir, bmf);
+	else {
+		getEnvConfigStr(&qmaildir, "QMAILDIR", QMAILDIR);
+		snprintf(badmailfrom, MAX_BUFF, "%s/%s/%s", qmaildir, controldir, bmf);
+	}
 	if (access(badmailfrom, F_OK))
 	{
 		fprintf(stderr, "UpdateSpamTable: %s: %s\n", badmailfrom, strerror(errno));
@@ -353,9 +364,13 @@ LoadBMF_internal(int *total, char *bmf)
 	static time_t   file_time;
 	struct stat     statbuf;
 
-	getEnvConfigStr(&qmaildir, "QMAILDIR", QMAILDIR);
-	getEnvConfigStr(&controldir, "CONTROLDIR", "control");
-	snprintf(badmailfrom, MAX_BUFF, "%s/%s/%s", qmaildir, controldir, bmf);
+	getEnvConfigStr(&controldir, "CONTROLDIR", CONTROLDIR);
+	if (*controldir == '/')
+		snprintf(badmailfrom, MAX_BUFF, "%s/%s", controldir, bmf);
+	else {
+		getEnvConfigStr(&qmaildir, "QMAILDIR", QMAILDIR);
+		snprintf(badmailfrom, MAX_BUFF, "%s/%s/%s", qmaildir, controldir, bmf);
+	}
 	if (total)
 		*total = 0;
 	if (stat(badmailfrom, &statbuf))

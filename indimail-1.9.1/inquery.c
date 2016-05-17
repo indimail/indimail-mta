@@ -1,5 +1,8 @@
 /*
  * $Log: inquery.c,v $
+ * Revision 2.19  2016-05-17 17:09:39+05:30  mbhangui
+ * use control directory set by configure
+ *
  * Revision 2.18  2016-01-12 23:46:38+05:30  Cprogrammer
  * fixed setting of InFifo file
  *
@@ -66,7 +69,7 @@
  */
 
 #ifndef	lint
-static char     sccsid[] = "$Id: inquery.c,v 2.18 2016-01-12 23:46:38+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: inquery.c,v 2.19 2016-05-17 17:09:39+05:30 mbhangui Exp $";
 #endif
 
 #include <stdlib.h>
@@ -84,7 +87,7 @@ static char     sccsid[] = "$Id: inquery.c,v 2.18 2016-01-12 23:46:38+05:30 Cpro
 void           *
 inquery(char query_type, char *email, char *ip)
 {
-	int             rfd, wfd, len1, len2, len3, bytes, idx, readTimeout, writeTimeout, pipe_size, tmperrno;
+	int             rfd, wfd, len1, len2, len3, bytes, idx, readTimeout, writeTimeout, pipe_size, tmperrno, relative;
 	static int      intBuf;
 	char            QueryBuf[MAX_BUFF + sizeof(int)], myFifo[MAX_BUFF], InFifo[MAX_BUFF], TmpBuf[MAX_BUFF];
 	char           *qmaildir, *controldir, *infifo;
@@ -136,14 +139,18 @@ inquery(char query_type, char *email, char *ip)
 	bytes += sizeof(int);
 
 	getEnvConfigStr(&qmaildir, "QMAILDIR", QMAILDIR);
-	getEnvConfigStr(&controldir, "CONTROLDIR", "control");
+	getEnvConfigStr(&controldir, "CONTROLDIR", CONTROLDIR);
+	relative = *controldir == '/' ? 0 : 1;
 	getEnvConfigStr(&infifo, "INFIFO", INFIFO);
 	/*- Open the Fifos */
 	if (*infifo == '/' || *infifo == '.') {
 		snprintf(TmpBuf, MAX_BUFF, "%s", infifo);
 		scopy(InFifo, TmpBuf, MAX_BUFF);
 	} else {
-		snprintf(TmpBuf, MAX_BUFF, "%s/%s/inquery/%s", qmaildir, controldir, infifo);
+		if (relative)
+			snprintf(TmpBuf, MAX_BUFF, "%s/%s/inquery/%s", qmaildir, controldir, infifo);
+		else
+			snprintf(TmpBuf, MAX_BUFF, "%s/inquery/%s", controldir, infifo);
 		for (idx = 1;;idx++) {
 			snprintf(InFifo, MAX_BUFF, "%s.%d", TmpBuf, idx);
 			if(access(InFifo, F_OK))
@@ -196,7 +203,10 @@ inquery(char query_type, char *email, char *ip)
 		errno = tmperrno;
 		return ((void *) 0);
 	} 
-	snprintf(TmpBuf, MAX_BUFF, "%s/%s/timeoutwrite", qmaildir, controldir);
+	if (relative)
+		snprintf(TmpBuf, MAX_BUFF, "%s/%s/timeoutwrite", qmaildir, controldir);
+	else
+		snprintf(TmpBuf, MAX_BUFF, "%s/timeoutwrite", controldir);
 	if((fp = fopen(TmpBuf, "r")))
 	{
 		if(fgets(TmpBuf, MAX_BUFF - 2, fp))
@@ -233,7 +243,10 @@ inquery(char query_type, char *email, char *ip)
 		case LIMIT_QUERY:
 #endif
 		case DOMAIN_QUERY:
-			snprintf(TmpBuf, MAX_BUFF, "%s/%s/timeoutread", qmaildir, controldir);
+			if (relative)
+				snprintf(TmpBuf, MAX_BUFF, "%s/%s/timeoutread", qmaildir, controldir);
+			else
+				snprintf(TmpBuf, MAX_BUFF, "%s/timeoutread", controldir);
 			if((fp = fopen(TmpBuf, "r")))
 			{
 				if(fgets(TmpBuf, MAX_BUFF - 2, fp))

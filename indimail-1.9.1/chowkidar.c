@@ -1,5 +1,8 @@
 /*
  * $Log: chowkidar.c,v $
+ * Revision 2.12  2016-05-17 17:09:39+05:30  mbhangui
+ * use control directory set by configure
+ *
  * Revision 2.11  2010-04-23 11:03:44+05:30  Cprogrammer
  * for -T, -B, -S option, chdir to qmail control directory
  *
@@ -46,7 +49,7 @@
 #define SPAMDB  3
 
 #ifndef	lint
-static char     sccsid[] = "$Id: chowkidar.c,v 2.11 2010-04-23 11:03:44+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: chowkidar.c,v 2.12 2016-05-17 17:09:39+05:30 mbhangui Exp $";
 #endif
 
 void            usage();
@@ -54,8 +57,8 @@ void            usage();
 int
 main(int argc, char **argv)
 {
-	char           *ptr, *revision = "$Revision: 2.11 $";
-	int             spamNumber, spamFilter, c, silent, type;
+	char           *ptr, *revision = "$Revision: 2.12 $";
+	int             spamNumber, spamFilter, c, silent, type, relative;
 	char            ignfile[SQL_BUF_SIZE], bad_from_rcpt_file[MAX_BUFF];
 	char           *filename = (char *) 0, *outfile = (char *) 0;
 	char           *qmaildir, *controldir, *ign;
@@ -72,7 +75,8 @@ main(int argc, char **argv)
 	spamNumber = spamFilter = 0;
 	filename = (char *) 0;
 	getEnvConfigStr(&qmaildir, "QMAILDIR", QMAILDIR);
-	getEnvConfigStr(&controldir, "CONTROLDIR", "control");
+	getEnvConfigStr(&controldir, "CONTROLDIR", CONTROLDIR);
+	relative = *controldir == '/' ? 0 : 1;
 #ifdef CLUSTERED_SITE
 	while ((c = getopt(argc, argv, "f:t:b:s:n:o:BTSVrqv")) != -1)
 #else
@@ -220,28 +224,45 @@ main(int argc, char **argv)
 		 */
 		if (strchr(outfile, '.') || strchr(outfile, '/'))
 			strncpy(bad_from_rcpt_file, outfile, MAX_BUFF);
-		else
-			snprintf(bad_from_rcpt_file, MAX_BUFF, "%s/%s/%s", qmaildir, controldir, outfile);
+		else {
+			if (relative)
+				snprintf(bad_from_rcpt_file, MAX_BUFF, "%s/%s/%s", qmaildir, controldir, outfile);
+			else
+				snprintf(bad_from_rcpt_file, MAX_BUFF, "%s/%s", controldir, outfile);
+		}
 		switch (type)
 		{
 			case BADMAIL:
-				snprintf(ignfile, MAX_BUFF, "%s/%s/badmailpatterns", qmaildir, controldir);
+				if (relative)
+					snprintf(ignfile, MAX_BUFF, "%s/%s/badmailpatterns", qmaildir, controldir);
+				else
+					snprintf(ignfile, MAX_BUFF, "%s/badmailpatterns", controldir);
 				if (loadIgnoreList(ignfile))
 					return(1);
 				break;
 			case BADRCPT:
-				snprintf(ignfile, MAX_BUFF, "%s/%s/badrcptpatterns", qmaildir, controldir);
+				if (relative)
+					snprintf(ignfile, MAX_BUFF, "%s/%s/badrcptpatterns", qmaildir, controldir);
+				else
+					snprintf(ignfile, MAX_BUFF, "%s/badrcptpatterns", controldir);
 				if (loadIgnoreList(ignfile))
 					return(1);
 				break;
 			case SPAMDB:
-				snprintf(ignfile, MAX_BUFF, "%s/%s/spamignorepatterns", qmaildir, controldir);
+				if (relative)
+					snprintf(ignfile, MAX_BUFF, "%s/%s/spamignorepatterns", qmaildir, controldir);
+				else
+					snprintf(ignfile, MAX_BUFF, "%s/spamignorepatterns", controldir);
 				if (loadIgnoreList(ignfile))
 					return(1);
 				break;
 		}
-		snprintf(ignfile, MAX_BUFF, "%s/%s/%s", qmaildir, controldir,
-			(ign = getenv("SPAMIGNORE")) ? ign : (ign = "spamignore"));
+		if (relative)
+			snprintf(ignfile, MAX_BUFF, "%s/%s/%s", qmaildir, controldir,
+				(ign = getenv("SPAMIGNORE")) ? ign : (ign = "spamignore"));
+		else
+			snprintf(ignfile, MAX_BUFF, "%s/%s", controldir,
+				(ign = getenv("SPAMIGNORE")) ? ign : (ign = "spamignore"));
 		if (!loadIgnoreList(ignfile) && !loadIgnoreList(bad_from_rcpt_file))
 			return(spamReport(spamNumber, outfile));
 	}

@@ -1,5 +1,8 @@
 /*
  * $Log: del_control.c,v $
+ * Revision 2.7  2016-05-17 17:09:39+05:30  mbhangui
+ * use control directory set by configure
+ *
  * Revision 2.6  2009-09-28 20:44:47+05:30  Cprogrammer
  * added chkrcptdomains to the list of control files from which a deleted domain should
  * be removed
@@ -36,7 +39,7 @@
 #include <string.h>
 
 #ifndef	lint
-static char     sccsid[] = "$Id: del_control.c,v 2.6 2009-09-28 20:44:47+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: del_control.c,v 2.7 2016-05-17 17:09:39+05:30 mbhangui Exp $";
 #endif
 
 /*
@@ -48,11 +51,15 @@ del_control(domain)
 {
 	char            filename[MAX_BUFF], tmpbuf[MAX_BUFF];
 	char           *qmaildir, *controldir;
-	int             i, status = 0;
+	int             i, status = 0, relative;
 
 	getEnvConfigStr(&qmaildir, "QMAILDIR", QMAILDIR);
-	getEnvConfigStr(&controldir, "CONTROLDIR", "control");
-	snprintf(filename, MAX_BUFF, "%s/%s/rcpthosts", qmaildir, controldir);
+	getEnvConfigStr(&controldir, "CONTROLDIR", CONTROLDIR);
+	relative = *controldir == '/' ? 0 : 1;
+	if (relative)
+		snprintf(filename, MAX_BUFF, "%s/%s/rcpthosts", qmaildir, controldir);
+	else
+		snprintf(filename, MAX_BUFF, "%s/rcpthosts", controldir);
 	status = remove_line(domain, filename, 0, INDIMAIL_QMAIL_MODE);
 	if (status < 1) /*- if no lines found or if remove_line returned error */
 	{
@@ -75,13 +82,22 @@ del_control(domain)
 		if (i == -1)
 			status = i;
 	} 
-	snprintf(filename, MAX_BUFF, "%s/%s/etrnhosts", qmaildir, controldir);
+	if (relative)
+		snprintf(filename, MAX_BUFF, "%s/%s/etrnhosts", qmaildir, controldir);
+	else
+		snprintf(filename, MAX_BUFF, "%s/etrnhosts", controldir);
 	if(!access(filename, F_OK) && remove_line(domain, filename, 0, INDIMAIL_QMAIL_MODE) == -1)
 		status = -1;
-	snprintf(filename, MAX_BUFF, "%s/%s/chkrcptdomains", qmaildir, controldir);
+	if (relative)
+		snprintf(filename, MAX_BUFF, "%s/%s/chkrcptdomains", qmaildir, controldir);
+	else
+		snprintf(filename, MAX_BUFF, "%s/chkrcptdomains", controldir);
 	if(!access(filename, F_OK) && remove_line(domain, filename, 0, INDIMAIL_QMAIL_MODE) == -1)
 		status = -1;
-	snprintf(filename, MAX_BUFF, "%s/%s/virtualdomains", qmaildir, controldir);
+	if (relative)
+		snprintf(filename, MAX_BUFF, "%s/%s/virtualdomains", qmaildir, controldir);
+	else
+		snprintf(filename, MAX_BUFF, "%s/virtualdomains", controldir);
 	if(use_etrn == 2)
 		snprintf(tmpbuf, MAX_BUFF, "%s:autoturn-", domain);
 	else

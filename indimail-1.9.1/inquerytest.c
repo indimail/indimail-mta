@@ -1,5 +1,8 @@
 /*
  * $Log: inquerytest.c,v $
+ * Revision 2.24  2016-05-17 17:09:39+05:30  mbhangui
+ * use control directory set by configure
+ *
  * Revision 2.23  2016-01-12 23:45:56+05:30  Cprogrammer
  * removed leftover sleep() call
  *
@@ -86,7 +89,7 @@
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: inquerytest.c,v 2.23 2016-01-12 23:45:56+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: inquerytest.c,v 2.24 2016-05-17 17:09:39+05:30 mbhangui Exp $";
 #endif
 
 void            print_limits(struct vlimits *);
@@ -169,8 +172,11 @@ main(int argc, char **argv)
 		else
 		{
 			getEnvConfigStr(&qmaildir, "QMAILDIR", QMAILDIR);
-			getEnvConfigStr(&controldir, "CONTROLDIR", "control");
-			snprintf(InFifo, MAX_BUFF, "%s/%s/inquery/%s", qmaildir, controldir, infifo);
+			getEnvConfigStr(&controldir, "CONTROLDIR", CONTROLDIR);
+			if (*controldir == '/')
+				snprintf(InFifo, MAX_BUFF, "%s/inquery/%s", controldir, infifo);
+			else
+				snprintf(InFifo, MAX_BUFF, "%s/%s/inquery/%s", qmaildir, controldir, infifo);
 		}
 		if (access(InFifo, F_OK) || (fd = open(InFifo, O_WRONLY|O_NONBLOCK)) == -1)
 		{
@@ -207,8 +213,11 @@ main(int argc, char **argv)
 		else
 		{
 			getEnvConfigStr(&qmaildir, "QMAILDIR", QMAILDIR);
-			getEnvConfigStr(&controldir, "CONTROLDIR", "control");
-			snprintf(InFifo, MAX_BUFF, "%s/%s/inquery/%s", qmaildir, controldir, infifo);
+			getEnvConfigStr(&controldir, "CONTROLDIR", CONTROLDIR);
+			if (*controldir == '/')
+				snprintf(InFifo, MAX_BUFF, "%s/inquery/%s", controldir, infifo);
+			else
+				snprintf(InFifo, MAX_BUFF, "%s/%s/inquery/%s", qmaildir, controldir, infifo);
 		}
 		pid = -1;
 	}

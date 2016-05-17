@@ -1,5 +1,8 @@
 /*
  * $Log: islocalif.c,v $
+ * Revision 2.6  2016-05-17 17:09:39+05:30  mbhangui
+ * use control directory set by configure
+ *
  * Revision 2.5  2014-04-17 11:39:45+05:30  Cprogrammer
  * display hostname in error message
  *
@@ -54,7 +57,7 @@
 #endif
 
 #ifndef	lint
-static char     sccsid[] = "$Id: islocalif.c,v 2.5 2014-04-17 11:39:45+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: islocalif.c,v 2.6 2016-05-17 17:09:39+05:30 mbhangui Exp $";
 #endif
 
 /*
@@ -98,9 +101,13 @@ islocalif(char *hostptr)
 	unsigned long   inaddr;
 #endif
 
-	getEnvConfigStr(&qmaildir, "QMAILDIR", QMAILDIR);
-	getEnvConfigStr(&controldir, "CONTROLDIR", "control");
-	snprintf(TmpBuf, MAX_BUFF, "%s/%s/localiphost", qmaildir, controldir);
+	getEnvConfigStr(&controldir, "CONTROLDIR", CONTROLDIR);
+	if (*controldir == '/')
+		snprintf(TmpBuf, MAX_BUFF, "%s/localiphost", controldir);
+	else {
+		getEnvConfigStr(&qmaildir, "QMAILDIR", QMAILDIR);
+		snprintf(TmpBuf, MAX_BUFF, "%s/%s/localiphost", qmaildir, controldir);
+	}
 	if ((fp = fopen(TmpBuf, "r")))
 	{
 		if (!fgets(TmpBuf, MAX_BUFF - 1, fp))

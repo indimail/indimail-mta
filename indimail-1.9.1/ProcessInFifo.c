@@ -1,5 +1,8 @@
 /*
  * $Log: ProcessInFifo.c,v $
+ * Revision 2.39  2016-05-17 17:09:39+05:30  mbhangui
+ * use control directory set by configure
+ *
  * Revision 2.38  2016-01-12 14:25:15+05:30  Cprogrammer
  * use AF_INET for get_local_ip()
  *
@@ -129,7 +132,7 @@
  */
 
 #ifndef	lint
-static char     sccsid[] = "$Id: ProcessInFifo.c,v 2.38 2016-01-12 14:25:15+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: ProcessInFifo.c,v 2.39 2016-05-17 17:09:39+05:30 mbhangui Exp $";
 #endif
 
 #include <fcntl.h>
@@ -223,7 +226,7 @@ do_startup(int instNum)
 int
 ProcessInFifo(int instNum)
 {
-	int             rfd, wfd, bytes, status, idx, pipe_size, readTimeout, writeTimeout;
+	int             rfd, wfd, bytes, status, idx, pipe_size, readTimeout, writeTimeout, relative;
 	struct passwd  *pw;
 	FILE           *fp;
 	char            InFifo[MAX_BUFF], pwbuf[MAX_BUFF], host_path[MAX_BUFF], tmpbuf[MAX_BUFF];
@@ -284,12 +287,17 @@ ProcessInFifo(int instNum)
 	}
 #endif
 	getEnvConfigStr(&qmaildir, "QMAILDIR", QMAILDIR);
-	getEnvConfigStr(&controldir, "CONTROLDIR", "control");
+	getEnvConfigStr(&controldir, "CONTROLDIR", CONTROLDIR);
+	relative = *controldir == '/' ? 0 : 1;
 	getEnvConfigStr(&infifo, "INFIFO", INFIFO);
 	if (*infifo == '/' || *infifo == '.')
 		snprintf(InFifo, MAX_BUFF, "%s", infifo);
-	else
-		snprintf(InFifo, MAX_BUFF, "%s/%s/inquery/%s", qmaildir, controldir, infifo);
+	else {
+		if (relative)
+			snprintf(InFifo, MAX_BUFF, "%s/%s/inquery/%s", qmaildir, controldir, infifo);
+		else
+			snprintf(InFifo, MAX_BUFF, "%s/inquery/%s", controldir, infifo);
+	}
 	getTimeoutValues(&readTimeout, &writeTimeout, qmaildir, controldir);
 	/*- Open the Fifos */
 	if (FifoCreate(InFifo) == -1)
@@ -374,9 +382,16 @@ ProcessInFifo(int instNum)
 		if (verbose || _debug)
 			prev_time = time(0);
 #ifdef CLUSTERED_SITE
-		snprintf(host_path, MAX_BUFF, "%s/%s/host.cntrl", qmaildir, controldir);
-		if (access(host_path, F_OK))
-			snprintf(host_path, MAX_BUFF, "%s/%s/host.mysql", qmaildir, controldir);
+		if (relative)
+			snprintf(host_path, MAX_BUFF, "%s/%s/host.cntrl", qmaildir, controldir);
+		else
+			snprintf(host_path, MAX_BUFF, "%s/host.cntrl", controldir);
+		if (access(host_path, F_OK)) {
+			if (relative)
+				snprintf(host_path, MAX_BUFF, "%s/%s/host.mysql", qmaildir, controldir);
+			else
+				snprintf(host_path, MAX_BUFF, "%s/host.mysql", controldir);
+		}
 		if (access(host_path, F_OK))
 			cntrl_host = 0;
 		else
@@ -640,9 +655,13 @@ getFifo_name()
 		snprintf(inFifo, MAX_BUFF, "%s", infifo);
 	else
 	{
-		getEnvConfigStr(&qmaildir, "QMAILDIR", QMAILDIR);
-		getEnvConfigStr(&controldir, "CONTROLDIR", "control");
-		snprintf(inFifo, MAX_BUFF, "%s/%s/inquery/%s", qmaildir, controldir, infifo);
+		getEnvConfigStr(&controldir, "CONTROLDIR", CONTROLDIR);
+		if (*controldir == '/')
+			snprintf(inFifo, MAX_BUFF, "%s/inquery/%s", controldir, infifo);
+		else {
+			getEnvConfigStr(&qmaildir, "QMAILDIR", QMAILDIR);
+			snprintf(inFifo, MAX_BUFF, "%s/%s/inquery/%s", qmaildir, controldir, infifo);
+		}
 	}
 	return(inFifo);
 }
@@ -870,7 +889,10 @@ getTimeoutValues(int *readTimeout, int *writeTimeout, char *qmaildir, char *cont
 	char            TmpBuf[MAX_BUFF];
 	FILE           *fp;
 
-	snprintf(TmpBuf, MAX_BUFF, "%s/%s/timeoutread", qmaildir, controldir);
+	if (*controldir == '/')
+		snprintf(TmpBuf, MAX_BUFF, "%s/timeoutread", controldir);
+	else
+		snprintf(TmpBuf, MAX_BUFF, "%s/%s/timeoutread", qmaildir, controldir);
 	if ((fp = fopen(TmpBuf, "r")))
 	{
 		if (fgets(TmpBuf, MAX_BUFF - 2, fp))
@@ -881,7 +903,10 @@ getTimeoutValues(int *readTimeout, int *writeTimeout, char *qmaildir, char *cont
 		fclose(fp);
 	} else
 		*readTimeout = 4;
-	snprintf(TmpBuf, MAX_BUFF, "%s/%s/timeoutwrite", qmaildir, controldir);
+	if (*controldir == '/')
+		snprintf(TmpBuf, MAX_BUFF, "%s/timeoutwrite", controldir);
+	else
+		snprintf(TmpBuf, MAX_BUFF, "%s/%s/timeoutwrite", qmaildir, controldir);
 	if ((fp = fopen(TmpBuf, "r")))
 	{
 		if (fgets(TmpBuf, MAX_BUFF - 2, fp))
