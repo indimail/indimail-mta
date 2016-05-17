@@ -227,7 +227,7 @@ AC_ARG_ENABLE(controldir, [  --enable-controldir=dir       directory for control
 	])
 AC_DEFINE_UNQUOTED(CONTROLDIR, "$controldir", Directory for control files)
 
-domaindir=$prefix/domains
+domaindir=$prefix
 AC_ARG_ENABLE(domaindir, [  --enable-domaindir=dir       directory for virtual domains.],
 	domaindir="$enableval",
 	[
