@@ -1,5 +1,8 @@
 /*
  * $Log: add_domain_assign.c,v $
+ * Revision 2.7  2016-05-17 16:08:55+05:30  Cprogrammer
+ * removed redundant controldir variable
+ *
  * Revision 2.6  2008-08-02 09:05:24+05:30  Cprogrammer
  * new function error_stack
  *
@@ -36,7 +39,7 @@
 #include <sys/stat.h>
 
 #ifndef	lint
-static char     sccsid[] = "$Id: add_domain_assign.c,v 2.6 2008-08-02 09:05:24+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: add_domain_assign.c,v 2.7 2016-05-17 16:08:55+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 /*
@@ -49,10 +52,9 @@ add_domain_assign(char *domain, char *domain_base_dir, uid_t uid,
 {
 	FILE           *fs1 = NULL;
 	char            filename[MAX_BUFF], tmpstr[MAX_BUFF];
-	char           *qmaildir, *controldir;
+	char           *qmaildir;
 
 	getEnvConfigStr(&qmaildir, "QMAILDIR", QMAILDIR);
-	getEnvConfigStr(&controldir, "CONTROLDIR", "control");
 	/*- stat assign file, if it's not there create one */
 	snprintf(filename, MAX_BUFF, "%s/users/assign", qmaildir);
 	if (access(filename, F_OK))
