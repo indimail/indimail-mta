@@ -1,5 +1,8 @@
 #
 # $Log: atrn.sh,v $
+# Revision 1.9  2016-05-17 23:11:42+05:30  Cprogrammer
+# fix for configurable control directory
+#
 # Revision 1.8  2009-04-19 13:38:58+05:30  Cprogrammer
 # replaced indimail/bin/echo with echo 1>&2
 #
@@ -32,7 +35,7 @@
 # 3 - No Pending message for node
 # 4 - Pending message for node
 #
-# $Id: atrn.sh,v 1.8 2009-04-19 13:38:58+05:30 Cprogrammer Stab mbhangui $
+# $Id: atrn.sh,v 1.9 2016-05-17 23:11:42+05:30 Cprogrammer Exp mbhangui $
 #
 trap "" 1 2 3
 if [ $# -lt 2 ] ; then
@@ -48,10 +51,14 @@ if [ " $INDIMAILDIR" = " " ] ; then
 	exit 1
 fi
 if [ " $CONTROLDIR" = " " ] ; then
-	CONTROLDIR="control"
+	CONTROLDIR=@controldir@
 fi
-if [ -f QMAIL/"$CONTROLDIR"/queuelifetime ] ; then
-	LIFETIME=`cat QMAIL/"$CONTROLDIR"/queuelifetime`
+slash=`echo $CONTROLDIR | cut -c1`
+if [ ! " $slash" = " /" ] ; then
+	cd QMAIL
+fi
+if [ -f "$CONTROLDIR"/queuelifetime ] ; then
+	LIFETIME=`cat "$CONTROLDIR"/queuelifetime`
 else
 	LIFETIME=1209600
 fi

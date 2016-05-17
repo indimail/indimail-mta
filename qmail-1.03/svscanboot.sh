@@ -1,4 +1,7 @@
 # $Log: svscanboot.sh,v $
+# Revision 1.13  2016-05-17 23:11:42+05:30  Cprogrammer
+# fix for configurable control directory
+#
 # Revision 1.12  2011-08-05 15:49:43+05:30  Cprogrammer
 # check /var/lock/subsys before creating status file
 #
@@ -34,7 +37,7 @@
 # Revision 1.2  2002-09-26 20:56:02+05:30  Cprogrammer
 # made service directory configurable
 #
-# $Id: svscanboot.sh,v 1.12 2011-08-05 15:49:43+05:30 Cprogrammer Stab mbhangui $
+# $Id: svscanboot.sh,v 1.13 2016-05-17 23:11:42+05:30 Cprogrammer Exp mbhangui $
 
 PATH=QMAIL/bin:/usr/local/bin:/bin:/sbin:/usr/bin:/usr/sbin
 
@@ -42,11 +45,19 @@ exec </dev/null
 exec >/dev/null
 exec 2>/dev/null
 
-if [ -f  QMAIL/control/scaninterval ] ; then
-	SCANINTERVAL=`cat QMAIL/control/scaninterval`
+if [ " $CONTROLDIR" = " " ] ; then
+	CONTROLDIR=@controldir@
+fi
+slash=`echo $CONTROLDIR | cut -c1`
+if [ ! " $slash" = " /" ] ; then
+	cd QMAIL
+fi
+if [ -f  $CONTROLDIR/scaninterval ] ; then
+	SCANINTERVAL=`cat $CONTROLDIR/scaninterval`
 else
 	SCANINTERVAL=300
 fi
+cd /
 use_readproctitle=0
 if [ $# -eq 0 ] ; then
 	if [ -d /service1 ] ; then

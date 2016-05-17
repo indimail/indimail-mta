@@ -1,5 +1,8 @@
 #
 # $Log: dk-filter.sh,v $
+# Revision 1.19  2016-05-17 23:11:42+05:30  Cprogrammer
+# fix for configurable control directory
+#
 # Revision 1.18  2014-03-12 08:50:48+05:30  Cprogrammer
 # bug - fixed signing when env variables DKSIGN or DKIMSIGN were set
 #
@@ -57,7 +60,7 @@
 # Revision 1.1  2009-04-02 14:52:27+05:30  Cprogrammer
 # Initial revision
 #
-# $Id: dk-filter.sh,v 1.18 2014-03-12 08:50:48+05:30 Cprogrammer Stab mbhangui $
+# $Id: dk-filter.sh,v 1.19 2016-05-17 23:11:42+05:30 Cprogrammer Exp mbhangui $
 #
 if [ -z "$QMAILREMOTE" -a -z "$QMAILLOCAL" ]; then
 	echo "dk-filter should be run by spawn-filter" 1>&2
@@ -67,19 +70,26 @@ dksign=0
 dkimsign=0
 dkverify=0
 dkimverify=0
+if [ " $CONTROLDIR" = " " ] ; then
+	CONTROLDIR=@controldir@
+fi
+slash=`echo $CONTROLDIR | cut -c1`
+if [ ! " $slash" = " /" ] ; then
+	cd QMAILHOME
+fi
 if [ -x QMAILHOME/bin/dktest -a -z "$DKVERIFY" ] ; then
 	if [ -z "$DKSIGN" ] ; then
-		DKSIGN=QMAILHOME/control/domainkeys/%/default
+		DKSIGN=$CONTROLDIR/domainkeys/%/default
 		dksign=2
-	elif [ " $DKSIGN" = " QMAILHOME/control/domainkeys/%/default" ] ; then
+	elif [ " $DKSIGN" = " $CONTROLDIR/domainkeys/%/default" ] ; then
 		dksign=2
 	fi
 fi
 if [ -x QMAILHOME/bin/dkim -a -z "$DKIMVERIFY" ] ; then
 	if [ -z "$DKIMSIGN" ] ; then
-		DKIMSIGN=QMAILHOME/control/domainkeys/%/default
+		DKIMSIGN=$CONTROLDIR/domainkeys/%/default
 		dkimsign=2
-	elif [ " $DKIMSIGN" = " QMAILHOME/control/domainkeys/%/default" ] ; then
+	elif [ " $DKIMSIGN" = " $CONTROLDIR/domainkeys/%/default" ] ; then
 		dkimsign=2
 	fi
 fi
@@ -101,7 +111,7 @@ if [ ! -z "$DKSIGN" ] ; then
 		dkkeyfn=$DKSIGN
 	fi
 	if [ $dksign -eq 2 -a ! -f $dkkeyfn ] ; then
-		dkkeyfn=QMAILHOME/control/domainkeys/default
+		dkkeyfn=$CONTROLDIR/domainkeys/default
 	fi
 	if [ -f $dkkeyfn ] ; then
 		dksign=1
@@ -131,7 +141,7 @@ if [ ! -z "$DKIMSIGN" ] ; then
 		dkimkeyfn=$DKIMSIGN
 	fi
 	if [ $dkimsign -eq 2 -a ! -f $dkimkeyfn ] ; then
-		dkimkeyfn=QMAILHOME/control/domainkeys/default
+		dkimkeyfn=$CONTROLDIR/domainkeys/default
 	fi
 	if [ -f $dkimkeyfn ] ; then
 		dkimsign=1

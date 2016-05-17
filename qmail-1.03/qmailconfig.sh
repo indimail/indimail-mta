@@ -1,5 +1,8 @@
 #
 # $Log: qmailconfig.sh,v $
+# Revision 1.7  2016-05-17 23:11:42+05:30  Cprogrammer
+# fix for configurable control directory
+#
 # Revision 1.6  2011-04-23 09:35:25+05:30  Cprogrammer
 # use hostname command from /var/indimail/sbin/hostname
 #
@@ -8,7 +11,7 @@
 # renamed config.sh to qmailconfig.sh
 #
 #
-# $Id: qmailconfig.sh,v 1.6 2011-04-23 09:35:25+05:30 Cprogrammer Exp mbhangui $
+# $Id: qmailconfig.sh,v 1.7 2016-05-17 23:11:42+05:30 Cprogrammer Exp mbhangui $
 #
 if [ -x ./hostname ] ; then
 	HOSTNAME_CMD=./hostname
@@ -17,6 +20,14 @@ elif [ -x QMAIL/sbin/hostname ] ; then
 else
 	HOSTNAME_CMD=hostname
 fi
+if [ " $CONTROLDIR" = " " ] ; then
+	CONTROLDIR=@controldir@
+fi
+slash=`echo $CONTROLDIR | cut -c1`
+if [ ! " $slash" = " /" ] ; then
+	cd QMAIL
+fi
+
 $HOSTNAME_CMD | tr '[A-Z]' '[a-z]' |
 (
 if read host
@@ -33,31 +44,31 @@ then
 	if read fqdn
 	then
 		echo Your host\'s fully qualified name in DNS is "$fqdn".
-		echo Putting "$fqdn" into control/me...
-		echo "$fqdn" > QMAIL/control/me
-		chmod 644 QMAIL/control/me
+		echo Putting "$fqdn" into $CONTROLDIR/me...
+		echo "$fqdn" > $CONTROLDIR/me
+		chmod 644 $CONTROLDIR/me
 		(
 			echo "$fqdn" | sed 's/^\([^\.]*\)\.\([^\.]*\)\./\2\./' |
 			(
 				read ddom
-				echo Putting "$ddom" into control/defaultdomain...
-				echo "$ddom" > QMAIL/control/defaultdomain
-				chmod 644 QMAIL/control/defaultdomain
+				echo Putting "$ddom" into $CONTROLDIR/defaultdomain...
+				echo "$ddom" > $CONTROLDIR/defaultdomain
+				chmod 644 $CONTROLDIR/defaultdomain
 			)
 		)
 		(
 			echo "$fqdn" | sed 's/^.*\.\([^\.]*\)\.\([^\.]*\)$/\1.\2/' |
 			(
 				read pdom
-				echo Putting "$pdom" into control/plusdomain...
-				echo "$pdom" > QMAIL/control/plusdomain
-				chmod 644 QMAIL/control/plusdomain
+				echo Putting "$pdom" into $CONTROLDIR/plusdomain...
+				echo "$pdom" > $CONTROLDIR/plusdomain
+				chmod 644 $CONTROLDIR/plusdomain
 			)
 		)
 		echo ' '
 		echo Checking local IP addresses:
-		: > QMAIL/control/locals
-		chmod 644 QMAIL/control/locals
+		: > $CONTROLDIR/locals
+		chmod 644 $CONTROLDIR/locals
 		(
 			if [ -x QMAIL/bin/dnsip ] ; then
 				QMAIL/bin/dnsip "$fqdn"
@@ -84,8 +95,8 @@ then
 				(
 					if read local
 					then
-						echo Adding "$local" to control/locals...
-						echo "$local" >> QMAIL/control/locals
+						echo Adding "$local" to $CONTROLDIR/locals...
+						echo "$local" >> $CONTROLDIR/locals
 					else
 						echo PTR lookup failed. I assume this address has no DNS name.
 					fi
@@ -94,21 +105,21 @@ then
 		)
 		echo ' '
 		echo If there are any other domain names that point to you,
-		echo you will have to add them to QMAIL/control/locals.
+		echo you will have to add them to $CONTROLDIR/locals.
 		echo You don\'t have to worry about aliases, i.e., domains with CNAME records.
 		echo ' '
-		echo Copying QMAIL/control/locals to QMAIL/control/rcpthosts...
-		cp QMAIL/control/locals QMAIL/control/rcpthosts
-		chmod 644 QMAIL/control/rcpthosts
+		echo Copying $CONTROLDIR/locals to $CONTROLDIR/rcpthosts...
+		cp $CONTROLDIR/locals $CONTROLDIR/rcpthosts
+		chmod 644 $CONTROLDIR/rcpthosts
 		echo 'Now qmail will refuse to accept SMTP messages except to those hosts.'
 		echo 'Make sure to change rcpthosts if you add hosts to locals or virtualdomains!'
 	else
 		echo Sorry, I couldn\'t find your host\'s canonical name in DNS.
-		echo You will have to set up control/me yourself.
+		echo You will have to set up $CONTROLDIR/me yourself.
 	fi
 	)
 else
 	echo Sorry, I couldn\'t find your hostname.
-	echo You will have to set up control/me yourself.
+	echo You will have to set up $CONTROLDIR/me yourself.
 fi
 )
