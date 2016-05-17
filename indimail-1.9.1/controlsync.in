@@ -1,6 +1,9 @@
 #!/bin/sh
 # WARNING: This file was auto-generated. Do not edit!
 # $Log: controlsync.in,v $
+# Revision 2.5  2016-05-17 15:22:57+05:30  Cprogrammer
+# cd to base directory if path is relative
+#
 # Revision 2.4  2016-05-17 14:42:22+05:30  Cprogrammer
 # use control directory defined by configure
 #
@@ -15,7 +18,7 @@
 #
 #
 #
-# $Id: controlsync.in,v 2.4 2016-05-17 14:42:22+05:30 Cprogrammer Exp mbhangui $
+# $Id: controlsync.in,v 2.5 2016-05-17 15:22:57+05:30 Cprogrammer Exp mbhangui $
 #
 usage ()
 {
@@ -102,6 +105,10 @@ case $operation in
 				fi
 			done
 		else
+			slash=`echo $CONTROLDIR | cut -c1`
+			if [ ! " $slash" = " /" ] ; then
+				cd @indimaildir@
+			fi
 			cat $CONTROLDIR/$basefile | while read line
 			do
 				@indimaildir@/sbin/adminclient -h $host -p $adminport -u $adminuser -P $adminpass -c "@indimaildir@/sbin/updatefile -u $line -s $filename"
