@@ -1,6 +1,9 @@
 #!/bin/sh
 #
 # $Log: vadddomain_handle.in,v $
+# Revision 2.13  2016-05-17 14:43:59+05:30  Cprogrammer
+# use control directory defined by configure
+#
 # Revision 2.12  2016-05-16 22:31:19+05:30  Cprogrammer
 # issue sighup to qmail-smtpd if tcpserver plugin has been configured to reload control files
 #
@@ -39,7 +42,7 @@
 # post handle for vadddomain
 #
 #
-# $Id: vadddomain_handle.in,v 2.12 2016-05-16 22:31:19+05:30 Cprogrammer Exp mbhangui $
+# $Id: vadddomain_handle.in,v 2.13 2016-05-17 14:43:59+05:30 Cprogrammer Exp mbhangui $
 
 # send sighup to inlookup service to reload domains
 (
@@ -77,14 +80,14 @@ echo "creating rules for spam, virus detected emails"
 
 # add the domain to spamignore
 echo "adding $1 to spamignore control file"
-if [ -f @indimaildir@/control/spamignore ] ; then
-	grep -w @"$1" @indimaildir@/control/spamignore > /dev/null
+if [ -f @controldir@/spamignore ] ; then
+	grep -w @"$1" @controldir@/spamignore > /dev/null
 	if [ $? -ne 0 ] ; then
-		echo @"$1" >> @indimaildir@/control/spamignore
-		/bin/sort -u @indimaildir@/control/spamignore -o @indimaildir@/control/spamignore
+		echo @"$1" >> @controldir@/spamignore
+		/bin/sort -u @controldir@/spamignore -o @controldir@/spamignore
 	fi
 else
-	echo @"$1" > @indimaildir@/control/spamignore
+	echo @"$1" > @controldir@/spamignore
 fi
 if [ -x /bin/chown ] ; then
 	chown=/bin/chown
@@ -95,6 +98,6 @@ elif [ -x /usr/bin/chown ] ; then
 else
 	chown=/bin/chown
 fi
-$chown indimail:indimail @indimaildir@/control/spamignore
-/bin/chmod 644 @indimaildir@/control/spamignore
+$chown indimail:indimail @controldir@/spamignore
+/bin/chmod 644 @controldir@/spamignore
 exit 0

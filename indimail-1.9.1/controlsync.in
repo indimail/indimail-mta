@@ -1,6 +1,9 @@
 #!/bin/sh
 # WARNING: This file was auto-generated. Do not edit!
 # $Log: controlsync.in,v $
+# Revision 2.4  2016-05-17 14:42:22+05:30  Cprogrammer
+# use control directory defined by configure
+#
 # Revision 2.3  2008-06-05 16:19:03+05:30  Cprogrammer
 # moved updatefile, adminclient to sbin
 #
@@ -12,7 +15,7 @@
 #
 #
 #
-# $Id: controlsync.in,v 2.3 2008-06-05 16:19:03+05:30 Cprogrammer Stab mbhangui $
+# $Id: controlsync.in,v 2.4 2016-05-17 14:42:22+05:30 Cprogrammer Exp mbhangui $
 #
 usage ()
 {
@@ -90,7 +93,7 @@ case $operation in
 	basefile=`/bin/basename $filename`
 	if [ " $batch_mode" -eq " 1" ] ; then
 		if [ " $CONTROLDIR" = " " ] ; then
-			cat @qmaildir@/control/$basefile | while read line
+			cat @controldir@/$basefile | while read line
 			do
 				@indimaildir@/sbin/adminclient -h $host -p $adminport -u $adminuser -P $adminpass -c "@indimaildir@/sbin/updatefile -u $line $filename"
 				ret=$?
@@ -99,7 +102,7 @@ case $operation in
 				fi
 			done
 		else
-			cat @qmaildir@/$CONTROLDIR/$basefile | while read line
+			cat $CONTROLDIR/$basefile | while read line
 			do
 				@indimaildir@/sbin/adminclient -h $host -p $adminport -u $adminuser -P $adminpass -c "@indimaildir@/sbin/updatefile -u $line -s $filename"
 				ret=$?
@@ -125,9 +128,9 @@ case $operation in
 		exit 1
 	fi
 	if [ $operation -eq 1 ] ; then
-		exec @indimaildir@/sbin/updatefile -u $domain:$host @qmaildir@/control/relayhosts
+		exec @indimaildir@/sbin/updatefile -u $domain:$host @controldir@/relayhosts
 	else
-		exec @indimaildir@/sbin/updatefile -d $domain:$host @qmaildir@/control/relayhosts
+		exec @indimaildir@/sbin/updatefile -d $domain:$host @controldir@/relayhosts
 	fi
 	;;
 esac

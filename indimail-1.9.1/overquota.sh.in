@@ -2,6 +2,9 @@
 # WARNING: This file was auto-generated. Do not edit!
 #
 # $Log: overquota.sh.in,v $
+# Revision 2.4  2016-05-17 14:43:23+05:30  Cprogrammer
+# use control directory defined by configure
+#
 # Revision 2.3  2010-07-23 20:38:00+05:30  Cprogrammer
 # use maildirdeliver to deliver to a maildir address
 #
@@ -15,7 +18,7 @@
 arg_count=$#
 domain=`echo $1 | cut -d@ -f2`
 if [ " $domain" = " " ] ; then
-	domain=`cat @indimaildir@/control/me`
+	domain=`cat @controldir@/me`
 fi
 f_char=`echo $1 | cut -c1`
 if [ " $f_char" = " /" ] ; then
@@ -37,7 +40,7 @@ case $arg_count in
 	# address currMessSize dailyMsgSize dailyMsgCount "dailySizeLimit"S,"dailyCountLimit"C
 	#
 	5)
-		echo "From: postmaster@`cat @indimaildir@/control/me`"
+		echo "From: postmaster@`cat @controldir@/me`"
 		echo "To: \"Owner of address\" <$1>"
 		echo "Subject: [Warning] Your Daily Limit has been exceeded"
 		echo ""
@@ -51,7 +54,7 @@ case $arg_count in
 	#
 	# address curMessSize totalCurUsage totalCurCount maildirquota "dummy"
 	#
-		echo "From: postmaster@`cat @indimaildir@/control/me`"
+		echo "From: postmaster@`cat @controldir@/me`"
     	echo "To: \"Owner of address\" <$1>"
 		echo "Subject: [Warning] Your Mail Box is overquota"
 		echo ""

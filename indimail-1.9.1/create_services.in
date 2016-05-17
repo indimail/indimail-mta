@@ -1,5 +1,8 @@
 #!/bin/sh
 # $Log: create_services.in,v $
+# Revision 2.60  2016-05-17 14:42:42+05:30  Cprogrammer
+# use control directory defined by configure
+#
 # Revision 2.59  2016-05-17 10:40:51+05:30  Cprogrammer
 # added --shared-objects argument to load smtp in tcpserver
 #
@@ -197,12 +200,13 @@ qcount=5
 tcpserver_plugin=0
 servicedir=/service
 indimaildir=@indimaildir@
+controldir=@controldir@
 
 #
 # End USER Configuration OPTIONS
 #
 
-# $Id: create_services.in,v 2.59 2016-05-17 10:40:51+05:30 Cprogrammer Exp mbhangui $
+# $Id: create_services.in,v 2.60 2016-05-17 14:42:42+05:30 Cprogrammer Exp mbhangui $
 
 usage()
 {
@@ -375,7 +379,7 @@ if [ $nodksignatures -eq 0 ] ; then
 	if [ -x $dir_prefix$indimaildir/bin/dknewkey ] ; then
 		ver_opt="both"
 		sign_opt="both"
-		$dir_prefix$indimaildir/bin/dknewkey $dir_prefix$indimaildir/control/domainkeys/$dkimkeyfn 1024
+		$dir_prefix$indimaildir/bin/dknewkey $dir_prefix"$controldir"/domainkeys/$dkimkeyfn 1024
 	else
 		ver_opt="none"
 		sign_opt="none"
@@ -431,7 +435,7 @@ do
 				--logfilter=/tmp/spamfifo --rejectspam=0 --spamexitcode=0 \
 				--dmasquerade \
 				--dkverify=$ver_opt \
-				--dksign=$sign_opt --private_key=$indimaildir/control/domainkeys/%/$dkimkeyfn \
+				--dksign=$sign_opt --private_key=$controldir/domainkeys/%/$dkimkeyfn \
 				$e_opt $extra_opt
 		else
 			$dir_prefix$indimaildir/sbin/svctool --smtp=$port --servicedir=$servicedir \
@@ -444,7 +448,7 @@ do
 				--logfilter=/tmp/spamfifo --rejectspam=0 --spamexitcode=0 \
 				--dmasquerade \
 				--dkverify=$ver_opt \
-				--dksign=$sign_opt --private_key=$indimaildir/control/domainkeys/%/$dkimkeyfn \
+				--dksign=$sign_opt --private_key=$controldir/domainkeys/%/$dkimkeyfn \
 				$e_opt $extra_opt
 		fi
 	else
@@ -458,7 +462,7 @@ do
 				--qhpsi="$qhpsi" \
 				--dmasquerade \
 				--dkverify=$ver_opt \
-				--dksign=$sign_opt --private_key=$indimaildir/control/domainkeys/%/$dkimkeyfn \
+				--dksign=$sign_opt --private_key=$controldir/domainkeys/%/$dkimkeyfn \
 				$e_opt $extra_opt
 		else
 			$dir_prefix$indimaildir/sbin/svctool --smtp=$port --servicedir=$servicedir \
@@ -469,7 +473,7 @@ do
 				--min-free=52428800 --content-filter --virus-filter \
 				--dmasquerade \
 				--dkverify=$ver_opt \
-				--dksign=$sign_opt --private_key=$indimaildir/control/domainkeys/%/$dkimkeyfn \
+				--dksign=$sign_opt --private_key=$controldir/domainkeys/%/$dkimkeyfn \
 				$e_opt $extra_opt
 		fi
 	fi
@@ -483,14 +487,14 @@ if [ $noclamav -eq 0 -o $clamav_os -eq 1 ] ; then
 		--min-free=52428800 --fsync --syncdir --virus-filter \
 		--qhpsi="$qhpsi" \
 		--dkverify="none" --dksign=$sign_opt \
-		--private_key=$indimaildir/control/domainkeys/%/$dkimkeyfn \
+		--private_key=$controldir/domainkeys/%/$dkimkeyfn \
 		$e_opt $extra_opt
 else
 	$dir_prefix$indimaildir/sbin/svctool --queueParam=defaultqueue \
 		--qbase=$qbase --qcount=$qcount --qstart=1 \
 		--min-free=52428800 --fsync --syncdir --virus-filter \
 		--dkverify="none" --dksign=$sign_opt \
-		--private_key=$indimaildir/control/domainkeys/%/$dkimkeyfn \
+		--private_key=$controldir/domainkeys/%/$dkimkeyfn \
 		$e_opt $extra_opt
 fi
 
@@ -595,7 +599,7 @@ fi
 #
 $dir_prefix$indimaildir/sbin/svctool --indisrvr=4000 --servicedir=$servicedir \
 	--localip=0 --maxdaemons=40 --maxperip=25 --avguserquota=2097152 \
-	--certfile=$indimaildir/control/servercert.pem --ssl \
+	--certfile=$controldir/servercert.pem --ssl \
 	--hardquota=52428800 --base_path=$mail_path $extra_opt
 $dir_prefix$indimaildir/sbin/svctool --inlookup=infifo --servicedir=$servicedir --cntrldir=control --threads=5 \
 	--query-cache --password-cache $extra_opt
@@ -610,7 +614,7 @@ fi
 #
 $dir_prefix$indimaildir/sbin/svctool --poppass=106 --localip=0 --maxdaemons=40 --maxperip=25 \
 	--memory=$poppass_mem \
-	--certfile=$indimaildir/control/servercert.pem --ssl \
+	--certfile=$controldir/servercert.pem --ssl \
 	--setpassword=$indimaildir/sbin/vsetpass --servicedir=$servicedir $extra_opt
 
 #

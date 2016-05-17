@@ -19,6 +19,9 @@
 # you why...
 #
 # $Log: tls-cert-check.in,v $
+# Revision 2.2  2016-05-17 14:43:51+05:30  Cprogrammer
+# use control directory defined by configure
+#
 # Revision 2.1  2009-05-28 08:47:44+05:30  Cprogrammer
 # script to check certificate validity
 #
@@ -28,28 +31,28 @@ LOGGER="logger -i -t tls-cert-check"
 
 for cert in servercert.pem clientcert.pem
 do
-	if [ -f "@indimaildir@/control/$cert" ]; then
+	if [ -f "@controldir@/$cert" ]; then
 		#First, check that it's a valid cert for the task
-		TEMP_PURPOSE=`openssl x509 -in @indimaildir@/control/$cert -noout -purpose 2>/dev/null`
+		TEMP_PURPOSE=`openssl x509 -in @controldir@/$cert -noout -purpose 2>/dev/null`
 		if [ "$?" != "0" ]; then
-			mv -f @indimaildir@/control/$cert @indimaildir@/control/BROKEN-${cert}
+			mv -f @controldir@/$cert @controldir@/BROKEN-${cert}
 			if [ $? -eq 0 ] ; then
-				echo "@indimaildir@/control/$cert is a broken cert. Disabled"
-				$LOGGER "@indimaildir@/control/$cert is a broken cert. Disabled"
+				echo "@controldir@/$cert is a broken cert. Disabled"
+				$LOGGER "@controldir@/$cert is a broken cert. Disabled"
 			fi
 		fi
 
 		#Now check it hasn't expired
-		TEMP_DATE=`openssl x509 -in @indimaildir@/control/$cert -noout -dates 2>/dev/null|grep -i after|cut -d= -f2`
+		TEMP_DATE=`openssl x509 -in @controldir@/$cert -noout -dates 2>/dev/null|grep -i after|cut -d= -f2`
 		EXPIRE_IN_SECS=`date +%s --date $TEMP_DATE 2>/dev/null`
 		if [ "`echo $EXPIRE_IN_SECS|egrep '^[0-9]+$'`" != "" ]; then
 			NOW_IN_SECS=`date +%s 2>/dev/null`
 			if [ "`echo $NOW_IN_SECS|egrep '^[0-9]+$'`" != "" ]; then
 				if [ $NOW_IN_SECS -gt $EXPIRE_IN_SECS ]; then
-				 mv -f @indimaildir@/control/$cert @indimaildir@/control/EXPIRED-${cert}
+				 mv -f @controldir@/$cert @controldir@/EXPIRED-${cert}
 				 if [ $? -eq 0 ] ; then
-				  echo "@indimaildir@/control/$cert has EXPIRED. Disabling"
-				  $LOGGER "@indimaildir@/control/$cert has EXPIRED. Disabling"
+				  echo "@controldir@/$cert has EXPIRED. Disabling"
+				  $LOGGER "@controldir@/$cert has EXPIRED. Disabling"
 			 	 fi
 				fi
 			fi
@@ -57,19 +60,19 @@ do
 
 		if [ "`echo $cert|grep server`" != "" ];then
 			if [ "`echo $TEMP_PURPOSE|egrep -i '(any purpose|server).* yes'`" = "" ]; then
-			 mv -f @indimaildir@/control/$cert @indimaildir@/control/NOT-A-SERVER-CERT-${cert}
+			 mv -f @controldir@/$cert @controldir@/NOT-A-SERVER-CERT-${cert}
 			 if [ $? -eq 0 ] ; then
-			 	echo "@indimaildir@/control/$cert is NOT a server cert. Disabled"
-			 	$LOGGER "@indimaildir@/control/$cert is NOT a server cert. Disabled"
+			 	echo "@controldir@/$cert is NOT a server cert. Disabled"
+			 	$LOGGER "@controldir@/$cert is NOT a server cert. Disabled"
 		 	 fi
 			fi
 		fi
 		if [ "`echo $cert|grep client`" != "" ];then
 			if [ "`echo $TEMP_PURPOSE|egrep -i '(any purpose|client).* yes'`" = "" ]; then
-			 mv -f @indimaildir@/control/$cert @indimaildir@/control/NOT-A-CLIENT-CERT-${cert}
+			 mv -f @controldir@/$cert @controldir@/NOT-A-CLIENT-CERT-${cert}
 			 if [ $? -eq 0 ] ; then
-			 echo "@indimaildir@/control/$cert is NOT a client cert. Disabled"
-			 $LOGGER "@indimaildir@/control/$cert is NOT a client cert. Disabled"
+			 echo "@controldir@/$cert is NOT a client cert. Disabled"
+			 $LOGGER "@controldir@/$cert is NOT a client cert. Disabled"
 		 	 fi
 			fi		
 		fi

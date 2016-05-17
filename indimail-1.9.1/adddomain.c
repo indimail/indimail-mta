@@ -1,5 +1,8 @@
 /*
  * $Log: adddomain.c,v $
+ * Revision 2.17  2016-05-17 14:40:32+05:30  Cprogrammer
+ * replace control directory with CONTROLDIR
+ *
  * Revision 2.16  2013-08-03 20:21:40+05:30  Cprogrammer
  * send sighup through post_handle
  *
@@ -81,7 +84,7 @@
 #include <sys/stat.h>
 
 #ifndef	lint
-static char     sccsid[] = "$Id: adddomain.c,v 2.16 2013-08-03 20:21:40+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: adddomain.c,v 2.17 2016-05-17 14:40:32+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 int
@@ -164,7 +167,7 @@ vadddomain(char *domain, char *ipaddr, char *dir, uid_t uid, gid_t gid, int chk_
 			error_stack(stderr, "%s: %s\n", tmpbuf, strerror(errno));
 			return (-1);
 		}
-		snprintf(tmpbuf, MAX_BUFF, "%s/control/%s/%s", INDIMAILDIR, domain,
+		snprintf(tmpbuf, MAX_BUFF, "%s/%s/%s", CONTROLDIR, domain,
 			 (((ptr = getenv("BULK_MAILDIR"))) ? ptr : BULK_MAILDIR));
 		if (r_mkdir(tmpbuf, INDIMAIL_DIR_MODE, uid, gid))
 		{
@@ -240,7 +243,7 @@ vadddomain(char *domain, char *ipaddr, char *dir, uid_t uid, gid_t gid, int chk_
 		}
 		if (chk_rcpt)
 		{
-			snprintf(tmpbuf, MAX_BUFF, "%s/control/chkrcptdomains", dir);
+			snprintf(tmpbuf, MAX_BUFF, "%s/chkrcptdomains", CONTROLDIR);
 			if (update_file(tmpbuf, domain, INDIMAIL_QMAIL_MODE))
 			{
 				snprintf(tmpbuf, MAX_BUFF, "%s/domains/%s", dir, domain);

@@ -27,7 +27,7 @@ the network. Each mailstore requires its own local MySQL database to store its l
 The above five different forms of usage allows you to add, modify, delete and display the
 \fIdbinfo\fR structure. With the '-e' option, the \fBEDITOR\fR environment variable is used to edit the
 Mail Cluster Definition file. For reliability, this structure is maintained in MySQL as well
-as a file defined by the MCDFILE environment variable (defaults to \fIINDIMAIL/control/mcdinfo\fR). On
+as a file defined by the MCDFILE environment variable (defaults to \fICONTROLDIR/mcdinfo\fR). On
 updation of the \fIdbinfo\fR structure, the entries in the file is synchronized with the entries in
 MySQL table \fIdbinfo\fR. In addition to the MySQL table \fIdbinfo\fR, \fBdbinfo(8)\fR also uses
 the  qmail assign file (\fIINDIMAIL/users/assign\fR) to find domains not listed in the \fIdbinfo\fR

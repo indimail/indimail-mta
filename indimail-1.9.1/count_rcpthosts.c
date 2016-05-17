@@ -1,5 +1,8 @@
 /*
  * $Log: count_rcpthosts.c,v $
+ * Revision 2.3  2016-05-17 14:42:34+05:30  Cprogrammer
+ * replace control directory with CONTROLDIR
+ *
  * Revision 2.2  2005-12-29 22:40:39+05:30  Cprogrammer
  * use getEnvConfigStr to set variables from environment variables
  *
@@ -20,7 +23,7 @@
 #include <stdio.h>
 
 #ifndef	lint
-static char     sccsid[] = "$Id: count_rcpthosts.c,v 2.2 2005-12-29 22:40:39+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: count_rcpthosts.c,v 2.3 2016-05-17 14:42:34+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 /*
@@ -35,8 +38,11 @@ count_rcpthosts()
 	register int    count;
 
 	getEnvConfigStr(&qmaildir, "QMAILDIR", QMAILDIR);
-	getEnvConfigStr(&controldir, "CONTROLDIR", "control");
-	snprintf(tmpstr, MAX_BUFF, "%s/%s/rcpthosts", qmaildir, controldir);
+	getEnvConfigStr(&controldir, "CONTROLDIR", CONTROLDIR);
+	if (*controldir == '/')
+		snprintf(tmpstr, MAX_BUFF, "%s/rcpthosts", controldir);
+	else
+		snprintf(tmpstr, MAX_BUFF, "%s/%s/rcpthosts", qmaildir, controldir);
 	if(!(fs = fopen(tmpstr, "r")))
 		return (0);
 	for(count = 0; fgets(tmpstr, MAX_BUFF, fs);count++);

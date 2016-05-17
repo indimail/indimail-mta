@@ -1,5 +1,8 @@
 /*
  * $Log: bulletin.c,v $
+ * Revision 2.13  2016-05-17 14:41:34+05:30  Cprogrammer
+ * replace control directory with CONTROLDIR
+ *
  * Revision 2.12  2010-06-07 18:31:28+05:30  Cprogrammer
  * additional connect_all argument to findmdahost()
  *
@@ -40,7 +43,7 @@
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: bulletin.c,v 2.12 2010-06-07 18:31:28+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: bulletin.c,v 2.13 2016-05-17 14:41:34+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef CLUSTERED_SITE
@@ -290,7 +293,7 @@ insert_bulletin(char *domain, char *emailFile, char *list_file)
 		fprintf(stderr, "%s contains '/'. Filename cannot have any path\n", emailFile);
 		return (-1);
 	}
-	snprintf(EmailFile, MAX_BUFF, "%s/control/%s/%s/%s", INDIMAILDIR, domain,
+	snprintf(EmailFile, MAX_BUFF, "%s/%s/%s/%s", CONTROLDIR, domain,
 			 (((ptr = getenv("BULK_MAILDIR"))) ? ptr : BULK_MAILDIR), emailFile);
 	if (!vget_assign(domain, 0, 0, &uid, &gid))
 	{

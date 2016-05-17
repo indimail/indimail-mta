@@ -1,6 +1,9 @@
 #!/bin/sh
 # WARNING: This file was auto-generated. Do not edit!
 # $Log: bogofilter-qfe.in,v $
+# Revision 2.15  2016-05-17 14:41:05+05:30  Cprogrammer
+# use controldir defined by configure
+#
 # Revision 2.14  2012-06-20 19:03:31+05:30  Cprogrammer
 # fix for recursive emails when email sent to training ids
 #
@@ -47,7 +50,7 @@
 # This a qmail specific bogofilter frontend script which allows the use of a 
 # centralized bogofilter running on an smtp mail server
 # Copyright (C) Gyepi Sam <gyepi@praxis-sw.com> 2002
-# $Id: bogofilter-qfe.in,v 2.14 2012-06-20 19:03:31+05:30 Cprogrammer Stab mbhangui $
+# $Id: bogofilter-qfe.in,v 2.15 2016-05-17 14:41:05+05:30 Cprogrammer Exp mbhangui $
  
 domain=$HOST
 #
@@ -64,18 +67,18 @@ if [ " $sender_domain" = " " -o " $sender_domain" = " #[]" ] ; then
 	exit 100
 fi
 auth_flag=0
-/bin/grep $sender_domain @qmaildir@/control/rcpthosts > /dev/null 2>&1
+/bin/grep $sender_domain @controldir@/rcpthosts > /dev/null 2>&1
 if [ $? -eq 0 ] ; then
 	auth_flag=1
 fi
 if [ $auth_flag -eq 0 ] ; then
-	/bin/grep $sender_domain @qmaildir@/control/locals > /dev/null 2>&1
+	/bin/grep $sender_domain @controldir@/locals > /dev/null 2>&1
 	if [ $? -eq 0 ] ; then
 		auth_flag=1
 	fi
 fi
 if [ $auth_flag -eq 0 ] ; then
-	/bin/grep "@$sender_domain" @qmaildir@/control/spamignore > /dev/null 2>&1
+	/bin/grep "@$sender_domain" @controldir@/spamignore > /dev/null 2>&1
 	if [ $? -eq 0 ] ; then
 		auth_flag=1
 	fi
@@ -84,7 +87,7 @@ fi
 # Sigh :( my last hope
 #
 if [ $auth_flag -eq 0 ] ; then
-	/bin/grep $SENDER @qmaildir@/control/spamignore > /dev/null 2>&1
+	/bin/grep $SENDER @controldir@/spamignore > /dev/null 2>&1
 	if [ $? -ne 0 ] ; then
 		echo "$SENDER: Sorry, You are not authorized to email $EXT@$domain"
 		exit 100
@@ -124,8 +127,8 @@ case "$EXT" in
 ;;
 esac
 (
-if [ -f @qmaildir@/control/spamignoreheaders ] ; then
-	/bin/grep -i -v -f @qmaildir@/control/spamignoreheaders
+if [ -f @controldir@/spamignoreheaders ] ; then
+	/bin/grep -i -v -f @controldir@/spamignoreheaders
 else
 	/bin/cat -
 fi

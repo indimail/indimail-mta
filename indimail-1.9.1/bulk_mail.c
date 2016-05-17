@@ -1,5 +1,8 @@
 /*
  * $Log: bulk_mail.c,v $
+ * Revision 2.4  2016-05-17 14:41:16+05:30  Cprogrammer
+ * replace control directory with CONTROLDIR
+ *
  * Revision 2.3  2010-05-06 22:30:33+05:30  Cprogrammer
  * corrected BulkMail flag path
  *
@@ -49,7 +52,7 @@
 #include <sys/stat.h>
 
 #ifndef	lint
-static char     sccsid[] = "$Id: bulk_mail.c,v 2.3 2010-05-06 22:30:33+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: bulk_mail.c,v 2.4 2016-05-17 14:41:16+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 int
@@ -64,8 +67,8 @@ bulk_mail(email, domain, homedir)
 	time_t          last_mtime;
 	int             status;
 
-	snprintf(bulkdir, MAX_BUFF, "%s/control/%s/%s", 
-		INDIMAILDIR, domain, (ptr = getenv("BULK_MAILDIR")) ? ptr : BULK_MAILDIR);
+	snprintf(bulkdir, MAX_BUFF, "%s/%s/%s", 
+		CONTROLDIR, domain, (ptr = getenv("BULK_MAILDIR")) ? ptr : BULK_MAILDIR);
 	if(access(bulkdir, F_OK))
 		return(0);
 	if (!(Dir = opendir(bulkdir)))

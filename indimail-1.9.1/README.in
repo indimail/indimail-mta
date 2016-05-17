@@ -292,6 +292,9 @@ Some of the features available in this package
 72. udplogger service for logging messages through UDP
 73. docker (www.docker.com) images for indimail (cprogrammer/indimail,
     cprogrammer/indimail-mta)
+74. tcpserver plugin feature - dynamically load shared objects given on
+    command line. Load shared objects defined by env variables PLUGIN0,
+    PLUGIN1, ...
 
 You can take a detailed look at the feature list at
 

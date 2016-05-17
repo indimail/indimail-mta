@@ -33,7 +33,7 @@ You can change this filename by defining \fBACTIVATEMAIL\fR environment variable
 user, \fBlogin_tasks(3)\fR copies the bulletin welcomemail.txt,all. \fBWELCOMEMAIL\fR
 environment variable can be used to use a different filename. \fBACTIVATEMAIL\fR and
 \fBWELCOMEMAIL\fR environment variables should refer to a filename in the directory
-INDIMAIL/control/domain_name/bulk_mail.
+CONTROLDIR/domain_name/bulk_mail.
 
 If \fBNOLASTAUTH\fR environment variable is defined, \fBlogin_tasks(3)\fR exits after copying
 bulletins. If not defined, further actions as described below are performed
@@ -80,7 +80,7 @@ removes the BOUNCE flag (pw_gid field).
 .SH Bulletins
 
 You can create a bulletin by creating RFC 822 formated files in the directory
-INDIMAIL/control/domain_name/bulk_mail where \fIdomain_name\fR is a name for a virtual domain
+CONTROLDIR/domain_name/bulk_mail where \fIdomain_name\fR is a name for a virtual domain
 created by the \fBvadddomain(1)\fR program.
 
 If the filename has the extension ,all then the bulletin gets copied to every user's Maildir

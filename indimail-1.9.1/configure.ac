@@ -216,6 +216,17 @@ AC_ARG_ENABLE(postfixdir, [  --enable-postfixdir=dir       directory where Postf
 		fi
 	])
 
+controldir=$prefix/control
+AC_ARG_ENABLE(controldir, [  --enable-controldir=dir       directory for control files .],
+	controdir="$enableval",
+	[
+		if test "$postfixdir" != ""
+		then
+			AC_DEFINE_UNQUOTED(CONTROLDIR,"$controldir", Directory for control files)
+		fi
+	])
+AC_DEFINE_UNQUOTED(CONTROLDIR, $controldir, Directory for control files)
+
 basepath="/home/mail"
 AC_ARG_ENABLE(basepath,   [  --enable-basepath=dir         Base Path for User's Home Directories.],
 	basepath="$enableval",
@@ -378,6 +389,7 @@ fi
 DATE=`date`
 AC_SUBST(DATE)
 AC_SUBST(indimaildir)
+AC_SUBST(controldir)
 AC_DEFINE_UNQUOTED(INDIMAILDIR,"$indimaildir",IndiMail Home Directory)
 rm -f indimail.dir
 
@@ -1224,6 +1236,7 @@ echo "MODFLAGS             = $MODFLAGS"
 echo "            Current settings"
 echo "-------------------------------------------------------------"
 echo "   qmail directory = $qmaildir --enable-qmaildir=$qmaildir"
+echo " control directory = $controldir --enable-controldir=$controldir"
 if test "$postfixdir" != ""
 then
 	echo " Postfix directory = $postfixdir --enable-postfixdir=$postfixdir"

@@ -1,5 +1,8 @@
 /*
  * $Log: Check_Login.c,v $
+ * Revision 2.2  2016-05-17 14:41:46+05:30  Cprogrammer
+ * replace control directory with CONTROLDIR
+ *
  * Revision 2.1  2002-11-30 21:31:29+05:30  Cprogrammer
  * removed vclose()
  *
@@ -19,7 +22,7 @@
 #include <unistd.h>
 
 #ifndef	lint
-static char     sccsid[] = "$Id: Check_Login.c,v 2.1 2002-11-30 21:31:29+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: Check_Login.c,v 2.2 2016-05-17 14:41:46+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 int
@@ -28,8 +31,8 @@ Check_Login(service, domain, type)
 {
 	char            TmpBuf1[MAX_BUFF], TmpBuf2[MAX_BUFF];
 
-	snprintf(TmpBuf1, MAX_BUFF, "%s/control/%s/%s/nologin", INDIMAILDIR, domain, service);
-	snprintf(TmpBuf2, MAX_BUFF, "%s/control/%s/%s/nologin", INDIMAILDIR, type, service);
+	snprintf(TmpBuf1, MAX_BUFF, "%s/%s/%s/nologin", CONTROLDIR, domain, service);
+	snprintf(TmpBuf2, MAX_BUFF, "%s/%s/%s/nologin", CONTROLDIR, type, service);
 	if(!access(TmpBuf1, F_OK) || !access(TmpBuf2, F_OK))
 	{
 		fprintf(stdout, "Login not permitted for %s\n", service);

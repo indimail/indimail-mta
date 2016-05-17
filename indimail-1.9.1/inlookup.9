@@ -14,7 +14,7 @@ randomly generated FIFO. The other FIFO is the randomly generated FIFO used for 
 of the query back.
 .PP
 \fBInLookup\fR creates a read FIFO determined by the environment variable INFIFO. If INFIFO is
-not defined, the default FIFO used is INDIMAIL/control/inquery/infifo. \fBInLookup\fR then goes
+not defined, the default FIFO used is CONTROLDIR/inquery/infifo. \fBInLookup\fR then goes
 into an infinite loop reading this FIFO.
 .PP
 Clients use the API function \fBinquery()\fR to use the InLookup service. The write FIFO is
@@ -26,7 +26,7 @@ Clients send requests for MySQL(1) queries to InLookup through the function \fBi
 FIFO. Clients which are currently using inquery are \fBqmail-smtpd(1)\fR, \fBproxyimap(8)\fR,
 \fBproxypop3(8)\fR, \fBvchkpass(8)\fR and \fBauthindi(8)\fR. \fBInLookup\fR uses the MCD
 (Mail Cluster Definition File) defined by the MCDFILE environment variable to load all
-databases. The MCDFILE defaults to INDIMAIL/control/mcdinfo. On start up \fBInLookup\fR can be
+databases. The MCDFILE defaults to CONTROLDIR/mcdinfo. On start up \fBInLookup\fR can be
 setup into debug mode by giving '-v' argument on the command line. If debugging is desired to
 be changed during execution of the server, set the environment variable DEBUG instead. Debugging
 can then be turned off/on anytime by giving the SIGUSR2 signal to the pid of the \fBInLookup\fR

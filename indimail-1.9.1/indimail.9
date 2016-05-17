@@ -189,7 +189,7 @@ to an IP address. This is maintained in the table \fIhost_table\fR. A program ca
 \fBvhostid(8)\fR can be used to add, modify or delete entries in \fIhost_table\fR.
 .PP
 To be able to access the \fBcentral database\fR, IndiMail programs need the following control
-files in the directory INDIMAIL/control
+files in the directory CONTROLDIR
 
 .nr step 1 1
 .IP \n[step] 2
@@ -211,8 +211,8 @@ host:user:password:mysql_socket/port as the format for \fIhost.master\fR and \fI
 IndiMail uses \fBgethostid(3)\fR and \fBgetaddrinfo(3)\fR to figure out its identity.
 \fBgetaddrinfo(3)\fR requires your hosts address to be either resolved by dns or be present
 in \fBhosts(5)\fR /etc/hosts. You can bypass \fBgethostid(3)\fR and \fBgetaddrifno(3)\fR by
-have your hostid in \fIINDIMAIL/control/hostid\fR and your IP address in
-\fBINDIMAIL/control/localiphost\fR.
+have your hostid in \fICONTROLDIR/hostid\fR and your IP address in
+\fBCONTROLDIR/localiphost\fR.
 .PP
 In a clustered setup, you can have multiple servers with each server having its own set of
 local users. The information for these users are stored in a MySQL database known as the
@@ -226,7 +226,7 @@ home directory, gecos, quota, access rights are maintained in another MySQL data
 Access to the individual \fBlocal database\fR by indimail programs is made easy by, having the
 parameters needed to connect to each of the MySQL \fBlocal datbase\fR, in a table called
 \fIdbinfo\fR, on the \fBcentral database\fR. The same information can be maintained in a control
-file \fBINDIMAIL/control/mcdinfo\fR. The file \fImcdinfo\fR allows one to maintain and sync
+file \fBCONTROLDIR/mcdinfo\fR. The file \fImcdinfo\fR allows one to maintain and sync
 information about each and every \fImailstore\fR on the \fIdbinfo\fR table. The updation
 depends on the timestamp of the \fImcdinfo\fR file and \fIdbinfo\fR table. The moment
 \fImcdinfo\fR is updated, the same information gets updated in the \fIdbinfo\fR table. The
@@ -239,13 +239,13 @@ in the \fIdbinfo\fR table and the \fImcdinfo\fR control file on all servers are 
 .PP
 In case you do not require a multi-host setup, IndiMail does not require \fBcentral database\fR.
 Programs just need to connect to the \fBlocal database\fR which can be configured by having the
-control file INDIMAIL/control/host.mysql.
+control file CONTROLDIR/host.mysql.
 
 .SH Virtual Domains
 .PP
 IndiMail has an idea of email domains that are "local" and "virtual". Local domains are ones
 which primarily match against /etc/passwd. Virtual domains match against domains listed in
-the control file INDIMAIL/control/virtualdomains. IndiMail makes use of the INDIMAIL/users/assign
+the control file CONTROLDIR/virtualdomains. IndiMail makes use of the INDIMAIL/users/assign
 file and \fIvirtualdomains\fR file. The \fIusers/assign\fR file gets compiled into a \fIusers/cdb\fR
 file. It is a hashed database to speed searches for patterns. If a pattern is matched then
 IndiMail delivers the email to the directory defined in the file using the uid and gid which is
@@ -400,7 +400,7 @@ QUEUEPROG          |qmail-multi  |used    |Program to be called to queue message
                    |             |        |messages to a to a QMQP server
 -------------------|-------------|--------|----------------------------------------
 CONTROLDIR         |qmail-smtpd  |used    |The directory containing control files.
-                   |qmail-remote |        |If not defined qmail_home/control
+                   |qmail-remote |        |If not defined CONTROLDIR
                    |spawn-filter |        |is used
                    |qmail-local  |        |
                    |ipmeprint    |        |
@@ -733,7 +733,7 @@ AUTH_DOMAINS       |             |        |List of comma separated domains whose
                    |             |        |listed in rcpthosts). Multiple domains
                    |             |        |can also be set with ':' or newline as
                    |             |        |the delimiter. e.g.
-                  AUTH_DOMAINS=`cat ~indimail/control/authdomains`
+                   |             |        |AUTH_DOMAINS=`cat ~indimail/control/authdomains`
                    |             |        |where authdomains is a file containing
                    |             |        |list of domains one per line.
 CHECKRELAY         |             |        |Relay table in MySQL is checked for
@@ -1272,8 +1272,8 @@ QMAILDIR           | /var/indimail
 TCP_FILE           | /var/indimail/etc/tcp.smtp
 OPEN_SMTP_CUR_FILE | /var/indimail/etc/open-smtp
 RELAY_TABLE        | relay
-MCDFILE            | "mcdinfo" or /var/indimail/control/mcdinfo
-INFIFO             | infifo or /var/indimail/control/inquery/infifo
+MCDFILE            | "mcdinfo" or CONTROLDIR/mcdinfo
+INFIFO             | infifo or CONTROLDIR/inquery/infifo
 .TE
 
 .SH STARTUP

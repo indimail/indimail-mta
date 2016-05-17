@@ -761,6 +761,7 @@ md5_crypt.lo: md5.h global.h
 edit = sed \
 	-e 's,@indimaildir\@,$(indimaildir),g' \
 	-e 's,@qmaildir\@,$(qmaildir),g' \
+	-e 's,@controldir\@,$(controldir),g' \
 	-e 's,@mysqlbindir\@,$(mysqlbindir),g' \
 	-e 's,@moduledir\@,$(moduledir),g' \
 	-e 's,@auth_inc\@,$(auth_inc),g' \
@@ -781,6 +782,9 @@ edit = sed \
 	-e 's,@HOST\@,$(host),g' \
 	-e 's,@DATE\@,$(DATE),g' \
 	-e 's,@prefix\@,$(prefix),g'
+editman = sed \
+	-e 's,INDIMAILDIR,$(indimaildir),g' \
+	-e 's,CONTROLDIR,$(controldir),g'
 
 controlsync: controlsync.in
 	$(edit) $@.in > $@
@@ -860,13 +864,13 @@ indimail.spec: indimail.spec.in catChangeLog
 indimail-@VERSION@-rpmlintrc: indimail-rpmlintrc.in
 	$(edit) indimail-rpmlintrc.in > $@
 login_tasks.3: login_tasks.9
-	cat $^ | sed s}INDIMAIL}$(indimaildir)}g > $@
+	$(editman) login_tasks.9 > $@
 svctool.8: svctool.9
-	cat $^ | sed s}INDIMAIL}$(indimaildir)}g > $@
+	$(editman) svctool.9 > $@
 dbinfo.8: dbinfo.9
 	cat $^ | sed s}INDIMAIL}$(indimaildir)}g > $@
 inlookup.8: inlookup.9
-	cat $^ | sed s}INDIMAIL}$(indimaildir)}g | sed s}LOGDIR}$(logdir)}g > $@
+	$(editman) inlookup.9 > $@
 vcfilter.1: vcfilter.9
 	cat $^ | sed s}INDIMAIL}$(indimaildir)}g > $@
 vadddomain.1:vadddomain.9
@@ -888,7 +892,7 @@ vmoveuser.1:vmoveuser.9
 vdelivermail.8:vdelivermail.9
 	cat $^ | sed s}INDIMAIL}$(indimaildir)}g > $@
 indimail.7:indimail.9
-	cat $^ | sed s}INDIMAIL}$(indimaildir)}g > $@
+	$(editman) indimail.9 > $@
 
 crc.$(OBJEXT): crc.c
 	$(COMPILE) $(DEFS) -DMAIN -c crc.c
