@@ -37,6 +37,7 @@ addrlist
 argv0
 atrn
 auto_ageout.h
+auto_control.c
 auto_break.c
 auto-ccld.sh
 auto_cleaner.c
@@ -103,7 +104,6 @@ qmailconfig
 config.0
 config-fast
 conf-qmail
-conf-locklogs
 datemail
 ddist
 deferrals
@@ -517,6 +517,5 @@ taia_tai.o
 nowutc
 yearcal
 yearcal.o
-conf-shared
 debian/changelog
 debian/_service
