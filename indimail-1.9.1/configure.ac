@@ -217,15 +217,26 @@ AC_ARG_ENABLE(postfixdir, [  --enable-postfixdir=dir       directory where Postf
 	])
 
 controldir=$prefix/control
-AC_ARG_ENABLE(controldir, [  --enable-controldir=dir       directory for control files .],
+AC_ARG_ENABLE(controldir, [  --enable-controldir=dir       directory for control files.],
 	controdir="$enableval",
 	[
-		if test "$postfixdir" != ""
+	 	if test "$domaindir" != ""
 		then
 			AC_DEFINE_UNQUOTED(CONTROLDIR,"$controldir", Directory for control files)
 		fi
 	])
-AC_DEFINE_UNQUOTED(CONTROLDIR, $controldir, Directory for control files)
+AC_DEFINE_UNQUOTED(CONTROLDIR, "$controldir", Directory for control files)
+
+domaindir=$prefix/domains
+AC_ARG_ENABLE(domaindir, [  --enable-domaindir=dir       directory for virtual domains.],
+	domaindir="$enableval",
+	[
+	 	if test "$domaindir" != ""
+		then
+			AC_DEFINE_UNQUOTED(DOMAINDIR,"$domaindir", Directory for virtual domains)
+		fi
+	])
+AC_DEFINE_UNQUOTED(DOMAINDIR, "$domaindir", Directory for virtual domains)
 
 basepath="/home/mail"
 AC_ARG_ENABLE(basepath,   [  --enable-basepath=dir         Base Path for User's Home Directories.],
@@ -390,6 +401,7 @@ DATE=`date`
 AC_SUBST(DATE)
 AC_SUBST(indimaildir)
 AC_SUBST(controldir)
+AC_SUBST(domaindir)
 AC_DEFINE_UNQUOTED(INDIMAILDIR,"$indimaildir",IndiMail Home Directory)
 rm -f indimail.dir
 
@@ -1237,6 +1249,7 @@ echo "            Current settings"
 echo "-------------------------------------------------------------"
 echo "   qmail directory = $qmaildir --enable-qmaildir=$qmaildir"
 echo " control directory = $controldir --enable-controldir=$controldir"
+echo " domains directory = $domaindir --enable-domaindir=$domaindir"
 if test "$postfixdir" != ""
 then
 	echo " Postfix directory = $postfixdir --enable-postfixdir=$postfixdir"
