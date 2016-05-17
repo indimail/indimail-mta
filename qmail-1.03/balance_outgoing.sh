@@ -1,5 +1,8 @@
 #
 # $Log: balance_outgoing.sh,v $
+# Revision 1.3  2016-05-17 23:11:42+05:30  Cprogrammer
+# fix for configurable control directory
+#
 # Revision 1.2  2011-07-03 16:54:23+05:30  Cprogrammer
 # fixed typo and do chdir to /var/indimail
 #
@@ -15,7 +18,7 @@
 # argv4          - size
 # argv5 .. argvn - recipients
 #
-# $Id: balance_outgoing.sh,v 1.2 2011-07-03 16:54:23+05:30 Cprogrammer Stab mbhangui $
+# $Id: balance_outgoing.sh,v 1.3 2016-05-17 23:11:42+05:30 Cprogrammer Exp mbhangui $
 #
 host=$1
 sender=$2
@@ -25,10 +28,13 @@ shift 4
 
 cd QMAIL
 if [ " $CONTROLDIR" = " " ] ; then
-	FN=QMAIL/control/filterargs
-else
-	FN=$CONTROLDIR/filterargs
+	CONTROLDIR=@controldir@
 fi
+slash=`echo $CONTROLDIR | cut -c1`
+if [ ! " $slash" = " /" ] ; then
+	cd QMAIL
+fi
+FN=$CONTROLDIR/filterargs
 if [ -n "$SPAMFILTER" -o -n "$FILTERARGS" -o -f $FN ] ; then
 	# execute spawn-filter if you have filters defined for remote/local deliveries
 	PROG="bin/spawn-filter"
@@ -36,22 +42,12 @@ else
 	PROG="bin/qmail-remote"
 fi
 # Make an array of IP addresses in variable IP
-if [ " $CONTROLDIR" = " " ] ; then
-	if [ -f QMAIL/control/outgoingip.$host ] ; then
-		IP=(`cat QMAIL/control/outgoingip.$host`)
-	elif [ -f QMAIL/control/outgoingip ] ; then
-		IP=(`cat QMAIL/control/outgoingip`)
-	else
-		exec -a qmail-remote $PROG "$host" "$sender" "$qqeh" $size $*
-	fi
+if [ -f $CONTROLDIR/outgoingip.$host ] ; then
+	IP=(`cat $CONTROLDIR/outgoingip.$host`)
+elif [ -f $CONTROLDIR/outgoingip ] ; then
+	IP=(`cat $CONTROLDIR/outgoingip`)
 else
-	if [ -f $CONTROLDIR/outgoingip.$host ] ; then
-		IP=(`cat $CONTROLDIR/outgoingip.$host`)
-	elif [ -f $CONTROLDIR/outgoingip ] ; then
-		IP=(`cat $CONTROLDIR/outgoingip`)
-	else
-		exec -a qmail-remote $PROG "$host" "$sender" "$qqeh" $size $*
-	fi
+	exec -a qmail-remote $PROG "$host" "$sender" "$qqeh" $size $*
 fi
 IP_COUNT=${#IP[*]} # array size
 if [ $IP_COUNT -gt 1 ] ; then
