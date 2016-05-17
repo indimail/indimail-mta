@@ -1,5 +1,8 @@
 /*
  * $Log: hier.c,v $
+ * Revision 1.196  2016-05-17 23:13:31+05:30  Cprogrammer
+ * fixed permission of ratelimit directory
+ *
  * Revision 1.195  2016-05-15 22:45:15+05:30  Cprogrammer
  * renamed qmail-smtpd.so to qmail_smtpd.so
  *
@@ -515,7 +518,7 @@ hier(inst_dir)
 	d(auto_qmail_home, "control/inquery", auto_uidv, auto_gidv, 0775);
 #endif
 	d(auto_qmail_home, "control/domainkeys", auto_uidv, auto_gidv, 0755);
-	d(auto_qmail_home, "control/ratelimit", auto_uidr, auto_gidq, 2755);
+	d(auto_qmail_home, "control/ratelimit", auto_uidr, auto_gidq, 02755);
 	d(auto_qmail_home, "plugins", auto_uido, auto_gidq, 0555);
 	d(auto_qmail_home, "qscanq", auto_uidc, auto_gidc, 0750);
 	d(auto_qmail_home, "qscanq/root", auto_uidc, auto_gidc, 0750);
@@ -1750,7 +1753,7 @@ _hier(inst_dir)
 void
 getversion_install_big_c()
 {
-	static char    *x = "$Id: hier.c,v 1.195 2016-05-15 22:45:15+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: hier.c,v 1.196 2016-05-17 23:13:31+05:30 Cprogrammer Exp mbhangui $";
 
 #ifdef INDIMAIL
 	if (x)
