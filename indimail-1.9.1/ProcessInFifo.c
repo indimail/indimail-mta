@@ -1,6 +1,6 @@
 /*
  * $Log: ProcessInFifo.c,v $
- * Revision 2.39  2016-05-17 17:09:39+05:30  mbhangui
+ * Revision 2.39  2016-05-17 17:09:39+05:30  Cprogrammer
  * use control directory set by configure
  *
  * Revision 2.38  2016-01-12 14:25:15+05:30  Cprogrammer
@@ -132,7 +132,7 @@
  */
 
 #ifndef	lint
-static char     sccsid[] = "$Id: ProcessInFifo.c,v 2.39 2016-05-17 17:09:39+05:30 mbhangui Exp $";
+static char     sccsid[] = "$Id: ProcessInFifo.c,v 2.39 2016-05-17 17:09:39+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #include <fcntl.h>

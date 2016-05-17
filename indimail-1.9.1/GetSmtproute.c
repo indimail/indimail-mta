@@ -1,6 +1,6 @@
 /*
  * $Log: GetSmtproute.c,v $
- * Revision 2.7  2016-05-17 17:09:39+05:30  mbhangui
+ * Revision 2.7  2016-05-17 17:09:39+05:30  Cprogrammer
  * use control directory set by configure
  *
  * Revision 2.6  2010-05-28 14:11:07+05:30  Cprogrammer
@@ -31,7 +31,7 @@
 #include <ctype.h>
 
 #ifndef	lint
-static char     sccsid[] = "$Id: GetSmtproute.c,v 2.7 2016-05-17 17:09:39+05:30 mbhangui Exp $";
+static char     sccsid[] = "$Id: GetSmtproute.c,v 2.7 2016-05-17 17:09:39+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 /*

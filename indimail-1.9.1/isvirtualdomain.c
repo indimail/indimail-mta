@@ -1,6 +1,6 @@
 /*
  * $Log: isvirtualdomain.c,v $
- * Revision 2.5  2016-05-17 17:09:39+05:30  mbhangui
+ * Revision 2.5  2016-05-17 17:09:39+05:30  Cprogrammer
  * use control directory set by configure
  *
  * Revision 2.4  2009-02-18 09:07:29+05:30  Cprogrammer
@@ -31,7 +31,7 @@
 #include <errno.h>
 
 #ifndef	lint
-static char     sccsid[] = "$Id: isvirtualdomain.c,v 2.5 2016-05-17 17:09:39+05:30 mbhangui Exp $";
+static char     sccsid[] = "$Id: isvirtualdomain.c,v 2.5 2016-05-17 17:09:39+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 int

@@ -1,6 +1,6 @@
 /*
  * $Log: dbload.c,v $
- * Revision 2.19  2016-05-17 17:09:39+05:30  mbhangui
+ * Revision 2.19  2016-05-17 17:09:39+05:30  Cprogrammer
  * use control directory set by configure
  *
  * Revision 2.18  2016-01-12 13:12:55+05:30  Cprogrammer
@@ -71,7 +71,7 @@
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: dbload.c,v 2.19 2016-05-17 17:09:39+05:30 mbhangui Exp $";
+static char     sccsid[] = "$Id: dbload.c,v 2.19 2016-05-17 17:09:39+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #include <unistd.h>

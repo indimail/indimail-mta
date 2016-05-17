@@ -1,6 +1,6 @@
 /*
  * $Log: dbinfoDel.c,v $
- * Revision 2.6  2016-05-17 17:09:39+05:30  mbhangui
+ * Revision 2.6  2016-05-17 17:09:39+05:30  Cprogrammer
  * use control directory set by configure
  *
  * Revision 2.5  2008-09-08 09:33:50+05:30  Cprogrammer
@@ -24,7 +24,7 @@
 #include <mysqld_error.h>
 
 #ifndef	lint
-static char     sccsid[] = "$Id: dbinfoDel.c,v 2.6 2016-05-17 17:09:39+05:30 mbhangui Exp $";
+static char     sccsid[] = "$Id: dbinfoDel.c,v 2.6 2016-05-17 17:09:39+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef CLUSTERED_SITE

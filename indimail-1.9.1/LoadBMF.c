@@ -1,6 +1,6 @@
 /*
  * $Log: LoadBMF.c,v $
- * Revision 2.16  2016-05-17 17:09:39+05:30  mbhangui
+ * Revision 2.16  2016-05-17 17:09:39+05:30  Cprogrammer
  * use control directory set by configure
  *
  * Revision 2.15  2010-03-30 12:55:40+05:30  Cprogrammer
@@ -52,7 +52,7 @@
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: LoadBMF.c,v 2.16 2016-05-17 17:09:39+05:30 mbhangui Exp $";
+static char     sccsid[] = "$Id: LoadBMF.c,v 2.16 2016-05-17 17:09:39+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef CLUSTERED_SITE

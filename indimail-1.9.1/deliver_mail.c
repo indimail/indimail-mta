@@ -1,6 +1,6 @@
 /*
  * $Log: deliver_mail.c,v $
- * Revision 2.64  2016-05-17 17:09:39+05:30  mbhangui
+ * Revision 2.64  2016-05-17 17:09:39+05:30  Cprogrammer
  * use control directory set by configure
  *
  * Revision 2.63  2015-12-17 17:39:57+05:30  Cprogrammer
@@ -220,7 +220,7 @@
 #include <sys/wait.h>
 
 #ifndef	lint
-static char     sccsid[] = "$Id: deliver_mail.c,v 2.64 2016-05-17 17:09:39+05:30 mbhangui Exp $";
+static char     sccsid[] = "$Id: deliver_mail.c,v 2.64 2016-05-17 17:09:39+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 /*- Function Prototypes */

@@ -1,6 +1,6 @@
 /*
  * $Log: vget_real_domain.c,v $
- * Revision 2.11  2016-05-17 17:09:39+05:30  mbhangui
+ * Revision 2.11  2016-05-17 17:09:39+05:30  Cprogrammer
  * use control directory set by configure
  *
  * Revision 2.10  2008-11-06 15:38:53+05:30  Cprogrammer
@@ -64,7 +64,7 @@
 #include <stdlib.h>
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vget_real_domain.c,v 2.11 2016-05-17 17:09:39+05:30 mbhangui Exp $";
+static char     sccsid[] = "$Id: vget_real_domain.c,v 2.11 2016-05-17 17:09:39+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef QUERY_CACHE

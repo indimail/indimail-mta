@@ -1,6 +1,6 @@
 /*
  * $Log: vdeldomain.c,v $
- * Revision 2.15  2016-05-17 17:09:39+05:30  mbhangui
+ * Revision 2.15  2016-05-17 17:09:39+05:30  Cprogrammer
  * use control directory set by configure
  *
  * Revision 2.14  2016-01-12 14:27:11+05:30  Cprogrammer
@@ -103,7 +103,7 @@
 #include <sys/socket.h>
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vdeldomain.c,v 2.15 2016-05-17 17:09:39+05:30 mbhangui Exp $";
+static char     sccsid[] = "$Id: vdeldomain.c,v 2.15 2016-05-17 17:09:39+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 char            Domain[MAX_BUFF];

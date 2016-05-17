@@ -1,6 +1,6 @@
 /*
  * $Log: dbinfoUpdate.c,v $
- * Revision 2.5  2016-05-17 17:09:39+05:30  mbhangui
+ * Revision 2.5  2016-05-17 17:09:39+05:30  Cprogrammer
  * use control directory set by configure
  *
  * Revision 2.4  2008-09-08 09:34:10+05:30  Cprogrammer
@@ -19,7 +19,7 @@
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: dbinfoUpdate.c,v 2.5 2016-05-17 17:09:39+05:30 mbhangui Exp $";
+static char     sccsid[] = "$Id: dbinfoUpdate.c,v 2.5 2016-05-17 17:09:39+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef CLUSTERED_SITE

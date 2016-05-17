@@ -1,6 +1,6 @@
 /*
  * $Log: chowkidar.c,v $
- * Revision 2.12  2016-05-17 17:09:39+05:30  mbhangui
+ * Revision 2.12  2016-05-17 17:09:39+05:30  Cprogrammer
  * use control directory set by configure
  *
  * Revision 2.11  2010-04-23 11:03:44+05:30  Cprogrammer
@@ -49,7 +49,7 @@
 #define SPAMDB  3
 
 #ifndef	lint
-static char     sccsid[] = "$Id: chowkidar.c,v 2.12 2016-05-17 17:09:39+05:30 mbhangui Exp $";
+static char     sccsid[] = "$Id: chowkidar.c,v 2.12 2016-05-17 17:09:39+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 void            usage();

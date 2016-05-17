@@ -1,6 +1,6 @@
 /*
  * $Log: del_control.c,v $
- * Revision 2.7  2016-05-17 17:09:39+05:30  mbhangui
+ * Revision 2.7  2016-05-17 17:09:39+05:30  Cprogrammer
  * use control directory set by configure
  *
  * Revision 2.6  2009-09-28 20:44:47+05:30  Cprogrammer
@@ -39,7 +39,7 @@
 #include <string.h>
 
 #ifndef	lint
-static char     sccsid[] = "$Id: del_control.c,v 2.7 2016-05-17 17:09:39+05:30 mbhangui Exp $";
+static char     sccsid[] = "$Id: del_control.c,v 2.7 2016-05-17 17:09:39+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 /*

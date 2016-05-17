@@ -1,6 +1,6 @@
 /*
  * $Log: get_local_hostid.c,v $
- * Revision 2.4  2016-05-17 17:09:39+05:30  mbhangui
+ * Revision 2.4  2016-05-17 17:09:39+05:30  Cprogrammer
  * use control directory set by configure
  *
  * Revision 2.3  2008-06-03 19:42:56+05:30  Cprogrammer
@@ -23,7 +23,7 @@
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: get_local_hostid.c,v 2.4 2016-05-17 17:09:39+05:30 mbhangui Exp $";
+static char     sccsid[] = "$Id: get_local_hostid.c,v 2.4 2016-05-17 17:09:39+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 
