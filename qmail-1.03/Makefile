@@ -478,18 +478,20 @@ auto_qmail.h envdir.h pathexec.h variables.h auto_control.h
 	./compile `grep -h -v "^#" conf-spf` condredirect.c
 
 qmailconfig: \
-warn-auto.sh qmailconfig.sh conf-qmail conf-break conf-split
+warn-auto.sh qmailconfig.sh conf-qmail conf-break conf-split conf-control
 	cat warn-auto.sh qmailconfig.sh \
 	| sed s}QMAIL}"`head -1 conf-qmail`"}g \
+	| sed s}@controldir\@}"`head -1 conf-control`"}g \
 	| sed s}BREAK}"`head -1 conf-break`"}g \
 	| sed s}SPLIT}"`head -1 conf-split`"}g \
 	> qmailconfig
 	chmod 755 qmailconfig
 
 config-fast: \
-warn-auto.sh config-fast.sh conf-qmail conf-break conf-split
+warn-auto.sh config-fast.sh conf-qmail conf-break conf-split conf-control
 	cat warn-auto.sh config-fast.sh \
 	| sed s}QMAIL}"`head -1 conf-qmail`"}g \
+	| sed s}@controldir\@}"`head -1 conf-control`"}g \
 	| sed s}BREAK}"`head -1 conf-break`"}g \
 	| sed s}SPLIT}"`head -1 conf-split`"}g \
 	> config-fast
@@ -679,15 +681,17 @@ warn-auto.sh etrn.sh conf-qmail
 	> etrn
 
 atrn: \
-warn-auto.sh atrn.sh conf-qmail
+warn-auto.sh atrn.sh conf-qmail conf-control
 	cat warn-auto.sh atrn.sh \
 	| sed s}QMAIL}"`head -1 conf-qmail`"}g \
+	| sed s}@controldir\@}"`head -1 conf-control`"}g \
 	> atrn
 
 balance_outgoing: \
-warn-auto.sh balance_outgoing.sh conf-qmail
+warn-auto.sh balance_outgoing.sh conf-qmail conf-control
 	cat warn-auto.sh balance_outgoing.sh \
 	| sed s}QMAIL}"`head -1 conf-qmail`"}g \
+	| sed s}@controldir\@}"`head -1 conf-control`"}g \
 	> balance_outgoing
 
 multirotate: \
@@ -731,16 +735,19 @@ indimail.plist: indimail.plist.in conf-qmail
 	> indimail.plist
 
 svscanboot: \
-warn-auto.sh svscanboot.sh conf-qmail
+warn-auto.sh svscanboot.sh conf-qmail conf-control
 	cat warn-auto.sh svscanboot.sh \
 	| sed s}QMAIL}"`head -1 conf-qmail`"}g \
+	| sed s}@controldir\@}"`head -1 conf-control`"}g \
 	> svscanboot
 
-upstart:upstart.in conf-qmail
+upstart:upstart.in conf-qmail conf-control
 	( \
 	echo "# svscan - runlevel compatibility"; \
 	echo "# WARNING: This file was auto-generated. Do not edit!"; \
-	cat upstart.in | sed s}QMAIL}"`head -1 conf-qmail`"}g \
+	cat upstart.in \
+	| sed s}QMAIL}"`head -1 conf-qmail`"}g \
+	| sed s}@controldir\@}"`head -1 conf-control`"}g \
 	) > upstart
 
 systemd:systemd.in conf-qmail
@@ -3688,9 +3695,10 @@ serialcmd.0: serialcmd.1
 	nroff -man serialcmd.1 > serialcmd.0
 
 maildircmd: \
-warn-auto.sh maildircmd.sh conf-qmail
+warn-auto.sh maildircmd.sh conf-qmail conf-control
 	cat warn-auto.sh maildircmd.sh \
 	| sed s}QMAIL}"`head -1 conf-qmail`"}g \
+	| sed s}@controldir\@}"`head -1 conf-control`"}g \
 	> maildircmd
 
 maildircmd.0: \
@@ -3727,9 +3735,10 @@ timeoutwrite.h fd.h exit.h open.h wait.h str.h fmt.h env.h
 	./compile serialqmtp.c
 
 maildirsmtp: \
-warn-auto.sh maildirsmtp.sh conf-qmail
+warn-auto.sh maildirsmtp.sh conf-qmail conf-control
 	cat warn-auto.sh maildirsmtp.sh \
-	| sed s}HOME}"`head -1 conf-qmail`"}g \
+	| sed s}QMAIL}"`head -1 conf-qmail`"}g \
+	| sed s}@controldir\@}"`head -1 conf-control`"}g \
 	> maildirsmtp
 
 maildirsmtp.0: \
@@ -4103,9 +4112,10 @@ warn-auto.sh zspam.sh conf-qmail
 	> zspam
 
 dk-filter: \
-warn-auto.sh dk-filter.sh conf-qmail
+warn-auto.sh dk-filter.sh conf-qmail conf-control
 	cat warn-auto.sh dk-filter.sh \
 	| sed s}QMAILHOME}"`head -1 conf-qmail`"}g \
+	| sed s}@controldir\@}"`head -1 conf-control`"}g \
 	> dk-filter
 
 scan_uint.o: \
@@ -4761,9 +4771,10 @@ Makefile-cert: conf-qmail Makefile-cert.mk
 	| sed s}QMAIL}"`head -1 conf-qmail`"}g \
 	> $@
 
-update_tmprsadh: conf-qmail update_tmprsadh.sh
+update_tmprsadh: conf-qmail update_tmprsadh.sh conf-control
 	@cat update_tmprsadh.sh\
 	| sed s}QMAIL}"`head -1 conf-qmail`"}g \
+	| sed s}@controldir\@}"`head -1 conf-control`"}g \
 	> $@
 
 tmprsadh: update_tmprsadh
