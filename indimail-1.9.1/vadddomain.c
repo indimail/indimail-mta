@@ -1,5 +1,8 @@
 /*
  * $Log: vadddomain.c,v $
+ * Revision 2.34  2016-05-17 15:24:11+05:30  Cprogrammer
+ * use domain directory set by configure
+ *
  * Revision 2.33  2016-01-12 14:27:05+05:30  Cprogrammer
  * use AF_INET for get_local_ip()
  *
@@ -165,7 +168,7 @@
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vadddomain.c,v 2.33 2016-01-12 14:27:05+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: vadddomain.c,v 2.34 2016-05-17 15:24:11+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 
@@ -191,7 +194,7 @@ main(argc, argv)
 	uid_t           uid;
 	gid_t           gid;
 	extern int      create_flag;
-	char           *qmaildir, *ptr, *base_argv0, *base_path;
+	char           *domaindir, *ptr, *base_argv0, *base_path;
 	FILE           *fs;
 	char            AliasLine[MAX_BUFF];
 	char           *auto_ids[] = {
@@ -229,11 +232,11 @@ main(argc, argv)
 	}
 	if (!*Dir)
 	{
-		getEnvConfigStr(&qmaildir, "QMAILDIR", QMAILDIR);
+		getEnvConfigStr(&domaindir, "DOMAINDIR", DOMAINDIR);
 		if (use_etrn)
 		{
 			if (!(ptr = vget_assign("autoturn", 0, 0, &uid, &gid)))
-				snprintf(Dir, MAX_BUFF, "%s/autoturn", qmaildir);
+				snprintf(Dir, MAX_BUFF, "%s/autoturn", domaindir);
 			else
 			{
 				Uid = uid;
@@ -241,7 +244,7 @@ main(argc, argv)
 				scopy(Dir, ptr, MAX_BUFF);
 			}
 		} else
-			scopy(Dir, INDIMAILDIR, MAX_BUFF);
+			scopy(Dir, domaindir, MAX_BUFF);
 	}
 	/*
 	 * add domain to virtualdomains and optionally to chkrcptdomains
