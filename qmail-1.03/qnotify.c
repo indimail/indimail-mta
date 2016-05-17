@@ -1,5 +1,8 @@
 /*
  * $Log: qnotify.c,v $
+ * Revision 1.7  2016-05-17 19:44:58+05:30  Cprogrammer
+ * use auto_control, set by conf-control to set control directory
+ *
  * Revision 1.6  2013-06-09 17:03:36+05:30  Cprogrammer
  * shortened variable declartion in addrparse() function
  *
@@ -23,6 +26,7 @@
 #include <fcntl.h>
 #include <sys/types.h>
 #include "auto_qmail.h"
+#include "auto_control.h"
 #include "stralloc.h"
 #include "qmail.h"
 #include "case.h"
@@ -463,7 +467,7 @@ main(int argc, char **argv)
 		if (!(qbase = env_get("QUEUE_BASE"))) {
 			if (!controldir) {
 				if (!(controldir = env_get("CONTROLDIR")))
-					controldir = "control";
+					controldir = auto_control;
 			}
 			if (chdir(controldir) == -1)
 				strerr_die4sys(111, FATAL, "unable to switch to ", controldir, ": ");
@@ -576,7 +580,7 @@ main(int argc, char **argv)
 void
 getversion_qnotify_c()
 {
-	static char    *x = "$Id: qnotify.c,v 1.6 2013-06-09 17:03:36+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: qnotify.c,v 1.7 2016-05-17 19:44:58+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

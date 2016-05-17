@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-send.c,v $
+ * Revision 1.60  2016-05-17 19:44:58+05:30  Cprogrammer
+ * use auto_control, set by conf-control to set control directory
+ *
  * Revision 1.59  2016-03-31 17:38:54+05:30  Cprogrammer
  * added log lock code to ensure complete lines get written when running as a multi delivery process
  * flush logs only when line gets completed
@@ -166,6 +169,7 @@
 #include "scan.h"
 #include "case.h"
 #include "auto_qmail.h"
+#include "auto_control.h"
 #include "trigger.h"
 #include "newfield.h"
 #include "quote.h"
@@ -267,7 +271,7 @@ lock_logs_open(int preopen)
 		lock_status = preopen;
 	if (lock_status > 0) {
 		if (!(controldir = env_get("CONTROLDIR")))
-			controldir = "control";
+			controldir = auto_control;
 		if (!stralloc_copys(&lockfn, controldir))
 			nomem();
 		if (!stralloc_append(&lockfn, "/"))
@@ -2746,7 +2750,7 @@ regetcontrols()
 	int             newholdjobs[CHANNELS] = { 0, 0 }; /*NJL*/
 
 	if (!controldir && !(controldir = env_get("CONTROLDIR")))
-		controldir = "control";
+		controldir = auto_control;
 	if (control_readfile(&newlocals, "locals", 1) != 1)
 	{
 		log5("alert: ", queuedesc, ": unable to reread ", controldir, "/locals\n");
@@ -3097,7 +3101,7 @@ main()
 void
 getversion_qmail_send_c()
 {
-	static char    *x = "$Id: qmail-send.c,v 1.59 2016-03-31 17:38:54+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-send.c,v 1.60 2016-05-17 19:44:58+05:30 Cprogrammer Exp mbhangui $";
 
 #ifdef INDIMAIL
 	if (x)

@@ -1,5 +1,8 @@
 /*
  * $Log: ipme.c,v $
+ * Revision 1.23  2016-05-17 19:44:58+05:30  Cprogrammer
+ * use auto_control, set by conf-control to set control directory
+ *
  * Revision 1.22  2016-05-16 21:15:24+05:30  Cprogrammer
  * removed stdio.h
  *
@@ -87,6 +90,7 @@
 #include "open.h"
 #include "getln.h"
 #include "ipme.h"
+#include "auto_control.h"
 #ifdef MOREIPME
 #include "substdio.h"
 #include "variables.h"
@@ -158,7 +162,7 @@ ipme_readipfile(ipa, fn)
 	if(!controldir)
 	{
 		if(!(controldir = env_get("CONTROLDIR")))
-			controldir = "control";
+			controldir = auto_control;
 	}
 	if (!stralloc_copys(&controlfile, controldir))
 		return(-1);
@@ -497,7 +501,7 @@ ipme_init()
 void
 getversion_ipme_c()
 {
-	static char    *x = "$Id: ipme.c,v 1.22 2016-05-16 21:15:24+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: ipme.c,v 1.23 2016-05-17 19:44:58+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

@@ -1,5 +1,8 @@
 /*
  * $Log: rwhconfig.c,v $
+ * Revision 1.4  2016-05-17 19:44:58+05:30  Cprogrammer
+ * use auto_control, set by conf-control to set control directory
+ *
  * Revision 1.3  2010-07-21 09:02:42+05:30  Cprogrammer
  * use CONTROLDIR environment variable instead of a hardcoded control directory
  *
@@ -16,6 +19,7 @@
 #include "strerr.h"
 #include "rwhconfig.h"
 #include "auto_qmail.h"
+#include "auto_control.h"
 #include "variables.h"
 #include "env.h"
 #include <unistd.h>
@@ -35,7 +39,7 @@ my_config_read(config_str *c, char *fname, int line)
 	if (!controldir)
 	{
 		if (!(controldir = env_get("CONTROLDIR")))
-			controldir = "control";
+			controldir = auto_control;
 	}
 	if (!stralloc_copys(&fn, controldir))
 		STRERR_SYS(-1, rwhconfig_err, 0)
@@ -146,7 +150,7 @@ nomem:
 void
 getversion_rwhconfig_c()
 {
-	static char    *x = "$Id: rwhconfig.c,v 1.3 2010-07-21 09:02:42+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: rwhconfig.c,v 1.4 2016-05-17 19:44:58+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

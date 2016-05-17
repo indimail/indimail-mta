@@ -1,5 +1,8 @@
 /*
  * $Log: rcpthosts.c,v $
+ * Revision 1.10  2016-05-17 19:44:58+05:30  Cprogrammer
+ * use auto_control, set by conf-control to set control directory
+ *
  * Revision 1.9  2011-01-14 22:23:01+05:30  Cprogrammer
  * set flagrh to -1 for all errors
  *
@@ -30,6 +33,7 @@
 #include "constmap.h"
 #include "stralloc.h"
 #include "env.h"
+#include "auto_control.h"
 #include "variables.h"
 #include "rcpthosts.h"
 
@@ -50,7 +54,7 @@ rcpthosts_init()
 	if (!controldir)
 	{
 		if (!(controldir = env_get("CONTROLDIR")))
-			controldir = "control";
+			controldir = auto_control;
 	}
 	if (!stralloc_copys(&morercpthosts, controldir))
 		return (flagrh = -1);
@@ -133,7 +137,7 @@ rcpthosts(buf, len, nolocal)
 void
 getversion_rcpthosts_c()
 {
-	static char    *x = "$Id: rcpthosts.c,v 1.9 2011-01-14 22:23:01+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: rcpthosts.c,v 1.10 2016-05-17 19:44:58+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

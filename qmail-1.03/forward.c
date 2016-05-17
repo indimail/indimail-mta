@@ -1,5 +1,8 @@
 /*
  * $Log: forward.c,v $
+ * Revision 1.9  2016-05-17 19:44:58+05:30  Cprogrammer
+ * use auto_control, set by conf-control to set control directory
+ *
  * Revision 1.8  2013-08-25 18:38:31+05:30  Cprogrammer
  * added SRS
  *
@@ -21,6 +24,7 @@
  */
 #include <unistd.h>
 #include "auto_qmail.h"
+#include "auto_control.h"
 #include "envdir.h"
 #include "pathexec.h"
 #include "sig.h"
@@ -83,7 +87,7 @@ main(argc, argv)
 		if (!controldir)
 		{
 			if (!(controldir = env_get("CONTROLDIR")))
-				controldir = "control";
+				controldir = auto_control;
 		}
 		if (chdir(controldir) == -1)
 			strerr_die4sys(111, FATAL, "unable to switch to ", controldir, ": ");
@@ -138,7 +142,7 @@ main(argc, argv)
 void
 getversion_forward_c()
 {
-	static char    *x = "$Id: forward.c,v 1.8 2013-08-25 18:38:31+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: forward.c,v 1.9 2016-05-17 19:44:58+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

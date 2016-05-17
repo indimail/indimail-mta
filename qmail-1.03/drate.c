@@ -1,5 +1,8 @@
 /*
  * $Log: drate.c,v $
+ * Revision 1.6  2016-05-17 19:44:58+05:30  Cprogrammer
+ * use auto_control, set by conf-control to set control directory
+ *
  * Revision 1.5  2015-08-20 18:34:42+05:30  Cprogrammer
  * exit 100 for invalid option
  *
@@ -34,6 +37,7 @@
 #include "str.h"
 #include "myctime.h"
 #include "auto_uids.h"
+#include "auto_control.h"
 
 #define FATAL     "drate: fatal: "
 
@@ -166,7 +170,7 @@ main(int argc, char **argv)
 	}
 	if (!controldir) {
 		if (!(controldir = env_get("CONTROLDIR")))
-			controldir = "control";
+			controldir = auto_control;
 	}
 	if (!domain) {
 		logerrf("domain not specified\n");
@@ -358,7 +362,7 @@ new:
 void
 getversion_drate_c()
 {
-	static char    *x = "$Id: drate.c,v 1.5 2015-08-20 18:34:42+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: drate.c,v 1.6 2016-05-17 19:44:58+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 	if (x)

@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-cdb.c,v $
+ * Revision 1.7  2016-05-17 19:44:58+05:30  Cprogrammer
+ * use auto_control, set by conf-control to set control directory
+ *
  * Revision 1.6  2005-08-23 17:35:32+05:30  Cprogrammer
  * gcc 4 compliance
  *
@@ -30,6 +33,7 @@
 #include "exit.h"
 #include "open.h"
 #include "auto_qmail.h"
+#include "auto_control.h"
 #include "variables.h"
 #include "env.h"
 #include "cdbmss.h"
@@ -42,7 +46,7 @@ void
 die_read()
 {
 	if(!(controldir = env_get("CONTROLDIR")))
-		controldir = "control";
+		controldir = auto_control;
 	strerr_die4sys(111, FATAL, "unable to read ", controldir, "/morercpthosts: ");
 }
 
@@ -50,7 +54,7 @@ void
 die_write()
 {
 	if(!(controldir = env_get("CONTROLDIR")))
-		controldir = "control";
+		controldir = auto_control;
 	strerr_die4sys(111, FATAL, "unable to write to ", controldir, "/morercpthosts.tmp: ");
 }
 
@@ -74,7 +78,7 @@ main(int argc, char **argv)
 	if (chdir(auto_qmail) == -1)
 		strerr_die4sys(111, FATAL, "unable to chdir to ", auto_qmail, ": ");
 	if(!(controldir = env_get("CONTROLDIR")))
-		controldir = "control";
+		controldir = auto_control;
 	if (!stralloc_copys(&controlfile1, controldir))
 		strerr_die2sys(111, FATAL, "out of memory: ");
 	if (!stralloc_cats(&controlfile1, "/"))
@@ -163,7 +167,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_cdb_c()
 {
-	static char    *x = "$Id: qmail-cdb.c,v 1.6 2005-08-23 17:35:32+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: qmail-cdb.c,v 1.7 2016-05-17 19:44:58+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

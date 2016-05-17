@@ -1,5 +1,8 @@
 /*
  * $Log: sqlmatch.c,v $
+ * Revision 1.8  2016-05-17 19:44:58+05:30  Cprogrammer
+ * use auto_control, set by conf-control to set control directory
+ *
  * Revision 1.7  2010-04-19 10:19:44+05:30  Cprogrammer
  * fixed setting MYSQL_OPT_CONNECT_TIMEOUT
  * make query work for MySQL server without NO_BACKSLASH_ESCAPES
@@ -36,6 +39,7 @@
 #include "scan.h"
 #include "qregex.h"
 #include "sqlmatch.h"
+#include "auto_control.h"
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <sys/mman.h>
@@ -489,7 +493,7 @@ sqlmatch(char *fn, char *addr, int len, char **errStr)
 	if (!controldir)
 	{
 		if(!(controldir = env_get("CONTROLDIR")))
-			controldir = "control";
+			controldir = auto_control;
 	}
 	if (errStr)
 		*errStr = 0;
@@ -536,7 +540,7 @@ sqlmatch_close_db(void)
 void
 getversion_sqlmatch_c()
 {
-	static char    *x = "$Id: sqlmatch.c,v 1.7 2010-04-19 10:19:44+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: sqlmatch.c,v 1.8 2016-05-17 19:44:58+05:30 Cprogrammer Exp mbhangui $";
 
 #ifdef INDIMAIL
 	x = sccsidh;

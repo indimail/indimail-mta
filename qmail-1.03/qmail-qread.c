@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-qread.c,v $
+ * Revision 1.26  2016-05-17 19:44:58+05:30  Cprogrammer
+ * use auto_control, set by conf-control to set control directory
+ *
  * Revision 1.25  2016-01-29 11:55:52+05:30  Cprogrammer
  * use defaultqueue to set env variables and set QUEUE variables
  *
@@ -63,6 +66,7 @@
 #include "fmtqfn.h"
 #include "readsubdir.h"
 #include "auto_qmail.h"
+#include "auto_control.h"
 #include "open.h"
 #include "datetime.h"
 #include "date822fmt.h"
@@ -573,7 +577,7 @@ main(int argc, char **argv)
 		die_home();
 	if (!controldir) {
 		if (!(controldir = env_get("CONTROLDIR")))
-			controldir = "control";
+			controldir = auto_control;
 	}
 	if (chdir(controldir) == -1)
 		die_controldir(controldir);
@@ -647,7 +651,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_qread_c()
 {
-	static char    *x = "$Id: qmail-qread.c,v 1.25 2016-01-29 11:55:52+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-qread.c,v 1.26 2016-05-17 19:44:58+05:30 Cprogrammer Exp mbhangui $";
 
 #ifdef INDIMAIL
 	if (x)

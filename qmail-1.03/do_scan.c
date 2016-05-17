@@ -1,5 +1,8 @@
 /*
  * $Log: do_scan.c,v $
+ * Revision 1.13  2016-05-17 19:44:58+05:30  Cprogrammer
+ * use auto_control, set by conf-control to set control directory
+ *
  * Revision 1.12  2009-05-01 10:38:48+05:30  Cprogrammer
  * change for errstr argument to address_match()
  *
@@ -43,6 +46,7 @@
 #include <stdlib.h>
 #include <dirent.h>
 #include "auto_qmail.h"
+#include "auto_control.h"
 #include "wait.h"
 #include "variables.h"
 #include "scan.h"
@@ -102,7 +106,7 @@ scan_badattachments(char *dir_name)
 	if (!controldir)
 	{
 		if (!(controldir = env_get("CONTROLDIR")))
-			controldir = "control";
+			controldir = auto_control;
 	}
 	if (*controldir != '/')
 	{
@@ -239,7 +243,7 @@ do_scan()
 void
 getversion_do_scan_c()
 {
-	static char    *x = "$Id: do_scan.c,v 1.12 2009-05-01 10:38:48+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: do_scan.c,v 1.13 2016-05-17 19:44:58+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

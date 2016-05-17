@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-sql.c,v $
+ * Revision 1.2  2016-05-17 19:44:58+05:30  Cprogrammer
+ * use auto_control, set by conf-control to set control directory
+ *
  * Revision 1.1  2010-04-22 15:21:36+05:30  Cprogrammer
  * Initial revision
  *
@@ -12,6 +15,7 @@
 #ifdef INDIMAIL
 #include "auto_uids.h"
 #include "auto_qmail.h"
+#include "auto_control.h"
 #include <fcntl.h>
 #include <errno.h>
 #include <sys/stat.h>
@@ -234,7 +238,7 @@ main(int argc, char **argv)
 	argv += optind;
 	if (!controldir) {
 		if (!(controldir = env_get("CONTROLDIR")))
-			controldir = "control";
+			controldir = auto_control;
 	}
 	if (!stralloc_copys(&filename, controldir))
 		die_nomem();
@@ -322,7 +326,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_sql_c()
 {
-	static char    *x = "$Id: qmail-sql.c,v 1.1 2010-04-22 15:21:36+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: qmail-sql.c,v 1.2 2016-05-17 19:44:58+05:30 Cprogrammer Exp mbhangui $";
 
 #ifdef INDIMAIL
 	x = sccsidh;

@@ -1,5 +1,8 @@
 /*
  * $Log: fastforward.c,v $
+ * Revision 1.6  2016-05-17 19:44:58+05:30  Cprogrammer
+ * use auto_control, set by conf-control to set control directory
+ *
  * Revision 1.5  2010-06-08 21:59:13+05:30  Cprogrammer
  * use envdir_set() on queuedefault to set default queue parameters
  *
@@ -20,6 +23,7 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include "auto_qmail.h"
+#include "auto_control.h"
 #include "envdir.h"
 #include "pathexec.h"
 #include "stralloc.h"
@@ -497,7 +501,7 @@ main(argc, argv)
 		if (!controldir)
 		{
 			if (!(controldir = env_get("CONTROLDIR")))
-				controldir = "control";
+				controldir = auto_control;
 		}
 		if (chdir(controldir) == -1)
 			strerr_die4sys(111, FATAL, "unable to switch to ", controldir, ": ");
@@ -535,7 +539,7 @@ main(argc, argv)
 void
 getversion_fastforward_c()
 {
-	static char    *x = "$Id: fastforward.c,v 1.5 2010-06-08 21:59:13+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: fastforward.c,v 1.6 2016-05-17 19:44:58+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

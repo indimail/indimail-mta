@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-greyd.c,v $
+ * Revision 1.17  2016-05-17 19:44:58+05:30  Cprogrammer
+ * use auto_control, set by conf-control to set control directory
+ *
  * Revision 1.16  2016-04-15 15:45:14+05:30  Cprogrammer
  * set noipv6 if LIBC_HAS_IP6 is not defined
  *
@@ -67,6 +70,7 @@
 #include <sys/select.h>
 #include "sgetopt.h"
 #include "auto_qmail.h"
+#include "auto_control.h"
 #include "ip.h"
 #include "sig.h"
 #include "getln.h"
@@ -1188,7 +1192,7 @@ main(int argc, char **argv)
 		strerr_die4sys(111, FATAL, "unable to chdir: ", auto_qmail, ": ");
 #ifndef NETQMAIL
 	if(!(controldir = env_get("CONTROLDIR")))
-		controldir = "control";
+		controldir = auto_control;
 #endif
 	if (whitefn) {
 		whitelist_init(whitefn);
@@ -1489,7 +1493,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_greyd_c()
 {
-	static char    *x = "$Id: qmail-greyd.c,v 1.16 2016-04-15 15:45:14+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-greyd.c,v 1.17 2016-05-17 19:44:58+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

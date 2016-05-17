@@ -1,5 +1,8 @@
 /*
  * $Log: replier.c,v $
+ * Revision 1.7  2016-05-17 19:44:58+05:30  Cprogrammer
+ * use auto_control, set by conf-control to set control directory
+ *
  * Revision 1.6  2010-06-08 22:00:41+05:30  Cprogrammer
  * use envdir_set() on queuedefault to set default queue parameters
  *
@@ -26,6 +29,7 @@
 #include "alloc.h"
 #include "envdir.h"
 #include "auto_qmail.h"
+#include "auto_control.h"
 #include "stralloc.h"
 #include "byte.h"
 #include "strerr.h"
@@ -149,7 +153,7 @@ main(int argc, char **argv)
 		if (!controldir)
 		{
 			if (!(controldir = env_get("CONTROLDIR")))
-				controldir = "control";
+				controldir = auto_control;
 		}
 		if (chdir(controldir) == -1)
 			strerr_die4sys(111, FATAL, "unable to switch to ", controldir, ": ");
@@ -312,7 +316,7 @@ main(int argc, char **argv)
 void
 getversion_replier_c()
 {
-	static char    *x = "$Id: replier.c,v 1.6 2010-06-08 22:00:41+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: replier.c,v 1.7 2016-05-17 19:44:58+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

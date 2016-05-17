@@ -1,5 +1,8 @@
 /*
  * $Log: qregex.c,v $
+ * Revision 1.24  2016-05-17 19:44:58+05:30  Cprogrammer
+ * use auto_control, set by conf-control to set control directory
+ *
  * Revision 1.23  2009-09-07 16:02:31+05:30  Cprogrammer
  * removed compilation warning
  *
@@ -73,12 +76,12 @@
  * Initial revision
  *
  * qregex (v2)
- * $Id: qregex.c,v 1.23 2009-09-07 16:02:31+05:30 Cprogrammer Stab mbhangui $
+ * $Id: qregex.c,v 1.24 2016-05-17 19:44:58+05:30 Cprogrammer Exp mbhangui $
  *
  * Author  : Evan Borgstrom (evan at unixpimps dot org)
  * Created : 2001/12/14 23:08:16
- * Modified: $Date: 2009-09-07 16:02:31+05:30 $
- * Revision: $Revision: 1.23 $
+ * Modified: $Date: 2016-05-17 19:44:58+05:30 $
+ * Revision: $Revision: 1.24 $
  *
  * Do POSIX regex matching on addresses for anti-relay / spam control.
  * It logs to the maillog
@@ -109,6 +112,7 @@
 #include "control.h"
 #include "matchregex.h"
 #include "qregex.h"
+#include "auto_control.h"
 #include "variables.h"
 #include <sys/types.h>
 #include <unistd.h>
@@ -132,7 +136,7 @@ cdbmatch(char *fn, char *addr, int len, struct constmap *maprh, char **errStr)
 	if (!controldir)
 	{
 		if(!(controldir = env_get("CONTROLDIR")))
-			controldir = "control";
+			controldir = auto_control;
 	}
 	if (errStr)
 		*errStr = 0;
@@ -339,7 +343,7 @@ regex_match(stralloc *addr, stralloc *map, char **errStr)
 void
 getversion_qregex_c()
 {
-	static char    *x = "$Id: qregex.c,v 1.23 2009-09-07 16:02:31+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: qregex.c,v 1.24 2016-05-17 19:44:58+05:30 Cprogrammer Exp mbhangui $";
 
 #ifdef INDIMAIL
 	x = sccsidh;

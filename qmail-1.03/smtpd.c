@@ -1,5 +1,8 @@
 /*
  * $Log: smtpd.c,v $
+ * Revision 1.189  2016-05-17 19:44:58+05:30  Cprogrammer
+ * use auto_control, set by conf-control to set control directory
+ *
  * Revision 1.188  2016-05-16 22:33:11+05:30  Cprogrammer
  * new function smtp_init() to load control files. For tcpserver_plugin()
  *
@@ -629,6 +632,7 @@
 #include "substdio.h"
 #include "alloc.h"
 #include "auto_qmail.h"
+#include "auto_control.h"
 #include "control.h"
 #include "received.h"
 #include "constmap.h"
@@ -727,7 +731,7 @@ int             secure_auth = 0;
 int             ssl_rfd = -1, ssl_wfd = -1;	/*- SSL_get_Xfd() are broken */
 char           *servercert, *clientca, *clientcrl;
 #endif
-char           *revision = "$Revision: 1.188 $";
+char           *revision = "$Revision: 1.189 $";
 char           *protocol = "SMTP";
 stralloc        proto = { 0 };
 static stralloc Revision = { 0 };
@@ -3517,7 +3521,7 @@ smtp_ehlo(char *arg)
 		if (!controldir)
 		{
 			if (!(controldir = env_get("CONTROLDIR")))
-				controldir = "control";
+				controldir = auto_control;
 		}
 		if (!stralloc_copys(&filename, controldir))
 			die_nomem();
@@ -6115,7 +6119,7 @@ tmp_rsa_cb(SSL *ssl, int export, int keylen)
 		if (!controldir)
 		{
 			if (!(controldir = env_get("CONTROLDIR")))
-				controldir = "control";
+				controldir = auto_control;
 		}
 		if (!stralloc_copys(&filename, controldir))
 			die_nomem();
@@ -6151,7 +6155,7 @@ tmp_dh_cb(SSL *ssl, int export, int keylen)
 		if (!controldir)
 		{
 			if (!(controldir = env_get("CONTROLDIR")))
-				controldir = "control";
+				controldir = auto_control;
 		}
 		if (!stralloc_copys(&filename, controldir))
 			die_nomem();
@@ -6176,7 +6180,7 @@ tmp_dh_cb(SSL *ssl, int export, int keylen)
 		if (!controldir)
 		{
 			if (!(controldir = env_get("CONTROLDIR")))
-				controldir = "control";
+				controldir = auto_control;
 		}
 		if (!stralloc_copys(&filename, controldir))
 			die_nomem();
@@ -6272,7 +6276,7 @@ tls_verify()
 			if (!controldir)
 			{
 				if (!(controldir = env_get("CONTROLDIR")))
-					controldir = "control";
+					controldir = auto_control;
 			}
 			if (!stralloc_copys(&filename, controldir))
 				die_nomem();
@@ -6383,7 +6387,7 @@ tls_init()
 	if (!controldir)
 	{
 		if (!(controldir = env_get("CONTROLDIR")))
-			controldir = "control";
+			controldir = auto_control;
 	}
 	if (!stralloc_copys(&filename, controldir))
 		die_nomem();
@@ -6838,7 +6842,7 @@ addrrelay() /*- Rejection of relay probes. */
 void
 getversion_smtpd_c()
 {
-	static char    *x = "$Id: smtpd.c,v 1.188 2016-05-16 22:33:11+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: smtpd.c,v 1.189 2016-05-17 19:44:58+05:30 Cprogrammer Exp mbhangui $";
 
 #ifdef INDIMAIL
 	if (x)

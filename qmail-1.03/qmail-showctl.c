@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-showctl.c,v $
+ * Revision 1.57  2016-05-17 19:44:58+05:30  Cprogrammer
+ * use auto_control, set by conf-control to set control directory
+ *
  * Revision 1.56  2014-01-22 20:38:48+05:30  Cprogrammer
  * added hassrs.h
  *
@@ -108,6 +111,7 @@
 #include "auto_patrn.h"
 #include "auto_spawn.h"
 #include "auto_split.h"
+#include "auto_control.h"
 #include "env.h"
 #include "variables.h"
 #include "hasindimail.h"
@@ -350,7 +354,7 @@ main(int argc, char **argv)
 		_exit(111);
 	}
 	if(!(controldir = env_get("CONTROLDIR")))
-		controldir = "control";
+		controldir = auto_control;
 	if (access(controldir, F_OK))
 	{
 		substdio_puts(subfdout, "Oops! Unable to chdir to control directory [");
@@ -781,7 +785,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_showctl_c()
 {
-	static char    *x = "$Id: qmail-showctl.c,v 1.56 2014-01-22 20:38:48+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: qmail-showctl.c,v 1.57 2016-05-17 19:44:58+05:30 Cprogrammer Exp mbhangui $";
 
 #ifdef INDIMAIL
 	if (x)
