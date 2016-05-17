@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-dkim.c,v $
+ * Revision 1.46  2016-05-17 19:44:58+05:30  Cprogrammer
+ * use auto_control, set by conf-control to set control directory
+ *
  * Revision 1.45  2016-03-01 18:48:02+05:30  Cprogrammer
  * added env variable UNSIGNED_SUBJECT to verify dkim without subject field
  *
@@ -161,6 +164,7 @@
 #include "now.h"
 #include "wait.h"
 #include "auto_qmail.h"
+#include "auto_control.h"
 #include "env.h"
 #include "control.h"
 #include "dkim.h"
@@ -377,7 +381,7 @@ write_signature(char *domain, char *keyfn)
 	if (keyfn[0] != '/') {
 		if (!controldir) {
 			if (!(controldir = env_get("CONTROLDIR")))
-				controldir = "control";
+				controldir = auto_control;
 		}
 		if (!stralloc_copys(&keyfnfrom, controldir))
 			die(51, 1);
@@ -1401,7 +1405,7 @@ main(argc, argv)
 void
 getversion_qmail_dkim_c()
 {
-	static char    *x = "$Id: qmail-dkim.c,v 1.45 2016-03-01 18:48:02+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-dkim.c,v 1.46 2016-05-17 19:44:58+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

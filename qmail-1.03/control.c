@@ -1,5 +1,8 @@
 /*
  * $Log: control.c,v $
+ * Revision 1.20  2016-05-17 19:44:58+05:30  Cprogrammer
+ * use auto_control, set by conf-control to set control directory
+ *
  * Revision 1.19  2014-04-15 13:06:44+05:30  Cprogrammer
  * control_readrandom - copy to sa without \0
  *
@@ -61,6 +64,7 @@
 #include "alloc.h"
 #include "scan.h"
 #include "env.h"
+#include "auto_control.h"
 #include "variables.h"
 #include <unistd.h>
 
@@ -130,7 +134,7 @@ control_readline(sa, fn)
 		if (!controldir)
 		{
 			if (!(controldir = env_get("CONTROLDIR")))
-				controldir = "control";
+				controldir = auto_control;
 		}
 		if (!stralloc_copys(&controlfile, controldir))
 			return(-1);
@@ -228,7 +232,7 @@ control_readnativefile(sa, fn, mode)
 		if (!controldir)
 		{
 			if (!(controldir = env_get("CONTROLDIR")))
-				controldir = "control";
+				controldir = auto_control;
 		}
 		if (!stralloc_copys(&controlfile, controldir))
 			return(-1);
@@ -303,7 +307,7 @@ control_readfile(sa, fn, flagme)
 		if (!controldir)
 		{
 			if (!(controldir = env_get("CONTROLDIR")))
-				controldir = "control";
+				controldir = auto_control;
 		}
 		if (!stralloc_copys(&controlfile, controldir))
 			return(-1);
@@ -378,7 +382,7 @@ control_readrandom(sa, fn)
 		if (!controldir)
 		{
 			if (!(controldir = env_get("CONTROLDIR")))
-				controldir = "control";
+				controldir = auto_control;
 		}
 		if (!stralloc_copys(&controlfile, controldir))
 			return(-1);
@@ -447,7 +451,7 @@ control_readcmd(stralloc *sa, char *fn)
 		if (!controldir)
 		{
 			if (!(controldir = env_get("CONTROLDIR")))
-				controldir = "control";
+				controldir = auto_control;
 		}
 		if (!stralloc_copys(&controlfile, controldir))
 			return(-1);
@@ -517,7 +521,7 @@ control_readcmd(stralloc *sa, char *fn)
 void
 getversion_control_c()
 {
-	static char    *x = "$Id: control.c,v 1.19 2014-04-15 13:06:44+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: control.c,v 1.20 2016-05-17 19:44:58+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

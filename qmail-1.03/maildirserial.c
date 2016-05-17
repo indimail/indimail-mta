@@ -1,5 +1,8 @@
 /*
  * $Log: maildirserial.c,v $
+ * Revision 1.9  2016-05-17 19:44:58+05:30  Cprogrammer
+ * use auto_control, set by conf-control to set control directory
+ *
  * Revision 1.8  2010-07-21 08:57:49+05:30  Cprogrammer
  * use CONTROLDIR environment variable instead of a hardcoded control directory
  *
@@ -56,6 +59,7 @@
 #include "quote.h"
 #include "byte.h"
 #include "auto_qmail.h"
+#include "auto_control.h"
 #include "variables.h"
 
 #define FATAL "maildirserial: fatal: "
@@ -119,7 +123,7 @@ my_config_readline(config_str *c, char *fname)
 	if (!controldir)
 	{
 		if (!(controldir = env_get("CONTROLDIR")))
-			controldir = "control";
+			controldir = auto_control;
 	}
 	if (!stralloc_copys(&fn, controldir))
 		die_nomem();
@@ -149,7 +153,7 @@ readcontrols()
 		if (!controldir)
 		{
 			if (!(controldir = env_get("CONTROLDIR")))
-				controldir = "control";
+				controldir = auto_control;
 		}
 		if (!stralloc_copys(&fn, controldir))
 			die_nomem();
@@ -674,7 +678,7 @@ main(argc, argv)
 void
 getversion_maildirserial_c()
 {
-	static char    *x = "$Id: maildirserial.c,v 1.8 2010-07-21 08:57:49+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: maildirserial.c,v 1.9 2016-05-17 19:44:58+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

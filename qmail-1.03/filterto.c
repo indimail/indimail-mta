@@ -1,5 +1,8 @@
 /*
  * $Log: filterto.c,v $
+ * Revision 1.7  2016-05-17 19:44:58+05:30  Cprogrammer
+ * use auto_control, set by conf-control to set control directory
+ *
  * Revision 1.6  2010-06-08 21:59:20+05:30  Cprogrammer
  * use envdir_set() on queuedefault to set default queue parameters
  *
@@ -22,6 +25,7 @@
 #include <unistd.h>
 #include <signal.h>
 #include "auto_qmail.h"
+#include "auto_control.h"
 #include "envdir.h"
 #include "sig.h"
 #include "exit.h"
@@ -100,7 +104,7 @@ main(int argc, char **argv, char **envp)
 		if (!controldir)
 		{
 			if (!(controldir = env_get("CONTROLDIR")))
-				controldir = "control";
+				controldir = auto_control;
 		}
 		if (chdir(controldir) == -1)
 			strerr_die4sys(111, FATAL, "unable to switch to ", controldir, ": ");
@@ -147,7 +151,7 @@ main(int argc, char **argv, char **envp)
 void
 getversion_filterto_c()
 {
-	static char    *x = "$Id: filterto.c,v 1.6 2010-06-08 21:59:20+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: filterto.c,v 1.7 2016-05-17 19:44:58+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-qmqpc.c,v $
+ * Revision 1.17  2016-05-17 19:44:58+05:30  Cprogrammer
+ * use auto_control, set by conf-control to set control directory
+ *
  * Revision 1.16  2015-08-24 19:08:14+05:30  Cprogrammer
  * replaced ip_scan() with ip4_scan()
  *
@@ -59,6 +62,7 @@
 #include "timeoutread.h"
 #include "timeoutwrite.h"
 #include "auto_qmail.h"
+#include "auto_control.h"
 #include "control.h"
 #include "fmt.h"
 #include "now.h"
@@ -348,7 +352,7 @@ main()
 	if (!controldir)
 	{
 		if (!(controldir = env_get("CONTROLDIR")))
-			controldir = "control";
+			controldir = auto_control;
 	}
 	if (!stralloc_copys(&qmqpfn, controldir))
 		nomem();
@@ -401,7 +405,7 @@ again:
 void
 getversion_qmail_qmqpc_c()
 {
-	static char    *x = "$Id: qmail-qmqpc.c,v 1.16 2015-08-24 19:08:14+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-qmqpc.c,v 1.17 2016-05-17 19:44:58+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

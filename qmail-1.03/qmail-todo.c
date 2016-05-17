@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-todo.c,v $
+ * Revision 1.34  2016-05-17 19:44:58+05:30  Cprogrammer
+ * use auto_control, set by conf-control to set control directory
+ *
  * Revision 1.33  2016-01-29 18:31:23+05:30  Cprogrammer
  * include queue name in logs
  *
@@ -68,6 +71,7 @@
 #include <sys/stat.h>
 #include "alloc.h"
 #include "auto_qmail.h"
+#include "auto_control.h"
 #include "byte.h"
 #include "sig.h"
 #include "constmap.h"
@@ -971,7 +975,7 @@ regetcontrols(void)
 	int             r;
 
 	if(!(controldir = env_get("CONTROLDIR")))
-		controldir = "control";
+		controldir = auto_control;
 	if (control_readfile(&newlocals, "locals", 1) != 1)
 	{
 		log5("alert: ", queuedesc, ": qmail-todo: unable to reread ", controldir, "/locals\n");
@@ -1155,7 +1159,7 @@ main()
 void
 getversion_qmail_todo_c()
 {
-	static char    *x = "$Id: qmail-todo.c,v 1.33 2016-01-29 18:31:23+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-todo.c,v 1.34 2016-05-17 19:44:58+05:30 Cprogrammer Exp mbhangui $";
 
 #ifdef INDIMAIL
 	if (x)

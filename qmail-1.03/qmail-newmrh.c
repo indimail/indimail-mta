@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-newmrh.c,v $
+ * Revision 1.10  2016-05-17 19:44:58+05:30  Cprogrammer
+ * use auto_control, set by conf-control to set control directory
+ *
  * Revision 1.9  2005-08-23 17:34:58+05:30  Cprogrammer
  * gcc 4 compliance
  *
@@ -33,6 +36,7 @@
 #include "exit.h"
 #include "open.h"
 #include "auto_qmail.h"
+#include "auto_control.h"
 #include "variables.h"
 #include "env.h"
 #include "cdbmss.h"
@@ -45,7 +49,7 @@ void
 die_read()
 {
 	if(!(controldir = env_get("CONTROLDIR")))
-		controldir = "control";
+		controldir = auto_control;
 	strerr_die4sys(111, FATAL, "unable to read ", controldir, "/morercpthosts: ");
 }
 
@@ -53,7 +57,7 @@ void
 die_write()
 {
 	if(!(controldir = env_get("CONTROLDIR")))
-		controldir = "control";
+		controldir = auto_control;
 	strerr_die4sys(111, FATAL, "unable to write to ", controldir, "/morercpthosts.tmp: ");
 }
 
@@ -77,7 +81,7 @@ main()
 		strerr_die4sys(111, FATAL, "unable to chdir to ", auto_qmail, ": ");
 
 	if(!(controldir = env_get("CONTROLDIR")))
-		controldir = "control";
+		controldir = auto_control;
 	if (!stralloc_copys(&controlfile1, controldir))
 		strerr_die2sys(111, FATAL, "out of memory: ");
 	if (!stralloc_cats(&controlfile1, "/morercpthosts"))
@@ -149,7 +153,7 @@ main()
 void
 getversion_qmail_newmrh_c()
 {
-	static char    *x = "$Id: qmail-newmrh.c,v 1.9 2005-08-23 17:34:58+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: qmail-newmrh.c,v 1.10 2016-05-17 19:44:58+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

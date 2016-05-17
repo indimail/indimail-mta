@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-remote.c,v $
+ * Revision 1.93  2016-05-17 19:44:58+05:30  Cprogrammer
+ * use auto_control, set by conf-control to set control directory
+ *
  * Revision 1.92  2015-08-24 19:08:34+05:30  Cprogrammer
  * replaced ip_scan() with ip4_scan(), replace ip_fmt() with ip4_fmt()
  *
@@ -311,6 +314,7 @@
 #include "case.h"
 #include "error.h"
 #include "auto_qmail.h"
+#include "auto_control.h"
 #include "control.h"
 #include "dns.h"
 #define _ALLOC_
@@ -637,7 +641,7 @@ temp_noip()
 	if (!controldir)
 	{
 		if (!(controldir = env_get("CONTROLDIR")))
-			controldir = "control";
+			controldir = auto_control;
 	}
 	out("Zinvalid ipaddr in ");
 	out(controldir);
@@ -788,7 +792,7 @@ perm_ambigmx()
 	if (!controldir)
 	{
 		if (!(controldir = env_get("CONTROLDIR")))
-			controldir = "control";
+			controldir = auto_control;
 	}
 	out(r);
 	out(controldir);
@@ -1319,7 +1323,7 @@ tls_init()
 	if (!controldir)
 	{
 		if (!(controldir = env_get("CONTROLDIR")))
-			controldir = "control";
+			controldir = auto_control;
 	}
 	if (!stralloc_copys(&servercert, controldir))
 		temp_nomem();
@@ -2550,7 +2554,7 @@ getcontrols()
 		if (!controldir)
 		{
 			if (!(controldir = env_get("CONTROLDIR")))
-				controldir = "control";
+				controldir = auto_control;
 		}
 		if (!stralloc_copys(&controlfile, controldir))
 			temp_nomem();
@@ -3161,7 +3165,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_remote_c()
 {
-	static char    *x = "$Id: qmail-remote.c,v 1.92 2015-08-24 19:08:34+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-remote.c,v 1.93 2016-05-17 19:44:58+05:30 Cprogrammer Exp mbhangui $";
 	x=sccsidauthcramh;
 	x=sccsidauthdigestmd5h;
 	x++;

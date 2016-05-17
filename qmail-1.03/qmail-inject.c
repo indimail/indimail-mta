@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-inject.c,v $
+ * Revision 1.28  2016-05-17 19:44:58+05:30  Cprogrammer
+ * use auto_control, set by conf-control to set control directory
+ *
  * Revision 1.27  2014-01-29 14:02:54+05:30  Cprogrammer
  * made domainqueue file configurable through env variable DOMAINQUEUE
  *
@@ -105,6 +108,7 @@
 #include "quote.h"
 #include "headerbody.h"
 #include "auto_qmail.h"
+#include "auto_control.h"
 #include "newfield.h"
 #include "constmap.h"
 #include "envrules.h"
@@ -1093,7 +1097,7 @@ getcontrols()
 		if (!controldir)
 		{
 			if (!(controldir = env_get("CONTROLDIR")))
-				controldir = "control";
+				controldir = auto_control;
 		}
 		if (chdir(controldir) == -1)
 			die_controldir(controldir);
@@ -1320,7 +1324,7 @@ main(argc, argv)
 void
 getversion_qmail_inject_c()
 {
-	static char    *x = "$Id: qmail-inject.c,v 1.27 2014-01-29 14:02:54+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: qmail-inject.c,v 1.28 2016-05-17 19:44:58+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

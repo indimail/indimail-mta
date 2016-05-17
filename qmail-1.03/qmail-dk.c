@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-dk.c,v $
+ * Revision 1.46  2016-05-17 19:44:58+05:30  Cprogrammer
+ * use auto_control, set by conf-control to set control directory
+ *
  * Revision 1.45  2015-12-24 14:36:56+05:30  Cprogrammer
  * fixed qmail-dk quitting during verfication without writing DomainKey-Status header
  *
@@ -158,6 +161,7 @@
 #include "now.h"
 #include "wait.h"
 #include "auto_qmail.h"
+#include "auto_control.h"
 #include "env.h"
 #include "scan.h"
 #include "mess822.h"
@@ -370,7 +374,7 @@ write_signature(DK *dk, char *dk_selector, char *keyfn,
 	if (keyfn[0] != '/') {
 		if (!controldir) {
 			if (!(controldir = env_get("CONTROLDIR")))
-				controldir = "control";
+				controldir = auto_control;
 		}
 		if (!stralloc_copys(&keyfnfrom, controldir))
 			die(51);
@@ -871,7 +875,7 @@ main(argc, argv)
 void
 getversion_qmail_dk_c()
 {
-	static char    *x = "$Id: qmail-dk.c,v 1.45 2015-12-24 14:36:56+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-dk.c,v 1.46 2016-05-17 19:44:58+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

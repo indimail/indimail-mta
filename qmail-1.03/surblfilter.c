@@ -1,5 +1,8 @@
 /*
  * $Log: surblfilter.c,v $
+ * Revision 1.9  2016-05-17 19:44:58+05:30  Cprogrammer
+ * use auto_control, set by conf-control to set control directory
+ *
  * Revision 1.8  2015-08-24 19:09:25+05:30  Cprogrammer
  * replace ip_fmt() with ip4_fmt()
  *
@@ -47,6 +50,7 @@
 #include "case.h"
 #include "constmap.h"
 #include "auto_qmail.h"
+#include "auto_control.h"
 #include "stralloc.h"
 #include "env.h"
 #include "control.h"
@@ -366,7 +370,7 @@ cachefunc(char *uri, size_t urilen, char **text, int flag)
 	if (!controldir)
 	{
 		if (!(controldir = env_get("CONTROLDIR")))
-			controldir = "control";
+			controldir = auto_control;
 	}
 	if (!stralloc_copys(&cachefile, controldir))
 		die_nomem();
@@ -893,7 +897,7 @@ main(int argc, char **argv)
 void
 getversion_surblfilter_c()
 {
-	static char    *x = "$Id: surblfilter.c,v 1.8 2015-08-24 19:09:25+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: surblfilter.c,v 1.9 2016-05-17 19:44:58+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
