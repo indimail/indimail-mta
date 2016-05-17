@@ -1,5 +1,8 @@
 /*
  * $Log: RemoteBulkMail.c,v $
+ * Revision 2.11  2016-05-17 14:56:36+05:30  Cprogrammer
+ * use control directory defined by configure
+ *
  * Revision 2.10  2010-04-15 14:13:10+05:30  Cprogrammer
  * added flags argument to mysql_real_connect()
  *
@@ -47,7 +50,7 @@
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: RemoteBulkMail.c,v 2.10 2010-04-15 14:13:10+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: RemoteBulkMail.c,v 2.11 2016-05-17 14:56:36+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #include <stdlib.h>
@@ -94,7 +97,7 @@ RemoteBulkMail(email, domain, homedir)
 		mysql_free_result(res);
 		return (0);
 	}
-	snprintf(bulkdir, MAX_BUFF, "%s/control/%s/%s", INDIMAILDIR, domain, ((ptr = getenv("BULK_MAILDIR"))) ? ptr : BULK_MAILDIR);
+	snprintf(bulkdir, MAX_BUFF, "%s/%s/%s", CONTROLDIR, domain, ((ptr = getenv("BULK_MAILDIR"))) ? ptr : BULK_MAILDIR);
 	for (status = 0; (row = mysql_fetch_row(res));)
 	{
 		snprintf(TmpBuf, MAX_BUFF, "%s/%s", bulkdir, row[0]);

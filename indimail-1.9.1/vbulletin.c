@@ -1,5 +1,8 @@
 /*
  * $Log: vbulletin.c,v $
+ * Revision 2.17  2016-05-17 14:57:02+05:30  Cprogrammer
+ * use control directory defined by configure
+ *
  * Revision 2.16  2014-04-17 12:19:10+05:30  Cprogrammer
  * use setuser_privilege() to set uid, gid and supplementary group ids.
  *
@@ -74,7 +77,7 @@
 #include <signal.h>
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vbulletin.c,v 2.16 2014-04-17 12:19:10+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: vbulletin.c,v 2.17 2016-05-17 14:57:02+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #define COPY_IT          0
@@ -428,7 +431,7 @@ spost(char *EmailOrDomain, char *Filename, int bulk)
 		fprintf(stderr, "%s: No such domain\n", Domain);
 		return (1);
 	}
-	snprintf(bulkdir, MAX_BUFF, "%s/control/%s/%s", INDIMAILDIR, domain, (ptr1 = getenv("BULK_MAILDIR")) ? ptr1 : BULK_MAILDIR);
+	snprintf(bulkdir, MAX_BUFF, "%s/%s/%s", CONTROLDIR, domain, (ptr1 = getenv("BULK_MAILDIR")) ? ptr1 : BULK_MAILDIR);
 	if (access(bulkdir, F_OK))
 	{
 		fprintf(stderr, "spost: access: %s: %s\n", bulkdir, strerror(errno));

@@ -1,5 +1,8 @@
 /*
  * $Log: SendWelcomeMail.c,v $
+ * Revision 2.6  2016-05-17 14:56:55+05:30  Cprogrammer
+ * use control directory defined by configure
+ *
  * Revision 2.5  2003-12-19 20:46:40+05:30  Cprogrammer
  * made activation and welcome mail configurable via ACTIVATEMAIL, WELCOMEMAIL
  * environment variables
@@ -23,7 +26,7 @@
 #include <stdlib.h>
 
 #ifndef	lint
-static char     sccsid[] = "$Id: SendWelcomeMail.c,v 2.5 2003-12-19 20:46:40+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: SendWelcomeMail.c,v 2.6 2016-05-17 14:56:55+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 void
@@ -33,8 +36,8 @@ SendWelcomeMail(char *homedir, char *username, char *domain, int inactFlag, char
 	char           *ptr;
 	struct stat     statbuf;
 
-	snprintf(bulkdir, MAX_BUFF, "%s/control/%s/%s", 
-		INDIMAILDIR, domain, (ptr = getenv("BULK_MAILDIR")) ? ptr : BULK_MAILDIR);
+	snprintf(bulkdir, MAX_BUFF, "%s/%s/%s", 
+		CONTROLDIR, domain, (ptr = getenv("BULK_MAILDIR")) ? ptr : BULK_MAILDIR);
 	if (!access(bulkdir, F_OK))
 	{
 		snprintf(TmpBuf, MAX_BUFF, "%s/%s", 

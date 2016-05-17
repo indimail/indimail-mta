@@ -1,5 +1,8 @@
 /*
  * $Log: spam.c,v $
+ * Revision 2.18  2016-05-17 14:56:59+05:30  Cprogrammer
+ * use control directory defined by configure
+ *
  * Revision 2.17  2010-04-23 11:02:44+05:30  Cprogrammer
  * use spamcount for project id in ftok
  *
@@ -68,7 +71,7 @@
 #define SPAMDB  3
 
 #ifndef	lint
-static char     sccsid[] = "$Id: spam.c,v 2.17 2010-04-23 11:02:44+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: spam.c,v 2.18 2016-05-17 14:56:59+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 static char    *parseLine1(char *);
@@ -259,8 +262,11 @@ spamReport(int spamNumber, char *outfile)
 		maxaddr = atoi(ptr);
 	}
 	getEnvConfigStr(&qmaildir, "QMAILDIR", QMAILDIR);
-	getEnvConfigStr(&controldir, "CONTROLDIR", "control");
-	snprintf(tmpbuf, MAX_BUFF, "%s/%s", qmaildir, controldir);
+	getEnvConfigStr(&controldir, "CONTROLDIR", CONTROLDIR);
+	if (*tmpbuf == '/')
+		snprintf(tmpbuf, MAX_BUFF, "%s", controldir);
+	else
+		snprintf(tmpbuf, MAX_BUFF, "%s/%s", qmaildir, controldir);
 	if (!memcmp(outfile, tmpbuf, strlen(tmpbuf)))
 		flag = 1;
 	else
