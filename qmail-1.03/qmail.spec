@@ -1303,6 +1303,9 @@ do
 		extra_opt="$extra_opt --deliverylimit-count=-1 --deliverylimit-size=-1"
 		extra_opt="$extra_opt --rbl=-rzen.spamhaus.org --rbl=-rdnsbl-1.uceprotect.net"
 	fi
+%if %{tcpserver_plugin} == 1
+		extra_opt="$extra_opt --shared-objects=1"
+%endif
 	if [ %{noclamav} -eq 0 -o $clamav_os -eq 1 ] ; then
 		%{_prefix}/sbin/svctool --smtp=$port --servicedir=%{servicedir} \
 			--qbase=%{qbase} --qcount=%{qcount} --qstart=1 \
@@ -1314,7 +1317,6 @@ do
 			--dmasquerade \
 			--dkverify=both \
 			--dksign=both --private_key=%{_prefix}/control/domainkeys/%/%{dkimkeyfn} \
-			--shared-objects=1 \
 			$extra_opt
 	else
 		%{_prefix}/sbin/svctool --smtp=$port --servicedir=%{servicedir} \
@@ -1326,7 +1328,6 @@ do
 			--dmasquerade \
 			--dkverify=both \
 			--dksign=both --private_key=%{_prefix}/control/domainkeys/%/%{dkimkeyfn} \
-			--shared-objects=1 \
 			$extra_opt
 	fi
 	echo "1" > %{servicedir}/qmail-smtpd.$port/variables/DISABLE_PLUGIN

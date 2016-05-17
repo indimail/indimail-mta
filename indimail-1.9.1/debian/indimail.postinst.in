@@ -35,6 +35,7 @@ noclamav=1
 nofetchmail=0
 nobogofilter=0
 nodksignature=0
+tcpserver_plugin=1
 default_domain=@defaultdomain@
 dkimkeyfn=default
 mysqlSocket=/var/run/mysqld/mysqld.sock
@@ -330,6 +331,9 @@ do
 		extra_opt="$extra_opt --deliverylimit-count=-1 --deliverylimit-size=-1"
 		extra_opt="$extra_opt --rbl=-rzen.spamhaus.org --rbl=-rdnsbl-1.uceprotect.net"
 	fi
+	if [ $tcpserver_plugin -eq 1 ] ; then
+		extra_opt="$extra_opt --shared-objects=1"
+	fi
 	if [ $spamfilter -eq 1 ] ; then
 		if [ $noclamav -eq 0 -o $clamav_os -eq 1 ] ; then
 			${prefix}/sbin/svctool --smtp=$port --servicedir=$servicedir \
@@ -345,7 +349,6 @@ do
 				--dmasquerade \
 				--dkverify=$ver_opt \
 				--dksign=$sign_opt --private_key=${prefix}/control/domainkeys/%/$dkimkeyfn \
-				--shared-objects=1 \
 				$extra_opt
 		else
 			${prefix}/sbin/svctool --smtp=$port --servicedir=$servicedir \
@@ -360,7 +363,6 @@ do
 				--dmasquerade \
 				--dkverify=both \
 				--dksign=both --private_key=${prefix}/control/domainkeys/%/$dkimkeyfn \
-				--shared-objects=1 \
 				$extra_opt
 		fi
 	else
@@ -376,7 +378,6 @@ do
 				--dmasquerade \
 				--dkverify=both \
 				--dksign=both --private_key=${prefix}/control/domainkeys/%/$dkimkeyfn \
-				--shared-objects=1 \
 				$extra_opt
 		else
 			${prefix}/sbin/svctool --smtp=$port --servicedir=$servicedir \
@@ -389,7 +390,6 @@ do
 				--dmasquerade \
 				--dkverify=both \
 				--dksign=both --private_key=${prefix}/control/domainkeys/%/$dkimkeyfn \
-				--shared-objects=1 \
 				$extra_opt
 		fi
 	fi
