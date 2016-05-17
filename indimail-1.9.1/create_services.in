@@ -1,5 +1,8 @@
 #!/bin/sh
 # $Log: create_services.in,v $
+# Revision 2.59  2016-05-17 10:40:51+05:30  Cprogrammer
+# added --shared-objects argument to load smtp in tcpserver
+#
 # Revision 2.58  2016-05-16 10:36:34+05:30  Cprogrammer
 # added --shared-objects option for smtp service creation
 #
@@ -191,6 +194,7 @@
 # script to create all services
 #
 qcount=5
+tcpserver_plugin=0
 servicedir=/service
 indimaildir=@indimaildir@
 
@@ -198,17 +202,18 @@ indimaildir=@indimaildir@
 # End USER Configuration OPTIONS
 #
 
-# $Id: create_services.in,v 2.58 2016-05-16 10:36:34+05:30 Cprogrammer Exp mbhangui $
+# $Id: create_services.in,v 2.59 2016-05-17 10:40:51+05:30 Cprogrammer Exp mbhangui $
 
 usage()
 {
-	echo "create_service [--servicedir=path] --qbase=path --mbase=path --mysqlPrefix=path [--destdir=path]
+	echo "create_service [--servicedir=path] --qbase=path --mbase=path --mysqlPrefix=path [--destdir=path] [--shared-objects=1]
 
-	servicedir  - path of Supervise service directory
-	qbase       - path for createing IndiMail's queue collection
-	mbase       - path where user's home maildir will be created
-	mysqlPrefix - Prefix for MySQL installation
-	destdir     - Staging directory for creating service
+	servicedir     - path of Supervise service directory
+	qbase          - path for createing IndiMail's queue collection
+	mbase          - path where user's home maildir will be created
+	mysqlPrefix    - Prefix for MySQL installation
+	destdir        - Staging directory for creating service
+	shared-objects - Enable loading of shared objects in tcpserver for SMTP
 	echo
 	echo Press ENTER or Cntrl C to quit"
 	read key
@@ -278,6 +283,9 @@ while test $# -gt 0; do
 	noclamav=1
 	;;
 
+	--shared-objects=*)
+	tcpserver_plugin=1
+	;;
     --destdir=*)
 	extra_opt="--destdir=$optarg"
 	dir_prefix=$optarg
@@ -407,6 +415,9 @@ do
 		e_opt="$e_opt --deliverylimit-count=-1 --deliverylimit-size=-1"
 		e_opt="$e_opt --rbl=-rzen.spamhaus.org --rbl=-rdnsbl-1.uceprotect.net"
 	fi
+	if [ $tcpserver_plugin -eq 1 ] ; then
+		e_opt="$e_opt --shared-objects=1"
+	fi
 	if [ $nobogofilter -eq 0 ] ; then
 		if [ $noclamav -eq 0 -o $clamav_os -eq 1 ] ; then
 			$dir_prefix$indimaildir/sbin/svctool --smtp=$port --servicedir=$servicedir \
@@ -421,7 +432,6 @@ do
 				--dmasquerade \
 				--dkverify=$ver_opt \
 				--dksign=$sign_opt --private_key=$indimaildir/control/domainkeys/%/$dkimkeyfn \
-				--shared-objects=1 \
 				$e_opt $extra_opt
 		else
 			$dir_prefix$indimaildir/sbin/svctool --smtp=$port --servicedir=$servicedir \
@@ -435,7 +445,6 @@ do
 				--dmasquerade \
 				--dkverify=$ver_opt \
 				--dksign=$sign_opt --private_key=$indimaildir/control/domainkeys/%/$dkimkeyfn \
-				--shared-objects=1 \
 				$e_opt $extra_opt
 		fi
 	else
@@ -450,7 +459,6 @@ do
 				--dmasquerade \
 				--dkverify=$ver_opt \
 				--dksign=$sign_opt --private_key=$indimaildir/control/domainkeys/%/$dkimkeyfn \
-				--shared-objects=1 \
 				$e_opt $extra_opt
 		else
 			$dir_prefix$indimaildir/sbin/svctool --smtp=$port --servicedir=$servicedir \
@@ -462,7 +470,6 @@ do
 				--dmasquerade \
 				--dkverify=$ver_opt \
 				--dksign=$sign_opt --private_key=$indimaildir/control/domainkeys/%/$dkimkeyfn \
-				--shared-objects=1 \
 				$e_opt $extra_opt
 		fi
 	fi
