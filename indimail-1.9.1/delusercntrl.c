@@ -1,5 +1,8 @@
 /*
  * $Log: delusercntrl.c,v $
+ * Revision 2.7  2016-05-17 15:38:40+05:30  Cprogrammer
+ * fixed comments
+ *
  * Revision 2.6  2009-02-06 11:37:14+05:30  Cprogrammer
  * fixed potential buffer overflow
  *
@@ -43,7 +46,7 @@
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: delusercntrl.c,v 2.6 2009-02-06 11:37:14+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: delusercntrl.c,v 2.7 2016-05-17 15:38:40+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef CLUSTERED_SITE
@@ -65,7 +68,7 @@ delusercntrl(char *user, char *domain, int force)
 	if (!user || !*user || !domain || !*domain)
 		return (1);
 	/*
-	 *  Check if Domain is distributed or not , by checking the Control file, /var/qmail/control/distdom
+	 *  Check if Domain is distributed or not , by checking hostcntrl table
 	 */
 	if (!force)
 	{
