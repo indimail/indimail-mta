@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail.spec.in,v 2.325 2016-05-17 10:41:12+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 2.326 2016-05-17 23:19:21+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %define _unpackaged_files_terminate_build 1
 
@@ -548,6 +548,7 @@ fi
 
 %configure --prefix=%{_prefix} --libexecdir=%{_prefix}/libexec --sysconfdir=%{_prefix}/etc \
 	--with-pkgconfigdir=%{_pkg_config_path} --libdir=%{_libdir} \
+	--enable-controldir=%{_prefix}/control --enable-domaindir=%{_prefix} \
 	--enable-mysqlbindir=%{mysqlPrefix}/bin --enable-mysqlprefix=%{mysqlPrefix} \
 	--mandir=%{_prefix}/man --sysconfdir=%{_prefix}/etc --enable-qmaildir=%{_prefix} \
 	--enable-basepath=@basepath@ --enable-logdir=@logdir@ \
