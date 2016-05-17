@@ -762,6 +762,7 @@ edit = sed \
 	-e 's,@indimaildir\@,$(indimaildir),g' \
 	-e 's,@qmaildir\@,$(qmaildir),g' \
 	-e 's,@controldir\@,$(controldir),g' \
+	-e 's,@domaindir\@,$(domaindir),g' \
 	-e 's,@mysqlbindir\@,$(mysqlbindir),g' \
 	-e 's,@moduledir\@,$(moduledir),g' \
 	-e 's,@auth_inc\@,$(auth_inc),g' \
