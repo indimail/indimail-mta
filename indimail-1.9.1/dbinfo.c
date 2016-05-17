@@ -1,5 +1,8 @@
 /*
  * $Log: dbinfo.c,v $
+ * Revision 2.15  2016-05-17 15:39:42+05:30  Cprogrammer
+ * use control directory set by configure
+ *
  * Revision 2.14  2009-09-23 14:58:36+05:30  Cprogrammer
  * fixed segementation fault in dbinfo when mcdinfo is absent
  *
@@ -92,7 +95,7 @@
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: dbinfo.c,v 2.14 2009-09-23 14:58:36+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: dbinfo.c,v 2.15 2016-05-17 15:39:42+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef CLUSTERED_SITE
@@ -173,15 +176,19 @@ editdbinfo(char *filename)
 
 	verbose = 1;
 	getEnvConfigStr(&qmaildir, "QMAILDIR", QMAILDIR);
-	getEnvConfigStr(&controldir, "CONTROLDIR", "control");
+	getEnvConfigStr(&controldir, "CONTROLDIR", CONTROLDIR);
 	if (!filename || !*filename)
 		getEnvConfigStr(&mcdfile, "MCDFILE", MCDFILE);
 	else
 		mcdfile = filename;
 	if (*mcdfile == '/' || *mcdfile == '.')
 		snprintf(mcdFile, MAX_BUFF, "%s", mcdfile);
-	else
-		snprintf(mcdFile, MAX_BUFF, "%s/%s/%s", qmaildir, controldir, mcdfile);
+	else {
+		if (*controldir == '/')
+			snprintf(mcdFile, MAX_BUFF, "%s/%s", controldir, mcdfile);
+		else
+			snprintf(mcdFile, MAX_BUFF, "%s/%s/%s", qmaildir, controldir, mcdfile);
+	}
 	snprintf(envbuf, MAX_BUFF, "MCDFILE=%s", mcdFile);
 	rhostsptr = LoadDbInfo_TXT(&total);
 	for (count = 0,tmpPtr = rhostsptr;tmpPtr && *tmpPtr;tmpPtr++)

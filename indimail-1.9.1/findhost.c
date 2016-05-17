@@ -1,5 +1,8 @@
 /*
  * $Log: findhost.c,v $
+ * Revision 2.35  2016-05-17 15:40:14+05:30  Cprogrammer
+ * use control directory set by configure
+ *
  * Revision 2.34  2016-04-20 19:32:55+05:30  Cprogrammer
  * added comments for explaining code logic
  *
@@ -195,7 +198,7 @@
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: findhost.c,v 2.34 2016-04-20 19:32:55+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: findhost.c,v 2.35 2016-05-17 15:40:14+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #include <stdio.h>
@@ -386,11 +389,18 @@ open_central_db(char *dbhost)
 	if ((ptr = (char *) getenv("CNTRL_HOST")) != (char *) 0)
 		scopy(cntrl_host, ptr, MAX_BUFF);
 	getEnvConfigStr(&qmaildir, "QMAILDIR", QMAILDIR);
-	getEnvConfigStr(&controldir, "CONTROLDIR", "control");
-	if (snprintf(host_path, MAX_BUFF, "%s/%s/host.cntrl", qmaildir, controldir) == -1)
-		host_path[MAX_BUFF - 1] = 0;
-	if (access(host_path, F_OK) && snprintf(host_path, MAX_BUFF, "%s/%s/host.mysql", qmaildir, controldir) == -1)
-		host_path[MAX_BUFF - 1] = 0;
+	getEnvConfigStr(&controldir, "CONTROLDIR", CONTROLDIR);
+	if (*controldir == '/') {
+		if (snprintf(host_path, MAX_BUFF, "%s/host.cntrl", controldir) == -1)
+			host_path[MAX_BUFF - 1] = 0;
+		if (access(host_path, F_OK) && snprintf(host_path, MAX_BUFF, "%s/host.mysql", controldir) == -1)
+			host_path[MAX_BUFF - 1] = 0;
+	} else {
+		if (snprintf(host_path, MAX_BUFF, "%s/%s/host.cntrl", qmaildir, controldir) == -1)
+			host_path[MAX_BUFF - 1] = 0;
+		if (access(host_path, F_OK) && snprintf(host_path, MAX_BUFF, "%s/%s/host.mysql", qmaildir, controldir) == -1)
+			host_path[MAX_BUFF - 1] = 0;
+	}
 	if (!*cntrl_host && !access(host_path, F_OK))
 	{
 		if (!(fp = fopen(host_path, "r")))

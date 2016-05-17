@@ -1,5 +1,8 @@
 /*
  * $Log: vauth_open.c,v $
+ * Revision 2.25  2016-05-17 15:40:24+05:30  Cprogrammer
+ * use control directory set by configure
+ *
  * Revision 2.24  2010-04-15 14:13:44+05:30  Cprogrammer
  * added flags argument to mysql_real_connect()
  *
@@ -105,7 +108,7 @@
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vauth_open.c,v 2.24 2010-04-15 14:13:44+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: vauth_open.c,v 2.25 2016-05-17 15:40:24+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #include <stdio.h>
@@ -139,9 +142,14 @@ vauth_open(char *dbhost)
 	if ((ptr = (char *) getenv("MYSQL_HOST")) != (char *) 0)
 		scopy(mysql_host, ptr, MAX_BUFF);
 	getEnvConfigStr(&qmaildir, "QMAILDIR", QMAILDIR);
-	getEnvConfigStr(&controldir, "CONTROLDIR", "control");
-	if (snprintf(host_path, MAX_BUFF, "%s/%s/host.mysql", qmaildir, controldir) == -1)
-		host_path[MAX_BUFF - 1] = 0;
+	getEnvConfigStr(&controldir, "CONTROLDIR", CONTROLDIR);
+	if (*controldir == '/') {
+		if (snprintf(host_path, MAX_BUFF, "%s/host.mysql", controldir) == -1)
+			host_path[MAX_BUFF - 1] = 0;
+	} else {
+		if (snprintf(host_path, MAX_BUFF, "%s/%s/host.mysql", qmaildir, controldir) == -1)
+			host_path[MAX_BUFF - 1] = 0;
+	}
 	if (!*mysql_host && !access(host_path, F_OK))
 	{
 		if (!(fp = fopen(host_path, "r")))

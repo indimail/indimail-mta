@@ -1,5 +1,8 @@
 /*
  * $Log: get_local_ip.c,v $
+ * Revision 2.8  2016-05-17 15:40:20+05:30  Cprogrammer
+ * use control directory set by configure
+ *
  * Revision 2.7  2016-01-12 14:26:41+05:30  Cprogrammer
  * pass address family as argument to get_local_ip()
  *
@@ -41,7 +44,7 @@
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: get_local_ip.c,v 2.7 2016-01-12 14:26:41+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: get_local_ip.c,v 2.8 2016-05-17 15:40:20+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 char           *
@@ -63,8 +66,11 @@ get_local_ip(int family)
 	if (*hostbuf)
 		return(hostbuf);
 	getEnvConfigStr(&qmaildir, "QMAILDIR", QMAILDIR);
-	getEnvConfigStr(&controldir, "CONTROLDIR", "control");
-	snprintf(TmpBuf, MAX_BUFF, "%s/%s/localiphost", qmaildir, controldir);
+	getEnvConfigStr(&controldir, "CONTROLDIR", CONTROLDIR);
+	if (*controldir == '/')
+		snprintf(TmpBuf, MAX_BUFF, "%s/localiphost", controldir);
+	else
+		snprintf(TmpBuf, MAX_BUFF, "%s/%s/localiphost", qmaildir, controldir);
 	if ((fp = fopen(TmpBuf, "r"))) {
 		if (!fgets(hostbuf, MAX_BUFF - 1, fp)) {
 			fclose(fp);

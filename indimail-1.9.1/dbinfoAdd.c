@@ -1,5 +1,8 @@
 /*
  * $Log: dbinfoAdd.c,v $
+ * Revision 2.4  2016-05-17 15:40:09+05:30  Cprogrammer
+ * use control directory set by configure
+ *
  * Revision 2.3  2008-05-28 16:34:29+05:30  Cprogrammer
  * removed USE_MYSQL
  *
@@ -14,13 +17,13 @@
 #include <mysqld_error.h>
 
 #ifndef	lint
-static char     sccsid[] = "$Id: dbinfoAdd.c,v 2.3 2008-05-28 16:34:29+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: dbinfoAdd.c,v 2.4 2016-05-17 15:40:09+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef CLUSTERED_SITE
 /*
  *
- * File      : /var/qmail/control/sql
+ * File      : controldir/mcdinfo
  * domain    : indicorp.com
  * distFlag  : 0
  * server    : 210.210.122.80
@@ -39,12 +42,16 @@ dbinfoAdd(char *domain, int distributed, char *sqlserver, char *mdahost, int por
 	int             err;
 
 	getEnvConfigStr(&qmaildir, "QMAILDIR", QMAILDIR);
-	getEnvConfigStr(&controldir, "CONTROLDIR", "control");
+	getEnvConfigStr(&controldir, "CONTROLDIR", CONTROLDIR);
 	getEnvConfigStr(&mcdfile, "MCDFILE", MCDFILE);
 	if(*mcdfile == '/')
 		scopy(mcdFile, mcdfile, MAX_BUFF);
-	else
-		snprintf(mcdFile, MAX_BUFF, "%s/%s/%s", qmaildir, controldir, mcdfile);
+	else {
+		if (*controldir == '/')
+			snprintf(mcdFile, MAX_BUFF, "%s/%s", controldir, mcdfile);
+		else
+			snprintf(mcdFile, MAX_BUFF, "%s/%s/%s", qmaildir, controldir, mcdfile);
+	}
 	if (open_master())
 	{
 		fprintf(stderr, "dbinfoAdd: Failed to open Master Db\n");
