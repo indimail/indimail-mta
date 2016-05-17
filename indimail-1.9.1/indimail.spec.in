@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail.spec.in,v 2.324 2016-05-16 21:25:02+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 2.325 2016-05-17 10:41:12+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %define _unpackaged_files_terminate_build 1
 
@@ -2510,6 +2510,9 @@ do
 		extra_opt="$extra_opt --deliverylimit-count=-1 --deliverylimit-size=-1"
 		extra_opt="$extra_opt --rbl=-rzen.spamhaus.org --rbl=-rdnsbl-1.uceprotect.net"
 	fi
+%if %{tcpserver_plugin} == 1
+		extra_opt="$extra_opt --shared-objects=1"
+%endif
 	if [ $spamfilter -eq 1 ] ; then
 		if [ %noclamav -eq 0 -o $clamav_os -eq 1 ] ; then
 			%{_prefix}/sbin/svctool --smtp=$port --servicedir=%{servicedir} \
@@ -2524,7 +2527,6 @@ do
 				--dmasquerade \
 				--dkverify=$ver_opt \
 				--dksign=$sign_opt --private_key=%{_prefix}/control/domainkeys/%/%{dkimkeyfn} \
-				--shared-objects=1 \
 				$extra_opt
 		else
 			%{_prefix}/sbin/svctool --smtp=$port --servicedir=%{servicedir} \
@@ -2538,7 +2540,6 @@ do
 				--dmasquerade \
 				--dkverify=both \
 				--dksign=both --private_key=%{_prefix}/control/domainkeys/%/%{dkimkeyfn} \
-				--shared-objects=1 \
 				$extra_opt
 		fi
 	else
@@ -2553,7 +2554,6 @@ do
 				--dmasquerade \
 				--dkverify=both \
 				--dksign=both --private_key=%{_prefix}/control/domainkeys/%/%{dkimkeyfn} \
-				--shared-objects=1 \
 				$extra_opt
 		else
 			%{_prefix}/sbin/svctool --smtp=$port --servicedir=%{servicedir} \
@@ -2565,7 +2565,6 @@ do
 				--dmasquerade \
 				--dkverify=both \
 				--dksign=both --private_key=%{_prefix}/control/domainkeys/%/%{dkimkeyfn} \
-				--shared-objects=1 \
 				$extra_opt
 		fi
 	fi
