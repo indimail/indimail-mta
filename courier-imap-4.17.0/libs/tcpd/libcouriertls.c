@@ -488,6 +488,9 @@ static int client_cert_cb(ssl_handle ssl, X509 **x509, EVP_PKEY **pkey)
 	return rc;
 }
 
+static SSL_CTX *tls_create_int(int isserver, const struct tls_info *info,
+			       int internal);
+
 static int server_cert_cb(ssl_handle ssl, int *ad, void *arg)
 {
 #ifdef HAVE_OPENSSL_SNI
@@ -522,14 +525,41 @@ static int server_cert_cb(ssl_handle ssl, int *ad, void *arg)
 	}
 
 	if (access(buffer, R_OK) == 0)
-		read_certfile(SSL_get_SSL_CTX(ssl), buffer, &cert_file_flags);
+	{
+		SSL_CTX *orig_ctx=SSL_get_SSL_CTX(ssl);
+		SSL_CTX *temp_ctx=tls_create_int(1, info, 1);
+		int rc;
 
+		if (!temp_ctx)
+		{
+			(*info->tls_err_msg)("Cannot load certificate file",
+					     info->app_data);
+			exit(1);
+		}
+		SSL_set_SSL_CTX(ssl, temp_ctx);
+		rc=read_certfile(orig_ctx, buffer, &cert_file_flags);
+		SSL_set_SSL_CTX(ssl, orig_ctx);
+		tls_destroy(temp_ctx);
+		if (!rc)
+		{
+			(*info->tls_err_msg)("Cannot load certificate file",
+					     info->app_data);
+			exit(1);
+		}
+	}
 	free(buffer);
+
 #endif
 	return SSL_TLSEXT_ERR_OK;
 }
 
 SSL_CTX *tls_create(int isserver, const struct tls_info *info)
+{
+	return tls_create_int(isserver, info, 0);
+}
+
+SSL_CTX *tls_create_int(int isserver, const struct tls_info *info,
+			int internal)
 {
 	SSL_CTX *ctx;
 	const char *protocol=safe_getenv(info, "TLS_PROTOCOL");
@@ -644,8 +674,15 @@ SSL_CTX *tls_create(int isserver, const struct tls_info *info)
 #endif
 #endif
 	info_copy->tlscache=NULL;
-	init_session_cache(info_copy, ctx);
 
+	if (internal)
+	{
+		SSL_CTX_set_session_cache_mode(ctx, SSL_SESS_CACHE_OFF);
+	}
+	else
+	{
+		init_session_cache(info_copy, ctx);
+	}
 
 	s = safe_getenv(info, "TCPLOCALIP");
 
@@ -661,8 +698,6 @@ SSL_CTX *tls_create(int isserver, const struct tls_info *info)
 		tls_destroy(ctx);
 		return (NULL);
 	}
-
-	SSL_CTX_set_session_cache_mode(ctx, SSL_SESS_CACHE_BOTH);
 
 	n=atoi(safe_getenv(info, "TLS_INTCACHESIZE"));
 
@@ -1060,7 +1095,6 @@ SSL *tls_connect(SSL_CTX *ctx, int fd)
 #ifdef HAVE_OPENSSL_SNI
 		if (info->peer_verify_domain)
 		{
-			fprintf(stderr, "Requesting %s\n", info->peer_verify_domain);
 			SSL_set_tlsext_host_name(ssl, info->peer_verify_domain);
 		}
 #endif
