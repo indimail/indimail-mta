@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-lspawn.c,v $
+ * Revision 1.21  2016-05-18 15:16:10+05:30  Cprogrammer
+ * use env variable ASSIGNDIR or auto_assign for users/cdb file
+ *
  * Revision 1.20  2014-11-04 23:12:54+05:30  Cprogrammer
  * BUG - fixed incorrect parsing of users with hyphen in username
  *
@@ -77,6 +80,7 @@
 #include "case.h"
 #include "slurpclose.h"
 #include "auto_qmail.h"
+#include "auto_assign.h"
 #include "auto_uids.h"
 #include "qlx.h"
 #include "open.h"
@@ -168,6 +172,8 @@ report(ss, wstat, s, len)
 stralloc        lower = { 0 };
 stralloc        nughde = { 0 };
 stralloc        wildchars = { 0 };
+char           *cdbdir;
+stralloc        cdbfile = { 0 };
 
 void
 nughde_get(local)
@@ -181,6 +187,17 @@ nughde_get(local)
 	int             fd;
 	int             flagwild;
 
+	if (!cdbdir)
+	{
+		if (!(cdbdir = env_get("ASSIGNDIR")))
+			cdbdir = auto_assign;
+	}
+	if (!stralloc_copys(&cdbfile, cdbdir))
+		_exit(QLX_NOMEM);
+	if (cdbfile.s[cdbfile.len - 1] != '/' && !stralloc_cats(&cdbfile, "/"))
+		_exit(QLX_NOMEM);
+	if (!stralloc_catb(&cdbfile, "cdb", 4))
+		_exit(QLX_NOMEM);
 	if (!stralloc_copys(&lower, "!"))
 		_exit(QLX_NOMEM);
 	if (!stralloc_cats(&lower, local))
@@ -190,8 +207,7 @@ nughde_get(local)
 	case_lowerb(lower.s, lower.len);
 	if (!stralloc_copys(&nughde, ""))
 		_exit(QLX_NOMEM);
-	fd = open_read("users/cdb");
-	if (fd == -1)
+	if ((fd = open_read(cdbfile.s)) == -1)
 		if (errno != error_noent)
 			_exit(QLX_CDB);
 	if (fd != -1)
@@ -418,7 +434,7 @@ spawn(fdmess, fdout, msgsize, sender, qqeh, recip, at)
 void
 getversion_qmail_lspawn_c()
 {
-	static char    *x = "$Id: qmail-lspawn.c,v 1.20 2014-11-04 23:12:54+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-lspawn.c,v 1.21 2016-05-18 15:16:10+05:30 Cprogrammer Exp mbhangui $";
 
 #ifdef INDIMAIL
 	if (x)
