@@ -1,5 +1,8 @@
 /*
  * $Log: add_domain_assign.c,v $
+ * Revision 2.8  2016-05-18 11:37:38+05:30  Cprogrammer
+ * use ASSGINDIR for users/assign
+ *
  * Revision 2.7  2016-05-17 16:08:55+05:30  Cprogrammer
  * removed redundant controldir variable
  *
@@ -39,7 +42,7 @@
 #include <sys/stat.h>
 
 #ifndef	lint
-static char     sccsid[] = "$Id: add_domain_assign.c,v 2.7 2016-05-17 16:08:55+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: add_domain_assign.c,v 2.8 2016-05-18 11:37:38+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 /*
@@ -52,11 +55,12 @@ add_domain_assign(char *domain, char *domain_base_dir, uid_t uid,
 {
 	FILE           *fs1 = NULL;
 	char            filename[MAX_BUFF], tmpstr[MAX_BUFF];
-	char           *qmaildir;
+	char           *qmaildir, *assigndir;
 
 	getEnvConfigStr(&qmaildir, "QMAILDIR", QMAILDIR);
+	getEnvConfigStr(&assigndir, "ASSIGNDIR", ASSIGNDIR);
 	/*- stat assign file, if it's not there create one */
-	snprintf(filename, MAX_BUFF, "%s/users/assign", qmaildir);
+	snprintf(filename, MAX_BUFF, "%s/assign", assigndir);
 	if (access(filename, F_OK))
 	{
 		/*
