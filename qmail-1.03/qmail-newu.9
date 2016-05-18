@@ -9,9 +9,9 @@ qmail-newu \- prepare address assignments for qmail-lspawn
 .SH DESCRIPTION
 .B qmail-newu
 reads the assignments in
-.B directory/users/assign
+.B directory/assign
 and writes them into
-.B directory/users/cdb
+.B directory/cdb
 in a binary format suited
 for quick access by
 .BR qmail-lspawn .
@@ -19,20 +19,20 @@ If
 .I directory
 is omitted
 .B qmail-newu
-uses QMAIL. Extra arguments provided after
+uses ASSIGN. Extra arguments provided after
 .I directory
 are silently ignored.
 
 If there is a problem with
-.BR users/assign ,
+.BR directory/assign ,
 .B qmail-newu
 complains and leaves
-.B users/cdb
+.B directory/cdb
 alone.
 
 .B qmail-newu
 ensures that
-.B users/cdb
+.B directory/cdb
 is updated atomically,
 so
 .B qmail-lspawn
@@ -42,10 +42,10 @@ to finish.
 However,
 .B qmail-newu
 makes no attempt to protect against two simultaneous updates of
-.BR users/cdb .
+.BR directory/cdb .
 
 The binary
-.B users/cdb
+.B directory/cdb
 format is portable across machines.
 .SH "SEE ALSO"
 qmail-users(5),
