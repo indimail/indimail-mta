@@ -1,5 +1,8 @@
 /*
  * $Log: make_user_dir.c,v $
+ * Revision 2.10  2016-05-18 11:46:15+05:30  Cprogrammer
+ * use DOMAINDIR for users directories
+ *
  * Revision 2.9  2010-08-08 13:02:21+05:30  Cprogrammer
  * made users_per_level configurable
  *
@@ -50,7 +53,7 @@
 #include <stdlib.h>
 
 #ifndef	lint
-static char     sccsid[] = "$Id: make_user_dir.c,v 2.9 2010-08-08 13:02:21+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: make_user_dir.c,v 2.10 2016-05-18 11:46:15+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 /*
@@ -69,8 +72,8 @@ make_user_dir(char *username, char *domain, uid_t uid, gid_t gid, int users_per_
 	tmpdir = (char *) NULL;
 	if (!domain || !*domain)
 	{
-		tmpdir = malloc(slen(INDIMAILDIR) + 7);
-		snprintf(tmpdir, slen(INDIMAILDIR) + 7, "%s/users", INDIMAILDIR);
+		tmpdir = malloc(slen(DOMAINDIR) + 7);
+		snprintf(tmpdir, slen(DOMAINDIR) + 7, "%s/users", DOMAINDIR);
 	} else
 		tmpdir = (char *) get_Mplexdir(username, domain, create_flag, uid, gid);
 	if (!(tmpstr = backfill(username, domain, tmpdir, 1)))
