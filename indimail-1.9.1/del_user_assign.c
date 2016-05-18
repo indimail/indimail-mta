@@ -1,5 +1,8 @@
 /*
  * $Log: del_user_assign.c,v $
+ * Revision 2.4  2016-05-18 16:43:43+05:30  Cprogrammer
+ * use assign file in ASSIGNDIR set by configure
+ *
  * Revision 2.3  2009-01-15 08:55:23+05:30  Cprogrammer
  * change for once_only flag in remove_line
  *
@@ -24,28 +27,26 @@
 #include <stdlib.h>
 
 #ifndef	lint
-static char     sccsid[] = "$Id: del_user_assign.c,v 2.3 2009-01-15 08:55:23+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: del_user_assign.c,v 2.4 2016-05-18 16:43:43+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 /*
  * remove a local user from the users/assign file and recompile
  */
 int
-del_user_assign(char *user)
+del_user_assign(char *user, char *dir)
 {
 	char            tmpbuf1[MAX_BUFF], tmpbuf2[MAX_BUFF], fname[MAX_BUFF];
-	char           *qmaildir;
+	char           *assigndir;
 
 	if(indimailuid == -1 || indimailgid == -1)
 		GetIndiId(&indimailuid, &indimailgid);
-	snprintf(tmpbuf1, MAX_BUFF, "=%s:%s:%lu:%lu:%s/users/%s:::", user, user,
-			(unsigned long) indimailuid,
-			(unsigned long) indimailgid, INDIMAILDIR, user);
-	snprintf(tmpbuf2, MAX_BUFF, "+%s-:%s:%lu:%lu:%s/users/%s:-::", user, user,
-			(unsigned long) indimailuid,
-			(unsigned long) indimailgid, INDIMAILDIR, user);
-	getEnvConfigStr(&qmaildir, "QMAILDIR", QMAILDIR);
-	snprintf(fname, MAX_BUFF, "%s/users/assign", qmaildir);
+	snprintf(tmpbuf1, MAX_BUFF, "=%s:%s:%lu:%lu:%s:::", user, user,
+		(unsigned long) indimailuid, (unsigned long) indimailgid, dir);
+	snprintf(tmpbuf2, MAX_BUFF, "+%s-:%s:%lu:%lu:%s:-::", user, user,
+		(unsigned long) indimailuid, (unsigned long) indimailgid, dir);
+	getEnvConfigStr(&assigndir, "ASSIGNDIR", ASSIGNDIR);
+	snprintf(fname, MAX_BUFF, "%s/assign", assigndir);
 	if(remove_line(tmpbuf1, fname, 0, INDIMAIL_QMAIL_MODE) == -1 || remove_line(tmpbuf2, fname, 0, INDIMAIL_QMAIL_MODE) == -1)
 		return(-1);
 	update_newu();
