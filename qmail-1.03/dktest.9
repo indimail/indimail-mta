@@ -14,7 +14,7 @@ exercises the domainkeys library. Both signing and verification merely print out
 They do not keep a copy of the input file. You will need to do something like this:
 
 .EX
- (./dktest -s QMAILHOME/control/domainkeys/dog </tmp/testmsg; cat /tmp/testmsg)\
+ (./dktest -s @controldir@/domainkeys/dog </tmp/testmsg; cat /tmp/testmsg)\
  | ./dktest -v
 .EE
 

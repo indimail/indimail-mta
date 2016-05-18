@@ -337,7 +337,7 @@ even though such messages violate the SMTP protocol.
 
 .SH "CONTROL FILES"
 .B qmail-smtpd
-by default looks at QMAILHOME/control for all control files. This path can be changed by defining the CONTROLDIR
+by default looks at @controldir@ for all control files. This path can be changed by defining the CONTROLDIR
 environment variable. Some of these control files can also be in cdb format if they have the
 .I .cdb
 extension.
@@ -1426,10 +1426,10 @@ You can use \fIdomainqueue\fR to queue mails for certain domains into specific d
 specify individual concurrencies for these queues (see qmail-send(8)). e.g. having
 
 yahoo.com:QUEUEDIR=/var/indimail/queue/queue6
-in QMAILHOME/control/domainqueue and
+in @controldir@/domainqueue and
 
 10
-in QMAILHOME/control/concurrencyr.queue6
+in @controldir@/concurrencyr.queue6
 
 will set 10 as the remote concurrency for all emails sent to yahoo.com
 

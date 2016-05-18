@@ -11,13 +11,13 @@ qmail-sql \- prepare data in MySQL for
 \fBqmail-smtpd\fR to access data in certain control files to be in MySQL. \fBqmail-sql\fR also
 prepares data in \fIfilename\fR to be inserted into \fItable_name\fR in MySQL.
 
-The below command will create a file \fIbadmailfrom.sql\fR in QMAIL/control and table \fIbmf\fR
+The below command will create a file \fIbadmailfrom.sql\fR in @controldir@ and table \fIbmf\fR
 in MySQL
 .EX
  qmail-sql -s localhost -u indimail -p ssh-1.5- -d indimail -t bmf badmailfrom
 .EE
 
-The below command will replace contents of file badmailfrom in QMAIL/control into the the table
+The below command will replace contents of file badmailfrom in @controldir@ into the the table
 \fIbmf\fR in MySQL.
 .EX
  qmail-sql -r badmailfrom

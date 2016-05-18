@@ -122,6 +122,14 @@ auto_control.o: \
 compile auto_control.c
 	./compile auto_control.c
 
+auto_assign.c: \
+auto-str conf-assign
+	./auto-str auto_assign `head -1 conf-assign` > auto_assign.c
+
+auto_assign.o: \
+compile auto_assign.c
+	./compile auto_assign.c
+
 auto_spawn.c: \
 auto-int conf-spawn
 	./auto-int auto_spawn `head -1 conf-spawn` > auto_spawn.c
@@ -466,9 +474,11 @@ substdio.a error.a str.a fs.a stralloc.a alloc.a
 condredirect.0: \
 condredirect.1
 	nroff -man condredirect.1 > condredirect.0
-condredirect.1: condredirect.9
+
+condredirect.1: condredirect.9 conf-qmail conf-control
 	cat condredirect.9 \
 	| sed s}QMAILHOME}"`head -1 conf-qmail`"}g \
+	| sed s}@controldir\@}"`head -1 conf-control`"}g \
 	> condredirect.1
 
 condredirect.o: \
@@ -762,9 +772,10 @@ svscanboot.8
 	nroff -man svscanboot.8 > svscanboot.0
 
 svscanboot.8: \
-svscanboot.9
+svscanboot.9 conf-qmail conf-control
 	cat svscanboot.9 \
 	| sed s}QMAIL}"`head -1 conf-qmail`"}g \
+	| sed s}@controldir\@}"`head -1 conf-contgrol`"}g \
 	> svscanboot.8
 
 env.a: \
@@ -1626,9 +1637,10 @@ qmail-control.5
 	nroff -man qmail-control.5 > qmail-control.0
 
 qmail-control.5: \
-qmail-control.9 conf-qmail
+qmail-control.9 conf-qmail conf-control
 	cat qmail-control.9 \
 	| sed s}QMAIL}"`head -1 conf-qmail`"}g \
+	| sed s}@controldir\@}"`head -1 conf-control`"}g \
 	> qmail-control.5
 
 qmail-getpw: \
@@ -1679,9 +1691,10 @@ qmail-inject.0: \
 qmail-inject.8
 	nroff -man qmail-inject.8 > qmail-inject.0
 
-qmail-inject.8: qmail-inject.9
+qmail-inject.8: qmail-inject.9 conf-qmail conf-control
 	cat qmail-inject.9 \
 	| sed s}QMAILHOME}"`head -1 conf-qmail`"}g \
+	| sed s}@controldir\@}"`head -1 conf-control`"}g \
 	> qmail-inject.8
 
 qmail-inject.o: \
@@ -1736,6 +1749,13 @@ qmail-local.0: \
 qmail-local.8
 	nroff -man qmail-local.8 > qmail-local.0
 
+qmail-local.8:\
+qmail-local.9 conf-qmail conf-control
+	cat qmail-local.9 \
+	| sed s}QMAILHOME}"`head -1 conf-qmail`"}g \
+	| sed s}@controldir\@}"`head -1 conf-control`"}g \
+	> qmail-local.8
+
 qmail-local.o: \
 compile qmail-local.c sig.h env.h byte.h exit.h \
 open.h wait.h lock.h seek.h getln.h strerr.h subfd.h \
@@ -1753,17 +1773,17 @@ qmail-log.5
 qmail-lspawn.o: \
 compile qmail-lspawn.c fd.h wait.h prot.h substdio.h stralloc.h \
 gen_alloc.h scan.h exit.h error.h cdb.h uint32.h case.h open.h byte.h str.h \
-slurpclose.h auto_qmail.h auto_uids.h qlx.h env.h hasindimail.h
+slurpclose.h auto_qmail.h auto_uids.h qlx.h env.h hasindimail.h auto_assign.h
 	./compile $(inc_deps) qmail-lspawn.c
 
 qmail-lspawn: \
 load qmail-lspawn.o spawn.o prot.o slurpclose.o coe.o get_uid.o sig.a wait.a \
 strerr.a case.a cdb.a fd.a open.a stralloc.a alloc.a substdio.a error.a str.a \
-fs.a auto_qmail.o auto_uids.o auto_spawn.o env.o str_diffn.o str_cpy.o \
+fs.a auto_qmail.o auto_uids.o auto_spawn.o auto_assign.o env.o str_diffn.o str_cpy.o \
 envread.o variables.o indimail.lib dns.lib
 	./load qmail-lspawn spawn.o prot.o slurpclose.o coe.o auto_uids.o get_uid.o \
 	auto_qmail.o auto_spawn.o env.o str_diffn.o str_cpy.o \
-	envread.o variables.o \
+	envread.o variables.o auto_assign.o \
 	sig.a wait.a case.a cdb.a fd.a open.a stralloc.a alloc.a \
 	strerr.a substdio.a error.a str.a fs.a \
 	`cat indimail.lib` `cat dns.lib`
@@ -1788,9 +1808,10 @@ qmail-newmrh.8
 	nroff -man qmail-newmrh.8 > qmail-newmrh.0
 
 qmail-newmrh.8: \
-qmail-newmrh.9 conf-qmail
+qmail-newmrh.9 conf-qmail conf-control
 	cat qmail-newmrh.9 \
 	| sed s}QMAIL}"`head -1 conf-qmail`"}g \
+	| sed s}@controldir\@}"`head -1 conf-control`"}g \
 	> qmail-newmrh.8
 
 qmail-newmrh.o: \
@@ -1813,9 +1834,10 @@ qmail-cdb.8
 	nroff -man qmail-cdb.8 > qmail-cdb.0
 
 qmail-cdb.8: \
-qmail-cdb.9 conf-break conf-spawn
+qmail-cdb.9 conf-break conf-spawn conf-control
 	cat qmail-cdb.9 \
 	| sed s}QMAIL}"`head -1 conf-qmail`"}g \
+	| sed s}@controldir\@}"`head -1 conf-control`"}g \
 	| sed s}BREAK}"`head -1 conf-break`"}g \
 	| sed s}SPAWN}"`head -1 conf-spawn`"}g \
 	> qmail-cdb.8
@@ -1828,35 +1850,37 @@ uint32.h env.h variables.h case.h auto_control.h
 
 recipient-cdb: \
 load recipient-cdb.o cdbmss.o getln.a open.a cdbmake.a seek.a case.a \
-stralloc.a alloc.a strerr.a substdio.a error.a str.a auto_qmail.o
+stralloc.a alloc.a strerr.a substdio.a error.a str.a auto_assign.o
 	./load recipient-cdb cdbmss.o getln.a open.a cdbmake.a \
 	seek.a case.a stralloc.a alloc.a strerr.a substdio.a \
-	error.a str.a auto_qmail.o 
+	error.a str.a auto_assign.o 
 
 recipient-cdb.0: \
 recipient-cdb.8
 	nroff -man recipient-cdb.8 > recipient-cdb.0
 
 recipient-cdb.8: \
-recipient-cdb.9 conf-break conf-spawn
+recipient-cdb.9 conf-break conf-spawn conf-assign
 	cat recipient-cdb.9 \
 	| sed s}QMAIL}"`head -1 conf-qmail`"}g \
+	| sed s}ASSIGN}"`head -1 conf-assign`"}g \
 	| sed s}BREAK}"`head -1 conf-break`"}g \
 	| sed s}SPAWN}"`head -1 conf-spawn`"}g \
 	> recipient-cdb.8
 
 recipient-cdb.o: \
 compile recipient-cdb.c strerr.h stralloc.h gen_alloc.h substdio.h \
-getln.h exit.h open.h auto_qmail.h cdbmss.h cdbmake.h \
+getln.h exit.h open.h auto_assign.h cdbmss.h cdbmake.h \
 uint32.h substdio.h case.h
 	./compile recipient-cdb.c
 
 qmail-newu: \
 load qmail-newu.o cdbmss.o getln.a open.a seek.a cdbmake.a case.a \
-stralloc.a alloc.a substdio.a error.a str.a auto_qmail.o
+stralloc.a alloc.a substdio.a error.a str.a auto_assign.o envread.o \
+str_diffn.o
 	./load qmail-newu cdbmss.o getln.a open.a seek.a cdbmake.a \
 	case.a stralloc.a alloc.a substdio.a error.a str.a \
-	auto_qmail.o 
+	auto_assign.o envread.o str_diffn.o
 
 qmail-newu.0: \
 qmail-newu.8
@@ -1866,14 +1890,15 @@ qmail-newu.8: \
 qmail-newu.9 conf-break conf-spawn
 	cat qmail-newu.9 \
 	| sed s}QMAIL}"`head -1 conf-qmail`"}g \
+	| sed s}ASSIGN}"`head -1 conf-assign`"}g \
 	| sed s}BREAK}"`head -1 conf-break`"}g \
 	| sed s}SPAWN}"`head -1 conf-spawn`"}g \
 	> qmail-newu.8
 
 qmail-newu.o: \
 compile qmail-newu.c stralloc.h gen_alloc.h subfd.h substdio.h \
-getln.h cdbmss.h cdbmake.h uint32.h exit.h \
-open.h error.h case.h auto_qmail.h byte.h
+getln.h cdbmss.h cdbmake.h uint32.h exit.h env.h \
+open.h error.h case.h auto_assign.h byte.h
 	./compile qmail-newu.c
 
 qmail-pop3d: \
@@ -1930,9 +1955,9 @@ timeoutread.h timeoutwrite.h
 qmail-pw2u: \
 load qmail-pw2u.o constmap.o control.o open.a getln.a case.a getopt.a \
 stralloc.a alloc.a substdio.a error.a str.a fs.a auto_usera.o now.o \
-auto_control.o auto_break.o auto_qmail.o envread.o str_diffn.o variables.o
+auto_control.o auto_break.o auto_assign.o envread.o str_diffn.o variables.o
 	./load qmail-pw2u constmap.o control.o open.a getln.a now.o \
-	auto_control.o auto_usera.o auto_break.o auto_qmail.o envread.o \
+	auto_control.o auto_usera.o auto_break.o auto_assign.o envread.o \
 	str_diffn.o variables.o case.a getopt.a stralloc.a alloc.a substdio.a \
 	error.a str.a fs.a
 
@@ -1944,6 +1969,7 @@ qmail-pw2u.8: \
 qmail-pw2u.9 conf-break conf-spawn
 	cat qmail-pw2u.9 \
 	| sed s}QMAIL}"`head -1 conf-qmail`"}g \
+	| sed s}ASSIGN}"`head -1 conf-assign`"}g \
 	| sed s}BREAK}"`head -1 conf-break`"}g \
 	| sed s}SPAWN}"`head -1 conf-spawn`"}g \
 	> qmail-pw2u.8
@@ -1951,7 +1977,7 @@ qmail-pw2u.9 conf-break conf-spawn
 qmail-pw2u.o: \
 compile qmail-pw2u.c substdio.h subfd.h \
 sgetopt.h subgetopt.h control.h constmap.h stralloc.h gen_alloc.h \
-fmt.h str.h scan.h open.h error.h getln.h auto_break.h auto_qmail.h \
+fmt.h str.h scan.h open.h error.h getln.h auto_break.h auto_assign.h \
 auto_usera.h byte.h
 	./compile qmail-pw2u.c
 
@@ -2213,14 +2239,16 @@ uint64.h variables.h conf-domainkeys auto_control.h
 
 qmail-dk.0: qmail-dk.8
 	nroff -man qmail-dk.8 > qmail-dk.0
-qmail-dk.8: qmail-dk.9
+qmail-dk.8: qmail-dk.9 conf-qmail conf-control
 	cat qmail-dk.9 \
 	| sed s}QMAILHOME}"`head -1 conf-qmail`"}g \
+	| sed s}@controldir\@}"`head -1 conf-control`"}g \
 	> qmail-dk.8
 
-dktest.8: dktest.9
+dktest.8: dktest.9 conf-qmail conf-control
 	cat dktest.9 \
 	| sed s}QMAILHOME}"`head -1 conf-qmail`"}g \
+	| sed s}@controldir\@}"`head -1 conf-control`"}g \
 	> dktest.8
 
 dkim.lib: \
@@ -2281,24 +2309,28 @@ auto_qmail.h sgetopt.h case.h env.h control.h domainkeys.h \
 hasdkim.h variables.h auto_control.h
 	./compile -I$(DESTDIR)$(INDIDIR)/include -I../libdkim-$(DKIM_VERSION) $(inc_deps) qmail-dkim.c
 
-qmail-dkim.8: qmail-dkim.9
+qmail-dkim.8: qmail-dkim.9 conf-qmail conf-control
 	cat qmail-dkim.9 \
 	| sed s}QMAILHOME}"`head -1 conf-qmail`"}g \
+	| sed s}@controldir\@}"`head -1 conf-control`"}g \
 	> qmail-dkim.8
 
-dk-filter.8: dk-filter.9
+dk-filter.8: dk-filter.9 conf-qmail conf-control
 	cat dk-filter.9 \
 	| sed s}QMAILHOME}"`head -1 conf-qmail`"}g \
+	| sed s}@controldir\@}"`head -1 conf-control`"}g \
 	> dk-filter.8
 
-qnotify.1: qnotify.9
+qnotify.1: qnotify.9 conf-qmail conf-control
 	cat qnotify.9 \
 	| sed s}QMAILHOME}"`head -1 conf-qmail`"}g \
+	| sed s}@controldir\@}"`head -1 conf-control`"}g \
 	> qnotify.1
 
-rrt.1: rrt.9
+rrt.1: rrt.9 conf-qmail conf-control
 	cat rrt.9 \
 	| sed s}QMAILHOME}"`head -1 conf-qmail`"}g \
+	| sed s}@controldir\@}"`head -1 conf-control`"}g \
 	> rrt.1
 
 qmail-remote: \
@@ -2324,9 +2356,10 @@ qmail-remote.0: \
 qmail-remote.8
 	nroff -man qmail-remote.8 > qmail-remote.0
 qmail-remote.8: \
-qmail-remote.9
+qmail-remote.9 conf-qmail conf-control
 	cat qmail-remote.9 \
 	| sed s}QMAIL}"`head -1 conf-qmail`"}g \
+	| sed s}@controldir\@}"`head -1 conf-control`"}g \
 	> qmail-remote.8
 
 qmail-remote.o: \
@@ -2390,11 +2423,12 @@ qmail-send.8
 	nroff -man qmail-send.8 > qmail-send.0
 
 qmail-send.8: \
-qmail-send.9 conf-break conf-spawn
+qmail-send.9 conf-break conf-spawn conf-qmail conf-control
 	cat qmail-send.9 \
 	| sed s}QMAILHOME}"`head -1 conf-qmail`"}g \
 	| sed s}BREAK}"`head -1 conf-break`"}g \
 	| sed s}SPAWN}"`head -1 conf-spawn`"}g \
+	| sed s}@controldir\@}"`head -1 conf-control`"}g \
 	> qmail-send.8
 
 qmail-send.o: \
@@ -2584,9 +2618,10 @@ qmail-todo.0: \
 qmail-todo.8
 	nroff -man qmail-todo.8 > qmail-todo.0
 qmail-todo.8: \
-qmail-todo.9
+qmail-todo.9 conf-qmail conf-control
 	cat qmail-todo.9 \
 	| sed s}QMAIL}"`head -1 conf-qmail`"}g \
+	| sed s}@controldir\@}"`head -1 conf-control`"}g \
 	> qmail-todo.8
 
 qmail-smtpd.0: \
@@ -2594,9 +2629,10 @@ qmail-smtpd.8
 	nroff -man qmail-smtpd.8 > qmail-smtpd.0
 
 qmail-smtpd.8: \
-qmail-smtpd.9
+qmail-smtpd.9 conf-qmail conf-control
 	cat qmail-smtpd.9 \
 	| sed s}QMAILHOME}"`head -1 conf-qmail`"}g \
+	| sed s}@controldir\@}"`head -1 conf-control`"}g \
 	> qmail-smtpd.8
 
 plugin_init.3: \
@@ -2764,6 +2800,7 @@ qmail-users.5: \
 qmail-users.9 conf-break conf-spawn
 	cat qmail-users.9 \
 	| sed s}QMAIL}"`head -1 conf-qmail`"}g \
+	| sed s}@assign@}"`head -1 conf-assign`"}g \
 	| sed s}BREAK}"`head -1 conf-break`"}g \
 	| sed s}SPAWN}"`head -1 conf-spawn`"}g \
 	> qmail-users.5
@@ -2792,9 +2829,10 @@ str.a auto_qmail.o scan_ulong.o auto_control.o
 qreceipt.0: \
 qreceipt.1
 	nroff -man qreceipt.1 > qreceipt.0
-qreceipt.1: qreceipt.9
+qreceipt.1: qreceipt.9 conf-qmail conf-control
 	cat qreceipt.9 \
 	| sed s}QMAILHOME}"`head -1 conf-qmail`"}g \
+	| sed s}@controldir\@}"`head -1 conf-control`"}g \
 	> qreceipt.1
 
 qreceipt.o: \
@@ -2869,9 +2907,10 @@ substdio.a error.a str.a fs.a lock.a seek.a alloc.a
 rrforward.0: \
 rrforward.1
 	nroff -man rrforward.1 > rrforward.0
-rrforward.1: rrforward.9
+rrforward.1: rrforward.9 conf-control conf-qmail
 	cat rrforward.9 \
 	| sed s}QMAILHOME}"`head -1 conf-qmail`"}g \
+	| sed s}@controldir\@}"`head -1 conf-control`"}g \
 	> rrforward.1
 
 rrforward.o: \
@@ -3661,9 +3700,10 @@ open.a wait.a sig.a fd.a fs.a
 maildirserial.0: \
 maildirserial.1
 	nroff -man maildirserial.1 > maildirserial.0
-maildirserial.1: maildirserial.9
+maildirserial.1: maildirserial.9 conf-qmail conf-control
 	cat maildirserial.9 \
 	| sed s}QMAILHOME}"`head -1 conf-qmail`"}g \
+	| sed s}@controldir\@}"`head -1 conf-control`"}g \
 	> maildirserial.1
 
 maildirserial.o: \
@@ -4511,9 +4551,10 @@ checkdomain.0: checkdomain.1
 
 filterto.0: filterto.1
 	nroff -man filterto.1 > filterto.0
-filterto.1: filterto.9
+filterto.1: filterto.9 conf-qmail conf-control
 	cat filterto.9 \
 	| sed s}QMAILHOME}"`head -1 conf-qmail`"}g \
+	| sed s}@controldir\@}"`head -1 conf-control`"}g \
 	> filterto.1
 
 condtomaildir.0: condtomaildir.1
@@ -4527,9 +4568,10 @@ ifaddr.0: ifaddr.1
 
 replier.0: replier.1
 	nroff -man replier.1 > replier.0
-replier.1: replier.9
+replier.1: replier.9 conf-qmail conf-control
 	cat replier.9 \
 	| sed s}QMAILHOME}"`head -1 conf-qmail`"}g \
+	| sed s}@controldir\@}"`head -1 conf-control`"}g \
 	> replier.1
 
 replier-config.0: replier-config.1
@@ -4808,9 +4850,10 @@ sig.a seek.a open.a wait.a fd.a fs.a
 dot-forward.0: \
 dot-forward.1
 	nroff -man dot-forward.1 > dot-forward.0
-dot-forward.1: dot-forward.9
+dot-forward.1: dot-forward.9 conf-qmail conf-control
 	cat dot-forward.9 \
 	| sed s}QMAILHOME}"`head -1 conf-qmail`"}g \
+	| sed s}@controldir\@}"`head -1 conf-control`"}g \
 	> dot-forward.1
 
 dot-forward.o: \
@@ -4835,9 +4878,10 @@ alloc.a error.a case.a str.a fs.a sig.a wait.a seek.a open.a fd.a
 fastforward.0: \
 fastforward.1
 	nroff -man fastforward.1 > fastforward.0
-fastforward.1: fastforward.9
+fastforward.1: fastforward.9 conf-qmail conf-control
 	cat fastforward.9 \
 	| sed s}QMAILHOME}"`head -1 conf-qmail`"}g \
+	| sed s}@controldir\@}"`head -1 conf-control`"}g \
 	> fastforward.1
 
 fastforward.o: \
@@ -5548,11 +5592,12 @@ fmt.h hasindimail.h substdio.h auto_control.h
 	./compile $(inc_deps) qmail-sql.c
 
 qmail-sql.8: \
-qmail-sql.9 conf-break conf-spawn
+qmail-sql.9 conf-break conf-spawn conf-control conf-qmail
 	cat qmail-sql.9 \
 	| sed s}QMAIL}"`head -1 conf-qmail`"}g \
 	| sed s}BREAK}"`head -1 conf-break`"}g \
 	| sed s}SPAWN}"`head -1 conf-spawn`"}g \
+	| sed s}@controldir\@}"`head -1 conf-control`"}g \
 	> qmail-sql.8
 
 sys-checkpwd: \
@@ -5642,9 +5687,10 @@ str_cspn.o: \
 compile str.h str_cspn.c
 	./compile str_cspn.c
 
-surblfilter.8: surblfilter.9
+surblfilter.8: surblfilter.9 conf-qmail conf-control
 	cat surblfilter.9 \
 	| sed s}QMAILHOME}"`head -1 conf-qmail`"}g \
+	| sed s}@controldir\@}"`head -1 conf-control`"}g \
 	> surblfilter.8
 
 surblfilter: \
