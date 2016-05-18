@@ -1,5 +1,8 @@
 /*
  * $Log: vauth_adduser.c,v $
+ * Revision 2.17  2016-05-18 11:47:12+05:30  Cprogrammer
+ * use DOMAINDIR for user home directories
+ *
  * Revision 2.16  2016-01-28 16:12:01+05:30  Cprogrammer
  * null terminate quota
  *
@@ -97,7 +100,7 @@
 #include <string.h>
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vauth_adduser.c,v 2.16 2016-01-28 16:12:01+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: vauth_adduser.c,v 2.17 2016-05-18 11:47:12+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #include <mysqld_error.h>
@@ -132,7 +135,7 @@ vauth_adduser(char *user, char *domain, char *pass, char *gecos, char *dir, char
 	}
 	domstr = (char *) 0;
 	if (!domain || !*domain)
-		snprintf(dom_dir, MAX_BUFF, "%s/users", INDIMAILDIR);
+		snprintf(dom_dir, MAX_BUFF, "%s/users", DOMAINDIR);
 	else
 	{
 		if(!vget_assign(domain, dom_dir, MAX_BUFF, &uid, &gid))
