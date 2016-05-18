@@ -21,6 +21,7 @@ endif
 
 prefix=/var/indimail
 controldir=/var/indimail/control
+assigndir=/var/indimail/users
 libdkim_version=1.4
 libsrs2_version=1.0.18
 tcpserver_plugin=1
@@ -51,6 +52,7 @@ build-stamp:
 	if [ -d ucspi-tcp-0.88 ] ; then echo $(prefix) > ucspi-tcp-0.88/conf-home; fi
 	if [ -d qmail-1.03 ]     ; then echo $(prefix) > qmail-1.03/conf-qmail; fi
 	if [ -d qmail-1.03 ]     ; then echo $(controldir) > qmail-1.03/conf-control; fi
+	if [ -d qmail-1.03 ]     ; then echo $(assigndir) > qmail-1.03/conf-assign; fi
 	if [ -d ucspi-tcp-0.88 ]             ; then $(MAKE) -s -C ucspi-tcp-0.88 DESTDIR=$(DESTDIR); fi
 	if [ -d libdkim-$(libdkim_version) ] ; then $(MAKE) -s -C libdkim-$(libdkim_version) DESTDIR=$(DESTDIR); fi
 	if [ -d libsrs2-$(libsrs2_version) ] ; then $(MAKE) -s -C libsrs2-$(libsrs2_version) DESTDIR=$(DESTDIR); fi
