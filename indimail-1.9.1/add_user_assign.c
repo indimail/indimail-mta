@@ -1,5 +1,8 @@
 /*
  * $Log: add_user_assign.c,v $
+ * Revision 2.5  2016-05-18 11:42:01+05:30  Cprogrammer
+ * use ASSIGNDIR for users/assign and DOMAINDIR as home for users
+ *
  * Revision 2.4  2008-09-14 19:38:27+05:30  Cprogrammer
  * done formatting
  *
@@ -29,7 +32,7 @@
 #include <unistd.h>
 
 #ifndef	lint
-static char     sccsid[] = "$Id: add_user_assign.c,v 2.4 2008-09-14 19:38:27+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: add_user_assign.c,v 2.5 2016-05-18 11:42:01+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 /*
@@ -40,13 +43,14 @@ add_user_assign(char *user, char *dir)
 {
 	FILE           *fp;
 	static char     filename[MAX_BUFF], tmpstr1[MAX_BUFF], tmpstr2[MAX_BUFF];
-	char           *qmaildir;
+	char           *qmaildir, *assigndir;
 
 	/*
 	 * stat assign file, if it's not there create one 
 	 */
 	getEnvConfigStr(&qmaildir, "QMAILDIR", QMAILDIR);
-	snprintf(filename, MAX_BUFF, "%s/users/assign", qmaildir);
+	getEnvConfigStr(&assigndir, "ASSIGNDIR", ASSIGNDIR);
+	snprintf(filename, MAX_BUFF, "%s/assign", assigndir);
 	if (access(filename, F_OK))
 	{
 		if(!(fp = fopen(filename, "a+")))
@@ -61,22 +65,20 @@ add_user_assign(char *user, char *dir)
 		GetIndiId(&indimailuid, &indimailgid);
 	if (!dir || !*dir)
 	{
-		snprintf(tmpstr1, MAX_BUFF, "=%s:%s:%lu:%lu:%s/users/%s:::",
-				user, user, (unsigned long) indimailuid,
-				(unsigned long) indimailgid, INDIMAILDIR, user);
-		snprintf(tmpstr2, MAX_BUFF, "+%s-:%s:%lu:%lu:%s/users/%s:-::",
-				user, user, (unsigned long) indimailuid,
-				(unsigned long) indimailgid, INDIMAILDIR, user);
-	} else
-	{
-		snprintf(tmpstr1, MAX_BUFF, "=%s:%s:%lu:%lu:%s/users/%s/%s:::",
-				user, user, (unsigned long) indimailuid,
-				(unsigned long) indimailgid, INDIMAILDIR, dir, user);
-		snprintf(tmpstr2, MAX_BUFF, "+%s-:%s:%lu:%lu:%s/users/%s/%s:-::", 
-				user, user, (unsigned long) indimailuid,
-				(unsigned long) indimailgid, INDIMAILDIR, dir, user);
+		snprintf(tmpstr1, MAX_BUFF, "=%s:%s:%lu:%lu:%s/%s:::",
+			user, user, (unsigned long) indimailuid,
+			(unsigned long) indimailgid, DOMAINDIR, user);
+		snprintf(tmpstr2, MAX_BUFF, "+%s-:%s:%lu:%lu:%s/%s:-::", 
+			user, user, (unsigned long) indimailuid,
+			(unsigned long) indimailgid, DOMAINDIR, user);
+	} else {
+		snprintf(tmpstr1, MAX_BUFF, "=%s:%s:%lu:%lu:%s/%s/%s:::",
+			user, user, (unsigned long) indimailuid,
+			(unsigned long) indimailgid, DOMAINDIR, dir, user);
+		snprintf(tmpstr2, MAX_BUFF, "+%s-:%s:%lu:%lu:%s/%s/%s:-::", 
+			user, user, (unsigned long) indimailuid,
+			(unsigned long) indimailgid, DOMAINDIR, dir, user);
 	}
-
 	if(update_file(filename, tmpstr1, INDIMAIL_QMAIL_MODE) || update_file(filename, tmpstr2, INDIMAIL_QMAIL_MODE))
 		return(-1);
 	update_newu();
