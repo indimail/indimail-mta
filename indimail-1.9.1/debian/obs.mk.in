@@ -1,5 +1,8 @@
 indimaildir=@indimaildir@
 qmaildir=@qmaildir@
+controldir=@controldir@
+domaindir=@domaindir@
+assigndir=@assigndir@
 mysqlbindir=@mysqlbindir@
 moduledir=@moduledir@
 auth_inc=@auth_inc@
@@ -75,6 +78,9 @@ MOSTLYCLEANFILES= indimail.prerm indimail.preinst indimail.postrm \
 
 edit = sed \
 	-e 's,@indimaildir\@,$(indimaildir),g' \
+	-e 's,@controldir\@,$(controldir),g' \
+	-e 's,@domaindir\@,$(domaindir),g' \
+	-e 's,@assigndir\@,$(assigndir),g' \
 	-e 's,@qmaildir\@,$(qmaildir),g' \
 	-e 's,@mysqlbindir\@,$(mysqlbindir),g' \
 	-e 's,@moduledir\@,$(moduledir),g' \
