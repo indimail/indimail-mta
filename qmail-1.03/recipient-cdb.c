@@ -1,5 +1,8 @@
 /*
  * $Log: recipient-cdb.c,v $
+ * Revision 1.8  2016-05-18 15:34:23+05:30  Cprogrammer
+ * use directory defined by auto_assign for writing recipients.cdb
+ *
  * Revision 1.7  2010-03-09 14:41:27+05:30  Cprogrammer
  * renamed qmail-recipients to recipient-cdb
  *
@@ -31,7 +34,7 @@
 #include "exit.h"
 #include "open.h"
 #include "case.h"
-#include "auto_qmail.h"
+#include "auto_assign.h"
 #include "cdbmss.h"
 
 #define FATAL "recipient-cdb: fatal: "
@@ -41,13 +44,13 @@ int             rename(const char *, const char *);
 void
 die_read()
 {
-	strerr_die2sys(111, FATAL, "unable to read users/recipients: ");
+	strerr_die2sys(111, FATAL, "unable to read recipients: ");
 }
 
 void
 die_write()
 {
-	strerr_die2sys(111, FATAL, "unable to write to users/recipients.tmp: ");
+	strerr_die2sys(111, FATAL, "unable to write to recipients.tmp: ");
 }
 
 char            inbuf[1024];
@@ -65,12 +68,12 @@ int
 main()
 {
 	umask(033);
-	if (chdir(auto_qmail) == -1)
-		strerr_die4sys(111, FATAL, "unable to chdir to ", auto_qmail, ": ");
-	if ((fd = open_read("users/recipients")) == -1)
+	if (chdir(auto_assign) == -1)
+		strerr_die4sys(111, FATAL, "unable to chdir to ", auto_assign, ": ");
+	if ((fd = open_read("recipients")) == -1)
 		die_read();
 	substdio_fdbuf(&ssin, read, fd, inbuf, sizeof inbuf);
-	if ((fdtemp = open_trunc("users/recipients.tmp")) == -1)
+	if ((fdtemp = open_trunc("recipients.tmp")) == -1)
 		die_write();
 	if (cdbmss_start(&cdbmss, fdtemp) == -1)
 		die_write();
@@ -113,8 +116,8 @@ main()
 		die_write();
 	if (close(fdtemp) == -1)
 		die_write();			/*- NFS stupidity */
-	if (rename("users/recipients.tmp", "users/recipients.cdb") == -1)
-		strerr_die2sys(111, FATAL, "unable to move users/recipients.tmp to users/recipients.cdb");
+	if (rename("recipients.tmp", "recipients.cdb") == -1)
+		strerr_die2sys(111, FATAL, "unable to move recipients.tmp to recipients.cdb");
 	_exit(0);
 	/*- Not Reached */
 	return (0);
@@ -123,7 +126,7 @@ main()
 void
 getversion_qmail_recipients_c()
 {
-	static char    *x = "$Id: recipient-cdb.c,v 1.7 2010-03-09 14:41:27+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: recipient-cdb.c,v 1.8 2016-05-18 15:34:23+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
