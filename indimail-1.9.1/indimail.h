@@ -1,5 +1,8 @@
 /*
  * $Log: indimail.h,v $
+ * Revision 2.218  2016-05-18 12:43:49+05:30  Cprogrammer
+ * added dir argument to del_user_assign()
+ *
  * Revision 2.217  2016-01-28 00:03:59+05:30  Cprogrammer
  * maildirquota specification for -q option to vadduser
  *
@@ -967,7 +970,7 @@
 #define INDIMAILH_H
 
 #ifndef	lint
-static char     sccsidh[] = "$Id: indimail.h,v 2.217 2016-01-28 00:03:59+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsidh[] = "$Id: indimail.h,v 2.218 2016-05-18 12:43:49+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef HAVE_CONFIG_H
@@ -1650,7 +1653,7 @@ int             remove_line(char *, char *, int, mode_t);
 int             signal_process(char *, int);
 int             update_newu(void);
 int             add_user_assign(char *, char *);
-int             del_user_assign(char *);
+int             del_user_assign(char *, char *);
 void            lowerit(char *);
 int             update_file(char *, char *, mode_t);
 int             count_rcpthosts(void);
