@@ -238,6 +238,17 @@ AC_ARG_ENABLE(domaindir, [  --enable-domaindir=dir       directory for virtual d
 	])
 AC_DEFINE_UNQUOTED(DOMAINDIR, "$domaindir", Directory for virtual domains)
 
+assigndir=$prefix/users
+AC_ARG_ENABLE(assigndir, [  --enable-assigndir=dir       directory for qmail users/assign.],
+	assigndir="$enableval",
+	[
+	 	if test "$assigndir" != ""
+		then
+			AC_DEFINE_UNQUOTED(ASSIGNDIR,"$assigndir", Directory for qmail users/assign)
+		fi
+	])
+AC_DEFINE_UNQUOTED(ASSIGNDIR, "$assigndir", Directory for qmail users/assign)
+
 basepath="/home/mail"
 AC_ARG_ENABLE(basepath,   [  --enable-basepath=dir         Base Path for User's Home Directories.],
 	basepath="$enableval",
@@ -402,6 +413,7 @@ AC_SUBST(DATE)
 AC_SUBST(indimaildir)
 AC_SUBST(controldir)
 AC_SUBST(domaindir)
+AC_SUBST(assigndir)
 AC_DEFINE_UNQUOTED(INDIMAILDIR,"$indimaildir",IndiMail Home Directory)
 rm -f indimail.dir
 
@@ -1229,6 +1241,7 @@ then
 	echo "-L../indimail-"$VERSION"/.libs -L../indimail-"$VERSION"/eps-1.2/.libs -L../indimail-"$VERSION"/cdb-1.0/.libs $auth_libs" > ../qmail-1.03/lib_deps
 	sed "s{QMAIL{$prefix{" ../qmail-1.03/conf-qmail.in > ../qmail-1.03/conf-qmail
 	echo $controldir > ../qmail-1.03/conf-control
+	echo $assigndir > ../qmail-1.03/conf-assign
 fi
 
 (
