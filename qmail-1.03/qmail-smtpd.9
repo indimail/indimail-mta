@@ -1213,7 +1213,7 @@ or simply 'cdb':
 
 .EX
    !nocheck.com
-   @mydomain.com:users/recipients.cdb
+   @mydomain.com:recipients.cdb
    example.com|ldap_pam ldapserver host port DN passwd
    *:etc/fastforward.cdb
    *|ldap_pam otherserver
@@ -1223,7 +1223,7 @@ or simply 'cdb':
 Legacy format:
 
 .EX
-   users/recipients.cdb
+   recipients.cdb
    etc/fastforward.cdb
 .EE
 
@@ -1238,9 +1238,9 @@ evaluation.
 
 .B recipient-cdb 
 may be used to construct a 
-.I users/recipients.cdb 
+.I ASSIGN/recipients.cdb 
 from 
-.IR users/recipients .
+.IR ASSIGN/recipients .
 
 The
 .B qmail-smtpd
