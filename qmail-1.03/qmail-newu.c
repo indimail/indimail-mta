@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-newu.c,v $
+ * Revision 1.9  2016-05-18 15:20:59+05:30  Cprogrammer
+ * use env variable ASSIGNDIR or auto_assign for users/cdb and user/assign file
+ *
  * Revision 1.8  2008-06-20 16:00:34+05:30  Cprogrammer
  * added argument to process different directory for assign file
  *
@@ -26,10 +29,11 @@
 #include "cdbmss.h"
 #include "exit.h"
 #include "byte.h"
+#include "env.h"
 #include "open.h"
 #include "error.h"
 #include "case.h"
-#include "auto_qmail.h"
+#include "auto_assign.h"
 
 int             rename(const char *, const char *);
 
@@ -117,13 +121,15 @@ main(int argc, char **argv)
 {
 	int             i;
 	int             numcolons;
+	char           *assigndir;
 
-	if (chdir(argc == 1 ? auto_qmail : argv[1]) == -1)
-		die_chdir(argc == 1 ? auto_qmail : argv[1]);
-	if ((fd = open_read("users/assign")) == -1)
+	assigndir = (assigndir = env_get("ASSIGNDIR")) ? assigndir : auto_assign;
+	if (chdir(argc == 1 ? assigndir : argv[1]) == -1)
+		die_chdir(argc == 1 ? assigndir : argv[1]);
+	if ((fd = open_read("assign")) == -1)
 		die_opena();
 	substdio_fdbuf(&ssin, read, fd, inbuf, sizeof(inbuf));
-	if ((fdtemp = open_trunc("users/cdb.tmp")) == -1)
+	if ((fdtemp = open_trunc("cdb.tmp")) == -1)
 		die_opent();
 	if (cdbmss_start(&cdbmss, fdtemp) == -1)
 		die_writet();
@@ -195,7 +201,7 @@ main(int argc, char **argv)
 		die_writet();
 	if (close(fdtemp) == -1)
 		die_writet();/*- NFS stupidity */
-	if (rename("users/cdb.tmp", "users/cdb") == -1)
+	if (rename("cdb.tmp", "cdb") == -1)
 		die_rename();
 	return(0);
 }
@@ -203,7 +209,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_newu_c()
 {
-	static char    *x = "$Id: qmail-newu.c,v 1.8 2008-06-20 16:00:34+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: qmail-newu.c,v 1.9 2016-05-18 15:20:59+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
