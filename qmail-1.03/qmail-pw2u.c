@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-pw2u.c,v $
+ * Revision 1.8  2016-05-18 15:31:28+05:30  Cprogrammer
+ * use auto_assign dir for files include, exclude, mailnames, subusers, append
+ *
  * Revision 1.7  2004-10-22 20:28:39+05:30  Cprogrammer
  * added RCS id
  *
@@ -36,7 +39,7 @@
 #include "error.h"
 #include "getln.h"
 #include "auto_break.h"
-#include "auto_qmail.h"
+#include "auto_assign.h"
 #include "auto_usera.h"
 
 void
@@ -427,39 +430,32 @@ main(argc, argv)
 			_exit(100);
 		}
 
-	if (chdir(auto_qmail) == -1)
+	if (chdir(auto_assign) == -1)
 		die_chdir();
 
 	/*
 	 * no need for control_init() 
+	 * use ./ in path to avoid use control directory
 	 */
 
-	okincl = control_readfile(&incl, "../users/include", 0);
-	if (okincl == -1)
+	if ((okincl = control_readfile(&incl, "./include", 0)) == -1)
 		die_control();
-	if (okincl)
-		if (!constmap_init(&mapincl, incl.s, incl.len, 0))
-			die_nomem();
+	if (okincl && !constmap_init(&mapincl, incl.s, incl.len, 0))
+		die_nomem();
 
-	okexcl = control_readfile(&excl, "../users/exclude", 0);
-	if (okexcl == -1)
+	if ((okexcl = control_readfile(&excl, "./exclude", 0)) == -1)
 		die_control();
-	if (okexcl)
-		if (!constmap_init(&mapexcl, excl.s, excl.len, 0))
-			die_nomem();
+	if (okexcl && !constmap_init(&mapexcl, excl.s, excl.len, 0))
+		die_nomem();
 
-	okmana = control_readfile(&mana, "../users/mailnames", 0);
-	if (okmana == -1)
+	if ((okmana = control_readfile(&mana, "./mailnames", 0)) == -1)
 		die_control();
-	if (okmana)
-		if (!constmap_init(&mapmana, mana.s, mana.len, 1))
-			die_nomem();
+	if (okmana && !constmap_init(&mapmana, mana.s, mana.len, 1))
+		die_nomem();
 
 	if (!stralloc_copys(&allusers, ""))
 		die_nomem();
-
-	for (;;)
-	{
+	for (;;) {
 		if (getln(subfdin, &line, &match, '\n') == -1)
 			die_read();
 		doaccount();
@@ -469,20 +465,16 @@ main(argc, argv)
 	if (!flagalias)
 		die_alias();
 
-	fd = open_read("users/subusers");
-	if (fd == -1)
-	{
+	if ((fd = open_read("subusers")) == -1) {
 		if (errno != error_noent)
 			die_control();
-	} else
-	{
+	} else {
 		substdio_fdbuf(&ss, read, fd, ssbuf, sizeof(ssbuf));
 
 		if (!constmap_init(&mapuser, allusers.s, allusers.len, 1))
 			die_nomem();
 
-		for (;;)
-		{
+		for (;;) {
 			if (getln(&ss, &line, &match, '\n') == -1)
 				die_read();
 			dosubuser();
@@ -493,16 +485,12 @@ main(argc, argv)
 		close(fd);
 	}
 
-	fd = open_read("users/append");
-	if (fd == -1)
-	{
+	if ((fd = open_read("append")) == -1) {
 		if (errno != error_noent)
 			die_control();
-	} else
-	{
+	} else {
 		substdio_fdbuf(&ss, read, fd, ssbuf, sizeof(ssbuf));
-		for (;;)
-		{
+		for (;;) {
 			if (getln(&ss, &line, &match, '\n') == -1)
 				die_read();
 			if (substdio_put(subfdout, line.s, line.len) == -1)
@@ -523,7 +511,7 @@ main(argc, argv)
 void
 getversion_qmail_pw2u_c()
 {
-	static char    *x = "$Id: qmail-pw2u.c,v 1.7 2004-10-22 20:28:39+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: qmail-pw2u.c,v 1.8 2016-05-18 15:31:28+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
