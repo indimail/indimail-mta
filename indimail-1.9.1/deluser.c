@@ -1,5 +1,8 @@
 /*
  * $Log: deluser.c,v $
+ * Revision 2.28  2016-05-18 12:43:34+05:30  Cprogrammer
+ * added dir argument to del_user_assign()
+ *
  * Revision 2.27  2016-01-12 14:26:36+05:30  Cprogrammer
  * use AF_INET for get_local_ip()
  *
@@ -138,7 +141,7 @@
 #endif
 
 #ifndef	lint
-static char     sccsid[] = "$Id: deluser.c,v 2.27 2016-01-12 14:26:36+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: deluser.c,v 2.28 2016-05-18 12:43:34+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 /*-
@@ -392,9 +395,8 @@ vdeluser(char *user, char *domain, int remove_db)
 			error_stack(stderr, "%s: No such user\n", user);
 			return (-1);
 		}
-		if (remove_db && del_user_assign(user))
+		if (remove_db && del_user_assign(user, Dir))
 			return (-1);
-		snprintf(Dir, MAX_BUFF, "%s/users/%s", INDIMAILDIR, user);
 		real_domain = NULL;
 	}
 	if (remove_db == 1)
