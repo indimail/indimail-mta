@@ -1,5 +1,8 @@
 /*
  * $Log: vdominfo.c,v $
+ * Revision 2.19  2016-05-18 11:47:29+05:30  Cprogrammer
+ * use ASSIGNDIR for users/assign
+ *
  * Revision 2.18  2016-05-17 17:09:39+05:30  Cprogrammer
  * use control directory set by configure
  *
@@ -131,7 +134,7 @@
 #include <sys/socket.h>
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vdominfo.c,v 2.18 2016-05-17 17:09:39+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: vdominfo.c,v 2.19 2016-05-18 11:47:29+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 char            Domain[MAX_BUFF];
@@ -497,10 +500,10 @@ void
 display_all_domains()
 {
 	FILE           *fs;
-	char           *tmpstr, *qmaildir;
+	char           *tmpstr, *assigndir;
 
-	getEnvConfigStr(&qmaildir, "QMAILDIR", QMAILDIR);
-	snprintf(TmpBuf, MAX_BUFF, "%s/users/assign", qmaildir);
+	getEnvConfigStr(&assigndir, "ASSIGNDIR", ASSIGNDIR);
+	snprintf(TmpBuf, MAX_BUFF, "%s/assign", assigndir);
 	if ((fs = fopen(TmpBuf, "r")) == NULL)
 	{
 		perror(TmpBuf);
