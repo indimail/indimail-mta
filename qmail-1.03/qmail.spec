@@ -1,6 +1,6 @@
 #
 #
-# $Id: qmail.spec,v 1.37 2016-05-17 23:14:10+05:30 Cprogrammer Exp mbhangui $
+# $Id: qmail.spec,v 1.38 2016-05-18 15:35:53+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %define _unpackaged_files_terminate_build 1
 
@@ -31,6 +31,7 @@
 
 %define _prefix            /var/indimail
 %define controldir         /var/indimail/control
+%define assigndir          /var/indimail/users
 %define ucspi_version      0.88
 %define qmail_version      1.03
 %define libdkim_version    1.4
@@ -368,6 +369,7 @@ if [ -d qmail-%{qmail_version} ] ; then
 	%{__rm} -f qmail-%{qmail_version}/conf-shared
 %endif
 	echo %{controldir} > qmail-%{qmail_version}/conf-control
+	echo %{assigndir} > qmail-%{qmail_version}/conf-assign
 fi
 #### ucspi-tcp ######################
 if [ -d ucspi-tcp-%{ucspi_version} ] ; then
