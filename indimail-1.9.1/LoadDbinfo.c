@@ -1,5 +1,8 @@
 /*
  * $Log: LoadDbinfo.c,v $
+ * Revision 2.43  2016-05-18 11:48:14+05:30  Cprogrammer
+ * use ASSIGNDIR for users/assign
+ *
  * Revision 2.42  2016-05-17 17:09:39+05:30  Cprogrammer
  * use control directory set by configure
  *
@@ -140,7 +143,7 @@
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: LoadDbinfo.c,v 2.42 2016-05-17 17:09:39+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: LoadDbinfo.c,v 2.43 2016-05-18 11:48:14+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #include <sys/types.h>
@@ -687,7 +690,7 @@ localDbinfo(int *total, DBINFO ***rhosts)
 {
 	FILE           *fp, *mfp;
 	char           *mysqlhost, *mysql_user = 0, *mysql_passwd = 0; 
-	char           *mysql_database = 0, *qmaildir, *controldir, *ptr, *domain;
+	char           *mysql_database = 0, *qmaildir, *assigndir, *controldir, *ptr, *domain;
 	char           *localhost, *mysql_socket = 0, *mysql_port = 0;
 	char            host_path[MAX_BUFF], mysqlhost_buf[MAX_BUFF], TmpBuf[MAX_BUFF];
 	int             count, field_count, found;
@@ -695,7 +698,8 @@ localDbinfo(int *total, DBINFO ***rhosts)
 
 	relayhosts = *rhosts;
 	getEnvConfigStr(&qmaildir, "QMAILDIR", QMAILDIR);
-	snprintf(TmpBuf, MAX_BUFF, "%s/users/assign", qmaildir);
+	getEnvConfigStr(&assigndir, "ASSIGNDIR", ASSIGNDIR);
+	snprintf(TmpBuf, MAX_BUFF, "%s/assign", assigndir);
 	if (!(fp = fopen(TmpBuf, "r")))
 	{
 		fprintf(stderr, "fopen: %s: %s\n", TmpBuf, strerror(errno));
