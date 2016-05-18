@@ -1,3 +1,4 @@
+auto_assign.o
 auto_control.o
 auto_control.c
 dns.h
@@ -543,6 +544,7 @@ qmail-limits.0
 qmail-limits.7
 qmail-local
 qmail-local.0
+qmail-local.8
 qmail-local.o
 qmail-log.0
 qmail-lspawn
@@ -651,6 +653,7 @@ qquote.o
 qreceipt
 qreceipt.0
 qreceipt.o
+qreceipt.1
 qregex.o
 qscanq
 qscanq.0
@@ -943,6 +946,7 @@ dns_text.o
 dns_text_dkim.o
 qmail-dk.8
 dk-filter
+dk-filter.8
 qmail-qfilter.0
 matchregex.o
 qregex_smtpd.o
@@ -957,6 +961,7 @@ batv.o
 batv
 qmail-greyd.o
 qmail-greyd
+qmail-greyd.0
 uacl
 uacl.o
 dkim.8
@@ -981,7 +986,6 @@ filterto.1
 maildirserial.1
 condredirect.1
 rrforward.1
-qreceipt.1
 hmac_md5.o
 hmac_sha1.obj
 md5c.o
@@ -992,6 +996,7 @@ qarf
 qarf.o
 qnotify
 qnotify.o
+qnotify.1
 smtp_plugin.o
 smtpd-plugin.so
 plugtest
@@ -1064,3 +1069,4 @@ qmail_smtpd.so
 str_end.o
 lock_sh.o
 sig_int.o
+queue-fix.0

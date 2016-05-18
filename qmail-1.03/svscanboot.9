@@ -21,7 +21,7 @@ If \fBsvscanboot\fR is given a command-line argument, it startups up svscan for 
 
 \fBsvscanboot\fR sets \fBSCANINTERVAL\fR environment variable to 300 seconds. This causes
 \fBsvscan\fR to look for new services every 300 seconds. You can change the interval by having
-the scan interval specified in the control file QMAIL/control/scaninterval. \fBsvscan\fR also
+the scan interval specified in the control file @controldir@/scaninterval. \fBsvscan\fR also
 sets the \fBSCANLOG\fR environment variable to have \fBsvscan\fR log all messages
 and errors using \fBmultilog\fR, in the directory \fIservicedir\fR/.svscan/log/current.
 

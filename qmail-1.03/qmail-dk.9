@@ -113,11 +113,11 @@ nor
 .B DKVERIFY
 are set, then
 .B DKSIGN
-will be set to QMAILHOME/control/domainkeys/%/default. The % will be replaced by the domain in the
+will be set to @controldir@/domainkeys/%/default. The % will be replaced by the domain in the
 From: header. If such a file does not exist, then it will be set to
-QMAILHOME/control/domainkeys/default. If such a private key exists, it will be used to sign the
+@controldir@/domainkeys/default. If such a private key exists, it will be used to sign the
 domain. You can also set \fBDKKEY\fR to chose a key different from
-QMAILHOME/control/domainkeys/%/default. \fBDKKEY\fR can also have % character that will be
+@controldir@/domainkeys/%/default. \fBDKKEY\fR can also have % character that will be
 replaced by the domain in the From: header.
 
 By default

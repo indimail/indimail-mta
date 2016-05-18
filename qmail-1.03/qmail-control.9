@@ -8,7 +8,7 @@ system by modifying
 .BR qmail 's
 .I control files
 in
-.BR QMAIL/control .
+.BR @controldir@ .
 
 .B qmail
 can survive with just one control file,
@@ -18,7 +18,7 @@ fully-qualified name of the current host.
 This file is used as the default for
 other hostname-related control files.
 
-If control files are required apart from what is present in QMAIL/control, you can
+If control files are required apart from what is present in @controldir@, you can
 set the environment variable CONTROLDIR. This forces qmail system to look at path
 defined by CONTROLDIR for all control files.
 

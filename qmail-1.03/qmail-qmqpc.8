@@ -22,7 +22,7 @@ is replaced with a symbolic link to
 IP addresses of QMQP servers, one address per line.
 .B qmail-qmqpc
 will try each address in turn until it establishes a QMQP connection
-or runs out of addresses. If \fIqmqpservers\fR control file has the sticky bit set,
+or runs out of addresses. If control file \fIqmqpservers\fR has the sticky bit set,
 \fBqmail-qmqpc\fR will use the modulus of current
 time in seconds and the number of servers in \fIqmqpservers\fR file to select just one
 address. If this address fails, \fBqmail-qmqpc\fR will revert to the traditional method where
