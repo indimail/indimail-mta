@@ -1,5 +1,8 @@
 /*
  * $Log: setup.c,v $
+ * Revision 1.23  2016-05-18 15:54:59+05:30  Cprogrammer
+ * added comments for documentation
+ *
  * Revision 1.22  2014-07-27 12:16:27+05:30  Cprogrammer
  * added comment for ci()
  *
@@ -84,7 +87,9 @@ void            df(int, int, int, char *, char *, char *, int);
 int             fdsourcedir = -1;
 uid_t           my_uid;
 char           *mailuser = "mail";
+char           *mailgroup = "mail";
 
+/*- gnu install style display */
 void
 dd(cmd, uid, gid, mode, home, subdir)
 	char           *cmd;
@@ -129,7 +134,7 @@ dd(cmd, uid, gid, mode, home, subdir)
 		substdio_puts(subfderr, get_user(uid));
 	substdio_puts(subfderr, ":");
 	if (my_uid)
-		substdio_puts(subfderr, "mail");
+		substdio_puts(subfderr, mailgroup);
 	else
 		substdio_puts(subfderr, get_group(gid));
 	substdio_puts(subfderr, " ");
@@ -164,7 +169,7 @@ df(uid, gid, mode, file, home, subdir, strip)
 		substdio_puts(subfderr, get_user(uid));
 	substdio_puts(subfderr, " -g ");
 	if (my_uid)
-		substdio_puts(subfderr, "mail");
+		substdio_puts(subfderr, mailgroup);
 	else
 		substdio_puts(subfderr, get_group(gid));
 	substdio_puts(subfderr, " -m ");
@@ -364,8 +369,9 @@ main(int argc, char **argv)
 
 #ifdef DARWIN
 	mailuser = "daemon";
+	mailgroup = "daemon";
 #endif
-	if (env_get("FAKED_MODE"))
+	if (env_get("FAKED_MODE")) /*-fix for debian generation */
 		my_uid = 1;
 	else
 		my_uid = getuid();
@@ -373,7 +379,7 @@ main(int argc, char **argv)
 		strerr_die2sys(111, FATAL, "unable to open current directory: ");
 	if (my_uid)
 	{
-		if (!(pw = getpwnam(mailuser)))
+		if (!(pw = getpwnam(mailuser))) /*- we expect this user to be present on all linux distros */
 			strerr_die2sys(111, FATAL, "unable to get uids/gids: ");
 		auto_uida = pw->pw_uid;
 		auto_gidn = pw->pw_gid;
@@ -395,7 +401,7 @@ main(int argc, char **argv)
 void
 getversion_setup_c()
 {
-	static char    *x = "$Id: setup.c,v 1.22 2014-07-27 12:16:27+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: setup.c,v 1.23 2016-05-18 15:54:59+05:30 Cprogrammer Exp mbhangui $";
 #ifdef INDIMAIL
 	if (x)
 		x = sccsidh;
