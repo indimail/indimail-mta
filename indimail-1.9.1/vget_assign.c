@@ -1,5 +1,8 @@
 /*
  * $Log: vget_assign.c,v $
+ * Revision 2.5  2016-05-18 11:47:38+05:30  Cprogrammer
+ * use ASSIGNDIR for users/cdb
+ *
  * Revision 2.4  2009-02-09 12:25:26+05:30  Cprogrammer
  * added prototype for cdb_seek()
  *
@@ -29,7 +32,7 @@
 #include <stdlib.h>
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vget_assign.c,v 2.4 2009-02-09 12:25:26+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: vget_assign.c,v 2.5 2016-05-18 11:47:38+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 extern int      cdb_seek(int, unsigned char *, unsigned int, int *);
@@ -44,7 +47,7 @@ char *
 vget_assign(char *domain, char *dir, int dir_len, uid_t *uid, gid_t *gid)
 {
 	int             dlen, i, fs;
-	char           *ptr, *qmaildir, *tmpstr, *tmpbuf1;
+	char           *ptr, *assigndir, *tmpstr, *tmpbuf1;
 	char            tmpbuf2[MAX_BUFF];
 	static char    *in_domain = NULL;
 	static char    *in_dir = NULL;
@@ -74,8 +77,8 @@ vget_assign(char *domain, char *dir, int dir_len, uid_t *uid, gid_t *gid)
 	if (!_cacheSwitch)
 		_cacheSwitch = 1;
 #endif
-	getEnvConfigStr(&qmaildir, "QMAILDIR", QMAILDIR);
-	snprintf(tmpbuf2, MAX_BUFF, "%s/users/cdb", qmaildir);
+	getEnvConfigStr(&assigndir, "ASSIGNDIR", ASSIGNDIR);
+	snprintf(tmpbuf2, MAX_BUFF, "%s/cdb", assigndir);
 	if ((fs = open(tmpbuf2, O_RDONLY)) == -1)
 	{
 		if (uid)
