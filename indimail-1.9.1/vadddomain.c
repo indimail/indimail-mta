@@ -1,5 +1,8 @@
 /*
  * $Log: vadddomain.c,v $
+ * Revision 2.35  2016-05-18 11:47:03+05:30  Cprogrammer
+ * fixed comments
+ *
  * Revision 2.34  2016-05-17 15:24:11+05:30  Cprogrammer
  * use domain directory set by configure
  *
@@ -168,7 +171,7 @@
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vadddomain.c,v 2.34 2016-05-17 15:24:11+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: vadddomain.c,v 2.35 2016-05-18 11:47:03+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 
@@ -248,7 +251,7 @@ main(argc, argv)
 	}
 	/*
 	 * add domain to virtualdomains and optionally to chkrcptdomains
-	 * add domain to /var/indimail/users/assign, /var/indimail/users/cdb
+	 * add domain to users/assign, users/cdb
 	 * create .qmail-default file
 	 */
 	if (base_path && !use_etrn)
