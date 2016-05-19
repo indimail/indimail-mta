@@ -46,7 +46,7 @@ man_MANS=vadduser.1 adminclient.8 chowkidar.8 clearopensmtp.8 dbinfo.8 hostcntrl
 	vdeluser.1 vdominfo.1 vfilter.8 vfstab.8 vgroup.1 vhostid.8 vipmap.1 vmoddomain.1 \
 	vlimit.1 vmoduser.1 vmoveuser.1 vpasswd.1 vpriv.8 vproxy.8 vrenamedomain.1 \
 	vrenameuser.1 vreorg.8 vsetuserquota.1 vsmtp.8 vuserinfo.1 indimail.7 IndiMail.7 \
-	updaterules.8 osh.8 svctool.8 systpass.8 vserverinfo.1 sslerator.1 echo.1 \
+	updaterules.8 osh.8 svctool.8 systpass.8 vserverinfo.1 sslerator.1 iecho.1 \
 	ismaildup.1 login_tasks.3 vtable.1 install_tables.8
 
 setuid_list = ../sbin/systpass vdeldomain vadddomain vadduser vdeluser \
@@ -143,7 +143,7 @@ indimailbin_PROGRAMS = crc crcdiff dbinfo displaytop hashtable hostcntrl indiver
 	printdir proxyimap proxypop3 resetquota sslerator vacation vaddaliasdomain vadddomain \
 	vadduser vadduserl valias vatrn vbulletin vcalias vcfilter vdeldomain vdeluser \
 	vdominfo vgroup vhostid vipmap vlimit vmoduser vmoveuser vpasswd vpriv ismaildup \
-	vproxy vrenamedomain vrenameuser vsetuserquota vsmtp vuserinfo crypt echo
+	vproxy vrenamedomain vrenameuser vsetuserquota vsmtp vuserinfo crypt iecho
 indimailsbin_PROGRAMS = adminclient chowkidar cindimail clearopensmtp config_settings \
 	copyemail execmysql hostsync indisrvr initsvc inlookup inquerytest install_tables \
 	ipchange mail_report mgmtpass osh postdel systpass testmra updatefile updaterules \
@@ -425,8 +425,8 @@ indiversion_DEPENDENCIES = indimail_settings.lo tls.lo proxylogin.lo auth_admin.
 indiversion_LDADD = proxylogin.lo tls.lo auth_admin.lo adminCmmd.lo storeHeader.lo \
 					parseAddress.lo @auth_libs@ $(top_builddir)/eps-1.2/libeps.la
 
-echo_SOURCES=echo.c
-echo_LDADD=
+iecho_SOURCES=iecho.c
+iecho_LDADD=
 
 addaliasdomain.lo: indimail.h config.h
 add_control.lo: indimail.h config.h
@@ -900,10 +900,10 @@ crc.$(OBJEXT): crc.c
 crc$(EXEEXT): $(crc_DEPENDENCIES) $(crc_OBJECTS)
 	$(LINK) $@.$(OBJEXT) $(crc_LDADD)
 
-echo.$(OBJEXT): echo.c
-	$(COMPILE) $(DEFS) -c echo.c
-echo$(EXEEXT): $(echo_DEPENDENCIES) $(echo_OBJECTS)
-	$(LINK) $@.$(OBJEXT) $(echo_LDADD)
+iecho.$(OBJEXT): iecho.c
+	$(COMPILE) $(DEFS) -c iecho.c
+iecho$(EXEEXT): $(iecho_DEPENDENCIES) $(iecho_OBJECTS)
+	$(LINK) $@.$(OBJEXT) $(iecho_LDADD)
 
 displaytop.$(OBJEXT): displaytop.c
 	$(COMPILE) $(DEFS) -DMAIN -c displaytop.c

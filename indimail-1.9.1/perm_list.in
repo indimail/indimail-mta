@@ -128,7 +128,7 @@
 %attr(0555,root,qmail) @indimaildir@/bin/dnstxt
 %attr(0555,root,qmail) @indimaildir@/bin/dot-forward
 %attr(0555,root,qmail) @indimaildir@/bin/drate
-%attr(0555,root,qmail) @indimaildir@/bin/echo
+%attr(0555,root,qmail) @indimaildir@/bin/iecho
 %attr(0555,root,qmail) @indimaildir@/bin/elq
 %attr(0555,root,qmail) @indimaildir@/bin/envdir
 %attr(0555,root,qmail) @indimaildir@/bin/envmigrate
@@ -808,7 +808,7 @@
 %attr(0444,root,qmail) @indimaildir@/man/man1/delcr.1.gz
 %attr(0444,root,qmail) @indimaildir@/man/man1/dot-forward.1.gz
 %attr(0444,root,qmail) @indimaildir@/man/man1/drate.1.gz
-%attr(0444,root,qmail) @indimaildir@/man/man1/echo.1.gz
+%attr(0444,root,qmail) @indimaildir@/man/man1/iecho.1.gz
 %attr(0444,root,qmail) @indimaildir@/man/man1/except.1.gz
 %attr(0444,root,qmail) @indimaildir@/man/man1/fastforward.1.gz
 %attr(0444,root,qmail) @indimaildir@/man/man1/fetchmail.1.gz
