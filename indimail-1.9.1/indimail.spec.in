@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail.spec.in,v 2.328 2016-05-19 09:02:14+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 2.329 2016-05-19 13:18:44+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %define _unpackaged_files_terminate_build 1
 
@@ -672,9 +672,9 @@ cd ..
 if [ -d ucspi-tcp-%{ucspi_version} ] ; then
 	%{__sed} 's{HOME{%{_prefix}{' ucspi-tcp-%{ucspi_version}/conf-home.in > ucspi-tcp-%{ucspi_version}/conf-home
 %if %{tcpserver_plugin} == 1
-	echo "-DLOAD_SHARED_OBJECTS" > ucspi-tcp-0.88/conf-shared
+	echo "-DLOAD_SHARED_OBJECTS" > ucspi-tcp-0.88/conf-dlopen
 %else
-	%{__rm} -f ucsp-tcp-0.88/conf-shared
+	%{__rm} -f ucsp-tcp-0.88/conf-dlopen
 %endif
 fi
 if [ $ID -eq 0 ] ; then
