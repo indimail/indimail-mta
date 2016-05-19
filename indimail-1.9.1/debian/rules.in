@@ -64,9 +64,9 @@ build-stamp:
 	#
 	# run configure script
 	#
-	if [ -d qmail-1.03 ] ; then /bin/rm -f qmail-1.03/conf-shared; fi
-	if [ -d ucspi-tcp-0.88 ] ; then /bin/rm -f ucspi-tcp-0.88/conf-shared; fi
-	if [ $(tcpserver_plugin) -eq 1 ] ; then echo "-DLOAD_SHARED_OBJECTS" > qmail-1.03/conf-shared; echo "-DLOAD_SHARED_OBJECTS" > ucspi-tcp-0.88/conf-shared; fi
+	if [ -d qmail-1.03 ] ; then /bin/rm -f qmail-1.03/conf-dlopen; fi
+	if [ -d ucspi-tcp-0.88 ] ; then /bin/rm -f ucspi-tcp-0.88/conf-dlopen; fi
+	if [ $(tcpserver_plugin) -eq 1 ] ; then echo "-DLOAD_SHARED_OBJECTS" > qmail-1.03/conf-dlopen; echo "-DLOAD_SHARED_OBJECTS" > ucspi-tcp-0.88/conf-dlopen; fi
 	#
 	if [ -d libdkim-$(libdkim_version) ] ; then cd libdkim-$(libdkim_version) ; ./configure --prefix=$(prefix) --libdir=$(libdir) --mandir=$(prefix)/man ; cd ..; fi
 	if [ -d libsrs2-$(libsrs2_version) ] ; then cd libsrs2-$(libsrs2_version) ; ./configure --prefix=$(prefix) --libdir=$(libdir) --mandir=$(prefix)/man ; cd ..; fi
