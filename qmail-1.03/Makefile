@@ -115,7 +115,7 @@ compile auto_qmail.c
 	./compile auto_qmail.c
 
 auto_control.c: \
-auto-str conf-qmail
+auto-str conf-control
 	./auto-str auto_control `head -1 conf-control` > auto_control.c
 
 auto_control.o: \
@@ -129,6 +129,14 @@ auto-str conf-assign
 auto_assign.o: \
 compile auto_assign.c
 	./compile auto_assign.c
+
+auto_shared.c: \
+auto-str conf-shared
+	./auto-str auto_shared `head -1 conf-control` > auto_shared.c
+
+auto_shared.o: \
+compile auto_shared.c
+	./compile auto_shared.c
 
 auto_spawn.c: \
 auto-int conf-spawn
@@ -1011,7 +1019,7 @@ hier.o: \
 compile hier.c auto_qmail.h auto_split.h auto_uids.h fmt.h fifo.h \
 qmail-todo.h hasindimail.h tcpto.h ip.h ipalloc.h hassrs.h \
 conf-domainkeys conf-srs conf-spf conf-ip conf-dkim conf-batv \
-conf-plugin conf-dlopen
+auto_shared.h auto_control.h auto_assign.h conf-plugin conf-dlopen
 	./compile $(inc_deps) \
 	`grep -h -v "^#" conf-tls conf-spf conf-ip conf-domainkeys conf-dkim \
 	conf-batv conf-plugin conf-dlopen` hier.c
@@ -1051,11 +1059,11 @@ setup: \
 load setup.o hier.o auto_qmail.o auto_uids.o get_uid.o \
 auto_control.o auto_assign.o subgetopt.o sgetopt.o \
 str_cpy.o strerr.a substdio.a open.a error.a str.a fs.a env.a \
-stralloc.a alloc.a stralloc.a
+auto_shared.o stralloc.a alloc.a stralloc.a
 	./load setup hier.o auto_qmail.o auto_uids.o get_uid.o \
 	auto_control.o auto_assign.o subgetopt.o sgetopt.o \
 	str_cpy.o strerr.a substdio.a open.a error.a str.a env.a \
-	stralloc.a alloc.a stralloc.a
+	auto_shared.o stralloc.a alloc.a stralloc.a
 
 setup.o: \
 compile setup.c substdio.h strerr.h error.h open.h env.h stralloc.h \
@@ -1065,11 +1073,11 @@ sgetopt.h auto_assign.h
 
 instcheck: \
 load instcheck.o hier.o auto_qmail.o get_uid.o auto_uids.o \
-auto_control.o auto_assign.o alloc.a \
+auto_shared.o auto_control.o auto_assign.o alloc.a \
 strerr.a substdio.a error.a str.a alloc.a stralloc.a
 	./load instcheck hier.o auto_qmail.o get_uid.o \
-	auto_control.o auto_assign.o auto_uids.o strerr.a \
-	substdio.a error.a str.a alloc.a stralloc.a alloc.a
+	auto_shared.o auto_control.o auto_assign.o auto_uids.o \
+	strerr.a substdio.a error.a str.a alloc.a stralloc.a alloc.a
 
 instcheck.o: \
 compile instcheck.c strerr.h error.h exit.h hasindimail.h
