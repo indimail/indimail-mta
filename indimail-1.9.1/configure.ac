@@ -216,7 +216,7 @@ AC_ARG_ENABLE(postfixdir, [  --enable-postfixdir=dir       directory where Postf
 		fi
 	])
 
-controldir=$prefix/control
+controldir="`dirname $sysconfdir`/control"
 AC_ARG_ENABLE(controldir, [  --enable-controldir=dir       directory for control files.],
 	controdir="$enableval",
 	[
@@ -238,7 +238,7 @@ AC_ARG_ENABLE(domaindir, [  --enable-domaindir=dir       directory for virtual d
 	])
 AC_DEFINE_UNQUOTED(DOMAINDIR, "$domaindir", Directory for virtual domains)
 
-assigndir=$prefix/users
+assigndir="`dirname $sysconfdir`/users"
 AC_ARG_ENABLE(assigndir, [  --enable-assigndir=dir       directory for qmail users/assign.],
 	assigndir="$enableval",
 	[
@@ -1240,8 +1240,7 @@ then
 	echo "-I../indimail-"$VERSION" -I../indimail-"$VERSION"/eps-1.2 $auth_inc" > ../qmail-1.03/inc_deps; \
 	echo "-L../indimail-"$VERSION"/.libs -L../indimail-"$VERSION"/eps-1.2/.libs -L../indimail-"$VERSION"/cdb-1.0/.libs $auth_libs" > ../qmail-1.03/lib_deps
 	sed "s{QMAIL{$prefix{" ../qmail-1.03/conf-qmail.in > ../qmail-1.03/conf-qmail
-	echo $controldir > ../qmail-1.03/conf-control
-	echo $assigndir > ../qmail-1.03/conf-assign
+	echo $sysconfdir > ../qmail-1.03/conf-sysconfdir
 fi
 
 (
@@ -1264,6 +1263,7 @@ echo "-------------------------------------------------------------"
 echo "   qmail directory = $qmaildir --enable-qmaildir=$qmaildir"
 echo " control directory = $controldir --enable-controldir=$controldir"
 echo " domains directory = $domaindir --enable-domaindir=$domaindir"
+echo "        sysconfdir = $sysconfdir"
 if test "$postfixdir" != ""
 then
 	echo " Postfix directory = $postfixdir --enable-postfixdir=$postfixdir"
