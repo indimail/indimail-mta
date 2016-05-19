@@ -1,6 +1,6 @@
 #
 #
-# $Id: qmail.spec,v 1.38 2016-05-18 15:35:53+05:30 Cprogrammer Exp mbhangui $
+# $Id: qmail.spec,v 1.39 2016-05-19 09:00:53+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %define _unpackaged_files_terminate_build 1
 
@@ -364,9 +364,9 @@ fi
 if [ -d qmail-%{qmail_version} ] ; then
 	%{__sed} 's{QMAIL{%{_prefix}{' qmail-%{qmail_version}/conf-qmail.in > qmail-%{qmail_version}/conf-qmail
 %if %{tcpserver_plugin} == 1
-	echo "-DLOAD_SHARED_OBJECTS" > qmail-%{qmail_version}/conf-shared
+	echo "-DLOAD_SHARED_OBJECTS" > qmail-%{qmail_version}/conf-dlopen
 %else
-	%{__rm} -f qmail-%{qmail_version}/conf-shared
+	%{__rm} -f qmail-%{qmail_version}/conf-dlopen
 %endif
 	echo %{controldir} > qmail-%{qmail_version}/conf-control
 	echo %{assigndir} > qmail-%{qmail_version}/conf-assign
@@ -375,9 +375,9 @@ fi
 if [ -d ucspi-tcp-%{ucspi_version} ] ; then
 	%{__sed} 's{HOME{%{_prefix}{' ucspi-tcp-%{ucspi_version}/conf-home.in > ucspi-tcp-%{ucspi_version}/conf-home
 %if %{tcpserver_plugin} == 1
-	echo "-DLOAD_SHARED_OBJECTS" > ucsp-tcp-%{ucspi_version}/conf-shared
+	echo "-DLOAD_SHARED_OBJECTS" > ucsp-tcp-%{ucspi_version}/conf-dlopen
 %else
-	%{__rm} -f ucsp-tcp-%{ucspi_version}/conf-shared
+	%{__rm} -f ucsp-tcp-%{ucspi_version}/conf-dlopen
 %endif
 fi
 
@@ -543,8 +543,8 @@ done
 %ghost %attr(0644,root,root)                      %{_prefix}/etc/services.log
 
 %attr(444,root,root)                              %{_prefix}/etc/qmailprog.list
-%attr(444,root,root)                              %{_prefix}/etc/leapsecs.dat
-%attr(444,root,root)                              %{_prefix}/etc/leapsecs.txt
+%attr(444,root,qmail)                             %{_prefix}/etc/leapsecs.dat
+%attr(444,root,qmail)                             %{_prefix}/etc/leapsecs.txt
 
 %if %noperms == 0
 %if 0%{?suse_version} >= 1120
