@@ -49,7 +49,7 @@ auto-ccld.sh: conf-cc conf-ld warn-auto.sh
 
 auto-gid: \
 load auto-gid.o substdio.a error.a str.a fs.a
-	./load auto-gid substdio.a error.a str.a fs.a 
+	./load auto-gid substdio.a error.a str.a fs.a
 
 auto-gid.o: \
 compile auto-gid.c subfd.h substdio.h exit.h \
@@ -58,7 +58,7 @@ scan.h fmt.h
 
 auto-int: \
 load auto-int.o substdio.a error.a str.a fs.a
-	./load auto-int substdio.a error.a str.a fs.a 
+	./load auto-int substdio.a error.a str.a fs.a
 
 auto-int.o: \
 compile auto-int.c substdio.h exit.h scan.h fmt.h
@@ -66,7 +66,7 @@ compile auto-int.c substdio.h exit.h scan.h fmt.h
 
 auto-int8: \
 load auto-int8.o substdio.a error.a str.a fs.a
-	./load auto-int8 substdio.a error.a str.a fs.a 
+	./load auto-int8 substdio.a error.a str.a fs.a
 
 auto-int8.o: \
 compile auto-int8.c substdio.h exit.h scan.h fmt.h
@@ -74,7 +74,7 @@ compile auto-int8.c substdio.h exit.h scan.h fmt.h
 
 auto-str: \
 load auto-str.o substdio.a error.a str.a
-	./load auto-str substdio.a error.a str.a 
+	./load auto-str substdio.a error.a str.a
 
 auto-str.o: \
 compile auto-str.c substdio.h exit.h
@@ -82,7 +82,7 @@ compile auto-str.c substdio.h exit.h
 
 auto-uid: \
 load auto-uid.o substdio.a error.a str.a fs.a
-	./load auto-uid substdio.a error.a str.a fs.a 
+	./load auto-uid substdio.a error.a str.a fs.a
 
 auto-uid.o: \
 compile auto-uid.c subfd.h substdio.h exit.h \
@@ -304,7 +304,7 @@ binm3+df.sh conf-qmail
 bouncesaying: \
 load bouncesaying.o strerr.a error.a substdio.a str.a wait.a
 	./load bouncesaying strerr.a error.a substdio.a str.a \
-	wait.a 
+	wait.a
 
 bouncesaying.0: \
 bouncesaying.1
@@ -422,7 +422,7 @@ it man
 
 chkshsgr: \
 load chkshsgr.o
-	./load chkshsgr 
+	./load chkshsgr
 
 chkshsgr.o: \
 compile chkshsgr.c exit.h
@@ -430,7 +430,7 @@ compile chkshsgr.c exit.h
 
 chkspawn: \
 load chkspawn.o substdio.a error.a str.a fs.a auto_spawn.o
-	./load chkspawn substdio.a error.a str.a fs.a auto_spawn.o 
+	./load chkspawn substdio.a error.a str.a fs.a auto_spawn.o
 
 chkspawn.o: \
 compile chkspawn.c subfd.h substdio.h fmt.h select.h \
@@ -775,7 +775,7 @@ svscanboot.8: \
 svscanboot.9 conf-qmail conf-control
 	cat svscanboot.9 \
 	| sed s}QMAIL}"`head -1 conf-qmail`"}g \
-	| sed s}@controldir\@}"`head -1 conf-contgrol`"}g \
+	| sed s}@controldir\@}"`head -1 conf-control`"}g \
 	> svscanboot.8
 
 env.a: \
@@ -812,7 +812,7 @@ compile error_temp.c error.h
 
 except: \
 load except.o strerr.a error.a substdio.a str.a wait.a
-	./load except strerr.a error.a substdio.a str.a wait.a 
+	./load except strerr.a error.a substdio.a str.a wait.a
 
 except.0: \
 except.1
@@ -1011,10 +1011,10 @@ hier.o: \
 compile hier.c auto_qmail.h auto_split.h auto_uids.h fmt.h fifo.h \
 qmail-todo.h hasindimail.h tcpto.h ip.h ipalloc.h hassrs.h \
 conf-domainkeys conf-srs conf-spf conf-ip conf-dkim conf-batv \
-conf-plugin conf-shared
+conf-plugin conf-dlopen
 	./compile $(inc_deps) \
 	`grep -h -v "^#" conf-tls conf-spf conf-ip conf-domainkeys conf-dkim \
-	conf-batv conf-plugin conf-shared` hier.c
+	conf-batv conf-plugin conf-dlopen` hier.c
 
 home: \
 home.sh conf-qmail
@@ -1040,7 +1040,7 @@ idedit: \
 load idedit.o strerr.a substdio.a error.a str.a fs.a wait.a open.a \
 seek.a
 	./load idedit strerr.a substdio.a error.a str.a fs.a \
-	wait.a open.a seek.a 
+	wait.a open.a seek.a
 
 idedit.o: \
 compile idedit.c exit.h scan.h fmt.h strerr.h open.h \
@@ -1048,23 +1048,28 @@ seek.h wait.h
 	./compile idedit.c
 
 setup: \
-load setup.o fifo.o hier.o auto_qmail.o auto_split.o auto_uids.o get_uid.o \
+load setup.o hier.o auto_qmail.o auto_uids.o get_uid.o \
+auto_control.o auto_assign.o subgetopt.o sgetopt.o \
 str_cpy.o strerr.a substdio.a open.a error.a str.a fs.a env.a \
-stralloc.a alloc.a
-	./load setup fifo.o hier.o auto_qmail.o auto_split.o auto_uids.o get_uid.o \
-	str_cpy.o strerr.a substdio.a open.a error.a str.a fs.a env.a \
-	stralloc.a alloc.a
+stralloc.a alloc.a stralloc.a
+	./load setup hier.o auto_qmail.o auto_uids.o get_uid.o \
+	auto_control.o auto_assign.o subgetopt.o sgetopt.o \
+	str_cpy.o strerr.a substdio.a open.a error.a str.a env.a \
+	stralloc.a alloc.a stralloc.a
 
 setup.o: \
-compile setup.c substdio.h strerr.h error.h open.h env.h \
-exit.h fifo.h subfd.h str.h auto_uids.h hasindimail.h
+compile setup.c substdio.h strerr.h error.h open.h env.h stralloc.h \
+exit.h subfd.h str.h auto_uids.h hasindimail.h auto_control.h \
+sgetopt.h auto_assign.h
 	./compile $(inc_deps) setup.c
 
 instcheck: \
-load instcheck.o fifo.o hier.o auto_qmail.o get_uid.o auto_split.o auto_uids.o \
-strerr.a substdio.a error.a str.a fs.a alloc.a
-	./load instcheck fifo.o hier.o auto_qmail.o get_uid.o auto_split.o \
-	auto_uids.o strerr.a substdio.a error.a str.a fs.a alloc.a
+load instcheck.o hier.o auto_qmail.o get_uid.o auto_uids.o \
+auto_control.o auto_assign.o alloc.a \
+strerr.a substdio.a error.a str.a alloc.a stralloc.a
+	./load instcheck hier.o auto_qmail.o get_uid.o \
+	auto_control.o auto_assign.o auto_uids.o strerr.a \
+	substdio.a error.a str.a alloc.a stralloc.a alloc.a
 
 instcheck.o: \
 compile instcheck.c strerr.h error.h exit.h hasindimail.h
@@ -1139,7 +1144,7 @@ auto_pidt.h: auto-pidt
 
 auto-pidt: \
 load auto-pidt.o substdio.a str.a error.a fmt_ulong.o
-	./load auto-pidt substdio.a str.a error.a fmt_ulong.o 
+	./load auto-pidt substdio.a str.a error.a fmt_ulong.o
 
 auto-pidt.o: compile auto-pidt.c exit.h scan.h fmt.h
 	./compile auto-pidt.c
@@ -1152,7 +1157,7 @@ auto_spool.o: compile auto_spool.c
 	./compile auto_spool.c
 
 auto-fnlen: load auto-fnlen.o substdio.a str.a error.a fmt_ulong.o
-	./load auto-fnlen substdio.a str.a error.a fmt_ulong.o 
+	./load auto-fnlen substdio.a str.a error.a fmt_ulong.o
 
 auto-fnlen.o: compile auto-fnlen.c substdio.h exit.h scan.h \
 fmt.h timestamp.h auto_pidt.h
@@ -1197,13 +1202,13 @@ auto_qstdin.o: compile auto_qstdin.c
 	./compile auto_qstdin.c
 
 auto-strarr: load auto-strarr.o substdio.a error.a str.a
-	./load auto-strarr substdio.a error.a str.a 
+	./load auto-strarr substdio.a error.a str.a
 
 auto-strarr.o: compile auto-strarr.c substdio.h exit.h
 	./compile auto-strarr.c
 
 cleanq: load cleanq.o get_uid.o auto_uids.o strerr.a error.a substdio.a str.a wait.a getopt.a
-	./load cleanq get_uid.o auto_uids.o strerr.a error.a substdio.a str.a wait.a getopt.a 
+	./load cleanq get_uid.o auto_uids.o strerr.a error.a substdio.a str.a wait.a getopt.a
 
 cleanq.o: compile cleanq.c substdio.h error.h strerr.h direntry.h \
 auto_ageout.h wait.h sgetopt.h str.h subgetopt.h
@@ -1377,7 +1382,7 @@ getln.a env.a open.a strerr.a stralloc.a alloc.a substdio.a error.a \
 str.a fs.a datetime.a
 	./load maildir2mbox maildir.o prioq.o now.o myctime.o \
 	gfrom.o lock.a getln.a env.a open.a strerr.a stralloc.a \
-	alloc.a substdio.a error.a str.a fs.a datetime.a 
+	alloc.a substdio.a error.a str.a fs.a datetime.a
 
 maildir2mbox.0: \
 maildir2mbox.1
@@ -1398,7 +1403,7 @@ mbox2maildir.o: compile mbox2maildir.c hasflock.h substdio.h fmt.h lock.h
 
 qmaildirmake: \
 load qmaildirmake.o strerr.a substdio.a error.a str.a
-	./load qmaildirmake strerr.a substdio.a error.a str.a 
+	./load qmaildirmake strerr.a substdio.a error.a str.a
 
 qmaildirmake.0: \
 qmaildirmake.1
@@ -1414,7 +1419,7 @@ getln.a env.a open.a strerr.a stralloc.a alloc.a substdio.a error.a \
 str.a
 	./load maildirwatch hfield.o headerbody.o maildir.o \
 	prioq.o now.o getln.a env.a open.a strerr.a stralloc.a \
-	alloc.a substdio.a error.a str.a 
+	alloc.a substdio.a error.a str.a
 
 maildirwatch.0: \
 maildirwatch.1
@@ -1558,7 +1563,7 @@ predate: \
 load predate.o datetime.a strerr.a sig.a fd.a wait.a substdio.a \
 error.a str.a fs.a
 	./load predate datetime.a strerr.a sig.a fd.a wait.a \
-	substdio.a error.a str.a fs.a 
+	substdio.a error.a str.a fs.a
 
 predate.o: \
 compile predate.c datetime.h wait.h fd.h fmt.h strerr.h \
@@ -1647,7 +1652,7 @@ qmail-getpw: \
 load qmail-getpw.o case.a substdio.a error.a str.a fs.a auto_break.o \
 auto_usera.o
 	./load qmail-getpw case.a substdio.a error.a str.a fs.a \
-	auto_break.o auto_usera.o 
+	auto_break.o auto_usera.o
 
 qmail-getpw.0: \
 qmail-getpw.8
@@ -1801,7 +1806,7 @@ str_diffn.o variables.o
 	./load qmail-newmrh cdbmss.o auto_qmail.o envread.o \
 	auto_control.o str_diffn.o variables.o \
 	getln.a open.a cdbmake.a seek.a case.a stralloc.a \
-	alloc.a strerr.a substdio.a error.a str.a 
+	alloc.a strerr.a substdio.a error.a str.a
 
 qmail-newmrh.0: \
 qmail-newmrh.8
@@ -1853,7 +1858,7 @@ load recipient-cdb.o cdbmss.o getln.a open.a cdbmake.a seek.a case.a \
 stralloc.a alloc.a strerr.a substdio.a error.a str.a auto_assign.o
 	./load recipient-cdb cdbmss.o getln.a open.a cdbmake.a \
 	seek.a case.a stralloc.a alloc.a strerr.a substdio.a \
-	error.a str.a auto_assign.o 
+	error.a str.a auto_assign.o
 
 recipient-cdb.0: \
 recipient-cdb.8
@@ -2028,7 +2033,7 @@ qmail-qmtpd: \
 load qmail-qmtpd.o rcpthosts.o control.o constmap.o received.o \
 date822fmt.o now.o qmail.o cdb.a fd.a wait.a datetime.a open.a \
 getln.a sig.a case.a env.a stralloc.a alloc.a substdio.a error.a \
-str.a fs.a auto_qmail.o variables.o auto_control.o 
+str.a fs.a auto_qmail.o variables.o auto_control.o
 	./load qmail-qmtpd rcpthosts.o control.o constmap.o auto_control.o \
 	received.o date822fmt.o now.o qmail.o cdb.a fd.a wait.a \
 	datetime.a open.a getln.a sig.a case.a env.a stralloc.a \
@@ -2056,7 +2061,7 @@ auto_control.o pathexec_run.o openreadclose.o strerr_die.o strerr_sys.o
 	envdir_set.o pathexec_env.o pathexec_run.o \
 	auto_control.o openreadclose.o strerr_die.o strerr_sys.o \
 	datetime.a open.a getln.a stralloc.a alloc.a substdio.a \
-	error.a str.a fs.a 
+	error.a str.a fs.a
 
 qmail-qread.0: \
 qmail-qread.8
@@ -2782,7 +2787,7 @@ readsubdir.h sig.h scan.h select.h str.h stralloc.h substdio.h \
 trigger.h env.h variables.h qmail-todo.h auto_control.h \
 hasindimail.h conf-sync
 	./compile $(inc_deps) `grep -h -v "^#" conf-sync` qmail-todo.c
- 
+
 
 qmail-upq: \
 warn-auto.sh qmail-upq.sh conf-qmail conf-break conf-split
@@ -2819,7 +2824,7 @@ load qreceipt.o headerbody.o hfield.o quote.o token822.o qmail.o \
 envdir_set.o pathexec_env.o pathexec_run.o openreadclose.o \
 open_read.o strerr_die.o strerr_sys.o variables.o \
 getln.a fd.a wait.a sig.a env.a stralloc.a alloc.a substdio.a error.a \
-str.a auto_qmail.o scan_ulong.o auto_control.o 
+str.a auto_qmail.o scan_ulong.o auto_control.o
 	./load qreceipt headerbody.o hfield.o quote.o token822.o \
 	envdir_set.o pathexec_env.o pathexec_run.o openreadclose.o \
 	open_read.o strerr_die.o strerr_sys.o variables.o auto_control.o \
@@ -2847,7 +2852,7 @@ qsmhook: \
 load qsmhook.o sig.a case.a fd.a wait.a getopt.a env.a stralloc.a \
 alloc.a substdio.a error.a str.a
 	./load qsmhook sig.a case.a fd.a wait.a getopt.a env.a \
-	stralloc.a alloc.a substdio.a error.a str.a 
+	stralloc.a alloc.a substdio.a error.a str.a
 
 qsmhook.o: \
 compile qsmhook.c fd.h stralloc.h gen_alloc.h sgetopt.h \
@@ -2974,7 +2979,7 @@ it man
 	if test ! -d $(DESTDIR)$(INDIDIR)/etc ; then \
 		mkdir -p $(DESTDIR)$(INDIDIR)/etc ; \
 	fi ;
-	./setup $(DESTDIR)$(INDIDIR) > $(DESTDIR)$(INDIDIR)/etc/qmailprog.list
+	./setup -d $(DESTDIR) $(INDIDIR) > $(DESTDIR)$(INDIDIR)/etc/qmailprog.list
 
 sgetopt.o: \
 compile sgetopt.c subfd.h substdio.h sgetopt.h subgetopt.h \
@@ -3613,7 +3618,7 @@ autoresponder.1
 load 822field.o mess822.a getln.a strerr.a substdio.a stralloc.a \
 alloc.a error.a str.a case.a fs.a
 	./load 822field mess822.a getln.a strerr.a substdio.a \
-	stralloc.a alloc.a error.a str.a case.a fs.a 
+	stralloc.a alloc.a error.a str.a case.a fs.a
 
 822field.0: \
 822field.1
@@ -3643,7 +3648,7 @@ sgetopt.h str.h case.h
 822body: load 822body.o byte_cr.o str_len.o strerr.a error.a getln.a stralloc.a \
 alloc.a str.a substdio.a mess822.a
 	./load 822body byte_cr.o str_len.o strerr.a error.a getln.a stralloc.a alloc.a \
-	str.a substdio.a mess822.a 
+	str.a substdio.a mess822.a
 
 822body.o: compile \
 822body.c \
@@ -3673,7 +3678,7 @@ sig.a getln.a stralloc.a strerr.a substdio.a alloc.a error.a str.a \
 wait.a open.a fd.a fs.a
 	./load serialsmtp timeoutread.o timeoutwrite.o quote.o \
 	case.a env.a sig.a getln.a stralloc.a strerr.a substdio.a \
-	alloc.a error.a str.a wait.a open.a fd.a fs.a 
+	alloc.a error.a str.a wait.a open.a fd.a fs.a
 
 serialsmtp.0: \
 serialsmtp.1
@@ -3695,7 +3700,7 @@ open.a wait.a sig.a fd.a fs.a
 	openreadclose.o envdir_set.o pathexec_env.o pathexec_run.o \
 	auto_control.o sconfig.o quote.o prioq.o now.o env.a getopt.a \
 	mess822.a libtai.a getln.a strerr.a substdio.a stralloc.a \
-	alloc.a error.a str.a open.a wait.a sig.a fd.a fs.a 
+	alloc.a error.a str.a open.a wait.a sig.a fd.a fs.a
 
 maildirserial.0: \
 maildirserial.1
@@ -3762,7 +3767,7 @@ stralloc.a strerr.a substdio.a alloc.a error.a str.a wait.a open.a \
 fd.a fs.a
 	./load serialqmtp timeoutread.o timeoutwrite.o env.a sig.a \
 	getln.a stralloc.a strerr.a substdio.a alloc.a error.a \
-	str.a wait.a open.a fd.a fs.a 
+	str.a wait.a open.a fd.a fs.a
 
 serialqmtp.0: \
 serialqmtp.1
@@ -3897,7 +3902,7 @@ matchup: \
 load matchup.o strerr.a getln.a substdio.a stralloc.a alloc.a error.a \
 str.a fs.a case.a
 	./load matchup strerr.a getln.a substdio.a stralloc.a \
-	alloc.a error.a str.a fs.a case.a 
+	alloc.a error.a str.a fs.a case.a
 
 matchup.0: \
 matchup.1
@@ -4180,7 +4185,7 @@ columnt: \
 load columnt.o slurpclose.o strerr.a substdio.a stralloc.a alloc.a \
 error.a str.a
 	./load columnt slurpclose.o strerr.a substdio.a stralloc.a \
-	alloc.a error.a str.a 
+	alloc.a error.a str.a
 
 columnt.0: \
 columnt.1
@@ -4338,7 +4343,7 @@ warn-auto.sh rspamhist.sh conf-qmail
 iftocc: load iftocc.o mess822.a getln.a strerr.a substdio.a stralloc.a \
 alloc.a error.a env.a str.a case.a fs.a open.a
 	./load iftocc mess822.a getln.a strerr.a substdio.a \
-	stralloc.a alloc.a error.a env.a str.a case.a fs.a open.a 
+	stralloc.a alloc.a error.a env.a str.a case.a fs.a open.a
 
 iftocc.0: iftocc.1
 	nroff -man iftocc.1 > iftocc.0
@@ -4358,7 +4363,7 @@ alloc.a error.a case.a str.a fs.a open.a wait.a sig.a fd.a
 	auto_control.o commands.o base64sub.o now.o env.a \
 	cdb.a mess822.a libtai.a getln.a strerr.a substdio.a \
 	stralloc.a alloc.a error.a case.a str.a fs.a open.a wait.a \
-	sig.a fd.a 
+	sig.a fd.a
 
 ofmipd.0: ofmipd.8
 	nroff -man ofmipd.8 > ofmipd.0
@@ -4390,7 +4395,7 @@ strerr.h auto_qmail.h variables.h auto_control.h
 ofmipname: load ofmipname.o cdbmss.o cdbmake.a strerr.a getln.a substdio.a \
 stralloc.a alloc.a error.a seek.a open.a str.a
 	./load ofmipname cdbmss.o cdbmake.a strerr.a getln.a \
-	substdio.a stralloc.a alloc.a error.a seek.a open.a str.a 
+	substdio.a stralloc.a alloc.a error.a seek.a open.a str.a
 
 ofmipname.0: \
 ofmipname.8
@@ -4412,7 +4417,7 @@ fd.a wait.a open.a case.a str.a fs.a libtai.a
 	envdir_set.o pathexec_env.o pathexec_run.o openreadclose.o \
 	auto_control.o rwhconfig.o constmap.o sconfig.o env.a getopt.a \
 	mess822.a getln.a strerr.a substdio.a stralloc.a alloc.a \
-	error.a sig.a fd.a wait.a open.a case.a str.a fs.a libtai.a 
+	error.a sig.a fd.a wait.a open.a case.a str.a fs.a libtai.a
 
 new-inject.0: \
 new-inject.1
@@ -4436,7 +4441,7 @@ tai_pack.o: compile tai_pack.c tai.h uint64.h
 822date: load 822date.o libtai.a mess822.a getln.a strerr.a substdio.a \
 auto_qmail.o stralloc.a alloc.a error.a str.a case.a fs.a
 	./load 822date auto_qmail.o libtai.a mess822.a getln.a strerr.a \
-	substdio.a stralloc.a alloc.a error.a str.a case.a fs.a 
+	substdio.a stralloc.a alloc.a error.a str.a case.a fs.a
 
 822date.0: 822date.1
 	nroff -man 822date.1 > 822date.0
@@ -4465,7 +4470,7 @@ leapsecs_add.o: compile leapsecs_add.c leapsecs.h tai.h uint64.h
 822received: load 822received.o auto_qmail.o libtai.a mess822.a getln.a strerr.a substdio.a \
 stralloc.a alloc.a error.a str.a case.a fs.a
 	./load 822received auto_qmail.o libtai.a mess822.a getln.a strerr.a \
-	substdio.a stralloc.a alloc.a error.a str.a case.a fs.a 
+	substdio.a stralloc.a alloc.a error.a str.a case.a fs.a
 
 822received.0: 822received.1
 	nroff -man 822received.1 > 822received.0
@@ -4478,7 +4483,7 @@ leapsecs.h caltime.h tai.h uint64.h case.h
 822print: load 822print.o auto_qmail.o libtai.a mess822.a getln.a strerr.a substdio.a \
 stralloc.a alloc.a error.a str.a case.a fs.a
 	./load 822print auto_qmail.o libtai.a mess822.a getln.a strerr.a \
-	substdio.a stralloc.a alloc.a error.a str.a case.a fs.a 
+	substdio.a stralloc.a alloc.a error.a str.a case.a fs.a
 
 822print.0: 822print.1
 	nroff -man 822print.1 > 822print.0
@@ -4491,7 +4496,7 @@ caltime.h tai.h uint64.h byte.h str.h
 parsedate: load parsedate.o auto_qmail.o libtai.a mess822.a getln.a strerr.a substdio.a \
 stralloc.a alloc.a error.a str.a case.a fs.a
 	./load parsedate auto_qmail.o libtai.a mess822.a getln.a strerr.a \
-	substdio.a stralloc.a alloc.a error.a str.a case.a fs.a 
+	substdio.a stralloc.a alloc.a error.a str.a case.a fs.a
 
 parsedate.o: compile parsedate.c strerr.h subfd.h substdio.h getln.h \
 mess822.h stralloc.h gen_alloc.h caltime.h caldate.h leapsecs.h \
@@ -4501,7 +4506,7 @@ caltime.h tai.h uint64.h
 tokenize: load tokenize.o mess822.a getln.a strerr.a substdio.a stralloc.a \
 alloc.a error.a str.a
 	./load tokenize mess822.a getln.a strerr.a substdio.a \
-	stralloc.a alloc.a error.a str.a 
+	stralloc.a alloc.a error.a str.a
 
 tokenize.o: compile tokenize.c strerr.h subfd.h substdio.h getln.h \
 mess822.h stralloc.h gen_alloc.h caltime.h caldate.h
@@ -4510,7 +4515,7 @@ mess822.h stralloc.h gen_alloc.h caltime.h caldate.h
 addrlist: load addrlist.o mess822.a getln.a strerr.a substdio.a stralloc.a \
 alloc.a error.a str.a
 	./load addrlist mess822.a getln.a strerr.a substdio.a \
-	stralloc.a alloc.a error.a str.a 
+	stralloc.a alloc.a error.a str.a
 
 addrlist.o: compile addrlist.c strerr.h subfd.h substdio.h getln.h \
 mess822.h stralloc.h gen_alloc.h caltime.h caldate.h
@@ -4519,7 +4524,7 @@ mess822.h stralloc.h gen_alloc.h caltime.h caldate.h
 qquote: load qquote.o mess822.a strerr.a substdio.a stralloc.a alloc.a error.a \
 str.a
 	./load qquote mess822.a strerr.a substdio.a stralloc.a \
-	alloc.a error.a str.a 
+	alloc.a error.a str.a
 
 qquote.o: compile qquote.c mess822.h stralloc.h gen_alloc.h caltime.h caldate.h \
 subfd.h strerr.h
@@ -4581,7 +4586,7 @@ replier-config.0: replier-config.1
 822headerok: load 822headerok.o getln.a substdio.a str.a stralloc.a alloc.a \
 error.a mess822.a
 	./load 822headerok getln.a substdio.a str.a stralloc.a alloc.a error.a \
-	mess822.a 
+	mess822.a
 
 822headerok.o: compile 822headerok.c \
 error.h getln.h substdio.h stralloc.h gen_alloc.h mess822.h caltime.h \
@@ -4591,7 +4596,7 @@ caldate.h exit.h
 822bodyfilter: load 822bodyfilter.o strerr.a getln.a substdio.a pathexec_run.o \
 env.a stralloc.a alloc.a str.a mess822.a fd.a error.a seek.a
 	./load 822bodyfilter pathexec_run.o strerr.a getln.a substdio.a env.a \
-	stralloc.a alloc.a str.a mess822.a fd.a error.a seek.a 
+	stralloc.a alloc.a str.a mess822.a fd.a error.a seek.a
 
 822bodyfilter.o: compile 822bodyfilter.c \
 exit.h error.h strerr.h substdio.h getln.h stralloc.h \
@@ -4605,7 +4610,7 @@ error.h stralloc.h gen_alloc.h str.h env.h pathexec.h
 822headerfilter: load 822headerfilter.o wait.a strerr.a substdio.a \
 pathexec_run.o env.a getln.a stralloc.a alloc.a str.a mess822.a fd.a error.a
 	./load 822headerfilter wait.a strerr.a substdio.a pathexec_run.o env.a getln.a \
-	stralloc.a alloc.a str.a mess822.a fd.a error.a 
+	stralloc.a alloc.a str.a mess822.a fd.a error.a
 
 822headerfilter.o: compile 822headerfilter.c \
 exit.h error.h wait.h strerr.h substdio.h getln.h \
@@ -4615,7 +4620,7 @@ stralloc.h gen_alloc.h mess822.h caltime.h caldate.h fd.h pathexec.h
 822addr: load 822addr.o strerr.a error.a mess822.a fs.a getln.a \
 stralloc.a substdio.a alloc.a str.a stralloc.a case.a
 	./load 822addr strerr.a error.a mess822.a fs.a getln.a stralloc.a \
-	substdio.a alloc.a str.a stralloc.a case.a 
+	substdio.a alloc.a str.a stralloc.a case.a
 
 822addr.o: compile 822addr.c \
 substdio.h strerr.h getln.h stralloc.h gen_alloc.h mess822.h caltime.h \
@@ -4625,7 +4630,7 @@ caldate.h case.h exit.h alloc.h
 822fields: load 822fields.o strerr.a error.a mess822.a fs.a getln.a \
 stralloc.a substdio.a alloc.a str.a stralloc.a case.a
 	./load 822fields strerr.a error.a mess822.a fs.a getln.a stralloc.a \
-	substdio.a alloc.a str.a stralloc.a case.a 
+	substdio.a alloc.a str.a stralloc.a case.a
 
 822fields.o: compile 822fields.c \
 substdio.h strerr.h getln.h stralloc.h gen_alloc.h mess822.h caltime.h \
@@ -4635,7 +4640,7 @@ caldate.h case.h exit.h alloc.h uint64.h
 checkaddr: load checkaddr.o mess822.a getln.a strerr.a substdio.a \
 stralloc.a alloc.a error.a env.a str.a case.a fs.a
 	./load checkaddr mess822.a getln.a strerr.a substdio.a stralloc.a alloc.a \
-	error.a env.a str.a case.a fs.a 
+	error.a env.a str.a case.a fs.a
 
 checkaddr.o: compile checkaddr.c \
 substdio.h strerr.h getln.h stralloc.h gen_alloc.h mess822.h caltime.h \
@@ -4645,7 +4650,7 @@ caldate.h case.h env.h exit.h
 checkdomain: load checkdomain.o mess822.a getln.a strerr.a substdio.a \
 stralloc.a alloc.a error.a env.a str.a case.a fs.a
 	./load checkdomain mess822.a getln.a strerr.a substdio.a stralloc.a \
-	alloc.a error.a env.a str.a case.a fs.a 
+	alloc.a error.a env.a str.a case.a fs.a
 
 checkdomain.o: compile checkdomain.c \
 substdio.h strerr.h getln.h stralloc.h gen_alloc.h mess822.h caltime.h \
@@ -4667,12 +4672,12 @@ alloc.a
 	openreadclose.o envdir_set.o pathexec_env.o pathexec_run.o \
 	auto_control.o open_read.o strerr.a fd.a sig.a wait.a env.a \
 	getln.a mess822.a substdio.a error.a str.a fs.a stralloc.a \
-	alloc.a 
+	alloc.a
 
 tomaildir: load tomaildir.o sig.a open.a strerr.a substdio.a env.a str.a \
 error.a fs.a now.o
 	./load tomaildir sig.a open.a strerr.a substdio.a env.a str.a error.a fs.a \
-	now.o 
+	now.o
 
 tomaildir.o: compile tomaildir.c \
 sig.h byte.h exit.h open.h substdio.h strerr.h error.h fmt.h \
@@ -4682,7 +4687,7 @@ str.h now.h datetime.h env.h
 condtomaildir: load condtomaildir.o sig.a open.a strerr.a substdio.a env.a \
 pathexec_run.o stralloc.a alloc.a str.a error.a fs.a seek.a wait.a now.o
 	./load condtomaildir sig.a open.a strerr.a substdio.a env.a pathexec_run.o \
-	stralloc.a alloc.a str.a error.a fs.a seek.a wait.a now.o 
+	stralloc.a alloc.a str.a error.a fs.a seek.a wait.a now.o
 
 condtomaildir.o: compile condtomaildir.c \
 sig.h byte.h exit.h open.h substdio.h strerr.h error.h fmt.h \
@@ -4692,7 +4697,7 @@ env.h str.h wait.h seek.h now.h datetime.h pathexec.h
 iftoccfrom: load iftoccfrom.o mess822.a getln.a strerr.a substdio.a \
 stralloc.a alloc.a error.a env.a str.a case.a fs.a open.a
 	./load iftoccfrom mess822.a getln.a strerr.a substdio.a stralloc.a alloc.a \
-	error.a env.a str.a case.a fs.a open.a 
+	error.a env.a str.a case.a fs.a open.a
 
 iftoccfrom.o: compile iftoccfrom.c \
 substdio.h strerr.h getln.h stralloc.h gen_alloc.h mess822.h caltime.h \
@@ -4702,7 +4707,7 @@ caldate.h case.h env.h exit.h
 ifaddr: load ifaddr.o mess822.a getln.a strerr.a substdio.a stralloc.a \
 alloc.a error.a env.a str.a fs.a case.a
 	./load ifaddr mess822.a getln.a strerr.a substdio.a stralloc.a alloc.a \
-	error.a env.a str.a fs.a case.a 
+	error.a env.a str.a fs.a case.a
 
 getconf.o: compile getconf.c \
 stralloc.h gen_alloc.h openreadclose.h strerr.h getconf.h byte.h
@@ -4734,7 +4739,7 @@ getln.a case.a fs.a fd.a wait.a
 replier-config: load replier-config.o strerr.a substdio.a stralloc.a str.a \
 error.a alloc.a open.a auto_ezmlm.o auto_qmail.o
 	./load replier-config strerr.a substdio.a stralloc.a str.a error.a alloc.a \
-	open.a auto_ezmlm.o auto_qmail.o 
+	open.a auto_ezmlm.o auto_qmail.o
 
 replier-config.o: compile replier-config.c \
 strerr.h substdio.h stralloc.h gen_alloc.h open.h exit.h \
@@ -4755,7 +4760,7 @@ auto_ezmlm.c: auto-str conf-ezmlm
 
 make-text: load make-text.o getln.a substdio.a stralloc.a alloc.a error.a \
 str.a
-	./load make-text getln.a substdio.a stralloc.a alloc.a error.a str.a 
+	./load make-text getln.a substdio.a stralloc.a alloc.a error.a str.a
 
 make-text.o: compile \
 make-text.c \
@@ -4775,7 +4780,7 @@ svcfns.o: compile svcfns.c bool.h svcfns.h
 	./compile svcfns.c
 
 qfilelog: load qfilelog.o
-	./load qfilelog 
+	./load qfilelog
 
 qfilelog.o: compile qfilelog.c
 	./compile qfilelog.c
@@ -4787,13 +4792,13 @@ multipipe.o: compile multipipe.c select.h direntry.h bool.h svcfns.h
 	./compile multipipe.c
 
 multitail: load multitail.o
-	./load multitail 
+	./load multitail
 
 multitail.o: compile multitail.c systime.h bool.h
 	./compile multitail.c
 
 teepipe: load teepipe.o
-	./load teepipe 
+	./load teepipe
 
 teepipe.o: compile teepipe.c
 	./compile teepipe.c
@@ -4830,7 +4835,7 @@ domainkeys.h: domainkeys.c makeheader  dktrace.h
 	./makeheader <domainkeys.c >domainkeys.h
 
 makeheader: load makeheader.o
-	./load makeheader 
+	./load makeheader
 
 makehader.o: makeheader.c compile
 	./compile makeheader.c
@@ -4845,7 +4850,7 @@ sig.a seek.a open.a wait.a fd.a fs.a
 	openreadclose.o envdir_set.o pathexec_env.o pathexec_run.o \
 	auto_control.o now.o token822.o env.a getln.a getopt.a \
 	strerr.a error.a substdio.a stralloc.a alloc.a case.a \
-	str.a sig.a seek.a open.a wait.a fd.a fs.a 
+	str.a sig.a seek.a open.a wait.a fd.a fs.a
 
 dot-forward.0: \
 dot-forward.1
@@ -4873,7 +4878,7 @@ alloc.a error.a case.a str.a fs.a sig.a wait.a seek.a open.a fd.a
 	envdir_set.o pathexec_env.o pathexec_run.o openreadclose.o \
 	auto_qmail.o auto_control.o getopt.a cdb.a env.a strerr.a \
 	substdio.a stralloc.a alloc.a error.a case.a str.a fs.a \
-	sig.a wait.a seek.a open.a fd.a 
+	sig.a wait.a seek.a open.a fd.a
 
 fastforward.0: \
 fastforward.1
@@ -4900,7 +4905,7 @@ printforward: \
 load printforward.o cdb.a strerr.a substdio.a stralloc.a alloc.a \
 error.a str.a
 	./load printforward cdb.a strerr.a substdio.a stralloc.a \
-	alloc.a error.a str.a 
+	alloc.a error.a str.a
 
 printforward.0: \
 printforward.1
@@ -4915,7 +4920,7 @@ printmaillist: \
 load printmaillist.o getln.a strerr.a substdio.a stralloc.a alloc.a \
 error.a str.a
 	./load printmaillist getln.a strerr.a substdio.a \
-	stralloc.a alloc.a error.a str.a 
+	stralloc.a alloc.a error.a str.a
 
 printmaillist.0: \
 printmaillist.1
@@ -4930,7 +4935,7 @@ setforward: \
 load setforward.o cdbmss.o cdbmake.a strerr.a substdio.a stralloc.a \
 alloc.a error.a str.a seek.a open.a case.a
 	./load setforward cdbmss.o cdbmake.a strerr.a substdio.a \
-	stralloc.a alloc.a error.a str.a seek.a open.a case.a 
+	stralloc.a alloc.a error.a str.a seek.a open.a case.a
 
 setforward.0: \
 setforward.1
@@ -4946,7 +4951,7 @@ setmaillist: \
 load setmaillist.o getln.a strerr.a substdio.a stralloc.a alloc.a \
 error.a str.a open.a
 	./load setmaillist getln.a strerr.a substdio.a stralloc.a \
-	alloc.a error.a str.a open.a 
+	alloc.a error.a str.a open.a
 
 setmaillist.0: \
 setmaillist.1
@@ -4965,7 +4970,7 @@ alloc.a error.a str.a fs.a seek.a open.a case.a
 	./load newaliases auto_qmail.o token822.o control.o \
 	variables.o now.o cdbmss.o auto_control.o env.a \
 	cdbmake.a strerr.a getln.a substdio.a stralloc.a \
-	alloc.a error.a str.a fs.a seek.a open.a case.a 
+	alloc.a error.a str.a fs.a seek.a open.a case.a
 
 newaliases.0: \
 newaliases.1
@@ -4984,7 +4989,7 @@ stralloc.a env.a alloc.a substdio.a error.a str.a \
 fs.a open.a wait.a fd.a
 	./load newinclude auto_qmail.o token822.o control.o now.o \
 	variables.o auto_control.o getln.a strerr.a stralloc.a \
-	env.a alloc.a substdio.a error.a str.a fs.a open.a wait.a fd.a 
+	env.a alloc.a substdio.a error.a str.a fs.a open.a wait.a fd.a
 
 newinclude.0: \
 newinclude.1
@@ -5443,10 +5448,10 @@ uint32.h exit.h str.h
 
 cdbtest: load cdbtest.o str_len.o error.o error_str.o byte_copy.o byte_cr.o \
 byte_diff.o cdb.o fmt_ulong.o uint32_unpack.o seek_set.o seek_cur.o subfderr.o \
-cdb.a substdio.a strerr.a 
+cdb.a substdio.a strerr.a
 	./load cdbtest str_len.o error.o error_str.o byte_copy.o byte_cr.o \
 	byte_diff.o cdb.o fmt_ulong.o uint32_unpack.o seek_set.o seek_cur.o subfderr.o \
-	cdb.a substdio.a strerr.a 
+	cdb.a substdio.a strerr.a
 
 cdbtest.o: compile cdbtest.c uint32.h fmt.h subfd.h substdio.h strerr.h seek.h cdb.h \
 uint32.h str.h exit.h
@@ -5778,7 +5783,7 @@ compile nowutc.c leapsecs.h tai.h uint64.h taia.h caltime.h caldate.h
 
 yearcal: \
 load yearcal.o libtai.a
-	./load yearcal libtai.a 
+	./load yearcal libtai.a
 
 yearcal.o: \
 compile yearcal.c caldate.h
