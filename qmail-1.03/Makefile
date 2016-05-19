@@ -115,16 +115,16 @@ compile auto_qmail.c
 	./compile auto_qmail.c
 
 auto_control.c: \
-auto-str conf-control
-	./auto-str auto_control `head -1 conf-control` > auto_control.c
+auto-str conf-sysconfdir
+	./auto-str auto_control "`head -1 conf-sysconfdir`/control" > auto_control.c
 
 auto_control.o: \
 compile auto_control.c
 	./compile auto_control.c
 
 auto_assign.c: \
-auto-str conf-assign
-	./auto-str auto_assign `head -1 conf-assign` > auto_assign.c
+auto-str conf-sysconfdir
+	./auto-str auto_assign "`head -1 conf-sysconfdir`/users" > auto_assign.c
 
 auto_assign.o: \
 compile auto_assign.c
@@ -132,7 +132,7 @@ compile auto_assign.c
 
 auto_shared.c: \
 auto-str conf-shared
-	./auto-str auto_shared `head -1 conf-control` > auto_shared.c
+	./auto-str auto_shared `head -1 conf-sysconfdir` > auto_shared.c
 
 auto_shared.o: \
 compile auto_shared.c
@@ -483,10 +483,10 @@ condredirect.0: \
 condredirect.1
 	nroff -man condredirect.1 > condredirect.0
 
-condredirect.1: condredirect.9 conf-qmail conf-control
+condredirect.1: condredirect.9 conf-qmail conf-sysconfdir
 	cat condredirect.9 \
 	| sed s}QMAILHOME}"`head -1 conf-qmail`"}g \
-	| sed s}@controldir\@}"`head -1 conf-control`"}g \
+	| sed s}@controldir\@}"`head -1 conf-sysconfdir`/control"}g \
 	> condredirect.1
 
 condredirect.o: \
@@ -496,20 +496,20 @@ auto_qmail.h envdir.h pathexec.h variables.h auto_control.h
 	./compile `grep -h -v "^#" conf-spf` condredirect.c
 
 qmailconfig: \
-warn-auto.sh qmailconfig.sh conf-qmail conf-break conf-split conf-control
+warn-auto.sh qmailconfig.sh conf-qmail conf-break conf-split conf-sysconfdir
 	cat warn-auto.sh qmailconfig.sh \
 	| sed s}QMAIL}"`head -1 conf-qmail`"}g \
-	| sed s}@controldir\@}"`head -1 conf-control`"}g \
+	| sed s}@controldir\@}"`head -1 conf-sysconfdir`/control"}g \
 	| sed s}BREAK}"`head -1 conf-break`"}g \
 	| sed s}SPLIT}"`head -1 conf-split`"}g \
 	> qmailconfig
 	chmod 755 qmailconfig
 
 config-fast: \
-warn-auto.sh config-fast.sh conf-qmail conf-break conf-split conf-control
+warn-auto.sh config-fast.sh conf-qmail conf-break conf-split conf-sysconfdir
 	cat warn-auto.sh config-fast.sh \
 	| sed s}QMAIL}"`head -1 conf-qmail`"}g \
-	| sed s}@controldir\@}"`head -1 conf-control`"}g \
+	| sed s}@controldir\@}"`head -1 conf-sysconfdir`/control"}g \
 	| sed s}BREAK}"`head -1 conf-break`"}g \
 	| sed s}SPLIT}"`head -1 conf-split`"}g \
 	> config-fast
@@ -699,17 +699,17 @@ warn-auto.sh etrn.sh conf-qmail
 	> etrn
 
 atrn: \
-warn-auto.sh atrn.sh conf-qmail conf-control
+warn-auto.sh atrn.sh conf-qmail conf-sysconfdir
 	cat warn-auto.sh atrn.sh \
 	| sed s}QMAIL}"`head -1 conf-qmail`"}g \
-	| sed s}@controldir\@}"`head -1 conf-control`"}g \
+	| sed s}@controldir\@}"`head -1 conf-sysconfdir`/control"}g \
 	> atrn
 
 balance_outgoing: \
-warn-auto.sh balance_outgoing.sh conf-qmail conf-control
+warn-auto.sh balance_outgoing.sh conf-qmail conf-sysconfdir
 	cat warn-auto.sh balance_outgoing.sh \
 	| sed s}QMAIL}"`head -1 conf-qmail`"}g \
-	| sed s}@controldir\@}"`head -1 conf-control`"}g \
+	| sed s}@controldir\@}"`head -1 conf-sysconfdir`/control"}g \
 	> balance_outgoing
 
 multirotate: \
@@ -753,19 +753,19 @@ indimail.plist: indimail.plist.in conf-qmail
 	> indimail.plist
 
 svscanboot: \
-warn-auto.sh svscanboot.sh conf-qmail conf-control
+warn-auto.sh svscanboot.sh conf-qmail conf-sysconfdir
 	cat warn-auto.sh svscanboot.sh \
 	| sed s}QMAIL}"`head -1 conf-qmail`"}g \
-	| sed s}@controldir\@}"`head -1 conf-control`"}g \
+	| sed s}@controldir\@}"`head -1 conf-sysconfdir`/control"}g \
 	> svscanboot
 
-upstart:upstart.in conf-qmail conf-control
+upstart:upstart.in conf-qmail conf-sysconfdir
 	( \
 	echo "# svscan - runlevel compatibility"; \
 	echo "# WARNING: This file was auto-generated. Do not edit!"; \
 	cat upstart.in \
 	| sed s}QMAIL}"`head -1 conf-qmail`"}g \
-	| sed s}@controldir\@}"`head -1 conf-control`"}g \
+	| sed s}@controldir\@}"`head -1 conf-sysconfdir`/control"}g \
 	) > upstart
 
 systemd:systemd.in conf-qmail
@@ -780,10 +780,10 @@ svscanboot.8
 	nroff -man svscanboot.8 > svscanboot.0
 
 svscanboot.8: \
-svscanboot.9 conf-qmail conf-control
+svscanboot.9 conf-qmail conf-sysconfdir
 	cat svscanboot.9 \
 	| sed s}QMAIL}"`head -1 conf-qmail`"}g \
-	| sed s}@controldir\@}"`head -1 conf-control`"}g \
+	| sed s}@controldir\@}"`head -1 conf-sysconfdir`/control"}g \
 	> svscanboot.8
 
 env.a: \
@@ -1650,10 +1650,10 @@ qmail-control.5
 	nroff -man qmail-control.5 > qmail-control.0
 
 qmail-control.5: \
-qmail-control.9 conf-qmail conf-control
+qmail-control.9 conf-qmail conf-sysconfdir
 	cat qmail-control.9 \
 	| sed s}QMAIL}"`head -1 conf-qmail`"}g \
-	| sed s}@controldir\@}"`head -1 conf-control`"}g \
+	| sed s}@controldir\@}"`head -1 conf-sysconfdir`/control"}g \
 	> qmail-control.5
 
 qmail-getpw: \
@@ -1704,10 +1704,10 @@ qmail-inject.0: \
 qmail-inject.8
 	nroff -man qmail-inject.8 > qmail-inject.0
 
-qmail-inject.8: qmail-inject.9 conf-qmail conf-control
+qmail-inject.8: qmail-inject.9 conf-qmail conf-sysconfdir
 	cat qmail-inject.9 \
 	| sed s}QMAILHOME}"`head -1 conf-qmail`"}g \
-	| sed s}@controldir\@}"`head -1 conf-control`"}g \
+	| sed s}@controldir\@}"`head -1 conf-sysconfdir`/control"}g \
 	> qmail-inject.8
 
 qmail-inject.o: \
@@ -1763,10 +1763,10 @@ qmail-local.8
 	nroff -man qmail-local.8 > qmail-local.0
 
 qmail-local.8:\
-qmail-local.9 conf-qmail conf-control
+qmail-local.9 conf-qmail conf-sysconfdir
 	cat qmail-local.9 \
 	| sed s}QMAILHOME}"`head -1 conf-qmail`"}g \
-	| sed s}@controldir\@}"`head -1 conf-control`"}g \
+	| sed s}@controldir\@}"`head -1 conf-sysconfdir`/control"}g \
 	> qmail-local.8
 
 qmail-local.o: \
@@ -1821,10 +1821,10 @@ qmail-newmrh.8
 	nroff -man qmail-newmrh.8 > qmail-newmrh.0
 
 qmail-newmrh.8: \
-qmail-newmrh.9 conf-qmail conf-control
+qmail-newmrh.9 conf-qmail conf-sysconfdir
 	cat qmail-newmrh.9 \
 	| sed s}QMAIL}"`head -1 conf-qmail`"}g \
-	| sed s}@controldir\@}"`head -1 conf-control`"}g \
+	| sed s}@controldir\@}"`head -1 conf-sysconfdir`/control"}g \
 	> qmail-newmrh.8
 
 qmail-newmrh.o: \
@@ -1847,10 +1847,10 @@ qmail-cdb.8
 	nroff -man qmail-cdb.8 > qmail-cdb.0
 
 qmail-cdb.8: \
-qmail-cdb.9 conf-break conf-spawn conf-control
+qmail-cdb.9 conf-break conf-spawn conf-sysconfdir
 	cat qmail-cdb.9 \
 	| sed s}QMAIL}"`head -1 conf-qmail`"}g \
-	| sed s}@controldir\@}"`head -1 conf-control`"}g \
+	| sed s}@controldir\@}"`head -1 conf-sysconfdir`/control"}g \
 	| sed s}BREAK}"`head -1 conf-break`"}g \
 	| sed s}SPAWN}"`head -1 conf-spawn`"}g \
 	> qmail-cdb.8
@@ -1873,10 +1873,10 @@ recipient-cdb.8
 	nroff -man recipient-cdb.8 > recipient-cdb.0
 
 recipient-cdb.8: \
-recipient-cdb.9 conf-break conf-spawn conf-assign
+recipient-cdb.9 conf-break conf-spawn conf-sysconfdir
 	cat recipient-cdb.9 \
 	| sed s}QMAIL}"`head -1 conf-qmail`"}g \
-	| sed s}ASSIGN}"`head -1 conf-assign`"}g \
+	| sed s}ASSIGN}"`head -1 conf-sysconfdir`/users"}g \
 	| sed s}BREAK}"`head -1 conf-break`"}g \
 	| sed s}SPAWN}"`head -1 conf-spawn`"}g \
 	> recipient-cdb.8
@@ -1903,7 +1903,7 @@ qmail-newu.8: \
 qmail-newu.9 conf-break conf-spawn
 	cat qmail-newu.9 \
 	| sed s}QMAIL}"`head -1 conf-qmail`"}g \
-	| sed s}ASSIGN}"`head -1 conf-assign`"}g \
+	| sed s}ASSIGN}"`head -1 conf-sysconfdir`/users"}g \
 	| sed s}BREAK}"`head -1 conf-break`"}g \
 	| sed s}SPAWN}"`head -1 conf-spawn`"}g \
 	> qmail-newu.8
@@ -1982,7 +1982,7 @@ qmail-pw2u.8: \
 qmail-pw2u.9 conf-break conf-spawn
 	cat qmail-pw2u.9 \
 	| sed s}QMAIL}"`head -1 conf-qmail`"}g \
-	| sed s}ASSIGN}"`head -1 conf-assign`"}g \
+	| sed s}ASSIGN}"`head -1 conf-sysconfdir`/users"}g \
 	| sed s}BREAK}"`head -1 conf-break`"}g \
 	| sed s}SPAWN}"`head -1 conf-spawn`"}g \
 	> qmail-pw2u.8
@@ -2252,16 +2252,16 @@ uint64.h variables.h conf-domainkeys auto_control.h
 
 qmail-dk.0: qmail-dk.8
 	nroff -man qmail-dk.8 > qmail-dk.0
-qmail-dk.8: qmail-dk.9 conf-qmail conf-control
+qmail-dk.8: qmail-dk.9 conf-qmail conf-sysconfdir
 	cat qmail-dk.9 \
 	| sed s}QMAILHOME}"`head -1 conf-qmail`"}g \
-	| sed s}@controldir\@}"`head -1 conf-control`"}g \
+	| sed s}@controldir\@}"`head -1 conf-sysconfdir`/control"}g \
 	> qmail-dk.8
 
-dktest.8: dktest.9 conf-qmail conf-control
+dktest.8: dktest.9 conf-qmail conf-sysconfdir
 	cat dktest.9 \
 	| sed s}QMAILHOME}"`head -1 conf-qmail`"}g \
-	| sed s}@controldir\@}"`head -1 conf-control`"}g \
+	| sed s}@controldir\@}"`head -1 conf-sysconfdir`/control"}g \
 	> dktest.8
 
 dkim.lib: \
@@ -2322,28 +2322,28 @@ auto_qmail.h sgetopt.h case.h env.h control.h domainkeys.h \
 hasdkim.h variables.h auto_control.h
 	./compile -I$(DESTDIR)$(INDIDIR)/include -I../libdkim-$(DKIM_VERSION) $(inc_deps) qmail-dkim.c
 
-qmail-dkim.8: qmail-dkim.9 conf-qmail conf-control
+qmail-dkim.8: qmail-dkim.9 conf-qmail conf-sysconfdir
 	cat qmail-dkim.9 \
 	| sed s}QMAILHOME}"`head -1 conf-qmail`"}g \
-	| sed s}@controldir\@}"`head -1 conf-control`"}g \
+	| sed s}@controldir\@}"`head -1 conf-sysconfdir`/control"}g \
 	> qmail-dkim.8
 
-dk-filter.8: dk-filter.9 conf-qmail conf-control
+dk-filter.8: dk-filter.9 conf-qmail conf-sysconfdir
 	cat dk-filter.9 \
 	| sed s}QMAILHOME}"`head -1 conf-qmail`"}g \
-	| sed s}@controldir\@}"`head -1 conf-control`"}g \
+	| sed s}@controldir\@}"`head -1 conf-sysconfdir`/control"}g \
 	> dk-filter.8
 
-qnotify.1: qnotify.9 conf-qmail conf-control
+qnotify.1: qnotify.9 conf-qmail conf-sysconfdir
 	cat qnotify.9 \
 	| sed s}QMAILHOME}"`head -1 conf-qmail`"}g \
-	| sed s}@controldir\@}"`head -1 conf-control`"}g \
+	| sed s}@controldir\@}"`head -1 conf-sysconfdir`/control"}g \
 	> qnotify.1
 
-rrt.1: rrt.9 conf-qmail conf-control
+rrt.1: rrt.9 conf-qmail conf-sysconfdir
 	cat rrt.9 \
 	| sed s}QMAILHOME}"`head -1 conf-qmail`"}g \
-	| sed s}@controldir\@}"`head -1 conf-control`"}g \
+	| sed s}@controldir\@}"`head -1 conf-sysconfdir`/control"}g \
 	> rrt.1
 
 qmail-remote: \
@@ -2369,10 +2369,10 @@ qmail-remote.0: \
 qmail-remote.8
 	nroff -man qmail-remote.8 > qmail-remote.0
 qmail-remote.8: \
-qmail-remote.9 conf-qmail conf-control
+qmail-remote.9 conf-qmail conf-sysconfdir
 	cat qmail-remote.9 \
 	| sed s}QMAIL}"`head -1 conf-qmail`"}g \
-	| sed s}@controldir\@}"`head -1 conf-control`"}g \
+	| sed s}@controldir\@}"`head -1 conf-sysconfdir`/control"}g \
 	> qmail-remote.8
 
 qmail-remote.o: \
@@ -2436,12 +2436,12 @@ qmail-send.8
 	nroff -man qmail-send.8 > qmail-send.0
 
 qmail-send.8: \
-qmail-send.9 conf-break conf-spawn conf-qmail conf-control
+qmail-send.9 conf-break conf-spawn conf-qmail conf-sysconfdir
 	cat qmail-send.9 \
 	| sed s}QMAILHOME}"`head -1 conf-qmail`"}g \
 	| sed s}BREAK}"`head -1 conf-break`"}g \
 	| sed s}SPAWN}"`head -1 conf-spawn`"}g \
-	| sed s}@controldir\@}"`head -1 conf-control`"}g \
+	| sed s}@controldir\@}"`head -1 conf-sysconfdir`/control"}g \
 	> qmail-send.8
 
 qmail-send.o: \
@@ -2631,10 +2631,10 @@ qmail-todo.0: \
 qmail-todo.8
 	nroff -man qmail-todo.8 > qmail-todo.0
 qmail-todo.8: \
-qmail-todo.9 conf-qmail conf-control
+qmail-todo.9 conf-qmail conf-sysconfdir
 	cat qmail-todo.9 \
 	| sed s}QMAIL}"`head -1 conf-qmail`"}g \
-	| sed s}@controldir\@}"`head -1 conf-control`"}g \
+	| sed s}@controldir\@}"`head -1 conf-sysconfdir`/control"}g \
 	> qmail-todo.8
 
 qmail-smtpd.0: \
@@ -2642,10 +2642,10 @@ qmail-smtpd.8
 	nroff -man qmail-smtpd.8 > qmail-smtpd.0
 
 qmail-smtpd.8: \
-qmail-smtpd.9 conf-qmail conf-control
+qmail-smtpd.9 conf-qmail conf-sysconfdir
 	cat qmail-smtpd.9 \
 	| sed s}QMAILHOME}"`head -1 conf-qmail`"}g \
-	| sed s}@controldir\@}"`head -1 conf-control`"}g \
+	| sed s}@controldir\@}"`head -1 conf-sysconfdir`/control"}g \
 	> qmail-smtpd.8
 
 plugin_init.3: \
@@ -2813,7 +2813,7 @@ qmail-users.5: \
 qmail-users.9 conf-break conf-spawn
 	cat qmail-users.9 \
 	| sed s}QMAIL}"`head -1 conf-qmail`"}g \
-	| sed s}@assign@}"`head -1 conf-assign`"}g \
+	| sed s}@assign@}"`head -1 conf-sysconfdir`/users"}g \
 	| sed s}BREAK}"`head -1 conf-break`"}g \
 	| sed s}SPAWN}"`head -1 conf-spawn`"}g \
 	> qmail-users.5
@@ -2842,10 +2842,10 @@ str.a auto_qmail.o scan_ulong.o auto_control.o
 qreceipt.0: \
 qreceipt.1
 	nroff -man qreceipt.1 > qreceipt.0
-qreceipt.1: qreceipt.9 conf-qmail conf-control
+qreceipt.1: qreceipt.9 conf-qmail conf-sysconfdir
 	cat qreceipt.9 \
 	| sed s}QMAILHOME}"`head -1 conf-qmail`"}g \
-	| sed s}@controldir\@}"`head -1 conf-control`"}g \
+	| sed s}@controldir\@}"`head -1 conf-sysconfdir`/control"}g \
 	> qreceipt.1
 
 qreceipt.o: \
@@ -2920,10 +2920,10 @@ substdio.a error.a str.a fs.a lock.a seek.a alloc.a
 rrforward.0: \
 rrforward.1
 	nroff -man rrforward.1 > rrforward.0
-rrforward.1: rrforward.9 conf-control conf-qmail
+rrforward.1: rrforward.9 conf-sysconfdir conf-qmail
 	cat rrforward.9 \
 	| sed s}QMAILHOME}"`head -1 conf-qmail`"}g \
-	| sed s}@controldir\@}"`head -1 conf-control`"}g \
+	| sed s}@controldir\@}"`head -1 conf-sysconfdir`/control"}g \
 	> rrforward.1
 
 rrforward.o: \
@@ -3713,10 +3713,10 @@ open.a wait.a sig.a fd.a fs.a
 maildirserial.0: \
 maildirserial.1
 	nroff -man maildirserial.1 > maildirserial.0
-maildirserial.1: maildirserial.9 conf-qmail conf-control
+maildirserial.1: maildirserial.9 conf-qmail conf-sysconfdir
 	cat maildirserial.9 \
 	| sed s}QMAILHOME}"`head -1 conf-qmail`"}g \
-	| sed s}@controldir\@}"`head -1 conf-control`"}g \
+	| sed s}@controldir\@}"`head -1 conf-sysconfdir`/control"}g \
 	> maildirserial.1
 
 maildirserial.o: \
@@ -3748,10 +3748,10 @@ serialcmd.0: serialcmd.1
 	nroff -man serialcmd.1 > serialcmd.0
 
 maildircmd: \
-warn-auto.sh maildircmd.sh conf-qmail conf-control
+warn-auto.sh maildircmd.sh conf-qmail conf-sysconfdir
 	cat warn-auto.sh maildircmd.sh \
 	| sed s}QMAIL}"`head -1 conf-qmail`"}g \
-	| sed s}@controldir\@}"`head -1 conf-control`"}g \
+	| sed s}@controldir\@}"`head -1 conf-sysconfdir`/control"}g \
 	> maildircmd
 
 maildircmd.0: \
@@ -3788,10 +3788,10 @@ timeoutwrite.h fd.h exit.h open.h wait.h str.h fmt.h env.h
 	./compile serialqmtp.c
 
 maildirsmtp: \
-warn-auto.sh maildirsmtp.sh conf-qmail conf-control
+warn-auto.sh maildirsmtp.sh conf-qmail conf-sysconfdir
 	cat warn-auto.sh maildirsmtp.sh \
 	| sed s}QMAIL}"`head -1 conf-qmail`"}g \
-	| sed s}@controldir\@}"`head -1 conf-control`"}g \
+	| sed s}@controldir\@}"`head -1 conf-sysconfdir`/control"}g \
 	> maildirsmtp
 
 maildirsmtp.0: \
@@ -4165,10 +4165,10 @@ warn-auto.sh zspam.sh conf-qmail
 	> zspam
 
 dk-filter: \
-warn-auto.sh dk-filter.sh conf-qmail conf-control
+warn-auto.sh dk-filter.sh conf-qmail conf-sysconfdir
 	cat warn-auto.sh dk-filter.sh \
 	| sed s}QMAILHOME}"`head -1 conf-qmail`"}g \
-	| sed s}@controldir\@}"`head -1 conf-control`"}g \
+	| sed s}@controldir\@}"`head -1 conf-sysconfdir`/control"}g \
 	> dk-filter
 
 scan_uint.o: \
@@ -4564,10 +4564,10 @@ checkdomain.0: checkdomain.1
 
 filterto.0: filterto.1
 	nroff -man filterto.1 > filterto.0
-filterto.1: filterto.9 conf-qmail conf-control
+filterto.1: filterto.9 conf-qmail conf-sysconfdir
 	cat filterto.9 \
 	| sed s}QMAILHOME}"`head -1 conf-qmail`"}g \
-	| sed s}@controldir\@}"`head -1 conf-control`"}g \
+	| sed s}@controldir\@}"`head -1 conf-sysconfdir`/control"}g \
 	> filterto.1
 
 condtomaildir.0: condtomaildir.1
@@ -4581,10 +4581,10 @@ ifaddr.0: ifaddr.1
 
 replier.0: replier.1
 	nroff -man replier.1 > replier.0
-replier.1: replier.9 conf-qmail conf-control
+replier.1: replier.9 conf-qmail conf-sysconfdir
 	cat replier.9 \
 	| sed s}QMAILHOME}"`head -1 conf-qmail`"}g \
-	| sed s}@controldir\@}"`head -1 conf-control`"}g \
+	| sed s}@controldir\@}"`head -1 conf-sysconfdir`/control"}g \
 	> replier.1
 
 replier-config.0: replier-config.1
@@ -4826,10 +4826,10 @@ Makefile-cert: conf-qmail Makefile-cert.mk
 	| sed s}QMAIL}"`head -1 conf-qmail`"}g \
 	> $@
 
-update_tmprsadh: conf-qmail update_tmprsadh.sh conf-control
+update_tmprsadh: conf-qmail update_tmprsadh.sh conf-sysconfdir
 	@cat update_tmprsadh.sh\
 	| sed s}QMAIL}"`head -1 conf-qmail`"}g \
-	| sed s}@controldir\@}"`head -1 conf-control`"}g \
+	| sed s}@controldir\@}"`head -1 conf-sysconfdir`/control"}g \
 	> $@
 
 tmprsadh: update_tmprsadh
@@ -4863,10 +4863,10 @@ sig.a seek.a open.a wait.a fd.a fs.a
 dot-forward.0: \
 dot-forward.1
 	nroff -man dot-forward.1 > dot-forward.0
-dot-forward.1: dot-forward.9 conf-qmail conf-control
+dot-forward.1: dot-forward.9 conf-qmail conf-sysconfdir
 	cat dot-forward.9 \
 	| sed s}QMAILHOME}"`head -1 conf-qmail`"}g \
-	| sed s}@controldir\@}"`head -1 conf-control`"}g \
+	| sed s}@controldir\@}"`head -1 conf-sysconfdir`/control"}g \
 	> dot-forward.1
 
 dot-forward.o: \
@@ -4891,10 +4891,10 @@ alloc.a error.a case.a str.a fs.a sig.a wait.a seek.a open.a fd.a
 fastforward.0: \
 fastforward.1
 	nroff -man fastforward.1 > fastforward.0
-fastforward.1: fastforward.9 conf-qmail conf-control
+fastforward.1: fastforward.9 conf-qmail conf-sysconfdir
 	cat fastforward.9 \
 	| sed s}QMAILHOME}"`head -1 conf-qmail`"}g \
-	| sed s}@controldir\@}"`head -1 conf-control`"}g \
+	| sed s}@controldir\@}"`head -1 conf-sysconfdir`/control"}g \
 	> fastforward.1
 
 fastforward.o: \
@@ -5605,12 +5605,12 @@ fmt.h hasindimail.h substdio.h auto_control.h
 	./compile $(inc_deps) qmail-sql.c
 
 qmail-sql.8: \
-qmail-sql.9 conf-break conf-spawn conf-control conf-qmail
+qmail-sql.9 conf-break conf-spawn conf-sysconfdir conf-qmail
 	cat qmail-sql.9 \
 	| sed s}QMAIL}"`head -1 conf-qmail`"}g \
 	| sed s}BREAK}"`head -1 conf-break`"}g \
 	| sed s}SPAWN}"`head -1 conf-spawn`"}g \
-	| sed s}@controldir\@}"`head -1 conf-control`"}g \
+	| sed s}@controldir\@}"`head -1 conf-sysconfdir`/control"}g \
 	> qmail-sql.8
 
 sys-checkpwd: \
@@ -5700,10 +5700,10 @@ str_cspn.o: \
 compile str.h str_cspn.c
 	./compile str_cspn.c
 
-surblfilter.8: surblfilter.9 conf-qmail conf-control
+surblfilter.8: surblfilter.9 conf-qmail conf-sysconfdir
 	cat surblfilter.9 \
 	| sed s}QMAILHOME}"`head -1 conf-qmail`"}g \
-	| sed s}@controldir\@}"`head -1 conf-control`"}g \
+	| sed s}@controldir\@}"`head -1 conf-sysconfdir`/control"}g \
 	> surblfilter.8
 
 surblfilter: \
