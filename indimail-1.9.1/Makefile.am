@@ -761,6 +761,8 @@ md5_crypt.lo: md5.h global.h
 edit = sed \
 	-e 's,@indimaildir\@,$(indimaildir),g' \
 	-e 's,@qmaildir\@,$(qmaildir),g' \
+	-e 's,@sysconfdir\@,$(sysconfdir),g' \
+	-e 's,@assigndir\@,$(assigndir),g' \
 	-e 's,@controldir\@,$(controldir),g' \
 	-e 's,@domaindir\@,$(domaindir),g' \
 	-e 's,@mysqlbindir\@,$(mysqlbindir),g' \
