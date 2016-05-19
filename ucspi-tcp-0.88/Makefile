@@ -333,8 +333,8 @@ choose compile load trywaitp.c haswaitp.h1 haswaitp.h2
 	./choose cl trywaitp haswaitp.h1 haswaitp.h2 > haswaitp.h
 
 hier.o: \
-compile hier.c auto_home.h conf-shared
-	./compile `grep -h -v "^#" conf-shared` hier.c
+compile hier.c auto_home.h conf-dlopen
+	./compile `grep -h -v "^#" conf-dlopen` hier.c
 
 http@: \
 warn-auto.sh http@.sh conf-home
@@ -461,12 +461,12 @@ env.h pathexec.h
 
 pathexec_rundl.o: \
 compile pathexec_run.c error.h stralloc.h gen_alloc.h str.h env.h \
-pathexec.h conf-shared
-	./compile `grep -h -v "^#" conf-shared` pathexec_run.c -o pathexec_rundl.o
+pathexec.h conf-dlopen
+	./compile `grep -h -v "^#" conf-dlopen` pathexec_run.c -o pathexec_rundl.o
 
 pathexec_run.o: \
 compile pathexec_run.c error.h stralloc.h gen_alloc.h str.h env.h \
-pathexec.h conf-shared
+pathexec.h conf-dlopen
 	./compile pathexec_run.c
 
 prog: \
@@ -792,11 +792,11 @@ stralloc.h gen_alloc.h
 
 load_shared.o: \
 compile load_shared.c str.h strerr.h
-	./compile `grep -h -v "^#" conf-shared` load_shared.c
+	./compile `grep -h -v "^#" conf-dlopen` load_shared.c
 
 tcpserver_plugin.o: \
-compile tcpserver_plugin.c str.h stralloc.h strerr.h scan.h fmt.h env.h conf-shared
-	./compile `grep -h -v "^#" conf-shared` tcpserver_plugin.c
+compile tcpserver_plugin.c str.h stralloc.h strerr.h scan.h fmt.h env.h conf-dlopen
+	./compile `grep -h -v "^#" conf-dlopen` tcpserver_plugin.c
 
 tcpserver: \
 load tcpserver.o rules.o tcpremoteinfo.o timeoutconn.o pathexec_rundl.o \
@@ -816,9 +816,9 @@ alloc.h buffer.h error.h strerr.h sgetopt.h subgetopt.h pathexec.h \
 socket.h uint32.h ndelay.h tcpremoteinfo.h stralloc.h rules.h \
 stralloc.h sig.h dns.h stralloc.h iopause.h taia.h tai.h uint64.h \
 ip6.h conf-tls conf-ip haveip6.h conf-mysqlrules \
-conf-shared mysql_config hasmysql.h
+conf-dlopen mysql_config hasmysql.h
 	./compile $(SSLINCS) $(mysql_inc) \
-	`grep -h -v "^#" conf-tls conf-ip conf-mysqlrules conf-shared` \
+	`grep -h -v "^#" conf-tls conf-ip conf-mysqlrules conf-dlopen` \
 	tcpserver.c
 
 mysql_config.o: compile mysql_config.c conf-mysqlrules
