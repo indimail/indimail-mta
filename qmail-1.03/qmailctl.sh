@@ -11,6 +11,9 @@
 ### END INIT INFO
 
 # $Log: qmailctl.sh,v $
+# Revision 1.45  2016-05-19 09:00:13+05:30  Cprogrammer
+# use iecho instead of echo
+#
 # Revision 1.44  2016-05-03 18:46:26+05:30  Cprogrammer
 # BUG - replaced failure with $fail
 #
@@ -154,8 +157,8 @@ if [ -f /etc/lsb-release -o -f /etc/debian_version ] ; then
 else
 	SYSTEM=`uname -s | tr "[:lower:]" "[:upper:]"`
 fi
-if [ -x QMAIL/bin/echo ] ; then
-	ECHO=QMAIL/bin/echo
+if [ -x QMAIL/bin/iecho ] ; then
+	ECHO=QMAIL/bin/iecho
 else
 	ECHO=echo
 fi
