@@ -52,6 +52,7 @@ auto-pidt
 auto_pidt.h
 auto_qmail.c
 auto_assign.c
+auto_shared.c
 auto_qstdin.c
 auto_retries.h
 auto_ripmime_cmd.c
