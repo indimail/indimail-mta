@@ -1,5 +1,8 @@
 /*
  * $Log: ofmipd.c,v $
+ * Revision 1.13  2016-05-21 14:48:20+05:30  Cprogrammer
+ * use auto_sysconfdir for leapsecs_init()
+ *
  * Revision 1.12  2016-01-28 09:01:21+05:30  Cprogrammer
  * chdir to qmail_home before leapsecs_init()
  *
@@ -46,7 +49,7 @@
 #include "byte.h"
 #include "rewritehost.h"
 #include "getln.h"
-#include "auto_qmail.h"
+#include "auto_sysconfdir.h"
 #include "qmail.h"
 #include "timeoutread.h"
 #include "timeoutwrite.h"
@@ -1273,7 +1276,7 @@ main(argc, argv)
 	remoteinfo = env_get("REMOTEINFO");
 	relayclient = env_get("RELAYCLIENT");
 	received_init();
-	if (chdir(auto_qmail) == -1)
+	if (chdir(auto_sysconfdir) == -1)
 		die_config();
 	if (leapsecs_init() == -1)
 		die_config();
@@ -1289,7 +1292,7 @@ main(argc, argv)
 void
 getversion_ofmipd_c()
 {
-	static char    *x = "$Id: ofmipd.c,v 1.12 2016-01-28 09:01:21+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: ofmipd.c,v 1.13 2016-05-21 14:48:20+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

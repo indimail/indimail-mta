@@ -1,5 +1,8 @@
 /*
  * $Log: 822print.c,v $
+ * Revision 1.6  2016-05-21 14:47:58+05:30  Cprogrammer
+ * use auto_sysconfdir for leapsecs_init()
+ *
  * Revision 1.5  2016-01-28 08:59:37+05:30  Cprogrammer
  * chdir qmail_home for opening etc/leapsecs.dat
  *
@@ -31,7 +34,7 @@
 #include "leapsecs.h"
 #include "caltime.h"
 #include "tai.h"
-#include "auto_qmail.h"
+#include "auto_sysconfdir.h"
 
 #define FATAL "822print: fatal: "
 
@@ -424,8 +427,8 @@ main()
 {
 	int             flagheader = 1;
 
-	if (chdir(auto_qmail) == -1)
-		strerr_die3sys(111, FATAL, "chdir: ", auto_qmail);
+	if (chdir(auto_sysconfdir) == -1)
+		strerr_die3sys(111, FATAL, "chdir: ", auto_sysconfdir);
 	if (leapsecs_init() == -1)
 		strerr_die2sys(111, FATAL, "unable to init leapsecs: ");
 	if (!mess822_begin(&h, a))
@@ -459,7 +462,7 @@ main()
 void
 getversion_822print_c()
 {
-	static char    *x = "$Id: 822print.c,v 1.5 2016-01-28 08:59:37+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: 822print.c,v 1.6 2016-05-21 14:47:58+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

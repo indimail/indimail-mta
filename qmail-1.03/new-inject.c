@@ -1,5 +1,8 @@
 /*
  * $Log: new-inject.c,v $
+ * Revision 1.9  2016-05-21 14:48:09+05:30  Cprogrammer
+ * use auto_sysconfdir for leapsecs_init()
+ *
  * Revision 1.8  2016-05-17 19:44:58+05:30  Cprogrammer
  * use auto_control, set by conf-control to set control directory
  *
@@ -26,7 +29,7 @@
  *
  */
 #include <unistd.h>
-#include "auto_qmail.h"
+#include "auto_sysconfdir.h"
 #include "auto_control.h"
 #include "env.h"
 #include "envdir.h"
@@ -534,8 +537,8 @@ main(argc, argv)
 		}
 	} /*- while ((opt = getopt(argc, argv, "nNaAhHFIMRSf:")) != opteof) */
 	argv += optind;
-	if (chdir(auto_qmail) == -1)
-		strerr_die4sys(111, FATAL, "unable to switch to ", auto_qmail, ": ");
+	if (chdir(auto_sysconfdir) == -1)
+		strerr_die4sys(111, FATAL, "unable to switch to ", auto_sysconfdir, ": ");
 	if (leapsecs_init() == -1)
 		strerr_die2sys(111, FATAL, "unable to init leapsecs: ");
 	if (config_env(&fnmft, "QMAILMFTFILE") == -1)
@@ -694,7 +697,7 @@ main(argc, argv)
 void
 getversion_new_inject_c()
 {
-	static char    *x = "$Id: new-inject.c,v 1.8 2016-05-17 19:44:58+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: new-inject.c,v 1.9 2016-05-21 14:48:09+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
