@@ -82,7 +82,6 @@ then
 	prefix="$defaultprefix"
 	ac_configure_args="$ac_configure_args -prefix=$prefix"
 fi
-
 AC_CHECK_HEADERS(syslog.h stdint.h shadow.h strings.h)
 AC_CHECK_TYPES([socklen_t], , , [
 #include <unistd.h>
@@ -218,8 +217,12 @@ socket_path="$enableval",
 ])
 AC_DEFINE_UNQUOTED(_PATH_NSVSD_SOCKET,"$socket_path",full path of the NSVS Socket File)
 
-config_path="$prefix/etc/nssd.conf"
-AC_ARG_ENABLE(config_path, [--enable-nssd-config-path=$prefix/nssd.conf     configuration file for nssd daemon.],
+if test " $sysconfdir" = " \${prefix}/etc"; then
+	config_path="$prefix/etc/nssd.conf"
+else
+	config_path="$sysconfdir/nssd.conf"
+fi
+AC_ARG_ENABLE(config_path, [--enable-nssd-config-path=$sysconfdir/nssd.conf     configuration file for nssd daemon.],
 config_path="$enableval",
 [
 	if test "$config_path" = ""
@@ -227,7 +230,7 @@ config_path="$enableval",
 		config_path="$prefix/etc/nssd.conf"
 	fi
 ])
-AC_DEFINE_UNQUOTED(_PATH_NSVSD_CONF,"$config_path",full path of the NSVS configuration File)
+AC_DEFINE_UNQUOTED(_PATH_NSVSD_CONF, "$config_path", full path of the NSVS configuration File)
 
 AC_SUBST([LIBTOOL_DEPS])
 AC_SUBST(LIBVER)
