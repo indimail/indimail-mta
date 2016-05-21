@@ -1,5 +1,8 @@
 /*
  * $Log: initsvc.c,v $
+ * Revision 2.20  2016-05-21 20:10:59+05:30  Cprogrammer
+ * used SHARREDIR for boot directory
+ *
  * Revision 2.19  2016-05-04 20:12:00+05:30  Cprogrammer
  * fix for systemd on debian/ubuntu
  *
@@ -69,7 +72,7 @@
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: initsvc.c,v 2.19 2016-05-04 20:12:00+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: initsvc.c,v 2.20 2016-05-21 20:10:59+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #define SV_ON    1
@@ -223,9 +226,9 @@ main(int argc, char **argv)
 			if (flag == SV_OFF)
 				return (0);
 			printf("Installing indimail.service\n");
-			if (chdir(QMAILDIR) || chdir("boot"))
+			if (chdir(SHAREDDIR) || chdir("boot"))
 			{
-				fprintf(stderr, "chdir %s/boot: %s\n", QMAILDIR, strerror(errno));
+				fprintf(stderr, "chdir %s/boot: %s\n", SHAREDDIR, strerror(errno));
 				return (1);
 			} else
 			if (fappend("systemd", "/lib/systemd/system/indimail.service", "w", 0644, 0, getgid()))
@@ -268,9 +271,9 @@ main(int argc, char **argv)
 			if (flag == SV_OFF)
 				return (0);
 			printf("Installing indimail.plist\n");
-			if (chdir(QMAILDIR) || chdir("boot"))
+			if (chdir(SHAREDDIR) || chdir("boot"))
 			{
-				fprintf(stderr, "chdir %s/boot: %s\n", QMAILDIR, strerror(errno));
+				fprintf(stderr, "chdir %s/boot: %s\n", SHAREDDIR, strerror(errno));
 				return (1);
 			} else
 			if (fappend("indimail.plist", "/System/Library/LaunchDaemons/indimail.plist", "w", 0644, 0, getgid()))
@@ -328,9 +331,9 @@ main(int argc, char **argv)
 			if (flag == SV_OFF)
 				return (0);
 			printf("Installing upstart service\n");
-			if (chdir(QMAILDIR) || chdir("boot"))
+			if (chdir(SHAREDDIR) || chdir("boot"))
 			{
-				fprintf(stderr, "chdir %s/boot: %s\n", QMAILDIR, strerror(errno));
+				fprintf(stderr, "chdir %s/boot: %s\n", SHAREDDIR, strerror(errno));
 				return (1);
 			} else
 			if (fappend("upstart", jobfile, "w", 0644, 0, getgid()))
