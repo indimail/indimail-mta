@@ -1,3 +1,5 @@
+auto_sysconfdir.c
+auto_sysconfdir.o
 auto_shared.o
 auto_shared.c
 auto_assign.o
