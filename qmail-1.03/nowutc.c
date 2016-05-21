@@ -1,5 +1,8 @@
 /*
  * $Log: nowutc.c,v $
+ * Revision 1.3  2016-05-21 14:48:14+05:30  Cprogrammer
+ * use auto_sysconfdir for leapsecs_init()
+ *
  * Revision 1.2  2016-01-28 23:51:48+05:30  Cprogrammer
  * chdir /var/indimail for leapsecs.dat
  *
@@ -15,7 +18,7 @@
 #include "tai.h"
 #include "taia.h"
 #include "caltime.h"
-#include "auto_qmail.h"
+#include "auto_sysconfdir.h"
 
 struct taia     now;
 struct tai      sec;
@@ -26,8 +29,8 @@ char            x[TAIA_FMTFRAC];
 int
 main()
 {
-	if (chdir(auto_qmail) == -1) {
-		fprintf(stderr, "chdir: %s: %s\n", auto_qmail, strerror(errno));
+	if (chdir(auto_sysconfdir) == -1) {
+		fprintf(stderr, "chdir: %s: %s\n", auto_sysconfdir, strerror(errno));
 		_exit (111);
 	}
 	if (leapsecs_init() == -1) {
@@ -49,7 +52,7 @@ main()
 void
 getversion_nowutc_c()
 {
-	static char    *x = "$Id: nowutc.c,v 1.2 2016-01-28 23:51:48+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: nowutc.c,v 1.3 2016-05-21 14:48:14+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

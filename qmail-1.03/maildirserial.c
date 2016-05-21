@@ -1,5 +1,8 @@
 /*
  * $Log: maildirserial.c,v $
+ * Revision 1.10  2016-05-21 14:48:06+05:30  Cprogrammer
+ * use auto_sysconfdir for leapsecs_init()
+ *
  * Revision 1.9  2016-05-17 19:44:58+05:30  Cprogrammer
  * use auto_control, set by conf-control to set control directory
  *
@@ -59,6 +62,7 @@
 #include "quote.h"
 #include "byte.h"
 #include "auto_qmail.h"
+#include "auto_sysconfdir.h"
 #include "auto_control.h"
 #include "variables.h"
 
@@ -227,11 +231,8 @@ bounce(fd, why, flagtimeout)
 	stralloc       *why;		/*- must end with \n; must not contain \n\n */
 	int             flagtimeout;
 {
-	int             match;
-	char           *bouncesender;
-	char           *bouncerecip;
-	char           *x;
-	int             n;
+	int             match, n, fddir;
+	char           *bouncesender, *bouncerecip, *x;
 
 	substdio_fdbuf(&ssmess, read, fd, messbuf, sizeof messbuf);
 
@@ -277,7 +278,13 @@ bounce(fd, why, flagtimeout)
 		bouncerecip = config_data(&doublebounceto)->s;
 	}
 	tai_now(&datetai);
+	if ((fddir = open_read(".")) == -1)
+		strerr_die2sys(111, FATAL, "unable to open current directory: ");
+	if (chdir(auto_sysconfdir) == -1)
+		strerr_die4sys(111, FATAL, "unable to chdir to ", auto_sysconfdir, ": ");
 	caltime_utc(&date.ct, &datetai, (int *) 0, (int *) 0);
+	if (fchdir(fddir) == -1)
+		strerr_die2sys(111, FATAL, "unable to set current directory: ");
 	date.known = 1;
 	if (!mess822_date(&datestr, &date))
 		die_nomem();
@@ -549,8 +556,6 @@ main(argc, argv)
 	client = argv;
 	if (!*client)
 		die_usage();
-	if (chdir(dir) == -1)
-		strerr_die4sys(111, FATAL, "unable to chdir to ", dir, ": ");
 	readcontrols();
 	if (!stralloc_copys(&deadfiles, ""))
 		die_nomem();
@@ -678,7 +683,7 @@ main(argc, argv)
 void
 getversion_maildirserial_c()
 {
-	static char    *x = "$Id: maildirserial.c,v 1.9 2016-05-17 19:44:58+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: maildirserial.c,v 1.10 2016-05-21 14:48:06+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

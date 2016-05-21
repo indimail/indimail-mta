@@ -1,5 +1,8 @@
 /*
  * $Log: 822date.c,v $
+ * Revision 1.7  2016-05-21 14:47:32+05:30  Cprogrammer
+ * use auto_sysconfdir for leapsecs_init()
+ *
  * Revision 1.6  2016-01-28 10:31:00+05:30  Cprogrammer
  * removed compiler warning for chdir()
  *
@@ -31,7 +34,7 @@
 #include "leapsecs.h"
 #include "caltime.h"
 #include "tai.h"
-#include "auto_qmail.h"
+#include "auto_sysconfdir.h"
 
 #define FATAL "822date: fatal: "
 
@@ -60,8 +63,8 @@ main(argc, argv)
 	int             argc;
 	char          **argv;
 {
-	if (chdir(auto_qmail) == -1)
-		strerr_die3sys(111, FATAL, "chdir: ", auto_qmail);
+	if (chdir(auto_sysconfdir) == -1)
+		strerr_die3sys(111, FATAL, "chdir: ", auto_sysconfdir);
 	if (leapsecs_init() == -1)
 		strerr_die2sys(111, FATAL, "unable to init leapsecs: ");
 	if (argv[1])
@@ -117,7 +120,7 @@ main(argc, argv)
 void
 getversion_822date_c()
 {
-	static char    *x = "$Id: 822date.c,v 1.6 2016-01-28 10:31:00+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: 822date.c,v 1.7 2016-05-21 14:47:32+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
