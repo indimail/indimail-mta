@@ -227,17 +227,6 @@ AC_ARG_ENABLE(controldir, [  --enable-controldir=dir       directory for control
 	])
 AC_DEFINE_UNQUOTED(CONTROLDIR, "$controldir", Directory for control files)
 
-domaindir=$prefix
-AC_ARG_ENABLE(domaindir, [  --enable-domaindir=dir       directory for virtual domains.],
-	domaindir="$enableval",
-	[
-	 	if test "$domaindir" != ""
-		then
-			AC_DEFINE_UNQUOTED(DOMAINDIR,"$domaindir", Directory for virtual domains)
-		fi
-	])
-AC_DEFINE_UNQUOTED(DOMAINDIR, "$domaindir", Directory for virtual domains)
-
 assigndir="`dirname $sysconfdir`/users"
 AC_ARG_ENABLE(assigndir, [  --enable-assigndir=dir       directory for qmail users/assign.],
 	assigndir="$enableval",
@@ -248,6 +237,28 @@ AC_ARG_ENABLE(assigndir, [  --enable-assigndir=dir       directory for qmail use
 		fi
 	])
 AC_DEFINE_UNQUOTED(ASSIGNDIR, "$assigndir", Directory for qmail users/assign)
+
+shareddir=$prefix
+AC_ARG_ENABLE(shareddir, [  --enable-shareddir=dir       directory for shared files.],
+	shareddir="$enableval",
+	[
+	 	if test "$shareddir" != ""
+		then
+			AC_DEFINE_UNQUOTED(SHAREDDIR,"$shareddir", Directory for shared files.)
+		fi
+	])
+AC_DEFINE_UNQUOTED(SHAREDDIR, "$shareddir", Directory for shared files)
+
+domaindir=$prefix
+AC_ARG_ENABLE(domaindir, [  --enable-domaindir=dir       directory for virtual domains.],
+	domaindir="$enableval",
+	[
+	 	if test "$domaindir" != ""
+		then
+			AC_DEFINE_UNQUOTED(DOMAINDIR,"$domaindir", Directory for virtual domains)
+		fi
+	])
+AC_DEFINE_UNQUOTED(DOMAINDIR, "$domaindir", Directory for virtual domains)
 
 basepath="/home/mail"
 AC_ARG_ENABLE(basepath,   [  --enable-basepath=dir         Base Path for User's Home Directories.],
@@ -414,6 +425,7 @@ AC_SUBST(indimaildir)
 AC_SUBST(controldir)
 AC_SUBST(domaindir)
 AC_SUBST(assigndir)
+AC_SUBST(shareddir)
 AC_DEFINE_UNQUOTED(INDIMAILDIR,"$indimaildir",IndiMail Home Directory)
 rm -f indimail.dir
 
@@ -1240,7 +1252,18 @@ then
 	echo "-I../indimail-"$VERSION" -I../indimail-"$VERSION"/eps-1.2 $auth_inc" > ../qmail-1.03/inc_deps; \
 	echo "-L../indimail-"$VERSION"/.libs -L../indimail-"$VERSION"/eps-1.2/.libs -L../indimail-"$VERSION"/cdb-1.0/.libs $auth_libs" > ../qmail-1.03/lib_deps
 	sed "s{QMAIL{$prefix{" ../qmail-1.03/conf-qmail.in > ../qmail-1.03/conf-qmail
-	echo $sysconfdir > ../qmail-1.03/conf-sysconfdir
+	q_sysconfdir=`dirname $sysconfdir`
+	if test "$q_sysconfdir" = "$qmaildir"; then
+		sed "s{SYSCONFDIR{$qmaildir{" ../qmail-1.03/conf-sysconfdir.in > ../qmail-1.03/conf-sysconfdir
+	else
+		q_sysconfdir=$sysconfdir
+		sed "s{SYSCONFDIR{$sysconfdir{" ../qmail-1.03/conf-sysconfdir.in > ../qmail-1.03/conf-sysconfdir
+	fi
+	if test "$shareddir" = "$qmaildir"; then
+		sed "s{SHAREDDIR{$qmaildir{" ../qmail-1.03/conf-shared.in > ../qmail-1.03/conf-shared
+	else
+		sed "s{SHAREDDIR{$prefix/share{" ../qmail-1.03/conf-shared.in > ../qmail-1.03/conf-shared
+	fi
 fi
 
 (
@@ -1263,7 +1286,8 @@ echo "-------------------------------------------------------------"
 echo "   qmail directory = $qmaildir --enable-qmaildir=$qmaildir"
 echo " control directory = $controldir --enable-controldir=$controldir"
 echo " domains directory = $domaindir --enable-domaindir=$domaindir"
-echo "        sysconfdir = $sysconfdir"
+echo "  shared directory = $shareddir --enable-shareddir=$shareddir"
+echo "        sysconfdir = $q_sysconfdir"
 if test "$postfixdir" != ""
 then
 	echo " Postfix directory = $postfixdir --enable-postfixdir=$postfixdir"
