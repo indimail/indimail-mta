@@ -1252,6 +1252,7 @@ then
 	echo "-I../indimail-"$VERSION" -I../indimail-"$VERSION"/eps-1.2 $auth_inc" > ../qmail-1.03/inc_deps; \
 	echo "-L../indimail-"$VERSION"/.libs -L../indimail-"$VERSION"/eps-1.2/.libs -L../indimail-"$VERSION"/cdb-1.0/.libs $auth_libs" > ../qmail-1.03/lib_deps
 	sed "s{QMAIL{$prefix{" ../qmail-1.03/conf-qmail.in > ../qmail-1.03/conf-qmail
+	sed "s{PREFIX{$prefix{" ../qmail-1.03/conf-prefix.in > ../qmail-1.03/conf-prefix
 	q_sysconfdir=`dirname $sysconfdir`
 	if test "$q_sysconfdir" = "$qmaildir"; then
 		sed "s{SYSCONFDIR{$qmaildir{" ../qmail-1.03/conf-sysconfdir.in > ../qmail-1.03/conf-sysconfdir
