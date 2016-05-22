@@ -14,8 +14,8 @@ INSTALL_STRIP_PROGRAM = $(install_sh) -c $(STRIP_OPT)
 
 indimailbindir=@prefix@/bin
 indimailsbindir=@prefix@/sbin
-indimaillibexecdir=@prefix@/libexec
-indimailauthlibdir=@prefix@/libexec/authlib
+indimaillibexecdir=@libexecdir@
+indimailauthlibdir=@libexecdir@/authlib
 
 libindimail_LTLIBRARIES = libindimail.la
 libindimail_la_SOURCES = $(COMMONSOURCES)
@@ -762,6 +762,9 @@ edit = sed \
 	-e 's,@indimaildir\@,$(indimaildir),g' \
 	-e 's,@qmaildir\@,$(qmaildir),g' \
 	-e 's,@sysconfdir\@,$(sysconfdir),g' \
+	-e 's,@shareddir\@,$(shareddir),g' \
+	-e 's,@mandir\@,$(mandir),g' \
+	-e 's,@libexecdir\@,$(libexecdir),g' \
 	-e 's,@domaindir\@,$(domaindir),g' \
 	-e 's,@mysqlbindir\@,$(mysqlbindir),g' \
 	-e 's,@moduledir\@,$(moduledir),g' \
@@ -785,7 +788,10 @@ edit = sed \
 	-e 's,@prefix\@,$(prefix),g'
 editman = sed \
 	-e 's,INDIMAILDIR,$(indimaildir),g' \
-	-e 's,CONTROLDIR,$(controldir),g'
+	-e 's,@sysconfdir\@,$(sysconfdir),g' \
+	-e 's,@qmaildir\@,$(qmaildir),g' \
+	-e 's,CONTROLDIR,$(controldir),g' \
+	-e 's,@prefix\@,$(prefix),g'
 
 controlsync: controlsync.in
 	$(edit) $@.in > $@
@@ -948,24 +954,24 @@ install-data-hook:
 	$(INSTALL_DATA) config.h $(DESTDIR)@prefix@/include/indimail_config.h || exit 1
 	$(INSTALL_DATA) indimail.h $(DESTDIR)@prefix@/include/indimail.h || exit 1
 	$(INSTALL_DATA) typesx.h $(DESTDIR)@prefix@/include/typesx.h || exit 1
-	$(INSTALL_DATA) data/wordlist.db $(DESTDIR)@prefix@/etc/wordlist.db  || exit 1
-	$(INSTALL_DATA) perm_list $(DESTDIR)@prefix@/etc/perm_list  || exit 1
-	$(mkinstalldirs) $(DESTDIR)@prefix@/modules || exit 1
-	$(INSTALL_DATA) $(DESTDIR)@libdir@/iauth.*  $(DESTDIR)@prefix@/modules || exit 1
+	$(INSTALL_DATA) data/wordlist.db $(DESTDIR)@sysconfdir@/wordlist.db  || exit 1
+	$(INSTALL_DATA) perm_list $(DESTDIR)@sysconfdir@/perm_list  || exit 1
+	$(mkinstalldirs) $(DESTDIR)@shareddir@/modules || exit 1
+	$(INSTALL_PROGRAM) $(DESTDIR)@libdir@/iauth.so  $(DESTDIR)@shareddir@/modules || exit 1
 	/bin/rm -f $(DESTDIR)@libdir@/iauth.* || exit 1
-	$(mkinstalldirs) $(DESTDIR)@prefix@/etc/yum.repos.d || exit 1
-	$(INSTALL_DATA) data/*.repo $(DESTDIR)@prefix@/etc/yum.repos.d || exit 1
-	$(mkinstalldirs) $(DESTDIR)@prefix@/libexec || exit 1
-	$(INSTALL_DATA) post_handle/* $(DESTDIR)@prefix@/libexec || exit 1
+	$(mkinstalldirs) $(DESTDIR)@sysconfdir@/yum.repos.d || exit 1
+	$(INSTALL_DATA) data/*.repo $(DESTDIR)@sysconfdir@/yum.repos.d || exit 1
+	$(mkinstalldirs) $(DESTDIR)@libexecdir@ || exit 1
+	$(INSTALL_DATA) post_handle/* $(DESTDIR)@libexecdir@ || exit 1
 	for f in $(post_handle_list); do \
-		if [ -f $(DESTDIR)@prefix@/libexec/$$f ] ; then \
-			chmod 555 $(DESTDIR)@prefix@/libexec/$$f; \
-			echo "chmod 555 $(DESTDIR)@prefix@/libexec/$$f"; \
+		if [ -f $(DESTDIR)@libexecdir@/$$f ] ; then \
+			chmod 555 $(DESTDIR)@libexecdir@/$$f; \
+			echo "chmod 555 $(DESTDIR)@libexecdir@/$$f"; \
 		fi;\
 	done
-	$(mkinstalldirs) $(DESTDIR)@prefix@/doc || exit 1
+	$(mkinstalldirs) $(DESTDIR)@shareddir@/doc || exit 1
 	for f in $(doc_list); do \
-		$(INSTALL_DATA) doc/$$f $(DESTDIR)@prefix@/doc/$$f || exit 1 ;\
+		$(INSTALL_DATA) doc/$$f $(DESTDIR)@shareddir@/doc/$$f || exit 1 ;\
 	done
 	if test `@idcommand@` = "0" ; then \
 		for f in $(setuid_list); do \
@@ -976,7 +982,7 @@ install-data-hook:
 				chmod 4555 $(DESTDIR)@prefix@/bin/$$f; \
 			fi;  \
 		done; \
-		chown indimail:indimail $(DESTDIR)@prefix@/etc/wordlist.db || true; \
+		chown indimail:indimail $(DESTDIR)@sysconfdir@/wordlist.db || true; \
 	fi
 	if test " $(DISTRIB_ID)" = " Ubuntu" -o " $(DISTRIB_ID)" = " Debian" ; then \
 		$(mkinstalldirs) $(DESTDIR)/etc/apparmor.d/local || exit 1; \
@@ -985,7 +991,7 @@ install-data-hook:
 		$(INSTALL_DATA) usr.bin.freshclam $(DESTDIR)/etc/apparmor.d/local/usr.bin.freshclam  || exit 1; \
 	fi
 	if test " $(DISTRIB_ID)" != " Ubuntu" -a " $(DISTRIB_ID)" != " Debian" ; then \
-		$(INSTALL_DATA) indimail.te $(DESTDIR)@prefix@/etc/indimail.te  || exit 1; \
+		$(INSTALL_DATA) indimail.te $(DESTDIR)@sysconfdir@/indimail.te  || exit 1; \
 	fi
 
 .gitignore: $(PROGRAMS) $(indimailbin_SCRIPTS) $(indimailsbin_SCRIPTS) \

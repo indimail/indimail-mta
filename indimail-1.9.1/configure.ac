@@ -181,7 +181,7 @@ do
 done
 
 qmaildir=""
-for f in $prefix /var/qmail
+for f in /var/indimail /var/qmail
 do
 	if test -d $f
 	then
@@ -216,7 +216,7 @@ AC_ARG_ENABLE(postfixdir, [  --enable-postfixdir=dir       directory where Postf
 		fi
 	])
 
-controldir="`dirname $sysconfdir`/control"
+controldir="$sysconfdir/control"
 AC_ARG_ENABLE(controldir, [  --enable-controldir=dir       directory for control files.],
 	controdir="$enableval",
 	[
@@ -227,7 +227,7 @@ AC_ARG_ENABLE(controldir, [  --enable-controldir=dir       directory for control
 	])
 AC_DEFINE_UNQUOTED(CONTROLDIR, "$controldir", Directory for control files)
 
-assigndir="`dirname $sysconfdir`/users"
+assigndir="$sysconfdir/users"
 AC_ARG_ENABLE(assigndir, [  --enable-assigndir=dir       directory for qmail users/assign.],
 	assigndir="$enableval",
 	[
@@ -1251,7 +1251,7 @@ if test -d ../qmail-1.03
 then
 	echo "-I../indimail-"$VERSION" -I../indimail-"$VERSION"/eps-1.2 $auth_inc" > ../qmail-1.03/inc_deps; \
 	echo "-L../indimail-"$VERSION"/.libs -L../indimail-"$VERSION"/eps-1.2/.libs -L../indimail-"$VERSION"/cdb-1.0/.libs $auth_libs" > ../qmail-1.03/lib_deps
-	sed "s{QMAIL{$prefix{" ../qmail-1.03/conf-qmail.in > ../qmail-1.03/conf-qmail
+	sed "s{QMAIL{$qmaildir{" ../qmail-1.03/conf-qmail.in > ../qmail-1.03/conf-qmail
 	sed "s{PREFIX{$prefix{" ../qmail-1.03/conf-prefix.in > ../qmail-1.03/conf-prefix
 	q_sysconfdir=`dirname $sysconfdir`
 	if test "$q_sysconfdir" = "$qmaildir"; then
@@ -1263,7 +1263,7 @@ then
 	if test "$shareddir" = "$qmaildir"; then
 		sed "s{SHAREDDIR{$qmaildir{" ../qmail-1.03/conf-shared.in > ../qmail-1.03/conf-shared
 	else
-		sed "s{SHAREDDIR{$prefix/share{" ../qmail-1.03/conf-shared.in > ../qmail-1.03/conf-shared
+		sed "s{SHAREDDIR{$shareddir{" ../qmail-1.03/conf-shared.in > ../qmail-1.03/conf-shared
 	fi
 fi
 
