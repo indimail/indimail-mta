@@ -1,3 +1,7 @@
+libtool
+config.status
+config.h
+.libs
 Makefile
 Makefile.in
 stamp-h1
