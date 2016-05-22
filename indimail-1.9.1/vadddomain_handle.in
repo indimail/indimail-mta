@@ -1,6 +1,9 @@
 #!/bin/sh
 #
 # $Log: vadddomain_handle.in,v $
+# Revision 2.15  2016-05-22 23:22:48+05:30  Cprogrammer
+# fhs compliance
+#
 # Revision 2.14  2016-05-17 23:16:42+05:30  Cprogrammer
 # set domain directory as set by configure
 #
@@ -45,7 +48,7 @@
 # post handle for vadddomain
 #
 #
-# $Id: vadddomain_handle.in,v 2.14 2016-05-17 23:16:42+05:30 Cprogrammer Exp mbhangui $
+# $Id: vadddomain_handle.in,v 2.15 2016-05-22 23:22:48+05:30 Cprogrammer Exp mbhangui $
 
 # send sighup to inlookup service to reload domains
 (
@@ -54,27 +57,27 @@
 ) | while read line
 do
 	echo "Sending SIGHUP to $line"
-	@indimaildir@/bin/svc -h $line
+	@prefix@/bin/svc -h $line
 done
 # print domain information
-@indimaildir@/bin/vdominfo $1
+@prefix@/bin/vdominfo $1
 
 # create user for bogofilter
 echo "Creating standard users for spam filter (bogofilter)"
 for i in ham spam register-ham register-spam
 do
-	@indimaildir@/bin/valias -i '&'"B"$i $i@$1
+	@prefix@/bin/valias -i '&'"B"$i $i@$1
 done
 for i in prefilt postfilt
 do
-	@indimaildir@/bin/vadduser -d -e $i@$1  xxxxxxxx
+	@prefix@/bin/vadduser -d -e $i@$1  xxxxxxxx
 done
 
 # create rule for moving spam, virus emails to folders
 echo "creating rules for spam, virus detected emails"
-@indimaildir@/bin/vcfilter -i -t  spamFilter -c 3 -k "Yes, spamicity=" -f Spam   -b 0 -h 32 \
+@prefix@/bin/vcfilter -i -t  spamFilter -c 3 -k "Yes, spamicity=" -f Spam   -b 0 -h 32 \
 	prefilt@$1 > /dev/null 2>&1
-@indimaildir@/bin/vcfilter -i -t virusFilter -c 0 -k "virus found" -f Quarantine -b 0 -h 28 \
+@prefix@/bin/vcfilter -i -t virusFilter -c 0 -k "virus found" -f Quarantine -b 0 -h 28 \
 	prefilt@$1 > /dev/null 2>&1
 
 # display domain directory
