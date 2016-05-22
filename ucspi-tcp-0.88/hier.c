@@ -1,5 +1,8 @@
 /*
  * $Log: hier.c,v $
+ * Revision 1.7  2016-05-23 04:42:32+05:30  Cprogrammer
+ * fhs compliance
+ *
  * Revision 1.6  2016-05-15 22:39:14+05:30  Cprogrammer
  * added rblsmtpd.so
  *
@@ -20,24 +23,35 @@
  *
  */
 #include "auto_home.h"
+#include "str.h"
 
 void            h(char *, int, int, int);
 void            d(char *, char *, int, int, int);
 void            c(char *, char *, char *, int, int, int);
+char           *getdirname(char *, char **);
 
 char           *auto_ucspi_home = auto_home;
+extern char    *sharedir;
 
 void
 hier(inst_dir)
 	char           *inst_dir;
 {
+	char           *mandir;
+
 	if (inst_dir && *inst_dir)
 		auto_ucspi_home = inst_dir;
+
+	if (sharedir && *sharedir && str_diff(auto_ucspi_home, sharedir)) {
+		mandir = getdirname(sharedir, 0);
+		h(sharedir, -1, -1, 0755);
+	} else
+		mandir = auto_ucspi_home;
 	h(auto_ucspi_home, -1, -1, 0555);
 	d(auto_ucspi_home, "bin", -1, -1, 0555);
-	d(auto_ucspi_home, "plugins", -1, -1, 0555);
-	d(auto_ucspi_home, "man", -1, -1, 0555);
-	d(auto_ucspi_home, "man/man1", -1, -1, 0555);
+	d(sharedir,        "plugins", -1, -1, 0555);
+	d(mandir,          "man", -1, -1, 0555);
+	d(mandir,          "man/man1", -1, -1, 0555);
 
 	c(auto_ucspi_home, "bin", "tcpserver", -1, -1, 0555);
 	c(auto_ucspi_home, "bin", "tcprules", -1, -1, 0555);
@@ -51,18 +65,18 @@ hier(inst_dir)
 	c(auto_ucspi_home, "bin", "mconnect", -1, -1, 0555);
 	c(auto_ucspi_home, "bin", "mconnect-io", -1, -1, 0555);
 	c(auto_ucspi_home, "bin", "rblsmtpd", -1, -1, 0555);
-	c(auto_ucspi_home, "man/man1", "tcpserver.1", -1, -1, 0644);
-	c(auto_ucspi_home, "man/man1", "tcprules.1", -1, -1, 0644);
-	c(auto_ucspi_home, "man/man1", "tcprulescheck.1", -1, -1, 0644);
-	c(auto_ucspi_home, "man/man1", "tcpclient.1", -1, -1, 0644);
-	c(auto_ucspi_home, "man/man1", "who@.1", -1, -1, 0644);
-	c(auto_ucspi_home, "man/man1", "date@.1", -1, -1, 0644);
-	c(auto_ucspi_home, "man/man1", "finger@.1", -1, -1, 0644);
-	c(auto_ucspi_home, "man/man1", "http@.1", -1, -1, 0644);
-	c(auto_ucspi_home, "man/man1", "tcpcat.1", -1, -1, 0644);
-	c(auto_ucspi_home, "man/man1", "mconnect.1", -1, -1, 0644);
-	c(auto_ucspi_home, "man/man1", "rblsmtpd.1", -1, -1, 0644);
+	c(mandir,          "man/man1", "tcpserver.1", -1, -1, 0644);
+	c(mandir,          "man/man1", "tcprules.1", -1, -1, 0644);
+	c(mandir,          "man/man1", "tcprulescheck.1", -1, -1, 0644);
+	c(mandir,          "man/man1", "tcpclient.1", -1, -1, 0644);
+	c(mandir,          "man/man1", "who@.1", -1, -1, 0644);
+	c(mandir,          "man/man1", "date@.1", -1, -1, 0644);
+	c(mandir,          "man/man1", "finger@.1", -1, -1, 0644);
+	c(mandir,          "man/man1", "http@.1", -1, -1, 0644);
+	c(mandir,          "man/man1", "tcpcat.1", -1, -1, 0644);
+	c(mandir,          "man/man1", "mconnect.1", -1, -1, 0644);
+	c(mandir,          "man/man1", "rblsmtpd.1", -1, -1, 0644);
 #ifdef LOAD_SHARED_OBJECTS
-	c(auto_ucspi_home, "plugins", "rblsmtpd.so", -1, -1, 0555);
+	c(sharedir,        "plugins", "rblsmtpd.so", -1, -1, 0555);
 #endif
 }
