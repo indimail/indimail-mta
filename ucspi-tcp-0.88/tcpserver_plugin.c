@@ -1,5 +1,8 @@
 /*
  *  $Log: tcpserver_plugin.c,v $
+ *  Revision 1.3  2016-05-23 04:44:17+05:30  Cprogrammer
+ *  added two arguments to strerr_die()
+ *
  *  Revision 1.2  2016-05-16 21:17:01+05:30  Cprogrammer
  *  added reload_flag for use in sighup handler
  *
@@ -17,7 +20,7 @@
 #include <dlfcn.h>
 
 #ifndef	lint
-static char     sccsid[] = "$Id: tcpserver_plugin.c,v 1.2 2016-05-16 21:17:01+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: tcpserver_plugin.c,v 1.3 2016-05-23 04:44:17+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #define FATAL "tcpserver: fatal: "
@@ -51,12 +54,12 @@ tcpserver_plugin(char **envp, int reload_flag)
 			strerr_die2x(111, FATAL, "out of memory");
 		if (reload_flag) {
 			if (!(handle = dlopen(shared_objfn.s, RTLD_NOW|RTLD_LOCAL|RTLD_NODELETE))) {
-				strerr_die(111, FATAL, "dlopen: ", shared_objfn.s, ": ", dlerror(), 0, (struct strerr *) 0);
+				strerr_die(111, FATAL, "dlopen: ", shared_objfn.s, ": ", dlerror(), 0, 0, 0, (struct strerr *) 0);
 				return (1);
 			}
 		} else {
 			if (!(handle = dlopen(shared_objfn.s, RTLD_NOW|RTLD_NOLOAD))) {
-				strerr_die(111, FATAL, "dlopen: ", shared_objfn.s, ": ", dlerror(), 0, (struct strerr *) 0);
+				strerr_die(111, FATAL, "dlopen: ", shared_objfn.s, ": ", dlerror(), 0, 0, 0, (struct strerr *) 0);
 				return (1);
 			}
 		}
@@ -70,7 +73,7 @@ tcpserver_plugin(char **envp, int reload_flag)
 		if ((func_name = env_get(env_str))) {
 			func = dlsym(handle, func_name);
 			if ((error = dlerror()))
-				strerr_die(111, FATAL, "dlsym: ", func_name, ": ", error, 0, (struct strerr *) 0);
+				strerr_die(111, FATAL, "dlsym: ", func_name, ": ", error, 0, 0, 0, (struct strerr *) 0);
 			/*- change to dir defined by PLUGIN<num>_dir */
 			s = env_str;
 			s += (i = fmt_str((char *) s, "PLUGIN"));
@@ -78,7 +81,7 @@ tcpserver_plugin(char **envp, int reload_flag)
 			s += (i = fmt_str((char *) s, "_dir"));
 			*s++ = 0;
 			if ((s = env_get(env_str)) && chdir(s))
-				strerr_die(111, FATAL, "chdir: ", s, ": ", 0, 0, (struct strerr *) 0);
+				strerr_die(111, FATAL, "chdir: ", s, ": ", 0, 0, 0, 0, (struct strerr *) 0);
 			(*func) (!reload_flag); /*- execute the function */
 		}
 	} /*- for (ptr1 = envp; *ptr1; ptr1++) { */

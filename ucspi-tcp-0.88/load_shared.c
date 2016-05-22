@@ -1,5 +1,8 @@
 /*
  * $Log: load_shared.c,v $
+ * Revision 1.5  2016-05-23 04:42:46+05:30  Cprogrammer
+ * added two arguments to strerr_die()
+ *
  * Revision 1.4  2016-05-15 21:49:11+05:30  Cprogrammer
  * use the basename of the shared object as the function to execute
  *
@@ -33,7 +36,7 @@ load_shared(char *file, char **argv, char **envp)
 	if (!str_end(file, ".so")) {
 		if (!(handle = dlopen(file, RTLD_NOW|RTLD_NOLOAD))) {
 			if (!(handle = dlopen(file, RTLD_NOW|RTLD_LOCAL|RTLD_NODELETE))) {
-				strerr_die(111, FATAL, "dlopen2: ", dlerror(), 0, 0, 0, (struct strerr *) 0);
+				strerr_die(111, FATAL, "dlopen2: ", dlerror(), 0, 0, 0, 0, 0, (struct strerr *) 0);
 				return;
 			}
 		}
@@ -47,12 +50,12 @@ load_shared(char *file, char **argv, char **envp)
 			fptr++;
 		func = dlsym(handle, fptr);
 		if ((error = dlerror()))
-			strerr_die(111, FATAL, "dlsym: ", fptr, ": ", error, 0, (struct strerr *) 0);
+			strerr_die(111, FATAL, "dlsym: ", fptr, ": ", error, 0, 0, 0, (struct strerr *) 0);
 		for (argc = 0,ptr = argv; *ptr; ptr++)
 			argc++;
 		(*func) (argc, argv, envp); /*- execute the function */
 		if (dlclose(handle)) /*- this will not unload the object due to RTLD_NODELETE */
-			strerr_die(111, FATAL, "dlclose: ", fptr, ": ", error, 0, (struct strerr *) 0);
+			strerr_die(111, FATAL, "dlclose: ", fptr, ": ", error, 0, 0, 0, (struct strerr *) 0);
 		_exit(0);
 	} else
 		execve(file, argv, envp);
