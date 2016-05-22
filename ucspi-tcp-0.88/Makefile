@@ -36,14 +36,6 @@ auto_home.o: \
 compile auto_home.c
 	./compile auto_home.c
 
-auto_shared.c: \
-auto-str conf-shared
-	./auto-str auto_shared `head -1 conf-shared` > auto_shared.c
-
-auto_shared.o: \
-compile auto_shared.c
-	./compile auto_shared.c
-
 buffer.o: \
 compile buffer.c buffer.h
 	./compile buffer.c
@@ -357,7 +349,7 @@ load setup.o hier.o auto_home.o str_diffn.o unix.a byte.a auto_shared.o
 
 setup.o: \
 compile setup.c buffer.h strerr.h error.h open.h exit.h fmt.h str.h \
-stralloc.h
+stralloc.h sgetopt.h
 	./compile setup.c
 
 instcheck: \
@@ -568,7 +560,7 @@ distclean: clean
 	/bin/rm -f conf-home
 
 install: it setup
-	./setup $(DESTDIR)$(INDIDIR)
+	./setup -d $(DESTDIR) -s "`head -1 conf-shared`" $(INDIDIR)
 
 sgetopt.o: \
 compile sgetopt.c buffer.h sgetopt.h subgetopt.h subgetopt.h
