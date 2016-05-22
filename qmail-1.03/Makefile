@@ -132,11 +132,27 @@ compile auto_assign.c
 
 auto_shared.c: \
 auto-str conf-shared
-	./auto-str auto_shared `head -1 conf-sysconfdir` > auto_shared.c
+	./auto-str auto_shared `head -1 conf-shared` > auto_shared.c
 
 auto_shared.o: \
 compile auto_shared.c
 	./compile auto_shared.c
+
+auto_sysconfdir.c: \
+auto-str conf-sysconfdir
+	./auto-str auto_sysconfdir `head -1 conf-sysconfdir` > auto_sysconfdir.c
+
+auto_sysconfdir.o: \
+compile auto_sysconfdir.c
+	./compile auto_sysconfdir.c
+
+auto_prefix.c: \
+auto-str conf-prefix
+	./auto-str auto_prefix `head -1 conf-prefix` > auto_prefix.c
+
+auto_prefix.o: \
+compile auto_prefix.c
+	./compile auto_prefix.c
 
 auto_spawn.c: \
 auto-int conf-spawn
@@ -1019,7 +1035,8 @@ hier.o: \
 compile hier.c auto_qmail.h auto_split.h auto_uids.h fmt.h fifo.h \
 qmail-todo.h hasindimail.h tcpto.h ip.h ipalloc.h hassrs.h \
 conf-domainkeys conf-srs conf-spf conf-ip conf-dkim conf-batv \
-auto_shared.h auto_control.h auto_assign.h conf-plugin conf-dlopen
+auto_shared.h auto_control.h auto_assign.h auto_sysconfdir.h \
+auto_prefix.h conf-plugin conf-dlopen
 	./compile $(inc_deps) \
 	`grep -h -v "^#" conf-tls conf-spf conf-ip conf-domainkeys conf-dkim \
 	conf-batv conf-plugin conf-dlopen` hier.c
@@ -1056,27 +1073,27 @@ seek.h wait.h
 	./compile idedit.c
 
 setup: \
-load setup.o hier.o auto_qmail.o auto_uids.o get_uid.o \
-auto_control.o auto_assign.o subgetopt.o sgetopt.o \
+load setup.o hier.o auto_qmail.o auto_uids.o get_uid.o auto_prefix.o \
+auto_control.o auto_assign.o auto_sysconfdir.o subgetopt.o sgetopt.o \
 str_cpy.o strerr.a substdio.a open.a error.a str.a fs.a env.a \
 auto_shared.o stralloc.a alloc.a stralloc.a
-	./load setup hier.o auto_qmail.o auto_uids.o get_uid.o \
-	auto_control.o auto_assign.o subgetopt.o sgetopt.o \
+	./load setup hier.o auto_qmail.o auto_uids.o get_uid.o auto_prefix.o \
+	auto_control.o auto_assign.o auto_sysconfdir.o subgetopt.o sgetopt.o \
 	str_cpy.o strerr.a substdio.a open.a error.a str.a env.a \
 	auto_shared.o stralloc.a alloc.a stralloc.a
 
 setup.o: \
 compile setup.c substdio.h strerr.h error.h open.h env.h stralloc.h \
-exit.h subfd.h str.h auto_uids.h hasindimail.h auto_control.h \
-sgetopt.h auto_assign.h
+exit.h subfd.h str.h auto_uids.h hasindimail.h \
+sgetopt.h
 	./compile $(inc_deps) setup.c
 
 instcheck: \
 load instcheck.o hier.o auto_qmail.o get_uid.o auto_uids.o \
-auto_shared.o auto_control.o auto_assign.o alloc.a \
-strerr.a substdio.a error.a str.a alloc.a stralloc.a
-	./load instcheck hier.o auto_qmail.o get_uid.o \
-	auto_shared.o auto_control.o auto_assign.o auto_uids.o \
+auto_sysconfdir.o auto_shared.o auto_control.o auto_assign.o alloc.a \
+auto_prefix.o strerr.a substdio.a error.a str.a alloc.a stralloc.a
+	./load instcheck hier.o auto_qmail.o get_uid.o auto_sysconfdir.o \
+	auto_prefix.o auto_shared.o auto_control.o auto_assign.o auto_uids.o \
 	strerr.a substdio.a error.a str.a alloc.a stralloc.a alloc.a
 
 instcheck.o: \
@@ -3701,14 +3718,15 @@ gen_alloc.h sig.h str.h case.h quote.h scan.h env.h byte.h conf-ip
 maildirserial: \
 load maildirserial.o auto_qmail.o qmail.o maildir.o sconfig.o quote.o \
 openreadclose.o envdir_set.o pathexec_env.o pathexec_run.o variables.o \
-auto_control.o prioq.o now.o env.a getopt.a mess822.a libtai.a \
+auto_sysconfdir.o auto_control.o prioq.o now.o env.a getopt.a mess822.a libtai.a \
 getln.a strerr.a substdio.a stralloc.a alloc.a error.a str.a \
 open.a wait.a sig.a fd.a fs.a
 	./load maildirserial auto_qmail.o qmail.o maildir.o variables.o \
 	openreadclose.o envdir_set.o pathexec_env.o pathexec_run.o \
-	auto_control.o sconfig.o quote.o prioq.o now.o env.a getopt.a \
-	mess822.a libtai.a getln.a strerr.a substdio.a stralloc.a \
-	alloc.a error.a str.a open.a wait.a sig.a fd.a fs.a
+	auto_control.o auto_sysconfdir.o sconfig.o quote.o prioq.o \
+	now.o env.a getopt.a mess822.a libtai.a getln.a strerr.a \
+	substdio.a stralloc.a alloc.a error.a str.a open.a wait.a \
+	sig.a fd.a fs.a
 
 maildirserial.0: \
 maildirserial.1
@@ -3726,7 +3744,7 @@ maildir.h prioq.h datetime.h envdir.h pathexec.h \
 wait.h sig.h str.h fmt.h tai.h uint64.h mess822.h \
 caltime.h caldate.h now.h datetime.h sconfig.h env.h \
 variables.h qmail.h substdio.h auto_qmail.h auto_control.h \
-conf-mime
+auto_sysconfdir.h conf-mime
 	./compile `grep -h -v "^#" conf-mime` maildirserial.c
 
 serialcmd: \
@@ -4362,13 +4380,13 @@ exit.h
 	./compile iftocc.c
 
 ofmipd: load ofmipd.o rewritehost.o rwhconfig.o sconfig.o \
-qmail.o auto_qmail.o auto_control.o variables.o timeoutread.o \
-timeoutwrite.o commands.o base64sub.o now.o env.a cdb.a \
+qmail.o auto_sysconfdir.o auto_control.o variables.o timeoutread.o \
+auto_qmail.o timeoutwrite.o commands.o base64sub.o now.o env.a cdb.a \
 mess822.a libtai.a getln.a strerr.a substdio.a stralloc.a \
 alloc.a error.a case.a str.a fs.a open.a wait.a sig.a fd.a
 	./load ofmipd rewritehost.o rwhconfig.o sconfig.o qmail.o \
-	auto_qmail.o variables.o timeoutread.o timeoutwrite.o \
-	auto_control.o commands.o base64sub.o now.o env.a \
+	auto_sysconfdir.o variables.o timeoutread.o timeoutwrite.o \
+	auto_qmail.o auto_control.o commands.o base64sub.o now.o env.a \
 	cdb.a mess822.a libtai.a getln.a strerr.a substdio.a \
 	stralloc.a alloc.a error.a case.a str.a fs.a open.a wait.a \
 	sig.a fd.a
@@ -4376,11 +4394,11 @@ alloc.a error.a case.a str.a fs.a open.a wait.a sig.a fd.a
 ofmipd.0: ofmipd.8
 	nroff -man ofmipd.8 > ofmipd.0
 
-ofmipd.o: compile ofmipd.c commands.h sig.h auto_qmail.h qmail.h substdio.h \
+ofmipd.o: compile ofmipd.c commands.h sig.h qmail.h substdio.h \
 timeoutread.h timeoutwrite.h stralloc.h gen_alloc.h \
 sconfig.h env.h exit.h error.h str.h mess822.h \
 caltime.h caldate.h tai.h uint64.h caltime.h cdb.h \
-fmt.h now.h case.h base64.h wait.h \
+fmt.h now.h case.h base64.h wait.h auto_sysconfdir.h \
 uint32.h byte.h getln.h open.h variables.h \
 leapsecs.h rewritehost.h rwhconfig.h
 	./compile ofmipd.c
@@ -4416,13 +4434,13 @@ exit.h byte.h
 	./compile ofmipname.c
 
 new-inject: \
-load new-inject.o qmail.o auto_qmail.o rewritehost.o rwhconfig.o \
+load new-inject.o qmail.o auto_sysconfdir.o rewritehost.o rwhconfig.o \
 envdir_set.o pathexec_env.o pathexec_run.o openreadclose.o variables.o \
-auto_control.o constmap.o sconfig.o env.a getopt.a mess822.a \
+auto_qmail.o auto_control.o constmap.o sconfig.o env.a getopt.a mess822.a \
 getln.a strerr.a substdio.a stralloc.a alloc.a error.a sig.a \
 fd.a wait.a open.a case.a str.a fs.a libtai.a
-	./load new-inject qmail.o auto_qmail.o rewritehost.o variables.o \
-	envdir_set.o pathexec_env.o pathexec_run.o openreadclose.o \
+	./load new-inject qmail.o auto_sysconfdir.o rewritehost.o variables.o \
+	auto_qmail.o envdir_set.o pathexec_env.o pathexec_run.o openreadclose.o \
 	auto_control.o rwhconfig.o constmap.o sconfig.o env.a getopt.a \
 	mess822.a getln.a strerr.a substdio.a stralloc.a alloc.a \
 	error.a sig.a fd.a wait.a open.a case.a str.a fs.a libtai.a
@@ -4435,7 +4453,7 @@ new-inject.o: \
 compile new-inject.c subfd.h substdio.h getln.h mess822.h variables.h \
 stralloc.h gen_alloc.h caltime.h caldate.h strerr.h exit.h caltime.h \
 leapsecs.h tai.h uint64.h sgetopt.h subgetopt.h stralloc.h sconfig.h \
-stralloc.h auto_qmail.h case.h constmap.h qmail.h sig.h env.h \
+stralloc.h auto_sysconfdir.h case.h constmap.h qmail.h sig.h env.h \
 rewritehost.h rwhconfig.h strerr.h str.h envdir.h pathexec.h \
 auto_control.h
 	./compile new-inject.c
@@ -4447,8 +4465,8 @@ tai_pack.o: compile tai_pack.c tai.h uint64.h
 	./compile tai_pack.c
 
 822date: load 822date.o libtai.a mess822.a getln.a strerr.a substdio.a \
-auto_qmail.o stralloc.a alloc.a error.a str.a case.a fs.a
-	./load 822date auto_qmail.o libtai.a mess822.a getln.a strerr.a \
+auto_sysconfdir.o stralloc.a alloc.a error.a str.a case.a fs.a
+	./load 822date auto_sysconfdir.o libtai.a mess822.a getln.a strerr.a \
 	substdio.a stralloc.a alloc.a error.a str.a case.a fs.a
 
 822date.0: 822date.1
@@ -4456,7 +4474,7 @@ auto_qmail.o stralloc.a alloc.a error.a str.a case.a fs.a
 
 822date.o: compile 822date.c strerr.h subfd.h substdio.h getln.h \
 mess822.h stralloc.h gen_alloc.h caltime.h caldate.h exit.h \
-leapsecs.h caltime.h tai.h uint64.h
+leapsecs.h caltime.h tai.h uint64.h auto_sysconfdir.h
 	./compile 822date.c
 
 caltime_fmt.o: compile caltime_fmt.c caldate.h caltime.h caldate.h
@@ -4475,9 +4493,9 @@ caldate_mjd.o: compile caldate_mjd.c caldate.h
 leapsecs_add.o: compile leapsecs_add.c leapsecs.h tai.h uint64.h
 	./compile leapsecs_add.c
 
-822received: load 822received.o auto_qmail.o libtai.a mess822.a getln.a strerr.a substdio.a \
-stralloc.a alloc.a error.a str.a case.a fs.a
-	./load 822received auto_qmail.o libtai.a mess822.a getln.a strerr.a \
+822received: load 822received.o auto_sysconfdir.o libtai.a \
+mess822.a getln.a strerr.a substdio.a stralloc.a alloc.a error.a str.a case.a fs.a
+	./load 822received auto_sysconfdir.o libtai.a mess822.a getln.a strerr.a \
 	substdio.a stralloc.a alloc.a error.a str.a case.a fs.a
 
 822received.0: 822received.1
@@ -4485,12 +4503,12 @@ stralloc.a alloc.a error.a str.a case.a fs.a
 
 822received.o: compile 822received.c strerr.h subfd.h substdio.h getln.h \
 mess822.h stralloc.h gen_alloc.h caltime.h caldate.h exit.h \
-leapsecs.h caltime.h tai.h uint64.h case.h
+leapsecs.h caltime.h tai.h uint64.h case.h auto_sysconfdir.h
 	./compile 822received.c
 
-822print: load 822print.o auto_qmail.o libtai.a mess822.a getln.a strerr.a substdio.a \
-stralloc.a alloc.a error.a str.a case.a fs.a
-	./load 822print auto_qmail.o libtai.a mess822.a getln.a strerr.a \
+822print: load 822print.o auto_sysconfdir.o libtai.a mess822.a \
+getln.a strerr.a substdio.a stralloc.a alloc.a error.a str.a case.a fs.a
+	./load 822print auto_sysconfdir.o libtai.a mess822.a getln.a strerr.a \
 	substdio.a stralloc.a alloc.a error.a str.a case.a fs.a
 
 822print.0: 822print.1
@@ -4498,17 +4516,17 @@ stralloc.a alloc.a error.a str.a case.a fs.a
 
 822print.o: compile 822print.c subfd.h substdio.h getln.h mess822.h \
 stralloc.h gen_alloc.h caltime.h caldate.h strerr.h exit.h leapsecs.h \
-caltime.h tai.h uint64.h byte.h str.h
+caltime.h tai.h uint64.h byte.h str.h auto_sysconfdir.h
 	./compile 822print.c
 
-parsedate: load parsedate.o auto_qmail.o libtai.a mess822.a getln.a strerr.a substdio.a \
-stralloc.a alloc.a error.a str.a case.a fs.a
-	./load parsedate auto_qmail.o libtai.a mess822.a getln.a strerr.a \
-	substdio.a stralloc.a alloc.a error.a str.a case.a fs.a
+parsedate: load parsedate.o auto_sysconfdir.o libtai.a mess822.a \
+getln.a strerr.a substdio.a stralloc.a alloc.a error.a str.a case.a fs.a
+	./load parsedate auto_sysconfdir.o libtai.a mess822.a getln.a \
+	strerr.a substdio.a stralloc.a alloc.a error.a str.a case.a fs.a
 
 parsedate.o: compile parsedate.c strerr.h subfd.h substdio.h getln.h \
 mess822.h stralloc.h gen_alloc.h caltime.h caldate.h leapsecs.h \
-caltime.h tai.h uint64.h
+caltime.h tai.h uint64.h auto_sysconfdir.h
 	./compile parsedate.c
 
 tokenize: load tokenize.o mess822.a getln.a strerr.a substdio.a stralloc.a \
@@ -5783,10 +5801,10 @@ compile cidr.c
 
 nowutc: \
 load nowutc.o libtai.a libtaia.a auto_qmail.o
-	./load nowutc auto_qmail.o libtai.a libtaia.a
+	./load nowutc auto_sysconfdir.o libtai.a libtaia.a
 
 nowutc.o: \
-compile nowutc.c leapsecs.h tai.h uint64.h taia.h caltime.h caldate.h
+compile nowutc.c leapsecs.h tai.h uint64.h taia.h caltime.h caldate.h auto_sysconfdir.h
 	./compile nowutc.c
 
 yearcal: \
