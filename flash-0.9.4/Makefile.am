@@ -77,18 +77,18 @@ system.menu: system.menu.in
 	$(edit) $@.in > $@
 
 install-data-local: modules
-	$(mkinstalldirs)  $(DESTDIR)@prefix@/man/man1
-	$(mkinstalldirs)  $(DESTDIR)@prefix@/modules
-	$(mkinstalldirs)  $(DESTDIR)@prefix@/etc
+	$(mkinstalldirs)  $(DESTDIR)@mandir@/man1
+	$(mkinstalldirs)  $(DESTDIR)@libexecdir@/modules
+	$(mkinstalldirs)  $(DESTDIR)@sysconfdir@
 	$(mkinstalldirs)  $(DESTDIR)@prefix@/lib
 	for f in "system.menu system.module system.rc system.flashlogin"; do \
-		$(INSTALL_DATA) $$f $(DESTDIR)@prefix@/etc ; \
+		$(INSTALL_DATA) $$f $(DESTDIR)@sysconfdir@ ; \
 	done; \
 	for f in $(modules_list); do \
-		/bin/mkdir -p $(DESTDIR)@prefix@/modules; \
-		$(LIBTOOL) --mode=install $(INSTALL_DATA) $$f $(DESTDIR)@prefix@/modules/$$f; \
+		/bin/mkdir -p $(DESTDIR)@libexecdir@/modules; \
+		$(LIBTOOL) --mode=install $(INSTALL_DATA) $$f $(DESTDIR)@libexecdir@/modules/$$f; \
 	done; \
-	$(INSTALL_DATA) flash.1 $(DESTDIR)@prefix@/man/man1
+	$(INSTALL_DATA) flash.1 $(DESTDIR)@mandir@/man1
 
 LIBTOOL_DEPS = @LIBTOOL_DEPS@
 libtool: $(LIBTOOL_DEPS)
