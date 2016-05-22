@@ -42,10 +42,10 @@ install-data-local:  pam-multi.8 pam-checkpwd.8
 	$(mkinstalldirs)  $(DESTDIR)$(moduledir)
 	$(mkinstalldirs)  $(DESTDIR)$(libdir)
 	$(mkinstalldirs)  $(DESTDIR)$(pam_confdir)
-	$(mkinstalldirs)  $(DESTDIR)@prefix@/man/man8
+	$(mkinstalldirs)  $(DESTDIR)@mandir@/man8
 	$(INSTALL_DATA) -c `basename $(pam_confdir)`/pam-multi $(DESTDIR)$(pam_confdir)
 	$(INSTALL_DATA) -c `basename $(pam_confdir)`/pop3 $(DESTDIR)$(pam_confdir)
 	$(INSTALL_DATA) -c `basename $(pam_confdir)`/imap $(DESTDIR)$(pam_confdir)
-	$(INSTALL_DATA) -c pam-multi.8 $(DESTDIR)@prefix@/man/man8
-	$(INSTALL_DATA) -c pam-checkpwd.8 $(DESTDIR)@prefix@/man/man8
+	$(INSTALL_DATA) -c pam-multi.8 $(DESTDIR)@mandir@/man8
+	$(INSTALL_DATA) -c pam-checkpwd.8 $(DESTDIR)@mandir@/man8
 
