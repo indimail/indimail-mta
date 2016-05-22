@@ -1,5 +1,8 @@
 /*
  * $Log: strerr_die.c,v $
+ * Revision 1.2  2016-05-23 04:43:21+05:30  Cprogrammer
+ * added two arguments to strerr_die(), strerr_warn()
+ *
  * Revision 1.1  2003-12-31 19:47:31+05:30  Cprogrammer
  * Initial revision
  *
@@ -9,7 +12,7 @@
 #include "strerr.h"
 
 void
-strerr_warn(char *x1, char *x2, char *x3, char *x4, char *x5, char *x6, struct strerr *se)
+strerr_warn(char *x1, char *x2, char *x3, char *x4, char *x5, char *x6, char *x7, char *x8, struct strerr *se)
 {
 	strerr_sysinit();
 
@@ -25,6 +28,10 @@ strerr_warn(char *x1, char *x2, char *x3, char *x4, char *x5, char *x6, struct s
 		buffer_puts(buffer_2, x5);
 	if (x6)
 		buffer_puts(buffer_2, x6);
+	if (x7)
+		buffer_puts(buffer_2, x7);
+	if (x8)
+		buffer_puts(buffer_2, x8);
 
 	while (se)
 	{
@@ -42,8 +49,8 @@ strerr_warn(char *x1, char *x2, char *x3, char *x4, char *x5, char *x6, struct s
 }
 
 void
-strerr_die(int e, char *x1, char *x2, char *x3, char *x4, char *x5, char *x6, struct strerr *se)
+strerr_die(int e, char *x1, char *x2, char *x3, char *x4, char *x5, char *x6, char *x7, char *x8, struct strerr *se)
 {
-	strerr_warn(x1, x2, x3, x4, x5, x6, se);
+	strerr_warn(x1, x2, x3, x4, x5, x6, x7, x8, se);
 	_exit(e);
 }
