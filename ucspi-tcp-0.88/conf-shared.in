@@ -1,0 +1,4 @@
+SHAREDDIR
+
+This is the ucspi-tcp shared directory. It must be a local directory, not
+shared among machines. This is where qmail shared files plugins lie. 
