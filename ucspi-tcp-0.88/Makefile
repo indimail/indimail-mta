@@ -344,8 +344,8 @@ warn-auto.sh http@.sh conf-home
 	chmod 755 http@
 
 setup: \
-load setup.o hier.o auto_home.o str_diffn.o unix.a byte.a auto_shared.o
-	./load setup hier.o auto_home.o auto_shared.o str_diffn.o unix.a byte.a 
+load setup.o hier.o auto_home.o str_diffn.o unix.a byte.a
+	./load setup hier.o auto_home.o str_diffn.o unix.a byte.a 
 
 setup.o: \
 compile setup.c buffer.h strerr.h error.h open.h exit.h fmt.h str.h \
@@ -353,8 +353,8 @@ stralloc.h sgetopt.h
 	./compile setup.c
 
 instcheck: \
-load instcheck.o hier.o auto_home.o auto_shared.o unix.a byte.a
-	./load instcheck hier.o auto_home.o auto_shared.o unix.a byte.a 
+load instcheck.o hier.o auto_home.o unix.a byte.a
+	./load instcheck hier.o auto_home.o unix.a byte.a 
 
 instcheck.o: \
 compile instcheck.c strerr.h error.h exit.h stralloc.h
