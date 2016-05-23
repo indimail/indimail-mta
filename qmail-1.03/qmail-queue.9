@@ -236,7 +236,7 @@ can be set either to the full path of a scanner or to a list of plugins.
 .LP
 .nr step 1 1
 .IP \n[step] 2
-is set to full path of the virus scanner, i.e. QHPSI=INDIDIR/bin/clamdscan.
+is set to full path of the virus scanner, i.e. QHPSI=PREFIX/bin/clamdscan.
 If full path is not specified,
 .B qmail-queue
 will use execvp(2) to run the scanner. Else it uses execv(2).
@@ -424,15 +424,15 @@ Samples with clamd/clamdscan:
 Here is a typical sample how to customize QHPSI together
 with Clam AV (clamd/clamdscan) for a tcpserver tcp.smtpd file:
 
- :allow,QHPSI='INDIDIR/bin/clamdscan %s --quiet --no-summary'
+ :allow,QHPSI='PREFIX/bin/clamdscan %s --quiet --no-summary'
 
 Comments:
 
  - The path of 'clamdscan' can be omitted, because it is in 
-   the standard path (INDIDIR/bin).
+   the standard path (PREFIX/bin).
  - In the configuration file clamav.conf, the option
   'ScanMail' has to be enabled; clamd has to run as 'root'.
- - The argument QHPSI='INDIDIR/bin/clamdscan %s --quiet --no-summary'
+ - The argument QHPSI='PREFIX/bin/clamdscan %s --quiet --no-summary'
    tells Clam AV to just provide the return status and print nothing
    on the stdout.
  - The argument QHPSIRC is not necessary, because
@@ -452,7 +452,7 @@ Comments:
    exceeds 9.000.000 byte, ~ 8.5MB.
 
 You can also set these variables outside tcp.smtp. e.g.
-  # echo INDIDIR/bin/clamdscan %s --quiet --no-summary \\
+  # echo PREFIX/bin/clamdscan %s --quiet --no-summary \\
      > /service/qmail.smtpd.25/variables/QHPSI
 
 .SH Compliance
