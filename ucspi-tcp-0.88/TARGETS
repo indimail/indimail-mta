@@ -1,6 +1,3 @@
-auto_shared.o
-auto_shared.c
-conf-shared
 load
 compile
 choose
