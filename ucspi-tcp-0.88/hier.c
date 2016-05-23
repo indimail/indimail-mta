@@ -1,5 +1,8 @@
 /*
  * $Log: hier.c,v $
+ * Revision 1.8  2016-05-23 20:18:47+05:30  Cprogrammer
+ * use /usr/lib/indimail/plugins for .so plugins
+ *
  * Revision 1.7  2016-05-23 04:42:32+05:30  Cprogrammer
  * fhs compliance
  *
@@ -49,7 +52,7 @@ hier(inst_dir)
 		mandir = auto_ucspi_home;
 	h(auto_ucspi_home, -1, -1, 0555);
 	d(auto_ucspi_home, "bin", -1, -1, 0555);
-	d(sharedir,        "plugins", -1, -1, 0555);
+	d(auto_ucspi_home, "lib/indimail/plugins", -1, -1, 0555);
 	d(mandir,          "man", -1, -1, 0555);
 	d(mandir,          "man/man1", -1, -1, 0555);
 
@@ -77,6 +80,6 @@ hier(inst_dir)
 	c(mandir,          "man/man1", "mconnect.1", -1, -1, 0644);
 	c(mandir,          "man/man1", "rblsmtpd.1", -1, -1, 0644);
 #ifdef LOAD_SHARED_OBJECTS
-	c(sharedir,        "plugins", "rblsmtpd.so", -1, -1, 0555);
+	c(auto_ucspi_home, "lib/indimail/plugins", "rblsmtpd.so", -1, -1, 0555);
 #endif
 }
