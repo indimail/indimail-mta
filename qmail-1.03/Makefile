@@ -1036,7 +1036,7 @@ compile hier.c auto_qmail.h auto_split.h auto_uids.h fmt.h fifo.h \
 qmail-todo.h hasindimail.h tcpto.h ip.h ipalloc.h hassrs.h \
 conf-domainkeys conf-srs conf-spf conf-ip conf-dkim conf-batv \
 auto_shared.h auto_control.h auto_assign.h auto_sysconfdir.h \
-auto_prefix.h conf-plugin conf-dlopen
+stralloc.h strerr.h auto_prefix.h conf-plugin conf-dlopen
 	./compile $(inc_deps) \
 	`grep -h -v "^#" conf-tls conf-spf conf-ip conf-domainkeys conf-dkim \
 	conf-batv conf-plugin conf-dlopen` hier.c
@@ -1297,7 +1297,7 @@ auto_scancmd.o: compile auto_scancmd.c
 qscanq.8: \
 qscanq.9
 	cat qscanq.9 \
-	| sed s}INDIDIR}"$(INDIDIR)"}g \
+	| sed s}SYSCONFDIR}"`head -1 conf-sysconfdir`"}g \
 	> qscanq.8
 
 qscanq.0: \
@@ -2192,7 +2192,7 @@ qmail-queue.8: \
 qmail-queue.9
 	cat qmail-queue.9 \
 	| sed s}QMAILHOME}"`head -1 conf-qmail`"}g \
-	| sed s}INDIDIR}"$(INDIDIR)"}g \
+	| sed s}PREFIX}"`head -1 conf-prefix`"}g \
 	> qmail-queue.8
 
 qmail-queue.o: \
@@ -2997,14 +2997,14 @@ substdio.h alloc.h auto_qmail.h exit.h env.h str.h
 
 install-strip: install
 distclean: clean
-	rm -f lib_deps inc_deps conf-qmail
+	rm -f lib_deps inc_deps
 
 install: \
-it man
-	if test ! -d $(DESTDIR)$(INDIDIR)/etc ; then \
-		mkdir -p $(DESTDIR)$(INDIDIR)/etc ; \
+it man leapsecs.dat conf-sysconfdir
+	if test ! -d $(DESTDIR)"`head -1 conf-sysconfdir`" ; then \
+		mkdir -p $(DESTDIR)"`head -1 conf-sysconfdir`" ; \
 	fi ;
-	./setup -d $(DESTDIR) $(INDIDIR) > $(DESTDIR)$(INDIDIR)/etc/qmailprog.list
+	./setup -d $(DESTDIR) $(INDIDIR) > $(DESTDIR)"`head -1 conf-sysconfdir`"/qmailprog.list
 
 sgetopt.o: \
 compile sgetopt.c subfd.h substdio.h sgetopt.h subgetopt.h \
