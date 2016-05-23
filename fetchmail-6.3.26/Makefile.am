@@ -18,7 +18,6 @@ sbin_SCRIPTS=       fetchmail.up fetchmail.down ip-down.local ip-up.local ppp-of
 
 MOSTLYCLEANFILES=fetchmail.up fetchmail.down fetchmail.cron ip-up.local ip-down.local
 
-mandir=@prefix@/man
 #endif
 
 dist_noinst_SCRIPTS=	specgen.sh
@@ -34,7 +33,7 @@ dist_man1_MANS+=	$(pym)
 CLEANFILES=		$(nodist_bin_SCRIPTS)
 
 # for gettext (used by fetchmail.c, NOT by GNU gettext)
-localedir=		$(datadir)/locale
+localedir=		$(datarootdir)/locale
 DEFS=			@DEFS@ -DLOCALEDIR=\"$(localedir)\"
 
 noinst_LIBRARIES=	libfm.a
