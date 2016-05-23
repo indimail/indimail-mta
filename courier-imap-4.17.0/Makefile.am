@@ -19,7 +19,7 @@ DISTCLEANFILES=stamp-h1 config.h config.log packaging/systemd/courier-imap.sysvi
 	packaging/suse/courier-imap.init pop3d.rc dbobj.h imapd-ssl.rc pop3d-ssl.rc imapd.rc dbobj.config
 
 CLEANFILES=$(databin_SCRIPTS) $(man_MANS) $(sysconf_DATA) $(sbin_SCRIPTS)
-databindir=$(datadir)
+databindir=$(libexecdir)
 databin_SCRIPTS=mkimapdcert mkpop3dcert mkdhparams
 
 binPROGRAMS=imapd pop3d maildirmake maildiracl deliverquota maildirkw
@@ -164,8 +164,7 @@ install-exec-local:
 		libs/tcpd/couriertls $(DESTDIR)$(bindir)/couriertls
 	$(mkinstalldirs) $(DESTDIR)$(sbindir)
 	for f in mkimapdcert mkpop3dcert mkdhparams; \
-		do rm -f $(DESTDIR)$(sbindir)/$$f ; \
-		$(LN_S) $(databindir)/$$f $(DESTDIR)$(sbindir)/$$f ; done
+		do rm -f $(DESTDIR)$(sbindir)/$$f ; done
 	$(mkinstalldirs) $(DESTDIR)$(localstatedir)
 
 install-exec-hook:
@@ -181,7 +180,7 @@ install-data-local: install-man
 	for f in `cat libs/authlib/modulelist ; echo $$authmodulelist ` ; do \
 		echo $$f; \
 		test "$$f" = "authpam" || test "$$f" = "authshadow" || continue ; \
-		chmod 4555 $(DESTDIR)/$(prefix)/libexec/authlib/$$f || exit 1; \
+		chmod 4555 $(DESTDIR)/$(libexecdir)/authlib/$$f || exit 1; \
 	done
 	test -d $(DESTDIR)/etc/pam.d || exit 0 ; \
 	test -w $(DESTDIR)/etc/pam.d || exit 0 ; \
