@@ -1,10 +1,10 @@
 # vim:syntax=apparmor
 # Last Modified: Thu Apr 24 15:14:48 IST 2014
 
-  @indimaildir@/etc/indimail.cnf r,
+  @sysconfdir@/indimail.cnf r,
   @indimaildir@/mysqldb/data/ r,
   @indimaildir@/mysqldb/data/** rwk,
   @indimaildir@/mysqldb/logs r,
   @indimaildir@/mysqldb/logs/* rw,
   /tmp/mysqld.3306.pid rw,
-  /tmp/mysql.sock w,
+  /var/run/mysqld/mysqld.sock w,
