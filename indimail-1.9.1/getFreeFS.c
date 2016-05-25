@@ -1,5 +1,8 @@
 /*
  * $Log: getFreeFS.c,v $
+ * Revision 2.7  2016-05-25 09:01:07+05:30  Cprogrammer
+ * use SYSCONFDIR for lastfstab
+ *
  * Revision 2.6  2010-08-09 18:28:38+05:30  Cprogrammer
  * use hostid instead of ip address
  *
@@ -22,7 +25,7 @@
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: getFreeFS.c,v 2.6 2010-08-09 18:28:38+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: getFreeFS.c,v 2.7 2016-05-25 09:01:07+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #include <stdlib.h>
@@ -77,11 +80,9 @@ getLastFstab()
 	int             fd;
 #endif
 	FILE           *fp;
-	char           *ptr;
-	char            LockFile[MAX_BUFF];
+	char           *ptr, *LockFile = SYSCONFDIR"/lastfstab";
 	static char     buffer[MAX_BUFF];
 
-	snprintf(LockFile, sizeof(LockFile), "%s/etc/lastfstab", INDIMAILDIR);
 #ifdef FILE_LOCKING
 	if ((fd = getDbLock(LockFile, 1)) == -1)
 		return ((char *) 0);
@@ -115,14 +116,13 @@ getLastFstab()
 static int
 putLastFstab(char *filesystem)
 {
-	char            LockFile[MAX_BUFF];
+	char           *LockFile = SYSCONFDIR"/lastfstab";
 #ifdef FILE_LOCKING
 	int             fd;
 #endif
 	FILE           *fp;
 
 #ifdef FILE_LOCKING
-	snprintf(LockFile, sizeof(LockFile), "%s/etc/lastfstab", INDIMAILDIR);
 	if ((fd = getDbLock(LockFile, 1)) == -1)
 		return (-1);
 #endif
