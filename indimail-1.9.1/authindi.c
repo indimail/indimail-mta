@@ -1,5 +1,8 @@
 /*
  * $Log: authindi.c,v $
+ * Revision 2.25  2016-05-25 08:58:10+05:30  Cprogrammer
+ * use LIBEXECDIR for authmodule directory
+ *
  * Revision 2.24  2014-02-05 01:49:18+05:30  Cprogrammer
  * changes to error messages if inquery/vauth_open fails
  *
@@ -86,7 +89,7 @@
 #include <stdint.h>
 
 #ifndef lint
-static char     sccsid[] = "$Id: authindi.c,v 2.24 2014-02-05 01:49:18+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: authindi.c,v 2.25 2016-05-25 08:58:10+05:30 Cprogrammer Exp mbhangui $";
 #endif
 #ifdef AUTH_SIZE
 #undef AUTH_SIZE
@@ -190,9 +193,9 @@ main(int argc, char **argv)
 	uid_t           uid;
 	gid_t           gid;
 	struct passwd  *pw;
-	char           *(imapargs[]) = { INDIMAILDIR"/sbin/imaplogin", INDIMAILDIR"/libexec/authlib/authindi",
+	char           *(imapargs[]) = { INDIMAILDIR"/sbin/imaplogin", LIBEXECDIR"/authlib/authindi",
 					INDIMAILDIR"/bin/imapd", "Maildir", 0 };
-	char           *(pop3args[]) = { INDIMAILDIR"/sbin/pop3login", INDIMAILDIR"/libexec/authlib/authindi",
+	char           *(pop3args[]) = { INDIMAILDIR"/sbin/pop3login", LIBEXECDIR"/authlib/authindi",
 					INDIMAILDIR"/bin/pop3d", "Maildir", 0 };
 #ifdef ENABLE_DOMAIN_LIMITS
 	time_t          curtime;
