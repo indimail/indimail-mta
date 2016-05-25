@@ -1,6 +1,9 @@
 #!/bin/sh
 # WARNING: This file was auto-generated. Do not edit!
 # $Log: svctool.in,v $
+# Revision 2.280  2016-05-25 09:06:06+05:30  Cprogrammer
+# fixes for FHS
+#
 # Revision 2.279  2016-05-18 11:46:41+05:30  Cprogrammer
 # use control directory set by configure
 #
@@ -1041,7 +1044,7 @@
 # Initial revision
 #
 #
-# $Id: svctool.in,v 2.279 2016-05-18 11:46:41+05:30 Cprogrammer Exp mbhangui $
+# $Id: svctool.in,v 2.280 2016-05-25 09:06:06+05:30 Cprogrammer Exp mbhangui $
 #
 
 #
@@ -1049,6 +1052,11 @@
 #
 QmailHOME=@qmaildir@
 indimaildir=@indimaildir@
+QmailBinPrefix=@prefix@
+mandir=@mandir@
+libexecdir=@libexecdir@
+sysconfdir=@sysconfdir@
+shareddir=@shareddir@
 LOGDIR=@logdir@
 #indimaildir=`awk -F: '{print $6}' /etc/passwd|grep indimail|head -1`
 CONCURRENCYINCOMING=150
@@ -1584,7 +1592,7 @@ Known values for OPTION are:
   mysqlPrefix    - Installation Prefix for mysql
   databasedir    - Directory containing the Database and Logs
   mysqlsocket    - Unix Domain Socket for connecting to mysql
-  config         - MySQL Configuration file (e.g. $indimaildir/etc/indimail.cnf)
+  config         - MySQL Configuration file (e.g. $sysconfdir/indimail.cnf)
   service_path   - Path where supervise scripts will be installed
   default-domain - default domain name for which this host will handle mails
 
@@ -1672,9 +1680,9 @@ Known values for OPTION are:
 	[--stdout]
 	[--wipe]
 
-  mysql          - Create $indimaildir/etc/indimail.cnf
-  imap           - Create $indimaildir/etc/imapd
-  pop3           - Create $indimaildir/etc/pop3d
+  mysql          - Create $sysconfdir/indimail.cnf
+  imap           - Create $sysconfdir/imapd
+  pop3           - Create $sysconfdir/pop3d
   qmail          - Create default qmail control files
   users          - Create Internal System Users used by IndiMail
   rmusers        - Remove Internal System Users used by IndiMail
@@ -1812,27 +1820,55 @@ else
     echo ""$DESTDIR"$QmailHOME exists"
   fi
   echo "Checking Critical IndiMail directories"
-  if [ -f "$DESTDIR"$QmailHOME/sbin/config_settings ] ; then
+  if [ -f "$DESTDIR"$QmailBinPrefix/sbin/config_settings ] ; then
     indimail_installed=1
-    LIST="alias autoturn bin boot control doc etc lib libexec man modules plugins qscanq sbin share users"
+    LIST1="alias autoturn bin qscanq sbin"
+    LIST2="boot doc lib libexec man modules"
+    LIST3="control users"
+    #LIST="alias autoturn bin boot control doc etc lib libexec man modules plugins qscanq sbin share users"
   else
     indimail_installed=0
-    LIST="alias bin boot control doc etc lib man plugins qscanq sbin share users"
+    LIST1="alias bin qscanq sbin"
+    LIST2="boot doc lib man"
+    LIST3="control users"
+    #LIST="alias bin boot control doc etc lib man plugins qscanq sbin share users"
   fi
-  for i in $LIST; do
-    if [ ! -d "$DESTDIR"$QmailHOME/$i ]; then
+  for i in $LIST1; do
+    if [ ! -d "$DESTDIR"$QmailHOME/$i -a ! -L "$DESTDIR"$QmailHOME/$i ]; then
       echo "! Couldn't find "$DESTDIR"$QmailHOME/$i!" 1>&2
       OK=0
     elif [ "$VERB" = y ]; then
       echo ""$DESTDIR"$QmailHOME/$i exists"
     fi
   done
+  for i in $LIST2; do
+    if [ ! -d "$DESTDIR"$shareddir/$i -a ! -L "$DESTDIR"$shareddir/$i ]; then
+      echo "! Couldn't find "$DESTDIR"$shareddir/$i!" 1>&2
+      OK=0
+    elif [ "$VERB" = y ]; then
+      echo ""$DESTDIR"$shareddir/$i exists"
+    fi
+  done
+  for i in $LIST3; do
+    if [ ! -d "$DESTDIR"$sysconfdir/$i -a ! -L "$DESTDIR"$sysconfdir/$i ]; then
+      echo "! Couldn't find "$DESTDIR"$sysconfdir/$i!" 1>&2
+      OK=0
+    elif [ "$VERB" = y ]; then
+      echo ""$DESTDIR"$sysconfdir/$i exists"
+    fi
+  done
+  if [ ! -d "$DESTDIR"@prefix@/lib/indimail/plugins -a ! -L "$DESTDIR"@prefix@/lib/indimail/plugins ]; then
+    echo "! Couldn't find "$DESTDIR"@prefix@/lib/indimail/plugins!" 1>&2
+    OK=0
+  elif [ "$VERB" = y ]; then
+    echo ""$DESTDIR"@prefix@/lib/indimail/plugins exists"
+  fi
   echo "Checking IndiMail queues"
   QUEUE_NO=$FIRST_QUEUE
   COUNT=1
   while true
   do
-    "$DESTDIR"$QmailHOME/bin/queue-fix -N "$DESTDIR"$QUEUE_BASE/queue"$QUEUE_NO" > /dev/null 2>&1
+    "$DESTDIR"$QmailBinPrefix/bin/queue-fix -N "$DESTDIR"$QUEUE_BASE/queue"$QUEUE_NO" > /dev/null 2>&1
     if [ $? -ne 0 ] ; then
       echo "status $? ! queue"$QUEUE_NO" should be fixed. Run queue-fix "$DESTDIR"$QUEUE_BASE/queue"$QUEUE_NO" !" 1>&2
       OK=0
@@ -1845,7 +1881,7 @@ else
     COUNT=`expr $COUNT + 1`
     QUEUE_NO=`expr $QUEUE_NO + 1`
   done
-  "$DESTDIR"$QmailHOME/bin/queue-fix -N "$DESTDIR"$QUEUE_BASE/nqueue > /dev/null 2>&1
+  "$DESTDIR"$QmailBinPrefix/bin/queue-fix -N "$DESTDIR"$QUEUE_BASE/nqueue > /dev/null 2>&1
   if [ $? -ne 0 ] ; then
     echo "status $? ! nqueue should be fixed. Run queue-fix "$DESTDIR"$QUEUE_BASE/nqueue !" 1>&2
     OK=0
@@ -1903,14 +1939,14 @@ for i in qmail nofiles indimail qscand; do
 done
 
 echo "Checking IndiMail Installation Permission"
-if [ ! -x "$DESTDIR"$QmailHOME/bin/instcheck ]; then
-  echo "! Couldn't find "$DESTDIR"$QmailHOME/bin/instcheck" 1>&2
+if [ ! -x "$DESTDIR"$QmailBinPrefix/bin/instcheck ]; then
+  echo "! Couldn't find "$DESTDIR"$QmailBinPrefix/bin/instcheck" 1>&2
   OK=0
 else
   if [ "$VERB" = y ]; then
     echo "instcheck from qmail is installed. Executing..."
   fi
-  "$DESTDIR"$QmailHOME/bin/instcheck "$DESTDIR"$QmailHOME
+  "$DESTDIR"$QmailBinPrefix/bin/instcheck "$DESTDIR"$QmailBinPrefix
   if [ $? -ne 0 ]; then
     echo "instcheck returned non-zero exit status. Check Installation"
     OK=0
@@ -1918,15 +1954,15 @@ else
 fi
 if [ $indimail_installed -eq 1 ] ; then
   echo "Checking IndiMail Default MySQL Tables"
-  if [ ! -x "$DESTDIR"$indimaildir/sbin/install_tables ]; then
-    echo "! Couldn't find "$DESTDIR"$QmailHOME/sbin/install_tables" 1>&2
+  if [ ! -x "$DESTDIR"$QmailBinPrefix/sbin/install_tables ]; then
+    echo "! Couldn't find "$DESTDIR"$QmailBinPrefix/sbin/install_tables" 1>&2
     OK=0
   else
     if [ "$VERB" = y ]; then
       echo "install_tables from indimail is installed. Executing..."
     fi
     if [ ! -f /tmp/skip-install_tables ] ; then
-      "$DESTDIR"$indimaildir/sbin/install_tables > /dev/null
+      "$DESTDIR"$QmailBinPrefix/sbin/install_tables > /dev/null
       if [ $? -ne 0 ]; then
         echo "install_tables returned non-zero exit status. Check Installation" 1>&2
         OK=0
@@ -2054,16 +2090,16 @@ fi
 
 echo "Checking mandatory services"
 M_SERVICE=""
-if [ -x "$DESTDIR"$QmailHOME/bin/bogofilter ] ; then
+if [ -x "$DESTDIR"$QmailBinPrefix/bin/bogofilter ] ; then
   M_SERVICE="$M_SERVICE qmail-spamlog"
 fi
-if [ -x "$DESTDIR"$QmailHOME/sbin/clamd -o -x "$DESTDIR"$QmailHOME/bin/freshclam ] ; then
+if [ -x "$DESTDIR"$QmailBinPrefix/sbin/clamd -o -x "$DESTDIR"$QmailBinPrefix/bin/freshclam ] ; then
   M_SERVICE="$M_SERVICE clamd freshclam"
 fi
 if [ -x /usr/sbin/clamd -o -x /usr/bin/freshclam ] ; then
   M_SERVICE="$M_SERVICE clamd freshclam"
 fi
-if [ -x "$DESTDIR"$QmailHOME/sbin/nssd ] ; then
+if [ -x "$DESTDIR"$QmailBinPrefix/sbin/nssd ] ; then
   M_SERVICE="$M_SERVICE pwdlookup"
 fi
 if [ $indimail_installed -eq 1 ] ; then
@@ -2148,20 +2184,20 @@ for i in $LOGDIRS; do
 done
 
 echo "Checking Firewall Rules"
-if [ ! -f "$DESTDIR"$indimaildir/etc/tcp.smtp ]; then
-  echo "! "$DESTDIR"$indimaildir/etc/tcp.smtp is missing" 1>&2
-  echo "...try: echo '127.:allow,RELAYCLIENT=\"\"' >> "$DESTDIR"$indimaildir/etc/tcp.smtp" 1>&2
+if [ ! -f "$DESTDIR"$sysconfdir/tcp.smtp ]; then
+  echo "! "$DESTDIR"$sysconfdir/tcp.smtp is missing" 1>&2
+  echo "...try: echo '127.:allow,RELAYCLIENT=\"\"' >> "$DESTDIR"$sysconfdir/tcp.smtp" 1>&2
   OK=0
 elif [ "$VERB" = y ]; then
-  echo ""$DESTDIR"$indimaildir/etc/tcp.smtp exists"
+  echo ""$DESTDIR"$sysconfdir/tcp.smtp exists"
 fi
 
-if [ ! -f "$DESTDIR"$indimaildir/etc/tcp.smtp.cdb ]; then
-  echo "! "$DESTDIR"$indimaildir/etc/tcp.smtp.cdb is missing" 1>&2
-  echo "...try: "$DESTDIR"$QmailHOME/bin/qmailctl cdb" 1>&2
+if [ ! -f "$DESTDIR"$sysconfdir/tcp.smtp.cdb ]; then
+  echo "! "$DESTDIR"$sysconfdir/tcp.smtp.cdb is missing" 1>&2
+  echo "...try: "$DESTDIR"$QmailBinPrefix/bin/qmailctl cdb" 1>&2
   OK=0
 elif [ "$VERB" = y ]; then
-  echo ""$DESTDIR"$indimaildir/etc/tcp.smtp.cdb exists"
+  echo ""$DESTDIR"$sysconfdir/tcp.smtp.cdb exists"
 fi
 
 echo "Checking Alias User"
@@ -2194,7 +2230,7 @@ if netstat -a | grep smtp | grep -i listen >/dev/null; then
     echo "! Sendmail is still running" 1>&2
     echo "...try: $RCDIR/init.d/sendmail stop" 1>&2
     OK=0
-  elif "$DESTDIR"$QmailHOME/bin/svok $servicedir/qmail-smtpd.25; then
+  elif "$DESTDIR"$QmailBinPrefix/bin/svok $servicedir/qmail-smtpd.25; then
     if [ "$VERB" = y ]; then
       echo "$servicedir/qmail-smtpd.25 is running"
     fi
@@ -2208,11 +2244,11 @@ fi
 for i in /usr/lib/sendmail /usr/sbin/sendmail; do
   if [ -f $i -a ! -L $i ]; then
     echo "! $i is a file, should be a link" 1>&2
-    echo "...try: uninstalling current MTA or: mv $i $i.old; ln -s $QmailHOME/bin/sendmail $i" 1>&2
+    echo "...try: uninstalling current MTA or: mv $i $i.old; ln -s $QmailBinPrefix/bin/sendmail $i" 1>&2
     OK=0
   elif [ ! -f $i ];then
     echo "! $i is missing" 1>&2
-    echo "...try: ln -s $QmailHOME/bin/sendmail $i" 1>&2
+    echo "...try: ln -s $QmailBinPrefix/bin/sendmail $i" 1>&2
     OK=0
   elif [ "$VERB" = y ]; then
     echo "$i exists"
@@ -2220,10 +2256,10 @@ for i in /usr/lib/sendmail /usr/sbin/sendmail; do
 done
 
 if [ $OK -eq 1 ]; then
-  echo "Congratulations, your IndiMail installation in "$DESTDIR"$indimaildir looks good!"
+  echo "Congratulations, your IndiMail installation in "$DESTDIR"$QmailHOME looks good!"
   return 0
 else
-  echo "! Potential problems were found with your IndiMail installation in "$DESTDIR"$indimaildir" 1>&2
+  echo "! Potential problems were found with your IndiMail installation in "$DESTDIR"$QmailHOME" 1>&2
   return 1
 fi
 }
@@ -2247,7 +2283,7 @@ echo "rcpthosts"
 if [ -f ./config-fast ] ; then
 	./config-fast $hostname $DESTDIR
 else
-	"$DESTDIR"$QmailHOME/sbin/config-fast $hostname $DESTDIR
+	"$DESTDIR"$QmailBinPrefix/sbin/config-fast $hostname $DESTDIR
 fi
 
 echo "Setting Following Files to Reasonable Defaults"
@@ -2273,7 +2309,7 @@ else
 	fi
 fi
 
-"$DESTDIR"$QmailHOME/bin/ipmeprint | \
+"$DESTDIR"$QmailBinPrefix/bin/ipmeprint | \
 	egrep -vw "::|::1|0\.0\.0\.0|127\.0\.0\.1|0000:0000:0000:0000:0000:0000:0000:0000" | \
 	head -1|awk '{print $3}'> /tmp/localiphost.$$
 if [ -s /tmp/localiphost.$$ ] ; then
@@ -2315,18 +2351,18 @@ if [ ! -f "$DESTDIR"$CONTROLDIR/greylist.white ] ; then
 	cat "$DESTDIR"$CONTROLDIR/localiphost > "$DESTDIR"$CONTROLDIR/greylist.white
 fi
 
-if [ " $wipe_option" = " 1" -o ! -f "$DESTDIR"/$QmailHOME/users/assign ] ; then
+if [ " $wipe_option" = " 1" -o ! -f "$DESTDIR"/$sysconfdir/users/assign ] ; then
 	echo "assign"
 fi
 if [ " $wipe_option" = " 1" ] ; then
-	echo "." > "$DESTDIR"$QmailHOME/users/assign
-	if [ -f "$DESTDIR"$QmailHOME/bin/qmail-newu ] ; then
-		"$DESTDIR"$QmailHOME/bin/qmail-newu "$DESTDIR"$QmailHOME
+	echo "." > "$DESTDIR"$sysconfdir/users/assign
+	if [ -f "$DESTDIR"$QmailBinPrefix/bin/qmail-newu ] ; then
+		"$DESTDIR"$QmailBinPrefix/bin/qmail-newu "$DESTDIR"$sysconfdir/users
 	fi
-elif [ ! -f "$DESTDIR"$QmailHOME/users/assign ] ; then
-	echo "." > "$DESTDIR"$QmailHOME/users/assign
-	if [ -f "$DESTDIR"$QmailHOME/bin/qmail-newu ] ; then
-		"$DESTDIR"$QmailHOME/bin/qmail-newu "$DESTDIR"$QmailHOME
+elif [ ! -f "$DESTDIR"$sysconfdir/users/assign ] ; then
+	echo "." > "$DESTDIR"$sysconfdir/users/assign
+	if [ -f "$DESTDIR"$QmailBinPrefix/bin/qmail-newu ] ; then
+		"$DESTDIR"$QmailBinPrefix/bin/qmail-newu "$DESTDIR"$sysconfdir/users
 	fi
 fi
 
@@ -2338,51 +2374,51 @@ fi
 
 for i in smtp qmtp qmqp imap pop3 poppass
 do
-	if [ ! -f "$DESTDIR"$QmailHOME/etc/tcp.$i ] ; then
+	if [ ! -f "$DESTDIR"$sysconfdir/tcp.$i ] ; then
 		echo "tcp.$i"
 	fi
 done
-if [ ! -f "$DESTDIR"$QmailHOME/etc/tcp.smtp ] ; then
+if [ ! -f "$DESTDIR"$sysconfdir/tcp.smtp ] ; then
 	(
 	echo "#127.:allow,RELAYCLIENT=\"\""
 	echo "#::1:allow,RELAYCLIENT=\"\"" 
 	echo "#=:allow,GREYIP=\"127.0.0.1:1999\""
 	echo "#:allow,GREYIP=\"127.0.0.1:1999\",RBLSMTPD=\"-No DNS PTR Record - MTA Misconfigured.\""
-	) > "$DESTDIR"$QmailHOME/etc/tcp.smtp
+	) > "$DESTDIR"$sysconfdir/tcp.smtp
 fi
-if [ ! -f "$DESTDIR"$QmailHOME/etc/tcp.qmtp ] ; then
+if [ ! -f "$DESTDIR"$sysconfdir/tcp.qmtp ] ; then
 	(
 	echo ":deny" 
-	) > "$DESTDIR"$QmailHOME/etc/tcp.qmtp
+	) > "$DESTDIR"$sysconfdir/tcp.qmtp
 fi
-if [ ! -f "$DESTDIR"$QmailHOME/etc/tcp.qmqp ] ; then
+if [ ! -f "$DESTDIR"$sysconfdir/tcp.qmqp ] ; then
 	(
 	echo ":deny" 
-	) > "$DESTDIR"$QmailHOME/etc/tcp.qmqp
+	) > "$DESTDIR"$sysconfdir/tcp.qmqp
 fi
-if [ -x "$DESTDIR"$QmailHOME/sbin/config_settings ] ; then
+if [ -x "$DESTDIR"$QmailBinPrefix/sbin/config_settings ] ; then
 	indimail_installed=1
 else
 	indimail_installed=0
 fi
 if [ $indimail_installed -eq 1 ] ; then
-	if [ ! -f "$DESTDIR"$QmailHOME/etc/tcp.imap ] ; then
+	if [ ! -f "$DESTDIR"$sysconfdir/tcp.imap ] ; then
 		(
 		echo "127.:allow,IMAPCLIENT=\"\""
 		echo "::1:allow,IMAPCLIENT=\"\"" 
-		) > "$DESTDIR"$QmailHOME/etc/tcp.imap
+		) > "$DESTDIR"$sysconfdir/tcp.imap
 	fi
-	if [ ! -f "$DESTDIR"$QmailHOME/etc/tcp.pop3 ] ; then
+	if [ ! -f "$DESTDIR"$sysconfdir/tcp.pop3 ] ; then
 		(
 		echo "127.:allow,POP3CLIENT=\"\""
 		echo "::1:allow,POP3CLIENT=\"\"" 
-		) > "$DESTDIR"$QmailHOME/etc/tcp.pop3
+		) > "$DESTDIR"$sysconfdir/tcp.pop3
 	fi
-	if [ ! -f "$DESTDIR"$QmailHOME/etc/tcp.poppass ] ; then
+	if [ ! -f "$DESTDIR"$sysconfdir/tcp.poppass ] ; then
 		(
 		echo "127.:allow"
 		echo "::1:allow"
-		) > "$DESTDIR"$QmailHOME/etc/tcp.poppass
+		) > "$DESTDIR"$sysconfdir/tcp.poppass
 	fi
 	if [ ! -f "$DESTDIR"$CONTROLDIR/host.mysql ] ; then
 		echo "host.mysql"
@@ -2412,16 +2448,16 @@ if [ $indimail_installed -eq 1 ] ; then
 else
 	LIST="tcp.smtp tcp.qmtp tcp.qmqp"
 fi
-if [ -f "$DESTDIR"$QmailHOME/bin/tcprules ] ; then
+if [ -f "$DESTDIR"$QmailBinPrefix/bin/tcprules ] ; then
 	for i in $LIST
 	do
-		"$DESTDIR"$QmailHOME/bin/tcprules "$DESTDIR"$QmailHOME/etc/"$i".cdb \
-			"$DESTDIR"$QmailHOME/etc/"$i".tmp < "$DESTDIR"$indimaildir/etc/$i
+		"$DESTDIR"$QmailBinPrefix/bin/tcprules "$DESTDIR"$sysconfdir/"$i".cdb \
+			"$DESTDIR"$sysconfdir/"$i".tmp < "$DESTDIR"$sysconfdir/$i
 	done
 else
 	for i in $LIST
 	do
-		echo "ucspi-tcp not installed: Run tcprules to build cdb for rules defined in "$DESTDIR"$indimaildir/etc/$i" 1>&2
+		echo "ucspi-tcp not installed: Run tcprules to build cdb for rules defined in "$DESTDIR"$sysconfdir/$i" 1>&2
 	done
 fi
 
@@ -2452,16 +2488,16 @@ echo
 fi
 
 echo "procmailrc"
-if [ ! -f "$DESTDIR"$QmailHOME/etc/procmailrc ] ; then
+if [ ! -f "$DESTDIR"$sysconfdir/procmailrc ] ; then
 	#
 	# ensure call to procmail in .qmail-default
-	# |preline procmail -p -m @indimaildir@/etc/procmailrc || exit 111
+	# |preline procmail -p -m $sysconfdir/procmailrc || exit 111
 	#
 	echo "procmailrc"
 	(
 	echo :0w
-	echo "|$QmailHOME/sbin/vfilter '' bounce-no-mailbox"
-	) > "$DESTDIR"$QmailHOME/etc/procmailrc
+	echo "|$QmailBinPrefix/sbin/vfilter '' bounce-no-mailbox"
+	) > "$DESTDIR"$sysconfdir/procmailrc
 fi
 }
 
@@ -2595,10 +2631,10 @@ if [ " $odmr" = " " ] ; then
 	else
 		echo $min_free > $conf_dir/MIN_FREE
 	fi
-	if [ ! " $QmailHOME" = " $indimaildir" ] ; then
-		echo "$QmailHOME/bin:/bin:/usr/bin:$indimaildir/bin" > $conf_dir/PATH
+	if [ " $QmailBinPrefix" = " /usr" ] ; then
+		echo "/bin:/usr/bin:/usr/sbin:/sbin" > $conf_dir/PATH
 	else
-		echo "$QmailHOME/bin:/bin:/usr/bin" > $conf_dir/PATH
+		echo "/bin:/usr/bin:$QmailBinPrefix/bin:$QmailBinPrefix/sbin" > $conf_dir/PATH
 	fi
 	if [ ! " $spamfilter" = " " ] ; then
 		echo "$spamfilter" > $conf_dir/SPAMFILTER
@@ -2687,14 +2723,14 @@ if [ " $odmr" = " " ] ; then
 fi # odmr
 if [ $shared_objects -eq 1 ] ; then
 	plugin_count=0
-	if [ -f "$DESTDIR"$QmailHOME/plugins/qmail_smtpd.so ] ; then
-	echo "$QmailHOME/plugins/qmail_smtpd.so" > $conf_dir/PLUGIN"$plugin_count"
+	if [ -f "$DESTDIR"@prefix@/lib/indimail/plugins/qmail_smtpd.so ] ; then
+	echo "@prefix@/lib/indimail/plugins/qmail_smtpd.so" > $conf_dir/PLUGIN"$plugin_count"
 	echo "smtp_init" > $conf_dir/PLUGIN0_init
 	echo "$QmailHOME" > $conf_dir/PLUGIN0_dir
 	plugin_count=`expr $plugin_count + 1`
 	fi
-	if [ -f "$DESTDIR"$QmailHOME/plugins/rblsmtpd.so ] ; then
-	echo "$QmailHOME/plugins/rblsmtpd.so" > $conf_dir/PLUGIN"$plugin_count"
+	if [ -f "$DESTDIR"@prefix@/lib/indimail/plugins/rblsmtpd.so ] ; then
+	echo "@prefix@/lib/indimail/plugins/rblsmtpd.so" > $conf_dir/PLUGIN"$plugin_count"
 	plugin_count=`expr $plugin_count + 1`
 	fi
 fi
@@ -2702,30 +2738,30 @@ case "$dkverify_option" in
 	dkim)
 	/bin/rm -f $conf_dir/DKSIGN $conf_dir/DKIMSIGN $conf_dir/DKVERIFY $conf_dir/DKIMVERIFY $conf_dir/DKQUEUE $conf_dir/DKIMQUEUE
 	echo > $conf_dir/DKIMVERIFY
-	echo "$QmailHOME/bin/qmail-dkim" > $conf_dir/QMAILQUEUE
+	echo "$QmailBinPrefix/bin/qmail-dkim" > $conf_dir/QMAILQUEUE
 	if [ $no_multi -eq 1 ] ; then
 		echo "$QUEUE_BASE"/queue1 > $conf_dir/QUEUEDIR
-		echo "$QmailHOME/bin/qmail-queue" > $conf_dir/DKIMQUEUE
+		echo "$QmailBinPrefix/bin/qmail-queue" > $conf_dir/DKIMQUEUE
 	fi
 	;;
 	dk)
 	echo > $conf_dir/DKVERIFY
 	/bin/rm -f $conf_dir/DKSIGN $conf_dir/DKIMSIGN $conf_dir/DKVERIFY $conf_dir/DKIMVERIFY $conf_dir/DKQUEUE $conf_dir/DKIMQUEUE
-	echo "$QmailHOME/bin/qmail-dk" > $conf_dir/QMAILQUEUE
+	echo "$QmailBinPrefix/bin/qmail-dk" > $conf_dir/QMAILQUEUE
 	if [ $no_multi -eq 1 ] ; then
 		echo "$QUEUE_BASE"/queue1 > $conf_dir/QUEUEDIR
-		echo "$QmailHOME/bin/qmail-queue" > $conf_dir/DKQUEUE
+		echo "$QmailBinPrefix/bin/qmail-queue" > $conf_dir/DKQUEUE
 	fi
 	;;
 	both)
 	/bin/rm -f $conf_dir/DKSIGN $conf_dir/DKIMSIGN $conf_dir/DKVERIFY $conf_dir/DKIMVERIFY $conf_dir/DKQUEUE $conf_dir/DKIMQUEUE
 	echo > $conf_dir/DKIMVERIFY
 	echo > $conf_dir/DKVERIFY
-	echo "$QmailHOME/bin/qmail-dk" > $conf_dir/QMAILQUEUE
-	echo "$QmailHOME/bin/qmail-dkim" > $conf_dir/DKQUEUE
+	echo "$QmailBinPrefix/bin/qmail-dk" > $conf_dir/QMAILQUEUE
+	echo "$QmailBinPrefix/bin/qmail-dkim" > $conf_dir/DKQUEUE
 	if [ $no_multi -eq 1 ] ; then
 		echo "$QUEUE_BASE"/queue1 > $conf_dir/QUEUEDIR
-		echo "$QmailHOME/bin/qmail-queue" > $conf_dir/DKIMQUEUE
+		echo "$QmailBinPrefix/bin/qmail-queue" > $conf_dir/DKIMQUEUE
 	fi
 	;;
 	none|*)
@@ -2734,14 +2770,14 @@ case "$dkverify_option" in
 		> $conf_dir/QMAILQUEUE
 		echo "$QUEUE_BASE"/queue1 > $conf_dir/QUEUEDIR
 	else
-		echo "$QmailHOME/bin/qmail-multi" > $conf_dir/QMAILQUEUE
+		echo "$QmailBinPrefix/bin/qmail-multi" > $conf_dir/QMAILQUEUE
 		> $conf_dir/QUEUEDIR
 	fi
 	;;
 esac
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.279 2016-05-18 11:46:41+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.280 2016-05-25 09:06:06+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -2752,7 +2788,7 @@ echo "HOSTNAME=\`uname -n\`"
 echo
 echo "if [ -z \"\$QMAILDUID\" -o -z \"\$NOFILESGID\" -o -z \"\$ME\" ]; then"
 echo "    echo QMAILDUID, NOFILESGID, or ME is unset in"
-echo "    echo $QmailHOME/supervise/qmail-smtpd.$tag/run"
+echo "    echo $SERVICEDIR/qmail-smtpd.$tag/run"
 echo "    sleep 5"
 echo "    exit 1"
 echo "fi"
@@ -2763,38 +2799,38 @@ echo "    sleep 5"
 echo "    exit 1"
 echo "fi"
 echo
-echo "exec $QmailHOME/bin/envdir $SERVICEDIR/qmail-smtpd.$tag/variables sh -c \""
-echo "exec $QmailHOME/bin/softlimit -m \\\$SOFT_MEM -o 1024 \\"
+echo "exec $QmailBinPrefix/bin/envdir $SERVICEDIR/qmail-smtpd.$tag/variables sh -c \""
+echo "exec $QmailBinPrefix/bin/softlimit -m \\\$SOFT_MEM -o 1024 \\"
 if [ " $rbl" = " " ] ; then
-	echo "$QmailHOME/bin/tcpserver -v -H -R -l \\\$LOCALIP \\"
+	echo "$QmailBinPrefix/bin/tcpserver -v -H -R -l \\\$LOCALIP \\"
 	> $conf_dir/RBLCOMMAND
 else
-	echo "$QmailHOME/bin/tcpserver -v -h -R -l \\\$LOCALIP \\"
+	echo "$QmailBinPrefix/bin/tcpserver -v -h -R -l \\\$LOCALIP \\"
 	(
 	if [ " $rbl_list" = " " ] ; then
-		if [ $shared_objects -eq 1 -a -f "$DESTDIR"$QmailHOME/plugins/rblsmtpd.so ] ; then
-		echo "$QmailHOME/plugins/rblsmtpd.so -rzen.spamhaus.org -rdnsbl-1.uceprotect.net -rdnsbl.sorbs.net -rbl.spamcop.net"
+		if [ $shared_objects -eq 1 -a -f "$DESTDIR"@prefix@/lib/indimail/plugins/rblsmtpd.so ] ; then
+		echo "@prefix@/lib/indimail/plugins/rblsmtpd.so -rzen.spamhaus.org -rdnsbl-1.uceprotect.net -rdnsbl.sorbs.net -rbl.spamcop.net"
 		else
-		echo "$QmailHOME/bin/rblsmtpd -rzen.spamhaus.org -rdnsbl-1.uceprotect.net -rdnsbl.sorbs.net -rbl.spamcop.net"
+		echo "$QmailBinPrefix/bin/rblsmtpd -rzen.spamhaus.org -rdnsbl-1.uceprotect.net -rdnsbl.sorbs.net -rbl.spamcop.net"
 		fi
 	else
-		if [ $shared_objects -eq 1 -a -f "$DESTDIR"$QmailHOME/plugins/rblsmtpd.so ] ; then
-		echo "$QmailHOME/plugins/rblsmtpd.so $rbl_list"
+		if [ $shared_objects -eq 1 -a -f "$DESTDIR"@prefix@/lib/indimail/plugins/rblsmtpd.so ] ; then
+		echo "@prefix@/lib/indimail/plugins/rblsmtpd.so $rbl_list"
 		else
-		echo "$QmailHOME/bin/rblsmtpd $rbl_list"
+		echo "$QmailBinPrefix/bin/rblsmtpd $rbl_list"
 		fi
 	fi
 	) > $conf_dir/RBLCOMMAND
 fi
-echo "-x $indimaildir/etc/tcp.smtp.cdb \\"
+echo "-x $sysconfdir/tcp.smtp.cdb \\"
 echo "-c $SERVICEDIR/qmail-smtpd.$tag/variables/MAXDAEMONS -o -b \\\$MAXDAEMONS \\"
 echo "-u \$QMAILDUID -g \$NOFILESGID \\\$LOCALIP \\\$PORT \\\$RBLCOMMAND \\"
-if [ $shared_objects -eq 1 -a -f "$DESTDIR"$QmailHOME/plugins/qmail_smtpd.so ] ; then
-echo "$QmailHOME/plugins/qmail_smtpd.so \$HOSTNAME  \\\$AUTHMODULES /bin/false 2>&1\""
+if [ $shared_objects -eq 1 -a -f "$DESTDIR"@prefix@/lib/indimail/plugins/qmail_smtpd.so ] ; then
+echo "@prefix@/lib/indimail/plugins/qmail_smtpd.so \$HOSTNAME  \\\$AUTHMODULES /bin/false 2>&1\""
 else
-echo "$QmailHOME/bin/qmail-smtpd \$HOSTNAME  \\\$AUTHMODULES /bin/false 2>&1\""
+echo "$QmailBinPrefix/bin/qmail-smtpd \$HOSTNAME  \\\$AUTHMODULES /bin/false 2>&1\""
 fi
-echo "$indimaildir/sbin/vchkpass $indimaildir/sbin/systpass" > $conf_dir/AUTHMODULES
+echo "$QmailBinPrefix/sbin/vchkpass $QmailBinPrefix/sbin/systpass" > $conf_dir/AUTHMODULES
 ) > "$DESTDIR"$SERVICEDIR/qmail-smtpd.$tag/run
 /bin/chmod +x "$DESTDIR"$SERVICEDIR/qmail-smtpd.$tag/run
 
@@ -2804,7 +2840,7 @@ if [ " $odmr" = " " ] ; then
 		/bin/mkdir -p "$DESTDIR"$SERVICEDIR/qmail-spamlog/log
 		(
 		echo "#!/bin/sh"
-		echo "# \$Id: svctool.in,v 2.279 2016-05-18 11:46:41+05:30 Cprogrammer Exp mbhangui $"
+		echo "# \$Id: svctool.in,v 2.280 2016-05-25 09:06:06+05:30 Cprogrammer Exp mbhangui $"
 		echo "# $prog_args"
 		echo ""
 		echo "LOGFILTER=\`cat $SERVICEDIR/qmail-smtpd.$tag/variables/LOGFILTER\`"
@@ -2813,8 +2849,8 @@ if [ " $odmr" = " " ] ; then
 		echo "	/usr/bin/mkfifo \$LOGFILTER"
 		echo "fi"
 		echo "/bin/chmod 666 \$LOGFILTER"
-		echo "exec $QmailHOME/bin/setuidgid indimail \\"
-		echo "$QmailHOME/bin/qmail-cat \$LOGFILTER"
+		echo "exec $QmailBinPrefix/bin/setuidgid indimail \\"
+		echo "$QmailBinPrefix/bin/qmail-cat \$LOGFILTER"
 		) > "$DESTDIR"$SERVICEDIR/qmail-spamlog/run
 		/bin/chmod +x "$DESTDIR"$SERVICEDIR/qmail-spamlog/run
 
@@ -2825,12 +2861,12 @@ if [ " $odmr" = " " ] ; then
 		#qmail-spamlog log script
 		(
 		echo "#!/bin/sh"
-		echo "# \$Id: svctool.in,v 2.279 2016-05-18 11:46:41+05:30 Cprogrammer Exp mbhangui $"
+		echo "# \$Id: svctool.in,v 2.280 2016-05-25 09:06:06+05:30 Cprogrammer Exp mbhangui $"
 		echo "# generated on $host on `date`"
 		echo "# $prog_args"
 		echo ""
-		echo "exec $QmailHOME/bin/setuidgid qmaill \\"
-		echo "$QmailHOME/bin/multilog t $LOGDIR/spamlog"
+		echo "exec $QmailBinPrefix/bin/setuidgid qmaill \\"
+		echo "$QmailBinPrefix/bin/multilog t $LOGDIR/spamlog"
 		) > "$DESTDIR"$SERVICEDIR/qmail-spamlog/log/run
 		/bin/chmod +x "$DESTDIR"$SERVICEDIR/qmail-spamlog/log/run
 	fi
@@ -2843,12 +2879,12 @@ if [ ! -d $LOGDIR ] ; then
 fi
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.279 2016-05-18 11:46:41+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.280 2016-05-25 09:06:06+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
-echo "exec $QmailHOME/bin/setuidgid qmaill \\"
-echo "$QmailHOME/bin/multilog t $LOGDIR/smtpd.$tag"
+echo "exec $QmailBinPrefix/bin/setuidgid qmaill \\"
+echo "$QmailBinPrefix/bin/multilog t $LOGDIR/smtpd.$tag"
 ) > "$DESTDIR"$SERVICEDIR/qmail-smtpd.$tag/log/run
 /bin/chmod +x "$DESTDIR"$SERVICEDIR/qmail-smtpd.$tag/log/run
 }
@@ -2865,7 +2901,7 @@ FIRST_QUEUE=$3
 QUEUE_DEF=$4
 
 if [ " $CONTROLDIR" = " " ] ; then
-	cntrldir=@controldir@
+	cntrldir=@sysconfdir@/control
 else
 	cntrldir=$CONTROLDIR
 fi
@@ -2933,19 +2969,19 @@ case "$dksign_option" in
 	dkim)
 	/bin/rm -f $conf_dir/DKSIGN $conf_dir/DKIMSIGN $conf_dir/DKQUEUE $conf_dir/DKIMQUEUE
 	echo "$private_key" > $conf_dir/DKIMSIGN
-	echo "$QmailHOME/bin/qmail-dkim" > $conf_dir/QMAILQUEUE
+	echo "$QmailBinPrefix/bin/qmail-dkim" > $conf_dir/QMAILQUEUE
 	;;
 	dk)
 	/bin/rm -f $conf_dir/DKSIGN $conf_dir/DKIMSIGN $conf_dir/DKQUEUE $conf_dir/DKIMQUEUE
 	echo "$private_key" > $conf_dir/DKSIGN
-	echo "$QmailHOME/bin/qmail-dk" > $conf_dir/QMAILQUEUE
+	echo "$QmailBinPrefix/bin/qmail-dk" > $conf_dir/QMAILQUEUE
 	;;
 	both)
 	/bin/rm -f $conf_dir/DKSIGN $conf_dir/DKIMSIGN $conf_dir/DKQUEUE $conf_dir/DKIMQUEUE
 	echo "$private_key" > $conf_dir/DKSIGN
 	echo "$private_key" > $conf_dir/DKIMSIGN
-	echo "$QmailHOME/bin/qmail-dk" > $conf_dir/QMAILQUEUE
-	echo "$QmailHOME/bin/qmail-dkim" > $conf_dir/DKQUEUE
+	echo "$QmailBinPrefix/bin/qmail-dk" > $conf_dir/QMAILQUEUE
+	echo "$QmailBinPrefix/bin/qmail-dkim" > $conf_dir/DKQUEUE
 	;;
 	none|*)
 	/bin/rm -f $conf_dir/DKSIGN $conf_dir/DKIMSIGN $conf_dir/DKQUEUE $conf_dir/DKIMQUEUE
@@ -2953,7 +2989,7 @@ case "$dksign_option" in
 		> $conf_dir/QMAILQUEUE
 		echo "$QUEUE_BASE"/queue1 > $conf_dir/QUEUEDIR
 	else
-		echo "$QmailHOME/bin/qmail-multi" > $conf_dir/QMAILQUEUE
+		echo "$QmailBinPrefix/bin/qmail-multi" > $conf_dir/QMAILQUEUE
 		> $conf_dir/QUEUEDIR
 	fi
 	;;
@@ -3023,19 +3059,19 @@ case "$dkverify_option" in
 	dkim)
 	/bin/rm -f $conf_dir/DKSIGN $conf_dir/DKIMSIGN $conf_dir/DKVERIFY $conf_dir/DKIMVERIFY $conf_dir/DKQUEUE $conf_dir/DKIMQUEUE
 	echo > $conf_dir/DKIMVERIFY
-	echo "$QmailHOME/bin/qmail-dkim" > $conf_dir/QMAILQUEUE
+	echo "$QmailBinPrefix/bin/qmail-dkim" > $conf_dir/QMAILQUEUE
 	;;
 	dk)
 	echo > $conf_dir/DKVERIFY
 	/bin/rm -f $conf_dir/DKSIGN $conf_dir/DKIMSIGN $conf_dir/DKVERIFY $conf_dir/DKIMVERIFY $conf_dir/DKQUEUE $conf_dir/DKIMQUEUE
-	echo "$QmailHOME/bin/qmail-dk" > $conf_dir/QMAILQUEUE
+	echo "$QmailBinPrefix/bin/qmail-dk" > $conf_dir/QMAILQUEUE
 	;;
 	both)
 	/bin/rm -f $conf_dir/DKSIGN $conf_dir/DKIMSIGN $conf_dir/DKVERIFY $conf_dir/DKIMVERIFY $conf_dir/DKQUEUE $conf_dir/DKIMQUEUE
 	echo > $conf_dir/DKIMVERIFY
 	echo > $conf_dir/DKVERIFY
-	echo "$QmailHOME/bin/qmail-dk" > $conf_dir/QMAILQUEUE
-	echo "$QmailHOME/bin/qmail-dkim" > $conf_dir/DKQUEUE
+	echo "$QmailBinPrefix/bin/qmail-dk" > $conf_dir/QMAILQUEUE
+	echo "$QmailBinPrefix/bin/qmail-dkim" > $conf_dir/DKQUEUE
 	;;
 	none|*)
 	/bin/rm -f $conf_dir/DKSIGN $conf_dir/DKIMSIGN $conf_dir/DKVERIFY $conf_dir/DKIMVERIFY $conf_dir/DKQUEUE $conf_dir/DKIMQUEUE
@@ -3043,7 +3079,7 @@ case "$dkverify_option" in
 		> $conf_dir/QMAILQUEUE
 		echo "$QUEUE_BASE"/queue1 > $conf_dir/QUEUEDIR
 	else
-		echo "$QmailHOME/bin/qmail-multi" > $conf_dir/QMAILQUEUE
+		echo "$QmailBinPrefix/bin/qmail-multi" > $conf_dir/QMAILQUEUE
 		> $conf_dir/QUEUEDIR
 	fi
 	;;
@@ -3094,14 +3130,14 @@ if [ ! " $spamfilter" = " " ] ; then
 else
 	> $conf_dir/SPAMFILTER
 fi
-if [ ! " $QmailHOME" = " $indimaildir" ] ; then
-	echo "$QmailHOME/bin:/bin:/usr/bin:$indimaildir/bin" > $conf_dir/PATH
+if [ " $QmailBinPrefix" = " /usr" ] ; then
+	echo "/bin:/usr/bin:/usr/sbin:/sbin" > $conf_dir/PATH
 else
-	echo "$QmailHOME/bin:/bin:/usr/bin" > $conf_dir/PATH
+	echo "/bin:/usr/bin:$QmailBinPrefix/bin:$QmailBinPrefix/sbin" > $conf_dir/PATH
 fi
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.279 2016-05-18 11:46:41+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.280 2016-05-25 09:06:06+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -3112,25 +3148,25 @@ echo "HOSTNAME=\`uname -n\`"
 echo
 echo "if [ -z \"\$QMAILDUID\" -o -z \"\$NOFILESGID\" -o -z \"\$ME\" ]; then"
 echo "    echo QMAILDUID, NOFILESGID, or ME is unset in"
-echo "    echo $QmailHOME/supervise/qmail-$type.$tag/run"
+echo "    echo $SERVICEDIR/qmail-$type.$tag/run"
 echo "    sleep 5"
 echo "    exit 1"
 echo "fi"
 echo
-echo "exec $QmailHOME/bin/envdir $SERVICEDIR/qmail-$type.$tag/variables sh -c \""
-echo "exec $QmailHOME/bin/softlimit -m \\\$SOFT_MEM -o 1024 \\"
-echo "$QmailHOME/bin/tcpserver -v -H -R -l \\\$LOCALIP \\"
+echo "exec $QmailBinPrefix/bin/envdir $SERVICEDIR/qmail-$type.$tag/variables sh -c \""
+echo "exec $QmailBinPrefix/bin/softlimit -m \\\$SOFT_MEM -o 1024 \\"
+echo "$QmailBinPrefix/bin/tcpserver -v -H -R -l \\\$LOCALIP \\"
 case $type in
 	qmtpd)
-	echo "-x $indimaildir/etc/tcp.qmtp.cdb \\"
+	echo "-x $sysconfdir/tcp.qmtp.cdb \\"
 	;;
 	qmqpd)
-	echo "-x $indimaildir/etc/tcp.qmqp.cdb \\"
+	echo "-x $sysconfdir/tcp.qmqp.cdb \\"
 	;;
 esac
 echo "-c $SERVICEDIR/qmail-$type.$tag/variables/MAXDAEMONS -o -b \\\$MAXDAEMONS \\"
 echo "-u \$QMAILDUID -g \$NOFILESGID \\\$LOCALIP \\\$PORT \\"
-echo "$QmailHOME/bin/qmail-$type 2>&1\""
+echo "$QmailBinPrefix/bin/qmail-$type 2>&1\""
 ) > "$DESTDIR"$SERVICEDIR/qmail-$type.$tag/run
 /bin/chmod +x "$DESTDIR"$SERVICEDIR/qmail-$type.$tag/run
 
@@ -3139,7 +3175,7 @@ if [ ! " $logfilter" = " " -a ! -d "$DESTDIR"$SERVICEDIR/qmail-spamlog/run ] ; t
 	/bin/mkdir -p "$DESTDIR"$SERVICEDIR/qmail-spamlog/log
 	(
 	echo "#!/bin/sh"
-	echo "# \$Id: svctool.in,v 2.279 2016-05-18 11:46:41+05:30 Cprogrammer Exp mbhangui $"
+	echo "# \$Id: svctool.in,v 2.280 2016-05-25 09:06:06+05:30 Cprogrammer Exp mbhangui $"
 	echo "# $prog_args"
 	echo ""
 	echo "LOGFILTER=\`cat $SERVICEDIR/qmail-$type.$tag/variables/LOGFILTER\`"
@@ -3148,8 +3184,8 @@ if [ ! " $logfilter" = " " -a ! -d "$DESTDIR"$SERVICEDIR/qmail-spamlog/run ] ; t
 	echo "	/usr/bin/mkfifo \$LOGFILTER"
 	echo "fi"
 	echo "/bin/chmod 666 \$LOGFILTER"
-	echo "exec $QmailHOME/bin/setuidgid indimail \\"
-	echo "$QmailHOME/bin/qmail-cat \$LOGFILTER"
+	echo "exec $QmailBinPrefix/bin/setuidgid indimail \\"
+	echo "$QmailBinPrefix/bin/qmail-cat \$LOGFILTER"
 	) > "$DESTDIR"$SERVICEDIR/qmail-spamlog/run
 	/bin/chmod +x "$DESTDIR"$SERVICEDIR/qmail-spamlog/run
 
@@ -3160,12 +3196,12 @@ if [ ! " $logfilter" = " " -a ! -d "$DESTDIR"$SERVICEDIR/qmail-spamlog/run ] ; t
 	#qmail-spamlog log script
 	(
 	echo "#!/bin/sh"
-	echo "# \$Id: svctool.in,v 2.279 2016-05-18 11:46:41+05:30 Cprogrammer Exp mbhangui $"
+	echo "# \$Id: svctool.in,v 2.280 2016-05-25 09:06:06+05:30 Cprogrammer Exp mbhangui $"
 	echo "# generated on $host on `date`"
 	echo "# $prog_args"
 	echo ""
-	echo "exec $QmailHOME/bin/setuidgid qmaill \\"
-	echo "$QmailHOME/bin/multilog t $LOGDIR/spamlog"
+	echo "exec $QmailBinPrefix/bin/setuidgid qmaill \\"
+	echo "$QmailBinPrefix/bin/multilog t $LOGDIR/spamlog"
 	) > "$DESTDIR"$SERVICEDIR/qmail-spamlog/log/run
 	/bin/chmod +x "$DESTDIR"$SERVICEDIR/qmail-spamlog/log/run
 fi
@@ -3177,12 +3213,12 @@ if [ ! -d $LOGDIR ] ; then
 fi
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.279 2016-05-18 11:46:41+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.280 2016-05-25 09:06:06+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
-echo "exec $QmailHOME/bin/setuidgid qmaill \\"
-echo "$QmailHOME/bin/multilog t $LOGDIR/$type.$tag"
+echo "exec $QmailBinPrefix/bin/setuidgid qmaill \\"
+echo "$QmailBinPrefix/bin/multilog t $LOGDIR/$type.$tag"
 ) > "$DESTDIR"$SERVICEDIR/qmail-$type.$tag/log/run
 /bin/chmod +x "$DESTDIR"$SERVICEDIR/qmail-$type.$tag/log/run
 }
@@ -3231,14 +3267,14 @@ fi
 
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.279 2016-05-18 11:46:41+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.280 2016-05-25 09:06:06+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
-echo "exec $QmailHOME/bin/envdir $SERVICEDIR/udplogger.$tag/variables sh -c \""
-echo "exec $QmailHOME/bin/setuidgid indimail \\"
-echo "$QmailHOME/bin/softlimit -m \\\$SOFT_MEM -o 1024 \\"
-echo "	$QmailHOME/bin/udplogger -p \\\$PORT -t \\\$TIMEOUT \\\$LOCALIP 2>&1 \""
+echo "exec $QmailBinPrefix/bin/envdir $SERVICEDIR/udplogger.$tag/variables sh -c \""
+echo "exec $QmailBinPrefix/bin/setuidgid indimail \\"
+echo "$QmailBinPrefix/bin/softlimit -m \\\$SOFT_MEM -o 1024 \\"
+echo "	$QmailBinPrefix/bin/udplogger -p \\\$PORT -t \\\$TIMEOUT \\\$LOCALIP 2>&1 \""
 ) > "$DESTDIR"$SERVICEDIR/udplogger.$tag/run
 /bin/chmod +x "$DESTDIR"$SERVICEDIR/udplogger.$tag/run
 
@@ -3249,12 +3285,12 @@ if [ ! -d $LOGDIR ] ; then
 fi
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.279 2016-05-18 11:46:41+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.280 2016-05-25 09:06:06+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
-echo "exec $QmailHOME/bin/setuidgid qmaill \\"
-echo "$QmailHOME/bin/multilog t $LOGDIR/udplogger.$tag"
+echo "exec $QmailBinPrefix/bin/setuidgid qmaill \\"
+echo "$QmailBinPrefix/bin/multilog t $LOGDIR/udplogger.$tag"
 ) > "$DESTDIR"$SERVICEDIR/udplogger.$tag/log/run
 /bin/chmod +x "$DESTDIR"$SERVICEDIR/udplogger.$tag/log/run
 }
@@ -3308,22 +3344,22 @@ else
 	echo 52428800 > $conf_dir/SOFT_MEM
 fi
 if [ " $GREYDAEMON" = " " ] ; then
-	GREYPROG=$QmailHOME/bin/qmail-greyd
+	GREYPROG=$QmailBinPrefix/bin/qmail-greyd
 else
-	GREYPROG=$QmailHOME/bin/greydaemon
+	GREYPROG=$QmailBinPrefix/bin/greydaemon
 fi
 WHITELIST=$CONTROLDIR/$WHITELIST
 CONTEXT_FILE=$CONTROLDIR/$CONTEXT_FILE
 
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.279 2016-05-18 11:46:41+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.280 2016-05-25 09:06:06+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
-echo "exec $QmailHOME/bin/envdir $SERVICEDIR/greylist.$tag/variables sh -c \""
-echo "exec $QmailHOME/bin/setuidgid indimail \\"
-echo "$QmailHOME/bin/softlimit -m \\\$SOFT_MEM -o 1024 \\"
+echo "exec $QmailBinPrefix/bin/envdir $SERVICEDIR/greylist.$tag/variables sh -c \""
+echo "exec $QmailBinPrefix/bin/setuidgid indimail \\"
+echo "$QmailBinPrefix/bin/softlimit -m \\\$SOFT_MEM -o 1024 \\"
 echo "	$GREYPROG -w $WHITELIST -t $TIMEOUT_DAYS -g $RESEND_WIN_HR \\"
 if [ " $GREYDAEMON" = " " ] ; then
 echo "	-m $MIN_RESEND_MIN -s $SAVE_INTERVAL -h $HASH_SIZE \\\$LOCALIP $CONTEXT_FILE 2>&1\""
@@ -3340,12 +3376,12 @@ if [ ! -d $LOGDIR ] ; then
 fi
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.279 2016-05-18 11:46:41+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.280 2016-05-25 09:06:06+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
-echo "exec $QmailHOME/bin/setuidgid qmaill \\"
-echo "$QmailHOME/bin/multilog t $LOGDIR/greylist.$tag"
+echo "exec $QmailBinPrefix/bin/setuidgid qmaill \\"
+echo "$QmailBinPrefix/bin/multilog t $LOGDIR/greylist.$tag"
 ) > "$DESTDIR"$SERVICEDIR/greylist.$tag/log/run
 /bin/chmod +x "$DESTDIR"$SERVICEDIR/greylist.$tag/log/run
 }
@@ -3403,7 +3439,7 @@ else
 	fi
 	create_imap_config_ssl > "$conf_dir"-ssl
 fi
-"$DESTDIR"$QmailHOME/bin/envmigrate $conf_dir
+"$DESTDIR"$QmailBinPrefix/bin/envmigrate $conf_dir
 if [ ! " $memory" = " " ] ; then
 	echo $memory > $conf_dir/SOFT_MEM
 else
@@ -3421,33 +3457,33 @@ else
 fi
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.279 2016-05-18 11:46:41+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.280 2016-05-25 09:06:06+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
 echo "INDIUID=\`/usr/bin/id -u indimail\`"
 echo "INDIGID=\`/usr/bin/id -g indimail\`"
 echo ""
-echo "prefix=$indimaildir"
+echo "prefix=$QmailBinPrefix"
 echo "bindir=\${prefix}/bin"
 echo ""
 if [ " $use_ssl" = " 1" ] ; then
-	echo "exec $QmailHOME/bin/envdir $SERVICEDIR/"$proxy_type"-imapd-ssl.$tag/variables sh -c \""
+	echo "exec $QmailBinPrefix/bin/envdir $SERVICEDIR/"$proxy_type"-imapd-ssl.$tag/variables sh -c \""
 else
-	echo "exec $QmailHOME/bin/envdir $SERVICEDIR/"$proxy_type"-imapd.$tag/variables sh -c \""
+	echo "exec $QmailBinPrefix/bin/envdir $SERVICEDIR/"$proxy_type"-imapd.$tag/variables sh -c \""
 fi
 echo "LIBAUTHMODULES=\\\"\\\""
 echo "for f in \\\`echo \\\$AUTHMODULES\\\`"
 echo "do"
 echo "	LIBAUTHMODULES=\\\"\\\$LIBAUTHMODULES \$prefix/libexec/authlib/\\\$f\\\""
 echo "done"
-echo "exec $QmailHOME/bin/softlimit -m \\\$SOFT_MEM -o 1024 \\"
+echo "exec $QmailBinPrefix/bin/softlimit -m \\\$SOFT_MEM -o 1024 \\"
 if [ " $use_ssl" = " 1" ] ; then
-	echo "$QmailHOME/bin/tcpserver -v -c $SERVICEDIR/"$proxy_type"-imapd-ssl.$tag/variables/MAXDAEMONS -C \\\$MAXPERIP \\"
+	echo "$QmailBinPrefix/bin/tcpserver -v -c $SERVICEDIR/"$proxy_type"-imapd-ssl.$tag/variables/MAXDAEMONS -C \\\$MAXPERIP \\"
 else
-	echo "$QmailHOME/bin/tcpserver -v -c $SERVICEDIR/"$proxy_type"-imapd.$tag/variables/MAXDAEMONS -C \\\$MAXPERIP \\"
+	echo "$QmailBinPrefix/bin/tcpserver -v -c $SERVICEDIR/"$proxy_type"-imapd.$tag/variables/MAXDAEMONS -C \\\$MAXPERIP \\"
 fi
-echo "-x $indimaildir/etc/tcp.imap.cdb -X \\"
+echo "-x $sysconfdir/tcp.imap.cdb -X \\"
 if [ " $use_ssl" = " 1" ] ; then
 	echo "-o -b \\\$MAXDAEMONS -H -l \\\$SSLADDRESS -R -u \$INDIUID -g \$INDIGID \\\$SSLADDRESS \\\$SSLPORT \\"
 	echo "\$prefix/bin/couriertls -server -tcpd \\"
@@ -3457,7 +3493,7 @@ fi
 if [ " $proxy_port" = " " ] ;then
 	echo "\$prefix/sbin/imaplogin \\\$LIBAUTHMODULES \$bindir/imapd Maildir 2>&1\""
 else
-	echo "$indimaildir/bin/proxyimap \$bindir/imapd Maildir 2>&1\""
+	echo "$QmailBinPrefix/bin/proxyimap \$bindir/imapd Maildir 2>&1\""
 fi
 ) > /tmp/imap-run.$$
 
@@ -3476,19 +3512,19 @@ fi
 # qmail-imapd log script
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.279 2016-05-18 11:46:41+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.280 2016-05-25 09:06:06+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
-echo "exec $QmailHOME/bin/setuidgid qmaill \\"
+echo "exec $QmailBinPrefix/bin/setuidgid qmaill \\"
 if [ " $proxy_port" = " " ] ;then
 	if [ " $use_ssl" = " 1" ] ; then
-		echo "$QmailHOME/bin/multilog t $LOGDIR/imapd-ssl.$tag"
+		echo "$QmailBinPrefix/bin/multilog t $LOGDIR/imapd-ssl.$tag"
 	else
-		echo "$QmailHOME/bin/multilog t $LOGDIR/imapd.$tag"
+		echo "$QmailBinPrefix/bin/multilog t $LOGDIR/imapd.$tag"
 	fi
 else
-	echo "$QmailHOME/bin/multilog t $LOGDIR/proxyIMAP.$tag"
+	echo "$QmailBinPrefix/bin/multilog t $LOGDIR/proxyIMAP.$tag"
 fi
 ) > /tmp/imaplog-run.$$
 if [ " $use_ssl" = " 1" ] ; then
@@ -3504,12 +3540,12 @@ create_imap_config()
 {
 echo "#--------- IndiMail ---------------------------"
 echo "DEFAULT_DOMAIN=$default_domain"
-echo "MIGRATEUSER=$indimaildir/bin/migrateuser"
+echo "MIGRATEUSER=$QmailBinPrefix/bin/migrateuser"
 echo "MIGRATEFLAG=indi.txt"
 echo "INFIFO=infifo"
 echo "QMAILDIR=$QmailHOME"
-echo "TCP_FILE=$indimaildir/etc/tcp.imap"
-echo "OPEN_SMTP_CUR_FILE=$indimaildir/etc/open-smtp"
+echo "TCP_FILE=$sysconfdir/tcp.imap"
+echo "OPEN_SMTP_CUR_FILE=$sysconfdir/open-smtp"
 echo "RELAY_TABLE=relay"
 echo "MCDFILE=mcdinfo"
 if [ " $IMAP_PORT" = " " ] ; then
@@ -3581,9 +3617,9 @@ echo "IMAP_MOVE_EXPUNGE_TO_TRASH=0"
 echo "IMAP_LOG_DELETIONS=0"
 echo "IMAPDEBUGFILE=0"
 echo "OUTBOX=.Outbox"
-echo "SENDMAIL=$QmailHOME/bin/sendmail"
+echo "SENDMAIL=$QmailBinPrefix/bin/sendmail"
 echo "HEADERFROM=X-IMAP-Sender"
-echo "IMAP_SHAREDINDEXFILE=$indimaildir/etc/shared/index"
+echo "IMAP_SHAREDINDEXFILE=$sysconfdir/shared/index"
 echo "MAILDIRPATH=Maildir"
 echo "IMAP_CAPABILITY=\"$IMAP_CAPABILITY AUTH=LOGIN AUTH=PLAIN AUTH=CRAM-MD5 AUTH=CRAM-SHA1 AUTH=CRAM-SHA256\""
 
@@ -3592,7 +3628,7 @@ if [ $use_starttls -eq 1 ] ; then
 	echo "IMAP_STARTTLS=YES"
 	echo "IMAP_TLS_REQUIRED=0"
 	if [ " $tlsprog" = " " ] ; then
-		echo "COURIERTLS=$indimaildir/bin/couriertls"
+		echo "COURIERTLS=$QmailBinPrefix/bin/couriertls"
 	else
 		echo "COURIERTLS=$tlsprog"
 	fi
@@ -3621,7 +3657,7 @@ echo "# TLS_TIMEOUT is currently not implemented, and reserved for future use."
 echo "# This is supposed to be an inactivity timeout, but its not yet implemented."
 echo "#"
 echo "# TLS_DHCERTFILE="
-echo "TLS_CERTFILE=$indimaildir/share/imapd.pem"
+echo "TLS_CERTFILE=$sysconfdir/imapd.pem"
 echo "# TLS_TRUSTCERTS="
 echo "TLS_VERIFYPEER=NONE"
 echo "TLS_CACHEFILE=$CONTROLDIR/couriersslcache"
@@ -3637,9 +3673,9 @@ fi
 postmaster=$1
 echo
 if [ " $2" = " IMAP" ] ; then
-	echo "RANDFILE = $indimaildir/share/imapd.rand"
+	echo "RANDFILE = $sysconfdir/imapd.rand"
 else
-	echo "RANDFILE = $indimaildir/share/pop3d.rand"
+	echo "RANDFILE = $sysconfdir/pop3d.rand"
 fi
 echo 
 echo "[ req ]"
@@ -3681,7 +3717,7 @@ echo "[imapd]"
 echo "accept = $SSLADDRESS:993"
 echo "protocol = imap"
 echo "connect = $SSLADDRESS:143"
-echo "cert = $indimaildir/share/imapd.pem"
+echo "cert = $sysconfdir/imapd.pem"
 }
 
 create_pop3_stunnel()
@@ -3698,7 +3734,7 @@ echo "[pop3d]"
 echo "accept = $SSLADDRESS:995"
 echo "protocol = pop3"
 echo "connect = $SSLADDRESS:110"
-echo "cert = $indimaildir/share/pop3d.pem"
+echo "cert = $sysconfdir/pop3d.pem"
 }
 
 create_pop3()
@@ -3756,7 +3792,7 @@ else
 	fi
 	create_pop3_config_ssl > "$conf_dir"-ssl
 fi
-"$DESTDIR"$QmailHOME/bin/envmigrate $conf_dir
+"$DESTDIR"$QmailBinPrefix/bin/envmigrate $conf_dir
 if [ ! " $memory" = " " ] ; then
 	echo $memory > $conf_dir/SOFT_MEM
 else
@@ -3774,33 +3810,33 @@ else
 fi
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.279 2016-05-18 11:46:41+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.280 2016-05-25 09:06:06+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
 echo "INDIUID=\`/usr/bin/id -u indimail\`"
 echo "INDIGID=\`/usr/bin/id -g indimail\`"
 echo ""
-echo "prefix=$indimaildir"
+echo "prefix=$QmailBinPrefix"
 echo "bindir=\${prefix}/bin"
 echo ""
 if [ " $use_ssl" = " 1" ] ; then
-	echo "exec $QmailHOME/bin/envdir $SERVICEDIR/"$proxy_type"-pop3d-ssl.$tag/variables sh -c \""
+	echo "exec $QmailBinPrefix/bin/envdir $SERVICEDIR/"$proxy_type"-pop3d-ssl.$tag/variables sh -c \""
 else
-	echo "exec $QmailHOME/bin/envdir $SERVICEDIR/"$proxy_type"-pop3d.$tag/variables sh -c \""
+	echo "exec $QmailBinPrefix/bin/envdir $SERVICEDIR/"$proxy_type"-pop3d.$tag/variables sh -c \""
 fi
 echo "LIBAUTHMODULES=\\\"\\\""
 echo "for f in \\\`echo \\\$AUTHMODULES\\\`"
 echo "do"
 echo "	LIBAUTHMODULES=\\\"\\\$LIBAUTHMODULES \$prefix/libexec/authlib/\\\$f\\\""
 echo "done"
-echo "exec $QmailHOME/bin/softlimit -m \\\$SOFT_MEM -o 1024 \\"
+echo "exec $QmailBinPrefix/bin/softlimit -m \\\$SOFT_MEM -o 1024 \\"
 if [ " $use_ssl" = " 1" ] ; then
-	echo "$QmailHOME/bin/tcpserver -v -c $SERVICEDIR/"$proxy_type"-pop3d-ssl.$tag/variables/MAXDAEMONS -C \\\$MAXPERIP \\"
+	echo "$QmailBinPrefix/bin/tcpserver -v -c $SERVICEDIR/"$proxy_type"-pop3d-ssl.$tag/variables/MAXDAEMONS -C \\\$MAXPERIP \\"
 else
-	echo "$QmailHOME/bin/tcpserver -v -c $SERVICEDIR/"$proxy_type"-pop3d.$tag/variables/MAXDAEMONS -C \\\$MAXPERIP \\"
+	echo "$QmailBinPrefix/bin/tcpserver -v -c $SERVICEDIR/"$proxy_type"-pop3d.$tag/variables/MAXDAEMONS -C \\\$MAXPERIP \\"
 fi
-echo "-x $indimaildir/etc/tcp.pop3.cdb -X \\"
+echo "-x $sysconfdir/tcp.pop3.cdb -X \\"
 if [ " $use_ssl" = " 1" ] ; then
 	echo "-o -b \\\$MAXDAEMONS -H -l \\\$SSLADDRESS -R -u \$INDIUID -g \$INDIGID \\\$SSLADDRESS \\\$SSLPORT \\"
 	echo "\$prefix/bin/couriertls -server -tcpd \\"
@@ -3810,7 +3846,7 @@ fi
 if [ " $proxy_port" = " " ] ;then
 	echo "\$prefix/sbin/pop3login \\\$LIBAUTHMODULES \$bindir/pop3d Maildir 2>&1\""
 else
-	echo "$indimaildir/bin/proxypop3 \$bindir/pop3d Maildir 2>&1\""
+	echo "$QmailBinPrefix/bin/proxypop3 \$bindir/pop3d Maildir 2>&1\""
 fi
 ) > /tmp/pop3-run.$$
 if [ " $use_ssl" = " 1" ] ; then
@@ -3828,19 +3864,19 @@ fi
 # qmail-pop3d log script
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.279 2016-05-18 11:46:41+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.280 2016-05-25 09:06:06+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
-echo "exec $QmailHOME/bin/setuidgid qmaill \\"
+echo "exec $QmailBinPrefix/bin/setuidgid qmaill \\"
 if [ " $proxy_port" = " " ] ;then
 	if [ " $use_ssl" = " 1" ] ; then
-		echo "$QmailHOME/bin/multilog t $LOGDIR/pop3d-ssl.$tag"
+		echo "$QmailBinPrefix/bin/multilog t $LOGDIR/pop3d-ssl.$tag"
 	else
-		echo "$QmailHOME/bin/multilog t $LOGDIR/pop3d.$tag"
+		echo "$QmailBinPrefix/bin/multilog t $LOGDIR/pop3d.$tag"
 	fi
 else
-	echo "$QmailHOME/bin/multilog t $LOGDIR/proxyPOP3.$tag"
+	echo "$QmailBinPrefix/bin/multilog t $LOGDIR/proxyPOP3.$tag"
 fi
 ) > /tmp/pop3log-run.$$
 if [ " $use_ssl" = " 1" ] ; then
@@ -3856,12 +3892,12 @@ create_pop3_config()
 {
 echo "#--------- IndiMail ---------------------------"
 echo "DEFAULT_DOMAIN=$default_domain"
-echo "MIGRATEUSER=$indimaildir/bin/migrateuser"
+echo "MIGRATEUSER=$QmailBinPrefix/bin/migrateuser"
 echo "MIGRATEFLAG=indi.txt"
 echo "INFIFO=infifo"
 echo "QMAILDIR=$QmailHOME"
-echo "TCP_FILE=$indimaildir/etc/tcp.pop3"
-echo "OPEN_SMTP_CUR_FILE=$indimaildir/etc/open-smtp"
+echo "TCP_FILE=$sysconfdir/tcp.pop3"
+echo "OPEN_SMTP_CUR_FILE=$sysconfdir/open-smtp"
 echo "RELAY_TABLE=relay"
 echo "MCDFILE=mcdinfo"
 if [ " $POP3_PORT" = " " ] ; then
@@ -3921,7 +3957,7 @@ if [ $use_starttls -eq 1 ] ; then
 	echo "POP3_STARTTLS=YES"
 	echo "POP3_TLS_REQUIRED=0"
 	if [ " $tlsprog" = " " ] ; then
-		echo "COURIERTLS=$indimaildir/bin/couriertls"
+		echo "COURIERTLS=$QmailBinPrefix/bin/couriertls"
 	else
 		echo "COURIERTLS=$tlsprog"
 	fi
@@ -3950,7 +3986,7 @@ echo "# TLS_TIMEOUT is currently not implemented, and reserved for future use."
 echo "# This is supposed to be an inactivity timeout, but its not yet implemented."
 echo "#"
 echo "# TLS_DHCERTFILE="
-echo "TLS_CERTFILE=$indimaildir/share/pop3d.pem"
+echo "TLS_CERTFILE=$sysconfdir/pop3d.pem"
 echo "# TLS_TRUSTCERTS="
 echo "TLS_VERIFYPEER=NONE"
 echo "TLS_CACHEFILE=$CONTROLDIR/couriersslcache"
@@ -4004,7 +4040,7 @@ if [ ! " $maxperip" = " " ] ; then
 else
 	echo "10" > $conf_dir/MAXPERIP
 fi
-echo $indimaildir/etc/indimail.cnf > $conf_dir/MYSQL_READ_DEFAULT_FILE
+echo $sysconfdir/indimail.cnf > $conf_dir/MYSQL_READ_DEFAULT_FILE
 echo $BIND_PORT   > $conf_dir/PORT
 if [ -n "$CNTRL_HOST" ] ; then
 	echo $CNTRL_HOST  > $conf_dir/CNTRL_HOST
@@ -4039,7 +4075,7 @@ fi
 echo 1 > $conf_dir/MYSQL_OPT_RECONNECT
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.279 2016-05-18 11:46:41+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.280 2016-05-25 09:06:06+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -4049,13 +4085,13 @@ echo "    sleep 5"
 echo "    exit 1"
 echo "fi"
 echo ""
-echo "exec $QmailHOME/bin/envdir $SERVICEDIR/indisrvr.$tag/variables sh -c \""
-echo "exec $QmailHOME/bin/setuidgid indimail \\"
+echo "exec $QmailBinPrefix/bin/envdir $SERVICEDIR/indisrvr.$tag/variables sh -c \""
+echo "exec $QmailBinPrefix/bin/setuidgid indimail \\"
 if [ " $use_ssl" = " 1" ] ; then
-	echo "$indimaildir/sbin/indisrvr -i \\\$LOCALIP -p \\\$PORT -b \\\$MAXDAEMONS \\"
+	echo "$QmailBinPrefix/sbin/indisrvr -i \\\$LOCALIP -p \\\$PORT -b \\\$MAXDAEMONS \\"
 	echo "-n \\\$CERTFILE 2>&1\""
 else
-	echo "$indimaildir/sbin/indisrvr -i \\\$LOCALIP -p \\\$PORT -b \\\$MAXDAEMONS 2>&1\""
+	echo "$QmailBinPrefix/sbin/indisrvr -i \\\$LOCALIP -p \\\$PORT -b \\\$MAXDAEMONS 2>&1\""
 fi
 ) > "$DESTDIR"$SERVICEDIR/indisrvr.$tag/run
 /bin/chmod +x "$DESTDIR"$SERVICEDIR/indisrvr.$tag/run
@@ -4067,12 +4103,12 @@ fi
 # indisrvr log script
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.279 2016-05-18 11:46:41+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.280 2016-05-25 09:06:06+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
-echo "exec $QmailHOME/bin/setuidgid qmaill \\"
-echo "$QmailHOME/bin/multilog t $LOGDIR/indisrvr.$tag"
+echo "exec $QmailBinPrefix/bin/setuidgid qmaill \\"
+echo "$QmailBinPrefix/bin/multilog t $LOGDIR/indisrvr.$tag"
 ) > "$DESTDIR"$SERVICEDIR/indisrvr.$tag/log/run
 /bin/chmod +x "$DESTDIR"$SERVICEDIR/indisrvr.$tag/log/run
 }
@@ -4093,7 +4129,7 @@ conf_dir="$DESTDIR"$SERVICEDIR/qscanq/variables
 # qscanq script
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.279 2016-05-18 11:46:41+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.280 2016-05-25 09:06:06+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -4104,7 +4140,7 @@ if [ " $scan_interval" = " " ] ; then
 else
 	echo "sleep $scan_interval"
 fi
-echo "exec $QmailHOME/bin/setuidgid qscand $QmailHOME/bin/cleanq -l"
+echo "exec $QmailBinPrefix/bin/setuidgid qscand $QmailBinPrefix/bin/cleanq -l"
 ) > "$DESTDIR"$SERVICEDIR/qscanq/run
 /bin/chmod +x "$DESTDIR"$SERVICEDIR/qscanq/run
 
@@ -4115,12 +4151,12 @@ fi
 # qscanq log script
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.279 2016-05-18 11:46:41+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.280 2016-05-25 09:06:06+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
-echo "exec $QmailHOME/bin/setuidgid qmaill \\"
-echo "$QmailHOME/bin/multilog t \\"
+echo "exec $QmailBinPrefix/bin/setuidgid qmaill \\"
+echo "$QmailBinPrefix/bin/multilog t \\"
 echo "	'-* cleanq starting' '-* deleting: *: not sticky' \\"
 echo "$LOGDIR/qscanq"
 ) > "$DESTDIR"$SERVICEDIR/qscanq/log/run
@@ -4138,7 +4174,7 @@ SERVICEDIR=$2
 if [ $# -gt 2 ] ; then
 	sysconfdir=$3
 else
-	sysconfdir=$indimaildir/etc
+	sysconfdir=$sysconfdir
 fi
 /bin/mkdir -p "$DESTDIR"$SERVICEDIR/clamd/log
 conf_dir="$DESTDIR"$SERVICEDIR/clamd/variables
@@ -4147,7 +4183,7 @@ conf_dir="$DESTDIR"$SERVICEDIR/clamd/variables
 # clamd script
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.279 2016-05-18 11:46:41+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.280 2016-05-25 09:06:06+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -4202,7 +4238,7 @@ echo "ans=\`grep -w \"^AllowSupplementaryGroups\" $sysconfdir/clamd.conf | awk '
 echo "if [ \" \$ans\" = \" yes\" -o \" \$ans\" = \" Yes\" ] ; then"
 echo "	exec $clamdPrefix/sbin/clamd"
 echo "else"
-echo "	exec $QmailHOME/bin/setuidgid qscand $clamdPrefix/sbin/clamd"
+echo "	exec $QmailBinPrefix/bin/setuidgid qscand $clamdPrefix/sbin/clamd"
 echo "fi"
 ) > "$DESTDIR"$SERVICEDIR/clamd/run
 /bin/chmod +x "$DESTDIR"$SERVICEDIR/clamd/run
@@ -4214,12 +4250,12 @@ fi
 # clamd log script
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.279 2016-05-18 11:46:41+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.280 2016-05-25 09:06:06+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
-echo "exec $QmailHOME/bin/setuidgid qmaill \\"
-echo "$QmailHOME/bin/multilog t $LOGDIR/clamd"
+echo "exec $QmailBinPrefix/bin/setuidgid qmaill \\"
+echo "$QmailBinPrefix/bin/multilog t $LOGDIR/clamd"
 ) > "$DESTDIR"$SERVICEDIR/clamd/log/run
 /bin/chmod +x "$DESTDIR"$SERVICEDIR/clamd/log/run
 
@@ -4230,7 +4266,7 @@ conf_dir="$DESTDIR"$SERVICEDIR/freshclam/variables
 # freshclam script
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.279 2016-05-18 11:46:41+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.280 2016-05-25 09:06:06+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -4242,7 +4278,7 @@ echo "	exit 1"
 echo "fi"
 echo "if [ ! -d \"\$dbd\" ] ; then"
 echo "	/bin/mkdir \$dbd"
-echo "	$chown qscand:qscand \$dbd"
+echo "	$chown qscand:qmail \$dbd"
 echo "	/bin/chmod 775 \$dbd"
 echo "fi"
 echo "exec 2>&1"
@@ -4261,10 +4297,10 @@ echo "    exec $clamdPrefix/bin/freshclam -v --stdout --datadir=\$dbd -f -d -c 2
 echo "  fi"
 echo "else"
 echo "  if [ \" \$fgd\" = \" yes\" -o \" \$fgd\" = \" Yes\" ] ; then"
-echo "    exec $QmailHOME/bin/setuidgid qscand \\"
+echo "    exec $QmailBinPrefix/bin/setuidgid qscand \\"
 echo "      $clamdPrefix/bin/freshclam -v --stdout --datadir=\$dbd -d -c 2"
 echo "  else"
-echo "    exec $QmailHOME/bin/setuidgid qscand \\"
+echo "    exec $QmailBinPrefix/bin/setuidgid qscand \\"
 echo "      $clamdPrefix/bin/freshclam -v --stdout --datadir=\$dbd -f -d -c 2"
 echo "  fi"
 echo "fi"
@@ -4278,12 +4314,12 @@ fi
 # freshclam log script
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.279 2016-05-18 11:46:41+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.280 2016-05-25 09:06:06+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
-echo "exec $QmailHOME/bin/setuidgid qmaill \\"
-echo "$QmailHOME/bin/multilog t $LOGDIR/freshclam"
+echo "exec $QmailBinPrefix/bin/setuidgid qmaill \\"
+echo "$QmailBinPrefix/bin/multilog t $LOGDIR/freshclam"
 ) > "$DESTDIR"$SERVICEDIR/freshclam/log/run
 /bin/chmod +x "$DESTDIR"$SERVICEDIR/freshclam/log/run
 }
@@ -4308,12 +4344,12 @@ conf_dir="$DESTDIR"$SERVICEDIR/pwdlookup/variables
 /bin/chmod 500 $conf_dir
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.279 2016-05-18 11:46:41+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.280 2016-05-25 09:06:06+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
-echo "exec $QmailHOME/bin/envdir $SERVICEDIR/pwdlookup/variables \\"
-echo "$QmailHOME/bin/setuidgid indimail $indimaildir/sbin/nssd -d notice 2>&1"
+echo "exec $QmailBinPrefix/bin/envdir $SERVICEDIR/pwdlookup/variables \\"
+echo "$QmailBinPrefix/bin/setuidgid indimail $QmailBinPrefix/sbin/nssd -d notice 2>&1"
 ) > "$DESTDIR"$SERVICEDIR/pwdlookup/run
 /bin/chmod +x "$DESTDIR"$SERVICEDIR/pwdlookup/run
 
@@ -4324,17 +4360,17 @@ fi
 # pwdlookup log script
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.279 2016-05-18 11:46:41+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.280 2016-05-25 09:06:06+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
-echo "exec $QmailHOME/bin/setuidgid qmaill \\"
-echo "$QmailHOME/bin/multilog t $LOGDIR/pwdlookup"
+echo "exec $QmailBinPrefix/bin/setuidgid qmaill \\"
+echo "$QmailBinPrefix/bin/multilog t $LOGDIR/pwdlookup"
 ) > "$DESTDIR"$SERVICEDIR/pwdlookup/log/run
 /bin/chmod +x "$DESTDIR"$SERVICEDIR/pwdlookup/log/run
 create_pwdlookup_conf "$5" "$6" "$7" "$8" "$9" > /tmp/config.cnf.$$
 if [ $? -eq 0 ] ; then
-	conf_file=$DESTDIR"$indimaildir/etc/nssd.conf"
+	conf_file=$DESTDIR"$sysconfdir/nssd.conf"
 	change_config $conf_file /tmp/config.cnf.$$
 fi
 }
@@ -4423,17 +4459,17 @@ if [ ! " $domainlimits" = " " ] ; then
 else
 	> $conf_dir/DOMAIN_LIMITS
 fi
-echo $indimaildir/etc/indimail.cnf > $conf_dir/MYSQL_READ_DEFAULT_FILE
+echo $sysconfdir/indimail.cnf > $conf_dir/MYSQL_READ_DEFAULT_FILE
 echo "inlookup" > $conf_dir/MYSQL_READ_DEFAULT_GROUP
 echo 1 > $conf_dir/MYSQL_OPT_RECONNECT
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.279 2016-05-18 11:46:41+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.280 2016-05-25 09:06:06+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
-echo "exec $QmailHOME/bin/envdir $SERVICEDIR/inlookup.$base_fifo_name/variables sh -c \""
-echo "exec $QmailHOME/bin/setuidgid indimail $indimaildir/sbin/inlookup -i \\\$THREAD_COUNT 2>&1\""
+echo "exec $QmailBinPrefix/bin/envdir $SERVICEDIR/inlookup.$base_fifo_name/variables sh -c \""
+echo "exec $QmailBinPrefix/bin/setuidgid indimail $QmailBinPrefix/sbin/inlookup -i \\\$THREAD_COUNT 2>&1\""
 ) > "$DESTDIR"$SERVICEDIR/inlookup.$base_fifo_name/run
 /bin/chmod +x "$DESTDIR"$SERVICEDIR/inlookup.$base_fifo_name/run
 
@@ -4444,12 +4480,12 @@ fi
 # inlookup log script
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.279 2016-05-18 11:46:41+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.280 2016-05-25 09:06:06+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
-echo "exec $QmailHOME/bin/setuidgid qmaill \\"
-echo "$QmailHOME/bin/multilog t $LOGDIR/inlookup.$base_fifo_name"
+echo "exec $QmailBinPrefix/bin/setuidgid qmaill \\"
+echo "$QmailBinPrefix/bin/multilog t $LOGDIR/inlookup.$base_fifo_name"
 ) > "$DESTDIR"$SERVICEDIR/inlookup.$base_fifo_name/log/run
 /bin/chmod +x "$DESTDIR"$SERVICEDIR/inlookup.$base_fifo_name/log/run
 }
@@ -4503,7 +4539,7 @@ if [ ! -d "$DESTDIR"$databasedir/data -o $force -eq 1 ] ; then
 	fi
 	if ( /bin/mkdir -p "$DESTDIR"$databasedir/data && /bin/mkdir -p "$DESTDIR"$databasedir/logs ) ; then
 		(
-		echo "# \$Id: svctool.in,v 2.279 2016-05-18 11:46:41+05:30 Cprogrammer Exp mbhangui $"
+		echo "# \$Id: svctool.in,v 2.280 2016-05-25 09:06:06+05:30 Cprogrammer Exp mbhangui $"
 		echo "# generated on $host on `date`"
 		echo ""
 		echo "# svctool --config=mysqldb --mysqlPrefix=$mysqlPrefix --databasedir=$databasedir --nolog"
@@ -4633,11 +4669,11 @@ fi
 /bin/chmod 500 "$DESTDIR"$SERVICEDIR/mysql.$port/variables
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.279 2016-05-18 11:46:41+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.280 2016-05-25 09:06:06+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
-echo "socket=\`dirname \$(grep socket $QmailHOME/etc/indimail.cnf 2>/dev/null| head -1 | cut -d= -f2) 2>/dev/null\`"
+echo "socket=\`dirname \$(grep socket $sysconfdir/indimail.cnf 2>/dev/null| head -1 | cut -d= -f2) 2>/dev/null\`"
 echo "if [ -z \"\$socket\" ] ; then"
 echo "    socket=`dirname $mysqlSocket`"
 echo "fi"
@@ -4648,8 +4684,8 @@ echo "fi"
 echo "MYSQL_BASE=$mysqlPrefix"
 echo "DATABASE=$databasedir"
 echo "PIDFILE=/tmp/mysql."$port".pid"
-echo "exec $QmailHOME/bin/softlimit -o 4096 \\"
-echo "$QmailHOME/bin/setuidgid mysql \$MYSQL_BASE/$mysqld --defaults-file=$conf_file \\"
+echo "exec $QmailBinPrefix/bin/softlimit -o 4096 \\"
+echo "$QmailBinPrefix/bin/setuidgid mysql \$MYSQL_BASE/$mysqld --defaults-file=$conf_file \\"
 echo "--port=$port --basedir=\$MYSQL_BASE \\"
 echo "--datadir=\$DATABASE/data \\"
 echo "--memlock \\"
@@ -4729,7 +4765,7 @@ echo "--pid-file=\$PIDFILE 2>&1"
 
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.279 2016-05-18 11:46:41+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.280 2016-05-25 09:06:06+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -4746,12 +4782,12 @@ fi
 # mysql log script
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.279 2016-05-18 11:46:41+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.280 2016-05-25 09:06:06+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
-echo "exec $QmailHOME/bin/setuidgid qmaill \\"
-echo "$QmailHOME/bin/multilog t $LOGDIR/mysql.$port"
+echo "exec $QmailBinPrefix/bin/setuidgid qmaill \\"
+echo "$QmailBinPrefix/bin/multilog t $LOGDIR/mysql.$port"
 ) > "$DESTDIR"$SERVICEDIR/mysql.$port/log/run
 /bin/chmod +x "$DESTDIR"$SERVICEDIR/mysql.$port/log/run
 }
@@ -4831,7 +4867,7 @@ TMVAL=`date +'%s'`
 DAY=`date +'%d'`
 TIMESTAMP=`date +'%F %R:%S'`
 SALT=`date +'%s'`
-CRYPT_PASS=`"$DESTDIR"$indimaildir/bin/crypt "$ADMIN_PASS" $SALT | cut -c 2-14`
+CRYPT_PASS=`"$DESTDIR"$QmailBinPrefix/bin/crypt "$ADMIN_PASS" $SALT | cut -c 2-14`
 echo "INSERT INTO mgmtaccess (user,pass,pw_uid,pw_gid,lastaccess,lastupdate,day,attempts,status,zztimestamp) VALUES ('admin','$CRYPT_PASS',0,0,$TMVAL,$TMVAL,$DAY,0,0,'$TIMESTAMP');"
 c_d=""
 c_d="$c_d CREATE TABLE indimail ("
@@ -4957,12 +4993,12 @@ fi
 # svscan log script
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.279 2016-05-18 11:46:41+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.280 2016-05-25 09:06:06+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
-echo "exec $QmailHOME/bin/setuidgid qmaill \\"
-echo "$QmailHOME/bin/multilog t $LOGDIR/svscan"
+echo "exec $QmailBinPrefix/bin/setuidgid qmaill \\"
+echo "$QmailBinPrefix/bin/multilog t $LOGDIR/svscan"
 ) > "$DESTDIR"$SERVICEDIR/.svscan/log/run
 /bin/chmod +x "$DESTDIR"$SERVICEDIR/.svscan/log/run
 }
@@ -4993,10 +5029,10 @@ if [ " $min_free" = " " ] ; then
 else
 	echo $min_free > $conf_dir/MIN_FREE
 fi
-if [ ! " $QmailHOME" = " $indimaildir" ] ; then
-	echo "$QmailHOME/bin:/bin:/usr/bin:$indimaildir/bin" > $conf_dir/PATH
+if [ " $QmailBinPrefix" = " /usr" ] ; then
+	echo "/bin:/usr/bin:/usr/sbin:/sbin" > $conf_dir/PATH
 else
-	echo "$QmailHOME/bin:/bin:/usr/bin" > $conf_dir/PATH
+	echo "/bin:/usr/bin:$QmailBinPrefix/bin:$QmailBinPrefix/sbin" > $conf_dir/PATH
 fi
 if [ ! " $CONTROLDIR" = " " ] ; then
 	echo $CONTROLDIR > $conf_dir/CONTROLDIR
@@ -5056,19 +5092,19 @@ case "$dkverify_option" in
 	dkim)
 	/bin/rm -f $conf_dir/DKSIGN $conf_dir/DKIMSIGN $conf_dir/DKVERIFY $conf_dir/DKIMVERIFY $conf_dir/DKQUEUE $conf_dir/DKIMQUEUE
 	echo > $conf_dir/DKIMVERIFY
-	echo "$QmailHOME/bin/qmail-dkim" > $conf_dir/QMAILQUEUE
+	echo "$QmailBinPrefix/bin/qmail-dkim" > $conf_dir/QMAILQUEUE
 	;;
 	dk)
 	echo > $conf_dir/DKVERIFY
 	/bin/rm -f $conf_dir/DKSIGN $conf_dir/DKIMSIGN $conf_dir/DKVERIFY $conf_dir/DKIMVERIFY $conf_dir/DKQUEUE $conf_dir/DKIMQUEUE
-	echo "$QmailHOME/bin/qmail-dk" > $conf_dir/QMAILQUEUE
+	echo "$QmailBinPrefix/bin/qmail-dk" > $conf_dir/QMAILQUEUE
 	;;
 	both)
 	/bin/rm -f $conf_dir/DKSIGN $conf_dir/DKIMSIGN $conf_dir/DKVERIFY $conf_dir/DKIMVERIFY $conf_dir/DKQUEUE $conf_dir/DKIMQUEUE
 	echo > $conf_dir/DKIMVERIFY
 	echo > $conf_dir/DKVERIFY
-	echo "$QmailHOME/bin/qmail-dk" > $conf_dir/QMAILQUEUE
-	echo "$QmailHOME/bin/qmail-dkim" > $conf_dir/DKQUEUE
+	echo "$QmailBinPrefix/bin/qmail-dk" > $conf_dir/QMAILQUEUE
+	echo "$QmailBinPrefix/bin/qmail-dkim" > $conf_dir/DKQUEUE
 	;;
 	none|*)
 	/bin/rm -f $conf_dir/DKSIGN $conf_dir/DKIMSIGN $conf_dir/DKVERIFY $conf_dir/DKIMVERIFY $conf_dir/DKQUEUE $conf_dir/DKIMQUEUE
@@ -5076,24 +5112,24 @@ case "$dkverify_option" in
 		> $conf_dir/QMAILQUEUE
 		echo "$QUEUE_BASE"/queue1 > $conf_dir/QUEUEDIR
 	else
-		echo "$QmailHOME/bin/qmail-multi" > $conf_dir/QMAILQUEUE
+		echo "$QmailBinPrefix/bin/qmail-multi" > $conf_dir/QMAILQUEUE
 		> $conf_dir/QUEUEDIR
 	fi
 	;;
 esac
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.279 2016-05-18 11:46:41+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.280 2016-05-25 09:06:06+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
-echo "exec $QmailHOME/bin/envdir $SERVICEDIR/fetchmail/variables sh -c \""
-echo "exec $QmailHOME/bin/setuidgid indimail \\"
-echo "$QmailHOME/bin/softlimit -m \\\$SOFT_MEM -o 1024 \\"
+echo "exec $QmailBinPrefix/bin/envdir $SERVICEDIR/fetchmail/variables sh -c \""
+echo "exec $QmailBinPrefix/bin/setuidgid indimail \\"
+echo "$QmailBinPrefix/bin/softlimit -m \\\$SOFT_MEM -o 1024 \\"
 if [ $silent -eq 1 ] ; then
-	echo "$QmailHOME/bin/fetchmail --silent --nodetach -f $indimaildir/etc/fetchmailrc 2>&1\""
+	echo "$QmailBinPrefix/bin/fetchmail --silent --nodetach -f $sysconfdir/fetchmailrc 2>&1\""
 else
-	echo "$QmailHOME/bin/fetchmail --nodetach -f $indimaildir/etc/fetchmailrc 2>&1\""
+	echo "$QmailBinPrefix/bin/fetchmail --nodetach -f $sysconfdir/fetchmailrc 2>&1\""
 fi
 ) > "$DESTDIR"$SERVICEDIR/fetchmail/run
 /bin/chmod +x "$DESTDIR"$SERVICEDIR/fetchmail/run
@@ -5105,12 +5141,12 @@ fi
 # fetchmail log script
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.279 2016-05-18 11:46:41+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.280 2016-05-25 09:06:06+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
-echo "exec $QmailHOME/bin/setuidgid qmaill \\"
-echo "$QmailHOME/bin/multilog t $LOGDIR/fetchmail"
+echo "exec $QmailBinPrefix/bin/setuidgid qmaill \\"
+echo "$QmailBinPrefix/bin/multilog t $LOGDIR/fetchmail"
 ) > "$DESTDIR"$SERVICEDIR/fetchmail/log/run
 /bin/chmod +x "$DESTDIR"$SERVICEDIR/fetchmail/log/run
 }
@@ -5166,7 +5202,7 @@ fi
 if [ ! " $pwd_cmd" = " " ] ; then
 	echo "$pwd_cmd /bin/false" > $conf_dir/PASSWORD_COMMAND
 else
-	echo "$indimaildir""/sbin/vsetpass /bin/false" > $conf_dir/PASSWORD_COMMAND
+	echo "$QmailBinPrefix""/sbin/vsetpass /bin/false" > $conf_dir/PASSWORD_COMMAND
 fi
 if [ " $use_ssl" = " 1" ] ; then
 	echo $certfile > $conf_dir/CERTFILE
@@ -5175,7 +5211,7 @@ else
 fi
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.279 2016-05-18 11:46:41+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.280 2016-05-25 09:06:06+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -5195,16 +5231,16 @@ echo "    sleep 5"
 echo "    exit 1"
 echo "fi"
 echo ""
-echo "exec $QmailHOME/bin/envdir $SERVICEDIR/qmail-poppass.$tag/variables sh -c \""
-echo "exec $QmailHOME/bin/softlimit -m \\\$SOFT_MEM -o 1024 \\"
-echo "$QmailHOME/bin/tcpserver -v -H -R -l \\\$LOCALIP \\"
-echo "-x $indimaildir/etc/tcp.poppass.cdb -X \\"
+echo "exec $QmailBinPrefix/bin/envdir $SERVICEDIR/qmail-poppass.$tag/variables sh -c \""
+echo "exec $QmailBinPrefix/bin/softlimit -m \\\$SOFT_MEM -o 1024 \\"
+echo "$QmailBinPrefix/bin/tcpserver -v -H -R -l \\\$LOCALIP \\"
+echo "-x $sysconfdir/tcp.poppass.cdb -X \\"
 echo "-c $SERVICEDIR/qmail-poppass.$tag/variables/MAXDAEMONS -C \\\$MAXPERIP -o -b \\\$MAXDAEMONS \\"
 if [ " $use_ssl" = " 1" ] ; then
 	echo "-n \\\$CERTFILE \\"
 fi
 echo "-u \$QMAILDUID -g \$NOFILESGID \\\$LOCALIP \\\$PORT \\"
-echo "$QmailHOME/bin/qmail-poppass \$HOSTNAME $indimaildir/sbin/vchkpass /bin/false 2>&1\""
+echo "$QmailBinPrefix/bin/qmail-poppass \$HOSTNAME $QmailBinPrefix/sbin/vchkpass /bin/false 2>&1\""
 ) > /tmp/poppass-run.$$
 /bin/mv /tmp/poppass-run.$$ "$DESTDIR"$SERVICEDIR/qmail-poppass.$tag/run
 /bin/chmod +x "$DESTDIR"$SERVICEDIR/qmail-poppass.$tag/run
@@ -5216,12 +5252,12 @@ fi
 # qmail-poppass log script
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.279 2016-05-18 11:46:41+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.280 2016-05-25 09:06:06+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
-echo "exec $QmailHOME/bin/setuidgid qmaill \\"
-echo "$QmailHOME/bin/multilog t $LOGDIR/poppass.$tag"
+echo "exec $QmailBinPrefix/bin/setuidgid qmaill \\"
+echo "$QmailBinPrefix/bin/multilog t $LOGDIR/poppass.$tag"
 ) > /tmp/popass-run.$$
 /bin/mv /tmp/popass-run.$$ "$DESTDIR"$SERVICEDIR/qmail-poppass.$tag/log/run
 /bin/chmod +x "$DESTDIR"$SERVICEDIR/qmail-poppass.$tag/log/run
@@ -5261,8 +5297,8 @@ if [ $nooverwrite -eq 1 -a -d "$DESTDIR"$QUEUE_BASE/nqueue ] ; then
 	return 0
 fi
 echo "Creating Queue "$DESTDIR"$QUEUE_BASE/nqueue"
-if [ -f "$DESTDIR"$QmailHOME/bin/queue-fix ] ; then
-	"$DESTDIR"$QmailHOME/bin/queue-fix "$DESTDIR"$QUEUE_BASE/nqueue > /dev/null
+if [ -f "$DESTDIR"$QmailBinPrefix/bin/queue-fix ] ; then
+	"$DESTDIR"$QmailBinPrefix/bin/queue-fix "$DESTDIR"$QUEUE_BASE/nqueue > /dev/null
 else
 	./queue-fix "$DESTDIR"$QUEUE_BASE/nqueue > /dev/null
 fi
@@ -5275,8 +5311,8 @@ do
 		/bin/mkdir -p "$DESTDIR"$QUEUE_BASE/queue"$QUEUE_NO"
 	fi
 	echo "Creating Queue "$DESTDIR"$QUEUE_BASE/queue"$QUEUE_NO""
-	if [ -f "$DESTDIR"$QmailHOME/bin/queue-fix ] ; then
-		"$DESTDIR"$QmailHOME/bin/queue-fix "$DESTDIR"$QUEUE_BASE/queue"$QUEUE_NO" > /dev/null
+	if [ -f "$DESTDIR"$QmailBinPrefix/bin/queue-fix ] ; then
+		"$DESTDIR"$QmailBinPrefix/bin/queue-fix "$DESTDIR"$QUEUE_BASE/queue"$QUEUE_NO" > /dev/null
 	else
 		./queue-fix "$DESTDIR"$QUEUE_BASE/queue"$QUEUE_NO" > /dev/null
 	fi
@@ -5299,7 +5335,7 @@ else
 	echo $QUEUE_BASE > $conf_dir/QUEUE_BASE
 	echo $NO_OF_QUEUES > $conf_dir/QUEUE_COUNT
 	echo $FIRST_QUEUE > $conf_dir/QUEUE_START
-	echo "$QmailHOME/bin/qmail-multi" > $conf_dir/QMAILQUEUE
+	echo "$QmailBinPrefix/bin/qmail-multi" > $conf_dir/QMAILQUEUE
 	> $conf_dir/QUEUEDIR
 fi
 if [ " $min_free" = " " ] ; then
@@ -5307,10 +5343,10 @@ if [ " $min_free" = " " ] ; then
 else
 	echo $min_free > $conf_dir/MIN_FREE
 fi
-if [ ! " $QmailHOME" = " $indimaildir" ] ; then
-	echo "$QmailHOME/bin:/bin:/usr/bin:$indimaildir/bin" > $conf_dir/PATH
+if [ " $QmailBinPrefix" = " /usr" ] ; then
+	echo "/bin:/usr/bin:/usr/sbin:/sbin" > $conf_dir/PATH
 else
-	echo "$QmailHOME/bin:/bin:/usr/bin" > $conf_dir/PATH
+	echo "/bin:/usr/bin:$QmailBinPrefix/bin:$QmailBinPrefix/sbin" > $conf_dir/PATH
 fi
 if [ ! " $routes" = " " ] ; then
 	echo $routes > $conf_dir/ROUTES
@@ -5370,13 +5406,13 @@ else
 	> $conf_dir/AUTH_SMTP
 fi
 if [ ! " $localfilter" = " " ] ; then
-	echo "$QmailHOME/bin/spawn-filter" > $conf_dir/QMAILLOCAL
+	echo "$QmailBinPrefix/bin/spawn-filter" > $conf_dir/QMAILLOCAL
 	echo "1" > $conf_dir/MAKE_SEEKABLE
 else
 	> $conf_dir/QMAILLOCAL
 fi
 if [ ! " $remotefilter" = " " ] ; then
-	echo "$QmailHOME/bin/spawn-filter" > $conf_dir/QMAILREMOTE
+	echo "$QmailBinPrefix/bin/spawn-filter" > $conf_dir/QMAILREMOTE
 	echo "$CONTROLDIR/ratelimit" > $conf_dir/RATELIMIT_DIR
 	echo "1" > $conf_dir/MAKE_SEEKABLE
 else
@@ -5396,21 +5432,21 @@ case "$dksign_option" in
 	/bin/rm -f $conf_dir/DKSIGN $conf_dir/DKIMSIGN $conf_dir/DKVERIFY $conf_dir/DKIMVERIFY $conf_dir/DKQUEUE $conf_dir/DKIMQUEUE
 	echo "$private_key" > $conf_dir/DKIMSIGN
 	if [ ! -f "$DESTDIR"$CONTROLDIR/filterargs ] ; then
-		echo "*:remote:$QmailHOME/bin/dk-filter" > "$DESTDIR"$CONTROLDIR/filterargs
+		echo "*:remote:$QmailBinPrefix/bin/dk-filter" > "$DESTDIR"$CONTROLDIR/filterargs
 	fi
 	;;
 	dk)
 	/bin/rm -f $conf_dir/DKSIGN $conf_dir/DKIMSIGN $conf_dir/DKVERIFY $conf_dir/DKIMVERIFY $conf_dir/DKQUEUE $conf_dir/DKIMQUEUE
 	echo "$private_key" > $conf_dir/DKSIGN
 	if [ ! -f "$DESTDIR"$CONTROLDIR/filterargs ] ; then
-		echo "*:remote:$QmailHOME/bin/dk-filter" > "$DESTDIR"$CONTROLDIR/filterargs
+		echo "*:remote:$QmailBinPrefix/bin/dk-filter" > "$DESTDIR"$CONTROLDIR/filterargs
 	fi
 	;;
 	both)
 	echo "$private_key" > $conf_dir/DKSIGN
 	echo "$private_key" > $conf_dir/DKIMSIGN
 	if [ ! -f "$DESTDIR"$CONTROLDIR/filterargs ] ; then
-		echo "*:remote:$QmailHOME/bin/dk-filter" > "$DESTDIR"$CONTROLDIR/filterargs
+		echo "*:remote:$QmailBinPrefix/bin/dk-filter" > "$DESTDIR"$CONTROLDIR/filterargs
 	fi
 	;;
 	none|*)
@@ -5419,11 +5455,11 @@ case "$dksign_option" in
 esac
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.279 2016-05-18 11:46:41+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.280 2016-05-25 09:06:06+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
-echo "exec $QmailHOME/bin/envdir $SERVICEDIR/qmail-send.$tag/variables \\"
+echo "exec $QmailBinPrefix/bin/envdir $SERVICEDIR/qmail-send.$tag/variables \\"
 echo "qmail-daemon \"\`cat $CONTROLDIR/defaultdelivery\`\" 2>&1"
 ) > "$DESTDIR"$SERVICEDIR/qmail-send."$tag"/run
 /bin/chmod +x "$DESTDIR"$SERVICEDIR/qmail-send."$tag"/run
@@ -5436,12 +5472,12 @@ fi
 /bin/mkdir -p "$DESTDIR"$SERVICEDIR/qmail-send."$tag"/log
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.279 2016-05-18 11:46:41+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.280 2016-05-25 09:06:06+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
-echo "exec $QmailHOME/bin/setuidgid qmaill \\"
-echo "$QmailHOME/bin/multilog t $LOGDIR/deliver."$tag""
+echo "exec $QmailBinPrefix/bin/setuidgid qmaill \\"
+echo "$QmailBinPrefix/bin/multilog t $LOGDIR/deliver."$tag""
 ) > "$DESTDIR"$SERVICEDIR/qmail-send."$tag"/log/run
 /bin/chmod +x "$DESTDIR"$SERVICEDIR/qmail-send."$tag"/log/run
 }
@@ -5468,9 +5504,9 @@ do
 	#
 	# prepend a . to the directory so that svscan will skip this directory
 	#
-	echo "Removed Service $pgname    : `"$DESTDIR"$QmailHOME/bin/svc -d $dir/"."$pgname 2>&1`"
+	echo "Removed Service $pgname    : `"$DESTDIR"$QmailBinPrefix/bin/svc -d $dir/"."$pgname 2>&1`"
 	if [ -d $dir/"."$pgname/log ] ; then
-		echo "Removed Service $pgname/log: `"$DESTDIR"$QmailHOME/bin/svc -d $dir/"."$pgname/log 2>&1`"
+		echo "Removed Service $pgname/log: `"$DESTDIR"$QmailBinPrefix/bin/svc -d $dir/"."$pgname/log 2>&1`"
 	fi
 done
 }
@@ -5506,9 +5542,9 @@ do
 	first_char=`echo $pgname | cut -c1`
 	if [ " $first_char" = " ." ] ; then
 		pgname=`echo $pgname | cut -c2-`
-		"$DESTDIR"$QmailHOME/bin/svstat $dir/$pgname
+		"$DESTDIR"$QmailBinPrefix/bin/svstat $dir/$pgname
 		if [ -d $dir/$pgname/log ] ; then
-			"$DESTDIR"$QmailHOME/bin/svstat $dir/$pgname/log
+			"$DESTDIR"$QmailBinPrefix/bin/svstat $dir/$pgname/log
 		fi
 	fi
 done
@@ -5671,11 +5707,11 @@ create_users()
 		if [ $? -ne 0 ]; then
 			echo "creating user indimail"
 			if [ -f /bin/bash ] ; then
-				echo "macOSuseradd -M -u $userid -g indimail -d $indimaildir -s /bin/bash -p $PRIV_PASS indimail"
-				macOSuseradd -M -u $userid -g indimail -d $indimaildir -s /bin/bash -p $PRIV_PASS indimail
+				echo "macOSuseradd -M -u $userid -g indimail -d $QmailHOME -s /bin/bash -p $PRIV_PASS indimail"
+				macOSuseradd -M -u $userid -g indimail -d $QmailHOME -s /bin/bash -p $PRIV_PASS indimail
 			else
-				echo "macOSuseradd -M -u $userid -g indimail -d $indimaildir -s /bin/sh -p $PRIV_PASS indimail"
-				macOSuseradd -M -u $userid -g indimail -d $indimaildir -s /bin/sh -p $PRIV_PASS indimail
+				echo "macOSuseradd -M -u $userid -g indimail -d $QmailHOME -s /bin/sh -p $PRIV_PASS indimail"
+				macOSuseradd -M -u $userid -g indimail -d $QmailHOME -s /bin/sh -p $PRIV_PASS indimail
 			fi
 		fi
 		;;
@@ -5689,11 +5725,11 @@ create_users()
 		if [ $? -ne 0 ]; then
 			echo "creating user indimail"
 			SALT=`date +'%s'`
-			CRYPT_PASS=`"$DESTDIR"$indimaildir/bin/crypt $PRIV_PASS $SALT | cut -c 2-14`
+			CRYPT_PASS=`"$DESTDIR"$QmailBinPrefix/bin/crypt $PRIV_PASS $SALT | cut -c 2-14`
 			if [ -f /bin/bash ] ; then
-				useradd $eopt -g indimail -d $indimaildir -s /bin/bash -p $CRYPT_PASS indimail
+				useradd $eopt -g indimail -d $QmailHOME -s /bin/bash -p $CRYPT_PASS indimail
 			else
-				useradd $eopt -g indimail -d $indimaildir -s /bin/sh -p $CRYPT_PASS indimail
+				useradd $eopt -g indimail -d $QmailHOME -s /bin/sh -p $CRYPT_PASS indimail
 			fi
 		fi
 		;;
@@ -5783,7 +5819,7 @@ create_users()
 		fi
 		;;
 		*)
-  		grep "^qscand:" /etc/passwd >/dev/null
+  		grep "^qscand:qmail" /etc/passwd >/dev/null
 		if [ $? -ne 0 ]; then
 			echo "creating user qscand"
 			useradd $eopt -g qscand -d $QmailHOME/qscanq -G qmail -s $safe_shell qscand
@@ -5840,8 +5876,8 @@ create_qmail_config()
 {
 	default_control
 	echo "Creating catch-all alias ($QmailHOME/alias/Maildir) for all system users"
-	if [ -x "$DESTDIR"$QmailHOME/bin/maildirmake ] ; then
-		"$DESTDIR"$QmailHOME/bin/maildirmake "$DESTDIR"$QmailHOME/alias/Maildir >/dev/null 2>&1
+	if [ -x "$DESTDIR"$QmailBinPrefix/bin/maildirmake ] ; then
+		"$DESTDIR"$QmailBinPrefix/bin/maildirmake "$DESTDIR"$QmailHOME/alias/Maildir >/dev/null 2>&1
 	else
 		/bin/mkdir -p "$DESTDIR"$QmailHOME/alias/Maildir/tmp >/dev/null 2>&1
 		/bin/mkdir -p "$DESTDIR"$QmailHOME/alias/Maildir/new >/dev/null 2>&1
@@ -5854,8 +5890,8 @@ create_qmail_config()
 	/bin/rm -f "$DESTDIR"$QmailHOME/alias/.qmail-postmaster
 	first_char=`echo $postmaster | cut -c1`
 	if [ " $first_char" = " /" ] ; then
-		if [ -x "$DESTDIR"$QmailHOME/bin/maildirmake ] ; then
-			"$DESTDIR"$QmailHOME/bin/maildirmake "$DESTDIR"$postmaster >/dev/null 2>&1
+		if [ -x "$DESTDIR"$QmailBinPrefix/bin/maildirmake ] ; then
+			"$DESTDIR"$QmailBinPrefix/bin/maildirmake "$DESTDIR"$postmaster >/dev/null 2>&1
 		else
 			/bin/mkdir -p "$DESTDIR"$postmaster/tmp >/dev/null 2>&1
 			/bin/mkdir -p "$DESTDIR"$postmaster/new >/dev/null 2>&1
@@ -5875,16 +5911,16 @@ create_qmail_config()
 		/bin/ln -s .qmail-postmaster .qmail-root
 		/bin/ln -s .qmail-postmaster .qmail-mailer-daemon
 	fi
-	if [ -f "$DESTDIR"$QmailHOME/bin/bogofilter ] ; then
+	if [ -f "$DESTDIR"$QmailBinPrefix/bin/bogofilter ] ; then
 		for i in spam ham register-spam register-ham
 		do
-			"$DESTDIR"$QmailHOME/bin/maildirmake "$DESTDIR"$QmailHOME/alias/$i >/dev/null 2>&1
+			"$DESTDIR"$QmailBinPrefix/bin/maildirmake "$DESTDIR"$QmailHOME/alias/$i >/dev/null 2>&1
 			if [ $? -eq 0 ] ; then
 				$chown -R alias:qmail "$DESTDIR"$QmailHOME/alias/$i
 				/bin/chmod -R 775 "$DESTDIR"$QmailHOME/alias/$i
 			fi
 			(
-				echo "|$QmailHOME/bin/bogofilter-qfe"
+				echo "|$QmailBinPrefix/bin/bogofilter-qfe"
 				echo "$QmailHOME/alias/$i/"
 			) > "$DESTDIR"$QmailHOME/alias/.qmail-B"$i"
 			$chown alias:qmail "$DESTDIR"$QmailHOME/alias/.qmail-B"$i"
@@ -5898,21 +5934,21 @@ create_qmail_config()
 
 create_startup()
 {
-	if [ -f "$DESTDIR"$QmailHOME/sbin/initsvc ] ; then
-		"$DESTDIR"$QmailHOME/sbin/initsvc -status
+	if [ -f "$DESTDIR"$QmailBinPrefix/sbin/initsvc ] ; then
+		"$DESTDIR"$QmailBinPrefix/sbin/initsvc -status
 	else
 		if [ -d /lib/systemd/system ] ; then
-			/bin/cp "$DESTDIR"$QmailHOME/boot/systemd /lib/systemd/system/indimail.service
+			/bin/cp "$DESTDIR"$shareddir/boot/systemd /lib/systemd/system/indimail.service
 		elif [ -f /sbin/initctl -a -d /etc/init ] ; then
-			/bin/cp "$DESTDIR"$QmailHOME/boot/upstart /etc/init/svscan.conf
+			/bin/cp "$DESTDIR"$shareddir/boot/upstart /etc/init/svscan.conf
 		elif [ -d /etc/event.d ] ; then
-			/bin/cp "$DESTDIR"$QmailHOME/boot/upstart /etc/event.d
+			/bin/cp "$DESTDIR"$shareddir/boot/upstart /etc/event.d
 		elif [ -d /System/Library/LaunchDaemons ] ; then
-			/bin/cp "$DESTDIR"$QmailHOME/boot/indimail.plist /System/Library/LaunchDaemons
+			/bin/cp "$DESTDIR"$shareddir/boot/indimail.plist /System/Library/LaunchDaemons
 		fi
 	fi
 	if [ -d /etc/init.d ] ; then
-		/bin/cp "$DESTDIR"$QmailHOME/bin/qmailctl /etc/init.d/indimail
+		/bin/cp "$DESTDIR"$QmailBinPrefix/bin/qmailctl /etc/init.d/indimail
 	fi
 	if [ -f /etc/init.d/indimail ] ; then
 		if [ -f /sbin/chkconfig ] ; then
@@ -5988,20 +6024,20 @@ create_startup()
 		fi
 		if [ -f /etc/debian_version ] ; then
 			$alternatives_cmd --install \
-				/usr/sbin/sendmail mta $QmailHOME/bin/sendmail 120 \
+				/usr/sbin/sendmail mta $QmailBinPrefix/bin/sendmail 120 \
 				--slave /usr/share/man/man8/sendmail.8.gz mta-sendmailman \
-					$QmailHOME/man/man8/sendmail.8.gz \
-				--slave /usr/bin/mailq mta-mailq $QmailHOME/bin/qmail-qread \
+					$mandir/man8/sendmail.8.gz \
+				--slave /usr/bin/mailq mta-mailq $QmailBinPrefix/bin/qmail-qread \
 				--slave /usr/share/man/man1/mailq.1.gz mta-mailqman \
-					$QmailHOME/man/man8/qmail-qread.8.gz \
-				--slave /usr/bin/rmail mta-rmail $QmailHOME/bin/rmail \
-				--slave /usr/share/man/man8/rmail.8.gz mta-rmailman $QmailHOME/man/man8/rmail.8.gz \
+					$mandir/man8/qmail-qread.8.gz \
+				--slave /usr/bin/rmail mta-rmail $QmailBinPrefix/bin/rmail \
+				--slave /usr/share/man/man8/rmail.8.gz mta-rmailman $mandir/man8/rmail.8.gz \
 				--slave /usr/bin/newaliases mta-newaliases \
-					$QmailHOME/bin/newaliases \
+					$QmailBinPrefix/bin/newaliases \
 				--slave /usr/share/man/man1/newaliases.1.gz mta-newaliasesman \
-					$QmailHOME/man/man1/newaliases.1.gz \
+					$mandir/man1/newaliases.1.gz \
 				--slave /usr/lib/sendmail mta-sendmail \
-					$QmailHOME/bin/sendmail \
+					$QmailBinPrefix/bin/sendmail \
 				--slave /etc/pam.d/smtp mta-pam /etc/pam.d/pam-multi
 		else
 			if [ ! -f /etc/SuSE-release ] ; then
@@ -6010,20 +6046,20 @@ create_startup()
 				init_script=""
 			fi
 			$alternatives_cmd --install \
-				/usr/sbin/sendmail mta $QmailHOME/bin/sendmail 120 \
+				/usr/sbin/sendmail mta $QmailBinPrefix/bin/sendmail 120 \
 				--slave /usr/share/man/man8/sendmail.8.gz mta-sendmailman \
-					$QmailHOME/man/man8/sendmail.8.gz \
-				--slave /usr/bin/mailq mta-mailq $QmailHOME/bin/qmail-qread \
+					$mandir/man8/sendmail.8.gz \
+				--slave /usr/bin/mailq mta-mailq $QmailBinPrefix/bin/qmail-qread \
 				--slave /usr/share/man/man1/mailq.1.gz mta-mailqman \
-					$QmailHOME/man/man8/qmail-qread.8.gz \
-				--slave /usr/bin/rmail mta-rmail $QmailHOME/bin/rmail \
-				--slave /usr/share/man/man8/rmail.8.gz mta-rmailman $QmailHOME/man/man8/rmail.8.gz \
+					$mandir/man8/qmail-qread.8.gz \
+				--slave /usr/bin/rmail mta-rmail $QmailBinPrefix/bin/rmail \
+				--slave /usr/share/man/man8/rmail.8.gz mta-rmailman $mandir/man8/rmail.8.gz \
 				--slave /usr/bin/newaliases mta-newaliases \
-					$QmailHOME/bin/newaliases \
+					$QmailBinPrefix/bin/newaliases \
 				--slave /usr/share/man/man1/newaliases.1.gz mta-newaliasesman \
-					$QmailHOME/man/man1/newaliases.1.gz \
+					$mandir/man1/newaliases.1.gz \
 				--slave /usr/lib/sendmail mta-sendmail \
-					$QmailHOME/bin/sendmail \
+					$QmailBinPrefix/bin/sendmail \
 				--slave /etc/pam.d/smtp mta-pam /etc/pam.d/pam-multi $init_script
 		fi
 	else
@@ -6031,13 +6067,13 @@ create_startup()
 			if [ -f $i -a ! -L $i ]; then
 				echo "! $i is a file, should be a link"
 				/bin/mv $i $i.old
-				/bin/ln -s $QmailHOME/bin/sendmail $i
+				/bin/ln -s $QmailBinPrefix/bin/sendmail $i
 			elif [ -L $i ];then
 				/bin/mv $i $i.old
-				/bin/ln -s $QmailHOME/bin/sendmail $i
+				/bin/ln -s $QmailBinPrefix/bin/sendmail $i
 			elif [ ! -f $i ];then
 				echo "! $i is missing"
-				/bin/ln -s $QmailHOME/bin/sendmail $i
+				/bin/ln -s $QmailBinPrefix/bin/sendmail $i
 			fi
 		done
 		if [ -f /etc/pam.d/smtp -a ! -L /etc/pam.d/smtp ] ; then
@@ -6056,8 +6092,8 @@ create_startup()
 
 remove_startup()
 {
-	if [ -f "$DESTDIR"$QmailHOME/sbin/initsvc ] ; then
-		"$DESTDIR"$QmailHOME/sbin/initsvc -off
+	if [ -f "$DESTDIR"$QmailBinPrefix/sbin/initsvc ] ; then
+		"$DESTDIR"$QmailBinPrefix/sbin/initsvc -off
 	fi
 	if [ -f /sbin/initctl -a -d /etc/init ] ; then
 		/bin/rm -f /etc/init/svscan.conf
@@ -6115,10 +6151,10 @@ remove_startup()
 		fi
 	done
 	if [ -x /usr/sbin/alternatives ] ; then
-		/usr/sbin/alternatives --remove mta $QmailHOME/bin/sendmail
+		/usr/sbin/alternatives --remove mta $QmailBinPrefix/bin/sendmail
 		/usr/sbin/alternatives --auto mta
 	elif [ -x /usr/sbin/update-alternatives ] ; then
-		/usr/sbin/update-alternatives --remove mta $QmailHOME/bin/sendmail
+		/usr/sbin/update-alternatives --remove mta $QmailBinPrefix/bin/sendmail
 		/usr/sbin/update-alternatives --auto mta
 		for i in /usr/lib/sendmail /usr/sbin/sendmail /etc/pam.d/smtp; do
 			if [ -f $i.old -o -L $i.old ]; then
@@ -6145,7 +6181,7 @@ remove_startup()
 
 selinux_module()
 {
-policy_dir=$QmailHOME/etc
+policy_dir=$sysconfdir
 # selinux
 status=0
 if [ -x /usr/sbin/selinuxenabled ] ; then
@@ -6184,33 +6220,33 @@ if [ -x /usr/sbin/selinuxenabled ] ; then
 		for i in sendmail envdir qmail-inject
 		do
 			if [ -x /usr/bin/chcon ] ; then
-				echo "changing security context for $QmailHOME/bin/$i"
-				/usr/bin/chcon -t bin_t $QmailHOME/bin/$i
+				echo "changing security context for $QmailBinPrefix/bin/$i"
+				/usr/bin/chcon -t bin_t $QmailBinPrefix/bin/$i
 				if [ $status -eq 0 ] ; then
 					status=$?
 				fi
 			fi
 			if [ -x /usr/sbin/semanage ] ; then
-				echo "Manage file context mapping (bin_t) definitions for $QmailHOME/bin/$i"
-				/usr/sbin/semanage fcontext -a -t bin_t $QmailHOME/bin/$i
+				echo "Manage file context mapping (bin_t) definitions for $QmailBinPrefix/bin/$i"
+				/usr/sbin/semanage fcontext -a -t bin_t $QmailBinPrefix/bin/$i
 				if [ $status -eq 0 ] ; then
 					status=$?
 				fi
 			fi
 		done
 		if [ -x /usr/bin/chcon ] ; then
-			echo "changing security context (mysqld_db_t) for $QmailHOME/mysqldb/data"
-			/usr/bin/chcon -R -u system_u -r object_r -t mysqld_db_t  $QmailHOME/mysqldb/data
+			echo "changing security context (mysqld_db_t) for $indimaildir/mysqldb/data"
+			/usr/bin/chcon -R -u system_u -r object_r -t mysqld_db_t  $indimaildir/mysqldb/data
 			if [ $status -eq 0 ] ; then
 				status=$?
 			fi
-			echo "changing security context (mysqld_log_t) for $QmailHOME/mysqldb/logs"
-			/usr/bin/chcon -R -u system_u -r object_r -t mysqld_log_t $QmailHOME/mysqldb/logs
+			echo "changing security context (mysqld_log_t) for $indimaildir/mysqldb/logs"
+			/usr/bin/chcon -R -u system_u -r object_r -t mysqld_log_t $indimaildir/mysqldb/logs
 			if [ $status -eq 0 ] ; then
 				status=$?
 			fi
-			echo "changing security context (mysqld_etc_t) for $QmailHOME/etc/indimail.cnf"
-			/usr/bin/chcon -R -u system_u -r object_r -t mysqld_etc_t $QmailHOME/etc/indimail.cnf
+			echo "changing security context (mysqld_etc_t) for $sysconfdir/indimail.cnf"
+			/usr/bin/chcon -R -u system_u -r object_r -t mysqld_etc_t $sysconfdir/indimail.cnf
 			if [ $status -eq 0 ] ; then
 				status=$?
 			fi
@@ -6221,22 +6257,22 @@ if [ -x /usr/sbin/selinuxenabled ] ; then
 					status=$?
 				fi
 			fi
-			echo "changing security context (man_t) for $QmailHOME/man"
-			/usr/bin/chcon -R -u system_u -r object_r -t man_t $QmailHOME/man
+			#echo "changing security context (man_t) for $mandir/man"
+			#/usr/bin/chcon -R -u system_u -r object_r -t man_t $mandir/man
 		fi
 		if [ -x /usr/sbin/semanage ] ; then
-			echo "Manage file context mapping (mysqld_db_t) definitions for $QmailHOME/mysqldb/data/*"
-			/usr/sbin/semanage fcontext -a -t mysqld_db_t "$QmailHOME/mysqldb/data(/.*)?"
+			echo "Manage file context mapping (mysqld_db_t) definitions for $indimaildir/mysqldb/data/*"
+			/usr/sbin/semanage fcontext -a -t mysqld_db_t "$indimaildir/mysqldb/data(/.*)?"
 			if [ $status -eq 0 ] ; then
 				status=$?
 			fi
-			echo "Manage file context mapping (mysqld_log_t) definitions for $QmailHOME/mysqldb/logs/*"
-			/usr/sbin/semanage fcontext -a -t mysqld_log_t "$QmailHOME/mysqldb/logs(/.*)?"
+			echo "Manage file context mapping (mysqld_log_t) definitions for $indimaildir/mysqldb/logs/*"
+			/usr/sbin/semanage fcontext -a -t mysqld_log_t "$indimaildir/mysqldb/logs(/.*)?"
 			if [ $status -eq 0 ] ; then
 				status=$?
 			fi
-			echo "Manage file context mapping (mysql_etc_t) definitions for $QmailHOME/etc/indimail.cnf"
-			/usr/sbin/semanage fcontext -a -t mysqld_etc_t "$QmailHOME/etc/indimail.cnf"
+			echo "Manage file context mapping (mysql_etc_t) definitions for $sysconfdir/indimail.cnf"
+			/usr/sbin/semanage fcontext -a -t mysqld_etc_t "$sysconfdir/indimail.cnf"
 			if [ $status -eq 0 ] ; then
 				status=$?
 			fi
@@ -6247,7 +6283,7 @@ if [ -x /usr/sbin/selinuxenabled ] ; then
 			fi
 		fi
 		if [ -x /usr/sbin/restorecon ] ; then
-			for i in $QmailHOME/mysqldb/data $QmailHOME/mysqldb/logs $QmailHOME/etc/indimail.cnf
+			for i in $indimaildir/mysqldb/data $indimaildir/mysqldb/logs $sysconfdir/indimail.cnf
 			do
 				echo "/usr/sbin/restorecon -Rv $i"
 				/usr/sbin/restorecon -Rv $i
@@ -6335,7 +6371,7 @@ echo "#TemporaryDirectory /var/tmp"
 echo ""
 echo "# Path to the database directory."
 echo "# Default: hardcoded (depends on installation options)"
-echo "DatabaseDirectory $QmailHOME/share/clamd"
+echo "DatabaseDirectory $indimaildir/clamd"
 echo ""
 echo "# Only load the official signatures published by the ClamAV project."
 echo "# Default: no"
@@ -6346,7 +6382,7 @@ echo "# Due to security reasons we recommend the local mode."
 echo ""
 echo "# Path to a local socket file the daemon will listen on."
 echo "# Default: disabled (must be specified by a user)"
-echo "LocalSocket /tmp/clamd.socket"
+echo "LocalSocket /var/run/clamd.scan/clamd.sock"
 echo ""
 echo "# Sets the group ownership on the unix socket."
 echo "# Default: disabled (the primary group of the user running clamd)"
@@ -6833,7 +6869,7 @@ create_freshclam_conf()
 echo "# Path to the database directory."
 echo "# WARNING: It must match clamd.conf's directive!"
 echo "# Default: hardcoded (depends on installation options)"
-echo "DatabaseDirectory $QmailHOME/share/clamd"
+echo "DatabaseDirectory $indimaildir/clamd"
 echo ""
 echo "# Path to the log file (make sure it has proper permissions)"
 echo "# Default: disabled"
@@ -7058,11 +7094,11 @@ echo "#ExtraDatabase dbname2"
 
 create_bogofilter_conf()
 {
-if [ ! -f "$DESTDIR"$indimaildir/etc/bogofilter.cf.example ] ; then
-	echo ""$DESTDIR"$indimaildir/etc/bogofilter.cf.example: No such file or directory" 1>&2
+if [ ! -f "$DESTDIR"$sysconfdir/bogofilter.cf.example ] ; then
+	echo ""$DESTDIR"$sysconfdir/bogofilter.cf.example: No such file or directory" 1>&2
 	return 1
 fi
-cat "$DESTDIR"$indimaildir/etc/bogofilter.cf.example | sed \
+cat "$DESTDIR"$sysconfdir/bogofilter.cf.example | sed \
 	-e 's,##bogofilter_dir=,bogofilter_dir=,g' \
 	-e 's,#spam_header_name=,spam_header_name=,g' \
 	-e 's,#spam_header_place=,spam_header_place=,g' \
@@ -7135,7 +7171,7 @@ report ()
 		/bin/rm -f $LOGDIR/reports/send_pend
 	fi
 	/bin/cat $LOGDIR/deliver.25/current 
-	) | "$DESTDIR"$QmailHOME/bin/matchup 5>$LOGDIR/reports/pend_tmp > $LOGDIR/reports/send
+	) | "$DESTDIR"$QmailBinPrefix/bin/matchup 5>$LOGDIR/reports/pend_tmp > $LOGDIR/reports/send
 	/bin/mv $LOGDIR/reports/pend_tmp $LOGDIR/reports/send_pend
 
 	(
@@ -7144,8 +7180,8 @@ report ()
 		/bin/rm -f $LOGDIR/reports/smtp25_pend
 	fi
 	/bin/cat $LOGDIR/smtpd.25/current
-	) | "$DESTDIR"$QmailHOME/bin/smtp-matchup 5>$LOGDIR/reports/pend_tmp | \
-	"$DESTDIR"$QmailHOME/bin/tai64nunix > $LOGDIR/reports/smtp25
+	) | "$DESTDIR"$QmailBinPrefix/bin/smtp-matchup 5>$LOGDIR/reports/pend_tmp | \
+	"$DESTDIR"$QmailBinPrefix/bin/tai64nunix > $LOGDIR/reports/smtp25
 	/bin/mv $LOGDIR/reports/pend_tmp $LOGDIR/reports/smtp25_pend
 	(
 	if [ -f $LOGDIR/reports/smtp587_pend ] ; then
@@ -7153,16 +7189,16 @@ report ()
 		/bin/rm -f $LOGDIR/reports/smtp587_pend
 	fi
 	/bin/cat $LOGDIR/smtpd.587/current
-	) | "$DESTDIR"$QmailHOME/bin/smtp-matchup 5>$LOGDIR/reports/pend_tmp | \
-	"$DESTDIR"$QmailHOME/bin/tai64nunix > $LOGDIR/reports/smtp587
+	) | "$DESTDIR"$QmailBinPrefix/bin/smtp-matchup 5>$LOGDIR/reports/pend_tmp | \
+	"$DESTDIR"$QmailBinPrefix/bin/tai64nunix > $LOGDIR/reports/smtp587
 	/bin/mv $LOGDIR/reports/pend_tmp $LOGDIR/reports/smtp587_pend
 
-	spamheader_name=`grep ^spam_header_name $indimaildir/etc/bogofilter.cf | cut -d= -f2`
+	spamheader_name=`grep ^spam_header_name $sysconfdir/bogofilter.cf | cut -d= -f2`
 	if [ " $spamheader_name" = " " ] ; then
 		> $LOGDIR/reports/spam
 	else
 		> $LOGDIR/reports/spam
-		/bin/cat $LOGDIR/spamlog/current | grep $spamheader_name| "$DESTDIR"$QmailHOME/bin/tai64nunix \
+		/bin/cat $LOGDIR/spamlog/current | grep $spamheader_name| "$DESTDIR"$QmailBinPrefix/bin/tai64nunix \
 		> $LOGDIR/reports/spam
 	fi
 
@@ -7178,19 +7214,19 @@ report ()
 				if [ " $i" = " zsmtp" ] ; then
 					if [ -s $LOGDIR/reports/smtp25 ] ; then
 						echo "---- Port 25 -----------------"
-						"$DESTDIR"$QmailHOME/bin/$i < $LOGDIR/reports/smtp25
+						"$DESTDIR"$QmailBinPrefix/bin/$i < $LOGDIR/reports/smtp25
 					fi
 					if [ -s $LOGDIR/reports/smtp587 ] ; then
 						echo "---- Port 587 ----------------"
-						"$DESTDIR"$QmailHOME/bin/$i < $LOGDIR/reports/smtp587
+						"$DESTDIR"$QmailBinPrefix/bin/$i < $LOGDIR/reports/smtp587
 					fi
 				elif [ " $i" = " zspam" ] ; then
 					if [ -s $LOGDIR/reports/spam ] ; then
-						"$DESTDIR"$QmailHOME/bin/$i < $LOGDIR/reports/spam
+						"$DESTDIR"$QmailBinPrefix/bin/$i < $LOGDIR/reports/spam
 					fi
 				else
 					if [ -s $LOGDIR/reports/send ] ; then
-						"$DESTDIR"$QmailHOME/bin/$i < $LOGDIR/reports/send
+						"$DESTDIR"$QmailBinPrefix/bin/$i < $LOGDIR/reports/send
 					fi
 				fi
 				echo
@@ -7202,19 +7238,19 @@ report ()
 				if [ " $i" = " zsmtp" ] ; then
 					if [ -s $LOGDIR/reports/smtp25 ] ; then
 						echo "---- Port 25 -----------------"
-						"$DESTDIR"$QmailHOME/bin/$i < $LOGDIR/reports/smtp25
+						"$DESTDIR"$QmailBinPrefix/bin/$i < $LOGDIR/reports/smtp25
 					fi
 					if [ -s $LOGDIR/reports/smtp587 ] ; then
 						echo "---- Port 587 ----------------"
-						"$DESTDIR"$QmailHOME/bin/$i < $LOGDIR/reports/smtp587
+						"$DESTDIR"$QmailBinPrefix/bin/$i < $LOGDIR/reports/smtp587
 					fi
 				elif [ " $i" = " zspam" ] ; then
 					if [ -s $LOGDIR/reports/spam ] ; then
-						"$DESTDIR"$QmailHOME/bin/$i < $LOGDIR/reports/spam
+						"$DESTDIR"$QmailBinPrefix/bin/$i < $LOGDIR/reports/spam
 					fi
 				else
 					if [ -s $LOGDIR/reports/send ] ; then
-						"$DESTDIR"$QmailHOME/bin/$i < $LOGDIR/reports/send
+						"$DESTDIR"$QmailBinPrefix/bin/$i < $LOGDIR/reports/send
 					fi
 				fi
 				echo
@@ -7238,7 +7274,7 @@ report ()
 				echo
 				echo Mail Statistics for `/bin/cat $CONTROLDIR/me`
 				echo on $date
-				echo from host `"$DESTDIR"$QmailHOME/sbin/hostname`
+				echo from host `"$DESTDIR"$QmailBinPrefix/sbin/hostname`
 				echo
 				echo "Since I am good only at reporting, please do not reply"
 				echo "to me."
@@ -7249,14 +7285,14 @@ report ()
 				echo
 				cat /tmp/report.$$
 				/bin/rm -f /tmp/report.$$
-				) | "$DESTDIR"$QmailHOME/bin/sendmail -t
+				) | "$DESTDIR"$QmailBinPrefix/bin/sendmail -t
 			else
 				(
 				echo ATTENTION: Mail Administrators - aaj kaa taaja khabar
 				echo
 				echo Mail Statistics for `/usr/bin/head -1 $CONTROLDIR/me` 
 				echo on $date
-				echo from host `"$DESTDIR"$QmailHOME/sbin/hostname`
+				echo from host `"$DESTDIR"$QmailBinPrefix/sbin/hostname`
 				echo
 				echo "I have attached a copy of the Statistics in zip file format."
 				echo "Since I am good only at reporting, please do not reply"
@@ -7272,7 +7308,7 @@ report ()
 				fi
 				QMAILNAME="IndiMail Reporter"
 				export QMAILNAME
-				"$DESTDIR"$indimaildir/bin/mpack -s "$subject" -d /tmp/descfile.$$ \
+				"$DESTDIR"$QmailBinPrefix/bin/mpack -s "$subject" -d /tmp/descfile.$$ \
 				-c "application/zip" /tmp/report.$$.zip $postmaster
 				/bin/rm -f /tmp/descfile.$$ /tmp/report.$$.zip
 			fi
@@ -7359,14 +7395,14 @@ done
 echo
 echo "Control Configuration ================================================="
 echo
-"$DESTDIR"$QmailHOME/bin/qmail-showctl
+"$DESTDIR"$QmailBinPrefix/bin/qmail-showctl
 echo
 echo "IndiMail Assign File:"
-cat "$DESTDIR"$QmailHOME/users/assign
+cat "$DESTDIR"$sysconfdir/users/assign
 echo
 echo "Software Configuration ================================================"
-LINES1=`"$DESTDIR"$indimaildir/sbin/config_settings | grep printf| /usr/bin/wc -l`
-"$DESTDIR"$indimaildir/bin/indiversion > /tmp/svctool.ver.$$
+LINES1=`"$DESTDIR"$QmailBinPrefix/sbin/config_settings | grep printf| /usr/bin/wc -l`
+"$DESTDIR"$QmailBinPrefix/bin/indiversion > /tmp/svctool.ver.$$
 LINES2=`/usr/bin/wc -l /tmp/svctool.ver.$$ | awk '{print $1}'`
 LINES2=`/usr/bin/expr $LINES2 - $LINES1`
 LINES3=`/usr/bin/expr $LINES2 - 3`
@@ -7394,19 +7430,18 @@ elif [ -f /lib/systemd/system/indimail.service ] ; then
 	file=/lib/systemd/system/indimail.service
 fi
 # who cuts the barber
-if [ -f $QmailHOME/etc/backup.conf ] ; then
-	file="$file `cat $QmailHOME/etc/backup.conf`"
+if [ -f $sysconfdir/backup.conf ] ; then
+	file="$file `cat $sysconfdir/backup.conf`"
 fi
 servicedir=$1
 	(
-	for i in $servicedir $CONTROLDIR $QmailHOME/users \
-		$indimaildir/etc $indimaildir/domains $indimaildir/autoturn \
-		$indimaildir/alias $indimaildir/boot \
-		$indimaildir/libexec $indimaildir/modules $indimaildir/plugins \
+	for i in $servicedir $CONTROLDIR \
+		$sysconfdir $QmailHOME/domains $QmailHOME/autoturn \
+		$QmailHOME/alias $shareddir \
 		/etc/inittab /etc/init.d/indimail \
 		$file /etc/passwd /etc/group /etc/hosts /etc/sysconfig/network \
-		$indimaildir/.bashrc $indimaildir/.bash_profile \
-		$indimaildir/.indimail $file
+		$QmailHOME/.bashrc $QmailHOME/.bash_profile \
+		$QmailHOME/.indimail $file
 	do
 		echo $i
 	done
@@ -7749,13 +7784,12 @@ while test $# -gt 0; do
 	--showctl=*)
 	CONTROLDIR=$optarg
 	export CONTROLDIR
-	"$DESTDIR"$QmailHOME/bin/qmail-showctl
+	"$DESTDIR"$QmailBinPrefix/bin/qmail-showctl
 	prog_args=""
 	exit 0
 	;;
 	--queuefix=*)
-	prefix=$optarg
-	"$DESTDIR"$QmailHOME/bin/queue-fix $prefix
+	"$DESTDIR"$QmailBinPrefix/bin/queue-fix $optarg
 	prog_args=""
 	exit 0
 	;;
@@ -7796,7 +7830,7 @@ while test $# -gt 0; do
 	;;
 
 	--version)
-	echo "\$Id: svctool.in,v 2.279 2016-05-18 11:46:41+05:30 Cprogrammer Exp mbhangui $"
+	echo "\$Id: svctool.in,v 2.280 2016-05-25 09:06:06+05:30 Cprogrammer Exp mbhangui $"
 	prog_args=""
 	exit 0
 	;;
@@ -7973,17 +8007,17 @@ done
 # Main
 #
 if [ " $CONTROLDIR" = " " ] ; then
-	cntrldir=@controldir@
+	cntrldir=@sysconfdir@/control
 else
 	slash=`echo $CONTROLDIR | cut -c1`
 	if [ " $slash" = " /" ] ; then
 		cntrldir=$CONTROLDIR
 	else
-		cntrldir=$QmailHOME/$CONTROLDIR
+		cntrldir=$sysconfdir/$CONTROLDIR
 	fi
 fi
 CONTROLDIR=$cntrldir
-export $CONTROLDIR
+export CONTROLDIR
 
 case $option in
 	1) # SMTP Service
@@ -8276,7 +8310,7 @@ case $option in
 				mysql_socket=$mysqlSocket
 			fi
 		fi
-		conf_file="$DESTDIR"$indimaildir/etc/indimail.cnf
+		conf_file="$DESTDIR"$sysconfdir/indimail.cnf
 		create_mysql_config > /tmp/config.cnf.$$
 		change_config $conf_file /tmp/config.cnf.$$
 		mysql_version=`$mysqlPrefix/$mysqld --version 2>&1 | grep Ver | awk '{print $3}'`
@@ -8289,7 +8323,7 @@ case $option in
 		fi
 		if [ $mariadb -eq 1 ] ; then
 			if [ -d /etc/my.cnf.d ] ; then
-				/bin/ln -sf $indimaildir/etc/indimail.cnf /etc/my.cnf.d/indimail.cnf
+				/bin/ln -sf $sysconfdir/indimail.cnf /etc/my.cnf.d/indimail.cnf
 				if [ -f /etc/my.cnf ] ; then
 					grep '^!includedir /etc/my.cnf.d' /etc/my.cnf > /dev/null 2>&1
 					if [ $? -ne 0 ] ; then
@@ -8297,7 +8331,7 @@ case $option in
 					fi
 				fi
 			elif  [ -d /etc/mysql ] ; then
-				/bin/ln -sf $indimaildir/etc/indimail.cnf /etc/mysql/indimail.cnf
+				/bin/ln -sf $sysconfdir/indimail.cnf /etc/mysql/indimail.cnf
 				if [ -f /etc/my.cnf ] ; then
 					grep '^!includedir /etc/mysql' /etc/my.cnf > /dev/null 2>&1
 					if [ $? -ne 0 ] ; then
@@ -8305,12 +8339,12 @@ case $option in
 					fi
 				fi
 			else
-				/bin/ln -sf $indimaildir/etc/indimail.cnf /etc/indimail.cnf
+				/bin/ln -sf $sysconfdir/indimail.cnf /etc/indimail.cnf
 			fi
 		else
 			if [ -d /etc/my.cnf.d -a ! -d /etc/mysql -a ! -h /etc/mysqlf ] ; then
 				/bin/ln -s /etc/my.cnf.d /etc/mysql
-				/bin/ln -sf $indimaildir/etc/indimail.cnf /etc/my.cnf.d/indimail.cnf
+				/bin/ln -sf $sysconfdir/indimail.cnf /etc/my.cnf.d/indimail.cnf
 				if [ -f /etc/my.cnf ] ; then
 					grep '^!includedir /etc/my.cnf.d' /etc/my.cnf > /dev/null 2>&1
 					if [ $? -ne 0 ] ; then
@@ -8318,7 +8352,7 @@ case $option in
 					fi
 				fi
 			elif  [ -d /etc/mysql ] ; then
-				/bin/ln -sf $indimaildir/etc/indimail.cnf /etc/mysql/indimail.cnf
+				/bin/ln -sf $sysconfdir/indimail.cnf /etc/mysql/indimail.cnf
 				if [ -f /etc/my.cnf ] ; then
 					grep '^!includedir /etc/mysql' /etc/my.cnf > /dev/null 2>&1
 					if [ $? -ne 0 ] ; then
@@ -8326,7 +8360,7 @@ case $option in
 					fi
 				fi
 			else
-				/bin/ln -sf $indimaildir/etc/indimail.cnf /etc/indimail.cnf
+				/bin/ln -sf $sysconfdir/indimail.cnf /etc/indimail.cnf
 			fi
 		fi
 		;;
@@ -8356,7 +8390,7 @@ case $option in
 				mysql_socket=$mysqlSocket
 			fi
 		fi
-		create_mysql_db "$databasedir" "$indimaildir/etc/indimail.cnf" "$mysql_socket"
+		create_mysql_db "$databasedir" "$sysconfdir/indimail.cnf" "$mysql_socket"
 		;;
 
 		imap)
@@ -8365,18 +8399,18 @@ case $option in
 			exit 1
 		fi
 		if [ " $use_ssl" = " 1" ] ; then
-			conf_file="$DESTDIR"$indimaildir/etc/imapd
+			conf_file="$DESTDIR"$sysconfdir/imapd
 			(
 			create_imap_config
 			create_imap_config_ssl
 			) > /tmp/config.cnf.$$
 			change_config $conf_file /tmp/config.cnf.$$
 		else
-			conf_file="$DESTDIR"$indimaildir/etc/imapd
+			conf_file="$DESTDIR"$sysconfdir/imapd
 			create_imap_config > /tmp/config.cnf.$$
 			change_config $conf_file /tmp/config.cnf.$$
 
-			conf_file="$DESTDIR"$indimaildir/etc/imapd-ssl
+			conf_file="$DESTDIR"$sysconfdir/imapd-ssl
 			create_imap_config_ssl > /tmp/config.cnf.$$
 			change_config $conf_file /tmp/config.cnf.$$
 		fi
@@ -8389,18 +8423,18 @@ case $option in
 		fi
 
 		if [ " $use_ssl" = " 1" ] ; then
-			conf_file="$DESTDIR"$indimaildir/etc/pop3d
+			conf_file="$DESTDIR"$sysconfdir/pop3d
 			(
 			create_pop3_config
 			create_pop3_config_ssl
 			) > /tmp/config.cnf.$$
 			change_config $conf_file /tmp/config.cnf.$$
 		else
-			conf_file="$DESTDIR"$indimaildir/etc/pop3d
+			conf_file="$DESTDIR"$sysconfdir/pop3d
 			create_pop3_config > /tmp/config.cnf.$$
 			change_config $conf_file /tmp/config.cnf.$$
 
-			conf_file="$DESTDIR"$indimaildir/etc/pop3d-ssl
+			conf_file="$DESTDIR"$sysconfdir/pop3d-ssl
 			create_pop3_config_ssl > /tmp/config.cnf.$$
 			change_config $conf_file /tmp/config.cnf.$$
 		fi
@@ -8438,13 +8472,13 @@ case $option in
 		;;
 
 		clamd)
-		if [ ! -d "$DESTDIR"$indimaildir/etc ] ; then
-			/bin/mkdir -p "$DESTDIR"$indimaildir/etc
+		if [ ! -d "$DESTDIR"$sysconfdir ] ; then
+			/bin/mkdir -p "$DESTDIR"$sysconfdir
 		fi
-		if [ -f "$DESTDIR"$indimaildir/sbin/clamd ] ; then
-			conf_file="$DESTDIR"$indimaildir/etc/clamd.conf
+		if [ -f "$DESTDIR"$QmailHOME/sbin/clamd ] ; then
+			conf_file="$DESTDIR"$sysconfdir/clamd.conf
 		else
-			conf_file="$DESTDIR"$indimaildir/etc/clamd.conf.disabled
+			conf_file="$DESTDIR"$sysconfdir/clamd.conf.disabled
 		fi
 		create_clamd_conf > /tmp/config.cnf.$$
 		if [ $? -eq 0 ] ; then
@@ -8452,11 +8486,25 @@ case $option in
 		else
 			/bin/rm -f /tmp/config.cnf.$$
 		fi
-
-		if [ -f "$DESTDIR"$indimaildir/bin/freshclam ] ; then
-			conf_file="$DESTDIR"$indimaildir/etc/freshclam.conf
+		dbd=`grep -w "^DatabaseDirectory" $sysconfdir/clamd.conf | awk '{print $2}'`
+		if [ -z "$dbd" ] ; then
+			echo "DatabaseDirectory not defined in $sysconfdir/clamd.conf" 1>&2
+			return 1
+		fi
+		/bin/mkdir -p $dbd
+		if [ $? -eq 0 ] ; then
+			$chown qscand:qmail $dbd
+			if [ $? -ne 0 ] ; then
+				return 1
+			fi
 		else
-			conf_file="$DESTDIR"$indimaildir/etc/freshclam.conf.disabled
+			return 1
+		fi
+
+		if [ -f "$DESTDIR"$QmailHOME/bin/freshclam ] ; then
+			conf_file="$DESTDIR"$sysconfdir/freshclam.conf
+		else
+			conf_file="$DESTDIR"$sysconfdir/freshclam.conf.disabled
 		fi
 		create_freshclam_conf > /tmp/config.cnf.$$
 		if [ $? -eq 0 ] ; then
@@ -8467,17 +8515,17 @@ case $option in
 		;;
 
 		bogofilter)
-		conf_file="$DESTDIR"$indimaildir/etc/bogofilter.cf
+		conf_file="$DESTDIR"$sysconfdir/bogofilter.cf
 		create_bogofilter_conf > /tmp/config.cnf.$$
 		if [ $? -eq 0 ] ; then
 			change_config $conf_file /tmp/config.cnf.$$
 		else
 			/bin/rm -f /tmp/config.cnf.$$
 		fi
-		if [ ! -f "$DESTDIR"$indimaildir/etc/wordlist.db ] ; then
+		if [ ! -f "$DESTDIR"$sysconfdir/wordlist.db ] ; then
 		# create empty wordlist.db
-			"$DESTDIR"$indimaildir/bin/bogoutil -l "$DESTDIR"$indimaildir/etc/wordlist.db < /dev/null
-			$chown indimail:indimail "$DESTDIR"$indimaildir/etc/wordlist.db
+			"$DESTDIR"$QmailHOME/bin/bogoutil -l "$DESTDIR"$sysconfdir/wordlist.db < /dev/null
+			$chown indimail:indimail "$DESTDIR"$sysconfdir/wordlist.db
 		fi
 		;;
 
@@ -8496,35 +8544,35 @@ case $option in
 				$chown indimail:indimail "$DESTDIR"$CONTROLDIR/servercert.pem
 				/bin/ln -sr $CONTROLDIR/servercert.pem "$DESTDIR"$CONTROLDIR/clientcert.pem
 				echo "Updating temporary RSA and DH keys"
-				"$DESTDIR"$indimaildir/bin/update_tmprsadh
+				"$DESTDIR"$QmailHOME/bin/update_tmprsadh
 				# imapd will be missing for indimail-mta. Skip if it is so
-				if [ -f "$DESTDIR"$indimaildir/bin/imapd ] ; then
+				if [ -f "$DESTDIR"$QmailHOME/bin/imapd ] ; then
 				# IMAP
 				echo "Creating SSL Configuration for IMAP"
 				create_ssl_cnf $postmaster IMAP > /tmp/config.cnf.$$
-				conf_file=$DESTDIR"$indimaildir/etc/imapd.cnf"
+				conf_file=$DESTDIR"$sysconfdir/imapd.cnf"
 				/bin/rm -f $conf_file
 				change_config $conf_file /tmp/config.cnf.$$
 				/bin/chmod 400 $conf_file
-				if [ -d "$DESTDIR"$indimaildir/share ] ; then
-				/bin/ln -s $CONTROLDIR/servercert.pem "$DESTDIR"$indimaildir/share/imapd.pem
+				if [ -d "$DESTDIR"$sysconfdir ] ; then
+				/bin/ln -s $CONTROLDIR/servercert.pem "$DESTDIR"$sysconfdir/imapd.pem
 				fi
 
 				# POP3
 				echo "Creating SSL Configuration for POP3"
 				create_ssl_cnf $postmaster POP3 > /tmp/config.cnf.$$
-				conf_file=$DESTDIR"$indimaildir/etc/pop3d.cnf"
+				conf_file=$DESTDIR"$sysconfdir/pop3d.cnf"
 				/bin/rm -f $conf_file
 				change_config $conf_file /tmp/config.cnf.$$
 				/bin/chmod 400 $conf_file
-				if [ -d "$DESTDIR"$indimaildir/share ] ; then
-				/bin/ln -s $CONTROLDIR/servercert.pem "$DESTDIR"$indimaildir/share/pop3d.pem
+				if [ -d "$DESTDIR"$sysconfdir ] ; then
+				/bin/ln -s $CONTROLDIR/servercert.pem "$DESTDIR"$sysconfdir/pop3d.pem
 				fi
 				echo "Restarting indisrvr, poppass"
-				$QmailHOME/bin/svc -d /service/indisrvr.*
-				$QmailHOME/bin/svc -d /service/qmail-poppass.*
-				$QmailHOME/bin/svc -u /service/indisrvr.*
-				$QmailHOME/bin/svc -u /service/qmail-poppass.*
+				$QmailBinPrefix/bin/svc -d /service/indisrvr.*
+				$QmailBinPrefix/bin/svc -d /service/qmail-poppass.*
+				$QmailBinPrefix/bin/svc -u /service/indisrvr.*
+				$QmailBinPrefix/bin/svc -u /service/qmail-poppass.*
 				fi
 				echo "WARNING!!! Restart all services using the generated certificates" 1>&2
 			fi
@@ -8583,9 +8631,9 @@ case $option in
 	grep "svscanboot" /etc/inittab >/dev/null
 	if [ $? -ne 0 ]; then
 		if [ -f /etc/debian_release ] ; then
-			echo "SV:2345:respawn:$QmailHOME/bin/svscanboot $servicedir <>/dev/console 2<>/dev/console" >> /etc/inittab
+			echo "SV:2345:respawn:$QmailBinPrefix/bin/svscanboot $servicedir <>/dev/console 2<>/dev/console" >> /etc/inittab
 		else
-			echo "SV:345:respawn:$QmailHOME/bin/svscanboot $servicedir <>/dev/console 2<>/dev/console" >> /etc/inittab
+			echo "SV:345:respawn:$QmailBinPrefix/bin/svscanboot $servicedir <>/dev/console 2<>/dev/console" >> /etc/inittab
 		fi
 		create_svscan $servicedir
 	else
@@ -8593,9 +8641,9 @@ case $option in
 		if [ $? -ne 0 ]; then
 			grep -v "svscanboot" /etc/inittab > /etc/inittab.svctool.$$
 			if [ -f /etc/debian_release ] ; then
-				echo "SV:345:respawn:$QmailHOME/bin/svscanboot $servicedir <>/dev/console 2<>/dev/console" >> /etc/inittab.svctool.$$
+				echo "SV:345:respawn:$QmailBinPrefix/bin/svscanboot $servicedir <>/dev/console 2<>/dev/console" >> /etc/inittab.svctool.$$
 			else
-				echo "SV:2345:respawn:$QmailHOME/bin/svscanboot $servicedir <>/dev/console 2<>/dev/console" >> /etc/inittab.svctool.$$
+				echo "SV:2345:respawn:$QmailBinPrefix/bin/svscanboot $servicedir <>/dev/console 2<>/dev/console" >> /etc/inittab.svctool.$$
 			fi
 			/bin/mv /etc/inittab.svctool.$$ /etc/inittab
 			create_svscan $servicedir
@@ -8947,10 +8995,10 @@ esac
 
 if [ ! " $prog_args" = " " ] ; then
 	if [ " $nolog" = " " ] ; then
-		if [ ! -d "$DESTDIR"$indimaildir/etc ] ; then
-			/bin/mkdir -p "$DESTDIR"$indimaildir/etc
+		if [ ! -d "$DESTDIR"$sysconfdir ] ; then
+			/bin/mkdir -p "$DESTDIR"$sysconfdir
 		fi
-		echo "`date` $prog_args" >> "$DESTDIR"$indimaildir/etc/services.log
+		echo "`date` $prog_args" >> "$DESTDIR"$sysconfdir/services.log
 	fi
 fi
 exit 0
