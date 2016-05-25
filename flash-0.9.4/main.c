@@ -1,5 +1,8 @@
 /*
  * $Log: main.c,v $
+ * Revision 1.6  2016-05-25 09:11:38+05:30  Cprogrammer
+ * use SYSCONFDIR for base directory
+ *
  * Revision 1.5  2011-07-29 09:23:56+05:30  Cprogrammer
  * fixed gcc warnings
  *
@@ -99,7 +102,7 @@ version()
 {
 	fprintf(stderr, "flash version %s, Copyright (C) 1996 Stephen Fegan <flash@netsoc.ucd.ie>\n\n\
 Compile-time options:\n\
-Default menu: `%s', Base directory: `%s'\n", VERSION, DEFAULT_MENU, INDIMAILDIR);
+Default menu: `%s', Base directory: `%s'\n", VERSION, DEFAULT_MENU, SYSCONFDIR);
 }
 
 int
