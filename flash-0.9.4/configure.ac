@@ -37,6 +37,18 @@ case "$host" in
 	STRIP_OPT=-s
 	;;
 esac
+flashmoduledir=$prefix/lib/indimail
+AC_ARG_ENABLE([flashmoduledir], [  --enable-modbase=DIR specify module installation path],
+flashmoduledir="$enableval"
+[
+	if test "$flashmoduledir" = ""
+	then
+		AC_MSG_ERROR([Unable to find your flash module dir, specify --enable-modbase.])
+	fi
+])
+AC_DEFINE_UNQUOTED(MODBASE,"$flashmoduledir",full path to flash Module Directory)
+AC_SUBST(flashmoduledir)
+AC_DEFINE_UNQUOTED(SYSCONFDIR, "$sysconfdir", Directory for menu)
 AC_SUBST([LIBTOOL_DEPS])
 AC_SUBST(defaultprefix)
 AC_SUBST(LIBVER)
@@ -57,104 +69,6 @@ then
 	libdir=$prefix/$acl_libdirstem
 fi
 RPATH_LIB="$acl_libdirstem"
-
-indiuser="indimail"
-AC_ARG_ENABLE(indiuser, [  --enable-indiuser=indimail   user indimail was installed as.],
-	indiuser="$enableval",
-	[
-		if test "$indiuser" = ""
-		then
-			AC_MSG_ERROR([Unable to find your indiuser user, specify --enable-indiuser.])
-		fi
-	])
-AC_DEFINE_UNQUOTED(INDIUSER,"$indiuser","")
-AC_SUBST(indiuser)
-echo $indiuser > indiusername
-
-indigroup="indimail"
-AC_ARG_ENABLE(indigroup, [  --enable-indigroup=indimail   group indimail was installed as.],
-	indigroup="$enableval",
-	[
-		if test "$indigroup" = ""
-		then
-			AC_MSG_ERROR([Unable to find your indigroup group, specify --enable-indigroup.])
-		fi
-	])
-AC_DEFINE_UNQUOTED(INDIGROUP,"$indigroup","")
-AC_SUBST(indigroup)
-
-AC_TRY_RUN( [
-
-#include <stdio.h>
-#include <pwd.h>
-#include <stdlib.h>
-#include <string.h>
-#include <unistd.h>
-
-int main()
-{
-struct passwd *pw;
-char tmpbuf[100];
-FILE *f;
-
-	unlink("indimail.dir");
-	unlink("indimail.uid");
-	unlink("indimail.gid");
-
-	if ( (f=fopen("indiusername","r+"))==NULL) {
-		fprintf(stderr, "could not open indiusername file\n");
-		fprintf(stdout, "could not open indiusername file\n");
-		exit(-1);
-	}
-    fgets(tmpbuf,100,f);
-    fclose(f);
-    tmpbuf[strlen(tmpbuf)-1] = 0;
-	if (( pw=getpwnam(tmpbuf)) != 0 ) {
-		f=fopen("indimail.dir","a+");
-		fprintf(f,"%s\n", pw->pw_dir);
-		fclose(f);
-
-		f=fopen("indimail.uid", "a+");
-		fprintf(f,"%d\n", pw->pw_uid);
-		fclose(f);
-
-		f=fopen("indimail.gid", "a+");
-		fprintf(f,"%d\n", pw->pw_gid);
-		fclose(f);
-	} else {
-		f=fopen("indimail.dir","a+");
-		fprintf(f,"/var/indimail\n");
-		fclose(f);
-
-		f=fopen("indimail.uid", "a+");
-		fprintf(f,"555\n");
-		fclose(f);
-
-		f=fopen("indimail.gid", "a+");
-		fprintf(f,"555\n");
-		fclose(f);
-	}
-	return(0);
-}
-],
-    AC_MSG_RESULT(yes),
-    AC_MSG_RESULT(no)
-    AC_MSG_ERROR(Could not find indimail user.),
-    AC_MSG_ERROR(Could not compile and run even a trivial ANSI C program - check CC.))
-
-
-indimaildir=`cat indimail.dir`
-AC_SUBST(indimaildir)
-AC_DEFINE_UNQUOTED(INDIMAILDIR,"$indimaildir","")
-rm -f indimail.dir
-
-flashmailuid=`cat indimail.uid`
-rm -f indimail.uid
-
-flashmailgid=`cat indimail.gid`
-rm -f indimail.gid
-rm -f indiusername 
-
 AC_CHECK_HEADERS(crypt.h)
 AC_CHECK_HEADERS(term.h)
 AC_CHECK_HEADERS(ncurses/term.h)
