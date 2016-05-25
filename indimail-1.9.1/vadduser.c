@@ -1,5 +1,8 @@
 /*
  * $Log: vadduser.c,v $
+ * Revision 2.42  2016-05-25 09:06:41+05:30  Cprogrammer
+ * use LIBEXECDIR for post handle
+ *
  * Revision 2.41  2016-01-28 16:34:10+05:30  Cprogrammer
  * fixed buffer overflow
  *
@@ -177,7 +180,7 @@
 #include <signal.h>
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vadduser.c,v 2.41 2016-01-28 16:34:10+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: vadduser.c,v 2.42 2016-05-25 09:06:41+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 char            Email[MAX_BUFF], User[MAX_BUFF], Domain[MAX_BUFF], Passwd[MAX_BUFF],
@@ -341,8 +344,7 @@ main(argc, argv)
 		snprintf(envbuf, sizeof(envbuf), "BASE_PATH=%s", base_path);
 	if (balance_flag)
 	{
-		snprintf(tmpbuf, sizeof(tmpbuf), "%s/etc/lastfstab", INDIMAILDIR);
-		if (!(fp = fopen(tmpbuf, "r")))
+		if (!(fp = fopen(SYSCONFDIR"/lastfstab", "r")))
 		{
 			perror(tmpbuf);
 			return(1);
@@ -381,7 +383,7 @@ main(argc, argv)
 	{
 		if (!(base_argv0 = strrchr(argv[0], '/')))
 			base_argv0 = argv[0];
-		return(post_handle("%s/libexec/%s %s@%s", INDIMAILDIR, base_argv0, User, real_domain));
+		return(post_handle("%s/%s %s@%s", LIBEXECDIR, base_argv0, User, real_domain));
 	} else
 		return(post_handle("%s %s@%s", ptr, User, real_domain));
 }
