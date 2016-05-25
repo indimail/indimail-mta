@@ -1,5 +1,8 @@
 /*
  * $Log: config_settings.c,v $
+ * Revision 2.7  2016-05-25 08:59:16+05:30  Cprogrammer
+ * use SYSCONFDIR for indimail.settings
+ *
  * Revision 2.6  2003-07-25 09:22:55+05:30  Cprogrammer
  * correction on multi-line strings
  *
@@ -21,7 +24,7 @@
 #include <unistd.h>
 
 #ifndef	lint
-static char     sccsid[] = "$Id: config_settings.c,v 2.6 2003-07-25 09:22:55+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: config_settings.c,v 2.7 2016-05-25 08:59:16+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 int
@@ -33,7 +36,7 @@ main(int argc, char **argv)
 
 	snprintf(buffer, sizeof(buffer), "./indimail.settings");
 	if(access(buffer, F_OK))
-		snprintf(buffer, sizeof(buffer), "%s/etc/indimail.settings", INDIMAILDIR);
+		snprintf(buffer, sizeof(buffer), "%s/indimail.settings", SYSCONFDIR);
 	if ((fp = fopen(buffer, "r")))
 	{
 		printf("/*- WARNING: Do not edit. This file has been automatically generated */\n");
