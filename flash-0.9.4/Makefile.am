@@ -78,15 +78,15 @@ system.menu: system.menu.in
 
 install-data-local: modules
 	$(mkinstalldirs)  $(DESTDIR)@mandir@/man1
-	$(mkinstalldirs)  $(DESTDIR)@libexecdir@/modules
+	$(mkinstalldirs)  $(DESTDIR)@flashmoduledir@/modules
 	$(mkinstalldirs)  $(DESTDIR)@sysconfdir@
 	$(mkinstalldirs)  $(DESTDIR)@prefix@/lib
 	for f in "system.menu system.module system.rc system.flashlogin"; do \
 		$(INSTALL_DATA) $$f $(DESTDIR)@sysconfdir@ ; \
 	done; \
 	for f in $(modules_list); do \
-		/bin/mkdir -p $(DESTDIR)@libexecdir@/modules; \
-		$(LIBTOOL) --mode=install $(INSTALL_DATA) $$f $(DESTDIR)@libexecdir@/modules/$$f; \
+		/bin/mkdir -p $(DESTDIR)@flashmoduledir@/modules; \
+		$(LIBTOOL) --mode=install $(INSTALL_DATA) $$f $(DESTDIR)@flashmoduledir@/modules/$$f; \
 	done; \
 	$(INSTALL_DATA) flash.1 $(DESTDIR)@mandir@/man1
 
