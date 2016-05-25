@@ -19,10 +19,14 @@ else
 	CFLAGS += -O2 -fno-strict-aliasing -Wno-unused-result -Wno-unused-result
 endif
 
-prefix=@indimaildir@
+prefix=@prefix@
+indimaildir=@indimaildir@
 domaindir=@domaindir@
+shareddir=@shareddir@
 version=@version@
 sysconfdir=@sysconfdir@
+libexecdir=@libexecdir@
+mandir=@mandir@
 clamav_version=@clamav_version@
 libdkim_version=@libdkim_version@
 libsrs2_version=@libsrs2_version@
@@ -46,9 +50,10 @@ DESTDIR=$(CURDIR)/debian/tmp
 define genControl
 $(shell if [ -d ../BUILD ] ; then ../BUILD/debian/gen_control; else debian/gen_control;fi)
 endef
-bits=$(shell dpkg-architecture -qDEB_BUILD_ARCH_BITS)
+#bits=$(shell dpkg-architecture -qDEB_BUILD_ARCH_BITS)
+bits=$(shell if [ -d /usr/lib64 ] ; then echo 64; else echo 32; fi)
 libdir=$(shell if [ $(bits) -eq 64 ] ; then echo $(prefix)/lib64; else echo $(prefix)/lib;fi)
-pkgdir=$(shell if [ $(bits) -eq 64 ] ; then echo /usr/lib64/pkgconfig; else echo /usr/lib/pkgconfig;fi)
+pkgconfigdir=$(shell if [ $(bits) -eq 64 ] ; then echo /usr/lib64/pkgconfig; else echo /usr/lib/pkgconfig;fi)
 
 build: build-stamp
 build-stamp:
@@ -58,30 +63,89 @@ build-stamp:
 	#
 	if [ -f ../BUILD/debian/obs_deb_prep ] ; then sh ../BUILD/debian/obs_deb_prep; fi
 	if [ -f ../BUILD/debian/gen_control ] ; then chmod +x ../BUILD/debian/gen_control; fi
-	if [ -f ../BUILD/debian/indimail-devel$(bits) ] ; then /bin/mv ../BUILD/debian/indimail-devel$(bits) ../BUILD/debian/indimail-devel.install; fi
-	if [ -f ../BUILD/debian/libindimail$(bits) ] ; then /bin/mv ../BUILD/debian/libindimail$(bits) ../BUILD/debian/libindimail.install; fi
+	if [ -f ../BUILD/debian/indimail-devel$(bits) ] ; then \
+		/bin/mv ../BUILD/debian/indimail-devel$(bits) \
+		../BUILD/debian/indimail-devel.install; \
+	fi
+	if [ -f ../BUILD/debian/libindimail$(bits) ] ; then \
+		/bin/mv ../BUILD/debian/libindimail$(bits) ../BUILD/debian/libindimail.install; \
+	fi
 	#
 	# run configure script
 	#
 	if [ -d qmail-1.03 ] ; then /bin/rm -f qmail-1.03/conf-dlopen; fi
 	if [ -d ucspi-tcp-0.88 ] ; then /bin/rm -f ucspi-tcp-0.88/conf-dlopen; fi
-	if [ $(tcpserver_plugin) -eq 1 ] ; then echo "-DLOAD_SHARED_OBJECTS" > qmail-1.03/conf-dlopen; echo "-DLOAD_SHARED_OBJECTS" > ucspi-tcp-0.88/conf-dlopen; fi
+	if [ $(tcpserver_plugin) -eq 1 ] ; then \
+		echo "-DLOAD_SHARED_OBJECTS" > qmail-1.03/conf-dlopen; \
+		echo "-DLOAD_SHARED_OBJECTS" > ucspi-tcp-0.88/conf-dlopen; \
+	fi
 	#
-	if [ -d libdkim-$(libdkim_version) ] ; then cd libdkim-$(libdkim_version) ; ./configure --prefix=$(prefix) --libdir=$(libdir) --mandir=$(prefix)/man ; cd ..; fi
-	if [ -d libsrs2-$(libsrs2_version) ] ; then cd libsrs2-$(libsrs2_version) ; ./configure --prefix=$(prefix) --libdir=$(libdir) --mandir=$(prefix)/man ; cd ..; fi
-	if [ -d indimail-$(version) ] ; then FAKED_MODE=1;export FAKED_MODE;cd indimail-$(version);./configure --prefix=$(prefix) --libdir=$(libdir) --with-pkgconfigdir=$(pkgdir) --libexecdir=$(prefix)/libexec --mandir=$(prefix)/man --sysconfdir=$(prefix)/etc --enable-qmaildir=$(prefix) --enable-domaindir=$(domaindir) --enable-tcprules-prog=$(prefix)/bin/tcprules --enable-tcpserver-file=$(prefix)/etc/tcp.smtp --enable-mysqlprefix=/usr --enable-moduledir=/lib/security `cat config/indimail.opts`;cd ..;unset FAKED_MODE; fi
-	if [ -d courier-imap-$(courier_version) ] ; then cd courier-imap-$(courier_version) ; ./configure --prefix=$(prefix) --libdir=$(libdir) --mandir=$(prefix)/man `cat ../indimail-$(version)/config/courier-imap.opts`; cd ..; fi
-	if [ -d bogofilter-$(bogofilter_version) ] ; then cd bogofilter-$(bogofilter_version) ; ./configure --prefix=$(prefix) --sysconfdir=$(prefix)/etc --libexecdir=$(prefix)/libexec --mandir=$(prefix)/man `cat ../indimail-$(version)/config/bogofilter.opts`; cd ..; fi
-	if [ -d fetchmail-$(fetchmail_version) ] ; then cd fetchmail-$(fetchmail_version); ./configure --prefix=$(prefix) --enable-indimail --enable-indimaildir=$(prefix) --libexecdir=$(prefix)/libexec --mandir=$(prefix)/man `cat ../indimail-$(version)/config/fetchmail.opts`; cd ..; fi
-	if [ -d nssd-$(nssd_version) ] ; then cd nssd-$(nssd_version) ; ./configure --prefix=$(prefix) --sysconfdir=$(prefix)/etc --libdir=$(libdir) --mandir=$(prefix)/man --enable-mysqlprefix=/usr `cat ../indimail-$(version)/config/nssd.opts`; cd ..; fi
-	if [ -d clamav-$(clamav_version) ] ; then  cd clamav-$(clamav_version) ; ./configure --prefix=$(prefix) --sysconfdir=$(prefix)/etc --with-dbdir=$(prefix)/share/clamd --libexecdir=$(prefix)/libexec --mandir=$(prefix)/man `cat ../indimail-$(version)/config/clamav.opts`; cd ..; fi
+	if [ -d libdkim-$(libdkim_version) ] ; then \
+		cd libdkim-$(libdkim_version) ; \
+		./configure --prefix=$(prefix) --libdir=$(libdir) --mandir=$(mandir) ; \
+		cd ..; \
+	fi
+	if [ -d libsrs2-$(libsrs2_version) ] ; then \
+		cd libsrs2-$(libsrs2_version) ; \
+		./configure --prefix=$(prefix) --libdir=$(libdir) --mandir=$(mandir) ; \
+		cd ..; \
+	fi
+	if [ -d indimail-$(version) ] ; then \
+		FAKED_MODE=1;export FAKED_MODE; \
+		cd indimail-$(version); \
+		./configure --prefix=$(prefix) --libdir=$(libdir) --datarootdir=$(shareddir) \
+		--with-pkgconfigdir=$(pkgconfigdir) --libexecdir=$(libexecdir) --enable-shareddir=$(shareddir) \
+		--enable-modbase=$(prefix)/lib/indimail --mandir=$(mandir) --sysconfdir=$(sysconfdir) \
+		--enable-qmaildir=$(indimaildir) --enable-domaindir=$(domaindir) \
+		--enable-tcprules-prog=$(prefix)/bin/tcprules \
+		--enable-tcpserver-file=$(sysconfdir)/tcp.smtp \
+		--enable-mysqlprefix=/usr --enable-moduledir=/lib/security `cat config/indimail.opts`; \
+		cd ..; \
+		unset FAKED_MODE; \
+	fi
+	if [ -d courier-imap-$(courier_version) ] ; then \
+		cd courier-imap-$(courier_version) ; \
+		./configure --prefix=$(prefix) --sysconfdir=$(sysconfdir) --libdir=$(libdir) \
+		--datarootdir=$(shareddir) --mandir=$(mandir) `cat ../indimail-$(version)/config/courier-imap.opts`; \
+		cd ..; \
+	fi
+	if [ -d bogofilter-$(bogofilter_version) ] ; then \
+		cd bogofilter-$(bogofilter_version) ; \
+		./configure --prefix=$(prefix) --sysconfdir=$(sysconfdir) --libexecdir=$(libexecdir) \
+		--mandir=$(mandir) `cat ../indimail-$(version)/config/bogofilter.opts`; \
+		cd ..; \
+	fi
+	if [ -d fetchmail-$(fetchmail_version) ] ; then \
+		cd fetchmail-$(fetchmail_version); \
+		./configure --prefix=$(prefix) --sysconfdir=$(sysconfdir) --enable-indimail -\
+		-enable-indimaildir=$(prefix) --datarootdir=$(shareddir) --libexecdir=$(libexecdir) \
+		--mandir=$(mandir) `cat ../indimail-$(version)/config/fetchmail.opts`; \
+		cd ..; \
+	fi
+	if [ -d nssd-$(nssd_version) ] ; then \
+		cd nssd-$(nssd_version) ; \
+		./configure --prefix=$(prefix) --sysconfdir=$(sysconfdir) --libdir=$(libdir) \
+		--mandir=$(mandir) --enable-mysqlprefix=/usr `cat ../indimail-$(version)/config/nssd.opts`; \
+		cd ..; \
+	fi
+	if [ -d clamav-$(clamav_version) ] ; then  \
+		cd clamav-$(clamav_version) ; \
+		./configure --prefix=$(prefix) --sysconfdir=$(sysconfdir) --with-dbdir=$(prefix)/share/clamd \
+		--libexecdir=$(libexecdir) --mandir=$(mandir) `cat ../indimail-$(version)/config/clamav.opts`; \
+		cd ..; \
+	fi
 	#
 	# run make
 	#
 	if [ -d libdkim-$(libdkim_version) ] ; then       $(MAKE) -s -C libdkim-$(libdkim_version) DESTDIR=$(DESTDIR); fi
 	if [ -d libsrs2-$(libsrs2_version) ] ; then       $(MAKE) -s -C libsrs2-$(libsrs2_version) DESTDIR=$(DESTDIR); fi
-	if [ -d indimail-$(version) ] ; then FAKED_MODE=1;export FAKED_MODE; $(MAKE) -s -C indimail-$(version) DESTDIR=$(DESTDIR);cd ..;unset FAKED_MODE; fi
+	if [ -d indimail-$(version) ] ; then \
+		FAKED_MODE=1;export FAKED_MODE; \
+		$(MAKE) -s -C indimail-$(version) DESTDIR=$(DESTDIR); \
+		cd ..;unset FAKED_MODE; \
+	fi
 	if [ -d ucspi-tcp-0.88 ] ; then                   echo $(prefix) > ucspi-tcp-0.88/conf-home; fi
+	if [ -d ucspi-tcp-0.88 ] ; then                   echo $(shareddir) > ucspi-tcp-0.88/conf-shared; fi
 	if [ -d ucspi-tcp-0.88 ] ; then                   $(MAKE) -s -C ucspi-tcp-0.88 DESTDIR=$(DESTDIR); fi
 	if [ -d courier-imap-$(courier_version) ] ; then  $(MAKE) -s -C courier-imap-$(courier_version) DESTDIR=$(DESTDIR); fi
 	if [ -d bogofilter-$(bogofilter_version) ] ; then $(MAKE) -s -C bogofilter-$(bogofilter_version) DESTDIR=$(DESTDIR); fi
@@ -106,7 +170,6 @@ install: build
 	dh_installdirs
 	if [ -d libdkim-$(libdkim_version) ] ; then       $(MAKE) -s install -C libdkim-$(libdkim_version) DESTDIR=$(DESTDIR); fi
 	if [ -d libsrs2-$(libsrs2_version) ] ; then       $(MAKE) -s install -C libsrs2-$(libsrs2_version) DESTDIR=$(DESTDIR); fi
-	if [ -d ucspi-tcp-0.88 ] ; then                   echo $(prefix) > ucspi-tcp-0.88/conf-home; fi
 	if [ -d ucspi-tcp-0.88 ] ; then                   $(MAKE) -s install -C ucspi-tcp-0.88 DESTDIR=$(DESTDIR); fi
 	if [ -d courier-imap-$(courier_version) ] ; then  $(MAKE) -s install -C courier-imap-$(courier_version) DESTDIR=$(DESTDIR); fi
 	if [ -d bogofilter-$(bogofilter_version) ] ; then $(MAKE) -s install -C bogofilter-$(bogofilter_version) DESTDIR=$(DESTDIR); fi
@@ -118,7 +181,7 @@ install: build
 binary-indep: build install
 	dh_testdir
 	dh_testroot
-	find $(DESTDIR)$(prefix)/man -name '*'.? -type f -exec gzip -q {} \;
+	find $(DESTDIR)$(mandir) -name '*'.? -type f -exec gzip -q {} \;
 	dh_install --sourcedir=$(DESTDIR) -pindimail
 	dh_install --sourcedir=$(DESTDIR) -pindimail-devel
 	dh_install --sourcedir=$(DESTDIR) -plibindimail
