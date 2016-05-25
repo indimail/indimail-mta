@@ -1,5 +1,8 @@
 /*
  * $Log: vmoveuser.c,v $
+ * Revision 2.10  2016-05-25 09:09:22+05:30  Cprogrammer
+ * use LIBEXECDIR for post handle
+ *
  * Revision 2.9  2010-03-02 08:18:27+05:30  Cprogrammer
  * changed Username xxx@yyy does not exist to xxx@yyy: No such user
  *
@@ -81,7 +84,7 @@
 #include <sys/stat.h>
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vmoveuser.c,v 2.9 2010-03-02 08:18:27+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: vmoveuser.c,v 2.10 2016-05-25 09:09:22+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 int
@@ -230,8 +233,8 @@ main(int argc, char **argv)
 	{
 		if (!(base_argv0 = strrchr(argv[0], '/')))
 			base_argv0 = argv[0];
-		return (post_handle("%s/libexec/%s %s@%s %s %s",
-					INDIMAILDIR, base_argv0, User, real_domain, OldDir, NewDir));
+		return (post_handle("%s/%s %s@%s %s %s",
+					LIBEXECDIR, base_argv0, User, real_domain, OldDir, NewDir));
 	} else
 		return (post_handle("%s %s@%s %s %s", tmpstr, User, real_domain, OldDir, NewDir));
 }

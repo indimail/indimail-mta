@@ -1,5 +1,8 @@
 /*
  * $Log: vrenamedomain.c,v $
+ * Revision 2.17  2016-05-25 09:09:54+05:30  Cprogrammer
+ * use LIBEXECDIR for post handle
+ *
  * Revision 2.16  2016-01-19 00:35:46+05:30  Cprogrammer
  * fixed bogus comparision.
  *
@@ -59,7 +62,7 @@
 #include <sys/stat.h>
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vrenamedomain.c,v 2.16 2016-01-19 00:35:46+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: vrenamedomain.c,v 2.17 2016-05-25 09:09:54+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 int
@@ -236,7 +239,7 @@ main(int argc, char **argv)
 	{
 		if (!(base_argv0 = strrchr(argv[0], '/')))
 			base_argv0 = argv[0];
-		return(post_handle("%s/libexec/%s %s %s", INDIMAILDIR, base_argv0, argv[1], argv[2]));
+		return(post_handle("%s/%s %s %s", LIBEXECDIR, base_argv0, argv[1], argv[2]));
 	} else
 		return(post_handle("%s %s %s", ptr, argv[1], argv[2]));
 }

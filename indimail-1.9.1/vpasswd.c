@@ -1,5 +1,8 @@
 /*
  * $Log: vpasswd.c,v $
+ * Revision 2.15  2016-05-25 09:09:31+05:30  Cprogrammer
+ * use LIBEXECDIR for post handle
+ *
  * Revision 2.14  2011-11-09 19:46:27+05:30  Cprogrammer
  * removed getversion
  *
@@ -101,7 +104,7 @@
 #include <signal.h>
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vpasswd.c,v 2.14 2011-11-09 19:46:27+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: vpasswd.c,v 2.15 2016-05-25 09:09:31+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 
@@ -157,7 +160,7 @@ main(argc, argv)
 	{
 		if (!(base_argv0 = strrchr(argv[0], '/')))
 			base_argv0 = argv[0];
-		return (post_handle("%s/libexec/%s %s@%s", INDIMAILDIR, base_argv0, User, real_domain));
+		return (post_handle("%s/%s %s@%s", LIBEXECDIR, base_argv0, User, real_domain));
 	} else
 		return (post_handle("%s %s@%s", ptr, User, real_domain));
 }

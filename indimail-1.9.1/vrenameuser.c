@@ -1,5 +1,8 @@
 /*
  * $Log: vrenameuser.c,v $
+ * Revision 2.13  2016-05-25 09:10:00+05:30  Cprogrammer
+ * use LIBEXECDIR for post handle
+ *
  * Revision 2.12  2014-04-17 11:43:04+05:30  Cprogrammer
  * set supplementary group ids for indimail
  *
@@ -50,7 +53,7 @@
 #include <signal.h>
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vrenameuser.c,v 2.12 2014-04-17 11:43:04+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: vrenameuser.c,v 2.13 2016-05-25 09:10:00+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 char            oldEmail[MAX_BUFF];
@@ -130,7 +133,7 @@ main(argc, argv)
 	{
 		if (!(base_argv0 = strrchr(argv[0], '/')))
 			base_argv0 = argv[0];
-		return (post_handle("%s/libexec/%s %s %s", INDIMAILDIR, base_argv0, oldEmail, newEmail));
+		return (post_handle("%s/%s %s %s", LIBEXECDIR, base_argv0, oldEmail, newEmail));
 	} else
 		return (post_handle("%s %s %s", ptr, oldEmail, newEmail));
 }
