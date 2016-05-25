@@ -30,6 +30,6 @@ munpack.1: unixunpk.man
 
 install-data-hook:
 	for f in $(doc_list); do \
-		/bin/mkdir -p $(DESTDIR)@prefix@/doc; \
-		$(INSTALL_DATA) $$f $(DESTDIR)@prefix@/doc/$$f || exit 1 ;\
+		/bin/mkdir -p $(DESTDIR)@datarootdir@/doc; \
+		$(INSTALL_DATA) $$f $(DESTDIR)@datarootdir@/doc/$$f || exit 1 ;\
 	done
