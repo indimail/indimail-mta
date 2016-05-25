@@ -1,5 +1,8 @@
 /*
  * $Log: vdeldomain.c,v $
+ * Revision 2.16  2016-05-25 09:07:44+05:30  Cprogrammer
+ * use LIBEXECDIR for post handle
+ *
  * Revision 2.15  2016-05-17 17:09:39+05:30  Cprogrammer
  * use control directory set by configure
  *
@@ -103,7 +106,7 @@
 #include <sys/socket.h>
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vdeldomain.c,v 2.15 2016-05-17 17:09:39+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: vdeldomain.c,v 2.16 2016-05-25 09:07:44+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 char            Domain[MAX_BUFF];
@@ -203,7 +206,7 @@ main(argc, argv)
 	{
 		if (!(base_argv0 = strrchr(argv[0], '/')))
 			base_argv0 = argv[0];
-		return(post_handle("%s/libexec/%s %s", INDIMAILDIR, base_argv0, Domain));
+		return(post_handle("%s/%s %s", LIBEXECDIR, base_argv0, Domain));
 	} else
 		return(post_handle("%s %s", ptr, Domain));
 }
