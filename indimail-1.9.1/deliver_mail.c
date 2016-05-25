@@ -1,5 +1,8 @@
 /*
  * $Log: deliver_mail.c,v $
+ * Revision 2.65  2016-05-25 09:00:40+05:30  Cprogrammer
+ * use LIBEXECDIR for overquota.sh
+ *
  * Revision 2.64  2016-05-17 17:09:39+05:30  Cprogrammer
  * use control directory set by configure
  *
@@ -220,7 +223,7 @@
 #include <sys/wait.h>
 
 #ifndef	lint
-static char     sccsid[] = "$Id: deliver_mail.c,v 2.64 2016-05-17 17:09:39+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: deliver_mail.c,v 2.65 2016-05-25 09:00:40+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 /*- Function Prototypes */
@@ -630,7 +633,7 @@ deliver_mail(char *address, mdir_t MsgSize, char *quota, uid_t uid, gid_t gid,
 		{
 			if ((ret = recordMailcount(address, MsgSize, &dailyMsgSize, &dailyMsgCount)) == -1)
 			{
-				getEnvConfigStr(&ptr, "OVERQUOTA_CMD", INDIMAILDIR"/libexec/overquota.sh");
+				getEnvConfigStr(&ptr, "OVERQUOTA_CMD", LIBEXECDIR"/overquota.sh");
 				if (!access(ptr, X_OK))
 				{
 					/*
@@ -698,7 +701,7 @@ deliver_mail(char *address, mdir_t MsgSize, char *quota, uid_t uid, gid_t gid,
 				return (-2);
 			if (ret == 1)
 			{
-				getEnvConfigStr(&ptr, "OVERQUOTA_CMD", INDIMAILDIR"/libexec/overquota.sh");
+				getEnvConfigStr(&ptr, "OVERQUOTA_CMD", LIBEXECDIR"/overquota.sh");
 				if (!access(ptr, X_OK))
 				{
 					/*
