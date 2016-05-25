@@ -22,7 +22,7 @@ fortune_SOURCES = fortune.c
 
 fortunebindir=@prefix@/bin
 fortunesbindir=@prefix@/sbin
-fortunedatadir=@prefix@/share/fortunes
+fortunedatadir=@datarootdir@/fortunes
 fortunedata_INSTALL=sh ./copy_fortune
 
 fortunebin_PROGRAMS = fortune randstr
