@@ -1,5 +1,8 @@
 /*
  * $Log: vfilter_header.c,v $
+ * Revision 2.5  2016-05-25 09:11:06+05:30  Cprogrammer
+ * use SYSCONFDIR for headerlist
+ *
  * Revision 2.4  2008-07-13 19:49:53+05:30  Cprogrammer
  * compilation on Mac OS X
  *
@@ -16,7 +19,7 @@
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vfilter_header.c,v 2.4 2008-07-13 19:49:53+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: vfilter_header.c,v 2.5 2016-05-25 09:11:06+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef VFILTER
@@ -28,16 +31,15 @@ static char     sccsid[] = "$Id: vfilter_header.c,v 2.4 2008-07-13 19:49:53+05:3
 char          **
 headerList()
 {
-	char            buffer[MAX_BUFF], tmpbuf[MAX_BUFF];
+	char            buffer[MAX_BUFF];
 	int             count, len;
-	char           *ptr;
+	char           *ptr = SYSCONFDIR"/headerlist";
 	char          **hptr;
 	FILE           *fp;
 
-	snprintf(tmpbuf, MAX_BUFF, "%s/etc/headerlist", INDIMAILDIR);
-	if (!(fp = fopen(tmpbuf, "r")))
+	if (!(fp = fopen(ptr, "r")))
 	{
-		fprintf(stderr, "headerList: %s: %s\n", tmpbuf, strerror(errno));
+		fprintf(stderr, "headerList: %s: %s\n", ptr, strerror(errno));
 		return ((char **) 0);
 	}
 	for (count = 0;;)
