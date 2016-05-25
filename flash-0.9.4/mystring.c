@@ -1,5 +1,8 @@
 /*
  * $Log: mystring.c,v $
+ * Revision 1.4  2016-05-25 09:12:44+05:30  Cprogrammer
+ * use SYSCONFDIR for base directory
+ *
  * Revision 1.3  2008-05-21 16:42:15+05:30  Cprogrammer
  * *** empty log message ***
  *
@@ -23,8 +26,8 @@
 #include "mystring.h"
 #include "misc.h"
 
-char           *basedirectory = INDIMAILDIR;
-char           *libdirectory = "/etc";
+char           *basedirectory = SYSCONFDIR;
+char           *libdirectory = "";
 char            escape = ESCAPE;
 
 char           *
@@ -139,11 +142,11 @@ stradp(char *filename, int type)
 	 */
 	if ((*filename == '.') || (*filename == '/'))
 		return filename;
-	strcpy(prefixed_filename, basedirectory);
-	if(type)
+	if(type) {
+		strcpy(prefixed_filename, MODBASE);
 		strcat(prefixed_filename, "/modules");
-	else
-		strcat(prefixed_filename, libdirectory);
+	} else
+		strcpy(prefixed_filename, basedirectory);
 	if (strlen(prefixed_filename) && prefixed_filename[strlen(prefixed_filename) - 1] != '/')
 		strcat(prefixed_filename, "/");
 	strcat(prefixed_filename, filename);
