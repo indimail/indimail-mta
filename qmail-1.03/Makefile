@@ -6,7 +6,8 @@ INDIDIR := $(shell head -1 conf-qmail 2>/dev/null|| echo "/var/indimail")
 SYSTEM := $(shell uname -s)
 SHELL=/bin/sh
 inc_deps := -DHAVE_CONFIG_H -I$(DESTDIR)$(INDIDIR)/include `cat ./inc_deps 2>/dev/null`
-lib_deps := -L$(DESTDIR)$(INDIDIR)/lib `cat ./lib_deps 2>/dev/null`
+#lib_deps := -L$(DESTDIR)$(INDIDIR)/lib `cat ./lib_deps 2>/dev/null`
+lib_deps=$(shell cat ./lib_deps)
 
 default: it man leapsecs.dat
 
