@@ -1,5 +1,8 @@
 /*
  * $Log: indiversion.c,v $
+ * Revision 2.139  2016-05-25 09:02:02+05:30  Cprogrammer
+ * use SYSCONFDIR for qmailprog.list, LIBEXECDIR for libexec programs
+ *
  * Revision 2.138  2015-08-26 11:08:06+05:30  Cprogrammer
  * added isPrime() function
  *
@@ -535,7 +538,7 @@
 #endif
 
 #ifndef	lint
-static char     sccsid[] = "$Id: indiversion.c,v 2.138 2015-08-26 11:08:06+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: indiversion.c,v 2.139 2016-05-25 09:02:02+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 void            getversion_indimail_settings_c();
@@ -943,7 +946,8 @@ int
 main()
 {
 	void indimail_settings();
-	char            listfile[MAX_BUFF];
+	char            buffer[MAX_BUFF];
+	char           *listfile = SYSCONFDIR"/qmailprog.list";
 	char          **ptr;
 	FILE           *fp;
 
@@ -955,15 +959,14 @@ main()
 		Ident(*ptr, 2);
 	for(ptr = libexec_program_list;*ptr;ptr++)
 		Ident(*ptr, 3);
-	snprintf(listfile, sizeof(listfile), "%s/etc/qmailprog.list", INDIMAILDIR);
 	if ((fp = fopen(listfile, "r")))
 	{
 		printf("\nMain Program Version List (qmail)\n");
 		for(;;)
 		{
-			if (fscanf(fp, "%s", listfile) == EOF)
+			if (fscanf(fp, "%s", buffer) == EOF)
 				break;
-			Ident(listfile, 0);
+			Ident(buffer, 0);
 		}
 		fclose(fp);
 	}
@@ -1294,7 +1297,7 @@ Ident(char *pgname, int mode)
 		snprintf(buffer, MAX_BUFF, "strings %s/sbin/%s", INDIMAILDIR, pgname);
 	else
 	if (mode == 3)
-		snprintf(buffer, MAX_BUFF, "strings %s/libexec/%s", INDIMAILDIR, pgname);
+		snprintf(buffer, MAX_BUFF, "strings %s/%s", LIBEXECDIR, pgname);
 	else
 		snprintf(buffer, MAX_BUFF, "strings %s/bin/%s", QMAILDIR, pgname);
 	if(!(fp = popen(buffer, "r")))
