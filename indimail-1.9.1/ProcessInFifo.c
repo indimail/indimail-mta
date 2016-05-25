@@ -1,5 +1,8 @@
 /*
  * $Log: ProcessInFifo.c,v $
+ * Revision 2.40  2016-05-25 09:05:20+05:30  Cprogrammer
+ * use /usr/lib/indimail for plugins
+ *
  * Revision 2.39  2016-05-17 17:09:39+05:30  Cprogrammer
  * use control directory set by configure
  *
@@ -132,7 +135,7 @@
  */
 
 #ifndef	lint
-static char     sccsid[] = "$Id: ProcessInFifo.c,v 2.39 2016-05-17 17:09:39+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: ProcessInFifo.c,v 2.40 2016-05-25 09:05:20+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #include <fcntl.h>
@@ -191,7 +194,7 @@ do_startup(int instNum)
 		plugin_symb = "startup";
 	if (!(start_plugin = getenv("START_PLUGIN")))
 		start_plugin = "indimail-license.so";
-	snprintf(plugin, MAX_BUFF - 1, INDIMAILDIR"/%s/%s", plugindir, start_plugin);
+	snprintf(plugin, MAX_BUFF - 1, "/usr/lib/indimail/%s/%s", plugindir, start_plugin);
 	if (access(plugin, F_OK))
 	{
 		fprintf(stderr, "InLookup[%d] plugin %s: %s\n", instNum, plugin, strerror(errno));
