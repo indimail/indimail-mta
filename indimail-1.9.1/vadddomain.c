@@ -1,5 +1,8 @@
 /*
  * $Log: vadddomain.c,v $
+ * Revision 2.36  2016-05-25 09:06:24+05:30  Cprogrammer
+ * use LIBEXECDIR for post handle
+ *
  * Revision 2.35  2016-05-18 11:47:03+05:30  Cprogrammer
  * fixed comments
  *
@@ -171,7 +174,7 @@
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vadddomain.c,v 2.35 2016-05-18 11:47:03+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: vadddomain.c,v 2.36 2016-05-25 09:06:24+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 
@@ -459,7 +462,7 @@ main(argc, argv)
 	{
 		if (!(base_argv0 = strrchr(argv[0], '/')))
 			base_argv0 = argv[0];
-		return(post_handle("%s/libexec/%s %s", INDIMAILDIR, base_argv0, Domain));
+		return(post_handle("%s/%s %s", LIBEXECDIR, base_argv0, Domain));
 	} else
 		return(post_handle("%s %s", ptr, Domain));
 }
