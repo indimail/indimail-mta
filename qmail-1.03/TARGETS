@@ -1,6 +1,3 @@
-conf-prefix
-conf-shared
-conf-sysconfdir
 auto_prefix.c
 auto_prefix.o
 auto_sysconfdir.c
