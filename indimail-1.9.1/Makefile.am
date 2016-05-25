@@ -5,6 +5,7 @@ COFLAGS=-z+05:30
 ACLOCAL_AMFLAGS=-I m4
 
 DEFS=@DEFS@ -fno-strict-aliasing -I. -Ieps-1.2 @auth_inc@
+cdb_lib=$(top_builddir)/cdb-1.0/libcdb.la
 
 INSTALL_PROGRAM = ${INSTALL}          -c
 install_sh_PROGRAM = $(install_sh)    -c
@@ -19,7 +20,7 @@ indimailauthlibdir=@libexecdir@/authlib
 
 libindimail_LTLIBRARIES = libindimail.la
 libindimail_la_SOURCES = $(COMMONSOURCES)
-libindimail_la_LIBADD =  $(top_builddir)/cdb-1.0/libcdb.la -L@mysql_libdir@ -lmysqlclient \
+libindimail_la_LIBADD =  -L@mysql_libdir@ -lmysqlclient \
 						 @LIB_CRYPT@ @LIB_SSL@ -lm
 libindimail_la_DEPENDENCIES = $(top_builddir)/cdb-1.0/libcdb.la
 libindimail_la_LDFLAGS = -version-info @LIBVER@:0:0 -release @VERSION@
@@ -183,173 +184,173 @@ usr.bin.freshclam
 #DISTCLEANFILES=.gitignore
 
 vuserinfo_SOURCES = vuserinfo.c
-vuserinfo_LDADD = @auth_libs@
+vuserinfo_LDADD = @auth_libs@ $(cdb_lib)
 
 vdominfo_SOURCES = vdominfo.c
-vdominfo_LDADD = @auth_libs@
+vdominfo_LDADD = @auth_libs@ $(cdb_lib)
 
 vdelivermail_SOURCES = vdelivermail.c 
-vdelivermail_LDADD = @auth_libs@
+vdelivermail_LDADD = @auth_libs@ $(cdb_lib)
 
 ismaildup_SOURCES = ismaildup.c 
-ismaildup_LDADD = @auth_libs@
+ismaildup_LDADD = @auth_libs@ $(cdb_lib)
 ismaildup_CFLAGS = -DMAIN
 
 printdir_SOURCES = printdir.c 
-printdir_LDADD = @auth_libs@
+printdir_LDADD = @auth_libs@ $(cdb_lib)
 
 hostsync_SOURCES = hostsync.c 
-hostsync_LDADD = @auth_libs@
+hostsync_LDADD = @auth_libs@ $(cdb_lib)
 
 clearopensmtp_SOURCES = clearopensmtp.c
-clearopensmtp_LDADD = @auth_libs@
+clearopensmtp_LDADD = @auth_libs@ $(cdb_lib)
 
 vadddomain_SOURCES = vadddomain.c 
-vadddomain_LDADD = @auth_libs@
+vadddomain_LDADD = @auth_libs@ $(cdb_lib)
 
 vdeldomain_SOURCES = vdeldomain.c 
-vdeldomain_LDADD = @auth_libs@
+vdeldomain_LDADD = @auth_libs@ $(cdb_lib)
 
 vpasswd_SOURCES = vpasswd.c 
-vpasswd_LDADD = @auth_libs@
+vpasswd_LDADD = @auth_libs@ $(cdb_lib)
 
 vadduser_SOURCES = vadduser.c
-vadduser_LDADD = @auth_libs@ $(shell cat socket.lib 2>/dev/null)
+vadduser_LDADD = @auth_libs@ $(cdb_lib) $(shell cat socket.lib 2>/dev/null)
 
 vgroup_SOURCES = vgroup.c
-vgroup_LDADD = @auth_libs@
+vgroup_LDADD = @auth_libs@ $(cdb_lib)
 
 vadduserl_SOURCES = vadduserl.c
-vadduserl_LDADD = @auth_libs@
+vadduserl_LDADD = @auth_libs@ $(cdb_lib)
 
 cindimail_SOURCES = cindimail.c 
-cindimail_LDADD = @auth_libs@ -lreadline @LIB_TERMCAP@
+cindimail_LDADD = @auth_libs@ $(cdb_lib) -lreadline @LIB_TERMCAP@
 
 vatrn_SOURCES = vatrn.c 
-vatrn_LDADD = @auth_libs@
+vatrn_LDADD = @auth_libs@ $(cdb_lib)
 
 vdeluser_SOURCES = vdeluser.c 
-vdeluser_LDADD = @auth_libs@
+vdeluser_LDADD = @auth_libs@ $(cdb_lib)
 
 vaddaliasdomain_SOURCES = vaddaliasdomain.c 
-vaddaliasdomain_LDADD = @auth_libs@
+vaddaliasdomain_LDADD = @auth_libs@ $(cdb_lib)
 
 vsetuserquota_SOURCES = vsetuserquota.c 
-vsetuserquota_LDADD = @auth_libs@
+vsetuserquota_LDADD = @auth_libs@ $(cdb_lib)
 
 vbulletin_SOURCES = vbulletin.c 
-vbulletin_LDADD = @auth_libs@
+vbulletin_LDADD = @auth_libs@ $(cdb_lib)
 
 vdeloldusers_SOURCES = vdeloldusers.c 
-vdeloldusers_LDADD = @auth_libs@
+vdeloldusers_LDADD = @auth_libs@ $(cdb_lib)
 
 vmoduser_SOURCES = vmoduser.c 
-vmoduser_LDADD = @auth_libs@
+vmoduser_LDADD = @auth_libs@ $(cdb_lib)
 
 vlimit_SOURCES = vlimit.c
-vlimit_LDADD = @auth_libs@
+vlimit_LDADD = @auth_libs@ $(cdb_lib)
 
 valias_SOURCES = valias.c 
-valias_LDADD = @auth_libs@
+valias_LDADD = @auth_libs@ $(cdb_lib)
 
 vipmap_SOURCES = vipmap.c 
-vipmap_LDADD = @auth_libs@
+vipmap_LDADD = @auth_libs@ $(cdb_lib)
 
 vacation_SOURCES = vacation.c 
-vacation_LDADD = @auth_libs@
+vacation_LDADD = @auth_libs@ $(cdb_lib)
 
 updaterules_SOURCES = updaterules.c 
-updaterules_LDADD = @auth_libs@
+updaterules_LDADD = @auth_libs@ $(cdb_lib)
 
 vreorg_SOURCES = vreorg.c
-vreorg_LDADD = @auth_libs@
+vreorg_LDADD = @auth_libs@ $(cdb_lib)
 
 vmoveuser_SOURCES = vmoveuser.c
-vmoveuser_LDADD = @auth_libs@
+vmoveuser_LDADD = @auth_libs@ $(cdb_lib)
 
 vrenameuser_SOURCES = vrenameuser.c
-vrenameuser_LDADD = @auth_libs@
+vrenameuser_LDADD = @auth_libs@ $(cdb_lib)
 
 vrenamedomain_SOURCES = vrenamedomain.c
-vrenamedomain_LDADD = @auth_libs@
+vrenamedomain_LDADD = @auth_libs@ $(cdb_lib)
 
 vcalias_SOURCES = vcalias.c
-vcalias_LDADD = @auth_libs@
+vcalias_LDADD = @auth_libs@ $(cdb_lib)
 
 vsmtp_SOURCES = vsmtp.c 
-vsmtp_LDADD = @auth_libs@
+vsmtp_LDADD = @auth_libs@ $(cdb_lib)
 
 vfstab_SOURCES = vfstab.c
-vfstab_LDADD = @auth_libs@
+vfstab_LDADD = @auth_libs@ $(cdb_lib)
 
 vhostid_SOURCES = vhostid.c 
-vhostid_LDADD = @auth_libs@
+vhostid_LDADD = @auth_libs@ $(cdb_lib)
 
 indisrvr_SOURCES = indisrvr.c 
-indisrvr_LDADD = @auth_libs@ $(shell cat socket.lib 2>/dev/null)
+indisrvr_LDADD = @auth_libs@ $(cdb_lib) $(shell cat socket.lib 2>/dev/null)
 
 sslerator_SOURCES = sslerator.c 
-sslerator_LDADD = @auth_libs@ $(shell cat socket.lib 2>/dev/null)
+sslerator_LDADD = @auth_libs@ $(cdb_lib) $(shell cat socket.lib 2>/dev/null)
 
 proxyimap_SOURCES = proxyimap.c 
-proxyimap_LDADD = @auth_libs@ proxylogin.lo tls.lo auth_admin.lo adminCmmd.lo
+proxyimap_LDADD = @auth_libs@ $(cdb_lib) proxylogin.lo tls.lo auth_admin.lo adminCmmd.lo
 proxyimap_DEPENDENCIES = proxylogin.lo tls.lo auth_admin.lo adminCmmd.lo
 
 proxypop3_SOURCES = proxypop3.c 
-proxypop3_LDADD = @auth_libs@ proxylogin.lo tls.lo auth_admin.lo adminCmmd.lo
+proxypop3_LDADD = @auth_libs@ $(cdb_lib) proxylogin.lo tls.lo auth_admin.lo adminCmmd.lo
 proxypop3_DEPENDENCIES = proxylogin.lo tls.lo auth_admin.lo adminCmmd.lo
 
 vchkpass_SOURCES = vchkpass.c 
-vchkpass_LDADD = @auth_libs@
+vchkpass_LDADD = @auth_libs@ $(cdb_lib)
 
 vsetpass_SOURCES = vsetpass.c 
-vsetpass_LDADD = @auth_libs@
+vsetpass_LDADD = @auth_libs@ $(cdb_lib)
 
 authindi_SOURCES = authindi.c 
-authindi_LDADD = @auth_libs@
+authindi_LDADD = @auth_libs@ $(cdb_lib)
 
 systpass_SOURCES = systpass.c 
-systpass_LDADD = @auth_libs@
+systpass_LDADD = @auth_libs@ $(cdb_lib)
 
 vproxy_SOURCES = vproxy.c 
-vproxy_LDADD = @auth_libs@
+vproxy_LDADD = @auth_libs@ $(cdb_lib)
 
 dbinfo_SOURCES = dbinfo.c 
-dbinfo_LDADD = @auth_libs@
+dbinfo_LDADD = @auth_libs@ $(cdb_lib)
 
 inquerytest_SOURCES = inquerytest.c 
-inquerytest_LDADD = @auth_libs@
+inquerytest_LDADD = @auth_libs@ $(cdb_lib)
 
 inlookup_SOURCES = inlookup.c 
-inlookup_LDADD = @auth_libs@
+inlookup_LDADD = @auth_libs@ $(cdb_lib)
 
 mgmtpass_SOURCES = mgmtpass.c 
-mgmtpass_LDADD = @auth_libs@
+mgmtpass_LDADD = @auth_libs@ $(cdb_lib)
 
 adminclient_SOURCES = adminclient.c
-adminclient_LDADD = @auth_libs@ tls.lo auth_admin.lo adminCmmd.lo
+adminclient_LDADD = @auth_libs@ tls.lo auth_admin.lo adminCmmd.lo $(cdb_lib)
 adminclient_DEPENDENCIES = tls.lo auth_admin.lo adminCmmd.lo
 
 sq_vacation_SOURCES = sq_vacation.c
-sq_vacation_LDADD = @auth_libs@
+sq_vacation_LDADD = @auth_libs@ $(cdb_lib)
 
 qmailmrtg7_SOURCES = qmailmrtg7.c
-qmailmrtg7_LDADD = @auth_libs@
+qmailmrtg7_LDADD = @auth_libs@ $(cdb_lib)
 
 vpriv_SOURCES = vpriv.c 
-vpriv_LDADD = @auth_libs@
+vpriv_LDADD = @auth_libs@ $(cdb_lib)
 
 hostcntrl_SOURCES = hostcntrl.c 
-hostcntrl_LDADD = @auth_libs@
+hostcntrl_LDADD = @auth_libs@ $(cdb_lib)
 
 ipchange_SOURCES = ipchange.c 
-ipchange_LDADD = @auth_libs@
+ipchange_LDADD = @auth_libs@ $(cdb_lib)
 
 resetquota_SOURCES = resetquota.c 
-resetquota_LDADD = @auth_libs@
+resetquota_LDADD = @auth_libs@ $(cdb_lib)
 
 testmra_SOURCES = testmra.c 
-testmra_LDADD = @auth_libs@ $(shell cat socket.lib 2>/dev/null)
+testmra_LDADD = @auth_libs@ $(cdb_lib) $(shell cat socket.lib 2>/dev/null)
 
 config_settings_SOURCES=config_settings.c
 config_settings_LDADD=
@@ -361,39 +362,39 @@ crcdiff_SOURCES=crcdiff.c
 crcdiff_LDADD=
 
 authpgsql_SOURCES=authpgsql.c
-authpgsql_LDADD=@auth_pg_libs@ @auth_libs@
+authpgsql_LDADD=@auth_pg_libs@ @auth_libs@ $(cdb_lib)
 
 crypt_SOURCES = crypt.c
 crypt_LDADD = @LIB_CRYPT@
 
 vfilter_SOURCES=vfilter.c
 vfilter_DEPENDENCIES=storeHeader.lo parseAddress.lo
-vfilter_LDADD= storeHeader.lo parseAddress.lo $(top_builddir)/eps-1.2/libeps.la @auth_libs@
+vfilter_LDADD= storeHeader.lo parseAddress.lo $(top_builddir)/eps-1.2/libeps.la @auth_libs@ $(cdb_lib)
 
 vmoddomain_SOURCES=vmoddomain.c
-vmoddomain_LDADD= @auth_libs@
+vmoddomain_LDADD= @auth_libs@ $(cdb_lib)
 
 vcfilter_SOURCES=vcfilter.c
-vcfilter_LDADD= @auth_libs@
+vcfilter_LDADD= @auth_libs@ $(cdb_lib)
 
 copyemail_SOURCES=copyemail.c
-copyemail_LDADD= @auth_libs@
+copyemail_LDADD= @auth_libs@ $(cdb_lib)
 
 mail_report_SOURCES=mail_report.c
-mail_report_LDADD= @auth_libs@
+mail_report_LDADD= @auth_libs@ $(cdb_lib)
 
 
 chowkidar_SOURCES = chowkidar.c
-chowkidar_LDADD = @auth_libs@
+chowkidar_LDADD = @auth_libs@ $(cdb_lib)
 
 postdel_SOURCES = postdel.c
-postdel_LDADD = @auth_libs@
+postdel_LDADD = @auth_libs@ $(cdb_lib)
 
 execmysql_SOURCES = execmysql.c
-execmysql_LDADD = @auth_libs@
+execmysql_LDADD = @auth_libs@ $(cdb_lib)
 
 vserverinfo_SOURCES = vserverinfo.c
-vserverinfo_LDADD = @auth_libs@
+vserverinfo_LDADD = @auth_libs@ $(cdb_lib)
 
 displaytop_SOURCES = displaytop.c
 displaytop_LDADD = @LIB_CURSES@ @LIB_TERMCAP@
@@ -407,23 +408,24 @@ hashtable_LDADD =
 hashtable_DEPENDENCIES = makeseekable.lo sockwrite.lo
 
 updatefile_SOURCES=updatefile.c
-updatefile_LDADD= @auth_libs@
+updatefile_LDADD= @auth_libs@ $(cdb_lib)
 
 initsvc_SOURCES = initsvc.c
 initsvc_LDADD =
 initsvc_DEPENDENCIES = getEnvConfig.lo fappend.lo
 
 install_tables_SOURCES = install_tables.c
-install_tables_LDADD = @auth_libs@
+install_tables_LDADD = @auth_libs@ $(cdb_lib)
 
 vtable_SOURCES = vtable.c
-vtable_LDADD = @auth_libs@
+vtable_LDADD = @auth_libs@ $(cdb_lib)
 
 indiversion_SOURCE = indiversion.c
 indiversion_DEPENDENCIES = indimail_settings.lo tls.lo proxylogin.lo auth_admin.lo \
 						   adminCmmd.lo storeHeader.lo parseAddress.lo
 indiversion_LDADD = proxylogin.lo tls.lo auth_admin.lo adminCmmd.lo storeHeader.lo \
-					parseAddress.lo @auth_libs@ $(top_builddir)/eps-1.2/libeps.la
+					parseAddress.lo @auth_libs@ $(top_builddir)/eps-1.2/libeps.la \
+					$(cdb_lib)
 
 iecho_SOURCES=iecho.c
 iecho_LDADD=
@@ -761,6 +763,7 @@ md5_crypt.lo: md5.h global.h
 edit = sed \
 	-e 's,@indimaildir\@,$(indimaildir),g' \
 	-e 's,@qmaildir\@,$(qmaildir),g' \
+	-e 's,@mandir\@,$(mandir),g' \
 	-e 's,@sysconfdir\@,$(sysconfdir),g' \
 	-e 's,@shareddir\@,$(shareddir),g' \
 	-e 's,@mandir\@,$(mandir),g' \
@@ -957,10 +960,8 @@ install-data-hook:
 	$(INSTALL_DATA) data/wordlist.db $(DESTDIR)@sysconfdir@/wordlist.db  || exit 1
 	$(INSTALL_DATA) perm_list $(DESTDIR)@sysconfdir@/perm_list  || exit 1
 	$(mkinstalldirs) $(DESTDIR)@shareddir@/modules || exit 1
-	$(INSTALL_PROGRAM) $(DESTDIR)@libdir@/iauth.so  $(DESTDIR)@shareddir@/modules || exit 1
+	$(INSTALL_PROGRAM) $(DESTDIR)@libdir@/iauth.so  $(DESTDIR)@prefix@/lib/indimail/modules || exit 1
 	/bin/rm -f $(DESTDIR)@libdir@/iauth.* || exit 1
-	$(mkinstalldirs) $(DESTDIR)@sysconfdir@/yum.repos.d || exit 1
-	$(INSTALL_DATA) data/*.repo $(DESTDIR)@sysconfdir@/yum.repos.d || exit 1
 	$(mkinstalldirs) $(DESTDIR)@libexecdir@ || exit 1
 	$(INSTALL_DATA) post_handle/* $(DESTDIR)@libexecdir@ || exit 1
 	for f in $(post_handle_list); do \
@@ -985,10 +986,10 @@ install-data-hook:
 		chown indimail:indimail $(DESTDIR)@sysconfdir@/wordlist.db || true; \
 	fi
 	if test " $(DISTRIB_ID)" = " Ubuntu" -o " $(DISTRIB_ID)" = " Debian" ; then \
-		$(mkinstalldirs) $(DESTDIR)/etc/apparmor.d/local || exit 1; \
-		$(INSTALL_DATA) usr.sbin.mysqld $(DESTDIR)/etc/apparmor.d/local/usr.sbin.mysqld  || exit 1; \
-		$(INSTALL_DATA) usr.sbin.clamd $(DESTDIR)/etc/apparmor.d/local/usr.sbin.clamd  || exit 1; \
-		$(INSTALL_DATA) usr.bin.freshclam $(DESTDIR)/etc/apparmor.d/local/usr.bin.freshclam  || exit 1; \
+		$(mkinstalldirs) $(DESTDIR)@sysconfdir@/apparmor.d/local || exit 1; \
+		$(INSTALL_DATA) usr.sbin.mysqld $(DESTDIR)@sysconfdir@/apparmor.d/local/usr.sbin.mysqld  || exit 1; \
+		$(INSTALL_DATA) usr.sbin.clamd $(DESTDIR)@sysconfdir@/apparmor.d/local/usr.sbin.clamd  || exit 1; \
+		$(INSTALL_DATA) usr.bin.freshclam $(DESTDIR)@sysconfdir@/apparmor.d/local/usr.bin.freshclam  || exit 1; \
 	fi
 	if test " $(DISTRIB_ID)" != " Ubuntu" -a " $(DISTRIB_ID)" != " Debian" ; then \
 		$(INSTALL_DATA) indimail.te $(DESTDIR)@sysconfdir@/indimail.te  || exit 1; \
