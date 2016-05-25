@@ -136,9 +136,9 @@ inc_deps: configure Makefile
 lib_deps: configure Makefile
 	if test -d ../qmail-1.03 ; then \
 		echo "-L../indimail-@VERSION@/.libs -L../indimail-@VERSION@/eps-1.2/.libs \
-		-L../indimail-@VERSION@/cdb-1.0/.libs @auth_libs@" > ../qmail-1.03/lib_deps; \
+		-L../indimail-@VERSION@/cdb-1.0/.libs -lcdb @auth_libs@" > ../qmail-1.03/lib_deps; \
 	fi ; \
-	echo @auth_libs@ > lib_deps
+	echo "-lcdb @auth_libs@" > lib_deps
 
 indimailbin_PROGRAMS = crc crcdiff dbinfo displaytop hashtable hostcntrl indiversion \
 	printdir proxyimap proxypop3 resetquota sslerator vacation vaddaliasdomain vadddomain \
@@ -763,6 +763,7 @@ md5_crypt.lo: md5.h global.h
 edit = sed \
 	-e 's,@indimaildir\@,$(indimaildir),g' \
 	-e 's,@qmaildir\@,$(qmaildir),g' \
+	-e 's,@controldir\@,$(controldir),g' \
 	-e 's,@mandir\@,$(mandir),g' \
 	-e 's,@sysconfdir\@,$(sysconfdir),g' \
 	-e 's,@shareddir\@,$(shareddir),g' \
