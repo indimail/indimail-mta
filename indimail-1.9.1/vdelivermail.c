@@ -1,5 +1,8 @@
 /*
  * $Log: vdelivermail.c,v $
+ * Revision 2.62  2016-05-25 09:08:03+05:30  Cprogrammer
+ * use LIBEXECDIR for overquota.sh
+ *
  * Revision 2.61  2016-05-17 17:09:39+05:30  Cprogrammer
  * use control directory set by configure
  *
@@ -267,7 +270,7 @@
 #include <sys/wait.h>
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vdelivermail.c,v 2.61 2016-05-17 17:09:39+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: vdelivermail.c,v 2.62 2016-05-25 09:08:03+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 /*- Globals */
@@ -624,7 +627,7 @@ processMail(struct passwd *pw, char *user, char *domain, mdir_t MsgSize)
 			vset_lastdeliver(user, domain, 0);
 		else
 		{
-			getEnvConfigStr(&ptr, "OVERQUOTA_CMD", INDIMAILDIR"/libexec/overquota.sh");
+			getEnvConfigStr(&ptr, "OVERQUOTA_CMD", LIBEXECDIR"/overquota.sh");
 			if (!access(ptr, X_OK))
 			{
 				/*
