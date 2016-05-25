@@ -236,7 +236,9 @@ AC_ARG_ENABLE(assigndir, [  --enable-assigndir=dir       directory for qmail use
 			AC_DEFINE_UNQUOTED(ASSIGNDIR,"$assigndir", Directory for qmail users/assign)
 		fi
 	])
-AC_DEFINE_UNQUOTED(ASSIGNDIR, "$assigndir", Directory for qmail users/assign)
+AC_DEFINE_UNQUOTED(ASSIGNDIR, "$assigndir",  Directory for qmail users/assign)
+AC_DEFINE_UNQUOTED(LIBEXECDIR,"$libexecdir", Directory for architecture-dependent binaries)
+AC_DEFINE_UNQUOTED(SYSCONFDIR,"$sysconfdir", Directory for configuration files)
 
 shareddir=$prefix
 AC_ARG_ENABLE(shareddir, [  --enable-shareddir=dir       directory for shared files.],
