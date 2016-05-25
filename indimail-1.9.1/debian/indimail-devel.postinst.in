@@ -1,7 +1,8 @@
 #!/bin/sh
 set -e
-prefix=@indimaildir@
-sysconfdir=/etc
+prefix=@prefix@
+mandir=@mandir@
+sysconfdir=@sysconfdir@
 
 ID=`id -u`
 if [ $ID -ne 0 ] ; then
@@ -33,19 +34,21 @@ esac
 
 #DEBHELPER#
 
-if [ -d ${prefix}/man/man3 ] ; then
+if [ -d ${mandir}/man3 ] ; then
 	echo "compressing man pages"
-	find ${prefix}/man/man3 -type f -exec gzip -q {} \;
+	find ${mandir}/man3 -type f -exec gzip -q {} \;
 fi
 echo "recreating ld.so cache"
-if [ -d ${sysconfdir}/ld.so.conf.d ] ; then
+if [ ! "@prefix@" = "/usr" ] ; then
+if [ -d /etc/ld.so.conf.d ] ; then
 	(
 		if [ -d @prefix@/lib64 ] ; then
 			echo @prefix@/lib64
 		else
 			echo @prefix@/lib
 		fi
-	) > ${sysconfdir}/ld.so.conf.d/indimail-devel-`uname -m`.conf
+	) > /etc/ld.so.conf.d/indimail-devel-`uname -m`.conf
 fi
 /sbin/ldconfig
+fi
 exit 0

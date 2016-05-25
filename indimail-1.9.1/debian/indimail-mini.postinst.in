@@ -2,9 +2,11 @@
 # postinst script for indimail-mini
 set -e
 
-prefix=@indimaildir@
+prefix=@prefix@
 logdir=@logdir@
-sysconfdir=/etc
+mandir=@mandir@
+sysconfdir=@sysconfdir@
+shareddir=@shareddir@
 rm=/bin/rm
 mv=/bin/mv
 
@@ -39,11 +41,11 @@ esac
 #DEBHELPER#
 
 if [ -f /tmp/indimail-devel.upgrade ] ; then # upgrade
-	if [ -f ${prefix}/boot/rpm.init ] ; then
+	if [ -f ${shareddir}/boot/rpm.init ] ; then
 		echo "recreating ld.so cache"
 		/sbin/ldconfig
 		echo "Running Custom Upgrade Script"
-		/bin/sh ${prefix}/boot/rpm.init upgrade
+		/bin/sh ${shareddir}/boot/rpm.init upgrade
 	fi
 	${rm} -f /tmp/indimail-devel.upgrade
 	exit 0
@@ -55,9 +57,9 @@ fi
 cd ${prefix}/bin
 /bin/ln -sf qmail-qmqpc qmail-queue
 echo "compressing man pages"
-find ${prefix}/man -type f -exec gzip -q {} \;
-if [ -f ${sysconfdir}/init.d/sendmail ] ; then
-	${sysconfdir}/init.d/sendmail stop
+find ${mandir} -type f -exec gzip -q {} \;
+if [ -f /etc/init.d/sendmail ] ; then
+	/etc/init.d/sendmail stop
 	if [ -f /sbin/chkconfig ] ; then
 		/sbin/chkconfig --del sendmail 2>/dev/null
 	fi
@@ -80,9 +82,9 @@ if [ -x /usr/sbin/update-alternatives ] ; then
 	/usr/sbin/update-alternatives --install \
 		/usr/sbin/sendmail-msp sendmail-msp ${prefix}/bin/sendmail 120 \
 		--slave /usr/share/man/man8/sendmail.8.gz sendmail.8.gz \
-			${prefix}/man/man8/sendmail.8.gz \
+			${mandir}/man8/sendmail.8.gz \
 		--slave /usr/share/man/man8/sendmail-msp.8.gz sendmail-msp.8.gz \
-			${prefix}/man/man8/sendmail.8.gz \
+			${mandir}/man8/sendmail.8.gz \
 		--slave /usr/sbin/sendmail sendmail ${prefix}/bin/sendmail \
 		--slave /usr/lib/sendmail lib.sendmail ${prefix}/bin/sendmail
 else
@@ -111,7 +113,7 @@ else
 		fi
 	done
 fi
-if [ ! -f ${prefix}/control/idhost ] ; then
-	uname -n > ${prefix}/control/idhost
+if [ ! -f ${sysconfdir}/control/idhost ] ; then
+	uname -n > ${sysconfdir}/control/idhost
 fi
 exit 0

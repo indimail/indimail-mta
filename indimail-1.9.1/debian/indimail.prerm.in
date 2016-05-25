@@ -16,8 +16,10 @@ set -e
 # for details, see http://www.debian.org/doc/debian-policy/ or
 # the debian-policy package
 
-prefix=@indimaildir@
-sysconfdir=/etc
+prefix=@prefix@
+indimaildir=@indimaildir@
+sysconfdir=@sysconfdir@
+mandir=@mandir@
 rm=/bin/rm
 mv=/bin/mv
 nocourierimap=0
@@ -34,20 +36,20 @@ case "$1" in
 	if [ -f ${prefix}/sbin/initsvc ] ; then
 		${prefix}/sbin/initsvc -status || /etc/init.d/indimail stop
 	fi
-	if test -f ${sysconfdir}/init/svscan.conf
+	if test -f /etc/init/svscan.conf
 	then
 		echo "Giving IndiMail exactly 5 seconds to exit nicely" 1>&2
 		/sbin/initctl emit qmailstop > /dev/null 2>&1 || true
 		if [ " $1" != " upgrade" ] ; then
-			${rm} -f ${sysconfdir}/event.d/svscan
+			${rm} -f /etc/event.d/svscan
 		fi
 		sleep 5
-	elif test -f ${sysconfdir}/event.d/svscan
+	elif test -f /etc/event.d/svscan
 	then
 		echo "Giving IndiMail exactly 5 seconds to exit nicely" 1>&2
 		/sbin/initctl emit qmailstop > /dev/null 2>&1
 		if [ " $1" != " upgrade" ] ; then
-			${rm} -f ${sysconfdir}/event.d/svscan || true
+			${rm} -f /etc/event.d/svscan || true
 		fi
 		sleep 5
 	elif test -x ${prefix}/sbin/initsvc
@@ -56,11 +58,11 @@ case "$1" in
 		${prefix}/sbin/initsvc -off
 		sleep 5
 	fi
-	if [ -f ${prefix}/boot/rpm.init ] ; then
+	if [ -f ${shareddir}/boot/rpm.init ] ; then
 		echo "Running Custom Un-Installation Script for preun" 1>&2
-		/bin/sh ${prefix}/boot/rpm.init preun
+		/bin/sh ${shareddir}/boot/rpm.init preun
 	fi
-	) > /tmp/indimail-uinstall.log
+	) > /tmp/indimail-uninstall.log
     ;;
 
     failed-upgrade)
@@ -82,9 +84,9 @@ if [ " $1" = " upgrade" -o " $1" = " deconfigure" ] ; then
 	exit 0
 fi
 
-if [ -s ${prefix}/etc/stat.override -a -f /usr/sbin/dpkg-statoverride ] ; then
+if [ -s ${sysconfdir}/stat.override -a -f /usr/sbin/dpkg-statoverride ] ; then
 	echo "reverting permissions"
-	/bin/cat ${prefix}/etc/stat.override | while read line
+	/bin/cat ${sysconfdir}/stat.override | while read line
 	do
 		if [ -f $line ] ; then
 			echo "reverting permission for $line"
@@ -101,9 +103,9 @@ $prefix/sbin/svctool --config=rm-boot
 if [ $nocourierimap -eq 0 ] ; then
 	for i in authshadow.7 authpwd.7 authpam.7 authcustom.7
 	do
-		${rm} -f ${prefix}/man/man7/$i.gz || true
+		${rm} -f ${mandir}/man7/$i.gz || true
 	done
-	${rmdir} --ignore-fail-on-non-empty ${prefix}/man/man7 2>/dev/null || true
+	${rmdir} --ignore-fail-on-non-empty ${mandir}/man7 2>/dev/null || true
 fi
 
 for i in lib sbin

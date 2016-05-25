@@ -1,4 +1,7 @@
 indimaildir=@indimaildir@
+mandir=@mandir@
+libexecdir=@libexecdir@
+shareddir=@shareddir@
 qmaildir=@qmaildir@
 domaindir=@domaindir@
 sysconfdir=@sysconfdir@
@@ -6,15 +9,12 @@ mysqlbindir=@mysqlbindir@
 moduledir=@moduledir@
 auth_inc=@auth_inc@
 auth_libs=@auth_libs@
-libdir=@libdir@
 logdir=@logdir@
 basepath=@basepath@
 mysql_prefix=@mysql_prefix@
 mysql_incdir=@mysql_incdir@
 mysql_libdir=@mysql_libdir@
-pkgconfigdir=@pkgconfigdir@
 defaultdomain=@defaultdomain@
-acl_libdirstem := $(shell basename @libdir@ 2>/dev/null|| echo "lib")
 release := $(shell head -1 changelog.in | awk '{print $2}' | cut -d'-' -f2 | cut -c-1)
 version=@version@
 prefix=@prefix@
@@ -22,7 +22,7 @@ prefix=@prefix@
 clamav_version=0.98
 libdkim_version=1.4
 libsrs2_version=1.0.18
-courier_version=4.16.2
+courier_version=4.17.0
 bogofilter_version=1.2.4
 fetchmail_version=6.3.26
 nssd_version=1.1
@@ -34,6 +34,11 @@ flash_version=0.9.4
 mpack_version=1.6
 logalert_version=0.3
 fortune_version=1.1
+
+bits=$(shell if [ -d /usr/lib64 ] ; then echo 64; else echo 32; fi)
+libdir=$(shell if [ $(bits) -eq 64 ] ; then echo $(prefix)/lib64; else echo $(prefix)/lib;fi)
+pkgconfigdir=$(shell if [ $(bits) -eq 64 ] ; then echo /usr/lib64/pkgconfig; else echo /usr/lib/pkgconfig;fi)
+acl_libdirstem=$(shell if [ $(bits) -eq 64 ] ; then echo lib64; else echo lib;fi)
 
 all: rules indimail.prerm indimail.preinst indimail.postrm indimail.postinst \
 obs_deb_prep gen_control indimail.install \
@@ -78,6 +83,9 @@ MOSTLYCLEANFILES= indimail.prerm indimail.preinst indimail.postrm \
 edit = sed \
 	-e 's,@indimaildir\@,$(indimaildir),g' \
 	-e 's,@domaindir\@,$(domaindir),g' \
+	-e 's,@mandir\@,$(mandir),g' \
+	-e 's,@libexecdir\@,$(libexecdir),g' \
+	-e 's,@shareddir\@,$(shareddir),g' \
 	-e 's,@sysconfdir\@,$(sysconfdir),g' \
 	-e 's,@qmaildir\@,$(qmaildir),g' \
 	-e 's,@mysqlbindir\@,$(mysqlbindir),g' \

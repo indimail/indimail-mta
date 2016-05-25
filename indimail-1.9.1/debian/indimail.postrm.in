@@ -19,8 +19,10 @@ set -e
 # the debian-policy package
 
 
-prefix=@indimaildir@
-sysconfdir=/etc
+prefix=@prefix@
+indimaildir=@indimaildir@
+shareddir=@shareddir@
+sysconfdir=@sysconfdir@
 servicedir=/service
 logdir=@logdir@
 rm=/bin/rm
@@ -74,8 +76,8 @@ esac
 if [ " $1" = " purge" ] ; then
 	nscd_up=`ps -ef |grep nscd |grep -v grep|wc -l`
 	if [ $nscd_up -ge 1 ] ; then
-		if [ -x ${sysconfdir}/init.d/nscd ] ; then
-			${sysconfdir}/init.d/nscd stop
+		if [ -x /etc/init.d/nscd ] ; then
+			/etc/init.d/nscd stop
 		fi
 	fi
 
@@ -90,104 +92,107 @@ if [ " $1" = " purge" ] ; then
 		/usr/bin/getent group $i > /dev/null && /usr/sbin/groupdel $i  >/dev/null || true
 	done
 	if [ $nscd_up -ge 1 ] ; then
-		if [ -x ${sysconfdir}/init.d/nscd ] ; then
-			${sysconfdir}/init.d/nscd start
+		if [ -x /etc/init.d/nscd ] ; then
+			/etc/init.d/nscd start
 		fi
 	fi
 
 	echo "removing database and configuration"
-	for i in mysqldb control domains users alias
+	for i in mysqldb domains alias
 	do
-		${rm} -rf ${prefix}/$i || true
+		${rm} -rf ${indimaildir}/$i || true
 	done
+	${rm} -rf ${indimaildir}/bin || true
+	${rm} -rf ${indimaildir}/sbin || true
+	${rm} -rf ${sysconfdir} || true
 	if [ -f /etc/mysql/indimail.cnf ] ; then
 		${rm} -f /etc/mysql/indimail.cnf
 	fi
-	if [ -d ${prefix}/control/domainkeys ] ; then
-		${rmdir} --ignore-fail-on-non-empty ${prefix}/control/domainkeys 2>/dev/null
+	if [ -d ${sysconfdir}/control/domainkeys ] ; then
+		${rmdir} --ignore-fail-on-non-empty ${sysconfdir}/control/domainkeys 2>/dev/null
 	fi
-	if [ -d ${prefix}/control ] ; then
-		${rmdir} --ignore-fail-on-non-empty ${prefix}/control 2>/dev/null
+	if [ -d ${sysconfdir}/control ] ; then
+		${rmdir} --ignore-fail-on-non-empty ${sysconfdir}/control 2>/dev/null
 	fi
 	for i in .qmail-nonspam .qmail-register-nonspam .qmail-register-spam .qmail-spam .qmail-default
 	do
-		${rm} -f ${prefix}/domains/${default_domain}/$i
+		${rm} -f ${indimaildir}/domains/${default_domain}/$i
 	done
 	if [ -d ${prefix}/${default_domain} ] ; then
-		${rmdir} --ignore-fail-on-non-empty ${prefix}/domains/${default_domain} 2>/dev/null
+		${rmdir} --ignore-fail-on-non-empty ${indimaildir}/domains/${default_domain} 2>/dev/null
 	fi
 	echo "removing aliases postmaster, mailer-daemon, root"
 	for i in postmaster mailer-daemon root
 	do
-		${rm} -f ${prefix}/alias/.qmail-"$i"
+		${rm} -f ${indimaildir}/alias/.qmail-"$i"
 	done
-	if [ -d ${prefix}/alias ] ; then
-		${rmdir} --ignore-fail-on-non-empty ${prefix}/alias 2>/dev/null
+	if [ -d ${indimaildir}/alias ] ; then
+		${rmdir} --ignore-fail-on-non-empty ${prefix}/indimaildir 2>/dev/null
 	fi
-	${rm} -f ${prefix}/share/imapd.pem ${prefix}/share/pop3d.pem
-	${rm} -f ${prefix}/etc/imapd.cnf.* ${prefix}/etc/pop3d.cnf.*
+	${rm} -f ${sysconfdir}/imapd.pem ${sysconfdir}/pop3d.pem
+	${rm} -f ${sysconfdir}/imapd.cnf.* ${sysconfdir}/pop3d.cnf.*
 
-	if [ ${prefix} != "/usr" ] ; then
-		echo "removing binaries, libraries, queues"
-		for i in bin sbin queue
-		do
-			${rm} -rf ${prefix}/$i || true
-		done
-		echo "removing man pages"
-		for i in ${prefix}/man/man1 ${prefix}/man/cat1 ${prefix}/man/man5 \
-			${prefix}/man/cat5 ${prefix}/man/man7 ${prefix}/man/cat7 \
-			${prefix}/man/man8 ${prefix}/man/cat8 ${prefix}/man/man3
+	echo "removing binaries, libraries, queues"
+	${rm} -rf ${indimaildir}/queue || true
+	if [ ${prefix} = "/var/indimail" -o ${prefix} = "/var/qmail" ] ; then
+		for i in ${prefix}/bin ${prefix}/sbin ${prefix}/lib ${prefix}/queue \
+			${mandir}/man1 ${mandir}/cat1 ${mandir}/man5 ${mandir}/cat5 \
+			${mandir}/man7 ${mandir}/cat7 ${mandir}/man8 ${mandir}/cat8
 		do
 			${rm} -rf $i || true
 		done
-		if [ -d ${prefix}/man ] ; then
-			/bin/rmdir --ignore-fail-on-non-empty ${prefix}/man 2>/dev/null
-		fi
-		for i in `/bin/ls ${prefix}/share 2>/dev/null`
+		for i in `/bin/ls ${sharedir} 2>/dev/null`
 		do
 			if [ " $i" = " clamd" ] ; then # leave the signatures
 				continue;
 			fi
-			${rm} -rf ${prefix}/share/$i || true
+			${rm} -rf ${shareddir}/$i || true
 		done
-		if [ -d ${prefix}/share ] ; then
-			${rmdir} --ignore-fail-on-non-empty ${prefix}/share 2>/dev/null
-		fi
+	else
+		for i in bin sbin control users
+		do
+			${rm} -f ${indimaildir}/$i || true
+		done
 	fi
+	echo "removing man pages"
+	${rmdir} --ignore-fail-on-non-empty ${mandir} || true
+	echo "removing architecture-independent shared directory"
+	${rmdir} --ignore-fail-on-non-empty ${shareddir} 2>/dev/null
 
 	if [ $nobogofilter -eq 0 ] ; then
-		${rm} -f ${prefix}/etc/bogofilter.cf ${prefix}/etc/bogofilter.cf.example
+		${rm} -f ${sysconfdir}/bogofilter.cf ${sysconfdir}/bogofilter.cf.example
 	fi
 
 	if [ $noclamav -eq 0 ] ; then
-		${rm} -f ${prefix}/etc/clamd.conf ${prefix}/etc/freshclam.conf
-		${rm} -f ${prefix}/etc/clamd.conf.disabled ${prefix}/etc/freshclam.conf.disabled
-		${rm} -f ${prefix}/etc/clamd.conf.sample ${prefix}/etc/freshclam.conf.sample
+		${rm} -f ${sysconfdir}/clamd.conf ${sysconfdir}/freshclam.conf
+		${rm} -f ${sysconfdir}/clamd.conf.disabled ${sysconfdir}/freshclam.conf.disabled
+		${rm} -f ${sysconfdir}/clamd.conf.sample ${sysconfdir}/freshclam.conf.sample
 	fi
 	if [ $nonssd -eq 0 ] ; then
-		${rm} -f ${prefix}/etc/nssd.conf
+		${rm} -f ${sysconfdir}/nssd.conf
 	fi
 	if [ $nofetchmail -eq 0 ] ; then
-		${rm} -f ${prefix}/etc/fetchmailrc
+		${rm} -f ${sysconfdir}/fetchmailrc
 	fi
 
 	echo "removing tcp configuration"
 	for i in imap pop3 smtp qmtp qmqp poppass
 	do
-		${rm} -f ${prefix}/etc/tcp.$i.cdb ${prefix}/etc/tcp.$i
+		${rm} -f ${sysconfdir}/tcp.$i.cdb ${sysconfdir}/tcp.$i
 	done
-	${rm} -f ${prefix}/control/controlfiles
+	${rm} -f ${sysconfdir}/control/controlfiles
 	for i in indimail.cnf stat.override backup.conf cronlist headerlist \
 		imapd.cnf imapd.dist imapd-ssl.dist inc_deps indimail.mrtg.cfg \
 		procmailrc indimail.settings lib_deps osh.table perm_list pop3d.cnf \
 		pop3d.dist pop3d-ssl.dist qmailprog.list quotawarnmsg.example \
 		services.log system.flashlogin system.menu system.module system.rc
 	do
-		${rm} -f ${prefix}/etc/$i
+		${rm} -f ${sysconfdir}/$i
 	done
-	if [ -d ${prefix}/etc ] ; then
-		${rmdir} --ignore-fail-on-non-empty ${prefix}/etc 2>/dev/null
-	fi
+	${rmdir} --ignore-fail-on-non-empty %{indimaildir}/domains 2>/dev/null
+	${rmdir} --ignore-fail-on-non-empty %{indimaildir}/users 2>/dev/null
+	${rmdir} --ignore-fail-on-non-empty %{indimaildir}/alias 2>/dev/null
+	${rmdir} --ignore-fail-on-non-empty %{indimaildir} 2>/dev/null
 
 	echo "removing startup services"
 	for i in clamd fetchmail freshclam indisrvr.4000 inlookup.infifo mysql.3306 \
@@ -210,11 +215,11 @@ if [ " $1" = " purge" ] ; then
 	fi
 
 	echo "removing logs"
-	${rm} -f ${prefix}/mysqldb/logs/logisam.log
-	${rm} -f ${prefix}/mysqldb/logs/logquery
-	${rm} -f ${prefix}/mysqldb/logs/logslow
+	${rm} -f ${indimaildir}/mysqldb/logs/logisam.log
+	${rm} -f ${indimaildir}/mysqldb/logs/logquery
+	${rm} -f ${indimaildir}/mysqldb/logs/logslow
 	count=`/bin/ls ${servicedir} 2>/dev/null| /usr/bin/wc -l`
-	if [ $count -eq 0 ] ; then
+	if [ $count -eq 0 ] ; then # ignore disabled services
 		${rm} -rf ${servicedir} || true
 	fi
 	if [ -h ${logdir} ] ; then
@@ -226,10 +231,10 @@ if [ " $1" = " purge" ] ; then
 else
 	echo "recreating ld.so cache"
 	/sbin/ldconfig
-	if [ -f ${prefix}/boot/rpm.init ] ; then
+	if [ -f ${shareddir}/boot/rpm.init ] ; then
 		echo "Running Custom Un-Installation Script for postun"
-		/bin/sh ${prefix}/boot/rpm.init postun
+		/bin/sh ${shareddir}/boot/rpm.init postun
 	fi
 fi
-) >> /tmp/indimail-uinstall.log
+) >> /tmp/indimail-uninstall.log
 exit 0

@@ -1,7 +1,6 @@
 #!/bin/sh
 set -e
-prefix=@indimaildir@
-sysconfdir=/etc
+prefix=@prefix@
 rm=/bin/rm
 
 ID=`id -u`
@@ -20,8 +19,8 @@ case "$1" in
 	touch /tmp/indimail-devel.$1
 	nscd_up=`ps -ef |grep nscd |grep -v grep|wc -l`
 	if [ $nscd_up -ge 1 ] ; then
-		if [ -x ${sysconfdir}/init.d/nscd ] ; then
-			${sysconfdir}/init.d/nscd stop
+		if [ -x /etc/init.d/nscd ] ; then
+			/etc/init.d/nscd stop
 		fi
 	fi
 	echo "Adding IndiMail users/groups"
@@ -39,8 +38,8 @@ case "$1" in
 		/usr/sbin/useradd -r -g indimail -d ${prefix} indimail
 	fi
 	if [ $nscd_up -ge 1 ] ; then
-		if [ -x ${sysconfdir}/init.d/nscd ] ; then
-			${sysconfdir}/init.d/nscd start
+		if [ -x /etc/init.d/nscd ] ; then
+			/etc/init.d/nscd start
 		fi
 	fi
 	;;

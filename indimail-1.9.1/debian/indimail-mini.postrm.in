@@ -1,7 +1,7 @@
 #!/bin/sh
 set -e
-prefix=@indimaildir@
-sysconfdir=/etc
+prefix=@prefix@
+sysconfdir=@sysconfdir@
 rm=/bin/rm
 mv=/bin/mv
 rmdir=/bin/rmdir
@@ -41,20 +41,21 @@ esac
 # Debian silliness
 #
 if [ " $1" = " remove" ] ; then
-	${rm} -f ${prefix}/bin/qmail-queue ${prefix}/control/idhost || true
-	for i in bin
+	${rm} -f ${prefix}/bin/qmail-queue ${sysconfdir}/control/idhost || true
+	if [ ! "@prefix@" = "/usr" ] ; then
+	for i in bin sbin libexecdir/indimail lib/indimail share/indimail
 	do
 		${rm} -rf ${prefix}/$i || true
 	done
-	${rmdir} --ignore-fail-on-non-empty ${prefix}/bin 2>/dev/null || true
-	${rmdir} --ignore-fail-on-non-empty ${prefix}/control 2>/dev/null || true
+	fi
+	${rmdir} --ignore-fail-on-non-empty ${sysconfdir} 2>/dev/null || true
 	${rmdir} --ignore-fail-on-non-empty ${prefix} 2>/dev/null || true
 fi
 if [ " $1" = " purge" ] ; then
 	nscd_up=`ps -ef |grep nscd |grep -v grep|wc -l`
 	if [ $nscd_up -ge 1 ] ; then
-		if [ -x ${sysconfdir}/init.d/nscd ] ; then
-			${sysconfdir}/init.d/nscd stop
+		if [ -x /etc/init.d/nscd ] ; then
+			/etc/init.d/nscd stop
 		fi
 	fi
 	echo "purging configuration"
@@ -63,14 +64,17 @@ if [ " $1" = " purge" ] ; then
 	echo "removing group indimail"
 	/usr/bin/getent group indimail  > /dev/null && /usr/sbin/groupdel indimail >/dev/null || true
 	if [ $nscd_up -ge 1 ] ; then
-		if [ -x ${sysconfdir}/init.d/nscd ] ; then
-			${sysconfdir}/init.d/nscd start
+		if [ -x /etc/init.d/nscd ] ; then
+			/etc/init.d/nscd start
 		fi
 	fi
-	for i in bin control
+	if [ ! "@prefix@" = "/usr" ] ; then
+	for i in bin sbin libexecdir/indimail lib/indimail share/indimail
 	do
 		${rm} -rf ${prefix}/$i || true
 	done
+	fi
+	${rmdir} --ignore-fail-on-non-empty ${sysconfdir} 2>/dev/null || true
 	${rmdir} --ignore-fail-on-non-empty ${prefix} 2>/dev/null || true
 fi
 exit 0

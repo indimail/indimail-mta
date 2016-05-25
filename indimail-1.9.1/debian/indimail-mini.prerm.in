@@ -5,8 +5,8 @@
 
 set -e
 
-prefix=@indimaildir@
-sysconfdir=/etc
+prefix=@prefix@
+shareddir=@shareddir@
 rm=/bin/rm
 mv=/bin/mv
 
@@ -18,9 +18,9 @@ fi
 
 case "$1" in
     remove|upgrade|deconfigure)
-	if [ -f ${prefix}/boot/rpm.init ] ; then
+	if [ -f ${shareddir}/boot/rpm.init ] ; then
 		echo "Running Custom Un-Installation Script for preun" 1>&2
-		/bin/sh ${prefix}/boot/rpm.init preun
+		/bin/sh ${shareddir}/boot/rpm.init preun
 	fi
     ;;
 
@@ -45,7 +45,7 @@ fi
 
 # Remove IndiMail being started on system boot
 echo "adding sendmail startup"
-if [ -f ${sysconfdir}/init.d/sendmail ] ; then
+if [ -f /etc/init.d/sendmail ] ; then
 	if [ -f /sbin/chkconfig ] ; then
 		/sbin/chkconfig --add sendmail 2>/dev/null
 	fi

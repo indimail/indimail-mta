@@ -17,14 +17,17 @@ set -e
 # for details, see http://www.debian.org/doc/debian-policy/ or
 # the debian-policy package
 
-prefix=@indimaildir@
+prefix=@prefix@
+indimaildir=@indimaildir@
+mandir=@mandir@
+shareddir=@shareddir@
 qcount=5
-qbase=${prefix}/queue
+qbase=${indimaildir}/queue
 mbase=@basepath@
 logdir=@logdir@
 mysqlPrefix=@mysql_prefix@
 servicedir=/service
-sysconfdir=/etc
+sysconfdir=@sysconfdir@
 rm=/bin/rm
 mv=/bin/mv
 ####################################
@@ -52,7 +55,7 @@ setperm()
 
 fixperms()
 {
-#%attr(0555,root,qmail) @indimaildir@/bin/rsmtp
+#%attr(0555,root,qmail) @prefix@/bin/rsmtp
 	if [ $# -eq 3 ] ; then # directory
 		lin=$2
 		file=$3
@@ -119,33 +122,34 @@ esac
 #
 # We need to do this for debian. SIGH!!
 #
-if [ -f ${prefix}/etc/perm_list ] ; then
+if [ -f ${sysconfdir}/perm_list ] ; then
 	echo "Fixing Permissions (debian stupidity)"
 (
-/bin/grep -v "^#" ${prefix}/etc/perm_list | while read line
+/bin/grep -v "^#" ${sysconfdir}/perm_list | while read line
 do
 	if [ " $line" = " " ] ; then
 		continue
 	fi
 	fixperms $line
 done
-) > ${prefix}/etc/stat.override
+) > ${sysconfdir}/stat.override
 fi
 
 if [ -f /tmp/indimail.upgrade ] ; then # upgrade
-	if [ -f ${prefix}/boot/rpm.init ] ; then
+	if [ -f ${shareddir}/boot/rpm.init ] ; then
 		echo "recreating ld.so cache"
 		/sbin/ldconfig
 		echo "Running Custom Upgrade Script"
-		/bin/sh ${prefix}/boot/rpm.init upgrade
+		/bin/sh ${shareddir}/boot/rpm.init upgrade
 	fi
 	${rm} -f /tmp/indimail.upgrade
 	exit 0
 fi
 ${rm} -f /tmp/indimail.install /tmp/indimail.upgrade
 # Recreate ld.so links and cache
+if [ ! "@prefix@" = "/usr" ] ; then
 echo "recreating ld.so cache"
-if [ -d ${sysconfdir}/ld.so.conf.d ] ; then
+if [ -d /etc/ld.so.conf.d ] ; then
 	(
 		echo @mysql_libdir@
 		if [ -d @prefix@/lib64 ] ; then
@@ -153,9 +157,10 @@ if [ -d ${sysconfdir}/ld.so.conf.d ] ; then
 		else
 			echo @prefix@/lib
 		fi
-	) > ${sysconfdir}/ld.so.conf.d/indimail-`uname -m`.conf
+	) > /etc/ld.so.conf.d/indimail-`uname -m`.conf
 fi
 /sbin/ldconfig
+fi
 
 if [ -f /usr/sbin/clamd -a -f /usr/bin/clamdscan ] ; then
 	clamav_os=1
@@ -168,8 +173,8 @@ echo " 1. Configure ${logdir} for multilog"
 echo " 2. Configure ${servicedir}. Move existing services to ${servicedir}.org"
 echo " 3. Configure svscanlog service"
 echo " 4. Configure standard catch-all accounts, default qmail configuration"
-echo " 5. Configure ${prefix}/etc/indimail.cnf for MySQL service"
-echo " 6. Configure MySQL DB in ${prefix}/mysqldb/data"
+echo " 5. Configure ${sysconfdir}/indimail.cnf for MySQL service"
+echo " 6. Configure MySQL DB in ${indimaildir}/mysqldb/data"
 echo " 7. Configure DKIM, Domainkeys signature"
 echo " 8. Configure QHPSI for inline virus scanning"
 echo " 9. Configure SMTP services on port in 465 25 587"
@@ -185,7 +190,7 @@ echo "18. Configure indisrvr service"
 echo "19. Configure nssd service"
 echo "20. Configure inlookup service"
 echo "21. Configure qscanq/clamd/freshclam service"
-echo "22. Configure ${prefix}/control/signatures"
+echo "22. Configure ${sysconfdir}/control/signatures"
 echo "23. Configure SPAM filter configuration"
 echo "24. Configure tcprules database for SMTP, IMAP, POP3, popass"
 echo "25. Configure indimail startup"
@@ -219,8 +224,8 @@ fi
 # create svscanlog service
 ${prefix}/sbin/svctool --svscanlog --servicedir=$servicedir
 
-echo "Creating default qmail configuraton and catch-all alias (${prefix}/alias/Maildir) for all system users"
-${prefix}/sbin/svctool --config=qmail --postmaster=${prefix}/alias/Maildir/ \
+echo "Creating default qmail configuraton and catch-all alias (${indimaildir}/alias/Maildir) for all system users"
+${prefix}/sbin/svctool --config=qmail --postmaster=${indimaildir}/alias/Maildir/ \
 	--default-domain=${default_domain} \
 	--mysqlhost=localhost --mysqluser=indimail --mysqlpass=ssh-1.5- --mysqlsocket=${mysqlSocket}
 
@@ -230,10 +235,10 @@ if [ -x ${mysqlPrefix}/libexec/mysqld -o -x ${mysqlPrefix}/sbin/mysqld ] ; then
 	${prefix}/sbin/svctool --config=mysql --mysqlPrefix=${mysqlPrefix} --mysqlsocket=${mysqlSocket}
 	# MySQL Database Creation
 	${prefix}/sbin/svctool --config=mysqldb --mysqlPrefix=${mysqlPrefix} \
-    	--databasedir=${prefix}/mysqldb --base_path=${mbase} --mysqlsocket=${mysqlSocket}
+    	--databasedir=${indimaildir}/mysqldb --base_path=${mbase} --mysqlsocket=${mysqlSocket}
 	# MySQL Supervise creation
 	${prefix}/sbin/svctool --mysql=3306 --servicedir=${servicedir} --mysqlPrefix=${mysqlPrefix} \
-		--databasedir=${prefix}/mysqldb --config=${prefix}/etc/indimail.cnf --default-domain=${default_domain}
+		--databasedir=${indimaildir}/mysqldb --config=${sysconfdir}/indimail.cnf --default-domain=${default_domain}
 	count=`ps -e|grep mysqld|wc -l`
 	if [ $count -gt 0 ] ; then
 		echo "Disabling mysqld service"
@@ -245,8 +250,8 @@ fi
 
 # MySQL apparmor
 if [ -x /etc/init.d/apparmor ] ; then
-	if [ -f ${prefix}/etc/apparmor.d/local/usr.sbin.mysqld -a -d /etc/apparmor.d/local ] ; then
-		cp ${prefix}/etc/apparmor.d/local/usr.sbin.mysqld /etc/apparmor.d/local
+	if [ -f ${sysconfdir}/apparmor.d/local/usr.sbin.mysqld -a -d /etc/apparmor.d/local ] ; then
+		cp ${sysconfdir}/apparmor.d/local/usr.sbin.mysqld /etc/apparmor.d/local
 	fi
 	if [ -f /etc/apparmor.d/local/usr.sbin.mysqld ] ; then
 		echo "Reloading apparmor profiles..."
@@ -265,7 +270,7 @@ if [ $nodksignature -eq 0 ] ; then
 		if [ " $key_bit" = " " ] ; then
 			key_bit=1024
 		fi
-		${prefix}/bin/dknewkey ${prefix}/control/domainkeys/$dkimkeyfn $key_bit
+		${prefix}/bin/dknewkey ${sysconfdir}/control/domainkeys/$dkimkeyfn $key_bit
 	else
 		ver_opt="none"
 		sign_opt="none"
@@ -295,7 +300,7 @@ if [ $noclamav -eq 0 ] ; then
 	clamav_os=0
 	clamdPrefix=${prefix}
 	qhpsi="${prefix}/bin/clamdscan %s --fdpass --quiet --no-summary"
-	mysysconfdir=${prefix}/etc
+	mysysconfdir=${sysconfdir}
 else
 	if [ -f /usr/sbin/clamd -a -f /usr/bin/clamdscan ] ; then
 		clamav_os=1
@@ -344,11 +349,11 @@ do
 				--chkrecipient --chkrelay --masquerade \
 				--min-free=52428800 --content-filter \
 				--qhpsi="$qhpsi" \
-				--spamfilter="${prefix}/bin/bogofilter -p -d ${prefix}/etc" \
+				--spamfilter="${prefix}/bin/bogofilter -p -d ${sysconfdir}" \
 				--logfilter=/tmp/spamfifo --rejectspam=0 --spamexitcode=0 \
 				--dmasquerade \
 				--dkverify=$ver_opt \
-				--dksign=$sign_opt --private_key=${prefix}/control/domainkeys/%/$dkimkeyfn \
+				--dksign=$sign_opt --private_key=${sysconfdir}/control/domainkeys/%/$dkimkeyfn \
 				$extra_opt
 		else
 			${prefix}/sbin/svctool --smtp=$port --servicedir=$servicedir \
@@ -358,11 +363,11 @@ do
 				--starttls --fsync --syncdir --memory=$smtp_soft_mem \
 				--chkrecipient --chkrelay --masquerade \
 				--min-free=52428800 --content-filter --virus-filter \
-				--spamfilter="${prefix}/bin/bogofilter -p -d ${prefix}/etc" \
+				--spamfilter="${prefix}/bin/bogofilter -p -d ${sysconfdir}" \
 				--logfilter=/tmp/spamfifo --rejectspam=0 --spamexitcode=0 \
 				--dmasquerade \
 				--dkverify=both \
-				--dksign=both --private_key=${prefix}/control/domainkeys/%/$dkimkeyfn \
+				--dksign=both --private_key=${sysconfdir}/control/domainkeys/%/$dkimkeyfn \
 				$extra_opt
 		fi
 	else
@@ -377,7 +382,7 @@ do
 				--qhpsi="$qhpsi" \
 				--dmasquerade \
 				--dkverify=both \
-				--dksign=both --private_key=${prefix}/control/domainkeys/%/$dkimkeyfn \
+				--dksign=both --private_key=${sysconfdir}/control/domainkeys/%/$dkimkeyfn \
 				$extra_opt
 		else
 			${prefix}/sbin/svctool --smtp=$port --servicedir=$servicedir \
@@ -389,7 +394,7 @@ do
 				--min-free=52428800 --content-filter --virus-filter \
 				--dmasquerade \
 				--dkverify=both \
-				--dksign=both --private_key=${prefix}/control/domainkeys/%/$dkimkeyfn \
+				--dksign=both --private_key=${sysconfdir}/control/domainkeys/%/$dkimkeyfn \
 				$extra_opt
 		fi
 	fi
@@ -404,14 +409,14 @@ if [ $noclamav -eq 0 -o $clamav_os -eq 1 ] ; then
 		--min-free=52428800 --fsync --syncdir \
 		--qhpsi="$qhpsi" \
 		--dkverify="none" --dksign=$sign_opt \
-		--private_key=${prefix}/control/domainkeys/%/$dkimkeyfn \
+		--private_key=${sysconfdir}/control/domainkeys/%/$dkimkeyfn \
 		$extra_opt
 else
 	${prefix}/sbin/svctool --queueParam=defaultqueue \
 		--qbase=${qbase} --qcount=${qcount} --qstart=1 \
 		--min-free=52428800 --fsync --syncdir --virus-filter \
 		--dkverify="none" --dksign=$sign_opt \
-		--private_key=${prefix}/control/domainkeys/%/$dkimkeyfn \
+		--private_key=${sysconfdir}/control/domainkeys/%/$dkimkeyfn \
 		$extra_opt
 fi
 #
@@ -447,14 +452,14 @@ if [ $nofetchmail -eq 0 ] ; then
 				--qbase=${qbase} --qcount=${qcount} --qstart=1 \
 				--cntrldir=control --default-domain=${default_domain} \
 				--qhpsi="$qhpsi" \
-				--spamfilter="${prefix}/bin/bogofilter -p -d ${prefix}/etc" --spamexitcode=0 \
+				--spamfilter="${prefix}/bin/bogofilter -p -d ${sysconfdir}" --spamexitcode=0 \
 				--memory=$fetchmail_mem --fsync --syncdir \
 				--dkverify=$ver_opt
 		else
 			${prefix}/sbin/svctool --fetchmail --servicedir=$servicedir \
 				--qbase=${qbase} --qcount=${qcount} --qstart=1 \
 				--cntrldir=control --default-domain=${default_domain} \
-				--spamfilter="${prefix}/bin/bogofilter -p -d ${prefix}/etc" --spamexitcode=0 \
+				--spamfilter="${prefix}/bin/bogofilter -p -d ${sysconfdir}" --spamexitcode=0 \
 				--memory=$fetchmail_mem --fsync --syncdir \
 				--dkverify=$ver_opt
 		fi
@@ -515,7 +520,7 @@ fi
 # IndiMail Daemons
 ${prefix}/sbin/svctool --indisrvr=4000 --servicedir=$servicedir \
 	--localip=0 --maxdaemons=40 --maxperip=25 --avguserquota=2097152 \
-    --certfile=${prefix}/control/servercert.pem --ssl \
+    --certfile=${sysconfdir}/control/servercert.pem --ssl \
 	--hardquota=52428800 --base_path=${mbase}
 ${prefix}/sbin/svctool --inlookup=infifo --servicedir=$servicedir \
 	--cntrldir=control --threads=5 --password-cache
@@ -526,7 +531,7 @@ ${prefix}/sbin/svctool --pwdlookup=/tmp/nssd.sock --threads=5 --timeout=-1 \
 fi
 ${prefix}/sbin/svctool --poppass=106 --localip=0 --maxdaemons=40 --maxperip=25 \
 	--memory=$poppass_mem \
-    --certfile=${prefix}/control/servercert.pem --ssl \
+    --certfile=${sysconfdir}/control/servercert.pem --ssl \
 	--setpassword=${prefix}/sbin/vsetpass --servicedir=$servicedir
 
 # virus/spam filtering
@@ -553,11 +558,11 @@ if [ $noclamav -eq 0 -o $clamav_os -eq 1 ] ; then
 fi
 if [ -x /etc/init.d/apparmor ] ; then
 if [ $noclamav -eq 0 -o $clamav_os -eq 1 ] ; then
-	if [ -f ${prefix}/etc/apparmor.d/local/usr.sbin.clamd -a -d /etc/apparmor.d/local ] ; then
-		cp ${prefix}/etc/apparmor.d/local/usr.sbin.clamd /etc/apparmor.d/local
+	if [ -f ${sysconfdir}/apparmor.d/local/usr.sbin.clamd -a -d /etc/apparmor.d/local ] ; then
+		cp ${sysconfdir}/apparmor.d/local/usr.sbin.clamd /etc/apparmor.d/local
 	fi
-	if [ -f ${prefix}/etc/apparmor.d/local/usr.bin.freshclam -a -d /etc/apparmor.d/local ] ; then
-		cp ${prefix}/etc/apparmor.d/local/usr.bin.freshclam /etc/apparmor.d/local
+	if [ -f ${sysconfdir}/apparmor.d/local/usr.bin.freshclam -a -d /etc/apparmor.d/local ] ; then
+		cp ${sysconfdir}/apparmor.d/local/usr.bin.freshclam /etc/apparmor.d/local
 	fi
 	if [ -f /etc/apparmor.d/local/usr.sbin.clamd -o -f /etc/apparmor.d/local/usr.bin.freshclam ] ; then
 		echo "Reloading apparmor profiles..."
@@ -573,7 +578,7 @@ fi
 # udplogger service
 ${prefix}/sbin/svctool --udplogger=3000 --localip=0 --timeout=10 --servicedir=${servicedir}
 
-/bin/cat <<EOFUU > ${prefix}/control/signatures
+/bin/cat <<EOFUU > ${sysconfdir}/control/signatures
 # Windows executables seen in active virii
 TVqQAAMAA
 TVpQAAIAA
@@ -593,19 +598,19 @@ TVrQAT8AA
 # .GIF file found in a previous Microsoft virus making the rounds.
 R0lGODlhaAA7APcAAP///+rp6puSp6GZrDUjUUc6Zn53mFJMdbGvvVtXh2xre8bF1x8cU4yLprOy
 EOFUU
-/bin/chown qscand:qscand ${prefix}/control/signatures
+/bin/chown qscand:qscand ${sysconfdir}/control/signatures
 
 #
 # bogofilter configuration
 #
 if [ $nobogofilter -eq 0 ] ; then
 	${prefix}/sbin/svctool --config=bogofilter
-	${rm} -f ${prefix}/etc/bogofilter.cf.example
+	${rm} -f ${sysconfdir}/bogofilter.cf.example
 fi
 # rebuild cdb
 for i in smtp qmtp qmqp imap pop3 poppass
 do
-	for j in `/bin/ls ${prefix}/etc/tcp.$i 2>/dev/null`
+	for j in `/bin/ls ${sysconfdir}/tcp.$i 2>/dev/null`
 	do
 		echo "Creating CDB $j.cdb"
    		${prefix}/bin/tcprules $j.cdb $j.tmp < $j && /bin/chmod 664 $j.cdb \
@@ -614,18 +619,18 @@ do
 done
 
 echo "compressing man pages"
-find ${prefix}/man -type f -exec gzip -q {} \;
-if [ -f ${prefix}/man/man7/authlib.7.gz ] ; then
+find ${mandir} -type f -exec gzip -q {} \;
+if [ -f ${mandir}/man7/authlib.7.gz ] ; then
 	for i in authshadow.7 authpwd.7 authpam.7 authcustom.7
 	do
-		${rm} -f ${prefix}/man/man7/$i
-		ln -sf ${prefix}/man/man7/authlib.7.gz ${prefix}/man/man7/$i.gz
+		${rm} -f ${mandir}/man7/$i
+		ln -sf ${mandir}/man7/authlib.7.gz ${mandir}/man7/$i.gz
 	done
 fi
 
-if [ -f ${prefix}/boot/rpm.init ] ; then
+if [ -f ${shareddir}/boot/rpm.init ] ; then
 	echo "Running Custom Installation Script"
-	/bin/sh ${prefix}/boot/rpm.init post
+	/bin/sh ${shareddir}/boot/rpm.init post
 fi
 #
 # Install IndiMail to be started on system boot
@@ -674,7 +679,7 @@ count=`expr $count + 1`
 echo "$count. If you want to use IndiMail to manage MySQL startup, remove"
 echo "   ${servicedir}/mysql.3306/down"
 count=`expr $count + 1`
-echo "$count. Change your default domain in ${prefix}/control/defaultdomain"
+echo "$count. Change your default domain in ${sysconfdir}/control/defaultdomain"
 count=`expr $count + 1`
 echo "$count. You can optionally run the following command to verify installation"
 echo "   sudo ${prefix}/sbin/svctool --check-install --servicedir=${servicedir} \\"
@@ -684,7 +689,7 @@ count=`expr $count + 1`
 echo "$count. You need to ensure that clamav signatures download have completed so that"
 echo "   you can start sending emails. Look at ${logdir}/freshclam/current"
 fi
-if [ ! -f ${prefix}/control/servercert.pem ] ; then
+if [ ! -f ${sysconfdir}/control/servercert.pem ] ; then
 count=`expr $count + 1`
 echo "$count. You also need to create CERTS for IMAP/POP3. run the following"
 echo "   command to create cert"
