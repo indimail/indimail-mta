@@ -1,5 +1,8 @@
 /*
  * $Log: MailQuotaWarn.c,v $
+ * Revision 2.17  2016-05-25 09:02:35+05:30  Cprogrammer
+ * use LIBEXECDIR for overquota.sh
+ *
  * Revision 2.16  2010-03-24 10:14:50+05:30  Cprogrammer
  * moved overquota.sh to libexec directory
  *
@@ -76,7 +79,7 @@
 #include <fcntl.h>
 
 #ifndef	lint
-static char     sccsid[] = "$Id: MailQuotaWarn.c,v 2.16 2010-03-24 10:14:50+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: MailQuotaWarn.c,v 2.17 2016-05-25 09:02:35+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 int
@@ -140,7 +143,7 @@ MailQuotaWarn(char *username, char *domain, char *Maildir, char *QuotaAlloted)
 				if (warn_usage || warn_mail)
 				{
 					close(open(tmpbuf, O_CREAT | O_TRUNC , 0644));
-					getEnvConfigStr(&ptr, "OVERQUOTA_CMD", INDIMAILDIR"/libexec/overquota.sh");
+					getEnvConfigStr(&ptr, "OVERQUOTA_CMD", LIBEXECDIR"/overquota.sh");
 					if (!access(ptr, X_OK))
 					{
 						/*
