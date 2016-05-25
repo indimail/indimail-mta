@@ -1,5 +1,8 @@
 /*
  * $Log: add_user_assign.c,v $
+ * Revision 2.6  2016-05-25 08:57:12+05:30  Cprogrammer
+ * removed not needed qmaildir variable
+ *
  * Revision 2.5  2016-05-18 11:42:01+05:30  Cprogrammer
  * use ASSIGNDIR for users/assign and DOMAINDIR as home for users
  *
@@ -32,7 +35,7 @@
 #include <unistd.h>
 
 #ifndef	lint
-static char     sccsid[] = "$Id: add_user_assign.c,v 2.5 2016-05-18 11:42:01+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: add_user_assign.c,v 2.6 2016-05-25 08:57:12+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 /*
@@ -43,12 +46,11 @@ add_user_assign(char *user, char *dir)
 {
 	FILE           *fp;
 	static char     filename[MAX_BUFF], tmpstr1[MAX_BUFF], tmpstr2[MAX_BUFF];
-	char           *qmaildir, *assigndir;
+	char           *assigndir;
 
 	/*
 	 * stat assign file, if it's not there create one 
 	 */
-	getEnvConfigStr(&qmaildir, "QMAILDIR", QMAILDIR);
 	getEnvConfigStr(&assigndir, "ASSIGNDIR", ASSIGNDIR);
 	snprintf(filename, MAX_BUFF, "%s/assign", assigndir);
 	if (access(filename, F_OK))
