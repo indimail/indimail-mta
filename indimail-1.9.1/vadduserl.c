@@ -1,5 +1,8 @@
 /*
  * $Log: vadduserl.c,v $
+ * Revision 2.2  2016-05-25 09:07:17+05:30  Cprogrammer
+ * use CONTROLDIR for lock file
+ *
  * Revision 2.1  2003-10-23 13:21:53+05:30  Cprogrammer
  * conditional compilation for locking code
  *
@@ -37,21 +40,21 @@
 #include <unistd.h>
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vadduserl.c,v 2.1 2003-10-23 13:21:53+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: vadduserl.c,v 2.2 2016-05-25 09:07:17+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef FILE_LOCKING
 int
 main(int argc, char **argv)
 {
-	char            path[MAX_BUFF], lockfile[MAX_BUFF];
+	char            path[MAX_BUFF];
+	char           *lockfile = CONTROLDIR"/adduser";
 	int             len, fd;
 
 	scopy(path, argv[0], MAX_BUFF);
 	len = slen(path);
 	if (path[len - 1] != 'l')
 		return (1);
-	snprintf(lockfile, MAX_BUFF, "%s/etc/adduser", INDIMAILDIR);
 	if ((fd = getDbLock(lockfile, 1)) == -1)
 		return (1);
 	path[len - 1] = 0;
