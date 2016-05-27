@@ -1,5 +1,8 @@
 /*
  * $Log: setup.c,v $
+ * Revision 1.24  2016-05-27 20:47:41+05:30  Cprogrammer
+ * FHS compliant setup program
+ *
  * Revision 1.23  2016-05-18 15:54:59+05:30  Cprogrammer
  * added comments for documentation
  *
@@ -63,6 +66,7 @@
 #include <sys/stat.h>
 #include <unistd.h>
 #include <pwd.h>
+#include <grp.h>
 #include "substdio.h"
 #include "auto_uids.h"
 #include "subfd.h"
@@ -71,11 +75,12 @@
 #include "strerr.h"
 #include "error.h"
 #include "open.h"
-#include "fifo.h"
 #include "exit.h"
 #include "hasindimail.h"
+#include "stralloc.h"
+#include "sgetopt.h"
 
-void            hier(char *);
+void            hier(char *, char *);
 int             uidinit(int);
 char           *get_user(uid_t);
 char           *get_group(gid_t);
@@ -86,8 +91,14 @@ void            df(int, int, int, char *, char *, char *, int);
 
 int             fdsourcedir = -1;
 uid_t           my_uid;
+gid_t           my_gid;
 char           *mailuser = "mail";
 char           *mailgroup = "mail";
+char           *destdir = 0, *sharedir = 0;
+int             lsb = 0;
+stralloc        tmpdir = { 0 };
+stralloc        dirbuf = { 0 };
+stralloc        dird = { 0 };
 
 /*- gnu install style display */
 void
@@ -149,6 +160,24 @@ dd(cmd, uid, gid, mode, home, subdir)
 }
 
 void
+dl(cmd, home, subdir, target)
+	char           *cmd;
+	char           *home;
+	char           *subdir;
+	char           *target;
+{
+	substdio_puts(subfderr, cmd);
+	substdio_puts(subfderr, " ");
+	substdio_puts(subfderr, target);
+	substdio_puts(subfderr, " ");
+	substdio_puts(subfderr, home);
+	substdio_puts(subfderr, "/");
+	substdio_puts(subfderr, subdir);
+	substdio_puts(subfderr, "\n");
+	substdio_flush(subfderr);
+}
+
+void
 df(uid, gid, mode, file, home, subdir, strip)
 	int             uid;
 	int             gid;
@@ -200,6 +229,81 @@ df(uid, gid, mode, file, home, subdir, strip)
 	substdio_flush(subfderr);
 }
 
+int
+myr_mkdir(home, mode)
+	char           *home;
+	int             mode;
+{
+	char           *ptr;
+	int             i;
+
+	if (!stralloc_copys(&dirbuf, home))
+		strerr_die2sys(111, FATAL, "out of memory: ");
+	if (!stralloc_0(&dirbuf))
+		strerr_die2sys(111, FATAL, "out of memory: ");
+	for (ptr = dirbuf.s + 1;*ptr;ptr++) {
+		if (*ptr == '/') {
+			*ptr = 0;
+			if (access(dirbuf.s, F_OK) && (i = mkdir(dirbuf.s, mode)) == -1)
+				return (i);
+			*ptr = '/';
+		}
+	}
+	return (mkdir(dirbuf.s, mode));
+}
+
+char    *
+getdirname(char *dir, char **basedir)
+{
+	char           *ptr;
+	int             len;
+
+	for (ptr = dir, len = 0;*ptr; ptr++, len++);
+	ptr--;
+	for (;ptr != dir && *ptr != '/';ptr--, len--);
+	if (basedir)
+		*basedir = ptr;
+	while (len > 1 && *ptr == '/')
+		ptr--,len--;
+	if (!stralloc_copyb(&dirbuf, dir, len))
+		strerr_die2sys(111, FATAL, "out of memory: ");
+	if (!stralloc_0(&dirbuf))
+		strerr_die2sys(111, FATAL, "out of memory: ");
+	return (dirbuf.s);
+}
+
+void
+l(home, subdir, target)
+	char           *home;
+	char           *subdir;
+	char           *target;
+{
+	if (destdir) {
+		if (!stralloc_copys(&tmpdir, destdir))
+			strerr_die2sys(111, FATAL, "out of memory: ");
+		if (!stralloc_cats(&tmpdir, home))
+			strerr_die2sys(111, FATAL, "out of memory: ");
+	} else
+	if (!stralloc_copys(&tmpdir, home))
+		strerr_die2sys(111, FATAL, "out of memory: ");
+	if (!stralloc_0(&tmpdir))
+		strerr_die2sys(111, FATAL, "out of memory: ");
+	if (chdir(tmpdir.s) == -1)
+		strerr_die4sys(111, FATAL, "unable to switch to ", tmpdir.s, ": ");
+	if (!stralloc_copys(&dird, target))
+		strerr_die2sys(111, FATAL, "out of memory: ");
+	if (!stralloc_append(&dird, "/"))
+		strerr_die2sys(111, FATAL, "out of memory: ");
+	if (!stralloc_cats(&dird, subdir))
+		strerr_die2sys(111, FATAL, "out of memory: ");
+	if (!stralloc_0(&dird))
+		strerr_die2sys(111, FATAL, "out of memory: ");
+	if (symlink(dird.s, subdir) == -1 && errno != error_exist)
+		strerr_die6sys(111, FATAL, "unable to symlink ", subdir, " to ", dird.s, ": ");
+	/*- dl(cmd, home, subdir, target) -*/
+	dl("/usr/bin/ln -s", tmpdir.s, subdir, dird.s);
+}
+
 void
 h(home, uid, gid, mode)
 	char           *home;
@@ -207,13 +311,23 @@ h(home, uid, gid, mode)
 	int             gid;
 	int             mode;
 {
-	if (mkdir(home, my_uid ? 0755 : 0700) == -1 && errno != error_exist)
-		strerr_die4sys(111, FATAL, "unable to mkdir ", home, ": ");
-	if (!my_uid && chown(home, uid, gid) == -1)
-		strerr_die4sys(111, FATAL, "unable to chown ", home, ": ");
-	if (!my_uid && chmod(home, mode) == -1)
-		strerr_die4sys(111, FATAL, "unable to chmod ", home, ": ");
-	dd("/usr/bin/mkdir", uid, gid, mode, home, 0);
+	if (destdir) {
+		if (!stralloc_copys(&tmpdir, destdir))
+			strerr_die2sys(111, FATAL, "out of memory: ");
+		if (!stralloc_cats(&tmpdir, home))
+			strerr_die2sys(111, FATAL, "out of memory: ");
+	} else
+	if (!stralloc_copys(&tmpdir, home))
+		strerr_die2sys(111, FATAL, "out of memory: ");
+	if (!stralloc_0(&tmpdir))
+		strerr_die2sys(111, FATAL, "out of memory: ");
+	if (myr_mkdir(tmpdir.s, my_uid ? 0755 : 0700) == -1 && errno != error_exist)
+		strerr_die4sys(111, FATAL, "unable to mkdir ", tmpdir.s, ": ");
+	if (!my_uid && chown(tmpdir.s, uid, gid) == -1)
+		strerr_die4sys(111, FATAL, "unable to chown ", tmpdir.s, ": ");
+	if (!my_uid && chmod(tmpdir.s, mode) == -1)
+		strerr_die4sys(111, FATAL, "unable to chmod ", tmpdir.s, ": ");
+	dd("/usr/bin/mkdir", uid, gid, mode, tmpdir.s, 0);
 }
 
 void
@@ -224,34 +338,40 @@ d(home, subdir, uid, gid, mode)
 	int             gid;
 	int             mode;
 {
-	if (chdir(home) == -1)
-		strerr_die4sys(111, FATAL, "unable to switch to ", home, ": ");
-	if (mkdir(subdir, my_uid ? 0755 : 0700) == -1 && errno != error_exist)
-		strerr_die6sys(111, FATAL, "unable to mkdir ", home, "/", subdir, ": ");
+	if (destdir) {
+		if (!stralloc_copys(&tmpdir, destdir))
+			strerr_die2sys(111, FATAL, "out of memory: ");
+		if (!stralloc_cats(&tmpdir, home))
+			strerr_die2sys(111, FATAL, "out of memory: ");
+		if (!stralloc_copy(&dird, &tmpdir))
+			strerr_die2sys(111, FATAL, "out of memory: ");
+		if (!stralloc_append(&tmpdir, "/"))
+			strerr_die2sys(111, FATAL, "out of memory: ");
+		if (!stralloc_cats(&tmpdir, subdir))
+			strerr_die2sys(111, FATAL, "out of memory: ");
+	} else {
+		if (!stralloc_copys(&tmpdir, home))
+			strerr_die2sys(111, FATAL, "out of memory: ");
+		if (!stralloc_copy(&dird, &tmpdir))
+			strerr_die2sys(111, FATAL, "out of memory: ");
+		if (!stralloc_append(&tmpdir, "/"))
+			strerr_die2sys(111, FATAL, "out of memory: ");
+		if (!stralloc_cats(&tmpdir, subdir))
+			strerr_die2sys(111, FATAL, "out of memory: ");
+	}
+	if (!stralloc_0(&tmpdir))
+		strerr_die2sys(111, FATAL, "out of memory: ");
+	if (!stralloc_0(&dird))
+		strerr_die2sys(111, FATAL, "out of memory: ");
+	if (myr_mkdir(tmpdir.s, my_uid ? 0755 : 0700) == -1 && errno != error_exist)
+		strerr_die6sys(111, FATAL, "unable to mkdir ", tmpdir.s, "/", subdir, ": ");
+	if (chdir(dird.s) == -1)
+		strerr_die4sys(111, FATAL, "unable to switch to ", dird.s, ": ");
 	if (!my_uid && chown(subdir, uid, gid) == -1)
-		strerr_die6sys(111, FATAL, "unable to chown ", home, "/", subdir, ": ");
+		strerr_die6sys(111, FATAL, "unable to chown ", dird.s, "/", subdir, ": ");
 	if (!my_uid && chmod(subdir, mode) == -1)
-		strerr_die6sys(111, FATAL, "unable to chmod ", home, "/", subdir, ": ");
-	dd("/usr/bin/mkdir", uid, gid, mode, home, subdir);
-}
-
-void
-p(home, fifo, uid, gid, mode)
-	char           *home;
-	char           *fifo;
-	int             uid;
-	int             gid;
-	int             mode;
-{
-	if (chdir(home) == -1)
-		strerr_die4sys(111, FATAL, "unable to switch to ", home, ": ");
-	if (fifo_make(fifo, my_uid ? 0755 : 0700) == -1 && errno != error_exist)
-		strerr_die6sys(111, FATAL, "unable to mkfifo ", home, "/", fifo, ": ");
-	if (!my_uid && chown(fifo, uid, gid) == -1)
-		strerr_die6sys(111, FATAL, "unable to chown ", home, "/", fifo, ": ");
-	if (!my_uid && chmod(fifo, mode) == -1)
-		strerr_die6sys(111, FATAL, "unable to chmod ", home, "/", fifo, ": ");
-	dd("/usr/bin/mkfifo", uid, gid, mode, home, fifo);
+		strerr_die6sys(111, FATAL, "unable to chmod ", dird.s, "/", subdir, ": ");
+	dd("/usr/bin/mkdir", uid, gid, mode, dird.s, subdir);
 }
 
 char            inbuf[SUBSTDIO_INSIZE];
@@ -271,14 +391,14 @@ c(home, subdir, file, uid, gid, mode)
 	int             gid;
 	int             mode;
 {
-	int             fdin;
-	int             fdout;
-	int             is_prog = 0;
+	int             fdin, fdout, is_prog = 0, i, j;
+	char           *subd;
+	struct stat     st;
 
 	if (!str_diff(subdir, "bin"))
 		is_prog = 1;
-	if (is_prog)
-	{
+	/*- for generating qmailprog.list */
+	if (is_prog) {
 		substdio_puts(subfdout, file);
 		substdio_put(subfdout, "\n", 1);
 	}
@@ -289,34 +409,81 @@ c(home, subdir, file, uid, gid, mode)
 	if((fdin = open_read(file)) == -1)
 		strerr_die4sys(111, FATAL, "unable to read ", file, ": ");
 	substdio_fdbuf(&ssin, read, fdin, inbuf, sizeof inbuf);
-	if (chdir(home) == -1)
-		strerr_die4sys(111, FATAL, "unable to switch to ", home, ": ");
+
+	if (destdir) {
+		if (!stralloc_copys(&tmpdir, destdir))
+			strerr_die2sys(111, FATAL, "out of memory: ");
+		if (!stralloc_cats(&tmpdir, home))
+			strerr_die2sys(111, FATAL, "out of memory: ");
+	} else
+	if (!stralloc_copys(&tmpdir, home))
+		strerr_die2sys(111, FATAL, "out of memory: ");
+	if (!stralloc_0(&tmpdir))
+		strerr_die2sys(111, FATAL, "out of memory: ");
+	if (chdir(tmpdir.s) == -1)
+		strerr_die4sys(111, FATAL, "unable to switch to ", tmpdir.s, ": ");
+
+	if (lstat(subdir, &st) == -1)
+		strerr_die6sys(111, FATAL, "unable to stat", tmpdir.s, "/", subdir, ": ");
+	subd = subdir;
+	if (st.st_mode & S_IFLNK) {
+		if (destdir) {
+			if (!stralloc_copys(&tmpdir, destdir))
+				strerr_die2sys(111, FATAL, "out of memory: ");
+			for (i = 28;;)
+			{
+				if (!stralloc_ready(&dird, i + 1))
+					strerr_die2sys(111, FATAL, "out of memory: ");
+				if ((j = readlink(subdir, dird.s, i)) == i) {
+					i += 28;
+				} else {
+					dird.s[j] = 0;
+					break;
+				}
+			}
+			if (!stralloc_copys(&tmpdir, destdir))
+				strerr_die2sys(111, FATAL, "out of memory: ");
+			if (!stralloc_cat(&tmpdir, &dird))
+				strerr_die2sys(111, FATAL, "out of memory: ");
+			if (chdir(tmpdir.s) == -1)
+				strerr_die6sys(111, FATAL, "unable to switch to ", destdir, "/", dird.s, ": ");
+			if (!stralloc_copys(&tmpdir, destdir))
+				strerr_die2sys(111, FATAL, "out of memory: ");
+			if (!stralloc_cats(&tmpdir, home))
+				strerr_die2sys(111, FATAL, "out of memory: ");
+			if (!stralloc_0(&tmpdir))
+				strerr_die2sys(111, FATAL, "out of memory: ");
+			subd = subdir;
+		} else
+		if (chdir(subdir) == -1)
+			strerr_die6sys(111, FATAL, "unable to switch to ", tmpdir.s, "/", subdir, ": ");
+	} else
 	if (chdir(subdir) == -1)
-		strerr_die6sys(111, FATAL, "unable to switch to ", home, "/", subdir, ": ");
+		strerr_die6sys(111, FATAL, "unable to switch to ", tmpdir.s, "/", subdir, ": ");
 	if((fdout = open_trunc(file)) == -1)
-		strerr_die8sys(111, FATAL, "unable to write ", home, "/", subdir, "/", file, ": ");
+		strerr_die8sys(111, FATAL, "unable to write ", tmpdir.s, "/", subd, "/", file, ": ");
 	substdio_fdbuf(&ssout, write, fdout, outbuf, sizeof outbuf);
 	switch (substdio_copy(&ssout, &ssin))
 	{
 	case -2:
 		strerr_die4sys(111, FATAL, "unable to read ", file, ": ");
 	case -3:
-		strerr_die8sys(111, FATAL, "unable to write ", home, "/", subdir, "/", file, ": ");
+		strerr_die8sys(111, FATAL, "unable to write ", tmpdir.s, "/", subd, "/", file, ": ");
 	}
 	close(fdin);
 	if (substdio_flush(&ssout) == -1)
-		strerr_die8sys(111, FATAL, "unable to write ", home, "/", subdir, "/", file, ": ");
+		strerr_die8sys(111, FATAL, "unable to write ", tmpdir.s, "/", subd, "/", file, ": ");
 	if (fsync(fdout) == -1)
-		strerr_die8sys(111, FATAL, "unable to write ", home, "/", subdir, "/", file, ": ");
+		strerr_die8sys(111, FATAL, "unable to write ", tmpdir.s, "/", subd, "/", file, ": ");
 	if (close(fdout) == -1)		/*- NFS silliness */
-		strerr_die8sys(111, FATAL, "unable to write ", home, "/", subdir, "/", file, ": ");
+		strerr_die8sys(111, FATAL, "unable to write ", tmpdir.s, "/", subd, "/", file, ": ");
 	if (!my_uid && chown(file, uid, gid) == -1)
-		strerr_die8sys(111, FATAL, "unable to chown ", home, "/", subdir, "/", file, ": ");
+		strerr_die8sys(111, FATAL, "unable to chown ", tmpdir.s, "/", subd, "/", file, ": ");
 	if (!my_uid && chmod(file, mode) == -1)
-		strerr_die8sys(111, FATAL, "unable to chmod ", home, "/", subdir, "/", file, ": ");
+		strerr_die8sys(111, FATAL, "unable to chmod ", tmpdir.s, "/", subd, "/", file, ": ");
 	if (is_prog)
 		substdio_flush(subfdout);
-	df(uid, gid, mode, file, home, subdir, is_prog ? 1 : 0);
+	df(uid, gid, mode, file, tmpdir.s, subd, is_prog ? 1 : 0);
 }
 
 #ifdef INDIMAIL
@@ -328,80 +495,68 @@ ci(char *home, char *subdir, char *file, int uid, int gid, int mode)
 }
 #endif
 
-void
-z(home, file, len, uid, gid, mode)
-	char           *home;
-	char           *file;
-	int             len;
-	int             uid;
-	int             gid;
-	int             mode;
-{
-	int             fdout;
-
-	if (chdir(home) == -1)
-		strerr_die4sys(111, FATAL, "unable to switch to ", home, ": ");
-	if((fdout = open_trunc(file)) == -1)
-		strerr_die6sys(111, FATAL, "unable to write ", home, "/", file, ": ");
-	substdio_fdbuf(&ssout, write, fdout, outbuf, sizeof outbuf);
-	while (len-- > 0)
-	{
-		if (substdio_put(&ssout, "", 1) == -1)
-			strerr_die6sys(111, FATAL, "unable to write ", home, "/", file, ": ");
-	}
-	if (substdio_flush(&ssout) == -1)
-		strerr_die6sys(111, FATAL, "unable to write ", home, "/", file, ": ");
-	if (fsync(fdout) == -1)
-		strerr_die6sys(111, FATAL, "unable to write ", home, "/", file, ": ");
-	if (close(fdout) == -1)		/*- NFS silliness */
-		strerr_die6sys(111, FATAL, "unable to write ", home, "/", file, ": ");
-	if (!my_uid && chown(file, uid, gid) == -1)
-		strerr_die6sys(111, FATAL, "unable to chown ", home, "/", file, ": ");
-	if (!my_uid && chmod(file, mode) == -1)
-		strerr_die6sys(111, FATAL, "unable to chmod ", home, "/", file, ": ");
-}
+char           *usage = "usage: setup -d destdir [-s sharedir] [instdir]";
 
 int
 main(int argc, char **argv)
 {
-	int             i;
+	int             opt;
 	struct passwd  *pw;
+	struct group   *gr;
 
 #ifdef DARWIN
 	mailuser = "daemon";
 	mailgroup = "daemon";
 #endif
-	if (env_get("FAKED_MODE")) /*-fix for debian generation */
+	while ((opt = getopt(argc, argv, "ld:s:")) != opteof) {
+		switch (opt) {
+		case 'd':
+			destdir = optarg;
+			break;
+		case 's':
+			sharedir = optarg;
+			break;
+		case 'l':
+			lsb = 1;
+			break;
+		default:
+			strerr_die1x(100, usage);
+		}
+	}
+	if (env_get("FAKED_MODE")) { /*-fix for debian generation */
 		my_uid = 1;
-	else
+		my_gid = 1;
+	} else {
 		my_uid = getuid();
+		my_gid = getgid();
+	}
 	if((fdsourcedir = open_read(".")) == -1)
 		strerr_die2sys(111, FATAL, "unable to open current directory: ");
-	if (my_uid)
-	{
-		if (!(pw = getpwnam(mailuser))) /*- we expect this user to be present on all linux distros */
-			strerr_die2sys(111, FATAL, "unable to get uids/gids: ");
+	if (my_uid) {
+		if (!(pw = getpwuid(my_uid)) && !(pw = getpwnam(mailuser))) /*- we expect this user to be present on all linux distros */
+			strerr_die2sys(111, FATAL, "unable to get uids: ");
+		if ((gr = getgrgid(my_gid)))
+			mailgroup = gr->gr_name;
+		mailuser = pw->pw_name;
 		auto_uida = pw->pw_uid;
 		auto_gidn = pw->pw_gid;
 		umask(022);
-	} else
-	{
+	} else {
 		if(uidinit(1) == -1)
 			strerr_die2sys(111, FATAL, "unable to get uids/gids: ");
 		umask(077);
 	}
-	if (argc == 1)
-		hier(0);
+	if (optind + 1 != argc)
+		hier(0, FATAL);
 	else
-	for (i = 1;i < argc;i++)
-		hier(argv[i]);
+		hier(argv[optind++], FATAL);
 	return (0);
 }
 
 void
 getversion_setup_c()
 {
-	static char    *x = "$Id: setup.c,v 1.23 2016-05-18 15:54:59+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: setup.c,v 1.24 2016-05-27 20:47:41+05:30 Cprogrammer Exp mbhangui $";
 #ifdef INDIMAIL
 	if (x)
 		x = sccsidh;

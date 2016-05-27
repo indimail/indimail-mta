@@ -7,7 +7,7 @@ SYSTEM := $(shell uname -s)
 SHELL=/bin/sh
 inc_deps := -DHAVE_CONFIG_H -I$(DESTDIR)$(INDIDIR)/include `cat ./inc_deps 2>/dev/null`
 #lib_deps := -L$(DESTDIR)$(INDIDIR)/lib `cat ./lib_deps 2>/dev/null`
-lib_deps=$(shell cat ./lib_deps)
+lib_deps=$(shell cat ./lib_deps 2>/dev/null)
 
 default: it man leapsecs.dat
 

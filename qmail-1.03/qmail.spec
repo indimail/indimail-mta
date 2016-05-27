@@ -1,6 +1,6 @@
 #
 #
-# $Id: qmail.spec,v 1.39 2016-05-19 09:00:53+05:30 Cprogrammer Exp mbhangui $
+# $Id: qmail.spec,v 1.40 2016-05-27 20:47:35+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %define _unpackaged_files_terminate_build 1
 
@@ -29,9 +29,11 @@
 %define fast_mode          0
 %endif
 
-%define _prefix            /var/indimail
-%define controldir         /var/indimail/control
-%define assigndir          /var/indimail/users
+%define qmaildir           /var/indimail
+%define _prefix            /usr
+%define qsysconfdir        /etc/indimail
+%define shareddir          /usr/share/indimail
+%define mandir             /usr/share/man
 %define ucspi_version      0.88
 %define qmail_version      1.03
 %define libdkim_version    1.4
@@ -46,7 +48,7 @@
 
 %define _verbose           0
 %define qcount             5
-%define qbase              %{_prefix}/queue
+%define qbase              %{qmaildir}/queue
 %define logdir             /var/log/indimail
 %define servicedir         /service
 %define dkimkeyfn          default
@@ -324,12 +326,7 @@ else
 fi
 fi
 
-if [ " %dist" = " mandrake" ] ; then
-./configure --prefix=%{_prefix} --libdir=%{_libdir} --libexecdir=%{_prefix}/libexec \
-	--x-libraries=%{_libdir} --mandir=%{_prefix}/man
-else
-%configure --prefix=%{_prefix} --mandir=%{_prefix}/man
-fi
+%configure --prefix=%{_prefix} --libdir=%{_libdir} --mandir=%{mandir}
 cd ..
 fi
 
@@ -351,33 +348,30 @@ else
 fi
 fi
 
-if [ " %dist" = " mandrake" ] ; then
-./configure --prefix=%{_prefix} --libdir=%{_libdir} --libexecdir=%{_prefix}/libexec \
-	--x-libraries=%{_libdir} --mandir=%{_prefix}/man
-else
-%configure --prefix=%{_prefix} --mandir=%{_prefix}/man
-fi
+%configure --prefix=%{_prefix} --libdir=%{_libdir} --mandir=%{mandir}
 cd ..
 fi
 
 #### qmail ######################
 if [ -d qmail-%{qmail_version} ] ; then
-	%{__sed} 's{QMAIL{%{_prefix}{' qmail-%{qmail_version}/conf-qmail.in > qmail-%{qmail_version}/conf-qmail
+	%{__sed} 's{QMAIL{%{qmaildir}{' qmail-%{qmail_version}/conf-qmail.in > qmail-%{qmail_version}/conf-qmail
+	%{__sed} 's{SYSCONFDIR{%{qsysconfdir}{' qmail-%{qmail_version}/conf-sysconfdir.in > qmail-%{qmail_version}/conf-sysconfdir
+	%{__sed} 's{SHAREDDIR{%{shareddir}{' qmail-%{qmail_version}/conf-shared.in > qmail-%{qmail_version}/conf-shared
+	%{__sed} 's{PREFIX{%{_prefix}{' qmail-%{qmail_version}/conf-prefix.in > qmail-%{qmail_version}/conf-prefix
 %if %{tcpserver_plugin} == 1
 	echo "-DLOAD_SHARED_OBJECTS" > qmail-%{qmail_version}/conf-dlopen
 %else
 	%{__rm} -f qmail-%{qmail_version}/conf-dlopen
 %endif
-	echo %{controldir} > qmail-%{qmail_version}/conf-control
-	echo %{assigndir} > qmail-%{qmail_version}/conf-assign
 fi
 #### ucspi-tcp ######################
 if [ -d ucspi-tcp-%{ucspi_version} ] ; then
 	%{__sed} 's{HOME{%{_prefix}{' ucspi-tcp-%{ucspi_version}/conf-home.in > ucspi-tcp-%{ucspi_version}/conf-home
+	%{__sed} 's{SHAREDDIR{%{shareddir}{' ucspi-tcp-%{ucspi_version}/conf-shared.in > ucspi-tcp-%{ucspi_version}/conf-shared
 %if %{tcpserver_plugin} == 1
-	echo "-DLOAD_SHARED_OBJECTS" > ucsp-tcp-%{ucspi_version}/conf-dlopen
+	echo "-DLOAD_SHARED_OBJECTS" > ucspi-tcp-%{ucspi_version}/conf-dlopen
 %else
-	%{__rm} -f ucsp-tcp-%{ucspi_version}/conf-dlopen
+	%{__rm} -f ucspi-tcp-%{ucspi_version}/conf-dlopen
 %endif
 fi
 
@@ -437,13 +431,13 @@ do
 	fi
 done
 fi
-%{__rm} -rf %{buildroot}%{_prefix}/man/man3
+%{__rm} -rf %{buildroot}%{mandir}/man3
 %{__rm} -rf %{buildroot}%{_prefix}/include
 %{__rm} -rf %{buildroot}%{_prefix}/lib/libdkim.a
 %{__rm} -rf %{buildroot}%{_prefix}/lib64/libdkim.a
 %{__rm} -rf %{buildroot}%{_prefix}/lib/libsrs2.a
 %{__rm} -rf %{buildroot}%{_prefix}/lib64/libsrs2.a
-%{__rm} -rf %{buildroot}%{_prefix}/queue
+%{__rm} -rf %{buildroot}%{qmaildir}/queue
 
 
 if [ -f ../SOURCES/svctool ] ; then
@@ -454,7 +448,7 @@ gunzip -c ../SOURCES/svctool.gz > %{buildroot}%{_prefix}/sbin/svctool
 fi
 
 # Compress the man pages
-find %{buildroot}%{_prefix}/man -type f -exec gzip -q {} \;
+find %{buildroot}%{mandir} -type f -exec gzip -q {} \;
 
 if [ -x /bin/touch ] ; then
 	TOUCH=/bin/touch
@@ -467,8 +461,8 @@ fi
 for i in tcp.smtp tcp.smtp.cdb tcp.qmtp tcp.qmtp.cdb tcp.qmqp tcp.qmqp.cdb \
 services.log
 do
-	if [ ! -f %{buildroot}%{_prefix}/etc/$i ] ; then
-		$TOUCH %{buildroot}%{_prefix}/etc/$i
+	if [ ! -f %{buildroot}%{qsysconfdir}/$i ] ; then
+		$TOUCH %{buildroot}%{qsysconfdir}/$i
 	fi
 done
 (
@@ -491,60 +485,64 @@ tarpitcount tarpitdelay timeoutconnect timeoutread timeoutremote timeoutsmtpd \
 timeoutwrite tlsclientciphers tlsclients tlsserverciphers todointerval virtualdomains \
 signaturedomains nosignaturedomains goodrcptto goodrcptpatterns qbase greylist.white
 do
-	echo "%ghost %config(noreplace,missingok)               %{_prefix}/control/$i"
+	echo "%ghost %config(noreplace,missingok)               %{qsysconfdir}/control/$i"
 	echo $i 1>&3
-	$TOUCH %{buildroot}%{_prefix}/control/$i
+	$TOUCH %{buildroot}%{qsysconfdir}/control/$i
 done
-) > config_files.list 3>%{buildroot}%{_prefix}/etc/controlfiles
+) > config_files.list 3>%{buildroot}%{qsysconfdir}/controlfiles
 
 %files -f config_files.list
 %defattr(-, root, root,-)
 #
 # Directories
 #
-%dir %attr(555,root,qmail)        %{_prefix}
-%dir %attr(555,root,qmail)        %{_prefix}/boot
-%dir %attr(555,root,qmail)        %{_prefix}/doc
-%dir %attr(2555,alias,qmail)      %{_prefix}/alias
-%dir %attr(750,qscand,qscand)     %{_prefix}/qscanq
-%dir %attr(750,qscand,qscand)     %{_prefix}/qscanq/root
-%dir %attr(750,qscand,qscand)     %{_prefix}/qscanq/root/scanq
-%dir %attr(755,indimail,indimail) %{_prefix}/control
-%dir %attr(2755,qmailr,qmail)     %{_prefix}/control/ratelimit
-%dir %attr(755,indimail,indimail) %{_prefix}/control/domainkeys
-%dir %attr(555,root,qmail)        %{_prefix}/man
-%dir %attr(555,root,qmail)        %{_prefix}/man/man1
-%dir %attr(555,root,qmail)        %{_prefix}/man/cat1
-%dir %attr(555,root,qmail)        %{_prefix}/man/man5
-%dir %attr(555,root,qmail)        %{_prefix}/man/cat5
-%dir %attr(555,root,qmail)        %{_prefix}/man/man7
-%dir %attr(555,root,qmail)        %{_prefix}/man/cat7
-%dir %attr(555,root,qmail)        %{_prefix}/man/man8
-%dir %attr(555,root,qmail)        %{_prefix}/man/cat8
+%dir %attr(555,root,qmail)        %{qmaildir}
+                                  %{qmaildir}/bin
+                                  %{qmaildir}/sbin
+                                  %{qmaildir}/users
+                                  %{qmaildir}/control
+%dir %attr(555,root,qmail)        %{shareddir}/boot
+%dir %attr(555,root,qmail)        %{shareddir}/doc
+%dir %attr(2555,alias,qmail)      %{qmaildir}/alias
+%dir %attr(750,qscand,qscand)     %{qmaildir}/qscanq
+%dir %attr(750,qscand,qscand)     %{qmaildir}/qscanq/root
+%dir %attr(750,qscand,qscand)     %{qmaildir}/qscanq/root/scanq
+%dir %attr(755,indimail,indimail) %{qsysconfdir}/control
+%dir %attr(2755,qmailr,qmail)     %{qsysconfdir}/control/ratelimit
+%dir %attr(755,indimail,indimail) %{qsysconfdir}/control/domainkeys
+%if "%{mandir}" != "/usr/share/man"
+%dir %attr(755,root,root)         %{mandir}
+%dir %attr(555,root,qmail)        %{mandir}/man1
+%dir %attr(555,root,qmail)        %{mandir}/cat1
+%dir %attr(555,root,qmail)        %{mandir}/man5
+%dir %attr(555,root,qmail)        %{mandir}/cat5
+%dir %attr(555,root,qmail)        %{mandir}/man7
+%dir %attr(555,root,qmail)        %{mandir}/cat7
+%dir %attr(555,root,qmail)        %{mandir}/man8
+%dir %attr(555,root,qmail)        %{mandir}/cat8
+%endif
+%if "%{_prefix}" != "/usr"
 %dir %attr(555,root,root)         %{_libdir}
+%endif
+%dir %attr(555,root,qmail)        %{qsysconfdir}/users
+%dir %attr(555,root,qmail)        %{_prefix}/lib/indimail/plugins
 
-%dir %attr(555,root,qmail)        %{_prefix}/users
-%dir %attr(555,root,qmail)        %{_prefix}/plugins
-%dir %attr(775,root,indimail)     %{_prefix}/etc
-%dir %attr(555,root,indimail)     %{_prefix}/sbin
-%dir %attr(555,root,qmail)        %{_prefix}/bin
+%attr(444,root,root)                              %{qsysconfdir}/controlfiles
 
-%attr(444,root,root)                              %{_prefix}/etc/controlfiles
-
-%ghost %config(noreplace,missingok)               %{_prefix}/etc/tcp.smtp
-%ghost %config(noreplace,missingok)               %{_prefix}/etc/tcp.qmtp
-%ghost %config(noreplace,missingok)               %{_prefix}/etc/tcp.qmqp
+%ghost %config(noreplace,missingok)               %{qsysconfdir}/tcp.smtp
+%ghost %config(noreplace,missingok)               %{qsysconfdir}/tcp.qmtp
+%ghost %config(noreplace,missingok)               %{qsysconfdir}/tcp.qmqp
 #
 # These files will get removed during uninstallation
 #
-%ghost %attr(0644,indimail,indimail)              %{_prefix}/etc/tcp.smtp.cdb
-%ghost %attr(0644,indimail,indimail)              %{_prefix}/etc/tcp.qmtp.cdb
-%ghost %attr(0644,indimail,indimail)              %{_prefix}/etc/tcp.qmqp.cdb
-%ghost %attr(0644,root,root)                      %{_prefix}/etc/services.log
+%ghost %attr(0644,indimail,indimail)              %{qsysconfdir}/tcp.smtp.cdb
+%ghost %attr(0644,indimail,indimail)              %{qsysconfdir}/tcp.qmtp.cdb
+%ghost %attr(0644,indimail,indimail)              %{qsysconfdir}/tcp.qmqp.cdb
+%ghost %attr(0644,root,root)                      %{qsysconfdir}/services.log
 
-%attr(444,root,root)                              %{_prefix}/etc/qmailprog.list
-%attr(444,root,qmail)                             %{_prefix}/etc/leapsecs.dat
-%attr(444,root,qmail)                             %{_prefix}/etc/leapsecs.txt
+%attr(444,root,root)                              %{qsysconfdir}/qmailprog.list
+%attr(444,root,qmail)                             %{qsysconfdir}/etc/leapsecs.dat
+%attr(444,root,qmail)                             %{qsysconfdir}/etc/leapsecs.txt
 
 %if %noperms == 0
 %if 0%{?suse_version} >= 1120
@@ -567,7 +565,7 @@ done
 %verify (not user group mode) %attr(2511, root, qscand)    %{_prefix}/bin/run-cleanq
 %verify (not user group mode) %attr(6511, qmailq, qmail)   %{_prefix}/bin/qmail-queue
 %verify (not user group mode) %attr(4555, qscand, qscand)  %{_prefix}/bin/qscanq
-%verify (not user group mode) %attr(2555, alias, qmail)    %{_prefix}/alias
+%verify (not user group mode) %attr(2555, alias, qmail)    %{qmaildir}/alias
 #%verify (not user group mode) %attr(2755, indimail, qmail) %{_prefix}/autoturn
 %endif
 %endif
@@ -836,81 +834,81 @@ done
 %if %nolibsrs2 == 0
 %attr(555,root,root)                    %{_prefix}/bin/srs
 %endif
-%attr(555,root,qmail)                   %{_prefix}/boot/binm2
-%attr(555,root,qmail)                   %{_prefix}/boot/proc+df
-%attr(555,root,qmail)                   %{_prefix}/boot/binm1+df
-%attr(555,root,qmail)                   %{_prefix}/boot/binm3+df
-%attr(555,root,qmail)                   %{_prefix}/boot/home+df
-%attr(555,root,qmail)                   %{_prefix}/boot/binm3
-%attr(555,root,qmail)                   %{_prefix}/boot/binm1
-%attr(555,root,qmail)                   %{_prefix}/boot/proc
-%attr(555,root,qmail)                   %{_prefix}/boot/home
-%attr(555,root,qmail)                   %{_prefix}/boot/binm2+df
-%attr(444,root,qmail)                   %{_prefix}/boot/upstart
-%attr(444,root,qmail)                   %{_prefix}/boot/systemd
+%attr(555,root,qmail)                   %{shareddir}/boot/binm2
+%attr(555,root,qmail)                   %{shareddir}/boot/proc+df
+%attr(555,root,qmail)                   %{shareddir}/boot/binm1+df
+%attr(555,root,qmail)                   %{shareddir}/boot/binm3+df
+%attr(555,root,qmail)                   %{shareddir}/boot/home+df
+%attr(555,root,qmail)                   %{shareddir}/boot/binm3
+%attr(555,root,qmail)                   %{shareddir}/boot/binm1
+%attr(555,root,qmail)                   %{shareddir}/boot/proc
+%attr(555,root,qmail)                   %{shareddir}/boot/home
+%attr(555,root,qmail)                   %{shareddir}/boot/binm2+df
+%attr(444,root,qmail)                   %{shareddir}/boot/upstart
+%attr(444,root,qmail)                   %{shareddir}/boot/systemd
 
-%attr(555,root,qmail)                   %{_prefix}/plugins/generic.so
-%attr(555,root,qmail)                   %{_prefix}/plugins/smtpd-plugin.so
-%attr(555,root,qmail)                   %{_prefix}/plugins/smtpd-plugin0.so
+%attr(555,root,qmail)                   %{_prefix}/lib/indimail/plugins/generic.so
+%attr(555,root,qmail)                   %{_prefix}/lib/indimail/plugins/smtpd-plugin.so
+%attr(555,root,qmail)                   %{_prefix}/lib/indimail/plugins/smtpd-plugin0.so
 %if %tcpserver_plugin != 0
-%attr(555,root,qmail)                   %{_prefix}/plugins/qmail_smtpd.so
-%attr(555,root,qmail)                   %{_prefix}/plugins/rblsmtpd.so
+%attr(555,root,qmail)                   %{_prefix}/lib/indimail/plugins/qmail_smtpd.so
+%attr(555,root,qmail)                   %{_prefix}/lib/indimail/plugins/rblsmtpd.so
 %endif
 
-%docdir %{_prefix}/doc
-%docdir %{_prefix}/man
-%attr(444,root,qmail)                   %{_prefix}/man/man[1,4,5,7,8]/*
-%attr(444,root,qmail)                   %{_prefix}/man/cat[1,4,5,7,8]/*
+%docdir %{shareddir}/doc
+%docdir %{mandir}
+%attr(444,root,qmail)                   %{mandir}/man[1,4,5,7,8]/*
+%attr(444,root,qmail)                   %{mandir}/cat[1,4,5,7,8]/*
 
-%attr(444,root,qmail)                   %{_prefix}/doc/README.indimail
-%attr(444,root,qmail)                   %{_prefix}/doc/README.filters
-%attr(444,root,qmail)                   %{_prefix}/doc/README.qmail
-%attr(444,root,qmail)                   %{_prefix}/doc/README.auth
-%attr(444,root,qmail)                   %{_prefix}/doc/README.clamav
-%attr(444,root,qmail)                   %{_prefix}/doc/README.logselect
-%attr(444,root,qmail)                   %{_prefix}/doc/README.moreipme
-%attr(444,root,qmail)                   %{_prefix}/doc/README.newline
-%attr(444,root,qmail)                   %{_prefix}/doc/README.qhpsi
-%attr(444,root,qmail)                   %{_prefix}/doc/README.qregex
-%attr(444,root,qmail)                   %{_prefix}/doc/README.queue-fix
-%attr(444,root,qmail)                   %{_prefix}/doc/README.greylist
-%attr(444,root,qmail)                   %{_prefix}/doc/README.recipients
-%attr(444,root,qmail)                   %{_prefix}/doc/README.remote-auth
-%attr(444,root,qmail)                   %{_prefix}/doc/README.spamcontrol
-%attr(444,root,qmail)                   %{_prefix}/doc/README.srs
-%attr(444,root,qmail)                   %{_prefix}/doc/README.starttls
-%attr(444,root,qmail)                   %{_prefix}/doc/README.status
-%attr(444,root,qmail)                   %{_prefix}/doc/README.tls
-%attr(444,root,qmail)                   %{_prefix}/doc/README.wildmat
-%attr(444,root,qmail)                   %{_prefix}/doc/README.surbl
-%attr(444,root,qmail)                   %{_prefix}/doc/INSTALL.maildir
-%attr(444,root,qmail)                   %{_prefix}/doc/TEST.receive
-%attr(444,root,qmail)                   %{_prefix}/doc/INSTALL.alias
-%attr(444,root,qmail)                   %{_prefix}/doc/UPGRADE
-%attr(444,root,qmail)                   %{_prefix}/doc/PIC.local2alias
-%attr(444,root,qmail)                   %{_prefix}/doc/INSTALL.mbox
-%attr(444,root,qmail)                   %{_prefix}/doc/PIC.local2local
-%attr(444,root,qmail)                   %{_prefix}/doc/INSTALL.ids
-%attr(444,root,qmail)                   %{_prefix}/doc/INSTALL.qmail
-%attr(444,root,qmail)                   %{_prefix}/doc/PIC.nullclient
-%attr(444,root,qmail)                   %{_prefix}/doc/PIC.rem2local
-%attr(444,root,qmail)                   %{_prefix}/doc/PIC.relaybad
-%attr(444,root,qmail)                   %{_prefix}/doc/SENDMAIL
-%attr(444,root,qmail)                   %{_prefix}/doc/FROMISP
-%attr(444,root,qmail)                   %{_prefix}/doc/REMOVE.binmail
-%attr(444,root,qmail)                   %{_prefix}/doc/PIC.local2ext
-%attr(444,root,qmail)                   %{_prefix}/doc/REMOVE.sendmail
-%attr(444,root,qmail)                   %{_prefix}/doc/AUTOTURN
-%attr(444,root,qmail)                   %{_prefix}/doc/INSTALL.vsm
-%attr(444,root,qmail)                   %{_prefix}/doc/QMAILFAQ
-%attr(444,root,qmail)                   %{_prefix}/doc/INTERNALS
-%attr(444,root,qmail)                   %{_prefix}/doc/INSTALL.ctl
-%attr(444,root,qmail)                   %{_prefix}/doc/TEST.deliver
-%attr(444,root,qmail)                   %{_prefix}/doc/EXTTODO
-%attr(444,root,qmail)                   %{_prefix}/doc/PIC.local2virt
-%attr(444,root,qmail)                   %{_prefix}/doc/PIC.relaygood
-%attr(444,root,qmail)                   %{_prefix}/doc/PIC.local2rem
-%attr(444,root,qmail)                   %{_prefix}/doc/TOISP
+%attr(444,root,qmail)                   %{shareddir}/doc/README.indimail
+%attr(444,root,qmail)                   %{shareddir}/doc/README.filters
+%attr(444,root,qmail)                   %{shareddir}/doc/README.qmail
+%attr(444,root,qmail)                   %{shareddir}/doc/README.auth
+%attr(444,root,qmail)                   %{shareddir}/doc/README.clamav
+%attr(444,root,qmail)                   %{shareddir}/doc/README.logselect
+%attr(444,root,qmail)                   %{shareddir}/doc/README.moreipme
+%attr(444,root,qmail)                   %{shareddir}/doc/README.newline
+%attr(444,root,qmail)                   %{shareddir}/doc/README.qhpsi
+%attr(444,root,qmail)                   %{shareddir}/doc/README.qregex
+%attr(444,root,qmail)                   %{shareddir}/doc/README.queue-fix
+%attr(444,root,qmail)                   %{shareddir}/doc/README.greylist
+%attr(444,root,qmail)                   %{shareddir}/doc/README.recipients
+%attr(444,root,qmail)                   %{shareddir}/doc/README.remote-auth
+%attr(444,root,qmail)                   %{shareddir}/doc/README.spamcontrol
+%attr(444,root,qmail)                   %{shareddir}/doc/README.srs
+%attr(444,root,qmail)                   %{shareddir}/doc/README.starttls
+%attr(444,root,qmail)                   %{shareddir}/doc/README.status
+%attr(444,root,qmail)                   %{shareddir}/doc/README.tls
+%attr(444,root,qmail)                   %{shareddir}/doc/README.wildmat
+%attr(444,root,qmail)                   %{shareddir}/doc/README.surbl
+%attr(444,root,qmail)                   %{shareddir}/doc/INSTALL.maildir
+%attr(444,root,qmail)                   %{shareddir}/doc/TEST.receive
+%attr(444,root,qmail)                   %{shareddir}/doc/INSTALL.alias
+%attr(444,root,qmail)                   %{shareddir}/doc/UPGRADE
+%attr(444,root,qmail)                   %{shareddir}/doc/PIC.local2alias
+%attr(444,root,qmail)                   %{shareddir}/doc/INSTALL.mbox
+%attr(444,root,qmail)                   %{shareddir}/doc/PIC.local2local
+%attr(444,root,qmail)                   %{shareddir}/doc/INSTALL.ids
+%attr(444,root,qmail)                   %{shareddir}/doc/INSTALL.qmail
+%attr(444,root,qmail)                   %{shareddir}/doc/PIC.nullclient
+%attr(444,root,qmail)                   %{shareddir}/doc/PIC.rem2local
+%attr(444,root,qmail)                   %{shareddir}/doc/PIC.relaybad
+%attr(444,root,qmail)                   %{shareddir}/doc/SENDMAIL
+%attr(444,root,qmail)                   %{shareddir}/doc/FROMISP
+%attr(444,root,qmail)                   %{shareddir}/doc/REMOVE.binmail
+%attr(444,root,qmail)                   %{shareddir}/doc/PIC.local2ext
+%attr(444,root,qmail)                   %{shareddir}/doc/REMOVE.sendmail
+%attr(444,root,qmail)                   %{shareddir}/doc/AUTOTURN
+%attr(444,root,qmail)                   %{shareddir}/doc/INSTALL.vsm
+%attr(444,root,qmail)                   %{shareddir}/doc/QMAILFAQ
+%attr(444,root,qmail)                   %{shareddir}/doc/INTERNALS
+%attr(444,root,qmail)                   %{shareddir}/doc/INSTALL.ctl
+%attr(444,root,qmail)                   %{shareddir}/doc/TEST.deliver
+%attr(444,root,qmail)                   %{shareddir}/doc/EXTTODO
+%attr(444,root,qmail)                   %{shareddir}/doc/PIC.local2virt
+%attr(444,root,qmail)                   %{shareddir}/doc/PIC.relaygood
+%attr(444,root,qmail)                   %{shareddir}/doc/PIC.local2rem
+%attr(444,root,qmail)                   %{shareddir}/doc/TOISP
 
 # Shared libraries (omit for architectures that don't support them)
 
@@ -936,13 +934,14 @@ done
 #
 # Directories
 #
-%dir %attr(555,root,qmail)              %{_prefix}
-%dir %attr(555,root,qmail)              %{_prefix}/doc
-%dir %attr(555,root,qmail)              %{_prefix}/man
-%dir %attr(555,root,qmail)              %{_prefix}/man/man1
-%dir %attr(555,root,qmail)              %{_prefix}/man/man8
+%dir %attr(555,root,qmail)              %{shareddir}/doc
+%if "%{mandir}" != "/usr/share/man"
+%dir %attr(755,root,root)               %{mandir}
+%dir %attr(755,root,root)               %{mandir}/man1
+%dir %attr(755,root,root)               %{mandir}/man8
+%endif
 
-%dir %attr(555,root,qmail)              %{_prefix}/bin
+%dir %attr(555,root,root)               %{_prefix}/bin
 
 %attr(555,root,qmail)                   %{_prefix}/bin/envdir
 %attr(555,root,qmail)                   %{_prefix}/bin/envuidgid
@@ -973,37 +972,37 @@ done
 %attr(555,root,qmail)                   %{_prefix}/bin/multirotate
 %attr(555,root,qmail)                   %{_prefix}/bin/svscanboot
 
-%docdir %{_prefix}/doc
-%docdir %{_prefix}/man
+%docdir %{shareddir}/doc
+%docdir %{mandir}
 
-%attr(444,root,qmail)                   %{_prefix}/doc/README.logselect
-%attr(444,root,qmail)                   %{_prefix}/man/man1/spipe.1.gz
-%attr(444,root,qmail)                   %{_prefix}/man/man1/qfilelog.1.gz
-%attr(444,root,qmail)                   %{_prefix}/man/man1/multipipe.1.gz
-%attr(444,root,qmail)                   %{_prefix}/man/man1/teepipe.1.gz
-%attr(444,root,qmail)                   %{_prefix}/man/man1/multitail.1.gz
-%attr(444,root,qmail)                   %{_prefix}/man/man1/qlogselect.1.gz
-%attr(444,root,qmail)                   %{_prefix}/man/man1/tai2tai64n.1.gz
-%attr(444,root,qmail)                   %{_prefix}/man/man1/tai64n2tai.1.gz
-%attr(444,root,qmail)                   %{_prefix}/man/man8/envdir.8.gz
-%attr(444,root,qmail)                   %{_prefix}/man/man8/envuidgid.8.gz
-%attr(444,root,qmail)                   %{_prefix}/man/man8/fghack.8.gz
-%attr(444,root,qmail)                   %{_prefix}/man/man8/multilog.8.gz
-%attr(444,root,qmail)                   %{_prefix}/man/man8/pgrphack.8.gz
-%attr(444,root,qmail)                   %{_prefix}/man/man8/readproctitle.8.gz
-%attr(444,root,qmail)                   %{_prefix}/man/man8/setlock.8.gz
-%attr(444,root,qmail)                   %{_prefix}/man/man8/setuidgid.8.gz
-%attr(444,root,qmail)                   %{_prefix}/man/man8/softlimit.8.gz
-%attr(444,root,qmail)                   %{_prefix}/man/man8/supervise.8.gz
-%attr(444,root,qmail)                   %{_prefix}/man/man8/svc.8.gz
-%attr(444,root,qmail)                   %{_prefix}/man/man8/svok.8.gz
-%attr(444,root,qmail)                   %{_prefix}/man/man8/svscan.8.gz
-%attr(444,root,qmail)                   %{_prefix}/man/man8/svstat.8.gz
-%attr(444,root,qmail)                   %{_prefix}/man/man8/tai64n.8.gz
-%attr(444,root,qmail)                   %{_prefix}/man/man8/tai64nlocal.8.gz
-%attr(444,root,qmail)                   %{_prefix}/man/man8/tai64nunix.8.gz
-%attr(444,root,qmail)                   %{_prefix}/man/man8/logselect.8.gz
-%attr(444,root,qmail)                   %{_prefix}/man/man8/svscanboot.8.gz
+%attr(444,root,qmail)                   %{shareddir}/doc/README.logselect
+%attr(444,root,qmail)                   %{mandir}/man1/spipe.1.gz
+%attr(444,root,qmail)                   %{mandir}/man1/qfilelog.1.gz
+%attr(444,root,qmail)                   %{mandir}/man1/multipipe.1.gz
+%attr(444,root,qmail)                   %{mandir}/man1/teepipe.1.gz
+%attr(444,root,qmail)                   %{mandir}/man1/multitail.1.gz
+%attr(444,root,qmail)                   %{mandir}/man1/qlogselect.1.gz
+%attr(444,root,qmail)                   %{mandir}/man1/tai2tai64n.1.gz
+%attr(444,root,qmail)                   %{mandir}/man1/tai64n2tai.1.gz
+%attr(444,root,qmail)                   %{mandir}/man8/envdir.8.gz
+%attr(444,root,qmail)                   %{mandir}/man8/envuidgid.8.gz
+%attr(444,root,qmail)                   %{mandir}/man8/fghack.8.gz
+%attr(444,root,qmail)                   %{mandir}/man8/multilog.8.gz
+%attr(444,root,qmail)                   %{mandir}/man8/pgrphack.8.gz
+%attr(444,root,qmail)                   %{mandir}/man8/readproctitle.8.gz
+%attr(444,root,qmail)                   %{mandir}/man8/setlock.8.gz
+%attr(444,root,qmail)                   %{mandir}/man8/setuidgid.8.gz
+%attr(444,root,qmail)                   %{mandir}/man8/softlimit.8.gz
+%attr(444,root,qmail)                   %{mandir}/man8/supervise.8.gz
+%attr(444,root,qmail)                   %{mandir}/man8/svc.8.gz
+%attr(444,root,qmail)                   %{mandir}/man8/svok.8.gz
+%attr(444,root,qmail)                   %{mandir}/man8/svscan.8.gz
+%attr(444,root,qmail)                   %{mandir}/man8/svstat.8.gz
+%attr(444,root,qmail)                   %{mandir}/man8/tai64n.8.gz
+%attr(444,root,qmail)                   %{mandir}/man8/tai64nlocal.8.gz
+%attr(444,root,qmail)                   %{mandir}/man8/tai64nunix.8.gz
+%attr(444,root,qmail)                   %{mandir}/man8/logselect.8.gz
+%attr(444,root,qmail)                   %{mandir}/man8/svscanboot.8.gz
 
 %files -n ucspi-tcp
 %attr(555,root,qmail)                   %{_prefix}/bin/tcpserver
@@ -1023,21 +1022,21 @@ done
 %attr(555,root,qmail)                   %{_prefix}/bin/qmail-greyd
 %attr(555,root,qmail)                   %{_prefix}/bin/greydaemon
 
-%attr(444,root,qmail)                   %{_prefix}/man/man1/tcpserver.1.gz
-%attr(444,root,qmail)                   %{_prefix}/man/man1/tcprules.1.gz
-%attr(444,root,qmail)                   %{_prefix}/man/man1/tcprulescheck.1.gz
-%attr(444,root,qmail)                   %{_prefix}/man/man1/tcpclient.1.gz
-%attr(444,root,qmail)                   %{_prefix}/man/man1/who@.1.gz
-%attr(444,root,qmail)                   %{_prefix}/man/man1/date@.1.gz
-%attr(444,root,qmail)                   %{_prefix}/man/man1/finger@.1.gz
-%attr(444,root,qmail)                   %{_prefix}/man/man1/http@.1.gz
-%attr(444,root,qmail)                   %{_prefix}/man/man1/tcpcat.1.gz
-%attr(444,root,qmail)                   %{_prefix}/man/man1/mconnect.1.gz
-%attr(444,root,qmail)                   %{_prefix}/man/man1/rblsmtpd.1.gz
-%attr(444,root,qmail)                   %{_prefix}/man/man1/udpclient.1.gz
-%attr(444,root,qmail)                   %{_prefix}/man/man8/greydaemon.8.gz
-%attr(444,root,qmail)                   %{_prefix}/man/man8/qmail-greyd.8.gz
-%attr(444,root,qmail)                   %{_prefix}/man/man8/udplogger.8.gz
+%attr(444,root,qmail)                   %{mandir}/man1/tcpserver.1.gz
+%attr(444,root,qmail)                   %{mandir}/man1/tcprules.1.gz
+%attr(444,root,qmail)                   %{mandir}/man1/tcprulescheck.1.gz
+%attr(444,root,qmail)                   %{mandir}/man1/tcpclient.1.gz
+%attr(444,root,qmail)                   %{mandir}/man1/who@.1.gz
+%attr(444,root,qmail)                   %{mandir}/man1/date@.1.gz
+%attr(444,root,qmail)                   %{mandir}/man1/finger@.1.gz
+%attr(444,root,qmail)                   %{mandir}/man1/http@.1.gz
+%attr(444,root,qmail)                   %{mandir}/man1/tcpcat.1.gz
+%attr(444,root,qmail)                   %{mandir}/man1/mconnect.1.gz
+%attr(444,root,qmail)                   %{mandir}/man1/rblsmtpd.1.gz
+%attr(444,root,qmail)                   %{mandir}/man1/udpclient.1.gz
+%attr(444,root,qmail)                   %{mandir}/man8/greydaemon.8.gz
+%attr(444,root,qmail)                   %{mandir}/man8/qmail-greyd.8.gz
+%attr(444,root,qmail)                   %{mandir}/man8/udplogger.8.gz
 
 %clean
 %{__rm} -rf %{buildroot}
@@ -1148,18 +1147,18 @@ do
 	%{__rm} -f /var/spool/mail/$i
 done
 
-/usr/bin/getent passwd indimail > /dev/null || /usr/sbin/useradd -r -g indimail -u 555 -d %{_prefix} indimail || true
+/usr/bin/getent passwd indimail > /dev/null || /usr/sbin/useradd -r -g indimail -u 555 -d %{qmaildir} indimail || true
 if [ $? = 4 ] ; then
-	/usr/sbin/useradd -r -g indimail -d %{_prefix} indimail
+	/usr/sbin/useradd -r -g indimail -d %{qmaildir} indimail
 fi
-/usr/bin/getent passwd alias    > /dev/null || /usr/sbin/useradd -M -g nofiles  -d %{_prefix}/alias  -s /sbin/nologin  alias || true
-/usr/bin/getent passwd qmaild   > /dev/null || /usr/sbin/useradd -M -g nofiles  -d %{_prefix}        -s /sbin/nologin qmaild || true
-/usr/bin/getent passwd qmaill   > /dev/null || /usr/sbin/useradd -M -g nofiles  -d %{_prefix}        -s /sbin/nologin qmaill || true
-/usr/bin/getent passwd qmailp   > /dev/null || /usr/sbin/useradd -M -g nofiles  -d %{_prefix}        -s /sbin/nologin qmailp || true
-/usr/bin/getent passwd qmailq   > /dev/null || /usr/sbin/useradd -M -g qmail    -d %{_prefix}        -s /sbin/nologin qmailq || true
-/usr/bin/getent passwd qmailr   > /dev/null || /usr/sbin/useradd -M -g qmail    -d %{_prefix}        -s /sbin/nologin qmailr || true
-/usr/bin/getent passwd qmails   > /dev/null || /usr/sbin/useradd -M -g qmail    -d %{_prefix}        -s /sbin/nologin qmails || true
-/usr/bin/getent passwd qscand   > /dev/null || /usr/sbin/useradd -M -g qscand   -d %{_prefix}/qscanq -G qmail,qscand -s /sbin/nologin qscand || true
+/usr/bin/getent passwd alias    > /dev/null || /usr/sbin/useradd -M -g nofiles  -d %{qmaildir}/alias  -s /sbin/nologin  alias || true
+/usr/bin/getent passwd qmaild   > /dev/null || /usr/sbin/useradd -M -g nofiles  -d %{qmaildir}        -s /sbin/nologin qmaild || true
+/usr/bin/getent passwd qmaill   > /dev/null || /usr/sbin/useradd -M -g nofiles  -d %{qmaildir}        -s /sbin/nologin qmaill || true
+/usr/bin/getent passwd qmailp   > /dev/null || /usr/sbin/useradd -M -g nofiles  -d %{qmaildir}        -s /sbin/nologin qmailp || true
+/usr/bin/getent passwd qmailq   > /dev/null || /usr/sbin/useradd -M -g qmail    -d %{qmaildir}        -s /sbin/nologin qmailq || true
+/usr/bin/getent passwd qmailr   > /dev/null || /usr/sbin/useradd -M -g qmail    -d %{qmaildir}        -s /sbin/nologin qmailr || true
+/usr/bin/getent passwd qmails   > /dev/null || /usr/sbin/useradd -M -g qmail    -d %{qmaildir}        -s /sbin/nologin qmails || true
+/usr/bin/getent passwd qscand   > /dev/null || /usr/sbin/useradd -M -g qscand   -d %{qmaildir}/qscanq -G qmail,qscand -s /sbin/nologin qscand || true
 if [ $nscd_up -ge 1 ] ; then
 	if [ -x %{_sysconfdir}/init.d/nscd ] ; then
 		%{_sysconfdir}/init.d/nscd start
@@ -1175,10 +1174,10 @@ if [ $ID -ne 0 ] ; then
 	exit 1
 fi
 if [ $argv1 -eq 2 ] ; then # upgrade
-	if [ -f %{_prefix}/boot/rpm.init ] ; then
+	if [ -f %{shareddir}/boot/rpm.init ] ; then
 		/sbin/ldconfig
 		echo "Running Custom Upgrade Script for post"
-		/bin/sh %{_prefix}/boot/rpm.init upgrade
+		/bin/sh %{shareddir}/boot/rpm.init upgrade
 	fi
 	exit 0
 fi
@@ -1206,7 +1205,7 @@ echo "11. Configure QMTP service"
 echo "12. Configure QMQP service"
 echo "13. Configure udplogger service"
 echo "14. Configure qscanq/clamd/freshclam service"
-echo "15. Configure %{_prefix}/control/signatures"
+echo "15. Configure %{qsysconfdir}/control/signatures"
 echo "16. Configure tcprules database for SMTP, QMTP, QMQP"
 echo "17. Configure indimail-mta startup"
 echo ""
@@ -1226,12 +1225,12 @@ fi
 # svscanlog service
 %{_prefix}/sbin/svctool --svscanlog --servicedir=%{servicedir}
 
-%{_prefix}/sbin/svctool --config=qmail --postmaster=%{_prefix}/alias/Maildir/ \
+%{_prefix}/sbin/svctool --config=qmail --postmaster=%{qmaildir}/alias/Maildir/ \
 	--default-domain=indimail.org
 
-if [ -f %{_prefix}/boot/rpm.init ] ; then
+if [ -f %{shareddir}/boot/rpm.init ] ; then
 	echo "Running Custom Installation Script for post"
-	/bin/sh %{_prefix}/boot/rpm.init post
+	/bin/sh %{shareddir}/boot/rpm.init post
 fi
 
 if [ %nodksignatures -eq 0 ] ; then
@@ -1241,7 +1240,7 @@ if [ %nodksignatures -eq 0 ] ; then
 		if [ " $key_bit" = " " ] ; then
 			key_bit=1024
 		fi
-		%{_prefix}/bin/dknewkey %{_prefix}/control/domainkeys/%{dkimkeyfn} $key_bit
+		%{_prefix}/bin/dknewkey %{qsysconfdir}/control/domainkeys/%{dkimkeyfn} $key_bit
 	else
 		ver_opt="none"
 		sign_opt="none"
@@ -1320,7 +1319,7 @@ do
 			--qhpsi="$qhpsi" \
 			--dmasquerade \
 			--dkverify=both \
-			--dksign=both --private_key=%{_prefix}/control/domainkeys/%/%{dkimkeyfn} \
+			--dksign=both --private_key=%{qsysconfdir}/control/domainkeys/%/%{dkimkeyfn} \
 			$extra_opt
 	else
 		%{_prefix}/sbin/svctool --smtp=$port --servicedir=%{servicedir} \
@@ -1331,7 +1330,7 @@ do
 			--min-free=52428800 --content-filter --virus-filter \
 			--dmasquerade \
 			--dkverify=both \
-			--dksign=both --private_key=%{_prefix}/control/domainkeys/%/%{dkimkeyfn} \
+			--dksign=both --private_key=%{qsysconfdir}/control/domainkeys/%/%{dkimkeyfn} \
 			$extra_opt
 	fi
 	echo "1" > %{servicedir}/qmail-smtpd.$port/variables/DISABLE_PLUGIN
@@ -1344,14 +1343,14 @@ if [ %{noclamav} -eq 0 -o $clamav_os -eq 1 ] ; then
 		--min-free=52428800 --fsync --syncdir \
 		--qhpsi="$qhpsi" \
 		--dkverify="none" --dksign=$sign_opt \
-		--private_key=%{_prefix}/control/domainkeys/%/%{dkimkeyfn} \
+		--private_key=%{qsysconfdir}/control/domainkeys/%/%{dkimkeyfn} \
 		$extra_opt
 else
 	%{_prefix}/sbin/svctool --queueParam=defaultqueue \
 		--qbase=%{qbase} --qcount=%{qcount} --qstart=1 \
 		--min-free=52428800 --fsync --syncdir --virus-filter \
 		--dkverify="none" --dksign=$sign_opt \
-		--private_key=%{_prefix}/control/domainkeys/%/%{dkimkeyfn} \
+		--private_key=%{qsysconfdir}/control/domainkeys/%/%{dkimkeyfn} \
 		$extra_opt
 fi
 
@@ -1421,7 +1420,7 @@ R0lGODlhaAA7APcAAP///+rp6puSp6GZrDUjUUc6Zn53mFJMdbGvvVtXh2xre8bF1x8cU4yLprOy:Vir
 # http://www.gossamer-threads.com/lists/qmail/users/114447
 UEsDBAoAAQAAAEBHYzCf4kJRDDAAAAAwAAAKAAAAc3ZtaXhlLmV4ZcuI1rOkjfn48VwCkMYHRTfM
 EOF
-%{__chown} qscand:qscand %{_prefix}/control/signatures
+%{__chown} qscand:qscand %{qsysconfdir}/control/signatures
 
 # Recreate ld.so links and cache
 if [ -d %{_sysconfdir}/ld.so.conf.d ] ; then
@@ -1434,7 +1433,7 @@ fi
 # rebuild cdb
 for i in smtp qmtp qmqp
 do
-	for j in `/bin/ls %{_prefix}/etc/tcp*.$i 2>/dev/null`
+	for j in `/bin/ls %{qsysconfdir}/tcp*.$i 2>/dev/null`
 	do
 		echo "Creating CDB $j.cdb"
    		%{_prefix}/bin/tcprules $j.cdb $j.tmp < $j && /bin/chmod 664 $j.cdb \
@@ -1465,11 +1464,11 @@ else
 	count=2
 fi
 count=`expr $count + 1`
-echo "$count. Change your default domain in %{_prefix}/control/defaultdomain"
+echo "$count. Change your default domain in %{qsysconfdir}/control/defaultdomain"
 count=`expr $count + 1`
 echo "$count. You can optionally run the following command to verify installation"
 echo "   sudo rpm -V indimail"
-if [ ! -f %{_prefix}/control/servercert.pem ] ; then
+if [ ! -f %{qsysconfdir}/control/servercert.pem ] ; then
 count=`expr $count + 1`
 echo "$count. You need to create CERTS for STARTTLS."
 echo "   Run the following command to create the Certificate"
@@ -1512,9 +1511,9 @@ then
 	echo "Giving IndiMail exactly 5 seconds to exit nicely"
 	sleep 5
 fi
-if [ -f %{_prefix}/boot/rpm.init ] ; then
+if [ -f %{shareddir}/boot/rpm.init ] ; then
 	echo "Running Custom Un-Installation Script for preun"
-	/bin/sh %{_prefix}/boot/rpm.init preun "$argv1"
+	/bin/sh %{shareddir}/boot/rpm.init preun "$argv1"
 fi
 
 # we are doing upgrade
@@ -1584,42 +1583,42 @@ fi
 
 if [ ! %{_prefix} = "/usr" ] ; then
 	echo "removing binaries, libraries, queues, man pages"
-	for i in %{_prefix}/bin %{_prefix}/sbin %{_prefix}/lib %{_prefix}/queue \
-		%{_prefix}/man/man1 %{_prefix}/man/cat1 %{_prefix}/man/man5 %{_prefix}/man/cat5 \
-		%{_prefix}/man/man7 %{_prefix}/man/cat7 %{_prefix}/man/man8 %{_prefix}/man/cat8
+	for i in %{_prefix}/bin %{_prefix}/sbin %{_prefix}/lib %{qmaildir}/queue \
+		%{mandir}/man1 %{mandir}/cat1 %{mandir}/man5 %{mandir}/cat5 \
+		%{mandir}/man7 %{mandir}/cat7 %{mandir}/man8 %{mandir}/cat8
 	do
 		%{__rm} -rf $i || true
 	done
-	/bin/rmdir --ignore-fail-on-non-empty %{_prefix}/man 2>/dev/null
-	for i in `/bin/ls %{_prefix}/share 2>/dev/null`
+	/bin/rmdir --ignore-fail-on-non-empty %{mandir} 2>/dev/null
+	for i in `/bin/ls %{shareddir} 2>/dev/null`
 	do
 		if [ " $i" = " clamd" ] ; then # leave the signatures
 			continue;
 		fi
-		%{__rm} -rf %{_prefix}/share/$i || true
+		%{__rm} -rf %{shareddir}/$i || true
 	done
-	/bin/rmdir --ignore-fail-on-non-empty %{_prefix}/share 2>/dev/null
+	/bin/rmdir --ignore-fail-on-non-empty %{shareddir} 2>/dev/null
 fi
 
 echo "removing configuration"
 for i in smtp qmtp qmqp
 do
-	for j in `/bin/ls %{_prefix}/etc/tcp*.$i 2>/dev/null`
+	for j in `/bin/ls %{qsysconfdir}/tcp*.$i 2>/dev/null`
 	do
 			%{__rm} -f $j.cdb
 	done
 done
-/bin/rmdir --ignore-fail-on-non-empty %{_prefix}/etc 2>/dev/null
+/bin/rmdir --ignore-fail-on-non-empty %{qsysconfdir} 2>/dev/null
 for i in assign cdb
 do
-		%{__rm} -f %{_prefix}/users/$i
+		%{__rm} -f %{qsysconfdir}/users/$i
 done
-/bin/rmdir --ignore-fail-on-non-empty %{_prefix}/users 2>/dev/null
+/bin/rmdir --ignore-fail-on-non-empty %{qsysconfdir}/users 2>/dev/null
 
-if [ -f %{_prefix}/etc/controlfiles ] ; then
-	for i in `%{__cat} %{_prefix}/etc/controlfiles`
+if [ -f %{qsysconfdir}/controlfiles ] ; then
+	for i in `%{__cat} %{qsysconfdir}/controlfiles`
 	do
-		%{__rm} -f %{_prefix}/control/$i
+		%{__rm} -f %{qsysconfdir}/control/$i
 	done
 else
 	for i in databytes defaultdelivery defaultdomain localiphost locals \
@@ -1627,19 +1626,19 @@ else
 		chkrcptdomains defaulthost envnoathost filterargs greylist.white \
 		hostip timeoutremote timeoutsmtpd
 	do
-		%{__rm} -f %{_prefix}/control/$i
+		%{__rm} -f %{qsysconfdir}/control/$i
 	done
 fi
-%{__rm} -f %{_prefix}/etc/controlfiles
-%{__rm} -f %{_prefix}/control/domainkeys/%{dkimkeyfn}.pub %{_prefix}/control/domainkeys/%dkimkeyfn
-/bin/rmdir --ignore-fail-on-non-empty %{_prefix}/control/domainkeys 2>/dev/null
-/bin/rmdir --ignore-fail-on-non-empty %{_prefix}/control 2>/dev/null
+%{__rm} -f %{qsysconfdir}/controlfiles
+%{__rm} -f %{qsysconfdir}/control/domainkeys/%{dkimkeyfn}.pub %{qsysconfdir}/control/domainkeys/%dkimkeyfn
+/bin/rmdir --ignore-fail-on-non-empty %{qsysconfdir}/control/domainkeys 2>/dev/null
+/bin/rmdir --ignore-fail-on-non-empty %{qsysconfdir}/control 2>/dev/null
 
 for i in postmaster mailer-daemon root ham spam register-ham register-spam
 do
-	%{__rm} -f %{_prefix}/alias/.qmail-"$i"
+	%{__rm} -f %{qmaildir}/alias/.qmail-"$i"
 done
-/bin/rmdir --ignore-fail-on-non-empty %{_prefix}/alias 2>/dev/null
+/bin/rmdir --ignore-fail-on-non-empty %{qmaildir}/alias 2>/dev/null
 
 echo "removing startup services"
 if [ %{noclamav} -eq 0 ] ; then
@@ -1680,9 +1679,9 @@ fi
 [ "$log_dir" != "/" ] && %{__rm} -fr $log_dir
 echo "recreating ld.so cache"
 /sbin/ldconfig
-if [ -f %{_prefix}/boot/rpm.init ] ; then
+if [ -f %{shareddir}/boot/rpm.init ] ; then
 	echo "Running Custom Un-Installation Script for postun"
-	/bin/sh %{_prefix}/boot/rpm.init postun
+	/bin/sh %{shareddir}/boot/rpm.init postun
 fi
 ) >> /tmp/indimail-mta.uninstall.log 2>&1
 
@@ -1695,11 +1694,14 @@ if [ $ID -ne 0 ] ; then
 	exit 1
 fi
 #echo "Running postrans script for %{version}-%{release} : arg=$1"
-if [ -f %{_prefix}/boot/rpm.init ] ; then
+if [ -f %{shareddir}/boot/rpm.init ] ; then
 	echo "Running Custom Installation Script for posttrans"
-	/bin/sh %{_prefix}/boot/rpm.init posttrans
+	/bin/sh %{shareddir}/boot/rpm.init posttrans
 fi
 echo ""
 
 # fix changelog for openSUSE buildservice
 %changelog
+* Wed May 25 2016 mbhangui@gmail.com
+Release 1.9.2 Start 13/08/2015
+1.  Removed compiler warning for fscanf
