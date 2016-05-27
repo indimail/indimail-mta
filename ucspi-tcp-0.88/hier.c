@@ -1,5 +1,8 @@
 /*
  * $Log: hier.c,v $
+ * Revision 1.9  2016-05-27 20:46:06+05:30  Cprogrammer
+ * fixed setting of permissions for FHS
+ *
  * Revision 1.8  2016-05-23 20:18:47+05:30  Cprogrammer
  * use /usr/lib/indimail/plugins for .so plugins
  *
@@ -26,7 +29,11 @@
  *
  */
 #include "auto_home.h"
+#include "auto_shared.h"
 #include "str.h"
+#include "strerr.h"
+#include "stralloc.h"
+stralloc        a = { 0 };
 
 void            h(char *, int, int, int);
 void            d(char *, char *, int, int, int);
@@ -37,25 +44,40 @@ char           *auto_ucspi_home = auto_home;
 extern char    *sharedir;
 
 void
-hier(inst_dir)
+hier(inst_dir, fatal)
 	char           *inst_dir;
+	char           *fatal;
 {
 	char           *mandir;
+	int             moder_d1, moder_d2;
 
 	if (inst_dir && *inst_dir)
 		auto_ucspi_home = inst_dir;
 
-	if (sharedir && *sharedir && str_diff(auto_ucspi_home, sharedir)) {
-		mandir = getdirname(sharedir, 0);
-		h(sharedir, -1, -1, 0755);
+	if (!sharedir)
+		sharedir = auto_shared;
+	if (!str_diff(auto_ucspi_home, "/var/indimail") || !str_diff(auto_ucspi_home, "/var/qmail")) {
+		moder_d1 = moder_d2 = 0555;
+	} else {
+		moder_d1 = 0755;
+		moder_d2 = 0555;
+	}
+	/*- shared directory for boot, doc, man */
+	if (str_diff(auto_home, auto_shared)) {
+		mandir = getdirname(auto_shared, 0);
+		if (!stralloc_copys(&a, mandir))
+			strerr_die2sys(111, fatal, "out of memory: ");
+		if (!stralloc_0(&a))
+			strerr_die2sys(111, fatal, "out of memory: ");
+		mandir = a.s;
+		h(auto_shared, 0, 0, 0755);
 	} else
 		mandir = auto_ucspi_home;
-	h(auto_ucspi_home, -1, -1, 0555);
-	d(auto_ucspi_home, "bin", -1, -1, 0555);
-	d(auto_ucspi_home, "lib/indimail/plugins", -1, -1, 0555);
-	d(mandir,          "man", -1, -1, 0555);
-	d(mandir,          "man/man1", -1, -1, 0555);
 
+	h(auto_ucspi_home, -1, -1, moder_d1);
+	d(auto_ucspi_home, "bin", -1, -1, moder_d2);
+	d(mandir,          "man", -1, -1, moder_d1);
+	d(mandir,          "man/man1", -1, -1, moder_d1);
 	c(auto_ucspi_home, "bin", "tcpserver", -1, -1, 0555);
 	c(auto_ucspi_home, "bin", "tcprules", -1, -1, 0555);
 	c(auto_ucspi_home, "bin", "tcprulescheck", -1, -1, 0555);
@@ -80,6 +102,7 @@ hier(inst_dir)
 	c(mandir,          "man/man1", "mconnect.1", -1, -1, 0644);
 	c(mandir,          "man/man1", "rblsmtpd.1", -1, -1, 0644);
 #ifdef LOAD_SHARED_OBJECTS
+	d(auto_ucspi_home, "lib/indimail/plugins", -1, -1, 0555);
 	c(auto_ucspi_home, "lib/indimail/plugins", "rblsmtpd.so", -1, -1, 0555);
 #endif
 }

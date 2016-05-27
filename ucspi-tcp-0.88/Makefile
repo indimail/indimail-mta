@@ -36,6 +36,14 @@ auto_home.o: \
 compile auto_home.c
 	./compile auto_home.c
 
+auto_shared.c: \
+auto-str conf-shared
+	./auto-str auto_shared `head -1 conf-shared` > auto_shared.c
+
+auto_shared.o: \
+compile auto_shared.c
+	./compile auto_shared.c
+
 buffer.o: \
 compile buffer.c buffer.h
 	./compile buffer.c
@@ -333,7 +341,7 @@ choose compile load trywaitp.c haswaitp.h1 haswaitp.h2
 	./choose cl trywaitp haswaitp.h1 haswaitp.h2 > haswaitp.h
 
 hier.o: \
-compile hier.c auto_home.h str.h conf-dlopen
+compile hier.c auto_home.h auto_shared.h stralloc.h strerr.h str.h conf-dlopen
 	./compile `grep -h -v "^#" conf-dlopen` hier.c
 
 http@: \
@@ -344,8 +352,8 @@ warn-auto.sh http@.sh conf-home
 	chmod 755 http@
 
 setup: \
-load setup.o hier.o auto_home.o str_diffn.o unix.a byte.a
-	./load setup hier.o auto_home.o str_diffn.o unix.a byte.a 
+load setup.o hier.o auto_home.o auto_shared.o str_diffn.o unix.a byte.a
+	./load setup hier.o auto_home.o auto_shared.o str_diffn.o unix.a byte.a 
 
 setup.o: \
 compile setup.c buffer.h strerr.h error.h open.h exit.h fmt.h str.h \
@@ -353,11 +361,13 @@ stralloc.h sgetopt.h
 	./compile setup.c
 
 instcheck: \
-load instcheck.o hier.o auto_home.o unix.a byte.a
-	./load instcheck hier.o auto_home.o unix.a byte.a 
+load instcheck.o hier.o auto_home.o auto_shared.o \
+str_diff.o str_diffn.o str_cpy.o unix.a byte.a
+	./load instcheck hier.o auto_home.o auto_shared.o \
+	str_diff.o str_diffn.o str_cpy.o unix.a byte.a 
 
 instcheck.o: \
-compile instcheck.c strerr.h error.h exit.h stralloc.h
+compile instcheck.c strerr.h error.h exit.h stralloc.h str.h alloc.h
 	./compile instcheck.c
 
 iopause.h: \
@@ -656,6 +666,10 @@ compile str_start.c str.h
 str_end.o: \
 compile str_end.c str.h
 	./compile str_end.c
+
+str_cpy.o: \
+compile str_cpy.c str.h
+	./compile str_cpy.c
 
 stralloc_cat.o: \
 compile stralloc_cat.c byte.h stralloc.h gen_alloc.h

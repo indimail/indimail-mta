@@ -1,3 +1,5 @@
+auto_shared.c
+auto_shared.o
 auto-str
 auto_home.c
 chkshsgr
