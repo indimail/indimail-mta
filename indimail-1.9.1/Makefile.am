@@ -136,9 +136,9 @@ inc_deps: configure Makefile
 lib_deps: configure Makefile
 	if test -d ../qmail-1.03 ; then \
 		echo "-L../indimail-@VERSION@/.libs -L../indimail-@VERSION@/eps-1.2/.libs \
-		-L../indimail-@VERSION@/cdb-1.0/.libs -lcdb @auth_libs@" > ../qmail-1.03/lib_deps; \
+		-L../indimail-@VERSION@/cdb-1.0/.libs @auth_libs@ -lcdb" > ../qmail-1.03/lib_deps; \
 	fi ; \
-	echo "-lcdb @auth_libs@" > lib_deps
+	echo "@auth_libs@ -lcdb" > lib_deps
 
 indimailbin_PROGRAMS = crc crcdiff dbinfo displaytop hashtable hostcntrl indiversion \
 	printdir proxyimap proxypop3 resetquota sslerator vacation vaddaliasdomain vadddomain \
