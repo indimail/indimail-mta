@@ -1,5 +1,8 @@
 /*
  * $Log: instcheck.c,v $
+ * Revision 1.20  2016-05-27 20:47:15+05:30  Cprogrammer
+ * FHS compliance
+ *
  * Revision 1.19  2014-07-27 12:50:53+05:30  Cprogrammer
  * fixed check for executables in sbin or bin directory
  *
@@ -56,10 +59,11 @@
 #include "str.h"
 #include "alloc.h"
 #include "error.h"
+#include "stralloc.h"
 #include "exit.h"
 #include "hasindimail.h"
 
-void            hier(char *);
+void            hier(char *, char *);
 #ifdef INDIMAIL
 void            _hier(char *);
 #endif
@@ -70,6 +74,9 @@ int             uidinit(int);
 #ifdef INDIMAIL
 extern int      ignore_man_error;
 #endif
+
+stralloc        dirbuf = { 0 };
+
 void
 perm(prefix1, prefix2, prefix3, file, type, uid, gid, mode, should_exit)
 	char           *prefix1;
@@ -92,7 +99,7 @@ perm(prefix1, prefix2, prefix3, file, type, uid, gid, mode, should_exit)
 	{
 		if (errno != error_noent)
 		{
-			strerr_warn4(WARNING, "unable to stat .../", file, ": ", &strerr_sys);
+			strerr_warn4(WARNING, "unable to stat ", file, ": ", &strerr_sys);
 			return;
 		}
 		if (!str_diffn(prefix2, "man/", 4)) /*- check for .gz extension */
@@ -104,12 +111,12 @@ perm(prefix1, prefix2, prefix3, file, type, uid, gid, mode, should_exit)
 			if (stat(tfile, &st) == -1)
 			{
 				if (errno != error_noent)
-					strerr_warn4(WARNING, "unable to stat .../", tfile, ": ", &strerr_sys);
+					strerr_warn4(WARNING, "unable to stat ", tfile, ": ", &strerr_sys);
 				else
 #ifdef INDIMAIL
 				if (!ignore_man_error)
 #endif
-					strerr_warn6(WARNING, prefix1, prefix2, prefix3, file, " does not exist", 0);
+					strerr_warn7(WARNING, prefix1, "/", prefix2, prefix3, file, " does not exist", 0);
 				if (tfile != file)
 					alloc_free(tfile);
 				return;
@@ -119,7 +126,7 @@ perm(prefix1, prefix2, prefix3, file, type, uid, gid, mode, should_exit)
 		{
 			if (stat("../lib64", &st) == -1)
 			{
-				strerr_warn4(WARNING, "unable to stat .../", file, ": ", &strerr_sys);
+				strerr_warn4(WARNING, "unable to stat file", file, ": ", &strerr_sys);
 				return;
 			} else {
 				if (chdir("../lib64") == -1) {
@@ -130,9 +137,9 @@ perm(prefix1, prefix2, prefix3, file, type, uid, gid, mode, should_exit)
 			if (stat(file, &st) == -1)
 			{
 				if (errno == error_noent)
-					strerr_warn6(WARNING, prefix1, prefix2, prefix3, file, " does not exist", 0);
+					strerr_warn7(WARNING, prefix1, "/", prefix2, prefix3, file, " does not exist", 0);
 				else
-					strerr_warn4(WARNING, "unable to stat .../", file, ": ", &strerr_sys);
+					strerr_warn4(WARNING, "unable to stat ", file, ": ", &strerr_sys);
 				return;
 			}
 			tfile = file;
@@ -141,7 +148,7 @@ perm(prefix1, prefix2, prefix3, file, type, uid, gid, mode, should_exit)
 		{
 			if (stat("../sbin", &st) == -1)
 			{
-				strerr_warn4(WARNING, "unable to stat .../", file, ": ", &strerr_sys);
+				strerr_warn4(WARNING, "unable to stat ", file, ": ", &strerr_sys);
 				return;
 			} else {
 				if (chdir("../sbin") == -1) {
@@ -152,16 +159,16 @@ perm(prefix1, prefix2, prefix3, file, type, uid, gid, mode, should_exit)
 			if (stat(file, &st) == -1)
 			{
 				if (errno == error_noent)
-					strerr_warn6(WARNING, prefix1, prefix2, prefix3, file, " does not exist", 0);
+					strerr_warn7(WARNING, prefix1, "/", prefix2, prefix3, file, " does not exist", 0);
 				else
-					strerr_warn4(WARNING, "unable to stat .../", file, ": ", &strerr_sys);
+					strerr_warn4(WARNING, "unable to stat ", file, ": ", &strerr_sys);
 				return;
 			}
 			tfile = file;
 		} else
 		{
 			if (!str_diffn(file, "man/", 4))
-				strerr_warn6(WARNING, prefix1, prefix2, prefix3, file, " does not exist", 0);
+				strerr_warn7(WARNING, prefix1, "/", prefix2, prefix3, file, " does not exist", 0);
 			else
 				strerr_die6sys(111, FATAL, prefix1, prefix2, prefix3, file, ": ");
 			return;
@@ -170,12 +177,12 @@ perm(prefix1, prefix2, prefix3, file, type, uid, gid, mode, should_exit)
 	if ((uid != -1) && (st.st_uid != uid))
 	{
 		err = 1;
-		strerr_warn6(WARNING, prefix1, prefix2, prefix3, tfile, " has wrong owner (will fix)", 0);
+		strerr_warn7(WARNING, prefix1, "/", prefix2, prefix3, tfile, " has wrong owner (will fix)", 0);
 	}
 	if ((gid != -1) && (st.st_gid != gid))
 	{
 		err = 1;
-		strerr_warn6(WARNING, prefix1, prefix2, prefix3, tfile, " has wrong group (will fix)", 0);
+		strerr_warn7(WARNING, prefix1, "/", prefix2, prefix3, tfile, " has wrong group (will fix)", 0);
 	}
 	if (err && chown(tfile, uid, gid) == -1)
 		strerr_die4sys(111, FATAL, "unable to chown ", tfile, ": ");
@@ -183,16 +190,27 @@ perm(prefix1, prefix2, prefix3, file, type, uid, gid, mode, should_exit)
 	if ((st.st_mode & 07777) != mode)
 	{
 		err = 1;
-		strerr_warn6(WARNING, prefix1, prefix2, prefix3, tfile, " has wrong permissions (will fix)", 0);
+		strerr_warn7(WARNING, prefix1, "/", prefix2, prefix3, tfile, " has wrong permissions (will fix)", 0);
 	}
 	if (err && chmod(tfile, mode) == -1)
 		strerr_die4sys(111, FATAL, "unable to chmod ", tfile, ": ");
 	if ((st.st_mode & S_IFMT) != type)
-		strerr_warn6(WARNING, prefix1, prefix2, prefix3, tfile, " has wrong type (unable to fix)", 0);
+		strerr_warn7(WARNING, prefix1, "/", prefix2, prefix3, tfile, " has wrong type (unable to fix)", 0);
 	if (tfile != file)
 		alloc_free(tfile);
 }
 
+void
+l(home, subdir, target)
+	char           *home;
+	char           *subdir;
+	char           *target;
+{
+	if (chdir(home) == -1)
+		strerr_die4sys(111, FATAL, "unable to switch to ", home, ": ");
+	if (chdir(subdir) == -1)
+		strerr_die6sys(111, FATAL, "unable to switch to ", home, "/", subdir, ": ");
+}
 void
 h(home, uid, gid, mode)
 	char           *home;
@@ -201,6 +219,26 @@ h(home, uid, gid, mode)
 	int             mode;
 {
 	perm("", "", "", home, S_IFDIR, uid, gid, mode, 1);
+}
+
+char    *
+getdirname(char *dir, char **basedir)
+{
+	char           *ptr;
+	int             len;
+
+	for (ptr = dir, len = 0;*ptr; ptr++, len++);
+	ptr--;
+	for (;ptr != dir && *ptr != '/';ptr--, len--);
+	if (basedir)
+		*basedir = ptr;
+	while (len > 1 && *ptr == '/')
+		ptr--,len--;
+	if (!stralloc_copyb(&dirbuf, dir, len))
+		strerr_die2sys(111, FATAL, "out of memory: ");
+	if (!stralloc_0(&dirbuf))
+		strerr_die2sys(111, FATAL, "out of memory: ");
+	return (dirbuf.s);
 }
 
 void
@@ -214,19 +252,6 @@ d(home, subdir, uid, gid, mode)
 	if (chdir(home) == -1)
 		strerr_die4sys(111, FATAL, "unable to switch to ", home, ": ");
 	perm("", home, "/", subdir, S_IFDIR, uid, gid, mode, 1);
-}
-
-void
-p(home, fifo, uid, gid, mode)
-	char           *home;
-	char           *fifo;
-	int             uid;
-	int             gid;
-	int             mode;
-{
-	if (chdir(home) == -1)
-		strerr_die4sys(111, FATAL, "unable to switch to ", home, ": ");
-	perm("", home, "/", fifo, S_IFIFO, uid, gid, mode, 1);
 }
 
 void
@@ -246,7 +271,7 @@ c(home, subdir, file, uid, gid, mode)
 			return;
 		strerr_die6sys(111, FATAL, "unable to switch to ", home, "/", subdir, ": ");
 	}
-	perm(".../", subdir, "/", file, S_IFREG, uid, gid, mode, 1);
+	perm(home, subdir, "/", file, S_IFREG, uid, gid, mode, 1);
 }
 
 #ifdef INDIMAIL
@@ -278,7 +303,7 @@ ci(home, subdir, file, uid, gid, mode)
 		} else
 			strerr_die6sys(111, FATAL, "unable to switch to ", home, "/", subdir, ": ");
 	}
-	perm(".../", subdir, "/", file, S_IFREG, uid, gid, mode, 0);
+	perm(home, subdir, "/", file, S_IFREG, uid, gid, mode, 0);
 }
 #endif
 
@@ -295,21 +320,7 @@ cd(home, subdir, file, uid, gid, mode)
 		strerr_die4sys(111, FATAL, "unable to switch to ", home, ": ");
 	if (chdir(subdir) == -1)
 		strerr_die6sys(111, FATAL, "unable to switch to ", home, "/", subdir, ": ");
-	perm(".../", subdir, "/", file, S_IFREG, uid, gid, mode, 1);
-}
-
-void
-z(home, file, len, uid, gid, mode)
-	char           *home;
-	char           *file;
-	int             len;
-	int             uid;
-	int             gid;
-	int             mode;
-{
-	if (chdir(home) == -1)
-		strerr_die4sys(111, FATAL, "unable to switch to ", home, ": ");
-	perm("", home, "/", file, S_IFREG, uid, gid, mode, 1);
+	perm(home, subdir, "/", file, S_IFREG, uid, gid, mode, 1);
 }
 
 int
@@ -321,14 +332,14 @@ main(int argc, char **argv)
 		strerr_die2sys(111, FATAL, "unable to get uids/gids: ");
 	if (argc == 1)
 	{
-		hier(0);
+		hier(0, FATAL);
 #ifdef INDIMAIL
 		_hier(0);
 #endif
 	} else
 	for (i = 1;i < argc;i++)
 	{
-		hier(argv[i]);
+		hier(argv[i], FATAL);
 #ifdef INDIMAIL
 		_hier(argv[i]);
 #endif
@@ -339,7 +350,7 @@ main(int argc, char **argv)
 void
 getversion_instcheck_c()
 {
-	static char    *x = "$Id: instcheck.c,v 1.19 2014-07-27 12:50:53+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: instcheck.c,v 1.20 2016-05-27 20:47:15+05:30 Cprogrammer Exp mbhangui $";
 #ifdef INDIMAIL
 	if (x)
 		x = sccsidh;
