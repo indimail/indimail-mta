@@ -1,5 +1,8 @@
 /*
  * $Log: setup.c,v $
+ * Revision 1.5  2016-05-27 20:45:47+05:30  Cprogrammer
+ * fixed shareddir setting
+ *
  * Revision 1.4  2016-05-23 16:07:40+05:30  Cprogrammer
  * fhs compliance code
  *
@@ -30,11 +33,10 @@
 
 void            dd(char *, int, int, int, char *, char *);
 void            df(int, int, int, char *, char *, char *, int);
-extern void     hier();
+extern void     hier(char *, char *);
 
-char           *usage = "usage: setup -d destdir s sharedir [instdir]";
+char           *usage = "usage: setup -d destdir -s sharedir [instdir]";
 char           *destdir = 0, *sharedir = 0;
-int             lsb = 0;
 stralloc        tmpdir = { 0 };
 stralloc        dirbuf = { 0 };
 stralloc        dird = { 0 };
@@ -392,23 +394,18 @@ main(int argc, char **argv)
 		case 's':
 			sharedir = optarg;
 			break;
-		case 'l':
-			lsb = 1;
-			break;
 		default:
 			strerr_die1x(100, usage);
 		}
 	}
-	if (!sharedir)
-		strerr_die1x(100, usage);
 	my_uid = getuid();
 	if ((fdsourcedir = open_read(".")) == -1)
 		strerr_die2sys(111, FATAL, "unable to open current directory: ");
 	umask(077);
 	if (optind + 1 != argc)
-		hier(0);
+		hier(0, FATAL);
 	else
-		hier(argv[optind++]);
+		hier(argv[optind++], FATAL);
 	_exit(0);
 	/*- Not reached */
 }
