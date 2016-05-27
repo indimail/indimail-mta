@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail.spec.in,v 2.330 2016-05-21 21:23:48+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 2.331 2016-05-27 20:48:52+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %define _unpackaged_files_terminate_build 1
 
@@ -27,12 +27,16 @@
 %define reconfigure_mode   1
 %else
 %define build_on_obs       0
-%define reconfigure_mode   1
+%define reconfigure_mode   0
 %endif
 
-%define _prefix            @indimaildir@
+%define _prefix            @prefix@
+%define indimaildir        @indimaildir@
 %define domaindir          @domaindir@
 %define sysconfdir         @sysconfdir@
+%define libexecdir         @libexecdir@
+%define mandir             @mandir@
+%define shareddir          @shareddir@
 %define pkgconfigdir       @pkgconfigdir@
 %define default_domain     @defaultdomain@
 %define courier_version    4.17.0
@@ -519,7 +523,7 @@ if [ -d libdkim-%{libdkim_version} ] ; then
 	fi
 fi
 
-%configure --prefix=%{_prefix} --mandir=%{_prefix}/man --libdir=%{_libdir}
+%configure --prefix=%{_prefix} --libdir=%{_libdir} --mandir=%{mandir}
 cd ..
 #### LIBSRS2 ######################
 if [ -d libsrs2-%{libsrs2_version} ] ; then
@@ -535,7 +539,7 @@ if [ -d libsrs2-%{libsrs2_version} ] ; then
 #./configure --prefix=%{_prefix} --libdir=%{_libdir} --libexecdir=%{_prefix}/libexec \
 #	--x-libraries=%{_libdir} --mandir=%{_prefix}/man
 #
-	%configure --prefix=%{_prefix} --mandir=%{_prefix}/man --libdir=%{_libdir}
+	%configure --prefix=%{_prefix} --libdir=%{_libdir} --mandir=%{mandir}
 	cd ..
 fi
 
@@ -549,12 +553,14 @@ if [ %{reconfigure_mode} -eq 1 ] ; then
 	autoreconf -fiv
 fi
 
-%configure --prefix=%{_prefix} --libexecdir=%{_prefix}/libexec --sysconfdir=%{sysconfdir} \
-	--with-pkgconfigdir=%{_pkg_config_path} --libdir=%{_libdir} --enable-domaindir=%{domaindir} 
+%configure --prefix=%{_prefix} --sysconfdir=%{sysconfdir} \
+	--with-pkgconfigdir=%{_pkg_config_path} --libdir=%{_libdir} --enable-domaindir=%{domaindir} \
 	--enable-mysqlbindir=%{mysqlPrefix}/bin --enable-mysqlprefix=%{mysqlPrefix} \
-	--mandir=%{_prefix}/man --enable-qmaildir=%{_prefix} \
+	--libexecdir=%{libexecdir} --mandir=%{mandir} --enable-qmaildir=%{indimaildir} \
+	--enable-shareddir=%{shareddir} --datarootdir=%{shareddir} \
+	--enable-modbase=${_prefix}/lib/indimail \
 	--enable-basepath=@basepath@ --enable-logdir=@logdir@ \
-	--enable-tcprules-prog=%{_prefix}/bin/tcprules --enable-tcpserver-file=%{_prefix}/etc/tcp.smtp \
+	--enable-tcprules-prog=%{_prefix}/bin/tcprules --enable-tcpserver-file=%{sysconfdir}/tcp.smtp \
 	--enable-moduledir=%module_dir `%{__cat} config/indimail.opts`
 %if %{tcpserver_plugin} == 1
 	echo "-DLOAD_SHARED_OBJECTS" > ../qmail-1.03/conf-dlopen
@@ -573,8 +579,8 @@ if [ -d ../nssd-%{nssd_version} ] ; then
 		autoreconf -fiv
 	fi
 
-	%configure --prefix=%{_prefix} --libexecdir=%{_prefix}/libexec --sysconfdir=%{sysconfdir} \
-	--mandir=%{_prefix}/man --libdir=/usr/%{_lib} \
+	%configure --prefix=%{_prefix} --libexecdir=%{libexecdir} --sysconfdir=%{sysconfdir} \
+	--mandir=%{mandir} --libdir=/usr/%{_lib} \
 	--enable-mysqlprefix=%{mysqlPrefix} --enable-mysqllibdir=%{mysqlPrefix}/%{_lib}/mysql \
 	`%{__cat} ../%{name}-%{version}/config/nssd.opts`
 fi
@@ -593,8 +599,9 @@ if [ -d ../courier-imap-%{courier_version} ] ; then
 		autoreconf -fiv
 		%{__cp} libs/unicode/depcomp .
 	fi
-	%configure --prefix=%{_prefix} --libexecdir=%{_prefix}/libexec --bindir=%{_prefix}/bin \
-	--mandir=%{_prefix}/man --sysconfdir=%{sysconfdir} --libdir=%{_libdir} \
+	%configure --prefix=%{_prefix} --libexecdir=%{libexecdir} --bindir=%{_prefix}/bin \
+	--mandir=%{mandir} --sysconfdir=%{sysconfdir} --libdir=%{_libdir} \
+	--datarootdir=%{shareddir} \
 	`%{__cat} ../%{name}-%{version}/config/courier-imap.opts`
 fi
 %endif
@@ -611,8 +618,8 @@ if [ -d ../bogofilter-%{bogofilter_version} ] ; then
 	fi
 	(
 	HOME='.';export HOME
-	./configure --prefix=%{_prefix} --libexecdir=%{_prefix}/libexec --sysconfdir=%{sysconfdir} \
-	--mandir=%{_prefix}/man `%{__cat} ../%{name}-%{version}/config/bogofilter.opts`
+	./configure --prefix=%{_prefix} --libexecdir=%{libexecdir} --sysconfdir=%{sysconfdir} \
+	--mandir=%{mandir} `%{__cat} ../%{name}-%{version}/config/bogofilter.opts`
 #%if 0%{?sles_version} == 10
 #        sed 's{extern int yylineno;{int yylineno = 1;{' < src/lexer.c > src/lexer.c.tmp
 #        %{__mv} src/lexer.c.tmp src/lexer.c
@@ -632,14 +639,14 @@ if [ -d ../clamav-%{clamav_version} ] ; then
 		autoreconf -fiv
 	fi
 	if [ %{build_on_obs} -eq 0 ] ; then
-	%configure --prefix=%{_prefix} --libexecdir=%{_prefix}/libexec --sysconfdir=%{sysconfdir} \
+	%configure --prefix=%{_prefix} --libexecdir=%{libexecdir} --sysconfdir=%{sysconfdir} \
 	--with-pkgconfigdir=%{_pkg_config_path} \
-	--with-dbdir=%{_prefix}/share/clamd --mandir=%{_prefix}/man \
+	--with-dbdir=%{indimaildir}/clamd --mandir=%{mandir} \
 	`%{__cat} ../%{name}-%{version}/config/clamav.opts`
 	else
 	# change to ./configure for openSUSE buildservice
-	./configure --prefix=%{_prefix} --libexecdir=%{_prefix}/libexec --sysconfdir=%{sysconfdir} \
-	--with-dbdir=%{_prefix}/share/clamd --mandir=%{_prefix}/man \
+	./configure --prefix=%{_prefix} --libexecdir=%{libexecdir} --sysconfdir=%{sysconfdir} \
+	--with-dbdir=%{indimaildir}/clamd --mandir=%{mandir} \
 	`%{__cat} ../%{name}-%{version}/config/clamav.opts`
 	fi
 fi
@@ -656,12 +663,12 @@ if [ -d ../fetchmail-%{fetchmail_version} ] ; then
 		autoreconf -fiv
 	fi
 	if [ %{build_on_obs} -eq 0 ] ; then
-	./configure --prefix=%{_prefix} --libexecdir=%{_prefix}/libexec --sysconfdir=%{sysconfdir} \
-		--enable-indimaildir=%{_prefix} --mandir=%{_prefix}/man \
+	./configure --prefix=%{_prefix} --libexecdir=%{libexecdir} --sysconfdir=%{sysconfdir} \
+		--enable-binprefix=%{_prefix} --mandir=%{mandir} --datarootdir=%{shareddir} \
 		`%{__cat} ../%{name}-%{version}/config/fetchmail.opts`
 	else
-	%configure --prefix=%{_prefix} --libexecdir=%{_prefix}/libexec --sysconfdir=%{sysconfdir} \
-		--enable-indimaildir=%{_prefix} --mandir=%{_prefix}/man \
+	%configure --prefix=%{_prefix} --libexecdir=%{libexecdir} --sysconfdir=%{sysconfdir} \
+		--enable-binprefix=%{_prefix} --mandir=%{mandir} --datarootdir=%{shareddir} \
 		`%{__cat} ../%{name}-%{version}/config/fetchmail.opts`
 	fi
 fi
@@ -670,6 +677,7 @@ cd ..
 #### ucspi-tcp ######################
 if [ -d ucspi-tcp-%{ucspi_version} ] ; then
 	%{__sed} 's{HOME{%{_prefix}{' ucspi-tcp-%{ucspi_version}/conf-home.in > ucspi-tcp-%{ucspi_version}/conf-home
+	%{__sed} 's{SHAREDDIR{%{shareddir}{' ucspi-tcp-%{ucspi_version}/conf-shared.in > ucspi-tcp-%{ucspi_version}/conf-shared
 %if %{tcpserver_plugin} == 1
 	echo "-DLOAD_SHARED_OBJECTS" > ucspi-tcp-0.88/conf-dlopen
 %else
@@ -730,7 +738,7 @@ do
 		# courier-imap installations misses out on this
 		if [ %nocourierimap -eq 0 -a " $i" = " courier-imap-%{courier_version}" ] ; then
 			%{__mkdir_p} %{buildroot}%{_prefix}/man/man1
-			%{__cp} libs/tcpd/couriertls.1 %{buildroot}%{_prefix}/man/man1/couriertls.1
+			%{__cp} libs/tcpd/couriertls.1 %{buildroot}%{mandir}/man1/couriertls.1
 		fi
 		cd ..
 	fi
@@ -739,7 +747,7 @@ for i in eps cdb flash indimail
 do
 	%{__rm} -f %{buildroot}%{_libdir}/lib"$i".la
 done
-%{__rm} -f %{buildroot}%{_prefix}/modules/iauth.la
+%{__rm} -f %{buildroot}%{shareddir}/modules/iauth.la
 
 if [ %noclamav -eq 0 ] ; then
 	for i in clamav clamunrar clamunrar_iface
@@ -771,20 +779,19 @@ if [ %nolibsrs2 -eq 0 ] ; then
 	fi
 fi
 
-%{__mkdir_p} %{buildroot}%{_prefix}/domains
-%{__mkdir_p} %{buildroot}%{_prefix}/etc
+%{__mkdir_p} %{buildroot}%{domaindir}/domains
 %{__mkdir_p} %{buildroot}%{_prefix}/include
-%{__cp} %{name}-%{version}/inc_deps %{buildroot}%{_prefix}/etc
-%{__cp} %{name}-%{version}/lib_deps %{buildroot}%{_prefix}/etc
+%{__cp} %{name}-%{version}/inc_deps %{buildroot}%{sysconfdir}
+%{__cp} %{name}-%{version}/lib_deps %{buildroot}%{sysconfdir}
 %{__cp} %{name}-%{version}/indimail.h %{buildroot}%{_prefix}/include
 %{__cp} %{name}-%{version}/typesx.h %{buildroot}%{_prefix}/include
 
 if [ %noclamav -eq 0 ] ; then
-	if [ -f %{buildroot}%{_prefix}/etc/clamd.conf ] ; then
-		%{__rm} -f %{buildroot}%{_prefix}/etc/clamd.conf
+	if [ -f %{buildroot}%{sysconfdir}/clamd.conf ] ; then
+		%{__rm} -f %{buildroot}%{sysconfdir}/clamd.conf
 	fi
-	if [ -f %{buildroot}%{_prefix}/etc/freshclam ] ; then
-		%{__rm} -f %{buildroot}%{_prefix}/etc/freshclam.conf
+	if [ -f %{buildroot}%{sysconfdir}/freshclam ] ; then
+		%{__rm} -f %{buildroot}%{sysconfdir}/freshclam.conf
 	fi
 	if [ -d %{buildroot}%{_prefix}/var ] ; then
 		/bin/rmdir %{buildroot}%{_prefix}/var
@@ -820,11 +827,11 @@ if [ -x /usr/bin/chrpath ] ; then
 		done
 	fi
 
-	/usr/bin/chrpath -d %{buildroot}%{_prefix}/libexec/authlib/authindi
-	/usr/bin/chrpath -d %{buildroot}%{_prefix}/libexec/authlib/authpgsql
-	/usr/bin/chrpath -d %{buildroot}%{_prefix}/libexec/sq_vacation
-	/usr/bin/chrpath -d %{buildroot}%{_prefix}/libexec/qmailmrtg7
-	/usr/bin/chrpath -d %{buildroot}%{_prefix}/modules/iauth.so
+	/usr/bin/chrpath -d %{buildroot}%{libexecdir}/authlib/authindi
+	/usr/bin/chrpath -d %{buildroot}%{libexecdir}/authlib/authpgsql
+	/usr/bin/chrpath -d %{buildroot}%{libexecdir}/sq_vacation
+	/usr/bin/chrpath -d %{buildroot}%{libexecdir}/qmailmrtg7
+	/usr/bin/chrpath -d %{buildroot}%{_prefix}/lib/indimail/modules/iauth.so
 
 	for i in adminclient chowkidar cindimail clearopensmtp copyemail execmysql \
 	hostsync indisrvr inlookup inquerytest install_tables ipchange mail_report \
@@ -841,12 +848,12 @@ if [ -x /usr/bin/chrpath ] ; then
 	fi
 fi
 # Compress the man pages
-find %{buildroot}%{_prefix}/man -type f -exec gzip -q {} \;
-if [ -f %{buildroot}%{_prefix}/man/man7/authlib.7.gz ] ; then
+find %{buildroot}%{mandir} -type f -exec gzip -q {} \;
+if [ -f %{buildroot}%{mandir}/man7/authlib.7.gz ] ; then
 	for i in authshadow.7 authpwd.7 authpam.7 authcustom.7
 	do
-		%{__rm} -f %{buildroot}%{_prefix}/man/man7/$i
-		ln -sf %{_prefix}/man/man7/authlib.7.gz %{buildroot}%{_prefix}/man/man7/$i.gz
+		%{__rm} -f %{buildroot}%{mandir}/man7/$i
+		ln -sf %{mandir}/man7/authlib.7.gz %{buildroot}%{mandir}/man7/$i.gz
 	done
 fi
 # pam-multi
@@ -870,32 +877,32 @@ for i in indimail.cnf tcp.imap tcp.imap.cdb tcp.pop3 tcp.pop3.cdb \
 tcp.smtp tcp.smtp.cdb tcp.qmtp tcp.qmtp.cdb tcp.qmqp tcp.qmqp.cdb \
 tcp.poppass tcp.poppass.cdb services.log
 do
-	if [ ! -f %{buildroot}%{_prefix}/etc/$i ] ; then
-		$TOUCH %{buildroot}%{_prefix}/etc/$i
+	if [ ! -f %{buildroot}%{sysconfdir}/$i ] ; then
+		$TOUCH %{buildroot}%{sysconfdir}/$i
 	fi
 done
 %if %nonssd == 0
-	$TOUCH %{buildroot}%{_prefix}/etc/nssd.conf
+	$TOUCH %{buildroot}%{sysconfdir}/nssd.conf
 %endif
 (
-for i in `%{__cat} %{buildroot}%{_prefix}/etc/controlfiles`
+for i in `%{__cat} %{buildroot}%{sysconfdir}/controlfiles`
 do
-	echo "%ghost %config(noreplace,missingok)               %{_prefix}/control/$i"
-	$TOUCH %{buildroot}%{_prefix}/control/$i
+	echo "%ghost %config(noreplace,missingok)               %{sysconfdir}/control/$i"
+	$TOUCH %{buildroot}%{sysconfdir}/control/$i
 done
 ) > config_files.list
 if [ %nobogofilter -eq 0 ] ; then
-	$TOUCH %{buildroot}%{_prefix}/etc/bogofilter.cf
+	$TOUCH %{buildroot}%{sysconfdir}/bogofilter.cf
 fi
 if [ %nofetchmail -eq 0 ] ; then
-	$TOUCH %{buildroot}%{_prefix}/etc/fetchmailrc
+	$TOUCH %{buildroot}%{sysconfdir}/fetchmailrc
 fi
 if [ %noclamav -eq 0 ] ; then # clamav >= 0.97.5, without clamav-db
-	if [ ! -d %{buildroot}%{_prefix}/share/clamd ] ; then
-		%{__mkdir_p} %{buildroot}%{_prefix}/share/clamd
+	if [ ! -d %{buildroot}%{shareddir}/clamd ] ; then
+		%{__mkdir_p} %{buildroot}%{shareddir}/clamd
 	else # with built-in clamav signatures
-		$TOUCH %{buildroot}%{_prefix}/share/clamd/clamav
-		$TOUCH %{buildroot}%{_prefix}/share/clamd/mirrors.dat
+		$TOUCH %{buildroot}%{shareddir}/clamd/clamav
+		$TOUCH %{buildroot}%{shareddir}/clamd/mirrors.dat
 	fi
 fi
 
@@ -904,57 +911,61 @@ fi
 #
 # Directories
 #
-%dir %attr(555,root,qmail)        %{_prefix}
-%dir %attr(555,root,qmail)        %{_prefix}/boot
-%dir %attr(555,root,qmail)        %{_prefix}/doc
-%dir %attr(2555,alias,qmail)      %{_prefix}/alias
-%dir %attr(750,qscand,qscand)     %{_prefix}/qscanq
-%dir %attr(750,qscand,qscand)     %{_prefix}/qscanq/root
-%dir %attr(750,qscand,qscand)     %{_prefix}/qscanq/root/scanq
-%dir %attr(555,root,root)         %{_prefix}/lib
-%dir %attr(555,root,root)         %{_prefix}/libexec
-%dir %attr(555,root,root)         %{_prefix}/libexec/authlib
-%dir %attr(755,indimail,indimail) %{_prefix}/control
-%dir %attr(775,indimail,indimail) %{_prefix}/control/inquery
-%dir %attr(2755,qmailr,qmail)     %{_prefix}/control/ratelimit
-%dir %attr(755,indimail,indimail) %{_prefix}/control/domainkeys
-%dir %attr(2755,indimail,qmail)   %{_prefix}/autoturn
-%dir %attr(555,root,root)         %{_prefix}/modules
-%dir %attr(555,root,qmail)        %{_prefix}/man
-%dir %attr(555,root,qmail)        %{_prefix}/man/man1
-%dir %attr(555,root,qmail)        %{_prefix}/man/cat1
-%dir %attr(555,root,qmail)        %{_prefix}/man/man5
-%dir %attr(555,root,qmail)        %{_prefix}/man/cat5
-%dir %attr(555,root,qmail)        %{_prefix}/man/man7
-%dir %attr(555,root,qmail)        %{_prefix}/man/cat7
-%dir %attr(555,root,qmail)        %{_prefix}/man/man8
-%dir %attr(555,root,qmail)        %{_prefix}/man/cat8
-%dir %attr(555,root,root)         %{_prefix}/include
+%dir %attr(555,root,qmail)        %{indimaildir}
+                                  %{indimaildir}/bin
+                                  %{indimaildir}/sbin
+                                  %{indimaildir}/control
+                                  %{indimaildir}/users
+%dir %attr(555,root,root)         %{shareddir}
+%dir %attr(555,root,qmail)        %{shareddir}/boot
+%dir %attr(555,root,qmail)        %{shareddir}/doc
+%dir %attr(555,root,root)         %{shareddir}/modules
+%dir %attr(2555,alias,qmail)      %{indimaildir}/alias
+%dir %attr(750,qscand,qscand)     %{indimaildir}/qscanq
+%dir %attr(750,qscand,qscand)     %{indimaildir}/qscanq/root
+%dir %attr(750,qscand,qscand)     %{indimaildir}/qscanq/root/scanq
+%dir %attr(555,root,root)         %{libexecdir}
+%dir %attr(555,root,root)         %{libexecdir}/authlib
+%dir %attr(755,root,root)         %{sysconfdir}
+%dir %attr(555,root,qmail)        %{sysconfdir}/users
+%dir %attr(755,indimail,indimail) %{sysconfdir}/control
+%dir %attr(775,indimail,indimail) %{sysconfdir}/control/inquery
+%dir %attr(2755,qmailr,qmail)     %{sysconfdir}/control/ratelimit
+%dir %attr(755,indimail,indimail) %{sysconfdir}/control/domainkeys
+%dir %attr(2755,indimail,qmail)   %{indimaildir}/autoturn
+%if "%{mandir}" != "/usr/share/man"
+%dir %attr(755,root,root)         %{mandir}
+%dir %attr(755,root,root)         %{mandir}/man1
+%dir %attr(755,root,root)         %{mandir}/cat1
+%dir %attr(755,root,root)         %{mandir}/man5
+%dir %attr(755,root,root)         %{mandir}/cat5
+%dir %attr(755,root,root)         %{mandir}/man7
+%dir %attr(755,root,root)         %{mandir}/cat7
+%dir %attr(755,root,root)         %{mandir}/man8
+%dir %attr(755,root,root)         %{mandir}/cat8
+%endif
+%if "%{_prefix}" != "/usr"
+%dir %attr(755,root,root)         %{_prefix}/include
 %dir %attr(555,root,root)         %{_libdir}
+%endif
 
 %if %nofetchmail == 0
 %if %i_m_on_mac == 0
-%dir %attr(755,root,root)         %{_prefix}/share/locale
+%dir %attr(755,root,root)         %{shareddir}/locale
 %endif
 %dir %attr(755,root,root)         %{_prefix}/lib*/python*
 %dir %attr(755,root,root)         %{_prefix}/lib*/python*/site-packages
 %endif
 
-%dir %attr(775,root,indimail)     %{_prefix}/domains
-%dir %attr(555,root,root)         %{_prefix}/share
+%dir %attr(775,root,indimail)     %{domaindir}/domains
 
 %if %noclamav == 0
 %dir %attr(755,root,root)         %{_libdir}/pkgconfig
 %dir %attr(775,qscand,qscand)     %{_prefix}/share/clamd
 %endif
 
-%dir %attr(755,root,root)         %{_prefix}/share/fortunes
-%dir %attr(555,root,qmail)        %{_prefix}/users
-%dir %attr(555,root,qmail)        %{_prefix}/plugins
-%dir %attr(775,root,indimail)     %{_prefix}/etc
-%dir %attr(755,root,root)         %{_prefix}/etc/yum.repos.d
-%dir %attr(555,root,indimail)     %{_prefix}/sbin
-%dir %attr(555,root,qmail)        %{_prefix}/bin
+%dir %attr(755,root,root)         %{shareddir}/fortunes
+%dir %attr(555,root,qmail)        %{_prefix}/lib/indimail/plugins
 #
 # If the configuration file should not be replaced when the RPM is
 # upgraded, mark it as follows:
@@ -969,14 +980,14 @@ fi
 # from the previous package revision. Whenever plain %config is used,
 # add a brief comment to the specfile explaining why.
 
-%attr(444,root,root) %config(noreplace)           %{_prefix}/etc/system.flashlogin
-%attr(444,root,root) %config(noreplace)           %{_prefix}/etc/system.rc
-%attr(444,root,root) %config(noreplace)           %{_prefix}/etc/system.menu
-%attr(444,root,root) %config(noreplace)           %{_prefix}/etc/system.module
-%attr(444,root,root) %config(noreplace)           %{_prefix}/etc/osh.table
+%attr(444,root,root) %config(noreplace)           %{sysconfdir}/system.flashlogin
+%attr(444,root,root) %config(noreplace)           %{sysconfdir}/system.rc
+%attr(444,root,root) %config(noreplace)           %{sysconfdir}/system.menu
+%attr(444,root,root) %config(noreplace)           %{sysconfdir}/system.module
+%attr(444,root,root) %config(noreplace)           %{sysconfdir}/osh.table
 # Allow new control files to get added with new packages
 # unlikely for this file to have local changes
-%attr(444,root,root)                              %{_prefix}/etc/controlfiles
+%attr(444,root,root)                              %{sysconfdir}/controlfiles
 # For configuration files that may be found missing during uninstall have
 # $config(missingok)
 #
@@ -985,43 +996,42 @@ fi
 # they are created during post-install should be marked as follows:
 # %ghost filename
 %if %nobogofilter == 0
-%ghost %config(noreplace,missingok)               %{_prefix}/etc/bogofilter.cf
+%ghost %config(noreplace,missingok)               %{sysconfdir}/bogofilter.cf
 %endif
 %if %nofetchmail == 0
-%ghost %config(noreplace,missingok)               %{_prefix}/etc/fetchmailrc
+%ghost %config(noreplace,missingok)               %{sysconfdir}/fetchmailrc
 %endif
 
-%ghost %config(noreplace,missingok)               %{_prefix}/etc/indimail.cnf
+%ghost %config(noreplace,missingok)               %{sysconfdir}/indimail.cnf
 %if %nonssd == 0
-%ghost %config(noreplace,missingok)               %{_prefix}/etc/nssd.conf
+%ghost %config(noreplace,missingok)               %{sysconfdir}/nssd.conf
 %endif
-%ghost %config(noreplace,missingok)               %{_prefix}/etc/tcp.imap
-%ghost %config(noreplace,missingok)               %{_prefix}/etc/tcp.pop3
-%ghost %config(noreplace,missingok)               %{_prefix}/etc/tcp.smtp
-%ghost %config(noreplace,missingok)               %{_prefix}/etc/tcp.qmtp
-%ghost %config(noreplace,missingok)               %{_prefix}/etc/tcp.qmqp
-%ghost %config(noreplace,missingok)               %{_prefix}/etc/tcp.poppass
+%ghost %config(noreplace,missingok)               %{sysconfdir}/tcp.imap
+%ghost %config(noreplace,missingok)               %{sysconfdir}/tcp.pop3
+%ghost %config(noreplace,missingok)               %{sysconfdir}/tcp.smtp
+%ghost %config(noreplace,missingok)               %{sysconfdir}/tcp.qmtp
+%ghost %config(noreplace,missingok)               %{sysconfdir}/tcp.qmqp
+%ghost %config(noreplace,missingok)               %{sysconfdir}/tcp.poppass
 #
 # These files will get removed during uninstallation
 #
-%ghost %attr(0644,indimail,indimail)              %{_prefix}/etc/tcp.smtp.cdb
-%ghost %attr(0644,indimail,indimail)              %{_prefix}/etc/tcp.qmtp.cdb
-%ghost %attr(0644,indimail,indimail)              %{_prefix}/etc/tcp.qmqp.cdb
-%ghost %attr(0644,indimail,indimail)              %{_prefix}/etc/tcp.imap.cdb
-%ghost %attr(0644,indimail,indimail)              %{_prefix}/etc/tcp.pop3.cdb
-%ghost %attr(0644,indimail,indimail)              %{_prefix}/etc/tcp.poppass.cdb
-%ghost %attr(0644,root,root)                      %{_prefix}/etc/services.log
+%ghost %attr(0644,indimail,indimail)              %{sysconfdir}/tcp.smtp.cdb
+%ghost %attr(0644,indimail,indimail)              %{sysconfdir}/tcp.qmtp.cdb
+%ghost %attr(0644,indimail,indimail)              %{sysconfdir}/tcp.qmqp.cdb
+%ghost %attr(0644,indimail,indimail)              %{sysconfdir}/tcp.imap.cdb
+%ghost %attr(0644,indimail,indimail)              %{sysconfdir}/tcp.pop3.cdb
+%ghost %attr(0644,indimail,indimail)              %{sysconfdir}/tcp.poppass.cdb
+%ghost %attr(0644,root,root)                      %{sysconfdir}/services.log
 
-%attr(444,root,root)                              %{_prefix}/etc/cronlist
-%attr(444,root,root)                              %{_prefix}/etc/indimail.te
-%attr(444,root,root)                              %{_prefix}/etc/indimail.mrtg.cfg
-%attr(444,root,root)                              %{_prefix}/etc/qmailprog.list
-%attr(444,root,root)                              %{_prefix}/etc/headerlist
-%attr(444,root,root)                              %{_prefix}/etc/indimail.settings
-%attr(444,root,root)                              %{_prefix}/etc/perm_list
-%attr(444,root,root)                              %{_prefix}/etc/yum.repos.d/*.repo
+%attr(444,root,root)                              %{sysconfdir}/cronlist
+%attr(444,root,root)                              %{sysconfdir}/indimail.te
+%attr(444,root,root)                              %{sysconfdir}/indimail.mrtg.cfg
+%attr(444,root,root)                              %{sysconfdir}/qmailprog.list
+%attr(444,root,root)                              %{sysconfdir}/headerlist
+%attr(444,root,root)                              %{sysconfdir}/indimail.settings
+%attr(444,root,root)                              %{sysconfdir}/perm_list
 # logalert
-%attr(444,root,root)                              %{_prefix}/etc/logalert_perm_list
+%attr(444,root,root)                              %{sysconfdir}/logalert_perm_list
 
 %if %noperms == 0
 %if 0%{?suse_version} >= 1120
@@ -1031,21 +1041,21 @@ fi
 %endif
 
 %if %nobogofilter == 0
-%attr(644,root,root)                              %{_prefix}/etc/bogofilter.cf.example
-%attr(0644,indimail,indimail) %config(noreplace)  %{_prefix}/etc/wordlist.db
+%attr(644,root,root)                              %{sysconfdir}/bogofilter.cf.example
+%attr(0644,indimail,indimail) %config(noreplace)  %{sysconfdir}/wordlist.db
 %endif
 
 %if %nocourierimap == 0
-%attr(600,root,root)                              %{_prefix}/etc/pop3d-ssl.dist
-%attr(600,root,root)                              %{_prefix}/etc/imapd-ssl.dist
-%attr(600,root,root)                              %{_prefix}/etc/pop3d.cnf
-%attr(600,root,root)                              %{_prefix}/etc/imapd.cnf
-%attr(600,root,root)                              %{_prefix}/etc/pop3d.dist
-%attr(600,root,root)                              %{_prefix}/etc/imapd.dist
-%attr(644,root,root)                              %{_prefix}/etc/quotawarnmsg.example
+%attr(600,root,root)                              %{sysconfdir}/pop3d-ssl.dist
+%attr(600,root,root)                              %{sysconfdir}/imapd-ssl.dist
+%attr(600,root,root)                              %{sysconfdir}/pop3d.cnf
+%attr(600,root,root)                              %{sysconfdir}/imapd.cnf
+%attr(600,root,root)                              %{sysconfdir}/pop3d.dist
+%attr(600,root,root)                              %{sysconfdir}/imapd.dist
+%attr(644,root,root)                              %{sysconfdir}/quotawarnmsg.example
 %endif
-%attr(644,root,qmail)                             %{_prefix}/etc/leapsecs.dat
-%attr(644,root,qmail)                             %{_prefix}/etc/leapsecs.txt
+%attr(644,root,qmail)                             %{sysconfdir}/etc/leapsecs.dat
+%attr(644,root,qmail)                             %{sysconfdir}/etc/leapsecs.txt
 
 #
 # Binaries
@@ -1095,8 +1105,8 @@ fi
 %verify (not user group mode) %attr(4555, root, root)      %{_prefix}/bin/vmoduser
 %verify (not user group mode) %attr(4555, root, root)      %{_prefix}/bin/vcfilter
 %verify (not user group mode) %attr(4555, root, root)      %{_prefix}/bin/vbulletin
-%verify (not user group mode) %attr(4555, root, qmail)     %{_prefix}/libexec/sq_vacation
-%verify (not user group mode) %attr(4555, root, root)      %{_prefix}/libexec/authlib/authshadow
+%verify (not user group mode) %attr(4555, root, qmail)     %{libexedir}/sq_vacation
+%verify (not user group mode) %attr(4555, root, root)      %{libexedir}/authlib/authshadow
 %verify (not user group mode) %attr(4555, root, root)      %{_prefix}/sbin/systpass
 %verify (not user group mode) %attr(2555, alias, qmail)    %{_prefix}/alias
 %verify (not user group mode) %attr(2755, indimail, qmail) %{_prefix}/autoturn
@@ -1435,14 +1445,14 @@ fi
 %attr(555,root,qmail)                   %{_prefix}/bin/ripole
 %attr(555,root,qmail)                   %{_prefix}/bin/valias
 %attr(555,root,qmail)                   %{_prefix}/bin/vproxy
-%attr(555,root,qmail)                   %{_prefix}/libexec/vadddomain
-%attr(555,root,qmail)                   %{_prefix}/libexec/vaddaliasdomain
-%attr(555,root,qmail)                   %{_prefix}/libexec/vrenamedomain
-%attr(555,root,qmail)                   %{_prefix}/libexec/vdeldomain
-%attr(555,root,qmail)                   %{_prefix}/libexec/vadduser
-%attr(555,root,qmail)                   %{_prefix}/libexec/overquota.sh
-%attr(555,root,qmail)                   %{_prefix}/libexec/qmailmrtg7
-%attr(4555,root,qmail)                  %{_prefix}/libexec/sq_vacation
+%attr(555,root,qmail)                   %{libexecdir}/vadddomain
+%attr(555,root,qmail)                   %{libexecdir}/vaddaliasdomain
+%attr(555,root,qmail)                   %{libexecdir}/vrenamedomain
+%attr(555,root,qmail)                   %{libexecdir}/vdeldomain
+%attr(555,root,qmail)                   %{libexecdir}/vadduser
+%attr(555,root,qmail)                   %{libexecdir}/overquota.sh
+%attr(555,root,qmail)                   %{libexecdir}/qmailmrtg7
+%attr(4555,root,qmail)                  %{libexecdir}/sq_vacation
 
 %if %nocourierimap == 0
 # courier imap
@@ -1458,12 +1468,8 @@ fi
 %attr(555,root,root)                    %{_prefix}/sbin/sharedindexinstall
 %attr(555,root,root)                    %{_prefix}/sbin/sharedindexsplit
 #
-                                        %{_prefix}/sbin/mkimapdcert
-                                        %{_prefix}/sbin/mkpop3dcert
-                                        %{_prefix}/sbin/mkdhparams
-#
 %if %i_m_on_mac == 0
-%attr(4555,root,root)                   %{_prefix}/libexec/authlib/authshadow
+%attr(4555,root,root)                   %{libexecdir}/authlib/authshadow
 %endif
 %endif
 
@@ -1487,9 +1493,9 @@ fi
 %attr(555,root,root)                    %{_prefix}/bin/bogotune
 %attr(555,root,root)                    %{_prefix}/bin/bogoutil
 %attr(555,root,root)                    %{_prefix}/bin/bogoupgrade
-%attr(555,root,root)                    %{_prefix}/sbin/bf_compact
-%attr(555,root,root)                    %{_prefix}/sbin/bf_copy
-%attr(555,root,root)                    %{_prefix}/sbin/bf_tar
+%attr(555,root,root)                    %{_prefix}/bin/bf_compact
+%attr(555,root,root)                    %{_prefix}/bin/bf_copy
+%attr(555,root,root)                    %{_prefix}/bin/bf_tar
 %endif
 
 %if %nolibdkim == 0
@@ -1541,269 +1547,269 @@ fi
 %attr(644,root,root) %config(noreplace) %{pam_confdir}/pop3
 %attr(644,root,root) %config(noreplace) %{pam_confdir}/imap
 
-%attr(555,root,qmail)                   %{_prefix}/boot/binm2
-%attr(555,root,qmail)                   %{_prefix}/boot/proc+df
-%attr(555,root,qmail)                   %{_prefix}/boot/binm1+df
-%attr(555,root,qmail)                   %{_prefix}/boot/binm3+df
-%attr(555,root,qmail)                   %{_prefix}/boot/home+df
-%attr(555,root,qmail)                   %{_prefix}/boot/binm3
-%attr(555,root,qmail)                   %{_prefix}/boot/binm1
-%attr(555,root,qmail)                   %{_prefix}/boot/proc
-%attr(555,root,qmail)                   %{_prefix}/boot/home
-%attr(555,root,qmail)                   %{_prefix}/boot/binm2+df
-%attr(444,root,qmail)                   %{_prefix}/boot/upstart
-%attr(444,root,qmail)                   %{_prefix}/boot/systemd
+%attr(555,root,qmail)                   %{shareddir}/boot/binm2
+%attr(555,root,qmail)                   %{shareddir}/boot/proc+df
+%attr(555,root,qmail)                   %{shareddir}/boot/binm1+df
+%attr(555,root,qmail)                   %{shareddir}/boot/binm3+df
+%attr(555,root,qmail)                   %{shareddir}/boot/home+df
+%attr(555,root,qmail)                   %{shareddir}/boot/binm3
+%attr(555,root,qmail)                   %{shareddir}/boot/binm1
+%attr(555,root,qmail)                   %{shareddir}/boot/proc
+%attr(555,root,qmail)                   %{shareddir}/boot/home
+%attr(555,root,qmail)                   %{shareddir}/boot/binm2+df
+%attr(444,root,qmail)                   %{shareddir}/boot/upstart
+%attr(444,root,qmail)                   %{shareddir}/boot/systemd
 %if %i_m_on_mac == 1
-%attr(444,root,qmail)                   %{_prefix}/boot/StartupParameters.plist
-%attr(444,root,qmail)                   %{_prefix}/boot/indimail.plist
+%attr(444,root,qmail)                   %{shareddir}/boot/StartupParameters.plist
+%attr(444,root,qmail)                   %{shareddir}/boot/indimail.plist
 %endif
 
 %if %nocourierimap == 0
-%attr(555,root,root)                    %{_prefix}/libexec/pop3d-ssl.rc
-%attr(555,root,root)                    %{_prefix}/libexec/makedatprog
-%attr(555,root,root)                    %{_prefix}/libexec/imapd-ssl.rc
-%attr(555,root,root)                    %{_prefix}/libexec/couriertcpd
-%attr(555,root,root)                    %{_prefix}/libexec/imapd.rc
-%attr(555,root,root)                    %{_prefix}/libexec/pop3d.rc
-%attr(555,root,root)                    %{_prefix}/share/mkimapdcert
-%attr(555,root,root)                    %{_prefix}/share/mkpop3dcert
-%attr(555,root,root)                    %{_prefix}/share/mkdhparams
+%attr(555,root,root)                    %{libexecdir}/pop3d-ssl.rc
+%attr(555,root,root)                    %{libexecdir}/makedatprog
+%attr(555,root,root)                    %{libexecdir}/imapd-ssl.rc
+%attr(555,root,root)                    %{libexecdir}/couriertcpd
+%attr(555,root,root)                    %{libexecdir}/imapd.rc
+%attr(555,root,root)                    %{libexecdir}/pop3d.rc
+%attr(555,root,root)                    %{libexecdir}/mkimapdcert
+%attr(555,root,root)                    %{libexecdir}/mkpop3dcert
+%attr(555,root,root)                    %{libexecdir}/mkdhparams
 %endif
-%attr(555,root,root)                    %{_prefix}/libexec/authlib/authindi
-%attr(555,root,root)                    %{_prefix}/libexec/authlib/authpgsql
-%attr(555,root,root)                    %{_prefix}/libexec/authlib/authgeneric
+%attr(555,root,root)                    %{libexecdir}/authlib/authindi
+%attr(555,root,root)                    %{libexecdir}/authlib/authpgsql
+%attr(555,root,root)                    %{libexecdir}/authlib/authgeneric
 
-%attr(555,root,qmail)                   %{_prefix}/plugins/generic.so
-%attr(555,root,qmail)                   %{_prefix}/plugins/smtpd-plugin.so
-%attr(555,root,qmail)                   %{_prefix}/plugins/smtpd-plugin0.so
+%attr(555,root,qmail)                   %{_prefix}/lib/indimail/plugins/generic.so
+%attr(555,root,qmail)                   %{_prefix}/lib/indimail/plugins/smtpd-plugin.so
+%attr(555,root,qmail)                   %{_prefix}/lib/indimail/plugins/smtpd-plugin0.so
 %if %tcpserver_plugin != 0
-%attr(555,root,qmail)                   %{_prefix}/plugins/qmail_smtpd.so
-%attr(555,root,qmail)                   %{_prefix}/plugins/rblsmtpd.so
+%attr(555,root,qmail)                   %{_prefix}/lib/indimail/plugins/qmail_smtpd.so
+%attr(555,root,qmail)                   %{_prefix}/lib/indimail/plugins/rblsmtpd.so
 %endif
 
-%attr(555,root,root)                    %{_prefix}/modules/background
-%attr(555,root,root)                    %{_prefix}/modules/alarms
-%attr(555,root,root)                    %{_prefix}/modules/countdown
-%attr(555,root,root)                    %{_prefix}/modules/iauth.so
+%attr(555,root,root)                    %{_prefix}/lib/indimail/modules/background
+%attr(555,root,root)                    %{_prefix}/lib/indimail/modules/alarms
+%attr(555,root,root)                    %{_prefix}/lib/indimail/modules/countdown
+%attr(555,root,root)                    %{_prefix}/lib/indimail/modules/iauth.so
 
-%attr(644,root,root)                    %{_prefix}/share/fortunes/definitions
-%attr(644,root,root)                    %{_prefix}/share/fortunes/linux.dat
-%attr(644,root,root)                    %{_prefix}/share/fortunes/food
-%attr(644,root,root)                    %{_prefix}/share/fortunes/medicine
-%attr(644,root,root)                    %{_prefix}/share/fortunes/magic
-%attr(644,root,root)                    %{_prefix}/share/fortunes/ethnic
-%attr(644,root,root)                    %{_prefix}/share/fortunes/art.dat
-%attr(644,root,root)                    %{_prefix}/share/fortunes/computers.dat
-%attr(644,root,root)                    %{_prefix}/share/fortunes/songs-poems.dat
-%attr(644,root,root)                    %{_prefix}/share/fortunes/kids
-%attr(644,root,root)                    %{_prefix}/share/fortunes/goedel
-%attr(644,root,root)                    %{_prefix}/share/fortunes/paradoxum
-%attr(644,root,root)                    %{_prefix}/share/fortunes/computers
-%attr(644,root,root)                    %{_prefix}/share/fortunes/goedel.dat
-%attr(644,root,root)                    %{_prefix}/share/fortunes/news
-%attr(644,root,root)                    %{_prefix}/share/fortunes/pets
-%attr(644,root,root)                    %{_prefix}/share/fortunes/law.dat
-%attr(644,root,root)                    %{_prefix}/share/fortunes/zippy
-%attr(644,root,root)                    %{_prefix}/share/fortunes/miscellaneous
-%attr(644,root,root)                    %{_prefix}/share/fortunes/ascii-art.dat
-%attr(644,root,root)                    %{_prefix}/share/fortunes/perl
-%attr(644,root,root)                    %{_prefix}/share/fortunes/kids.dat
-%attr(644,root,root)                    %{_prefix}/share/fortunes/love.dat
-%attr(644,root,root)                    %{_prefix}/share/fortunes/work.dat
-%attr(644,root,root)                    %{_prefix}/share/fortunes/humorists
-%attr(644,root,root)                    %{_prefix}/share/fortunes/definitions.dat
-%attr(644,root,root)                    %{_prefix}/share/fortunes/drugs
-%attr(644,root,root)                    %{_prefix}/share/fortunes/education.dat
-%attr(644,root,root)                    %{_prefix}/share/fortunes/politics.dat
-%attr(644,root,root)                    %{_prefix}/share/fortunes/science.dat
-%attr(644,root,root)                    %{_prefix}/share/fortunes/love
-%attr(644,root,root)                    %{_prefix}/share/fortunes/men-women
-%attr(644,root,root)                    %{_prefix}/share/fortunes/ascii-art
-%attr(644,root,root)                    %{_prefix}/share/fortunes/humorists.dat
-%attr(644,root,root)                    %{_prefix}/share/fortunes/platitudes.dat
-%attr(644,root,root)                    %{_prefix}/share/fortunes/debian
-%attr(644,root,root)                    %{_prefix}/share/fortunes/sports.dat
-%attr(644,root,root)                    %{_prefix}/share/fortunes/riddles
-%attr(644,root,root)                    %{_prefix}/share/fortunes/law
-%attr(644,root,root)                    %{_prefix}/share/fortunes/knghtbrd.dat
-%attr(644,root,root)                    %{_prefix}/share/fortunes/sports
-%attr(644,root,root)                    %{_prefix}/share/fortunes/perl.dat
-%attr(644,root,root)                    %{_prefix}/share/fortunes/tao.dat
-%attr(644,root,root)                    %{_prefix}/share/fortunes/linuxcookie
-%attr(644,root,root)                    %{_prefix}/share/fortunes/linuxcookie.dat
-%attr(644,root,root)                    %{_prefix}/share/fortunes/riddles.dat
-%attr(644,root,root)                    %{_prefix}/share/fortunes/medicine.dat
-%attr(644,root,root)                    %{_prefix}/share/fortunes/fortunes
-%attr(644,root,root)                    %{_prefix}/share/fortunes/cookie
-%attr(644,root,root)                    %{_prefix}/share/fortunes/cookie.dat
-%attr(644,root,root)                    %{_prefix}/share/fortunes/art
-%attr(644,root,root)                    %{_prefix}/share/fortunes/politics
-%attr(644,root,root)                    %{_prefix}/share/fortunes/songs-poems
-%attr(644,root,root)                    %{_prefix}/share/fortunes/startrek.dat
-%attr(644,root,root)                    %{_prefix}/share/fortunes/men-women.dat
-%attr(644,root,root)                    %{_prefix}/share/fortunes/kernelnewbies
-%attr(644,root,root)                    %{_prefix}/share/fortunes/fortunes.dat
-%attr(644,root,root)                    %{_prefix}/share/fortunes/magic.dat
-%attr(644,root,root)                    %{_prefix}/share/fortunes/science
-%attr(644,root,root)                    %{_prefix}/share/fortunes/platitudes
-%attr(644,root,root)                    %{_prefix}/share/fortunes/kernelnewbies.dat
-%attr(644,root,root)                    %{_prefix}/share/fortunes/literature.dat
-%attr(644,root,root)                    %{_prefix}/share/fortunes/translate-me
-%attr(644,root,root)                    %{_prefix}/share/fortunes/startrek
-%attr(644,root,root)                    %{_prefix}/share/fortunes/drugs.dat
-%attr(644,root,root)                    %{_prefix}/share/fortunes/zippy.dat
-%attr(644,root,root)                    %{_prefix}/share/fortunes/linux
-%attr(644,root,root)                    %{_prefix}/share/fortunes/work
-%attr(644,root,root)                    %{_prefix}/share/fortunes/literature
-%attr(644,root,root)                    %{_prefix}/share/fortunes/knghtbrd
-%attr(644,root,root)                    %{_prefix}/share/fortunes/news.dat
-%attr(644,root,root)                    %{_prefix}/share/fortunes/paradoxum.dat
-%attr(644,root,root)                    %{_prefix}/share/fortunes/bofh-excuses.dat
-%attr(644,root,root)                    %{_prefix}/share/fortunes/translate-me.dat
-%attr(644,root,root)                    %{_prefix}/share/fortunes/miscellaneous.dat
-%attr(644,root,root)                    %{_prefix}/share/fortunes/rj.dat
-%attr(644,root,root)                    %{_prefix}/share/fortunes/debian.dat
-%attr(644,root,root)                    %{_prefix}/share/fortunes/tao
-%attr(644,root,root)                    %{_prefix}/share/fortunes/food.dat
-%attr(644,root,root)                    %{_prefix}/share/fortunes/ethnic.dat
-%attr(644,root,root)                    %{_prefix}/share/fortunes/people.dat
-%attr(644,root,root)                    %{_prefix}/share/fortunes/people
-%attr(644,root,root)                    %{_prefix}/share/fortunes/wisdom.dat
-%attr(644,root,root)                    %{_prefix}/share/fortunes/rj
-%attr(644,root,root)                    %{_prefix}/share/fortunes/wisdom
-%attr(644,root,root)                    %{_prefix}/share/fortunes/pets.dat
-%attr(644,root,root)                    %{_prefix}/share/fortunes/bofh-excuses
-%attr(644,root,root)                    %{_prefix}/share/fortunes/education
-%attr(644,root,root)                    %{_prefix}/share/fortunes/age
-%attr(644,root,root)                    %{_prefix}/share/fortunes/age.dat
-%attr(644,root,root)                    %{_prefix}/share/fortunes/chanakya
-%attr(644,root,root)                    %{_prefix}/share/fortunes/chanakya.dat
-%attr(644,root,root)                    %{_prefix}/share/fortunes/joel-on-software
-%attr(644,root,root)                    %{_prefix}/share/fortunes/joel-on-software.dat
-%attr(644,root,root)                    %{_prefix}/share/fortunes/osp
-%attr(644,root,root)                    %{_prefix}/share/fortunes/osp.dat
-%attr(644,root,root)                    %{_prefix}/share/fortunes/paul-graham
-%attr(644,root,root)                    %{_prefix}/share/fortunes/paul-graham.dat
-%attr(644,root,root)                    %{_prefix}/share/fortunes/thirukkural
-%attr(644,root,root)                    %{_prefix}/share/fortunes/thirukkural.dat
-%attr(644,root,root)                    %{_prefix}/share/fortunes/vedas-1
-%attr(644,root,root)                    %{_prefix}/share/fortunes/vedas-1.dat
-%attr(644,root,root)                    %{_prefix}/share/fortunes/vedas-2
-%attr(644,root,root)                    %{_prefix}/share/fortunes/vedas-2.dat
+%attr(644,root,root)                    %{shareddir}/fortunes/definitions
+%attr(644,root,root)                    %{shareddir}/fortunes/linux.dat
+%attr(644,root,root)                    %{shareddir}/fortunes/food
+%attr(644,root,root)                    %{shareddir}/fortunes/medicine
+%attr(644,root,root)                    %{shareddir}/fortunes/magic
+%attr(644,root,root)                    %{shareddir}/fortunes/ethnic
+%attr(644,root,root)                    %{shareddir}/fortunes/art.dat
+%attr(644,root,root)                    %{shareddir}/fortunes/computers.dat
+%attr(644,root,root)                    %{shareddir}/fortunes/songs-poems.dat
+%attr(644,root,root)                    %{shareddir}/fortunes/kids
+%attr(644,root,root)                    %{shareddir}/fortunes/goedel
+%attr(644,root,root)                    %{shareddir}/fortunes/paradoxum
+%attr(644,root,root)                    %{shareddir}/fortunes/computers
+%attr(644,root,root)                    %{shareddir}/fortunes/goedel.dat
+%attr(644,root,root)                    %{shareddir}/fortunes/news
+%attr(644,root,root)                    %{shareddir}/fortunes/pets
+%attr(644,root,root)                    %{shareddir}/fortunes/law.dat
+%attr(644,root,root)                    %{shareddir}/fortunes/zippy
+%attr(644,root,root)                    %{shareddir}/fortunes/miscellaneous
+%attr(644,root,root)                    %{shareddir}/fortunes/ascii-art.dat
+%attr(644,root,root)                    %{shareddir}/fortunes/perl
+%attr(644,root,root)                    %{shareddir}/fortunes/kids.dat
+%attr(644,root,root)                    %{shareddir}/fortunes/love.dat
+%attr(644,root,root)                    %{shareddir}/fortunes/work.dat
+%attr(644,root,root)                    %{shareddir}/fortunes/humorists
+%attr(644,root,root)                    %{shareddir}/fortunes/definitions.dat
+%attr(644,root,root)                    %{shareddir}/fortunes/drugs
+%attr(644,root,root)                    %{shareddir}/fortunes/education.dat
+%attr(644,root,root)                    %{shareddir}/fortunes/politics.dat
+%attr(644,root,root)                    %{shareddir}/fortunes/science.dat
+%attr(644,root,root)                    %{shareddir}/fortunes/love
+%attr(644,root,root)                    %{shareddir}/fortunes/men-women
+%attr(644,root,root)                    %{shareddir}/fortunes/ascii-art
+%attr(644,root,root)                    %{shareddir}/fortunes/humorists.dat
+%attr(644,root,root)                    %{shareddir}/fortunes/platitudes.dat
+%attr(644,root,root)                    %{shareddir}/fortunes/debian
+%attr(644,root,root)                    %{shareddir}/fortunes/sports.dat
+%attr(644,root,root)                    %{shareddir}/fortunes/riddles
+%attr(644,root,root)                    %{shareddir}/fortunes/law
+%attr(644,root,root)                    %{shareddir}/fortunes/knghtbrd.dat
+%attr(644,root,root)                    %{shareddir}/fortunes/sports
+%attr(644,root,root)                    %{shareddir}/fortunes/perl.dat
+%attr(644,root,root)                    %{shareddir}/fortunes/tao.dat
+%attr(644,root,root)                    %{shareddir}/fortunes/linuxcookie
+%attr(644,root,root)                    %{shareddir}/fortunes/linuxcookie.dat
+%attr(644,root,root)                    %{shareddir}/fortunes/riddles.dat
+%attr(644,root,root)                    %{shareddir}/fortunes/medicine.dat
+%attr(644,root,root)                    %{shareddir}/fortunes/fortunes
+%attr(644,root,root)                    %{shareddir}/fortunes/cookie
+%attr(644,root,root)                    %{shareddir}/fortunes/cookie.dat
+%attr(644,root,root)                    %{shareddir}/fortunes/art
+%attr(644,root,root)                    %{shareddir}/fortunes/politics
+%attr(644,root,root)                    %{shareddir}/fortunes/songs-poems
+%attr(644,root,root)                    %{shareddir}/fortunes/startrek.dat
+%attr(644,root,root)                    %{shareddir}/fortunes/men-women.dat
+%attr(644,root,root)                    %{shareddir}/fortunes/kernelnewbies
+%attr(644,root,root)                    %{shareddir}/fortunes/fortunes.dat
+%attr(644,root,root)                    %{shareddir}/fortunes/magic.dat
+%attr(644,root,root)                    %{shareddir}/fortunes/science
+%attr(644,root,root)                    %{shareddir}/fortunes/platitudes
+%attr(644,root,root)                    %{shareddir}/fortunes/kernelnewbies.dat
+%attr(644,root,root)                    %{shareddir}/fortunes/literature.dat
+%attr(644,root,root)                    %{shareddir}/fortunes/translate-me
+%attr(644,root,root)                    %{shareddir}/fortunes/startrek
+%attr(644,root,root)                    %{shareddir}/fortunes/drugs.dat
+%attr(644,root,root)                    %{shareddir}/fortunes/zippy.dat
+%attr(644,root,root)                    %{shareddir}/fortunes/linux
+%attr(644,root,root)                    %{shareddir}/fortunes/work
+%attr(644,root,root)                    %{shareddir}/fortunes/literature
+%attr(644,root,root)                    %{shareddir}/fortunes/knghtbrd
+%attr(644,root,root)                    %{shareddir}/fortunes/news.dat
+%attr(644,root,root)                    %{shareddir}/fortunes/paradoxum.dat
+%attr(644,root,root)                    %{shareddir}/fortunes/bofh-excuses.dat
+%attr(644,root,root)                    %{shareddir}/fortunes/translate-me.dat
+%attr(644,root,root)                    %{shareddir}/fortunes/miscellaneous.dat
+%attr(644,root,root)                    %{shareddir}/fortunes/rj.dat
+%attr(644,root,root)                    %{shareddir}/fortunes/debian.dat
+%attr(644,root,root)                    %{shareddir}/fortunes/tao
+%attr(644,root,root)                    %{shareddir}/fortunes/food.dat
+%attr(644,root,root)                    %{shareddir}/fortunes/ethnic.dat
+%attr(644,root,root)                    %{shareddir}/fortunes/people.dat
+%attr(644,root,root)                    %{shareddir}/fortunes/people
+%attr(644,root,root)                    %{shareddir}/fortunes/wisdom.dat
+%attr(644,root,root)                    %{shareddir}/fortunes/rj
+%attr(644,root,root)                    %{shareddir}/fortunes/wisdom
+%attr(644,root,root)                    %{shareddir}/fortunes/pets.dat
+%attr(644,root,root)                    %{shareddir}/fortunes/bofh-excuses
+%attr(644,root,root)                    %{shareddir}/fortunes/education
+%attr(644,root,root)                    %{shareddir}/fortunes/age
+%attr(644,root,root)                    %{shareddir}/fortunes/age.dat
+%attr(644,root,root)                    %{shareddir}/fortunes/chanakya
+%attr(644,root,root)                    %{shareddir}/fortunes/chanakya.dat
+%attr(644,root,root)                    %{shareddir}/fortunes/joel-on-software
+%attr(644,root,root)                    %{shareddir}/fortunes/joel-on-software.dat
+%attr(644,root,root)                    %{shareddir}/fortunes/osp
+%attr(644,root,root)                    %{shareddir}/fortunes/osp.dat
+%attr(644,root,root)                    %{shareddir}/fortunes/paul-graham
+%attr(644,root,root)                    %{shareddir}/fortunes/paul-graham.dat
+%attr(644,root,root)                    %{shareddir}/fortunes/thirukkural
+%attr(644,root,root)                    %{shareddir}/fortunes/thirukkural.dat
+%attr(644,root,root)                    %{shareddir}/fortunes/vedas-1
+%attr(644,root,root)                    %{shareddir}/fortunes/vedas-1.dat
+%attr(644,root,root)                    %{shareddir}/fortunes/vedas-2
+%attr(644,root,root)                    %{shareddir}/fortunes/vedas-2.dat
 
 %if %noclamav == 0
 %if %nosignatures == 0
-%ghost                   %config(noreplace) %{_prefix}/share/clamd/clamav*
-%ghost                   %config(noreplace) %{_prefix}/share/clamd/mirrors.dat
-%attr(664,qscand,qscand) %config(noreplace) %{_prefix}/share/clamd/main.cvd
-%attr(664,qscand,qscand) %config(noreplace) %{_prefix}/share/clamd/daily.cvd
+%ghost                   %config(noreplace) %{shareddir}/clamd/clamav*
+%ghost                   %config(noreplace) %{shareddir}/clamd/mirrors.dat
+%attr(664,qscand,qscand) %config(noreplace) %{shareddir}/clamd/main.cvd
+%attr(664,qscand,qscand) %config(noreplace) %{shareddir}/clamd/daily.cvd
 %endif
-%attr(644,root,root)                        %{_prefix}/etc/clamd.conf.sample
-%attr(644,root,root)                        %{_prefix}/etc/freshclam.conf.sample
+%attr(644,root,root)                        %{sysconfdir}/clamd.conf.sample
+%attr(644,root,root)                        %{sysconfdir}/freshclam.conf.sample
 %attr(644,root,root)                        %{_pkg_config_path}/libclamav.pc
 %endif
 
 %if %nofetchmail == 0
 %if %i_m_on_mac == 0
-%attr(644,root,root)                    %{_prefix}/share/locale/*/LC_MESSAGES/*.mo
+%attr(644,root,root)                    %{shareddir}/locale/*/LC_MESSAGES/*.mo
 %endif
-%attr(644,root,root)                    %{_prefix}/lib*/python*/site-packages/fetchmailconf.pyo
-%attr(555,root,root)                    %{_prefix}/lib*/python*/site-packages/fetchmailconf.py
-%attr(644,root,root)                    %{_prefix}/lib*/python*/site-packages/fetchmailconf.pyc
+%attr(644,root,root)                    %{_prefix}/lib/python*/site-packages/fetchmailconf.pyo
+%attr(555,root,root)                    %{_prefix}/lib/python*/site-packages/fetchmailconf.py
+%attr(644,root,root)                    %{_prefix}/lib/python*/site-packages/fetchmailconf.pyc
 %endif
 
-%docdir %{_prefix}/doc
-%docdir %{_prefix}/man
-%attr(444,root,qmail)                   %{_prefix}/man/man[1,4,5,8]/*
-%attr(444,root,qmail)                   %{_prefix}/man/cat[1,4,5,8]/*
-%attr(444,root,qmail)                   %{_prefix}/man/cat7/forgeries.0.gz
-%attr(444,root,qmail)                   %{_prefix}/man/cat7/qmail-limits.0.gz
-%attr(444,root,qmail)                   %{_prefix}/man/cat7/qmail.0.gz
-%attr(444,root,qmail)                   %{_prefix}/man/man7/IndiMail.7.gz
-%attr(444,root,qmail)                   %{_prefix}/man/man7/forgeries.7.gz
-%attr(444,root,qmail)                   %{_prefix}/man/man7/indimail.7.gz
-%attr(444,root,qmail)                   %{_prefix}/man/man7/qmail-limits.7.gz
-%attr(444,root,qmail)                   %{_prefix}/man/man7/qmail.7.gz
+%docdir %{shareddir}/doc
+%docdir %{mandir}
+%attr(444,root,qmail)                   %{mandir}/man[1,4,5,8]/*
+%attr(444,root,qmail)                   %{mandir}/cat[1,4,5,8]/*
+%attr(444,root,qmail)                   %{mandir}/cat7/forgeries.0.gz
+%attr(444,root,qmail)                   %{mandir}/cat7/qmail-limits.0.gz
+%attr(444,root,qmail)                   %{mandir}/cat7/qmail.0.gz
+%attr(444,root,qmail)                   %{mandir}/man7/IndiMail.7.gz
+%attr(444,root,qmail)                   %{mandir}/man7/forgeries.7.gz
+%attr(444,root,qmail)                   %{mandir}/man7/indimail.7.gz
+%attr(444,root,qmail)                   %{mandir}/man7/qmail-limits.7.gz
+%attr(444,root,qmail)                   %{mandir}/man7/qmail.7.gz
 
 %if %nocourierimap == 0
-%attr(444,root,qmail)                   %{_prefix}/man/man7/authlib.7.gz
-                                        %{_prefix}/man/man7/authcustom.7.gz
-                                        %{_prefix}/man/man7/authpam.7.gz
-                                        %{_prefix}/man/man7/authpwd.7.gz
-                                        %{_prefix}/man/man7/authshadow.7.gz
-                                        %{_prefix}/man/man7/courier-unicode.7.gz
+%attr(444,root,qmail)                   %{mandir}/man7/authlib.7.gz
+                                        %{mandir}/man7/authcustom.7.gz
+                                        %{mandir}/man7/authpam.7.gz
+                                        %{mandir}/man7/authpwd.7.gz
+                                        %{mandir}/man7/authshadow.7.gz
+                                        %{mandir}/man7/courier-unicode.7.gz
 %endif
 
-%attr(444,root,qmail)                   %{_prefix}/doc/HOWTO.sharedmaildir
-%attr(444,root,qmail)                   %{_prefix}/doc/README.auth
-%attr(444,root,qmail)                   %{_prefix}/doc/README.clamav
-%attr(444,root,qmail)                   %{_prefix}/doc/README.cdb
-%attr(444,root,qmail)                   %{_prefix}/doc/README.filters
-%attr(444,root,qmail)                   %{_prefix}/doc/README.greylist
-%attr(444,root,qmail)                   %{_prefix}/doc/README.indimail
-%attr(444,root,qmail)                   %{_prefix}/doc/README.logselect
-%attr(444,root,qmail)                   %{_prefix}/doc/README.moreipme
-%attr(444,root,qmail)                   %{_prefix}/doc/README.newline
-%attr(444,root,qmail)                   %{_prefix}/doc/README.qhpsi
-%attr(444,root,qmail)                   %{_prefix}/doc/README.qregex
-%attr(444,root,qmail)                   %{_prefix}/doc/README.queue-fix
-%attr(444,root,qmail)                   %{_prefix}/doc/README.qmail
-%attr(444,root,qmail)                   %{_prefix}/doc/README.recipients
-%attr(444,root,qmail)                   %{_prefix}/doc/README.remote-auth
-%attr(444,root,qmail)                   %{_prefix}/doc/README.spamcontrol
-%attr(444,root,qmail)                   %{_prefix}/doc/README.srs
-%attr(444,root,qmail)                   %{_prefix}/doc/README.starttls
-%attr(444,root,qmail)                   %{_prefix}/doc/README.status
-%attr(444,root,qmail)                   %{_prefix}/doc/README.surbl
-%attr(444,root,qmail)                   %{_prefix}/doc/README.tls
-%attr(444,root,qmail)                   %{_prefix}/doc/README.wildmat
-%attr(444,root,qmail)                   %{_prefix}/doc/INSTALL.maildir
-%attr(444,root,qmail)                   %{_prefix}/doc/TEST.receive
-%attr(444,root,qmail)                   %{_prefix}/doc/README-CLUSTER
-%attr(444,root,qmail)                   %{_prefix}/doc/Quick-INSTALL
-%attr(444,root,qmail)                   %{_prefix}/doc/INSTALL.indimail
-%attr(444,root,qmail)                   %{_prefix}/doc/INSTALL-RPM
-%attr(444,root,qmail)                   %{_prefix}/doc/INSTALL-MINI
-%attr(444,root,qmail)                   %{_prefix}/doc/INSTALL-MYSQL
-%attr(444,root,qmail)                   %{_prefix}/doc/RELEASE-Notes
-%attr(444,root,qmail)                   %{_prefix}/doc/INSTALL.alias
-%attr(444,root,qmail)                   %{_prefix}/doc/ChangeLog
-%attr(444,root,qmail)                   %{_prefix}/doc/UPGRADE
-%attr(444,root,qmail)                   %{_prefix}/doc/percenthack.shtml
-%attr(444,root,qmail)                   %{_prefix}/doc/README.vlimits
-%attr(444,root,qmail)                   %{_prefix}/doc/PIC.local2alias
-%attr(444,root,qmail)                   %{_prefix}/doc/CREDITS
-%attr(444,root,qmail)                   %{_prefix}/doc/INSTALL.mbox
-%attr(444,root,qmail)                   %{_prefix}/doc/PIC.local2local
-%attr(444,root,qmail)                   %{_prefix}/doc/INSTALL.ids
-%attr(444,root,qmail)                   %{_prefix}/doc/INSTALL.qmail
-%attr(444,root,qmail)                   %{_prefix}/doc/HOWTO.bogofilter
-%attr(444,root,qmail)                   %{_prefix}/doc/PIC.nullclient
-%attr(444,root,qmail)                   %{_prefix}/doc/PIC.rem2local
-%attr(444,root,qmail)                   %{_prefix}/doc/PIC.relaybad
-%attr(444,root,qmail)                   %{_prefix}/doc/SENDMAIL
-%attr(444,root,qmail)                   %{_prefix}/doc/37rules.pdf
-%attr(444,root,qmail)                   %{_prefix}/doc/indimail_arch.png
-%attr(444,root,qmail)                   %{_prefix}/doc/indimail_queue.png
-%attr(444,root,qmail)                   %{_prefix}/doc/COPYING
-%attr(444,root,qmail)                   %{_prefix}/doc/FAQ.pdf
-%attr(444,root,qmail)                   %{_prefix}/doc/FROMISP
-%attr(444,root,qmail)                   %{_prefix}/doc/README.mpack
-%attr(444,root,qmail)                   %{_prefix}/doc/REMOVE.binmail
-%attr(444,root,qmail)                   %{_prefix}/doc/PIC.local2ext
-%attr(444,root,qmail)                   %{_prefix}/doc/README
-%attr(444,root,qmail)                   %{_prefix}/doc/REMOVE.sendmail
-%attr(444,root,qmail)                   %{_prefix}/doc/AUTOTURN
-%attr(444,root,qmail)                   %{_prefix}/doc/INSTALL.vsm
-%attr(444,root,qmail)                   %{_prefix}/doc/QMAILFAQ
-%attr(444,root,qmail)                   %{_prefix}/doc/INTERNALS
-%attr(444,root,qmail)                   %{_prefix}/doc/INSTALL.ctl
-%attr(444,root,qmail)                   %{_prefix}/doc/TEST.deliver
-%attr(444,root,qmail)                   %{_prefix}/doc/EXTTODO
-%attr(444,root,qmail)                   %{_prefix}/doc/PIC.local2virt
-%attr(444,root,qmail)                   %{_prefix}/doc/PIC.relaygood
-%attr(444,root,qmail)                   %{_prefix}/doc/PIC.local2rem
-%attr(444,root,qmail)                   %{_prefix}/doc/TOISP
+%attr(444,root,qmail)                   %{shareddir}/doc/HOWTO.sharedmaildir
+%attr(444,root,qmail)                   %{shareddir}/doc/README.auth
+%attr(444,root,qmail)                   %{shareddir}/doc/README.clamav
+%attr(444,root,qmail)                   %{shareddir}/doc/README.cdb
+%attr(444,root,qmail)                   %{shareddir}/doc/README.filters
+%attr(444,root,qmail)                   %{shareddir}/doc/README.greylist
+%attr(444,root,qmail)                   %{shareddir}/doc/README.indimail
+%attr(444,root,qmail)                   %{shareddir}/doc/README.logselect
+%attr(444,root,qmail)                   %{shareddir}/doc/README.moreipme
+%attr(444,root,qmail)                   %{shareddir}/doc/README.newline
+%attr(444,root,qmail)                   %{shareddir}/doc/README.qhpsi
+%attr(444,root,qmail)                   %{shareddir}/doc/README.qregex
+%attr(444,root,qmail)                   %{shareddir}/doc/README.queue-fix
+%attr(444,root,qmail)                   %{shareddir}/doc/README.qmail
+%attr(444,root,qmail)                   %{shareddir}/doc/README.recipients
+%attr(444,root,qmail)                   %{shareddir}/doc/README.remote-auth
+%attr(444,root,qmail)                   %{shareddir}/doc/README.spamcontrol
+%attr(444,root,qmail)                   %{shareddir}/doc/README.srs
+%attr(444,root,qmail)                   %{shareddir}/doc/README.starttls
+%attr(444,root,qmail)                   %{shareddir}/doc/README.status
+%attr(444,root,qmail)                   %{shareddir}/doc/README.surbl
+%attr(444,root,qmail)                   %{shareddir}/doc/README.tls
+%attr(444,root,qmail)                   %{shareddir}/doc/README.wildmat
+%attr(444,root,qmail)                   %{shareddir}/doc/INSTALL.maildir
+%attr(444,root,qmail)                   %{shareddir}/doc/TEST.receive
+%attr(444,root,qmail)                   %{shareddir}/doc/README-CLUSTER
+%attr(444,root,qmail)                   %{shareddir}/doc/Quick-INSTALL
+%attr(444,root,qmail)                   %{shareddir}/doc/INSTALL.indimail
+%attr(444,root,qmail)                   %{shareddir}/doc/INSTALL-RPM
+%attr(444,root,qmail)                   %{shareddir}/doc/INSTALL-MINI
+%attr(444,root,qmail)                   %{shareddir}/doc/INSTALL-MYSQL
+%attr(444,root,qmail)                   %{shareddir}/doc/RELEASE-Notes
+%attr(444,root,qmail)                   %{shareddir}/doc/INSTALL.alias
+%attr(444,root,qmail)                   %{shareddir}/doc/ChangeLog
+%attr(444,root,qmail)                   %{shareddir}/doc/UPGRADE
+%attr(444,root,qmail)                   %{shareddir}/doc/percenthack.shtml
+%attr(444,root,qmail)                   %{shareddir}/doc/README.vlimits
+%attr(444,root,qmail)                   %{shareddir}/doc/PIC.local2alias
+%attr(444,root,qmail)                   %{shareddir}/doc/CREDITS
+%attr(444,root,qmail)                   %{shareddir}/doc/INSTALL.mbox
+%attr(444,root,qmail)                   %{shareddir}/doc/PIC.local2local
+%attr(444,root,qmail)                   %{shareddir}/doc/INSTALL.ids
+%attr(444,root,qmail)                   %{shareddir}/doc/INSTALL.qmail
+%attr(444,root,qmail)                   %{shareddir}/doc/HOWTO.bogofilter
+%attr(444,root,qmail)                   %{shareddir}/doc/PIC.nullclient
+%attr(444,root,qmail)                   %{shareddir}/doc/PIC.rem2local
+%attr(444,root,qmail)                   %{shareddir}/doc/PIC.relaybad
+%attr(444,root,qmail)                   %{shareddir}/doc/SENDMAIL
+%attr(444,root,qmail)                   %{shareddir}/doc/37rules.pdf
+%attr(444,root,qmail)                   %{shareddir}/doc/indimail_arch.png
+%attr(444,root,qmail)                   %{shareddir}/doc/indimail_queue.png
+%attr(444,root,qmail)                   %{shareddir}/doc/COPYING
+%attr(444,root,qmail)                   %{shareddir}/doc/FAQ.pdf
+%attr(444,root,qmail)                   %{shareddir}/doc/FROMISP
+%attr(444,root,qmail)                   %{shareddir}/doc/README.mpack
+%attr(444,root,qmail)                   %{shareddir}/doc/REMOVE.binmail
+%attr(444,root,qmail)                   %{shareddir}/doc/PIC.local2ext
+%attr(444,root,qmail)                   %{shareddir}/doc/README
+%attr(444,root,qmail)                   %{shareddir}/doc/REMOVE.sendmail
+%attr(444,root,qmail)                   %{shareddir}/doc/AUTOTURN
+%attr(444,root,qmail)                   %{shareddir}/doc/INSTALL.vsm
+%attr(444,root,qmail)                   %{shareddir}/doc/QMAILFAQ
+%attr(444,root,qmail)                   %{shareddir}/doc/INTERNALS
+%attr(444,root,qmail)                   %{shareddir}/doc/INSTALL.ctl
+%attr(444,root,qmail)                   %{shareddir}/doc/TEST.deliver
+%attr(444,root,qmail)                   %{shareddir}/doc/EXTTODO
+%attr(444,root,qmail)                   %{shareddir}/doc/PIC.local2virt
+%attr(444,root,qmail)                   %{shareddir}/doc/PIC.relaygood
+%attr(444,root,qmail)                   %{shareddir}/doc/PIC.local2rem
+%attr(444,root,qmail)                   %{shareddir}/doc/TOISP
 
 # Shared libraries (omit for architectures that don't support them)
 
@@ -1863,11 +1869,11 @@ fi
 %defattr(-, root, root, 0755)
 %dir %attr(555,root,root)              %{_prefix}/include
 %dir %attr(555,root,root)              %{_libdir}
-%dir %attr(555,root,qmail)             %{_prefix}/man/man3
-%doc %attr(444,root,qmail)             %{_prefix}/man/man3/*
+%dir %attr(555,root,qmail)             %{mandir}/man3
+%doc %attr(444,root,qmail)             %{mandir}/man3/*
 
-%attr(644,root,qmail)                   %{_prefix}/etc/inc_deps
-%attr(644,root,qmail)                   %{_prefix}/etc/lib_deps
+%attr(644,root,qmail)                   %{sysconfdir}/inc_deps
+%attr(644,root,qmail)                   %{sysconfdir}/lib_deps
 
 %attr(644,root,qmail)                   %{_prefix}/include/eps_unroll.h
 %attr(644,root,qmail)                   %{_prefix}/include/eps_buffer.h
@@ -2027,13 +2033,17 @@ fi
 #
 # Directories
 #
-%dir %attr(555,root,qmail)        %{_prefix}
-%dir %attr(755,indimail,indimail) %{_prefix}/control
-%dir %attr(555,root,qmail)        %{_prefix}/man
-%dir %attr(555,root,qmail)        %{_prefix}/man/man1
-%dir %attr(555,root,qmail)        %{_prefix}/man/cat1
-%dir %attr(555,root,qmail)        %{_prefix}/man/man8
-%dir %attr(555,root,qmail)        %{_prefix}/man/cat8
+%dir %attr(555,root,qmail)        %{indimaildir}
+                                  %{indimaildir}/bin
+                                  %{indimaildir}/sbin
+                                  %{indimaildir}/users
+                                  %{indimaildir}/control
+%dir %attr(755,indimail,indimail) %{sysconfdir}/control
+%dir %attr(755,root,root)         %{mandir}
+%dir %attr(755,root,root)         %{mandir}/man1
+%dir %attr(755,root,root)         %{mandir}/cat1
+%dir %attr(755,root,root)         %{mandir}/man8
+%dir %attr(755,root,root)         %{mandir}/cat8
 #
 %attr(555,root,qmail)             %{_prefix}/bin/sendmail
 %attr(555,root,qmail)             %{_prefix}/bin/qmail-inject
@@ -2043,7 +2053,6 @@ fi
 %attr(555,root,qmail)             %{_prefix}/bin/datemail
 %attr(555,root,qmail)             %{_prefix}/bin/mailsubj
 %attr(555,root,qmail)             %{_prefix}/bin/qmail-showctl
-%attr(555,root,root)              %{_prefix}/bin/maildirmake
 %attr(555,root,qmail)             %{_prefix}/bin/qmaildirmake
 %attr(555,root,qmail)             %{_prefix}/bin/maildir2mbox
 %attr(555,root,qmail)             %{_prefix}/bin/maildirwatch
@@ -2051,27 +2060,26 @@ fi
 %attr(555,root,qmail)             %{_prefix}/bin/elq
 %attr(555,root,qmail)             %{_prefix}/bin/pinq
 #
-%attr(444,root,qmail)             %{_prefix}/man/man1/forward.1.gz
-%attr(444,root,qmail)             %{_prefix}/man/cat1/forward.0.gz
-%attr(444,root,qmail)             %{_prefix}/man/man1/predate.1.gz
-%attr(444,root,qmail)             %{_prefix}/man/man1/datemail.1.gz
-%attr(444,root,qmail)             %{_prefix}/man/man1/mailsubj.1.gz
-%attr(444,root,qmail)             %{_prefix}/man/cat1/mailsubj.0.gz
-%attr(444,root,qmail)             %{_prefix}/man/man1/maildirmake.1.gz
-%attr(444,root,qmail)             %{_prefix}/man/man1/qmaildirmake.1.gz
-%attr(444,root,qmail)             %{_prefix}/man/cat1/qmaildirmake.0.gz
-%attr(444,root,qmail)             %{_prefix}/man/man1/maildir2mbox.1.gz
-%attr(444,root,qmail)             %{_prefix}/man/cat1/maildir2mbox.0.gz
-%attr(444,root,qmail)             %{_prefix}/man/man1/maildirwatch.1.gz
-%attr(444,root,qmail)             %{_prefix}/man/cat1/maildirwatch.0.gz
+%attr(444,root,qmail)             %{mandir}/man1/forward.1.gz
+%attr(444,root,qmail)             %{mandir}/cat1/forward.0.gz
+%attr(444,root,qmail)             %{mandir}/man1/predate.1.gz
+%attr(444,root,qmail)             %{mandir}/man1/datemail.1.gz
+%attr(444,root,qmail)             %{mandir}/man1/mailsubj.1.gz
+%attr(444,root,qmail)             %{mandir}/cat1/mailsubj.0.gz
+%attr(444,root,qmail)             %{mandir}/man1/qmaildirmake.1.gz
+%attr(444,root,qmail)             %{mandir}/cat1/qmaildirmake.0.gz
+%attr(444,root,qmail)             %{mandir}/man1/maildir2mbox.1.gz
+%attr(444,root,qmail)             %{mandir}/cat1/maildir2mbox.0.gz
+%attr(444,root,qmail)             %{mandir}/man1/maildirwatch.1.gz
+%attr(444,root,qmail)             %{mandir}/cat1/maildirwatch.0.gz
 #
-%attr(444,root,qmail)             %{_prefix}/man/man8/qmail-showctl.8.gz
-%attr(444,root,qmail)             %{_prefix}/man/cat8/qmail-showctl.0.gz
-%attr(444,root,qmail)             %{_prefix}/man/man8/qmail-inject.8.gz
-%attr(444,root,qmail)             %{_prefix}/man/man8/sendmail.8.gz
-%attr(444,root,qmail)             %{_prefix}/man/cat8/qmail-inject.0.gz
-%attr(444,root,qmail)             %{_prefix}/man/man8/qmail-qmqpc.8.gz
-%attr(444,root,qmail)             %{_prefix}/man/cat8/qmail-qmqpc.0.gz
+%attr(444,root,qmail)             %{mandir}/man8/qmail-showctl.8.gz
+%attr(444,root,qmail)             %{mandir}/cat8/qmail-showctl.0.gz
+%attr(444,root,qmail)             %{mandir}/man8/qmail-inject.8.gz
+%attr(444,root,qmail)             %{mandir}/man8/sendmail.8.gz
+%attr(444,root,qmail)             %{mandir}/cat8/qmail-inject.0.gz
+%attr(444,root,qmail)             %{mandir}/man8/qmail-qmqpc.8.gz
+%attr(444,root,qmail)             %{mandir}/cat8/qmail-qmqpc.0.gz
 
 # a copy of /var/qmail/control/me, /var/qmail/control/defaultdomain,
 # and /var/qmail/control/plusdomain from your central server, so that qmail-inject uses appropriate host names in outgoing mail; and
@@ -2135,11 +2143,11 @@ fi
 %verify_permissions -e %{_prefix}/bin/vmoduser
 %verify_permissions -e %{_prefix}/bin/vcfilter
 %verify_permissions -e %{_prefix}/bin/vbulletin
-%verify_permissions -e %{_prefix}/libexec/sq_vacation
-%verify_permissions -e %{_prefix}/libexec/authlib/authshadow
+%verify_permissions -e %{libexecdir}/sq_vacation
+%verify_permissions -e %{libexecdir}/authlib/authshadow
 %verify_permissions -e %{_prefix}/sbin/systpass
-%verify_permissions -e %{_prefix}/alias
-%verify_permissions -e %{_prefix}/autoturn
+%verify_permissions -e %{indimaildir}/alias
+%verify_permissions -e %{indimaildir}/autoturn
 %endif
 %endif
 
@@ -2353,7 +2361,7 @@ echo " 1. Configure %{logdir} for multilog"
 echo " 2. Configure %{servicedir}. Move existing services to %{servicedir}.org"
 echo " 3. Configure svscanlog service"
 echo " 4. Configure standard catch-all accounts, default qmail configuration"
-echo " 5. Configure %{_prefix}/etc/indimail.cnf for MySQL service"
+echo " 5. Configure %{sysconfdir}/indimail.cnf for MySQL service"
 echo " 6. Configure MySQL DB in %{_prefix}/mysqldb/data"
 echo " 7. Configure DKIM, Domainkeys signature"
 echo " 8. Configure QHPSI for inline virus scanning"
@@ -2408,7 +2416,7 @@ if [ -x %{mysqlPrefix}/libexec/mysqld -o -x %{mysqlPrefix}/sbin/mysqld ] ; then
     	--databasedir=%{_prefix}/mysqldb --base_path=%{mbase} --mysqlsocket=%{mysqlSocket}
 	# MySQL Supervise creation
 	%{_prefix}/sbin/svctool --mysql=3306 --servicedir=%{servicedir} --mysqlPrefix=%{mysqlPrefix} \
-		--databasedir=%{_prefix}/mysqldb --config=%{_prefix}/etc/indimail.cnf --default-domain=%{default_domain}
+		--databasedir=%{_prefix}/mysqldb --config=%{sysconfdir}/indimail.cnf --default-domain=%{default_domain}
 	count=`ps -e|grep mysqld|wc -l`
 	if [ $count -gt 0 ] ; then
 		echo "Disabling mysqld service"
@@ -2480,7 +2488,11 @@ else
 		clamav_os=1
 		clamdPrefix="/usr"
 		qhpsi="/usr/bin/clamdscan %s --fdpass --quiet --no-summary"
-		mysysconfdir=%{_sysconfdir}
+		if [ -d /etc/clamav ] ; then
+			mysysconfdir=/etc/clamav
+		else
+			mysysconfdir=%{_sysconfdir}
+		fi
 	else
 		clamav_os=0
 	fi
@@ -2524,7 +2536,7 @@ do
 				--cntrldir=control --localip=0 --maxdaemons=75 --maxperip=25 --persistdb \
 				--starttls --fsync --syncdir --memory=%{smtp_soft_mem} --chkrecipient --chkrelay --masquerade \
 				--min-free=52428800 --content-filter \
-				--spamfilter="%{_prefix}/bin/bogofilter -p -d %{_prefix}/etc" \
+				--spamfilter="%{_prefix}/bin/bogofilter -p -d %{sysconfdir}" \
 				--logfilter=/tmp/spamfifo --rejectspam=0 --spamexitcode=0 \
 				--qhpsi="$qhpsi" \
 				--dmasquerade \
@@ -2538,7 +2550,7 @@ do
 				--cntrldir=control --localip=0 --maxdaemons=75 --maxperip=25 --persistdb \
 				--starttls --fsync --syncdir --memory=%{smtp_soft_mem} --chkrecipient --chkrelay --masquerade \
 				--min-free=52428800 --content-filter --virus-filter \
-				--spamfilter="%{_prefix}/bin/bogofilter -p -d %{_prefix}/etc" \
+				--spamfilter="%{_prefix}/bin/bogofilter -p -d %{sysconfdir}" \
 				--logfilter=/tmp/spamfifo --rejectspam=0 --spamexitcode=0 \
 				--dmasquerade \
 				--dkverify=both \
@@ -2618,7 +2630,7 @@ if [ %nofetchmail -eq 0 ] ; then
 				--qbase=%{qbase} --qcount=%{qcount} --qstart=1 \
 				--cntrldir=control --default-domain=%{default_domain} \
 				--qhpsi="$qhpsi" \
-				--spamfilter="%{_prefix}/bin/bogofilter -p -d %{_prefix}/etc" \
+				--spamfilter="%{_prefix}/bin/bogofilter -p -d %{sysconfdir}" \
 				--logfilter=/tmp/spamfifo --rejectspam=0 --spamexitcode=0 \
 				--memory=%{fetchmail_mem} --fsync --syncdir \
 				--dkverify=$ver_opt
@@ -2626,7 +2638,7 @@ if [ %nofetchmail -eq 0 ] ; then
 			%{_prefix}/sbin/svctool --fetchmail --servicedir=%{servicedir} \
 				--qbase=%{qbase} --qcount=%{qcount} --qstart=1 \
 				--cntrldir=control --default-domain=%{default_domain} \
-				--spamfilter="%{_prefix}/bin/bogofilter -p -d %{_prefix}/etc" \
+				--spamfilter="%{_prefix}/bin/bogofilter -p -d %{sysconfdir}" \
 				--logfilter=/tmp/spamfifo --rejectspam=0 --spamexitcode=0 \
 				--memory=%{fetchmail_mem} --fsync --syncdir \
 				--dkverify=$ver_opt
@@ -2759,7 +2771,7 @@ fi
 # rebuild cdb
 for i in smtp qmtp qmqp imap pop3 poppass
 do
-	for j in `/bin/ls %{_prefix}/etc/tcp*.$i 2>/dev/null`
+	for j in `/bin/ls %{sysconfdir}/tcp*.$i 2>/dev/null`
 	do
 		echo "Creating CDB $j.cdb"
    		%{_prefix}/bin/tcprules $j.cdb $j.tmp < $j && /bin/chmod 664 $j.cdb \
@@ -2777,9 +2789,9 @@ done
 echo "adding indimail startup"
 %{_prefix}/sbin/svctool --config=add-boot
 
-if [ -f ${_prefix}/etc/cronlist ] ; then
+if [ -f ${sysconfdir}/cronlist ] ; then
 	echo "adding cron entries"
-	/usr/bin/crontab -u root ${_prefix}/etc/cronlist
+	/usr/bin/crontab -u root ${sysconfdir}/cronlist
 fi
 ) >> /tmp/indimail-install.log 2>&1
 
@@ -2933,24 +2945,33 @@ fi
 	done
 %endif
 
-if [ ! %{_prefix} = "/usr" ] ; then
-	echo "removing binaries, libraries, queues, man pages"
+echo "removing binaries, libraries, queues, man pages"
+if [ %{_prefix} = "/var/indimail" -o %{_prefix} = "/var/qmail" ] ; then
 	for i in %{_prefix}/bin %{_prefix}/sbin %{_prefix}/lib %{_prefix}/queue \
-		%{_prefix}/man/man1 %{_prefix}/man/cat1 %{_prefix}/man/man5 %{_prefix}/man/cat5 \
-		%{_prefix}/man/man7 %{_prefix}/man/cat7 %{_prefix}/man/man8 %{_prefix}/man/cat8
+		%{mandir}/man1 %{mandir}/cat1 %{mandir}/man5 %{mandir}/cat5 \
+		%{mandir}/man7 %{mandir}/cat7 %{mandir}/man8 %{mandir}/cat8
 	do
 		%{__rm} -rf $i || true
 	done
-	/bin/rmdir --ignore-fail-on-non-empty %{_prefix}/man 2>/dev/null
-	for i in `/bin/ls %{_prefix}/share 2>/dev/null`
+	for i in `/bin/ls %{shareddir} 2>/dev/null`
 	do
 		if [ " $i" = " clamd" ] ; then # leave the signatures
 			continue;
 		fi
-		%{__rm} -rf %{_prefix}/share/$i || true
+		%{__rm} -rf %{shareddir}/$i || true
 	done
-	/bin/rmdir --ignore-fail-on-non-empty %{_prefix}/share 2>/dev/null
+else
+	for i in bin sbin control users
+	do
+		echo "removing link $i"
+		%{__rm} -f %{indimaildir}/$i || true
+	done
+	%{__rm} -rf %{_prefix}/queue || true
 fi
+echo "removing man pages"
+/bin/rmdir --ignore-fail-on-non-empty %{mandir} 2>/dev/null
+echo "removing architecture-independent shared directory"
+/bin/rmdir --ignore-fail-on-non-empty %{shareddir} 2>/dev/null
 
 echo "removing configuration"
 for i in indimail.cnf backup.conf cronlist indimail.te headerlist \
@@ -2959,7 +2980,7 @@ for i in indimail.cnf backup.conf cronlist indimail.te headerlist \
 		pop3d.dist pop3d-ssl.dist qmailprog.list quotawarnmsg.example \
 		services.log system.flashlogin system.menu system.module system.rc
 do
-	%{__rm} -f %{_prefix}/etc/$i
+	%{__rm} -f %{sysconfdir}/$i
 done
 for i in /etc /etc/my.cnf.d /etc/mysql
 do
@@ -2967,33 +2988,33 @@ do
 done
 
 if [ %nofetchmail -eq 0 ] ; then
-	%{__rm} -f %{_prefix}/etc/fetchmailrc
+	%{__rm} -f %{sysconfdir}/fetchmailrc
 fi
 if [ %nobogofilter -eq 0 ] ; then
-	%{__rm} -f %{_prefix}/etc/bogofilter.cf
+	%{__rm} -f %{sysconfdir}/bogofilter.cf
 fi
 %if %nonssd == 0
-	%{__rm} -f %{_prefix}/etc/nssd.conf
+	%{__rm} -f %{sysconfdir}/nssd.conf
 %endif
 
 for i in smtp qmtp qmqp imap pop3 poppass
 do
-	for j in `/bin/ls %{_prefix}/etc/tcp*.$i 2>/dev/null`
+	for j in `/bin/ls %{sysconfdir}/tcp*.$i 2>/dev/null`
 	do
 			%{__rm} -f $j.cdb
 	done
 done
-/bin/rmdir --ignore-fail-on-non-empty %{_prefix}/etc 2>/dev/null
+/bin/rmdir --ignore-fail-on-non-empty %{sysconfdir} 2>/dev/null
 for i in assign cdb
 do
-		%{__rm} -f %{_prefix}/users/$i
+		%{__rm} -f %{sysconfdir}/users/$i
 done
-/bin/rmdir --ignore-fail-on-non-empty %{_prefix}/users 2>/dev/null
+/bin/rmdir --ignore-fail-on-non-empty %{sysconfdir}/users 2>/dev/null
 
-if [ -f %{_prefix}/etc/controlfiles ] ; then
-	for i in `%{__cat} %{_prefix}/etc/controlfiles`
+if [ -f %{sysconfdir}/controlfiles ] ; then
+	for i in `%{__cat} %{sysconfdir}/controlfiles`
 	do
-		%{__rm} -f %{_prefix}/control/$i
+		%{__rm} -f %{sysconfdir}/control/$i
 	done
 else
 	for i in databytes defaultdelivery defaultdomain localiphost locals \
@@ -3001,22 +3022,25 @@ else
 		chkrcptdomains defaulthost envnoathost filterargs greylist.white \
 		hostip timeoutremote timeoutsmtpd tlsserverciphers dnsbllist
 	do
-		%{__rm} -f %{_prefix}/control/$i
+		%{__rm} -f %{sysconfdir}/control/$i
 	done
 fi
-%{__rm} -f %{_prefix}/etc/controlfiles
-%{__rm} -f %{_prefix}/control/domainkeys/%{dkimkeyfn}.pub %{_prefix}/control/domainkeys/%dkimkeyfn
-/bin/rmdir --ignore-fail-on-non-empty %{_prefix}/control/domainkeys 2>/dev/null
-/bin/rmdir --ignore-fail-on-non-empty %{_prefix}/control 2>/dev/null
-%{__rm} -rf %{_prefix}/control/defaultqueue
+%{__rm} -f %{sysconfdir}/controlfiles
+%{__rm} -f %{sysconfdir}/control/domainkeys/%{dkimkeyfn}.pub %{sysconfdir}/control/domainkeys/%dkimkeyfn
+/bin/rmdir --ignore-fail-on-non-empty %{sysconfdir}/control/domainkeys 2>/dev/null
+/bin/rmdir --ignore-fail-on-non-empty %{sysconfdir}/control 2>/dev/null
+%{__rm} -rf %{sysconfdir}/control/defaultqueue
 
 for i in postmaster mailer-daemon root ham spam register-ham register-spam
 do
-	%{__rm} -f %{_prefix}/alias/.qmail-"$i"
+	%{__rm} -f %{indimaildir}/alias/.qmail-"$i"
 done
-/bin/rmdir --ignore-fail-on-non-empty %{_prefix}/alias 2>/dev/null
-%{__rm} -f %{_prefix}/share/imapd.pem %{_prefix}/share/pop3d.pem
-%{__rm} -f %{_prefix}/etc/pop3d.cnf.* %{_prefix}/etc/imapd.cnf.*
+/bin/rmdir --ignore-fail-on-non-empty %{indimaildir}/domains 2>/dev/null
+/bin/rmdir --ignore-fail-on-non-empty %{indimaildir}/users 2>/dev/null
+/bin/rmdir --ignore-fail-on-non-empty %{indimaildir}/alias 2>/dev/null
+/bin/rmdir --ignore-fail-on-non-empty %{indimaildir} 2>/dev/null
+%{__rm} -f %{sysconfdir}/imapd.pem %{sysconfdir}/pop3d.pem
+%{__rm} -f %{sysconfdir}/pop3d.cnf.* %{sysconfdir}/imapd.cnf.*
 
 echo "removing startup services"
 if [ %{noclamav} -eq 0 ] ; then
@@ -3034,7 +3058,7 @@ do
 	if [ -d %{servicedir}/$i ] ; then
 		%{__rm} -rf %{servicedir}/$i || true
 	fi
-	%{__rm} -f %{_prefix}/etc/$i.conf %{_prefix}/etc/$i.conf.disabled
+	%{__rm} -f %{sysconfdir}/$i.conf %{sysconfdir}/$i.conf.disabled
 done
 fi
 for i in fetchmail indisrvr.4000 inlookup.infifo mysql.3306 \
@@ -3057,14 +3081,14 @@ done
 fi
 
 #selinux
-%{__rm} -f %{_prefix}/etc/indimail.te %{_prefix}/etc/indimail.mod %{_prefix}/etc/indimail.pp
+%{__rm} -f %{sysconfdir}/indimail.te %{sysconfdir}/indimail.mod %{sysconfdir}/indimail.pp
 
 echo "removing logs"
-%{__rm} -f %{_prefix}/mysqldb/logs/logisam.log
-%{__rm} -f %{_prefix}/mysqldb/logs/logquery
-%{__rm} -f %{_prefix}/mysqldb/logs/logslow
+%{__rm} -f %{indimaildir}/mysqldb/logs/logisam.log
+%{__rm} -f %{indimaildir}/mysqldb/logs/logquery
+%{__rm} -f %{indimaildir}/mysqldb/logs/logslow
 count=`/bin/ls %{servicedir} 2>/dev/null| /usr/bin/wc -l`
-if [ $count -eq 0 ] ; then
+if [ $count -eq 0 ] ; then # ignore disabled services
 	%{__rm} -rf %{servicedir} || true
 fi
 if [ -h %{logdir} ] ; then
@@ -3173,12 +3197,14 @@ argv1=$1
 if [ $argv1 -eq 1 ] ; then
 	exit 0
 fi
+if [ %{_prefix} = "/var/indimail" -o %{_prefix} = "/var/qmail" ] ; then
 echo "removing man pages, include files"
 for i in %{_prefix}/include %{_prefix}/man/man3
 do
 	%{__rm} -rf $i || true
 done
 /bin/rmdir --ignore-fail-on-non-empty %{_prefix}/man 2>/dev/null
+fi
 echo "removing static libraries"
 %{__rm} -f %{_libdir}/libeps.a
 %{__rm} -f %{_libdir}/libcdb.a
