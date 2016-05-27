@@ -3,5 +3,5 @@
 
   capability setuid,
   capability setgid,
-  /var/indimail/share/clamd/ r,
-  /var/indimail/share/clamd/** krw,
+  /var/indimail/clamd/ r,
+  /var/indimail/clamd/** krw,
