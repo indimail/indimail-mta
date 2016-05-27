@@ -17,13 +17,16 @@ set -e
 # for details, see http://www.debian.org/doc/debian-policy/ or
 # the debian-policy package
 
-prefix=/var/indimail
+prefix=/usr
+qmaildir=/var/indimail
+mandir=/usr/share/man
+shareddir=/usr/share/indimail
 qcount=5
 qbase=${prefix}/queue
 mbase=/home/mail
 logdir=/var/log/indimail
 servicedir=/service
-sysconfdir=/etc
+sysconfdir=/etc/indimail
 rm=/bin/rm
 ####################################
 nodksignature=0
@@ -115,38 +118,44 @@ esac
 #
 # We need to do this for debian. SIGH!!
 #
-if [ -f ${prefix}/etc/perm_list ] ; then
+if [ -f ${sysconfdir}/perm_list ] ; then
 	echo "Fixing Permissions (debian stupidity)"
 (
-/bin/grep -v "^#" ${prefix}/etc/perm_list | while read line
+/bin/grep -v "^#" ${sysconfdir}/perm_list | while read line
 do
 	if [ " $line" = " " ] ; then
 		continue
 	fi
 	fixperms $line
 done
-) > ${prefix}/etc/stat.override
+) > ${sysconfdir}/stat.override
 fi
 
 if [ -f /tmp/indimail-mta.upgrade ] ; then # upgrade
-	if [ -f ${prefix}/boot/rpm.init ] ; then
+	if [ -f ${shareddir}/boot/rpm.init ] ; then
 		echo "recreating ld.so cache"
 		/sbin/ldconfig
 		echo "Running Custom Upgrade Script"
-		/bin/sh ${prefix}/boot/rpm.init upgrade
+		/bin/sh ${shareddir}/boot/rpm.init upgrade
 	fi
 	${rm} -f /tmp/indimail-mta.upgrade
 	exit 0
 fi
 ${rm} -f /tmp/indimail-mta.install /tmp/indimail-mta.upgrade
 # Recreate ld.so links and cache
+if [ ! "${prefix}" = "/usr" ] ; then
 echo "recreating ld.so cache"
-if [ -d ${sysconfdir}/ld.so.conf.d ] ; then
+if [ -d /etc/ld.so.conf.d ] ; then
 	(
-		echo /var/indimail/lib
-	) > ${sysconfdir}/ld.so.conf.d/indimail-`uname -m`.conf
+		if [ -d /usr/lib64 ] ; then
+			echo /usr/lib64
+		else
+			echo /usr/lib
+		fi
+	) > /etc/ld.so.conf.d/indimail-`uname -m`.conf
 fi
 /sbin/ldconfig
+fi
 
 if [ -f /usr/sbin/clamd -a -f /usr/bin/clamdscan ] ; then
 	clamav_os=1
@@ -167,7 +176,7 @@ echo "11. Configure QMTP service"
 echo "12. Configure QMQP service"
 echo "13. Configure udplogger service"
 echo "14. Configure qscanq/clamd/freshclam service"
-echo "15. Configure ${prefix}/control/signatures"
+echo "15. Configure ${sysconfdir}/control/signatures"
 echo "16. Configure tcprules database for SMTP, QMTP, QMQP"
 echo "17. Configure indimail-mta startup"
 if [ -x /etc/init.d/apparmor ] ; then
@@ -192,13 +201,13 @@ fi
 
 # Misc/Configuration
 ${prefix}/sbin/svctool --svscanlog --servicedir=$servicedir
-if [ -f ${prefix}/boot/rpm.init ] ; then
+if [ -f ${shareddir}/boot/rpm.init ] ; then
 	echo "Running Custom Installation Script"
-	/bin/sh ${prefix}/boot/rpm.init post
+	/bin/sh ${shareddir}/boot/rpm.init post
 fi
 
-echo "Creating default qmail configuraton and catch-all alias (${prefix}/alias/Maildir) for all system users"
-${prefix}/sbin/svctool --config=qmail --postmaster=${prefix}/alias/Maildir/ \
+echo "Creating default qmail configuraton and catch-all alias (${qmaildir}/alias/Maildir) for all system users"
+${prefix}/sbin/svctool --config=qmail --postmaster=${qmaildir}/alias/Maildir/ \
 	--default-domain=${default_domain}
 
 if [ $nodksignature -eq 0 ] ; then
@@ -208,7 +217,7 @@ if [ $nodksignature -eq 0 ] ; then
 		if [ " $key_bit" = " " ] ; then
 			key_bit=1024
 		fi
-		${prefix}/bin/dknewkey ${prefix}/control/domainkeys/$dkimkeyfn $key_bit
+		${prefix}/bin/dknewkey ${sysconfdir}/control/domainkeys/$dkimkeyfn $key_bit
 	else
 		ver_opt="none"
 		sign_opt="none"
@@ -233,7 +242,7 @@ if [ $noclamav -eq 0 ] ; then
 	clamav_os=0
 	clamdPrefix=${prefix}
 	qhpsi="${prefix}/bin/clamdscan %s --fdpass --quiet --no-summary"
-	mysysconfdir=${prefix}/etc
+	mysysconfdir=${sysconfdir}
 else
 	if [ -f /usr/sbin/clamd -a -f /usr/bin/clamdscan ] ; then
 		clamav_os=1
@@ -281,7 +290,7 @@ do
 			--qhpsi="$qhpsi" \
 			--dmasquerade \
 			--dkverify=both \
-			--dksign=both --private_key=${prefix}/control/domainkeys/%/$dkimkeyfn \
+			--dksign=both --private_key=${sysconfdir}/control/domainkeys/%/$dkimkeyfn \
 			$extra_opt
 	else
 		${prefix}/sbin/svctool --smtp=$port --servicedir=$servicedir \
@@ -293,7 +302,7 @@ do
 			--min-free=52428800 --content-filter --virus-filter \
 			--dmasquerade \
 			--dkverify=both \
-			--dksign=both --private_key=${prefix}/control/domainkeys/%/$dkimkeyfn \
+			--dksign=both --private_key=${sysconfdir}/control/domainkeys/%/$dkimkeyfn \
 			$extra_opt
 	fi
 	echo "1" > $servicedir/qmail-smtpd.$port/variables/DISABLE_PLUGIN
@@ -304,14 +313,14 @@ if [ $noclamav -eq 0 -o $clamav_os -eq 1 ] ; then
 		--min-free=52428800 --fsync --syncdir \
 		--qhpsi="$qhpsi" \
 		--dkverify="none" --dksign=$sign_opt \
-		--private_key=${prefix}/control/domainkeys/%/$dkimkeyfn \
+		--private_key=${sysconfdir}/control/domainkeys/%/$dkimkeyfn \
 		$extra_opt
 else
 	${prefix}/sbin/svctool --queueParam=defaultqueue \
 		--qbase=${qbase} --qcount=${qcount} --qstart=1 \
 		--min-free=52428800 --fsync --syncdir --virus-filter \
 		--dkverify="none" --dksign=$sign_opt \
-		--private_key=${prefix}/control/domainkeys/%/$dkimkeyfn \
+		--private_key=${sysconfdir}/control/domainkeys/%/$dkimkeyfn \
 		$extra_opt
 fi
 ${prefix}/sbin/svctool --smtp=366 --odmr --servicedir=$servicedir \
@@ -344,7 +353,7 @@ fi
 # udplogger service
 ${prefix}/sbin/svctool --udplogger=3000 --localip=0 --timeout=10 --servicedir=${servicedir}
 
-/bin/cat <<EOFUU > ${prefix}/control/signatures
+/bin/cat <<EOFUU > ${sysconfdir}/control/signatures
 # Windows executables seen in active virii
 TVqQAAMAA
 TVpQAAIAA
@@ -364,7 +373,7 @@ TVrQAT8AA
 # .GIF file found in a previous Microsoft virus making the rounds.
 R0lGODlhaAA7APcAAP///+rp6puSp6GZrDUjUUc6Zn53mFJMdbGvvVtXh2xre8bF1x8cU4yLprOy
 EOFUU
-/bin/chown qscand:qscand ${prefix}/control/signatures
+/bin/chown qscand:qscand ${sysconfdir}/control/signatures
 
 if [ -x /etc/init.d/apparmor ] ; then
 if [ $noclamav -eq 0 -o $clamav_os -eq 1 ] ; then
@@ -372,14 +381,16 @@ if [ $noclamav -eq 0 -o $clamav_os -eq 1 ] ; then
 		(
 		echo "# Site-specific additions and overrides for usr.sbin.clamd."
 		echo "# For more details, please see /etc/apparmor.d/local/README."
-  		echo "${prefix}/share/clamd/ r,"
-  		echo "${prefix/}share/clamd/** krw,"
+		echo "capability setuid,"
+		echo "capability setgid,"
+  		echo "${shareddir}/clamd/ r,"
+  		echo "${shareddir}/clamd/** krw,"
 		) > /etc/apparmor.d/local/usr.sbin.clamd
 		(
 		echo "# Site-specific additions and overrides for usr.bin.freshclam."
 		echo "# For more details, please see /etc/apparmor.d/local/README."
-  		echo "${prefix}/share/clamd/ r,"
-  		echo "${prefix}/share/clamd/** krw,"
+  		echo "${shareddir}/share/clamd/ r,"
+  		echo "${shareddir}/share/clamd/** krw,"
 		) > /etc/apparmor.d/local/usr.bin.freshclam
 		echo "Reloading apparmor profiles..."
 		/usr/sbin/service apparmor reload || true
@@ -390,7 +401,7 @@ fi
 # rebuild cdb
 for i in smtp qmtp qmqp
 do
-	for j in `/bin/ls ${prefix}/etc/tcp.$i 2>/dev/null`
+	for j in `/bin/ls ${sysconfdir}/tcp.$i 2>/dev/null`
 	do
 		echo "Creating CDB $j.cdb"
    		${prefix}/bin/tcprules $j.cdb $j.tmp < $j && /bin/chmod 664 $j.cdb \
@@ -399,12 +410,12 @@ do
 done
 
 echo "compressing man pages"
-find ${prefix}/man -type f -exec gzip -q {} \;
-if [ -f ${prefix}/man/man7/authlib.7.gz ] ; then
+find ${mandir} -type f -exec gzip -q {} \;
+if [ -f ${mandir}/man7/authlib.7.gz ] ; then
 	for i in authshadow.7 authpwd.7 authpam.7 authcustom.7
 	do
-		${rm} -f ${prefix}/man/man7/$i
-		ln -sf ${prefix}/man/man7/authlib.7.gz ${prefix}/man/man7/$i.gz
+		${rm} -f ${mandir}/man7/$i
+		ln -sf ${mandir}/man7/authlib.7.gz ${mandir}/man7/$i.gz
 	done
 fi
 
@@ -445,12 +456,12 @@ fi
 echo "   You can also use the 'service' command to start indimail-mta"
 echo "   sudo service indimail start"
 count=`expr $count + 1`
-echo "$count. Change your default domain in ${prefix}/control/defaultdomain"
+echo "$count. Change your default domain in ${sysconfdir}/control/defaultdomain"
 count=`expr $count + 1`
 echo "$count. You can optionally run the following command to verify installation"
 echo "   sudo ${prefix}/sbin/svctool --check-install --servicedir=${servicedir} \\"
 echo "       --qbase=${qbase} --qcount=${qcount} --qstart=1"
-if [ ! -f ${prefix}/control/servercert.pem ] ; then
+if [ ! -f ${sysconfdir}/control/servercert.pem ] ; then
 count=`expr $count + 1`
 echo "$count. You also need to create CERTS for IMAP/POP3. run the following"
 echo "   command to create cert"

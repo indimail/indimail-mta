@@ -106,7 +106,8 @@ build-stamp:
 	if [ -d courier-imap-$(courier_version) ] ; then \
 		cd courier-imap-$(courier_version) ; \
 		./configure --prefix=$(prefix) --sysconfdir=$(sysconfdir) --libdir=$(libdir) \
-		--datarootdir=$(shareddir) --mandir=$(mandir) `cat ../indimail-$(version)/config/courier-imap.opts`; \
+		--libexecdir=$(libexecdir) --datarootdir=$(shareddir) --mandir=$(mandir) \
+		`cat ../indimail-$(version)/config/courier-imap.opts`; \
 		cd ..; \
 	fi
 	if [ -d bogofilter-$(bogofilter_version) ] ; then \
@@ -117,8 +118,8 @@ build-stamp:
 	fi
 	if [ -d fetchmail-$(fetchmail_version) ] ; then \
 		cd fetchmail-$(fetchmail_version); \
-		./configure --prefix=$(prefix) --sysconfdir=$(sysconfdir) --enable-indimail -\
-		-enable-indimaildir=$(prefix) --datarootdir=$(shareddir) --libexecdir=$(libexecdir) \
+		./configure --prefix=$(prefix) --sysconfdir=$(sysconfdir) --enable-indimail \
+		--enable-binprefix=$(prefix) --datarootdir=$(shareddir) --libexecdir=$(libexecdir) \
 		--mandir=$(mandir) `cat ../indimail-$(version)/config/fetchmail.opts`; \
 		cd ..; \
 	fi

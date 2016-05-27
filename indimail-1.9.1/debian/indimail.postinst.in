@@ -137,8 +137,6 @@ fi
 
 if [ -f /tmp/indimail.upgrade ] ; then # upgrade
 	if [ -f ${shareddir}/boot/rpm.init ] ; then
-		echo "recreating ld.so cache"
-		/sbin/ldconfig
 		echo "Running Custom Upgrade Script"
 		/bin/sh ${shareddir}/boot/rpm.init upgrade
 	fi
@@ -147,7 +145,7 @@ if [ -f /tmp/indimail.upgrade ] ; then # upgrade
 fi
 ${rm} -f /tmp/indimail.install /tmp/indimail.upgrade
 # Recreate ld.so links and cache
-if [ ! "@prefix@" = "/usr" ] ; then
+if [ ! "${prefix}" = "/usr" ] ; then
 echo "recreating ld.so cache"
 if [ -d /etc/ld.so.conf.d ] ; then
 	(

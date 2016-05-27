@@ -19,8 +19,10 @@ set -e
 # the debian-policy package
 
 
-prefix=/var/indimail
-sysconfdir=/etc
+prefix=/usr
+qmaildir=/var/indimail
+sysconfdir=/etc/indimail
+shareddir=/usr/share/indimail
 servicedir=/service
 logdir=/var/log/indimail
 rm=/bin/rm
@@ -67,8 +69,8 @@ esac
 if [ " $1" = " purge" ] ; then
 	nscd_up=`ps -ef |grep nscd |grep -v grep|wc -l`
 	if [ $nscd_up -ge 1 ] ; then
-		if [ -x ${sysconfdir}/init.d/nscd ] ; then
-			${sysconfdir}/init.d/nscd stop
+		if [ -x /etc/init.d/nscd ] ; then
+			/etc/init.d/nscd stop
 		fi
 	fi
 
@@ -83,21 +85,26 @@ if [ " $1" = " purge" ] ; then
 		/usr/bin/getent group $i > /dev/null && /usr/sbin/groupdel $i  >/dev/null || true
 	done
 	if [ $nscd_up -ge 1 ] ; then
-		if [ -x ${sysconfdir}/init.d/nscd ] ; then
-			${sysconfdir}/init.d/nscd start
+		if [ -x /etc/init.d/nscd ] ; then
+			/etc/init.d/nscd start
 		fi
 	fi
 
 	echo "removing database and configuration"
-	for i in control domains users alias
+	for i in mysqldb domains alias
 	do
 		${rm} -rf ${prefix}/$i || true
 	done
-	if [ -d ${prefix}/control/domainkeys ] ; then
-		${rmdir} --ignore-fail-on-non-empty ${prefix}/control/domainkeys 2>/dev/null
+	${rm} -f ${qmaildir}/bin || true
+	${rm} -f ${qmaildir}/sbin || true
+	${rm} -f ${qmaildir}/users || true
+	${rm} -f ${qmaildir}/control || true
+	${rm} -rf ${sysconfdir} || true
+	if [ -d ${sysconfdir}/control/domainkeys ] ; then
+		${rmdir} --ignore-fail-on-non-empty ${sysconfdir}/control/domainkeys 2>/dev/null
 	fi
-	if [ -d ${prefix}/control ] ; then
-		${rmdir} --ignore-fail-on-non-empty ${prefix}/control 2>/dev/null
+	if [ -d ${sysconfdir}/control ] ; then
+		${rmdir} --ignore-fail-on-non-empty ${sysconfdir}/control 2>/dev/null
 	fi
 	for i in .qmail-nonspam .qmail-register-nonspam .qmail-register-spam .qmail-spam .qmail-default
 	do
@@ -115,50 +122,55 @@ if [ " $1" = " purge" ] ; then
 		${rmdir} --ignore-fail-on-non-empty ${prefix}/alias 2>/dev/null
 	fi
 
-	if [ ${prefix} != "/usr" ] ; then
-		echo "removing binaries, libraries, queues"
+	echo "removing binaries, libraries, queues"
+	if [ ${prefix} = "/var/indimail" -o ${prefix} = "/var/qmail" ] ; then
 		for i in bin sbin queue
 		do
 			${rm} -rf ${prefix}/$i || true
 		done
 		echo "removing man pages"
-		for i in ${prefix}/man/man1 ${prefix}/man/cat1 ${prefix}/man/man5 \
-			${prefix}/man/cat5 ${prefix}/man/man7 ${prefix}/man/cat7 \
-			${prefix}/man/man8 ${prefix}/man/cat8 ${prefix}/man/man3
+		for i in ${prefix}/bin ${prefix}/sbin ${prefix}/lib ${prefix}/queue \
+			${mandir}/man1 ${mandir}/cat1 ${mandir}/man5 \
+			${mandir}/cat5 ${mandir}/man7 ${mandir}/cat7 \
+			${mandir}/man8 ${mandir}/cat8 ${mandir}/man3
 		do
 			${rm} -rf $i || true
 		done
-		if [ -d ${prefix}/man ] ; then
-			/bin/rmdir --ignore-fail-on-non-empty ${prefix}/man 2>/dev/null
-		fi
-		for i in `/bin/ls ${prefix}/share 2>/dev/null`
+		for i in `/bin/ls ${shareddir} 2>/dev/null`
 		do
 			if [ " $i" = " clamd" ] ; then # leave the signatures
 				continue;
 			fi
-			${rm} -rf ${prefix}/share/$i || true
+			${rm} -rf ${shareddir}/$i || true
 		done
-		if [ -d ${prefix}/share ] ; then
-			${rmdir} --ignore-fail-on-non-empty ${prefix}/share 2>/dev/null
-		fi
+	else
+		for i in bin sbin control users
+		do
+			${rm} -f ${qmaildir}/$i || true
+		done
 	fi
+	echo "removing man pages"
+	${rmdir} --ignore-fail-on-non-empty ${mandir} || true
+	echo "removing architecture-independent shared directory"
+	${rmdir} --ignore-fail-on-non-empty ${shareddir} 2>/dev/null
 
 	echo "removing tcp configuration"
 	for i in smtp qmtp qmqp
 	do
-		${rm} -f ${prefix}/etc/tcp.$i.cdb ${prefix}/etc/tcp.$i
+		${rm} -f ${sysconfdir}/tcp.$i.cdb ${sysconfdir}/tcp.$i
 	done
-	${rm} -f ${prefix}/control/controlfiles
+	${rm} -f ${sysocnfdir}/control/controlfiles
 	for i in indimail.cnf stat.override backup.conf cronlist headerlist \
 		inc_deps indimail.mrtg.cfg \
 		procmailrc indimail.settings lib_deps osh.table perm_list \
 		qmailprog.list quotawarnmsg.example services.log
 	do
-		${rm} -f ${prefix}/etc/$i
+		${rm} -f ${sysconfdir}/$i
 	done
-	if [ -d ${prefix}/etc ] ; then
-		${rmdir} --ignore-fail-on-non-empty ${prefix}/etc 2>/dev/null
-	fi
+	${rmdir} --ignore-fail-on-non-empty ${qmaildir}/domains 2>/dev/null
+	${rmdir} --ignore-fail-on-non-empty ${qmaildir}/users 2>/dev/null
+	${rmdir} --ignore-fail-on-non-empty ${qmaildir}/alias 2>/dev/null
+	${rmdir} --ignore-fail-on-non-empty ${qmaildir} 2>/dev/null
 
 	echo "removing startup services"
 	for i in clamd freshclam qmail-send.25 qmail-smtpd.25 qmail-smtpd.366 qmail-spamlog qscanq \
@@ -184,9 +196,9 @@ if [ " $1" = " purge" ] ; then
 else
 	echo "recreating ld.so cache"
 	/sbin/ldconfig
-	if [ -f ${prefix}/boot/rpm.init ] ; then
+	if [ -f ${shareddir}/boot/rpm.init ] ; then
 		echo "Running Custom Un-Installation Script for postun"
-		/bin/sh ${prefix}/boot/rpm.init postun
+		/bin/sh ${shareddir}/boot/rpm.init postun
 	fi
 fi
 exit 0

@@ -19,6 +19,7 @@ set -e
 prefix=@prefix@
 indimaildir=@indimaildir@
 sysconfdir=@sysconfdir@
+shareddir=@shareddir@
 mandir=@mandir@
 rm=/bin/rm
 mv=/bin/mv
