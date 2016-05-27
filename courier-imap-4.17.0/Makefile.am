@@ -33,7 +33,8 @@ libexec_PROGRAMS=@libexecPROGRAMS_exec@
 
 EXTRA_PROGRAMS=
 
-man_MANS=couriertcpd.1 deliverquota.8 maildirmake.1 maildiracl.1 imapd.8 mkdhparams.8 mkimapdcert.8 mkpop3dcert.8 maildirkw.1 makeimapaccess.8
+man_MANS=couriertcpd.1 couriertls.1 deliverquota.8 maildirmake.1 maildiracl.1 imapd.8 mkdhparams.8 \
+		 mkimapdcert.8 mkpop3dcert.8 maildirkw.1 makeimapaccess.8
 EXTRA_DIST=README README.cygwin\
 	COPYING.GPL NEWS.html $(TEMPLFILES) pgpkeys.txt
 
@@ -106,6 +107,9 @@ imapd-ssl.dist: libs/imap/imapd-ssl.dist
 couriertcpd.1: libs/tcpd/couriertcpd.1
 	cp $(srcdir)/libs/tcpd/couriertcpd.1 .
 
+couriertls.1: libs/tcpd/couriertls.1
+	cp $(srcdir)/libs/tcpd/couriertls.1 .
+
 deliverquota.8: libs/maildir/deliverquota.8
 	cp libs/maildir/deliverquota.8 .
 
@@ -162,10 +166,6 @@ install-exec-local:
 	$(mkinstalldirs) $(DESTDIR)$(bindir)
 	test ! -x libs/tcpd/couriertls || $(INSTALL_PROGRAM) $(INSTALL_STRIP_FLAG) \
 		libs/tcpd/couriertls $(DESTDIR)$(bindir)/couriertls
-	$(mkinstalldirs) $(DESTDIR)$(sbindir)
-	for f in mkimapdcert mkpop3dcert mkdhparams; \
-		do rm -f $(DESTDIR)$(sbindir)/$$f ; done
-	$(mkinstalldirs) $(DESTDIR)$(localstatedir)
 
 install-exec-hook:
 	chmod 444 $(DESTDIR)$(sysconfdir)/quotawarnmsg.example
@@ -194,8 +194,6 @@ install-data-local: install-man
 	@echo "Do not forget to run make install-configure"
 
 uninstall-local:
-	for f in mkimapdcert mkpop3dcert mkdhparams; \
-		do rm -f $(DESTDIR)$(sbindir)/$$f ; done
 	rm -f $(DESTDIR)$(bindir)/couriertls
 
 INSTALL.txt: INSTALL.html
