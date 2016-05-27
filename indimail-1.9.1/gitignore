@@ -118,3 +118,6 @@ indimail-permissions.paranoid
 doc/RELEASE-Notes.in
 libindimail.pc
 obs.mk
+usr.sbin.clamd
+usr.sbin.mysqld
+usr.bin.freshclam

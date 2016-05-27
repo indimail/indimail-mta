@@ -3,5 +3,5 @@
 
   capability setuid,
   capability setgid,
-  @shareddir@/clamd/ r,
-  @shareddir@/clamd/** krw,
+  @indimaildir@/clamd/ r,
+  @indimaildir@/clamd/** krw,

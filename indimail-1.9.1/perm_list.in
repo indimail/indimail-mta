@@ -455,15 +455,15 @@
 %attr(4555,root,root) @prefix@/bin/vrenameuser
 %attr(4555,root,root) @prefix@/bin/vsetuserquota
 %attr(4555,root,root) @prefix@/bin/vuserinfo
-%attr(4555,root,root) @prefix@/libexec/authlib/authshadow
+%attr(4555,root,root) @libexecdir@/authlib/authshadow
 %attr(4555,root,root) @prefix@/sbin/systpass
 %attr(6511,qmailq,qmail) @prefix@/bin/qmail-queue
 %attr(6511,qscand,qmail) @prefix@/bin/qhpsi
 %attr(6511,root,indimail) @prefix@/bin/bogofilter
 
-%attr(0555,root,root) @libexecdir@/mkimapdcert
-%attr(0555,root,root) @libexecdir@/mkpop3dcert
-%attr(0555,root,root) @libexecdir@/mkdhparams
+%attr(0555,root,root) @shareddir@/mkimapdcert
+%attr(0555,root,root) @shareddir@/mkpop3dcert
+%attr(0555,root,root) @shareddir@/mkdhparams
 #
 # Boot
 #
