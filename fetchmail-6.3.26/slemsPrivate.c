@@ -23,12 +23,12 @@ main(int argc, char **argv)
 {
 	int             i;
 	static char    *priv_cmds[] = {
-		INDIMAILDIR "/bin/qmail-tcpok",
-		INDIMAILDIR "/bin/svc",
-		INDIMAILDIR "/bin/svstat",
-		INDIMAILDIR "/bin/ppp-off",
-		INDIMAILDIR "/bin/fixwvdialconf",
-		INDIMAILDIR "/bin/qmail-qstat",
+		BINPREFIX "/bin/qmail-tcpok",
+		BINPREFIX "/bin/svc",
+		BINPREFIX "/bin/svstat",
+		BINPREFIX "/bin/ppp-off",
+		BINPREFIX "/bin/fixwvdialconf",
+		BINPREFIX "/bin/qmail-qstat",
 		"/usr/bin/killall",
 		"/usr/bin/wvdial",
 		0

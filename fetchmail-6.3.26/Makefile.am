@@ -19,7 +19,6 @@ sbin_SCRIPTS=       fetchmail.up fetchmail.down ip-down.local ip-up.local ppp-of
 MOSTLYCLEANFILES=fetchmail.up fetchmail.down fetchmail.cron ip-up.local ip-down.local
 
 #endif
-
 dist_noinst_SCRIPTS=	specgen.sh
 dist_man1_MANS=		fetchmail.man
 
@@ -131,7 +130,7 @@ mxget_CFLAGS=	-DSTANDALONE -DHAVE_CONFIG_H -I$(builddir)
 @SET_MAKE@
 #ifdef INDIMAIL
 edit = sed \
-	-e 's,@indimaildir\@,$(indimaildir),g' \
+	-e 's,@binprefix\@,$(binprefix),g' \
 	-e 's,@prefix\@,$(prefix),g'
 #endif
 

@@ -814,25 +814,25 @@ case "$LIBS" in *-lssl*)
 	;;
 esac
 
-indimaildir=""
-for f in /var/indimail
+binprefix=""
+for f in /var/indimail /usr
 do
 	if test -d $f
 	then
-		indimaildir=$f
+		binprefix=$f
 	fi
 done
 
-AC_ARG_ENABLE(indimaildir, [  --enable-indimaildir=dir   directory where IndiMail is installed.],
-	indimaildir="$enableval",
+AC_ARG_ENABLE(binprefix, [  --enable-binprefix=dir   directory where IndiMail is installed.],
+	binprefix="$enableval",
 	[
-		if test "$indimaildir" = ""
+		if test "$binprefix" = ""
 		then
-			AC_MSG_ERROR([Unable to find your indimaildir directory, specify --enable-indimaildir.])
+			AC_MSG_ERROR([Unable to find your indimail bin prefix, specify --enable-binprefix.])
 		fi
 	])
-AC_DEFINE_UNQUOTED(INDIMAILDIR,"$indimaildir", directory for IndiMail installation)
-AC_SUBST(indimaildir)
+AC_DEFINE_UNQUOTED(BINPREFIX,"$binprefix", directory for IndiMail installation)
+AC_SUBST(binprefix)
 
 ###	use option --with-socks=DIR to point at SOCKS library
 AC_ARG_WITH(socks,
@@ -876,7 +876,7 @@ dnl for libesmtp/ modules:
 ACX_WHICH_GETHOSTBYNAME_R
 
 ###	use option --with-hesiod=DIR to point at a HESIOD directory
-AC_ma_SEARCH_PACKAGE(hesiod, hesiod_getmailhost, /usr/athena /usr /usr/local,hesiod, hesiod.h)
+#AC_ma_SEARCH_PACKAGE(hesiod, hesiod_getmailhost, /usr/athena /usr /usr/local,hesiod, hesiod.h)
 
 ###	use option --with-gssapi=DIR to compile in GSSAPI support
 AC_ARG_WITH(gssapi,
