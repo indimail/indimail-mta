@@ -1,5 +1,8 @@
 /*
  * $Log: hier.c,v $
+ * Revision 1.198  2016-05-29 20:04:40+05:30  Cprogrammer
+ * moved instcheck to sbin
+ *
  * Revision 1.197  2016-05-27 20:47:07+05:30  Cprogrammer
  * FHS compliance
  *
@@ -543,7 +546,7 @@ hier(inst_dir, fatal)
 		auto_qmail_home = inst_dir;
 	/* Directories */
 	if (!str_diff(auto_qmail, "/var/indimail") || !str_diff(auto_qmail, "/var/qmail")) {
-		h(auto_qmail, auto_uido, auto_gidq, 0555);
+		h(auto_qmail_home, auto_uido, auto_gidq, 0555);
 	}
 
 	auto_cntrl_dir = getdirname(auto_control, &auto_cntrl_base);
@@ -582,11 +585,11 @@ hier(inst_dir, fatal)
 		if (!stralloc_0(&a3))
 			strerr_die2sys(111, fatal, "out of memory: ");
 		mandir = a3.s;
-		h(auto_shared, 0, 0, 0755);
+		h(auto_shared, auto_uido, auto_gidq, 0555);
 	} else
 		mandir = auto_qmail_home;
 
-	/*- shared directory for control, etc */
+	/*- shared directory for control, config files */
 	if (str_diff(auto_qmail, auto_sysconfdir))
 		h(auto_sysconfdir, 0, 0, 0755);
 
@@ -739,7 +742,6 @@ hier(inst_dir, fatal)
 	c(auto_qmail_home, "bin", "qmail-sighup", auto_uido, auto_gidq, 0555);
 	c(auto_qmail_home, "bin", "qmail-sigalrm", auto_uido, auto_gidq, 0555);
 	c(auto_qmail_home, "bin", "qmail-sigterm", auto_uido, auto_gidq, 0555);
-	c(auto_qmail_home, "bin", "instcheck", auto_uido, auto_gidq, 0500);
 
 	c(auto_qmail_home, "bin", "dnscname", auto_uido, auto_gidq, 0555);
 	c(auto_qmail_home, "bin", "dnsptr", auto_uido, auto_gidq, 0555);
@@ -952,6 +954,7 @@ hier(inst_dir, fatal)
 	c(auto_qmail_home, "sbin", "hostname", auto_uido, auto_gidq, 0555);
 	c(auto_qmail_home, "sbin", "qmailconfig", auto_uido, auto_gidq, 0555);
 	c(auto_qmail_home, "sbin", "config-fast", auto_uido, auto_gidq, 0555);
+	c(auto_qmail_home, "sbin", "instcheck", auto_uido, auto_gidq, 0500);
 
 	/* Man Pages, Documents */
 	c(auto_shared,     "doc", "QMAILFAQ", auto_uido, auto_gidq, 0444);
@@ -1862,7 +1865,7 @@ _hier(inst_dir)
 void
 getversion_install_big_c()
 {
-	static char    *x = "$Id: hier.c,v 1.197 2016-05-27 20:47:07+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: hier.c,v 1.198 2016-05-29 20:04:40+05:30 Cprogrammer Exp mbhangui $";
 
 #ifdef INDIMAIL
 	if (x)
