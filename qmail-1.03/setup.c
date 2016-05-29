@@ -1,5 +1,8 @@
 /*
  * $Log: setup.c,v $
+ * Revision 1.25  2016-05-29 20:12:07+05:30  Cprogrammer
+ * code beautified
+ *
  * Revision 1.24  2016-05-27 20:47:41+05:30  Cprogrammer
  * FHS compliant setup program
  *
@@ -406,7 +409,7 @@ c(home, subdir, file, uid, gid, mode)
 		strerr_die2sys(111, FATAL, "unable to switch back to source directory: ");
 	if (!str_diff(subdir, "doc") && chdir("doc") == -1)
 		strerr_die2sys(111, FATAL, "unable to switch to source doc directory: ");
-	if((fdin = open_read(file)) == -1)
+	if ((fdin = open_read(file)) == -1)
 		strerr_die4sys(111, FATAL, "unable to read ", file, ": ");
 	substdio_fdbuf(&ssin, read, fdin, inbuf, sizeof inbuf);
 
@@ -460,7 +463,7 @@ c(home, subdir, file, uid, gid, mode)
 	} else
 	if (chdir(subdir) == -1)
 		strerr_die6sys(111, FATAL, "unable to switch to ", tmpdir.s, "/", subdir, ": ");
-	if((fdout = open_trunc(file)) == -1)
+	if ((fdout = open_trunc(file)) == -1)
 		strerr_die8sys(111, FATAL, "unable to write ", tmpdir.s, "/", subd, "/", file, ": ");
 	substdio_fdbuf(&ssout, write, fdout, outbuf, sizeof outbuf);
 	switch (substdio_copy(&ssout, &ssin))
@@ -530,7 +533,7 @@ main(int argc, char **argv)
 		my_uid = getuid();
 		my_gid = getgid();
 	}
-	if((fdsourcedir = open_read(".")) == -1)
+	if ((fdsourcedir = open_read(".")) == -1)
 		strerr_die2sys(111, FATAL, "unable to open current directory: ");
 	if (my_uid) {
 		if (!(pw = getpwuid(my_uid)) && !(pw = getpwnam(mailuser))) /*- we expect this user to be present on all linux distros */
@@ -542,7 +545,7 @@ main(int argc, char **argv)
 		auto_gidn = pw->pw_gid;
 		umask(022);
 	} else {
-		if(uidinit(1) == -1)
+		if (uidinit(1) == -1)
 			strerr_die2sys(111, FATAL, "unable to get uids/gids: ");
 		umask(077);
 	}
@@ -556,7 +559,7 @@ main(int argc, char **argv)
 void
 getversion_setup_c()
 {
-	static char    *x = "$Id: setup.c,v 1.24 2016-05-27 20:47:41+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: setup.c,v 1.25 2016-05-29 20:12:07+05:30 Cprogrammer Exp mbhangui $";
 #ifdef INDIMAIL
 	if (x)
 		x = sccsidh;
