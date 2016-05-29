@@ -1,5 +1,4 @@
 perm_list
-debian/perm_list
 conf-prefix
 conf-shared
 conf-sysconfdir
