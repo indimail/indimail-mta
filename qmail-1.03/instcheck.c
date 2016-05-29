@@ -1,5 +1,8 @@
 /*
  * $Log: instcheck.c,v $
+ * Revision 1.21  2016-05-29 20:03:24+05:30  Cprogrammer
+ * fixed display of double slash "//"
+ *
  * Revision 1.20  2016-05-27 20:47:15+05:30  Cprogrammer
  * FHS compliance
  *
@@ -91,8 +94,9 @@ perm(prefix1, prefix2, prefix3, file, type, uid, gid, mode, should_exit)
 {
 	struct stat     st;
 	int             len, err = 0;
-	char           *tfile = 0;
+	char           *tfile = 0, *slashd;
 
+	slashd = (prefix1 && *prefix1) ? "/" : "";
 	if (stat(file, &st) != -1)
 		tfile = file;
 	else
@@ -116,7 +120,7 @@ perm(prefix1, prefix2, prefix3, file, type, uid, gid, mode, should_exit)
 #ifdef INDIMAIL
 				if (!ignore_man_error)
 #endif
-					strerr_warn7(WARNING, prefix1, "/", prefix2, prefix3, file, " does not exist", 0);
+					strerr_warn7(WARNING, prefix1, slashd, prefix2, prefix3, file, " does not exist", 0);
 				if (tfile != file)
 					alloc_free(tfile);
 				return;
@@ -137,7 +141,7 @@ perm(prefix1, prefix2, prefix3, file, type, uid, gid, mode, should_exit)
 			if (stat(file, &st) == -1)
 			{
 				if (errno == error_noent)
-					strerr_warn7(WARNING, prefix1, "/", prefix2, prefix3, file, " does not exist", 0);
+					strerr_warn7(WARNING, prefix1, slashd, prefix2, prefix3, file, " does not exist", 0);
 				else
 					strerr_warn4(WARNING, "unable to stat ", file, ": ", &strerr_sys);
 				return;
@@ -159,7 +163,7 @@ perm(prefix1, prefix2, prefix3, file, type, uid, gid, mode, should_exit)
 			if (stat(file, &st) == -1)
 			{
 				if (errno == error_noent)
-					strerr_warn7(WARNING, prefix1, "/", prefix2, prefix3, file, " does not exist", 0);
+					strerr_warn7(WARNING, prefix1, slashd, prefix2, prefix3, file, " does not exist", 0);
 				else
 					strerr_warn4(WARNING, "unable to stat ", file, ": ", &strerr_sys);
 				return;
@@ -168,21 +172,21 @@ perm(prefix1, prefix2, prefix3, file, type, uid, gid, mode, should_exit)
 		} else
 		{
 			if (!str_diffn(file, "man/", 4))
-				strerr_warn7(WARNING, prefix1, "/", prefix2, prefix3, file, " does not exist", 0);
+				strerr_warn7(WARNING, prefix1, slashd, prefix2, prefix3, file, " does not exist", 0);
 			else
-				strerr_die6sys(111, FATAL, prefix1, prefix2, prefix3, file, ": ");
+				strerr_die7sys(111, FATAL, prefix1, slashd, prefix2, prefix3, file, ": ");
 			return;
 		}
 	}
 	if ((uid != -1) && (st.st_uid != uid))
 	{
 		err = 1;
-		strerr_warn7(WARNING, prefix1, "/", prefix2, prefix3, tfile, " has wrong owner (will fix)", 0);
+		strerr_warn7(WARNING, prefix1, slashd, prefix2, prefix3, tfile, " has wrong owner (will fix)", 0);
 	}
 	if ((gid != -1) && (st.st_gid != gid))
 	{
 		err = 1;
-		strerr_warn7(WARNING, prefix1, "/", prefix2, prefix3, tfile, " has wrong group (will fix)", 0);
+		strerr_warn7(WARNING, prefix1, slashd, prefix2, prefix3, tfile, " has wrong group (will fix)", 0);
 	}
 	if (err && chown(tfile, uid, gid) == -1)
 		strerr_die4sys(111, FATAL, "unable to chown ", tfile, ": ");
@@ -190,12 +194,12 @@ perm(prefix1, prefix2, prefix3, file, type, uid, gid, mode, should_exit)
 	if ((st.st_mode & 07777) != mode)
 	{
 		err = 1;
-		strerr_warn7(WARNING, prefix1, "/", prefix2, prefix3, tfile, " has wrong permissions (will fix)", 0);
+		strerr_warn7(WARNING, prefix1, slashd, prefix2, prefix3, tfile, " has wrong permissions (will fix)", 0);
 	}
 	if (err && chmod(tfile, mode) == -1)
 		strerr_die4sys(111, FATAL, "unable to chmod ", tfile, ": ");
 	if ((st.st_mode & S_IFMT) != type)
-		strerr_warn7(WARNING, prefix1, "/", prefix2, prefix3, tfile, " has wrong type (unable to fix)", 0);
+		strerr_warn7(WARNING, prefix1, slashd, prefix2, prefix3, tfile, " has wrong type (unable to fix)", 0);
 	if (tfile != file)
 		alloc_free(tfile);
 }
@@ -328,7 +332,7 @@ main(int argc, char **argv)
 {
 	int             i;
 
-	if(uidinit(1) == -1)
+	if (uidinit(1) == -1)
 		strerr_die2sys(111, FATAL, "unable to get uids/gids: ");
 	if (argc == 1)
 	{
@@ -350,7 +354,7 @@ main(int argc, char **argv)
 void
 getversion_instcheck_c()
 {
-	static char    *x = "$Id: instcheck.c,v 1.20 2016-05-27 20:47:15+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: instcheck.c,v 1.21 2016-05-29 20:03:24+05:30 Cprogrammer Exp mbhangui $";
 #ifdef INDIMAIL
 	if (x)
 		x = sccsidh;
