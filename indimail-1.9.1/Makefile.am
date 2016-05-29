@@ -764,7 +764,6 @@ edit = sed \
 	-e 's,@indimaildir\@,$(indimaildir),g' \
 	-e 's,@qmaildir\@,$(qmaildir),g' \
 	-e 's,@controldir\@,$(controldir),g' \
-	-e 's,@mandir\@,$(mandir),g' \
 	-e 's,@sysconfdir\@,$(sysconfdir),g' \
 	-e 's,@shareddir\@,$(shareddir),g' \
 	-e 's,@mandir\@,$(mandir),g' \
