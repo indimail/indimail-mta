@@ -1,3 +1,4 @@
+perm_list
 auto_prefix.c
 auto_prefix.o
 auto_sysconfdir.c
