@@ -73,11 +73,12 @@ build-stamp:
 	#
 	# run configure script
 	#
-	if [ -d qmail-1.03 ] ; then /bin/rm -f qmail-1.03/conf-dlopen; fi
-	if [ -d ucspi-tcp-0.88 ] ; then /bin/rm -f ucspi-tcp-0.88/conf-dlopen; fi
 	if [ $(tcpserver_plugin) -eq 1 ] ; then \
 		echo "-DLOAD_SHARED_OBJECTS" > qmail-1.03/conf-dlopen; \
 		echo "-DLOAD_SHARED_OBJECTS" > ucspi-tcp-0.88/conf-dlopen; \
+	else \
+		/bin/rm -f qmail-1.03/conf-dlopen; \
+		/bin/rm -f ucspi-tcp-1.03/conf-dlopen; \
 	fi
 	#
 	if [ -d libdkim-$(libdkim_version) ] ; then \
@@ -158,7 +159,13 @@ build-stamp:
 
 clean:
 	${rm} -f build-stamp configure-stamp
-	#$(MAKE) -s clean; $(MAKE) -s distclean || true
+	if [ -d libdkim-$(libdkim_version) ] ; then $(MAKE) -s -C libdkim-$(libdkim_version) clean||true; fi
+	if [ -d libdkim-$(libdkim_version) ] ; then $(MAKE) -s -C libdkim-$(libdkim_version) distclean||true; fi
+	if [ -d libsrs2-$(libsrs2_version) ] ; then $(MAKE) -s -C libsrs2-$(libsrs2_version) clean||true; fi
+	if [ -d libsrs2-$(libsrs2_version) ] ; then $(MAKE) -s -C libsrs2-$(libsrs2_version) distclean||true; fi
+	if [ -d ucspi-tcp-0.88 ]             ; then $(MAKE) -s -C ucspi-tcp-0.88 clean||true; fi
+	if [ -d qmail-1.03 ]                 ; then $(MAKE) -s -C qmail-1.03 clean||true; fi
+	$(MAKE) -s clean; $(MAKE) -s distclean || true
 	dh_testdir
 	dh_testroot
 	dh_clean
