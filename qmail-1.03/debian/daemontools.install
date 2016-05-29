@@ -15,7 +15,7 @@ usr/bin/svstat /usr/bin
 usr/bin/tai64n /usr/bin
 usr/bin/tai64nlocal /usr/bin
 usr/bin/tai2tai64n /usr/bin
-usr//bin/tai64n2tai /usr/bin
+usr/bin/tai64n2tai /usr/bin
 usr/bin/tai64nunix /usr/bin
 usr/bin/leapsecs /usr/bin
 usr/bin/nowutc /usr/bin
