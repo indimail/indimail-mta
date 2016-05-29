@@ -19,15 +19,16 @@ set -e
 
 prefix=/usr
 qmaildir=/var/indimail
-mandir=/usr/share/man
-shareddir=/usr/share/indimail
+mandir=${prefix}/share/man
+shareddir=${prefix}/share/indimail
 qcount=5
-qbase=${prefix}/queue
+qbase=${qmaildir}/queue
 mbase=/home/mail
 logdir=/var/log/indimail
 servicedir=/service
 sysconfdir=/etc/indimail
 rm=/bin/rm
+mv=/bin/mv
 ####################################
 nodksignature=0
 noclamav=1
