@@ -1,6 +1,6 @@
 #
 #
-# $Id: qmail.spec,v 1.40 2016-05-27 20:47:35+05:30 Cprogrammer Exp mbhangui $
+# $Id: qmail.spec,v 1.41 2016-05-29 20:11:50+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %define _unpackaged_files_terminate_build 1
 
@@ -657,7 +657,6 @@ done
 %attr(555,root,qmail)                   %{_prefix}/bin/atrn
 %attr(555,root,qmail)                   %{_prefix}/bin/cdbstats
 %attr(555,root,qmail)                   %{_prefix}/bin/zsenders
-%attr(500,root,qmail)                   %{_prefix}/bin/instcheck
 %attr(555,root,qmail)                   %{_prefix}/bin/suids
 %attr(555,root,qmail)                   %{_prefix}/bin/maildirserial
 %attr(500,root,qmail)                   %{_prefix}/bin/qmail-start
@@ -776,6 +775,7 @@ done
 %attr(555,root,qmail)                   %{_prefix}/sbin/hostname
 %attr(555,root,qmail)                   %{_prefix}/sbin/config-fast
 %attr(555,root,qmail)                   %{_prefix}/sbin/qmailconfig
+%attr(500,root,qmail)                   %{_prefix}/sbin/instcheck
 %attr(555,root,qmail)                   %{_prefix}/sbin/batv
 %attr(555,root,qmail)                   %{_prefix}/sbin/plugtest
 %attr(555,root,qmail)                   %{_prefix}/sbin/sys-checkpwd
