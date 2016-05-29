@@ -35,10 +35,15 @@ mpack_version=1.6
 logalert_version=0.3
 fortune_version=1.1
 
-bits=$(shell if [ -d /usr/lib64 ] ; then echo 64; else echo 32; fi)
-libdir=$(shell if [ $(bits) -eq 64 ] ; then echo $(prefix)/lib64; else echo $(prefix)/lib;fi)
-pkgconfigdir=$(shell if [ $(bits) -eq 64 ] ; then echo /usr/lib64/pkgconfig; else echo /usr/lib/pkgconfig;fi)
-acl_libdirstem=$(shell if [ $(bits) -eq 64 ] ; then echo lib64; else echo lib;fi)
+#bits=$(shell if [ -d /usr/lib64 ] ; then echo 64; else echo 32; fi)
+#libdir=$(shell if [ $(bits) -eq 64 ] ; then echo $(prefix)/lib64; else echo $(prefix)/lib;fi)
+#acl_libdirstem=$(shell if [ $(bits) -eq 64 ] ; then echo lib64; else echo lib;fi)
+#pkgconfigdir=$(shell if [ $(bits) -eq 64 ] ; then echo /usr/lib64/pkgconfig; else echo /usr/lib/pkgconfig;fi)
+bits=32
+libdir=@prefix@/lib
+acl_libdirstem=lib
+pkgconfigdir=@prefix@/lib/pkgconfig
+
 
 all: rules indimail.prerm indimail.preinst indimail.postrm indimail.postinst \
 obs_deb_prep gen_control indimail.install \

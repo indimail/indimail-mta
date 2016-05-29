@@ -51,9 +51,12 @@ define genControl
 $(shell if [ -d ../BUILD ] ; then ../BUILD/debian/gen_control; else debian/gen_control;fi)
 endef
 #bits=$(shell dpkg-architecture -qDEB_BUILD_ARCH_BITS)
-bits=$(shell if [ -d /usr/lib64 ] ; then echo 64; else echo 32; fi)
-libdir=$(shell if [ $(bits) -eq 64 ] ; then echo $(prefix)/lib64; else echo $(prefix)/lib;fi)
-pkgconfigdir=$(shell if [ $(bits) -eq 64 ] ; then echo /usr/lib64/pkgconfig; else echo /usr/lib/pkgconfig;fi)
+#bits=$(shell if [ -d /usr/lib64 ] ; then echo 64; else echo 32; fi)
+#libdir=$(shell if [ $(bits) -eq 64 ] ; then echo $(prefix)/lib64; else echo $(prefix)/lib;fi)
+#pkgconfigdir=$(shell if [ $(bits) -eq 64 ] ; then echo /usr/lib64/pkgconfig; else echo /usr/lib/pkgconfig;fi)
+bits=32
+libdir=@prefix@/lib
+pkgconfigdir=@prefix@/lib/pkgconfig
 
 build: build-stamp
 build-stamp:
