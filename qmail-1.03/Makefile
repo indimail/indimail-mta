@@ -8,6 +8,20 @@ SHELL=/bin/sh
 inc_deps := -DHAVE_CONFIG_H -I$(DESTDIR)$(INDIDIR)/include `cat ./inc_deps 2>/dev/null`
 #lib_deps := -L$(DESTDIR)$(INDIDIR)/lib `cat ./lib_deps 2>/dev/null`
 lib_deps=$(shell cat ./lib_deps 2>/dev/null)
+prefix=$(shell head -1 conf-prefix 2>/dev/null)
+qmaildir=$(shell head -1 conf-qmail 2>/dev/null)
+mandir=$(shell echo `head -1 conf-prefix`/share/man 2>/dev/null)
+shareddir=$(shell head -1 conf-shared 2>/dev/null)
+sysconfdir=$(shell head -1 conf-sysconfdir 2>/dev/null)
+
+edit = sed \
+	-e 's,@qmaildir\@,$(qmaildir),g' \
+	-e 's,@mandir\@,$(mandir),g' \
+	-e 's,@sysconfdir\@,$(sysconfdir),g' \
+	-e 's,@shareddir\@,$(shareddir),g' \
+	-e 's,@libexecdir\@,$(libexecdir),g' \
+	-e 's,@logdir\@,$(logdir),g' \
+	-e 's,@prefix\@,$(prefix),g'
 
 default: it man leapsecs.dat
 
@@ -15,6 +29,9 @@ all:it man leapsecs.dat
 
 show:
 	echo $(inc_deps);echo ----;echo $(lib_deps)
+
+perm_list: perm_list.in
+	$(edit) $@.in > $@;/bin/cp perm_list debian/perm_list
 
 addresses.0: \
 addresses.5
@@ -1324,7 +1341,7 @@ run-cleanq.9
 	> run-cleanq.8
 
 it: \
-822date 822field 822header 822print 822received addcr addrlist \
+perm_list 822date 822field 822header 822print 822received addcr addrlist \
 argv0 atrn autoresponder balance_outgoing base64 batv binm1 binm1+df \
 binm2 binm2+df binm3 binm3+df bouncesaying cdbdump cdbget cdbgetm \
 cdbmake cdbmake-12 cdbmake-sv cdbstats cdbtest cidr condredirect config-fast \
