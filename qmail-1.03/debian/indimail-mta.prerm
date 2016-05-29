@@ -18,7 +18,8 @@ set -e
 
 prefix=/usr
 qmaildir=/var/indimail
-shareddir=/usr/share/indimail
+shareddir=${prefix}/share/indimail
+mandir=${prefix}/share/man
 sysconfdir=/etc/indimail
 rm=/bin/rm
 mv=/bin/mv
@@ -32,35 +33,40 @@ fi
 
 case "$1" in
     remove|upgrade|deconfigure)
+	(
 	if [ -f ${prefix}/sbin/initsvc ] ; then
 		${prefix}/sbin/initsvc -status || /etc/init.d/indimail stop
 	fi
-	if test -f /etc/init/svscan.conf
+	echo "Giving IndiMail exactly 5 seconds to exit nicely" 1>&2
+	if test -f /lib/systemd/system/indimail.service && test -x /bin/systemctl
 	then
-		echo "Giving IndiMail exactly 5 seconds to exit nicely" 1>&2
+		/bin/systemctl stop indimail.service > /dev/null 2>&1 || true
+		/bin/systemctl disable indimail.service > /dev/null 2>&1 || true
+		if [ " $1" != " upgrade" ] ; then
+			${rm} -f /lib/systemd/system/indimail.service || true
+		fi
+	elif test -f /etc/init/svscan.conf
+	then
 		/sbin/initctl emit qmailstop > /dev/null 2>&1 || true
 		if [ " $1" != " upgrade" ] ; then
 			${rm} -f /etc/event.d/svscan
 		fi
-		sleep 5
 	elif test -f /etc/event.d/svscan
 	then
-		echo "Giving IndiMail exactly 5 seconds to exit nicely" 1>&2
-		/sbin/initctl emit qmailstop > /dev/null 2>&1
+		/sbin/initctl emit qmailstop > /dev/null 2>&1 || true
 		if [ " $1" != " upgrade" ] ; then
 			${rm} -f /etc/event.d/svscan || true
 		fi
-		sleep 5
 	elif test -x ${prefix}/sbin/initsvc
 	then
-		echo "Giving IndiMail exactly 5 seconds to exit nicely" 1>&2
-		${prefix}/sbin/initsvc -off
-		sleep 5
+		${prefix}/sbin/initsvc -off || true
 	fi
 	if [ -f ${shareddir}/boot/rpm.init ] ; then
 		echo "Running Custom Un-Installation Script for preun" 1>&2
 		/bin/sh ${shareddir}/boot/rpm.init preun
 	fi
+	sleep 5
+	) > /tmp/indimail-mta-uninstall.log 2>&1
     ;;
 
     failed-upgrade)
@@ -82,6 +88,7 @@ if [ " $1" = " upgrade" -o " $1" = " deconfigure" ] ; then
 	exit 0
 fi
 
+(
 if [ -s ${sysconfdir}/stat.override -a -f /usr/sbin/dpkg-statoverride ] ; then
 	echo "reverting permissions"
 	/bin/cat ${sysconfdir}/stat.override | while read line
@@ -109,7 +116,8 @@ fi
 for i in lib sbin
 do
 	if [ -f /usr/$i/sendmail.old ] ; then
-		mv /usr/$i/sendmail.old /usr/$i/sendmail
+		${mv} /usr/$i/sendmail.old /usr/$i/sendmail
 	fi
 done
 exit 0
+) >> /tmp/indimail-mta-uninstall.log 2>&1
