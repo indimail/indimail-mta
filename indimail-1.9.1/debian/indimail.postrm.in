@@ -20,6 +20,7 @@ set -e
 
 
 prefix=@prefix@
+mandir=@mandir@
 indimaildir=@indimaildir@
 shareddir=@shareddir@
 sysconfdir=@sysconfdir@
@@ -111,17 +112,17 @@ if [ " $1" = " purge" ] ; then
 		${rm} -f /etc/mysql/indimail.cnf
 	fi
 	if [ -d ${sysconfdir}/control/domainkeys ] ; then
-		${rmdir} --ignore-fail-on-non-empty ${sysconfdir}/control/domainkeys 2>/dev/null
+		${rmdir} --ignore-fail-on-non-empty ${sysconfdir}/control/domainkeys || true
 	fi
 	if [ -d ${sysconfdir}/control ] ; then
-		${rmdir} --ignore-fail-on-non-empty ${sysconfdir}/control 2>/dev/null
+		${rmdir} --ignore-fail-on-non-empty ${sysconfdir}/control || true
 	fi
 	for i in .qmail-nonspam .qmail-register-nonspam .qmail-register-spam .qmail-spam .qmail-default
 	do
 		${rm} -f ${indimaildir}/domains/${default_domain}/$i
 	done
-	if [ -d ${prefix}/${default_domain} ] ; then
-		${rmdir} --ignore-fail-on-non-empty ${indimaildir}/domains/${default_domain} 2>/dev/null
+	if [ -d ${indimaildir}/domains/${default_domain} ] ; then
+		${rmdir} --ignore-fail-on-non-empty ${indimaildir}/domains/${default_domain} || true
 	fi
 	echo "removing aliases postmaster, mailer-daemon, root"
 	for i in postmaster mailer-daemon root
@@ -129,14 +130,14 @@ if [ " $1" = " purge" ] ; then
 		${rm} -f ${indimaildir}/alias/.qmail-"$i"
 	done
 	if [ -d ${indimaildir}/alias ] ; then
-		${rmdir} --ignore-fail-on-non-empty ${prefix}/indimaildir 2>/dev/null
+		${rmdir} --ignore-fail-on-non-empty ${indimaildir}/alias || true
 	fi
 	${rm} -f ${sysconfdir}/imapd.pem ${sysconfdir}/pop3d.pem
 	${rm} -f ${sysconfdir}/imapd.cnf.* ${sysconfdir}/pop3d.cnf.*
 
 	echo "removing binaries, libraries, queues"
 	if [ ${prefix} = "/var/indimail" -o ${prefix} = "/var/qmail" ] ; then
-		for i in ${prefix}/bin ${prefix}/sbin ${prefix}/lib ${prefix}/queue \
+		for i in ${prefix}/bin ${prefix}/sbin ${prefix}/lib ${indimaildir}/queue \
 			${mandir}/man1 ${mandir}/cat1 ${mandir}/man5 ${mandir}/cat5 \
 			${mandir}/man7 ${mandir}/cat7 ${mandir}/man8 ${mandir}/cat8
 		do
@@ -150,6 +151,7 @@ if [ " $1" = " purge" ] ; then
 			${rm} -rf ${shareddir}/$i || true
 		done
 	else
+		${rm} -rf ${indimaildir}/queue
 		for i in bin sbin control users
 		do
 			${rm} -f ${indimaildir}/$i || true
@@ -158,7 +160,9 @@ if [ " $1" = " purge" ] ; then
 	echo "removing man pages"
 	${rmdir} --ignore-fail-on-non-empty ${mandir} || true
 	echo "removing architecture-independent shared directory"
-	${rmdir} --ignore-fail-on-non-empty ${shareddir} 2>/dev/null
+	if [ -d ${shareddir} ] ; then
+	${rmdir} --ignore-fail-on-non-empty ${shareddir} || true
+	fi
 
 	if [ $nobogofilter -eq 0 ] ; then
 		${rm} -f ${sysconfdir}/bogofilter.cf ${sysconfdir}/bogofilter.cf.example
@@ -190,10 +194,15 @@ if [ " $1" = " purge" ] ; then
 	do
 		${rm} -f ${sysconfdir}/$i
 	done
-	${rmdir} --ignore-fail-on-non-empty %{indimaildir}/domains 2>/dev/null
-	${rmdir} --ignore-fail-on-non-empty %{indimaildir}/users 2>/dev/null
-	${rmdir} --ignore-fail-on-non-empty %{indimaildir}/alias 2>/dev/null
-	${rmdir} --ignore-fail-on-non-empty %{indimaildir} 2>/dev/null
+	if [ -d ${indimaildir}/domains ] ; then
+	${rmdir} --ignore-fail-on-non-empty ${indimaildir}/domains || true
+	fi
+	if [ -d ${indimaildir}/users ] ; then
+	${rmdir} --ignore-fail-on-non-empty ${indimaildir}/users || true
+	fi
+	if [ -d ${indimaildir} ] ; then
+	${rmdir} --ignore-fail-on-non-empty ${indimaildir} || true
+	fi
 
 	echo "removing startup services"
 	for i in clamd fetchmail freshclam indisrvr.4000 inlookup.infifo mysql.3306 \
