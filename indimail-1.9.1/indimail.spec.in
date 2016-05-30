@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail.spec.in,v 2.332 2016-05-29 20:10:38+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 2.333 2016-05-30 20:23:36+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %define _unpackaged_files_terminate_build 1
 
@@ -927,6 +927,7 @@ fi
 %dir %attr(555,root,root)         %{libexecdir}
 %dir %attr(555,root,root)         %{libexecdir}/authlib
 %dir %attr(755,root,root)         %{sysconfdir}
+%dir %attr(775,root,qmail)        %{sysconfdir}/etc
 %dir %attr(555,root,qmail)        %{sysconfdir}/users
 %dir %attr(755,indimail,indimail) %{sysconfdir}/control
 %dir %attr(775,indimail,indimail) %{sysconfdir}/control/inquery
@@ -1720,19 +1721,19 @@ fi
 
 %docdir %{shareddir}/doc
 %docdir %{mandir}
-%attr(444,root,qmail)                   %{mandir}/man[1,4,5,8]/*
-%attr(444,root,qmail)                   %{mandir}/cat[1,4,5,8]/*
-%attr(444,root,qmail)                   %{mandir}/cat7/forgeries.0.gz
-%attr(444,root,qmail)                   %{mandir}/cat7/qmail-limits.0.gz
-%attr(444,root,qmail)                   %{mandir}/cat7/qmail.0.gz
-%attr(444,root,qmail)                   %{mandir}/man7/IndiMail.7.gz
-%attr(444,root,qmail)                   %{mandir}/man7/forgeries.7.gz
-%attr(444,root,qmail)                   %{mandir}/man7/indimail.7.gz
-%attr(444,root,qmail)                   %{mandir}/man7/qmail-limits.7.gz
-%attr(444,root,qmail)                   %{mandir}/man7/qmail.7.gz
+%attr(644,root,root)                    %{mandir}/man[1,5,7,8]/*
+%attr(644,root,root)                    %{mandir}/cat[1,5,7,8]/*
+%attr(644,root,root)                    %{mandir}/cat7/forgeries.0.gz
+%attr(644,root,root)                    %{mandir}/cat7/qmail-limits.0.gz
+%attr(644,root,root)                    %{mandir}/cat7/qmail.0.gz
+%attr(644,root,root)                    %{mandir}/man7/IndiMail.7.gz
+%attr(644,root,root)                    %{mandir}/man7/forgeries.7.gz
+%attr(644,root,root)                    %{mandir}/man7/indimail.7.gz
+%attr(644,root,root)                    %{mandir}/man7/qmail-limits.7.gz
+%attr(644,root,root)                    %{mandir}/man7/qmail.7.gz
 
 %if %nocourierimap == 0
-%attr(444,root,qmail)                   %{mandir}/man7/authlib.7.gz
+%attr(644,root,root)                    %{mandir}/man7/authlib.7.gz
                                         %{mandir}/man7/authcustom.7.gz
                                         %{mandir}/man7/authpam.7.gz
                                         %{mandir}/man7/authpwd.7.gz
@@ -2961,6 +2962,7 @@ if [ %{_prefix} = "/var/indimail" -o %{_prefix} = "/var/qmail" ] ; then
 		%{__rm} -rf %{shareddir}/$i || true
 	done
 else
+	%{__rm} -rf %{indimaildir}/queue || true
 	for i in bin sbin control users
 	do
 		echo "removing link $i"
