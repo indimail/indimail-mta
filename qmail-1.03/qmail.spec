@@ -1,6 +1,6 @@
 #
 #
-# $Id: qmail.spec,v 1.41 2016-05-29 20:11:50+05:30 Cprogrammer Exp mbhangui $
+# $Id: qmail.spec,v 1.42 2016-05-30 20:26:37+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %define _unpackaged_files_terminate_build 1
 
@@ -512,18 +512,19 @@ done
 %dir %attr(755,indimail,indimail) %{qsysconfdir}/control/domainkeys
 %if "%{mandir}" != "/usr/share/man"
 %dir %attr(755,root,root)         %{mandir}
-%dir %attr(555,root,qmail)        %{mandir}/man1
-%dir %attr(555,root,qmail)        %{mandir}/cat1
-%dir %attr(555,root,qmail)        %{mandir}/man5
-%dir %attr(555,root,qmail)        %{mandir}/cat5
-%dir %attr(555,root,qmail)        %{mandir}/man7
-%dir %attr(555,root,qmail)        %{mandir}/cat7
-%dir %attr(555,root,qmail)        %{mandir}/man8
-%dir %attr(555,root,qmail)        %{mandir}/cat8
+%dir %attr(755,root,root)         %{mandir}/man1
+%dir %attr(755,root,root)         %{mandir}/cat1
+%dir %attr(755,root,root)         %{mandir}/man5
+%dir %attr(755,root,root)         %{mandir}/cat5
+%dir %attr(755,root,root)         %{mandir}/man7
+%dir %attr(755,root,root)         %{mandir}/cat7
+%dir %attr(755,root,root)         %{mandir}/man8
+%dir %attr(755,root,root)         %{mandir}/cat8
 %endif
 %if "%{_prefix}" != "/usr"
 %dir %attr(555,root,root)         %{_libdir}
 %endif
+%dir %attr(775,root,qmail)        %{qsysconfdir}/etc
 %dir %attr(555,root,qmail)        %{qsysconfdir}/users
 %dir %attr(555,root,qmail)        %{_prefix}/lib/indimail/plugins
 
