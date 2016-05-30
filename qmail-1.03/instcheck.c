@@ -1,5 +1,8 @@
 /*
  * $Log: instcheck.c,v $
+ * Revision 1.22  2016-05-30 20:25:14+05:30  Cprogrammer
+ * removed call to _hier() indimail function
+ *
  * Revision 1.21  2016-05-29 20:03:24+05:30  Cprogrammer
  * fixed display of double slash "//"
  *
@@ -64,19 +67,12 @@
 #include "error.h"
 #include "stralloc.h"
 #include "exit.h"
-#include "hasindimail.h"
 
 void            hier(char *, char *);
-#ifdef INDIMAIL
-void            _hier(char *);
-#endif
 int             uidinit(int);
 
 #define FATAL "instcheck: fatal: "
 #define WARNING "instcheck: warning: "
-#ifdef INDIMAIL
-extern int      ignore_man_error;
-#endif
 
 stralloc        dirbuf = { 0 };
 
@@ -117,9 +113,6 @@ perm(prefix1, prefix2, prefix3, file, type, uid, gid, mode, should_exit)
 				if (errno != error_noent)
 					strerr_warn4(WARNING, "unable to stat ", tfile, ": ", &strerr_sys);
 				else
-#ifdef INDIMAIL
-				if (!ignore_man_error)
-#endif
 					strerr_warn7(WARNING, prefix1, slashd, prefix2, prefix3, file, " does not exist", 0);
 				if (tfile != file)
 					alloc_free(tfile);
@@ -335,31 +328,17 @@ main(int argc, char **argv)
 	if (uidinit(1) == -1)
 		strerr_die2sys(111, FATAL, "unable to get uids/gids: ");
 	if (argc == 1)
-	{
 		hier(0, FATAL);
-#ifdef INDIMAIL
-		_hier(0);
-#endif
-	} else
+	else
 	for (i = 1;i < argc;i++)
-	{
 		hier(argv[i], FATAL);
-#ifdef INDIMAIL
-		_hier(argv[i]);
-#endif
-	}
 	return (0);
 }
 
 void
 getversion_instcheck_c()
 {
-	static char    *x = "$Id: instcheck.c,v 1.21 2016-05-29 20:03:24+05:30 Cprogrammer Exp mbhangui $";
-#ifdef INDIMAIL
-	if (x)
-		x = sccsidh;
-#else
+	static char    *x = "$Id: instcheck.c,v 1.22 2016-05-30 20:25:14+05:30 Cprogrammer Exp mbhangui $";
 	if (x)
 		x++;
-#endif
 }
