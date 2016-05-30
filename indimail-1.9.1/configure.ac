@@ -392,6 +392,9 @@ FILE *f;
 		fprintf(f,"%d\n", pw->pw_gid);
 		fclose(f);
 	} else {
+		f=fopen("indimail.dir", "a+");
+		fprintf(f,"/var/indimail\n");
+		fclose(f);
 		f=fopen("indimail.uid", "a+");
 		fprintf(f,"555\n");
 		fclose(f);
@@ -416,7 +419,7 @@ fi
 
 if test ! -f indimail.dir
 then
-	indimaildir=$prefix
+	indimaildir=$qmaildir
 else
 	indimaildir=`cat indimail.dir`
 fi
