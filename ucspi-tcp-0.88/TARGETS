@@ -218,3 +218,5 @@ rbl.o
 scan_uint.o
 tcpserver_plugin.o
 rblsmtpd.so
+auto_shared.o
+str_cpy.o
