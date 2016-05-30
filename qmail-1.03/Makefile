@@ -2,11 +2,11 @@
 COFLAGS=-z+05:30
 DKIM_VERSION=1.4
 SRS_VERSION=1.0.18
-INDIDIR := $(shell head -1 conf-qmail 2>/dev/null|| echo "/var/indimail")
+QMAILDIR := $(shell head -1 conf-qmail 2>/dev/null|| echo "/var/indimail")
 SYSTEM := $(shell uname -s)
 SHELL=/bin/sh
-inc_deps := -DHAVE_CONFIG_H -I$(DESTDIR)$(INDIDIR)/include `cat ./inc_deps 2>/dev/null`
-#lib_deps := -L$(DESTDIR)$(INDIDIR)/lib `cat ./lib_deps 2>/dev/null`
+inc_deps := -DHAVE_CONFIG_H -I$(DESTDIR)$(QMAILDIR)/include `cat ./inc_deps 2>/dev/null`
+#lib_deps := -L$(DESTDIR)$(QMAILDIR)/lib `cat ./lib_deps 2>/dev/null`
 lib_deps=$(shell cat ./lib_deps 2>/dev/null)
 prefix=$(shell head -1 conf-prefix 2>/dev/null)
 qmaildir=$(shell head -1 conf-qmail 2>/dev/null)
@@ -31,7 +31,7 @@ show:
 	echo $(inc_deps);echo ----;echo $(lib_deps)
 
 perm_list: perm_list.in
-	$(edit) $@.in > $@;/bin/cp perm_list debian/perm_list
+	$(edit) $@.in > $@
 
 addresses.0: \
 addresses.5
@@ -2301,19 +2301,19 @@ dktest.8: dktest.9 conf-qmail conf-sysconfdir
 
 dkim.lib: \
 trydkim.c str_len.o str_cpy.o byte_copy.o dns_text.o compile load conf-dkim dns.lib
-	( ( ./compile -I$(DESTDIR)$(INDIDIR)/include -I../libdkim-$(DKIM_VERSION) \
+	( ( ./compile -I$(DESTDIR)$(QMAILDIR)/include -I../libdkim-$(DKIM_VERSION) \
 		`grep -h -v "^#" conf-dkim` trydkim.c && \
 	g++ -o trydkim trydkim.o str_len.o str_cpy.o byte_copy.o dns_text.o \
 	-L../libdkim-$(DKIM_VERSION)/.libs \
-	-L../libdkim-$(DKIM_VERSION) -L$(DESTDIR)$(INDIDIR)/lib \
+	-L../libdkim-$(DKIM_VERSION) -L$(DESTDIR)$(QMAILDIR)/lib \
 	`cat dns.lib` -ldkim -lcrypto ) >/dev/null 2>&1 \
-	&& echo "-L../libdkim-$(DKIM_VERSION)/.libs -L../libdkim-$(DKIM_VERSION) -L$(DESTDIR)$(INDIDIR)/lib -ldkim" || exit 0 ) > dkim.lib
+	&& echo "-L../libdkim-$(DKIM_VERSION)/.libs -L../libdkim-$(DKIM_VERSION) -L$(DESTDIR)$(QMAILDIR)/lib -ldkim" || exit 0 ) > dkim.lib
 	rm -f trydkim.o trydkim
 
 hasdkim.h:  \
 str_len.o str_cpy.o byte_copy.o dns_text.o \
 trydkim.c compile load dns.lib dkim.lib conf-indi
-	( ( ./compile -I$(DESTDIR)$(INDIDIR)/include -I../libdkim-$(DKIM_VERSION) `grep -h -v "^#" conf-dkim` trydkim.c && \
+	( ( ./compile -I$(DESTDIR)$(QMAILDIR)/include -I../libdkim-$(DKIM_VERSION) `grep -h -v "^#" conf-dkim` trydkim.c && \
 	g++ -o trydkim trydkim.o str_len.o str_cpy.o byte_copy.o dns_text.o \
 	-L../libdkim-$(DKIM_VERSION)/.libs \
 	-L../libdkim-$(DKIM_VERSION) `cat dkim.lib dns.lib` -lcrypto ) >/dev/null 2>&1 \
@@ -2337,7 +2337,7 @@ getopt.a sig.a stralloc.a substdio.a str.a dns.lib dkim.lib
 	MakeArgs.o envread.o fd_move.o wait_pid.o open_excl.o open_read.o \
 	scan_ulong.o getln.o getln2.o case_diffs.o dns_text.o \
 	getopt.a sig.a stralloc.a substdio.a str.a \
-	-L$(DESTDIR)$(INDIDIR)/lib `cat dns.lib dkim.lib` -lcrypto ; \
+	-L$(DESTDIR)$(QMAILDIR)/lib `cat dns.lib dkim.lib` -lcrypto ; \
 	else \
 	g++ -s -o qmail-dkim qmail-dkim.o now.o error.o \
 	date822fmt.o datetime.o datetime_un.o stralloc_cats.o stralloc_catb.o \
@@ -2347,7 +2347,7 @@ getopt.a sig.a stralloc.a substdio.a str.a dns.lib dkim.lib
 	MakeArgs.o envread.o fd_move.o wait_pid.o open_excl.o open_read.o \
 	scan_ulong.o getln.o getln2.o case_diffs.o dns_text.o \
 	getopt.a sig.a stralloc.a substdio.a str.a \
-	-L$(DESTDIR)$(INDIDIR)/lib `cat dns.lib dkim.lib` -lcrypto ; \
+	-L$(DESTDIR)$(QMAILDIR)/lib `cat dns.lib dkim.lib` -lcrypto ; \
 	fi
 
 qmail-dkim.o: \
@@ -2355,7 +2355,7 @@ compile qmail-dkim.c substdio.h open.h sig.h fmt.h fd.h \
 qmail.h alloc.h str.h stralloc.h datetime.h now.h wait.h \
 auto_qmail.h sgetopt.h case.h env.h control.h domainkeys.h \
 hasdkim.h variables.h auto_control.h
-	./compile -I$(DESTDIR)$(INDIDIR)/include -I../libdkim-$(DKIM_VERSION) $(inc_deps) qmail-dkim.c
+	./compile -I$(DESTDIR)$(QMAILDIR)/include -I../libdkim-$(DKIM_VERSION) $(inc_deps) qmail-dkim.c
 
 qmail-dkim.8: qmail-dkim.9 conf-qmail conf-sysconfdir
 	cat qmail-dkim.9 \
@@ -3014,6 +3014,7 @@ substdio.h alloc.h auto_qmail.h exit.h env.h str.h
 	./compile sendmail.c
 
 install-strip: install
+
 distclean: clean
 	rm -f lib_deps inc_deps
 
@@ -3022,7 +3023,7 @@ it man leapsecs.dat conf-sysconfdir
 	if test ! -d $(DESTDIR)"`head -1 conf-sysconfdir`" ; then \
 		mkdir -p $(DESTDIR)"`head -1 conf-sysconfdir`" ; \
 	fi ;
-	./setup -d $(DESTDIR) $(INDIDIR) > $(DESTDIR)"`head -1 conf-sysconfdir`"/qmailprog.list
+	./setup -d $(DESTDIR) $(QMAILDIR) > $(DESTDIR)"`head -1 conf-sysconfdir`"/qmailprog.list
 
 sgetopt.o: \
 compile sgetopt.c subfd.h substdio.h sgetopt.h subgetopt.h \
@@ -3244,17 +3245,17 @@ scan.h fmt.h
 	./compile splogger.c
 
 srs.lib: trysrs.c compile load conf-srs dns.lib
-	( ( ./compile -I$(DESTDIR)$(INDIDIR)/include -I../libsrs2-$(SRS_VERSION)/libsrs2 \
+	( ( ./compile -I$(DESTDIR)$(QMAILDIR)/include -I../libsrs2-$(SRS_VERSION)/libsrs2 \
 		`grep -h -v "^#" conf-srs` trysrs.c && \
 	./load trysrs -L../libsrs2-$(SRS_VERSION)/libsrs2/.libs \
-	-L../libsrs2-$(SRS_VERSION)/libsrs2 -L$(DESTDIR)$(INDIDIR)/lib \
+	-L../libsrs2-$(SRS_VERSION)/libsrs2 -L$(DESTDIR)$(QMAILDIR)/lib \
 	-lsrs2 ) >/dev/null 2>&1 \
 	&& echo "-L../libsrs2-$(SRS_VERSION)/libsrs2/.libs -L../libsrs2-$(SRS_VERSION)/libsrs2 \
-		-L$(DESTDIR)$(INDIDIR)/lib -lsrs2" || exit 0 ) > srs.lib
+		-L$(DESTDIR)$(QMAILDIR)/lib -lsrs2" || exit 0 ) > srs.lib
 	rm -f trysrs.o trysrs
 
 hassrs.h:  trysrs.c compile load srs.lib conf-indi
-	( ( ./compile -I$(DESTDIR)$(INDIDIR)/include -I../libsrs2-$(SRS_VERSION)/libsrs2 \
+	( ( ./compile -I$(DESTDIR)$(QMAILDIR)/include -I../libsrs2-$(SRS_VERSION)/libsrs2 \
 		`grep -h -v "^#" conf-srs` trysrs.c && \
 	./load trysrs -L../libsrs2-$(SRS_VERSION)/libsrs2/.libs \
 	-L../libsrs2-$(SRS_VERSION)/libsrs2 `cat srs.lib`) >/dev/null 2>&1 \
