@@ -1,4 +1,10 @@
 indimaildir=/var/indimail
+mandir=/usr/share/man
+sysconfdir=/etc/indimail
+shareddir=/usr/share/indimail
+libexecdir=/usr/libexec/indimail
+logdir=/var/log/indimail
+prefix=/usr
 all: rules indimail-mta.prerm indimail-mta.preinst indimail-mta.postrm indimail-mta.postinst \
 obs_deb_prep \
 indimail-mta-xUbuntu_16.04.dsc indimail-mta-xUbuntu_15.10.dsc \
@@ -8,6 +14,18 @@ indimail-mta-xUbuntu_12.10.dsc indimail-mta-xUbuntu_12.04.dsc indimail-mta-xUbun
 indimail-mta-xUbuntu_11.04.dsc indimail-mta-xUbuntu_10.10.dsc indimail-mta-xUbuntu_10.04.dsc \
 indimail-mta-Debian_8.0.dsc indimail-mta-Debian_7.0.dsc indimail-mta-Debian_6.0.dsc \
 debian.tar.gz dummy.tar.gz
+
+edit = sed \
+	-e 's,@qmaildir\@,$(indimaildir),g' \
+	-e 's,@mandir\@,$(mandir),g' \
+	-e 's,@sysconfdir\@,$(sysconfdir),g' \
+	-e 's,@shareddir\@,$(shareddir),g' \
+	-e 's,@libexecdir\@,$(libexecdir),g' \
+	-e 's,@logdir\@,$(logdir),g' \
+	-e 's,@prefix\@,$(prefix),g'
+
+perm_list: ../perm_list.in
+	$(edit) ../$@.in > $@
 
 install: all
 install-strip: install
