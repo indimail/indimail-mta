@@ -1,5 +1,8 @@
 /*
  * $Log: hier.c,v $
+ * Revision 1.199  2016-05-30 20:24:49+05:30  Cprogrammer
+ * removed _hier()
+ *
  * Revision 1.198  2016-05-29 20:04:40+05:30  Cprogrammer
  * moved instcheck to sbin
  *
@@ -481,10 +484,6 @@ void            h(char *, int, int, int);
 void            l(char *, char *, char *);
 void            c(char *, char *, char *, int, int, int);
 char           *getdirname(char *, char **);
-#ifdef INDIMAIL
-/*- dummy function */
-void            ci(char *, char *, char *, int, int, int);
-#endif
 
 stralloc        a1 = { 0 };
 stralloc        a2 = { 0 };
@@ -570,10 +569,10 @@ hier(inst_dir, fatal)
 		strerr_die2sys(111, fatal, "out of memory: ");
 	auto_assgn_dir = a2.s;
 	if (!str_diff(auto_qmail, auto_assgn_dir))
-		d(auto_qmail_home, "users", auto_uido, auto_gidq, 0755);
+		d(auto_qmail_home, "users", auto_uido, auto_gidq, 0555);
 	else {
 		h(auto_assgn_dir, 0, 0, 0755);
-		d(auto_assgn_dir, "users", auto_uido, auto_gidq, 0755);
+		d(auto_assgn_dir, "users", auto_uido, auto_gidq, 0555);
 		l(auto_qmail_home, "users", auto_assgn_dir);
 	}
 
@@ -594,24 +593,24 @@ hier(inst_dir, fatal)
 		h(auto_sysconfdir, 0, 0, 0755);
 
 	if (str_diff(auto_qmail, auto_prefix)) {
-		uidr = auto_uido;
-		gidr = auto_gidq;
-		moder_d = 0555;
-		moder_f = 0444;
+		uidr = 0;
+		gidr = 0;
+		moder_d = 0755;
+		moder_f = 0644;
 		if (access(auto_prefix, F_OK))
 			h(auto_prefix, uidr, gidr, 0755);
 		l(auto_qmail_home, "bin", auto_prefix);
 		l(auto_qmail_home, "sbin", auto_prefix);
 	} else {
-		uidr = 0;
-		gidr = 0;
-		moder_d = 0755;
-		moder_f = 0644;
+		uidr = auto_uido;
+		gidr = auto_gidq;
+		moder_d = 0555;
+		moder_f = 0444;
 	}
 	d(auto_prefix,     "bin", uidr, gidr, 0555);
 	d(auto_prefix,     "sbin", uidr, gidr, 0555);
 	d(auto_qmail_home, "domains", auto_uido, auto_gidv, 0775);
-	d(auto_sysconfdir, "etc", auto_uido, auto_gidv, 0775);
+	d(auto_sysconfdir, "etc", auto_uido, auto_gidq, 0775);
 	d(auto_qmail_home, "qscanq", auto_uidc, auto_gidc, 0750);
 	d(auto_qmail_home, "qscanq/root", auto_uidc, auto_gidc, 0750);
 	d(auto_qmail_home, "qscanq/root/scanq", auto_uidc, auto_gidc, 0750);
@@ -1385,487 +1384,10 @@ hier(inst_dir, fatal)
 	c(mandir,          "man/man3", "plugin_init.3", uidr, gidr, moder_f);
 }
 
-#ifdef INDIMAIL
-/*
- * written for debian shortsightedness / stupidity
- * why can't the debian community learn from others?
- */
-int             ignore_man_error = 0;
-
-void
-_hier(inst_dir)
-	char           *inst_dir;
-{
-	int             auto_gido = 0;
-	char           *auto_qmail_home = auto_qmail;
-
-	if (inst_dir && *inst_dir)
-		auto_qmail_home = inst_dir;
-	ignore_man_error = 1;
-	/* Directories */
-	h(auto_qmail_home, auto_uido, auto_gidq, 0555);
-	d(auto_qmail_home, "domains", auto_uido, auto_gidv, 0775);
-	d(auto_qmail_home, "etc", auto_uido, auto_gidv, 0775);
-	d(auto_qmail_home, "bin", auto_uido, auto_gidq, 0555);
-	d(auto_qmail_home, "sbin", auto_uido, auto_gidv, 0555);
-	d(auto_qmail_home, "control/inquery", auto_uidv, auto_gidv, 0775);
-	d(auto_qmail_home, "lib", auto_uido, auto_gido, 0555);
-	d(auto_qmail_home, "libexec", auto_uido, auto_gido, 0555);
-	d(auto_qmail_home, "libexec/authlib", auto_uido, auto_gido, 0555);
-	d(auto_prefix,     "lib/indimail/modules", auto_uido, auto_gido, 0555);
-	d(auto_qmail_home, "share", auto_uido, auto_gido, 0555);
-	d(auto_qmail_home, "share/fortunes", auto_uido, auto_gido, 0755);
-	d(auto_qmail_home, "autoturn", auto_uidv, auto_gidq, 02755);
-
-	/*- IndiMail */
-	ci(auto_qmail_home, "bin", "bogofilter-qfe", auto_uido, auto_gidq, 0555);
-	ci(auto_qmail_home, "bin", "crc", auto_uido, auto_gidq, 0555);
-	ci(auto_qmail_home, "bin", "crcdiff", auto_uido, auto_gidq, 0555);
-	ci(auto_qmail_home, "bin", "iecho", auto_uido, auto_gidq, 0555);
-	ci(auto_qmail_home, "bin", "crypt", auto_uido, auto_gidq, 0555);
-	ci(auto_qmail_home, "bin", "dbinfo", auto_uido, auto_gidq, 0555);
-	ci(auto_qmail_home, "bin", "displaytop", auto_uido, auto_gidq, 0555);
-	ci(auto_qmail_home, "bin", "hashtable", auto_uido, auto_gidq, 0555);
-	ci(auto_qmail_home, "bin", "hostcntrl", auto_uido, auto_gidq, 0555);
-	ci(auto_qmail_home, "bin", "indiversion", auto_uido, auto_gidq, 0555);
-	ci(auto_qmail_home, "bin", "logmonitor", auto_uido, auto_gidq, 0555);
-	ci(auto_qmail_home, "bin", "mailzipper", auto_uido, auto_gidq, 0555);
-	ci(auto_qmail_home, "bin", "printdir", auto_uido, auto_gido, 04555);
-	ci(auto_qmail_home, "bin", "proxyimap", auto_uido, auto_gidq, 0555);
-	ci(auto_qmail_home, "bin", "proxypop3", auto_uido, auto_gidq, 0555);
-	ci(auto_qmail_home, "bin", "resetquota", auto_uido, auto_gidq, 0555);
-	ci(auto_qmail_home, "bin", "sslerator", auto_uido, auto_gidq, 0555);
-	ci(auto_qmail_home, "bin", "vacation", auto_uido, auto_gidq, 0555);
-	ci(auto_qmail_home, "bin", "vaddaliasdomain", auto_uido, auto_gido, 04555);
-	ci(auto_qmail_home, "bin", "vadddomain", auto_uido, auto_gido, 04555);
-	ci(auto_qmail_home, "bin", "vadduser", auto_uido, auto_gido, 04555);
-	ci(auto_qmail_home, "bin", "vadduserl", auto_uido, auto_gidq, 0555);
-	ci(auto_qmail_home, "bin", "valias", auto_uido, auto_gidq, 0555);
-	ci(auto_qmail_home, "bin", "vatrn", auto_uido, auto_gidq, 0555);
-	ci(auto_qmail_home, "bin", "vbulletin", auto_uido, auto_gido, 04555);
-	ci(auto_qmail_home, "bin", "vcalias", auto_uido, auto_gidq, 0555);
-	ci(auto_qmail_home, "bin", "vcaliasrev", auto_uido, auto_gidq, 0555);
-	ci(auto_qmail_home, "bin", "vcfilter", auto_uido, auto_gido, 04555);
-	ci(auto_qmail_home, "bin", "vdeldomain", auto_uido, auto_gido, 04555);
-	ci(auto_qmail_home, "bin", "vdeluser", auto_uido, auto_gido, 04555);
-	ci(auto_qmail_home, "bin", "vdominfo", auto_uido, auto_gido, 04555);
-	ci(auto_qmail_home, "bin", "versioninfo", auto_uido, auto_gidq, 0555);
-	ci(auto_qmail_home, "bin", "vgroup", auto_uido, auto_gidq, 0555);
-	ci(auto_qmail_home, "bin", "vhostid", auto_uido, auto_gidq, 0555);
-	ci(auto_qmail_home, "bin", "vipmap", auto_uido, auto_gidq, 0555);
-	ci(auto_qmail_home, "bin", "vlimit", auto_uido, auto_gidq, 0555);
-	ci(auto_qmail_home, "bin", "vmoduser", auto_uido, auto_gido, 04555);
-	ci(auto_qmail_home, "bin", "vmoveuser", auto_uido, auto_gido, 04555);
-	ci(auto_qmail_home, "bin", "vpasswd", auto_uido, auto_gidq, 0555);
-	ci(auto_qmail_home, "bin", "vpriv", auto_uido, auto_gidq, 0555);
-	ci(auto_qmail_home, "bin", "vproxy", auto_uido, auto_gidq, 0555);
-	ci(auto_qmail_home, "bin", "vrenamedomain", auto_uido, auto_gido, 04555);
-	ci(auto_qmail_home, "bin", "vrenameuser", auto_uido, auto_gido, 04555);
-	ci(auto_qmail_home, "bin", "vsetuserquota", auto_uido, auto_gido, 04555);
-	ci(auto_qmail_home, "bin", "vsmtp", auto_uido, auto_gidq, 0555);
-	ci(auto_qmail_home, "bin", "vuserinfo", auto_uido, auto_gido, 04555);
-	/*- */
-	ci(auto_qmail_home, "doc", "37rules.pdf", auto_uido, auto_gidq, 0444);
-	ci(auto_qmail_home, "doc", "ChangeLog", auto_uido, auto_gidq, 0444);
-	ci(auto_qmail_home, "doc", "COPYING", auto_uido, auto_gidq, 0444);
-	ci(auto_qmail_home, "doc", "CREDITS", auto_uido, auto_gidq, 0444);
-	ci(auto_qmail_home, "doc", "FAQ.pdf", auto_uido, auto_gidq, 0444);
-	ci(auto_qmail_home, "doc", "HOWTO.bogofilter", auto_uido, auto_gidq, 0444);
-	ci(auto_qmail_home, "doc", "HOWTO.sharedmaildir", auto_uido, auto_gidq, 0444);
-	ci(auto_qmail_home, "doc", "indimail_arch.png", auto_uido, auto_gidq, 0444);
-	ci(auto_qmail_home, "doc", "indimail_queue.png", auto_uido, auto_gidq, 0444);
-	ci(auto_qmail_home, "doc", "INSTALL.indimail", auto_uido, auto_gidq, 0444);
-	ci(auto_qmail_home, "doc", "INSTALL-MINI", auto_uido, auto_gidq, 0444);
-	ci(auto_qmail_home, "doc", "INSTALL-MYSQL", auto_uido, auto_gidq, 0444);
-	ci(auto_qmail_home, "doc", "INSTALL-RPM", auto_uido, auto_gidq, 0444);
-	ci(auto_qmail_home, "doc", "percenthack.shtml", auto_uido, auto_gidq, 0444);
-	ci(auto_qmail_home, "doc", "Quick-INSTALL", auto_uido, auto_gidq, 0444);
-	ci(auto_qmail_home, "doc", "README", auto_uido, auto_gidq, 0444);
-	ci(auto_qmail_home, "doc", "README.cdb", auto_uido, auto_gidq, 0444);
-	ci(auto_qmail_home, "doc", "README-CLUSTER", auto_uido, auto_gidq, 0444);
-	ci(auto_qmail_home, "doc", "README.mpack", auto_uido, auto_gidq, 0444);
-	ci(auto_qmail_home, "doc", "README.vlimits", auto_uido, auto_gidq, 0444);
-	ci(auto_qmail_home, "doc", "RELEASE-Notes", auto_uido, auto_gidq, 0444);
-
-	/*- */
-	ci(auto_qmail_home, "etc", "controlfiles", auto_uido, auto_gido, 0444);
-	ci(auto_qmail_home, "etc", "cronlist", auto_uido, auto_gido, 0444);
-	ci(auto_qmail_home, "etc", "headerlist", auto_uido, auto_gido, 0444);
-	ci(auto_qmail_home, "etc", "indimail.mrtg.cfg", auto_uido, auto_gido, 0444);
-	ci(auto_qmail_home, "etc", "indimail.settings", auto_uido, auto_gido, 0444);
-	ci(auto_qmail_home, "etc", "osh.table", auto_uido, auto_gido, 0444);
-	ci(auto_qmail_home, "etc", "perm_list", auto_uido, auto_gido, 0444);
-	ci(auto_qmail_home, "etc", "system.flashlogin", auto_uido, auto_gido, 0444);
-	ci(auto_qmail_home, "etc", "system.menu", auto_uido, auto_gido, 0444);
-	ci(auto_qmail_home, "etc", "system.module", auto_uido, auto_gido, 0444);
-	ci(auto_qmail_home, "etc", "system.rc", auto_uido, auto_gido, 0444);
-	ci(auto_qmail_home, "etc", "wordlist.db", auto_uidv, auto_gidv, 0644);
-	/*- */
-
-	/*- */
-#if 0
-	ci(auto_qmail_home, "lib", "libcdb.so", auto_uido, auto_gido, 0755);
-	ci(auto_qmail_home, "lib", "libeps.so", auto_uido, auto_gido, 0755);
-	ci(auto_qmail_home, "lib", "libflash.so", auto_uido, auto_gido, 0755);
-	ci(auto_qmail_home, "lib", "libindimail.so", auto_uido, auto_gido, 0755);
-#endif
-	/*- */
-	ci(auto_qmail_home, "libexec", "overquota.sh", auto_uido, auto_gidq, 0555);
-	ci(auto_qmail_home, "libexec", "qmailmrtg7", auto_uido, auto_gidq, 0555);
-	ci(auto_qmail_home, "libexec", "sq_vacation", auto_uido, auto_gidq, 04555);
-	ci(auto_qmail_home, "libexec", "vadddomain", auto_uido, auto_gidq, 0555);
-	ci(auto_qmail_home, "libexec", "vadduser", auto_uido, auto_gidq, 0555);
-	ci(auto_qmail_home, "libexec/authlib", "authindi", auto_uido, auto_gido, 0555);
-	ci(auto_qmail_home, "libexec/authlib", "authshadow", auto_uido, auto_gido, 04555);
-
-	/*- */
-	ci(auto_qmail_home, "man/man1", "initsvc.1", auto_uido, auto_gidq, 0444);
-	ci(auto_qmail_home, "man/man1", "printdir.1", auto_uido, auto_gidq, 0444);
-	ci(auto_qmail_home, "man/man1", "sslerator.1", auto_uido, auto_gidq, 0444);
-	ci(auto_qmail_home, "man/man1", "vaddaliasdomain.1", auto_uido, auto_gidq, 0444);
-	ci(auto_qmail_home, "man/man1", "vadddomain.1", auto_uido, auto_gidq, 0444);
-	ci(auto_qmail_home, "man/man1", "vadduser.1", auto_uido, auto_gidq, 0444);
-	ci(auto_qmail_home, "man/man1", "valias.1", auto_uido, auto_gidq, 0444);
-	ci(auto_qmail_home, "man/man1", "vatrn.1", auto_uido, auto_gidq, 0444);
-	ci(auto_qmail_home, "man/man1", "vbulletin.1", auto_uido, auto_gidq, 0444);
-	ci(auto_qmail_home, "man/man1", "vcfilter.1", auto_uido, auto_gidq, 0444);
-	ci(auto_qmail_home, "man/man1", "vdeldomain.1", auto_uido, auto_gidq, 0444);
-	ci(auto_qmail_home, "man/man1", "vdeluser.1", auto_uido, auto_gidq, 0444);
-	ci(auto_qmail_home, "man/man1", "vdominfo.1", auto_uido, auto_gidq, 0444);
-	ci(auto_qmail_home, "man/man1", "vgroup.1", auto_uido, auto_gidq, 0444);
-	ci(auto_qmail_home, "man/man1", "vipmap.1", auto_uido, auto_gidq, 0444);
-	ci(auto_qmail_home, "man/man1", "vlimit.1", auto_uido, auto_gidq, 0444);
-	ci(auto_qmail_home, "man/man1", "vmoddomain.1", auto_uido, auto_gidq, 0444);
-	ci(auto_qmail_home, "man/man1", "vmoduser.1", auto_uido, auto_gidq, 0444);
-	ci(auto_qmail_home, "man/man1", "vmoveuser.1", auto_uido, auto_gidq, 0444);
-	ci(auto_qmail_home, "man/man1", "vpasswd.1", auto_uido, auto_gidq, 0444);
-	ci(auto_qmail_home, "man/man1", "vrenamedomain.1", auto_uido, auto_gidq, 0444);
-	ci(auto_qmail_home, "man/man1", "vrenameuser.1", auto_uido, auto_gidq, 0444);
-	ci(auto_qmail_home, "man/man1", "vserverinfo.1", auto_uido, auto_gidq, 0444);
-	ci(auto_qmail_home, "man/man1", "vsetuserquota.1", auto_uido, auto_gidq, 0444);
-	ci(auto_qmail_home, "man/man1", "vuserinfo.1", auto_uido, auto_gidq, 0444);
-	ci(auto_qmail_home, "man/man1", "iecho.1", auto_uido, auto_gidq, 0444);
-
-	ci(auto_qmail_home, "man/man7", "indimail.7", auto_uido, auto_gidq, 0444);
-	ci(auto_qmail_home, "man/man7", "IndiMail.7", auto_uido, auto_gidq, 0444);
-
-	ci(auto_qmail_home, "man/man8", "adminclient.8", auto_uido, auto_gidq, 0444);
-	ci(auto_qmail_home, "man/man8", "chowkidar.8", auto_uido, auto_gidq, 0444);
-	ci(auto_qmail_home, "man/man8", "clearopensmtp.8", auto_uido, auto_gidq, 0444);
-	ci(auto_qmail_home, "man/man8", "dbinfo.8", auto_uido, auto_gidq, 0444);
-	ci(auto_qmail_home, "man/man8", "hostcntrl.8", auto_uido, auto_gidq, 0444);
-	ci(auto_qmail_home, "man/man8", "hostsync.8", auto_uido, auto_gidq, 0444);
-	ci(auto_qmail_home, "man/man8", "indisrvr.8", auto_uido, auto_gidq, 0444);
-	ci(auto_qmail_home, "man/man8", "indiversion.8", auto_uido, auto_gidq, 0444);
-	ci(auto_qmail_home, "man/man8", "inlookup.8", auto_uido, auto_gidq, 0444);
-	ci(auto_qmail_home, "man/man8", "InLookup.8", auto_uido, auto_gidq, 0444);
-	ci(auto_qmail_home, "man/man8", "inquerytest.8", auto_uido, auto_gidq, 0444);
-	ci(auto_qmail_home, "man/man8", "ipchange.8", auto_uido, auto_gidq, 0444);
-	ci(auto_qmail_home, "man/man8", "logmonitor.8", auto_uido, auto_gidq, 0444);
-	ci(auto_qmail_home, "man/man8", "mgmtpass.8", auto_uido, auto_gidq, 0444);
-	ci(auto_qmail_home, "man/man8", "osh.8", auto_uido, auto_gidq, 0444);
-	ci(auto_qmail_home, "man/man8", "pam-checkpwd.8", auto_uido, auto_gidq, 0444);
-	ci(auto_qmail_home, "man/man8", "pam-multi.8", auto_uido, auto_gidq, 0444);
-	ci(auto_qmail_home, "man/man8", "postdel.8", auto_uido, auto_gidq, 0444);
-	ci(auto_qmail_home, "man/man8", "proxyimap.8", auto_uido, auto_gidq, 0444);
-	ci(auto_qmail_home, "man/man8", "proxypop3.8", auto_uido, auto_gidq, 0444);
-	ci(auto_qmail_home, "man/man8", "resetquota.8", auto_uido, auto_gidq, 0444);
-	ci(auto_qmail_home, "man/man8", "svctool.8", auto_uido, auto_gidq, 0444);
-	ci(auto_qmail_home, "man/man8", "systpass.8", auto_uido, auto_gidq, 0444);
-	ci(auto_qmail_home, "man/man8", "updaterules.8", auto_uido, auto_gidq, 0444);
-	ci(auto_qmail_home, "man/man8", "vacation.8", auto_uido, auto_gidq, 0444);
-	ci(auto_qmail_home, "man/man8", "vcalias.8", auto_uido, auto_gidq, 0444);
-	ci(auto_qmail_home, "man/man8", "vcaliasrev.sh.8", auto_uido, auto_gidq, 0444);
-	ci(auto_qmail_home, "man/man8", "vchkpass.8", auto_uido, auto_gidq, 0444);
-	ci(auto_qmail_home, "man/man8", "vdelivermail.8", auto_uido, auto_gidq, 0444);
-	ci(auto_qmail_home, "man/man8", "vdeloldusers.8", auto_uido, auto_gidq, 0444);
-	ci(auto_qmail_home, "man/man8", "vfilter.8", auto_uido, auto_gidq, 0444);
-	ci(auto_qmail_home, "man/man8", "vfstab.8", auto_uido, auto_gidq, 0444);
-	ci(auto_qmail_home, "man/man8", "vhostid.8", auto_uido, auto_gidq, 0444);
-	ci(auto_qmail_home, "man/man8", "vpriv.8", auto_uido, auto_gidq, 0444);
-	ci(auto_qmail_home, "man/man8", "vproxy.8", auto_uido, auto_gidq, 0444);
-	ci(auto_qmail_home, "man/man8", "vreorg.8", auto_uido, auto_gidq, 0444);
-	ci(auto_qmail_home, "man/man8", "vsmtp.8", auto_uido, auto_gidq, 0444);
-
-	/*- */
-	ci(auto_qmail_home, "sbin", "adminclient", auto_uido, auto_gidq, 0555);
-	ci(auto_qmail_home, "sbin", "chowkidar", auto_uido, auto_gidq, 0555);
-	ci(auto_qmail_home, "sbin", "cindimail", auto_uido, auto_gidq, 0555);
-	ci(auto_qmail_home, "sbin", "clearopensmtp", auto_uido, auto_gidq, 0555);
-	ci(auto_qmail_home, "sbin", "config_settings", auto_uido, auto_gidq, 0555);
-	ci(auto_qmail_home, "sbin", "controlsync", auto_uido, auto_gidq, 0555);
-	ci(auto_qmail_home, "sbin", "copyemail", auto_uido, auto_gidq, 0555);
-	ci(auto_qmail_home, "sbin", "cputime", auto_uido, auto_gidq, 0555);
-	ci(auto_qmail_home, "sbin", "execmysql", auto_uido, auto_gidq, 0555);
-	ci(auto_qmail_home, "sbin", "hostsync", auto_uido, auto_gidq, 0555);
-	ci(auto_qmail_home, "sbin", "indisrvr", auto_uido, auto_gidq, 0555);
-	ci(auto_qmail_home, "sbin", "initsvc", auto_uido, auto_gidq, 0555);
-	ci(auto_qmail_home, "sbin", "inlookup", auto_uido, auto_gidq, 0555);
-	ci(auto_qmail_home, "sbin", "inquerytest", auto_uido, auto_gidq, 0555);
-	ci(auto_qmail_home, "sbin", "install_tables", auto_uido, auto_gidq, 0555);
-	ci(auto_qmail_home, "sbin", "ipchange", auto_uido, auto_gidq, 0555);
-	ci(auto_qmail_home, "sbin", "mail_report", auto_uido, auto_gidq, 0555);
-	ci(auto_qmail_home, "sbin", "mgmtpass", auto_uido, auto_gidq, 0555);
-	ci(auto_qmail_home, "sbin", "myslave", auto_uido, auto_gidq, 0555);
-	ci(auto_qmail_home, "sbin", "osh", auto_uido, auto_gidq, 0555);
-	ci(auto_qmail_home, "sbin", "pam-checkpwd", auto_uido, auto_gido, 0555);
-	ci(auto_qmail_home, "sbin", "postdel", auto_uido, auto_gidq, 0555);
-	ci(auto_qmail_home, "sbin", "svctool", auto_uido, auto_gidq, 0555);
-	ci(auto_qmail_home, "sbin", "systpass", auto_uido, auto_gido, 04555);
-	ci(auto_qmail_home, "sbin", "testmra", auto_uido, auto_gidq, 0555);
-	ci(auto_qmail_home, "sbin", "tls-cert-check", auto_uido, auto_gidq, 0555);
-	ci(auto_qmail_home, "sbin", "updatefile", auto_uido, auto_gidq, 0555);
-	ci(auto_qmail_home, "sbin", "updaterules", auto_uido, auto_gidq, 0555);
-	ci(auto_qmail_home, "sbin", "vchkpass", auto_uido, auto_gidq, 0555);
-	ci(auto_qmail_home, "sbin", "vdelivermail", auto_uido, auto_gidq, 0555);
-	ci(auto_qmail_home, "sbin", "vdeloldusers", auto_uido, auto_gidq, 0555);
-	ci(auto_qmail_home, "sbin", "vfilter", auto_uido, auto_gidq, 0555);
-	ci(auto_qmail_home, "sbin", "vfstab", auto_uido, auto_gidq, 0555);
-	ci(auto_qmail_home, "sbin", "vmoddomain", auto_uido, auto_gidq, 0555);
-	ci(auto_qmail_home, "sbin", "vreorg", auto_uido, auto_gidq, 0555);
-	ci(auto_qmail_home, "sbin", "vserverinfo", auto_uido, auto_gidq, 0555);
-	ci(auto_qmail_home, "sbin", "vsetpass", auto_uido, auto_gidq, 0555);
-
-	/*- flash modules */
-	ci(auto_prefix,     "lib/indimail/modules", "alarms", auto_uido, auto_gido, 0555);
-	ci(auto_prefix,     "lib/indimail/modules", "background", auto_uido, auto_gido, 0555);
-	ci(auto_prefix,     "lib/indimail/modules", "countdown", auto_uido, auto_gido, 0555);
-
-	/*- pam module */
-	ci(auto_prefix,     "lib/indimail/modules", "iauth.so", auto_uido, auto_gido, 0555);
-
-	/*- flash, mime, mpack, fortune */
-	ci(auto_qmail_home, "bin", "altermime", auto_uido, auto_gidq, 0555);
-	ci(auto_qmail_home, "bin", "mpack", auto_uido, auto_gidq, 0555);
-	ci(auto_qmail_home, "bin", "munpack", auto_uido, auto_gidq, 0555);
-	ci(auto_qmail_home, "bin", "flash", auto_uido, auto_gidq, 0555);
-	ci(auto_qmail_home, "bin", "ripmime", auto_uido, auto_gidq, 0555);
-	ci(auto_qmail_home, "bin", "ripole", auto_uido, auto_gidq, 0555);
-	ci(auto_qmail_home, "bin", "fortune", auto_uido, auto_gidq, 0555);
-	ci(auto_qmail_home, "bin", "randstr", auto_uido, auto_gidq, 0555);
-	ci(auto_qmail_home, "sbin", "rot", auto_uido, auto_gidq, 0555);
-	ci(auto_qmail_home, "sbin", "strfile", auto_uido, auto_gidq, 0555);
-	ci(auto_qmail_home, "sbin", "unstr", auto_uido, auto_gidq, 0555);
-
-	ci(auto_qmail_home, "man/man1", "strfile.1", auto_uido, auto_gidq, 0444);
-	ci(auto_qmail_home, "man/man1", "unstr.1", auto_uido, auto_gidq, 0444);
-	ci(auto_qmail_home, "man/man1", "randstr.1", auto_uido, auto_gidq, 0444);
-	ci(auto_qmail_home, "man/man1", "fortune.1", auto_uido, auto_gidq, 0444);
-	ci(auto_qmail_home, "man/man1", "altermime.1", auto_uido, auto_gidq, 0444);
-	ci(auto_qmail_home, "man/man1", "flash.1", auto_uido, auto_gidq, 0444);
-	ci(auto_qmail_home, "man/man1", "mpack.1", auto_uido, auto_gidq, 0444);
-	ci(auto_qmail_home, "man/man1", "munpack.1", auto_uido, auto_gidq, 0444);
-	ci(auto_qmail_home, "man/man1", "ripmime.1", auto_uido, auto_gidq, 0444);
-
-	ci(auto_qmail_home, "share/fortunes", "age", auto_uido, auto_gido, 0644);
-	ci(auto_qmail_home, "share/fortunes", "age.dat", auto_uido, auto_gido, 0644);
-	ci(auto_qmail_home, "share/fortunes", "art", auto_uido, auto_gido, 0644);
-	ci(auto_qmail_home, "share/fortunes", "art.dat", auto_uido, auto_gido, 0644);
-	ci(auto_qmail_home, "share/fortunes", "ascii-art", auto_uido, auto_gido, 0644);
-	ci(auto_qmail_home, "share/fortunes", "ascii-art.dat", auto_uido, auto_gido, 0644);
-	ci(auto_qmail_home, "share/fortunes", "bofh-excuses", auto_uido, auto_gido, 0644);
-	ci(auto_qmail_home, "share/fortunes", "bofh-excuses.dat", auto_uido, auto_gido, 0644);
-	ci(auto_qmail_home, "share/fortunes", "chanakya", auto_uido, auto_gido, 0644);
-	ci(auto_qmail_home, "share/fortunes", "chanakya.dat", auto_uido, auto_gido, 0644);
-	ci(auto_qmail_home, "share/fortunes", "computers", auto_uido, auto_gido, 0644);
-	ci(auto_qmail_home, "share/fortunes", "computers.dat", auto_uido, auto_gido, 0644);
-	ci(auto_qmail_home, "share/fortunes", "cookie", auto_uido, auto_gido, 0644);
-	ci(auto_qmail_home, "share/fortunes", "cookie.dat", auto_uido, auto_gido, 0644);
-	ci(auto_qmail_home, "share/fortunes", "debian", auto_uido, auto_gido, 0644);
-	ci(auto_qmail_home, "share/fortunes", "debian.dat", auto_uido, auto_gido, 0644);
-	ci(auto_qmail_home, "share/fortunes", "definitions", auto_uido, auto_gido, 0644);
-	ci(auto_qmail_home, "share/fortunes", "definitions.dat", auto_uido, auto_gido, 0644);
-	ci(auto_qmail_home, "share/fortunes", "drugs", auto_uido, auto_gido, 0644);
-	ci(auto_qmail_home, "share/fortunes", "drugs.dat", auto_uido, auto_gido, 0644);
-	ci(auto_qmail_home, "share/fortunes", "education", auto_uido, auto_gido, 0644);
-	ci(auto_qmail_home, "share/fortunes", "education.dat", auto_uido, auto_gido, 0644);
-	ci(auto_qmail_home, "share/fortunes", "ethnic", auto_uido, auto_gido, 0644);
-	ci(auto_qmail_home, "share/fortunes", "ethnic.dat", auto_uido, auto_gido, 0644);
-	ci(auto_qmail_home, "share/fortunes", "food", auto_uido, auto_gido, 0644);
-	ci(auto_qmail_home, "share/fortunes", "food.dat", auto_uido, auto_gido, 0644);
-	ci(auto_qmail_home, "share/fortunes", "fortunes", auto_uido, auto_gido, 0644);
-	ci(auto_qmail_home, "share/fortunes", "fortunes.dat", auto_uido, auto_gido, 0644);
-	ci(auto_qmail_home, "share/fortunes", "goedel", auto_uido, auto_gido, 0644);
-	ci(auto_qmail_home, "share/fortunes", "goedel.dat", auto_uido, auto_gido, 0644);
-	ci(auto_qmail_home, "share/fortunes", "humorists", auto_uido, auto_gido, 0644);
-	ci(auto_qmail_home, "share/fortunes", "humorists.dat", auto_uido, auto_gido, 0644);
-	ci(auto_qmail_home, "share/fortunes", "joel-on-software", auto_uido, auto_gido, 0644);
-	ci(auto_qmail_home, "share/fortunes", "joel-on-software.dat", auto_uido, auto_gido, 0644);
-	ci(auto_qmail_home, "share/fortunes", "kernelnewbies", auto_uido, auto_gido, 0644);
-	ci(auto_qmail_home, "share/fortunes", "kernelnewbies.dat", auto_uido, auto_gido, 0644);
-	ci(auto_qmail_home, "share/fortunes", "kids", auto_uido, auto_gido, 0644);
-	ci(auto_qmail_home, "share/fortunes", "kids.dat", auto_uido, auto_gido, 0644);
-	ci(auto_qmail_home, "share/fortunes", "knghtbrd", auto_uido, auto_gido, 0644);
-	ci(auto_qmail_home, "share/fortunes", "knghtbrd.dat", auto_uido, auto_gido, 0644);
-	ci(auto_qmail_home, "share/fortunes", "law", auto_uido, auto_gido, 0644);
-	ci(auto_qmail_home, "share/fortunes", "law.dat", auto_uido, auto_gido, 0644);
-	ci(auto_qmail_home, "share/fortunes", "linux", auto_uido, auto_gido, 0644);
-	ci(auto_qmail_home, "share/fortunes", "linuxcookie", auto_uido, auto_gido, 0644);
-	ci(auto_qmail_home, "share/fortunes", "linuxcookie.dat", auto_uido, auto_gido, 0644);
-	ci(auto_qmail_home, "share/fortunes", "linux.dat", auto_uido, auto_gido, 0644);
-	ci(auto_qmail_home, "share/fortunes", "literature", auto_uido, auto_gido, 0644);
-	ci(auto_qmail_home, "share/fortunes", "literature.dat", auto_uido, auto_gido, 0644);
-	ci(auto_qmail_home, "share/fortunes", "love", auto_uido, auto_gido, 0644);
-	ci(auto_qmail_home, "share/fortunes", "love.dat", auto_uido, auto_gido, 0644);
-	ci(auto_qmail_home, "share/fortunes", "magic", auto_uido, auto_gido, 0644);
-	ci(auto_qmail_home, "share/fortunes", "magic.dat", auto_uido, auto_gido, 0644);
-	ci(auto_qmail_home, "share/fortunes", "medicine", auto_uido, auto_gido, 0644);
-	ci(auto_qmail_home, "share/fortunes", "medicine.dat", auto_uido, auto_gido, 0644);
-	ci(auto_qmail_home, "share/fortunes", "men-women", auto_uido, auto_gido, 0644);
-	ci(auto_qmail_home, "share/fortunes", "men-women.dat", auto_uido, auto_gido, 0644);
-	ci(auto_qmail_home, "share/fortunes", "miscellaneous", auto_uido, auto_gido, 0644);
-	ci(auto_qmail_home, "share/fortunes", "miscellaneous.dat", auto_uido, auto_gido, 0644);
-	ci(auto_qmail_home, "share/fortunes", "news", auto_uido, auto_gido, 0644);
-	ci(auto_qmail_home, "share/fortunes", "news.dat", auto_uido, auto_gido, 0644);
-	ci(auto_qmail_home, "share/fortunes", "osp", auto_uido, auto_gido, 0644);
-	ci(auto_qmail_home, "share/fortunes", "osp.dat", auto_uido, auto_gido, 0644);
-	ci(auto_qmail_home, "share/fortunes", "paradoxum", auto_uido, auto_gido, 0644);
-	ci(auto_qmail_home, "share/fortunes", "paradoxum.dat", auto_uido, auto_gido, 0644);
-	ci(auto_qmail_home, "share/fortunes", "paul-graham", auto_uido, auto_gido, 0644);
-	ci(auto_qmail_home, "share/fortunes", "paul-graham.dat", auto_uido, auto_gido, 0644);
-	ci(auto_qmail_home, "share/fortunes", "people", auto_uido, auto_gido, 0644);
-	ci(auto_qmail_home, "share/fortunes", "people.dat", auto_uido, auto_gido, 0644);
-	ci(auto_qmail_home, "share/fortunes", "perl", auto_uido, auto_gido, 0644);
-	ci(auto_qmail_home, "share/fortunes", "perl.dat", auto_uido, auto_gido, 0644);
-	ci(auto_qmail_home, "share/fortunes", "pets", auto_uido, auto_gido, 0644);
-	ci(auto_qmail_home, "share/fortunes", "pets.dat", auto_uido, auto_gido, 0644);
-	ci(auto_qmail_home, "share/fortunes", "platitudes", auto_uido, auto_gido, 0644);
-	ci(auto_qmail_home, "share/fortunes", "platitudes.dat", auto_uido, auto_gido, 0644);
-	ci(auto_qmail_home, "share/fortunes", "politics", auto_uido, auto_gido, 0644);
-	ci(auto_qmail_home, "share/fortunes", "politics.dat", auto_uido, auto_gido, 0644);
-	ci(auto_qmail_home, "share/fortunes", "riddles", auto_uido, auto_gido, 0644);
-	ci(auto_qmail_home, "share/fortunes", "riddles.dat", auto_uido, auto_gido, 0644);
-	ci(auto_qmail_home, "share/fortunes", "rj", auto_uido, auto_gido, 0644);
-	ci(auto_qmail_home, "share/fortunes", "rj.dat", auto_uido, auto_gido, 0644);
-	ci(auto_qmail_home, "share/fortunes", "science", auto_uido, auto_gido, 0644);
-	ci(auto_qmail_home, "share/fortunes", "science.dat", auto_uido, auto_gido, 0644);
-	ci(auto_qmail_home, "share/fortunes", "songs-poems", auto_uido, auto_gido, 0644);
-	ci(auto_qmail_home, "share/fortunes", "songs-poems.dat", auto_uido, auto_gido, 0644);
-	ci(auto_qmail_home, "share/fortunes", "sports", auto_uido, auto_gido, 0644);
-	ci(auto_qmail_home, "share/fortunes", "sports.dat", auto_uido, auto_gido, 0644);
-	ci(auto_qmail_home, "share/fortunes", "startrek", auto_uido, auto_gido, 0644);
-	ci(auto_qmail_home, "share/fortunes", "startrek.dat", auto_uido, auto_gido, 0644);
-	ci(auto_qmail_home, "share/fortunes", "tao", auto_uido, auto_gido, 0644);
-	ci(auto_qmail_home, "share/fortunes", "tao.dat", auto_uido, auto_gido, 0644);
-	ci(auto_qmail_home, "share/fortunes", "thirukkural", auto_uido, auto_gido, 0644);
-	ci(auto_qmail_home, "share/fortunes", "thirukkural.dat", auto_uido, auto_gido, 0644);
-	ci(auto_qmail_home, "share/fortunes", "translate-me", auto_uido, auto_gido, 0644);
-	ci(auto_qmail_home, "share/fortunes", "translate-me.dat", auto_uido, auto_gido, 0644);
-	ci(auto_qmail_home, "share/fortunes", "vedas-1", auto_uido, auto_gido, 0644);
-	ci(auto_qmail_home, "share/fortunes", "vedas-1.dat", auto_uido, auto_gido, 0644);
-	ci(auto_qmail_home, "share/fortunes", "vedas-2", auto_uido, auto_gido, 0644);
-	ci(auto_qmail_home, "share/fortunes", "vedas-2.dat", auto_uido, auto_gido, 0644);
-	ci(auto_qmail_home, "share/fortunes", "wisdom", auto_uido, auto_gido, 0644);
-	ci(auto_qmail_home, "share/fortunes", "wisdom.dat", auto_uido, auto_gido, 0644);
-	ci(auto_qmail_home, "share/fortunes", "work", auto_uido, auto_gido, 0644);
-	ci(auto_qmail_home, "share/fortunes", "work.dat", auto_uido, auto_gido, 0644);
-	ci(auto_qmail_home, "share/fortunes", "zippy", auto_uido, auto_gido, 0644);
-	ci(auto_qmail_home, "share/fortunes", "zippy.dat", auto_uido, auto_gido, 0644);
-
-	/*- courier-imap */
-	ci(auto_qmail_home, "bin", "couriertls", auto_uido, auto_gido, 0555);
-	ci(auto_qmail_home, "bin", "deliverquota", auto_uido, auto_gido, 0555);
-	ci(auto_qmail_home, "bin", "imapd", auto_uido, auto_gido, 0555);
-	ci(auto_qmail_home, "bin", "maildiracl", auto_uido, auto_gido, 0555);
-	ci(auto_qmail_home, "bin", "maildirkw", auto_uido, auto_gido, 0555);
-	ci(auto_qmail_home, "bin", "maildirmake", auto_uido, auto_gido, 0555);
-	ci(auto_qmail_home, "bin", "pop3d", auto_uido, auto_gido, 0555);
-	/*- */
-	ci(auto_qmail_home, "etc", "imapd.cnf", auto_uido, auto_gido, 0600);
-	ci(auto_qmail_home, "etc", "imapd.dist", auto_uido, auto_gido, 0600);
-	ci(auto_qmail_home, "etc", "imapd-ssl.dist", auto_uido, auto_gido, 0600);
-	ci(auto_qmail_home, "etc", "pop3d.cnf", auto_uido, auto_gido, 0600);
-	ci(auto_qmail_home, "etc", "pop3d.dist", auto_uido, auto_gido, 0600);
-	ci(auto_qmail_home, "etc", "pop3d-ssl.dist", auto_uido, auto_gido, 0600);
-	ci(auto_qmail_home, "etc", "quotawarnmsg.example", auto_uido, auto_gido, 0644);
-	/*- */
-	ci(auto_qmail_home, "libexec", "couriertcpd", auto_uido, auto_gido, 0555);
-	ci(auto_qmail_home, "libexec", "imapd.rc", auto_uido, auto_gido, 0555);
-	ci(auto_qmail_home, "libexec", "imapd-ssl.rc", auto_uido, auto_gido, 0555);
-	ci(auto_qmail_home, "libexec", "makedatprog", auto_uido, auto_gido, 0555);
-	ci(auto_qmail_home, "libexec", "pop3d.rc", auto_uido, auto_gido, 0555);
-	ci(auto_qmail_home, "libexec", "pop3d-ssl.rc", auto_uido, auto_gido, 0555);
-	/*- */
-	ci(auto_qmail_home, "man/man1", "couriertcpd.1", auto_uido, auto_gidq, 0444);
-	ci(auto_qmail_home, "man/man1", "maildiracl.1", auto_uido, auto_gidq, 0444);
-	ci(auto_qmail_home, "man/man1", "maildirkw.1", auto_uido, auto_gidq, 0444);
-	ci(auto_qmail_home, "man/man1", "maildirmake.1", auto_uido, auto_gidq, 0444);
-
-	ci(auto_qmail_home, "man/man7", "authlib.7", auto_uido, auto_gidq, 0444);
-	ci(auto_qmail_home, "man/man7", "authpam.7", auto_uido, auto_gidq, 0444);
-	ci(auto_qmail_home, "man/man7", "authpwd.7", auto_uido, auto_gidq, 0444);
-	ci(auto_qmail_home, "man/man7", "authcustom.7", auto_uido, auto_gidq, 0444);
-	ci(auto_qmail_home, "man/man7", "authshadow.7", auto_uido, auto_gidq, 0444);
-
-	ci(auto_qmail_home, "man/man8", "deliverquota.8", auto_uido, auto_gidq, 0444);
-	ci(auto_qmail_home, "man/man8", "imapd.8", auto_uido, auto_gidq, 0444);
-	ci(auto_qmail_home, "man/man8", "mkimapdcert.8", auto_uido, auto_gidq, 0444);
-	ci(auto_qmail_home, "man/man8", "mkpop3dcert.8", auto_uido, auto_gidq, 0444);
-	/*- */
-	ci(auto_qmail_home, "sbin", "imaplogin", auto_uido, auto_gido, 0555);
-	ci(auto_qmail_home, "sbin", "pop3login", auto_uido, auto_gido, 0555);
-	ci(auto_qmail_home, "sbin", "sharedindexinstall", auto_uido, auto_gido, 0555);
-	ci(auto_qmail_home, "sbin", "sharedindexsplit", auto_uido, auto_gido, 0555);
-	/*- */
-	ci(auto_qmail_home, "share", "mkimapdcert", auto_uido, auto_gido, 0555);
-	ci(auto_qmail_home, "share", "mkpop3dcert", auto_uido, auto_gido, 0555);
-
-	/*- bogofilter */
-	ci(auto_qmail_home, "bin", "bogofilter", auto_uido, auto_gidv, 06511);
-	ci(auto_qmail_home, "bin", "bogolexer", auto_uido, auto_gido, 0555);
-	ci(auto_qmail_home, "bin", "bogotune", auto_uido, auto_gido, 0555);
-	ci(auto_qmail_home, "bin", "bogoupgrade", auto_uido, auto_gido, 0555);
-	ci(auto_qmail_home, "bin", "bogoutil", auto_uido, auto_gido, 0555);
-	ci(auto_qmail_home, "sbin", "bf_copy", auto_uido, auto_gido, 0555);
-	ci(auto_qmail_home, "sbin", "bf_tar", auto_uido, auto_gido, 0555);
-	ci(auto_qmail_home, "sbin", "bf_compact", auto_uido, auto_gido, 0555);
-	/*- */
-	ci(auto_qmail_home, "etc", "bogofilter.cf", auto_uido, auto_gido, 0644);
-	/*- */
-	ci(auto_qmail_home, "man/man1", "bf_compact.1", auto_uido, auto_gidq, 0444);
-	ci(auto_qmail_home, "man/man1", "bf_copy.1", auto_uido, auto_gidq, 0444);
-	ci(auto_qmail_home, "man/man1", "bf_tar.1", auto_uido, auto_gidq, 0444);
-	ci(auto_qmail_home, "man/man1", "bogofilter.1", auto_uido, auto_gidq, 0444);
-	ci(auto_qmail_home, "man/man1", "bogolexer.1", auto_uido, auto_gidq, 0444);
-	ci(auto_qmail_home, "man/man1", "bogotune.1", auto_uido, auto_gidq, 0444);
-	ci(auto_qmail_home, "man/man1", "bogoupgrade.1", auto_uido, auto_gidq, 0444);
-	ci(auto_qmail_home, "man/man1", "bogoutil.1", auto_uido, auto_gidq, 0444);
-
-	/*- nssd */
-	ci(auto_qmail_home, "sbin", "nssd", auto_uido, auto_gidq, 0555);
-	ci(auto_qmail_home, "sbin", "check_getpw", auto_uido, auto_gidq, 0555);
-	/*- */
-	ci("/usr", "lib", "libnss_nssd.so.2.0.0", auto_uido, auto_gido, 0755);
-	/*- */
-	ci(auto_qmail_home, "man/man5", "nssd.conf.5", auto_uido, auto_gidq, 0444);
-	ci(auto_qmail_home, "man/man8", "nssd.8", auto_uido, auto_gidq, 0444);
-
-	/*- fetchmail */
-	ci(auto_qmail_home, "bin", "fetchmail", auto_uido, auto_gido, 0555);
-	ci(auto_qmail_home, "bin", "fetchmailconf", auto_uido, auto_gido, 0555);
-	ci(auto_qmail_home, "sbin", "fetchmail.cron", auto_uido, auto_gido, 0555);
-	ci(auto_qmail_home, "sbin", "fetchmail.down", auto_uido, auto_gido, 0555);
-	ci(auto_qmail_home, "sbin", "fetchmail.up", auto_uido, auto_gido, 0555);
-	ci(auto_qmail_home, "sbin", "fixwvdialconf", auto_uido, auto_gido, 0555);
-	ci(auto_qmail_home, "sbin", "ip-down.local", auto_uido, auto_gido, 0555);
-	ci(auto_qmail_home, "sbin", "ip-up.local", auto_uido, auto_gido, 0555);
-	ci(auto_qmail_home, "sbin", "ppp-off", auto_uido, auto_gido, 0555);
-	ci(auto_qmail_home, "sbin", "slemsPrivate", auto_uido, auto_gido, 0555);
-	ci(auto_qmail_home, "sbin", "writefifo", auto_uido, auto_gido, 0555);
-	/*- */
-	ci(auto_qmail_home, "lib/python2.7/site-packages", "fetchmailconf.py", auto_uido, auto_gido, 0555);
-	ci(auto_qmail_home, "lib/python2.7/site-packages", "fetchmailconf.pyc", auto_uido, auto_gido, 0644);
-	ci(auto_qmail_home, "lib/python2.7/site-packages", "fetchmailconf.pyo", auto_uido, auto_gido, 0644);
-	/*- */
-	ci(auto_qmail_home, "man/man1", "fetchmail.1", auto_uido, auto_gidq, 0444);
-	ci(auto_qmail_home, "man/man1", "fetchmailconf.1", auto_uido, auto_gidq, 0444);
-}
-#endif
-
 void
 getversion_install_big_c()
 {
-	static char    *x = "$Id: hier.c,v 1.198 2016-05-29 20:04:40+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: hier.c,v 1.199 2016-05-30 20:24:49+05:30 Cprogrammer Exp mbhangui $";
 
 #ifdef INDIMAIL
 	if (x)
