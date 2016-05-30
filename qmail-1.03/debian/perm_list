@@ -24,6 +24,7 @@
 %dir %attr(0755,root,root)         /usr/share/man/man7
 %dir %attr(0755,root,root)         /usr/share/man/man8
 %dir %attr(0555,root,qmail)        /usr/lib/indimail/plugins
+%dir %attr(0775,root,qmail)        /etc/indimail/etc
 %dir %attr(0755,root,qmail)        /etc/indimail/users
 %dir %attr(0755,indimail,indimail) /etc/indimail/control
 %dir %attr(0755,indimail,indimail) /etc/indimail/control/domainkeys
