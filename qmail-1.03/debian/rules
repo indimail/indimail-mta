@@ -132,6 +132,7 @@ binary-indep: build install
 	dh_testdir
 	dh_testroot
 	find $(DESTDIR)/$(mandir) -name '*'.? -type f -exec gzip -q {} \;
+	dh_install --sourcedir=$(CURDIR)/debian/indimail-mta -pindimail-mta
 	dh_install --sourcedir=$(CURDIR)/debian/indimail-mta -pdaemontools
 	dh_install --sourcedir=$(CURDIR)/debian/indimail-mta -pucspi-tcp
 	dh_installchangelogs
