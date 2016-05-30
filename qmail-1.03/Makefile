@@ -1115,8 +1115,8 @@ auto_prefix.o strerr.a substdio.a error.a str.a alloc.a stralloc.a
 	strerr.a substdio.a error.a str.a alloc.a stralloc.a alloc.a
 
 instcheck.o: \
-compile instcheck.c strerr.h error.h exit.h hasindimail.h
-	./compile $(inc_deps) instcheck.c
+compile instcheck.c strerr.h error.h exit.h
+	./compile instcheck.c
 
 ip.o: \
 compile ip.c fmt.h scan.h ip.h byte.h conf-ip
