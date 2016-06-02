@@ -119,8 +119,8 @@ auto_uids.h
 auto_uids.o
 auto_usera.c
 auto_usera.o
-base64
-base64.o
+qbase64
+qbase64.o
 base64sub.o
 binm1
 binm1+df

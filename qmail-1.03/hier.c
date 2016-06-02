@@ -1,5 +1,8 @@
 /*
  * $Log: hier.c,v $
+ * Revision 1.200  2016-06-02 17:40:36+05:30  Cprogrammer
+ * renamed base64 to qbase64
+ *
  * Revision 1.199  2016-05-30 20:24:49+05:30  Cprogrammer
  * removed _hier()
  *
@@ -752,7 +755,7 @@ hier(inst_dir, fatal)
 	c(auto_qmail_home, "bin", "idedit", auto_uido, auto_gidq, 0555);
 	c(auto_qmail_home, "bin", "qmailctl", auto_uido, auto_gidq, 0555);
 	c(auto_qmail_home, "bin", "uacl", auto_uido, auto_gidq, 0555);
-	c(auto_qmail_home, "bin", "base64", auto_uido, auto_gidq, 0555);
+	c(auto_qmail_home, "bin", "qbase64", auto_uido, auto_gidq, 0555);
 	c(auto_qmail_home, "bin", "swaks", auto_uido, auto_gidq, 0555);
 	c(auto_qmail_home, "bin", "mbox2maildir.pl", auto_uido, auto_gidq, 0555);
 	c(auto_qmail_home, "bin", "qmail-scanner-queue.pl", auto_uido, auto_gidq, 0555);
@@ -1015,7 +1018,7 @@ hier(inst_dir, fatal)
 	c(mandir,          "man/man1", "fixcrio.1", uidr, gidr, moder_f);
 	c(mandir,          "man/man1", "recordio.1", uidr, gidr, moder_f);
 	c(mandir,          "man/man1", "uacl.1", uidr, gidr, moder_f);
-	c(mandir,          "man/man1", "base64.1", uidr, gidr, moder_f);
+	c(mandir,          "man/man1", "qbase64.1", uidr, gidr, moder_f);
 	c(mandir,          "man/man1", "swaks.1", uidr, gidr, moder_f);
 	c(mandir,          "man/man7", "forgeries.7", uidr, gidr, moder_f);
 	c(mandir,          "man/cat7", "forgeries.0", uidr, gidr, moder_f);
@@ -1387,7 +1390,7 @@ hier(inst_dir, fatal)
 void
 getversion_install_big_c()
 {
-	static char    *x = "$Id: hier.c,v 1.199 2016-05-30 20:24:49+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: hier.c,v 1.200 2016-06-02 17:40:36+05:30 Cprogrammer Exp mbhangui $";
 
 #ifdef INDIMAIL
 	if (x)

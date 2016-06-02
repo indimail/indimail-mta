@@ -67,7 +67,7 @@
 %attr(0555,root,qmail) @prefix@/bin/atrn
 %attr(0555,root,qmail) @prefix@/bin/autoresponder
 %attr(0555,root,qmail) @prefix@/bin/balance_outgoing
-%attr(0555,root,qmail) @prefix@/bin/base64
+%attr(0555,root,qmail) @prefix@/bin/qbase64
 %attr(0555,root,qmail) @prefix@/bin/bouncesaying
 %attr(0555,root,qmail) @prefix@/bin/cdbdump
 %attr(0555,root,qmail) @prefix@/bin/cdbget
@@ -508,7 +508,7 @@
 %attr(0644,root,root) @mandir@/man1/addcr.1.gz
 %attr(0644,root,root) @mandir@/man1/argv0.1.gz
 %attr(0644,root,root) @mandir@/man1/autoresponder.1.gz
-%attr(0644,root,root) @mandir@/man1/base64.1.gz
+%attr(0644,root,root) @mandir@/man1/qbase64.1.gz
 %attr(0644,root,root) @mandir@/man1/bouncesaying.1.gz
 %attr(0644,root,root) @mandir@/man1/cdbdump.1.gz
 %attr(0644,root,root) @mandir@/man1/cdbget.1.gz
