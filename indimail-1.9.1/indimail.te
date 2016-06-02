@@ -1,5 +1,8 @@
 #
 # $Log: indimail.te,v $
+# Revision 2.14  2016-06-02 17:46:35+05:30  Cprogrammer
+# selinux rules for FHS compliant indimail
+#
 # Revision 2.13  2016-04-22 10:38:53+05:30  Cprogrammer
 # added selinux rules for iwebadmin
 #
@@ -40,38 +43,83 @@
 # selinux module config
 #
 #
-# $Id: indimail.te,v 2.13 2016-04-22 10:38:53+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.te,v 2.14 2016-06-02 17:46:35+05:30 Cprogrammer Exp mbhangui $
 # 
-module indimail 1.0;
+#
+# semanage permissive -a svc_start_t
+# semanage permissive -d svc_start_t
+# disable dontaudit statments
+# semodule -DB
+# enable dontaudit statements
+# semodule -B
+module indimail 1.1;
 
 require {
-	type semanage_t;
-	type mysqld_t;
+	type antivirus_db_t;
+	type antivirus_exec_t;
+	type antivirus_t;
+	type antivirus_var_run_t;
+	type crond_tmp_t;
+	type default_t;
+	type etc_runtime_t;
+	type etc_t;
+	type http_port_t;
 	type httpd_t;
 	type httpd_sys_script_t;
-	type user_home_t;
+	type init_t;
 	type initrc_t;
-	type home_root_t;
-	type user_tmp_t;
-	type tmp_t;
-	type nscd_t;
-	type var_t;
-	type var_lib_t;
-	type var_run_t;
-	type pop_port_t;
-	type antivirus_t;
-	type crond_tmp_t;
 	type mandb_t;
 	type mandb_home_t;
-	class unix_stream_socket connectto;
-	class capability fowner;
-	class capability { setuid setgid };
-	class tcp_socket name_connect;
-	class file { execute getattr setattr read create lock rename execute_no_trans write unlink open append ioctl };
-	class sock_file { create write unlink setattr };
-	class lnk_file read;
+	type mysqld_db_t;
+	type mysqld_etc_t;
+	type mysqld_t;
+	type mysqld_tmp_t;
+	type mysqld_var_run_t;
+	type net_conf_t;
+	type node_t;
+	type ntop_port_t;
+	type nscd_t;
+	type passwd_file_t;
+	type pop_port_t;
+	type proc_net_t;
+	type smtp_port_t;
+	type sssd_public_t;
+	type sssd_var_lib_t;
+	type rpm_script_tmp_t;
+	type semanage_t;
+	type svc_multilog_t;
+	type svc_run_exec_t;
+	type svc_run_t;
+	type svc_start_t;
+	type svc_svc_t;
+	type home_root_t;
+	type root_t;
+	type user_home_t;
+	type user_tmp_t;
+	type tmp_t;
+	type usr_t;
+	type var_t;
+	type var_lib_t;
+	type var_lock_t;
+	type var_log_t;
+	type var_run_t;
+	type reserved_port_t;
+	type unreserved_port_t;
+	class capability { chown net_bind_service dac_override dac_read_search fowner fsetid setuid setgid sys_ptrace };
 	class dir { search getattr setattr read create write rmdir remove_name open add_name };
+	class fifo_file { create read write open unlink getattr setattr };
+	class file { execute getattr setattr read create link lock rename execute_no_trans write unlink open append ioctl };
+	class lnk_file read;
+	class fd use;
+	class netlink_route_socket { nlmsg_read bind read write getattr create };
+	class process { noatsecure rlimitinh siginh sigchld execmem ptrace };
+	class sock_file { create write unlink getattr setattr };
+	class tcp_socket { listen name_bind name_connect accept create node_bind setopt bind getattr };
+	class udp_socket { bind connect read write getattr name_bind create node_bind };
+	class unix_stream_socket {read write connectto };
 }
+
+#permissive svc_start_t;
 
 #============= httpd_t ==============
 allow httpd_t initrc_t:unix_stream_socket connectto;
@@ -92,6 +140,7 @@ allow httpd_sys_script_t self:capability setuid;
 allow httpd_sys_script_t self:capability setgid;
 
 #============= mysqld_t ==============
+allow mysqld_t usr_t:file { append create rename write unlink };
 allow mysqld_t var_t:file { create getattr open lock read rename unlink write };
 allow mysqld_t var_t:dir { add_name remove_name create write };
 allow mysqld_t user_tmp_t:file open;
@@ -113,7 +162,135 @@ allow antivirus_t var_t:dir { read write rmdir setattr read remove_name create a
 allow antivirus_t var_t:file { create open getattr read write rename unlink append };
 allow antivirus_t crond_tmp_t:file write;
 allow antivirus_t var_run_t:sock_file { create write unlink setattr };
+allow antivirus_t svc_start_t:unix_stream_socket connectto;
 
 #============= mandb_t ==============
 allow mandb_t var_t:file { open read getattr ioctl };
 allow mandb_t mandb_home_t:dir { search getattr };
+
+#============= svc_start_t ==============
+allow svc_start_t antivirus_db_t:file { getattr open read unlink append write rename create };
+allow svc_start_t antivirus_db_t:dir { open search remove_name create rmdir read write add_name getattr setattr };
+allow svc_start_t antivirus_exec_t:file { open execute getattr read execute_no_trans };
+allow svc_start_t antivirus_var_run_t:dir { add_name remove_name getattr search setattr write };
+allow svc_start_t antivirus_var_run_t:sock_file { write unlink create getattr setattr };
+
+#!!!! WARNING: 'default_t' is a base type.
+allow svc_start_t default_t:dir { write add_name remove_name };
+allow svc_start_t default_t:fifo_file { read write };
+allow svc_start_t default_t:file { write open unlink rename append lock create };
+
+#!!!! WARNING: 'etc_runtime_t' is a base type.
+allow svc_start_t etc_runtime_t:file unlink;
+
+#!!!! WARNING: 'home_root_t' is a base type.
+allow svc_start_t home_root_t:dir { create add_name read remove_name setattr write };
+allow svc_start_t home_root_t:file { create getattr setattr lock open read write unlink rename };
+
+allow svc_start_t http_port_t:tcp_socket name_connect;
+
+allow svc_start_t mysqld_db_t:dir search;
+allow svc_start_t mysqld_etc_t:dir { open read search getattr };
+allow svc_start_t mysqld_etc_t:file { open read ioctl getattr };
+allow svc_start_t mysqld_etc_t:lnk_file read;
+allow svc_start_t mysqld_t:unix_stream_socket connectto;
+allow svc_start_t mysqld_tmp_t:file open;
+allow svc_start_t mysqld_var_run_t:dir {search getattr };
+allow svc_start_t mysqld_var_run_t:sock_file write;
+
+allow svc_start_t net_conf_t:file { read open getattr };
+
+allow svc_start_t passwd_file_t:file { getattr open read };
+allow svc_start_t proc_net_t:file read;
+
+#!!!! WARNING: 'root_t' is a base type.
+allow svc_start_t root_t:dir { write add_name create remove_name };
+allow svc_start_t root_t:fifo_file { write open read create };
+allow svc_start_t root_t:file { getattr ioctl open read write unlink append lock create rename execute execute_no_trans };
+
+allow svc_start_t rpm_script_tmp_t:file { execute execute_no_trans };
+
+allow svc_start_t self:process { execmem ptrace };
+allow svc_start_t self:capability { chown setuid setgid dac_override fsetid fowner sys_ptrace };
+allow svc_start_t self:netlink_route_socket { getattr bind read write create nlmsg_read };
+allow svc_start_t self:udp_socket { connect read write create getattr };
+allow svc_start_t sssd_public_t:dir search;
+allow svc_start_t sssd_var_lib_t:dir search;
+allow svc_start_t svc_svc_t:file execute_no_trans;
+allow svc_start_t svc_run_exec_t:file unlink;
+allow svc_start_t svc_run_t:process { noatsecure rlimitinh siginh };
+allow svc_start_t smtp_port_t:tcp_socket name_connect;
+
+#!!!! WARNING: 'tmp_t' is a base type.
+allow svc_start_t tmp_t:dir { add_name rmdir create read remove_name setattr write };
+allow svc_start_t tmp_t:file { create open write link unlink };
+allow svc_start_t tmp_t:fifo_file { create setattr getattr };
+
+allow svc_start_t user_tmp_t:fifo_file { getattr setattr };
+#!!!! WARNING: 'usr_t' is a base type.
+allow svc_start_t usr_t:file write;
+allow svc_start_t usr_t:fifo_file { open read };
+
+#!!!! WARNING: 'var_lock_t' is a base type.
+allow svc_start_t var_lock_t:dir { create add_name write remove_name };
+allow svc_start_t var_lock_t:file { read write open unlink create append lock };
+allow svc_start_t var_lock_t:lnk_file read;
+
+#!!!! WARNING: 'var_t' is a base type.
+allow svc_start_t var_t:dir { read create write add_name remove_name setattr rmdir };
+allow svc_start_t var_t:file { create getattr setattr ioctl open read lock write unlink };
+allow svc_start_t var_t:fifo_file { open read };
+
+#============= svc_run_t ==============
+
+#!!!! WARNING: 'etc_t' is a base type.
+allow svc_run_t etc_t:dir { add_name write remove_name };
+allow svc_run_t etc_t:fifo_file { create read write open unlink };
+
+allow svc_run_t init_t:unix_stream_socket { write read };
+
+#!!!! WARNING: 'root_t' is a base type.
+allow svc_run_t root_t:file { read open };
+#
+allow svc_run_t node_t:tcp_socket node_bind;
+allow svc_run_t node_t:udp_socket node_bind;
+allow svc_run_t pop_port_t:tcp_socket name_bind;
+allow svc_run_t smtp_port_t:tcp_socket name_bind;
+allow svc_run_t sssd_var_lib_t:dir search;
+allow svc_run_t svc_multilog_t:process { rlimitinh siginh noatsecure };
+
+allow svc_run_t self:tcp_socket { accept create listen setopt bind getattr };
+allow svc_run_t self:udp_socket { bind create };
+allow svc_run_t self:capability { net_bind_service dac_override dac_read_search };
+
+#!!!! WARNING: 'tmp_t' is a base type.
+allow svc_run_t tmp_t:dir { add_name write remove_name };
+allow svc_run_t tmp_t:file { create write open };
+allow svc_run_t tmp_t:fifo_file { open getattr read write };
+allow svc_run_t tmp_t:sock_file { create setattr unlink };
+
+allow svc_run_t reserved_port_t:tcp_socket name_bind;
+allow svc_run_t unreserved_port_t:tcp_socket name_bind;
+allow svc_run_t unreserved_port_t:udp_socket name_bind;
+
+allow svc_run_t mysqld_etc_t:file { open getattr read };
+allow svc_run_t mysqld_t:unix_stream_socket connectto;
+allow svc_run_t mysqld_t:process { rlimitinh noatsecure siginh };
+allow svc_run_t mysqld_var_run_t:dir search;
+allow svc_run_t mysqld_var_run_t:sock_file write;
+allow svc_run_t ntop_port_t:udp_socket name_bind;
+allow svc_run_t passwd_file_t:file { getattr read open };
+
+
+allow svc_run_t user_tmp_t:fifo_file { read write getattr open };
+allow svc_run_t user_tmp_t:file open;
+allow svc_run_t user_tmp_t:sock_file unlink;
+
+#!!!! WARNING: 'var_t' is a base type.
+allow svc_run_t var_t:dir read;
+
+#============= svc_multilog_t ==============
+allow svc_multilog_t init_t:unix_stream_socket { write read };
+allow svc_multilog_t var_log_t:dir create;
+allow svc_multilog_t svc_start_t:process sigchld;
+allow svc_multilog_t svc_start_t:fd use;
