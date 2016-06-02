@@ -79,7 +79,7 @@
 %attr(0555,root,qmail) @prefix@/bin/atrn
 %attr(0555,root,qmail) @prefix@/bin/autoresponder
 %attr(0555,root,qmail) @prefix@/bin/balance_outgoing
-%attr(0555,root,qmail) @prefix@/bin/base64
+%attr(0555,root,qmail) @prefix@/bin/qbase64
 %attr(0555,root,qmail) @prefix@/bin/bogofilter-qfe
 %attr(0555,root,qmail) @prefix@/bin/bouncesaying
 %attr(0555,root,qmail) @prefix@/bin/cdbdump
@@ -747,7 +747,7 @@
 %attr(0644,root,root)  @mandir@/man1/altermime.1.gz
 %attr(0644,root,root)  @mandir@/man1/argv0.1.gz
 %attr(0644,root,root)  @mandir@/man1/autoresponder.1.gz
-%attr(0644,root,root)  @mandir@/man1/base64.1.gz
+%attr(0644,root,root)  @mandir@/man1/qbase64.1.gz
 %attr(0644,root,root)  @mandir@/man1/bf_compact.1.gz
 %attr(0644,root,root)  @mandir@/man1/bf_copy.1.gz
 %attr(0644,root,root)  @mandir@/man1/bf_tar.1.gz

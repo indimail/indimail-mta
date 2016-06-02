@@ -1,6 +1,6 @@
 #
 #
-# $Id: qmail.spec,v 1.42 2016-05-30 20:26:37+05:30 Cprogrammer Exp mbhangui $
+# $Id: qmail.spec,v 1.43 2016-06-02 17:42:35+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %define _unpackaged_files_terminate_build 1
 
@@ -679,7 +679,7 @@ done
 %attr(555,root,qmail)                   %{_prefix}/bin/xqp
 %attr(555,root,qmail)                   %{_prefix}/bin/dot-forward
 %attr(555,root,qmail)                   %{_prefix}/bin/datemail
-%attr(555,root,qmail)                   %{_prefix}/bin/base64
+%attr(555,root,qmail)                   %{_prefix}/bin/qbase64
 %attr(555,root,qmail)                   %{_prefix}/bin/swaks
 %attr(555,root,qmail)                   %{_prefix}/bin/rhosts
 %attr(555,root,qmail)                   %{_prefix}/bin/replier

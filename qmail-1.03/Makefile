@@ -1342,7 +1342,7 @@ run-cleanq.9
 
 it: \
 perm_list 822date 822field 822header 822print 822received addcr addrlist \
-argv0 atrn autoresponder balance_outgoing base64 batv binm1 binm1+df \
+argv0 atrn autoresponder balance_outgoing qbase64 batv binm1 binm1+df \
 binm2 binm2+df binm3 binm3+df bouncesaying cdbdump cdbget cdbgetm \
 cdbmake cdbmake-12 cdbmake-sv cdbstats cdbtest cidr condredirect config-fast \
 datemail delcr dk-filter dknewkey dktest dnscname dnsfq dnsip \
@@ -3585,15 +3585,15 @@ compile queue-fix.c direntry.h stralloc.h fmt.h error.h subfd.h getln.h str.h op
 scan.h auto_split.h auto_uids.h tcpto.h
 	./compile queue-fix.c
 
-base64: \
-load base64.o base64sub.o sgetopt.o subgetopt.o error_str.o getln.o getln2.o \
+qbase64: \
+load qbase64.o base64sub.o sgetopt.o subgetopt.o error_str.o getln.o getln2.o \
 substdio.a stralloc.a alloc.a error.o str.a
-	./load base64 base64sub.o sgetopt.o subgetopt.o error_str.o getln.o getln2.o \
+	./load qbase64 base64sub.o sgetopt.o subgetopt.o error_str.o getln.o getln2.o \
 	substdio.a stralloc.a alloc.a error.o str.a
 
-base64.o: \
-compile base64.c stralloc.h base64.h sgetopt.h getln.h error.h
-	./compile base64.c
+qbase64.o: \
+compile qbase64.c stralloc.h base64.h sgetopt.h getln.h error.h
+	./compile qbase64.c
 
 maildirdeliver: \
 load maildirdeliver.o now.o envread.o substdio.a strerr.a error.a fs.a \
