@@ -1,8 +1,11 @@
 #
-# $Log: $
+# $Log: indimail-mta.te,v $
+# Revision 1.1  2016-06-02 18:04:09+05:30  Cprogrammer
+# Initial revision
 #
 #
-# $Id: $
+#
+# $Id: indimail-mta.te,v 1.1 2016-06-02 18:04:09+05:30 Cprogrammer Exp mbhangui $
 # 
 #
 # semanage permissive -a svc_start_t
