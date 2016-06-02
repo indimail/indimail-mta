@@ -1,6 +1,6 @@
 #
 #
-# $Id: qmail.spec,v 1.43 2016-06-02 17:42:35+05:30 Cprogrammer Exp mbhangui $
+# $Id: qmail.spec,v 1.44 2016-06-02 18:05:16+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %define _unpackaged_files_terminate_build 1
 
@@ -541,6 +541,7 @@ done
 %ghost %attr(0644,indimail,indimail)              %{qsysconfdir}/tcp.qmqp.cdb
 %ghost %attr(0644,root,root)                      %{qsysconfdir}/services.log
 
+%attr(444,root,root)                              %{qsysconfdir}/indimail.te
 %attr(444,root,root)                              %{qsysconfdir}/qmailprog.list
 %attr(444,root,qmail)                             %{qsysconfdir}/etc/leapsecs.dat
 %attr(444,root,qmail)                             %{qsysconfdir}/etc/leapsecs.txt
@@ -1180,6 +1181,11 @@ if [ $argv1 -eq 2 ] ; then # upgrade
 		echo "Running Custom Upgrade Script for post"
 		/bin/sh %{shareddir}/boot/rpm.init upgrade
 	fi
+	echo "doing post upgrade activities"
+	(
+	# selinux
+	%{_prefix}/sbin/svctool --config=selinux
+	) >> /tmp/indimail-mta-install.log 2>&1
 	exit 0
 fi
 if [ -x /bin/touch ] ; then
@@ -1442,6 +1448,8 @@ do
 	done
 done
 
+# selinux
+%{_prefix}/sbin/svctool --config=selinux
 #
 # Install IndiMail to be started on system boot
 # The add-boot command installs svscan to be started by init, systemd, upstart or launchctl
@@ -1609,6 +1617,7 @@ do
 			%{__rm} -f $j.cdb
 	done
 done
+%{__rm} -f %{qsysconfdir}/indimail-mta.te %{qsysconfdir}/indimail-mta.mod %{qsysconfdir}/indimail-mta.pp
 /bin/rmdir --ignore-fail-on-non-empty %{qsysconfdir} 2>/dev/null
 for i in assign cdb
 do
