@@ -1,5 +1,8 @@
 /*
  * $Log: hier.c,v $
+ * Revision 1.202  2016-06-02 19:04:09+05:30  Cprogrammer
+ * moved whois to sbin
+ *
  * Revision 1.201  2016-06-02 18:05:38+05:30  Cprogrammer
  * added selinux policy file indimail-mta.te
  *
@@ -753,7 +756,6 @@ hier(inst_dir, fatal)
 	c(auto_qmail_home, "bin", "dnsptr", auto_uido, auto_gidq, 0555);
 	c(auto_qmail_home, "bin", "dnsip", auto_uido, auto_gidq, 0555);
 	c(auto_qmail_home, "bin", "dnsmxip", auto_uido, auto_gidq, 0555);
-	c(auto_qmail_home, "bin", "whois", auto_uido, auto_gidq, 0555);
 	c(auto_qmail_home, "bin", "dnsfq", auto_uido, auto_gidq, 0555);
 	c(auto_qmail_home, "bin", "ipmeprint", auto_uido, auto_gidq, 0555);
 	c(auto_qmail_home, "bin", "idedit", auto_uido, auto_gidq, 0555);
@@ -950,8 +952,6 @@ hier(inst_dir, fatal)
 	c(auto_qmail_home, "bin", "qhpsi", auto_uidc, auto_gidq, 06511);
 	c(auto_qmail_home, "bin", "qscanq", auto_uidc, auto_gidc, 04511);
 	c(auto_qmail_home, "bin", "run-cleanq", auto_uido, auto_gidc, 02511);
-	c(auto_qmail_home, "sbin", "sys-checkpwd", auto_uido, auto_gidq, 0555);
-	c(auto_qmail_home, "sbin", "ldap-checkpwd", auto_uido, auto_gidq, 0555);
 
 	/*- misc */
 #ifdef BATV
@@ -961,6 +961,9 @@ hier(inst_dir, fatal)
 	c(auto_qmail_home, "sbin", "qmailconfig", auto_uido, auto_gidq, 0555);
 	c(auto_qmail_home, "sbin", "config-fast", auto_uido, auto_gidq, 0555);
 	c(auto_qmail_home, "sbin", "instcheck", auto_uido, auto_gidq, 0500);
+	c(auto_qmail_home, "sbin", "sys-checkpwd", auto_uido, auto_gidq, 0555);
+	c(auto_qmail_home, "sbin", "ldap-checkpwd", auto_uido, auto_gidq, 0555);
+	c(auto_qmail_home, "sbin", "whois", auto_uido, auto_gidq, 0555);
 
 	/* Man Pages, Documents */
 	c(auto_shared,     "doc", "QMAILFAQ", auto_uido, auto_gidq, 0444);
@@ -1394,7 +1397,7 @@ hier(inst_dir, fatal)
 void
 getversion_install_big_c()
 {
-	static char    *x = "$Id: hier.c,v 1.201 2016-06-02 18:05:38+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: hier.c,v 1.202 2016-06-02 19:04:09+05:30 Cprogrammer Exp mbhangui $";
 
 #ifdef INDIMAIL
 	if (x)
