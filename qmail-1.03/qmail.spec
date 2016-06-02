@@ -1,6 +1,6 @@
 #
 #
-# $Id: qmail.spec,v 1.44 2016-06-02 18:05:16+05:30 Cprogrammer Exp mbhangui $
+# $Id: qmail.spec,v 1.45 2016-06-02 19:04:21+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %define _unpackaged_files_terminate_build 1
 
@@ -603,7 +603,6 @@ done
 %attr(555,root,qmail)                   %{_prefix}/bin/recordio
 %attr(555,root,qmail)                   %{_prefix}/bin/uacl
 %attr(555,root,qmail)                   %{_prefix}/bin/dnsmxip
-%attr(555,root,qmail)                   %{_prefix}/bin/whois
 %attr(555,root,qmail)                   %{_prefix}/bin/zrecipients
 %attr(555,root,qmail)                   %{_prefix}/bin/xsender
 %attr(555,root,qmail)                   %{_prefix}/bin/rxdelay
@@ -774,6 +773,7 @@ done
 %attr(555,root,qmail)                   %{_prefix}/bin/senders
 %attr(555,root,qmail)                   %{_prefix}/bin/spfquery
 %attr(555,root,qmail)                   %{_prefix}/bin/srsfilter
+%attr(555,root,qmail)                   %{_prefix}/sbin/whois
 %attr(555,root,qmail)                   %{_prefix}/sbin/hostname
 %attr(555,root,qmail)                   %{_prefix}/sbin/config-fast
 %attr(555,root,qmail)                   %{_prefix}/sbin/qmailconfig

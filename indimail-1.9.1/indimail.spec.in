@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail.spec.in,v 2.335 2016-06-02 17:44:46+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 2.336 2016-06-02 19:05:00+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %define _unpackaged_files_terminate_build 1
 
@@ -1206,7 +1206,6 @@ fi
 %attr(500,root,qmail)                   %{_prefix}/bin/qmail-lspawn
 %attr(555,root,qmail)                   %{_prefix}/bin/dnstxt
 %attr(555,root,qmail)                   %{_prefix}/bin/dnsmxip
-%attr(555,root,qmail)                   %{_prefix}/bin/whois
 %attr(555,root,qmail)                   %{_prefix}/bin/dnsfq
 %attr(555,root,qmail)                   %{_prefix}/bin/dnsptr
 %attr(555,root,qmail)                   %{_prefix}/bin/dnsip
@@ -1428,6 +1427,7 @@ fi
 %attr(555,root,qmail)                   %{_prefix}/sbin/plugtest
 %attr(555,root,qmail)                   %{_prefix}/sbin/sys-checkpwd
 %attr(555,root,qmail)                   %{_prefix}/sbin/ldap-checkpwd
+%attr(555,root,qmail)                   %{_prefix}/sbin/whois
 
 %if %nonssd == 0
 %attr(555,root,qmail)                   %{_prefix}/sbin/nssd

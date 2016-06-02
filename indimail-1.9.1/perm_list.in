@@ -313,7 +313,6 @@
 %attr(0555,root,qmail) @prefix@/bin/tai64n2tai
 %attr(0555,root,qmail) @prefix@/bin/udpclient
 %attr(0555,root,qmail) @prefix@/bin/udplogger
-%attr(0555,root,qmail) @prefix@/bin/whois
 %attr(0555,root,qmail) @prefix@/bin/yearcal
 %attr(0555,root,qmail) @prefix@/bin/qaes
 %attr(0555,root,root)  @prefix@/bin/rblsmtpd
@@ -405,25 +404,17 @@
 %attr(0555,root,qmail) @prefix@/sbin/vserverinfo
 %attr(0555,root,qmail) @prefix@/sbin/vsetpass
 %attr(0555,root,qmail) @prefix@/sbin/vtable
+%attr(0555,root,qmail) @prefix@/sbin/whois
 
 %attr(0555,root,root) @prefix@/sbin/bf_compact
 %attr(0555,root,root) @prefix@/sbin/bf_copy
 %attr(0555,root,root) @prefix@/sbin/bf_tar
 %attr(0555,root,root) @prefix@/sbin/clamd
-%attr(0555,root,root) @prefix@/sbin/fetchmail.cron
-%attr(0555,root,root) @prefix@/sbin/fetchmail.down
-%attr(0555,root,root) @prefix@/sbin/fetchmail.up
-%attr(0555,root,root) @prefix@/sbin/fixwvdialconf
 %attr(0555,root,root) @prefix@/sbin/imaplogin
-%attr(0555,root,root) @prefix@/sbin/ip-down.local
-%attr(0555,root,root) @prefix@/sbin/ip-up.local
 %attr(0555,root,root) @prefix@/sbin/pam-checkpwd
 %attr(0555,root,root) @prefix@/sbin/pop3login
-%attr(0555,root,root) @prefix@/sbin/ppp-off
 %attr(0555,root,root) @prefix@/sbin/sharedindexinstall
 %attr(0555,root,root) @prefix@/sbin/sharedindexsplit
-%attr(0555,root,root) @prefix@/sbin/slemsPrivate
-%attr(0555,root,root) @prefix@/sbin/writefifo
 #
 # logalert
 #

@@ -262,7 +262,6 @@
 %attr(0555,root,qmail) @prefix@/bin/tai64n2tai
 %attr(0555,root,qmail) @prefix@/bin/udpclient
 %attr(0555,root,qmail) @prefix@/bin/udplogger
-%attr(0555,root,qmail) @prefix@/bin/whois
 %attr(0555,root,qmail) @prefix@/bin/leapsecs
 %attr(0555,root,qmail) @prefix@/bin/nowutc
 %attr(0555,root,qmail) @prefix@/bin/yearcal
@@ -278,6 +277,7 @@
 %attr(0500,root,qmail) @prefix@/sbin/instcheck
 %attr(0555,root,qmail) @prefix@/sbin/svctool
 %attr(0555,root,qmail) @prefix@/sbin/sys-checkpwd
+%attr(0555,root,qmail) @prefix@/sbin/whois
 #
 # Setuid
 #
