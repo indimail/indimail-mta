@@ -1,5 +1,8 @@
 /*
  * $Log: hier.c,v $
+ * Revision 1.201  2016-06-02 18:05:38+05:30  Cprogrammer
+ * added selinux policy file indimail-mta.te
+ *
  * Revision 1.200  2016-06-02 17:40:36+05:30  Cprogrammer
  * renamed base64 to qbase64
  *
@@ -656,6 +659,7 @@ hier(inst_dir, fatal)
 #endif
 	c(auto_sysconfdir, "etc", "leapsecs.dat", auto_uido, auto_gidq, 0644);
 	c(auto_sysconfdir, "etc", "leapsecs.txt", auto_uido, auto_gidq, 0644);
+	c(auto_sysconfdir, "etc/..", "indimail-mta.te", auto_uido, auto_gidq, 0644);
 
 	/* Binaries */
 	c(auto_qmail_home, "bin", "qmail-lspawn", auto_uido, auto_gidq, 0500);
@@ -1390,7 +1394,7 @@ hier(inst_dir, fatal)
 void
 getversion_install_big_c()
 {
-	static char    *x = "$Id: hier.c,v 1.200 2016-06-02 17:40:36+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: hier.c,v 1.201 2016-06-02 18:05:38+05:30 Cprogrammer Exp mbhangui $";
 
 #ifdef INDIMAIL
 	if (x)
