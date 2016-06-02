@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail.spec.in,v 2.334 2016-06-01 09:50:12+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 2.335 2016-06-02 17:44:46+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %define _unpackaged_files_terminate_build 1
 
@@ -81,7 +81,7 @@
 
 %define _verbose           1
 %define qcount             5
-%define qbase              %{_prefix}/queue
+%define qbase              %{indimaildir}/queue
 %define mbase              @basepath@
 %define logdir             @logdir@
 %define servicedir         /service
@@ -737,7 +737,7 @@ do
 %endif
 		# courier-imap installations misses out on this
 		if [ %nocourierimap -eq 0 -a " $i" = " courier-imap-%{courier_version}" ] ; then
-			%{__mkdir_p} %{buildroot}%{_prefix}/man/man1
+			%{__mkdir_p} %{buildroot}%{mandir}/man1
 			%{__cp} libs/tcpd/couriertls.1 %{buildroot}%{mandir}/man1/couriertls.1
 		fi
 		cd ..
@@ -1303,7 +1303,7 @@ fi
 %attr(555,root,qmail)                   %{_prefix}/bin/xqp
 %attr(555,root,qmail)                   %{_prefix}/bin/dot-forward
 %attr(555,root,qmail)                   %{_prefix}/bin/datemail
-%attr(555,root,qmail)                   %{_prefix}/bin/base64
+%attr(555,root,qmail)                   %{_prefix}/bin/qbase64
 %attr(555,root,qmail)                   %{_prefix}/bin/swaks
 %attr(555,root,qmail)                   %{_prefix}/bin/rhosts
 %attr(555,root,qmail)                   %{_prefix}/bin/replier
@@ -2280,18 +2280,18 @@ do
 	%{__rm} -f /var/spool/mail/$i
 done
 
-/usr/bin/getent passwd indimail > /dev/null || /usr/sbin/useradd -r -g indimail -u 555 -d %{_prefix} indimail || true
+/usr/bin/getent passwd indimail > /dev/null || /usr/sbin/useradd -r -g indimail -u 555 -d %{indimaildir} indimail || true
 if [ $? = 4 ] ; then
-	/usr/sbin/useradd -r -g indimail -d %{_prefix} indimail
+	/usr/sbin/useradd -r -g indimail -d %{indimaildir} indimail
 fi
-/usr/bin/getent passwd alias    > /dev/null || /usr/sbin/useradd -M -g nofiles  -d %{_prefix}/alias  -s /sbin/nologin  alias || true
-/usr/bin/getent passwd qmaild   > /dev/null || /usr/sbin/useradd -M -g nofiles  -d %{_prefix}        -s /sbin/nologin qmaild || true
-/usr/bin/getent passwd qmaill   > /dev/null || /usr/sbin/useradd -M -g nofiles  -d %{_prefix}        -s /sbin/nologin qmaill || true
-/usr/bin/getent passwd qmailp   > /dev/null || /usr/sbin/useradd -M -g nofiles  -d %{_prefix}        -s /sbin/nologin qmailp || true
-/usr/bin/getent passwd qmailq   > /dev/null || /usr/sbin/useradd -M -g qmail    -d %{_prefix}        -s /sbin/nologin qmailq || true
-/usr/bin/getent passwd qmailr   > /dev/null || /usr/sbin/useradd -M -g qmail    -d %{_prefix}        -s /sbin/nologin qmailr || true
-/usr/bin/getent passwd qmails   > /dev/null || /usr/sbin/useradd -M -g qmail    -d %{_prefix}        -s /sbin/nologin qmails || true
-/usr/bin/getent passwd qscand   > /dev/null || /usr/sbin/useradd -M -g qscand   -d %{_prefix}/qscanq -G qmail,qscand -s /sbin/nologin qscand || true
+/usr/bin/getent passwd alias    > /dev/null || /usr/sbin/useradd -M -g nofiles  -d %{indimaildir}/alias  -s /sbin/nologin  alias || true
+/usr/bin/getent passwd qmaild   > /dev/null || /usr/sbin/useradd -M -g nofiles  -d %{indimaildir}        -s /sbin/nologin qmaild || true
+/usr/bin/getent passwd qmaill   > /dev/null || /usr/sbin/useradd -M -g nofiles  -d %{indimaildir}        -s /sbin/nologin qmaill || true
+/usr/bin/getent passwd qmailp   > /dev/null || /usr/sbin/useradd -M -g nofiles  -d %{indimaildir}        -s /sbin/nologin qmailp || true
+/usr/bin/getent passwd qmailq   > /dev/null || /usr/sbin/useradd -M -g qmail    -d %{indimaildir}        -s /sbin/nologin qmailq || true
+/usr/bin/getent passwd qmailr   > /dev/null || /usr/sbin/useradd -M -g qmail    -d %{indimaildir}        -s /sbin/nologin qmailr || true
+/usr/bin/getent passwd qmails   > /dev/null || /usr/sbin/useradd -M -g qmail    -d %{indimaildir}        -s /sbin/nologin qmails || true
+/usr/bin/getent passwd qscand   > /dev/null || /usr/sbin/useradd -M -g qscand   -d %{indimaildir}/qscanq -G qmail,qscand -s /sbin/nologin qscand || true
 if [ $nscd_up -ge 1 ] ; then
 	if [ -x %{_sysconfdir}/init.d/nscd ] ; then
 		%{_sysconfdir}/init.d/nscd start
@@ -2317,12 +2317,12 @@ else
 fi
 
 if [ $argv1 -eq 2 ] ; then # upgrade
-	if [ -f %{_prefix}/boot/rpm.init ] ; then
+	if [ -f %{shareddir}/boot/rpm.init ] ; then
 %if %i_m_on_mac == 0
 		/sbin/ldconfig
 %endif
 		echo "Running Custom Upgrade Script for post"
-		/bin/sh %{_prefix}/boot/rpm.init upgrade
+		/bin/sh %{shareddir}/boot/rpm.init upgrade
 	fi
 	echo "doing post upgrade activities"
 	(
@@ -2354,7 +2354,7 @@ echo " 2. Configure %{servicedir}. Move existing services to %{servicedir}.org"
 echo " 3. Configure svscanlog service"
 echo " 4. Configure standard catch-all accounts, default qmail configuration"
 echo " 5. Configure %{sysconfdir}/indimail.cnf for MySQL service"
-echo " 6. Configure MySQL DB in %{_prefix}/mysqldb/data"
+echo " 6. Configure MySQL DB in %{indimaildir}/mysqldb/data"
 echo " 7. Configure DKIM, Domainkeys signature"
 echo " 8. Configure QHPSI for inline virus scanning"
 echo " 9. Configure SMTP services on port in 465 25 587"
@@ -2370,7 +2370,7 @@ echo "18. Configure indisrvr service"
 echo "19. Configure nssd service"
 echo "20. Configure inlookup service"
 echo "21. Configure qscanq/clamd/freshclam service"
-echo "22. Configure %{_prefix}/control/signatures"
+echo "22. Configure %{sysconfdir}/control/signatures"
 echo "23. Configure SPAM filter configuration"
 echo "24. Configure tcprules database for SMTP, IMAP, POP3, popass"
 echo "25. Configure selinux configuration"
@@ -2393,8 +2393,8 @@ fi
 # svscanlog service
 %{_prefix}/sbin/svctool --svscanlog --servicedir=%{servicedir}
 
-echo "Creating default qmail configuraton and catch-all alias (${_prefix}/alias/Maildir) for all system users"
-%{_prefix}/sbin/svctool --config=qmail --postmaster=%{_prefix}/alias/Maildir/ \
+echo "Creating default qmail configuraton and catch-all alias (${indimaildir}/alias/Maildir) for all system users"
+%{_prefix}/sbin/svctool --config=qmail --postmaster=%{indimaildir}/alias/Maildir/ \
 	--default-domain=%{default_domain} --mysqlhost=localhost --mysqluser=indimail \
 	--mysqlpass=ssh-1.5- --mysqlsocket=%{mysqlSocket}
 
@@ -2405,10 +2405,10 @@ if [ -x %{mysqlPrefix}/libexec/mysqld -o -x %{mysqlPrefix}/sbin/mysqld ] ; then
 	%{_prefix}/sbin/svctool --config=mysql   --mysqlPrefix=%{mysqlPrefix} --mysqlsocket=%{mysqlSocket}
 	# MySQL Database Creation
 	%{_prefix}/sbin/svctool --config=mysqldb --mysqlPrefix=%{mysqlPrefix} \
-    	--databasedir=%{_prefix}/mysqldb --base_path=%{mbase} --mysqlsocket=%{mysqlSocket}
+    	--databasedir=%{indimaildir}/mysqldb --base_path=%{mbase} --mysqlsocket=%{mysqlSocket}
 	# MySQL Supervise creation
 	%{_prefix}/sbin/svctool --mysql=3306 --servicedir=%{servicedir} --mysqlPrefix=%{mysqlPrefix} \
-		--databasedir=%{_prefix}/mysqldb --config=%{sysconfdir}/indimail.cnf --default-domain=%{default_domain}
+		--databasedir=%{indimaildir}/mysqldb --config=%{sysconfdir}/indimail.cnf --default-domain=%{default_domain}
 	count=`ps -e|grep mysqld|wc -l`
 	if [ $count -gt 0 ] ; then
 		echo "Disabling mysqld service"
@@ -2426,7 +2426,7 @@ if [ %nodksignatures -eq 0 ] ; then
 		if [ " $key_bit" = " " ] ; then
 			key_bit=1024
 		fi
-		%{_prefix}/bin/dknewkey %{_prefix}/control/domainkeys/default $key_bit
+		%{_prefix}/bin/dknewkey %{sysconfdir}/control/domainkeys/default $key_bit
 	else
 		ver_opt="none"
 		sign_opt="none"
@@ -2533,7 +2533,7 @@ do
 				--qhpsi="$qhpsi" \
 				--dmasquerade \
 				--dkverify=$ver_opt \
-				--dksign=$sign_opt --private_key=%{_prefix}/control/domainkeys/%/%{dkimkeyfn} \
+				--dksign=$sign_opt --private_key=%{sysconfdir}/control/domainkeys/%/%{dkimkeyfn} \
 				$extra_opt
 		else
 			%{_prefix}/sbin/svctool --smtp=$port --servicedir=%{servicedir} \
@@ -2546,7 +2546,7 @@ do
 				--logfilter=/tmp/spamfifo --rejectspam=0 --spamexitcode=0 \
 				--dmasquerade \
 				--dkverify=both \
-				--dksign=both --private_key=%{_prefix}/control/domainkeys/%/%{dkimkeyfn} \
+				--dksign=both --private_key=%{sysconfdir}/control/domainkeys/%/%{dkimkeyfn} \
 				$extra_opt
 		fi
 	else
@@ -2560,7 +2560,7 @@ do
 				--qhpsi="$qhpsi" \
 				--dmasquerade \
 				--dkverify=both \
-				--dksign=both --private_key=%{_prefix}/control/domainkeys/%/%{dkimkeyfn} \
+				--dksign=both --private_key=%{sysconfdir}/control/domainkeys/%/%{dkimkeyfn} \
 				$extra_opt
 		else
 			%{_prefix}/sbin/svctool --smtp=$port --servicedir=%{servicedir} \
@@ -2571,7 +2571,7 @@ do
 				--min-free=52428800 --content-filter --virus-filter \
 				--dmasquerade \
 				--dkverify=both \
-				--dksign=both --private_key=%{_prefix}/control/domainkeys/%/%{dkimkeyfn} \
+				--dksign=both --private_key=%{sysconfdir}/control/domainkeys/%/%{dkimkeyfn} \
 				$extra_opt
 		fi
 	fi
@@ -2690,7 +2690,7 @@ fi
 # IndiMail Daemons
 %{_prefix}/sbin/svctool --indisrvr=4000 --servicedir=%{servicedir} \
 	--localip=0 --maxdaemons=40 --maxperip=25 --avguserquota=2097152 \
-    --certfile=%{_prefix}/control/servercert.pem --ssl \
+    --certfile=%{sysconfdir}/control/servercert.pem --ssl \
 	--hardquota=52428800 --base_path=%{mbase}
 %{_prefix}/sbin/svctool --inlookup=infifo --servicedir=%{servicedir} --cntrldir=control \
 	--threads=5 --query-cache --password-cache
@@ -2701,7 +2701,7 @@ if [ %nonssd -eq 0 ] ; then
 fi
 %{_prefix}/sbin/svctool --poppass=106 --localip=0 --maxdaemons=40 --maxperip=25 \
 	--memory=%{poppass_mem} \
-    --certfile=%{_prefix}/control/servercert.pem --ssl \
+    --certfile=%{sysconfdir}/control/servercert.pem --ssl \
 	--setpassword=%{_prefix}/sbin/vsetpass --servicedir=%{servicedir}
 
 # virus/spam filtering
@@ -2729,7 +2729,7 @@ fi
 # udplogger service
 %{_prefix}/sbin/svctool --udplogger=3000 --localip=0 --timeout=10 --servicedir=%{servicedir}
 
-%{__cat} <<EOF > %{_prefix}/control/signatures
+%{__cat} <<EOF > %{sysconfdir}/control/signatures
 # Windows executables seen in active virii
 TVqQAAMAA:
 TVpQAAIAA
@@ -2751,7 +2751,7 @@ R0lGODlhaAA7APcAAP///+rp6puSp6GZrDUjUUc6Zn53mFJMdbGvvVtXh2xre8bF1x8cU4yLprOy:Vir
 # http://www.gossamer-threads.com/lists/qmail/users/114447
 UEsDBAoAAQAAAEBHYzCf4kJRDDAAAAAwAAAKAAAAc3ZtaXhlLmV4ZcuI1rOkjfn48VwCkMYHRTfM
 EOF
-%{__chown} qscand:qscand %{_prefix}/control/signatures
+%{__chown} qscand:qscand %{sysconfdir}/control/signatures
 
 #
 # bogofilter configuration
@@ -2787,9 +2787,9 @@ if [ -f ${sysconfdir}/cronlist ] ; then
 fi
 ) >> /tmp/indimail-install.log 2>&1
 
-if [ -f %{_prefix}/boot/rpm.init ] ; then
+if [ -f %{shareddir}/boot/rpm.init ] ; then
 	echo "Running Custom Installation Script for post"
-	/bin/sh %{_prefix}/boot/rpm.init post
+	/bin/sh %{shareddir}/boot/rpm.init post
 fi
 
 if [ -x /bin/systemctl ] ; then
@@ -2812,7 +2812,7 @@ else
 %endif
 fi
 count=`expr $count + 1`
-echo "$count. Change your default domain in %{_prefix}/control/defaultdomain"
+echo "$count. Change your default domain in %{sysconfdir}/control/defaultdomain"
 count=`expr $count + 1`
 echo "$count. You can optionally run the following command to verify installation"
 echo "   sudo rpm -V indimail"
@@ -2821,7 +2821,7 @@ count=`expr $count + 1`
 echo "$count. You need to ensure that clamav signatures download have completed so that"
 echo "   you can start sending emails. Look at %{logdir}/freshclam/current"
 %endif
-if [ ! -f %{_prefix}/control/servercert.pem ] ; then
+if [ ! -f %{sysconfdir}/control/servercert.pem ] ; then
 count=`expr $count + 1`
 %if %nocourierimap == 0
 echo "$count. You need to create CERTS for STARTTLS / SSL enabled IMAP/POP3."
@@ -2872,9 +2872,9 @@ then
 	sleep 5
 fi
 
-if [ -f %{_prefix}/boot/rpm.init ] ; then
+if [ -f %{shareddir}/boot/rpm.init ] ; then
 	echo "Running Custom Un-Installation Script for preun"
-	/bin/sh %{_prefix}/boot/rpm.init preun "$argv1"
+	/bin/sh %{shareddir}/boot/rpm.init preun "$argv1"
 fi
 
 # we are doing upgrade
@@ -2939,7 +2939,7 @@ fi
 
 echo "removing binaries, libraries, queues, man pages"
 if [ %{_prefix} = "/var/indimail" -o %{_prefix} = "/var/qmail" ] ; then
-	for i in %{_prefix}/bin %{_prefix}/sbin %{_prefix}/lib %{_prefix}/queue \
+	for i in %{_prefix}/bin %{_prefix}/sbin %{_prefix}/lib %{indimaildir}/queue \
 		%{mandir}/man1 %{mandir}/cat1 %{mandir}/man5 %{mandir}/cat5 \
 		%{mandir}/man7 %{mandir}/cat7 %{mandir}/man8 %{mandir}/cat8
 	do
@@ -2959,7 +2959,7 @@ else
 		echo "removing link $i"
 		%{__rm} -f %{indimaildir}/$i || true
 	done
-	%{__rm} -rf %{_prefix}/queue || true
+	%{__rm} -rf %{indimaildir}/queue || true
 fi
 if [ -d %{mandir} ] ; then
 echo "removing man pages"
@@ -3114,9 +3114,9 @@ echo "recreating ld.so cache"
 /sbin/ldconfig
 %endif
 
-if [ -f %{_prefix}/boot/rpm.init ] ; then
+if [ -f %{shareddir}/boot/rpm.init ] ; then
 	echo "Running Custom Un-Installation Script for postun"
-	/bin/sh %{_prefix}/boot/rpm.init postun
+	/bin/sh %{shareddir}/boot/rpm.init postun
 fi
 
 ### SCRIPTLET ###############################################################################
@@ -3128,9 +3128,9 @@ if [ $ID -ne 0 ] ; then
 	exit 1
 fi
 #echo "Running postrans script for %{version}-%{release} : arg=$1"
-if [ -f %{_prefix}/boot/rpm.init ] ; then
+if [ -f %{shareddir}/boot/rpm.init ] ; then
 	echo "Running Custom Installation Script for posttrans"
-	/bin/sh %{_prefix}/boot/rpm.init posttrans
+	/bin/sh %{shareddir}/boot/rpm.init posttrans
 fi
 echo ""
 
@@ -3211,11 +3211,11 @@ if [ $argv1 -eq 1 ] ; then
 fi
 if [ %{_prefix} = "/var/indimail" -o %{_prefix} = "/var/qmail" ] ; then
 echo "removing man pages, include files"
-for i in %{_prefix}/include %{_prefix}/man/man3
+for i in %{_prefix}/include %{mandir}/man3
 do
 	%{__rm} -rf $i || true
 done
-/bin/rmdir --ignore-fail-on-non-empty %{_prefix}/man 2>/dev/null
+/bin/rmdir --ignore-fail-on-non-empty %{mandir} 2>/dev/null
 fi
 echo "removing static libraries"
 %{__rm} -f %{_libdir}/libeps.a
@@ -3272,9 +3272,9 @@ fi
 
 %{__rm} -f /var/spool/mail/indimail
 
-/usr/bin/getent passwd indimail > /dev/null || /usr/sbin/useradd -r -g indimail -u 555 -d %{_prefix} indimail || true
+/usr/bin/getent passwd indimail > /dev/null || /usr/sbin/useradd -r -g indimail -u 555 -d %{indimaildir} indimail || true
 if [ $? = 4 ] ; then
-	/usr/sbin/useradd -r -g indimail -d %{_prefix} indimail
+	/usr/sbin/useradd -r -g indimail -d %{indimaildir} indimail
 fi
 if [ $nscd_up -ge 1 ] ; then
 	if [ -x %{_sysconfdir}/init.d/nscd ] ; then
@@ -3321,7 +3321,7 @@ if [ -n $alternatives_cmd ] ; then
 	/usr/sbin/alternatives --install \
 		/usr/sbin/sendmail mta %{_prefix}/bin/sendmail 120 \
 		--slave /usr/share/man/man8/sendmail.8.gz mta-sendmailman \
-			%{_prefix}/man/man8/sendmail.8.gz \
+			%{mandir}/man8/sendmail.8.gz \
 		--slave /usr/lib/sendmail mta-sendmail %{_prefix}/bin/sendmail \
 		--slave /usr/bin/rmail mta-rmail %{_prefix}/bin/rmail
 	/usr/sbin/alternatives --set mta %{_prefix}/bin/sendmail
@@ -3351,8 +3351,8 @@ else
 		fi
 	done
 fi
-if [ ! -f %{_prefix}/control/idhost ] ; then
-	uname -n > %{_prefix}/control/idhost
+if [ ! -f %{sysconfdir}/control/idhost ] ; then
+	uname -n > %{sysconfdir}/control/idhost
 fi
 
 %postun mini
