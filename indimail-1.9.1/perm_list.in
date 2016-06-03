@@ -93,7 +93,6 @@
 %attr(0555,root,qmail) @prefix@/bin/checkaddr
 %attr(0555,root,qmail) @prefix@/bin/checkdomain
 %attr(0555,root,qmail) @prefix@/bin/cidr
-%attr(0555,root,qmail) @prefix@/bin/cleanq
 %attr(0555,root,qmail) @prefix@/bin/columnt
 %attr(0555,root,qmail) @prefix@/bin/condredirect
 %attr(0555,root,qmail) @prefix@/bin/condtomaildir
@@ -189,13 +188,10 @@
 %attr(0555,root,qmail) @prefix@/bin/qmail-inject
 %attr(0555,root,qmail) @prefix@/bin/qmail-lagcheck
 %attr(0555,root,qmail) @prefix@/bin/qmail-lint
-%attr(0555,root,qmail) @prefix@/bin/qmail-multi
-%attr(0555,root,qmail) @prefix@/bin/qmail-nullqueue
 %attr(0555,root,qmail) @prefix@/bin/qmail-pop3d
 %attr(0555,root,qmail) @prefix@/bin/qmail-popbull
 %attr(0555,root,qmail) @prefix@/bin/qmail-poppass
 %attr(0555,root,qmail) @prefix@/bin/qmail-qfilter
-%attr(0555,root,qmail) @prefix@/bin/qmail-qmqpc
 %attr(0555,root,qmail) @prefix@/bin/qmail-qmqpd
 %attr(0555,root,qmail) @prefix@/bin/qmail-qmtpd
 %attr(0555,root,qmail) @prefix@/bin/qmail-qread
@@ -211,11 +207,9 @@
 %attr(0555,root,qmail) @prefix@/bin/qnotify
 %attr(0555,root,qmail) @prefix@/bin/qpq
 %attr(0555,root,qmail) @prefix@/bin/qreceipt
-%attr(0555,root,qmail) @prefix@/bin/qscanq-stdin
 %attr(0555,root,qmail) @prefix@/bin/qsmhook
 %attr(0555,root,qmail) @prefix@/bin/queue-fix
 %attr(0555,root,qmail) @prefix@/bin/randstr
-%attr(0555,root,qmail) @prefix@/bin/readproctitle
 %attr(0555,root,qmail) @prefix@/bin/recipients
 %attr(0555,root,qmail) @prefix@/bin/recordio
 %attr(0555,root,qmail) @prefix@/bin/replier
@@ -263,8 +257,6 @@
 %attr(0555,root,qmail) @prefix@/bin/surblqueue
 %attr(0555,root,qmail) @prefix@/bin/svc
 %attr(0555,root,qmail) @prefix@/bin/svok
-%attr(0555,root,qmail) @prefix@/bin/svscan
-%attr(0555,root,qmail) @prefix@/bin/svscanboot
 %attr(0555,root,qmail) @prefix@/bin/svstat
 %attr(0555,root,qmail) @prefix@/bin/swaks
 %attr(0555,root,qmail) @prefix@/bin/tai64n
@@ -405,6 +397,14 @@
 %attr(0555,root,qmail) @prefix@/sbin/vsetpass
 %attr(0555,root,qmail) @prefix@/sbin/vtable
 %attr(0555,root,qmail) @prefix@/sbin/whois
+%attr(0555,root,qmail) @prefix@/sbin/cleanq
+%attr(0555,root,qmail) @prefix@/sbin/qmail-qmqpc
+%attr(0555,root,qmail) @prefix@/sbin/qscanq-stdin
+%attr(0555,root,qmail) @prefix@/sbin/qmail-multi
+%attr(0555,root,qmail) @prefix@/sbin/qmail-nullqueue
+%attr(0555,root,qmail) @prefix@/sbin/svscan
+%attr(0555,root,qmail) @prefix@/sbin/svscanboot
+%attr(0555,root,qmail) @prefix@/sbin/readproctitle
 
 %attr(0555,root,root) @prefix@/sbin/bf_compact
 %attr(0555,root,root) @prefix@/sbin/bf_copy
@@ -432,8 +432,6 @@
 #
 # Setuid
 #
-%attr(2511,root,qscand)   @prefix@/bin/run-cleanq
-%attr(4511,qscand,qscand) @prefix@/bin/qscanq
 %attr(4555,root,qmail)    @libexecdir@/sq_vacation
 %attr(4555,root,root)     @prefix@/bin/printdir
 %attr(4555,root,root)     @prefix@/bin/vaddaliasdomain
@@ -451,9 +449,11 @@
 %attr(4555,root,root)     @prefix@/bin/vsetuserquota
 %attr(4555,root,root)     @prefix@/bin/vuserinfo
 %attr(4555,root,root)     @libexecdir@/authlib/authshadow
+%attr(2511,root,qscand)   @prefix@/sbin/run-cleanq
+%attr(4511,qscand,qscand) @prefix@/sbin/qscanq
 %attr(4555,root,root)     @prefix@/sbin/systpass
-%attr(6511,qmailq,qmail)  @prefix@/bin/qmail-queue
-%attr(6511,qscand,qmail)  @prefix@/bin/qhpsi
+%attr(6511,qmailq,qmail)  @prefix@/sbin/qmail-queue
+%attr(6511,qscand,qmail)  @prefix@/sbin/qhpsi
 %attr(6511,root,indimail) @prefix@/bin/bogofilter
 #
 # courier-imap

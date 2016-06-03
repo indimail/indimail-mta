@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail.spec.in,v 2.336 2016-06-02 19:05:00+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 2.337 2016-06-03 10:12:55+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %define _unpackaged_files_terminate_build 1
 
@@ -747,7 +747,7 @@ for i in eps cdb flash indimail
 do
 	%{__rm} -f %{buildroot}%{_libdir}/lib"$i".la
 done
-%{__rm} -f %{buildroot}%{shareddir}/modules/iauth.la
+%{__rm} -f %{buildroot}%{_prefix}/lib/indimail/modules/iauth.la
 
 if [ %noclamav -eq 0 ] ; then
 	for i in clamav clamunrar clamunrar_iface
@@ -898,11 +898,11 @@ if [ %nofetchmail -eq 0 ] ; then
 	$TOUCH %{buildroot}%{sysconfdir}/fetchmailrc
 fi
 if [ %noclamav -eq 0 ] ; then # clamav >= 0.97.5, without clamav-db
-	if [ ! -d %{buildroot}%{shareddir}/clamd ] ; then
-		%{__mkdir_p} %{buildroot}%{shareddir}/clamd
+	if [ ! -d %{buildroot}%{indimaildir}/clamd ] ; then
+		%{__mkdir_p} %{buildroot}%{indimaildir}/clamd
 	else # with built-in clamav signatures
-		$TOUCH %{buildroot}%{shareddir}/clamd/clamav
-		$TOUCH %{buildroot}%{shareddir}/clamd/mirrors.dat
+		$TOUCH %{buildroot}%{indimaildir}/clamd/clamav
+		$TOUCH %{buildroot}%{indimaildir}/clamd/mirrors.dat
 	fi
 fi
 
@@ -919,7 +919,7 @@ fi
 %dir %attr(555,root,root)         %{shareddir}
 %dir %attr(555,root,qmail)        %{shareddir}/boot
 %dir %attr(555,root,qmail)        %{shareddir}/doc
-%dir %attr(555,root,root)         %{shareddir}/modules
+%dir %attr(555,root,root)         %{_prefix}/lib/indimail
 %dir %attr(2555,alias,qmail)      %{indimaildir}/alias
 %dir %attr(750,qscand,qscand)     %{indimaildir}/qscanq
 %dir %attr(750,qscand,qscand)     %{indimaildir}/qscanq/root
@@ -1061,8 +1061,6 @@ fi
 #
 # Binaries
 #
-%attr(6511,qscand,qmail)                %{_prefix}/bin/qhpsi
-%attr(6511,qmailq,qmail)                %{_prefix}/bin/qmail-queue
 %attr(4555,root,root)                   %{_prefix}/bin/vrenameuser
 %attr(4555,root,root)                   %{_prefix}/bin/vmoveuser
 %attr(4555,root,root)                   %{_prefix}/bin/vuserinfo
@@ -1071,7 +1069,6 @@ fi
 %attr(4555,root,root)                   %{_prefix}/bin/vcfilter
 %attr(4555,root,root)                   %{_prefix}/bin/vsetuserquota
 %attr(4555,root,root)                   %{_prefix}/bin/vaddaliasdomain
-%attr(4511,qscand,qscand)               %{_prefix}/bin/qscanq
 %attr(4555,root,root)                   %{_prefix}/bin/vadduser
 %attr(4555,root,root)                   %{_prefix}/bin/printdir
 %attr(4555,root,root)                   %{_prefix}/bin/vdeluser
@@ -1079,7 +1076,10 @@ fi
 %attr(4555,root,root)                   %{_prefix}/bin/vdominfo
 %attr(4555,root,root)                   %{_prefix}/bin/vadddomain
 %attr(4555,root,root)                   %{_prefix}/bin/vdeldomain
-%attr(2511,root,qscand)                 %{_prefix}/bin/run-cleanq
+%attr(6511,qscand,qmail)                %{_prefix}/sbin/qhpsi
+%attr(6511,qmailq,qmail)                %{_prefix}/sbin/qmail-queue
+%attr(4511,qscand,qscand)               %{_prefix}/sbin/qscanq
+%attr(2511,root,qscand)                 %{_prefix}/sbin/run-cleanq
 %attr(4555,root,root)                   %{_prefix}/sbin/systpass
 
 %if %noperms == 0
@@ -1090,16 +1090,12 @@ fi
 %verify (not user group mode) %attr(4555, root, root)      %{_prefix}/bin/vrenamedomain
 %verify (not user group mode) %attr(4555, root, root)      %{_prefix}/bin/vsetuserquota
 %verify (not user group mode) %attr(4555, root, root)      %{_prefix}/bin/vmoveuser
-%verify (not user group mode) %attr(6511, qscand, qmail)   %{_prefix}/bin/qhpsi
-%verify (not user group mode) %attr(2511, root, qscand)    %{_prefix}/bin/run-cleanq
 %verify (not user group mode) %attr(4555, root, root)      %{_prefix}/bin/vuserinfo
-%verify (not user group mode) %attr(6511, qmailq, qmail)   %{_prefix}/bin/qmail-queue
 %verify (not user group mode) %attr(4555, root, root)      %{_prefix}/bin/vdeldomain
 %verify (not user group mode) %attr(4555, root, root)      %{_prefix}/bin/vadddomain
 %if %nobogofilter == 0
 %verify (not user group mode) %attr(6511, root, indimail)  %{_prefix}/bin/bogofilter
 %endif
-%verify (not user group mode) %attr(4555, qscand, qscand)  %{_prefix}/bin/qscanq
 %verify (not user group mode) %attr(4511, root, root)      %{_prefix}/bin/vdominfo
 %verify (not user group mode) %attr(4555, root, root)      %{_prefix}/bin/vrenameuser
 %verify (not user group mode) %attr(4555, root, root)      %{_prefix}/bin/printdir
@@ -1108,9 +1104,13 @@ fi
 %verify (not user group mode) %attr(4555, root, root)      %{_prefix}/bin/vbulletin
 %verify (not user group mode) %attr(4555, root, qmail)     %{libexedir}/sq_vacation
 %verify (not user group mode) %attr(4555, root, root)      %{libexedir}/authlib/authshadow
-%verify (not user group mode) %attr(4555, root, root)      %{_prefix}/sbin/systpass
 %verify (not user group mode) %attr(2555, alias, qmail)    %{_prefix}/alias
 %verify (not user group mode) %attr(2755, indimail, qmail) %{_prefix}/autoturn
+%verify (not user group mode) %attr(6511, qscand, qmail)   %{_prefix}/sbin/qhpsi
+%verify (not user group mode) %attr(2511, root, qscand)    %{_prefix}/sbin/run-cleanq
+%verify (not user group mode) %attr(6511, qmailq, qmail)   %{_prefix}/sbin/qmail-queue
+%verify (not user group mode) %attr(4555, qscand, qscand)  %{_prefix}/sbin/qscanq
+%verify (not user group mode) %attr(4555, root, root)      %{_prefix}/sbin/systpass
 %endif
 %endif
 
@@ -1180,7 +1180,7 @@ fi
 %attr(555,root,qmail)                   %{_prefix}/sbin/postdel
 
 %attr(555,root,qmail)                   %{_prefix}/bin/qmail-popbull
-%attr(555,root,qmail)                   %{_prefix}/bin/cleanq
+%attr(555,root,qmail)                   %{_prefix}/sbin/cleanq
 %attr(555,root,qmail)                   %{_prefix}/bin/zsuccesses
 %attr(555,root,qmail)                   %{_prefix}/bin/ofmipd
 %attr(555,root,qmail)                   %{_prefix}/bin/qmail-lagcheck
@@ -1237,7 +1237,6 @@ fi
 %attr(555,root,qmail)                   %{_prefix}/bin/dbinfo
 %attr(555,root,qmail)                   %{_prefix}/bin/sslerator
 %attr(555,root,qmail)                   %{_prefix}/bin/ifaddr
-%attr(555,root,qmail)                   %{_prefix}/bin/svscan
 %attr(555,root,qmail)                   %{_prefix}/bin/matchup
 %attr(555,root,qmail)                   %{_prefix}/bin/zspam
 %attr(555,root,qmail)                   %{_prefix}/bin/recipients
@@ -1246,7 +1245,6 @@ fi
 %attr(555,root,qmail)                   %{_prefix}/bin/setforward
 %attr(555,root,qmail)                   %{_prefix}/bin/cdbdump
 %attr(555,root,qmail)                   %{_prefix}/bin/iftocc
-%attr(555,root,qmail)                   %{_prefix}/bin/qmail-qmqpc
 %attr(555,root,qmail)                   %{_prefix}/bin/serialqmtp
 %attr(555,root,qmail)                   %{_prefix}/bin/altermime
 %attr(555,root,qmail)                   %{_prefix}/bin/rsmtprdomains
@@ -1255,7 +1253,6 @@ fi
 %attr(555,root,qmail)                   %{_prefix}/bin/rsmtpfailures
 %attr(555,root,qmail)                   %{_prefix}/bin/fghack
 %attr(555,root,qmail)                   %{_prefix}/bin/cdbmake-sv
-%attr(555,root,qmail)                   %{_prefix}/bin/svscanboot
 %attr(555,root,qmail)                   %{_prefix}/bin/successes
 %attr(555,root,qmail)                   %{_prefix}/bin/qmail-sigterm
 %attr(555,root,qmail)                   %{_prefix}/bin/spipe
@@ -1352,10 +1349,8 @@ fi
 %attr(555,root,qmail)                   %{_prefix}/bin/ripmime
 %attr(555,root,qmail)                   %{_prefix}/bin/stripmime.pl
 %attr(555,root,qmail)                   %{_prefix}/bin/fixcrio
-%attr(555,root,qmail)                   %{_prefix}/bin/qscanq-stdin
 %attr(555,root,qmail)                   %{_prefix}/bin/rsmtpsenders
 %attr(555,root,qmail)                   %{_prefix}/bin/queue-fix
-%attr(555,root,qmail)                   %{_prefix}/bin/readproctitle
 %attr(555,root,qmail)                   %{_prefix}/bin/zdeferrals
 %attr(555,root,qmail)                   %{_prefix}/bin/qmail-scanner-queue.pl
 %attr(555,root,qmail)                   %{_prefix}/bin/rspamstat
@@ -1382,13 +1377,11 @@ fi
 %attr(555,root,qmail)                   %{_prefix}/bin/serialcmd
 %attr(555,root,qmail)                   %{_prefix}/bin/qmail-qread
 %attr(555,root,qmail)                   %{_prefix}/bin/zfailures
-%attr(555,root,qmail)                   %{_prefix}/bin/qmail-nullqueue
 %attr(500,root,qmail)                   %{_prefix}/bin/qmail-daemon
 %attr(555,root,qmail)                   %{_prefix}/bin/zsendmail
 %attr(555,root,qmail)                   %{_prefix}/bin/multipipe
 %attr(555,root,qmail)                   %{_prefix}/bin/cdbmake-12
 %attr(555,root,qmail)                   %{_prefix}/bin/multilog
-%attr(555,root,qmail)                   %{_prefix}/bin/qmail-multi
 %attr(555,root,qmail)                   %{_prefix}/bin/qmail-qfilter
 %attr(555,root,qmail)                   %{_prefix}/bin/srsfilter
 %attr(555,root,qmail)                   %{_prefix}/bin/surblfilter
@@ -1428,6 +1421,13 @@ fi
 %attr(555,root,qmail)                   %{_prefix}/sbin/sys-checkpwd
 %attr(555,root,qmail)                   %{_prefix}/sbin/ldap-checkpwd
 %attr(555,root,qmail)                   %{_prefix}/sbin/whois
+%attr(555,root,qmail)                   %{_prefix}/sbin/qmail-nullqueue
+%attr(555,root,qmail)                   %{_prefix}/sbin/qmail-multi
+%attr(555,root,qmail)                   %{_prefix}/sbin/qmail-qmqpc
+%attr(555,root,qmail)                   %{_prefix}/sbin/qscanq-stdin
+%attr(555,root,qmail)                   %{_prefix}/sbin/svscan
+%attr(555,root,qmail)                   %{_prefix}/sbin/svscanboot
+%attr(555,root,qmail)                   %{_prefix}/sbin/readproctitle
 
 %if %nonssd == 0
 %attr(555,root,qmail)                   %{_prefix}/sbin/nssd
@@ -1714,9 +1714,9 @@ fi
 %docdir %{mandir}
 %attr(644,root,root)                    %{mandir}/man[1,5,7,8]/*
 %attr(644,root,root)                    %{mandir}/cat[1,5,7,8]/*
-%attr(644,root,root)                    %{mandir}/cat7/forgeries.0.gz
-%attr(644,root,root)                    %{mandir}/cat7/qmail-limits.0.gz
-%attr(644,root,root)                    %{mandir}/cat7/qmail.0.gz
+#%attr(644,root,root)                    %{mandir}/cat7/forgeries.0.gz
+#%attr(644,root,root)                    %{mandir}/cat7/qmail-limits.0.gz
+#%attr(644,root,root)                    %{mandir}/cat7/qmail.0.gz
 #%attr(644,root,root)                    %{mandir}/man7/IndiMail.7.gz
 #%attr(644,root,root)                    %{mandir}/man7/forgeries.7.gz
 #%attr(644,root,root)                    %{mandir}/man7/indimail.7.gz
@@ -2039,7 +2039,7 @@ fi
 #
 %attr(555,root,qmail)             %{_prefix}/bin/sendmail
 %attr(555,root,qmail)             %{_prefix}/bin/qmail-inject
-%attr(555,root,qmail)             %{_prefix}/bin/qmail-qmqpc
+%attr(555,root,qmail)             %{_prefix}/sbin/qmail-qmqpc
 %attr(555,root,qmail)             %{_prefix}/bin/forward
 %attr(555,root,qmail)             %{_prefix}/bin/predate
 %attr(555,root,qmail)             %{_prefix}/bin/datemail
@@ -2119,25 +2119,25 @@ fi
 %verify_permissions -e %{_prefix}/bin/vrenamedomain
 %verify_permissions -e %{_prefix}/bin/vsetuserquota
 %verify_permissions -e %{_prefix}/bin/vmoveuser
-%verify_permissions -e %{_prefix}/bin/qhpsi
-%verify_permissions -e %{_prefix}/bin/run-cleanq
 %verify_permissions -e %{_prefix}/bin/vuserinfo
-%verify_permissions -e %{_prefix}/bin/qmail-queue
 %verify_permissions -e %{_prefix}/bin/vdeldomain
 %verify_permissions -e %{_prefix}/bin/vadddomain
 %if %nobogofilter == 0
 %verify_permissions -e %{_prefix}/bin/bogofilter
 %endif
-%verify_permissions -e %{_prefix}/bin/qscanq
 %verify_permissions -e %{_prefix}/bin/vdominfo
 %verify_permissions -e %{_prefix}/bin/vrenameuser
 %verify_permissions -e %{_prefix}/bin/printdir
 %verify_permissions -e %{_prefix}/bin/vmoduser
 %verify_permissions -e %{_prefix}/bin/vcfilter
 %verify_permissions -e %{_prefix}/bin/vbulletin
+%verify_permissions -e %{_prefix}/sbin/qhpsi
+%verify_permissions -e %{_prefix}/sbin/run-cleanq
+%verify_permissions -e %{_prefix}/sbin/qmail-queue
+%verify_permissions -e %{_prefix}/sbin/qscanq
+%verify_permissions -e %{_prefix}/sbin/systpass
 %verify_permissions -e %{libexecdir}/sq_vacation
 %verify_permissions -e %{libexecdir}/authlib/authshadow
-%verify_permissions -e %{_prefix}/sbin/systpass
 %verify_permissions -e %{indimaildir}/alias
 %verify_permissions -e %{indimaildir}/autoturn
 %endif
@@ -2937,7 +2937,7 @@ fi
 	done
 %endif
 
-echo "removing binaries, libraries, queues, man pages"
+echo "removing binaries, libraries, libexec, shared dir, modules, queues, man pages"
 if [ %{_prefix} = "/var/indimail" -o %{_prefix} = "/var/qmail" ] ; then
 	for i in %{_prefix}/bin %{_prefix}/sbin %{_prefix}/lib %{indimaildir}/queue \
 		%{mandir}/man1 %{mandir}/cat1 %{mandir}/man5 %{mandir}/cat5 \
@@ -2947,19 +2947,29 @@ if [ %{_prefix} = "/var/indimail" -o %{_prefix} = "/var/qmail" ] ; then
 	done
 	for i in `/bin/ls %{shareddir} 2>/dev/null`
 	do
-		if [ " $i" = " clamd" ] ; then # leave the signatures
-			continue;
-		fi
 		%{__rm} -rf %{shareddir}/$i || true
 	done
 else
-	%{__rm} -rf %{indimaildir}/queue || true
 	for i in bin sbin control users
 	do
 		echo "removing link $i"
 		%{__rm} -f %{indimaildir}/$i || true
 	done
+	# queue
 	%{__rm} -rf %{indimaildir}/queue || true
+	# modules
+	%{__rm} -rf %{_prefix}/lib/indimail || true
+	# shareddir
+	if [ ! " %{shareddir}" = " /usr/share" ] ; then
+		for i in `/bin/ls %{shareddir} 2>/dev/null`
+		do
+			%{__rm} -rf %{shareddir}/$i || true
+		done
+	fi
+	# libexecdir
+	if [ ! " %{libexecdir}" = " /usr/libexec" ] ; then
+		%{__rm} -rf %{libexecdir} || true
+	fi
 fi
 if [ -d %{mandir} ] ; then
 echo "removing man pages"
@@ -3283,10 +3293,10 @@ if [ $nscd_up -ge 1 ] ; then
 fi
 %endif
 
-if [ -f %{_prefix}/bin/qmail-qmqpc ] ; then
-	%{__rm} -f %{_prefix}/bin/qmail-queue
+if [ -f %{_prefix}/sbin/qmail-qmqpc ] ; then
+	%{__rm} -f %{_prefix}/sbin/qmail-queue
 fi
-cd %{_prefix}/bin
+cd %{_prefix}/sbin
 /bin/ln -sf qmail-qmqpc qmail-queue
 if [ -f %{_sysconfdir}/init.d/sendmail ] ; then
 	%{_sysconfdir}/init.d/sendmail stop
@@ -3377,6 +3387,10 @@ if [ -n $alternatives_cmd ] ; then
 			%{__rm} -f $i
 			%{__mv} $i.old $i
 		fi
+	done
+	for i in newaliases rmail
+	do
+		%{__rm} -f %{_prefix}/bin/"$i"_i
 	done
 else
 	if [ -f %{_sysconfdir}/init.d/sendmail ] ; then
