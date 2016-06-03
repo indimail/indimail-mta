@@ -1,5 +1,8 @@
 /*
  * $Log: qscanq-stdin.c,v $
+ * Revision 1.4  2016-06-03 09:58:33+05:30  Cprogrammer
+ * moved qmail-multi to sbin
+ *
  * Revision 1.3  2005-02-14 23:06:19+05:30  Cprogrammer
  * unset VIRUSCHECK to prevent recursive calls to qscanq
  *
@@ -85,7 +88,7 @@ alarm_handler(int sig)
 int
 main(int argc, char *argv[])
 {
-	char           *(qqargs[]) = { "bin/qmail-multi", 0 };
+	char           *(qqargs[]) = { "sbin/qmail-multi", 0 };
 	int             fdout = -1;
 	int             n = 0;
 	char            inbuf[2048];
@@ -195,7 +198,7 @@ main(int argc, char *argv[])
 void
 getversion_qscanq_stdin_c()
 {
-	static char    *x = "$Id: qscanq-stdin.c,v 1.3 2005-02-14 23:06:19+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: qscanq-stdin.c,v 1.4 2016-06-03 09:58:33+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
