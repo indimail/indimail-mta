@@ -1387,7 +1387,7 @@ directory for IndiMail using the following command:
 Mac OS X 10.5.x or later
 % sudo cp @indimaildir@/boot/indimail.plist /System/Library/LaunchDaemons
 
-NOTE: You can also add @indimaildir@/bin/svscanboot to /etc/rc.local
+NOTE: You can also add @prefix@/sbin/svscanboot to /etc/rc.local
 
 prior to Mac OS X 10.5.x (NOTE: I have not compiled/tested IndiMail on Mac OS X prior to 10.5.x)
 % cd ..
@@ -1476,11 +1476,11 @@ PS Output
 % ps waux
 user       pid %cpu %mem    vsz   rss tty      stat start   time command
 smmsp     2506  0.0  0.0   9180  1512 ?        Ss   14:21   0:00 sendmail: Queue runner@01:00:00 for /var/spool/clientmqueue
-root     31328  0.0  0.0   2944  1024 ?        Ss   15:24   0:00 /bin/sh @indimaildir@/bin/svscanboot /service /service1
-root     31330  0.0  0.0   1908   388 ?        S    15:24   0:00 @indimaildir@/bin/svscan /service
+root     31328  0.0  0.0   2944  1024 ?        Ss   15:24   0:00 /bin/sh @prefix@/sbin/svscanboot /service /service1
+root     31330  0.0  0.0   1908   388 ?        S    15:24   0:00 @prefix@/sbin/svscan /service
 root     31331  0.0  0.0   1744   320 ?        S    15:24   0:00 supervise log
 qmaill   31332  0.0  0.0   1756   316 ?        S    15:24   0:00 @indimaildir@/bin/multilog t @logdir@/svscan
-root     31333  0.0  0.0   1728   268 ?        S    15:24   0:00 @indimaildir@/bin/readproctitle /service errors: ................................................................................................................................................................................................................................................................................................................................................................................................................
+root     31333  0.0  0.0   1728   268 ?        S    15:24   0:00 @indimaildir@/sbin/readproctitle /service errors: ................................................................................................................................................................................................................................................................................................................................................................................................................
 root     31334  0.0  0.0   1744   324 ?        S    15:24   0:00 supervise qmail-imapd-ssl.993
 indimail 31335  0.0  0.0   5928  1188 ?        S    15:24   0:00 @indimaildir@/bin/tcpserver -v -c /service/qmail-imapd-ssl.993/variables/MAXDAEMONS -C 25 -x @indimaildir@/etc/tcp.imap.cdb -X -o -b 40 -H -l 0 -R -u 555 -g 555 0 993 @indimaildir@/bin/couriertls -server -tcpd @indimaildir@/sbin/imaplogin @indimaildir@/libexec/authlib/authindi @indimaildir@/libexec/authlib/authpam @indimaildir@/bin/imapd Maildir
 root     31337  0.0  0.0   1744   316 ?        S    15:24   0:00 supervise log

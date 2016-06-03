@@ -1,5 +1,8 @@
 /*
  * $Log: initsvc.c,v $
+ * Revision 2.21  2016-06-03 10:13:01+05:30  Cprogrammer
+ * moved svscanboot to sbin
+ *
  * Revision 2.20  2016-05-21 20:10:59+05:30  Cprogrammer
  * used SHARREDIR for boot directory
  *
@@ -72,7 +75,7 @@
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: initsvc.c,v 2.20 2016-05-21 20:10:59+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: initsvc.c,v 2.21 2016-06-03 10:13:01+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #define SV_ON    1
@@ -371,7 +374,7 @@ main(int argc, char **argv)
 		return (1);
 	}
 	/*
-	 * SV:345:respawn:/var/qmail/bin/svscanboot /service <>/dev/console 2<>/dev/console
+	 * SV:345:respawn:/usr/sbin/svscanboot /service <>/dev/console 2<>/dev/console
 	 */
 	for (found = 0;;)
 	{
@@ -450,10 +453,10 @@ main(int argc, char **argv)
 		close(fd);
 	}
 	/*
-	 * SV:345:respawn:/var/qmail/bin/svscanboot <>/dev/console 2<>/dev/console
+	 * SV:345:respawn:/usr/sbin/svscanboot <>/dev/console 2<>/dev/console
 	 */
 	snprintf(buffer, sizeof(buffer), debian_version ?  
-			"SV:2345:%s:%s/bin/svscanboot <>%s 2<>%s" : "SV:345:%s:%s/bin/svscanboot <>%s 2<>%s",
+			"SV:2345:%s:%s/sbin/svscanboot <>%s 2<>%s" : "SV:345:%s:%s/sbin/svscanboot <>%s 2<>%s",
 			 flag == SV_ON ? "respawn" : "off", qmaildir, device, device);
 	fprintf(fp, "%s\n", buffer);
 	if (fclose(fp))
