@@ -85,6 +85,12 @@ esac
 
 # we are doing upgrade
 if [ " $1" = " upgrade" -o " $1" = " deconfigure" ] ; then
+	if [ " $1" = " deconfigure" ] ; then
+		${mv} ${mandir}/man8/rmail_i.8.gz ${mandir}/man8/rmail.8.gz || true
+		${mv} ${mandir}/man1/newaliases_i.1.gz ${mandir}/man1/newaliases.1.gz || true
+		${mv} $prefix/bin/newaliases_i $prefix/bin/newaliases || true
+		${mv} $prefix/bin/rmail_i $prefix/bin/rmail || true
+	fi
 	exit 0
 fi
 
@@ -98,6 +104,10 @@ if [ -s ${sysconfdir}/stat.override -a -f /usr/sbin/dpkg-statoverride ] ; then
 		fi
 	done
 fi
+${mv} ${mandir}/man8/rmail_i.8.gz ${mandir}/man8/rmail.8.gz || true
+${mv} ${mandir}/man1/newaliases_i.1.gz ${mandir}/man1/newaliases.1.gz || true
+${mv} ${prefix}/bin/newaliases_i ${prefix}/bin/newaliases || true
+${mv} ${prefix}/bin/rmail_i ${prefix}/bin/rmail || true
 # Remove IndiMail being started on system boot
 echo "removing indimail startup"
 SERVICE_LIST="sendmail exim4 mysql"
