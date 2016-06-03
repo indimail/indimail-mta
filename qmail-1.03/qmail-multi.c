@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-multi.c,v $
+ * Revision 1.48  2016-06-03 09:58:05+05:30  Cprogrammer
+ * moved qmail-queue to sbin
+ *
  * Revision 1.47  2012-08-16 11:36:21+05:30  Cprogrammer
  * added case 88 for surblfilter
  *
@@ -511,7 +514,7 @@ qmail_multi(int argc, char **argv)
 		_exit(53);
 	}
 	if (!(qqargs[0] = env_get("QUEUEPROG")))
-		qqargs[0] = "bin/qmail-queue";
+		qqargs[0] = "sbin/qmail-queue";
 	execv(*qqargs, argv);
 	_exit(120);
 	/*- Not reached */
@@ -675,6 +678,6 @@ discard_envelope()
 void
 getversion_qmail_multi_c()
 {
-	static char    *x = "$Id: qmail-multi.c,v 1.47 2012-08-16 11:36:21+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: qmail-multi.c,v 1.48 2016-06-03 09:58:05+05:30 Cprogrammer Exp mbhangui $";
 	x++;
 }
