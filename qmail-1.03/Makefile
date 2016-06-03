@@ -782,31 +782,31 @@ warn-auto.sh qmailctl.sh conf-qmail
 	| sed s}QMAIL}"`head -1 conf-qmail`"}g \
 	> qmailctl
 
-indimail.plist: indimail.plist.in conf-qmail
-	cat indimail.plist.in | sed s}QMAIL}"`head -1 conf-qmail`"}g \
+indimail.plist: indimail.plist.in conf-prefix
+	cat indimail.plist.in | sed s}PREFIX}"`head -1 conf-prefix`"}g \
 	> indimail.plist
 
 svscanboot: \
-warn-auto.sh svscanboot.sh conf-qmail conf-sysconfdir
+warn-auto.sh svscanboot.sh conf-prefix conf-sysconfdir
 	cat warn-auto.sh svscanboot.sh \
-	| sed s}QMAIL}"`head -1 conf-qmail`"}g \
+	| sed s}PREFIX}"`head -1 conf-prefix`"}g \
 	| sed s}@controldir\@}"`head -1 conf-sysconfdir`/control"}g \
 	> svscanboot
 
-upstart:upstart.in conf-qmail conf-sysconfdir
+upstart:upstart.in conf-prefix conf-sysconfdir
 	( \
 	echo "# svscan - runlevel compatibility"; \
 	echo "# WARNING: This file was auto-generated. Do not edit!"; \
 	cat upstart.in \
-	| sed s}QMAIL}"`head -1 conf-qmail`"}g \
+	| sed s}PREFIX}"`head -1 conf-prefix`"}g \
 	| sed s}@controldir\@}"`head -1 conf-sysconfdir`/control"}g \
 	) > upstart
 
-systemd:systemd.in conf-qmail
+systemd:systemd.in conf-prefix
 	( \
 	echo "# svscan - runlevel compatibility"; \
 	echo "# WARNING: This file was auto-generated. Do not edit!"; \
-	cat systemd.in | sed s}QMAIL}"`head -1 conf-qmail`"}g \
+	cat systemd.in | sed s}PREFIX}"`head -1 conf-prefix`"}g \
 	) > systemd
 
 svscanboot.0: \
@@ -814,9 +814,9 @@ svscanboot.8
 	nroff -man svscanboot.8 > svscanboot.0
 
 svscanboot.8: \
-svscanboot.9 conf-qmail conf-sysconfdir
+svscanboot.9 conf-prefix conf-sysconfdir
 	cat svscanboot.9 \
-	| sed s}QMAIL}"`head -1 conf-qmail`"}g \
+	| sed s}PREFIX}"`head -1 conf-prefix`"}g \
 	| sed s}@controldir\@}"`head -1 conf-sysconfdir`/control"}g \
 	> svscanboot.8
 
