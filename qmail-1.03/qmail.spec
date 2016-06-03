@@ -1,6 +1,6 @@
 #
 #
-# $Id: qmail.spec,v 1.46 2016-06-03 09:58:25+05:30 Cprogrammer Exp mbhangui $
+# $Id: qmail.spec,v 1.47 2016-06-03 13:09:03+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %define _unpackaged_files_terminate_build 1
 
@@ -1547,6 +1547,10 @@ else
 		fi
 	done
 fi
+%{__mv} %{mandir}/man8/rmail_i.8.gz %{mandir}/man8/rmail.8.gz || true
+%{__mv} %{mandir}/man1/newaliases_i.1.gz %{mandir}/man1/newaliases.1.gz || true
+%{__mv} %{_prefix}/bin/newaliases_i %{_prefix}/bin/newaliases || true
+%{__mv} %{_prefix}/bin/rmail_i %{_prefix}/bin/rmail || true
 # Remove IndiMail being started on system boot
 echo "removing indimail startup"
 %{_prefix}/sbin/svctool --config=rm-boot
