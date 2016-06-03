@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-queue.c,v $
+ * Revision 1.59  2016-06-03 09:58:17+05:30  Cprogrammer
+ * moved qhspi to sbin
+ *
  * Revision 1.58  2016-01-29 11:50:48+05:30  Cprogrammer
  * append null only when copying extraqueue from env variable
  *
@@ -605,7 +608,7 @@ qhpsiprog(char *program)
 		}
 		if (!stralloc_copys(&line, auto_qmail))
 			die(51);
-		if (!stralloc_cats(&line, "/bin/qhpsi"))
+		if (!stralloc_cats(&line, "/sbin/qhpsi"))
 			die(51);
 		if (!stralloc_0(&line))
 			die(51);
@@ -1215,7 +1218,7 @@ main()
 void
 getversion_qmail_queue_c()
 {
-	static char    *x = "$Id: qmail-queue.c,v 1.58 2016-01-29 11:50:48+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-queue.c,v 1.59 2016-06-03 09:58:17+05:30 Cprogrammer Exp mbhangui $";
 
 #ifdef INDIMAIL
 	if (x)
