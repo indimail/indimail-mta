@@ -145,22 +145,33 @@ if [ " $1" = " purge" ] ; then
 		done
 		for i in `/bin/ls ${sharedir} 2>/dev/null`
 		do
-			if [ " $i" = " clamd" ] ; then # leave the signatures
-				continue;
-			fi
 			${rm} -rf ${shareddir}/$i || true
 		done
 	else
-		${rm} -rf ${indimaildir}/queue
 		for i in bin sbin control users
 		do
 			${rm} -f ${indimaildir}/$i || true
 		done
+		# queue
+		${rm} -rf ${indimaildir}/queue || true
+		# modules
+		${rm} -rf ${prefix}/lib/indimail || true
+		# shareddir
+		if [ ! " ${shareddir}" = " /usr/share" ] ; then
+			for i in `/bin/ls ${shareddir} 2>/dev/null`
+			do
+				${rm} -rf ${shareddir}/$i || true
+			done
+		fi
+		# libexecdir
+		if [ ! " ${libexecdir}" = " /usr/libexec" ] ; then
+			${rm} -rf ${libexecdir} || true
+		fi
 	fi
 	echo "removing man pages"
 	${rmdir} --ignore-fail-on-non-empty ${mandir} || true
-	echo "removing architecture-independent shared directory"
 	if [ -d ${shareddir} ] ; then
+	echo "removing architecture-independent shared directory"
 	${rmdir} --ignore-fail-on-non-empty ${shareddir} || true
 	fi
 
