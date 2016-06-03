@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-daemon.c,v $
+ * Revision 1.19  2016-06-03 13:34:48+05:30  Cprogrammer
+ * moved qmail-start to sbin
+ *
  * Revision 1.18  2016-03-31 17:02:13+05:30  Cprogrammer
  * added handler for SIGINT
  *
@@ -87,7 +90,7 @@ char            sserrbuf[512];
 substdio        sserr = SUBSTDIO_FDBUF(write, 2, sserrbuf, sizeof(sserrbuf));
 int             flagexitasap = 0;
 char            strnum[FMT_ULONG];
-char           *(qlargs[]) = { "bin/qmail-start", "./Mailbox", 0};
+char           *(qlargs[]) = { "sbin/qmail-start", "./Mailbox", 0};
 struct pidtab
 {
 	int pid;
@@ -526,7 +529,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_daemon_c()
 {
-	static char    *x = "$Id: qmail-daemon.c,v 1.18 2016-03-31 17:02:13+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-daemon.c,v 1.19 2016-06-03 13:34:48+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
