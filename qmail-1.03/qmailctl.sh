@@ -11,6 +11,12 @@
 ### END INIT INFO
 
 # $Log: qmailctl.sh,v $
+# Revision 1.47  2016-06-03 10:10:03+05:30  Cprogrammer
+# use PREFIX instead of QMAIL for binaries
+#
+# Revision 1.46  2016-06-03 10:08:52+05:30  Cprogrammer
+# use PREFIX for binaries
+#
 # Revision 1.45  2016-05-19 09:00:13+05:30  Cprogrammer
 # use iecho instead of echo
 #
@@ -157,8 +163,8 @@ if [ -f /etc/lsb-release -o -f /etc/debian_version ] ; then
 else
 	SYSTEM=`uname -s | tr "[:lower:]" "[:upper:]"`
 fi
-if [ -x QMAIL/bin/iecho ] ; then
-	ECHO=QMAIL/bin/iecho
+if [ -x PREFIX/bin/iecho ] ; then
+	ECHO=PREFIX/bin/iecho
 else
 	ECHO=echo
 fi
@@ -270,7 +276,7 @@ case "$SYSTEM" in
 	;;
 esac
 
-PATH=$PATH:QMAIL/bin:QMAIL/sbin:/usr/local/bin:/usr/bin:/bin
+PATH=$PATH:PREFIX/bin:PREFIX/sbin:/usr/local/bin:/usr/bin:/bin
 export PATH
 myhelp()
 {
@@ -299,15 +305,15 @@ stop()
 	for i in `echo $SERVICE/*`
 	do
 		$ECHO -n $"Stopping $i: "
-		QMAIL/bin/svc -d $i 2>>/tmp/sv.err && $succ || $fail
+		PREFIX/bin/svc -d $i 2>>/tmp/sv.err && $succ || $fail
 		RETVAL=$?
 		echo
 		let ret+=$RETVAL
 	done
 	if [ ! -f /bin/systemctl ] ; then
 		$ECHO -n $"Stopping svscan: "
-		if [ -f QMAIL/sbin/initsvc ] ; then
-			QMAIL/sbin/initsvc -off > /dev/null 2>>/tmp/sv.err && $succ || $fail
+		if [ -f PREFIX/sbin/initsvc ] ; then
+			PREFIX/sbin/initsvc -off > /dev/null 2>>/tmp/sv.err && $succ || $fail
 		elif [ -f /sbin/initctl ] ; then
 			/sbin/initctl stop svscan >/dev/null 2>>/tmp/sv.err && $succ || $fail
 		else
@@ -337,11 +343,11 @@ start()
 	if [ -d /var/lock/subsys -a -f /var/lock/subsys/svscan ] ; then
 		exit 0
 	fi
-	QMAIL/bin/svstat $SERVICE/.svscan/log > /dev/null
+	PREFIX/bin/svstat $SERVICE/.svscan/log > /dev/null
 	if [ $? -ne 0 ] ; then
 		$ECHO -n $"Starting svscan: "
-		if [ -f QMAIL/sbin/initsvc ] ; then
-			QMAIL/sbin/initsvc -on > /dev/null 2>/tmp/sv.err && $succ || $fail
+		if [ -f PREFIX/sbin/initsvc ] ; then
+			PREFIX/sbin/initsvc -on > /dev/null 2>/tmp/sv.err && $succ || $fail
 		elif [ -f /sbin/initctl ] ; then
 			/sbin/initctl start svscan >/dev/null 2>>/tmp/sv.err && $succ || $fail
 		else
@@ -353,7 +359,7 @@ start()
   			/bin/grep "^SV:" /etc/inittab |/bin/grep svscan |/bin/grep respawn >/dev/null
 			if [ $? -ne 0 ]; then
 				/bin/grep -v "svscan" /etc/inittab > /etc/inittab.svctool.$$
-				echo "SV:345:respawn:QMAIL/bin/svscanboot $servicedir <>$device 2<>$device" >> /etc/inittab.svctool.$$
+				echo "SV:345:respawn:PREFIX/sbin/svscanboot $servicedir <>$device 2<>$device" >> /etc/inittab.svctool.$$
 				if [ $? -eq 0 ] ; then
 					/bin/mv /etc/inittab.svctool.$$ /etc/inittab
 				fi
@@ -368,7 +374,7 @@ start()
 		do
 			if [ ! -f $i/down ] ; then
 				$ECHO -n $"Starting $i: "
-				QMAIL/bin/svc -u $i 2>/tmp/sv.err && $succ || $fail
+				PREFIX/bin/svc -u $i 2>/tmp/sv.err && $succ || $fail
 				RETVAL=$?
 				echo
 				let ret+=$RETVAL
@@ -408,7 +414,7 @@ case "$1" in
 	for i in `echo $SERVICE/qmail-smtpd.* $SERVICE/qmail-qmqpd.* $SERVICE/qmail-qmtpd.*`
 	do
 		$ECHO -n $"Stopping $i: "
-		QMAIL/bin/svc -d $i && $succ || $fail
+		PREFIX/bin/svc -d $i && $succ || $fail
 		RETVAL=$?
 		echo
 		let ret+=$RETVAL
@@ -416,7 +422,7 @@ case "$1" in
 	for i in `echo $SERVICE/qmail-send.*`
 	do
 		$ECHO -n $"Terminating $i: "
-		QMAIL/bin/svc -t $i && $succ || $fail
+		PREFIX/bin/svc -t $i && $succ || $fail
 		RETVAL=$?
 		echo
 		let ret+=$RETVAL
@@ -425,7 +431,7 @@ case "$1" in
 	do
 		if [ ! -f $i/down ] ; then
 		$ECHO -n $"Starting $i: "
-			QMAIL/bin/svc -u $i && $succ || $fail
+			PREFIX/bin/svc -u $i && $succ || $fail
 			RETVAL=$?
 			echo
 			let ret+=$RETVAL
@@ -435,8 +441,8 @@ case "$1" in
 	;;
   shut)
 	$ECHO -n $"shutdown svscan: "
-	if [ -f QMAIL/sbin/initsvc ] ; then
-		QMAIL/sbin/initsvc -off > /dev/null && $succ || $fail
+	if [ -f PREFIX/sbin/initsvc ] ; then
+		PREFIX/sbin/initsvc -off > /dev/null && $succ || $fail
 	elif [ -f /sbin/initctl ] ; then
 		/sbin/initctl stop svscan >/dev/null && $succ || $fail
 	else
@@ -456,12 +462,12 @@ case "$1" in
   flush)
 	ret=0
 	$ECHO -n $"Flushing timeout table + ALRM signal to qmail-send."
-	QMAIL/bin/qmail-tcpok > /dev/null && $succ || $fail
+	PREFIX/bin/qmail-tcpok > /dev/null && $succ || $fail
 	echo
 	for i in `echo $SERVICE/qmail-send.*`
 	do
 		$ECHO -n $"Flushing $i: "
-		QMAIL/bin/svc -a $i && $succ || $fail
+		PREFIX/bin/svc -a $i && $succ || $fail
 		RETVAL=$?
 		echo
 		let ret+=$RETVAL
@@ -475,12 +481,12 @@ case "$1" in
 		ps -ef|/bin/grep svscanboot|/bin/grep -v grep
 	fi
 	RETVAL=$?
-	QMAIL/bin/svstat $SERVICE/.svscan/log $SERVICE/* $SERVICE/*/log
+	PREFIX/bin/svstat $SERVICE/.svscan/log $SERVICE/* $SERVICE/*/log
 	let ret+=$RETVAL
 	[ $ret -eq 0 ] && exit 0 || exit 1
 	;;
   queue)
-	QMAIL/bin/qmail-qread -c
+	PREFIX/bin/qmail-qread -c
 	ret=$?
 	[ $ret -eq 0 ] && exit 0 || exit 1
 	;;
@@ -489,7 +495,7 @@ case "$1" in
 	for i in `echo $SERVICE/qmail-send.*`
 	do
 		$ECHO -n $"sending HUP signal to $i: "
-		QMAIL/bin/svc -h $i && $succ || $fail
+		PREFIX/bin/svc -h $i && $succ || $fail
 		RETVAL=$?
 		echo
 		let ret+=$RETVAL
@@ -501,7 +507,7 @@ case "$1" in
 	for i in `echo $SERVICE/qmail-send.* $SERVICE/qmail-smtpd.*`
 	do
 		$ECHO -n $"pausing $i: "
-		QMAIL/bin/svc -p $i && $succ || $fail
+		PREFIX/bin/svc -p $i && $succ || $fail
 		RETVAL=$?
 		echo
 		let ret+=$RETVAL
@@ -513,7 +519,7 @@ case "$1" in
 	for i in `echo $SERVICE/qmail-send.* $SERVICE/qmail-smtpd.*`
 	do
 		$ECHO -n $"continuing $i: "
-		QMAIL/bin/svc -c $i && $succ || $fail
+		PREFIX/bin/svc -c $i && $succ || $fail
 		RETVAL=$?
 		echo
 		let ret+=$RETVAL
@@ -546,7 +552,7 @@ case "$1" in
 		for j in `/bin/ls $INDIMAILDIR/etc/tcp*.$i 2>/dev/null`
 		do
 			$ECHO -n $"building $j.cdb: "
-			QMAIL/bin/tcprules $j.cdb $j.tmp < $j && /bin/chmod 664 $j.cdb \
+			PREFIX/bin/tcprules $j.cdb $j.tmp < $j && /bin/chmod 664 $j.cdb \
 				&& /bin/chown indimail:indimail $j.cdb && $succ || $fail
 			RETVAL=$?
 			echo
