@@ -51,10 +51,10 @@ if [ -f /tmp/indimail-devel.upgrade ] ; then # upgrade
 	exit 0
 fi
 ${rm} -f /tmp/indimail-devel.install /tmp/indimail-devel.upgrade
-if [ -f ${prefix}/bin/qmail-qmqpc ] ; then
-	${rm} -f ${prefix}/bin/qmail-queue
+if [ -f ${prefix}/sbin/qmail-qmqpc ] ; then
+	${rm} -f ${prefix}/sbin/qmail-queue
 fi
-cd ${prefix}/bin
+cd ${prefix}/sbin
 /bin/ln -sf qmail-qmqpc qmail-queue
 echo "compressing man pages"
 find ${mandir} -type f -exec gzip -q {} \;
