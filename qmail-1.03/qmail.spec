@@ -1,6 +1,6 @@
 #
 #
-# $Id: qmail.spec,v 1.47 2016-06-03 13:09:03+05:30 Cprogrammer Exp mbhangui $
+# $Id: qmail.spec,v 1.48 2016-06-03 13:33:56+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %define _unpackaged_files_terminate_build 1
 
@@ -561,17 +561,6 @@ done
 %attr(4511,qscand,qscand)               %{_prefix}/sbin/qscanq
 %attr(2511,root,qscand)                 %{_prefix}/sbin/run-cleanq
 
-%if %noperms == 0
-%if 0%{?suse_version} >= 1120
-%verify (not user group mode) %attr(6511, qscand, qmail)   %{_prefix}/sbin/qhpsi
-%verify (not user group mode) %attr(2511, root, qscand)    %{_prefix}/sbin/run-cleanq
-%verify (not user group mode) %attr(6511, qmailq, qmail)   %{_prefix}/sbin/qmail-queue
-%verify (not user group mode) %attr(4555, qscand, qscand)  %{_prefix}/sbin/qscanq
-%verify (not user group mode) %attr(2555, alias, qmail)    %{qmaildir}/alias
-#%verify (not user group mode) %attr(2755, indimail, qmail) %{_prefix}/autoturn
-%endif
-%endif
-
 %attr(555,root,qmail)                   %{_prefix}/bin/qmail-popbull
 %attr(555,root,qmail)                   %{_prefix}/bin/zsuccesses
 %attr(555,root,qmail)                   %{_prefix}/bin/ofmipd
@@ -593,10 +582,8 @@ done
 %attr(555,root,qmail)                   %{_prefix}/bin/checkdomain
 %attr(555,root,qmail)                   %{_prefix}/bin/maildirqmtp
 %attr(555,root,qmail)                   %{_prefix}/bin/qmailctl
-%attr(500,root,qmail)                   %{_prefix}/bin/qmail-lspawn
 %attr(555,root,qmail)                   %{_prefix}/bin/dnstxt
 %attr(555,root,qmail)                   %{_prefix}/bin/printmaillist
-%attr(511,root,qmail)                   %{_prefix}/bin/qmail-todo
 %attr(555,root,qmail)                   %{_prefix}/bin/qmail-tcpto
 %attr(555,root,qmail)                   %{_prefix}/bin/newinclude
 %attr(555,root,qmail)                   %{_prefix}/bin/recordio
@@ -610,7 +597,6 @@ done
 %attr(555,root,qmail)                   %{_prefix}/bin/pinq
 %attr(555,root,qmail)                   %{_prefix}/bin/mlmatchup
 %attr(555,root,qmail)                   %{_prefix}/bin/822print
-%attr(511,root,qmail)                   %{_prefix}/bin/qmail-send
 %attr(555,root,qmail)                   %{_prefix}/bin/sendmail
 %attr(555,root,qmail)                   %{_prefix}/bin/rmail
 %attr(555,root,qmail)                   %{_prefix}/bin/ifaddr
@@ -658,7 +644,6 @@ done
 %attr(555,root,qmail)                   %{_prefix}/bin/zsenders
 %attr(555,root,qmail)                   %{_prefix}/bin/suids
 %attr(555,root,qmail)                   %{_prefix}/bin/maildirserial
-%attr(500,root,qmail)                   %{_prefix}/bin/qmail-start
 %attr(555,root,qmail)                   %{_prefix}/bin/822fields
 %attr(511,root,qmail)                   %{_prefix}/bin/qmail-popup
 %attr(555,root,qmail)                   %{_prefix}/bin/ofmipname
@@ -739,8 +724,6 @@ done
 %attr(555,root,qmail)                   %{_prefix}/bin/except
 %attr(555,root,qmail)                   %{_prefix}/bin/dknewkey
 %attr(555,root,qmail)                   %{_prefix}/bin/maildirsmtp
-%attr(511,root,qmail)                   %{_prefix}/bin/qmail-clean
-%attr(511,root,qmail)                   %{_prefix}/bin/qmail-rspawn
 %attr(555,root,qmail)                   %{_prefix}/bin/xrecipient
 %attr(555,root,qmail)                   %{_prefix}/bin/argv0
 %attr(555,root,qmail)                   %{_prefix}/bin/qmail-qmtpd
@@ -754,7 +737,6 @@ done
 %attr(555,root,qmail)                   %{_prefix}/bin/serialcmd
 %attr(555,root,qmail)                   %{_prefix}/bin/qmail-qread
 %attr(555,root,qmail)                   %{_prefix}/bin/zfailures
-%attr(500,root,qmail)                   %{_prefix}/bin/qmail-daemon
 %attr(555,root,qmail)                   %{_prefix}/bin/zsendmail
 %attr(555,root,qmail)                   %{_prefix}/bin/822received
 %attr(555,root,qmail)                   %{_prefix}/bin/cdbmake-12
@@ -783,6 +765,13 @@ done
 %attr(555,root,qmail)                   %{_prefix}/sbin/qmail-multi
 %attr(555,root,qmail)                   %{_prefix}/sbin/cleanq
 %attr(555,root,qmail)                   %{_prefix}/sbin/qmail-qmqpc
+%attr(500,root,qmail)                   %{_prefix}/sbin/qmail-daemon
+%attr(500,root,qmail)                   %{_prefix}/sbin/qmail-start
+%attr(511,root,qmail)                   %{_prefix}/sbin/qmail-clean
+%attr(511,root,qmail)                   %{_prefix}/sbin/qmail-rspawn
+%attr(500,root,qmail)                   %{_prefix}/sbin/qmail-lspawn
+%attr(511,root,qmail)                   %{_prefix}/sbin/qmail-send
+%attr(511,root,qmail)                   %{_prefix}/sbin/qmail-todo
 
 # daemontools
 %attr(555,root,qmail)                   %{_prefix}/bin/envdir
@@ -911,6 +900,17 @@ done
 %attr(444,root,qmail)                   %{shareddir}/doc/PIC.relaygood
 %attr(444,root,qmail)                   %{shareddir}/doc/PIC.local2rem
 %attr(444,root,qmail)                   %{shareddir}/doc/TOISP
+
+%if %noperms == 0
+%if 0%{?suse_version} >= 1120
+%verify (not user group mode) %attr(6511, qscand, qmail)   %{_prefix}/sbin/qhpsi
+%verify (not user group mode) %attr(2511, root, qscand)    %{_prefix}/sbin/run-cleanq
+%verify (not user group mode) %attr(6511, qmailq, qmail)   %{_prefix}/sbin/qmail-queue
+%verify (not user group mode) %attr(4555, qscand, qscand)  %{_prefix}/sbin/qscanq
+%verify (not user group mode) %attr(2555, alias, qmail)    %{qmaildir}/alias
+#%verify (not user group mode) %attr(2755, indimail, qmail) %{_prefix}/autoturn
+%endif
+%endif
 
 # Shared libraries (omit for architectures that don't support them)
 

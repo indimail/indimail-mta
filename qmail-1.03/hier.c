@@ -1,5 +1,8 @@
 /*
  * $Log: hier.c,v $
+ * Revision 1.204  2016-06-03 13:33:18+05:30  Cprogrammer
+ * moved qmail-daemon, qmail-start, qmail-lspawn, qmail-rspawn, qmail-clean, qmail-send, qmail-todo to sbin
+ *
  * Revision 1.203  2016-06-03 09:56:37+05:30  Cprogrammer
  * moved non-user programs to sbin
  *
@@ -670,18 +673,9 @@ hier(inst_dir, fatal)
 #endif
 
 	/* Binaries */
-	c(auto_qmail_home, "bin", "qmail-lspawn", auto_uido, auto_gidq, 0500);
-	c(auto_qmail_home, "bin", "qmail-start", auto_uido, auto_gidq, 0500);
-	c(auto_qmail_home, "bin", "qmail-daemon", auto_uido, auto_gidq, 0500);
 	c(auto_qmail_home, "bin", "qmail-getpw", auto_uido, auto_gidq, 0511);
 	c(auto_qmail_home, "bin", "qmail-local", auto_uido, auto_gidq, 0511);
 	c(auto_qmail_home, "bin", "qmail-remote", auto_uido, auto_gidq, 0511);
-	c(auto_qmail_home, "bin", "qmail-rspawn", auto_uido, auto_gidq, 0511);
-	c(auto_qmail_home, "bin", "qmail-clean", auto_uido, auto_gidq, 0511);
-	c(auto_qmail_home, "bin", "qmail-send", auto_uido, auto_gidq, 0511);
-#ifdef EXTERNAL_TODO
-	c(auto_qmail_home, "bin", "qmail-todo", auto_uido,auto_gidq,0511);
-#endif
 	c(auto_qmail_home, "bin", "relaytest", auto_uido, auto_gidq, 0511);
 	c(auto_qmail_home, "bin", "splogger", auto_uido, auto_gidq, 0511);
 	c(auto_qmail_home, "bin", "qmail-newu", auto_uido, auto_gidq, 0500);
@@ -793,7 +787,6 @@ hier(inst_dir, fatal)
 #ifdef HAVESRS
 	c(auto_qmail_home ,"bin", "srsfilter", auto_uido, auto_gidq, 0555);
 #endif
-
 #ifdef DOMAIN_KEYS
 	c(auto_qmail_home, "bin", "dknewkey", auto_uido, auto_gidq, 0555);
 	c(auto_qmail_home, "bin", "dktest", auto_uido, auto_gidq, 0555);
@@ -801,10 +794,6 @@ hier(inst_dir, fatal)
 #endif
 #ifdef HASDKIM
 	c(auto_qmail_home, "bin", "qmail-dkim", auto_uido, auto_gidq, 0555);
-#endif
-
-#ifdef SMTP_PLUGIN
-	c(auto_qmail_home, "sbin", "plugtest", auto_uido, auto_gidq, 0555);
 #endif
 #if defined(SMTP_PLUGIN) || defined(LOAD_SHARED_OBJECTS)
 	d(auto_prefix,     "lib/indimail/plugins", auto_uido, auto_gidq, 0555);
@@ -827,6 +816,18 @@ hier(inst_dir, fatal)
 	c(auto_qmail_home, "sbin", "qmail-qmqpc", auto_uido, auto_gidq, 0555);
 	c(auto_qmail_home, "sbin", "cleanq", auto_uido, auto_gidq, 0555);
 	c(auto_qmail_home, "sbin", "qscanq-stdin", auto_uido, auto_gidq, 0555);
+	c(auto_qmail_home, "sbin", "qmail-lspawn", auto_uido, auto_gidq, 0500);
+	c(auto_qmail_home, "sbin", "qmail-rspawn", auto_uido, auto_gidq, 0511);
+	c(auto_qmail_home, "sbin", "qmail-start", auto_uido, auto_gidq, 0500);
+	c(auto_qmail_home, "sbin", "qmail-daemon", auto_uido, auto_gidq, 0500);
+	c(auto_qmail_home, "sbin", "qmail-clean", auto_uido, auto_gidq, 0511);
+	c(auto_qmail_home, "sbin", "qmail-send", auto_uido, auto_gidq, 0511);
+#ifdef EXTERNAL_TODO
+	c(auto_qmail_home, "sbin", "qmail-todo", auto_uido,auto_gidq,0511);
+#endif
+#ifdef SMTP_PLUGIN
+	c(auto_qmail_home, "sbin", "plugtest", auto_uido, auto_gidq, 0555);
+#endif
 
 	/* mess822 */
 	c(auto_qmail_home, "bin", "ofmipd", auto_uido, auto_gidq, 0555);
@@ -1402,7 +1403,7 @@ hier(inst_dir, fatal)
 void
 getversion_install_big_c()
 {
-	static char    *x = "$Id: hier.c,v 1.203 2016-06-03 09:56:37+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: hier.c,v 1.204 2016-06-03 13:33:18+05:30 Cprogrammer Exp mbhangui $";
 
 #ifdef INDIMAIL
 	if (x)
