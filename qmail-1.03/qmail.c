@@ -1,5 +1,8 @@
 /*
  * $Log: qmail.c,v $
+ * Revision 1.25  2016-06-03 09:57:41+05:30  Cprogrammer
+ * moved qmail-mullqueue, qmail-queue to sbin
+ *
  * Revision 1.24  2009-11-13 23:05:29+05:30  Cprogrammer
  * report QHPSI error when exit code is 77
  *
@@ -113,11 +116,11 @@ qmail_open(qq)
 		if (chdir(auto_qmail) == -1)
 			_exit(61);
 		if (!binqqargs[0] && env_get("NULLQUEUE"))
-			binqqargs[0] = "bin/qmail-nullqueue";
+			binqqargs[0] = "sbin/qmail-nullqueue";
 		if (!binqqargs[0])
 			binqqargs[0] = env_get("QMAILQUEUE");
 		if (!binqqargs[0])
-			binqqargs[0] = "bin/qmail-queue";
+			binqqargs[0] = "sbin/qmail-queue";
 		execv(*binqqargs, binqqargs);
 		_exit(120);
 	}
@@ -316,7 +319,7 @@ qmail_close(qq)
 void
 getversion_qmail_c()
 {
-	static char    *x = "$Id: qmail.c,v 1.24 2009-11-13 23:05:29+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: qmail.c,v 1.25 2016-06-03 09:57:41+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
