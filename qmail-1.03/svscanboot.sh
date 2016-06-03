@@ -1,4 +1,7 @@
 # $Log: svscanboot.sh,v $
+# Revision 1.14  2016-06-03 09:58:42+05:30  Cprogrammer
+# moved svscan to sbin
+#
 # Revision 1.13  2016-05-17 23:11:42+05:30  Cprogrammer
 # fix for configurable control directory
 #
@@ -37,9 +40,9 @@
 # Revision 1.2  2002-09-26 20:56:02+05:30  Cprogrammer
 # made service directory configurable
 #
-# $Id: svscanboot.sh,v 1.13 2016-05-17 23:11:42+05:30 Cprogrammer Exp mbhangui $
+# $Id: svscanboot.sh,v 1.14 2016-06-03 09:58:42+05:30 Cprogrammer Exp mbhangui $
 
-PATH=QMAIL/bin:/usr/local/bin:/bin:/sbin:/usr/bin:/usr/sbin
+PATH=PREFIX/bin:PREFIX/sbin:/bin:/sbin:/usr/bin:/usr/sbin
 
 exec </dev/null
 exec >/dev/null
@@ -76,16 +79,16 @@ else
 	STATUSFILE=/tmp/svscan
 fi
 if [ $# -eq 0 -o $# -eq 1 ] ; then
-	QMAIL/bin/svc -dx $SERVICEDIR/* $SERVICEDIR/*/log $SERVICEDIR/.svscan/log
+	PREFIX/bin/svc -dx $SERVICEDIR/* $SERVICEDIR/*/log $SERVICEDIR/.svscan/log
 	if [ $use_readproctitle -eq 1 ] ; then
 		exec env - PATH=$PATH SCANINTERVAL=$SCANINTERVAL \
 			STATUSFILE=$STATUSFILE \
-			QMAIL/bin/svscan $SERVICEDIR 2>&1 | \
-		env - PATH=$PATH QMAIL/bin/readproctitle $SERVICEDIR errors: ................................................................................................................................................................................................................................................................................................................................................................................................................
+			PREFIX/sbin/svscan $SERVICEDIR 2>&1 | \
+		env - PATH=$PATH PREFIX/sbin/readproctitle $SERVICEDIR errors: ................................................................................................................................................................................................................................................................................................................................................................................................................
 	else
 		exec env - PATH=$PATH SCANINTERVAL=$SCANINTERVAL SCANLOG="" \
 			STATUSFILE=$STATUSFILE \
-			QMAIL/bin/svscan $SERVICEDIR
+			PREFIX/sbin/svscan $SERVICEDIR
 	fi
 else
 	for i in $*
@@ -94,14 +97,14 @@ else
 			continue
 		fi
 		SERVICEDIR=$i
-		QMAIL/bin/svc -dx $SERVICEDIR/* $SERVICEDIR/*/log
+		PREFIX/bin/svc -dx $SERVICEDIR/* $SERVICEDIR/*/log
 		if [ $use_readproctitle -eq 1 ] ; then
 			env - PATH=$PATH SCANINTERVAL=$SCANINTERVAL \
-				QMAIL/bin/svscan $SERVICEDIR 2>&1 | \
-			env - PATH=$PATH QMAIL/bin/readproctitle $SERVICEDIR errors: ................................................................................................................................................................................................................................................................................................................................................................................................................ &
+				PREFIX/sbin/svscan $SERVICEDIR 2>&1 | \
+			env - PATH=$PATH PREFIX/sbin/readproctitle $SERVICEDIR errors: ................................................................................................................................................................................................................................................................................................................................................................................................................ &
 		else
 			env - PATH=$PATH SCANINTERVAL=$SCANINTERVAL SCANLOG="" \
-				QMAIL/bin/svscan $SERVICEDIR &
+				PREFIX/sbin/svscan $SERVICEDIR &
 		fi
 	done
 	if [ -d /var/lock/subsys ] ; then

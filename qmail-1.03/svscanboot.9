@@ -28,7 +28,7 @@ and errors using \fBmultilog\fR, in the directory \fIservicedir\fR/.svscan/log/c
 \fBsvscanboot\fR sets PATH to
 
 .EX
-QMAIL/bin:/usr/local/bin:/bin:/sbin:/usr/bin:/usr/sbin
+PREFIX/bin:/usr/local/bin:/bin:/sbin:/usr/bin:/usr/sbin
 .EE
 
 (all in one line, no space)
@@ -37,7 +37,7 @@ and clears all other environment variables.
 
 The recommended way is to put the following entry in /etc/inittab to invoke svscanboot.
 
-SV:345:respawn:QMAIL/bin/svscanboot <>/dev/console 2<>/dev/console
+SV:345:respawn:PREFIX/bin/svscanboot <>/dev/console 2<>/dev/console
 
 .SH SEE ALSO
 supervise(8),
