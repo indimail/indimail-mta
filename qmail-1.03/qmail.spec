@@ -1,6 +1,6 @@
 #
 #
-# $Id: qmail.spec,v 1.45 2016-06-02 19:04:21+05:30 Cprogrammer Exp mbhangui $
+# $Id: qmail.spec,v 1.46 2016-06-03 09:58:25+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %define _unpackaged_files_terminate_build 1
 
@@ -556,24 +556,23 @@ done
 #
 # Binaries
 #
-%attr(6511,qscand,qmail)                %{_prefix}/bin/qhpsi
-%attr(6511,qmailq,qmail)                %{_prefix}/bin/qmail-queue
-%attr(4511,qscand,qscand)               %{_prefix}/bin/qscanq
-%attr(2511,root,qscand)                 %{_prefix}/bin/run-cleanq
+%attr(6511,qscand,qmail)                %{_prefix}/sbin/qhpsi
+%attr(6511,qmailq,qmail)                %{_prefix}/sbin/qmail-queue
+%attr(4511,qscand,qscand)               %{_prefix}/sbin/qscanq
+%attr(2511,root,qscand)                 %{_prefix}/sbin/run-cleanq
 
 %if %noperms == 0
 %if 0%{?suse_version} >= 1120
-%verify (not user group mode) %attr(6511, qscand, qmail)   %{_prefix}/bin/qhpsi
-%verify (not user group mode) %attr(2511, root, qscand)    %{_prefix}/bin/run-cleanq
-%verify (not user group mode) %attr(6511, qmailq, qmail)   %{_prefix}/bin/qmail-queue
-%verify (not user group mode) %attr(4555, qscand, qscand)  %{_prefix}/bin/qscanq
+%verify (not user group mode) %attr(6511, qscand, qmail)   %{_prefix}/sbin/qhpsi
+%verify (not user group mode) %attr(2511, root, qscand)    %{_prefix}/sbin/run-cleanq
+%verify (not user group mode) %attr(6511, qmailq, qmail)   %{_prefix}/sbin/qmail-queue
+%verify (not user group mode) %attr(4555, qscand, qscand)  %{_prefix}/sbin/qscanq
 %verify (not user group mode) %attr(2555, alias, qmail)    %{qmaildir}/alias
 #%verify (not user group mode) %attr(2755, indimail, qmail) %{_prefix}/autoturn
 %endif
 %endif
 
 %attr(555,root,qmail)                   %{_prefix}/bin/qmail-popbull
-%attr(555,root,qmail)                   %{_prefix}/bin/cleanq
 %attr(555,root,qmail)                   %{_prefix}/bin/zsuccesses
 %attr(555,root,qmail)                   %{_prefix}/bin/ofmipd
 %attr(555,root,qmail)                   %{_prefix}/bin/qmail-lagcheck
@@ -626,7 +625,6 @@ done
 %attr(555,root,qmail)                   %{_prefix}/bin/nowutc
 %attr(555,root,qmail)                   %{_prefix}/bin/cdbdump
 %attr(555,root,qmail)                   %{_prefix}/bin/iftocc
-%attr(555,root,qmail)                   %{_prefix}/bin/qmail-qmqpc
 %attr(555,root,qmail)                   %{_prefix}/bin/serialqmtp
 %attr(555,root,qmail)                   %{_prefix}/bin/rsmtprdomains
 %attr(511,root,qmail)                   %{_prefix}/bin/qmail-getpw
@@ -756,14 +754,12 @@ done
 %attr(555,root,qmail)                   %{_prefix}/bin/serialcmd
 %attr(555,root,qmail)                   %{_prefix}/bin/qmail-qread
 %attr(555,root,qmail)                   %{_prefix}/bin/zfailures
-%attr(555,root,qmail)                   %{_prefix}/bin/qmail-nullqueue
 %attr(500,root,qmail)                   %{_prefix}/bin/qmail-daemon
 %attr(555,root,qmail)                   %{_prefix}/bin/zsendmail
 %attr(555,root,qmail)                   %{_prefix}/bin/822received
 %attr(555,root,qmail)                   %{_prefix}/bin/cdbmake-12
 %attr(555,root,qmail)                   %{_prefix}/bin/dnscname
 %attr(555,root,qmail)                   %{_prefix}/bin/maildircmd
-%attr(555,root,qmail)                   %{_prefix}/bin/qmail-multi
 %attr(555,root,qmail)                   %{_prefix}/bin/qmail-qfilter
 %attr(555,root,qmail)                   %{_prefix}/bin/surblfilter
 %attr(555,root,qmail)                   %{_prefix}/bin/surblqueue
@@ -783,6 +779,10 @@ done
 %attr(555,root,qmail)                   %{_prefix}/sbin/sys-checkpwd
 %attr(555,root,qmail)                   %{_prefix}/sbin/ldap-checkpwd
 %attr(555,root,qmail)                   %{_prefix}/sbin/svctool
+%attr(555,root,qmail)                   %{_prefix}/sbin/qmail-nullqueue
+%attr(555,root,qmail)                   %{_prefix}/sbin/qmail-multi
+%attr(555,root,qmail)                   %{_prefix}/sbin/cleanq
+%attr(555,root,qmail)                   %{_prefix}/sbin/qmail-qmqpc
 
 # daemontools
 %attr(555,root,qmail)                   %{_prefix}/bin/envdir
@@ -790,14 +790,12 @@ done
 %attr(555,root,qmail)                   %{_prefix}/bin/fghack
 %attr(555,root,qmail)                   %{_prefix}/bin/multilog
 %attr(555,root,qmail)                   %{_prefix}/bin/pgrphack
-%attr(555,root,qmail)                   %{_prefix}/bin/readproctitle
 %attr(555,root,qmail)                   %{_prefix}/bin/setlock
 %attr(555,root,qmail)                   %{_prefix}/bin/setuidgid
 %attr(555,root,qmail)                   %{_prefix}/bin/softlimit
 %attr(555,root,qmail)                   %{_prefix}/bin/supervise
 %attr(555,root,qmail)                   %{_prefix}/bin/svc
 %attr(555,root,qmail)                   %{_prefix}/bin/svok
-%attr(555,root,qmail)                   %{_prefix}/bin/svscan
 %attr(555,root,qmail)                   %{_prefix}/bin/svstat
 %attr(555,root,qmail)                   %{_prefix}/bin/tai64n
 %attr(555,root,qmail)                   %{_prefix}/bin/tai64nlocal
@@ -812,9 +810,11 @@ done
 %attr(555,root,qmail)                   %{_prefix}/bin/logselect
 %attr(555,root,qmail)                   %{_prefix}/bin/qlogselect
 %attr(555,root,qmail)                   %{_prefix}/bin/multirotate
-%attr(555,root,qmail)                   %{_prefix}/bin/svscanboot
 %attr(555,root,qmail)                   %{_prefix}/bin/udplogger
 %attr(555,root,qmail)                   %{_prefix}/bin/udpclient
+%attr(555,root,qmail)                   %{_prefix}/sbin/svscan
+%attr(555,root,qmail)                   %{_prefix}/sbin/svscanboot
+%attr(555,root,qmail)                   %{_prefix}/sbin/readproctitle
 
 # ucspi-tcp
 %attr(555,root,root)                    %{_prefix}/bin/mconnect-io
@@ -950,14 +950,12 @@ done
 %attr(555,root,qmail)                   %{_prefix}/bin/fghack
 %attr(555,root,qmail)                   %{_prefix}/bin/multilog
 %attr(555,root,qmail)                   %{_prefix}/bin/pgrphack
-%attr(555,root,qmail)                   %{_prefix}/bin/readproctitle
 %attr(555,root,qmail)                   %{_prefix}/bin/setlock
 %attr(555,root,qmail)                   %{_prefix}/bin/setuidgid
 %attr(555,root,qmail)                   %{_prefix}/bin/softlimit
 %attr(555,root,qmail)                   %{_prefix}/bin/supervise
 %attr(555,root,qmail)                   %{_prefix}/bin/svc
 %attr(555,root,qmail)                   %{_prefix}/bin/svok
-%attr(555,root,qmail)                   %{_prefix}/bin/svscan
 %attr(555,root,qmail)                   %{_prefix}/bin/svstat
 %attr(555,root,qmail)                   %{_prefix}/bin/tai64n
 %attr(555,root,qmail)                   %{_prefix}/bin/tai64nlocal
@@ -972,7 +970,9 @@ done
 %attr(555,root,qmail)                   %{_prefix}/bin/logselect
 %attr(555,root,qmail)                   %{_prefix}/bin/qlogselect
 %attr(555,root,qmail)                   %{_prefix}/bin/multirotate
-%attr(555,root,qmail)                   %{_prefix}/bin/svscanboot
+%attr(555,root,qmail)                   %{_prefix}/sbin/svscan
+%attr(555,root,qmail)                   %{_prefix}/sbin/svscanboot
+%attr(555,root,qmail)                   %{_prefix}/sbin/readproctitle
 
 %docdir %{shareddir}/doc
 %docdir %{mandir}
@@ -1076,10 +1076,10 @@ fi
 
 %if %noperms == 0
 %if 0%{?suse_version} >= 1120
-%verify_permissions -e %{_prefix}/bin/qhpsi
-%verify_permissions -e %{_prefix}/bin/run-cleanq
-%verify_permissions -e %{_prefix}/bin/qmail-queue
-%verify_permissions -e %{_prefix}/bin/qscanq
+%verify_permissions -e %{_prefix}/sbin/qhpsi
+%verify_permissions -e %{_prefix}/sbin/run-cleanq
+%verify_permissions -e %{_prefix}/sbin/qmail-queue
+%verify_permissions -e %{_prefix}/sbin/qscanq
 %verify_permissions -e %{_prefix}/alias
 #%verify_permissions -e %{_prefix}/autoturn
 %endif
@@ -1590,7 +1590,7 @@ if [ $nscd_up -ge 1 ] ; then
 	fi
 fi
 
-if [ ! %{_prefix} = "/usr" ] ; then
+if [ %{_prefix} = "/var/indimail" -o %{_prefix} = "/var/qmail" ] ; then
 	echo "removing binaries, libraries, queues, man pages"
 	for i in %{_prefix}/bin %{_prefix}/sbin %{_prefix}/lib %{qmaildir}/queue \
 		%{mandir}/man1 %{mandir}/cat1 %{mandir}/man5 %{mandir}/cat5 \
@@ -1601,12 +1601,37 @@ if [ ! %{_prefix} = "/usr" ] ; then
 	/bin/rmdir --ignore-fail-on-non-empty %{mandir} 2>/dev/null
 	for i in `/bin/ls %{shareddir} 2>/dev/null`
 	do
-		if [ " $i" = " clamd" ] ; then # leave the signatures
-			continue;
-		fi
 		%{__rm} -rf %{shareddir}/$i || true
 	done
-	/bin/rmdir --ignore-fail-on-non-empty %{shareddir} 2>/dev/null
+else
+	for i in bin sbin control users
+	do
+		echo "removing link $i"
+		%{__rm} -f %{qmaildir}/$i || true
+	done
+	# queue
+	%{__rm} -rf %{qmaildir}/queue || true
+	# modules
+	%{__rm} -rf %{_prefix}/lib/indimail || true
+	# shareddir
+	if [ ! " %{shareddir}" = " /usr/share" ] ; then
+		for i in `/bin/ls %{shareddir} 2>/dev/null`
+		do
+			%{__rm} -rf %{shareddir}/$i || true
+		done
+	fi
+	# libexecdir
+	if [ ! " %{libexecdir}" = " /usr/libexec" ] ; then
+		%{__rm} -rf %{libexecdir} || true
+	fi
+fi
+if [ -d %{mandir} ] ; then
+echo "removing man pages"
+/bin/rmdir --ignore-fail-on-non-empty %{mandir} 2>/dev/null
+fi
+if [ -d %{shareddir} ] ; then
+echo "removing architecture-independent shared directory"
+/bin/rmdir --ignore-fail-on-non-empty %{shareddir} 2>/dev/null
 fi
 
 echo "removing configuration"

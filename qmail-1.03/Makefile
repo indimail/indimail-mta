@@ -777,9 +777,9 @@ warn-auto.sh qpq.sh conf-qmail
 	> qpq
 
 qmailctl: \
-warn-auto.sh qmailctl.sh conf-qmail
+warn-auto.sh qmailctl.sh conf-prefix
 	(head -1 warn-auto.sh | sed  s}sh}bash};cat qmailctl.sh) \
-	| sed s}QMAIL}"`head -1 conf-qmail`"}g \
+	| sed s}PREFIX}"`head -1 conf-prefix`"}g \
 	> qmailctl
 
 indimail.plist: indimail.plist.in conf-prefix
