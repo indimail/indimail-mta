@@ -7,7 +7,7 @@
 	<key>KeepAlive</key>
 	<true/>
 	<key>Program</key>
-	<string>QMAIL/bin/svscanboot</string>
+	<string>PREFIX/sbin/svscanboot</string>
 	<key>ProgramArguments</key>
 	<array>
 		<string>svscan</string>
