@@ -1,5 +1,8 @@
 #
 # $Log: systemd.in,v $
+# Revision 1.2  2016-06-03 09:58:50+05:30  Cprogrammer
+# moved svscanboot to sbin
+#
 # Revision 1.1  2011-07-21 13:25:24+05:30  Cprogrammer
 # Initial revision
 #
@@ -8,14 +11,14 @@
 # to start - systemctl start indimail.service
 # to stop  - systemctl stop  indimail.service
 #
-# $Id: systemd.in,v 1.1 2011-07-21 13:25:24+05:30 Cprogrammer Exp mbhangui $
+# $Id: systemd.in,v 1.2 2016-06-03 09:58:50+05:30 Cprogrammer Exp mbhangui $
 #
 [Unit]
 Description=IndiMail Messaging Platform
 After=local-fs.target network.target
 
 [Service]
-ExecStart=QMAIL/bin/svscanboot /service
+ExecStart=PREFIX/sbin/svscanboot /service
 ExecStop=/etc/init.d/indimail stop
 Restart=on-failure
 Type=simple
