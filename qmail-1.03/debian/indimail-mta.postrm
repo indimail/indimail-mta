@@ -149,11 +149,28 @@ if [ " $1" = " purge" ] ; then
 		do
 			${rm} -f ${qmaildir}/$i || true
 		done
+		# queue
+		${rm} -rf ${qmaildir}/queue || true
+		# modules
+		${rm} -rf ${prefix}/lib/indimail || true
+		# shareddir
+		if [ ! " ${shareddir}" = " /usr/share" ] ; then
+			for i in `/bin/ls ${shareddir} 2>/dev/null`
+			do
+				${rm} -rf ${shareddir}/$i || true
+			done
+		fi
+		# libexecdir
+		if [ ! " ${libexecdir}" = " /usr/libexec" ] ; then
+			${rm} -rf ${libexecdir} || true
+		fi
 	fi
 	echo "removing man pages"
 	${rmdir} --ignore-fail-on-non-empty ${mandir} 2>/dev/null|| true
+	if [ -d ${shareddir} ] ; then
 	echo "removing architecture-independent shared directory"
 	${rmdir} --ignore-fail-on-non-empty ${shareddir} 2>/dev/null || true
+	fi
 
 	echo "removing tcp configuration"
 	for i in smtp qmtp qmqp
