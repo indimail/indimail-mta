@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail.spec.in,v 2.338 2016-06-03 13:08:01+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 2.339 2016-06-03 13:34:17+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %define _unpackaged_files_terminate_build 1
 
@@ -1082,38 +1082,6 @@ fi
 %attr(2511,root,qscand)                 %{_prefix}/sbin/run-cleanq
 %attr(4555,root,root)                   %{_prefix}/sbin/systpass
 
-%if %noperms == 0
-%if 0%{?suse_version} >= 1120
-%verify (not user group mode) %attr(4555, root, root)      %{_prefix}/bin/vdeluser
-%verify (not user group mode) %attr(4555, root, root)      %{_prefix}/bin/vadduser
-%verify (not user group mode) %attr(4555, root, root)      %{_prefix}/bin/vaddaliasdomain
-%verify (not user group mode) %attr(4555, root, root)      %{_prefix}/bin/vrenamedomain
-%verify (not user group mode) %attr(4555, root, root)      %{_prefix}/bin/vsetuserquota
-%verify (not user group mode) %attr(4555, root, root)      %{_prefix}/bin/vmoveuser
-%verify (not user group mode) %attr(4555, root, root)      %{_prefix}/bin/vuserinfo
-%verify (not user group mode) %attr(4555, root, root)      %{_prefix}/bin/vdeldomain
-%verify (not user group mode) %attr(4555, root, root)      %{_prefix}/bin/vadddomain
-%if %nobogofilter == 0
-%verify (not user group mode) %attr(6511, root, indimail)  %{_prefix}/bin/bogofilter
-%endif
-%verify (not user group mode) %attr(4511, root, root)      %{_prefix}/bin/vdominfo
-%verify (not user group mode) %attr(4555, root, root)      %{_prefix}/bin/vrenameuser
-%verify (not user group mode) %attr(4555, root, root)      %{_prefix}/bin/printdir
-%verify (not user group mode) %attr(4555, root, root)      %{_prefix}/bin/vmoduser
-%verify (not user group mode) %attr(4555, root, root)      %{_prefix}/bin/vcfilter
-%verify (not user group mode) %attr(4555, root, root)      %{_prefix}/bin/vbulletin
-%verify (not user group mode) %attr(2555, alias, qmail)    %{_prefix}/alias
-%verify (not user group mode) %attr(2755, indimail, qmail) %{_prefix}/autoturn
-%verify (not user group mode) %attr(6511, qscand, qmail)   %{_prefix}/sbin/qhpsi
-%verify (not user group mode) %attr(2511, root, qscand)    %{_prefix}/sbin/run-cleanq
-%verify (not user group mode) %attr(6511, qmailq, qmail)   %{_prefix}/sbin/qmail-queue
-%verify (not user group mode) %attr(4555, qscand, qscand)  %{_prefix}/sbin/qscanq
-%verify (not user group mode) %attr(4555, root, root)      %{_prefix}/sbin/systpass
-%verify (not user group mode) %attr(4555, root, qmail)     %{libexedir}/sq_vacation
-%verify (not user group mode) %attr(4555, root, root)      %{libexedir}/authlib/authshadow
-%endif
-%endif
-
 %attr(555,root,qmail)                   %{_prefix}/bin/logmonitor
 %attr(555,root,qmail)                   %{_prefix}/bin/hostcntrl
 %attr(555,root,qmail)                   %{_prefix}/bin/bogofilter-qfe
@@ -1202,7 +1170,6 @@ fi
 %attr(555,root,qmail)                   %{_prefix}/bin/svok
 %attr(555,root,qmail)                   %{_prefix}/bin/maildirqmtp
 %attr(555,root,qmail)                   %{_prefix}/bin/qmailctl
-%attr(500,root,qmail)                   %{_prefix}/bin/qmail-lspawn
 %attr(555,root,qmail)                   %{_prefix}/bin/dnstxt
 %attr(555,root,qmail)                   %{_prefix}/bin/dnsmxip
 %attr(555,root,qmail)                   %{_prefix}/bin/dnsfq
@@ -1210,7 +1177,6 @@ fi
 %attr(555,root,qmail)                   %{_prefix}/bin/dnsip
 %attr(555,root,qmail)                   %{_prefix}/bin/dnscname
 %attr(555,root,qmail)                   %{_prefix}/bin/printmaillist
-%attr(511,root,qmail)                   %{_prefix}/bin/qmail-todo
 %attr(555,root,qmail)                   %{_prefix}/bin/tai64nunix
 %attr(555,root,qmail)                   %{_prefix}/bin/tai2tai64n
 %attr(555,root,qmail)                   %{_prefix}/bin/tai64n2tai
@@ -1230,7 +1196,6 @@ fi
 %attr(511,root,qmail)                   %{_prefix}/bin/qmail-remote
 %attr(555,root,qmail)                   %{_prefix}/bin/pinq
 %attr(555,root,qmail)                   %{_prefix}/bin/mlmatchup
-%attr(511,root,qmail)                   %{_prefix}/bin/qmail-send
 %attr(555,root,qmail)                   %{_prefix}/bin/sendmail
 %attr(555,root,qmail)                   %{_prefix}/bin/rmail
 %attr(555,root,qmail)                   %{_prefix}/bin/dbinfo
@@ -1280,7 +1245,6 @@ fi
 %attr(555,root,qmail)                   %{_prefix}/bin/zsenders
 %attr(555,root,qmail)                   %{_prefix}/bin/suids
 %attr(555,root,qmail)                   %{_prefix}/bin/maildirserial
-%attr(500,root,qmail)                   %{_prefix}/bin/qmail-start
 %attr(511,root,qmail)                   %{_prefix}/bin/qmail-popup
 %attr(555,root,qmail)                   %{_prefix}/bin/ofmipname
 %attr(511,root,qmail)                   %{_prefix}/bin/qmail-local
@@ -1361,8 +1325,6 @@ fi
 %attr(555,root,qmail)                   %{_prefix}/bin/multitail
 %attr(555,root,qmail)                   %{_prefix}/bin/except
 %attr(555,root,qmail)                   %{_prefix}/bin/maildirsmtp
-%attr(511,root,qmail)                   %{_prefix}/bin/qmail-clean
-%attr(511,root,qmail)                   %{_prefix}/bin/qmail-rspawn
 %attr(555,root,qmail)                   %{_prefix}/bin/pgrphack
 %attr(555,root,qmail)                   %{_prefix}/bin/xrecipient
 %attr(555,root,qmail)                   %{_prefix}/bin/argv0
@@ -1376,7 +1338,6 @@ fi
 %attr(555,root,qmail)                   %{_prefix}/bin/serialcmd
 %attr(555,root,qmail)                   %{_prefix}/bin/qmail-qread
 %attr(555,root,qmail)                   %{_prefix}/bin/zfailures
-%attr(500,root,qmail)                   %{_prefix}/bin/qmail-daemon
 %attr(555,root,qmail)                   %{_prefix}/bin/zsendmail
 %attr(555,root,qmail)                   %{_prefix}/bin/multipipe
 %attr(555,root,qmail)                   %{_prefix}/bin/cdbmake-12
@@ -1428,6 +1389,13 @@ fi
 %attr(555,root,qmail)                   %{_prefix}/sbin/svscan
 %attr(555,root,qmail)                   %{_prefix}/sbin/svscanboot
 %attr(555,root,qmail)                   %{_prefix}/sbin/readproctitle
+%attr(500,root,qmail)                   %{_prefix}/sbin/qmail-daemon
+%attr(500,root,qmail)                   %{_prefix}/sbin/qmail-start
+%attr(511,root,qmail)                   %{_prefix}/sbin/qmail-send
+%attr(511,root,qmail)                   %{_prefix}/sbin/qmail-todo
+%attr(511,root,qmail)                   %{_prefix}/sbin/qmail-clean
+%attr(500,root,qmail)                   %{_prefix}/sbin/qmail-lspawn
+%attr(511,root,qmail)                   %{_prefix}/sbin/qmail-rspawn
 
 %if %nonssd == 0
 %attr(555,root,qmail)                   %{_prefix}/sbin/nssd
@@ -1802,6 +1770,38 @@ fi
 %attr(444,root,qmail)                   %{shareddir}/doc/PIC.relaygood
 %attr(444,root,qmail)                   %{shareddir}/doc/PIC.local2rem
 %attr(444,root,qmail)                   %{shareddir}/doc/TOISP
+
+%if %noperms == 0
+%if 0%{?suse_version} >= 1120
+%verify (not user group mode) %attr(4555, root, root)      %{_prefix}/bin/vdeluser
+%verify (not user group mode) %attr(4555, root, root)      %{_prefix}/bin/vadduser
+%verify (not user group mode) %attr(4555, root, root)      %{_prefix}/bin/vaddaliasdomain
+%verify (not user group mode) %attr(4555, root, root)      %{_prefix}/bin/vrenamedomain
+%verify (not user group mode) %attr(4555, root, root)      %{_prefix}/bin/vsetuserquota
+%verify (not user group mode) %attr(4555, root, root)      %{_prefix}/bin/vmoveuser
+%verify (not user group mode) %attr(4555, root, root)      %{_prefix}/bin/vuserinfo
+%verify (not user group mode) %attr(4555, root, root)      %{_prefix}/bin/vdeldomain
+%verify (not user group mode) %attr(4555, root, root)      %{_prefix}/bin/vadddomain
+%if %nobogofilter == 0
+%verify (not user group mode) %attr(6511, root, indimail)  %{_prefix}/bin/bogofilter
+%endif
+%verify (not user group mode) %attr(4511, root, root)      %{_prefix}/bin/vdominfo
+%verify (not user group mode) %attr(4555, root, root)      %{_prefix}/bin/vrenameuser
+%verify (not user group mode) %attr(4555, root, root)      %{_prefix}/bin/printdir
+%verify (not user group mode) %attr(4555, root, root)      %{_prefix}/bin/vmoduser
+%verify (not user group mode) %attr(4555, root, root)      %{_prefix}/bin/vcfilter
+%verify (not user group mode) %attr(4555, root, root)      %{_prefix}/bin/vbulletin
+%verify (not user group mode) %attr(2555, alias, qmail)    %{_prefix}/alias
+%verify (not user group mode) %attr(2755, indimail, qmail) %{_prefix}/autoturn
+%verify (not user group mode) %attr(6511, qscand, qmail)   %{_prefix}/sbin/qhpsi
+%verify (not user group mode) %attr(2511, root, qscand)    %{_prefix}/sbin/run-cleanq
+%verify (not user group mode) %attr(6511, qmailq, qmail)   %{_prefix}/sbin/qmail-queue
+%verify (not user group mode) %attr(4555, qscand, qscand)  %{_prefix}/sbin/qscanq
+%verify (not user group mode) %attr(4555, root, root)      %{_prefix}/sbin/systpass
+%verify (not user group mode) %attr(4555, root, qmail)     %{libexedir}/sq_vacation
+%verify (not user group mode) %attr(4555, root, root)      %{libexedir}/authlib/authshadow
+%endif
+%endif
 
 # Shared libraries (omit for architectures that don't support them)
 

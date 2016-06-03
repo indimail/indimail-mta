@@ -41,22 +41,15 @@
 # Binaries
 #
 %attr(0500,root,qmail) @prefix@/bin/qmail-cdb
-%attr(0500,root,qmail) @prefix@/bin/qmail-daemon
-%attr(0500,root,qmail) @prefix@/bin/qmail-lspawn
 %attr(0500,root,qmail) @prefix@/bin/qmail-newmrh
 %attr(0500,root,qmail) @prefix@/bin/qmail-newu
 %attr(0500,root,qmail) @prefix@/bin/qmail-sql
-%attr(0500,root,qmail) @prefix@/bin/qmail-start
 %attr(0500,root,qmail) @prefix@/bin/recipient-cdb
-%attr(0511,root,qmail) @prefix@/bin/qmail-clean
 %attr(0511,root,qmail) @prefix@/bin/qmail-getpw
 %attr(0511,root,qmail) @prefix@/bin/qmail-local
 %attr(0511,root,qmail) @prefix@/bin/qmail-popup
 %attr(0511,root,qmail) @prefix@/bin/qmail-pw2u
 %attr(0511,root,qmail) @prefix@/bin/qmail-remote
-%attr(0511,root,qmail) @prefix@/bin/qmail-rspawn
-%attr(0511,root,qmail) @prefix@/bin/qmail-send
-%attr(0511,root,qmail) @prefix@/bin/qmail-todo
 %attr(0511,root,qmail) @prefix@/bin/relaytest
 %attr(0511,root,qmail) @prefix@/bin/splogger
 %attr(0511,root,root)  @prefix@/bin/incrmesg
@@ -405,6 +398,13 @@
 %attr(0555,root,qmail) @prefix@/sbin/svscan
 %attr(0555,root,qmail) @prefix@/sbin/svscanboot
 %attr(0555,root,qmail) @prefix@/sbin/readproctitle
+%attr(0500,root,qmail) @prefix@/sbin/qmail-daemon
+%attr(0500,root,qmail) @prefix@/sbin/qmail-start
+%attr(0500,root,qmail) @prefix@/sbin/qmail-lspawn
+%attr(0511,root,qmail) @prefix@/sbin/qmail-rspawn
+%attr(0511,root,qmail) @prefix@/sbin/qmail-clean
+%attr(0511,root,qmail) @prefix@/sbin/qmail-send
+%attr(0511,root,qmail) @prefix@/sbin/qmail-todo
 
 %attr(0555,root,root) @prefix@/sbin/bf_compact
 %attr(0555,root,root) @prefix@/sbin/bf_copy
