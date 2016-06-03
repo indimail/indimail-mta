@@ -67,7 +67,7 @@
 %attr(0555,root,qmail) /usr/bin/atrn
 %attr(0555,root,qmail) /usr/bin/autoresponder
 %attr(0555,root,qmail) /usr/bin/balance_outgoing
-%attr(0555,root,qmail) /usr/bin/base64
+%attr(0555,root,qmail) /usr/bin/qbase64
 %attr(0555,root,qmail) /usr/bin/bouncesaying
 %attr(0555,root,qmail) /usr/bin/cdbdump
 %attr(0555,root,qmail) /usr/bin/cdbget
@@ -80,7 +80,7 @@
 %attr(0555,root,qmail) /usr/bin/checkaddr
 %attr(0555,root,qmail) /usr/bin/checkdomain
 %attr(0555,root,qmail) /usr/bin/cidr
-%attr(0555,root,qmail) /usr/bin/cleanq
+%attr(0555,root,qmail) /usr/sbin/cleanq
 %attr(0555,root,qmail) /usr/bin/columnt
 %attr(0555,root,qmail) /usr/bin/condredirect
 %attr(0555,root,qmail) /usr/bin/condtomaildir
@@ -164,7 +164,7 @@
 %attr(0555,root,qmail) /usr/bin/qmail-popbull
 %attr(0555,root,qmail) /usr/bin/qmail-poppass
 %attr(0555,root,qmail) /usr/bin/qmail-qfilter
-%attr(0555,root,qmail) /usr/bin/qmail-qmqpc
+%attr(0555,root,qmail) /usr/sbin/qmail-qmqpc
 %attr(0555,root,qmail) /usr/bin/qmail-qmqpd
 %attr(0555,root,qmail) /usr/bin/qmail-qmtpd
 %attr(0555,root,qmail) /usr/bin/qmail-qread
@@ -180,7 +180,7 @@
 %attr(0555,root,qmail) /usr/bin/qnotify
 %attr(0555,root,qmail) /usr/bin/qpq
 %attr(0555,root,qmail) /usr/bin/qreceipt
-%attr(0555,root,qmail) /usr/bin/qscanq-stdin
+%attr(0555,root,qmail) /usr/sbin/qscanq-stdin
 %attr(0555,root,qmail) /usr/bin/qsmhook
 %attr(0555,root,qmail) /usr/bin/queue-fix
 %attr(0555,root,qmail) /usr/bin/readproctitle
@@ -262,7 +262,6 @@
 %attr(0555,root,qmail) /usr/bin/tai64n2tai
 %attr(0555,root,qmail) /usr/bin/udpclient
 %attr(0555,root,qmail) /usr/bin/udplogger
-%attr(0555,root,qmail) /usr/bin/whois
 %attr(0555,root,qmail) /usr/bin/leapsecs
 %attr(0555,root,qmail) /usr/bin/nowutc
 %attr(0555,root,qmail) /usr/bin/yearcal
@@ -278,13 +277,14 @@
 %attr(0500,root,qmail) /usr/sbin/instcheck
 %attr(0555,root,qmail) /usr/sbin/svctool
 %attr(0555,root,qmail) /usr/sbin/sys-checkpwd
+%attr(0555,root,qmail) /usr/sbin/whois
 #
 # Setuid
 #
-%attr(2511,root,qscand) /usr/bin/run-cleanq
-%attr(4511,qscand,qscand) /usr/bin/qscanq
-%attr(6511,qmailq,qmail) /usr/bin/qmail-queue
-%attr(6511,qscand,qmail) /usr/bin/qhpsi
+%attr(2511,root,qscand) /usr/sbin/run-cleanq
+%attr(4511,qscand,qscand) /usr/sbin/qscanq
+%attr(6511,qmailq,qmail) /usr/sbin/qmail-queue
+%attr(6511,qscand,qmail) /usr/sbin/qhpsi
 #
 # ucspi-tcp
 #
@@ -325,6 +325,8 @@
 #
 %attr(0444,root,root)  /etc/indimail/perm_list
 %attr(0444,root,root)  /etc/indimail/qmailprog.list
+%attr(0644,root,root)  /etc/indimail/etc/leapsecs.txt
+%attr(0644,root,root)  /etc/indimail/etc/leapsecs.dat
 %attr(0644,root,root)  /etc/indimail/procmailrc
 #
 # docs
@@ -506,7 +508,7 @@
 %attr(0644,root,root) /usr/share/man/man1/addcr.1.gz
 %attr(0644,root,root) /usr/share/man/man1/argv0.1.gz
 %attr(0644,root,root) /usr/share/man/man1/autoresponder.1.gz
-%attr(0644,root,root) /usr/share/man/man1/base64.1.gz
+%attr(0644,root,root) /usr/share/man/man1/qbase64.1.gz
 %attr(0644,root,root) /usr/share/man/man1/bouncesaying.1.gz
 %attr(0644,root,root) /usr/share/man/man1/cdbdump.1.gz
 %attr(0644,root,root) /usr/share/man/man1/cdbget.1.gz
