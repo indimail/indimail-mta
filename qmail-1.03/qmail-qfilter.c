@@ -1,5 +1,8 @@
 /* 
  * $Log: qmail-qfilter.c,v $
+ * Revision 1.10  2016-06-03 09:58:12+05:30  Cprogrammer
+ * moved qmail-multi to sbin
+ *
  * Revision 1.9  2011-07-13 20:56:18+05:30  Cprogrammer
  * removed useless close()
  *
@@ -88,7 +91,7 @@
 static size_t   env_len = 0;
 static size_t   msg_len = 0;
 char            strnum[FMT_ULONG];
-static char    *binqqargs[2] = { "bin/qmail-multi", 0 };
+static char    *binqqargs[2] = { "sbin/qmail-multi", 0 };
 struct substdio sserr;
 char            errbuf[256];
 
@@ -441,7 +444,7 @@ main(int argc, char *argv[])
 		scan_int(x, &errfd);
 	substdio_fdbuf(&sserr, write, errfd, errbuf, sizeof(errbuf));
 	if (!(binqqargs[0] = getenv("QQF_QMAILQUEUE")))
-		binqqargs[0] = "bin/qmail-multi";
+		binqqargs[0] = "sbin/qmail-multi";
 	filters = parse_args(argc - 1, argv + 1);
 	copy_fd(0, 0, &msg_len);
 	copy_fd(1, ENVIN, &env_len);
@@ -457,7 +460,7 @@ main(int argc, char *argv[])
 void
 getversion_qmail_qfilter_c()
 {
-	static char    *x = "$Id: qmail-qfilter.c,v 1.9 2011-07-13 20:56:18+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: qmail-qfilter.c,v 1.10 2016-06-03 09:58:12+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

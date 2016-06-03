@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-dkim.c,v $
+ * Revision 1.47  2016-06-03 09:57:59+05:30  Cprogrammer
+ * moved qmail-multi to sbin
+ *
  * Revision 1.46  2016-05-17 19:44:58+05:30  Cprogrammer
  * use auto_control, set by conf-control to set control directory
  *
@@ -963,7 +966,7 @@ checkPractice(int dkimRet)
 	return (0);
 }
 
-static char    *binqqargs[2] = { "bin/qmail-multi", 0 };
+static char    *binqqargs[2] = { "sbin/qmail-multi", 0 };
 
 int
 dkim_setoptions(DKIMSignOptions *opts, char *signOptions)
@@ -1405,7 +1408,7 @@ main(argc, argv)
 void
 getversion_qmail_dkim_c()
 {
-	static char    *x = "$Id: qmail-dkim.c,v 1.46 2016-05-17 19:44:58+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-dkim.c,v 1.47 2016-06-03 09:57:59+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
