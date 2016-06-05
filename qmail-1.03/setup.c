@@ -1,5 +1,8 @@
 /*
  * $Log: setup.c,v $
+ * Revision 1.26  2016-06-05 13:21:34+05:30  Cprogrammer
+ * treat files in sbin as programs
+ *
  * Revision 1.25  2016-05-29 20:12:07+05:30  Cprogrammer
  * code beautified
  *
@@ -398,7 +401,7 @@ c(home, subdir, file, uid, gid, mode)
 	char           *subd;
 	struct stat     st;
 
-	if (!str_diff(subdir, "bin"))
+	if (!str_diff(subdir, "bin") || !str_diff(subdir, "sbin"))
 		is_prog = 1;
 	/*- for generating qmailprog.list */
 	if (is_prog) {
@@ -559,7 +562,7 @@ main(int argc, char **argv)
 void
 getversion_setup_c()
 {
-	static char    *x = "$Id: setup.c,v 1.25 2016-05-29 20:12:07+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: setup.c,v 1.26 2016-06-05 13:21:34+05:30 Cprogrammer Exp mbhangui $";
 #ifdef INDIMAIL
 	if (x)
 		x = sccsidh;
