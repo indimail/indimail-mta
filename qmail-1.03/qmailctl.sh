@@ -11,6 +11,9 @@
 ### END INIT INFO
 
 # $Log: qmailctl.sh,v $
+# Revision 1.48  2016-06-05 13:21:00+05:30  Cprogrammer
+# moved qmail-tcpok to sbin
+#
 # Revision 1.47  2016-06-03 10:10:03+05:30  Cprogrammer
 # use PREFIX instead of QMAIL for binaries
 #
@@ -462,7 +465,7 @@ case "$1" in
   flush)
 	ret=0
 	$ECHO -n $"Flushing timeout table + ALRM signal to qmail-send."
-	PREFIX/bin/qmail-tcpok > /dev/null && $succ || $fail
+	PREFIX/sbin/qmail-tcpok > /dev/null && $succ || $fail
 	echo
 	for i in `echo $SERVICE/qmail-send.*`
 	do
