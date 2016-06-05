@@ -1,5 +1,8 @@
 #
 # $Log: qmailconfig.sh,v $
+# Revision 1.8  2016-06-05 13:20:18+05:30  Cprogrammer
+# use PREFIX instead of QMAIL for binary prefix
+#
 # Revision 1.7  2016-05-17 23:11:42+05:30  Cprogrammer
 # fix for configurable control directory
 #
@@ -11,12 +14,12 @@
 # renamed config.sh to qmailconfig.sh
 #
 #
-# $Id: qmailconfig.sh,v 1.7 2016-05-17 23:11:42+05:30 Cprogrammer Exp mbhangui $
+# $Id: qmailconfig.sh,v 1.8 2016-06-05 13:20:18+05:30 Cprogrammer Exp mbhangui $
 #
 if [ -x ./hostname ] ; then
 	HOSTNAME_CMD=./hostname
-elif [ -x QMAIL/sbin/hostname ] ; then
-	HOSTNAME_CMD=QMAIL/sbin/hostname
+elif [ -x PREFIX/sbin/hostname ] ; then
+	HOSTNAME_CMD=PREFIX/sbin/hostname
 else
 	HOSTNAME_CMD=hostname
 fi
@@ -34,8 +37,8 @@ if read host
 then
 	echo Your hostname is "$host".
 	(
-	if [ -x QMAIL/bin/dnsfq ] ; then
-		QMAIL/bin/dnsfq "$host" | tr '[A-Z]' '[a-z]'
+	if [ -x PREFIX/sbin/dnsfq ] ; then
+		PREFIX/sbin/dnsfq "$host" | tr '[A-Z]' '[a-z]'
 	else
 		./dnsfq "$host" | tr '[A-Z]' '[a-z]'
 	fi
@@ -70,13 +73,13 @@ then
 		: > $CONTROLDIR/locals
 		chmod 644 $CONTROLDIR/locals
 		(
-			if [ -x QMAIL/bin/dnsip ] ; then
-				QMAIL/bin/dnsip "$fqdn"
+			if [ -x PREFIX/sbin/dnsip ] ; then
+				PREFIX/sbin/dnsip "$fqdn"
 			else
 				./dnsip "$fqdn"
 			fi
-			if [ -x QMAIL/bbin/ipmeprint ] ; then
-				QMAIL/bin/ipmeprint | awk '{print $3}'
+			if [ -x PREFIX/bin/ipmeprint ] ; then
+				PREFIX/bin/ipmeprint | awk '{print $3}'
 			else
 				./ipmeprint | awk '{print $3}'
 			fi
@@ -86,8 +89,8 @@ then
 			do
 				echo "$localip: " | tr -d '\012'
 				(
-				if [ -x QMAIL/bin/dnsptr ] ; then
-					QMAIL/bin/dnsptr "$localip" 2>/dev/null
+				if [ -x PREFIX/sbin/dnsptr ] ; then
+					PREFIX/sbin/dnsptr "$localip" 2>/dev/null
 				else
 					./dnsptr "$localip" 2>/dev/null
 				fi
