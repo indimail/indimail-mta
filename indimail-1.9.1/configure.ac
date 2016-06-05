@@ -199,6 +199,18 @@ AC_ARG_ENABLE(qmaildir, [  --enable-qmaildir=dir         directory where qmail i
 AC_DEFINE_UNQUOTED(QMAILDIR,"$qmaildir",qmail's home directory)
 AC_SUBST(qmaildir)
 
+servicedir="/service"
+AC_ARG_ENABLE(servicedir, [  --enable-servicedir=dir         directory where supervise services are installed.],
+	servicedir="$enableval",
+	[
+		if test "$servicedir" = ""
+		then
+			AC_MSG_ERROR([Unable to find your servicedir directory, specify --enable-servicedir.])
+		fi
+	])
+AC_DEFINE_UNQUOTED(SERVICEDIR,"$servicedir",supervise service directory)
+AC_SUBST(servicedir)
+
 for f in /var/postfix
 do
 	if test -d $f
@@ -1294,6 +1306,7 @@ echo " control directory = $controldir --enable-controldir=$controldir"
 echo " domains directory = $domaindir --enable-domaindir=$domaindir"
 echo "  shared directory = $shareddir --enable-shareddir=$shareddir"
 echo "        sysconfdir = $q_sysconfdir"
+echo "        servicedir = $servicedir"
 if test "$postfixdir" != ""
 then
 	echo " Postfix directory = $postfixdir --enable-postfixdir=$postfixdir"
