@@ -42,8 +42,6 @@
 %attr(0511,root,qmail) @prefix@/bin/qmail-popup
 %attr(0511,root,qmail) @prefix@/bin/qmail-pw2u
 %attr(0511,root,qmail) @prefix@/bin/qmail-remote
-%attr(0511,root,qmail) @prefix@/bin/relaytest
-%attr(0511,root,qmail) @prefix@/bin/splogger
 %attr(0555,root,qmail) @prefix@/bin/822addr
 %attr(0555,root,qmail) @prefix@/bin/822body
 %attr(0555,root,qmail) @prefix@/bin/822bodyfilter
@@ -83,12 +81,6 @@
 %attr(0555,root,qmail) @prefix@/bin/dk-filter
 %attr(0555,root,qmail) @prefix@/bin/dknewkey
 %attr(0555,root,qmail) @prefix@/bin/dktest
-%attr(0555,root,qmail) @prefix@/bin/dnscname
-%attr(0555,root,qmail) @prefix@/bin/dnsfq
-%attr(0555,root,qmail) @prefix@/bin/dnsip
-%attr(0555,root,qmail) @prefix@/bin/dnsmxip
-%attr(0555,root,qmail) @prefix@/bin/dnsptr
-%attr(0555,root,qmail) @prefix@/bin/dnstxt
 %attr(0555,root,qmail) @prefix@/bin/dot-forward
 %attr(0555,root,qmail) @prefix@/bin/drate
 %attr(0555,root,qmail) @prefix@/bin/elq
@@ -164,8 +156,6 @@
 %attr(0555,root,qmail) @prefix@/bin/qmail-sighup
 %attr(0555,root,qmail) @prefix@/bin/qmail-sigterm
 %attr(0555,root,qmail) @prefix@/bin/qmail-smtpd
-%attr(0555,root,qmail) @prefix@/bin/qmail-tcpok
-%attr(0555,root,qmail) @prefix@/bin/qmail-tcpto
 %attr(0555,root,qmail) @prefix@/bin/qnotify
 %attr(0555,root,qmail) @prefix@/bin/qpq
 %attr(0555,root,qmail) @prefix@/bin/qreceipt
@@ -254,6 +244,8 @@
 #
 # sbin
 #
+%attr(0555,root,qmail) @prefix@/sbin/qmail-tcpok
+%attr(0555,root,qmail) @prefix@/sbin/qmail-tcpto
 %attr(0555,root,qmail) @prefix@/sbin/qmail-multi
 %attr(0555,root,qmail) @prefix@/sbin/qmail-nullqueue
 %attr(0555,root,qmail) @prefix@/sbin/qmail-qmqpc
@@ -278,6 +270,14 @@
 %attr(0511,root,qmail) @prefix@/sbin/qmail-clean
 %attr(0511,root,qmail) @prefix@/sbin/qmail-send
 %attr(0511,root,qmail) @prefix@/sbin/qmail-todo
+%attr(0511,root,qmail) @prefix@/sbin/relaytest
+%attr(0511,root,qmail) @prefix@/sbin/splogger
+%attr(0555,root,qmail) @prefix@/sbin/dnscname
+%attr(0555,root,qmail) @prefix@/sbin/dnsfq
+%attr(0555,root,qmail) @prefix@/sbin/dnsip
+%attr(0555,root,qmail) @prefix@/sbin/dnsmxip
+%attr(0555,root,qmail) @prefix@/sbin/dnsptr
+%attr(0555,root,qmail) @prefix@/sbin/dnstxt
 #
 # Setuid
 #
