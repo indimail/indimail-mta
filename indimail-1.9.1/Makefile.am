@@ -763,6 +763,7 @@ md5_crypt.lo: md5.h global.h
 edit = sed \
 	-e 's,@indimaildir\@,$(indimaildir),g' \
 	-e 's,@qmaildir\@,$(qmaildir),g' \
+	-e 's,@servicedir\@,$(servicedir),g' \
 	-e 's,@controldir\@,$(controldir),g' \
 	-e 's,@sysconfdir\@,$(sysconfdir),g' \
 	-e 's,@shareddir\@,$(shareddir),g' \
@@ -796,6 +797,8 @@ editman = sed \
 	-e 's,CONTROLDIR,$(controldir),g' \
 	-e 's,@prefix\@,$(prefix),g'
 
+indimail.fc: indimail.fc.in
+	$(edit) $@.in > $@
 controlsync: controlsync.in
 	$(edit) $@.in > $@
 versioninfo: versioninfo.in
@@ -941,7 +944,7 @@ initsvc$(EXEEXT): $(initsvc_OBJECTS) $(initsvc_DEPENDENCIES)
 	$(LINK) $(initsvc_LDFLAGS) $(initsvc_OBJECTS) fappend.$(OBJEXT) getEnvConfig.$(OBJEXT) $(initsvc_LDADD)
 
 install-data-local: initsvc libindimail.la indimail-@VERSION@-rpmlintrc \
-indimail.spec iauth.la indimail.te usr.sbin.mysqld usr.sbin.clamd usr.bin.freshclam
+indimail.spec iauth.la indimail.te indimail.fc usr.sbin.mysqld usr.sbin.clamd usr.bin.freshclam
 	if [ " $(DESTDIR)" = " " ] ; then \
 		if test `@idcommand@` != "0" ; then \
 			echo "you are not root"; \
@@ -993,6 +996,7 @@ install-data-hook:
 	fi
 	if test " $(DISTRIB_ID)" != " Ubuntu" -a " $(DISTRIB_ID)" != " Debian" ; then \
 		$(INSTALL_DATA) indimail.te $(DESTDIR)@sysconfdir@/indimail.te  || exit 1; \
+		$(INSTALL_DATA) indimail.fc $(DESTDIR)@sysconfdir@/indimail.fc  || exit 1; \
 	fi
 
 .gitignore: $(PROGRAMS) $(indimailbin_SCRIPTS) $(indimailsbin_SCRIPTS) \
