@@ -1,6 +1,6 @@
 #
 #
-# $Id: qmail.spec,v 1.48 2016-06-03 13:33:56+05:30 Cprogrammer Exp mbhangui $
+# $Id: qmail.spec,v 1.49 2016-06-05 13:21:20+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %define _unpackaged_files_terminate_build 1
 
@@ -560,6 +560,8 @@ done
 %attr(6511,qmailq,qmail)                %{_prefix}/sbin/qmail-queue
 %attr(4511,qscand,qscand)               %{_prefix}/sbin/qscanq
 %attr(2511,root,qscand)                 %{_prefix}/sbin/run-cleanq
+%attr(511,root,qmail)                   %{_prefix}/sbin/relaytest
+%attr(511,root,qmail)                   %{_prefix}/sbin/splogger
 
 %attr(555,root,qmail)                   %{_prefix}/bin/qmail-popbull
 %attr(555,root,qmail)                   %{_prefix}/bin/zsuccesses
@@ -569,7 +571,6 @@ done
 %attr(555,root,qmail)                   %{_prefix}/bin/deferrals
 %attr(555,root,qmail)                   %{_prefix}/bin/maildirwatch
 %attr(555,root,qmail)                   %{_prefix}/bin/bouncesaying
-%attr(511,root,qmail)                   %{_prefix}/bin/relaytest
 %attr(555,root,qmail)                   %{_prefix}/bin/checkaddr
 %attr(555,root,qmail)                   %{_prefix}/bin/rsmtprecipients
 %attr(555,root,qmail)                   %{_prefix}/bin/autoresponder
@@ -582,13 +583,10 @@ done
 %attr(555,root,qmail)                   %{_prefix}/bin/checkdomain
 %attr(555,root,qmail)                   %{_prefix}/bin/maildirqmtp
 %attr(555,root,qmail)                   %{_prefix}/bin/qmailctl
-%attr(555,root,qmail)                   %{_prefix}/bin/dnstxt
 %attr(555,root,qmail)                   %{_prefix}/bin/printmaillist
-%attr(555,root,qmail)                   %{_prefix}/bin/qmail-tcpto
 %attr(555,root,qmail)                   %{_prefix}/bin/newinclude
 %attr(555,root,qmail)                   %{_prefix}/bin/recordio
 %attr(555,root,qmail)                   %{_prefix}/bin/uacl
-%attr(555,root,qmail)                   %{_prefix}/bin/dnsmxip
 %attr(555,root,qmail)                   %{_prefix}/bin/zrecipients
 %attr(555,root,qmail)                   %{_prefix}/bin/xsender
 %attr(555,root,qmail)                   %{_prefix}/bin/rxdelay
@@ -629,7 +627,6 @@ done
 %attr(555,root,qmail)                   %{_prefix}/bin/qmail-sighup
 %attr(555,root,qmail)                   %{_prefix}/bin/multilog-matchup
 %attr(555,root,qmail)                   %{_prefix}/bin/822headerok
-%attr(511,root,qmail)                   %{_prefix}/bin/splogger
 %attr(555,root,qmail)                   %{_prefix}/bin/mbox2maildir
 %attr(555,root,qmail)                   %{_prefix}/bin/printforward
 %attr(555,root,qmail)                   %{_prefix}/bin/zddist
@@ -668,7 +665,6 @@ done
 %attr(555,root,qmail)                   %{_prefix}/bin/replier
 %attr(500,root,qmail)                   %{_prefix}/bin/qmail-cdb
 %attr(555,root,qmail)                   %{_prefix}/bin/cdbtest
-%attr(555,root,qmail)                   %{_prefix}/bin/dnsfq
 %attr(555,root,qmail)                   %{_prefix}/bin/822header
 %attr(555,root,qmail)                   %{_prefix}/bin/qmaildirmake
 %attr(555,root,qmail)                   %{_prefix}/bin/maildir2mbox
@@ -699,7 +695,6 @@ done
 %attr(555,root,qmail)                   %{_prefix}/bin/failures
 %attr(555,root,qmail)                   %{_prefix}/bin/rsmtp
 %attr(555,root,qmail)                   %{_prefix}/bin/qail
-%attr(555,root,qmail)                   %{_prefix}/bin/qmail-tcpok
 %attr(555,root,qmail)                   %{_prefix}/bin/qpq
 %attr(555,root,qmail)                   %{_prefix}/bin/replier-config
 %attr(555,root,qmail)                   %{_prefix}/bin/etrn
@@ -717,7 +712,6 @@ done
 %attr(555,root,qmail)                   %{_prefix}/bin/qmail-scanner-queue.pl
 %attr(555,root,qmail)                   %{_prefix}/bin/rspamstat
 %attr(555,root,qmail)                   %{_prefix}/bin/iftoccfrom
-%attr(555,root,qmail)                   %{_prefix}/bin/dnsptr
 %attr(555,root,qmail)                   %{_prefix}/bin/zsuids
 %attr(555,root,qmail)                   %{_prefix}/bin/qreceipt
 %attr(555,root,qmail)                   %{_prefix}/bin/qmail-qmqpd
@@ -728,7 +722,6 @@ done
 %attr(555,root,qmail)                   %{_prefix}/bin/argv0
 %attr(555,root,qmail)                   %{_prefix}/bin/qmail-qmtpd
 %attr(555,root,qmail)                   %{_prefix}/bin/addcr
-%attr(555,root,qmail)                   %{_prefix}/bin/dnsip
 %attr(555,root,qmail)                   %{_prefix}/bin/qsmhook
 %attr(555,root,qmail)                   %{_prefix}/bin/rspamhist
 %attr(500,root,qmail)                   %{_prefix}/bin/recipient-cdb
@@ -740,7 +733,6 @@ done
 %attr(555,root,qmail)                   %{_prefix}/bin/zsendmail
 %attr(555,root,qmail)                   %{_prefix}/bin/822received
 %attr(555,root,qmail)                   %{_prefix}/bin/cdbmake-12
-%attr(555,root,qmail)                   %{_prefix}/bin/dnscname
 %attr(555,root,qmail)                   %{_prefix}/bin/maildircmd
 %attr(555,root,qmail)                   %{_prefix}/bin/qmail-qfilter
 %attr(555,root,qmail)                   %{_prefix}/bin/surblfilter
@@ -764,6 +756,8 @@ done
 %attr(555,root,qmail)                   %{_prefix}/sbin/qmail-nullqueue
 %attr(555,root,qmail)                   %{_prefix}/sbin/qmail-multi
 %attr(555,root,qmail)                   %{_prefix}/sbin/cleanq
+%attr(555,root,qmail)                   %{_prefix}/sbin/qmail-tcpok
+%attr(555,root,qmail)                   %{_prefix}/sbin/qmail-tcpto
 %attr(555,root,qmail)                   %{_prefix}/sbin/qmail-qmqpc
 %attr(500,root,qmail)                   %{_prefix}/sbin/qmail-daemon
 %attr(500,root,qmail)                   %{_prefix}/sbin/qmail-start
@@ -772,6 +766,12 @@ done
 %attr(500,root,qmail)                   %{_prefix}/sbin/qmail-lspawn
 %attr(511,root,qmail)                   %{_prefix}/sbin/qmail-send
 %attr(511,root,qmail)                   %{_prefix}/sbin/qmail-todo
+%attr(555,root,qmail)                   %{_prefix}/sbin/dnstxt
+%attr(555,root,qmail)                   %{_prefix}/sbin/dnsmxip
+%attr(555,root,qmail)                   %{_prefix}/sbin/dnscname
+%attr(555,root,qmail)                   %{_prefix}/sbin/dnsptr
+%attr(555,root,qmail)                   %{_prefix}/sbin/dnsfq
+%attr(555,root,qmail)                   %{_prefix}/sbin/dnsip
 
 # daemontools
 %attr(555,root,qmail)                   %{_prefix}/bin/envdir
