@@ -70,7 +70,7 @@ if [ -d $1 ] ; then
 		echo "Unable to get local ip addresses" 1>&2
 		exit 1
 	fi
-	mxip=`QMAIL/bin/dnsmxip`
+	mxip=`QMAIL/sbin/dnsmxip`
 	if [ $? -ne 0 ] ; then
 		echo "Unable to get MX for $1" 1>&2
 		exit 1
