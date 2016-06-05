@@ -1,5 +1,8 @@
 /*
  * $Log: spawn-filter.c,v $
+ * Revision 1.65  2016-06-05 13:22:05+05:30  Cprogrammer
+ * fixed stupid error message
+ *
  * Revision 1.64  2014-03-26 15:32:26+05:30  Cprogrammer
  * report deliveries blackholed by filters in delivery log
  *
@@ -274,8 +277,8 @@ report(int errCode, char *s1, char *s2, char *s3, char *s4, char *s5, char *s6)
 	if (!errCode)
 	{
 		if (substdio_put(subfdoutsmall, 
-			"r\0KIndiSPAM Reporter accepted message.\n"
-			"Reporter said: 250 ok notification queued\n\0", 82) == -1)
+			"r\0Kfilter accepted message.\n"
+			"filter said: 250 ok notification queued\n\0", 82) == -1)
 			_exit(111);
 	} else
 	{
@@ -297,7 +300,7 @@ report(int errCode, char *s1, char *s2, char *s3, char *s4, char *s5, char *s6)
 		if (substdio_put(subfdoutsmall, "\0", 1) == -1)
 			_exit(111);
 		if (substdio_puts(subfdoutsmall, 
-			errCode == 111 ?  "ZReporter said: Message deferred" : "DGiving up on IndiSPAM Reporter\n") == -1)
+			errCode == 111 ?  "Zfilter said: Message deferred" : "DGiving up on filter\n") == -1)
 			_exit(111);
 		if (substdio_put(subfdoutsmall, "\0", 1) == -1)
 			_exit(111);
@@ -1152,7 +1155,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_spawn_filter_c()
 {
-	static char    *x = "$Id: spawn-filter.c,v 1.64 2014-03-26 15:32:26+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: spawn-filter.c,v 1.65 2016-06-05 13:22:05+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 	if (x)
