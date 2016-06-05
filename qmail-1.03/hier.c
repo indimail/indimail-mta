@@ -1,5 +1,8 @@
 /*
  * $Log: hier.c,v $
+ * Revision 1.205  2016-06-05 13:18:38+05:30  Cprogrammer
+ * moved relaytest, splogger, dns*, qmail-qmqpc, qmail-tcpto, qmail-tcpok, qmail-queue, qmail-nullqueue, qmail-multi to sbin
+ *
  * Revision 1.204  2016-06-03 13:33:18+05:30  Cprogrammer
  * moved qmail-daemon, qmail-start, qmail-lspawn, qmail-rspawn, qmail-clean, qmail-send, qmail-todo to sbin
  *
@@ -676,19 +679,12 @@ hier(inst_dir, fatal)
 	c(auto_qmail_home, "bin", "qmail-getpw", auto_uido, auto_gidq, 0511);
 	c(auto_qmail_home, "bin", "qmail-local", auto_uido, auto_gidq, 0511);
 	c(auto_qmail_home, "bin", "qmail-remote", auto_uido, auto_gidq, 0511);
-	c(auto_qmail_home, "bin", "relaytest", auto_uido, auto_gidq, 0511);
-	c(auto_qmail_home, "bin", "splogger", auto_uido, auto_gidq, 0511);
 	c(auto_qmail_home, "bin", "qmail-newu", auto_uido, auto_gidq, 0500);
 	c(auto_qmail_home, "bin", "qmail-newmrh", auto_uido, auto_gidq, 0500);
 	c(auto_qmail_home, "bin", "qmail-pw2u", auto_uido, auto_gidq, 0511);
 	c(auto_qmail_home, "bin", "qmail-inject", auto_uido, auto_gidq, 0555);
-	c(auto_qmail_home, "bin", "predate", auto_uido, auto_gidq, 0555);
-	c(auto_qmail_home, "bin", "datemail", auto_uido, auto_gidq, 0555);
-	c(auto_qmail_home, "bin", "mailsubj", auto_uido, auto_gidq, 0555);
 	c(auto_qmail_home, "bin", "qmail-showctl", auto_uido, auto_gidq, 0555);
 	c(auto_qmail_home, "bin", "qmail-qread", auto_uido, auto_gidq, 0555);
-	c(auto_qmail_home, "bin", "qmail-tcpto", auto_uido, auto_gidq, 0555);
-	c(auto_qmail_home, "bin", "qmail-tcpok", auto_uido, auto_gidq, 0555);
 	c(auto_qmail_home, "bin", "qmail-pop3d", auto_uido, auto_gidq, 0555);
 	c(auto_qmail_home, "bin", "qmail-popbull", auto_uido, auto_gidq, 0555);
 	c(auto_qmail_home, "bin", "qmail-popup", auto_uido, auto_gidq, 0511);
@@ -711,6 +707,9 @@ hier(inst_dir, fatal)
 	c(auto_qmail_home, "bin", "qail", auto_uido, auto_gidq, 0555);
 	c(auto_qmail_home, "bin", "elq", auto_uido, auto_gidq, 0555);
 	c(auto_qmail_home, "bin", "pinq", auto_uido, auto_gidq, 0555);
+	c(auto_qmail_home, "bin", "predate", auto_uido, auto_gidq, 0555);
+	c(auto_qmail_home, "bin", "datemail", auto_uido, auto_gidq, 0555);
+	c(auto_qmail_home, "bin", "mailsubj", auto_uido, auto_gidq, 0555);
 
 	c(auto_qmail_home, "bin", "qmail-lint", auto_uido, auto_gidq, 0555);
 	c(auto_qmail_home, "bin", "qmail-qfilter", auto_uido, auto_gidq, 0555);
@@ -748,11 +747,6 @@ hier(inst_dir, fatal)
 	c(auto_qmail_home, "bin", "qmail-sigalrm", auto_uido, auto_gidq, 0555);
 	c(auto_qmail_home, "bin", "qmail-sigterm", auto_uido, auto_gidq, 0555);
 
-	c(auto_qmail_home, "bin", "dnscname", auto_uido, auto_gidq, 0555);
-	c(auto_qmail_home, "bin", "dnsptr", auto_uido, auto_gidq, 0555);
-	c(auto_qmail_home, "bin", "dnsip", auto_uido, auto_gidq, 0555);
-	c(auto_qmail_home, "bin", "dnsmxip", auto_uido, auto_gidq, 0555);
-	c(auto_qmail_home, "bin", "dnsfq", auto_uido, auto_gidq, 0555);
 	c(auto_qmail_home, "bin", "ipmeprint", auto_uido, auto_gidq, 0555);
 	c(auto_qmail_home, "bin", "idedit", auto_uido, auto_gidq, 0555);
 	c(auto_qmail_home, "bin", "qmailctl", auto_uido, auto_gidq, 0555);
@@ -781,7 +775,6 @@ hier(inst_dir, fatal)
 
 #ifdef USE_SPF
 	c(auto_qmail_home, "bin", "spfquery", auto_uido, auto_gidq, 0555);
-	c(auto_qmail_home, "bin", "dnstxt", auto_uido, auto_gidq, 0555);
 #endif
 
 #ifdef HAVESRS
@@ -813,9 +806,13 @@ hier(inst_dir, fatal)
 	c(auto_qmail_home, "bin", "delcr", auto_uido, auto_gidq, 0555);
 	c(auto_qmail_home, "bin", "fixcrio", auto_uido, auto_gidq, 0555);
 
-	c(auto_qmail_home, "sbin", "qmail-qmqpc", auto_uido, auto_gidq, 0555);
+	c(auto_qmail_home, "sbin", "relaytest", auto_uido, auto_gidq, 0511);
+	c(auto_qmail_home, "sbin", "splogger", auto_uido, auto_gidq, 0511);
+	c(auto_qmail_home, "sbin", "qmail-tcpto", auto_uido, auto_gidq, 0555);
+	c(auto_qmail_home, "sbin", "qmail-tcpok", auto_uido, auto_gidq, 0555);
 	c(auto_qmail_home, "sbin", "cleanq", auto_uido, auto_gidq, 0555);
 	c(auto_qmail_home, "sbin", "qscanq-stdin", auto_uido, auto_gidq, 0555);
+	c(auto_qmail_home, "sbin", "qmail-qmqpc", auto_uido, auto_gidq, 0555);
 	c(auto_qmail_home, "sbin", "qmail-lspawn", auto_uido, auto_gidq, 0500);
 	c(auto_qmail_home, "sbin", "qmail-rspawn", auto_uido, auto_gidq, 0511);
 	c(auto_qmail_home, "sbin", "qmail-start", auto_uido, auto_gidq, 0500);
@@ -827,6 +824,14 @@ hier(inst_dir, fatal)
 #endif
 #ifdef SMTP_PLUGIN
 	c(auto_qmail_home, "sbin", "plugtest", auto_uido, auto_gidq, 0555);
+#endif
+	c(auto_qmail_home, "sbin", "dnscname", auto_uido, auto_gidq, 0555);
+	c(auto_qmail_home, "sbin", "dnsptr", auto_uido, auto_gidq, 0555);
+	c(auto_qmail_home, "sbin", "dnsip", auto_uido, auto_gidq, 0555);
+	c(auto_qmail_home, "sbin", "dnsmxip", auto_uido, auto_gidq, 0555);
+	c(auto_qmail_home, "sbin", "dnsfq", auto_uido, auto_gidq, 0555);
+#ifdef USE_SPF
+	c(auto_qmail_home, "sbin", "dnstxt", auto_uido, auto_gidq, 0555);
 #endif
 
 	/* mess822 */
@@ -1403,7 +1408,7 @@ hier(inst_dir, fatal)
 void
 getversion_install_big_c()
 {
-	static char    *x = "$Id: hier.c,v 1.204 2016-06-03 13:33:18+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: hier.c,v 1.205 2016-06-05 13:18:38+05:30 Cprogrammer Exp mbhangui $";
 
 #ifdef INDIMAIL
 	if (x)
