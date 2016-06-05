@@ -1,5 +1,8 @@
 #
 # $Log: etrn.sh,v $
+# Revision 1.9  2016-06-05 13:17:53+05:30  Cprogrammer
+# moved dnsmxip to sbin
+#
 # Revision 1.8  2009-04-19 13:39:33+05:30  Cprogrammer
 # replaced indimail/bin/echo with echo 1>&2
 #
@@ -25,7 +28,7 @@
 # 3 - No Pending message for node
 # 4 - Pending message for node
 #
-# $Id: etrn.sh,v 1.8 2009-04-19 13:39:33+05:30 Cprogrammer Stab mbhangui $
+# $Id: etrn.sh,v 1.9 2016-06-05 13:17:53+05:30 Cprogrammer Exp mbhangui $
 #
 trap "" 1 2 3
 if [ $# -ne 2 ] ; then
