@@ -530,9 +530,10 @@ auto_qmail.h envdir.h pathexec.h variables.h auto_control.h
 	./compile `grep -h -v "^#" conf-spf` condredirect.c
 
 qmailconfig: \
-warn-auto.sh qmailconfig.sh conf-qmail conf-break conf-split conf-sysconfdir
+warn-auto.sh qmailconfig.sh conf-qmail conf-prefix conf-break conf-split conf-sysconfdir
 	cat warn-auto.sh qmailconfig.sh \
 	| sed s}QMAIL}"`head -1 conf-qmail`"}g \
+	| sed s}PREFIX}"`head -1 conf-prefix`"}g \
 	| sed s}@controldir\@}"`head -1 conf-sysconfdir`/control"}g \
 	| sed s}BREAK}"`head -1 conf-break`"}g \
 	| sed s}SPLIT}"`head -1 conf-split`"}g \
@@ -2471,10 +2472,11 @@ qmail-send.8
 	nroff -man qmail-send.8 > qmail-send.0
 
 qmail-send.8: \
-qmail-send.9 conf-break conf-spawn conf-qmail conf-sysconfdir
+qmail-send.9 conf-break conf-spawn conf-qmail conf-sysconfdir conf-prefix
 	cat qmail-send.9 \
 	| sed s}QMAILHOME}"`head -1 conf-qmail`"}g \
 	| sed s}BREAK}"`head -1 conf-break`"}g \
+	| sed s}PREFIX}"`head -1 conf-prefix`"}g \
 	| sed s}SPAWN}"`head -1 conf-spawn`"}g \
 	| sed s}@controldir\@}"`head -1 conf-sysconfdir`/control"}g \
 	> qmail-send.8
