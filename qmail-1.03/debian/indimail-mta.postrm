@@ -92,10 +92,6 @@ if [ " $1" = " purge" ] ; then
 	fi
 
 	echo "removing database and configuration"
-	for i in mysqldb domains alias
-	do
-		${rm} -rf ${prefix}/$i || true
-	done
 	${rm} -f ${qmaildir}/bin || true
 	${rm} -f ${qmaildir}/sbin || true
 	${rm} -f ${qmaildir}/users || true
@@ -109,18 +105,19 @@ if [ " $1" = " purge" ] ; then
 	fi
 	for i in .qmail-nonspam .qmail-register-nonspam .qmail-register-spam .qmail-spam .qmail-default
 	do
-		${rm} -f ${prefix}/domains/${default_domain}/$i
+		${rm} -f ${qmaildir}/domains/${default_domain}/$i
 	done
-	if [ -d ${prefix}/${default_domain} ] ; then
-		${rmdir} --ignore-fail-on-non-empty ${prefix}/domains/${default_domain} 2>/dev/null || true
+	if [ -d ${qmaildir}/domains/${default_domain} ] ; then
+		${rmdir} --ignore-fail-on-non-empty ${qmaildir}/domains/${default_domain} 2>/dev/null || true
 	fi
 	echo "removing aliases postmaster, mailer-daemon, root"
 	for i in postmaster mailer-daemon root
 	do
-		${rm} -f ${prefix}/alias/.qmail-"$i"
+		${rm} -f ${qmaildir}/alias/.qmail-"$i"
 	done
-	if [ -d ${prefix}/alias ] ; then
-		${rmdir} --ignore-fail-on-non-empty ${prefix}/alias 2>/dev/null || true
+	${rm} -rf ${qmaildir}/Maildir
+	if [ -d ${qmaildir}/alias ] ; then
+		${rmdir} --ignore-fail-on-non-empty ${qmaildir}/alias 2>/dev/null || true
 	fi
 
 	echo "removing binaries, libraries, queues"
@@ -211,7 +208,7 @@ if [ " $1" = " purge" ] ; then
 		log_dir=${logdir}
 	fi
 	[ "$log_dir" != "/" ] && ${rm} -fr $log_dir
-	) >> /tmp/indimail-mta-uninstall.og 2>&1
+	) >> /tmp/indimail-mta-uninstall.log 2>&1
 else
 	echo "recreating ld.so cache"
 	/sbin/ldconfig
