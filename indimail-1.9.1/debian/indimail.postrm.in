@@ -129,6 +129,7 @@ if [ " $1" = " purge" ] ; then
 	do
 		${rm} -f ${indimaildir}/alias/.qmail-"$i"
 	done
+	${rm} -rf ${indimaildir}/alias/Maildir
 	if [ -d ${indimaildir}/alias ] ; then
 		${rmdir} --ignore-fail-on-non-empty ${indimaildir}/alias || true
 	fi
