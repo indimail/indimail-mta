@@ -1,4 +1,5 @@
 debian/indimail-mta.install
+indimail-mta.fc
 perm_list
 conf-prefix
 conf-shared
