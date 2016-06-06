@@ -162,6 +162,7 @@ build-stamp:
 
 clean:
 	${rm} -f build-stamp configure-stamp
+	${rm} -rf $(DESTDIR)
 	if [ -d libdkim-$(libdkim_version) ] ; then $(MAKE) -s -C libdkim-$(libdkim_version) clean||true; fi
 	if [ -d libdkim-$(libdkim_version) ] ; then $(MAKE) -s -C libdkim-$(libdkim_version) distclean||true; fi
 	if [ -d libsrs2-$(libsrs2_version) ] ; then $(MAKE) -s -C libsrs2-$(libsrs2_version) clean||true; fi
