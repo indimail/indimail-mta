@@ -1,5 +1,8 @@
 #
 # $Log: indimail.fc.in,v $
+# Revision 2.3  2016-06-06 16:38:08+05:30  Cprogrammer
+# fixed syntax error
+#
 # Revision 2.2  2016-06-05 13:12:54+05:30  Cprogrammer
 # added mhsqldb, clamdand sysconfdir
 #
@@ -7,14 +10,14 @@
 # semanage file context
 #
 #
-# $Id: indimail.fc.in,v 2.2 2016-06-05 13:12:54+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.fc.in,v 2.3 2016-06-06 16:38:08+05:30 Cprogrammer Exp mbhangui $
 #
-@servicedir@[[:digit:]]?(/.*)?         -d     gen_context(system_u:object_r:svc_svc_t,s0)
-@servicedir@(/.*)?/.*/run              --     gen_context(system_u:object_r:svc_run_exec_t,s0)
-@servicedir@/.*/run                    --     gen_context(system_u:object_r:svc_run_exec_t,s0)
-@servicedir@/.*/variables(/.*)?        --     gen_context(system_u:object_r:svc_conf_t,s0)
-@indimaildir@/mysqldb/data(/.*)?   --     gen_context(system_u:object_r:mysqld_db_t,s0)
-@indimaildir@/mysqldb/logs(/.*)?   --     gen_context(system_u:object_r:mysqld_log_t,s0)
-@indimaildir@/clamd                --     gen_context(system_u:object_r:antivirus_db_t,s0)
-@sysconfdir@(/.*)?                --     gen_context(system_u:object_r:etc_t,s0)
-@sysconfdir@/indimail.cnf         --     gen_context(system_u:object_r:mysqld_etc_t,s0)
+@servicedir@[[:digit:]]?(/.*)?         -d     system_u:object_r:svc_svc_t:s0
+@servicedir@(/.*)?/.*/run              --     system_u:object_r:svc_run_exec_t:s0
+@servicedir@/.*/run                    --     system_u:object_r:svc_run_exec_t:s0
+@servicedir@/.*/variables(/.*)?        --     system_u:object_r:svc_conf_t:s0
+@indimaildir@/mysqldb/data(/.*)?   --     system_u:object_r:mysqld_db_t:s0
+@indimaildir@/mysqldb/logs(/.*)?   --     system_u:object_r:mysqld_log_t:s0
+@indimaildir@/clamd                --     system_u:object_r:antivirus_db_t:s0
+@sysconfdir@(/.*)?                --     system_u:object_r:etc_t:s0
+@sysconfdir@/indimail.cnf         --     system_u:object_r:mysqld_etc_t:s0
