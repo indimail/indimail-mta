@@ -34,23 +34,14 @@
 # Binaries
 #
 %attr(0500,root,qmail) /usr/bin/qmail-cdb
-%attr(0500,root,qmail) /usr/bin/qmail-daemon
-%attr(0500,root,qmail) /usr/bin/qmail-lspawn
 %attr(0500,root,qmail) /usr/bin/qmail-newmrh
 %attr(0500,root,qmail) /usr/bin/qmail-newu
-%attr(0500,root,qmail) /usr/bin/qmail-start
 %attr(0500,root,qmail) /usr/bin/recipient-cdb
-%attr(0511,root,qmail) /usr/bin/qmail-clean
 %attr(0511,root,qmail) /usr/bin/qmail-getpw
 %attr(0511,root,qmail) /usr/bin/qmail-local
 %attr(0511,root,qmail) /usr/bin/qmail-popup
 %attr(0511,root,qmail) /usr/bin/qmail-pw2u
 %attr(0511,root,qmail) /usr/bin/qmail-remote
-%attr(0511,root,qmail) /usr/bin/qmail-rspawn
-%attr(0511,root,qmail) /usr/bin/qmail-send
-%attr(0511,root,qmail) /usr/bin/qmail-todo
-%attr(0511,root,qmail) /usr/bin/relaytest
-%attr(0511,root,qmail) /usr/bin/splogger
 %attr(0555,root,qmail) /usr/bin/822addr
 %attr(0555,root,qmail) /usr/bin/822body
 %attr(0555,root,qmail) /usr/bin/822bodyfilter
@@ -80,7 +71,6 @@
 %attr(0555,root,qmail) /usr/bin/checkaddr
 %attr(0555,root,qmail) /usr/bin/checkdomain
 %attr(0555,root,qmail) /usr/bin/cidr
-%attr(0555,root,qmail) /usr/sbin/cleanq
 %attr(0555,root,qmail) /usr/bin/columnt
 %attr(0555,root,qmail) /usr/bin/condredirect
 %attr(0555,root,qmail) /usr/bin/condtomaildir
@@ -91,12 +81,6 @@
 %attr(0555,root,qmail) /usr/bin/dk-filter
 %attr(0555,root,qmail) /usr/bin/dknewkey
 %attr(0555,root,qmail) /usr/bin/dktest
-%attr(0555,root,qmail) /usr/bin/dnscname
-%attr(0555,root,qmail) /usr/bin/dnsfq
-%attr(0555,root,qmail) /usr/bin/dnsip
-%attr(0555,root,qmail) /usr/bin/dnsmxip
-%attr(0555,root,qmail) /usr/bin/dnsptr
-%attr(0555,root,qmail) /usr/bin/dnstxt
 %attr(0555,root,qmail) /usr/bin/dot-forward
 %attr(0555,root,qmail) /usr/bin/drate
 %attr(0555,root,qmail) /usr/bin/elq
@@ -158,13 +142,10 @@
 %attr(0555,root,qmail) /usr/bin/qmail-inject
 %attr(0555,root,qmail) /usr/bin/qmail-lagcheck
 %attr(0555,root,qmail) /usr/bin/qmail-lint
-%attr(0555,root,qmail) /usr/bin/qmail-multi
-%attr(0555,root,qmail) /usr/bin/qmail-nullqueue
 %attr(0555,root,qmail) /usr/bin/qmail-pop3d
 %attr(0555,root,qmail) /usr/bin/qmail-popbull
 %attr(0555,root,qmail) /usr/bin/qmail-poppass
 %attr(0555,root,qmail) /usr/bin/qmail-qfilter
-%attr(0555,root,qmail) /usr/sbin/qmail-qmqpc
 %attr(0555,root,qmail) /usr/bin/qmail-qmqpd
 %attr(0555,root,qmail) /usr/bin/qmail-qmtpd
 %attr(0555,root,qmail) /usr/bin/qmail-qread
@@ -175,12 +156,9 @@
 %attr(0555,root,qmail) /usr/bin/qmail-sighup
 %attr(0555,root,qmail) /usr/bin/qmail-sigterm
 %attr(0555,root,qmail) /usr/bin/qmail-smtpd
-%attr(0555,root,qmail) /usr/bin/qmail-tcpok
-%attr(0555,root,qmail) /usr/bin/qmail-tcpto
 %attr(0555,root,qmail) /usr/bin/qnotify
 %attr(0555,root,qmail) /usr/bin/qpq
 %attr(0555,root,qmail) /usr/bin/qreceipt
-%attr(0555,root,qmail) /usr/sbin/qscanq-stdin
 %attr(0555,root,qmail) /usr/bin/qsmhook
 %attr(0555,root,qmail) /usr/bin/queue-fix
 %attr(0555,root,qmail) /usr/bin/readproctitle
@@ -227,8 +205,6 @@
 %attr(0555,root,qmail) /usr/bin/surblqueue
 %attr(0555,root,qmail) /usr/bin/svc
 %attr(0555,root,qmail) /usr/bin/svok
-%attr(0555,root,qmail) /usr/bin/svscan
-%attr(0555,root,qmail) /usr/bin/svscanboot
 %attr(0555,root,qmail) /usr/bin/svstat
 %attr(0555,root,qmail) /usr/bin/swaks
 %attr(0555,root,qmail) /usr/bin/tai64n
@@ -268,6 +244,12 @@
 #
 # sbin
 #
+%attr(0555,root,qmail) /usr/sbin/qmail-tcpok
+%attr(0555,root,qmail) /usr/sbin/qmail-tcpto
+%attr(0555,root,qmail) /usr/sbin/qmail-multi
+%attr(0555,root,qmail) /usr/sbin/qmail-nullqueue
+%attr(0555,root,qmail) /usr/sbin/qmail-qmqpc
+%attr(0555,root,qmail) /usr/sbin/qscanq-stdin
 %attr(0555,root,qmail) /usr/sbin/batv
 %attr(0555,root,qmail) /usr/sbin/config-fast
 %attr(0555,root,qmail) /usr/sbin/hostname
@@ -278,6 +260,24 @@
 %attr(0555,root,qmail) /usr/sbin/svctool
 %attr(0555,root,qmail) /usr/sbin/sys-checkpwd
 %attr(0555,root,qmail) /usr/sbin/whois
+%attr(0555,root,qmail) /usr/sbin/svscan
+%attr(0555,root,qmail) /usr/sbin/svscanboot
+%attr(0555,root,qmail) /usr/sbin/cleanq
+%attr(0500,root,qmail) /usr/sbin/qmail-daemon
+%attr(0500,root,qmail) /usr/sbin/qmail-start
+%attr(0500,root,qmail) /usr/sbin/qmail-lspawn
+%attr(0511,root,qmail) /usr/sbin/qmail-rspawn
+%attr(0511,root,qmail) /usr/sbin/qmail-clean
+%attr(0511,root,qmail) /usr/sbin/qmail-send
+%attr(0511,root,qmail) /usr/sbin/qmail-todo
+%attr(0511,root,qmail) /usr/sbin/relaytest
+%attr(0511,root,qmail) /usr/sbin/splogger
+%attr(0555,root,qmail) /usr/sbin/dnscname
+%attr(0555,root,qmail) /usr/sbin/dnsfq
+%attr(0555,root,qmail) /usr/sbin/dnsip
+%attr(0555,root,qmail) /usr/sbin/dnsmxip
+%attr(0555,root,qmail) /usr/sbin/dnsptr
+%attr(0555,root,qmail) /usr/sbin/dnstxt
 #
 # Setuid
 #
