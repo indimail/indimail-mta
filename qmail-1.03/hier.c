@@ -1,5 +1,8 @@
 /*
  * $Log: hier.c,v $
+ * Revision 1.206  2016-06-06 17:05:24+05:30  Cprogrammer
+ * added indimail-mta.fc
+ *
  * Revision 1.205  2016-06-05 13:18:38+05:30  Cprogrammer
  * moved relaytest, splogger, dns*, qmail-qmqpc, qmail-tcpto, qmail-tcpok, qmail-queue, qmail-nullqueue, qmail-multi to sbin
  *
@@ -673,6 +676,7 @@ hier(inst_dir, fatal)
 	c(auto_sysconfdir, "etc", "leapsecs.txt", auto_uido, auto_gidq, 0644);
 #ifndef INDIMAIL
 	c(auto_sysconfdir, "etc/..", "indimail-mta.te", auto_uido, auto_gidq, 0644);
+	c(auto_sysconfdir, "etc/..", "indimail-mta.fc", auto_uido, auto_gidq, 0644);
 #endif
 
 	/* Binaries */
@@ -1408,7 +1412,7 @@ hier(inst_dir, fatal)
 void
 getversion_install_big_c()
 {
-	static char    *x = "$Id: hier.c,v 1.205 2016-06-05 13:18:38+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: hier.c,v 1.206 2016-06-06 17:05:24+05:30 Cprogrammer Exp mbhangui $";
 
 #ifdef INDIMAIL
 	if (x)

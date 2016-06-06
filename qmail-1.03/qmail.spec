@@ -1,6 +1,6 @@
 #
 #
-# $Id: qmail.spec,v 1.50 2016-06-06 14:49:43+05:30 Cprogrammer Exp mbhangui $
+# $Id: qmail.spec,v 1.51 2016-06-06 17:05:39+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %define _unpackaged_files_terminate_build 1
 
@@ -542,6 +542,7 @@ done
 %ghost %attr(0644,root,root)                      %{qsysconfdir}/services.log
 
 %attr(444,root,root)                              %{qsysconfdir}/indimail-mta.te
+%attr(444,root,root)                              %{qsysconfdir}/indimail-mta.fc
 %attr(444,root,root)                              %{qsysconfdir}/qmailprog.list
 %attr(444,root,qmail)                             %{qsysconfdir}/etc/leapsecs.dat
 %attr(444,root,qmail)                             %{qsysconfdir}/etc/leapsecs.txt

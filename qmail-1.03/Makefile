@@ -13,6 +13,7 @@ qmaildir=$(shell head -1 conf-qmail 2>/dev/null)
 mandir=$(shell echo `head -1 conf-prefix`/share/man 2>/dev/null)
 shareddir=$(shell head -1 conf-shared 2>/dev/null)
 sysconfdir=$(shell head -1 conf-sysconfdir 2>/dev/null)
+servicedir=/service
 
 edit = sed \
 	-e 's,@qmaildir\@,$(qmaildir),g' \
@@ -786,6 +787,14 @@ warn-auto.sh qmailctl.sh conf-prefix
 indimail.plist: indimail.plist.in conf-prefix
 	cat indimail.plist.in | sed s}PREFIX}"`head -1 conf-prefix`"}g \
 	> indimail.plist
+
+indimail-mta.fc: \
+indimail-mta.fc.in conf-qmail conf-sysconfdir
+	cat indimail-mta.fc.in \
+	| sed s}@servicedir\@}"$(servicedir)"}g \
+	| sed s}@qmaildir\@}"`head -1 conf-qmail`"}g \
+	| sed s}@sysconfdir\@}"`head -1 conf-sysconfdir`"}g \
+	> indimail-mta.fc
 
 svscanboot: \
 warn-auto.sh svscanboot.sh conf-prefix conf-sysconfdir
