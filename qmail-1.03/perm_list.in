@@ -161,7 +161,6 @@
 %attr(0555,root,qmail) @prefix@/bin/qreceipt
 %attr(0555,root,qmail) @prefix@/bin/qsmhook
 %attr(0555,root,qmail) @prefix@/bin/queue-fix
-%attr(0555,root,qmail) @prefix@/bin/readproctitle
 %attr(0555,root,qmail) @prefix@/bin/recipients
 %attr(0555,root,qmail) @prefix@/bin/recordio
 %attr(0555,root,qmail) @prefix@/bin/replier
@@ -262,6 +261,7 @@
 %attr(0555,root,qmail) @prefix@/sbin/whois
 %attr(0555,root,qmail) @prefix@/sbin/svscan
 %attr(0555,root,qmail) @prefix@/sbin/svscanboot
+%attr(0555,root,qmail) @prefix@/sbin/readproctitle
 %attr(0555,root,qmail) @prefix@/sbin/cleanq
 %attr(0500,root,qmail) @prefix@/sbin/qmail-daemon
 %attr(0500,root,qmail) @prefix@/sbin/qmail-start
