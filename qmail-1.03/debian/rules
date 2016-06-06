@@ -19,16 +19,19 @@ else
 	CFLAGS += -O2 -fno-strict-aliasing -Wno-unused-result -Wno-unused-result
 endif
 
-prefix=/var/indimail
+prefix=/usr
+qmaildir=/var/indimail
 qsysconfdir=/etc/indimail
 mandir=$(prefix)/share/man
 libdkim_version=1.4
 libsrs2_version=1.0.18
 tcpserver_plugin=1
+bits=$(shell if [ -d /usr/lib64 ] ; then echo 64; else echo 32; fi)
+libdir=$(shell if [ $(bits) -eq 64 ] ; then echo $(prefix)/lib64; else echo $(prefix)/lib;fi)
 cp=/bin/cp
 rm=/bin/rm
 
-DESTDIR=$(CURDIR)/debian/indimail-mta
+DESTDIR=$(CURDIR)/debian/indimail-mta.tmp
 
 build: build-stamp
 build-stamp:
@@ -66,10 +69,12 @@ build-stamp:
 	if [ -d libdkim-$(libdkim_version) ] ; then $(MAKE) -s -C libdkim-$(libdkim_version) DESTDIR=$(DESTDIR); fi
 	if [ -d libsrs2-$(libsrs2_version) ] ; then $(MAKE) -s -C libsrs2-$(libsrs2_version) DESTDIR=$(DESTDIR); fi
 	if [ -d qmail-1.03 ]                 ; then $(MAKE) -s -C qmail-1.03 DESTDIR=$(DESTDIR); fi
+	${rm} -rf $(DESTDIR)/$(prefix)/$(libdir)/*.la
 	touch build-stamp
 
 clean:
 	rm -f build-stamp configure-stamp
+	${rm} -rf $(DESTDIR)
 	if [ -d libdkim-$(libdkim_version) ] ; then $(MAKE) -s -C libdkim-$(libdkim_version) clean||true; fi
 	if [ -d libdkim-$(libdkim_version) ] ; then $(MAKE) -s -C libdkim-$(libdkim_version) distclean||true; fi
 	if [ -d libsrs2-$(libsrs2_version) ] ; then $(MAKE) -s -C libsrs2-$(libsrs2_version) clean||true; fi
@@ -106,9 +111,6 @@ install: build
 	if [ -f ../SOURCES/svctool.gz ] ; then \
 		gunzip -c ../SOURCES/svctool.gz > $(DESTDIR)/$(prefix)/sbin/svctool; \
 	fi
-	if [ -f ../SOURCES/perm_list ] ; then \
-		${cp} ../SOURCES/perm_list $(DESTDIR)/$(sysconfdir); \
-	fi
 	if [ -f ../SOURCES/usr.sbin.clamd ] ; then \
 		${cp} ../SOURCES/usr.sbin.clamd $(DESTDIR)/$(sysconfdir)/apparmor.d/local; \
 	fi
@@ -117,9 +119,6 @@ install: build
 	fi
 	if [ -f ../BUILD/debian/svctool ] ; then \
 		${cp} ../BUILD/debian/svctool $(DESTDIR)/$(prefix)/sbin; \
-	fi
-	if [ -f ../BUILD/debian/perm_list ] ; then \
-		${cp} ../BUILD/debian/perm_list $(DESTDIR)/$(sysconfdir); \
 	fi
 	if [ -f ../BUILD/debian/usr.sbin.clamd ] ; then \
 		${cp} ../BUILD/debian/usr.sbin.clamd $(DESTDIR)/$(sysconfdir)/apparmor.d/local; \
@@ -132,9 +131,9 @@ binary-indep: build install
 	dh_testdir
 	dh_testroot
 	find $(DESTDIR)/$(mandir) -name '*'.? -type f -exec gzip -q {} \;
-	dh_install --sourcedir=$(CURDIR)/debian/indimail-mta -pindimail-mta
-	dh_install --sourcedir=$(CURDIR)/debian/indimail-mta -pdaemontools
-	dh_install --sourcedir=$(CURDIR)/debian/indimail-mta -pucspi-tcp
+	dh_install --sourcedir=$(DESTDIR) -pindimail-mta
+	dh_install --sourcedir=$(DESTDIR) -pdaemontools
+	dh_install --sourcedir=$(DESTDIR) -pucspi-tcp
 	dh_installchangelogs
 	dh_installdocs
 	dh_link
