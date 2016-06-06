@@ -1,5 +1,8 @@
 #
 # $Log: indimail.te,v $
+# Revision 2.15  2016-06-06 16:40:03+05:30  Cprogrammer
+# removed rpm_script_tmp_t
+#
 # Revision 2.14  2016-06-02 17:46:35+05:30  Cprogrammer
 # selinux rules for FHS compliant indimail
 #
@@ -43,7 +46,7 @@
 # selinux module config
 #
 #
-# $Id: indimail.te,v 2.14 2016-06-02 17:46:35+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.te,v 2.15 2016-06-06 16:40:03+05:30 Cprogrammer Exp mbhangui $
 # 
 #
 # semanage permissive -a svc_start_t
@@ -85,7 +88,6 @@ require {
 	type smtp_port_t;
 	type sssd_public_t;
 	type sssd_var_lib_t;
-	type rpm_script_tmp_t;
 	type semanage_t;
 	type svc_multilog_t;
 	type svc_run_exec_t;
@@ -94,9 +96,9 @@ require {
 	type svc_svc_t;
 	type home_root_t;
 	type root_t;
+	type tmp_t;
 	type user_home_t;
 	type user_tmp_t;
-	type tmp_t;
 	type usr_t;
 	type var_t;
 	type var_lib_t;
@@ -207,8 +209,6 @@ allow svc_start_t proc_net_t:file read;
 allow svc_start_t root_t:dir { write add_name create remove_name };
 allow svc_start_t root_t:fifo_file { write open read create };
 allow svc_start_t root_t:file { getattr ioctl open read write unlink append lock create rename execute execute_no_trans };
-
-allow svc_start_t rpm_script_tmp_t:file { execute execute_no_trans };
 
 allow svc_start_t self:process { execmem ptrace };
 allow svc_start_t self:capability { chown setuid setgid dac_override fsetid fowner sys_ptrace };
