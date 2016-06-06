@@ -3,14 +3,12 @@ usr/bin/envuidgid /usr/bin
 usr/bin/fghack /usr/bin
 usr/bin/multilog /usr/bin
 usr/bin/pgrphack /usr/bin
-usr/bin/readproctitle /usr/bin
 usr/bin/setlock /usr/bin
 usr/bin/setuidgid /usr/bin
 usr/bin/softlimit /usr/bin
 usr/bin/supervise /usr/bin
 usr/bin/svc /usr/bin
 usr/bin/svok /usr/bin
-usr/bin/svscan /usr/bin
 usr/bin/svstat /usr/bin
 usr/bin/tai64n /usr/bin
 usr/bin/tai64nlocal /usr/bin
@@ -28,7 +26,9 @@ usr/bin/multitail /usr/bin
 usr/bin/logselect /usr/bin
 usr/bin/qlogselect /usr/bin
 usr/bin/multirotate /usr/bin
-usr/bin/svscanboot /usr/bin
+usr/sbin/readproctitle /usr/bin
+usr/sbin/svscan /usr/bin
+usr/sbin/svscanboot /usr/bin
 usr/share/man/man1/spipe.1.gz /usr/share/man/man1
 usr/share/man/man1/qfilelog.1.gz /usr/share/man/man1
 usr/share/man/man1/multipipe.1.gz /usr/share/man/man1
