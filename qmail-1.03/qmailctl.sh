@@ -11,6 +11,9 @@
 ### END INIT INFO
 
 # $Log: qmailctl.sh,v $
+# Revision 1.49  2016-06-06 14:49:22+05:30  Cprogrammer
+# use runlevel 2 for debian
+#
 # Revision 1.48  2016-06-05 13:21:00+05:30  Cprogrammer
 # moved qmail-tcpok to sbin
 #
@@ -362,7 +365,11 @@ start()
   			/bin/grep "^SV:" /etc/inittab |/bin/grep svscan |/bin/grep respawn >/dev/null
 			if [ $? -ne 0 ]; then
 				/bin/grep -v "svscan" /etc/inittab > /etc/inittab.svctool.$$
-				echo "SV:345:respawn:PREFIX/sbin/svscanboot $servicedir <>$device 2<>$device" >> /etc/inittab.svctool.$$
+				if [ " $SYSTEM" = " Debian" ] ; then
+					echo "SV:2345:respawn:PREFIX/sbin/svscanboot $servicedir <>$device 2<>$device" >> /etc/inittab.svctool.$$
+				else
+					echo "SV:345:respawn:PREFIX/sbin/svscanboot $servicedir <>$device 2<>$device" >> /etc/inittab.svctool.$$
+				fi
 				if [ $? -eq 0 ] ; then
 					/bin/mv /etc/inittab.svctool.$$ /etc/inittab
 				fi
