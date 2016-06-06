@@ -1,6 +1,6 @@
 #
 #
-# $Id: qmail.spec,v 1.49 2016-06-05 13:21:20+05:30 Cprogrammer Exp mbhangui $
+# $Id: qmail.spec,v 1.50 2016-06-06 14:49:43+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %define _unpackaged_files_terminate_build 1
 
@@ -541,7 +541,7 @@ done
 %ghost %attr(0644,indimail,indimail)              %{qsysconfdir}/tcp.qmqp.cdb
 %ghost %attr(0644,root,root)                      %{qsysconfdir}/services.log
 
-%attr(444,root,root)                              %{qsysconfdir}/indimail.te
+%attr(444,root,root)                              %{qsysconfdir}/indimail-mta.te
 %attr(444,root,root)                              %{qsysconfdir}/qmailprog.list
 %attr(444,root,qmail)                             %{qsysconfdir}/etc/leapsecs.dat
 %attr(444,root,qmail)                             %{qsysconfdir}/etc/leapsecs.txt
@@ -559,6 +559,7 @@ done
 %attr(6511,qscand,qmail)                %{_prefix}/sbin/qhpsi
 %attr(6511,qmailq,qmail)                %{_prefix}/sbin/qmail-queue
 %attr(4511,qscand,qscand)               %{_prefix}/sbin/qscanq
+%attr(555,root,qmail)                   %{_prefix}/sbin/qscanq-stdin
 %attr(2511,root,qscand)                 %{_prefix}/sbin/run-cleanq
 %attr(511,root,qmail)                   %{_prefix}/sbin/relaytest
 %attr(511,root,qmail)                   %{_prefix}/sbin/splogger
@@ -703,7 +704,6 @@ done
 %attr(555,root,qmail)                   %{_prefix}/bin/filterto
 %attr(555,root,qmail)                   %{_prefix}/bin/stripmime.pl
 %attr(555,root,qmail)                   %{_prefix}/bin/fixcrio
-%attr(555,root,qmail)                   %{_prefix}/bin/qscanq-stdin
 %attr(555,root,qmail)                   %{_prefix}/bin/rsmtpsenders
 %attr(555,root,qmail)                   %{_prefix}/bin/queue-fix
 %attr(555,root,qmail)                   %{_prefix}/bin/822body
@@ -1109,7 +1109,20 @@ then
 	/bin/systemctl stop indimail.service > /dev/null 2>&1
 elif test -x %{_prefix}/sbin/initsvc
 then
-	%{_prefix}/sbin/initsvc -off
+	%{_prefix}/sbin/initsvc -status || /etc/init.d/indimail stop || true
+	%{_prefix}/sbin/initsvc -off || true
+else
+	/etc/init.d/indimail stop
+  	/bin/grep "^SV:" /etc/inittab |/bin/grep svscan |/bin/grep respawn >/dev/null
+	if [ $? -eq 0 ] ; then
+		/bin/grep -v "svscan" /etc/inittab > /etc/inittab.svctool.$$
+		if [ $? -eq 0 ] ; then
+			/bin/mv /etc/inittab.svctool.$$ /etc/inittab
+			/sbin/init q
+		else
+			%{__rm} -f /etc/inittab.svctool.$$
+		fi
+	fi
 fi
 sleep 5
 
@@ -1468,7 +1481,11 @@ elif [ -f %{_sysconfdir}/systemd/system/multi-user.target.wants/indimail.service
 	echo "1. Issue /bin/systemctl start indimail.service to start services"
 	count=1
 else
+	if [ -f %{_prefix}/sbin/initsvc ] ; then
 	echo "1. Issue %{_prefix}/sbin/initsvc -on"
+	else
+	echo "1. Issue /etc/init.d/indimail start"
+	fi
 	echo "2. Issue /sbin/init q to start services"
 	count=2
 fi
@@ -1493,33 +1510,40 @@ if [ $ID -ne 0 ] ; then
 	exit 1
 fi
 (
+echo "Giving IndiMail exactly 5 seconds to exit nicely"
 if test -f %{_sysconfdir}/init/svscan.conf
 then
 	/sbin/initctl emit qmailstop > /dev/null 2>&1
-	echo "Giving IndiMail exactly 5 seconds to exit nicely"
-	sleep 5
 	if [ $argv1 -ne 1 ] ; then # not an upgrade
 		%{__rm} -f %{_sysconfdir}/init/svscan.conf
 	fi
 elif test -f %{_sysconfdir}/event.d/svscan
 then
 	/sbin/initctl emit qmailstop > /dev/null 2>&1
-	echo "Giving IndiMail exactly 5 seconds to exit nicely"
-	sleep 5
 	if [ $argv1 -ne 1 ] ; then # not an upgrade
 		%{__rm} -f %{_sysconfdir}/event.d/svscan
 	fi
 elif test -f %{_sysconfdir}/systemd/system/multi-user.target.wants/indimail.service
 then
 	/bin/systemctl stop indimail.service > /dev/null 2>&1
-	echo "Giving IndiMail exactly 5 seconds to exit nicely"
-	sleep 5
 elif test -x %{_prefix}/sbin/initsvc
 then
-	%{_prefix}/sbin/initsvc -off
-	echo "Giving IndiMail exactly 5 seconds to exit nicely"
-	sleep 5
+	%{_prefix}/sbin/initsvc -status || /etc/init.d/indimail stop || true
+	%{_prefix}/sbin/initsvc -off || true
+else
+	/etc/init.d/indimail stop || true
+  	/bin/grep "^sv:" /etc/inittab |/bin/grep svscan |/bin/grep respawn >/dev/null
+	if [ $? -eq 0 ] ; then
+		/bin/grep -v "svscan" /etc/inittab > /etc/inittab.svctool.$$
+		if [ $? -eq 0 ] ; then
+			/bin/mv /etc/inittab.svctool.$$ /etc/inittab
+			/sbin/init q
+		else
+			%{__rm} -f /etc/inittab.svctool.$$
+		fi
+	fi
 fi
+sleep 5
 if [ -f %{shareddir}/boot/rpm.init ] ; then
 	echo "Running Custom Un-Installation Script for preun"
 	/bin/sh %{shareddir}/boot/rpm.init preun "$argv1"
