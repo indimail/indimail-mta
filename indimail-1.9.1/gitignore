@@ -1,7 +1,11 @@
+tmp
+indimail.mod
 *_handle
 ChangeLog
 doc/CREDITS
 doc/ChangeLog
+indimail.pp
+indimail.fc
 indisub.c
 Makefile
 Makefile.in
