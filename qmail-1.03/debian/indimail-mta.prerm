@@ -34,9 +34,6 @@ fi
 case "$1" in
     remove|upgrade|deconfigure)
 	(
-	if [ -f ${prefix}/sbin/initsvc ] ; then
-		${prefix}/sbin/initsvc -status || /etc/init.d/indimail stop
-	fi
 	echo "Giving IndiMail exactly 5 seconds to exit nicely" 1>&2
 	if test -f /lib/systemd/system/indimail.service && test -x /bin/systemctl
 	then
@@ -59,7 +56,20 @@ case "$1" in
 		fi
 	elif test -x ${prefix}/sbin/initsvc
 	then
+		${prefix}/sbin/initsvc -status || /etc/init.d/indimail stop || true
 		${prefix}/sbin/initsvc -off || true
+	else
+		/etc/init.d/indimail stop || true
+  		/bin/grep "^SV:" /etc/inittab |/bin/grep svscan |/bin/grep respawn >/dev/null
+		if [ $? -eq 0 ] ; then
+			/bin/grep -v "svscan" /etc/inittab > /etc/inittab.svctool.$$
+			if [ $? -eq 0 ] ; then
+				/bin/mv /etc/inittab.svctool.$$ /etc/inittab
+				/sbin/init q
+			else
+				${rm} -f /etc/inittab.svctool.$$
+			fi
+		fi
 	fi
 	if [ -f ${shareddir}/boot/rpm.init ] ; then
 		echo "Running Custom Un-Installation Script for preun" 1>&2
