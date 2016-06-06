@@ -164,7 +164,7 @@ fi
 echo "Doing post installation activities for the following"
 echo ""
 echo " 1. Configure ${logdir} for multilog"
-echo " 2. Configure ${servicedir}. Move existing services to %{servicedir}.org"
+echo " 2. Configure ${servicedir}. Move existing services to ${servicedir}.org"
 echo " 3. Configure svscanlog service"
 echo " 4. Configure standard catch-all accounts, default qmail configuration"
 echo " 5. Configure DKIM, Domainkeys signature"
@@ -450,7 +450,11 @@ elif [ -f /etc/systemd/system/multi-user.target.wants/indimail.service ] ; then
 	echo "1. Issue /bin/systemctl start indimail.service to start services"
 	count=1
 else
+	if [ -x ${prefix}/sbin/initsvc ] ; then
 	echo "1. Issue ${prefix}/sbin/initsvc -on"
+	else
+	echo "1. Issue /etc/init.d/indimail start"
+	fi
 	echo "2. Issue /sbin/init q to start services"
 	count=2
 fi
