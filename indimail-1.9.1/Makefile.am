@@ -179,7 +179,7 @@ vdeluser.1 vdelivermail.8 vrenamedomain.1 vrenameuser.1 vpasswd.1 vmoveuser.1 \
 vcfilter.1 indimail.7 svctool.8 indisub.c indimail.mrtg.cfg overquota.sh \
 vadddomain_handle vadduser_handle vdeldomain_handle vaddaliasdomain_handle \
 vrenamedomain_handle login_tasks.3 authgeneric obs.mk usr.sbin.mysqld usr.sbin.clamd \
-usr.bin.freshclam indimail.mod
+usr.bin.freshclam indimail.mod indimail.pp
 
 #DISTCLEANFILES=.gitignore
 
