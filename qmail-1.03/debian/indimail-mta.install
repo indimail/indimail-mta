@@ -10,7 +10,6 @@ var/indimail/users     /var/indimail
 usr/bin                /usr
 usr/sbin               /usr
 usr/share/indimail/*   /usr/share/indimail
-usr/libexec/indimail/* /usr/libexec/indimail
 usr/lib/indimail       /usr/lib
 usr/share/man/man1     /usr/share/man
 usr/share/man/cat1     /usr/share/man
@@ -20,4 +19,4 @@ usr/share/man/man7     /usr/share/man
 usr/share/man/cat7     /usr/share/man
 usr/share/man/man8     /usr/share/man
 usr/share/man/cat8     /usr/share/man
-usr/@acl_libdirstem@   /usr
+usr/lib/*.so.*   /usr/lib
