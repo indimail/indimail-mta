@@ -3109,7 +3109,7 @@ byte_copy.c byte_cr.c byte_diff.c byte_rchr.c byte_zero.c str.h \
 str_chr.c str_cpy.c str_diff.c str_diffn.c str_len.c str_rchr.c \
 str_start.c lock.h lock_ex.c lock_exnb.c lock_un.c tryflock.c getln.3 \
 getln.h getln.c getln2.3 getln2.c sgetopt.3 sgetopt.h sgetopt.c \
-subgetopt.3 subgetopt.h subgetopt.c error.3 error_str.3 error_temp.3 \
+subgetopt.3 subgetopt.h subgetopt.c qerror.3 error_str.3 error_temp.3 \
 error.h error.c error_str.c error_temp.c fmt.h fmt_str.c fmt_strn.c \
 fmt_uint.c fmt_uint0.c fmt_ulong.c fmt_xlong.c scan.h scan_ulong.c scan_8long.c \
 slurpclose.h slurpclose.c quote.h quote.c hfield.h hfield.c \
