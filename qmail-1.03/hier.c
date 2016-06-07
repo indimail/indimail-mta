@@ -1,5 +1,8 @@
 /*
  * $Log: hier.c,v $
+ * Revision 1.207  2016-06-07 10:56:01+05:30  Cprogrammer
+ * moved error.3 to qerror.3 to avoid conflict with GNU error(3) extension
+ *
  * Revision 1.206  2016-06-06 17:05:24+05:30  Cprogrammer
  * added indimail-mta.fc
  *
@@ -1371,7 +1374,7 @@ hier(inst_dir, fatal)
 	c(mandir,          "man/man3", "datetime.3", uidr, gidr, moder_f);
 	c(mandir,          "man/man3", "direntry.3", uidr, gidr, moder_f);
 	c(mandir,          "man/man3", "env.3", uidr, gidr, moder_f);
-	c(mandir,          "man/man3", "error.3", uidr, gidr, moder_f);
+	c(mandir,          "man/man3", "qerror.3", uidr, gidr, moder_f);
 	c(mandir,          "man/man3", "error_str.3", uidr, gidr, moder_f);
 	c(mandir,          "man/man3", "error_temp.3", uidr, gidr, moder_f);
 	c(mandir,          "man/man3", "fd_copy.3", uidr, gidr, moder_f);
@@ -1412,7 +1415,7 @@ hier(inst_dir, fatal)
 void
 getversion_install_big_c()
 {
-	static char    *x = "$Id: hier.c,v 1.206 2016-06-06 17:05:24+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: hier.c,v 1.207 2016-06-07 10:56:01+05:30 Cprogrammer Exp mbhangui $";
 
 #ifdef INDIMAIL
 	if (x)
