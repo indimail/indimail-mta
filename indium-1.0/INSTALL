@@ -2,9 +2,10 @@ indium requires tcl/tk and bwidget to be installed on your system
 
 fast install guide.. 
    type as root: 
-    # ./configure --prefix=/var/indimail \
-        --libexecdir=/var/indimail/libexec --sysconfdir=/var/indimail/etc \
-        --enable-mysqlprefix=/usr/local/mysql \
-        --mandir=/var/indimail/man --sysconfdir=/var/indimail/etc
+    # ./configure --prefix=/usr \
+        --mandir=/usr/share/man \
+        --libexecdir=/usr/libexec/indimail --sysconfdir=/etc/indimail \
+        --enable-shareddir=/usr/share/indimail \
+        --enable-mysqlprefix=/usr
     # make
     # make install-strip
