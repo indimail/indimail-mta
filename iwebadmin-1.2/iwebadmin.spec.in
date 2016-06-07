@@ -1,5 +1,8 @@
 #
 # $Log: iwebadmin.spec.in,v $
+# Revision 1.16  2016-06-07 11:23:38+05:30  Cprogrammer
+# replaced release with 1.B_CNT
+#
 # Revision 1.15  2016-06-07 10:50:18+05:30  Cprogrammer
 # changes for FHS
 #
@@ -61,7 +64,7 @@
 # Initial revision
 #
 #
-# $Id: iwebadmin.spec.in,v 1.15 2016-06-07 10:50:18+05:30 Cprogrammer Exp mbhangui $
+# $Id: iwebadmin.spec.in,v 1.16 2016-06-07 11:23:38+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %define _unpackaged_files_terminate_build 1
 
@@ -112,7 +115,7 @@ Version: @version@
 %if %build_on_obs != 0
 Release: 1.<B_CNT>
 %else
-Release: 1
+Release: 1.B_CNT
 %endif
 %if %build_on_obs == 1
 License: GPL-3.0+
