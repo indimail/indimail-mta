@@ -7,6 +7,7 @@ sys_libdir=@sys_libdir@
 cgibindir=@cgibindir@
 imagedir=@imagedir@
 version=@version@
+sysconfdir=@sysconfdir@
 #
 
 all: rules postinst postrm debian.tar.gz dummy.tar.gz  \
@@ -33,6 +34,7 @@ clean:
 edit = sed \
 	-e 's,@indimaildir\@,$(indimaildir),g' \
 	-e 's,@mysql_prefix\@,$(mysql_prefix),g' \
+	-e 's,@sysconfdir\@,$(sysconfdir),g' \
 	-e 's,@htmldir\@,$(htmldir),g' \
 	-e 's,@htmllibdir\@,$(htmllibdir),g' \
 	-e 's,@sys_libdir\@,$(sys_libdir),g' \
@@ -43,9 +45,9 @@ edit = sed \
 
 rules: rules.in
 	$(edit) $@.in > $@; chmod +x $@;
-postinst: postinst.in
+postinst: postinst.in obs.mk
 	$(edit) $@.in > $@;
-postrm: postrm.in
+postrm: postrm.in obs.mk
 	$(edit) $@.in > $@;
 iwebadmin-Debian_5.0.dsc: iwebadmin-Debian_5.0.dsc.in
 	$(edit) $@.in > $@
