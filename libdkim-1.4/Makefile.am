@@ -5,6 +5,7 @@ ACLOCAL_AMFLAGS=-I m4
 
 include_HEADERS = dkim.h macros.h
 COMMONSOURCES= dkimfuncs.cpp dns.cpp dkimbase.cpp dkimsign.cpp dkimverify.cpp
+includedir=@prefix@/include/indimail
 
 libdkim_LTLIBRARIES=libdkim.la
 libdkim_la_SOURCES=$(COMMONSOURCES) 
@@ -39,6 +40,6 @@ libtool: $(LIBTOOL_DEPS)
 	$(SHELL) ./config.status --recheck
 
 install-data-local:
-	$(mkinstalldirs)  $(DESTDIR)@prefix@/lib
-	$(mkinstalldirs)  $(DESTDIR)@prefix@/include
+	$(mkinstalldirs)  $(DESTDIR)@libdir@
+	$(mkinstalldirs)  $(DESTDIR)@prefix@/include/indimail
 #	$(CXX) $(DEFS) -c dkim.c
