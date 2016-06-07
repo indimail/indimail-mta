@@ -1,5 +1,8 @@
-#
+#!/bin/sh
 # $Log: indium.in,v $
+# Revision 2.112  2016-06-07 22:32:32+05:30  Cprogrammer
+# renamed madHelp to IndiMailHelp
+#
 # Revision 2.111  2016-06-07 18:38:54+05:30  Cprogrammer
 # FHS compliance
 #
@@ -14411,10 +14414,10 @@ incr prgindic
 catch {.intro.x.f.fr.log insert end "$prgtext\n"}
 source @scriptdir@/base64.tcl
 
-set prgtext "Loading Module..madHelp.tcl [expr [clock click -milliseconds] - $tmval] ms"
+set prgtext "Loading Module..IndiMailHelp.tcl [expr [clock click -milliseconds] - $tmval] ms"
 incr prgindic
 catch {.intro.x.f.fr.log insert end "$prgtext\n"}
-source @scriptdir@/madHelp.tcl
+source @scriptdir@/IndiMailHelp.tcl
 
 package require combobox 2.2
 package require mclistbox 1.02
