@@ -5,8 +5,6 @@
 
 set -e
 
-
-prefix=@indimaildir@
 ####################################
 
 ID=`id -u`
