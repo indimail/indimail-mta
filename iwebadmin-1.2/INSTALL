@@ -25,14 +25,15 @@ the above information then starting from scratch.
 
 0. fast install guide.. 
    type as root: 
-    # ./configure --enable-indimaildir=/var/indimail \
+    # ./configure --prefix=/usr \
+        --sysconfdir=/etc/indimail \
         --enable-ezmlmdir=/var/indimail \
         --disable-ipauth --disable-trivial-password --enable-modify-quota \
-        --enable-mysqlprefix=/usr/local/mysql \
+        --enable-mysqlprefix=/usr \
         --enable-htmldir=/var/www/html \
         --enable-cgibindir=/var/www/cgi-bin \
         --enable-imagedir=/var/www/html/images/iwebadmin \
-        --enable-htmllibdir=/var/indimail/share/iwebadmin
+        --enable-htmllibdir=/usr/share/indimail/iwebadmin
     # make
     # make install-strip
 
@@ -212,5 +213,5 @@ If you have any questions or comments please email
 indimail-support@lists.sourceforge.net or join the mailing list at
 http://groups.google.com/group/indimail
 
-$Id: INSTALL,v 1.6 2013-09-20 14:45:03+05:30 Cprogrammer Exp mbhangui $
+$Id: INSTALL,v 1.7 2016-06-06 23:27:57+05:30 Cprogrammer Exp mbhangui $
 
