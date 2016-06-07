@@ -1,9 +1,7 @@
 #!/bin/sh
 set -e
-prefix=@indimaildir@
-sysconfdir=/etc
+sysconfdir=@sysconfdir@
 rm=/bin/rm
-rmdir=/bin/rmdir
 
 ID=`id -u`
 if [ $ID -ne 0 ] ; then
@@ -38,12 +36,11 @@ case "$1" in
 esac
 if [ " $1" = " remove" ] ; then
 	echo "reverting permissions"
-	if [ -s ${prefix}/etc/iwebadmin_stat.override -a -f /usr/sbin/dpkg-statoverride ] ; then
-		/bin/cat ${prefix}/etc/iwebadmin_stat.override | while read line
+	if [ -s ${sysconfdir}/iwebadmin_stat.override -a -f /usr/sbin/dpkg-statoverride ] ; then
+		/bin/cat ${sysconfdir}/iwebadmin_stat.override | while read line
 		do
 			/usr/sbin/dpkg-statoverride --remove $line
 		done
-		${rm} -f ${prefix}/etc/iwebadmin_stat.override 2>/dev/null || true
-		${rmdir} --ignore-fail-on-non-empty ${prefix}/etc 2>/dev/null || true
+		${rm} -f ${sysconfdir}/iwebadmin_stat.override 2>/dev/null || true
 	fi
 fi

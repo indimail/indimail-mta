@@ -19,11 +19,14 @@ else
 	CFLAGS += -O2
 endif
 
-prefix=@indimaildir@
+prefix=@prefix@
+sysconfdir=@sysconfdir@
+mysql_prefix=@mysql_prefix@
 version=@version@
 #
-DESTDIR=$(CURDIR)/debian/iwebadmin
-bits=$(shell dpkg-architecture -qDEB_BUILD_ARCH_BITS)
+DESTDIR=$(CURDIR)/debian/iwebadmin.tmp
+#bits=$(shell dpkg-architecture -qDEB_BUILD_ARCH_BITS)
+bits=32
 libdir=$(shell if [ $(bits) -eq 64 ] ; then echo $(prefix)/lib64; else echo $(prefix)/lib;fi)
 
 build: build-stamp
@@ -35,11 +38,12 @@ build-stamp:
 	#
 	# run configure script
 	#
-	./configure --prefix=${prefix} --enable-indimaildir=${prefix} \
+	./configure --prefix=${prefix} \
+		--sysconfdir=${sysconfdir} \
 		--libdir=$(libdir) \
 		--enable-ezmlmdir=${prefix}/bin --disable-ipauth \
 		--disable-trivial-password \
-		--enable-mysqlprefix=/usr \
+		--enable-mysqlprefix=${mysql_prefix} \
 		--enable-modify-quota \
 		--enable-htmldir=@htmldir@ \
 		--enable-cgibindir=@cgibindir@ \
@@ -53,7 +57,8 @@ build-stamp:
 
 clean:
 	rm -f build-stamp configure-stamp
-	#$(MAKE) -s clean; $(MAKE) -s distclean || true
+	/bin/rm -rf $(DESTDIR)
+	$(MAKE) -s clean; $(MAKE) -s distclean || true
 	dh_testdir
 	dh_testroot
 	dh_clean

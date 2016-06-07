@@ -1,7 +1,7 @@
 #!/bin/sh
 set -e
 
-prefix=@indimaildir@
+sysconfdir=@sysconfdir@
 
 setperm()
 {
@@ -58,12 +58,12 @@ if [ $ID -ne 0 ] ; then
 	echo "You are not root" >&2
 	exit 1
 fi
-if [ -f ${prefix}/etc/iwebadmin_perm_list ] ; then
+if [ -f ${sysconfdir}/iwebadmin_perm_list ] ; then
 	echo "Fixing Permissions (debian stupidity)"
 (
-/bin/grep -v "^#" ${prefix}/etc/iwebadmin_perm_list | while read line
+/bin/grep -v "^#" ${sysconfdir}/iwebadmin_perm_list | while read line
 do
 	fixperms $line
 done
-) > ${prefix}/etc/iwebadmin_stat.override
+) > ${sysconfdir}/iwebadmin_stat.override
 fi
