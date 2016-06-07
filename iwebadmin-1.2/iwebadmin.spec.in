@@ -1,5 +1,8 @@
 #
 # $Log: iwebadmin.spec.in,v $
+# Revision 1.17  2016-06-07 22:17:45+05:30  Cprogrammer
+# use --mysqlPrefix instead of --enable-mysqlincdir and --enable-mysqllibdir
+#
 # Revision 1.16  2016-06-07 11:23:38+05:30  Cprogrammer
 # replaced release with 1.B_CNT
 #
@@ -64,7 +67,7 @@
 # Initial revision
 #
 #
-# $Id: iwebadmin.spec.in,v 1.16 2016-06-07 11:23:38+05:30 Cprogrammer Exp mbhangui $
+# $Id: iwebadmin.spec.in,v 1.17 2016-06-07 22:17:45+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %define _unpackaged_files_terminate_build 1
 
@@ -100,7 +103,6 @@
 %define _prefix            @prefix@
 %define sysconfdir         @sysconfdir@
 %define see_base           For a description of IndiMail visit http://www.indimail.org
-%define _verbose           0
 
 %if %build_on_obs != 0
 # change mysqlPrefix to /usr for openSUSE buildservice
@@ -206,13 +208,6 @@ if [ $ID -eq 0 ] ; then
 	fi
 fi
 
-if [ %{_verbose} -eq 0 ] ; then
-	DEVICE=/dev/null
-else
-	DEVICE=/dev/tty
-fi
-echo "Will send output to $DEVICE"
-
 cd %{name}-%{version}
 if [ %{fast_mode} -eq 0 ] ; then
 if [ %{build_on_obs} -eq 0 ] ; then
@@ -232,8 +227,7 @@ fi
 	--sysconfdir=%{sysconfdir} \
 	--libdir=%{_libdir} \
 	--enable-ezmlmdir=%{_prefix}/bin --disable-ipauth --disable-trivial-password \
-	--enable-mysqlincdir=%{mysqlPrefix}/include/mysql \
-	--enable-mysqllibdir=%{mysqlPrefix}/%{_lib}/mysql \
+	--mysqlPrefix=%{mysqlPrefix} \
 	--enable-modify-quota \
 	--enable-htmldir=@htmldir@ \
 	--enable-cgibindir=@cgibindir@ \
@@ -247,8 +241,8 @@ for i in %{name}-%{version}
 do
 if [ -d $i ] ; then
 	cd $i
-	%{__make} DESTDIR=%{buildroot}
-	%{__make} DESTDIR=%{buildroot} install-strip
+	%{__make} -s DESTDIR=%{buildroot}
+	%{__make} -s DESTDIR=%{buildroot} install-strip
 	cd ..
 fi
 done
@@ -261,11 +255,16 @@ fi
 %files
 %defattr(-,root,root,-)
 %if "%{_prefix}" != "/usr"
-%dir %attr(555,root,qmail)              %{_prefix}
+%dir %attr(555,root,qmail)          %{_prefix}
 %endif
+%dir %attr(555,root,qmail)          %{shareddir}/iwebadmin
+%dir %attr(555,root,qmail)          %{shareddir}/iwebadmin/html
+%dir %attr(555,root,qmail)          %{shareddir}/iwebadmin/lang
 
+# binary
 %attr(6555,root,indimail)           @cgibindir@/iwebadmin
 
+#html
 %attr(444,root,root)                @htmllibdir@/html/add_autorespond.html
 %attr(444,root,root)                @htmllibdir@/html/add_forward.html
 %attr(444,root,root)                @htmllibdir@/html/add_listdig.html
@@ -322,7 +321,7 @@ fi
 %attr(444,root,root)                @htmllibdir@/lang/tr
 %attr(444,root,root)                @htmllibdir@/lang/zh-cn
 %attr(444,root,root)                @sysconfdir@/iwebadmin_perm_list
-
+#images
 %attr(444,root,root)                @imagedir@/delete.png
 %attr(444,root,root)                @imagedir@/disabled.png
 %attr(444,root,root)                @imagedir@/lowerleft.png
