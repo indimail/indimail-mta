@@ -1,5 +1,6 @@
 #!/bin/sh
-prefix=@indimaildir@
+shareddir=@shareddir@
+libdir=@libdir@
 rm=/bin/rm
 
 ID=`id -u`
@@ -32,25 +33,25 @@ esac
 
 #DEBHELPER#
 
+# we are doing upgrade or removal
+
+ID=`id -u`
+if [ $ID -ne 0 ] ; then
+	echo "You are not root" >&2
+	exit 1
+fi
+
 #
 # We need to do this for debian. SIGH!!
 #
 
-if [ -f /tmp/indium.upgrade ] ; then # upgrade
-	if [ -f ${prefix}/boot/rpm.init ] ; then
-		/sbin/ldconfig
-		echo "Running Custom Upgrade Script"
-		/bin/sh ${prefix}/boot/rpm.init upgrade
+if [ ! " $libdir" = " /usr/lib" ] ; then
+	# Recreate ld.so links and cache
+	echo "ldconfig..."
+	if [ -d ${sysconfdir}/ld.so.conf.d ] ; then
+		(
+			echo $libdir
+		) > ${sysconfdir}/ld.so.conf.d/indium-`uname -m`.conf
 	fi
-	${rm} -f /tmp/indium.upgrade
-	exit 0
-fi
-${rm} -f /tmp/indium.install /tmp/indium.upgrade
-# Recreate ld.so links and cache
-echo "ldconfig..."
-if [ -d ${sysconfdir}/ld.so.conf.d ] ; then
-	(
-		echo @indimaildir@/lib
-	) > ${sysconfdir}/ld.so.conf.d/indium-`uname -m`.conf
 fi
 /sbin/ldconfig
