@@ -81,31 +81,28 @@ esac
 CGIBINTARGETS=iwebadmin
 AC_SUBST(CGIBINTARGETS)
 
-indimaildir="/var/indimail"
-for f in /var/indimail
-do
-    if test -d $f
-    then
-        indimaildir=$f
-    fi
-done
-
-AC_ARG_ENABLE(indimaildir, [  --enable-indimaildir=DIR  Home directory of indimail.],
-    indimaildir="$enableval",
-    [
-        if test "$indimaildir" = ""
-        then
-            AC_MSG_ERROR([Unable to find your indimaildir, specify --enable-indimaildir.])
-        fi
-    ] )
-AC_SUBST(indimaildir)
 AC_SUBST(idcommand)
 
+defaultprefix="/usr"
 if test x$prefix = xNONE
 then
-	prefix="$indimaildir"
-	ac_configure_args="$ac_configure_args -prefix=$prefix"
+	prefix="$defaultprefix"
+	ac_configure_args="$ac_configure_args --prefix=$prefix"
 fi
+tlib='${exec_prefix}/lib'
+if test x$libdir = x$tlib
+then
+	dnl Does not work on RHEL 5, CentOS 5 64 bit systems
+	if test -d /lib64 -a "$acl_libdirstem" = "lib"
+	then
+		acl_libdirstem=lib64
+		libdir=$prefix/$acl_libdirstem
+	fi
+	ilibdir=$prefix/$acl_libdirstem
+else
+	ilibdir=$libdir
+fi
+RPATH_LIB="$acl_libdirstem"
 
 AC_ARG_ENABLE(mysqlprefix, [  --enable-mysqlprefix=""       MySQL Prefix Directory.],[mysql_prefix=$enableval],[mysql_prefix=""])
 
@@ -179,8 +176,7 @@ fi
 
 AC_CHECK_LIB(mysqlclient -L${mysql_libdir}, mysql_real_connect,libs="$libs -lmysqlclient",
 	AC_MSG_ERROR([could not find libmysqlclient which is needed for MySQL support]),)
-auth_incs="-I$indimaildir/include -I$mysql_incdir"
-RPATH_LIB="$acl_libdirstem"
+auth_incs="-I$prefix/include/indimail -I$mysql_incdir"
 if test -f /usr/bin/lsb_release
 then
 DISTRIB_ID=$(lsb_release -si)
@@ -194,7 +190,7 @@ AC_SUBST(DISTRIB_VERSION)
 #libdir=$prefix/$acl_libdirstem
 case "$host" in
 	*-*-darwin*)
-	auth_libs="-L. -L$libdir -L$indimaildir/lib -lindimail -lcdb $LIB_CRYPT -L$mysql_libdir -lmysqlclient $LIB_SSL"
+	auth_libs="-L. -L$libdir -lindimail -lcdb $LIB_CRYPT -L$mysql_libdir -lmysqlclient $LIB_SSL"
 	;;
 	*)
 	auth_libs="-L. -L$libdir -Xlinker -R -Xlinker $libdir -lindimail -lcdb $LIB_CRYPT -L$mysql_libdir -lmysqlclient $LIB_SSL"
@@ -277,7 +273,7 @@ AC_ARG_ENABLE(imagedir, [  --enable-imagedir=DIR     Where to put the image file
     ] )
 AC_SUBST(imagedir)
 
-htmllibdir="/var/indimail/share/iwebadmin"
+htmllibdir="$prefix/share/indimail/iwebadmin"
 
 AC_ARG_ENABLE(htmllibdir, [  --enable-htmllibdir=DIR   iwebadmin HTML library directory.],
     htmllibdir="$enableval",
@@ -527,7 +523,6 @@ echo "          html dir = "$htmldir""
 echo "         image dir = "$imagedir""
 echo "         image URL = "$imageurl""
 echo "      template dir = "$htmllibdir""
-echo "      indimail dir = "$indimaildir""
 echo "         ezmlm dir = "$ezmlmdir""
 echo "    system lib dir = "$sys_libdir""
 echo "         ezmlm idx = "$ezmlmidx""
