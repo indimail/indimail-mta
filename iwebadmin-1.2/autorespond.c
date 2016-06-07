@@ -1,5 +1,5 @@
 /*
- * $Id: autorespond.c,v 1.7 2013-10-01 17:13:32+05:30 Cprogrammer Exp mbhangui $
+ * $Id: autorespond.c,v 1.8 2016-06-07 10:46:05+05:30 Cprogrammer Exp mbhangui $
  * Copyright (C) 1999-2004 Inter7 Internet Technologies, Inc. 
  *
  * This program is free software; you can redistribute it and/or modify
@@ -194,6 +194,7 @@ addautorespondnow()
 	}
 	/*- subject in iwebadmin autoresponder panel */
 	fprintf(fs, "Reference: %s\n", Alias);
+	fprintf(fs, "Subject: This is an autoresponse From: %s@%s Re: %s\n", ActionUser, Domain, Alias);
 	fprintf(fs, "\n%s\n", Message);
 	fclose(fs);
 	/*- Make the autoresponder .qmail file */
@@ -306,6 +307,7 @@ modautorespondnow()
 	}
 	/*- subject in iwebadmin autoresponder panel */
 	fprintf(fs, "Reference: %s\n", Alias);
+	fprintf(fs, "Subject: This is an autoresponse From: %s@%s Re: %s\n", ActionUser, Domain, Alias);
 	fprintf(fs, "\n%s\n", Message);
 	fclose(fs);
 	/*- Make the autoresponder .qmail file */
