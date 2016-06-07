@@ -145,7 +145,6 @@ if [ -f /tmp/indimail.upgrade ] ; then # upgrade
 fi
 ${rm} -f /tmp/indimail.install /tmp/indimail.upgrade
 # Recreate ld.so links and cache
-if [ ! "${prefix}" = "/usr" ] ; then
 echo "recreating ld.so cache"
 if [ -d /etc/ld.so.conf.d ] ; then
 	(
@@ -158,7 +157,6 @@ if [ -d /etc/ld.so.conf.d ] ; then
 	) > /etc/ld.so.conf.d/indimail-`uname -m`.conf
 fi
 /sbin/ldconfig
-fi
 
 if [ -f /usr/sbin/clamd -a -f /usr/bin/clamdscan ] ; then
 	clamav_os=1
