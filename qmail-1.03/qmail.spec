@@ -1,6 +1,6 @@
 #
 #
-# $Id: qmail.spec,v 1.51 2016-06-06 17:05:39+05:30 Cprogrammer Exp mbhangui $
+# $Id: qmail.spec,v 1.52 2016-06-07 10:56:48+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %define _unpackaged_files_terminate_build 1
 
@@ -60,6 +60,7 @@
 Summary: A Flexible SMTP server
 Name: indimail-mta
 Version: 1.9.1
+Provides: daemontools, ucspi-tcp
 %if %build_on_obs == 1
 Release: 1.<B_CNT>
 %else
@@ -178,7 +179,7 @@ BuildRoot: %(mktemp -ud %{_tmppath}/%{name}-%{version}-%{release}-XXXXXXX)
 Excludeos: windows 
 
 %description
-indimail-mta provides a standalone SMTP server that is part of the IndiMail
+indimail-mta provides a standalone mta server that is part of the IndiMail
 messaging platform. It comprises of the following packages
 
 qmail,
