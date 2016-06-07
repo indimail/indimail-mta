@@ -1,5 +1,5 @@
 /*
- * $Id: user.c,v 1.11 2013-10-01 17:14:23+05:30 Cprogrammer Exp mbhangui $
+ * $Id: user.c,v 1.12 2016-06-07 10:47:51+05:30 Cprogrammer Exp mbhangui $
  * Copyright (C) 1999-2004 Inter7 Internet Technologies, Inc. 
  *
  * This program is free software; you can redistribute it and/or modify
@@ -819,6 +819,7 @@ makevacation(FILE * d, char *dir)
 		return 1;
 	}
 	fprintf(f, "Reference: %s\n", subject);
+	fprintf(f, "Subject: This is an autoresponse From: %s@%s Re: %s\n", ActionUser, Domain, subject);
 	fprintf(f, "\n%s\n", Message);
 	fclose(f);
 	return 0;
@@ -1260,6 +1261,17 @@ parse_users_dotqmail(char newchar)
 			while (fgets(linebuf, sizeof (linebuf), fs2) != NULL) {
 				if (*linebuf == '\n')
 					break;
+				if (strncasecmp(linebuf, "Subject: ", 9) == 0) {
+					char *ptr;
+					if ((ptr = strstr(linebuf, "Subject: This is an autoresponse From:"))) {
+						if ((ptr = strstr(linebuf, "Re: ")))
+							ptr += 4;
+						else
+							ptr += 39;
+						printh("%H", ptr);
+					} else
+						printh("%H", &linebuf[9]);
+				}
 				if (strncasecmp(linebuf, "Reference: ", 11) == 0)
 					printh("%H", &linebuf[11]);
 			}
