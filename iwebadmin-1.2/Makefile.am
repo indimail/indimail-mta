@@ -37,8 +37,8 @@ MOSTLYCLEANFILES = iwebadmin.spec iwebadmin-@VERSION@-rpmlintrc \
 				   iwebadmin_perm_list obs.mk
 
 edit = sed \
-	-e 's,@indimaildir\@,$(indimaildir),g' \
 	-e 's,@mysql_prefix\@,$(mysql_prefix),g' \
+	-e 's,@sysconfdir\@,$(sysconfdir),g' \
 	-e 's,@htmldir\@,$(htmldir),g' \
 	-e 's,@htmllibdir\@,$(htmllibdir),g' \
 	-e 's,@sys_libdir\@,$(sys_libdir),g' \
@@ -103,5 +103,5 @@ install-data-local:
 		chmod 4555 $(DESTDIR)$(bindir)/iwebadmin; \
 	fi
 install-data-hook:
-	$(mkinstalldirs)         $(DESTDIR)@indimaildir@/etc
-	$(INSTALL_DATA) iwebadmin_perm_list $(DESTDIR)@indimaildir@/etc/iwebadmin_perm_list  || exit 1
+	$(mkinstalldirs)         $(DESTDIR)@sysconfdir@
+	$(INSTALL_DATA) iwebadmin_perm_list $(DESTDIR)@sysconfdir@/iwebadmin_perm_list  || exit 1
