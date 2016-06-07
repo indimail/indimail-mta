@@ -144,7 +144,6 @@ if [ -f /tmp/indimail-mta.upgrade ] ; then # upgrade
 fi
 ${rm} -f /tmp/indimail-mta.install /tmp/indimail-mta.upgrade
 # Recreate ld.so links and cache
-if [ ! "${prefix}" = "/usr" ] ; then
 echo "recreating ld.so cache"
 if [ -d /etc/ld.so.conf.d ] ; then
 	(
@@ -154,8 +153,7 @@ if [ -d /etc/ld.so.conf.d ] ; then
 			echo /usr/lib
 		fi
 	) > /etc/ld.so.conf.d/indimail-`uname -m`.conf
-fi
-/sbin/ldconfig
+	/sbin/ldconfig
 fi
 
 if [ -f /usr/sbin/clamd -a -f /usr/bin/clamdscan ] ; then
