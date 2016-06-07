@@ -1,5 +1,8 @@
 #
 # $Log: litesrc.in,v $
+# Revision 2.8  2016-06-07 18:39:08+05:30  Cprogrammer
+# FHS compliance
+#
 # Revision 2.7  2009-10-03 23:55:03+05:30  Cprogrammer
 # changed etcdir to scripdir
 #
@@ -68,9 +71,9 @@ proc main {} {
 		if {[file exists /usr/bin/top]} {
 		.mbar1.misc.menu add command -label "Top System Processes" -command "catch {exec $configs(xterm) -e /usr/bin/top &} result" -underline 0
 		}
-		.mbar1.misc.menu add command -label "Flash Interface"      -command "catch {exec $configs(xterm) -e @indimaildir@/bin/flash &} result" -underline 5
-		if {[file exists @indimaildir@/bin/gq]} {
-		.mbar1.misc.menu add command -label "Ldap Client"          -command "catch {exec @indimaildir@/bin/gq &} result" -underline 1
+		.mbar1.misc.menu add command -label "Flash Interface"      -command "catch {exec $configs(xterm) -e @prefix@/bin/flash &} result" -underline 5
+		if {[file exists @prefix@/bin/gq]} {
+		.mbar1.misc.menu add command -label "Ldap Client"          -command "catch {exec @prefix@/bin/gq &} result" -underline 1
 		}
 		.mbar1.misc.menu add separator
 		.mbar1.misc.menu add command -label "Preferences"          -command "preferences 2" -underline 0
@@ -81,7 +84,7 @@ proc main {} {
 	menubutton .mbar1.help -text "Help" -menu .mbar1.help.menu -highlightthickness 2 -highlightbackground black -bd 4 \
 		-background brown1 -underline 0
 	menu .mbar1.help.menu -tearoff 0
-	.mbar1.help.menu add command -label "IndiMail"       -command "exec xpdf @indimaildir@/doc/indimail.pdf &" -underline 0
+	.mbar1.help.menu add command -label "IndiMail"       -command "exec evince @shareddir@/doc/indimail.pdf &" -underline 0
 	.mbar1.help.menu add command -label "About"          -command "doHelp About" -underline 0
 	.mbar1.help.menu add separator
 	.mbar1.help.menu add cascade -label "SLEMS Lite"     -menu .mbar1.help.menu.slite -underline 0
@@ -121,7 +124,7 @@ proc main {} {
 	if {[file exist @imagedir@/filemanager.gif]} {
 		.mbar2.b5 config -image [image create photo -file @imagedir@/filemanager.gif]
 	}
-	button .mbar2.bh -text "Help"          -command "exec xpdf @indimaildir@/doc/indimail.pdf &" \
+	button .mbar2.bh -text "Help"          -command "exec evince @shareddir@/doc/indimail.pdf &" \
 		-relief groove -bd 2 -highlightthickness 1 -highlightbackground black
 	if {[file exist @imagedir@/help.gif]} {
 		.mbar2.bh config -image [image create photo -file @imagedir@/help.gif]

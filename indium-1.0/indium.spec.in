@@ -1,5 +1,8 @@
 #
 # $Log: indium.spec.in,v $
+# Revision 1.11  2016-06-07 18:39:01+05:30  Cprogrammer
+# FHS compliance
+#
 # Revision 1.10  2015-12-29 00:38:42+05:30  Cprogrammer
 # added rhel version 7
 #
@@ -31,7 +34,7 @@
 # Initial revision
 #
 #
-# $Id: indium.spec.in,v 1.10 2015-12-29 00:38:42+05:30 Cprogrammer Exp mbhangui $
+# $Id: indium.spec.in,v 1.11 2016-06-07 18:39:01+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %define _unpackaged_files_terminate_build 1
 
@@ -64,13 +67,17 @@
 %define fast_mode          0
 %endif
 
-%define _prefix            @indimaildir@
+%define _prefix            @prefix@
+%define shareddir          @shareddir@
+%define mandir             @mandir@
+%define libexecdir         @libexecdir@
+%define sysconfdir         @sysconfdir@
 %define see_base           For a description of IndiMail visit http://www.indimail.org
-%define _verbose           0
+%define _verbose           1
 %define tai_version        1.0
 %define fbsql_version      1.0
 %define bwidget_version    1.8.0
-%define tcl_version        8.5
+%define tcl_version        8.6
 
 %if %build_on_obs != 0
 # change mysqlPrefix to /usr for openSUSE buildservice
@@ -223,20 +230,10 @@ echo "reconfiguring..."
 fi
 fi
 
-if [ " %dist" = " mandrake" ] ; then
 %configure --prefix=%{_prefix} \
-	--libdir=%{_libdir} --x-libraries=%{_libdir} \
-	--libexecdir=%{_prefix}/libexec --sysconfdir=%{_prefix}/etc \
-	--enable-mysqlincdir=%{mysqlPrefix}/include/mysql \
-	--enable-mysqllibdir=%{mysqlPrefix}/%{_lib}/mysql \
-	--mandir=%{_prefix}/man --sysconfdir=%{_prefix}/etc
-else
-%configure --prefix=%{_prefix} \
-	--libexecdir=%{_prefix}/libexec --sysconfdir=%{_prefix}/etc \
-	--enable-mysqlincdir=%{mysqlPrefix}/include/mysql \
-	--enable-mysqllibdir=%{mysqlPrefix}/%{_lib}/mysql \
-	--mandir=%{_prefix}/man --sysconfdir=%{_prefix}/etc
-fi
+	--libexecdir=%{libexecdir} --sysconfdir=%{sysconfdir} \
+	--enable-shareddir=%{shareddir} \
+	--mandir=%{mandir} --enable-mysqlpreix=/usr
 
 %install
 [ "$RPM_BUILD_ROOT" != "/" ] && /bin/rm -fr $RPM_BUILD_ROOT
@@ -274,71 +271,75 @@ find ./BWidget-%{bwidget_version} -depth -print | cpio -pdmv %{buildroot}$TCL_PA
 
 # copy files here
 if [ -x /usr/bin/chrpath ] ; then
-	/usr/bin/chrpath -d %{buildroot}%{_libdir}/*.so
+#/usr/bin/chrpath -d %{buildroot}%{_libdir}/*.so
 	/usr/bin/chrpath -d %{buildroot}%{_prefix}/sbin/pwhelper
 fi
+%{__rm} -f %{buildroot}%{_libdir}/*.so
 
 %files
 %defattr(-, root, root,-)
+%if "%{_prefix}" != "/usr"
 %dir %attr(555,root,qmail)              %{_prefix}
+%endif
 #
 # Image files
 #
-%attr(444,root,indimail)                %{_prefix}/share/indium-%{version}/images/adddomain.gif
-%attr(444,root,indimail)                %{_prefix}/share/indium-%{version}/images/addgroup.gif
-%attr(444,root,indimail)                %{_prefix}/share/indium-%{version}/images/adduser.gif
-%attr(444,root,indimail)                %{_prefix}/share/indium-%{version}/images/arrow_left.gif
-%attr(444,root,indimail)                %{_prefix}/share/indium-%{version}/images/arrow_right.gif
-%attr(444,root,indimail)                %{_prefix}/share/indium-%{version}/images/atrn.gif
-%attr(444,root,indimail)                %{_prefix}/share/indium-%{version}/images/bulletin.gif
-%attr(444,root,indimail)                %{_prefix}/share/indium-%{version}/images/buttonexit.gif
-%attr(444,root,indimail)                %{_prefix}/share/indium-%{version}/images/buttonlogin.gif
-%attr(444,root,indimail)                %{_prefix}/share/indium-%{version}/images/cron.gif
-%attr(444,root,indimail)                %{_prefix}/share/indium-%{version}/images/dbcontrol.gif
-%attr(444,root,indimail)                %{_prefix}/share/indium-%{version}/images/deldomain.gif
-%attr(444,root,indimail)                %{_prefix}/share/indium-%{version}/images/delolduser.gif
-%attr(444,root,indimail)                %{_prefix}/share/indium-%{version}/images/deluser.gif
-%attr(444,root,indimail)                %{_prefix}/share/indium-%{version}/images/edit.gif
-%attr(444,root,indimail)                %{_prefix}/share/indium-%{version}/images/exit.gif
-%attr(444,root,indimail)                %{_prefix}/share/indium-%{version}/images/filemanager.gif
-%attr(444,root,indimail)                %{_prefix}/share/indium-%{version}/images/folder.gif
-%attr(444,root,indimail)                %{_prefix}/share/indium-%{version}/images/folder.xbm
-%attr(444,root,indimail)                %{_prefix}/share/indium-%{version}/images/forum.gif
-%attr(444,root,indimail)                %{_prefix}/share/indium-%{version}/images/go.gif
-%attr(444,root,indimail)                %{_prefix}/share/indium-%{version}/images/gq.gif
-%attr(444,root,indimail)                %{_prefix}/share/indium-%{version}/images/green.gif
-%attr(444,root,indimail)                %{_prefix}/share/indium-%{version}/images/greenoff.gif
-%attr(444,root,indimail)                %{_prefix}/share/indium-%{version}/images/greenon.gif
-%attr(444,root,indimail)                %{_prefix}/share/indium-%{version}/images/help.gif
-%attr(444,root,indimail)                %{_prefix}/share/indium-%{version}/images/indimaillogo_small.gif
-%attr(444,root,indimail)                %{_prefix}/share/indium-%{version}/images/linux.xbm
-%attr(444,root,indimail)                %{_prefix}/share/indium-%{version}/images/linux_mask.xbm
-%attr(444,root,indimail)                %{_prefix}/share/indium-%{version}/images/loginleft.gif
-%attr(444,root,indimail)                %{_prefix}/share/indium-%{version}/images/logintop.gif
-%attr(444,root,indimail)                %{_prefix}/share/indium-%{version}/images/mbar1.gif
-%attr(444,root,indimail)                %{_prefix}/share/indium-%{version}/images/moduser.gif
-%attr(444,root,indimail)                %{_prefix}/share/indium-%{version}/images/neat.gif
-%attr(444,root,indimail)                %{_prefix}/share/indium-%{version}/images/passwd.gif
-%attr(444,root,indimail)                %{_prefix}/share/indium-%{version}/images/postel.gif
-%attr(444,root,indimail)                %{_prefix}/share/indium-%{version}/images/preferences.gif
-%attr(444,root,indimail)                %{_prefix}/share/indium-%{version}/images/pwrdLogo150.gif
-%attr(444,root,indimail)                %{_prefix}/share/indium-%{version}/images/queuestatus.gif
-%attr(444,root,indimail)                %{_prefix}/share/indium-%{version}/images/quit.gif
-%attr(444,root,indimail)                %{_prefix}/share/indium-%{version}/images/red.gif
-%attr(444,root,indimail)                %{_prefix}/share/indium-%{version}/images/reload.gif
-%attr(444,root,indimail)                %{_prefix}/share/indium-%{version}/images/secpanel.gif
-%attr(444,root,indimail)                %{_prefix}/share/indium-%{version}/images/serviceTool.gif
-%attr(444,root,indimail)                %{_prefix}/share/indium-%{version}/images/shit.gif
-%attr(444,root,indimail)                %{_prefix}/share/indium-%{version}/images/showctl.gif
-%attr(444,root,indimail)                %{_prefix}/share/indium-%{version}/images/slemslite.gif
-%attr(444,root,indimail)                %{_prefix}/share/indium-%{version}/images/smtp.gif
-%attr(444,root,indimail)                %{_prefix}/share/indium-%{version}/images/stop.gif
-%attr(444,root,indimail)                %{_prefix}/share/indium-%{version}/images/textedit.gif
-%attr(444,root,indimail)                %{_prefix}/share/indium-%{version}/images/tkrat.xbm
-%attr(444,root,indimail)                %{_prefix}/share/indium-%{version}/images/tkratmask.xbm
-%attr(444,root,indimail)                %{_prefix}/share/indium-%{version}/images/top.gif
-%attr(444,root,indimail)                %{_prefix}/share/indium-%{version}/images/version.gif
-%attr(444,root,indimail)                %{_prefix}/share/indium-%{version}/images/warning.gif
+%attr(444,root,indimail)                %{shareddir}/indium/images/adddomain.gif
+%attr(444,root,indimail)                %{shareddir}/indium/images/addgroup.gif
+%attr(444,root,indimail)                %{shareddir}/indium/images/adduser.gif
+%attr(444,root,indimail)                %{shareddir}/indium/images/arrow_left.gif
+%attr(444,root,indimail)                %{shareddir}/indium/images/arrow_right.gif
+%attr(444,root,indimail)                %{shareddir}/indium/images/atrn.gif
+%attr(444,root,indimail)                %{shareddir}/indium/images/bulletin.gif
+%attr(444,root,indimail)                %{shareddir}/indium/images/buttonexit.gif
+%attr(444,root,indimail)                %{shareddir}/indium/images/buttonlogin.gif
+%attr(444,root,indimail)                %{shareddir}/indium/images/cron.gif
+%attr(444,root,indimail)                %{shareddir}/indium/images/dbcontrol.gif
+%attr(444,root,indimail)                %{shareddir}/indium/images/deldomain.gif
+%attr(444,root,indimail)                %{shareddir}/indium/images/delolduser.gif
+%attr(444,root,indimail)                %{shareddir}/indium/images/deluser.gif
+%attr(444,root,indimail)                %{shareddir}/indium/images/edit.gif
+%attr(444,root,indimail)                %{shareddir}/indium/images/exit.gif
+%attr(444,root,indimail)                %{shareddir}/indium/images/filemanager.gif
+%attr(444,root,indimail)                %{shareddir}/indium/images/folder.gif
+%attr(444,root,indimail)                %{shareddir}/indium/images/folder.xbm
+%attr(444,root,indimail)                %{shareddir}/indium/images/forum.gif
+%attr(444,root,indimail)                %{shareddir}/indium/images/go.gif
+%attr(444,root,indimail)                %{shareddir}/indium/images/gq.gif
+%attr(444,root,indimail)                %{shareddir}/indium/images/green.gif
+%attr(444,root,indimail)                %{shareddir}/indium/images/greenoff.gif
+%attr(444,root,indimail)                %{shareddir}/indium/images/greenon.gif
+%attr(444,root,indimail)                %{shareddir}/indium/images/help.gif
+%attr(444,root,indimail)                %{shareddir}/indium/images/indimaillogo_small.gif
+%attr(444,root,indimail)                %{shareddir}/indium/images/linux.xbm
+%attr(444,root,indimail)                %{shareddir}/indium/images/linux_mask.xbm
+%attr(444,root,indimail)                %{shareddir}/indium/images/loginleft.gif
+%attr(444,root,indimail)                %{shareddir}/indium/images/logintop.gif
+%attr(444,root,indimail)                %{shareddir}/indium/images/mbar1.gif
+%attr(444,root,indimail)                %{shareddir}/indium/images/moduser.gif
+%attr(444,root,indimail)                %{shareddir}/indium/images/neat.gif
+%attr(444,root,indimail)                %{shareddir}/indium/images/passwd.gif
+%attr(444,root,indimail)                %{shareddir}/indium/images/postel.gif
+%attr(444,root,indimail)                %{shareddir}/indium/images/preferences.gif
+%attr(444,root,indimail)                %{shareddir}/indium/images/pwrdLogo150.gif
+%attr(444,root,indimail)                %{shareddir}/indium/images/queuestatus.gif
+%attr(444,root,indimail)                %{shareddir}/indium/images/quit.gif
+%attr(444,root,indimail)                %{shareddir}/indium/images/red.gif
+%attr(444,root,indimail)                %{shareddir}/indium/images/reload.gif
+%attr(444,root,indimail)                %{shareddir}/indium/images/secpanel.gif
+%attr(444,root,indimail)                %{shareddir}/indium/images/serviceTool.gif
+%attr(444,root,indimail)                %{shareddir}/indium/images/shit.gif
+%attr(444,root,indimail)                %{shareddir}/indium/images/showctl.gif
+%attr(444,root,indimail)                %{shareddir}/indium/images/slemslite.gif
+%attr(444,root,indimail)                %{shareddir}/indium/images/smtp.gif
+%attr(444,root,indimail)                %{shareddir}/indium/images/stop.gif
+%attr(444,root,indimail)                %{shareddir}/indium/images/textedit.gif
+%attr(444,root,indimail)                %{shareddir}/indium/images/tkrat.xbm
+%attr(444,root,indimail)                %{shareddir}/indium/images/tkratmask.xbm
+%attr(444,root,indimail)                %{shareddir}/indium/images/top.gif
+%attr(444,root,indimail)                %{shareddir}/indium/images/version.gif
+%attr(444,root,indimail)                %{shareddir}/indium/images/warning.gif
+
 %if %nobwidget == 0
 #
 # BWidget
@@ -388,6 +389,7 @@ fi
 %attr(644,root,root) /usr/%{_lib}/tcl%{tcl_version}/BWidget-%{bwidget_version}/BWman/ArrowButton.html
 %attr(644,root,root) /usr/%{_lib}/tcl%{tcl_version}/BWidget-%{bwidget_version}/BWman/ComboBox.html
 %attr(644,root,root) /usr/%{_lib}/tcl%{tcl_version}/BWidget-%{bwidget_version}/BWman/Label.html
+
 %attr(644,root,root) /usr/%{_lib}/tcl%{tcl_version}/BWidget-%{bwidget_version}/scrollw.tcl
 %attr(644,root,root) /usr/%{_lib}/tcl%{tcl_version}/BWidget-%{bwidget_version}/notebook.tcl
 %attr(644,root,root) /usr/%{_lib}/tcl%{tcl_version}/BWidget-%{bwidget_version}/separator.tcl
@@ -410,6 +412,7 @@ fi
 %attr(644,root,root) /usr/%{_lib}/tcl%{tcl_version}/BWidget-%{bwidget_version}/titleframe.tcl
 %attr(644,root,root) /usr/%{_lib}/tcl%{tcl_version}/BWidget-%{bwidget_version}/progressbar.tcl
 %attr(644,root,root) /usr/%{_lib}/tcl%{tcl_version}/BWidget-%{bwidget_version}/dialog.tcl
+
 %attr(644,root,root) /usr/%{_lib}/tcl%{tcl_version}/BWidget-%{bwidget_version}/CHANGES.txt
 %attr(644,root,root) /usr/%{_lib}/tcl%{tcl_version}/BWidget-%{bwidget_version}/images/italic.gif
 %attr(644,root,root) /usr/%{_lib}/tcl%{tcl_version}/BWidget-%{bwidget_version}/images/save.gif
@@ -477,32 +480,37 @@ fi
 %attr(555,root,indimail)                %{_prefix}/bin/secpanel
 %attr(555,root,indimail)                %{_prefix}/bin/supernotepad
 %attr(555,root,indimail)                %{_prefix}/bin/tkdiff
-%attr(444,root,indimail)                %{_prefix}/share/indium-%{version}/scripts/balloon.tcl
-%attr(444,root,indimail)                %{_prefix}/share/indium-%{version}/scripts/base64.tcl
-%attr(444,root,indimail)                %{_prefix}/share/indium-%{version}/scripts/combobox.tcl
-%attr(444,root,indimail)                %{_prefix}/share/indium-%{version}/scripts/common.tcl
-%attr(444,root,indimail)                %{_prefix}/share/indium-%{version}/scripts/convert_history.tcl
-%attr(444,root,indimail)                %{_prefix}/share/indium-%{version}/scripts/fileman.tcl
-%attr(444,root,indimail)                %{_prefix}/share/indium-%{version}/scripts/global.tcl
-%attr(444,root,indimail)                %{_prefix}/share/indium-%{version}/scripts/gui.tcl
-%attr(444,root,indimail)                %{_prefix}/share/indium-%{version}/scripts/help.tcl
-%attr(444,root,indimail)                %{_prefix}/share/indium-%{version}/scripts/hugecombo.tcl
-%attr(444,root,indimail)                %{_prefix}/share/indium-%{version}/scripts/hugelist.tcl
-%attr(444,root,indimail)                %{_prefix}/share/indium-%{version}/scripts/keydistribute.tcl
-%attr(444,root,indimail)                %{_prefix}/share/indium-%{version}/scripts/listserver.tcl
-%attr(444,root,indimail)                %{_prefix}/share/indium-%{version}/scripts/madHelp.tcl
-%attr(444,root,indimail)                %{_prefix}/share/indium-%{version}/scripts/mclistbox.tcl
-%attr(444,root,indimail)                %{_prefix}/share/indium-%{version}/scripts/notebook.tcl
-%attr(444,root,indimail)                %{_prefix}/share/indium-%{version}/scripts/progressbar.tcl
-%attr(444,root,indimail)                %{_prefix}/share/indium-%{version}/scripts/ranges.tcl
-%attr(444,root,indimail)                %{_prefix}/share/indium-%{version}/scripts/secpanel.dist
-%attr(444,root,indimail)                %{_prefix}/share/indium-%{version}/scripts/secpanel.wait
+%attr(555,root,indimail)                %{shareddir}/indium/scripts/balloon.tcl
+%attr(555,root,indimail)                %{shareddir}/indium/scripts/base64.tcl
+%attr(555,root,indimail)                %{shareddir}/indium/scripts/combobox.tcl
+%attr(555,root,indimail)                %{shareddir}/indium/scripts/common.tcl
+%attr(555,root,indimail)                %{shareddir}/indium/scripts/convert_history.tcl
+%attr(555,root,indimail)                %{shareddir}/indium/scripts/convert_profile.tcl
+%attr(555,root,indimail)                %{shareddir}/indium/scripts/export_profiles.tcl
+%attr(555,root,indimail)                %{shareddir}/indium/scripts/dppw.tcl
+%attr(555,root,indimail)                %{shareddir}/indium/scripts/secpanel_remoteconf.sh
+%attr(555,root,indimail)                %{shareddir}/indium/scripts/spdistkey
+%attr(555,root,indimail)                %{shareddir}/indium/scripts/fileman.tcl
+%attr(555,root,indimail)                %{shareddir}/indium/scripts/global.tcl
+%attr(555,root,indimail)                %{shareddir}/indium/scripts/gui.tcl
+%attr(555,root,indimail)                %{shareddir}/indium/scripts/help.tcl
+%attr(555,root,indimail)                %{shareddir}/indium/scripts/hugecombo.tcl
+%attr(555,root,indimail)                %{shareddir}/indium/scripts/hugelist.tcl
+%attr(555,root,indimail)                %{shareddir}/indium/scripts/keydistribute.tcl
+%attr(555,root,indimail)                %{shareddir}/indium/scripts/listserver.tcl
+%attr(555,root,indimail)                %{shareddir}/indium/scripts/madHelp.tcl
+%attr(555,root,indimail)                %{shareddir}/indium/scripts/mclistbox.tcl
+%attr(555,root,indimail)                %{shareddir}/indium/scripts/notebook.tcl
+%attr(555,root,indimail)                %{shareddir}/indium/scripts/progressbar.tcl
+%attr(555,root,indimail)                %{shareddir}/indium/scripts/ranges.tcl
+%attr(555,root,indimail)                %{shareddir}/indium/scripts/secpanel.dist
+%attr(555,root,indimail)                %{shareddir}/indium/scripts/secpanel.wait
 
 # Shared libraries (omit for architectures that don't support them)
-%{_libdir}/libtai64.so
+#%{_libdir}/libtai64.so
 %{_libdir}/libtai64-%{tai_version}.so.0
 %{_libdir}/libtai64-%{tai_version}.so.0.0.0
-%{_libdir}/libfbsql.so
+#%{_libdir}/libfbsql.so
 %{_libdir}/libfbsql-%{fbsql_version}.so.0
 %{_libdir}/libfbsql-%{fbsql_version}.so.0.0.0
 
@@ -516,10 +524,11 @@ fi
 # they are created during post-install should be marked as follows:
 # %config(missingok) filename
 #
-%doc %attr(444, root, qmail)                          %{_prefix}/share/indium-%{version}/lib/userhelp.txt
-%attr(444,root,indimail) %config(noreplace,missingok) %{_prefix}/share/indium-%{version}/etc/default.config
-%attr(444,root,indimail) %config(noreplace,missingok) %{_prefix}/share/indium-%{version}/etc/default.profile
-%attr(444,root,indimail) %config(noreplace,missingok) %{_prefix}/share/indium-%{version}/etc/filemanrc
+%doc %attr(444, root, qmail)                          %{shareddir}/indium/lib/userhelp.txt
+%attr(444,root,indimail) %config(noreplace,missingok) %{sysconfdir}/default.config
+%attr(444,root,indimail) %config(noreplace,missingok) %{sysconfdir}/default.profile
+%attr(444,root,indimail) %config(noreplace,missingok) %{sysconfdir}/filemanrc
+%attr(444,root,indimail) %config(noreplace,missingok) %{sysconfdir}/termdefs.txt
 
 %clean
 %{__rm} -rf %{buildroot}

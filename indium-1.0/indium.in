@@ -1,5 +1,8 @@
 #
 # $Log: indium.in,v $
+# Revision 2.111  2016-06-07 18:38:54+05:30  Cprogrammer
+# FHS compliance
+#
 # Revision 2.110  2010-06-25 17:44:13+05:30  Cprogrammer
 # changes for field name changes in vdominfo
 #
@@ -386,22 +389,22 @@ proc main {} {
 		if {[file exists /usr/bin/mytop]} {
 		.mbar1.misc.menu add command -label "Top MySQL  Processes" -command "catch {exec $configs(xterm) -e /usr/bin/mytop &} result" -underline 4
 		}
-		.mbar1.misc.menu add command -label "Shit Interface"       -command "catch {exec $configs(xterm) -e @indimaildir@/bin/shit &} result" -underline 5
+		.mbar1.misc.menu add command -label "Shit Interface"       -command "catch {exec $configs(xterm) -e @prefix@/bin/shit &} result" -underline 5
 		if {[file exists /usr/local/mysqlcc/mysqlcc]} {
 		.mbar1.misc.menu add command -label "MySQL Control Center" -command "catch {exec /usr/local/mysqlcc/mysqlcc &} result" -underline 6
 		} else {
 		.mbar1.misc.menu add command -label "MySQL Client"         -command "mysql" -underline 6
 		}
 		.mbar1.misc.menu add command -label "Command Line"         -command "commandLine" -underline 1
-		if {[file exists @indimaildir@/bin/gq]} {
-		.mbar1.misc.menu add command -label "Ldap Client"          -command "catch {exec @indimaildir@/bin/gq &} result" -underline 1
+		if {[file exists @prefix@/bin/gq]} {
+		.mbar1.misc.menu add command -label "Ldap Client"          -command "catch {exec @prefix@/bin/gq &} result" -underline 1
 		}
 		.mbar1.misc.menu add command -label "IndiVersion"          -command "indiversion" -underline 4
 		.mbar1.misc.menu add command -label "Scheduler"            -command "xcron 1" -underline 0
 		if {[file exists /usr/sbin/neat]} {
 		.mbar1.misc.menu add command -label "Network Config"       -command "catch {exec /usr/sbin/neat &} result" -underline 0
 		}
-		if {[file exists @indimaildir@/bin/fetchmailconf]} {
+		if {[file exists @prefix@/bin/fetchmailconf]} {
 		.mbar1.misc.menu add command -label "Fetchmail Config"     -command "fetch_config" -underline 2
 		}
 		.mbar1.misc.menu add separator
@@ -413,7 +416,7 @@ proc main {} {
 	menubutton .mbar1.help -text "Help" -menu .mbar1.help.menu -highlightthickness 2 -highlightbackground black -bd 4 \
 		-background brown1 -underline 0
 	menu .mbar1.help.menu -tearoff 0
-	.mbar1.help.menu add command -label "IndiMail"       -command "exec xpdf @indimaildir@/doc/indimail.pdf &" -underline 0
+	.mbar1.help.menu add command -label "IndiMail"       -command "exec evince @shareddir@/doc/indimail.pdf &" -underline 0
 	.mbar1.help.menu add command -label "About"          -command "doHelp About" -underline 0
 	.mbar1.help.menu add separator
 	.mbar1.help.menu add cascade -label "qmail commands(1)"  -menu .mbar1.help.menu.qmail1 -underline 15
@@ -545,7 +548,7 @@ proc main {} {
 	if {[file exist @imagedir@/textedit.gif]} {
 		.mbar2.b12 config -image [image create photo -file @imagedir@/textedit.gif]
 	}
-	button .mbar2.bh -text "Help"          -command "exec xpdf @indimaildir@/doc/indimail.pdf &" \
+	button .mbar2.bh -text "Help"          -command "exec evince @shareddir@/doc/indimail.pdf &" \
 		-relief groove -bd 2 -highlightthickness 1 -highlightbackground black
 	if {[file exist @imagedir@/help.gif]} {
 		.mbar2.bh config -image [image create photo -file @imagedir@/help.gif]
@@ -656,7 +659,7 @@ proc ClientStart {} {
 		    	incr i
 			}
 	    	-(ssh|rsh) {
-				catch {exec @indimaildir@/bin/secpanel} result
+				catch {exec @prefix@/bin/secpanel} result
 				exit 0
 			}
 	    	default {
@@ -689,7 +692,7 @@ proc initdomain {} {
 	set result ""
 
 	set domain_list {}
-	set cmd "| @indimaildir@/bin/dbinfo -s"
+	set cmd "| @prefix@/bin/dbinfo -s"
 	if {[catch {open $cmd r} f] } {
 		msg_dialog .d {initdomain} "$f" @imagedir@/warning.gif 0 "OK"
 		return 1
@@ -733,13 +736,13 @@ proc initdomain {} {
 		catch {unset server_list($line)}
 		catch {unset sqlserver_list($line)}
 		catch {unset aliasdomain_list($line)}
-		foreach server [exec @indimaildir@/bin/dbinfo -s -d $line | grep ^mda | awk {{print $3}} 2>/dev/null] {
+		foreach server [exec @prefix@/bin/dbinfo -s -d $line | grep ^mda | awk {{print $3}} 2>/dev/null] {
 			set server_list($line) [lappend dummy $server]
 		}
-		foreach server [exec @indimaildir@/bin/dbinfo -s -d $line | grep ^sqlserver | awk {{print $2}} 2>/dev/null] {
+		foreach server [exec @prefix@/bin/dbinfo -s -d $line | grep ^sqlserver | awk {{print $2}} 2>/dev/null] {
 			set sqlserver_list($line) [lappend dummy $server]
 		}
-		set cmd "| @indimaildir@/bin/vdominfo -l $line"
+		set cmd "| @prefix@/bin/vdominfo -l $line"
 		if {[catch {open $cmd r} f] } {
 			msg_dialog .d {initdomain} $f @imagedir@/warning.gif 0 "OK"
 			return 1
@@ -759,7 +762,7 @@ proc initdomain {} {
 			puts stderr "initdomain: $line: $result"
 		}
 	}
-	catch {exec @indimaildir@/bin/vdominfo | grep "domain:" | grep -v "aliased to" | awk {{print $2}} 2>/dev/null} tmp_list
+	catch {exec @prefix@/bin/vdominfo | grep "domain:" | grep -v "aliased to" | awk {{print $2}} 2>/dev/null} tmp_list
 	if {[llength $tmp_list]} {
 		foreach line $tmp_list {
 			puts stdout "searching $line in $domain_list"
@@ -1516,7 +1519,7 @@ proc run_relay {operation all host dom filename oldline newline lw listwin} {
 	}
 	switch $operation {
 		1 {
-			set cmd "| @indimaildir@/sbin/controlsync -h $host -v -f $controldir/me -u $adminuser -P $adminpass -p $adminport"
+			set cmd "| @prefix@/sbin/controlsync -h $host -v -f $controldir/me -u $adminuser -P $adminpass -p $adminport"
 			if {[catch {open $cmd r} f] } {
 				msg_dialog .d {controlsync} $f @imagedir@/warning.gif 0 "OK"
 				return 1
@@ -1531,7 +1534,7 @@ proc run_relay {operation all host dom filename oldline newline lw listwin} {
 				msg_dialog .d $result "$host is not a valid indimail setup" @imagedir@/warning.gif 0 "OK"
 				return 1
 			}
-			set cmd "exec @indimaildir@/sbin/controlsync -a -h $host -D $dom"
+			set cmd "exec @prefix@/sbin/controlsync -a -h $host -D $dom"
 		}
 		2 {
 			set msg "You are About to Delete Relay $host for Domain $dom.\nAre you sure you want to delete?\nClick OK to continue"
@@ -1539,14 +1542,14 @@ proc run_relay {operation all host dom filename oldline newline lw listwin} {
 			if {$action != 1} {
 				return
 			}
-			set cmd "exec @indimaildir@/sbin/controlsync -d -h $host -D $dom"
+			set cmd "exec @prefix@/sbin/controlsync -d -h $host -D $dom"
 		}
 		3 {
 			if {$all == 0} {
-				set cmd "exec @indimaildir@/sbin/controlsync -h $host -A $newline -u $adminuser -P $adminpass -p $adminport -f $controldir/$filename"
+				set cmd "exec @prefix@/sbin/controlsync -h $host -A $newline -u $adminuser -P $adminpass -p $adminport -f $controldir/$filename"
 			} else {
 				foreach line $relayhosts {
-					set cmd "exec @indimaildir@/sbin/controlsync -h $line -A $newline -u $adminuser -P $adminpass -p $adminport -f $controldir/$filename"
+					set cmd "exec @prefix@/sbin/controlsync -h $line -A $newline -u $adminuser -P $adminpass -p $adminport -f $controldir/$filename"
 					runCommand $cmd
 					if {$returnstatus != 0} {
 						msg_dialog .d $line $result @imagedir@/warning.gif 0 "OK"
@@ -1563,10 +1566,10 @@ proc run_relay {operation all host dom filename oldline newline lw listwin} {
 				return
 			}
 			if {$all == 0} {
-				set cmd "exec @indimaildir@/sbin/controlsync -h $host -A $newline -R $oldline -u $adminuser -P $adminpass -p $adminport -f $controldir/$filename"
+				set cmd "exec @prefix@/sbin/controlsync -h $host -A $newline -R $oldline -u $adminuser -P $adminpass -p $adminport -f $controldir/$filename"
 			} else {
 				foreach line $relayhosts {
-					set cmd "exec @indimaildir@/sbin/controlsync -h $line -A $newline -R $oldline -u $adminuser -P $adminpass -p $adminport -f $controldir/$filename"
+					set cmd "exec @prefix@/sbin/controlsync -h $line -A $newline -R $oldline -u $adminuser -P $adminpass -p $adminport -f $controldir/$filename"
 					runCommand $cmd
 					if {$returnstatus != 0} {
 						msg_dialog .d $line $result @imagedir@/warning.gif 0 "OK"
@@ -1583,10 +1586,10 @@ proc run_relay {operation all host dom filename oldline newline lw listwin} {
 				return
 			}
 			if {$all == 0} {
-				set cmd "exec @indimaildir@/sbin/controlsync -h $host -R $oldline -u $adminuser -P $adminpass -p $adminport -f $controldir/$filename"
+				set cmd "exec @prefix@/sbin/controlsync -h $host -R $oldline -u $adminuser -P $adminpass -p $adminport -f $controldir/$filename"
 			} else {
 				foreach line $relayhosts {
-					set cmd "exec @indimaildir@/sbin/controlsync -h $line -R $oldline -u $adminuser -P $adminpass -p $adminport -f $controldir/$filename"
+					set cmd "exec @prefix@/sbin/controlsync -h $line -R $oldline -u $adminuser -P $adminpass -p $adminport -f $controldir/$filename"
 					runCommand $cmd
 					if {$returnstatus != 0} {
 						msg_dialog .d $line $result @imagedir@/warning.gif 0 "OK"
@@ -1628,7 +1631,7 @@ proc displayFile {filename host listwin args} {
 		msg_dialog .d {displayFile} "RelayHost not selected" @imagedir@/warning.gif 0 "OK"
 		return 1
 	}
-	set cmd "| @indimaildir@/sbin/controlsync -h $host -v -f $controldir/$filename -u $adminuser -P $adminpass -p $adminport"
+	set cmd "| @prefix@/sbin/controlsync -h $host -v -f $controldir/$filename -u $adminuser -P $adminpass -p $adminport"
 	if {[catch {open $cmd r} f] } {
 		msg_dialog .d {controlsync} $f @imagedir@/warning.gif 0 "OK"
 		return 1
@@ -1689,7 +1692,7 @@ proc ipmeprint {local} {
 	global localips
 
 	if {$local == 1} {
-		set cmd "| @indimaildir@/bin/dnsfq $hostname"
+		set cmd "| @prefix@/bin/dnsfq $hostname"
 		if {[catch {open $cmd r} f] } {
 			msg_dialog .d {dnsfq} $f @imagedir@/warning.gif 0 "OK"
 			return 1
@@ -1707,7 +1710,7 @@ proc ipmeprint {local} {
 	} else {
 		set localips {}
 	}
-	set cmd "| @indimaildir@/bin/ipmeprint"
+	set cmd "| @prefix@/bin/ipmeprint"
 	if {[catch {open $cmd r} f] } {
 		msg_dialog .d {ipmeprint} $f @imagedir@/warning.gif 0 "OK"
 		return 1
@@ -1794,7 +1797,7 @@ proc run_adddomain {args} {
 	}
 	set quota [expr $var_quota * 1048576]
 	set vaddcmd "\"vadddomain -D $mysql_database -S $mysql_host -p $mysql_port -U $mysql_user -P $mysql_pass -q $quota -d $domaindir -i $uid -g $gid $opt $Domain $password\""
-	set cmd "exec @indimaildir@/sbin/adminclient -h $adminhost -p $adminport -u $adminuser -P $adminpass -n @indimaildir@/control/clientcert.pem -c $vaddcmd"
+	set cmd "exec @prefix@/sbin/adminclient -h $adminhost -p $adminport -u $adminuser -P $adminpass -n @sysconfdir@/control/clientcert.pem -c $vaddcmd"
 	runCommand $cmd
 	if {$returnstatus == 0} {
 		.statusBar.lab configure -text "Added domain $Domain"
@@ -2066,7 +2069,7 @@ proc run_adduser {} {
 	}
 	set quota [expr $var_quota * 1048576]
 	set vaddcmd "\"vadduser -q $quota -c \\\"$gecos\\\" $opt $username@$domain $password\""
-	set cmd "exec @indimaildir@/sbin/adminclient -h $adminhost -p $adminport -u $adminuser -P $adminpass -n @indimaildir@/control/clientcert.pem -c $vaddcmd"
+	set cmd "exec @prefix@/sbin/adminclient -h $adminhost -p $adminport -u $adminuser -P $adminpass -n @sysconfdir@/control/clientcert.pem -c $vaddcmd"
 	runCommand $cmd
 	if {$returnstatus == 0} {
 		.statusBar.lab configure -text "Added user $username@$domain"
@@ -2510,7 +2513,7 @@ proc vmoduser {} {
 		-command {setvacation}
 	button $lwin.b11.b -relief raised -text "Edit" \
 		-bd 2 -state disabled \
-		-command {exec @indimaildir@/bin/supernotepad -r $maildir/.vacation.msg &}
+		-command {exec @prefix@/bin/supernotepad -r $maildir/.vacation.msg &}
 	balloonHelp $lwin.b11.b "Edit Auto Response Text"
 	if {[file exist @imagedir@/edit.gif]} {
 		$lwin.b11.b configure -image [image create photo -file @imagedir@/edit.gif]
@@ -2585,12 +2588,12 @@ proc setvacation {} {
 
 	if {$vacationflag == 1} { 
 		set returnstatus [catch {file copy $maildir/.vacation.msg $maildir/vacation.msg} result]
-		exec @indimaildir@/bin/supernotepad -r $maildir/vacation.msg
+		exec @prefix@/bin/supernotepad -r $maildir/vacation.msg
 		if {[file exists $maildir/vacation.msg] == 0} { 
 			set vacationflag 0
 			$lwin.b11.c deselect
 		} else {
-			set cmd "exec @indimaildir@/bin/vacation $username@$domain $maildir/vacation.msg"
+			set cmd "exec @prefix@/bin/vacation $username@$domain $maildir/vacation.msg"
 			runCommand $cmd
 			if {$returnstatus == 0} {
 				.statusBar.lab configure -text "Set vacation for $username@$domain"
@@ -2607,7 +2610,7 @@ proc setvacation {} {
 			}
 		}
 	} else {
-		set cmd "exec @indimaildir@/bin/vacation $username@$domain -"
+		set cmd "exec @prefix@/bin/vacation $username@$domain -"
 		runCommand $cmd
 		if {$returnstatus == 0} {
 			.statusBar.lab configure -text "Removed vacation for $username@$domain"
@@ -2662,9 +2665,9 @@ proc vuserinfo {server} {
 	catch {unset varuser}
 	catch {unset status}
 	if {[string length $server] > 0} {
-		set cmd "| @indimaildir@/sbin/adminclient -h $server    -p $adminport -u $adminuser -P $adminpass -n @indimaildir@/control/clientcert.pem -c \"vuserinfo $username@$domain\""
+		set cmd "| @prefix@/sbin/adminclient -h $server    -p $adminport -u $adminuser -P $adminpass -n @sysconfdir@/control/clientcert.pem -c \"vuserinfo $username@$domain\""
 	} else {
-		set cmd "| @indimaildir@/sbin/adminclient -h $adminhost -p $adminport -u $adminuser -P $adminpass -n @indimaildir@/control/clientcert.pem -c \"vuserinfo $username@$domain\""
+		set cmd "| @prefix@/sbin/adminclient -h $adminhost -p $adminport -u $adminuser -P $adminpass -n @sysconfdir@/control/clientcert.pem -c \"vuserinfo $username@$domain\""
 	}
 	if {$BWidget_present == 1} {
 		set prgtext "Hmm... I am Busy"
@@ -2746,7 +2749,7 @@ proc vuserinfo {server} {
 		$rwin.dir.e configure -state normal
 		$rwin.dir.b configure -state normal
 		pack $lwin.b11
-		if {[string compare -length [expr [string length @indimaildir@/bin] + 11] $tmp_vac "| @indimaildir@/bin/vacation"] == 0 || [string compare -length [expr [string length @indimaildir@] + 24] $tmp_vac "| @indimaildir@/bin/qmail-autoresponder"] == 0} {
+		if {[string compare -length [expr [string length @prefix@/bin] + 11] $tmp_vac "| @prefix@/bin/vacation"] == 0 || [string compare -length [expr [string length @prefix@] + 24] $tmp_vac "| @prefix@/bin/qmail-autoresponder"] == 0} {
 			$lwin.b11.c select
 		} else {
 			$lwin.b11.c deselect
@@ -2827,9 +2830,9 @@ proc vuserinfo {server} {
 		$lwin.b9 deselect
 	}
 	if {[string length $server] > 0} {
-		set cmd "| @indimaildir@/sbin/adminclient -h $server -p $adminport -u $adminuser -P $adminpass -n @indimaildir@/control/clientcert.pem -c \"valias -s $username@$domain\""
+		set cmd "| @prefix@/sbin/adminclient -h $server -p $adminport -u $adminuser -P $adminpass -n @sysconfdir@/control/clientcert.pem -c \"valias -s $username@$domain\""
 	} else {
-		set cmd "| @indimaildir@/sbin/adminclient -h $adminhost -p $adminport -u $adminuser -P $adminpass -n @indimaildir@/control/clientcert.pem -c \"valias -s $username@$domain\""
+		set cmd "| @prefix@/sbin/adminclient -h $adminhost -p $adminport -u $adminuser -P $adminpass -n @sysconfdir@/control/clientcert.pem -c \"valias -s $username@$domain\""
 	}
 	if {[catch {open $cmd r} f] } {
 		catch {destroy .progress}
@@ -2945,7 +2948,7 @@ proc run_moduser {server} {
 			return
 		}
 		set vmodcmd "\"vmoveuser  $username@$domain $maildir\""
-		set cmd "exec @indimaildir@/sbin/adminclient -h $server -p $adminport -u $adminuser -P $adminpass -n @indimaildir@/control/clientcert.pem -c $vmodcmd"
+		set cmd "exec @prefix@/sbin/adminclient -h $server -p $adminport -u $adminuser -P $adminpass -n @sysconfdir@/control/clientcert.pem -c $vmodcmd"
 		runCommand $cmd
 		if {$returnstatus == 0} {
 			.statusBar.lab configure -text "$username@$domain Maildir modified to $maildir"
@@ -3002,7 +3005,7 @@ proc run_moduser {server} {
 	}
 	if {[string length $opt] > 0 && [string compare $opt "-x"] != 0} {
 		set vmodcmd "\"vmoduser -x $username@$domain\""
-		set cmd "exec @indimaildir@/sbin/adminclient -h $server -p $adminport -u $adminuser -P $adminpass -n @indimaildir@/control/clientcert.pem -c $vmodcmd"
+		set cmd "exec @prefix@/sbin/adminclient -h $server -p $adminport -u $adminuser -P $adminpass -n @sysconfdir@/control/clientcert.pem -c $vmodcmd"
 		runCommand $cmd
 	}
 	set quota [expr $var_quota * 1048576]
@@ -3022,7 +3025,7 @@ proc run_moduser {server} {
 	} else {
 		set vmodcmd "\"vmoduser -q $quota -c \\\"$gecos\\\" $opt $username@$domain\""
 	}
-	set cmd "exec @indimaildir@/sbin/adminclient -h $server -p $adminport -u $adminuser -P $adminpass -n @indimaildir@/control/clientcert.pem -c $vmodcmd"
+	set cmd "exec @prefix@/sbin/adminclient -h $server -p $adminport -u $adminuser -P $adminpass -n @sysconfdir@/control/clientcert.pem -c $vmodcmd"
 	runCommand $cmd
 	if {$returnstatus == 0} {
 		vuserinfo $server
@@ -3047,7 +3050,7 @@ proc run_passwd {server} {
 	} else {
 		return 0
 	}
-	set cmd "exec @indimaildir@/sbin/adminclient -h $server -p $adminport -u $adminuser -P $adminpass -n @indimaildir@/control/clientcert.pem -c $vmodcmd"
+	set cmd "exec @prefix@/sbin/adminclient -h $server -p $adminport -u $adminuser -P $adminpass -n @sysconfdir@/control/clientcert.pem -c $vmodcmd"
 	runCommand $cmd
 	if {$returnstatus == 0} {
 		vuserinfo $server
@@ -3167,7 +3170,7 @@ proc run_alias {alias server} {
 		}
 		set valiascmd "\"valias -d \\\"$alias\\\" $username@$domain\""
 	}
-	set cmd "exec @indimaildir@/sbin/adminclient -h $server -p $adminport -u $adminuser -P $adminpass -n @indimaildir@/control/clientcert.pem -c $valiascmd"
+	set cmd "exec @prefix@/sbin/adminclient -h $server -p $adminport -u $adminuser -P $adminpass -n @sysconfdir@/control/clientcert.pem -c $valiascmd"
 	runCommand $cmd
 	if {$returnstatus == 0} {
 		vuserinfo $server
@@ -3418,9 +3421,9 @@ proc run_dominfo {domval w4} {
 	variable dir
 
 	if {$domval == ""} {
-		set cmd "| @indimaildir@/bin/vdominfo"
+		set cmd "| @prefix@/bin/vdominfo"
 	} else {
-		set cmd "| @indimaildir@/bin/vdominfo $domval"
+		set cmd "| @prefix@/bin/vdominfo $domval"
 	}
 	if {[catch {open $cmd r} f] } {
 		catch {destroy .progress}
@@ -3516,9 +3519,9 @@ Are you sure you want to DELETE $w2?  Click OK to continue"
 	}
 	if {$action == 1} {
 		if {$real_domain == 1} {
-			set cmd "exec @indimaildir@/sbin/adminclient -h $adminhost -p $adminport -u $adminuser -P $adminpass -n @indimaildir@/control/clientcert.pem -c \"vdeldomain -c $w2\""
+			set cmd "exec @prefix@/sbin/adminclient -h $adminhost -p $adminport -u $adminuser -P $adminpass -n @sysconfdir@/control/clientcert.pem -c \"vdeldomain -c $w2\""
 		} else {
-			set cmd "exec @indimaildir@/sbin/adminclient -h $adminhost -p $adminport -u $adminuser -P $adminpass -n @indimaildir@/control/clientcert.pem -c \"vdeldomain $w2\""
+			set cmd "exec @prefix@/sbin/adminclient -h $adminhost -p $adminport -u $adminuser -P $adminpass -n @sysconfdir@/control/clientcert.pem -c \"vdeldomain $w2\""
 		}
 		runCommand $cmd
 		if {[string length $result]} {
@@ -3565,7 +3568,7 @@ proc run_renamedomain {old_domain new_domain} {
 	set msg "You are About to Rename $old_domain to $new_domain. Click OK to continue"
 	set action [msg_dialog .d {Confirm Rename} $msg @imagedir@/warning.gif 0 "OK"]
 	if {$action == 1} {
-		set cmd "exec @indimaildir@/sbin/adminclient -h $adminhost -p $adminport -u $adminuser -P $adminpass -n @indimaildir@/control/clientcert.pem -c \"vrenamedomain $old_domain $new_domain\""
+		set cmd "exec @prefix@/sbin/adminclient -h $adminhost -p $adminport -u $adminuser -P $adminpass -n @sysconfdir@/control/clientcert.pem -c \"vrenamedomain $old_domain $new_domain\""
 		runCommand $cmd
 		if {$returnstatus == 0} {
 			.statusBar.lab configure -text "Renamed domain $old_domain to $new_domain"
@@ -3593,7 +3596,7 @@ proc run_addaliasdomain {olddomain aliasdomain} {
 		msg_dialog .d {Invalid Host} {hostname required} @imagedir@/warning.gif 0 "OK"
 		return 1
 	}
-	set cmd "exec @indimaildir@/sbin/adminclient -h $adminhost -p $adminport -u $adminuser -P $adminpass -n @indimaildir@/control/clientcert.pem -c \"vaddaliasdomain $aliasdomain $olddomain\""
+	set cmd "exec @prefix@/sbin/adminclient -h $adminhost -p $adminport -u $adminuser -P $adminpass -n @sysconfdir@/control/clientcert.pem -c \"vaddaliasdomain $aliasdomain $olddomain\""
 	runCommand $cmd
 	if {$returnstatus == 0} {
 		initdomain
@@ -3707,7 +3710,7 @@ proc run_indiversion {dbwin} {
 		set prgtext "Hmm... I am Busy"
 		progressDialog
 	}
-	set cmd "| @indimaildir@/sbin/adminclient -h $adminhost -p $adminport -u $adminuser -P $adminpass -n @indimaildir@/control/clientcert.pem -c \"indiversion\" | grep -v indimail.h"
+	set cmd "| @prefix@/sbin/adminclient -h $adminhost -p $adminport -u $adminuser -P $adminpass -n @sysconfdir@/control/clientcert.pem -c \"indiversion\" | grep -v indimail.h"
 	if {[catch {open $cmd r} f] } {
 		destroy .progress
 		msg_dialog .d "indiversion" $f @imagedir@/warning.gif 0 "OK"
@@ -3721,7 +3724,7 @@ proc run_indiversion {dbwin} {
 		set pc [expr $count * 100 / 362]
 		.statusBar.foo configure -text "$pc %"
 		set id      [lindex $line 0]
-		if {[string compare $id "\$Id:"] != 0} {
+		if {[string compare $id "\"] != 0} {
 			if {[string compare $line "Main Program Version List"] != 0 && \
 				[string length $line] > 0 && \
 				[string compare -length 17 $line "Indi Mail Version"] != 0} {
@@ -3898,7 +3901,7 @@ proc run_deluser {server} {
 	set msg "You are About to Delete $username@$domain. Click OK to continue\n"
 	set action [msg_dialog .d {Confirm Deletion} $msg @imagedir@/warning.gif 0 "OK"]
 	if {$action == 1} {
-		set cmd "exec @indimaildir@/sbin/adminclient -h $server -p $adminport -u $adminuser -P $adminpass -n @indimaildir@/control/clientcert.pem -c \"vdeluser $username@$domain\""
+		set cmd "exec @prefix@/sbin/adminclient -h $server -p $adminport -u $adminuser -P $adminpass -n @sysconfdir@/control/clientcert.pem -c \"vdeluser $username@$domain\""
 		runCommand $cmd
 		if {$returnstatus == 0} {
 			set username ""
@@ -3934,7 +3937,7 @@ proc run_renameuser {olduser newuser domain_name server} {
 	set msg "You are About to rename $olduser@$domain_name to  $newuser@$domain_name. Click OK to continue\n"
 	set action [msg_dialog .d {Confirm Deletion} $msg @imagedir@/warning.gif 0 "OK"]
 	if {$action == 1} {
-		set cmd "exec @indimaildir@/sbin/adminclient -h $server -p $adminport -u $adminuser -P $adminpass -n @indimaildir@/control/clientcert.pem -c \"vrenameuser $olduser@$domain_name $newuser@$domain_name\""
+		set cmd "exec @prefix@/sbin/adminclient -h $server -p $adminport -u $adminuser -P $adminpass -n @sysconfdir@/control/clientcert.pem -c \"vrenameuser $olduser@$domain_name $newuser@$domain_name\""
 		runCommand $cmd
 		if {$returnstatus == 0} {
 			set username ""
@@ -4427,7 +4430,7 @@ proc run_mysql {} {
 		msg_dialog .d {Invalid Host} {hostname required} @imagedir@/warning.gif 0 "OK"
 		return 1
 	}
-	catch "exec $configs(xterm) -e @indimaildir@/sbin/execmysql -d $domain $adminhost &" result
+	catch "exec $configs(xterm) -e @prefix@/sbin/execmysql -d $domain $adminhost &" result
 }
 
 proc dbcontrol {args} {
@@ -4746,11 +4749,11 @@ proc dbcontrol {args} {
 	frame $f3          -relief flat  -bd 2
 	pack $entryframe1 $dbinfoframe $f3 -side top -fill none -anchor nw
 	label $entryframe1.l -relief flat   -text "MCD File" -bd 2 -width 10
-	set mcdfile @indimaildir@
+	set mcdfile @sysconfdir@
 	append mcdfile "/control/sql"
 	entry  $entryframe1.e -relief sunken -textvariable mcdfile -bd 2 -width 40
 	button $entryframe1.b \
-		-command {set initialdir @indimaildir@/control;fileDialog $w $entryframe1.e open 0} -padx "9" -pady "3" -relief ridge 
+		-command {set initialdir @sysconfdir@/control;fileDialog $w $entryframe1.e open 0} -padx "9" -pady "3" -relief ridge 
 	balloonHelp $entryframe1.b "Click to browse for MCD File"
 	$entryframe1.b configure -image [image create photo -data "R0lGODlhEAAQAIUAAPwCBAQCBOSmZPzSnPzChPzGhPyuZEwyHExOTFROTFxaVFRSTMSGTPT29Ozu7Nze3NTS1MzKzMTGxLy6vLS2tLSytDQyNOTm5OTi5Ly+vKyqrKSmpIyOjLR+RNTW1MzOzJyenGxqZBweHKSinJSWlExKTMTCxKyurGxubBQSFAwKDJyanERCRERGRAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACH5BAEAAAAALAAAAAAQABAAAAaRQIBwGCgGhkhkEWA8HpNPojFJFU6ryitTiw0IBgRBkxsYFAiGtDodDZwPCERCEV8sEk0CI9FoOB4BEBESExQVFgEEBw8PFxcYEBIZGhscCEwdCxAPGA8eHxkUGyAhIkwHEREQqxEZExUjJCVWCBAZJhEmGRUnoygpQioZGxsnxsQrHByzQiJxz3EsLSwWpkJ+QQAh/mhDcmVhdGVkIGJ5IEJNUFRvR0lGIFBybyB2ZXJzaW9uIDIuNQ0KqSBEZXZlbENvciAxOTk3LDE5OTguIEFsbCByaWdodHMgcmVzZXJ2ZWQuDQpodHRwOi8vd3d3LmRldmVsY29yLmNvbQA7"]
 	set Checkbutton [checkbutton $entryframe1.c -text "Clustered" -variable clustered]
@@ -5136,7 +5139,7 @@ proc dbcontrol {args} {
 	variable optwin
 	global   opframe2 inactiveFlag vfilter_disabled vfilterFile \
 		postFlag preFlag global_disabled post_disabled
-	if {[catch {open @indimaildir@/etc/headerlist r} f]} {
+	if {[catch {open @sysconfdir@/headerlist r} f]} {
 		set header_list {
 			"Return-Path" \
 			"From" \
@@ -5644,9 +5647,9 @@ proc get_smtp {dbwin server} {
 	}
 	.statusBar.lab configure -text "SMTP"
 	if {$server != ""} {
-		set cmd "| @indimaildir@/sbin/adminclient -h $server    -p $adminport -u $adminuser -P $adminpass -n @indimaildir@/control/clientcert.pem -c \"vsmtp -s $Domain\""
+		set cmd "| @prefix@/sbin/adminclient -h $server    -p $adminport -u $adminuser -P $adminpass -n @sysconfdir@/control/clientcert.pem -c \"vsmtp -s $Domain\""
 	} else {
-		set cmd "| @indimaildir@/sbin/adminclient -h $adminhost -p $adminport -u $adminuser -P $adminpass -n @indimaildir@/control/clientcert.pem -c \"vsmtp -s $Domain\""
+		set cmd "| @prefix@/sbin/adminclient -h $adminhost -p $adminport -u $adminuser -P $adminpass -n @sysconfdir@/control/clientcert.pem -c \"vsmtp -s $Domain\""
 	}
 	if {$BWidget_present == 1} {
 		set prgtext "Hmm... I am Busy"
@@ -5803,21 +5806,21 @@ proc run_smtp {dbwin port srchost dsthost server} {
 		return 1
 	}
 	if {[string compare $mode "add"] == 0} {
-		set smtpcmd "@indimaildir@/bin/vsmtp -i $new_port -m $src_host $dst_host@$domain"
+		set smtpcmd "@prefix@/bin/vsmtp -i $new_port -m $src_host $dst_host@$domain"
 	} elseif {[string compare $mode "mod"] == 0} {
-		set smtpcmd "@indimaildir@/bin/vsmtp -u $new_port -m $srchost $dsthost@$domain"
+		set smtpcmd "@prefix@/bin/vsmtp -u $new_port -m $srchost $dsthost@$domain"
 	} else {
 		set msg "You are About to Delete SMTP Route for Domain $domain from $srchost to $dsthost. Click OK to continue"
 		set action [msg_dialog .d {Confirm Deletion} $msg @imagedir@/warning.gif 0 "OK"]
 		if {$action != 1} {
 			return 1
 		}
-		set smtpcmd "@indimaildir@/bin/vsmtp -d -m $srchost $dsthost@$domain"
+		set smtpcmd "@prefix@/bin/vsmtp -d -m $srchost $dsthost@$domain"
 	}
 	if {$server != ""} {
-		set cmd "exec @indimaildir@/sbin/adminclient -h $server -p $adminport -u $adminuser -P $adminpass -n @indimaildir@/control/clientcert.pem -c \"$smtpcmd\""
+		set cmd "exec @prefix@/sbin/adminclient -h $server -p $adminport -u $adminuser -P $adminpass -n @sysconfdir@/control/clientcert.pem -c \"$smtpcmd\""
 	} else {
-		set cmd "exec @indimaildir@/sbin/adminclient -h $adminhost -p $adminport -u $adminuser -P $adminpass -n @indimaildir@/control/clientcert.pem -c \"$smtpcmd\""
+		set cmd "exec @prefix@/sbin/adminclient -h $adminhost -p $adminport -u $adminuser -P $adminpass -n @sysconfdir@/control/clientcert.pem -c \"$smtpcmd\""
 	}
 	runCommand $cmd
 	if {$returnstatus == 0} {
@@ -5844,9 +5847,9 @@ proc get_hostid {dbwin server} {
 	}
 	.statusBar.lab configure -text "HOSTID"
 	if {[string length $server] > 0} {
-		set cmd "| @indimaildir@/sbin/adminclient -h $server    -p $adminport -u $adminuser -P $adminpass -n @indimaildir@/control/clientcert.pem -c \"vhostid -s\""
+		set cmd "| @prefix@/sbin/adminclient -h $server    -p $adminport -u $adminuser -P $adminpass -n @sysconfdir@/control/clientcert.pem -c \"vhostid -s\""
 	} else {
-		set cmd "| @indimaildir@/sbin/adminclient -h $adminhost -p $adminport -u $adminuser -P $adminpass -n @indimaildir@/control/clientcert.pem -c \"vhostid -s\""
+		set cmd "| @prefix@/sbin/adminclient -h $adminhost -p $adminport -u $adminuser -P $adminpass -n @sysconfdir@/control/clientcert.pem -c \"vhostid -s\""
 	}
 	if {$BWidget_present == 1} {
 		set prgtext "Hmm... I am Busy"
@@ -5991,9 +5994,9 @@ proc run_hostid {dbwin hostid ipaddr server} {
 		set hostidcmd "vhostid -d $hostid"
 	}
 	if {$server != ""} {
-		set cmd "exec @indimaildir@/sbin/adminclient -h $server -p $adminport -u $adminuser -P $adminpass -n @indimaildir@/control/clientcert.pem -c \"$hostidcmd\""
+		set cmd "exec @prefix@/sbin/adminclient -h $server -p $adminport -u $adminuser -P $adminpass -n @sysconfdir@/control/clientcert.pem -c \"$hostidcmd\""
 	} else {
-		set cmd "exec @indimaildir@/sbin/adminclient -h $adminhost -p $adminport -u $adminuser -P $adminpass -n @indimaildir@/control/clientcert.pem -c \"$hostidcmd\""
+		set cmd "exec @prefix@/sbin/adminclient -h $adminhost -p $adminport -u $adminuser -P $adminpass -n @sysconfdir@/control/clientcert.pem -c \"$hostidcmd\""
 	}
 	runCommand $cmd
 	if {$returnstatus == 0} {
@@ -6020,9 +6023,9 @@ proc get_dbinfo {dbwin} {
 	}
 	.statusBar.lab configure -text "DBINFO"
 	if {[string length $Domain]} {
-		set cmd "| @indimaildir@/bin/dbinfo -s -l -d $Domain $mcdfile 2>/dev/null"
+		set cmd "| @prefix@/bin/dbinfo -s -l -d $Domain $mcdfile 2>/dev/null"
 	} else {
-		set cmd "| @indimaildir@/bin/dbinfo -s -l $mcdfile 2>/dev/null"
+		set cmd "| @prefix@/bin/dbinfo -s -l $mcdfile 2>/dev/null"
 	}
 	if {$BWidget_present == 1} {
 		set prgtext "Hmm... I am Busy"
@@ -6256,21 +6259,21 @@ proc run_dbinfo {dbwin Domain mcdfile mserver mdahost port dbname user passwd cl
 		} else {
 			set opt ""
 		}
-		set dbinfocmd "@indimaildir@/bin/dbinfo -i -S $mserver -p $port -D $dbname -U $user -P $passwd $opt -d $Domain -m $mdahost $mcdfile"
+		set dbinfocmd "@prefix@/bin/dbinfo -i -S $mserver -p $port -D $dbname -U $user -P $passwd $opt -d $Domain -m $mdahost $mcdfile"
 	} elseif {[string compare $mode "mod"] == 0} {
 		if {$clustered == 1} {
 			set opt "-c"
 		} else {
 			set opt ""
 		}
-		set dbinfocmd "@indimaildir@/bin/dbinfo -u -S $mserver -p $port -D $dbname -U $user -P $passwd $opt -d $Domain -m $mdahost $mcdfile"
+		set dbinfocmd "@prefix@/bin/dbinfo -u -S $mserver -p $port -D $dbname -U $user -P $passwd $opt -d $Domain -m $mdahost $mcdfile"
 	} else {
 		set msg "You are About to Delete Database info $mcdfile for $mdahost Domain $Domain. Click OK to continue"
 		set action [msg_dialog .d {Confirm Deletion} $msg @imagedir@/warning.gif 0 "OK"]
 		if {$action != 1} {
 			return 1
 		}
-		set dbinfocmd "@indimaildir@/bin/dbinfo -r -d $Domain -m $mdahost $mcdfile"
+		set dbinfocmd "@prefix@/bin/dbinfo -r -d $Domain -m $mdahost $mcdfile"
 	}
 	set cmd "exec $dbinfocmd"
 	set returnstatus [catch {eval $cmd} result]
@@ -6453,26 +6456,26 @@ proc run_fstab {dbwin filesystem mdahost maxusers maxsize status server} {
 		} else {
 			set opt "-o 0"
 		}
-		set fstabcmd "@indimaildir@/bin/vfstab -i $opt -n $maxusers -q $maxsize -m $mdahost $filesystem"
+		set fstabcmd "@prefix@/bin/vfstab -i $opt -n $maxusers -q $maxsize -m $mdahost $filesystem"
 	} elseif {[string compare $mode "mod"] == 0} {
 		if {$status == 1} {
 			set opt "-o 1"
 		} else {
 			set opt "-o 0"
 		}
-		set fstabcmd "@indimaildir@/bin/vfstab -u $opt -n $maxusers -q $maxsize -m $mdahost $filesystem"
+		set fstabcmd "@prefix@/bin/vfstab -u $opt -n $maxusers -q $maxsize -m $mdahost $filesystem"
 	} else {
 		set msg "You are About to Delete filesystem $filesystem for $mdahost. Click OK to continue"
 		set action [msg_dialog .d {Confirm Deletion} $msg @imagedir@/warning.gif 0 "OK"]
 		if {$action != 1} {
 			return 1
 		}
-		set fstabcmd "@indimaildir@/bin/vfstab -d -m $mdahost $filesystem"
+		set fstabcmd "@prefix@/bin/vfstab -d -m $mdahost $filesystem"
 	}
 	if {$server != ""} {
-		set cmd "exec @indimaildir@/sbin/adminclient -h $server -p $adminport -u $adminuser -P $adminpass -n @indimaildir@/control/clientcert.pem -c \"$fstabcmd\""
+		set cmd "exec @prefix@/sbin/adminclient -h $server -p $adminport -u $adminuser -P $adminpass -n @sysconfdir@/control/clientcert.pem -c \"$fstabcmd\""
 	} else {
-		set cmd "exec @indimaildir@/sbin/adminclient -h $adminhost -p $adminport -u $adminuser -P $adminpass -n @indimaildir@/control/clientcert.pem -c \"$fstabcmd\""
+		set cmd "exec @prefix@/sbin/adminclient -h $adminhost -p $adminport -u $adminuser -P $adminpass -n @sysconfdir@/control/clientcert.pem -c \"$fstabcmd\""
 	}
 	runCommand $cmd
 	if {$returnstatus == 0} {
@@ -6500,15 +6503,15 @@ proc get_fstab {dbwin server} {
 	.statusBar.lab configure -text "FSTAB"
 	if {[string length $server] > 0} {
 		if {[string length $mdahost] > 0} {
-			set cmd "| @indimaildir@/sbin/adminclient -h $server    -p $adminport -u $adminuser -P $adminpass -n @indimaildir@/control/clientcert.pem -c \"vfstab -s -m $mdahost\""
+			set cmd "| @prefix@/sbin/adminclient -h $server    -p $adminport -u $adminuser -P $adminpass -n @sysconfdir@/control/clientcert.pem -c \"vfstab -s -m $mdahost\""
 		} else {
-			set cmd "| @indimaildir@/sbin/adminclient -h $server    -p $adminport -u $adminuser -P $adminpass -n @indimaildir@/control/clientcert.pem -c \"vfstab -s\""
+			set cmd "| @prefix@/sbin/adminclient -h $server    -p $adminport -u $adminuser -P $adminpass -n @sysconfdir@/control/clientcert.pem -c \"vfstab -s\""
 		}
 	} else {
 		if {[string length $mdahost] > 0} {
-			set cmd "| @indimaildir@/sbin/adminclient -h $adminhost -p $adminport -u $adminuser -P $adminpass -n @indimaildir@/control/clientcert.pem -c \"vfstab -s -m $mdahost\""
+			set cmd "| @prefix@/sbin/adminclient -h $adminhost -p $adminport -u $adminuser -P $adminpass -n @sysconfdir@/control/clientcert.pem -c \"vfstab -s -m $mdahost\""
 		} else {
-			set cmd "| @indimaildir@/sbin/adminclient -h $adminhost -p $adminport -u $adminuser -P $adminpass -n @indimaildir@/control/clientcert.pem -c \"vfstab -s\""
+			set cmd "| @prefix@/sbin/adminclient -h $adminhost -p $adminport -u $adminuser -P $adminpass -n @sysconfdir@/control/clientcert.pem -c \"vfstab -s\""
 		}
 	}
 	if {$BWidget_present == 1} {
@@ -6566,9 +6569,9 @@ proc get_ipmap {dbwin server} {
 	}
 	.statusBar.lab configure -text "IPMAP"
 	if {[string length $server] > 0} {
-		set cmd "| @indimaildir@/sbin/adminclient -h $server    -p $adminport -u $adminuser -P $adminpass -n @indimaildir@/control/clientcert.pem -c \"vipmap -s $Domain\""
+		set cmd "| @prefix@/sbin/adminclient -h $server    -p $adminport -u $adminuser -P $adminpass -n @sysconfdir@/control/clientcert.pem -c \"vipmap -s $Domain\""
 	} else {
-		set cmd "| @indimaildir@/sbin/adminclient -h $adminhost -p $adminport -u $adminuser -P $adminpass -n @indimaildir@/control/clientcert.pem -c \"vipmap -s $Domain\""
+		set cmd "| @prefix@/sbin/adminclient -h $adminhost -p $adminport -u $adminuser -P $adminpass -n @sysconfdir@/control/clientcert.pem -c \"vipmap -s $Domain\""
 	}
 	if {$BWidget_present == 1} {
 		set prgtext "Hmm... I am Busy"
@@ -6703,21 +6706,21 @@ proc run_ipmap {dbwin ipaddr idomain server} {
 		return 1
 	}
 	if {[string compare $mode "add"] == 0} {
-		set vipmapcmd "@indimaildir@/bin/vipmap -i $ipaddr $idomain"
+		set vipmapcmd "@prefix@/bin/vipmap -i $ipaddr $idomain"
 	} elseif {[string compare $mode "mod"] == 0} {
-		set vipmapcmd "@indimaildir@/bin/vipmap -u $ipaddr $idomain"
+		set vipmapcmd "@prefix@/bin/vipmap -u $ipaddr $idomain"
 	} else {
 		set msg "You are About to Delete IPMAP for $ipaddr. Click OK to continue"
 		set action [msg_dialog .d {Confirm Deletion} $msg @imagedir@/warning.gif 0 "OK"]
 		if {$action != 1} {
 			return 1
 		}
-		set vipmapcmd "@indimaildir@/bin/vipmap -d $ipaddr $idomain"
+		set vipmapcmd "@prefix@/bin/vipmap -d $ipaddr $idomain"
 	}
 	if {$server != ""} {
-		set cmd "exec @indimaildir@/sbin/adminclient -h $server    -p $adminport -u $adminuser -P $adminpass -n @indimaildir@/control/clientcert.pem -c \"$vipmapcmd\""
+		set cmd "exec @prefix@/sbin/adminclient -h $server    -p $adminport -u $adminuser -P $adminpass -n @sysconfdir@/control/clientcert.pem -c \"$vipmapcmd\""
 	} else {
-		set cmd "exec @indimaildir@/sbin/adminclient -h $adminhost -p $adminport -u $adminuser -P $adminpass -n @indimaildir@/control/clientcert.pem -c \"$vipmapcmd\""
+		set cmd "exec @prefix@/sbin/adminclient -h $adminhost -p $adminport -u $adminuser -P $adminpass -n @sysconfdir@/control/clientcert.pem -c \"$vipmapcmd\""
 	}
 	runCommand $cmd
 	if {$returnstatus == 0} {
@@ -6744,9 +6747,9 @@ proc get_atrnmap {dbwin server} {
 	}
 	.statusBar.lab configure -text "ATRNMAP"
 	if {[string length $server] > 0} {
-		set cmd "| @indimaildir@/sbin/adminclient -h $server    -p $adminport -u $adminuser -P $adminpass -n @indimaildir@/control/clientcert.pem -c \"vatrn -s $Domain\""
+		set cmd "| @prefix@/sbin/adminclient -h $server    -p $adminport -u $adminuser -P $adminpass -n @sysconfdir@/control/clientcert.pem -c \"vatrn -s $Domain\""
 	} else {
-		set cmd "| @indimaildir@/sbin/adminclient -h $adminhost -p $adminport -u $adminuser -P $adminpass -n @indimaildir@/control/clientcert.pem -c \"vatrn -s $Domain\""
+		set cmd "| @prefix@/sbin/adminclient -h $adminhost -p $adminport -u $adminuser -P $adminpass -n @sysconfdir@/control/clientcert.pem -c \"vatrn -s $Domain\""
 	}
 	if {$BWidget_present == 1} {
 		set prgtext "Hmm... I am Busy"
@@ -6953,21 +6956,21 @@ proc run_atrn {dbwin username domain atrndomain server} {
 		return 1
 	}
 	if {[string compare $mode "add"] == 0} {
-		set atrnmapcmd "@indimaildir@/bin/vatrn -i $atrndomain $username@$domain"
+		set atrnmapcmd "@prefix@/bin/vatrn -i $atrndomain $username@$domain"
 	} elseif {[string compare $mode "mod"] == 0} {
-		set atrnmapcmd "@indimaildir@/bin/vatrn -u $atrndomain -i $newatrndomain $username@$domain"
+		set atrnmapcmd "@prefix@/bin/vatrn -u $atrndomain -i $newatrndomain $username@$domain"
 	} else {
 		set msg "You are About to Delete ATRN Map for $atrndomain. Click OK to continue"
 		set action [msg_dialog .d {Confirm Deletion} $msg @imagedir@/warning.gif 0 "OK"]
 		if {$action != 1} {
 			return 1
 		}
-		set atrnmapcmd "@indimaildir@/bin/vatrn -d $atrndomain $username@$domain"
+		set atrnmapcmd "@prefix@/bin/vatrn -d $atrndomain $username@$domain"
 	}
 	if {$server != ""} {
-		set cmd "exec @indimaildir@/sbin/adminclient -h $server    -p $adminport -u $adminuser -P $adminpass -n @indimaildir@/control/clientcert.pem -c \"$atrnmapcmd\""
+		set cmd "exec @prefix@/sbin/adminclient -h $server    -p $adminport -u $adminuser -P $adminpass -n @sysconfdir@/control/clientcert.pem -c \"$atrnmapcmd\""
 	} else {
-		set cmd "exec @indimaildir@/sbin/adminclient -h $adminhost -p $adminport -u $adminuser -P $adminpass -n @indimaildir@/control/clientcert.pem -c \"$atrnmapcmd\""
+		set cmd "exec @prefix@/sbin/adminclient -h $adminhost -p $adminport -u $adminuser -P $adminpass -n @sysconfdir@/control/clientcert.pem -c \"$atrnmapcmd\""
 	}
 	runCommand $cmd
 	if {$returnstatus == 0} {
@@ -7174,7 +7177,7 @@ proc run_mgmt {operation dbwin user pass} {
 				progressDialog
 			}
 			set result ""
-			set cmd "exec @indimaildir@/sbin/mgmtpass -u $user -p $pass"
+			set cmd "exec @prefix@/sbin/mgmtpass -u $user -p $pass"
 			set returnstatus [catch {eval $cmd} result]
 			if {$returnstatus != 0} {
 				catch {destroy .progress}
@@ -7205,7 +7208,7 @@ proc run_mgmt {operation dbwin user pass} {
 				progressDialog
 			}
 			set result ""
-			set cmd "exec @indimaildir@/sbin/mgmtpass -u $user -a $pass"
+			set cmd "exec @prefix@/sbin/mgmtpass -u $user -a $pass"
 			set returnstatus [catch {eval $cmd} result]
 			if {$returnstatus != 0} {
 				catch {destroy .progress}
@@ -7426,18 +7429,18 @@ proc run_filter {operation dbwin user domain} {
 			} else {
 				set bvar $t_bounce
 			}
-			set filtcmd "\"@indimaildir@/bin/vcfilter -i -t \\\"$t_filtername\\\" -h $t_header_no -c $t_comparision_no -k $t_keyword -f $t_destination -b \\\"$bvar\\\" $user@$domain\""
+			set filtcmd "\"@prefix@/bin/vcfilter -i -t \\\"$t_filtername\\\" -h $t_header_no -c $t_comparision_no -k $t_keyword -f $t_destination -b \\\"$bvar\\\" $user@$domain\""
 			if {[string length $server] > 0} {
 				if {[string length $mdahost] > 0} {
-					set cmd "exec @indimaildir@/sbin/adminclient -h $server    -p $adminport -u $adminuser -P $adminpass -n @indimaildir@/control/clientcert.pem -c $filtcmd"
+					set cmd "exec @prefix@/sbin/adminclient -h $server    -p $adminport -u $adminuser -P $adminpass -n @sysconfdir@/control/clientcert.pem -c $filtcmd"
 				} else {
-					set cmd "exec @indimaildir@/sbin/adminclient -h $server    -p $adminport -u $adminuser -P $adminpass -n @indimaildir@/control/clientcert.pem -c $filtcmd"
+					set cmd "exec @prefix@/sbin/adminclient -h $server    -p $adminport -u $adminuser -P $adminpass -n @sysconfdir@/control/clientcert.pem -c $filtcmd"
 				}
 			} else {
 				if {[string length $mdahost] > 0} {
-					set cmd "exec @indimaildir@/sbin/adminclient -h $adminhost -p $adminport -u $adminuser -P $adminpass -n @indimaildir@/control/clientcert.pem -c $filtcmd"
+					set cmd "exec @prefix@/sbin/adminclient -h $adminhost -p $adminport -u $adminuser -P $adminpass -n @sysconfdir@/control/clientcert.pem -c $filtcmd"
 				} else {
-					set cmd "exec @indimaildir@/sbin/adminclient -h $adminhost -p $adminport -u $adminuser -P $adminpass -n @indimaildir@/control/clientcert.pem -c $filtcmd"
+					set cmd "exec @prefix@/sbin/adminclient -h $adminhost -p $adminport -u $adminuser -P $adminpass -n @sysconfdir@/control/clientcert.pem -c $filtcmd"
 				}
 			}
 			runCommand $cmd
@@ -7503,19 +7506,19 @@ proc run_filter {operation dbwin user domain} {
 			} else {
 				set bvar $t_bounce
 			}
-			set filtcmd "\"@indimaildir@/bin/vcfilter -u $t_filterno -h $t_header_no -c $t_comparision_no -k $t_keyword -f $t_destination -b $bvar $user@$domain\""
+			set filtcmd "\"@prefix@/bin/vcfilter -u $t_filterno -h $t_header_no -c $t_comparision_no -k $t_keyword -f $t_destination -b $bvar $user@$domain\""
 			set result ""
 			if {[string length $server] > 0} {
 				if {[string length $mdahost] > 0} {
-					set cmd "exec @indimaildir@/sbin/adminclient -h $server    -p $adminport -u $adminuser -P $adminpass -n @indimaildir@/control/clientcert.pem -c $filtcmd"
+					set cmd "exec @prefix@/sbin/adminclient -h $server    -p $adminport -u $adminuser -P $adminpass -n @sysconfdir@/control/clientcert.pem -c $filtcmd"
 				} else {
-					set cmd "exec @indimaildir@/sbin/adminclient -h $server    -p $adminport -u $adminuser -P $adminpass -n @indimaildir@/control/clientcert.pem -c $filtcmd"
+					set cmd "exec @prefix@/sbin/adminclient -h $server    -p $adminport -u $adminuser -P $adminpass -n @sysconfdir@/control/clientcert.pem -c $filtcmd"
 				}
 			} else {
 				if {[string length $mdahost] > 0} {
-					set cmd "exec @indimaildir@/sbin/adminclient -h $adminhost -p $adminport -u $adminuser -P $adminpass -n @indimaildir@/control/clientcert.pem -c $filtcmd"
+					set cmd "exec @prefix@/sbin/adminclient -h $adminhost -p $adminport -u $adminuser -P $adminpass -n @sysconfdir@/control/clientcert.pem -c $filtcmd"
 				} else {
-					set cmd "exec @indimaildir@/sbin/adminclient -h $adminhost -p $adminport -u $adminuser -P $adminpass -n @indimaildir@/control/clientcert.pem -c $filtcmd"
+					set cmd "exec @prefix@/sbin/adminclient -h $adminhost -p $adminport -u $adminuser -P $adminpass -n @sysconfdir@/control/clientcert.pem -c $filtcmd"
 				}
 			}
 			runCommand $cmd
@@ -7532,18 +7535,18 @@ proc run_filter {operation dbwin user domain} {
 				return 1
 			}
 			set result ""
-			set filtcmd "\"@indimaildir@/bin/vcfilter -d $t_filterno $user@$domain\""
+			set filtcmd "\"@prefix@/bin/vcfilter -d $t_filterno $user@$domain\""
 			if {[string length $server] > 0} {
 				if {[string length $mdahost] > 0} {
-					set cmd "exec @indimaildir@/sbin/adminclient -h $server    -p $adminport -u $adminuser -P $adminpass -n @indimaildir@/control/clientcert.pem -c $filtcmd"
+					set cmd "exec @prefix@/sbin/adminclient -h $server    -p $adminport -u $adminuser -P $adminpass -n @sysconfdir@/control/clientcert.pem -c $filtcmd"
 				} else {
-					set cmd "exec @indimaildir@/sbin/adminclient -h $server    -p $adminport -u $adminuser -P $adminpass -n @indimaildir@/control/clientcert.pem -c $filtcmd"
+					set cmd "exec @prefix@/sbin/adminclient -h $server    -p $adminport -u $adminuser -P $adminpass -n @sysconfdir@/control/clientcert.pem -c $filtcmd"
 				}
 			} else {
 				if {[string length $mdahost] > 0} {
-					set cmd "exec @indimaildir@/sbin/adminclient -h $adminhost -p $adminport -u $adminuser -P $adminpass -n @indimaildir@/control/clientcert.pem -c $filtcmd"
+					set cmd "exec @prefix@/sbin/adminclient -h $adminhost -p $adminport -u $adminuser -P $adminpass -n @sysconfdir@/control/clientcert.pem -c $filtcmd"
 				} else {
-					set cmd "exec @indimaildir@/sbin/adminclient -h $adminhost -p $adminport -u $adminuser -P $adminpass -n @indimaildir@/control/clientcert.pem -c $filtcmd"
+					set cmd "exec @prefix@/sbin/adminclient -h $adminhost -p $adminport -u $adminuser -P $adminpass -n @sysconfdir@/control/clientcert.pem -c $filtcmd"
 				}
 			}
 			runCommand $cmd
@@ -7816,7 +7819,7 @@ proc run_bulletin {} {
 		msg_dialog .d {vbulletin} {Email File not selected} @imagedir@/warning.gif 0 "OK"
 		return 1
 	}
-	append cmd "exec @indimaildir@/bin/vbulletin -f $emailfile "
+	append cmd "exec @prefix@/bin/vbulletin -f $emailfile "
 	if {$bulletin_type == 1} {
 		if {$domain_bulletin == 1} {
 			append cmd "-a "
@@ -7908,7 +7911,7 @@ proc editcontrol {} {
 	Entry $fr.1.e -editable false -relief sunken  -textvariable filename -bd 2
 	pack $fr.1.e -side left -expand 1 -fill x -anchor nw
 	create_tree $fr.2
-	set controldirs [glob -nocomplain @indimaildir@/control*]
+	set controldirs [glob -nocomplain @sysconfdir@/control*]
 	frame $fr.3.controldir
 	frame $fr.3.1
 	frame $fr.3.2
@@ -7930,31 +7933,31 @@ proc editcontrol {} {
 		-values $controldirs
 
 	pack $fr.3.controldir.l $fr.3.controldir.e -side left -anchor nw
-	if {[file exists @indimaildir@/bin/easyedit]} {
+	if {[file exists @prefix@/bin/easyedit]} {
 		checkbutton $fr.3.controldir.c -text "Novice Mode" -variable novice_mode -offvalue 0 \
 			-onvalue 1 -bd 2 -relief flat -indicatoron 1
 		pack $fr.3.controldir.c -side left -expand 0  -anchor nw
 	} else {
 		set novice_mode 0
 	}
-	button $fr.3.1.b1 -text "Rebuild Assign" -command {exec @indimaildir@/bin/qmail-newu}
-	balloonHelp $fr.3.1.b1 "Rebuild @indimaildir@/users/cdb"
+	button $fr.3.1.b1 -text "Rebuild Assign" -command {exec @prefix@/bin/qmail-newu}
+	balloonHelp $fr.3.1.b1 "Rebuild @sysconfdir@/users/cdb"
 	$fr.3.1.b1 configure -image [image create photo -data "R0lGODlhEAAQAIUAAPwCBCRaJBxWJBxOHBRGBCxeLLTatCSKFCymJBQ6BAwmBNzu3AQCBAQOBCRSJKzWrGy+ZDy+NBxSHFSmTBxWHLTWtCyaHCSSFCx6PETKNBQ+FBwaHCRKJMTixLy6vExOTKyqrFxaXDQyNDw+PBQSFHx6fCwuLJyenDQ2NISChLSytJSSlFxeXAwODCQmJBweHAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACH5BAEAAAAALAAAAAAQABAAAAaBQIBQGBAMBALCcCksGA4IQkJBUDIDC6gVwGhshY5HlMn9DiCRL1MyYE8iiapaSKlALBdMRiPckDkdeXt9HgxkGhWDXB4fH4ZMGnxcICEiI45kQiQkDCUmJZskmUIiJyiPQgyoQwwpH35LqqgMKiEjq5obqh8rLCMtowAkLqovuH5BACH+aENyZWF0ZWQgYnkgQk1QVG9HSUYgUHJvIHZlcnNpb24gMi41DQqpIERldmVsQ29yIDE5OTcsMTk5OC4gQWxsIHJpZ2h0cyByZXNlcnZlZC4NCmh0dHA6Ly93d3cuZGV2ZWxjb3IuY29tADs="]
 	label $fr.3.1.l -text "Rebuild Assign CDB File" -anchor nw -justify left
-	button $fr.3.1.b2 -relief raised -text "Edit" -bd 2 -command "set filename @indimaildir@/users/assign;editfile 2"
-	balloonHelp $fr.3.1.b2 "Edit @indimaildir@/users/assign"
+	button $fr.3.1.b2 -relief raised -text "Edit" -bd 2 -command "set filename @sysconfdir@/users/assign;editfile 2"
+	balloonHelp $fr.3.1.b2 "Edit @sysconfdir@/users/assign"
 	if {[file exist @imagedir@/edit.gif]} {
 		$fr.3.1.b2 configure -image [image create photo -file @imagedir@/edit.gif]
 	}
 	pack $fr.3.1.b1 $fr.3.1.b2 $fr.3.1.l -side left -anchor nw
 
-	button $fr.3.2.b1 -text "Rebuild Morercpthosts" -command {exec @indimaildir@/bin/qmail-newmrh}
-	balloonHelp $fr.3.2.b1 "Rebuild @indimaildir@/control/morercpthosts.cdb"
+	button $fr.3.2.b1 -text "Rebuild Morercpthosts" -command {exec @prefix@/bin/qmail-newmrh}
+	balloonHelp $fr.3.2.b1 "Rebuild @sysconfdir@/control/morercpthosts.cdb"
 	$fr.3.2.b1 configure -image [image create photo -data "R0lGODlhEAAQAIUAAPwCBCRaJBxWJBxOHBRGBCxeLLTatCSKFCymJBQ6BAwmBNzu3AQCBAQOBCRSJKzWrGy+ZDy+NBxSHFSmTBxWHLTWtCyaHCSSFCx6PETKNBQ+FBwaHCRKJMTixLy6vExOTKyqrFxaXDQyNDw+PBQSFHx6fCwuLJyenDQ2NISChLSytJSSlFxeXAwODCQmJBweHAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACH5BAEAAAAALAAAAAAQABAAAAaBQIBQGBAMBALCcCksGA4IQkJBUDIDC6gVwGhshY5HlMn9DiCRL1MyYE8iiapaSKlALBdMRiPckDkdeXt9HgxkGhWDXB4fH4ZMGnxcICEiI45kQiQkDCUmJZskmUIiJyiPQgyoQwwpH35LqqgMKiEjq5obqh8rLCMtowAkLqovuH5BACH+aENyZWF0ZWQgYnkgQk1QVG9HSUYgUHJvIHZlcnNpb24gMi41DQqpIERldmVsQ29yIDE5OTcsMTk5OC4gQWxsIHJpZ2h0cyByZXNlcnZlZC4NCmh0dHA6Ly93d3cuZGV2ZWxjb3IuY29tADs="]
 	label $fr.3.2.l -text "Rebuild morercpthosts CDB File" -anchor nw -justify left
 	button $fr.3.2.b2 -relief raised -text "Edit" -bd 2 \
 		-command "set filename $controldir/morercpthosts;editfile 2"
-	balloonHelp $fr.3.2.b2 "Rebuild @indimaildir@/control/morercpthosts.cdb"
+	balloonHelp $fr.3.2.b2 "Rebuild @sysconfdir@/control/morercpthosts.cdb"
 	if {[file exist @imagedir@/edit.gif]} {
 		$fr.3.2.b2 configure -image [image create photo -file @imagedir@/edit.gif]
 	}
@@ -7962,8 +7965,8 @@ proc editcontrol {} {
 
 	button $fr.3.3.b1 -text "Rebuild tcprules" \
 		-command {
-			exec @indimaildir@/bin/tcprules @indimaildir@/etc/$tcpfile.cdb
-			@indimaildir@/etc/$tcpfile.tmp < @indimaildir@/etc/$tcpfile
+			exec @prefix@/bin/tcprules @sysconfdir@/$tcpfile.cdb
+			@sysconfdir@/$tcpfile.tmp < @sysconfdir@/$tcpfile
 		}
 	$fr.3.3.b1 configure -image [image create photo -data "R0lGODlhEAAQAIUAAPwCBCRaJBxWJBxOHBRGBCxeLLTatCSKFCymJBQ6BAwmBNzu3AQCBAQOBCRSJKzWrGy+ZDy+NBxSHFSmTBxWHLTWtCyaHCSSFCx6PETKNBQ+FBwaHCRKJMTixLy6vExOTKyqrFxaXDQyNDw+PBQSFHx6fCwuLJyenDQ2NISChLSytJSSlFxeXAwODCQmJBweHAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACH5BAEAAAAALAAAAAAQABAAAAaBQIBQGBAMBALCcCksGA4IQkJBUDIDC6gVwGhshY5HlMn9DiCRL1MyYE8iiapaSKlALBdMRiPckDkdeXt9HgxkGhWDXB4fH4ZMGnxcICEiI45kQiQkDCUmJZskmUIiJyiPQgyoQwwpH35LqqgMKiEjq5obqh8rLCMtowAkLqovuH5BACH+aENyZWF0ZWQgYnkgQk1QVG9HSUYgUHJvIHZlcnNpb24gMi41DQqpIERldmVsQ29yIDE5OTcsMTk5OC4gQWxsIHJpZ2h0cyByZXNlcnZlZC4NCmh0dHA6Ly93d3cuZGV2ZWxjb3IuY29tADs="]
 	balloonHelp $fr.3.3.b1 "Rebuild tcprules in CDB Format"
@@ -7978,7 +7981,7 @@ proc editcontrol {} {
 	button $fr.3.3.b2 -relief raised -text "Edit" -bd 2 \
 		-command {
 				if {$tcpfile != ""} {
-					set filename @indimaildir@/etc/$tcpfile
+					set filename @sysconfdir@/$tcpfile
 					editfile 2
 				} else {
 					msg_dialog .d {tcprules} "rules file not selected" @imagedir@/warning.gif 0 "OK"
@@ -8037,17 +8040,17 @@ proc create_tree {twin} {
 
 	$tree bindText  <ButtonPress-3>        "select tree 3 $tree $list"
 	$tree bindImage <ButtonPress-3>        "select tree 3 $tree $list"
-	foreach rootdir [glob -nocomplain @indimaildir@/control*] {
+	foreach rootdir [glob -nocomplain @sysconfdir@/control*] {
 		$tree insert end root $rootdir -text $rootdir -data $rootdir -open 0 \
 			-image [Bitmap::get folder]
 		getdir $tree $rootdir $rootdir
 	}
-	foreach rootdir "@indimaildir@/etc $env(HOME)" {
+	foreach rootdir "@sysconfdir@ $env(HOME)" {
 		$tree insert end root $rootdir -text $rootdir -data $rootdir -open 0 \
 			-image [Bitmap::get folder]
 		getdir $tree $rootdir $rootdir
 	}
-	if {[file exists @indimaildir@/etc/maildirshared]} {
+	if {[file exists @sysconfdir@/maildirshared]} {
 		$tree insert end root "PublicFolders" -text "PublicFolders" -open 1 \
 			-image [Bitmap::get folder]
 		getshareddir $tree "PublicFolders"
@@ -8059,7 +8062,7 @@ proc create_tree {twin} {
 proc getshareddir {tree node} {
 	variable count
 
-	if {[catch {open @indimaildir@/etc/maildirshared r} f] } {
+	if {[catch {open @sysconfdir@/maildirshared r} f] } {
 		msg_dialog .d {Public Folders} $f @imagedir@/warning.gif 0 "OK"
 		return 1
 	}
@@ -8081,7 +8084,7 @@ proc getshareddir {tree node} {
 proc getdir {tree node path} {
 	variable count
 	global lfiles
-	if {[catch {open @indimaildir@/etc/controlfiles r} f]} {
+	if {[catch {open @sysconfdir@/controlfiles r} f]} {
 		set control_files {
 			"badheaders" \
 			"badheaderthresh" \
@@ -8190,7 +8193,7 @@ proc getdir {tree node path} {
 	set lfiles   {}
 	foreach f $lentries {
 		set tail [file tail $f]
-		if {$tail == "dbquery"} {
+		if {$tail == "inquery" || $tail == "ratelimit" || $tail == "defaultqueue" || $tail = "domainkeys"} {
 			continue
 		}
 		if {$tail  == "." || $tail == ".."} {
@@ -8211,8 +8214,8 @@ proc getdir {tree node path} {
 		}
 	}
 	set tail [file tail $path]
-	set len [string length @indimaildir@]
-	if {[string compare -length $len $path @indimaildir@] == 0 && [string compare -length 7 $tail "control"] == 0} {
+	set len [string length @sysconfdir@]
+	if {[string compare -length $len $path @sysconfdir@] == 0 && [string compare -length 7 $tail "control"] == 0} {
 		foreach line $control_files {
 			if {[file exists [file join $path $line]] == 0} {
 				lappend lfiles $line
@@ -8245,7 +8248,7 @@ proc showMenuMaildir {node name} {
 	variable nodeTmp
 	variable nameTmp
 
-	if {[catch {open @indimaildir@/etc/maildirshared r} f] } {
+	if {[catch {open @sysconfdir@/maildirshared r} f] } {
 		msg_dialog .d {Public Folders} $f @imagedir@/warning.gif 0 "OK"
 		return 1
 	}
@@ -8287,7 +8290,7 @@ proc showMenuMaildir {node name} {
 					return
 				}
 				set maildir_line "$nameTmp	$nodeTmp"
-				set cmd "exec updatefile -d \"$maildir_line\" @indimaildir@/etc/maildirshared"
+				set cmd "exec updatefile -d \"$maildir_line\" @sysconfdir@/maildirshared"
 				runCommand $cmd
 				if {$returnstatus != 0} {
 					msg_dialog .d {updatefile} $result @imagedir@/warning.gif 0 "OK"
@@ -8351,12 +8354,12 @@ proc createMaildir {x y} {
 		-highlightbackground black\
 		-command {
 			set maildir_line "$maildirname	$maildirpath"
-			set cmd "exec @indimaildir@/bin/maildirmake -S $maildirpath"
+			set cmd "exec @prefix@/bin/maildirmake -S $maildirpath"
 			runCommand $cmd
 			if {$returnstatus != 0} {
 				msg_dialog .d {maildirmake} $result @imagedir@/warning.gif 0 "OK"
 			} else {
-				set cmd "exec updatefile -u \"$maildir_line\" @indimaildir@/etc/maildirshared"
+				set cmd "exec updatefile -u \"$maildir_line\" @sysconfdir@/maildirshared"
 				runCommand $cmd
 				if {$returnstatus != 0} {
 					msg_dialog .d {updatefile} $result @imagedir@/warning.gif 0 "OK"
@@ -8445,9 +8448,9 @@ proc createSharedFolder {maildir x y} {
 		-highlightbackground black -command {
 		setFolderOptions $Rdonly $Write $Group
 		if {$var_quota == -1} {
-		set cmd "exec @indimaildir@/bin/maildirmake -s $folderOptions -f $maildirname $maildirTmp"
+		set cmd "exec @prefix@/bin/maildirmake -s $folderOptions -f $maildirname $maildirTmp"
 		} else {
-		set cmd "exec @indimaildir@/bin/maildirmake -s $folderOptions -q $var_quota -f $maildirname $maildirTmp"
+		set cmd "exec @prefix@/bin/maildirmake -s $folderOptions -q $var_quota -f $maildirname $maildirTmp"
 		}
 		runCommand $cmd
 		if {$returnstatus != 0} {
@@ -8684,10 +8687,10 @@ proc editfile {action} {
 		catch {$dwin.log insert end "$result\n"}
 		catch {$dwin.log yview moveto 1}
 	} elseif {$action == 1} {
-		set cmd "exec @indimaildir@/bin/supernotepad -r $controldir/$filename &"
+		set cmd "exec @prefix@/bin/supernotepad -r $controldir/$filename &"
 		set returnstatus [catch {eval $cmd} result]
 	} elseif {$action == 2} {
-		set cmd "exec @indimaildir@/bin/supernotepad -r $filename &"
+		set cmd "exec @prefix@/bin/supernotepad -r $filename &"
 		catch $cmd result
 		catch {$dwin.log insert end "$result\n"}
 		catch {$dwin.log yview moveto 1}
@@ -8819,7 +8822,7 @@ proc svctool {mode} {
 	$lwin1.servicedir.showall configure \
 		-command {showContextMenu $listwin.list}
 	variable initEnable
-	if {[catch {exec @indimaildir@/sbin/initsvc -status} result] == 0} {
+	if {[catch {exec @prefix@/sbin/initsvc -status} result] == 0} {
 		set initEnable 1
 	} else {
 		set initEnable 0
@@ -8827,25 +8830,25 @@ proc svctool {mode} {
 	checkbutton $lwin1.inittab.c -text "Enable Inittab/Upstart" -variable initEnable \
 		-command {
 			if {$initEnable} {
-				if {[catch {exec @indimaildir@/sbin/initsvc -on} result]} {
+				if {[catch {exec @prefix@/sbin/initsvc -on} result]} {
 					msg_dialog .d {service tool} $result @imagedir@/warning.gif 0 "OK"
 				}
 			} else {
-				if {[catch {exec @indimaildir@/sbin/initsvc -off} result]} {
+				if {[catch {exec @prefix@/sbin/initsvc -off} result]} {
 					msg_dialog .d {service tool} $result @imagedir@/warning.gif 0 "OK"
 				}
 			}
-			if {[catch {exec @indimaildir@/sbin/initsvc -status} result] == 0} {
+			if {[catch {exec @prefix@/sbin/initsvc -status} result] == 0} {
 				set initEnable 1
 			} else {
 				set initEnable 0
 			}
-			if {[catch {exec @indimaildir@/sbin/initsvc -print} result] == 0} {
+			if {[catch {exec @prefix@/sbin/initsvc -print} result] == 0} {
 				balloonHelp $lwin1.inittab.c $result
 			}
 			msg_dialog .d {service tool} "Current /etc/inittab entry\n$result" @imagedir@/warning.gif 0 "OK"
 		}
-	if {[catch {exec @indimaildir@/sbin/initsvc -print} result] == 0} {
+	if {[catch {exec @prefix@/sbin/initsvc -print} result] == 0} {
 		balloonHelp $lwin1.inittab.c $result
 	} else {
 		balloonHelp $lwin1.inittab.c "Enable svscan in System Startup (inittab or upstart)"
@@ -9295,7 +9298,7 @@ proc removeService {path} {
 		set prgtext "Stopping service $newPath"
 		set atime [clock format [clock seconds] -format "%d:%m:%y %H:%M:%S"]
 		puts $logfd "$atime: Stopping service $newPath"
-		if {[catch {exec @indimaildir@/bin/svc -d $newPath} result]} {
+		if {[catch {exec @prefix@/bin/svc -d $newPath} result]} {
 			set atime [clock format [clock seconds] -format "%d:%m:%y %H:%M:%S"]
 			puts $logfd "$atime: $result"
 			catch {destroy .progress}
@@ -9305,7 +9308,7 @@ proc removeService {path} {
 		set prgtext "Stopping service $newPath/log"
 		set atime [clock format [clock seconds] -format "%d:%m:%y %H:%M:%S"]
 		puts $logfd "$atime: Stopping service $newPath/log"
-		if {[catch {exec @indimaildir@/bin/svc -d $newPath/log} result]} {
+		if {[catch {exec @prefix@/bin/svc -d $newPath/log} result]} {
 			set atime [clock format [clock seconds] -format "%d:%m:%y %H:%M:%S"]
 			puts $logfd "$atime: $result"
 			catch {destroy .progress}
@@ -9390,7 +9393,7 @@ proc refreshService {lwin1 listwin service_list} {
 	$listwin.list delete 0 end
 	set svText ""
 	foreach line $service_list {
-		set cmd "| @indimaildir@/bin/svstat $servicedir/$line"
+		set cmd "| @prefix@/bin/svstat $servicedir/$line"
 		if {[catch {open $cmd r} f] } {
 			msg_dialog .d {svstat} $f @imagedir@/warning.gif 0 "OK"
 			break
@@ -9409,7 +9412,7 @@ proc refreshService {lwin1 listwin service_list} {
 		}
 
 		if {[file isdirectory $servicedir/$line/log]} {
-			set cmd "| @indimaildir@/bin/svstat $servicedir/$line/log"
+			set cmd "| @prefix@/bin/svstat $servicedir/$line/log"
 			if {[catch {open $cmd r} f] } {
 				msg_dialog .d {svstat} $f @imagedir@/warning.gif 0 "OK"
 				break
@@ -9572,7 +9575,7 @@ proc svcConfig {listwin $service_list win} {
 			entry $win.frame.controldir.entry -relief sunken \
 				-textvariable svc_controldir
 			button $win.frame.controldir.button \
-				-command "set initialdir @indimaildir@;fileDialog $w $win.frame.controldir.entry dir 0" -padx "9" \
+				-command "set initialdir @sysconfdir@;fileDialog $w $win.frame.controldir.entry dir 0" -padx "9" \
 				-pady "3" -relief ridge
 			balloonHelp $win.frame.controldir.button "Click to browse for qmail's control directory"
 			$win.frame.controldir.button configure -image [image create photo -data "R0lGODlhEAAQAIUAAPwCBAQCBOSmZPzSnPzChPzGhPyuZEwyHExOTFROTFxaVFRSTMSGTPT29Ozu7Nze3NTS1MzKzMTGxLy6vLS2tLSytDQyNOTm5OTi5Ly+vKyqrKSmpIyOjLR+RNTW1MzOzJyenGxqZBweHKSinJSWlExKTMTCxKyurGxubBQSFAwKDJyanERCRERGRAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACH5BAEAAAAALAAAAAAQABAAAAaRQIBwGCgGhkhkEWA8HpNPojFJFU6ryitTiw0IBgRBkxsYFAiGtDodDZwPCERCEV8sEk0CI9FoOB4BEBESExQVFgEEBw8PFxcYEBIZGhscCEwdCxAPGA8eHxkUGyAhIkwHEREQqxEZExUjJCVWCBAZJhEmGRUnoygpQioZGxsnxsQrHByzQiJxz3EsLSwWpkJ+QQAh/mhDcmVhdGVkIGJ5IEJNUFRvR0lGIFBybyB2ZXJzaW9uIDIuNQ0KqSBEZXZlbENvciAxOTk3LDE5OTguIEFsbCByaWdodHMgcmVzZXJ2ZWQuDQpodHRwOi8vd3d3LmRldmVsY29yLmNvbQA7"]
@@ -10186,7 +10189,7 @@ proc svcConfig {listwin $service_list win} {
 
 			frame $win.frame.args
 			label $win.frame.args.l -text "Filter Arguments" -width 16 -justify left -anchor nw
-			set spamfilterargs "@indimaildir@/bin/bogofilter -p -d @indimaildir@/etc"
+			set spamfilterargs "@prefix@/bin/bogofilter -p -d @sysconfdir@"
 			entry $win.frame.args.e -textvariable spamfilterargs -bd 2 \
 				-width 30 -state disabled
 			pack $win.frame.args.l $win.frame.args.e -side left -anchor nw
@@ -10250,7 +10253,7 @@ proc svcConfig {listwin $service_list win} {
 							if {[string index $svc_controldir 0] == "/"} {
 								set filename $svc_controldir/$spamfile
 							} else {
-								set filename @indimaildir@/$svc_controldir/$spamfile
+								set filename @sysconfdir@/$svc_controldir/$spamfile
 							}
 							editfile 2
 						} else {
@@ -10680,7 +10683,7 @@ proc svcConfig {listwin $service_list win} {
 			entry $win.frame.controldir.entry -relief sunken -textvariable svc_controldir
 			button $win.frame.controldir.button \
 				-pady "3" -relief ridge -padx "9" \
-				-command "set initialdir @indimaildir@;fileDialog $w $win.frame.controldir.entry dir 0"
+				-command "set initialdir @sysconfdir@;fileDialog $w $win.frame.controldir.entry dir 0"
 			balloonHelp $win.frame.controldir.button "Click to browse for qmail's control directory"
 			$win.frame.controldir.button configure -image [image create photo -data "R0lGODlhEAAQAIUAAPwCBAQCBOSmZPzSnPzChPzGhPyuZEwyHExOTFROTFxaVFRSTMSGTPT29Ozu7Nze3NTS1MzKzMTGxLy6vLS2tLSytDQyNOTm5OTi5Ly+vKyqrKSmpIyOjLR+RNTW1MzOzJyenGxqZBweHKSinJSWlExKTMTCxKyurGxubBQSFAwKDJyanERCRERGRAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACH5BAEAAAAALAAAAAAQABAAAAaRQIBwGCgGhkhkEWA8HpNPojFJFU6ryitTiw0IBgRBkxsYFAiGtDodDZwPCERCEV8sEk0CI9FoOB4BEBESExQVFgEEBw8PFxcYEBIZGhscCEwdCxAPGA8eHxkUGyAhIkwHEREQqxEZExUjJCVWCBAZJhEmGRUnoygpQioZGxsnxsQrHByzQiJxz3EsLSwWpkJ+QQAh/mhDcmVhdGVkIGJ5IEJNUFRvR0lGIFBybyB2ZXJzaW9uIDIuNQ0KqSBEZXZlbENvciAxOTk3LDE5OTguIEFsbCByaWdodHMgcmVzZXJ2ZWQuDQpodHRwOi8vd3d3LmRldmVsY29yLmNvbQA7"]
 			pack $win.frame.controldir.label $win.frame.controldir.entry $win.frame.controldir.button -side left -anchor nw
@@ -10906,7 +10909,7 @@ proc svcConfig {listwin $service_list win} {
 			entry $win.frame.controldir.entry -relief sunken -textvariable svc_controldir
 			button $win.frame.controldir.button \
 				-pady "3" -relief ridge -padx "9" \
-				-command "set initialdir @indimaildir@;fileDialog $w $win.frame.controldir.entry dir 0"
+				-command "set initialdir @sysconfdir@;fileDialog $w $win.frame.controldir.entry dir 0"
 			balloonHelp $win.frame.controldir.button "Click to browse for qmail's control directory"
 			$win.frame.controldir.button configure -image [image create photo -data "R0lGODlhEAAQAIUAAPwCBAQCBOSmZPzSnPzChPzGhPyuZEwyHExOTFROTFxaVFRSTMSGTPT29Ozu7Nze3NTS1MzKzMTGxLy6vLS2tLSytDQyNOTm5OTi5Ly+vKyqrKSmpIyOjLR+RNTW1MzOzJyenGxqZBweHKSinJSWlExKTMTCxKyurGxubBQSFAwKDJyanERCRERGRAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACH5BAEAAAAALAAAAAAQABAAAAaRQIBwGCgGhkhkEWA8HpNPojFJFU6ryitTiw0IBgRBkxsYFAiGtDodDZwPCERCEV8sEk0CI9FoOB4BEBESExQVFgEEBw8PFxcYEBIZGhscCEwdCxAPGA8eHxkUGyAhIkwHEREQqxEZExUjJCVWCBAZJhEmGRUnoygpQioZGxsnxsQrHByzQiJxz3EsLSwWpkJ+QQAh/mhDcmVhdGVkIGJ5IEJNUFRvR0lGIFBybyB2ZXJzaW9uIDIuNQ0KqSBEZXZlbENvciAxOTk3LDE5OTguIEFsbCByaWdodHMgcmVzZXJ2ZWQuDQpodHRwOi8vd3d3LmRldmVsY29yLmNvbQA7"]
 			pack $win.frame.controldir.label $win.frame.controldir.entry $win.frame.controldir.button -side left -anchor nw
@@ -11014,7 +11017,7 @@ proc svcConfig {listwin $service_list win} {
 
 			frame $win.frame.args
 			label $win.frame.args.l -text "Filter Arguments" -width 16 -justify left -anchor nw
-			set spamfilterargs "@indimaildir@/bin/bogofilter -p -d @indimaildir@/etc"
+			set spamfilterargs "@prefix@/bin/bogofilter -p -d @sysconfdir@"
 			entry $win.frame.args.e -textvariable spamfilterargs -bd 2 \
 				-width 30
 
@@ -11276,7 +11279,7 @@ proc getsvcvalue {mode win tag} {
 			set paranoid 0
 			set dmasquerade 0
 			set spamvar 0
-			set spamfilterargs "@indimaildir@/bin/bogofilter -p -d @indimaildir@/etc"
+			set spamfilterargs "@prefix@/bin/bogofilter -p -d @sysconfdir@"
 			set spamexit 0
 			set spamexitcode ""
 			set rejectspam 0
@@ -11303,7 +11306,7 @@ proc getsvcvalue {mode win tag} {
 					if {[string index $tmp 0] == "/"} {
 						set svc_controldir $tmp
 					} else {
-						set svc_controldir "@indimaildir@/$tmp"
+						set svc_controldir "@sysconfdir@/$tmp"
 					}
 				}
 			}
@@ -11768,7 +11771,7 @@ proc getsvcvalue {mode win tag} {
 			set minfree 50
 			set memory 5
 			set spamvar 0
-			set spamfilterargs "@indimaildir@/bin/bogofilger -p -d @indimaildir@/etc"
+			set spamfilterargs "@prefix@/bin/bogofilger -p -d @sysconfdir@"
 			set spamexit 0
 			set spamexitcode ""
 			set rejectspam 0
@@ -12007,11 +12010,11 @@ proc createSvc {mode} {
 				set cntrldir [string range $svc_controldir $index end]
 			}
 			if {$odmr} {
-				set cmd "exec @indimaildir@/sbin/svctool --smtp=$smtpport --servicedir=$servicedir \
+				set cmd "exec @prefix@/sbin/svctool --smtp=$smtpport --servicedir=$servicedir \
 					--cntrldir=$cntrldir --odmr --maxdaemons=$maxdaemons --maxperip=$maxperip"
 			} else {
 				set t_min_free [expr $minfree * 1024 * 1024]
-				set cmd "exec @indimaildir@/sbin/svctool --smtp=$smtpport --qbase=$qbase --qcount=$qcount --qstart=$qstart --servicedir=$servicedir \
+				set cmd "exec @prefix@/sbin/svctool --smtp=$smtpport --qbase=$qbase --qcount=$qcount --qstart=$qstart --servicedir=$servicedir \
 					--cntrldir=$cntrldir --min-free=$t_min_free --maxdaemons=$maxdaemons --maxperip=$maxperip"
 				if {$usefsync == 1} {
 					append cmd " --fsync "
@@ -12127,7 +12130,7 @@ proc createSvc {mode} {
 			}
 		}
 		imap {
-			set cmd "exec @indimaildir@/sbin/svctool --imap=$imapport \
+			set cmd "exec @prefix@/sbin/svctool --imap=$imapport \
 				--servicedir=$servicedir --maxdaemons=$maxdaemons \
 				--maxperip=$maxperip"
 			if {$default_domain_val == ""} {
@@ -12150,7 +12153,7 @@ proc createSvc {mode} {
 			}
 		}
 		pop3 {
-			set cmd "exec @indimaildir@/sbin/svctool --pop3=$pop3port \
+			set cmd "exec @prefix@/sbin/svctool --pop3=$pop3port \
 				--servicedir=$servicedir --maxdaemons=$maxdaemons \
 				--maxperip=$maxperip"
 			if {$default_domain_val == ""} {
@@ -12180,7 +12183,7 @@ proc createSvc {mode} {
 				incr index
 				set cntrldir [string range $svc_controldir $index end]
 			}
-			set cmd "exec @indimaildir@/sbin/svctool \
+			set cmd "exec @prefix@/sbin/svctool \
 				--dbserver=$dbfifo_name \
 				--cntrldir=$cntrldir --servicedir=$servicedir --threads=$dbthreads"
 			if {$pwcache == 1} {
@@ -12194,7 +12197,7 @@ proc createSvc {mode} {
 		indisrvr {
 			set t_avg_userquota [expr $avguserquota * 1024 * 1024]
 			set t_hard_quota [expr $hardquota * 1024 * 1024]
-			set cmd "exec @indimaildir@/sbin/svctool --indisrvr=$adminport \
+			set cmd "exec @prefix@/sbin/svctool --indisrvr=$adminport \
 				--servicedir=$servicedir --mysqlhost=$mysqlhost \
 				--mysqluser=$mysqluser --mysqlpass=$mysqlpass --avguserquota=$t_avg_userquota \
 				--hardquota=$t_hard_quota --basepath=$basepath \
@@ -12213,7 +12216,7 @@ proc createSvc {mode} {
 				set cntrldir [string range $svc_controldir $index end]
 			}
 			set t_min_free [expr $minfree * 1024 * 1024]
-			set cmd "exec @indimaildir@/sbin/svctool --fetchmail --qcount=$qcount --qstart=$qstart --servicedir=$servicedir \
+			set cmd "exec @prefix@/sbin/svctool --fetchmail --qcount=$qcount --qstart=$qstart --servicedir=$servicedir \
 				--cntrldir=$cntrldir --min-free=$t_min_free"
 			if {$default_domain_val == ""} {
 				append cmd " --default-domain=$default_domain "
@@ -12269,7 +12272,7 @@ proc svc {win listwin type} {
 		set result ""
 		append result "svc $flag $servicedir/$service_name3\n"
 		catch {$dwin.log insert end "$result"}
-		catch {exec @indimaildir@/bin/svc $flag $servicedir/$service_name3} result
+		catch {exec @prefix@/bin/svc $flag $servicedir/$service_name3} result
 		if {[string length $result] == 0} {
 			.statusBar.lab configure -text "svc $flag $servicedir/$service_name3 success"
 		} else {
@@ -12286,7 +12289,7 @@ proc svc {win listwin type} {
 		set result ""
 		append result "Starting service $servicedir/$service_name1\n"
 		catch {$dwin.log insert end "$result"}
-		catch {exec @indimaildir@/bin/svc -u $servicedir/$service_name1} result
+		catch {exec @prefix@/bin/svc -u $servicedir/$service_name1} result
 		if {[string length $result] == 0} {
 			. configure -cursor watch
 			update idletasks
@@ -12309,7 +12312,7 @@ proc svc {win listwin type} {
 		set atime [clock format [clock seconds] -format "%d:%m:%y %H:%M:%S"]
 		puts $logfd "$atime: Shutting service $servicedir/$service_name2"
 		catch {$dwin.log insert end "$result"}
-		catch {exec @indimaildir@/bin/svc -d $servicedir/$service_name2} result
+		catch {exec @prefix@/bin/svc -d $servicedir/$service_name2} result
 		if {[string length $result] == 0} {
 			. configure -cursor watch
 			update idletasks
@@ -12337,7 +12340,7 @@ proc svc {win listwin type} {
 		}
 		set returnstatus 0
 		foreach line $service_name {
-			catch {exec @indimaildir@/bin/svc -d $line} tmp_result
+			catch {exec @prefix@/bin/svc -d $line} tmp_result
 			if {[string length $tmp_result] != 0} {
 				set atime [clock format [clock seconds] -format "%d:%m:%y %H:%M:%S"]
 				puts $logfd "$atime: $tmp_result"
@@ -12362,7 +12365,7 @@ proc svc {win listwin type} {
 		append result "Starting all services in $servicedir\n"
 		set returnstatus 0
 		foreach line $service_name {
-			catch {exec @indimaildir@/bin/svc -u $line} tmp_result
+			catch {exec @prefix@/bin/svc -u $line} tmp_result
 			if {[string length $tmp_result] != 0} {
 				set returnstatus 1
 				catch {$dwin.log insert end "$tmp_result\n"}
@@ -12388,7 +12391,7 @@ proc svc {win listwin type} {
 		set service_name3 ""
 		$listwin.list delete 0 end
 		foreach line $service_list {
-			set cmd "| @indimaildir@/bin/svstat $servicedir/$line"
+			set cmd "| @prefix@/bin/svstat $servicedir/$line"
 			if {[catch {open $cmd r} f] } {
 				catch {$dwin.log insert end "$f\n"}
 				msg_dialog .d "svstat" $f @imagedir@/warning.gif 0 "OK"
@@ -12406,7 +12409,7 @@ proc svc {win listwin type} {
 				$win.stop.right.entry list insert end $line
 			}
 			if {[file isdirectory $servicedir/$line/log]} {
-				set cmd "| @indimaildir@/bin/svstat $servicedir/$line/log"
+				set cmd "| @prefix@/bin/svstat $servicedir/$line/log"
 				if {[catch {open $cmd r} f] } {
 					catch {$dwin.log insert end "$f\n"}
 					msg_dialog .d "svstat" $f @imagedir@/warning.gif 0 "OK"
@@ -12610,7 +12613,7 @@ proc commandLine {} {
 
 proc runcmd {} {
 	global program cmdline dwin configs
-	set cmd "exec sh -c \"@indimaildir@/bin/$program $cmdline\""
+	set cmd "exec sh -c \"@prefix@/bin/$program $cmdline\""
 	set returnstatus [catch {eval $cmd} result]
 	$dwin.log insert end "$result\n"
 	$dwin.log yview moveto 1
@@ -12620,7 +12623,7 @@ proc secpanel {} {
 	global argc argv
 	source @scriptdir@/global.tcl
 	wm withdraw .
-	catch {exec @indimaildir@/bin/secpanel "indimail"} result
+	catch {exec @prefix@/bin/secpanel "indimail"} result
 	wm deiconify .
 }
 
@@ -13051,7 +13054,7 @@ proc groupMember {w1} {
 	global t_email
 	source @scriptdir@/global.tcl
 
-	set cmd "| @indimaildir@/sbin/adminclient -h $server -p $adminport -u $adminuser -P $adminpass -n @indimaildir@/control/clientcert.pem -c \"valias -s $t_email\""
+	set cmd "| @prefix@/sbin/adminclient -h $server -p $adminport -u $adminuser -P $adminpass -n @sysconfdir@/control/clientcert.pem -c \"valias -s $t_email\""
 	if {[catch {open $cmd r} f] } {
 		msg_dialog .d {Add Group} $f @imagedir@/warning.gif 0 "OK"
 		return 1
@@ -13089,9 +13092,9 @@ proc run_group {operation dbwin mwin} {
 				progressDialog
 			}
 			if {[string length $Domain] == 0} {
-				set cmd "| @ldapbindir@/ldapsearch -x -b \"o=indimail\"  \"givenName=MailGroup\" | @indimaildir@/bin/ldapaddr"
+				set cmd "| @ldapbindir@/ldapsearch -x -b \"o=indimail\"  \"givenName=MailGroup\" | @prefix@/bin/ldapaddr"
 			} else {
-				set cmd "| @ldapbindir@/ldapsearch -x -b \"ou=$Domain,o=indimail\" \"givenName=MailGroup\" | @indimaildir@/bin/ldapaddr"
+				set cmd "| @ldapbindir@/ldapsearch -x -b \"ou=$Domain,o=indimail\" \"givenName=MailGroup\" | @prefix@/bin/ldapaddr"
 			}
 			if {[catch {open $cmd r} f] } {
 				catch {destroy .progress}
@@ -13129,7 +13132,7 @@ proc run_group {operation dbwin mwin} {
 				msg_dialog .d "Add Group" "GroupName Required" @imagedir@/warning.gif 0 "OK"
 				return 1
 			}
-			set cmd "exec @indimaildir@/sbin/adminclient -h $server -p $adminport -u $adminuser -P $adminpass -n @indimaildir@/control/clientcert.pem -c \"vgroup -a $t_email -c $t_groupname postmaster\""
+			set cmd "exec @prefix@/sbin/adminclient -h $server -p $adminport -u $adminuser -P $adminpass -n @sysconfdir@/control/clientcert.pem -c \"vgroup -a $t_email -c $t_groupname postmaster\""
 			runCommand $cmd
 			if {$returnstatus == 0} {
 				run_group 1 $dbwin $mwin
@@ -13155,7 +13158,7 @@ proc run_group {operation dbwin mwin} {
 				return 0
 			}
 			if {[string compare $t_oldemail $t_email] != 0} {
-				set cmd "exec @indimaildir@/sbin/adminclient -h $server -p $adminport -u $adminuser -P $adminpass -n @indimaildir@/control/clientcert.pem -c \"vrenameuser $t_oldemail $t_email\""
+				set cmd "exec @prefix@/sbin/adminclient -h $server -p $adminport -u $adminuser -P $adminpass -n @sysconfdir@/control/clientcert.pem -c \"vrenameuser $t_oldemail $t_email\""
 				runCommand $cmd
 				if {$returnstatus != 0} {
 					.statusBar.lab configure -text "Group rename $t_oldemail to $t_email failed"
@@ -13168,7 +13171,7 @@ proc run_group {operation dbwin mwin} {
 			}
 			if {[string compare $t_oldgroupname $t_groupname] != 0} {
 				set gecos "MailGroup $t_groupname"
-				set cmd "exec @indimaildir@/sbin/adminclient -h $server -p $adminport -u $adminuser -P $adminpass -n @indimaildir@/control/clientcert.pem -c \"vmoduser -c \\\"$gecos\\\" $t_email\""
+				set cmd "exec @prefix@/sbin/adminclient -h $server -p $adminport -u $adminuser -P $adminpass -n @sysconfdir@/control/clientcert.pem -c \"vmoduser -c \\\"$gecos\\\" $t_email\""
 				runCommand $cmd
 				if {$returnstatus == 0} {
 					run_group 1 $dbwin $mwin
@@ -13188,7 +13191,7 @@ proc run_group {operation dbwin mwin} {
 			if {$action != 1} {
 				return 1
 			}
-			set cmd "exec @indimaildir@/sbin/adminclient -h $server -p $adminport -u $adminuser -P $adminpass -n @indimaildir@/control/clientcert.pem -c \"vdeluser $t_email\""
+			set cmd "exec @prefix@/sbin/adminclient -h $server -p $adminport -u $adminuser -P $adminpass -n @sysconfdir@/control/clientcert.pem -c \"vdeluser $t_email\""
 			runCommand $cmd
 			if {$returnstatus == 0} {
 				run_group 1 $dbwin $mwin
@@ -13219,7 +13222,7 @@ proc run_group {operation dbwin mwin} {
 				lappend memberList $t_member
 			}
 			foreach alias $memberList {
-				set cmd "exec @indimaildir@/sbin/adminclient -h $server -p $adminport -u $adminuser -P $adminpass -n @indimaildir@/control/clientcert.pem -c \"valias -i \\\"$alias\\\" $t_email\""
+				set cmd "exec @prefix@/sbin/adminclient -h $server -p $adminport -u $adminuser -P $adminpass -n @sysconfdir@/control/clientcert.pem -c \"valias -i \\\"$alias\\\" $t_email\""
 				runCommand $cmd
 				if {$returnstatus == 0} {
 					groupMember $mwin
@@ -13243,7 +13246,7 @@ proc run_group {operation dbwin mwin} {
 				msg_dialog .d "Add Member" "Old Member Email Required" @imagedir@/warning.gif 0 "OK"
 				return 1
 			}
-			set cmd "exec @indimaildir@/sbin/adminclient -h $server -p $adminport -u $adminuser -P $adminpass -n @indimaildir@/control/clientcert.pem -c \"valias -u \\\"$t_oldmember\\\" -i \\\"$t_member\\\" $t_email\""
+			set cmd "exec @prefix@/sbin/adminclient -h $server -p $adminport -u $adminuser -P $adminpass -n @sysconfdir@/control/clientcert.pem -c \"valias -u \\\"$t_oldmember\\\" -i \\\"$t_member\\\" $t_email\""
 			runCommand $cmd
 			if {$returnstatus == 0} {
 				groupMember $mwin
@@ -13265,7 +13268,7 @@ proc run_group {operation dbwin mwin} {
 				msg_dialog .d "Delete Member" "Member Email Required" @imagedir@/warning.gif 0 "OK"
 				return 1
 			}
-			set cmd "exec @indimaildir@/sbin/adminclient -h $server -p $adminport -u $adminuser -P $adminpass -n @indimaildir@/control/clientcert.pem -c \"valias -d \\\"$t_member\\\" $t_email\""
+			set cmd "exec @prefix@/sbin/adminclient -h $server -p $adminport -u $adminuser -P $adminpass -n @sysconfdir@/control/clientcert.pem -c \"valias -d \\\"$t_member\\\" $t_email\""
 			runCommand $cmd
 			if {$returnstatus == 0} {
 				groupMember $mwin
@@ -13485,7 +13488,7 @@ proc run_delolduser {domain server option iage mage tage runfast verbose} {
 	}
 	catch {$dwin.log insert end "vdeloldusers -d $domain $vdelopt -a $iage -u $mage -t $tage\n"}
 	set vdelcmd "\"vdeloldusers -d $domain $vdelopt -a $iage -u $mage -t $tage\""
-	set cmd "| @indimaildir@/sbin/adminclient -h $server -p $adminport -u $adminuser -P $adminpass -n @indimaildir@/control/clientcert.pem -c $vdelcmd"
+	set cmd "| @prefix@/sbin/adminclient -h $server -p $adminport -u $adminuser -P $adminpass -n @sysconfdir@/control/clientcert.pem -c $vdelcmd"
 	set returnstatus [catch {open $cmd r} f]
 	if {[info exists logfd] && [info exists logevent]} {
 		incr logevent
@@ -13788,7 +13791,7 @@ proc run_priv {operation dbwin} {
 				return 1
 			}
 			set vprivcmd "\"vpriv -i $program $t_adminuser $cmdargs\""
-			set cmd "exec @indimaildir@/sbin/adminclient -h $server -p $adminport -u $adminuser -P $adminpass -n @indimaildir@/control/clientcert.pem -c $vprivcmd"
+			set cmd "exec @prefix@/sbin/adminclient -h $server -p $adminport -u $adminuser -P $adminpass -n @sysconfdir@/control/clientcert.pem -c $vprivcmd"
 			runCommand $cmd
 			if {$returnstatus == 0} {
 				run_priv 1 $dbwin
@@ -13817,7 +13820,7 @@ proc run_priv {operation dbwin} {
 				return 1
 			}
 			set vprivcmd "\"vpriv -m $program $t_adminuser $cmdargs\""
-			set cmd "exec @indimaildir@/sbin/adminclient -h $server -p $adminport -u $adminuser -P $adminpass -n @indimaildir@/control/clientcert.pem -c $vprivcmd"
+			set cmd "exec @prefix@/sbin/adminclient -h $server -p $adminport -u $adminuser -P $adminpass -n @sysconfdir@/control/clientcert.pem -c $vprivcmd"
 			runCommand $cmd
 			if {$returnstatus == 0} {
 				run_priv 1 $dbwin
@@ -13842,7 +13845,7 @@ proc run_priv {operation dbwin} {
 				return 1
 			}
 			set vprivcmd "\"vpriv -d $program $t_adminuser\""
-			set cmd "exec @indimaildir@/sbin/adminclient -h $server -p $adminport -u $adminuser -P $adminpass -n @indimaildir@/control/clientcert.pem -c $vprivcmd"
+			set cmd "exec @prefix@/sbin/adminclient -h $server -p $adminport -u $adminuser -P $adminpass -n @sysconfdir@/control/clientcert.pem -c $vprivcmd"
 			runCommand $cmd
 			if {$returnstatus == 0} {
 				run_priv 1 $dbwin
@@ -14117,7 +14120,7 @@ proc run_domlimits {} {
 	} else {
 		set domlimitcmd "\"vlimit $domain\""
 	}
-	set cmd "exec @indimaildir@/sbin/adminclient -h $server -p $adminport -u $adminuser -P $adminpass -n @indimaildir@/control/clientcert.pem -c $domlimitcmd"
+	set cmd "exec @prefix@/sbin/adminclient -h $server -p $adminport -u $adminuser -P $adminpass -n @sysconfdir@/control/clientcert.pem -c $domlimitcmd"
 	if {$BWidget_present == 1} {
 		set prgtext "Hmm... I am Busy"
 		progressDialog
@@ -14150,7 +14153,7 @@ proc del_domlimits {} {
 		return
 	}
 	set domlimitcmd "\"vlimit -D $domain\""
-	set cmd "exec @indimaildir@/sbin/adminclient -h $server -p $adminport -u $adminuser -P $adminpass -n @indimaildir@/control/clientcert.pem -c $domlimitcmd"
+	set cmd "exec @prefix@/sbin/adminclient -h $server -p $adminport -u $adminuser -P $adminpass -n @sysconfdir@/control/clientcert.pem -c $domlimitcmd"
 	if {$BWidget_present == 1} {
 		set prgtext "Hmm... I am Busy"
 		progressDialog
@@ -14186,7 +14189,7 @@ proc get_domlimits {} {
 	set domlimits::norelay 0
 	set domlimits::reset 0
 	set domlimitcmd "\"vlimit -s $domain\""
-	set cmd "| @indimaildir@/sbin/adminclient -h $server -p $adminport -u $adminuser -P $adminpass -n @indimaildir@/control/clientcert.pem -c $domlimitcmd"
+	set cmd "| @prefix@/sbin/adminclient -h $server -p $adminport -u $adminuser -P $adminpass -n @sysconfdir@/control/clientcert.pem -c $domlimitcmd"
 
 	if {$BWidget_present == 1} {
 		set prgtext "Hmm... I am Busy"

@@ -61,7 +61,7 @@ case "$host" in
 	;;
 esac
 
-defaultprefix="/var/indimail"
+defaultprefix="/usr"
 LIBVER=0:0:0
 AC_SUBST(LIBVER)
 AC_SUBST(STRIP_OPT)
@@ -98,114 +98,20 @@ then
 	. /usr/lib/tclConfig.sh
 fi
 
-indiuser="indimail"
-AC_ARG_ENABLE(indiuser, [  --enable-indiuser=indimail    user IndiMail was installed as.],
-	indiuser="$enableval",
+shareddir=$prefix
+AC_ARG_ENABLE(shareddir, [  --enable-shareddir=dir       directory for shared files.],
+	shareddir="$enableval",
 	[
-		if test "$indiuser" = ""
+	 	if test "$shareddir" != ""
 		then
-			AC_MSG_ERROR([Unable to find your indiuser user, specify --enable-indiuser.])
+			AC_DEFINE_UNQUOTED(SHAREDDIR,"$shareddir", Directory for shared files.)
 		fi
 	])
-AC_DEFINE_UNQUOTED(INDIUSER,"$indiuser",IndiMail User)
-AC_SUBST(indiuser)
-echo $indiuser > indiusername
-
-indigroup="indimail"
-AC_ARG_ENABLE(indigroup,[  --enable-indigroup=indimail   group IndiMail was installed as.],
-	indigroup="$enableval",
-	[
-		if test "$indigroup" = ""
-		then
-			AC_MSG_ERROR([Unable to find your indigroup group, specify --enable-indigroup.])
-		fi
-	])
-AC_DEFINE_UNQUOTED(INDIGROUP,"$indigroup",IndiMail Group)
-AC_SUBST(indigroup)
-
-AC_TRY_RUN( [
-
-#include <stdio.h>
-#include <pwd.h>
-#include <stdlib.h>
-#include <string.h>
-#include <unistd.h>
-
-int main()
-{
-struct passwd *pw;
-char tmpbuf[100];
-FILE *f;
-
-	unlink("indimail.uid");
-	unlink("indimail.gid");
-
-	if ( (f=fopen("indiusername","r+"))==NULL) {
-		fprintf(stderr, "could not open indiusername file\n");
-		fprintf(stdout, "could not open indiusername file\n");
-		exit(-1);
-	}
-    fgets(tmpbuf,100,f);
-    fclose(f);
-    tmpbuf[strlen(tmpbuf)-1] = 0;
-	if (( pw=getpwnam(tmpbuf)) != 0 ) {
-		f=fopen("indimail.dir","a+");
-		fprintf(f,"%s\n", pw->pw_dir);
-		fclose(f);
-
-		f=fopen("indimail.uid", "a+");
-		fprintf(f,"%d\n", pw->pw_uid);
-		fclose(f);
-
-		f=fopen("indimail.gid", "a+");
-		fprintf(f,"%d\n", pw->pw_gid);
-		fclose(f);
-	} else {
-		f=fopen("indimail.uid", "a+");
-		fprintf(f,"555\n");
-		fclose(f);
-
-		f=fopen("indimail.gid", "a+");
-		fprintf(f,"555\n");
-		fclose(f);
-	}
-	return(0);
-}
-],
-    AC_MSG_RESULT(yes),
-    AC_MSG_RESULT(no)
-    AC_MSG_ERROR(Could not find indimail user.),
-    AC_MSG_ERROR(Could not compile and run even a trivial ANSI C program - check CC.))
-
-if test ! -f indimail.uid
-then
-	AC_MSG_ERROR(No indimail user.)
-fi
-
-if test ! -f indimail.gid
-then
-	AC_MSG_ERROR(No indimail group.)
-fi
-
-if test ! -f indimail.dir
-then
-	indimaildir=$prefix
-else
-	indimaildir=`cat indimail.dir`
-fi
+AC_DEFINE_UNQUOTED(SHAREDDIR, "$shareddir", Directory for shared files)
+AC_SUBST(shareddir)
 
 DATE=`date`
 AC_SUBST(DATE)
-AC_SUBST(indimaildir)
-AC_DEFINE_UNQUOTED(INDIMAILDIR,"$indimaildir",IndiMail Home Directory)
-rm -f indimail.dir
-
-indimailuid=`cat indimail.uid`
-rm -f indimail.uid
-
-indimailgid=`cat indimail.gid`
-rm -f indimail.gid
-rm -f indiusername 
 
 AC_ARG_ENABLE(mysqlprefix, [  --enable-mysqlprefix=""       MySQL Prefix Directory.],[mysql_prefix=$enableval],[mysql_prefix=""])
 
@@ -280,7 +186,7 @@ fi
 AC_CHECK_LIB(mysqlclient -L${mysql_libdir}, mysql_real_connect,libs="$libs -lmysqlclient",
 	AC_MSG_ERROR([could not find libmysqlclient which is needed for MySQL support]),)
 
-auth_inc="$TCL_INCLUDE_SPEC -I$indimaildir/include -I$mysql_incdir"
+auth_inc="$TCL_INCLUDE_SPEC -I$prefix/include/indimail -I$mysql_incdir"
 auth_libs="-L. -L$libdir -L$mysql_libdir -lmysqlclient"
 
 AC_SUBST(mysql_prefix)

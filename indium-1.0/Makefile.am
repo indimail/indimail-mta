@@ -20,13 +20,18 @@ libfbsqldir=@libdir@
 libtai64dir=@libdir@
 guibindir=@prefix@/bin
 guisbindir=@prefix@/sbin
+tcldir=@shareddir@/indium/scripts
+tcletcdir=@sysconfdir@
+tcllibdir=@shareddir@/indium/lib
 
-tcl_script_list = global.tcl balloon.tcl base64.tcl combobox.tcl fileman.tcl help.tcl \
+tcl_SCRIPTS = global.tcl balloon.tcl base64.tcl combobox.tcl fileman.tcl help.tcl \
 	hugecombo.tcl hugelist.tcl madHelp.tcl mclistbox.tcl notebook.tcl progressbar.tcl \
-	ranges.tcl common.tcl convert_history.tcl gui.tcl \
-	keydistribute.tcl listserver.tcl secpanel.dist secpanel.wait 
-tcl_etc_list = default.config default.profile filemanrc
-tcl_lib_list = userhelp.txt
+	ranges.tcl common.tcl convert_history.tcl convert_profile.tcl gui.tcl \
+	keydistribute.tcl listserver.tcl secpanel.dist secpanel.wait dppw.tcl \
+	export_profiles.tcl spdistkey secpanel_remoteconf.sh dppw.tcl
+
+tcletc_DATA = default.config default.profile filemanrc termdefs.txt
+tcllib_DATA = userhelp.txt
 
 all-local: .gitignore
 
@@ -43,14 +48,19 @@ pwhelper_SOURCES = pwhelper.c
 pwhelper_DEPENDENCIES = pipe_exec.lo
 
 edit = sed \
-	-e 's,@indimaildir\@,$(indimaildir),g' \
+	-e 's,@prefix\@,$(prefix),g' \
+	-e 's,@indimaildir\@,"/var/indimail",g' \
+	-e 's,@shareddir\@,$(shareddir),g' \
+	-e 's,@libexecdir\@,$(libexecdir),g' \
+	-e 's,@mandir\@,$(mandir),g' \
+	-e 's,@sysconfdir\@,$(sysconfdir),g' \
 	-e 's,@mysql_prefix\@,$(mysql_prefix),g' \
 	-e 's,@auth_inc\@,$(auth_inc),g' \
 	-e 's,@libdir\@,$(libdir),g' \
-	-e 's,@scriptdir\@,$(datarootdir)/$(distdir)/scripts,g' \
-	-e 's,@sharelibdir\@,$(datarootdir)/$(distdir)/lib,g' \
-	-e 's,@imagedir\@,$(datarootdir)/$(distdir)/images,g' \
-	-e 's,@shareetcdir\@,$(datarootdir)/$(distdir)/etc,g' \
+	-e 's,@scriptdir\@,$(shareddir)/indium/scripts,g' \
+	-e 's,@sharelibdir\@,$(shareddir)/indium/lib,g' \
+	-e 's,@imagedir\@,$(shareddir)/indium/images,g' \
+	-e 's,@shareetcdir\@,$(sysconfdir),g' \
 	-e 's,@defaultdomain\@,$(defaultdomain),g' \
 	-e 's,@version\@,$(VERSION),g' \
 	-e 's,@prefix\@,$(prefix),g'
@@ -86,20 +96,8 @@ obs.mk: debian/obs.mk.in
 
 install-data-hook:
 	for f in `ls images`; do \
-		/bin/mkdir -p $(DESTDIR)$(datarootdir)/$(distdir)/images; \
-		$(INSTALL_DATA) images/$$f $(DESTDIR)$(datarootdir)/$(distdir)/images/$$f || exit 1 ;\
-	done
-	for f in $(tcl_script_list); do \
-		/bin/mkdir -p $(DESTDIR)$(datarootdir)/$(distdir)/scripts; \
-		$(INSTALL_DATA) $$f $(DESTDIR)$(datarootdir)/$(distdir)/scripts/$$f || exit 1 ;\
-	done
-	for f in $(tcl_etc_list); do \
-		/bin/mkdir -p $(DESTDIR)$(datarootdir)/$(distdir)/etc; \
-		$(INSTALL_DATA) $$f $(DESTDIR)$(datarootdir)/$(distdir)/etc/$$f || exit 1 ;\
-	done
-	for f in $(tcl_lib_list); do \
-		/bin/mkdir -p $(DESTDIR)$(datarootdir)/$(distdir)/lib; \
-		$(INSTALL_DATA) $$f $(DESTDIR)$(datarootdir)/$(distdir)/lib/$$f || exit 1 ;\
+		/bin/mkdir -p $(DESTDIR)$(shareddir)/indium/images; \
+		$(INSTALL_DATA) images/$$f $(DESTDIR)$(shareddir)/indium/images/$$f || exit 1 ;\
 	done
 .gitignore: $(PROGRAMS) $(guibin_SCRIPTS) $(MOSTLYCLEANFILES) $(noinst_SCRIPTS) gitignore
 	(for f in $^; do \

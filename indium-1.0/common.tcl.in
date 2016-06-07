@@ -1,5 +1,8 @@
 #
 # $Log: common.tcl.in,v $
+# Revision 2.21  2016-06-07 18:38:23+05:30  Cprogrammer
+# FHS compliance
+#
 # Revision 2.20  2010-06-25 17:43:33+05:30  Cprogrammer
 # replaced qmail-qstat with qmail-qread
 #
@@ -240,7 +243,7 @@ proc progressDialog {} {
 
 proc showManEntry {} {
 	global mlvar aidedir tcl_platform env
-	help::init  @indimaildir@/doc/indimail.html
+	help::init  @shareddir@/doc/indimail.html
 }
 
 # SetIcon --
@@ -1108,7 +1111,7 @@ proc preferences {mode} {
 
 	## Frame 1 #######################################################################
 	if {$mode == 1} {
-	catch {exec @indimaildir@/bin/dbinfo -s | grep domain | sort -u | awk {{print $2}}} domain_list
+	catch {exec @prefix@/bin/dbinfo -s | grep domain | sort -u | awk {{print $2}}} domain_list
 	frame $lwin2.configs1
 	pack $lwin2.configs1 -side top -anchor nw
 	label $lwin2.configs1.label1 -relief ridge -text "Default Domain" -bd 2 -width 20
@@ -1283,7 +1286,7 @@ proc preferences {mode} {
 	## Frame 11 #######################################################################
 	set exists [info exists configs(controldir)]
 	if {$exists == 0} {
-		set controldir @indimaildir@/control
+		set controldir @sysconfdir@/control
 		set configs(controldir) $controldir
 	} else {
 		set controldir $configs(controldir)
@@ -1514,7 +1517,7 @@ proc loadPreferences {} {
 		set adminport $configs(adminport)
 		set adminuser $configs(adminuser)
 		set adminpass $configs(adminpass)
-		set controldir @indimaildir@/control
+		set controldir @sysconfdir@/control
 		append controldir "/control"
 		set servcedir $configs(servicedir)
 		set bgColor $configs(bgColor)
@@ -1554,7 +1557,7 @@ proc default_config {} {
 	set configs(mysql_pass) "ssh-1.5-"
 	set configs(browser) "/usr/bin/firefox"
 	set configs(mailclient) "/usr/local/bin/sylpheed"
-	set configs(controldir) "@indimaildir@/control"
+	set configs(controldir) "@sysconfdir@/control"
 	if {[file exists "/service"]} {
 		set configs(servicedir) "/service"
 	} elseif {[file exists "/service1"]} {
@@ -1577,15 +1580,15 @@ proc default_config {} {
 			msg_dialog .d {default config} "$result" @imagedir@/warning.gif 0 "OK"
 			return 1
 		}
-		catch {file copy @shareetcdir@/filemanrc $env(HOME)/.indimail/.filemanrc} result
+		catch {file copy @sysconfdir@/filemanrc $env(HOME)/.indimail/.filemanrc} result
 		if {$result != ""} {
 			msg_dialog .d {default config} "$result" @imagedir@/warning.gif 0 "OK"
 		}
-		catch {file copy @indimaildir@/etc/cronlist $env(HOME)/.indimail/.cronlist} result
+		catch {file copy @sysconfdir@/cronlist $env(HOME)/.indimail/.cronlist} result
 		if {$result != ""} {
 			msg_dialog .d {default config} "$result" @imagedir@/warning.gif 0 "OK"
 		}
-		catch {file copy @indimaildir@/etc/osh.table $env(HOME)/.indimail/osh.table} result
+		catch {file copy @sysconfdir@/osh.table $env(HOME)/.indimail/osh.table} result
 		if {$result != ""} {
 			msg_dialog .d {default config} "$result" @imagedir@/warning.gif 0 "OK"
 		}
@@ -1827,7 +1830,7 @@ proc logBrowser {mode} {
 		close $f
 		set datalist [split $data "\n"]
 		for {set i 0} {$i < [llength $datalist]} {incr i} {
-			if {[string compare -length [string length "@indimaildir@/bin/multilog"] "@indimaildir@/bin/multilog" [lindex $datalist $i]] == 0} {
+			if {[string compare -length [string length "@prefix@/bin/multilog"] "@prefix@/bin/multilog" [lindex $datalist $i]] == 0} {
 				set  str "[lindex [lindex $datalist $i] 2]/current"
 				lappend logfile_list $str
 				if {[string first "imapd" $str] != -1} {
@@ -1860,9 +1863,9 @@ proc logBrowser {mode} {
 		pack $b.scale.e -fill x -side top 
 		pack $b.scale.l -side bottom -anchor s -fill y
 
-		if {[file exists @indimaildir@/sbin/osh]} {
+		if {[file exists @prefix@/sbin/osh]} {
 			set env(TABLE_NAME) "$env(HOME)/.indimail/osh.table"
-			button $b.scale.e.o   -text "Operator Shell" -highlightbackground white -bg black -bd 0 -command "catch {exec $configs(xterm) -e \"su -c @indimaildir@/sbin/osh\" &} result"
+			button $b.scale.e.o   -text "Operator Shell" -highlightbackground white -bg black -bd 0 -command "catch {exec $configs(xterm) -e \"su -c @prefix@/sbin/osh\" &} result"
 			$b.scale.e.o configure -image [image create photo -data "R0lGODlhFgAWAIcAAPwCBAQCBPTy9PTu9Ozq7OTi5Nze3OTe5Nza3NzW3NTS1MzOzMzKzMzGzMTCxMTGxOzm7AwGDBQOFBQSFCQeHCwmLCwuLDQyNDw6PERCRFROVEQ+RDQ2NLy+vKSipISChGxqbExKTOzu7OTm5Pz+/GRiZMS+xLy6vBQWFLy2vCwiHFQ+NMSmfNSyhIxmTDwuLJx+bLS2tCwmHMyyhMyqfPTqpPzyvLSWbLSWfPzitIx+ZDw2PAwKDCQiJGxWRPTmrPTerMyuhPzqtPz63PTWnPz6zNy+nIRiVDQuLKyWbOTanPz21NS2jNS6lDQqJHRaTPzmrPTSnPzyxOTClPz2xNSuhPTqxPzuvOzSpAQGDOTKnMy2jOzSrPTu1NzKnOzOnBwWHJRuXLSWdPTatPzqvNzClCwmJOzSnOTOnPTuxOzKlOzerOzarOzitJR6ZNTO1IxmXPTWrNSyjPzOjPTSpLSehHRqZOzirOTCjPS+fPzGhOy6bOzKhGROPMy2lPz+1PzmtKRyRHRiNNTCdPz+zNzCjEQ2NKySdDQmJAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACH5BAEAAAAALAAAAAAWABYAAAj/AAEIHEiwoMGBARIqXMhQIUIBAwYQIFCggIEDCBIoULBgAYMGDgIIDEBAwMSKBRBk3NjxAciQIwdACBBBwgQKFSxcwJBBwwYMHBx0EAmA5EwPH0CEsCChoYgOQ0cSGCHhA4kSS5syJGDiBNEAFVGUKKEBAwWFFM6SNJHi64gDFEKE4FBBggoKK1i0cPECxokYXw0gsECYggQZM2jAqGHjBo4cOtqOxLhDAg8ePXz8ABJEyBAWRIoYOfJipEoMCZEkuaFkSAslS5jUGJKkSRAnRREo0JDwCZQoTKQAmUKlihQrVa5gKZ1lI+oAK7QM2cJlSZMuU4Z4+TJEx0iNOwKAggkjZkyOFmS8kClzpcUQLRRGbjRD4MgZNEzSqKG+ZgobI2248dUbDDDwABzcxSEHEFpgEcUcdMRRhx1fFejAAx0cgcYdSxiBRx566LEHH0d8QFRRNC3Uhx985CHEH0MAEkhCBxWkgiCDFEFIEYUYUmONMhyCRxVH/PgjBYioYJAdAQEAIf5oQ3JlYXRlZCBieSBCTVBUb0dJRiBQcm8gdmVyc2lvbiAyLjUNCqkgRGV2ZWxDb3IgMTk5NywxOTk4LiBBbGwgcmlnaHRzIHJlc2VydmVkLg0KaHR0cDovL3d3dy5kZXZlbGNvci5jb20AOw=="]
 			balloonHelp $b.scale.e.o "Operator Shell"
 		}
@@ -1878,7 +1881,7 @@ proc logBrowser {mode} {
 			-range {0 300 1} -editable false \
 			-vcmd {regexp {^[0-9]*$} %P} -validate key -invcmd bell
 		set loadf $b.scale.e.f
-		if {[file exists @indimaildir@/sbin/osh]} {
+		if {[file exists @prefix@/sbin/osh]} {
 		pack $b.scale.e.o $b.scale.e.f $b.scale.e.svc -side left -anchor nw
 		} else {
 		pack $b.scale.e.f $b.scale.e.svc -side left -anchor nw
@@ -1902,7 +1905,7 @@ proc logBrowser {mode} {
 		if {[file exist @imagedir@/version.gif]} {
 			$b.menu.b2 config -image [image create photo -file @imagedir@/version.gif]
 		}
-		button $b.menu.b3 -text "Ldap Client" -command "catch {exec @indimaildir@/bin/gq &} result" -relief groove -bd 2 \
+		button $b.menu.b3 -text "Ldap Client" -command "catch {exec @prefix@/bin/gq &} result" -relief groove -bd 2 \
 			-highlightthickness 1 -highlightbackground black
 		if {[file exist @imagedir@/gq.gif]} {
 			$b.menu.b3 config -image [image create photo -file @imagedir@/gq.gif]
@@ -1917,7 +1920,7 @@ proc logBrowser {mode} {
 		if {[file exist @imagedir@/neat.gif]} {
 			$b.menu.b5 config -image [image create photo -file @imagedir@/neat.gif]
 		}
-		button $b.menu.b6 -text "Shit Interface" -command "catch {exec $configs(xterm) -e @indimaildir@/bin/shit &} result" -relief groove -bd 2 \
+		button $b.menu.b6 -text "FLASH Interface" -command "catch {exec $configs(xterm) -e @prefix@/bin/shit &} result" -relief groove -bd 2 \
 			-highlightthickness 1 -highlightbackground black
 		if {[file exist @imagedir@/shit.gif]} {
 			$b.menu.b6 config -image [image create photo -file @imagedir@/shit.gif]
@@ -1961,7 +1964,7 @@ proc logBrowser {mode} {
 		if {[file exist @imagedir@/preferences.gif]} {
 			$b.menu.b1 config -image [image create photo -file @imagedir@/preferences.gif]
 		}
-		button $b.menu.b2 -text "Ldap Client" -command "catch {exec @indimaildir@/bin/gq &} result" \
+		button $b.menu.b2 -text "Ldap Client" -command "catch {exec @prefix@/bin/gq &} result" \
 			-relief groove -bd 2 \
 			-highlightthickness 1 -highlightbackground black
 		if {[file exist @imagedir@/gq.gif]} {
@@ -1973,7 +1976,7 @@ proc logBrowser {mode} {
 		if {[file exist @imagedir@/top.gif]} {
 			$b.menu.b3 config -image [image create photo -file @imagedir@/top.gif]
 		}
-		button $b.menu.b4 -text "Shit Interface" -command "catch {exec $configs(xterm) -e @indimaildir@/bin/flash &} result" \
+		button $b.menu.b4 -text "FLASH Interface" -command "catch {exec $configs(xterm) -e @prefix@/bin/flash &} result" \
 			-relief groove -bd 2 \
 			-highlightthickness 1 -highlightbackground black
 		if {[file exist @imagedir@/shit.gif]} {
@@ -2211,7 +2214,7 @@ proc addText {filename Fdesc} {
 	}
 	catch {set tmp_result [glob $servicedir/* $servicedir/*/log]}
 	if {[info exists tmp_result] && $tmp_result != ""} {
-		set cmd "exec @indimaildir@/bin/svstat $tmp_result"
+		set cmd "exec @prefix@/bin/svstat $tmp_result"
 		catch {eval $cmd} result
 		append svText "\n$result"
 	} else {
@@ -2388,12 +2391,12 @@ proc xcron {mode} {
 		}
 		close $f
 	} else {
-	lappend standard_list "2,32 * * * * @indimaildir@/bin/hostsync"
-	lappend standard_list "5,35 * * * * @indimaildir@/bin/clearopensmtp"
-	lappend standard_list "5,35 * * * * @indimaildir@/bin/fetchmail.cron"
-	lappend standard_list "7 * * * * @indimaildir@/bin/vfstab -b"
-	lappend standard_list "24 0,4,8,12,16,20 * * * * @indimaildir@/bin/chowkidar -f /var/log/indimail/deliver.25/current -o $controldir/badmailfrom -n 300 -B > /dev/null 2>&1"
-	lappend standard_list "24 0,4,8,12,16,20 * * * * @indimaildir@/bin/chowkidar -f /var/log/indimail/deliver.25/current -o $controldir/badrcptto -n 300 -T > /dev/null 2>&1"
+	lappend standard_list "2,32 * * * * @prefix@/bin/hostsync"
+	lappend standard_list "5,35 * * * * @prefix@/bin/clearopensmtp"
+	lappend standard_list "5,35 * * * * @prefix@/bin/fetchmail.cron"
+	lappend standard_list "7 * * * * @prefix@/bin/vfstab -b"
+	lappend standard_list "24 0,4,8,12,16,20 * * * * @prefix@/bin/chowkidar -f /var/log/indimail/deliver.25/current -o $controldir/badmailfrom -n 300 -B > /dev/null 2>&1"
+	lappend standard_list "24 0,4,8,12,16,20 * * * * @prefix@/bin/chowkidar -f /var/log/indimail/deliver.25/current -o $controldir/badrcptto -n 300 -T > /dev/null 2>&1"
 	}
 	createWindow
 	focus $w
@@ -2411,7 +2414,7 @@ proc xcron {mode} {
 		{"Image Files"		{.jpeg .jpg} }
 		{"Image Files"		""		{GIFF JPEG} }
 	}
-	set initialdir @indimaildir@/bin
+	set initialdir @prefix@/bin
 	TitleFrame $w.fr -text "Scheduler" -side center -relief groove -bd 2
 	pack $w.fr
 	set scrollfr [$w.fr getframe]
@@ -3844,7 +3847,7 @@ proc qmailAdv {mode} {
 			set output_desc "Local IP Addresses"; \
 			$bwin1.2.run configure -text "Info"; \
 			$bwin1.2.run configure -cursor {}; \
-			set cmd "exec @indimaildir@/bin/ipmeprint"; \
+			set cmd "exec @prefix@/bin/ipmeprint"; \
 			set mycmd "$cmd $arguments"; \
 			$bwin1.1.queue configure -state disabled; \
 		}
@@ -3855,7 +3858,7 @@ proc qmailAdv {mode} {
 			set output_desc "DNS cnames"; \
 			$bwin1.2.run configure -text "DNS cname"; \
 			$bwin1.2.run configure -cursor {}; \
-			set cmd "exec @indimaildir@/bin/dnscname"; \
+			set cmd "exec @prefix@/bin/dnscname"; \
 			set mycmd "$cmd $arguments"; \
 			$bwin1.1.queue configure -state disabled; \
 		}
@@ -3866,7 +3869,7 @@ proc qmailAdv {mode} {
 			set output_desc "DNS ptrs"; \
 			$bwin1.2.run configure -text "DNS ptr"; \
 			$bwin1.2.run configure -cursor {}; \
-			set cmd "exec @indimaildir@/bin/dnsptr"; \
+			set cmd "exec @prefix@/bin/dnsptr"; \
 			set mycmd "$cmd $arguments"; \
 			$bwin1.1.queue configure -state disabled; \
 		}
@@ -3877,7 +3880,7 @@ proc qmailAdv {mode} {
 			set output_desc "DNS Fully Qualified Name"; \
 			$bwin1.2.run configure -text "DNS fq"; \
 			$bwin1.2.run configure -cursor {}; \
-			set cmd "exec @indimaildir@/bin/dnsfq"; \
+			set cmd "exec @prefix@/bin/dnsfq"; \
 			set mycmd "$cmd $arguments"; \
 			$bwin1.1.queue configure -state disabled; \
 		}
@@ -3888,7 +3891,7 @@ proc qmailAdv {mode} {
 			set output_desc "DNS IP Addresses"; \
 			$bwin1.2.run configure -text "DNS ip"; \
 			$bwin1.2.run configure -cursor {}; \
-			set cmd "exec @indimaildir@/bin/dnsip"; \
+			set cmd "exec @prefix@/bin/dnsip"; \
 			set mycmd "$cmd $arguments"; \
 			$bwin1.1.queue configure -state disabled; \
 		}
@@ -3899,7 +3902,7 @@ proc qmailAdv {mode} {
 			set arguments ""; \
 			$bwin1.2.run configure -text "DNS mxip"; \
 			$bwin1.2.run configure -cursor {}; \
-			set cmd "exec @indimaildir@/bin/dnsmxip"; \
+			set cmd "exec @prefix@/bin/dnsmxip"; \
 			set mycmd "$cmd $arguments"; \
 			$bwin1.1.queue configure -state disabled; \
 		}
@@ -3911,7 +3914,7 @@ proc qmailAdv {mode} {
 			set output_desc "Queued Mail Stats"; \
 			$bwin1.2.run configure -text "Queue Info"; \
 			$bwin1.2.run configure -cursor {}; \
-			set cmd "exec @indimaildir@/bin/qmail-qread"; \
+			set cmd "exec @prefix@/bin/qmail-qread"; \
 			set mycmd "$cmd $arguments"; \
 			$bwin1.1.queue configure -state disabled; \
 		}
@@ -3929,7 +3932,7 @@ proc qmailAdv {mode} {
 			set output_desc "Queued Mail Information"; \
 			$bwin1.2.run configure -text "Queue Read"; \
 			$bwin1.2.run configure -cursor {}; \
-			set cmd "exec @indimaildir@/bin/qmail-qread"; \
+			set cmd "exec @prefix@/bin/qmail-qread"; \
 			set mycmd "$cmd $arguments"; \
 			$bwin1.1.queue configure -state disabled; \
 		}
@@ -3940,7 +3943,7 @@ proc qmailAdv {mode} {
 			set output_desc "Queued Mail Headers"; \
 			$bwin1.2.run configure -text "Queue Print"; \
 			$bwin1.2.run configure -cursor {}; \
-			set cmd "exec @indimaildir@/bin/qpq"; \
+			set cmd "exec @prefix@/bin/qpq"; \
 			set mycmd "$cmd $arguments"; \
 			$bwin1.1.queue configure -state disabled; \
 		}
@@ -3951,7 +3954,7 @@ proc qmailAdv {mode} {
 			set output_desc "Queued Mail Remote Timeouts"; \
 			$bwin1.2.run configure -text "Queue Timeouts"; \
 			$bwin1.2.run configure -cursor {}; \
-			set cmd "exec @indimaildir@/bin/qmail-tcpto"; \
+			set cmd "exec @prefix@/bin/qmail-tcpto"; \
 			set mycmd "$cmd $arguments"; \
 			$bwin1.1.queue configure -state disabled; \
 		}
@@ -3962,7 +3965,7 @@ proc qmailAdv {mode} {
 			set output_desc "Queue Fix"; \
 			$bwin1.2.run configure -text "Queue Fix"; \
 			$bwin1.2.run configure -cursor {}; \
-			set cmd "exec @indimaildir@/bin/queue-fix"; \
+			set cmd "exec @prefix@/bin/queue-fix"; \
 			set mycmd "$cmd $arguments"; \
 			$bwin1.1.queue configure -state normal; \
 		}
@@ -3978,7 +3981,7 @@ proc qmailAdv {mode} {
 			set output_desc "Queue RM"; \
 			$bwin1.2.run configure -text "Queue RM"; \
 			$bwin1.2.run configure -cursor {}; \
-			set cmd "exec @indimaildir@/bin/qmail-rm"; \
+			set cmd "exec @prefix@/bin/qmail-rm"; \
 			set mycmd "$cmd $arguments"; \
 			$bwin1.1.queue configure -state normal; \
 		}
@@ -3995,14 +3998,14 @@ proc qmailAdv {mode} {
  -y <yankdir>	directory to put files yanked from the queue \[default: <queuedir>/yanked\]"
 
 	frame $opframe2.7 -bd 0
-	button $opframe2.7.b -text "Reset Timeout" -command {exec @indimaildir@/bin/qmail-tcpok}
+	button $opframe2.7.b -text "Reset Timeout" -command {exec @prefix@/bin/qmail-tcpok}
 	$opframe2.7.b configure -image [image create photo -data "R0lGODlhEAAQAIUAAPwCBCRaJBxWJBxOHBRGBCxeLLTatCSKFCymJBQ6BAwmBNzu3AQCBAQOBCRSJKzWrGy+ZDy+NBxSHFSmTBxWHLTWtCyaHCSSFCx6PETKNBQ+FBwaHCRKJMTixLy6vExOTKyqrFxaXDQyNDw+PBQSFHx6fCwuLJyenDQ2NISChLSytJSSlFxeXAwODCQmJBweHAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACH5BAEAAAAALAAAAAAQABAAAAaBQIBQGBAMBALCcCksGA4IQkJBUDIDC6gVwGhshY5HlMn9DiCRL1MyYE8iiapaSKlALBdMRiPckDkdeXt9HgxkGhWDXB4fH4ZMGnxcICEiI45kQiQkDCUmJZskmUIiJyiPQgyoQwwpH35LqqgMKiEjq5obqh8rLCMtowAkLqovuH5BACH+aENyZWF0ZWQgYnkgQk1QVG9HSUYgUHJvIHZlcnNpb24gMi41DQqpIERldmVsQ29yIDE5OTcsMTk5OC4gQWxsIHJpZ2h0cyByZXNlcnZlZC4NCmh0dHA6Ly93d3cuZGV2ZWxjb3IuY29tADs="]
 	label $opframe2.7.l -text "Reset Timeouts"
 	pack $opframe2.7.b $opframe2.7.l -side left -anchor w
 	pack $opframe2.1 $opframe2.2 $opframe2.3 $opframe2.4 $opframe2.5 $opframe2.6 $opframe2.7 -side top -anchor w
 
 	set arguments ""
-	set cmd "exec @indimaildir@/bin/ipmeprint"		
+	set cmd "exec @prefix@/bin/ipmeprint"		
 	set output_desc "Local IP Addresses"
 	set queuedirs [glob -nocomplain @indimaildir@/queue*]
 	frame $bwin1.1
@@ -4090,7 +4093,7 @@ proc showCtl {mode} {
 		-highlightthickness 5 -highlightbackground black -state normal
 	pack $lwin.quit -side top -expand 0 -fill none -anchor nw
 
-	set cmd "| @indimaildir@/bin/qmail-showctl"
+	set cmd "| @prefix@/bin/qmail-showctl"
 	if {$BWidget_present == 1} {
 		set prgtext "Hmm... I am Busy"
 		progressDialog
@@ -4136,8 +4139,8 @@ proc fetch_config {} {
 			return 1
 		}
 	}
-	if {[file exists @indimaildir@/bin/fetchmailconf]} {
-		set conffile @indimaildir@/bin/fetchmailconf
+	if {[file exists @prefix@/bin/fetchmailconf]} {
+		set conffile @prefix@/bin/fetchmailconf
 	} 
 	if {[catch {exec su $User -c "$conffile -f $env(HOME)/etc/.fetchmailrc" &} result]} {
 		msg_dialog .d {config} "$result" @imagedir@/warning.gif 0 "OK"
@@ -4400,16 +4403,16 @@ proc authenticate {mode} {
 			msg_dialog .d {Invalid Domain} {Domain value not given} @imagedir@/warning.gif 0 "OK"
 			return 1
 		}
-		catch {exec @indimaildir@/sbin/pwhelper $User@$domain $Password @indimaildir@/sbin/vchkpass /bin/false} result
+		catch {exec @prefix@/sbin/pwhelper $User@$domain $Password @prefix@/sbin/vchkpass /bin/false} result
 	} else {
-		catch {exec @indimaildir@/sbin/pwhelper $User $Password @indimaildir@/sbin/systpass /bin/false} result
+		catch {exec @prefix@/sbin/pwhelper $User $Password @prefix@/sbin/systpass /bin/false} result
 	}
 	if {[string length $result] == 0 } {
 		if {$mode == 1} {
 			menuStatus disabled
 			if {$User != "postmaster"} {
 				if {$is_distributed($domain)} {
-					if {[catch {exec @indimaildir@/bin/vuserinfo $User@$domain | grep "Sql Database" | awk {{print $4}}} result]} {
+					if {[catch {exec @prefix@/bin/vuserinfo $User@$domain | grep "Sql Database" | awk {{print $4}}} result]} {
 						msg_dialog .d "Userinfo" $result @imagedir@/warning.gif 0 "OK"
 					}
 					set t_server $result
@@ -4529,7 +4532,7 @@ proc oshcmd {} {
 	source @scriptdir@/global.tcl
 
 	if {$User == "root"} {
-		catch {exec $configs(xterm) -e @indimaildir@/sbin/osh &} result
+		catch {exec $configs(xterm) -e @prefix@/sbin/osh &} result
 	} else {
 		if {[catch {open "/tmp/osh.[pid]" w} fid] } {
 			tk_dialog . "osh" $fid {} {} "OK"
@@ -4537,7 +4540,7 @@ proc oshcmd {} {
 		}
 		puts $fid "#!/bin/sh"
 		puts $fid "trap \"\" SIGHUP"
-		puts $fid "@indimaildir@/sbin/osh"
+		puts $fid "@prefix@/sbin/osh"
 		puts $fid "/bin/rm -f \$0"
 		puts $fid "exit 0"
 		close $fid
