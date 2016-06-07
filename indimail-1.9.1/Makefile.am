@@ -957,9 +957,9 @@ indimail.spec iauth.la indimail.te indimail.fc usr.sbin.mysqld usr.sbin.clamd us
 # This is the last step in indimail installation. Post this installation will start in qmail
 # Hence we still cannot start svscan.
 install-data-hook: 
-	$(INSTALL_DATA) config.h $(DESTDIR)@prefix@/include/indimail_config.h || exit 1
-	$(INSTALL_DATA) indimail.h $(DESTDIR)@prefix@/include/indimail.h || exit 1
-	$(INSTALL_DATA) typesx.h $(DESTDIR)@prefix@/include/typesx.h || exit 1
+	$(INSTALL_DATA) config.h $(DESTDIR)@prefix@/include/indimail/indimail_config.h || exit 1
+	$(INSTALL_DATA) indimail.h $(DESTDIR)@prefix@/include/indimail/indimail.h || exit 1
+	$(INSTALL_DATA) typesx.h $(DESTDIR)@prefix@/include/indimail/typesx.h || exit 1
 	$(INSTALL_DATA) data/wordlist.db $(DESTDIR)@sysconfdir@/wordlist.db  || exit 1
 	$(INSTALL_DATA) perm_list $(DESTDIR)@sysconfdir@/perm_list  || exit 1
 	$(mkinstalldirs) $(DESTDIR)@shareddir@/modules || exit 1
