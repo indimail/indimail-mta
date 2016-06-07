@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail.spec.in,v 2.340 2016-06-05 13:14:51+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 2.341 2016-06-07 10:52:44+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %define _unpackaged_files_terminate_build 1
 
@@ -79,7 +79,7 @@
 %define nobogofilter       0
 %define nodksignatures     0
 
-%define _verbose           1
+%define _verbose           0
 %define qcount             5
 %define qbase              %{indimaildir}/queue
 %define mbase              @basepath@
@@ -109,6 +109,7 @@
 Summary: A Flexible Messaging Platform with Multi-Host/Multi-Protocol support
 Name: indimail
 Version: @version@
+Provides: libindimail, indimail-mta, daemontools, ucspi-tcp
 %if %build_on_obs == 1
 Release: 1.<B_CNT>
 %else
@@ -224,7 +225,7 @@ NoSource: 20
 
 URL: http://www.indimail.org
 #AutoReqProv: No
-Conflicts: %{name}-mini, %{name}-mta %{name}-mta-daemontools %{name}-mta-ucspi-tcp
+Conflicts: %{name}-mini, %{name}-mta daemontools ucspi-tcp
 BuildRequires: openssl-devel rpm gcc gcc-c++ make bison binutils coreutils grep
 BuildRequires: glibc glibc-devel openssl procps readline-devel
 BuildRequires: sed ncurses-devel gettext-devel
@@ -780,11 +781,9 @@ if [ %nolibsrs2 -eq 0 ] ; then
 fi
 
 %{__mkdir_p} %{buildroot}%{domaindir}/domains
-%{__mkdir_p} %{buildroot}%{_prefix}/include
+%{__mkdir_p} %{buildroot}%{_prefix}/include/indimail
 %{__cp} %{name}-%{version}/inc_deps %{buildroot}%{sysconfdir}
 %{__cp} %{name}-%{version}/lib_deps %{buildroot}%{sysconfdir}
-%{__cp} %{name}-%{version}/indimail.h %{buildroot}%{_prefix}/include
-%{__cp} %{name}-%{version}/typesx.h %{buildroot}%{_prefix}/include
 
 if [ %noclamav -eq 0 ] ; then
 	if [ -f %{buildroot}%{sysconfdir}/clamd.conf ] ; then
@@ -947,7 +946,6 @@ fi
 %dir %attr(755,root,root)         %{mandir}/cat8
 %endif
 %if "%{_prefix}" != "/usr"
-%dir %attr(755,root,root)         %{_prefix}/include
 %dir %attr(555,root,root)         %{_libdir}
 %endif
 
@@ -1863,45 +1861,47 @@ fi
 
 %files devel
 %defattr(-, root, root, 0755)
-%dir %attr(555,root,root)              %{_prefix}/include
+%dir %attr(555,root,root)              %{_prefix}/include/indimail
+%if "%{_prefix}" != "/usr"
 %dir %attr(555,root,root)              %{_libdir}
 %dir %attr(555,root,qmail)             %{mandir}/man3
+%endif
 %doc %attr(444,root,qmail)             %{mandir}/man3/*
 
 %attr(644,root,qmail)                   %{sysconfdir}/inc_deps
 %attr(644,root,qmail)                   %{sysconfdir}/lib_deps
 
-%attr(644,root,qmail)                   %{_prefix}/include/eps_unroll.h
-%attr(644,root,qmail)                   %{_prefix}/include/eps_buffer.h
-%attr(644,root,qmail)                   %{_prefix}/include/eps_email.h
-%attr(644,root,qmail)                   %{_prefix}/include/rfc2822.h
-%attr(444,root,qmail)                   %{_prefix}/include/indimail.h
-%attr(444,root,qmail)                   %{_prefix}/include/typesx.h
-%attr(644,root,qmail)                   %{_prefix}/include/eps_mime.h
-%attr(644,root,qmail)                   %{_prefix}/include/eps_boundary.h
-%attr(444,root,qmail)                   %{_prefix}/include/indimail_config.h
-%attr(644,root,qmail)                   %{_prefix}/include/eps_roll.h
-%attr(644,root,qmail)                   %{_prefix}/include/eps_line.h
-%attr(644,root,qmail)                   %{_prefix}/include/eps_int_buffer.h
-%attr(644,root,qmail)                   %{_prefix}/include/eps_base64.h
-%attr(644,root,qmail)                   %{_prefix}/include/eps_misc.h
-%attr(644,root,qmail)                   %{_prefix}/include/eps_address.h
-%attr(644,root,qmail)                   %{_prefix}/include/eps.h
-%attr(644,root,qmail)                   %{_prefix}/include/eps_interface.h
-%attr(644,root,qmail)                   %{_prefix}/include/eps_int_stream.h
-%attr(644,root,qmail)                   %{_prefix}/include/eps_header.h
-%attr(644,root,qmail)                   %{_prefix}/include/eps_content.h
-%attr(644,root,qmail)                   %{_prefix}/include/cdb.h
-%attr(644,root,qmail)                   %{_prefix}/include/cdbmake.h
-%attr(644,root,qmail)                   %{_prefix}/include/uint32.h
+%attr(644,root,qmail)                   %{_prefix}/include/indimail/eps_unroll.h
+%attr(644,root,qmail)                   %{_prefix}/include/indimail/eps_buffer.h
+%attr(644,root,qmail)                   %{_prefix}/include/indimail/eps_email.h
+%attr(644,root,qmail)                   %{_prefix}/include/indimail/rfc2822.h
+%attr(444,root,qmail)                   %{_prefix}/include/indimail/indimail.h
+%attr(444,root,qmail)                   %{_prefix}/include/indimail/typesx.h
+%attr(644,root,qmail)                   %{_prefix}/include/indimail/eps_mime.h
+%attr(644,root,qmail)                   %{_prefix}/include/indimail/eps_boundary.h
+%attr(444,root,qmail)                   %{_prefix}/include/indimail/indimail_config.h
+%attr(644,root,qmail)                   %{_prefix}/include/indimail/eps_roll.h
+%attr(644,root,qmail)                   %{_prefix}/include/indimail/eps_line.h
+%attr(644,root,qmail)                   %{_prefix}/include/indimail/eps_int_buffer.h
+%attr(644,root,qmail)                   %{_prefix}/include/indimail/eps_base64.h
+%attr(644,root,qmail)                   %{_prefix}/include/indimail/eps_misc.h
+%attr(644,root,qmail)                   %{_prefix}/include/indimail/eps_address.h
+%attr(644,root,qmail)                   %{_prefix}/include/indimail/eps.h
+%attr(644,root,qmail)                   %{_prefix}/include/indimail/eps_interface.h
+%attr(644,root,qmail)                   %{_prefix}/include/indimail/eps_int_stream.h
+%attr(644,root,qmail)                   %{_prefix}/include/indimail/eps_header.h
+%attr(644,root,qmail)                   %{_prefix}/include/indimail/eps_content.h
+%attr(644,root,qmail)                   %{_prefix}/include/indimail/cdb.h
+%attr(644,root,qmail)                   %{_prefix}/include/indimail/cdbmake.h
+%attr(644,root,qmail)                   %{_prefix}/include/indimail/uint32.h
 
 %if %noclamav == 0
 %attr(644,root,qmail)                   %{_prefix}/include/clamav.h
 %endif
 
 %if %nolibdkim == 0
-%attr(644,root,qmail)                   %{_prefix}/include/dkim.h
-%attr(644,root,qmail)                   %{_prefix}/include/macros.h
+%attr(644,root,qmail)                   %{_prefix}/include/indimail/dkim.h
+%attr(644,root,qmail)                   %{_prefix}/include/indimail/macros.h
 %attr(644,root,qmail)                   %{_libdir}/libdkim.a
 %endif
 
@@ -1911,7 +1911,7 @@ fi
 %endif
 
 %if %nolibsrs2 == 0
-%attr(644,root,qmail)                   %{_prefix}/include/srs2.h
+%attr(644,root,qmail)                   %{_prefix}/include/indimail/srs2.h
 %attr(644,root,qmail)                   %{_libdir}/libsrs2.a
 %endif
 
@@ -1924,7 +1924,7 @@ fi
 %if %i_m_on_mac == 1
 %{_libdir}/libclam*.dylib
 %else
-%{_libdir}/libclam*.so*
+%{_libdir}/libclam*.so
 %endif
 %endif
 
