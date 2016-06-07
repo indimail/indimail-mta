@@ -2,6 +2,7 @@
 
 # SecPanel
 # Shellscript for wrapping ssh-connections
+# Ver. for SecPanel 0.5.2
 
 
 $1
@@ -13,4 +14,5 @@ Connection closed
 Press <Return> to continue...
 EOF
 
-read
+read end
+

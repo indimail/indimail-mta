@@ -1,24 +1,15 @@
 #!/bin/sh
-# Use the shell to start the wish interpreter: \
+#  -*- tcl -*-
+# Executing wish #\
 exec wish "$0" "$@"
 
-# $Log: secpanel.tcl,v $
-# Revision 2.3  2003-09-13 10:27:07+05:30  Manny
-# version upgrade
-#
-# Revision 2.2  2003-08-07 22:41:54+05:30  Manny
-# changed user to indimail
-#
-# Revision 2.1  2003-04-07 15:41:06+05:30  Manny
-# ssh gui client
-#
 #######################################################################
 #
-# SecPanel - Graphical user interface for managing SSH- and
-# SCP-connections
+# secpanel - Graphical user interface for managing SSH- and
+# SFTP-connections
 #
-# Author: Steffen Leich <secpanel@pingx.net>
-# http://www.pingx.net/secpanel
+# Author: Steffen Leich <steffen.leich _at_ gmail.com>
+# http://secpanel.net
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -36,60 +27,68 @@ exec wish "$0" "$@"
 #
 #######################################################################
 
-set spversion 0.41
-set idstring "\$Id: secpanel.tcl,v 2.3 2003-09-13 10:27:07+05:30 Manny Exp root $"
+set spversion 0.6.0
+
 set returnstatus [catch {set indimaildir [eval {exec grep ^indimail /etc/passwd | awk -F: {{print $6}}}]} result]
 if {$returnstatus != 0} {
 	puts stdout "failed to get home dir for indimail"
 	exit 1
 }
+set sshdir "$env(HOME)/.ssh"
 
-global sites; 
 global actdirsel;
 global questres;
 global userres;
 
 proc init {argc argv} {
-    global env sites configs tk_version launcher defident wingeom agent
+    global env configs tk_version launcher defident agent wins platform
+
+    if {! [info exists env(DISPLAY)] || $env(DISPLAY) == ""} {
+		catch {exec "uname -a"} ver
+	if {! [regexp -nocase "macintosh" $ver]} {
+	    puts "No valid Xwindow DISPLAY environment or MacOSX platform -> exiting secpanel"
+	    exit
+	} else {
+	    set platform "macosx"
+	}
+    } else {
+		set platform "linux"
+    }
     
     set mintcl 8.0
     set mintk 8.0
     
     if {[info tclversion]<$mintcl || $tk_version<$mintk} {
-	puts -nonewline stderr "For running SecPanel:\nTcl $mintcl/Tk $mintk minimum versions required. "
-	puts stderr "You have Tcl [info tclversion]/Tk $tk_version"
-	exit 1
+		puts -nonewline stderr "For running secpanel:\nTcl $mintcl/Tk $mintk minimum versions required. "
+		puts stderr "You have Tcl [info tclversion]/Tk $tk_version"
+		exit 1
     }
-    
+
     set secpaneldir "$env(HOME)/.indimail"
     if {! [file exists $secpaneldir]} {
-	file mkdir $secpaneldir
-	exec chmod 700 $secpaneldir
-	puts "Created config-dir $secpaneldir (chmod 700)..."
+		file mkdir $secpaneldir
+		exec chmod 700 $secpaneldir
+		puts "Created config-dir $secpaneldir (chmod 700)..."
     }
+
+
+    if [file exists $secpaneldir/spdata.lck] {
+		puts "Found protected secpanel data"
+		exec @scriptdir@/dppw.tcl "de"
+    }
+
     
     if {! [file exists $secpaneldir/.runfiles]} {
-	file mkdir $secpaneldir/.runfiles
+		file mkdir $secpaneldir/.runfiles
     }
     
-    if {! [file exists "$secpaneldir/default.profile"]} {
-	puts "Creating my default-profile $secpaneldir/default.profile ..."
-	file copy "@shareetcdir@/default.profile" "$secpaneldir/default.profile"
-    }
-    
-    set sitefile "$env(HOME)/.indimail/sites"
-    if [file exists $sitefile] {
-	set sf [open $sitefile r]
-	while {[gets $sf line] >= 0} {
-	    set els [split $line \#]
-	    set sites([lindex $els 0]) "[lindex $els 1]#[lindex $els 2]"
-	}
-	close $sf
+    if {! [file exists $secpaneldir/profiles]} {
+		file mkdir $secpaneldir/profiles
     }
     
     set configfile "$env(HOME)/.indimail/config"
     if {! [file exists $configfile]} {
-	file copy "@shareetcdir@/default.config" "$configfile"
+		file copy @sysconfdir@/default.config "$configfile"
     }
     source $configfile
     initconfigs
@@ -97,84 +96,71 @@ proc init {argc argv} {
     array set gshorts {fore foreground back background}
     
     foreach gcolval [array names gshorts] {
-	if [info exists configs($gcolval)] {
-	    option add *$gshorts($gcolval) $configs($gcolval)
-	}
+		if [info exists configs($gcolval)] {
+			option add *$gshorts($gcolval) $configs($gcolval)
+		}
     }
     
     array set shorts {entfore Entry.foreground entback Entry.background \
 			  listfore Listbox.foreground listback Listbox.background}
     
     foreach colval [array names shorts] {
-	if [info exists configs($colval)] {
-	    option add *$shorts($colval) $configs($colval)
-	    if {$colval == "listfore"} {
-		option add *Text.foreground $configs($colval)		
-	    }
-	    if {$colval == "listback"} {
-		option add *Text.background $configs($colval)		
-	    }
-	}
+		if [info exists configs($colval)] {
+			option add *$shorts($colval) $configs($colval)
+			if {$colval == "listfore"} {
+				option add *Text.foreground $configs($colval)		
+			}
+			if {$colval == "listback"} {
+				option add *Text.background $configs($colval)		
+			}
+		}
     }
     
     set fb ""
     set fi ""
     
-    if [info exists configs(fontbold)] {
-	if $configs(fontbold) {
-	    set fb "bold"
+    if {([info exists configs(sysfonts)] && ($configs(sysfonts) != 1)) || ! [info exists configs(sysfonts)]} {
+	    if [info exists configs(fontbold)] {
+			if $configs(fontbold) {
+				set fb "bold"
+			}
+	    }
+	    
+	    if [info exists configs(fontitalic)] {
+			if $configs(fontitalic) {
+				set fi "italic"
+			}
+	    }
+	    
+	    if {[info exists configs(fontfam)] && [info exists configs(fontsize)]} {
+			option add *Font "\"$configs(fontfam)\" $configs(fontsize) $fb $fi"
+	    }
 	}
-    }
-    
-    if [info exists configs(fontitalic)] {
-	if $configs(fontitalic) {
-	    set fi "italic"
-	}
-    }
-    
-    if {[info exists configs(fontfam)] && [info exists configs(fontsize)]} {
-	option add *Font "\"$configs(fontfam)\" $configs(fontsize) $fb $fi"
-    }
-    
+
     set agent 0
 }
 
 proc initconfigs {} {
     global configs
     foreach {bintag binprog} \
-	    {sshbin ssh keygenbin ssh-keygen agentbin ssh-agent \
-	    addbin ssh-add askpassbin askpass scpbin scp xtermbin xterm browserbin opera} {
-	if {! [info exists configs($bintag)]} {
-	    set configs($bintag) $binprog
-	}
-    }
+	{sshbin ssh keygenbin ssh-keygen agentbin ssh-agent \
+	     addbin ssh-add askpassbin ssh-askpass scpbin scp sftpbin Filezilla termver Xterm browserbin firefox \
+	     } {
+		 if {! [info exists configs($bintag)]} {
+		     set configs($bintag) $binprog
+		 }
+	     }
+
     if {! [info exists configs(sshver)]} {
-	set configs(sshver) "OpenSSH"
+		set configs(sshver) "OpenSSH"
     }
-
+    
     if {! [info exists configs(termver)]} {
-	set configs(termver) "Xterm"
+		set configs(termver) "Xterm"
     }
 
-    if {! [info exists configs(lswait)]} {
-	set configs(lswait) "1"
-    }
-
-    if {! [info exists configs(lsinterpret)]} {
-	set configs(lsinterpret) "tcl"
-    }
-
-    if {! [info exists configs(scpguiport)]} {
-	set configs(scpguiport) 8820
-    }
-    if {! [info exists configs(listserverport)]} {
-	set configs(listserverport) 9920
-    }
-    if {! [info exists configs(controlremoteport)]} {
-	set configs(controlremoteport) 9910
-    }
-    if {! [info exists configs(controllocalport)]} {
-	set configs(controllocalport) 8810
+    if {! [info exists configs(protectdata)]} {
+		set configs(protectdata) 0
     }
 }
 
@@ -185,16 +171,110 @@ proc browsebin {which} {
     choosefile $widget([set which]ent) "actdirsel" "Open" ""
 }
 
+proc manage_remote {mode} {
+    global widget rfts configs env termtype ramhost ramport ramuser
+
+    set usetermver $configs(termver)
+
+    set icontag ""
+    
+    set configs(xtermbin) $termtype([set usetermver]_path)
+    set titlepar $termtype([set usetermver]_titlepar)
+    set quotepar $termtype([set usetermver]_quotepar)
+    set execpar $termtype([set usetermver]_execpar)
+    if {[info exists termicon] && $termicon} {
+	set icontag $termtype([set usetermver]_iconpar)
+    }
+    # </xterm selection and params>
+
+    switch -regexp $mode {
+	init {
+	    if {[selection own] == $widget(specsites)} {
+		set actentry [$widget(specsites) get active]
+		set rmprof [retprof $actentry]
+
+		source "$env(HOME)/.indimail/profiles/$rmprof.profile"
+
+		set ramhost $host
+		set ramport $port
+		set ramuser $user
+	    } else {
+		showmessage "No entry selected" ""
+		return
+	    }
+
+	    if {[winfo exists .top40]} {
+		if [showconfirm\
+			"There is another remote management session. Cancel this former session?"\
+			.top40] {
+		    manage_remote cancel
+		} else {
+		    return
+		}
+	    }
+
+	    set rfts [clock clicks]
+
+	    Window show .top40
+	    .top40.lab51 config -text "Remote Account Manager for $title ($ramuser@$ramhost)"
+	    
+	    set connstring "@scriptdir@/secpanel_remoteconf.sh $ramhost $ramport $ramuser $configs(scpbin) read $rfts"
+
+	    set runstring "exec $configs(xtermbin) $execpar $quotepar <CONNFILE> $quotepar"
+		exec echo $runstring
+
+	    provrunfile term nobg $connstring $runstring
+
+	    set shostsfile "$env(HOME)/.indimail/.runfiles/ram.$rfts/.shosts"
+	    set keysfile "$env(HOME)/.indimail/.runfiles/ram.$rfts/authorized_keys"
+
+	    if {[file exists $shostsfile]} {
+		$widget(remoteshostsfile) insert end [exec cat $shostsfile]
+	    }
+	    if {[file exists $keysfile]} {
+		$widget(remotekeysfile) insert end [exec cat $keysfile]
+	    }
+
+	    $widget(remotercfile) insert end "Not yet supported, breaks scp..."
+	}
+	cancel {
+	    file delete -force "$env(HOME)/.indimail/.runfiles/ram.$rfts"
+	    unset rfts
+	    Window destroy .top40
+	}
+	write {
+	    if [showconfirm "Really write back remote configuration?" ".top40"] {
+
+		set shostsfile [open "$env(HOME)/.indimail/.runfiles/ram.$rfts/.shosts" w]
+		puts -nonewline $shostsfile [$widget(remoteshostsfile) get 1.0 end]
+		close $shostsfile
+
+		set keysfile [open "$env(HOME)/.indimail/.runfiles/ram.$rfts/authorized_keys" w]
+		puts -nonewline $keysfile [$widget(remotekeysfile) get 1.0 end]
+		close $keysfile
+
+		set connstring "@scriptdir@/secpanel_remoteconf.sh $ramhost $ramport $ramuser $configs(scpbin) write $rfts"
+
+		set runstring "exec $configs(xtermbin) $execpar $quotepar <CONNFILE> $quotepar"
+		
+		provrunfile term bg $connstring $runstring
+
+		Window destroy .top40
+	    }
+	}
+    }
+}
+
 proc save_globals {mode} {
-    global widget env configs launcher defident
+    global widget env configs launcher defident wins
     set conffile [open "$env(HOME)/.indimail/config" w]
     switch -regexp $mode {
 	bins {
 	    array set bindefs { \
 		    ssh ssh keygen ssh-keygen agent ssh-agent add ssh-add \
-		    askpass askpass scp scp xterm xterm browser opera}
+		    askpass ssh-askpass scp scp browser firefox }
 
-	    foreach f {ssh keygen agent add askpass scp xterm browser} {
+	    foreach f {ssh keygen agent add askpass scp browser} {
 		if {[$widget([set f]ent) get] == ""} {
 		    $widget([set f]ent) insert 0 $bindefs($f)
 		}
@@ -204,17 +284,19 @@ proc save_globals {mode} {
 	    }
 	    puts $conffile "set configs(sshver) \"$configs(sshver)\""
 	    puts $conffile "set configs(termver) \"$configs(termver)\""
+	    puts $conffile "set configs(sftpbin) \"$configs(sftpbin)\""
 	    if [info exists defident] {
 		puts $conffile "set defident \"$defident\""
 	    }
 	    puts $conffile "set launcher $launcher"
 	}
-	"geom|color|fonts|scp|agent|chdef" {
-	    foreach f {ssh keygen agent add askpass scp xterm browser} {
+	"geom|startsat|color|fonts|scp|agent|chdef|protectdata" {
+	    foreach f {ssh keygen agent add askpass scp browser} {
 		puts $conffile "set configs([set f]bin) \"$configs([set f]bin)\""
 	    }
 	    puts $conffile "set configs(sshver) \"$configs(sshver)\""
 	    puts $conffile "set configs(termver) \"$configs(termver)\""
+	    puts $conffile "set configs(sftpbin) \"$configs(sftpbin)\""
 	    puts $conffile "set launcher $launcher"
 	    if [info exists defident] {
 		puts $conffile "set defident \"$defident\""
@@ -228,40 +310,27 @@ proc save_globals {mode} {
 	}
     }
 
-    foreach font {fontfam fontsize fontbold fontitalic} {
+    foreach font {fontfam fontsize fontbold fontitalic sysfonts} {
 	if [info exists configs($font)] {
-	    puts $conffile "set configs($font) $configs($font)"
+	    puts $conffile "set configs($font) \"$configs($font)\""
 	}
     }
 
     if [info exists configs(wingeom)] {
-	puts $conffile "set wingeom [wm geometry .top17]"
 	puts $conffile "set configs(wingeom) \"$configs(wingeom)\""
     }
 
-    foreach scpbool {scpstats scppres scpverb scpcomp scpshowhidden \
-	    lswait lsverbose} {
-	if [info exists configs($scpbool)] {
-	    if $configs($scpbool) {
-		puts $conffile "set configs($scpbool) \"$configs($scpbool)\""
-	    } else {
-		puts $conffile "set configs($scpbool) \"$configs($scpbool)\""
-	    }
-	}
+    if [info exists configs(protectdata)] {
+	puts $conffile "set configs(protectdata) \"$configs(protectdata)\""
     }
 
-    if [info exists configs(scpport)] {
-	regsub -all " " $configs(scpport) "" configs(scpport)
-	puts $conffile "set configs(scpport) \"$configs(scpport)\""
+    foreach w [array names wins] {
+	puts $conffile "set wins($w) \"$wins($w)\""
     }
 
-    if [info exists configs(lsinterpret)] {
-	puts $conffile "set configs(lsinterpret) \"$configs(lsinterpret)\""
-    }
-
-    foreach port {scpgui listserver controlremote controllocal} {
-	puts $conffile "set configs([set port]port) \"$configs([set port]port)\""
-    }
+    if [info exists configs(startsat)] {
+	puts $conffile "set configs(startsat) \"$configs(startsat)\""
+    }    
 
     close $conffile
     showstatus "Global configs saved"
@@ -284,7 +353,7 @@ proc chcol {var button title} {
 }
 
 proc colorchoose {parent title} {
-    set col [tk_chooseColor -parent $parent -title "SecPanel - $title"]
+    set col [tk_chooseColor -parent $parent -title "secpanel - $title"]
     return $col
 }
 
@@ -310,21 +379,6 @@ proc fontman {mode} {
 		incr fs
 	    }
 
-	    # activate listenelement in fontfam und size mit richtigen Werten
-	    # font-ex.text mit eingestellten werten
-	}
-	
-	save {
-	    set configs(fontfam) \"[$names get active]\"
-	    set configs(fontsize) [$sizes get active]
-	    save_globals fonts
-	    Window destroy .top23
-	}
-
-	ul {
-	    set name [$names get active]
-	    set size [$sizes get active]
-	    
 	    if $configs(fontbold) {
 		set fb "bold"
 	    } else {
@@ -336,8 +390,76 @@ proc fontman {mode} {
 	    } else {
 		set fi ""
 	    }
+	    
+	    if {! $configs(sysfonts)} {
 
-	    .top23.lab30 config -text "[$names get active] [$sizes get active]" -font "\"$name\" $size $fi $fb"
+		if {[info exists configs(fontfam)] && [info exists configs(fontsize)]} {
+		    set label "$configs(fontfam) $configs(fontsize)"
+		    .top23.lab30 config \
+			-font "\"$configs(fontfam)\" $configs(fontsize) $fi $fb"
+		} else {
+		    set label ""
+		}
+
+ 		.top23.lab30 config -text "$label"
+	    } else {
+ 		.top23.lab30 config -text "Using external sysfonts"
+	    }		
+	    
+	    set fc 0
+	    if [info exists configs(fontfam)] {
+		foreach fn [$names get 0 end] {
+		    if {$fn =="$configs(fontfam)"} {
+			$names activate $fc
+			$names see $fc
+		    }
+		    incr fc		    
+		}
+	    }
+	    
+	    set sc 0
+	    if [info exists configs(fontsize)] {
+		foreach fs [$sizes get 0 end] {
+		    if {$fs =="$configs(fontsize)"} {
+			$sizes activate $sc
+			$sizes see $sc
+		    }
+		    incr sc		    
+		}
+	    }
+
+	    # activate listenelement in fontfam und size mit richtigen Werten
+	    # font-ex.text mit eingestellten werten
+	}
+	
+	save {
+	    set configs(fontfam) [$names get active]
+	    set configs(fontsize) [$sizes get active]
+	    save_globals fonts
+	    Window destroy .top23
+	}
+
+	ul {
+
+	    if {! $configs(sysfonts)} {
+		set name [$names get active]
+		set size [$sizes get active]
+		
+		if $configs(fontbold) {
+		    set fb "bold"
+		} else {
+		    set fb ""
+		}
+		
+		if $configs(fontitalic) {
+		    set fi "italic"
+		} else {
+		    set fi ""
+		}
+		.top23.lab30 config -text "[$names get active] [$sizes get active]" -font "\"$name\" $size $fi $fb"
+	    } else {
+ 		.top23.lab30 config -text "Using external sysfonts"
+	    }		
 	}
     }
 }
@@ -390,186 +512,7 @@ proc colorman {mode} {
     }
 }
 
-proc export {mode form} {
-    global sites env widget configs
-
-    # source def-files
-    if {$mode == "def"} {
-	if {[$widget(defsites) index end] > 0} {
-	    source "$env(HOME)/.indimail/default.profile"
-	    set actconn [$widget(defsites) get active]
-	    set host [lindex [split $sites($actconn) #] 0]
-	    
-	    set userentry [lindex [split $sites($actconn) #] 1]
-	    
-	    if {$userentry == "<ASKFORUSER>"} {
-		set user [askforuser]
-		if {$user == "#####"} {
-		    return
-		}
-	    } else {
-		set user $userentry
-	    }
-	    
-	    set title $actconn
-	} else {
-	    showmessage "No conncections available, please use \"New\"" ""
-	    return
-	}
-    }
-    
-    # source spec-files
-    if {$mode == "spec"} {
-	if {[$widget(specsites) index end] > 0} {
-	    set actconn [retprof [$widget(specsites) get active]]
-	    source "$env(HOME)/.indimail/$actconn.profile"
-	} else {
-	    showmessage "No conncections available, please use \"New\"" ""
-	    return
-	}
-    }
-
-    # forwardings
-    if {[array size lfs] > 0} {
-	foreach lf [array names lfs] {
-	    if {[regsub {<TARGET-HOST>} [lindex [split $lf :] 1] $host th]} {
-		append lf_tag  " -L [lindex [split $lf :] 0]:$th:[lindex [split $lf :] 2] "
-	    } else {
-		append lf_tag  " -L [lindex [split $lf :] 0]:[lindex [split $lf :] 1]:[lindex [split $lf :] 2] "
-	    }
-	}
-    } else {
-	set lf_tag " "
-    }
-
-    set localhost [info hostname]
-    if {[array size rfs] > 0} {
-	foreach rf [array names rfs] {
-	    if {[regsub {<LOCAL-HOST>} [lindex [split $rf :] 1] $localhost lh]} {
-		append rf_tag  " -R [lindex [split $rf :] 0]:$lh:[lindex [split $rf :] 2] "
-	    } else {
-		append rf_tag  " -R [lindex [split $rf :] 0]:[lindex [split $rf :] 1]:[lindex [split $rf :] 2] "
-	    }
-	}
-    } else {
-	set rf_tag " "
-    }
-
-    if {$user != ""} {
-	set user_tag "-l $user "
-    } else {
-	set user_tag " "
-    }
-    
-    if {$port == 22 || $port == ""} {
-	set port_tag " "
-    } else {
-	set port_tag "-p $port "
-    }
-    
-    if {$algo != "default" || $algo == ""} {
-	set algo_tag "-c $algo "
-    } else {
-	set algo_tag " "
-    }
-    
-    if {$identity != ""} {
-	set ident_tag "-i $identity "
-    } else {
-	set ident_tag " "
-    }
-
-    if {$command != ""} {
-	set command_tag "$command"
-    } else {
-	set command_tag ""
-    }
-    
-    if $compress {
-	# openssh
-	if {$configs(sshver) == "OpenSSH"} {
-	    set compressval_tag "-o \'CompressionLevel [set compressval]\' "
-	} else {
-	    set compressval_tag "-o CompressionLevel=$compressval "
-	}
-    } else {
-	set compressval_tag " "
-    }
-    
-    array set bools {
-	"agentforward" "-a" \
-		"x11forward" "-x" \
-		"nopriv" "-P"  "verbose" "-v" \
-		"quiet" "-q" \
-		"fork" "-f" \
-		"gateway" "-g" \
-		"compress" "-C"
-    }
-    
-    # foreach f [array names $bools]
-    foreach f {agentforward x11forward nopriv verbose \
-	    quiet fork gateway compress} {
-	if [set $f] {
-	    set [set f]_tag "$bools($f) "
-	} else {
-	    set [set f]_tag " "
-	}
-    }
-
-    # foreach f [array names $bools]
-    foreach f {agentforward x11forward nopriv verbose \
-	    quiet fork gateway compress} {
-	if [set $f] {
-	    set [set f]_tagssh "yes"
-	} else {
-	    set [set f]_tagssh "no"
-	}
-    }
-
-    set sshvertag "-[set sshverconnect] "
-    set ipvertag "-[set ipverconnect] "
-
-    # openssh
-    if {! $x11forward} {
-	if {$configs(sshver) == "OpenSSH"} {
-	    set x11forward_tag "-X "
-	}
-    }
-
-    set connstring "$configs(sshbin) $user_tag \
-	    $agentforward_tag $x11forward_tag $sshvertag $ipvertag $port_tag $algo_tag \
-	    $ident_tag $nopriv_tag $verbose_tag $quiet_tag \
-	    $fork_tag $gateway_tag $compress_tag $compressval_tag \
-	    $lf_tag $rf_tag $host $command_tag"
-
-
-    switch -exact $form {
-	"ssh" {
-	    puts "Host $host"
-	    puts "Compression $compress_tagssh"
-	    puts "CompressionLevel $compressval_tag"
-	    puts "ForwardAgent $agentforward_tagssh"
-	    puts "ForwardX11 $x11forward_tagssh"
-	    puts "GatewayPorts $gateway_tagssh"
-	    puts "HostName $host"
-	    puts "IdentityFile $ident_tag"
-	    puts "LocalForward"
-	    puts "Port $port_tag"
-	    puts "Protocol $sshvertag"
-	    puts "RemoteForward"
-	    puts "StrictHostKeyChecking"
-	    puts "User $user_tag"
-	}
-	"sh" {
-	    puts "#!/bin/sh"
-	    puts "#\n#Exported by SecPanel\n#"
-	    puts "$connstring"
-	}
-    }
-}
-
-
-proc showmenu {mode} {
+proc showmenu {} {
     if [winfo exists .pm1] {
 	Window destroy .pm1
     }
@@ -579,66 +522,105 @@ proc showmenu {mode} {
     }
 
     menu .pm1 -tearoff 0 -borderwidth 1
-    .pm1 add command -label Connect -command "connect $mode"
-    .pm1 add command -label Edit -command "propconn $mode 1"
+    .pm1 add command -label "Connect" -command "connect"
+    .pm1 add command -label "Edit" -command "propconn specsites"
 
-    if {$mode == "def"} {
-	.pm1 add command -label "Edit default profile" -command "changetab ssh; load_profile def"
-    }
-
-    .pm1 add command -label Delete -command "delconn $mode"
+    .pm1 add command -label "Delete" -command "delconn"
     .pm1 add command -label "Show info" -state "disabled"
+    .pm1 add command -label "Manage remote account" -command "manage_remote init"
     .pm1 add cascade -label "Export as..." -menu .pm1.pm2
     .pm1 add separator
-    .pm1 add command -label "New connection" -command "newconn $mode 1"
+    .pm1 add command -label "New connection" -command "newconn 1"
     
     menu .pm1.pm2 -tearoff 0 -borderwidth 1
-    .pm1.pm2 add command -label "Shellscript" -command "export $mode sh" -state "disabled"
-    .pm1.pm2 add command -label "SSH configfile" -command "export $mode ssh" -state "disabled"
-    .pm1.pm2 add command -label "GNOME icon" -command "export $mode gnome"
-    .pm1.pm2 add command -label "KDE icon" -command "export $mode kde" -state "disabled"
+    .pm1.pm2 add command -label "Shellscript" -command "export sh" -state "disabled"
+    .pm1.pm2 add command -label "SSH configfile" -command "export ssh" -state "disabled"
+    .pm1.pm2 add command -label "GNOME icon" -command "export gnome" -state "disabled"
+    .pm1.pm2 add command -label "KDE icon" -command "export kde" -state "disabled"
     
     tk_popup .pm1 [winfo pointerx .top17] [winfo pointery .top17]
 }
 
 proc historyman {mode "categ {}" "text {}"} {
-    global env histjob
+    global env histjob configs wins
+
     switch -exact $mode {
 	write {
 	    set hf [open "$env(HOME)/.indimail/history" a]
 	    puts $hf "$categ#[clock seconds]#$text"
 	    close $hf
+	    if [winfo exists .top26] {
+			historyman print
+	    }
 	}
 	show {
 	    Window show .top26
+
+	    if {[info exists configs(wingeom)] && $configs(wingeom)} {
+			if [info exists wins(hist)] {
+				wm geometry ".top26" $wins(hist)
+			}
+	    }
+
 	    set histjob 1
 	    historyman print
 	}
 	report {
+
+	    set repdir "$env(HOME)/.indimail/reports"
+	    if {! [file exists "$repdir"]} {
+		file mkdir "$repdir"
+	    }
+
+	    set index [open "$repdir/index.html" w]
+	    puts $index "<!-- generated by secpanel [exec date]-->\n<frameset border=0 frameborder=\"no\" rows=\"10%,90%\">\n<frame src=\"header.html\" name=\"header\">\n<frameset border=0 frameborder=\"no\" cols=\"20%,80%\">\n<frame src=\"panel.html\" name=\"panel\">\n<frame src=\"1.html\" name=\"content\">\n</frameset></frameset>"
+	    close $index
+
+	    set header [open "$repdir/header.html" w]
+	    puts $header "<font size=\"+2\">Report of Secure Shell actions</font><br>Generated by secpanel [exec date]"
+	    close $header
+
+	    set panel [open "$repdir/panel.html" w]
+	    puts $panel "<b>Actions</b>\n<HR>\n<a target=\"content\" href=\"1.html\">SSH connect</a><br>\n<a target=\"content\" href=\"2.html\">SFTP connect</a><br>\n<a target=\"content\" href=\"4.html\">Keygen</a><br>\n<a target=\"content\" href=\"5.html\">Keydist</a><br>\n<a target=\"content\" href=\"6.html\">Agent</a><HR>"
+	    close $panel
+
 	    if {! [file exists "$env(HOME)/.indimail/history"]} {
 		showmessage "No history available" .top26
 		return
 	    }
+
+	    foreach m {1 2 4 5 6} {
+		set modef[set m] [open "$repdir/[set m].html" w]
+		puts [set modef[set m]] "<table border=0 width=\"80%\">\n"
+	    }
+
 	    set hf [open "$env(HOME)/.indimail/history" r]
 	    while {[gets $hf line] >= 0} {
 		set elems [split $line "#"]
-		if {[lindex $elems 0] == $histjob} {
-		}
+		set actmode [set modef[lindex $elems 0]]
+		puts $actmode "<tr><td>[clock format [lindex $elems 1]]<hr noshade></td><td>[lindex $elems 2]<hr noshade></td></tr>\n"
 	    }
-	    close $hf	    
+
+	    foreach m2 {1 2 4 5 6} {
+		puts [set modef[set m2]] "</table>\n"
+		close [set modef[set m2]]
+	    }
+	    showmessage "Report for actual history generated in ~/.indimail/reports/index.html" .top26
+
+	    exec $configs(browserbin) "file:$env(HOME)/.indimail/reports/index.html" &
 	}
 	print {
 	    set text .top26.cpd27.03
 	    $text delete 1.0 end
 	    if {! [file exists "$env(HOME)/.indimail/history"]} {
-		return
+			return
 	    }
 	    set hf [open "$env(HOME)/.indimail/history" r]
 	    while {[gets $hf line] >= 0} {
-		set elems [split $line "#"]
-		if {[lindex $elems 0] == $histjob} {
-		    $text insert end "[clock format [lindex $elems 1]] - [lindex $elems 2]\n"
-		}
+			set elems [split $line "#"]
+			if {[lindex $elems 0] == $histjob} {
+				$text insert end "[clock format [lindex $elems 1]] - [lindex $elems 2]\n"
+			}
 	    }
 	    $text see end
 	    close $hf
@@ -678,12 +660,6 @@ proc historyman {mode "categ {}" "text {}"} {
 	}
     }
 }
-
-proc updateDistLabel {} {
-    .top17.fra35.fra17.lab39 config -text \
-	    "Dist. as [.top17.fra35.fra17.fra17.01 get active] to\n[.top17.fra35.fra17.cpd29.01 get active]"
-}
-
 
 proc showcomm {mode} {
     global widget lfstemp rfstemp
@@ -759,7 +735,10 @@ proc save_forwards {mode} {
     }
 
     array set [set mode]fs [array get [set mode]fstemp]
-    unset [set mode]fstemp
+
+    if [info exists [set mode]fstemp] {
+	unset [set mode]fstemp
+    }
 
     Window destroy [set [set mode]win]
 }
@@ -788,34 +767,49 @@ proc open_forwardings {mode} {
 }
 
 proc changetab {mode} {
-    global agent
+    global agent widget wins configs
     switch -exact $mode {
 	"small" {
+
+	    if {! [$widget(specsites) index end] > 0} {
+		showmessage "No conncections available, please add one..." ""
+		return
+	    }
+
 	    wm withdraw .top17
 	    Window show .top27
+
+	    if {[info exists configs(wingeom)] && $configs(wingeom)} {
+		if [info exists wins(sat)] {
+		    wm geometry ".top27" $wins(sat)
+		}
+	    }
+
+	    .top27.but27 config -image [image create photo -file @imagedir@/swinback_gr.gif]
+
 	    if {$agent == 1 || $agent == "ext"} {
-		.top27.lab34 config -text "Agent active" -bg green -fg black
+		.top27.but27 config -bg green -fg black
 	    } else {
-		.top27.lab34 config -text "No Agent" -bg firebrick1
+		.top27.but27 config -bg firebrick1
 	    }
 
 	    specsiteupdate "ss"
-	    defsiteupdate "ss"
 	    bind .top27 <Destroy> {
 		changetab big
 	    }
 	}
 	"big" {
 	    wm withdraw .top27
+	    destroyfilter .top27
 	    Window show .top17
 	}
 	"default" {
-	    foreach f {21 27 35 44 46} {
+	    foreach f {21 35 44 46} {
 		if {[grid info .top17.fra[set f]] != ""} {
 		    grid remove .top17.fra[set f]
 		}
 	    }
-	    array set frames {connect 46 terminal 44 key 35 ssh 21 scp 27}
+	    array set frames {connect 46 terminal 44 key 35 ssh 21}
 	    
 	    grid .top17.fra$frames($mode) -in .top17 \
 		    -column 0 -row 1 -columnspan 1 -rowspan 1 \
@@ -866,115 +860,176 @@ proc choosefile {{entry ""} {startdir ""} {mode ""} {task ""}} {
     }
 }
 
-proc clear_distmenu {} {
-    global env widget sites
+proc showmessage_wizard {text} {
+    global widget
+    $widget(messageline) config -text "$text"
+}
 
-    $widget(keydisthost) delete 0 end
-    $widget(keydistuser) delete 0 end
-
-    $widget(scphosts) delete 0 end
-    $widget(scpusers) delete 0 end
-
-    set disthosts [list]
-    set distusers [list]
-
-    lappend distusers $env(USER)
-
-    foreach s [array names sites] {
-	set he [lindex [split $sites($s) '#'] 0]
-	set ue [lindex [split $sites($s) '#'] 1]
-	set hfound 0
-	set ufound 0
-
-	set usercheck 1
-
-	if {$ue == ""} {
-	    set usercheck 0
+proc distwizard {mode direct} {
+    global widget key connectionprofiles
+    switch -exact $mode {
+	"key" {
+	    switchtab_wizard "key"
+	    update_keylist
+	    $widget(contbutton) config -command "distwizard host f" -text "Continue" -state "active"
+	    $widget(backbutton) config -state "disabled" -command ""
+	    showmessage_wizard ""
 	}
-
-	foreach hd $disthosts {
-	    if {$he == $hd} {
-		set hfound 1
-		break
-	    }
-	}
-
-	if {$hfound != 1} {
-	    lappend disthosts $he
-	}
-
-	if {$usercheck} {
-	    foreach ud $distusers {
-		if {$ue == $ud} {
-		    set ufound 1
-		    break
+	"host" {
+	    if {$direct == "f"} {
+		set key [$widget(distkeyentry) get]
+		if {$key == ""} {
+		    showmessage_wizard "Please choose key!"
+		    return
 		}
 	    }
-	    if {$ufound != 1} {
-		lappend distusers $ue
+	    switchtab_wizard "host"
+	    $widget(contbutton) config -command "distwizard confirm f" -text "Continue" -state "active"
+	    $widget(backbutton) config -command "distwizard key b" -state "active"
+	    showmessage_wizard ""
+	}
+	"confirm" {
+	    if {$direct == "f"} {
+		if {[selection own] != $widget(distconnlist)} {
+		    showmessage_wizard "Please choose connection!"
+		    return
+		}
+		set connections [$widget(distconnlist) curselection]
 	    }
+
+	    set connectiontitles ""
+	    set connectionprofiles ""
+	    foreach connentry $connections {
+		set connectiontitles [concat $connectiontitles [$widget(distconnlist) get $connentry]]
+		lappend connectionprofiles [retprof [$widget(distconnlist) get $connentry]]
+	    }
+
+	    switchtab_wizard "confirm"
+	    $widget(finishmessage) config -text "Distribute\n$key\nto connection\n[lsort $connectiontitles]"
+	    $widget(contbutton) config -command "distwizard finish f" -text "Distribute key" -state "active"
+	    $widget(backbutton) config -command "distwizard host b" -state "active"
+	    showmessage_wizard ""
+	}
+	"finish" {
+	    Window destroy .top53
+	    distkey "\"$key\"" "$connectionprofiles"
 	}
     }
+}
 
-    set profiles [glob -nocomplain "$env(HOME)/.indimail/*.profile"]
-    foreach prof $profiles {
-	if {[file rootname [file tail $prof]] == "default"} {
-	    continue
-	}
-	source $prof
 
-	set he $host
-	set ue $user
-	set hfound 0
-	set ufound 0
+proc distkey {key connectionprofiles} {
+    global env widget configs termtype
 
-	foreach hd $disthosts {
-	    if {$he == $hd} {
-		set hfound 1
-		break
-	    }
-	}
-	if {$hfound != 1} {
-	    lappend disthosts $he
-	}
+    set connstring ""
 
-	foreach ud $distusers {
-	    if {$ue == $ud} {
-		set ufound 1
-		break
-	    }
-	}
-	if {$ufound != 1} {
-	    lappend distusers $ue
-	}
+    foreach actconn $connectionprofiles {
 	
-	unset lfs
-    }
+	source "$env(HOME)/.indimail/profiles/$actconn.profile"
 
-    foreach hent [lsort $disthosts] {
-	$widget(keydisthost) insert end $hent
-	$widget(scphosts) insert end $hent
+	if {$user == "<ASKFORUSER>"} {
+	    set user [askforuser]
+	    if {$user == "#####"} {
+		return
+	    }
+	}
+
+	set singleactstring "@scriptdir@/spdistkey $host $port $user $key $configs(sshbin)"
+	set connstring "$connstring $singleactstring"
+	set connstring "$connstring \n\n\necho ==============================================================\n\n"
+
+	historyman write 5 "$key -> $user@$host"
+
     }
-    foreach uent [lsort $distusers] {
-	$widget(keydistuser) insert end $uent
-	$widget(scpusers) insert end $uent
+    set connstring "$connstring echo
+    echo \"Key-Distribution finished\nPress <Return> to continue\"
+    read out
+    exit"
+
+
+    set usetermver $configs(termver)
+
+    set icontag ""
+    
+    set configs(xtermbin) $termtype([set usetermver]_path)
+    set titlepar $termtype([set usetermver]_titlepar)
+    set quotepar $termtype([set usetermver]_quotepar)
+    set execpar $termtype([set usetermver]_execpar)
+    if {[info exists termicon] && $termicon} {
+	set icontag $termtype([set usetermver]_iconpar)
     }
+    # </xterm selection and params>
+
+    set runstring "exec $configs(xtermbin) $titlepar \"secpanel Key-Distribution\" $execpar $quotepar <CONNFILE> $quotepar"
+
+    provrunfile term bg $connstring $runstring
+}
+
+proc command_trace {mode "text {}"} {
+    global env configs wins
+
+    set tracetext ".top24.cpd25.03"
+    set tracefile "$env(HOME)/.indimail/.runfiles/trace.log"
+
+    switch -exact $mode {
+		"view" {
+			Window show .top24
+
+			if {[info exists configs(wingeom)] && $configs(wingeom)} {
+				if [info exists wins(trace)] {
+					wm geometry ".top24" $wins(trace)
+				}
+			}
+
+			$tracetext delete 1.0 end
+			if [file exists "$tracefile"] {
+				set tf [open "$tracefile" r]
+				while {[gets $tf line] >= 0} {
+					set elems [split $line "#"]
+					$tracetext insert end "[clock format [lindex $elems 0]] - [lindex $elems 1]\n"
+				}
+				close $tf
+			} else {
+				$tracetext insert end "No tracelog available"
+			}
+			$tracetext see end
+		}
+		"save" {
+			set tf [open "$tracefile" a]
+			puts $tf "[clock seconds]#[quote_double_space $text]"
+			close $tf
+			if [winfo exists .top24] {
+				command_trace "view"
+			}
+		}
+    }
+}
+
+proc switchtab_wizard {mode} {
+	global widget
+	foreach f {key host confirm} {
+		if {[grid info $widget([set f]frame)] != ""} {
+			grid remove $widget([set f]frame)
+		}
+	}
+
+	grid $widget([set mode]frame) -in .top53  -column 0 -row 1 -columnspan 1 -rowspan 1  -ipadx 2 -ipady 2 -padx 2 -pady 2 -sticky nesw
 }
 
 proc clear_prmenu {} {
     global env widget
     $widget(profiles) delete 0 end
-    foreach prof [lsort [glob -nocomplain "$env(HOME)/.indimail/*.profile"]] {
+    foreach prof [lsort [glob -nocomplain "$env(HOME)/.indimail/profiles/*.profile"]] {
 	$widget(profiles) insert end "[file rootname [file tail $prof]]"
     }
 }
 
 proc clear_profiles {} {
-    global env widget agentforward x11forward stricthost nopriv lfs rfs \
+    global env widget noagentforward x11forward stricthost nopriv lfs rfs \
 	    verbose quiet fork gateway compress algo compressval \
 	    connwait termicon sshverconnect ipverconnect askuserspec noexec
 
-    foreach b {agentforward x11forward stricthost nopriv \
+    foreach b {noagentforward x11forward stricthost nopriv \
 	    verbose quiet fork gateway compress connwait termicon askuserspec noexec} {
 	set [set b] 0
     }
@@ -982,7 +1037,7 @@ proc clear_profiles {} {
     set algo "default"
     set compressval 6
 
-    foreach e {host command title subsys identity cfgfile user port profile} {
+    foreach e {profile host command title subsys identity cfgfile user port} {
 	$widget([set e]ent) delete 0 end
     }
     
@@ -1011,283 +1066,355 @@ proc clear_profiles {} {
     }
 }
 
-proc connect {mode {cm ""}} {
-    global widget sites env configs
+proc provrunfile {term bg connstring runstring} {
+    global env platform 
+
+    if {$bg=="bg"} {
+		set bgtag "&"
+    } else {
+		set bgtag ""
+    }
+
+    if {$term == "term"} {
+	set cf "$env(HOME)/.indimail/.runfiles/runproc.[clock clicks]"
+	set connfile [open $cf w]
+	
+	puts $connfile "#!/bin/sh\n"
+	puts $connfile $connstring
+
+	if {$bg == "nobg"} {
+	    puts $connfile "\necho \"secpanel: Cleaning up handling data for this operation...\";\nrm -f $cf"
+	}
+
+
+		close $connfile
+		exec chmod +x $cf
+		
+		set cfr "$cf-run"
+		set crfile [open "$cfr" w]
+		
+		puts $crfile [regsub {<CONNFILE>} $runstring $cf]
+		close $crfile
+		exec chmod +x $cfr
+		
+		exec $cfr $bgtag
+    } else {
+		set cfr "$env(HOME)/.indimail/.runfiles/runproc.[clock clicks]-run"
+		set crfile [open "$cfr" w]
+		
+		puts $crfile "$runstring $connstring"
+		close $crfile
+		exec chmod +x $cfr
+		
+		exec $cfr $bgtag
+    }
+
+}
+
+proc connect_sftp {} {
+    global widget env configs 
+
+    if {! [$widget(specsites) index end] > 0} {
+		showmessage "No connections available, please use \"New\"" ""
+		return
+    }
     
+    if {[selection own] != $widget(specsites)} {
+		showmessage "Please select connection" .top17
+		return
+    }
+    
+    set connsel [$widget(specsites) curselection]
+
+    set connstring ""
+
+    foreach connselentry $connsel {
+
+		set actconn [retprof [$widget(specsites) get $connselentry]]
+
+		source "$env(HOME)/.indimail/profiles/$actconn.profile"
+		
+		if {$user == "<ASKFORUSER>"} {
+			set user [askforuser]
+			if {$user == "#####"} {
+				return
+			}
+		}
+
+		switch -exact $configs(sftpbin) {
+		    "Filezilla" {
+			set runstring "filezilla -l interactive "
+		    }
+		    "GNOME-Nautilus" {
+			set runstring "nautilus "
+		    }
+		    "KDE-Konqueror" {
+			set runstring "konqueror "
+		    }
+		}
+
+		set connstring "sftp://$user@$host:$port"
+		
+		command_trace save "$runstring$connstring"
+		provrunfile noterm bg "" $runstring$connstring
+		historyman write 2 "$connstring"
+    }
+}
+
+proc multiconnect {mode} {
+    global widget env configs
+
+    if {! [$widget(specsites) index end] > 0} {
+		showmessage "No connections available, please use \"New\"" ""
+		return
+    }
+    
+    if {[selection own] != $widget(specsites)} {
+		showmessage "Please select connection" .top17
+		return
+    }
+    
+    set connsel [$widget(specsites) curselection]
+
+    set connstring ""
+
+    foreach connselentry $connsel {
+
+	set actconn [retprof [$widget(specsites) get $connselentry]]
+
+	source "$env(HOME)/.indimail/profiles/$actconn.profile"
+	
+	if {$user == "<ASKFORUSER>"} {
+		set user [askforuser]
+		if {$user == "#####"} {
+			return
+		}
+	}
+	switch -exact $mode {
+	    "multixterm" {
+		set connstring "$connstring $user@$host:$port"
+	    }
+	    "cssh" {
+		set connstring "$connstring $user@$host:$port"
+	    }
+	}
+    }
+
+    switch -exact $mode {
+	"multixterm" {
+	    set runstring "multixterm -xc \"ssh %n\""
+	}
+	"cssh" {
+	    set runstring "cssh"
+	}
+    }
+
+    command_trace save "$runstring $connstring"
+    provrunfile noterm bg $connstring $runstring
+}
+
+proc connect {{cm ""}} {
+    global widget env configs termtype
+
     set sshverconnect 1
     
-    if {$mode == "def"} {
-	if {[$widget(defsites) index end] > 0} {
-	    source "$env(HOME)/.indimail/default.profile"
-
-	    if {$cm == "ss"} {
-		set actconn [$widget(sdefsites).sdefmenu entrycget active -label]
-	    } else {
-		set actconn [$widget(defsites) get active]
-	    }
-
-	    set host [lindex [split $sites($actconn) \#] 0]
-	    set user [lindex [split $sites($actconn) \#] 1]
-						
-	    if {$user == "<ASKFORUSER>"} {
-		set user [askforuser]
-		if {$user == "#####"} {
-		    return
-		}
-	    }
-	    
-	    set title $actconn
-	} else {
-	    showmessage "No conncections available, please use \"New\"" ""
+    if {$cm == "ss"} {
+	set connsel 1
+    } else {
+	
+	if {! [$widget(specsites) index end] > 0} {
+	    showmessage "No connections available, please use \"New\"" ""
 	    return
 	}
-    }
-    
-    if {$mode == "spec"} {
-	if {[$widget(specsites) index end] > 0} {
-
-	    if {$cm == "ss"} {
-		set actconn [retprof [$widget(sspecsites).sspecmenu entrycget active -label]]
-	    } else {
-		set actconn [retprof [$widget(specsites) get active]]
-	    }
-
-	    source "$env(HOME)/.indimail/$actconn.profile"
-
-	    if {$user == "<ASKFORUSER>"} {
-		set user [askforuser]
-		if {$user == "#####"} {
-		    return
-		}
-	    }
-	} else {
-	    showmessage "No conncections available, please use \"New\"" ""
+	
+	if {[selection own] != $widget(specsites)} {
+	    showmessage "Please select connection" .top17
 	    return
 	}
-    }
 
-    if {[array size lfs] > 0} {
-	foreach lf [array names lfs] {
-	    if {[regsub {<TARGET-HOST>} [lindex [split $lf :] 1] $host th]} {
-		append lf_tag " -L [lindex [split $lf :] 0]:$th:[lindex [split $lf :] 2] "
-	    } else {
-		append lf_tag " -L [lindex [split $lf :] 0]:[lindex [split $lf :] 1]:[lindex [split $lf :] 2] "
-	    }
-	}
-    } else {
-	set lf_tag " "
-    }
-
-    set localhost [info hostname]
-    if {[array size rfs] > 0} {
-	foreach rf [array names rfs] {
-	    if {[regsub {<LOCAL-HOST>} [lindex [split $rf :] 1] $localhost lh]} {
-		append rf_tag " -R [lindex [split $rf :] 0]:$lh:[lindex [split $rf :] 2] "
-	    } else {
-		append rf_tag " -R [lindex [split $rf :] 0]:[lindex [split $rf :] 1]:[lindex [split $rf :] 2] "
-	    }
-	}
-    } else {
-	set rf_tag " "
-    }
-
-    if {$user != ""} {
-	set user_tag "-l $user "
-    } else {
-	set user_tag " "
+	set connsel [$widget(specsites) curselection]
+	
     }
     
-    if {$port == 22 || $port == ""} {
-	set port_tag " "
-    } else {
-	set port_tag "-p $port "
-    }
-    
-    if {$algo != "default" || $algo == ""} {
-	set algo_tag "-c $algo "
-    } else {
-	set algo_tag " "
-    }
-    
-    if {$identity != ""} {
-	set ident_tag "-i $identity "
-    } else {
-	set ident_tag " "
-    }
-   
-    if {[info exists cfgfile] && $cfgfile != ""} {
-	set cfgfile_tag "-F $cfgfile "
-    } else {
-	set cfgfile_tag " "
-    }    
-    
-    if {$command != "" && ([info exists noexec] && ! $noexec) && \
-	    ([info exists subsys] && $subsys == "")} {
-	set command_tag "$command"
-    } elseif {[info exists subsys] && $subsys != ""} {
-	set command_tag "-s $subsys"
-    } else {
-	set command_tag ""
-    }
-    
-    if $compress {
-	# openssh
-	if {$configs(sshver) == "OpenSSH"} {
-	    set compressval_tag "-o \'CompressionLevel [set compressval]\' "
-	} else {
-	    set compressval_tag "-o CompressionLevel=$compressval "
-	}
-    } else {
-	set compressval_tag " "
-    }
-    
-    array set bools {
-	"agentforward" "-a" \
-	    "x11forward" "-x" \
-	    "stricthost" "-o StrictHostKeyChecking=yes" \
-	    "nopriv" "-P" \
-	    "verbose" "-v" \
-	    "quiet" "-q" \
-	    "fork" "-f" \
-	    "gateway" "-g" \
-	    "compress" "-C" \
-	    "noexec" "-N"
-    }
-    
-    # foreach f [array names $bools]
-    foreach f {agentforward x11forward stricthost nopriv verbose \
-	    quiet fork gateway compress noexec} {
-	if {[info exists $f] && [set $f]} {
-	    set [set f]_tag "$bools($f) "
-	} else {
-	    set [set f]_tag " "
-	}
-    }
 
-    if [info exists sshverconnect] {
-	set sshvertag "-[set sshverconnect] "
-    }
+    foreach connselentry $connsel {
 
-    if [info exists ipverconnect] {
-	set ipvertag "-[set ipverconnect] "
-    } else {
-	set ipvertag " "
-    }
+		if {$cm == "ss"} {
+		    set actconn [retprof [$widget(sspecsites).sspecmenu entrycget active -label]]
+		} else {
+		    set actconn [retprof [$widget(specsites) get $connselentry]]
+		}
 
-    # openssh
-    if {$configs(sshver) == "OpenSSH"} {
-	if {[info exists x11forward] && ! $x11forward} {
-	    set x11forward_tag "-X "
-	}	    
-	if {[info exists noexec] && $noexec} {
-	    set noexec_tag "-N "
-	}
-    }
+		source "$env(HOME)/.indimail/profiles/$actconn.profile"
+		
+		if {$user == "<ASKFORUSER>"} {
+			set user [askforuser]
+			if {$user == "#####"} {
+			return
+			}
+		}
+		
+		if {[array size lfs] > 0} {
+			foreach lf [array names lfs] {
+			if {[regsub {<TARGET-HOST>} [lindex [split $lf :] 1] $host th]} {
+				append lf_tag " -L [lindex [split $lf :] 0]:$th:[lindex [split $lf :] 2] "
+			} else {
+				append lf_tag " -L [lindex [split $lf :] 0]:[lindex [split $lf :] 1]:[lindex [split $lf :] 2] "
+			}
+			}
+		} else {
+			set lf_tag " "
+		}
+		
+		set localhost [info hostname]
+		if {[array size rfs] > 0} {
+			foreach rf [array names rfs] {
+			if {[regsub {<LOCAL-HOST>} [lindex [split $rf :] 1] $localhost lh]} {
+				append rf_tag " -R [lindex [split $rf :] 0]:$lh:[lindex [split $rf :] 2] "
+			} else {
+				append rf_tag " -R [lindex [split $rf :] 0]:[lindex [split $rf :] 1]:[lindex [split $rf :] 2] "
+			}
+			}
+		} else {
+			set rf_tag " "
+		}
 
-    set icontag ""
-    switch -regexp $configs(termver) {
-	"GNOME-Term" {
-	    set titlepar "-t"
-	    set quotepar "\""
-	    if {[info exists termicon] && $termicon} {
-		set icontag "-iconic"
-	    }
-	}
-	"KDE-Term" {
-	}
-	"Xterm|Rxvt|Aterm" {
-	    set titlepar "-title"
-	    set quotepar ""	    
-	    if {[info exists termicon] && $termicon} {
-		set icontag "-iconic"
-	    }
-	}
-	"Eterm" {
-	    set titlepar "-T"
-	    set quotepar ""	    
-	    if {[info exists termicon] && $termicon} {
-		set icontag "--iconic"
-	    }
-	}
-    }
+		if {$user != ""} {
+			set user_tag "-l $user "
+		} else {
+			set user_tag " "
+		}
+		
+		if {$port == 22 || $port == ""} {
+			set port_tag " "
+		} else {
+			set port_tag "-p $port "
+		}
+		
+		if {$algo != "default" || $algo == ""} {
+			set algo_tag "-c $algo "
+		} else {
+			set algo_tag " "
+		}
+		
+		if {$identity != ""} {
+			set ident_tag "-i $identity "
+		} else {
+			set ident_tag " "
+		}
+	   
+		if {[info exists cfgfile] && $cfgfile != ""} {
+			set cfgfile_tag "-F $cfgfile "
+		} else {
+			set cfgfile_tag " "
+		}    
+		
+		if {[info exists noagentforward] && $noagentforward} {
+			set noagentforward_tag "-a "
+		} else {
+			set noagentforward_tag "-A "
+		}    
 
-    set waittag ""
-    set woption ""
-    if {[info exists connwait] && $connwait } {
-	set waittag "@shareetcdir@/secpanel.wait"
-	set woption "\'"
-    }
+		if {$command != "" && ([info exists noexec] && ! $noexec) && \
+			([info exists subsys] && $subsys == "")} {
+			set command_tag "$command"
+		} elseif {[info exists subsys] && $subsys != ""} {
+			set command_tag "-s $subsys"
+		} else {
+			set command_tag ""
+		}
+		
+		if $compress {
+			# openssh
+			if {$configs(sshver) == "OpenSSH"} {
+			set compressval_tag "-o \'CompressionLevel [set compressval]\' "
+			} else {
+			set compressval_tag "-o CompressionLevel=$compressval "
+			}
+		} else {
+			set compressval_tag " "
+		}
+		
+		array set bools {
+			"x11forward" "-x" \
+			"stricthost" "-o StrictHostKeyChecking=yes" \
+			"nopriv" "-P" \
+			"verbose" "-v" \
+			"quiet" "-q" \
+			"fork" "-f" \
+			"gateway" "-g" \
+			"compress" "-C" \
+			"noexec" "-N"
+		}
+		
+		# foreach f [array names $bools]
+		foreach f {x11forward stricthost nopriv verbose \
+				   quiet fork gateway compress noexec} {
+			if {[info exists $f] && [set $f]} {
+			set [set f]_tag "$bools($f) "
+			} else {
+			set [set f]_tag " "
+			}
+		}
 
-    set cf "$env(HOME)/.indimail/.runfiles/connect.[clock clicks]"
-    set connfile [open $cf w]
+		if [info exists sshverconnect] {
+			set sshvertag "-[set sshverconnect] "
+		}
 
-    set connstring "$configs(sshbin) $user_tag \
-	    $agentforward_tag $x11forward_tag $noexec_tag $stricthost_tag $sshvertag \
-            $ipvertag $port_tag $algo_tag \
-	    $ident_tag $cfgfile_tag $nopriv_tag $verbose_tag $quiet_tag \
-	    $fork_tag $gateway_tag $compress_tag $compressval_tag \
-	    $lf_tag $rf_tag $host $command_tag"
+		if [info exists ipverconnect] {
+			set ipvertag "-[set ipverconnect] "
+		} else {
+			set ipvertag " "
+		}
 
-    puts $connfile $connstring
-    close $connfile
-    exec chmod +x $cf
+		# openssh
+		if {$configs(sshver) == "OpenSSH"} {
+			if {[info exists x11forward] && ! $x11forward} {
+			set x11forward_tag "-X "
+			}	    
+			if {[info exists noexec] && $noexec} {
+			set noexec_tag "-N "
+			}
+		}
 
-    set cfr "$cf-run"
-    set crfile [open "$cfr" w]
-    set runstring "exec $configs(xtermbin) $icontag $titlepar \"SSH Connection - $title\" \
-	    -e $quotepar $waittag $woption $cf $woption $quotepar"
-    puts $crfile $runstring
-    close $crfile
-    exec chmod +x $cfr
+		set usetermver $configs(termver)
+		
+		set icontag ""
+		
+		set configs(xtermbin) $termtype([set usetermver]_path)
+		set titlepar $termtype([set usetermver]_titlepar)
+		set quotepar $termtype([set usetermver]_quotepar)
+		set execpar $termtype([set usetermver]_execpar)
+		if {[info exists termicon] && $termicon} {
+			set icontag $termtype([set usetermver]_iconpar)
+		}
+		# </xterm selection and params>
 
-    exec $cfr &
 
-    historyman write 1 "$title"
-}
+		set waittag ""
+		set woption ""
+		if {[info exists connwait] && $connwait } {
+			set waittag "@scriptdir@/secpanel.wait"
+			set woption "\'"
+		}
 
-proc defsiteupdate {{mode ""}} {
-    global widget sites
-    $widget(defsites) delete 0 end
-    
-    if {$mode == "ss"} {
-	if {! [winfo exists $widget(sdefsites).sdefmenu]} {
-	    menu $widget(sdefsites).sdefmenu -tearoff 0 -border 1
-	    $widget(sdefsites) config -menu $widget(sdefsites).sdefmenu
-	} else {
-	    $widget(sdefsites).sdefmenu delete 0 end
-	}    
-    }
-    
-    foreach s [lsort [array names sites]] {
-	if {$mode == "ss"} {
-	    $widget(sdefsites).sdefmenu add command -label "$s" -command "connect def ss"
-	}
-	$widget(defsites) insert end $s
+		set connstring "$configs(sshbin) $user_tag \
+			$noagentforward_tag $x11forward_tag $noexec_tag $stricthost_tag $sshvertag \
+				$ipvertag $port_tag $algo_tag \
+			$ident_tag $cfgfile_tag $nopriv_tag $verbose_tag $quiet_tag \
+			$fork_tag $gateway_tag $compress_tag $compressval_tag \
+			$lf_tag $rf_tag $host $command_tag"
+
+		set runstring "exec $configs(xtermbin) $icontag $titlepar \"SSH Connection - $title\" \
+			$execpar $quotepar $waittag $woption <CONNFILE> $woption $quotepar"
+
+		provrunfile term bg $connstring $runstring
+
+		historyman write 1 "$title"
+		command_trace save "$connstring"
     }
 }
 
-proc probeversion {} {
-    global widget configs
-
-    set binstring [$widget(sshent) get]
-    if {$binstring == ""} {
-	set binstring "ssh"
-    }
-
-    catch {exec $binstring -V} ver
-
-    if [regexp -nocase "openssh" $ver] {
-	set restext "I guess we have an OpenSSH-version\n\nFound $ver"
-	set configs(sshver) "OpenSSH"
-    } elseif [regexp -nocase "SSH Secure Shell" $ver] {
-	set restext "I guess we have a\nSSH.com-version\n\nFound $ver"
-	set configs(sshver) "SSH.com"
-    } else {
-	set restext "I am not sure about what kind of program is this!\n\nMaybe not a SSH-binary?\nOr doesn't exist at all..."
-    }	
-
-    showmessage "$restext" .top17
-}
 
 proc showconfirm {text parent} {
     global questres
@@ -1332,7 +1459,13 @@ proc askforuser {"mode c"} {
     Window show .top21
 
     if {$mode == "md"} {
-	wm title .top21 "SecPanel - Make dir" 
+	wm title .top21 "secpanel - Make dir" 
+	.top21.fra22.mes23 config -text "Enter name of new directory:"
+	.top21.but26 config -text "Make dir"
+    }
+
+    if {$mode == "protectdata"} {
+	wm title .top21 "secpanel - Give password for secpanel data protection" 
 	.top21.fra22.mes23 config -text "Enter name of new directory:"
 	.top21.but26 config -text "Make dir"
     }
@@ -1347,551 +1480,14 @@ proc askforuser {"mode c"} {
     return $userres
 }
 
-proc scptransfer {mode} {
-    global env widget configs scpurl
-
-    set scptransfer "$env(HOME)/.indimail/.runfiles/scptransfer.[clock clicks]"
-
-    set dlr $widget(scpdirsr)
-    set flr $widget(scpfilesr)
-    set dll $widget(scpdirsl)
-    set fll $widget(scpfilesl)
-
-    set lactdir [.top34.fra35.ent45 get]
-    set ractdir [.top34.fra37.ent44 get]
-
-    switch -exact $mode {
-	cptoremote {
-	    if {[selection own] == $dll} {
-		set rectag " -r "
-		set lr $dll
-	    } elseif {[selection own] == $fll} {
-		set rectag ""
-		set lr $fll
-	    } else {
-		showmessage "No files or directories selected on the local site" .top34
-		return
-	    }
-	}
-	cptolocal {
-	    if {[selection own] == $dlr} {
-		set rectag " -r "
-		set lr $dlr
-	    } elseif {[selection own] == $flr} {
-		set rectag ""
-		set lr $flr
-	    } else {
-		showmessage "No files or directories selected on the remote site" .top34
-		return
-	    }
-	}
-    }
-    
-    foreach cs [$lr curselection] {
-	lappend resslist [$lr get $cs]
-    }
-    
-    array set bools {
-	"scpstats" "-q" \
-		"scppres" "-p" \
-		"scpverb" "-v" \
-		"scpcomp" "-C"
-    }
-
-    foreach f [array names bools] {
-	if [set configs($f)] {
-	    set [set f]_tag "$bools($f) "
-	} else {
-	    set [set f]_tag " "
-	}
-    }
-
-    if [info exists configs(scpport)] {
-	if {$configs(scpport) != "" && $configs(scpport) != 22} {
-	    set porttag " -P $configs(scpport) "
-	} else {
-	    set porttag ""
-	}
-    }
-
-    if {$configs(sshver) == "OpenSSH"} {
-	set progtag " -S $configs(sshbin) "
-    } else {
-	set progtag ""
-    }
-
-    set transferfile [open "$scptransfer" w]
-
-    puts -nonewline $transferfile "$configs(scpbin) $progtag $porttag $scpstats_tag $scppres_tag \
-	    $scpverb_tag $scpcomp_tag $rectag "
-    
-    regsub -all " " $ractdir "\\ " rpad1
-    regsub -all "\\(" $rpad1 "\\(" rpad2
-    regsub -all "\\)" $rpad2 "\\)" rpad
-
-    regsub -all " " $lactdir "\\ " lpad1
-    regsub -all "\\(" $lpad1 "\\(" lpad2
-    regsub -all "\\)" $lpad2 "\\)" lpad
-
-    foreach r $resslist {
-	if {$mode == "cptolocal"} {
-	    regsub -all " " $r "\\ " rp1
-	    regsub -all "\\(" $rp1 "\\(" rp2
-	    regsub -all "\\)" $rp2 "\\)" rp
-	    puts -nonewline $transferfile "\"$scpurl:$rpad/$rp\" "
-	} else {
-	    puts -nonewline $transferfile "\"$lactdir/$r\" "
-	}
-    }
-    
-    if {$mode == "cptolocal"} {
-	puts $transferfile " \"$lactdir\""
-    } else {
-	puts $transferfile " \"$scpurl:$rpad\""
-    }
-
-    close $transferfile
-    exec chmod +x "$scptransfer"
-    
-    if {$configs(termver) == "GNOME-Term"} {
-	set quotepar "\""
-    } else {
-	set quotepar ""
-    }
-
-    set cf "$scptransfer-run"
-    set connfile [open $cf w]
-
-    set connstring "exec $configs(xtermbin) -e $quotepar @shareetcdir@/secpanel.wait \"$scptransfer\" $quotepar &"
-    puts $connfile $connstring
-    close $connfile
-    exec chmod +x $cf
-    exec $cf &
-
-    if {$mode == "cptolocal"} {
-	historyman write 3 "$scpurl -> Local"
-    } else {
-	historyman write 3 "Local -> $scpurl"
-    }
-}
-
-proc scpAuth {sock} {
-    global pass
-
-    gets $sock passandport
-
-    set serverpass [lindex [split $passandport] 1]
-
-    if {$serverpass != $pass} {
-	close $sock
-	showmessage "Wrong authentication from remote ListServer\nHad to reject connection" .top17
-	return
-    } else {
-	close $sock
-	scpman opengui
-    }
-}
-
-proc Accept {sock addr port} {
-    global pass
-
-    fconfigure $sock -buffering line
-    fileevent $sock readable "scpAuth $sock"
-}
-
-proc scptools {tool side} {
-    global widget scplister configs scpurl
-
-    set actdirl "[.top34.fra35.ent45 get]"
-    set actdirr "[.top34.fra37.ent44 get]"
-
-    set dlr $widget(scpdirsr)
-    set flr $widget(scpfilesr)
-    set dll $widget(scpdirsl)
-    set fll $widget(scpfilesl)
-
-    set ltext "local"
-    set rtext "remote"
-
-    switch -exact $tool {
-	mkdir {
-
-	    set newdir [askforuser md]
-	    if {$newdir == "#####"} {
-		return
-	    }
-
-	    switch -exact $side {
-		l {
-		    file mkdir "[set actdir[set side]]/$newdir"
-		}
-		r {
-		    puts $scplister "++MakeDir [set actdir[set side]]/$newdir"
-		}
-	    }
-	    scpswitchdir ent [set side]
-	}
-	delete {
-	    if {[selection own] == [set dl[set side]]} {
-		set lr [set dl[set side]]
-	    } elseif {[selection own] == [set fl[set side]]} {
-		set lr [set fl[set side]]
-	    } else {
-		showmessage "No files or directories selected on the [set [set side]text] site" .top34
-		return
-	    }
-	    
-	    foreach cs [$lr curselection] {
-		lappend resslist "[set actdir[set side]]/[$lr get $cs]"
-	    }
-	    
-	    if [showconfirm "Really delete $resslist?" ""] {
-		switch -exact $side {
-		    l {
-			foreach f $resslist {
-			    if {[catch {file delete $f} err] > 0} {
-				showmessage "$err" .top34
-			    }
-			}
-		    }
-		    r {
-			foreach f $resslist {
-			    puts $scplister "++DelFile $f"
-			}
-		    }
-		}
-		scpswitchdir ent [set side]
-	    }
-	}
-	list {
-	    set text .top47.cpd48.03
-	    Window show .top47
-	    $text delete 1.0 end
-
-	    if $configs(scpshowhidden) {
-		set ls "la"
-	    } else {
-		set ls "l"
-	    }
-
-	    switch -exact $side {
-		l {
-		    if $configs(scpshowhidden) {
-			set ls "la"
-		    } else {
-			set ls "l"
-		    }
-		    $text insert end "Contents of $actdirl\n\n"
-		    update idletasks
-		    set fl [open "| ls -$ls [quote_space $actdirl]" r]
-		    while {[gets $fl line] >= 0} {
-			$text insert end "$line\n"
-		    }
-		    close $fl
-		}
-		r {
-		    $text insert end "Contents of $scpurl:$actdirr\n\n"
-		    update idletasks
-		    puts $scplister "++Listing$ls $actdirr"
-		    while 1 {
-			gets $scplister line
-			if {$line == "+++++"} {
-			    break
-			}
-			$text insert end "$line\n"
-		    }
-		}
-	    }
-	}
-    }
-}
-
 proc quote_space {in} {
     regsub -all " " $in "\\ " out
     return $out
 }
 
-proc scpman {mode} {
-    global widget configs env scplister scpurl controlserver pass spversion
-
-    switch -exact $mode {
-	open {
-	    set host [$widget(scphosts) get active]
-	    set user [$widget(scpusers) get active]
-
-	    if {[ $widget(scphosts) index end] <= 0} {
-		showmessage "Please configure a new connection. There are no hosts to connect to!" .top17
-		return
-	    }
-
-	    if {[lindex [.top17.fra27.fra30.fra18.but19 config -text] end] == \
-		    "Connect to user@host (choose from the lists)" || \
-		    [string index [lindex [.top17.fra27.fra30.fra18.but19 config -text] end] end] == "@"} {
-		showmessage "Please choose the connection parameters from the lists!" .top17
-		return
-	    }
-
-	    if {$user == "<ASKFORUSER>"} {
-		set user [askforuser]
-		if {$user == "#####"} {
-		    return
-		}
-	    }
-
-	    set scpurl "$user@$host"
-
-	    # Launching Control-Server in SecPanel
-	    if [info exists controlserver] {
-		close $controlserver
-	    }
-	    set controlserver [socket -server "Accept" -myaddr 127.0.0.1 $configs(controllocalport)]
-	    fconfigure $controlserver -buffering line
-
-	    showstatus "Waiting for ListServer-Callback"
-
-	    # Generating a password
-	    set pass [expr {int(rand() * 1000 * [pid])}][expr {int(rand() * 1000 * [pid])}]
-
-	    # Launching listserver on remote site
-	    set lf [open "@scriptdir@/listserver.[set configs(lsinterpret)]" r]
-	    set currlf [open "$env(HOME)/.indimail/.listserver.[set configs(lsinterpret)]" w]
-	    while {[gets $lf line] >= 0} {
-		if [regsub {<PASS-XXXXX>} $line $pass out] {
-		    puts $currlf $out
-		    continue
-		}
-		if [regsub {<listserverport-XXXXX>} $line $configs(listserverport) out] {
-		    puts $currlf $out
-		    continue
-		}
-		if [regsub {<controlremoteport-XXXXX>} $line $configs(controlremoteport) out] {
-		    puts $currlf $out
-		    continue
-		}
-		puts $currlf $line
-	    }
-	    close $currlf
-	    close $lf
-
-	    if [set configs(lsverbose)] {
-		set lsverbosetag "-v"
-	    } else {
-		set lsverbosetag " "
-	    }
-
-	    if [info exists configs(scpport)] {
-		if {$configs(scpport) != "" && $configs(scpport) != 22} {
-		    set porttag " -p $configs(scpport) "
-		} else {
-		    set porttag ""
-		}
-	    }
-
-	    switch -regexp $configs(termver) {
-		"GNOME-Term" {
-		    set titlepar "-t"
-		    set quotepar "\""
-		    if {[info exists termicon] && $termicon} {
-			set icontag "-iconic"
-		    }
-		}
-		"KDE-Term" {
-		}
-		"Xterm|Rxvt|Aterm" {
-		    set titlepar "-title"
-		    set quotepar ""	    
-		    if {[info exists termicon] && $termicon} {
-			set icontag "-iconic"
-		    }
-		}
-		"Eterm" {
-		    set titlepar "-T"
-		    set quotepar ""	    
-		    if {[info exists termicon] && $termicon} {
-			set icontag "--iconic"
-		    }
-		}
-	    }
-	    
-	    set waittag ""
-	    set woption ""
-	    if {[info exists configs(lswait)] && [set configs(lswait)] } {
-		set waittag "@shareetcdir@/secpanel.wait"
-		set woption "\'"
-	    }
-
-	    set scpf "$env(HOME)/.indimail/.runfiles/scpconnect.[clock clicks]"
-	    set scpfrun "$scpf-run"
-
-	    set connectfile [open "$scpf" w]
-	    set connectrunfile [open "$scpfrun" w]
-
-	    puts $connectrunfile "echo -e \"SecPanel $spversion ListServer\n\nIn this shell we get a connection for establishing\na graphical file listing.\n---------------------------------------------------------\n\n\""
-	    set connstring "exec $configs(xtermbin) $titlepar \"SecPanel ListServer\" \
-		    -e $quotepar $waittag $woption $scpfrun $woption $quotepar"
-
-  	    set connrunstring "$configs(sshbin) -C $lsverbosetag $porttag \
-  		    -L $configs(scpguiport):localhost:$configs(listserverport) \
-                    -R $configs(controlremoteport):localhost:$configs(controllocalport) \
-  		    -l $user $host cat < $env(HOME)/.indimail/.listserver.[set configs(lsinterpret)] \">\" .listserver\\; chmod +x .listserver\\; ./.listserver"
-
-
-	    puts $connectfile $connstring
-	    
-	    puts $connectrunfile $connrunstring
-
-	    close $connectfile
-	    close $connectrunfile
-
-	    exec chmod +x $scpf
-	    exec chmod +x $scpfrun
-
-	    exec $scpf &
-	    
-	    historyman write 2 "$scpurl"
-	}
-	opengui {
-	    showstatus "Received CallBack from ListServer"
-	    close $controlserver
-	    unset controlserver
-
-	    Window show .top34
-	    .top34.fra46.lab47 config -text "$env(USER)@[info hostname]"
-	    .top34.fra17.lab18 config -text "$scpurl"
-
-		if {[file exist @imagedir@/arrow_right.gif]} {
-	    .top34.fra48.but49 config -image [image create photo -file @imagedir@/arrow_right.gif]
-		}
-		if {[file exist @imagedir@/arrow_left.gif]} {
-	    .top34.fra48.but50 config -image [image create photo -file @imagedir@/arrow_left.gif]
-		}
-
-	    if {[catch {set scplister [socket localhost $configs(scpguiport)]} err] > 0} {
-		puts "opengui Error: $err"
-	    }
-
-	    fconfigure $scplister -buffering line
-	    showstatus "Connected to ListServer"
-	    puts $scplister "auth $pass"
-	    
-	    scplist $env(HOME) l
-	    scplist "++InitListing" r
-	}
-	close {
-	    puts $scplister "++CloseYourSelf"
-	    close $scplister
-	    Window destroy .top34
-	}
-    }
-}
-
-proc scpswitchdir {y mode} {
-    global widget env
-    switch -exact $mode {
-	l {
-	    set actdir "[.top34.fra35.ent45 get]"
-	    if {$y == "ent"} {
-		if {$actdir == "~"} {
-		    scplist "$env(HOME)" $mode
-		} else {
-		    scplist "$actdir" $mode
-		}
-		return
-	    }
-	}
-	r {
-	    set actdir "[.top34.fra37.ent44 get]"
-	    if {$y == "ent"} {
-		if {$actdir == "~"} {
-		    scplist "++InitListing" r
-		} else {
-		    scplist "$actdir" $mode
-		}
-		return
-	    }
-	}
-    }
-    set dl $widget(scpdirs[set mode])
-    set fl $widget(scpfiles[set mode])
-
-    if {$actdir != "/"} {
-	scplist "$actdir/[$dl get [$dl nearest $y]]" $mode
-    } else {
-	scplist "/[$dl get [$dl nearest $y]]" $mode
-    }
-}
-
-proc scplist {actdir mode} {
-    global widget scplister configs
-
-    set dl $widget(scpdirs[set mode])
-    set fl $widget(scpfiles[set mode])
-
-    $dl delete 0 end
-    $fl delete 0 end
-    
-    set pe [file split "$actdir"]
-    set pl [llength $pe]
-    
-    if {[lindex $pe [expr $pl - 1]] == ".."} {
-	set actdir "[eval file join [lrange $pe 0 [expr $pl - 3]]]"
-    }
-    
-    if {$actdir != "/"} {
-	$dl insert end ..
-    }
-
-    switch -exact $mode {
-	"l" {
-	    .top34.fra35.ent45 delete 0 end
-	    .top34.fra35.ent45 insert 0 "$actdir"
-
-	    if $configs(scpshowhidden) {
-		set gpat "glob -nocomplain \"$actdir/.*\" \"$actdir/*\""
-	    } else {
-		set gpat "glob -nocomplain \"$actdir/*\""
-	    }
-
-	    foreach f [lsort [eval $gpat]] {
-
-		if {[file tail "$f"] == ".." || [file tail "$f"] == "."} {
-		    continue
-		}
-		if [file isdirectory "$f"] {
-		    $dl insert end [file tail "$f"]
-		} else {
-		    $fl insert end [file tail "$f"]
-		}
-	    }
-	}
-	"r" {
-	    puts $scplister "$actdir\t$configs(scpshowhidden)"
-	    
-	    # Catching errors from ListServer...
-	    set actdir "[string trimleft [gets $scplister] "+"]"
-
-	    .top34.fra37.ent44 delete 0 end
-	    .top34.fra37.ent44 insert 0 "$actdir"
-
-	    while 1 {
-		gets $scplister line
-		if {$line == "+++++"} {
-		    break
-		}
-		if [regsub {^\+\+ } $line "" ls] {
-		    $dl insert end [file tail $ls]
-		} else {
-		    $fl insert end [file tail $ls]
-		}
-	    }
-	}
-    }
-}
-
-proc updateSCPLabel {} {
-    global widget
-    .top17.fra27.fra30.fra18.but19 config -text \
-	    "Connect to [$widget(scpusers) get active]@[$widget(scphosts) get active]"
+proc quote_double_space {in} {
+    regsub -all " +" $in " " out
+    return $out
 }
 
 proc showmessage {text parent} {
@@ -1913,62 +1509,34 @@ proc showmessage {text parent} {
     tkwait window .top22
 }
 
+
 proc check_sources {mode} {
     global configs
     switch -exact $mode {
 	ssh {
 	}
 	sp {
-	    exec $configs(browserbin) "http://www.pingx.net/secpanel?sp_check" &
+	    exec $configs(browserbin) "http://secpanel.net/?sp_check" &
 	}
     }
 }
 
-proc delconn mode {
-    global widget env sites
-    switch -exact $mode {
-	def {
-	    if {[selection own] == $widget(defsites)} {
-		set actentry [$widget(defsites) get active]
-		if {[showconfirm "Delete $actentry?" ""] == 1} {
-		    unset sites($actentry)	    
-		    set sitefile [open "$env(HOME)/.indimail/sites" w]
-		    foreach s [array names sites] {
-			puts $sitefile "$s#$sites($s)"
-		    }
-		    close $sitefile
-		    defsiteupdate
-		    clear_distmenu
-		    selection clear
-		} else {
-		    return
-		}
-	    } else {
-		showmessage "No entry selected" ""
-	    }
+proc delconn {} {
+    global widget env
+    if {[selection own] == $widget(specsites)} {
+	set actentry [$widget(specsites) get active]
+	set delprof [retprof $actentry]
+	if {[showconfirm "Delete $actentry?" ""] == 1} {
+	    file delete "$env(HOME)/.indimail/profiles/$delprof.profile"
+	    specsiteupdate
+	    clear_prmenu
+	    selection clear
+	} else {
+	    return
 	}
-	spec {
-	    if {[selection own] == $widget(specsites)} {
-		set actentry [$widget(specsites) get active]
-		set delprof [retprof $actentry]
-		if {$delprof == "default"} {
-		    showmessage "You may not delete the default profile" ""
-		    return
-		} else {
-		    if {[showconfirm "Delete $actentry?" ""] == 1} {
-			file delete "$env(HOME)/.indimail/$delprof.profile"
-			specsiteupdate
-			clear_prmenu
-			clear_distmenu
-			selection clear
-		    } else {
-			return
-		    }
-		}    
-	    } else {
-		showmessage "No entry selected" ""
-	    }
-	}
+
+    } else {
+	showmessage "No entry selected" ""
     }
 }
 
@@ -1979,98 +1547,67 @@ proc delete_profile {} {
 	showmessage "To delete a profile first load it" ""
 	return
     }
-    if {$act == "default"} {
-	showmessage "You may not delete the default profile" ""
-	return
-    }
     if {[showconfirm "Delete $act?" ""] == 1} {
-	file delete "$env(HOME)/.indimail/$act.profile"
+	file delete "$env(HOME)/.indimail/profiles/$act.profile"
 	clear_prmenu
 	clear_profiles
 	specsiteupdate
-	clear_distmenu
     }
-}
-
-proc distkey {} {
-    global env widget configs
-
-    if {[lindex [.top17.fra35.fra17.lab39 config -text] end] == "Dist. to host:"} {
-	showmessage "Please choose the distribution parameters from the lists!" .top17
-	return
-    }
-
-    set host [$widget(keydisthost) get active]
-    set identfile [$widget(keydistkey) get]
-
-    if {$identfile == ""} {
-	showmessage "No key for distribution selected" ""
-	return
-    }
-    
-    set user [$widget(keydistuser) get active]
-
-    if {$user == "<ASKFORUSER>"} {
-	set user [askforuser]
-	if {$user == "#####"} {
-	    return
-	}
-    } elseif {$user == ""} {
-	set user $env(USER)
-    }
-
-    switch -regexp $configs(termver) {
-	"GNOME-Term" {
-	    set titlepar "-t"
-	    set quotepar "\""
-	}
-	"KDE-Term" {
-	}
-	"Xterm|Rxvt|Aterm" {
-	    set titlepar "-title"
-	    set quotepar ""	    
-	}
-	"Eterm" {
-	    set titlepar "-T"
-	    set quotepar ""	    
-	}
-    }
-
-    set dfile "$env(HOME)/.indimail/.runfiles/keydist.[clock clicks]"
-    set df [open "$dfile" w]
-
-    set actstring "exec $configs(xtermbin) $titlepar \"SecPanel Key-Distribution\" \
-	    -e $quotepar @shareetcdir@/secpanel.dist $host $user $identfile $configs(sshbin) $quotepar"
-    puts $df $actstring
-
-    close $df
-    exec chmod +x $dfile
-    exec $dfile &
-    
-    historyman write 5 "$identfile -> $user@$host"
 }
 
 proc hostkey {mode} {
-    global env widget
+    global env widget configs hostkeytype
     set khfile "$env(HOME)/.ssh/known_hosts"
+
+    catch {exec $configs(keygenbin) -h} ver
+    if [regexp -nocase "F hostname Find hostname" $ver] {
+	set hostkeytype "hashed"
+    } else {
+	set hostkeytype "clear"
+    }
+
     switch -exact $mode {
 	edit {
-	    if [file exists $khfile] {
-		Window show .top50
-		$widget(knownhosts) delete 0 end
+	    
+	    Window show .top50
+	    $widget(knownhosts) delete 0 end
+
+	    if { ! [file exists $khfile]} {
+		showmessage "No $khfile found" ""
+		return
+	    }
+
+	    if {$hostkeytype=="hashed"} {
+		
+		# handle new hashed hostkey format
+		set profiles [glob -nocomplain "$env(HOME)/.indimail/profiles/*.profile"]
+		
+		foreach prof [lsort $profiles] {
+		    source $prof
+		    catch {exec $configs(keygenbin) -F $host} ver		
+		 
+		    if [regexp -nocase "found" $ver] {
+			$widget(knownhosts) insert end $host
+		    }
+		}
+		
+		return
+		# end of handling hashed hostkeys
+		
+	    } else {
+		
 		set hosts [open $khfile r]
 		while {[gets $hosts line] >= 0} {
 		    lappend hl [lindex [split $line] 0]
 		}
-
-		foreach h [lsort $hl] {
-		    $widget(knownhosts) insert end $h
+		
+		if {[file size $khfile] > 0} {
+		    foreach h [lsort $hl] {
+			$widget(knownhosts) insert end $h
+		    }
 		}
-
+		    
 		close $hosts
-		return
-	    } else {
-		showmessage "No $khfile found" ""
 		return
 	    }
 	}
@@ -2110,26 +1647,35 @@ proc hostkey {mode} {
 	    }
 	    set actk [$widget(knownhosts) get active]
 	    if {[showconfirm "Delete $actk?" ".top50"] == 1} {
-		if [file exists $khfile] {
-		    set hosts [open $khfile r]
-		    # read lines
-		    while {[gets $hosts line] >= 0} {
-			lappend klines $line
+
+		if {$hostkeytype=="hashed"} {
+		    # handle deletion of hashed hostkeys
+		    if [catch {exec $configs(keygenbin) -R $actk} err] {
+			showmessage $err ""
 		    }
-		    close $hosts
-		    # write lines
-		    set hosts [open $khfile w]
-		    foreach line $klines {
-			set kparts [split $line]
-			if {[lindex $kparts 0] != $actk} {
-			    puts $hosts $line
+		    # end handling deletion of hashed hostkeys
+		} else {
+
+		    if [file exists $khfile] {
+			set hosts [open $khfile r]
+			# read lines
+			while {[gets $hosts line] >= 0} {
+			    lappend klines $line
 			}
+			close $hosts
+			# write lines
+			set hosts [open $khfile w]
+			foreach line $klines {
+			    set kparts [split $line]
+			    if {[lindex $kparts 0] != $actk} {
+				puts $hosts $line
+			    }
+			}
+			close $hosts
 		    }
-		    close $hosts
-		    hostkey edit
-		    selection clear
-		    return
 		}
+		hostkey edit
+		selection clear
 	    } else {
 		return
 	    }
@@ -2144,25 +1690,23 @@ proc insprot {nr mode} {
 }
 
 proc keygen {mode "in_keytype {}"} {
-    global env widget configs pwtextmode nopass passintext kf keytype
+    global env widget configs pwtextmode nopass passintext kf keytype termtype
     
-    switch -regexp $configs(termver) {
-	"GNOME-Term" {
-	    set titlepar "-t"
-	    set quotepar "\""
-	}
-	"KDE-Term" {
-	}
-	"Xterm|Rxvt|Aterm" {
-	    set titlepar "-title"
-	    set quotepar ""	    
-	}
-	"Eterm" {
-	    set titlepar "-T"
-	    set quotepar ""	    
-	}
+
+    set usetermver $configs(termver)
+    
+    set icontag ""
+    
+    set configs(xtermbin) $termtype([set usetermver]_path)
+    set titlepar $termtype([set usetermver]_titlepar)
+    set quotepar $termtype([set usetermver]_quotepar)
+    set execpar $termtype([set usetermver]_execpar)
+    if {[info exists termicon] && $termicon} {
+	set icontag $termtype([set usetermver]_iconpar)
     }
-    
+    # </xterm selection and params>
+
+   
     switch -exact $mode {
 	gen {
 	    # comment
@@ -2211,31 +1755,42 @@ proc keygen {mode "in_keytype {}"} {
 	    array set ktshorts {"SSH1 RSA1" "rsa1" "SSH2 RSA" "rsa" "SSH2 DSA" "dsa"}
 	    set typetag "-t $ktshorts($keytype) "
 	    
-	    set kfile "$env(HOME)/.indimail/.runfiles/keygen.[clock clicks]"
-	    set kf [open "$kfile" w]
-	    puts $kf "$configs(keygenbin) $filetag $passtag $typetag $commtag"
-	    close $kf
-	    exec chmod +x $kfile
+	    set connstring "$configs(keygenbin) $filetag $passtag $typetag $commtag"
 
-	    set cf "$kfile-run"
-	    set connfile [open $cf w]
+	    if {$passintext} {
+			set kgstringt "$configs(keygenbin) $filetag $typetag $commtag"
+	    } else {
+			set kgstringt "$configs(keygenbin) $filetag -N ***** $typetag $commtag"
+	    }
 
-	    set actstring "exec $configs(xtermbin) $titlepar \"SecPanel ssh-keygen\" \
-		    -e $quotepar @shareetcdir@/secpanel.wait $kfile $quotepar"
-	    puts $connfile $actstring
-	    close $connfile
-	    exec chmod +x $cf
-	    exec $cf
-	    update_keylist
-	    
+	    set runstring "exec $configs(xtermbin) $titlepar \"secpanel ssh-keygen\" \
+		    $execpar $quotepar @scriptdir@/secpanel.wait <CONNFILE> $quotepar"
+
+	   
+
+	    command_trace save "$kgstringt"
 	    historyman write 4 "$identfile"
+	    
+	    provrunfile term nobg $connstring $runstring
+		 
+	    update_keylist
+	    keygen clear
+
+	}
+	"clear" {
+	    foreach ke {.top52.fra18.ent24 .top52.fra18.ent29 .top52.fra18.ent29 .top52.fra18.ent25} {
+		[set ke] delete 0 end
+	    }
+	    $widget(identpath) delete 0 end
+	    set keytype "SSH2 DSA"
+	    set nopass 0
+	    set passintext 0
+	    set pwtextmode 0
 	}
 	0 {
 	    set keytype "SSH2 DSA"
 	    Window show .top52
-		if {[file exist @imagedir@/folder.gif]} {
 	    .top52.fra18.but27 configure -image [image create photo -file @imagedir@/folder.gif]
-		}
 	    update_keylist
 	}
 	1 {
@@ -2247,24 +1802,13 @@ proc keygen {mode "in_keytype {}"} {
 	    set kf "$env(HOME)/.ssh/[$widget(keylist) get active]"
 
 	    if [set pwtextmode] {
-		set ksf "$env(HOME)/.indimail/.runfiles/keychpwd.[clock clicks]"
-		set ksfile [open "$ksf" w]
-		set kstring "$configs(keygenbin) -p -f $kf"
-		puts $ksfile $kstring
-		close $ksfile
-		exec chmod +x $ksf
-
-		set kcf "$ksf-run"
-		set kcfile [open "$kcf" w]
+		set connstring "$configs(keygenbin) -p -f $kf"
 		
-		set actstring "exec $configs(xtermbin) $titlepar \"SecPanel - \
+		set runstring "exec $configs(xtermbin) $titlepar \"secpanel - \
 			change password for $kf\" \
-			-e $quotepar @shareetcdir@/secpanel.wait $ksf $quotepar"
-		puts $kcfile $actstring
-		close $kcfile
-		
-		exec chmod +x $kcf
-		exec $kcf &
+			$execpar $quotepar @scriptdir@/secpanel.wait <CONNFILE> $quotepar"
+
+		provrunfile term bg $connstring $runstring
 	    } else {		
 		Window show .top20
 		$widget(proplabel) config -text $kf
@@ -2280,15 +1824,22 @@ proc keygen {mode "in_keytype {}"} {
 		return
 	    }
 
-	    if [catch {exec $configs(keygenbin) -p -f $kf \
-		    -P $oldp -N $newp1} err] {
+	    set chpwdstr "$configs(keygenbin) -p -f $kf -P ***** -N *****"
+
+	    if [catch {exec $configs(keygenbin) -p -f $kf -P $oldp -N $newp1} err] {
 		showmessage $err ""
 		return
 	    }
 	    Window destroy .top20
+	    command_trace save "$chpwdstr"
 	}
 	info {
 	    if {$in_keytype != "host"} {
+
+		if {[$widget(keylist) index end] == 0} {
+		    return
+		}
+
 		if {[selection own] != $widget(keylist)} {
 		    showmessage "No key selected!" .top52
 		    return
@@ -2302,24 +1853,32 @@ proc keygen {mode "in_keytype {}"} {
 	    } else {
 		set khfile "$env(HOME)/.ssh/known_hosts"
 		
+		if {[$widget(knownhosts) index end] == 0} {
+		    return
+		}
+		
 		set actk [$widget(knownhosts) get active]
 		
 		if [file exists $khfile] {
-		    set hosts [open $khfile r]
-		    while {[gets $hosts line] >= 0} {
-			set kparts [split $line]
-			if {[lindex $kparts 0] == $actk} {
-			    set fname "$env(HOME)/.indimail/.runfiles/hkview.[clock clicks]"
-			    set af [open "$fname" w]
-			    puts $af $line
-			    close $af
-			    set actkfile "$fname"
+		    if {[file size $khfile] > 0} {
+			set hosts [open $khfile r]
+			while {[gets $hosts line] >= 0} {
+			    set kparts [split $line]
+			    if {[lindex $kparts 0] == $actk} {
+				set fname "$env(HOME)/.indimail/.runfiles/hkview.[clock clicks]"
+				set af [open "$fname" w]
+				puts $af $line
+				close $af
+				set actkfile "$fname"
+			    }
 			}
+			close $hosts
+		    } else {
+			showmessage "Keyfile empty" .top50
+			return
 		    }
-		    close $hosts
-	
 		} else {
-		    showmessage "Keyfile not found" .top52
+		    showmessage "Keyfile not found" .top50
 		    return
 		}
 	    }
@@ -2330,8 +1889,14 @@ proc keygen {mode "in_keytype {}"} {
 	    if [file exists "$actkfile"] {
 		Window show .top19
 
+		if {$in_keytype != "host"} {
+		    set kt "user key"
+		} else {
+		    set kt "host key"
+		}
+
 		.top19.fra22.lab23 config -text "Keyfile: $actkfile"
-		.top19.fra22.lab24 config -text "Keytype: "
+		.top19.fra22.lab24 config -text "Keytype: $kt"
 
 		$fptext config -state normal
 		$bbtext config -state normal
@@ -2365,26 +1930,41 @@ proc keygen {mode "in_keytype {}"} {
 	chpath {
 	    choosefile "" "" "" keygen
 	}
+	dist {
+	    Window show .top53
+	    specsiteupdate
+	    distwizard key f
+	}
     }
 }
 
 proc update_keylist {} {
     global widget env
-    $widget(keylist) delete 0 end
+    if [winfo exists .top52] {
+	$widget(keylist) delete 0 end
+    }
+    if [winfo exists .top53] {
+	$widget(distkeylist) delete 0 end
+    }
+
     set keyfiles [glob -nocomplain "$env(HOME)/.ssh/*.pub"]
     foreach kf [lsort $keyfiles] {
-	$widget(keylist) insert end [file rootname [file tail $kf]]
+	if [winfo exists .top52] {
+	    $widget(keylist) insert end [file rootname [file tail $kf]]
+	}
+	if [winfo exists .top53] {
+	    $widget(distkeylist) insert end [file rootname [file tail $kf]]
+	}
     }
 }
 
 proc load_profile {mode} {
-    global env widget agentforward x11forward stricthost nopriv \
+    global env widget noagentforward x11forward stricthost nopriv \
 	verbose quiet fork gateway compress algo \
 	compressval lfs rfs connwait termicon sshverconnect \
 	ipverconnect askuserspec noexec
 
-    # first clear them all
-    foreach var {agentforward x11forward stricthost nopriv \
+    foreach var {noagentforward x11forward stricthost nopriv \
 		     verbose quiet fork gateway compress algo \
 		     compressval lfs rfs connwait termicon askuserspec noexec} {
 	if [info exists [set var]] {
@@ -2408,13 +1988,11 @@ proc load_profile {mode} {
 
     if {$mode == "ssh"} {
 	set profile [$widget(profiles) get active]
-    } elseif {$mode == "connects"} {
+    } elseif {$mode == "specsites"} {
 	set profile [retprof [$widget(specsites) get active]]
-    } elseif {$mode == "def"} {
-	set profile "default"	
     }
 
-    source $env(HOME)/.indimail/$profile.profile
+    source $env(HOME)/.indimail/profiles/$profile.profile
 
     foreach f {title host user port command subsys identity cfgfile profile} {
 	$widget([set f]ent) delete 0 end
@@ -2429,7 +2007,7 @@ proc load_profile {mode} {
 	foreach listelem $lfsnew {
 	    array set lfs \
 		    "[lindex [split $listelem :] 0]:<TARGET-HOST>:[lindex [split $listelem :] 1] \
-		    {Local forward vom old Version of SecPanel}"
+		    {Local forward vom old Version of secpanel}"
 	}
     }
 
@@ -2443,7 +2021,7 @@ proc load_profile {mode} {
 }
 
 proc manage_agent {mode "m run"} {
-    global env widget configs launcher defident agent
+    global env widget configs launcher defident agent wins
     switch -exact $mode {
 	"launch" {
 	    
@@ -2469,9 +2047,13 @@ proc manage_agent {mode "m run"} {
 	    }
 	    close $agentout
 	    $widget(statusagent) config -text "Agent active" -bg green -fg black
-	    wm title .top17 "SecPanel - Agent active"
+
+	    $widget(idents) delete 0 end
+
+	    wm title .top17 "secpanel - Agent active"
 	    set agent 1
 
+	    command_trace save "$configs(agentbin) -c"
 	    historyman write 6 "Launching agent"
 	}
 	"kill" {
@@ -2482,6 +2064,8 @@ proc manage_agent {mode "m run"} {
 		unset env(SSH_AGENT_PID)
 		unset env(SSH_AUTH_SOCK)
 		historyman write 6 "Stopping agent"
+	    } elseif {$m == "end" && $launcher && $agent == "ext"} {
+		return
 	    } else {
 		if [info exists env(SSH_AGENT_PID)] {
 		    if {$agent == "ext"} {
@@ -2493,11 +2077,15 @@ proc manage_agent {mode "m run"} {
 			unset env(SSH_AGENT_PID)
 			unset env(SSH_AUTH_SOCK)
 			$widget(statusagent) config -text "No Agent" -bg firebrick1
-			wm title .top17 "SecPanel - No Agent"
+			wm title .top17 "secpanel - No Agent"
 			$widget(idents) delete 0 end
 			set agent 0
 
+			command_trace save "$configs(agentbin) -k"
 			historyman write 6 "Stopping agent"
+			if [winfo exists .top33] {
+			    destroyfilter .top33
+			}
 		    } else {
 			return
 		    }
@@ -2507,27 +2095,41 @@ proc manage_agent {mode "m run"} {
 	    }
 	}
 	"info" {
-	    if [info exists env(SSH_AGENT_PID)] {
+	    if {[info exists env(SSH_AGENT_PID)] && [info exists env(SSH_AUTH_SOCK)]} {
 		Window show .top33
+
+		if {[info exists configs(wingeom)] && $configs(wingeom)} {
+		    if [info exists wins(agentinfo)] {
+			wm geometry ".top33" $wins(agentinfo)
+		    }
+		}
+
 		.top33.fra34.lab38 config -text $env(SSH_AUTH_SOCK)
 		.top33.fra34.lab39 config -text $env(SSH_AGENT_PID)
 
 		catch {exec $configs(addbin) -l} err
+
+		command_trace save "$configs(addbin) -l"
 
 		set text .top33.cpd36.03
 		$text delete 1.0 end
 		$text insert end "Fingerprints of keys contained by the running agent:\n\n"
 		$text insert end $err
 	    } else {
-		showmessage "No agent running" .top17
+		showmessage "No agent running or\nagent environment not clean" .top17
 	    }
 	}
 	"chdef" {
 	    set defident [tk_getOpenFile -initialdir "$env(HOME)/.ssh/"]
 	    if {$defident != ""} {
 		save_globals chdef
-		historyman write 6 "Changing default identity to $defident"
+		historyman write 6 "Setting default identity to $defident"
 	    }
+	}
+	"rmdef" {
+	    set defident ""
+	    save_globals chdef
+	    historyman write 6 "Removing default identity"
 	}
 	"addident" {
 	    if {! [info exists env(SSH_AGENT_PID)]} {
@@ -2535,11 +2137,14 @@ proc manage_agent {mode "m run"} {
 		return
 	    }
 
-	    if {($m == "start") && $launcher && [info exists defident]} {
-		tkwait visibility .top17
-		showstatus "Adding default identity"
-		update idletasks
-		set fname $defident
+	    if {($m == "start")} {
+		if { $launcher && [info exists defident] && $defident != ""} {
+		    showstatus "Adding default identity"
+		    update idletasks
+		    set fname $defident
+		} else {
+		    set fname ""
+		}
 	    } else {
 		showstatus "Adding identity"
 		update idletasks
@@ -2552,6 +2157,7 @@ proc manage_agent {mode "m run"} {
 		}
 
 		catch {exec $configs(addbin) $fname < /dev/null} err
+		command_trace save "$configs(addbin) $fname < /dev/null"
 
 		if [string match "*No such file*" $err] {
 		    showmessage "Can't find your askpass program-\nCheck configuration!" .top17
@@ -2571,6 +2177,9 @@ proc manage_agent {mode "m run"} {
 		}
 		if {! $found} {
 		    $widget(idents) insert end $fname
+		}
+		if [winfo exists .top33] {
+		    manage_agent "info"
 		}
 		showstatus ""
 		historyman write 6 "Adding identity $fname"
@@ -2592,117 +2201,49 @@ proc manage_agent {mode "m run"} {
 		catch {exec $configs(addbin) -d [$widget(idents) get active]}
 		$widget(idents) delete active
 		selection clear
+		command_trace save "$configs(addbin) -d [$widget(idents) get active]"
 		historyman write 6 "Removing identity [$widget(idents) get active]"
+		if [winfo exists .top33] {
+		    manage_agent "info"
+		}
 	    }
 	}
     }
 }
 
-proc newconn {mode state} {
-    global widget env sites askuserdef
-    switch -exact $mode {
-	def {
-	    switch -exact $state {
-		1 {
-		    Window show .top40
-		    $widget(newuser) insert 0 $env(USER)
-		    grab .top40
-		}
-		2 {
-		    set newtit [$widget(newtit) get]
-		    set newaddr [$widget(newaddr) get]
-
-		    if {$askuserdef} {
-			set newuser "<ASKFORUSER>"
-		    } else {
-			set newuser [$widget(newuser) get]
-		    }
-
-		    if {$newtit != "" && $newaddr != ""} {
-			set sites($newtit) "$newaddr#$newuser"
-			
-			set sitefile [open "$env(HOME)/.indimail/sites" w]
-			foreach s [array names sites] {
-			    puts $sitefile "$s#$sites($s)"
-			}
-			close $sitefile
-			
-			defsiteupdate
-			clear_distmenu
-			
-			Window destroy .top40
-		    } else {
-			showmessage "Please enter address and title" ""
-		    }
-		}
-	    }
-	}
-	spec {
-	    changetab ssh
-	    clear_profiles
-	}
-    }
+proc newconn {state} {
+    changetab ssh
+    clear_profiles
 }
 
-proc propconn {spec mode} {
-    global widget env sites askuserdef
-    switch -exact $spec {
-	def {
-	    switch -exact $mode {
-		1 {
-		    if {[$widget(defsites) index end] > 0} {
-			set act [$widget(defsites) get active]
-			Window show .top40
-			$widget(newtit) insert 0 $act
-			$widget(newaddr) insert 0 [lindex [split $sites($act) #] 0]
-
-			set userentry [lindex [split $sites($act) #] 1]
-			if {$userentry == "<ASKFORUSER>"} {
-			    set askuserdef 1
-			} else {
-			    $widget(newuser) insert 0 $userentry
-			    set askuserdef 0
-			}
-
-			.top40.fra45.but47 config -command "propconn def 2"
-			grab .top40
-		    } else {
-			showmessage "No conncections available, please use \"New\"" ""
-			return
-		    }
-		}
-		2 {
-		    unset sites([$widget(defsites) get active])
-		    newconn def 2
-		}
-	    }
-	}
-	spec {
-	    if {[$widget(specsites) index end] > 0} {
-		changetab ssh
-		load_profile connects
-	    } else {
-		showmessage "No conncections available, please use \"New\"" ""
-		return
-	    }
-	}
+proc propconn {mode} {
+    global widget
+    if {[selection own] != $widget([set mode])} {
+	showmessage "Please select connection" .top17
+	return
+    }
+    if {[$widget([set mode]) index end] > 0} {
+	changetab ssh
+	load_profile $mode
+    } else {
+	showmessage "No conncections available, please use \"New\"" ""
+	return
     }
 }
 
 proc retprof {tit} {
     global env
-    foreach f [glob -nocomplain "$env(HOME)/.indimail/*.profile"] {
+    foreach f [glob -nocomplain "$env(HOME)/.indimail/profiles/*.profile"] {
 	source $f
 	if {$title == $tit} {
 	    return "[file rootname [file tail $f]]"
 	}
-
 	unset lfs
     }
 }
 
 proc save_profile {} {
-    global env widget agentforward x11forward stricthost nopriv verbose \
+    global env widget noagentforward x11forward stricthost nopriv verbose \
 	    quiet fork gateway compress algo compressval lfs rfs \
 	    connwait termicon sshverconnect ipverconnect askuserspec noexec
 
@@ -2722,19 +2263,9 @@ proc save_profile {} {
     set command [$widget(commandent) get]
     set subsys [$widget(subsysent) get]
 
-    if {$prname == "default"} {
-	if {$title != "Default Profile" || $host != "" \
-		|| $user != "" || $command != "" || $subsys != "" || \
-		([info exists askuserspec] && $askuserspec == 1)} {
-	    showmessage "You may not enter host, user or command/subsys for the \
-		    default profile and you may not change the title" ""
-	    return
-	}
-    } else {
-	if {$title == "" || $host == ""} {
-	    showmessage "You must enter at least host and title" ""
-	    return
-	}
+    if {$title == "" || $host == ""} {
+	showmessage "You must enter at least host and title" ""
+	return
     }
     
     if {$subsys != "" && ($command != "" || $noexec)} {
@@ -2744,14 +2275,14 @@ proc save_profile {} {
     set identity [$widget(identityent) get]
     set cfgfile [$widget(cfgfileent) get]
 
-    set prfile [open "$env(HOME)/.indimail/$prname.profile" w]
+    set prfile [open "$env(HOME)/.indimail/profiles/$prname.profile" w]
     
-    puts $prfile "#\n# SecPanel-Pofile\n# Do not edit, use SecPanel instead\n#"
+    puts $prfile "#\n# secpanel-Profile\n# Do not edit, use secpanel instead\n#"
     
     foreach ent {title host user port command subsys identity cfgfile} {
 	puts $prfile "set [set ent] \"[set $ent]\""
     }
-    foreach bool {agentforward x11forward stricthost nopriv verbose \
+    foreach bool {noagentforward x11forward stricthost nopriv verbose \
 	    quiet fork gateway compress connwait termicon askuserspec noexec} {
 	if [info exists [set bool]] {
 	    if [set $bool] {
@@ -2786,7 +2317,6 @@ proc save_profile {} {
     specsiteupdate    
     clear_prmenu
     clear_profiles
-    clear_distmenu
 }
 
 proc seldistkey {} {
@@ -2795,51 +2325,50 @@ proc seldistkey {} {
 	{{Public keys} {.pub}}
 	{{All files} *}
     }
-    $widget(keydistkey) delete 0 end
-    $widget(keydistkey) insert 0 \
+    $widget(distkeyentry) delete 0 end
+    $widget(distkeyentry) insert 0 \
 	    [tk_getOpenFile -initialdir "$env(HOME)/.ssh"  -filetypes $ftypes]
 }
 
-proc showman {man} {
-    global configs
-
-	set cmd "man $man | ul -t unknown"
-	exec @indimaildir@/bin/FMbrowse command $cmd
-}
 
 proc specsiteupdate {{mode ""}} {
     global widget env
     $widget(specsites) delete 0 end
-    set profiles [glob -nocomplain "$env(HOME)/.indimail/*.profile"]
+
+    if [winfo exists $widget(distconnlist)] {
+		$widget(distconnlist) delete 0 end
+    }
+
+    set profiles [glob -nocomplain "$env(HOME)/.indimail/profiles/*.profile"]
 
     if {$mode == "ss"} {
-	if {! [winfo exists $widget(sspecsites).sspecmenu]} {
-	    menu $widget(sspecsites).sspecmenu -tearoff 0 -border 1
-	    $widget(sspecsites) config -menu $widget(sspecsites).sspecmenu
-	} else {
-	    $widget(sspecsites).sspecmenu delete 0 end
-	}
+		if {! [winfo exists $widget(sspecsites).sspecmenu]} {
+			menu $widget(sspecsites).sspecmenu -tearoff 0 -border 1
+			$widget(sspecsites) config -menu $widget(sspecsites).sspecmenu
+		} else {
+			$widget(sspecsites).sspecmenu delete 0 end
+		}
     }
 
     foreach prof [lsort $profiles] {
-	if {[file rootname [file tail $prof]] == "default"} {
-	    continue
-	}
-	source $prof
-	$widget(specsites) insert end $title
+		source $prof
+		$widget(specsites) insert end $title
+		if [winfo exists $widget(distconnlist)] {
+			$widget(distconnlist) insert end $title
+		}
 
-	if {$mode == "ss"} {
-	     $widget(sspecsites).sspecmenu add command -label "$title" -command "connect spec ss"
-	}
-	
-	unset lfs
+		if {$mode == "ss"} {
+			 $widget(sspecsites).sspecmenu add command -label "$title" -command "connect ss"
+		}
+		
+		unset lfs
     }
 }
 
 proc about {} {
     global spversion
     Window show .top25
-    .top25.fra26.lab21 config -text "SecPanel $spversion"
+    .top25.fra26.lab21 config -text "secpanel $spversion"
 }
 
 proc showstatus {text} {
@@ -2850,81 +2379,158 @@ proc showstatus {text} {
 
 proc do_firstinit {lv} {
     global spversion env
-
-    if {$lv < 0.40} {
-	showmessage "You are a first time user of Ver. $spversion.\nWe have to convert the history file format..." \
-	    .top17
-	source @scriptdir@/convert_history.tcl
-    }
-
-    showmessage "You are a first time user of Ver. $spversion.\nWe go to configuration..." \
-	    .top17
-    changetab terminal
+    source @scriptdir@/convert_history.tcl
+    source @scriptdir@/convert_profile.tcl
 }
 
 proc do_exit {} {
-    global env
-    
-    foreach f [glob -nocomplain "$env(HOME)/.indimail/.runfiles/*.*"] {
-	file delete $f
+    global env wins configs
+
+    foreach f [glob -nocomplain "$env(HOME)/.indimail/.runfiles/*"] {
+		file delete -force $f
     }
 
     if {[info exists env(SSH_AGENT_PID)] && [info exists env(SSH_AUTH_SOCK)]} {
-	manage_agent kill "end"
+		manage_agent kill "end"
+    }
+
+    foreach {winn winnr} {base .top17 trace .top24 sat .top27 agentinfo .top33 hist .top26} {
+		if [winfo exists $winnr] {
+			set wins($winn) [wm geometry $winnr]
+		}
     }
 
     save_globals "geom"
 
-    exit 0
+    # spdata
+    if [set configs(protectdata)] {
+		exec @scriptdir@/dppw.tcl "en"
+    }
+
+    destroyfilter .top17
+
+    exit
+}
+
+proc destroyfilter {win} {
+    global wins
+    foreach {winn winnr} {base .top17 trace .top24 sat .top27 agentinfo .top33 hist .top26} {
+		if {$win == $winnr} {
+			set wins($winn) [wm geometry $win]
+		}
+    }
+    Window destroy $win
 }
 
 proc main {argc argv} {
-    global widget sites env configs spversion launcher agent
+    global widget env configs spversion launcher agent termtype
 
-    bind .top17 <Destroy> {
-        do_exit
+    wm protocol .top17 WM_DELETE_WINDOW do_exit
+
+#    bind .top17 <Destroy> {
+#        do_exit
+#    }
+
+    foreach f {ssh keygen agent add askpass scp browser} {
+		$widget([set f]ent) insert 0 "$configs([set f]bin)"
+    }
+    foreach b {connects profiles keys configs indadmin sscreen} {
+		$widget([set b]but) config -border 2 -relief groove -image \
+			[image create photo -file @imagedir@/[set b]_gr.gif]
+    }
+
+    foreach {sftptag sftpprog} {
+	"KDE-Konqueror" konqueror
+	"GNOME-Nautilus" nautilus
+	"Filezilla" filezilla
+    } {
+	if {! [catch {exec which "$sftpprog"}]} {
+	    .top17.fra44.fra19.fra30.men34.m add radiobutton \
+		-value "$sftptag" -variable "configs(sftpbin)" -label "$sftptag"
+	} else {
+	    .top17.fra44.fra19.fra30.men34.m add radiobutton \
+		-value "$sftpprog" -variable "configs(sftpbin)" -label "$sftptag (not found)" \
+		-state "disabled"
+	}	
+    }
+
+    source @sysconfdir@/termdefs.txt
+
+    foreach k [array names termtype] {
+	if [string match "*_path" $k] {
+	    set termname [string replace $k [string first "_" $k] end]
+	    set termpath $termtype($k)
+	    if {! [catch {exec which "$termpath"}]} {
+		.top17.fra44.fra19.fra32.men35.01 add radiobutton \
+		    -value "$termname" -variable "configs(termver)" -label "$termname"
+	    } else {
+		.top17.fra44.fra19.fra32.men35.01 add radiobutton \
+		    -value "$termname" -variable "configs(termver)" -label "$termname (not found)" \
+		    -state "disabled"
+	    }
+	}
+    }
+
+    set lv 0
+
+    if [file exists "$env(HOME)/.indimail/.init"] {
+	set vf [open "$env(HOME)/.indimail/.init" r]
+	set lv [read $vf]
+
+	if {[string equal $spversion $lv] != 1} {
+	    do_firstinit $lv
+	    exec echo -n $spversion > $env(HOME)/.indimail/.init
+	}
+	close $vf
+    } else {
+	exec echo -n $spversion > $env(HOME)/.indimail/.init
+    }
+
+    menu .mc1 -tearoff 0 -borderwidth 1
+
+
+    if {! [catch {exec which "cssh"}]} {
+	.mc1 add command -label "ClusterSSH" -command "multiconnect cssh"
+    } else {
+	.mc1 add command -label "ClusterSSH (not found)" -command "multiconnect cssh" -state "disabled"
+    }
+
+    if {! [catch {exec which "multixterm"}]} {
+	.mc1 add command -label "Multi Xterm" -command "multiconnect multixterm"
+    } else {
+	.mc1 add command -label "Multi Xterm (not found)" -command "multiconnect multixterm" -state "disabled"
+    }
+
+    if {[catch {exec which "filezilla"}] && [catch {exec which "nautilus"}] && [catch {exec which "konqueror"}]
+} {
+	.top17.fra46.fra26.fra29.fra36.but34 configure -state "disabled"
+    }
+
+    bind .top17.fra46.fra26.fra29.fra36.but38 <Button> {
+	tk_popup .mc1 [winfo pointerx .top17] [winfo pointery .top17]
     }
 
     clear_prmenu
     clear_profiles
-    defsiteupdate
     specsiteupdate
-    clear_distmenu
-    foreach f {ssh keygen agent add askpass scp xterm browser} {
-	$widget([set f]ent) insert 0 "$configs([set f]bin)"
-    }
-    foreach b {connects scp profiles keys configs madadmin sscreen} {
-		if {[file exist @imagedir@/[set b].gif]} {
-			$widget([set b]but) config -image [image create photo -file @imagedir@/[set b].gif]
-		}
-    }
-
-    set lv 0
-    set newuse false
-    if {! [file exists "$env(HOME)/.indimail/.init"]} {
-	set newuse true
-    } else {
-	set vf [open "$env(HOME)/.indimail/.init" r]
-	set lv [read $vf]
-	if {$spversion > $lv} {
-	    set newuse true
-	}
-	close $vf
-    }
-    if {$newuse} {
-	do_firstinit $lv
-	exec echo $spversion > $env(HOME)/.indimail/.init
-    }
-
 
     if {[info exists env(SSH_AGENT_PID)] && [info exists env(SSH_AUTH_SOCK)]} {
 	$widget(statusagent) config -text "Agent active (external)" -bg green -fg black
-	wm title .top17 "SecPanel - Agent active (external)"
+	wm title .top17 "secpanel - Agent active (external)"
 	historyman write 6 "Accepted external agent"
+
+	set initagentout [open "| ssh-add -L" r]
+	while {[gets $initagentout line] >= 0} {
+	    if [string match "The agent has no identities*" $line] {
+		continue
+	    }
+	    $widget(idents) insert end [lindex [split $line] 2]
+	}
+
 	set agent "ext"
     } else {
 	$widget(statusagent) config -text "No Agent" -bg firebrick1
-	wm title .top17 "SecPanel - No agent"
+	wm title .top17 "secpanel - No agent"
     }
 
 
@@ -2933,6 +2539,11 @@ proc main {argc argv} {
 	    manage_agent addident "start"
 	}
     }
+
+    if {[info exists configs(startsat)] && $configs(startsat)} {
+	changetab small
+    }
+
 }
 
 proc indiadmin {} {
@@ -2940,24 +2551,25 @@ proc indiadmin {} {
 	if {[string compare $indiinvoked "indimail"] == 0} {
 		exit 0
 	} else {
-		exec @indimaildir@/indium &
+		exec @prefix@/bin/indium &
 	}
 }
 
 source @scriptdir@/gui.tcl
 
 if {[info exists configs(wingeom)] && $configs(wingeom)} {
-    wm geometry ".top17" $wingeom
+    if [info exists wins(base)] {
+	wm geometry ".top17" $wins(base)
+    }
 }
 
 foreach b {.top17.fra44.fra19.fra20.but23 .top17.fra44.fra19.fra26.03 \
 	       .top17.fra44.fra19.fra27.03 .top17.fra44.fra19.fra28.03 \
-	       .top17.fra44.fra19.fra29.03 .top17.fra44.fra19.fra32.03 \
-	       .top17.fra44.fra19.fra30.03 .top17.fra21.fra24.but22 \
-	       .top17.fra21.fra24.but23 .top17.fra44.fra19.fra18.03} {
-	if {[file exist @imagedir@/folder.gif]} {
+	       .top17.fra44.fra19.fra29.03 \
+	       .top17.fra44.fra19.fra34.but34 .top17.fra21.fra24.but22 \
+	       .top17.fra21.fra24.but23 .top17.fra44.fra19.fra18.03 \
+	       } {
     $b configure -image [image create photo -file @imagedir@/folder.gif]
-	}
 }
 
 global indiinvoked
