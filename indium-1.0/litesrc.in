@@ -1,5 +1,8 @@
-#
+#!/bin/sh
 # $Log: litesrc.in,v $
+# Revision 2.9  2016-06-07 22:29:30+05:30  Cprogrammer
+# added shebang
+#
 # Revision 2.8  2016-06-07 18:39:08+05:30  Cprogrammer
 # FHS compliance
 #
