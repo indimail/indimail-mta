@@ -1,5 +1,8 @@
 #
 # $Log: indimail.te,v $
+# Revision 2.16  2016-06-07 10:53:21+05:30  Cprogrammer
+# added selinux rules for iwebadmin
+#
 # Revision 2.15  2016-06-06 16:40:03+05:30  Cprogrammer
 # removed rpm_script_tmp_t
 #
@@ -46,7 +49,7 @@
 # selinux module config
 #
 #
-# $Id: indimail.te,v 2.15 2016-06-06 16:40:03+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.te,v 2.16 2016-06-07 10:53:21+05:30 Cprogrammer Exp mbhangui $
 # 
 #
 # semanage permissive -a svc_start_t
@@ -98,6 +101,7 @@ require {
 	type root_t;
 	type tmp_t;
 	type user_home_t;
+	type user_home_dir_t;
 	type user_tmp_t;
 	type usr_t;
 	type var_t;
@@ -135,11 +139,17 @@ allow httpd_t var_t:file { execute setattr read create execute_no_trans write ge
 allow httpd_t var_t:lnk_file read;
 
 #============= httpd_sys_script_t ==============
-allow httpd_sys_script_t home_root_t:dir { add_name write read };
-allow httpd_sys_script_t home_root_t:file { open getattr write create read };
-allow httpd_sys_script_t var_t:file { getattr execute open read };
-allow httpd_sys_script_t self:capability setuid;
-allow httpd_sys_script_t self:capability setgid;
+
+allow httpd_sys_script_t user_home_dir_t:dir search;
+allow httpd_sys_script_t user_home_t:dir { setattr getattr read create write rmdir search remove_name open add_name };
+allow httpd_sys_script_t user_home_t:file { create unlink read write open getattr setattr lock unlink };
+allow httpd_sys_script_t home_root_t:dir { add_name remove_name read write };
+allow httpd_sys_script_t self:capability { fowner setuid setgid };
+allow httpd_sys_script_t user_tmp_t:lnk_file read;
+allow httpd_sys_script_t var_t:dir { create read write remove_name add_name rmdir setattr };
+allow httpd_sys_script_t var_t:file { execute setattr read create execute_no_trans write getattr unlink open };
+allow httpd_sys_script_t var_t:lnk_file read;
+allow httpd_sys_script_t home_root_t:file { unlink read write open create lock getattr };
 
 #============= mysqld_t ==============
 allow mysqld_t usr_t:file { append create rename write unlink };
