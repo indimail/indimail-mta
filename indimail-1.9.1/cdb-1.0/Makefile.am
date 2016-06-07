@@ -13,6 +13,7 @@ doc_list= README.cdb
 
 include_HEADERS = cdb.h cdbmake.h uint32.h
 COMMONSOURCES= cdb_hash.c cdbmake_add.c cdbmake_hash.c cdbmake_pack.c cdb_seek.c cdb_unpack.c
+includedir=@prefix@/include/indimail
 INC = $(include_HEADERS)
 
 libcdb_LTLIBRARIES = libcdb.la
@@ -52,7 +53,7 @@ load: warn-auto.sh conf-ld
 
 install-data-local:
 	$(mkinstalldirs)  $(DESTDIR)@prefix@/lib
-	$(mkinstalldirs)  $(DESTDIR)@prefix@/include
+	$(mkinstalldirs)  $(DESTDIR)@prefix@/include/indimail
 
 install-data-hook:
 	for f in $(doc_list); do \

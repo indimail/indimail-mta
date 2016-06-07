@@ -13,6 +13,7 @@ include_HEADERS = eps_line.h eps_buffer.h eps_unroll.h eps_content.h eps.h eps_i
 	eps_header.h eps_email.h eps_boundary.h eps_mime.h eps_address.h eps_base64.h eps_roll.h eps_int_buffer.h
 COMMONSOURCES=eps_line.c eps_buffer.c eps_unroll.c eps_content.c eps.c eps_int_stream.c rfc2822.c eps_misc.c eps_header.c \
 	eps_email.c eps_boundary.c eps_mime.c eps_address.c eps_base64.c eps_roll.c eps_int_buffer.c
+includedir=@prefix@/include/indimail
 INC = $(include_HEADERS)
 
 libeps_LTLIBRARIES = libeps.la
@@ -40,7 +41,7 @@ eps_int_buffer.lo: $(INC)
 
 install-data-local:
 	$(mkinstalldirs)  $(DESTDIR)@prefix@/lib
-	$(mkinstalldirs)  $(DESTDIR)@prefix@/include
+	$(mkinstalldirs)  $(DESTDIR)@prefix@/include/indimail
 
 LIBTOOL_DEPS = @LIBTOOL_DEPS@
 libtool: $(LIBTOOL_DEPS)
