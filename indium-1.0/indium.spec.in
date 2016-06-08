@@ -1,5 +1,11 @@
 #
 # $Log: indium.spec.in,v $
+# Revision 1.13  2016-06-08 10:42:35+05:30  Cprogrammer
+# added tk library images
+#
+# Revision 1.12  2016-06-07 22:29:19+05:30  Cprogrammer
+# FHS compliance
+#
 # Revision 1.11  2016-06-07 18:39:01+05:30  Cprogrammer
 # FHS compliance
 #
@@ -34,7 +40,7 @@
 # Initial revision
 #
 #
-# $Id: indium.spec.in,v 1.11 2016-06-07 18:39:01+05:30 Cprogrammer Exp mbhangui $
+# $Id: indium.spec.in,v 1.13 2016-06-08 10:42:35+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %define _unpackaged_files_terminate_build 1
 
@@ -272,7 +278,7 @@ find ./BWidget-%{bwidget_version} -depth -print | cpio -pdmv %{buildroot}$TCL_PA
 # copy files here
 if [ -x /usr/bin/chrpath ] ; then
 #/usr/bin/chrpath -d %{buildroot}%{_libdir}/*.so
-	/usr/bin/chrpath -d %{buildroot}%{_prefix}/sbin/pwhelper
+	/usr/bin/chrpath -d %{buildroot}%{libexecdir}/pwhelper
 fi
 %{__rm} -f %{buildroot}%{_libdir}/*.so
 
@@ -281,6 +287,10 @@ fi
 %if "%{_prefix}" != "/usr"
 %dir %attr(555,root,qmail)              %{_prefix}
 %endif
+%dir %attr(555,root,qmail)              %{shareddir}/indium
+%dir %attr(555,root,qmail)              %{shareddir}/indium/scripts
+%dir %attr(555,root,qmail)              %{shareddir}/indium/images
+%dir %attr(555,root,qmail)              %{shareddir}/indium/lib
 #
 # Image files
 #
@@ -339,6 +349,19 @@ fi
 %attr(444,root,indimail)                %{shareddir}/indium/images/top.gif
 %attr(444,root,indimail)                %{shareddir}/indium/images/version.gif
 %attr(444,root,indimail)                %{shareddir}/indium/images/warning.gif
+%attr(444,root,indimail)                %{shareddir}/indium/images/back.gif
+%attr(444,root,indimail)                %{shareddir}/indium/images/configs_gr.gif
+%attr(444,root,indimail)                %{shareddir}/indium/images/connects_gr.gif
+%attr(444,root,indimail)                %{shareddir}/indium/images/indadmin_gr.gif
+%attr(444,root,indimail)                %{shareddir}/indium/images/keys_gr.gif
+%attr(444,root,indimail)                %{shareddir}/indium/images/profiles_gr.gif
+%attr(444,root,indimail)                %{shareddir}/indium/images/sscreen_gr.gif
+%attr(444,root,indimail)                %{shareddir}/indium/images/bwidget.xbm
+%attr(444,root,indimail)                %{shareddir}/indium/images/file.gif
+%attr(444,root,indimail)                %{shareddir}/indium/images/filemiss.gif
+%attr(444,root,indimail)                %{shareddir}/indium/images/hourglass.gif
+%attr(444,root,indimail)                %{shareddir}/indium/images/x1.xbm
+
 
 %if %nobwidget == 0
 #
@@ -473,38 +496,35 @@ fi
 #
 # These files will get removed during installation
 #
-%attr(755,root,indimail)                %{_prefix}/sbin/pwhelper
 %attr(555,root,indimail)                %{_prefix}/bin/FMbrowse
 %attr(555,root,indimail)                %{_prefix}/bin/indium
 %attr(555,root,indimail)                %{_prefix}/bin/litesrc
 %attr(555,root,indimail)                %{_prefix}/bin/secpanel
 %attr(555,root,indimail)                %{_prefix}/bin/supernotepad
 %attr(555,root,indimail)                %{_prefix}/bin/tkdiff
-%attr(555,root,indimail)                %{shareddir}/indium/scripts/balloon.tcl
-%attr(555,root,indimail)                %{shareddir}/indium/scripts/base64.tcl
-%attr(555,root,indimail)                %{shareddir}/indium/scripts/combobox.tcl
-%attr(555,root,indimail)                %{shareddir}/indium/scripts/common.tcl
-%attr(555,root,indimail)                %{shareddir}/indium/scripts/convert_history.tcl
-%attr(555,root,indimail)                %{shareddir}/indium/scripts/convert_profile.tcl
-%attr(555,root,indimail)                %{shareddir}/indium/scripts/export_profiles.tcl
+%attr(755,root,indimail)                %{libexecdir}/pwhelper
 %attr(555,root,indimail)                %{shareddir}/indium/scripts/dppw.tcl
-%attr(555,root,indimail)                %{shareddir}/indium/scripts/secpanel_remoteconf.sh
 %attr(555,root,indimail)                %{shareddir}/indium/scripts/spdistkey
-%attr(555,root,indimail)                %{shareddir}/indium/scripts/fileman.tcl
-%attr(555,root,indimail)                %{shareddir}/indium/scripts/global.tcl
-%attr(555,root,indimail)                %{shareddir}/indium/scripts/gui.tcl
-%attr(555,root,indimail)                %{shareddir}/indium/scripts/help.tcl
-%attr(555,root,indimail)                %{shareddir}/indium/scripts/hugecombo.tcl
-%attr(555,root,indimail)                %{shareddir}/indium/scripts/hugelist.tcl
-%attr(555,root,indimail)                %{shareddir}/indium/scripts/keydistribute.tcl
-%attr(555,root,indimail)                %{shareddir}/indium/scripts/listserver.tcl
-%attr(555,root,indimail)                %{shareddir}/indium/scripts/madHelp.tcl
-%attr(555,root,indimail)                %{shareddir}/indium/scripts/mclistbox.tcl
-%attr(555,root,indimail)                %{shareddir}/indium/scripts/notebook.tcl
-%attr(555,root,indimail)                %{shareddir}/indium/scripts/progressbar.tcl
-%attr(555,root,indimail)                %{shareddir}/indium/scripts/ranges.tcl
-%attr(555,root,indimail)                %{shareddir}/indium/scripts/secpanel.dist
 %attr(555,root,indimail)                %{shareddir}/indium/scripts/secpanel.wait
+%attr(555,root,indimail)                %{shareddir}/indium/scripts/secpanel_remoteconf.sh
+%attr(444,root,indimail)                %{shareddir}/indium/scripts/convert_profile.tcl
+%attr(444,root,indimail)                %{shareddir}/indium/scripts/convert_history.tcl
+%attr(444,root,indimail)                %{shareddir}/indium/scripts/balloon.tcl
+%attr(444,root,indimail)                %{shareddir}/indium/scripts/base64.tcl
+%attr(444,root,indimail)                %{shareddir}/indium/scripts/combobox.tcl
+%attr(444,root,indimail)                %{shareddir}/indium/scripts/common.tcl
+%attr(444,root,indimail)                %{shareddir}/indium/scripts/export_profiles.tcl
+%attr(444,root,indimail)                %{shareddir}/indium/scripts/fileman.tcl
+%attr(444,root,indimail)                %{shareddir}/indium/scripts/global.tcl
+%attr(444,root,indimail)                %{shareddir}/indium/scripts/gui.tcl
+%attr(444,root,indimail)                %{shareddir}/indium/scripts/help.tcl
+%attr(444,root,indimail)                %{shareddir}/indium/scripts/hugecombo.tcl
+%attr(444,root,indimail)                %{shareddir}/indium/scripts/hugelist.tcl
+%attr(444,root,indimail)                %{shareddir}/indium/scripts/IndiMailHelp.tcl
+%attr(444,root,indimail)                %{shareddir}/indium/scripts/mclistbox.tcl
+%attr(444,root,indimail)                %{shareddir}/indium/scripts/notebook.tcl
+%attr(444,root,indimail)                %{shareddir}/indium/scripts/progressbar.tcl
+%attr(444,root,indimail)                %{shareddir}/indium/scripts/ranges.tcl
 
 # Shared libraries (omit for architectures that don't support them)
 #%{_libdir}/libtai64.so
