@@ -46,7 +46,7 @@ NoExtension	INTERNAL BrowseFile OLDFILE
 .jpg	gimp OLDFILE &
 .JPG	gimp OLDFILE &
 [BROWSEFONT]
-*-Courier-Medium-R-Normal-*-120-*
+fixed
 [BROWSECOLORS]
 white
 gray41
