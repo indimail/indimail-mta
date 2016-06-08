@@ -1,5 +1,8 @@
 /*
  * $Log: indiversion.c,v $
+ * Revision 2.140  2016-06-08 15:28:08+05:30  Cprogrammer
+ * fixed locating programs in aditional directories like sbin, libexec
+ *
  * Revision 2.139  2016-05-25 09:02:02+05:30  Cprogrammer
  * use SYSCONFDIR for qmailprog.list, LIBEXECDIR for libexec programs
  *
@@ -531,6 +534,7 @@
 #ifdef MAIN
 #include "indimail.h"
 #include <string.h>
+#include <unistd.h>
 #else
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -538,7 +542,7 @@
 #endif
 
 #ifndef	lint
-static char     sccsid[] = "$Id: indiversion.c,v 2.139 2016-05-25 09:02:02+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: indiversion.c,v 2.140 2016-06-08 15:28:08+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 void            getversion_indimail_settings_c();
@@ -1298,8 +1302,23 @@ Ident(char *pgname, int mode)
 	else
 	if (mode == 3)
 		snprintf(buffer, MAX_BUFF, "strings %s/%s", LIBEXECDIR, pgname);
-	else
-		snprintf(buffer, MAX_BUFF, "strings %s/bin/%s", QMAILDIR, pgname);
+	else {
+		snprintf(buffer, MAX_BUFF, "%s/bin/%s", QMAILDIR, pgname);
+		if (!access(buffer, F_OK))
+			snprintf(buffer, MAX_BUFF, "strings %s/bin/%s", QMAILDIR, pgname);
+		else {
+			snprintf(buffer, MAX_BUFF, "%s/sbin/%s", QMAILDIR, pgname);
+			if (!access(buffer, F_OK))
+				snprintf(buffer, MAX_BUFF, "strings %s/sbin/%s", QMAILDIR, pgname);
+			else {
+				snprintf(buffer, MAX_BUFF, "%s/libexec/%s", QMAILDIR, pgname);
+				if (!access(buffer, F_OK))
+					snprintf(buffer, MAX_BUFF, "strings %s/libexec/%s", QMAILDIR, pgname);
+				else
+					return;
+			}
+		}
+	}
 	if(!(fp = popen(buffer, "r")))
 	{
 		perror(buffer);
