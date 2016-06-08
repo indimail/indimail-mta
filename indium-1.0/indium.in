@@ -1,5 +1,8 @@
 #!/bin/sh
 # $Log: indium.in,v $
+# Revision 2.115  2016-06-08 19:29:10+05:30  Cprogrammer
+# fixed version information display
+#
 # Revision 2.114  2016-06-08 10:42:27+05:30  Cprogrammer
 # fixed paths for missing images
 #
@@ -3736,15 +3739,7 @@ proc run_indiversion {dbwin} {
 		set pc [expr $count * 100 / 362]
 		.statusBar.foo configure -text "$pc %"
 		set id      [lindex $line 0]
-		if {[string compare $id "\"] != 0} {
-			if {[string compare $line "Main Program Version List"] != 0 && \
-				[string length $line] > 0 && \
-				[string compare -length 17 $line "Indi Mail Version"] != 0} {
-				$dwin.log insert end "$line\n"
-				$dwin.log yview scroll 1 units
-			}
-			continue
-		}
+		if {[string compare -length 4 $id "\"] == 0} {
 		set code    [lindex $line 1]
 		set version [lindex $line 2]
 		set major   [lindex [split $version .] 0]
@@ -3753,6 +3748,13 @@ proc run_indiversion {dbwin} {
 		set time    [lindex $line 4]
 		$dbwin insert end [list $code $major $minor $date $time]
 		$dbwin yview scroll 1 units
+		}
+		if {[string length $line] > 0 && \
+			[string compare $line "Main Program Version List"] != 0 && \
+			[string compare -length 16 $line "IndiMail Version"] != 0} {
+			$dwin.log insert end "$line\n"
+			$dwin.log yview scroll 1 units
+		}
 	}
 	$dwin.log configure -state disabled
 	if {$BWidget_present == 1} {
@@ -4027,7 +4029,7 @@ proc userlist {} {
 		-highlightbackground black -takefocus 1 -relief raised
 	wm geometry $base +${x}+${y}
 	wm focusmodel $base passive
-	wm geometry $base 820x460
+	wm geometry $base 820x480
 	wm maxsize $base 1009 738
 	wm minsize $base 1 1
 	wm overrideredirect $base 0
