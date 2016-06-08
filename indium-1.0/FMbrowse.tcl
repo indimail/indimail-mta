@@ -27,7 +27,7 @@ proc Browse {mode argum} {
 	wm protocol $w WM_DELETE_WINDOW {destroy .;return}
     #wm iconify $w
 	#wm title $w $argum
-	wm title $w "MAD ManPage/Command Browser"
+	wm title $w "IndiMail ManPage/Command Browser"
 	frame $w.mbar -relief raised -bd 3
 	pack $w.mbar -side top -fill x
 	menubutton $w.mbar.fonts -text "Fonts" -menu $w.mbar.fonts.menu
@@ -112,7 +112,7 @@ proc DoLine {Text line} {
 		4	{set TextType underline}	
 		5	{set TextType blink}	
 		7	{set TextType reverse}	
-		default	{set TextType default}
+		default {set TextType default}
 	}
 	if {$TextType != "default"} {
 	    eval set match \[string range \$line $matchid\]
@@ -524,7 +524,7 @@ if {!$oldTK} {
 }
 set X11PATH {/usr/lib/X11}
 set fonts { \
-        {default *-Courier-Medium-R-Normal-*-120-*} {fixed fixed} \
+        {default *-Courier-Medium-R-Normal-*-80-*} {fixed fixed} \
         {6x10 6x10} {7x13 7x13} {7x14 7x14} {8x13 8x13} {9x15 9x15} \
         {times8 *times*-r-*-80*} {times12 *times*-r-*-120*} \
         {times14 *times*-r-*-140*} {times18 *times*-r-*-180*} \
