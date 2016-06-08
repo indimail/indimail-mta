@@ -1,5 +1,8 @@
 #
 # $Log: common.tcl.in,v $
+# Revision 2.22  2016-06-08 10:42:04+05:30  Cprogrammer
+# fixed paths for dns*, qmail-tcpto and images
+#
 # Revision 2.21  2016-06-07 18:38:23+05:30  Cprogrammer
 # FHS compliance
 #
@@ -146,7 +149,7 @@ proc validateKey {c val} {
 }
 
 proc splash {maxevents} {
-	global prgindic prgtext tk_library
+	global prgindic prgtext
 	global indiumversion indiliteversion textcolor
 	variable tfr
 	variable top
@@ -164,8 +167,8 @@ proc splash {maxevents} {
 	wm protocol $top WM_DELETE_WINDOW {wm withdraw $top}
 	wm withdraw .
 
-	set ximg  [label $top.x   -bitmap @$tk_library/images/x1.xbm      -foreground grey90 -background white]
-	set bwimg [label $ximg.bw -bitmap @$tk_library/images/bwidget.xbm -foreground grey90 -background white]
+	set ximg  [label $top.x   -bitmap @@imagedir@/x1.xbm      -foreground grey90 -background white]
+	set bwimg [label $ximg.bw -bitmap @@imagedir@/bwidget.xbm -foreground grey90 -background white]
 	set frame [frame $ximg.f -background white]
 	if {[info exists indiumversion]} {
 	set lab1  [label $frame.lab1 -text "Indium $indiumversion"     -background white -font {times 24}]
@@ -212,7 +215,7 @@ proc splash {maxevents} {
 
 proc progressDialog {} {
 	variable top
-	global prgtext tk_library w want_progressdialog
+	global prgtext w want_progressdialog
 
 	catch {destroy .progress}
 	if {$want_progressdialog == 0} {
@@ -231,9 +234,9 @@ proc progressDialog {} {
 	wm positionfrom $top program
 	wm protocol $top WM_DELETE_WINDOW {destroy $top}
 	$top configure -cursor watch
-	if {[file exist $tk_library/images/hourglass.gif]} {
+	if {[file exist @imagedir@/hourglass.gif]} {
 		label $top.i
-		$top.i config -image [image create photo -file $tk_library/images/hourglass.gif]
+		$top.i config -image [image create photo -file @imagedir@/hourglass.gif]
 		pack $top.i -side left
 	}
 	label $top.l -text $prgtext -width 20 -relief flat
@@ -3858,7 +3861,7 @@ proc qmailAdv {mode} {
 			set output_desc "DNS cnames"; \
 			$bwin1.2.run configure -text "DNS cname"; \
 			$bwin1.2.run configure -cursor {}; \
-			set cmd "exec @prefix@/bin/dnscname"; \
+			set cmd "exec @prefix@/sbin/dnscname"; \
 			set mycmd "$cmd $arguments"; \
 			$bwin1.1.queue configure -state disabled; \
 		}
@@ -3869,7 +3872,7 @@ proc qmailAdv {mode} {
 			set output_desc "DNS ptrs"; \
 			$bwin1.2.run configure -text "DNS ptr"; \
 			$bwin1.2.run configure -cursor {}; \
-			set cmd "exec @prefix@/bin/dnsptr"; \
+			set cmd "exec @prefix@/sbin/dnsptr"; \
 			set mycmd "$cmd $arguments"; \
 			$bwin1.1.queue configure -state disabled; \
 		}
@@ -3880,7 +3883,7 @@ proc qmailAdv {mode} {
 			set output_desc "DNS Fully Qualified Name"; \
 			$bwin1.2.run configure -text "DNS fq"; \
 			$bwin1.2.run configure -cursor {}; \
-			set cmd "exec @prefix@/bin/dnsfq"; \
+			set cmd "exec @prefix@/sbin/dnsfq"; \
 			set mycmd "$cmd $arguments"; \
 			$bwin1.1.queue configure -state disabled; \
 		}
@@ -3891,7 +3894,7 @@ proc qmailAdv {mode} {
 			set output_desc "DNS IP Addresses"; \
 			$bwin1.2.run configure -text "DNS ip"; \
 			$bwin1.2.run configure -cursor {}; \
-			set cmd "exec @prefix@/bin/dnsip"; \
+			set cmd "exec @prefix@/sbin/dnsip"; \
 			set mycmd "$cmd $arguments"; \
 			$bwin1.1.queue configure -state disabled; \
 		}
@@ -3902,7 +3905,7 @@ proc qmailAdv {mode} {
 			set arguments ""; \
 			$bwin1.2.run configure -text "DNS mxip"; \
 			$bwin1.2.run configure -cursor {}; \
-			set cmd "exec @prefix@/bin/dnsmxip"; \
+			set cmd "exec @prefix@/sbin/dnsmxip"; \
 			set mycmd "$cmd $arguments"; \
 			$bwin1.1.queue configure -state disabled; \
 		}
@@ -3954,7 +3957,7 @@ proc qmailAdv {mode} {
 			set output_desc "Queued Mail Remote Timeouts"; \
 			$bwin1.2.run configure -text "Queue Timeouts"; \
 			$bwin1.2.run configure -cursor {}; \
-			set cmd "exec @prefix@/bin/qmail-tcpto"; \
+			set cmd "exec @prefix@/sbin/qmail-tcpto"; \
 			set mycmd "$cmd $arguments"; \
 			$bwin1.1.queue configure -state disabled; \
 		}
@@ -3998,7 +4001,7 @@ proc qmailAdv {mode} {
  -y <yankdir>	directory to put files yanked from the queue \[default: <queuedir>/yanked\]"
 
 	frame $opframe2.7 -bd 0
-	button $opframe2.7.b -text "Reset Timeout" -command {exec @prefix@/bin/qmail-tcpok}
+	button $opframe2.7.b -text "Reset Timeout" -command {exec @prefix@/sbin/qmail-tcpok}
 	$opframe2.7.b configure -image [image create photo -data "R0lGODlhEAAQAIUAAPwCBCRaJBxWJBxOHBRGBCxeLLTatCSKFCymJBQ6BAwmBNzu3AQCBAQOBCRSJKzWrGy+ZDy+NBxSHFSmTBxWHLTWtCyaHCSSFCx6PETKNBQ+FBwaHCRKJMTixLy6vExOTKyqrFxaXDQyNDw+PBQSFHx6fCwuLJyenDQ2NISChLSytJSSlFxeXAwODCQmJBweHAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACH5BAEAAAAALAAAAAAQABAAAAaBQIBQGBAMBALCcCksGA4IQkJBUDIDC6gVwGhshY5HlMn9DiCRL1MyYE8iiapaSKlALBdMRiPckDkdeXt9HgxkGhWDXB4fH4ZMGnxcICEiI45kQiQkDCUmJZskmUIiJyiPQgyoQwwpH35LqqgMKiEjq5obqh8rLCMtowAkLqovuH5BACH+aENyZWF0ZWQgYnkgQk1QVG9HSUYgUHJvIHZlcnNpb24gMi41DQqpIERldmVsQ29yIDE5OTcsMTk5OC4gQWxsIHJpZ2h0cyByZXNlcnZlZC4NCmh0dHA6Ly93d3cuZGV2ZWxjb3IuY29tADs="]
 	label $opframe2.7.l -text "Reset Timeouts"
 	pack $opframe2.7.b $opframe2.7.l -side left -anchor w
@@ -4403,9 +4406,9 @@ proc authenticate {mode} {
 			msg_dialog .d {Invalid Domain} {Domain value not given} @imagedir@/warning.gif 0 "OK"
 			return 1
 		}
-		catch {exec @prefix@/sbin/pwhelper $User@$domain $Password @prefix@/sbin/vchkpass /bin/false} result
+		catch {exec @libexecdir@/pwhelper $User@$domain $Password @prefix@/sbin/vchkpass /bin/false} result
 	} else {
-		catch {exec @prefix@/sbin/pwhelper $User $Password @prefix@/sbin/systpass /bin/false} result
+		catch {exec @libexecdir@/pwhelper $User $Password @prefix@/sbin/systpass /bin/false} result
 	}
 	if {[string length $result] == 0 } {
 		if {$mode == 1} {
