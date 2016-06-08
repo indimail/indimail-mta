@@ -1,5 +1,8 @@
 #
 # $Log: common.tcl.in,v $
+# Revision 2.23  2016-06-08 23:34:15+05:30  Cprogrammer
+# changed fetchmailrc path to /etc/indimail
+#
 # Revision 2.22  2016-06-08 10:42:04+05:30  Cprogrammer
 # fixed paths for dns*, qmail-tcpto and images
 #
@@ -1923,10 +1926,10 @@ proc logBrowser {mode} {
 		if {[file exist @imagedir@/neat.gif]} {
 			$b.menu.b5 config -image [image create photo -file @imagedir@/neat.gif]
 		}
-		button $b.menu.b6 -text "FLASH Interface" -command "catch {exec $configs(xterm) -e @prefix@/bin/shit &} result" -relief groove -bd 2 \
+		button $b.menu.b6 -text "FLASH Interface" -command "catch {exec $configs(xterm) -e @prefix@/bin/flash &} result" -relief groove -bd 2 \
 			-highlightthickness 1 -highlightbackground black
-		if {[file exist @imagedir@/shit.gif]} {
-			$b.menu.b6 config -image [image create photo -file @imagedir@/shit.gif]
+		if {[file exist @imagedir@/flash.gif]} {
+			$b.menu.b6 config -image [image create photo -file @imagedir@/flash.gif]
 		}
 		button $b.menu.b7 -text "Queue Statistics" -command "qmailAdv 1"   -relief groove -bd 2 \
 			-highlightthickness 1 -highlightbackground black
@@ -1982,8 +1985,8 @@ proc logBrowser {mode} {
 		button $b.menu.b4 -text "FLASH Interface" -command "catch {exec $configs(xterm) -e @prefix@/bin/flash &} result" \
 			-relief groove -bd 2 \
 			-highlightthickness 1 -highlightbackground black
-		if {[file exist @imagedir@/shit.gif]} {
-			$b.menu.b4 config -image [image create photo -file @imagedir@/shit.gif]
+		if {[file exist @imagedir@/flash.gif]} {
+			$b.menu.b4 config -image [image create photo -file @imagedir@/flash.gif]
 		}
 		button $b.menu.b5 -text "Queue Statistics" -command "qmailAdv 2" \
 			-relief groove -bd 2 \
@@ -2387,7 +2390,8 @@ proc xcron {mode} {
 		if {[catch {open $env(HOME)/.indimail/.cronlist r} f] } {
 			msg_dialog .d {cronlist} "open: $f" @imagedir@/warning.gif 0 "OK"
 			return 1
-		} while {[gets $f line] >= 0} {
+		}
+		while {[gets $f line] >= 0} {
 			if { [string index $line 0] != "#" } {
 				lappend standard_list $line
 			}
@@ -4144,8 +4148,9 @@ proc fetch_config {} {
 	}
 	if {[file exists @prefix@/bin/fetchmailconf]} {
 		set conffile @prefix@/bin/fetchmailconf
-	} 
-	if {[catch {exec su $User -c "$conffile -f $env(HOME)/etc/.fetchmailrc" &} result]} {
+	}
+	set User $env(LOGNAME)
+	if {[catch {exec su $User -c "$conffile -f @sysconfdir@/fetchmailrc" &} result]} {
 		msg_dialog .d {config} "$result" @imagedir@/warning.gif 0 "OK"
 		return 1
 	}
