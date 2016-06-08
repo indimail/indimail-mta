@@ -1,5 +1,11 @@
 #!/bin/sh
 # $Log: indium.in,v $
+# Revision 2.114  2016-06-08 10:42:27+05:30  Cprogrammer
+# fixed paths for missing images
+#
+# Revision 2.113  2016-06-07 23:41:34+05:30  Cprogrammer
+# fixed mysql_user, mysql_pass variables as global variables
+#
 # Revision 2.112  2016-06-07 22:32:32+05:30  Cprogrammer
 # renamed madHelp to IndiMailHelp
 #
@@ -768,7 +774,6 @@ proc initdomain {} {
 	catch {exec @prefix@/bin/vdominfo | grep "domain:" | grep -v "aliased to" | awk {{print $2}} 2>/dev/null} tmp_list
 	if {[llength $tmp_list]} {
 		foreach line $tmp_list {
-			puts stdout "searching $line in $domain_list"
 			if {[lsearch -exact $domain_list $line] != -1} {
 				set server_list($line) "127.0.0.1"
 				set aliasdomain_list($line) ""
@@ -1695,7 +1700,7 @@ proc ipmeprint {local} {
 	global localips
 
 	if {$local == 1} {
-		set cmd "| @prefix@/bin/dnsfq $hostname"
+		set cmd "| @prefix@/sbin/dnsfq $hostname"
 		if {[catch {open $cmd r} f] } {
 			msg_dialog .d {dnsfq} $f @imagedir@/warning.gif 0 "OK"
 			return 1
@@ -3212,7 +3217,7 @@ proc vmodDomain {} {
 	destroyFirstPage
 	if {$authenticated != 1} {
 		Login 1
-	} 
+	}
 	set Description "Domain Modification"
 	if {$BWidget_present == 1} {
 		set   pw  [PanedWindow $w -weights available -side top]
@@ -3265,7 +3270,11 @@ proc vmodDomain {} {
 		$twin1.domain list insert end $line
 	}
 	foreach line $local_domain_list {
-		$twin1.domain list insert end $line
+		foreach jline $domain_list {
+			if {[lsearch -exact $jline $line] == -1} {
+				$twin1.domain list insert end $line
+			}
+		}
 	}
 	label $twin1.alias -text "" -relief flat -bd 0 -width 15
 	combobox $twin1.aliasdomain \
@@ -8196,7 +8205,7 @@ proc getdir {tree node path} {
 	set lfiles   {}
 	foreach f $lentries {
 		set tail [file tail $f]
-		if {$tail == "inquery" || $tail == "ratelimit" || $tail == "defaultqueue" || $tail = "domainkeys"} {
+		if {$tail == "inquery" || $tail == "ratelimit" || $tail == "defaultqueue" || $tail == "domainkeys"} {
 			continue
 		}
 		if {$tail  == "." || $tail == ".."} {
@@ -8551,7 +8560,7 @@ proc select {where num tree list node} {
 }
 
 proc select_node {tree list node} {
-	global lfiles my_dir tk_library
+	global lfiles my_dir
 
 	set my_dir $node
 	set lfiles   {}
@@ -8577,12 +8586,12 @@ proc select_node {tree list node} {
 		lappend lfiles $f
 		if {[file tail $node] == "control"} {
 			if {[file exists $node/$f]} {
-				$list insert end f:$num -text $f -image [image create photo -file $tk_library/images/file.gif]
+				$list insert end f:$num -text $f -image [image create photo -file @imagedir@/file.gif]
 			} else {
-				$list insert end f:$num -text $f -image [image create photo -file $tk_library/images/filemiss.gif]
+				$list insert end f:$num -text $f -image [image create photo -file @imagedir@/filemiss.gif]
 			}
 		} else {
-			$list insert end f:$num -text $f -image [image create photo -file $tk_library/images/file.gif]
+			$list insert end f:$num -text $f -image [image create photo -file @imagedir@/file.gif]
 		}
 		incr num
 	}
@@ -9350,7 +9359,6 @@ proc selectService {w1 w2 args} {
 	if {[info exists args] && [string length $args] > 0} {
 		set name   [lindex [$w2 get $args] 0]
 		set status [lindex [$w2 get $args] 1]
-		puts stdout "name is $name"
 		set service_name3 $name
 		if {$status == "down"} {
 			set service_name1 $name
@@ -9506,12 +9514,12 @@ proc svcConfig {listwin $service_list win} {
 	global helocheck helofqdn
 	global lwin1
 
+	source @scriptdir@/global.tcl
 	set localips {}
 	set mysqluser $mysql_user
 	set mysqlpass $mysql_pass
 	set default_domain_val ""
 	set overquota_mailsize -1
-	source @scriptdir@/global.tcl
 	variable mode
 	variable tmpwin
 	variable dlimit
@@ -11509,7 +11517,7 @@ proc getsvcvalue {mode win tag} {
 				if {$qhpsi == 1} {
 					$tmpwin.frame.qhpsi.e       configure -state normal
 				} else {
-					$tmpwin.frame.qhpsi.e       configure -state diabled
+					$tmpwin.frame.qhpsi.e       configure -state disabled
 				}
 				$tmpwin.frame.bodycheck.c   configure -state normal
 				if {$bodycheck == 1} {
@@ -14254,7 +14262,7 @@ proc get_domlimits {} {
 global indiumversion
 global BWidget_present
 global prgindic prgtext
-global default_domain configs tk_library
+global default_domain configs
 global configs option
 
 set tmval [clock click -milliseconds]
