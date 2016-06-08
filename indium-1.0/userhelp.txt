@@ -116,9 +116,9 @@ To keep the selection the same but put the cursor somewhere else, hold down "Con
 
 # Special menu #
 
-# HTML:  Opens up a box of special-character buttons that you can click to insert strange-looking sequences of characters into an HTML document, such as "&cent;" and "&pound;" (which show up as a cent sign, "¢," and a pound sign, "£," in a browser).  There are legal symbols, fractions, foreign characters (mainly for French, Spanish, Portuguese, and German), and more.
+# HTML:  Opens up a box of special-character buttons that you can click to insert strange-looking sequences of characters into an HTML document, such as "&cent;" and "&pound;" (which show up as a cent sign, "Â¢," and a pound sign, "Â£," in a browser).  There are legal symbols, fractions, foreign characters (mainly for French, Spanish, Portuguese, and German), and more.
 
-# Plain Text:  You see the same special-character box as for HTML, but what you see is what (in plain text) you get.  Voilà:  & < > ¡ ¢ £ § © ® ¶ ± ¼ ½ ¾ ¿ À Á Â Ã Ä Æ Ç È É Ê Ë Í Î Ï Ñ Ó Ô Ö Ø Ú Û Ü ß à á â ã ä æ ç è é ê ë í î ï ñ ó ô ö ø ú û ü !  (They're bigger in the box, so you can see them better.)
+# Plain Text:  You see the same special-character box as for HTML, but what you see is what (in plain text) you get.  VoilÃ :  & < > Â¡ Â¢ Â£ Â§ Â© Â® Â¶ Â± Â¼ Â½ Â¾ Â¿ Ã€ Ã Ã‚ Ãƒ Ã„ Ã† Ã‡ Ãˆ Ã‰ ÃŠ Ã‹ Ã Ã Ã Ã‘ Ã“ Ã” Ã– Ã˜ Ãš Ã› Ãœ ÃŸ Ã  Ã¡ Ã¢ Ã£ Ã¤ Ã¦ Ã§ Ã¨ Ã© Ãª Ã« Ã­ Ã® Ã¯ Ã± Ã³ Ã´ Ã¶ Ã¸ Ãº Ã» Ã¼ !  (They're bigger in the box, so you can see them better.)
 
 # Color:  Opens a box with sliders to change the proportions of red, green, and blue in a color you might or might not want to select, and a big button to display the color.  The sliders go from 0 (none) to 255 (maximum).  The big button displays the hexadecimal (base 16) code for the color in black letters if the color is light or white ones if the color is dark.  For example, if you select a color with 255 parts red, 204 parts green, and 153 parts blue, the hexadecimal code (displayed in black letters) will be "FFCC99" because "FF" in hexadecimal numeration means 255, "CC" means 204, and "99" means 153.  If you click the big button, the hexadecimal code (in quotation marks) will be inserted into your document at the cursor location.  Click the "Close" button to select a color for use in HTML code and to close the box.
 
