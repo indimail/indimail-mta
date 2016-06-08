@@ -7,7 +7,7 @@
  * added sccsidh
  *
  * Revision 2.1  2003-02-11 23:13:00+05:30  Cprogrammer
- * authentication helper for MAD
+ * authentication helper for indium
  *
  */
 #include <stdlib.h>
