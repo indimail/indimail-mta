@@ -1,5 +1,8 @@
 /*
  * $Log: hier.c,v $
+ * Revision 1.208  2016-06-08 10:47:38+05:30  Cprogrammer
+ * fix permissions for control control/domainkeys etc/indimail/users control/inquery
+ *
  * Revision 1.207  2016-06-07 10:56:01+05:30  Cprogrammer
  * moved error.3 to qerror.3 to avoid conflict with GNU error(3) extension
  *
@@ -579,10 +582,10 @@ hier(inst_dir, fatal)
 		strerr_die2sys(111, fatal, "out of memory: ");
 	auto_cntrl_dir = a1.s;
 	if (!str_diff(auto_qmail, auto_cntrl_dir))
-		d(auto_qmail_home, "control", auto_uidv, auto_gidv, 0755);
+		d(auto_qmail_home, "control", auto_uidv, auto_gidq, 0775);
 	else {
 		h(auto_cntrl_dir, 0, 0, 0755);
-		d(auto_cntrl_dir, "control", auto_uidv, auto_gidv, 0755);
+		d(auto_cntrl_dir, "control", auto_uidv, auto_gidq, 0775);
 		l(auto_qmail_home, "control", auto_cntrl_dir);
 	}
 
@@ -593,10 +596,10 @@ hier(inst_dir, fatal)
 		strerr_die2sys(111, fatal, "out of memory: ");
 	auto_assgn_dir = a2.s;
 	if (!str_diff(auto_qmail, auto_assgn_dir))
-		d(auto_qmail_home, "users", auto_uido, auto_gidq, 0555);
+		d(auto_qmail_home, "users", auto_uidv, auto_gidq, 0775);
 	else {
 		h(auto_assgn_dir, 0, 0, 0755);
-		d(auto_assgn_dir, "users", auto_uido, auto_gidq, 0555);
+		d(auto_assgn_dir, "users", auto_uidv, auto_gidq, 0775);
 		l(auto_qmail_home, "users", auto_assgn_dir);
 	}
 
@@ -612,7 +615,7 @@ hier(inst_dir, fatal)
 	} else
 		mandir = auto_qmail_home;
 
-	/*- shared directory for control, config files */
+	/*- sysconf directory for control, config files */
 	if (str_diff(auto_qmail, auto_sysconfdir))
 		h(auto_sysconfdir, 0, 0, 0755);
 
@@ -640,10 +643,10 @@ hier(inst_dir, fatal)
 	d(auto_qmail_home, "qscanq/root/scanq", auto_uidc, auto_gidc, 0750);
 	d(auto_qmail_home, "alias", auto_uida, auto_gidq, 02555);
 	d(auto_qmail_home, "autoturn", auto_uidv, auto_gidq, 02755);
-	d(auto_cntrl_dir,  "control/domainkeys", auto_uidv, auto_gidv, 0755);
+	d(auto_cntrl_dir,  "control/domainkeys", auto_uidv, auto_gidq, 0775);
 	d(auto_cntrl_dir,  "control/ratelimit", auto_uidr, auto_gidq, 02755);
 #ifdef INDIMAIL
-	d(auto_cntrl_dir,  "control/inquery", auto_uidv, auto_gidv, 0775);
+	d(auto_cntrl_dir,  "control/inquery", auto_uidv, auto_gidq, 0775);
 #endif
 	d(auto_shared,     "boot", auto_uido, auto_gidq, 0555);
 	d(auto_shared,     "doc", auto_uido, auto_gidq, 0555);
@@ -1415,7 +1418,7 @@ hier(inst_dir, fatal)
 void
 getversion_install_big_c()
 {
-	static char    *x = "$Id: hier.c,v 1.207 2016-06-07 10:56:01+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: hier.c,v 1.208 2016-06-08 10:47:38+05:30 Cprogrammer Exp mbhangui $";
 
 #ifdef INDIMAIL
 	if (x)
