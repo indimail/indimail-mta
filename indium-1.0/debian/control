@@ -9,7 +9,7 @@ Vcs-Browser: http://indimail.git.sourceforge.net/git/gitweb.cgi?p=indimail/indim
 
 Package: indium
 Architecture: any
-Depends: tcl8.4-dev, libmysqlclient16 (>= 5.1.21-1), ${misc:Depends}
+Depends: tcl8.6-dev, libmysqlclient16 (>= 5.1.21-1), ${misc:Depends}
 Pre-Depends: ${misc:Pre-Depends}
 Description: Web Administration GUI for IndiMail User Administration
  .
