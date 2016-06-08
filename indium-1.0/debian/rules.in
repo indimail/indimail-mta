@@ -19,10 +19,18 @@ else
 	CFLAGS += -O2
 endif
 
-prefix=@indimaildir@
+prefix=@prefix@
 version=@version@
+libexecdir=@libexecdir@
+shareddir=@shareddir@
+sysconfdir=@sysconfdir@
+mandir=@mandir@
+mysql_prefix=@mysql_prefix@
 #
-DESTDIR=$(CURDIR)/debian/indium
+#bits=$(shell dpkg-architecture -qDEB_BUILD_ARCH_BITS)
+bits=32
+libdir=$(shell if [ $(bits) -eq 64 ] ; then echo $(prefix)/lib64; else echo $(prefix)/lib;fi)
+DESTDIR=$(CURDIR)/debian/indium.tmp
 
 build: build-stamp
 build-stamp:
@@ -34,10 +42,9 @@ build-stamp:
 	# run configure script
 	#
 	./configure --prefix=${prefix} \
-        --libexecdir=${prefix}/libexec --sysconfdir=${prefix}/etc \
-        --enable-mysqlincdir=/usr/include/mysql \
-        --enable-mysqllibdir=/usr/lib/mysql \
-        --mandir=${prefix}/man --sysconfdir=${prefix}/etc
+	--libexecdir=${libexecdir} --sysconfdir=${sysconfdir} \
+	--enable-shareddir=${shareddir} \
+	--mandir=${mandir} --enable-mysqlpreix=${mysql_prefix}
 	#
 	# run make
 	#
@@ -46,7 +53,8 @@ build-stamp:
 
 clean:
 	rm -f build-stamp configure-stamp
-	#$(MAKE) -s clean; $(MAKE) -s distclean || true
+	/bin/rm -rf $(DESTDIR)
+	$(MAKE) -s clean; $(MAKE) -s distclean || true
 	dh_testdir
 	dh_testroot
 	dh_clean
