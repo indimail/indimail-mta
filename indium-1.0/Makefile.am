@@ -19,23 +19,22 @@ libtai64_la_LDFLAGS = -version-info @LIBVER@ -release @VERSION@
 libfbsqldir=@libdir@
 libtai64dir=@libdir@
 guibindir=@prefix@/bin
-guisbindir=@prefix@/sbin
-tcldir=@shareddir@/indium/scripts
+guilibexecdir=@libexecdir@
+tclscriptdir=@shareddir@/indium/scripts
 tcletcdir=@sysconfdir@
 tcllibdir=@shareddir@/indium/lib
 
-tcl_SCRIPTS = global.tcl balloon.tcl base64.tcl combobox.tcl fileman.tcl help.tcl \
-	hugecombo.tcl hugelist.tcl madHelp.tcl mclistbox.tcl notebook.tcl progressbar.tcl \
+tclscript_DATA = global.tcl balloon.tcl base64.tcl combobox.tcl fileman.tcl help.tcl \
+	hugecombo.tcl hugelist.tcl IndiMailHelp.tcl mclistbox.tcl notebook.tcl progressbar.tcl \
 	ranges.tcl common.tcl convert_history.tcl convert_profile.tcl gui.tcl \
-	keydistribute.tcl listserver.tcl secpanel.dist secpanel.wait dppw.tcl \
-	export_profiles.tcl spdistkey secpanel_remoteconf.sh dppw.tcl
+	secpanel.wait dppw.tcl export_profiles.tcl spdistkey secpanel_remoteconf.sh
 
 tcletc_DATA = default.config default.profile filemanrc termdefs.txt
 tcllib_DATA = userhelp.txt
 
 all-local: .gitignore
 
-guisbin_PROGRAMS = pwhelper
+guilibexec_PROGRAMS = pwhelper
 
 guibin_SCRIPTS = indium litesrc supernotepad secpanel FMbrowse tkdiff
 
@@ -49,7 +48,7 @@ pwhelper_DEPENDENCIES = pipe_exec.lo
 
 edit = sed \
 	-e 's,@prefix\@,$(prefix),g' \
-	-e 's,@indimaildir\@,"/var/indimail",g' \
+	-e 's,@indimaildir\@,/var/indimail,g' \
 	-e 's,@shareddir\@,$(shareddir),g' \
 	-e 's,@libexecdir\@,$(libexecdir),g' \
 	-e 's,@mandir\@,$(mandir),g' \
