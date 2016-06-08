@@ -1,5 +1,8 @@
 #!/bin/sh
 # $Log: litesrc.in,v $
+# Revision 2.10  2016-06-08 10:42:45+05:30  Cprogrammer
+# removed tk_library variable
+#
 # Revision 2.9  2016-06-07 22:29:30+05:30  Cprogrammer
 # added shebang
 #
@@ -187,7 +190,7 @@ proc main {} {
 global indiliteversion
 global BWidget_present
 global prgindic prgtext
-global default_domain configs tk_library
+global default_domain configs
 global configs mailcheck mailclient mailargs option
 
 set tmval [clock click -milliseconds]
@@ -199,7 +202,7 @@ if {$::tcl_platform(platform) != "unix"} {
 	puts stdout "This code aborts if your OS has anything to do with words like 'Bill' or 'Gates'"
 	puts stdout "If you have got this error, it means that you should either"
 	puts stdout ""
-	puts stdout "1. Let experts at INDI manage your mailing requirements"
+	puts stdout "1. Let experts at IndiMail manage your mailing requirements"
 	puts stdout "2. Change to a better Operating System"
 	puts stdout "3. Sell your soul and downgrade your Mail Platform to something which runs on $tcl_platform(platform)"
 	puts stdout ""
