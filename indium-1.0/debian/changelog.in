@@ -1,5 +1,7 @@
-indium (@version@-1) unstable; urgency=low
+indium (@version@-2) unstable; urgency=low
 
   * debian subdir for debian builds
+  * FHS version
+  * upgraded to secpanel 0.6.0
 
- -- Manvendra Bhangui <manvendra@indimail.org>  Fri, 22 May 2011 23:49:33 +0530
+ -- Manvendra Bhangui <manvendra@indimail.org>  Tue, 06 Jun 2016 20:27:53 +0530
