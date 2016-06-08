@@ -56,10 +56,14 @@ struct mysql_Connect
 /*- miscellaneous support routines (error handling etc) */
 
 void
-output_error(Tcl_Interp * interp, int sql_number)
+output_error(Tcl_Interp * interp, int sql_number, char *errmsg)
 {
-	snprintf(errormsg, sizeof(errormsg), "Error %u (%s)", mysql_errno(&connection[sql_number].mysql),
-			 mysql_error(&connection[sql_number].mysql));
+	if (sql_number > 0)
+		snprintf(errormsg, sizeof(errormsg), "Error %u (%s)", mysql_errno(&connection[sql_number].mysql),
+			mysql_error(&connection[sql_number].mysql));
+	else
+	if (errmsg)
+		strcpy(errormsg, errmsg);
 	Tcl_SetResult(interp, errormsg, TCL_STATIC);
 }
 
@@ -84,9 +88,19 @@ fbsql_connect(Tcl_Interp * interp, int sql_number, int argc, char **argv)
 	if (argc > 2 && argv[2])
 		passwd = argv[2];
 	mysql_init(&connection[sql_number].mysql);
+	if (mysql_options(&connection[sql_number].mysql, MYSQL_READ_DEFAULT_FILE, "indimail.cnf"))
+	{
+		output_error(interp, sql_number, "invalid options in indimail.cnf");
+		return TCL_ERROR;
+	}
+	if (mysql_options(&connection[sql_number].mysql, MYSQL_READ_DEFAULT_GROUP, "indimail"))
+	{
+		output_error(interp, sql_number, "invalid options in indimail.cnf");
+		return TCL_ERROR;
+	}
 	if (!(mysql_real_connect(&connection[sql_number].mysql, host, user, passwd, 0, 0, 0, 0)))
 	{
-		output_error(interp, sql_number);
+		output_error(interp, sql_number, 0);
 		return TCL_ERROR;
 	} else
 	{
@@ -131,7 +145,7 @@ fbsql_selectdb(Tcl_Interp * interp, int sql_number, int argc, char **argv)
 	database = argv[0];
 	if (mysql_select_db(&connection[sql_number].mysql, database))
 	{
-		output_error(interp, sql_number);
+		output_error(interp, sql_number, 0);
 		return TCL_ERROR;
 	} else
 		return TCL_OK;
@@ -225,7 +239,7 @@ fbsql_query(Tcl_Interp * interp, int sql_number, int argc, char **argv)
 	/*- execute the sql query statement */
 	if (mysql_query(&connection[sql_number].mysql, query))
 	{
-		output_error(interp, sql_number);
+		output_error(interp, sql_number, 0);
 		Tcl_DStringFree(&ds);
 		return TCL_ERROR;
 	}
@@ -235,7 +249,7 @@ fbsql_query(Tcl_Interp * interp, int sql_number, int argc, char **argv)
 	/*- execute the sql query statement */
 	if (mysql_query(&connection[sql_number].mysql, query))
 	{
-		output_error(interp, sql_number);
+		output_error(interp, sql_number, 0);
 		return TCL_ERROR;
 	}
 #endif
@@ -249,7 +263,7 @@ fbsql_query(Tcl_Interp * interp, int sql_number, int argc, char **argv)
 	{
 		if (field_count)
 		{
-			output_error(interp, sql_number);
+			output_error(interp, sql_number, 0);
 			return TCL_ERROR;
 		}
 		connection[sql_number].NUMROWS = (int) mysql_affected_rows(&connection[sql_number].mysql);
@@ -351,7 +365,7 @@ fbsql_startquery(Tcl_Interp * interp, int sql_number, int argc, char **argv)
 	/*- execute the sql query statement */
 	if (mysql_query(&connection[sql_number].mysql, query))
 	{
-		output_error(interp, sql_number);
+		output_error(interp, sql_number, 0);
 #if UTF_ENCODING
 		Tcl_DStringFree(&ds);
 #endif
@@ -381,7 +395,7 @@ fbsql_startquery(Tcl_Interp * interp, int sql_number, int argc, char **argv)
 	{
 		if (connection[sql_number].field_count)
 		{
-			output_error(interp, sql_number);
+			output_error(interp, sql_number, 0);
 			return TCL_ERROR;
 		}
 		Tcl_SetResult(interp, "sql startquery; query executed ok but returned no results.", TCL_STATIC);
