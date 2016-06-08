@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail.spec.in,v 2.341 2016-06-07 10:52:44+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 2.342 2016-06-08 10:49:21+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %define _unpackaged_files_terminate_build 1
 
@@ -914,8 +914,8 @@ fi
 %dir %attr(555,root,qmail)        %{indimaildir}
                                   %{indimaildir}/bin
                                   %{indimaildir}/sbin
-                                  %{indimaildir}/control
                                   %{indimaildir}/users
+                                  %{indimaildir}/control
 %dir %attr(555,root,root)         %{shareddir}
 %dir %attr(555,root,qmail)        %{shareddir}/boot
 %dir %attr(555,root,qmail)        %{shareddir}/doc
@@ -928,11 +928,11 @@ fi
 %dir %attr(555,root,root)         %{libexecdir}/authlib
 %dir %attr(755,root,root)         %{sysconfdir}
 %dir %attr(775,root,qmail)        %{sysconfdir}/etc
-%dir %attr(555,root,qmail)        %{sysconfdir}/users
-%dir %attr(755,indimail,indimail) %{sysconfdir}/control
-%dir %attr(775,indimail,indimail) %{sysconfdir}/control/inquery
+%dir %attr(775,indimail,qmail)    %{sysconfdir}/users
+%dir %attr(775,indimail,qmail)    %{sysconfdir}/control
+%dir %attr(775,indimail,qmail)    %{sysconfdir}/control/inquery
 %dir %attr(2755,qmailr,qmail)     %{sysconfdir}/control/ratelimit
-%dir %attr(755,indimail,indimail) %{sysconfdir}/control/domainkeys
+%dir %attr(775,indimail,qmail)    %{sysconfdir}/control/domainkeys
 %dir %attr(2755,indimail,qmail)   %{indimaildir}/autoturn
 %if "%{mandir}" != "/usr/share/man"
 %dir %attr(755,root,root)         %{mandir}

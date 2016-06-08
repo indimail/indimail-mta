@@ -18,12 +18,12 @@
 %dir %attr(0555,root,qmail)        @libexecdir@
 %dir %attr(0555,root,qmail)        @libexecdir@/authlib
 %dir %attr(0775,root,qmail)        @sysconfdir@/etc
-%dir %attr(0755,indimail,indimail) @sysconfdir@/control
-%dir %attr(0775,indimail,indimail) @sysconfdir@/control/inquery
-%dir %attr(0755,indimail,indimail) @sysconfdir@/control/domainkeys
+%dir %attr(0775,indimail,qmail)    @sysconfdir@/control
+%dir %attr(0775,indimail,qmail)    @sysconfdir@/control/inquery
+%dir %attr(0775,indimail,qmail)    @sysconfdir@/control/domainkeys
 %dir %attr(2755,qmailr,qmail)      @sysconfdir@/control/ratelimit
 %dir %attr(0755,root,root)         @sysconfdir@/control/defaultqueue
-%dir %attr(0555,root,qmail)        @sysconfdir@/users
+%dir %attr(0775,indimail,qmail)    @sysconfdir@/users
 %dir %attr(0755,root,root)         @mandir@
 %dir %attr(0755,root,root)         @mandir@/cat1
 %dir %attr(0755,root,root)         @mandir@/cat5
