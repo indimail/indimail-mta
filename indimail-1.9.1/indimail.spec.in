@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail.spec.in,v 2.343 2016-06-09 12:56:50+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 2.344 2016-06-09 14:16:06+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %define _unpackaged_files_terminate_build 1
 
@@ -1077,10 +1077,10 @@ fi
 %attr(4555,root,root)                   %{_prefix}/bin/vdominfo
 %attr(4555,root,root)                   %{_prefix}/bin/vadddomain
 %attr(4555,root,root)                   %{_prefix}/bin/vdeldomain
-%attr(6511,qscand,qmail)                %{_prefix}/sbin/qhpsi
-%attr(6511,qmailq,qmail)                %{_prefix}/sbin/qmail-queue
-%attr(4511,qscand,qscand)               %{_prefix}/sbin/qscanq
-%attr(2511,root,qscand)                 %{_prefix}/sbin/run-cleanq
+%attr(6551,qscand,qmail)                %{_prefix}/sbin/qhpsi
+%attr(6551,qmailq,qmail)                %{_prefix}/sbin/qmail-queue
+%attr(4551,qscand,qscand)               %{_prefix}/sbin/qscanq
+%attr(2551,root,qscand)                 %{_prefix}/sbin/run-cleanq
 %attr(4555,root,root)                   %{_prefix}/sbin/systpass
 
 # indimail binaries
@@ -1165,8 +1165,8 @@ fi
 %attr(555,root,qmail)                   %{_prefix}/bin/svstat
 %attr(555,root,qmail)                   %{_prefix}/bin/ddist
 %attr(555,root,qmail)                   %{_prefix}/bin/smtp-matchup
-%attr(500,root,qmail)                   %{_prefix}/bin/qmail-newu
-%attr(511,root,qmail)                   %{_prefix}/bin/qmail-pw2u
+%attr(550,root,qmail)                   %{_prefix}/bin/qmail-newu
+%attr(551,root,qmail)                   %{_prefix}/bin/qmail-pw2u
 %attr(555,root,qmail)                   %{_prefix}/bin/qfilelog
 %attr(555,root,qmail)                   %{_prefix}/bin/checkdomain
 %attr(555,root,qmail)                   %{_prefix}/bin/svok
@@ -1188,7 +1188,7 @@ fi
 %attr(555,root,qmail)                   %{_prefix}/bin/xsender
 %attr(555,root,qmail)                   %{_prefix}/bin/rxdelay
 %attr(555,root,qmail)                   %{_prefix}/bin/cdbmake
-%attr(511,root,qmail)                   %{_prefix}/bin/qmail-remote
+%attr(551,root,qmail)                   %{_prefix}/bin/qmail-remote
 %attr(555,root,qmail)                   %{_prefix}/bin/pinq
 %attr(555,root,qmail)                   %{_prefix}/bin/mlmatchup
 %attr(555,root,qmail)                   %{_prefix}/bin/sendmail
@@ -1207,7 +1207,7 @@ fi
 %attr(555,root,qmail)                   %{_prefix}/bin/serialqmtp
 %attr(555,root,qmail)                   %{_prefix}/bin/altermime
 %attr(555,root,qmail)                   %{_prefix}/bin/rsmtprdomains
-%attr(511,root,qmail)                   %{_prefix}/bin/qmail-getpw
+%attr(551,root,qmail)                   %{_prefix}/bin/qmail-getpw
 %attr(555,root,qmail)                   %{_prefix}/bin/balance_outgoing
 %attr(555,root,qmail)                   %{_prefix}/bin/rsmtpfailures
 %attr(555,root,qmail)                   %{_prefix}/bin/fghack
@@ -1229,7 +1229,7 @@ fi
 %attr(555,root,qmail)                   %{_prefix}/bin/printforward
 %attr(555,root,qmail)                   %{_prefix}/bin/zddist
 %attr(555,root,qmail)                   %{_prefix}/bin/elq
-%attr(500,root,qmail)                   %{_prefix}/bin/qmail-newmrh
+%attr(550,root,qmail)                   %{_prefix}/bin/qmail-newmrh
 %attr(555,root,qmail)                   %{_prefix}/bin/supervise
 %attr(555,root,qmail)                   %{_prefix}/bin/preline
 %attr(555,root,qmail)                   %{_prefix}/bin/cdbget
@@ -1239,9 +1239,9 @@ fi
 %attr(555,root,qmail)                   %{_prefix}/bin/zsenders
 %attr(555,root,qmail)                   %{_prefix}/bin/suids
 %attr(555,root,qmail)                   %{_prefix}/bin/maildirserial
-%attr(511,root,qmail)                   %{_prefix}/bin/qmail-popup
+%attr(551,root,qmail)                   %{_prefix}/bin/qmail-popup
 %attr(555,root,qmail)                   %{_prefix}/bin/ofmipname
-%attr(511,root,qmail)                   %{_prefix}/bin/qmail-local
+%attr(551,root,qmail)                   %{_prefix}/bin/qmail-local
 %attr(555,root,qmail)                   %{_prefix}/bin/serialsmtp
 %attr(555,root,qmail)                   %{_prefix}/bin/predate
 %attr(555,root,qmail)                   %{_prefix}/bin/condredirect
@@ -1260,8 +1260,8 @@ fi
 %attr(555,root,qmail)                   %{_prefix}/bin/swaks
 %attr(555,root,qmail)                   %{_prefix}/bin/rhosts
 %attr(555,root,qmail)                   %{_prefix}/bin/replier
-%attr(500,root,qmail)                   %{_prefix}/bin/qmail-cdb
-%attr(500,root,qmail)                   %{_prefix}/bin/qmail-sql
+%attr(550,root,qmail)                   %{_prefix}/bin/qmail-cdb
+%attr(550,root,qmail)                   %{_prefix}/bin/qmail-sql
 %attr(555,root,qmail)                   %{_prefix}/bin/cdbtest
 %attr(555,root,qmail)                   %{_prefix}/bin/tai64n
 %attr(555,root,qmail)                   %{_prefix}/bin/qmaildirmake
@@ -1325,7 +1325,7 @@ fi
 %attr(555,root,qmail)                   %{_prefix}/bin/addcr
 %attr(555,root,qmail)                   %{_prefix}/bin/qsmhook
 %attr(555,root,qmail)                   %{_prefix}/bin/rspamhist
-%attr(500,root,qmail)                   %{_prefix}/bin/recipient-cdb
+%attr(550,root,qmail)                   %{_prefix}/bin/recipient-cdb
 %attr(555,root,qmail)                   %{_prefix}/bin/rsmtpsdomains
 %attr(555,root,qmail)                   %{_prefix}/bin/qmail-inject
 %attr(555,root,qmail)                   %{_prefix}/bin/serialcmd
@@ -1368,7 +1368,7 @@ fi
 %attr(555,root,qmail)                   %{_prefix}/sbin/hostname
 %attr(555,root,qmail)                   %{_prefix}/sbin/config-fast
 %attr(555,root,qmail)                   %{_prefix}/sbin/qmailconfig
-%attr(500,root,qmail)                   %{_prefix}/sbin/instcheck
+%attr(550,root,qmail)                   %{_prefix}/sbin/instcheck
 %attr(555,root,qmail)                   %{_prefix}/sbin/batv
 %attr(555,root,qmail)                   %{_prefix}/sbin/plugtest
 %attr(555,root,qmail)                   %{_prefix}/sbin/sys-checkpwd
@@ -1384,15 +1384,15 @@ fi
 %attr(555,root,qmail)                   %{_prefix}/sbin/qmail-qmqpc
 %attr(555,root,qmail)                   %{_prefix}/sbin/qmail-tcpok
 %attr(555,root,qmail)                   %{_prefix}/sbin/qmail-tcpto
-%attr(500,root,qmail)                   %{_prefix}/sbin/qmail-daemon
-%attr(500,root,qmail)                   %{_prefix}/sbin/qmail-start
-%attr(511,root,qmail)                   %{_prefix}/sbin/qmail-send
-%attr(511,root,qmail)                   %{_prefix}/sbin/qmail-todo
-%attr(511,root,qmail)                   %{_prefix}/sbin/qmail-clean
-%attr(500,root,qmail)                   %{_prefix}/sbin/qmail-lspawn
-%attr(511,root,qmail)                   %{_prefix}/sbin/qmail-rspawn
-%attr(511,root,qmail)                   %{_prefix}/sbin/relaytest
-%attr(511,root,qmail)                   %{_prefix}/sbin/splogger
+%attr(550,root,qmail)                   %{_prefix}/sbin/qmail-daemon
+%attr(550,root,qmail)                   %{_prefix}/sbin/qmail-start
+%attr(551,root,qmail)                   %{_prefix}/sbin/qmail-send
+%attr(551,root,qmail)                   %{_prefix}/sbin/qmail-todo
+%attr(551,root,qmail)                   %{_prefix}/sbin/qmail-clean
+%attr(550,root,qmail)                   %{_prefix}/sbin/qmail-lspawn
+%attr(551,root,qmail)                   %{_prefix}/sbin/qmail-rspawn
+%attr(551,root,qmail)                   %{_prefix}/sbin/relaytest
+%attr(551,root,qmail)                   %{_prefix}/sbin/splogger
 %attr(555,root,qmail)                   %{_prefix}/sbin/dnstxt
 %attr(555,root,qmail)                   %{_prefix}/sbin/dnsmxip
 %attr(555,root,qmail)                   %{_prefix}/sbin/dnsfq
@@ -1460,7 +1460,7 @@ fi
 %attr(555,root,root)                    %{_prefix}/bin/tcprules
 # bogofilter
 %if %nobogofilter == 0
-%attr(6511,root,indimail)               %{_prefix}/bin/bogofilter
+%attr(6551,root,indimail)               %{_prefix}/bin/bogofilter
 %attr(555,root,root)                    %{_prefix}/bin/bogolexer
 %attr(555,root,root)                    %{_prefix}/bin/bogotune
 %attr(555,root,root)                    %{_prefix}/bin/bogoutil
@@ -1492,11 +1492,11 @@ fi
 %endif
 # logalert
 %attr(555,root,root)                    %{_prefix}/bin/logalert
-%attr(0511,root,root)                   %{_prefix}/bin/logclient
-%attr(0511,root,root)                   %{_prefix}/bin/incrmesg
-%attr(0511,root,root)                   %{_prefix}/bin/showbytes
-%attr(0511,root,root)                   %{_prefix}/sbin/rpclog
-%attr(0511,root,root)                   %{_prefix}/sbin/logsrv
+%attr(0551,root,root)                   %{_prefix}/bin/logclient
+%attr(0551,root,root)                   %{_prefix}/bin/incrmesg
+%attr(0551,root,root)                   %{_prefix}/bin/showbytes
+%attr(0551,root,root)                   %{_prefix}/sbin/rpclog
+%attr(0551,root,root)                   %{_prefix}/sbin/logsrv
 
 # fetchmail
 %if %nofetchmail == 0
@@ -1785,17 +1785,17 @@ fi
 %verify (not user group mode) %attr(4555, root, root)      %{_prefix}/bin/vdeldomain
 %verify (not user group mode) %attr(4555, root, root)      %{_prefix}/bin/vadddomain
 %if %nobogofilter == 0
-%verify (not user group mode) %attr(6511, root, indimail)  %{_prefix}/bin/bogofilter
+%verify (not user group mode) %attr(6551, root, indimail)  %{_prefix}/bin/bogofilter
 %endif
-%verify (not user group mode) %attr(4511, root, root)      %{_prefix}/bin/vdominfo
+%verify (not user group mode) %attr(4551, root, root)      %{_prefix}/bin/vdominfo
 %verify (not user group mode) %attr(4555, root, root)      %{_prefix}/bin/vrenameuser
 %verify (not user group mode) %attr(4555, root, root)      %{_prefix}/bin/printdir
 %verify (not user group mode) %attr(4555, root, root)      %{_prefix}/bin/vmoduser
 %verify (not user group mode) %attr(4555, root, root)      %{_prefix}/bin/vcfilter
 %verify (not user group mode) %attr(4555, root, root)      %{_prefix}/bin/vbulletin
-%verify (not user group mode) %attr(6511, qscand, qmail)   %{_prefix}/sbin/qhpsi
-%verify (not user group mode) %attr(2511, root, qscand)    %{_prefix}/sbin/run-cleanq
-%verify (not user group mode) %attr(6511, qmailq, qmail)   %{_prefix}/sbin/qmail-queue
+%verify (not user group mode) %attr(6551, qscand, qmail)   %{_prefix}/sbin/qhpsi
+%verify (not user group mode) %attr(2551, root, qscand)    %{_prefix}/sbin/run-cleanq
+%verify (not user group mode) %attr(6551, qmailq, qmail)   %{_prefix}/sbin/qmail-queue
 %verify (not user group mode) %attr(4555, qscand, qscand)  %{_prefix}/sbin/qscanq
 %verify (not user group mode) %attr(4555, root, root)      %{_prefix}/sbin/systpass
 %verify (not user group mode) %attr(2555, alias, qmail)    %{indimaildir}/alias

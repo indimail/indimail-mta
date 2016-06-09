@@ -40,19 +40,19 @@
 #
 # Binaries
 #
-%attr(0500,root,qmail) @prefix@/bin/qmail-cdb
-%attr(0500,root,qmail) @prefix@/bin/qmail-newmrh
-%attr(0500,root,qmail) @prefix@/bin/qmail-newu
-%attr(0500,root,qmail) @prefix@/bin/qmail-sql
-%attr(0500,root,qmail) @prefix@/bin/recipient-cdb
-%attr(0511,root,qmail) @prefix@/bin/qmail-getpw
-%attr(0511,root,qmail) @prefix@/bin/qmail-local
-%attr(0511,root,qmail) @prefix@/bin/qmail-popup
-%attr(0511,root,qmail) @prefix@/bin/qmail-pw2u
-%attr(0511,root,qmail) @prefix@/bin/qmail-remote
-%attr(0511,root,root)  @prefix@/bin/incrmesg
-%attr(0511,root,root)  @prefix@/bin/logclient
-%attr(0511,root,root)  @prefix@/bin/showbytes
+%attr(0550,root,qmail) @prefix@/bin/qmail-cdb
+%attr(0550,root,qmail) @prefix@/bin/qmail-newmrh
+%attr(0550,root,qmail) @prefix@/bin/qmail-newu
+%attr(0550,root,qmail) @prefix@/bin/qmail-sql
+%attr(0550,root,qmail) @prefix@/bin/recipient-cdb
+%attr(0551,root,qmail) @prefix@/bin/qmail-getpw
+%attr(0551,root,qmail) @prefix@/bin/qmail-local
+%attr(0551,root,qmail) @prefix@/bin/qmail-popup
+%attr(0551,root,qmail) @prefix@/bin/qmail-pw2u
+%attr(0551,root,qmail) @prefix@/bin/qmail-remote
+%attr(0551,root,root)  @prefix@/bin/incrmesg
+%attr(0551,root,root)  @prefix@/bin/logclient
+%attr(0551,root,root)  @prefix@/bin/showbytes
 %attr(0555,root,qmail) @prefix@/bin/822addr
 %attr(0555,root,qmail) @prefix@/bin/822body
 %attr(0555,root,qmail) @prefix@/bin/822bodyfilter
@@ -358,7 +358,7 @@
 %attr(0555,root,qmail) @prefix@/sbin/plugtest
 %attr(0555,root,qmail) @prefix@/sbin/postdel
 %attr(0555,root,qmail) @prefix@/sbin/qmailconfig
-%attr(0500,root,qmail) @prefix@/sbin/instcheck
+%attr(0550,root,qmail) @prefix@/sbin/instcheck
 %attr(0555,root,qmail) @prefix@/sbin/hostname
 %attr(0555,root,qmail) @prefix@/sbin/rot
 %attr(0555,root,qmail) @prefix@/sbin/strfile
@@ -391,15 +391,15 @@
 %attr(0555,root,qmail) @prefix@/sbin/qmail-nullqueue
 %attr(0555,root,qmail) @prefix@/sbin/qmail-tcpok
 %attr(0555,root,qmail) @prefix@/sbin/qmail-tcpto
-%attr(0500,root,qmail) @prefix@/sbin/qmail-daemon
-%attr(0500,root,qmail) @prefix@/sbin/qmail-start
-%attr(0500,root,qmail) @prefix@/sbin/qmail-lspawn
-%attr(0511,root,qmail) @prefix@/sbin/qmail-rspawn
-%attr(0511,root,qmail) @prefix@/sbin/qmail-clean
-%attr(0511,root,qmail) @prefix@/sbin/qmail-send
-%attr(0511,root,qmail) @prefix@/sbin/qmail-todo
-%attr(0511,root,qmail) @prefix@/sbin/relaytest
-%attr(0511,root,qmail) @prefix@/sbin/splogger
+%attr(0550,root,qmail) @prefix@/sbin/qmail-daemon
+%attr(0550,root,qmail) @prefix@/sbin/qmail-start
+%attr(0550,root,qmail) @prefix@/sbin/qmail-lspawn
+%attr(0551,root,qmail) @prefix@/sbin/qmail-rspawn
+%attr(0551,root,qmail) @prefix@/sbin/qmail-clean
+%attr(0551,root,qmail) @prefix@/sbin/qmail-send
+%attr(0551,root,qmail) @prefix@/sbin/qmail-todo
+%attr(0551,root,qmail) @prefix@/sbin/relaytest
+%attr(0551,root,qmail) @prefix@/sbin/splogger
 %attr(0555,root,qmail) @prefix@/sbin/dnscname
 %attr(0555,root,qmail) @prefix@/sbin/dnsfq
 %attr(0555,root,qmail) @prefix@/sbin/dnsip
@@ -419,8 +419,8 @@
 #
 # logalert
 #
-%attr(0511,root,root) @prefix@/sbin/logsrv
-%attr(0511,root,root) @prefix@/sbin/rpclog
+%attr(0551,root,root) @prefix@/sbin/logsrv
+%attr(0551,root,root) @prefix@/sbin/rpclog
 #
 # Post handle
 #
@@ -450,12 +450,12 @@
 %attr(4555,root,root)     @prefix@/bin/vsetuserquota
 %attr(4555,root,root)     @prefix@/bin/vuserinfo
 %attr(4555,root,root)     @libexecdir@/authlib/authshadow
-%attr(2511,root,qscand)   @prefix@/sbin/run-cleanq
-%attr(4511,qscand,qscand) @prefix@/sbin/qscanq
+%attr(2551,root,qscand)   @prefix@/sbin/run-cleanq
+%attr(4551,qscand,qscand) @prefix@/sbin/qscanq
 %attr(4555,root,root)     @prefix@/sbin/systpass
-%attr(6511,qmailq,qmail)  @prefix@/sbin/qmail-queue
-%attr(6511,qscand,qmail)  @prefix@/sbin/qhpsi
-%attr(6511,root,indimail) @prefix@/bin/bogofilter
+%attr(6551,qmailq,qmail)  @prefix@/sbin/qmail-queue
+%attr(6551,qscand,qmail)  @prefix@/sbin/qhpsi
+%attr(6551,root,indimail) @prefix@/bin/bogofilter
 #
 # courier-imap
 #
