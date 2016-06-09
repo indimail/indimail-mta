@@ -2,8 +2,8 @@
 #Directories
 #
 %dir %attr(0555,root,qmail)        @indimaildir@
-%dir %attr(2755,indimail,qmail)    @indimaildir@/autoturn
-%dir %attr(2555,alias,qmail)       @indimaildir@/alias
+%dir %attr(2775,indimail,qmail)    @indimaildir@/autoturn
+%dir %attr(2775,alias,qmail)       @indimaildir@/alias
 %dir %attr(0750,qscand,qscand)     @indimaildir@/qscanq
 %dir %attr(0750,qscand,qscand)     @indimaildir@/qscanq/root
 %dir %attr(0750,qscand,qscand)     @indimaildir@/qscanq/root/scanq
@@ -21,8 +21,8 @@
 %dir %attr(0775,indimail,qmail)    @sysconfdir@/control
 %dir %attr(0775,indimail,qmail)    @sysconfdir@/control/inquery
 %dir %attr(0775,indimail,qmail)    @sysconfdir@/control/domainkeys
-%dir %attr(2755,qmailr,qmail)      @sysconfdir@/control/ratelimit
-%dir %attr(0755,root,root)         @sysconfdir@/control/defaultqueue
+%dir %attr(2775,qmailr,qmail)      @sysconfdir@/control/ratelimit
+%dir %attr(0775,indimail,qmail)    @sysconfdir@/control/defaultqueue
 %dir %attr(0775,indimail,qmail)    @sysconfdir@/users
 %dir %attr(0755,root,root)         @mandir@
 %dir %attr(0755,root,root)         @mandir@/cat1
@@ -809,7 +809,7 @@
 %attr(0644,root,root)  @mandir@/man1/multipipe.1.gz
 %attr(0644,root,root)  @mandir@/man1/multitail.1.gz
 %attr(0644,root,root)  @mandir@/man1/munpack.1.gz
-%attr(0644,root,root)  @mandir@/man1/newaliases.1.gz
+%attr(0644,root,root)  @mandir@/man1/inewaliases.1.gz
 %attr(0644,root,root)  @mandir@/man1/newinclude.1.gz
 %attr(0644,root,root)  @mandir@/man1/new-inject.1.gz
 %attr(0644,root,root)  @mandir@/man1/plugtest.1.gz
@@ -1058,10 +1058,10 @@
 %attr(0644,root,root)  @mandir@/man8/readproctitle.8.gz
 %attr(0644,root,root)  @mandir@/man8/recipient-cdb.8.gz
 %attr(0644,root,root)  @mandir@/man8/resetquota.8.gz
-%attr(0644,root,root)  @mandir@/man8/rmail.8.gz
+%attr(0644,root,root)  @mandir@/man8/irmail.8.gz
+%attr(0644,root,root)  @mandir@/man8/isendmail.8.gz
 %attr(0644,root,root)  @mandir@/man8/rpclog.8.gz
 %attr(0644,root,root)  @mandir@/man8/run-cleanq.8.gz
-%attr(0644,root,root)  @mandir@/man8/sendmail.8.gz
 %attr(0644,root,root)  @mandir@/man8/setlock.8.gz
 %attr(0644,root,root)  @mandir@/man8/setuidgid.8.gz
 %attr(0644,root,root)  @mandir@/man8/softlimit.8.gz

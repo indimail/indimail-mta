@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail.spec.in,v 2.342 2016-06-08 10:49:21+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 2.343 2016-06-09 12:56:50+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %define _unpackaged_files_terminate_build 1
 
@@ -920,7 +920,7 @@ fi
 %dir %attr(555,root,qmail)        %{shareddir}/boot
 %dir %attr(555,root,qmail)        %{shareddir}/doc
 %dir %attr(555,root,root)         %{_prefix}/lib/indimail
-%dir %attr(2555,alias,qmail)      %{indimaildir}/alias
+%dir %attr(2775,alias,qmail)      %{indimaildir}/alias
 %dir %attr(750,qscand,qscand)     %{indimaildir}/qscanq
 %dir %attr(750,qscand,qscand)     %{indimaildir}/qscanq/root
 %dir %attr(750,qscand,qscand)     %{indimaildir}/qscanq/root/scanq
@@ -931,9 +931,10 @@ fi
 %dir %attr(775,indimail,qmail)    %{sysconfdir}/users
 %dir %attr(775,indimail,qmail)    %{sysconfdir}/control
 %dir %attr(775,indimail,qmail)    %{sysconfdir}/control/inquery
-%dir %attr(2755,qmailr,qmail)     %{sysconfdir}/control/ratelimit
+%dir %attr(2775,qmailr,qmail)     %{sysconfdir}/control/ratelimit
 %dir %attr(775,indimail,qmail)    %{sysconfdir}/control/domainkeys
-%dir %attr(2755,indimail,qmail)   %{indimaildir}/autoturn
+%dir %attr(775,indimail,qmail)    %{sysconfdir}/control/defaultqueue
+%dir %attr(2775,indimail,qmail)   %{indimaildir}/autoturn
 %if "%{mandir}" != "/usr/share/man"
 %dir %attr(755,root,root)         %{mandir}
 %dir %attr(755,root,root)         %{mandir}/man1
@@ -1191,7 +1192,7 @@ fi
 %attr(555,root,qmail)                   %{_prefix}/bin/pinq
 %attr(555,root,qmail)                   %{_prefix}/bin/mlmatchup
 %attr(555,root,qmail)                   %{_prefix}/bin/sendmail
-%attr(555,root,qmail)                   %{_prefix}/bin/rmail
+%attr(555,root,qmail)                   %{_prefix}/bin/irmail
 %attr(555,root,qmail)                   %{_prefix}/bin/dbinfo
 %attr(555,root,qmail)                   %{_prefix}/bin/sslerator
 %attr(555,root,qmail)                   %{_prefix}/bin/ifaddr
@@ -1246,7 +1247,7 @@ fi
 %attr(555,root,qmail)                   %{_prefix}/bin/condredirect
 %attr(555,root,qmail)                   %{_prefix}/bin/fastforward
 %attr(555,root,qmail)                   %{_prefix}/bin/rspamsdomain
-%attr(555,root,qmail)                   %{_prefix}/bin/newaliases
+%attr(555,root,qmail)                   %{_prefix}/bin/inewaliases
 %attr(555,root,qmail)                   %{_prefix}/bin/qmail-rm
 %attr(555,root,qmail)                   %{_prefix}/bin/zsmtp
 %attr(555,root,qmail)                   %{_prefix}/bin/qmail-pop3d
@@ -1668,7 +1669,6 @@ fi
 %endif
 %attr(644,root,root)                        %{sysconfdir}/clamd.conf.sample
 %attr(644,root,root)                        %{sysconfdir}/freshclam.conf.sample
-%attr(644,root,root)                        %{_pkg_config_path}/libclamav.pc
 %endif
 
 %if %nofetchmail == 0
@@ -1793,13 +1793,13 @@ fi
 %verify (not user group mode) %attr(4555, root, root)      %{_prefix}/bin/vmoduser
 %verify (not user group mode) %attr(4555, root, root)      %{_prefix}/bin/vcfilter
 %verify (not user group mode) %attr(4555, root, root)      %{_prefix}/bin/vbulletin
-%verify (not user group mode) %attr(2555, alias, qmail)    %{_prefix}/alias
-%verify (not user group mode) %attr(2755, indimail, qmail) %{_prefix}/autoturn
 %verify (not user group mode) %attr(6511, qscand, qmail)   %{_prefix}/sbin/qhpsi
 %verify (not user group mode) %attr(2511, root, qscand)    %{_prefix}/sbin/run-cleanq
 %verify (not user group mode) %attr(6511, qmailq, qmail)   %{_prefix}/sbin/qmail-queue
 %verify (not user group mode) %attr(4555, qscand, qscand)  %{_prefix}/sbin/qscanq
 %verify (not user group mode) %attr(4555, root, root)      %{_prefix}/sbin/systpass
+%verify (not user group mode) %attr(2555, alias, qmail)    %{indimaildir}/alias
+%verify (not user group mode) %attr(2755, indimail, qmail) %{indimaildir}/autoturn
 %verify (not user group mode) %attr(4555, root, qmail)     %{libexedir}/sq_vacation
 %verify (not user group mode) %attr(4555, root, root)      %{libexedir}/authlib/authshadow
 %endif
@@ -1852,7 +1852,6 @@ fi
 %{_libdir}/libindimail-%{version}.so.0
 %{_libdir}/libindimail-%{version}.so.0.0.0
 %endif
-%{_pkg_config_path}/libindimail.pc
 
 %if %nonssd == 0
                                         /usr/%{_lib}/libnss_nssd.so.2
@@ -1926,6 +1925,7 @@ fi
 %else
 %{_libdir}/libclam*.so
 %endif
+%attr(644,root,root)                        %{_pkg_config_path}/libclamav.pc
 %endif
 
 %if %nolibdkim == 0
@@ -2072,7 +2072,7 @@ fi
 %attr(444,root,qmail)             %{mandir}/man8/qmail-showctl.8.gz
 %attr(444,root,qmail)             %{mandir}/cat8/qmail-showctl.0.gz
 %attr(444,root,qmail)             %{mandir}/man8/qmail-inject.8.gz
-%attr(444,root,qmail)             %{mandir}/man8/sendmail.8.gz
+%attr(444,root,qmail)             %{mandir}/man8/isendmail.8.gz
 %attr(444,root,qmail)             %{mandir}/cat8/qmail-inject.0.gz
 %attr(444,root,qmail)             %{mandir}/man8/qmail-qmqpc.8.gz
 %attr(444,root,qmail)             %{mandir}/cat8/qmail-qmqpc.0.gz
@@ -2848,6 +2848,7 @@ if [ $ID -ne 0 ] ; then
 	exit 1
 fi
 
+(
 if test -f %{_sysconfdir}/init/svscan.conf
 then
 	/sbin/initctl emit qmailstop > /dev/null 2>&1
@@ -2886,13 +2887,10 @@ if [ $argv1 -eq 1 ] ; then
 	exit 0
 fi
 
-%{__mv} %{mandir}/man8/rmail_i.8.gz %{mandir}/man8/rmail.8.gz || true
-%{__mv} %{mandir}/man1/newaliases_i.1.gz %{mandir}/man1/newaliases.1.gz || true
-%{__mv} %{_prefix}/bin/newaliases_i %{_prefix}/bin/newaliases || true
-%{__mv} %{_prefix}/bin/rmail_i %{_prefix}/bin/rmail || true
 # Remove IndiMail being started on system boot
 echo "removing indimail startup"
 %{_prefix}/sbin/svctool --config=rm-boot
+) > /tmp/indimail-uninstall.log 2>&1
 
 ### SCRIPTLET ###############################################################################
 %postun
@@ -2911,6 +2909,7 @@ if [ $argv1 -eq 1 ] ; then
 	exit 0
 fi
 
+(
 # remove users / groups
 nscd_up=`ps -ef |grep nscd |grep -v grep|wc -l`
 if [ $nscd_up -ge 1 ] ; then
@@ -3111,7 +3110,7 @@ done
 fi
 
 #selinux
-%{__rm} -f %{sysconfdir}/indimail.te %{sysconfdir}/indimail.mod %{sysconfdir}/indimail.pp
+%{__rm} -f %{sysconfdir}/indimail.te %{sysconfdir}/indimail.mod %{sysconfdir}/indimail.pp %{sysconfdir}/indimail.fc
 
 echo "removing logs"
 %{__rm} -f %{indimaildir}/mysqldb/logs/logisam.log
@@ -3136,6 +3135,7 @@ if [ -f %{shareddir}/boot/rpm.init ] ; then
 	echo "Running Custom Un-Installation Script for postun"
 	/bin/sh %{shareddir}/boot/rpm.init postun
 fi
+) >> /tmp/indimail-uninstall.log 2>&1
 
 ### SCRIPTLET ###############################################################################
 %posttrans
@@ -3336,13 +3336,13 @@ if [ -n $alternatives_cmd ] ; then
 		echo "! /etc/pam.d/smtp is a file, should be a link" 1>&2
 		%{__mv} /etc/pam.d/smtp /etc/pam.d/smtp.old
 	fi
-	/usr/sbin/alternatives --install \
+	$alternatives_cmd --install \
 		/usr/sbin/sendmail mta %{_prefix}/bin/sendmail 120 \
 		--slave /usr/share/man/man8/sendmail.8.gz mta-sendmailman \
-			%{mandir}/man8/sendmail.8.gz \
+			%{mandir}/man8/isendmail.8.gz \
 		--slave /usr/lib/sendmail mta-sendmail %{_prefix}/bin/sendmail \
-		--slave /usr/bin/rmail mta-rmail %{_prefix}/bin/rmail
-	/usr/sbin/alternatives --set mta %{_prefix}/bin/sendmail
+		--slave /usr/bin/rmail mta-rmail %{_prefix}/bin/irmail
+	$alternatives_cmd --set mta %{_prefix}/bin/sendmail
 else
 	for i in /usr/lib/sendmail /usr/sbin/sendmail; do
 		if [ -f $i -a ! -L $i ]; then
@@ -3395,10 +3395,6 @@ if [ -n $alternatives_cmd ] ; then
 			%{__rm} -f $i
 			%{__mv} $i.old $i
 		fi
-	done
-	for i in newaliases rmail
-	do
-		%{__rm} -f %{_prefix}/bin/"$i"_i
 	done
 else
 	if [ -f %{_sysconfdir}/init.d/sendmail ] ; then
