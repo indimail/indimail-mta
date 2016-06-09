@@ -2,9 +2,10 @@
 #Directories
 #
 %dir %attr(0555,root,qmail)        @qmaildir@
-%dir %attr(2555,alias,qmail)       @qmaildir@/alias
+%dir %attr(2775,alias,qmail)       @qmaildir@/alias
 %dir %attr(0775,qscand,qscand)     @qmaildir@/clamd
 %dir %attr(0775,root,indimail)     @qmaildir@/domains
+%dir %attr(2775,indimail,qmail)    @qmaildir@/autoturn
 %dir %attr(0750,qscand,qscand)     @qmaildir@/qscanq
 %dir %attr(0750,qscand,qscand)     @qmaildir@/qscanq/root
 %dir %attr(0750,qscand,qscand)     @qmaildir@/qscanq/root/scanq
@@ -28,8 +29,8 @@
 %dir %attr(0775,indimail,qmail)    @sysconfdir@/users
 %dir %attr(0775,indimail,qmail)    @sysconfdir@/control
 %dir %attr(0775,indimail,qmail)    @sysconfdir@/control/domainkeys
-%dir %attr(2755,qmailr,qmail)      @sysconfdir@/control/ratelimit
-%dir %attr(0755,root,qmail)        @sysconfdir@/control/defaultqueue
+%dir %attr(2775,qmailr,qmail)      @sysconfdir@/control/ratelimit
+%dir %attr(0775,indimail,qmail)    @sysconfdir@/control/defaultqueue
 #
 # Binaries
 #
@@ -119,7 +120,7 @@
 %attr(0555,root,qmail) @prefix@/bin/multipipe
 %attr(0555,root,qmail) @prefix@/bin/multirotate
 %attr(0555,root,qmail) @prefix@/bin/multitail
-%attr(0555,root,qmail) @prefix@/bin/newaliases
+%attr(0555,root,qmail) @prefix@/bin/inewaliases
 %attr(0555,root,qmail) @prefix@/bin/newinclude
 %attr(0555,root,qmail) @prefix@/bin/new-inject
 %attr(0555,root,qmail) @prefix@/bin/ofmipd
@@ -166,7 +167,7 @@
 %attr(0555,root,qmail) @prefix@/bin/replier
 %attr(0555,root,qmail) @prefix@/bin/replier-config
 %attr(0555,root,qmail) @prefix@/bin/rhosts
-%attr(0555,root,qmail) @prefix@/bin/rmail
+%attr(0555,root,qmail) @prefix@/bin/irmail
 %attr(0555,root,qmail) @prefix@/bin/rpmattr
 %attr(0555,root,qmail) @prefix@/bin/rrforward
 %attr(0555,root,qmail) @prefix@/bin/rrt
@@ -548,7 +549,7 @@
 %attr(0644,root,root) @mandir@/man1/mconnect.1.gz
 %attr(0644,root,root) @mandir@/man1/multipipe.1.gz
 %attr(0644,root,root) @mandir@/man1/multitail.1.gz
-%attr(0644,root,root) @mandir@/man1/newaliases.1.gz
+%attr(0644,root,root) @mandir@/man1/inewaliases.1.gz
 %attr(0644,root,root) @mandir@/man1/newinclude.1.gz
 %attr(0644,root,root) @mandir@/man1/new-inject.1.gz
 %attr(0644,root,root) @mandir@/man1/plugtest.1.gz
@@ -686,9 +687,9 @@
 %attr(0644,root,root) @mandir@/man8/queue-fix.8.gz
 %attr(0644,root,root) @mandir@/man8/readproctitle.8.gz
 %attr(0644,root,root) @mandir@/man8/recipient-cdb.8.gz
-%attr(0644,root,root) @mandir@/man8/rmail.8.gz
+%attr(0644,root,root) @mandir@/man8/irmail.8.gz
+%attr(0644,root,root) @mandir@/man8/isendmail.8.gz
 %attr(0644,root,root) @mandir@/man8/run-cleanq.8.gz
-%attr(0644,root,root) @mandir@/man8/sendmail.8.gz
 %attr(0644,root,root) @mandir@/man8/setlock.8.gz
 %attr(0644,root,root) @mandir@/man8/setuidgid.8.gz
 %attr(0644,root,root) @mandir@/man8/softlimit.8.gz

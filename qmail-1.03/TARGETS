@@ -461,9 +461,9 @@ myctime.o
 ndelay.a
 ndelay.o
 ndelay_off.o
-newaliases
+inewaliases
 newaliases.0
-newaliases.o
+inewaliases.o
 newfield.o
 newinclude
 newinclude.0
@@ -986,7 +986,7 @@ crypt.lib
 shadow.lib
 ldap.lib
 cdbgetm
-rmail
+irmail
 fastforward.1
 dot-forward.1
 replier.1
