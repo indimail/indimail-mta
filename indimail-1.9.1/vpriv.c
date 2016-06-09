@@ -1,5 +1,8 @@
 /*
  * $Log: vpriv.c,v $
+ * Revision 2.7  2016-06-09 14:22:56+05:30  Cprogrammer
+ * allow privilege to process running with indimail gid
+ *
  * Revision 2.6  2011-11-09 19:46:29+05:30  Cprogrammer
  * removed getversion
  *
@@ -22,7 +25,7 @@
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vpriv.c,v 2.6 2011-11-09 19:46:29+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: vpriv.c,v 2.7 2016-06-09 14:22:56+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef CLUSTERED_SITE
@@ -47,11 +50,13 @@ main(argc, argv)
 	int             action, err, i;
 	char           *ptr, *user, *program, *cmdargs, *oldcmdargs;
 	uid_t           uid;
+	gid_t           gid;
 
 	if (indimailuid == -1 || indimailgid == -1)
 		GetIndiId(&indimailuid, &indimailgid);
 	uid = getuid();
-	if (uid != 0 && uid != indimailuid)
+	gid = getgid();
+	if (uid != 0 && uid != indimailuid && gid != indimailgid)
 	{
 		error_stack(stderr, "you must be root or indimail to run this program\n");
 		return(1);

@@ -1,5 +1,8 @@
 /*
  * $Log: vdeldomain.c,v $
+ * Revision 2.17  2016-06-09 14:22:35+05:30  Cprogrammer
+ * allow privilege to process running with indimail gid
+ *
  * Revision 2.16  2016-05-25 09:07:44+05:30  Cprogrammer
  * use LIBEXECDIR for post handle
  *
@@ -106,7 +109,7 @@
 #include <sys/socket.h>
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vdeldomain.c,v 2.16 2016-05-25 09:07:44+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: vdeldomain.c,v 2.17 2016-06-09 14:22:35+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 char            Domain[MAX_BUFF];
@@ -122,6 +125,7 @@ main(argc, argv)
 {
 	int             err;
 	uid_t           uid;
+	gid_t           gid;
 	char           *ptr, *base_argv0;
 #ifdef CLUSTERED_SITE
 	char            mcdFile[MAX_BUFF];
@@ -134,7 +138,8 @@ main(argc, argv)
 	if (indimailuid == -1 || indimailgid == -1)
 		GetIndiId(&indimailuid, &indimailgid);
 	uid = getuid();
-	if (uid != 0 && uid != indimailuid)
+	gid = getgid();
+	if (uid != 0 && uid != indimailuid && gid != indimailgid)
 	{
 		fprintf(stderr, "you must be root or indimail to run this program\n");
 		return(1);

@@ -1,5 +1,8 @@
 /*
  * $Log: vbulletin.c,v $
+ * Revision 2.18  2016-06-09 14:22:29+05:30  Cprogrammer
+ * allow privilege to process running with indimail gid
+ *
  * Revision 2.17  2016-05-17 14:57:02+05:30  Cprogrammer
  * use control directory defined by configure
  *
@@ -77,7 +80,7 @@
 #include <signal.h>
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vbulletin.c,v 2.17 2016-05-17 14:57:02+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: vbulletin.c,v 2.18 2016-06-09 14:22:29+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #define COPY_IT          0
@@ -276,7 +279,7 @@ process_domain(EmailFile, ExcludeFile, domain)
 	time_t          tm;
 	int             pid, first = 1;
 	uid_t           uid, myuid;
-	gid_t           gid;
+	gid_t           gid, mygid;
 
 	if (!fsi && !(fsi = fopen(EmailFile, "r")))
 	{
@@ -297,9 +300,10 @@ process_domain(EmailFile, ExcludeFile, domain)
 		return (-1);
 	}
 	myuid = getuid();
-	if (myuid != 0 && myuid != uid)
+	mygid = getgid();
+	if (myuid != 0 && myuid != uid && mygid != gid)
 	{
-		error_stack(stderr, "you must be root or domain user (uid=%d) to run this program\n", uid);
+		error_stack(stderr, "you must be root or domain user (uid=%d/gid=%d) to run this program\n", uid, gid);
 		return(1);
 	}
 	if (setuser_privileges(uid, gid, "indimail"))

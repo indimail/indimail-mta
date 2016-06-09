@@ -1,5 +1,8 @@
 /*
  * $Log: vdominfo.c,v $
+ * Revision 2.20  2016-06-09 14:22:43+05:30  Cprogrammer
+ * allow privilege to process running with indimail gid
+ *
  * Revision 2.19  2016-05-18 11:47:29+05:30  Cprogrammer
  * use ASSIGNDIR for users/assign
  *
@@ -134,7 +137,7 @@
 #include <sys/socket.h>
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vdominfo.c,v 2.19 2016-05-18 11:47:29+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: vdominfo.c,v 2.20 2016-06-09 14:22:43+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 char            Domain[MAX_BUFF];
@@ -170,10 +173,12 @@ main(argc, argv)
 	char           *argv[];
 {
 	uid_t           myuid;
+	gid_t           mygid;
 
 	if (get_options(argc, argv))
 		return(1);
 	myuid = getuid();
+	mygid = getgid();
 	if (*Domain)
 	{
 		if (vget_assign(Domain, Dir, MAX_BUFF, &Uid, &Gid) == NULL)
@@ -181,9 +186,9 @@ main(argc, argv)
 			error_stack(stderr, "domain %s does not exist\n", Domain);
 			return(1);
 		}
-		if (myuid != Uid && myuid != 0)
+		if (myuid != Uid && mygid != Gid && myuid != 0)
 		{
-			error_stack(stderr, "you must be root or domain user (uid=%d) to run this program\n", Uid);
+			error_stack(stderr, "you must be root / domain user (uid=%d) / (gid=%d) to run this program\n", Uid, Gid);
 			return(1);
 		}
 		if (setuser_privileges(Uid, Gid, "indimail"))

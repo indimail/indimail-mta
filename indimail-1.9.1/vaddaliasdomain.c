@@ -1,5 +1,8 @@
 /*
  * $Log: vaddaliasdomain.c,v $
+ * Revision 2.6  2016-06-09 14:21:41+05:30  Cprogrammer
+ * allow privilege to process running with indimail gid
+ *
  * Revision 2.5  2011-11-09 19:45:41+05:30  Cprogrammer
  * removed getversion
  *
@@ -66,7 +69,7 @@
 #include <signal.h>
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vaddaliasdomain.c,v 2.5 2011-11-09 19:45:41+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: vaddaliasdomain.c,v 2.6 2016-06-09 14:21:41+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 char            Domain_old[MAX_BUFF], Domain_new[MAX_BUFF];
@@ -81,13 +84,15 @@ main(argc, argv)
 {
 	int             err;
 	uid_t           uid;
+	gid_t           gid;
 
 	if(get_options(argc, argv))
 		return(1);
 	if (indimailuid == -1 || indimailgid == -1)
 		GetIndiId(&indimailuid, &indimailgid);
 	uid = getuid();
-	if (uid != 0 && uid != indimailuid)
+	gid = getgid();
+	if (uid != 0 && uid != indimailuid && gid != indimailgid)
 	{
 		error_stack(stderr, "you must be root or indimail to run this program\n");
 		return(1);

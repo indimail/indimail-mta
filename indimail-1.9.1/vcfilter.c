@@ -1,5 +1,8 @@
 /*
  * $Log: vcfilter.c,v $
+ * Revision 2.30  2016-06-09 14:22:32+05:30  Cprogrammer
+ * allow privilege to process running with indimail gid
+ *
  * Revision 2.29  2014-04-17 11:42:30+05:30  Cprogrammer
  * set supplementary group ids for indimail
  *
@@ -96,7 +99,7 @@
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vcfilter.c,v 2.29 2014-04-17 11:42:30+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: vcfilter.c,v 2.30 2016-06-09 14:22:32+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef VFILTER
@@ -140,7 +143,7 @@ main(int argc, char **argv)
 {
 	int             i, j, status = -1, raw = 0, cluster_conn = 0;
 	uid_t           uid, uidtmp;
-	gid_t           gid;
+	gid_t           gid, gidtmp;
 	struct passwd  *pw;
 	char           *real_domain;
 	char            user[AUTH_SIZE], domain[AUTH_SIZE], vfilter_file[MAX_BUFF],
@@ -175,9 +178,10 @@ main(int argc, char **argv)
 	if (FilterAction != FILTER_SELECT)
 	{
 		uidtmp = getuid();
-		if (uidtmp != 0 && uidtmp != uid)
+		gidtmp = getgid();
+		if (uidtmp != 0 && uidtmp != uid && gidtmp != gid)
 		{
-			error_stack(stderr, "you must be root or domain user (uid=%d) to run this program\n", uid);
+			error_stack(stderr, "you must be root or domain user (uid=%d/gid=%d) to run this program\n", uid, gid);
 			if (cluster_conn)
 				vclose();
 			return(1);

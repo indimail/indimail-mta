@@ -1,5 +1,8 @@
 /*
  * $Log: vadduser.c,v $
+ * Revision 2.43  2016-06-09 14:22:26+05:30  Cprogrammer
+ * allow privilege to process running with indimail gid
+ *
  * Revision 2.42  2016-05-25 09:06:41+05:30  Cprogrammer
  * use LIBEXECDIR for post handle
  *
@@ -180,7 +183,7 @@
 #include <signal.h>
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vadduser.c,v 2.42 2016-05-25 09:06:41+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: vadduser.c,v 2.43 2016-06-09 14:22:26+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 char            Email[MAX_BUFF], User[MAX_BUFF], Domain[MAX_BUFF], Passwd[MAX_BUFF],
@@ -206,7 +209,7 @@ main(argc, argv)
 	char            tmpbuf[MAX_BUFF], buffer[MAX_BUFF], quotaVal[QUOTA_BUFLEN];
 	FILE           *fp;
 	uid_t           uid, uidtmp;
-	gid_t           gid;
+	gid_t           gid, gidtmp;
 #ifdef ENABLE_DOMAIN_LIMITS
 	int             domain_limits;
 	struct vlimits  limits;
@@ -269,9 +272,10 @@ main(argc, argv)
 		return(1);
 	}
 	uidtmp = getuid();
-	if (uidtmp != 0 && uidtmp != uid)
+	gidtmp = getgid();
+	if (uidtmp != 0 && uidtmp != uid && gidtmp != gid)
 	{
-		error_stack(stderr, "you must be root or domain user (uid=%d) to run this program\n", uid);
+		error_stack(stderr, "you must be root or domain user (uid=%d/gid=%d) to run this program\n", uid, gid);
 		return(1);
 	}
 	if (setuser_privileges(uid, gid, "indimail"))

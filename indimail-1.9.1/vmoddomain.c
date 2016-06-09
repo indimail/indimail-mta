@@ -1,5 +1,8 @@
 /*
  * $Log: vmoddomain.c,v $
+ * Revision 2.8  2016-06-09 14:22:47+05:30  Cprogrammer
+ * allow privilege to process running with indimail gid
+ *
  * Revision 2.7  2011-12-24 08:49:17+05:30  Cprogrammer
  * display a more helpful usage
  *
@@ -32,7 +35,7 @@
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vmoddomain.c,v 2.7 2011-12-24 08:49:17+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: vmoddomain.c,v 2.8 2016-06-09 14:22:47+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 static void     usage();
@@ -48,7 +51,7 @@ main(int argc, char **argv)
 	char            TheDir[AUTH_SIZE];
 	int             use_vfilter, domain_limits;
 	uid_t           uid, myuid;
-	gid_t           gid;
+	gid_t           gid, mygid;
 
 	if (get_options(argc, argv, &use_vfilter, &domain_limits, &handler, &domain))
 		return (1);
@@ -60,7 +63,8 @@ main(int argc, char **argv)
 	if (indimailuid == -1 || indimailgid == -1)
 		GetIndiId(&indimailuid, &indimailgid);
 	myuid = getuid();
-	if (myuid != 0 && myuid != indimailuid)
+	mygid = getgid();
+	if (myuid != 0 && myuid != indimailuid && mygid != indimailgid)
 	{
 		error_stack(stderr, "you must be root or indimail to run this program\n");
 		return(1);

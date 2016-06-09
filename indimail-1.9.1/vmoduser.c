@@ -1,5 +1,8 @@
 /*
  * $Log: vmoduser.c,v $
+ * Revision 2.28  2016-06-09 14:22:51+05:30  Cprogrammer
+ * allow privilege to process running with indimail gid
+ *
  * Revision 2.27  2014-04-18 17:33:19+05:30  Cprogrammer
  * added option -D to create folder.dateformat in user's Maildir
  *
@@ -150,7 +153,7 @@
 #include <signal.h>
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vmoduser.c,v 2.27 2014-04-18 17:33:19+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: vmoduser.c,v 2.28 2016-06-09 14:22:51+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 char            Email[MAX_BUFF];
@@ -181,9 +184,7 @@ main(argc, argv)
 {
 	int             err, fd;
 	uid_t           uid;
-#ifdef ENABLE_AUTH_LOGGING
 	gid_t           gid;
-#endif
 	struct passwd   PwTmp;
 	struct passwd  *pw;
 	char            tmpbuf[MAX_BUFF], tmpQuota[MAX_BUFF];
@@ -203,7 +204,8 @@ main(argc, argv)
 	if (indimailuid == -1 || indimailgid == -1)
 		GetIndiId(&indimailuid, &indimailgid);
 	uid = getuid();
-	if (uid != 0 && uid != indimailuid)
+	gid = getgid();
+	if (uid != 0 && uid != indimailuid && gid != indimailgid)
 	{
 		error_stack(stderr, "you must be root or indimail to run this program\n");
 		return(1);

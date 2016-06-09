@@ -1,5 +1,8 @@
 /*
  * $Log: vrenamedomain.c,v $
+ * Revision 2.18  2016-06-09 14:22:59+05:30  Cprogrammer
+ * allow privilege to process running with indimail gid
+ *
  * Revision 2.17  2016-05-25 09:09:54+05:30  Cprogrammer
  * use LIBEXECDIR for post handle
  *
@@ -62,7 +65,7 @@
 #include <sys/stat.h>
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vrenamedomain.c,v 2.17 2016-05-25 09:09:54+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: vrenamedomain.c,v 2.18 2016-06-09 14:22:59+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 int
@@ -84,7 +87,8 @@ main(int argc, char **argv)
 	if (indimailuid == -1 || indimailgid == -1)
 		GetIndiId(&indimailuid, &indimailgid);
 	uid = getuid();
-	if (uid != 0 && uid != indimailuid)
+	gid = getgid();
+	if (uid != 0 && uid != indimailuid && gid != indimailgid)
 	{
 		error_stack(stderr, "you must be root or indimail to run this program\n");
 		return (1);
