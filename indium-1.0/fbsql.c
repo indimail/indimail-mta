@@ -56,7 +56,7 @@ struct mysql_Connect
 /*- miscellaneous support routines (error handling etc) */
 
 void
-output_error(Tcl_Interp * interp, int sql_number, char *errmsg)
+output_error(Tcl_Interp *interp, int sql_number, char *errmsg)
 {
 	if (sql_number > 0)
 		snprintf(errormsg, sizeof(errormsg), "Error %u (%s)", mysql_errno(&connection[sql_number].mysql),
@@ -69,7 +69,7 @@ output_error(Tcl_Interp * interp, int sql_number, char *errmsg)
 
 /*- sql connect */
 int
-fbsql_connect(Tcl_Interp * interp, int sql_number, int argc, char **argv)
+fbsql_connect(Tcl_Interp *interp, int sql_number, int argc, char **argv)
 {
 	char           *host = NULL;
 	char           *user = NULL;
@@ -110,7 +110,7 @@ fbsql_connect(Tcl_Interp * interp, int sql_number, int argc, char **argv)
 }
 
 int
-fbsql_disconnect(Tcl_Interp * interp, int sql_number)
+fbsql_disconnect(Tcl_Interp *interp, int sql_number)
 {
 	/*- check that we are connected? */
 	if (!connection[sql_number].CONNECTED)
@@ -126,7 +126,7 @@ fbsql_disconnect(Tcl_Interp * interp, int sql_number)
 /*- sql general commands */
 
 int
-fbsql_selectdb(Tcl_Interp * interp, int sql_number, int argc, char **argv)
+fbsql_selectdb(Tcl_Interp *interp, int sql_number, int argc, char **argv)
 {
 	char           *database = NULL;
 
@@ -152,7 +152,7 @@ fbsql_selectdb(Tcl_Interp * interp, int sql_number, int argc, char **argv)
 }
 
 int
-fbsql_numrows(Tcl_Interp * interp, int sql_number, int argc, char **argv)
+fbsql_numrows(Tcl_Interp *interp, int sql_number, int argc, char **argv)
 {
 	Tcl_Obj        *obj_result;
 
@@ -202,7 +202,7 @@ determine_field_type(int type)
 /*- sql query command(s) */
 
 int
-fbsql_query(Tcl_Interp * interp, int sql_number, int argc, char **argv)
+fbsql_query(Tcl_Interp *interp, int sql_number, int argc, char **argv)
 {
 	char           *query = NULL;
 	int             i, length, field_count;
@@ -303,7 +303,7 @@ fbsql_query(Tcl_Interp * interp, int sql_number, int argc, char **argv)
 
 /*- sql query command(s) - non standard enhancements for FastBase */
 int
-fbsql_startquery(Tcl_Interp * interp, int sql_number, int argc, char **argv)
+fbsql_startquery(Tcl_Interp *interp, int sql_number, int argc, char **argv)
 {
 	char           *query = NULL;
 	int             i;
@@ -407,7 +407,7 @@ fbsql_startquery(Tcl_Interp * interp, int sql_number, int argc, char **argv)
 }
 
 int
-fbsql_fetchrow(Tcl_Interp * interp, int sql_number, int argc, char **argv)
+fbsql_fetchrow(Tcl_Interp *interp, int sql_number, int argc, char **argv)
 {
 	int             i, field_type, length;
 	MYSQL_ROW       row;
@@ -554,7 +554,7 @@ fbsql_fetchrow(Tcl_Interp * interp, int sql_number, int argc, char **argv)
 }
 
 int
-fbsql_endquery(Tcl_Interp * interp, int sql_number, int argc, char **argv)
+fbsql_endquery(Tcl_Interp *interp, int sql_number, int argc, char **argv)
 {
 	/*- check we are connected? */
 	if (!connection[sql_number].CONNECTED)
@@ -576,7 +576,7 @@ fbsql_endquery(Tcl_Interp * interp, int sql_number, int argc, char **argv)
 
 /*- tcl sql command */
 int
-SqlCmd(ClientData sql_word, Tcl_Interp * interp, int argc, char **argv)
+SqlCmd(ClientData sql_word, Tcl_Interp *interp, int argc, char **argv)
 {
 	int             sql_number = (int) sql_word;
 
@@ -624,10 +624,10 @@ SqlCmd(ClientData sql_word, Tcl_Interp * interp, int argc, char **argv)
 #ifdef WINDOWS
 extern
 __declspec(dllexport)
-int             Fbsql_Init(Tcl_Interp * interp);
+int             Fbsql_Init(Tcl_Interp *interp);
 #endif
 int
-Fbsql_Init(Tcl_Interp * interp)
+Fbsql_Init(Tcl_Interp *interp)
 {
 	int             i;
 	char            command_name[10];

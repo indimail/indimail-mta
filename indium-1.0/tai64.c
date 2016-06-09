@@ -136,7 +136,7 @@ tai64nunix(Tcl_Interp *interp, int argc, char **argv)
 }
 
 int
-Tai64Cmd(ClientData sql_word, Tcl_Interp * interp, int argc, char **argv)
+Tai64Cmd(ClientData data, Tcl_Interp *interp, int argc, char **argv)
 {
 	/*- any command specified */
 	if (argc <= 1)
@@ -160,17 +160,17 @@ Tai64Cmd(ClientData sql_word, Tcl_Interp * interp, int argc, char **argv)
 	return TCL_ERROR;
 }
 
-/*- define the TCL initialisation code to create the "fbsql" command */
+/*- define the TCL initialisation code to create the "tai64" command */
 /*- haven't tested this yet (for building on Unix) */
 #ifdef WINDOWS
 extern
 __declspec(dllexport)
-int             Tai_Init(Tcl_Interp * interp);
+int             Tai_Init(Tcl_Interp *interp);
 #endif
 int
-Tai_Init(Tcl_Interp * interp)
+Tai_Init(Tcl_Interp *interp)
 {
-	/*- create the main "sql" command */
+	/*- create the main "tai64" command */
 	Tcl_CreateCommand(interp, "tai64", (Tcl_CmdProc *) Tai64Cmd, (ClientData) 0, (Tcl_CmdDeleteProc *) NULL);
 	return (Tcl_PkgProvide(interp, "tai64", "1.0") == TCL_ERROR ? TCL_ERROR : TCL_OK);
 }
