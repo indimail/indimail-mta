@@ -722,11 +722,11 @@ warn-auto.sh elq.sh conf-qmail conf-break conf-split
 	| sed s}SPLIT}"`head -1 conf-split`"}g \
 	> elq
 
-rmail: \
+irmail: \
 warn-auto.sh rmail.sh conf-qmail
 	cat warn-auto.sh rmail.sh \
 	| sed s}QMAIL}"`head -1 conf-qmail`"}g \
-	> rmail
+	> irmail
 
 etrn: \
 warn-auto.sh etrn.sh conf-qmail
@@ -1360,7 +1360,7 @@ dnsmxip dnsptr dnstxt dot-forward drate elq envdir envuidgid \
 etrn except fastforward fghack fixcrio forward generic.so greydaemon \
 home home+df hostname idedit iftocc indimail.plist instcheck ipmeprint \
 ldap-checkpwd leapsecs logselect maildir2mbox maildircmd maildirdeliver maildirqmtp maildirserial \
-maildirsmtp maildirwatch mailsubj mbox2maildir multilog multirotate newaliases newinclude \
+maildirsmtp maildirwatch mailsubj mbox2maildir multilog multirotate inewaliases newinclude \
 new-inject nowutc ofmipd ofmipname parsedate pgrphack pinq plugtest \
 predate preline printforward printmaillist proc proc+df qaes qail \
 qarf qmail-cat qmail-cdb qmail-clean qmailconfig qmailctl \
@@ -1370,7 +1370,7 @@ qmail-popup qmail-pw2u qmail-qfilter qmail-qmqpc qmail-qmqpd qmail-qmtpd qmail-q
 qmail-remote qmail-rm qmail-rspawn qmail-send qmail-showctl qmail-sigalrm qmail-sighup qmail-sigterm \
 qmail-smtpd qmail_smtpd.so qmail-sql qmail-start qmail-tcpok qmail-tcpto qmail-todo qmail-upq \
 qnotify qpq qquote qreceipt qsmhook queue-fix readproctitle \
-recipient-cdb recordio relaytest rewind rmail rpmattr rrforward rrt \
+recipient-cdb recordio relaytest rewind irmail rpmattr rrforward rrt \
 sendmail serialcmd serialqmtp serialsmtp setforward setlock setmaillist setuidgid \
 setup smtpd-plugin0.so smtpd-plugin.so softlimit sortedtest spawn-filter spfquery splogger \
 srsfilter supervise surblfilter surblqueue svc svok svscan svscanboot \
@@ -5018,25 +5018,25 @@ compile setmaillist.c substdio.h subfd.h substdio.h strerr.h \
 stralloc.h gen_alloc.h getln.h open.h byte.h
 	./compile setmaillist.c
 
-newaliases: \
-load newaliases.o auto_qmail.o token822.o control.o \
+inewaliases: \
+load inewaliases.o auto_qmail.o token822.o control.o \
 now.o cdbmss.o variables.o auto_control.o env.a \
 cdbmake.a strerr.a getln.a substdio.a stralloc.a \
 alloc.a error.a str.a fs.a seek.a open.a case.a
-	./load newaliases auto_qmail.o token822.o control.o \
+	./load inewaliases auto_qmail.o token822.o control.o \
 	variables.o now.o cdbmss.o auto_control.o env.a \
 	cdbmake.a strerr.a getln.a substdio.a stralloc.a \
 	alloc.a error.a str.a fs.a seek.a open.a case.a
 
-newaliases.0: \
-newaliases.1
-	nroff -man newaliases.1 > newaliases.0
-
-newaliases.o: \
-compile newaliases.c substdio.h strerr.h stralloc.h gen_alloc.h \
+inewaliases.o: \
+compile inewaliases.c substdio.h strerr.h stralloc.h gen_alloc.h \
 getln.h open.h token822.h gen_alloc.h control.h byte.h \
 auto_qmail.h case.h cdbmss.h cdbmake.h uint32.h substdio.h variables.h
-	./compile newaliases.c
+	./compile inewaliases.c
+
+newaliases.0: \
+inewaliases.1
+	nroff -man inewaliases.1 > newaliases.0
 
 newinclude: \
 load newinclude.o auto_qmail.o token822.o control.o \

@@ -1,6 +1,6 @@
 #
 #
-# $Id: qmail.spec,v 1.52 2016-06-07 10:56:48+05:30 Cprogrammer Exp mbhangui $
+# $Id: qmail.spec,v 1.53 2016-06-09 12:59:42+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %define _unpackaged_files_terminate_build 1
 
@@ -434,11 +434,15 @@ done
 fi
 %{__rm} -rf %{buildroot}%{mandir}/man3
 %{__rm} -rf %{buildroot}%{_prefix}/include
-%{__rm} -rf %{buildroot}%{_prefix}/lib/libdkim.a
-%{__rm} -rf %{buildroot}%{_prefix}/lib64/libdkim.a
-%{__rm} -rf %{buildroot}%{_prefix}/lib/libsrs2.a
-%{__rm} -rf %{buildroot}%{_prefix}/lib64/libsrs2.a
 %{__rm} -rf %{buildroot}%{qmaildir}/queue
+%{__rm} -f  %{buildroot}%{_prefix}/lib/libdkim.a
+%{__rm} -f  %{buildroot}%{_prefix}/lib/libdkim.so
+%{__rm} -f  %{buildroot}%{_prefix}/lib64/libdkim.a
+%{__rm} -f  %{buildroot}%{_prefix}/lib64/libdkim.so
+%{__rm} -f  %{buildroot}%{_prefix}/lib/libsrs2.a
+%{__rm} -f  %{buildroot}%{_prefix}/lib/libsrs2.so
+%{__rm} -f  %{buildroot}%{_prefix}/lib64/libsrs2.a
+%{__rm} -f  %{buildroot}%{_prefix}/lib64/libsrs2.so
 
 
 if [ -f ../SOURCES/svctool ] ; then
@@ -504,13 +508,15 @@ done
                                   %{qmaildir}/control
 %dir %attr(555,root,qmail)        %{shareddir}/boot
 %dir %attr(555,root,qmail)        %{shareddir}/doc
-%dir %attr(2555,alias,qmail)      %{qmaildir}/alias
+%dir %attr(2775,alias,qmail)      %{qmaildir}/alias
 %dir %attr(750,qscand,qscand)     %{qmaildir}/qscanq
 %dir %attr(750,qscand,qscand)     %{qmaildir}/qscanq/root
 %dir %attr(750,qscand,qscand)     %{qmaildir}/qscanq/root/scanq
-%dir %attr(755,indimail,indimail) %{qsysconfdir}/control
-%dir %attr(2755,qmailr,qmail)     %{qsysconfdir}/control/ratelimit
-%dir %attr(755,indimail,indimail) %{qsysconfdir}/control/domainkeys
+%dir %attr(775,indimail,qmail)    %{qsysconfdir}/control
+%dir %attr(2775,qmailr,qmail)     %{qsysconfdir}/control/ratelimit
+%dir %attr(775,indimail,qmail)    %{qsysconfdir}/control/domainkeys
+%dir %attr(775,indimail,qmail)    %{qsysconfdir}/control/defaultqueue
+%dir %attr(2775,indimail,qmail)   %{qmaildir}/autoturn
 %if "%{mandir}" != "/usr/share/man"
 %dir %attr(755,root,root)         %{mandir}
 %dir %attr(755,root,root)         %{mandir}/man1
@@ -599,7 +605,7 @@ done
 %attr(555,root,qmail)                   %{_prefix}/bin/mlmatchup
 %attr(555,root,qmail)                   %{_prefix}/bin/822print
 %attr(555,root,qmail)                   %{_prefix}/bin/sendmail
-%attr(555,root,qmail)                   %{_prefix}/bin/rmail
+%attr(555,root,qmail)                   %{_prefix}/bin/irmail
 %attr(555,root,qmail)                   %{_prefix}/bin/ifaddr
 %attr(555,root,qmail)                   %{_prefix}/bin/matchup
 %attr(555,root,qmail)                   %{_prefix}/bin/zspam
@@ -654,7 +660,7 @@ done
 %attr(555,root,qmail)                   %{_prefix}/bin/condredirect
 %attr(555,root,qmail)                   %{_prefix}/bin/fastforward
 %attr(555,root,qmail)                   %{_prefix}/bin/rspamsdomain
-%attr(555,root,qmail)                   %{_prefix}/bin/newaliases
+%attr(555,root,qmail)                   %{_prefix}/bin/inewaliases
 %attr(555,root,qmail)                   %{_prefix}/bin/qmail-rm
 %attr(555,root,qmail)                   %{_prefix}/bin/zsmtp
 %attr(555,root,qmail)                   %{_prefix}/bin/qmail-pop3d
@@ -910,7 +916,7 @@ done
 %verify (not user group mode) %attr(6511, qmailq, qmail)   %{_prefix}/sbin/qmail-queue
 %verify (not user group mode) %attr(4555, qscand, qscand)  %{_prefix}/sbin/qscanq
 %verify (not user group mode) %attr(2555, alias, qmail)    %{qmaildir}/alias
-#%verify (not user group mode) %attr(2755, indimail, qmail) %{_prefix}/autoturn
+%verify (not user group mode) %attr(2755, indimail, qmail) %{qmaildir}/autoturn
 %endif
 %endif
 
@@ -918,13 +924,11 @@ done
 
 
 %if %nolibdkim == 0
-%{_libdir}/libdkim.so
 %{_libdir}/libdkim-%{libdkim_version}.so.0
 %{_libdir}/libdkim-%{libdkim_version}.so.0.0.0
 %endif
 
 %if %nolibsrs2 == 0
-%{_libdir}/libsrs2.so
 %{_libdir}/libsrs2-%{libsrs2_version}.so.0
 %{_libdir}/libsrs2-%{libsrs2_version}.so.0.0.0
 %endif
@@ -1445,12 +1449,14 @@ EOF
 %{__chown} qscand:qscand %{qsysconfdir}/control/signatures
 
 # Recreate ld.so links and cache
+if [ ! " %{_libdir}" = " /usr/lib" -a ! " ${_libdir}" = " /usr/lib64" ] ; then
 if [ -d %{_sysconfdir}/ld.so.conf.d ] ; then
 	(
 		echo %{_libdir}
 	) > %{_sysconfdir}/ld.so.conf.d/indimail-%{_arch}.conf
 fi
 /sbin/ldconfig
+fi
 
 # rebuild cdb
 for i in smtp qmtp qmqp
@@ -1573,10 +1579,6 @@ else
 		fi
 	done
 fi
-%{__mv} %{mandir}/man8/rmail_i.8.gz %{mandir}/man8/rmail.8.gz || true
-%{__mv} %{mandir}/man1/newaliases_i.1.gz %{mandir}/man1/newaliases.1.gz || true
-%{__mv} %{_prefix}/bin/newaliases_i %{_prefix}/bin/newaliases || true
-%{__mv} %{_prefix}/bin/rmail_i %{_prefix}/bin/rmail || true
 # Remove IndiMail being started on system boot
 echo "removing indimail startup"
 %{_prefix}/sbin/svctool --config=rm-boot

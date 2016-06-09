@@ -1,5 +1,8 @@
 /*
  * $Log: hier.c,v $
+ * Revision 1.209  2016-06-09 12:59:27+05:30  Cprogrammer
+ * renamed rmail, sendmail, newaliases to fix problems with setting mta alternatives
+ *
  * Revision 1.208  2016-06-08 10:47:38+05:30  Cprogrammer
  * fix permissions for control control/domainkeys etc/indimail/users control/inquery
  *
@@ -641,10 +644,11 @@ hier(inst_dir, fatal)
 	d(auto_qmail_home, "qscanq", auto_uidc, auto_gidc, 0750);
 	d(auto_qmail_home, "qscanq/root", auto_uidc, auto_gidc, 0750);
 	d(auto_qmail_home, "qscanq/root/scanq", auto_uidc, auto_gidc, 0750);
-	d(auto_qmail_home, "alias", auto_uida, auto_gidq, 02555);
-	d(auto_qmail_home, "autoturn", auto_uidv, auto_gidq, 02755);
+	d(auto_qmail_home, "alias", auto_uida, auto_gidq, 02775);
+	d(auto_qmail_home, "autoturn", auto_uidv, auto_gidq, 02775);
 	d(auto_cntrl_dir,  "control/domainkeys", auto_uidv, auto_gidq, 0775);
-	d(auto_cntrl_dir,  "control/ratelimit", auto_uidr, auto_gidq, 02755);
+	d(auto_cntrl_dir,  "control/ratelimit", auto_uidr, auto_gidq, 02775);
+	d(auto_cntrl_dir,  "control/defaultqueue", auto_uidv, auto_gidq, 0775);
 #ifdef INDIMAIL
 	d(auto_cntrl_dir,  "control/inquery", auto_uidv, auto_gidq, 0775);
 #endif
@@ -734,7 +738,7 @@ hier(inst_dir, fatal)
 	c(auto_qmail_home, "bin", "qpq", auto_uido, auto_gidq, 0555);
 	c(auto_qmail_home, "bin", "qmail-greyd", auto_uido, auto_gidq, 0555);
 	c(auto_qmail_home, "bin", "greydaemon", auto_uido, auto_gidq, 0555);
-	c(auto_qmail_home, "bin", "rmail", auto_uido, auto_gidq, 0555);
+	c(auto_qmail_home, "bin", "irmail", auto_uido, auto_gidq, 0555);
 	c(auto_qmail_home, "bin", "rrforward", auto_uido, auto_gidq, 0555);
 	c(auto_qmail_home, "bin", "maildirdeliver", auto_uido, auto_gidq, 0555);
 	c(auto_qmail_home, "bin", "qmail-rm", auto_uido, auto_gidq, 0555);
@@ -875,7 +879,7 @@ hier(inst_dir, fatal)
 	c(auto_qmail_home, "bin", "fastforward", auto_uido, auto_gidq, 0555);
 	c(auto_qmail_home, "bin", "printforward", auto_uido, auto_gidq, 0555);
 	c(auto_qmail_home, "bin", "setforward", auto_uido, auto_gidq, 0555);
-	c(auto_qmail_home, "bin", "newaliases", auto_uido, auto_gidq, 0555);
+	c(auto_qmail_home, "bin", "inewaliases", auto_uido, auto_gidq, 0555);
 	c(auto_qmail_home, "bin", "printmaillist", auto_uido, auto_gidq, 0555);
 	c(auto_qmail_home, "bin", "setmaillist", auto_uido, auto_gidq, 0555);
 	c(auto_qmail_home, "bin", "newinclude", auto_uido, auto_gidq, 0555);
@@ -1179,7 +1183,7 @@ hier(inst_dir, fatal)
 	c(mandir,          "man/cat1", "printforward.0", uidr, gidr, moder_f);
 	c(mandir,          "man/man1", "setforward.1", uidr, gidr, moder_f);
 	c(mandir,          "man/cat1", "setforward.0", uidr, gidr, moder_f);
-	c(mandir,          "man/man1", "newaliases.1", uidr, gidr, moder_f);
+	c(mandir,          "man/man1", "inewaliases.1", uidr, gidr, moder_f);
 	c(mandir,          "man/cat1", "newaliases.0", uidr, gidr, moder_f);
 	c(mandir,          "man/man1", "printmaillist.1", uidr, gidr, moder_f);
 	c(mandir,          "man/cat1", "printmaillist.0", uidr, gidr, moder_f);
@@ -1314,8 +1318,8 @@ hier(inst_dir, fatal)
 	c(mandir,          "man/cat8", "spawn-filter.0", uidr, gidr, moder_f);
 	c(mandir,          "man/man8", "qmail-inject.8", uidr, gidr, moder_f);
 	c(mandir,          "man/cat8", "qmail-inject.0", uidr, gidr, moder_f);
-	c(mandir,          "man/man8", "sendmail.8", uidr, gidr, moder_f);
-	c(mandir,          "man/man8", "rmail.8", uidr, gidr, moder_f);
+	c(mandir,          "man/man8", "isendmail.8", uidr, gidr, moder_f);
+	c(mandir,          "man/man8", "irmail.8", uidr, gidr, moder_f);
 	c(mandir,          "man/man8", "qmail-showctl.8", uidr, gidr, moder_f);
 	c(mandir,          "man/cat8", "qmail-showctl.0", uidr, gidr, moder_f);
 	c(mandir,          "man/man8", "qmail-newmrh.8", uidr, gidr, moder_f);
@@ -1418,7 +1422,7 @@ hier(inst_dir, fatal)
 void
 getversion_install_big_c()
 {
-	static char    *x = "$Id: hier.c,v 1.208 2016-06-08 10:47:38+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: hier.c,v 1.209 2016-06-09 12:59:27+05:30 Cprogrammer Exp mbhangui $";
 
 #ifdef INDIMAIL
 	if (x)
