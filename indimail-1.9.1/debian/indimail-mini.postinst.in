@@ -82,9 +82,9 @@ if [ -x /usr/sbin/update-alternatives ] ; then
 	/usr/sbin/update-alternatives --install \
 		/usr/sbin/sendmail-msp sendmail-msp ${prefix}/bin/sendmail 120 \
 		--slave /usr/share/man/man8/sendmail.8.gz sendmail.8.gz \
-			${mandir}/man8/sendmail.8.gz \
+			${mandir}/man8/isendmail.8.gz \
 		--slave /usr/share/man/man8/sendmail-msp.8.gz sendmail-msp.8.gz \
-			${mandir}/man8/sendmail.8.gz \
+			${mandir}/man8/isendmail.8.gz \
 		--slave /usr/sbin/sendmail sendmail ${prefix}/bin/sendmail \
 		--slave /usr/lib/sendmail lib.sendmail ${prefix}/bin/sendmail
 else
