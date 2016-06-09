@@ -1,5 +1,8 @@
 #!/bin/sh
 # $Log: indium.in,v $
+# Revision 2.116  2016-06-09 13:05:42+05:30  Cprogrammer
+# added full list of man pages
+#
 # Revision 2.115  2016-06-08 19:29:10+05:30  Cprogrammer
 # fixed version information display
 #
@@ -401,7 +404,7 @@ proc main {} {
 		if {[file exists /usr/bin/mytop]} {
 		.mbar1.misc.menu add command -label "Top MySQL  Processes" -command "catch {exec $configs(xterm) -e /usr/bin/mytop &} result" -underline 4
 		}
-		.mbar1.misc.menu add command -label "Shit Interface"       -command "catch {exec $configs(xterm) -e @prefix@/bin/shit &} result" -underline 5
+		.mbar1.misc.menu add command -label "Flash Interface"       -command "catch {exec $configs(xterm) -e @prefix@/bin/flash &} result" -underline 5
 		if {[file exists /usr/local/mysqlcc/mysqlcc]} {
 		.mbar1.misc.menu add command -label "MySQL Control Center" -command "catch {exec /usr/local/mysqlcc/mysqlcc &} result" -underline 6
 		} else {
@@ -421,7 +424,6 @@ proc main {} {
 		}
 		.mbar1.misc.menu add separator
 		.mbar1.misc.menu add command -label "Preferences"          -command "preferences 1" -underline 0
-
 	#
 	# Help Menu
 	#
@@ -433,29 +435,46 @@ proc main {} {
 	.mbar1.help.menu add separator
 	.mbar1.help.menu add cascade -label "qmail commands(1)"  -menu .mbar1.help.menu.qmail1 -underline 15
 		menu .mbar1.help.menu.qmail1 -tearoff 0
-		foreach line {forward rrforward condredirect bouncesaying except maildirkw maildirmake maildir2mbox maildirwatch \
-			maildirdeliver mailsubj qreceipt qbiff preline addcr delcr fixcrio recordio rblsmtpd qmail-autoresponder \
-			xqp qmail-showctl qmail-newmrh qmail-newu qmail-pw2u qmail-qread qmail-rm qmail-tcpok \
-			maildircmd serialcmd rewind qmail-tcpto bogofilter bogotune bogoutil \
-			bogolexer bogoupgrade altermime ripmime reformime makemime shit} {
+		foreach line { 822addr 822body 822bodyfilter 822date 822field 822fields 822header 822headerfilter \
+			822headerok 822print 822received addcr altermime autoresponder bf_compact bf_copy bf_tar bogofilter \
+			bogolexer bogotune bogoupgrade bogoutil bouncesaying cdbdump cdbget cdbgetm cdbmake cdbstats cdbtest \
+			checkaddr checkdomain condredirect condtomaildir datemail delcr dot-forward \
+			drate except fastforward filterto fixcrio flash fortune forward iecho ifaddr iftocc iftoccfrom incrmesg \
+			initsvc ismaildup logclient maildir2mbox maildiracl maildircmd maildirdeliver maildirkw maildirmake \
+			maildirqmtp maildirserial maildirsmtp maildirwatch mailsubj mpack multipipe multitail munpack new-inject \
+			newaliases newinclude plugtest predate preline printdir printforward printmaillist qaes qarf qbase64 \
+			qfilelog qlogselect qmail-cat qmail-qfilter qmail-rm qmaildirmake qnotify qreceipt randstr rblsmtpd \
+			recordio relaytest replier-config replier ripmime rrforward rrt serialcmd serialcmd serialqmtp serialsmtp \
+			setforward setmaillist spipe srs sslerator strfile swaks teepipe uacl udpclient unstr vaddaliasdomain vadddomain \
+			vadduser valias vatrn vbulletin vcfilter vdeldomain vdeluser vdominfo vgroup vipmap vlimit vmoddomain vmoduser \
+			vmoveuser vpasswd vrenamedomain vrenameuser vserverinfo vsetuserquota vtable vuserinfo xqp } {
 			.mbar1.help.menu.qmail1 add command -label $line -command "Browse command \"man $line | ul -t unknown\""
 		}
 	.mbar1.help.menu add cascade -label "qmail formats(5)"   -menu .mbar1.help.menu.qmail5 -underline 14
 		menu .mbar1.help.menu.qmail5 -tearoff 0
-		foreach line {addresses envelopes maildir mbox qmail-command dot-qmail qmail-control qmail-header qmail-log \
-			qmail-users} {
+		foreach line {addresses envelopes maildir mbox dot-qmail qmail-control qmail-header qmail-log \
+			qmail-users qmtp nssd.conf rewriting} {
 			.mbar1.help.menu.qmail5 add command -label $line -command "Browse command \"man $line | ul -t unknown\""
 		}
 	.mbar1.help.menu add cascade -label "qmail internals(7)" -menu .mbar1.help.menu.qmail7 -underline 16
 		menu .mbar1.help.menu.qmail7 -tearoff 0
-		foreach line {forgeries qmail qmail-limits authlib} {
-			.mbar1.help.menu.qmail7 add command -label $line -command "Browse command \"man $line | ul -t unknown\""
+		foreach line {forgeries qmail qmail-limits indimail} {
+			.mbar1.help.menu.qmail7 add command -label $line -command "Browse command \"man -s7 $line | ul -t unknown\""
 		}
-	.mbar1.help.menu add cascade -label "qmail daemons(8)"   -menu .mbar1.help.menu.qmail8 -underline 14
+		.mbar1.help.menu add cascade -label "qmail system(8)"   -menu .mbar1.help.menu.qmail8 -underline 14
 		menu .mbar1.help.menu.qmail8 -tearoff 0
-		foreach line {qmail-local qmail-lspawn qmail-getpw qmail-remote qmail-rspawn qmail-clean qmail-send \
-			qmail-todo qmail-start splogger qmail-queue qmail-multi qmail-dk qmail-inject \
-			qscanq qscanq-stdin qmail-smtpd spawn-filter} {
+		foreach line {adminclient chowkidar cleanq clearopensmtp dbinfo dk-filter dkim dknewkey \
+			dktest greydaemon hostcntrl hostsync indisrvr indiversion inlookup \
+			inquerytest install_tables ipchange ldap-checkpwd logalert logmonitor logselect logsrv makeimapaccess \
+			mgmtpass mkdhparams nssd ofmipd ofmipname osh pam-checkpwd \
+			pam-multi postdel proxyimap proxypop3 qmail-cdb qmail-clean qmail-command qmail-daemon qmail-dk \
+			qmail-dkim qmail-getpw qmail-greyd qmail-inject qmail-internals qmail-local qmail-lspawn qmail-multi \
+			qmail-newmrh qmail-newu qmail-nullqueue qmail-pop3d qmail-poppass qmail-popup qmail-pw2u qmail-qmqpc \
+			qmail-qmqpd qmail-qmtpd qmail-qread qmail-queue qmail-remote qmail-rspawn qmail-send qmail-showctl \
+			qmail-smtpd qmail-sql qmail-start qmail-tcpok qmail-tcpto qmail-todo qmailctl qscanq-stdin qscanq \
+			queue-fix recipient-cdb resetquota rmail rpclog run-cleanq sendmail \
+			spawn-filter splogger surblfilter sys-checkpwd systpass udplogger updaterules vacation vcalias vcaliasrev \
+			vchkpass vdelivermail vdeloldusers vfilter vfstab vhostid vpriv vproxy vreorg vsmtp } {
 			.mbar1.help.menu.qmail8 add command -label $line -command "Browse command \"man $line | ul -t unknown\""
 		}
 	.mbar1.help.menu add cascade -label "ucspi-tcp"      -menu .mbar1.help.menu.ucspi -underline 0
@@ -467,12 +486,12 @@ proc main {} {
 	.mbar1.help.menu add cascade -label "daemontools"    -menu .mbar1.help.menu.daemon -underline 0
 		menu .mbar1.help.menu.daemon -tearoff 0
 		foreach line {svctool svscan svscanboot readproctitle supervise svc svok svstat multilog softlimit envdir \
-			envuidgid fghack pgrphack setlock setuidgid tai64n tai64nlocal tai64nunix} {
+			envuidgid fghack pgrphack setlock setuidgid tai64n tai64nlocal tai64nunix tai2tai64n tai64n2tai } {
 			.mbar1.help.menu.daemon add command -label $line -command "Browse command \"man $line | ul -t unknown\""
 		}
 	.mbar1.help.menu add cascade -label "Qmailanalog"    -menu .mbar1.help.menu.analog -underline 0
 		menu .mbar1.help.menu.analog -tearoff 0
-		foreach line {matchup xsender xrecipient columnt} {
+		foreach line {matchup mlmatchup xsender xrecipient columnt} {
 			.mbar1.help.menu.analog add command -label $line -command "Browse command \"man $line | ul -t unknown\""
 		}
 	.mbar1.help.menu add cascade -label "RFC"            -menu .mbar1.help.menu.rfc -underline 0
@@ -483,7 +502,8 @@ proc main {} {
 		}
 	.mbar1.help.menu add cascade -label "IMAP/POP3"      -menu .mbar1.help.menu.imap -underline 0
 		menu .mbar1.help.menu.imap -tearoff 0
-		foreach line {authlib maildirmake deliverquota imapd mkimapdcert mkpop3dcert} {
+		foreach line {authlib authcustom authpam authpwd authshadow courier-unicode maildirmake deliverquota \
+			imapd mkimapdcert mkpop3dcert couriertls couriertcpd } {
 			.mbar1.help.menu.imap add command -label $line -command "Browse command \"man $line | ul -t unknown\""
 		}
 	.mbar1.help.menu add cascade -label "Fetchmail"     -menu .mbar1.help.menu.slite -underline 0
