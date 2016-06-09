@@ -107,7 +107,6 @@ if [ " $1" = " purge" ] ; then
 	${rm} -f ${indimaildir}/sbin || true
 	${rm} -f ${indimaildir}/users || true
 	${rm} -f ${indimaildir}/control || true
-	${rm} -rf ${sysconfdir} || true
 	if [ -f /etc/mysql/indimail.cnf ] ; then
 		${rm} -f /etc/mysql/indimail.cnf
 	fi
@@ -136,8 +135,8 @@ if [ " $1" = " purge" ] ; then
 	${rm} -f ${sysconfdir}/imapd.pem ${sysconfdir}/pop3d.pem
 	${rm} -f ${sysconfdir}/imapd.cnf.* ${sysconfdir}/pop3d.cnf.*
 
-	echo "removing binaries, libraries, queues"
 	if [ ${prefix} = "/var/indimail" -o ${prefix} = "/var/qmail" ] ; then
+		echo "removing binaries, man pages, queues"
 		for i in ${prefix}/bin ${prefix}/sbin ${prefix}/lib ${indimaildir}/queue \
 			${mandir}/man1 ${mandir}/cat1 ${mandir}/man5 ${mandir}/cat5 \
 			${mandir}/man7 ${mandir}/cat7 ${mandir}/man8 ${mandir}/cat8
@@ -154,6 +153,7 @@ if [ " $1" = " purge" ] ; then
 			${rm} -f ${indimaildir}/$i || true
 		done
 		# queue
+		echo "removing queue"
 		${rm} -rf ${indimaildir}/queue || true
 		# modules
 		${rm} -rf ${prefix}/lib/indimail || true
