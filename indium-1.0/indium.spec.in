@@ -1,5 +1,8 @@
 #
 # $Log: indium.spec.in,v $
+# Revision 1.14  2016-06-08 23:30:43+05:30  Cprogrammer
+# renamed image for flash
+#
 # Revision 1.13  2016-06-08 10:42:35+05:30  Cprogrammer
 # added tk library images
 #
@@ -40,7 +43,7 @@
 # Initial revision
 #
 #
-# $Id: indium.spec.in,v 1.13 2016-06-08 10:42:35+05:30 Cprogrammer Exp mbhangui $
+# $Id: indium.spec.in,v 1.14 2016-06-08 23:30:43+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %define _unpackaged_files_terminate_build 1
 
@@ -338,7 +341,7 @@ fi
 %attr(444,root,indimail)                %{shareddir}/indium/images/reload.gif
 %attr(444,root,indimail)                %{shareddir}/indium/images/secpanel.gif
 %attr(444,root,indimail)                %{shareddir}/indium/images/serviceTool.gif
-%attr(444,root,indimail)                %{shareddir}/indium/images/shit.gif
+%attr(444,root,indimail)                %{shareddir}/indium/images/flash.gif
 %attr(444,root,indimail)                %{shareddir}/indium/images/showctl.gif
 %attr(444,root,indimail)                %{shareddir}/indium/images/slemslite.gif
 %attr(444,root,indimail)                %{shareddir}/indium/images/smtp.gif
