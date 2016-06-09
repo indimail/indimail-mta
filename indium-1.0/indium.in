@@ -3759,7 +3759,7 @@ proc run_indiversion {dbwin} {
 		set pc [expr $count * 100 / 362]
 		.statusBar.foo configure -text "$pc %"
 		set id      [lindex $line 0]
-		if {[string compare -length 4 $id "\"] == 0} {
+		if {[string compare -length 4 $id "\$Id:"] == 0} {
 		set code    [lindex $line 1]
 		set version [lindex $line 2]
 		set major   [lindex [split $version .] 0]
