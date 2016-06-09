@@ -1,5 +1,8 @@
 /*
  * $Log: indimail.h,v $
+ * Revision 2.219  2016-06-09 15:26:55+05:30  Cprogrammer
+ * added function check_group()
+ *
  * Revision 2.218  2016-05-18 12:43:49+05:30  Cprogrammer
  * added dir argument to del_user_assign()
  *
@@ -970,7 +973,7 @@
 #define INDIMAILH_H
 
 #ifndef	lint
-static char     sccsidh[] = "$Id: indimail.h,v 2.218 2016-05-18 12:43:49+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsidh[] = "$Id: indimail.h,v 2.219 2016-06-09 15:26:55+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef HAVE_CONFIG_H
@@ -2019,6 +2022,7 @@ int             mlist_filterno(char *);
 void            parseAddress(struct header_t *, char *);
 int             is_mailing_list(char *, char *);
 void            rewindAddrToken();
+int             check_group(gid_t);
 #endif
 
 extern int      create_flag;
