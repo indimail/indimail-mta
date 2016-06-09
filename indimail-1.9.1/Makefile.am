@@ -66,7 +66,7 @@ AliasInLookup.c atrn_access.c autoturn_dir.c backfill.c bulk_mail.c bulletin.c \
 Check_Login.c checkPerm.c check_quota.c close_big_dir.c cntrl_clearaddflag.c \
 cntrl_cleardelflag.c compile_morercpthosts.c CopyEmailFile.c copyPwdStruct.c \
 count_dir.c count_rcpthosts.c count_table.c CreateDomainDirs.c create_table.c \
-dbinfoAdd.c dbinfoDel.c dbinfoSelect.c dbinfoUpdate.c dbload.c indisub.c \
+check_group.c dbinfoAdd.c dbinfoDel.c dbinfoSelect.c dbinfoUpdate.c dbload.c indisub.c \
 dec_dir_control.c del_control.c del_domain_assign.c deldomain.c digest_md5.c \
 deliver_mail.c delunreadmails.c del_user_assign.c deluser.c delusercntrl.c \
 Dirname.c error_stack.c error_temp.c evaluate.c fappend.c FifoCreate.c \
@@ -595,6 +595,7 @@ dbinfo.lo: indimail.h config.h
 vrenameuser.lo: indimail.h config.h
 initsvc.lo: indimail.h config.h
 vrenamedomain.lo: indimail.h config.h
+check_group.lo: error_stack.h config.h
 dbinfoAdd.lo: indimail.h config.h
 dbinfoDel.lo: indimail.h config.h
 count_table.lo: indimail.h config.h

@@ -1,5 +1,8 @@
 /*
  * $Log: indiversion.c,v $
+ * Revision 2.141  2016-06-09 15:32:15+05:30  Cprogrammer
+ * added check_group() function
+ *
  * Revision 2.140  2016-06-08 15:28:08+05:30  Cprogrammer
  * fixed locating programs in aditional directories like sbin, libexec
  *
@@ -542,7 +545,7 @@
 #endif
 
 #ifndef	lint
-static char     sccsid[] = "$Id: indiversion.c,v 2.140 2016-06-08 15:28:08+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: indiversion.c,v 2.141 2016-06-09 15:32:15+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 void            getversion_indimail_settings_c();
@@ -564,6 +567,7 @@ void            getversion_CreateDomainDirs_c();
 void            getversion_dec_dir_control_c();
 void            getversion_del_control_c();
 void            getversion_del_domain_assign_c();
+void            getversion_check_group_c();
 void            getversion_deldomain_c();
 void            getversion_del_user_assign_c();
 void            getversion_deluser_c();
@@ -1012,6 +1016,7 @@ getversion(char *id)
 	getversion_GetPrefix_c();
 	getversion_GetIndiId_c();
 	getversion_getindimail_c();
+	getversion_check_group_c();
 	getversion_host_in_locals_c();
 	getversion_inc_dir_c();
 	getversion_inc_dir_control_c();
