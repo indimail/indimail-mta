@@ -33,7 +33,7 @@ usr/share/man/cat1/maildirwatch.0.gz /usr/share/man/cat1
 usr/share/man/man8/qmail-showctl.8.gz /usr/share/man/man8
 usr/share/man/cat8/qmail-showctl.0.gz /usr/share/man/cat8
 usr/share/man/man8/qmail-inject.8.gz /usr/share/man/man8
-usr/share/man/man8/sendmail.8.gz /usr/share/man/man8
+usr/share/man/man8/isendmail.8.gz /usr/share/man/man8
 usr/share/man/cat8/qmail-inject.0.gz /usr/share/man/cat8
 usr/share/man/man8/qmail-qmqpc.8.gz /usr/share/man/man8
 usr/share/man/cat8/qmail-qmqpc.0.gz /usr/share/man/cat8
