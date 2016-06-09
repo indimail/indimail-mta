@@ -1,5 +1,8 @@
 /*
  * $Log: vmoddomain.c,v $
+ * Revision 2.9  2016-06-09 15:32:32+05:30  Cprogrammer
+ * run if indimail gid is present in process supplementary groups
+ *
  * Revision 2.8  2016-06-09 14:22:47+05:30  Cprogrammer
  * allow privilege to process running with indimail gid
  *
@@ -35,7 +38,7 @@
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vmoddomain.c,v 2.8 2016-06-09 14:22:47+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: vmoddomain.c,v 2.9 2016-06-09 15:32:32+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 static void     usage();
@@ -64,7 +67,7 @@ main(int argc, char **argv)
 		GetIndiId(&indimailuid, &indimailgid);
 	myuid = getuid();
 	mygid = getgid();
-	if (myuid != 0 && myuid != indimailuid && mygid != indimailgid)
+	if (myuid != 0 && myuid != indimailuid && mygid != indimailgid && check_group(indimailgid) != 1)
 	{
 		error_stack(stderr, "you must be root or indimail to run this program\n");
 		return(1);

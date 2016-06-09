@@ -1,5 +1,8 @@
 /*
  * $Log: vdominfo.c,v $
+ * Revision 2.21  2016-06-09 15:32:32+05:30  Cprogrammer
+ * run if indimail gid is present in process supplementary groups
+ *
  * Revision 2.20  2016-06-09 14:22:43+05:30  Cprogrammer
  * allow privilege to process running with indimail gid
  *
@@ -137,7 +140,7 @@
 #include <sys/socket.h>
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vdominfo.c,v 2.20 2016-06-09 14:22:43+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: vdominfo.c,v 2.21 2016-06-09 15:32:32+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 char            Domain[MAX_BUFF];
@@ -186,7 +189,7 @@ main(argc, argv)
 			error_stack(stderr, "domain %s does not exist\n", Domain);
 			return(1);
 		}
-		if (myuid != Uid && mygid != Gid && myuid != 0)
+		if (myuid != Uid && mygid != Gid && myuid != 0 && check_group(Gid) != 1)
 		{
 			error_stack(stderr, "you must be root / domain user (uid=%d) / (gid=%d) to run this program\n", Uid, Gid);
 			return(1);

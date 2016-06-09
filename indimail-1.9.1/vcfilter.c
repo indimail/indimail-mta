@@ -1,5 +1,8 @@
 /*
  * $Log: vcfilter.c,v $
+ * Revision 2.31  2016-06-09 15:32:32+05:30  Cprogrammer
+ * run if indimail gid is present in process supplementary groups
+ *
  * Revision 2.30  2016-06-09 14:22:32+05:30  Cprogrammer
  * allow privilege to process running with indimail gid
  *
@@ -99,7 +102,7 @@
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vcfilter.c,v 2.30 2016-06-09 14:22:32+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: vcfilter.c,v 2.31 2016-06-09 15:32:32+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef VFILTER
@@ -179,7 +182,7 @@ main(int argc, char **argv)
 	{
 		uidtmp = getuid();
 		gidtmp = getgid();
-		if (uidtmp != 0 && uidtmp != uid && gidtmp != gid)
+		if (uidtmp != 0 && uidtmp != uid && gidtmp != gid && check_group(gid) != 1)
 		{
 			error_stack(stderr, "you must be root or domain user (uid=%d/gid=%d) to run this program\n", uid, gid);
 			if (cluster_conn)

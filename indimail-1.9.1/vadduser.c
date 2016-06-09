@@ -1,5 +1,8 @@
 /*
  * $Log: vadduser.c,v $
+ * Revision 2.44  2016-06-09 15:32:32+05:30  Cprogrammer
+ * run if indimail gid is present in process supplementary groups
+ *
  * Revision 2.43  2016-06-09 14:22:26+05:30  Cprogrammer
  * allow privilege to process running with indimail gid
  *
@@ -183,7 +186,7 @@
 #include <signal.h>
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vadduser.c,v 2.43 2016-06-09 14:22:26+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: vadduser.c,v 2.44 2016-06-09 15:32:32+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 char            Email[MAX_BUFF], User[MAX_BUFF], Domain[MAX_BUFF], Passwd[MAX_BUFF],
@@ -273,7 +276,7 @@ main(argc, argv)
 	}
 	uidtmp = getuid();
 	gidtmp = getgid();
-	if (uidtmp != 0 && uidtmp != uid && gidtmp != gid)
+	if (uidtmp != 0 && uidtmp != uid && gidtmp != gid && check_group(gid) != 1)
 	{
 		error_stack(stderr, "you must be root or domain user (uid=%d/gid=%d) to run this program\n", uid, gid);
 		return(1);
