@@ -18,7 +18,7 @@ where
 .I dir
 is a directory,
 .I dot
-is a .qmail file, 
+is a \.qmail file, 
 .I local
 is the local portion of an email address, and
 .I host
@@ -52,7 +52,7 @@ If outlocal is empty,
 In either case,
 .B replier-config
 sets up two 
-.B .qmail
+.B \.qmail
 files to control the help-address replier:
 .B dot-help
 and
@@ -124,36 +124,36 @@ file contains text sent in response to messages received at the help address.
 To configure a replier at the address joe-replier-help@example.com, the user joe issues the
 command
 
- replier-config ~/replier ~/.qmail-replier joe-replier example.com
+ replier-config ~/replier ~/\.qmail-replier joe-replier example.com
 
 If email to joe@example.com is delivered to joe@joehost.example.com, the following command may be
 appropriate to configure a replier at joe-replier-help@example.com:
 
- replier-config ~/replier ~/.qmail-replier joe-replier joehost.example.com joe-replier example.com
+ replier-config ~/replier ~/\.qmail-replier joe-replier joehost.example.com joe-replier example.com
 
 If the user replier handles mail for the virtual domain replier.example.com, then the following
 command creates a replier at help@replier.example.com:
 
- replier-config ~/replier ~/.qmail replier example.com ""
+ replier-config ~/replier ~/\.qmail replier example.com ""
 
 .B Adding replier addresses
 
 To add a new replier address that filters only the body of a message, edit the dir/bodyfilter
 shell script and add a new case corresponding to the new address. Then create a symbolic link from
-dir/qmail-bodyfilter to the .qmail file that controls the new address. That's it!
+dir/qmail-bodyfilter to the \.qmail file that controls the new address. That's it!
 
 Adding a command to filter the message header is entirely analagous, but use dir/headerfilter and
 dir/qmail-headerfilter, while entire-message filters use dir/msgfilter and dir/qmail-msgfilter.
 
 .B Bounce handling
 
-By default, a replier created with replier-config silently throws away bounce messages. The .qmail
+By default, a replier created with replier-config silently throws away bounce messages. The \.qmail
 file controlling bounces is a symbolic link pointing to dir/bouncer. Edit dir/bouncer to change the
 treatment of bounce messages.
 
 .SH Examples
 
-.qmail commands
+\.qmail commands
 Save messages to test@example.com:
 
   | condtomaildir ./Test ifaddr to cc : test@example.com
