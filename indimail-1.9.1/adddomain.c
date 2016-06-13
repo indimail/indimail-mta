@@ -194,7 +194,7 @@ vadddomain(char *domain, char *ipaddr, char *dir, uid_t uid, gid_t gid, int chk_
 	else
 	if (!use_etrn)
 		snprintf(tmpbuf, MAX_BUFF, "%s/domains/%s/.qmail-default", dir, domain);
-	umask(0007)
+	umask(0007);
 	if (!(fs = fopen(tmpbuf, "w+")))
 	{
 		error_stack(stderr, "fopen: %s: %s\n", tmpbuf, strerror(errno));
