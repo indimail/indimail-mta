@@ -14,7 +14,7 @@ hasifaddr.h
 srsfilter
 cidr
 drate
-rmail
+irmail
 822addr
 822addr.0
 822body
@@ -225,7 +225,7 @@ multilog-matchup
 multipipe
 multirotate
 multitail
-newaliases
+inewaliases
 newaliases.0
 newinclude
 newinclude.0
