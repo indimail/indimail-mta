@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-qread.c,v $
+ * Revision 1.27  2016-06-13 17:49:11+05:30  Cprogrammer
+ * removed ifdef indimail
+ *
  * Revision 1.26  2016-05-17 19:44:58+05:30  Cprogrammer
  * use auto_control, set by conf-control to set control directory
  *
@@ -77,7 +80,6 @@
 #include "exit.h"
 #include "envdir.h"
 #include "pathexec.h"
-#include "hasindimail.h"
 
 #ifndef QUEUE_COUNT
 #define QUEUE_COUNT 10
@@ -651,13 +653,8 @@ main(int argc, char **argv)
 void
 getversion_qmail_qread_c()
 {
-	static char    *x = "$Id: qmail-qread.c,v 1.26 2016-05-17 19:44:58+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-qread.c,v 1.27 2016-06-13 17:49:11+05:30 Cprogrammer Exp mbhangui $";
 
-#ifdef INDIMAIL
-	if (x)
-		x = sccsidh;
-#else
 	if (x)
 		x++;
-#endif
 }
