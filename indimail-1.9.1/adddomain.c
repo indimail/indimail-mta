@@ -1,5 +1,8 @@
 /*
  * $Log: adddomain.c,v $
+ * Revision 2.18  2016-06-13 14:22:47+05:30  Cprogrammer
+ * change umask to 0007 to avoid creating .qmail-default with restrictive perms
+ *
  * Revision 2.17  2016-05-17 14:40:32+05:30  Cprogrammer
  * replace control directory with CONTROLDIR
  *
@@ -84,7 +87,7 @@
 #include <sys/stat.h>
 
 #ifndef	lint
-static char     sccsid[] = "$Id: adddomain.c,v 2.17 2016-05-17 14:40:32+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: adddomain.c,v 2.18 2016-06-13 14:22:47+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 int
@@ -191,6 +194,7 @@ vadddomain(char *domain, char *ipaddr, char *dir, uid_t uid, gid_t gid, int chk_
 	else
 	if (!use_etrn)
 		snprintf(tmpbuf, MAX_BUFF, "%s/domains/%s/.qmail-default", dir, domain);
+	umask(0007)
 	if (!(fs = fopen(tmpbuf, "w+")))
 	{
 		error_stack(stderr, "fopen: %s: %s\n", tmpbuf, strerror(errno));
@@ -220,6 +224,7 @@ vadddomain(char *domain, char *ipaddr, char *dir, uid_t uid, gid_t gid, int chk_
 	}
 	if (add_domain_assign(domain, dir, uid, gid))
 		return(-1);
+	umask(INDIMAIL_UMASK);
 	if (!use_etrn || use_etrn == 1)
 	{
 		if (add_control(domain, domain))
