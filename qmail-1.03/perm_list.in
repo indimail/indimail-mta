@@ -256,7 +256,7 @@
 %attr(0555,root,qmail) @prefix@/sbin/ldap-checkpwd
 %attr(0555,root,qmail) @prefix@/sbin/plugtest
 %attr(0555,root,qmail) @prefix@/sbin/qmailconfig
-%attr(0500,root,qmail) @prefix@/sbin/instcheck
+%attr(0550,root,qmail) @prefix@/sbin/instcheck
 %attr(0555,root,qmail) @prefix@/sbin/svctool
 %attr(0555,root,qmail) @prefix@/sbin/sys-checkpwd
 %attr(0555,root,qmail) @prefix@/sbin/whois
@@ -264,9 +264,9 @@
 %attr(0555,root,qmail) @prefix@/sbin/svscanboot
 %attr(0555,root,qmail) @prefix@/sbin/readproctitle
 %attr(0555,root,qmail) @prefix@/sbin/cleanq
-%attr(0500,root,qmail) @prefix@/sbin/qmail-daemon
-%attr(0500,root,qmail) @prefix@/sbin/qmail-start
-%attr(0500,root,qmail) @prefix@/sbin/qmail-lspawn
+%attr(0550,root,qmail) @prefix@/sbin/qmail-daemon
+%attr(0550,root,qmail) @prefix@/sbin/qmail-start
+%attr(0550,root,qmail) @prefix@/sbin/qmail-lspawn
 %attr(0551,root,qmail) @prefix@/sbin/qmail-rspawn
 %attr(0551,root,qmail) @prefix@/sbin/qmail-clean
 %attr(0551,root,qmail) @prefix@/sbin/qmail-send
