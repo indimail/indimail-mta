@@ -1,25 +1,11 @@
 #
 #
-# $Id: indimail.spec.in,v 2.345 2016-06-13 14:25:25+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 2.346 2016-06-13 19:18:17+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %define _unpackaged_files_terminate_build 1
 
 %define is_suse %(test -e /etc/SuSE-release && echo 1 || echo 0)
 %define is_fedora %(test -e /etc/fedora-release && echo 1 || echo 0)
-
-%define dist redhat
-%define disttag rh
-
-%if %{is_suse} != 0
-%define dist suse
-%define disttag suse
-%endif
-
-%if %{is_fedora} != 0
-%define dist fedora
-%define disttag rhfc
-%define fedora_version %(cat /etc/fedora-release | awk '{print $3}')
-%endif
 
 %if 0%{?opensuse_bs}
 # define to 1 if building on openSUSE build service
@@ -96,30 +82,45 @@
 %define mysqlSocket        /var/run/mysqld/mysqld.sock
 
 %if %build_on_obs == 1
-%define packager Manvendra Bhangui <manvendra@indimail.org>
-%endif
-
-%if %build_on_obs == 1
 # change mysqlPrefix to /usr for openSUSE buildservice
 %define mysqlPrefix        /usr
 %else
 %define mysqlPrefix        @mysql_prefix@
 %endif
 
+%if %build_on_obs == 1
+%define packager Manvendra Bhangui <manvendra@indimail.org>
+%define dist redhat
+%define disttag rh
+
+%if %{is_suse} != 0
+%define dist suse
+%define disttag suse
+%endif
+
+%if %{is_fedora} != 0
+%define dist fedora
+%define disttag rhfc
+%define fedora_version %(cat /etc/fedora-release | awk '{print $3}')
+%endif
+%endif
+
 Summary: A Flexible Messaging Platform with Multi-Host/Multi-Protocol support
 Name: indimail
-Version: @version@
-Provides: libindimail, indimail-mta, daemontools, ucspi-tcp
+Version: @release@
+Provides: libindimail = @release@, indimail-mta = @release@, daemontools = @release@, ucspi-tcp = @release@
 %if %build_on_obs == 1
 Release: 1.<B_CNT>
 %else
-Release: 1.B_CCNT
+Release: 1.B_CCNT%{?dist}
 %endif
+
 %if %build_on_obs == 1
 License: GPL-3.0+
 %else
 License: GPLv3
 %endif
+
 %if %{undefined suse_version} && %{undefined sles_version}
 Group: System Environment/Base
 %else
@@ -196,6 +197,7 @@ Patch12: http://downloads.sourceforge.net/%{name}/Patches/clamav-%{clamav_versio
 Patch13: http://downloads.sourceforge.net/%{name}/Patches/courier-imap-%{courier_version}-1.2.mac_supplement.patch.gz
 %endif
 
+%if 0 != 0
 NoSource: 0
 NoSource: 2
 %if %nocourierimap == 0
@@ -222,6 +224,7 @@ NoSource: 13
 NoSource: 14
 NoSource: 19
 NoSource: 20
+%endif
 
 URL: http://www.indimail.org
 #AutoReqProv: No
@@ -535,11 +538,6 @@ if [ -d libsrs2-%{libsrs2_version} ] ; then
 		aclocal -I m4
 		autoreconf -fiv
 	fi
-
-# for mandrake use --x-libraries
-#./configure --prefix=%{_prefix} --libdir=%{_libdir} --libexecdir=%{_prefix}/libexec \
-#	--x-libraries=%{_libdir} --mandir=%{_prefix}/man
-#
 	%configure --prefix=%{_prefix} --libdir=%{_libdir} --mandir=%{mandir}
 	cd ..
 fi
@@ -620,11 +618,7 @@ if [ -d ../bogofilter-%{bogofilter_version} ] ; then
 	(
 	HOME='.';export HOME
 	./configure --prefix=%{_prefix} --libexecdir=%{libexecdir} --sysconfdir=%{sysconfdir} \
-	--mandir=%{mandir} `%{__cat} ../%{name}-%{version}/config/bogofilter.opts`
-#%if 0%{?sles_version} == 10
-#        sed 's{extern int yylineno;{int yylineno = 1;{' < src/lexer.c > src/lexer.c.tmp
-#        %{__mv} src/lexer.c.tmp src/lexer.c
-#%endif
+	--mandir=%{mandir} --libdir=%{_libdir} `%{__cat} ../%{name}-%{version}/config/bogofilter.opts`
 	)
 fi
 %endif
@@ -643,11 +637,13 @@ if [ -d ../clamav-%{clamav_version} ] ; then
 	%configure --prefix=%{_prefix} --libexecdir=%{libexecdir} --sysconfdir=%{sysconfdir} \
 	--with-pkgconfigdir=%{_pkg_config_path} \
 	--with-dbdir=%{indimaildir}/clamd --mandir=%{mandir} \
+	--libdir=%{_libdir} \
 	`%{__cat} ../%{name}-%{version}/config/clamav.opts`
 	else
 	# change to ./configure for openSUSE buildservice
 	./configure --prefix=%{_prefix} --libexecdir=%{libexecdir} --sysconfdir=%{sysconfdir} \
 	--with-dbdir=%{indimaildir}/clamd --mandir=%{mandir} \
+	--libdir=%{_libdir} \
 	`%{__cat} ../%{name}-%{version}/config/clamav.opts`
 	fi
 fi
@@ -666,10 +662,12 @@ if [ -d ../fetchmail-%{fetchmail_version} ] ; then
 	if [ %{build_on_obs} -eq 0 ] ; then
 	./configure --prefix=%{_prefix} --libexecdir=%{libexecdir} --sysconfdir=%{sysconfdir} \
 		--enable-binprefix=%{_prefix} --mandir=%{mandir} --datarootdir=%{shareddir} \
+		--libdir=%{_libdir} \
 		`%{__cat} ../%{name}-%{version}/config/fetchmail.opts`
 	else
 	%configure --prefix=%{_prefix} --libexecdir=%{libexecdir} --sysconfdir=%{sysconfdir} \
 		--enable-binprefix=%{_prefix} --mandir=%{mandir} --datarootdir=%{shareddir} \
+		--libdir=%{_libdir} \
 		`%{__cat} ../%{name}-%{version}/config/fetchmail.opts`
 	fi
 fi
@@ -694,7 +692,6 @@ if [ $ID -eq 0 ] ; then
 fi
 
 %install
-[ "$RPM_BUILD_ROOT" != "/" ] && %{__rm} -fr $RPM_BUILD_ROOT
 ID=$(id -u)
 %{__mkdir_p} $RPM_BUILD_ROOT%{_prefix}
 for i in libdkim-%{libdkim_version} libsrs2-%{libsrs2_version} %{name}-%{version} \
@@ -766,6 +763,15 @@ if [ %nocourierimap -eq 0 ] ; then
    	/usr/bin/chrpath -d %{buildroot}%{_prefix}/sbin/imaplogin
 	fi
 fi
+if [ %nobogofilter -eq 0 ] ; then
+	if [ -x /usr/bin/chrpath ] ; then
+		for i in bogofilter bogoutil bogotune
+		do
+			chmod 755 %{buildroot}%{_prefix}/bin/$i
+   			/usr/bin/chrpath -d %{buildroot}%{_prefix}/bin/$i
+		done
+	fi
+fi
 if [ %nolibdkim -eq 0 ] ; then
 	%{__rm} -f %{buildroot}%{_libdir}/libdkim.la
 	if [ -x /usr/bin/chrpath ] ; then
@@ -831,6 +837,9 @@ if [ -x /usr/bin/chrpath ] ; then
 	/usr/bin/chrpath -d %{buildroot}%{libexecdir}/sq_vacation
 	/usr/bin/chrpath -d %{buildroot}%{libexecdir}/qmailmrtg7
 	/usr/bin/chrpath -d %{buildroot}%{_prefix}/lib/indimail/modules/iauth.so
+	/usr/bin/chrpath -d %{buildroot}%{_prefix}/lib/indimail/modules/background
+	/usr/bin/chrpath -d %{buildroot}%{_prefix}/lib/indimail/modules/alarms
+	/usr/bin/chrpath -d %{buildroot}%{_prefix}/lib/indimail/modules/countdown
 
 	for i in adminclient chowkidar cindimail clearopensmtp copyemail execmysql \
 	hostsync indisrvr inlookup inquerytest install_tables ipchange mail_report \
@@ -853,7 +862,6 @@ if [ -f %{buildroot}%{mandir}/man7/authlib.7.gz ] ; then
 	do
 		%{__rm} -f %{buildroot}%{mandir}/man7/$i
 		echo ".so man7/authlib.7" |gzip -c > %{buildroot}%{mandir}/man7/$i.gz
-		#ln -sf %{mandir}/man7/authlib.7.gz %{buildroot}%{mandir}/man7/$i.gz
 	done
 fi
 # pam-multi
@@ -872,7 +880,7 @@ elif [ -x /usr/bin/touch ] ; then
 else
 	TOUCH=/bin/touch
 fi
-# Create these files so that %ghost does not complain
+# Create these files so that percentghost does not complain
 for i in indimail.cnf tcp.imap tcp.imap.cdb tcp.pop3 tcp.pop3.cdb \
 tcp.smtp tcp.smtp.cdb tcp.qmtp tcp.qmtp.cdb tcp.qmqp tcp.qmqp.cdb \
 tcp.poppass tcp.poppass.cdb services.log
@@ -970,15 +978,15 @@ fi
 #
 # If the configuration file should not be replaced when the RPM is
 # upgraded, mark it as follows:
-# %config(noreplace) filename
+# percentconfig(noreplace) filename
 #
 # Configuration files must be marked as such in packages.
-# As a rule of thumb, use %config(noreplace) instead of plain %config unless your best,
+# As a rule of thumb, use percentconfig(noreplace) instead of plain percentconfig unless your best,
 # educated guess is that doing so will break things. In other words, think hard before
 # overwriting local changes in configuration files on package upgrades.
 # An example case when /not/ to use noreplace is when a package's configuration file
 # changes so that the new package revision wouldn't work with the config file
-# from the previous package revision. Whenever plain %config is used,
+# from the previous package revision. Whenever plain percentconfig is used,
 # add a brief comment to the specfile explaining why.
 
 %attr(444,root,root) %config(noreplace)           %{sysconfdir}/system.flashlogin
@@ -995,7 +1003,7 @@ fi
 # For files that should be included in the list of files so that they
 # are uninstalled when the package is removed but may not exist until
 # they are created during post-install should be marked as follows:
-# %ghost filename
+# percentghost filename
 %if %nobogofilter == 0
 %ghost %config(noreplace,missingok)               %{sysconfdir}/bogofilter.cf
 %endif
@@ -1684,23 +1692,6 @@ fi
 %docdir %{mandir}
 %attr(644,root,root)                    %{mandir}/man[1,5,7,8]/*
 %attr(644,root,root)                    %{mandir}/cat[1,5,7,8]/*
-#%attr(644,root,root)                    %{mandir}/cat7/forgeries.0.gz
-#%attr(644,root,root)                    %{mandir}/cat7/qmail-limits.0.gz
-#%attr(644,root,root)                    %{mandir}/cat7/qmail.0.gz
-#%attr(644,root,root)                    %{mandir}/man7/IndiMail.7.gz
-#%attr(644,root,root)                    %{mandir}/man7/forgeries.7.gz
-#%attr(644,root,root)                    %{mandir}/man7/indimail.7.gz
-#%attr(644,root,root)                    %{mandir}/man7/qmail-limits.7.gz
-#%attr(644,root,root)                    %{mandir}/man7/qmail.7.gz
-
-#%if %nocourierimap == 0
-#%attr(644,root,root)                    %{mandir}/man7/authlib.7.gz
-#                                        %{mandir}/man7/authcustom.7.gz
-#                                        %{mandir}/man7/authpam.7.gz
-#                                        %{mandir}/man7/authpwd.7.gz
-#                                        %{mandir}/man7/authshadow.7.gz
-#                                        %{mandir}/man7/courier-unicode.7.gz
-#%endif
 
 %attr(444,root,qmail)                   %{shareddir}/doc/HOWTO.sharedmaildir
 %attr(444,root,qmail)                   %{shareddir}/doc/README.auth
@@ -2057,53 +2048,55 @@ fi
 %attr(555,root,qmail)             %{_prefix}/sbin/qmail-qmqpc
 #
 %attr(444,root,qmail)             %{mandir}/man1/forward.1.gz
-%attr(444,root,qmail)             %{mandir}/cat1/forward.0.gz
 %attr(444,root,qmail)             %{mandir}/man1/predate.1.gz
 %attr(444,root,qmail)             %{mandir}/man1/datemail.1.gz
 %attr(444,root,qmail)             %{mandir}/man1/mailsubj.1.gz
-%attr(444,root,qmail)             %{mandir}/cat1/mailsubj.0.gz
 %attr(444,root,qmail)             %{mandir}/man1/qmaildirmake.1.gz
-%attr(444,root,qmail)             %{mandir}/cat1/qmaildirmake.0.gz
 %attr(444,root,qmail)             %{mandir}/man1/maildir2mbox.1.gz
-%attr(444,root,qmail)             %{mandir}/cat1/maildir2mbox.0.gz
 %attr(444,root,qmail)             %{mandir}/man1/maildirwatch.1.gz
+%attr(444,root,qmail)             %{mandir}/cat1/forward.0.gz
+%attr(444,root,qmail)             %{mandir}/cat1/mailsubj.0.gz
+%attr(444,root,qmail)             %{mandir}/cat1/qmaildirmake.0.gz
+%attr(444,root,qmail)             %{mandir}/cat1/maildir2mbox.0.gz
 %attr(444,root,qmail)             %{mandir}/cat1/maildirwatch.0.gz
 #
 %attr(444,root,qmail)             %{mandir}/man8/qmail-showctl.8.gz
-%attr(444,root,qmail)             %{mandir}/cat8/qmail-showctl.0.gz
 %attr(444,root,qmail)             %{mandir}/man8/qmail-inject.8.gz
 %attr(444,root,qmail)             %{mandir}/man8/isendmail.8.gz
-%attr(444,root,qmail)             %{mandir}/cat8/qmail-inject.0.gz
 %attr(444,root,qmail)             %{mandir}/man8/qmail-qmqpc.8.gz
+%attr(444,root,qmail)             %{mandir}/cat8/qmail-showctl.0.gz
+%attr(444,root,qmail)             %{mandir}/cat8/qmail-inject.0.gz
 %attr(444,root,qmail)             %{mandir}/cat8/qmail-qmqpc.0.gz
 
 # a copy of /var/qmail/control/me, /var/qmail/control/defaultdomain,
-# and /var/qmail/control/plusdomain from your central server, so that qmail-inject uses appropriate host names in outgoing mail; and
-# this host's name in /var/qmail/control/idhost, so that qmail-inject generates Message-ID without any risk of collision
+# and /var/qmail/control/plusdomain from your central server, so that
+# qmail-inject uses appropriate host names in outgoing mail; and
+# this host's name in /var/qmail/control/idhost, so that
+# qmail-inject generates Message-ID without any risk of collision
 
 %clean
-%{__rm} -rf %{buildroot}
+[ "%{buildroot}" != "/" ] && %{__rm} -fr %{buildroot}
 
 #            install   erase   upgrade  reinstall
-# % pretrans      0        -         0
-# % pre           1        -         2         2
-# % post          1        -         2         2
-# % preun         -        0         1         -
-# % postun        -        0         1         -
-# % posttrans     0        -         0
-# The scriptlets in %pre and %post are respectively run before and after a package is installed.
-# The scriptlets %preun and %postun are run before and after a package is uninstalled.
-# The scriptlets %pretrans and %posttrans are run at start and end of a transaction.
+# pretrans      0        -         0
+# pre           1        -         2         2
+# post          1        -         2         2
+# preun         -        0         1         -
+# postun        -        0         1         -
+# posttrans     0        -         0
+# The scriptlets in percentpre and percentpost are respectively run before and after a package is installed.
+# The scriptlets percentpreun and percentpostun are run before and after a package is uninstalled.
+# The scriptlets percentpretrans and percentposttrans are run at start and end of a transaction.
 # On upgrade, the scripts are run in the following order:
 #
-#   1. %pretrans of new package
-#   2. %pre of new package
+#   1. pretrans of new package
+#   2. pre of new package
 #   3. (package install)
-#   4. %post of new package
-#   5. %preun of old package
+#   4. post of new package
+#   5. preun of old package
 #   6. (removal of old package)
-#   7. %postun of old package
-#   8. %posttrans of new package 
+#   7. postun of old package
+#   8. posttrans of new package 
 
 ### SCRIPTLET ###############################################################################
 %verifyscript
@@ -3145,7 +3138,6 @@ if [ $ID -ne 0 ] ; then
 	echo "You are not root" 1>&2
 	exit 1
 fi
-#echo "Running postrans script for %{version}-%{release} : arg=$1"
 if [ -f %{shareddir}/boot/rpm.init ] ; then
 	echo "Running Custom Installation Script for posttrans"
 	/bin/sh %{shareddir}/boot/rpm.init posttrans
