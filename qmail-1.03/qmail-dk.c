@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-dk.c,v $
+ * Revision 1.48  2016-06-13 14:14:27+05:30  Cprogrammer
+ * BUG - removed extra semicolon after if () statement
+ *
  * Revision 1.47  2016-06-03 09:57:53+05:30  Cprogrammer
  * moved qmail-multi to sbin
  *
@@ -573,7 +576,7 @@ dk_setoptions(char **selector, int *advicelen, int *opth, int *optr, int *optc,
 			break;
 		case 'b':
 			*advicelen = atoi(optarg);
-			if (*advicelen > ADVICE_BUF);
+			if (*advicelen > ADVICE_BUF)
 				*advicelen = ADVICE_BUF;
 			break;
 		case 'c':
@@ -878,7 +881,7 @@ main(argc, argv)
 void
 getversion_qmail_dk_c()
 {
-	static char    *x = "$Id: qmail-dk.c,v 1.47 2016-06-03 09:57:53+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-dk.c,v 1.48 2016-06-13 14:14:27+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
