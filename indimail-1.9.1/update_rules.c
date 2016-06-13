@@ -1,5 +1,8 @@
 /*
  * $Log: update_rules.c,v $
+ * Revision 2.9  2016-06-13 14:24:23+05:30  Cprogrammer
+ * set umask in the child process instead of parent
+ *
  * Revision 2.8  2010-02-28 11:39:42+05:30  Cprogrammer
  * renamed OPEN_SMTP_CUR_FILE to OPEN_SMTP
  *
@@ -61,7 +64,7 @@
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: update_rules.c,v 2.8 2010-02-28 11:39:42+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: update_rules.c,v 2.9 2016-06-13 14:24:23+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef POP_AUTH_OPEN_RELAY
@@ -87,7 +90,6 @@ update_rules(lock)
 	char           *tcp_file, *open_smtp;
 	char            TmpBuf1[MAX_BUFF];
 
-	umask(INDIMAIL_TCPRULES_UMASK);
 	getEnvConfigStr(&open_smtp, "OPEN_SMTP", OPEN_SMTP);
 #ifdef FILE_LOCKING
 	if (lock && ((fd = getDbLock(open_smtp, 1)) == -1))
@@ -181,6 +183,7 @@ tcprules_open()
 			close(pim[0]);
 			_exit(120);
 		}
+		umask(INDIMAIL_TCPRULES_UMASK);
 		getEnvConfigStr(&tcp_file, "TCP_FILE", TCP_FILE);
 		scopy(bin0, TCPRULES_PROG, MAX_BUFF);
 		scopy(bin1, tcp_file, MAX_BUFF);
