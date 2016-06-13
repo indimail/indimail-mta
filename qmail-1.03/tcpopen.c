@@ -1,5 +1,8 @@
 /*
  * $Log: tcpopen.c,v $
+ * Revision 1.2  2016-06-13 14:17:37+05:30  Cprogrammer
+ * close socket on connect() failure
+ *
  * Revision 1.1  2015-08-20 19:03:05+05:30  Cprogrammer
  * Initial revision
  *
@@ -128,12 +131,14 @@ tcpopen(host, service, port) /*- Thanks to Richard's Steven */
 
 	if (host && *host && ((strchr(host, '/') || ((dir = Dirname(host)) && !access(dir, F_OK)))))
 	{
-		if ((fd = socket (AF_UNIX, SOCK_STREAM, 0)) == -1)
+		if ((fd = socket(AF_UNIX, SOCK_STREAM, 0)) == -1)
         	return -1;
     	unixaddr.sun_family = AF_UNIX;
-    	byte_copy (unixaddr.sun_path, sizeof(unixaddr.sun_path), host);
-    	if (connect (fd, (struct sockaddr *) &unixaddr, sizeof(struct sockaddr_un) ) == -1)
+    	byte_copy(unixaddr.sun_path, sizeof(unixaddr.sun_path), host);
+    	if (connect(fd, (struct sockaddr *) &unixaddr, sizeof(struct sockaddr_un)) == -1) {
+			close (fd);
         	return -1;
+		}
 		return(fd);
 	}
 #ifdef sun
@@ -414,7 +419,7 @@ tcpopen(host, service, port) /*- Thanks to Richard's Steven */
 void
 getversion_tcpopen_c()
 {
-	static char    *x = "$Id: tcpopen.c,v 1.1 2015-08-20 19:03:05+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: tcpopen.c,v 1.2 2016-06-13 14:17:37+05:30 Cprogrammer Exp mbhangui $";
 #ifdef INDIMAIL
 	char *y = sccsid;
 	if (y)
