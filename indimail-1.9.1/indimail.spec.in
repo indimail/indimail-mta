@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail.spec.in,v 2.344 2016-06-09 14:16:06+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 2.345 2016-06-13 14:25:25+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %define _unpackaged_files_terminate_build 1
 
@@ -916,7 +916,7 @@ fi
                                   %{indimaildir}/sbin
                                   %{indimaildir}/users
                                   %{indimaildir}/control
-%dir %attr(555,root,root)         %{shareddir}
+%dir %attr(555,root,qmail)        %{shareddir}
 %dir %attr(555,root,qmail)        %{shareddir}/boot
 %dir %attr(555,root,qmail)        %{shareddir}/doc
 %dir %attr(555,root,root)         %{_prefix}/lib/indimail
@@ -1865,7 +1865,7 @@ fi
 %dir %attr(555,root,root)              %{_libdir}
 %dir %attr(555,root,qmail)             %{mandir}/man3
 %endif
-%doc %attr(444,root,qmail)             %{mandir}/man3/*
+%doc %attr(644,root,root)              %{mandir}/man3/*
 
 %attr(644,root,qmail)                   %{sysconfdir}/inc_deps
 %attr(644,root,qmail)                   %{sysconfdir}/lib_deps
