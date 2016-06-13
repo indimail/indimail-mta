@@ -65,7 +65,7 @@ Version: 1.9.1
 Provides: daemontools, ucspi-tcp
 Release: 1.<B_CNT>
 %else
-Release: 1%{?dist}
+Release: 1.1%{?dist}
 %endif
 
 %if %build_on_obs == 1
@@ -2107,6 +2107,37 @@ echo ""
 
 # fix changelog for openSUSE buildservice
 %changelog
-* Wed May 25 2016 mbhangui@gmail.com
+* Wed May 25 2016 mbhangui@gmail.com @release@-@version@
 Release 1.9.2 Start 13/08/2015
-1.  Removed compiler warning for fscanf
+1.  Added leapsecs program, leapsecs.dat
+2.  Added yearcal, nowutc programs
+3.  prefix queue name in qmail-send, qmail-todo logs
+4.  BUG - qmail-queue.c: fixed missing null character in extraqueue when EXTRAQUEUE is defined
+5.  dkim.c - Use basename of private key as the selector in absense of -y option
+6.  spawn.c - add environment variable MESSID (queue filename)
+7.  str_end.c - added str_end() function
+8.  qmail-send.c, qsutil.c, sig.c, qmail-daemon.c - flush qmail-send logs only on line completion
+9.  various fixes for debian packaging (lib64, devel, libindimail)
+10. renamed package indimail-shared to libindimail
+11. hier.c - create ratelimit directory
+12. qmail-greyd.c - added missing flush statement to flush logs
+13. greylist.c - fixed IPV6 address for connect, fixed incorrect formating of context filename, fixed buffer overflow with ip_str
+14. ip.c - fixed mapped ipv4 address in ip6_scan()
+15. smtpd.c - pass ip6 address to greylist()
+16. ipv6 version of udplogger
+17. greylist.c - create ipv4 socket if ipv6 stack is disabled (reported by Andrzej Boreczko)
+18. qmail-greyd.c - set noipv6 if LIBC_HAS_IP6 is not defined
+19. fixed debian mysql config, database creation in postinst.
+20. udpclient - added -r, -t option to allow reading responses from server
+21. create udplogger service during rpm/deb installation
+22. qmailctl.sh - BUG, replaced failure with $fail
+23. qmail.spec, indimail.spec, indimail, indimail-mta postinst script fixes for debian8/ubuntu15 migration to systemd from upstart
+24. docker images for indimail, indimail-mta
+25. tcpserver: ip4_bit.c fix stack smashing - num defined as int instead of unsigned long
+26. added tcpserver_plugin.c to dynamically load shared objects in tcpserver main()
+27. use RTLD_NOLOAD in load_shared() to load shared objects only once
+28. svctool, indimail.spec, qmail.spec, debain postinst scripts modified to load qmail_smtpd.so instead of qmail-smtpd
+29. smtpd.c - smtp_init() function to load all control files only once
+30. Massive FHS changes
+31. qmail-dk.c - BUG - removed extra semicolon after if () statement
+32. tcpopen.c - close socket on connect() failure
