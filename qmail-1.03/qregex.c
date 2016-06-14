@@ -1,5 +1,8 @@
 /*
  * $Log: qregex.c,v $
+ * Revision 1.25  2016-06-14 09:10:09+05:30  Cprogrammer
+ * updated with original authors and maintainers
+ *
  * Revision 1.24  2016-05-17 19:44:58+05:30  Cprogrammer
  * use auto_control, set by conf-control to set control directory
  *
@@ -76,12 +79,12 @@
  * Initial revision
  *
  * qregex (v2)
- * $Id: qregex.c,v 1.24 2016-05-17 19:44:58+05:30 Cprogrammer Exp mbhangui $
+ * $Id: qregex.c,v 1.25 2016-06-14 09:10:09+05:30 Cprogrammer Exp mbhangui $
  *
  * Author  : Evan Borgstrom (evan at unixpimps dot org)
  * Created : 2001/12/14 23:08:16
- * Modified: $Date: 2016-05-17 19:44:58+05:30 $
- * Revision: $Revision: 1.24 $
+ * Modified: $Date: 2016-06-14 09:10:09+05:30 $
+ * Revision: $Revision: 1.25 $
  *
  * Do POSIX regex matching on addresses for anti-relay / spam control.
  * It logs to the maillog
@@ -92,6 +95,28 @@
  * qregex.c is released under a BSD style copyright.
  * See http://www.unixpimps.org/software/qregex/copyright.html
  *
+ *
+ * CONTACT:
+ *  qregex is maintained by:
+ *	Andrew St. Jean
+ *	andrew@arda.homeunix.net
+ *	www.arda.homeunix.net/store/qmail/
+ *
+ * Contributers to qregex:
+ *	Jeremy Kitchen	
+ *	kitchen at scriptkitchen dot com
+ *	http://www.scriptkitchen.com/qmail
+
+ *	Alex Pleiner
+ *	alex@zeitform.de
+ *	zeitform Internet Dienste
+ *	http://www.zeitform.de/
+ *
+ *	Thanos Massias
+ *
+ * Original qregex patch written by:
+ *	Evan Borgstrom
+ *	evan at unixpimps dot org
  * Note: this revision follows the coding guidelines set forth by the rest of
  *       the qmail code and that described at the following URL.
  *       http://cr.yp.to/qmail/guarantee.html
@@ -343,7 +368,7 @@ regex_match(stralloc *addr, stralloc *map, char **errStr)
 void
 getversion_qregex_c()
 {
-	static char    *x = "$Id: qregex.c,v 1.24 2016-05-17 19:44:58+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qregex.c,v 1.25 2016-06-14 09:10:09+05:30 Cprogrammer Exp mbhangui $";
 
 #ifdef INDIMAIL
 	x = sccsidh;
