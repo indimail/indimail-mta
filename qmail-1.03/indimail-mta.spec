@@ -1,60 +1,60 @@
 #
 #
-# $Id: indimail-mta.spec,v 1.55 2016-06-13 19:18:38+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail-mta.spec,v 1.56 2016-06-14 09:08:20+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
-%define _unpackaged_files_terminate_build 1
+%global _unpackaged_files_terminate_build 1
 
-%define is_mandrake %(test -e /etc/mandrake-release && echo 1 || echo 0)
-%define is_suse %(test -e /etc/SuSE-release && echo 1 || echo 0)
-%define is_fedora %(test -e /etc/fedora-release && echo 1 || echo 0)
+%global is_suse %(test -e /etc/SuSE-release && echo 1 || echo 0)
+%global is_fedora %(test -e /etc/fedora-release && echo 1 || echo 0)
 
+%global _hardened_build    1
 %if 0%{?opensuse_bs}
 # define to 1 if building on openSUSE build service
-%define build_on_obs       1
-%define fast_mode          1
+%global build_on_obs       1
+%global fast_mode          1
 %else
-%define build_on_obs       0
-%define fast_mode          1
+%global build_on_obs       0
+%global fast_mode          1
 %endif
 
-%define qmaildir           /var/indimail
-%define _prefix            /usr
-%define qsysconfdir        /etc/indimail
-%define shareddir          /usr/share/indimail
-%define mandir             /usr/share/man
-%define ucspi_version      0.88
-%define qmail_version      1.03
-%define libdkim_version    1.4
-%define libsrs2_version    1.0.18
-%define tcpserver_plugin   1
-%define noperms            1
-%define see_base           For a description of IndiMail visit http://www.indimail.org
-%define nolibdkim          0
-%define nolibsrs2          0
-%define noclamav           1
-%define nodksignatures     0
+%global qmaildir           /var/indimail
+%global _prefix            /usr
+%global qsysconfdir        /etc/indimail
+%global shareddir          /usr/share/indimail
+%global mandir             /usr/share/man
+%global ucspi_version      0.88
+%global qmail_version      1.03
+%global libdkim_version    1.4
+%global libsrs2_version    1.0.18
+%global tcpserver_plugin   1
+%global noperms            1
+%global see_base           For a description of IndiMail visit http://www.indimail.org
+%global nolibdkim          0
+%global nolibsrs2          0
+%global noclamav           1
+%global nodksignatures     0
 
-%define _verbose           0
-%define qcount             5
-%define qbase              %{qmaildir}/queue
-%define logdir             /var/log/indimail
-%define servicedir         /service
-%define dkimkeyfn          default
-%define fedorareview       1
+%global _verbose           0
+%global qcount             5
+%global qbase              %{qmaildir}/queue
+%global logdir             /var/log/indimail
+%global servicedir         /service
+%global dkimkeyfn          default
+%global fedorareview       1
 
 %if %build_on_obs == 1
-%define packager Manvendra Bhangui <manvendra@indimail.org>
+%global packager Manvendra Bhangui <manvendra@indimail.org>
 
-%define dist redhat
-%define disttag rh
+%global dist redhat
+%global disttag rh
 
 %if %{is_suse} != 0
-%define dist suse
-%define disttag suse
+%global dist suse
+%global disttag suse
 %endif
 %if %{is_fedora} != 0
-%define dist fedora
-%define disttag rhfc
+%global dist fedora
+%global disttag rhfc
 %endif
 %endif
 
@@ -323,11 +323,11 @@ ID=$(id -u)
 #### Stupid Mandriva ######################
 %if 0%{?mandriva_version} > 2009
 %ifarch x86_64
-%define _libdir %{_prefix}/lib64
-%define _lib lib64
+%global _libdir %{_prefix}/lib64
+%global _lib lib64
 %else
-%define _libdir %{_prefix}/lib
-%define _lib lib
+%global _libdir %{_prefix}/lib
+%global _lib lib
 %endif
 %endif
 #### LIBDKIM ######################
@@ -1179,6 +1179,7 @@ done
 %attr(555,root,qmail)                   %{_prefix}/lib/indimail/plugins/rblsmtpd.so
 %endif
 
+%attr(444,root,qmail)                   %{shareddir}/doc/COPYING
 %attr(444,root,qmail)                   %{shareddir}/doc/README.indimail
 %attr(444,root,qmail)                   %{shareddir}/doc/README.filters
 %attr(444,root,qmail)                   %{shareddir}/doc/README.qmail
@@ -1270,8 +1271,6 @@ done
 %dir %attr(755,root,root)               %{mandir}/man1
 %dir %attr(755,root,root)               %{mandir}/man8
 %endif
-
-%dir %attr(555,root,root)               %{_prefix}/bin
 
 %attr(555,root,qmail)                   %{_prefix}/bin/envdir
 %attr(555,root,qmail)                   %{_prefix}/bin/envuidgid
@@ -1631,13 +1630,13 @@ fi
 
 # SMTP
 %ifarch x86_64
-%define smtp_soft_mem 104857600
-%define qmtp_soft_mem 104857600
-%define qmqp_soft_mem 104857600
+%global smtp_soft_mem 104857600
+%global qmtp_soft_mem 104857600
+%global qmqp_soft_mem 104857600
 %else
-%define smtp_soft_mem 52428800
-%define qmtp_soft_mem 52428800
-%define qmqp_soft_mem 52428800
+%global smtp_soft_mem 52428800
+%global qmtp_soft_mem 52428800
+%global qmqp_soft_mem 52428800
 %endif
 
 # Define QHPSI for inline virus scanning by qmail-queue
