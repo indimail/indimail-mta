@@ -1,5 +1,8 @@
 /*
  * $Log: hier.c,v $
+ * Revision 1.212  2016-06-14 09:11:20+05:30  Cprogrammer
+ * added README.licenses
+ *
  * Revision 1.211  2016-06-14 09:06:42+05:30  Cprogrammer
  * aded GPLv3 license
  *
@@ -998,6 +1001,7 @@ hier(inst_dir, fatal)
 
 	/* GPLv3 License, Man Pages, Documents */
 	c(auto_shared,     "doc", "COPYING", auto_uido, auto_gidq, 0444);
+	c(auto_shared,     "doc", "README.licenses", auto_uido, auto_gidq, 0444);
 	c(auto_shared,     "doc", "QMAILFAQ", auto_uido, auto_gidq, 0444);
 	c(auto_shared,     "doc", "UPGRADE", auto_uido, auto_gidq, 0444);
 	c(auto_shared,     "doc", "SENDMAIL", auto_uido, auto_gidq, 0444);
@@ -1429,7 +1433,7 @@ hier(inst_dir, fatal)
 void
 getversion_install_big_c()
 {
-	static char    *x = "$Id: hier.c,v 1.211 2016-06-14 09:06:42+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: hier.c,v 1.212 2016-06-14 09:11:20+05:30 Cprogrammer Exp mbhangui $";
 
 #ifdef INDIMAIL
 	if (x)
