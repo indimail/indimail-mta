@@ -180,6 +180,7 @@
 void            usage(void);
 int             search_file(const char *, const char *);
 int             remove_file(const char *);
+int             delete_file(const char *);
 int             expire_file(const char *);
 char           *read_file(const char *);
 int             find_files(char *, char *[], const char *);
@@ -194,7 +195,7 @@ const char      cvsrid[] = "$Id: qmail-rm.c,v 1.14 2014-01-29 14:03:50+05:30 Cpr
 /*- globals */
 extern const char *__progname;
 const char     *default_pattern = ".*";
-int             regex_flags = 0, verbosity = 0, conf_split, remove_files = 0;
+int             regex_flags = 0, verbosity = 0, conf_split, remove_files = 0, delete_files = 0;
 char           *yank_dir = "yanked";
 unsigned long   read_bytes = 0;
 
@@ -334,7 +335,7 @@ main(int argc, char **argv)
 	if (argc < 2)
 		usage();
 	conf_split = auto_split;
-	while ((ch = getopt(argc, argv, "eirvh?n:p:q:s:y:X:x:")) != -1)
+	while ((ch = getopt(argc, argv, "deirvh?n:p:q:s:y:X:x:")) != -1)
 	{
 		switch (ch)
 		{
@@ -345,6 +346,9 @@ main(int argc, char **argv)
 			break;
 		case 'r':
 			remove_files = 1;
+			break;
+		case 'd':
+			delete_files = 1;
 			break;
 		case 'v':
 			verbosity++;
@@ -548,6 +552,7 @@ usage(void)
 	logerr("  -q <qbase>    specify the base qmail queue dir [default: ");
 	logerr(auto_qmail);
 	logerr("/queue]\n");
+	logerr("  -d            actually remove files not yank them, no -p will delete all the messages!\n");
 	logerr("  -r            actually remove files, without this we'll only print them\n");
 	logerr("  -s <split>    specify your conf-split value if non-standard [default: ");
 	strnum[fmt_ulong(strnum, auto_split)] = 0;
@@ -688,8 +693,7 @@ find_files(char *queuedir, char *dir_list[], const char *pattern)
 				flush();
 				i++;
 				tmp_fd = open(".", O_RDONLY);
-				if (tmp_fd >= 0 && (remove_files == 1 || expire_files == 1))
-				{
+				if (tmp_fd >= 0 && remove_files == 1) {
 					if (chdir(queuedir))
 						die_chdir(queuedir);
 					remove_file(ftsp->fts_name);
@@ -699,14 +703,32 @@ find_files(char *queuedir, char *dir_list[], const char *pattern)
 						logerr(error_str(errno));
 						logerrf("\n");
 					}
+				} else
+				if ((tmp_fd >= 0) && (delete_files == 1)) {
+					if (chdir(queuedir))
+						die_chdir(queuedir);
+					delete_file(ftsp->fts_name);
+					if (fchdir(tmp_fd) != 0) {
+						logerr("fchdir: ");
+						logerr(error_str(errno));
+						logerrf("\n");
+					}
+				} else
+				if ((tmp_fd >= 0) && (expire_files == 1)) {	/* this makes sure the the Remove option takes precedence over the eXpire options. */
+					if (chdir(queuedir))
+						die_chdir(queuedir);
+					expire_file(ftsp->fts_name);
+					if (fchdir(tmp_fd) != 0) {
+						logerr("fchdir: ");
+						logerr(error_str(errno));
+						logerrf("\n");
+					}
 				}
-				if (tmp_fd >= 0)
-				{
+				if (tmp_fd >= 0) {
 					close(tmp_fd);
 					tmp_fd = -1;
 				}
-			} else
-			{
+			} else {
 				out("no\n");
 				flush();
 			}
@@ -1068,6 +1090,112 @@ mk_newpath(char *queue, int inode_name)
 		logerrf("\n");
 		return NULL;
 	}
+}
+
+/*
+ * delete_file()
+ *
+ *     Takes a filename and assumes it is the path to a qmail queue file
+ * (named after its inode). It attempts to find it in all the queues and
+ * removes the file(s). It returns the inode number of the file it removed 
+ * from the queue or -1 on an error. This works with version .94 of qmail
+ * -remove.
+ */
+int
+delete_file(const char *filename)
+{
+	int             i, count = 0;
+	unsigned long   inode_num;
+	char           *my_name, *old_name = NULL;
+	struct stat     statinfo;
+
+	if (filename == NULL) {
+		logerrf("expire_file: no filename\n");
+		return -1;
+	}
+	my_name = strrchr(filename, '/');
+	if (my_name == NULL) {
+		my_name = (char *) filename;
+	} else {
+		my_name++;
+	}
+
+	inode_num = strtoul(my_name, NULL, 10);
+	if ((inode_num == ULONG_MAX) || (inode_num == 0)) {
+		logerr(my_name);
+		logerr(" ");
+		logerrf("doesn't look like an inode number\n");
+		return -1;
+	}
+
+	for (i = 0; (queues[i] != NULL); i++) {
+		old_name = mk_hashpath((char *) queues[i], inode_num);
+		if (old_name == NULL) {
+			logerrf("delete_file(): unable to create old name\n");
+			return -1;
+		}
+		if (unlink(old_name) == 0) { /*- succeeded */
+			logerr("remove ");
+			logerrf(old_name);
+			count++;
+		} else {
+			if (errno == ENOENT) {
+				if (old_name) {
+					if (verbosity >= 2) {
+						logerr("delete_file(");
+						logerr(old_name);
+						logerrf("): not a file\n");
+					}
+					free(old_name);
+					old_name = NULL;
+				}
+				if (!(old_name = mk_nohashpath((char *) queues[i], inode_num)))
+					return -1;
+				if (stat(old_name, &statinfo) == -1) {
+					if (verbosity >= 2) {
+						logerr("delete_file(");
+						logerr(old_name);
+						logerrf("): no stat info\n");
+					}
+					continue;
+				}
+				if (!S_ISREG(statinfo.st_mode)) {
+					if (verbosity >= 2) {
+						logerr("delete_file(");
+						logerr(old_name);
+						logerrf("): not a file\n");
+					}
+					continue;
+				}
+				if (unlink(old_name) == 0) {
+					/*- succeeded */
+					logerr("remove ");
+					logerr(old_name);
+					logerrf("\n");
+					count++;
+				} else {
+					if (errno != ENOENT) {
+						logerr("unlink: ");
+						logerr(old_name);
+						logerr(": ");
+						logerr(strerror(errno));
+						logerrf("\n");
+					}
+				}
+			} else {
+				/*- failed but exists */
+				logerr("unlink: ");
+				logerr(old_name);
+				logerr(": ");
+				logerr(strerror(errno));
+				logerrf("\n");
+			}
+		}
+	}
+	/*- garbage collection */
+	if (old_name)
+		free(old_name);
+	return count;
 }
 
 /*
