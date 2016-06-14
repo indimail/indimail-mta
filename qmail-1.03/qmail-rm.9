@@ -3,7 +3,7 @@
 qmail-rm \- Remove mails from Queue
 .SH SYNOPSIS
 .B qmail-rm
-[-eirvh]
+[-eidrvh]
 [-n NUM]
 [-p ]
 [-q queuedir]
@@ -68,6 +68,9 @@ specify the \fIpattern\fR to search for
 .TP
 -q \fIqbase\fR
 specify the base qmail queue dir [default: QMAILHOME/queue]
+.TP
+-d
+actually remove files not yank them, no -p will delete all the messages!
 .TP
 -r
 actually remove files, without this we'll only print them
