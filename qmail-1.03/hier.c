@@ -1,5 +1,8 @@
 /*
  * $Log: hier.c,v $
+ * Revision 1.211  2016-06-14 09:06:42+05:30  Cprogrammer
+ * aded GPLv3 license
+ *
  * Revision 1.210  2016-06-09 14:15:04+05:30  Cprogrammer
  * relaxed permissions on few executables
  *
@@ -993,7 +996,8 @@ hier(inst_dir, fatal)
 	c(auto_qmail_home, "sbin", "ldap-checkpwd", auto_uido, auto_gidq, 0555);
 	c(auto_qmail_home, "sbin", "whois", auto_uido, auto_gidq, 0555);
 
-	/* Man Pages, Documents */
+	/* GPLv3 License, Man Pages, Documents */
+	c(auto_shared,     "doc", "COPYING", auto_uido, auto_gidq, 0444);
 	c(auto_shared,     "doc", "QMAILFAQ", auto_uido, auto_gidq, 0444);
 	c(auto_shared,     "doc", "UPGRADE", auto_uido, auto_gidq, 0444);
 	c(auto_shared,     "doc", "SENDMAIL", auto_uido, auto_gidq, 0444);
@@ -1425,7 +1429,7 @@ hier(inst_dir, fatal)
 void
 getversion_install_big_c()
 {
-	static char    *x = "$Id: hier.c,v 1.210 2016-06-09 14:15:04+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: hier.c,v 1.211 2016-06-14 09:06:42+05:30 Cprogrammer Exp mbhangui $";
 
 #ifdef INDIMAIL
 	if (x)
