@@ -181,7 +181,6 @@
 %attr(0555,root,qmail) @prefix@/bin/qmail-qmtpd
 %attr(0555,root,qmail) @prefix@/bin/qmail-qread
 %attr(0555,root,qmail) @prefix@/bin/qmail-rm
-%attr(0555,root,qmail) @prefix@/bin/qmail-scanner-queue.pl
 %attr(0555,root,qmail) @prefix@/bin/qmail-showctl
 %attr(0555,root,qmail) @prefix@/bin/qmail-sigalrm
 %attr(0555,root,qmail) @prefix@/bin/qmail-sighup
@@ -232,7 +231,6 @@
 %attr(0555,root,qmail) @prefix@/bin/spipe
 %attr(0555,root,qmail) @prefix@/bin/srsfilter
 %attr(0555,root,qmail) @prefix@/bin/sslerator
-%attr(0555,root,qmail) @prefix@/bin/stripmime.pl
 %attr(0555,root,qmail) @prefix@/bin/successes
 %attr(0555,root,qmail) @prefix@/bin/suids
 %attr(0555,root,qmail) @prefix@/bin/supervise
