@@ -1,5 +1,8 @@
 /*
  * $Log: hier.c,v $
+ * Revision 1.213  2016-06-15 11:58:04+05:30  Cprogrammer
+ * removed qmail-scanner-queue.pl, stripmime.pl
+ *
  * Revision 1.212  2016-06-14 09:11:20+05:30  Cprogrammer
  * added README.licenses
  *
@@ -777,8 +780,6 @@ hier(inst_dir, fatal)
 	c(auto_qmail_home, "bin", "qbase64", auto_uido, auto_gidq, 0555);
 	c(auto_qmail_home, "bin", "swaks", auto_uido, auto_gidq, 0555);
 	c(auto_qmail_home, "bin", "mbox2maildir.pl", auto_uido, auto_gidq, 0555);
-	c(auto_qmail_home, "bin", "qmail-scanner-queue.pl", auto_uido, auto_gidq, 0555);
-	c(auto_qmail_home, "bin", "stripmime.pl", auto_uido, auto_gidq, 0555);
 
 	c(auto_qmail_home, "bin", "recipient-cdb", auto_uido, auto_gidq, 0550);
 	c(auto_qmail_home, "bin", "qmail-cdb", auto_uido, auto_gidq, 0550);
@@ -1433,7 +1434,7 @@ hier(inst_dir, fatal)
 void
 getversion_install_big_c()
 {
-	static char    *x = "$Id: hier.c,v 1.212 2016-06-14 09:11:20+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: hier.c,v 1.213 2016-06-15 11:58:04+05:30 Cprogrammer Exp mbhangui $";
 
 #ifdef INDIMAIL
 	if (x)
