@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail-mta.spec,v 1.58 2016-06-15 11:58:31+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail-mta.spec,v 1.59 2016-06-15 19:21:22+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 
@@ -11,10 +11,10 @@
 %if 0%{?opensuse_bs}
 # define to 1 if building on openSUSE build service
 %global build_on_obs       1
-%global fast_mode          1
+%global reconfigure_mode   1
 %else
 %global build_on_obs       0
-%global fast_mode          1
+%global reconfigure_mode   1
 %endif
 
 %global qmaildir           /var/indimail
@@ -38,6 +38,7 @@
 %global qcount             5
 %global qbase              %{qmaildir}/queue
 %global logdir             /var/log/indimail
+%global plugindir          %{_prefix}/lib/indimail/plugins
 %global servicedir         /service
 %global dkimkeyfn          default
 
@@ -63,29 +64,33 @@ Summary: A Flexible SMTP server
 Name: indimail-mta
 Version: 1.9.1
 %if %fedorareview == 0
-Provides: daemontools = @release@, ucspi-tcp = @release@
+Provides: daemontools = %{version}, ucspi-tcp = %{version}
 Release: 1.<B_CNT>
 %else
 Release: 1.1%{?dist}
 %endif
 
-## uid/gid management
+## user/group management
+# Note: it is not necessary to assign 555 for uid, gid. The package will use any id assigned to username, groupname
+# at runtime
 %global uid                555
 %global gid                555
 %global username           indimail
 %global groupname          indimail
+# Note: 999 indimail-mta does not require any specific values for uids/gids. 999 is just
+# for rpmlint to shut up and stop complaining
+Provides: user(%username)   = %uid
+Provides: user(alias)       > 999
+Provides: user(qmaild)      > 999
+Provides: user(qmaill)      > 999
+Provides: user(qmailp)      > 999
+Provides: user(qmailq)      > 999
+Provides: user(qmailr)      > 999
+Provides: user(qmails)      > 999
 Provides: group(%groupname) = %gid
-Provides: user(%username) = %uid
-Provides: user(alias)
-Provides: user(qmaild)
-Provides: user(qmaill)
-Provides: user(qmailp)
-Provides: user(qmailq)
-Provides: user(qmailr)
-Provides: user(qmails)
-Provides: group(nofiles)
-Provides: group(qmail)
-Provides: group(qscand)
+Provides: group(nofiles)    > 999
+Provides: group(qmail)      > 999
+Provides: group(qscand)     > 999
 Requires(pre): shadow-utils
 Requires(postun): shadow-utils
 
@@ -134,7 +139,7 @@ NoSource: 4
 
 URL: http://www.indimail.org
 #AutoReqProv: No
-Conflicts: indimail, indimail-mini
+Conflicts: indimail, indimail-mini, indimail-mta < 2.0
 BuildRequires: openssl-devel rpm gcc gcc-c++ make bison binutils coreutils grep
 BuildRequires: glibc glibc-devel openssl procps readline-devel
 BuildRequires: sed ncurses-devel gettext-devel
@@ -311,25 +316,25 @@ echo "------------------------------------------------------"
 for i in qmail-%{qmail_version} ucspi-tcp-%{ucspi_version} \
 libdkim-%{libdkim_version} libsrs2-%{libsrs2_version}
 do
-	(
-	if [ -d $i ] ; then
-		%{__rm} -rf $i
-	fi
-	if [ " $i" = " libdkim-%{libdkim_version}" -a %nolibdkim -ne 0 ] ; then
-		continue
-	fi
-	if [ " $i" = " libsrs2-%{libsrs2_version}" -a %nolibsrs2 -ne 0 ] ; then
-		continue
-	fi
-	if [ -f ../SOURCES/$i.tar.bz2 ] ; then
-		%{__bzip2} -d -c ../SOURCES/$i.tar.bz2 |tar xf -
-	elif [ -f ../SOURCES/$i.tar.gz ] ; then
-		gunzip -c ../SOURCES/$i.tar.gz |tar xf -
-	else
-		echo "No Source Archive for $i"
-		exit 1
-	fi
-	)
+(
+  if [ -d $i ] ; then
+    %{__rm} -rf $i
+  fi
+  if [ " $i" = " libdkim-%{libdkim_version}" -a %nolibdkim -ne 0 ] ; then
+    continue
+  fi
+  if [ " $i" = " libsrs2-%{libsrs2_version}" -a %nolibsrs2 -ne 0 ] ; then
+    continue
+  fi
+  if [ -f ../SOURCES/$i.tar.bz2 ] ; then
+    %{__bzip2} -d -c ../SOURCES/$i.tar.bz2 |tar xf -
+  elif [ -f ../SOURCES/$i.tar.gz ] ; then
+    gunzip -c ../SOURCES/$i.tar.gz |tar xf -
+  else
+    echo "No Source Archive for $i"
+  exit 1
+  fi
+)
 done
 
 %patch1  -p0
@@ -341,18 +346,18 @@ ID=$(id -u)
 if [ -d libdkim-%{libdkim_version} ] ; then
 cd libdkim-%{libdkim_version}
 
-if [ %{fast_mode} -eq 0 ] ; then
-if [ %{build_on_obs} -eq 0 ] ; then
-	echo "reconfiguring..."
-	autoreconf -fi
-else
-	echo "reconfiguring..."
-%if %{undefined centos_version} && %{undefined rhel_version} && %{undefined sles_version}
-%if 0%{?fedora_version} > 10 || 0%{?suse_version} || 0%{?mandriva_version} > 2009
-	autoreconf -fi
-%endif
-%endif
-fi
+if [ %{reconfigure_mode} -eq 0 ] ; then
+  if [ %{build_on_obs} -eq 0 ] ; then
+    echo "reconfiguring..."
+    autoreconf -fi
+  else
+    echo "reconfiguring..."
+    %if %{undefined centos_version} && %{undefined rhel_version} && %{undefined sles_version}
+      %if 0%{?fedora_version} > 10 || 0%{?suse_version} || 0%{?mandriva_version} > 2009
+        autoreconf -fi
+      %endif
+    %endif
+  fi
 fi
 
 %configure --prefix=%{_prefix} --libdir=%{_libdir} --mandir=%{mandir}
@@ -363,18 +368,18 @@ fi
 if [ -d libsrs2-%{libsrs2_version} ] ; then
 cd libsrs2-%{libsrs2_version}
 
-if [ %{fast_mode} -eq 0 ] ; then
-if [ %{build_on_obs} -eq 0 ] ; then
-	echo "reconfiguring..."
-	autoreconf -fi
-else
-	echo "reconfiguring..."
-%if %{undefined centos_version} && %{undefined rhel_version} && %{undefined sles_version}
-%if 0%{?fedora_version} > 10 || 0%{?suse_version} || 0%{?mandriva_version} > 2009
-	autoreconf -fi
-%endif
-%endif
-fi
+if [ %{reconfigure_mode} -eq 0 ] ; then
+  if [ %{build_on_obs} -eq 0 ] ; then
+    echo "reconfiguring..."
+    autoreconf -fi
+  else
+    echo "reconfiguring..."
+    %if %{undefined centos_version} && %{undefined rhel_version} && %{undefined sles_version}
+      %if 0%{?fedora_version} > 10 || 0%{?suse_version} || 0%{?mandriva_version} > 2009
+        autoreconf -fi
+      %endif
+    %endif
+  fi
 fi
 
 %configure --prefix=%{_prefix} --libdir=%{_libdir} --mandir=%{mandir}
@@ -383,69 +388,69 @@ fi
 
 #### qmail ######################
 if [ -d qmail-%{qmail_version} ] ; then
-	%{__sed} 's{QMAIL{%{qmaildir}{' qmail-%{qmail_version}/conf-qmail.in > qmail-%{qmail_version}/conf-qmail
-	%{__sed} 's{SYSCONFDIR{%{qsysconfdir}{' qmail-%{qmail_version}/conf-sysconfdir.in > qmail-%{qmail_version}/conf-sysconfdir
-	%{__sed} 's{SHAREDDIR{%{shareddir}{' qmail-%{qmail_version}/conf-shared.in > qmail-%{qmail_version}/conf-shared
-	%{__sed} 's{PREFIX{%{_prefix}{' qmail-%{qmail_version}/conf-prefix.in > qmail-%{qmail_version}/conf-prefix
-%if %{tcpserver_plugin} == 1
-	echo "-DLOAD_SHARED_OBJECTS" > qmail-%{qmail_version}/conf-dlopen
-%else
-	%{__rm} -f qmail-%{qmail_version}/conf-dlopen
-%endif
-	# create conf-users
-	(
-	echo "alias"
-	echo "qmaild"
-	echo "qmaill"
-	echo "root"
-	echo "qmailp"
-	echo "qmailq"
-	echo "qmailr"
-	echo "qmails"
-	echo %username
-	echo "qscand"
-	echo 
-	echo "The qmail system is heavily partitioned for security; it does almost"
-	echo "nothing as root."
-	echo
-	echo "The first nine lines of this file are the alias user, the daemon user,"
-	echo "the log user, the owner of miscellaneous files such as binaries, the"
-	echo "passwd user, the queue user, the remote user, the send user, the"
-	echo "indimail user and the virus scan user."
-	) > /tmp/conf-users
-	diff /tmp/conf-users qmail-%{qmail_version}/conf-users > /dev/null 2>&1
-	if [ $? -ne 0 ] ; then
-		%{__mv} /tmp/conf-users qmail-%{qmail_version}/conf-users
-	else
-		%{__rm} -f /tmp/conf-users
-	fi
-	# create conf-groups
-	(
-	echo "qmail"
-	echo "nofiles"
-	echo %groupname
-	echo "qscand"
-	echo
-	echo "These are the qmail groups. The second group should not have access to"
-	echo "any files, but it must be usable for processes; this requirement"
-	echo "excludes the \`\`nogroup'' and \`\`nobody'' groups on many systems."
-	) > /tmp/conf-groups
-	diff /tmp/conf-groups qmail-%{qmail_version}/conf-groups > /dev/null 2>&1
-	if [ $? -ne 0 ] ; then
-		%{__mv} /tmp/conf-groups qmail-%{qmail_version}/conf-groups
-	else
-		%{__rm} -f /tmp/conf-groups
-	fi
+  %{__sed} 's{QMAIL{%{qmaildir}{' qmail-%{qmail_version}/conf-qmail.in > qmail-%{qmail_version}/conf-qmail
+  %{__sed} 's{SYSCONFDIR{%{qsysconfdir}{' qmail-%{qmail_version}/conf-sysconfdir.in > qmail-%{qmail_version}/conf-sysconfdir
+  %{__sed} 's{SHAREDDIR{%{shareddir}{' qmail-%{qmail_version}/conf-shared.in > qmail-%{qmail_version}/conf-shared
+  %{__sed} 's{PREFIX{%{_prefix}{' qmail-%{qmail_version}/conf-prefix.in > qmail-%{qmail_version}/conf-prefix
+  %if %{tcpserver_plugin} == 1
+    echo "-DLOAD_SHARED_OBJECTS" > qmail-%{qmail_version}/conf-dlopen
+  %else
+    %{__rm} -f qmail-%{qmail_version}/conf-dlopen
+  %endif
+  # create conf-users
+  (
+  echo "alias"
+  echo "qmaild"
+  echo "qmaill"
+  echo "root"
+  echo "qmailp"
+  echo "qmailq"
+  echo "qmailr"
+  echo "qmails"
+  echo %username
+  echo "qscand"
+  echo 
+  echo "The qmail system is heavily partitioned for security; it does almost"
+  echo "nothing as root."
+  echo
+  echo "The first nine lines of this file are the alias user, the daemon user,"
+  echo "the log user, the owner of miscellaneous files such as binaries, the"
+  echo "passwd user, the queue user, the remote user, the send user, the"
+  echo "indimail user and the virus scan user."
+  ) > /tmp/conf-users
+  diff /tmp/conf-users qmail-%{qmail_version}/conf-users > /dev/null 2>&1
+  if [ $? -ne 0 ] ; then
+    %{__mv} /tmp/conf-users qmail-%{qmail_version}/conf-users
+  else
+    %{__rm} -f /tmp/conf-users
+  fi
+   # create conf-groups
+   (
+   echo "qmail"
+   echo "nofiles"
+   echo %groupname
+   echo "qscand"
+   echo
+   echo "These are the qmail groups. The second group should not have access to"
+   echo "any files, but it must be usable for processes; this requirement"
+   echo "excludes the \`\`nogroup'' and \`\`nobody'' groups on many systems."
+   ) > /tmp/conf-groups
+   diff /tmp/conf-groups qmail-%{qmail_version}/conf-groups > /dev/null 2>&1
+   if [ $? -ne 0 ] ; then
+     %{__mv} /tmp/conf-groups qmail-%{qmail_version}/conf-groups
+   else
+     %{__rm} -f /tmp/conf-groups
+   fi
 fi
 #### ucspi-tcp ######################
 if [ -d ucspi-tcp-%{ucspi_version} ] ; then
-	%{__sed} 's{HOME{%{_prefix}{' ucspi-tcp-%{ucspi_version}/conf-home.in > ucspi-tcp-%{ucspi_version}/conf-home
-	%{__sed} 's{SHAREDDIR{%{shareddir}{' ucspi-tcp-%{ucspi_version}/conf-shared.in > ucspi-tcp-%{ucspi_version}/conf-shared
-%if %{tcpserver_plugin} == 1
-	echo "-DLOAD_SHARED_OBJECTS" > ucspi-tcp-%{ucspi_version}/conf-dlopen
-%else
-	%{__rm} -f ucspi-tcp-%{ucspi_version}/conf-dlopen
-%endif
+  %{__sed} 's{HOME{%{_prefix}{' ucspi-tcp-%{ucspi_version}/conf-home.in > ucspi-tcp-%{ucspi_version}/conf-home
+  %{__sed} 's{SHAREDDIR{%{shareddir}{' ucspi-tcp-%{ucspi_version}/conf-shared.in > ucspi-tcp-%{ucspi_version}/conf-shared
+  %if %{tcpserver_plugin} == 1
+    echo "-DLOAD_SHARED_OBJECTS" > ucspi-tcp-%{ucspi_version}/conf-dlopen
+  %else
+    %{__rm} -f ucspi-tcp-%{ucspi_version}/conf-dlopen
+  %endif
 fi
 #### svctool ########################
 if [ -f ../SOURCES/svctool ] ; then
@@ -462,40 +467,40 @@ ID=$(id -u)
 for i in libdkim-%{libdkim_version} libsrs2-%{libsrs2_version} \
 qmail-%{qmail_version} ucspi-tcp-%{ucspi_version}
 do
-	if [ " $i" = " libdkim-%{libdkim_version}" -a %nolibdkim -ne 0 ] ; then
-		continue
-	fi
-	if [ " $i" = " libsrs2-%{libsrs2_version}" -a %nolibsrs2 -ne 0 ] ; then
-		continue
-	fi
-	if [ -d $i ] ; then
-		cd $i
-		if [ %{_verbose} -eq 0 ] ; then
-			%{__make} -s DESTDIR=%{buildroot}
-			%{__make} -s DESTDIR=%{buildroot} install-strip
-		else
-			%{__make} DESTDIR=%{buildroot}
-			%{__make} DESTDIR=%{buildroot} install-strip
-		fi
-		cd ..
-	fi
-	if [ -f ./svctool ] ; then
-		%{__mkdir_p} %{buildroot}%{_prefix}/sbin
-		%{__cp} ./svctool %{buildroot}%{_prefix}/sbin/svctool
-	fi
+  if [ " $i" = " libdkim-%{libdkim_version}" -a %nolibdkim -ne 0 ] ; then
+    continue
+  fi
+  if [ " $i" = " libsrs2-%{libsrs2_version}" -a %nolibsrs2 -ne 0 ] ; then
+    continue
+  fi
+  if [ -d $i ] ; then
+    cd $i
+    if [ %{_verbose} -eq 0 ] ; then
+      %{__make} -s DESTDIR=%{buildroot}
+      %{__make} -s DESTDIR=%{buildroot} install-strip
+    else
+      %{__make} DESTDIR=%{buildroot}
+      %{__make} DESTDIR=%{buildroot} install-strip
+    fi
+    cd ..
+  fi
+  if [ -f ./svctool ] ; then
+    %{__mkdir_p} %{buildroot}%{_prefix}/sbin
+    %{__cp} ./svctool %{buildroot}%{_prefix}/sbin/svctool
+  fi
 done
 if [ %nolibdkim -eq 0 ] ; then
-	%{__rm} -f %{buildroot}%{_libdir}/libdkim.la
-	if [ -x /usr/bin/chrpath ] ; then
-    	/usr/bin/chrpath -d %{buildroot}%{_prefix}/bin/dkim
-	fi
+  %{__rm} -f %{buildroot}%{_libdir}/libdkim.la
+  if [ -x /usr/bin/chrpath ] ; then
+    /usr/bin/chrpath -d %{buildroot}%{_prefix}/bin/dkim
+  fi
 fi
 if [ %nolibsrs2 -eq 0 ] ; then
-	%{__rm} -f %{buildroot}%{_libdir}/libsrs2.la
-	if [ -x /usr/bin/chrpath ] ; then
-		/usr/bin/chrpath -d %{buildroot}%{_prefix}/bin/srsfilter
-		/usr/bin/chrpath -d %{buildroot}%{_prefix}/bin/srs
-	fi
+  %{__rm} -f %{buildroot}%{_libdir}/libsrs2.la
+  if [ -x /usr/bin/chrpath ] ; then
+    /usr/bin/chrpath -d %{buildroot}%{_prefix}/bin/srsfilter
+    /usr/bin/chrpath -d %{buildroot}%{_prefix}/bin/srs
+  fi
 fi
 
 %if %noperms == 0
@@ -507,45 +512,40 @@ install -m 644 %{S:7} %{buildroot}%{_sysconfdir}/permissions.d/%{name}-permissio
 %endif
 
 if [ -x /usr/bin/chrpath ] ; then
-/usr/bin/chrpath -d %{buildroot}%{_libdir}/*.so
-for i in tcpserver ismaildup
-do
-	if [ -f %{buildroot}%{_prefix}/bin/$i ] ; then
-    	/usr/bin/chrpath -d %{buildroot}%{_prefix}/bin/$i
-	fi
-done
+  /usr/bin/chrpath -d %{buildroot}%{_libdir}/*.so
+  for i in tcpserver ismaildup
+  do
+    if [ -f %{buildroot}%{_prefix}/bin/$i ] ; then
+      /usr/bin/chrpath -d %{buildroot}%{_prefix}/bin/$i
+    fi
+  done
 fi
 # remove devel files as we are not building a devel package
 %{__rm} -rf %{buildroot}%{mandir}/man3
 %{__rm} -rf %{buildroot}%{_prefix}/include
 %{__rm} -rf %{buildroot}%{qmaildir}/queue
-%{__rm} -f  %{buildroot}%{_prefix}/lib/libdkim.a
-%{__rm} -f  %{buildroot}%{_prefix}/lib/libdkim.so
-%{__rm} -f  %{buildroot}%{_prefix}/lib64/libdkim.a
-%{__rm} -f  %{buildroot}%{_prefix}/lib64/libdkim.so
-%{__rm} -f  %{buildroot}%{_prefix}/lib/libsrs2.a
-%{__rm} -f  %{buildroot}%{_prefix}/lib/libsrs2.so
-%{__rm} -f  %{buildroot}%{_prefix}/lib64/libsrs2.a
-%{__rm} -f  %{buildroot}%{_prefix}/lib64/libsrs2.so
-
+for i in libdkim libsrs2
+do
+%{__rm} -f  %{buildroot}%{_libdir}/$i.a
+%{__rm} -f  %{buildroot}%{_libdir}/$i.so
+done
 
 # Compress the man pages
 find %{buildroot}%{mandir} -type f -exec gzip -q {} \;
 
 if [ -x /bin/touch ] ; then
-	TOUCH=/bin/touch
+  TOUCH=/bin/touch
 elif [ -x /usr/bin/touch ] ; then
-	TOUCH=/usr/bin/touch
+  TOUCH=/usr/bin/touch
 else
-	TOUCH=/bin/touch
+  TOUCH=/bin/touch
 fi
-# Create these files so that percentghost does not complain
-for i in tcp.smtp tcp.smtp.cdb tcp.qmtp tcp.qmtp.cdb tcp.qmqp tcp.qmqp.cdb \
-services.log
+# Create these files so that %%ghost does not complain
+for i in tcp.smtp tcp.smtp.cdb tcp.qmtp tcp.qmtp.cdb tcp.qmqp tcp.qmqp.cdb
 do
-	if [ ! -f %{buildroot}%{qsysconfdir}/$i ] ; then
-		$TOUCH %{buildroot}%{qsysconfdir}/$i
-	fi
+  if [ ! -f %{buildroot}%{qsysconfdir}/$i ] ; then
+    $TOUCH %{buildroot}%{qsysconfdir}/$i
+  fi
 done
 (
 for i in accesslist authdomains badext badextpatterns badhelo badmailfrom \
@@ -567,9 +567,9 @@ tarpitcount tarpitdelay timeoutconnect timeoutread timeoutremote timeoutsmtpd \
 timeoutwrite tlsclientciphers tlsclients tlsserverciphers todointerval virtualdomains \
 signaturedomains nosignaturedomains goodrcptto goodrcptpatterns qbase greylist.white
 do
-	echo "%ghost %config(noreplace,missingok)               %{qsysconfdir}/control/$i"
-	echo $i 1>&3
-	$TOUCH %{buildroot}%{qsysconfdir}/control/$i
+  echo "%ghost %config(noreplace,missingok)               %{qsysconfdir}/control/$i"
+  echo $i 1>&3
+  $TOUCH %{buildroot}%{qsysconfdir}/control/$i
 done
 ) > config_files.list 3>%{buildroot}%{qsysconfdir}/controlfiles
 
@@ -615,7 +615,7 @@ done
 %endif
 %dir %attr(775,root,qmail)        %{qsysconfdir}/etc
 %dir %attr(555,root,qmail)        %{qsysconfdir}/users
-%dir %attr(555,root,qmail)        %{_prefix}/lib/indimail/plugins
+%dir %attr(555,root,qmail)        %{plugindir}
 
 %attr(444,root,root)                              %{qsysconfdir}/controlfiles
 
@@ -628,7 +628,6 @@ done
 %ghost %attr(0644,indimail,indimail)              %{qsysconfdir}/tcp.smtp.cdb
 %ghost %attr(0644,indimail,indimail)              %{qsysconfdir}/tcp.qmtp.cdb
 %ghost %attr(0644,indimail,indimail)              %{qsysconfdir}/tcp.qmqp.cdb
-%ghost %attr(0644,root,root)                      %{qsysconfdir}/services.log
 
 %attr(444,root,root)                              %{qsysconfdir}/indimail-mta.te
 %attr(444,root,root)                              %{qsysconfdir}/indimail-mta.fc
@@ -798,7 +797,6 @@ done
 %attr(555,root,qmail)                   %{_prefix}/bin/822body
 %attr(555,root,qmail)                   %{_prefix}/bin/zdeferrals
 %attr(555,root,qmail)                   %{_prefix}/bin/dktest
-%attr(555,root,qmail)                   %{_prefix}/bin/qmail-scanner-queue.pl
 %attr(555,root,qmail)                   %{_prefix}/bin/rspamstat
 %attr(555,root,qmail)                   %{_prefix}/bin/iftoccfrom
 %attr(555,root,qmail)                   %{_prefix}/bin/zsuids
@@ -1222,67 +1220,42 @@ done
 %attr(444,root,qmail)                   %{shareddir}/boot/upstart
 %attr(444,root,qmail)                   %{shareddir}/boot/systemd
 
-%attr(555,root,qmail)                   %{_prefix}/lib/indimail/plugins/generic.so
-%attr(555,root,qmail)                   %{_prefix}/lib/indimail/plugins/smtpd-plugin.so
-%attr(555,root,qmail)                   %{_prefix}/lib/indimail/plugins/smtpd-plugin0.so
+%attr(555,root,qmail)                   %{plugindir}/generic.so
+%attr(555,root,qmail)                   %{plugindir}/smtpd-plugin.so
+%attr(555,root,qmail)                   %{plugindir}/smtpd-plugin0.so
 %if %tcpserver_plugin != 0
-%attr(555,root,qmail)                   %{_prefix}/lib/indimail/plugins/qmail_smtpd.so
-%attr(555,root,qmail)                   %{_prefix}/lib/indimail/plugins/rblsmtpd.so
+%attr(555,root,qmail)                   %{plugindir}/qmail_smtpd.so
+%attr(555,root,qmail)                   %{plugindir}/rblsmtpd.so
 %endif
 
 %attr(444,root,qmail)                   %{shareddir}/doc/COPYING
 %attr(444,root,qmail)                   %{shareddir}/doc/README.licenses
-%attr(444,root,qmail)                   %{shareddir}/doc/README.indimail
-%attr(444,root,qmail)                   %{shareddir}/doc/README.filters
-%attr(444,root,qmail)                   %{shareddir}/doc/README.qmail
-%attr(444,root,qmail)                   %{shareddir}/doc/README.auth
-%attr(444,root,qmail)                   %{shareddir}/doc/README.clamav
-%attr(444,root,qmail)                   %{shareddir}/doc/README.moreipme
-%attr(444,root,qmail)                   %{shareddir}/doc/README.newline
-%attr(444,root,qmail)                   %{shareddir}/doc/README.qhpsi
-%attr(444,root,qmail)                   %{shareddir}/doc/README.qregex
-%attr(444,root,qmail)                   %{shareddir}/doc/README.queue-fix
-%attr(444,root,qmail)                   %{shareddir}/doc/README.greylist
-%attr(444,root,qmail)                   %{shareddir}/doc/README.recipients
-%attr(444,root,qmail)                   %{shareddir}/doc/README.remote-auth
-%attr(444,root,qmail)                   %{shareddir}/doc/README.spamcontrol
-%attr(444,root,qmail)                   %{shareddir}/doc/README.srs
-%attr(444,root,qmail)                   %{shareddir}/doc/README.starttls
-%attr(444,root,qmail)                   %{shareddir}/doc/README.status
-%attr(444,root,qmail)                   %{shareddir}/doc/README.tls
-%attr(444,root,qmail)                   %{shareddir}/doc/README.wildmat
-%attr(444,root,qmail)                   %{shareddir}/doc/README.surbl
-%attr(444,root,qmail)                   %{shareddir}/doc/INSTALL.maildir
-%attr(444,root,qmail)                   %{shareddir}/doc/TEST.receive
-%attr(444,root,qmail)                   %{shareddir}/doc/INSTALL.alias
-%attr(444,root,qmail)                   %{shareddir}/doc/UPGRADE
-%attr(444,root,qmail)                   %{shareddir}/doc/PIC.local2alias
-%attr(444,root,qmail)                   %{shareddir}/doc/INSTALL.mbox
-%attr(444,root,qmail)                   %{shareddir}/doc/PIC.local2local
-%attr(444,root,qmail)                   %{shareddir}/doc/INSTALL.ids
-%attr(444,root,qmail)                   %{shareddir}/doc/INSTALL.qmail
-%attr(444,root,qmail)                   %{shareddir}/doc/PIC.nullclient
-%attr(444,root,qmail)                   %{shareddir}/doc/PIC.rem2local
-%attr(444,root,qmail)                   %{shareddir}/doc/PIC.relaybad
-%attr(444,root,qmail)                   %{shareddir}/doc/SENDMAIL
+%attr(444,root,qmail)                   %{shareddir}/doc/CREDITS
 %attr(444,root,qmail)                   %{shareddir}/doc/FROMISP
-%attr(444,root,qmail)                   %{shareddir}/doc/REMOVE.binmail
-%attr(444,root,qmail)                   %{shareddir}/doc/PIC.local2ext
-%attr(444,root,qmail)                   %{shareddir}/doc/REMOVE.sendmail
-%attr(444,root,qmail)                   %{shareddir}/doc/AUTOTURN
-%attr(444,root,qmail)                   %{shareddir}/doc/INSTALL.vsm
-%attr(444,root,qmail)                   %{shareddir}/doc/QMAILFAQ
-%attr(444,root,qmail)                   %{shareddir}/doc/INTERNALS
-%attr(444,root,qmail)                   %{shareddir}/doc/INSTALL.ctl
-%attr(444,root,qmail)                   %{shareddir}/doc/TEST.deliver
-%attr(444,root,qmail)                   %{shareddir}/doc/EXTTODO
-%attr(444,root,qmail)                   %{shareddir}/doc/PIC.local2virt
-%attr(444,root,qmail)                   %{shareddir}/doc/PIC.relaygood
-%attr(444,root,qmail)                   %{shareddir}/doc/PIC.local2rem
 %attr(444,root,qmail)                   %{shareddir}/doc/TOISP
+%attr(444,root,qmail)                   %{shareddir}/doc/AUTOTURN
+%attr(444,root,qmail)                   %{shareddir}/doc/INTERNALS
+%attr(444,root,qmail)                   %{shareddir}/doc/EXTTODO
+%attr(444,root,qmail)                   %{shareddir}/doc/README.qmail
+%attr(444,root,qmail)                   %{shareddir}/doc/README.clamav
+%attr(444,root,qmail)                   %{shareddir}/doc/README.greylist
+%attr(444,root,qmail)                   %{shareddir}/doc/README.filters
+%attr(444,root,qmail)                   %{shareddir}/doc/README.moreipme
+%attr(444,root,qmail)                   %{shareddir}/doc/README.recipients
 %if %fedorareview == 0
 %attr(444,root,qmail)                   %{shareddir}/doc/README.logselect
 %endif
+%attr(444,root,qmail)                   %{shareddir}/doc/README.srs
+%attr(444,root,qmail)                   %{shareddir}/doc/README.surbl
+%attr(444,root,qmail)                   %{shareddir}/doc/PIC.local2alias
+%attr(444,root,qmail)                   %{shareddir}/doc/PIC.local2local
+%attr(444,root,qmail)                   %{shareddir}/doc/PIC.nullclient
+%attr(444,root,qmail)                   %{shareddir}/doc/PIC.rem2local
+%attr(444,root,qmail)                   %{shareddir}/doc/PIC.relaybad
+%attr(444,root,qmail)                   %{shareddir}/doc/PIC.local2ext
+%attr(444,root,qmail)                   %{shareddir}/doc/PIC.local2virt
+%attr(444,root,qmail)                   %{shareddir}/doc/PIC.relaygood
+%attr(444,root,qmail)                   %{shareddir}/doc/PIC.local2rem
 
 %if %noperms == 0
 %if 0%{?suse_version} >= 1120
@@ -1446,9 +1419,9 @@ done
 # preun         -        0         1         -
 # postun        -        0         1         -
 # posttrans     0        -         0
-# The scriptlets in %pre and %post are respectively run before and after a package is installed.
-# The scriptlets %preun and %postun are run before and after a package is uninstalled.
-# The scriptlets %pretrans and %posttrans are run at start and end of a transaction.
+# The scriptlets in %%pre and %%post are respectively run before and after a package is installed.
+# The scriptlets %%preun and %%postun are run before and after a package is uninstalled.
+# The scriptlets %%pretrans and %%posttrans are run at start and end of a transaction.
 # On upgrade, the scripts are run in the following order:
 #
 #   1. pretrans of new package
@@ -1464,11 +1437,11 @@ done
 %verifyscript
 ID=$(id -u)
 if [ $ID -ne 0 ] ; then
-	echo "You are not root" 1>&2
-	exit 1
+  echo "You are not root" 1>&2
+  exit 1
 fi
 %{_prefix}/sbin/svctool --check-install --servicedir=%{servicedir} \
-	--qbase=%{qbase} --qcount=%{qcount} --qstart=1
+  --qbase=%{qbase} --qcount=%{qcount} --qstart=1
 
 %if %noperms == 0
 %if 0%{?suse_version} >= 1120
@@ -1477,7 +1450,7 @@ fi
 %verify_permissions -e %{_prefix}/sbin/qmail-queue
 %verify_permissions -e %{_prefix}/sbin/qscanq
 %verify_permissions -e %{_prefix}/alias
-#%verify_permissions -e %{_prefix}/autoturn
+%verify_permissions -e %{_prefix}/autoturn
 %endif
 %endif
 
@@ -1486,39 +1459,39 @@ fi
 argv1=$1
 ID=$(id -u)
 if [ $ID -ne 0 ] ; then
-	echo "You are not root" 1>&2
-	exit 1
+  echo "You are not root" 1>&2
+  exit 1
 fi
 if [ -f %{_prefix}/sbin/initsvc ] ; then
-	%{_prefix}/sbin/initsvc -status
+  %{_prefix}/sbin/initsvc -status
 fi
 
 echo "Giving IndiMail exactly 5 seconds to exit nicely"
 if test -f %{_sysconfdir}/init/svscan.conf
 then
-	/sbin/initctl emit qmailstop > /dev/null 2>&1
+  /sbin/initctl emit qmailstop > /dev/null 2>&1
 elif test -f %{_sysconfdir}/event.d/svscan
 then
-	/sbin/initctl emit qmailstop > /dev/null 2>&1
+  /sbin/initctl emit qmailstop > /dev/null 2>&1
 elif test -f %{_sysconfdir}/systemd/system/multi-user.target.wants/indimail.service
 then
-	/bin/systemctl stop indimail.service > /dev/null 2>&1
+  /bin/systemctl stop indimail.service > /dev/null 2>&1
 elif test -x %{_prefix}/sbin/initsvc
 then
-	%{_prefix}/sbin/initsvc -status || /etc/init.d/indimail stop || true
-	%{_prefix}/sbin/initsvc -off || true
+  %{_prefix}/sbin/initsvc -status || /etc/init.d/indimail stop || true
+  %{_prefix}/sbin/initsvc -off || true
 else
-	/etc/init.d/indimail stop
-  	/bin/grep "^SV:" /etc/inittab |/bin/grep svscan |/bin/grep respawn >/dev/null
-	if [ $? -eq 0 ] ; then
-		/bin/grep -v "svscan" /etc/inittab > /etc/inittab.svctool.$$
-		if [ $? -eq 0 ] ; then
-			/bin/mv /etc/inittab.svctool.$$ /etc/inittab
-			/sbin/init q
-		else
-			%{__rm} -f /etc/inittab.svctool.$$
-		fi
-	fi
+  /etc/init.d/indimail stop
+  /bin/grep "^SV:" /etc/inittab |/bin/grep svscan |/bin/grep respawn >/dev/null
+  if [ $? -eq 0 ] ; then
+    /bin/grep -v "svscan" /etc/inittab > /etc/inittab.svctool.$$
+    if [ $? -eq 0 ] ; then
+      %{__mv} /etc/inittab.svctool.$$ /etc/inittab
+      /sbin/init q
+    else
+      %{__rm} -f /etc/inittab.svctool.$$
+    fi
+  fi
 fi
 sleep 5
 
@@ -1527,12 +1500,12 @@ sleep 5
 argv1=$1
 ID=$(id -u)
 if [ $ID -ne 0 ] ; then
-	echo "You are not root" 1>&2
-	exit 1
+  echo "You are not root" 1>&2
+  exit 1
 fi
 # we are doing upgrade
 if [ $argv1 -eq 2 ] ; then
-	exit 0
+  exit 0
 fi
 #
 # Create a users and groups. Do not report any problems if they already
@@ -1540,14 +1513,14 @@ fi
 #
 nscd_up=`ps -ef |grep nscd |grep -v grep|wc -l`
 if [ $nscd_up -ge 1 ] ; then
-	if [ -x %{_sysconfdir}/init.d/nscd ] ; then
-		%{_sysconfdir}/init.d/nscd stop
-	fi
+  if [ -x %{_sysconfdir}/init.d/nscd ] ; then
+    %{_sysconfdir}/init.d/nscd stop
+  fi
 fi
 echo "Adding IndiMail users/groups"
 /usr/bin/getent group %groupname  > /dev/null || /usr/sbin/groupadd -r -g %gid %groupname || true
 if [ $? = 4 ] ; then
-	/usr/sbin/groupadd %groupname
+  /usr/sbin/groupadd %groupname
 fi
 /usr/bin/getent group nofiles   > /dev/null || /usr/sbin/groupadd nofiles  || true
 /usr/bin/getent group qmail     > /dev/null || /usr/sbin/groupadd qmail    || true
@@ -1555,7 +1528,7 @@ fi
 
 /usr/bin/getent passwd %username > /dev/null || /usr/sbin/useradd -r -g %groupname -u %uid -d %{qmaildir} %username || true
 if [ $? = 4 ] ; then
-	/usr/sbin/useradd -r -g %groupname -d %{qmaildir} %username
+  /usr/sbin/useradd -r -g %groupname -d %{qmaildir} %username
 fi
 /usr/bin/getent passwd alias    > /dev/null || /usr/sbin/useradd -M -g nofiles  -d %{qmaildir}/alias  -s /sbin/nologin alias  || true
 /usr/bin/getent passwd qmaild   > /dev/null || /usr/sbin/useradd -M -g nofiles  -d %{qmaildir}        -s /sbin/nologin qmaild || true
@@ -1568,12 +1541,12 @@ fi
 
 for i in %username alias qmaild qmaill qmailp qmailq qmailr qmails qscand
 do
-	%{__rm} -f /var/spool/mail/$i
+  %{__rm} -f /var/spool/mail/$i
 done
 if [ $nscd_up -ge 1 ] ; then
-	if [ -x %{_sysconfdir}/init.d/nscd ] ; then
-		%{_sysconfdir}/init.d/nscd start
-	fi
+  if [ -x %{_sysconfdir}/init.d/nscd ] ; then
+    %{_sysconfdir}/init.d/nscd start
+  fi
 fi
 
 ### SCRIPTLET ###############################################################################
@@ -1581,28 +1554,28 @@ fi
 argv1=$1
 ID=$(id -u)
 if [ $ID -ne 0 ] ; then
-	echo "You are not root" 1>&2
-	exit 1
+  echo "You are not root" 1>&2
+  exit 1
 fi
 if [ $argv1 -eq 2 ] ; then # upgrade
-	if [ -f %{shareddir}/boot/rpm.init ] ; then
-		/sbin/ldconfig
-		echo "Running Custom Upgrade Script for post"
-		/bin/sh %{shareddir}/boot/rpm.init upgrade
-	fi
-	echo "doing post upgrade activities"
-	(
-	# selinux
-	%{_prefix}/sbin/svctool --config=selinux
-	) >> /tmp/indimail-mta-install.log 2>&1
-	exit 0
+  if [ -f %{shareddir}/boot/rpm.init ] ; then
+    /sbin/ldconfig
+    echo "Running Custom Upgrade Script for post"
+    /bin/sh %{shareddir}/boot/rpm.init upgrade
+  fi
+  echo "doing post upgrade activities"
+  (
+  # selinux
+  %{_prefix}/sbin/svctool --config=selinux
+  ) >> /tmp/indimail-mta-install.log 2>&1
+  exit 0
 fi
 if [ -x /bin/touch ] ; then
-	TOUCH=/bin/touch
+  TOUCH=/bin/touch
 elif [ -x /usr/bin/touch ] ; then
-	TOUCH=/usr/bin/touch
+  TOUCH=/usr/bin/touch
 else
-	TOUCH=/bin/touch
+  TOUCH=/bin/touch
 fi
 
 echo "Doing post installation activities for the following"
@@ -1629,53 +1602,53 @@ echo ""
 (
 echo "Creating %{logdir}"
 if [ ! -d %{logdir} ] ; then
-	%{__mkdir_p} %{logdir}
+  %{__mkdir_p} %{logdir}
 fi
 %{__chown} -R qmaill:nofiles %{logdir}
 
 if [ -d /service ] ; then
-	echo "UFO found in /service. Moving it to /service.org"
-	%{__mv} -f %{servicedir} %{servicedir}.org
+  echo "UFO found in /service. Moving it to /service.org"
+  %{__mv} -f %{servicedir} %{servicedir}.org
 fi
 
 # svscanlog service
 %{_prefix}/sbin/svctool --svscanlog --servicedir=%{servicedir}
 
 %{_prefix}/sbin/svctool --config=qmail --postmaster=%{qmaildir}/alias/Maildir/ \
-	--default-domain=indimail.org
+  --default-domain=indimail.org
 
 if [ -f %{shareddir}/boot/rpm.init ] ; then
-	echo "Running Custom Installation Script for post"
-	/bin/sh %{shareddir}/boot/rpm.init post
+  echo "Running Custom Installation Script for post"
+  /bin/sh %{shareddir}/boot/rpm.init post
 fi
 
 if [ %nodksignatures -eq 0 ] ; then
-	if [ -x %{_prefix}/bin/dknewkey ] ; then
-		ver_opt="both"
-		sign_opt="both"
-		if [ " $key_bit" = " " ] ; then
-			key_bit=1024
-		fi
-		%{_prefix}/bin/dknewkey %{qsysconfdir}/control/domainkeys/%{dkimkeyfn} $key_bit
-	else
-		ver_opt="none"
-		sign_opt="none"
-	fi
+  if [ -x %{_prefix}/bin/dknewkey ] ; then
+    ver_opt="both"
+    sign_opt="both"
+    if [ " $key_bit" = " " ] ; then
+      key_bit=1024
+    fi
+    %{_prefix}/bin/dknewkey %{qsysconfdir}/control/domainkeys/%{dkimkeyfn} $key_bit
+  else
+    ver_opt="none"
+    sign_opt="none"
+  fi
 else
-	ver_opt="none"
-	sign_opt="none"
+  ver_opt="none"
+  sign_opt="none"
 fi
 
 %if %noperms == 0
 %if 0%{?suse_version} >= 1120
 %if 0%{?set_permissions:1} > 0
-	if [ ! -f /tmp/no_permissions ] ; then
-    	%set_permissions %{name}
-	fi
+  if [ ! -f /tmp/no_permissions ] ; then
+    %set_permissions %{name}
+  fi
 %else
-	if [ ! -f /tmp/no_permissions ] ; then
-    	%run_permissions
-	fi
+  if [ ! -f /tmp/no_permissions ] ; then
+    %run_permissions
+  fi
 %endif
 %endif
 %endif
@@ -1693,86 +1666,86 @@ fi
 
 # Define QHPSI for inline virus scanning by qmail-queue
 if [ %{noclamav} -eq 0 ] ; then
-	echo "Checking if clamav is installed"
-	clamav_os=0
-	clamdPrefix=%{_prefix}
-	qhpsi="%{_prefix}/bin/clamdscan %s --fdpass --quiet --no-summary"
-	mysysconfdir=%{_prefix}/etc
+  echo "Checking if clamav is installed"
+  clamav_os=0
+  clamdPrefix=%{_prefix}
+  qhpsi="%{_prefix}/bin/clamdscan %s --fdpass --quiet --no-summary"
+  mysysconfdir=%{_prefix}/etc
 else
-	if [ -f /usr/sbin/clamd -a -f /usr/bin/clamdscan ] ; then
-		clamav_os=1
-		clamdPrefix="/usr"
-		qhpsi="/usr/bin/clamdscan %s --fdpass --quiet --no-summary"
-		mysysconfdir=%{_sysconfdir}
-	else
-		clamav_os=0
-	fi
+  if [ -f /usr/sbin/clamd -a -f /usr/bin/clamdscan ] ; then
+    clamav_os=1
+    clamdPrefix="/usr"
+    qhpsi="/usr/bin/clamdscan %s --fdpass --quiet --no-summary"
+    mysysconfdir=%{_sysconfdir}
+  else
+    clamav_os=0
+  fi
 fi
 
 # SMTP ports
 for port in 465 25 587
 do
-	if [ $port -eq 465 ] ; then
-		extra_opt="--skipsend --ssl"
-		extra_opt="$extra_opt --rbl=-rzen.spamhaus.org --rbl=-rdnsbl-1.uceprotect.net"
-	elif [ $port -eq 587 ] ; then
-		extra_opt="--skipsend --authsmtp --antispoof"
-	else
-		extra_opt="--remote-authsmtp=plain --localfilter --remotefilter"
-		extra_opt="$extra_opt --deliverylimit-count=-1 --deliverylimit-size=-1"
-		extra_opt="$extra_opt --rbl=-rzen.spamhaus.org --rbl=-rdnsbl-1.uceprotect.net"
-	fi
+  if [ $port -eq 465 ] ; then
+    extra_opt="--skipsend --ssl"
+    extra_opt="$extra_opt --rbl=-rzen.spamhaus.org --rbl=-rdnsbl-1.uceprotect.net"
+  elif [ $port -eq 587 ] ; then
+    extra_opt="--skipsend --authsmtp --antispoof"
+  else
+    extra_opt="--remote-authsmtp=plain --localfilter --remotefilter"
+    extra_opt="$extra_opt --deliverylimit-count=-1 --deliverylimit-size=-1"
+    extra_opt="$extra_opt --rbl=-rzen.spamhaus.org --rbl=-rdnsbl-1.uceprotect.net"
+  fi
 %if %{tcpserver_plugin} == 1
-		extra_opt="$extra_opt --shared-objects=1"
+    extra_opt="$extra_opt --shared-objects=1"
 %endif
-	if [ %{noclamav} -eq 0 -o $clamav_os -eq 1 ] ; then
-		%{_prefix}/sbin/svctool --smtp=$port --servicedir=%{servicedir} \
-			--qbase=%{qbase} --qcount=%{qcount} --qstart=1 \
-			--query-cache --dnscheck --password-cache \
-			--cntrldir=control --localip=0 --maxdaemons=75 --maxperip=25 --persistdb \
-			--starttls --fsync --syncdir --memory=%{smtp_soft_mem} --chkrecipient --chkrelay --masquerade \
-			--min-free=52428800 --content-filter \
-			--qhpsi="$qhpsi" \
-			--dmasquerade \
-			--dkverify=both \
-			--dksign=both --private_key=%{qsysconfdir}/control/domainkeys/%/%{dkimkeyfn} \
-			$extra_opt
-	else
-		%{_prefix}/sbin/svctool --smtp=$port --servicedir=%{servicedir} \
-			--qbase=%{qbase} --qcount=%{qcount} --qstart=1 \
-			--query-cache --dnscheck --password-cache \
-			--cntrldir=control --localip=0 --maxdaemons=75 --maxperip=25 --persistdb \
-			--starttls --fsync --syncdir --memory=%{smtp_soft_mem} --chkrecipient --chkrelay --masquerade \
-			--min-free=52428800 --content-filter --virus-filter \
-			--dmasquerade \
-			--dkverify=both \
-			--dksign=both --private_key=%{qsysconfdir}/control/domainkeys/%/%{dkimkeyfn} \
-			$extra_opt
-	fi
-	echo "1" > %{servicedir}/qmail-smtpd.$port/variables/DISABLE_PLUGIN
+  if [ %{noclamav} -eq 0 -o $clamav_os -eq 1 ] ; then
+    %{_prefix}/sbin/svctool --smtp=$port --servicedir=%{servicedir} \
+      --qbase=%{qbase} --qcount=%{qcount} --qstart=1 \
+      --query-cache --dnscheck --password-cache \
+      --cntrldir=control --localip=0 --maxdaemons=75 --maxperip=25 --persistdb \
+      --starttls --fsync --syncdir --memory=%{smtp_soft_mem} --chkrecipient --chkrelay --masquerade \
+      --min-free=52428800 --content-filter \
+      --qhpsi="$qhpsi" \
+      --dmasquerade \
+      --dkverify=both \
+      --dksign=both --private_key=%{qsysconfdir}/control/domainkeys/%/%{dkimkeyfn} \
+      $extra_opt
+  else
+    %{_prefix}/sbin/svctool --smtp=$port --servicedir=%{servicedir} \
+      --qbase=%{qbase} --qcount=%{qcount} --qstart=1 \
+      --query-cache --dnscheck --password-cache \
+      --cntrldir=control --localip=0 --maxdaemons=75 --maxperip=25 --persistdb \
+      --starttls --fsync --syncdir --memory=%{smtp_soft_mem} --chkrecipient --chkrelay --masquerade \
+      --min-free=52428800 --content-filter --virus-filter \
+      --dmasquerade \
+      --dkverify=both \
+      --dksign=both --private_key=%{qsysconfdir}/control/domainkeys/%/%{dkimkeyfn} \
+      $extra_opt
+  fi
+  echo "1" > %{servicedir}/qmail-smtpd.$port/variables/DISABLE_PLUGIN
 done
 
 # queue parameters in control/defaultqueue for qmail-inject, sendmail
 if [ %{noclamav} -eq 0 -o $clamav_os -eq 1 ] ; then
-	%{_prefix}/sbin/svctool --queueParam=defaultqueue \
-		--qbase=%{qbase} --qcount=%{qcount} --qstart=1 \
-		--min-free=52428800 --fsync --syncdir \
-		--qhpsi="$qhpsi" \
-		--dkverify="none" --dksign=$sign_opt \
-		--private_key=%{qsysconfdir}/control/domainkeys/%/%{dkimkeyfn} \
-		$extra_opt
+  %{_prefix}/sbin/svctool --queueParam=defaultqueue \
+    --qbase=%{qbase} --qcount=%{qcount} --qstart=1 \
+    --min-free=52428800 --fsync --syncdir \
+    --qhpsi="$qhpsi" \
+    --dkverify="none" --dksign=$sign_opt \
+    --private_key=%{qsysconfdir}/control/domainkeys/%/%{dkimkeyfn} \
+    $extra_opt
 else
-	%{_prefix}/sbin/svctool --queueParam=defaultqueue \
-		--qbase=%{qbase} --qcount=%{qcount} --qstart=1 \
-		--min-free=52428800 --fsync --syncdir --virus-filter \
-		--dkverify="none" --dksign=$sign_opt \
-		--private_key=%{qsysconfdir}/control/domainkeys/%/%{dkimkeyfn} \
-		$extra_opt
+  %{_prefix}/sbin/svctool --queueParam=defaultqueue \
+    --qbase=%{qbase} --qcount=%{qcount} --qstart=1 \
+    --min-free=52428800 --fsync --syncdir --virus-filter \
+    --dkverify="none" --dksign=$sign_opt \
+    --private_key=%{qsysconfdir}/control/domainkeys/%/%{dkimkeyfn} \
+    $extra_opt
 fi
 
 # ODMR service
 %{_prefix}/sbin/svctool --smtp=366 --odmr --servicedir=%{servicedir} \
-	--query-cache --password-cache
+  --query-cache --password-cache
 echo "1" > %{servicedir}/qmail-smtpd.366/variables/DISABLE_PLUGIN
 
 # Greylist daemon
@@ -1781,34 +1754,34 @@ echo "1" > %{servicedir}/qmail-smtpd.366/variables/DISABLE_PLUGIN
     --hash-size=65536 --save-interval=5 --whitelist=greylist.white
 # qmail-qmtpd service
 %{_prefix}/sbin/svctool --qmtp=209 --servicedir=%{servicedir} --qbase=%{qbase} \
-	--qcount=%{qcount} --qstart=1 --cntrldir=control --localip=0 --maxdaemons=75 --maxperip=25 \
-	--fsync --syncdir --memory=%{qmtp_soft_mem} --min-free=52428800
+  --qcount=%{qcount} --qstart=1 --cntrldir=control --localip=0 --maxdaemons=75 --maxperip=25 \
+  --fsync --syncdir --memory=%{qmtp_soft_mem} --min-free=52428800
 # qmail-qmqpd service
 %{_prefix}/sbin/svctool --qmqp=628 --servicedir=%{servicedir} --qbase=%{qbase} \
-	--qcount=%{qcount} --qstart=1 --cntrldir=control --localip=0 --maxdaemons=75 --maxperip=25 \
-	--fsync --syncdir --memory=%{qmqp_soft_mem} --min-free=52428800
+  --qcount=%{qcount} --qstart=1 --cntrldir=control --localip=0 --maxdaemons=75 --maxperip=25 \
+  --fsync --syncdir --memory=%{qmqp_soft_mem} --min-free=52428800
 $TOUCH %{servicedir}/qmail-qmqpd.628/down
 
 # virus/spam filtering
 %{_prefix}/sbin/svctool --qscanq --servicedir=%{servicedir} --scanint=200
 if [ %{noclamav} -eq 0 -o $clamav_os -eq 1 ] ; then
-	%{_prefix}/sbin/svctool --config=clamd
-	# create clamd, freshclam service
-	%{_prefix}/sbin/svctool --clamd --servicedir=%{servicedir} --clamdPrefix=$clamdPrefix \
-		--sysconfdir=$mysysconfdir
-	if [ $clamav_os -eq 1 ] ; then
-		echo "Checking if clamd/freshclam is running"
-		count=`ps -e|grep clamd|wc -l`
-		if [ $count -gt 0 ] ; then
-			echo "Disabling clamd service"
-			$TOUCH %{servicedir}/clamd/down
-		fi
-		count=`ps -e|grep freshclam|wc -l`
-		if [ $count -gt 0 ] ; then
-			echo "Disabling freshclam service"
-			$TOUCH %{servicedir}/freshclam/down
-		fi
-	fi
+  %{_prefix}/sbin/svctool --config=clamd
+  # create clamd, freshclam service
+  %{_prefix}/sbin/svctool --clamd --servicedir=%{servicedir} --clamdPrefix=$clamdPrefix \
+    --sysconfdir=$mysysconfdir
+  if [ $clamav_os -eq 1 ] ; then
+    echo "Checking if clamd/freshclam is running"
+    count=`ps -e|grep clamd|wc -l`
+    if [ $count -gt 0 ] ; then
+      echo "Disabling clamd service"
+      $TOUCH %{servicedir}/clamd/down
+    fi
+    count=`ps -e|grep freshclam|wc -l`
+    if [ $count -gt 0 ] ; then
+      echo "Disabling freshclam service"
+      $TOUCH %{servicedir}/freshclam/down
+    fi
+  fi
 fi
 
 # udplogger service
@@ -1841,9 +1814,9 @@ EOF
 # Recreate ld.so links and cache
 if [ ! " %{_libdir}" = " /usr/lib" -a ! " ${_libdir}" = " /usr/lib64" ] ; then
 if [ -d %{_sysconfdir}/ld.so.conf.d ] ; then
-	(
-		echo %{_libdir}
-	) > %{_sysconfdir}/ld.so.conf.d/indimail-%{_arch}.conf
+  (
+    echo %{_libdir}
+  ) > %{_sysconfdir}/ld.so.conf.d/indimail-%{_arch}.conf
 fi
 /sbin/ldconfig
 fi
@@ -1851,12 +1824,12 @@ fi
 # rebuild cdb
 for i in smtp qmtp qmqp
 do
-	for j in `/bin/ls %{qsysconfdir}/tcp*.$i 2>/dev/null`
-	do
-		echo "Creating CDB $j.cdb"
-   		%{_prefix}/bin/tcprules $j.cdb $j.tmp < $j && /bin/chmod 664 $j.cdb \
-			&& chown indimail:indimail $j.cdb
-	done
+  for j in `/bin/ls %{qsysconfdir}/tcp*.$i 2>/dev/null`
+  do
+    echo "Creating CDB $j.cdb"
+       %{_prefix}/bin/tcprules $j.cdb $j.tmp < $j && /bin/chmod 664 $j.cdb \
+      && chown indimail:indimail $j.cdb
+  done
 done
 
 # selinux
@@ -1870,22 +1843,22 @@ echo "adding indimail startup"
 ) >> /tmp/indimail-mta.install.log 2>&1
 
 if [ -x /bin/systemctl ] ; then
-	/bin/systemctl enable indimail.service
+  /bin/systemctl enable indimail.service
 fi
 if [ -f %{_sysconfdir}/init/svscan.conf -o -f %{_sysconfdir}/event.d/svscan ] ; then
-	echo "1. Issue /sbin/initctl emit qmailstart to start services"
-	count=1
+  echo "1. Issue /sbin/initctl emit qmailstart to start services"
+  count=1
 elif [ -f %{_sysconfdir}/systemd/system/multi-user.target.wants/indimail.service ] ; then
-	echo "1. Issue /bin/systemctl start indimail.service to start services"
-	count=1
+  echo "1. Issue /bin/systemctl start indimail.service to start services"
+  count=1
 else
-	if [ -f %{_prefix}/sbin/initsvc ] ; then
-	echo "1. Issue %{_prefix}/sbin/initsvc -on"
-	else
-	echo "1. Issue /etc/init.d/indimail start"
-	fi
-	echo "2. Issue /sbin/init q to start services"
-	count=2
+  if [ -f %{_prefix}/sbin/initsvc ] ; then
+  echo "1. Issue %{_prefix}/sbin/initsvc -on"
+  else
+  echo "1. Issue /etc/init.d/indimail start"
+  fi
+  echo "2. Issue /sbin/init q to start services"
+  count=2
 fi
 count=`expr $count + 1`
 echo "$count. Change your default domain in %{qsysconfdir}/control/defaultdomain"
@@ -1904,70 +1877,70 @@ fi
 argv1=$1
 ID=$(id -u)
 if [ $ID -ne 0 ] ; then
-	echo "You are not root" 1>&2
-	exit 1
+  echo "You are not root" 1>&2
+  exit 1
 fi
 (
 echo "Giving IndiMail exactly 5 seconds to exit nicely"
 if test -f %{_sysconfdir}/init/svscan.conf
 then
-	/sbin/initctl emit qmailstop > /dev/null 2>&1
-	if [ $argv1 -ne 1 ] ; then # not an upgrade
-		%{__rm} -f %{_sysconfdir}/init/svscan.conf
-	fi
+  /sbin/initctl emit qmailstop > /dev/null 2>&1
+  if [ $argv1 -ne 1 ] ; then # not an upgrade
+    %{__rm} -f %{_sysconfdir}/init/svscan.conf
+  fi
 elif test -f %{_sysconfdir}/event.d/svscan
 then
-	/sbin/initctl emit qmailstop > /dev/null 2>&1
-	if [ $argv1 -ne 1 ] ; then # not an upgrade
-		%{__rm} -f %{_sysconfdir}/event.d/svscan
-	fi
+  /sbin/initctl emit qmailstop > /dev/null 2>&1
+  if [ $argv1 -ne 1 ] ; then # not an upgrade
+    %{__rm} -f %{_sysconfdir}/event.d/svscan
+  fi
 elif test -f %{_sysconfdir}/systemd/system/multi-user.target.wants/indimail.service
 then
-	/bin/systemctl stop indimail.service > /dev/null 2>&1
+  /bin/systemctl stop indimail.service > /dev/null 2>&1
 elif test -x %{_prefix}/sbin/initsvc
 then
-	%{_prefix}/sbin/initsvc -status || /etc/init.d/indimail stop || true
-	%{_prefix}/sbin/initsvc -off || true
+  %{_prefix}/sbin/initsvc -status || /etc/init.d/indimail stop || true
+  %{_prefix}/sbin/initsvc -off || true
 else
-	/etc/init.d/indimail stop || true
-  	/bin/grep "^sv:" /etc/inittab |/bin/grep svscan |/bin/grep respawn >/dev/null
-	if [ $? -eq 0 ] ; then
-		/bin/grep -v "svscan" /etc/inittab > /etc/inittab.svctool.$$
-		if [ $? -eq 0 ] ; then
-			/bin/mv /etc/inittab.svctool.$$ /etc/inittab
-			/sbin/init q
-		else
-			%{__rm} -f /etc/inittab.svctool.$$
-		fi
-	fi
+  /etc/init.d/indimail stop || true
+    /bin/grep "^sv:" /etc/inittab |/bin/grep svscan |/bin/grep respawn >/dev/null
+  if [ $? -eq 0 ] ; then
+    /bin/grep -v "svscan" /etc/inittab > /etc/inittab.svctool.$$
+    if [ $? -eq 0 ] ; then
+      /bin/mv /etc/inittab.svctool.$$ /etc/inittab
+      /sbin/init q
+    else
+      %{__rm} -f /etc/inittab.svctool.$$
+    fi
+  fi
 fi
 sleep 5
 if [ -f %{shareddir}/boot/rpm.init ] ; then
-	echo "Running Custom Un-Installation Script for preun"
-	/bin/sh %{shareddir}/boot/rpm.init preun "$argv1"
+  echo "Running Custom Un-Installation Script for preun"
+  /bin/sh %{shareddir}/boot/rpm.init preun "$argv1"
 fi
 
 # we are doing upgrade
 if [ $argv1 -eq 1 ] ; then
-	exit 0
+  exit 0
 fi
 
 if [ -f /etc/init.d/sendmail ] ; then
-	if [ -f /sbin/chkconfig ] ; then
-		/sbin/chkconfig --add sendmail
-	fi
+  if [ -f /sbin/chkconfig ] ; then
+    /sbin/chkconfig --add sendmail
+  fi
 fi
 if [ -x /usr/sbin/alternatives ] ; then
-	/usr/sbin/alternatives --remove mta %{_prefix}/bin/sendmail
-	/usr/sbin/alternatives --auto mta
+  /usr/sbin/alternatives --remove mta %{_prefix}/bin/sendmail
+  /usr/sbin/alternatives --auto mta
 else
-	for i in /usr/lib/sendmail /usr/sbin/sendmail; do
-		if [ -f $i.old -o -L $i.old ]; then
-			echo "restoring sendmail"
-			%{__rm} -f $i
-			%{__mv} $i.old $i
-		fi
-	done
+  for i in /usr/lib/sendmail /usr/sbin/sendmail; do
+    if [ -f $i.old -o -L $i.old ]; then
+      echo "restoring sendmail"
+      %{__rm} -f $i
+      %{__mv} $i.old $i
+    fi
+  done
 fi
 # Remove IndiMail being started on system boot
 echo "removing indimail startup"
@@ -1979,112 +1952,112 @@ echo "removing indimail startup"
 argv1=$1
 ID=$(id -u)
 if [ $ID -ne 0 ] ; then
-	echo "You are not root" 1>&2
-	exit 1
+  echo "You are not root" 1>&2
+  exit 1
 fi
 # we are doing upgrade
 if [ $argv1 -eq 1 ] ; then
-	echo "recreating ld.so cache"
-	/sbin/ldconfig
-	exit 0
+  echo "recreating ld.so cache"
+  /sbin/ldconfig
+  exit 0
 fi
 (
 # remove users / groups
 nscd_up=`ps -ef |grep nscd |grep -v grep|wc -l`
 if [ $nscd_up -ge 1 ] ; then
-	if [ -x %{_sysconfdir}/init.d/nscd ] ; then
-		%{_sysconfdir}/init.d/nscd stop
-	fi
+  if [ -x %{_sysconfdir}/init.d/nscd ] ; then
+    %{_sysconfdir}/init.d/nscd stop
+  fi
 fi
 for i in alias qmaild qmaill qmailp qmailq qmailr qmails qscand indimail
 do
-	echo "Removing user $i"
-	/usr/bin/getent passwd $i > /dev/null && /usr/sbin/userdel $i >/dev/null || true
+  echo "Removing user $i"
+  /usr/bin/getent passwd $i > /dev/null && /usr/sbin/userdel $i >/dev/null || true
 done
 for i in nofiles qmail qscand indimail
 do
-	echo "Removing group $i"
-	/usr/bin/getent group $i > /dev/null && /usr/sbin/groupdel $i  >/dev/null || true
+  echo "Removing group $i"
+  /usr/bin/getent group $i > /dev/null && /usr/sbin/groupdel $i  >/dev/null || true
 done
 if [ $nscd_up -ge 1 ] ; then
-	if [ -x %{_sysconfdir}/init.d/nscd ] ; then
-		%{_sysconfdir}/init.d/nscd start
-	fi
+  if [ -x %{_sysconfdir}/init.d/nscd ] ; then
+    %{_sysconfdir}/init.d/nscd start
+  fi
 fi
 
 if [ %{_prefix} = "/var/indimail" -o %{_prefix} = "/var/qmail" ] ; then
-	echo "removing binaries, libraries, queues, man pages"
-	for i in %{_prefix}/bin %{_prefix}/sbin %{_prefix}/lib %{qmaildir}/queue \
-		%{mandir}/man1 %{mandir}/cat1 %{mandir}/man5 %{mandir}/cat5 \
-		%{mandir}/man7 %{mandir}/cat7 %{mandir}/man8 %{mandir}/cat8
-	do
-		%{__rm} -rf $i || true
-	done
-	/bin/rmdir --ignore-fail-on-non-empty %{mandir} 2>/dev/null
-	for i in `/bin/ls %{shareddir} 2>/dev/null`
-	do
-		%{__rm} -rf %{shareddir}/$i || true
-	done
+  echo "removing binaries, libraries, queues, man pages"
+  for i in %{_prefix}/bin %{_prefix}/sbin %{_prefix}/lib %{qmaildir}/queue \
+    %{mandir}/man1 %{mandir}/cat1 %{mandir}/man5 %{mandir}/cat5 \
+    %{mandir}/man7 %{mandir}/cat7 %{mandir}/man8 %{mandir}/cat8
+  do
+    %{__rm} -rf $i || true
+  done
+  /bin/rmdir --ignore-fail-on-non-empty %{mandir} 2>/dev/null
+  for i in `/bin/ls %{shareddir} 2>/dev/null`
+  do
+    %{__rm} -rf %{shareddir}/$i || true
+  done
 else
-	for i in bin sbin control users
-	do
-		echo "removing link $i"
-		%{__rm} -f %{qmaildir}/$i || true
-	done
-	# queue
-	%{__rm} -rf %{qmaildir}/queue || true
-	# modules
-	%{__rm} -rf %{_prefix}/lib/indimail || true
-	# shareddir
-	if [ ! " %{shareddir}" = " /usr/share" ] ; then
-		for i in `/bin/ls %{shareddir} 2>/dev/null`
-		do
-			%{__rm} -rf %{shareddir}/$i || true
-		done
-	fi
-	# libexecdir
-	if [ ! " %{libexecdir}" = " /usr/libexec" ] ; then
-		%{__rm} -rf %{libexecdir} || true
-	fi
+  for i in bin sbin control users
+  do
+    echo "removing link $i"
+    %{__rm} -f %{qmaildir}/$i || true
+  done
+  # queue
+  %{__rm} -rf %{qmaildir}/queue || true
+  # modules
+  %{__rm} -rf %{_prefix}/lib/indimail || true
+  # shareddir
+  if [ ! " %{shareddir}" = " /usr/share" ] ; then
+    for i in `/bin/ls %{shareddir} 2>/dev/null`
+    do
+      %{__rm} -rf %{shareddir}/$i || true
+    done
+  fi
+  # libexecdir
+  if [ ! " %{libexecdir}" = " /usr/libexec" ] ; then
+    %{__rm} -rf %{libexecdir} || true
+  fi
 fi
 if [ -d %{mandir} ] ; then
-echo "removing man pages"
-/bin/rmdir --ignore-fail-on-non-empty %{mandir} 2>/dev/null
+  echo "removing man pages"
+  /bin/rmdir --ignore-fail-on-non-empty %{mandir} 2>/dev/null
 fi
 if [ -d %{shareddir} ] ; then
-echo "removing architecture-independent shared directory"
-/bin/rmdir --ignore-fail-on-non-empty %{shareddir} 2>/dev/null
+  echo "removing architecture-independent shared directory"
+  /bin/rmdir --ignore-fail-on-non-empty %{shareddir} 2>/dev/null
 fi
 
 echo "removing configuration"
 for i in smtp qmtp qmqp
 do
-	for j in `/bin/ls %{qsysconfdir}/tcp*.$i 2>/dev/null`
-	do
-			%{__rm} -f $j.cdb
-	done
+  for j in `/bin/ls %{qsysconfdir}/tcp*.$i 2>/dev/null`
+  do
+      %{__rm} -f $j.cdb
+  done
 done
 %{__rm} -f %{qsysconfdir}/indimail-mta.te %{qsysconfdir}/indimail-mta.mod %{qsysconfdir}/indimail-mta.pp
 /bin/rmdir --ignore-fail-on-non-empty %{qsysconfdir} 2>/dev/null
 for i in assign cdb
 do
-		%{__rm} -f %{qsysconfdir}/users/$i
+    %{__rm} -f %{qsysconfdir}/users/$i
 done
 /bin/rmdir --ignore-fail-on-non-empty %{qsysconfdir}/users 2>/dev/null
 
 if [ -f %{qsysconfdir}/controlfiles ] ; then
-	for i in `%{__cat} %{qsysconfdir}/controlfiles`
-	do
-		%{__rm} -f %{qsysconfdir}/control/$i
-	done
+  for i in `%{__cat} %{qsysconfdir}/controlfiles`
+  do
+    %{__rm} -f %{qsysconfdir}/control/$i
+  done
 else
-	for i in databytes defaultdelivery defaultdomain localiphost locals \
-		me nodnscheck plusdomain queue_base smtpgreeting signatures \
-		chkrcptdomains defaulthost envnoathost filterargs greylist.white \
-		hostip timeoutremote timeoutsmtpd
-	do
-		%{__rm} -f %{qsysconfdir}/control/$i
-	done
+  for i in databytes defaultdelivery defaultdomain localiphost locals \
+    me nodnscheck plusdomain queue_base smtpgreeting signatures \
+    chkrcptdomains defaulthost envnoathost filterargs greylist.white \
+    hostip timeoutremote timeoutsmtpd
+  do
+    %{__rm} -f %{qsysconfdir}/control/$i
+  done
 fi
 %{__rm} -f %{qsysconfdir}/controlfiles
 %{__rm} -f %{qsysconfdir}/control/domainkeys/%{dkimkeyfn}.pub %{qsysconfdir}/control/domainkeys/%dkimkeyfn
@@ -2093,52 +2066,52 @@ fi
 
 for i in postmaster mailer-daemon root ham spam register-ham register-spam
 do
-	%{__rm} -f %{qmaildir}/alias/.qmail-"$i"
+  %{__rm} -f %{qmaildir}/alias/.qmail-"$i"
 done
 /bin/rmdir --ignore-fail-on-non-empty %{qmaildir}/alias 2>/dev/null
 
 echo "removing startup services"
 if [ %{noclamav} -eq 0 ] ; then
-	clamav_os=0
+  clamav_os=0
 else
-	if [ -f /usr/sbin/clamd -a -f /usr/bin/clamdscan ] ; then
-		clamav_os=1
-	else
-		clamav_os=0
-	fi
+  if [ -f /usr/sbin/clamd -a -f /usr/bin/clamdscan ] ; then
+    clamav_os=1
+  else
+    clamav_os=0
+  fi
 fi
 if [ %{noclamav} -eq 0 -o $clamav_os -eq 1 ] ; then
 for i in clamd freshclam
 do
-	if [ -d %{servicedir}/$i ] ; then
-		%{__rm} -rf %{servicedir}/$i || true
-	fi
+  if [ -d %{servicedir}/$i ] ; then
+    %{__rm} -rf %{servicedir}/$i || true
+  fi
 done
 fi
 for i in qmail-send.25 qmail-smtpd.25 qmail-smtpd.366 \
 qmail-spamlog qscanq qmail-smtpd.465 qmail-smtpd.587 qmail-qmtpd.209 \
 qmail-qmqpd.628 greylist.1999 udplogger.3000 .svscan
 do
-	if [ -d %{servicedir}/$i ] ; then
-		%{__rm} -rf %{servicedir}/$i || true
-	fi
+  if [ -d %{servicedir}/$i ] ; then
+    %{__rm} -rf %{servicedir}/$i || true
+  fi
 done
 echo "removing logs"
 count=`/bin/ls %{servicedir} 2>/dev/null| /usr/bin/wc -l`
 if [ $count -eq 0 ] ; then
-	%{__rm} -rf %{servicedir} || true
+  %{__rm} -rf %{servicedir} || true
 fi
 if [ -h %{logdir} ] ; then
-	log_dir=`/bin/ls -ld %{logdir} | /usr/bin/awk '{print $10}'`
+  log_dir=`/bin/ls -ld %{logdir} | /usr/bin/awk '{print $10}'`
 else
-	log_dir=%{logdir}
+  log_dir=%{logdir}
 fi
 [ "$log_dir" != "/" ] && %{__rm} -fr $log_dir
 echo "recreating ld.so cache"
 /sbin/ldconfig
 if [ -f %{shareddir}/boot/rpm.init ] ; then
-	echo "Running Custom Un-Installation Script for postun"
-	/bin/sh %{shareddir}/boot/rpm.init postun
+  echo "Running Custom Un-Installation Script for postun"
+  /bin/sh %{shareddir}/boot/rpm.init postun
 fi
 ) >> /tmp/indimail-mta.uninstall.log 2>&1
 
@@ -2147,18 +2120,18 @@ fi
 argv1=$1
 ID=$(id -u)
 if [ $ID -ne 0 ] ; then
-	echo "You are not root" 1>&2
-	exit 1
+  echo "You are not root" 1>&2
+  exit 1
 fi
 if [ -f %{shareddir}/boot/rpm.init ] ; then
-	echo "Running Custom Installation Script for posttrans"
-	/bin/sh %{shareddir}/boot/rpm.init posttrans
+  echo "Running Custom Installation Script for posttrans"
+  /bin/sh %{shareddir}/boot/rpm.init posttrans
 fi
 echo ""
 
 # fix changelog for openSUSE buildservice
 %changelog
-* Wed May 25 2016 mbhangui@gmail.com @release@-@version@
+* Wed May 25 2016 mbhangui@gmail.com %{version}-%{release}
 Release 1.9.2 Start 13/08/2015
 1.  Added leapsecs program, leapsecs.dat
 2.  Added yearcal, nowutc programs
