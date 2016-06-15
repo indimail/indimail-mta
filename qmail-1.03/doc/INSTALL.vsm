@@ -19,7 +19,7 @@ for the security or reliability of any of those tools.
 
 1. What to configure
 
-The qmail system is started from /var/qmail/rc with
+The qmail system is started from /etc/indimail/control/defaultdeliver with
 
    qmail-start ./Mailbox splogger qmail
 
