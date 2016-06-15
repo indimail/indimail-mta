@@ -51,7 +51,7 @@ Make sure you include the trailing slash on Maildir/.
 
 The system administrator can set up Maildir as the default for everybody
 by creating a maildir in the new-user template directory and replacing
-./Mailbox with ./Maildir/ in /var/qmail/rc.
+./Mailbox with ./Maildir/ in /service/qmail-send.25/run.
 
 Until your MUA supports maildir, you'll probably want to convert maildir
 format to (gaaack) mbox format. I've supplied a maildir2mbox utility

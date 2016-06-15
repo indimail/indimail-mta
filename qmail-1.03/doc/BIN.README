@@ -1,18 +1,18 @@
-Like any other piece of software (and information generally), qmail
+Like any other piece of software (and information generally), indimail-mta
 comes with NO WARRANTY.
 
-Configuration: The qmail home directory is /var/qmail. (This must be a
+Configuration: The indimail-mta home directory is /var/indimail. (This must be a
 local directory, not shared among machines. Under Linux, make sure that
 all mail-handling filesystems are mounted with synchronous metadata.)
 The user-ext delimiter is -. The silent concurrency limit is 120. The
 queue subdirectory split is 23.
 
 To install:
-       # make setup
+       # dnf -y install indimail-mta
 
-To set up qmail to receive and deliver mail, follow the instructions in
-/var/qmail/doc/fastforward/ALIASES, and then start at step 9 of
-/var/qmail/doc/INSTALL.
+To set up indimail-mta to receive and deliver mail, follow the instructions in
+/usr/share/indimail/doc/INSTALL.alias, and then run the command
+/usr/bin/svc -u /service/qmail-send.25
 
 Compilation environment: Oops, the package creator forgot to edit this!
 He's supposed to list his OS version, compiler version, hardware, and

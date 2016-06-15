@@ -1,3 +1,7 @@
+indimail-mta is based on qmail. It incorporates many features over
+and above the original qmail and in most cases you will not require
+to install any patches to upgrade feature list.
+
 qmail is a secure, reliable, efficient, simple message transfer agent.
 It is meant as a replacement for the entire sendmail-binmail system on
 typical Internet-connected UNIX hosts.
