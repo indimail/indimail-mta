@@ -330,17 +330,23 @@
 #
 # docs
 #
-%attr(0444,root,qmail) @shareddir@/doc/AUTOTURN
-%attr(0444,root,qmail) @shareddir@/doc/EXTTODO
+%attr(0444,root,qmail) @shareddir@/doc/COPYING
+%attr(0444,root,qmail) @shareddir@/doc/README.license
+%attr(0444,root,qmail) @shareddir@/doc/CREDITS
 %attr(0444,root,qmail) @shareddir@/doc/FROMISP
-%attr(0444,root,qmail) @shareddir@/doc/INSTALL.alias
-%attr(0444,root,qmail) @shareddir@/doc/INSTALL.ctl
-%attr(0444,root,qmail) @shareddir@/doc/INSTALL.ids
-%attr(0444,root,qmail) @shareddir@/doc/INSTALL.maildir
-%attr(0444,root,qmail) @shareddir@/doc/INSTALL.mbox
-%attr(0444,root,qmail) @shareddir@/doc/INSTALL.qmail
-%attr(0444,root,qmail) @shareddir@/doc/INSTALL.vsm
+%attr(0444,root,qmail) @shareddir@/doc/TOISP
+%attr(0444,root,qmail) @shareddir@/doc/AUTOTURN
 %attr(0444,root,qmail) @shareddir@/doc/INTERNALS
+%attr(0444,root,qmail) @shareddir@/doc/EXTTODO
+%attr(0444,root,qmail) @shareddir@/doc/README.qmail
+%attr(0444,root,qmail) @shareddir@/doc/README.clamav
+%attr(0444,root,qmail) @shareddir@/doc/README.logselect
+%attr(0444,root,qmail) @shareddir@/doc/README.greylist
+%attr(0444,root,qmail) @shareddir@/doc/README.filters
+%attr(0444,root,qmail) @shareddir@/doc/README.moreipme
+%attr(0444,root,qmail) @shareddir@/doc/README.recipients
+%attr(0444,root,qmail) @shareddir@/doc/README.srs
+%attr(0444,root,qmail) @shareddir@/doc/README.surbl
 %attr(0444,root,qmail) @shareddir@/doc/PIC.local2alias
 %attr(0444,root,qmail) @shareddir@/doc/PIC.local2ext
 %attr(0444,root,qmail) @shareddir@/doc/PIC.local2local
@@ -350,35 +356,6 @@
 %attr(0444,root,qmail) @shareddir@/doc/PIC.relaybad
 %attr(0444,root,qmail) @shareddir@/doc/PIC.relaygood
 %attr(0444,root,qmail) @shareddir@/doc/PIC.rem2local
-%attr(0444,root,qmail) @shareddir@/doc/QMAILFAQ
-%attr(0444,root,qmail) @shareddir@/doc/README.auth
-%attr(0444,root,qmail) @shareddir@/doc/README.clamav
-%attr(0444,root,qmail) @shareddir@/doc/README.filters
-%attr(0444,root,qmail) @shareddir@/doc/README.greylist
-%attr(0444,root,qmail) @shareddir@/doc/README.indimail
-%attr(0444,root,qmail) @shareddir@/doc/README.logselect
-%attr(0444,root,qmail) @shareddir@/doc/README.moreipme
-%attr(0444,root,qmail) @shareddir@/doc/README.newline
-%attr(0444,root,qmail) @shareddir@/doc/README.qhpsi
-%attr(0444,root,qmail) @shareddir@/doc/README.qmail
-%attr(0444,root,qmail) @shareddir@/doc/README.qregex
-%attr(0444,root,qmail) @shareddir@/doc/README.queue-fix
-%attr(0444,root,qmail) @shareddir@/doc/README.recipients
-%attr(0444,root,qmail) @shareddir@/doc/README.remote-auth
-%attr(0444,root,qmail) @shareddir@/doc/README.spamcontrol
-%attr(0444,root,qmail) @shareddir@/doc/README.srs
-%attr(0444,root,qmail) @shareddir@/doc/README.starttls
-%attr(0444,root,qmail) @shareddir@/doc/README.status
-%attr(0444,root,qmail) @shareddir@/doc/README.surbl
-%attr(0444,root,qmail) @shareddir@/doc/README.tls
-%attr(0444,root,qmail) @shareddir@/doc/README.wildmat
-%attr(0444,root,qmail) @shareddir@/doc/REMOVE.binmail
-%attr(0444,root,qmail) @shareddir@/doc/REMOVE.sendmail
-%attr(0444,root,qmail) @shareddir@/doc/SENDMAIL
-%attr(0444,root,qmail) @shareddir@/doc/TEST.deliver
-%attr(0444,root,qmail) @shareddir@/doc/TEST.receive
-%attr(0444,root,qmail) @shareddir@/doc/TOISP
-%attr(0444,root,qmail) @shareddir@/doc/UPGRADE
 #
 # Man pages
 # 

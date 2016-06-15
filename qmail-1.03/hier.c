@@ -1,5 +1,8 @@
 /*
  * $Log: hier.c,v $
+ * Revision 1.214  2016-06-15 19:21:14+05:30  Cprogrammer
+ * removed old documentation
+ *
  * Revision 1.213  2016-06-15 11:58:04+05:30  Cprogrammer
  * removed qmail-scanner-queue.pl, stripmime.pl
  *
@@ -1003,6 +1006,32 @@ hier(inst_dir, fatal)
 	/* GPLv3 License, Man Pages, Documents */
 	c(auto_shared,     "doc", "COPYING", auto_uido, auto_gidq, 0444);
 	c(auto_shared,     "doc", "README.licenses", auto_uido, auto_gidq, 0444);
+	c(auto_shared,     "doc", "CREDITS", auto_uido, auto_gidq, 0444);
+	c(auto_shared,     "doc", "FROMISP", auto_uido, auto_gidq, 0444);
+	c(auto_shared,     "doc", "TOISP", auto_uido, auto_gidq, 0444);
+	c(auto_shared,     "doc", "AUTOTURN", auto_uido, auto_gidq, 0444);
+	c(auto_shared,     "doc", "EXTTODO", auto_uido, auto_gidq, 0444);
+	c(auto_shared,     "doc", "INTERNALS", auto_uido, auto_gidq, 0444);
+	c(auto_shared,     "doc", "README.qmail", auto_uido, auto_gidq, 0444);
+	c(auto_shared,     "doc", "README.clamav", auto_uido, auto_gidq, 0444);
+	c(auto_shared,     "doc", "README.greylist", auto_uido, auto_gidq, 0444);
+	c(auto_shared,     "doc", "README.logselect", auto_uido, auto_gidq, 0444);
+	c(auto_shared,     "doc", "README.srs", auto_uido, auto_gidq, 0444);
+	c(auto_shared,     "doc", "README.surbl", auto_uido, auto_gidq, 0444);
+	c(auto_shared,     "doc", "README.filters", auto_uido, auto_gidq, 0444);
+	c(auto_shared,     "doc", "README.moreipme", auto_uido, auto_gidq, 0444);
+	c(auto_shared,     "doc", "README.recipients", auto_uido, auto_gidq, 0444);
+	c(auto_shared,     "doc", "PIC.local2alias", auto_uido, auto_gidq, 0444);
+	c(auto_shared,     "doc", "PIC.local2ext", auto_uido, auto_gidq, 0444);
+	c(auto_shared,     "doc", "PIC.local2local", auto_uido, auto_gidq, 0444);
+	c(auto_shared,     "doc", "PIC.local2rem", auto_uido, auto_gidq, 0444);
+	c(auto_shared,     "doc", "PIC.local2virt", auto_uido, auto_gidq, 0444);
+	c(auto_shared,     "doc", "PIC.nullclient", auto_uido, auto_gidq, 0444);
+	c(auto_shared,     "doc", "PIC.relaybad", auto_uido, auto_gidq, 0444);
+	c(auto_shared,     "doc", "PIC.relaygood", auto_uido, auto_gidq, 0444);
+	c(auto_shared,     "doc", "PIC.rem2local", auto_uido, auto_gidq, 0444);
+#if 0
+	c(auto_shared,     "doc", "README.indimail", auto_uido, auto_gidq, 0444);
 	c(auto_shared,     "doc", "QMAILFAQ", auto_uido, auto_gidq, 0444);
 	c(auto_shared,     "doc", "UPGRADE", auto_uido, auto_gidq, 0444);
 	c(auto_shared,     "doc", "SENDMAIL", auto_uido, auto_gidq, 0444);
@@ -1017,42 +1046,18 @@ hier(inst_dir, fatal)
 	c(auto_shared,     "doc", "TEST.receive", auto_uido, auto_gidq, 0444);
 	c(auto_shared,     "doc", "REMOVE.sendmail", auto_uido, auto_gidq, 0444);
 	c(auto_shared,     "doc", "REMOVE.binmail", auto_uido, auto_gidq, 0444);
-	c(auto_shared,     "doc", "PIC.local2alias", auto_uido, auto_gidq, 0444);
-	c(auto_shared,     "doc", "PIC.local2ext", auto_uido, auto_gidq, 0444);
-	c(auto_shared,     "doc", "PIC.local2local", auto_uido, auto_gidq, 0444);
-	c(auto_shared,     "doc", "PIC.local2rem", auto_uido, auto_gidq, 0444);
-	c(auto_shared,     "doc", "PIC.local2virt", auto_uido, auto_gidq, 0444);
-	c(auto_shared,     "doc", "PIC.nullclient", auto_uido, auto_gidq, 0444);
-	c(auto_shared,     "doc", "PIC.relaybad", auto_uido, auto_gidq, 0444);
-	c(auto_shared,     "doc", "PIC.relaygood", auto_uido, auto_gidq, 0444);
-	c(auto_shared,     "doc", "PIC.rem2local", auto_uido, auto_gidq, 0444);
-	c(auto_shared,     "doc", "FROMISP", auto_uido, auto_gidq, 0444);
-	c(auto_shared,     "doc", "TOISP", auto_uido, auto_gidq, 0444);
-	c(auto_shared,     "doc", "AUTOTURN", auto_uido, auto_gidq, 0444);
-	c(auto_shared,     "doc", "EXTTODO", auto_uido, auto_gidq, 0444);
-	c(auto_shared,     "doc", "INTERNALS", auto_uido, auto_gidq, 0444);
-	c(auto_shared,     "doc", "README.qmail", auto_uido, auto_gidq, 0444);
-	c(auto_shared,     "doc", "README.indimail", auto_uido, auto_gidq, 0444);
 	c(auto_shared,     "doc", "README.auth", auto_uido, auto_gidq, 0444);
-	c(auto_shared,     "doc", "README.clamav", auto_uido, auto_gidq, 0444);
-	c(auto_shared,     "doc", "README.greylist", auto_uido, auto_gidq, 0444);
-	c(auto_shared,     "doc", "README.logselect", auto_uido, auto_gidq, 0444);
-	c(auto_shared,     "doc", "README.moreipme", auto_uido, auto_gidq, 0444);
 	c(auto_shared,     "doc", "README.newline", auto_uido, auto_gidq, 0444);
 	c(auto_shared,     "doc", "README.qhpsi", auto_uido, auto_gidq, 0444);
 	c(auto_shared,     "doc", "README.qregex", auto_uido, auto_gidq, 0444);
 	c(auto_shared,     "doc", "README.queue-fix", auto_uido, auto_gidq, 0444);
-	c(auto_shared,     "doc", "README.recipients", auto_uido, auto_gidq, 0444);
 	c(auto_shared,     "doc", "README.remote-auth", auto_uido, auto_gidq, 0444);
 	c(auto_shared,     "doc", "README.spamcontrol", auto_uido, auto_gidq, 0444);
 	c(auto_shared,     "doc", "README.starttls", auto_uido, auto_gidq, 0444);
 	c(auto_shared,     "doc", "README.status", auto_uido, auto_gidq, 0444);
 	c(auto_shared,     "doc", "README.tls", auto_uido, auto_gidq, 0444);
 	c(auto_shared,     "doc", "README.wildmat", auto_uido, auto_gidq, 0444);
-	c(auto_shared,     "doc", "README.filters", auto_uido, auto_gidq, 0444);
-	c(auto_shared,     "doc", "README.srs", auto_uido, auto_gidq, 0444);
-	c(auto_shared,     "doc", "README.surbl", auto_uido, auto_gidq, 0444);
-
+#endif
 	c(mandir,          "man/man1", "qmail-cat.1", uidr, gidr, moder_f);
 	c(mandir,          "man/man1", "predate.1", uidr, gidr, moder_f);
 	c(mandir,          "man/man1", "datemail.1", uidr, gidr, moder_f);
@@ -1434,7 +1439,7 @@ hier(inst_dir, fatal)
 void
 getversion_install_big_c()
 {
-	static char    *x = "$Id: hier.c,v 1.213 2016-06-15 11:58:04+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: hier.c,v 1.214 2016-06-15 19:21:14+05:30 Cprogrammer Exp mbhangui $";
 
 #ifdef INDIMAIL
 	if (x)
