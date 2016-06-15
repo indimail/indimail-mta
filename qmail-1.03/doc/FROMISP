@@ -14,11 +14,11 @@ already installed on mail.big.isp.
    mail.big.isp.
 
 2. Make sure that your ISP puts virt.dom into
-   /var/qmail/control/rcpthosts. Now qmail-smtpd will accept mail for
+   /etc/indimail/control/rcpthosts. Now qmail-smtpd will accept mail for
    virt.dom.
 
 3. Make sure that your ISP puts virt.dom:yourunixaccount-ppp into
-   /var/qmail/control/virtualdomains, and gives qmail-send a SIGHUP. Now
+   /etc/indimail/control/virtualdomains, and gives qmail-send a SIGHUP. Now
    all messages for whatever@virt.dom will be delivered to
    yourunixaccount-ppp-whatever.
 
