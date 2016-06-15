@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail-mta.spec,v 1.56 2016-06-14 09:08:20+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail-mta.spec,v 1.58 2016-06-15 11:58:31+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 
@@ -40,6 +40,7 @@
 %global logdir             /var/log/indimail
 %global servicedir         /service
 %global dkimkeyfn          default
+
 %global fedorareview       1
 
 %if %build_on_obs == 1
@@ -62,11 +63,31 @@ Summary: A Flexible SMTP server
 Name: indimail-mta
 Version: 1.9.1
 %if %fedorareview == 0
-Provides: daemontools, ucspi-tcp
+Provides: daemontools = @release@, ucspi-tcp = @release@
 Release: 1.<B_CNT>
 %else
 Release: 1.1%{?dist}
 %endif
+
+## uid/gid management
+%global uid                555
+%global gid                555
+%global username           indimail
+%global groupname          indimail
+Provides: group(%groupname) = %gid
+Provides: user(%username) = %uid
+Provides: user(alias)
+Provides: user(qmaild)
+Provides: user(qmaill)
+Provides: user(qmailp)
+Provides: user(qmailq)
+Provides: user(qmailr)
+Provides: user(qmails)
+Provides: group(nofiles)
+Provides: group(qmail)
+Provides: group(qscand)
+Requires(pre): shadow-utils
+Requires(postun): shadow-utils
 
 %if %build_on_obs == 1
 License: GPL-3.0+
@@ -118,7 +139,7 @@ BuildRequires: openssl-devel rpm gcc gcc-c++ make bison binutils coreutils grep
 BuildRequires: glibc glibc-devel openssl procps readline-devel
 BuildRequires: sed ncurses-devel gettext-devel
 BuildRequires: python-devel flex findutils
-BuildRequires: readline gzip autoconf pkgconfig
+BuildRequires: readline gzip autoconf pkgconfig diffutils
 %if %build_on_obs == 1
 BuildRequires: libidn-devel
 %endif
@@ -170,14 +191,14 @@ BuildRequires: db4-devel
 %endif
 
 # rpm -qf /bin/ls
-# rpm -qp --queryformat '%{arch}\n' some-file.rpm
+# rpm -qp --queryformat '%' {arch}\n some-file.rpm
 # rpm --showrc for all macros
 # rpm -qlp some-file.rpm
-Requires: /usr/sbin/useradd /usr/sbin/groupadd
+#Requires: /usr/sbin/useradd /usr/sbin/groupadd
 Requires: /sbin/chkconfig /usr/sbin/userdel /usr/sbin/groupdel procps /usr/bin/awk
 Requires: coreutils grep /bin/sh glibc openssl
 Requires: daemontools ucspi-tcp
-#BuildRoot: %(mktemp -ud %{_tmppath}/%{name}-%{version}-%{release}-XXXXXXX)
+#BuildRoot: '%'(mktemp -ud '%'{_tmppath}/'%'{name}-'%'{version}-'%'{release}-XXXXXXX)
 #
 # IndiMail is choosy and runs on reliable OS only
 #
@@ -198,9 +219,9 @@ ucspi-tcp,
 
 The package combines qmail with other packages like libdkim, libsrs2
 
-qmail, daemontools, ucspi-tcp, serialmail, qmailanalog, fastforward, mess822 - Original Author:
----------------
-    Dan J. Bernstein <djb@cr.yp.to>
+qmail, daemontools, ucspi-tcp, serialmail, qmailanalog, fastforward, mess822
+
+Original Author: Dan J. Bernstein <djb@cr.yp.to>
 
 %{see_base}
 
@@ -230,9 +251,7 @@ matching specified patterns. It automatically rotates logs to limit the
 amount of disk space used. If the disk fills up, it pauses and tries
 again, without losing any data.
 
-Original Author:
----------------
-    Dan J. Bernstein <djb@cr.yp.to>
+Original Author: Dan J. Bernstein <djb@cr.yp.to>
 
 %package -n ucspi-tcp
 %if %fedorareview == 0
@@ -277,9 +296,7 @@ tcpserver and tcpclient conform to UCSPI, the UNIX Client-Server Program
 Interface, using the TCP protocol. UCSPI tools are available for several
 different networks.
 
-Original Author:
----------------
-    Dan J. Bernstein <djb@cr.yp.to>
+Original Author: Dan J. Bernstein <djb@cr.yp.to>
 
 %prep
 echo "---------------- INFORMATION ------------------------"
@@ -320,16 +337,6 @@ done
 
 %build
 ID=$(id -u)
-#### Stupid Mandriva ######################
-%if 0%{?mandriva_version} > 2009
-%ifarch x86_64
-%global _libdir %{_prefix}/lib64
-%global _lib lib64
-%else
-%global _libdir %{_prefix}/lib
-%global _lib lib
-%endif
-%endif
 #### LIBDKIM ######################
 if [ -d libdkim-%{libdkim_version} ] ; then
 cd libdkim-%{libdkim_version}
@@ -385,6 +392,50 @@ if [ -d qmail-%{qmail_version} ] ; then
 %else
 	%{__rm} -f qmail-%{qmail_version}/conf-dlopen
 %endif
+	# create conf-users
+	(
+	echo "alias"
+	echo "qmaild"
+	echo "qmaill"
+	echo "root"
+	echo "qmailp"
+	echo "qmailq"
+	echo "qmailr"
+	echo "qmails"
+	echo %username
+	echo "qscand"
+	echo 
+	echo "The qmail system is heavily partitioned for security; it does almost"
+	echo "nothing as root."
+	echo
+	echo "The first nine lines of this file are the alias user, the daemon user,"
+	echo "the log user, the owner of miscellaneous files such as binaries, the"
+	echo "passwd user, the queue user, the remote user, the send user, the"
+	echo "indimail user and the virus scan user."
+	) > /tmp/conf-users
+	diff /tmp/conf-users qmail-%{qmail_version}/conf-users > /dev/null 2>&1
+	if [ $? -ne 0 ] ; then
+		%{__mv} /tmp/conf-users qmail-%{qmail_version}/conf-users
+	else
+		%{__rm} -f /tmp/conf-users
+	fi
+	# create conf-groups
+	(
+	echo "qmail"
+	echo "nofiles"
+	echo %groupname
+	echo "qscand"
+	echo
+	echo "These are the qmail groups. The second group should not have access to"
+	echo "any files, but it must be usable for processes; this requirement"
+	echo "excludes the \`\`nogroup'' and \`\`nobody'' groups on many systems."
+	) > /tmp/conf-groups
+	diff /tmp/conf-groups qmail-%{qmail_version}/conf-groups > /dev/null 2>&1
+	if [ $? -ne 0 ] ; then
+		%{__mv} /tmp/conf-groups qmail-%{qmail_version}/conf-groups
+	else
+		%{__rm} -f /tmp/conf-groups
+	fi
 fi
 #### ucspi-tcp ######################
 if [ -d ucspi-tcp-%{ucspi_version} ] ; then
@@ -464,6 +515,7 @@ do
 	fi
 done
 fi
+# remove devel files as we are not building a devel package
 %{__rm} -rf %{buildroot}%{mandir}/man3
 %{__rm} -rf %{buildroot}%{_prefix}/include
 %{__rm} -rf %{buildroot}%{qmaildir}/queue
@@ -740,7 +792,6 @@ done
 %attr(555,root,qmail)                   %{_prefix}/bin/forward
 %attr(555,root,qmail)                   %{_prefix}/bin/new-inject
 %attr(555,root,qmail)                   %{_prefix}/bin/filterto
-%attr(555,root,qmail)                   %{_prefix}/bin/stripmime.pl
 %attr(555,root,qmail)                   %{_prefix}/bin/fixcrio
 %attr(555,root,qmail)                   %{_prefix}/bin/rsmtpsenders
 %attr(555,root,qmail)                   %{_prefix}/bin/queue-fix
@@ -1180,6 +1231,7 @@ done
 %endif
 
 %attr(444,root,qmail)                   %{shareddir}/doc/COPYING
+%attr(444,root,qmail)                   %{shareddir}/doc/README.licenses
 %attr(444,root,qmail)                   %{shareddir}/doc/README.indimail
 %attr(444,root,qmail)                   %{shareddir}/doc/README.filters
 %attr(444,root,qmail)                   %{shareddir}/doc/README.qmail
@@ -1493,24 +1545,19 @@ if [ $nscd_up -ge 1 ] ; then
 	fi
 fi
 echo "Adding IndiMail users/groups"
-/usr/bin/getent group indimail  > /dev/null || /usr/sbin/groupadd -r -g 555 indimail || true
+/usr/bin/getent group %groupname  > /dev/null || /usr/sbin/groupadd -r -g %gid %groupname || true
 if [ $? = 4 ] ; then
-	/usr/sbin/groupadd indimail
+	/usr/sbin/groupadd %groupname
 fi
 /usr/bin/getent group nofiles   > /dev/null || /usr/sbin/groupadd nofiles  || true
 /usr/bin/getent group qmail     > /dev/null || /usr/sbin/groupadd qmail    || true
 /usr/bin/getent group qscand    > /dev/null || /usr/sbin/groupadd qscand   || true
 
-for i in indimail alias qmaild qmaill qmailp qmailq qmailr qmails qscand
-do
-	%{__rm} -f /var/spool/mail/$i
-done
-
-/usr/bin/getent passwd indimail > /dev/null || /usr/sbin/useradd -r -g indimail -u 555 -d %{qmaildir} indimail || true
+/usr/bin/getent passwd %username > /dev/null || /usr/sbin/useradd -r -g %groupname -u %uid -d %{qmaildir} %username || true
 if [ $? = 4 ] ; then
-	/usr/sbin/useradd -r -g indimail -d %{qmaildir} indimail
+	/usr/sbin/useradd -r -g %groupname -d %{qmaildir} %username
 fi
-/usr/bin/getent passwd alias    > /dev/null || /usr/sbin/useradd -M -g nofiles  -d %{qmaildir}/alias  -s /sbin/nologin  alias || true
+/usr/bin/getent passwd alias    > /dev/null || /usr/sbin/useradd -M -g nofiles  -d %{qmaildir}/alias  -s /sbin/nologin alias  || true
 /usr/bin/getent passwd qmaild   > /dev/null || /usr/sbin/useradd -M -g nofiles  -d %{qmaildir}        -s /sbin/nologin qmaild || true
 /usr/bin/getent passwd qmaill   > /dev/null || /usr/sbin/useradd -M -g nofiles  -d %{qmaildir}        -s /sbin/nologin qmaill || true
 /usr/bin/getent passwd qmailp   > /dev/null || /usr/sbin/useradd -M -g nofiles  -d %{qmaildir}        -s /sbin/nologin qmailp || true
@@ -1518,6 +1565,11 @@ fi
 /usr/bin/getent passwd qmailr   > /dev/null || /usr/sbin/useradd -M -g qmail    -d %{qmaildir}        -s /sbin/nologin qmailr || true
 /usr/bin/getent passwd qmails   > /dev/null || /usr/sbin/useradd -M -g qmail    -d %{qmaildir}        -s /sbin/nologin qmails || true
 /usr/bin/getent passwd qscand   > /dev/null || /usr/sbin/useradd -M -g qscand   -d %{qmaildir}/qscanq -G qmail,qscand -s /sbin/nologin qscand || true
+
+for i in %username alias qmaild qmaill qmailp qmailq qmailr qmails qscand
+do
+	%{__rm} -f /var/spool/mail/$i
+done
 if [ $nscd_up -ge 1 ] ; then
 	if [ -x %{_sysconfdir}/init.d/nscd ] ; then
 		%{_sysconfdir}/init.d/nscd start
