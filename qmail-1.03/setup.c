@@ -1,5 +1,8 @@
 /*
  * $Log: setup.c,v $
+ * Revision 1.27  2016-06-17 17:26:57+05:30  Cprogrammer
+ * allow linked dir to have a different basename
+ *
  * Revision 1.26  2016-06-05 13:21:34+05:30  Cprogrammer
  * treat files in sbin as programs
  *
@@ -279,10 +282,11 @@ getdirname(char *dir, char **basedir)
 }
 
 void
-l(home, subdir, target)
+l(home, subdir, target, relative)
 	char           *home;
 	char           *subdir;
 	char           *target;
+	int             relative;
 {
 	if (destdir) {
 		if (!stralloc_copys(&tmpdir, destdir))
@@ -298,10 +302,12 @@ l(home, subdir, target)
 		strerr_die4sys(111, FATAL, "unable to switch to ", tmpdir.s, ": ");
 	if (!stralloc_copys(&dird, target))
 		strerr_die2sys(111, FATAL, "out of memory: ");
-	if (!stralloc_append(&dird, "/"))
-		strerr_die2sys(111, FATAL, "out of memory: ");
-	if (!stralloc_cats(&dird, subdir))
-		strerr_die2sys(111, FATAL, "out of memory: ");
+	if (relative) {
+		if (!stralloc_append(&dird, "/"))
+			strerr_die2sys(111, FATAL, "out of memory: ");
+		if (!stralloc_cats(&dird, subdir))
+			strerr_die2sys(111, FATAL, "out of memory: ");
+	}
 	if (!stralloc_0(&dird))
 		strerr_die2sys(111, FATAL, "out of memory: ");
 	if (symlink(dird.s, subdir) == -1 && errno != error_exist)
@@ -562,7 +568,7 @@ main(int argc, char **argv)
 void
 getversion_setup_c()
 {
-	static char    *x = "$Id: setup.c,v 1.26 2016-06-05 13:21:34+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: setup.c,v 1.27 2016-06-17 17:26:57+05:30 Cprogrammer Exp mbhangui $";
 #ifdef INDIMAIL
 	if (x)
 		x = sccsidh;
