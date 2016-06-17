@@ -1,6 +1,9 @@
 #!/bin/sh
 # WARNING: This file was auto-generated. Do not edit!
 # $Log: bogofilter-qfe.in,v $
+# Revision 2.16  2016-06-17 10:40:20+05:30  Cprogrammer
+# FHS compliance
+#
 # Revision 2.15  2016-05-17 14:41:05+05:30  Cprogrammer
 # use controldir defined by configure
 #
@@ -50,7 +53,7 @@
 # This a qmail specific bogofilter frontend script which allows the use of a 
 # centralized bogofilter running on an smtp mail server
 # Copyright (C) Gyepi Sam <gyepi@praxis-sw.com> 2002
-# $Id: bogofilter-qfe.in,v 2.15 2016-05-17 14:41:05+05:30 Cprogrammer Exp mbhangui $
+# $Id: bogofilter-qfe.in,v 2.16 2016-06-17 10:40:20+05:30 Cprogrammer Exp mbhangui $
  
 domain=$HOST
 #
@@ -96,12 +99,12 @@ fi
 if [ -f @indimaildir@/domains/$domain/wordlist.db ] ; then
 	wordlist=@indimaildir@/domains/$domain
 else
-	wordlist=@indimaildir@/etc
+	wordlist=@sysconfdir@
 fi
 if [ -f @indimaildir@/domains/$domain/bogofilter.cf ] ; then
 	config_file=@indimaildir@/domains/$domain/bogofilter.cf
 else
-	config_file=@indimaildir@/etc/bogofilter.cf
+	config_file=@sysconfdir@/bogofilter.cf
 fi
 spam_header_name=`grep ^spam_header_name $config_file 2>/dev/null | cut -d= -f2`
 if [ " $spam_header_name" = " " ] ; then
@@ -148,7 +151,7 @@ if [ ! " $REPORT" = " " ] ; then
 		echo
 		echo "Analysis of mail sent by $SENDER to $EXT@$HOST"
 		echo
-		@indimaildir@/bin/bogofilter -c $config_file -d $wordlist -vvv < /tmp/bogofilter.$$
+		@prefix@/bin/bogofilter -c $config_file -d $wordlist -vvv < /tmp/bogofilter.$$
 		) | @qmaildir@/bin/sendmail -t
 	else
 		(
@@ -162,7 +165,7 @@ if [ ! " $REPORT" = " " ] ; then
 		else
 			postmaster="$REPORT_TO"
 		fi
-		@indimaildir@/bin/bogofilter -c $config_file -d $wordlist -vvv < /tmp/bogofilter.$$ > /tmp/report.$$
+		@prefix@/bin/bogofilter -c $config_file -d $wordlist -vvv < /tmp/bogofilter.$$ > /tmp/report.$$
 		if [ " $opt" = " -s" -o " $opt" = " -Ns" ] ; then
 			/usr/bin/zip -q -j /tmp/report.$$.zip /tmp/report.$$ /tmp/bogofilter.$$
 			/bin/rm -f /tmp/report.$$
@@ -176,7 +179,7 @@ if [ ! " $REPORT" = " " ] ; then
 		fi
 		QMAILNAME="IndiMail SPAM Reporter"
 		export QMAILNAME
-		@indimaildir@/bin/mpack -s "$subject" -d /tmp/descfile.$$ \
+		@prefix@/bin/mpack -s "$subject" -d /tmp/descfile.$$ \
 			-c "application/zip" /tmp/report.$$.zip $postmaster
 		/bin/rm -f /tmp/descfile.$$ /tmp/report.$$.zip
 	fi
@@ -195,7 +198,7 @@ headcount=`@qmaildir@/bin/822header < /tmp/bogofilter.$$| wc -l`
 		tail --lines=+$headcount < /tmp/bogofilter.$$
 	fi
 	/bin/rm -f /tmp/bogofilter.$$
-) | @indimaildir@/bin/bogofilter -c $config_file -d $wordlist $opt
+) | @prefix@/bin/bogofilter -c $config_file -d $wordlist $opt
 status=$?
 if [ $status = 0 ] ; then
 	exit 0
