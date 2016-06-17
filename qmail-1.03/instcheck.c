@@ -1,5 +1,8 @@
 /*
  * $Log: instcheck.c,v $
+ * Revision 1.23  2016-06-17 17:22:00+05:30  Cprogrammer
+ * allow linked dir to have a different basename
+ *
  * Revision 1.22  2016-05-30 20:25:14+05:30  Cprogrammer
  * removed call to _hier() indimail function
  *
@@ -198,10 +201,11 @@ perm(prefix1, prefix2, prefix3, file, type, uid, gid, mode, should_exit)
 }
 
 void
-l(home, subdir, target)
+l(home, subdir, target, dummy)
 	char           *home;
 	char           *subdir;
 	char           *target;
+	int             dummy;
 {
 	if (chdir(home) == -1)
 		strerr_die4sys(111, FATAL, "unable to switch to ", home, ": ");
@@ -338,7 +342,7 @@ main(int argc, char **argv)
 void
 getversion_instcheck_c()
 {
-	static char    *x = "$Id: instcheck.c,v 1.22 2016-05-30 20:25:14+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: instcheck.c,v 1.23 2016-06-17 17:22:00+05:30 Cprogrammer Exp mbhangui $";
 	if (x)
 		x++;
 }
