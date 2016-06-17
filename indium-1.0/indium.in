@@ -405,11 +405,7 @@ proc main {} {
 		.mbar1.misc.menu add command -label "Top MySQL  Processes" -command "catch {exec $configs(xterm) -e /usr/bin/mytop &} result" -underline 4
 		}
 		.mbar1.misc.menu add command -label "Flash Interface"       -command "catch {exec $configs(xterm) -e @prefix@/bin/flash &} result" -underline 5
-		if {[file exists /usr/local/mysqlcc/mysqlcc]} {
-		.mbar1.misc.menu add command -label "MySQL Control Center" -command "catch {exec /usr/local/mysqlcc/mysqlcc &} result" -underline 6
-		} else {
 		.mbar1.misc.menu add command -label "MySQL Client"         -command "mysql" -underline 6
-		}
 		.mbar1.misc.menu add command -label "Command Line"         -command "commandLine" -underline 1
 		if {[file exists @prefix@/bin/gq]} {
 		.mbar1.misc.menu add command -label "Ldap Client"          -command "catch {exec @prefix@/bin/gq &} result" -underline 1
@@ -1550,7 +1546,7 @@ proc run_relay {operation all host dom filename oldline newline lw listwin} {
 	}
 	switch $operation {
 		1 {
-			set cmd "| @prefix@/sbin/controlsync -h $host -v -f $controldir/me -u $adminuser -P $adminpass -p $adminport"
+			set cmd "| @libexecdir@/controlsync -h $host -v -f $controldir/me -u $adminuser -P $adminpass -p $adminport"
 			if {[catch {open $cmd r} f] } {
 				msg_dialog .d {controlsync} $f @imagedir@/warning.gif 0 "OK"
 				return 1
@@ -1565,7 +1561,7 @@ proc run_relay {operation all host dom filename oldline newline lw listwin} {
 				msg_dialog .d $result "$host is not a valid indimail setup" @imagedir@/warning.gif 0 "OK"
 				return 1
 			}
-			set cmd "exec @prefix@/sbin/controlsync -a -h $host -D $dom"
+			set cmd "exec @libexecdir@/controlsync -a -h $host -D $dom"
 		}
 		2 {
 			set msg "You are About to Delete Relay $host for Domain $dom.\nAre you sure you want to delete?\nClick OK to continue"
@@ -1573,14 +1569,14 @@ proc run_relay {operation all host dom filename oldline newline lw listwin} {
 			if {$action != 1} {
 				return
 			}
-			set cmd "exec @prefix@/sbin/controlsync -d -h $host -D $dom"
+			set cmd "exec @libexecdir@/controlsync -d -h $host -D $dom"
 		}
 		3 {
 			if {$all == 0} {
-				set cmd "exec @prefix@/sbin/controlsync -h $host -A $newline -u $adminuser -P $adminpass -p $adminport -f $controldir/$filename"
+				set cmd "exec @libexecdir@/controlsync -h $host -A $newline -u $adminuser -P $adminpass -p $adminport -f $controldir/$filename"
 			} else {
 				foreach line $relayhosts {
-					set cmd "exec @prefix@/sbin/controlsync -h $line -A $newline -u $adminuser -P $adminpass -p $adminport -f $controldir/$filename"
+					set cmd "exec @libexecdir@/controlsync -h $line -A $newline -u $adminuser -P $adminpass -p $adminport -f $controldir/$filename"
 					runCommand $cmd
 					if {$returnstatus != 0} {
 						msg_dialog .d $line $result @imagedir@/warning.gif 0 "OK"
@@ -1597,10 +1593,10 @@ proc run_relay {operation all host dom filename oldline newline lw listwin} {
 				return
 			}
 			if {$all == 0} {
-				set cmd "exec @prefix@/sbin/controlsync -h $host -A $newline -R $oldline -u $adminuser -P $adminpass -p $adminport -f $controldir/$filename"
+				set cmd "exec @libexecdir@/controlsync -h $host -A $newline -R $oldline -u $adminuser -P $adminpass -p $adminport -f $controldir/$filename"
 			} else {
 				foreach line $relayhosts {
-					set cmd "exec @prefix@/sbin/controlsync -h $line -A $newline -R $oldline -u $adminuser -P $adminpass -p $adminport -f $controldir/$filename"
+					set cmd "exec @libexecdir@/controlsync -h $line -A $newline -R $oldline -u $adminuser -P $adminpass -p $adminport -f $controldir/$filename"
 					runCommand $cmd
 					if {$returnstatus != 0} {
 						msg_dialog .d $line $result @imagedir@/warning.gif 0 "OK"
@@ -1617,10 +1613,10 @@ proc run_relay {operation all host dom filename oldline newline lw listwin} {
 				return
 			}
 			if {$all == 0} {
-				set cmd "exec @prefix@/sbin/controlsync -h $host -R $oldline -u $adminuser -P $adminpass -p $adminport -f $controldir/$filename"
+				set cmd "exec @libexecdir@/controlsync -h $host -R $oldline -u $adminuser -P $adminpass -p $adminport -f $controldir/$filename"
 			} else {
 				foreach line $relayhosts {
-					set cmd "exec @prefix@/sbin/controlsync -h $line -R $oldline -u $adminuser -P $adminpass -p $adminport -f $controldir/$filename"
+					set cmd "exec @libexecdir@/controlsync -h $line -R $oldline -u $adminuser -P $adminpass -p $adminport -f $controldir/$filename"
 					runCommand $cmd
 					if {$returnstatus != 0} {
 						msg_dialog .d $line $result @imagedir@/warning.gif 0 "OK"
@@ -1662,7 +1658,7 @@ proc displayFile {filename host listwin args} {
 		msg_dialog .d {displayFile} "RelayHost not selected" @imagedir@/warning.gif 0 "OK"
 		return 1
 	}
-	set cmd "| @prefix@/sbin/controlsync -h $host -v -f $controldir/$filename -u $adminuser -P $adminpass -p $adminport"
+	set cmd "| @libexecdir@/controlsync -h $host -v -f $controldir/$filename -u $adminuser -P $adminpass -p $adminport"
 	if {[catch {open $cmd r} f] } {
 		msg_dialog .d {controlsync} $f @imagedir@/warning.gif 0 "OK"
 		return 1
@@ -4464,7 +4460,8 @@ proc run_mysql {} {
 		msg_dialog .d {Invalid Host} {hostname required} @imagedir@/warning.gif 0 "OK"
 		return 1
 	}
-	catch "exec $configs(xterm) -e @prefix@/sbin/execmysql -d $domain $adminhost &" result
+	puts stdout "exec $configs(xterm) -e @libexecdir@/execmysql -d $domain $adminhost"
+	catch "exec $configs(xterm) -e \"@libexecdir@/execmysql -d $domain $adminhost\" &" result
 }
 
 proc dbcontrol {args} {
@@ -8324,7 +8321,7 @@ proc showMenuMaildir {node name} {
 					return
 				}
 				set maildir_line "$nameTmp	$nodeTmp"
-				set cmd "exec updatefile -d \"$maildir_line\" @sysconfdir@/maildirshared"
+				set cmd "exec @libexecdir@/updatefile -d \"$maildir_line\" @sysconfdir@/maildirshared"
 				runCommand $cmd
 				if {$returnstatus != 0} {
 					msg_dialog .d {updatefile} $result @imagedir@/warning.gif 0 "OK"
@@ -8393,7 +8390,7 @@ proc createMaildir {x y} {
 			if {$returnstatus != 0} {
 				msg_dialog .d {maildirmake} $result @imagedir@/warning.gif 0 "OK"
 			} else {
-				set cmd "exec updatefile -u \"$maildir_line\" @sysconfdir@/maildirshared"
+				set cmd "exec @libexecdir@/updatefile -u \"$maildir_line\" @sysconfdir@/maildirshared"
 				runCommand $cmd
 				if {$returnstatus != 0} {
 					msg_dialog .d {updatefile} $result @imagedir@/warning.gif 0 "OK"
