@@ -1,6 +1,9 @@
 #!/bin/sh
 # WARNING: This file was auto-generated. Do not edit!
 # $Log: logmonitor.in,v $
+# Revision 2.10  2016-06-17 17:30:55+05:30  Cprogrammer
+# FHS compliance. moved internal binaries to libexec dir
+#
 # Revision 2.9  2008-06-05 20:13:54+05:30  Cprogrammer
 # removed useless comment
 #
@@ -29,7 +32,7 @@
 # script to monitor log files
 #
 #
-# $Id: logmonitor.in,v 2.9 2008-06-05 20:13:54+05:30 Cprogrammer Stab mbhangui $
+# $Id: logmonitor.in,v 2.10 2016-06-17 17:30:55+05:30 Cprogrammer Exp mbhangui $
 #
 
 usage()
@@ -124,8 +127,8 @@ esac
 	fi
 ) \
 | internal_filter \
-| @indimaildir@/bin/hashtable -l $MSG_LINE_COUNT -c $threshold \
-| @indimaildir@/bin/displaytop -n $display_size $batchmode
+| @libexecdir@/hashtable -l $MSG_LINE_COUNT -c $threshold \
+| @libexecdir@/displaytop -n $display_size $batchmode
 }
 
 if test $# -eq 0; then
@@ -159,7 +162,7 @@ while test $# -gt 0; do
 			threshold=$optarg
 		;;
 		--version)
-			echo "\$Id: logmonitor.in,v 2.9 2008-06-05 20:13:54+05:30 Cprogrammer Stab mbhangui $"
+			echo "\$Id: logmonitor.in,v 2.10 2016-06-17 17:30:55+05:30 Cprogrammer Exp mbhangui $"
 			exit 0
 		;;
 		--help)
