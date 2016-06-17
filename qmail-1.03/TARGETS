@@ -1,5 +1,7 @@
 indimail-mta.fc
 perm_list
+auto_libexec.c
+auto_libexec.o
 auto_prefix.c
 auto_prefix.o
 auto_sysconfdir.c
