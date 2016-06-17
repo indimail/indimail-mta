@@ -6,7 +6,8 @@
 .SH NAME
 randstr \- fetch a random text string from a specified file
 .SH SYNOPIS
-.BI "randstr " filename filename.dat
+.BI "randstr " filename
+filename.dat
 .SH DESCRIPTION
 In essence, 
 .B randstr
