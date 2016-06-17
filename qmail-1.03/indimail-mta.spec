@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail-mta.spec,v 1.60 2016-06-17 09:31:12+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail-mta.spec,v 1.61 2016-06-17 17:21:35+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 
@@ -19,9 +19,11 @@
 
 %global qmaildir           /var/indimail
 %global _prefix            /usr
+%global libexecdir         %{_prefix}/libexec/indimail
+%global shareddir          %{_prefix}/share/indimail
+%global mandir             %{_prefix}/share/man
+%global plugindir          %{_prefix}/lib/indimail/plugins
 %global qsysconfdir        /etc/indimail
-%global shareddir          /usr/share/indimail
-%global mandir             /usr/share/man
 %global ucspi_version      0.88
 %global qmail_version      1.03
 %global libdkim_version    1.4
@@ -38,7 +40,6 @@
 %global qcount             5
 %global qbase              %{qmaildir}/queue
 %global logdir             /var/log/indimail
-%global plugindir          %{_prefix}/lib/indimail/plugins
 %global servicedir         /service
 %global dkimkeyfn          default
 
@@ -583,6 +584,9 @@ done
                                   %{qmaildir}/sbin
                                   %{qmaildir}/users
                                   %{qmaildir}/control
+                                  %{qmaildir}/libexec
+%dir %attr(555,root,qmail)        %{libexecdir}
+%dir %attr(555,root,qmail)        %{shareddir}
 %dir %attr(555,root,qmail)        %{shareddir}/boot
 %dir %attr(555,root,qmail)        %{shareddir}/doc
 %dir %attr(2775,alias,qmail)      %{qmaildir}/alias
@@ -655,14 +659,12 @@ done
 %attr(755,root,qmail)                   %{_prefix}/bin/zsuccesses
 %attr(755,root,qmail)                   %{_prefix}/bin/ofmipd
 %attr(755,root,qmail)                   %{_prefix}/bin/qmail-lagcheck
-%attr(755,root,qmail)                   %{_prefix}/bin/mbox2maildir.pl
 %attr(755,root,qmail)                   %{_prefix}/bin/deferrals
 %attr(755,root,qmail)                   %{_prefix}/bin/maildirwatch
 %attr(755,root,qmail)                   %{_prefix}/bin/bouncesaying
 %attr(755,root,qmail)                   %{_prefix}/bin/checkaddr
 %attr(755,root,qmail)                   %{_prefix}/bin/rsmtprecipients
 %attr(755,root,qmail)                   %{_prefix}/bin/autoresponder
-%attr(755,root,qmail)                   %{_prefix}/bin/idedit
 %attr(755,root,qmail)                   %{_prefix}/bin/ddist
 %attr(755,root,qmail)                   %{_prefix}/bin/822headerfilter
 %attr(755,root,qmail)                   %{_prefix}/bin/smtp-matchup
@@ -686,7 +688,6 @@ done
 %attr(755,root,qmail)                   %{_prefix}/bin/matchup
 %attr(755,root,qmail)                   %{_prefix}/bin/zspam
 %attr(755,root,qmail)                   %{_prefix}/bin/recipients
-%attr(755,root,qmail)                   %{_prefix}/bin/update_tmprsadh
 %attr(755,root,qmail)                   %{_prefix}/bin/setforward
 %attr(755,root,qmail)                   %{_prefix}/bin/822date
 %attr(755,root,qmail)                   %{_prefix}/bin/leapsecs
@@ -696,19 +697,14 @@ done
 %attr(755,root,qmail)                   %{_prefix}/bin/iftocc
 %attr(755,root,qmail)                   %{_prefix}/bin/serialqmtp
 %attr(755,root,qmail)                   %{_prefix}/bin/rsmtprdomains
-%attr(755,root,qmail)                   %{_prefix}/bin/balance_outgoing
 %attr(755,root,qmail)                   %{_prefix}/bin/rsmtpfailures
-%attr(755,root,qmail)                   %{_prefix}/bin/cdbmake-sv
 %attr(755,root,qmail)                   %{_prefix}/bin/successes
-%attr(755,root,qmail)                   %{_prefix}/bin/qmail-sigterm
 %attr(755,root,qmail)                   %{_prefix}/bin/delcr
 %attr(755,root,qmail)                   %{_prefix}/bin/setmaillist
 %attr(755,root,qmail)                   %{_prefix}/bin/zrxdelay
 %attr(755,root,qmail)                   %{_prefix}/bin/maildirdeliver
 %attr(755,root,qmail)                   %{_prefix}/bin/qmail-showctl
-%attr(755,root,qmail)                   %{_prefix}/bin/envmigrate
 %attr(755,root,qmail)                   %{_prefix}/bin/rspamrdomain
-%attr(755,root,qmail)                   %{_prefix}/bin/qmail-sighup
 %attr(755,root,qmail)                   %{_prefix}/bin/multilog-matchup
 %attr(755,root,qmail)                   %{_prefix}/bin/822headerok
 %attr(755,root,qmail)                   %{_prefix}/bin/mbox2maildir
@@ -719,7 +715,6 @@ done
 %attr(755,root,qmail)                   %{_prefix}/bin/cdbget
 %attr(755,root,qmail)                   %{_prefix}/bin/cdbgetm
 %attr(755,root,qmail)                   %{_prefix}/bin/822addr
-%attr(755,root,qmail)                   %{_prefix}/bin/atrn
 %attr(755,root,qmail)                   %{_prefix}/bin/cdbstats
 %attr(755,root,qmail)                   %{_prefix}/bin/zsenders
 %attr(755,root,qmail)                   %{_prefix}/bin/suids
@@ -755,13 +750,10 @@ done
 %attr(755,root,qmail)                   %{_prefix}/bin/qaes
 %attr(755,root,qmail)                   %{_prefix}/bin/qnotify
 %attr(755,root,qmail)                   %{_prefix}/bin/rrt
-%attr(755,root,qmail)                   %{_prefix}/bin/greydaemon
-%attr(755,root,qmail)                   %{_prefix}/bin/qmail-greyd
 %attr(755,root,qmail)                   %{_prefix}/bin/drate
 %attr(755,root,qmail)                   %{_prefix}/bin/cidr
 %attr(755,root,qmail)                   %{_prefix}/bin/spawn-filter
 %attr(755,root,qmail)                   %{_prefix}/bin/tcp-env
-%attr(755,root,qmail)                   %{_prefix}/bin/qmail-lint
 %attr(755,root,qmail)                   %{_prefix}/bin/rrforward
 %attr(755,root,qmail)                   %{_prefix}/bin/qmail-dk
 %attr(755,root,qmail)                   %{_prefix}/bin/qmail-dkim
@@ -769,7 +761,6 @@ done
 %attr(755,root,qmail)                   %{_prefix}/bin/mailsubj
 %attr(755,root,qmail)                   %{_prefix}/bin/condtomaildir
 %attr(755,root,qmail)                   %{_prefix}/bin/822field
-%attr(755,root,qmail)                   %{_prefix}/bin/testzero
 %attr(755,root,qmail)                   %{_prefix}/bin/qmail-cat
 %attr(755,root,qmail)                   %{_prefix}/bin/qmail-poppass
 %attr(755,root,qmail)                   %{_prefix}/bin/failures
@@ -777,7 +768,6 @@ done
 %attr(755,root,qmail)                   %{_prefix}/bin/qail
 %attr(755,root,qmail)                   %{_prefix}/bin/qpq
 %attr(755,root,qmail)                   %{_prefix}/bin/replier-config
-%attr(755,root,qmail)                   %{_prefix}/bin/etrn
 %attr(755,root,qmail)                   %{_prefix}/bin/forward
 %attr(755,root,qmail)                   %{_prefix}/bin/new-inject
 %attr(755,root,qmail)                   %{_prefix}/bin/filterto
@@ -799,7 +789,6 @@ done
 %attr(755,root,qmail)                   %{_prefix}/bin/argv0
 %attr(755,root,qmail)                   %{_prefix}/bin/qmail-qmtpd
 %attr(755,root,qmail)                   %{_prefix}/bin/addcr
-%attr(755,root,qmail)                   %{_prefix}/bin/qsmhook
 %attr(755,root,qmail)                   %{_prefix}/bin/rspamhist
 %attr(755,root,qmail)                   %{_prefix}/bin/rsmtpsdomains
 %attr(755,root,qmail)                   %{_prefix}/bin/qmail-inject
@@ -808,22 +797,15 @@ done
 %attr(755,root,qmail)                   %{_prefix}/bin/zfailures
 %attr(755,root,qmail)                   %{_prefix}/bin/zsendmail
 %attr(755,root,qmail)                   %{_prefix}/bin/822received
-%attr(755,root,qmail)                   %{_prefix}/bin/cdbmake-12
 %attr(755,root,qmail)                   %{_prefix}/bin/maildircmd
 %attr(755,root,qmail)                   %{_prefix}/bin/qmail-qfilter
 %attr(755,root,qmail)                   %{_prefix}/bin/surblfilter
 %attr(755,root,qmail)                   %{_prefix}/bin/surblqueue
-%attr(755,root,qmail)                   %{_prefix}/bin/qmail-sigalrm
-%attr(755,root,qmail)                   %{_prefix}/bin/ipmeprint
 %attr(755,root,qmail)                   %{_prefix}/bin/rpmattr
 %attr(755,root,qmail)                   %{_prefix}/bin/senders
 %attr(755,root,qmail)                   %{_prefix}/bin/spfquery
 %attr(755,root,qmail)                   %{_prefix}/bin/srsfilter
 
-%attr(755,root,qmail)                   %{_prefix}/sbin/whois
-%attr(755,root,qmail)                   %{_prefix}/sbin/hostname
-%attr(755,root,qmail)                   %{_prefix}/sbin/config-fast
-%attr(755,root,qmail)                   %{_prefix}/sbin/qmailconfig
 %attr(755,root,qmail)                   %{_prefix}/sbin/batv
 %attr(755,root,qmail)                   %{_prefix}/sbin/plugtest
 %attr(755,root,qmail)                   %{_prefix}/sbin/sys-checkpwd
@@ -835,12 +817,6 @@ done
 %attr(755,root,qmail)                   %{_prefix}/sbin/qmail-tcpok
 %attr(755,root,qmail)                   %{_prefix}/sbin/qmail-tcpto
 %attr(755,root,qmail)                   %{_prefix}/sbin/qmail-qmqpc
-%attr(755,root,qmail)                   %{_prefix}/sbin/dnstxt
-%attr(755,root,qmail)                   %{_prefix}/sbin/dnsmxip
-%attr(755,root,qmail)                   %{_prefix}/sbin/dnscname
-%attr(755,root,qmail)                   %{_prefix}/sbin/dnsptr
-%attr(755,root,qmail)                   %{_prefix}/sbin/dnsfq
-%attr(755,root,qmail)                   %{_prefix}/sbin/dnsip
 
 %attr(751,root,qmail)                   %{_prefix}/bin/qmail-newu
 %attr(751,root,qmail)                   %{_prefix}/bin/qmail-newmrh
@@ -854,7 +830,6 @@ done
 %attr(751,root,qmail)                   %{_prefix}/sbin/qmail-clean
 %attr(751,root,qmail)                   %{_prefix}/sbin/qmail-send
 %attr(751,root,qmail)                   %{_prefix}/sbin/qmail-todo
-%attr(751,root,qmail)                   %{_prefix}/sbin/instcheck
 
 %attr(755,root,qmail)                   %{_prefix}/bin/qmail-getpw
 %attr(755,root,qmail)                   %{_prefix}/bin/qmail-local
@@ -864,6 +839,29 @@ done
 
 %attr(755,root,qmail)                   %{_prefix}/sbin/relaytest
 %attr(755,root,qmail)                   %{_prefix}/sbin/splogger
+
+%attr(755,root,qmail)                   %{libexecdir}/atrn
+%attr(755,root,qmail)                   %{libexecdir}/etrn
+%attr(755,root,qmail)                   %{libexecdir}/cdbmake-12
+%attr(755,root,qmail)                   %{libexecdir}/cdbmake-sv
+%attr(755,root,qmail)                   %{libexecdir}/config-fast
+%attr(755,root,qmail)                   %{libexecdir}/idedit
+%attr(755,root,qmail)                   %{libexecdir}/hostname
+%attr(755,root,qmail)                   %{libexecdir}/qmailconfig
+%attr(755,root,qmail)                   %{libexecdir}/dnstxt
+%attr(755,root,qmail)                   %{libexecdir}/dnsmxip
+%attr(755,root,qmail)                   %{libexecdir}/dnsfq
+%attr(755,root,qmail)                   %{libexecdir}/dnsptr
+%attr(755,root,qmail)                   %{libexecdir}/dnsip
+%attr(755,root,qmail)                   %{libexecdir}/dnscname
+%attr(755,root,qmail)                   %{libexecdir}/envmigrate
+%attr(755,root,qmail)                   %{libexecdir}/qsmhook
+%attr(755,root,qmail)                   %{libexecdir}/update_tmprsadh
+%attr(751,root,qmail)                   %{libexecdir}/instcheck
+%attr(751,root,qmail)                   %{libexecdir}/whois
+%attr(755,root,qmail)                   %{libexecdir}/testzero
+%attr(755,root,qmail)                   %{libexecdir}/qmail-lint
+%attr(755,root,qmail)                   %{libexecdir}/ipmeprint
 
 %if %fedorareview == 0
 %docdir %{mandir}
@@ -952,6 +950,7 @@ done
 %attr(0644,root,root)                   %{mandir}/man1/datemail.1.gz
 %attr(0644,root,root)                   %{mandir}/man1/predate.1.gz
 %attr(0644,root,root)                   %{mandir}/man1/qmail-cat.1.gz
+%attr(0644,root,root)                   %{mandir}/man1/cidr.1.gz
 %if %nolibsrs2 == 0
 %attr(0644,root,root)                   %{mandir}/man1/srs.1.gz
 %endif
@@ -1193,6 +1192,8 @@ done
 %attr(555,root,qmail)                   %{_prefix}/sbin/readproctitle
 
 # ucspi-tcp
+%attr(755,root,qmail)                   %{_prefix}/bin/greydaemon
+%attr(755,root,qmail)                   %{_prefix}/bin/qmail-greyd
 %attr(555,root,root)                    %{_prefix}/bin/mconnect-io
 %attr(555,root,root)                    %{_prefix}/bin/rblsmtpd
 %attr(555,root,root)                    %{_prefix}/bin/tcprulescheck
