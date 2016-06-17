@@ -1,4 +1,7 @@
 # $Log: rspamsdomain.sh,v $
+# Revision 1.5  2016-06-17 20:19:15+05:30  Cprogrammer
+# use SYSCONFDIR for bogofilter.cf
+#
 # Revision 1.4  2009-11-11 08:35:13+05:30  Cprogrammer
 # assign X-Bogosity to spamheader_name by default
 #
@@ -17,8 +20,7 @@
 #qmail-local:  pid 18367 MAIL from <mbhangui@yahoo.com> RCPT <mbhangui@technology.indicorp.com> Size: 19666 X-Bogocity: No, spam probability=0.000000, cutoff=5.11e-01
 #qmail-remote: pid 18860 MAIL from <mbhangui@yahoo.com> RCPT <manvendra_bhangui@indicorp.com> Size: 19708 X-Bogocity: No, spam probability=0.000000, cutoff=5.11e-01
 
-INDIMAILDIR=`grep -w "^indimail" /etc/passwd | cut -d: -f6|head -1`
-spamheader_name=`grep ^spam_header_name $INDIMAILDIR/etc/bogofilter.cf | cut -d= -f2`
+spamheader_name=`grep ^spam_header_name SYSCONFDIR/bogofilter.cf | cut -d= -f2`
 if [ " $spamheader_name" = " " ] ; then
 	spamheader_name="X-Bogosity"
 fi

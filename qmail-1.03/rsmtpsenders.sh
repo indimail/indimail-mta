@@ -1,4 +1,7 @@
 # $Log: rsmtpsenders.sh,v $
+# Revision 1.7  2016-06-17 20:17:59+05:30  Cprogrammer
+# use SYSCONFDIR for bogofilter.cf
+#
 # Revision 1.6  2009-12-17 16:03:11+05:30  Cprogrammer
 # fix for null host obtained from smtp logs
 #
@@ -25,8 +28,7 @@
 # qmail-smtpd: pid 1821 from 127.0.0.1 HELO <localhost.localdomain> MAIL from: <jbks@tca-os.de> RCPT <yahoo> AUTH <local-rcpt> Size: 2281 X-Bogocity: No, spam probability=0.208748, cutoff=5.11e-01
 # tcpserver: end 30906 status 0
 
-INDIMAILDIR=`grep -w "^indimail" /etc/passwd | cut -d: -f6|head -1`
-spamheader_name=`grep ^spam_header_name $INDIMAILDIR/etc/bogofilter.cf | cut -d= -f2`
+spamheader_name=`grep ^spam_header_name SYSCONFDIR/bogofilter.cf | cut -d= -f2`
 if [ " $spamheader_name" = " " ] ; then
 	spamheader_name="X-Bogosity"
 fi
