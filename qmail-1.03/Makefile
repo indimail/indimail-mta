@@ -777,9 +777,10 @@ warn-auto.sh qmail-sigalrm.sh conf-qmail
 	> qmail-sigalrm
 
 qpq: \
-warn-auto.sh qpq.sh conf-qmail
+warn-auto.sh qpq.sh conf-qmail conf-prefix
 	cat warn-auto.sh qpq.sh \
 	| sed s}QMAIL}"`head -1 conf-qmail`"}g \
+	| sed s}PREFIX}"`head -1 conf-prefix`"}g \
 	> qpq
 
 qmailctl: \
