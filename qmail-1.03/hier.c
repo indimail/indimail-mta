@@ -1,5 +1,8 @@
 /*
  * $Log: hier.c,v $
+ * Revision 1.218  2016-06-17 20:15:39+05:30  Cprogrammer
+ * moved qmailanalog scripts to libexec dir
+ *
  * Revision 1.217  2016-06-17 18:29:01+05:30  Cprogrammer
  * FHS compliance - moved internal binaries to libexec dir
  *
@@ -781,7 +784,6 @@ hier(inst_dir, fatal)
 	c(auto_qmail_home, "bin", "qmail-cat", auto_uido, auto_gidq, moder_x);
 	c(auto_qmail_home, "bin", "qmail-poppass", auto_uido, auto_gidq, moder_x);
 	c(auto_qmail_home, "bin", "qmail-lagcheck", auto_uido, auto_gidq, moder_x);
-	c(auto_qmail_home, "bin", "qpq", auto_uido, auto_gidq, moder_x);
 	c(auto_qmail_home, "bin", "qmail-greyd", auto_uido, auto_gidq, moder_x);
 	c(auto_qmail_home, "bin", "greydaemon", auto_uido, auto_gidq, moder_x);
 	c(auto_qmail_home, "bin", "irmail", auto_uido, auto_gidq, moder_x);
@@ -792,6 +794,7 @@ hier(inst_dir, fatal)
 	c(auto_qmail_home, "bin", "qnotify", auto_uido, auto_gidq, moder_x);
 	c(auto_qmail_home, "bin", "rrt", auto_uido, auto_gidq, moder_x);
 	c(auto_qmail_home, "bin", "qarf", auto_uido, auto_gidq, moder_x);
+	c(auto_libexec_dir, auto_libexec_base, "qpq", auto_uido, auto_gidq, moder_x);
 	c(auto_libexec_dir, auto_libexec_base, "qail", auto_uido, auto_gidq, moder_x);
 	c(auto_libexec_dir, auto_libexec_base, "elq", auto_uido, auto_gidq, moder_x);
 	c(auto_libexec_dir, auto_libexec_base, "pinq", auto_uido, auto_gidq, moder_x);
@@ -802,7 +805,6 @@ hier(inst_dir, fatal)
 #if defined(HASDKIM) || defined(DOMAIN_KEYS)
 	c(auto_qmail_home, "bin", "dk-filter", auto_uido, auto_gidq, moder_x);
 #endif
-	c(auto_qmail_home, "bin", "rpmattr", auto_uido, auto_gidq, moder_x);
 	c(auto_qmail_home, "bin", "queue-fix", auto_uido, auto_gidq, moder_x);
 
 	c(auto_qmail_home, "bin", "qmailctl", auto_uido, auto_gidq, moder_x);
@@ -826,13 +828,14 @@ hier(inst_dir, fatal)
 #ifdef TLS
 	c(auto_libexec_dir, auto_libexec_base, "update_tmprsadh", auto_uido, auto_gidq, moder_x);
 #endif
+	c(auto_libexec_dir, auto_libexec_base, "rpmattr", auto_uido, auto_gidq, moder_x);
 	c(auto_libexec_dir, auto_libexec_base, "ipmeprint", auto_uido, auto_gidq, moder_x);
 	c(auto_libexec_dir, auto_libexec_base, "idedit", auto_uido, auto_gidq, moder_x);
 	c(auto_libexec_dir, auto_libexec_base, "cdbmake-12", auto_uido, auto_gidq, moder_x);
 	c(auto_libexec_dir, auto_libexec_base, "cdbmake-sv", auto_uido, auto_gidq, moder_x);
 	c(auto_libexec_dir, auto_libexec_base, "testzero", auto_uido, auto_gidq, moder_x);
-	c(auto_qmail_home, "bin", "qaes", auto_uido, auto_gidq, moder_x);
 
+	c(auto_qmail_home, "bin", "qaes", auto_uido, auto_gidq, moder_x);
 #ifdef USE_SPF
 	c(auto_qmail_home, "bin", "spfquery", auto_uido, auto_gidq, moder_x);
 #endif
@@ -971,43 +974,44 @@ hier(inst_dir, fatal)
 	c(auto_qmail_home, "bin", "matchup", auto_uido, auto_gidq, moder_x);
 	c(auto_qmail_home, "bin", "mlmatchup", auto_uido, auto_gidq, moder_x);
 	c(auto_qmail_home, "bin", "columnt", auto_uido, auto_gidq, moder_x);
-	c(auto_qmail_home, "bin", "zoverall", auto_uido, auto_gidq, moder_x);
-	c(auto_qmail_home, "bin", "zsendmail", auto_uido, auto_gidq, moder_x);
 	c(auto_qmail_home, "bin", "xqp", auto_uido, auto_gidq, moder_x);
-	c(auto_qmail_home, "bin", "xsender", auto_uido, auto_gidq, moder_x);
-	c(auto_qmail_home, "bin", "xrecipient", auto_uido, auto_gidq, moder_x);
-	c(auto_qmail_home, "bin", "ddist", auto_uido, auto_gidq, moder_x);
-	c(auto_qmail_home, "bin", "deferrals", auto_uido, auto_gidq, moder_x);
-	c(auto_qmail_home, "bin", "failures", auto_uido, auto_gidq, moder_x);
-	c(auto_qmail_home, "bin", "successes", auto_uido, auto_gidq, moder_x);
-	c(auto_qmail_home, "bin", "rhosts", auto_uido, auto_gidq, moder_x);
-	c(auto_qmail_home, "bin", "recipients", auto_uido, auto_gidq, moder_x);
-	c(auto_qmail_home, "bin", "rxdelay", auto_uido, auto_gidq, moder_x);
-	c(auto_qmail_home, "bin", "senders", auto_uido, auto_gidq, moder_x);
-	c(auto_qmail_home, "bin", "suids", auto_uido, auto_gidq, moder_x);
-	c(auto_qmail_home, "bin", "zddist", auto_uido, auto_gidq, moder_x);
-	c(auto_qmail_home, "bin", "zdeferrals", auto_uido, auto_gidq, moder_x);
-	c(auto_qmail_home, "bin", "zfailures", auto_uido, auto_gidq, moder_x);
-	c(auto_qmail_home, "bin", "zsuccesses", auto_uido, auto_gidq, moder_x);
-	c(auto_qmail_home, "bin", "zrhosts", auto_uido, auto_gidq, moder_x);
-	c(auto_qmail_home, "bin", "zrecipients", auto_uido, auto_gidq, moder_x);
-	c(auto_qmail_home, "bin", "zrxdelay", auto_uido, auto_gidq, moder_x);
-	c(auto_qmail_home, "bin", "zsenders", auto_uido, auto_gidq, moder_x);
-	c(auto_qmail_home, "bin", "zsuids", auto_uido, auto_gidq, moder_x);
-	c(auto_qmail_home, "bin", "multilog-matchup", auto_uido, auto_gidq, moder_x);
-	c(auto_qmail_home, "bin", "smtp-matchup", auto_uido, auto_gidq, moder_x);
-	c(auto_qmail_home, "bin", "rsmtp", auto_uido, auto_gidq, moder_x);
-	c(auto_qmail_home, "bin", "rsmtpfailures", auto_uido, auto_gidq, moder_x);
-	c(auto_qmail_home, "bin", "rsmtpsdomains", auto_uido, auto_gidq, moder_x);
-	c(auto_qmail_home, "bin", "rsmtprdomains", auto_uido, auto_gidq, moder_x);
-	c(auto_qmail_home, "bin", "rsmtpsenders", auto_uido, auto_gidq, moder_x);
-	c(auto_qmail_home, "bin", "rsmtprecipients", auto_uido, auto_gidq, moder_x);
-	c(auto_qmail_home, "bin", "zsmtp", auto_uido, auto_gidq, moder_x);
-	c(auto_qmail_home, "bin", "zspam", auto_uido, auto_gidq, moder_x);
-	c(auto_qmail_home, "bin", "rspamrdomain", auto_uido, auto_gidq, moder_x);
-	c(auto_qmail_home, "bin", "rspamsdomain", auto_uido, auto_gidq, moder_x);
-	c(auto_qmail_home, "bin", "rspamstat", auto_uido, auto_gidq, moder_x);
-	c(auto_qmail_home, "bin", "rspamhist", auto_uido, auto_gidq, moder_x);
+
+	c(auto_libexec_dir, auto_libexec_base, "zoverall", auto_uido, auto_gidq, moder_x);
+	c(auto_libexec_dir, auto_libexec_base, "zsendmail", auto_uido, auto_gidq, moder_x);
+	c(auto_libexec_dir, auto_libexec_base, "xsender", auto_uido, auto_gidq, moder_x);
+	c(auto_libexec_dir, auto_libexec_base, "xrecipient", auto_uido, auto_gidq, moder_x);
+	c(auto_libexec_dir, auto_libexec_base, "ddist", auto_uido, auto_gidq, moder_x);
+	c(auto_libexec_dir, auto_libexec_base, "deferrals", auto_uido, auto_gidq, moder_x);
+	c(auto_libexec_dir, auto_libexec_base, "failures", auto_uido, auto_gidq, moder_x);
+	c(auto_libexec_dir, auto_libexec_base, "successes", auto_uido, auto_gidq, moder_x);
+	c(auto_libexec_dir, auto_libexec_base, "rhosts", auto_uido, auto_gidq, moder_x);
+	c(auto_libexec_dir, auto_libexec_base, "recipients", auto_uido, auto_gidq, moder_x);
+	c(auto_libexec_dir, auto_libexec_base, "rxdelay", auto_uido, auto_gidq, moder_x);
+	c(auto_libexec_dir, auto_libexec_base, "senders", auto_uido, auto_gidq, moder_x);
+	c(auto_libexec_dir, auto_libexec_base, "suids", auto_uido, auto_gidq, moder_x);
+	c(auto_libexec_dir, auto_libexec_base, "zddist", auto_uido, auto_gidq, moder_x);
+	c(auto_libexec_dir, auto_libexec_base, "zdeferrals", auto_uido, auto_gidq, moder_x);
+	c(auto_libexec_dir, auto_libexec_base, "zfailures", auto_uido, auto_gidq, moder_x);
+	c(auto_libexec_dir, auto_libexec_base, "zsuccesses", auto_uido, auto_gidq, moder_x);
+	c(auto_libexec_dir, auto_libexec_base, "zrhosts", auto_uido, auto_gidq, moder_x);
+	c(auto_libexec_dir, auto_libexec_base, "zrecipients", auto_uido, auto_gidq, moder_x);
+	c(auto_libexec_dir, auto_libexec_base, "zrxdelay", auto_uido, auto_gidq, moder_x);
+	c(auto_libexec_dir, auto_libexec_base, "zsenders", auto_uido, auto_gidq, moder_x);
+	c(auto_libexec_dir, auto_libexec_base, "zsuids", auto_uido, auto_gidq, moder_x);
+	c(auto_libexec_dir, auto_libexec_base, "multilog-matchup", auto_uido, auto_gidq, moder_x);
+	c(auto_libexec_dir, auto_libexec_base, "smtp-matchup", auto_uido, auto_gidq, moder_x);
+	c(auto_libexec_dir, auto_libexec_base, "rsmtp", auto_uido, auto_gidq, moder_x);
+	c(auto_libexec_dir, auto_libexec_base, "rsmtpfailures", auto_uido, auto_gidq, moder_x);
+	c(auto_libexec_dir, auto_libexec_base, "rsmtpsdomains", auto_uido, auto_gidq, moder_x);
+	c(auto_libexec_dir, auto_libexec_base, "rsmtprdomains", auto_uido, auto_gidq, moder_x);
+	c(auto_libexec_dir, auto_libexec_base, "rsmtpsenders", auto_uido, auto_gidq, moder_x);
+	c(auto_libexec_dir, auto_libexec_base, "rsmtprecipients", auto_uido, auto_gidq, moder_x);
+	c(auto_libexec_dir, auto_libexec_base, "zsmtp", auto_uido, auto_gidq, moder_x);
+	c(auto_libexec_dir, auto_libexec_base, "zspam", auto_uido, auto_gidq, moder_x);
+	c(auto_libexec_dir, auto_libexec_base, "rspamrdomain", auto_uido, auto_gidq, moder_x);
+	c(auto_libexec_dir, auto_libexec_base, "rspamsdomain", auto_uido, auto_gidq, moder_x);
+	c(auto_libexec_dir, auto_libexec_base, "rspamstat", auto_uido, auto_gidq, moder_x);
+	c(auto_libexec_dir, auto_libexec_base, "rspamhist", auto_uido, auto_gidq, moder_x);
 
 	/* setuid/setgid Programs */
 	c(auto_qmail_home, "sbin", "qmail-queue", auto_uidq, auto_gidq, 06551);
@@ -1481,7 +1485,7 @@ hier(inst_dir, fatal)
 void
 getversion_install_big_c()
 {
-	static char    *x = "$Id: hier.c,v 1.217 2016-06-17 18:29:01+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: hier.c,v 1.218 2016-06-17 20:15:39+05:30 Cprogrammer Exp mbhangui $";
 
 #ifdef INDIMAIL
 	if (x)

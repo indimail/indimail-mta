@@ -3998,9 +3998,10 @@ str.h fmt.h scan.h case.h
 	
 
 successes: \
-warn-auto.sh successes.sh conf-qmail
+warn-auto.sh successes.sh conf-qmail conf-libexec
 	cat warn-auto.sh successes.sh \
 	| sed s}QMAIL}"`head -1 conf-qmail`"}g \
+	| sed s}LIBEXEC}"`head -1 conf-libexec`"}g \
 	> successes
 
 suids: \
@@ -4040,9 +4041,10 @@ xsender.1
 	nroff -man xsender.1 > xsender.0
 
 zddist: \
-warn-auto.sh zddist.sh conf-qmail
+warn-auto.sh zddist.sh conf-qmail conf-libexec
 	cat warn-auto.sh zddist.sh \
 	| sed s}QMAIL}"`head -1 conf-qmail`"}g \
+	| sed s}LIBEXEC}"`head -1 conf-libexec`"}g \
 	> zddist
 
 ddist: \
@@ -4052,9 +4054,10 @@ warn-auto.sh ddist.sh conf-qmail
 	> ddist
 
 zdeferrals: \
-warn-auto.sh zdeferrals.sh conf-qmail
+warn-auto.sh zdeferrals.sh conf-qmail conf-libexec
 	cat warn-auto.sh zdeferrals.sh \
 	| sed s}QMAIL}"`head -1 conf-qmail`"}g \
+	| sed s}LIBEXEC}"`head -1 conf-libexec`"}g \
 	> zdeferrals
 
 deferrals: warn-auto.sh deferrals.sh conf-qmail
@@ -4063,9 +4066,10 @@ deferrals: warn-auto.sh deferrals.sh conf-qmail
 	> deferrals
 
 zfailures: \
-warn-auto.sh zfailures.sh conf-qmail
+warn-auto.sh zfailures.sh conf-qmail conf-libexec
 	cat warn-auto.sh zfailures.sh \
 	| sed s}QMAIL}"`head -1 conf-qmail`"}g \
+	| sed s}LIBEXEC}"`head -1 conf-libexec`"}g \
 	> zfailures
 
 failures: \
@@ -4081,33 +4085,38 @@ warn-auto.sh zoverall.sh conf-qmail
 	> zoverall
 
 zrecipients: \
-warn-auto.sh zrecipients.sh conf-qmail
+warn-auto.sh zrecipients.sh conf-qmail conf-libexec
 	cat warn-auto.sh zrecipients.sh \
 	| sed s}QMAIL}"`head -1 conf-qmail`"}g \
+	| sed s}LIBEXEC}"`head -1 conf-libexec`"}g \
 	> zrecipients
 
 zrhosts: \
-warn-auto.sh zrhosts.sh conf-qmail
+warn-auto.sh zrhosts.sh conf-qmail conf-libexec
 	cat warn-auto.sh zrhosts.sh \
 	| sed s}QMAIL}"`head -1 conf-qmail`"}g \
+	| sed s}LIBEXEC}"`head -1 conf-libexec`"}g \
 	> zrhosts
 
 zsmtp: \
-warn-auto.sh zsmtp.sh conf-qmail
+warn-auto.sh zsmtp.sh conf-qmail conf-libexec
 	cat warn-auto.sh zsmtp.sh \
 	| sed s}QMAIL}"`head -1 conf-qmail`"}g \
+	| sed s}LIBEXEC}"`head -1 conf-libexec`"}g \
 	> zsmtp
 
 zrxdelay: \
-warn-auto.sh zrxdelay.sh conf-qmail
+warn-auto.sh zrxdelay.sh conf-qmail conf-libexec
 	cat warn-auto.sh zrxdelay.sh \
 	| sed s}QMAIL}"`head -1 conf-qmail`"}g \
+	| sed s}LIBEXEC}"`head -1 conf-libexec`"}g \
 	> zrxdelay
 
 zsenders: \
-warn-auto.sh zsenders.sh conf-qmail
+warn-auto.sh zsenders.sh conf-qmail conf-libexec
 	cat warn-auto.sh zsenders.sh \
 	| sed s}QMAIL}"`head -1 conf-qmail`"}g \
+	| sed s}LIBEXEC}"`head -1 conf-libexec`"}g \
 	> zsenders
 
 zsendmail: \
@@ -4123,9 +4132,10 @@ warn-auto.sh zsuccesses.sh conf-qmail
 	> zsuccesses
 
 zsuids: \
-warn-auto.sh zsuids.sh conf-qmail
+warn-auto.sh zsuids.sh conf-qmail conf-libexec
 	cat warn-auto.sh zsuids.sh \
 	| sed s}QMAIL}"`head -1 conf-qmail`"}g \
+	| sed s}LIBEXEC}"`head -1 conf-libexec`"}g \
 	> zsuids
 
 multilog-matchup: \
@@ -4159,9 +4169,10 @@ warn-auto.sh envmigrate.sh
 	> envmigrate
 
 rsmtp: \
-warn-auto.sh rsmtp.sh conf-qmail
+warn-auto.sh rsmtp.sh conf-qmail conf-sysconfdir
 	cat warn-auto.sh rsmtp.sh \
 	| sed s}QMAIL}"`head -1 conf-qmail`"}g \
+	| sed s}SYSCONFDIR}"`head -1 conf-sysconfdir`"}g \
 	> rsmtp
 
 rsmtpfailures: \
@@ -4171,27 +4182,31 @@ warn-auto.sh rsmtpfailures.sh conf-qmail
 	> rsmtpfailures
 
 rsmtpsdomains: \
-warn-auto.sh rsmtpsdomains.sh conf-qmail
+warn-auto.sh rsmtpsdomains.sh conf-qmail conf-sysconfdir
 	cat warn-auto.sh rsmtpsdomains.sh \
 	| sed s}QMAIL}"`head -1 conf-qmail`"}g \
+	| sed s}SYSCONFDIR}"`head -1 conf-sysconfdir`"}g \
 	> rsmtpsdomains
 
 rsmtprdomains: \
-warn-auto.sh rsmtprdomains.sh conf-qmail
+warn-auto.sh rsmtprdomains.sh conf-qmail conf-sysconfdir
 	cat warn-auto.sh rsmtprdomains.sh \
 	| sed s}QMAIL}"`head -1 conf-qmail`"}g \
+	| sed s}SYSCONFDIR}"`head -1 conf-sysconfdir`"}g \
 	> rsmtprdomains
 
 rsmtprecipients: \
-warn-auto.sh rsmtprecipients.sh conf-qmail
+warn-auto.sh rsmtprecipients.sh conf-qmail conf-sysconfdir
 	cat warn-auto.sh rsmtprecipients.sh \
 	| sed s}QMAIL}"`head -1 conf-qmail`"}g \
+	| sed s}SYSCONFDIR}"`head -1 conf-sysconfdir`"}g \
 	> rsmtprecipients
 
 rsmtpsenders: \
-warn-auto.sh rsmtpsenders.sh conf-qmail
+warn-auto.sh rsmtpsenders.sh conf-qmail conf-sysconfdir
 	cat warn-auto.sh rsmtpsenders.sh \
 	| sed s}QMAIL}"`head -1 conf-qmail`"}g \
+	| sed s}SYSCONFDIR}"`head -1 conf-sysconfdir`"}g \
 	> rsmtpsenders
 
 rxdelay: \
@@ -4201,21 +4216,24 @@ warn-auto.sh rxdelay.sh conf-qmail
 	> rxdelay
 
 rspamrdomain: \
-warn-auto.sh rspamrdomain.sh conf-qmail
+warn-auto.sh rspamrdomain.sh conf-qmail conf-sysconfdir
 	cat warn-auto.sh rspamrdomain.sh \
 	| sed s}QMAIL}"`head -1 conf-qmail`"}g \
+	| sed s}SYSCONFDIR}"`head -1 conf-sysconfdir`"}g \
 	> rspamrdomain
 
 rspamsdomain: \
-warn-auto.sh rspamsdomain.sh conf-qmail
+warn-auto.sh rspamsdomain.sh conf-qmail conf-sysconfdir
 	cat warn-auto.sh rspamsdomain.sh \
 	| sed s}QMAIL}"`head -1 conf-qmail`"}g \
+	| sed s}SYSCONFDIR}"`head -1 conf-sysconfdir`"}g \
 	> rspamsdomain
 
 zspam: \
-warn-auto.sh zspam.sh conf-qmail
+warn-auto.sh zspam.sh conf-qmail conf-libexec
 	cat warn-auto.sh zspam.sh \
 	| sed s}QMAIL}"`head -1 conf-qmail`"}g \
+	| sed s}LIBEXEC}"`head -1 conf-libexec`"}g \
 	> zspam
 
 dk-filter: \
@@ -4391,9 +4409,10 @@ rpmattr.o: compile rpmattr.c substdio.h strerr.h auto_uids.h substdio.h str.h
 	./compile rpmattr.c
 
 rspamstat: \
-warn-auto.sh rspamstat.sh conf-qmail
+warn-auto.sh rspamstat.sh conf-qmail conf-sysconfdir
 	cat warn-auto.sh rspamstat.sh \
 	| sed s}QMAIL}"`head -1 conf-qmail`"}g \
+	| sed s}SYSCONFDIR}"`head -1 conf-sysconfdir`"}g \
 	> rspamstat
 
 rspamhist: \
