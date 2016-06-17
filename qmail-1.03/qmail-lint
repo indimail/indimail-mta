@@ -97,6 +97,17 @@ if (open(F, "<control/virtualdomains")) {
   }
 }
 
+if (open(F, "<control/queue_base")) {
+  while(<F>) {
+    chomp;
+    next if m"^#";
+      $queue_base{$_} = "";
+  }
+} else {
+  print "Warning: Without a control/queue_base file\n";
+  &verbose(NOQUEUEBASE);
+}
+
 # double-plus ungood if they have no rcpthosts file
 if (open(F, "<control/rcpthosts")) {
   while(<F>) {
@@ -266,13 +277,20 @@ foreach $domain (keys %virtualdomains) {
   &verbose(IMPLICITVDOM);
 }
 
-# make sure trigger isn't broken.
-$mode = (stat("$qmail/queue/lock/trigger"))[2];
-if ($mode != 010622) {
-  print "Error: $qmail/queue/lock/trigger does not have prw--w--w- permissions\n";
-  &verbose(TRIGGER);
+open(QB, "<control/queue_base")
+    or die "Unable to open control/queue_base\n";
+chop($queue_base = <QB>);
+close(QB);
+opendir(D, $queue_base) or die;
+while($_ = readdir(D)) {
+  next unless /^queue/;
+  $qdir = $_;
+  $mode = (stat("$queue_base/$qdir/lock/trigger"))[2];
+  if ($mode != 010622) {
+    print "Error: $queue_base/$qdir/lock/trigger does not have prw--w--w- permissions [$mode]\n";
+    &verbose(TRIGGER);
+  }
 }
-
 
 __END__
 " # GNU Emacs is sooooooo dumb about perl syntax.
@@ -298,6 +316,9 @@ NORCPTHOSTS
   mail for.  Typically, this includes any host mentioned in locals or
   virtualdomains.  It also includes any hosts for which you are a secondary
   MX.  See http://qmail-docs.surfdirect.com.au/docs/qmail-antirelay.html
+QUEUEBASE
+  indimail-mta control/queue_base to determine all queues. If this is absent
+  mails cannot be queued by qmail-queue
 LOCALVDOM
   Qmail-send examines control/locals before it examines control/virtualdomains.
   Therefore, if a host is in locals, it will never be considered virtual.
