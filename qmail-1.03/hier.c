@@ -1,5 +1,8 @@
 /*
  * $Log: hier.c,v $
+ * Revision 1.216  2016-06-17 17:20:42+05:30  Cprogrammer
+ * added conf-libexec, auto_libexec variable for libexecdir (internal binaries)
+ *
  * Revision 1.215  2016-06-17 09:30:47+05:30  Cprogrammer
  * permissions fixes for rpmlint
  *
@@ -519,6 +522,7 @@
 #include "auto_shared.h"
 #include "auto_sysconfdir.h"
 #include "auto_prefix.h"
+#include "auto_libexec.h"
 #include "auto_uids.h"
 #include "qmail-todo.h"
 #include "fmt.h"
@@ -529,13 +533,15 @@
 
 void            d(char *, char *, int, int, int);
 void            h(char *, int, int, int);
-void            l(char *, char *, char *);
+void            l(char *, char *, char *, int);
 void            c(char *, char *, char *, int, int, int);
 char           *getdirname(char *, char **);
 
 stralloc        a1 = { 0 };
 stralloc        a2 = { 0 };
 stralloc        a3 = { 0 };
+stralloc        a4 = { 0 };
+stralloc        a5 = { 0 };
 char            buf[100 + FMT_ULONG];
 extern int      lsb;
 
@@ -585,7 +591,7 @@ hier(inst_dir, fatal)
 	char           *inst_dir, *fatal;
 {
 	char           *auto_cntrl_base, *auto_cntrl_dir, *auto_assgn_base, *auto_assgn_dir;
-	char           *auto_qmail_home = auto_qmail;
+	char           *auto_libexec_base, *auto_libexec_dir, *auto_qmail_home = auto_qmail;
 	char           *mandir;
 	mode_t          moder_d, moder_f, moder_x, moder_s, moder_t, moder_u;
 	uid_t           uidr;
@@ -609,7 +615,8 @@ hier(inst_dir, fatal)
 	else {
 		h(auto_cntrl_dir, 0, 0, 0755);
 		d(auto_cntrl_dir, "control", auto_uidv, auto_gidq, 0775);
-		l(auto_qmail_home, "control", auto_cntrl_dir);
+		/*- l(auto_qmail_home, "control", auto_cntrl_dir); -*/
+		l(auto_qmail_home, "control", auto_control, 0);
 	}
 
 	auto_assgn_dir = getdirname(auto_assign, &auto_assgn_base);
@@ -623,7 +630,8 @@ hier(inst_dir, fatal)
 	else {
 		h(auto_assgn_dir, 0, 0, 0755);
 		d(auto_assgn_dir, "users", auto_uidv, auto_gidq, 0775);
-		l(auto_qmail_home, "users", auto_assgn_dir);
+		/*- l(auto_qmail_home, "users", auto_assgn_dir); -*/
+		l(auto_qmail_home, "users", auto_assign, 0);
 	}
 
 	/*- shared directory for boot, doc, man */
@@ -637,6 +645,25 @@ hier(inst_dir, fatal)
 		h(auto_shared, auto_uido, auto_gidq, 0555);
 	} else
 		mandir = auto_qmail_home;
+
+	/*- libexecdir directory for internal binaries */
+	auto_libexec_dir = getdirname(auto_libexec, &auto_libexec_base);
+	if (!stralloc_copys(&a4, auto_libexec_dir))
+		strerr_die2sys(111, fatal, "out of memory: ");
+	if (!stralloc_0(&a4))
+		strerr_die2sys(111, fatal, "out of memory: ");
+	if (!stralloc_copys(&a5, auto_libexec_base + 1))
+		strerr_die2sys(111, fatal, "out of memory: ");
+	if (!stralloc_0(&a5))
+		strerr_die2sys(111, fatal, "out of memory: ");
+	auto_libexec_dir = a4.s;
+	auto_libexec_base = a5.s;
+	if (!str_diff(auto_qmail, auto_libexec)) {
+		d(auto_qmail_home, auto_libexec_base, auto_uidv, auto_gidq, 0555);
+	} else {
+		h(auto_libexec, 0, 0, 0555);
+		l(auto_qmail_home, "libexec", auto_libexec, 0);
+	}
 
 	/*- sysconf directory for control, config files */
 	if (str_diff(auto_qmail, auto_sysconfdir))
@@ -653,8 +680,8 @@ hier(inst_dir, fatal)
 		moder_u = 0755;
 		if (access(auto_prefix, F_OK))
 			h(auto_prefix, uidr, gidr, 0755);
-		l(auto_qmail_home, "bin", auto_prefix);
-		l(auto_qmail_home, "sbin", auto_prefix);
+		l(auto_qmail_home, "bin", auto_prefix, 1);
+		l(auto_qmail_home, "sbin", auto_prefix, 1);
 	} else {
 		uidr = auto_uido;
 		gidr = auto_gidq;
@@ -729,7 +756,6 @@ hier(inst_dir, fatal)
 	c(auto_qmail_home, "bin", "sendmail", auto_uido, auto_gidq, moder_x);
 	c(auto_qmail_home, "bin", "tcp-env", auto_uido, auto_gidq, moder_x);
 	c(auto_qmail_home, "bin", "qreceipt", auto_uido, auto_gidq, moder_x);
-	c(auto_qmail_home, "bin", "qsmhook", auto_uido, auto_gidq, moder_x);
 	c(auto_qmail_home, "bin", "forward", auto_uido, auto_gidq, moder_x);
 	c(auto_qmail_home, "bin", "preline", auto_uido, auto_gidq, moder_x);
 	c(auto_qmail_home, "bin", "condredirect", auto_uido, auto_gidq, moder_x);
@@ -746,7 +772,6 @@ hier(inst_dir, fatal)
 	c(auto_qmail_home, "bin", "datemail", auto_uido, auto_gidq, moder_x);
 	c(auto_qmail_home, "bin", "mailsubj", auto_uido, auto_gidq, moder_x);
 
-	c(auto_qmail_home, "bin", "qmail-lint", auto_uido, auto_gidq, moder_x);
 	c(auto_qmail_home, "bin", "qmail-qfilter", auto_uido, auto_gidq, moder_x);
 	c(auto_qmail_home, "bin", "surblfilter", auto_uido, auto_gidq, moder_x);
 	c(auto_qmail_home, "bin", "surblqueue", auto_uido, auto_gidq, moder_x);
@@ -767,28 +792,20 @@ hier(inst_dir, fatal)
 	c(auto_qmail_home, "bin", "qnotify", auto_uido, auto_gidq, moder_x);
 	c(auto_qmail_home, "bin", "rrt", auto_uido, auto_gidq, moder_x);
 	c(auto_qmail_home, "bin", "qarf", auto_uido, auto_gidq, moder_x);
-	c(auto_qmail_home, "bin", "etrn", auto_uido, auto_gidq, moder_x);
-	c(auto_qmail_home, "bin", "atrn", auto_uido, auto_gidq, moder_x);
-	c(auto_qmail_home, "bin", "balance_outgoing", auto_uido, auto_gidq, moder_x);
+	c(auto_libexec_dir, auto_libexec_base, "qmail-lint", auto_uido, auto_gidq, moder_x);
+	c(auto_libexec_dir, auto_libexec_base, "qsmhook", auto_uido, auto_gidq, moder_x);
+	c(auto_libexec_dir, auto_libexec_base, "etrn", auto_uido, auto_gidq, moder_x);
+	c(auto_libexec_dir, auto_libexec_base, "atrn", auto_uido, auto_gidq, moder_x);
 #if defined(HASDKIM) || defined(DOMAIN_KEYS)
 	c(auto_qmail_home, "bin", "dk-filter", auto_uido, auto_gidq, moder_x);
 #endif
 	c(auto_qmail_home, "bin", "rpmattr", auto_uido, auto_gidq, moder_x);
-#ifdef TLS
-	c(auto_qmail_home, "bin", "update_tmprsadh", auto_uido, auto_gidq, moder_x);
-#endif
 	c(auto_qmail_home, "bin", "queue-fix", auto_uido, auto_gidq, moder_x);
-	c(auto_qmail_home, "bin", "qmail-sighup", auto_uido, auto_gidq, moder_x);
-	c(auto_qmail_home, "bin", "qmail-sigalrm", auto_uido, auto_gidq, moder_x);
-	c(auto_qmail_home, "bin", "qmail-sigterm", auto_uido, auto_gidq, moder_x);
 
-	c(auto_qmail_home, "bin", "ipmeprint", auto_uido, auto_gidq, moder_x);
-	c(auto_qmail_home, "bin", "idedit", auto_uido, auto_gidq, moder_x);
 	c(auto_qmail_home, "bin", "qmailctl", auto_uido, auto_gidq, moder_x);
 	c(auto_qmail_home, "bin", "uacl", auto_uido, auto_gidq, moder_x);
 	c(auto_qmail_home, "bin", "qbase64", auto_uido, auto_gidq, moder_x);
 	c(auto_qmail_home, "bin", "swaks", auto_uido, auto_gidq, moder_x);
-	c(auto_qmail_home, "bin", "mbox2maildir.pl", auto_uido, auto_gidq, moder_x);
 
 	c(auto_qmail_home, "bin", "qmail-newu", auto_uido, auto_gidq, moder_t);
 	c(auto_qmail_home, "bin", "qmail-newmrh", auto_uido, auto_gidq, moder_t);
@@ -803,9 +820,14 @@ hier(inst_dir, fatal)
 	c(auto_qmail_home, "bin", "cdbdump", auto_uido, auto_gidq, moder_x);
 	c(auto_qmail_home, "bin", "cdbstats", auto_uido, auto_gidq, moder_x);
 	c(auto_qmail_home, "bin", "cdbtest", auto_uido, auto_gidq, moder_x);
-	c(auto_qmail_home, "bin", "cdbmake-12", auto_uido, auto_gidq, moder_x);
-	c(auto_qmail_home, "bin", "cdbmake-sv", auto_uido, auto_gidq, moder_x);
-	c(auto_qmail_home, "bin", "testzero", auto_uido, auto_gidq, moder_x);
+#ifdef TLS
+	c(auto_libexec_dir, auto_libexec_base, "update_tmprsadh", auto_uido, auto_gidq, moder_x);
+#endif
+	c(auto_libexec_dir, auto_libexec_base, "ipmeprint", auto_uido, auto_gidq, moder_x);
+	c(auto_libexec_dir, auto_libexec_base, "idedit", auto_uido, auto_gidq, moder_x);
+	c(auto_libexec_dir, auto_libexec_base, "cdbmake-12", auto_uido, auto_gidq, moder_x);
+	c(auto_libexec_dir, auto_libexec_base, "cdbmake-sv", auto_uido, auto_gidq, moder_x);
+	c(auto_libexec_dir, auto_libexec_base, "testzero", auto_uido, auto_gidq, moder_x);
 	c(auto_qmail_home, "bin", "qaes", auto_uido, auto_gidq, moder_x);
 
 #ifdef USE_SPF
@@ -854,13 +876,13 @@ hier(inst_dir, fatal)
 #ifdef SMTP_PLUGIN
 	c(auto_qmail_home, "sbin", "plugtest", auto_uido, auto_gidq, moder_x);
 #endif
-	c(auto_qmail_home, "sbin", "dnscname", auto_uido, auto_gidq, moder_x);
-	c(auto_qmail_home, "sbin", "dnsptr", auto_uido, auto_gidq, moder_x);
-	c(auto_qmail_home, "sbin", "dnsip", auto_uido, auto_gidq, moder_x);
-	c(auto_qmail_home, "sbin", "dnsmxip", auto_uido, auto_gidq, moder_x);
-	c(auto_qmail_home, "sbin", "dnsfq", auto_uido, auto_gidq, moder_x);
+	c(auto_libexec_dir, auto_libexec_base, "dnscname", auto_uido, auto_gidq, moder_x);
+	c(auto_libexec_dir, auto_libexec_base, "dnsptr", auto_uido, auto_gidq, moder_x);
+	c(auto_libexec_dir, auto_libexec_base, "dnsip", auto_uido, auto_gidq, moder_x);
+	c(auto_libexec_dir, auto_libexec_base, "dnsmxip", auto_uido, auto_gidq, moder_x);
+	c(auto_libexec_dir, auto_libexec_base, "dnsfq", auto_uido, auto_gidq, moder_x);
 #ifdef USE_SPF
-	c(auto_qmail_home, "sbin", "dnstxt", auto_uido, auto_gidq, moder_x);
+	c(auto_libexec_dir, auto_libexec_base, "dnstxt", auto_uido, auto_gidq, moder_x);
 #endif
 
 	/* mess822 */
@@ -889,7 +911,6 @@ hier(inst_dir, fatal)
 	c(auto_qmail_home, "bin", "replier-config", auto_uido, auto_gidq, moder_x);
 
 	/* fastforward */
-	c(auto_qmail_home, "bin", "envmigrate", auto_uido, auto_gidq, moder_x);
 	c(auto_qmail_home, "bin", "dot-forward", auto_uido, auto_gidq, moder_x);
 	c(auto_qmail_home, "bin", "fastforward", auto_uido, auto_gidq, moder_x);
 	c(auto_qmail_home, "bin", "printforward", auto_uido, auto_gidq, moder_x);
@@ -995,15 +1016,16 @@ hier(inst_dir, fatal)
 #ifdef BATV
 	c(auto_qmail_home, "sbin", "batv", auto_uido, auto_gidq, moder_x);
 #endif
+	c(auto_libexec_dir, auto_libexec_base, "envmigrate", auto_uido, auto_gidq, moder_x);
+	c(auto_libexec_dir, auto_libexec_base, "hostname", auto_uido, auto_gidq, moder_x);
+	c(auto_libexec_dir, auto_libexec_base, "qmailconfig", auto_uido, auto_gidq, moder_x);
+	c(auto_libexec_dir, auto_libexec_base, "config-fast", auto_uido, auto_gidq, moder_x);
+	c(auto_libexec_dir, auto_libexec_base, "instcheck", auto_uido, auto_gidq, moder_t);
+	c(auto_libexec_dir, auto_libexec_base, "whois", auto_uido, auto_gidq, moder_x);
 	c(auto_qmail_home, "sbin", "qmail-multi", auto_uido, auto_gidq, moder_x);
 	c(auto_qmail_home, "sbin", "qmail-nullqueue", auto_uido, auto_gidq, moder_x);
-	c(auto_qmail_home, "sbin", "hostname", auto_uido, auto_gidq, moder_x);
-	c(auto_qmail_home, "sbin", "qmailconfig", auto_uido, auto_gidq, moder_x);
-	c(auto_qmail_home, "sbin", "config-fast", auto_uido, auto_gidq, moder_x);
-	c(auto_qmail_home, "sbin", "instcheck", auto_uido, auto_gidq, moder_t);
 	c(auto_qmail_home, "sbin", "sys-checkpwd", auto_uido, auto_gidq, moder_x);
 	c(auto_qmail_home, "sbin", "ldap-checkpwd", auto_uido, auto_gidq, moder_x);
-	c(auto_qmail_home, "sbin", "whois", auto_uido, auto_gidq, moder_x);
 
 #if defined(SMTP_PLUGIN) || defined(LOAD_SHARED_OBJECTS)
 	d(auto_prefix,     "lib/indimail/plugins", auto_uido, auto_gidq, 0555);
@@ -1072,6 +1094,7 @@ hier(inst_dir, fatal)
 	c(auto_shared,     "doc", "README.tls", auto_uido, auto_gidq, 0444);
 	c(auto_shared,     "doc", "README.wildmat", auto_uido, auto_gidq, 0444);
 #endif
+	c(mandir,          "man/man1", "cidr.1", uidr, gidr, moder_f);
 	c(mandir,          "man/man1", "qmail-cat.1", uidr, gidr, moder_f);
 	c(mandir,          "man/man1", "predate.1", uidr, gidr, moder_f);
 	c(mandir,          "man/man1", "datemail.1", uidr, gidr, moder_f);
@@ -1455,7 +1478,7 @@ hier(inst_dir, fatal)
 void
 getversion_install_big_c()
 {
-	static char    *x = "$Id: hier.c,v 1.215 2016-06-17 09:30:47+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: hier.c,v 1.216 2016-06-17 17:20:42+05:30 Cprogrammer Exp mbhangui $";
 
 #ifdef INDIMAIL
 	if (x)
