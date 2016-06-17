@@ -152,8 +152,9 @@ indimailsbin_PROGRAMS = adminclient chowkidar clearopensmtp \
 	vmoddomain vreorg vtable
 
 indimaillibexec_PROGRAMS = sq_vacation qmailmrtg7 execmysql cindimail hashtable displaytop \
-						   config_settings updatefile myslave
-indimaillibexec_SCRIPTS = mailzipper overquota.sh controlsync cputime tls-cert-check get-cert
+						   config_settings updatefile
+indimaillibexec_SCRIPTS = mailzipper overquota.sh controlsync cputime tls-cert-check get-cert \
+						  myslave
 
 indimailauthlib_PROGRAMS = authindi authpgsql
 
