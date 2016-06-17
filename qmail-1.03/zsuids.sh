@@ -1,5 +1,8 @@
 #
 # $Log: zsuids.sh,v $
+# Revision 1.5  2016-06-17 20:21:53+05:30  Cprogrammer
+# qmailanalog scripts moved to libexec dir
+#
 # Revision 1.4  2011-11-13 15:40:47+05:30  Cprogrammer
 # fix for ubuntu (sort is /usr/bin/sort)
 #
@@ -26,5 +29,5 @@ One line per sender uid. Information on each line:
 '
 (
 echo mess bytes sbytes rbytes recips tries xdelay uid
-QMAIL/bin/suids | sort -n -r -k 1,1 -k 2,2 -k 3,3 -k 4,4
+LIBEXEC/suids | sort -n -r -k 1,1 -k 2,2 -k 3,3 -k 4,4
 ) | QMAIL/bin/columnt

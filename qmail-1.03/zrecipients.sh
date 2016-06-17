@@ -1,5 +1,8 @@
 #
 # $Log: zrecipients.sh,v $
+# Revision 1.6  2016-06-17 20:20:45+05:30  Cprogrammer
+# qmailanalog scripts moved to libexec dir
+#
 # Revision 1.5  2011-11-13 15:40:26+05:30  Cprogrammer
 # fix for ubuntu (sort is /usr/bin/sort)
 #
@@ -26,5 +29,5 @@ One line per recipient. Information on each line:
 '
 (
 echo sbytes mess tries xdelay recipient
-QMAIL/bin/recipients | sort -n -r -k 1,1 -k 2,2 -k 4,4 -k 3,3
+LIBEXEC/recipients | sort -n -r -k 1,1 -k 2,2 -k 4,4 -k 3,3
 ) | QMAIL/bin/columnt
