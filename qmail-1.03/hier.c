@@ -1,5 +1,8 @@
 /*
  * $Log: hier.c,v $
+ * Revision 1.215  2016-06-17 09:30:47+05:30  Cprogrammer
+ * permissions fixes for rpmlint
+ *
  * Revision 1.214  2016-06-15 19:21:14+05:30  Cprogrammer
  * removed old documentation
  *
@@ -584,7 +587,9 @@ hier(inst_dir, fatal)
 	char           *auto_cntrl_base, *auto_cntrl_dir, *auto_assgn_base, *auto_assgn_dir;
 	char           *auto_qmail_home = auto_qmail;
 	char           *mandir;
-	int             uidr, gidr, moder_d, moder_f;
+	mode_t          moder_d, moder_f, moder_x, moder_s, moder_t, moder_u;
+	uid_t           uidr;
+	gid_t           gidr;
 
 	if (inst_dir && *inst_dir)
 		auto_qmail_home = inst_dir;
@@ -642,6 +647,10 @@ hier(inst_dir, fatal)
 		gidr = 0;
 		moder_d = 0755;
 		moder_f = 0644;
+		moder_x = 0755;
+		moder_s = 0755;
+		moder_t = 0751;
+		moder_u = 0755;
 		if (access(auto_prefix, F_OK))
 			h(auto_prefix, uidr, gidr, 0755);
 		l(auto_qmail_home, "bin", auto_prefix);
@@ -651,6 +660,10 @@ hier(inst_dir, fatal)
 		gidr = auto_gidq;
 		moder_d = 0555;
 		moder_f = 0444;
+		moder_x = 0555;
+		moder_s = 0555;
+		moder_t = 0550;
+		moder_u = 0551;
 	}
 	d(auto_prefix,     "bin", uidr, gidr, 0555);
 	d(auto_prefix,     "sbin", uidr, gidr, 0555);
@@ -681,16 +694,16 @@ hier(inst_dir, fatal)
 	d(mandir,          "man/man8", uidr, gidr, moder_d);
 
 	/* Boot files */
-	c(auto_shared,     "boot", "home", auto_uido, auto_gidq, 0555);
-	c(auto_shared,     "boot", "home+df", auto_uido, auto_gidq, 0555);
-	c(auto_shared,     "boot", "proc", auto_uido, auto_gidq, 0555);
-	c(auto_shared,     "boot", "proc+df", auto_uido, auto_gidq, 0555);
-	c(auto_shared,     "boot", "binm1", auto_uido, auto_gidq, 0555);
-	c(auto_shared,     "boot", "binm1+df", auto_uido, auto_gidq, 0555);
-	c(auto_shared,     "boot", "binm2", auto_uido, auto_gidq, 0555);
-	c(auto_shared,     "boot", "binm2+df", auto_uido, auto_gidq, 0555);
-	c(auto_shared,     "boot", "binm3", auto_uido, auto_gidq, 0555);
-	c(auto_shared,     "boot", "binm3+df", auto_uido, auto_gidq, 0555);
+	c(auto_shared,     "boot", "home", auto_uido, auto_gidq, 0755);
+	c(auto_shared,     "boot", "home+df", auto_uido, auto_gidq, 0755);
+	c(auto_shared,     "boot", "proc", auto_uido, auto_gidq, 0755);
+	c(auto_shared,     "boot", "proc+df", auto_uido, auto_gidq, 0755);
+	c(auto_shared,     "boot", "binm1", auto_uido, auto_gidq, 0755);
+	c(auto_shared,     "boot", "binm1+df", auto_uido, auto_gidq, 0755);
+	c(auto_shared,     "boot", "binm2", auto_uido, auto_gidq, 0755);
+	c(auto_shared,     "boot", "binm2+df", auto_uido, auto_gidq, 0755);
+	c(auto_shared,     "boot", "binm3", auto_uido, auto_gidq, 0755);
+	c(auto_shared,     "boot", "binm3+df", auto_uido, auto_gidq, 0755);
 	c(auto_shared,     "boot", "upstart", auto_uido, auto_gidq, 0444);
 	c(auto_shared,     "boot", "systemd", auto_uido, auto_gidq, 0444);
 #ifdef DARWIN
@@ -705,285 +718,274 @@ hier(inst_dir, fatal)
 #endif
 
 	/* Binaries */
-	c(auto_qmail_home, "bin", "qmail-getpw", auto_uido, auto_gidq, 0551);
-	c(auto_qmail_home, "bin", "qmail-local", auto_uido, auto_gidq, 0551);
-	c(auto_qmail_home, "bin", "qmail-remote", auto_uido, auto_gidq, 0551);
-	c(auto_qmail_home, "bin", "qmail-newu", auto_uido, auto_gidq, 0550);
-	c(auto_qmail_home, "bin", "qmail-newmrh", auto_uido, auto_gidq, 0550);
-	c(auto_qmail_home, "bin", "qmail-pw2u", auto_uido, auto_gidq, 0551);
-	c(auto_qmail_home, "bin", "qmail-inject", auto_uido, auto_gidq, 0555);
-	c(auto_qmail_home, "bin", "qmail-showctl", auto_uido, auto_gidq, 0555);
-	c(auto_qmail_home, "bin", "qmail-qread", auto_uido, auto_gidq, 0555);
-	c(auto_qmail_home, "bin", "qmail-pop3d", auto_uido, auto_gidq, 0555);
-	c(auto_qmail_home, "bin", "qmail-popbull", auto_uido, auto_gidq, 0555);
-	c(auto_qmail_home, "bin", "qmail-popup", auto_uido, auto_gidq, 0551);
-	c(auto_qmail_home, "bin", "qmail-qmqpd", auto_uido, auto_gidq, 0555);
-	c(auto_qmail_home, "bin", "qmail-qmtpd", auto_uido, auto_gidq, 0555);
-	c(auto_qmail_home, "bin", "qmail-smtpd", auto_uido, auto_gidq, 0555);
-	c(auto_qmail_home, "bin", "sendmail", auto_uido, auto_gidq, 0555);
-	c(auto_qmail_home, "bin", "tcp-env", auto_uido, auto_gidq, 0555);
-	c(auto_qmail_home, "bin", "qreceipt", auto_uido, auto_gidq, 0555);
-	c(auto_qmail_home, "bin", "qsmhook", auto_uido, auto_gidq, 0555);
-	c(auto_qmail_home, "bin", "forward", auto_uido, auto_gidq, 0555);
-	c(auto_qmail_home, "bin", "preline", auto_uido, auto_gidq, 0555);
-	c(auto_qmail_home, "bin", "condredirect", auto_uido, auto_gidq, 0555);
-	c(auto_qmail_home, "bin", "bouncesaying", auto_uido, auto_gidq, 0555);
-	c(auto_qmail_home, "bin", "except", auto_uido, auto_gidq, 0555);
-	c(auto_qmail_home, "bin", "qmaildirmake", auto_uido, auto_gidq, 0555);
-	c(auto_qmail_home, "bin", "maildir2mbox", auto_uido, auto_gidq, 0555);
-	c(auto_qmail_home, "bin", "mbox2maildir", auto_uido, auto_gidq, 0555);
-	c(auto_qmail_home, "bin", "maildirwatch", auto_uido, auto_gidq, 0555);
-	c(auto_qmail_home, "bin", "qail", auto_uido, auto_gidq, 0555);
-	c(auto_qmail_home, "bin", "elq", auto_uido, auto_gidq, 0555);
-	c(auto_qmail_home, "bin", "pinq", auto_uido, auto_gidq, 0555);
-	c(auto_qmail_home, "bin", "predate", auto_uido, auto_gidq, 0555);
-	c(auto_qmail_home, "bin", "datemail", auto_uido, auto_gidq, 0555);
-	c(auto_qmail_home, "bin", "mailsubj", auto_uido, auto_gidq, 0555);
+	c(auto_qmail_home, "bin", "qmail-inject", auto_uido, auto_gidq, moder_x);
+	c(auto_qmail_home, "bin", "qmail-showctl", auto_uido, auto_gidq, moder_x);
+	c(auto_qmail_home, "bin", "qmail-qread", auto_uido, auto_gidq, moder_x);
+	c(auto_qmail_home, "bin", "qmail-pop3d", auto_uido, auto_gidq, moder_x);
+	c(auto_qmail_home, "bin", "qmail-popbull", auto_uido, auto_gidq, moder_x);
+	c(auto_qmail_home, "bin", "qmail-qmqpd", auto_uido, auto_gidq, moder_x);
+	c(auto_qmail_home, "bin", "qmail-qmtpd", auto_uido, auto_gidq, moder_x);
+	c(auto_qmail_home, "bin", "qmail-smtpd", auto_uido, auto_gidq, moder_x);
+	c(auto_qmail_home, "bin", "sendmail", auto_uido, auto_gidq, moder_x);
+	c(auto_qmail_home, "bin", "tcp-env", auto_uido, auto_gidq, moder_x);
+	c(auto_qmail_home, "bin", "qreceipt", auto_uido, auto_gidq, moder_x);
+	c(auto_qmail_home, "bin", "qsmhook", auto_uido, auto_gidq, moder_x);
+	c(auto_qmail_home, "bin", "forward", auto_uido, auto_gidq, moder_x);
+	c(auto_qmail_home, "bin", "preline", auto_uido, auto_gidq, moder_x);
+	c(auto_qmail_home, "bin", "condredirect", auto_uido, auto_gidq, moder_x);
+	c(auto_qmail_home, "bin", "bouncesaying", auto_uido, auto_gidq, moder_x);
+	c(auto_qmail_home, "bin", "except", auto_uido, auto_gidq, moder_x);
+	c(auto_qmail_home, "bin", "qmaildirmake", auto_uido, auto_gidq, moder_x);
+	c(auto_qmail_home, "bin", "maildir2mbox", auto_uido, auto_gidq, moder_x);
+	c(auto_qmail_home, "bin", "mbox2maildir", auto_uido, auto_gidq, moder_x);
+	c(auto_qmail_home, "bin", "maildirwatch", auto_uido, auto_gidq, moder_x);
+	c(auto_qmail_home, "bin", "qail", auto_uido, auto_gidq, moder_x);
+	c(auto_qmail_home, "bin", "elq", auto_uido, auto_gidq, moder_x);
+	c(auto_qmail_home, "bin", "pinq", auto_uido, auto_gidq, moder_x);
+	c(auto_qmail_home, "bin", "predate", auto_uido, auto_gidq, moder_x);
+	c(auto_qmail_home, "bin", "datemail", auto_uido, auto_gidq, moder_x);
+	c(auto_qmail_home, "bin", "mailsubj", auto_uido, auto_gidq, moder_x);
 
-	c(auto_qmail_home, "bin", "qmail-lint", auto_uido, auto_gidq, 0555);
-	c(auto_qmail_home, "bin", "qmail-qfilter", auto_uido, auto_gidq, 0555);
-	c(auto_qmail_home, "bin", "surblfilter", auto_uido, auto_gidq, 0555);
-	c(auto_qmail_home, "bin", "surblqueue", auto_uido, auto_gidq, 0555);
-	c(auto_qmail_home, "bin", "drate", auto_uido, auto_gidq, 0555);
-	c(auto_qmail_home, "bin", "cidr", auto_uido, auto_gidq, 0555);
-	c(auto_qmail_home, "bin", "spawn-filter", auto_uido, auto_gidq, 0555);
-	c(auto_qmail_home, "bin", "qmail-cat", auto_uido, auto_gidq, 0555);
-	c(auto_qmail_home, "bin", "qmail-poppass", auto_uido, auto_gidq, 0555);
-	c(auto_qmail_home, "bin", "qmail-lagcheck", auto_uido, auto_gidq, 0555);
-	c(auto_qmail_home, "bin", "qpq", auto_uido, auto_gidq, 0555);
-	c(auto_qmail_home, "bin", "qmail-greyd", auto_uido, auto_gidq, 0555);
-	c(auto_qmail_home, "bin", "greydaemon", auto_uido, auto_gidq, 0555);
-	c(auto_qmail_home, "bin", "irmail", auto_uido, auto_gidq, 0555);
-	c(auto_qmail_home, "bin", "rrforward", auto_uido, auto_gidq, 0555);
-	c(auto_qmail_home, "bin", "maildirdeliver", auto_uido, auto_gidq, 0555);
-	c(auto_qmail_home, "bin", "qmail-rm", auto_uido, auto_gidq, 0555);
-	c(auto_qmail_home, "bin", "autoresponder", auto_uido, auto_gidq, 0555);
-	c(auto_qmail_home, "bin", "qnotify", auto_uido, auto_gidq, 0555);
-	c(auto_qmail_home, "bin", "rrt", auto_uido, auto_gidq, 0555);
-	c(auto_qmail_home, "bin", "qarf", auto_uido, auto_gidq, 0555);
-	c(auto_qmail_home, "bin", "etrn", auto_uido, auto_gidq, 0555);
-	c(auto_qmail_home, "bin", "atrn", auto_uido, auto_gidq, 0555);
-	c(auto_qmail_home, "bin", "balance_outgoing", auto_uido, auto_gidq, 0555);
+	c(auto_qmail_home, "bin", "qmail-lint", auto_uido, auto_gidq, moder_x);
+	c(auto_qmail_home, "bin", "qmail-qfilter", auto_uido, auto_gidq, moder_x);
+	c(auto_qmail_home, "bin", "surblfilter", auto_uido, auto_gidq, moder_x);
+	c(auto_qmail_home, "bin", "surblqueue", auto_uido, auto_gidq, moder_x);
+	c(auto_qmail_home, "bin", "drate", auto_uido, auto_gidq, moder_x);
+	c(auto_qmail_home, "bin", "cidr", auto_uido, auto_gidq, moder_x);
+	c(auto_qmail_home, "bin", "spawn-filter", auto_uido, auto_gidq, moder_x);
+	c(auto_qmail_home, "bin", "qmail-cat", auto_uido, auto_gidq, moder_x);
+	c(auto_qmail_home, "bin", "qmail-poppass", auto_uido, auto_gidq, moder_x);
+	c(auto_qmail_home, "bin", "qmail-lagcheck", auto_uido, auto_gidq, moder_x);
+	c(auto_qmail_home, "bin", "qpq", auto_uido, auto_gidq, moder_x);
+	c(auto_qmail_home, "bin", "qmail-greyd", auto_uido, auto_gidq, moder_x);
+	c(auto_qmail_home, "bin", "greydaemon", auto_uido, auto_gidq, moder_x);
+	c(auto_qmail_home, "bin", "irmail", auto_uido, auto_gidq, moder_x);
+	c(auto_qmail_home, "bin", "rrforward", auto_uido, auto_gidq, moder_x);
+	c(auto_qmail_home, "bin", "maildirdeliver", auto_uido, auto_gidq, moder_x);
+	c(auto_qmail_home, "bin", "qmail-rm", auto_uido, auto_gidq, moder_x);
+	c(auto_qmail_home, "bin", "autoresponder", auto_uido, auto_gidq, moder_x);
+	c(auto_qmail_home, "bin", "qnotify", auto_uido, auto_gidq, moder_x);
+	c(auto_qmail_home, "bin", "rrt", auto_uido, auto_gidq, moder_x);
+	c(auto_qmail_home, "bin", "qarf", auto_uido, auto_gidq, moder_x);
+	c(auto_qmail_home, "bin", "etrn", auto_uido, auto_gidq, moder_x);
+	c(auto_qmail_home, "bin", "atrn", auto_uido, auto_gidq, moder_x);
+	c(auto_qmail_home, "bin", "balance_outgoing", auto_uido, auto_gidq, moder_x);
 #if defined(HASDKIM) || defined(DOMAIN_KEYS)
-	c(auto_qmail_home, "bin", "dk-filter", auto_uido, auto_gidq, 0555);
+	c(auto_qmail_home, "bin", "dk-filter", auto_uido, auto_gidq, moder_x);
 #endif
-	c(auto_qmail_home, "bin", "rpmattr", auto_uido, auto_gidq, 0555);
+	c(auto_qmail_home, "bin", "rpmattr", auto_uido, auto_gidq, moder_x);
 #ifdef TLS
-	c(auto_qmail_home, "bin", "update_tmprsadh", auto_uido, auto_gidq, 0555);
+	c(auto_qmail_home, "bin", "update_tmprsadh", auto_uido, auto_gidq, moder_x);
 #endif
-	c(auto_qmail_home, "bin", "queue-fix", auto_uido, auto_gidq, 0555);
-	c(auto_qmail_home, "bin", "qmail-sighup", auto_uido, auto_gidq, 0555);
-	c(auto_qmail_home, "bin", "qmail-sigalrm", auto_uido, auto_gidq, 0555);
-	c(auto_qmail_home, "bin", "qmail-sigterm", auto_uido, auto_gidq, 0555);
+	c(auto_qmail_home, "bin", "queue-fix", auto_uido, auto_gidq, moder_x);
+	c(auto_qmail_home, "bin", "qmail-sighup", auto_uido, auto_gidq, moder_x);
+	c(auto_qmail_home, "bin", "qmail-sigalrm", auto_uido, auto_gidq, moder_x);
+	c(auto_qmail_home, "bin", "qmail-sigterm", auto_uido, auto_gidq, moder_x);
 
-	c(auto_qmail_home, "bin", "ipmeprint", auto_uido, auto_gidq, 0555);
-	c(auto_qmail_home, "bin", "idedit", auto_uido, auto_gidq, 0555);
-	c(auto_qmail_home, "bin", "qmailctl", auto_uido, auto_gidq, 0555);
-	c(auto_qmail_home, "bin", "uacl", auto_uido, auto_gidq, 0555);
-	c(auto_qmail_home, "bin", "qbase64", auto_uido, auto_gidq, 0555);
-	c(auto_qmail_home, "bin", "swaks", auto_uido, auto_gidq, 0555);
-	c(auto_qmail_home, "bin", "mbox2maildir.pl", auto_uido, auto_gidq, 0555);
+	c(auto_qmail_home, "bin", "ipmeprint", auto_uido, auto_gidq, moder_x);
+	c(auto_qmail_home, "bin", "idedit", auto_uido, auto_gidq, moder_x);
+	c(auto_qmail_home, "bin", "qmailctl", auto_uido, auto_gidq, moder_x);
+	c(auto_qmail_home, "bin", "uacl", auto_uido, auto_gidq, moder_x);
+	c(auto_qmail_home, "bin", "qbase64", auto_uido, auto_gidq, moder_x);
+	c(auto_qmail_home, "bin", "swaks", auto_uido, auto_gidq, moder_x);
+	c(auto_qmail_home, "bin", "mbox2maildir.pl", auto_uido, auto_gidq, moder_x);
 
-	c(auto_qmail_home, "bin", "recipient-cdb", auto_uido, auto_gidq, 0550);
-	c(auto_qmail_home, "bin", "qmail-cdb", auto_uido, auto_gidq, 0550);
+	c(auto_qmail_home, "bin", "qmail-newu", auto_uido, auto_gidq, moder_t);
+	c(auto_qmail_home, "bin", "qmail-newmrh", auto_uido, auto_gidq, moder_t);
+	c(auto_qmail_home, "bin", "recipient-cdb", auto_uido, auto_gidq, moder_t);
+	c(auto_qmail_home, "bin", "qmail-cdb", auto_uido, auto_gidq, moder_t);
 #ifdef INDIMAIL
-	c(auto_qmail_home, "bin", "qmail-sql", auto_uido, auto_gidq, 0550);
+	c(auto_qmail_home, "bin", "qmail-sql", auto_uido, auto_gidq, moder_t);
 #endif
-	c(auto_qmail_home, "bin", "cdbmake", auto_uido, auto_gidq, 0555);
-	c(auto_qmail_home, "bin", "cdbget", auto_uido, auto_gidq, 0555);
-	c(auto_qmail_home, "bin", "cdbgetm", auto_uido, auto_gidq, 0555);
-	c(auto_qmail_home, "bin", "cdbdump", auto_uido, auto_gidq, 0555);
-	c(auto_qmail_home, "bin", "cdbstats", auto_uido, auto_gidq, 0555);
-	c(auto_qmail_home, "bin", "cdbtest", auto_uido, auto_gidq, 0555);
-	c(auto_qmail_home, "bin", "cdbmake-12", auto_uido, auto_gidq, 0555);
-	c(auto_qmail_home, "bin", "cdbmake-sv", auto_uido, auto_gidq, 0555);
-	c(auto_qmail_home, "bin", "testzero", auto_uido, auto_gidq, 0555);
-	c(auto_qmail_home, "bin", "qaes", auto_uido, auto_gidq, 0555);
+	c(auto_qmail_home, "bin", "cdbmake", auto_uido, auto_gidq, moder_x);
+	c(auto_qmail_home, "bin", "cdbget", auto_uido, auto_gidq, moder_x);
+	c(auto_qmail_home, "bin", "cdbgetm", auto_uido, auto_gidq, moder_x);
+	c(auto_qmail_home, "bin", "cdbdump", auto_uido, auto_gidq, moder_x);
+	c(auto_qmail_home, "bin", "cdbstats", auto_uido, auto_gidq, moder_x);
+	c(auto_qmail_home, "bin", "cdbtest", auto_uido, auto_gidq, moder_x);
+	c(auto_qmail_home, "bin", "cdbmake-12", auto_uido, auto_gidq, moder_x);
+	c(auto_qmail_home, "bin", "cdbmake-sv", auto_uido, auto_gidq, moder_x);
+	c(auto_qmail_home, "bin", "testzero", auto_uido, auto_gidq, moder_x);
+	c(auto_qmail_home, "bin", "qaes", auto_uido, auto_gidq, moder_x);
 
 #ifdef USE_SPF
-	c(auto_qmail_home, "bin", "spfquery", auto_uido, auto_gidq, 0555);
+	c(auto_qmail_home, "bin", "spfquery", auto_uido, auto_gidq, moder_x);
 #endif
 
 #ifdef HAVESRS
-	c(auto_qmail_home ,"bin", "srsfilter", auto_uido, auto_gidq, 0555);
+	c(auto_qmail_home ,"bin", "srsfilter", auto_uido, auto_gidq, moder_x);
 #endif
 #ifdef DOMAIN_KEYS
-	c(auto_qmail_home, "bin", "dknewkey", auto_uido, auto_gidq, 0555);
-	c(auto_qmail_home, "bin", "dktest", auto_uido, auto_gidq, 0555);
-	c(auto_qmail_home, "bin", "qmail-dk", auto_uido, auto_gidq, 0555);
+	c(auto_qmail_home, "bin", "dknewkey", auto_uido, auto_gidq, moder_x);
+	c(auto_qmail_home, "bin", "dktest", auto_uido, auto_gidq, moder_x);
+	c(auto_qmail_home, "bin", "qmail-dk", auto_uido, auto_gidq, moder_x);
 #endif
 #ifdef HASDKIM
-	c(auto_qmail_home, "bin", "qmail-dkim", auto_uido, auto_gidq, 0555);
-#endif
-#if defined(SMTP_PLUGIN) || defined(LOAD_SHARED_OBJECTS)
-	d(auto_prefix,     "lib/indimail/plugins", auto_uido, auto_gidq, 0555);
-#endif
-#ifdef SMTP_PLUGIN
-	c(auto_prefix,     "lib/indimail/plugins", "smtpd-plugin.so", auto_uido, auto_gidq, 0555);
-	c(auto_prefix,     "lib/indimail/plugins", "smtpd-plugin0.so", auto_uido, auto_gidq, 0555);
-#endif
-	c(auto_prefix,     "lib/indimail/plugins", "generic.so", auto_uido, auto_gidq, 0555);
-#ifdef LOAD_SHARED_OBJECTS
-	c(auto_prefix,     "lib/indimail/plugins", "qmail_smtpd.so", auto_uido, auto_gidq, 0555);
+	c(auto_qmail_home, "bin", "qmail-dkim", auto_uido, auto_gidq, moder_x);
 #endif
 
-	c(auto_qmail_home, "bin", "recordio", auto_uido, auto_gidq, 0555);
-	c(auto_qmail_home, "bin", "argv0", auto_uido, auto_gidq, 0555);
-	c(auto_qmail_home, "bin", "addcr", auto_uido, auto_gidq, 0555);
-	c(auto_qmail_home, "bin", "delcr", auto_uido, auto_gidq, 0555);
-	c(auto_qmail_home, "bin", "fixcrio", auto_uido, auto_gidq, 0555);
+	c(auto_qmail_home, "bin", "recordio", auto_uido, auto_gidq, moder_x);
+	c(auto_qmail_home, "bin", "argv0", auto_uido, auto_gidq, moder_x);
+	c(auto_qmail_home, "bin", "addcr", auto_uido, auto_gidq, moder_x);
+	c(auto_qmail_home, "bin", "delcr", auto_uido, auto_gidq, moder_x);
+	c(auto_qmail_home, "bin", "fixcrio", auto_uido, auto_gidq, moder_x);
+	c(auto_qmail_home, "bin", "qmail-getpw", auto_uido, auto_gidq, moder_u);
+	c(auto_qmail_home, "bin", "qmail-local", auto_uido, auto_gidq, moder_u);
+	c(auto_qmail_home, "bin", "qmail-remote", auto_uido, auto_gidq, moder_u);
+	c(auto_qmail_home, "bin", "qmail-pw2u", auto_uido, auto_gidq, moder_u);
+	c(auto_qmail_home, "bin", "qmail-popup", auto_uido, auto_gidq, moder_u);
 
-	c(auto_qmail_home, "sbin", "relaytest", auto_uido, auto_gidq, 0551);
-	c(auto_qmail_home, "sbin", "splogger", auto_uido, auto_gidq, 0551);
-	c(auto_qmail_home, "sbin", "qmail-tcpto", auto_uido, auto_gidq, 0555);
-	c(auto_qmail_home, "sbin", "qmail-tcpok", auto_uido, auto_gidq, 0555);
-	c(auto_qmail_home, "sbin", "cleanq", auto_uido, auto_gidq, 0555);
-	c(auto_qmail_home, "sbin", "qscanq-stdin", auto_uido, auto_gidq, 0555);
-	c(auto_qmail_home, "sbin", "qmail-qmqpc", auto_uido, auto_gidq, 0555);
-	c(auto_qmail_home, "sbin", "qmail-lspawn", auto_uido, auto_gidq, 0550);
-	c(auto_qmail_home, "sbin", "qmail-rspawn", auto_uido, auto_gidq, 0551);
-	c(auto_qmail_home, "sbin", "qmail-start", auto_uido, auto_gidq, 0550);
-	c(auto_qmail_home, "sbin", "qmail-daemon", auto_uido, auto_gidq, 0550);
-	c(auto_qmail_home, "sbin", "qmail-clean", auto_uido, auto_gidq, 0551);
-	c(auto_qmail_home, "sbin", "qmail-send", auto_uido, auto_gidq, 0551);
+	c(auto_qmail_home, "sbin", "relaytest", auto_uido, auto_gidq, moder_u);
+	c(auto_qmail_home, "sbin", "splogger", auto_uido, auto_gidq, moder_u);
+	c(auto_qmail_home, "sbin", "qmail-tcpto", auto_uido, auto_gidq, moder_x);
+	c(auto_qmail_home, "sbin", "qmail-tcpok", auto_uido, auto_gidq, moder_x);
+	c(auto_qmail_home, "sbin", "cleanq", auto_uido, auto_gidq, moder_x);
+	c(auto_qmail_home, "sbin", "qscanq-stdin", auto_uido, auto_gidq, moder_x);
+	c(auto_qmail_home, "sbin", "qmail-qmqpc", auto_uido, auto_gidq, moder_x);
+	c(auto_qmail_home, "sbin", "qmail-daemon", auto_uido, auto_gidq, moder_t);
+	c(auto_qmail_home, "sbin", "qmail-start", auto_uido, auto_gidq, moder_t);
+	c(auto_qmail_home, "sbin", "qmail-lspawn", auto_uido, auto_gidq, moder_t);
+	c(auto_qmail_home, "sbin", "qmail-rspawn", auto_uido, auto_gidq, moder_t);
+	c(auto_qmail_home, "sbin", "qmail-clean", auto_uido, auto_gidq, moder_t);
+	c(auto_qmail_home, "sbin", "qmail-send", auto_uido, auto_gidq, moder_t);
 #ifdef EXTERNAL_TODO
-	c(auto_qmail_home, "sbin", "qmail-todo", auto_uido,auto_gidq,0551);
+	c(auto_qmail_home, "sbin", "qmail-todo", auto_uido,auto_gidq,moder_t);
 #endif
 #ifdef SMTP_PLUGIN
-	c(auto_qmail_home, "sbin", "plugtest", auto_uido, auto_gidq, 0555);
+	c(auto_qmail_home, "sbin", "plugtest", auto_uido, auto_gidq, moder_x);
 #endif
-	c(auto_qmail_home, "sbin", "dnscname", auto_uido, auto_gidq, 0555);
-	c(auto_qmail_home, "sbin", "dnsptr", auto_uido, auto_gidq, 0555);
-	c(auto_qmail_home, "sbin", "dnsip", auto_uido, auto_gidq, 0555);
-	c(auto_qmail_home, "sbin", "dnsmxip", auto_uido, auto_gidq, 0555);
-	c(auto_qmail_home, "sbin", "dnsfq", auto_uido, auto_gidq, 0555);
+	c(auto_qmail_home, "sbin", "dnscname", auto_uido, auto_gidq, moder_x);
+	c(auto_qmail_home, "sbin", "dnsptr", auto_uido, auto_gidq, moder_x);
+	c(auto_qmail_home, "sbin", "dnsip", auto_uido, auto_gidq, moder_x);
+	c(auto_qmail_home, "sbin", "dnsmxip", auto_uido, auto_gidq, moder_x);
+	c(auto_qmail_home, "sbin", "dnsfq", auto_uido, auto_gidq, moder_x);
 #ifdef USE_SPF
-	c(auto_qmail_home, "sbin", "dnstxt", auto_uido, auto_gidq, 0555);
+	c(auto_qmail_home, "sbin", "dnstxt", auto_uido, auto_gidq, moder_x);
 #endif
 
 	/* mess822 */
-	c(auto_qmail_home, "bin", "ofmipd", auto_uido, auto_gidq, 0555);
-	c(auto_qmail_home, "bin", "ofmipname", auto_uido, auto_gidq, 0555);
-	c(auto_qmail_home, "bin", "iftocc", auto_uido, auto_gidq, 0555);
-	c(auto_qmail_home, "bin", "iftoccfrom", auto_uido, auto_gidq, 0555);
-	c(auto_qmail_home, "bin", "ifaddr", auto_uido, auto_gidq, 0555);
-	c(auto_qmail_home, "bin", "new-inject", auto_uido, auto_gidq, 0555);
-	c(auto_qmail_home, "bin", "822field", auto_uido, auto_gidq, 0555);
-	c(auto_qmail_home, "bin", "822header", auto_uido, auto_gidq, 0555);
-	c(auto_qmail_home, "bin", "822date", auto_uido, auto_gidq, 0555);
-	c(auto_qmail_home, "bin", "822received", auto_uido, auto_gidq, 0555);
-	c(auto_qmail_home, "bin", "822print", auto_uido, auto_gidq, 0555);
-	c(auto_qmail_home, "bin", "822body", auto_uido, auto_gidq, 0555);
-	c(auto_qmail_home, "bin", "822headerok", auto_uido, auto_gidq, 0555);
-	c(auto_qmail_home, "bin", "822bodyfilter", auto_uido, auto_gidq, 0555);
-	c(auto_qmail_home, "bin", "822headerfilter", auto_uido, auto_gidq, 0555);
-	c(auto_qmail_home, "bin", "822addr", auto_uido, auto_gidq, 0555);
-	c(auto_qmail_home, "bin", "822fields", auto_uido, auto_gidq, 0555);
-	c(auto_qmail_home, "bin", "checkaddr", auto_uido, auto_gidq, 0555);
-	c(auto_qmail_home, "bin", "checkdomain", auto_uido, auto_gidq, 0555);
-	c(auto_qmail_home, "bin", "filterto", auto_uido, auto_gidq, 0555);
-	c(auto_qmail_home, "bin", "condtomaildir", auto_uido, auto_gidq, 0555);
-	c(auto_qmail_home, "bin", "replier", auto_uido, auto_gidq, 0555);
-	c(auto_qmail_home, "bin", "replier-config", auto_uido, auto_gidq, 0555);
+	c(auto_qmail_home, "bin", "ofmipd", auto_uido, auto_gidq, moder_x);
+	c(auto_qmail_home, "bin", "ofmipname", auto_uido, auto_gidq, moder_x);
+	c(auto_qmail_home, "bin", "iftocc", auto_uido, auto_gidq, moder_x);
+	c(auto_qmail_home, "bin", "iftoccfrom", auto_uido, auto_gidq, moder_x);
+	c(auto_qmail_home, "bin", "ifaddr", auto_uido, auto_gidq, moder_x);
+	c(auto_qmail_home, "bin", "new-inject", auto_uido, auto_gidq, moder_x);
+	c(auto_qmail_home, "bin", "822field", auto_uido, auto_gidq, moder_x);
+	c(auto_qmail_home, "bin", "822header", auto_uido, auto_gidq, moder_x);
+	c(auto_qmail_home, "bin", "822date", auto_uido, auto_gidq, moder_x);
+	c(auto_qmail_home, "bin", "822received", auto_uido, auto_gidq, moder_x);
+	c(auto_qmail_home, "bin", "822print", auto_uido, auto_gidq, moder_x);
+	c(auto_qmail_home, "bin", "822body", auto_uido, auto_gidq, moder_x);
+	c(auto_qmail_home, "bin", "822headerok", auto_uido, auto_gidq, moder_x);
+	c(auto_qmail_home, "bin", "822bodyfilter", auto_uido, auto_gidq, moder_x);
+	c(auto_qmail_home, "bin", "822headerfilter", auto_uido, auto_gidq, moder_x);
+	c(auto_qmail_home, "bin", "822addr", auto_uido, auto_gidq, moder_x);
+	c(auto_qmail_home, "bin", "822fields", auto_uido, auto_gidq, moder_x);
+	c(auto_qmail_home, "bin", "checkaddr", auto_uido, auto_gidq, moder_x);
+	c(auto_qmail_home, "bin", "checkdomain", auto_uido, auto_gidq, moder_x);
+	c(auto_qmail_home, "bin", "filterto", auto_uido, auto_gidq, moder_x);
+	c(auto_qmail_home, "bin", "condtomaildir", auto_uido, auto_gidq, moder_x);
+	c(auto_qmail_home, "bin", "replier", auto_uido, auto_gidq, moder_x);
+	c(auto_qmail_home, "bin", "replier-config", auto_uido, auto_gidq, moder_x);
 
 	/* fastforward */
-	c(auto_qmail_home, "bin", "envmigrate", auto_uido, auto_gidq, 0555);
-	c(auto_qmail_home, "bin", "dot-forward", auto_uido, auto_gidq, 0555);
-	c(auto_qmail_home, "bin", "fastforward", auto_uido, auto_gidq, 0555);
-	c(auto_qmail_home, "bin", "printforward", auto_uido, auto_gidq, 0555);
-	c(auto_qmail_home, "bin", "setforward", auto_uido, auto_gidq, 0555);
-	c(auto_qmail_home, "bin", "inewaliases", auto_uido, auto_gidq, 0555);
-	c(auto_qmail_home, "bin", "printmaillist", auto_uido, auto_gidq, 0555);
-	c(auto_qmail_home, "bin", "setmaillist", auto_uido, auto_gidq, 0555);
-	c(auto_qmail_home, "bin", "newinclude", auto_uido, auto_gidq, 0555);
+	c(auto_qmail_home, "bin", "envmigrate", auto_uido, auto_gidq, moder_x);
+	c(auto_qmail_home, "bin", "dot-forward", auto_uido, auto_gidq, moder_x);
+	c(auto_qmail_home, "bin", "fastforward", auto_uido, auto_gidq, moder_x);
+	c(auto_qmail_home, "bin", "printforward", auto_uido, auto_gidq, moder_x);
+	c(auto_qmail_home, "bin", "setforward", auto_uido, auto_gidq, moder_x);
+	c(auto_qmail_home, "bin", "inewaliases", auto_uido, auto_gidq, moder_x);
+	c(auto_qmail_home, "bin", "printmaillist", auto_uido, auto_gidq, moder_x);
+	c(auto_qmail_home, "bin", "setmaillist", auto_uido, auto_gidq, moder_x);
+	c(auto_qmail_home, "bin", "newinclude", auto_uido, auto_gidq, moder_x);
 
 	/* daemontools */
-	c(auto_qmail_home, "bin", "envdir", auto_uido, auto_gidq, 0555);
-	c(auto_qmail_home, "bin", "envuidgid", auto_uido, auto_gidq, 0555);
-	c(auto_qmail_home, "bin", "fghack", auto_uido, auto_gidq, 0555);
-	c(auto_qmail_home, "bin", "multilog", auto_uido, auto_gidq, 0555);
-	c(auto_qmail_home, "bin", "pgrphack", auto_uido, auto_gidq, 0555);
-	c(auto_qmail_home, "bin", "setlock", auto_uido, auto_gidq, 0555);
-	c(auto_qmail_home, "bin", "setuidgid", auto_uido, auto_gidq, 0555);
-	c(auto_qmail_home, "bin", "softlimit", auto_uido, auto_gidq, 0555);
-	c(auto_qmail_home, "bin", "supervise", auto_uido, auto_gidq, 0555);
-	c(auto_qmail_home, "bin", "svc", auto_uido, auto_gidq, 0555);
-	c(auto_qmail_home, "bin", "svok", auto_uido, auto_gidq, 0555);
-	c(auto_qmail_home, "bin", "svstat", auto_uido, auto_gidq, 0555);
-	c(auto_qmail_home, "bin", "tai64n", auto_uido, auto_gidq, 0555);
-	c(auto_qmail_home, "bin", "tai64nlocal", auto_uido, auto_gidq, 0555);
-	c(auto_qmail_home, "bin", "tai64nunix", auto_uido, auto_gidq, 0555);
-	c(auto_qmail_home, "bin", "tai2tai64n", auto_uido, auto_gidq, 0555);
-	c(auto_qmail_home, "bin", "tai64n2tai", auto_uido, auto_gidq, 0555);
-	c(auto_qmail_home, "bin", "leapsecs", auto_uido, auto_gidq, 0555);
-	c(auto_qmail_home, "bin", "yearcal", auto_uido, auto_gidq, 0555);
-	c(auto_qmail_home, "bin", "nowutc", auto_uido, auto_gidq, 0555);
-	c(auto_qmail_home, "bin", "spipe", auto_uido, auto_gidq, 0555);
-	c(auto_qmail_home, "bin", "qfilelog", auto_uido, auto_gidq, 0555);
-	c(auto_qmail_home, "bin", "multipipe", auto_uido, auto_gidq, 0555);
-	c(auto_qmail_home, "bin", "teepipe", auto_uido, auto_gidq, 0555);
-	c(auto_qmail_home, "bin", "multitail", auto_uido, auto_gidq, 0555);
-	c(auto_qmail_home, "bin", "logselect", auto_uido, auto_gidq, 0555);
-	c(auto_qmail_home, "bin", "qlogselect", auto_uido, auto_gidq, 0555);
-	c(auto_qmail_home, "bin", "multirotate", auto_uido, auto_gidq, 0555);
-	c(auto_qmail_home, "bin", "udplogger", auto_uido, auto_gidq, 0555);
-	c(auto_qmail_home, "bin", "udpclient", auto_uido, auto_gidq, 0555);
-	c(auto_qmail_home, "sbin", "svscan", auto_uido, auto_gidq, 0555);
-	c(auto_qmail_home, "sbin", "svscanboot", auto_uido, auto_gidq, 0555);
-	c(auto_qmail_home, "sbin", "readproctitle", auto_uido, auto_gidq, 0555);
+	c(auto_qmail_home, "bin", "envdir", auto_uido, auto_gidq, moder_x);
+	c(auto_qmail_home, "bin", "envuidgid", auto_uido, auto_gidq, moder_x);
+	c(auto_qmail_home, "bin", "fghack", auto_uido, auto_gidq, moder_x);
+	c(auto_qmail_home, "bin", "multilog", auto_uido, auto_gidq, moder_x);
+	c(auto_qmail_home, "bin", "pgrphack", auto_uido, auto_gidq, moder_x);
+	c(auto_qmail_home, "bin", "setlock", auto_uido, auto_gidq, moder_x);
+	c(auto_qmail_home, "bin", "setuidgid", auto_uido, auto_gidq, moder_x);
+	c(auto_qmail_home, "bin", "softlimit", auto_uido, auto_gidq, moder_x);
+	c(auto_qmail_home, "bin", "supervise", auto_uido, auto_gidq, moder_x);
+	c(auto_qmail_home, "bin", "svc", auto_uido, auto_gidq, moder_x);
+	c(auto_qmail_home, "bin", "svok", auto_uido, auto_gidq, moder_x);
+	c(auto_qmail_home, "bin", "svstat", auto_uido, auto_gidq, moder_x);
+	c(auto_qmail_home, "bin", "tai64n", auto_uido, auto_gidq, moder_x);
+	c(auto_qmail_home, "bin", "tai64nlocal", auto_uido, auto_gidq, moder_x);
+	c(auto_qmail_home, "bin", "tai64nunix", auto_uido, auto_gidq, moder_x);
+	c(auto_qmail_home, "bin", "tai2tai64n", auto_uido, auto_gidq, moder_x);
+	c(auto_qmail_home, "bin", "tai64n2tai", auto_uido, auto_gidq, moder_x);
+	c(auto_qmail_home, "bin", "leapsecs", auto_uido, auto_gidq, moder_x);
+	c(auto_qmail_home, "bin", "yearcal", auto_uido, auto_gidq, moder_x);
+	c(auto_qmail_home, "bin", "nowutc", auto_uido, auto_gidq, moder_x);
+	c(auto_qmail_home, "bin", "spipe", auto_uido, auto_gidq, moder_x);
+	c(auto_qmail_home, "bin", "qfilelog", auto_uido, auto_gidq, moder_x);
+	c(auto_qmail_home, "bin", "multipipe", auto_uido, auto_gidq, moder_x);
+	c(auto_qmail_home, "bin", "teepipe", auto_uido, auto_gidq, moder_x);
+	c(auto_qmail_home, "bin", "multitail", auto_uido, auto_gidq, moder_x);
+	c(auto_qmail_home, "bin", "logselect", auto_uido, auto_gidq, moder_x);
+	c(auto_qmail_home, "bin", "qlogselect", auto_uido, auto_gidq, moder_x);
+	c(auto_qmail_home, "bin", "multirotate", auto_uido, auto_gidq, moder_x);
+	c(auto_qmail_home, "bin", "udplogger", auto_uido, auto_gidq, moder_x);
+	c(auto_qmail_home, "bin", "udpclient", auto_uido, auto_gidq, moder_x);
+	c(auto_qmail_home, "sbin", "svscan", auto_uido, auto_gidq, moder_x);
+	c(auto_qmail_home, "sbin", "svscanboot", auto_uido, auto_gidq, moder_x);
+	c(auto_qmail_home, "sbin", "readproctitle", auto_uido, auto_gidq, moder_x);
 
 	/* serialmail */
-	c(auto_qmail_home, "bin", "serialcmd", auto_uido, auto_gidq, 0555);
-	c(auto_qmail_home, "bin", "serialqmtp", auto_uido, auto_gidq, 0555);
-	c(auto_qmail_home, "bin", "serialsmtp", auto_uido, auto_gidq, 0555);
-	c(auto_qmail_home, "bin", "maildircmd", auto_uido, auto_gidq, 0555);
-	c(auto_qmail_home, "bin", "maildirqmtp", auto_uido, auto_gidq, 0555);
-	c(auto_qmail_home, "bin", "maildirsmtp", auto_uido, auto_gidq, 0555);
-	c(auto_qmail_home, "bin", "maildirserial", auto_uido, auto_gidq, 0555);
+	c(auto_qmail_home, "bin", "serialcmd", auto_uido, auto_gidq, moder_x);
+	c(auto_qmail_home, "bin", "serialqmtp", auto_uido, auto_gidq, moder_x);
+	c(auto_qmail_home, "bin", "serialsmtp", auto_uido, auto_gidq, moder_x);
+	c(auto_qmail_home, "bin", "maildircmd", auto_uido, auto_gidq, moder_x);
+	c(auto_qmail_home, "bin", "maildirqmtp", auto_uido, auto_gidq, moder_x);
+	c(auto_qmail_home, "bin", "maildirsmtp", auto_uido, auto_gidq, moder_x);
+	c(auto_qmail_home, "bin", "maildirserial", auto_uido, auto_gidq, moder_x);
 
 	/* Report Programs */
-	c(auto_qmail_home, "bin", "matchup", auto_uido, auto_gidq, 0555);
-	c(auto_qmail_home, "bin", "mlmatchup", auto_uido, auto_gidq, 0555);
-	c(auto_qmail_home, "bin", "columnt", auto_uido, auto_gidq, 0555);
-	c(auto_qmail_home, "bin", "zoverall", auto_uido, auto_gidq, 0555);
-	c(auto_qmail_home, "bin", "zsendmail", auto_uido, auto_gidq, 0555);
-	c(auto_qmail_home, "bin", "xqp", auto_uido, auto_gidq, 0555);
-	c(auto_qmail_home, "bin", "xsender", auto_uido, auto_gidq, 0555);
-	c(auto_qmail_home, "bin", "xrecipient", auto_uido, auto_gidq, 0555);
-	c(auto_qmail_home, "bin", "ddist", auto_uido, auto_gidq, 0555);
-	c(auto_qmail_home, "bin", "deferrals", auto_uido, auto_gidq, 0555);
-	c(auto_qmail_home, "bin", "failures", auto_uido, auto_gidq, 0555);
-	c(auto_qmail_home, "bin", "successes", auto_uido, auto_gidq, 0555);
-	c(auto_qmail_home, "bin", "rhosts", auto_uido, auto_gidq, 0555);
-	c(auto_qmail_home, "bin", "recipients", auto_uido, auto_gidq, 0555);
-	c(auto_qmail_home, "bin", "rxdelay", auto_uido, auto_gidq, 0555);
-	c(auto_qmail_home, "bin", "senders", auto_uido, auto_gidq, 0555);
-	c(auto_qmail_home, "bin", "suids", auto_uido, auto_gidq, 0555);
-	c(auto_qmail_home, "bin", "zddist", auto_uido, auto_gidq, 0555);
-	c(auto_qmail_home, "bin", "zdeferrals", auto_uido, auto_gidq, 0555);
-	c(auto_qmail_home, "bin", "zfailures", auto_uido, auto_gidq, 0555);
-	c(auto_qmail_home, "bin", "zsuccesses", auto_uido, auto_gidq, 0555);
-	c(auto_qmail_home, "bin", "zrhosts", auto_uido, auto_gidq, 0555);
-	c(auto_qmail_home, "bin", "zrecipients", auto_uido, auto_gidq, 0555);
-	c(auto_qmail_home, "bin", "zrxdelay", auto_uido, auto_gidq, 0555);
-	c(auto_qmail_home, "bin", "zsenders", auto_uido, auto_gidq, 0555);
-	c(auto_qmail_home, "bin", "zsuids", auto_uido, auto_gidq, 0555);
-	c(auto_qmail_home, "bin", "multilog-matchup", auto_uido, auto_gidq, 0555);
-	c(auto_qmail_home, "bin", "smtp-matchup", auto_uido, auto_gidq, 0555);
-	c(auto_qmail_home, "bin", "rsmtp", auto_uido, auto_gidq, 0555);
-	c(auto_qmail_home, "bin", "rsmtpfailures", auto_uido, auto_gidq, 0555);
-	c(auto_qmail_home, "bin", "rsmtpsdomains", auto_uido, auto_gidq, 0555);
-	c(auto_qmail_home, "bin", "rsmtprdomains", auto_uido, auto_gidq, 0555);
-	c(auto_qmail_home, "bin", "rsmtpsenders", auto_uido, auto_gidq, 0555);
-	c(auto_qmail_home, "bin", "rsmtprecipients", auto_uido, auto_gidq, 0555);
-	c(auto_qmail_home, "bin", "zsmtp", auto_uido, auto_gidq, 0555);
-	c(auto_qmail_home, "bin", "zspam", auto_uido, auto_gidq, 0555);
-	c(auto_qmail_home, "bin", "rspamrdomain", auto_uido, auto_gidq, 0555);
-	c(auto_qmail_home, "bin", "rspamsdomain", auto_uido, auto_gidq, 0555);
-	c(auto_qmail_home, "bin", "rspamstat", auto_uido, auto_gidq, 0555);
-	c(auto_qmail_home, "bin", "rspamhist", auto_uido, auto_gidq, 0555);
+	c(auto_qmail_home, "bin", "matchup", auto_uido, auto_gidq, moder_x);
+	c(auto_qmail_home, "bin", "mlmatchup", auto_uido, auto_gidq, moder_x);
+	c(auto_qmail_home, "bin", "columnt", auto_uido, auto_gidq, moder_x);
+	c(auto_qmail_home, "bin", "zoverall", auto_uido, auto_gidq, moder_x);
+	c(auto_qmail_home, "bin", "zsendmail", auto_uido, auto_gidq, moder_x);
+	c(auto_qmail_home, "bin", "xqp", auto_uido, auto_gidq, moder_x);
+	c(auto_qmail_home, "bin", "xsender", auto_uido, auto_gidq, moder_x);
+	c(auto_qmail_home, "bin", "xrecipient", auto_uido, auto_gidq, moder_x);
+	c(auto_qmail_home, "bin", "ddist", auto_uido, auto_gidq, moder_x);
+	c(auto_qmail_home, "bin", "deferrals", auto_uido, auto_gidq, moder_x);
+	c(auto_qmail_home, "bin", "failures", auto_uido, auto_gidq, moder_x);
+	c(auto_qmail_home, "bin", "successes", auto_uido, auto_gidq, moder_x);
+	c(auto_qmail_home, "bin", "rhosts", auto_uido, auto_gidq, moder_x);
+	c(auto_qmail_home, "bin", "recipients", auto_uido, auto_gidq, moder_x);
+	c(auto_qmail_home, "bin", "rxdelay", auto_uido, auto_gidq, moder_x);
+	c(auto_qmail_home, "bin", "senders", auto_uido, auto_gidq, moder_x);
+	c(auto_qmail_home, "bin", "suids", auto_uido, auto_gidq, moder_x);
+	c(auto_qmail_home, "bin", "zddist", auto_uido, auto_gidq, moder_x);
+	c(auto_qmail_home, "bin", "zdeferrals", auto_uido, auto_gidq, moder_x);
+	c(auto_qmail_home, "bin", "zfailures", auto_uido, auto_gidq, moder_x);
+	c(auto_qmail_home, "bin", "zsuccesses", auto_uido, auto_gidq, moder_x);
+	c(auto_qmail_home, "bin", "zrhosts", auto_uido, auto_gidq, moder_x);
+	c(auto_qmail_home, "bin", "zrecipients", auto_uido, auto_gidq, moder_x);
+	c(auto_qmail_home, "bin", "zrxdelay", auto_uido, auto_gidq, moder_x);
+	c(auto_qmail_home, "bin", "zsenders", auto_uido, auto_gidq, moder_x);
+	c(auto_qmail_home, "bin", "zsuids", auto_uido, auto_gidq, moder_x);
+	c(auto_qmail_home, "bin", "multilog-matchup", auto_uido, auto_gidq, moder_x);
+	c(auto_qmail_home, "bin", "smtp-matchup", auto_uido, auto_gidq, moder_x);
+	c(auto_qmail_home, "bin", "rsmtp", auto_uido, auto_gidq, moder_x);
+	c(auto_qmail_home, "bin", "rsmtpfailures", auto_uido, auto_gidq, moder_x);
+	c(auto_qmail_home, "bin", "rsmtpsdomains", auto_uido, auto_gidq, moder_x);
+	c(auto_qmail_home, "bin", "rsmtprdomains", auto_uido, auto_gidq, moder_x);
+	c(auto_qmail_home, "bin", "rsmtpsenders", auto_uido, auto_gidq, moder_x);
+	c(auto_qmail_home, "bin", "rsmtprecipients", auto_uido, auto_gidq, moder_x);
+	c(auto_qmail_home, "bin", "zsmtp", auto_uido, auto_gidq, moder_x);
+	c(auto_qmail_home, "bin", "zspam", auto_uido, auto_gidq, moder_x);
+	c(auto_qmail_home, "bin", "rspamrdomain", auto_uido, auto_gidq, moder_x);
+	c(auto_qmail_home, "bin", "rspamsdomain", auto_uido, auto_gidq, moder_x);
+	c(auto_qmail_home, "bin", "rspamstat", auto_uido, auto_gidq, moder_x);
+	c(auto_qmail_home, "bin", "rspamhist", auto_uido, auto_gidq, moder_x);
 
-	/* Setuid Programs */
+	/* setuid/setgid Programs */
 	c(auto_qmail_home, "sbin", "qmail-queue", auto_uidq, auto_gidq, 06551);
 	c(auto_qmail_home, "sbin", "qhpsi", auto_uidc, auto_gidq, 06551);
 	c(auto_qmail_home, "sbin", "qscanq", auto_uidc, auto_gidc, 04551);
@@ -991,17 +993,29 @@ hier(inst_dir, fatal)
 
 	/*- misc */
 #ifdef BATV
-	c(auto_qmail_home, "sbin", "batv", auto_uido, auto_gidq, 0555);
+	c(auto_qmail_home, "sbin", "batv", auto_uido, auto_gidq, moder_x);
 #endif
-	c(auto_qmail_home, "sbin", "qmail-multi", auto_uido, auto_gidq, 0555);
-	c(auto_qmail_home, "sbin", "qmail-nullqueue", auto_uido, auto_gidq, 0555);
-	c(auto_qmail_home, "sbin", "hostname", auto_uido, auto_gidq, 0555);
-	c(auto_qmail_home, "sbin", "qmailconfig", auto_uido, auto_gidq, 0555);
-	c(auto_qmail_home, "sbin", "config-fast", auto_uido, auto_gidq, 0555);
-	c(auto_qmail_home, "sbin", "instcheck", auto_uido, auto_gidq, 0550);
-	c(auto_qmail_home, "sbin", "sys-checkpwd", auto_uido, auto_gidq, 0555);
-	c(auto_qmail_home, "sbin", "ldap-checkpwd", auto_uido, auto_gidq, 0555);
-	c(auto_qmail_home, "sbin", "whois", auto_uido, auto_gidq, 0555);
+	c(auto_qmail_home, "sbin", "qmail-multi", auto_uido, auto_gidq, moder_x);
+	c(auto_qmail_home, "sbin", "qmail-nullqueue", auto_uido, auto_gidq, moder_x);
+	c(auto_qmail_home, "sbin", "hostname", auto_uido, auto_gidq, moder_x);
+	c(auto_qmail_home, "sbin", "qmailconfig", auto_uido, auto_gidq, moder_x);
+	c(auto_qmail_home, "sbin", "config-fast", auto_uido, auto_gidq, moder_x);
+	c(auto_qmail_home, "sbin", "instcheck", auto_uido, auto_gidq, moder_t);
+	c(auto_qmail_home, "sbin", "sys-checkpwd", auto_uido, auto_gidq, moder_x);
+	c(auto_qmail_home, "sbin", "ldap-checkpwd", auto_uido, auto_gidq, moder_x);
+	c(auto_qmail_home, "sbin", "whois", auto_uido, auto_gidq, moder_x);
+
+#if defined(SMTP_PLUGIN) || defined(LOAD_SHARED_OBJECTS)
+	d(auto_prefix,     "lib/indimail/plugins", auto_uido, auto_gidq, 0555);
+#endif
+#ifdef SMTP_PLUGIN
+	c(auto_prefix,     "lib/indimail/plugins", "smtpd-plugin.so", auto_uido, auto_gidq, moder_s);
+	c(auto_prefix,     "lib/indimail/plugins", "smtpd-plugin0.so", auto_uido, auto_gidq, moder_s);
+#endif
+	c(auto_prefix,     "lib/indimail/plugins", "generic.so", auto_uido, auto_gidq, moder_s);
+#ifdef LOAD_SHARED_OBJECTS
+	c(auto_prefix,     "lib/indimail/plugins", "qmail_smtpd.so", auto_uido, auto_gidq, moder_s);
+#endif
 
 	/* GPLv3 License, Man Pages, Documents */
 	c(auto_shared,     "doc", "COPYING", auto_uido, auto_gidq, 0444);
@@ -1312,6 +1326,8 @@ hier(inst_dir, fatal)
 	c(mandir,          "man/cat8", "splogger.0", uidr, gidr, moder_f);
 	c(mandir,          "man/man8", "qmail-internals.8", uidr, gidr, moder_f);
 	c(mandir,          "man/man8", "qmail-queue.8", uidr, gidr, moder_f);
+	c(mandir,          "man/man8", "qhpsi.8", uidr, gidr, moder_f);
+	c(mandir,          "man/man8", "surblqueue.8", uidr, gidr, moder_f);
 	c(mandir,          "man/cat8", "qmail-queue.0", uidr, gidr, moder_f);
 	c(mandir,          "man/man8", "qmail-nullqueue.8", uidr, gidr, moder_f);
 
@@ -1439,7 +1455,7 @@ hier(inst_dir, fatal)
 void
 getversion_install_big_c()
 {
-	static char    *x = "$Id: hier.c,v 1.214 2016-06-15 19:21:14+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: hier.c,v 1.215 2016-06-17 09:30:47+05:30 Cprogrammer Exp mbhangui $";
 
 #ifdef INDIMAIL
 	if (x)
