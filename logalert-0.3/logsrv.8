@@ -5,6 +5,7 @@ logsrv \- log message monitor
 
 .SH SYNOPSYS
 \fBlogsrv\fR [-s] [-f] [-r \fIloghost\fR]
+\fBshowbytes\fR \fIstatusfile\fR]
 
 .SH DESCRIPTION
 \fBlogsrv\fR(8) binds on \fIlogsrv\fR port (6340) in /etc/services. This can be overriden by
@@ -17,7 +18,7 @@ log message. If \fBlogsrv\fR is run as a server, it writes its pid to /tmp/logsr
 For each client from which log messages are received, \fBlogsrv\fR creates a status file
 named /usr/local/tmp/\fIhostname\fR.status. The directory can be changes by setting \fBSTATUSDIR\fR
 environment variable. The status file contains the pid and the bytes accumulated from the client
-represented by \fIhostname\fR.
+represented by \fIhostname\fR. The byte position in this status file can be displayed by \fBshowbytes\fR(1).
 
 .SH OPTIONS
 .TP
