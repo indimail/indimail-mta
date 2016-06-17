@@ -1,5 +1,8 @@
 #
 # $Log: indimail.mrtg.cfg.in,v $
+# Revision 2.9  2016-06-17 10:41:32+05:30  Cprogrammer
+# FHS compliance
+#
 # Revision 2.8  2013-03-04 23:12:50+05:30  Cprogrammer
 # fixed concurrency graphs
 #
@@ -29,7 +32,7 @@
 #
 # indexmaker --title="IndiMail Statistics" --section=title \
 #       --output=/var/www/html/mailmrtg/index.html \
-#        @indimaildir@/etc/indimail.mrtg.cfg
+#        @sysconfdir@/indimail.mrtg.cfg
 HtmlDir: /var/www/html/mailmrtg/
 ImageDir: /var/www/html/mailmrtg/
 WorkDir: /var/www/html/mailmrtg/
@@ -39,7 +42,7 @@ Title[msg]: Messages (Success, Attempts)
 MaxBytes[msg]: 10000
 AbsMax[msg]: 20000
 Options[msg]: growright,unknaszero,nopercent,gauge
-Target[msg]: `@indimaildir@/libexec/qmailmrtg7 m @logdir@/deliver.25`
+Target[msg]: `@libexecdir@/qmailmrtg7 m @logdir@/deliver.25`
 PageTop[msg]: <B>Stats for Messages</B><br>
 ShortLegend[msg]: msg
 YLegend[msg]: msg/hour
@@ -57,7 +60,7 @@ Title[messstatus]: Message Status (Success, Failure)
 MaxBytes[messstatus]: 10000
 AbsMax[messstatus]: 100000
 Options[messstatus]: growright,unknaszero,nopercent,gauge
-Target[messstatus]: `@indimaildir@/libexec/qmailmrtg7 s @logdir@/deliver.25`
+Target[messstatus]: `@libexecdir@/qmailmrtg7 s @logdir@/deliver.25`
 PageTop[messstatus]: <B>Message Status</B><BR> 
 ShortLegend[messstatus]: msg
 YLegend[messstatus]: msg/hour
@@ -74,7 +77,7 @@ Title[queue1-size]: Queue Size (Messages/Todo)
 MaxBytes[queue1-size]: 10000
 AbsMax[queue1-size]: 100000
 Options[queue1-size]: growright,unknaszero,nopercent,gauge
-Target[queue1-size]: `@indimaildir@/libexec/qmailmrtg7 q @indimaildir@/queue`
+Target[queue1-size]: `@libexecdir@/qmailmrtg7 q @indimaildir@/queue`
 PageTop[queue1-size]: <B>Queue Size</B><br>
 ShortLegend[queue1-size]: Msg
 YLegend[queue1-size]: msg total
@@ -92,7 +95,7 @@ Title[queue2-size]: Queue Size (Local/Remote)
 MaxBytes[queue2-size]: 10000
 AbsMax[queue2-size]: 100000
 Options[queue2-size]: growright,unknaszero,nopercent,gauge
-Target[queue2-size]: `@indimaildir@/libexec/qmailmrtg7 Q @indimaildir@/queue`
+Target[queue2-size]: `@libexecdir@/qmailmrtg7 Q @indimaildir@/queue`
 PageTop[queue2-size]: <B>Queue Size</B><br>
 ShortLegend[queue2-size]: Msg
 YLegend[queue2-size]: msg total
@@ -110,7 +113,7 @@ Title[bits]: Bits Transfered
 MaxBytes[bits]: 1540000
 AbsMax[bits]: 100000000
 Options[bits]: growright,unknaszero,nopercent,gauge
-Target[bits]: `@indimaildir@/libexec/qmailmrtg7 b @logdir@/deliver.25`
+Target[bits]: `@libexecdir@/qmailmrtg7 b @logdir@/deliver.25`
 PageTop[bits]: <B>Bits Transfered</B><br>
 ShortLegend[bits]: bits
 YLegend[bits]: bits/sec
@@ -128,7 +131,7 @@ Title[concurrency]: Local/Remote Concurrency
 MaxBytes[concurrency]: 500
 AbsMax[concurrency]: 10000
 Options[concurrency]: growright,unknaszero,nopercent,gauge
-Target[concurrency]: `@indimaildir@/libexec/qmailmrtg7 c @logdir@/deliver.25`
+Target[concurrency]: `@libexecdir@/qmailmrtg7 c @logdir@/deliver.25`
 PageTop[concurrency]: <B>Local/Remote Concurrency</B><br>
 ShortLegend[concurrency]: concurrency
 YLegend[concurrency]: max concurrency
@@ -146,7 +149,7 @@ Title[spam]: Ham/Spam
 MaxBytes[spam]: 10000
 AbsMax[spam]: 100000
 Options[spam]: growright,unknaszero,nopercent,gauge
-Target[spam]: `@indimaildir@/libexec/qmailmrtg7 S @logdir@/smtpd.25`
+Target[spam]: `@libexecdir@/qmailmrtg7 S @logdir@/smtpd.25`
 PageTop[spam]: <B>Bogofilter</B><br>
 ShortLegend[spam]: Msg
 YLegend[spam]: spam/hour
@@ -164,7 +167,7 @@ Title[clamd]: clamd
 MaxBytes[clamd]: 10000
 AbsMax[clamd]: 100000
 Options[clamd]: growright,unknaszero,nopercent,gauge
-Target[clamd]: `@indimaildir@/libexec/qmailmrtg7 C @logdir@/clamd`
+Target[clamd]: `@libexecdir@/qmailmrtg7 C @logdir@/clamd`
 PageTop[clamd]: <B>ClamAV</B><br>
 ShortLegend[clamd]: Msg
 YLegend[clamd]: viri/hour
@@ -182,7 +185,7 @@ Title[smtpad587]: SMTP Totals (Port 587)
 MaxBytes[smtpad587]: 1000
 AbsMax[smtpad587]: 100000
 Options[smtpad587]: growright,unknaszero,nopercent,gauge
-Target[smtpad587]: `@indimaildir@/libexec/qmailmrtg7 a @logdir@/smtpd.587`
+Target[smtpad587]: `@libexecdir@/qmailmrtg7 a @logdir@/smtpd.587`
 PageTop[smtpad587]: <B>SMTP Totals</B><BR>
 ShortLegend[smtpad587]: SMTP
 YLegend[smtpad587]: SMTP/hour
@@ -200,7 +203,7 @@ Title[smtp587]: SMTP Concurrency (Port 587)
 MaxBytes[smtp587]: 100
 AbsMax[smtp587]: 500
 Options[smtp587]: growright,unknaszero,nopercent,gauge
-Target[smtp587]: `@indimaildir@/libexec/qmailmrtg7 t @logdir@/smtpd.587`
+Target[smtp587]: `@libexecdir@/qmailmrtg7 t @logdir@/smtpd.587`
 PageTop[smtp587]: <B>SMTP Concurrency</B><BR>
 ShortLegend[smtp587]: SMTP
 YLegend[smtp587]: max SMTP
@@ -218,7 +221,7 @@ Title[smtpad]: SMTP Totals (Port 25)
 MaxBytes[smtpad]: 1000
 AbsMax[smtpad]: 100000
 Options[smtpad]: growright,unknaszero,nopercent,gauge
-Target[smtpad]: `@indimaildir@/libexec/qmailmrtg7 a @logdir@/smtpd.25`
+Target[smtpad]: `@libexecdir@/qmailmrtg7 a @logdir@/smtpd.25`
 PageTop[smtpad]: <B>SMTP Totals</B><BR>
 ShortLegend[smtpad]: SMTP
 YLegend[smtpad]: SMTP/hour
@@ -236,7 +239,7 @@ Title[smtp]: SMTP Concurrency (Port 25)
 MaxBytes[smtp]: 100
 AbsMax[smtp]: 500
 Options[smtp]: growright,unknaszero,nopercent,gauge
-Target[smtp]: `@indimaildir@/libexec/qmailmrtg7 t @logdir@/smtpd.25`
+Target[smtp]: `@libexecdir@/qmailmrtg7 t @logdir@/smtpd.25`
 PageTop[smtp]: <B>SMTP Concurrency</B><BR>
 ShortLegend[smtp]: SMTP
 YLegend[smtp]: max SMTP
@@ -254,7 +257,7 @@ Title[pop3ad]: POP3 Totals
 MaxBytes[pop3ad]: 1000
 AbsMax[pop3ad]: 100000
 Options[pop3ad]: growright,unknaszero,nopercent,gauge
-Target[pop3ad]: `@indimaildir@/libexec/qmailmrtg7 a @logdir@/pop3d.110`
+Target[pop3ad]: `@libexecdir@/qmailmrtg7 a @logdir@/pop3d.110`
 PageTop[pop3ad]: <B>POP3 Totals</B><BR>
 ShortLegend[pop3ad]: POP3
 YLegend[pop3ad]: POP3/hour
@@ -271,7 +274,7 @@ Title[pop3]: POP3 Concurrency
 MaxBytes[pop3]: 100
 AbsMax[pop3]: 500 
 Options[pop3]: growright,unknaszero,nopercent,gauge
-Target[pop3]: `@indimaildir@/libexec/qmailmrtg7 t @logdir@/pop3d.110`
+Target[pop3]: `@libexecdir@/qmailmrtg7 t @logdir@/pop3d.110`
 PageTop[pop3]: <B>POP3 Concurrency</B><BR>
 ShortLegend[pop3]: POP3
 YLegend[pop3]: max POP3
@@ -289,7 +292,7 @@ Title[imapad]: IMAP Totals
 MaxBytes[imapad]: 1000
 AbsMax[imapad]: 100000
 Options[imapad]: growright,unknaszero,nopercent,gauge
-Target[imapad]: `@indimaildir@/libexec/qmailmrtg7 a @logdir@/imapd.143`
+Target[imapad]: `@libexecdir@/qmailmrtg7 a @logdir@/imapd.143`
 PageTop[imapad]: <B>IMAP Totals</B><BR>
 ShortLegend[imapad]: IMAP
 YLegend[imapad]: IMAP/hour
@@ -306,7 +309,7 @@ Title[imap]: IMAP Concurrency
 MaxBytes[imap]: 100
 AbsMax[imap]: 500 
 Options[imap]: growright,unknaszero,nopercent,gauge
-Target[imap]: `@indimaildir@/libexec/qmailmrtg7 t @logdir@/imapd.143`
+Target[imap]: `@libexecdir@/qmailmrtg7 t @logdir@/imapd.143`
 PageTop[imap]: <B>IMAP Concurrency</B><BR>
 ShortLegend[imap]: IMAP
 YLegend[imap]: max IMAP
@@ -324,7 +327,7 @@ Title[smtpsad]: SMTP SSL Totals
 MaxBytes[smtpsad]: 1000
 AbsMax[smtpsad]: 100000
 Options[smtpsad]: growright,unknaszero,nopercent,gauge
-Target[smtpsad]: `@indimaildir@/libexec/qmailmrtg7 a @logdir@/smtpd.465`
+Target[smtpsad]: `@libexecdir@/qmailmrtg7 a @logdir@/smtpd.465`
 PageTop[smtpsad]: <B>SMTP Totals</B><BR>
 ShortLegend[smtpsad]: SMTP
 YLegend[smtpsad]: SMTP/hour
@@ -342,7 +345,7 @@ Title[smtps]: SMTP SSL Concurrency
 MaxBytes[smtps]: 100
 AbsMax[smtps]: 500
 Options[smtps]: growright,unknaszero,nopercent,gauge
-Target[smtps]: `@indimaildir@/libexec/qmailmrtg7 t @logdir@/smtpd.465`
+Target[smtps]: `@libexecdir@/qmailmrtg7 t @logdir@/smtpd.465`
 PageTop[smtps]: <B>SMTP Concurrency</B><BR>
 ShortLegend[smtps]: SMTP
 YLegend[smtps]: max SMTP
@@ -360,7 +363,7 @@ Title[pop3sad]: POP3 SSL Totals
 MaxBytes[pop3sad]: 1000
 AbsMax[pop3sad]: 100000
 Options[pop3sad]: growright,unknaszero,nopercent,gauge
-Target[pop3sad]: `@indimaildir@/libexec/qmailmrtg7 a @logdir@/pop3d-ssl.995`
+Target[pop3sad]: `@libexecdir@/qmailmrtg7 a @logdir@/pop3d-ssl.995`
 PageTop[pop3sad]: <B>POP3 Totals</B><BR>
 ShortLegend[pop3sad]: POP3
 YLegend[pop3sad]: POP3/hour
@@ -377,7 +380,7 @@ Title[pop3s]: POP3 SSL Concurrency
 MaxBytes[pop3s]: 100
 AbsMax[pop3s]: 500 
 Options[pop3s]: growright,unknaszero,nopercent,gauge
-Target[pop3s]: `@indimaildir@/libexec/qmailmrtg7 t @logdir@/pop3d-ssl.995`
+Target[pop3s]: `@libexecdir@/qmailmrtg7 t @logdir@/pop3d-ssl.995`
 PageTop[pop3s]: <B>POP3 Concurrency</B><BR>
 ShortLegend[pop3s]: POP3
 YLegend[pop3s]: max POP3
@@ -395,7 +398,7 @@ Title[imapsad]: IMAP SSL Totals
 MaxBytes[imapsad]: 1000
 AbsMax[imapsad]: 100000
 Options[imapsad]: growright,unknaszero,nopercent,gauge
-Target[imapsad]: `@indimaildir@/libexec/qmailmrtg7 a @logdir@/imapd-ssl.993`
+Target[imapsad]: `@libexecdir@/qmailmrtg7 a @logdir@/imapd-ssl.993`
 PageTop[imapsad]: <B>IMAP Totals</B><BR>
 ShortLegend[imapsad]: IMAP
 YLegend[imapsad]: IMAP/hour
@@ -412,7 +415,7 @@ Title[imaps]: IMAP SSL Concurrency
 MaxBytes[imaps]: 100
 AbsMax[imaps]: 500 
 Options[imaps]: growright,unknaszero,nopercent,gauge
-Target[imaps]: `@indimaildir@/libexec/qmailmrtg7 t @logdir@/imapd-ssl.993`
+Target[imaps]: `@libexecdir@/qmailmrtg7 t @logdir@/imapd-ssl.993`
 PageTop[imaps]: <B>IMAP Concurrency</B><BR>
 ShortLegend[imaps]: IMAP
 YLegend[imaps]: max IMAP
