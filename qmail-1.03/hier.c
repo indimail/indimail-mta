@@ -1,5 +1,8 @@
 /*
  * $Log: hier.c,v $
+ * Revision 1.217  2016-06-17 18:29:01+05:30  Cprogrammer
+ * FHS compliance - moved internal binaries to libexec dir
+ *
  * Revision 1.216  2016-06-17 17:20:42+05:30  Cprogrammer
  * added conf-libexec, auto_libexec variable for libexecdir (internal binaries)
  *
@@ -765,9 +768,6 @@ hier(inst_dir, fatal)
 	c(auto_qmail_home, "bin", "maildir2mbox", auto_uido, auto_gidq, moder_x);
 	c(auto_qmail_home, "bin", "mbox2maildir", auto_uido, auto_gidq, moder_x);
 	c(auto_qmail_home, "bin", "maildirwatch", auto_uido, auto_gidq, moder_x);
-	c(auto_qmail_home, "bin", "qail", auto_uido, auto_gidq, moder_x);
-	c(auto_qmail_home, "bin", "elq", auto_uido, auto_gidq, moder_x);
-	c(auto_qmail_home, "bin", "pinq", auto_uido, auto_gidq, moder_x);
 	c(auto_qmail_home, "bin", "predate", auto_uido, auto_gidq, moder_x);
 	c(auto_qmail_home, "bin", "datemail", auto_uido, auto_gidq, moder_x);
 	c(auto_qmail_home, "bin", "mailsubj", auto_uido, auto_gidq, moder_x);
@@ -792,6 +792,9 @@ hier(inst_dir, fatal)
 	c(auto_qmail_home, "bin", "qnotify", auto_uido, auto_gidq, moder_x);
 	c(auto_qmail_home, "bin", "rrt", auto_uido, auto_gidq, moder_x);
 	c(auto_qmail_home, "bin", "qarf", auto_uido, auto_gidq, moder_x);
+	c(auto_libexec_dir, auto_libexec_base, "qail", auto_uido, auto_gidq, moder_x);
+	c(auto_libexec_dir, auto_libexec_base, "elq", auto_uido, auto_gidq, moder_x);
+	c(auto_libexec_dir, auto_libexec_base, "pinq", auto_uido, auto_gidq, moder_x);
 	c(auto_libexec_dir, auto_libexec_base, "qmail-lint", auto_uido, auto_gidq, moder_x);
 	c(auto_libexec_dir, auto_libexec_base, "qsmhook", auto_uido, auto_gidq, moder_x);
 	c(auto_libexec_dir, auto_libexec_base, "etrn", auto_uido, auto_gidq, moder_x);
@@ -1478,7 +1481,7 @@ hier(inst_dir, fatal)
 void
 getversion_install_big_c()
 {
-	static char    *x = "$Id: hier.c,v 1.216 2016-06-17 17:20:42+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: hier.c,v 1.217 2016-06-17 18:29:01+05:30 Cprogrammer Exp mbhangui $";
 
 #ifdef INDIMAIL
 	if (x)
