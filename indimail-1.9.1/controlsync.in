@@ -1,6 +1,9 @@
 #!/bin/sh
 # WARNING: This file was auto-generated. Do not edit!
 # $Log: controlsync.in,v $
+# Revision 2.7  2016-06-17 17:28:53+05:30  Cprogrammer
+# FHS compliance. moved internal binaries to libexec dir
+#
 # Revision 2.6  2016-06-17 10:41:03+05:30  Cprogrammer
 # FHS compliance
 #
@@ -21,7 +24,7 @@
 #
 #
 #
-# $Id: controlsync.in,v 2.6 2016-06-17 10:41:03+05:30 Cprogrammer Exp mbhangui $
+# $Id: controlsync.in,v 2.7 2016-06-17 17:28:53+05:30 Cprogrammer Exp mbhangui $
 #
 usage ()
 {
@@ -101,7 +104,7 @@ case $operation in
 		if [ " $CONTROLDIR" = " " ] ; then
 			cat @controldir@/$basefile | while read line
 			do
-				@prefix@/sbin/adminclient -h $host -p $adminport -u $adminuser -P $adminpass -c "@prefix@/sbin/updatefile -u $line $filename"
+				@prefix@/sbin/adminclient -h $host -p $adminport -u $adminuser -P $adminpass -c "@libexecdir@/updatefile -u $line $filename"
 				ret=$?
 				if [ $ret -ne 0 ] ; then
 					exit 1
@@ -114,7 +117,7 @@ case $operation in
 			fi
 			cat $CONTROLDIR/$basefile | while read line
 			do
-				@prefix@/sbin/adminclient -h $host -p $adminport -u $adminuser -P $adminpass -c "@prefix@/sbin/updatefile -u $line -s $filename"
+				@prefix@/sbin/adminclient -h $host -p $adminport -u $adminuser -P $adminpass -c "@libexecdir@/updatefile -u $line -s $filename"
 				ret=$?
 				if [ $ret -ne 0 ] ; then
 					exit 1
@@ -123,7 +126,7 @@ case $operation in
 		fi
 		exit $ret
 	else
-		exec @prefix@/sbin/adminclient -h $host -p $adminport -u $adminuser -P $adminpass -c "@prefix@/sbin/updatefile $options $filename"
+		exec @prefix@/sbin/adminclient -h $host -p $adminport -u $adminuser -P $adminpass -c "@libexecdir@/updatefile $options $filename"
 	fi
 	;;
 	1|2)
@@ -138,9 +141,9 @@ case $operation in
 		exit 1
 	fi
 	if [ $operation -eq 1 ] ; then
-		exec @prefix@/sbin/updatefile -u $domain:$host @controldir@/relayhosts
+		exec @libexecdir@/updatefile -u $domain:$host @controldir@/relayhosts
 	else
-		exec @prefix@/sbin/updatefile -d $domain:$host @controldir@/relayhosts
+		exec @libexecdir@/updatefile -d $domain:$host @controldir@/relayhosts
 	fi
 	;;
 esac
