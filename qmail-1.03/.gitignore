@@ -1,4 +1,5 @@
 debian/indimail-mta.install
+doc/CREDITS
 indimail-mta.fc
 perm_list
 conf-prefix
