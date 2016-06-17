@@ -140,28 +140,28 @@ lib_deps: configure Makefile
 	fi ; \
 	echo "@auth_libs@ -lcdb" > lib_deps
 
-indimailbin_PROGRAMS = crc crcdiff dbinfo displaytop hashtable hostcntrl indiversion \
+indimailbin_PROGRAMS = crc crcdiff dbinfo hostcntrl indiversion \
 	printdir proxyimap proxypop3 resetquota sslerator vacation vaddaliasdomain vadddomain \
-	vadduser vadduserl valias vatrn vbulletin vcalias vcfilter vdeldomain vdeluser \
+	vadduser valias vatrn vbulletin vcalias vcfilter vdeldomain vdeluser \
 	vdominfo vgroup vhostid vipmap vlimit vmoduser vmoveuser vpasswd vpriv ismaildup \
 	vproxy vrenamedomain vrenameuser vsetuserquota vsmtp vuserinfo crypt iecho
-indimailsbin_PROGRAMS = adminclient chowkidar cindimail clearopensmtp config_settings \
-	copyemail execmysql hostsync indisrvr initsvc inlookup inquerytest install_tables \
-	ipchange mail_report mgmtpass osh postdel systpass testmra updatefile updaterules \
+indimailsbin_PROGRAMS = adminclient chowkidar clearopensmtp \
+	copyemail hostsync indisrvr initsvc inlookup inquerytest install_tables \
+	ipchange mail_report mgmtpass osh postdel systpass testmra updaterules \
 	vserverinfo vchkpass vsetpass vdelivermail vdeloldusers vfilter vfstab \
 	vmoddomain vreorg vtable
 
-indimaillibexec_PROGRAMS = sq_vacation qmailmrtg7
+indimaillibexec_PROGRAMS = sq_vacation qmailmrtg7 execmysql cindimail hashtable displaytop \
+						   config_settings updatefile myslave
+indimaillibexec_SCRIPTS = mailzipper overquota.sh controlsync cputime tls-cert-check get-cert
 
 indimailauthlib_PROGRAMS = authindi authpgsql
 
 indimailauthlib_SCRIPTS = authgeneric
 
-indimaillibexec_SCRIPTS = overquota.sh
+indimailbin_SCRIPTS = versioninfo vcaliasrev logmonitor bogofilter-qfe
 
-indimailbin_SCRIPTS = versioninfo vcaliasrev logmonitor bogofilter-qfe mailzipper
-
-indimailsbin_SCRIPTS = myslave controlsync svctool cputime tls-cert-check create_services get-cert
+indimailsbin_SCRIPTS = svctool
 
 noinst_SCRIPTS = indimail.spec indimail-@VERSION@-rpmlintrc \
 	INSTALL INSTALL-RPM INSTALL-MYSQL README-CLUSTER RELEASE-Notes Quick-INSTALL \
@@ -171,7 +171,7 @@ noinst_SCRIPTS = indimail.spec indimail-@VERSION@-rpmlintrc \
 post_handle_list = vadddomain vadduser vdeldomain vaddaliasdomain vrenamedomain
 
 MOSTLYCLEANFILES=versioninfo vcaliasrev myslave logmonitor controlsync bogofilter-qfe \
-svctool indimail_settings.c cronlist crypt create_services \
+svctool indimail_settings.c cronlist crypt \
 indimail.spec cscope.* *.dSYM inc_deps lib_deps socket.lib \
 indimail-@VERSION@-rpmlintrc tls-cert-check mailzipper \
 perm_list dbinfo.8 inlookup.8 vadddomain.1 vdeldomain.1 vadduser.1 \
@@ -219,9 +219,6 @@ vadduser_LDADD = @auth_libs@ $(cdb_lib) $(shell cat socket.lib 2>/dev/null)
 
 vgroup_SOURCES = vgroup.c
 vgroup_LDADD = @auth_libs@ $(cdb_lib)
-
-vadduserl_SOURCES = vadduserl.c
-vadduserl_LDADD = @auth_libs@ $(cdb_lib)
 
 cindimail_SOURCES = cindimail.c 
 cindimail_LDADD = @auth_libs@ $(cdb_lib) -lreadline @LIB_TERMCAP@
@@ -569,7 +566,6 @@ vadddomain.lo: indimail.h config.h
 vadd_atrn_map.lo: indimail.h config.h
 vadd_ip_map.lo: indimail.h config.h
 vadduser.lo: indimail.h config.h
-vadduserl.lo: indimail.h config.h
 valias.lo: indimail.h config.h
 valias_delete.lo: indimail.h config.h
 valias_delete_domain.lo: indimail.h config.h
