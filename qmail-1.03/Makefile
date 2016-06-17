@@ -133,6 +133,14 @@ auto_qmail.o: \
 compile auto_qmail.c
 	./compile auto_qmail.c
 
+auto_libexec.c: \
+auto-str conf-libexec
+	./auto-str auto_libexec `head -1 conf-libexec` > auto_libexec.c
+
+auto_libexec.o: \
+compile auto_libexec.c
+	./compile auto_libexec.c
+
 auto_control.c: \
 auto-str conf-sysconfdir
 	./auto-str auto_control "`head -1 conf-sysconfdir`/control" > auto_control.c
@@ -531,10 +539,11 @@ auto_qmail.h envdir.h pathexec.h variables.h auto_control.h
 	./compile `grep -h -v "^#" conf-spf` condredirect.c
 
 qmailconfig: \
-warn-auto.sh qmailconfig.sh conf-qmail conf-prefix conf-break conf-split conf-sysconfdir
+warn-auto.sh qmailconfig.sh conf-qmail conf-prefix conf-break conf-split conf-sysconfdir conf-libexec
 	cat warn-auto.sh qmailconfig.sh \
 	| sed s}QMAIL}"`head -1 conf-qmail`"}g \
 	| sed s}PREFIX}"`head -1 conf-prefix`"}g \
+	| sed s}LIBEXEC}"`head -1 conf-libexec`"}g \
 	| sed s}@controldir\@}"`head -1 conf-sysconfdir`/control"}g \
 	| sed s}BREAK}"`head -1 conf-break`"}g \
 	| sed s}SPLIT}"`head -1 conf-split`"}g \
@@ -729,9 +738,11 @@ warn-auto.sh rmail.sh conf-qmail
 	> irmail
 
 etrn: \
-warn-auto.sh etrn.sh conf-qmail
+warn-auto.sh etrn.sh conf-qmail conf-libexec conf-prefix
 	cat warn-auto.sh etrn.sh \
 	| sed s}QMAIL}"`head -1 conf-qmail`"}g \
+	| sed s}PREFIX}"`head -1 conf-prefix`"}g \
+	| sed s}LIBEXEC}"`head -1 conf-libexec`"}g \
 	> etrn
 
 atrn: \
@@ -740,13 +751,6 @@ warn-auto.sh atrn.sh conf-qmail conf-sysconfdir
 	| sed s}QMAIL}"`head -1 conf-qmail`"}g \
 	| sed s}@controldir\@}"`head -1 conf-sysconfdir`/control"}g \
 	> atrn
-
-balance_outgoing: \
-warn-auto.sh balance_outgoing.sh conf-qmail conf-sysconfdir
-	cat warn-auto.sh balance_outgoing.sh \
-	| sed s}QMAIL}"`head -1 conf-qmail`"}g \
-	| sed s}@controldir\@}"`head -1 conf-sysconfdir`/control"}g \
-	> balance_outgoing
 
 multirotate: \
 warn-auto.sh multirotate.sh conf-qmail
@@ -1104,11 +1108,11 @@ setup: \
 load setup.o hier.o auto_qmail.o auto_uids.o get_uid.o auto_prefix.o \
 auto_control.o auto_assign.o auto_sysconfdir.o subgetopt.o sgetopt.o \
 str_cpy.o strerr.a substdio.a open.a error.a str.a fs.a env.a \
-auto_shared.o stralloc.a alloc.a stralloc.a
+auto_libexec.o auto_shared.o stralloc.a alloc.a stralloc.a
 	./load setup hier.o auto_qmail.o auto_uids.o get_uid.o auto_prefix.o \
 	auto_control.o auto_assign.o auto_sysconfdir.o subgetopt.o sgetopt.o \
 	str_cpy.o strerr.a substdio.a open.a error.a str.a env.a \
-	auto_shared.o stralloc.a alloc.a stralloc.a
+	auto_libexec.o auto_shared.o stralloc.a alloc.a stralloc.a
 
 setup.o: \
 compile setup.c substdio.h strerr.h error.h open.h env.h stralloc.h \
@@ -1119,10 +1123,10 @@ sgetopt.h
 instcheck: \
 load instcheck.o hier.o auto_qmail.o get_uid.o auto_uids.o \
 auto_sysconfdir.o auto_shared.o auto_control.o auto_assign.o alloc.a \
-auto_prefix.o strerr.a substdio.a error.a str.a alloc.a stralloc.a
+auto_prefix.o auto_libexec.o strerr.a substdio.a error.a str.a alloc.a stralloc.a
 	./load instcheck hier.o auto_qmail.o get_uid.o auto_sysconfdir.o \
 	auto_prefix.o auto_shared.o auto_control.o auto_assign.o auto_uids.o \
-	strerr.a substdio.a error.a str.a alloc.a stralloc.a alloc.a
+	auto_libexec.o strerr.a substdio.a error.a str.a alloc.a stralloc.a alloc.a
 
 instcheck.o: \
 compile instcheck.c strerr.h error.h exit.h
@@ -1352,7 +1356,7 @@ run-cleanq.9
 
 it: \
 indimail-mta.fc perm_list 822date 822field 822header 822print 822received addcr addrlist \
-argv0 atrn autoresponder balance_outgoing qbase64 batv binm1 binm1+df \
+argv0 atrn autoresponder qbase64 batv binm1 binm1+df \
 binm2 binm2+df binm3 binm3+df bouncesaying cdbdump cdbget cdbgetm \
 cdbmake cdbmake-12 cdbmake-sv cdbstats cdbtest cidr condredirect config-fast \
 datemail delcr dk-filter dknewkey dktest dnscname dnsfq dnsip \
@@ -1367,7 +1371,7 @@ qarf qmail-cat qmail-cdb qmail-clean qmailconfig qmailctl \
 qmail-daemon qmaildirmake qmail-dk qmail-dkim qmail-getpw qmail-greyd qmail-inject qmail-local \
 qmail-lspawn qmail-multi qmail-newmrh qmail-newu qmail-nullqueue qmail-pop3d qmail-popbull qmail-poppass \
 qmail-popup qmail-pw2u qmail-qfilter qmail-qmqpc qmail-qmqpd qmail-qmtpd qmail-qread qmail-queue \
-qmail-remote qmail-rm qmail-rspawn qmail-send qmail-showctl qmail-sigalrm qmail-sighup qmail-sigterm \
+qmail-remote qmail-rm qmail-rspawn qmail-send qmail-showctl \
 qmail-smtpd qmail_smtpd.so qmail-sql qmail-start qmail-tcpok qmail-tcpto qmail-todo qmail-upq \
 qnotify qpq qquote qreceipt qsmhook queue-fix readproctitle \
 recipient-cdb recordio relaytest rewind irmail rpmattr rrforward rrt \
@@ -2414,9 +2418,10 @@ qmail-remote.0: \
 qmail-remote.8
 	nroff -man qmail-remote.8 > qmail-remote.0
 qmail-remote.8: \
-qmail-remote.9 conf-qmail conf-sysconfdir
+qmail-remote.9 conf-qmail conf-sysconfdir conf-libexec
 	cat qmail-remote.9 \
 	| sed s}QMAIL}"`head -1 conf-qmail`"}g \
+	| sed s}LIBEXEC}"`head -1 conf-libexec`"}g \
 	| sed s}@controldir\@}"`head -1 conf-sysconfdir`/control"}g \
 	> qmail-remote.8
 
