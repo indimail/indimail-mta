@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail-mta.spec,v 1.61 2016-06-17 17:21:35+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail-mta.spec,v 1.62 2016-06-17 18:29:42+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 
@@ -679,7 +679,6 @@ done
 %attr(755,root,qmail)                   %{_prefix}/bin/xsender
 %attr(755,root,qmail)                   %{_prefix}/bin/rxdelay
 %attr(755,root,qmail)                   %{_prefix}/bin/cdbmake
-%attr(755,root,qmail)                   %{_prefix}/bin/pinq
 %attr(755,root,qmail)                   %{_prefix}/bin/mlmatchup
 %attr(755,root,qmail)                   %{_prefix}/bin/822print
 %attr(755,root,qmail)                   %{_prefix}/bin/sendmail
@@ -710,7 +709,6 @@ done
 %attr(755,root,qmail)                   %{_prefix}/bin/mbox2maildir
 %attr(755,root,qmail)                   %{_prefix}/bin/printforward
 %attr(755,root,qmail)                   %{_prefix}/bin/zddist
-%attr(755,root,qmail)                   %{_prefix}/bin/elq
 %attr(755,root,qmail)                   %{_prefix}/bin/preline
 %attr(755,root,qmail)                   %{_prefix}/bin/cdbget
 %attr(755,root,qmail)                   %{_prefix}/bin/cdbgetm
@@ -765,8 +763,6 @@ done
 %attr(755,root,qmail)                   %{_prefix}/bin/qmail-poppass
 %attr(755,root,qmail)                   %{_prefix}/bin/failures
 %attr(755,root,qmail)                   %{_prefix}/bin/rsmtp
-%attr(755,root,qmail)                   %{_prefix}/bin/qail
-%attr(755,root,qmail)                   %{_prefix}/bin/qpq
 %attr(755,root,qmail)                   %{_prefix}/bin/replier-config
 %attr(755,root,qmail)                   %{_prefix}/bin/forward
 %attr(755,root,qmail)                   %{_prefix}/bin/new-inject
@@ -862,6 +858,10 @@ done
 %attr(755,root,qmail)                   %{libexecdir}/testzero
 %attr(755,root,qmail)                   %{libexecdir}/qmail-lint
 %attr(755,root,qmail)                   %{libexecdir}/ipmeprint
+%attr(755,root,qmail)                   %{libexecdir}/elq
+%attr(755,root,qmail)                   %{libexecdir}/pinq
+%attr(755,root,qmail)                   %{libexecdir}/qail
+%attr(755,root,qmail)                   %{libexecdir}/qpq
 
 %if %fedorareview == 0
 %docdir %{mandir}
