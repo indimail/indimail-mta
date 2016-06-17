@@ -1,5 +1,8 @@
 #
 # $Log: qmailconfig.sh,v $
+# Revision 1.9  2016-06-17 17:26:18+05:30  Cprogrammer
+# FHS compliance
+#
 # Revision 1.8  2016-06-05 13:20:18+05:30  Cprogrammer
 # use PREFIX instead of QMAIL for binary prefix
 #
@@ -14,7 +17,7 @@
 # renamed config.sh to qmailconfig.sh
 #
 #
-# $Id: qmailconfig.sh,v 1.8 2016-06-05 13:20:18+05:30 Cprogrammer Exp mbhangui $
+# $Id: qmailconfig.sh,v 1.9 2016-06-17 17:26:18+05:30 Cprogrammer Exp mbhangui $
 #
 if [ -x ./hostname ] ; then
 	HOSTNAME_CMD=./hostname
@@ -37,8 +40,8 @@ if read host
 then
 	echo Your hostname is "$host".
 	(
-	if [ -x PREFIX/sbin/dnsfq ] ; then
-		PREFIX/sbin/dnsfq "$host" | tr '[A-Z]' '[a-z]'
+	if [ -x LIBEXEC/dnsfq ] ; then
+		LIBEXEC/dnsfq "$host" | tr '[A-Z]' '[a-z]'
 	else
 		./dnsfq "$host" | tr '[A-Z]' '[a-z]'
 	fi
@@ -73,13 +76,13 @@ then
 		: > $CONTROLDIR/locals
 		chmod 644 $CONTROLDIR/locals
 		(
-			if [ -x PREFIX/sbin/dnsip ] ; then
-				PREFIX/sbin/dnsip "$fqdn"
+			if [ -x LIBEXEC/dnsip ] ; then
+				LIBEXEC/dnsip "$fqdn"
 			else
 				./dnsip "$fqdn"
 			fi
-			if [ -x PREFIX/bin/ipmeprint ] ; then
-				PREFIX/bin/ipmeprint | awk '{print $3}'
+			if [ -x LIBEXEC/ipmeprint ] ; then
+				LIBEXEC/ipmeprint | awk '{print $3}'
 			else
 				./ipmeprint | awk '{print $3}'
 			fi
@@ -89,8 +92,8 @@ then
 			do
 				echo "$localip: " | tr -d '\012'
 				(
-				if [ -x PREFIX/sbin/dnsptr ] ; then
-					PREFIX/sbin/dnsptr "$localip" 2>/dev/null
+				if [ -x LIBEXEC/dnsptr ] ; then
+					LIBEXEC/dnsptr "$localip" 2>/dev/null
 				else
 					./dnsptr "$localip" 2>/dev/null
 				fi
