@@ -2,6 +2,9 @@
 # WARNING: This file was auto-generated. Do not edit!
 #
 # $Log: overquota.sh.in,v $
+# Revision 2.5  2016-06-17 17:31:25+05:30  Cprogrammer
+# FHS compliance
+#
 # Revision 2.4  2016-05-17 14:43:23+05:30  Cprogrammer
 # use control directory defined by configure
 #
@@ -28,9 +31,9 @@ fi
 mail_command()
 {
 	if [ " $command" = " " ] ; then
-		@indimaildir@/bin/sendmail $1
+		@prefx@/bin/sendmail $1
 	else
-		@indimaildir@/bin/maildirdeliver $1
+		@prefx@/bin/maildirdeliver $1
 	fi
 }
 
