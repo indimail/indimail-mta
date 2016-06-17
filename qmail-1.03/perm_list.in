@@ -71,7 +71,6 @@
 %attr(0755,root,qmail) @prefix@/bin/dktest
 %attr(0755,root,qmail) @prefix@/bin/dot-forward
 %attr(0755,root,qmail) @prefix@/bin/drate
-%attr(0755,root,qmail) @prefix@/bin/elq
 %attr(0755,root,qmail) @prefix@/bin/envdir
 %attr(0755,root,qmail) @prefix@/bin/envuidgid
 %attr(0755,root,qmail) @prefix@/bin/except
@@ -108,12 +107,10 @@
 %attr(0755,root,qmail) @prefix@/bin/ofmipd
 %attr(0755,root,qmail) @prefix@/bin/ofmipname
 %attr(0755,root,qmail) @prefix@/bin/pgrphack
-%attr(0755,root,qmail) @prefix@/bin/pinq
 %attr(0755,root,qmail) @prefix@/bin/predate
 %attr(0755,root,qmail) @prefix@/bin/preline
 %attr(0755,root,qmail) @prefix@/bin/printforward
 %attr(0755,root,qmail) @prefix@/bin/printmaillist
-%attr(0755,root,qmail) @prefix@/bin/qail
 %attr(0755,root,qmail) @prefix@/bin/qarf
 %attr(0755,root,qmail) @prefix@/bin/qfilelog
 %attr(0755,root,qmail) @prefix@/bin/qmail-cat
@@ -135,7 +132,6 @@
 %attr(0755,root,qmail) @prefix@/bin/qmail-showctl
 %attr(0755,root,qmail) @prefix@/bin/qmail-smtpd
 %attr(0755,root,qmail) @prefix@/bin/qnotify
-%attr(0755,root,qmail) @prefix@/bin/qpq
 %attr(0755,root,qmail) @prefix@/bin/qreceipt
 %attr(0755,root,qmail) @prefix@/bin/queue-fix
 %attr(0755,root,qmail) @prefix@/bin/recipients
@@ -267,6 +263,11 @@
 %attr(0755,root,qmail) @libexecdir@/testzero
 %attr(0755,root,qmail) @libexecdir@/qmail-lint
 %attr(0755,root,qmail) @libexecdir@/ipmeprint
+%attr(0755,root,qmail) @libexecdir@/rpmattr
+%attr(0755,root,qmail) @libexecdir@/elq
+%attr(0755,root,qmail) @libexecdir@/pinq
+%attr(0755,root,qmail) @libexecdir@/qail
+%attr(0755,root,qmail) @libexecdir@/qpq
 
 %attr(0751,root,qmail) @prefix@/bin/qmail-getpw
 %attr(0751,root,qmail) @prefix@/bin/qmail-local
