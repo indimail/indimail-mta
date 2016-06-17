@@ -53,14 +53,14 @@
 # in your system.
 
 #
-@indimaildir@/bin/qhpsi                  qscand:qmail   6511
-@indimaildir@/bin/run-cleanq             root:qscand    2511
-@indimaildir@/bin/qmail-queue            qmailq:qmail   6511
-@indimaildir@/bin/bogofilter             root:indimail  6511
-@indimaildir@/bin/qscanq                 qscand:qscand  4555
-@indimaildir@/libexec/sq_vacation        root:qmail     4555
-@indimaildir@/libexec/authlib/authshadow root:root      4555
-@indimaildir@/sbin/systpass              root:root      4555
+@prefix@/bin/qhpsi                  qscand:qmail   6511
+@prefix@/bin/run-cleanq             root:qscand    2511
+@prefix@/bin/qmail-queue            qmailq:qmail   6511
+@prefix@/bin/bogofilter             root:indimail  6511
+@prefix@/bin/qscanq                 qscand:qscand  4555
+@libexecdir@/sq_vacation            root:qmail     4555
+@libexecdir@/authlib/authshadow     root:root      4555
+@prefix@/sbin/systpass              root:root      4555
 
 #
 # Directories

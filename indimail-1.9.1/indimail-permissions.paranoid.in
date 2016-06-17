@@ -27,12 +27,12 @@
 # you do not need or by restricting access to them using packet filters
 # or tcp wrappers (see hosts_access(5)) to gain a higher level of security
 # in your system.
-@indimaildir@/bin/qhpsi                  qscand:qmail   6511
-@indimaildir@/bin/run-cleanq             root:qscand    2511
-@indimaildir@/bin/qmail-queue            qmailq:qmail   6511
-@indimaildir@/bin/bogofilter             root:indimail  6511
-@indimaildir@/bin/qscanq                 qscand:qscand  4555
-@indimaildir@/libexec/authlib/authshadow root:root      4555
+@prefix@/bin/qhpsi                  qscand:qmail   6511
+@prefix@/bin/run-cleanq             root:qscand    2511
+@prefix@/bin/qmail-queue            qmailq:qmail   6511
+@prefix@/bin/bogofilter             root:indimail  6511
+@prefix@/bin/qscanq                 qscand:qscand  4555
+@libexecdir@/authlib/authshadow root:root      4555
 
 #
 # Directories

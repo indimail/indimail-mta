@@ -13,29 +13,29 @@
 # file.
 # 
 #
-@indimaildir@/bin/vdeluser               root:root      4555
-@indimaildir@/bin/vadduser               root:root      4555
-@indimaildir@/bin/vaddaliasdomain        root:root      4555
-@indimaildir@/bin/vrenamedomain          root:root      4555
-@indimaildir@/bin/vsetuserquota          root:root      4555
-@indimaildir@/bin/vmoveuser              root:root      4555
-@indimaildir@/bin/qhpsi                  qscand:qmail   6511
-@indimaildir@/bin/run-cleanq             root:qscand    2511
-@indimaildir@/bin/vuserinfo              root:root      4555
-@indimaildir@/bin/qmail-queue            qmailq:qmail   6511
-@indimaildir@/bin/vdeldomain             root:root      4555
-@indimaildir@/bin/vadddomain             root:root      4555
-@indimaildir@/bin/bogofilter             root:indimail  6511
-@indimaildir@/bin/qscanq                 qscand:qscand  4555
-@indimaildir@/bin/vdominfo               root:root      4511
-@indimaildir@/bin/vrenameuser            root:root      4555
-@indimaildir@/bin/printdir               root:root      4555
-@indimaildir@/bin/vmoduser               root:root      4555
-@indimaildir@/bin/vcfilter               root:root      4555
-@indimaildir@/bin/vbulletin              root:root      4555
-@indimaildir@/libexec/sq_vacation        root:qmail     4555
-@indimaildir@/libexec/authlib/authshadow root:root      4555
-@indimaildir@/sbin/systpass              root:root      4555
+@prefix@/bin/vdeluser               root:root      4555
+@prefix@/bin/vadduser               root:root      4555
+@prefix@/bin/vaddaliasdomain        root:root      4555
+@prefix@/bin/vrenamedomain          root:root      4555
+@prefix@/bin/vsetuserquota          root:root      4555
+@prefix@/bin/vmoveuser              root:root      4555
+@prefix@/bin/qhpsi                  qscand:qmail   6511
+@prefix@/bin/run-cleanq             root:qscand    2511
+@prefix@/bin/vuserinfo              root:root      4555
+@prefix@/bin/qmail-queue            qmailq:qmail   6511
+@prefix@/bin/vdeldomain             root:root      4555
+@prefix@/bin/vadddomain             root:root      4555
+@prefix@/bin/bogofilter             root:indimail  6511
+@prefix@/bin/qscanq                 qscand:qscand  4555
+@prefix@/bin/vdominfo               root:root      4511
+@prefix@/bin/vrenameuser            root:root      4555
+@prefix@/bin/printdir               root:root      4555
+@prefix@/bin/vmoduser               root:root      4555
+@prefix@/bin/vcfilter               root:root      4555
+@prefix@/bin/vbulletin              root:root      4555
+@libexecdir@/sq_vacation        root:qmail     4555
+@libexecdir@/authlib/authshadow root:root      4555
+@prefix@/sbin/systpass              root:root      4555
 
 #
 # Directories
