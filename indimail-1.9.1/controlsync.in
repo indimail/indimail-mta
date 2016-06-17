@@ -1,6 +1,9 @@
 #!/bin/sh
 # WARNING: This file was auto-generated. Do not edit!
 # $Log: controlsync.in,v $
+# Revision 2.6  2016-06-17 10:41:03+05:30  Cprogrammer
+# FHS compliance
+#
 # Revision 2.5  2016-05-17 15:22:57+05:30  Cprogrammer
 # cd to base directory if path is relative
 #
@@ -18,7 +21,7 @@
 #
 #
 #
-# $Id: controlsync.in,v 2.5 2016-05-17 15:22:57+05:30 Cprogrammer Exp mbhangui $
+# $Id: controlsync.in,v 2.6 2016-06-17 10:41:03+05:30 Cprogrammer Exp mbhangui $
 #
 usage ()
 {
@@ -98,7 +101,7 @@ case $operation in
 		if [ " $CONTROLDIR" = " " ] ; then
 			cat @controldir@/$basefile | while read line
 			do
-				@indimaildir@/sbin/adminclient -h $host -p $adminport -u $adminuser -P $adminpass -c "@indimaildir@/sbin/updatefile -u $line $filename"
+				@prefix@/sbin/adminclient -h $host -p $adminport -u $adminuser -P $adminpass -c "@prefix@/sbin/updatefile -u $line $filename"
 				ret=$?
 				if [ $ret -ne 0 ] ; then
 					exit 1
@@ -111,7 +114,7 @@ case $operation in
 			fi
 			cat $CONTROLDIR/$basefile | while read line
 			do
-				@indimaildir@/sbin/adminclient -h $host -p $adminport -u $adminuser -P $adminpass -c "@indimaildir@/sbin/updatefile -u $line -s $filename"
+				@prefix@/sbin/adminclient -h $host -p $adminport -u $adminuser -P $adminpass -c "@prefix@/sbin/updatefile -u $line -s $filename"
 				ret=$?
 				if [ $ret -ne 0 ] ; then
 					exit 1
@@ -120,7 +123,7 @@ case $operation in
 		fi
 		exit $ret
 	else
-		exec @indimaildir@/sbin/adminclient -h $host -p $adminport -u $adminuser -P $adminpass -c "@indimaildir@/sbin/updatefile $options $filename"
+		exec @prefix@/sbin/adminclient -h $host -p $adminport -u $adminuser -P $adminpass -c "@prefix@/sbin/updatefile $options $filename"
 	fi
 	;;
 	1|2)
@@ -135,9 +138,9 @@ case $operation in
 		exit 1
 	fi
 	if [ $operation -eq 1 ] ; then
-		exec @indimaildir@/sbin/updatefile -u $domain:$host @controldir@/relayhosts
+		exec @prefix@/sbin/updatefile -u $domain:$host @controldir@/relayhosts
 	else
-		exec @indimaildir@/sbin/updatefile -d $domain:$host @controldir@/relayhosts
+		exec @prefix@/sbin/updatefile -d $domain:$host @controldir@/relayhosts
 	fi
 	;;
 esac
