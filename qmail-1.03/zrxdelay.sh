@@ -1,5 +1,8 @@
 #
 # $Log: zrxdelay.sh,v $
+# Revision 1.4  2016-06-17 20:21:00+05:30  Cprogrammer
+# qmailanalog scripts moved to libexec dir
+#
 # Revision 1.3  2008-05-25 17:21:57+05:30  Cprogrammer
 # sort on the first field
 #
@@ -18,5 +21,5 @@ One line per recipient, sorted by avg. Information on each line:
 '
 (
 echo avg tries recipient
-QMAIL/bin/recipients | QMAIL/bin/rxdelay | sort -n -r -k 1,1
+LIBEXEC/recipients | LIBEXEC/rxdelay | sort -n -r -k 1,1
 ) | QMAIL/bin/columnt
