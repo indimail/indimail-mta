@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail.spec.in,v 2.351 2016-06-17 20:15:02+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 2.352 2016-06-17 20:53:44+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 
@@ -886,7 +886,7 @@ if [ -x /usr/bin/chrpath ] ; then
   /usr/bin/chrpath -d %{buildroot}%{_libdir}/*.so
   for i in dbinfo flash hostcntrl indiversion printdir \
     proxyimap proxypop3 resetquota sigtool vacation vaddaliasdomain vadddomain vadduser \
-    vadduserl valias vatrn vbulletin vcalias vcfilter vdeldomain vdeluser vdominfo \
+    valias vatrn vbulletin vcalias vcfilter vdeldomain vdeluser vdominfo \
     vgroup vhostid vipmap vlimit vmoduser vmoveuser vpasswd vpriv sslerator \
     vproxy vrenamedomain vrenameuser vsetuserquota vsmtp vuserinfo tcpserver ismaildup
   do
@@ -1181,7 +1181,6 @@ fi
 %attr(755,root,qmail)                   %{_prefix}/bin/vipmap
 %attr(755,root,qmail)                   %{_prefix}/bin/vsmtp
 %attr(755,root,qmail)                   %{_prefix}/bin/vgroup
-%attr(755,root,qmail)                   %{_prefix}/bin/vadduserl
 %attr(755,root,qmail)                   %{_prefix}/bin/vcaliasrev
 %attr(755,root,qmail)                   %{_prefix}/bin/vacation
 %attr(755,root,qmail)                   %{_prefix}/bin/proxyimap
@@ -1205,7 +1204,6 @@ fi
 %attr(755,root,qmail)                   %{_prefix}/sbin/mail_report
 %attr(755,root,qmail)                   %{_prefix}/sbin/mgmtpass
 %attr(755,root,qmail)                   %{_prefix}/sbin/svctool
-%attr(755,root,qmail)                   %{_prefix}/sbin/create_services
 %attr(755,root,qmail)                   %{_prefix}/sbin/testmra
 %attr(755,root,qmail)                   %{_prefix}/sbin/updaterules
 %attr(755,root,qmail)                   %{_prefix}/sbin/vchkpass
@@ -1255,7 +1253,6 @@ fi
 %attr(755,root,qmail)                   %{_prefix}/bin/logselect
 %attr(755,root,qmail)                   %{_prefix}/bin/qlogselect
 %attr(755,root,qmail)                   %{_prefix}/bin/teepipe
-%attr(755,root,qmail)                   %{_prefix}/bin/ipmeprint
 %attr(755,root,qmail)                   %{_prefix}/bin/uacl
 %attr(755,root,qmail)                   %{_prefix}/bin/envdir
 %attr(755,root,qmail)                   %{_prefix}/bin/cdbmake
@@ -1437,48 +1434,49 @@ fi
 %attr(751,root,qmail)                   %{libexecdir}/whois
 %attr(755,root,qmail)                   %{libexecdir}/testzero
 %attr(755,root,qmail)                   %{libexecdir}/qmail-lint
+%attr(755,root,qmail)                   %{libexecdir}/ipmeprint
 %attr(755,root,qmail)                   %{libexecdir}/rpmattr
 %attr(755,root,qmail)                   %{libexecdir}/elq
 %attr(755,root,qmail)                   %{libexecdir}/pinq
 %attr(755,root,qmail)                   %{libexecdir}/qail
 %attr(755,root,qmail)                   %{libexecdir}/qpq
 
-%attr(755,root,qmail)                   %{_prefix}/bin/zsuccesses
-%attr(755,root,qmail)                   %{_prefix}/bin/deferrals
-%attr(755,root,qmail)                   %{_prefix}/bin/rsmtprecipients
-%attr(755,root,qmail)                   %{_prefix}/bin/smtp-matchup
-%attr(755,root,qmail)                   %{_prefix}/bin/zrecipients
-%attr(755,root,qmail)                   %{_prefix}/bin/xsender
-%attr(755,root,qmail)                   %{_prefix}/bin/rxdelay
-%attr(755,root,qmail)                   %{_prefix}/bin/zspam
-%attr(755,root,qmail)                   %{_prefix}/bin/recipients
-%attr(755,root,qmail)                   %{_prefix}/bin/rsmtprdomains
-%attr(755,root,qmail)                   %{_prefix}/bin/rsmtpfailures
-%attr(755,root,qmail)                   %{_prefix}/bin/successes
-%attr(755,root,qmail)                   %{_prefix}/bin/zrxdelay
-%attr(755,root,qmail)                   %{_prefix}/bin/rspamrdomain
-%attr(755,root,qmail)                   %{_prefix}/bin/rspamsdomain
-%attr(755,root,qmail)                   %{_prefix}/bin/multilog-matchup
-%attr(755,root,qmail)                   %{_prefix}/bin/zddist
-%attr(755,root,qmail)                   %{_prefix}/bin/zsenders
-%attr(755,root,qmail)                   %{_prefix}/bin/senders
-%attr(755,root,qmail)                   %{_prefix}/bin/suids
-%attr(755,root,qmail)                   %{_prefix}/bin/zsmtp
-%attr(755,root,qmail)                   %{_prefix}/bin/zoverall
-%attr(755,root,qmail)                   %{_prefix}/bin/rhosts
-%attr(755,root,qmail)                   %{_prefix}/bin/zrhosts
-%attr(755,root,qmail)                   %{_prefix}/bin/failures
-%attr(755,root,qmail)                   %{_prefix}/bin/rsmtp
-%attr(755,root,qmail)                   %{_prefix}/bin/rsmtpsenders
-%attr(755,root,qmail)                   %{_prefix}/bin/zdeferrals
-%attr(755,root,qmail)                   %{_prefix}/bin/rspamstat
-%attr(755,root,qmail)                   %{_prefix}/bin/zsuids
-%attr(755,root,qmail)                   %{_prefix}/bin/xrecipient
-%attr(755,root,qmail)                   %{_prefix}/bin/rspamhist
-%attr(755,root,qmail)                   %{_prefix}/bin/rsmtpsdomains
-%attr(755,root,qmail)                   %{_prefix}/bin/zfailures
-%attr(755,root,qmail)                   %{_prefix}/bin/zsendmail
-%attr(755,root,qmail)                   %{_prefix}/bin/ddist
+%attr(755,root,qmail)                   %{libexecdir}/zsuccesses
+%attr(755,root,qmail)                   %{libexecdir}/deferrals
+%attr(755,root,qmail)                   %{libexecdir}/rsmtprecipients
+%attr(755,root,qmail)                   %{libexecdir}/smtp-matchup
+%attr(755,root,qmail)                   %{libexecdir}/zrecipients
+%attr(755,root,qmail)                   %{libexecdir}/xsender
+%attr(755,root,qmail)                   %{libexecdir}/rxdelay
+%attr(755,root,qmail)                   %{libexecdir}/zspam
+%attr(755,root,qmail)                   %{libexecdir}/recipients
+%attr(755,root,qmail)                   %{libexecdir}/rsmtprdomains
+%attr(755,root,qmail)                   %{libexecdir}/rsmtpfailures
+%attr(755,root,qmail)                   %{libexecdir}/successes
+%attr(755,root,qmail)                   %{libexecdir}/zrxdelay
+%attr(755,root,qmail)                   %{libexecdir}/rspamrdomain
+%attr(755,root,qmail)                   %{libexecdir}/rspamsdomain
+%attr(755,root,qmail)                   %{libexecdir}/multilog-matchup
+%attr(755,root,qmail)                   %{libexecdir}/zddist
+%attr(755,root,qmail)                   %{libexecdir}/zsenders
+%attr(755,root,qmail)                   %{libexecdir}/senders
+%attr(755,root,qmail)                   %{libexecdir}/suids
+%attr(755,root,qmail)                   %{libexecdir}/zsmtp
+%attr(755,root,qmail)                   %{libexecdir}/zoverall
+%attr(755,root,qmail)                   %{libexecdir}/rhosts
+%attr(755,root,qmail)                   %{libexecdir}/zrhosts
+%attr(755,root,qmail)                   %{libexecdir}/failures
+%attr(755,root,qmail)                   %{libexecdir}/rsmtp
+%attr(755,root,qmail)                   %{libexecdir}/rsmtpsenders
+%attr(755,root,qmail)                   %{libexecdir}/zdeferrals
+%attr(755,root,qmail)                   %{libexecdir}/rspamstat
+%attr(755,root,qmail)                   %{libexecdir}/zsuids
+%attr(755,root,qmail)                   %{libexecdir}/xrecipient
+%attr(755,root,qmail)                   %{libexecdir}/rspamhist
+%attr(755,root,qmail)                   %{libexecdir}/rsmtpsdomains
+%attr(755,root,qmail)                   %{libexecdir}/zfailures
+%attr(755,root,qmail)                   %{libexecdir}/zsendmail
+%attr(755,root,qmail)                   %{libexecdir}/ddist
 
 %if %nonssd == 0
 %attr(755,root,qmail)                   %{_prefix}/sbin/nssd
