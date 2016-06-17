@@ -1,16 +1,15 @@
-.LL 8i
 .TH vcalias 8
 .SH NAME
 .PP
 vcalias \- convert .qmail to IndiMail \fIvalias\fR database
 .PP
-vcaliasrev.sh \- convert IndiMail \fIvalias\fR database to .qmail
+vcaliasrev \- convert IndiMail \fIvalias\fR database to .qmail
 
 .SH SYNOPSYS
 .PP
 \fBvcalias\fR \fIvirtual_domain\fR
 .PP
-\fBvcaliasrev.sh\fR \fIvirtual_domain\fR
+\fBvcaliasrev\fR \fIvirtual_domain\fR
 
 .SH DESCRIPTION
 .PP
@@ -22,9 +21,9 @@ should be taken by the user not have duplicate entries (i.e. Entries maintained 
 file as well as valias.
 
 .PP
-.B vcaliasrev.sh
+.B vcaliasrev
 does the reverse of vcalias. It converts from IndiMail's valias entries to .qmail files.
-.B vcaliasrev.sh
+.B vcaliasrev
 is a shell script which uses MySQL client to query the valias table and build the .qmail files.
 
 .SH OPTIONS
