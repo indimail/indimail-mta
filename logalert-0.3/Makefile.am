@@ -13,7 +13,7 @@ LIBS = @LEXLIB@ @LIBPCRE_LIBS@
 bin_PROGRAMS=logclient incrmesg logalert showbytes
 sbin_PROGRAMS=logsrv rpclog
 
-man_MANS = logalert.8 logsrv.8 rpclog.8 incrmesg.1 logclient.1
+man_MANS = logalert.8 logsrv.8 rpclog.8 incrmesg.1 logclient.1 showbytes.1
 
 MOSTLYCLEANFILES=logalert.spec logalert-@VERSION@-rpmlintrc \
 				lex.c parser.h parser.c logalert_perm_list obs.mk
