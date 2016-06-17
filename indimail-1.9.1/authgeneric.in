@@ -1,12 +1,15 @@
 #!/bin/sh
 #
 # $Log: authgeneric.in,v $
+# Revision 2.2  2016-06-17 10:39:25+05:30  Cprogrammer
+# FHS compliance
+#
 # Revision 2.1  2010-11-12 19:37:28+05:30  Cprogrammer
 # authmodule to create users on imap/pop3 login (written for way2sms)
 #
 #
 
-# $Id: authgeneric.in,v 2.1 2010-11-12 19:37:28+05:30 Cprogrammer Exp mbhangui $
+# $Id: authgeneric.in,v 2.2 2016-06-17 10:39:25+05:30 Cprogrammer Exp mbhangui $
 if [ $# -lt 2 ] ; then
 	echo "Incorrect arguments" 1>&2
 	echo "AUTHFAILURE" 1>&2
@@ -24,7 +27,7 @@ fi
 #
 # create the user here
 #
-@indimaildir@/bin/vadduser -d "$user"@"$domain" $PASSWORD > /dev/null
+@prefix@/bin/vadduser -d "$user"@"$domain" $PASSWORD > /dev/null
 if [ $? -ne 0 ] ; then
 	if [ $? -eq 17 ] ; then
 		echo "authgeneric: user exists" 1>&2
@@ -43,7 +46,7 @@ AUTHENTICATED=$USER
 AUTHADDR=$USER
 AUTHFULLNAME=$user
 # do vuserinfo to set MAILDIRQUOTA environment variable
-@indimaildir@/bin/vuserinfo $AUTHENTICATED > /tmp/courier_auth.$$
+@prefix@/bin/vuserinfo $AUTHENTICATED > /tmp/courier_auth.$$
 if [ $? -eq 0 ] ; then
 	quota=`cat /tmp/courier_auth.$$ |grep quota|head -1 | cut -d: -f2 | awk '{print $1}'`
 	MAILDIRQUOTA=$quota"S","0C"
@@ -52,7 +55,7 @@ if [ $? -eq 0 ] ; then
 	MAILDIR=$HOME/Maildir
 	export AUTHENTICATED AUTHADDR AUTHFULLNAME MAILDIRQUOTA HOME MAILDIR
 	if [ ! -d $MAILDIR ] ; then
-		@indimaildir@/bin/maildirmake $MAILDIR > /dev/null
+		@prefix@/bin/maildirmake $MAILDIR > /dev/null
 		if [ $? -ne 0 ] ; then
 			echo "authgeneric: maildirmaike $MAILDIR failed" 1>&2
 			exit 1
