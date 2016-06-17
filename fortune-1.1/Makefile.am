@@ -28,7 +28,7 @@ fortunedata_INSTALL=sh ./copy_fortune
 fortunebin_PROGRAMS = fortune randstr
 fortunesbin_PROGRAMS = strfile unstr rot
 fortunedata_DATA=cookies ocookies
-man1_MANS=fortune.man randstr.man strfile.man unstr.man
+man1_MANS=fortune.man randstr.man strfile.man unstr.man rot.man
 
 MOSTLYCLEANFILES=stamp-cookies stamp-ocookies datfiles/*.dat copy_fortune
 
