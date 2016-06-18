@@ -8,36 +8,51 @@ logmonitor - generic live log monitor
 .I options
 ]
 
+.B
+hashtable
+-l \fIlineCount\fR -c \fIReportCount\fR
+
+.B
+displaytop
+[-b] -n \fIdisplayCount\fR
+
 .SH DESCRIPTION
 \fBlogmonitor\fR is a utility for monitoring specific values in any log file being generated
 continuously by applications. It feeds the items to another utility called \fBhashtable\fR and
 \fBdisplaytop\fR.
 
 \fBhashtable\fR creates a hash table of all lines fed to it and displays count of occurrences
-of each item feed to it.
+of each item feed to it. It creates an hashtable of \fIlineCount\fR entries for sorting purposes.
+Entries are printed only if they occur more than \fIReportCount\fR
 
-\fBdisplaytop\fR sorts the entries and displays the entries on the screen with the entries
-having the maximum occurrences at the top.
+\fBdisplaytop\fR sorts the entries and displays the entries on the screen, sorted in descending order,
+according to the number of cocurrences.
 
 .SH OPTIONS
-.PP
+.TP
 \fB\-\-logfile\fR
 Path of log file to monitor
+
 .TP
 \fB\-\-display_size\fR
-Maximum number of entries to display on screen.
+Maximum number of entries to display on screen. This option is passed as -n option to \fBdisplaytop\fR
+
 .TP
 \fB\-\-format\fR
 Type of format of the log file. i.e qmail-send or qmail-smtpd log file
+
 .TP
 \fB\-\-threshold\fR
-Minimum no of occurrences of an item above which the item should be reported
+Minimum no of occurrences of an item above which the item should be reported. This option is passed as -c option
+to \fBhashtable\fR
+
 .TP
 \fB\-\-follow\fR
 Continuously monitor the log file (like tail -f)
+
 .TP
 \fB\-\-batchmode\fR
-Set this if the output is not a terminal.
+Set this if the output is not a terminal. This causes \fBlogmonitor\fR to use the -b option when calling displaytop
 
 .SH RETURN VALUE
 0 for success, 1 for any failure.
