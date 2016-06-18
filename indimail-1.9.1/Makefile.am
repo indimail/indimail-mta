@@ -48,7 +48,7 @@ man_MANS=vadduser.1 adminclient.8 chowkidar.8 clearopensmtp.8 dbinfo.8 hostcntrl
 	vlimit.1 vmoduser.1 vmoveuser.1 vpasswd.1 vpriv.8 vproxy.8 vrenamedomain.1 \
 	vrenameuser.1 vreorg.8 vsetuserquota.1 vsmtp.8 vuserinfo.1 indimail.7 IndiMail.7 \
 	updaterules.8 osh.8 svctool.8 systpass.8 vserverinfo.1 sslerator.1 iecho.1 \
-	ismaildup.1 login_tasks.3 vtable.1 install_tables.8
+	ismaildup.1 login_tasks.3 vtable.1 install_tables.8 displaytop.8 hashtable.8
 
 setuid_list = ../sbin/systpass vdeldomain vadddomain vadduser vdeluser \
 			  vaddaliasdomain vrenamedomain vrenameuser vbulletin vdominfo \
