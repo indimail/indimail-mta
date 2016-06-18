@@ -317,7 +317,6 @@
 %attr(0755,root,qmail) @prefix@/sbin/vsetpass
 %attr(0755,root,qmail) @prefix@/sbin/vtable
 
-%attr(0755,root,qmail) @prefix@/sbin/whois
 %attr(0755,root,qmail) @prefix@/sbin/cleanq
 %attr(0755,root,qmail) @prefix@/sbin/qscanq-stdin
 %attr(0755,root,qmail) @prefix@/sbin/svscan
@@ -365,6 +364,7 @@
 %attr(0755,root,qmail) @libexecdir@/pinq
 %attr(0755,root,qmail) @libexecdir@/qail
 %attr(0755,root,qmail) @libexecdir@/qpq
+%attr(0755,root,qmail) @libexecdir@/whois
 
 %attr(0755,root,qmail) @libexecdir@/zsuids
 %attr(0755,root,qmail) @libexecdir@/ddist
