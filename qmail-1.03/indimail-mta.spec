@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail-mta.spec,v 1.63 2016-06-17 20:15:59+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail-mta.spec,v 1.64 2016-06-19 00:30:00+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 
@@ -855,7 +855,7 @@ done
 %attr(755,root,qmail)                   %{libexecdir}/qsmhook
 %attr(755,root,qmail)                   %{libexecdir}/update_tmprsadh
 %attr(751,root,qmail)                   %{libexecdir}/instcheck
-%attr(751,root,qmail)                   %{libexecdir}/whois
+%attr(755,root,qmail)                   %{libexecdir}/whois
 %attr(755,root,qmail)                   %{libexecdir}/testzero
 %attr(755,root,qmail)                   %{libexecdir}/qmail-lint
 %attr(755,root,qmail)                   %{libexecdir}/ipmeprint
