@@ -1,5 +1,8 @@
 /*
  * $Log: hier.c,v $
+ * Revision 1.10  2016-06-20 08:30:59+05:30  Cprogrammer
+ * added man page for mconnect-io
+ *
  * Revision 1.9  2016-05-27 20:46:06+05:30  Cprogrammer
  * fixed setting of permissions for FHS
  *
@@ -100,6 +103,7 @@ hier(inst_dir, fatal)
 	c(mandir,          "man/man1", "http@.1", -1, -1, 0644);
 	c(mandir,          "man/man1", "tcpcat.1", -1, -1, 0644);
 	c(mandir,          "man/man1", "mconnect.1", -1, -1, 0644);
+	c(mandir,          "man/man1", "mconnect-io.1", -1, -1, 0644);
 	c(mandir,          "man/man1", "rblsmtpd.1", -1, -1, 0644);
 #ifdef LOAD_SHARED_OBJECTS
 	d(auto_ucspi_home, "lib/indimail/plugins", -1, -1, 0555);
