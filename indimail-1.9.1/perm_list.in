@@ -56,7 +56,6 @@
 %attr(0755,root,qmail) @prefix@/bin/argv0
 %attr(0755,root,qmail) @prefix@/bin/autoresponder
 %attr(0755,root,qmail) @prefix@/bin/qbase64
-%attr(0755,root,qmail) @prefix@/bin/bogofilter-qfe
 %attr(0755,root,qmail) @prefix@/bin/bouncesaying
 %attr(0755,root,qmail) @prefix@/bin/cdbdump
 %attr(0755,root,qmail) @prefix@/bin/cdbget
@@ -115,7 +114,6 @@
 %attr(0755,root,qmail) @prefix@/bin/mpack
 %attr(0755,root,qmail) @prefix@/bin/multilog
 %attr(0755,root,qmail) @prefix@/bin/multipipe
-%attr(0755,root,qmail) @prefix@/bin/multirotate
 %attr(0755,root,qmail) @prefix@/bin/multitail
 %attr(0755,root,qmail) @prefix@/bin/munpack
 %attr(0755,root,qmail) @prefix@/bin/newaliases
@@ -206,14 +204,11 @@
 %attr(0755,root,qmail) @prefix@/bin/vproxy
 %attr(0755,root,qmail) @prefix@/bin/vsmtp
 %attr(0755,root,qmail) @prefix@/bin/xqp
-%attr(0755,root,qmail) @prefix@/bin/leapsecs
-%attr(0755,root,qmail) @prefix@/bin/nowutc
 %attr(0755,root,qmail) @prefix@/bin/qlogselect
 %attr(0755,root,qmail) @prefix@/bin/tai2tai64n
 %attr(0755,root,qmail) @prefix@/bin/tai64n2tai
 %attr(0755,root,qmail) @prefix@/bin/udpclient
 %attr(0755,root,qmail) @prefix@/bin/udplogger
-%attr(0755,root,qmail) @prefix@/bin/yearcal
 %attr(0755,root,qmail) @prefix@/bin/qaes
 %attr(0755,root,root)  @prefix@/bin/rblsmtpd
 %attr(0755,root,root)  @prefix@/bin/tcpcat
@@ -284,7 +279,6 @@
 %attr(0755,root,qmail) @prefix@/sbin/check_getpw
 %attr(0755,root,qmail) @prefix@/sbin/chowkidar
 %attr(0755,root,qmail) @prefix@/sbin/clearopensmtp
-%attr(0755,root,qmail) @prefix@/sbin/copyemail
 %attr(0755,root,qmail) @prefix@/sbin/hostsync
 %attr(0755,root,qmail) @prefix@/sbin/indisrvr
 %attr(0755,root,qmail) @prefix@/sbin/initsvc
@@ -293,7 +287,6 @@
 %attr(0755,root,qmail) @prefix@/sbin/install_tables
 %attr(0755,root,qmail) @prefix@/sbin/ipchange
 %attr(0755,root,qmail) @prefix@/sbin/ldap-checkpwd
-%attr(0755,root,qmail) @prefix@/sbin/mail_report
 %attr(0755,root,qmail) @prefix@/sbin/mgmtpass
 %attr(0755,root,qmail) @prefix@/sbin/nssd
 %attr(0755,root,qmail) @prefix@/sbin/osh
@@ -303,7 +296,6 @@
 %attr(0755,root,qmail) @prefix@/sbin/strfile
 %attr(0755,root,qmail) @prefix@/sbin/svctool
 %attr(0755,root,qmail) @prefix@/sbin/sys-checkpwd
-%attr(0755,root,qmail) @prefix@/sbin/testmra
 %attr(0755,root,qmail) @prefix@/sbin/unstr
 %attr(0755,root,qmail) @prefix@/sbin/updaterules
 %attr(0755,root,qmail) @prefix@/sbin/vchkpass
@@ -365,6 +357,13 @@
 %attr(0755,root,qmail) @libexecdir@/qail
 %attr(0755,root,qmail) @libexecdir@/qpq
 %attr(0755,root,qmail) @libexecdir@/whois
+%attr(0755,root,qmail) @libexecdir@/leapsecs
+%attr(0755,root,qmail) @libexecdir@/nowutc
+%attr(0755,root,qmail) @libexecdir@/yearcal
+%attr(0755,root,qmail) @libexecdir@/bogofilter-qfe
+%attr(0755,root,qmail) @libexecdir@/testmra
+%attr(0755,root,qmail) @libexecdir@/mail_report
+%attr(0755,root,qmail) @libexecdir@/copyemail
 
 %attr(0755,root,qmail) @libexecdir@/zsuids
 %attr(0755,root,qmail) @libexecdir@/ddist
