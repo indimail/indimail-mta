@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail-mta.spec,v 1.66 2016-06-20 08:41:32+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail-mta.spec,v 1.67 2016-06-20 10:12:47+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 
@@ -1187,8 +1187,6 @@ done
 %attr(555,root,qmail)                   %{_prefix}/bin/multitail
 %attr(555,root,qmail)                   %{_prefix}/bin/logselect
 %attr(555,root,qmail)                   %{_prefix}/bin/qlogselect
-%attr(555,root,qmail)                   %{_prefix}/bin/udpclient
-%attr(555,root,qmail)                   %{_prefix}/bin/udplogger
 %attr(555,root,qmail)                   %{_prefix}/sbin/svscan
 %attr(555,root,qmail)                   %{_prefix}/sbin/svscanboot
 %attr(555,root,qmail)                   %{_prefix}/sbin/readproctitle
@@ -1208,6 +1206,8 @@ done
 %attr(555,root,root)                    %{_prefix}/bin/finger@
 %attr(555,root,root)                    %{_prefix}/bin/http@
 %attr(555,root,root)                    %{_prefix}/bin/tcprules
+%attr(555,root,qmail)                   %{_prefix}/bin/udpclient
+%attr(555,root,qmail)                   %{_prefix}/bin/udplogger
 %endif
 
 %if %nolibdkim == 0
