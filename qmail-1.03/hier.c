@@ -1,5 +1,8 @@
 /*
  * $Log: hier.c,v $
+ * Revision 1.220  2016-06-20 08:41:25+05:30  Cprogrammer
+ * moved batv to libexecdir
+ *
  * Revision 1.219  2016-06-20 08:31:49+05:30  Cprogrammer
  * added man pages for mbox2maildir, qmail-popbull
  *
@@ -1014,6 +1017,9 @@ hier(inst_dir, fatal)
 	c(auto_libexec_dir, auto_libexec_base, "rspamsdomain", auto_uido, auto_gidq, moder_x);
 	c(auto_libexec_dir, auto_libexec_base, "rspamstat", auto_uido, auto_gidq, moder_x);
 	c(auto_libexec_dir, auto_libexec_base, "rspamhist", auto_uido, auto_gidq, moder_x);
+#ifdef BATV
+	c(auto_libexec_dir, auto_libexec_base, "batv", auto_uido, auto_gidq, moder_x);
+#endif
 
 	/* setuid/setgid Programs */
 	c(auto_qmail_home, "sbin", "qmail-queue", auto_uidq, auto_gidq, 06551);
@@ -1022,9 +1028,6 @@ hier(inst_dir, fatal)
 	c(auto_qmail_home, "sbin", "run-cleanq", auto_uido, auto_gidc, 02551);
 
 	/*- misc */
-#ifdef BATV
-	c(auto_qmail_home, "sbin", "batv", auto_uido, auto_gidq, moder_x);
-#endif
 	c(auto_libexec_dir, auto_libexec_base, "envmigrate", auto_uido, auto_gidq, moder_x);
 	c(auto_libexec_dir, auto_libexec_base, "hostname", auto_uido, auto_gidq, moder_x);
 	c(auto_libexec_dir, auto_libexec_base, "qmailconfig", auto_uido, auto_gidq, moder_x);
@@ -1490,7 +1493,7 @@ hier(inst_dir, fatal)
 void
 getversion_install_big_c()
 {
-	static char    *x = "$Id: hier.c,v 1.219 2016-06-20 08:31:49+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: hier.c,v 1.220 2016-06-20 08:41:25+05:30 Cprogrammer Exp mbhangui $";
 
 #ifdef INDIMAIL
 	if (x)
