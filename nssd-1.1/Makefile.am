@@ -20,7 +20,7 @@ libnss_nssd_la_DEPENDENCIES = common.h config.h nsvs.h
 libnss_nssd_la_LDFLAGS = -module -version-info @LIBVER@:0:0 -export-symbols $(srcdir)/@OS@.sym
 
 nssdsbindir=@prefix@/sbin
-nssdsbin_PROGRAMS = nssd check_getpw
+nssdsbin_PROGRAMS = nssd
 nssd_SOURCES = nssd.c nssd_misc.c util.c config.c
 #nssd_CFLAGS  = -Wall @MYSQL_CFLAGS@ @PTHREAD_CFLAGS@
 nssd_CFLAGS  = -Wall @auth_inc@ @PTHREAD_CFLAGS@
@@ -28,6 +28,9 @@ nssd_LDFLAGS = @auth_libs@ @PTHREAD_CFLAGS@ @PTHREAD_LIBS@
 #nssd_LDFLAGS = @MYSQL_LIBS@ @PTHREAD_CFLAGS@ @PTHREAD_LIBS@
 nssd_LDADD = 
 nssd_DEPENDENCIES = config.h
+
+nssdlibexecdir=@libexecdir@
+nssdlibexec_PROGRAMS = check_getpw
 man_MANS=nssd.8 nssd.conf.5
 
 noinst_HEADERS = nssd.h
