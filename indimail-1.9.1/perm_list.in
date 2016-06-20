@@ -275,7 +275,6 @@
 %attr(0755,root,root) @prefix@/bin/srs
 
 %attr(0755,root,qmail) @prefix@/sbin/adminclient
-%attr(0755,root,qmail) @prefix@/sbin/batv
 %attr(0755,root,qmail) @prefix@/sbin/check_getpw
 %attr(0755,root,qmail) @prefix@/sbin/chowkidar
 %attr(0755,root,qmail) @prefix@/sbin/clearopensmtp
@@ -360,6 +359,7 @@
 %attr(0755,root,qmail) @libexecdir@/leapsecs
 %attr(0755,root,qmail) @libexecdir@/nowutc
 %attr(0755,root,qmail) @libexecdir@/yearcal
+%attr(0755,root,qmail) @libexecdir@/batv
 %attr(0755,root,qmail) @libexecdir@/bogofilter-qfe
 %attr(0755,root,qmail) @libexecdir@/testmra
 %attr(0755,root,qmail) @libexecdir@/mail_report

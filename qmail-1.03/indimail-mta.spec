@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail-mta.spec,v 1.65 2016-06-20 08:32:08+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail-mta.spec,v 1.66 2016-06-20 08:41:32+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 
@@ -766,6 +766,7 @@ done
 %attr(755,root,qmail)                   %{libexecdir}/yearcal
 %attr(755,root,qmail)                   %{libexecdir}/nowutc
 %attr(755,root,qmail)                   %{libexecdir}/qmail-lagcheck
+%attr(755,root,qmail)                   %{libexecdir}/batv
 %attr(755,root,qmail)                   %{libexecdir}/zsuccesses
 %attr(755,root,qmail)                   %{libexecdir}/deferrals
 %attr(755,root,qmail)                   %{libexecdir}/rsmtprecipients
@@ -803,7 +804,6 @@ done
 %attr(755,root,qmail)                   %{libexecdir}/rspamsdomain
 %attr(755,root,qmail)                   %{libexecdir}/zrxdelay
 
-%attr(755,root,qmail)                   %{_prefix}/sbin/batv
 %attr(755,root,qmail)                   %{_prefix}/sbin/plugtest
 %attr(755,root,qmail)                   %{_prefix}/sbin/sys-checkpwd
 %attr(755,root,qmail)                   %{_prefix}/sbin/ldap-checkpwd

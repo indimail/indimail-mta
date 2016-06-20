@@ -182,7 +182,6 @@
 %attr(0755,root,qmail) @prefix@/sbin/qmail-nullqueue
 %attr(0755,root,qmail) @prefix@/sbin/qmail-qmqpc
 %attr(0755,root,qmail) @prefix@/sbin/qscanq-stdin
-%attr(0755,root,qmail) @prefix@/sbin/batv
 %attr(0755,root,qmail) @prefix@/sbin/ldap-checkpwd
 %attr(0755,root,qmail) @prefix@/sbin/plugtest
 %attr(0755,root,qmail) @prefix@/sbin/svctool
@@ -231,6 +230,7 @@
 %attr(0755,root,qmail) @libexecdir@/leapsecs
 %attr(0755,root,qmail) @libexecdir@/nowutc
 %attr(0755,root,qmail) @libexecdir@/yearcal
+%attr(0755,root,qmail) @libexecdir@/batv
 
 %attr(0755,root,qmail) @libexecdir/ddist
 %attr(0755,root,qmail) @libexecdir/deferrals
