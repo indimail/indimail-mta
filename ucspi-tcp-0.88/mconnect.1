@@ -9,6 +9,7 @@ mconnect \- connects to a remote SMTP server.
 .I port
 ]
 ]
+
 .SH DESCRIPTION
 .B mconnect
 connects to
@@ -27,6 +28,11 @@ is not supplied, mconnect uses port 25 (SMTP).
 If
 .I host
 is not supplied, mconnect connects to the local host.
+
+\fBmconnect\fR uses \fBtcpclient\fR(1) to connect to a SMTP server. If it is successful, it runs mconnect-io, with descriptor 6 reading
+from the network and descriptor 7 writing to the network.
+
+
 .SH SEE ALSO
 tcpserver(1),
 tcprules(1),
