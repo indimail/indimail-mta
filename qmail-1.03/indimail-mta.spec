@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail-mta.spec,v 1.64 2016-06-19 00:30:00+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail-mta.spec,v 1.65 2016-06-20 08:32:08+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 
@@ -658,7 +658,6 @@ done
 %attr(755,root,qmail)                   %{_prefix}/bin/qmail-popbull
 %attr(755,root,qmail)                   %{_prefix}/bin/ofmipd
 %attr(755,root,qmail)                   %{_prefix}/bin/queue-fix
-%attr(755,root,qmail)                   %{_prefix}/bin/qmail-lagcheck
 %attr(755,root,qmail)                   %{_prefix}/bin/maildirwatch
 %attr(755,root,qmail)                   %{_prefix}/bin/bouncesaying
 %attr(755,root,qmail)                   %{_prefix}/bin/checkaddr
@@ -680,9 +679,6 @@ done
 %attr(755,root,qmail)                   %{_prefix}/bin/matchup
 %attr(755,root,qmail)                   %{_prefix}/bin/setforward
 %attr(755,root,qmail)                   %{_prefix}/bin/822date
-%attr(755,root,qmail)                   %{_prefix}/bin/leapsecs
-%attr(755,root,qmail)                   %{_prefix}/bin/yearcal
-%attr(755,root,qmail)                   %{_prefix}/bin/nowutc
 %attr(755,root,qmail)                   %{_prefix}/bin/cdbdump
 %attr(755,root,qmail)                   %{_prefix}/bin/iftocc
 %attr(755,root,qmail)                   %{_prefix}/bin/serialqmtp
@@ -766,6 +762,10 @@ done
 %attr(755,root,qmail)                   %{_prefix}/bin/srsfilter
 
 %attr(755,root,qmail)                   %{libexecdir}/rpmattr
+%attr(755,root,qmail)                   %{libexecdir}/leapsecs
+%attr(755,root,qmail)                   %{libexecdir}/yearcal
+%attr(755,root,qmail)                   %{libexecdir}/nowutc
+%attr(755,root,qmail)                   %{libexecdir}/qmail-lagcheck
 %attr(755,root,qmail)                   %{libexecdir}/zsuccesses
 %attr(755,root,qmail)                   %{libexecdir}/deferrals
 %attr(755,root,qmail)                   %{libexecdir}/rsmtprecipients
@@ -934,6 +934,7 @@ done
 %attr(0644,root,root)                   %{mandir}/man1/mailsubj.1.gz
 %attr(0644,root,root)                   %{mandir}/man1/maildirwatch.1.gz
 %attr(0644,root,root)                   %{mandir}/man1/maildir2mbox.1.gz
+%attr(0644,root,root)                   %{mandir}/man1/mbox2maildir.1.gz
 %attr(0644,root,root)                   %{mandir}/man1/qmaildirmake.1.gz
 %attr(0644,root,root)                   %{mandir}/man1/except.1.gz
 %attr(0644,root,root)                   %{mandir}/man1/bouncesaying.1.gz
@@ -1005,6 +1006,7 @@ done
 %attr(0644,root,root)                   %{mandir}/man8/qmail-tcpok.8.gz
 %attr(0644,root,root)                   %{mandir}/man8/queue-fix.0.gz
 %attr(0644,root,root)                   %{mandir}/man8/queue-fix.8.gz
+%attr(0644,root,root)                   %{mandir}/man8/qmail-popbull.8.gz
 %attr(0644,root,root)                   %{mandir}/man8/qmail-qread.8.gz
 %attr(0644,root,root)                   %{mandir}/man8/qmail-pw2u.8.gz
 %attr(0644,root,root)                   %{mandir}/man8/qmail-newu.8.gz
@@ -1185,7 +1187,6 @@ done
 %attr(555,root,qmail)                   %{_prefix}/bin/multitail
 %attr(555,root,qmail)                   %{_prefix}/bin/logselect
 %attr(555,root,qmail)                   %{_prefix}/bin/qlogselect
-%attr(555,root,qmail)                   %{_prefix}/bin/multirotate
 %attr(555,root,qmail)                   %{_prefix}/bin/udpclient
 %attr(555,root,qmail)                   %{_prefix}/bin/udplogger
 %attr(555,root,qmail)                   %{_prefix}/sbin/svscan
@@ -1330,7 +1331,6 @@ done
 %attr(555,root,qmail)                   %{_prefix}/bin/multitail
 %attr(555,root,qmail)                   %{_prefix}/bin/logselect
 %attr(555,root,qmail)                   %{_prefix}/bin/qlogselect
-%attr(555,root,qmail)                   %{_prefix}/bin/multirotate
 %attr(555,root,qmail)                   %{_prefix}/sbin/svscan
 %attr(555,root,qmail)                   %{_prefix}/sbin/svscanboot
 %attr(555,root,qmail)                   %{_prefix}/sbin/readproctitle
@@ -1410,6 +1410,7 @@ done
 %attr(0644,root,qmail)                  %{mandir}/man1/http@.1.gz
 %attr(0644,root,qmail)                  %{mandir}/man1/tcpcat.1.gz
 %attr(0644,root,qmail)                  %{mandir}/man1/mconnect.1.gz
+%attr(0644,root,qmail)                  %{mandir}/man1/mconnect-io.1.gz
 %attr(0644,root,qmail)                  %{mandir}/man1/rblsmtpd.1.gz
 %attr(0644,root,qmail)                  %{mandir}/man1/udpclient.1.gz
 %attr(0644,root,qmail)                  %{mandir}/man8/udplogger.8.gz
