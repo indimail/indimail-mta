@@ -1,5 +1,8 @@
 /*
  * $Log: mbox2maildir.c,v $
+ * Revision 1.3  2016-06-20 08:32:40+05:30  Cprogrammer
+ * minor indentation change
+ *
  * Revision 1.2  2008-07-15 19:57:19+05:30  Cprogrammer
  * porting for Mac OS X
  *
@@ -24,8 +27,8 @@
 #include "substdio.h"
 
 char            host[68], filename[96], filenamen[96];
-char            buf_f_space[8192];	/*- buffer for disk writing */
 char            buf_1_space[1024];
+char            buf_f_space[8192];	/*- buffer for disk writing */
 int             flagsleep = 0, state = 1, tmpfd = -1, seenat = 0;
 substdio        buf_1, buf_f;
 
@@ -286,7 +289,8 @@ main(int argc, char **argv)
 	}
 	if (argc < 3)
 	{
-		usage:w2("usage: mbox2maildir [-ks] mbox Maildir\n");
+usage:
+		w2("usage: mbox2maildir [-ks] mbox Maildir\n");
 		die_clean();
 	}
 	strcpy(filename, "tmp/");
@@ -375,7 +379,7 @@ main(int argc, char **argv)
 void
 getversion_mbox2maildir_c()
 {
-	static char    *x = "$Id: mbox2maildir.c,v 1.2 2008-07-15 19:57:19+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: mbox2maildir.c,v 1.3 2016-06-20 08:32:40+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
