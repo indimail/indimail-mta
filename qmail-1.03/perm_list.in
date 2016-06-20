@@ -95,7 +95,6 @@
 %attr(0755,root,qmail) @prefix@/bin/mlmatchup
 %attr(0755,root,qmail) @prefix@/bin/multilog
 %attr(0755,root,qmail) @prefix@/bin/multipipe
-%attr(0755,root,qmail) @prefix@/bin/multirotate
 %attr(0755,root,qmail) @prefix@/bin/multitail
 %attr(0755,root,qmail) @prefix@/bin/inewaliases
 %attr(0755,root,qmail) @prefix@/bin/newinclude
@@ -170,9 +169,6 @@
 %attr(0755,root,qmail) @prefix@/bin/tai64n2tai
 %attr(0755,root,qmail) @prefix@/bin/udpclient
 %attr(0755,root,qmail) @prefix@/bin/udplogger
-%attr(0755,root,qmail) @prefix@/bin/leapsecs
-%attr(0755,root,qmail) @prefix@/bin/nowutc
-%attr(0755,root,qmail) @prefix@/bin/yearcal
 %attr(0550,root,qmail) @prefix@/bin/qmail-cdb
 %attr(0550,root,qmail) @prefix@/bin/qmail-newmrh
 %attr(0550,root,qmail) @prefix@/bin/qmail-newu
@@ -232,6 +228,9 @@
 %attr(0755,root,qmail) @libexecdir@/qail
 %attr(0755,root,qmail) @libexecdir@/qpq
 %attr(0755,root,qmail) @libexecdir@/rpmattr
+%attr(0755,root,qmail) @libexecdir@/leapsecs
+%attr(0755,root,qmail) @libexecdir@/nowutc
+%attr(0755,root,qmail) @libexecdir@/yearcal
 
 %attr(0755,root,qmail) @libexecdir/ddist
 %attr(0755,root,qmail) @libexecdir/deferrals
@@ -513,6 +512,7 @@
 %attr(0644,root,root) @mandir@/man1/iftocc.1.gz
 %attr(0644,root,root) @mandir@/man1/iftoccfrom.1.gz
 %attr(0644,root,root) @mandir@/man1/maildir2mbox.1.gz
+%attr(0644,root,root) @mandir@/man1/mbox2maildir.1.gz
 %attr(0644,root,root) @mandir@/man1/maildircmd.1.gz
 %attr(0644,root,root) @mandir@/man1/maildirdeliver.1.gz
 %attr(0644,root,root) @mandir@/man1/maildirqmtp.1.gz
@@ -663,6 +663,7 @@
 %attr(0644,root,root) @mandir@/man8/qscanq-stdin.8.gz
 %attr(0644,root,root) @mandir@/man8/queue-fix.0.gz
 %attr(0644,root,root) @mandir@/man8/queue-fix.8.gz
+%attr(0644,root,root) @mandir@/man8/qmail-popbull.8.gz
 %attr(0644,root,root) @mandir@/man8/readproctitle.8.gz
 %attr(0644,root,root) @mandir@/man8/recipient-cdb.8.gz
 %attr(0644,root,root) @mandir@/man8/irmail.8.gz

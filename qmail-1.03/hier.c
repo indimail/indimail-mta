@@ -1,5 +1,8 @@
 /*
  * $Log: hier.c,v $
+ * Revision 1.219  2016-06-20 08:31:49+05:30  Cprogrammer
+ * added man pages for mbox2maildir, qmail-popbull
+ *
  * Revision 1.218  2016-06-17 20:15:39+05:30  Cprogrammer
  * moved qmailanalog scripts to libexec dir
  *
@@ -783,7 +786,6 @@ hier(inst_dir, fatal)
 	c(auto_qmail_home, "bin", "spawn-filter", auto_uido, auto_gidq, moder_x);
 	c(auto_qmail_home, "bin", "qmail-cat", auto_uido, auto_gidq, moder_x);
 	c(auto_qmail_home, "bin", "qmail-poppass", auto_uido, auto_gidq, moder_x);
-	c(auto_qmail_home, "bin", "qmail-lagcheck", auto_uido, auto_gidq, moder_x);
 	c(auto_qmail_home, "bin", "qmail-greyd", auto_uido, auto_gidq, moder_x);
 	c(auto_qmail_home, "bin", "greydaemon", auto_uido, auto_gidq, moder_x);
 	c(auto_qmail_home, "bin", "irmail", auto_uido, auto_gidq, moder_x);
@@ -802,6 +804,7 @@ hier(inst_dir, fatal)
 	c(auto_libexec_dir, auto_libexec_base, "qsmhook", auto_uido, auto_gidq, moder_x);
 	c(auto_libexec_dir, auto_libexec_base, "etrn", auto_uido, auto_gidq, moder_x);
 	c(auto_libexec_dir, auto_libexec_base, "atrn", auto_uido, auto_gidq, moder_x);
+	c(auto_libexec_dir, auto_libexec_base, "qmail-lagcheck", auto_uido, auto_gidq, moder_x);
 #if defined(HASDKIM) || defined(DOMAIN_KEYS)
 	c(auto_qmail_home, "bin", "dk-filter", auto_uido, auto_gidq, moder_x);
 #endif
@@ -890,6 +893,9 @@ hier(inst_dir, fatal)
 #ifdef USE_SPF
 	c(auto_libexec_dir, auto_libexec_base, "dnstxt", auto_uido, auto_gidq, moder_x);
 #endif
+	c(auto_libexec_dir, auto_libexec_base, "leapsecs", auto_uido, auto_gidq, moder_x);
+	c(auto_libexec_dir, auto_libexec_base, "yearcal", auto_uido, auto_gidq, moder_x);
+	c(auto_libexec_dir, auto_libexec_base, "nowutc", auto_uido, auto_gidq, moder_x);
 
 	/* mess822 */
 	c(auto_qmail_home, "bin", "ofmipd", auto_uido, auto_gidq, moder_x);
@@ -944,9 +950,6 @@ hier(inst_dir, fatal)
 	c(auto_qmail_home, "bin", "tai64nunix", auto_uido, auto_gidq, moder_x);
 	c(auto_qmail_home, "bin", "tai2tai64n", auto_uido, auto_gidq, moder_x);
 	c(auto_qmail_home, "bin", "tai64n2tai", auto_uido, auto_gidq, moder_x);
-	c(auto_qmail_home, "bin", "leapsecs", auto_uido, auto_gidq, moder_x);
-	c(auto_qmail_home, "bin", "yearcal", auto_uido, auto_gidq, moder_x);
-	c(auto_qmail_home, "bin", "nowutc", auto_uido, auto_gidq, moder_x);
 	c(auto_qmail_home, "bin", "spipe", auto_uido, auto_gidq, moder_x);
 	c(auto_qmail_home, "bin", "qfilelog", auto_uido, auto_gidq, moder_x);
 	c(auto_qmail_home, "bin", "multipipe", auto_uido, auto_gidq, moder_x);
@@ -954,7 +957,6 @@ hier(inst_dir, fatal)
 	c(auto_qmail_home, "bin", "multitail", auto_uido, auto_gidq, moder_x);
 	c(auto_qmail_home, "bin", "logselect", auto_uido, auto_gidq, moder_x);
 	c(auto_qmail_home, "bin", "qlogselect", auto_uido, auto_gidq, moder_x);
-	c(auto_qmail_home, "bin", "multirotate", auto_uido, auto_gidq, moder_x);
 	c(auto_qmail_home, "bin", "udplogger", auto_uido, auto_gidq, moder_x);
 	c(auto_qmail_home, "bin", "udpclient", auto_uido, auto_gidq, moder_x);
 	c(auto_qmail_home, "sbin", "svscan", auto_uido, auto_gidq, moder_x);
@@ -1133,6 +1135,7 @@ hier(inst_dir, fatal)
 	c(mandir,          "man/cat1", "qmaildirmake.0", uidr, gidr, moder_f);
 	c(mandir,          "man/man1", "maildir2mbox.1", uidr, gidr, moder_f);
 	c(mandir,          "man/cat1", "maildir2mbox.0", uidr, gidr, moder_f);
+	c(mandir,          "man/man1", "mbox2maildir.1", uidr, gidr, moder_f);
 	c(mandir,          "man/man1", "maildirwatch.1", uidr, gidr, moder_f);
 	c(mandir,          "man/cat1", "maildirwatch.0", uidr, gidr, moder_f);
 	c(mandir,          "man/man1", "mailsubj.1", uidr, gidr, moder_f);
@@ -1332,6 +1335,7 @@ hier(inst_dir, fatal)
 	c(mandir,          "man/man1", "udpclient.1", uidr, gidr, moder_f);
 	c(mandir,          "man/man8", "udplogger.8", uidr, gidr, moder_f);
 
+	/*- qmail */
 	c(mandir,          "man/man8", "qmailctl.8", uidr, gidr, moder_f);
 	c(mandir,          "man/man8", "qmail-local.8", uidr, gidr, moder_f);
 	c(mandir,          "man/cat8", "qmail-local.0", uidr, gidr, moder_f);
@@ -1360,6 +1364,7 @@ hier(inst_dir, fatal)
 	c(mandir,          "man/man8", "surblqueue.8", uidr, gidr, moder_f);
 	c(mandir,          "man/cat8", "qmail-queue.0", uidr, gidr, moder_f);
 	c(mandir,          "man/man8", "qmail-nullqueue.8", uidr, gidr, moder_f);
+	c(mandir,          "man/man8", "qmail-popbull.8", uidr, gidr, moder_f);
 
 #ifdef HASDKIM
 	c(mandir,          "man/man8", "qmail-dkim.8", uidr, gidr, moder_f);
@@ -1485,7 +1490,7 @@ hier(inst_dir, fatal)
 void
 getversion_install_big_c()
 {
-	static char    *x = "$Id: hier.c,v 1.218 2016-06-17 20:15:39+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: hier.c,v 1.219 2016-06-20 08:31:49+05:30 Cprogrammer Exp mbhangui $";
 
 #ifdef INDIMAIL
 	if (x)
