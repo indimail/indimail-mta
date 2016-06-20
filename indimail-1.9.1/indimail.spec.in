@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail.spec.in,v 2.355 2016-06-20 08:42:30+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 2.356 2016-06-20 10:13:18+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 
@@ -1371,8 +1371,6 @@ fi
 %attr(755,root,qmail)                   %{_prefix}/bin/822field
 %attr(755,root,qmail)                   %{_prefix}/bin/822body
 %attr(755,root,qmail)                   %{_prefix}/bin/822received
-%attr(755,root,qmail)                   %{_prefix}/bin/leapsecs
-%attr(755,root,qmail)                   %{_prefix}/bin/yearcal
 
 %attr(755,root,qmail)                   %{_prefix}/sbin/plugtest
 %attr(755,root,qmail)                   %{_prefix}/sbin/sys-checkpwd
@@ -1438,8 +1436,8 @@ fi
 %attr(755,root,qmail)                   %{libexecdir}/qpq
 %attr(755,root,qmail)                   %{libexecdir}/qmail-lagcheck
 %attr(755,root,qmail)                   %{libexecdir}/nowutc
-%attr(755,root,qmail)                   %{libexecdir}/udplogger
-%attr(755,root,qmail)                   %{libexecdir}/udpclient
+%attr(755,root,qmail)                   %{libexecdir}/leapsecs
+%attr(755,root,qmail)                   %{libexecdir}/yearcal
 %attr(755,root,qmail)                   %{libexecdir}/batv
 
 %attr(755,root,qmail)                   %{libexecdir}/zsuccesses
@@ -1537,6 +1535,8 @@ fi
 %attr(755,root,root)                    %{_prefix}/bin/finger@
 %attr(755,root,root)                    %{_prefix}/bin/http@
 %attr(755,root,root)                    %{_prefix}/bin/tcprules
+%attr(755,root,root)                    %{_prefix}/bin/udplogger
+%attr(755,root,root)                    %{_prefix}/bin/udpclient
 # bogofilter
 %if %nobogofilter == 0
 %attr(6551,root,indimail)               %{_prefix}/bin/bogofilter
