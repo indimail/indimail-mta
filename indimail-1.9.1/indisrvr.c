@@ -1,5 +1,8 @@
 /*
  * $Log: indisrvr.c,v $
+ * Revision 2.53  2016-06-21 17:13:05+05:30  Cprogrammer
+ * fixed compiler warning
+ *
  * Revision 2.52  2016-06-21 13:32:34+05:30  Cprogrammer
  * use SSL_set_cipher_list as part of crypto-policy-compliance
  *
@@ -186,7 +189,7 @@
 #include "indimail.h"
 
 #ifndef lint
-static char     sccsid[] = "$Id: indisrvr.c,v 2.52 2016-06-21 13:32:34+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: indisrvr.c,v 2.53 2016-06-21 17:13:05+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef CLUSTERED_SITE
@@ -381,7 +384,9 @@ SSL_CTX *
 load_certificate(char *certfile)
 {
 	SSL_CTX        *myctx = (SSL_CTX *) 0;
+#ifdef CRYPTO_POLICY_NON_COMPLIANCE
 	char           *ptr;
+#endif
 
     /* setup SSL context (load key and cert into ctx) */
 	if (!(myctx = SSL_CTX_new(SSLv23_server_method())))
@@ -429,10 +434,13 @@ main(argc, argv)
 {
 	int             n, socket_desc, pid, backlog;
 	char            pgname[MAXBUF];
-	char           *port, *ipaddr, *ptr;
+	char           *port, *ipaddr;
 	struct sockaddr_in cliaddress;
 	int             addrlen, len, new;
 	struct linger   linger;
+#ifndef CRYPTO_POLICY_NON_COMPLIANCE
+	char           *cipher;
+#endif
 #ifdef ENABLE_IPV6
 	char            hostname[256], servicename[100];
 #endif
@@ -609,11 +617,11 @@ main(argc, argv)
 				}
 				SSL_CTX_free(ctx);
 #ifndef CRYPTO_POLICY_NON_COMPLIANCE
-				if (!(ptr = getenv("SSL_CIPHER")))
-					ptr = "PROFILE=SYSTEM";
-				if (!SSL_set_cipher_list(ssl, ptr))
+				if (!(cipher = getenv("SSL_CIPHER")))
+					cipher = "PROFILE=SYSTEM";
+				if (!SSL_set_cipher_list(ssl, cipher))
 				{
-					fprintf(stderr, "unable to set ciphers: %s: %s\n", ptr,
+					fprintf(stderr, "unable to set ciphers: %s: %s\n", cipher,
 						ERR_error_string(ERR_get_error(), 0));
 					SSL_free(ssl);
 					return (1);
