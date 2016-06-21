@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail-mta.spec,v 1.67 2016-06-20 10:12:47+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail-mta.spec,v 1.68 2016-06-21 09:06:16+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 
@@ -1238,8 +1238,8 @@ done
 %attr(555,root,qmail)                   %{plugindir}/rblsmtpd.so
 %endif
 
-%attr(444,root,qmail)                   %{shareddir}/doc/COPYING
-%attr(444,root,qmail)                   %{shareddir}/doc/README.licenses
+%license %attr(444,root,qmail)          %{shareddir}/doc/COPYING
+%license %attr(444,root,qmail)          %{shareddir}/doc/README.licenses
 %attr(444,root,qmail)                   %{shareddir}/doc/CREDITS
 %attr(444,root,qmail)                   %{shareddir}/doc/FROMISP
 %attr(444,root,qmail)                   %{shareddir}/doc/TOISP
