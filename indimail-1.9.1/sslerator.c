@@ -1,5 +1,8 @@
 /*
  * $Log: sslerator.c,v $
+ * Revision 2.3  2016-06-21 13:32:39+05:30  Cprogrammer
+ * use SSL_set_cipher_list as part of crypto-policy-compliance
+ *
  * Revision 2.2  2010-04-15 12:49:45+05:30  Cprogrammer
  * include string.h for Mac OS X
  *
@@ -10,7 +13,7 @@
 #include "indimail.h"
 
 #ifndef lint
-static char     sccsid[] = "$Id: sslerator.c,v 2.2 2010-04-15 12:49:45+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: sslerator.c,v 2.3 2016-06-21 13:32:39+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef HAVE_SSL
@@ -146,7 +149,7 @@ translate(SSL *ssl, int err_to_net, int out, int clearout, int clearerr, unsigne
 				flagexitasap = 1;
 			if ((r = (err_to_net ? ssl_write(ssl, tbuf, n) : sockwrite(2, tbuf, n))) < 0)
 			{
-				fprintf(stderr, "translate: unable to write to %s: %s\n", 
+				fprintf(stderr, "translate: unable to write to %s: %s\n",
 						err_to_net ? "network" : "stderr", strerror(errno));
 				return (1);
 			}
@@ -159,6 +162,7 @@ SSL_CTX *
 load_certificate(char *certfile)
 {
 	SSL_CTX        *myctx = (SSL_CTX *) 0;
+	char           *ptr;
 
     /* setup SSL context (load key and cert into ctx) */
 	if (!(myctx = SSL_CTX_new(SSLv23_server_method())))
@@ -168,13 +172,16 @@ load_certificate(char *certfile)
 		return ((SSL_CTX *) 0);
 	}
 	/* set prefered ciphers */
-	if (getenv("SSL_CIPHER") && !SSL_CTX_set_cipher_list(myctx, getenv("SSL_CIPHER")))
+#ifdef CRYPTO_POLICY_NON_COMPLIANCE
+	ptr = getenv("SSL_CIPHER");
+	if (ptr && !SSL_CTX_set_cipher_list(myctx, ptr))
 	{
-		fprintf(stderr, "SSL_CTX_set_cipher_list: unable to set cipher list: %s\n",
+		fprintf(stderr, "SSL_CTX_set_cipher_list: unable to set cipher list: %s: %s\n", ptr,
 			ERR_error_string(ERR_get_error(), 0));
 		SSL_CTX_free(myctx);
 		return ((SSL_CTX *) 0);
 	}
+#endif
 	if (SSL_CTX_use_certificate_chain_file(myctx, certfile))
 	{
 		if (SSL_CTX_use_RSAPrivateKey_file(myctx, certfile, SSL_FILETYPE_PEM) != 1)
@@ -202,7 +209,7 @@ get_options(int argc, char **argv, int *err_to_net, char ***pgargs)
 
 	certfile = 0;
 	*err_to_net = 0;
-	while ((c = getopt(argc, argv, "vn:")) != -1) 
+	while ((c = getopt(argc, argv, "vn:")) != -1)
 	{
 		switch (c)
 		{
@@ -266,7 +273,7 @@ main(argc, argv)
 	char          **pgargs, *ptr;
 	int             status, r, ret, n, err_to_net, pid, pi1[2], pi2[2], pi3[2];
 
-	if(get_options(argc, argv, &err_to_net, &pgargs))
+	if (get_options(argc, argv, &err_to_net, &pgargs))
 		return(1);
 	if (usessl == 0)
 	{
@@ -301,7 +308,7 @@ main(argc, argv)
 			if (pi3[1] != 2)
 				close(pi1[1]);
 			/*
-			 * signals are allready set in the parent 
+			 * signals are allready set in the parent
 			 */
 			putenv("SSLERATOR=1");
 			execv(pgargs[0], pgargs);
@@ -335,9 +342,21 @@ main(argc, argv)
 		_exit(1);
 	}
 	SSL_CTX_free(ctx);
+#ifndef CRYPTO_POLICY_NON_COMPLIANCE
+	if (!(ptr = getenv("SSL_CIPHER")))
+		ptr = "PROFILE=SYSTEM";
+	if (!SSL_set_cipher_list(ssl, ptr))
+	{
+		fprintf(stderr, "unable to set ciphers: %s: %s\n", ptr,
+			ERR_error_string(ERR_get_error(), 0));
+		SSL_free(ssl);
+		return (1);
+	}
+#endif
 	if (!(sbio = BIO_new_socket(0, BIO_NOCLOSE)))
 	{
 		fprintf(stderr, "%d: unable to set up BIO socket\n", getpid());
+		SSL_free(ssl);
 		_exit(1);
 	}
 	SSL_set_bio(ssl, sbio, sbio); /*- cannot fail */

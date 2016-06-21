@@ -1,5 +1,8 @@
 /*
  * $Log: tls.c,v $
+ * Revision 2.5  2016-06-21 13:32:43+05:30  Cprogrammer
+ * use SSL_set_cipher_list as part of crypto-policy-compliance
+ *
  * Revision 2.4  2011-04-08 17:27:19+05:30  Cprogrammer
  * added HAVE_CONFIG_H
  *
@@ -39,7 +42,7 @@ ssl_free()
 }
 
 /*
- * don't want to fail handshake if certificate can't be verified 
+ * don't want to fail handshake if certificate can't be verified
  */
 static int
 verify_cb(int preverify_ok, X509_STORE_CTX * ctx)
@@ -52,10 +55,10 @@ check_cert(SSL *ssl)
 {
 	X509           *peer;
     char            peer_CN[256];
-    
+
     if (SSL_get_verify_result(ssl) != X509_V_OK)
 	{
-		fprintf(stderr, "check_cert: Unable to get peer certificate %s\n", 
+		fprintf(stderr, "check_cert: Unable to get peer certificate %s\n",
 			ERR_error_string(ERR_get_error(), 0));
 		return (1);
 	}
@@ -68,13 +71,13 @@ check_cert(SSL *ssl)
     /*- Check the common name */
     if (!(peer = SSL_get_peer_certificate(ssl)))
 	{
-		fprintf(stderr, "check_cert: Unable to get peer certificate %s\n", 
+		fprintf(stderr, "check_cert: Unable to get peer certificate %s\n",
 			ERR_error_string(ERR_get_error(), 0));
 		return (1);
 	}
     X509_NAME_get_text_by_NID(X509_get_subject_name(peer), NID_commonName, peer_CN, 256);
 	/*-
-    if(strcasecmp(peer_CN,host))
+    if (strcasecmp(peer_CN,host))
     err_exit("Common name doesn't match host name");
 	*/
 	return (0);
@@ -92,7 +95,6 @@ tls_init(int fd, char *clientcert)
 	usessl = (access(clientcert, F_OK) ? 0 : 1);
 	if (!usessl)
 		return (0);
-	ciphers = getenv("TLSCLIENTCIPHERS");
 	SSL_library_init();
 	if (!(ctx = SSL_CTX_new(SSLv23_client_method())))
 	{
@@ -108,17 +110,20 @@ tls_init(int fd, char *clientcert)
 		return (1);
 	}
 	/*
-	 * set the callback here; SSL_set_verify didn't work before 0.9.6c 
+	 * set the callback here; SSL_set_verify didn't work before 0.9.6c
 	 */
 	SSL_CTX_set_verify(ctx, SSL_VERIFY_PEER, verify_cb);
     /*- Set our cipher list */
-	if(ciphers && !SSL_CTX_set_cipher_list(ctx, ciphers))
+	ciphers = getenv("TLSCLIENTCIPHERS");
+#ifdef CRYPTO_POLICY_NON_COMPLIANCE
+	if (ciphers && !SSL_CTX_set_cipher_list(ctx, ciphers))
 	{
-		fprintf(stderr, "unable to set ciphers: %s\n", 
+		fprintf(stderr, "unable to set ciphers: %s: %s\n", ciphers,
 			ERR_error_string(ERR_get_error(), 0));
 		SSL_CTX_free(ctx);
 		return (1);
 	}
+#endif
 	if (SSL_CTX_use_certificate_chain_file(ctx, clientcert))
 	{
 		if (SSL_CTX_use_RSAPrivateKey_file(ctx, clientcert, SSL_FILETYPE_PEM) != 1)
@@ -138,13 +143,24 @@ tls_init(int fd, char *clientcert)
 	}
 	if (!(myssl = SSL_new(ctx)))
 	{
-		fprintf(stderr, "unable to set up SSL session: %s\n", 
+		fprintf(stderr, "unable to set up SSL session: %s\n",
 			ERR_error_string(ERR_get_error(), 0));
 		SSL_CTX_free(ctx);
 		return (1);
 	}
 	ssl = myssl;
 	SSL_CTX_free(ctx);
+#ifndef CRYPTO_POLICY_NON_COMPLIANCE
+	if (!ciphers)
+		ciphers = "PROFILE=SYSTEM";
+	if (!SSL_set_cipher_list(ssl, ciphers))
+	{
+		fprintf(stderr, "unable to set ciphers: %s: %s\n", ciphers,
+			ERR_error_string(ERR_get_error(), 0));
+		SSL_free(ssl);
+		return (1);
+	}
+#endif
     if (!(sbio = BIO_new_socket(fd, BIO_NOCLOSE)))
 	{
 		fprintf(stderr, "BIO_new_socket failed\n");
@@ -155,7 +171,7 @@ tls_init(int fd, char *clientcert)
     if ((ret = SSL_connect(myssl)) <= 0)
 	{
 		SSL_free(myssl);
-		fprintf(stderr, "SSL_connect: SSL Handshake: %s\n", 
+		fprintf(stderr, "SSL_connect: SSL Handshake: %s\n",
 			ERR_error_string(ERR_get_error(), 0));
 			/*- SSL_get_error(myssl, ret)); -*/
 		usessl = 0;
@@ -220,7 +236,7 @@ ssl_timeoutio(int (*fun) (), long t, int rfd, int wfd, SSL * ssl, char *buf, int
 			break;
 		}
 		/*
-		 * n is the number of descriptors that changed status 
+		 * n is the number of descriptors that changed status
 		 */
 	} while (n > 0);
 	if (n != -1)
@@ -306,7 +322,7 @@ safewrite(fd, buf, len, timeout)
 void
 getversion_tls_c()
 {
-	static char    *x = "$Id: tls.c,v 2.4 2011-04-08 17:27:19+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: tls.c,v 2.5 2016-06-21 13:32:43+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

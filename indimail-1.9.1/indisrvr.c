@@ -1,5 +1,8 @@
 /*
  * $Log: indisrvr.c,v $
+ * Revision 2.52  2016-06-21 13:32:34+05:30  Cprogrammer
+ * use SSL_set_cipher_list as part of crypto-policy-compliance
+ *
  * Revision 2.51  2016-01-21 16:44:39+05:30  Cprogrammer
  * fixed bogus comparision
  *
@@ -183,7 +186,7 @@
 #include "indimail.h"
 
 #ifndef lint
-static char     sccsid[] = "$Id: indisrvr.c,v 2.51 2016-01-21 16:44:39+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: indisrvr.c,v 2.52 2016-06-21 13:32:34+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef CLUSTERED_SITE
@@ -378,6 +381,7 @@ SSL_CTX *
 load_certificate(char *certfile)
 {
 	SSL_CTX        *myctx = (SSL_CTX *) 0;
+	char           *ptr;
 
     /* setup SSL context (load key and cert into ctx) */
 	if (!(myctx = SSL_CTX_new(SSLv23_server_method())))
@@ -387,13 +391,16 @@ load_certificate(char *certfile)
 		return ((SSL_CTX *) 0);
 	}
 	/* set prefered ciphers */
-	if (getenv("SSL_CIPHER") && !SSL_CTX_set_cipher_list(myctx, getenv("SSL_CIPHER")))
+#ifdef CRYPTO_POLICY_NON_COMPLIANCE
+	ptr = getenv("SSL_CIPHER");
+	if (ptr && !SSL_CTX_set_cipher_list(myctx, ptr))
 	{
-		fprintf(stderr, "SSL_CTX_set_cipher_list: unable to set cipher list: %s\n",
+		fprintf(stderr, "SSL_CTX_set_cipher_list: unable to set cipher list: %s: %s\n", ptr,
 			ERR_error_string(ERR_get_error(), 0));
 		SSL_CTX_free(myctx);
 		return ((SSL_CTX *) 0);
 	}
+#endif
 	if (SSL_CTX_use_certificate_chain_file(myctx, certfile))
 	{
 		if (SSL_CTX_use_RSAPrivateKey_file(myctx, certfile, SSL_FILETYPE_PEM) != 1)
@@ -422,7 +429,7 @@ main(argc, argv)
 {
 	int             n, socket_desc, pid, backlog;
 	char            pgname[MAXBUF];
-	char           *port, *ipaddr;
+	char           *port, *ipaddr, *ptr;
 	struct sockaddr_in cliaddress;
 	int             addrlen, len, new;
 	struct linger   linger;
@@ -574,7 +581,7 @@ main(argc, argv)
 					if (pi3[1] != 2)
 						close(pi1[1]);
 					/*
-					 * signals are allready set in the parent 
+					 * signals are allready set in the parent
 					 */
 					n = call_prg();
 					close(0);
@@ -601,9 +608,21 @@ main(argc, argv)
 					_exit(1);
 				}
 				SSL_CTX_free(ctx);
+#ifndef CRYPTO_POLICY_NON_COMPLIANCE
+				if (!(ptr = getenv("SSL_CIPHER")))
+					ptr = "PROFILE=SYSTEM";
+				if (!SSL_set_cipher_list(ssl, ptr))
+				{
+					fprintf(stderr, "unable to set ciphers: %s: %s\n", ptr,
+						ERR_error_string(ERR_get_error(), 0));
+					SSL_free(ssl);
+					return (1);
+				}
+#endif
 				if (!(sbio = BIO_new_socket(0, BIO_NOCLOSE)))
 				{
 					filewrt(3, "%d: unable to set up BIO socket\n", getpid());
+					SSL_free(ssl);
 					_exit(1);
 				}
 				SSL_set_bio(ssl, sbio, sbio); /*- cannot fail */
@@ -832,9 +851,9 @@ get_options(int argc, char **argv, char **ipaddr, char **port, int *backlog)
 	*ipaddr = *port = 0;
 	*backlog = -1;
 #ifdef HAVE_SSL
-	while ((c = getopt(argc, argv, "vi:p:b:n:")) != -1) 
+	while ((c = getopt(argc, argv, "vi:p:b:n:")) != -1)
 #else
-	while ((c = getopt(argc, argv, "vi:p:b:")) != -1) 
+	while ((c = getopt(argc, argv, "vi:p:b:")) != -1)
 #endif
 	{
 		switch (c)
@@ -920,6 +939,8 @@ static void
 SigHup(void)
 {
 	filewrt(3, "%d: IndiServer received SIGHUP\n", getpid());
+	if (ctx)
+		SSL_CTX_free(ctx);
 	ctx = load_certificate(certfile);
 	(void) signal(SIGHUP, (void(*)()) SigHup);
 	errno = EINTR;
