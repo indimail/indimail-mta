@@ -1,5 +1,8 @@
 /*
  * $Log: tls.c,v $
+ * Revision 1.2  2016-06-21 13:31:22+05:30  Cprogrammer
+ * use SSL_set_cipher_list as part of crypto-policy-compliance
+ *
  * Revision 1.1  2013-05-15 00:34:51+05:30  Cprogrammer
  * Initial revision
  *
@@ -66,7 +69,7 @@ check_cert(SSL *ssl)
 	}
     X509_NAME_get_text_by_NID(X509_get_subject_name(peer), NID_commonName, peer_CN, 256);
 	/*-
-    if(strcasecmp(peer_CN,host))
+    if (strcasecmp(peer_CN,host))
     err_exit("Common name doesn't match host name");
 	*/
 	return (0);
@@ -84,7 +87,6 @@ tls_init(int fd, char *clientcert)
 	usessl = (access(clientcert, F_OK) ? 0 : 1);
 	if (!usessl)
 		return (0);
-	ciphers = getenv("TLSCLIENTCIPHERS");
 	SSL_library_init();
 	if (!(ctx = SSL_CTX_new(SSLv23_client_method())))
 	{
@@ -104,13 +106,16 @@ tls_init(int fd, char *clientcert)
 	 */
 	SSL_CTX_set_verify(ctx, SSL_VERIFY_PEER, verify_cb);
     /*- Set our cipher list */
-	if(ciphers && !SSL_CTX_set_cipher_list(ctx, ciphers))
+	ciphers = getenv("TLSCLIENTCIPHERS");
+#ifdef CRYPTO_POLICY_NON_COMPLIANCE
+	if (ciphers && !SSL_CTX_set_cipher_list(ctx, ciphers))
 	{
-		fprintf(stderr, "unable to set ciphers: %s\n", 
+		fprintf(stderr, "unable to set ciphers: %s: %s\n", ciphers,
 			ERR_error_string(ERR_get_error(), 0));
 		SSL_CTX_free(ctx);
 		return (1);
 	}
+#endif
 	if (SSL_CTX_use_certificate_chain_file(ctx, clientcert))
 	{
 		if (SSL_CTX_use_RSAPrivateKey_file(ctx, clientcert, SSL_FILETYPE_PEM) != 1)
@@ -137,6 +142,17 @@ tls_init(int fd, char *clientcert)
 	}
 	ssl = myssl;
 	SSL_CTX_free(ctx);
+#ifndef CRYPTO_POLICY_NON_COMPLIANCE
+	if (!ciphers)
+		ciphers = "PROFILE=SYSTEM";
+	if (!SSL_set_cipher_list(myssl, ciphers))
+	{
+		fprintf(stderr, "unable to set ciphers: %s: %s\n", ciphers,
+			ERR_error_string(ERR_get_error(), 0));
+		SSL_free(myssl);
+		return (1);
+	}
+#endif
     if (!(sbio = BIO_new_socket(fd, BIO_NOCLOSE)))
 	{
 		fprintf(stderr, "BIO_new_socket failed\n");
@@ -338,7 +354,7 @@ va_dcl
 void
 getversion_tls_c()
 {
-	static char    *x = "$Id: tls.c,v 1.1 2013-05-15 00:34:51+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: tls.c,v 1.2 2016-06-21 13:31:22+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

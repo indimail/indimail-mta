@@ -1,5 +1,8 @@
 /*
  * $Log: logsrv.c,v $
+ * Revision 1.10  2016-06-21 13:30:57+05:30  Cprogrammer
+ * use SSL_set_cipher_list as part of crypto-policy-compliance
+ *
  * Revision 1.9  2014-04-17 11:27:43+05:30  Cprogrammer
  * added sys/param.h
  *
@@ -88,7 +91,7 @@ program RPCLOG
 #define STATUSDIR PREFIX"/tmp/"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: logsrv.c,v 1.9 2014-04-17 11:27:43+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: logsrv.c,v 1.10 2016-06-21 13:30:57+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef __STDC__
@@ -281,6 +284,7 @@ SSL_CTX *
 load_certificate(char *certfile)
 {
 	SSL_CTX        *myctx = (SSL_CTX *) 0;
+	char           *cipher;
 
     /* setup SSL context (load key and cert into ctx) */
 	if (!(myctx = SSL_CTX_new(SSLv23_server_method())))
@@ -290,13 +294,16 @@ load_certificate(char *certfile)
 		return ((SSL_CTX *) 0);
 	}
 	/* set prefered ciphers */
-	if (getenv("SSL_CIPHER") && !SSL_CTX_set_cipher_list(myctx, getenv("SSL_CIPHER")))
+	cipher = getenv("SSL_CIPHER");
+#ifdef CRYPTO_POLICY_NON_COMPLIANCE
+	if (cipher && !SSL_CTX_set_cipher_list(myctx, cipher))
 	{
 		fprintf(stderr, "SSL_CTX_set_cipher_list: unable to set cipher list: %s\n",
 			ERR_error_string(ERR_get_error(), 0));
 		SSL_CTX_free(myctx);
 		return ((SSL_CTX *) 0);
 	}
+#endif
 	if (SSL_CTX_use_certificate_chain_file(myctx, certfile))
 	{
 		if (SSL_CTX_use_RSAPrivateKey_file(myctx, certfile, SSL_FILETYPE_PEM) != 1)
@@ -607,9 +614,21 @@ main(int argc, char **argv)
 					_exit(1);
 				}
 				SSL_CTX_free(ctx);
+#ifndef CRYPTO_POLICY_NON_COMPLIANCE
+				if (!ptr)
+					ptr = "PROFILE=SYSTEM";
+				if (!SSL_set_cipher_list(ssl, ptr))
+				{
+					fprintf(stderr, "unable to set ciphers: %s: %s\n", ptr,
+						ERR_error_string(ERR_get_error(), 0));
+					SSL_free(ssl);
+					return (1);
+				}
+#endif
 				if (!(sbio = BIO_new_socket(0, BIO_NOCLOSE)))
 				{
 					fprintf(stderr, "%d: unable to set up BIO socket\n", getpid());
+					SSL_free(ssl);
 					_exit(1);
 				}
 				SSL_set_bio(ssl, sbio, sbio); /*- cannot fail */
