@@ -284,7 +284,9 @@ SSL_CTX *
 load_certificate(char *certfile)
 {
 	SSL_CTX        *myctx = (SSL_CTX *) 0;
+#ifdef CRYPTO_POLICY_NON_COMPLIANCE
 	char           *cipher;
+#endif
 
     /* setup SSL context (load key and cert into ctx) */
 	if (!(myctx = SSL_CTX_new(SSLv23_server_method())))
@@ -294,8 +296,8 @@ load_certificate(char *certfile)
 		return ((SSL_CTX *) 0);
 	}
 	/* set prefered ciphers */
-	cipher = getenv("SSL_CIPHER");
 #ifdef CRYPTO_POLICY_NON_COMPLIANCE
+	cipher = getenv("SSL_CIPHER");
 	if (cipher && !SSL_CTX_set_cipher_list(myctx, cipher))
 	{
 		fprintf(stderr, "SSL_CTX_set_cipher_list: unable to set cipher list: %s\n",
