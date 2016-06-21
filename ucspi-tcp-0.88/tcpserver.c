@@ -1,5 +1,8 @@
 /*
  * $Log: tcpserver.c,v $
+ * Revision 1.53  2016-06-21 13:33:06+05:30  Cprogrammer
+ * use SSL_set_cipher_list as part of crypto-policy-compliance
+ *
  * Revision 1.52  2016-05-16 21:21:09+05:30  Cprogrammer
  * call tcpserver_plugin with reload option on sighup
  *
@@ -177,7 +180,7 @@
 #include "auto_home.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: tcpserver.c,v 1.52 2016-05-16 21:21:09+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: tcpserver.c,v 1.53 2016-06-21 13:33:06+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef IPV6
@@ -1475,7 +1478,7 @@ main(int argc, char **argv, char **envp)
 		case 'n':
 			flagssl = 1;
 			if (!stralloc_copys(&certfile, optarg) || !stralloc_0(&certfile))
-				strerr_die2x(111,FATAL,"out of memory");
+				strerr_die2x(111, FATAL, "out of memory");
 			break;
 #endif
 #ifdef IPV6
@@ -1562,8 +1565,11 @@ main(int argc, char **argv, char **envp)
 		if (!(ctx = SSL_CTX_new(SSLv23_server_method())))
 			strerr_die2x(111, FATAL, "unable to create SSL context");
 		/* set prefered ciphers */
-		if (env_get("SSL_CIPHER") && !SSL_CTX_set_cipher_list(ctx, env_get("SSL_CIPHER")))
-			strerr_die2x(111,FATAL,"unable to set cipher list");
+#ifdef CRYPTO_POLICY_NON_COMPLIANCE
+		x = env_get("SSL_CIPHER");
+		if (x && !SSL_CTX_set_cipher_list(ctx, x))
+			strerr_die3x(111, FATAL, "unable to set cipher list:", x);
+#endif
 		if (SSL_CTX_use_RSAPrivateKey_file(ctx, certfile.s, SSL_FILETYPE_PEM) != 1)
 			strerr_die2x(111, FATAL, "unable to load RSA private key");
 		if (SSL_CTX_use_certificate_file(ctx, certfile.s, SSL_FILETYPE_PEM) != 1)
@@ -1680,6 +1686,7 @@ main(int argc, char **argv, char **envp)
 				switch (fork())
 				{
 				case 0:
+					SSL_CTX_free(ctx);
 					close(0);
 					close(1);
 					close(pi2c[1]);
@@ -1695,15 +1702,25 @@ main(int argc, char **argv, char **envp)
 					strerr_die2sys(111, DROP, "unable to fork: ");
 				default:
 					ssl = SSL_new(ctx);
+					SSL_CTX_free(ctx);
 					if (!ssl)
 						strerr_die2x(111, DROP, "unable to set up SSL session");
+#ifdef CRYPTO_POLICY_NON_COMPLIANCE
+					if (!(x = env_get("SSL_CIPHER")))
+						x = "PROFILE:SYSTEM";
+					if (!SSL_set_cipher_list(myssl, x))
+						strerr_die3x(111, FATAL, "unable to set cipher list:", x);
+#endif
 					sbio = BIO_new_socket(0, BIO_NOCLOSE);
-					if (!sbio)
+					if (!sbio) {
+						SSL_free(ssl);
 						strerr_die2x(111, DROP, "unable to set up BIO socket");
+					}
 					SSL_set_bio(ssl, sbio, sbio);
 					close(pi2c[0]);
 					close(pi4c[1]);
 					translate(ssl, pi2c[1], pi4c[0], 3600);
+					SSL_free(ssl);
 					_exit(0);
 				}
 			}
