@@ -1,5 +1,8 @@
 /*
  * $Log: sslerator.c,v $
+ * Revision 2.4  2016-06-21 17:13:26+05:30  Cprogrammer
+ * fixed compiler warning
+ *
  * Revision 2.3  2016-06-21 13:32:39+05:30  Cprogrammer
  * use SSL_set_cipher_list as part of crypto-policy-compliance
  *
@@ -13,7 +16,7 @@
 #include "indimail.h"
 
 #ifndef lint
-static char     sccsid[] = "$Id: sslerator.c,v 2.3 2016-06-21 13:32:39+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: sslerator.c,v 2.4 2016-06-21 17:13:26+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef HAVE_SSL
@@ -162,7 +165,9 @@ SSL_CTX *
 load_certificate(char *certfile)
 {
 	SSL_CTX        *myctx = (SSL_CTX *) 0;
+#ifdef CRYPTO_POLICY_NON_COMPLIANCE
 	char           *ptr;
+#endif
 
     /* setup SSL context (load key and cert into ctx) */
 	if (!(myctx = SSL_CTX_new(SSLv23_server_method())))
