@@ -1,5 +1,8 @@
 /*
  * $Log: indiversion.c,v $
+ * Revision 2.142  2016-06-21 13:31:45+05:30  Cprogrammer
+ * corrected executable paths
+ *
  * Revision 2.141  2016-06-09 15:32:15+05:30  Cprogrammer
  * added check_group() function
  *
@@ -545,7 +548,7 @@
 #endif
 
 #ifndef	lint
-static char     sccsid[] = "$Id: indiversion.c,v 2.141 2016-06-09 15:32:15+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: indiversion.c,v 2.142 2016-06-21 13:31:45+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 void            getversion_indimail_settings_c();
@@ -897,15 +900,12 @@ char           *bin_program_list[] =
 	"imapd",
 	"pop3d",
 	"logmonitor",
-	"bogofilter-qfe",
-	"hashtable",
 	"ismaildup",
 	0
 };
 
 char           *sbin_program_list[] = 
 {
-	"cindimail",
 	"inlookup",
 	"indisrvr",
 	"inquerytest",
@@ -915,30 +915,25 @@ char           *sbin_program_list[] =
 	"clearopensmtp",
 	"hostsync",
 	"vdeloldusers",
+	"vmoddomain",
 	"vreorg",
+	"vtable",
 	"updaterules",
 	"systpass",
 	"vchkpass",
 	"vsetpass",
 	"chowkidar",
 	"ipchange",
-	"testmra",
-	"execmysql",
 	"vdelivermail",
 	"vfilter",
 	"postdel",
-	"controlsync",
-	"updatefile",
 	"adminclient",
 	"vfstab",
-	"myslave",
 	"svctool",
 	"cputime",
-	"copyemail",
-	"mail_report",
 	"mgmtpass",
 	"vserverinfo",
-	"tls-cert-check",
+	"bogofilter-qfe",
 	0
 };
 
@@ -947,6 +942,18 @@ char           *libexec_program_list[] =
 	"authlib/authindi",
 	"qmailmrtg7",
 	"sq_vacation",
+	"execmysql",
+	"tls-cert-check",
+	"get-cert",
+	"cindimail",
+	"hashtable",
+	"displaytop",
+	"updatefile",
+	"mail_report",
+	"testmra",
+	"copyemail",
+	"controlsync",
+	"myslave",
 	0
 };
 
