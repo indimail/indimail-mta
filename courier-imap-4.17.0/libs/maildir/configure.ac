@@ -164,4 +164,4 @@ else
 	[ Maildir target separator ])
 fi
 
-AC_OUTPUT(Makefile sharedindexinstall sharedindexsplit)
+AC_OUTPUT(Makefile sharedindexinstall sharedindexsplit sharedindexinstall.1 sharedindexsplit.1)
