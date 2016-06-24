@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail-mta.spec,v 1.68 2016-06-21 09:06:16+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail-mta.spec,v 1.69 2016-06-24 13:26:35+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 
@@ -955,6 +955,7 @@ done
 %attr(0644,root,root)                   %{mandir}/man1/cidr.1.gz
 %if %nolibsrs2 == 0
 %attr(0644,root,root)                   %{mandir}/man1/srs.1.gz
+%attr(0644,root,root)                   %{mandir}/man1/srsfilter.1.gz
 %endif
 %attr(0644,root,root)                   %{mandir}/man5/rfc-4870.5.gz
 %attr(0644,root,root)                   %{mandir}/man5/rfc-4871.5.gz
@@ -985,6 +986,9 @@ done
 %attr(0644,root,root)                   %{mandir}/man5/maildir.5.gz
 %attr(0644,root,root)                   %{mandir}/man5/envelopes.5.gz
 %attr(0644,root,root)                   %{mandir}/man5/addresses.5.gz
+%if %nolibsrs2 == 0
+%attr(0644,root,root)                   %{mandir}/man5/qmail-srs.5.gz
+%endif
 %attr(0644,root,root)                   %{mandir}/man7/forgeries.7.gz
 %attr(0644,root,root)                   %{mandir}/man7/qmail.7.gz
 %attr(0644,root,root)                   %{mandir}/man7/qmail-limits.7.gz
