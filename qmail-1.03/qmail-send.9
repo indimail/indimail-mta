@@ -53,6 +53,12 @@ uses
 to queue bounces and aliases/forwards. This can be changed by using QMAILQUEUE environment variable. If a different
 queue program is desired for bounces, it can be set by using BOUNCEQUEUE environment variable.
 
+When injecting a bounce for a previously forwarded email, whose sender was rewritten using \fISRS\fB,
+.B qmail-send
+rewrites the recipient to the original sender using Sender Rewriting Scheme, if \fISRS\fB has been configured. see
+.B qmail-srs(5)
+for information on how to do this
+
 If
 .B qmail-send
 receives a TERM signal,
@@ -588,6 +594,7 @@ nice(1),
 addresses(5),
 envelopes(5),
 qmail-control(5),
+qmail-srs(5),
 qmail-log(5),
 qmail-queue(8),
 qmail-multi(8),

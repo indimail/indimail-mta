@@ -66,9 +66,9 @@ is either empty or a lone hyphen.
 If it is empty,
 .B qmail-local
 treats a nonexistent
-.B .qmail\fIext
+.B .qmail\fIext\fR
 the same way as an empty
-.BR .qmail\fIext :
+.BR .qmail\fIext\fR :
 namely, following the delivery instructions in
 .IR defaultdelivery .
 Prepend the contents of
@@ -92,9 +92,15 @@ print a description of the delivery instructions.
 \fBqmail-local\fR uses few environment variables. These environment variables can be recipient
 specific by using envrules. See \fBspawn-filter(8)\fR for more details.
 
+When forwarding, due to instructions in a dot-qmail file,
+.B qmail-local
+rewrites the sender using Sender Rewriting Scheme if \fISRS\fB has been configured. see
+.B qmail-srs(5)
+for information on how to do this
+
 .SH "CONTROL FILES"
 .B
-qmail-remote
+qmail-local
 by default looks at @controldir@ for all control files. This path can be changed by defining the CONTROLDIR
 environment variable.
 
@@ -119,6 +125,7 @@ indicates temporary failure.
 
 .SH "SEE ALSO"
 dot-qmail(5),
+qmail-srs(5),
 envelopes(5),
 qmail-command(8),
 qmail-queue(8),
