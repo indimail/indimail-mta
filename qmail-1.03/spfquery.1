@@ -1,0 +1,20 @@
+.TH spfquery 1
+.SH NAME
+spfquery - SPF query tool
+
+.SH SYNOPSIS
+spfquery
+.I sender-ip 
+.I sender-helo/ehlo
+.I envelope-from
+[
+.I local_rules
+.I best_guess_rules
+]
+
+.SH DESCRIPTION
+\fBspfquery\fR is a tool that can be used for checking if a \fIsender-ip\fR is authorized to send emails
+for the domain in \fIenvelope-from\fR
+
+.SH "SEE ALSO"
+qmail-smtpd(8)
