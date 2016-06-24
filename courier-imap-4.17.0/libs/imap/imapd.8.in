@@ -31,16 +31,12 @@
 .\" -----------------------------------------------------------------
 .SH "NAME"
 imapd \- The Courier IMAP server
+
 .SH "SYNOPSIS"
 .HP \w'\fB@libexecdir@/couriertcpd\fR\ 'u
 \fB@libexecdir@/couriertcpd\fR {couriertcpd\ options} {@prefix@/sbin/imaplogin} [\fImodules\fR...] {@prefix@/bin/imapd} {\&./Maildir}
 .HP \w'\fB@prefix@/bin/imapd\fR\ 'u
 \fB@prefix@/bin/imapd\fR {\&./Maildir}
-
-.HP \w'\fB@libexecdir@/couriertcpd\fR\ 'u
-\fB@libexecdir@/couriertcpd\fR {couriertcpd\ options} {@prefix@/sbin/pop3login} [\fImodules\fR...] {@prefix@/bin/pop3d} {\&./Maildir}
-.HP \w'\fB@prefix@/bin/pop3d\fR\ 'u
-\fB@prefix@/bin/pop3d\fR {\&./Maildir}
 
 .SH "DESCRIPTION"
 .PP

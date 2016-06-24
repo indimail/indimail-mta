@@ -34,7 +34,7 @@ libexec_PROGRAMS=@libexecPROGRAMS_exec@
 EXTRA_PROGRAMS=
 
 man_MANS=couriertcpd.1 couriertls.1 deliverquota.8 maildirmake.1 maildiracl.1 imapd.8 mkdhparams.8 \
-		 mkimapdcert.8 mkpop3dcert.8 maildirkw.1 makeimapaccess.8
+		 mkimapdcert.8 mkpop3dcert.8 maildirkw.1 makeimapaccess.8 pop3d.8 imaplogin.8 pop3login.8
 EXTRA_DIST=README README.cygwin\
 	COPYING.GPL NEWS.html $(TEMPLFILES) pgpkeys.txt
 
@@ -124,6 +124,12 @@ maildirkw.1: libs/maildir/maildirkw.1
 
 imapd.8: libs/imap/imapd.8
 	cp libs/imap/imapd.8 .
+imaplogin.8: libs/imap/imaplogin.8
+	cp libs/imap/imaplogin.8 .
+pop3d.8: libs/imap/pop3d.8
+	cp libs/imap/pop3d.8 .
+pop3login.8: libs/imap/pop3login.8
+	cp libs/imap/pop3login.8 .
 
 mkdhparams: libs/imap/mkdhparams
 	cp libs/imap/mkdhparams .
