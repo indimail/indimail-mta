@@ -1,3 +1,4 @@
+.LL 8i
 .TH qmail-poppass 8 "03 Aug 2009" IndiMail "Authentication"
 .SH "NAME"
 qmail-poppass \- change passwords from across the network using
@@ -27,10 +28,10 @@ interface for authencation and uses the
 .B setpassword
 interface for setting the password.
 .B checkpassword
-provides a simple, uniform password-checking interface to all root
+interface provides a simple, uniform password-checking interface to all root
 applications. It is suitable for use by applications such as login, ftpd, and pop3d.
 .B setpassword
-provides a simple, uniform password-setting interface to all root applications. It is suitable for use by
+interface provides a simple, uniform password-setting interface to all root applications. It is suitable for use by
 applications such as pop3d, imapd.
 
 .PP
@@ -126,7 +127,7 @@ please report it to
 mbhangui@gmail\&.com
 
 .SH "SEE ALSO"
-qmail-smtpd(8)
+qmail-smtpd(8), vsetpass(8)
 
 .SH "AUTHOR"
 .PP
