@@ -3,7 +3,7 @@ COFLAGS=-z+05:30
 
 CFLAGS = -g -O4 -Wall -fPIC
 bin_PROGRAMS = ripmime ripole
-man_MANS = ripmime.1
+man_MANS = ripmime.1 ripole.1
 ripmime_SOURCES = mime.c ffget.c MIME_headers.c tnef.c rawget.c pldstr.c \
 				  logger.c libmime-decoders.c boundary-stack.c uuencode.c \
 				  filename-filters.c ole.c olestream-unwrap.c bytedecoders.c \
