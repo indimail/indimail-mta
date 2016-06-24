@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail.spec.in,v 2.356 2016-06-20 10:13:18+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 2.357 2016-06-24 10:28:40+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 
@@ -671,7 +671,7 @@ if [ -d ../courier-imap-%{courier_version} ] ; then
   fi
   %configure --prefix=%{_prefix} --libexecdir=%{libexecdir} --bindir=%{_prefix}/bin \
   --mandir=%{mandir} --sysconfdir=%{sysconfdir} --libdir=%{_libdir} \
-  --datarootdir=%{shareddir} \
+  --datarootdir=%{shareddir} --with-certsdir=%{sysconfdir}/control \
   `%{__cat} ../%{name}-%{version}/config/courier-imap.opts`
 fi
 %endif
@@ -923,7 +923,7 @@ if [ -x /usr/bin/chrpath ] ; then
     fi
     if [ -f %{buildroot}%{libexecdir}/$i ] ; then
       /usr/bin/chrpath -d %{buildroot}%{libexecdir}/$i
-	fi
+    fi
   done
   if [ %noclamav -eq 0 ] ; then
     /usr/bin/chrpath -d %{buildroot}%{_prefix}/bin/clamd
@@ -978,6 +978,7 @@ if [ %nobogofilter -eq 0 ] ; then
 fi
 if [ %nofetchmail -eq 0 ] ; then
   $TOUCH %{buildroot}%{sysconfdir}/fetchmailrc
+#%%find_lang fetchmail
 fi
 if [ %noclamav -eq 0 ] ; then # clamav >= 0.97.5, without clamav-db
   if [ ! -d %{buildroot}%{indimaildir}/clamd ] ; then
@@ -999,7 +1000,6 @@ fi
                                   %{indimaildir}/users
                                   %{indimaildir}/control
                                   %{indimaildir}/libexec
-%dir %attr(555,root,qmail)        %{libexecdir}
 %dir %attr(555,root,qmail)        %{shareddir}
 %dir %attr(555,root,qmail)        %{shareddir}/boot
 %dir %attr(555,root,qmail)        %{shareddir}/doc
@@ -1752,7 +1752,32 @@ fi
 
 %if %nofetchmail == 0
 %if %i_m_on_mac == 0
-%attr(644,root,root)                    %{shareddir}/locale/*/LC_MESSAGES/*.mo
+#%attr(644,root,root)                    %{shareddir}/locale/*/LC_MESSAGES/*.mo
+#%files -f fetchmail.lang
+%lang(eo) /usr/share/indimail/locale/eo/LC_MESSAGES/fetchmail.mo
+%lang(gl) /usr/share/indimail/locale/gl/LC_MESSAGES/fetchmail.mo
+%lang(sq) /usr/share/indimail/locale/sq/LC_MESSAGES/fetchmail.mo
+%lang(pt) /usr/share/indimail/locale/pt_BR/LC_MESSAGES/fetchmail.mo
+%lang(cs) /usr/share/indimail/locale/cs/LC_MESSAGES/fetchmail.mo
+%lang(ru) /usr/share/indimail/locale/ru/LC_MESSAGES/fetchmail.mo
+%lang(de) /usr/share/indimail/locale/de/LC_MESSAGES/fetchmail.mo
+%lang(vi) /usr/share/indimail/locale/vi/LC_MESSAGES/fetchmail.mo
+%lang(ca) /usr/share/indimail/locale/ca/LC_MESSAGES/fetchmail.mo
+%lang(pl) /usr/share/indimail/locale/pl/LC_MESSAGES/fetchmail.mo
+%lang(it) /usr/share/indimail/locale/it/LC_MESSAGES/fetchmail.mo
+%lang(id) /usr/share/indimail/locale/id/LC_MESSAGES/fetchmail.mo
+%lang(fr) /usr/share/indimail/locale/fr/LC_MESSAGES/fetchmail.mo
+%lang(nl) /usr/share/indimail/locale/nl/LC_MESSAGES/fetchmail.mo
+%lang(sv) /usr/share/indimail/locale/sv/LC_MESSAGES/fetchmail.mo
+%lang(es) /usr/share/indimail/locale/es/LC_MESSAGES/fetchmail.mo
+%lang(da) /usr/share/indimail/locale/da/LC_MESSAGES/fetchmail.mo
+%lang(tr) /usr/share/indimail/locale/tr/LC_MESSAGES/fetchmail.mo
+%lang(el) /usr/share/indimail/locale/el/LC_MESSAGES/fetchmail.mo
+%lang(fi) /usr/share/indimail/locale/fi/LC_MESSAGES/fetchmail.mo
+%lang(en) /usr/share/indimail/locale/en_GB/LC_MESSAGES/fetchmail.mo
+%lang(zh) /usr/share/indimail/locale/zh_CN/LC_MESSAGES/fetchmail.mo
+%lang(sk) /usr/share/indimail/locale/sk/LC_MESSAGES/fetchmail.mo
+%lang(ja) /usr/share/indimail/locale/ja/LC_MESSAGES/fetchmail.mo
 %endif
 %attr(644,root,root)                    %{_prefix}/lib/python*/site-packages/fetchmailconf.pyo
 %attr(755,root,root)                    %{_prefix}/lib/python*/site-packages/fetchmailconf.py
