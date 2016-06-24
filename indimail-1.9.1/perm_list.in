@@ -695,6 +695,9 @@
 %attr(0644,root,root)  @mandir@/cat8/run-cleanq.0.gz
 %attr(0644,root,root)  @mandir@/cat8/spawn-filter.0.gz
 %attr(0644,root,root)  @mandir@/cat8/splogger.0.gz
+%attr(0644,root,root)  @mandir@/man1/srsfilter.1.gz
+%attr(0644,root,root)  @mandir@/man1/spfquery.1.gz
+%attr(0644,root,root)  @mandir@/man1/crypt.1.gz
 %attr(0644,root,root)  @mandir@/man1/822addr.1.gz
 %attr(0644,root,root)  @mandir@/man1/822body.1.gz
 %attr(0644,root,root)  @mandir@/man1/822bodyfilter.1.gz
@@ -934,6 +937,7 @@
 %attr(0644,root,root)  @mandir@/man5/rfc-4870.5.gz
 %attr(0644,root,root)  @mandir@/man5/rfc-4871.5.gz
 %attr(0644,root,root)  @mandir@/man5/rfc-822.5.gz
+%attr(0644,root,root)  @mandir@/man5/qmail-srs.5.gz
 %attr(0644,root,root)  @mandir@/man5/tcp-environ.5.gz
 %attr(0644,root,root)  @mandir@/man7/authlib.7.gz
 %attr(0644,root,root)  @mandir@/man7/forgeries.7.gz
@@ -942,6 +946,7 @@
 %attr(0644,root,root)  @mandir@/man7/qmail.7.gz
 %attr(0644,root,root)  @mandir@/man7/qmail-limits.7.gz
 %attr(0644,root,root)  @mandir@/man8/adminclient.8.gz
+%attr(0644,root,root)  @mandir@/man8/vsetpass.8.gz
 %attr(0644,root,root)  @mandir@/man8/chowkidar.8.gz
 %attr(0644,root,root)  @mandir@/man8/clamav-milter.8.gz
 %attr(0644,root,root)  @mandir@/man8/clamd.8.gz
