@@ -1552,7 +1552,7 @@ rewritehost.0 822date.0 822received.0 822print.0 \
 condtomaildir.0 iftoccfrom.0 ifaddr.0 replier.0 replier-config.0 qscanq.0 \
 qscanq-stdin.0 cleanq.0 run-cleanq.0 dot-forward.0 \
 fastforward.0 printforward.0 setforward.0 newaliases.0 \
-printmaillist.0 setmaillist.0 newinclude.0 qmaildirmake.0
+printmaillist.0 setmaillist.0 newinclude.0 qmaildirmake.0 qmail-srs.5
 
 mbox.0: \
 mbox.5
@@ -1705,6 +1705,13 @@ qmail-control.9 conf-qmail conf-sysconfdir
 	| sed s}QMAIL}"`head -1 conf-qmail`"}g \
 	| sed s}@controldir\@}"`head -1 conf-sysconfdir`/control"}g \
 	> qmail-control.5
+
+qmail-srs.5: \
+qmail-srs.9 conf-qmail conf-sysconfdir
+	cat qmail-srs.9 \
+	| sed s}QMAIL}"`head -1 conf-qmail`"}g \
+	| sed s}@controldir\@}"`head -1 conf-sysconfdir`/control"}g \
+	> qmail-srs.5
 
 qmail-getpw: \
 load qmail-getpw.o case.a substdio.a error.a str.a fs.a auto_break.o \

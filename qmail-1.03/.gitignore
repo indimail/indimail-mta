@@ -1,6 +1,7 @@
 debian/indimail-mta.install
 auto_libexec.o
 doc/CREDITS
+qmail-srs.5
 indimail-mta.fc
 perm_list
 conf-prefix

@@ -1,5 +1,8 @@
 /*
  * $Log: hier.c,v $
+ * Revision 1.221  2016-06-24 13:26:18+05:30  Cprogrammer
+ * added srsfilter, qmail-srs man page
+ *
  * Revision 1.220  2016-06-20 08:41:25+05:30  Cprogrammer
  * moved batv to libexecdir
  *
@@ -1157,6 +1160,9 @@ hier(inst_dir, fatal)
 	c(mandir,          "man/man1", "qnotify.1", uidr, gidr, moder_f);
 	c(mandir,          "man/man1", "rrt.1", uidr, gidr, moder_f);
 	c(mandir,          "man/man1", "qarf.1", uidr, gidr, moder_f);
+#ifdef HAVESRS
+	c(mandir,          "man/man1", "srsfilter.1", uidr, gidr, moder_f);
+#endif
 
 	/* serialmail */
 	c(mandir,          "man/man1", "serialcmd.1", uidr, gidr, moder_f);
@@ -1240,6 +1246,9 @@ hier(inst_dir, fatal)
 	c(mandir,          "man/man5", "rfc-3798.5", uidr, gidr, moder_f);
 	c(mandir,          "man/man5", "rfc-4871.5", uidr, gidr, moder_f);
 	c(mandir,          "man/man5", "rfc-4870.5", uidr, gidr, moder_f);
+#ifdef HAVESRS
+	c(mandir,          "man/man1", "qmail-srs.5", uidr, gidr, moder_f);
+#endif
 
 	/*- fastforward */
 	c(mandir,          "man/man1", "dot-forward.1", uidr, gidr, moder_f);
@@ -1493,7 +1502,7 @@ hier(inst_dir, fatal)
 void
 getversion_install_big_c()
 {
-	static char    *x = "$Id: hier.c,v 1.220 2016-06-20 08:41:25+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: hier.c,v 1.221 2016-06-24 13:26:18+05:30 Cprogrammer Exp mbhangui $";
 
 #ifdef INDIMAIL
 	if (x)
