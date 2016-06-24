@@ -558,6 +558,7 @@
 %attr(0644,root,root) @mandir@/man1/spipe.1.gz
 %attr(0644,root,root) @mandir@/man1/srs.1.gz
 %attr(0644,root,root) @mandir@/man1/srsfilter.1.gz
+%attr(0644,root,root) @mandir@/man1/spfquery.1.gz
 %attr(0644,root,root) @mandir@/man1/qmail-srs.5.gz
 %attr(0644,root,root) @mandir@/man1/swaks.1.gz
 %attr(0644,root,root) @mandir@/man1/tai2tai64n.1.gz

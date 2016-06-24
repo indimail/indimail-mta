@@ -1,5 +1,8 @@
 /*
  * $Log: hier.c,v $
+ * Revision 1.222  2016-06-24 16:37:25+05:30  Cprogrammer
+ * added spfquery man page
+ *
  * Revision 1.221  2016-06-24 13:26:18+05:30  Cprogrammer
  * added srsfilter, qmail-srs man page
  *
@@ -1163,6 +1166,9 @@ hier(inst_dir, fatal)
 #ifdef HAVESRS
 	c(mandir,          "man/man1", "srsfilter.1", uidr, gidr, moder_f);
 #endif
+#ifdef USE_SPF
+	c(mandir,          "man/man1", "spfquery.1", uidr, gidr, moder_f);
+#endif
 
 	/* serialmail */
 	c(mandir,          "man/man1", "serialcmd.1", uidr, gidr, moder_f);
@@ -1247,7 +1253,7 @@ hier(inst_dir, fatal)
 	c(mandir,          "man/man5", "rfc-4871.5", uidr, gidr, moder_f);
 	c(mandir,          "man/man5", "rfc-4870.5", uidr, gidr, moder_f);
 #ifdef HAVESRS
-	c(mandir,          "man/man1", "qmail-srs.5", uidr, gidr, moder_f);
+	c(mandir,          "man/man5", "qmail-srs.5", uidr, gidr, moder_f);
 #endif
 
 	/*- fastforward */
@@ -1502,7 +1508,7 @@ hier(inst_dir, fatal)
 void
 getversion_install_big_c()
 {
-	static char    *x = "$Id: hier.c,v 1.221 2016-06-24 13:26:18+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: hier.c,v 1.222 2016-06-24 16:37:25+05:30 Cprogrammer Exp mbhangui $";
 
 #ifdef INDIMAIL
 	if (x)
