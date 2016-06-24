@@ -7,7 +7,7 @@ ACLOCAL_AMFLAGS=-I ../../m4
 #CONFIG_STATUS_DEPENDENCIES = ../tcpd/couriertls.config
 
 DISTCLEANFILES=imapd.pam pop3d.pam imapd.cnf pop3d.cnf
-CLEANFILES=imapd.8 imapd.html mkimapdcert.html mkimapdcert.8 \
+CLEANFILES=imapd.8 pop3d.8 imapd.html mkimapdcert.html mkimapdcert.8 \
 	makeimapaccess.html makeimapaccess.8 \
 	mkdhparams.html mkdhparams.8 \
 	courierpop3d.html courierpop3d.8 mkpop3dcert.html mkpop3dcert.8
@@ -16,7 +16,7 @@ EXTRA_DIST=testsuite testsuite.txt smaptestsuite smaptestsuite.txt \
 	BUGS BUGS.html README README.html imapd.authpam \
 	pop3d.authpam system-auth.authpam system-auth2.authpam\
 	makeimapaccess.8.in makeimapaccess.html.in \
-	imapd.html.in imapd.8.in \
+	imapd.html.in imapd.8.in pop3d.8.in \
 	mkdhparams.html.in mkdhparams.8.in \
 	mkimapdcert.html.in mkimapdcert.8.in \
 	mkpop3dcert.html.in mkpop3dcert.8.in \
@@ -26,7 +26,7 @@ EXTRA_DIST=testsuite testsuite.txt smaptestsuite smaptestsuite.txt \
 noinst_SCRIPTS=mkimapdcert mkpop3dcert mkdhparams
 noinst_PROGRAMS=imaplogin imapd pop3login pop3d
 
-noinst_DATA=imapd.8 imapd.html imapd.cnf pop3d.cnf \
+noinst_DATA=imapd.8 pop3d.8 imapd.html imapd.cnf pop3d.cnf \
 	makeimapaccess.html makeimapaccess.8 \
 	mkdhparams.html mkdhparams.8 \
 	mkimapdcert.html mkimapdcert.8 \
@@ -116,6 +116,9 @@ imapd.html: imapd.html.in
 imapd.8: imapd.8.in
 	./config.status --file=imapd.8
 
+pop3d.8: pop3d.8.in
+	./config.status --file=pop3d.8
+
 makeimapaccess.html: makeimapaccess.html.in
 	./config.status --file=makeimapaccess.html
 
@@ -163,6 +166,10 @@ imapd.html.in: imapd.sgml ../docbook/sgml2html
 imapd.8.in: imapd.sgml ../docbook/sgml2man
 	../docbook/sgml2man imapd.sgml imapd.8.in
 	mv imapd.8 imapd.8.in
+
+pop3d.8.in: imapd.sgml ../docbook/sgml2man
+	../docbook/sgml2man imapd.sgml pop3d.8.in
+	mv pop3d.8 pop3d.8.in
 
 makeimapaccess.html.in: makeimapaccess.sgml ../docbook/sgml2html
 	../docbook/sgml2html makeimapaccess.sgml makeimapaccess.html.in
