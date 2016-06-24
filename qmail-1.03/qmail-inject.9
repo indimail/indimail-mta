@@ -10,14 +10,19 @@ qmail-inject \- preprocess and send a mail message
 ] [
 .I recip ...
 ]
+
 .SH DESCRIPTION
 .B qmail-inject
 reads a mail message from its standard input,
 adds appropriate information to the message header,
 and invokes
 .B qmail-queue
-to send the message
-to one or more recipients.
+to send the message to one or more recipients.
+
+.B qmail-inject
+rewrites the sender using Sender Rewriting Scheme if \fISRS\fB has been configured. see
+.B qmail-srs(5)
+for information on how to do this
 
 See
 .B qmail-header(5)
@@ -30,6 +35,7 @@ normally exits 0.
 It exits 100 if it was invoked improperly
 or if there is a severe syntax error in the message.
 It exits 111 for temporary errors.
+
 .SH "ENVIRONMENT VARIABLES"
 For the convenience of users who do not run
 .B qmail-inject
@@ -154,6 +160,7 @@ of the copy going to that recipient.
 Use a per-message VERP.
 .B qmail-inject
 will append the current date and process ID to the envelope sender.
+
 .SH OPTIONS
 .TP
 .B \-a
@@ -213,6 +220,7 @@ Feed the resulting message to
 .B \-n
 Print the message rather than feeding it to
 .BR qmail-queue .
+
 .SH "CONTROL FILES"
 
 .TP 5
@@ -422,7 +430,8 @@ and
 @controldir@/defaultqueue directory.
 
 .SH "SEE ALSO"
-sendmail(8),
+sendmail(1),
+qmail-srs(5),
 addresses(5),
 rfc-822(5),
 qmail-control(5),
