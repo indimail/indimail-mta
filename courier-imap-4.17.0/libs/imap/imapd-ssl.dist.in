@@ -245,7 +245,7 @@ COURIERTLS=@bindir@/couriertls
 #
 # This is an experimental feature.
 
-TLS_CERTFILE=@certsdir@/imapd.pem
+TLS_CERTFILE=@certsdir@/servercert.pem
 
 ##NAME: TLS_DHPARAMS:0
 #
