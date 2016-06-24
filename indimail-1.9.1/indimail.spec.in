@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail.spec.in,v 2.357 2016-06-24 10:28:40+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 2.358 2016-06-24 16:38:33+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 
@@ -1752,8 +1752,8 @@ fi
 
 %if %nofetchmail == 0
 %if %i_m_on_mac == 0
-#%attr(644,root,root)                    %{shareddir}/locale/*/LC_MESSAGES/*.mo
-#%files -f fetchmail.lang
+#%%attr(644,root,root)                    %%{shareddir}/locale/*/LC_MESSAGES/*.mo
+#%%files -f fetchmail.lang
 %lang(eo) /usr/share/indimail/locale/eo/LC_MESSAGES/fetchmail.mo
 %lang(gl) /usr/share/indimail/locale/gl/LC_MESSAGES/fetchmail.mo
 %lang(sq) /usr/share/indimail/locale/sq/LC_MESSAGES/fetchmail.mo
