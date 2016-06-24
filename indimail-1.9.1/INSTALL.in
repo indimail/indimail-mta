@@ -564,6 +564,7 @@ the installation.
         --mandir=@mandir@ \
         --libdir=@libdir@ \
         --sysconfdir=@sysconfdir@ \
+        --with-certsdir=@sysconfdir@/control \
         --libexecdir=@libexecdir@ \
         --datarootdir=@shareddir@ \
         --without-authchangepwdir \
@@ -888,16 +889,12 @@ the installation.
         --postmaster=postmaster@indimail.org --ssl
 
     If you have used the --ssl option above, you can quickly generate a self-signed X.509 key for
-    IMAP/POP3 over SSL by running the following two commands. These commands should be run
+    IMAP/POP3 over SSL by running the following command. This command should be run
     after editing the files @sysconfdir@/imapd.cnf, @sysconfdir@/pop3d.cnf
 
-    % sudo @prefix@/sbin/mkimapdcert
-    % sudo @prefix@/sbin/mkpop3dcert
+    the command additionally creates a self-signed X.509 certificate for SMTP over SSL. i.e.
 
-    The above two commands is also run by running svctool with --config=cert option. This will
-    additionally create a self-signed X.509 certificate for SMTP over SSL. i.e.
-
-    % sudo @prefix@/sbin/svctool --config=cert
+    % sudo @prefix@/sbin/svctool --config=cert --postmaster=youremail@yourdomain
 
     ##### STEP 6  ## Query Pooling/Caching/Lookup Service ##################
     The command below creates InLookup service with 5 threads. This provides qmail-smtpd, IMAP
