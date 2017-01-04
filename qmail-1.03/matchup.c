@@ -1,5 +1,8 @@
 /*
  * $Log: matchup.c,v $
+ * Revision 1.7  2017-01-04 12:56:35+05:30  Cprogrammer
+ * ignore qmail-daemon and local/remote debug lines
+ *
  * Revision 1.6  2008-02-05 15:31:03+05:30  Cprogrammer
  * added ability to process both microsecond and tai64n format timestamp
  *
@@ -719,9 +722,11 @@ main()
 		else
 		if (str_equal(line.s + field[1], "number"));
 		else
-		if (str_equal(line.s + field[1], "local"));
+		if (str_equal(line.s + field[1], "local:"));
 		else
-		if (str_equal(line.s + field[1], "remote"));
+		if (str_equal(line.s + field[1], "remote:"));
+		else
+		if (str_equal(line.s + field[1], "qmail-daemon:"));
 		else
 		if (str_equal(line.s + field[1], "warning:"))
 			out(outline.s, outline.len);
@@ -748,7 +753,7 @@ main()
 void
 getversion_matchup_c()
 {
-	static char    *x = "$Id: matchup.c,v 1.6 2008-02-05 15:31:03+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: matchup.c,v 1.7 2017-01-04 12:56:35+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
