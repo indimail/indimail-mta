@@ -37,7 +37,7 @@ and clears all other environment variables.
 
 The recommended way is to put the following entry in /etc/inittab to invoke svscanboot.
 
-SV:345:respawn:PREFIX/bin/svscanboot <>/dev/console 2<>/dev/console
+SV:345:respawn:LIBEXEC/svscanboot <>/dev/console 2<>/dev/console
 
 .SH SEE ALSO
 supervise(8),
