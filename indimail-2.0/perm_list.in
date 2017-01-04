@@ -311,7 +311,6 @@
 %attr(0755,root,qmail) @prefix@/sbin/cleanq
 %attr(0755,root,qmail) @prefix@/sbin/qscanq-stdin
 %attr(0755,root,qmail) @prefix@/sbin/svscan
-%attr(0755,root,qmail) @prefix@/sbin/svscanboot
 %attr(0755,root,qmail) @prefix@/sbin/readproctitle
 %attr(0755,root,qmail) @prefix@/sbin/qmail-qmqpc
 %attr(0755,root,qmail) @prefix@/sbin/qmail-multi
@@ -329,6 +328,7 @@
 %attr(0755,root,root) @prefix@/sbin/sharedindexinstall
 %attr(0755,root,root) @prefix@/sbin/sharedindexsplit
 
+%attr(0755,root,qmail) @libexecdir@/svscanboot
 %attr(0755,root,qmail) @libexecdir@/atrn
 %attr(0755,root,qmail) @libexecdir@/etrn
 %attr(0755,root,qmail) @libexecdir@/cdbmake-12
@@ -479,8 +479,8 @@
 %attr(0755,root,qmail) @libexecdir@/controlsync
 %attr(0755,root,qmail) @libexecdir@/mailzipper
 %attr(0755,root,qmail) @libexecdir@/updatefile
-%attr(0755,root,qmail) @libexecdir@/config_settings
-%attr(0755,root,qmail) @libexecdir@/bin/displaytop
+%attr(0755,root,qmail) @libexecdir@/indimail_config
+%attr(0755,root,qmail) @libexecdir@/displaytop
 %attr(0755,root,qmail) @libexecdir@/hashtable
 %attr(0755,root,qmail) @libexecdir@/cindimail
 %attr(0755,root,qmail) @libexecdir@/cputime
