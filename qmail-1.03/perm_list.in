@@ -187,7 +187,6 @@
 %attr(0755,root,qmail) @prefix@/sbin/svctool
 %attr(0755,root,qmail) @prefix@/sbin/sys-checkpwd
 %attr(0755,root,qmail) @prefix@/sbin/svscan
-%attr(0755,root,qmail) @prefix@/sbin/svscanboot
 %attr(0755,root,qmail) @prefix@/sbin/readproctitle
 %attr(0755,root,qmail) @prefix@/sbin/cleanq
 
@@ -199,6 +198,7 @@
 %attr(0751,root,qmail) @prefix@/sbin/qmail-send
 %attr(0751,root,qmail) @prefix@/sbin/qmail-todo
 
+%attr(0755,root,qmail) @libexecdir@/svscanboot
 %attr(0755,root,qmail) @libexecdir@/cdbmake-12
 %attr(0755,root,qmail) @libexecdir@/cdbmake-sv
 %attr(0755,root,qmail) @libexecdir@/atrn
