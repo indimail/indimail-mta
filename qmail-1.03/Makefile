@@ -802,10 +802,11 @@ indimail-mta.fc.in conf-qmail conf-sysconfdir
 	> indimail-mta.fc
 
 svscanboot: \
-warn-auto.sh svscanboot.sh conf-prefix conf-sysconfdir
+warn-auto.sh svscanboot.sh conf-prefix conf-sysconfdir conf-libexec
 	cat warn-auto.sh svscanboot.sh \
 	| sed s}PREFIX}"`head -1 conf-prefix`"}g \
 	| sed s}@controldir\@}"`head -1 conf-sysconfdir`/control"}g \
+	| sed s}LIBEXEC}"`head -1 conf-libexec`"}g \
 	> svscanboot
 
 upstart:upstart.in conf-prefix conf-sysconfdir
@@ -817,11 +818,13 @@ upstart:upstart.in conf-prefix conf-sysconfdir
 	| sed s}@controldir\@}"`head -1 conf-sysconfdir`/control"}g \
 	) > upstart
 
-systemd:systemd.in conf-prefix
+systemd:systemd.in conf-prefix conf-libexec
 	( \
 	echo "# svscan - runlevel compatibility"; \
 	echo "# WARNING: This file was auto-generated. Do not edit!"; \
-	cat systemd.in | sed s}PREFIX}"`head -1 conf-prefix`"}g \
+	cat systemd.in \
+	| sed s}PREFIX}"`head -1 conf-prefix`"}g \
+	| sed s}LIBEXEC}"`head -1 conf-libexec`"}g \
 	) > systemd
 
 svscanboot.0: \
@@ -829,10 +832,11 @@ svscanboot.8
 	nroff -man svscanboot.8 > svscanboot.0
 
 svscanboot.8: \
-svscanboot.9 conf-prefix conf-sysconfdir
+svscanboot.9 conf-prefix conf-sysconfdir conf-libexec
 	cat svscanboot.9 \
 	| sed s}PREFIX}"`head -1 conf-prefix`"}g \
 	| sed s}@controldir\@}"`head -1 conf-sysconfdir`/control"}g \
+	| sed s}LIBEXEC}"`head -1 conf-libexec`"}g \
 	> svscanboot.8
 
 env.a: \
