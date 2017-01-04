@@ -1,5 +1,11 @@
 /*
  * $Log: initsvc.c,v $
+ * Revision 2.23  2017-01-04 21:46:51+05:30  Cprogrammer
+ * remove indimail.service for -off argument
+ *
+ * Revision 2.22  2017-01-04 15:46:05+05:30  Cprogrammer
+ * moved svscanboot to libexecdir
+ *
  * Revision 2.21  2016-06-03 10:13:01+05:30  Cprogrammer
  * moved svscanboot to sbin
  *
@@ -75,7 +81,7 @@
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: initsvc.c,v 2.21 2016-06-03 10:13:01+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: initsvc.c,v 2.23 2017-01-04 21:46:51+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #define SV_ON    1
@@ -188,7 +194,7 @@ main(int argc, char **argv)
 {
 	FILE           *fp;
 	char           *device = "/dev/console";
-	char           *qmaildir, *ptr, *jobfile = 0, *print_cmd = 0, *jobdir = 0;
+	char           *libexecdir, *ptr, *jobfile = 0, *print_cmd = 0, *jobdir = 0;
 	char            buffer[2048];
 	int             flag, found, colonCount, fd, debian_version;
 	long            pos;
@@ -220,7 +226,7 @@ main(int argc, char **argv)
 		fprintf(stderr, "usage: initsvc -on|-off|-status|-print\n");
 		return (1);
 	}
-	getEnvConfigStr(&qmaildir, "QMAILDIR", QMAILDIR);
+	getEnvConfigStr(&libexecdir, "LIBEXECDIR", LIBEXECDIR);
 	if (!access("/bin/systemctl", X_OK))
 	{
 		/* Install indimail.service */
@@ -247,6 +253,7 @@ main(int argc, char **argv)
 				return (systemd_control("enable"));
 				break;
 			case SV_OFF:
+				unlink("/lib/systemd/system/indimail.service");
 				return (systemd_control("disable"));
 				break;
 			case SV_STAT:
@@ -456,8 +463,8 @@ main(int argc, char **argv)
 	 * SV:345:respawn:/usr/sbin/svscanboot <>/dev/console 2<>/dev/console
 	 */
 	snprintf(buffer, sizeof(buffer), debian_version ?  
-			"SV:2345:%s:%s/sbin/svscanboot <>%s 2<>%s" : "SV:345:%s:%s/sbin/svscanboot <>%s 2<>%s",
-			 flag == SV_ON ? "respawn" : "off", qmaildir, device, device);
+			"SV:2345:%s:%s/svscanboot <>%s 2<>%s" : "SV:345:%s:%s/svscanboot <>%s 2<>%s",
+			 flag == SV_ON ? "respawn" : "off", libexecdir, device, device);
 	fprintf(fp, "%s\n", buffer);
 	if (fclose(fp))
 	{
