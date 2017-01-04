@@ -1,5 +1,8 @@
 #
 # $Log: indimail.te,v $
+# Revision 2.18  2017-01-04 21:46:15+05:30  Cprogrammer
+# added rules for fifo
+#
 # Revision 2.17  2017-01-04 12:58:13+05:30  Cprogrammer
 # added rules for svscanboot, svc
 #
@@ -52,7 +55,7 @@
 # selinux module config
 #
 #
-# $Id: indimail.te,v 2.17 2017-01-04 12:58:13+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.te,v 2.18 2017-01-04 21:46:15+05:30 Cprogrammer Exp mbhangui $
 # 
 #
 # semanage permissive -a svc_start_t
@@ -147,12 +150,12 @@ allow httpd_sys_script_t user_home_dir_t:dir search;
 allow httpd_sys_script_t user_home_t:dir { setattr getattr read create write rmdir search remove_name open add_name };
 allow httpd_sys_script_t user_home_t:file { create unlink read write open getattr setattr lock unlink };
 allow httpd_sys_script_t home_root_t:dir { add_name remove_name read write };
+allow httpd_sys_script_t home_root_t:file { unlink read write open create lock getattr };
 allow httpd_sys_script_t self:capability { fowner setuid setgid };
 allow httpd_sys_script_t user_tmp_t:lnk_file read;
 allow httpd_sys_script_t var_t:dir { create read write remove_name add_name rmdir setattr };
 allow httpd_sys_script_t var_t:file { execute setattr read create execute_no_trans write getattr unlink open };
 allow httpd_sys_script_t var_t:lnk_file read;
-allow httpd_sys_script_t home_root_t:file { unlink read write open create lock getattr };
 
 #============= mysqld_t ==============
 allow mysqld_t usr_t:file { append create rename write unlink };
@@ -192,7 +195,7 @@ allow svc_start_t antivirus_var_run_t:sock_file { write unlink create getattr se
 
 #!!!! WARNING: 'default_t' is a base type.
 allow svc_start_t default_t:dir { write add_name remove_name };
-allow svc_start_t default_t:fifo_file { read write };
+allow svc_start_t default_t:fifo_file { open read write };
 allow svc_start_t default_t:file { write open unlink rename append lock create };
 
 #!!!! WARNING: 'etc_runtime_t' is a base type.
