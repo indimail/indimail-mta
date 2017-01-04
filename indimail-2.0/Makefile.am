@@ -153,7 +153,7 @@ indimailsbin_PROGRAMS = adminclient chowkidar clearopensmtp \
 	vmoddomain vreorg vtable
 
 indimaillibexec_PROGRAMS = sq_vacation qmailmrtg7 execmysql cindimail hashtable displaytop \
-						   config_settings updatefile mail_report testmra copyemail
+						   indimail_config updatefile mail_report testmra copyemail
 indimaillibexec_SCRIPTS = mailzipper overquota.sh controlsync cputime tls-cert-check get-cert \
 						  myslave bogofilter-qfe
 
@@ -351,8 +351,8 @@ resetquota_LDADD = @auth_libs@ $(cdb_lib)
 testmra_SOURCES = testmra.c 
 testmra_LDADD = @auth_libs@ $(cdb_lib) $(shell cat socket.lib 2>/dev/null)
 
-config_settings_SOURCES=config_settings.c
-config_settings_LDADD=
+indimail_config_SOURCES=indimail_config.c
+indimail_config_LDADD=
 
 crc_SOURCES=crc.c
 crc_LDADD=
@@ -631,9 +631,9 @@ inquery.lo: indimail.h config.h
 postdel.lo: indimail.h config.h
 ProcessInFifo.lo: indimail.h config.h
 PwdInLookup.lo: indimail.h config.h
-config_settings.lo: indimail.h config.h
-indimail_settings.c: indimail.settings config_settings
-	./config_settings > indimail_settings.c
+indimail_config.lo: indimail.h config.h
+indimail_settings.c: indimail.settings indimail_config
+	./indimail_config > indimail_settings.c
 parseAddress.lo: indimail.h config.h
 storeHeader.lo: indimail.h config.h
 ssl_timeout.lo: config.h
