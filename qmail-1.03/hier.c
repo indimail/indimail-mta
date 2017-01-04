@@ -1,5 +1,8 @@
 /*
  * $Log: hier.c,v $
+ * Revision 1.223  2017-01-04 15:46:35+05:30  Cprogrammer
+ * moved svscanboot to libexecdir
+ *
  * Revision 1.222  2016-06-24 16:37:25+05:30  Cprogrammer
  * added spfquery man page
  *
@@ -969,7 +972,6 @@ hier(inst_dir, fatal)
 	c(auto_qmail_home, "bin", "udplogger", auto_uido, auto_gidq, moder_x);
 	c(auto_qmail_home, "bin", "udpclient", auto_uido, auto_gidq, moder_x);
 	c(auto_qmail_home, "sbin", "svscan", auto_uido, auto_gidq, moder_x);
-	c(auto_qmail_home, "sbin", "svscanboot", auto_uido, auto_gidq, moder_x);
 	c(auto_qmail_home, "sbin", "readproctitle", auto_uido, auto_gidq, moder_x);
 
 	/* serialmail */
@@ -987,6 +989,7 @@ hier(inst_dir, fatal)
 	c(auto_qmail_home, "bin", "columnt", auto_uido, auto_gidq, moder_x);
 	c(auto_qmail_home, "bin", "xqp", auto_uido, auto_gidq, moder_x);
 
+	c(auto_libexec_dir, auto_libexec_base, "svscanboot", auto_uido, auto_gidq, moder_x);
 	c(auto_libexec_dir, auto_libexec_base, "zoverall", auto_uido, auto_gidq, moder_x);
 	c(auto_libexec_dir, auto_libexec_base, "zsendmail", auto_uido, auto_gidq, moder_x);
 	c(auto_libexec_dir, auto_libexec_base, "xsender", auto_uido, auto_gidq, moder_x);
@@ -1508,7 +1511,7 @@ hier(inst_dir, fatal)
 void
 getversion_install_big_c()
 {
-	static char    *x = "$Id: hier.c,v 1.222 2016-06-24 16:37:25+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: hier.c,v 1.223 2017-01-04 15:46:35+05:30 Cprogrammer Exp mbhangui $";
 
 #ifdef INDIMAIL
 	if (x)
