@@ -1,5 +1,8 @@
 #
 # $Log: indimail.te,v $
+# Revision 2.17  2017-01-04 12:58:13+05:30  Cprogrammer
+# added rules for svscanboot, svc
+#
 # Revision 2.16  2016-06-07 10:53:21+05:30  Cprogrammer
 # added selinux rules for iwebadmin
 #
@@ -49,7 +52,7 @@
 # selinux module config
 #
 #
-# $Id: indimail.te,v 2.16 2016-06-07 10:53:21+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.te,v 2.17 2017-01-04 12:58:13+05:30 Cprogrammer Exp mbhangui $
 # 
 #
 # semanage permissive -a svc_start_t
@@ -250,6 +253,11 @@ allow svc_start_t var_lock_t:lnk_file read;
 allow svc_start_t var_t:dir { read create write add_name remove_name setattr rmdir };
 allow svc_start_t var_t:file { create getattr setattr ioctl open read lock write unlink };
 allow svc_start_t var_t:fifo_file { open read };
+
+#============= init_t ==============
+
+allow init_t var_t:file { execute execute_no_trans ioctl open read };
+allow init_t root_t:fifo_file { open write };
 
 #============= svc_run_t ==============
 
