@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail.spec.in,v 2.359 2017-01-04 12:59:41+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 2.360 2017-01-04 21:57:42+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 
@@ -255,7 +255,12 @@ NoSource: 20
 
 URL: http://www.indimail.org
 #AutoReqProv: No
-Conflicts: %{name}-mini, %{name}-mta daemontools ucspi-tcp
+Conflicts: %{name}-mini
+Conflicts: %{name}-mta
+Conflicts: daemontools
+Conflicts: ucspi-tcp
+Conflicts: %{name} < 2.0
+Obsoletes: %{name} < 2.0
 BuildRequires: openssl-devel rpm gcc gcc-c++ make bison binutils coreutils grep
 BuildRequires: glibc glibc-devel openssl procps readline-devel
 BuildRequires: sed ncurses-devel gettext-devel
@@ -398,6 +403,7 @@ locations) and tools to manage virtual domains ?
 Summary: IndiMail - Development header files and libraries
 Group: Development/Libraries/Other
 Requires: libindimail
+Conflicts: %{name}-devel < 2.0
 
 %description devel
 This package contains the development header files and libraries
@@ -408,6 +414,7 @@ necessary to develop IndiMail client applications.
 %package -n libindimail
 Summary: IndiMail - Shared libraries
 Group: Development/Libraries/Other
+Conflicts: libindimail < 2.0
 
 %description -n libindimail
 This package contains the shared libraries (*.so*) which certain
@@ -419,6 +426,7 @@ languages and applications need to dynamically load and use IndiMail.
 Summary: IndiMail - Mini Client Installation
 Group: Productivity/Networking/Email/Clients
 Conflicts: %{name}
+Conflicts: %{name}-mini < 2.0
 
 %description mini
 This package contains sendmail, qmail-inject and qmail-qmqpc - Bare minimum
@@ -1220,7 +1228,7 @@ fi
 %attr(755,root,qmail)                   %{libexecdir}/controlsync
 %attr(755,root,qmail)                   %{libexecdir}/mailzipper
 %attr(755,root,qmail)                   %{libexecdir}/updatefile
-%attr(755,root,qmail)                   %{libexecdir}/config_settings
+%attr(755,root,qmail)                   %{libexecdir}/indimail_config
 %attr(755,root,qmail)                   %{libexecdir}/displaytop
 %attr(755,root,qmail)                   %{libexecdir}/hashtable
 %attr(755,root,qmail)                   %{libexecdir}/cindimail
@@ -1378,7 +1386,6 @@ fi
 %attr(755,root,qmail)                   %{_prefix}/sbin/qscanq-stdin
 %attr(755,root,qmail)                   %{_prefix}/sbin/cleanq
 %attr(755,root,qmail)                   %{_prefix}/sbin/svscan
-%attr(755,root,qmail)                   %{_prefix}/sbin/svscanboot
 %attr(755,root,qmail)                   %{_prefix}/sbin/readproctitle
 %attr(755,root,qmail)                   %{_prefix}/sbin/qmail-nullqueue
 %attr(755,root,qmail)                   %{_prefix}/sbin/qmail-multi
@@ -1407,6 +1414,7 @@ fi
 %attr(755,root,qmail)                   %{_prefix}/sbin/relaytest
 %attr(755,root,qmail)                   %{_prefix}/sbin/splogger
 
+%attr(755,root,qmail)                   %{libexecdir}/svscanboot
 %attr(755,root,qmail)                   %{libexecdir}/atrn
 %attr(755,root,qmail)                   %{libexecdir}/etrn
 %attr(755,root,qmail)                   %{libexecdir}/cdbmake-12
@@ -2459,7 +2467,7 @@ fi
 %{_prefix}/sbin/svctool --svscanlog --servicedir=%{servicedir}
 
 if [ -x /usr/bin/uname -o -x /bin/uname ] ; then
-	default_domain=`uname -n`
+  default_domain=`uname -n`
 fi
 echo "Creating default qmail configuraton and catch-all alias (${indimaildir}/alias/Maildir) for all system users"
 %{_prefix}/sbin/svctool --config=qmail --postmaster=%{indimaildir}/alias/Maildir/ \
