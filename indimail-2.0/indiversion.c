@@ -1,5 +1,8 @@
 /*
  * $Log: indiversion.c,v $
+ * Revision 2.143  2017-01-04 21:46:37+05:30  Cprogrammer
+ * moved cputime, bogofilter-qfe to libexecdir
+ *
  * Revision 2.142  2016-06-21 13:31:45+05:30  Cprogrammer
  * corrected executable paths
  *
@@ -548,7 +551,7 @@
 #endif
 
 #ifndef	lint
-static char     sccsid[] = "$Id: indiversion.c,v 2.142 2016-06-21 13:31:45+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: indiversion.c,v 2.143 2017-01-04 21:46:37+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 void            getversion_indimail_settings_c();
@@ -852,7 +855,6 @@ char           *bin_program_list[] =
 	"vdeldomain",
 	"vpasswd",
 	"vadduser",
-	"vadduserl",
 	"vdeluser",
 	"vaddaliasdomain",
 	"vsetuserquota",
@@ -930,10 +932,8 @@ char           *sbin_program_list[] =
 	"adminclient",
 	"vfstab",
 	"svctool",
-	"cputime",
 	"mgmtpass",
 	"vserverinfo",
-	"bogofilter-qfe",
 	0
 };
 
@@ -954,6 +954,8 @@ char           *libexec_program_list[] =
 	"copyemail",
 	"controlsync",
 	"myslave",
+	"cputime",
+	"bogofilter-qfe",
 	0
 };
 
