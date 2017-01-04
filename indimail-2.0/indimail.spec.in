@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail.spec.in,v 2.358 2016-06-24 16:38:33+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 2.359 2017-01-04 12:59:41+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 
@@ -2458,6 +2458,9 @@ fi
 # svscanlog service
 %{_prefix}/sbin/svctool --svscanlog --servicedir=%{servicedir}
 
+if [ -x /usr/bin/uname -o -x /bin/uname ] ; then
+	default_domain=`uname -n`
+fi
 echo "Creating default qmail configuraton and catch-all alias (${indimaildir}/alias/Maildir) for all system users"
 %{_prefix}/sbin/svctool --config=qmail --postmaster=%{indimaildir}/alias/Maildir/ \
   --default-domain=%{default_domain} --mysqlhost=localhost --mysqluser=indimail \
@@ -2963,6 +2966,11 @@ if [ $ID -ne 0 ] ; then
 fi
 # we are doing upgrade
 if [ $argv1 -eq 1 ] ; then
+  (
+  if [ -x %{libexecdir}/postupgrade.sh ] ; then
+    /bin/sh %{libexecdir}/postupgrade.sh
+  fi
+  ) > /tmp/indimail-upgrade.log 2>&1
 %if %i_m_on_mac == 0
   echo "recreating ld.so cache"
   /sbin/ldconfig
@@ -3049,11 +3057,11 @@ echo "removing architecture-independent shared directory"
 fi
 
 echo "removing configuration"
-for i in indimail.cnf backup.conf cronlist indimail.te headerlist \
+for i in backup.conf cronlist indimail.te \
     imapd.cnf imapd.dist imapd-ssl.dist inc_deps indimail.mrtg.cfg \
     indimail.settings lib_deps osh.table perm_list pop3d.cnf \
     pop3d.dist pop3d-ssl.dist qmailprog.list quotawarnmsg.example \
-    system.flashlogin system.menu system.module system.rc
+    system.module
 do
   %{__rm} -f %{sysconfdir}/$i
 done
