@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail-mta.spec,v 1.70 2016-06-24 16:37:32+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail-mta.spec,v 1.71 2017-01-08 19:03:25+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 
@@ -43,7 +43,7 @@
 %global servicedir         /service
 %global dkimkeyfn          default
 
-%global fedorareview       1
+%global fedorareview       0
 
 %if %build_on_obs == 1
 %global packager Manvendra Bhangui <manvendra@indimail.org>
@@ -66,7 +66,11 @@ Name: indimail-mta
 Version: 2.0
 %if %fedorareview == 0
 Provides: daemontools = %{version}, ucspi-tcp = %{version}
+%if %build_on_obs == 1
 Release: 1.<B_CNT>
+%else
+Release: 1.B_CCNT%{?dist}
+%endif
 %else
 Release: 1.1%{?dist}
 %endif
@@ -585,7 +589,7 @@ done
                                   %{qmaildir}/users
                                   %{qmaildir}/control
                                   %{qmaildir}/libexec
-%dir %attr(555,root,qmail)        %{libexecdir}
+%dir %attr(555,root,root)         %{libexecdir}
 %dir %attr(555,root,qmail)        %{shareddir}
 %dir %attr(555,root,qmail)        %{shareddir}/boot
 %dir %attr(555,root,qmail)        %{shareddir}/doc
@@ -617,9 +621,9 @@ done
 %if "%{_prefix}" != "/usr"
 %dir %attr(555,root,root)         %{_libdir}
 %endif
-%dir %attr(775,root,qmail)        %{qsysconfdir}/etc
-%dir %attr(555,root,qmail)        %{qsysconfdir}/users
-%dir %attr(555,root,qmail)        %{plugindir}
+%dir %attr(775,root,qmail)            %{qsysconfdir}/etc
+%dir %attr(775,indimail,qmail)        %{qsysconfdir}/users
+%dir %attr(555,root,qmail)            %{plugindir}
 
 %attr(444,root,root) %config(noreplace)           %{qsysconfdir}/controlfiles
 
@@ -633,11 +637,11 @@ done
 %ghost %attr(0644,indimail,indimail)              %{qsysconfdir}/tcp.qmtp.cdb
 %ghost %attr(0644,indimail,indimail)              %{qsysconfdir}/tcp.qmqp.cdb
 
-%attr(444,root,root)  %config(noreplace)           %{qsysconfdir}/indimail-mta.te
-%attr(444,root,root)  %config(noreplace)           %{qsysconfdir}/indimail-mta.fc
+%attr(644,root,qmail) %config(noreplace)           %{qsysconfdir}/indimail-mta.te
+%attr(644,root,qmail) %config(noreplace)           %{qsysconfdir}/indimail-mta.fc
 %attr(444,root,root)  %config(noreplace)           %{qsysconfdir}/qmailprog.list
-%attr(444,root,qmail) %config(noreplace)           %{qsysconfdir}/etc/leapsecs.dat
-%attr(444,root,qmail) %config(noreplace)           %{qsysconfdir}/etc/leapsecs.txt
+%attr(644,root,qmail) %config(noreplace)           %{qsysconfdir}/etc/leapsecs.dat
+%attr(644,root,qmail) %config(noreplace)           %{qsysconfdir}/etc/leapsecs.txt
 
 %if %noperms == 0
 %if 0%{?suse_version} >= 1120
@@ -837,6 +841,7 @@ done
 %attr(755,root,qmail)                   %{_prefix}/sbin/relaytest
 %attr(755,root,qmail)                   %{_prefix}/sbin/splogger
 
+%attr(755,root,qmail)                   %{libexecdir}/svscanboot
 %attr(755,root,qmail)                   %{libexecdir}/atrn
 %attr(755,root,qmail)                   %{libexecdir}/etrn
 %attr(755,root,qmail)                   %{libexecdir}/cdbmake-12
@@ -866,8 +871,8 @@ done
 
 %if %fedorareview == 0
 %docdir %{mandir}
-%attr(444,root,root)                    %{mandir}/man[1,4,5,7,8]/*
-%attr(444,root,root)                    %{mandir}/cat[1,4,5,7,8]/*
+%attr(0644,root,root)                   %{mandir}/man[1,4,5,7,8]/*
+%attr(0644,root,root)                   %{mandir}/cat[1,4,5,7,8]/*
 %else
 %attr(0644,root,root)                   %{mandir}/man1/qmail-qfilter.1.gz
 %attr(0644,root,root)                   %{mandir}/man1/drate.1.gz
@@ -1168,51 +1173,50 @@ done
 
 # daemontools
 %if %fedorareview == 0
-%attr(555,root,qmail)                   %{_prefix}/bin/envdir
-%attr(555,root,qmail)                   %{_prefix}/bin/envuidgid
-%attr(555,root,qmail)                   %{_prefix}/bin/fghack
-%attr(555,root,qmail)                   %{_prefix}/bin/multilog
-%attr(555,root,qmail)                   %{_prefix}/bin/pgrphack
-%attr(555,root,qmail)                   %{_prefix}/bin/setlock
-%attr(555,root,qmail)                   %{_prefix}/bin/setuidgid
-%attr(555,root,qmail)                   %{_prefix}/bin/softlimit
-%attr(555,root,qmail)                   %{_prefix}/bin/supervise
-%attr(555,root,qmail)                   %{_prefix}/bin/svc
-%attr(555,root,qmail)                   %{_prefix}/bin/svok
-%attr(555,root,qmail)                   %{_prefix}/bin/svstat
-%attr(555,root,qmail)                   %{_prefix}/bin/tai64n
-%attr(555,root,qmail)                   %{_prefix}/bin/tai64nlocal
-%attr(555,root,qmail)                   %{_prefix}/bin/tai64nunix
-%attr(555,root,qmail)                   %{_prefix}/bin/tai2tai64n
-%attr(555,root,qmail)                   %{_prefix}/bin/tai64n2tai
-%attr(555,root,qmail)                   %{_prefix}/bin/spipe
-%attr(555,root,qmail)                   %{_prefix}/bin/qfilelog
-%attr(555,root,qmail)                   %{_prefix}/bin/multipipe
-%attr(555,root,qmail)                   %{_prefix}/bin/teepipe
-%attr(555,root,qmail)                   %{_prefix}/bin/multitail
-%attr(555,root,qmail)                   %{_prefix}/bin/logselect
-%attr(555,root,qmail)                   %{_prefix}/bin/qlogselect
-%attr(555,root,qmail)                   %{_prefix}/sbin/svscan
-%attr(555,root,qmail)                   %{_prefix}/sbin/svscanboot
-%attr(555,root,qmail)                   %{_prefix}/sbin/readproctitle
+%attr(755,root,qmail)                   %{_prefix}/bin/envdir
+%attr(755,root,qmail)                   %{_prefix}/bin/envuidgid
+%attr(755,root,qmail)                   %{_prefix}/bin/fghack
+%attr(755,root,qmail)                   %{_prefix}/bin/multilog
+%attr(755,root,qmail)                   %{_prefix}/bin/pgrphack
+%attr(755,root,qmail)                   %{_prefix}/bin/setlock
+%attr(755,root,qmail)                   %{_prefix}/bin/setuidgid
+%attr(755,root,qmail)                   %{_prefix}/bin/softlimit
+%attr(755,root,qmail)                   %{_prefix}/bin/supervise
+%attr(755,root,qmail)                   %{_prefix}/bin/svc
+%attr(755,root,qmail)                   %{_prefix}/bin/svok
+%attr(755,root,qmail)                   %{_prefix}/bin/svstat
+%attr(755,root,qmail)                   %{_prefix}/bin/tai64n
+%attr(755,root,qmail)                   %{_prefix}/bin/tai64nlocal
+%attr(755,root,qmail)                   %{_prefix}/bin/tai64nunix
+%attr(755,root,qmail)                   %{_prefix}/bin/tai2tai64n
+%attr(755,root,qmail)                   %{_prefix}/bin/tai64n2tai
+%attr(755,root,qmail)                   %{_prefix}/bin/spipe
+%attr(755,root,qmail)                   %{_prefix}/bin/qfilelog
+%attr(755,root,qmail)                   %{_prefix}/bin/multipipe
+%attr(755,root,qmail)                   %{_prefix}/bin/teepipe
+%attr(755,root,qmail)                   %{_prefix}/bin/multitail
+%attr(755,root,qmail)                   %{_prefix}/bin/logselect
+%attr(755,root,qmail)                   %{_prefix}/bin/qlogselect
+%attr(755,root,qmail)                   %{_prefix}/sbin/svscan
+%attr(755,root,qmail)                   %{_prefix}/sbin/readproctitle
 
 # ucspi-tcp
 %attr(755,root,qmail)                   %{_prefix}/bin/greydaemon
 %attr(755,root,qmail)                   %{_prefix}/bin/qmail-greyd
-%attr(555,root,root)                    %{_prefix}/bin/mconnect-io
-%attr(555,root,root)                    %{_prefix}/bin/rblsmtpd
-%attr(555,root,root)                    %{_prefix}/bin/tcprulescheck
-%attr(555,root,root)                    %{_prefix}/bin/tcpcat
-%attr(555,root,root)                    %{_prefix}/bin/date@
-%attr(555,root,root)                    %{_prefix}/bin/who@
-%attr(555,root,root)                    %{_prefix}/bin/tcpclient
-%attr(555,root,root)                    %{_prefix}/bin/tcpserver
-%attr(555,root,root)                    %{_prefix}/bin/mconnect
-%attr(555,root,root)                    %{_prefix}/bin/finger@
-%attr(555,root,root)                    %{_prefix}/bin/http@
-%attr(555,root,root)                    %{_prefix}/bin/tcprules
-%attr(555,root,qmail)                   %{_prefix}/bin/udpclient
-%attr(555,root,qmail)                   %{_prefix}/bin/udplogger
+%attr(755,root,root)                    %{_prefix}/bin/mconnect-io
+%attr(755,root,root)                    %{_prefix}/bin/rblsmtpd
+%attr(755,root,root)                    %{_prefix}/bin/tcprulescheck
+%attr(755,root,root)                    %{_prefix}/bin/tcpcat
+%attr(755,root,root)                    %{_prefix}/bin/date@
+%attr(755,root,root)                    %{_prefix}/bin/who@
+%attr(755,root,root)                    %{_prefix}/bin/tcpclient
+%attr(755,root,root)                    %{_prefix}/bin/tcpserver
+%attr(755,root,root)                    %{_prefix}/bin/mconnect
+%attr(755,root,root)                    %{_prefix}/bin/finger@
+%attr(755,root,root)                    %{_prefix}/bin/http@
+%attr(755,root,root)                    %{_prefix}/bin/tcprules
+%attr(755,root,qmail)                   %{_prefix}/bin/udpclient
+%attr(755,root,qmail)                   %{_prefix}/bin/udplogger
 %endif
 
 %if %nolibdkim == 0
@@ -1235,12 +1239,12 @@ done
 %attr(444,root,qmail)                   %{shareddir}/boot/upstart
 %attr(444,root,qmail)                   %{shareddir}/boot/systemd
 
-%attr(555,root,qmail)                   %{plugindir}/generic.so
-%attr(555,root,qmail)                   %{plugindir}/smtpd-plugin.so
-%attr(555,root,qmail)                   %{plugindir}/smtpd-plugin0.so
+%attr(755,root,qmail)                   %{plugindir}/generic.so
+%attr(755,root,qmail)                   %{plugindir}/smtpd-plugin.so
+%attr(755,root,qmail)                   %{plugindir}/smtpd-plugin0.so
 %if %tcpserver_plugin != 0
-%attr(555,root,qmail)                   %{plugindir}/qmail_smtpd.so
-%attr(555,root,qmail)                   %{plugindir}/rblsmtpd.so
+%attr(755,root,qmail)                   %{plugindir}/qmail_smtpd.so
+%attr(755,root,qmail)                   %{plugindir}/rblsmtpd.so
 %endif
 
 %license %attr(444,root,qmail)          %{shareddir}/doc/COPYING
@@ -1337,8 +1341,9 @@ done
 %attr(555,root,qmail)                   %{_prefix}/bin/logselect
 %attr(555,root,qmail)                   %{_prefix}/bin/qlogselect
 %attr(555,root,qmail)                   %{_prefix}/sbin/svscan
-%attr(555,root,qmail)                   %{_prefix}/sbin/svscanboot
 %attr(555,root,qmail)                   %{_prefix}/sbin/readproctitle
+
+%attr(555,root,qmail)                   %{libexecdir}/svscanboot
 
 %if %fedorareview == 0
 %docdir %{mandir}
@@ -1493,10 +1498,16 @@ then
   /bin/systemctl stop indimail.service > /dev/null 2>&1
 elif test -x %{_prefix}/sbin/initsvc
 then
-  %{_prefix}/sbin/initsvc -status || /etc/init.d/indimail stop || true
+  if [ -x /etc/init.d/indimail ] ; then
+    %{_prefix}/sbin/initsvc -status || /etc/init.d/indimail stop || true
+  else
+    %{_prefix}/sbin/initsvc -status || true
+  fi
   %{_prefix}/sbin/initsvc -off || true
 else
-  /etc/init.d/indimail stop
+  if [ -x /etc/init.d/indimail ] ; then
+    /etc/init.d/indimail stop
+  fi
   /bin/grep "^SV:" /etc/inittab |/bin/grep svscan |/bin/grep respawn >/dev/null
   if [ $? -eq 0 ] ; then
     /bin/grep -v "svscan" /etc/inittab > /etc/inittab.svctool.$$
@@ -1581,7 +1592,7 @@ if [ $argv1 -eq 2 ] ; then # upgrade
   echo "doing post upgrade activities"
   (
   # selinux
-  %{_prefix}/sbin/svctool --config=selinux
+  %{_prefix}/sbin/svctool --servicedir=%{servicedir} --config=selinux
   ) >> /tmp/indimail-mta-install.log 2>&1
   exit 0
 fi
@@ -1760,7 +1771,7 @@ fi
 
 # ODMR service
 %{_prefix}/sbin/svctool --smtp=366 --odmr --servicedir=%{servicedir} \
-  --query-cache --password-cache
+  --query-cache --password-cache --memory=%{smtp_soft_mem}
 echo "1" > %{servicedir}/qmail-smtpd.366/variables/DISABLE_PLUGIN
 
 # Greylist daemon
@@ -1802,7 +1813,7 @@ fi
 # udplogger service
 %{_prefix}/sbin/svctool --udplogger=3000 --localip=0 --timeout=10 --servicedir=%{servicedir}
 
-%{__cat} <<EOF > %{_prefix}/control/signatures
+%{__cat} <<EOF > %{qsysconfdir}/control/signatures
 # Windows executables seen in active virii
 TVqQAAMAA:
 TVpQAAIAA
@@ -1848,7 +1859,7 @@ do
 done
 
 # selinux
-%{_prefix}/sbin/svctool --config=selinux
+%{_prefix}/sbin/svctool --servicedir=/service --config=selinux
 #
 # Install IndiMail to be started on system boot
 # The add-boot command installs svscan to be started by init, systemd, upstart or launchctl
@@ -2124,6 +2135,13 @@ fi
 [ "$log_dir" != "/" ] && %{__rm} -fr $log_dir
 echo "recreating ld.so cache"
 /sbin/ldconfig
+if [ -x /usr/sbin/selinuxenabled ] ; then
+  /usr/sbin/selinuxenabled
+  if [ $? -eq 0 -a -x /usr/sbin/semodule ] ; then
+	echo "disabling selinux module"
+    /usr/sbin/semodule -r indimail-mta
+  fi
+fi
 if [ -f %{shareddir}/boot/rpm.init ] ; then
   echo "Running Custom Un-Installation Script for postun"
   /bin/sh %{shareddir}/boot/rpm.init postun
