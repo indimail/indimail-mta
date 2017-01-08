@@ -1,5 +1,8 @@
 /*
  * $Log: setup.c,v $
+ * Revision 1.28  2017-01-08 19:04:26+05:30  Cprogrammer
+ * added option to skip devel man pages
+ *
  * Revision 1.27  2016-06-17 17:26:57+05:30  Cprogrammer
  * allow linked dir to have a different basename
  *
@@ -89,7 +92,7 @@
 #include "stralloc.h"
 #include "sgetopt.h"
 
-void            hier(char *, char *);
+void            hier(char *, char *, int);
 int             uidinit(int);
 char           *get_user(uid_t);
 char           *get_group(gid_t);
@@ -559,16 +562,16 @@ main(int argc, char **argv)
 		umask(077);
 	}
 	if (optind + 1 != argc)
-		hier(0, FATAL);
+		hier(0, FATAL, 1);
 	else
-		hier(argv[optind++], FATAL);
+		hier(argv[optind++], FATAL, 1);
 	return (0);
 }
 
 void
 getversion_setup_c()
 {
-	static char    *x = "$Id: setup.c,v 1.27 2016-06-17 17:26:57+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: setup.c,v 1.28 2017-01-08 19:04:26+05:30 Cprogrammer Exp mbhangui $";
 #ifdef INDIMAIL
 	if (x)
 		x = sccsidh;
