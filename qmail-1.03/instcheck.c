@@ -1,5 +1,8 @@
 /*
  * $Log: instcheck.c,v $
+ * Revision 1.24  2017-01-08 19:04:07+05:30  Cprogrammer
+ * added option to skip devel man pages
+ *
  * Revision 1.23  2016-06-17 17:22:00+05:30  Cprogrammer
  * allow linked dir to have a different basename
  *
@@ -71,7 +74,7 @@
 #include "stralloc.h"
 #include "exit.h"
 
-void            hier(char *, char *);
+void            hier(char *, char *, int);
 int             uidinit(int);
 
 #define FATAL "instcheck: fatal: "
@@ -332,17 +335,17 @@ main(int argc, char **argv)
 	if (uidinit(1) == -1)
 		strerr_die2sys(111, FATAL, "unable to get uids/gids: ");
 	if (argc == 1)
-		hier(0, FATAL);
+		hier(0, FATAL, 0);
 	else
 	for (i = 1;i < argc;i++)
-		hier(argv[i], FATAL);
+		hier(argv[i], FATAL, 0);
 	return (0);
 }
 
 void
 getversion_instcheck_c()
 {
-	static char    *x = "$Id: instcheck.c,v 1.23 2016-06-17 17:22:00+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: instcheck.c,v 1.24 2017-01-08 19:04:07+05:30 Cprogrammer Exp mbhangui $";
 	if (x)
 		x++;
 }

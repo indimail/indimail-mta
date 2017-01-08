@@ -1,5 +1,8 @@
 /*
  * $Log: hier.c,v $
+ * Revision 1.224  2017-01-08 19:02:27+05:30  Cprogrammer
+ * skip development man pages if dev_package is 0
+ *
  * Revision 1.223  2017-01-04 15:46:35+05:30  Cprogrammer
  * moved svscanboot to libexecdir
  *
@@ -608,8 +611,9 @@ str_diff(s, t)
 }
 
 void
-hier(inst_dir, fatal)
+hier(inst_dir, fatal, dev_package)
 	char           *inst_dir, *fatal;
+	int             dev_package;
 {
 	char           *auto_cntrl_base, *auto_cntrl_dir, *auto_assgn_base, *auto_assgn_dir;
 	char           *auto_libexec_base, *auto_libexec_dir, *auto_qmail_home = auto_qmail;
@@ -1462,6 +1466,8 @@ hier(inst_dir, fatal)
 	c(mandir,          "man/man8", "run-cleanq.8", uidr, gidr, moder_f);
 	c(mandir,          "man/cat8", "run-cleanq.0", uidr, gidr, moder_f);
 
+	if (!dev_package)
+		return;
 	/*- library */
 	c(mandir,          "man/man3", "alloc.3", uidr, gidr, moder_f);
 	c(mandir,          "man/man3", "case.3", uidr, gidr, moder_f);
@@ -1511,7 +1517,7 @@ hier(inst_dir, fatal)
 void
 getversion_install_big_c()
 {
-	static char    *x = "$Id: hier.c,v 1.223 2017-01-04 15:46:35+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: hier.c,v 1.224 2017-01-08 19:02:27+05:30 Cprogrammer Exp mbhangui $";
 
 #ifdef INDIMAIL
 	if (x)
