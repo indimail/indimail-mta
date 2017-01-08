@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail.spec.in,v 2.360 2017-01-04 21:57:42+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 2.361 2017-01-08 18:54:55+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 
@@ -1121,11 +1121,11 @@ fi
 %attr(444,root,root) %config(noreplace)           %{sysconfdir}/indimail.settings
 %attr(444,root,root) %config(noreplace)           %{sysconfdir}/perm_list
 
-%attr(444,root,root)  %config(noreplace)          %{sysconfdir}/indimail.te
-%attr(444,root,root)  %config(noreplace)          %{sysconfdir}/indimail.fc
+%attr(644,root,qmail) %config(noreplace)          %{sysconfdir}/indimail.te
+%attr(644,root,qmail) %config(noreplace)          %{sysconfdir}/indimail.fc
 %attr(444,root,root)  %config(noreplace)          %{sysconfdir}/qmailprog.list
-%attr(444,root,qmail) %config(noreplace)          %{sysconfdir}/etc/leapsecs.dat
-%attr(444,root,qmail) %config(noreplace)          %{sysconfdir}/etc/leapsecs.txt
+%attr(644,root,qmail) %config(noreplace)          %{sysconfdir}/etc/leapsecs.dat
+%attr(644,root,qmail) %config(noreplace)          %{sysconfdir}/etc/leapsecs.txt
 # logalert
 %attr(444,root,qmail) %config(noreplace)          %{sysconfdir}/logalert_perm_list
 
@@ -1543,8 +1543,8 @@ fi
 %attr(755,root,root)                    %{_prefix}/bin/finger@
 %attr(755,root,root)                    %{_prefix}/bin/http@
 %attr(755,root,root)                    %{_prefix}/bin/tcprules
-%attr(755,root,root)                    %{_prefix}/bin/udplogger
-%attr(755,root,root)                    %{_prefix}/bin/udpclient
+%attr(755,root,qmail)                   %{_prefix}/bin/udplogger
+%attr(755,root,qmail)                   %{_prefix}/bin/udpclient
 # bogofilter
 %if %nobogofilter == 0
 %attr(6551,root,indimail)               %{_prefix}/bin/bogofilter
@@ -2400,7 +2400,7 @@ if [ $argv1 -eq 2 ] ; then # upgrade
   echo "doing post upgrade activities"
   (
   # selinux
-  %{_prefix}/sbin/svctool --config=selinux
+  %{_prefix}/sbin/svctool --servicedir=%{servicedir} --config=selinux
   ) >> /tmp/indimail-install.log 2>&1
   exit 0
 fi
@@ -2848,7 +2848,7 @@ do
 done
 
 # selinux
-%{_prefix}/sbin/svctool --config=selinux
+%{_prefix}/sbin/svctool --servicedir=%{servicedir} --config=selinux
 
 #
 # Install IndiMail to be started on system boot
@@ -3095,9 +3095,6 @@ do
       %{__rm} -f $j.cdb
   done
 done
-if [ -d %{sysconfdir} ] ; then
-/bin/rmdir --ignore-fail-on-non-empty %{sysconfdir} 2>/dev/null
-fi
 for i in assign cdb
 do
     %{__rm} -f %{sysconfdir}/users/$i
@@ -3130,6 +3127,9 @@ if [ -d %{sysconfdir}/control ] ; then
 fi
 if [ -d %{sysconfdir}/control/defaultqueue ] ; then
 %{__rm} -rf %{sysconfdir}/control/defaultqueue
+fi
+if [ -d %{sysconfdir} ] ; then
+/bin/rmdir --ignore-fail-on-non-empty %{sysconfdir} 2>/dev/null
 fi
 
 for i in postmaster mailer-daemon root ham spam register-ham register-spam
@@ -3207,6 +3207,14 @@ fi
 echo "recreating ld.so cache"
 /sbin/ldconfig
 %endif
+
+if [ -x /usr/sbin/selinuxenabled ] ; then
+  /usr/sbin/selinuxenabled
+  if [ $? -eq 0 -a -x /usr/sbin/semodule ] ; then
+	echo "disabling selinux module"
+    /usr/sbin/semodule -r indimail
+  fi
+fi
 
 if [ -f %{shareddir}/boot/rpm.init ] ; then
   echo "Running Custom Un-Installation Script for postun"
