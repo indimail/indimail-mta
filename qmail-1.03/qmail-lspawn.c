@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-lspawn.c,v $
+ * Revision 1.22  2017-01-09 19:36:15+05:30  Cprogrammer
+ * use postmaster@virtualdomain for null user (bounce)
+ *
  * Revision 1.21  2016-05-18 15:16:10+05:30  Cprogrammer
  * use env variable ASSIGNDIR or auto_assign for users/cdb file
  *
@@ -314,7 +317,7 @@ spawn(fdmess, fdout, msgsize, sender, qqeh, recip, at)
 			return (-1);
 		for(cptr = user, ptr = recip + f + 1;*ptr && *ptr != '@';*cptr++ = *ptr++);
 		*cptr = 0;
-		if ((pw = (struct passwd *) vauth_getpw(user, recip + at + 1)))
+		if ((pw = (struct passwd *) vauth_getpw(*user ? user : "postmaster", recip + at + 1)))
 		{
 			snprintf(pwstruct, sizeof(pwstruct), "PWSTRUCT=%s@%s:%s:%d:%d:%s:%s:%s:%d", 
 				pw->pw_name,
@@ -331,7 +334,7 @@ spawn(fdmess, fdout, msgsize, sender, qqeh, recip, at)
 		{
 			if (userNotFound)
 			{
-				snprintf(pwstruct, sizeof(pwstruct), "PWSTRUCT=No such user %s@%s", user, recip + at + 1);
+				snprintf(pwstruct, sizeof(pwstruct), "PWSTRUCT=No such user %s@%s", *user ? user : "postmaster", recip + at + 1);
 				if (!env_put(pwstruct))
 					return (-1);
 			} else
@@ -434,7 +437,7 @@ spawn(fdmess, fdout, msgsize, sender, qqeh, recip, at)
 void
 getversion_qmail_lspawn_c()
 {
-	static char    *x = "$Id: qmail-lspawn.c,v 1.21 2016-05-18 15:16:10+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-lspawn.c,v 1.22 2017-01-09 19:36:15+05:30 Cprogrammer Exp mbhangui $";
 
 #ifdef INDIMAIL
 	if (x)
