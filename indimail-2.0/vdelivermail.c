@@ -1,5 +1,8 @@
 /*
  * $Log: vdelivermail.c,v $
+ * Revision 2.63  2017-01-09 19:38:54+05:30  Cprogrammer
+ * initialize user, domain, bounce, userext variables
+ *
  * Revision 2.62  2016-05-25 09:08:03+05:30  Cprogrammer
  * use LIBEXECDIR for overquota.sh
  *
@@ -270,7 +273,7 @@
 #include <sys/wait.h>
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vdelivermail.c,v 2.62 2016-05-25 09:08:03+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: vdelivermail.c,v 2.63 2017-01-09 19:38:54+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 /*- Globals */
@@ -334,7 +337,9 @@ main(int argc, char **argv)
 	/*
 	 * get the arguments to the program and setup things 
 	 */
+	*TheUser = *TheDomain = *Bounce = 0;
 #ifdef QMAIL_EXT
+	*TheUserExt = 0;
 	get_arguments(argc, argv, TheUser, TheDomain, TheUserExt, Bounce);
 #else
 	get_arguments(argc, argv, TheUser, TheDomain, 0, Bounce);
