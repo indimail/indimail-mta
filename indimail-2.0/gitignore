@@ -11,6 +11,7 @@ Makefile
 Makefile.in
 configure
 post_handle
+indimail_config
 INSTALL
 INSTALL-MINI
 INSTALL-MYSQL
