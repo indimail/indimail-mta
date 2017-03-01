@@ -1,5 +1,8 @@
 /*
  * $Log: rblsmtpd.c,v $
+ * Revision 1.15  2017-03-01 22:52:13+05:30  Cprogrammer
+ * reset optind as it gets called in tcpserver and rblsmtpd.so might be loaded as shared object
+ *
  * Revision 1.14  2016-05-15 22:41:42+05:30  Cprogrammer
  * rblsmtpd() function for use as shared object
  *
@@ -70,7 +73,7 @@
 #define FATAL "rblsmtpd: fatal: "
 
 #ifndef	lint
-static char     sccsid[] = "$Id: rblsmtpd.c,v 1.14 2016-05-15 22:41:42+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: rblsmtpd.c,v 1.15 2017-03-01 22:52:13+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 void
@@ -587,6 +590,8 @@ rblsmtpd(int argc, char **argv, char **envp)
 		buffer_flush(buffer_2);
 #endif
 	}
+	/*- reset optind as it gets called in tcpserver and rblsmtpd.so might be loaded as shared object */
+	optind = 1;
 	while ((opt = getopt(argc, argv, "bBcCt:r:a:")) != opteof)
 	{
 		switch (opt)
