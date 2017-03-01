@@ -1,4 +1,6 @@
-%define _prefix            @prefix@
+%global _prefix            @prefix@
+%global mandir             @mandir@
+%global sysconfdir         @sysconfdir@
 %define debug_package %{nil}
 
 %if 0%{?opensuse_bs}
@@ -49,42 +51,22 @@ incoming mail automatically.  SmartList also needs procmail to operate.
 %setup
 
 %build
-%if 0%{?mandriva_version} > 2009
-	/bin/rm m4/*
-	aclocal
-	libtoolize --force
-	autoheader
-	autoconf
-	automake
-./configure --prefix=%{_prefix} --mandir=%{_prefix}/man \
-	--sysconfdir=%{_prefix}/etc \
-	--enable-sendmail-prog=%{_prefix}/bin/sendmail
-%else
-%configure --prefix=%{_prefix} --mandir=%{_prefix}/man \
-	--sysconfdir=%{_prefix}/etc \
-	--enable-sendmail-prog=%{_prefix}/bin/sendmail
-%endif
+%configure --prefix=%{_prefix} --enable-sendmail-prog=%{_prefix}/bin/sendmail \
+	--sysconfdir=/etc/indimail
 
 %install
 [ "$RPM_BUILD_ROOT" != "/" ] && %{__rm} -fr $RPM_BUILD_ROOT
 %{__make} -s DESTDIR=%{buildroot}
 %{__make} -s DESTDIR=%{buildroot} install-strip
-find %{buildroot}%{_prefix}/man -type f -exec gzip -q {} \;
+find %{buildroot}%{mandir} -type f -exec gzip -q {} \;
 
 %files
-%dir %attr(555,root,qmail)        %{_prefix}
-%dir %attr(555,root,qmail)        %{_prefix}/bin
-%dir %attr(555,root,qmail)        %{_prefix}/etc
-%dir %attr(555,root,qmail)        %{_prefix}/man
-%dir %attr(555,root,qmail)        %{_prefix}/man/man1
-%dir %attr(555,root,qmail)        %{_prefix}/man/man5
-
 %attr(4511,root,root)              %{_prefix}/bin/procmail
 %attr(555,root,root)               %{_prefix}/bin/lockfile
 %attr(555,root,root)               %{_prefix}/bin/formail
-%attr(444,root,root)               %{_prefix}/etc/procmail_perm_list
+%attr(444,root,root)               %{sysconfdir}/procmail_perm_list
 %defattr(-,root,root)
-%doc %attr(444,root,qmail)         %{_prefix}/man/*/*
+%attr(644,root,root)               %{mandir}/man[1,5]/*
 %doc [A-Z]* examples
 
 %changelog
