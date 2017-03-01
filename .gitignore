@@ -449,3 +449,4 @@ ripmime-*/ripole
 ripmime-*/stamp-h1
 rpmbuild/
 ucspi-tcp-*/*.lib
+indimail-2.*/migrate1to2
