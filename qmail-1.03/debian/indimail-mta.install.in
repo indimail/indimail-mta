@@ -9,6 +9,7 @@ var/indimail/control   /var/indimail
 var/indimail/users     /var/indimail
 usr/bin                /usr
 usr/sbin               /usr
+usr/libexec            /usr
 usr/share/indimail/*   /usr/share/indimail
 usr/lib/indimail       /usr/lib
 usr/share/man/man1     /usr/share/man
