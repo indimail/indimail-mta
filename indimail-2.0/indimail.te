@@ -1,5 +1,8 @@
 #
 # $Log: indimail.te,v $
+# Revision 2.19  2017-03-01 23:08:59+05:30  Cprogrammer
+# added selinux rules
+#
 # Revision 2.18  2017-01-04 21:46:15+05:30  Cprogrammer
 # added rules for fifo
 #
@@ -55,7 +58,7 @@
 # selinux module config
 #
 #
-# $Id: indimail.te,v 2.18 2017-01-04 21:46:15+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.te,v 2.19 2017-03-01 23:08:59+05:30 Cprogrammer Exp mbhangui $
 # 
 #
 # semanage permissive -a svc_start_t
@@ -261,6 +264,8 @@ allow svc_start_t var_t:fifo_file { open read };
 
 allow init_t var_t:file { execute execute_no_trans ioctl open read };
 allow init_t root_t:fifo_file { open write };
+allow init_t user_tmp_t:file open;
+allow init_t svc_svc_t:dir read;
 
 #============= svc_run_t ==============
 
