@@ -13,6 +13,7 @@ qmaildir=$(shell head -1 conf-qmail 2>/dev/null)
 mandir=$(shell echo `head -1 conf-prefix`/share/man 2>/dev/null)
 shareddir=$(shell head -1 conf-shared 2>/dev/null)
 sysconfdir=$(shell head -1 conf-sysconfdir 2>/dev/null)
+libexecdir=$(shell head -1 conf-libexec 2>/dev/null)
 servicedir=/service
 
 edit = sed \
@@ -3047,11 +3048,12 @@ distclean: clean
 	rm -f lib_deps inc_deps
 
 install: \
-it man leapsecs.dat conf-sysconfdir
+it man leapsecs.dat conf-sysconfdir perm_list
 	if test ! -d $(DESTDIR)"`head -1 conf-sysconfdir`" ; then \
 		mkdir -p $(DESTDIR)"`head -1 conf-sysconfdir`" ; \
 	fi ;
-	./setup -d $(DESTDIR) $(QMAILDIR) > $(DESTDIR)"`head -1 conf-sysconfdir`"/qmailprog.list
+	./setup -d $(DESTDIR) $(QMAILDIR) > $(DESTDIR)"`head -1 conf-sysconfdir`"/qmailprog.list && \
+	cp perm_list $(DESTDIR)"`head -1 conf-sysconfdir`"
 
 sgetopt.o: \
 compile sgetopt.c subfd.h substdio.h sgetopt.h subgetopt.h \
