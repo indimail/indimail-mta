@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail-mta.spec,v 1.71 2017-01-08 19:03:25+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail-mta.spec,v 1.72 2017-03-01 22:54:59+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 
@@ -626,6 +626,7 @@ done
 %dir %attr(555,root,qmail)            %{plugindir}
 
 %attr(444,root,root) %config(noreplace)           %{qsysconfdir}/controlfiles
+%attr(444,root,root) %config(noreplace)           %{qsysconfdir}/perm_list
 
 %ghost %config(noreplace,missingok)               %{qsysconfdir}/tcp.smtp
 %ghost %config(noreplace,missingok)               %{qsysconfdir}/tcp.qmtp
