@@ -15,9 +15,9 @@ usr/bin/tai64nlocal /usr/bin
 usr/bin/tai2tai64n /usr/bin
 usr/bin/tai64n2tai /usr/bin
 usr/bin/tai64nunix /usr/bin
-usr/bin/leapsecs /usr/bin
-usr/bin/nowutc /usr/bin
-usr/bin/yearcal /usr/bin
+usr/libexec/indimail/leapsecs /usr/libexec/indimail
+usr/libexec/indimail/nowutc /usr/libexec/indimail
+usr/libexec/indimail/yearcal /usr/libexec/indimail
 usr/bin/spipe /usr/bin
 usr/bin/qfilelog /usr/bin
 usr/bin/multipipe /usr/bin
@@ -25,10 +25,10 @@ usr/bin/teepipe /usr/bin
 usr/bin/multitail /usr/bin
 usr/bin/logselect /usr/bin
 usr/bin/qlogselect /usr/bin
-usr/bin/multirotate /usr/bin
-usr/sbin/readproctitle /usr/bin
-usr/sbin/svscan /usr/bin
-usr/sbin/svscanboot /usr/bin
+usr/sbin/readproctitle /usr/sbin
+usr/sbin/svscan /usr/sbin
+usr/libexec/indimail/svscanboot /usr/libexec/indimail
+etc/indimail/perm_list           /etc/indimail/daemontools_perm_list
 usr/share/man/man1/spipe.1.gz /usr/share/man/man1
 usr/share/man/man1/qfilelog.1.gz /usr/share/man/man1
 usr/share/man/man1/multipipe.1.gz /usr/share/man/man1
