@@ -137,7 +137,6 @@
 %attr(0755,root,qmail) @prefix@/bin/qmail-dkim
 %attr(0755,root,qmail) @prefix@/bin/qmail-greyd
 %attr(0755,root,qmail) @prefix@/bin/qmail-inject
-%attr(0755,root,qmail) @prefix@/bin/qmail-lagcheck
 %attr(0755,root,qmail) @prefix@/bin/qmail-pop3d
 %attr(0755,root,qmail) @prefix@/bin/qmail-popbull
 %attr(0755,root,qmail) @prefix@/bin/qmail-poppass
@@ -364,6 +363,7 @@
 %attr(0755,root,qmail) @libexecdir@/testmra
 %attr(0755,root,qmail) @libexecdir@/mail_report
 %attr(0755,root,qmail) @libexecdir@/copyemail
+%attr(0755,root,qmail) @libexecdir@/qmail-lagcheck
 
 %attr(0755,root,qmail) @libexecdir@/zsuids
 %attr(0755,root,qmail) @libexecdir@/ddist
