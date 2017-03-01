@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail.spec.in,v 2.361 2017-01-08 18:54:55+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 2.362 2017-01-10 19:27:10+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 
@@ -171,7 +171,7 @@ Source9:  http://downloads.sourceforge.net/%{name}/nssd-%{nssd_version}.tar.gz
 Source10: http://downloads.sourceforge.net/bogofilter/bogofilter-%{bogofilter_version}.tar.bz2
 %endif
 %if %nofetchmail == 0
-Source11: http://downloads.sourceforge.net/fetchmail/fetchmail-%{fetchmail_version}.tar.xz 
+Source11: http://downloads.sourceforge.net/fetchmail/fetchmail-%{fetchmail_version}.tar.xz
 %endif
 %if %noclamav == 0
 Source12: http://downloads.sourceforge.net/clamav/clamav-%{clamav_version}.tar.gz
@@ -334,8 +334,8 @@ BuildRequires: sharutils
 %endif
 
 %if 0%{?suse_version}
-BuildRequires: -post-build-checks  
-#!BuildIgnore: post-build-checks  
+BuildRequires: -post-build-checks
+#!BuildIgnore: post-build-checks
 #!BuildIgnore: brp-check-suse
 %endif
 %endif
@@ -367,7 +367,7 @@ BuildRoot: %(mktemp -ud %{_tmppath}/%{name}-%{version}-%{release}-XXXXXXX)
 #
 # IndiMail is choosy and runs on reliable OS only
 #
-Excludeos: windows 
+Excludeos: windows
 
 %description
 IndiMail is a messaging platform built using following packages
@@ -392,7 +392,7 @@ You can read the feature list to get an idea of the changes and new
 features that have been added over the original packages.
 
 The package combines qmail with other packages like courier-imap for
-IMAP/POP3, bogofilter for SPAM control, fetchmail for hosts with 
+IMAP/POP3, bogofilter for SPAM control, fetchmail for hosts with
 intermittent connectivity. IndiMail provides ability for a single domain
 to have users across multiple hosts (even across different geographical
 locations) and tools to manage virtual domains ?
@@ -614,7 +614,7 @@ if [ -d ../qmail-%{qmail_version} ] ; then
   echo "qmails"
   echo %username
   echo "qscand"
-  echo 
+  echo
   echo "The qmail system is heavily partitioned for security; it does almost"
   echo "nothing as root."
   echo
@@ -954,7 +954,6 @@ if [ -x /usr/bin/chrpath ] ; then
   /usr/bin/chrpath -d %{buildroot}%{_prefix}/sbin/pam-checkpwd
 fi
 
-
 if [ -x /bin/touch ] ; then
   TOUCH=/bin/touch
 elif [ -x /usr/bin/touch ] ; then
@@ -965,7 +964,7 @@ fi
 # Create these files so that %%ghost does not complain
 for i in indimail.cnf tcp.imap tcp.imap.cdb tcp.pop3 tcp.pop3.cdb \
 tcp.smtp tcp.smtp.cdb tcp.qmtp tcp.qmtp.cdb tcp.qmqp tcp.qmqp.cdb \
-tcp.poppass tcp.poppass.cdb
+tcp.poppass tcp.poppass.cdb procmailrc
 do
   if [ ! -f %{buildroot}%{sysconfdir}/$i ] ; then
     $TOUCH %{buildroot}%{sysconfdir}/$i
@@ -977,7 +976,7 @@ done
 (
 for i in `%{__cat} %{buildroot}%{sysconfdir}/controlfiles`
 do
-  echo "%ghost %config(noreplace,missingok)               %{sysconfdir}/control/$i"
+  echo "%ghost %config(noreplace,missingok)   %{sysconfdir}/control/$i"
   $TOUCH %{buildroot}%{sysconfdir}/control/$i
 done
 ) > config_files.list
@@ -1088,12 +1087,15 @@ fi
 # are uninstalled when the package is removed but may not exist until
 # they are created during post-install should be marked as follows:
 # %%ghost filename
+%ghost %attr(0644,root,root) %config(noreplace,missingok) %{sysconfdir}/users/assign
+%ghost %attr(0644,root,root) %config(noreplace,missingok) %{sysconfdir}/users/cdb
 %if %nobogofilter == 0
 %ghost %config(noreplace,missingok)               %{sysconfdir}/bogofilter.cf
 %endif
 %if %nofetchmail == 0
 %ghost %config(noreplace,missingok)               %{sysconfdir}/fetchmailrc
 %endif
+%ghost %config(noreplace,missingok)               %{sysconfdir}/procmailrc
 
 %ghost %config(noreplace,missingok)               %{sysconfdir}/indimail.cnf
 %if %nonssd == 0
@@ -1114,6 +1116,10 @@ fi
 %ghost %attr(0644,indimail,indimail)              %{sysconfdir}/tcp.imap.cdb
 %ghost %attr(0644,indimail,indimail)              %{sysconfdir}/tcp.pop3.cdb
 %ghost %attr(0644,indimail,indimail)              %{sysconfdir}/tcp.poppass.cdb
+#
+#
+%ghost %attr(0644,root,root)                      %{sysconfdir}/indimail.pp
+%ghost %attr(0644,root,root)                      %{sysconfdir}/indimail.mod
 
 %attr(444,root,root) %config(noreplace)           %{sysconfdir}/cronlist
 %attr(444,root,root) %config(noreplace)           %{sysconfdir}/indimail.mrtg.cfg
@@ -1754,8 +1760,6 @@ fi
 %attr(664,qscand,qscand) %config(noreplace) %{shareddir}/clamd/main.cvd
 %attr(664,qscand,qscand) %config(noreplace) %{shareddir}/clamd/daily.cvd
 %endif
-%attr(644,root,root)                        %{sysconfdir}/clamd.conf.sample
-%attr(644,root,root)                        %{sysconfdir}/freshclam.conf.sample
 %endif
 
 %if %nofetchmail == 0
@@ -2172,7 +2176,7 @@ fi
 #   5. preun of old package
 #   6. (removal of old package)
 #   7. postun of old package
-#   8. posttrans of new package 
+#   8. posttrans of new package
 
 ### SCRIPTLET ###############################################################################
 %verifyscript
@@ -2250,7 +2254,7 @@ if [ -d %{_prefix} -a -d /service ] ; then
 fi
 
 ### SCRIPTLET ###############################################################################
-%pre 
+%pre
 argv1=$1
 ID=$(id -u)
 if [ $ID -ne 0 ] ; then
@@ -2411,7 +2415,7 @@ if [ -d %{_sysconfdir}/ld.so.conf.d ] ; then
   (
     echo %{_libdir}
     if [ -f %{mysqlPrefix}/%{_lib}/mysql/libmysqlclient.so ] ; then
-      echo %{mysqlPrefix}/%{_lib}/mysql 
+      echo %{mysqlPrefix}/%{_lib}/mysql
     elif [ -f %{mysqlPrefix}/%{_lib}/libmysqlclient.so ] ; then
       echo %{mysqlPrefix}/%{_lib}
     fi
@@ -2579,7 +2583,7 @@ do
     # local authenticated users
     # why bother with spamfilter
     # if you do, then you have a serious
-    # problem with your organization, not 
+    # problem with your organization, not
     # with IndiMail
     spamfilter=0
     extra_opt="--skipsend --authsmtp --antispoof"
@@ -3065,17 +3069,13 @@ echo "removing architecture-independent shared directory"
 fi
 
 echo "removing configuration"
-for i in backup.conf cronlist indimail.te \
-    imapd.cnf imapd.dist imapd-ssl.dist inc_deps indimail.mrtg.cfg \
-    indimail.settings lib_deps osh.table perm_list pop3d.cnf \
-    pop3d.dist pop3d-ssl.dist qmailprog.list quotawarnmsg.example \
-    system.module
+for i in indimail.cnf procmailrc
 do
   %{__rm} -f %{sysconfdir}/$i
 done
 for i in /etc /etc/my.cnf.d /etc/mysql
 do
-  %{__rm} -f $i/indimail.cnf 
+  %{__rm} -f $i/indimail.cnf
 done
 
 if [ %nofetchmail -eq 0 ] ; then
@@ -3088,17 +3088,6 @@ fi
   %{__rm} -f %{sysconfdir}/nssd.conf
 %endif
 
-for i in smtp qmtp qmqp imap pop3 poppass
-do
-  for j in `/bin/ls %{sysconfdir}/tcp*.$i 2>/dev/null`
-  do
-      %{__rm} -f $j.cdb
-  done
-done
-for i in assign cdb
-do
-    %{__rm} -f %{sysconfdir}/users/$i
-done
 if [ -d %{sysconfdir}/users ] ; then
 /bin/rmdir --ignore-fail-on-non-empty %{sysconfdir}/users 2>/dev/null
 fi
@@ -3110,14 +3099,14 @@ if [ -f %{sysconfdir}/controlfiles ] ; then
   done
 else
   for i in databytes defaultdelivery defaultdomain localiphost locals \
-    me nodnscheck plusdomain queue_base smtpgreeting signatures \
+    me nodnscheck plusdomain queue_base smtpgreeting \
     chkrcptdomains defaulthost envnoathost filterargs greylist.white \
-    hostip timeoutremote timeoutsmtpd tlsserverciphers dnsbllist
+    hostip timeoutremote timeoutsmtpd tlsserverciphers dnsbllist \
+    doublebounceto doublebouncehost
   do
     %{__rm} -f %{sysconfdir}/control/$i
   done
 fi
-%{__rm} -f %{sysconfdir}/controlfiles
 %{__rm} -f %{sysconfdir}/control/domainkeys/%{dkimkeyfn}.pub %{sysconfdir}/control/domainkeys/%dkimkeyfn
 if [ -d %{sysconfdir}/control/domainkeys ] ; then
 /bin/rmdir --ignore-fail-on-non-empty %{sysconfdir}/control/domainkeys 2>/dev/null
@@ -3186,9 +3175,6 @@ do
 done
 fi
 
-#selinux
-%{__rm} -f %{sysconfdir}/indimail.te %{sysconfdir}/indimail.mod %{sysconfdir}/indimail.pp %{sysconfdir}/indimail.fc
-
 echo "removing logs"
 %{__rm} -f %{indimaildir}/mysqldb/logs/logisam.log
 %{__rm} -f %{indimaildir}/mysqldb/logs/logquery
@@ -3211,7 +3197,7 @@ echo "recreating ld.so cache"
 if [ -x /usr/sbin/selinuxenabled ] ; then
   /usr/sbin/selinuxenabled
   if [ $? -eq 0 -a -x /usr/sbin/semodule ] ; then
-	echo "disabling selinux module"
+    echo "disabling selinux module"
     /usr/sbin/semodule -r indimail
   fi
 fi
