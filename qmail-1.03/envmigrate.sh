@@ -1,4 +1,7 @@
 # $Log: envmigrate.sh,v $
+# Revision 1.3  2017-03-01 22:53:59+05:30  Cprogrammer
+# secure permission for env variables
+#
 # Revision 1.2  2004-02-13 14:49:09+05:30  Cprogrammer
 # removed #!/bin/sh as it is auto generated
 #
@@ -19,6 +22,7 @@ file=`basename $1`
 mv $1 $1.tmp
 if [ $? = 0 ] ; then
 	mkdir $1
+	chmod 500 $1
 	if [ $? = 0 ] ; then
 		mv $1.tmp $1/."$file"
 	else
