@@ -40,13 +40,13 @@ formail_DEPENDENCIES=common.$(OBJEXT) fields.$(OBJEXT) formisc.$(OBJEXT) sublib.
 authenticate.$(OBJEXT): authenticate.c
 	$(COMPILE) -DPROCMAIL -DHAVE_CONFIG_H -c authenticate.c
 
-procmail: procmail.$(OBJEXT) $(procmail_DEPENDENCIES)
+procmail$(EXEEXT): procmail.$(OBJEXT) $(procmail_DEPENDENCIES)
 	$(COMPILE) $(CFLAGS) $@.$(OBJEXT) $(procmail_DEPENDENCIES) -o $@ $(LDFLAGS) $(procmail_LDADD)
 
-lockfile: lockfile.$(OBJEXT) $(lockfile_DEPENDENCIES)
+lockfile$(EXEEXT): lockfile.$(OBJEXT) $(lockfile_DEPENDENCIES)
 	$(COMPILE) $(CFLAGS) $@.$(OBJEXT) $(lockfile_DEPENDENCIES) -o $@ $(LDFLAGS) $(lockfile_LDADD)
 
-formail: formail.$(OBJEXT) $(formail_DEPENDENCIES)
+formail$(EXEEXT): formail.$(OBJEXT) $(formail_DEPENDENCIES)
 	$(COMPILE) $(CFLAGS) $@.$(OBJEXT) $(formail_DEPENDENCIES) -o $@ $(LDFLAGS)
 
 man_MANS=procmail.1 formail.1 lockfile.1 procmailrc.5 procmailsc.5 procmailex.5
@@ -83,6 +83,8 @@ edit = sed \
 	-e 's,@DESTDIR\@,$(DESTDIR),g' \
 	-e 's,@HOST\@,$(host),g' \
 	-e 's,@DATE\@,$(DATE),g' \
+	-e 's,@mandir\@,$(mandir),g' \
+	-e 's,@sysconfdir\@,$(sysconfdir),g' \
 	-e 's,@prefix\@,$(prefix),g'
 
 procmail-@VERSION@-rpmlintrc: procmail-rpmlintrc.in
@@ -95,7 +97,7 @@ procmail_perm_list: procmail_perm_list.in
 	$(edit) $@.in > $@
 
 install-data-hook:
-	$(INSTALL_DATA) procmail_perm_list $(DESTDIR)@prefix@/etc/procmail_perm_list  || exit 1
+	$(INSTALL_DATA) procmail_perm_list $(DESTDIR)$(sysconfdir)/procmail_perm_list  || exit 1
 	if test `@idcommand@` = "0" ; then \
 		chown root:indimail $(DESTDIR)$(bindir)/procmail || true; \
 		chmod 4511 $(DESTDIR)$(bindir)/procmail || true; \
