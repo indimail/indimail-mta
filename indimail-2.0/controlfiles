@@ -112,3 +112,5 @@ goodrcptpatterns
 qbase
 greylist.white
 domainqueue
+queue_base
+dnsbllist
