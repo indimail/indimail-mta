@@ -59,6 +59,8 @@ bogofilter-*/trio/.deps/
 bogofilter-*/trio/Makefile
 bogofilter-*/trio/Makefile.in
 bogofilter-*/trio/README
+courier-imap-*/courier-imap.spec
+courier-imap-*/m4
 courier-imap-*/.gitignore
 courier-imap-*/COPYING
 courier-imap-*/INSTALL
@@ -72,6 +74,10 @@ courier-imap-*/config.sub
 courier-imap-*/configure
 courier-imap-*/depcomp
 courier-imap-*/install-sh
+courier-imap-*/libs/makedat/Makefile.in
+courier-imap-*/libs/makedat/aclocal.m4
+courier-imap-*/libs/makedat/config.h.in
+courier-imap-*/libs/makedat/configure
 courier-imap-*/libs/authlib/COPYING
 courier-imap-*/libs/authlib/INSTALL
 courier-imap-*/libs/authlib/Makefile.in
