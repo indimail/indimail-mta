@@ -1,5 +1,5 @@
 Source: indimail-mta
-Section: misc
+Section: mail
 Priority: extra
 Maintainer: Manvendra Bhangui <manvendra@indimail.org>
 Standards-Version: 3.9.1
