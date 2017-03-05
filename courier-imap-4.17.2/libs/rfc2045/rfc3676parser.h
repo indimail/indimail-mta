@@ -9,7 +9,7 @@
 */
 
 #include	"rfc2045/rfc2045_config.h"
-#include	<unicode/unicode.h>
+#include	"unicode/unicode.h"
 #include	<stdlib.h>
 #include	<string.h>
 

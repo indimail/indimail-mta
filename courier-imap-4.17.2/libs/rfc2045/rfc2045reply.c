@@ -10,7 +10,7 @@
 #include	"rfc822/rfc2047.h"
 #include	"rfc2045charset.h"
 #include	"rfc822/rfc822.h"
-#include	<unicode/unicode.h>
+#include	"unicode/unicode.h"
 #include	<stdio.h>
 #include	<unistd.h>
 #include	<stdlib.h>

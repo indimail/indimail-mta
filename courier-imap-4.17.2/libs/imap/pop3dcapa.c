@@ -55,12 +55,12 @@ const char *pop3_externalauth()
 	return external;
 }
 
-void pop3dcapa(int type)
+void pop3dcapa()
 {
 	const char *p, *q;
 	const char *external=pop3_externalauth();
 
-	printf(type ? "+OK AUTH methods supported:\r\n" : "+OK Here's what I can do:\r\n");
+	printf("+OK Here's what I can do:\r\n");
 
 	if ((p=getenv("POP3_TLS")) != 0 && atoi(p) &&
 	    (p=getenv("POP3AUTH_TLS")) != 0 && *p)
@@ -76,39 +76,12 @@ void pop3dcapa(int type)
 		if (!external)
 			external="";
 
-		if (type)
-		{
-			for (q = p;*q;q++)
-			{
-				if (isspace(*q))
-				{
-					putchar('\r');
-					putchar('\n');
-				} else
-					putchar(*q);
-			}
-			if (*p && *external)
-			{
-				putchar('\r');
-				putchar('\n');
-				printf("EXTERNAL\r\n.\r\n");
-			} else
-				printf("\r\n.\r\n");
-		} else
-			printf("SASL %s%s%s\r\n", p, *p && *external ? " ":"",
-		       *external ? "EXTERNAL":"");
+		printf("SASL %s%s%s\r\n", p, *p && *external ? " ":"",
+	       *external ? "EXTERNAL":"");
 	} else
-	{
-		if (type)
-			printf("LOGIN\r\nPLAIN\r\nCRAM-MD5\r\nCRAM-SHA1\r\nCRAM-SHA256\r\n.\r\n");
-		else
-			printf("SASL LOGIN PLAIN CRAM-MD5 CRAM-SHA1 CRAM-SHA256\r\n");
-	}
-	if (!type)
-	{
-		if (have_starttls())
-			printf("STLS\r\n");
-		printf("TOP\r\nUSER\r\nLOGIN-DELAY 10\r\nPIPELINING\r\nUIDL\r\n.\r\n");
-	}
+		printf("SASL LOGIN PLAIN CRAM-MD5 CRAM-SHA1 CRAM-SHA256\r\n");
+	if (have_starttls())
+		printf("STLS\r\n");
+	printf("TOP\r\nUSER\r\nLOGIN-DELAY 10\r\nPIPELINING\r\nUIDL\r\n.\r\n");
 	fflush(stdout);
 }

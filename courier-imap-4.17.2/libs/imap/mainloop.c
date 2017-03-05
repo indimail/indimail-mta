@@ -25,7 +25,7 @@
 
 static const char rcsid[]="$Id: mainloop.c,v 1.10 2006/07/07 23:17:18 mrsam Exp $";
 
-extern int do_imap_command(const char *);
+extern int do_imap_command(const char *, int *);
 
 extern unsigned long header_count, body_count;
 extern unsigned long bytes_received_count, bytes_sent_count;
@@ -137,18 +137,21 @@ void mainloop(void)
 			curtoken->tokentype == IT_NUMBER)
 		{
 		int	rc;
+		int flushflag = 0;
 
 			if (strlen(tag)+strlen(curtoken->tokenbuf) > max_atom_size)
 				write_error_exit("max atom size too small");
 		  		
 			strncat(tag, curtoken->tokenbuf, max_atom_size);
-			rc=do_imap_command(tag);
+			rc=do_imap_command(tag, &flushflag);
 
 			if (rc == 0)
 			{
 				noerril = 0;
 				writeflush();
 				read_eol();
+				if (flushflag)
+					readflush();
 				continue;
 			}
 			if (rc == -2)

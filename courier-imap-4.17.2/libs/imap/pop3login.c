@@ -244,7 +244,7 @@ main(int argc, char **argv)
 			} else
 			if (strcmp(p, "CAPA") == 0)
 			{
-				pop3dcapa(0);
+				pop3dcapa();
 				continue;
 			} else
 			if (strcmp(p, "STLS") == 0)
@@ -292,7 +292,7 @@ main(int argc, char **argv)
 					continue;
 				} else
 				{
-					pop3dcapa(1);
+					pop3dcapa();
 					continue;
 				}
 			} else

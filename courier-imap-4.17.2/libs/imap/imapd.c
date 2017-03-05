@@ -14,11 +14,8 @@
 #include	<signal.h>
 #include	<fcntl.h>
 #include	<pwd.h>
-#ifdef HAVE_SYS_UTSNAME_H
-#include    <sys/utsname.h>
-#endif
-#if	HAVE_UNISTD_H
-#include	<unistd.h>
+#if HAVE_UNISTD_H
+#include <unistd.h>
 #endif
 #if HAVE_DIRENT_H
 #include <dirent.h>
@@ -52,6 +49,9 @@
 #if HAVE_LOCALE_H
 #include	<locale.h>
 #endif
+#ifdef HAVE_SYS_UTSNAME_H
+#include    <sys/utsname.h>
+#endif
 
 #include	"maildir/maildiraclt.h"
 #include	"maildir/maildirnewshared.h"
@@ -73,7 +73,7 @@
 #include	"outbox.h"
 #include	"authlib/authmod.h"
 #include	"authlib/auth.h"
-#include    "rfc822/rfc822.h"
+#include	"rfc822/rfc822.h"
 
 #include	"maildir/config.h"
 #include	"maildir/maildiraclt.h"
@@ -87,7 +87,7 @@
 #include	"maildir/maildirinfo.h"
 #include	"maildir/loginexec.h"
 
-#include    "unicode/unicode.h"
+#include	"unicode/unicode.h"
 #include	"maildir/maildirkeywords.h"
 
 #define KEYWORD_IMAPVERBOTTEN " (){%*\"\\]"
@@ -177,7 +177,7 @@ void quotainfo_out(const char* qroot)
 	char    quotabuf[QUOTABUFSIZE];
 	char	qresult[200]="";
 	char	qbuf[200];
-	
+
 	if ((maildir_getquota(".", quotabuf) == 0) && (strcmp(qroot,"ROOT") == 0))
 	{
 		struct maildirsize quotainfo;
@@ -188,7 +188,7 @@ void quotainfo_out(const char* qroot)
 			quotainfo.quota.nbytes=quotainfo.size.nbytes=
 				quotainfo.quota.nmessages=
 				quotainfo.size.nmessages=0;
-			
+
 		if (quotainfo.quota.nbytes > 0)
 		{
 			sprintf(qbuf,"STORAGE %ld %ld",
@@ -718,7 +718,7 @@ int     rb;
 		nbytes -= n;
 		if (p[n-1] == '\n') lastnl = 1;
 		else lastnl = 0;
-		
+
 		while (n)
 		{
 			e = memchr(p, '\r', n);
@@ -731,7 +731,7 @@ int     rb;
 				rb = fwrite(p, 1, e-p, fp);
 			}
 			else
-			{	
+			{
 				rb = fwrite(p, 1, n, fp);
 			}
 			n -= rb;
@@ -761,7 +761,7 @@ int     rb;
 	nbytes=ftell(fp);
 	if (nbytes == (unsigned long)-1 ||
 		(p=maildir_requota(newname, nbytes)) == 0)
-		
+
 	{
 		fclose(fp);
 		unlink(tmpname);
@@ -1164,7 +1164,7 @@ void doNoop(int real_noop)
 #endif
 	struct noopKeywordUpdateInfo kui;
 
-	imapscan_init(&new_maildir_info); 
+	imapscan_init(&new_maildir_info);
 
 	if (imapscan_maildir(&new_maildir_info, current_mailbox, 0,
 			     current_mailbox_ro, NULL))
@@ -1486,7 +1486,7 @@ static int doId()
 				writes("\" \"os-version\" \"");
 				writeqs(uts.release);
 			}
-			
+
 		}
 	}
 #endif
@@ -2784,7 +2784,7 @@ static void writeacl(const char *aclstr)
 	writeqs(p);
 	free(p);
 }
-	
+
 static int list_acl_cb(const char *ident,
 		       const maildir_aclt *acl,
 		       void *cb_arg)
@@ -3275,7 +3275,7 @@ void aclminimum(const char *identifier)
 
 	writes(*identifier == '-' ? "\"\"":ACL_ADMINISTER ACL_LOOKUP);
 	writes(" " ACL_CREATE
-	       " " ACL_EXPUNGE 
+	       " " ACL_EXPUNGE
 	       " " ACL_INSERT
 	       " " ACL_POST
 	       " " ACL_READ
@@ -3769,7 +3769,7 @@ int do_folder_delete(char *mailbox_name)
 	if (acl_read_folder(&l, mi.homedir, mi.maildir) < 0)
 		return -1;
 
-	if (strcmp(mi.maildir, INBOX))
+	if (strcasecmp(mi.maildir, INBOX))
 	{
 		char *p=maildir_name2dir(mi.homedir, mi.maildir);
 
@@ -4136,7 +4136,7 @@ static int validate_charset(const char *tag, char **charset)
 	return (0);
 }
 
-int do_imap_command(const char *tag)
+int do_imap_command(const char *tag, int *flushflag)
 {
 struct	imaptoken *curtoken=nexttoken();
 int	uid=0;
@@ -4272,7 +4272,7 @@ int	uid=0;
 		rc=mailbox_scan(reference, name,
 				list_flags,
 				list_callback, cmdbuf);
- 
+
 		free(reference);
 		free(name);
 		if (rc == 0)
@@ -4326,7 +4326,7 @@ int	uid=0;
 					     ACL_INSERT);
 				return 0;
 			}
-			
+
 			rc=append(tag, tok->tokenbuf, p);
 			free(p);
 			maildir_info_destroy(&mi);
@@ -6124,7 +6124,7 @@ int	uid=0;
 				      append_rights,
 				      ACL_INSERT ACL_DELETEMSGS
 				      ACL_SEEN ACL_WRITE);
-			
+
 			if (strchr(append_rights, ACL_INSERT[0]) == NULL)
 			{
 				writes(tag);
@@ -6336,7 +6336,7 @@ char	*p, *q;
 		*p=0;
 		p=strrchr(q, '/');
 	}
-	
+
 	if (p)
 		p[1]=0;
 	else	*q=0;
@@ -6427,7 +6427,7 @@ static int is_smap()
 int main(int argc, char **argv)
 {
 	const char *ip;
-	char *p;
+	const char *p;
 	const char *tag;
 	const char *port;
 	mode_t oldumask;
@@ -6456,6 +6456,12 @@ int main(int argc, char **argv)
 
 	if ((tag=getenv("IMAPLOGINTAG")) != 0)
 	{
+		if (getenv("AUTHENTICATED") == NULL)
+		{
+			printf("* BYE AUTHENTICATED environment variable not set.\r\n");
+			fflush(stdout);
+			exit(0);
+		}
 		authmodclient();
 	} else
 	{

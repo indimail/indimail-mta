@@ -36,7 +36,7 @@
 
 #include "config.h"
 
-#include <unicode/unicode.h>
+#include "unicode/unicode.h"
 
 #include <string.h>
 #include <stdlib.h>

@@ -147,6 +147,11 @@ int n = 0;
 	return (n);
 }
 
+void readflush()
+{
+   imap_readptrleft=0;
+}
+
 void readfill()
 {
 	imap_readptrleft=doread(readbuf, sizeof(readbuf));

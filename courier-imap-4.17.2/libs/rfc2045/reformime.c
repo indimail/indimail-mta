@@ -31,7 +31,7 @@
 #include	"rfc822/rfc822.h"
 #include	"rfc822/rfc2047.h"
 #include	"rfc2045charset.h"
-#include	<unicode/unicode.h>
+#include	"unicode/unicode.h"
 
 #if HAVE_UNISTD_H
 #include	<unistd.h>
@@ -183,7 +183,8 @@ char *disposition_name, *disposition_filename;
 	rfc2045_mimeinfo(s, &content_type, &transfer_encoding, &charset);
 	rfc2045_mimepos(s, &start, &end, &body, &nlines, &nbodylines);
 
-	if (rfc2231_udecodeType(s, "name", NULL, &content_name) < 0)
+	if (rfc2231_udecodeType(s, "name", NULL, &content_name) < 0
+	    && (content_name=strdup("")) == NULL)
 	{
 		perror("malloc");
 		exit(1);

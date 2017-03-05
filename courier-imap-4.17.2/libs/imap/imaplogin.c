@@ -1,5 +1,5 @@
 /*
-** Copyright 1998 - 2004 Double Precision, Inc.
+** Copyright 1998 - 2016 Double Precision, Inc.
 ** See COPYING for distribution information.
 */
 
@@ -135,7 +135,7 @@ int	waitstat;
 	return (0);
 }
 
-int do_imap_command(const char *tag)
+int do_imap_command(const char *tag, int *flushflag)
 {
 	struct	imaptoken *curtoken=nexttoken();
 	char authservice[40];
@@ -184,11 +184,11 @@ int do_imap_command(const char *tag)
 	if (strcmp(curtoken->tokenbuf, "STARTTLS") == 0)
 	{
 		if (!have_starttls())	return (-1);
-		if (starttls(tag))		return (-1);
+		if (starttls(tag))		return (-2);
 		putenv("IMAP_STARTTLS=NO");
 		putenv("IMAP_TLS_REQUIRED=0");
 		putenv("IMAP_TLS=1");
-
+		*flushflag=1;
 		return (0);
 	}
 
