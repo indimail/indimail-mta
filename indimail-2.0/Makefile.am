@@ -16,7 +16,7 @@ INSTALL_STRIP_PROGRAM = $(install_sh) -c $(STRIP_OPT)
 indimailbindir=@prefix@/bin
 indimailsbindir=@prefix@/sbin
 indimaillibexecdir=@libexecdir@
-indimailauthlibdir=@libexecdir@/authlib
+indimailauthlibdir=@libexecdir@/imapmodules
 
 libindimail_LTLIBRARIES = libindimail.la
 libindimail_la_SOURCES = $(COMMONSOURCES)
