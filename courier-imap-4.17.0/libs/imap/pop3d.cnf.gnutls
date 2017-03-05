@@ -1,9 +1,0 @@
-organization = "Courier Mail Server"
-unit = "Automatically-generated POP3 SSL key"
-locality = "New York"
-state = "NY"
-country = US
-cn = "localhost"
-serial = 001
-expiration_days = 365
-email = "postmaster@example.com"
