@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail.spec.in,v 2.363 2017-03-05 10:39:20+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 2.364 2017-03-05 17:03:58+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 
@@ -14,7 +14,7 @@
 %global reconfigure_mode   1
 %else
 %global build_on_obs       0
-%global reconfigure_mode   1
+%global reconfigure_mode   0
 %endif
 
 %global _prefix            @prefix@
@@ -193,15 +193,15 @@ Source19:  http://downloads.sourceforge.net/%{name}/libdkim-%{libdkim_version}.t
 Source20:  http://downloads.sourceforge.net/%{name}/libsrs2-%{libsrs2_version}.tar.gz
 %endif
 
-Patch1:  http://downloads.sourceforge.net/%{name}/Patches/qmail-%{qmail_version}.patch.gz
-Patch2:  http://downloads.sourceforge.net/%{name}/Patches/ucspi-tcp-%{ucspi_version}.patch.gz
+Patch1:  http://downloads.sourceforge.net/%{name}/Patches-2.0/qmail-%{qmail_version}.patch.gz
+Patch2:  http://downloads.sourceforge.net/%{name}/Patches-2.0/ucspi-tcp-%{ucspi_version}.patch.gz
 
 %if %build_on_obs == 0
 %if %nocourierimap == 0
 %if %i_m_on_mac == 1
-Patch3:  http://downloads.sourceforge.net/%{name}/Patches/courier-imap-%{courier_version}-1.2.patch.gz
+Patch3:  http://downloads.sourceforge.net/%{name}/Patches-1.0/courier-imap-%{courier_version}-1.2.patch.gz
 %else
-Patch3:  http://downloads.sourceforge.net/%{name}/Patches/courier-imap-%{courier_version}.patch.gz
+Patch3:  http://downloads.sourceforge.net/%{name}/Patches-1.0/courier-imap-%{courier_version}.patch.gz
 %endif
 %endif
 %endif
@@ -209,19 +209,19 @@ Patch3:  http://downloads.sourceforge.net/%{name}/Patches/courier-imap-%{courier
 # Comment out below for openSUSE buildservice
 %if %build_on_obs == 0
 %if %nobogofilter == 0
-Patch10: http://downloads.sourceforge.net/%{name}/Patches/bogofilter-%{bogofilter_version}.patch.gz
+Patch10: http://downloads.sourceforge.net/%{name}/Patches-1.0/bogofilter-%{bogofilter_version}.patch.gz
 %endif
 %if %nofetchmail == 0
-Patch11: http://downloads.sourceforge.net/%{name}/Patches/fetchmail-%{fetchmail_version}.patch.gz
+Patch11: http://downloads.sourceforge.net/%{name}/Patches-1.0/fetchmail-%{fetchmail_version}.patch.gz
 %endif
 %endif
 
 %if %noclamav == 0
-Patch12: http://downloads.sourceforge.net/%{name}/Patches/clamav-%{clamav_version}.patch.gz
+Patch12: http://downloads.sourceforge.net/%{name}/Patches-1.0/clamav-%{clamav_version}.patch.gz
 %endif
 
 %if %i_m_on_mac == 1
-Patch13: http://downloads.sourceforge.net/%{name}/Patches/courier-imap-%{courier_version}-1.2.mac_supplement.patch.gz
+Patch13: http://downloads.sourceforge.net/%{name}/Patches-1.0/courier-imap-%{courier_version}-1.2.mac_supplement.patch.gz
 %endif
 
 %if 0 != 0
