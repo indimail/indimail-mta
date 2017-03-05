@@ -1,0 +1,72 @@
+#! @SHELL@
+#
+#
+# Copyright 2000-2007 Double Precision, Inc.  See COPYING for
+# distribution information.
+#
+# This is a short script to quickly generate a self-signed X.509 key for
+# IMAP over SSL.  Normally this script would get called by an automatic
+# package installation routine.
+
+if test "@ssllib@" = "openssl"
+then
+	test -x @OPENSSL@ || exit 0
+else
+	test -x @CERTTOOL@ || exit 0
+fi
+
+prefix="@prefix@"
+
+if test -f @certsdir@/imapd.pem
+then
+	echo "@certsdir@/imapd.pem already exists."
+	exit 1
+fi
+
+umask 077
+set -e
+
+BITS="$BITS"
+
+cleanup() {
+	rm -f @certsdir@/imapd.pem
+	rm -f @certsdir@/imapd.rand
+	rm -f @certsdir@/imapd.key
+	rm -f @certsdir@/imapd.cert
+	exit 1
+}
+
+cd @certsdir@
+
+if test "@ssllib@" = "openssl"
+then
+	cp /dev/null @certsdir@/imapd.pem
+	chmod 600 @certsdir@/imapd.pem
+	chown @mailuser@ @certsdir@/imapd.pem
+
+	dd if=@RANDOMV@ of=@certsdir@/imapd.rand count=1 2>/dev/null
+	@OPENSSL@ req -new -x509 -days 365 -nodes \
+		  -config @sysconfdir@/imapd.cnf -out @certsdir@/imapd.pem -keyout @certsdir@/imapd.pem || cleanup
+	@OPENSSL@ x509 -subject -dates -fingerprint -noout -in @certsdir@/imapd.pem || cleanup
+	rm -f @certsdir@/imapd.rand
+else
+	if test "$BITS" = ""
+	then
+		BITS="high"
+	fi
+	cp /dev/null @certsdir@/imapd.key
+	chmod 600 @certsdir@/imapd.key
+	cp /dev/null @certsdir@/imapd.cert
+	chmod 600 @certsdir@/imapd.cert
+	cp /dev/null @certsdir@/imapd.pem
+	chmod 600 @certsdir@/imapd.pem
+	chown @mailuser@ @certsdir@/imapd.pem
+	cp /dev/null @certsdir@/imapd.pem
+	cp /dev/null @certsdir@/imapd.cert
+	cp /dev/null @certsdir@/imapd.key
+
+	@CERTTOOL@ --generate-privkey --sec-param=$BITS --outfile imapd.key
+	@CERTTOOL@ --generate-self-signed --load-privkey imapd.key --outfile imapd.cert --template @sysconfdir@/imapd.cnf
+	cat imapd.key imapd.cert >imapd.pem
+	rm -f imapd.key imapd.cert
+fi

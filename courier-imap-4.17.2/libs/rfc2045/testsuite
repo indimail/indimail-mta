@@ -1,0 +1,227 @@
+LANG=en_US.UTF-8
+LC_ALL=en_US.UTF-8
+unset LC_CTYPE
+unset LC_NUMERIC
+unset LC_TIME
+unset LC_COLLATE
+unset LC_MONETARY
+unset LC_MESSAGES
+unset LC_PAPER
+unset LC_NAME
+unset LC_ADDRESS
+unset LC_TELEPHONE
+unset LC_MEASUREMENT
+unset LC_IDENTIFICATION
+unset LC_ALL
+unset CHARSET
+unset MM_CHARSET
+export LANG
+export LC_ALL
+
+cat >testsuite.dat <<EOF
+Subject: test
+Mime-Version: 1.0
+Content-Type: multipart/mixed; boundary=aaa
+
+
+--aaa
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: quoted-printable
+
+=C3=81BC
+
+--aaa
+Content-Type: text/plain; charset=iso-8859-1
+Content-Transfer-Encoding: 8bit
+
+ABC
+
+--aaa
+Content-Type: text/plain; charset=iso-8859-1
+Content-Transfer-Encoding: quoted-printable
+
+=C1
+
+--aaa
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 8bit
+
+Á
+
+--aaa
+Content-Type: message/rfc822
+
+Subject: testing
+
+test message
+
+--aaa---
+EOF
+LANG=en_US.utf-8 ./reformime -r <testsuite.dat | sed 's/=_.*//;s/X-Mime-Autoconverted:.*//'
+LANG=en_US.utf-8 ./reformime -r7 <testsuite.dat | sed 's/=_.*//;s/X-Mime-Autoconverted:.*//'
+LANG=en_US.utf-8 ./reformime -r8 <testsuite.dat | sed 's/=_.*//;s/X-Mime-Autoconverted:.*//'
+
+cat >testsuite.dat <<EOF
+From: nobody
+To: nobody
+Subject: this is
+   a test
+
+testing
+EOF
+./headercheck 0 "" <testsuite.dat
+echo "--"
+./headercheck 2 "" <testsuite.dat
+echo "--"
+./headercheck 1 "" <testsuite.dat
+
+cat >testsuite.dat <<EOF
+From: nobody
+To: nobody
+Mime-Version: 1.0
+Content-Type: message/rfc822
+
+From: nobody@example.com
+To: nobody@example.com
+Message-ID: <a@b>
+Subject: Example
+   subject
+
+EOF
+echo "---"
+./headercheck 0 "1.1" <testsuite.dat
+echo "--"
+./headercheck 2 "1.1" <testsuite.dat
+echo "--"
+./headercheck 1 "1.1" <testsuite.dat
+
+cat >testsuite.dat <<EOF
+Mime-Version: 1.0
+Content-Type: multipart/mixed; boundary=aaa
+
+
+--aaa
+Content-Type: text/plain; name*=n%41me
+Content-Disposition: attachment; filename*1=n%41me;
+				 filename*2*=".%65xe";
+				 filename*0*=iso8859-1'en_US'file
+
+Testing
+
+--aaa
+Content-Type: text/plain; name=name
+Content-Disposition: attachment; filename=name.exe; filename*1=n%41me;
+				 filename*2*=".%65xe";
+				 filename*0*=iso8859-1'en_US'file
+
+Testing
+
+--aaa---
+EOF
+LANG=en_US.utf-8 ./reformime -i <testsuite.dat | sed 's/^charset:.*/charset: iso-8859-1/'
+
+echo "foo" >confmdtest
+
+./makemime -c application/octet-stream -C utf-8 -N footest confmdtest
+
+./makemime -c application/octet-stream -C utf-8 -N footest:1 confmdtest
+./makemime -c application/octet-stream -C utf-8 -N f:::::::::::::::::::::::::1 confmdtest
+
+LANG=en_US.utf-8 ./reformime -h '=?iso-8859-1?Q?H=F3la!?= test =?iso-8859-1?Q?H=F3la!_?=  =?iso-8859-1?Q?H=F3la!?=  test'
+rm -f confmdtest
+
+cat >testsuite.dat <<EOF
+Subject: test
+Mime-Version: 1.0
+Content-Type: text/plain; charset=utf-8
+Content-Description: =?iso-8859-1?Q?H=F3la!?= test =?iso-8859-1?Q?H=F3la!_?=
+		     =?iso-8859-1?Q?H=F3la!?=  test
+
+testing
+EOF
+LANG=en_US.utf-8 ./reformime -i <./testsuite.dat
+LANG=en_US.utf-8 ./reformime -H '=?iso-8859-1?Q?H=F3la!?= test <test1@example.com>'
+LANG=en_US.utf-8 ./reformime -H '=?iso-8859-1?Q?H=F3la=22?= test <test1@example.com>'
+LANG=en_US.utf-8 ./reformime -O 'Hóla <user@Hóla.example.com>, user@example.com (Hóla), John Smith <user@example.com>, user2@example.com, "John Smith (Accounting)" <user3@example.com>, "Hóla Smith (Accounting)" <user4@example.com>, john smith <user@hóla.example.com>'
+
+LANG=en_US.utf-8 ./reformime -H '=?UTF-8?B?SMOzbGE=?= <user@xn--hla-gna.example.com>, =?UTF-8?B?SMOzbGE=?= <user@example.com>, John Smith <user@example.com>, user2@example.com, "John Smith (Accounting)" <user3@example.com>, =?UTF-8?B?SMOzbGE=?= Smith =?UTF-8?B?KEFjY291bnRpbmcp?= <user4@example.com>, john smith <user@xn--hla-gna.example.com>'
+
+LANG=en_US.utf-8 ./reformime -H 'list: address1 <address1@example.com>, address2 <address2@example.com>;'
+
+LANG=en_US.utf-8 ./reformime -O 'list: address1 <address1@example.com>, address2 <address2@example.com>;'
+
+./reformime -u <<EOF
+From: Sam =?iso-8859-1?B?SOhsbG8=?= <nobody@xn--8ca.example.com>
+Subject: =?iso-8859-1?B?SOhsbG8=?=
+Mime-Version: 1.0
+Content-Type: multipart/mixed; boundary="aaa"
+
+Ignore this
+
+--aaa
+Content-Type: message/rfc822
+
+Subject: embedded message
+Mime-Version: 1.0
+Content-Type: multipart/mixed; boundary="bbb"
+
+Ignore this too
+
+--bbb
+Content-Type: TEXT/plain; charset=iso-8859-1
+Content-Transfer-Encoding: quoted-printable
+
+H=C2llo!
+
+--bbb--
+
+--aaa--
+EOF
+./reformime -u <<EOF
+Subject: test
+Mime-Version: 1.0
+Content-Type: text/plain; charset="utf-7"
+
+AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA+AMM
+EOF
+
+./reformime -u >/dev/null <<EOF
+Subject: test
+Mime-Version: 1.0
+Content-Type: text/plain; charset="utf-7"
+
+AA+AM
+BB
+EOF
+
+x="XXXXXXXX"
+x="
+$x$x$x$x$x$x$x$x"
+x="$x$x$x$x"
+x="$x$x$x$x"
+x="$x$x"
+
+(cat <<EOF
+Subject: test
+Mime-Version: 1.0
+Content-Type: text/plain; charset='iso-8859-15'
+$x
+EOF
+) | tr 'X' '\244' | ./reformime -u | tail -32
+
+rm testsuite.dat

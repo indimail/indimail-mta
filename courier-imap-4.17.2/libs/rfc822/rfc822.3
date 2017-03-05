@@ -1,0 +1,599 @@
+'\" t
+.\"<!-- Copyright 2001-2007 Double Precision, Inc.  See COPYING for -->
+.\"<!-- distribution information. -->
+.\"     Title: rfc822
+.\"    Author: Sam Varshavchik
+.\" Generator: DocBook XSL Stylesheets v1.78.1 <http://docbook.sf.net/>
+.\"      Date: 06/27/2015
+.\"    Manual: Double Precision, Inc.
+.\"    Source: Courier Mail Server
+.\"  Language: English
+.\"
+.TH "RFC822" "3" "06/27/2015" "Courier Mail Server" "Double Precision, Inc\&."
+.\" -----------------------------------------------------------------
+.\" * Define some portability stuff
+.\" -----------------------------------------------------------------
+.\" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.\" http://bugs.debian.org/507673
+.\" http://lists.gnu.org/archive/html/groff/2009-02/msg00013.html
+.\" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.ie \n(.g .ds Aq \(aq
+.el       .ds Aq '
+.\" -----------------------------------------------------------------
+.\" * set default formatting
+.\" -----------------------------------------------------------------
+.\" disable hyphenation
+.nh
+.\" disable justification (adjust text to left margin only)
+.ad l
+.\" -----------------------------------------------------------------
+.\" * MAIN CONTENT STARTS HERE *
+.\" -----------------------------------------------------------------
+.SH "NAME"
+rfc822 \- RFC 822 parsing library
+.SH "SYNOPSIS"
+.sp
+.nf
+#include <rfc822\&.h>
+
+#include <rfc2047\&.h>
+
+cc \&.\&.\&. \-lrfc822
+.fi
+.SH "DESCRIPTION"
+.PP
+The rfc822 library provides functions for parsing E\-mail headers in the RFC 822 format\&. This library also includes some functions to help with encoding and decoding 8\-bit text, as defined by RFC 2047\&.
+.PP
+The format used by E\-mail headers to encode sender and recipient information is defined by
+\m[blue]\fBRFC 822\fR\m[]\&\s-2\u[1]\d\s+2
+(and its successor,
+\m[blue]\fBRFC 2822\fR\m[]\&\s-2\u[2]\d\s+2)\&. The format allows the actual E\-mail address and the sender/recipient name to be expressed together, for example:
+John Smith <jsmith@example\&.com>
+.PP
+The main purposes of the rfc822 library is to:
+.PP
+1) Parse a text string containing a list of RFC 822\-formatted address into its logical components: names and E\-mail addresses\&.
+.PP
+2) Access those individual components\&.
+.PP
+3) Allow some limited modifications of the parsed structure, and then convert it back into a text string\&.
+.SS "Tokenizing an E\-mail header"
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+struct rfc822t *tokens=rfc822t_alloc_new(const char *header,
+                void (*err_func)(const char *, int, void *),
+                void *func_arg);
+
+void rfc822t_free(tokens);
+.fi
+.if n \{\
+.RE
+.\}
+.PP
+The
+\fBrfc822t_alloc_new\fR() function (superceeds
+\fBrfc822t_alloc\fR(), which is now obsolete) accepts an E\-mail
+\fIheader\fR, and parses it into individual tokens\&. This function allocates and returns a pointer to an
+rfc822t
+structure, which is later used by
+\fBrfc822a_alloc\fR() to extract individual addresses from these tokens\&.
+.PP
+If
+\fIerr_func\fR
+argument, if not NULL, is a pointer to a callback function\&. The function is called in the event that the E\-mail header is corrupted to the point that it cannot even be parsed\&. This is a rare instance \-\- most forms of corruption are still valid at least on the lexical level\&. The only time this error is reported is in the event of mismatched parenthesis, angle brackets, or quotes\&. The callback function receives the
+\fIheader\fR
+pointer, an index to the syntax error in the header string, and the
+\fIfunc_arg\fR
+argument\&.
+.PP
+The semantics of
+\fIerr_func\fR
+are subject to change\&. It is recommended to leave this argument as NULL in the current version of the library\&.
+.PP
+\fBrfc822t_alloc\fR() returns a pointer to a dynamically\-allocated
+rfc822t
+structure\&. A NULL pointer is returned if there\*(Aqs insufficient memory to allocate this structure\&. The
+\fBrfc822t_free\fR() function destroys
+rfc822t
+structure and frees all dynamically allocated memory\&.
+.if n \{\
+.sp
+.\}
+.RS 4
+.it 1 an-trap
+.nr an-no-space-flag 1
+.nr an-break-flag 1
+.br
+.ps +1
+\fBNote\fR
+.ps -1
+.br
+.PP
+Until
+\fBrfc822t_free\fR() is called, the contents of
+\fIheader\fR
+MUST NOT be destroyed or altered in any way\&. The contents of
+\fIheader\fR
+are not modified by
+\fBrfc822t_alloc\fR(), however the
+rfc822t
+structure contains pointers to portions of the supplied
+\fIheader\fR, and they must remain valid\&.
+.sp .5v
+.RE
+.SS "Extracting E\-mail addresses"
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+struct rfc822a *addrs=rfc822a_alloc(struct rfc822t *tokens);
+
+void rfc822a_free(addrs);
+.fi
+.if n \{\
+.RE
+.\}
+.PP
+The
+\fBrfc822a_alloc\fR() function returns a dynamically\-allocated
+rfc822a
+structure, that contains individual addresses that were logically parsed from a
+rfc822t
+structure\&. The
+\fBrfc822a_alloc\fR() function returns NULL if there was insufficient memory to allocate the
+rfc822a
+structure\&. The
+\fBrfc822a_free\fR() function destroys the
+rfc822a
+function, and frees all associated dynamically\-allocated memory\&. The
+rfc822t
+structure passed to
+\fBrfc822a_alloc\fR() must not be destroyed before
+\fBrfc822a_free\fR() destroys the
+rfc822a
+structure\&.
+.PP
+The
+rfc822a
+structure has the following fields:
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+struct rfc822a {
+        struct rfc822addr *addrs;
+        int     naddrs;
+} ;
+.fi
+.if n \{\
+.RE
+.\}
+.PP
+The
+\fInaddrs\fR
+field gives the number of
+rfc822addr
+structures that are pointed to by
+\fIaddrs\fR, which is an array\&. Each
+rfc822addr
+structure represents either an address found in the original E\-mail header,
+\fIor the contents of some legacy "syntactical sugar"\fR\&. For example, the following is a valid E\-mail header:
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+To: recipient\-list: tom@example\&.com, john@example\&.com;
+.fi
+.if n \{\
+.RE
+.\}
+.PP
+Typically, all of this, except for "To:", is tokenized by
+\fBrfc822t_alloc\fR(), then parsed by
+\fBrfc822a_alloc\fR()\&. "recipient\-list:" and the trailing semicolon is a legacy mailing list specification that is no longer in widespread use, but must still must be accounted for\&. The resulting
+rfc822a
+structure will have four
+rfc822addr
+structures: one for "recipient\-list:"; one for each address; and one for the trailing semicolon\&. Each
+rfc822a
+structure has the following fields:
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+struct rfc822addr {
+        struct rfc822token *tokens;
+        struct rfc822token *name;
+} ;
+.fi
+.if n \{\
+.RE
+.\}
+.PP
+If
+\fItokens\fR
+is a null pointer, this structure represents some non\-address portion of the original header, such as "recipient\-list:" or a semicolon\&. Otherwise it points to a structure that represents the E\-mail address in tokenized form\&.
+.PP
+\fIname\fR
+either points to the tokenized form of a non\-address portion of the original header, or to a tokenized form of the recipient\*(Aqs name\&.
+\fIname\fR
+will be NULL if the recipient name was not provided\&. For the following address:
+Tom Jones <tjones@example\&.com>
+\- the
+\fItokens\fR
+field points to the tokenized form of "tjones@example\&.com", and
+\fIname\fR
+points to the tokenized form of "Tom Jones"\&.
+.PP
+Each
+rfc822token
+structure contains the following fields:
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+struct rfc822token {
+        struct rfc822token *next;
+        int token;
+        const char *ptr;
+        int len;
+} ;
+.fi
+.if n \{\
+.RE
+.\}
+.PP
+The
+\fInext\fR
+pointer builds a linked list of all tokens in this name or address\&. The possible values for the
+\fItoken\fR
+field are:
+.PP
+0x00
+.RS 4
+This is a simple atom \- a sequence of non\-special characters that is delimited by whitespace or special characters (see below)\&.
+.RE
+.PP
+0x22
+.RS 4
+The value of the ascii quote \- this is a quoted string\&.
+.RE
+.PP
+Open parenthesis: \*(Aq(\*(Aq
+.RS 4
+This is an old style comment\&. A deprecated form of E\-mail addressing uses \- for example \- "john@example\&.com (John Smith)" instead of "John Smith <john@example\&.com>"\&. This old\-style notation defined parenthesized content as arbitrary comments\&. The
+rfc822token
+with
+\fItoken\fR
+set to \*(Aq(\*(Aq is created for the contents of the entire comment\&.
+.RE
+.PP
+Symbols: \*(Aq<\*(Aq, \*(Aq>\*(Aq, \*(Aq@\*(Aq, and many others
+.RS 4
+The remaining possible values of
+\fItoken\fR
+include all the characters in RFC 822 headers that have special significance\&.
+.RE
+.PP
+When a
+rfc822token
+structure does not represent a special character, the
+\fIptr\fR
+field points to a text string giving its contents\&. The contents are NOT null\-terminated, the
+\fIlen\fR
+field contains the number of characters included\&. The macro rfc822_is_atom(token) indicates whether
+\fIptr\fR
+and
+\fIlen\fR
+are used for the given
+\fItoken\fR\&. Currently
+\fBrfc822_is_atom\fR() returns true if
+\fItoken\fR
+is a zero byte, \*(Aq"\*(Aq, or \*(Aq(\*(Aq\&.
+.PP
+Note that it\*(Aqs possible that
+\fIlen\fR
+might be zero\&. This happens with null addresses used as return addresses for delivery status notifications\&.
+.SS "Working with E\-mail addresses"
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+void rfc822_deladdr(struct rfc822a *addrs, int index);
+
+void rfc822tok_print(const struct rfc822token *list,
+        void (*func)(char, void *), void *func_arg);
+
+void rfc822_print(const struct rfc822a *addrs,
+        void (*print_func)(char, void *),
+        void (*print_separator)(const char *, void *), void *callback_arg);
+ 
+void rfc822_addrlist(const struct rfc822a *addrs,
+                void (*print_func)(char, void *),
+                void *callback_arg);
+ 
+void rfc822_namelist(const struct rfc822a *addrs,
+                void (*print_func)(char, void *),
+                void *callback_arg);
+
+void rfc822_praddr(const struct rfc822a *addrs,
+                int index,
+                void (*print_func)(char, void *),
+                void *callback_arg);
+
+void rfc822_prname(const struct rfc822a *addrs,
+                int index,
+                void (*print_func)(char, void *),
+                void *callback_arg);
+
+void rfc822_prname_orlist(const struct rfc822a *addrs,
+                int index,
+                void (*print_func)(char, void *),
+                void *callback_arg);
+
+char *rfc822_gettok(const struct rfc822token *list);
+char *rfc822_getaddrs(const struct rfc822a *addrs);
+char *rfc822_getaddr(const struct rfc822a *addrs, int index);
+char *rfc822_getname(const struct rfc822a *addrs, int index);
+char *rfc822_getname_orlist(const struct rfc822a *addrs, int index);
+
+char *rfc822_getaddrs_wrap(const struct rfc822a *, int);
+.fi
+.if n \{\
+.RE
+.\}
+.PP
+These functions are used to work with individual addresses that are parsed by
+\fBrfc822a_alloc\fR()\&.
+.PP
+\fBrfc822_deladdr\fR() removes a single
+rfc822addr
+structure, whose
+\fIindex\fR
+is given, from the address array in
+rfc822addr\&.
+\fInaddrs\fR
+is decremented by one\&.
+.PP
+\fBrfc822tok_print\fR() converts a tokenized
+\fIlist\fR
+of
+rfc822token
+objects into a text string\&. The callback function,
+\fIfunc\fR, is called one character at a time, for every character in the tokenized objects\&. An arbitrary pointer,
+\fIfunc_arg\fR, is passed unchanged as the additional argument to the callback function\&.
+\fBrfc822tok_print\fR() is not usually the most convenient and efficient function, but it has its uses\&.
+.PP
+\fBrfc822_print\fR() takes an entire
+rfc822a
+structure, and uses the callback functions to print the contained addresses, in their original form, separated by commas\&. The function pointed to by
+\fIprint_func\fR
+is used to print each individual address, one character at a time\&. Between the addresses, the
+\fIprint_separator\fR
+function is called to print the address separator, usually the string ", "\&. The
+\fIcallback_arg\fR
+argument is passed along unchanged, as an additional argument to these functions\&.
+.PP
+The functions
+\fBrfc822_addrlist\fR() and
+\fBrfc822_namelist\fR() also print the contents of the entire
+rfc822a
+structure, but in a different way\&.
+\fBrfc822_addrlist\fR() prints just the actual E\-mail addresses, not the recipient names or comments\&. Each E\-mail address is followed by a newline character\&.
+\fBrfc822_namelist\fR() prints just the names or comments, followed by newlines\&.
+.PP
+The functions
+\fBrfc822_praddr\fR() and
+\fBrfc822_prname\fR() are just like
+\fBrfc822_addrlist\fR() and
+\fBrfc822_namelist\fR(), except that they print a single name or address in the
+rfc822a
+structure, given its
+\fIindex\fR\&. The functions
+\fBrfc822_gettok\fR(),
+\fBrfc822_getaddrs\fR(),
+\fBrfc822_getaddr\fR(), and
+\fBrfc822_getname\fR() are equivalent to
+\fBrfc822tok_print\fR(),
+\fBrfc822_print\fR(),
+\fBrfc822_praddr\fR() and
+\fBrfc822_prname\fR(), but, instead of using a callback function pointer, these functions write the output into a dynamically allocated buffer\&. That buffer must be destroyed by
+\fBfree\fR(3) after use\&. These functions will return a null pointer in the event of a failure to allocate memory for the buffer\&.
+.PP
+\fBrfc822_prname_orlist\fR() is similar to
+\fBrfc822_prname\fR(), except that it will also print the legacy RFC822 group list syntax (which are also parsed by
+\fBrfc822a_alloc\fR())\&.
+\fBrfc822_praddr\fR() will print an empty string for an index that corresponds to a group list name (or terminated semicolon)\&.
+\fBrfc822_prname\fR() will also print an empty string\&.
+\fBrfc822_prname_orlist\fR() will instead print either the name of the group list, or a single string ";"\&.
+\fBrfc822_getname_orlist\fR() will instead save it into a dynamically allocated buffer\&.
+.PP
+The function
+\fBrfc822_getaddrs_wrap\fR() is similar to
+\fBrfc822_getaddrs\fR(), except that the generated text is wrapped on or about the 73rd column, using newline characters\&.
+.SS "Working with dates"
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+time_t timestamp=rfc822_parsedt(const char *datestr)
+const char *datestr=rfc822_mkdate(time_t timestamp);
+void rfc822_mkdate_buf(time_t timestamp, char *buffer);
+.fi
+.if n \{\
+.RE
+.\}
+.PP
+These functions convert between timestamps and dates expressed in the
+Date:
+E\-mail header format\&.
+.PP
+\fBrfc822_parsedt\fR() returns the timestamp corresponding to the given date string (0 if there was a syntax error)\&.
+.PP
+\fBrfc822_mkdate\fR() returns a date string corresponding to the given timestamp\&.
+\fBrfc822_mkdate_buf\fR() writes the date string into the given buffer instead, which must be big enough to accommodate it\&.
+.SS "Working with 8\-bit MIME\-encoded headers"
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+int error=rfc2047_decode(const char *text,
+                int (*callback_func)(const char *, int, const char *, void *),
+                void *callback_arg);
+ 
+extern char *str=rfc2047_decode_simple(const char *text);
+ 
+extern char *str=rfc2047_decode_enhanced(const char *text,
+                const char *charset);
+ 
+void rfc2047_print(const struct rfc822a *a,
+        const char *charset,
+        void (*print_func)(char, void *),
+        void (*print_separator)(const char *, void *), void *);
+
+ 
+char *buffer=rfc2047_encode_str(const char *string,
+                const char *charset);
+ 
+int error=rfc2047_encode_callback(const char *string,
+        const char *charset,
+        int (*func)(const char *, size_t, void *),
+        void *callback_arg);
+ 
+char *buffer=rfc2047_encode_header(const struct rfc822a *a,
+        const char *charset);
+.fi
+.if n \{\
+.RE
+.\}
+.PP
+These functions provide additional logic to encode or decode 8\-bit content in 7\-bit RFC 822 headers, as specified in RFC 2047\&.
+.PP
+\fBrfc2047_decode\fR() is a basic RFC 2047 decoding function\&. It receives a pointer to some 7bit RFC 2047\-encoded text, and a callback function\&. The callback function is repeatedly called\&. Each time it\*(Aqs called it receives a piece of decoded text\&. The arguments are: a pointer to a text fragment, number of bytes in the text fragment, followed by a pointer to the character set of the text fragment\&. The character set pointer is NULL for portions of the original text that are not RFC 2047\-encoded\&.
+.PP
+The callback function also receives
+\fIcallback_arg\fR, as its last argument\&. If the callback function returns a non\-zero value,
+\fBrfc2047_decode\fR() terminates, returning that value\&. Otherwise,
+\fBrfc2047_decode\fR() returns 0 after a successful decoding\&.
+\fBrfc2047_decode\fR() returns \-1 if it was unable to allocate sufficient memory\&.
+.PP
+\fBrfc2047_decode_simple\fR() and
+\fBrfc2047_decode_enhanced\fR() are alternatives to
+\fBrfc2047_decode\fR() which forego a callback function, and return the decoded text in a dynamically\-allocated memory buffer\&. The buffer must be
+\fBfree\fR(3)\-ed after use\&.
+\fBrfc2047_decode_simple\fR() discards all character set specifications, and merely decodes any 8\-bit text\&.
+\fBrfc2047_decode_enhanced\fR() is a compromise to discarding all character set information\&. The local character set being used is specified as the second argument to
+\fBrfc2047_decode_enhanced\fR()\&. Any RFC 2047\-encoded text in a different character set will be prefixed by the name of the character set, in brackets, in the resulting output\&.
+.PP
+\fBrfc2047_decode_simple\fR() and
+\fBrfc2047_decode_enhanced\fR() return a null pointer if they are unable to allocate sufficient memory\&.
+.PP
+The
+\fBrfc2047_print\fR() function is equivalent to
+\fBrfc822_print\fR(), followed by
+\fBrfc2047_decode_enhanced\fR() on the result\&. The callback functions are used in an identical fashion, except that they receive text that\*(Aqs already decoded\&.
+.PP
+The function
+\fBrfc2047_encode_str\fR() takes a
+\fIstring\fR
+and
+\fIcharset\fR
+being the name of the local character set, then encodes any 8\-bit portions of
+\fIstring\fR
+using RFC 2047 encoding\&.
+\fBrfc2047_encode_str\fR() returns a dynamically\-allocated buffer with the result, which must be
+\fBfree\fR(3)\-ed after use, or NULL if there was insufficient memory to allocate the buffer\&.
+.PP
+The function
+\fBrfc2047_encode_callback\fR() is similar to
+\fBrfc2047_encode_str\fR() except that the callback function is repeatedly called to received the encoding string\&. Each invocation of the callback function receives a pointer to a portion of the encoded text, the number of characters in this portion, and
+\fIcallback_arg\fR\&.
+.PP
+The function
+\fBrfc2047_encode_header\fR() is basically equivalent to
+\fBrfc822_getaddrs\fR(), followed by
+\fBrfc2047_encode_str\fR();
+.SS "Working with subjects"
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+char *basesubj=rfc822_coresubj(const char *subj);
+
+char *basesubj=rfc822_coresubj_nouc(const char *subj);
+.fi
+.if n \{\
+.RE
+.\}
+.PP
+This function takes the contents of the subject header, and returns the "core" subject header that\*(Aqs used in the specification of the IMAP THREAD function\&. This function is designed to strip all subject line artifacts that might\*(Aqve been added in the process of forwarding or replying to a message\&. Currently,
+\fBrfc822_coresubj\fR() performs the following transformations:
+.PP
+Whitespace
+.RS 4
+Leading and trailing whitespace is removed\&. Consecutive whitespace characters are collapsed into a single whitespace character\&. All whitespace characters are replaced by a space\&.
+.RE
+.PP
+Re:, (fwd) [foo]
+.RS 4
+These artifacts (and several others) are removed from the subject line\&.
+.RE
+.PP
+Note that this function does NOT do MIME decoding\&. In order to implement IMAP THREAD, it is necessary to call something like
+\fBrfc2047_decode\fR() before calling
+\fBrfc822_coresubj\fR()\&.
+.PP
+This function returns a pointer to a dynamically\-allocated buffer, which must be
+\fBfree\fR(3)\-ed after use\&.
+.PP
+\fBrfc822_coresubj_nouc\fR() is like
+\fBrfc822_coresubj\fR(), except that the subject is not converted to uppercase\&.
+.SH "SEE ALSO"
+.PP
+\m[blue]\fB\fBrfc2045\fR(3)\fR\m[]\&\s-2\u[3]\d\s+2,
+\m[blue]\fB\fBreformail\fR(1)\fR\m[]\&\s-2\u[4]\d\s+2,
+\m[blue]\fB\fBreformime\fR(1)\fR\m[]\&\s-2\u[5]\d\s+2\&.
+.SH "AUTHOR"
+.PP
+\fBSam Varshavchik\fR
+.RS 4
+Author
+.RE
+.SH "NOTES"
+.IP " 1." 4
+RFC 822
+.RS 4
+\%http://www.rfc-editor.org/rfc/rfc822.txt
+.RE
+.IP " 2." 4
+RFC 2822
+.RS 4
+\%http://www.rfc-editor.org/rfc/rfc2822.txt
+.RE
+.IP " 3." 4
+\fBrfc2045\fR(3)
+.RS 4
+\%[set $man.base.url.for.relative.links]/rfc2045.html
+.RE
+.IP " 4." 4
+\fBreformail\fR(1)
+.RS 4
+\%[set $man.base.url.for.relative.links]/reformail.html
+.RE
+.IP " 5." 4
+\fBreformime\fR(1)
+.RS 4
+\%[set $man.base.url.for.relative.links]/reformime.html
+.RE

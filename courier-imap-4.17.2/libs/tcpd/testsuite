@@ -1,0 +1,38 @@
+# Copyright 2002 Double Precision, Inc.
+# See COPYING for distribution information.
+#
+
+doit() {
+  echo "--./tlscachetest $1--"
+  ./tlscachetest "$1"
+}
+
+rm -f test.dat
+
+doit +00000000
+doit +11111111
+doit +22222222
+doit +33333333
+doit +44444444
+doit +55555555
+doit +66666666
+doit +77777777
+doit +88888888
+doit +99999999
+doit +000000000
+doit +111111111
+doit +222222222
+doit +333333333
+doit +444444444
+doit +55555555
+doit +66666666
+doit +77777777
+doit +88888888
+doit +99999999
+doit +00000000
+doit +11111111
+doit +22222222
+doit -00000000-77777777
+doit -11111111-55555555
+
+rm -f test.dat

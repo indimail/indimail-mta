@@ -1,0 +1,152 @@
+#! /bin/sh
+
+./testrfc3676parser <<EOF
+  linecr
+line
+linec
+line
+EOF
+
+./testrfc3676parser <<EOF
+Fixed
+Flowed 1 
+Flowed 2  
+> QuoteDepth1
+> QuoteDepth1
+> QuoteDepth1Flowed 
+> QuoteDepth1Fixed
+>> QuoteDepth2Flowed 
+>>QuoteDepth2Flowed 
+> QuoteDepth1Fixed
+ Stuffed
+EOF
+
+./testrfc3676parser 1 <<EOF
+Fixed
+Flowed 1 
+Flowed 2  
+> QuoteDepth1
+> QuoteDepth1
+> QuoteDepth1Flowed 
+> QuoteDepth1Fixed
+>> QuoteDepth2Flowed 
+>>QuoteDepth2Flowed 
+> QuoteDepth1Fixed
+ Stuffed
+EOF
+
+( echo "Fixed"; echo "Fixed" | tr -d '\010') | ./testrfc3676parser
+
+( echo "Flowed "; echo "Fixed" | tr -d '\010') | ./testrfc3676parser 1
+
+( echo "Flowed "; echo "Flowed " | tr -d '\010') | ./testrfc3676parser 1
+
+( echo "Flowed "; echo ">>" | tr -d '\010') | ./testrfc3676parser 1
+
+( echo "Flowed "; echo ">> " | tr -d '\010') | ./testrfc3676parser 1
+
+( echo "Flowed  "; echo ">>" | tr -d '\010') | ./testrfc3676parser 2
+
+( echo "Flowed  "; echo ">> " | tr -d '\010') | ./testrfc3676parser 2
+
+./testrfc3676parser 1 <<EOF
+Flowed text 
+Fixed line
+
+Next flowed section
+EOF
+
+./testrfc3676parser 1 <<EOF
+Flowed text 
+Spurious flowed line 
+
+Next flowed section
+EOF
+
+
+./testrfc3676parser <<EOF
+fixedline
+-- 
+signature
+EOF
+
+./testrfc3676parser <<EOF
+flowed line 
+flowed line 
+-- 
+signature
+EOF
+
+./testrfc3676parser <<EOF
+fixedline
+> -- 
+signature
+EOF
+
+./testrfc3676parser <<EOF
+flowed line 
+flowed line 
+> -- 
+signature
+EOF
+
+
+./testrfc3676parser 1 <<EOF
+fixedline
+-- 
+signature
+EOF
+
+./testrfc3676parser 1 <<EOF
+flowed line 
+flowed line 
+-- 
+signature
+EOF
+
+./testrfc3676parser 1 <<EOF
+fixedline
+> -- 
+signature
+EOF
+
+./testrfc3676parser 1 <<EOF
+flowed line 
+flowed line 
+> -- 
+signature
+EOF
+
+( echo "Fixed"; echo "-- " | tr -d '\010') | ./testrfc3676parser
+
+( echo "Flowed "; echo "-- " | tr -d '\010') | ./testrfc3676parser
+
+
+( echo "Fixed"; echo "-- " | tr -d '\010') | ./testrfc3676parser 1
+
+( echo "Flowed "; echo "-- " | tr -d '\010') | ./testrfc3676parser 1
+
+
+./testrfc3676parser <<EOF
+fixed
+-a-
+flowed 
+flowed 
+-b-
+EOF
+
+./testrfc3676parser 1 <<EOF
+fixed
+-a-
+flowed 
+flowed 
+-b-
+EOF
+
+./testrfc3676parser 0 <<EOF
+1234567890 1234567890 1234567890 1234567890 1234567890 1234567890 1234567890 1234567890 1234567890 1234567890 1234567890 1234567890
+EOF
+
+./testrfc3676parser 0 <<EOF
+123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890
+EOF

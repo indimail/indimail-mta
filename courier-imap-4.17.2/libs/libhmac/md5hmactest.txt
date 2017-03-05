@@ -1,0 +1,7 @@
+test_cases[1].digest=0x9294727a3638bb1c13f48ef8158bfc9d
+test_cases[2].digest=0x750c783e6ab0b503eaa86e310a5db738
+test_cases[3].digest=0x56be34521d144c88dbb8c733f0e8b3f6
+test_cases[4].digest=0x697eaf0aca3a3aea3a75164746ffaa79
+test_cases[5].digest=0x56461ef2342edc00f9bab995690efd4c
+test_cases[6].digest=0x6b1ab7fe4bd7bf8f0b62e6ce61b9d0cd
+test_cases[7].digest=0x6f630fad67cda0ee1fb1f562db3aa53e

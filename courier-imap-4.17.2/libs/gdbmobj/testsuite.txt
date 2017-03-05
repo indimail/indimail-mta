@@ -1,0 +1,11 @@
+Storing foo/bar into testgdbm.dat:
+Storing foo/baz into testgdbm.dat:
+Storing bar/foo into testgdbm.dat:
+Fetching foo from testgdbm.dat: baz
+Fetching bar from testgdbm.dat: foo
+Dumping testgdbm.dat:
+Key: bar, Data: foo
+Key: foo, Data: baz
+Deleting -foo from testgdbm.dat:
+Dumping testgdbm.dat:
+Key: bar, Data: foo
