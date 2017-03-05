@@ -107,7 +107,7 @@ authcustomobj=
 mancustom=
 endif
 
-extradir=@libexecdir@/authlib
+extradir=@libexecdir@/imapmodules
 
 libauthpam_la_SOURCES=$(authpamc)
 libauthpwd_la_SOURCES=$(authpwdc)
