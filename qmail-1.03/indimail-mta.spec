@@ -1867,11 +1867,11 @@ done
 #
 echo "adding indimail startup"
 %{_prefix}/sbin/svctool --config=add-boot
-) >> /tmp/indimail-mta.install.log 2>&1
 
 if [ -x /bin/systemctl ] ; then
   /bin/systemctl enable indimail.service
 fi
+) >> /tmp/indimail-mta.install.log 2>&1
 if [ -f %{_sysconfdir}/init/svscan.conf -o -f %{_sysconfdir}/event.d/svscan ] ; then
   echo "1. Issue /sbin/initctl emit qmailstart to start services"
   count=1
