@@ -145,14 +145,14 @@ fi
 ${rm} -f /tmp/indimail-mta.install /tmp/indimail-mta.upgrade
 # Recreate ld.so links and cache
 echo "recreating ld.so cache"
-if [ -d /etc/ld.so.conf.d ] ; then
+if [ -d ${sysconfdir}/ld.so.conf.d ] ; then
 	(
 		if [ -d /usr/lib64 ] ; then
 			echo /usr/lib64
 		else
 			echo /usr/lib
 		fi
-	) > /etc/ld.so.conf.d/indimail-`uname -m`.conf
+	) > ${sysconfdir}/ld.so.conf.d/indimail-`uname -m`.conf
 	/sbin/ldconfig
 fi
 
@@ -178,7 +178,7 @@ echo "14. Configure qscanq/clamd/freshclam service"
 echo "15. Configure ${sysconfdir}/control/signatures"
 echo "16. Configure tcprules database for SMTP, QMTP, QMQP"
 echo "17. Configure indimail-mta startup"
-if [ -x /etc/init.d/apparmor ] ; then
+if [ -x ${sysconfdir}/init.d/apparmor ] ; then
 if [ $noclamav -eq 0 -o $clamav_os -eq 1 ] ; then
 echo "18. Creating apparmor profile for clamav"
 fi
@@ -247,8 +247,8 @@ else
 		clamav_os=1
 		clamdPrefix="/usr"
 		qhpsi="/usr/bin/clamdscan %s --fdpass --quiet --no-summary"
-		if [ -d /etc/clamav ] ; then
-			mysysconfdir=/etc/clamav
+		if [ -d ${sysconfdir}/clamav ] ; then
+			mysysconfdir=${sysconfdir}/clamav
 		else
 			mysysconfdir=${sysconfdir}
 		fi
@@ -374,23 +374,23 @@ R0lGODlhaAA7APcAAP///+rp6puSp6GZrDUjUUc6Zn53mFJMdbGvvVtXh2xre8bF1x8cU4yLprOy
 EOFUU
 /bin/chown qscand:qscand ${sysconfdir}/control/signatures
 
-if [ -x /etc/init.d/apparmor ] ; then
+if [ -x ${sysconfdir}/init.d/apparmor ] ; then
 if [ $noclamav -eq 0 -o $clamav_os -eq 1 ] ; then
-	if [ -d /etc/apparmor.d/local ] ; then
+	if [ -d ${sysconfdir}/apparmor.d/local ] ; then
 		(
 		echo "# Site-specific additions and overrides for usr.sbin.clamd."
-		echo "# For more details, please see /etc/apparmor.d/local/README."
+		echo "# For more details, please see ${sysconfdir}/apparmor.d/local/README."
 		echo "capability setuid,"
 		echo "capability setgid,"
   		echo "${shareddir}/clamd/ r,"
   		echo "${shareddir}/clamd/** krw,"
-		) > /etc/apparmor.d/local/usr.sbin.clamd
+		) > ${sysconfdir}/apparmor.d/local/usr.sbin.clamd
 		(
 		echo "# Site-specific additions and overrides for usr.bin.freshclam."
-		echo "# For more details, please see /etc/apparmor.d/local/README."
+		echo "# For more details, please see ${sysconfdir}/apparmor.d/local/README."
   		echo "${shareddir}/share/clamd/ r,"
   		echo "${shareddir}/share/clamd/** krw,"
-		) > /etc/apparmor.d/local/usr.bin.freshclam
+		) > ${sysconfdir}/apparmor.d/local/usr.bin.freshclam
 		echo "Reloading apparmor profiles..."
 		/usr/sbin/service apparmor reload || true
 	fi
@@ -435,23 +435,26 @@ fi
 SERVICE_LIST="sendmail exim4"
 export SERVICE_LIST
 ${prefix}/sbin/svctool --config=add-boot
+if [ -x /bin/systemctl ] ; then
+  /bin/systemctl enable indimail.service
+fi
 
 #
 # create /tmp/skip-install_tables so that svctool does not run sbin/install_tables
 #
 ) >> /tmp/indimail-mta-install.log 2>&1
 
-if [ -f /etc/init/svscan.conf -o -f /etc/event.d/svscan ] ; then
+if [ -f ${sysconfdir}/init/svscan.conf -o -f ${sysconfdir}/event.d/svscan ] ; then
 	echo "1. Issue /sbin/initctl emit qmailstart to start services"
 	count=1
-elif [ -f /etc/systemd/system/multi-user.target.wants/indimail.service ] ; then
+elif [ -f ${sysconfdir}/systemd/system/multi-user.target.wants/indimail.service ] ; then
 	echo "1. Issue /bin/systemctl start indimail.service to start services"
 	count=1
 else
 	if [ -x ${prefix}/sbin/initsvc ] ; then
 	echo "1. Issue ${prefix}/sbin/initsvc -on"
 	else
-	echo "1. Issue /etc/init.d/indimail start"
+	echo "1. Issue ${sysconfdir}/init.d/indimail start"
 	fi
 	echo "2. Issue /sbin/init q to start services"
 	count=2
