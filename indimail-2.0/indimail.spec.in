@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail.spec.in,v 2.362 2017-01-10 19:27:10+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 2.363 2017-03-05 10:39:20+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 
@@ -26,7 +26,7 @@
 %global shareddir          @shareddir@
 %global pkgconfigdir       @pkgconfigdir@
 %global default_domain     @defaultdomain@
-%global courier_version    4.17.0
+%global courier_version    4.17.2
 %global bogofilter_version 1.2.4
 %global pam_multi_version  1.1
 %global ucspi_version      0.88
@@ -911,8 +911,8 @@ if [ -x /usr/bin/chrpath ] ; then
     done
   fi
 
-  /usr/bin/chrpath -d %{buildroot}%{libexecdir}/authlib/authindi
-  /usr/bin/chrpath -d %{buildroot}%{libexecdir}/authlib/authpgsql
+  /usr/bin/chrpath -d %{buildroot}%{libexecdir}/imapmodules/authindi
+  /usr/bin/chrpath -d %{buildroot}%{libexecdir}/imapmodules/authpgsql
   /usr/bin/chrpath -d %{buildroot}%{libexecdir}/sq_vacation
   /usr/bin/chrpath -d %{buildroot}%{libexecdir}/qmailmrtg7
   /usr/bin/chrpath -d %{buildroot}%{moduledir}/iauth.so
@@ -1016,7 +1016,7 @@ fi
 %dir %attr(750,qscand,qscand)     %{indimaildir}/qscanq/root
 %dir %attr(750,qscand,qscand)     %{indimaildir}/qscanq/root/scanq
 %dir %attr(555,root,root)         %{libexecdir}
-%dir %attr(555,root,root)         %{libexecdir}/authlib
+%dir %attr(555,root,root)         %{libexecdir}/imapmodules
 %dir %attr(755,root,root)         %{sysconfdir}
 %dir %attr(775,root,qmail)        %{sysconfdir}/etc
 %dir %attr(775,indimail,qmail)    %{sysconfdir}/users
@@ -1154,6 +1154,7 @@ fi
 %attr(600,root,root)                              %{sysconfdir}/imapd.cnf
 %attr(600,root,root)                              %{sysconfdir}/pop3d.dist
 %attr(600,root,root)                              %{sysconfdir}/imapd.dist
+%attr(600,root,root)                              %{sysconfdir}/authmodulelist
 %attr(644,root,root)                              %{sysconfdir}/quotawarnmsg.example
 %endif
 
@@ -1532,7 +1533,7 @@ fi
 %attr(755,root,root)                    %{_prefix}/sbin/sharedindexsplit
 #
 %if %i_m_on_mac == 0
-%attr(4755,root,root)                   %{libexecdir}/authlib/authshadow
+%attr(4755,root,root)                   %{libexecdir}/imapmodules/authshadow
 %endif
 %endif
 
@@ -1631,9 +1632,9 @@ fi
 %attr(755,root,root)                    %{libexecdir}/mkpop3dcert
 %attr(755,root,root)                    %{libexecdir}/mkdhparams
 %endif
-%attr(755,root,root)                    %{libexecdir}/authlib/authindi
-%attr(755,root,root)                    %{libexecdir}/authlib/authpgsql
-%attr(755,root,root)                    %{libexecdir}/authlib/authgeneric
+%attr(755,root,root)                    %{libexecdir}/imapmodules/authindi
+%attr(755,root,root)                    %{libexecdir}/imapmodules/authpgsql
+%attr(755,root,root)                    %{libexecdir}/imapmodules/authgeneric
 
 %attr(755,root,qmail)                   %{plugindir}/generic.so
 %attr(755,root,qmail)                   %{plugindir}/smtpd-plugin.so
@@ -1875,7 +1876,7 @@ fi
 %verify (not user group mode) %attr(2755, alias, qmail)    %{indimaildir}/alias
 %verify (not user group mode) %attr(2755, indimail, qmail) %{indimaildir}/autoturn
 %verify (not user group mode) %attr(4755, root, qmail)     %{libexedir}/sq_vacation
-%verify (not user group mode) %attr(4755, root, root)      %{libexedir}/authlib/authshadow
+%verify (not user group mode) %attr(4755, root, root)      %{libexedir}/imapmodules/authshadow
 %endif
 %endif
 
@@ -2214,7 +2215,7 @@ fi
 %verify_permissions -e %{_prefix}/sbin/qscanq
 %verify_permissions -e %{_prefix}/sbin/systpass
 %verify_permissions -e %{libexecdir}/sq_vacation
-%verify_permissions -e %{libexecdir}/authlib/authshadow
+%verify_permissions -e %{libexecdir}/imapmodules/authshadow
 %verify_permissions -e %{indimaildir}/alias
 %verify_permissions -e %{indimaildir}/autoturn
 %endif
@@ -2865,7 +2866,6 @@ if [ -f ${sysconfdir}/cronlist ] ; then
   echo "adding cron entries"
   /usr/bin/crontab -u root ${sysconfdir}/cronlist
 fi
-) >> /tmp/indimail-install.log 2>&1
 
 if [ -f %{shareddir}/boot/rpm.init ] ; then
   echo "Running Custom Installation Script for post"
@@ -2875,6 +2875,7 @@ fi
 if [ -x /bin/systemctl ] ; then
   /bin/systemctl enable indimail.service
 fi
+) >> /tmp/indimail-install.log 2>&1
 if [ -f %{_sysconfdir}/init/svscan.conf -o -f %{_sysconfdir}/event.d/svscan ] ; then
   echo "1. Issue /sbin/initctl emit qmailstart to start services"
   count=1
