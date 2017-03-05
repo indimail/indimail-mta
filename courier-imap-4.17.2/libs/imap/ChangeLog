@@ -1,3 +1,33 @@
+4.17.2
+
+2016-08-03  Sam Varshavchik  <mrsam@courier-mta.com>
+
+	* imapd.c (do_folder_delete): Fix check for DELETE INBOX.
+
+4.17.1
+
+2016-04-30  Sam Varshavchik  <mrsam@courier-mta.com>
+
+	* Fix TLS SNI code.
+
+4.17.0
+
+2016-04-23  Sam Varshavchik  <mrsam@courier-mta.com>
+
+	* Stop using SSL2 and SSL3 openssl configuration methods.
+
+2016-03-03  Sam Varshavchik  <mrsam@courier-mta.com>
+
+	* libs/tcpd/libcouriertls.c: Add support for TLS SNI.
+
+2016-01-22  Sam Varshavchik  <mrsam@courier-mta.com>
+
+	* imaplogin.c (starttls): flush stdin after negotiating STARTTLS.
+
+2016-01-17  Sam Varshavchik  <mrsam@courier-mta.com>
+
+	* Fix Courier-IMAP rpm build on pre-systemd systems.
+
 4.16.2
 
 2015-06-27  Sam Varshavchik  <mrsam@courier-mta.com>
