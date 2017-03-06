@@ -1,1 +1,5 @@
 test-driver
+compile
+py-compile
+ylwrap
+po/Makevars.template
