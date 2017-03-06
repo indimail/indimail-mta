@@ -959,7 +959,6 @@ install-data-hook:
 	$(INSTALL_DATA) config.h $(DESTDIR)@prefix@/include/indimail/indimail_config.h || exit 1
 	$(INSTALL_DATA) indimail.h $(DESTDIR)@prefix@/include/indimail/indimail.h || exit 1
 	$(INSTALL_DATA) typesx.h $(DESTDIR)@prefix@/include/indimail/typesx.h || exit 1
-	$(INSTALL_DATA) data/wordlist.db $(DESTDIR)@sysconfdir@/wordlist.db  || exit 1
 	$(INSTALL_DATA) perm_list $(DESTDIR)@sysconfdir@/perm_list  || exit 1
 	$(mkinstalldirs) $(DESTDIR)@shareddir@/modules || exit 1
 	$(INSTALL_PROGRAM) $(DESTDIR)@libdir@/iauth.so  $(DESTDIR)@prefix@/lib/indimail/modules || exit 1
@@ -985,7 +984,6 @@ install-data-hook:
 				chmod 4555 $(DESTDIR)@prefix@/bin/$$f; \
 			fi;  \
 		done; \
-		chown indimail:indimail $(DESTDIR)@sysconfdir@/wordlist.db || true; \
 	fi
 	if test " $(DISTRIB_ID)" = " Ubuntu" -o " $(DISTRIB_ID)" = " Debian" ; then \
 		$(mkinstalldirs) $(DESTDIR)@sysconfdir@/apparmor.d/local || exit 1; \
