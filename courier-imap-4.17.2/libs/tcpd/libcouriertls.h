@@ -21,6 +21,9 @@
 #include	<fcntl.h>
 #endif
 
+#ifndef SSL_TLSEXT_ERR_OK
+#define SSL_TLSEXT_ERR_OK 0
+#endif
 #ifdef COURIERTCPD_EXPOSE_OPENSSL
 
 #define	DEBUG_SAFESTACK	1	/* For openssl 0.9.6 */
