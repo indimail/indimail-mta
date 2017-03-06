@@ -169,7 +169,7 @@ quotawarnmsg.example: libs/maildir/quotawarnmsg
 	cp -f $(srcdir)/libs/maildir/quotawarnmsg quotawarnmsg.example
 
 install-exec-local:
-	$(mkinstalldirs) $(DESTDIR)$(libexecdir)/authlib
+	$(mkinstalldirs) $(DESTDIR)$(libexecdir)/imapmodules
 	for f in `cat libs/authlib/installlist` dummy ; do \
 		test "$$f" = "dummy" && continue ; \
 		echo $$f; \
