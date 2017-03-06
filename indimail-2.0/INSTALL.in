@@ -209,7 +209,7 @@ I usually prefer to run privileged commands like this (so that I don't get fond 
                                . mpack-1.6           (1.5  Mb)
                                . fortune-1.1         (8.4  Mb)
                                . courier-imap-4.17.2 (75   Mb)
-                               . bogofilter-1.2.3    (11.6 Mb)
+                               . bogofilter-1.2.4    (11.6 Mb)
                                . fetchmail-6.3.26   (10.5 Mb)
                                . iwebadmin-1.2      (3.0  Mb)
                                ------------------------------
@@ -421,11 +421,12 @@ the installation.
 
     % wget http://cr.yp.to/software/qmail-1.03.tar.gz
     % gunzip -c qmail-1.03.tar.gz | tar xf -
-    % gunzip -c indimail-@version@/patches/qmail-1.03.patch.gz | patch -p0
+    % gunzip -c indimail-@version@/Patches-2.0/qmail-1.03.patch.gz | patch -p0
 
     change first line in qmail-1.03/conf-qmail to @indimaildir@
     change first line in qmail-1.03/conf-shared to @shareddir@
     change first line in qmail-1.03/conf-prefix to @prefix@
+	change first line in qmail-1.03/conf-libexec to @libexecdir@
     change first line in qmail-1.03/conf-sysconfdir to @sysconfdir@
 
     % cd indimail-@version@
@@ -520,7 +521,7 @@ the installation.
     Download the ucspi-tcp package. The latest published ucspi-tcp package is ucspi-tcp-0.88.tar.gz.
     % wget http://cr.yp.to/ucspi-tcp/ucspi-tcp-0.88.tar.gz
     % gunzip -c ucspi-tcp-0.88.tar.gz | tar xf -
-    % gunzip -c indimail-@version@/patches/ucspi-tcp-0.88.patch.gz | patch -p0
+    % gunzip -c indimail-@version@/Patches-2.0/ucspi-tcp-0.88.patch.gz | patch -p0
 
     ensure that mysql_config is in the path. This is needed by ucspi-tcp to detect
     MySQL libraries.
@@ -546,15 +547,15 @@ the installation.
     compatible with IndiMail.
 
     % bzip2 -d -c courier-imap-4.17.2.tar.bz2 | tar xf -
-    % gunzip -c indimail-@version@/patches/courier-imap-4.17.2.patch.gz | patch -p0
+    % gunzip -c indimail-@version@/Patch-1.0/courier-imap-4.17.2.patch.gz | patch -p0
     % cd courier-imap-4.17.2
 
    x-------------------------------- Mac OS X ONLY -----------------------------------------x
    |% bzip2 -d -c courier-imap-3.0.8.tar.bz2 | tar xf -                                     |
    |If you are on Mac OS X 10.5.x you will need to apply courier-imap-3.0.8-1.2.patch and   |
    |a supplement patch                                                                      |
-   |% gunzip -c indimail-@version@/patches/courier-imap-3.0.8-1.2.patch.gz | patch -p0      |
-   |% gunzip -c indimail-@version@/patches/courier-imap-3.0.8-1.2.mac-supplement.patch.gz \ |
+   |% gunzip -c indimail-@version@/Patch-1.0/courier-imap-3.0.8-1.2.patch.gz | patch -p0      |
+   |% gunzip -c indimail-@version@/Patch-1.0/courier-imap-3.0.8-1.2.mac-supplement.patch.gz \ |
    | | patch -p0                                                                            |
    |% cd courier-imap-3.0.8                                                                 |
    x----------------------------------------------------------------------------------------x
@@ -583,15 +584,15 @@ the installation.
     conjunction with nssd(8)
 
     ##### STEP 7  ##### SPAM Filter ###########################
-    Install Bogofilter (http://www.bogofilter.org) MD5 c3ed7f483b83abcbf6d8c797084bd06e 
+    Install Bogofilter (http://www.bogofilter.org) MD5 d0a5eebb3274b23ceabe766a6443a1c5 
     current working directory /home/local/src
     Download the bogofilter package. The latest tested bogofilter package is
-    bogofilter-1.2.3.tar.bz2. 
+    bogofilter-1.2.4.tar.bz2. 
 
-    % wget http://downloads.sourceforge.net/bogofilter/bogofilter-1.2.3.tar.bz2
-    % bzip2 -d -c bogofilter-1.2.3.tar.bz2 | tar xf -
-    % gunzip -c indimail-@version@/patches/bogofilter-1.2.3.patch.gz | patch -p0
-    % cd bogofilter-1.2.3
+    % wget http://downloads.sourceforge.net/bogofilter/bogofilter-1.2.4.tar.bz2
+    % bzip2 -d -c bogofilter-1.2.4.tar.bz2 | tar xf -
+    % gunzip -c indimail-@version@/Patch-1.0/bogofilter-1.2.4.patch.gz | patch -p0
+    % cd bogofilter-1.2.4
     % autoreconf -fi
     % ./configure --prefix=@prefix@ --sysconfdir=@sysconfdir@ --enable-indimail \
          --libexecdir=@libexecdir@ \
@@ -650,7 +651,7 @@ the installation.
 
     % wget http://downloads.sourceforge.net/fetchmail/fetchmail-6.3.26.tar.bz2
     % xz -d -c fetchmail-6.3.26.tar.bz2 | tar xf -
-    % gunzip -c indimail-@version@/patches/fetchmail-6.3.26.patch.gz | patch -p0
+    % gunzip -c indimail-@version@/Patch-1.0/fetchmail-6.3.26.patch.gz | patch -p0
     % cd fetchmail-6.3.26
     % autoreconf -fi
     % ./configure --prefix=@prefix@ --enable-indimail \
@@ -658,6 +659,7 @@ the installation.
         --enable-binprefix=@prefix@ \
         --datarootdir=@shareddir@ \
         --libexecdir=@libexecdir@ \
+        --libdir=@libdir@ \
         --mandir=@mandir@ \
         --with-ssl
     % make -s [DESTDIR=staging_directory]
