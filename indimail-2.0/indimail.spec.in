@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail.spec.in,v 2.365 2017-03-07 02:15:56+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 2.366 2017-03-07 02:38:52+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 
@@ -25,7 +25,6 @@
 %global libexecdir         @libexecdir@
 %global mandir             @mandir@
 %global shareddir          @shareddir@
-%global pythondir          @pythondir@
 %global default_domain     @defaultdomain@
 %global courier_version    4.17.2
 %global bogofilter_version 1.2.4
