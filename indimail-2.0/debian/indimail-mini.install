@@ -15,9 +15,9 @@ usr/bin/qmail-showctl /usr/bin
 usr/bin/qmaildirmake /usr/bin
 usr/bin/maildir2mbox /usr/bin
 usr/bin/maildirwatch /usr/bin
-usr/bin/qail /usr/bin
-usr/bin/elq /usr/bin
-usr/bin/pinq /usr/bin
+usr/libexec/indimail/qail /usr/libexec/indimail
+usr/libexec/indimail/elq /usr/libexec/indimail
+usr/libexec/indimail/pinq /usr/libexec/indimail
 usr/share/man/man1/forward.1.gz /usr/share/man/man1
 usr/share/man/cat1/forward.0.gz /usr/share/man/cat1
 usr/share/man/man1/predate.1.gz /usr/share/man/man1
