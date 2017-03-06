@@ -1,20 +1,21 @@
 #
 #
-# $Id: indimail.spec.in,v 2.364 2017-03-05 17:03:58+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 2.365 2017-03-07 02:15:56+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 
 %global is_suse %(test -e /etc/SuSE-release && echo 1 || echo 0)
 %global is_fedora %(test -e /etc/fedora-release && echo 1 || echo 0)
+%global pythondir %(python -c "from distutils.sysconfig import get_python_lib; print get_python_lib()")
 
 %global _hardened_build    1
 %if 0%{?opensuse_bs}
 # define to 1 if building on openSUSE build service
 %global build_on_obs       1
-%global reconfigure_mode   1
+%global reconfigure_mode   0
 %else
 %global build_on_obs       0
-%global reconfigure_mode   0
+%global reconfigure_mode   1
 %endif
 
 %global _prefix            @prefix@
@@ -24,7 +25,7 @@
 %global libexecdir         @libexecdir@
 %global mandir             @mandir@
 %global shareddir          @shareddir@
-%global pkgconfigdir       @pkgconfigdir@
+%global pythondir          @pythondir@
 %global default_domain     @defaultdomain@
 %global courier_version    4.17.2
 %global bogofilter_version 1.2.4
@@ -44,7 +45,7 @@
 %global libsrs2_version    1.0.18
 %global mysql_version      6.0.9-alpha
 %if 0%{?suse_version}
-%global noperms            0
+%global noperms            1
 %else
 %global noperms            1
 %endif
@@ -63,7 +64,7 @@
 %global nolibdkim          0
 %global nolibsrs2          0
 %global nofetchmail        0
-%global nobogofilter       0
+%global nobogofilter       1
 %global nodksignatures     0
 
 %global _verbose           0
@@ -95,6 +96,7 @@
 %global packager Manvendra Bhangui <manvendra@indimail.org>
 %global dist redhat
 %global disttag rh
+%endif
 
 %if %{is_suse} != 0
 %global dist suse
@@ -102,10 +104,9 @@
 %endif
 
 %if %{is_fedora} != 0
-%global dist fedora
+%global dist %{?dist}
 %global disttag rhfc
 %global fedora_version %(cat /etc/fedora-release | awk '{print $3}')
-%endif
 %endif
 
 Summary: A Flexible Messaging Platform with Multi-Host/Multi-Protocol support
@@ -139,8 +140,10 @@ Provides: group(%groupname) = %gid
 Provides: group(nofiles)    > 999
 Provides: group(qmail)      > 999
 Provides: group(qscand)     > 999
+%if %build_on_obs == 0
 Requires(pre): shadow-utils
 Requires(postun): shadow-utils
+%endif
 
 %if %build_on_obs == 1
 License: GPL-3.0+
@@ -317,6 +320,7 @@ PreReq: permissions
 %endif
 %endif
 
+%if %nobogofilter == 0
 %if 0%{?suse_version}
 BuildRequires: db-devel
 %else
@@ -324,6 +328,7 @@ BuildRequires: db-devel
 BuildRequires: libdb-devel
 %else
 BuildRequires: db4-devel
+%endif
 %endif
 %endif
 
@@ -444,7 +449,8 @@ echo target_alias  %_target_alias
 echo target_cpu    %_target_cpu
 echo target_os     %_target_os
 echo target_vendor %_target_vendor
-echo Building %{name}-%{version}-%{release} Build %{_build} OS %{_os} Dist %dist disttag %disttag lib=%{_lib} libdir=%{_libdir}
+echo pythondir     %{pythondir}
+echo Building %{name}-%{version}-%{release} Build %{_build} OS %{_os} Dist %{dist} disttag %{disttag} lib=%{_lib} libdir=%{_libdir}
 echo "------------------------------------------------------"
 
 for i in %{name}-%{version} altermime-0.3.10 ripmime-1.4.0.9 flash-0.9.4 \
@@ -738,17 +744,10 @@ if [ -d ../fetchmail-%{fetchmail_version} ] ; then
     aclocal -I m4
     autoreconf -fiv
   fi
-  if [ %{build_on_obs} -eq 0 ] ; then
-  ./configure --prefix=%{_prefix} --libexecdir=%{libexecdir} --sysconfdir=%{sysconfdir} \
-    --enable-binprefix=%{_prefix} --mandir=%{mandir} --datarootdir=%{shareddir} \
-    --libdir=%{_libdir} \
-    `%{__cat} ../%{name}-%{version}/config/fetchmail.opts`
-  else
   %configure --prefix=%{_prefix} --libexecdir=%{libexecdir} --sysconfdir=%{sysconfdir} \
     --enable-binprefix=%{_prefix} --mandir=%{mandir} --datarootdir=%{shareddir} \
     --libdir=%{_libdir} \
     `%{__cat} ../%{name}-%{version}/config/fetchmail.opts`
-  fi
 fi
 %endif
 cd ..
@@ -818,6 +817,9 @@ do
       %{__cp} libs/tcpd/couriertls.1 %{buildroot}%{mandir}/man1/couriertls.1
     fi
     cd ..
+    if [ %nobogofilter -eq 0 -a " $i" = " bogofilter-%{bogofilter_version}" ] ; then
+		%{__cp} %{name}-%{version}/data/wordlist.db %{sysconfdir}/wordlist.db
+	fi
   fi
 done
 for i in eps cdb flash indimail
@@ -964,7 +966,8 @@ fi
 # Create these files so that %%ghost does not complain
 for i in indimail.cnf tcp.imap tcp.imap.cdb tcp.pop3 tcp.pop3.cdb \
 tcp.smtp tcp.smtp.cdb tcp.qmtp tcp.qmtp.cdb tcp.qmqp tcp.qmqp.cdb \
-tcp.poppass tcp.poppass.cdb procmailrc
+tcp.poppass tcp.poppass.cdb procmailrc indimail.pp indimail.mod \
+users/cdb users/assign
 do
   if [ ! -f %{buildroot}%{sysconfdir}/$i ] ; then
     $TOUCH %{buildroot}%{sysconfdir}/$i
@@ -1045,8 +1048,6 @@ fi
 %if %i_m_on_mac == 0
 %dir %attr(755,root,root)         %{shareddir}/locale
 %endif
-%dir %attr(755,root,root)         %{_prefix}/lib*/python*
-%dir %attr(755,root,root)         %{_prefix}/lib*/python*/site-packages
 %endif
 
 %dir %attr(775,root,indimail)     %{domaindir}/domains
@@ -1792,9 +1793,9 @@ fi
 %lang(sk) /usr/share/indimail/locale/sk/LC_MESSAGES/fetchmail.mo
 %lang(ja) /usr/share/indimail/locale/ja/LC_MESSAGES/fetchmail.mo
 %endif
-%attr(644,root,root)                    %{_prefix}/lib/python*/site-packages/fetchmailconf.pyo
-%attr(755,root,root)                    %{_prefix}/lib/python*/site-packages/fetchmailconf.py
-%attr(644,root,root)                    %{_prefix}/lib/python*/site-packages/fetchmailconf.pyc
+%attr(644,root,root)                    %{pythondir}/fetchmailconf.pyo
+%attr(755,root,root)                    %{pythondir}/fetchmailconf.py
+%attr(644,root,root)                    %{pythondir}/fetchmailconf.pyc
 %endif
 
 %docdir %{shareddir}/doc
