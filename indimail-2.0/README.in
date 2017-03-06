@@ -295,6 +295,8 @@ Some of the features available in this package
 74. tcpserver plugin feature - dynamically load shared objects given on
     command line. Load shared objects defined by env variables PLUGIN0,
     PLUGIN1, ...
+    tcpserver plugin allows you to load qmail-smtpd, rblsmtpd once in memory
+75. FHS compliance
 
 You can take a detailed look at the feature list at
 
@@ -354,37 +356,27 @@ both 32 and 64 bit) are
     * SUSE
           o openSUSE 13.2
           o openSUSE 13.1
-          o openSUSE 11.4
-          o openSUSE Tumbleweed
+          o SUSE Linux Enterprise 12 SP2
           o SUSE Linux Enterprise 12 SP1
           o SUSE Linux Enterprise 12
           o SUSE Linux Enterprise 11 SP4
           o SUSE Linux Enterprise 11 SP3
           o SUSE Linux Enterprise 11 SP2
           o SUSE Linux Enterprise 11 SP1
-          o SUSE Linux Enterprise 11
-          o SUSE Linux Enterprise 10
 
     * Red Hat
-          o Fedora 23
-          o Fedora 22
-          o Fedora 21
+          o Fedora 25
+          o Fedora 24
           o Red Hat Enterprise Linux 7
           o Red Hat Enterprise Linux 6
-          o Red Hat Enterprise Linux 5
           o CentOS 7
           o CentOS 6
-          o CentOS 5
 
     * Debian
           o Debian 8.0
           o Debian 7.0
+          o Ubuntu 16.10
           o Ubuntu 16.04
-          o Ubuntu 15.10
-          o Ubuntu 15.04
-          o Ubuntu 14.10
-          o Ubuntu 14.04
-          o Ubuntu 12.04
 
 
 Enterprise Support
