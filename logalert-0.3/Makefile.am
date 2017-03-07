@@ -33,6 +33,8 @@ edit = sed \
 	-e 's,@version\@,$(VERSION),g' \
 	-e 's,@VERSION\@,$(VERSION),g' \
 	-e 's,@DESTDIR\@,$(DESTDIR),g' \
+	-e 's,@mandir\@,$(mandir),g' \
+	-e 's,@sysconfdir\@,$(sysconfdir),g' \
 	-e 's,@HOST\@,$(host),g' \
 	-e 's,@DATE\@,$(DATE),g' \
 	-e 's,@prefix\@,$(prefix),g'
