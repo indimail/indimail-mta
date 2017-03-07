@@ -1,5 +1,8 @@
 /*
  * $Log: logsrv.c,v $
+ * Revision 1.11  2017-03-07 19:35:08+05:30  Cprogrammer
+ * added CRYPTO_POLICY_NON_COMPLIANCE
+ *
  * Revision 1.10  2016-06-21 13:30:57+05:30  Cprogrammer
  * use SSL_set_cipher_list as part of crypto-policy-compliance
  *
@@ -91,7 +94,7 @@ program RPCLOG
 #define STATUSDIR PREFIX"/tmp/"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: logsrv.c,v 1.10 2016-06-21 13:30:57+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: logsrv.c,v 1.11 2017-03-07 19:35:08+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef __STDC__
