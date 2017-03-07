@@ -1,0 +1,404 @@
+#
+# $Log: iwebadmin.spec.in,v $
+# Revision 1.18  2017-03-07 14:22:35+05:30  Cprogrammer
+# fixed typo (--enable-mysqlprefix)
+# fixed paths
+#
+# Revision 1.17  2016-06-07 22:17:45+05:30  Cprogrammer
+# use --mysqlPrefix instead of --enable-mysqlincdir and --enable-mysqllibdir
+#
+# Revision 1.16  2016-06-07 11:23:38+05:30  Cprogrammer
+# replaced release with 1.B_CNT
+#
+# Revision 1.15  2016-06-07 10:50:18+05:30  Cprogrammer
+# changes for FHS
+#
+# Revision 1.14  2016-04-05 15:59:51+05:30  Cprogrammer
+# added BuildConflicts: indimail
+#
+# Revision 1.13  2016-04-05 07:05:04+05:30  Cprogrammer
+# use chrpath for SLES and openSUSE
+#
+# Revision 1.12  2015-12-17 17:21:46+05:30  Cprogrammer
+# use root perm for iwebadmin
+#
+# Revision 1.11  2013-10-01 13:33:38+05:30  Cprogrammer
+# changed permission of iwebadmin
+#
+# Revision 1.10  2013-09-20 14:45:39+05:30  Cprogrammer
+# fix patch application
+#
+# Revision 1.9  2011-11-26 09:08:31+05:30  Cprogrammer
+# use htmllibdir
+#
+# Revision 1.8  2011-10-25 10:40:02+05:30  Cprogrammer
+# added iwebadmin_perm_list
+#
+# Revision 1.7  2011-05-13 10:35:30+05:30  Cprogrammer
+# fix for obs
+#
+# Revision 1.6  2010-10-09 13:54:07+05:30  Cprogrammer
+# changed defattr
+#
+# Revision 1.5  2010-04-27 19:43:00+05:30  Cprogrammer
+# no ldconfig required
+#
+# Revision 1.4  2010-04-27 19:32:05+05:30  Cprogrammer
+# increment release number for every run
+#
+# Revision 1.3  2010-04-26 22:28:26+05:30  Cprogrammer
+# added mysql_prefix
+#
+# Revision 1.2  2010-04-26 16:06:55+05:30  Cprogrammer
+# fixed --enable-ezmlmdir
+#
+# Revision 1.1  2010-04-26 15:17:29+05:30  Cprogrammer
+# Initial revision
+#
+# Revision 1.5  2010-02-24 09:13:43+05:30  Cprogrammer
+# added bwidget to Requires
+#
+# Revision 1.4  2010-02-20 13:52:50+05:30  Cprogrammer
+# added ldconfig
+#
+# Revision 1.3  2010-02-20 11:44:02+05:30  Cprogrammer
+# added fast_mode
+#
+# Revision 1.2  2010-02-20 11:17:17+05:30  Cprogrammer
+# fix for autoreconf
+#
+# Revision 1.1  2010-02-20 10:53:59+05:30  Cprogrammer
+# Initial revision
+#
+#
+# $Id: iwebadmin.spec.in,v 1.18 2017-03-07 14:22:35+05:30 Cprogrammer Exp mbhangui $
+%undefine _missing_build_ids_terminate_build
+%define _unpackaged_files_terminate_build 1
+
+%define is_mandrake %(test -e /etc/mandrake-release && echo 1 || echo 0)
+%define is_suse %(test -e /etc/SuSE-release && echo 1 || echo 0)
+%define is_fedora %(test -e /etc/fedora-release && echo 1 || echo 0)
+
+%define dist redhat
+%define disttag rh
+
+%if %is_mandrake
+%define dist mandrake
+%define disttag mdk
+%endif
+%if %is_suse
+%define dist suse
+%define disttag suse
+%endif
+%if %is_fedora
+%define dist fedora
+%define disttag rhfc
+%endif
+
+%if 0%{?opensuse_bs}
+# define to 1 if building on openSUSE build service
+%define build_on_obs       1
+%define fast_mode          0
+%else
+%define build_on_obs       0
+%define fast_mode          0
+%endif
+
+%define _prefix            @prefix@
+%define sysconfdir         @sysconfdir@
+%define see_base           For a description of IndiMail visit http://www.indimail.org
+
+%if %build_on_obs != 0
+# change mysqlPrefix to /usr for openSUSE buildservice
+%define mysqlPrefix        /usr
+%else
+%define mysqlPrefix        @mysql_prefix@
+%endif
+
+Summary: Web Administration GUI for IndiMail User Administration
+Name: iwebadmin
+Version: @version@
+%if %build_on_obs != 0
+Release: 1.<B_CNT>
+%else
+Release: 1.B_CNT
+%endif
+%if %build_on_obs == 1
+License: GPL-3.0+
+%else
+License: GPLv3
+%endif
+Group: System Environment/Base
+Source0:  http://downloads.sourceforge.net/indimail/%{name}-%{version}.tar.gz
+Source2: %{name}-%{version}-rpmlintrc
+
+URL: http://www.indimail.org
+AutoReqProv: No
+BuildRequires: rpm gcc make binutils coreutils grep
+BuildRequires: glibc glibc-devel procps cpio
+BuildRequires: sed gettext-devel
+BuildRequires: findutils
+BuildRequires: gzip autoconf indimail-devel
+%if %{undefined rhel_version}
+BuildRequires: sharutils
+%else
+%if 0%{?rhel_version} != 600 && 0%{?rhel_version} != 700
+BuildRequires: sharutils
+%endif
+%endif
+
+%if %build_on_obs == 1
+BuildRequires: mysql-devel libidn-devel
+%else
+BuildRequires: mysql-devel
+%endif
+%if %{undefined centos_version} && %{undefined rhel_version}
+BuildRequires: chrpath
+%endif
+%if 0%{?suse_version}
+BuildRequires: -post-build-checks  
+#!BuildIgnore: post-build-checks  
+%endif
+
+Requires: coreutils grep /bin/sh glibc /usr/sbin/useradd /usr/sbin/groupadd
+Requires: procps /usr/bin/awk indimail > 1.6
+BuildRoot: %(mktemp -ud %{_tmppath}/%{name}-%{version}-%{release}-XXXXXX)
+Excludeos: windows 
+
+%description
+iwebadmin provides a Web frontend for administering IndiMail Users
+
+%{see_base}
+
+%prep
+echo "---------------- INFORMATION ------------------------"
+echo target        %_target
+echo target_alias  %_target_alias
+echo target_cpu    %_target_cpu
+echo target_os     %_target_os
+echo target_vendor %_target_vendor
+echo Building %{name}-%{version}-%{release} Build %{_build} OS %{_os} Dist %dist disttag %disttag libs %{_lib} %{_libdir}
+echo "------------------------------------------------------"
+
+proj=%{name}-%{version}
+if [ -d $proj ] ; then
+	/bin/rm -rf $proj
+fi
+if [ -f ../SOURCES/$proj.tar.gz ] ; then
+	gunzip -c ../SOURCES/$proj.tar.gz |tar xf -
+elif [ -f ../SOURCES/$proj.tar.bz2 ] ; then
+	bzip2 -d -c ../SOURCES/$proj.tar.bz2 |tar xf -
+else
+	echo "No Source Archive for $proj"
+	exit 1
+fi
+if [ -d $proj ] ; then
+	if [ -f %{name}-%{version}/patches/$proj.patch ] ; then
+	    # Copy for the SRPM
+		/bin/cp %{name}-%{version}/patches/$proj.patch ../SOURCES
+	fi
+fi
+
+%build
+ID=$(id -u)
+if [ $ID -eq 0 ] ; then
+	/usr/bin/getent group indimail || /usr/sbin/groupadd -r -g 555 indimail
+	if [ $? = 4 ] ; then
+		/usr/sbin/groupadd -r indimail
+	fi
+	/usr/bin/getent passwd indimail || /usr/sbin/useradd -r -g indimail -u 555 -d {_prefix} indimail || true
+	if [ $? = 4 ] ; then
+		/usr/sbin/useradd -r -g indimail -d {_prefix} indimail
+	fi
+fi
+
+cd %{name}-%{version}
+if [ %{fast_mode} -eq 0 ] ; then
+if [ %{build_on_obs} -eq 0 ] ; then
+	echo "reconfiguring..."
+	autoreconf -fi
+else
+echo "reconfiguring..."
+%if %{undefined centos_version} && %{undefined rhel_version} && %{undefined sles_version}
+%if 0%{?fedora_version} > 10 || 0%{?suse_version} || 0%{?mandriva_version} > 2009
+	autoreconf -fi
+%endif
+%endif
+fi
+fi
+
+./configure --prefix=%{_prefix} \
+	--sysconfdir=%{sysconfdir} \
+	--libdir=%{_libdir} \
+	--enable-ezmlmdir=%{_prefix}/bin --disable-ipauth --disable-trivial-password \
+	--enable-mysqlprefix=%{mysqlPrefix} \
+	--enable-modify-quota \
+	--enable-htmldir=@htmldir@ \
+	--enable-cgibindir=@cgibindir@ \
+	--enable-imagedir=@imagedir@ \
+	--enable-htmllibdir=@htmllibdir@
+
+%install
+[ "$RPM_BUILD_ROOT" != "/" ] && /bin/rm -fr $RPM_BUILD_ROOT
+ID=$(id -u)
+for i in %{name}-%{version}
+do
+if [ -d $i ] ; then
+	cd $i
+	%{__make} -s DESTDIR=%{buildroot}
+	%{__make} -s DESTDIR=%{buildroot} install-strip
+	cd ..
+fi
+done
+
+# copy files here
+if [ -x /usr/bin/chrpath ] ; then
+	/usr/bin/chrpath -d %{buildroot}@cgibindir@/iwebadmin
+fi
+
+%files
+%defattr(-,root,root,-)
+%if "%{_prefix}" != "/usr"
+%dir %attr(555,root,qmail)          %{_prefix}
+%endif
+%dir %attr(555,root,qmail)          @htmllibdir@/iwebadmin
+%dir %attr(555,root,qmail)          @htmllibdir@/iwebadmin/html
+%dir %attr(555,root,qmail)          @htmllibdir@/iwebadmin/lang
+
+# binary
+%attr(6555,root,indimail)           @cgibindir@/iwebadmin
+
+#html
+%attr(444,root,root)                @htmllibdir@/html/add_autorespond.html
+%attr(444,root,root)                @htmllibdir@/html/add_forward.html
+%attr(444,root,root)                @htmllibdir@/html/add_listdig.html
+%attr(444,root,root)                @htmllibdir@/html/add_listmod.html
+%attr(444,root,root)                @htmllibdir@/html/add_listuser.html
+%attr(444,root,root)                @htmllibdir@/html/add_mailinglist-idx.html
+%attr(444,root,root)                @htmllibdir@/html/add_mailinglist-no-idx.html
+%attr(444,root,root)                @htmllibdir@/html/add_user.html
+%attr(444,root,root)                @htmllibdir@/html/change_password.html
+%attr(444,root,root)                @htmllibdir@/html/change_password_success.html
+%attr(444,root,root)                @htmllibdir@/html/colortable
+%attr(444,root,root)                @htmllibdir@/html/del_autorespond_confirm.html
+%attr(444,root,root)                @htmllibdir@/html/del_forward_confirm.html
+%attr(444,root,root)                @htmllibdir@/html/del_listdig.html
+%attr(444,root,root)                @htmllibdir@/html/del_listmod.html
+%attr(444,root,root)                @htmllibdir@/html/del_listuser.html
+%attr(444,root,root)                @htmllibdir@/html/del_mailinglist_confirm.html
+%attr(444,root,root)                @htmllibdir@/html/del_user_confirm.html
+%attr(444,root,root)                @htmllibdir@/html/footer.html
+%attr(444,root,root)                @htmllibdir@/html/header.html
+%attr(444,root,root)                @htmllibdir@/html/main_menu.html
+%attr(444,root,root)                @htmllibdir@/html/mod_autorespond.html
+%attr(444,root,root)                @htmllibdir@/html/mod_dotqmail.html
+%attr(444,root,root)                @htmllibdir@/html/mod_mailinglist-idx.html
+%attr(444,root,root)                @htmllibdir@/html/mod_user.html
+%attr(444,root,root)                @htmllibdir@/html/setremotecatchall.html
+%attr(444,root,root)                @htmllibdir@/html/show_autorespond.html
+%attr(444,root,root)                @htmllibdir@/html/show_digest_subscribers.html
+%attr(444,root,root)                @htmllibdir@/html/show_forwards.html
+%attr(444,root,root)                @htmllibdir@/html/show_login.html
+%attr(444,root,root)                @htmllibdir@/html/show_mailinglist.html
+%attr(444,root,root)                @htmllibdir@/html/show_moderators.html
+%attr(444,root,root)                @htmllibdir@/html/show_subscribers.html
+%attr(444,root,root)                @htmllibdir@/html/show_users.html
+%attr(444,root,root)                @htmllibdir@/lang/bg
+%attr(444,root,root)                @htmllibdir@/lang/cs
+%attr(444,root,root)                @htmllibdir@/lang/da
+%attr(444,root,root)                @htmllibdir@/lang/de
+%attr(444,root,root)                @htmllibdir@/lang/en
+%attr(444,root,root)                @htmllibdir@/lang/es
+%attr(444,root,root)                @htmllibdir@/lang/fi
+%attr(444,root,root)                @htmllibdir@/lang/fr
+%attr(444,root,root)                @htmllibdir@/lang/hu
+%attr(444,root,root)                @htmllibdir@/lang/it
+%attr(444,root,root)                @htmllibdir@/lang/ja
+%attr(444,root,root)                @htmllibdir@/lang/lt
+%attr(444,root,root)                @htmllibdir@/lang/nl
+%attr(444,root,root)                @htmllibdir@/lang/no
+%attr(444,root,root)                @htmllibdir@/lang/pl
+%attr(444,root,root)                @htmllibdir@/lang/pt-br
+%attr(444,root,root)                @htmllibdir@/lang/ru
+%attr(444,root,root)                @htmllibdir@/lang/sk
+%attr(444,root,root)                @htmllibdir@/lang/sv
+%attr(444,root,root)                @htmllibdir@/lang/tr
+%attr(444,root,root)                @htmllibdir@/lang/zh-cn
+%attr(444,root,root)                @sysconfdir@/iwebadmin_perm_list
+#images
+%attr(444,root,root)                @imagedir@/delete.png
+%attr(444,root,root)                @imagedir@/disabled.png
+%attr(444,root,root)                @imagedir@/lowerleft.png
+%attr(444,root,root)                @imagedir@/lowermiddle.png
+%attr(444,root,root)                @imagedir@/lowerright.png
+%attr(444,root,root)                @imagedir@/main.png
+%attr(444,root,root)                @imagedir@/main1.png
+%attr(444,root,root)                @imagedir@/main2.png
+%attr(444,root,root)                @imagedir@/middleleft1.png
+%attr(444,root,root)                @imagedir@/middleleft2.png
+%attr(444,root,root)                @imagedir@/middlelogin.png
+%attr(444,root,root)                @imagedir@/middleright1.png
+%attr(444,root,root)                @imagedir@/modify.png
+%attr(444,root,root)                @imagedir@/pixel.png
+%attr(444,root,root)                @imagedir@/radio-off.png
+%attr(444,root,root)                @imagedir@/radio-on.png
+%attr(444,root,root)                @imagedir@/trash.png
+%attr(444,root,root)                @imagedir@/upperleft.png
+%attr(444,root,root)                @imagedir@/uppermiddle1.png
+%attr(444,root,root)                @imagedir@/uppermiddle2.png
+%attr(444,root,root)                @imagedir@/upperright.png
+
+#
+# If the configuration file should not be replaced when the RPM is
+# upgraded, mark it as follows:
+# %config(noreplace) filename
+#
+# For files that should be included in the list of files so that they
+# are uninstalled when the package is removed but may not exist until
+# they are created during post-install should be marked as follows:
+# %config(missingok) filename
+#
+
+%clean
+%{__rm} -rf %{buildroot}
+
+#          install   erase   upgrade  reinstall
+# % pre         1        -         2         2
+# % post        1        -         2         2
+# % preun       -        0         1         -
+# % postun      -        0         1         -
+%pre 
+#echo This is pre for %{version}-%{release} : arg=$1
+argv1=$1
+ID=$(id -u)
+if [ $ID -ne 0 ] ; then
+	echo "You are not root"
+	exit 1
+fi
+
+%post
+argv1=$1
+ID=$(id -u)
+if [ $ID -ne 0 ] ; then
+	echo "You are not root"
+	exit 1
+fi
+
+%preun
+#echo This is preun for %{version}-%{release} : arg=$1
+ID=$(id -u)
+if [ $ID -ne 0 ] ; then
+	echo "You are not root"
+	exit 1
+fi
+
+%postun
+#echo This is postun for %{version}-%{release} : arg=$1
+ID=$(id -u)
+if [ $ID -ne 0 ] ; then
+	echo "You are not root"
+	exit 1
+fi
+
+# fix changelog for openSUSE buildservice
+%changelog
