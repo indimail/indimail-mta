@@ -44,7 +44,7 @@ build-stamp:
 	./configure --prefix=${prefix} \
 	--libexecdir=${libexecdir} --sysconfdir=${sysconfdir} \
 	--enable-shareddir=${shareddir} \
-	--mandir=${mandir} --enable-mysqlpreix=${mysql_prefix}
+	--mandir=${mandir} --enable-mysqlprefix=${mysql_prefix}
 	#
 	# run make
 	#
