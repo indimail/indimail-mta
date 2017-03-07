@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail.spec.in,v 2.366 2017-03-07 02:38:52+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 2.367 2017-03-07 14:19:28+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 
@@ -111,7 +111,7 @@
 Summary: A Flexible Messaging Platform with Multi-Host/Multi-Protocol support
 Name: indimail
 Version: @version@
-Provides: libindimail = @version@, indimail-mta = @version@, daemontools = @version@, ucspi-tcp = @version@
+Provides: indimail-mta = @version@, daemontools = @version@, ucspi-tcp = @version@
 %if %build_on_obs == 1
 Release: 1.<B_CNT>
 %else
@@ -352,10 +352,12 @@ Requires: coreutils grep /bin/sh glibc openssl
 # rpm -qp --queryformat %%{arch} some-file.rpm
 # rpm --showrc for all macros
 # rpm -qlp some-file.rpm
+%if %build_on_obs == 1
 %if %i_m_on_mac == 0
-#Requires: /usr/sbin/useradd /usr/sbin/groupadd
-Requires: /sbin/chkconfig /usr/sbin/userdel /usr/sbin/groupdel procps /usr/bin/awk
+Requires: /usr/sbin/useradd /usr/sbin/groupadd /usr/sbin/groupdel
 %endif
+%endif
+Requires: /sbin/chkconfig procps /usr/bin/awk
 
 %if 0%{?suse_version}
 Requires: mysql-community-server
@@ -367,7 +369,9 @@ Requires: mysql-server
 Requires: policycoreutils-python
 %endif
 
+%if %build_on_obs == 1
 BuildRoot: %(mktemp -ud %{_tmppath}/%{name}-%{version}-%{release}-XXXXXXX)
+%endif
 #
 # IndiMail is choosy and runs on reliable OS only
 #
@@ -665,7 +669,7 @@ if [ -d ../nssd-%{nssd_version} ] ; then
   fi
 
   %configure --prefix=%{_prefix} --libexecdir=%{libexecdir} --sysconfdir=%{sysconfdir} \
-  --mandir=%{mandir} --libdir=/usr/%{_lib} \
+  --mandir=%{mandir} --libdir=%{_libdir} \
   --enable-mysqlprefix=%{mysqlPrefix} \
   `%{__cat} ../%{name}-%{version}/config/nssd.opts`
 fi
@@ -834,7 +838,7 @@ if [ %noclamav -eq 0 ] ; then
   done
 fi
 if [ %nonssd -eq 0 ] ; then
-  %{__rm} -f %{buildroot}/usr/%{_lib}/libnss_nssd.la
+  %{__rm} -f %{buildroot}%{_libdir}/libnss_nssd.la
 fi
 if [ %nocourierimap -eq 0 ] ; then
   %{__rm} -f %{buildroot}/%{_libdir}/libunicode.la
@@ -1802,8 +1806,13 @@ fi
 %attr(644,root,root)                    %{mandir}/man[1,5,7,8]/*
 %attr(644,root,root)                    %{mandir}/cat[1,5,7,8]/*
 
+%if %build_on_obs == 0
+%license %attr(444,root,qmail)          %{shareddir}/doc/COPYING
+%license %attr(444,root,qmail)          %{shareddir}/doc/README.licenses
+%else
 %attr(444,root,qmail)                   %{shareddir}/doc/COPYING
 %attr(444,root,qmail)                   %{shareddir}/doc/README.licenses
+%endif
 %attr(444,root,qmail)                   %{shareddir}/doc/CREDITS
 %attr(444,root,qmail)                   %{shareddir}/doc/RELEASE-Notes
 %attr(444,root,qmail)                   %{shareddir}/doc/AUTOTURN
@@ -1929,8 +1938,8 @@ fi
 %endif
 
 %if %nonssd == 0
-                                        /usr/%{_lib}/libnss_nssd.so.2
-%attr(755,root,root)                    /usr/%{_lib}/libnss_nssd.so.2.0.0
+                                        %{_libdir}/libnss_nssd.so.2
+%attr(755,root,root)                    %{_libdir}/libnss_nssd.so.2.0.0
 %endif
 
 %files devel
@@ -2039,7 +2048,7 @@ fi
 %endif
 
 %if %nonssd == 0
-                                        /usr/%{_lib}/libnss_nssd.so
+                                        %{_libdir}/libnss_nssd.so
 %endif
 
 %{_pkg_config_path}/libindimail.pc
@@ -2096,6 +2105,10 @@ fi
 %{_libdir}/libcdb-%{cdb_version}.0.dylib
 %{_libdir}/libflash-%{flash_version}.0.dylib
 %{_libdir}/libindimail-%{version}.0.dylib
+%endif
+%if %nonssd == 0
+                                        %{_libdir}/libnss_nssd.so.2
+%attr(755,root,root)                    %{_libdir}/libnss_nssd.so.2.0.0
 %endif
 %{_pkg_config_path}/libindimail.pc
 
