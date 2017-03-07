@@ -1,4 +1,6 @@
 %define _prefix            @prefix@
+%define mandir             @mandir@
+%define sysconfdir         @sysconfdir@
 
 %if 0%{?opensuse_bs}
 # define to 1 if building on openSUSE build service
@@ -33,11 +35,8 @@ BuildRequires: -post-build-checks
 
 %if %build_on_obs == 1
 %define packager Manvendra Bhangui <manvendra@indimail.org>
-%if 0%{?mandriva_version} == 201100
-BuildRequires: coreutils
-%else
+BuildRequires: libidn-devel
 BuildRequires: coreutils sh-utils
-%endif
 %endif
 
 Requires: coreutils grep /bin/sh glibc
@@ -59,40 +58,29 @@ normally used by sysadmins.
 %setup
 
 %build
-%if 0%{?mandriva_version} > 2009
-	/bin/rm -f m4/*
-	aclocal
-	libtoolize --force
-	autoheader
-	autoconf
-	automake
-./configure --prefix=%{_prefix} --sysconfdir=%{_prefix}/etc --mandir=%{_prefix}/man
-%else
-%configure --prefix=%{_prefix}  --sysconfdir=%{_prefix}/etc --mandir=%{_prefix}/man
-%endif
+%configure --prefix=%{_prefix}  --sysconfdir=%{sysconfdir} --mandir=%{mandir}
 
 %install
 [ "$RPM_BUILD_ROOT" != "/" ] && %{__rm} -fr $RPM_BUILD_ROOT
 %{__make} -s DESTDIR=%{buildroot}
 %{__make} -s DESTDIR=%{buildroot} install-strip
-find %{buildroot}%{_prefix}/man -type f -exec gzip -q {} \;
+find %{buildroot}%{mandir} -type f -exec gzip -q {} \;
 
 %files
-%dir %attr(555,root,root)        %{_prefix}
-%dir %attr(555,root,root)        %{_prefix}/bin
-%dir %attr(555,root,root)        %{_prefix}/man
-%dir %attr(555,root,root)        %{_prefix}/man/man1
-%dir %attr(555,root,root)        %{_prefix}/man/man8
-
 %attr(0511,root,root)            %{_prefix}/bin/logalert
 %attr(0511,root,root)            %{_prefix}/bin/logclient
 %attr(0511,root,root)            %{_prefix}/bin/incrmesg
 %attr(0511,root,root)            %{_prefix}/bin/showbytes
 %attr(0511,root,root)            %{_prefix}/sbin/rpclog
 %attr(0511,root,root)            %{_prefix}/sbin/logsrv
-%attr(444,root,root)             %{_prefix}/etc/logalert_perm_list
+%attr(444,root,root)             %{sysconfdir}/logalert_perm_list
 %defattr(-,root,root)
-%doc %attr(444,root,root)        %{_prefix}/man/*/*
+%doc %attr(444,root,root)        %{_mandir}/man1/incrmesg.1.gz
+%doc %attr(444,root,root)        %{_mandir}/man1/logclient.1.gz
+%doc %attr(444,root,root)        %{_mandir}/man1/showbytes.1.gz
+%doc %attr(444,root,root)        %{_mandir}/man8/logalert.8.gz
+%doc %attr(444,root,root)        %{_mandir}/man8/logsrv.8.gz
+%doc %attr(444,root,root)        %{_mandir}/man8/rpclog.8.gz
 
 %changelog
 
