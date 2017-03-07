@@ -7,12 +7,8 @@ logdir=/var/log/indimail
 prefix=/usr
 all: rules indimail-mta.prerm indimail-mta.preinst indimail-mta.postrm indimail-mta.postinst \
 obs_deb_prep indimail-mta.install \
-indimail-mta-xUbuntu_16.04.dsc indimail-mta-xUbuntu_15.10.dsc \
-indimail-mta-xUbuntu_15.04.dsc indimail-mta-xUbuntu_14.10.dsc \
-indimail-mta-xUbuntu_14.04.dsc indimail-mta-xUbuntu_13.10.dsc indimail-mta-xUbuntu_13.04.dsc \
-indimail-mta-xUbuntu_12.10.dsc indimail-mta-xUbuntu_12.04.dsc indimail-mta-xUbuntu_11.10.dsc \
-indimail-mta-xUbuntu_11.04.dsc indimail-mta-xUbuntu_10.10.dsc indimail-mta-xUbuntu_10.04.dsc \
-indimail-mta-Debian_8.0.dsc indimail-mta-Debian_7.0.dsc indimail-mta-Debian_6.0.dsc \
+indimail-mta-xUbuntu_16.10.dsc indimail-mta-xUbuntu_16.04.dsc \
+indimail-mta-Debian_8.0.dsc indimail-mta-Debian_7.0.dsc \
 debian.tar.gz dummy.tar.gz
 
 #bits=$(shell if [ -d /usr/lib64 ] ; then echo 64; else echo 32; fi)
@@ -42,7 +38,7 @@ indimail-mta.install: indimail-mta.install.in
 
 clean:
 	/bin/rm -f rules indimail-mta.prerm indimail-mta.preinst indimail-mta.postrm \
-	indimail-mta.install indimail-mta.postinst obs_deb_prep debian.tar.gz dummy.tar.gz *.dsc
+	indimail-mta.install indimail-mta.postinst obs_deb_prep debian.tar.gz dummy.tar.gz
 
 noinst_SCRIPTS = indimail-mta.prerm indimail-mta.preinst indimail-mta.postrm \
 				 indimail-mta.postinst indimail-mta.install daemontools.install \
