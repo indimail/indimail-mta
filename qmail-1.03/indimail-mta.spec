@@ -1,20 +1,22 @@
 #
 #
-# $Id: indimail-mta.spec,v 1.72 2017-03-01 22:54:59+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail-mta.spec,v 1.73 2017-03-07 14:20:42+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 
 %global is_suse %(test -e /etc/SuSE-release && echo 1 || echo 0)
 %global is_fedora %(test -e /etc/fedora-release && echo 1 || echo 0)
 
-%global _hardened_build    1
 %if 0%{?opensuse_bs}
 # define to 1 if building on openSUSE build service
 %global build_on_obs       1
-%global reconfigure_mode   1
+%global reconfigure_mode   0
 %else
 %global build_on_obs       0
-%global reconfigure_mode   1
+%global reconfigure_mode   0
+%endif
+%if %build_on_obs == 0
+%global _hardened_build    1
 %endif
 
 %global qmaildir           /var/indimail
@@ -96,8 +98,10 @@ Provides: group(%groupname) = %gid
 Provides: group(nofiles)    > 999
 Provides: group(qmail)      > 999
 Provides: group(qscand)     > 999
+%if %build_on_obs == 0
 Requires(pre): shadow-utils
 Requires(postun): shadow-utils
+%endif
 
 %if %build_on_obs == 1
 License: GPL-3.0+
@@ -131,7 +135,6 @@ Source9:%{name}-permissions.paranoid
 Patch1: http://downloads.sourceforge.net/indimail/Patches/qmail-%{qmail_version}.patch.gz
 Patch2: http://downloads.sourceforge.net/indimail/Patches/ucspi-tcp-%{ucspi_version}.patch.gz
 
-%if 0 != 0
 NoSource: 1
 NoSource: 2
 %if %nolibdkim == 0
@@ -139,7 +142,6 @@ NoSource: 3
 %endif
 %if %nolibsrs2 == 0
 NoSource: 4
-%endif
 %endif
 
 URL: http://www.indimail.org
@@ -204,11 +206,13 @@ BuildRequires: db4-devel
 # rpm -qp --queryformat '%' {arch}\n some-file.rpm
 # rpm --showrc for all macros
 # rpm -qlp some-file.rpm
-#Requires: /usr/sbin/useradd /usr/sbin/groupadd
-Requires: /sbin/chkconfig /usr/sbin/userdel /usr/sbin/groupdel procps /usr/bin/awk
+%if %build_on_obs == 1
+Requires: /usr/sbin/useradd /usr/sbin/userdel /usr/sbin/groupadd /usr/sbin/groupdel
+BuildRoot: %(mktemp -ud %{_tmppath}/%{name}-%{version}-%{release}-XXXXXXX)
+%endif
+Requires: /sbin/chkconfig procps /usr/bin/awk
 Requires: coreutils grep /bin/sh glibc openssl
 Requires: daemontools ucspi-tcp
-#BuildRoot: '%'(mktemp -ud '%'{_tmppath}/'%'{name}-'%'{version}-'%'{release}-XXXXXXX)
 #
 # IndiMail is choosy and runs on reliable OS only
 #
@@ -462,7 +466,7 @@ if [ -f ../SOURCES/svctool ] ; then
 %{__cp} ../SOURCES/svctool .
 fi
 if [ -f ../SOURCES/svctool.gz ] ; then
-gunzip -c ../SOURCES/svctool.gz > svctool
+gunzip -c ../SOURCES/svctool.gz > ../SOURCES/svctool
 fi
 
 
@@ -488,10 +492,12 @@ do
       %{__make} DESTDIR=%{buildroot} install-strip
     fi
     cd ..
-  fi
-  if [ -f ./svctool ] ; then
-    %{__mkdir_p} %{buildroot}%{_prefix}/sbin
-    %{__cp} ./svctool %{buildroot}%{_prefix}/sbin/svctool
+  	if [ " $i" = " qmail-%{qmail_version}" ] ; then
+  		if [ -f ../SOURCES/svctool ] ; then
+    		%{__mkdir_p} %{buildroot}%{_prefix}/sbin
+    		%{__cp} ../SOURCES/svctool %{buildroot}%{_prefix}/sbin/svctool
+  		fi
+  	fi
   fi
 done
 if [ %nolibdkim -eq 0 ] ; then
@@ -1248,8 +1254,13 @@ done
 %attr(755,root,qmail)                   %{plugindir}/rblsmtpd.so
 %endif
 
+%if %build_on_obs == 0
 %license %attr(444,root,qmail)          %{shareddir}/doc/COPYING
 %license %attr(444,root,qmail)          %{shareddir}/doc/README.licenses
+%else
+%attr(444,root,qmail)                   %{shareddir}/doc/COPYING
+%attr(444,root,qmail)                   %{shareddir}/doc/README.licenses
+%endif
 %attr(444,root,qmail)                   %{shareddir}/doc/CREDITS
 %attr(444,root,qmail)                   %{shareddir}/doc/FROMISP
 %attr(444,root,qmail)                   %{shareddir}/doc/TOISP
@@ -2165,37 +2176,92 @@ echo ""
 
 # fix changelog for openSUSE buildservice
 %changelog
-* Wed May 25 2016 mbhangui@gmail.com %{version}-%{release}
-Release 1.9.2 Start 13/08/2015
-1.  Added leapsecs program, leapsecs.dat
-2.  Added yearcal, nowutc programs
-3.  prefix queue name in qmail-send, qmail-todo logs
-4.  BUG - qmail-queue.c: fixed missing null character in extraqueue when EXTRAQUEUE is defined
-5.  dkim.c - Use basename of private key as the selector in absense of -y option
-6.  spawn.c - add environment variable MESSID (queue filename)
-7.  str_end.c - added str_end() function
-8.  qmail-send.c, qsutil.c, sig.c, qmail-daemon.c - flush qmail-send logs only on line completion
-9.  various fixes for debian packaging (lib64, devel, libindimail)
-10. renamed package indimail-shared to libindimail
-11. hier.c - create ratelimit directory
-12. qmail-greyd.c - added missing flush statement to flush logs
-13. greylist.c - fixed IPV6 address for connect, fixed incorrect formating of context filename, fixed buffer overflow with ip_str
-14. ip.c - fixed mapped ipv4 address in ip6_scan()
-15. smtpd.c - pass ip6 address to greylist()
-16. ipv6 version of udplogger
-17. greylist.c - create ipv4 socket if ipv6 stack is disabled (reported by Andrzej Boreczko)
-18. qmail-greyd.c - set noipv6 if LIBC_HAS_IP6 is not defined
-19. fixed debian mysql config, database creation in postinst.
-20. udpclient - added -r, -t option to allow reading responses from server
-21. create udplogger service during rpm/deb installation
-22. qmailctl.sh - BUG, replaced failure with $fail
-23. qmail.spec, indimail.spec, indimail, indimail-mta postinst script fixes for debian8/ubuntu15 migration to systemd from upstart
-24. docker images for indimail, indimail-mta
-25. tcpserver: ip4_bit.c fix stack smashing - num defined as int instead of unsigned long
-26. added tcpserver_plugin.c to dynamically load shared objects in tcpserver main()
-27. use RTLD_NOLOAD in load_shared() to load shared objects only once
-28. svctool, indimail.spec, qmail.spec, debain postinst scripts modified to load qmail_smtpd.so instead of qmail-smtpd
-29. smtpd.c - smtp_init() function to load all control files only once
-30. Massive FHS changes
-31. qmail-dk.c - BUG - removed extra semicolon after if () statement
-32. tcpopen.c - close socket on connect() failure
+* Mon Mar 06 2017 mbhangui@gmail.com
+Release 2.0 Start 21/01/2016
+1.  vdominfo.c - Removed compiler warning for fscanf
+2.  maildirquota specification for -q option to vadduser
+3.  Added leapsecs program, leapsecs.dat
+4.  Added yearcal, nowutc programs
+5.  prefix queue name in qmail-send, qmail-todo logs
+6.  BUG - qmail-queue.c: fixed missing null character in extraqueue when EXTRAQUEUE is
+    defined
+7.  dkim.c - Use basename of private key as the selector in absense of -y option
+8.  spawn.c - add environment variable MESSID (queue filename)
+9.  str_end.c - added str_end() function
+10. qmail-send.c, qsutil.c, sig.c, qmail-daemon.c - flush qmail-send logs only on line completion
+11. various fixes for debian packaging (lib64, devel, libindimail)
+12. renamed package indimail-shared to libindimail
+13. hier.c - create ratelimit directory
+14. qmail-greyd.c - added missing flush statement to flush logs
+15. greylist.c - fixed IPV6 address for connect, fixed incorrect formating of context filename,
+    fixed buffer overflow with ip_str
+16. ip.c - fixed mapped ipv4 address in ip6_scan()
+17. smtpd.c - pass ip6 address to greylist()
+18. ipv6 version of udplogger
+19. greylist.c - create ipv4 socket if ipv6 stack is disabled (reported by Andrzej Boreczko)
+20. qmail-greyd.c - set noipv6 if LIBC_HAS_IP6 is not defined
+21. fixed debian mysql config, database creation in postinst.
+22. svctool - Another attempt to fix installation issues with Oracle's MySQL
+23. udpclient - added -r, -t option to allow reading responses from server
+24. svctool - added option to add udplogger service
+25. debian - create apparmor profile for clamav, freshclam, mysql
+26. create udplogger service during rpm/deb installation
+27. created selinux rules for iwebadmin to work with apache2
+28. iwebadmin fix - Changed /tmp/mysql.sock to /var/lib/mysql/mysql.sock (for apache2 using a
+    private /tmp directory).
+29. Fix MySQL Db creation for missing password filed in mysql user table
+30. Chose MySQL unix domain socket path (/var/lib/mysql/mysql.sock or /var/run/mysqld/mysqld.sock)
+31. qmailctl.sh - BUG, replaced failure with $fail
+32. initsvc.c - fix for debian8/ubuntu15 migration to systemd from upstart
+33. svctool - fixes for debian8/ubuntu15 migration to systemd from upstart
+34. qmail.spec, indimail.spec, indimail, indimail-mta postinst script fixes
+    for debian8/ubuntu15 migration to systemd from upstart
+35. svctool - create /var/run/mysqld with mysql:mysql permissions in mysql
+    supervise service
+36. docker images for indimail, indimail-mta
+37. tcpserver: ip4_bit.c fix stack smashing - num defined as int instead of unsigned long
+38. upgrade courier-imap to version 4.17.0
+39. added tcpserver_plugin.c to dynamically load shared objects in tcpserver main()
+40. use RTLD_NOLOAD in load_shared() to load shared objects only once
+41. svctool, indimail.spec, qmail.spec, debain postinst scripts modified to
+    load qmail_smtpd.so instead of qmail-smtpd
+42. smtpd.c - smtp_init() function to load all control files only once
+43. vadddomain post_handle - issue sighup to qmail-smtpd service if tcpserver
+    plugin has been configured (to reload control files)
+44. Fix TLS SNI code in libcouriertls.c
+45. Massive FHS changes
+46. added check_group() function to allow privileged programs to run if
+    supplementary groups has indimail gid
+47. qmail-dk.c - BUG - removed extra semicolon after if () statement
+48. tcpopen.c - close socket on connect() failure
+49. adddomain.c - change umask to 0007 to avoid creating .qmail-default with
+    restrictive perms
+50. Allow permissions on setuid programs to processes running with indimail/qmail group
+51. update_rules.c - set umask in the child process instead of parent
+52. use SSL_set_cipher_list as part of crypto-policy-compliance - tcpserver.c,
+    tls.c, sslerator.c, indisrvr.c, logclient.c, logsrv.c
+53. indimail.service, initsvc.c, hier.c, svctool, perm_list - moved svscanboot to libexec
+54. initsvc.c - remove systemd unit file for -off arg
+55. renamed config_settings to indimail_config in libexecdir
+56. svctool - use indimail_config from libexec
+57. matchup.c - ignore qmail-daemon and debug local:, remote: lines
+58. svctool - fixed indimail.fc not found for --config=selinux
+59. spec file - Remove selinux module during rpm uninstall of indimail, indimail-mta
+60. spec file - Fix empty servicedir in selinux config
+61. svctool - Fixed instcheck path
+62. hier.c, instcheck.c, setup.c - skip devel man pages
+63. use postmaster@virtualdomain for null user (bounce)
+64. svctool - use control/defaulthost for DEFAULT_DOMAIN in /service/qmail-send.25/variables
+65. reset optind as it gets called in tcpserver and rblsmtpd.so might be loaded as
+    shared object
+66. copy perm_list to sysconfigdir in indimail-mta package
+67. fixed libexecdir typo in perm_list
+68. renamed imap modules directory to imapmodules (svctool, Makefile.am,
+    indimail.spec)
+69. upgraded courier-imap to 4.17.2
+70. added PKG_INSTALLDIR macro for systems having old pkgconfig package
+71. moved wordlist.db installation from Makefile.am to rpm spec file
+72. indimail.spec - use pythondir variable for python site-package directory
+73. added dsc files for Ubuntu-16.10
+74. fixed libnss_nssd.so missing in libindimail
+75. Use AutoReqProv = no in indimail.spec
