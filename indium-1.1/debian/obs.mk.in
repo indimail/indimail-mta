@@ -37,13 +37,13 @@ postrm: postrm.in obs.mk
 	$(edit) $@.in > $@;
 postinst: postinst.in obs.mk
 	$(edit) $@.in > $@;
-indium-Debian_8.0.dsc: indium-Debian_8.0.dsc.in
+indium-Debian_8.0.dsc: indium-Debian_8.0.dsc.in Makefile
 	$(edit) $@.in > $@
-indium-Debian_7.0.dsc: indium-Debian_7.0.dsc.in
+indium-Debian_7.0.dsc: indium-Debian_7.0.dsc.in Makefile
 	$(edit) $@.in > $@
-indium-xUbuntu_16.10.dsc: indium-xUbuntu_16.10.dsc.in
+indium-xUbuntu_16.10.dsc: indium-xUbuntu_16.10.dsc.in Makefile
 	$(edit) $@.in > $@
-indium-xUbuntu_16.04.dsc: indium-xUbuntu_16.04.dsc.in
+indium-xUbuntu_16.04.dsc: indium-xUbuntu_16.04.dsc.in Makefile
 	$(edit) $@.in > $@
 changelog:changelog.in
 	$(edit) $@.in > $@

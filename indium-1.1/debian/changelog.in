@@ -1,4 +1,4 @@
-indium (@version@-2) unstable; urgency=low
+indium (@version@-1) unstable; urgency=low
 
   * debian subdir for debian builds
   * FHS version
