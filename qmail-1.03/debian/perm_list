@@ -115,7 +115,6 @@
 %attr(0755,root,qmail) /usr/bin/qmail-dkim
 %attr(0755,root,qmail) /usr/bin/qmail-greyd
 %attr(0755,root,qmail) /usr/bin/qmail-inject
-%attr(0755,root,qmail) /usr/bin/qmail-lagcheck
 %attr(0755,root,qmail) /usr/bin/qmail-pop3d
 %attr(0755,root,qmail) /usr/bin/qmail-popbull
 %attr(0755,root,qmail) /usr/bin/qmail-poppass
@@ -222,11 +221,11 @@
 %attr(0755,root,qmail) /usr/libexec/indimail/qmail-lint
 %attr(0755,root,qmail) /usr/libexec/indimail/ipmeprint
 %attr(0755,root,qmail) /usr/libexec/indimail/rpmattr
+%attr(0755,root,qmail) /usr/libexec/indimail/qmail-lagcheck
 %attr(0755,root,qmail) /usr/libexec/indimail/elq
 %attr(0755,root,qmail) /usr/libexec/indimail/pinq
 %attr(0755,root,qmail) /usr/libexec/indimail/qail
 %attr(0755,root,qmail) /usr/libexec/indimail/qpq
-%attr(0755,root,qmail) /usr/libexec/indimail/rpmattr
 %attr(0755,root,qmail) /usr/libexec/indimail/leapsecs
 %attr(0755,root,qmail) /usr/libexec/indimail/nowutc
 %attr(0755,root,qmail) /usr/libexec/indimail/yearcal
