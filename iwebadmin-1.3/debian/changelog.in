@@ -1,0 +1,7 @@
+iwebadmin (@version@-1) unstable; urgency=low
+
+  * debian subdir for debian builds
+  * FHS version
+  * removed --enable-indimalidir
+
+ -- Manvendra Bhangui <manvendra@indimail.org>  Tue, 07 Mar 2017 15:49:17 +0530
