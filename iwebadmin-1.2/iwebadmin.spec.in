@@ -1,5 +1,9 @@
 #
 # $Log: iwebadmin.spec.in,v $
+# Revision 1.18  2017-03-07 14:22:35+05:30  Cprogrammer
+# fixed typo (--enable-mysqlprefix)
+# fixed paths
+#
 # Revision 1.17  2016-06-07 22:17:45+05:30  Cprogrammer
 # use --mysqlPrefix instead of --enable-mysqlincdir and --enable-mysqllibdir
 #
@@ -67,7 +71,7 @@
 # Initial revision
 #
 #
-# $Id: iwebadmin.spec.in,v 1.17 2016-06-07 22:17:45+05:30 Cprogrammer Exp mbhangui $
+# $Id: iwebadmin.spec.in,v 1.18 2017-03-07 14:22:35+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %define _unpackaged_files_terminate_build 1
 
@@ -223,11 +227,11 @@ echo "reconfiguring..."
 fi
 fi
 
-./configure --enable-indimaildir=%{_prefix} \
+./configure --prefix=%{_prefix} \
 	--sysconfdir=%{sysconfdir} \
 	--libdir=%{_libdir} \
 	--enable-ezmlmdir=%{_prefix}/bin --disable-ipauth --disable-trivial-password \
-	--mysqlPrefix=%{mysqlPrefix} \
+	--enable-mysqlprefix=%{mysqlPrefix} \
 	--enable-modify-quota \
 	--enable-htmldir=@htmldir@ \
 	--enable-cgibindir=@cgibindir@ \
@@ -257,9 +261,9 @@ fi
 %if "%{_prefix}" != "/usr"
 %dir %attr(555,root,qmail)          %{_prefix}
 %endif
-%dir %attr(555,root,qmail)          %{shareddir}/iwebadmin
-%dir %attr(555,root,qmail)          %{shareddir}/iwebadmin/html
-%dir %attr(555,root,qmail)          %{shareddir}/iwebadmin/lang
+%dir %attr(555,root,qmail)          @htmllibdir@/iwebadmin
+%dir %attr(555,root,qmail)          @htmllibdir@/iwebadmin/html
+%dir %attr(555,root,qmail)          @htmllibdir@/iwebadmin/lang
 
 # binary
 %attr(6555,root,indimail)           @cgibindir@/iwebadmin
