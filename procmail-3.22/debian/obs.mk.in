@@ -3,24 +3,10 @@ version=@version@
 #
 
 all: rules postinst postrm debian.tar.gz dummy.tar.gz  \
-	procmail-Debian_5.0.dsc \
-	procmail-Debian_6.0.dsc \
+	procmail-Debian_8.0.dsc \
 	procmail-Debian_7.0.dsc \
-	procmail-xUbuntu_16.04.dsc \
-	procmail-xUbuntu_15.10.dsc \
-	procmail-xUbuntu_15.04.dsc \
-	procmail-xUbuntu_14.10.dsc \
-	procmail-xUbuntu_14.04.dsc \
-	procmail-xUbuntu_13.10.dsc \
-	procmail-xUbuntu_13.04.dsc \
-	procmail-xUbuntu_12.10.dsc \
-	procmail-xUbuntu_12.04.dsc \
-	procmail-xUbuntu_11.10.dsc \
-	procmail-xUbuntu_11.04.dsc \
-	procmail-xUbuntu_10.10.dsc \
-	procmail-xUbuntu_10.04.dsc \
-	procmail-xUbuntu_9.10.dsc \
-	procmail-xUbuntu_8.04.dsc
+	procmail-xUbuntu_16.10.dsc \
+	procmail-xUbuntu_16.04.dsc
 
 clean:
 	/bin/rm -f rules postinst postrm *.dsc debian.tar.gz dummy.tar.gz _service
@@ -29,51 +15,23 @@ edit = sed \
 	-e 's,@version\@,$(version),g' \
 	-e 's,@prefix\@,$(prefix),g'
 
-rules: rules.in
+rules: rules.in obs.mk
 	$(edit) $@.in > $@; chmod +x $@;
-postinst: postinst.in
+postinst: postinst.in obs.mk
 	$(edit) $@.in > $@;
-postrm: postrm.in
+postrm: postrm.in obs.mk
 	$(edit) $@.in > $@;
-procmail-Debian_5.0.dsc: procmail-Debian_5.0.dsc.in
+procmail-Debian_8.0.dsc: procmail-Debian_8.0.dsc.in obs.mk
 	$(edit) $@.in > $@
-procmail-Debian_6.0.dsc: procmail-Debian_6.0.dsc.in
+procmail-Debian_7.0.dsc: procmail-Debian_7.0.dsc.in obs.mk
 	$(edit) $@.in > $@
-procmail-Debian_7.0.dsc: procmail-Debian_7.0.dsc.in
+procmail-xUbuntu_16.10.dsc: procmail-xUbuntu_16.10.dsc.in obs.mk
 	$(edit) $@.in > $@
-procmail-xUbuntu_16.04.dsc: procmail-xUbuntu_16.04.dsc.in
+procmail-xUbuntu_16.04.dsc: procmail-xUbuntu_16.04.dsc.in obs.mk
 	$(edit) $@.in > $@
-procmail-xUbuntu_15.10.dsc: procmail-xUbuntu_15.10.dsc.in
+_service: _service.in obs.mk
 	$(edit) $@.in > $@
-procmail-xUbuntu_15.04.dsc: procmail-xUbuntu_15.04.dsc.in
-	$(edit) $@.in > $@
-procmail-xUbuntu_14.10.dsc: procmail-xUbuntu_14.10.dsc.in
-	$(edit) $@.in > $@
-procmail-xUbuntu_14.04.dsc: procmail-xUbuntu_14.04.dsc.in
-	$(edit) $@.in > $@
-procmail-xUbuntu_13.10.dsc: procmail-xUbuntu_13.10.dsc.in
-	$(edit) $@.in > $@
-procmail-xUbuntu_13.04.dsc: procmail-xUbuntu_13.04.dsc.in
-	$(edit) $@.in > $@
-procmail-xUbuntu_12.10.dsc: procmail-xUbuntu_12.10.dsc.in
-	$(edit) $@.in > $@
-procmail-xUbuntu_12.04.dsc: procmail-xUbuntu_12.04.dsc.in
-	$(edit) $@.in > $@
-procmail-xUbuntu_11.10.dsc: procmail-xUbuntu_11.10.dsc.in
-	$(edit) $@.in > $@
-procmail-xUbuntu_11.04.dsc: procmail-xUbuntu_11.04.dsc.in
-	$(edit) $@.in > $@
-procmail-xUbuntu_10.10.dsc: procmail-xUbuntu_10.10.dsc.in
-	$(edit) $@.in > $@
-procmail-xUbuntu_10.04.dsc: procmail-xUbuntu_10.04.dsc.in
-	$(edit) $@.in > $@
-procmail-xUbuntu_9.10.dsc: procmail-xUbuntu_9.10.dsc.in
-	$(edit) $@.in > $@
-procmail-xUbuntu_8.04.dsc: procmail-xUbuntu_8.04.dsc.in
-	$(edit) $@.in > $@
-_service: _service.in
-	$(edit) $@.in > $@
-changelog: changelog.in
+changelog: changelog.in obs.mk
 	$(edit) $@.in > $@
 
 dummy.tar.gz: README
