@@ -1,4 +1,0 @@
-* QmailAdmin rewrites a user's .qmail file whenever changes are made on the 
-  modify user screen.  The code currently doesn't handle .qmail files that
-  were hand-modified or generated elsewhere (e.g. by TMDA).
-
