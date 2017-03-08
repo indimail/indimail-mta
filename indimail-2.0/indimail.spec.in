@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail.spec.in,v 2.369 2017-03-08 10:27:40+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 2.370 2017-03-08 18:25:38+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 
@@ -91,16 +91,6 @@
 
 %if %build_on_obs == 1
 %global packager Manvendra Bhangui <manvendra@indimail.org>
-%endif
-
-%if 0%{?suse_version}
-%global dist suse
-%global disttag suse
-%endif
-
-%if 0%{?fedora_version}
-%global dist %{?dist}
-%global disttag fedora
 %endif
 
 Summary: A Flexible Messaging Platform with Multi-Host/Multi-Protocol support
@@ -251,7 +241,7 @@ NoSource: 20
 %endif
 
 URL: http://www.indimail.org
-#AutoReqProv: No
+AutoReqProv: No
 Conflicts: %{name}-mini
 Conflicts: %{name}-mta
 Conflicts: daemontools
@@ -273,7 +263,6 @@ BuildRequires: libidn-devel gdbm-devel
 %if %{defined fedora_version}
 BuildRequires: redhat-lsb-core
 %endif
-
 %if %{defined centos_version} || %{defined rhel_version}
 BuildRequires: redhat-lsb
 %endif
@@ -447,9 +436,9 @@ echo target_alias  %_target_alias
 echo target_cpu    %_target_cpu
 echo target_os     %_target_os
 echo target_vendor %_target_vendor
-echo Project       %_project
+echo Project       %{_project}
 echo pythondir     %{pythondir}
-echo Building %{name}-%{version}-%{release} Build %{_build} OS %{_os} Dist %{dist} disttag %{disttag} lib=%{_lib} libdir=%{_libdir}
+echo Building %{name}-%{version}-%{release} Build %{_build} OS %{_os} lib=%{_lib} libdir=%{_libdir}
 echo "------------------------------------------------------"
 
 for i in %{name}-%{version} altermime-0.3.10 ripmime-1.4.0.9 flash-0.9.4 \
