@@ -34,6 +34,7 @@ AC_TYPE_SIZE_T
 AC_STRUCT_TM
 AC_TYPE_GETGROUPS
 
+AM_PATH_PYTHON
 dnl Checks for library functions.
 AC_CHECK_FUNCS(fdatasync sigaction sigprocmask fnmatch gethostname fchown getmntent getmntinfo setenv unsetenv)
 
@@ -451,7 +452,7 @@ rm -f indimail.uid
 
 indimailgid=`cat indimail.gid`
 rm -f indimail.gid
-rm -f indiusername 
+rm -f indiusername
 
 defaultdomain=""
 AC_ARG_ENABLE(default-domain, [  --enable-default-domain=name  Default domain name, default is null.],
@@ -646,7 +647,7 @@ AC_ARG_ENABLE(maildir-quota,[  --enable-maildir-quota=y|n    Turn on (y, default
 	])
 case $USE_MAILDIRQUOTA in
 1*|y*|Y*)
-	USE_MAILDIRQUOTA=1 
+	USE_MAILDIRQUOTA=1
 	AC_DEFINE_UNQUOTED(USE_MAILDIRQUOTA,$USE_MAILDIRQUOTA,Enable Maildir Quota)
 	;;
 *)
@@ -1027,7 +1028,7 @@ case $ENABLE_PASSWD in
 	;;
 esac
 
-if test -f /etc/shadow 
+if test -f /etc/shadow
 then
 	HAS_SHADOW=1
 	AC_DEFINE_UNQUOTED(HAS_SHADOW,$HAS_SHADOW,/etc/shadow present)
@@ -1268,19 +1269,50 @@ if test -d ../qmail-1.03
 then
 	echo "-I../indimail-"$VERSION" -I../indimail-"$VERSION"/eps-1.2 $auth_inc" > ../qmail-1.03/inc_deps; \
 	echo "-L../indimail-"$VERSION"/.libs -L../indimail-"$VERSION"/eps-1.2/.libs -L../indimail-"$VERSION"/cdb-1.0/.libs $auth_libs -lcdb" > ../qmail-1.03/lib_deps
-	sed "s{QMAIL{$qmaildir{" ../qmail-1.03/conf-qmail.in > ../qmail-1.03/conf-qmail
-	sed "s{PREFIX{$prefix{" ../qmail-1.03/conf-prefix.in > ../qmail-1.03/conf-prefix
+
+	sed "s{QMAIL{$qmaildir{" ../qmail-1.03/conf-qmail.in > /tmp/conf-qmail
+	diff /tmp/conf-qmail ../qmail-1.03/conf-qmail > /dev/null 2>&1
+	if test $? -ne 0  ; then
+		mv /tmp/conf-qmail ../qmail-1.03/conf-qmail
+	else
+		/bin/rm -f /tmp/conf-qmail
+	fi
+
+	sed "s{PREFIX{$prefix{" ../qmail-1.03/conf-prefix.in > /tmp/conf-prefix
+	diff /tmp/conf-prefix ../qmail-1.03/conf-prefix > /dev/null 2>&1
+	if test $? -ne 0  ; then
+		mv /tmp/conf-prefix ../qmail-1.03/conf-prefix
+	else
+		/bin/rm -f /tmp/conf-prefix
+	fi
+
 	q_sysconfdir=`dirname $sysconfdir`
+	(
 	if test "$q_sysconfdir" = "$qmaildir"; then
-		sed "s{SYSCONFDIR{$qmaildir{" ../qmail-1.03/conf-sysconfdir.in > ../qmail-1.03/conf-sysconfdir
+		sed "s{SYSCONFDIR{$qmaildir{" ../qmail-1.03/conf-sysconfdir.in
 	else
 		q_sysconfdir=$sysconfdir
-		sed "s{SYSCONFDIR{$sysconfdir{" ../qmail-1.03/conf-sysconfdir.in > ../qmail-1.03/conf-sysconfdir
+		sed "s{SYSCONFDIR{$sysconfdir{" ../qmail-1.03/conf-sysconfdir.in
 	fi
-	if test "$shareddir" = "$qmaildir"; then
-		sed "s{SHAREDDIR{$qmaildir{" ../qmail-1.03/conf-shared.in > ../qmail-1.03/conf-shared
+	) > /tmp/conf-sysconfdir
+	diff /tmp/conf-sysconfdir ../qmail-1.03/conf-sysconfdir > /dev/null 2>&1
+	if test $? -ne 0  ; then
+		mv /tmp/conf-sysconfdir ../qmail-1.03/conf-sysconfdir
 	else
-		sed "s{SHAREDDIR{$shareddir{" ../qmail-1.03/conf-shared.in > ../qmail-1.03/conf-shared
+		/bin/rm -f /tmp/conf-sysconfdir
+	fi
+	(
+	if test "$shareddir" = "$qmaildir"; then
+		sed "s{SHAREDDIR{$qmaildir{" ../qmail-1.03/conf-shared.in
+	else
+		sed "s{SHAREDDIR{$shareddir{" ../qmail-1.03/conf-shared.in
+	fi
+	) > /tmp/conf-shared
+	diff /tmp/conf-shared ../qmail-1.03/conf-shared > /dev/null 2>&1
+	if test $? -ne 0  ; then
+		mv /tmp/conf-shared ../qmail-1.03/conf-shared
+	else
+		/bin/rm -f /tmp/conf-shared
 	fi
 fi
 
@@ -1305,6 +1337,7 @@ echo "   qmail directory = $qmaildir --enable-qmaildir=$qmaildir"
 echo " control directory = $controldir --enable-controldir=$controldir"
 echo " domains directory = $domaindir --enable-domaindir=$domaindir"
 echo "  shared directory = $shareddir --enable-shareddir=$shareddir"
+echo " py site directory = $pythondir"
 echo "        sysconfdir = $q_sysconfdir"
 echo "        servicedir = $servicedir"
 if test "$postfixdir" != ""
