@@ -16,7 +16,7 @@
 %dir %attr(0755,root,qmail)        @shareddir@/fortunes
 %dir %attr(0755,root,qmail)        @shareddir@/table_config
 %dir %attr(0555,root,qmail)        @libexecdir@
-%dir %attr(0555,root,qmail)        @libexecdir@/authlib
+%dir %attr(0555,root,qmail)        @libexecdir@/imapmodules
 %dir %attr(0775,root,qmail)        @sysconfdir@/etc
 %dir %attr(0775,indimail,qmail)    @sysconfdir@/control
 %dir %attr(0775,indimail,qmail)    @sysconfdir@/control/inquery
@@ -434,7 +434,7 @@
 %attr(4755,root,root)     @prefix@/bin/vrenameuser
 %attr(4755,root,root)     @prefix@/bin/vsetuserquota
 %attr(4755,root,root)     @prefix@/bin/vuserinfo
-%attr(4755,root,root)     @libexecdir@/authlib/authshadow
+%attr(4755,root,root)     @libexecdir@/imapmodules/authshadow
 %attr(2551,root,qscand)   @prefix@/sbin/run-cleanq
 %attr(4551,qscand,qscand) @prefix@/sbin/qscanq
 %attr(4755,root,root)     @prefix@/sbin/systpass
@@ -488,8 +488,8 @@
 %attr(0755,root,qmail) @libexecdir@/myslave
 %attr(0755,root,qmail) @libexecdir@/overquota.sh
 %attr(0755,root,qmail) @libexecdir@/qmailmrtg7
-%attr(0755,root,root)  @libexecdir@/authlib/authgeneric
-%attr(0755,root,root)  @libexecdir@/authlib/authindi
+%attr(0755,root,root)  @libexecdir@/imapmodules/authgeneric
+%attr(0755,root,root)  @libexecdir@/imapmodules/authindi
 %attr(0755,root,root)  @libexecdir@/couriertcpd
 %attr(0755,root,root)  @libexecdir@/imapd.rc
 %attr(0755,root,root)  @libexecdir@/imapd-ssl.rc
