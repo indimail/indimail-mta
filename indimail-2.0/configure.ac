@@ -34,7 +34,6 @@ AC_TYPE_SIZE_T
 AC_STRUCT_TM
 AC_TYPE_GETGROUPS
 
-AM_PATH_PYTHON
 dnl Checks for library functions.
 AC_CHECK_FUNCS(fdatasync sigaction sigprocmask fnmatch gethostname fchown getmntent getmntinfo setenv unsetenv)
 
@@ -1337,7 +1336,6 @@ echo "   qmail directory = $qmaildir --enable-qmaildir=$qmaildir"
 echo " control directory = $controldir --enable-controldir=$controldir"
 echo " domains directory = $domaindir --enable-domaindir=$domaindir"
 echo "  shared directory = $shareddir --enable-shareddir=$shareddir"
-echo " py site directory = $pythondir"
 echo "        sysconfdir = $q_sysconfdir"
 echo "        servicedir = $servicedir"
 if test "$postfixdir" != ""
