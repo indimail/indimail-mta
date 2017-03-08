@@ -44,6 +44,7 @@ logalert_version=@logalert_version@
 fortune_version=@fortune_version@
 tcpserver_plugin=1
 rm=/bin/rm
+cp=/bin/cp
 
 DESTDIR=$(CURDIR)/debian/tmp
 
@@ -189,6 +190,9 @@ install: build
 	if [ -d nssd-$(nssd_version) ] ; then             $(MAKE) -s install -C nssd-$(nssd_version) DESTDIR=$(DESTDIR); fi
 	if [ -d clamav-$(clamav_version) ] ; then         $(MAKE) -s install -C clamav-$(clamav_version) DESTDIR=$(DESTDIR); fi
 	if [ -d indimail-$(version) ] ; then              $(MAKE) -s install -C indimail-$(version) DESTDIR=$(DESTDIR); fi
+	if [ -d bogofilter-${bogofilter_version} ] ; then \
+		${cp} indimail-${version}/data/wordlist.db $(DESTDIR)${sysconfdir}/wordlist.db \
+	fi
 
 binary-indep: build install
 	dh_testdir
