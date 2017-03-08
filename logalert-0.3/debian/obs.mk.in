@@ -1,0 +1,42 @@
+prefix=@prefix@
+mandir=@mandir@
+sysconfdir=@sysconfdir@
+version=@version@
+#
+
+all: rules postinst postrm debian.tar.gz dummy.tar.gz  \
+	logalert-Debian_8.0.dsc \
+	logalert-Debian_7.0.dsc \
+	logalert-xUbuntu_16.10.dsc \
+	logalert-xUbuntu_16.04.dsc
+
+clean:
+	/bin/rm -f rules postinst postrm *.dsc debian.tar.gz dummy.tar.gz
+
+edit = sed \
+	-e 's,@version\@,$(version),g' \
+	-e 's,@sysconfdir\@,$(sysconfdir),g' \
+	-e 's,@mandir\@,$(mandir),g' \
+	-e 's,@prefix\@,$(prefix),g'
+
+rules: rules.in obs.mk
+	$(edit) $@.in > $@; chmod +x $@;
+postinst: postinst.in obs.mk
+	$(edit) $@.in > $@;
+postrm: postrm.in obs.mk
+	$(edit) $@.in > $@;
+logalert-Debian_8.0.dsc: logalert-Debian_8.0.dsc.in obs.mk
+	$(edit) $@.in > $@
+logalert-Debian_7.0.dsc: logalert-Debian_7.0.dsc.in obs.mk
+	$(edit) $@.in > $@
+logalert-xUbuntu_16.10.dsc: logalert-xUbuntu_16.10.dsc.in obs.mk
+	$(edit) $@.in > $@
+logalert-xUbuntu_16.04.dsc: logalert-xUbuntu_16.04.dsc.in obs.mk
+	$(edit) $@.in > $@
+changelog: changelog.in obs.mk
+	$(edit) $@.in > $@
+
+dummy.tar.gz: README
+	tar cf - README |gzip > $@
+debian.tar.gz: copyright rules control changelog postinst postrm compat
+	tar cf - copyright rules postinst postrm control changelog compat |gzip > $@

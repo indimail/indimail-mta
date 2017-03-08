@@ -1,0 +1,11 @@
+changelog
+debian.tar.gz
+dummy.tar.gz
+logalert-Debian_7.0.dsc
+logalert-Debian_8.0.dsc
+logalert-xUbuntu_16.04.dsc
+logalert-xUbuntu_16.10.dsc
+obs.mk
+postinst
+postrm
+rules
