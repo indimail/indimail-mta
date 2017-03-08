@@ -32,7 +32,7 @@
 @prefix@/bin/qmail-queue            qmailq:qmail   6511
 @prefix@/bin/bogofilter             root:indimail  6511
 @prefix@/bin/qscanq                 qscand:qscand  4555
-@libexecdir@/authlib/authshadow root:root      4555
+@libexecdir@/imapmodules/authshadow root:root      4555
 
 #
 # Directories
