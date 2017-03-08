@@ -872,7 +872,7 @@ vadduser_handle: vadduser_handle.in
 create_services: create_services.in
 	$(edit) $@.in > $@
 indimail.spec: indimail.spec.in catChangeLog
-	($(edit) $@.in;./catChangeLog) > $@
+	($(edit) $@.in;./catChangeLog) | $(edit) > $@
 indimail-@VERSION@-rpmlintrc: indimail-rpmlintrc.in
 	$(edit) indimail-rpmlintrc.in > $@
 login_tasks.3: login_tasks.9

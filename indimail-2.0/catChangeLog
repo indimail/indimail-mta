@@ -1,10 +1,13 @@
 #!/bin/sh
 # $Log: catChangeLog,v $
+# Revision 2.2  2017-03-08 18:24:24+05:30  Cprogrammer
+# added version in changelog generation
+#
 # Revision 2.1  2014-03-12 08:54:46+05:30  Cprogrammer
 # utility to append changelog to indimail.spec
 #
 #
-# $Id: catChangeLog,v 2.1 2014-03-12 08:54:46+05:30 Cprogrammer Exp mbhangui $
+# $Id: catChangeLog,v 2.2 2017-03-08 18:24:24+05:30 Cprogrammer Exp mbhangui $
 #
 flag=0
 cat doc/ChangeLog|while read line
@@ -13,12 +16,12 @@ do
 	if [ $? -eq 0 -a $flag -ne 0 ] ; then
 		break
 	fi
-	echo "$line" | grep "^[0-9]*/.*/.*" > /dev/null
+	echo "$line" | grep "^[0-9]*/.*/.*" > /dev/null # skip dates
 	if [ $? -eq 0 ] ; then
 		continue
 	fi
-	if [ $flag -eq 0 ] ; then
-		echo "* `date +"%a %b %d %Y"` mbhangui@gmail.com"
+	if [ $flag -eq 0 ] ; then # first line
+		echo "* `date +"%a %b %d %Y"` mbhangui@gmail.com" @version@-@release@
 		flag=1
 		continue
 	elif [ $flag -eq 1 ] ; then
