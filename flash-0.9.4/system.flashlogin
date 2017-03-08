@@ -17,8 +17,8 @@
 set noclobber
 
 # Environment stuff
-setenv PATH /usr/local/bin:/var/indimail/bin:/var/qmail/bin:/usr/bin:/bin
-setenv MANPATH /usr/local/man:/var/qmail/man:/var/indimail/man:/usr/man:/usr/X11/man:usr/openwin/man
+setenv PATH /usr/local/bin:/usr/bin:/bin
+setenv MANPATH /usr/local/man:/usr/man:/usr/X11/man:usr/openwin/man
 setenv EDITOR /bin/vi
 setenv PAGER "/usr/bin/less"
 setenv LESS "-e"

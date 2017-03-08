@@ -1,7 +1,10 @@
-#@indimaildir@/bin/flash
+#!@prefix@/bin/flash
 # WARNING: This file was auto-generated. Do not edit!
 #
 # $Log: system.menu.in,v $
+# Revision 1.8  2017-03-08 13:51:21+05:30  Cprogrammer
+# fixed paths for FHS
+#
 # Revision 1.7  2009-02-15 20:48:13+05:30  Cprogrammer
 # fixed rpmlintrc warnings
 #
@@ -23,7 +26,7 @@
 #
 # Sample flash menu file definition
 #
-# $Id: system.menu.in,v 1.7 2009-02-15 20:48:13+05:30 Cprogrammer Exp mbhangui $
+# $Id: system.menu.in,v 1.8 2017-03-08 13:51:21+05:30 Cprogrammer Exp mbhangui $
 #
 
 # Main menu
@@ -60,33 +63,31 @@ EndMenu
 
 Menu Top Right Offset 1 -1 Domain-Admin
 	Title:IndiMail Domain Administration:h:
-	Exec:List               Domains:P:/var/indimail/bin/vdominfo:
-	Args:Directory Structure Layout:P:/var/indimail/bin/printdir:Domain Name:
+	Exec:List               Domains:P:@prefix@/bin/vdominfo:
+	Args:Directory Structure Layout:P:@prefix@/bin/printdir:Domain Name:
 	Nop::
-	Args:Add                 Domain::/var/indimail/bin/vadddomain -v:Domain Name:
-	Args:Add Alias           Domain::/var/indimail/bin/vaddaliasdomain -v:Domain Name:
-	Args:Rename              Domain::/var/indimail/bin/vrenamedomain -v:Domain Name:
-	Args:Delete              Domain::/var/indimail/bin/vdeldomain -v:Domain Name:
+	Args:Add                 Domain::@prefix@/bin/vadddomain -v:Domain Name:
+	Args:Add Alias           Domain::@prefix@/bin/vaddaliasdomain -v:Domain Name:
+	Args:Rename              Domain::@prefix@/bin/vrenamedomain -v:Domain Name:
+	Args:Delete              Domain::@prefix@/bin/vdeldomain -v:Domain Name:
 	Nop::
-	Args:Database       Conversions::/var/indimail/bin/vconvert:vconvert Options:
-	Args:Reorganize       Datatbase:&:/var/indimail/bin/vreorg:vreorg Options:
-	Args:Remove Old           Users:&:/var/indimail/bin/vdeloldusers -v:vdeloldusers Options:
-	Args:Convert .qmail to   valias::/var/indimail/bin/vcalias -v:Domain Name:
+	Args:Reorganize       Datatbase:&:@prefix@/sbin/vreorg:vreorg Options:
+	Args:Remove Old           Users:&:@prefix@/sbin/vdeloldusers -v:vdeloldusers Options:
+	Args:Convert .qmail to   valias::@prefix@/bin/vcalias -v:Domain Name:
 	Nop::
-	Args:Mail Database  Information:P:/var/indimail/bin/dbinfo:
-	Args:Show    Smtp         Ports:P:/var/indimail/bin/vsmtp:Domain Name:
-	Args:Modify/Del  Smtp     Ports::/var/indimail/bin/vsmtp:vsmtp Options:
-	Exec:Show               Hostids:P:/var/indimail/bin/vhostid::
-	Args:Modify             Hostids::/var/indimail/bin/vhostid:vhostid Options:
-	Exec:Clear  OpenSmtp     Tables::/var/indimail/bin/clearopensmtp -v::
-	Args:Send             Bulletins::/var/indimail/bin/vpopbull -v:vpopbull Options:
-	Exec:Show      IP          Maps:P:/var/indimail/bin/vipmap:
-	Args:Configure IP          Maps::/var/indimail/bin/vipmap -v:vipmaps Options:
-	Exec:Show Filesystem  Balancing:P:/var/indimail/bin/vfstab -v::
-	Args:Filesystem       Balancing::/var/indimail/bin/vfstab -v:vfstab Options:
+	Args:Mail Database  Information:P:@prefix@/bin/dbinfo:
+	Args:Show    Smtp         Ports:P:@prefix@/bin/vsmtp:Domain Name:
+	Args:Modify/Del  Smtp     Ports::@prefix@/bin/vsmtp:vsmtp Options:
+	Exec:Show               Hostids:P:@prefix@/bin/vhostid::
+	Args:Modify             Hostids::@prefix@/bin/vhostid:vhostid Options:
+	Exec:Clear  OpenSmtp     Tables::@prefix@/sbin/clearopensmtp -v::
+	Exec:Show      IP          Maps:P:@prefix@/bin/vipmap:
+	Args:Configure IP          Maps::@prefix@/bin/vipmap -v:vipmaps Options:
+	Exec:Show Filesystem  Balancing:P:@prefix@/sbin/vfstab -v::
+	Args:Filesystem       Balancing::@prefix@/sbin/vfstab -v:vfstab Options:
 	Nop::
-	Args:Management Port      Admin::/var/indimail/bin/mgmtpass:mgmtpass Options:
-	Args:Adminclient               ::/var/indimail/bin/adminclient:adminclient Options:
+	Args:Management Port      Admin::@prefix@/sbin/mgmtpass:mgmtpass Options:
+	Args:Adminclient               ::@prefix@/sbin/adminclient:adminclient Options:
 	Nop::
 	Exit:Exit                  Menu:
 # All menus should have Exit lines.
@@ -94,53 +95,49 @@ EndMenu
 
 Menu Top Right Offset 1 -1 user-admin
 	Title:IndiMail User Administration:h:
-	Args:User    Information:P:/var/indimail/bin/vuserinfo:User Name:
+	Args:User    Information:P:@prefix@/bin/vuserinfo:User Name:
 	Nop::
-	Args:Add            User::/var/indimail/bin/vadduser -v:User Name:
-	Args:Change  User Passwd::/var/indimail/bin/vpasswd -v:User Name:
-	Args:Rename         User::/var/indimail/bin/vrenameuser -v:Olduser Newuser:
-	Args:Move User   Homedir::/var/indimail/bin/vmoveuser -v:Username NewDirectory:
-	Args:Modify         User::/var/indimail/bin/vmoduser -v:User Name:
-	Args:Modify User   Quota::/var/indimail/bin/vsetuserquota -v:Username Newquota:
-	Args:Delete         User::/var/indimail/bin/vdeluser -v:User Name:
-	Args:Create        Alias::/var/indimail/bin/valias -v:valias Options:
-	Args:Create     Vacation::/var/indimail/bin/vacation -v:Email Address & vacationMessageFile:
+	Args:Add            User::@prefix@/bin/vadduser -v:User Name:
+	Args:Change  User Passwd::@prefix@/bin/vpasswd -v:User Name:
+	Args:Rename         User::@prefix@/bin/vrenameuser -v:Olduser Newuser:
+	Args:Move User   Homedir::@prefix@/bin/vmoveuser -v:Username NewDirectory:
+	Args:Modify         User::@prefix@/bin/vmoduser -v:User Name:
+	Args:Modify User   Quota::@prefix@/bin/vsetuserquota -v:Username Newquota:
+	Args:Delete         User::@prefix@/bin/vdeluser -v:User Name:
+	Args:Create        Alias::@prefix@/bin/valias -v:valias Options:
+	Args:Create     Vacation::@prefix@/bin/vacation -v:Email Address & vacationMessageFile:
 	Nop::
-	Args:Show        Filters:P:/var/indimail/bin/vcfilter -s:User Name:
-	Args:Add/Mod/Del Filters:P:/var/indimail/bin/vcfilter:vcfilter Options:
+	Args:Show        Filters:P:@prefix@/bin/vcfilter -s:User Name:
+	Args:Add/Mod/Del Filters:P:@prefix@/bin/vcfilter:vcfilter Options:
 	Nop::
 	Exit:Exit this menu:
 EndMenu
 
 Menu Top Right Offset 1 -1 qmail-admin
 	Title:Qmail  User   Administration:h:
-	Args:Queue          Statistics:P:/var/qmail/bin/qmail-qstat:qstat Options:
-	Args:Queue               Print:P:/var/qmail/bin/qpq:qpq Options:
-	Exec:Print    Qmail      Queue:P:/var/qmail/bin/qmail-qread::
+	Args:Queue          Statistics:P:@prefix@/bin/qmail-qstat:qstat Options:
+	Args:Queue               Print:P:@libexecdir@/qpq:qpq Options:
+	Exec:Print    Qmail      Queue:P:@prefix@/bin/qmail-qread::
 	Nop::
-	Exec:List     Timeout    Table:P:/var/qmail/bin/qmail-tcpto::
-	Exec:Reset    Timeout    Table:P:/var/qmail/bin/qmail-tcpok::
+	Exec:List     Timeout    Table:P:@prefix@/sbin/qmail-tcpto::
+	Exec:Reset    Timeout    Table:P:@prefix@/sbin/qmail-tcpok::
 	Nop::
-	Args:Supervise            Tool::/var/qmail/bin/svctool:svctool Options:
-	Args:Supervise         Control::/var/qmail/bin/svc:svc Options:
-	Args:Supervise          Status:P:/var/qmail/bin/svstat:svstat Options:
+	Args:Supervise            Tool::@prefix@/sbin/svctool:svctool Options:
+	Args:Supervise         Control::@prefix@/bin/svc:svc Options:
+	Args:Supervise          Status:P:@prefix@/bin/svstat:svstat Options:
 	Nop::
-	Exec:IP       Address     Info::/var/qmail/bin/ipmeprint::
-	Args:DNS                 Cname::/var/qmail/bin/dnscname:dnscname Options:
-	Args:DNS                   ptr::/var/qmail/bin/dnsptr:dnsptr Options:
-	Args:DNS                    fq::/var/qmail/bin/dnsfq:dnsfq Options:
-	Args:DNS                    IP::/var/qmail/bin/dnsip:dnsip Options:
-	Args:DNS                  MXIP::/var/qmail/bin/dnsmxip:dnsmxip Options:
+	Exec:IP       Address     Info::@libexecdir@/bin/ipmeprint::
+	Args:DNS                 Cname::@libexecdir@/bin/dnscname:dnscname Options:
+	Args:DNS                   ptr::@libexecdir@/bin/dnsptr:dnsptr Options:
+	Args:DNS                    fq::@libexecdir@/bin/dnsfq:dnsfq Options:
+	Args:DNS                    IP::@libexecdir@/bin/dnsip:dnsip Options:
+	Args:DNS                  MXIP::@libexecdir@/bin/dnsmxip:dnsmxip Options:
 	Nop::
-	Args:Fix       Qmail     Queue:P:/var/qmail/bin/queue-fix:queue-fix Options:
-	Exec:Rebuild   Qmail       CDB::/var/qmail/bin/qmail-newu::
-	Exec:Rebuild morercpthosts.cdb::/var/qmail/bin/qmail-newmrh::
+	Args:Fix       Qmail     Queue:P:@prefix@/bin/queue-fix:queue-fix Options:
+	Exec:Rebuild   Qmail       CDB::@prefix@/bin/qmail-newu::
+	Exec:Rebuild morercpthosts.cdb::@prefix@/bin/qmail-newmrh::
 	Nop::
-	Exec:Send SIGALRM     To Qmail::/var/qmail/bin/qmail-sigalrm::
-	Exec:Send SIGHUP      To Qmail::/var/qmail/bin/qmail-sighup::
-	Exec:Send SIGTERM     To Qmail::/var/qmail/bin/qmail-sigterm::
-	Nop::
-	Exec:Qmail     Control    Info:P:/var/qmail/bin/qmail-showctl::
+	Exec:Qmail     Control    Info:P:@prefix@/bin/qmail-showctl::
 EndMenu
 
 Menu Top Right Offset 1 -1 qmail-man
@@ -275,11 +272,11 @@ Menu Top Right Offset 1 -1 misc-tools
 	Exec:System                Top:N:/usr/bin/top::
 	Exec:MySql                 Top:N:/usr/bin/mytop::
 	Nop::
-	Args:Checksums                :P:/var/indimail/bin/crc -v:Directory/Files:
-	Exec:IndiMail Version (Adv)   :P:/var/indimail/bin/indiversion::
-	Exec:IndiMail Version (Simple):N:/var/indimail/bin/versioninfo::
+	Args:Checksums                :P:@prefix@/bin/crc -v:Directory/Files:
+	Exec:IndiMail Version (Adv)   :P:@prefix@/bin/indiversion::
+	Exec:IndiMail Version (Simple):N:@prefix@/bin/versioninfo::
 	Nop::
-	Args:Connect     To      Mysql:N:/var/indimail/bin/execmysql:-d domain host:
+	Args:Connect     To      Mysql:N:@libexecdir@/execmysql:-d domain host:
 EndMenu
 
 Menu Top Right Offset 0 -1 HotKeys

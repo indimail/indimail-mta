@@ -30,15 +30,12 @@ If you manage to get it to compile elsewhere, please let us know.
 Installation:
 
 The creation of the binaries should be as simple as "./configure;make" on a Linux
-system.  The flash binary should go somewhere safe, we like /var/vpopmail/bin.
+system.  The flash binary should go somewhere safe, we like /usr/bin.
 Users who will have flash as their shell should have it changed
 by standard means to the location of the flash executable.
 ./configure /might/ work on other systems; if it does, drop us a line.
 
 There are a few important things to remember: 
-
-* config.h defines a few important things such as INDIMAILDIR,
-  which is where to put startup rc files and menu definition files
 
 * system.flashlogin is the file executed by flash upon login.
   You can set environment variables, check the return codes from
@@ -121,7 +118,7 @@ How do I write menus?
 			Nop:This is a comment:
 
 Putting it together:
-	To execute the menu, you can either put the line `#!/var/indimail/bin/flash'
+	To execute the menu, you can either put the line `#!/usr/bin/flash'
 	at the first line in the menu, or type `flash <menu-name>'.
 
 	A sample menu is provided with this distribution, please examine it.

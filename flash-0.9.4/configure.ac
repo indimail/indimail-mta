@@ -15,7 +15,7 @@ AC_PROG_LIBTOOL
 AC_LIB_PREPARE_MULTILIB
 
 LIBVER=0:0:0
-defaultprefix="/var/indimail"
+defaultprefix="/usr"
 
 if test x$prefix = xNONE
 then
