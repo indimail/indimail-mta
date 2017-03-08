@@ -186,13 +186,11 @@ install: build
 	if [ -d ucspi-tcp-0.88 ] ; then                   $(MAKE) -s install -C ucspi-tcp-0.88 DESTDIR=$(DESTDIR); fi
 	if [ -d courier-imap-$(courier_version) ] ; then  $(MAKE) -s install -C courier-imap-$(courier_version) DESTDIR=$(DESTDIR); fi
 	if [ -d bogofilter-$(bogofilter_version) ] ; then $(MAKE) -s install -C bogofilter-$(bogofilter_version) DESTDIR=$(DESTDIR); fi
+	if [ -d bogofilter-$(bogofilter_version) ] ; then ${cp} indimail-$(version)/data/wordlist.db $(DESTDIR)$(sysconfdir)/wordlist.db; fi
 	if [ -d fetchmail-$(fetchmail_version) ] ; then   $(MAKE) -s install -C fetchmail-$(fetchmail_version) DESTDIR=$(DESTDIR); fi
 	if [ -d nssd-$(nssd_version) ] ; then             $(MAKE) -s install -C nssd-$(nssd_version) DESTDIR=$(DESTDIR); fi
 	if [ -d clamav-$(clamav_version) ] ; then         $(MAKE) -s install -C clamav-$(clamav_version) DESTDIR=$(DESTDIR); fi
 	if [ -d indimail-$(version) ] ; then              $(MAKE) -s install -C indimail-$(version) DESTDIR=$(DESTDIR); fi
-	if [ -d bogofilter-${bogofilter_version} ] ; then \
-		${cp} indimail-${version}/data/wordlist.db $(DESTDIR)${sysconfdir}/wordlist.db \
-	fi
 
 binary-indep: build install
 	dh_testdir
