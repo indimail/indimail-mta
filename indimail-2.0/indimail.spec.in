@@ -1,23 +1,21 @@
 #
 #
-# $Id: indimail.spec.in,v 2.367 2017-03-07 14:19:28+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 2.368 2017-03-08 09:09:39+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 
-%global is_suse %(test -e /etc/SuSE-release && echo 1 || echo 0)
-%global is_fedora %(test -e /etc/fedora-release && echo 1 || echo 0)
-%global pythondir %(python -c "from distutils.sysconfig import get_python_lib; print get_python_lib()")
-
-%global _hardened_build    1
-%if 0%{?opensuse_bs}
-# define to 1 if building on openSUSE build service
+%if %{defined _project}
+# define if building on openSUSE build service
 %global build_on_obs       1
 %global reconfigure_mode   0
 %else
+%define _project           local
 %global build_on_obs       0
-%global reconfigure_mode   1
+%global reconfigure_mode   0
+%global _hardened_build    1
 %endif
 
+%global pythondir %(python -c "from distutils.sysconfig import get_python_lib; print get_python_lib()")
 %global _prefix            @prefix@
 %global indimaildir        @indimaildir@
 %global domaindir          @domaindir@
@@ -63,7 +61,7 @@
 %global nolibdkim          0
 %global nolibsrs2          0
 %global nofetchmail        0
-%global nobogofilter       1
+%global nobogofilter       0
 %global nodksignatures     0
 
 %global _verbose           0
@@ -93,19 +91,16 @@
 
 %if %build_on_obs == 1
 %global packager Manvendra Bhangui <manvendra@indimail.org>
-%global dist redhat
-%global disttag rh
 %endif
 
-%if %{is_suse} != 0
+%if 0%{?suse_version}
 %global dist suse
 %global disttag suse
 %endif
 
-%if %{is_fedora} != 0
+%if 0%{?fedora_version}
 %global dist %{?dist}
-%global disttag rhfc
-%global fedora_version %(cat /etc/fedora-release | awk '{print $3}')
+%global disttag fedora
 %endif
 
 Summary: A Flexible Messaging Platform with Multi-Host/Multi-Protocol support
@@ -452,6 +447,7 @@ echo target_alias  %_target_alias
 echo target_cpu    %_target_cpu
 echo target_os     %_target_os
 echo target_vendor %_target_vendor
+echo Project       %_project
 echo pythondir     %{pythondir}
 echo Building %{name}-%{version}-%{release} Build %{_build} OS %{_os} Dist %{dist} disttag %{disttag} lib=%{_lib} libdir=%{_libdir}
 echo "------------------------------------------------------"
@@ -569,10 +565,10 @@ if [ -d libdkim-%{libdkim_version} ] ; then
     aclocal -I m4
     autoreconf -fiv
   fi
+  %configure --prefix=%{_prefix} --libdir=%{_libdir} --mandir=%{mandir}
+  cd ..
 fi
 
-%configure --prefix=%{_prefix} --libdir=%{_libdir} --mandir=%{mandir}
-cd ..
 #### LIBSRS2 ######################
 if [ -d libsrs2-%{libsrs2_version} ] ; then
   cd libsrs2-%{libsrs2_version}
@@ -821,8 +817,8 @@ do
     fi
     cd ..
     if [ %nobogofilter -eq 0 -a " $i" = " bogofilter-%{bogofilter_version}" ] ; then
-		%{__cp} %{name}-%{version}/data/wordlist.db %{sysconfdir}/wordlist.db
-	fi
+      %{__cp} %{name}-%{version}/data/wordlist.db %{buildroot}%{sysconfdir}/wordlist.db
+    fi
   fi
 done
 for i in eps cdb flash indimail
