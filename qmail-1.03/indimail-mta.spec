@@ -1,21 +1,17 @@
 #
 #
-# $Id: indimail-mta.spec,v 1.73 2017-03-07 14:20:42+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail-mta.spec,v 1.74 2017-03-08 09:12:49+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 
-%global is_suse %(test -e /etc/SuSE-release && echo 1 || echo 0)
-%global is_fedora %(test -e /etc/fedora-release && echo 1 || echo 0)
-
-%if 0%{?opensuse_bs}
-# define to 1 if building on openSUSE build service
+%if %{defined _project}
+# define if building on openSUSE build service
 %global build_on_obs       1
 %global reconfigure_mode   0
 %else
+%define _project           local
 %global build_on_obs       0
 %global reconfigure_mode   0
-%endif
-%if %build_on_obs == 0
 %global _hardened_build    1
 %endif
 
@@ -49,18 +45,16 @@
 
 %if %build_on_obs == 1
 %global packager Manvendra Bhangui <manvendra@indimail.org>
+%endif
 
-%global dist redhat
-%global disttag rh
-
-%if %{is_suse} != 0
+%if 0%{?suse_version}
 %global dist suse
 %global disttag suse
 %endif
-%if %{is_fedora} != 0
-%global dist fedora
-%global disttag rhfc
-%endif
+
+%if 0%{?fedora_version}
+%global dist %{?dist}
+%global disttag fedora
 %endif
 
 Summary: A Flexible SMTP server
@@ -353,46 +347,28 @@ done
 ID=$(id -u)
 #### LIBDKIM ######################
 if [ -d libdkim-%{libdkim_version} ] ; then
-cd libdkim-%{libdkim_version}
-
-if [ %{reconfigure_mode} -eq 0 ] ; then
-  if [ %{build_on_obs} -eq 0 ] ; then
+  cd libdkim-%{libdkim_version}
+  if [ %{reconfigure_mode} -eq 1 ] ; then
     echo "reconfiguring..."
-    autoreconf -fi
-  else
-    echo "reconfiguring..."
-    %if %{undefined centos_version} && %{undefined rhel_version} && %{undefined sles_version}
-      %if 0%{?fedora_version} > 10 || 0%{?suse_version} || 0%{?mandriva_version} > 2009
-        autoreconf -fi
-      %endif
-    %endif
+    %{__mkdir_p} m4
+    aclocal -I m4
+    autoreconf -fiv
   fi
-fi
-
-%configure --prefix=%{_prefix} --libdir=%{_libdir} --mandir=%{mandir}
-cd ..
+  %configure --prefix=%{_prefix} --libdir=%{_libdir} --mandir=%{mandir}
+  cd ..
 fi
 
 #### LIBSRS2 ######################
 if [ -d libsrs2-%{libsrs2_version} ] ; then
-cd libsrs2-%{libsrs2_version}
-
-if [ %{reconfigure_mode} -eq 0 ] ; then
-  if [ %{build_on_obs} -eq 0 ] ; then
+  cd libsrs2-%{libsrs2_version}
+  if [ %{reconfigure_mode} -eq 1 ] ; then
     echo "reconfiguring..."
-    autoreconf -fi
-  else
-    echo "reconfiguring..."
-    %if %{undefined centos_version} && %{undefined rhel_version} && %{undefined sles_version}
-      %if 0%{?fedora_version} > 10 || 0%{?suse_version} || 0%{?mandriva_version} > 2009
-        autoreconf -fi
-      %endif
-    %endif
+    %{__mkdir_p} m4
+    aclocal -I m4
+    autoreconf -fiv
   fi
-fi
-
-%configure --prefix=%{_prefix} --libdir=%{_libdir} --mandir=%{mandir}
-cd ..
+  %configure --prefix=%{_prefix} --libdir=%{_libdir} --mandir=%{mandir}
+  cd ..
 fi
 
 #### qmail ######################
@@ -492,12 +468,12 @@ do
       %{__make} DESTDIR=%{buildroot} install-strip
     fi
     cd ..
-  	if [ " $i" = " qmail-%{qmail_version}" ] ; then
-  		if [ -f ../SOURCES/svctool ] ; then
-    		%{__mkdir_p} %{buildroot}%{_prefix}/sbin
-    		%{__cp} ../SOURCES/svctool %{buildroot}%{_prefix}/sbin/svctool
-  		fi
-  	fi
+    if [ " $i" = " qmail-%{qmail_version}" ] ; then
+      if [ -f ../SOURCES/svctool ] ; then
+        %{__mkdir_p} %{buildroot}%{_prefix}/sbin
+        %{__cp} ../SOURCES/svctool %{buildroot}%{_prefix}/sbin/svctool
+      fi
+    fi
   fi
 done
 if [ %nolibdkim -eq 0 ] ; then
@@ -2150,7 +2126,7 @@ echo "recreating ld.so cache"
 if [ -x /usr/sbin/selinuxenabled ] ; then
   /usr/sbin/selinuxenabled
   if [ $? -eq 0 -a -x /usr/sbin/semodule ] ; then
-	echo "disabling selinux module"
+    echo "disabling selinux module"
     /usr/sbin/semodule -r indimail-mta
   fi
 fi
