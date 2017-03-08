@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail.spec.in,v 2.368 2017-03-08 09:09:39+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 2.369 2017-03-08 10:27:40+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 
@@ -11,7 +11,7 @@
 %else
 %define _project           local
 %global build_on_obs       0
-%global reconfigure_mode   0
+%global reconfigure_mode   1
 %global _hardened_build    1
 %endif
 
