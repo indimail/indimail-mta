@@ -1,85 +1,17 @@
 #
-# $Log: indium.spec.in,v $
-# Revision 1.16  2017-03-07 20:22:33+05:30  Cprogrammer
-# added libidn-devel for obs
-#
-# Revision 1.15  2017-03-07 16:26:05+05:30  Cprogrammer
-# fixed typo
-#
-# Revision 1.14  2016-06-08 23:30:43+05:30  Cprogrammer
-# renamed image for flash
-#
-# Revision 1.13  2016-06-08 10:42:35+05:30  Cprogrammer
-# added tk library images
-#
-# Revision 1.12  2016-06-07 22:29:19+05:30  Cprogrammer
-# FHS compliance
-#
-# Revision 1.11  2016-06-07 18:39:01+05:30  Cprogrammer
-# FHS compliance
-#
-# Revision 1.10  2015-12-29 00:38:42+05:30  Cprogrammer
-# added rhel version 7
-#
-# Revision 1.9  2011-12-18 11:01:55+05:30  Cprogrammer
-# removed unused images
-#
-# Revision 1.8  2011-05-22 23:40:13+05:30  Cprogrammer
-# *** empty log message ***
-#
-# Revision 1.7  2010-06-25 17:45:56+05:30  Cprogrammer
-# changed default attribute of /var/indimail directory
-#
-# Revision 1.6  2010-05-02 00:31:45+05:30  Cprogrammer
-# added missing assignment of argv1
-#
-# Revision 1.5  2010-02-24 09:13:43+05:30  Cprogrammer
-# added bwidget to Requires
-#
-# Revision 1.4  2010-02-20 13:52:50+05:30  Cprogrammer
-# added ldconfig
-#
-# Revision 1.3  2010-02-20 11:44:02+05:30  Cprogrammer
-# added fast_mode
-#
-# Revision 1.2  2010-02-20 11:17:17+05:30  Cprogrammer
-# fix for autoreconf
-#
-# Revision 1.1  2010-02-20 10:53:59+05:30  Cprogrammer
-# Initial revision
-#
 #
 # $Id: indium.spec.in,v 1.16 2017-03-07 20:22:33+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %define _unpackaged_files_terminate_build 1
 
-%define is_mandrake %(test -e /etc/mandrake-release && echo 1 || echo 0)
-%define is_suse %(test -e /etc/SuSE-release && echo 1 || echo 0)
-%define is_fedora %(test -e /etc/fedora-release && echo 1 || echo 0)
-
-%define dist redhat
-%define disttag rh
-
-%if %is_mandrake
-%define dist mandrake
-%define disttag mdk
-%endif
-%if %is_suse
-%define dist suse
-%define disttag suse
-%endif
-%if %is_fedora
-%define dist fedora
-%define disttag rhfc
-%endif
-
-%if 0%{?opensuse_bs}
+%if %{defined _project}
 # define to 1 if building on openSUSE build service
 %define build_on_obs       1
-%define fast_mode          0
+%define fast_mode          1
 %else
 %define build_on_obs       0
-%define fast_mode          0
+%define fast_mode          1
+%global _hardened_build    1
 %endif
 
 %define _prefix            @prefix@
@@ -105,12 +37,17 @@
 Summary: TCL/TK based Administration GUI for IndiMail
 Name: indium
 Version: @version@
-%if %build_on_obs != 0
+%if %build_on_obs == 1
 Release: 1.<B_CNT>
 %else
-Release: 1.B_CNT
+Release: 1.B_CCNT%{?dist}
 %endif
+
+%if %build_on_obs == 1
+License: GPL-3.0+
+%else
 License: GPLv3
+%endif
 Group: System Environment/Base
 Source0:  http://downloads.sourceforge.net/indimail/%{name}-%{version}.tar.gz
 Source2: %{name}-%{version}-rpmlintrc

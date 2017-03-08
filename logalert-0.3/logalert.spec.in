@@ -1,20 +1,31 @@
+#
+#
+%undefine _missing_build_ids_terminate_build
+%global _unpackaged_files_terminate_build 1
+
 %define _prefix            @prefix@
 %define mandir             @mandir@
 %define sysconfdir         @sysconfdir@
 
-%if 0%{?opensuse_bs}
+%if %{defined _project}
 # define to 1 if building on openSUSE build service
 %define build_on_obs       1
 %define fast_mode          1
 %else
 %define build_on_obs       0
-%define fast_mode          0
+%define fast_mode          1
+%global _hardened_build    1
 %endif
 
 Summary: Watch files for specific patterns
 Name: logalert
 Version: @VERSION@
-Release: 1
+%if %build_on_obs == 1
+Release: 1.<B_CNT>
+%else
+Release: 1.B_CCNT%{?dist}
+%endif
+
 %if %build_on_obs == 1
 License: GPL-3.0+
 %else
