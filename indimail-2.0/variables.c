@@ -1,5 +1,8 @@
 /*
  * $Log: variables.c,v $
+ * Revision 2.55  2017-03-08 13:52:21+05:30  Cprogrammer
+ * removed vconvert
+ *
  * Revision 2.54  2014-01-02 23:54:50+05:30  Cprogrammer
  * set delayed insert to off for MySQL delayed inserts
  *
@@ -210,7 +213,7 @@
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: variables.c,v 2.54 2014-01-02 23:54:50+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: variables.c,v 2.55 2017-03-08 13:52:21+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 vdir_type       vdir;
@@ -372,7 +375,6 @@ ADMINCOMMAND adminCommands[] = {
 	{INDIMAILDIR"/bin/vadddomain", "Add a Virtual Domain"},
 	{INDIMAILDIR"/bin/vcalias", "Convert .qmail files to valias format"},
 	{INDIMAILDIR"/bin/vcaliasrev.sh", "Convert Alias to .qmail format"},
-	{INDIMAILDIR"/bin/vconvert", "Database Conversion Utility"},
 	{INDIMAILDIR"/bin/vdeldomain", "Delete a Virtual Domain"},
 	{INDIMAILDIR"/bin/vrenamedomain", "Rename a Virtual Domain"},
 	{INDIMAILDIR"/bin/vdominfo", "Domain Information"},
