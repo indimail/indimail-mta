@@ -84,7 +84,10 @@ replaces occurrences of the following special characters in the \fImessagefile\f
  - Validity period can be specified (Start Date or End Date or
    combination of Start Date and End Date)
  - Will not respond to nearly every type of mailing list or bulk email.
- - Will not respond to spam mails (mails filtered by bogofilter)
+ - Will not respond to spam mails (mails filtered by bogofilter).
+   Uses X-Bogosity header and look for 'Yes' in the header.
+ - WIll not respond to senders listed in badrcptto, badrcptpatterns, badrcptto.cdb
+   and MySQL table listed in badrcptto.sql
  - Will not respond to bounce messages or MAILER-DAEMON.
  - Bounces looping messages.
  - Can insert the original subject into the response.

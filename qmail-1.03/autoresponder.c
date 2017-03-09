@@ -1,5 +1,8 @@
 /*
  * $Log: autoresponder.c,v $
+ * Revision 1.32  2017-03-09 14:35:38+05:30  Cprogrammer
+ * ignore responses to senders listed in badrcptto
+ *
  * Revision 1.31  2015-12-12 15:01:41+05:30  Cprogrammer
  * fix for deliver to email alias
  *
@@ -111,6 +114,8 @@
 #include "ip.h"
 #include "ipme.h"
 #include "tai.h"
+#include "constmap.h"
+#include "qregex.h"
 
 #define strcasecmp(x,y)    case_diffs((x), (y))
 #define strncasecmp(x,y,z) case_diffb((x), (z), (y))
@@ -526,23 +531,55 @@ get_arguments(int argc, char *argv[])
 		usage("Could not change directory to DIRECTORY");
 }
 
+static stralloc badrcptto = { 0 };
+static stralloc badrcptpatterns = { 0 };
+struct constmap mapbadrcpt;
+
 void
-check_sender(char *sender)
+check_sender(stralloc *sender)
 {
 	int             i;
+	char           *errStr = 0;
+
 	/*- Ignore messages with an empty SENDER (sent from system) */
-	if (str_equal(sender, "mailer-daemon"))
+	if (str_equal(sender->s, "mailer-daemon"))
 		ignore("SENDER was mailer-daemon");
-	if (!sender[0])
+	if (!sender->s[0])
 		ignore("SENDER is empty, mail came from system account");
-	if (str_equal(sender, "#@[]"))
+	if (str_equal(sender->s, "#@[]"))
 		ignore("SENDER is <#@[]> (double bounce message)");
-	if (!sender[i = str_chr(sender, '@')])
+	if (!sender->s[i = str_chr(sender->s, '@')])
 		ignore("SENDER did not contain a hostname");
-	if (i > 8 && !str_diffn(sender + i - 8, "-request", 8))
+	if (i > 8 && !str_diffn(sender->s + i - 8, "-request", 8))
 		ignore("SENDER was owner list");
-	if (!str_diffn(sender, "owner-", 6))
+	if (!str_diffn(sender->s, "owner-", 6))
 		ignore("SENDER was owner list");
+	if ((control_readfile(&badrcptto, "badrcptto", 0)) == -1)
+		strerr_die2sys(111, FATAL, "badrcptto: ");
+	if ((control_readfile(&badrcptpatterns, "badrcptpatterns", 0)) == -1)
+		strerr_die2sys(111, FATAL, "badrcptto: ");
+	if (!constmap_init(&mapbadrcpt, badrcptto.s, badrcptto.len, 0))
+		strerr_die2sys(111, FATAL, "out of memory: ");
+	switch (address_match("badrcptto", sender, &badrcptto, &mapbadrcpt, &badrcptpatterns, &errStr))
+	{
+	case 1:
+		/*- match occurred */
+		ignore("SENDER is blacklisted");
+		return;
+	case 0:
+		break;
+	case -1:
+		strerr_die2sys(111, FATAL, "out of memory: ");
+	case -2:
+		strerr_die2sys(111, FATAL, "unable to read badrcpto.cdb: ");
+	case -3:
+		strerr_die2sys(111, FATAL, "unable to lseek: ");
+	case -4:
+		strerr_die4sys(111, FATAL, "regex compilation failed: ", errStr, ": ");
+	default:
+		strerr_die4sys(111, FATAL, "unknown error: ", errStr, ": ");
+		break;
+	}
 }
 
 void
@@ -1084,7 +1121,7 @@ main(int argc, char *argv[])
 	if (!stralloc_0(&mailfrom))
 		strerr_die2sys(111, FATAL, "out of memory: ");
 	case_lowers(mailfrom.s);
-	check_sender(mailfrom.s);
+	check_sender(&mailfrom);
 	/*- Read and parse header */
 	if (lseek(0, 0, SEEK_SET) == -1)
 		strerr_die2sys(111, FATAL, "unable to lseek: ");
@@ -1309,7 +1346,7 @@ main(int argc, char *argv[])
 void
 getversion_qmail_autoresponder_c()
 {
-	static char    *x = "$Id: autoresponder.c,v 1.31 2015-12-12 15:01:41+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: autoresponder.c,v 1.32 2017-03-09 14:35:38+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
