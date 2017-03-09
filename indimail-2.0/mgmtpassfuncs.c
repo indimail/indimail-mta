@@ -1,5 +1,8 @@
 /*
  * $Log: mgmtpassfuncs.c,v $
+ * Revision 2.23  2017-03-09 23:34:15+05:30  Cprogrammer
+ * changed location of pass.dict to /etc/indimail
+ *
  * Revision 2.22  2011-10-28 14:16:04+05:30  Cprogrammer
  * added auth_method argument to pw_comp
  *
@@ -71,7 +74,7 @@
 #include "indimail.h"
 
 #ifndef lint
-static char     sccsid[] = "$Id: mgmtpassfuncs.c,v 2.22 2011-10-28 14:16:04+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: mgmtpassfuncs.c,v 2.23 2017-03-09 23:34:15+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef CLUSTERED_SITE
@@ -83,7 +86,7 @@ static char     sccsid[] = "$Id: mgmtpassfuncs.c,v 2.22 2011-10-28 14:16:04+05:3
 #define SETPAS_MAX_ATTEMPTS 6
 #define LOGIN_MAX_ATTEMPTS 3
 #define DAILY_MAX_ATTEMPTS 6
-#define PASSDICT "/var/indimail/etc/pass.dict"
+#define PASSDICT SYSCONFDIR"/pass.dict"
 #include <unistd.h>
 
 int
