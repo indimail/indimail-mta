@@ -330,6 +330,7 @@ the installation.
     % wget http://downloads.sourceforge.net/indimail/package.checksums # MD5 sum of all the packages
     % wget http://downloads.sourceforge.net/indimail/indimail-@version@.tar.gz
     % wget http://downloads.sourceforge.net/indimail/libdkim-1.4.tar.gz
+    % wget http://downloads.sourceforge.net/indimail/libsrs2-1.0.18.tar.gz
     % wget http://downloads.sourceforge.net/courier/courier-imap-4.17.2.tar.bz2
     % wget http://downloads.sourceforge.net/indimail/flash-0.9.4.tar.gz
     % wget http://downloads.sourceforge.net/indimail/altermime-0.3.10.tar.gz
@@ -426,7 +427,7 @@ the installation.
     change first line in qmail-1.03/conf-qmail to @indimaildir@
     change first line in qmail-1.03/conf-shared to @shareddir@
     change first line in qmail-1.03/conf-prefix to @prefix@
-	change first line in qmail-1.03/conf-libexec to @libexecdir@
+    change first line in qmail-1.03/conf-libexec to @libexecdir@
     change first line in qmail-1.03/conf-sysconfdir to @sysconfdir@
 
     % cd indimail-@version@
