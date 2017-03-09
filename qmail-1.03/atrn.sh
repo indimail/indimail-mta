@@ -1,5 +1,8 @@
 #
 # $Log: atrn.sh,v $
+# Revision 1.10  2017-03-09 16:37:26+05:30  Cprogrammer
+# FHS changes
+#
 # Revision 1.9  2016-05-17 23:11:42+05:30  Cprogrammer
 # fix for configurable control directory
 #
@@ -35,7 +38,7 @@
 # 3 - No Pending message for node
 # 4 - Pending message for node
 #
-# $Id: atrn.sh,v 1.9 2016-05-17 23:11:42+05:30 Cprogrammer Exp mbhangui $
+# $Id: atrn.sh,v 1.10 2017-03-09 16:37:26+05:30 Cprogrammer Exp mbhangui $
 #
 trap "" 1 2 3
 if [ $# -lt 2 ] ; then
@@ -55,7 +58,7 @@ if [ " $CONTROLDIR" = " " ] ; then
 fi
 slash=`echo $CONTROLDIR | cut -c1`
 if [ ! " $slash" = " /" ] ; then
-	cd QMAIL
+	cd SYSCONFDIR
 fi
 if [ -f "$CONTROLDIR"/queuelifetime ] ; then
 	LIFETIME=`cat "$CONTROLDIR"/queuelifetime`
@@ -69,7 +72,7 @@ pend=0
 for domains in $1
 do
 	count=`for i in $domains/Maildir/new $domains/Maildir/cur ; do /bin/ls $i; done|wc -l`
-	QMAIL/bin/setlock -nx $domains/seriallock /bin/rm $domains/seriallock
+	PREFIX/bin/setlock -nx $domains/seriallock /bin/rm $domains/seriallock
 	if [ -f $domains/seriallock ] ; then
 		pend=1
 	fi
@@ -101,11 +104,11 @@ do
 	else
 		qvirtual=$domains
 	fi
-	QMAIL/bin/setlock -nx $domains/seriallock QMAIL/bin/maildirserial \
+	PREFIX/bin/setlock -nx $domains/seriallock PREFIX/bin/maildirserial \
 		-b -t $LIFETIME $domains/Maildir "$qvirtual"- \
-		QMAIL/bin/serialsmtp "$qvirtual"- AutoTURN 1
-	QMAIL/bin/setlock -nx $domains/seriallock $INDIMAILDIR/bin/resetquota \
+		PREFIX/bin/serialsmtp "$qvirtual"- AutoTURN 1
+	PREFIX/bin/setlock -nx $domains/seriallock PREFIX/bin/resetquota \
 		$domains/Maildir
-	QMAIL/bin/setlock -nx $domains/seriallock /bin/rm $domains/seriallock
+	PREFIX/bin/setlock -nx $domains/seriallock /bin/rm $domains/seriallock
 done
 exit 0

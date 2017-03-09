@@ -1,5 +1,8 @@
 #
 # $Log: multilog-matchup.sh,v $
+# Revision 1.3  2017-03-09 16:38:59+05:30  Cprogrammer
+# FHS changes
+#
 # Revision 1.2  2004-01-03 13:43:45+05:30  Cprogrammer
 # replaced HOME with QMAIL
 #
@@ -7,4 +10,4 @@
 # Initial revision
 #
 #
-exec QMAIL/bin/tai64nunix|QMAIL/bin/matchup
+exec PREFIX/bin/tai64nunix|PREFIX/bin/matchup

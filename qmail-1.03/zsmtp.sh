@@ -1,4 +1,7 @@
 # $Log: zsmtp.sh,v $
+# Revision 1.8  2017-03-09 16:40:00+05:30  Cprogrammer
+# FHS changes
+#
 # Revision 1.7  2016-06-17 20:21:21+05:30  Cprogrammer
 # qmailanalog scripts moved to libexec dir
 #
@@ -44,7 +47,7 @@ One line per SMTP delivery. Information on each line:
 (
 echo sbytes xdelay embryo mess spam success failure host
 LIBEXEC/rsmtp | sort -n -r
-) | QMAIL/bin/columnt
+) | PREFIX/bin/columnt
 
 echo
 exec 0</tmp/smtp.$$
@@ -57,7 +60,7 @@ One line per reason for delivery failure. Information on each line:
 (
 echo del xdelay reason
 LIBEXEC/rsmtpfailures | sort -n -r -k 2,2
-) | QMAIL/bin/columnt | tr _ ' '
+) | PREFIX/bin/columnt | tr _ ' '
 
 echo
 exec 0</tmp/smtp.$$
@@ -73,7 +76,7 @@ One line per sender host. Information on each line:
 (
 echo sbytes xdelay mess spam host
 LIBEXEC/rsmtpsdomains | sort -n -r
-) | QMAIL/bin/columnt
+) | PREFIX/bin/columnt
 
 echo
 exec 0</tmp/smtp.$$
@@ -89,7 +92,7 @@ One line per sender host. Information on each line:
 (
 echo sbytes xdelay mess spam host
 LIBEXEC/rsmtprdomains | sort -n -r
-) | QMAIL/bin/columnt
+) | PREFIX/bin/columnt
 
 echo
 exec 0</tmp/smtp.$$
@@ -105,7 +108,7 @@ One line per sender host. Information on each line:
 (
 echo sbytes xdelay mess spam sender
 LIBEXEC/rsmtpsenders | sort -n -r
-) | QMAIL/bin/columnt
+) | PREFIX/bin/columnt
 
 echo
 exec 0</tmp/smtp.$$
@@ -121,6 +124,6 @@ One line per sender host. Information on each line:
 (
 echo sbytes xdelay mess spam recipient
 LIBEXEC/rsmtprecipients | sort -n -r
-) | QMAIL/bin/columnt
+) | PREFIX/bin/columnt
 
 /bin/rm -f /tmp/smtp.$$

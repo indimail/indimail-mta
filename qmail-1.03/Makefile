@@ -324,33 +324,33 @@ binm1.sh conf-qmail
 	> binm1
 
 binm1+df: \
-binm1+df.sh conf-qmail
+binm1+df.sh conf-prefix
 	cat binm1+df.sh \
-	| sed s}QMAIL}"`head -1 conf-qmail`"}g \
+	| sed s}PREFIX}"`head -1 conf-prefix`"}g \
 	> binm1+df
 
 binm2: \
-binm2.sh conf-qmail
+binm2.sh conf-prefix
 	cat binm2.sh \
-	| sed s}QMAIL}"`head -1 conf-qmail`"}g \
+	| sed s}PREFIX}"`head -1 conf-prefix`"}g \
 	> binm2
 
 binm2+df: \
-binm2+df.sh conf-qmail
+binm2+df.sh conf-prefix
 	cat binm2+df.sh \
-	| sed s}QMAIL}"`head -1 conf-qmail`"}g \
+	| sed s}PREFIX}"`head -1 conf-prefix`"}g \
 	> binm2+df
 
 binm3: \
-binm3.sh conf-qmail
+binm3.sh conf-prefix
 	cat binm3.sh \
-	| sed s}QMAIL}"`head -1 conf-qmail`"}g \
+	| sed s}PREFIX}"`head -1 conf-prefix`"}g \
 	> binm3
 
 binm3+df: \
-binm3+df.sh conf-qmail
+binm3+df.sh conf-prefix
 	cat binm3+df.sh \
-	| sed s}QMAIL}"`head -1 conf-qmail`"}g \
+	| sed s}PREFIX}"`head -1 conf-prefix`"}g \
 	> binm3+df
 
 bouncesaying: \
@@ -540,9 +540,9 @@ auto_qmail.h envdir.h pathexec.h variables.h auto_control.h
 	./compile `grep -h -v "^#" conf-spf` condredirect.c
 
 qmailconfig: \
-warn-auto.sh qmailconfig.sh conf-qmail conf-prefix conf-break conf-split conf-sysconfdir conf-libexec
+warn-auto.sh qmailconfig.sh conf-prefix conf-prefix conf-break conf-split conf-sysconfdir conf-libexec
 	cat warn-auto.sh qmailconfig.sh \
-	| sed s}QMAIL}"`head -1 conf-qmail`"}g \
+	| sed s}SYSCONFDIR}"`head -1 conf-sysconfdir`"}g \
 	| sed s}PREFIX}"`head -1 conf-prefix`"}g \
 	| sed s}LIBEXEC}"`head -1 conf-libexec`"}g \
 	| sed s}@controldir\@}"`head -1 conf-sysconfdir`/control"}g \
@@ -552,9 +552,10 @@ warn-auto.sh qmailconfig.sh conf-qmail conf-prefix conf-break conf-split conf-sy
 	chmod 755 qmailconfig
 
 config-fast: \
-warn-auto.sh config-fast.sh conf-qmail conf-break conf-split conf-sysconfdir
+warn-auto.sh config-fast.sh conf-prefix conf-break conf-split conf-sysconfdir
 	cat warn-auto.sh config-fast.sh \
-	| sed s}QMAIL}"`head -1 conf-qmail`"}g \
+	| sed s}PREFIX}"`head -1 conf-prefix`"}g \
+	| sed s}SYSCONFDIR}"`head -1 conf-sysconfdir`"}g \
 	| sed s}@controldir\@}"`head -1 conf-sysconfdir`/control"}g \
 	| sed s}BREAK}"`head -1 conf-break`"}g \
 	| sed s}SPLIT}"`head -1 conf-split`"}g \
@@ -576,9 +577,9 @@ compile date822fmt.c datetime.h fmt.h date822fmt.h
 	./compile date822fmt.c
 
 datemail: \
-warn-auto.sh datemail.sh conf-qmail conf-break conf-split
+warn-auto.sh datemail.sh conf-prefix conf-break conf-split
 	cat warn-auto.sh datemail.sh \
-	| sed s}QMAIL}"`head -1 conf-qmail`"}g \
+	| sed s}PREFIX}"`head -1 conf-prefix`"}g \
 	| sed s}BREAK}"`head -1 conf-break`"}g \
 	| sed s}SPLIT}"`head -1 conf-split`"}g \
 	> datemail
@@ -725,17 +726,15 @@ dot-qmail.9 conf-break
 	> dot-qmail.5
 
 elq: \
-warn-auto.sh elq.sh conf-qmail conf-break conf-split
+warn-auto.sh elq.sh conf-prefix conf-break conf-split
 	cat warn-auto.sh elq.sh \
-	| sed s}QMAIL}"`head -1 conf-qmail`"}g \
-	| sed s}BREAK}"`head -1 conf-break`"}g \
-	| sed s}SPLIT}"`head -1 conf-split`"}g \
+	| sed s}PREFIX}"`head -1 conf-prefix`"}g \
 	> elq
 
 irmail: \
-warn-auto.sh rmail.sh conf-qmail
+warn-auto.sh rmail.sh conf-prefix
 	cat warn-auto.sh rmail.sh \
-	| sed s}QMAIL}"`head -1 conf-qmail`"}g \
+	| sed s}PREFIX}"`head -1 conf-prefix`"}g \
 	> irmail
 
 etrn: \
@@ -747,16 +746,18 @@ warn-auto.sh etrn.sh conf-qmail conf-libexec conf-prefix
 	> etrn
 
 atrn: \
-warn-auto.sh atrn.sh conf-qmail conf-sysconfdir
+warn-auto.sh atrn.sh conf-qmail conf-sysconfdir conf-prefix
 	cat warn-auto.sh atrn.sh \
+	| sed s}PREFIX}"`head -1 conf-prefix`"}g \
+	| sed s}SYSCONFDIR}"`head -1 conf-sysconfdir`"}g \
 	| sed s}QMAIL}"`head -1 conf-qmail`"}g \
 	| sed s}@controldir\@}"`head -1 conf-sysconfdir`/control"}g \
 	> atrn
 
 multirotate: \
-warn-auto.sh multirotate.sh conf-qmail
+warn-auto.sh multirotate.sh conf-prefix
 	cat warn-auto.sh multirotate.sh \
-	| sed s}QMAIL}"`head -1 conf-qmail`"}g \
+	| sed s}PREFIX}"`head -1 conf-prefix`"}g \
 	> multirotate
 
 qmail-sighup: \
@@ -805,6 +806,7 @@ indimail-mta.fc.in conf-qmail conf-sysconfdir
 svscanboot: \
 warn-auto.sh svscanboot.sh conf-prefix conf-sysconfdir conf-libexec
 	cat warn-auto.sh svscanboot.sh \
+	| sed s}SYSCONFDIR}"`head -1 conf-sysconfdir`"}g \
 	| sed s}PREFIX}"`head -1 conf-prefix`"}g \
 	| sed s}@controldir\@}"`head -1 conf-sysconfdir`/control"}g \
 	| sed s}LIBEXEC}"`head -1 conf-libexec`"}g \
@@ -1495,9 +1497,9 @@ open.h headerbody.h maildir.h strerr.h
 	./compile maildirwatch.c
 
 mailsubj: \
-warn-auto.sh mailsubj.sh conf-qmail conf-break conf-split
+warn-auto.sh mailsubj.sh conf-prefix conf-break conf-split
 	cat warn-auto.sh mailsubj.sh \
-	| sed s}QMAIL}"`head -1 conf-qmail`"}g \
+	| sed s}PREFIX}"`head -1 conf-prefix`"}g \
 	| sed s}BREAK}"`head -1 conf-break`"}g \
 	| sed s}SPLIT}"`head -1 conf-split`"}g \
 	> mailsubj
@@ -1615,9 +1617,9 @@ compile open_write.c open.h
 	./compile open_write.c
 
 pinq: \
-warn-auto.sh pinq.sh conf-qmail conf-break conf-split
+warn-auto.sh pinq.sh conf-prefix conf-break conf-split
 	cat warn-auto.sh pinq.sh \
-	| sed s}QMAIL}"`head -1 conf-qmail`"}g \
+	| sed s}PREFIX}"`head -1 conf-prefix`"}g \
 	| sed s}BREAK}"`head -1 conf-break`"}g \
 	| sed s}SPLIT}"`head -1 conf-split`"}g \
 	> pinq
@@ -1654,15 +1656,15 @@ gen_alloc.h
 	./compile prioq.c
 
 proc: \
-proc.sh conf-qmail
+proc.sh conf-prefix
 	cat proc.sh \
-	| sed s}QMAIL}"`head -1 conf-qmail`"}g \
+	| sed s}PREFIX}"`head -1 conf-prefix`"}g \
 	> proc
 
 proc+df: \
-proc+df.sh conf-qmail
+proc+df.sh conf-prefix
 	cat proc+df.sh \
-	| sed s}QMAIL}"`head -1 conf-qmail`"}g \
+	| sed s}PREFIX}"`head -1 conf-prefix`"}g \
 	> proc+df
 
 prot.o: \
@@ -1670,9 +1672,9 @@ compile prot.c hasshsgr.h prot.h
 	./compile prot.c
 
 qail: \
-warn-auto.sh qail.sh conf-qmail conf-break conf-split
+warn-auto.sh qail.sh conf-prefix conf-break conf-split
 	cat warn-auto.sh qail.sh \
-	| sed s}QMAIL}"`head -1 conf-qmail`"}g \
+	| sed s}PREFIX}"`head -1 conf-prefix`"}g \
 	| sed s}BREAK}"`head -1 conf-break`"}g \
 	| sed s}SPLIT}"`head -1 conf-split`"}g \
 	> qail
@@ -3820,9 +3822,10 @@ serialcmd.0: serialcmd.1
 	nroff -man serialcmd.1 > serialcmd.0
 
 maildircmd: \
-warn-auto.sh maildircmd.sh conf-qmail conf-sysconfdir
+warn-auto.sh maildircmd.sh conf-prefix conf-sysconfdir
 	cat warn-auto.sh maildircmd.sh \
-	| sed s}QMAIL}"`head -1 conf-qmail`"}g \
+	| sed s}SYSCONFDIR}"`head -1 conf-sysconfdir`"}g \
+	| sed s}PREFIX}"`head -1 conf-prefix`"}g \
 	| sed s}@controldir\@}"`head -1 conf-sysconfdir`/control"}g \
 	> maildircmd
 
@@ -3860,9 +3863,10 @@ timeoutwrite.h fd.h exit.h open.h wait.h str.h fmt.h env.h
 	./compile serialqmtp.c
 
 maildirsmtp: \
-warn-auto.sh maildirsmtp.sh conf-qmail conf-sysconfdir
+warn-auto.sh maildirsmtp.sh conf-prefix conf-sysconfdir
 	cat warn-auto.sh maildirsmtp.sh \
-	| sed s}QMAIL}"`head -1 conf-qmail`"}g \
+	| sed s}SYSCONFDIR}"`head -1 conf-sysconfdir`"}g \
+	| sed s}PREFIX}"`head -1 conf-prefix`"}g \
 	| sed s}@controldir\@}"`head -1 conf-sysconfdir`/control"}g \
 	> maildirsmtp
 
@@ -3871,9 +3875,9 @@ maildirsmtp.1
 	nroff -man maildirsmtp.1 > maildirsmtp.0
 
 maildirqmtp: \
-warn-auto.sh maildirqmtp.sh conf-qmail
+warn-auto.sh maildirqmtp.sh conf-prefix
 	cat warn-auto.sh maildirqmtp.sh \
-	| sed s}HOME}"`head -1 conf-qmail`"}g \
+	| sed s}PREFIX}"`head -1 conf-prefix`"}g \
 	> maildirqmtp
 
 maildirqmtp.0: \
@@ -4059,9 +4063,9 @@ xsender.1
 	nroff -man xsender.1 > xsender.0
 
 zddist: \
-warn-auto.sh zddist.sh conf-qmail conf-libexec
+warn-auto.sh zddist.sh conf-prefix conf-libexec
 	cat warn-auto.sh zddist.sh \
-	| sed s}QMAIL}"`head -1 conf-qmail`"}g \
+	| sed s}PREFIX}"`head -1 conf-prefix`"}g \
 	| sed s}LIBEXEC}"`head -1 conf-libexec`"}g \
 	> zddist
 
@@ -4072,9 +4076,9 @@ warn-auto.sh ddist.sh conf-qmail
 	> ddist
 
 zdeferrals: \
-warn-auto.sh zdeferrals.sh conf-qmail conf-libexec
+warn-auto.sh zdeferrals.sh conf-prefix conf-libexec
 	cat warn-auto.sh zdeferrals.sh \
-	| sed s}QMAIL}"`head -1 conf-qmail`"}g \
+	| sed s}PREFIX}"`head -1 conf-prefix`"}g \
 	| sed s}LIBEXEC}"`head -1 conf-libexec`"}g \
 	> zdeferrals
 
@@ -4084,9 +4088,9 @@ deferrals: warn-auto.sh deferrals.sh conf-qmail
 	> deferrals
 
 zfailures: \
-warn-auto.sh zfailures.sh conf-qmail conf-libexec
+warn-auto.sh zfailures.sh conf-prefix conf-libexec
 	cat warn-auto.sh zfailures.sh \
-	| sed s}QMAIL}"`head -1 conf-qmail`"}g \
+	| sed s}PREFIX}"`head -1 conf-prefix`"}g \
 	| sed s}LIBEXEC}"`head -1 conf-libexec`"}g \
 	> zfailures
 
@@ -4103,37 +4107,37 @@ warn-auto.sh zoverall.sh conf-qmail
 	> zoverall
 
 zrecipients: \
-warn-auto.sh zrecipients.sh conf-qmail conf-libexec
+warn-auto.sh zrecipients.sh conf-prefix conf-libexec
 	cat warn-auto.sh zrecipients.sh \
-	| sed s}QMAIL}"`head -1 conf-qmail`"}g \
+	| sed s}PREFIX}"`head -1 conf-prefix`"}g \
 	| sed s}LIBEXEC}"`head -1 conf-libexec`"}g \
 	> zrecipients
 
 zrhosts: \
-warn-auto.sh zrhosts.sh conf-qmail conf-libexec
+warn-auto.sh zrhosts.sh conf-prefix conf-libexec
 	cat warn-auto.sh zrhosts.sh \
-	| sed s}QMAIL}"`head -1 conf-qmail`"}g \
+	| sed s}PREFIX}"`head -1 conf-prefix`"}g \
 	| sed s}LIBEXEC}"`head -1 conf-libexec`"}g \
 	> zrhosts
 
 zsmtp: \
-warn-auto.sh zsmtp.sh conf-qmail conf-libexec
+warn-auto.sh zsmtp.sh conf-prefix conf-libexec
 	cat warn-auto.sh zsmtp.sh \
-	| sed s}QMAIL}"`head -1 conf-qmail`"}g \
+	| sed s}PREFIX}"`head -1 conf-prefix`"}g \
 	| sed s}LIBEXEC}"`head -1 conf-libexec`"}g \
 	> zsmtp
 
 zrxdelay: \
-warn-auto.sh zrxdelay.sh conf-qmail conf-libexec
+warn-auto.sh zrxdelay.sh conf-prefix conf-libexec
 	cat warn-auto.sh zrxdelay.sh \
-	| sed s}QMAIL}"`head -1 conf-qmail`"}g \
+	| sed s}PREFIX}"`head -1 conf-prefix`"}g \
 	| sed s}LIBEXEC}"`head -1 conf-libexec`"}g \
 	> zrxdelay
 
 zsenders: \
-warn-auto.sh zsenders.sh conf-qmail conf-libexec
+warn-auto.sh zsenders.sh conf-prefix conf-libexec
 	cat warn-auto.sh zsenders.sh \
-	| sed s}QMAIL}"`head -1 conf-qmail`"}g \
+	| sed s}PREFIX}"`head -1 conf-prefix`"}g \
 	| sed s}LIBEXEC}"`head -1 conf-libexec`"}g \
 	> zsenders
 
@@ -4144,22 +4148,23 @@ warn-auto.sh zsendmail.sh conf-qmail
 	> zsendmail
 
 zsuccesses: \
-warn-auto.sh zsuccesses.sh conf-qmail
+warn-auto.sh zsuccesses.sh conf-prefix conf-libexec
 	cat warn-auto.sh zsuccesses.sh \
-	| sed s}QMAIL}"`head -1 conf-qmail`"}g \
+	| sed s}LIBEXEC}"`head -1 conf-libexec`"}g \
+	| sed s}PREFIX}"`head -1 conf-prefix`"}g \
 	> zsuccesses
 
 zsuids: \
-warn-auto.sh zsuids.sh conf-qmail conf-libexec
+warn-auto.sh zsuids.sh conf-prefix conf-libexec
 	cat warn-auto.sh zsuids.sh \
-	| sed s}QMAIL}"`head -1 conf-qmail`"}g \
+	| sed s}PREFIX}"`head -1 conf-prefix`"}g \
 	| sed s}LIBEXEC}"`head -1 conf-libexec`"}g \
 	> zsuids
 
 multilog-matchup: \
-warn-auto.sh multilog-matchup.sh conf-qmail
+warn-auto.sh multilog-matchup.sh conf-prefix
 	cat warn-auto.sh multilog-matchup.sh \
-	| sed s}QMAIL}"`head -1 conf-qmail`"}g \
+	| sed s}PREFIX}"`head -1 conf-prefix`"}g \
 	> multilog-matchup
 
 smtp-matchup: \
@@ -4248,16 +4253,17 @@ warn-auto.sh rspamsdomain.sh conf-qmail conf-sysconfdir
 	> rspamsdomain
 
 zspam: \
-warn-auto.sh zspam.sh conf-qmail conf-libexec
+warn-auto.sh zspam.sh conf-prefix conf-libexec
 	cat warn-auto.sh zspam.sh \
-	| sed s}QMAIL}"`head -1 conf-qmail`"}g \
+	| sed s}PREFIX}"`head -1 conf-prefix`"}g \
 	| sed s}LIBEXEC}"`head -1 conf-libexec`"}g \
 	> zspam
 
 dk-filter: \
-warn-auto.sh dk-filter.sh conf-qmail conf-sysconfdir
+warn-auto.sh dk-filter.sh conf-prefix conf-sysconfdir
 	cat warn-auto.sh dk-filter.sh \
-	| sed s}QMAILHOME}"`head -1 conf-qmail`"}g \
+	| sed s}SYSCONFDIR}"`head -1 conf-sysconfdir`"}g \
+	| sed s}PREFIX}"`head -1 conf-prefix`"}g \
 	| sed s}@controldir\@}"`head -1 conf-sysconfdir`/control"}g \
 	> dk-filter
 
@@ -5565,23 +5571,23 @@ testzero.o: compile testzero.c uint32.h scan.h strerr.h cdb_make.h subfd.h subst
 uint32.h exit.h
 	./compile testzero.c
 
-cdbmake-12: warn-auto.sh cdbmake-12.sh conf-qmail
+cdbmake-12: warn-auto.sh cdbmake-12.sh conf-prefix
 	cat warn-auto.sh cdbmake-12.sh \
-	| sed s}QMAIL}"`head -1 conf-qmail`"}g \
+	| sed s}PREFIX}"`head -1 conf-prefix`"}g \
 	> cdbmake-12
 	chmod 755 cdbmake-12
 
 cdbmake-sv: \
-warn-auto.sh cdbmake-sv.sh conf-qmail
+warn-auto.sh cdbmake-sv.sh conf-prefix
 	cat warn-auto.sh cdbmake-sv.sh \
-	| sed s}QMAIL}"`head -1 conf-qmail`"}g \
+	| sed s}PREFIX}"`head -1 conf-prefix`"}g \
 	> cdbmake-sv
 	chmod 755 cdbmake-sv
 
 cdbgetm: \
-warn-auto.sh cdbgetm.sh conf-qmail
+warn-auto.sh cdbgetm.sh conf-prefix
 	cat warn-auto.sh cdbgetm.sh \
-	| sed s}QMAIL}"`head -1 conf-qmail`"}g \
+	| sed s}PREFIX}"`head -1 conf-prefix`"}g \
 	> cdbgetm
 	chmod 755 cdbgetm
 
@@ -5832,9 +5838,9 @@ uint64.h base64.h qmail.h auto_control.h
 	./compile surblfilter.c
 
 surblqueue: \
-warn-auto.sh surblqueue.sh conf-qmail
+warn-auto.sh surblqueue.sh conf-prefix
 	cat warn-auto.sh surblqueue.sh \
-	| sed s}QMAIL}"`head -1 conf-qmail`"}g \
+	| sed s}PREFIX}"`head -1 conf-prefix`"}g \
 	> surblqueue
 	chmod 755 surblqueue
 
