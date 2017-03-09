@@ -1,5 +1,8 @@
 /*
  * $Log: smtpd.c,v $
+ * Revision 1.190  2017-03-09 14:36:39+05:30  Cprogrammer
+ * added comments to describe open_control_once() function.
+ *
  * Revision 1.189  2016-05-17 19:44:58+05:30  Cprogrammer
  * use auto_control, set by conf-control to set control directory
  *
@@ -731,7 +734,7 @@ int             secure_auth = 0;
 int             ssl_rfd = -1, ssl_wfd = -1;	/*- SSL_get_Xfd() are broken */
 char           *servercert, *clientca, *clientcrl;
 #endif
-char           *revision = "$Revision: 1.189 $";
+char           *revision = "$Revision: 1.190 $";
 char           *protocol = "SMTP";
 stralloc        proto = { 0 };
 static stralloc Revision = { 0 };
@@ -2911,6 +2914,7 @@ open_control_once(int *open_flag, int *open_flagp, char **fn, char **fn_p, char 
 		if (fn_p && *fn_p)
 			*fn_p = 0;
 	}
+	/*- open the control file e.g. badrcptto */
 	if ((open_flag && !*open_flag && fn && !(*fn))) {
 		x = (envstr ? env_get(envstr) : 0);
 		if ((*open_flag = control_readfile(sfn, *fn = (x && *x ? x : cfn), 0)) == -1)
@@ -2918,6 +2922,7 @@ open_control_once(int *open_flag, int *open_flagp, char **fn, char **fn_p, char 
 		if (*open_flag && mapvar && !constmap_init(mapvar, sfn->s, sfn->len, 0))
 			die_nomem();
 	}
+	/*- open the control file having patterns e.g. badrcptpatterns */
 	if ((open_flagp && !*open_flagp && fn_p && !(*fn_p))) {
 		x = (envstr_p ? env_get(envstr_p) : 0);
 		if ((*open_flagp = control_readfile(sfn_p, *fn_p = (x && *x ? x : cfn_p), 0)) == -1)
@@ -6842,7 +6847,7 @@ addrrelay() /*- Rejection of relay probes. */
 void
 getversion_smtpd_c()
 {
-	static char    *x = "$Id: smtpd.c,v 1.189 2016-05-17 19:44:58+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: smtpd.c,v 1.190 2017-03-09 14:36:39+05:30 Cprogrammer Exp mbhangui $";
 
 #ifdef INDIMAIL
 	if (x)
