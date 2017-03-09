@@ -1,5 +1,8 @@
 #
 # $Log: cdbmake-sv.sh,v $
+# Revision 1.2  2017-03-09 16:38:04+05:30  Cprogrammer
+# FHS changes
+#
 # Revision 1.1  2008-09-16 08:22:51+05:30  Cprogrammer
 # Initial revision
 #
@@ -24,4 +27,4 @@ awk '{
 END {
     print ""
 }
-' | QMAIL/bin/cdbmake "$@"
+' | PREFIX/bin/cdbmake "$@"

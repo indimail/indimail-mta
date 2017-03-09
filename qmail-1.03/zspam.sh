@@ -1,4 +1,7 @@
 # $Log: zspam.sh,v $
+# Revision 1.7  2017-03-09 16:40:04+05:30  Cprogrammer
+# FHS changes
+#
 # Revision 1.6  2016-06-17 20:21:33+05:30  Cprogrammer
 # qmailanalog scripts moved to libexec dir
 #
@@ -34,7 +37,7 @@ One line per delivery through SPAM Filter. Information on each line:
 (
 echo spambytes spam sbytes mess host
 LIBEXEC/rspamrdomain | sort -n -r -k 1,1 -k 2,2 -k 4,4 -k 3,3
-) | QMAIL/bin/columnt
+) | PREFIX/bin/columnt
 echo
 exec 0</tmp/smtp.$$
 echo 'Sender domains SPAM filter messages sorted on spambytes and spam
@@ -50,7 +53,7 @@ One line per delivery through SPAM Filter. Information on each line:
 (
 echo spambytes spam sbytes mess host
 LIBEXEC/rspamsdomain | sort -n -r -k 1,1 -k 2,2 -k 4,4 -k 3,3
-) | QMAIL/bin/columnt
+) | PREFIX/bin/columnt
 
 echo
 exec 0</tmp/smtp.$$
@@ -70,7 +73,7 @@ One line per host/domain. Information on each line:
 (
 echo sbytes mess spam spam_pct unsure unsure_pct ham ham_pct
 LIBEXEC/rspamstat | sort -n -r -k 3,3 -k 2,2 -k 1,1
-) | QMAIL/bin/columnt
+) | PREFIX/bin/columnt
 
 echo
 exec 0</tmp/smtp.$$
@@ -84,6 +87,6 @@ echo 'Histogram of Spam Distribution
 (
 echo spamicity hist mess
 LIBEXEC/rspamhist
-) | QMAIL/bin/columnt
+) | PREFIX/bin/columnt
 
 /bin/rm -f /tmp/smtp.$$

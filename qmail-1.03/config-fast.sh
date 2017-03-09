@@ -9,7 +9,7 @@ if [ " $CONTROLDIR" = " " ] ; then
 fi
 slash=`echo $CONTROLDIR | cut -c1`
 if [ ! " $slash" = " /" ] ; then
-	cd QMAIL
+	cd SYSCONFDIR
 fi
 echo Putting "$fqdn" into "$DESTDIR"/$CONTROLDIR/me...
 echo "$fqdn" > "$DESTDIR"/$CONTROLDIR/me

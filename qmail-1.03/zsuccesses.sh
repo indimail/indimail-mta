@@ -1,5 +1,8 @@
 #
 # $Log: zsuccesses.sh,v $
+# Revision 1.6  2017-03-09 16:40:08+05:30  Cprogrammer
+# FHS changes
+#
 # Revision 1.5  2016-06-17 20:21:43+05:30  Cprogrammer
 # qmailanalog scripts moved to libexec dir
 #
@@ -25,4 +28,4 @@ One line per reason for successful delivery. Information on each line:
 (
 echo del xdelay reason
 LIBEXEC/successes | sort -k 2,2 -k 1,1
-) | QMAIL/bin/columnt | tr _ ' '
+) | PREFIX/bin/columnt | tr _ ' '

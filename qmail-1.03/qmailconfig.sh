@@ -1,5 +1,8 @@
 #
 # $Log: qmailconfig.sh,v $
+# Revision 1.10  2017-03-09 16:39:20+05:30  Cprogrammer
+# FHS changes
+#
 # Revision 1.9  2016-06-17 17:26:18+05:30  Cprogrammer
 # FHS compliance
 #
@@ -17,7 +20,7 @@
 # renamed config.sh to qmailconfig.sh
 #
 #
-# $Id: qmailconfig.sh,v 1.9 2016-06-17 17:26:18+05:30 Cprogrammer Exp mbhangui $
+# $Id: qmailconfig.sh,v 1.10 2017-03-09 16:39:20+05:30 Cprogrammer Exp mbhangui $
 #
 if [ -x ./hostname ] ; then
 	HOSTNAME_CMD=./hostname
@@ -31,7 +34,7 @@ if [ " $CONTROLDIR" = " " ] ; then
 fi
 slash=`echo $CONTROLDIR | cut -c1`
 if [ ! " $slash" = " /" ] ; then
-	cd QMAIL
+	cd SYSCONFDIR
 fi
 
 $HOSTNAME_CMD | tr '[A-Z]' '[a-z]' |

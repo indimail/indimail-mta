@@ -1,5 +1,8 @@
 #
 # $Log: zdeferrals.sh,v $
+# Revision 1.6  2017-03-09 16:39:40+05:30  Cprogrammer
+# FHS changes
+#
 # Revision 1.5  2016-06-17 20:20:26+05:30  Cprogrammer
 # qmailanalog scripts moved to libexec dir
 #
@@ -25,4 +28,4 @@ One line per reason for deferral sorted by xdelay. Information on each line:
 (
 echo del xdelay reason
 LIBEXEC/deferrals | sort -n -r -k 2,2
-) | QMAIL/bin/columnt | tr _ ' '
+) | PREFIX/bin/columnt | tr _ ' '

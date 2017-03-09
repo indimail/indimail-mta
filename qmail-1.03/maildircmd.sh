@@ -1,5 +1,8 @@
 #
 # $Log: maildircmd.sh,v $
+# Revision 1.4  2017-03-09 16:38:36+05:30  Cprogrammer
+# FHS changes
+#
 # Revision 1.3  2016-05-17 23:11:42+05:30  Cprogrammer
 # fix for configurable control directory
 #
@@ -15,7 +18,7 @@ if [ " $CONTROLDIR" = " " ] ; then
 fi
 slash=`echo $CONTROLDIR | cut -c1`
 if [ ! " $slash" = " /" ] ; then
-	cd QMAIL
+	cd SYSCONFDIR
 fi
 if [ -f "$CONTROLDIR"/queuelifetime ] ; then
 	LIFETIME=`cat "$CONTROLDIR"/queuelifetime`
@@ -23,5 +26,5 @@ else
 	LIFETIME=1209600
 fi
 exec \
-QMAIL/bin/maildirserial -b -t $LIFETIME -- "$1" "$2" \
-QMAIL/bin/serialcmd "$1" "$3"
+PREFIX/bin/maildirserial -b -t $LIFETIME -- "$1" "$2" \
+PREFIX/bin/serialcmd "$1" "$3"

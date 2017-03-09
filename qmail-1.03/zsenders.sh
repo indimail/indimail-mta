@@ -1,5 +1,8 @@
 #
 # $Log: zsenders.sh,v $
+# Revision 1.7  2017-03-09 16:39:57+05:30  Cprogrammer
+# FHS changes
+#
 # Revision 1.6  2016-06-17 20:21:08+05:30  Cprogrammer
 # qmailanalog scripts moved to libexec dir
 #
@@ -33,4 +36,4 @@ One line per sender. Information on each line:
 ( 
 echo mess bytes sbytes rbytes recips tries xdelay sender
 LIBEXEC/senders | sort -n -r -k 1,1 -k 2,2 -k 3,3 -k 4,4 -k 6,6
-) | QMAIL/bin/columnt
+) | PREFIX/bin/columnt

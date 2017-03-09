@@ -1,5 +1,8 @@
 #
 # $Log: zfailures.sh,v $
+# Revision 1.6  2017-03-09 16:39:44+05:30  Cprogrammer
+# FHS changes
+#
 # Revision 1.5  2016-06-17 20:20:34+05:30  Cprogrammer
 # qmailanalog scripts moved to libexec dir
 #
@@ -25,4 +28,4 @@ One line per reason for delivery failure. Information on each line:
 (
 echo del xdelay reason
 LIBEXEC/failures | sort -n -r -k 2,2
-) | QMAIL/bin/columnt | tr _ ' '
+) | PREFIX/bin/columnt | tr _ ' '

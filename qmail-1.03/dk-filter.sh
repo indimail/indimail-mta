@@ -1,5 +1,8 @@
 #
 # $Log: dk-filter.sh,v $
+# Revision 1.20  2017-03-09 16:38:15+05:30  Cprogrammer
+# FHS changes
+#
 # Revision 1.19  2016-05-17 23:11:42+05:30  Cprogrammer
 # fix for configurable control directory
 #
@@ -60,7 +63,7 @@
 # Revision 1.1  2009-04-02 14:52:27+05:30  Cprogrammer
 # Initial revision
 #
-# $Id: dk-filter.sh,v 1.19 2016-05-17 23:11:42+05:30 Cprogrammer Exp mbhangui $
+# $Id: dk-filter.sh,v 1.20 2017-03-09 16:38:15+05:30 Cprogrammer Exp mbhangui $
 #
 if [ -z "$QMAILREMOTE" -a -z "$QMAILLOCAL" ]; then
 	echo "dk-filter should be run by spawn-filter" 1>&2
@@ -75,9 +78,9 @@ if [ " $CONTROLDIR" = " " ] ; then
 fi
 slash=`echo $CONTROLDIR | cut -c1`
 if [ ! " $slash" = " /" ] ; then
-	cd QMAILHOME
+	cd SYSCONFDIR
 fi
-if [ -x QMAILHOME/bin/dktest -a -z "$DKVERIFY" ] ; then
+if [ -x PREFIX/bin/dktest -a -z "$DKVERIFY" ] ; then
 	if [ -z "$DKSIGN" ] ; then
 		DKSIGN=$CONTROLDIR/domainkeys/%/default
 		dksign=2
@@ -85,7 +88,7 @@ if [ -x QMAILHOME/bin/dktest -a -z "$DKVERIFY" ] ; then
 		dksign=2
 	fi
 fi
-if [ -x QMAILHOME/bin/dkim -a -z "$DKIMVERIFY" ] ; then
+if [ -x PREFIX/bin/dkim -a -z "$DKIMVERIFY" ] ; then
 	if [ -z "$DKIMSIGN" ] ; then
 		DKIMSIGN=$CONTROLDIR/domainkeys/%/default
 		dkimsign=2
@@ -94,8 +97,8 @@ if [ -x QMAILHOME/bin/dkim -a -z "$DKIMVERIFY" ] ; then
 	fi
 fi
 if [ ! -z "$DKSIGN" ] ; then
-	if [ ! -f QMAILHOME/bin/dktest ] ; then
-		echo "QMAILHOME/bin/dktest: No such file or directory" 1>&2
+	if [ ! -f PREFIX/bin/dktest ] ; then
+		echo "PREFIX/bin/dktest: No such file or directory" 1>&2
 		exit 1
 	fi
 	percent_found=0
@@ -124,8 +127,8 @@ if [ ! -z "$DKSIGN" ] ; then
 	dkselector=`basename $dkkeyfn`
 fi
 if [ ! -z "$DKIMSIGN" ] ; then
-	if [ ! -f QMAILHOME/bin/dkim ] ; then
-		echo "QMAILHOME/bin/dkim: No such file or directory" 1>&2
+	if [ ! -f PREFIX/bin/dkim ] ; then
+		echo "PREFIX/bin/dkim: No such file or directory" 1>&2
 		exit 1
 	fi
 	percent_found=0
@@ -154,15 +157,15 @@ if [ ! -z "$DKIMSIGN" ] ; then
 	dkimselector=`basename $dkimkeyfn`
 fi
 if [ ! -z "$DKVERIFY" ] ; then
-	if [ ! -f QMAILHOME/bin/dktest ] ; then
-		echo "QMAILHOME/bin/dktest: No such file or directory" 1>&2
+	if [ ! -f PREFIX/bin/dktest ] ; then
+		echo "PREFIX/bin/dktest: No such file or directory" 1>&2
 		exit 1
 	fi
 	dkverify=1
 fi
 if [ ! -z "$DKIMVERIFY" ] ; then
-	if [ ! -f QMAILHOME/bin/dkim ] ; then
-		echo "QMAILHOME/bin/dkim: No such file or directory" 1>&2
+	if [ ! -f PREFIX/bin/dkim ] ; then
+		echo "PREFIX/bin/dkim: No such file or directory" 1>&2
 		exit 1
 	fi
 	dkimverify=1
@@ -176,7 +179,7 @@ if [ $dkimsign -eq 1 ] ; then
 	zopt=0
 	yopt=0
 	sopt=0
-	dkimopts="QMAILHOME/bin/dkim"
+	dkimopts="PREFIX/bin/dkim"
 	while [ $1 != -- ]
 	do
 		case $1 in
@@ -261,7 +264,7 @@ if [ $dksign -eq 1 ] ; then
 	#dktest: [-f] [-b advice_length] [-c nofws|simple] [-v|-s selector] [-h] [-t#] [-r] [-T][-d dnsrecord]
 	# DKSIGNOPTIONS="-z 1 -b 2 -x - -y $dkimselector -s $dkimkeyfn"
 	set -- `getopt hrb:c:s: $DKSIGNOPTIONS`
-	dkopts="QMAILHOME/bin/dktest"
+	dkopts="PREFIX/bin/dktest"
 	sopt=0
 	while [ $1 != -- ]
 	do
@@ -295,7 +298,7 @@ if [ $dksign -eq 1 ] ; then
 		dkopts="$dkopts -s $dkkeyfn"
 	fi
 	exec 0</tmp/dk.$$
-	#QMAILHOME/bin/dktest -h -s $dkkeyfn
+	#PREFIX/bin/dktest -h -s $dkkeyfn
 	eval $dkopts
 	exit_val=$?
 	# allow error due to duplicate DomainKey-Header
@@ -314,7 +317,7 @@ if [ $dkimverify -eq 1 ] ; then
 		practice=2
 	fi
 	exec 0</tmp/dk.$$
-	QMAILHOME/bin/dkim -p $practice -v
+	PREFIX/bin/dkim -p $practice -v
 	ret=$?
 	case $ret in
 		14)
@@ -333,7 +336,7 @@ if [ $dkimverify -eq 1 ] ; then
 fi
 if [ $dkverify -eq 1 ] ; then
 	exec 0</tmp/dk.$$
-	QMAILHOME/bin/dktest -v
+	PREFIX/bin/dktest -v
 	if [ $? -ne 0 ] ; then
 		/bin/rm -f /tmp/dk.$$
 		exit 1

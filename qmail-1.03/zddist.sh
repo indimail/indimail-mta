@@ -1,5 +1,8 @@
 #
 # $Log: zddist.sh,v $
+# Revision 1.4  2017-03-09 16:39:37+05:30  Cprogrammer
+# FHS changes
+#
 # Revision 1.3  2016-06-17 20:19:44+05:30  Cprogrammer
 # qmailanalog scripts moved to libexec dir
 #
@@ -18,4 +21,4 @@ all happened within doneby seconds. The average ddelay was avg.
 (
 echo doneby avg pct
 LIBEXEC/ddist |sort -n -r
-) | QMAIL/bin/columnt
+) | PREFIX/bin/columnt

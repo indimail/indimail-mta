@@ -1,4 +1,7 @@
 # $Log: svscanboot.sh,v $
+# Revision 1.15  2017-03-09 16:39:32+05:30  Cprogrammer
+# FHS changes
+#
 # Revision 1.14  2016-06-03 09:58:42+05:30  Cprogrammer
 # moved svscan to sbin
 #
@@ -40,7 +43,7 @@
 # Revision 1.2  2002-09-26 20:56:02+05:30  Cprogrammer
 # made service directory configurable
 #
-# $Id: svscanboot.sh,v 1.14 2016-06-03 09:58:42+05:30 Cprogrammer Exp mbhangui $
+# $Id: svscanboot.sh,v 1.15 2017-03-09 16:39:32+05:30 Cprogrammer Exp mbhangui $
 
 PATH=PREFIX/bin:PREFIX/sbin:/bin:/sbin:/usr/bin:/usr/sbin
 
@@ -53,7 +56,7 @@ if [ " $CONTROLDIR" = " " ] ; then
 fi
 slash=`echo $CONTROLDIR | cut -c1`
 if [ ! " $slash" = " /" ] ; then
-	cd QMAIL
+	cd SYSCONFDIR
 fi
 if [ -f  $CONTROLDIR/scaninterval ] ; then
 	SCANINTERVAL=`cat $CONTROLDIR/scaninterval`
