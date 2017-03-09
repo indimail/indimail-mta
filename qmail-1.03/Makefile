@@ -3667,6 +3667,8 @@ alloc_re.o case_diffs.o case_diffb.o case_lowers.o env.o envread.o auto_qmail.o 
 open_read.o scan_ulong.o variables.o control.o quote.o tai_now.o fmt_ulong.o auto_control.o \
 ip.o ipme.o ipalloc.o scan_xlong.o socket_v4mappedprefix.o socket_v6any.o fmt_hexbytes.o \
 datetime.o date822fmt.o datetime_un.o fmt_uint.o fmt_uint0.o now.o fmt_xlong.o \
+qregex.o constmap.o cdb_seek.o cdb_unpack.o cdb_hash.o matchregex.o \
+wildmat.o case_lowerb.o \
 fmt_str.o myctime.o sgetopt.o getln.a mess822.a strerr.a substdio.a stralloc.a \
 str.a
 	./load autoresponder alloc.o error.o error_str.o alloc_re.o auto_control.o \
@@ -3675,13 +3677,16 @@ str.a
 	quote.o tai_now.o fmt_ulong.o fmt_str.o myctime.o sgetopt.o \
 	datetime.o date822fmt.o datetime_un.o fmt_uint.o fmt_uint0.o fmt_xlong.o \
 	ip.o ipme.o ipalloc.o scan_xlong.o socket_v4mappedprefix.o socket_v6any.o \
+	qregex.o constmap.o cdb_seek.o cdb_unpack.o cdb_hash.o matchregex.o \
+	wildmat.o case_lowerb.o \
 	getln.a mess822.a strerr.a substdio.a stralloc.a \
 	str.a
 
 autoresponder.o: \
 compile autoresponder.c substdio.h subfd.h mess822.h date822fmt.h \
 getln.h stralloc.h env.h case.h auto_qmail.h str.h strerr.h control.h \
-error.h alloc.h ip.h byte.h ipme.h fmt.h quote.h tai.h sgetopt.h conf-mime
+constmap.h error.h alloc.h ip.h byte.h ipme.h fmt.h quote.h tai.h \
+qregex.h sgetopt.h conf-mime
 	./compile -DMAKE_SEEKABLE -DQUOTE `grep -h -v "^#" conf-mime` autoresponder.c
 
 autoresponder.0: \
@@ -4914,7 +4919,7 @@ Makefile-cert: conf-qmail Makefile-cert.mk
 
 update_tmprsadh: conf-qmail update_tmprsadh.sh conf-sysconfdir
 	@cat update_tmprsadh.sh\
-	| sed s}QMAIL}"`head -1 conf-qmail`"}g \
+	| sed s}@sysconfdir\@}"`head -1 conf-sysconfdir`"}g \
 	| sed s}@controldir\@}"`head -1 conf-sysconfdir`/control"}g \
 	> $@
 
