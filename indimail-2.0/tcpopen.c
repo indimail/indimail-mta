@@ -115,11 +115,11 @@ tcpopen(host, service, port) /*- Thanks to Richard's Steven */
 	if (host && *host && ((strchr(host, '/') || ((dir = Dirname(host)) && !access(dir, F_OK)))))
 	{
 		if ((fd = socket (AF_UNIX, SOCK_STREAM, 0)) == -1)
-        	return -1;
-    	unixaddr.sun_family = AF_UNIX;
-    	scopy (unixaddr.sun_path, host, sizeof(unixaddr.sun_path));
-    	if (connect (fd, (struct sockaddr *) &unixaddr, sizeof(struct sockaddr_un) ) == -1)
-        	return -1;
+			return -1;
+		unixaddr.sun_family = AF_UNIX;
+		scopy (unixaddr.sun_path, host, sizeof(unixaddr.sun_path));
+		if (connect(fd, (struct sockaddr *) &unixaddr, sizeof(struct sockaddr_un)) == -1)
+			return -1;
 		return(fd);
 	}
 #ifdef sun
@@ -230,8 +230,8 @@ tcpopen(host, service, port) /*- Thanks to Richard's Steven */
 					break;
 				}
 			} /*- for (errno = 0;;) */
-	 		if (!retval || errno != ECONNREFUSED)
-	 			break;
+			if (!retval || errno != ECONNREFUSED)
+				break;
 		} /*- for (;;) */
 		/*- try the next address record in list */
 	} /*- for (res = res0; res && fd == -1; res = res->ai_next) */
@@ -343,8 +343,8 @@ tcpopen(host, service, port) /*- Thanks to Richard's Steven */
 				return (-1);
 			}
 		} /*- for (errno = 0;;) */
-	 	if (!retval)
-	 		break;
+		if (!retval)
+			break;
 	} /*- for (;;) */
 #endif /*- #ifdef ENABLE_IPV6 */
 	linger.l_onoff = 1;
