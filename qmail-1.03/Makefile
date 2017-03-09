@@ -818,6 +818,7 @@ upstart:upstart.in conf-prefix conf-sysconfdir
 	echo "# WARNING: This file was auto-generated. Do not edit!"; \
 	cat upstart.in \
 	| sed s}PREFIX}"`head -1 conf-prefix`"}g \
+	| sed s}SYSCONFDIR}"`head -1 conf-sysconfdir`"}g \
 	| sed s}@controldir\@}"`head -1 conf-sysconfdir`/control"}g \
 	) > upstart
 
@@ -4918,9 +4919,9 @@ systime.h: compile trysystime.c trytime.c
 cert cert-req: Makefile-cert
 	@$(MAKE) -sf $< $@
 
-Makefile-cert: conf-qmail Makefile-cert.mk
+Makefile-cert: conf-sysconfdir Makefile-cert.mk
 	@cat Makefile-cert.mk \
-	| sed s}QMAIL}"`head -1 conf-qmail`"}g \
+	| sed s}SYSCONFDIR}"`head -1 conf-sysconfdir`"}g \
 	> $@
 
 update_tmprsadh: conf-qmail update_tmprsadh.sh conf-sysconfdir

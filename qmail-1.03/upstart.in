@@ -1,4 +1,7 @@
 # $Log: upstart.in,v $
+# Revision 1.8  2017-03-09 21:54:17+05:30  Cprogrammer
+# FHS compliance
+#
 # Revision 1.7  2016-06-03 09:58:58+05:30  Cprogrammer
 # moved svscan to sbin
 #
@@ -26,10 +29,10 @@
 # to stop  - initctl emit qmailstop
 # start svscan
 # stop  svscan
-# $Id: upstart.in,v 1.7 2016-06-03 09:58:58+05:30 Cprogrammer Exp mbhangui $
+# $Id: upstart.in,v 1.8 2017-03-09 21:54:17+05:30 Cprogrammer Exp mbhangui $
 description "Start IndiMail Services"
 author      "$Author: Cprogrammer $"
-version     "$Revision: 1.7 $"
+version     "$Revision: 1.8 $"
 
 umask 022
 
@@ -71,7 +74,7 @@ script
 	fi
 	slash=`echo $CONTROLDIR | cut -c1`
 	if [ ! " $slash" = " /" ] ; then
-		cd QMAIL
+		cd SYSCONFDIR
 	fi
 	if [ -f  $CONTROLDIR/scaninterval ] ; then
 		SCANINTERVAL=`cat $CONTROLDIR/scaninterval`
