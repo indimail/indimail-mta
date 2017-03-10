@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-remote.c,v $
+ * Revision 1.95  2017-03-10 17:58:59+05:30  Cprogrammer
+ * added back SSLv23 method
+ *
  * Revision 1.94  2017-03-10 11:29:37+05:30  Cprogrammer
  * made TLS client method configurable using control file tlsclientmethod
  *
@@ -1340,6 +1343,9 @@ tls_init()
 		temp_nomem();
 	if (control_rldef(&ssl_option, tlsFilename.s, 0, "TLSv1") != 1)
 		temp_control();
+	if (str_equal( ssl_option.s, "SSLv23"))
+		method = 2;
+	else
 	if (str_equal(ssl_option.s, "SSLv3"))
 		method = 3;
 	else
@@ -1433,6 +1439,9 @@ tls_init()
 		}
 	}
 	SSL_library_init();
+	if (method == 2 && (ctx = SSL_CTX_new(SSLv23_client_method())))
+		method_fail = 0;
+	else
 	if (method == 3 && (ctx=SSL_CTX_new(SSLv3_client_method())))
 		method_fail = 0;
 	else
@@ -1443,9 +1452,6 @@ tls_init()
 		method_fail = 0;
 	else
 	if (method == 6 && (ctx=SSL_CTX_new(TLSv1_2_client_method())))
-		method_fail = 0;
-	else /*- for future use */
-	if (method && (ctx = SSL_CTX_new(SSLv23_client_method())))
 		method_fail = 0;
 	if (method_fail) 
 	{
@@ -3196,7 +3202,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_remote_c()
 {
-	static char    *x = "$Id: qmail-remote.c,v 1.94 2017-03-10 11:29:37+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-remote.c,v 1.95 2017-03-10 17:58:59+05:30 Cprogrammer Exp mbhangui $";
 	x=sccsidauthcramh;
 	x=sccsidauthdigestmd5h;
 	x++;
