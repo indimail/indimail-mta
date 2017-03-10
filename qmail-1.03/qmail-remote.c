@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-remote.c,v $
+ * Revision 1.94  2017-03-10 11:29:37+05:30  Cprogrammer
+ * made TLS client method configurable using control file tlsclientmethod
+ *
  * Revision 1.93  2016-05-17 19:44:58+05:30  Cprogrammer
  * use auto_control, set by conf-control to set control directory
  *
@@ -1318,64 +1321,90 @@ tls_init()
 	char           *t;
 	SSL            *myssl;
 	SSL_CTX        *ctx;
-	stralloc        saciphers = {0}, servercert = {0}, clientcert = {0};
+	stralloc        saciphers = {0}, tlsFilename = {0}, clientcert = {0};
+	stralloc        ssl_option = {0};
+	int             method = 4; /* (1..2 unused) [1..3] = ssl[1..3], 4 = tls1, 5=tls1.1, 6=tls1.2 */
+	int             method_fail = 1;
 
 	if (!controldir)
 	{
 		if (!(controldir = env_get("CONTROLDIR")))
 			controldir = auto_control;
 	}
-	if (!stralloc_copys(&servercert, controldir))
+
+	if (!stralloc_copys(&tlsFilename, controldir))
 		temp_nomem();
-	if (!stralloc_catb(&servercert, "/clientcert.pem", 15))
+	if (!stralloc_catb(&tlsFilename, "/tlsclientmethod", 16))
 		temp_nomem();
-	if (!stralloc_0(&servercert))
+	if (!stralloc_0(&tlsFilename))
 		temp_nomem();
-	if (access(servercert.s, F_OK))
+	if (control_rldef(&ssl_option, tlsFilename.s, 0, "TLSv1") != 1)
+		temp_control();
+	if (str_equal(ssl_option.s, "SSLv3"))
+		method = 3;
+	else
+	if (str_equal(ssl_option.s, "TLSv1"))
+		method = 4;
+	else
+	if (str_equal(ssl_option.s, "TLSv1_1"))
+		method = 5;
+	else
+	if (str_equal(ssl_option.s, "TLSv1_2"))
+		method = 6;
+	if (!stralloc_copys(&tlsFilename, controldir))
+		temp_nomem();
+	if (!stralloc_catb(&tlsFilename, "/clientcert.pem", 15))
+		temp_nomem();
+	if (!stralloc_0(&tlsFilename))
+		temp_nomem();
+	if (access(tlsFilename.s, F_OK)) {
+		alloc_free(tlsFilename.s);
 		return (0);
+	}
 	if (partner_fqdn)
 	{
 		struct stat     st;
-		if (!stralloc_copys(&servercert, controldir))
+		if (!stralloc_copys(&tlsFilename, controldir))
 			temp_nomem();
-		if (!stralloc_catb(&servercert, "/tlshosts/", 10))
+		if (!stralloc_catb(&tlsFilename, "/tlshosts/", 10))
 			temp_nomem();
-		if (!stralloc_catb(&servercert, partner_fqdn, str_len(partner_fqdn)))
+		if (!stralloc_catb(&tlsFilename, partner_fqdn, str_len(partner_fqdn)))
 			temp_nomem();
-		if (!stralloc_catb(&servercert, ".pem", 4))
+		if (!stralloc_catb(&tlsFilename, ".pem", 4))
 			temp_nomem();
-		if (!stralloc_0(&servercert))
+		if (!stralloc_0(&tlsFilename))
 			temp_nomem();
-		if (stat(servercert.s, &st))
+		if (stat(tlsFilename.s, &st))
 		{
 			needtlsauth = 0;
-			if (!stralloc_copys(&servercert, controldir))
+			if (!stralloc_copys(&tlsFilename, controldir))
 				temp_nomem();
-			if (!stralloc_catb(&servercert, "/notlshosts/", 12))
+			if (!stralloc_catb(&tlsFilename, "/notlshosts/", 12))
 				temp_nomem();
-			if (!stralloc_catb(&servercert, partner_fqdn, str_len(partner_fqdn) + 1))
+			if (!stralloc_catb(&tlsFilename, partner_fqdn, str_len(partner_fqdn) + 1))
 				temp_nomem();
-			if (!stralloc_0(&servercert))
+			if (!stralloc_0(&tlsFilename))
 				temp_nomem();
-			if (!stat(servercert.s, &st))
+			if (!stat(tlsFilename.s, &st))
 			{
-				alloc_free(servercert.s);
+				alloc_free(tlsFilename.s);
 				return (0);
 			}
-			if (!stralloc_copys(&servercert, controldir))
+			if (!stralloc_copys(&tlsFilename, controldir))
 				temp_nomem();
-			if (!stralloc_catb(&servercert, "/tlshosts/exhaustivelist", 24))
+			if (!stralloc_catb(&tlsFilename, "/tlshosts/exhaustivelist", 24))
 				temp_nomem();
-			if (!stralloc_0(&servercert))
+			if (!stralloc_0(&tlsFilename))
 				temp_nomem();
-			if (!stat(servercert.s, &st))
+			if (!stat(tlsFilename.s, &st))
 			{
-				alloc_free(servercert.s);
+				alloc_free(tlsFilename.s);
 				return 0;
 			}
 		} else
 			needtlsauth = 1;
 	}
+
 	if (!smtps)
 	{
 		stralloc       *sa = ehlokw.sa;
@@ -1388,16 +1417,15 @@ tls_init()
 		{
 			if (!needtlsauth)
 			{
-				if (servercert.s)
-					alloc_free(servercert.s);
+				alloc_free(tlsFilename.s);
 				return 0;
 			}
 			out("ZNo TLS achieved while ");
-			out(servercert.s);
+			out(tlsFilename.s);
 			out(" exists");
 			if (!stralloc_copyb(&smtptext, "No TLS achieved while ", 22))
 				temp_nomem();
-			if (!stralloc_cats(&smtptext, servercert.s))
+			if (!stralloc_cats(&smtptext, tlsFilename.s))
 				temp_nomem();
 			if (!stralloc_catb(&smtptext, " exists", 7))
 				temp_nomem();
@@ -1405,12 +1433,25 @@ tls_init()
 		}
 	}
 	SSL_library_init();
-	if (!(ctx = SSL_CTX_new(SSLv23_client_method())))
+	if (method == 3 && (ctx=SSL_CTX_new(SSLv3_client_method())))
+		method_fail = 0;
+	else
+	if (method == 4 && (ctx=SSL_CTX_new(TLSv1_client_method())))
+		method_fail = 0;
+	else
+	if (method == 5 && (ctx=SSL_CTX_new(TLSv1_1_client_method())))
+		method_fail = 0;
+	else
+	if (method == 6 && (ctx=SSL_CTX_new(TLSv1_2_client_method())))
+		method_fail = 0;
+	else /*- for future use */
+	if (method && (ctx = SSL_CTX_new(SSLv23_client_method())))
+		method_fail = 0;
+	if (method_fail) 
 	{
 		if (!smtps && !needtlsauth)
 		{
-			if (servercert.s)
-				alloc_free(servercert.s);
+			alloc_free(tlsFilename.s);
 			return 0;
 		}
 		t = (char *) ssl_error();
@@ -1423,22 +1464,20 @@ tls_init()
 
 	if (needtlsauth)
 	{
-		if (!SSL_CTX_load_verify_locations(ctx, servercert.s, NULL))
+		if (!SSL_CTX_load_verify_locations(ctx, tlsFilename.s, NULL))
 		{
 			t = (char *) ssl_error();
 			SSL_CTX_free(ctx);
 			out("ZTLS unable to load ");
 			if (!stralloc_copyb(&smtptext, "TLS unable to load ", 19))
 				temp_nomem();
-			if (!stralloc_cats(&smtptext, servercert.s))
+			if (!stralloc_cats(&smtptext, tlsFilename.s))
 				temp_nomem();
 			if (!stralloc_catb(&smtptext, ": ", 2))
 				temp_nomem();
 			if (!stralloc_cats(&smtptext, t))
 				temp_nomem();
-			if (servercert.s)
-				alloc_free(servercert.s);
-			tls_quit(servercert.s, t);
+			tls_quit(tlsFilename.s, t);
 		}
 		/*
 		 * set the callback here; SSL_set_verify didn't work before 0.9.6c 
@@ -1465,12 +1504,9 @@ tls_init()
 		SSL_CTX_free(ctx);
 		if (!smtps && !needtlsauth)
 		{
-			if (servercert.s)
-				alloc_free(servercert.s);
+			alloc_free(tlsFilename.s);
 			return 0;
 		}
-		if (servercert.s)
-			alloc_free(servercert.s);
 		if (!stralloc_copyb(&smtptext, "TLS error initializing ssl: ", 28))
 			temp_nomem();
 		if (!stralloc_cats(&smtptext, t))
@@ -1514,16 +1550,15 @@ tls_init()
 			SSL_free(myssl);
 			if (!needtlsauth)
 			{
-				if (servercert.s)
-					alloc_free(servercert.s);
+				alloc_free(tlsFilename.s);
 				return 0;
 			}
 			out("ZSTARTTLS rejected while ");
-			out(servercert.s);
+			out(tlsFilename.s);
 			out(" exists");
 			if (!stralloc_copyb(&smtptext, "STARTTLS rejected while ", 24))
 				temp_nomem();
-			if (!stralloc_cats(&smtptext, servercert.s))
+			if (!stralloc_cats(&smtptext, tlsFilename.s))
 				temp_nomem();
 			if (!stralloc_catb(&smtptext, " exists", 7))
 				temp_nomem();
@@ -1533,8 +1568,6 @@ tls_init()
 	ssl = myssl;
 	if (ssl_timeoutconn(timeout, smtpfd, smtpfd, ssl) <= 0)
 	{
-		if (servercert.s)
-			alloc_free(servercert.s);
 		t = (char *) ssl_error_str();
 		if (!stralloc_copyb(&smtptext, "TLS connect failed: ", 20))
 			temp_nomem();
@@ -1551,20 +1584,17 @@ tls_init()
 		if (r != X509_V_OK)
 		{
 			out("ZTLS unable to verify server with ");
-			if (servercert.s)
-				alloc_free(servercert.s);
 			t = (char *) X509_verify_cert_error_string(r);
 			if (!stralloc_copyb(&smtptext, "TLS unable to verify server with ", 33))
 				temp_nomem();
-			if (!stralloc_cats(&smtptext, servercert.s))
+			if (!stralloc_cats(&smtptext, tlsFilename.s))
 				temp_nomem();
 			if (!stralloc_catb(&smtptext, ": ", 2))
 				temp_nomem();
 			if (!stralloc_cats(&smtptext, t))
 				temp_nomem();
-			tls_quit(servercert.s, t);
+			tls_quit(tlsFilename.s, t);
 		}
-		alloc_free(servercert.s);
 		if (!(peercert = SSL_get_peer_certificate(ssl)))
 		{
 			out("ZTLS unable to verify server ");
@@ -1642,6 +1672,7 @@ tls_init()
 		}
 		X509_free(peercert);
 	}
+	alloc_free(tlsFilename.s);
 	if (smtps && (code = smtpcode()) != 220)
 		quit("ZTLS Connected to ", " but greeting failed", code, -1);
 	return 1;
@@ -3165,7 +3196,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_remote_c()
 {
-	static char    *x = "$Id: qmail-remote.c,v 1.93 2016-05-17 19:44:58+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-remote.c,v 1.94 2017-03-10 11:29:37+05:30 Cprogrammer Exp mbhangui $";
 	x=sccsidauthcramh;
 	x=sccsidauthdigestmd5h;
 	x++;
