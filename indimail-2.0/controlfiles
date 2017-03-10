@@ -114,3 +114,6 @@ greylist.white
 domainqueue
 queue_base
 dnsbllist
+maxdeliveredto
+tlsclientmethod
+tlsservermethod
