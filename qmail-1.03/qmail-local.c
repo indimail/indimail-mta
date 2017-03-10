@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-local.c,v $
+ * Revision 1.28  2017-03-10 11:26:36+05:30  Cprogrammer
+ * no of duplicate Delivered-To configurable in maxdeliveredto control file
+ *
  * Revision 1.27  2015-08-24 19:07:43+05:30  Cprogrammer
  * moved fmt_xlong() to separate source fmt_xlong.c
  *
@@ -635,11 +638,13 @@ mailforward(char **recips)
 void
 bouncexf()
 {
-	int             match;
+	int             match, matches = 0, maxdeliveredto;
 	substdio        ss;
 
 	if (seek_begin(0) == -1)
 		temp_rewind();
+	if (control_readint(&maxdeliveredto, "maxdeliveredto") == -1)
+		strerr_die1x(111, "Unable to read control file maxdeliveredto. (#4.3.0)");
 	substdio_fdbuf(&ss, read, 0, buf, sizeof(buf));
 	for (;;)
 	{
@@ -649,9 +654,10 @@ bouncexf()
 			break;
 		if (messline.len <= 1)
 			break;
-		if (messline.len == dtline.len)
-			if (!str_diffn(messline.s, dtline.s, dtline.len))
-				strerr_die1x(100, "This message is looping: it already has my Delivered-To line. (#5.4.6)");
+		if (messline.len == dtline.len && !str_diffn(messline.s, dtline.s, dtline.len))
+			matches++;
+		if (maxdeliveredto > -1 && matches > maxdeliveredto)
+			strerr_die1x(100, "This message is looping: it already has my Delivered-To line. (#5.4.6)");
 	}
 }
 
@@ -1260,7 +1266,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_local_c()
 {
-	static char    *x = "$Id: qmail-local.c,v 1.27 2015-08-24 19:07:43+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-local.c,v 1.28 2017-03-10 11:26:36+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
