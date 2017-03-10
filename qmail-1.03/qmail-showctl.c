@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-showctl.c,v $
+ * Revision 1.58  2017-03-10 11:30:22+05:30  Cprogrammer
+ * added control files maxdeliveredto, tlsclientmethod, tlsservermethod
+ *
  * Revision 1.57  2016-05-17 19:44:58+05:30  Cprogrammer
  * use auto_control, set by conf-control to set control directory
  *
@@ -434,6 +437,7 @@ main(int argc, char **argv)
 	do_str("plusdomain", 1, "plusdomain", "Plus domain name is ");
 	do_lst("qmqpservers", "No QMQP servers.", "QMQP server: ", ".");
 	do_int("queuelifetime", "604800", "Message lifetime in the queue is ", " seconds");
+	do_int("maxdeliveredto", 0, "Maximum Delivered-To lines: ", "");
 	do_int("bouncelifetime","604800","Bounce message lifetime in the queue is "," seconds (or max of queuelifetime)");
 	do_int("holdremote", "0", "Hold Remote is ", "");
 	do_int("holdlocal", "0", "Hold Local is ", "");
@@ -519,6 +523,8 @@ main(int argc, char **argv)
 	do_lst("nosignhosts","Nothing defined.",""," will be excluded for BATV signing (remote hosts).");
 	do_lst("nosignmydoms","Nothing defined.",""," will be excluded for BATV signing (local domain).");
 #endif
+	do_str("tlsclientmethod", 0, "TLSv1", "TLS client method is ");
+	do_str("tlsservermethod", 0, "TLSv1", "TLS server method is ");
 
 	while ((d = readdir(dir)))
 	{
@@ -575,6 +581,12 @@ main(int argc, char **argv)
 		if (str_equal(d->d_name, "concurrencylocal"))
 			continue;
 		if (str_equal(d->d_name, "concurrencyremote"))
+			continue;
+		if (str_equal(d->d_name, "maxdeliveredto"))
+			continue;
+		if (str_equal(d->d_name, "tlsclientmethod"))
+			continue;
+		if (str_equal(d->d_name, "tlsservermethod"))
 			continue;
 		if (str_start(d->d_name, "concurrencyr")) {
 			print_concurrency();
@@ -785,7 +797,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_showctl_c()
 {
-	static char    *x = "$Id: qmail-showctl.c,v 1.57 2016-05-17 19:44:58+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-showctl.c,v 1.58 2017-03-10 11:30:22+05:30 Cprogrammer Exp mbhangui $";
 
 #ifdef INDIMAIL
 	if (x)
