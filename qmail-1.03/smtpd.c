@@ -1,5 +1,8 @@
 /*
  * $Log: smtpd.c,v $
+ * Revision 1.191  2017-03-10 11:33:05+05:30  Cprogrammer
+ * TLS server method configurable through control file tlsservermethod
+ *
  * Revision 1.190  2017-03-09 14:36:39+05:30  Cprogrammer
  * added comments to describe open_control_once() function.
  *
@@ -734,7 +737,7 @@ int             secure_auth = 0;
 int             ssl_rfd = -1, ssl_wfd = -1;	/*- SSL_get_Xfd() are broken */
 char           *servercert, *clientca, *clientcrl;
 #endif
-char           *revision = "$Revision: 1.190 $";
+char           *revision = "$Revision: 1.191 $";
 char           *protocol = "SMTP";
 stralloc        proto = { 0 };
 static stralloc Revision = { 0 };
@@ -6372,27 +6375,57 @@ tls_verify()
 void
 tls_init()
 {
+	const char     *ciphers;
+	int             method = 4; /* (1..2 unused) [1..3] = ssl[1..3], 4 = tls1, 5=tls1.1, 6=tls1.2 */
 	SSL            *myssl;
 	SSL_CTX        *ctx;
-	const char     *ciphers;
-	stralloc        saciphers = { 0 };
 	X509_STORE     *store;
 	X509_LOOKUP    *lookup;
+	stralloc        saciphers = { 0 };
 	stralloc        filename = {0};
+	stralloc        ssl_option = {0};
 
-	SSL_library_init();
-	/*
-	 * a new SSL context with the bare minimum of options 
-	 */
-	if (!(ctx = SSL_CTX_new(SSLv23_server_method())))
-	{
-		tls_err("unable to initialize ctx");
-		return;
-	}
 	if (!controldir)
 	{
 		if (!(controldir = env_get("CONTROLDIR")))
 			controldir = auto_control;
+	}
+	if (control_rldef(&ssl_option, "tlsservermethod", 0, "TLSv1") != 1)
+		die_control();
+	if (str_equal( ssl_option.s, "SSLv3"))
+		method = 3;
+	else
+	if (str_equal( ssl_option.s, "TLSv1"))
+		method = 4;
+	else
+	if (str_equal( ssl_option.s, "TLSv1_1"))
+		method = 5;
+	else
+	if (str_equal( ssl_option.s, "TLSv1_2"))
+		method = 6;
+	SSL_library_init();
+	/*
+	 * a new SSL context with the bare minimum of options 
+	 */
+	if (method == 3 && !(ctx=SSL_CTX_new(SSLv3_server_method()))) {
+		tls_err("454 TLS not available: unable to initialize SSLv3 ctx (#4.3.0)\r\n");
+		return;
+	} else
+	if (method == 4 && !(ctx=SSL_CTX_new(TLSv1_server_method()))) {
+		tls_err("454 TLS not available: unable to initialize TLSv1 ctx (#4.3.0)\r\n");
+		return;
+	} else
+	if (method == 5 && !(ctx=SSL_CTX_new(TLSv1_1_server_method()))) {
+		tls_err("454 TLS not available: unable to initialize TLSv1_1 ctx (#4.3.0)\r\n");
+     	return;
+	} else
+	if (method == 6 && !(ctx=SSL_CTX_new(TLSv1_2_server_method()))) {
+		tls_err("454 TLS not available: unable to initialize TLSv1_2 ctx (#4.3.0)\r\n");
+		return;
+	} else
+	if (method && !(ctx = SSL_CTX_new(SSLv23_server_method()))) {
+		tls_err("454 TLS not available: unable to initialize SSLv23 ctx (#4.3.0)\r\n");
+		return;
 	}
 	if (!stralloc_copys(&filename, controldir))
 		die_nomem();
@@ -6515,9 +6548,16 @@ tls_init()
 	/*
 	 * populate the protocol string, used in Received 
 	 */
-	if (!stralloc_cats(&proto, "(") || !stralloc_cats(&proto, (char *) SSL_get_cipher(ssl)))
+	if (!stralloc_cats(&proto, "("))
 		die_nomem();
-	if (!stralloc_cats(&proto, "encrypted) "))
+	if (!stralloc_copys(&proto, (char *) SSL_get_version(ssl)))
+		die_nomem();
+	if (!stralloc_catb(&proto, " ", 1))
+		die_nomem();
+	if (!stralloc_catb(&proto, (char *) SSL_CIPHER_get_name(SSL_get_current_cipher(ssl)),
+			str_len((char *) SSL_CIPHER_get_name(SSL_get_current_cipher(ssl)))))
+		die_nomem();
+	if (!stralloc_cats(&proto, " encrypted) "))
 		die_nomem();
 	/*
 	 * have to discard the pre-STARTTLS HELO/EHLO argument, if any 
@@ -6847,7 +6887,7 @@ addrrelay() /*- Rejection of relay probes. */
 void
 getversion_smtpd_c()
 {
-	static char    *x = "$Id: smtpd.c,v 1.190 2017-03-09 14:36:39+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: smtpd.c,v 1.191 2017-03-10 11:33:05+05:30 Cprogrammer Exp mbhangui $";
 
 #ifdef INDIMAIL
 	if (x)
