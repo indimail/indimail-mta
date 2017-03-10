@@ -37,6 +37,14 @@ already appears in the header,
 .B qmail-local
 bounces the message,
 to prevent mail forwarding loops.
+If
+.IR maxdeliveredto 
+is a value greater than the number of exact
+.I local@domain 
+matches then delivery progresses.
+If
+.IR maxdeliveredto 
+is -1 then this stage goes unchecked.
 
 The message's envelope sender is
 .IR sender .
