@@ -2519,7 +2519,7 @@ scan.h case.h auto_qmail.h trigger.h newfield.h stralloc.h quote.h \
 qmail.h qsutil.h prioq.h datetime.h gen_alloc.h constmap.h envrules.h \
 fmtqfn.h readsubdir.h direntry.h variables.h env.h qmail-todo.h \
 hasindimail.h auto_control.h conf-mime conf-sync conf-batv \
-conf-srs conf-locklogs
+hassrs.h conf-srs conf-locklogs
 	./compile $(inc_deps) `grep -h -v "^#" conf-mime \
 		conf-sync conf-batv conf-locklogs` qmail-send.c
 
