@@ -1,5 +1,8 @@
 /*
  * $Log: install_tables.c,v $
+ * Revision 2.9  2017-03-13 14:02:33+05:30  Cprogrammer
+ * replaced qmaildir with sysconfdir
+ *
  * Revision 2.8  2016-05-17 17:09:39+05:30  Cprogrammer
  * use control directory set by configure
  *
@@ -32,7 +35,7 @@
 #endif
 
 #ifndef	lint
-static char     sccsid[] = "$Id: install_tables.c,v 2.8 2016-05-17 17:09:39+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: install_tables.c,v 2.9 2017-03-13 14:02:33+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 int
@@ -43,7 +46,7 @@ main(int argc, char **argv)
 #endif
 #ifdef CLUSTERED_SITE
 	static char     host_path[MAX_BUFF];
-	char           *qmaildir, *controldir;
+	char           *sysconfdir, *controldir;
 	int             hostmaster_present = 0;
 #endif
 	int             i;
@@ -74,8 +77,8 @@ main(int argc, char **argv)
 		if (snprintf(host_path, MAX_BUFF, "%s/host.master", controldir) == -1)
 			host_path[MAX_BUFF - 1] = 0;
 	} else {
-		getEnvConfigStr(&qmaildir, "QMAILDIR", QMAILDIR);
-		if (snprintf(host_path, MAX_BUFF, "%s/%s/host.master", qmaildir, controldir) == -1)
+		getEnvConfigStr(&sysconfdir, "SYSCONFDIR", SYSCONFDIR);
+		if (snprintf(host_path, MAX_BUFF, "%s/%s/host.master", sysconfdir, controldir) == -1)
 			host_path[MAX_BUFF - 1] = 0;
 	}
 	if (!access(host_path, F_OK) || getenv("MASTER_HOST"))
