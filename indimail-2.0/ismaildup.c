@@ -1,5 +1,8 @@
 /*
  * $Log: ismaildup.c,v $
+ * Revision 2.2  2017-03-13 14:03:02+05:30  Cprogrammer
+ * use PREFIX for bin programs
+ *
  * Revision 2.1  2011-06-30 20:38:13+05:30  Cprogrammer
  * duplicate email eliminator
  *
@@ -17,7 +20,7 @@
 #endif
 
 #ifndef	lint
-static char     sccsid[] = "$Id: ismaildup.c,v 2.1 2011-06-30 20:38:13+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: ismaildup.c,v 2.2 2017-03-13 14:03:02+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef HAVE_SSL 
@@ -97,9 +100,9 @@ ismaildup(char *maildir)
 {
 	int             md_len, error, code, wait_status, n, pim[2];
 	long unsigned   pid;
-	char            bin0[MAX_BUFF], buffer[MAX_BUFF], dupfile[MAX_BUFF];
+	char            buffer[MAX_BUFF], dupfile[MAX_BUFF];
 	char          **argv;
-	char           *ptr, *qmaildir;
+	char           *ptr;
 	char           *binqqargs[8];
 	EVP_MD_CTX      mdctx;
 	const EVP_MD   *md;
@@ -122,9 +125,7 @@ ismaildup(char *maildir)
 		close(pim[0]);
 		if (dup2(pim[1], 1) == -1)
 			_exit(111);
-		getEnvConfigStr(&qmaildir, "QMAILDIR", QMAILDIR);
-		snprintf(bin0, MAX_BUFF, "%s/bin/822header", qmaildir);
-		binqqargs[0] = bin0;
+		binqqargs[0] = PREFIX"/bin/822header";
 		if ((ptr = getenv("ELIMINATE_DUPS_ARGS")) && !(argv = MakeArgs(ptr)))
 		{
 			fprintf(stderr, "ismaildup: MakeArgs: %s\n", strerror(errno));
