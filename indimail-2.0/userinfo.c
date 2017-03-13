@@ -1,5 +1,8 @@
 /*
  * $Log: userinfo.c,v $
+ * Revision 2.41  2017-03-13 14:10:34+05:30  Cprogrammer
+ * replaced qmaildir with sysconfdir
+ *
  * Revision 2.40  2016-05-17 17:09:39+05:30  Cprogrammer
  * use control directory set by configure
  *
@@ -215,7 +218,7 @@
 #include <sys/socket.h>
 
 #ifndef	lint
-static char     sccsid[] = "$Id: userinfo.c,v 2.40 2016-05-17 17:09:39+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: userinfo.c,v 2.41 2017-03-13 14:10:34+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 extern char *strptime(const char *, const char *, struct tm *);
@@ -228,7 +231,7 @@ vuserinfo(Email, User, Domain, DisplayName, DisplayPasswd, DisplayUid, DisplayGi
 	                DisplayLastAuth, DisplayMail, DisplayFilter, DisplayAll;
 {
 	struct passwd  *mypw;
-	char           *ptr, *real_domain, *mailstore, *qmaildir, *controldir, *passwd_hash;
+	char           *ptr, *real_domain, *mailstore, *sysconfdir, *controldir, *passwd_hash;
 	FILE           *fp;
 #ifdef CLUSTERED_SITE
 	int             is_dist = 0;
@@ -256,8 +259,8 @@ vuserinfo(Email, User, Domain, DisplayName, DisplayPasswd, DisplayUid, DisplayGi
 		if (*controldir == '/')
 			snprintf(tmpbuf, MAX_BUFF, "%s/rcpthosts", controldir);
 		else {
-			getEnvConfigStr(&qmaildir, "QMAILDIR", QMAILDIR);
-			snprintf(tmpbuf, MAX_BUFF, "%s/%s/rcpthosts", qmaildir, controldir);
+			getEnvConfigStr(&sysconfdir, "SYSCONFDIR", SYSCONFDIR);
+			snprintf(tmpbuf, MAX_BUFF, "%s/%s/rcpthosts", sysconfdir, controldir);
 		}
 		if (!(fp = fopen(tmpbuf, "r")))
 		{
