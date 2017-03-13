@@ -1,5 +1,8 @@
 /*
  * $Log: variables.c,v $
+ * Revision 2.56  2017-03-13 14:11:43+05:30  Cprogrammer
+ * replaced INDIMAILDIR with PREFIX
+ *
  * Revision 2.55  2017-03-08 13:52:21+05:30  Cprogrammer
  * removed vconvert
  *
@@ -213,7 +216,7 @@
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: variables.c,v 2.55 2017-03-08 13:52:21+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: variables.c,v 2.56 2017-03-13 14:11:43+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 vdir_type       vdir;
@@ -349,52 +352,52 @@ char            cntrl_host[MAX_BUFF];
 char           *cntrl_port;
 #endif /*- #ifdef CLUSTERED_SITE */
 ADMINCOMMAND adminCommands[] = {
-	{INDIMAILDIR"/bin/vadduser", "Add a user to a Virtual Domain"},
-	{INDIMAILDIR"/bin/vpasswd", "Change Password for a Mail User"},
-	{INDIMAILDIR"/bin/vdeluser", "Delete Mail User from a Virtual Domain"},
-	{INDIMAILDIR"/bin/vsetuserquota", "Set Filesystem Quota for a Mail user"},
-	{INDIMAILDIR"/bin/vbulletin", "Send out Bulletins"},
-	{INDIMAILDIR"/bin/vmoduser", "Modify Mail User Characteristics"},
-	{INDIMAILDIR"/bin/valias", "Add an Alias"},
-	{INDIMAILDIR"/bin/vuserinfo", "Mail User Information"},
-	{INDIMAILDIR"/bin/vipmap", "Add/Modify/Delete IP Maps"},
-	{INDIMAILDIR"/bin/vacation", "Add Mail Vacation Autoresponder"},
-	{INDIMAILDIR"/bin/vmoveuser", "Move a user between different file systems"},
-	{INDIMAILDIR"/bin/vrenameuser", "Rename a user"},
-	{INDIMAILDIR"/bin/crc", "Calculate Checksums of files/directories"},
-	{INDIMAILDIR"/bin/vcfilter", "Create Filters"},
-	{INDIMAILDIR"/bin/indiversion", "List out Version Numbers for IndiMail Components"},
-	{INDIMAILDIR"/bin/vsmtp", "Add/Modify/Delete SMTP Routes"},
-	{INDIMAILDIR"/bin/dbinfo", "Add/Modify/Delete Mail Control Defination"},
-	{INDIMAILDIR"/bin/vhostid", "Add/Modify/Delete Host IDs"},
-	{INDIMAILDIR"/bin/mgmtpass", "Manage Admin Client Passwords"},
-	{INDIMAILDIR"/bin/inquerytest", "Test Database Server"},
-	{INDIMAILDIR"/bin/printdir", "Print Mail Hash Directory Info"},
-	{INDIMAILDIR"/bin/svstat", "Get Service Status for IndiMail Services"},
-	{INDIMAILDIR"/bin/vaddaliasdomain", "Add an Alias Domain"},
-	{INDIMAILDIR"/bin/vadddomain", "Add a Virtual Domain"},
-	{INDIMAILDIR"/bin/vcalias", "Convert .qmail files to valias format"},
-	{INDIMAILDIR"/bin/vcaliasrev.sh", "Convert Alias to .qmail format"},
-	{INDIMAILDIR"/bin/vdeldomain", "Delete a Virtual Domain"},
-	{INDIMAILDIR"/bin/vrenamedomain", "Rename a Virtual Domain"},
-	{INDIMAILDIR"/bin/vdominfo", "Domain Information"},
-	{INDIMAILDIR"/bin/vfstab", "Add/Modify/Delete Filesystem Balancing for Mail filesystems"},
-	{INDIMAILDIR"/bin/vgroup", "Add/Modify/Delete Groups "},
-	{INDIMAILDIR"/bin/vatrn", "Add ATRN Maps for ODMR"},
-	{INDIMAILDIR"/bin/vpriv", "Add Privileges to Program for IndiSrvr"},
-	{INDIMAILDIR"/bin/vlimit", "Administer Domain Wide Limits"},
-	{INDIMAILDIR"/bin/hostcntrl", "Administer Hostcntrl Entries"},
-	{INDIMAILDIR"/sbin/resetquota", "Reset/Correct quota for a Maildir"},
-	{INDIMAILDIR"/sbin/updatefile", "Update Control Files"},
-	{INDIMAILDIR"/sbin/vreorg", "Reorganize Mail Database"},
-	{INDIMAILDIR"/sbin/vdeloldusers", "Delete Old Mail Users"},
-	{INDIMAILDIR"/sbin/ipchange", "Change/Update IP Address changes in IndiMail"},
-	{INDIMAILDIR"/sbin/svctool", "Service Configuration tool"},
-	{INDIMAILDIR"/sbin/clearopensmtp", "Clear Open SMTP session"},
-	{INDIMAILDIR"/sbin/hostsync", "Sync Hostcntrl Information"},
-	{INDIMAILDIR"/sbin/inquerytest", "Test inlookup queries"},
-	{INDIMAILDIR"/sbin/vmoddomain", "Modify Domain Information"},
-	{INDIMAILDIR"/bin/vserverinfo", "Mail Server Information"},
+	{PREFIX"/bin/vadduser", "Add a user to a Virtual Domain"},
+	{PREFIX"/bin/vpasswd", "Change Password for a Mail User"},
+	{PREFIX"/bin/vdeluser", "Delete Mail User from a Virtual Domain"},
+	{PREFIX"/bin/vsetuserquota", "Set Filesystem Quota for a Mail user"},
+	{PREFIX"/bin/vbulletin", "Send out Bulletins"},
+	{PREFIX"/bin/vmoduser", "Modify Mail User Characteristics"},
+	{PREFIX"/bin/valias", "Add an Alias"},
+	{PREFIX"/bin/vuserinfo", "Mail User Information"},
+	{PREFIX"/bin/vipmap", "Add/Modify/Delete IP Maps"},
+	{PREFIX"/bin/vacation", "Add Mail Vacation Autoresponder"},
+	{PREFIX"/bin/vmoveuser", "Move a user between different file systems"},
+	{PREFIX"/bin/vrenameuser", "Rename a user"},
+	{PREFIX"/bin/crc", "Calculate Checksums of files/directories"},
+	{PREFIX"/bin/vcfilter", "Create Filters"},
+	{PREFIX"/bin/indiversion", "List out Version Numbers for IndiMail Components"},
+	{PREFIX"/bin/vsmtp", "Add/Modify/Delete SMTP Routes"},
+	{PREFIX"/bin/dbinfo", "Add/Modify/Delete Mail Control Defination"},
+	{PREFIX"/bin/vhostid", "Add/Modify/Delete Host IDs"},
+	{PREFIX"/bin/mgmtpass", "Manage Admin Client Passwords"},
+	{PREFIX"/bin/inquerytest", "Test Database Server"},
+	{PREFIX"/bin/printdir", "Print Mail Hash Directory Info"},
+	{PREFIX"/bin/svstat", "Get Service Status for IndiMail Services"},
+	{PREFIX"/bin/vaddaliasdomain", "Add an Alias Domain"},
+	{PREFIX"/bin/vadddomain", "Add a Virtual Domain"},
+	{PREFIX"/bin/vcalias", "Convert .qmail files to valias format"},
+	{PREFIX"/bin/vcaliasrev.sh", "Convert Alias to .qmail format"},
+	{PREFIX"/bin/vdeldomain", "Delete a Virtual Domain"},
+	{PREFIX"/bin/vrenamedomain", "Rename a Virtual Domain"},
+	{PREFIX"/bin/vdominfo", "Domain Information"},
+	{PREFIX"/bin/vfstab", "Add/Modify/Delete Filesystem Balancing for Mail filesystems"},
+	{PREFIX"/bin/vgroup", "Add/Modify/Delete Groups "},
+	{PREFIX"/bin/vatrn", "Add ATRN Maps for ODMR"},
+	{PREFIX"/bin/vpriv", "Add Privileges to Program for IndiSrvr"},
+	{PREFIX"/bin/vlimit", "Administer Domain Wide Limits"},
+	{PREFIX"/bin/hostcntrl", "Administer Hostcntrl Entries"},
+	{PREFIX"/sbin/resetquota", "Reset/Correct quota for a Maildir"},
+	{PREFIX"/sbin/updatefile", "Update Control Files"},
+	{PREFIX"/sbin/vreorg", "Reorganize Mail Database"},
+	{PREFIX"/sbin/vdeloldusers", "Delete Old Mail Users"},
+	{PREFIX"/sbin/ipchange", "Change/Update IP Address changes in IndiMail"},
+	{PREFIX"/sbin/svctool", "Service Configuration tool"},
+	{PREFIX"/sbin/clearopensmtp", "Clear Open SMTP session"},
+	{PREFIX"/sbin/hostsync", "Sync Hostcntrl Information"},
+	{PREFIX"/sbin/inquerytest", "Test inlookup queries"},
+	{PREFIX"/sbin/vmoddomain", "Modify Domain Information"},
+	{PREFIX"/bin/vserverinfo", "Mail Server Information"},
 	{(char *) NULL, (char *) NULL}
 };
 
