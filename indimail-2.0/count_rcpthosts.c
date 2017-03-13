@@ -1,5 +1,8 @@
 /*
  * $Log: count_rcpthosts.c,v $
+ * Revision 2.5  2017-03-13 13:39:42+05:30  Cprogrammer
+ * replaced qmaildir with sysconfdir
+ *
  * Revision 2.4  2016-05-17 15:39:36+05:30  Cprogrammer
  * fixed comment
  *
@@ -26,7 +29,7 @@
 #include <stdio.h>
 
 #ifndef	lint
-static char     sccsid[] = "$Id: count_rcpthosts.c,v 2.4 2016-05-17 15:39:36+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: count_rcpthosts.c,v 2.5 2017-03-13 13:39:42+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 /*
@@ -36,16 +39,16 @@ int
 count_rcpthosts()
 {
 	static char     tmpstr[MAX_BUFF];
-	char           *qmaildir, *controldir;
+	char           *sysconfdir, *controldir;
 	FILE           *fs;
 	register int    count;
 
-	getEnvConfigStr(&qmaildir, "QMAILDIR", QMAILDIR);
+	getEnvConfigStr(&sysconfdir, "SYSCONFDIR", SYSCONFDIR);
 	getEnvConfigStr(&controldir, "CONTROLDIR", CONTROLDIR);
 	if (*controldir == '/')
 		snprintf(tmpstr, MAX_BUFF, "%s/rcpthosts", controldir);
 	else
-		snprintf(tmpstr, MAX_BUFF, "%s/%s/rcpthosts", qmaildir, controldir);
+		snprintf(tmpstr, MAX_BUFF, "%s/%s/rcpthosts", sysconfdir, controldir);
 	if(!(fs = fopen(tmpstr, "r")))
 		return (0);
 	for(count = 0; fgets(tmpstr, MAX_BUFF, fs);count++);
