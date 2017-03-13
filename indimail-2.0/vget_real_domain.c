@@ -1,5 +1,8 @@
 /*
  * $Log: vget_real_domain.c,v $
+ * Revision 2.12  2017-03-13 14:13:36+05:30  Cprogrammer
+ * replaced qmaildir with sysconfdir
+ *
  * Revision 2.11  2016-05-17 17:09:39+05:30  Cprogrammer
  * use control directory set by configure
  *
@@ -64,7 +67,7 @@
 #include <stdlib.h>
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vget_real_domain.c,v 2.11 2016-05-17 17:09:39+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: vget_real_domain.c,v 2.12 2017-03-13 14:13:36+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef QUERY_CACHE
@@ -83,7 +86,7 @@ vget_real_domain(char *domain)
 	gid_t           gid;
 #ifdef CLUSTERED_SITE
 	FILE           *fp;
-	char           *qmaildir, *controldir;
+	char           *sysconfdir, *controldir;
 	int             ret;
 	char            TmpBuf[MAX_BUFF];
 #endif
@@ -165,18 +168,18 @@ vget_real_domain(char *domain)
 			scopy(domval, domain, MAX_BUFF);
 			return(domval);
 		}
-		getEnvConfigStr(&qmaildir, "QMAILDIR", QMAILDIR);
+		getEnvConfigStr(&sysconfdir, "SYSCONFDIR", SYSCONFDIR);
 		getEnvConfigStr(&controldir, "CONTROLDIR", CONTROLDIR);
 		if (*controldir == '/')
 			snprintf(TmpBuf, MAX_BUFF, "%s/host.cntrl", controldir);
 		else
-			snprintf(TmpBuf, MAX_BUFF, "%s/%s/host.cntrl", qmaildir, controldir);
+			snprintf(TmpBuf, MAX_BUFF, "%s/%s/host.cntrl", sysconfdir, controldir);
 		if (access(TmpBuf, F_OK))
 		{
 			if (*controldir == '/')
 				snprintf(tmpbuf, MAX_BUFF, "%s/rcpthosts", controldir);
 			else
-				snprintf(tmpbuf, MAX_BUFF, "%s/%s/rcpthosts", qmaildir, controldir);
+				snprintf(tmpbuf, MAX_BUFF, "%s/%s/rcpthosts", sysconfdir, controldir);
 			if (!(fp = fopen(tmpbuf, "r")))
 			{
 				fprintf(stderr, "vget_real_domain: fopen: %s: %s\n", tmpbuf, strerror(errno));
@@ -203,7 +206,7 @@ vget_real_domain(char *domain)
 			if (*controldir == '/')
 				snprintf(tmpbuf, MAX_BUFF, "%s/morercpthosts", controldir);
 			else
-				snprintf(tmpbuf, MAX_BUFF, "%s/%s/morercpthosts", qmaildir, controldir);
+				snprintf(tmpbuf, MAX_BUFF, "%s/%s/morercpthosts", sysconfdir, controldir);
 			if (!(fp = fopen(tmpbuf, "r")))
 			{
 				if (errno != ENOENT)
