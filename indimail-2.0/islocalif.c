@@ -1,5 +1,8 @@
 /*
  * $Log: islocalif.c,v $
+ * Revision 2.7  2017-03-13 14:02:48+05:30  Cprogrammer
+ * replaced qmaildir with sysconfdir
+ *
  * Revision 2.6  2016-05-17 17:09:39+05:30  Cprogrammer
  * use control directory set by configure
  *
@@ -57,7 +60,7 @@
 #endif
 
 #ifndef	lint
-static char     sccsid[] = "$Id: islocalif.c,v 2.6 2016-05-17 17:09:39+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: islocalif.c,v 2.7 2017-03-13 14:02:48+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 /*
@@ -82,7 +85,7 @@ islocalif(char *hostptr)
 	char           *buf, *ptr;
 	struct sockaddr_in *sin = 0;
 	char            TmpBuf[MAX_BUFF];
-	char           *qmaildir, *controldir;
+	char           *sysconfdir, *controldir;
 	FILE           *fp;
 #ifdef ENABLE_IPV6
 	struct sockaddr_in6 *sin6 = 0;
@@ -105,8 +108,8 @@ islocalif(char *hostptr)
 	if (*controldir == '/')
 		snprintf(TmpBuf, MAX_BUFF, "%s/localiphost", controldir);
 	else {
-		getEnvConfigStr(&qmaildir, "QMAILDIR", QMAILDIR);
-		snprintf(TmpBuf, MAX_BUFF, "%s/%s/localiphost", qmaildir, controldir);
+		getEnvConfigStr(&sysconfdir, "SYSCONFDIR", SYSCONFDIR);
+		snprintf(TmpBuf, MAX_BUFF, "%s/%s/localiphost", sysconfdir, controldir);
 	}
 	if ((fp = fopen(TmpBuf, "r")))
 	{
