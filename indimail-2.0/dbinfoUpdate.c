@@ -1,5 +1,8 @@
 /*
  * $Log: dbinfoUpdate.c,v $
+ * Revision 2.6  2017-03-13 13:41:38+05:30  Cprogrammer
+ * replace qmaildir with sysconfdir
+ *
  * Revision 2.5  2016-05-17 17:09:39+05:30  Cprogrammer
  * use control directory set by configure
  *
@@ -19,7 +22,7 @@
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: dbinfoUpdate.c,v 2.5 2016-05-17 17:09:39+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: dbinfoUpdate.c,v 2.6 2017-03-13 13:41:38+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef CLUSTERED_SITE
@@ -29,7 +32,7 @@ int
 dbinfoUpdate(char *domain, int dist, char *sqlserver, char *mdahost, int port, char *database, char *user, char *passwd)
 {
 	char            SqlBuf[SQL_BUF_SIZE], mcdFile[MAX_BUFF], optbuf[MAX_BUFF];
-	char           *mcdfile, *qmaildir, *controldir;
+	char           *mcdfile, *sysconfdir, *controldir;
 	int             err, len;
 
 	getEnvConfigStr(&controldir, "CONTROLDIR", CONTROLDIR);
@@ -40,8 +43,8 @@ dbinfoUpdate(char *domain, int dist, char *sqlserver, char *mdahost, int port, c
 		if (*controldir == '/')
 			snprintf(mcdFile, MAX_BUFF, "%s/%s", controldir, mcdfile);
 		else {
-			getEnvConfigStr(&qmaildir, "QMAILDIR", QMAILDIR);
-			snprintf(mcdFile, MAX_BUFF, "%s/%s/%s", qmaildir, controldir, mcdfile);
+			getEnvConfigStr(&sysconfdir, "SYSCONFDIR", SYSCONFDIR);
+			snprintf(mcdFile, MAX_BUFF, "%s/%s/%s", sysconfdir, controldir, mcdfile);
 		}
 	}
 	if (open_master())
