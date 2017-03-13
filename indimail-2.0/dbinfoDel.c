@@ -1,5 +1,8 @@
 /*
  * $Log: dbinfoDel.c,v $
+ * Revision 2.7  2017-03-13 13:41:15+05:30  Cprogrammer
+ * replace qmaildir with sysconfdir
+ *
  * Revision 2.6  2016-05-17 17:09:39+05:30  Cprogrammer
  * use control directory set by configure
  *
@@ -24,7 +27,7 @@
 #include <mysqld_error.h>
 
 #ifndef	lint
-static char     sccsid[] = "$Id: dbinfoDel.c,v 2.6 2016-05-17 17:09:39+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: dbinfoDel.c,v 2.7 2017-03-13 13:41:15+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef CLUSTERED_SITE
@@ -32,7 +35,7 @@ int
 dbinfoDel(char *domain, char *mdahost)
 {
 	char            SqlBuf[SQL_BUF_SIZE], mcdFile[MAX_BUFF];
-	char           *mcdfile, *qmaildir, *controldir;
+	char           *mcdfile, *sysconfdir, *controldir;
 	int             err;
 
 	getEnvConfigStr(&controldir, "CONTROLDIR", CONTROLDIR);
@@ -43,8 +46,8 @@ dbinfoDel(char *domain, char *mdahost)
 		if (*controldir == '/')
 			snprintf(mcdFile, MAX_BUFF, "%s/%s", controldir, mcdfile);
 		else {
-			getEnvConfigStr(&qmaildir, "QMAILDIR", QMAILDIR);
-			snprintf(mcdFile, MAX_BUFF, "%s/%s/%s", qmaildir, controldir, mcdfile);
+			getEnvConfigStr(&sysconfdir, "SYSCONFDIR", SYSCONFDIR);
+			snprintf(mcdFile, MAX_BUFF, "%s/%s/%s", sysconfdir, controldir, mcdfile);
 		}
 	}
 	if (open_master())
