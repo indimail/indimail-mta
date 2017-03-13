@@ -84,7 +84,7 @@ and the current quota status. It contains a header in format:
 If the size of the mail is within the quota, or if the size of the mail is less than
 OVERQUOTA_MAILSIZE (1000 bytes as defined in indimail.h) but would bring the user
 overquota, the mail is delivered and the user's current quota usage updated. Else the mail is
-bounced back with Over Quota message. Also if INDIMAIL/libexec/overquota.sh exists, the
+bounced back with Over Quota message. Also if LIBEXECDIR/overquota.sh exists, the
 command is executed with the following arguments
 
  maildir_path Message_size Current_disk_usage Current_mailcount quota

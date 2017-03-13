@@ -22,7 +22,7 @@ in the assign file (See qmail-users(5)).
 .SH POST HANDLE
 If the environment variable POST_HANDLE is set, \fBvdeluser\fR executes the program defined by
 the POST_HANDLE environment variable, passing \fIemail_address\fR as a parameter. If POST_HANDLE
-is not defined, the program/script INDIMAIL/libexec/vdeluser will be executed with \fIemail_address\fR
+is not defined, the program/script LIBEXECDIR/vdeluser will be executed with \fIemail_address\fR
 as a parameter.
 
 .SH OPTIONS
@@ -31,7 +31,8 @@ as a parameter.
 Set verbose mode.
 .TP
 \fIemail address\fR
-Fully qualified email account. For example: user@domain.com. If no domain is specified then the account is removed from the default virtual domain. 
+Fully qualified email account. For example: user@domain.com. If no domain is specified then the account is removed
+from the default virtual domain. 
 
 .SH RETURN VALUE
 0 if all steps were successful, non-zero otherwise. If any of the steps fail, a diagnostic message is printed.

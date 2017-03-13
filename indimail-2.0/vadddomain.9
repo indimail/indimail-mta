@@ -46,7 +46,7 @@ account is created on the first host on which the domain is created. Post adding
 .SH POST HANDLE
 If the environment variable POST_HANDLE is set, \fBvadddomain\fR executes the program defined by
 the POST_HANDLE environment variable, passing \fIvirtual_domain\fR as a parameter. If POST_HANDLE
-is not defined, the program/script INDIMAIL/libexec/vadddomain will be executed with \fIvirtual_domain\fR
+is not defined, the program/script LIBEXECDIR/vadddomain will be executed with \fIvirtual_domain\fR
 as a parameter.
 
 .SH OPTIONS
@@ -130,10 +130,12 @@ Port to connect to for accessing the database
 Adds a clustered domain.  This implies use of the \fB-S\fR, \fB-U\fR, \fB-P\fR, \fB-L\fR options
 .TP
 \fIvirtual_domain\fR
-Name of the new virtual domain. \fInew_domain\fR can contain alphanumeric characters besides '-' and '.' . However the first and the last character cannot be '-'.
+Name of the new virtual domain. \fInew_domain\fR can contain alphanumeric characters besides '-' and '.' . However the first and
+the last character cannot be '-'.
 .TP
 [\fIpostmaster password\fR]
-The password for the RFC required postmaster account. If the password is not supplied on the command line then vadddomain will prompt for the password twice.
+The password for the RFC required postmaster account. If the password is not supplied on the command line then vadddomain will
+prompt for the password twice.
 
 .SH RETURN VALUE
 0 if all steps were successful, non-zero otherwise. If any of the steps fail, a diagnostic message is printed.
@@ -141,7 +143,8 @@ The password for the RFC required postmaster account. If the password is not sup
 .SH NOTE
 .nr step 1 1
 .IP \n[step] 3
-The virtual domain becomes active after running this program. No additional files need to be modified. A new directory is added under INDIMAIL/domains to house all the .qmail files, configuration files for the new virtual domain. 
+The virtual domain becomes active after running this program. No additional files need to be modified. A new directory is added
+under INDIMAIL/domains to house all the .qmail files, configuration files for the new virtual domain. 
 .IP \n+[step]
 vadddomain has the setuid bit set and runs as root.
 .IP \n+[step]
