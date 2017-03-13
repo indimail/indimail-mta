@@ -1,5 +1,8 @@
 /*
  * $Log: adddomain.c,v $
+ * Revision 2.19  2017-03-13 13:33:58+05:30  Cprogrammer
+ * replaced INDIMAILDIR with PREFIX
+ *
  * Revision 2.18  2016-06-13 14:22:47+05:30  Cprogrammer
  * change umask to 0007 to avoid creating .qmail-default with restrictive perms
  *
@@ -87,7 +90,7 @@
 #include <sys/stat.h>
 
 #ifndef	lint
-static char     sccsid[] = "$Id: adddomain.c,v 2.18 2016-06-13 14:22:47+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: adddomain.c,v 2.19 2017-03-13 13:33:58+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 int
@@ -210,10 +213,10 @@ vadddomain(char *domain, char *ipaddr, char *dir, uid_t uid, gid_t gid, int chk_
 		{
 #ifdef VFILTER
 			if (use_vfilter)
-				fprintf(fs, "| %s/sbin/vfilter '' bounce-no-mailbox\n", INDIMAILDIR);
+				fprintf(fs, "| %s/sbin/vfilter '' bounce-no-mailbox\n", PREFIX);
 			else
 #endif
-				fprintf(fs, "| %s/sbin/vdelivermail '' bounce-no-mailbox\n", INDIMAILDIR);
+				fprintf(fs, "| %s/sbin/vdelivermail '' bounce-no-mailbox\n", PREFIX);
 		}
 		fclose(fs);
 	}
