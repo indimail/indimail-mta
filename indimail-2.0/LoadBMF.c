@@ -1,5 +1,8 @@
 /*
  * $Log: LoadBMF.c,v $
+ * Revision 2.17  2017-03-13 14:03:55+05:30  Cprogrammer
+ * replaced qmaildir with sysconfdir
+ *
  * Revision 2.16  2016-05-17 17:09:39+05:30  Cprogrammer
  * use control directory set by configure
  *
@@ -52,7 +55,7 @@
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: LoadBMF.c,v 2.16 2016-05-17 17:09:39+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: LoadBMF.c,v 2.17 2017-03-13 14:03:55+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef CLUSTERED_SITE
@@ -82,7 +85,7 @@ LoadBMF(int *total, char *bmf)
 	MYSQL_RES      *res = 0;
 	MYSQL_ROW       row;
 	time_t          mtime = 0l, mcd_time = 0l, file_time = 0l;
-	char           *qmaildir, *controldir;
+	char           *sysconfdir, *controldir;
 	struct utimbuf  ubuf;
 	FILE           *fp;
 
@@ -92,8 +95,8 @@ LoadBMF(int *total, char *bmf)
 	if (*controldir == '/')
 		snprintf(badmailfrom, MAX_BUFF, "%s/%s", controldir, bmf);
 	else {
-		getEnvConfigStr(&qmaildir, "QMAILDIR", QMAILDIR);
-		snprintf(badmailfrom, MAX_BUFF, "%s/%s/%s", qmaildir, controldir, bmf);
+		getEnvConfigStr(&sysconfdir, "SYSCONFDIR", SYSCONFDIR);
+		snprintf(badmailfrom, MAX_BUFF, "%s/%s/%s", sysconfdir, controldir, bmf);
 	}
 	if (stat(badmailfrom, &statbuf))
 	{
@@ -276,15 +279,15 @@ int
 UpdateSpamTable(char *bmf)
 {
 	char            SqlBuf[SQL_BUF_SIZE], badmailfrom[MAX_BUFF];
-	char           *qmaildir, *controldir;
+	char           *sysconfdir, *controldir;
 	int             badmail_flag, err, es_opt = 0;
 
 	getEnvConfigStr(&controldir, "CONTROLDIR", CONTROLDIR);
 	if (*controldir == '/')
 		snprintf(badmailfrom, MAX_BUFF, "%s/%s", controldir, bmf);
 	else {
-		getEnvConfigStr(&qmaildir, "QMAILDIR", QMAILDIR);
-		snprintf(badmailfrom, MAX_BUFF, "%s/%s/%s", qmaildir, controldir, bmf);
+		getEnvConfigStr(&sysconfdir, "SYSCONFDIR", SYSCONFDIR);
+		snprintf(badmailfrom, MAX_BUFF, "%s/%s/%s", sysconfdir, controldir, bmf);
 	}
 	if (access(badmailfrom, F_OK))
 	{
@@ -356,7 +359,7 @@ static char **
 LoadBMF_internal(int *total, char *bmf)
 {
 	FILE           *fp;
-	char           *ptr, *qmaildir, *controldir;
+	char           *ptr, *sysconfdir, *controldir;
 	char            tmpbuf[MAX_BUFF], badmailfrom[MAX_BUFF];
 	int             count, len;
 	static int      _count;
@@ -368,8 +371,8 @@ LoadBMF_internal(int *total, char *bmf)
 	if (*controldir == '/')
 		snprintf(badmailfrom, MAX_BUFF, "%s/%s", controldir, bmf);
 	else {
-		getEnvConfigStr(&qmaildir, "QMAILDIR", QMAILDIR);
-		snprintf(badmailfrom, MAX_BUFF, "%s/%s/%s", qmaildir, controldir, bmf);
+		getEnvConfigStr(&sysconfdir, "SYSCONFDIR", SYSCONFDIR);
+		snprintf(badmailfrom, MAX_BUFF, "%s/%s/%s", sysconfdir, controldir, bmf);
 	}
 	if (total)
 		*total = 0;
