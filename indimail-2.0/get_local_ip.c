@@ -1,5 +1,8 @@
 /*
  * $Log: get_local_ip.c,v $
+ * Revision 2.9  2017-03-13 13:44:16+05:30  Cprogrammer
+ * replaced qmaildir with sysconfdir
+ *
  * Revision 2.8  2016-05-17 15:40:20+05:30  Cprogrammer
  * use control directory set by configure
  *
@@ -44,7 +47,7 @@
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: get_local_ip.c,v 2.8 2016-05-17 15:40:20+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: get_local_ip.c,v 2.9 2017-03-13 13:44:16+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 char           *
@@ -52,7 +55,7 @@ get_local_ip(int family)
 {
 	static char     hostbuf[MAX_BUFF]; /*- hostname or ip address */
 	char            TmpBuf[MAX_BUFF];
-	char           *ptr, *qmaildir, *controldir;
+	char           *ptr, *sysconfdir, *controldir;
 	FILE           *fp;
 #ifdef HAVE_STRUCT_SOCKADDR_STORAGE
 	struct sockaddr *sa;
@@ -65,12 +68,12 @@ get_local_ip(int family)
 
 	if (*hostbuf)
 		return(hostbuf);
-	getEnvConfigStr(&qmaildir, "QMAILDIR", QMAILDIR);
+	getEnvConfigStr(&sysconfdir, "SYSCONFDIR", SYSCONFDIR);
 	getEnvConfigStr(&controldir, "CONTROLDIR", CONTROLDIR);
 	if (*controldir == '/')
 		snprintf(TmpBuf, MAX_BUFF, "%s/localiphost", controldir);
 	else
-		snprintf(TmpBuf, MAX_BUFF, "%s/%s/localiphost", qmaildir, controldir);
+		snprintf(TmpBuf, MAX_BUFF, "%s/%s/localiphost", sysconfdir, controldir);
 	if ((fp = fopen(TmpBuf, "r"))) {
 		if (!fgets(hostbuf, MAX_BUFF - 1, fp)) {
 			fclose(fp);
