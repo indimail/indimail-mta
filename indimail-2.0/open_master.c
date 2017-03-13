@@ -1,5 +1,8 @@
 /*
  * $Log: open_master.c,v $
+ * Revision 2.9  2017-03-13 14:04:53+05:30  Cprogrammer
+ * replaced qmaildir with sysconfdir
+ *
  * Revision 2.8  2016-05-17 17:09:39+05:30  Cprogrammer
  * use control directory set by configure
  *
@@ -13,7 +16,7 @@
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: open_master.c,v 2.8 2016-05-17 17:09:39+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: open_master.c,v 2.9 2017-03-13 14:04:53+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef CLUSTERED_SITE
@@ -25,7 +28,7 @@ static char     sccsid[] = "$Id: open_master.c,v 2.8 2016-05-17 17:09:39+05:30 C
 int
 open_master()
 {
-	char           *ptr, *qmaildir, *controldir;
+	char           *ptr, *sysconfdir, *controldir;
 	char            host_path[MAX_BUFF], master_host[MAX_BUFF];
 	FILE           *fp;
 
@@ -36,8 +39,8 @@ open_master()
 		if (snprintf(host_path, MAX_BUFF, "%s/host.master", controldir) == -1)
 			host_path[MAX_BUFF - 1] = 0;
 	} else {
-		getEnvConfigStr(&qmaildir, "QMAILDIR", QMAILDIR);
-		if (snprintf(host_path, MAX_BUFF, "%s/%s/host.master", qmaildir, controldir) == -1)
+		getEnvConfigStr(&sysconfdir, "SYSCONFDIR", SYSCONFDIR);
+		if (snprintf(host_path, MAX_BUFF, "%s/%s/host.master", sysconfdir, controldir) == -1)
 			host_path[MAX_BUFF - 1] = 0;
 	}
 	if (!(fp = fopen(host_path, "r")))
