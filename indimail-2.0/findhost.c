@@ -1,5 +1,8 @@
 /*
  * $Log: findhost.c,v $
+ * Revision 2.36  2017-03-13 13:43:34+05:30  Cprogrammer
+ * replaced qmaildir with sysconfdir
+ *
  * Revision 2.35  2016-05-17 15:40:14+05:30  Cprogrammer
  * use control directory set by configure
  *
@@ -198,7 +201,7 @@
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: findhost.c,v 2.35 2016-05-17 15:40:14+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: findhost.c,v 2.36 2017-03-13 13:43:34+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #include <stdio.h>
@@ -369,7 +372,7 @@ open_central_db(char *dbhost)
 	static char     host_path[MAX_BUFF], atexit_registered = 0;
 	char            SqlBuf[SQL_BUF_SIZE];
 	char           *ptr, *mysql_user = 0, *mysql_passwd = 0, *mysql_database = 0,
-				   *cntrl_socket = 0, *qmaildir, *controldir;
+				   *cntrl_socket = 0, *sysconfdir, *controldir;
 	int             mysqlport = -1, count;
 	unsigned int    flags;
 	FILE           *fp;
@@ -388,7 +391,7 @@ open_central_db(char *dbhost)
 	else
 	if ((ptr = (char *) getenv("CNTRL_HOST")) != (char *) 0)
 		scopy(cntrl_host, ptr, MAX_BUFF);
-	getEnvConfigStr(&qmaildir, "QMAILDIR", QMAILDIR);
+	getEnvConfigStr(&sysconfdir, "SYSCONFDIR", SYSCONFDIR);
 	getEnvConfigStr(&controldir, "CONTROLDIR", CONTROLDIR);
 	if (*controldir == '/') {
 		if (snprintf(host_path, MAX_BUFF, "%s/host.cntrl", controldir) == -1)
@@ -396,9 +399,9 @@ open_central_db(char *dbhost)
 		if (access(host_path, F_OK) && snprintf(host_path, MAX_BUFF, "%s/host.mysql", controldir) == -1)
 			host_path[MAX_BUFF - 1] = 0;
 	} else {
-		if (snprintf(host_path, MAX_BUFF, "%s/%s/host.cntrl", qmaildir, controldir) == -1)
+		if (snprintf(host_path, MAX_BUFF, "%s/%s/host.cntrl", sysconfdir, controldir) == -1)
 			host_path[MAX_BUFF - 1] = 0;
-		if (access(host_path, F_OK) && snprintf(host_path, MAX_BUFF, "%s/%s/host.mysql", qmaildir, controldir) == -1)
+		if (access(host_path, F_OK) && snprintf(host_path, MAX_BUFF, "%s/%s/host.mysql", sysconfdir, controldir) == -1)
 			host_path[MAX_BUFF - 1] = 0;
 	}
 	if (!*cntrl_host && !access(host_path, F_OK))
