@@ -884,25 +884,28 @@ dbinfo.8: dbinfo.9
 inlookup.8: inlookup.9
 	$(editman) inlookup.9 > $@
 vcfilter.1: vcfilter.9
-	cat $^ | sed s}INDIMAIL}$(indimaildir)}g > $@
+	cat $^ | sed s}SYSCONFDIR}$(sysconfdir)}g > $@
 vadddomain.1:vadddomain.9
-	cat $^ | sed s}INDIMAIL}$(indimaildir)}g > $@
+	cat $^ | sed s}LIBEXECDIR}$(libexecdir)}g \
+		| sed s}INDIMAILDIR}$(indimaildir)}g > $@
 vdeldomain.1:vdeldomain.9
-	cat $^ | sed s}INDIMAIL}$(indimaildir)}g > $@
+	cat $^ | sed s}LIBEXECDIR}$(libexecdir)}g > $@
 vadduser.1:vadduser.9
-	cat $^ | sed s}INDIMAIL}$(indimaildir)}g > $@
+	cat $^ | sed s}INDIMAIL}$(indimaildir)}g |
+		| sed s}LIBEXECDIR}$(libexecdir)}g > $@
 vdeluser.1:vdeluser.9
-	cat $^ | sed s}INDIMAIL}$(indimaildir)}g > $@
+	cat $^ | sed s}LIBEXECDIR}$(libexecdir)}g > $@
 vrenamedomain.1:vrenamedomain.9
-	cat $^ | sed s}INDIMAIL}$(indimaildir)}g > $@
+	cat $^ | sed s}LIBEXECDIR}$(libexecdir)}g > $@
 vrenameuser.1:vrenameuser.9
-	cat $^ | sed s}INDIMAIL}$(indimaildir)}g > $@
+	cat $^ | sed s}LIBEXECDIR}$(libexecdir)}g > $@
 vpasswd.1:vpasswd.9
-	cat $^ | sed s}INDIMAIL}$(indimaildir)}g > $@
+	cat $^ | sed s}LIBEXECDIR}$(libexecdir)}g > $@
 vmoveuser.1:vmoveuser.9
-	cat $^ | sed s}INDIMAIL}$(indimaildir)}g > $@
+	cat $^ | sed s}LIBEXECDIR}$(libexecdir)}g > $@
 vdelivermail.8:vdelivermail.9
-	cat $^ | sed s}INDIMAIL}$(indimaildir)}g > $@
+	cat $^ | sed s}INDIMAIL}$(indimaildir)}g |
+		| sed s}LIBEXECDIR}$(libexecdir)}g > $@
 indimail.7:indimail.9
 	$(editman) indimail.9 > $@
 
