@@ -1,5 +1,8 @@
 /*
  * $Log: qmail_remote.c,v $
+ * Revision 2.10  2017-03-13 14:08:00+05:30  Cprogrammer
+ * replaced QMAILDIR with PREFIX
+ *
  * Revision 2.9  2009-11-09 10:42:50+05:30  Cprogrammer
  * changed BUFF_SIZE to MAX_BUFF
  *
@@ -50,7 +53,7 @@
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: qmail_remote.c,v 2.9 2009-11-09 10:42:50+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: qmail_remote.c,v 2.10 2017-03-13 14:08:00+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #include <stdlib.h>
@@ -72,9 +75,8 @@ qmail_remote(char *user, char *domain)
 {
 	int             pim1[2], wait_status, err, tmperrno;
 	pid_t           pid;
-	char           *ptr, *qmaildir, *binqqargs[7];
+	char           *ptr, *binqqargs[7];
 	char            recipient[AUTH_SIZE], mail_size[28];
-	char            bin0[MAX_BUFF];
 
 	if (pipe(pim1) == -1)
 		return (-2);
@@ -94,8 +96,6 @@ qmail_remote(char *user, char *domain)
 			exit(111);
 		if (dup2(1, 2) == -1)
 			exit(111);
-		getEnvConfigStr(&qmaildir, "QMAILDIR", QMAILDIR);
-		snprintf(bin0, MAX_BUFF, "%s/bin/qmail-remote", qmaildir);
 		binqqargs[0] = "qmail-remote";
 		binqqargs[1] = domain;
 		getEnvConfigStr(&ptr, "SENDER", "");
@@ -105,7 +105,7 @@ qmail_remote(char *user, char *domain)
 		binqqargs[4] = mail_size;
 		binqqargs[5] = recipient;
 		binqqargs[6] = 0;
-		execv(bin0, binqqargs);
+		execv(PREFIX"/bin/qmail-remote", binqqargs);
 		if(error_temp(errno))
 			exit(111);
 		exit(100);
