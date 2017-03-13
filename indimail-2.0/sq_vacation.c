@@ -1,5 +1,8 @@
 /*
  * $Log: sq_vacation.c,v $
+ * Revision 2.11  2017-03-13 14:09:39+05:30  Cprogrammer
+ * replaced INDIMAILDIR with PREFIX
+ *
  * Revision 2.10  2011-10-28 14:16:29+05:30  Cprogrammer
  * added auth_method argument to pw_comp
  *
@@ -57,7 +60,9 @@
 #define HAVE_STDARG_H
 #define QUERY_CACHE 1
 #define CLUSTERED_SITE 1
-#define INDIMAILDIR "/var/indimail"
+#ifndef PREFIX
+#define PREFIX "/usr"
+#endif
 #define INDIMAIL_QMAIL_MODE     0644
 #define DEFAULT_DOMAIN "indimail.org"
 #define AUTH_SIZE               300
@@ -97,7 +102,7 @@
 #define ERR_UNEXPECTED  126     /*- other unexpected error */
 
 #ifndef lint
-static char     sccsid[] = "$Id: sq_vacation.c,v 2.10 2011-10-28 14:16:29+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: sq_vacation.c,v 2.11 2017-03-13 14:09:39+05:30 Cprogrammer Exp mbhangui $";
 #endif
 #ifndef INDIMAILH_H
 int             vauthOpen_user(char *);
@@ -414,13 +419,13 @@ main(int argc, char **argv)
 		else
 		if (setuid(uid))
 			die_sys(ERR_PRIVILEGE, "setuid %d", uid);
-		vacargs[0] = INDIMAILDIR"/bin/vmoduser";
+		vacargs[0] = PREFIX"/bin/vmoduser";
 		vacargs[1] = "-l";
 		vacargs[2] = "-"; /*- remove autoresponder */
 		vacargs[3] = email;
 		vacargs[4] = 0;
 		execv(*vacargs, vacargs);
-		die_sys(ERR_EXEC, "execv: %s/bin/vmoduser -l- %s", INDIMAILDIR, email);
+		die_sys(ERR_EXEC, "execv: %s/bin/vmoduser -l- %s", PREFIX, email);
 		exit(ERR_EXEC);
 	} else
 	if (!strncmp(action, "init", 4))
@@ -437,13 +442,13 @@ main(int argc, char **argv)
 		if ((fd = open(".vacation.msg", O_CREAT | O_WRONLY, S_IWUSR | S_IRUSR)) == -1)
 			die_sys(ERR_AUTO_MSG, ".vacation.msg");
 		close(fd);
-		vacargs[0] = INDIMAILDIR"/bin/vmoduser";
+		vacargs[0] = PREFIX"/bin/vmoduser";
 		vacargs[1] = "-l";
 		vacargs[2] = ".vacation.msg";
 		vacargs[3] = email;
 		vacargs[4] = 0;
 		execv(*vacargs, vacargs);
-		die_sys(ERR_EXEC, "execv: %s/bin/vmoduser -l .vacation.msg %s", INDIMAILDIR, email);
+		die_sys(ERR_EXEC, "execv: %s/bin/vmoduser -l .vacation.msg %s", PREFIX, email);
 	}
 	exit(status);
 }
