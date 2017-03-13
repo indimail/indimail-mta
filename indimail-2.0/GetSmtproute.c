@@ -1,5 +1,8 @@
 /*
  * $Log: GetSmtproute.c,v $
+ * Revision 2.8  2017-03-13 13:44:35+05:30  Cprogrammer
+ * replaced qmaildir with sysconfdir
+ *
  * Revision 2.7  2016-05-17 17:09:39+05:30  Cprogrammer
  * use control directory set by configure
  *
@@ -31,7 +34,7 @@
 #include <ctype.h>
 
 #ifndef	lint
-static char     sccsid[] = "$Id: GetSmtproute.c,v 2.7 2016-05-17 17:09:39+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: GetSmtproute.c,v 2.8 2017-03-13 13:44:35+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 /*
@@ -44,15 +47,15 @@ static char     sccsid[] = "$Id: GetSmtproute.c,v 2.7 2016-05-17 17:09:39+05:30 
 int
 GetSmtproute(char *domain)
 {
-	char           *qmaildir, *controldir, *routes;
+	char           *sysconfdir, *controldir, *routes;
 	int             default_port, relative;
 	char            smtproute[1024];
 
-	getEnvConfigStr(&qmaildir, "QMAILDIR", QMAILDIR);
+	getEnvConfigStr(&sysconfdir, "SYSCONFDIR", SYSCONFDIR);
 	getEnvConfigStr(&controldir, "CONTROLDIR", CONTROLDIR);
 	relative = *controldir == '/' ? 0 : 1;
 	if (relative)
-		snprintf(smtproute, sizeof(smtproute) - 1, "%s/%s/qmtproutes", qmaildir, controldir);
+		snprintf(smtproute, sizeof(smtproute) - 1, "%s/%s/qmtproutes", sysconfdir, controldir);
 	else
 		snprintf(smtproute, sizeof(smtproute) - 1, "%s/qmtproutes", controldir);
 	default_port = access(smtproute, F_OK) ? PORT_SMTP : PORT_QMTP;
@@ -66,7 +69,7 @@ GetSmtproute(char *domain)
 	}
 	if (relative)
 		snprintf(smtproute, sizeof(smtproute) - 1, "%s/%s/%s",
-			qmaildir, controldir, default_port == PORT_SMTP ? "smtproutes" : "qmtproutes");
+			sysconfdir, controldir, default_port == PORT_SMTP ? "smtproutes" : "qmtproutes");
 	else
 		snprintf(smtproute, sizeof(smtproute) - 1, "%s/%s",
 			controldir, default_port == PORT_SMTP ? "smtproutes" : "qmtproutes");
