@@ -1,5 +1,8 @@
 /*
  * $Log: dbload.c,v $
+ * Revision 2.20  2017-03-13 13:42:17+05:30  Cprogrammer
+ * replaced qmaildir with sysconfdir
+ *
  * Revision 2.19  2016-05-17 17:09:39+05:30  Cprogrammer
  * use control directory set by configure
  *
@@ -71,7 +74,7 @@
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: dbload.c,v 2.19 2016-05-17 17:09:39+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: dbload.c,v 2.20 2017-03-13 13:42:17+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #include <unistd.h>
@@ -212,7 +215,7 @@ int
 connect_db(DBINFO **ptr, MYSQL **mysqlptr)
 {
 	char            mcdFile[MAX_BUFF];
-	char           *qmaildir, *controldir, *mcdfile, *server;
+	char           *sysconfdir, *controldir, *mcdfile, *server;
 	int             maxattempts, retry_interval;
 	unsigned int    flags;
 
@@ -241,8 +244,8 @@ connect_db(DBINFO **ptr, MYSQL **mysqlptr)
 		if (*controldir == '/')
 			snprintf(mcdFile, MAX_BUFF, "%s/%s", controldir, mcdfile);
 		else {
-			getEnvConfigStr(&qmaildir, "QMAILDIR", QMAILDIR);
-			snprintf(mcdFile, MAX_BUFF, "%s/%s/%s", qmaildir, controldir, mcdfile);
+			getEnvConfigStr(&sysconfdir, "SYSCONFDIR", SYSCONFDIR);
+			snprintf(mcdFile, MAX_BUFF, "%s/%s/%s", sysconfdir, controldir, mcdfile);
 		}
 	}
 	if (!mysql_init(*mysqlptr))
