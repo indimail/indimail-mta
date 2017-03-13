@@ -444,6 +444,7 @@ AC_SUBST(domaindir)
 AC_SUBST(assigndir)
 AC_SUBST(shareddir)
 AC_DEFINE_UNQUOTED(INDIMAILDIR,"$indimaildir",IndiMail Home Directory)
+AC_DEFINE_UNQUOTED(PREFIX,"$prefix",Bin Prefix)
 rm -f indimail.dir
 
 indimailuid=`cat indimail.uid`
