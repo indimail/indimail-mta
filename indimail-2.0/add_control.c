@@ -1,5 +1,8 @@
 /*
  * $Log: add_control.c,v $
+ * Revision 2.7  2017-03-13 13:33:39+05:30  Cprogrammer
+ * replaced qmaildir with sysconfdir
+ *
  * Revision 2.6  2016-05-17 17:09:39+05:30  Cprogrammer
  * use control directory set by configure
  *
@@ -23,7 +26,7 @@
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: add_control.c,v 2.6 2016-05-17 17:09:39+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: add_control.c,v 2.7 2017-03-13 13:33:39+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 int
@@ -31,9 +34,9 @@ add_control(char *domain, char *target)
 {
 	int             count, relative;
 	char            filename[MAX_BUFF], tmpstr[MAX_BUFF];
-	char           *qmaildir, *controldir;
+	char           *sysconfdir, *controldir;
 
-	getEnvConfigStr(&qmaildir, "QMAILDIR", QMAILDIR);
+	getEnvConfigStr(&sysconfdir, "SYSCONFDIR", SYSCONFDIR);
 	getEnvConfigStr(&controldir, "CONTROLDIR", CONTROLDIR);
 	relative = (*controldir == '/' ? 0 : 1);
 
@@ -43,9 +46,9 @@ add_control(char *domain, char *target)
 	 */
 	if (relative) {
 		if ((count = count_rcpthosts()) >= 50)
-			snprintf(filename, MAX_BUFF, "%s/%s/morercpthosts", qmaildir, controldir);
+			snprintf(filename, MAX_BUFF, "%s/%s/morercpthosts", sysconfdir, controldir);
 		else
-			snprintf(filename, MAX_BUFF, "%s/%s/rcpthosts", qmaildir, controldir);
+			snprintf(filename, MAX_BUFF, "%s/%s/rcpthosts", sysconfdir, controldir);
 	} else {
 		if ((count = count_rcpthosts()) >= 50)
 			snprintf(filename, MAX_BUFF, "%s/morercpthosts", controldir);
@@ -63,7 +66,7 @@ add_control(char *domain, char *target)
 	 * Add to virtualdomains file and remove duplicates  and set mode 
 	 */
 	if (relative) 
-		snprintf(filename, MAX_BUFF, "%s/%s/virtualdomains", qmaildir, controldir);
+		snprintf(filename, MAX_BUFF, "%s/%s/virtualdomains", sysconfdir, controldir);
 	else
 		snprintf(filename, MAX_BUFF, "%s/virtualdomains", controldir);
 	if(target && *target)
@@ -76,7 +79,7 @@ add_control(char *domain, char *target)
 	 * make sure it's not in locals and set mode 
 	 */
 	if (relative) 
-		snprintf(filename, MAX_BUFF, "%s/%s/locals", qmaildir, controldir);
+		snprintf(filename, MAX_BUFF, "%s/%s/locals", sysconfdir, controldir);
 	else
 		snprintf(filename, MAX_BUFF, "%s/locals", controldir);
 	if(remove_line(domain, filename, 0, INDIMAIL_QMAIL_MODE) == -1)
@@ -87,7 +90,7 @@ add_control(char *domain, char *target)
 		 * Add to etrndomains file and remove duplicates  and set mode 
 		 */
 		if (relative) 
-			snprintf(filename, MAX_BUFF, "%s/%s/etrnhosts", qmaildir, controldir);
+			snprintf(filename, MAX_BUFF, "%s/%s/etrnhosts", sysconfdir, controldir);
 		else
 			snprintf(filename, MAX_BUFF, "%s/etrnhosts", controldir);
 		snprintf(tmpstr, MAX_BUFF, "%s", domain);
