@@ -1,5 +1,8 @@
 /*
  * $Log: proxypop3.c,v $
+ * Revision 2.8  2017-03-13 14:06:44+05:30  Cprogrammer
+ * replaced INDIMAILDIR with PREFIX
+ *
  * Revision 2.7  2010-03-06 15:47:33+05:30  Cprogrammer
  * use COURIERTLS env variable to execute TLS enabler program
  *
@@ -35,7 +38,7 @@
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: proxypop3.c,v 2.7 2010-03-06 15:47:33+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: proxypop3.c,v 2.8 2017-03-13 14:06:44+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef CLUSTERED_SITE
