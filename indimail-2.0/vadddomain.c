@@ -1,5 +1,8 @@
 /*
  * $Log: vadddomain.c,v $
+ * Revision 2.39  2017-03-13 14:11:19+05:30  Cprogrammer
+ * replaced INDIMAILDIR with PREFIX
+ *
  * Revision 2.38  2016-06-09 15:32:32+05:30  Cprogrammer
  * run if indimail gid is present in process supplementary groups
  *
@@ -180,7 +183,7 @@
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vadddomain.c,v 2.38 2016-06-09 15:32:32+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: vadddomain.c,v 2.39 2017-03-13 14:11:19+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 
@@ -399,7 +402,7 @@ main(argc, argv)
 			snprintf(TmpBuf, MAX_BUFF, "%s/.qmail-default", a_dir);
 			if ((fs = fopen(TmpBuf, "w+")) != NULL)
 			{
-				fprintf(fs, "| %s/sbin/vdelivermail '' %s\n", INDIMAILDIR, BounceEmail);
+				fprintf(fs, "| %s/sbin/vdelivermail '' %s\n", PREFIX, BounceEmail);
 				fclose(fs);
 				if (chown(TmpBuf, a_uid, a_gid) == -1)
 				{
