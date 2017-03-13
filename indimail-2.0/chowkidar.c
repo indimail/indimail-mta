@@ -61,7 +61,7 @@ main(int argc, char **argv)
 	int             spamNumber, spamFilter, c, silent, type, relative;
 	char            ignfile[SQL_BUF_SIZE], bad_from_rcpt_file[MAX_BUFF];
 	char           *filename = (char *) 0, *outfile = (char *) 0;
-	char           *qmaildir, *controldir, *ign;
+	char           *sysconfdir, *controldir, *ign;
 #ifdef CLUSTERED_SITE
 	int             total, sync_mode;
 	char          **Ptr, **bmfptr;
@@ -74,7 +74,7 @@ main(int argc, char **argv)
 #endif
 	spamNumber = spamFilter = 0;
 	filename = (char *) 0;
-	getEnvConfigStr(&qmaildir, "QMAILDIR", QMAILDIR);
+	getEnvConfigStr(&sysconfdir, "SYSCONFDIR", SYSCONFDIR);
 	getEnvConfigStr(&controldir, "CONTROLDIR", CONTROLDIR);
 	relative = *controldir == '/' ? 0 : 1;
 #ifdef CLUSTERED_SITE
@@ -126,9 +126,9 @@ main(int argc, char **argv)
 			if (!outfile)
 			{
 				outfile = "badmailfrom";
-				if (chdir(qmaildir) || chdir(controldir))
+				if (chdir(sysconfdir) || chdir(controldir))
 				{
-					fprintf(stderr, "unable to cd to qmaildir or controldir\n");
+					fprintf(stderr, "unable to cd to sysconfdir or controldir\n");
 					return (1);
 				}
 			}
@@ -145,9 +145,9 @@ main(int argc, char **argv)
 			if (!outfile)
 			{
 				outfile = "badrcptto";
-				if (chdir(qmaildir) || chdir(controldir))
+				if (chdir(sysconfdir) || chdir(controldir))
 				{
-					fprintf(stderr, "unable to cd to qmaildir or controldir\n");
+					fprintf(stderr, "unable to cd to sysconfdir or controldir\n");
 					return (1);
 				}
 			}
@@ -164,9 +164,9 @@ main(int argc, char **argv)
 			if (!outfile)
 			{
 				outfile = "spamdb";
-				if (chdir(qmaildir) || chdir(controldir))
+				if (chdir(sysconfdir) || chdir(controldir))
 				{
-					fprintf(stderr, "unable to cd to qmaildir or controldir\n");
+					fprintf(stderr, "unable to cd to sysconfdir or controldir\n");
 					return (1);
 				}
 			}
@@ -226,7 +226,7 @@ main(int argc, char **argv)
 			strncpy(bad_from_rcpt_file, outfile, MAX_BUFF);
 		else {
 			if (relative)
-				snprintf(bad_from_rcpt_file, MAX_BUFF, "%s/%s/%s", qmaildir, controldir, outfile);
+				snprintf(bad_from_rcpt_file, MAX_BUFF, "%s/%s/%s", sysconfdir, controldir, outfile);
 			else
 				snprintf(bad_from_rcpt_file, MAX_BUFF, "%s/%s", controldir, outfile);
 		}
@@ -234,7 +234,7 @@ main(int argc, char **argv)
 		{
 			case BADMAIL:
 				if (relative)
-					snprintf(ignfile, MAX_BUFF, "%s/%s/badmailpatterns", qmaildir, controldir);
+					snprintf(ignfile, MAX_BUFF, "%s/%s/badmailpatterns", sysconfdir, controldir);
 				else
 					snprintf(ignfile, MAX_BUFF, "%s/badmailpatterns", controldir);
 				if (loadIgnoreList(ignfile))
@@ -242,7 +242,7 @@ main(int argc, char **argv)
 				break;
 			case BADRCPT:
 				if (relative)
-					snprintf(ignfile, MAX_BUFF, "%s/%s/badrcptpatterns", qmaildir, controldir);
+					snprintf(ignfile, MAX_BUFF, "%s/%s/badrcptpatterns", sysconfdir, controldir);
 				else
 					snprintf(ignfile, MAX_BUFF, "%s/badrcptpatterns", controldir);
 				if (loadIgnoreList(ignfile))
@@ -250,7 +250,7 @@ main(int argc, char **argv)
 				break;
 			case SPAMDB:
 				if (relative)
-					snprintf(ignfile, MAX_BUFF, "%s/%s/spamignorepatterns", qmaildir, controldir);
+					snprintf(ignfile, MAX_BUFF, "%s/%s/spamignorepatterns", sysconfdir, controldir);
 				else
 					snprintf(ignfile, MAX_BUFF, "%s/spamignorepatterns", controldir);
 				if (loadIgnoreList(ignfile))
@@ -258,7 +258,7 @@ main(int argc, char **argv)
 				break;
 		}
 		if (relative)
-			snprintf(ignfile, MAX_BUFF, "%s/%s/%s", qmaildir, controldir,
+			snprintf(ignfile, MAX_BUFF, "%s/%s/%s", sysconfdir, controldir,
 				(ign = getenv("SPAMIGNORE")) ? ign : (ign = "spamignore"));
 		else
 			snprintf(ignfile, MAX_BUFF, "%s/%s", controldir,
