@@ -1,5 +1,8 @@
 /*
  * $Log: vmoddomain.c,v $
+ * Revision 2.10  2017-03-13 14:13:51+05:30  Cprogrammer
+ * replaced INDIMAILDIR with PREFIX
+ *
  * Revision 2.9  2016-06-09 15:32:32+05:30  Cprogrammer
  * run if indimail gid is present in process supplementary groups
  *
@@ -38,7 +41,7 @@
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vmoddomain.c,v 2.9 2016-06-09 15:32:32+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: vmoddomain.c,v 2.10 2017-03-13 14:13:51+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 static void     usage();
@@ -173,10 +176,10 @@ set_handler(char *dir, char *handler, uid_t uid, gid_t gid, int use_vfilter)
 	}
 #ifdef VFILTER
 	if(use_vfilter == 1)
-		filewrt(fd, "| %s/sbin/vfilter '' %s\n", INDIMAILDIR, handler);
+		filewrt(fd, "| %s/sbin/vfilter '' %s\n", PREFIX, handler);
 	else
 #endif
-		filewrt(fd, "| %s/sbin/vdelivermail '' %s\n", INDIMAILDIR, handler);
+		filewrt(fd, "| %s/sbin/vdelivermail '' %s\n", PREFIX, handler);
 	close(fd);
 	if (rename(tmpbuf, ".qmail-default"))
 	{
