@@ -1,5 +1,8 @@
 /*
  * $Log: get_local_hostid.c,v $
+ * Revision 2.5  2017-03-13 13:43:49+05:30  Cprogrammer
+ * replaced qmaildir with sysconfdir
+ *
  * Revision 2.4  2016-05-17 17:09:39+05:30  Cprogrammer
  * use control directory set by configure
  *
@@ -23,7 +26,7 @@
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: get_local_hostid.c,v 2.4 2016-05-17 17:09:39+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: get_local_hostid.c,v 2.5 2017-03-13 13:43:49+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 
@@ -32,7 +35,7 @@ get_local_hostid()
 {
 	static char     hostid[MAX_BUFF];
 	char            TmpFname[MAX_BUFF];
-	char           *qmaildir, *controldir, *ptr;
+	char           *sysconfdir, *controldir, *ptr;
 	FILE           *fp;
 	long            hostidno;
 
@@ -40,8 +43,8 @@ get_local_hostid()
 	if (*controldir == '/')
 		snprintf(TmpFname, MAX_BUFF, "%s/hostid", controldir);
 	else {
-		getEnvConfigStr(&qmaildir, "QMAILDIR", QMAILDIR);
-		snprintf(TmpFname, MAX_BUFF, "%s/%s/hostid", qmaildir, controldir);
+		getEnvConfigStr(&sysconfdir, "SYSCONFDIR", SYSCONFDIR);
+		snprintf(TmpFname, MAX_BUFF, "%s/%s/hostid", sysconfdir, controldir);
 	}
 	if ((fp = fopen(TmpFname, "r")))
 	{
