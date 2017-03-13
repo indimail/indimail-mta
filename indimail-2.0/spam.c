@@ -1,5 +1,8 @@
 /*
  * $Log: spam.c,v $
+ * Revision 2.19  2017-03-13 14:08:26+05:30  Cprogrammer
+ * replaced qmaildir with sysconfdir, use PREFIX for bin prefix
+ *
  * Revision 2.18  2016-05-17 14:56:59+05:30  Cprogrammer
  * use control directory defined by configure
  *
@@ -71,7 +74,7 @@
 #define SPAMDB  3
 
 #ifndef	lint
-static char     sccsid[] = "$Id: spam.c,v 2.18 2016-05-17 14:56:59+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: spam.c,v 2.19 2017-03-13 14:08:26+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 static char    *parseLine1(char *);
@@ -245,7 +248,7 @@ spamReport(int spamNumber, char *outfile)
 {
 	FILE           *fp;
 	char            tmpbuf[MAX_BUFF];
-	char           *qmaildir, *controldir, *ptr;
+	char           *sysconfdir, *controldir, *ptr;
 	char           *(spamprog[3]);
 	maddr          *p;
 	int             i, flag, spamcnt = 0;
@@ -261,12 +264,12 @@ spamReport(int spamNumber, char *outfile)
 		getEnvConfigStr(&ptr, "MAXADDR", MAXADDR);
 		maxaddr = atoi(ptr);
 	}
-	getEnvConfigStr(&qmaildir, "QMAILDIR", QMAILDIR);
+	getEnvConfigStr(&sysconfdir, "SYSCONFDIR", SYSCONFDIR);
 	getEnvConfigStr(&controldir, "CONTROLDIR", CONTROLDIR);
 	if (*tmpbuf == '/')
 		snprintf(tmpbuf, MAX_BUFF, "%s", controldir);
 	else
-		snprintf(tmpbuf, MAX_BUFF, "%s/%s", qmaildir, controldir);
+		snprintf(tmpbuf, MAX_BUFF, "%s/%s", sysconfdir, controldir);
 	if (!memcmp(outfile, tmpbuf, strlen(tmpbuf)))
 		flag = 1;
 	else
@@ -291,7 +294,7 @@ spamReport(int spamNumber, char *outfile)
 	fprintf(stderr, "%d Spammers detected\n", spamcnt);
 	if (flag && spamcnt)
 	{
-		spamprog[0] = QMAILDIR"/bin/qmail-cdb";
+		spamprog[0] = PREFIX"/bin/qmail-cdb";
 		if ((ptr = strrchr(outfile, '/')))
 			ptr++;
 		else
