@@ -1,5 +1,8 @@
 /*
  * $Log: autoturn_dir.c,v $
+ * Revision 2.5  2017-03-13 13:36:15+05:30  Cprogrammer
+ * replaced qmaildir with sysconfdir
+ *
  * Revision 2.4  2016-05-17 17:09:39+05:30  Cprogrammer
  * use control directory set by configure
  *
@@ -18,7 +21,7 @@
 #include <ctype.h>
 
 #ifndef	lint
-static char     sccsid[] = "$Id: autoturn_dir.c,v 2.4 2016-05-17 17:09:39+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: autoturn_dir.c,v 2.5 2017-03-13 13:36:15+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 char           *
@@ -26,16 +29,16 @@ autoturn_dir(char *domain)
 {
 	char            filename[MAX_BUFF], template[MAX_BUFF];
 	static char     tmpbuf[MAX_BUFF];
-	char           *ptr, *qmaildir, *controldir;
+	char           *ptr, *sysconfdir, *controldir;
 	int             len;
 	FILE           *fp;
 
-	getEnvConfigStr(&qmaildir, "QMAILDIR", QMAILDIR);
+	getEnvConfigStr(&sysconfdir, "SYSCONFDIR", SYSCONFDIR);
 	getEnvConfigStr(&controldir, "CONTROLDIR", CONTROLDIR);
 	if (*controldir == '/')
 		snprintf(filename, MAX_BUFF, "%s/virtualdomains", controldir);
 	else
-		snprintf(filename, MAX_BUFF, "%s/%s/virtualdomains", qmaildir, controldir);
+		snprintf(filename, MAX_BUFF, "%s/%s/virtualdomains", sysconfdir, controldir);
 	if (!(fp = fopen(filename, "r")))
 	{
 		perror(filename);
