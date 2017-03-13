@@ -1,5 +1,8 @@
 /*
  * $Log: update_newu.c,v $
+ * Revision 2.3  2017-03-13 14:10:05+05:30  Cprogrammer
+ * use PREFIX for bin prefix
+ *
  * Revision 2.2  2008-06-25 10:15:44+05:30  Cprogrammer
  * corrected permission of cdb file during creation
  *
@@ -23,7 +26,7 @@
 #include <sys/stat.h>
 
 #ifndef	lint
-static char     sccsid[] = "$Id: update_newu.c,v 2.2 2008-06-25 10:15:44+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: update_newu.c,v 2.3 2017-03-13 14:10:05+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 /*
@@ -37,13 +40,8 @@ update_newu()
 	pid = vfork();
 	if (pid == 0)
 	{
-		char            tmpbuf[MAX_BUFF];
-		char           *qmaildir;
-
 		umask(022);
-		getEnvConfigStr(&qmaildir, "QMAILDIR", QMAILDIR);
-		snprintf(tmpbuf, MAX_BUFF, "%s/bin/qmail-newu", qmaildir);
-		execl(tmpbuf, "qmail-newu", NULL);
+		execl(PREFIX"/bin/qmail-newu", "qmail-newu", NULL);
 		exit(127);
 	} else
 		wait(&pid);
