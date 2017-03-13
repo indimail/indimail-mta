@@ -1,5 +1,8 @@
 /*
  * $Log: inquerytest.c,v $
+ * Revision 2.25  2017-03-13 14:02:17+05:30  Cprogrammer
+ * replaced qmaildir with sysconfdir
+ *
  * Revision 2.24  2016-05-17 17:09:39+05:30  Cprogrammer
  * use control directory set by configure
  *
@@ -89,7 +92,7 @@
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: inquerytest.c,v 2.24 2016-05-17 17:09:39+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: inquerytest.c,v 2.25 2017-03-13 14:02:17+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 void            print_limits(struct vlimits *);
@@ -116,7 +119,7 @@ main(int argc, char **argv)
 	struct vlimits *lmt;
 #endif
 	void           *dbptr;
-	char           *ptr, *infifo = 0, *qmaildir, *controldir, *email = 0, *ipaddr = 0;
+	char           *ptr, *infifo = 0, *sysconfdir, *controldir, *email = 0, *ipaddr = 0;
 	char            InFifo[MAX_BUFF], InFifoEnv[MAX_BUFF];
 	int             c, query_type = -1, fd = -1, status;
 	pid_t           pid;
@@ -171,12 +174,12 @@ main(int argc, char **argv)
 			snprintf(InFifo, MAX_BUFF, "%s", infifo);
 		else
 		{
-			getEnvConfigStr(&qmaildir, "QMAILDIR", QMAILDIR);
+			getEnvConfigStr(&sysconfdir, "SYSCONFDIR", SYSCONFDIR);
 			getEnvConfigStr(&controldir, "CONTROLDIR", CONTROLDIR);
 			if (*controldir == '/')
 				snprintf(InFifo, MAX_BUFF, "%s/inquery/%s", controldir, infifo);
 			else
-				snprintf(InFifo, MAX_BUFF, "%s/%s/inquery/%s", qmaildir, controldir, infifo);
+				snprintf(InFifo, MAX_BUFF, "%s/%s/inquery/%s", sysconfdir, controldir, infifo);
 		}
 		if (access(InFifo, F_OK) || (fd = open(InFifo, O_WRONLY|O_NONBLOCK)) == -1)
 		{
@@ -212,12 +215,12 @@ main(int argc, char **argv)
 			snprintf(InFifo, MAX_BUFF, "%s", infifo);
 		else
 		{
-			getEnvConfigStr(&qmaildir, "QMAILDIR", QMAILDIR);
+			getEnvConfigStr(&sysconfdir, "SYSCONFDIR", SYSCONFDIR);
 			getEnvConfigStr(&controldir, "CONTROLDIR", CONTROLDIR);
 			if (*controldir == '/')
 				snprintf(InFifo, MAX_BUFF, "%s/inquery/%s", controldir, infifo);
 			else
-				snprintf(InFifo, MAX_BUFF, "%s/%s/inquery/%s", qmaildir, controldir, infifo);
+				snprintf(InFifo, MAX_BUFF, "%s/%s/inquery/%s", sysconfdir, controldir, infifo);
 		}
 		pid = -1;
 	}
