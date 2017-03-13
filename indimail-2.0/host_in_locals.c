@@ -1,5 +1,8 @@
 /*
  * $Log: host_in_locals.c,v $
+ * Revision 2.5  2017-03-13 13:44:51+05:30  Cprogrammer
+ * replaced qmaildir with sysconfdir
+ *
  * Revision 2.4  2016-05-17 17:09:39+05:30  Cprogrammer
  * use control directory set by configure
  *
@@ -27,7 +30,7 @@
 #include <ctype.h>
 
 #ifndef	lint
-static char     sccsid[] = "$Id: host_in_locals.c,v 2.4 2016-05-17 17:09:39+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: host_in_locals.c,v 2.5 2017-03-13 13:44:51+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef IP_ALIAS_DOMAINS
@@ -36,7 +39,7 @@ host_in_locals(domain)
 	char           *domain;
 {
 	char            tmpbuf[MAX_BUFF];
-	char           *ptr, *qmaildir, *controldir;
+	char           *ptr, *sysconfdir, *controldir;
 	FILE           *fs;
 
 	if(!domain || !*domain)
@@ -48,8 +51,8 @@ host_in_locals(domain)
 	if (*controldir == '/')
 		snprintf(tmpbuf, MAX_BUFF, "%s/locals", controldir);
 	else {
-		getEnvConfigStr(&qmaildir, "QMAILDIR", QMAILDIR);
-		snprintf(tmpbuf, MAX_BUFF, "%s/%s/locals", qmaildir, controldir);
+		getEnvConfigStr(&sysconfdir, "SYSCONFDIR", SYSCONFDIR);
+		snprintf(tmpbuf, MAX_BUFF, "%s/%s/locals", sysconfdir, controldir);
 	}
 	if(!(fs = fopen(tmpbuf, "r")))
 		return (0);
