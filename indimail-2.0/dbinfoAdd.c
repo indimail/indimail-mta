@@ -1,5 +1,8 @@
 /*
  * $Log: dbinfoAdd.c,v $
+ * Revision 2.5  2017-03-13 13:40:13+05:30  Cprogrammer
+ * replace qmaildir with sysconfdir
+ *
  * Revision 2.4  2016-05-17 15:40:09+05:30  Cprogrammer
  * use control directory set by configure
  *
@@ -17,7 +20,7 @@
 #include <mysqld_error.h>
 
 #ifndef	lint
-static char     sccsid[] = "$Id: dbinfoAdd.c,v 2.4 2016-05-17 15:40:09+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: dbinfoAdd.c,v 2.5 2017-03-13 13:40:13+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef CLUSTERED_SITE
@@ -38,10 +41,10 @@ int
 dbinfoAdd(char *domain, int distributed, char *sqlserver, char *mdahost, int port, char *database, char *user, char *passwd)
 {
 	char            SqlBuf[SQL_BUF_SIZE], mcdFile[MAX_BUFF];
-	char           *mcdfile, *qmaildir, *controldir;
+	char           *mcdfile, *sysconfdir, *controldir;
 	int             err;
 
-	getEnvConfigStr(&qmaildir, "QMAILDIR", QMAILDIR);
+	getEnvConfigStr(&sysconfdir, "SYSCONFDIR", SYSCONFDIR);
 	getEnvConfigStr(&controldir, "CONTROLDIR", CONTROLDIR);
 	getEnvConfigStr(&mcdfile, "MCDFILE", MCDFILE);
 	if(*mcdfile == '/')
@@ -50,7 +53,7 @@ dbinfoAdd(char *domain, int distributed, char *sqlserver, char *mdahost, int por
 		if (*controldir == '/')
 			snprintf(mcdFile, MAX_BUFF, "%s/%s", controldir, mcdfile);
 		else
-			snprintf(mcdFile, MAX_BUFF, "%s/%s/%s", qmaildir, controldir, mcdfile);
+			snprintf(mcdFile, MAX_BUFF, "%s/%s/%s", sysconfdir, controldir, mcdfile);
 	}
 	if (open_master())
 	{
