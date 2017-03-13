@@ -1,5 +1,8 @@
 /*
  * $Log: vauth_open.c,v $
+ * Revision 2.26  2017-03-13 14:12:07+05:30  Cprogrammer
+ * replaced qmaildir with sysconfdir
+ *
  * Revision 2.25  2016-05-17 15:40:24+05:30  Cprogrammer
  * use control directory set by configure
  *
@@ -108,7 +111,7 @@
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vauth_open.c,v 2.25 2016-05-17 15:40:24+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: vauth_open.c,v 2.26 2017-03-13 14:12:07+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #include <stdio.h>
@@ -122,7 +125,7 @@ vauth_open(char *dbhost)
 {
 	char            SqlBuf[SQL_BUF_SIZE], host_path[MAX_BUFF];
 	char           *ptr, *mysql_user = 0, *mysql_passwd = 0, *mysql_database = 0,
-		           *mysql_socket = 0, *qmaildir, *controldir;
+		           *mysql_socket = 0, *sysconfdir, *controldir;
 	int             mysqlport = -1, count;
 	unsigned int    flags;
 	FILE           *fp;
@@ -141,13 +144,13 @@ vauth_open(char *dbhost)
 	else
 	if ((ptr = (char *) getenv("MYSQL_HOST")) != (char *) 0)
 		scopy(mysql_host, ptr, MAX_BUFF);
-	getEnvConfigStr(&qmaildir, "QMAILDIR", QMAILDIR);
+	getEnvConfigStr(&sysconfdir, "SYSCONFDIR", SYSCONFDIR);
 	getEnvConfigStr(&controldir, "CONTROLDIR", CONTROLDIR);
 	if (*controldir == '/') {
 		if (snprintf(host_path, MAX_BUFF, "%s/host.mysql", controldir) == -1)
 			host_path[MAX_BUFF - 1] = 0;
 	} else {
-		if (snprintf(host_path, MAX_BUFF, "%s/%s/host.mysql", qmaildir, controldir) == -1)
+		if (snprintf(host_path, MAX_BUFF, "%s/%s/host.mysql", sysconfdir, controldir) == -1)
 			host_path[MAX_BUFF - 1] = 0;
 	}
 	if (!*mysql_host && !access(host_path, F_OK))
