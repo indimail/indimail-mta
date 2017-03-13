@@ -1,5 +1,8 @@
 /*
  * $Log: add_vacation.c,v $
+ * Revision 2.10  2017-03-13 13:35:23+05:30  Cprogrammer
+ * replaced QMAILDIR with PREFIX
+ *
  * Revision 2.9  2010-03-08 22:04:03+05:30  Cprogrammer
  * renamed qmail-autoresponder as autoresponder to shorten path
  *
@@ -36,7 +39,7 @@
 #include <sys/stat.h>
 
 #ifndef	lint
-static char     sccsid[] = "$Id: add_vacation.c,v 2.9 2010-03-08 22:04:03+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: add_vacation.c,v 2.10 2017-03-13 13:35:23+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 int
@@ -98,9 +101,8 @@ add_vacation(char *email, char *fname)
 		perror(TmpBuf);
 		return(1);
 	}
-	/*- fprintf(fp1, "| %s/bin/vacation\n", INDIMAILDIR); -*/
 	fprintf(fp1, "| %s/bin/autoresponder -q %s/.vacation.msg %s/.vacation.dir\n%s/Maildir/\n",
-		QMAILDIR, pw->pw_dir, pw->pw_dir, pw->pw_dir);
+		PREFIX, pw->pw_dir, pw->pw_dir, pw->pw_dir);
 	fclose(fp1);
 	if (chown(TmpBuf, uid, gid) || chmod(TmpBuf, INDIMAIL_QMAIL_MODE))
 	{
