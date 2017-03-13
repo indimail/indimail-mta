@@ -1,5 +1,8 @@
 /*
  * $Log: postdel.c,v $
+ * Revision 2.8  2017-03-13 14:05:07+05:30  Cprogrammer
+ * replaced INDIMAILDIR with PREFIX
+ *
  * Revision 2.7  2011-11-09 19:45:30+05:30  Cprogrammer
  * removed getversion
  *
@@ -25,7 +28,7 @@
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: postdel.c,v 2.7 2011-11-09 19:45:30+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: postdel.c,v 2.8 2017-03-13 14:05:07+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #include <string.h>
@@ -54,8 +57,8 @@ static char     sccsid[] = "$Id: postdel.c,v 2.7 2011-11-09 19:45:30+05:30 Cprog
 #define EX_NOPERM		77		/*- permission denied */
 #define EX_CONFIG		78		/*- configuration error */
 
-char           *(vdelargs[]) = { INDIMAILDIR"/sbin/vdelivermail", "''", BOUNCE_ALL, 0};
-char           *(filtargs[]) = { INDIMAILDIR"/sbin/vfilter", "''", BOUNCE_ALL, 0};
+char           *(vdelargs[]) = { PREFIX"/sbin/vdelivermail", "''", BOUNCE_ALL, 0};
+char           *(filtargs[]) = { PREFIX"/sbin/vfilter", "''", BOUNCE_ALL, 0};
 
 static int      get_options(int, char **, char *, char *, char *, char *, int *);
 
