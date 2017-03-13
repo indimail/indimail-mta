@@ -1,5 +1,8 @@
 /*
  * $Log: deliver_mail.c,v $
+ * Revision 2.66  2017-03-13 13:43:08+05:30  Cprogrammer
+ * use PREFIX for binaries
+ *
  * Revision 2.65  2016-05-25 09:00:40+05:30  Cprogrammer
  * use LIBEXECDIR for overquota.sh
  *
@@ -223,7 +226,7 @@
 #include <sys/wait.h>
 
 #ifndef	lint
-static char     sccsid[] = "$Id: deliver_mail.c,v 2.65 2016-05-25 09:00:40+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: deliver_mail.c,v 2.66 2017-03-13 13:43:08+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 /*- Function Prototypes */
@@ -235,7 +238,7 @@ static void     getAlertConfig(char *, char *);
 static void
 getAlertConfig(char *mailalert_host, char *mailalert_port)
 {
-	char           *tmpstr, *cptr, *qmaildir, *controldir;
+	char           *tmpstr, *cptr, *sysconfdir, *controldir;
 	char            TmpBuf[MAX_BUFF];
 	static char     alert_host[MAX_BUFF], alert_port[MAX_BUFF];
 	FILE           *fp;
@@ -251,8 +254,8 @@ getAlertConfig(char *mailalert_host, char *mailalert_port)
 	if (*controldir == '/')
 		snprintf(TmpBuf, sizeof(TmpBuf), "%s/mailalert.cfg", controldir);
 	else {
-		getEnvConfigStr(&qmaildir, "QMAILDIR", QMAILDIR);
-		snprintf(TmpBuf, sizeof(TmpBuf), "%s/%s/mailalert.cfg", qmaildir, controldir);
+		getEnvConfigStr(&sysconfdir, "SYSCONFDIR", SYSCONFDIR);
+		snprintf(TmpBuf, sizeof(TmpBuf), "%s/%s/mailalert.cfg", sysconfdir, controldir);
 	}
 	if ((fp = fopen(TmpBuf, "r")))
 	{
@@ -296,13 +299,12 @@ qmail_inject_open(char *address, int *write_fd)
 {
 	int             pim[2];
 	long unsigned   pid;
-	char           *qmaildir, *sender;
+	char           *sender;
 #ifdef POSTFIXDIR
 	char           *mta;
 #endif
 	char            Address[AUTH_SIZE];
-	char            bin0[MAX_BUFF];
-	char           *binqqargs[6];
+	char           *binqqargs[6], *bin0;
 
 	/*- skip over an & sign if there */
 	*write_fd = -1;
@@ -323,20 +325,19 @@ qmail_inject_open(char *address, int *write_fd)
 		close(pim[1]);
 		if (dup2(pim[0], 0) == -1)
 			_exit(111);
-		getEnvConfigStr(&qmaildir, "QMAILDIR", QMAILDIR);
 		getEnvConfigStr(&sender, "SENDER", "postmaster");
 #ifdef POSTFIXDIR
 		if (!(mta = getenv("MTA")))
-			snprintf(bin0, MAX_BUFF, "%s/bin/qmail-inject", qmaildir);
+			bin0 = PREFIX"/bin/qmail-inject";
 		else
 		{
 			if (!strncmp(mta, "Postfix", 8))
-				snprintf(bin0, MAX_BUFF, "%s/bin/sendmail", POSTFIXDIR);
+				bin0 = PREFIX"/bin/sendmail";
 			else
-				snprintf(bin0, MAX_BUFF, "%s/bin/qmail-inject", qmaildir);
+				bin0 = PREFIX"/bin/qmail-inject";
 		}
 #else
-	snprintf(bin0, MAX_BUFF, "%s/bin/qmail-inject", qmaildir);
+	bin0 = PREFIX"/bin/qmail-inject";
 #endif
 		binqqargs[0] = bin0;
 		binqqargs[1] = "-f";
