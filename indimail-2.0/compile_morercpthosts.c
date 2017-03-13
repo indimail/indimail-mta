@@ -1,5 +1,8 @@
 /*
  * $Log: compile_morercpthosts.c,v $
+ * Revision 2.2  2017-03-13 13:38:04+05:30  Cprogrammer
+ * use PREFIX for bin programs
+ *
  * Revision 2.1  2005-12-29 22:40:21+05:30  Cprogrammer
  * use getEnvConfigStr to set variables from environment variables
  *
@@ -20,7 +23,7 @@
 #include <sys/wait.h>
 
 #ifndef	lint
-static char     sccsid[] = "$Id: compile_morercpthosts.c,v 2.1 2005-12-29 22:40:21+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: compile_morercpthosts.c,v 2.2 2017-03-13 13:38:04+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 /*
@@ -34,12 +37,7 @@ compile_morercpthosts()
 	pid = vfork();
 	if (pid == 0)
 	{
-		char            tmpbuf[MAX_BUFF];
-		char           *qmaildir;
-
-		getEnvConfigStr(&qmaildir, "QMAILDIR", QMAILDIR);
-		snprintf(tmpbuf, MAX_BUFF, "%s/bin/qmail-newmrh", qmaildir);
-		execl(tmpbuf, "qmail-newmrh", NULL);
+		execl(PREFIX"/bin/qmail-newmrh", "qmail-newmrh", NULL);
 		exit(127);
 	} else
 		wait(&pid);
