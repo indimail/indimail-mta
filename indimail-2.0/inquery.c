@@ -1,5 +1,8 @@
 /*
  * $Log: inquery.c,v $
+ * Revision 2.20  2017-03-13 14:01:57+05:30  Cprogrammer
+ * replaced qmaildir with sysconfdir
+ *
  * Revision 2.19  2016-05-17 17:09:39+05:30  Cprogrammer
  * use control directory set by configure
  *
@@ -69,7 +72,7 @@
  */
 
 #ifndef	lint
-static char     sccsid[] = "$Id: inquery.c,v 2.19 2016-05-17 17:09:39+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: inquery.c,v 2.20 2017-03-13 14:01:57+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #include <stdlib.h>
@@ -90,7 +93,7 @@ inquery(char query_type, char *email, char *ip)
 	int             rfd, wfd, len1, len2, len3, bytes, idx, readTimeout, writeTimeout, pipe_size, tmperrno, relative;
 	static int      intBuf;
 	char            QueryBuf[MAX_BUFF + sizeof(int)], myFifo[MAX_BUFF], InFifo[MAX_BUFF], TmpBuf[MAX_BUFF];
-	char           *qmaildir, *controldir, *infifo;
+	char           *sysconfdir, *controldir, *infifo;
 	static char    *pwbuf;
 	FILE           *fp;
 	void            (*sig_pipe_save) ();
@@ -138,7 +141,7 @@ inquery(char query_type, char *email, char *ip)
 	*((int *) QueryBuf) = bytes;
 	bytes += sizeof(int);
 
-	getEnvConfigStr(&qmaildir, "QMAILDIR", QMAILDIR);
+	getEnvConfigStr(&sysconfdir, "SYSCONFDIR", SYSCONFDIR);
 	getEnvConfigStr(&controldir, "CONTROLDIR", CONTROLDIR);
 	relative = *controldir == '/' ? 0 : 1;
 	getEnvConfigStr(&infifo, "INFIFO", INFIFO);
@@ -148,7 +151,7 @@ inquery(char query_type, char *email, char *ip)
 		scopy(InFifo, TmpBuf, MAX_BUFF);
 	} else {
 		if (relative)
-			snprintf(TmpBuf, MAX_BUFF, "%s/%s/inquery/%s", qmaildir, controldir, infifo);
+			snprintf(TmpBuf, MAX_BUFF, "%s/%s/inquery/%s", sysconfdir, controldir, infifo);
 		else
 			snprintf(TmpBuf, MAX_BUFF, "%s/inquery/%s", controldir, infifo);
 		for (idx = 1;;idx++) {
@@ -204,7 +207,7 @@ inquery(char query_type, char *email, char *ip)
 		return ((void *) 0);
 	} 
 	if (relative)
-		snprintf(TmpBuf, MAX_BUFF, "%s/%s/timeoutwrite", qmaildir, controldir);
+		snprintf(TmpBuf, MAX_BUFF, "%s/%s/timeoutwrite", sysconfdir, controldir);
 	else
 		snprintf(TmpBuf, MAX_BUFF, "%s/timeoutwrite", controldir);
 	if((fp = fopen(TmpBuf, "r")))
@@ -244,7 +247,7 @@ inquery(char query_type, char *email, char *ip)
 #endif
 		case DOMAIN_QUERY:
 			if (relative)
-				snprintf(TmpBuf, MAX_BUFF, "%s/%s/timeoutread", qmaildir, controldir);
+				snprintf(TmpBuf, MAX_BUFF, "%s/%s/timeoutread", sysconfdir, controldir);
 			else
 				snprintf(TmpBuf, MAX_BUFF, "%s/timeoutread", controldir);
 			if((fp = fopen(TmpBuf, "r")))
