@@ -1,5 +1,8 @@
 /*
  * $Log: dbinfo.c,v $
+ * Revision 2.16  2017-03-13 13:40:51+05:30  Cprogrammer
+ * replaced qmaildir with sysconfdir
+ *
  * Revision 2.15  2016-05-17 15:39:42+05:30  Cprogrammer
  * use control directory set by configure
  *
@@ -95,7 +98,7 @@
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: dbinfo.c,v 2.15 2016-05-17 15:39:42+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: dbinfo.c,v 2.16 2017-03-13 13:40:51+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef CLUSTERED_SITE
@@ -168,14 +171,14 @@ static int
 editdbinfo(char *filename)
 {
 	char            mcdFile[MAX_BUFF], TmpBuf[MAX_BUFF], envbuf[MAX_BUFF];
-	char           *ptr, *qmaildir, *controldir, *mcdfile;
+	char           *ptr, *sysconfdir, *controldir, *mcdfile;
 	DBINFO        **rhostsptr, **tmpPtr;
 	uid_t           uid;
 	gid_t           gid;
 	int             total, count;
 
 	verbose = 1;
-	getEnvConfigStr(&qmaildir, "QMAILDIR", QMAILDIR);
+	getEnvConfigStr(&sysconfdir, "SYSCONFDIR", SYSCONFDIR);
 	getEnvConfigStr(&controldir, "CONTROLDIR", CONTROLDIR);
 	if (!filename || !*filename)
 		getEnvConfigStr(&mcdfile, "MCDFILE", MCDFILE);
@@ -187,7 +190,7 @@ editdbinfo(char *filename)
 		if (*controldir == '/')
 			snprintf(mcdFile, MAX_BUFF, "%s/%s", controldir, mcdfile);
 		else
-			snprintf(mcdFile, MAX_BUFF, "%s/%s/%s", qmaildir, controldir, mcdfile);
+			snprintf(mcdFile, MAX_BUFF, "%s/%s/%s", sysconfdir, controldir, mcdfile);
 	}
 	snprintf(envbuf, MAX_BUFF, "MCDFILE=%s", mcdFile);
 	rhostsptr = LoadDbInfo_TXT(&total);
