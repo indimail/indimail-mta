@@ -1,5 +1,8 @@
 /*
  * $Log: vdelivermail.c,v $
+ * Revision 2.64  2017-03-13 14:12:43+05:30  Cprogrammer
+ * replaced qmaildir with sysconfdir
+ *
  * Revision 2.63  2017-01-09 19:38:54+05:30  Cprogrammer
  * initialize user, domain, bounce, userext variables
  *
@@ -273,7 +276,7 @@
 #include <sys/wait.h>
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vdelivermail.c,v 2.63 2017-01-09 19:38:54+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: vdelivermail.c,v 2.64 2017-03-13 14:12:43+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 /*- Globals */
@@ -888,18 +891,18 @@ reject_mail(char *user, char *domain, int status, mdir_t MsgSize, char *bounce)
 static int
 bhfcheck(char *addr)
 {
-	char           *ptr, *mapbhf, *qmaildir, *controldir;
+	char           *ptr, *mapbhf, *sysconfdir, *controldir;
 	char            tmpbuf[MAX_BUFF];
 	int             i, j, fd, count, k = 0;
 	struct stat     statbuf;
 	char            subvalue;
 
-	getEnvConfigStr(&qmaildir, "QMAILDIR", QMAILDIR);
+	getEnvConfigStr(&sysconfdir, "SYSCONFDIR", SYSCONFDIR);
 	getEnvConfigStr(&controldir, "CONTROLDIR", CONTROLDIR);
 	if (*controldir == '/')
 		snprintf(tmpbuf, sizeof(tmpbuf), "%s/blackholedsender", controldir);
 	else
-		snprintf(tmpbuf, sizeof(tmpbuf), "%s/%s/blackholedsender", qmaildir, controldir);
+		snprintf(tmpbuf, sizeof(tmpbuf), "%s/%s/blackholedsender", sysconfdir, controldir);
 	if (!stat(tmpbuf, &statbuf))
 	{
 		if (!(mapbhf = (char *) malloc(statbuf.st_size)))
@@ -957,7 +960,7 @@ bhfcheck(char *addr)
 	if (*controldir == '/')
 		snprintf(tmpbuf, sizeof(tmpbuf), "%s/blackholedpatterns",  controldir);
 	else
-		snprintf(tmpbuf, sizeof(tmpbuf), "%s/%s/blackholedpatterns", qmaildir, controldir);
+		snprintf(tmpbuf, sizeof(tmpbuf), "%s/%s/blackholedpatterns", sysconfdir, controldir);
 	if (!stat(tmpbuf, &statbuf))
 	{
 		if (!(mapbhf = (char *) malloc(statbuf.st_size)))
