@@ -1,5 +1,8 @@
 /*
  * $Log: isvirtualdomain.c,v $
+ * Revision 2.6  2017-03-13 14:03:35+05:30  Cprogrammer
+ * replaced qmaildir with sysconfdir
+ *
  * Revision 2.5  2016-05-17 17:09:39+05:30  Cprogrammer
  * use control directory set by configure
  *
@@ -31,22 +34,22 @@
 #include <errno.h>
 
 #ifndef	lint
-static char     sccsid[] = "$Id: isvirtualdomain.c,v 2.5 2016-05-17 17:09:39+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: isvirtualdomain.c,v 2.6 2017-03-13 14:03:35+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 int
 isvirtualdomain(char *domain)
 {
 	FILE           *fp;
-	char           *qmaildir, *controldir, *ptr;
+	char           *sysconfdir, *controldir, *ptr;
 	char            tmpbuf[MAX_BUFF];
 
 	getEnvConfigStr(&controldir, "CONTROLDIR", CONTROLDIR);
 	if (*controldir == '/')
 		snprintf(tmpbuf, MAX_BUFF, "%s/virtualdomains", controldir);
 	else {
-		getEnvConfigStr(&qmaildir, "QMAILDIR", QMAILDIR);
-		snprintf(tmpbuf, MAX_BUFF, "%s/%s/virtualdomains", qmaildir, controldir);
+		getEnvConfigStr(&sysconfdir, "SYSCONFDIR", SYSCONFDIR);
+		snprintf(tmpbuf, MAX_BUFF, "%s/%s/virtualdomains", sysconfdir, controldir);
 	}
 	if(!(fp = fopen(tmpbuf, "r")))
 		return(0);
