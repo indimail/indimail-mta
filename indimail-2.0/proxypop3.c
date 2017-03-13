@@ -166,7 +166,7 @@ main(int argc, char **argv)
 					ptr++;
 				if (!p || !strcmp(ptr, "sslerator"))
 				{
-					binqqargs[0] = INDIMAILDIR"/bin/sslerator";
+					binqqargs[0] = PREFIX"/bin/sslerator";
 					binqqargs[1] = argv[0];
 					binqqargs[2] = argv[1]; 
 					binqqargs[3] = argv[2];

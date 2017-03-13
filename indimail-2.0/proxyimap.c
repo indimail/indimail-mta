@@ -1,5 +1,8 @@
 /*
  * $Log: proxyimap.c,v $
+ * Revision 2.9  2017-03-13 14:06:08+05:30  Cprogrammer
+ * replaced INDIMAILDIR with PREFIX
+ *
  * Revision 2.8  2010-03-06 15:46:52+05:30  Cprogrammer
  * use COURIERTLS env variable to execute TLS enabler program
  *
@@ -38,7 +41,7 @@
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: proxyimap.c,v 2.8 2010-03-06 15:46:52+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: proxyimap.c,v 2.9 2017-03-13 14:06:08+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef CLUSTERED_SITE
@@ -148,7 +151,7 @@ main(int argc, char **argv)
 					p++;
 				if (!ptr || !strcmp(p, "sslerator"))
 				{
-					binqqargs[0] = INDIMAILDIR"/bin/sslerator";
+					binqqargs[0] = PREFIX"/bin/sslerator";
 					binqqargs[1] = argv[0];
 					binqqargs[2] = argv[1]; 
 					binqqargs[3] = argv[2];

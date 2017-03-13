@@ -1,5 +1,8 @@
 /*
  * $Log: proxylogin.c,v $
+ * Revision 2.46  2017-03-13 14:06:35+05:30  Cprogrammer
+ * replaced INDIMAILDIR with PREFIX
+ *
  * Revision 2.45  2013-06-10 15:46:48+05:30  Cprogrammer
  * set MAILDIRQUOTA=0S if quota is NOQUOTA
  *
@@ -156,7 +159,7 @@
 #include <unistd.h>
 
 #ifndef	lint
-static char     sccsid[] = "$Id: proxylogin.c,v 2.45 2013-06-10 15:46:48+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: proxylogin.c,v 2.46 2017-03-13 14:06:35+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef CLUSTERED_SITE
@@ -184,7 +187,7 @@ autoAddUser(char *email, char *pass, char *service)
 		scopy(encrypted, pass, MAX_BUFF);
 	else
 		mkpasswd3(pass, encrypted, MAX_BUFF);
-	getEnvConfigStr(&ptr, "ADDUSERCMD", INDIMAILDIR"/bin/autoadduser");
+	getEnvConfigStr(&ptr, "ADDUSERCMD", PREFIX"/bin/autoadduser");
 	if (!access(ptr, X_OK))
 	{
 		snprintf(cmdbuf, sizeof(cmdbuf), "%s %s %s", ptr, email, encrypted);
