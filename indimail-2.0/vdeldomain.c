@@ -1,5 +1,8 @@
 /*
  * $Log: vdeldomain.c,v $
+ * Revision 2.19  2017-03-13 14:12:26+05:30  Cprogrammer
+ * replaced qmaildir with sysconfdir
+ *
  * Revision 2.18  2016-06-09 15:32:32+05:30  Cprogrammer
  * run if indimail gid is present in process supplementary groups
  *
@@ -112,7 +115,7 @@
 #include <sys/socket.h>
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vdeldomain.c,v 2.18 2016-06-09 15:32:32+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: vdeldomain.c,v 2.19 2017-03-13 14:12:26+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 char            Domain[MAX_BUFF];
@@ -132,7 +135,7 @@ main(argc, argv)
 	char           *ptr, *base_argv0;
 #ifdef CLUSTERED_SITE
 	char            mcdFile[MAX_BUFF];
-	char           *ipaddr, *mcdfile, *qmaildir, *controldir;
+	char           *ipaddr, *mcdfile, *sysconfdir, *controldir;
 	int             total, is_dist;
 #endif
 
@@ -155,12 +158,12 @@ main(argc, argv)
 	if ((err = vdeldomain(Domain)) != VA_SUCCESS)
 		error_stack(stderr, 0);
 #ifdef CLUSTERED_SITE
-	getEnvConfigStr(&qmaildir, "QMAILDIR", QMAILDIR);
+	getEnvConfigStr(&sysconfdir, "SYSCONFDIR", SYSCONFDIR);
 	getEnvConfigStr(&controldir, "CONTROLDIR", CONTROLDIR);
 	if (*controldir == '/')
 		snprintf(mcdFile, MAX_BUFF, "%s/host.master", controldir);
 	else
-		snprintf(mcdFile, MAX_BUFF, "%s/%s/host.master", qmaildir, controldir);
+		snprintf(mcdFile, MAX_BUFF, "%s/%s/host.master", sysconfdir, controldir);
 	if (access(mcdFile, F_OK))
 		err = 1;
 	if (!err)
@@ -197,7 +200,7 @@ main(argc, argv)
 				if (*controldir == '/')
 					snprintf(mcdFile, MAX_BUFF, "%s/%s", controldir, mcdfile);
 				else
-					snprintf(mcdFile, MAX_BUFF, "%s/%s/%s", qmaildir, controldir, mcdfile);
+					snprintf(mcdFile, MAX_BUFF, "%s/%s/%s", sysconfdir, controldir, mcdfile);
 			}
 			if (!access(mcdfile, F_OK) && unlink(mcdFile))
 			{
