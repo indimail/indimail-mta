@@ -1,5 +1,8 @@
 /*
  * $Log: indiversion.c,v $
+ * Revision 2.144  2017-03-13 13:45:13+05:30  Cprogrammer
+ * replaced INDIMAILDIR, QMAILDIR with PREFIX
+ *
  * Revision 2.143  2017-01-04 21:46:37+05:30  Cprogrammer
  * moved cputime, bogofilter-qfe to libexecdir
  *
@@ -551,7 +554,7 @@
 #endif
 
 #ifndef	lint
-static char     sccsid[] = "$Id: indiversion.c,v 2.143 2017-01-04 21:46:37+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: indiversion.c,v 2.144 2017-03-13 13:45:13+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 void            getversion_indimail_settings_c();
@@ -1309,25 +1312,25 @@ Ident(char *pgname, int mode)
 	char            idbuf[] = "# %Id: "; /*- workaround for git bug */
 
 	if (mode == 1)
-		snprintf(buffer, MAX_BUFF, "strings %s/bin/%s", INDIMAILDIR, pgname);
+		snprintf(buffer, MAX_BUFF, "strings %s/bin/%s", PREFIX, pgname);
 	else
 	if (mode == 2)
-		snprintf(buffer, MAX_BUFF, "strings %s/sbin/%s", INDIMAILDIR, pgname);
+		snprintf(buffer, MAX_BUFF, "strings %s/sbin/%s", PREFIX, pgname);
 	else
 	if (mode == 3)
 		snprintf(buffer, MAX_BUFF, "strings %s/%s", LIBEXECDIR, pgname);
 	else {
-		snprintf(buffer, MAX_BUFF, "%s/bin/%s", QMAILDIR, pgname);
+		snprintf(buffer, MAX_BUFF, "%s/bin/%s", PREFIX, pgname);
 		if (!access(buffer, F_OK))
-			snprintf(buffer, MAX_BUFF, "strings %s/bin/%s", QMAILDIR, pgname);
+			snprintf(buffer, MAX_BUFF, "strings %s/bin/%s", PREFIX, pgname);
 		else {
-			snprintf(buffer, MAX_BUFF, "%s/sbin/%s", QMAILDIR, pgname);
+			snprintf(buffer, MAX_BUFF, "%s/sbin/%s", PREFIX, pgname);
 			if (!access(buffer, F_OK))
-				snprintf(buffer, MAX_BUFF, "strings %s/sbin/%s", QMAILDIR, pgname);
+				snprintf(buffer, MAX_BUFF, "strings %s/sbin/%s", PREFIX, pgname);
 			else {
-				snprintf(buffer, MAX_BUFF, "%s/libexec/%s", QMAILDIR, pgname);
+				snprintf(buffer, MAX_BUFF, "%s/libexec/%s", PREFIX, pgname);
 				if (!access(buffer, F_OK))
-					snprintf(buffer, MAX_BUFF, "strings %s/libexec/%s", QMAILDIR, pgname);
+					snprintf(buffer, MAX_BUFF, "strings %s/libexec/%s", PREFIX, pgname);
 				else
 					return;
 			}
