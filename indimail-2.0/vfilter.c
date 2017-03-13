@@ -1,5 +1,8 @@
 /*-
  * $Log: vfilter.c,v $
+ * Revision 2.50  2017-03-13 14:13:16+05:30  Cprogrammer
+ * replaced INDIMAILDIR with PREFIX
+ *
  * Revision 2.49  2015-12-17 17:36:46+05:30  Cprogrammer
  * fixed issue of indimail.org string in X-Filter header
  *
@@ -160,7 +163,7 @@
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vfilter.c,v 2.49 2015-12-17 17:36:46+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: vfilter.c,v 2.50 2017-03-13 14:13:16+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef VFILTER
@@ -596,7 +599,7 @@ execMda(char **argptr, char **mda)
 {
 	char           *x;
 	char          **argv;
-	char           *(vdelargs[]) = { INDIMAILDIR"/sbin/vdelivermail", "''", BOUNCE_ALL, 0};
+	char           *(vdelargs[]) = { PREFIX"/sbin/vdelivermail", "''", BOUNCE_ALL, 0};
 
 	*mda = *vdelargs;
 	if ((x = getenv("MDA")))
@@ -846,7 +849,7 @@ get_options(int argc, char **argv, char *bounce, char *emailid, char *user, char
 static int
 myExit(int argc, char **argv, int status, int bounce, char *DestFolder, char *forward)
 {
-	char           *revision = "$Revision: 2.49 $";
+	char           *revision = "$Revision: 2.50 $";
 	char           *ptr, *mda;
 	char            MaildirFolder[MAX_BUFF], XFilter[MAX_BUFF];
 	pid_t           pid;
