@@ -70,9 +70,8 @@ installation cater to multiple instances having different properties / configura
 To setup a new IndiMail instance, requires you to just set few environment variables. Unlike
 qmail/netqmail, IndiMail doesn't force you to recompile each time you require a new instance.
 Multiple queues eliminates what is known as 'the silly qmail syndrome' and gives IndiMail the
-capability to perform better than a stock qmail installation. All IndiMail files lie under
-/var/indimail (including qmail binaries). IndiMail's multiple queue gives allows one to achieve
-tremendous inject rates using commodity hardware as can be seen here
+capability to perform better than a stock qmail installation. IndiMail's multiple queue gives
+allows one to achieve tremendous inject rates using commodity hardware as can be seen here
 
 http://groups.google.co.in/group/indimail/browse_thread/thread/f9e0b6214d88ca6d#
 
@@ -118,8 +117,8 @@ You could also look at
 
 http://indimail.blogspot.com/2009/11/indimail-installation-steps.html
 
-Once you have installed IndiMail, you will find all man pages in /var/indimail/man and
-documents in /var/indimail/doc. You can do man -M /var/indimail/man indimail to get started
+Once you have installed IndiMail, you will find all man pages in @mandir@ and
+documents in @shareddir@/doc. You can do man indimail to get started
 with understanding IndiMail.
 
 DISCLAIMER

@@ -1036,7 +1036,7 @@ the installation.
    alternative MTA in case your system has /usr/sbin/alternatives. Additionally
    sendmail will be disabled.
 
-   % sudo /var/indimail/sbin/svctool --config=add-boot
+   % sudo /usr/sbin/svctool --config=add-boot
 
    The above command will install svscanboot (in inittab, /etc/init or /etc/event.d). It
    will also set IndiMail as an alternative MTA and replace /usr/sbin/sendmail or
@@ -1619,10 +1619,10 @@ indimail 31500  0.0  0.0   6572   860 ?        S    15:24   0:00 @prefix@/sbin/i
 qmails   31501  0.0  0.0   1900   392 ?        S    15:24   0:00 qmail-todo
 qmailq   31502  0.0  0.0   1872   368 ?        S    15:24   0:00 qmail-clean
 root      1056  0.0  0.0   1740   316 ?        S    15:24   0:00 supervise qmail-qmtpd.209
-indimail  1078  0.0  0.0   6640  1108 ?        S    15:24   0:00 @prefix@/bin/tcpserver -v -H -R -l 0 -x @sysconfdir@/tcp.qmtp.cdb -c @servicedir@/qmail-qmtpd.209/variables/MAXDAEMONS -o -b 75 -u 555 -g 555 0 209 /var/indimail/bin/qmail-qmtpd
+indimail  1078  0.0  0.0   6640  1108 ?        S    15:24   0:00 @prefix@/bin/tcpserver -v -H -R -l 0 -x @sysconfdir@/tcp.qmtp.cdb -c @servicedir@/qmail-qmtpd.209/variables/MAXDAEMONS -o -b 75 -u 555 -g 555 0 209 @prefix@/bin/qmail-qmtpd
 qmaill    1089  0.0  0.0   1756   336 ?        S    15:24   0:00 @prefix@/bin/multilog t @logdir@/qmtpd.209
 root      1058  0.0  0.0   1740   316 ?        S    15:24   0:00 supervise qmail-qmqpd.628
-indimail  1102  0.0  0.0   6640   836 ?        S    15:24   0:00 @prefix@/bin/tcpserver -v -H -R -l 0 -x @sysconfdir@/tcp.qmqp.cdb -c @servicedir@/qmail-qmqpd.628/variables/MAXDAEMONS -o -b 75 -u 555 -g 555 0 628 /var/indimail/bin/qmail-qmqpd
+indimail  1102  0.0  0.0   6640   836 ?        S    15:24   0:00 @prefix@/bin/tcpserver -v -H -R -l 0 -x @sysconfdir@/tcp.qmqp.cdb -c @servicedir@/qmail-qmqpd.628/variables/MAXDAEMONS -o -b 75 -u 555 -g 555 0 628 @prefix@/bin/qmail-qmqpd
 qmaill    1110  0.0  0.0   1756   288 ?        S    15:24   0:00 @prefix@/bin/multilog t @logdir@/qmqpd.628
 ---------- * -------------- * ------------ * -------------- * ------------ * -------------- * ------------
 Basic Installation

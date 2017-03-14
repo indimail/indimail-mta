@@ -136,19 +136,19 @@
        mysql> GRANT REPLICATION SLAVE on *.* to repl;
 
        Create a link to existing MySQL config file
-       # ln -sf /var/indimail/etc/indimail.cnf /etc/indimail.cnf
+       # ln -sf /etc/indimail/indimail.cnf /etc/my.cnf.d/indimail.cnf
 
        NOTE: user and password are the userid and password of a privileged user in your
        existing MySQL Database)
 
 The information for IndiMail to connect to IndiMail is maintained in the file
 
-/var/indimail/control/host.mysql    # for non-clustered setup
+/etc/indimail/control/host.mysql    # for non-clustered setup
 
 and
 
-/var/indimail/control/host.cntrl    # for clustered setup
-/var/indimail/control/host.master   # for clustered setup
+/etc/indimail/control/host.cntrl    # for clustered setup
+/etc/indimail/control/host.master   # for clustered setup
 
 The format for this file is
 
