@@ -891,7 +891,7 @@ vadddomain.1:vadddomain.9
 vdeldomain.1:vdeldomain.9
 	cat $^ | sed s}LIBEXECDIR}$(libexecdir)}g > $@
 vadduser.1:vadduser.9
-	cat $^ | sed s}INDIMAIL}$(indimaildir)}g |
+	cat $^ | sed s}INDIMAIL}$(indimaildir)}g \
 		| sed s}LIBEXECDIR}$(libexecdir)}g > $@
 vdeluser.1:vdeluser.9
 	cat $^ | sed s}LIBEXECDIR}$(libexecdir)}g > $@
@@ -904,7 +904,7 @@ vpasswd.1:vpasswd.9
 vmoveuser.1:vmoveuser.9
 	cat $^ | sed s}LIBEXECDIR}$(libexecdir)}g > $@
 vdelivermail.8:vdelivermail.9
-	cat $^ | sed s}INDIMAIL}$(indimaildir)}g |
+	cat $^ | sed s}INDIMAIL}$(indimaildir)}g \
 		| sed s}LIBEXECDIR}$(libexecdir)}g > $@
 indimail.7:indimail.9
 	$(editman) indimail.9 > $@
