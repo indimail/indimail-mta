@@ -1,1127 +1,15 @@
 #!/bin/sh
 # WARNING: This file was auto-generated. Do not edit!
 # $Log: svctool.in,v $
-# Revision 2.305  2017-03-10 18:00:02+05:30  Cprogrammer
-# removed leftover comments
+# Revision 2.306  2017-03-14 08:47:26+05:30  Cprogrammer
+# trimmed by removing RCS log
 #
-# Revision 2.304  2017-03-09 14:33:28+05:30  Cprogrammer
-# passs --controldir argument to update_tmprsadh
-#
-# Revision 2.303  2017-03-08 16:15:07+05:30  Cprogrammer
-# fixed typo, AUTHMODULES replaced by IMAPMODULES
-#
-# Revision 2.302  2017-03-08 15:41:09+05:30  Cprogrammer
-# fixed services.log logfile directory
-#
-# Revision 2.301  2017-03-05 15:07:47+05:30  Cprogrammer
-# added variable libexecdir for imapd, pop3d supervise run files
-#
-# Revision 2.300  2017-03-05 10:39:57+05:30  Cprogrammer
-# renamed imap modules directory to imapmodules
-#
-# Revision 2.299  2017-03-01 23:14:02+05:30  Cprogrammer
-# use control/defaulthost for DEFAULT_DOMAIN in /service/qmail-send.25/variables to
-# bounce emails to postmaster@default_domain in qmail-lspawn for null user
-#
-# Revision 2.298  2017-01-09 19:40:03+05:30  Cprogrammer
-# use control/defaulthost for DEFAULT_DOMAIN in /service/qmail-send.25/variables
-#
-# Revision 2.297  2017-01-08 18:59:10+05:30  Cprogrammer
-# fixed instcheck path
-#
-# Revision 2.296  2017-01-04 21:47:33+05:30  Cprogrammer
-# fixed indimail.fc file not found
-#
-# Revision 2.295  2017-01-04 15:46:20+05:30  Cprogrammer
-# moved svscanboot to libexecdir
-#
-# Revision 2.294  2016-06-24 10:27:47+05:30  Cprogrammer
-# changed imapd/pop3d certfile to servercert.pem
-#
-# Revision 2.293  2016-06-20 08:35:38+05:30  Cprogrammer
-# moved bogofilter-qfe to libexecdir
-#
-# Revision 2.292  2016-06-17 20:14:28+05:30  Cprogrammer
-# moved qmailanalog scripts to libexecdir
-#
-# Revision 2.291  2016-06-17 17:31:57+05:30  Cprogrammer
-# FHS compliance. moved internal binaries to libexec dir
-#
-# Revision 2.290  2016-06-17 08:58:56+05:30  Cprogrammer
-# create services.log in logdir (/var/log/indimail)
-#
-# Revision 2.289  2016-06-09 12:57:49+05:30  Cprogrammer
-# renamed rmail, sendmail, newaliases to fix problems with setting mta alternatives
-#
-# Revision 2.288  2016-06-06 18:40:10+05:30  Cprogrammer
-# fixed default_domain getting overwritten by hostname
-#
-# Revision 2.287  2016-06-06 16:41:56+05:30  Cprogrammer
-# replaced servicedir with @servicedir@ variable
-# compile indimail.fc in indimail.pp and remove semanage fc command
-#
-# Revision 2.286  2016-06-03 10:13:29+05:30  Cprogrammer
-# moved qmail-queue to sbin
-#
-# Revision 2.285  2016-06-02 18:06:09+05:30  Cprogrammer
-# added selinux config file for indimail-mta
-#
-# Revision 2.284  2016-06-02 17:45:25+05:30  Cprogrammer
-# changes for selinux rules (FHS)
-#
-# Revision 2.283  2016-05-30 15:50:11+05:30  Cprogrammer
-# fixed syntax error and renaming of newaliases man page
-#
-# Revision 2.282  2016-05-29 20:09:12+05:30  Cprogrammer
-# fixes for FHS
-#
-# Revision 2.281  2016-05-27 20:49:39+05:30  Cprogrammer
-# FHS compliance
-#
-# Revision 2.280  2016-05-25 09:06:06+05:30  Cprogrammer
-# fixes for FHS
-#
-# Revision 2.279  2016-05-18 11:46:41+05:30  Cprogrammer
-# use control directory set by configure
-#
-# Revision 2.278  2016-05-17 19:52:19+05:30  Cprogrammer
-# set cntrldir as set by configure
-#
-# Revision 2.277  2016-05-16 10:59:27+05:30  Cprogrammer
-# check presense of shared objects before setting the variables
-#
-# Revision 2.276  2016-05-16 10:37:29+05:30  Cprogrammer
-# added --shared-objects option for smtp service creation
-#
-# Revision 2.275  2016-05-04 20:08:44+05:30  Cprogrammer
-# fixed mysql socket value
-# fixed indimail startup for debian8/ubuntu15 migration to systemd
-# create /var/run/mysqld during mysql startup under supervise
-#
-# Revision 2.274  2016-05-03 13:35:38+05:30  Cprogrammer
-# fix for oracle lethargy
-#
-# Revision 2.273  2016-05-02 11:48:07+05:30  Cprogrammer
-# fixed typo. renamed password_field to pass_str
-#
-# Revision 2.272  2016-04-29 15:32:08+05:30  Cprogrammer
-# fixed default_bits in cert to 4096
-#
-# Revision 2.271  2016-04-29 14:51:03+05:30  Cprogrammer
-# fixed mysql socket paths
-# fix for mysql 5.7 missing password field in user table
-#
-# Revision 2.270  2016-04-28 13:38:19+05:30  Cprogrammer
-# echo mysqldb creation statements to installation log
-#
-# Revision 2.269  2016-04-25 12:46:03+05:30  Cprogrammer
-# log output of few db setup scripts
-#
-# Revision 2.268  2016-04-22 11:56:44+05:30  Cprogrammer
-# fixed auto removal of udplogger.3000
-#
-# Revision 2.267  2016-04-22 10:44:50+05:30  Cprogrammer
-# changed /tmp/mysql.sock to /var/lib/mysql/mysql.sock
-#
-# Revision 2.266  2016-04-20 20:13:31+05:30  Cprogrammer
-# create qmail-send variable MYSQL_OPT_RECONNECT only if --persistdb is given
-#
-# Revision 2.265  2016-04-20 19:33:49+05:30  Cprogrammer
-# removed redundant variables from qmail-send.25/variables
-#
-# Revision 2.264  2016-04-19 11:25:19+05:30  Cprogrammer
-# fixed value of GREYIP in tcp.smtp
-#
-# Revision 2.263  2016-04-18 18:48:37+05:30  Cprogrammer
-# added option to add udplogger service
-#
-# Revision 2.262  2016-04-18 13:37:54+05:30  Cprogrammer
-# figure out mysqld variables by running mysqld --no-defaults --verbose --help
-#
-# Revision 2.261  2016-04-18 08:57:01+05:30  Cprogrammer
-# fixes for Oracle's mindless updates with database installation
-#
-# Revision 2.260  2016-04-05 00:55:24+05:30  Cprogrammer
-# added RATELIMIT_DIR env variable
-#
-# Revision 2.259  2016-03-31 17:34:05+05:30  Cprogrammer
-# skip imap/pop3 certs/configs for indimail-mta package
-#
-# Revision 2.258  2016-01-29 12:21:12+05:30  Cprogrammer
-# set selinux context to man_t for /var/indimail/man
-#
-# Revision 2.257  2016-01-21 11:56:08+05:30  Cprogrammer
-# create /etc/mysql for mysql-community-libs
-#
-# Revision 2.256  2016-01-21 00:12:54+05:30  Cprogrammer
-# corrected typo
-# create link to indimail.cnf in /etc/my.cnf.d
-#
-# Revision 2.255  2016-01-20 20:12:37+05:30  Cprogrammer
-# removed --model option for mysql
-#
-# Revision 2.254  2016-01-20 16:43:31+05:30  Cprogrammer
-# fixed for clamd, mysql-community-server
-#
-# Revision 2.253  2016-01-01 19:22:29+05:30  Cprogrammer
-# fixed setting of whitelist, context file for qmail-greyd
-#
-# Revision 2.252  2015-12-28 14:36:57+05:30  Cprogrammer
-# set permission of variables directory to 500
-#
-# Revision 2.251  2015-12-24 14:42:18+05:30  Cprogrammer
-# handle MySQL-community-server & MariaDB-server installation
-# removed dependency on mysql_config for getting mysql version
-#
-# Revision 2.250  2015-08-01 11:05:02+05:30  Cprogrammer
-# removed dummpy xpg4 link
-#
-# Revision 2.249  2014-08-08 13:15:42+05:30  Cprogrammer
-# do not overwrite clamd.conf, freshclam.conf installed outside indimail
-#
-# Revision 2.248  2014-07-27 12:29:30+05:30  Cprogrammer
-# added tlsserverciphers control file
-#
-# Revision 2.247  2014-06-19 08:30:39+05:30  Cprogrammer
-# disabled sql-mode in indimail.cnf and enabled in mysql startup
-#
-# Revision 2.246  2014-06-18 17:02:40+05:30  Cprogrammer
-# added --force option to force mysqldb creation
-# added options for mysql server 5.6.19
-#
-# Revision 2.245  2014-06-11 19:28:35+05:30  Cprogrammer
-# fixed mysql privileges
-#
-# Revision 2.244  2014-05-29 16:50:03+05:30  Cprogrammer
-# modifications for indimail-mta
-#
-# Revision 2.243  2014-05-28 18:49:17+05:30  Cprogrammer
-# fixes for clamd, freshclam configuration on ubuntu
-#
-# Revision 2.242  2014-05-21 18:08:35+05:30  Cprogrammer
-# fixed issue with "drop database test"
-#
-# Revision 2.241  2014-05-20 16:30:50+05:30  Cprogrammer
-# fix mailq, newaliases man pages to be put under alternatives (openSUSE)
-#
-# Revision 2.240  2014-05-20 13:10:39+05:30  Cprogrammer
-# fix for openSUSE
-#
-# Revision 2.239  2014-05-18 18:19:37+05:30  Cprogrammer
-# fix for sendmail installation which do not use alternatives command
-#
-# Revision 2.238  2014-05-18 18:02:55+05:30  Cprogrammer
-# fix for openSUSE
-#
-# Revision 2.237  2014-05-18 16:57:13+05:30  Cprogrammer
-# added Show_view_priv, Create_tablespace_priv
-#
-# Revision 2.236  2014-05-15 17:11:29+05:30  Cprogrammer
-# fixed clamdscan path in run file
-#
-# Revision 2.235  2014-05-15 11:08:47+05:30  Cprogrammer
-# added check for /bin/systemctl path
-#
-# Revision 2.234  2014-05-12 16:21:15+05:30  Cprogrammer
-# fixes for mysqldb, indimail.cnf creation
-# fixes for clamd.conf, freshclam.conf creation on ubuntu
-# fixes for service enable/disable on ubuntu
-#
-# Revision 2.233  2014-04-30 16:51:08+05:30  Cprogrammer
-# added check for mysql_config
-# added configurable service list for removal or addition
-#
-# Revision 2.232  2014-04-24 11:33:17+05:30  Cprogrammer
-# fixed update-rc.d syntax for ubuntu
-#
-# Revision 2.231  2014-04-23 13:53:15+05:30  Cprogrammer
-# fixes for debian
-#
-# Revision 2.230  2014-04-19 11:45:07+05:30  Cprogrammer
-# added option --config=selinux to apply selinux policy
-#
-# Revision 2.229  2014-04-18 17:35:36+05:30  Cprogrammer
-# added facility to use clamav outside indimail
-#
-# Revision 2.228  2014-03-10 19:07:30+05:30  Cprogrammer
-# added option --cname-lookup to Perform CNAME lookup for recipient host in qmail-remote
-#
-# Revision 2.227  2013-11-25 14:49:25+05:30  Cprogrammer
-# update-rc.d syntax corrected
-# use runlevel 2 for debian
-#
-# Revision 2.226  2013-11-22 14:15:26+05:30  Cprogrammer
-# updated clamd.conf, freshclam.conf creation
-#
-# Revision 2.225  2013-11-22 11:31:13+05:30  Cprogrammer
-# fixed no_multi option
-#
-# Revision 2.224  2013-11-15 19:13:59+05:30  Cprogrammer
-# fixed meaning of dnscheck
-#
-# Revision 2.223  2013-06-04 14:29:14+05:30  Cprogrammer
-# add spam, ham, register-spam, register-ham alias only if bogofilter is installed
-#
-# Revision 2.222  2013-05-14 15:30:24+05:30  Cprogrammer
-# use absolute path for commands
-#
-# Revision 2.221  2013-05-08 01:54:03+05:30  Cprogrammer
-# fix for system missing initsvc
-#
-# Revision 2.220  2013-04-29 08:24:46+05:30  Cprogrammer
-# fixed QMAILDEFAULTHOST setting problem with courier-outbox mails
-#
-# Revision 2.219  2013-02-26 08:33:50+05:30  Cprogrammer
-# Fixed grant privileges for mysql user
-#
-# Revision 2.218  2013-02-21 23:14:17+05:30  Cprogrammer
-# fixed IMAP_CAPABILITY, POP3AUTH in imap, pop3 service
-#
-# Revision 2.217  2011-12-18 07:33:02+05:30  Cprogrammer
-# fixed recursive loop when email is sent to register-spam, register-ham, ham and spam
-#
-# Revision 2.216  2011-12-10 10:32:52+05:30  Cprogrammer
-# added AUTH CRAM-SHA256 in imap/pop3
-#
-# Revision 2.215  2011-12-10 09:19:37+05:30  Cprogrammer
-# added IMAP_LOG_DELETIONS, POP3AUTH variable
-#
-# Revision 2.214  2011-11-13 15:42:49+05:30  Cprogrammer
-# fix spam_header_name in bogofilter.cf
-# fixes in report generation module
-#
-# Revision 2.213  2011-10-25 23:14:25+05:30  Cprogrammer
-# added LOGIN, PLAIN, CRAM-MD5 to imap auth capability
-#
-# Revision 2.212  2011-09-27 13:40:46+05:30  Cprogrammer
-# added /lib/systemd/system/indimail.service
-#
-# Revision 2.211  2011-07-21 17:07:12+05:30  Cprogrammer
-# use bin/mysqld # oracle is getting brain-dead
-#
-# Revision 2.210  2011-07-08 22:03:00+05:30  Cprogrammer
-# create dnsbllist control file
-#
-# Revision 2.209  2011-06-22 22:32:48+05:30  Cprogrammer
-# create default procmailrc file
-#
-# Revision 2.208  2011-05-07 17:23:37+05:30  Cprogrammer
-# formated text in default_mysql_config
-#
-# Revision 2.207  2011-05-01 16:26:28+05:30  Cprogrammer
-# fix for mysql configuration not getting created
-#
-# Revision 2.206  2011-04-28 23:13:41+05:30  Cprogrammer
-# added nooverwrite option for service
-#
-# Revision 2.205  2011-04-23 10:35:31+05:30  Cprogrammer
-# moved config-fast to sbin
-#
-# Revision 2.204  2011-04-16 14:37:13+05:30  Cprogrammer
-# added --logfilter argument for fetchmail service
-#
-# Revision 2.203  2011-04-16 10:59:23+05:30  Cprogrammer
-# added subject logging in log_header_format in bogofilter.cf
-#
-# Revision 2.202  2011-03-12 20:19:18+05:30  Cprogrammer
-# use update-rc.d for ubuntu
-#
-# Revision 2.201  2011-03-11 23:09:15+05:30  Cprogrammer
-# show --memory option for poppass creation
-#
-# Revision 2.200  2011-02-18 21:04:23+05:30  Cprogrammer
-# fix creation of mysql config with Oracle's awful MySQL distribution
-#
-# Revision 2.199  2011-02-04 16:43:47+05:30  Cprogrammer
-# added START_PLUGIN variable for qmail-send startup plugin
-#
-# Revision 2.198  2011-01-26 21:37:26+05:30  Cprogrammer
-# changed TLS_PROTOCOL to SSL23 for courier-imap-4.8.x
-#
-# Revision 2.197  2011-01-20 19:01:01+05:30  Cprogrammer
-# fix for new mysql version where mysql_install_db is in scripts directory
-#
-# Revision 2.196  2011-01-18 21:20:49+05:30  Cprogrammer
-# fixed linking of sendmail
-#
-# Revision 2.195  2010-11-12 21:59:22+05:30  Cprogrammer
-# improved readability
-#
-# Revision 2.194  2010-07-24 19:23:25+05:30  Cprogrammer
-# fix for debian system
-#
-# Revision 2.193  2010-07-23 20:38:30+05:30  Cprogrammer
-# use /var/indimail/etc/backup.conf to configure extra files to get backed up
-# using svctool --backup option
-#
-# Revision 2.192  2010-07-21 09:27:14+05:30  Cprogrammer
-# fixed syntax for specifying qmail's control directory
-#
-# Revision 2.191  2010-06-19 16:56:37+05:30  Cprogrammer
-# added rmail man page
-#
-# Revision 2.190  2010-06-19 13:43:01+05:30  Cprogrammer
-# added rmail in alternatives
-#
-# Revision 2.189  2010-06-12 10:42:03+05:30  Cprogrammer
-# removed /etc/init.d/indimail in remote_startup function
-#
-# Revision 2.188  2010-06-11 19:46:20+05:30  Cprogrammer
-# queue_ident can be non-integer
-#
-# Revision 2.187  2010-06-11 19:20:37+05:30  Cprogrammer
-# added option to install indimail startup
-# added new option --delivery
-# added check if svctool is run by superuser
-#
-# Revision 2.186  2010-06-09 22:13:53+05:30  Cprogrammer
-# removed sendmail.sh
-#
-# Revision 2.185  2010-06-09 21:01:12+05:30  Cprogrammer
-# added option queueParam to add defaultqueue containing env variables for qmail-queue clients
-#
-# Revision 2.184  2010-06-05 15:15:01+05:30  Cprogrammer
-# port for Fedora 13 upstart
-#
-# Revision 2.183  2010-05-18 17:14:29+05:30  Cprogrammer
-# create control files defaulthost
-# reorganized function to create control files
-#
-# Revision 2.182  2010-05-17 14:20:36+05:30  Cprogrammer
-# removed creation of prefilt, postfilt and default spam rule for indimail.org as this is now handled by post handle
-#
-# Revision 2.181  2010-05-16 23:27:23+05:30  Cprogrammer
-# fix creation of alias Maildir
-#
-# Revision 2.180  2010-05-16 19:39:01+05:30  Cprogrammer
-# fix for Mac OS x
-#
-# Revision 2.179  2010-05-16 18:27:28+05:30  Cprogrammer
-# fixed creation of qscand user
-#
-# Revision 2.178  2010-05-13 13:11:24+05:30  Cprogrammer
-# added --no-multi option for not setting QMAILQUEUE to qmail-multi
-# add indimail users as hidden on OS X
-#
-# Revision 2.177  2010-04-24 15:25:10+05:30  Cprogrammer
-# added options to be provide for --routes
-#
-# Revision 2.176  2010-04-20 13:18:21+05:30  Cprogrammer
-# fixed softlink for hostip
-#
-# Revision 2.175  2010-04-17 11:48:05+05:30  Cprogrammer
-# removed --skip-safemalloc option for MySQL 5.5.3, 5.5.4
-#
-# Revision 2.174  2010-04-08 08:40:40+05:30  Cprogrammer
-# change ownership of .qmail-postmaster to alias
-#
-# Revision 2.173  2010-04-03 16:46:04+05:30  Cprogrammer
-# added option to creeate QMQP service
-#
-# Revision 2.172  2010-03-31 09:21:54+05:30  Cprogrammer
-# added GREYIP env variable along with RBLSMTPD env variable in tcp.smtp
-#
-# Revision 2.171  2010-03-30 12:03:56+05:30  Cprogrammer
-# fix freshclam.conf
-#
-# Revision 2.170  2010-03-28 16:49:34+05:30  Cprogrammer
-# create hostip in default_control
-#
-# Revision 2.169  2010-03-26 15:58:50+05:30  Cprogrammer
-# create tcp.qmtp
-#
-# Revision 2.168  2010-03-25 10:27:06+05:30  Cprogrammer
-# added option to create qmtpd service
-#
-# Revision 2.167  2010-03-22 10:50:57+05:30  Cprogrammer
-# do not clobber default control files if they exist
-#
-# Revision 2.166  2010-03-12 15:57:48+05:30  Cprogrammer
-# changes for clamav-0.96rc1
-#
-# Revision 2.165  2010-03-07 13:50:17+05:30  Cprogrammer
-# fixed --tlsprog option
-#
-# Revision 2.164  2010-03-06 18:29:35+05:30  Cprogrammer
-# added option --tlsprog to specify external TLS enabler
-#
-# Revision 2.163  2010-03-03 16:06:25+05:30  Cprogrammer
-# create host.mysql in default_control
-#
-# Revision 2.162  2010-03-02 14:03:28+05:30  Cprogrammer
-# removed unsupported AUTH methods for pop3 and imap services
-#
-# Revision 2.161  2010-03-01 15:38:13+05:30  Cprogrammer
-# advertise STARTTLS for POP3 and IMAP
-#
-# Revision 2.160  2010-03-01 11:58:58+05:30  Cprogrammer
-# added case for mysql-5.1.44
-# changed skip-locking to skip-external-locking in my.cnf
-#
-# Revision 2.159  2010-02-27 20:31:09+05:30  Cprogrammer
-# fixed typo couriersslcache
-#
-# Revision 2.158  2010-02-24 09:11:54+05:30  Cprogrammer
-# changed RBLSMTPD message
-#
-# Revision 2.157  2010-02-18 14:04:20+05:30  Cprogrammer
-# added MYSQL_READ_DEFAULT_FILE env variable for inlookup service
-#
-# Revision 2.156  2010-02-18 11:03:13+05:30  Cprogrammer
-# added --query-cache for imap/pop3 service
-# removed MYSQL_HOST, MYSQL_USER, MYSQL_PASSWD environment variable for indisrv
-#
-# Revision 2.155  2010-01-11 11:25:15+05:30  Cprogrammer
-# made mysql_host, mysql_user, mysql_pass env variables optional for indisrvr service
-# use mysql_user, mysql_pass from command line in pwdlookup service
-#
-# Revision 2.154  2010-01-06 09:37:52+05:30  Cprogrammer
-# MYSQL_PASS is now MYSQL_PASSWD
-#
-# Revision 2.153  2009-12-30 13:09:39+05:30  Cprogrammer
-# added creation of vfilter table
-#
-# Revision 2.152  2009-12-21 09:19:17+05:30  Cprogrammer
-# fixed problem with delivery to register-spam, spam, register-ham, ham ids
-#
-# Revision 2.151  2009-12-17 14:59:53+05:30  Cprogrammer
-# added case for mysql-5.5
-#
-# Revision 2.150  2009-12-16 20:07:48+05:30  Cprogrammer
-# replaced all chown occurences with $chown
-#
-# Revision 2.149  2009-12-11 12:52:59+05:30  Cprogrammer
-# create environment variable MYSQL_OPT_RECONNECT for qmail-send, indisrvr and inlookup service
-#
-# Revision 2.148  2009-12-03 20:34:30+05:30  Cprogrammer
-# use environment variabel AUTHMODULES for smtp auth modules
-#
-# Revision 2.147  2009-11-28 20:45:25+05:30  Cprogrammer
-# added port 587 in stats
-# updated check-install function
-#
-# Revision 2.146  2009-11-24 20:19:13+05:30  Cprogrammer
-# use Maildir instead of forwarding in .qmail files for bogofilter-qfe
-#
-# Revision 2.145  2009-11-22 20:52:21+05:30  Cprogrammer
-# added envnoathost, timeoutsmtpd, timeoutremote
-#
-# Revision 2.144  2009-11-17 09:06:27+05:30  Cprogrammer
-# fixed typo with echo command
-#
-# Revision 2.143  2009-11-16 21:44:15+05:30  Cprogrammer
-# figure out path of chown, touch at runtime
-#
-# Revision 2.142  2009-11-15 23:13:38+05:30  Cprogrammer
-# added new clamd.conf, freshclam.conf for clamav-0.95.3
-#
-# Revision 2.141  2009-11-15 14:36:26+05:30  Cprogrammer
-# added --query-cache, --password-cache for smtp service (of use in auth smtp)
-#
-# Revision 2.140  2009-11-11 08:32:31+05:30  Cprogrammer
-# turn off greylisting by default
-#
-# Revision 2.139  2009-11-06 10:24:04+05:30  Cprogrammer
-# commented out RELAYCLIENT for loopback addresses
-#
-# Revision 2.138  2009-11-06 08:49:44+05:30  Cprogrammer
-# added --no-bootstrap option to skip running mysqld
-# fixed svctool arguments not getting recorded in poppass run file
-#
-# Revision 2.137  2009-11-05 10:26:54+05:30  Cprogrammer
-# fix for MySQL database creation
-# print all errors to stderr
-#
-# Revision 2.136  2009-11-03 09:11:47+05:30  Cprogrammer
-# removed setting of SPAMFILTER in qmail-send variables
-#
-# Revision 2.135  2009-10-29 11:31:57+05:30  Cprogrammer
-# check for cert in indisrvr run script
-# restart qmail-poppass service after new cert creation
-#
-# Revision 2.134  2009-10-28 13:24:12+05:30  Cprogrammer
-# fix for using greydaemon, fix for reverse dns check
-#
-# Revision 2.133  2009-10-27 16:30:12+05:30  Cprogrammer
-# more cases for MySQL versions
-#
-# Revision 2.132  2009-10-24 10:29:42+05:30  Cprogrammer
-# added terminator for case statement
-#
-# Revision 2.131  2009-10-24 07:23:05+05:30  Cprogrammer
-# added cases for mysql-3.0
-#
-# Revision 2.130  2009-10-18 20:33:49+05:30  Cprogrammer
-# restart indisrvr after cert creation
-#
-# Revision 2.129  2009-10-14 21:25:28+05:30  Cprogrammer
-# added --general-log option, removed --log-isam option
-#
-# Revision 2.128  2009-09-17 10:34:25+05:30  Cprogrammer
-# display warning when certficate is changed/created
-#
-# Revision 2.127  2009-09-10 14:22:38+05:30  Cprogrammer
-# fix for broken qscanq log service
-#
-# Revision 2.126  2009-09-07 10:24:18+05:30  Cprogrammer
-# added --hash-size option for greylisting service creation
-#
-# Revision 2.125  2009-09-05 20:07:53+05:30  Cprogrammer
-# increased softmem to 50M
-#
-# Revision 2.124  2009-09-03 20:54:40+05:30  Cprogrammer
-# fixed problem with whitelist file for qmail-greyd
-#
-# Revision 2.123  2009-09-02 12:25:31+05:30  Cprogrammer
-# added option use-greydaemon to use John Levine's greydaemon
-#
-# Revision 2.122  2009-08-24 14:40:46+05:30  Cprogrammer
-# added qmail-poppass, greylist service in checks for mandatory services
-# added GREYIP in tcprules
-#
-# Revision 2.121  2009-08-23 21:12:02+05:30  Cprogrammer
-# option to create supervise script for John Levine's greydaemon
-#
-# Revision 2.120  2009-08-19 07:41:12+05:30  Cprogrammer
-# make tcpserver run file to sleep if certficate is not present
-#
-# Revision 2.119  2009-08-18 20:35:29+05:30  Cprogrammer
-# fix for mysql 5
-#
-# Revision 2.118  2009-08-17 16:00:15+05:30  Cprogrammer
-# libexec does not exist on SUSE
-#
-# Revision 2.117  2009-08-13 14:43:01+05:30  Cprogrammer
-# added IPV6 loopback address to tcp.smtp, tcp.imap, tcp.pop3 and tcp.poppass
-#
-# Revision 2.116  2009-08-11 17:02:22+05:30  Cprogrammer
-# added -ssl option for indisrvr
-#
-# Revision 2.115  2009-08-06 22:31:17+05:30  Cprogrammer
-# added poppass service creation
-#
-# Revision 2.114  2009-07-10 20:49:52+05:30  Cprogrammer
-# fix for fedora selinux
-#
-# Revision 2.113  2009-06-25 12:38:47+05:30  Cprogrammer
-# use logdir from configure
-#
-# Revision 2.112  2009-06-19 19:47:44+05:30  Cprogrammer
-# changes in check_installation for mac
-#
-# Revision 2.111  2009-06-08 12:44:08+05:30  Cprogrammer
-# compress mysql export files
-#
-# Revision 2.110  2009-06-08 10:35:30+05:30  Cprogrammer
-# added option to --backup to specify backup directory
-#
-# Revision 2.109  2009-05-28 12:43:29+05:30  Cprogrammer
-# generate single ssl key, cert for SMTP, IMAP, POP3
-#
-# Revision 2.108  2009-05-27 14:07:08+05:30  Cprogrammer
-# added --ssl option for SMTPS service on port 465
-#
-# Revision 2.107  2009-04-17 14:32:03+05:30  Cprogrammer
-# corrected field separator for filterargs
-#
-# Revision 2.106  2009-04-08 12:33:50+05:30  Cprogrammer
-# added option for adding rbl
-#
-# Revision 2.105  2009-04-07 20:23:36+05:30  Cprogrammer
-# create chkrcptdomains
-#
-# Revision 2.104  2009-04-07 20:19:16+05:30  Cprogrammer
-# create control/filterargs instead of using FILTERARGS env variable
-#
-# Revision 2.103  2009-04-07 11:38:22+05:30  Cprogrammer
-# added option to have dk,dkim verification/signing
-#
-# Revision 2.102  2009-03-29 19:57:59+05:30  Cprogrammer
-# changed default databytes to 10 M
-#
-# Revision 2.101  2009-03-13 20:13:38+05:30  Cprogrammer
-# added net_read_timeout, net_write_timeout, wait_timeout to indimail.cnf
-#
-# Revision 2.100  2009-03-08 11:40:54+05:30  Cprogrammer
-# added --qhpsi option for fetchmail
-#
-# Revision 2.99  2009-03-06 19:53:34+05:30  Cprogrammer
-# added --wipe option to wipe out users/assign file
-#
-# Revision 2.98  2009-03-03 20:48:55+05:30  Cprogrammer
-# added option to specify port and socket in mysql config creation
-#
-# Revision 2.97  2009-03-01 14:41:05+05:30  Cprogrammer
-# corrected localiphost creation
-#
-# Revision 2.96  2009-03-01 12:59:56+05:30  Cprogrammer
-# added silent option for fetchmail service creation
-#
-# Revision 2.95  2009-02-22 11:32:57+05:30  Cprogrammer
-# added creatoin of spam,ham,register-spam,register-ham aliases
-#
-# Revision 2.94  2009-02-11 10:35:10+05:30  Cprogrammer
-# remove skip_federated for mysql-6.0.9-alpha
-#
-# Revision 2.93  2009-02-09 20:01:11+05:30  Cprogrammer
-# added authshadow
-#
-# Revision 2.92  2009-02-09 12:53:49+05:30  Cprogrammer
-# change for mysql-6.0.9-alpha
-#
-# Revision 2.91  2009-02-06 16:19:37+05:30  Cprogrammer
-# allow directory to be specified for postmaster in create_qmail_config
-#
-# Revision 2.90  2009-02-05 20:02:58+05:30  Cprogrammer
-# let all err messages for pwdlookup go into current rather than through syslog
-#
-# Revision 2.89  2009-02-05 10:59:21+05:30  Cprogrammer
-# create logdir when creating any service
-#
-# Revision 2.88  2009-02-04 08:29:49+05:30  Cprogrammer
-# stop and restart nscd if adding users
-#
-# Revision 2.87  2009-02-02 15:06:57+05:30  Cprogrammer
-# destdir inside readme causes problem in rpm build
-#
-# Revision 2.86  2009-02-02 14:41:09+05:30  Cprogrammer
-# fixed creation of README if DESTDIR was given
-#
-# Revision 2.85  2009-02-02 11:00:49+05:30  Cprogrammer
-# moved indimail.cnf to /var/indimail/etc
-#
-# Revision 2.84  2009-01-29 13:15:03+05:30  Cprogrammer
-# corrected column lengths for indimail, indibak, mgmtaccess table
-#
-# Revision 2.83  2009-01-28 13:47:15+05:30  Cprogrammer
-# added --silent option to fetchmail startup
-#
-# Revision 2.82  2009-01-26 00:05:41+05:30  Cprogrammer
-# corrected typo for wordlist.db
-# create imapd.cnf, pop3.cnf in cert creation
-# do not create config files on error
-# corrected creation of control file queue_base
-#
-# Revision 2.81  2009-01-22 11:56:28+05:30  Cprogrammer
-# changed MySQL config to indimail.cnf
-# set MYSQL_READ_DEFAULT_GROUP as inlookup for inlookup server
-# set MYSQL_READ_DEFAULT_FILE as indimail.cnf for indisrvr
-#
-# Revision 2.80  2009-01-20 16:48:00+05:30  Cprogrammer
-# show error when no base option provided
-#
-# Revision 2.79  2009-01-20 10:03:10+05:30  Cprogrammer
-# enhanced dumpconfig
-# added use-grant, stdout options for creating users in MySQL by using
-# create user, grant statements
-# set default_domain
-#
-# Revision 2.78  2009-01-13 14:41:12+05:30  Cprogrammer
-# create empty wordlist only if wordlist does not exist
-#
-# Revision 2.77  2009-01-11 19:48:06+05:30  Cprogrammer
-# added --sql-mode=NO_BACKSLASH_ESCAPES
-#
-# Revision 2.76  2009-01-10 12:35:10+05:30  Cprogrammer
-# cert option now will generate IMAP and POP3 certificates
-# config=bogofilter option now creates an empty wordlist.db
-# BUG - crypt was being run from /var/indimail/bin even when --destdir was specified
-#
-# Revision 2.75  2009-01-08 23:23:46+05:30  Cprogrammer
-# added dumpconfig command
-# removed create_mysqldb() in create_mysql()
-# create control file queue_base
-#
-# Revision 2.74  2008-12-24 14:01:00+05:30  Cprogrammer
-# added more options for clamd virus scanner
-#
-# Revision 2.73  2008-11-06 15:05:25+05:30  Cprogrammer
-# added --query-cache
-#
-# Revision 2.72  2008-10-24 21:47:06+05:30  Cprogrammer
-# added option to create ssl services for IMAP and POP3
-#
-# Revision 2.71  2008-10-18 11:37:17+05:30  Cprogrammer
-# MCDFILE changed to mcdinfo
-#
-# Revision 2.70  2008-09-16 10:02:59+05:30  Cprogrammer
-# removed --silent option
-#
-# Revision 2.69  2008-09-04 16:41:45+05:30  Cprogrammer
-# added pwdlookup creation
-# added authindi
-#
-# Revision 2.68  2008-08-13 16:32:42+05:30  Cprogrammer
-# BUG. do not process spam reports if X-Bogosity not found in bogofilter configuration
-#
-# Revision 2.67  2008-08-06 18:43:20+05:30  Cprogrammer
-# fixed problem with using path in log-bin
-#
-# Revision 2.66  2008-07-27 20:56:24+05:30  Cprogrammer
-# use /sbin/chkconfig if present
-#
-# Revision 2.65  2008-07-27 16:21:02+05:30  Cprogrammer
-# changes for fc9 (upstart init)
-#
-# Revision 2.64  2008-07-26 09:21:49+05:30  Cprogrammer
-# changed socket file to /tmp/clamd.socket
-#
-# Revision 2.63  2008-07-18 19:20:22+05:30  Cprogrammer
-# get host during ./configure
-#
-# Revision 2.62  2008-07-17 22:56:41+05:30  Cprogrammer
-# added dscl commands for mac
-#
-# Revision 2.61  2008-06-27 13:29:19+05:30  Cprogrammer
-# display installation directory
-#
-# Revision 2.60  2008-06-27 12:45:19+05:30  Cprogrammer
-# fixed create_mysql_db when DESTDIR was specified
-#
-# Revision 2.59  2008-06-27 12:23:07+05:30  Cprogrammer
-# corrected issue with DESTDIR
-#
-# Revision 2.58  2008-06-27 08:57:55+05:30  Cprogrammer
-# increased default soft memory
-# set helochecks for odmr also
-#
-# Revision 2.57  2008-06-22 20:25:52+05:30  Cprogrammer
-# create supervise log directory for svscan
-#
-# Revision 2.56  2008-06-21 09:38:32+05:30  Cprogrammer
-# use CONCURRENCYINCOMING for tcpserver concurrency
-# set correct permissions for openssl certs
-# More comprehensive output when creating services
-#
-# Revision 2.55  2008-06-20 15:18:29+05:30  Cprogrammer
-# changes for staged installation/configuration
-#
-# Revision 2.54  2008-06-17 20:34:29+05:30  Cprogrammer
-# create tcp.smtp, tcp.imap, tcp.pop3 cdb files
-# create assign file
-# correct permission of log directory
-#
-# Revision 2.53  2008-06-17 12:02:33+05:30  Cprogrammer
-# added creation of ssl cert
-# added generic config creation routine
-#
-# Revision 2.52  2008-06-14 19:19:17+05:30  Cprogrammer
-# added mysqldb option to --config
-#
-# Revision 2.51  2008-06-13 21:04:27+05:30  Cprogrammer
-# added option to creae bogofilter.cf
-#
-# Revision 2.50  2008-06-10 19:12:54+05:30  Cprogrammer
-# corrections in rmsvc and ensvc options
-#
-# Revision 2.49  2008-06-10 17:05:55+05:30  Cprogrammer
-# corrected repair_tables
-# corrected addition of qscand user
-#
-# Revision 2.48  2008-06-09 15:48:05+05:30  Cprogrammer
-# added description for odmr
-#
-# Revision 2.47  2008-06-06 09:14:45+05:30  Cprogrammer
-# added checking of svscanboot in inittab
-# modified default_control()
-#
-# Revision 2.46  2008-06-06 08:33:24+05:30  Cprogrammer
-# updated clamd config file
-# added freshclam.conf file
-#
-# Revision 2.45  2008-06-05 21:50:01+05:30  Cprogrammer
-# added configurable scan interval for qscanq
-#
-# Revision 2.44  2008-06-05 20:16:05+05:30  Cprogrammer
-# overhaul of code (removed all unused code)
-#
-# Revision 2.43  2008-06-05 16:21:21+05:30  Cprogrammer
-# moved systpass, vchkpass, indisrvr, inlookup to sbin
-#
-# Revision 2.42  2008-06-04 13:52:26+05:30  Cprogrammer
-# added warning that file is auto-generated
-#
-# WARNING: This file was auto-generated. Do not edit!
-# Revision 2.41  2008-06-03 19:47:03+05:30  Cprogrammer
-# added legacy server option for imap/pop3 proxy service creation
-#
-# Revision 2.40  2008-05-30 11:24:53+05:30  Cprogrammer
-# updated check_installation
-# set qmail-spamlog LOGFILTER using values defined in qmail-smtpd LOGFILTER
-#
-# Revision 2.39  2008-05-28 17:56:04+05:30  Cprogrammer
-# overhaul of mysql code
-#
-# Revision 2.38  2008-05-26 22:29:46+05:30  Cprogrammer
-# filter out lines not having Spam header (X-Bogosity)
-#
-# Revision 2.37  2008-05-25 18:49:27+05:30  Cprogrammer
-# changed log directory for proxy imap/pop3 service
-#
-# Revision 2.36  2008-05-25 17:32:42+05:30  Cprogrammer
-# big overhaul
-# removed ldap code
-# removed php ini creation
-# added remote-authsmtp, internal virus scanner config
-#
-# Revision 2.35  2007-12-22 00:29:11+05:30  Cprogrammer
-# combined spamfilter & spamfilterargs
-#
-# Revision 2.34  2005-07-04 21:09:29+05:30  Cprogrammer
-# changed clamav.conf to clamd.conf
-#
-# Revision 2.33  2005-05-30 10:40:46+05:30  Cprogrammer
-# corrected slapd script
-#
-# Revision 2.32  2005-03-30 23:57:03+05:30  Cprogrammer
-# added options for setting qhpsi, viruscheck, AUTHSELF
-#
-# Revision 2.31  2005-02-22 22:11:23+05:30  Cprogrammer
-# changed signature directory to /var/indimail/share/clamd
-#
-# Revision 2.30  2005-02-22 22:00:43+05:30  Cprogrammer
-# upgrade to clamd-0.83
-#
-# Revision 2.29  2005-02-13 21:59:21+05:30  Cprogrammer
-# removed --log-update option from mysqld run script
-#
-# Revision 2.28  2005-01-01 00:25:26+05:30  Cprogrammer
-# added IMAP_UMASK
-#
-# Revision 2.27  2004-10-02 19:33:17+05:30  Cprogrammer
-# provision for running external virus scanner
-#
-# Revision 2.26  2004-09-21 23:39:18+05:30  Cprogrammer
-# added service entry for freshclam
-#
-# Revision 2.25  2004-09-20 23:03:29+05:30  Cprogrammer
-# added option for setting up virus scanning service via qscanq
-#
-# Revision 2.24  2004-08-22 12:29:56+05:30  Cprogrammer
-# Change default imap config not to use lock
-#
-# Revision 2.23  2004-06-22 22:26:43+05:30  Cprogrammer
-# added delivery limits for count, size and overquota
-#
-# Revision 2.22  2004-06-20 18:20:24+05:30  Cprogrammer
-# BUG. Delivery limit was not working
-#
-# Revision 2.21  2004-06-20 16:37:19+05:30  Cprogrammer
-# rename ISOCOR_BASE_PATH to BASE_PATH
-#
-# Revision 2.20  2004-06-20 01:06:24+05:30  Cprogrammer
-# added --overquota_mailsize
-#
-# Revision 2.19  2004-06-19 00:22:00+05:30  Cprogrammer
-# include IMAP_SHAREDINDEXFILE variable for imap
-#
-# Revision 2.18  2004-05-29 21:42:37+05:30  Cprogrammer
-# set fd 2 to fd 0 in sendmail.sh to prevent loosing client's IP address
-#
-# Revision 2.17  2004-05-25 09:59:53+05:30  Cprogrammer
-# added option to set domain masquerading
-#
-# Revision 2.16  2004-05-23 22:16:01+05:30  Cprogrammer
-# added paranoid option for hostaccess
-#
-# Revision 2.15  2004-05-17 00:50:15+05:30  Cprogrammer
-# run qmail-cat with indimail uid
-#
-# Revision 2.14  2004-05-05 22:55:11+05:30  Cprogrammer
-# Corrected NULL SPAMFILTERARGS getting created in qmail-send variables
-# create sendmail wrapper and spamlog service only for non-odmr directories
-#
-# Revision 2.13  2004-02-26 12:07:47+05:30  Cprogrammer
-# *** empty log message ***
-#
-# Revision 2.12  2004-02-18 14:24:46+05:30  Cprogrammer
-# added bodycheck and antispoof
-#
-# Revision 2.11  2004-01-15 23:22:17+05:30  Cprogrammer
-# added authsmtp, helocheck, helofqdn, dnscheck options
-#
-# Revision 2.10  2004-01-11 23:58:45+05:30  Cprogrammer
-# set QMAILUSER to set sender when sending report as an attachment
-#
-# Revision 2.9  2004-01-10 09:47:09+05:30  Cprogrammer
-# reports added
-#
-# Revision 2.8  2004-01-05 14:11:27+05:30  Cprogrammer
-# added qregex option
-# added zsmtp analyzer scripts
-#
-# Revision 2.7  2003-12-31 01:20:21+05:30  Cprogrammer
-# added usefsync options
-#
-# Revision 2.6  2003-12-30 00:30:06+05:30  Cprogrammer
-# changes for envidir
-#
-# Revision 2.5  2003-12-16 00:34:46+05:30  Cprogrammer
-# changes for adding localfilter and remotefilter
-#
-# Revision 2.4  2003-12-07 21:45:50+05:30  Cprogrammer
-# added filtering options for qmail-local and qmail-remote
-#
-# Revision 2.3  2003-12-07 00:22:09+05:30  Cprogrammer
-# added backup for ldap
-# added checking of queue in --check-install
-#
-# Revision 2.2  2003-11-07 16:59:01+05:30  Cprogrammer
-# production release
-#
-# Revision 2.1  2003-11-05 14:25:57+05:30  Cprogrammer
-# added slapd configuration
-# added creation of php.ini
-# few fixes
-#
-# Revision 1.45  2003-10-30 00:59:37+05:30  Cprogrammer
-# create table indimail
-#
-# Revision 1.44  2003-10-30 00:15:46+05:30  Cprogrammer
-# create default mysql database for --mysql option
-#
-# Revision 1.43  2003-10-27 00:52:25+05:30  Cprogrammer
-# added CHECKSENDER code
-#
-# Revision 1.42  2003-10-23 01:28:53+05:30  Cprogrammer
-# added notifyspam, rejectspam, and spamexitcode
-#
-# Revision 1.41  2003-10-16 01:29:36+05:30  Cprogrammer
-# option to reject spam in smtp and fetchmail
-#
-# Revision 1.40  2003-10-16 01:22:11+05:30  Cprogrammer
-# option to setup spam filter
-# option to setup odmr
-#
-# Revision 1.39  2003-09-16 18:01:36+05:30  Cprogrammer
-# changed options for fetchmail run file
-#
-# Revision 1.38  2003-07-29 19:55:49+05:30  Cprogrammer
-# additional checks introduced
-#
-# Revision 1.37  2003-07-11 20:30:37+05:30  Cprogrammer
-# added checks to smtp run file
-#
-# Revision 1.36  2003-06-25 22:35:42+05:30  Cprogrammer
-# allow ldap to be skipped in inlookup run file creation
-#
-# Revision 1.35  2003-06-09 22:49:18+05:30  Cprogrammer
-# added deliverylimit option
-#
-# Revision 1.34  2003-03-15 13:24:03+05:30  Cprogrammer
-# added options to change concurrency for folderdaemon and indisrvr
-# few bugs on setting of maxdaemons and maxperip corrected
-#
-# Revision 1.33  2002-12-23 20:50:35+05:30  Cprogrammer
-# corrected shutdown script for mysql
-# corrected creation of inlookup run script (use basename)
-#
-# Revision 1.32  2002-12-11 00:09:52+05:30  Cprogrammer
-# added options to set maxdaemons, maxperip, ldapaccesscheck
-#
-# Revision 1.31  2002-12-05 14:13:21+05:30  Cprogrammer
-# made indimail directory configurable
-# flexibility added in terms of configuring destination port in imap/pop3 configuration
-# now possible to skip qmail-send script when creating smtp listener
-#
-# Revision 1.30  2002-11-29 19:52:00+05:30  Cprogrammer
-# --daemontools options corrected
-# typo QmailHome replaced with QmailHOME
-# added --threads option to inlookup
-#
-# Revision 1.29  2002-11-28 01:09:04+05:30  Cprogrammer
-# change for getopt() implementation in indisrvr
-# added missing ISOCOR_BASE_PATH
-#
-# Revision 1.28  2002-11-03 00:35:34+05:30  Cprogrammer
-# organized mysql data and logs in separate directories
-#
-# Revision 1.27  2002-10-19 17:59:18+05:30  Cprogrammer
-# added shutown script for mysql, added logging options in mysql run script
-# inlookup to be run with indimail uid
-#
-# Revision 1.26  2002-10-04 23:47:54+05:30  Cprogrammer
-# made MASTER_HOST configurable
-# corrected logdir creation in qmail-send scripot
-#
-# Revision 1.25  2002-10-01 20:21:53+05:30  Cprogrammer
-# added DEFAULT_DOMAIN
-#
-# Revision 1.24  2002-10-01 18:10:20+05:30  Cprogrammer
-# added configurable DATABYTES
-#
-# Revision 1.23  2002-10-01 01:04:41+05:30  Cprogrammer
-# imapd was called incorrectly
-#
-# Revision 1.22  2002-10-01 01:01:19+05:30  Cprogrammer
-# correction in arguments passing
-#
-# Revision 1.21  2002-10-01 00:43:56+05:30  Cprogrammer
-# fix for missing xpg4
-#
-# Revision 1.20  2002-09-30 22:58:18+05:30  Cprogrammer
-# set options to configure control files
-#
-# Revision 1.19  2002-09-27 02:37:40+05:30  Cprogrammer
-# added multiple options
-#
-# Revision 1.18  2002-09-26 01:07:23+05:30  Cprogrammer
-# enhanced printing of activity on stdout
-#
-# Revision 1.17  2002-09-15 15:20:07+05:30  Cprogrammer
-# fix for running queue-fix correctly
-#
-# Revision 1.16  2002-09-14 21:30:33+05:30  Cprogrammer
-# added option to specify mysql config file
-#
-# Revision 1.15  2002-09-14 20:50:35+05:30  Cprogrammer
-# added qmail-daemon
-#
-# Revision 1.14  2002-09-13 12:13:49+05:30  Cprogrammer
-# changed path for daemontools and ucspi-tcp to /var/qmail/bin
-#
-# Revision 1.13  2002-09-12 20:58:41+05:30  Cprogrammer
-# fix for solaris
-#
-# Revision 1.12  2002-09-12 16:45:25+05:30  Cprogrammer
-# added option for mysql and fetchmail service
-#
-# Revision 1.11  2002-09-04 23:07:56+05:30  Cprogrammer
-# removed relays.orgs.org
-#
-# Revision 1.10  2002-09-04 01:51:26+05:30  Cprogrammer
-# made svctool configurable for changes in conf-qmail
-#
-# Revision 1.9  2002-09-02 17:58:32+05:30  Cprogrammer
-# added authentication module systpass for system users (/etc/shadow)
-# added check to ensure cntrldir is relative to /var/qmail
-#
-# Revision 1.8  2002-08-19 19:51:47+05:30  Cprogrammer
-# added options for inlookup, proxy and indisrvr
-#
-# Revision 1.7  2002-08-19 10:58:16+05:30  Cprogrammer
-# changed logdir (unique logdir for each port)
-#
-# Revision 1.6  2002-08-19 02:34:00+05:30  Cprogrammer
-# added control dir configuration
-#
-# Revision 1.5  2002-08-19 02:05:37+05:30  Cprogrammer
-# added showctl, ensvc, rmsvc commands
-#
-# Revision 1.4  2002-08-19 00:33:17+05:30  Cprogrammer
-# corrected program name
-#
-# Revision 1.3  2002-08-19 00:19:52+05:30  Cprogrammer
-# corrected printing of version number
-#
-# Revision 1.2  2002-08-19 00:18:38+05:30  Cprogrammer
-# mkdir shifted before creation of run script
 #
 # Revision 1.1  2002-08-19 00:09:57+05:30  Cprogrammer
 # Initial revision
 #
 #
-# $Id: svctool.in,v 2.305 2017-03-10 18:00:02+05:30 Cprogrammer Exp mbhangui $
+# $Id: svctool.in,v 2.306 2017-03-14 08:47:26+05:30 Cprogrammer Exp mbhangui $
 #
 
 #
@@ -2890,7 +1778,7 @@ esac
 echo "$QmailBinPrefix/sbin/vchkpass $QmailBinPrefix/sbin/systpass" > $conf_dir/AUTHMODULES
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.305 2017-03-10 18:00:02+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.306 2017-03-14 08:47:26+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -2952,7 +1840,7 @@ if [ " $odmr" = " " ] ; then
 		/bin/mkdir -p "$DESTDIR"$SERVICEDIR/qmail-spamlog/log
 		(
 		echo "#!/bin/sh"
-		echo "# \$Id: svctool.in,v 2.305 2017-03-10 18:00:02+05:30 Cprogrammer Exp mbhangui $"
+		echo "# \$Id: svctool.in,v 2.306 2017-03-14 08:47:26+05:30 Cprogrammer Exp mbhangui $"
 		echo "# $prog_args"
 		echo ""
 		echo "LOGFILTER=\`cat $SERVICEDIR/qmail-smtpd.$tag/variables/LOGFILTER\`"
@@ -2973,7 +1861,7 @@ if [ " $odmr" = " " ] ; then
 		#qmail-spamlog log script
 		(
 		echo "#!/bin/sh"
-		echo "# \$Id: svctool.in,v 2.305 2017-03-10 18:00:02+05:30 Cprogrammer Exp mbhangui $"
+		echo "# \$Id: svctool.in,v 2.306 2017-03-14 08:47:26+05:30 Cprogrammer Exp mbhangui $"
 		echo "# generated on $host on `date`"
 		echo "# $prog_args"
 		echo ""
@@ -2991,7 +1879,7 @@ if [ ! -d $LOGDIR ] ; then
 fi
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.305 2017-03-10 18:00:02+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.306 2017-03-14 08:47:26+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -3250,7 +2138,7 @@ else
 fi
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.305 2017-03-10 18:00:02+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.306 2017-03-14 08:47:26+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -3288,7 +2176,7 @@ if [ ! " $logfilter" = " " -a ! -d "$DESTDIR"$SERVICEDIR/qmail-spamlog/run ] ; t
 	/bin/mkdir -p "$DESTDIR"$SERVICEDIR/qmail-spamlog/log
 	(
 	echo "#!/bin/sh"
-	echo "# \$Id: svctool.in,v 2.305 2017-03-10 18:00:02+05:30 Cprogrammer Exp mbhangui $"
+	echo "# \$Id: svctool.in,v 2.306 2017-03-14 08:47:26+05:30 Cprogrammer Exp mbhangui $"
 	echo "# $prog_args"
 	echo ""
 	echo "LOGFILTER=\`cat $SERVICEDIR/qmail-$type.$tag/variables/LOGFILTER\`"
@@ -3309,7 +2197,7 @@ if [ ! " $logfilter" = " " -a ! -d "$DESTDIR"$SERVICEDIR/qmail-spamlog/run ] ; t
 	#qmail-spamlog log script
 	(
 	echo "#!/bin/sh"
-	echo "# \$Id: svctool.in,v 2.305 2017-03-10 18:00:02+05:30 Cprogrammer Exp mbhangui $"
+	echo "# \$Id: svctool.in,v 2.306 2017-03-14 08:47:26+05:30 Cprogrammer Exp mbhangui $"
 	echo "# generated on $host on `date`"
 	echo "# $prog_args"
 	echo ""
@@ -3326,7 +2214,7 @@ if [ ! -d $LOGDIR ] ; then
 fi
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.305 2017-03-10 18:00:02+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.306 2017-03-14 08:47:26+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -3380,7 +2268,7 @@ fi
 
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.305 2017-03-10 18:00:02+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.306 2017-03-14 08:47:26+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -3398,7 +2286,7 @@ if [ ! -d $LOGDIR ] ; then
 fi
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.305 2017-03-10 18:00:02+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.306 2017-03-14 08:47:26+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -3466,7 +2354,7 @@ CONTEXT_FILE=$CONTROLDIR/$CONTEXT_FILE
 
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.305 2017-03-10 18:00:02+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.306 2017-03-14 08:47:26+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -3489,7 +2377,7 @@ if [ ! -d $LOGDIR ] ; then
 fi
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.305 2017-03-10 18:00:02+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.306 2017-03-14 08:47:26+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -3570,7 +2458,7 @@ else
 fi
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.305 2017-03-10 18:00:02+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.306 2017-03-14 08:47:26+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -3626,7 +2514,7 @@ fi
 # qmail-imapd log script
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.305 2017-03-10 18:00:02+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.306 2017-03-14 08:47:26+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -3657,7 +2545,6 @@ echo "DEFAULT_DOMAIN=$default_domain"
 echo "MIGRATEUSER=$QmailBinPrefix/bin/migrateuser"
 echo "MIGRATEFLAG=indi.txt"
 echo "INFIFO=infifo"
-echo "QMAILDIR=$QmailHOME"
 echo "TCP_FILE=$sysconfdir/tcp.imap"
 echo "OPEN_SMTP_CUR_FILE=$sysconfdir/open-smtp"
 echo "RELAY_TABLE=relay"
@@ -3918,7 +2805,7 @@ else
 fi
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.305 2017-03-10 18:00:02+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.306 2017-03-14 08:47:26+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -3973,7 +2860,7 @@ fi
 # qmail-pop3d log script
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.305 2017-03-10 18:00:02+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.306 2017-03-14 08:47:26+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -4004,7 +2891,6 @@ echo "DEFAULT_DOMAIN=$default_domain"
 echo "MIGRATEUSER=$QmailBinPrefix/bin/migrateuser"
 echo "MIGRATEFLAG=indi.txt"
 echo "INFIFO=infifo"
-echo "QMAILDIR=$QmailHOME"
 echo "TCP_FILE=$sysconfdir/tcp.pop3"
 echo "OPEN_SMTP_CUR_FILE=$sysconfdir/open-smtp"
 echo "RELAY_TABLE=relay"
@@ -4184,7 +3070,7 @@ fi
 echo 1 > $conf_dir/MYSQL_OPT_RECONNECT
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.305 2017-03-10 18:00:02+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.306 2017-03-14 08:47:26+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -4212,7 +3098,7 @@ fi
 # indisrvr log script
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.305 2017-03-10 18:00:02+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.306 2017-03-14 08:47:26+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -4239,7 +3125,7 @@ conf_dir="$DESTDIR"$SERVICEDIR/qscanq/variables
 # qscanq script
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.305 2017-03-10 18:00:02+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.306 2017-03-14 08:47:26+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -4261,7 +3147,7 @@ fi
 # qscanq log script
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.305 2017-03-10 18:00:02+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.306 2017-03-14 08:47:26+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -4293,7 +3179,7 @@ conf_dir="$DESTDIR"$SERVICEDIR/clamd/variables
 # clamd script
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.305 2017-03-10 18:00:02+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.306 2017-03-14 08:47:26+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -4360,7 +3246,7 @@ fi
 # clamd log script
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.305 2017-03-10 18:00:02+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.306 2017-03-14 08:47:26+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -4376,7 +3262,7 @@ conf_dir="$DESTDIR"$SERVICEDIR/freshclam/variables
 # freshclam script
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.305 2017-03-10 18:00:02+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.306 2017-03-14 08:47:26+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -4424,7 +3310,7 @@ fi
 # freshclam log script
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.305 2017-03-10 18:00:02+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.306 2017-03-14 08:47:26+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -4454,7 +3340,7 @@ conf_dir="$DESTDIR"$SERVICEDIR/pwdlookup/variables
 /bin/chmod 500 $conf_dir
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.305 2017-03-10 18:00:02+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.306 2017-03-14 08:47:26+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -4470,7 +3356,7 @@ fi
 # pwdlookup log script
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.305 2017-03-10 18:00:02+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.306 2017-03-14 08:47:26+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -4574,7 +3460,7 @@ echo "inlookup" > $conf_dir/MYSQL_READ_DEFAULT_GROUP
 echo 1 > $conf_dir/MYSQL_OPT_RECONNECT
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.305 2017-03-10 18:00:02+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.306 2017-03-14 08:47:26+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -4590,7 +3476,7 @@ fi
 # inlookup log script
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.305 2017-03-10 18:00:02+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.306 2017-03-14 08:47:26+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -4649,7 +3535,7 @@ if [ ! -d "$DESTDIR"$databasedir/data -o $force -eq 1 ] ; then
 	fi
 	if ( /bin/mkdir -p "$DESTDIR"$databasedir/data && /bin/mkdir -p "$DESTDIR"$databasedir/logs ) ; then
 		(
-		echo "# \$Id: svctool.in,v 2.305 2017-03-10 18:00:02+05:30 Cprogrammer Exp mbhangui $"
+		echo "# \$Id: svctool.in,v 2.306 2017-03-14 08:47:26+05:30 Cprogrammer Exp mbhangui $"
 		echo "# generated on $host on `date`"
 		echo ""
 		echo "# svctool --config=mysqldb --mysqlPrefix=$mysqlPrefix --databasedir=$databasedir --nolog"
@@ -4779,7 +3665,7 @@ fi
 /bin/chmod 500 "$DESTDIR"$SERVICEDIR/mysql.$port/variables
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.305 2017-03-10 18:00:02+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.306 2017-03-14 08:47:26+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -4875,7 +3761,7 @@ echo "--pid-file=\$PIDFILE 2>&1"
 
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.305 2017-03-10 18:00:02+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.306 2017-03-14 08:47:26+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -4892,7 +3778,7 @@ fi
 # mysql log script
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.305 2017-03-10 18:00:02+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.306 2017-03-14 08:47:26+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -5103,7 +3989,7 @@ fi
 # svscan log script
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.305 2017-03-10 18:00:02+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.306 2017-03-14 08:47:26+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -5229,7 +4115,7 @@ case "$dkverify_option" in
 esac
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.305 2017-03-10 18:00:02+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.306 2017-03-14 08:47:26+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -5251,7 +4137,7 @@ fi
 # fetchmail log script
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.305 2017-03-10 18:00:02+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.306 2017-03-14 08:47:26+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -5322,7 +4208,7 @@ else
 fi
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.305 2017-03-10 18:00:02+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.306 2017-03-14 08:47:26+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -5363,7 +4249,7 @@ fi
 # qmail-poppass log script
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.305 2017-03-10 18:00:02+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.306 2017-03-14 08:47:26+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -5580,7 +4466,7 @@ case "$dksign_option" in
 esac
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.305 2017-03-10 18:00:02+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.306 2017-03-14 08:47:26+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -5597,7 +4483,7 @@ fi
 /bin/mkdir -p "$DESTDIR"$SERVICEDIR/qmail-send."$tag"/log
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.305 2017-03-10 18:00:02+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.306 2017-03-14 08:47:26+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -7931,7 +6817,7 @@ while test $# -gt 0; do
 	;;
 
 	--version)
-	echo "\$Id: svctool.in,v 2.305 2017-03-10 18:00:02+05:30 Cprogrammer Exp mbhangui $"
+	echo "\$Id: svctool.in,v 2.306 2017-03-14 08:47:26+05:30 Cprogrammer Exp mbhangui $"
 	prog_args=""
 	exit 0
 	;;
