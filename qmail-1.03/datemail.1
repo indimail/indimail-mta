@@ -24,7 +24,7 @@ qmail will only add a Date field to locally-injected (not SMTP) messages
 that don't already have a Date field. If you don't like the Date header
 qmail adds, either configure your mail user agent (MUA) to add them, or
 use the "\fBdatemail\fR" command to inject messages instead of qmail-inject.
-Some people even replace /var/indimail/bin/sendmail with a symbolic link to
+Some people even replace /usr/bin/sendmail with a symbolic link to
 \fBdatemail\fR.
 
 Received fields are always stamped in UTC. Changing this would require a

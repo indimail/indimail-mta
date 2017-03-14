@@ -1,4 +1,4 @@
-/var/indimail/bin/clamdscan --quiet ./
+/usr/bin/clamdscan --quiet ./
 The first line of this file gives the scan command to be executed by qscanq.
 The command may be any command line invoking a virus scanner that scans
 the current directory (and any subdirectories), and returns:
@@ -8,8 +8,8 @@ something else if a runtime error occurs.
 
 Examples:
 /var/qmail/bin/run-antivir		# Wrapper for antivir
-/var/indimail/bin/clamscan -r --quiet --tempdir=. .	# clamscan w/o wrapper
-/var/indimail/bin/clamdscan --quiet ./			# clamdscan
+/usr/bin/clamscan -r --quiet --tempdir=. .	# clamscan w/o wrapper
+/usr/bin/clamdscan --quiet ./			# clamdscan
 
 (NOTE: The "#" and subsequent text are NOT meant to be copied into the
 first line of the file; they are comments for your benefit.)
