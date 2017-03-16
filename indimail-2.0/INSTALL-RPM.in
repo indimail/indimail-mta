@@ -26,11 +26,9 @@ http://download.opensuse.org/repositories/home:/mbhangui/
 You can install indimail using yum by using the following command (depending on
 your architecture)
 
-# yum install indimail.i386
-
-or
-
-# yum install indimail.x86_64
+# yum install indimail
+   or
+# dnf install indimail
 
 What the RPM/Deb does
 ---------------------
@@ -51,9 +49,10 @@ A) Package Installation/Upgrade
       (database in @indimaildir@/mysqldb/data and logs in @indimaildir@/mysqldb/logs)
    6. Installs 5 queues in @indimaildir@/queue (queue1, queue2, ... queue5)
    7. Install MTA as the alterntive MTA. Creates link sendmail in /usr/sbin or
-      /usr/lib to @indimaildir@/bin/sendmail
+      /usr/lib to @prefix@/bin/sendmail
    8. Creates directory for supervise logs in @logdir@
-   9. Sets up svscan to be run by init (/etc/inittab) or by upstart (/etc/event.d)
+   9. Sets up svscan to be run by init (/etc/inittab), upstart (/etc/event.d) or
+      by systemctl (/lib/systemd/system)
 
 B) Package Removal
    1. Stops IndiMail services (in case the system already has IndiMail installed)
@@ -67,8 +66,8 @@ B) Package Removal
    5. removes svscan to be run by init (/etc/inittab) or by upstart (/etc/event.d). removes
       all startup scripts
    6. Sets the original sendmail as the MTA.
-   NOTE: MySQL database is not removed, config files in @indimaildir@/etc,
-         @indimaildir@/control, @indimaildir@/users, .qmail files in @indimaildir@/alias,
+   NOTE: MySQL database is not removed, config files in @sysconfdir@/etc,
+         @sysconfdir@/control, @sysconfdir@/users, .qmail files in @indimaildir@/alias,
          domain information in @indimaildir@/domains are not removed.
 
 What the RPM/Deb does not do
@@ -102,7 +101,7 @@ Start IndiMail Services
 
    % sudo service indimail start         # (works on all systems)
        or
-   % sudo @indimaildir@/sbin/initsvc -on # (works on all systems)
+   % sudo @prefix@/sbin/initsvc -on # (works on all systems)
        or
    % sudo init q                         # (if your system uses traditional init)
        or
@@ -119,7 +118,7 @@ for configuring fetchmail. To have these services started automatically during r
 delete the files /service/mysql.3306/down and /service/fetchmail/down . After deleting
 the file you can use the following to start MySQL
 
-    % sudo @indimaildir@/bin/svc -u /service/mysql.3306
+    % sudo @prefix@/bin/svc -u /service/mysql.3306
 
 NOTE: Please disable MySQL from getting started up by the system by executing the
       chkconfig command
@@ -132,12 +131,12 @@ you will need to tell IndiMail on how to connect to MySQL.
 
 The information for IndiMail to connect to IndiMail is maintained in the file
 
-@indimaildir@/control/host.mysql    # for non-clustered setup
+@sysconfdir@/control/host.mysql    # for non-clustered setup
 
 and
 
-@indimaildir@/control/host.cntrl    # for clustered setup
-@indimaildir@/control/host.master   # for clustered setup
+@sysconfdir@/control/host.cntrl    # for clustered setup
+@sysconfdir@/control/host.master   # for clustered setup
 
 The format for this file is
 
@@ -156,6 +155,7 @@ Log files are creaed in /var/log/indimail/*
 How to install MySQL
 --------------------
 
+NOTE: Replace 5.5.2-m2 with your favourite version
     You can download mysql-5.5.2-m2.tar.gz from dev.mysql.com
     Install MySQL 5.5.2-m2 with MD5 cd3254f29561953ffb7c023cb1b825d2
     (You can install MySQL 5.1.x and greater)

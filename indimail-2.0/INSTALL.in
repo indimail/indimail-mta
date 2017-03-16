@@ -731,7 +731,7 @@ the installation.
 
     ##### STEP 1  ## MySQL Configuration and Database Creation ##################
     a) Create MySQL configuration (@sysconfdir@/indimail.cnf)
-    % sudo @indimaildir@/sbin/svctool --config=mysql --mysqlPrefix=@mysql_prefix@ \
+    % sudo @prefix@/sbin/svctool --config=mysql --mysqlPrefix=@mysql_prefix@ \
      --mysqlport=3306 --mysqlsocket=/tmp/mysql.sock
     You can have a section [indimail] in @sysconfdir@/indimail.cnf for parameters specific
     to indimail

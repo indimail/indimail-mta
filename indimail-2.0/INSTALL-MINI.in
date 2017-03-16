@@ -22,22 +22,22 @@ Here's how to set up a central server to offer QMQP service to authorized client
 
 IndiMail includes a QMQP server, qmail-qmqpd. You also need to have tcpserver installed.
 
-first create @indimaildir@/etc/qmqp.tcp in tcprules format to allow queueing from the
+first create @sysconfdir@/etc/qmqp.tcp in tcprules format to allow queueing from the
 authorized hosts. make sure to deny connections from unauthorized hosts. for example, if
 queueing is allowed from 1.2.3.*:
 
      1.2.3.:allow
      :deny
 
-Then create @indimaildir@/etc/qmqp.cdb:
+Then create @sysconfdir@/etc/qmqp.cdb:
 
-     @indimaildir@/bin/tcprules @indimaildir@/etc/qmqp.cdb \
-         @indimaildir@/etc/qmqp.tmp < @indimaildir@/etc/qmqp.tcp
+     @prefix@/bin/tcprules @sysconfdir@/etc/qmqp.cdb \
+         @sysconfdir@/etc/qmqp.tmp < @sysconfdir@/etc/qmqp.tcp
 
-You can change @indimaildir@/etc/qmqp.tcp and run tcprules again at any
+You can change @sysconfdir@/etc/qmqp.tcp and run tcprules again at any
 time. Finally qmail-qmqpd to be run under supervise:
 
-sudo @indimaildir@/sbin/svctool --qmqp=628 --servicedir=/service --maxdaemons=75 --maxperip=25 \
+sudo @prefix@/sbin/svctool --qmqp=628 --servicedir=/service --maxdaemons=75 --maxperip=25 \
         --qbase=@indimaildir@/queue --qcount=5 --qstart=1 --cntrldir=control --localip=0 \
          --fsync --syncdir --memory=104857600 --min-free=52428800
 
@@ -61,20 +61,20 @@ Here's what you do need:
 
     * qmail-qmqpc, forward, qmail-inject, sendmail, predate, datemail, mailsubj,
       qmail-showctl, maildirmake, maildir2mbox, maildirwatch, qail, elq, and pinq
-      in @indimaildir@/bin;
-    * a symbolic link to qmail-qmqpc from @indimaildir@/bin/qmail-queue;
-    * symbolic links to @indimaildir@/bin/sendmail from /usr/sbin/sendmail
+      in @prefix@/bin;
+    * a symbolic link to qmail-qmqpc from @prefix@/sbin/qmail-queue;
+    * symbolic links to @prefix@/bin/sendmail from /usr/sbin/sendmail
       and /usr/lib/sendmail;
-    * all the manual pages in @indimaildir@/man;
+    * all the manual pages in @mandir@/man;
     * a list of IP addresses of QMQP servers, one per line, in
-      @indimaildir@/control/qmqpservers;
-    * a copy of @indimaildir@/control/me, @indimaildir@/control/defaultdomain,
-      and @indimaildir@/control/plusdomain from your central server, so
+      @sysconfdir@/control/qmqpservers;
+    * a copy of @sysconfdir@/control/me, @sysconfdir@/control/defaultdomain,
+      and @sysconfdir@/control/plusdomain from your central server, so
       that qmail-inject uses appropriate host names in outgoing mail; and
-    * this host's name in @indimaildir@/control/idhost, so that qmail-inject
+    * this host's name in @sysconfdir@/control/idhost, so that qmail-inject
       generates Message-ID without any risk of collision. 
 
-Everything can be shared across hosts except for @indimaildir@/control/idhost.
+Everything can be shared across hosts except for @sysconfdir@/control/idhost.
 
 Remember that users won't be able to send mail if all the QMQP servers are down.
 Most sites have two or three independent QMQP servers.
@@ -88,12 +88,12 @@ You won't need most of the indimail-mini programs on a firewall, but you will
 need qmail-smtpd to accept messages through SMTP. You can survive with a tiny
 configuration:
 
-    * @indimaildir@/bin/qmail-qmqpc;
-    * @indimaildir@/bin/qmail-smtpd;
-    * a symbolic link to qmail-qmqpc from @indimaildir@/bin/qmail-queue;
-    * the internal gateway's IP address in @indimaildir@/control/qmqpservers;
-    * the firewall host's name in @indimaildir@/control/me; and
-    * the list of acceptable domains in @indimaildir@/control/rcpthosts. 
+    * @prefix@/sbin/qmail-qmqpc;
+    * @prefix@/bin/qmail-smtpd;
+    * a symbolic link to qmail-qmqpc from @prefix@/sbin/qmail-queue;
+    * the internal gateway's IP address in @sysconfdir@/control/qmqpservers;
+    * the firewall host's name in @sysconfdir@/control/me; and
+    * the list of acceptable domains in @sysconfdir@/control/rcpthosts. 
 
 You don't need to worry about setting up redundant QMQP servers here. If the internal
 gateway is down, qmail-smtpd will temporarily reject the message, and the remote client
@@ -105,8 +105,8 @@ Here's how to set up ezmlm to send messages to a smarthost through QMQP:
 
    1. Create a /var/mini-indimail directory.
    2. Create a /var/mini-indimail/bin directory.
-   3. Make a symbolic link to @indimaildir@/bin/qmail-qmqpc from /var/mini-indimail/bin/qmail-queue.
-   4. Put the smarthost's IP address into @indimaildir@/control/qmqpservers.
+   3. Make a symbolic link to @prefix@/sbin/qmail-qmqpc from /var/mini-indimail/bin/qmail-queue.
+   4. Put the smarthost's IP address into @sysconfdir@/control/qmqpservers.
    5. Compile and install ezmlm with /var/mini-qmail in conf-qmail. 
 
 You don't need to worry about setting up redundant QMQP servers here. If the smarthost is down,

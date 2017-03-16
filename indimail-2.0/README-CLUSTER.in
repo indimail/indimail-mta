@@ -77,17 +77,17 @@ DATE: @DATE@
     There are three files required on all hosts serving mailboxes (mailstores) for 
     clustered domain - host.cntrl,host.master & mcdinfo
 
-    echo hostcntrl_host > @indimaildir@/control/host.mysql   (MySQL host to which all programs will
+    echo hostcntrl_host > @sysconfdir@/control/host.mysql   (MySQL host to which all programs will
                                                              connect)
       or
 
-    echo "hostcntrl_host:user:password:mysql socket/port" > @indimaildir@/control/host.mysql
+    echo "hostcntrl_host:user:password:mysql socket/port" > @sysconfdir@/control/host.mysql
 
     For a clustered domain you need to have two additional files - host.cntrl & host.master.
     Additionally, IndiMail supports the use of Master-Slave architecture in MySQL.
 
-    echo hostcntrl_master > @indimaildir@/control/host.master (for a clustered domain, the master host)
-    echo hostcntrl_slave  > @indimaildir@/control/host.cntrl  (for a clustered domain, the slave host)
+    echo hostcntrl_master > @sysconfdir@/control/host.master (for a clustered domain, the master host)
+    echo hostcntrl_slave  > @sysconfdir@/control/host.cntrl  (for a clustered domain, the slave host)
 
     where hostcntrl_master is the IP address of MySQL Master having the host control information.
     where hostcntrl_slaver is the IP address of MySQL Slave  having the host control information.
@@ -124,12 +124,12 @@ DATE: @DATE@
     echo "user     indimail"
     echo "pass     ssh-1.5-"
     echo
-    ) > @indimaildir@/control/mcdinfo
+    ) > @sysconfdir@/control/mcdinfo
     
     The above can also be achieved by executing the following commands
-    % @indimaildir@/bin/dbinfo -i -S 192.168.2.115 -D indimail -U indimail -P ssh-1.5- \
+    % @prefix@/bin/dbinfo -i -S 192.168.2.115 -D indimail -U indimail -P ssh-1.5- \
         -p 3306 -d indimail.org -m 192.168.2.115
-    % @indimaildir@/bin/dbinfo -i -S 192.168.2.116 -D indimail -U indimail -P ssh-1.5- \
+    % @prefix@/bin/dbinfo -i -S 192.168.2.116 -D indimail -U indimail -P ssh-1.5- \
         -p 3306 -d indimail.org -m 192.168.2.116
 
     -- NOTE ----------------------------------------------------------------------------
@@ -137,9 +137,9 @@ DATE: @DATE@
     information. For better performance you may want to have each mailstore have its own
     MySQL server on the mailstore itself. In that case you can execute the following
     commands
-    % @indimaildir@/bin/dbinfo -i -S 192.168.2.115 -D indimail -U indimail -P ssh-1.5- \
+    % @prefix@/bin/dbinfo -i -S 192.168.2.115 -D indimail -U indimail -P ssh-1.5- \
         -p 3306 -d indimail.org -m 192.168.2.115
-    % @indimaildir@/bin/dbinfo -i -S 192.168.2.116 -D indimail -U indimail -P ssh-1.5- \
+    % @prefix@/bin/dbinfo -i -S 192.168.2.116 -D indimail -U indimail -P ssh-1.5- \
         -p 3306 -d indimail.org -m 192.168.2.116
     ------------------------------------------------------------------------------------
 

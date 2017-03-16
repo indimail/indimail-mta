@@ -39,10 +39,10 @@
           o mysql-5.6.19
           o mysql-5.7.10
 
-    2. If you have /etc/my.conf, replace socket=/var/lib/mysql/mysql.sock with
-       socket=/tmp/mysql.sock 
-       NOTE: If you change the socket/port then you have to edit @indimaildir@control/host.*
-       and @indimaildir@etc/indimail.cnf to change the socket path / port
+    2. If you have /etc/my.cnf, replace socket=/var/lib/mysql/mysql.sock with
+       socket=/var/run/mysqld/mysqld.sock 
+       NOTE: If you change the socket/port then you have to edit @sysconfdir@/control/host.*
+       and @sysconfdir@/indimail.cnf to change the socket path / port
 
     3. If the user root in mysql does not have a password. This will prevent anyone on
        the system to connect to MySQL using a password.
@@ -79,9 +79,9 @@
     these scripts.
 
     Create service in supervise to start mysqld
-    # @indimaildir@/sbin/svctool --mysql=3306 --servicedir=/service \
+    # @prefix@/sbin/svctool --mysql=3306 --servicedir=/service \
         --mysqlPrefix=@mysql_prefix@ --databasedir=@indimaildir@/mysqldb \
-        --config=@indimaildir@/etc/indimail.cnf --default-domain=indimail.org
+        --config=@sysconfdir@/indimail.cnf --default-domain=indimail.org
 
     ##### STEP 2  ## MySQL Database Creation ##################
     Create MySQL Database. You have to either run option a) or option b) depending on whether
@@ -93,18 +93,18 @@
        However, a bug was detected in how the MySQL server parses the
        output of `mysql_real_escape_string()'.
        so have `sql-mode=NO_BACKSLASH_ESCAPES' in the server option
-       file (@indimaildir@/etc/indimail.cnf)
+       file (@sysconfdir@/indimail.cnf)
 
-       # @indimaildir@/sbin/svctool --config=mysql --mysqlPrefix=@mysql_prefix@ \
-           --mysqlport=3306 --mysqlsocket=/tmp/mysql.sock
+       # @prefix@/sbin/svctool --config=mysql --mysqlPrefix=@mysql_prefix@ \
+           --mysqlport=3306 --mysqlsocket=/var/run/mysqld/mysqld.sock
 
        Create a new MySQL database
-       # @indimaildir@/sbin/svctool --config=mysqldb --mysqlPrefix=@mysql_prefix@ \
+       # @prefix@/sbin/svctool --config=mysqldb --mysqlPrefix=@mysql_prefix@ \
            --databasedir=@indimaildir@/mysqldb --default-domain=indimail.org \
            --base_path=/home/mail
 
        Create a link to IndiMail's MySQL config file
-       # ln -sf @indimaildir@/etc/indimail.cnf /etc/indimail.cnf
+       # ln -sf @sysconfdir@/indimail.cnf /etc/my.cnf.d/indimail.cnf
 
     b) For creation of a database in an existing running copy of MySQL on your server
        The below are needed only if you are going to use the existing MySQL database).
@@ -112,7 +112,7 @@
 
        Method 1 - Using svctool
        ------------------------
-       # @indimaildir@/sbin/svctool --config=mysqldb --mysqlPrefix=@mysql_prefix@ \
+       # @prefix@/sbin/svctool --config=mysqldb --mysqlPrefix=@mysql_prefix@ \
            --databasedir=@indimaildir@/mysqldb --default-domain=indimail.org \
            --base_path=/home/mail --stdout | mysql -u user -ppassword
 
@@ -143,12 +143,12 @@
 
 The information for IndiMail to connect to IndiMail is maintained in the file
 
-/etc/indimail/control/host.mysql    # for non-clustered setup
+@sysconfdir@/control/host.mysql    # for non-clustered setup
 
 and
 
-/etc/indimail/control/host.cntrl    # for clustered setup
-/etc/indimail/control/host.master   # for clustered setup
+@sysconfdir@/control/host.cntrl    # for clustered setup
+@sysconfdir@/control/host.master   # for clustered setup
 
 The format for this file is
 
