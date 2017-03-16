@@ -1,0 +1,35 @@
+#!/bin/sh
+rcsflag=0
+make clean
+make distclean
+if test -f $HOME/.rpmmacros
+then
+	topdir=`grep ^%_topdir $HOME/.rpmmacros | awk '{print $2}'`
+	if test -n "$topdir"
+	then
+		rpmbuild=$topdir
+	else
+		rpmbuild=$HOME/rpmbuild
+	fi
+else
+	rpmbuild=$HOME/rpmbuild
+fi
+/bin/rm -rf autom4te.cache
+if test -d RCS
+then
+	rcsflag=1
+	mv RCS ../RCS"bogofilter-wordlist"
+fi
+cd ..
+tar cf - bogofilter-wordlist-1.0 |gzip -c > $rpmbuild/SOURCES/bogofilter-wordlist-1.0.tar.gz
+cd bogofilter-wordlist-1.0
+if test $rcsflag -eq 1
+then
+	mv ../RCSairplay ./RCS
+fi
+if test $# -eq 1
+then
+	rpmbuild -bb --clean --target $1 bogofilter-wordlist.spec
+else
+	rpmbuild -bb --clean bogofilter-wordlist.spec
+fi
