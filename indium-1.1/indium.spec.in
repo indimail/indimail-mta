@@ -1,8 +1,9 @@
 #
 #
-# $Id: indium.spec.in,v 1.16 2017-03-07 20:22:33+05:30 Cprogrammer Exp mbhangui $
+# $Id: indium.spec.in,v 1.17 2017-03-16 15:44:07+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %define _unpackaged_files_terminate_build 1
+%global debug_package %{nil}
 
 %if %{defined _project}
 # define to 1 if building on openSUSE build service
