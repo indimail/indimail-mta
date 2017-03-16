@@ -354,7 +354,7 @@ Requires: mysql-server
 Requires: policycoreutils-python
 %endif
 %if %nobogofilter == 0
-%Requires: bogofilter-wordlist
+Requires: bogofilter-wordlist
 %endif
 
 %if %build_on_obs == 1
