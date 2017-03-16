@@ -36,7 +36,7 @@ BuildRequires: -post-build-checks
 #!BuildIgnore: brp-check-suse
 %endif
 %endif
-Requires:indimail > 2.0
+Requires:indimail >= 2.0
 
 %description
 bogofilter-wordlist provides a SPAM database for bogofilter in Berkeley DB format
