@@ -1,5 +1,6 @@
 #!/bin/sh
 rcsflag=0
+version=@version@
 make clean
 make distclean
 if test -f $HOME/.rpmmacros
@@ -18,14 +19,14 @@ fi
 if test -d RCS
 then
 	rcsflag=1
-	mv RCS ../RCS"bogofilter-wordlist"
+	mv RCS ../RCSbogowordlist
 fi
 cd ..
-tar cf - bogofilter-wordlist-1.0 |gzip -c > $rpmbuild/SOURCES/bogofilter-wordlist-1.0.tar.gz
-cd bogofilter-wordlist-1.0
+tar cf - bogofilter-wordlist-$version |gzip -c > $rpmbuild/SOURCES/bogofilter-wordlist-$version.tar.gz
+cd bogofilter-wordlist-$version
 if test $rcsflag -eq 1
 then
-	mv ../RCSairplay ./RCS
+	mv ../RCSbogowordlist ./RCS
 fi
 if test $# -eq 1
 then

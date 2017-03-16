@@ -1,5 +1,6 @@
 %undefine _missing_build_ids_terminate_build
 %define _unpackaged_files_terminate_build 1
+%global debug_package %{nil}
 
 %if %{defined _project}
 # define to 1 if building on openSUSE build service
@@ -14,8 +15,8 @@
 %define sysconfdir         @sysconfdir@
 
 Name: bogofilter-wordlist
-Version: 1.0	
-Release:	1%{?dist}
+Version: @version@
+Release: 1%{?dist}
 Summary: SPAM wordlist database for bogofilter
 
 Group: System Environment/Base
@@ -27,7 +28,14 @@ License: GPLv3
 URL: http://www.indimail.org
 Source0:  http://downloads.sourceforge.net/indimail/%{name}-%{version}.tar.gz
 
+%if %build_on_obs == 1
+BuildRequires: libidn-devel
+%if 0%{?suse_version}
 BuildRequires: -post-build-checks
+#!BuildIgnore: post-build-checks
+#!BuildIgnore: brp-check-suse
+%endif
+%endif
 Requires:indimail > 2.0
 
 %description
