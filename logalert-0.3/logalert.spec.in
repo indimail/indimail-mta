@@ -2,6 +2,7 @@
 #
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
+%global debug_package %{nil}
 
 %define _prefix            @prefix@
 %define mandir             @mandir@
