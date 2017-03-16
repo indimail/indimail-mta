@@ -1,6 +1,9 @@
 #
 # $Log: $
 #
+%undefine _missing_build_ids_terminate_build
+%define _unpackaged_files_terminate_build 1
+%global debug_package %{nil}
 %if 0%{?opensuse_bs}
 # define to 1 if building on openSUSE build service
 %define build_on_obs       1
