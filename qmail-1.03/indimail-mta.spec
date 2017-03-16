@@ -1,8 +1,9 @@
 #
 #
-# $Id: indimail-mta.spec,v 1.74 2017-03-08 09:12:49+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail-mta.spec,v 1.75 2017-03-16 15:46:30+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
+%global debug_package %{nil}
 
 %if %{defined _project}
 # define if building on openSUSE build service
