@@ -27,34 +27,28 @@ License: GPLv3
 URL: http://www.indimail.org
 Source0:  http://downloads.sourceforge.net/indimail/%{name}-%{version}.tar.gz
 
-#BuildRequires:	
-#Requires:	
+BuildRequires: -post-build-checks
+Requires:indimail > 2.0
 
 %description
 bogofilter-wordlist provides a SPAM database for bogofilter in Berkeley DB format
 
-
 %prep
 %setup -q
-
 
 %build
 %configure --sysconfdir=%{sysconfdir}
 make %{?_smp_mflags}
-
 
 %install
 [ "$RPM_BUILD_ROOT" != "/" ] && /bin/rm -fr $RPM_BUILD_ROOT
 ID=$(id -u)
 %make_install
 
-
 %files
 %dir %attr(755,root,root)                         %{sysconfdir}
 %attr(0644,indimail,indimail) %config(noreplace)  %{sysconfdir}/wordlist.db
 
 %doc
-
-
 
 %changelog
