@@ -1,5 +1,5 @@
 /*
- * $Id: user.c,v 1.12 2016-06-07 10:47:51+05:30 Cprogrammer Exp mbhangui $
+ * $Id: user.c,v 1.13 2017-03-18 17:24:47+05:30 Cprogrammer Exp mbhangui $
  * Copyright (C) 1999-2004 Inter7 Internet Technologies, Inc. 
  *
  * This program is free software; you can redistribute it and/or modify
@@ -901,29 +901,27 @@ modusergo()
 		 */
 		} else
 		if (strncmp(Quota, "NOQUOTA", 2) == 0) {
-			if (vsetuserquota(ActionUser, Domain, Quota)) {
+			if (vsetuserquota(ActionUser, Domain, Quota) == -1)
 				snprintf(StatusMessage, sizeof (StatusMessage), "%s", html_text[307]);	/* invalid quota */
-			} else {
+			else
 				snprintf(StatusMessage, sizeof (StatusMessage), "%s", html_text[308]);
-			}
 		} else
 		if (atoi(Quota)) {
 			quotaptr = Quota;
 			if (quota_to_bytes(qconvert, quotaptr)) {
 				snprintf(StatusMessage, sizeof (StatusMessage), "%s", html_text[307]);
-			} else if (strcmp(qconvert, vpw->pw_shell) == 0) {
+			} else
+			if (strcmp(qconvert, vpw->pw_shell) == 0) {
 			/*
 			 * unchanged, do nothing 
 			 */
 			} else
-			if (vsetuserquota(ActionUser, Domain, qconvert)) {
+			if ((err = vsetuserquota(ActionUser, Domain, qconvert)) == -1)
 				snprintf(StatusMessage, sizeof (StatusMessage), "%s", html_text[307]);
-			} else {
+			else
 				snprintf(StatusMessage, sizeof (StatusMessage), html_text[309], qconvert);
-			}
-		} else {
+		} else
 			snprintf(StatusMessage, sizeof (StatusMessage), "%s", html_text[307]);
-		}
 	}
 #endif
 	GetValue(TmpCGI, Gecos, "gecos=", sizeof (Gecos));
