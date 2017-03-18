@@ -7,9 +7,11 @@ or if configure exits with an "Invalid configuration" error,
 you will need to run `libtoolize --force` in the IwebAdmin source
 directory before following any other instructions in this guide.
 
-iwebadmin needs to install into indimail directories
-/var/indimail/share/iwebadmin, the web server's cgi-bin directory
-and the web server's html directory. Hence root.
+iwebadmin needs to install into directories
+/usr/share/iwebadmin - lang and html directory,
+/var/www/cg-bin      - the web server's cgi-bin directory
+/var/www/html/image  - web server's image directory.
+Hence root.
 
 Since iwebadmin is a suid binary, make sure it's installed on
 a volume that isn't mounted with the 'nosuid' option in /etc/fstab.
@@ -33,7 +35,7 @@ the above information then starting from scratch.
         --enable-htmldir=/var/www/html \
         --enable-cgibindir=/var/www/cgi-bin \
         --enable-imagedir=/var/www/html/images/iwebadmin \
-        --enable-htmllibdir=/usr/share/indimail/iwebadmin
+        --enable-htmllibdir=/usr/share/iwebadmin
     # make
     # make install-strip
 
@@ -213,5 +215,5 @@ If you have any questions or comments please email
 indimail-support@lists.sourceforge.net or join the mailing list at
 http://groups.google.com/group/indimail
 
-$Id: INSTALL,v 1.7 2016-06-06 23:27:57+05:30 Cprogrammer Exp mbhangui $
+$Id: INSTALL,v 1.8 2017-03-18 14:20:57+05:30 Cprogrammer Exp mbhangui $
 
