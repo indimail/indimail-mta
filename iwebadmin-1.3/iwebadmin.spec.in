@@ -6,12 +6,13 @@
 %global debug_package %{nil}
 
 %if %{defined _project}
-# define to 1 if building on openSUSE build service
+# define if building on openSUSE build service
 %define build_on_obs       1
-%define fast_mode          1
+%global reconfigure_mode   0
 %else
+%define _project           local
 %define build_on_obs       0
-%define fast_mode          1
+%global reconfigure_mode   1
 %global _hardened_build    1
 %endif
 
@@ -125,18 +126,8 @@ if [ $ID -eq 0 ] ; then
 fi
 
 cd %{name}-%{version}
-if [ %{fast_mode} -eq 0 ] ; then
-if [ %{build_on_obs} -eq 0 ] ; then
-	echo "reconfiguring..."
+if [ %{reconfigure_mode} -eq 1 ] ; then
 	autoreconf -fi
-else
-echo "reconfiguring..."
-%if %{undefined centos_version} && %{undefined rhel_version} && %{undefined sles_version}
-%if 0%{?fedora_version} > 10 || 0%{?suse_version} || 0%{?mandriva_version} > 2009
-	autoreconf -fi
-%endif
-%endif
-fi
 fi
 
 ./configure --prefix=%{_prefix} \
@@ -173,9 +164,9 @@ fi
 %if "%{_prefix}" != "/usr"
 %dir %attr(555,root,qmail)          %{_prefix}
 %endif
-%dir %attr(555,root,qmail)          @htmllibdir@/iwebadmin
-%dir %attr(555,root,qmail)          @htmllibdir@/iwebadmin/html
-%dir %attr(555,root,qmail)          @htmllibdir@/iwebadmin/lang
+%dir %attr(555,root,qmail)          @htmllibdir@
+%dir %attr(555,root,qmail)          @htmllibdir@/html
+%dir %attr(555,root,qmail)          @htmllibdir@/lang
 
 # binary
 %attr(6555,root,indimail)           @cgibindir@/iwebadmin
@@ -215,6 +206,8 @@ fi
 %attr(444,root,root)                @htmllibdir@/html/show_moderators.html
 %attr(444,root,root)                @htmllibdir@/html/show_subscribers.html
 %attr(444,root,root)                @htmllibdir@/html/show_users.html
+
+#language files
 %attr(444,root,root)                @htmllibdir@/lang/bg
 %attr(444,root,root)                @htmllibdir@/lang/cs
 %attr(444,root,root)                @htmllibdir@/lang/da
@@ -236,6 +229,7 @@ fi
 %attr(444,root,root)                @htmllibdir@/lang/sv
 %attr(444,root,root)                @htmllibdir@/lang/tr
 %attr(444,root,root)                @htmllibdir@/lang/zh-cn
+
 %attr(444,root,root)                @sysconfdir@/iwebadmin_perm_list
 #images
 %attr(444,root,root)                @imagedir@/delete.png
