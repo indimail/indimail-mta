@@ -1313,6 +1313,11 @@ http://download.opensuse.org/repositories/home:/indimail/
 &
 http://download.opensuse.org/repositories/home:/mbhangui/
 
+The corresponding install instructions for the two repositories are
+https://software.opensuse.org/download.html?project=home%3Aindimail&package=indimail
+&
+https://software.opensuse.org/download.html?project=home%3Ambhangui&package=indimail
+
 ---------- * -------------- * ------------ * -------------- * ------------ * -------------- * ------------
 CentOS/Fedora/openSUSE/RedHat NOTES
 

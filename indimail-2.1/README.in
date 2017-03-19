@@ -278,24 +278,26 @@ Some of the features available in this package
 61. Message Disposition Notification using qnotify
 62. Return Receipt Responder - rrt
 63. Enforce STARTTLS before AUTH using FORCE_TLS environment variable
-62. Updated man pages.
-63. Jens Wehrenbrecht's IPv4 CIDR extension
-64. Li Minh Bui's IPv6 support for compact IPv6 addresses and CIDR notation support
-65. SRS support
-66. domain based delivery rate control using drate
-67. domain based queue using domainqueue control file
-68. Ability to drop bounces
-69. Ability to discard emails if filter exits 2
-70. goodrcpt, goodrcptpatterns
-71. FORCE_TLS env variable to enforce STARTTLS during AUTH
-72. udplogger service for logging messages through UDP
-73. docker (www.docker.com) images for indimail (cprogrammer/indimail,
+64. Updated man pages.
+65. Jens Wehrenbrecht's IPv4 CIDR extension
+66. Li Minh Bui's IPv6 support for compact IPv6 addresses and CIDR notation support
+67. SRS support
+68. domain based delivery rate control using drate
+69. domain based queue using domainqueue control file
+70. Ability to drop bounces
+71. Ability to discard emails if filter exits 2
+72. goodrcpt, goodrcptpatterns
+73. udplogger service for logging messages through UDP
+74. docker (www.docker.com) images for indimail (cprogrammer/indimail,
     cprogrammer/indimail-mta)
-74. tcpserver plugin feature - dynamically load shared objects given on
+75. tcpserver plugin feature - dynamically load shared objects given on
     command line. Load shared objects defined by env variables PLUGIN0,
     PLUGIN1, ...
     tcpserver plugin allows you to load qmail-smtpd, rblsmtpd once in memory
-75. FHS compliance
+76. FHS compliance
+77. Ed Neville - allow multiple Delivered-To in qmail-local using control file maxdeliveredto
+78. Ed Neville - configure TLS method in control/tlsclientmethod (qmail-smtpd),
+    control/tlsservermethod (qmail-remote)
 
 You can take a detailed look at the feature list at
 

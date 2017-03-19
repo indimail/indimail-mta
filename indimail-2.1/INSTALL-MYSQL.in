@@ -1,6 +1,8 @@
     Do not read this without reading INSTALL-@version@. This is a important file. Most users
     in my experience have got stuck with MySQL installation and configuration. Following
     are the three most common issues that users have experienced installing IndiMail
+    If you have done a RPM/DEB/yum/dnf/dpkg/apt-get installation, all these steps
+    are automatically taken care by the post-installation scripts.
 
     1. MySQL version : As far as possible use mysql 5.1.x or greater. If you use an
        unsupported version of MySQL, you might face the following problems
@@ -9,35 +11,6 @@
           installation or when you run the command svctool --config=mysqldb ...
           However, this issue is not a big deal as each and every IndiMail program has
           been coded to create the required MySQl table when the table is accessed.
-
-          The following versions have been confirmed to work. Let me know your version
-          of MySQL and if you faced any of the above issue
-
-          o mysql-6.0.3-alpha
-          o mysql-6.0.9-alpha
-          o mysql-5.0.26
-          o mysql-5.0.45
-          o mysql-5.0.77
-          o mysql-5.1.40
-          o mysql-5.1.44
-          o mysql-5.1.48
-          o mariadb 5.1.42
-          o mariadb 5.1.44
-          o mariadb 5.1.47
-          o mariadb 5.2.4
-          o mariadb 5.2.6
-          o mariadb-5.5.32
-          o mariadb-5.5.36
-          o mariadb-10.0.21
-          o mysql-5.4.3-beta
-          o mysql-5.5.0-m2
-          o mysql-5.5.2-m2
-          o mysql-5.5.3-m3
-          o mysql-5.5.8
-          o mysql-5.5.13
-          o mysql-5.5.14
-          o mysql-5.6.19
-          o mysql-5.7.10
 
     2. If you have /etc/my.cnf, replace socket=/var/lib/mysql/mysql.sock with
        socket=/var/run/mysqld/mysqld.sock 
@@ -89,7 +62,7 @@
     configure a new MySQL server on your host.
 
     a) For creation of a brand new MySQL database
-       Create MySQL Options file @indimaildir@/etc/indimail.cnf
+       Create MySQL Options file @sysconfdir@/indimail.cnf
        However, a bug was detected in how the MySQL server parses the
        output of `mysql_real_escape_string()'.
        so have `sql-mode=NO_BACKSLASH_ESCAPES' in the server option

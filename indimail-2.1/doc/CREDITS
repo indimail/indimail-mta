@@ -129,7 +129,7 @@ The site http://qmail.org and the qmail mailing list for wealth of information
 83. Peter Ladwig - had the idea to use hard tarpitting in case of too many invalid
     RECIPIENTS.
 84. Flash Secure Menu Shell - WWW: http://www.netsoc.ucd.ie/flash/ Author: Steve Fegan
-85. Levent Serinol - MySQL support to tcpserver
+85. Levent Serinol - MySQL support in tcpserver
 86. mpack/munpack from CMU
 87. moresmtproutes patch by Richard Lyons
 88. Andrew Richard's early talker patch
@@ -155,4 +155,5 @@ The site http://qmail.org and the qmail mailing list for wealth of information
 102.Roberto Puzzanghera <roberto.puzzanghera at gmail.com> - using FORCE_TLS environment
     variable to force TLS during AUTH
 103.Ed Neville - allow multiple Delivered-To in qmail-local using control file maxdeliveredto
-104.Ed Neville - configure TLS method in control/tlsclientmethod (qmail-smtpd), control/tlsservermethod (qmail-remote)
+104.Ed Neville - configure TLS method in control/tlsclientmethod (qmail-smtpd),
+    control/tlsservermethod (qmail-remote)
