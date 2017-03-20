@@ -1,6 +1,6 @@
 #
 #
-# $Id: iwebadmin.spec.in,v 1.20 2017-03-18 17:24:36+05:30 Cprogrammer Exp mbhangui $
+# $Id: iwebadmin.spec.in,v 1.21 2017-03-20 16:21:10+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %define _unpackaged_files_terminate_build 1
 %global debug_package %{nil}
@@ -33,7 +33,7 @@ Version: @version@
 %if %build_on_obs == 1
 Release: 1.<B_CNT>
 %else
-Release: 1.B_CCNT%{?dist}
+Release: 1.1%{?dist}
 %endif
 
 %if %build_on_obs == 1
