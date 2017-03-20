@@ -132,10 +132,10 @@ $config['apc_debug'] = false;
 // For example %n = mail.domain.tld, %t = domain.tld
 // WARNING: After hostname change update of mail_host column in users table is
 //          required to match old user data records with the new host.
-$config['default_host'] = 'localhost';
+$config['default_host'] = 'ssl://indimail.org:993';
 
 // TCP port used for IMAP connections
-$config['default_port'] = 143;
+$config['default_port'] = 993;
 
 // IMAP AUTH type (DIGEST-MD5, CRAM-MD5, LOGIN, PLAIN or null to use
 // best server supported one)
@@ -144,13 +144,12 @@ $config['imap_auth_type'] = 'LOGIN';
 // IMAP socket context options
 // See http://php.net/manual/en/context.ssl.php
 // The example below enables server certificate validation
-//$config['imap_conn_options'] = array(
-//  'ssl'         => array(
-//     'verify_peer'  => true,
-//     'verify_depth' => 3,
-//     'cafile'       => '/etc/openssl/certs/ca.crt',
-//   ),
-// );
+$config['imap_conn_options'] = array(
+  'ssl'         => array(
+     'verify_peer'       => false,
+     'verify_peer_name'  => false,
+   ),
+);
 $config['imap_conn_options'] = null;
 
 // IMAP connection timeout, in seconds. Default: 0 (use default_socket_timeout)
@@ -393,7 +392,7 @@ $config['temp_dir_ttl'] = '48h';
 // enforce connections over https
 // with this option enabled, all non-secure connections will be redirected.
 // set the port for the ssl connection as value of this option if it differs from the default 443
-$config['force_https'] = false;
+$config['force_https'] = true;
 
 // tell PHP that it should work as under secure connection
 // even if it doesn't recognize it as secure ($_SERVER['HTTPS'] is not set)
@@ -523,10 +522,10 @@ $config['max_recipients'] = 0;
 $config['max_group_members'] = 0; 
 
 // Name your service. This is displayed on the login screen and in the window title
-$config['product_name'] = 'Roundcube Webmail';
+$config['product_name'] = 'IndiMail Webmail';
 
 // Add this user-agent to message headers when sending
-$config['useragent'] = 'Roundcube Webmail/'.RCMAIL_VERSION;
+$config['useragent'] = 'IndiMail Webmail/'.RCMAIL_VERSION;
 
 // try to load host-specific configuration
 // see http://trac.roundcube.net/wiki/Howto_Config for more details
