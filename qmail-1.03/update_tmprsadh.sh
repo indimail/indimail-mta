@@ -20,14 +20,14 @@
 
 umask 0077 || exit 0
 if [ -x /bin/chown ] ; then
-	CHOWN=/bin/chown
+	chown=/bin/chown
 else
-	CHOWN=/usr/bin/chown
+	chown=/usr/bin/chown
 fi
 if [ -x /bin/chmod ] ; then
-	CHMOD=/bin/chmod
+	chmod=/bin/chmod
 else
-	CHMOD=/usr/bin/chmod
+	chmod=/usr/bin/chmod
 fi
 
 export PATH="$PATH:/usr/local/bin/ssl:/usr/sbin"
