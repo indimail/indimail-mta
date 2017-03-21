@@ -548,7 +548,7 @@ hostaccess hostid hostip idhost localdomains localiphost locals maxhops \
 maxrecipients me moreipme morercpthosts morercpthosts.cdb nodnscheck \
 notipme outgoingip percenthack plusdomain qmqpservers qregex \
 quarantine queueforward queuelifetime rcptdomains rcpt.envrules rcpthosts \
-recipients rejectspam relayclients relaydomains relayhosts relaymailfrom 
+recipients rejectspam relayclients relaydomains relayhosts relaymailfrom \
 signatures smtpgreeting smtproutes spamignore \
 spamignorepatterns spamredirect spfipv6 spfbehavior spfexp spfguess spfrules \
 tarpitcount tarpitdelay timeoutconnect timeoutread timeoutremote timeoutsmtpd \
