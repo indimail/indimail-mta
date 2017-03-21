@@ -1,5 +1,8 @@
 #
 # $Log: indimail-mta.te,v $
+# Revision 1.4  2017-03-21 11:18:39+05:30  Cprogrammer
+# updated selinux rules
+#
 # Revision 1.3  2017-01-08 19:04:01+05:30  Cprogrammer
 # added rule for init_t
 #
@@ -11,7 +14,7 @@
 #
 #
 #
-# $Id: indimail-mta.te,v 1.3 2017-01-08 19:04:01+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail-mta.te,v 1.4 2017-03-21 11:18:39+05:30 Cprogrammer Exp mbhangui $
 # 
 #
 # semanage permissive -a svc_start_t
@@ -95,11 +98,16 @@ allow httpd_t var_t:file { execute setattr read create execute_no_trans write ge
 allow httpd_t var_t:lnk_file read;
 
 #============= httpd_sys_script_t ==============
-allow httpd_sys_script_t home_root_t:dir { add_name write read };
-allow httpd_sys_script_t home_root_t:file { open getattr write create read };
-allow httpd_sys_script_t var_t:file { getattr execute open read };
-allow httpd_sys_script_t self:capability setuid;
-allow httpd_sys_script_t self:capability setgid;
+allow httpd_sys_script_t user_home_dir_t:dir search;
+allow httpd_sys_script_t user_home_t:dir { setattr getattr read create write rmdir search remove_name open add_name };
+allow httpd_sys_script_t user_home_t:file { create unlink read write open getattr setattr lock unlink };
+allow httpd_sys_script_t home_root_t:dir { add_name remove_name read write };
+allow httpd_sys_script_t home_root_t:file { unlink read write open create lock getattr };
+allow httpd_sys_script_t self:capability { fowner setuid setgid dac_override dac_read_search};
+allow httpd_sys_script_t user_tmp_t:lnk_file read;
+allow httpd_sys_script_t var_t:dir { create read write remove_name add_name rmdir setattr };
+allow httpd_sys_script_t var_t:file { execute setattr read create execute_no_trans write getattr unlink open lock };
+allow httpd_sys_script_t var_t:lnk_file read;
 
 #============= nscd_t ==============
 allow nscd_t initrc_t:unix_stream_socket connectto;
@@ -131,7 +139,7 @@ allow svc_start_t antivirus_var_run_t:sock_file { write unlink create getattr se
 
 #!!!! WARNING: 'default_t' is a base type.
 allow svc_start_t default_t:dir { write add_name remove_name };
-allow svc_start_t default_t:fifo_file { read write };
+allow svc_start_t default_t:fifo_file { open read write };
 allow svc_start_t default_t:file { write open unlink rename append lock create };
 
 #!!!! WARNING: 'etc_runtime_t' is a base type.
@@ -234,5 +242,8 @@ allow svc_multilog_t svc_start_t:process sigchld;
 allow svc_multilog_t svc_start_t:fd use;
 
 #============= init_t ==============
+allow init_t var_t:file { execute execute_no_trans ioctl open read };
+allow init_t root_t:fifo_file { open write };
+allow init_t user_tmp_t:file open;
 allow init_t svc_svc_t:dir read;
-allow init_t var_t:file { execute execute_no_trans open read };
+
