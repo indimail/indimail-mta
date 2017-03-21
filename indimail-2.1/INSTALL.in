@@ -914,6 +914,9 @@ the installation.
     # fedora
     % sudo yum install clamav-data clamav-server clamav-filesystem clamav-lib clamav-update clamav
 
+    Edit /usr/lib/tmpfiles.d/clamd.scan.conf with the following line
+    d /var/run/clamd.scan 0750 qscand qmail
+
     # for Ubuntu
     % sudo apt-get install clamav clamav-daemon
     % sudo update-rc.d -f clamav-daemon disable
@@ -923,6 +926,12 @@ the installation.
     % sudo rpm -Uvh http://download.fedoraproject.org/pub/epel/6/x86_64/epel-release-6-8.noarch.rpm
     % sudo yum install clamav clamd
     % sudo chkconfig clamd off
+
+    # CentOS 7
+    % sudo yum -y install epel-release
+    % sudo yum -y update
+    % sudo yum -y install clamav-server clamav-data clamav-update clamav-filesystem clamav clamav-scanner-systemd \
+       clamav-lib clamav-server-systemd
 
     The commands below will create services for virus scanning and spam filter.
 
