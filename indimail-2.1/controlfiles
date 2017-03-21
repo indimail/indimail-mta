@@ -26,8 +26,6 @@ databytes
 defaultdelivery
 defaultdomain
 defaulthost
-dh1024.pem
-dh512.pem
 disclaimer
 domainbindings
 doublebouncehost
@@ -80,8 +78,6 @@ relayclients
 relaydomains
 relayhosts
 relaymailfrom
-rsa512.pem
-servercert.pem
 signatures
 smtpgreeting
 smtproutes
