@@ -18,6 +18,7 @@
 %dir %attr(0555,root,qmail)        @libexecdir@
 %dir %attr(0555,root,qmail)        @libexecdir@/imapmodules
 %dir %attr(0775,root,qmail)        @sysconfdir@/etc
+%dir %attr(0775,indimail,qmail)    @sysconfdir@/certs
 %dir %attr(0775,indimail,qmail)    @sysconfdir@/control
 %dir %attr(0775,indimail,qmail)    @sysconfdir@/control/inquery
 %dir %attr(0775,indimail,qmail)    @sysconfdir@/control/domainkeys
@@ -1086,6 +1087,18 @@
 %attr(0777,root,root) @libdir@/libflash.so
 %attr(0777,root,root) @libdir@/libflash-0.9.4.so.0
 %attr(0755,root,root) @libdir@/libflash-0.9.4.so.0.0.0
+%attr(0777,root,root) @libdir@/libnss_nssd.so
+%attr(0777,root,root) @libdir@/libnss_nssd.so.2
+%attr(0755,root,root) @libdir@/libnss_nssd.so.2.0.0
+%attr(0777,root,root) @libdir@/libdkim.so
+%attr(0777,root,root) @libdir@/libdkim-1.4.so.0
+%attr(0755,root,root) @libdir@/libdkim-1.4.so.0.0.0
+%attr(0777,root,root) @libdir@/libsrs2-1.0.18.so.0
+%attr(0777,root,root) @libdir@/libsrs2.so
+%attr(0755,root,root) @libdir@/libsrs2-1.0.18.so.0.0.0
+%attr(0777,root,root) @libdir@/libunicode.so
+%attr(0777,root,root) @libdir@/libunicode.so.1
+%attr(0755,root,root) @libdir@/libunicode.so.1.1.0
 %attr(0777,root,root) @libdir@/libindimail.so
 %attr(0777,root,root) @libdir@/libindimail-@version@.so.0
 %attr(0755,root,root) @libdir@/libindimail-@version@.so.0.0.0
@@ -1093,27 +1106,27 @@
 # header files
 #
 %attr(0644,root,root)  @prefix@/include/clamav.h
-%attr(0644,root,root)  @prefix@/include/eps_content.h
-%attr(0644,root,root)  @prefix@/include/cdbmake.h
-%attr(0644,root,root)  @prefix@/include/eps_roll.h
-%attr(0644,root,root)  @prefix@/include/indimail.h
-%attr(0644,root,root)  @prefix@/include/eps.h
-%attr(0644,root,root)  @prefix@/include/rfc2822.h
-%attr(0644,root,root)  @prefix@/include/eps_unroll.h
-%attr(0644,root,root)  @prefix@/include/eps_interface.h
-%attr(0644,root,root)  @prefix@/include/indimail_config.h
-%attr(0644,root,root)  @prefix@/include/eps_address.h
-%attr(0644,root,root)  @prefix@/include/eps_base64.h
-%attr(0644,root,root)  @prefix@/include/eps_mime.h
-%attr(0644,root,root)  @prefix@/include/dkim.h
-%attr(0644,root,root)  @prefix@/include/eps_buffer.h
-%attr(0644,root,root)  @prefix@/include/eps_header.h
-%attr(0644,root,root)  @prefix@/include/uint32.h
-%attr(0644,root,root)  @prefix@/include/eps_misc.h
-%attr(0644,root,root)  @prefix@/include/eps_email.h
-%attr(0644,root,root)  @prefix@/include/eps_line.h
-%attr(0644,root,root)  @prefix@/include/eps_boundary.h
-%attr(0644,root,root)  @prefix@/include/eps_int_buffer.h
-%attr(0644,root,root)  @prefix@/include/macros.h
-%attr(0644,root,root)  @prefix@/include/cdb.h
-%attr(0644,root,root)  @prefix@/include/eps_int_stream.h
+%attr(0644,root,root)  @prefix@/include/indimail/eps_content.h
+%attr(0644,root,root)  @prefix@/include/indimail/cdbmake.h
+%attr(0644,root,root)  @prefix@/include/indimail/eps_roll.h
+%attr(0644,root,root)  @prefix@/include/indimail/indimail.h
+%attr(0644,root,root)  @prefix@/include/indimail/eps.h
+%attr(0644,root,root)  @prefix@/include/indimail/rfc2822.h
+%attr(0644,root,root)  @prefix@/include/indimail/eps_unroll.h
+%attr(0644,root,root)  @prefix@/include/indimail/eps_interface.h
+%attr(0644,root,root)  @prefix@/include/indimail/indimail_config.h
+%attr(0644,root,root)  @prefix@/include/indimail/eps_address.h
+%attr(0644,root,root)  @prefix@/include/indimail/eps_base64.h
+%attr(0644,root,root)  @prefix@/include/indimail/eps_mime.h
+%attr(0644,root,root)  @prefix@/include/indimail/dkim.h
+%attr(0644,root,root)  @prefix@/include/indimail/eps_buffer.h
+%attr(0644,root,root)  @prefix@/include/indimail/eps_header.h
+%attr(0644,root,root)  @prefix@/include/indimail/uint32.h
+%attr(0644,root,root)  @prefix@/include/indimail/eps_misc.h
+%attr(0644,root,root)  @prefix@/include/indimail/eps_email.h
+%attr(0644,root,root)  @prefix@/include/indimail/eps_line.h
+%attr(0644,root,root)  @prefix@/include/indimail/eps_boundary.h
+%attr(0644,root,root)  @prefix@/include/indimail/eps_int_buffer.h
+%attr(0644,root,root)  @prefix@/include/indimail/macros.h
+%attr(0644,root,root)  @prefix@/include/indimail/cdb.h
+%attr(0644,root,root)  @prefix@/include/indimail/eps_int_stream.h
