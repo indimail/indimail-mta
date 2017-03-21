@@ -1,5 +1,8 @@
 #
 # $Log: indimail.te,v $
+# Revision 2.20  2017-03-21 11:11:07+05:30  Cprogrammer
+# added dac_override capability for iwebadmin
+#
 # Revision 2.19  2017-03-01 23:08:59+05:30  Cprogrammer
 # added selinux rules
 #
@@ -58,7 +61,7 @@
 # selinux module config
 #
 #
-# $Id: indimail.te,v 2.19 2017-03-01 23:08:59+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.te,v 2.20 2017-03-21 11:11:07+05:30 Cprogrammer Exp mbhangui $
 # 
 #
 # semanage permissive -a svc_start_t
@@ -120,7 +123,7 @@ require {
 	type var_run_t;
 	type reserved_port_t;
 	type unreserved_port_t;
-	class capability { chown net_bind_service dac_override dac_read_search fowner fsetid setuid setgid sys_ptrace };
+	class capability { chown net_bind_service dac_override dac_read_search fowner fsetid setuid setgid sys_ptrace dac_override dac_read_search};
 	class dir { search getattr setattr read create write rmdir remove_name open add_name };
 	class fifo_file { create read write open unlink getattr setattr };
 	class file { execute getattr setattr read create link lock rename execute_no_trans write unlink open append ioctl };
@@ -154,10 +157,10 @@ allow httpd_sys_script_t user_home_t:dir { setattr getattr read create write rmd
 allow httpd_sys_script_t user_home_t:file { create unlink read write open getattr setattr lock unlink };
 allow httpd_sys_script_t home_root_t:dir { add_name remove_name read write };
 allow httpd_sys_script_t home_root_t:file { unlink read write open create lock getattr };
-allow httpd_sys_script_t self:capability { fowner setuid setgid };
+allow httpd_sys_script_t self:capability { fowner setuid setgid dac_override dac_read_search};
 allow httpd_sys_script_t user_tmp_t:lnk_file read;
 allow httpd_sys_script_t var_t:dir { create read write remove_name add_name rmdir setattr };
-allow httpd_sys_script_t var_t:file { execute setattr read create execute_no_trans write getattr unlink open };
+allow httpd_sys_script_t var_t:file { execute setattr read create execute_no_trans write getattr unlink open lock };
 allow httpd_sys_script_t var_t:lnk_file read;
 
 #============= mysqld_t ==============
