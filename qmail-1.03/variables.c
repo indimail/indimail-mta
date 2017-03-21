@@ -1,5 +1,8 @@
 /*
  * $Log: variables.c,v $
+ * Revision 1.4  2017-03-21 15:40:38+05:30  Cprogrammer
+ * added certdir variable
+ *
  * Revision 1.3  2004-10-22 20:32:03+05:30  Cprogrammer
  * added RCS id
  *
@@ -9,11 +12,12 @@
  */
 char           *queuedir;
 char           *controldir;
+char           *certdir;
 
 void
 getversion_variables_c()
 {
-	static char    *x = "$Id: variables.c,v 1.3 2004-10-22 20:32:03+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: variables.c,v 1.4 2017-03-21 15:40:38+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
