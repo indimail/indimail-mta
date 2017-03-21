@@ -4927,7 +4927,6 @@ Makefile-cert: conf-sysconfdir Makefile-cert.mk
 update_tmprsadh: conf-qmail update_tmprsadh.sh conf-sysconfdir
 	@cat update_tmprsadh.sh\
 	| sed s}@sysconfdir\@}"`head -1 conf-sysconfdir`"}g \
-	| sed s}@controldir\@}"`head -1 conf-sysconfdir`/control"}g \
 	> $@
 
 tmprsadh: update_tmprsadh
