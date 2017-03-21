@@ -599,12 +599,6 @@ all in
 Exclusions of domains you host for Bounce Address Tag Validation (BATV).
 
 .TP 5
-.I clientcert.pem
-SSL certificate that is used to authenticate with the remote server
-during a TLS session. If clientcert.pem does not exist, \fBqmail-remote\fR
-will not negotiate TLS.
-
-.TP 5
 .I tlsclientciphers
 A set of OpenSSL client cipher strings. Multiple ciphers
 contained in a string should be separated by a colon.
@@ -612,6 +606,13 @@ contained in a string should be separated by a colon.
 .TP 5
 .I tlsclientmethod
 The TLS protocol list. Accepted values are SSLv23, SSLv3, TLSv1, TLSv1_1, TLSv1_2. The default is TLSv1.
+
+.TP 5
+.I clientcert.pem
+SSL certificate that is used to authenticate with the remote server
+during a TLS session. If clientcert.pem does not exist, \fBqmail-remote\fR
+will not negotiate TLS.
+The default location of @controldir@ can be overriden by environment variable CERTDIR
 
 .TP 5
 .I tlshosts/<FQDN>.pem
@@ -623,6 +624,18 @@ is the fully-qualified domain name of the server). One of the
 or the
 .I CommonName
 attributes have to match. The file contains the trusted CA certificates.
+The default location of @controldir@ can be overriden by environment variable CERTDIR
+
+.TP 5
+.I tlshosts/exhaustivelist
+if this file exists
+no TLS will be tried on hosts other than those for which a file
+.B tlshosts/<FQDN>.pem
+exists.
+The default location of @controldir@ can be overriden by environment variable CERTDIR
+
+.B WARNING:
+this option may cause mail to be delayed, bounced, doublebounced, or lost.
 
 .TP 5
 .I notlshosts/<FQDN>
@@ -632,16 +645,7 @@ will not try TLS on servers for which this file exists
 is the fully-qualified domain name of the server). 
 .IR (tlshosts/<FQDN>.pem 
 takes precedence over this file however).
-
-.TP 5
-.I tlshosts/exhaustivelist
-if this file exists
-no TLS will be tried on hosts other than those for which a file
-.B tlshosts/<FQDN>.pem
-exists.
-
-.B WARNING:
-this option may cause mail to be delayed, bounced, doublebounced, or lost.
+The default location of @controldir@ can be overriden by environment variable CERTDIR
 
 .SH "SEE ALSO"
 addresses(5),

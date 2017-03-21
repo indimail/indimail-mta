@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail-mta.spec,v 1.76 2017-03-21 11:19:06+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail-mta.spec,v 1.77 2017-03-21 15:39:21+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 %global debug_package %{nil}
@@ -589,6 +589,10 @@ done
 %dir %attr(750,qscand,qscand)     %{qmaildir}/qscanq
 %dir %attr(750,qscand,qscand)     %{qmaildir}/qscanq/root
 %dir %attr(750,qscand,qscand)     %{qmaildir}/qscanq/root/scanq
+%dir %attr(755,root,root)         %{qsysconfdir}
+%dir %attr(775,root,qmail)        %{qsysconfdir}/etc
+%dir %attr(775,indimail,qmail)    %{qsysconfdir}/users
+%dir %attr(775,indimail,qmail)    %{qsysconfdir}/certs
 %dir %attr(775,indimail,qmail)    %{qsysconfdir}/control
 %dir %attr(2775,qmailr,qmail)     %{qsysconfdir}/control/ratelimit
 %dir %attr(775,indimail,qmail)    %{qsysconfdir}/control/domainkeys
@@ -613,8 +617,6 @@ done
 %if "%{_prefix}" != "/usr"
 %dir %attr(555,root,root)         %{_libdir}
 %endif
-%dir %attr(775,root,qmail)            %{qsysconfdir}/etc
-%dir %attr(775,indimail,qmail)        %{qsysconfdir}/users
 %dir %attr(555,root,qmail)            %{plugindir}
 
 %attr(444,root,root) %config(noreplace)           %{qsysconfdir}/controlfiles

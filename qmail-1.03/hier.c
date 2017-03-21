@@ -1,5 +1,8 @@
 /*
  * $Log: hier.c,v $
+ * Revision 1.225  2017-03-21 15:39:11+05:30  Cprogrammer
+ * added certs directory for certificates
+ *
  * Revision 1.224  2017-01-08 19:02:27+05:30  Cprogrammer
  * skip development man pages if dev_package is 0
  *
@@ -626,9 +629,15 @@ hier(inst_dir, fatal, dev_package)
 		auto_qmail_home = inst_dir;
 	/* Directories */
 	if (!str_diff(auto_qmail, "/var/indimail") || !str_diff(auto_qmail, "/var/qmail")) {
+		/* create indimail/qmail home directory (/var/indimail or /var/qmail */
 		h(auto_qmail_home, auto_uido, auto_gidq, 0555);
 	}
 
+	/*-
+	 * auto_control    = /etc/indimail/control
+	 * auto_cntrl_dir  = /etc/indimail
+	 * auto_cntrl_base = control
+	 */
 	auto_cntrl_dir = getdirname(auto_control, &auto_cntrl_base);
 	if (!stralloc_copys(&a1, auto_cntrl_dir))
 		strerr_die2sys(111, fatal, "out of memory: ");
@@ -636,14 +645,22 @@ hier(inst_dir, fatal, dev_package)
 		strerr_die2sys(111, fatal, "out of memory: ");
 	auto_cntrl_dir = a1.s;
 	if (!str_diff(auto_qmail, auto_cntrl_dir))
+		/* create control directory (/var/indimail/control */
 		d(auto_qmail_home, "control", auto_uidv, auto_gidq, 0775);
 	else {
+		/* create control directory (/etc/indimail */
 		h(auto_cntrl_dir, 0, 0, 0755);
+		/* create control directory (/etc/indimail/control */
 		d(auto_cntrl_dir, "control", auto_uidv, auto_gidq, 0775);
-		/*- l(auto_qmail_home, "control", auto_cntrl_dir); -*/
+		/*- link /var/indimail/control to /etc/indimail/control */
 		l(auto_qmail_home, "control", auto_control, 0);
 	}
 
+	/*-
+	 * auto_assign     = /etc/indimail/users
+	 * auto_assgn_dir  = /etc/indimail
+	 * auto_assgn_base = users
+	 */
 	auto_assgn_dir = getdirname(auto_assign, &auto_assgn_base);
 	if (!stralloc_copys(&a2, auto_assgn_dir))
 		strerr_die2sys(111, fatal, "out of memory: ");
@@ -655,23 +672,29 @@ hier(inst_dir, fatal, dev_package)
 	else {
 		h(auto_assgn_dir, 0, 0, 0755);
 		d(auto_assgn_dir, "users", auto_uidv, auto_gidq, 0775);
-		/*- l(auto_qmail_home, "users", auto_assgn_dir); -*/
+		/*- link /var/indimail/users to /etc/indimail/users */
 		l(auto_qmail_home, "users", auto_assign, 0);
 	}
 
 	/*- shared directory for boot, doc, man */
 	if (str_diff(auto_qmail, auto_shared)) {
+		/*- autoshared = /usr/share/indimail */
 		mandir = getdirname(auto_shared, 0);
 		if (!stralloc_copys(&a3, mandir))
 			strerr_die2sys(111, fatal, "out of memory: ");
 		if (!stralloc_0(&a3))
 			strerr_die2sys(111, fatal, "out of memory: ");
-		mandir = a3.s;
+		mandir = a3.s; /* /usr/share */
 		h(auto_shared, auto_uido, auto_gidq, 0555);
 	} else
 		mandir = auto_qmail_home;
 
-	/*- libexecdir directory for internal binaries */
+	/*-
+	 * libexecdir directory for internal binaries
+	 * auto_libexec      = /usr/libexec/indimail
+	 * auto_libexec_dir  = /usr/libexec
+	 * auto_libexec_base = indimail
+	 */
 	auto_libexec_dir = getdirname(auto_libexec, &auto_libexec_base);
 	if (!stralloc_copys(&a4, auto_libexec_dir))
 		strerr_die2sys(111, fatal, "out of memory: ");
@@ -687,12 +710,13 @@ hier(inst_dir, fatal, dev_package)
 		d(auto_qmail_home, auto_libexec_base, auto_uidv, auto_gidq, 0555);
 	} else {
 		h(auto_libexec, 0, 0, 0555);
+		/*- link /var/indimail/libexec to /usr/libexec/indimail */
 		l(auto_qmail_home, "libexec", auto_libexec, 0);
 	}
 
 	/*- sysconf directory for control, config files */
 	if (str_diff(auto_qmail, auto_sysconfdir))
-		h(auto_sysconfdir, 0, 0, 0755);
+		h(auto_sysconfdir, 0, 0, 0755); /*- create /etc/indimail */
 
 	if (str_diff(auto_qmail, auto_prefix)) {
 		uidr = 0;
@@ -721,6 +745,7 @@ hier(inst_dir, fatal, dev_package)
 	d(auto_prefix,     "sbin", uidr, gidr, 0555);
 	d(auto_qmail_home, "domains", auto_uido, auto_gidv, 0775);
 	d(auto_sysconfdir, "etc", auto_uido, auto_gidq, 0775);
+	d(auto_sysconfdir, "certs", auto_uidv, auto_gidq, 0775);
 	d(auto_qmail_home, "qscanq", auto_uidc, auto_gidc, 0750);
 	d(auto_qmail_home, "qscanq/root", auto_uidc, auto_gidc, 0750);
 	d(auto_qmail_home, "qscanq/root/scanq", auto_uidc, auto_gidc, 0750);
@@ -1517,7 +1542,7 @@ hier(inst_dir, fatal, dev_package)
 void
 getversion_install_big_c()
 {
-	static char    *x = "$Id: hier.c,v 1.224 2017-01-08 19:02:27+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: hier.c,v 1.225 2017-03-21 15:39:11+05:30 Cprogrammer Exp mbhangui $";
 
 #ifdef INDIMAIL
 	if (x)
