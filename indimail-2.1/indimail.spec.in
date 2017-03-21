@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail.spec.in,v 2.372 2017-03-19 21:34:15+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 2.373 2017-03-21 11:22:02+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 %global debug_package %{nil}
@@ -970,6 +970,13 @@ for i in `%{__cat} %{buildroot}%{sysconfdir}/controlfiles`
 do
   echo "%ghost %config(noreplace,missingok)   %{sysconfdir}/control/$i"
   $TOUCH %{buildroot}%{sysconfdir}/control/$i
+done
+
+for i in rsa512.pem rsa1024.pem dh512.pem dh1024.pem \
+servercert.rand servercert.cnf servercert.pem
+do
+  echo "%ghost %config(noreplace,missingok)   %{sysconfdir}/certs/$i"
+  $TOUCH %{buildroot}%{sysconfdir}/certs/$i
 done
 ) > config_files.list
 if [ %nobogofilter -eq 0 ] ; then
@@ -2769,7 +2776,7 @@ fi
 # IndiMail Daemons
 %{_prefix}/sbin/svctool --indisrvr=4000 --servicedir=%{servicedir} \
   --localip=0 --maxdaemons=40 --maxperip=25 --avguserquota=2097152 \
-    --certfile=%{sysconfdir}/control/servercert.pem --ssl \
+    --certfile=%{sysconfdir}/certs/servercert.pem --ssl \
   --hardquota=52428800 --base_path=%{mbase}
 %{_prefix}/sbin/svctool --inlookup=infifo --servicedir=%{servicedir} --cntrldir=control \
   --threads=5 --query-cache --password-cache
@@ -2780,7 +2787,7 @@ if [ %nonssd -eq 0 ] ; then
 fi
 %{_prefix}/sbin/svctool --poppass=106 --localip=0 --maxdaemons=40 --maxperip=25 \
   --memory=%{poppass_mem} \
-    --certfile=%{sysconfdir}/control/servercert.pem --ssl \
+    --certfile=%{sysconfdir}/certs/servercert.pem --ssl \
   --setpassword=%{_prefix}/sbin/vsetpass --servicedir=%{servicedir}
 
 # virus/spam filtering
@@ -2900,15 +2907,15 @@ count=`expr $count + 1`
 echo "$count. You need to ensure that clamav signatures download have completed so that"
 echo "   you can start sending emails. Look at %{logdir}/freshclam/current"
 %endif
-if [ ! -f %{sysconfdir}/control/servercert.pem ] ; then
+if [ ! -f %{sysconfdir}/certs/servercert.pem ] ; then
 count=`expr $count + 1`
 %if %nocourierimap == 0
 echo "$count. You need to create CERTS for STARTTLS / SSL enabled IMAP/POP3."
 %else
 echo "$count. You need to create CERTS for STARTTLS."
 %endif
-echo "   Run the following command to create the Certificate"
-echo "   %{_prefix}/sbin/svctool --postmaster=postmaster@indimail.org --config=cert"
+echo "   Run the following command to create Certificate for TLS/SSL"
+echo "   %{_prefix}/sbin/svctool --config-cert --postmaster=postmaster@yourdomain --common_name=yourdomain"
 fi
 
 echo
@@ -3060,11 +3067,11 @@ else
 fi
 if [ -d %{mandir} ] ; then
 echo "removing man pages"
-/bin/rmdir --ignore-fail-on-non-empty %{mandir} 2>/dev/null
+/bin/rmdir --ignore-fail-on-non-empty %{mandir}
 fi
 if [ -d %{shareddir} ] ; then
 echo "removing architecture-independent shared directory"
-/bin/rmdir --ignore-fail-on-non-empty %{shareddir} 2>/dev/null
+/bin/rmdir --ignore-fail-on-non-empty %{shareddir}
 fi
 
 echo "removing configuration"
@@ -3087,16 +3094,14 @@ fi
   %{__rm} -f %{sysconfdir}/nssd.conf
 %endif
 
-if [ -d %{sysconfdir}/users ] ; then
-/bin/rmdir --ignore-fail-on-non-empty %{sysconfdir}/users 2>/dev/null
-fi
-
 if [ -f %{sysconfdir}/controlfiles ] ; then
+  echo "Removing default config files from %{sysconfdir}/controlfiles"
   for i in `%{__cat} %{sysconfdir}/controlfiles`
   do
     %{__rm} -f %{sysconfdir}/control/$i
   done
 else
+  echo "Removing default config files"
   for i in databytes defaultdelivery defaultdomain localiphost locals \
     me nodnscheck plusdomain queue_base smtpgreeting \
     chkrcptdomains defaulthost envnoathost filterargs greylist.white \
@@ -3105,33 +3110,53 @@ else
   do
     %{__rm} -f %{sysconfdir}/control/$i
   done
+  for i in rsa1024.pem servercert.cnf servercert.pem dh1024.pem \
+  dh512.pem rsa512.pem servercert.rand
+  do
+    %{__rm} -f %{sysconfdir}/certs/$i
+  done
 fi
+
+if [ -d %{sysconfdir}/users ] ; then
+/bin/rmdir --ignore-fail-on-non-empty %{sysconfdir}/users
+fi
+
 %{__rm} -f %{sysconfdir}/control/domainkeys/%{dkimkeyfn}.pub %{sysconfdir}/control/domainkeys/%dkimkeyfn
 if [ -d %{sysconfdir}/control/domainkeys ] ; then
-/bin/rmdir --ignore-fail-on-non-empty %{sysconfdir}/control/domainkeys 2>/dev/null
-fi
-if [ -d %{sysconfdir}/control ] ; then
-/bin/rmdir --ignore-fail-on-non-empty %{sysconfdir}/control 2>/dev/null
+/bin/rmdir --ignore-fail-on-non-empty %{sysconfdir}/control/domainkeys
 fi
 if [ -d %{sysconfdir}/control/defaultqueue ] ; then
 %{__rm} -rf %{sysconfdir}/control/defaultqueue
 fi
-if [ -d %{sysconfdir} ] ; then
-/bin/rmdir --ignore-fail-on-non-empty %{sysconfdir} 2>/dev/null
+if [ -d %{sysconfdir}/control ] ; then
+/bin/rmdir --ignore-fail-on-non-empty %{sysconfdir}/control
+fi
+if [ -d %{sysconfdir}/certs ] ; then
+/bin/rmdir --ignore-fail-on-non-empty %{sysconfdir}/certs
 fi
 
+if [ -d %{indimaildir}/domains ] ; then
+/bin/rmdir --ignore-fail-on-non-empty %{indimaildir}/domains
+fi
+
+echo "removing aliases postmaster, mailer-daemon, root"
 for i in postmaster mailer-daemon root ham spam register-ham register-spam
 do
   %{__rm} -f %{indimaildir}/alias/.qmail-"$i"
 done
-if [ -d %{indimaildir}/domains ] ; then
-/bin/rmdir --ignore-fail-on-non-empty %{indimaildir}/domains 2>/dev/null
-fi
 if [ -d %{indimaildir}/alias ] ; then
-/bin/rmdir --ignore-fail-on-non-empty %{indimaildir}/alias 2>/dev/null
+/bin/rmdir --ignore-fail-on-non-empty %{indimaildir}/alias
+fi
+
+for i in .qmail-nonspam .qmail-register-nonspam .qmail-register-spam .qmail-spam .qmail-default
+do
+  %{__rm} -f %{indimaildir}/domains/%{default_domain}/$i
+done
+if [ -d %{indimaildir}/domains/%{default_domain} ] ; then
+  /bin/rmdir --ignore-fail-on-non-empty %{indimaildir}/domains/%{default_domain}
 fi
 if [ -d %{indimaildir} ] ; then
-/bin/rmdir --ignore-fail-on-non-empty %{indimaildir} 2>/dev/null
+/bin/rmdir --ignore-fail-on-non-empty %{indimaildir}
 fi
 %{__rm} -f %{sysconfdir}/imapd.pem %{sysconfdir}/pop3d.pem
 %{__rm} -f %{sysconfdir}/pop3d.cnf.* %{sysconfdir}/imapd.cnf.*
@@ -3155,6 +3180,10 @@ do
   %{__rm} -f %{sysconfdir}/$i.conf %{sysconfdir}/$i.conf.disabled
 done
 fi
+if [ -d %{sysconfdir} ] ; then
+/bin/rmdir --ignore-fail-on-non-empty %{sysconfdir}
+fi
+
 for i in fetchmail indisrvr.4000 inlookup.infifo mysql.3306 \
 pwdlookup qmail-imapd.143 qmail-imapd-ssl.993 qmail-pop3d.110 qmail-pop3d-ssl.995 \
 qmail-send.25 qmail-smtpd.25 qmail-smtpd.366 qmail-spamlog qscanq qmail-imapd.4143 \

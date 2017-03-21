@@ -687,9 +687,9 @@ echo "   you can start sending emails. Look at ${logdir}/freshclam/current"
 fi
 if [ ! -f ${sysconfdir}/control/servercert.pem ] ; then
 count=`expr $count + 1`
-echo "$count. You also need to create CERTS for IMAP/POP3. run the following"
+echo "$count. You also need to create CERTS for SSL/TLS. run the following"
 echo "   command to create cert"
-echo "   ${prefix}/sbin/svctool --postmaster=postmaster@indimail.org --config=cert"
+echo "   ${prefix}/sbin/svctool --config-cert --postmaster=postmaster@yourdomain --common_name=yourdomain"
 fi
 echo
 echo "Check /tmp/indimail-install.log for the detailed installation log!!!"

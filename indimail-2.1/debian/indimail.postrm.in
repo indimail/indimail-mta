@@ -103,37 +103,9 @@ if [ " $1" = " purge" ] ; then
 	do
 		${rm} -rf ${indimaildir}/$i || true
 	done
-	${rm} -f ${indimaildir}/bin || true
-	${rm} -f ${indimaildir}/sbin || true
-	${rm} -f ${indimaildir}/users || true
-	${rm} -f ${indimaildir}/control || true
 	if [ -f /etc/mysql/indimail.cnf ] ; then
 		${rm} -f /etc/mysql/indimail.cnf
 	fi
-	if [ -d ${sysconfdir}/control/domainkeys ] ; then
-		${rmdir} --ignore-fail-on-non-empty ${sysconfdir}/control/domainkeys || true
-	fi
-	if [ -d ${sysconfdir}/control ] ; then
-		${rmdir} --ignore-fail-on-non-empty ${sysconfdir}/control || true
-	fi
-	for i in .qmail-nonspam .qmail-register-nonspam .qmail-register-spam .qmail-spam .qmail-default
-	do
-		${rm} -f ${indimaildir}/domains/${default_domain}/$i
-	done
-	if [ -d ${indimaildir}/domains/${default_domain} ] ; then
-		${rmdir} --ignore-fail-on-non-empty ${indimaildir}/domains/${default_domain} || true
-	fi
-	echo "removing aliases postmaster, mailer-daemon, root"
-	for i in postmaster mailer-daemon root
-	do
-		${rm} -f ${indimaildir}/alias/.qmail-"$i"
-	done
-	${rm} -rf ${indimaildir}/alias/Maildir
-	if [ -d ${indimaildir}/alias ] ; then
-		${rmdir} --ignore-fail-on-non-empty ${indimaildir}/alias || true
-	fi
-	${rm} -f ${sysconfdir}/imapd.pem ${sysconfdir}/pop3d.pem
-	${rm} -f ${sysconfdir}/imapd.cnf.* ${sysconfdir}/pop3d.cnf.*
 
 	if [ ${prefix} = "/var/indimail" -o ${prefix} = "/var/qmail" ] ; then
 		echo "removing binaries, man pages, queues"
@@ -176,6 +148,26 @@ if [ " $1" = " purge" ] ; then
 	${rmdir} --ignore-fail-on-non-empty ${shareddir} || true
 	fi
 
+	echo "removing configuration"
+	for i in imap pop3 smtp qmtp qmqp poppass
+	do
+		${rm} -f ${sysconfdir}/tcp.$i.cdb ${sysconfdir}/tcp.$i
+	done
+	${rm} -f ${sysconfdir}/control/controlfiles
+	for i in indimail.cnf stat.override backup.conf cronlist headerlist \
+		imapd.cnf imapd.dist imapd-ssl.dist inc_deps indimail.mrtg.cfg \
+		procmailrc indimail.settings lib_deps osh.table perm_list pop3d.cnf \
+		pop3d.dist pop3d-ssl.dist qmailprog.list quotawarnmsg.example \
+		services.log system.flashlogin system.menu system.module system.rc
+	do
+		${rm} -f ${sysconfdir}/$i
+	done
+	for i in rsa1024.pem servercert.cnf servercert.pem dh1024.pem \
+		dh512.pem rsa512.pem servercert.rand
+	do
+		${rm} -f ${sysconfdir}/certs/$i
+	done
+
 	if [ $nobogofilter -eq 0 ] ; then
 		${rm} -f ${sysconfdir}/bogofilter.cf ${sysconfdir}/bogofilter.cf.example
 	fi
@@ -192,28 +184,58 @@ if [ " $1" = " purge" ] ; then
 		${rm} -f ${sysconfdir}/fetchmailrc
 	fi
 
-	echo "removing tcp configuration"
-	for i in imap pop3 smtp qmtp qmqp poppass
+	for i in assign cdb
 	do
-		${rm} -f ${sysconfdir}/tcp.$i.cdb ${sysconfdir}/tcp.$i
+    	${rm} -f ${sysconfdir}/users/$i
 	done
-	${rm} -f ${sysconfdir}/control/controlfiles
-	for i in indimail.cnf stat.override backup.conf cronlist headerlist \
-		imapd.cnf imapd.dist imapd-ssl.dist inc_deps indimail.mrtg.cfg \
-		procmailrc indimail.settings lib_deps osh.table perm_list pop3d.cnf \
-		pop3d.dist pop3d-ssl.dist qmailprog.list quotawarnmsg.example \
-		services.log system.flashlogin system.menu system.module system.rc
-	do
-		${rm} -f ${sysconfdir}/$i
-	done
+	if [ -d ${sysconfdir}/users ] ; then
+	${rmdir} --ignore-fail-on-non-empty ${sysconfdir}/users || true
+	fi
+	${rm} -f ${sysconfdir}/control/domainkeys/default.pub ${sysconfdir}/control/domainkeys/default
+	if [ -d ${sysconfdir}/control/domainkeys ] ; then
+		${rmdir} --ignore-fail-on-non-empty ${sysconfdir}/control/domainkeys || true
+	fi
+	if [ -d ${sysconfdir}/control/defaultqueue ] ; then
+	${rm} -rf ${sysconfdir}/control/defaultqueue 2>/dev/null || true
+	fi
+	if [ -d ${sysconfdir}/control ] ; then
+	${rmdir} --ignore-fail-on-non-empty ${sysconfdir}/control || true
+	fi
+	if [ -d ${sysconfdir}/certs ] ; then
+	${rmdir} --ignore-fail-on-non-empty ${sysconfdir}/certs || true
+	fi
+	if [ -d ${sysconfdir} ] ; then
+	${rmdir} --ignore-fail-on-non-empty ${sysconfdir} || true
+	fi
 	if [ -d ${indimaildir}/domains ] ; then
 	${rmdir} --ignore-fail-on-non-empty ${indimaildir}/domains || true
 	fi
-	if [ -d ${indimaildir}/users ] ; then
-	${rmdir} --ignore-fail-on-non-empty ${indimaildir}/users || true
+
+	echo "removing aliases postmaster, mailer-daemon, root"
+	for i in postmaster mailer-daemon root
+	do
+		${rm} -f ${indimaildir}/alias/.qmail-"$i"
+	done
+	${rm} -rf ${indimaildir}/alias/Maildir
+	if [ -d ${indimaildir}/alias ] ; then
+		${rmdir} --ignore-fail-on-non-empty ${indimaildir}/alias || true
+	fi
+
+	for i in .qmail-nonspam .qmail-register-nonspam .qmail-register-spam .qmail-spam .qmail-default
+	do
+		${rm} -f ${indimaildir}/domains/${default_domain}/$i
+	done
+	if [ -d ${indimaildir}/domains/${default_domain} ] ; then
+		${rmdir} --ignore-fail-on-non-empty ${indimaildir}/domains/${default_domain} || true
 	fi
 	if [ -d ${indimaildir} ] ; then
 	${rmdir} --ignore-fail-on-non-empty ${indimaildir} || true
+	fi
+	${rm} -f ${sysconfdir}/imapd.pem ${sysconfdir}/pop3d.pem
+	${rm} -f ${sysconfdir}/imapd.cnf.* ${sysconfdir}/pop3d.cnf.*
+
+	if [ -d ${sysconfdir} ] ; then
+	${rmdir} --ignore-fail-on-non-empty ${sysconfdir} || true
 	fi
 
 	echo "removing startup services"
