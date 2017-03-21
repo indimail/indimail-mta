@@ -65,7 +65,7 @@ $config['smtp_pass'] = '%p';
 
 // provide an URL where a user can get support for this Roundcube installation
 // PLEASE DO NOT LINK TO THE ROUNDCUBE.NET WEBSITE HERE!
-$config['support_url'] = 'http://indimail.sourceforge.net';
+$config['support_url'] = 'https://sourceforge.net/p/indimail/support-requests';
 
 // Name your service. This is displayed on the login screen and in the window title
 $config['product_name'] = 'IndiMail Webmail';
