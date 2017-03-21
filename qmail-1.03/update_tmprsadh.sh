@@ -4,6 +4,9 @@
 # Frederik Vermeulen 2004-04-19 GPL
 #
 # $Log: update_tmprsadh.sh,v $
+# Revision 1.4  2017-03-21 10:57:36+05:30  Cprogrammer
+# updated certificate directory to sysconfdir/certs
+#
 # Revision 1.3  2017-03-09 14:37:37+05:30  Cprogrammer
 # fixed controldir path
 #
@@ -16,6 +19,16 @@
 #
 
 umask 0077 || exit 0
+if [ -x /bin/chown ] ; then
+	CHOWN=/bin/chown
+else
+	CHOWN=/usr/bin/chown
+fi
+if [ -x /bin/chmod ] ; then
+	CHMOD=/bin/chmod
+else
+	CHMOD=/usr/bin/chmod
+fi
 
 export PATH="$PATH:/usr/local/bin/ssl:/usr/sbin"
 while test $# -gt 0; do
@@ -25,8 +38,8 @@ while test $# -gt 0; do
     esac
 
     case "$1" in
-    --controldir=*)
-	CONTROLDIR=$optarg
+    --certdir=*)
+	CERTDIR=$optarg
 	;;
 
     *)
@@ -38,26 +51,27 @@ while test $# -gt 0; do
     shift
 done
 
-if [ " $CONTROLDIR" = " " ] ; then
-	CONTROLDIR=@controldir@
+if [ " $CERTDIR" = " " ] ; then
+	CERTDIR=@sysconfdir@/certs
 fi
-slash=`echo $CONTROLDIR | cut -c1`
+slash=`echo $CERTDIR | cut -c1`
 if [ ! " $slash" = " /" ] ; then
 	cd @sysconfdir@
 fi
-openssl genrsa -out $CONTROLDIR/rsa512.new 512 &&
-chmod 600 $CONTROLDIR/rsa512.new &&
-chown indimail:indimail $CONTROLDIR/rsa512.new &&
-mv -f $CONTROLDIR/rsa512.new $CONTROLDIR/rsa512.pem
-echo
+/usr/bin/openssl genrsa -out $CERTDIR/rsa512.new 512 &&
+$chmod 600 $CERTDIR/rsa512.new &&
+$chown indimail:indimail $CERTDIR/rsa512.new &&
+mv -f $CERTDIR/rsa512.new $CERTDIR/rsa512.pem
+echo rsa512.pem
 
-openssl dhparam -2 -out $CONTROLDIR/dh512.new 512 &&
-chmod 600 $CONTROLDIR/dh512.new &&
-chown indimail:indimail $CONTROLDIR/dh512.new &&
-mv -f $CONTROLDIR/dh512.new $CONTROLDIR/dh512.pem
-echo
+/usr/bin/openssl dhparam -2 -out $CERTDIR/dh512.new 512 &&
+$chmod 600 $CERTDIR/dh512.new &&
+$chown indimail:indimail $CERTDIR/dh512.new &&
+mv -f $CERTDIR/dh512.new $CERTDIR/dh512.pem
+echo dh512.pem
 
-openssl dhparam -2 -out $CONTROLDIR/dh1024.new 1024 &&
-chmod 600 $CONTROLDIR/dh1024.new &&
-chown indimail:indimail $CONTROLDIR/dh1024.new &&
-mv -f $CONTROLDIR/dh1024.new $CONTROLDIR/dh1024.pem
+/usr/bin/openssl dhparam -2 -out $CERTDIR/dh1024.new 1024 &&
+$chmod 600 $CERTDIR/dh1024.new &&
+$chown indimail:indimail $CERTDIR/dh1024.new &&
+mv -f $CERTDIR/dh1024.new $CERTDIR/dh1024.pem
+echo dh1024.pem
