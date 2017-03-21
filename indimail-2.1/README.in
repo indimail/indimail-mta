@@ -298,6 +298,8 @@ Some of the features available in this package
 77. Ed Neville - allow multiple Delivered-To in qmail-local using control file maxdeliveredto
 78. Ed Neville - configure TLS method in control/tlsclientmethod (qmail-smtpd),
     control/tlsservermethod (qmail-remote)
+79. roundcube support for password, autoresponder through roundcube plugin
+    iwebadmin
 
 You can take a detailed look at the feature list at
 
@@ -348,22 +350,20 @@ the bleeding edge rpms at
 
 http://download.opensuse.org/repositories/home:/mbhangui/
 
-You will also find the RPMs/Deb for both 32bit and 64bit OS on the above
-repositories
+The corresponding install instructions for the two repositories are
+https://software.opensuse.org/download.html?project=home%3Aindimail&package=indimail
+&
+https://software.opensuse.org/download.html?project=home%3Ambhangui&package=indimail
 
-Currently, the list of supported distributions for IndiMail is (for
-both 32 and 64 bit) are
+Currently, the list of supported distributions for IndiMail is
 
     * SUSE
+          o openSUSE_Leap_42.2
           o openSUSE 13.2
           o openSUSE 13.1
           o SUSE Linux Enterprise 12 SP2
           o SUSE Linux Enterprise 12 SP1
           o SUSE Linux Enterprise 12
-          o SUSE Linux Enterprise 11 SP4
-          o SUSE Linux Enterprise 11 SP3
-          o SUSE Linux Enterprise 11 SP2
-          o SUSE Linux Enterprise 11 SP1
 
     * Red Hat
           o Fedora 25
@@ -420,30 +420,5 @@ GIT Repository
 --------------
 IndiMail has a git repository at http://indimail.git.sourceforge.net/
 
-Supported/Tested MySQL versions (read INSTALL-MYSQL*)
-
-mysql-6.0.3-alpha
-mysql-6.0.9-alpha
-mysql-5.0.26
-mysql-5.0.45
-mysql-5.0.77
-mysql-5.1.40
-mysql-5.1.44
-mysql-5.1.48
-MariaDB 5.1.42
-MariaDB 5.1.44
-MariaDB 5.1.47
-MariaDB 5.2.4
-MariaDB 5.2.6
-MariaDB 5.5.32
-MariaDB 5.5.36
-mysql-5.4.3-beta
-mysql-5.5.0-m2
-mysql-5.5.2-m2
-mysql-5.5.3-m3
-mysql-5.5.8
-mysql-5.5.13
-mysql-5.5.14
-mysql-5.7.12
 
 -- Manvendra Bhangui <manvendra@indimail.org>
