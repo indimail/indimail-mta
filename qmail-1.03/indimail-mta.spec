@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail-mta.spec,v 1.75 2017-03-16 15:46:30+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail-mta.spec,v 1.76 2017-03-21 11:19:06+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 %global debug_package %{nil}
@@ -541,23 +541,32 @@ badmailpatterns badrcptpatterns badrcptto bindroutes blackholedpatterns \
 blackholedsender bodycheck bouncefrom bouncehost bouncemaxbytes bouncemessage \
 bouncesubject chkrcptdomains clientca.pem clientcert.pem concurrencyincoming \
 concurrencylocal concurrencyremote databytes defaultdelivery defaultdomain defaulthost \
-dh1024.pem dh512.pem disclaimer domainbindings doublebouncehost doublebouncemessage \
+disclaimer domainbindings doublebouncehost doublebouncemessage \
 doublebouncesubject doublebounceto earlytalkerdroptime envnoathost etrnhosts extraqueue \
 filterargs from.envrules globalspamredirect helohost holdlocal holdremote \
 hostaccess hostid hostip idhost localdomains localiphost locals maxhops \
 maxrecipients me moreipme morercpthosts morercpthosts.cdb nodnscheck \
 notipme outgoingip percenthack plusdomain qmqpservers qregex \
 quarantine queueforward queuelifetime rcptdomains rcpt.envrules rcpthosts \
-recipients rejectspam relayclients relaydomains relayhosts relaymailfrom \
-rsa512.pem servercert.pem signatures smtpgreeting smtproutes spamignore \
+recipients rejectspam relayclients relaydomains relayhosts relaymailfrom 
+signatures smtpgreeting smtproutes spamignore \
 spamignorepatterns spamredirect spfipv6 spfbehavior spfexp spfguess spfrules \
 tarpitcount tarpitdelay timeoutconnect timeoutread timeoutremote timeoutsmtpd \
 timeoutwrite tlsclientciphers tlsclients tlsserverciphers todointerval virtualdomains \
-signaturedomains nosignaturedomains goodrcptto goodrcptpatterns qbase greylist.white
+signaturedomains nosignaturedomains goodrcptto goodrcptpatterns qbase greylist.white \
+maxdeliveredto tlsclientmethod tlsservermethod dnsbllist domainqueue
 do
   echo "%ghost %config(noreplace,missingok)               %{qsysconfdir}/control/$i"
   echo $i 1>&3
   $TOUCH %{buildroot}%{qsysconfdir}/control/$i
+done
+
+for i in rsa1024.pem servercert.cnf servercert.pem dh1024.pem \
+dh512.pem rsa512.pem servercert.rand
+do
+  echo "%ghost %config(noreplace,missingok)               %{qsysconfdir}/certs/$i"
+  echo ../certs/$i 1>&3
+  $TOUCH %{buildroot}%{qsysconfdir}/certs/$i
 done
 ) > config_files.list 3>%{buildroot}%{qsysconfdir}/controlfiles
 
@@ -1880,11 +1889,11 @@ echo "$count. Change your default domain in %{qsysconfdir}/control/defaultdomain
 count=`expr $count + 1`
 echo "$count. You can optionally run the following command to verify installation"
 echo "   sudo rpm -V indimail"
-if [ ! -f %{qsysconfdir}/control/servercert.pem ] ; then
+if [ ! -f %{qsysconfdir}/certs/servercert.pem ] ; then
 count=`expr $count + 1`
 echo "$count. You need to create CERTS for STARTTLS."
-echo "   Run the following command to create the Certificate"
-echo "   %{_prefix}/sbin/svctool --postmaster=postmaster@indimail.org --config=cert"
+echo "   Run the following command to create Certificate for TLS/SSL"
+echo "   %{_prefix}/sbin/svctool --config-cert --postmaster=postmaster@yourdomain --common_name=yourdomain"
 fi
 
 ### SCRIPTLET ###############################################################################
@@ -2061,11 +2070,13 @@ done
 /bin/rmdir --ignore-fail-on-non-empty %{qsysconfdir}/users 2>/dev/null
 
 if [ -f %{qsysconfdir}/controlfiles ] ; then
+  echo "Removing default config files from %{qsysconfdir}/controlfiles"
   for i in `%{__cat} %{qsysconfdir}/controlfiles`
   do
     %{__rm} -f %{qsysconfdir}/control/$i
   done
 else
+  echo "Removing default config files"
   for i in databytes defaultdelivery defaultdomain localiphost locals \
     me nodnscheck plusdomain queue_base smtpgreeting signatures \
     chkrcptdomains defaulthost envnoathost filterargs greylist.white \
@@ -2073,11 +2084,17 @@ else
   do
     %{__rm} -f %{qsysconfdir}/control/$i
   done
+  for i in rsa1024.pem servercert.cnf servercert.pem dh1024.pem \
+  dh512.pem rsa512.pem servercert.rand
+  do
+    %{__rm} -f %{qsysconfdir}/certs/$i
+  done
 fi
 %{__rm} -f %{qsysconfdir}/controlfiles
 %{__rm} -f %{qsysconfdir}/control/domainkeys/%{dkimkeyfn}.pub %{qsysconfdir}/control/domainkeys/%dkimkeyfn
 /bin/rmdir --ignore-fail-on-non-empty %{qsysconfdir}/control/domainkeys 2>/dev/null
 /bin/rmdir --ignore-fail-on-non-empty %{qsysconfdir}/control 2>/dev/null
+/bin/rmdir --ignore-fail-on-non-empty %{qsysconfdir}/certs 2>/dev/null
 
 for i in postmaster mailer-daemon root ham spam register-ham register-spam
 do

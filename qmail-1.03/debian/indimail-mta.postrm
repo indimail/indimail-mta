@@ -91,18 +91,7 @@ if [ " $1" = " purge" ] ; then
 		fi
 	fi
 
-	echo "removing database and configuration"
-	${rm} -f ${qmaildir}/bin || true
-	${rm} -f ${qmaildir}/sbin || true
-	${rm} -f ${qmaildir}/users || true
-	${rm} -f ${qmaildir}/control || true
-	${rm} -rf ${sysconfdir} || true
-	if [ -d ${sysconfdir}/control/domainkeys ] ; then
-		${rmdir} --ignore-fail-on-non-empty ${sysconfdir}/control/domainkeys 2>/dev/null || true
-	fi
-	if [ -d ${sysconfdir}/control ] ; then
-		${rmdir} --ignore-fail-on-non-empty ${sysconfdir}/control 2>/dev/null || true
-	fi
+	echo "removing configuration"
 	for i in .qmail-nonspam .qmail-register-nonspam .qmail-register-spam .qmail-spam .qmail-default
 	do
 		${rm} -f ${qmaildir}/domains/${default_domain}/$i
@@ -110,6 +99,7 @@ if [ " $1" = " purge" ] ; then
 	if [ -d ${qmaildir}/domains/${default_domain} ] ; then
 		${rmdir} --ignore-fail-on-non-empty ${qmaildir}/domains/${default_domain} 2>/dev/null || true
 	fi
+	${rmdir} --ignore-fail-on-non-empty ${qmaildir}/domains 2>/dev/null || true
 	echo "removing aliases postmaster, mailer-daemon, root"
 	for i in postmaster mailer-daemon root
 	do
@@ -119,6 +109,25 @@ if [ " $1" = " purge" ] ; then
 	if [ -d ${qmaildir}/alias ] ; then
 		${rmdir} --ignore-fail-on-non-empty ${qmaildir}/alias 2>/dev/null || true
 	fi
+
+	echo "removing tcp configuration"
+	for i in smtp qmtp qmqp
+	do
+		${rm} -f ${sysconfdir}/tcp.$i.cdb ${sysconfdir}/tcp.$i
+	done
+	${rm} -f ${sysocnfdir}/control/controlfiles
+	for i in indimail.cnf stat.override backup.conf cronlist headerlist \
+		inc_deps indimail.mrtg.cfg \
+		procmailrc indimail.settings lib_deps osh.table perm_list \
+		qmailprog.list quotawarnmsg.example services.log
+	do
+		${rm} -f ${sysconfdir}/$i
+	done
+	for i in rsa1024.pem servercert.cnf servercert.pem dh1024.pem \
+		dh512.pem rsa512.pem servercert.rand
+	do
+		${rm} -f ${sysconfdir}/certs/$i
+	done
 
 	echo "removing binaries, libraries, queues"
 	if [ ${prefix} = "/var/indimail" -o ${prefix} = "/var/qmail" ] ; then
@@ -162,29 +171,33 @@ if [ " $1" = " purge" ] ; then
 			${rm} -rf ${libexecdir} || true
 		fi
 	fi
+	for i in assign cdb
+	do
+    	${rm} -f ${sysconfdir}/users/$i
+	done
+	if [ -d ${sysconfdir}/users ] ; then
+	${rmdir} --ignore-fail-on-non-empty ${sysconfdir}/users || true
+	fi
+	${rm} -f ${sysconfdir}/control/domainkeys/default.pub ${sysconfdir}/control/domainkeys/default
+	if [ -d ${sysconfdir}/control/domainkeys ] ; then
+		${rmdir} --ignore-fail-on-non-empty ${sysconfdir}/control/domainkeys 2>/dev/null || true
+	fi
+	if [ -d ${sysconfdir}/control/defaultqueue ] ; then
+	${rm} -rf ${sysconfdir}/control/defaultqueue 2>/dev/null || true
+	fi
+	if [ -d ${sysconfdir}/control ] ; then
+	${rmdir} --ignore-fail-on-non-empty ${sysconfdir}/control || true
+	fi
+	if [ -d ${sysconfdir}/certs ] ; then
+	${rmdir} --ignore-fail-on-non-empty ${sysconfdir}/certs || true
+	fi
+	${rm} -rf ${sysconfdir} || true
 	echo "removing man pages"
 	${rmdir} --ignore-fail-on-non-empty ${mandir} 2>/dev/null|| true
 	if [ -d ${shareddir} ] ; then
 	echo "removing architecture-independent shared directory"
 	${rmdir} --ignore-fail-on-non-empty ${shareddir} 2>/dev/null || true
 	fi
-
-	echo "removing tcp configuration"
-	for i in smtp qmtp qmqp
-	do
-		${rm} -f ${sysconfdir}/tcp.$i.cdb ${sysconfdir}/tcp.$i
-	done
-	${rm} -f ${sysocnfdir}/control/controlfiles
-	for i in indimail.cnf stat.override backup.conf cronlist headerlist \
-		inc_deps indimail.mrtg.cfg \
-		procmailrc indimail.settings lib_deps osh.table perm_list \
-		qmailprog.list quotawarnmsg.example services.log
-	do
-		${rm} -f ${sysconfdir}/$i
-	done
-	${rmdir} --ignore-fail-on-non-empty ${qmaildir}/domains 2>/dev/null || true
-	${rmdir} --ignore-fail-on-non-empty ${qmaildir}/users 2>/dev/null || true
-	${rmdir} --ignore-fail-on-non-empty ${qmaildir}/alias 2>/dev/null || true
 	${rmdir} --ignore-fail-on-non-empty ${qmaildir} 2>/dev/null || true
 
 	echo "removing startup services"
