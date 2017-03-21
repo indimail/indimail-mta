@@ -1,5 +1,8 @@
 /*
  * $Log: smtpd.c,v $
+ * Revision 1.193  2017-03-21 15:39:52+05:30  Cprogrammer
+ * use CERTDIR to override tls/ssl certificates
+ *
  * Revision 1.192  2017-03-10 17:56:07+05:30  Cprogrammer
  * fixed value of protocol line for tls session in Received header
  *
@@ -740,7 +743,7 @@ int             secure_auth = 0;
 int             ssl_rfd = -1, ssl_wfd = -1;	/*- SSL_get_Xfd() are broken */
 char           *servercert, *clientca, *clientcrl;
 #endif
-char           *revision = "$Revision: 1.192 $";
+char           *revision = "$Revision: 1.193 $";
 char           *protocol = "SMTP";
 stralloc        proto = { 0 };
 static stralloc Revision = { 0 };
@@ -3529,12 +3532,12 @@ smtp_ehlo(char *arg)
 		stralloc        filename = {0};
 		struct stat     st;
 
-		if (!controldir)
+		if (!certdir)
 		{
-			if (!(controldir = env_get("CONTROLDIR")))
-				controldir = auto_control;
+			if (!(certdir = env_get("CERTDIR")))
+				certdir = auto_control;
 		}
-		if (!stralloc_copys(&filename, controldir))
+		if (!stralloc_copys(&filename, certdir))
 			die_nomem();
 		if (!stralloc_catb(&filename, "/", 1))
 			die_nomem();
@@ -6127,12 +6130,12 @@ tmp_rsa_cb(SSL *ssl, int export, int keylen)
 	{
 		FILE           *in;
 
-		if (!controldir)
+		if (!certdir)
 		{
-			if (!(controldir = env_get("CONTROLDIR")))
-				controldir = auto_control;
+			if (!(certdir = env_get("CERTDIR")))
+				certdir = auto_control;
 		}
-		if (!stralloc_copys(&filename, controldir))
+		if (!stralloc_copys(&filename, certdir))
 			die_nomem();
 		if (!stralloc_catb(&filename, "/rsa512.pem", 11))
 			die_nomem();
@@ -6160,15 +6163,15 @@ tmp_dh_cb(SSL *ssl, int export, int keylen)
 
 	if (!export)
 		keylen = 1024;
+	if (!certdir)
+	{
+		if (!(certdir = env_get("CERTDIR")))
+			certdir = auto_control;
+	}
 	if (keylen == 512)
 	{
 		FILE           *in;
-		if (!controldir)
-		{
-			if (!(controldir = env_get("CONTROLDIR")))
-				controldir = auto_control;
-		}
-		if (!stralloc_copys(&filename, controldir))
+		if (!stralloc_copys(&filename, certdir))
 			die_nomem();
 		if (!stralloc_catb(&filename, "/dh512.pem", 10))
 			die_nomem();
@@ -6188,12 +6191,7 @@ tmp_dh_cb(SSL *ssl, int export, int keylen)
 	if (keylen == 1024)
 	{
 		FILE           *in;
-		if (!controldir)
-		{
-			if (!(controldir = env_get("CONTROLDIR")))
-				controldir = auto_control;
-		}
-		if (!stralloc_copys(&filename, controldir))
+		if (!stralloc_copys(&filename, certdir))
 			die_nomem();
 		if (!stralloc_catb(&filename, "/dh1024.pem", 11))
 			die_nomem();
@@ -6284,12 +6282,12 @@ tls_verify()
 			 * it is probably due to 0.9.6b supporting only 8k key exchange
 			 * data while the 0.9.6c release increases that limit to 100k 
 			 */
-			if (!controldir)
+			if (!certdir)
 			{
-				if (!(controldir = env_get("CONTROLDIR")))
-					controldir = auto_control;
+				if (!(certdir = env_get("CERTDIR")))
+					certdir = auto_control;
 			}
-			if (!stralloc_copys(&filename, controldir))
+			if (!stralloc_copys(&filename, certdir))
 				die_nomem();
 			if (!stralloc_catb(&filename, "/", 1))
 				die_nomem();
@@ -6388,11 +6386,6 @@ tls_init()
 	stralloc        filename = {0};
 	stralloc        ssl_option = {0};
 
-	if (!controldir)
-	{
-		if (!(controldir = env_get("CONTROLDIR")))
-			controldir = auto_control;
-	}
 	if (control_rldef(&ssl_option, "tlsservermethod", 0, "TLSv1") != 1)
 		die_control();
 	if (str_equal( ssl_option.s, "SSLv23"))
@@ -6433,7 +6426,12 @@ tls_init()
 		tls_err("454 TLS not available: unable to initialize TLSv1_2 ctx (#4.3.0)\r\n");
 		return;
 	}
-	if (!stralloc_copys(&filename, controldir))
+	if (!certdir)
+	{
+		if (!(certdir = env_get("CERTDIR")))
+			certdir = auto_control;
+	}
+	if (!stralloc_copys(&filename, certdir))
 		die_nomem();
 	if (!stralloc_catb(&filename, "/", 1))
 		die_nomem();
@@ -6448,7 +6446,7 @@ tls_init()
 		tls_err("missing certificate");
 		return;
 	}
-	if (!stralloc_copys(&filename, controldir))
+	if (!stralloc_copys(&filename, certdir))
 		die_nomem();
 	if (!stralloc_catb(&filename, "/", 1))
 		die_nomem();
@@ -6463,7 +6461,7 @@ tls_init()
 	 * crl checking 
 	 */
 	store = SSL_CTX_get_cert_store(ctx);
-	if (!stralloc_copys(&filename, controldir))
+	if (!stralloc_copys(&filename, certdir))
 		die_nomem();
 	if (!stralloc_catb(&filename, "/", 1))
 		die_nomem();
@@ -6493,7 +6491,7 @@ tls_init()
 	/*
 	 * this will also check whether public and private keys match 
 	 */
-	if (!stralloc_copys(&filename, controldir))
+	if (!stralloc_copys(&filename, certdir))
 		die_nomem();
 	if (!stralloc_catb(&filename, "/", 1))
 		die_nomem();
@@ -6892,7 +6890,7 @@ addrrelay() /*- Rejection of relay probes. */
 void
 getversion_smtpd_c()
 {
-	static char    *x = "$Id: smtpd.c,v 1.192 2017-03-10 17:56:07+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: smtpd.c,v 1.193 2017-03-21 15:39:52+05:30 Cprogrammer Exp mbhangui $";
 
 #ifdef INDIMAIL
 	if (x)

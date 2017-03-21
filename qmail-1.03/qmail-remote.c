@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-remote.c,v $
+ * Revision 1.96  2017-03-21 15:39:33+05:30  Cprogrammer
+ * use CERTDIR to override tls/ssl certificates
+ *
  * Revision 1.95  2017-03-10 17:58:59+05:30  Cprogrammer
  * added back SSLv23 method
  *
@@ -1329,13 +1332,13 @@ tls_init()
 	int             method = 4; /* (1..2 unused) [1..3] = ssl[1..3], 4 = tls1, 5=tls1.1, 6=tls1.2 */
 	int             method_fail = 1;
 
-	if (!controldir)
+	if (!certdir)
 	{
-		if (!(controldir = env_get("CONTROLDIR")))
-			controldir = auto_control;
+		if (!(certdir = env_get("CERTDIR")))
+			certdir = auto_control;
 	}
 
-	if (!stralloc_copys(&tlsFilename, controldir))
+	if (!stralloc_copys(&tlsFilename, certdir))
 		temp_nomem();
 	if (!stralloc_catb(&tlsFilename, "/tlsclientmethod", 16))
 		temp_nomem();
@@ -1357,7 +1360,7 @@ tls_init()
 	else
 	if (str_equal(ssl_option.s, "TLSv1_2"))
 		method = 6;
-	if (!stralloc_copys(&tlsFilename, controldir))
+	if (!stralloc_copys(&tlsFilename, certdir))
 		temp_nomem();
 	if (!stralloc_catb(&tlsFilename, "/clientcert.pem", 15))
 		temp_nomem();
@@ -1370,7 +1373,7 @@ tls_init()
 	if (partner_fqdn)
 	{
 		struct stat     st;
-		if (!stralloc_copys(&tlsFilename, controldir))
+		if (!stralloc_copys(&tlsFilename, certdir))
 			temp_nomem();
 		if (!stralloc_catb(&tlsFilename, "/tlshosts/", 10))
 			temp_nomem();
@@ -1383,7 +1386,7 @@ tls_init()
 		if (stat(tlsFilename.s, &st))
 		{
 			needtlsauth = 0;
-			if (!stralloc_copys(&tlsFilename, controldir))
+			if (!stralloc_copys(&tlsFilename, certdir))
 				temp_nomem();
 			if (!stralloc_catb(&tlsFilename, "/notlshosts/", 12))
 				temp_nomem();
@@ -1396,7 +1399,7 @@ tls_init()
 				alloc_free(tlsFilename.s);
 				return (0);
 			}
-			if (!stralloc_copys(&tlsFilename, controldir))
+			if (!stralloc_copys(&tlsFilename, certdir))
 				temp_nomem();
 			if (!stralloc_catb(&tlsFilename, "/tlshosts/exhaustivelist", 24))
 				temp_nomem();
@@ -1494,7 +1497,7 @@ tls_init()
 	/*
 	 * let the other side complain if it needs a cert and we don't have one 
 	 */
-	if (!stralloc_copys(&clientcert, controldir))
+	if (!stralloc_copys(&clientcert, certdir))
 		temp_nomem();
 	if (!stralloc_catb(&clientcert, "/clientcert.pem", 15))
 		temp_nomem();
@@ -3202,7 +3205,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_remote_c()
 {
-	static char    *x = "$Id: qmail-remote.c,v 1.95 2017-03-10 17:58:59+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-remote.c,v 1.96 2017-03-21 15:39:33+05:30 Cprogrammer Exp mbhangui $";
 	x=sccsidauthcramh;
 	x=sccsidauthdigestmd5h;
 	x++;
