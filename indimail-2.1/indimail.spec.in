@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail.spec.in,v 2.373 2017-03-21 11:22:02+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 2.374 2017-03-21 16:14:53+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 %global debug_package %{nil}
@@ -1019,6 +1019,7 @@ fi
 %dir %attr(755,root,root)         %{sysconfdir}
 %dir %attr(775,root,qmail)        %{sysconfdir}/etc
 %dir %attr(775,indimail,qmail)    %{sysconfdir}/users
+%dir %attr(775,indimail,qmail)    %{sysconfdir}/certs
 %dir %attr(775,indimail,qmail)    %{sysconfdir}/control
 %dir %attr(775,indimail,qmail)    %{sysconfdir}/control/inquery
 %dir %attr(2775,qmailr,qmail)     %{sysconfdir}/control/ratelimit

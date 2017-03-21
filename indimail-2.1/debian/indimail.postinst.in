@@ -516,7 +516,7 @@ fi
 # IndiMail Daemons
 ${prefix}/sbin/svctool --indisrvr=4000 --servicedir=$servicedir \
 	--localip=0 --maxdaemons=40 --maxperip=25 --avguserquota=2097152 \
-    --certfile=${sysconfdir}/control/servercert.pem --ssl \
+    --certfile=${sysconfdir}/certs/servercert.pem --ssl \
 	--hardquota=52428800 --base_path=${mbase}
 ${prefix}/sbin/svctool --inlookup=infifo --servicedir=$servicedir \
 	--cntrldir=control --threads=5 --password-cache
@@ -527,7 +527,7 @@ ${prefix}/sbin/svctool --pwdlookup=/tmp/nssd.sock --threads=5 --timeout=-1 \
 fi
 ${prefix}/sbin/svctool --poppass=106 --localip=0 --maxdaemons=40 --maxperip=25 \
 	--memory=$poppass_mem \
-    --certfile=${sysconfdir}/control/servercert.pem --ssl \
+    --certfile=${sysconfdir}/certs/servercert.pem --ssl \
 	--setpassword=${prefix}/sbin/vsetpass --servicedir=$servicedir
 
 # virus/spam filtering
@@ -685,7 +685,7 @@ count=`expr $count + 1`
 echo "$count. You need to ensure that clamav signatures download have completed so that"
 echo "   you can start sending emails. Look at ${logdir}/freshclam/current"
 fi
-if [ ! -f ${sysconfdir}/control/servercert.pem ] ; then
+if [ ! -f ${sysconfdir}/certs/servercert.pem ] ; then
 count=`expr $count + 1`
 echo "$count. You also need to create CERTS for SSL/TLS. run the following"
 echo "   command to create cert"

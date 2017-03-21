@@ -1,6 +1,9 @@
 #!/bin/sh
 # WARNING: This file was auto-generated. Do not edit!
 # $Log: svctool.in,v $
+# Revision 2.308  2017-03-21 16:15:16+05:30  Cprogrammer
+# use sysconfdir/certs for tls/ssl certificates
+#
 # Revision 2.307  2017-03-16 12:19:23+05:30  Cprogrammer
 # quoted svctool arguments and save install time arguments in variables/.options file
 #
@@ -12,7 +15,7 @@
 # Initial revision
 #
 #
-# $Id: svctool.in,v 2.307 2017-03-16 12:19:23+05:30 Cprogrammer Exp mbhangui $
+# $Id: svctool.in,v 2.308 2017-03-21 16:15:16+05:30 Cprogrammer Exp mbhangui $
 #
 
 #
@@ -44,13 +47,13 @@ shared_objects=0
 #
 # End of User Configuration
 #
-usage()
-{
 if [ -f /usr/bin/less ] ; then
 	MORE=/usr/bin/less
 else
 	MORE=/usr/bin/more
 fi
+usage()
+{
 echo "Press ENTER for options, Cntrl C to quit" 1>&2
 read key
 $MORE <<EOF
@@ -200,6 +203,7 @@ Known values for OPTION are:
 	[--dkverify=dk|dkim|both|none]
 	[--dksign=dk|dkim|both|none --private_key=private_key]
 	[--remote-authsmtp=b]
+	[--ssl]
 	--default-domain=domain
 
  Installs a new queue without a SMTP listener
@@ -247,6 +251,7 @@ Known values for OPTION are:
                    vdelivermail to make a MySQL connection and hence improves
                    delivery times.
   b              - Authenticated SMTP method to use by qmail-remote (plain, login, cram-md5)
+  ssl            - Use SSL encrypted communication in qmail-remote
 
 --queueParam=dir --qbase=queue_path --qcount=N --qstart=I
 	[--cntrldir=cntrl_path]
@@ -414,6 +419,7 @@ Known values for OPTION are:
 	[--proxy=destport]
 	[--legacyserver]
 	[--postmaster=user[@domain]]
+	[--common_name=CN]
 	[--query-cache]
 	[--ssl|--tlsprog|--starttls]
 
@@ -425,6 +431,7 @@ Known values for OPTION are:
   proxy          - Install as a proxy and connect to actual imap on destport
   legacyserver   - To be set if destination IMAP server is not Indimail's IMAP server
   postmaster     - name of the user who will be the contact for Certificates.
+  common_name    - Common Name (CN) for server
   query-cache    - Enable caching of queries
   tlsprog        - External progam to enable TLS session
   starttls       - Advertise STARTTLS capability
@@ -442,6 +449,7 @@ Known values for OPTION are:
 	[--proxy=destport]
 	[--legacyserver]
 	[--postmaster=user[@domain]]
+	[--common_name=CN]
 	[--query-cache]
 	[--ssl|--tlsprog|--starttls]
 
@@ -453,6 +461,7 @@ Known values for OPTION are:
   proxy          - Install as a proxy
   legacyserver   - To be set if destination POP3 server is not Indimail's POP3 server
   postmaster     - name of the user who will be the contact for Certificates.
+  common_name    - Common Name (CN) for server
   query-cache    - Enable caching of queries
   tlsprog        - External progam to enable TLS session
   starttls       - Advertise STARTTLS capability
@@ -638,6 +647,7 @@ Known values for OPTION are:
 
 --config=mysql|mysqldb|imap|pop3|qmail|users|rmusers|clamd|bogofilter|cert|add-boot|rm-boot|selinux
 	[--postmaster=user[@domain]]
+	[--common_name=CN]
 	[--default-domain=domain]
 	[--mysqlPrefix=mysqlPrefix]
 	[--mysqlhost=mysqlhost --mysqluser=mysqluser --mysqlpass=mysqlpass]
@@ -664,6 +674,7 @@ Known values for OPTION are:
   all            - Create All the above configuration files
   postmaster     - name of the user who will recieve bounces on the local host.
                    This can also be a remote user i.e. &postmaster@indi.com
+  common_name    - Common Name (CN) for server
   default-domain - default domain name for which this host will handle mails
   mysqlPrefix    - Installation Prefix for mysql
   mysqlhost      - MySQL Host having authentication tables
@@ -1584,6 +1595,7 @@ else
 fi
 if [ " $use_ssl" = " 1" ] ; then
 	echo > $conf_dir/SMTPS
+	echo $sysconfdir/certs > $conf_dir/CERTDIR
 fi
 if [ " $odmr" = " " ] ; then
 	echo $QUEUE_BASE > $conf_dir/QUEUE_BASE
@@ -1593,6 +1605,7 @@ if [ " $odmr" = " " ] ; then
 		> $conf_dir/STARTTLS
 	else
 		echo > $conf_dir/STARTTLS
+		echo $sysconfdir/certs > $conf_dir/CERTDIR
 	fi
 	if [ " $qregex" = " " ] ; then
 		> $conf_dir/QREGEX
@@ -1780,7 +1793,7 @@ esac
 echo "$QmailBinPrefix/sbin/vchkpass $QmailBinPrefix/sbin/systpass" > $conf_dir/AUTHMODULES
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.307 2017-03-16 12:19:23+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.308 2017-03-21 16:15:16+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -1843,7 +1856,7 @@ if [ " $odmr" = " " ] ; then
 		/bin/mkdir -p "$DESTDIR"$SERVICEDIR/qmail-spamlog/log
 		(
 		echo "#!/bin/sh"
-		echo "# \$Id: svctool.in,v 2.307 2017-03-16 12:19:23+05:30 Cprogrammer Exp mbhangui $"
+		echo "# \$Id: svctool.in,v 2.308 2017-03-21 16:15:16+05:30 Cprogrammer Exp mbhangui $"
 		echo "# $prog_args"
 		echo ""
 		echo "LOGFILTER=\`cat $SERVICEDIR/qmail-smtpd.$tag/variables/LOGFILTER\`"
@@ -1864,7 +1877,7 @@ if [ " $odmr" = " " ] ; then
 		#qmail-spamlog log script
 		(
 		echo "#!/bin/sh"
-		echo "# \$Id: svctool.in,v 2.307 2017-03-16 12:19:23+05:30 Cprogrammer Exp mbhangui $"
+		echo "# \$Id: svctool.in,v 2.308 2017-03-21 16:15:16+05:30 Cprogrammer Exp mbhangui $"
 		echo "# generated on $host on `date`"
 		echo "# $prog_args"
 		echo ""
@@ -1882,7 +1895,7 @@ if [ ! -d $LOGDIR ] ; then
 fi
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.307 2017-03-16 12:19:23+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.308 2017-03-21 16:15:16+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -2142,7 +2155,7 @@ else
 fi
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.307 2017-03-16 12:19:23+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.308 2017-03-21 16:15:16+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -2180,7 +2193,7 @@ if [ ! " $logfilter" = " " -a ! -d "$DESTDIR"$SERVICEDIR/qmail-spamlog/run ] ; t
 	/bin/mkdir -p "$DESTDIR"$SERVICEDIR/qmail-spamlog/log
 	(
 	echo "#!/bin/sh"
-	echo "# \$Id: svctool.in,v 2.307 2017-03-16 12:19:23+05:30 Cprogrammer Exp mbhangui $"
+	echo "# \$Id: svctool.in,v 2.308 2017-03-21 16:15:16+05:30 Cprogrammer Exp mbhangui $"
 	echo "# $prog_args"
 	echo ""
 	echo "LOGFILTER=\`cat $SERVICEDIR/qmail-$type.$tag/variables/LOGFILTER\`"
@@ -2201,7 +2214,7 @@ if [ ! " $logfilter" = " " -a ! -d "$DESTDIR"$SERVICEDIR/qmail-spamlog/run ] ; t
 	#qmail-spamlog log script
 	(
 	echo "#!/bin/sh"
-	echo "# \$Id: svctool.in,v 2.307 2017-03-16 12:19:23+05:30 Cprogrammer Exp mbhangui $"
+	echo "# \$Id: svctool.in,v 2.308 2017-03-21 16:15:16+05:30 Cprogrammer Exp mbhangui $"
 	echo "# generated on $host on `date`"
 	echo "# $prog_args"
 	echo ""
@@ -2218,7 +2231,7 @@ if [ ! -d $LOGDIR ] ; then
 fi
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.307 2017-03-16 12:19:23+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.308 2017-03-21 16:15:16+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -2273,7 +2286,7 @@ fi
 
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.307 2017-03-16 12:19:23+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.308 2017-03-21 16:15:16+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -2291,7 +2304,7 @@ if [ ! -d $LOGDIR ] ; then
 fi
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.307 2017-03-16 12:19:23+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.308 2017-03-21 16:15:16+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -2360,7 +2373,7 @@ CONTEXT_FILE=$CONTROLDIR/$CONTEXT_FILE
 
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.307 2017-03-16 12:19:23+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.308 2017-03-21 16:15:16+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -2383,7 +2396,7 @@ if [ ! -d $LOGDIR ] ; then
 fi
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.307 2017-03-16 12:19:23+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.308 2017-03-21 16:15:16+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -2465,7 +2478,7 @@ else
 fi
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.307 2017-03-16 12:19:23+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.308 2017-03-21 16:15:16+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -2521,7 +2534,7 @@ fi
 # qmail-imapd log script
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.307 2017-03-16 12:19:23+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.308 2017-03-21 16:15:16+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -2632,7 +2645,7 @@ echo "IMAP_SHAREDINDEXFILE=$sysconfdir/shared/index"
 echo "MAILDIRPATH=Maildir"
 echo "IMAP_CAPABILITY=\"$IMAP_CAPABILITY AUTH=LOGIN AUTH=PLAIN AUTH=CRAM-MD5 AUTH=CRAM-SHA1 AUTH=CRAM-SHA256\""
 
-# IMAP_STARTLS, IMAP_TLS_REQUIRED, COURIERTLS required for advertising STARTTLS
+# IMAP_STARTTLS, IMAP_TLS_REQUIRED, COURIERTLS required for advertising STARTTLS
 if [ $use_starttls -eq 1 ] ; then
 	echo "IMAP_STARTTLS=YES"
 	echo "IMAP_TLS_REQUIRED=0"
@@ -2660,13 +2673,13 @@ fi
 echo "IMAP_CAPABILITY_TLS=\"$IMAP_CAPABILITY\""
 echo "TLS_PROTOCOL=SSL23"
 echo "TLS_STARTTLS_PROTOCOL=TLS1"
-echo "# TLS_CIPHER_LIST=\"ALL:!ADH:RC4+RSA:+SSLv2:@STRENGTH\""
+echo "# TLS_CIPHER_LIST=\"TLSv1:HIGH:!LOW:!MEDIUM:!EXP:!NULL:!aNULL@STRENGTH\""
 echo "##NAME: TLS_TIMEOUT:0"
 echo "# TLS_TIMEOUT is currently not implemented, and reserved for future use."
 echo "# This is supposed to be an inactivity timeout, but its not yet implemented."
 echo "#"
 echo "# TLS_DHCERTFILE="
-echo "TLS_CERTFILE=$sysconfdir/control/servercert.pem"
+echo "TLS_CERTFILE=$sysconfdir/certs/servercert.pem"
 echo "# TLS_TRUSTCERTS="
 echo "TLS_VERIFYPEER=NONE"
 echo "TLS_CACHEFILE=$CONTROLDIR/couriersslcache"
@@ -2680,12 +2693,9 @@ if [ $# -ne 2 ] ; then
 	return 1
 fi
 postmaster=$1
+cn=$2
 echo
-if [ " $2" = " IMAP" ] ; then
-	echo "RANDFILE = $sysconfdir/imapd.rand"
-else
-	echo "RANDFILE = $sysconfdir/pop3d.rand"
-fi
+echo "RANDFILE = $sysconfdir/certs/servercert.rand"
 echo 
 echo "[ req ]"
 echo "default_bits = 4096"
@@ -2693,19 +2703,15 @@ echo "encrypt_key = yes"
 echo "distinguished_name = req_dn"
 echo "x509_extensions = cert_type"
 echo "prompt = no"
-echo "default_md = sha1"
+echo "default_md = sha256"
 echo 
 echo "[ req_dn ]"
 echo "C=IN"
 echo "ST=GOA"
 echo "L=Porvorim"
 echo "O=IndiMail Server"
-if [ " $2" = " IMAP" ] ; then
-	echo "OU=Automatically-generated IMAP SSL key"
-else
-	echo "OU=Automatically-generated POP3 SSL key"
-fi
-echo "CN=localhost"
+echo "OU=Automatically-generated SSL key"
+echo "CN=$cn"
 echo "emailAddress=$postmaster"
 echo 
 echo "[ cert_type ]"
@@ -2723,7 +2729,7 @@ echo "[imapd]"
 echo "accept = $SSLADDRESS:993"
 echo "protocol = imap"
 echo "connect = $SSLADDRESS:143"
-echo "cert = $sysconfdir/control/servercert.pem"
+echo "cert = $sysconfdir/certs/servercert.pem"
 }
 
 create_pop3_stunnel()
@@ -2737,7 +2743,7 @@ echo "[pop3d]"
 echo "accept = $SSLADDRESS:995"
 echo "protocol = pop3"
 echo "connect = $SSLADDRESS:110"
-echo "cert = $sysconfdir/control/servercert.pem"
+echo "cert = $sysconfdir/certs/servercert.pem"
 }
 
 create_pop3()
@@ -2813,7 +2819,7 @@ else
 fi
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.307 2017-03-16 12:19:23+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.308 2017-03-21 16:15:16+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -2868,7 +2874,7 @@ fi
 # qmail-pop3d log script
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.307 2017-03-16 12:19:23+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.308 2017-03-21 16:15:16+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -2956,7 +2962,7 @@ fi
 echo "DEBUG_LOGIN=0"
 echo "POP3AUTH=\"LOGIN PLAIN CRAM-MD5 CRAM-SHA1 CRAM-SHA256\""
 
-# POP3_STARTLS, POP3_TLS_REQUIRED, COURIERTLS required for advertising STARTTLS
+# POP3_STARTTLS, POP3_TLS_REQUIRED, COURIERTLS required for advertising STARTTLS
 if [ $use_starttls -eq 1 ] ; then
 	echo "POP3_STARTTLS=YES"
 	echo "POP3_TLS_REQUIRED=0"
@@ -2984,13 +2990,13 @@ fi
 echo "POP3AUTH_TLS=\"$POP3AUTH\""
 echo "TLS_PROTOCOL=SSL23"
 echo "TLS_STARTTLS_PROTOCOL=TLS1"
-echo "# TLS_CIPHER_LIST=\"ALL:!ADH:RC4+RSA:+SSLv2:@STRENGTH\""
+echo "# TLS_CIPHER_LIST=\"TLSv1:HIGH:!LOW:!MEDIUM:!EXP:!NULL:!aNULL@STRENGTH\""
 echo "##NAME: TLS_TIMEOUT:0"
 echo "# TLS_TIMEOUT is currently not implemented, and reserved for future use."
 echo "# This is supposed to be an inactivity timeout, but its not yet implemented."
 echo "#"
 echo "# TLS_DHCERTFILE="
-echo "TLS_CERTFILE=$sysconfdir/control/servercert.pem"
+echo "TLS_CERTFILE=$sysconfdir/certs/servercert.pem"
 echo "# TLS_TRUSTCERTS="
 echo "TLS_VERIFYPEER=NONE"
 echo "TLS_CACHEFILE=$CONTROLDIR/couriersslcache"
@@ -3079,7 +3085,7 @@ fi
 echo 1 > $conf_dir/MYSQL_OPT_RECONNECT
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.307 2017-03-16 12:19:23+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.308 2017-03-21 16:15:16+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -3107,7 +3113,7 @@ fi
 # indisrvr log script
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.307 2017-03-16 12:19:23+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.308 2017-03-21 16:15:16+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -3135,7 +3141,7 @@ conf_dir="$DESTDIR"$SERVICEDIR/qscanq/variables
 # qscanq script
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.307 2017-03-16 12:19:23+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.308 2017-03-21 16:15:16+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -3157,7 +3163,7 @@ fi
 # qscanq log script
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.307 2017-03-16 12:19:23+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.308 2017-03-21 16:15:16+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -3190,7 +3196,7 @@ conf_dir="$DESTDIR"$SERVICEDIR/clamd/variables
 # clamd script
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.307 2017-03-16 12:19:23+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.308 2017-03-21 16:15:16+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -3257,7 +3263,7 @@ fi
 # clamd log script
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.307 2017-03-16 12:19:23+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.308 2017-03-21 16:15:16+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -3274,7 +3280,7 @@ conf_dir="$DESTDIR"$SERVICEDIR/freshclam/variables
 # freshclam script
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.307 2017-03-16 12:19:23+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.308 2017-03-21 16:15:16+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -3322,7 +3328,7 @@ fi
 # freshclam log script
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.307 2017-03-16 12:19:23+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.308 2017-03-21 16:15:16+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -3353,7 +3359,7 @@ conf_dir="$DESTDIR"$SERVICEDIR/pwdlookup/variables
 /bin/chmod 500 $conf_dir
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.307 2017-03-16 12:19:23+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.308 2017-03-21 16:15:16+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -3369,7 +3375,7 @@ fi
 # pwdlookup log script
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.307 2017-03-16 12:19:23+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.308 2017-03-21 16:15:16+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -3474,7 +3480,7 @@ echo "inlookup" > $conf_dir/MYSQL_READ_DEFAULT_GROUP
 echo 1 > $conf_dir/MYSQL_OPT_RECONNECT
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.307 2017-03-16 12:19:23+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.308 2017-03-21 16:15:16+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -3490,7 +3496,7 @@ fi
 # inlookup log script
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.307 2017-03-16 12:19:23+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.308 2017-03-21 16:15:16+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -3550,7 +3556,7 @@ if [ ! -d "$DESTDIR"$databasedir/data -o $force -eq 1 ] ; then
 	fi
 	if ( /bin/mkdir -p "$DESTDIR"$databasedir/data && /bin/mkdir -p "$DESTDIR"$databasedir/logs ) ; then
 		(
-		echo "# \$Id: svctool.in,v 2.307 2017-03-16 12:19:23+05:30 Cprogrammer Exp mbhangui $"
+		echo "# \$Id: svctool.in,v 2.308 2017-03-21 16:15:16+05:30 Cprogrammer Exp mbhangui $"
 		echo "# generated on $host on `date`"
 		echo ""
 		echo "# svctool --config=mysqldb --mysqlPrefix=$mysqlPrefix --databasedir=$databasedir --nolog"
@@ -3681,7 +3687,7 @@ conf_dir="$DESTDIR"$SERVICEDIR/mysql.$port/variables
 /bin/chmod 500 $conf_dir
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.307 2017-03-16 12:19:23+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.308 2017-03-21 16:15:16+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -3777,7 +3783,7 @@ echo "--pid-file=\$PIDFILE 2>&1"
 
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.307 2017-03-16 12:19:23+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.308 2017-03-21 16:15:16+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -3794,7 +3800,7 @@ fi
 # mysql log script
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.307 2017-03-16 12:19:23+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.308 2017-03-21 16:15:16+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -4007,7 +4013,7 @@ fi
 # svscan log script
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.307 2017-03-16 12:19:23+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.308 2017-03-21 16:15:16+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -4133,7 +4139,7 @@ case "$dkverify_option" in
 esac
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.307 2017-03-16 12:19:23+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.308 2017-03-21 16:15:16+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -4155,7 +4161,7 @@ fi
 # fetchmail log script
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.307 2017-03-16 12:19:23+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.308 2017-03-21 16:15:16+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -4227,7 +4233,7 @@ else
 fi
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.307 2017-03-16 12:19:23+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.308 2017-03-21 16:15:16+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -4268,7 +4274,7 @@ fi
 # qmail-poppass log script
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.307 2017-03-16 12:19:23+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.308 2017-03-21 16:15:16+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -4283,7 +4289,7 @@ echo "$prog_args" > $conf_dir/.options
 create_queue()
 {
 if [ $# -ne 6 ] ; then
-	echo "USAGE: create_queue qbase queue_count first_queue_no supervise_dir ident routes=smtp|qmtp|static" 1>&2
+	echo "USAGE: create_queue qbase queue_count first_queue_no supervise_dir ident routes=smtp|qmtp|static use_ssl" 1>&2
 	return 1
 fi
 QUEUE_BASE=$1
@@ -4292,6 +4298,7 @@ FIRST_QUEUE=$3
 SERVICEDIR=$4
 QUEUE_IDENT=$5
 routes=$6
+use_certdir=$7
 if [ " $servicetag" = " " ] ; then
 	tag=$QUEUE_IDENT
 else
@@ -4365,6 +4372,9 @@ if [ " $QmailBinPrefix" = " /usr" ] ; then
 	echo "/bin:/usr/bin:/usr/sbin:/sbin" > $conf_dir/PATH
 else
 	echo "/bin:/usr/bin:$QmailBinPrefix/bin:$QmailBinPrefix/sbin" > $conf_dir/PATH
+fi
+if [ $use_certdir -eq 1 ] ; then
+echo $sysconfdir/certs > $conf_dir/CERTDIR
 fi
 if [ ! " $routes" = " " ] ; then
 	echo $routes > $conf_dir/ROUTES
@@ -4486,7 +4496,7 @@ case "$dksign_option" in
 esac
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.307 2017-03-16 12:19:23+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.308 2017-03-21 16:15:16+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -4503,7 +4513,7 @@ fi
 /bin/mkdir -p "$DESTDIR"$SERVICEDIR/qmail-send."$tag"/log
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.307 2017-03-16 12:19:23+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.308 2017-03-21 16:15:16+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -6784,6 +6794,9 @@ while test $# -gt 0; do
 	--postmaster=*)
 	postmaster=$optarg
 	;;
+	--common_name=*)
+	common_name=$optarg
+	;;
 	--attach)
 	if [ -f /usr/bin/zip ] ; then
 		attach_report=1
@@ -6842,7 +6855,7 @@ while test $# -gt 0; do
 	;;
 
 	--version)
-	echo "\$Id: svctool.in,v 2.307 2017-03-16 12:19:23+05:30 Cprogrammer Exp mbhangui $"
+	echo "\$Id: svctool.in,v 2.308 2017-03-21 16:15:16+05:30 Cprogrammer Exp mbhangui $"
 	exit 0
 	;;
 
@@ -7077,7 +7090,11 @@ case $option in
 		esac
 		if [ " $skipsend" = " " ] ; then
 			echo "Creating $qcount queues"
-			create_queue "$qbase" "$qcount" "$qstart" "$servicedir" "$smtp_port" "$routes"
+			if [ $use_starttls -ne 0 -o $use_ssl -ne 0 ] ; then
+				create_queue "$qbase" "$qcount" "$qstart" "$servicedir" "$smtp_port" "$routes" "1"
+			else
+				create_queue "$qbase" "$qcount" "$qstart" "$servicedir" "$smtp_port" "$routes" "0"
+			fi
 		fi
 	fi
 	if [ " $odmr" = " " ] ; then
@@ -7535,44 +7552,73 @@ case $option in
 			echo "postmaster not specified" 1>&2
 			exit 1
 		fi
-		if [ ! -f "$DESTDIR"$CONTROLDIR/servercert.pem ] ; then
-			openssl req -new -x509 -nodes -days 366 -out "$DESTDIR"$CONTROLDIR/servercert.pem \
-				-keyout "$DESTDIR"$CONTROLDIR/servercert.pem
+		if [ " $common_name" = " " ] ; then
+			echo "CN not specified" 1>&2
+			exit 1
+		fi
+		echo "Creating SSL Configuration"
+		create_ssl_cnf $postmaster $common_name > /tmp/config.cnf.$$
+		conf_file=$DESTDIR"$sysconfdir/certs/servercert.cnf"
+		/bin/rm -f $conf_file
+		change_config $conf_file /tmp/config.cnf.$$
+		/bin/chmod 400 $conf_file
+		if [ ! -f "$DESTDIR"$sysconfdir/certs/servercert.pem ] ; then
+			(
+			/usr/bin/openssl req -new -x509 -nodes -days 366 -out "$DESTDIR"$sysconfdir/certs/servercert.pem \
+				-keyout "$DESTDIR"$sysconfdir/certs/servercert.pem -config $conf_file
 			if [ $? = 0 ] ; then
 				# qmail-smtpd, qmail-remote
 				echo "Creating Private Key, Certificate"
-				/bin/chmod 640 "$DESTDIR"$CONTROLDIR/servercert.pem
-				$chown indimail:indimail "$DESTDIR"$CONTROLDIR/servercert.pem
-				/bin/ln -sr $CONTROLDIR/servercert.pem "$DESTDIR"$CONTROLDIR/clientcert.pem
+				/bin/chmod 640 "$DESTDIR"$sysconfdir/certs/servercert.pem
+				$chown indimail:indimail "$DESTDIR"$sysconfdir/certs/servercert.pem
+				/bin/ln -sr $sysconfdir/certs/servercert.pem "$DESTDIR"$sysconfdir/certs/clientcert.pem
 				echo "Updating temporary RSA and DH keys"
-				"$DESTDIR"$libexecdir/update_tmprsadh --controldir="$DESTDIR"$CONTROLDIR
-				# imapd will be missing for indimail-mta. Skip if it is so
-				if [ -f "$DESTDIR"$QmailBinPrefix/bin/imapd ] ; then
-				# IMAP
-				echo "Creating SSL Configuration for IMAP"
-				create_ssl_cnf $postmaster IMAP > /tmp/config.cnf.$$
-				conf_file=$DESTDIR"$sysconfdir/imapd.cnf"
-				/bin/rm -f $conf_file
-				change_config $conf_file /tmp/config.cnf.$$
-				/bin/chmod 400 $conf_file
+				"$DESTDIR"$libexecdir/update_tmprsadh --certdir="$DESTDIR"$sysconfdir/certs
 
-				# POP3
-				echo "Creating SSL Configuration for POP3"
-				create_ssl_cnf $postmaster POP3 > /tmp/config.cnf.$$
-				conf_file=$DESTDIR"$sysconfdir/pop3d.cnf"
-				/bin/rm -f $conf_file
-				change_config $conf_file /tmp/config.cnf.$$
-				/bin/chmod 400 $conf_file
-				echo "Restarting indisrvr, poppass"
-				$QmailBinPrefix/bin/svc -d @servicedir@/indisrvr.*
-				$QmailBinPrefix/bin/svc -d @servicedir@/qmail-poppass.*
-				$QmailBinPrefix/bin/svc -u @servicedir@/indisrvr.*
-				$QmailBinPrefix/bin/svc -u @servicedir@/qmail-poppass.*
-				fi
-				echo "WARNING!!! Restart all services using the generated certificates" 1>&2
+				echo "Fixing CERTDIR variable for qmail-smtpd.25 and qmail-smtpd.465"
+				for i in /service/qmail-smtpd.25/variables /service/qmail-smtpd.465/variables
+				do
+					j=`cat $i/CERTDIR 2>/dev/null`
+					if [ ! " $j" = " $sysconfdir/certs" ] ; then
+						echo $sysconfdir/certs > $i/CERTDIR
+					fi
+				done
+				echo "Updating certfile as $sysconfdir/certs/servercert.pem"
+				for i in `echo /service/*/variables/*CERTFILE`
+				do
+					j=`cat $i`
+					if [ ! " $j" = " $sysconfdir/certs/servercert.pem" ] ; then
+						echo "Fixed $i"
+						echo "$sysconfdir/certs/servercert.pem" > $i
+					fi
+				done
+				echo "Updating tls cachefile as $sysconfdir/certs/couriersslcache"
+				for i in `echo /service/*/variables/TLS_CACHEFILE`
+				do
+					j=`cat $i`
+					if [ ! " $j" = " $sysconfdir/certs/couriersslcache" ] ; then
+						echo "Fixed $i"
+						echo "$sysconfdir/certs/couriersslcache" > $i
+					fi
+				done
+				# restart services
+				for i in `echo /service/*-ssl.* /service/indisrvr.* /service/qmail-poppass.*`
+				do
+					if [ -d $i ] ; then
+						echo $QmailBinPrefix/bin/svc -d $i
+						"$DESTDIR"$QmailBinPrefix/bin/svc -d $i
+						echo $QmailBinPrefix/bin/svc -u $i
+						"$DESTDIR"$QmailBinPrefix/bin/svc -u $i
+					fi
+				done
+			else
+				echo "Failed to create openssl x509 certificate" 1>&2
+				exit 1
 			fi
+			/usr/bin/openssl x509 -in "$DESTDIR"$sysconfdir/certs/servercert.pem -noout -text
+			) 2>&1 | $MORE
 		else
-			echo ""$DESTDIR"$CONTROLDIR/servercert.pem exists. Remove to create new" 1>&2
+			echo ""$DESTDIR"$sysconfdir/certs/servercert.pem exists. Remove to create new" 1>&2
 			exit 1
 		fi
 		;;
