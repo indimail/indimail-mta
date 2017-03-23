@@ -1,0 +1,38 @@
+.TH ezmlm-sub 1
+.SH NAME
+ezmlm-sub \- manually add addresses to a mailing list
+.SH SYNOPSIS
+.B ezmlm-sub
+.I dir
+[
+.I box\fB@\fIdomain ...
+]
+.SH DESCRIPTION
+.B ezmlm-sub
+adds each address
+.I box\fB@\fIdomain
+to the mailing list stored in
+.IR dir .
+
+If
+.I box\fB@\fIdomain
+is already on the mailing list,
+.B ezmlm-sub
+leaves it there.
+
+.B ezmlm-sub
+converts
+.I domain
+to lowercase before adding
+.I box\fB@\fIdomain
+to the mailing list.
+
+.I box\fB@\fIdomain
+cannot be longer than 400 characters.
+.SH "SEE ALSO"
+ezmlm-list(1),
+ezmlm-manage(1),
+ezmlm-make(1),
+ezmlm-send(1),
+ezmlm-unsub(1),
+ezmlm(5)

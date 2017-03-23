@@ -1,0 +1,317 @@
+.TH ezmlm 5
+.SH NAME
+ezmlm \- format of ezmlm directory
+.SH OVERVIEW
+An
+.B ezmlm
+directory,
+.IR dir ,
+stores information about an
+.B ezmlm
+mailing list.
+.B ezmlm-make
+creates
+.IR dir ;
+.B ezmlm-sub
+and
+.B ezmlm-unsub
+manipulate the subscriber list stored under
+.IR dir ;
+.B ezmlm-manage
+handles administrative requests automatically;
+.B ezmlm-send
+sends a message to all subscribers listed in
+.IR dir .
+.SH SUBSCRIBERS
+.I dir\fB/subscribers
+is a directory containing the subscriber list.
+.B ezmlm-manage
+allows automatic subscription if
+.I dir\fB/public
+exists.
+
+The list is hashed into 53 files, named
+.B @ 
+through
+.B t
+in ASCII.
+A nonexistent file is treated as an empty file.
+
+Each file contains a series of addresses.
+An address can be any string of non-NUL characters up to 400 bytes long.
+Each address is preceded by the letter T and followed by a NUL.
+
+For reliability,
+when an address is added to or removed from the mailing list,
+the relevant file is recreated under a temporary name
+inside
+.I dir\fB/subscribers
+and then moved into place.
+
+.I dir\fB/key
+is a binary file.
+.B ezmlm-manage
+uses
+.I dir\fB/key
+to create confirmation numbers.
+Anyone who can guess the contents of
+.I dir\fB/key
+can forge subscription requests.
+.B ezmlm-make
+does not put much effort into making
+.I dir\fB/key
+difficult to guess;
+for better security, you should add some random garbage to
+.IR dir\fB/key .
+.SH ARCHIVE
+.I dir\fB/archive
+is a directory containing messages previously sent to subscribers.
+.B ezmlm-send
+archives all new messages if
+.I dir\fB/archived
+exists.
+
+Messages sent to the mailing list are numbered from 1 upwards,
+whether or not they are archived.
+.I dir\fB/num
+is the number of messages sent so far.
+
+.I dir\fB/archive
+has subdirectories,
+each subdirectory storing up to 100 messages.
+Message number 100m+n, with n between 0 and 99, is stored in
+.IR dir\fB/archive/\fIm\fB/\fIn .
+For example, message number 15307 is stored in
+.IR dir\fB/archive/153/07 .
+
+.B ezmlm-manage
+will ignore message files without the owner-execute bit set.
+.B ezmlm-send
+turns on the owner-execute bit after safely writing the message to disk.
+.SH BOUNCES
+.I dir\fB/bounce
+is a directory containing bounce messages.
+.B ezmlm-return
+stores several types of files here.
+.SH "DELIVERY INSTRUCTIONS"
+.B ezmlm-make
+sets up four files to control mailing list deliveries.
+Each file is a series of delivery instructions in
+.B dot-qmail
+format.
+
+.I dir\fB/editor
+handles incoming mailing list submissions.
+.B ezmlm-make
+sets up
+.I dir\fB/editor
+to invoke
+.B ezmlm-send
+to immediately forward each message to all subscribers
+and then to run
+.BR ezmlm-warn .
+
+.I dir\fB/owner
+handles incoming messages for the mailing list's owner.
+.B ezmlm-make
+sets up 
+.I dir\fB/owner
+to store messages in
+.I dir\fB/Mailbox
+and then to run
+.BR ezmlm-warn .
+
+.I dir\fB/bouncer
+handles incoming bounce messages.
+.B ezmlm-make
+sets up
+.I dir\fB/bouncer
+to invoke
+.B ezmlm-return
+and then
+.BR ezmlm-warn .
+
+.I dir\fB/manager
+handles incoming administrative requests.
+.B ezmlm-make
+sets up
+.I dir\fB/manager
+to invoke
+.B ezmlm-manage
+and then
+.BR ezmlm-warn .
+.SH TEXT
+.I dir\fB/text
+is a directory
+containing files sent out by
+.B ezmlm-manage
+in response to administrative requests:
+.TP 15
+.B top
+Introducing
+.BR ezmlm .
+This is placed at the top of each response.
+.TP
+.B bottom
+Explaining how to use
+.BR ezmlm .
+This is placed at the bottom of each response.
+.TP
+.B sub-confirm
+Explaining how to confirm a subscription request.
+.TP
+.B sub-ok
+Acknowledging successful subscription.
+.TP
+.B sub-nop
+Acknowledging a subscription request for an address already
+on the mailing list.
+.TP
+.B sub-bad
+Rejecting a bad subscription confirmation number.
+.TP
+.B unsub-confirm
+Explaining how to confirm an unsubscription request,
+and explaining how to figure out the subscription address.
+.TP
+.B unsub-ok
+Acknowledging successful unsubscription.
+.TP
+.B unsub-nop
+Acknowledging an unsubscription request for an address not
+on the mailing list.
+.TP
+.B unsub-bad
+Rejecting a bad unsubscription confirmation number.
+.TP
+.B get-bad
+Rejecting a bad archive retrieval request.
+.TP
+.B bounce-warn
+Pointing out that messages have bounced.
+.TP
+.B bounce-probe
+Pointing out that a warning message has bounced.
+.TP
+.B bounce-num
+Explaining that
+.B ezmlm-return
+has kept a list of bounced message numbers.
+.TP
+.B bounce-bottom
+Separating the bounce message.
+.PP
+.B ezmlm-manage
+replaces the line
+.B !A
+in any of these files
+with the name of the subscription address.
+It replaces the line
+.B !R
+in
+.B sub-confirm
+and
+.B unsub-confirm
+with the address that the subscriber must reply to.
+.SH "OUTGOING MESSAGE EDITING"
+.I dir\fB/headerremove
+is a list of bad header field names,
+one per line.
+.B ezmlm-send
+removes these header fields from all outgoing messages.
+.B ezmlm-make
+sets up
+.I dir\fB/headerremove
+to remove
+.BR Return-Path ,
+.BR Return-Receipt-To ,
+and
+.B Return-Path
+fields.
+
+.I dir\fB/headeradd
+is a list of new header fields.
+.B ezmlm-send
+adds these fields to every outgoing message.
+.B ezmlm-make
+sets up
+.I dir\fB/headeradd
+with no new fields.
+.SH MISCELLANY
+The first line of
+.I dir\fB/mailinglist
+is a line of text.
+.B ezmlm-send
+creates a new
+.B Mailing-List
+field, showing the contents of
+.IR dir\fB/mailinglist ,
+in every outgoing message.
+
+The first lines of
+.I dir\fB/outlocal
+and
+.I dir\fB/outhost
+give the outgoing name of the mailing list.
+These are used by
+.B ezmlm-manage
+and
+.B ezmlm-send
+to construct sender addresses for outgoing messages.
+
+The first lines of
+.I dir\fB/inlocal
+and
+.I dir\fB/inhost
+give the incoming name of the mailing list.
+These are used by
+.B ezmlm-manage
+to parse incoming envelopes.
+Normally
+.I inlocal
+and
+.I inhost
+are the same as
+.I outlocal
+and
+.IR outhost ,
+but sometimes they are different,
+with
+.I outlocal\fB@\fIouthost
+forwarded to
+.IR inlocal\fB@\fIinhost .
+
+If
+.I dir\fB/sublist
+exists,
+this mailing list is a sublist,
+redistributing messages from a parent mailing list.
+The first line of
+.I dir\fB/sublist
+is the name of the parent list.
+This affects the behavior of
+.BR ezmlm-send .
+
+.I dir\fB/lock
+is an empty file.
+Any program that reads or writes the subscriber list,
+or adds messages to the archive,
+locks
+.IR dir\fB/lock .
+
+.I dir\fB/Log
+is an advisory log of subscription and unsubscription actions.
+.B WARNING:
+.B Log
+is not protected against system crashes.
+Log entries may be missing or corrupted if the system goes down.
+.SH "SEE ALSO"
+ezmlm-list(1),
+ezmlm-make(1),
+ezmlm-manage(1),
+ezmlm-return(1),
+ezmlm-send(1),
+ezmlm-sub(1),
+ezmlm-unsub(1),
+ezmlm-warn(1),
+dot-qmail(5)

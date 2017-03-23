@@ -1,0 +1,23 @@
+*.o
+*.0
+*.a
+ezmlm-make ezmlm-manage ezmlm-send ezmlm-reject ezmlm-return
+ezmlm-warn ezmlm-weed ezmlm-list ezmlm-sub ezmlm-unsub ezmlm-queue
+install
+direntry.h
+fork.h
+uint32.h
+auto_qmail.c
+auto_bin.c
+auto-str
+hasflock.h
+hassgact.h
+makelib
+make-makelib
+compile
+make-compile
+load
+systype
+find-systype
+make-load
+auto-ccld.sh

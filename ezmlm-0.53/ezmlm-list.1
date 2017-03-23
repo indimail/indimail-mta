@@ -1,0 +1,22 @@
+.TH ezmlm-list 1
+.SH NAME
+ezmlm-list \- show the addresses on a mailing list
+.SH SYNOPSIS
+.B ezmlm-list
+.I dir
+.SH DESCRIPTION
+.B ezmlm-list
+prints the subscriber list for the mailing list stored in
+.IR dir ,
+one address per line.
+
+.B WARNING:
+Unless you have disabled automatic subscriptions,
+the addresses in a mailing list are under the control
+of a possibly malicious remote user.
+.B ezmlm-list
+does not strip control characters.
+.SH "SEE ALSO"
+ezmlm-sub(1),
+ezmlm-unsub(1),
+ezmlm(5)
