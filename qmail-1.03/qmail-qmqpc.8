@@ -3,6 +3,9 @@
 qmail-qmqpc \- queue a mail message via QMQP
 .SH SYNOPSIS
 .B qmail-qmqpc
+[
+.I server
+[...] ]
 .SH DESCRIPTION
 .B qmail-qmqpc
 offers the same interface as
@@ -16,6 +19,13 @@ installation,
 .B qmail-queue
 is replaced with a symbolic link to
 .BR qmail-qmqpc .
+
+If one or more server IP addresses 
+are specified on the command line,
+.B qmail-qmqpc
+will ignore the control files and instead use the QMQP servers specified on the
+command line.
+ 
 .SH "CONTROL FILES"
 .TP 5
 .I qmqpservers

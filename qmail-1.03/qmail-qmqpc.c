@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-qmqpc.c,v $
+ * Revision 1.18  2017-03-23 20:06:57+05:30  Cprogrammer
+ * added option to specifiy qmqpservers on command line
+ *
  * Revision 1.17  2016-05-17 19:44:58+05:30  Cprogrammer
  * use auto_control, set by conf-control to set control directory
  *
@@ -293,7 +296,7 @@ doit(char *server, union v46addr *outip)
 stralloc        servers = { 0 };
 
 int
-main()
+main(int argc, char **argv)
 {
 	int             i, j, r, server_count, server_no = 0, load_dist = 0;
 	char           *x;
@@ -307,7 +310,7 @@ main()
 		die_home();
 	if (control_init() == -1)
 		die_control();
-	if (control_readfile(&servers, "qmqpservers", 0) != 1)
+	if (argc == 1 && control_readfile(&servers, "qmqpservers", 0) != 1)
 		die_control();
 	if (control_readint(&timeout, "timeout") == -1)
 		die_control();
@@ -362,30 +365,30 @@ main()
 		die_control();
 	if (st.st_mode & 01000)
 		load_dist = 1;
-	i = 0;
-	if (load_dist)
-	{
-		server_count = 0;
-		for (j = 0; j < servers.len; ++j)
-		{
-			if (!servers.s[j])
-			{
-				server_count++;
-				i = j + 1;
+	if (argc == 1) {
+		i = 0;
+		if (load_dist) {
+			server_count = 0;
+			for (j = 0; j < servers.len; ++j) {
+				if (!servers.s[j]) {
+					server_count++;
+					i = j + 1;
+				}
 			}
+			server_no = (now() % server_count);
 		}
-		server_no = (now() % server_count);
 	}
 again:
+	if (argc > 1) {
+		while (argv[i])
+			doit(argv[i++], &outip);
+		_exit (lasterror);
+	}
 	i = server_count = 0;
-	for (j = 0; j < servers.len; ++j)
-	{
-		if (!servers.s[j])
-		{
-			if (load_dist)
-			{
-				if (server_count == server_no || server_count == -1)
-				{
+	for (j = 0; j < servers.len; ++j) {
+		if (!servers.s[j]) {
+			if (load_dist) {
+				if (server_count == server_no || server_count == -1) {
 					doit(servers.s + i, &outip);
 					load_dist = 0; /*- fallback to traditional method */
 					goto again;
@@ -405,7 +408,7 @@ again:
 void
 getversion_qmail_qmqpc_c()
 {
-	static char    *x = "$Id: qmail-qmqpc.c,v 1.17 2016-05-17 19:44:58+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-qmqpc.c,v 1.18 2017-03-23 20:06:57+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
