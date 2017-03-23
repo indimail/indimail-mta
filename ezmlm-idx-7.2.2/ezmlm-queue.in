@@ -1,0 +1,2 @@
+exec PREFIX/bin/envdir SYSCONFDIR/control/defaultqueue \
+	PREFIX/sbin/qmail-multi
