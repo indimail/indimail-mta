@@ -1,0 +1,86 @@
+.TH ezmlm-send 1
+.SH NAME
+ezmlm-send \- distribute a message to a mailing list
+.SH SYNOPSIS
+.B ezmlm-send
+.I dir
+.SH DESCRIPTION
+.B ezmlm-send
+reads a mail message and
+sends it to the mailing list stored in
+.IR dir .
+If
+.I dir\fB/archived
+exists,
+.B ezmlm-send
+records a copy of the message in the
+.I dir\fB/archive
+directory.
+
+At the beginning of the message,
+.B ezmlm-send
+prints a new
+.B Mailing-List
+field with the contents of
+.IR dir\fB/mailinglist .
+It rejects the message if there is already a
+.B Mailing-List
+field.
+
+.B ezmlm-send
+then prints all the new fields listed in
+.IR dir\fB/headeradd ,
+followed by an appropriate
+.B Delivered-To
+line.
+
+.B ezmlm-send
+deletes any incoming fields with names listed in
+.IR dir\fB/headerremove .
+
+.B ezmlm-send
+does not distribute bounce messages:
+if the environment variable
+.B SENDER
+is set, and is either empty or
+.BR #@[] ,
+.B ezmlm-send
+rejects the message.
+.SH "SUBLISTS"
+If
+.I dir\fB/sublist
+exists,
+.B ezmlm-send
+changes its behavior in several ways.
+
+First, if
+.B SENDER
+is set,
+and the first line of
+.I dir\fB/sublist
+has the form
+.IR parent\fB@\fIparenthost ,
+.B ezmlm-send
+insists that
+.B SENDER
+have the form
+.IR parent\fB...@\fIparenthost .
+
+Second,
+.B ezmlm-send
+demands that the message already have a
+.B Mailing-List
+field.
+
+Third,
+.B ezmlm-send
+does not add its own
+.B Mailing-List
+field.
+.SH "SEE ALSO"
+ezmlm-manage(1),
+ezmlm-make(1),
+ezmlm-sub(1),
+ezmlm-unsub(1),
+ezmlm-reject(1),
+ezmlm(5)

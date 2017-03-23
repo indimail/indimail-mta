@@ -1,0 +1,39 @@
+.TH ezmlm-warn 1
+.SH NAME
+ezmlm-warn \- send out bounce warnings
+.SH SYNOPSIS
+.B ezmlm-warn
+.I dir
+.SH DESCRIPTION
+.B ezmlm-warn
+sends out warning messages
+for the mailing list stored in
+.IR dir .
+
+.B ezmlm-warn
+scans
+.I dir\fB/bounce
+for bounce messages received by
+.BR ezmlm-return .
+If it sees a distribution bounce for
+.I box\fB@\fIdomain
+received more than ten days ago,
+it sends
+.I box\fB@\fIdomain
+a list of all the message numbers missed recently,
+and deletes the bounce.
+If it sees a warning bounce for
+.I box\fB@\fIdomain
+received more than ten days ago,
+it sends
+.I box\fB@\fIdomain
+a probe,
+and deletes the bounce.
+
+.B ezmlm-warn
+will not send a warning or probe to an address that is
+not currently a subscriber.
+.SH "SEE ALSO"
+ezmlm-make(1),
+ezmlm-return(1),
+ezmlm(5)

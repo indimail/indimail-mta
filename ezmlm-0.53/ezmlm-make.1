@@ -1,0 +1,87 @@
+.TH ezmlm-make 1
+.SH NAME
+ezmlm-make \- create a new mailing list
+.SH SYNOPSIS
+.B ezmlm-make
+[
+.B \-aApP
+]
+.I dir
+.I dot
+.I local
+.I host
+.SH DESCRIPTION
+.B ezmlm-make
+sets up a new mailing list,
+.IR local\fB@\fIhost ,
+along with several extra addresses to handle administrative requests.
+
+All mailing list information is stored in a new directory,
+.IR dir .
+.I dir
+must be an absolute pathname, starting with a slash.
+
+.B ezmlm-make
+sets up four
+.B .qmail
+files:
+.IR dot ,
+.IR dot\fB-owner ,
+.IR dot\fB-return-default ,
+and
+.IR dot\fB-default .
+You should make sure that messages to
+.IR local\fB@\fIhost ,
+.IR local\fB-owner@\fIhost ,
+etc. are controlled by
+these
+.B .qmail
+files.
+
+Typical use of
+.B ezmlm-make
+by a normal user:
+
+.EX
+   ezmlm-make ~/SOS ~/.qmail-sos joe-sos isp.net
+.EE
+
+Typical use of
+.B ezmlm-make
+by
+.BR alias :
+
+.EX
+   ezmlm-make ~alias/SOS ~alias/.qmail-sos sos isp.net
+.EE
+.SH OPTIONS
+.TP 5
+.B \-a
+(Default.) Archived.
+.B ezmlm-make
+will touch
+.IR dir\fB/archived ,
+so that
+.B ezmlm-send
+will archive new messages.
+.TP
+.B \-A
+Not archived.
+.TP 5
+.B \-p
+(Default.) Public.
+.B ezmlm-make
+will touch
+.IR dir\fB/public ,
+so that
+.B ezmlm-manage
+will respond to administrative requests.
+.TP
+.B \-P
+Private.
+.SH "SEE ALSO"
+ezmlm-manage(1),
+ezmlm-send(1),
+ezmlm-sub(1),
+ezmlm-unsub(1),
+ezmlm(5)

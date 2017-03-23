@@ -1,0 +1,35 @@
+.TH ezmlm-unsub 1
+.SH NAME
+ezmlm-unsub \- manually remove addresses from a mailing list
+.SH SYNOPSIS
+.B ezmlm-unsub
+.I dir
+[
+.I box\fB@\fIdomain ...
+]
+.SH DESCRIPTION
+.B ezmlm-unsub
+removes each address
+.I box\fB@\fIdomain
+from the mailing list stored in
+.IR dir .
+
+If
+.I box\fB@\fIdomain
+is not on the mailing list,
+.B ezmlm-unsub
+keeps it off.
+
+.B ezmlm-unsub
+converts
+.I domain
+to lowercase before removing
+.I box\fB@\fIdomain
+from the mailing list.
+.SH "SEE ALSO"
+ezmlm-list(1),
+ezmlm-manage(1),
+ezmlm-make(1),
+ezmlm-send(1),
+ezmlm-sub(1),
+ezmlm(5)

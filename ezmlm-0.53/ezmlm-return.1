@@ -1,0 +1,71 @@
+.TH ezmlm-return 1
+.SH NAME
+ezmlm-return \- handle mailing list bounces
+.SH SYNOPSIS
+.B ezmlm-return
+.I dir
+.SH DESCRIPTION
+.B ezmlm-return
+handles bounces for the mailing list
+stored in
+.IR dir .
+
+.B ezmlm-return
+is normally invoked from a
+.B .qmail
+file.
+It reads a mail message from its standard input,
+and a mail envelope from the
+.BR SENDER ,
+.BR LOCAL ,
+and
+.BR HOST
+environment variables.
+.SH ADDRESSES
+.B ezmlm-return
+handles mail sent to any of the following addresses:
+.TP
+.I local\fB\-return\-
+Trash.
+A help message or subscription acknowledgment bounced.
+.TP
+.I local\fB\-return\-\fImsg\fB\-\fIbox\fB=\fIdomain
+Distribution bounce.
+Message number
+.I msg
+was lost on the way to
+.IR box\fB@\fIdomain .
+.TP
+.I local\fB\-return\-\fImsg\fB\-
+Pre-VERP distribution bounce, in QSBMF format.
+Message number
+.I msg
+was lost on the way to one or more addresses;
+.B ezmlm-return
+will parse the bounce to figure out the addresses.
+.TP
+.I local\fB\-return\-warn\-\fIcookie\fB-\fIbox\fB=\fIdomain
+Warning bounce.
+A warning message from
+.B ezmlm-warn
+bounced.
+.TP
+.I local\fB\-return\-probe\-\fIcookie\fB-\fIbox\fB=\fIdomain
+Probe bounce.
+A probe from
+.B ezmlm-warn
+bounced.
+.B ezmlm-return
+will remove
+.I box\fB@\fIdomain
+from the mailing list.
+.SH "SEE ALSO"
+ezmlm-manage(1),
+ezmlm-make(1),
+ezmlm-send(1),
+ezmlm-sub(1),
+ezmlm-unsub(1),
+ezmlm-warn(1),
+ezmlm-weed(1),
+ezmlm(5),
+qmail-command(8)

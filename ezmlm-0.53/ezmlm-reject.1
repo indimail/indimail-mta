@@ -1,0 +1,32 @@
+.TH ezmlm-reject 1
+.SH NAME
+ezmlm-reject \- reject messages unsuitable for distribution
+.SH SYNOPSIS
+.B ezmlm-reject
+[
+.B \-cCsS
+]
+.SH DESCRIPTION
+.B ezmlm-reject
+reads a mail message from its standard input.
+It rejects the message if it sees something it doesn't like.
+.SH OPTIONS
+.TP
+.B \-c
+(Default.)
+Commands are not permitted in the Subject line.
+A Subject line consisting solely of HELP, SUBSCRIBE, or UNSUBSCRIBE
+is rejected.
+.TP
+.B \-C
+Commands are permitted in the subject line.
+.TP
+.B \-s
+(Default.)
+A nonempty Subject line is required.
+.TP
+.B \-S
+A Subject line is not required.
+.SH "SEE ALSO"
+ezmlm-send(1),
+qmail-command(8)
