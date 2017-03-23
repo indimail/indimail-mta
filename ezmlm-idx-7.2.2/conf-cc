@@ -1,0 +1,3 @@
+gcc -O -s -I/usr/include/mysql
+
+This will be used to compile .c files.
