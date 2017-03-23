@@ -4824,6 +4824,10 @@ substdio.h strerr.h getln.h stralloc.h gen_alloc.h mess822.h caltime.h \
 caldate.h case.h env.h exit.h alloc.h str.h
 	./compile ifaddr.c
 
+openreadclose.o: compile openreadclose.c \
+error.h open.h stralloc.h gen_alloc.h openreadclose.h
+	./compile openreadclose.c
+
 replier.o: compile replier.c auto_qmail.h variables.h \
 stralloc.h gen_alloc.h strerr.h error.h qmail.h substdio.h env.h sig.h \
 open.h getln.h case.h scan.h str.h fmt.h exit.h getconf.h \
@@ -4851,11 +4855,6 @@ replier-config.o: compile replier-config.c \
 strerr.h substdio.h stralloc.h gen_alloc.h open.h exit.h \
 auto_ezmlm.h auto_qmail.h str.h help.t
 	./compile replier-config.c
-
-openreadclose.o: compile openreadclose.c \
-error.h open.h stralloc.h gen_alloc.h openreadclose.h
-	./compile openreadclose.c
-
 
 auto_ezmlm.o: compile \
 auto_ezmlm.c
