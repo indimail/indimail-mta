@@ -68,7 +68,7 @@
  * use SPFIPV6 env variable to use spf ipv6 code
  *
  * Revision 1.172  2013-07-16 20:27:14+05:30  Cprogrammer
- * fix size getting clobbered by strnum in log_spam() function
+ * fix size getting clobbered by strnum in log_fifo() function
  *
  * Revision 1.171  2013-06-09 17:03:49+05:30  Cprogrammer
  * shortened variable declartion in addrparse() function
@@ -131,7 +131,7 @@
  * multiple plugin feature
  *
  * Revision 1.151  2011-04-16 14:43:47+05:30  Cprogrammer
- * spamfd can be confugured using SPAMFD env variable
+ * logfifofd can be confugured using LOGFIFO_FD env variable
  *
  * Revision 1.150  2011-04-13 21:27:15+05:30  Cprogrammer
  * added env variable DISABLE_PLUGIN to disable loading of smtp plugins
@@ -950,7 +950,7 @@ PLUGIN         **plug = (PLUGIN **) 0;
 void           **handle;
 int              plugin_count;
 #endif
-int             spamfd = 255;
+int             logfifofd = 255;
 
 struct authcmd
 {
@@ -1215,7 +1215,7 @@ addrallowed(char *rcpt)
 }
 
 void
-log_spam(char *arg1, char *arg2, unsigned long size, stralloc *line)
+log_fifo(char *arg1, char *arg2, unsigned long size, stralloc *line)
 {
 	int             logfifo, match;
 	char           *fifo_name;
@@ -1300,27 +1300,27 @@ log_spam(char *arg1, char *arg2, unsigned long size, stralloc *line)
 		return;
 	}
 	/*
-	 * Read X-Bogosity line from bogofilter on spamfd. spamfd would have already
+	 * Read X-Bogosity line from bogofilter on logfifofd. logfifofd would have already
 	 * been opened before qmail_open() by create_logfilter() function
 	 */
-	if (!fstat(spamfd, &statbuf) && statbuf.st_size > 0 && !lseek(spamfd, 0, SEEK_SET))
+	if (!fstat(logfifofd, &statbuf) && statbuf.st_size > 0 && !lseek(logfifofd, 0, SEEK_SET))
 	{
 		if (substdio_puts(&spamout, " ") == -1)
 		{
 			close(logfifo);
-			close(spamfd);
+			close(logfifofd);
 			return;
 		}
-		substdio_fdbuf(&spamin, read, spamfd, inbuf, sizeof(inbuf));
+		substdio_fdbuf(&spamin, read, logfifofd, inbuf, sizeof(inbuf));
 		if (getln(&spamin, line, &match, '\n') == -1)
 		{
 			logerr("qmail-smtpd: read error: ");
 			logerr(error_str(errno));
 			logerrf("\n");
-			close(spamfd);
+			close(logfifofd);
 			return;
 		}
-		close(spamfd);
+		close(logfifofd);
 		if (!stralloc_0(line))
 			die_nomem();
 		if (line->len)
@@ -1363,7 +1363,7 @@ log_trans(char *arg1, char *arg2, char *arg3, int len, char *arg4, int notify)
 			 * write data to spamlogger and get X-Bogosity line in tmpLine
 			 */
 			if (!notify)
-				log_spam(arg2, ptr, msg_size, &tmpLine);
+				log_fifo(arg2, ptr, msg_size, &tmpLine);
 			logerr("qmail-smtpd: ");
 			logerrpid();
 			logerr(arg1);
@@ -1454,7 +1454,7 @@ err_queue(char *arg1, char *arg2, char *arg3, int len, char *arg4, char *qqx,
 			/*
 			 * write data to spamlogger 
 			 */
-			log_spam(arg2, ptr, msg_size, &tmpLine);
+			log_fifo(arg2, ptr, msg_size, &tmpLine);
 			logerr("qmail-smtpd: ");
 			logerrpid();
 			logerr(arg1);
@@ -5058,15 +5058,15 @@ create_logfilter()
 			die_nomem();
 		if (!stralloc_0(&tmpFile))
 			die_nomem();
-		if ((x = env_get("SPAMFD")))
-			scan_int(x, &spamfd);
+		if ((x = env_get("LOGFIFO_FD")))
+			scan_int(x, &logfifofd);
 		if ((fd = open(tmpFile.s, O_RDWR | O_EXCL | O_CREAT, 0600)) == -1)
 			die_logfilter();
 		if (unlink(tmpFile.s))
 			die_logfilter();
-		if (dup2(fd, spamfd) == -1)
+		if (dup2(fd, logfifofd) == -1)
 			die_logfilter();
-		if (fd != spamfd)
+		if (fd != logfifofd)
 			close(fd);
 	}
 	return;
