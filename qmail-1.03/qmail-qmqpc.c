@@ -380,8 +380,8 @@ main(int argc, char **argv)
 	}
 again:
 	if (argc > 1) {
-		while (argv[i])
-			doit(argv[i++], &outip);
+		for (i = 1; argv[i]; i++)
+			doit(argv[i], &outip);
 		_exit (lasterror);
 	}
 	i = server_count = 0;
