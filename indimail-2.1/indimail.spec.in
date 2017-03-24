@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail.spec.in,v 2.374 2017-03-21 16:14:53+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 2.375 2017-03-24 19:42:51+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 %global debug_package %{nil}
@@ -2616,7 +2616,7 @@ do
         --starttls --fsync --syncdir --memory=%{smtp_soft_mem} --chkrecipient --chkrelay --masquerade \
         --min-free=52428800 --content-filter \
         --spamfilter="%{_prefix}/bin/bogofilter -p -d %{sysconfdir}" \
-        --logfilter=/tmp/spamfifo --rejectspam=0 --spamexitcode=0 \
+        --logfilter=/tmp/logfifo --rejectspam=0 --spamexitcode=0 \
         --qhpsi="$qhpsi" \
         --dmasquerade \
         --dkverify=$ver_opt \
@@ -2630,7 +2630,7 @@ do
         --starttls --fsync --syncdir --memory=%{smtp_soft_mem} --chkrecipient --chkrelay --masquerade \
         --min-free=52428800 --content-filter --virus-filter \
         --spamfilter="%{_prefix}/bin/bogofilter -p -d %{sysconfdir}" \
-        --logfilter=/tmp/spamfifo --rejectspam=0 --spamexitcode=0 \
+        --logfilter=/tmp/logfifo --rejectspam=0 --spamexitcode=0 \
         --dmasquerade \
         --dkverify=both \
         --dksign=both --private_key=%{sysconfdir}/control/domainkeys/%/%{dkimkeyfn} \
@@ -2710,7 +2710,7 @@ if [ %nofetchmail -eq 0 ] ; then
         --cntrldir=control --default-domain=%{default_domain} \
         --qhpsi="$qhpsi" \
         --spamfilter="%{_prefix}/bin/bogofilter -p -d %{sysconfdir}" \
-        --logfilter=/tmp/spamfifo --rejectspam=0 --spamexitcode=0 \
+        --logfilter=/tmp/logfifo --rejectspam=0 --spamexitcode=0 \
         --memory=%{fetchmail_mem} --fsync --syncdir \
         --dkverify=$ver_opt
     else
@@ -2718,7 +2718,7 @@ if [ %nofetchmail -eq 0 ] ; then
         --qbase=%{qbase} --qcount=%{qcount} --qstart=1 \
         --cntrldir=control --default-domain=%{default_domain} \
         --spamfilter="%{_prefix}/bin/bogofilter -p -d %{sysconfdir}" \
-        --logfilter=/tmp/spamfifo --rejectspam=0 --spamexitcode=0 \
+        --logfilter=/tmp/logfifo --rejectspam=0 --spamexitcode=0 \
         --memory=%{fetchmail_mem} --fsync --syncdir \
         --dkverify=$ver_opt
     fi

@@ -346,7 +346,7 @@ do
 				--min-free=52428800 --content-filter \
 				--qhpsi="$qhpsi" \
 				--spamfilter="${prefix}/bin/bogofilter -p -d ${sysconfdir}" \
-				--logfilter=/tmp/spamfifo --rejectspam=0 --spamexitcode=0 \
+				--logfilter=/tmp/logfifo --rejectspam=0 --spamexitcode=0 \
 				--dmasquerade \
 				--dkverify=$ver_opt \
 				--dksign=$sign_opt --private_key=${sysconfdir}/control/domainkeys/%/$dkimkeyfn \
@@ -360,7 +360,7 @@ do
 				--chkrecipient --chkrelay --masquerade \
 				--min-free=52428800 --content-filter --virus-filter \
 				--spamfilter="${prefix}/bin/bogofilter -p -d ${sysconfdir}" \
-				--logfilter=/tmp/spamfifo --rejectspam=0 --spamexitcode=0 \
+				--logfilter=/tmp/logfifo --rejectspam=0 --spamexitcode=0 \
 				--dmasquerade \
 				--dkverify=both \
 				--dksign=both --private_key=${sysconfdir}/control/domainkeys/%/$dkimkeyfn \

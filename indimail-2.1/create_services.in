@@ -1,5 +1,8 @@
 #!/bin/sh
 # $Log: create_services.in,v $
+# Revision 2.62  2017-03-24 19:42:44+05:30  Cprogrammer
+# renamed spamfifo to logfifo
+#
 # Revision 2.61  2017-03-09 14:35:01+05:30  Cprogrammer
 # fixed FHS paths
 #
@@ -212,7 +215,7 @@ libexecdir=@libexecdir@
 # End USER Configuration OPTIONS
 #
 
-# $Id: create_services.in,v 2.61 2017-03-09 14:35:01+05:30 Cprogrammer Exp mbhangui $
+# $Id: create_services.in,v 2.62 2017-03-24 19:42:44+05:30 Cprogrammer Exp mbhangui $
 
 usage()
 {
@@ -463,7 +466,7 @@ do
 				--min-free=52428800 --content-filter --virus-filter \
 				--qhpsi="$qhpsi" \
 				--spamfilter="$prefix/bin/bogofilter -p -d $sysconfdir/etc" \
-				--logfilter=/tmp/spamfifo --rejectspam=0 --spamexitcode=0 \
+				--logfilter=/tmp/logfifo --rejectspam=0 --spamexitcode=0 \
 				--dmasquerade \
 				--dkverify=$ver_opt \
 				--dksign=$sign_opt --private_key=$controldir/domainkeys/%/$dkimkeyfn \
@@ -476,7 +479,7 @@ do
 				--starttls --fsync --syncdir --memory=$smtp_soft_mem --chkrecipient --chkrelay --masquerade \
 				--min-free=52428800 --content-filter --virus-filter \
 				--spamfilter="$prefix/bin/bogofilter -p -d $sysconfdir/etc" \
-				--logfilter=/tmp/spamfifo --rejectspam=0 --spamexitcode=0 \
+				--logfilter=/tmp/logfifo --rejectspam=0 --spamexitcode=0 \
 				--dmasquerade \
 				--dkverify=$ver_opt \
 				--dksign=$sign_opt --private_key=$controldir/domainkeys/%/$dkimkeyfn \
@@ -564,14 +567,14 @@ if [ $nofetchmail -eq 0 ] ; then
 				--cntrldir=control --default-domain=indimail.org \
 				--qhpsi="$qhpsi" \
 				--spamfilter="$prefix/bin/bogofilter -p -d $sysconfdir/etc" \
-				--logfilter=/tmp/spamfifo --rejectspam=0 --spamexitcode=0 \
+				--logfilter=/tmp/logfifo --rejectspam=0 --spamexitcode=0 \
 				--memory=$fetchmail_mem --fsync --syncdir --dkverify=$ver_opt $extra_opt
 		else
 			$dir_prefix$prefix/sbin/svctool --fetchmail --servicedir=$servicedir \
 				--qbase=$qbase --qcount=$qcount --qstart=1 \
 				--cntrldir=control --default-domain=indimail.org \
 				--spamfilter="$prefix/bin/bogofilter -p -d $sysconfdir/etc" \
-				--logfilter=/tmp/spamfifo --rejectspam=0 --spamexitcode=0 \
+				--logfilter=/tmp/logfifo --rejectspam=0 --spamexitcode=0 \
 				--memory=$fetchmail_mem --fsync --syncdir --dkverify=$ver_opt $extra_opt
 		fi
 	else
