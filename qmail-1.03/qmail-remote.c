@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-remote.c,v $
+ * Revision 1.97  2017-03-24 15:34:35+05:30  Cprogrammer
+ * fixes for onsuccess, onfailure scripts
+ *
  * Revision 1.96  2017-03-21 15:39:33+05:30  Cprogrammer
  * use CERTDIR to override tls/ssl certificates
  *
@@ -570,6 +573,11 @@ zero()
 		_exit(0);
 }
 
+/*
+ * succ  1 - success
+ * succ  0 - perm failure
+ * succ -1 - temp failure
+ */
 void
 zerodie(char *s1, int succ)
 {
@@ -598,6 +606,12 @@ outsafe(stralloc *sa)
 
 /*
  * set smtpenv variable which gets used for SMTPTEXT environment variable
+ * return 1 on NOMEM
+ * smtptenv      = Text obtained from remote host during conversation
+ * smtptenv null = Conversation with remote host did not happen at all
+ * smtptext      = Text set internally indicating error with processing email
+ * code xxx      = Actual smtp status code (250, 454, 553, etc)
+ * code   0      = Temporary failure. No conversation with remote host took place
  */
 int
 setsmtptext(int code, int type)
@@ -621,13 +635,13 @@ setsmtptext(int code, int type)
 				return (1);
 			}
 		}
-		if (code > 0)
+		if (code >= 0)
 		{
 			strnum[fmt_ulong(strnum, code)] = 0;
 			if (!env_put2("SMTPCODE", strnum))
 				return (1);
-		} else
-		if (!env_put2((type == 's' || mxps) ? "QMTPCODE" : "SMTPCODE", "4.4.1"))
+		} else /*- shouldn't happen - no additional code available from remote host. BUG in code */
+		if (!env_put2((type == 's' || mxps) ? "QMTPCODE" : "SMTPCODE", "-1"))
 			temp_nomem();
 	}
 	return (0);
@@ -1185,6 +1199,14 @@ outsmtptext()
 	}
 }
 
+/*
+ * die =   0 - success
+ * die =  -1 - failure system error
+ * die =   1 - failure non-system error
+ *
+ * code =  xxx - smtp code
+ * code =    0 - temporary failure
+ */
 void
 quit(char *prepend, char *append, int code, int die)
 {
@@ -1238,7 +1260,7 @@ quit(char *prepend, char *append, int code, int die)
 		out(";\n");
 	}
 #endif
-	zerodie(prepend, !die);
+	zerodie(prepend, die == -1 ? -1 : !die);
 }
 
 void
@@ -2332,22 +2354,22 @@ qmtp(stralloc *h, char *ip, int port)
 			flagallok = 0;
 		} else {				/* if (smtptext.s[0] == 'Z') */
 			out("s");
-			flagallok = 0;
+			flagallok = -1;
 		}
 		if (substdio_put(subfdoutsmall, smtptext.s + 1, smtptext.len - 1) == -1)
 			temp_qmtp_noconn(h, ip, port);
 		zero();
 	} /*- for (i = 0; i < reciplist.len; ++i) */
-	if (!flagallok) {
-		out("DGiving up on ");
-		outhost();
-		out(" - Protocol QMTP\n");
-		zerodie("DGiving up on ", flagallok);
-	} else {
+	if (flagallok == 1) {
 		out("K");
 		outhost();
 		out(" accepted message - Protocol QMTP\n");
 		zerodie("K", flagallok);
+	} else {
+		out("DGiving up on ");
+		outhost();
+		out(" - Protocol QMTP\n");
+		zerodie("DGiving up on ", flagallok);
 	}
 }
 
@@ -3205,7 +3227,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_remote_c()
 {
-	static char    *x = "$Id: qmail-remote.c,v 1.96 2017-03-21 15:39:33+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-remote.c,v 1.97 2017-03-24 15:34:35+05:30 Cprogrammer Exp mbhangui $";
 	x=sccsidauthcramh;
 	x=sccsidauthdigestmd5h;
 	x++;
