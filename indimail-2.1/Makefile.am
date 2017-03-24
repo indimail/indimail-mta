@@ -361,6 +361,7 @@ crcdiff_SOURCES=crcdiff.c
 crcdiff_LDADD=
 
 authpgsql_SOURCES=authpgsql.c
+authpgsql_CFLAGS = -I/usr/include/postgresql
 authpgsql_LDADD=@auth_pg_libs@ @auth_libs@ $(cdb_lib)
 
 crypt_SOURCES = crypt.c
