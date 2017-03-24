@@ -1,6 +1,9 @@
 #!/bin/sh
 # WARNING: This file was auto-generated. Do not edit!
 # $Log: svctool.in,v $
+# Revision 2.310  2017-03-24 15:33:09+05:30  Cprogrammer
+# renamed spamfifo to logfifo
+#
 # Revision 2.309  2017-03-23 20:02:05+05:30  Cprogrammer
 # added subjectAltName
 #
@@ -18,7 +21,7 @@
 # Initial revision
 #
 #
-# $Id: svctool.in,v 2.309 2017-03-23 20:02:05+05:30 Cprogrammer Exp mbhangui $
+# $Id: svctool.in,v 2.310 2017-03-24 15:33:09+05:30 Cprogrammer Exp mbhangui $
 #
 
 #
@@ -89,7 +92,7 @@ Known values for OPTION are:
 	[--virus-filter=v]
 	[--qhpsi=q]
 	[--spamfilter=spamfilter_args]
-	[--logfilter=spam_fifo]
+	[--logfilter=logfifo]
 	[--rejectspam=r --spamexitcode=e --localfilter --remotefilter]
 	[--paranoid --dmasquerade]
 	[--remote-authsmtp=b]
@@ -147,8 +150,8 @@ Known values for OPTION are:
                    file or the filename given as argument to content-filter
   c              - Optional filename passed to content-filter argument
   spamfilter     - Spamfilter program along with arguments
-  spam_fifo      - Capture additional status message from spamfilter in 
-                   spamlogger logfile via spam_fifo
+  logfifo        - Capture additional status message from spamfilter in 
+                   qmail-logfifo logfile via logfifo
   r              - Mails get rejected as spam if exit status of spamfilter
                    equals the value of spamexitcode. r can have following values
                    0 - Do not reject SPAM mails
@@ -201,7 +204,7 @@ Known values for OPTION are:
 	[--routes=smtp|qmtp|static]
 	[--cname-lookup]
 	[--min-free=M --deliverylimit-count=D --deliverylimit-size=S]
-	[--logfilter=spam_fifo]
+	[--logfilter=logfifo]
 	[--rejectspam=r --spamexitcode=e --localfilter --remotefilter]
 	[--dkverify=dk|dkim|both|none]
 	[--dksign=dk|dkim|both|none --private_key=private_key]
@@ -228,8 +231,8 @@ Known values for OPTION are:
                    badmailfrom, badrcptto, blackholedsenders, spamignore
                    relaymailfrom, authdomains, chkuserdomains
   spamfilter     - Spamfilter program along with arguments
-  spam_fifo      - Capture additional status message from spamfilter in 
-                   spamlogger logfile via spam_fifo
+  logfifo        - Capture additional status message from spamfilter in 
+                   qmail-logfifo logfile via logfifo
   r              - Mails get rejected as spam if exit status of spamfilter
                    equals the value of spamexitcode. r can have following values
                    0 - Do not reject SPAM mails
@@ -266,7 +269,7 @@ Known values for OPTION are:
 	[--virus-filter=v]
 	[--qhpsi=q]
 	[--spamfilter=spamfilter_args]
-	[--logfilter=spam_fifo]
+	[--logfilter=logfifo]
 	[--rejectspam=r --spamexitcode=e --localfilter --remotefilter]
 	[--dkverify=dk|dkim|both|none]
 	[--dksign=dk|dkim|both|none --private_key=private_key]
@@ -297,8 +300,8 @@ Known values for OPTION are:
                    file or the filename given as argument to content-filter
   c              - Optional filename passed to content-filter argument
   spamfilter     - Spamfilter program along with arguments
-  spam_fifo      - Capture additional status message from spamfilter in 
-                   spamlogger logfile via spam_fifo
+  logfifo        - Capture additional status message from spamfilter in 
+                   qmail-logfifo logfile via logfifo
   r              - Mails get rejected as spam if exit status of spamfilter
                    equals the value of spamexitcode. r can have following values
                    0 - Do not reject SPAM mails
@@ -335,7 +338,7 @@ Known values for OPTION are:
 	[--memory=b --min-free=M]
 	[--qhpsi=q]
 	[--spamfilter=spamfilter_args]
-	[--logfilter=spam_fifo]
+	[--logfilter=logfifo]
 	[--rejectspam=r --spamexitcode=e]
 	[--dkverify=dk|dkim|both|none]
 	[--dksign=dk|dkim|both|none --private_key=private_key]
@@ -361,8 +364,8 @@ Known values for OPTION are:
   q              - Full path to an external virus scanner (like clamdscan)
   spamfilter     - Spamfilter program along with arguments
 
-  spam_fifo      - Capture additional status message from spamfilter in 
-                   spamlogger logfile via spam_fifo
+  logfifo        - Capture additional status message from spamfilter in 
+                   qmail-logfifo logfile via logfifo
   r              - Mails get rejected as spam if exit status of spamfilter
                    equals the value of spamexitcode. r can have following values
                    0 - Do not reject SPAM mails
@@ -379,7 +382,7 @@ Known values for OPTION are:
 	[--memory=b --min-free=M]
 	[--qhpsi=q]
 	[--spamfilter=spamfilter_args]
-	[--logfilter=spam_fifo]
+	[--logfilter=logfifo]
 	[--rejectspam=r --spamexitcode=e]
 	[--dkverify=dk|dkim|both|none]
 	[--dksign=dk|dkim|both|none --private_key=private_key]
@@ -405,8 +408,8 @@ Known values for OPTION are:
   q              - Full path to an external virus scanner (like clamdscan)
   spamfilter     - Spamfilter program along with arguments
 
-  spam_fifo      - Capture additional status message from spamfilter in 
-                   spamlogger logfile via spam_fifo
+  logfifo        - Capture additional status message from spamfilter in 
+                   qmail-logfifo logfile via logfifo
   r              - Mails get rejected as spam if exit status of spamfilter
                    equals the value of spamexitcode. r can have following values
                    0 - Do not reject SPAM mails
@@ -583,7 +586,7 @@ Known values for OPTION are:
 	[--domainlimits]
 	[--memory=b --min-free=M]
 	[--spamfilter=spamfilter_args]
-	[--logfilter=spam_fifo]
+	[--logfilter=logfifo]
 	[--rejectspam=r --spamexitcode=e]
 	[--qhpsi=q]
 	[--dkverify=dk|dkim|both|none]
@@ -605,8 +608,8 @@ Known values for OPTION are:
   domainlimits   - Apply Domain Limits configured by vmoddomlimits(1)
   q              - Full path to an external virus scanner (like clamdscan)
   spamfilter     - Spamfilter program along with arguments
-  spam_fifo      - Capture additional status message from spamfilter in 
-                   spamlogger logfile via spam_fifo  
+  logfifo        - Capture additional status message from spamfilter in 
+                   qmail-logfifo logfile via logfifo  
   r              - Mails get rejected as spam if exit status of spamfilter
                    equals the value of spamexitcode. r can have following values
                    0 - Do not reject SPAM mails
@@ -1088,7 +1091,7 @@ fi
 echo "Checking mandatory services"
 M_SERVICE=""
 if [ -x "$DESTDIR"$QmailBinPrefix/bin/bogofilter ] ; then
-  M_SERVICE="$M_SERVICE qmail-spamlog"
+  M_SERVICE="$M_SERVICE qmail-logfifo"
 fi
 if [ -x "$DESTDIR"$QmailBinPrefix/sbin/clamd -o -x "$DESTDIR"$QmailBinPrefix/bin/freshclam ] ; then
   M_SERVICE="$M_SERVICE clamd freshclam"
@@ -1686,7 +1689,7 @@ if [ " $odmr" = " " ] ; then
 		> $conf_dir/DOMAIN_LIMITS
 	fi
 	if [ ! " $chkrecipient" = " " ] ; then
-		echo  > $conf_dir/CHECKRECIPIENT
+		echo 1 > $conf_dir/CHECKRECIPIENT
 	else
 		> $conf_dir/CHECKRECIPIENT
 	fi
@@ -1796,7 +1799,7 @@ esac
 echo "$QmailBinPrefix/sbin/vchkpass $QmailBinPrefix/sbin/systpass" > $conf_dir/AUTHMODULES
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.309 2017-03-23 20:02:05+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.310 2017-03-24 15:33:09+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -1852,14 +1855,14 @@ fi
 ) > "$DESTDIR"$SERVICEDIR/qmail-smtpd.$tag/run
 /bin/chmod +x "$DESTDIR"$SERVICEDIR/qmail-smtpd.$tag/run
 
-# SPAM Logger service
+# fifo Logger service
 if [ " $odmr" = " " ] ; then
 	if [ ! " $logfilter" = " " ] ; then
-		# qmail-spam logger
-		/bin/mkdir -p "$DESTDIR"$SERVICEDIR/qmail-spamlog/log
+		# qmail-logfifo logger
+		/bin/mkdir -p "$DESTDIR"$SERVICEDIR/qmail-logfifo/log
 		(
 		echo "#!/bin/sh"
-		echo "# \$Id: svctool.in,v 2.309 2017-03-23 20:02:05+05:30 Cprogrammer Exp mbhangui $"
+		echo "# \$Id: svctool.in,v 2.310 2017-03-24 15:33:09+05:30 Cprogrammer Exp mbhangui $"
 		echo "# $prog_args"
 		echo ""
 		echo "LOGFILTER=\`cat $SERVICEDIR/qmail-smtpd.$tag/variables/LOGFILTER\`"
@@ -1870,24 +1873,24 @@ if [ " $odmr" = " " ] ; then
 		echo "/bin/chmod 666 \$LOGFILTER"
 		echo "exec $QmailBinPrefix/bin/setuidgid indimail \\"
 		echo "$QmailBinPrefix/bin/qmail-cat \$LOGFILTER"
-		) > "$DESTDIR"$SERVICEDIR/qmail-spamlog/run
-		/bin/chmod +x "$DESTDIR"$SERVICEDIR/qmail-spamlog/run
+		) > "$DESTDIR"$SERVICEDIR/qmail-logfifo/run
+		/bin/chmod +x "$DESTDIR"$SERVICEDIR/qmail-logfifo/run
 
 		if [ ! -d $LOGDIR ] ; then
 			/bin/mkdir -p $LOGDIR
 			$chown qmaill:nofiles $LOGDIR
 		fi
-		#qmail-spamlog log script
+		#qmail-logfifo log script
 		(
 		echo "#!/bin/sh"
-		echo "# \$Id: svctool.in,v 2.309 2017-03-23 20:02:05+05:30 Cprogrammer Exp mbhangui $"
+		echo "# \$Id: svctool.in,v 2.310 2017-03-24 15:33:09+05:30 Cprogrammer Exp mbhangui $"
 		echo "# generated on $host on `date`"
 		echo "# $prog_args"
 		echo ""
 		echo "exec $QmailBinPrefix/bin/setuidgid qmaill \\"
-		echo "$QmailBinPrefix/bin/multilog t $LOGDIR/spamlog"
-		) > "$DESTDIR"$SERVICEDIR/qmail-spamlog/log/run
-		/bin/chmod +x "$DESTDIR"$SERVICEDIR/qmail-spamlog/log/run
+		echo "$QmailBinPrefix/bin/multilog t $LOGDIR/logfifo"
+		) > "$DESTDIR"$SERVICEDIR/qmail-logfifo/log/run
+		/bin/chmod +x "$DESTDIR"$SERVICEDIR/qmail-logfifo/log/run
 	fi
 fi #odmr
 
@@ -1898,7 +1901,7 @@ if [ ! -d $LOGDIR ] ; then
 fi
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.309 2017-03-23 20:02:05+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.310 2017-03-24 15:33:09+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -2158,7 +2161,7 @@ else
 fi
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.309 2017-03-23 20:02:05+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.310 2017-03-24 15:33:09+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -2191,12 +2194,12 @@ echo "$QmailBinPrefix/bin/qmail-$type 2>&1\""
 ) > "$DESTDIR"$SERVICEDIR/qmail-$type.$tag/run
 /bin/chmod +x "$DESTDIR"$SERVICEDIR/qmail-$type.$tag/run
 
-if [ ! " $logfilter" = " " -a ! -d "$DESTDIR"$SERVICEDIR/qmail-spamlog/run ] ; then
+if [ ! " $logfilter" = " " -a ! -d "$DESTDIR"$SERVICEDIR/qmail-logfifo/run ] ; then
 	# qmail-spam logger
-	/bin/mkdir -p "$DESTDIR"$SERVICEDIR/qmail-spamlog/log
+	/bin/mkdir -p "$DESTDIR"$SERVICEDIR/qmail-logfifo/log
 	(
 	echo "#!/bin/sh"
-	echo "# \$Id: svctool.in,v 2.309 2017-03-23 20:02:05+05:30 Cprogrammer Exp mbhangui $"
+	echo "# \$Id: svctool.in,v 2.310 2017-03-24 15:33:09+05:30 Cprogrammer Exp mbhangui $"
 	echo "# $prog_args"
 	echo ""
 	echo "LOGFILTER=\`cat $SERVICEDIR/qmail-$type.$tag/variables/LOGFILTER\`"
@@ -2207,24 +2210,24 @@ if [ ! " $logfilter" = " " -a ! -d "$DESTDIR"$SERVICEDIR/qmail-spamlog/run ] ; t
 	echo "/bin/chmod 666 \$LOGFILTER"
 	echo "exec $QmailBinPrefix/bin/setuidgid indimail \\"
 	echo "$QmailBinPrefix/bin/qmail-cat \$LOGFILTER"
-	) > "$DESTDIR"$SERVICEDIR/qmail-spamlog/run
-	/bin/chmod +x "$DESTDIR"$SERVICEDIR/qmail-spamlog/run
+	) > "$DESTDIR"$SERVICEDIR/qmail-logfifo/run
+	/bin/chmod +x "$DESTDIR"$SERVICEDIR/qmail-logfifo/run
 
 	if [ ! -d $LOGDIR ] ; then
 		/bin/mkdir -p $LOGDIR
 		$chown qmaill:nofiles $LOGDIR
 	fi
-	#qmail-spamlog log script
+	#qmail-logfifo log script
 	(
 	echo "#!/bin/sh"
-	echo "# \$Id: svctool.in,v 2.309 2017-03-23 20:02:05+05:30 Cprogrammer Exp mbhangui $"
+	echo "# \$Id: svctool.in,v 2.310 2017-03-24 15:33:09+05:30 Cprogrammer Exp mbhangui $"
 	echo "# generated on $host on `date`"
 	echo "# $prog_args"
 	echo ""
 	echo "exec $QmailBinPrefix/bin/setuidgid qmaill \\"
-	echo "$QmailBinPrefix/bin/multilog t $LOGDIR/spamlog"
-	) > "$DESTDIR"$SERVICEDIR/qmail-spamlog/log/run
-	/bin/chmod +x "$DESTDIR"$SERVICEDIR/qmail-spamlog/log/run
+	echo "$QmailBinPrefix/bin/multilog t $LOGDIR/logfifo"
+	) > "$DESTDIR"$SERVICEDIR/qmail-logfifo/log/run
+	/bin/chmod +x "$DESTDIR"$SERVICEDIR/qmail-logfifo/log/run
 fi
 
 # qmail-qm[t|q]pd log script
@@ -2234,7 +2237,7 @@ if [ ! -d $LOGDIR ] ; then
 fi
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.309 2017-03-23 20:02:05+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.310 2017-03-24 15:33:09+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -2289,7 +2292,7 @@ fi
 
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.309 2017-03-23 20:02:05+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.310 2017-03-24 15:33:09+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -2307,7 +2310,7 @@ if [ ! -d $LOGDIR ] ; then
 fi
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.309 2017-03-23 20:02:05+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.310 2017-03-24 15:33:09+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -2376,7 +2379,7 @@ CONTEXT_FILE=$CONTROLDIR/$CONTEXT_FILE
 
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.309 2017-03-23 20:02:05+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.310 2017-03-24 15:33:09+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -2399,7 +2402,7 @@ if [ ! -d $LOGDIR ] ; then
 fi
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.309 2017-03-23 20:02:05+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.310 2017-03-24 15:33:09+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -2481,7 +2484,7 @@ else
 fi
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.309 2017-03-23 20:02:05+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.310 2017-03-24 15:33:09+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -2537,7 +2540,7 @@ fi
 # qmail-imapd log script
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.309 2017-03-23 20:02:05+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.310 2017-03-24 15:33:09+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -2825,7 +2828,7 @@ else
 fi
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.309 2017-03-23 20:02:05+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.310 2017-03-24 15:33:09+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -2880,7 +2883,7 @@ fi
 # qmail-pop3d log script
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.309 2017-03-23 20:02:05+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.310 2017-03-24 15:33:09+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -3091,7 +3094,7 @@ fi
 echo 1 > $conf_dir/MYSQL_OPT_RECONNECT
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.309 2017-03-23 20:02:05+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.310 2017-03-24 15:33:09+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -3119,7 +3122,7 @@ fi
 # indisrvr log script
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.309 2017-03-23 20:02:05+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.310 2017-03-24 15:33:09+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -3147,7 +3150,7 @@ conf_dir="$DESTDIR"$SERVICEDIR/qscanq/variables
 # qscanq script
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.309 2017-03-23 20:02:05+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.310 2017-03-24 15:33:09+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -3169,7 +3172,7 @@ fi
 # qscanq log script
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.309 2017-03-23 20:02:05+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.310 2017-03-24 15:33:09+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -3202,7 +3205,7 @@ conf_dir="$DESTDIR"$SERVICEDIR/clamd/variables
 # clamd script
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.309 2017-03-23 20:02:05+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.310 2017-03-24 15:33:09+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -3269,7 +3272,7 @@ fi
 # clamd log script
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.309 2017-03-23 20:02:05+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.310 2017-03-24 15:33:09+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -3286,7 +3289,7 @@ conf_dir="$DESTDIR"$SERVICEDIR/freshclam/variables
 # freshclam script
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.309 2017-03-23 20:02:05+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.310 2017-03-24 15:33:09+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -3334,7 +3337,7 @@ fi
 # freshclam log script
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.309 2017-03-23 20:02:05+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.310 2017-03-24 15:33:09+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -3365,7 +3368,7 @@ conf_dir="$DESTDIR"$SERVICEDIR/pwdlookup/variables
 /bin/chmod 500 $conf_dir
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.309 2017-03-23 20:02:05+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.310 2017-03-24 15:33:09+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -3381,7 +3384,7 @@ fi
 # pwdlookup log script
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.309 2017-03-23 20:02:05+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.310 2017-03-24 15:33:09+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -3486,7 +3489,7 @@ echo "inlookup" > $conf_dir/MYSQL_READ_DEFAULT_GROUP
 echo 1 > $conf_dir/MYSQL_OPT_RECONNECT
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.309 2017-03-23 20:02:05+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.310 2017-03-24 15:33:09+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -3502,7 +3505,7 @@ fi
 # inlookup log script
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.309 2017-03-23 20:02:05+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.310 2017-03-24 15:33:09+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -3562,7 +3565,7 @@ if [ ! -d "$DESTDIR"$databasedir/data -o $force -eq 1 ] ; then
 	fi
 	if ( /bin/mkdir -p "$DESTDIR"$databasedir/data && /bin/mkdir -p "$DESTDIR"$databasedir/logs ) ; then
 		(
-		echo "# \$Id: svctool.in,v 2.309 2017-03-23 20:02:05+05:30 Cprogrammer Exp mbhangui $"
+		echo "# \$Id: svctool.in,v 2.310 2017-03-24 15:33:09+05:30 Cprogrammer Exp mbhangui $"
 		echo "# generated on $host on `date`"
 		echo ""
 		echo "# svctool --config=mysqldb --mysqlPrefix=$mysqlPrefix --databasedir=$databasedir --nolog"
@@ -3693,7 +3696,7 @@ conf_dir="$DESTDIR"$SERVICEDIR/mysql.$port/variables
 /bin/chmod 500 $conf_dir
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.309 2017-03-23 20:02:05+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.310 2017-03-24 15:33:09+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -3708,7 +3711,8 @@ echo "fi"
 echo "MYSQL_BASE=$mysqlPrefix"
 echo "DATABASE=$databasedir"
 echo "PIDFILE=/tmp/mysql."$port".pid"
-echo "exec $QmailBinPrefix/bin/softlimit -o 4096 \\"
+echo "ulimit -u 8192 -n 8192"
+echo "exec $QmailBinPrefix/bin/softlimit -o 8192 \\"
 echo "$QmailBinPrefix/bin/setuidgid mysql \$MYSQL_BASE/$mysqld --defaults-file=$conf_file \\"
 echo "--port=$port --basedir=\$MYSQL_BASE \\"
 echo "--datadir=\$DATABASE/data \\"
@@ -3789,7 +3793,7 @@ echo "--pid-file=\$PIDFILE 2>&1"
 
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.309 2017-03-23 20:02:05+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.310 2017-03-24 15:33:09+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -3806,7 +3810,7 @@ fi
 # mysql log script
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.309 2017-03-23 20:02:05+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.310 2017-03-24 15:33:09+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -3968,6 +3972,7 @@ echo "#   also need to also adjust /etc/apparmor.d/usr.sbin.mysqld."
 echo "#"
 echo 
 echo "sql_mode=\"NO_ENGINE_SUBSTITUTION,STRICT_TRANS_TABLES\""
+echo "explicit_defaults_for_timestamp=TRUE"
 echo "user     = mysql"
 echo "socket   = $mysql_socket"
 echo "port     = $mysql_port"
@@ -4019,7 +4024,7 @@ fi
 # svscan log script
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.309 2017-03-23 20:02:05+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.310 2017-03-24 15:33:09+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -4145,7 +4150,7 @@ case "$dkverify_option" in
 esac
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.309 2017-03-23 20:02:05+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.310 2017-03-24 15:33:09+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -4167,7 +4172,7 @@ fi
 # fetchmail log script
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.309 2017-03-23 20:02:05+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.310 2017-03-24 15:33:09+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -4239,7 +4244,7 @@ else
 fi
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.309 2017-03-23 20:02:05+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.310 2017-03-24 15:33:09+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -4280,7 +4285,7 @@ fi
 # qmail-poppass log script
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.309 2017-03-23 20:02:05+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.310 2017-03-24 15:33:09+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -4502,7 +4507,7 @@ case "$dksign_option" in
 esac
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.309 2017-03-23 20:02:05+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.310 2017-03-24 15:33:09+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -4519,7 +4524,7 @@ fi
 /bin/mkdir -p "$DESTDIR"$SERVICEDIR/qmail-send."$tag"/log
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.309 2017-03-23 20:02:05+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.310 2017-03-24 15:33:09+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -6222,7 +6227,7 @@ report ()
 		> $LOGDIR/reports/spam
 	else
 		> $LOGDIR/reports/spam
-		/bin/cat $LOGDIR/spamlog/current | grep $spamheader_name| "$DESTDIR"$QmailBinPrefix/bin/tai64nunix \
+		/bin/cat $LOGDIR/logfifo/current | grep $spamheader_name| "$DESTDIR"$QmailBinPrefix/bin/tai64nunix \
 		> $LOGDIR/reports/spam
 	fi
 
@@ -6861,7 +6866,7 @@ while test $# -gt 0; do
 	;;
 
 	--version)
-	echo "\$Id: svctool.in,v 2.309 2017-03-23 20:02:05+05:30 Cprogrammer Exp mbhangui $"
+	echo "\$Id: svctool.in,v 2.310 2017-03-24 15:33:09+05:30 Cprogrammer Exp mbhangui $"
 	exit 0
 	;;
 
