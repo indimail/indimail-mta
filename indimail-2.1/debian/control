@@ -9,7 +9,7 @@ Vcs-Browser: http://indimail.git.sourceforge.net/git/gitweb.cgi?p=indimail/indim
 
 Package: indimail
 Architecture: any
-Pre-Depends: mysql-server bogofilter-wordlist
+Pre-Depends: mysql-server, bogofilter-wordlist
 Depends: ${shlibs:Depends}, ${misc:Depends}, net-tools, coreutils, binutils
 Replaces: indimail-mini, libindimail, indimail-mta
 Conflicts: indimail-mini, indimail-mta
