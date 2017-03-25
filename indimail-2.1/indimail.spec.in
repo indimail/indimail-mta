@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail.spec.in,v 2.375 2017-03-24 19:42:51+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 2.376 2017-03-25 10:49:19+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 %global debug_package %{nil}
@@ -97,7 +97,7 @@
 Summary: A Flexible Messaging Platform with Multi-Host/Multi-Protocol support
 Name: indimail
 Version: @version@
-Provides: indimail-mta = @version@, daemontools = @version@, ucspi-tcp = @version@ libindimail = @version@
+Provides: indimail-mta = @version@, daemontools = @version@, ucspi-tcp = @version@, libindimail = @version@
 %if %build_on_obs == 1
 Release: 1.<B_CNT>
 %else
