@@ -148,6 +148,9 @@ warn-auto.sh choose.sh
 	cat warn-auto.sh choose.sh > choose
 	chmod 755 choose
 
+distclean: TARGETS
+	rm -f `cat TARGETS`
+
 clean: \
 TARGETS
 	rm -f `cat TARGETS`

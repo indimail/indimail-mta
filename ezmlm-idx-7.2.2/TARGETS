@@ -408,3 +408,4 @@ wrap_stat.lo
 wrap_waitpid.lo
 ezmlm-queue
 __TSTDIR
+ezmlm-idx.spec
