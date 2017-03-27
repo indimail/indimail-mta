@@ -26,6 +26,7 @@
 %dir %attr(0755,root,root)         /usr/share/man/man8
 %dir %attr(0555,root,qmail)        /usr/lib/indimail/plugins
 %dir %attr(0775,root,qmail)        /etc/indimail/etc
+%dir %attr(0775,indimail,qmail)    /etc/indimail/certs
 %dir %attr(0775,indimail,qmail)    /etc/indimail/users
 %dir %attr(0775,indimail,qmail)    /etc/indimail/control
 %dir %attr(0775,indimail,qmail)    /etc/indimail/control/domainkeys
@@ -325,6 +326,7 @@
 %attr(0644,root,root)  /etc/indimail/etc/leapsecs.txt
 %attr(0644,root,root)  /etc/indimail/etc/leapsecs.dat
 %attr(0644,root,root)  /etc/indimail/procmailrc
+%attr(0644,root,root)  /etc/indimail/indimail-mta.release
 #
 # docs
 #
