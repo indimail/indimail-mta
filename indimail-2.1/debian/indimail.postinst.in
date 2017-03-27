@@ -217,6 +217,9 @@ if [ -d /service ] ; then
 	${mv} -f $servicedir "$servicedir".org
 fi
 
+# fifolog service
+${prefix}/sbin/svctool --fifologger=/tmp/logfifo --servicedir=${servicedir}
+
 # create svscanlog service
 ${prefix}/sbin/svctool --svscanlog --servicedir=$servicedir
 

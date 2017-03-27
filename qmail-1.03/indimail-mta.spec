@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail-mta.spec,v 1.78 2017-03-27 08:51:32+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail-mta.spec,v 1.79 2017-03-27 23:18:34+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 %global debug_package %{nil}
@@ -60,7 +60,7 @@
 
 Summary: A Flexible SMTP server
 Name: indimail-mta
-Version: 2.0
+Version: 2.1
 %if %fedorareview == 0
 Provides: daemontools = %{version}, ucspi-tcp = %{version}
 %if %build_on_obs == 1
@@ -346,6 +346,15 @@ done
 
 %build
 ID=$(id -u)
+(
+echo NAME=indimail-mta
+echo Description="IndiMail MTA"
+echo MTA_version="%{version}"
+echo ID=indimail-mta
+echo HOME_URL="http://www.indimail.org"
+echo PACKAGE_BUGREPORT='Manvendra Bhangui manvendra@indimail.org'
+) > indimail-mta-release
+
 #### LIBDKIM ######################
 if [ -d libdkim-%{libdkim_version} ] ; then
   cd libdkim-%{libdkim_version}
@@ -477,6 +486,7 @@ do
     fi
   fi
 done
+install -m 0644 indimail-mta-release %{buildroot}%{qsysconfdir}/indimail-mta-release
 if [ %nolibdkim -eq 0 ] ; then
   %{__rm} -f %{buildroot}%{_libdir}/libdkim.la
   if [ -x /usr/bin/chrpath ] ; then
@@ -632,11 +642,12 @@ done
 %ghost %attr(0644,indimail,indimail)              %{qsysconfdir}/tcp.qmtp.cdb
 %ghost %attr(0644,indimail,indimail)              %{qsysconfdir}/tcp.qmqp.cdb
 
-%attr(644,root,qmail) %config(noreplace)           %{qsysconfdir}/indimail-mta.te
-%attr(644,root,qmail) %config(noreplace)           %{qsysconfdir}/indimail-mta.fc
-%attr(444,root,root)  %config(noreplace)           %{qsysconfdir}/qmailprog.list
-%attr(644,root,qmail) %config(noreplace)           %{qsysconfdir}/etc/leapsecs.dat
-%attr(644,root,qmail) %config(noreplace)           %{qsysconfdir}/etc/leapsecs.txt
+%attr(644,root,qmail) %config(noreplace)          %{qsysconfdir}/indimail-mta.te
+%attr(644,root,qmail) %config(noreplace)          %{qsysconfdir}/indimail-mta.fc
+%attr(444,root,root)  %config(noreplace)          %{qsysconfdir}/qmailprog.list
+%attr(644,root,qmail) %config(noreplace)          %{qsysconfdir}/etc/leapsecs.dat
+%attr(644,root,qmail) %config(noreplace)          %{qsysconfdir}/etc/leapsecs.txt
+%attr(444,root,root)  %config(noreplace)          %{qsysconfdir}/indimail-mta-release
 
 %if %noperms == 0
 %if 0%{?suse_version} >= 1120
@@ -1636,6 +1647,9 @@ if [ -d /service ] ; then
   echo "UFO found in /service. Moving it to /service.org"
   %{__mv} -f %{servicedir} %{servicedir}.org
 fi
+
+# fifolog service
+%{_prefix}/sbin/svctool --fifologger=/tmp/logfifo --servicedir=%{servicedir}
 
 # svscanlog service
 %{_prefix}/sbin/svctool --svscanlog --servicedir=%{servicedir}

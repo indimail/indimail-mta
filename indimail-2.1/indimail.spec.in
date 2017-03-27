@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail.spec.in,v 2.380 2017-03-27 18:21:52+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 2.381 2017-03-27 23:17:52+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 %global debug_package %{nil}
@@ -2475,6 +2475,9 @@ if [ -d /service ] ; then
   echo "UFO found in /service. Moving it to /service.org" 1>&2
   %{__mv} -f %{servicedir} %{servicedir}.org
 fi
+
+# fifolog service
+%{_prefix}/sbin/svctool --fifologger=/tmp/logfifo --servicedir=%{servicedir}
 
 # svscanlog service
 %{_prefix}/sbin/svctool --svscanlog --servicedir=%{servicedir}
