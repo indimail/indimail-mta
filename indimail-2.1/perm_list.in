@@ -9,6 +9,7 @@
 %dir %attr(0750,qscand,qscand)     @indimaildir@/qscanq/root/scanq
 %dir %attr(0775,qscand,qscand)     @indimaildir@/clamd
 %dir %attr(0755,root,qmail)        @indimaildir@/queue
+%dir %attr(0775,indimail,qmail)    @indimaildir@/inquery
 %dir %attr(0555,root,qmail)        @shareddir@
 %dir %attr(0555,root,qmail)        @shareddir@/boot
 %dir %attr(0555,root,qmail)        @shareddir@/doc
@@ -20,7 +21,6 @@
 %dir %attr(0775,root,qmail)        @sysconfdir@/etc
 %dir %attr(0775,indimail,qmail)    @sysconfdir@/certs
 %dir %attr(0775,indimail,qmail)    @sysconfdir@/control
-%dir %attr(0775,indimail,qmail)    @sysconfdir@/control/inquery
 %dir %attr(0775,indimail,qmail)    @sysconfdir@/control/domainkeys
 %dir %attr(2775,qmailr,qmail)      @sysconfdir@/control/ratelimit
 %dir %attr(0775,indimail,qmail)    @sysconfdir@/control/defaultqueue
