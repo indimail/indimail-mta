@@ -22,41 +22,41 @@ the command \fBsvctool --config=add-boot\fR.
 Known values for OPTION are:
 
 --smtp=Port --qbase=queue_path --qcount=N --qstart=I
-    --servicedir=service_path
-    [--cntrldir=cntrl_path]
-    --localip=a --maxdaemons=m --maxperip=i
-    [--no-multi]
-    [--mysqlhost=mysqlhost --mysqluser=mysqluser --mysqlpass=mysqlpass]
-    [--persistdb]
-    [--dnscheck]
-    [--starttls]
-    [--helofqdn --helocheck]
-    [--fsync --syncdir]
-    [--qregex]
-    [--memory=b]
-    [--overquota_mailsize=o]
-    [--domainlimits]
-    [--chkrecipient --cugmail --authsmtp --authall --chkrelay]
-    [--masquerade] [--antispoof]
-    [--routes=smtp|qmtp|static]
-    [--cname-lookup]
-    [--min-free=M --skipsend --deliverylimit-count=D --deliverylimit-size=S]
-    [--rbl=list]
-    [--content-filter=c]
-    [--virus-filter=v]
-    [--qhpsi=q]
-    [--spamfilter=spamfilter_args]
-    [--logfilter=logfifo]
-    [--rejectspam=r --spamexitcode=e --localfilter --remotefilter]
-    [--paranoid --dmasquerade]
-    [--remote-authsmtp=b]
-    [--odmr]
-    [--ssl]
-    [--shared-objects=0|1]
-    [--dkverify=dk|dkim|both|none]
-    [--dksign=dk|dkim|both|none --private_key=private_key]
-    [--password-cache] [--query-cache]
-    --default-domain=domain
+	--servicedir=service_path
+	[--cntrldir=cntrl_path]
+	--localip=a --maxdaemons=m --maxperip=i
+	[--no-multi]
+	[--mysqlhost=mysqlhost --mysqluser=mysqluser --mysqlpass=mysqlpass]
+	[--persistdb]
+	[--dnscheck]
+	[--starttls]
+	[--helofqdn --helocheck]
+	[--fsync --syncdir]
+	[--qregex]
+	[--memory=b]
+	[--overquota_mailsize=o]
+	[--domainlimits]
+	[--chkrecipient --cugmail --authsmtp --authall --chkrelay]
+	[--masquerade] [--antispoof]
+	[--routes=smtp|qmtp|static]
+	[--cname-lookup]
+	[--min-free=M --skipsend --deliverylimit-count=D --deliverylimit-size=S]
+	[--rbl=list]
+	[--content-filter=c]
+	[--virus-filter=v]
+	[--qhpsi=q]
+	[--spamfilter=spamfilter_args]
+	[--logfilter=logfifo]
+	[--rejectspam=r --spamexitcode=e --localfilter --remotefilter]
+	[--paranoid --dmasquerade]
+	[--remote-authsmtp=b]
+	[--odmr]
+	[--ssl]
+	[--shared-objects=0|1]
+	[--dkverify=dk|dkim|both|none]
+	[--dksign=dk|dkim|both|none --private_key=private_key]
+	[--password-cache] [--query-cache]
+	--default-domain=domain
 
  Installs a new queue with a SMTP Listener
   m              - Concurrency of connections to allow
@@ -145,26 +145,26 @@ Known values for OPTION are:
   shared-objects - Enabled tcpserver plugins, 0 - disabled, 1 - enabled
 
 --delivery=ident --qbase=queue_path --qcount=N --qstart=I
-    --servicedir=service_path
-    [--cntrldir=cntrl_path]
-    [--no-multi]
-    [--mysqlhost=mysqlhost --mysqluser=mysqluser --mysqlpass=mysqlpass]
-    [--persistdb]
-    [--fsync --syncdir]
-    [--qregex]
-    [--memory=b]
-    [--overquota_mailsize=o]
-    [--domainlimits]
-    [--routes=smtp|qmtp|static]
-    [--cname-lookup]
-    [--min-free=M --deliverylimit-count=D --deliverylimit-size=S]
-    [--logfilter=logfifo]
-    [--rejectspam=r --spamexitcode=e --localfilter --remotefilter]
-    [--dkverify=dk|dkim|both|none]
-    [--dksign=dk|dkim|both|none --private_key=private_key]
-    [--remote-authsmtp=b]
-    [--ssl]
-    --default-domain=domain
+	--servicedir=service_path
+	[--cntrldir=cntrl_path]
+	[--no-multi]
+	[--mysqlhost=mysqlhost --mysqluser=mysqluser --mysqlpass=mysqlpass]
+	[--persistdb]
+	[--fsync --syncdir]
+	[--qregex]
+	[--memory=b]
+	[--overquota_mailsize=o]
+	[--domainlimits]
+	[--routes=smtp|qmtp|static]
+	[--cname-lookup]
+	[--min-free=M --deliverylimit-count=D --deliverylimit-size=S]
+	[--logfilter=logfifo]
+	[--rejectspam=r --spamexitcode=e --localfilter --remotefilter]
+	[--dkverify=dk|dkim|both|none]
+	[--dksign=dk|dkim|both|none --private_key=private_key]
+	[--remote-authsmtp=b]
+	[--ssl]
+	--default-domain=domain
 
  Installs a new queue without a SMTP listener
   N              - No of Queues
@@ -214,19 +214,19 @@ Known values for OPTION are:
   ssl            - Use SSL encrypted communication in qmail-remote
 
 --queueParam=dir --qbase=queue_path --qcount=N --qstart=I
-    [--cntrldir=cntrl_path]
-    [--min-free=M]
-    [--no-multi]
-    [--fsync --syncdir]
-    [--qregex]
-    [--content-filter=c]
-    [--virus-filter=v]
-    [--qhpsi=q]
-    [--spamfilter=spamfilter_args]
-    [--logfilter=logfifo]
-    [--rejectspam=r --spamexitcode=e --localfilter --remotefilter]
-    [--dkverify=dk|dkim|both|none]
-    [--dksign=dk|dkim|both|none --private_key=private_key]
+	[--cntrldir=cntrl_path]
+	[--min-free=M]
+	[--no-multi]
+	[--fsync --syncdir]
+	[--qregex]
+	[--content-filter=c]
+	[--virus-filter=v]
+	[--qhpsi=q]
+	[--spamfilter=spamfilter_args]
+	[--logfilter=logfifo]
+	[--rejectspam=r --spamexitcode=e --localfilter --remotefilter]
+	[--dkverify=dk|dkim|both|none]
+	[--dksign=dk|dkim|both|none --private_key=private_key]
 
  Installs a new queue with a SMTP Listener
   dir            - dir where to install queuedef environment variable directory
@@ -267,8 +267,8 @@ Known values for OPTION are:
   private_key    - Path to Private key created by dknewkey
 
 --greylist=port --min-resend-min=m --resend-win-hr=g --timeout-days=t
-        --context-file=f --save_interval=s --whitelist=w --hash-size=s
-        --localip=a --use-greydaemon
+		--context-file=f --save_interval=s --whitelist=w --hash-size=s
+		--localip=a --use-greydaemon
 
   Installs a new Greylist Daemon
   a              - IP Address to listen
@@ -285,17 +285,17 @@ Known values for OPTION are:
   use-greydaemon - Use John Levine's greydaemon
 
 --qmtp=Port --qbase=queue_path --qcount=N --qstart=I
-    --servicedir=service_path
-    [--cntrldir=cntrl_path]
-    --localip=a --maxdaemons=m --maxperip=i
-    [--fsync --syncdir]
-    [--memory=b --min-free=M]
-    [--qhpsi=q]
-    [--spamfilter=spamfilter_args]
-    [--logfilter=logfifo]
-    [--rejectspam=r --spamexitcode=e]
-    [--dkverify=dk|dkim|both|none]
-    [--dksign=dk|dkim|both|none --private_key=private_key]
+	--servicedir=service_path
+	[--cntrldir=cntrl_path]
+	--localip=a --maxdaemons=m --maxperip=i
+	[--fsync --syncdir]
+	[--memory=b --min-free=M]
+	[--qhpsi=q]
+	[--spamfilter=spamfilter_args]
+	[--logfilter=logfifo]
+	[--rejectspam=r --spamexitcode=e]
+	[--dkverify=dk|dkim|both|none]
+	[--dksign=dk|dkim|both|none --private_key=private_key]
 
  Installs a new queue with a QMTP Listener
   m              - Concurrency of connections to allow
@@ -329,17 +329,17 @@ Known values for OPTION are:
   private_key    - Path to Private key created by dknewkey
 
 --qmqp=Port --qbase=queue_path --qcount=N --qstart=I
-    --servicedir=service_path 
-    [--cntrldir=cntrl_path]
-    --localip=a --maxdaemons=m --maxperip=i
-    [--fsync --syncdir]
-    [--memory=b --min-free=M]
-    [--qhpsi=q]
-    [--spamfilter=spamfilter_args]
-    [--logfilter=logfifo]
-    [--rejectspam=r --spamexitcode=e]
-    [--dkverify=dk|dkim|both|none]
-    [--dksign=dk|dkim|both|none --private_key=private_key]
+	--servicedir=service_path 
+	[--cntrldir=cntrl_path]
+	--localip=a --maxdaemons=m --maxperip=i
+	[--fsync --syncdir]
+	[--memory=b --min-free=M]
+	[--qhpsi=q]
+	[--spamfilter=spamfilter_args]
+	[--logfilter=logfifo]
+	[--rejectspam=r --spamexitcode=e]
+	[--dkverify=dk|dkim|both|none]
+	[--dksign=dk|dkim|both|none --private_key=private_key]
 
  Installs a new queue with a QMQP Listener
   m              - Concurrency of connections to allow
@@ -373,16 +373,16 @@ Known values for OPTION are:
   private_key    - Path to Private key created by dknewkey
 
 --imap=Port --servicedir=service_path
-    --localip=a --maxdaemons=m --maxperip=i
-    --default-domain=domain
-    [--domainlimits --nolastauth]
-    [--proxy=destport]
-    [--infifo=fifo_path]
-    [--legacyserver]
-    [--postmaster=user[@domain]]
-    [--common_name=CN]
-    [--query-cache]
-    [--ssl|--tlsprog|--starttls]
+	--localip=a --maxdaemons=m --maxperip=i
+	--default-domain=domain
+	[--domainlimits --nolastauth]
+	[--proxy=destport]
+	[--infifo=fifo_path]
+	[--legacyserver]
+	[--postmaster=user[@domain]]
+	[--common_name=CN]
+	[--query-cache]
+	[--ssl|--tlsprog|--starttls]
 
   Installs a new IMAP4 Listner
   Port           - Bind on this port for IMAP
@@ -406,15 +406,15 @@ Known values for OPTION are:
   default-domain - default domain name for which this host will handle mails
 
 --pop3=Port --servicedir=service_path
-    --localip=a --maxdaemons=m --maxperip=i
-    --default-domain=domain
-    [--domainlimits --nolastauth]
-    [--proxy=destport]
-    [--legacyserver]
-    [--postmaster=user[@domain]]
-    [--common_name=CN]
-    [--query-cache]
-    [--ssl|--tlsprog|--starttls]
+	--localip=a --maxdaemons=m --maxperip=i
+	--default-domain=domain
+	[--domainlimits --nolastauth]
+	[--proxy=destport]
+	[--legacyserver]
+	[--postmaster=user[@domain]]
+	[--common_name=CN]
+	[--query-cache]
+	[--ssl|--tlsprog|--starttls]
 
   Installs a new POP3 Listner
   Port           - Bind on this port for POP3
@@ -466,11 +466,11 @@ Known values for OPTION are:
                    "@servicedir@/.qmail-smtpd.25 @servicedir@/.qmail-imapd.143"
 
 --inlookup=fifo_path --threads=N
-    --domainlimits
-    [--routes=smtp|qmtp|static]
-    --servicedir=service_path
-    [--cntrldir=cntrl_path]
-    [--password-cache] [--query-cache]
+	--domainlimits
+	[--routes=smtp|qmtp|static]
+	--servicedir=service_path
+	[--cntrldir=cntrl_path]
+	[--password-cache] [--query-cache]
 
   Installs a new Fifo Server
   fifo_path      - Install fifo specified by this path
@@ -484,9 +484,9 @@ Known values for OPTION are:
   routes         - Perform SMTPROUTE / QMTPROUTE / static routing
 
 --pwdlookup=socket_path --threads=N --timeout=t
-    [--mysqlhost=mysqlhost --mysqluser=mysqluser --mysqlpass=mysqlpass]
-    [--mysqlport=port | --mysqlsocket=socket]
-    --servicedir=service_path
+	[--mysqlhost=mysqlhost --mysqluser=mysqluser --mysqlpass=mysqlpass]
+	[--mysqlport=port | --mysqlsocket=socket]
+	--servicedir=service_path
 
   Installs a new Name Service Password Lookup Daemon
   socket_path    - Use socket_path as communication between
@@ -501,10 +501,10 @@ Known values for OPTION are:
   service_path   - Path where supervise scripts will be installed
 
 --indisrvr=Port --mysqlhost=mysqlhost --mysqluser=mysqluser --mysqlpass=mysqlpass
-    --localip=a --maxdaemons=m --maxperip=i
-    --domainlimits
-    --avguserquota=quota --hardquota=quota
-    --base_path=path --servicedir=service_path
+	--localip=a --maxdaemons=m --maxperip=i
+	--domainlimits
+	--avguserquota=quota --hardquota=quota
+	--base_path=path --servicedir=service_path
 
   Installs a new Indi Admin Server
   Port           - TCP/IP port on which to bind
@@ -522,9 +522,9 @@ Known values for OPTION are:
   domainlimits   - Apply Domain Limits configured by vmoddomlimits(1)
 
 --mysql=mysqlport --mysqlPrefix=mysqlPrefix --databasedir=databasedir
-    --config=conf_file --servicedir=service_path
-    [--mysqlsocket=socket]
-    [--default-domain=domain]
+	--config=conf_file --servicedir=service_path
+	[--mysqlsocket=socket]
+	[--default-domain=domain]
 
   Installs a new MySQL Server
   mysqlport      - Install MySQL to listen on this port
@@ -536,17 +536,17 @@ Known values for OPTION are:
   default-domain - default domain name for which this host will handle mails
 
 --fetchmail --qbase=queue_path --qcount=N --qstart=I --servicedir=service_path
-    [--cntrldir=cntrl_path]
-    --default-domain=domain
-    [--silent]
-    [--fsync --syncdir]
-    [--domainlimits]
-    [--memory=b --min-free=M]
-    [--spamfilter=spamfilter_args]
-    [--logfilter=logfifo]
-    [--rejectspam=r --spamexitcode=e]
-    [--qhpsi=q]
-    [--dkverify=dk|dkim|both|none]
+	[--cntrldir=cntrl_path]
+	--default-domain=domain
+	[--silent]
+	[--fsync --syncdir]
+	[--domainlimits]
+	[--memory=b --min-free=M]
+	[--spamfilter=spamfilter_args]
+	[--logfilter=logfifo]
+	[--rejectspam=r --spamexitcode=e]
+	[--qhpsi=q]
+	[--dkverify=dk|dkim|both|none]
 
   Install Fetchmail Server
   queue_path     - Path where the queues are installed. If this is different from
@@ -581,15 +581,15 @@ Known values for OPTION are:
   n            - Scan interval for Virus scanning
 
 --clamd --servicedir=service_path --clamdPrefix=clamdPrefix
-    [--sysconfdir=sysconfdir]
+	[--sysconfdir=sysconfdir]
 
   service_path - Path where supervise scripts will be installed
   clamdPrefix  - Installation Prefix for clamd
   sysconfdir   - Path for config files (clamd.conf, freshclam.conf)
 
 --poppass=Port --localip=a --setpassword=cmd --maxdaemons=m --maxperip=i
-    [--memory=b]
-    [--certfile=certificate --ssl]
+	[--memory=b]
+	[--certfile=certificate --ssl]
   Port           - TCP/IP port on which to bind
   m              - Concurrency of connections to allow
   i              - Concurrency of connections to be allowed from a
@@ -608,17 +608,23 @@ Known values for OPTION are:
   t            - Timeout for reads
   service_path - Path where supervise scripts will be installed
 
+--fifologger=fifo_path --servicedir=service_path
+  fifo_path    - Path to a writeable fifo which can be used by
+                 any application to log messages to qmail-logfifo
+                 service
+  service_path - Path where supervise scripts will be installed
+
 --config=mysql|mysqldb|qmail|users|rmusers|clamd|bogofilter|cert|add-boot|rm-boot|selinux
-    [--postmaster=user[@domain]]
-    [--common_name=CN]
-    [--default-domain=domain]
-    [--mysqlPrefix=mysqlPrefix]
-    [--mysqlhost=mysqlhost --mysqluser=mysqluser --mysqlpass=mysqlpass]
-    [--mysqlport=port | --mysqlsocket=socket]
-    [--databasedir=databasedir]
-    [--use-grant]
-    [--stdout]
-    [--wipe]
+	[--postmaster=user[@domain]]
+	[--common_name=CN]
+	[--default-domain=domain]
+	[--mysqlPrefix=mysqlPrefix]
+	[--mysqlhost=mysqlhost --mysqluser=mysqluser --mysqlpass=mysqlpass]
+	[--mysqlport=port | --mysqlsocket=socket]
+	[--databasedir=databasedir]
+	[--use-grant]
+	[--stdout]
+	[--wipe]
 
   mysql          - Create $sysconfdir/indimail.cnf
   imap           - Create $sysconfdir/imapd
@@ -674,10 +680,10 @@ Known values for OPTION are:
 --repair-tables
 
 --report=all| zddist| zdeferrals| zfailures| zoverall| zrecipients| zrhosts|
-    zrxdelay| zsenders| zsendmail| zsuccesses| zsuids | zsmtp | zspam
-    [--postmaster=user[@domain]]
-    [--attach]
-    [--logdir=multilog_base_dir]
+		zrxdelay| zsenders| zsendmail| zsuccesses| zsuids | zsmtp | zspam
+	[--postmaster=user[@domain]]
+	[--attach]
+	[--logdir=multilog_base_dir]
 
   postmaster - name of the user who will recieve the report.
   attach     - zip and send the report as an attachment
