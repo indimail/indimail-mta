@@ -326,6 +326,7 @@
 %attr(0644,root,root)  @sysconfdir@/etc/leapsecs.txt
 %attr(0644,root,root)  @sysconfdir@/etc/leapsecs.dat
 %attr(0644,root,root)  @sysconfdir@/procmailrc
+%attr(0644,root,root)  @sysconfdir@/indimail-mta-release
 #
 # docs
 #
