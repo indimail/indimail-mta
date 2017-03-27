@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail.spec.in,v 2.378 2017-03-27 10:35:49+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 2.379 2017-03-27 12:14:52+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 %global debug_package %{nil}
@@ -242,7 +242,7 @@ NoSource: 20
 %endif
 
 URL: http://www.indimail.org
-AutoReqProv: No
+AutoReqProv: Yes
 Conflicts: %{name}-mini
 Conflicts: %{name}-mta
 Conflicts: daemontools
