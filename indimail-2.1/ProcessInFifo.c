@@ -1,5 +1,8 @@
 /*
  * $Log: ProcessInFifo.c,v $
+ * Revision 2.42  2017-03-27 08:53:35+05:30  Cprogrammer
+ * added FIFODIR variable for location of infifo
+ *
  * Revision 2.41  2017-03-13 14:05:45+05:30  Cprogrammer
  * replaced qmaildir with sysconfdir
  *
@@ -138,7 +141,7 @@
  */
 
 #ifndef	lint
-static char     sccsid[] = "$Id: ProcessInFifo.c,v 2.41 2017-03-13 14:05:45+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: ProcessInFifo.c,v 2.42 2017-03-27 08:53:35+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #include <fcntl.h>
@@ -236,7 +239,7 @@ ProcessInFifo(int instNum)
 	struct passwd  *pw;
 	FILE           *fp;
 	char            InFifo[MAX_BUFF], pwbuf[MAX_BUFF], host_path[MAX_BUFF], tmpbuf[MAX_BUFF];
-	char           *ptr, *cptr, *sysconfdir, *controldir, *QueryBuf, *email, *myFifo,
+	char           *ptr, *cptr, *sysconfdir, *infifo_dir, *controldir, *QueryBuf, *email, *myFifo,
 				   *remoteip, *infifo, *local_ip, *cntrl_host, *real_domain;
 	void            (*pstat) ();
 	time_t          prev_time = 0l;
@@ -292,18 +295,23 @@ ProcessInFifo(int instNum)
 		break;
 	}
 #endif
-	getEnvConfigStr(&sysconfdir, "SYSCONFDIR", SYSCONFDIR);
 	getEnvConfigStr(&controldir, "CONTROLDIR", CONTROLDIR);
-	relative = *controldir == '/' ? 0 : 1;
+	getEnvConfigStr(&infifo_dir, "FIFODIR", INDIMAILDIR"/inquery");
+	relative = *infifo_dir == '/' ? 0 : 1;
 	getEnvConfigStr(&infifo, "INFIFO", INFIFO);
 	if (*infifo == '/' || *infifo == '.')
 		snprintf(InFifo, MAX_BUFF, "%s", infifo);
 	else {
 		if (relative)
-			snprintf(InFifo, MAX_BUFF, "%s/%s/inquery/%s", sysconfdir, controldir, infifo);
-		else
-			snprintf(InFifo, MAX_BUFF, "%s/inquery/%s", controldir, infifo);
+			snprintf(InFifo, MAX_BUFF, INDIMAILDIR"%s/%s", infifo_dir, infifo);
+		else {
+			if (indimailuid == -1 || indimailgid == -1)
+				GetIndiId(&indimailuid, &indimailgid);
+			r_mkdir(infifo_dir, 0775, indimailuid, indimailgid);
+			snprintf(InFifo, MAX_BUFF, "%s/%s", infifo_dir, infifo);
+		}
 	}
+	getEnvConfigStr(&sysconfdir, "SYSCONFDIR", SYSCONFDIR);
 	getTimeoutValues(&readTimeout, &writeTimeout, sysconfdir, controldir);
 	/*- Open the Fifos */
 	if (FifoCreate(InFifo) == -1)
@@ -654,20 +662,18 @@ static char *
 getFifo_name()
 {
 	static char     inFifo[MAX_BUFF];
-	char           *sysconfdir, *controldir, *infifo;
+	char           *infifo_dir, *infifo;
 
 	getEnvConfigStr(&infifo, "INFIFO", INFIFO);
 	if (*infifo == '/' || *infifo == '.')
 		snprintf(inFifo, MAX_BUFF, "%s", infifo);
 	else
 	{
-		getEnvConfigStr(&controldir, "CONTROLDIR", CONTROLDIR);
-		if (*controldir == '/')
-			snprintf(inFifo, MAX_BUFF, "%s/inquery/%s", controldir, infifo);
-		else {
-			getEnvConfigStr(&sysconfdir, "SYSCONFDIR", SYSCONFDIR);
-			snprintf(inFifo, MAX_BUFF, "%s/%s/inquery/%s", sysconfdir, controldir, infifo);
-		}
+		getEnvConfigStr(&infifo_dir, "FIFODIR", INDIMAILDIR"/inquery");
+		if (*infifo_dir == '/')
+			snprintf(inFifo, MAX_BUFF, "%s/%s", infifo_dir, infifo);
+		else
+			snprintf(inFifo, MAX_BUFF, INDIMAILDIR"%s/%s", infifo_dir, infifo);
 	}
 	return(inFifo);
 }

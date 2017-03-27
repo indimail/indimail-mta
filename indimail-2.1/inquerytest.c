@@ -1,5 +1,8 @@
 /*
  * $Log: inquerytest.c,v $
+ * Revision 2.26  2017-03-27 08:54:04+05:30  Cprogrammer
+ * added FIFODIR variable for location of infifo
+ *
  * Revision 2.25  2017-03-13 14:02:17+05:30  Cprogrammer
  * replaced qmaildir with sysconfdir
  *
@@ -92,7 +95,7 @@
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: inquerytest.c,v 2.25 2017-03-13 14:02:17+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: inquerytest.c,v 2.26 2017-03-27 08:54:04+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 void            print_limits(struct vlimits *);
@@ -119,7 +122,7 @@ main(int argc, char **argv)
 	struct vlimits *lmt;
 #endif
 	void           *dbptr;
-	char           *ptr, *infifo = 0, *sysconfdir, *controldir, *email = 0, *ipaddr = 0;
+	char           *ptr, *infifo = 0, *infifo_dir, *controldir, *email = 0, *ipaddr = 0;
 	char            InFifo[MAX_BUFF], InFifoEnv[MAX_BUFF];
 	int             c, query_type = -1, fd = -1, status;
 	pid_t           pid;
@@ -174,12 +177,15 @@ main(int argc, char **argv)
 			snprintf(InFifo, MAX_BUFF, "%s", infifo);
 		else
 		{
-			getEnvConfigStr(&sysconfdir, "SYSCONFDIR", SYSCONFDIR);
 			getEnvConfigStr(&controldir, "CONTROLDIR", CONTROLDIR);
-			if (*controldir == '/')
-				snprintf(InFifo, MAX_BUFF, "%s/inquery/%s", controldir, infifo);
-			else
-				snprintf(InFifo, MAX_BUFF, "%s/%s/inquery/%s", sysconfdir, controldir, infifo);
+			getEnvConfigStr(&infifo_dir, "FIFODIR", INDIMAILDIR"/inquery");
+			if (*infifo_dir == '/') {
+				if (indimailuid == -1 || indimailgid == -1)
+					GetIndiId(&indimailuid, &indimailgid);
+				r_mkdir(infifo_dir, 0775, indimailuid, indimailgid);
+				snprintf(InFifo, MAX_BUFF, "%s/%s", infifo_dir, infifo);
+			} else
+				snprintf(InFifo, MAX_BUFF, INDIMAILDIR"%s/%s", infifo_dir, infifo);
 		}
 		if (access(InFifo, F_OK) || (fd = open(InFifo, O_WRONLY|O_NONBLOCK)) == -1)
 		{
@@ -215,12 +221,12 @@ main(int argc, char **argv)
 			snprintf(InFifo, MAX_BUFF, "%s", infifo);
 		else
 		{
-			getEnvConfigStr(&sysconfdir, "SYSCONFDIR", SYSCONFDIR);
 			getEnvConfigStr(&controldir, "CONTROLDIR", CONTROLDIR);
+			getEnvConfigStr(&infifo_dir, "FIFODIR", INDIMAILDIR"/inquery");
 			if (*controldir == '/')
-				snprintf(InFifo, MAX_BUFF, "%s/inquery/%s", controldir, infifo);
+				snprintf(InFifo, MAX_BUFF, "%s/%s", infifo_dir, infifo);
 			else
-				snprintf(InFifo, MAX_BUFF, "%s/%s/inquery/%s", sysconfdir, controldir, infifo);
+				snprintf(InFifo, MAX_BUFF, INDIMAILDIR"%s/%s", infifo_dir, infifo);
 		}
 		pid = -1;
 	}

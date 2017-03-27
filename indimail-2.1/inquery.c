@@ -1,5 +1,8 @@
 /*
  * $Log: inquery.c,v $
+ * Revision 2.21  2017-03-27 08:53:59+05:30  Cprogrammer
+ * added FIFODIR variable for location of infifo
+ *
  * Revision 2.20  2017-03-13 14:01:57+05:30  Cprogrammer
  * replaced qmaildir with sysconfdir
  *
@@ -72,7 +75,7 @@
  */
 
 #ifndef	lint
-static char     sccsid[] = "$Id: inquery.c,v 2.20 2017-03-13 14:01:57+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: inquery.c,v 2.21 2017-03-27 08:53:59+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #include <stdlib.h>
@@ -93,7 +96,7 @@ inquery(char query_type, char *email, char *ip)
 	int             rfd, wfd, len1, len2, len3, bytes, idx, readTimeout, writeTimeout, pipe_size, tmperrno, relative;
 	static int      intBuf;
 	char            QueryBuf[MAX_BUFF + sizeof(int)], myFifo[MAX_BUFF], InFifo[MAX_BUFF], TmpBuf[MAX_BUFF];
-	char           *sysconfdir, *controldir, *infifo;
+	char           *sysconfdir, *controldir, *infifo_dir, *infifo;
 	static char    *pwbuf;
 	FILE           *fp;
 	void            (*sig_pipe_save) ();
@@ -143,7 +146,8 @@ inquery(char query_type, char *email, char *ip)
 
 	getEnvConfigStr(&sysconfdir, "SYSCONFDIR", SYSCONFDIR);
 	getEnvConfigStr(&controldir, "CONTROLDIR", CONTROLDIR);
-	relative = *controldir == '/' ? 0 : 1;
+	getEnvConfigStr(&infifo_dir, "FIFODIR", INDIMAILDIR"/inquery");
+	relative = *infifo_dir == '/' ? 0 : 1;
 	getEnvConfigStr(&infifo, "INFIFO", INFIFO);
 	/*- Open the Fifos */
 	if (*infifo == '/' || *infifo == '.') {
@@ -151,9 +155,13 @@ inquery(char query_type, char *email, char *ip)
 		scopy(InFifo, TmpBuf, MAX_BUFF);
 	} else {
 		if (relative)
-			snprintf(TmpBuf, MAX_BUFF, "%s/%s/inquery/%s", sysconfdir, controldir, infifo);
-		else
-			snprintf(TmpBuf, MAX_BUFF, "%s/inquery/%s", controldir, infifo);
+			snprintf(TmpBuf, MAX_BUFF, INDIMAILDIR"%s/%s", infifo_dir, infifo);
+		else {
+			if (indimailuid == -1 || indimailgid == -1)
+				GetIndiId(&indimailuid, &indimailgid);
+			r_mkdir(infifo_dir, 0775, indimailuid, indimailgid);
+			snprintf(TmpBuf, MAX_BUFF, "%s/%s", infifo_dir, infifo);
+		}
 		for (idx = 1;;idx++) {
 			snprintf(InFifo, MAX_BUFF, "%s.%d", TmpBuf, idx);
 			if(access(InFifo, F_OK))
