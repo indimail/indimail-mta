@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail.spec.in,v 2.379 2017-03-27 12:14:52+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 2.380 2017-03-27 18:21:52+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 %global debug_package %{nil}
@@ -1128,6 +1128,7 @@ fi
 %attr(644,root,qmail) %config(noreplace)          %{sysconfdir}/indimail.te
 %attr(644,root,qmail) %config(noreplace)          %{sysconfdir}/indimail.fc
 %attr(444,root,root)  %config(noreplace)          %{sysconfdir}/qmailprog.list
+%attr(444,root,root)  %config(noreplace)          %{sysconfdir}/indimail-release
 %attr(644,root,qmail) %config(noreplace)          %{sysconfdir}/etc/leapsecs.dat
 %attr(644,root,qmail) %config(noreplace)          %{sysconfdir}/etc/leapsecs.txt
 # logalert
@@ -1243,6 +1244,7 @@ fi
 %attr(755,root,qmail)                   %{libexecdir}/testmra
 %attr(755,root,qmail)                   %{libexecdir}/mail_report
 %attr(755,root,qmail)                   %{libexecdir}/copyemail
+%attr(755,root,qmail)                   %{libexecdir}/postupgrade.sh
 
 # qmail binaries
 %attr(755,root,qmail)                   %{_prefix}/bin/qmail-popbull
@@ -2401,18 +2403,18 @@ else
 fi
 
 if [ $argv1 -eq 2 ] ; then # upgrade
-  if [ -f %{shareddir}/boot/rpm.init ] ; then
+  (
+  if [ -f %{libexecdir}/postupgrade.sh ] ; then
 %if %i_m_on_mac == 0
     /sbin/ldconfig
 %endif
-    echo "Running Custom Upgrade Script for post"
-    /bin/sh %{shareddir}/boot/rpm.init upgrade
+    echo "Running Custom Upgrade Script for post upgrade"
+    /bin/sh %{libexecdir}/postupgrade.sh post upgrade @version@ $*
   fi
   echo "doing post upgrade activities"
-  (
   # selinux
   %{_prefix}/sbin/svctool --servicedir=%{servicedir} --config=selinux
-  ) >> /tmp/indimail-install.log 2>&1
+  ) >> /tmp/indimail-setup.log 2>&1
   exit 0
 fi
 
@@ -2873,15 +2875,15 @@ if [ -f ${sysconfdir}/cronlist ] ; then
   /usr/bin/crontab -u root ${sysconfdir}/cronlist
 fi
 
-if [ -f %{shareddir}/boot/rpm.init ] ; then
-  echo "Running Custom Installation Script for post"
-  /bin/sh %{shareddir}/boot/rpm.init post
+if [ -f %{libexecdir}/postupgrade.sh ] ; then
+  echo "Running Custom Installation Script for post install"
+  /bin/sh %{libexecdir}/postupgrade.sh post install @version@ $*
 fi
 
 if [ -x /bin/systemctl ] ; then
   /bin/systemctl enable indimail.service
 fi
-) >> /tmp/indimail-install.log 2>&1
+) >> /tmp/indimail-setup.log 2>&1
 if [ -f %{_sysconfdir}/init/svscan.conf -o -f %{_sysconfdir}/event.d/svscan ] ; then
   echo "1. Issue /sbin/initctl emit qmailstart to start services"
   count=1
@@ -2960,20 +2962,24 @@ then
   sleep 5
 fi
 
-if [ -f %{shareddir}/boot/rpm.init ] ; then
-  echo "Running Custom Un-Installation Script for preun"
-  /bin/sh %{shareddir}/boot/rpm.init preun "$argv1"
-fi
-
 # we are doing upgrade
 if [ $argv1 -eq 1 ] ; then
+  if [ -f %{libexecdir}/postupgrade.sh ] ; then
+    echo "Running Custom Un-Installation Script for preun upgrade"
+    /bin/sh %{libexecdir}/postupgrade.sh preun upgrade @version@ "$argv1"
+  fi
   exit 0
+fi
+
+if [ -f %{libexecdir}/postupgrade.sh ] ; then
+  echo "Running Custom Un-Installation Script for preun pre-uninstall"
+  /bin/sh %{libexecdir}/postupgrade.sh preun uninstall @version@ "$argv1"
 fi
 
 # Remove IndiMail being started on system boot
 echo "removing indimail startup"
 %{_prefix}/sbin/svctool --config=rm-boot
-) > /tmp/indimail-uninstall.log 2>&1
+) >> /tmp/indimail-setup.log 2>&1
 
 ### SCRIPTLET ###############################################################################
 %postun
@@ -2986,10 +2992,11 @@ fi
 # we are doing upgrade
 if [ $argv1 -eq 1 ] ; then
   (
-  if [ -x %{libexecdir}/postupgrade.sh ] ; then
-    /bin/sh %{libexecdir}/postupgrade.sh
+  if [ -f %{libexecdir}/postupgrade.sh ] ; then
+    echo "Running Custom Un-Installation Script for postun upgrade"
+    /bin/sh %{libexecdir}/postupgrade.sh postun upgrade @version@ $*
   fi
-  ) > /tmp/indimail-upgrade.log 2>&1
+  ) >> /tmp/indimail-setup.log
 %if %i_m_on_mac == 0
   echo "recreating ld.so cache"
   /sbin/ldconfig
@@ -3231,11 +3238,11 @@ if [ -x /usr/sbin/selinuxenabled ] ; then
   fi
 fi
 
-if [ -f %{shareddir}/boot/rpm.init ] ; then
-  echo "Running Custom Un-Installation Script for postun"
-  /bin/sh %{shareddir}/boot/rpm.init postun
+if [ -f %{libexecdir}/postupgrade.sh ] ; then
+  echo "Running Custom Un-Installation Script for postun uninstall"
+  /bin/sh %{libexecdir}/postupgrade.sh postun uninstall @version@ $*
 fi
-) >> /tmp/indimail-uninstall.log 2>&1
+) >> /tmp/indimail-setup.log 2>&1
 
 ### SCRIPTLET ###############################################################################
 %posttrans
@@ -3245,9 +3252,11 @@ if [ $ID -ne 0 ] ; then
   echo "You are not root" 1>&2
   exit 1
 fi
-if [ -f %{shareddir}/boot/rpm.init ] ; then
+if [ -f %{libexecdir}/postupgrade.sh ] ; then
+(
   echo "Running Custom Installation Script for posttrans"
-  /bin/sh %{shareddir}/boot/rpm.init posttrans
+  /bin/sh %{libexecdir}/postupgrade.sh posttrans noargs @version@ $*
+) >> /tmp/indimail-setup.log 2>&1
 fi
 echo ""
 
