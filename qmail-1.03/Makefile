@@ -33,7 +33,7 @@ show:
 	echo $(inc_deps);echo ----;echo $(lib_deps)
 
 perm_list: perm_list.in
-	$(edit) $@.in > $@
+	$(edit) $@.in > $@ && cp $@ debian
 
 addresses.0: \
 addresses.5
