@@ -14,7 +14,9 @@ of the query back.
 .PP
 \fBInLookup\fR creates a read FIFO determined by the environment variable INFIFO. If INFIFO is
 not defined, the default FIFO used is INDIMAILDIR/inquery/infifo. \fBInLookup\fR then goes
-into an infinite loop reading this FIFO.
+into an infinite loop reading this FIFO. \fBInLookup\fR also uses FIFODIR to look for INFIFO,
+if INFIFO is not an absolute path.
+
 .PP
 Clients use the API function \fBinquery()\fR to use the InLookup service. The write FIFO is
 generated and created by the client when using the inquery() function. The path of this FIFO is
