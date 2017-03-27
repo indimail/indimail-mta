@@ -535,6 +535,7 @@
 %attr(0644,root,root)          @sysconfdir@/indimail.lic
 %attr(0644,root,root)          @sysconfdir@/nssd.conf
 %attr(0644,root,root)          @sysconfdir@/procmailrc
+%attr(0644,root,root)          @sysconfdir@/indimail-release
 %attr(0644,root,root)          /etc/apparmor.d/local/usr.sbin.mysqld
 
 #
