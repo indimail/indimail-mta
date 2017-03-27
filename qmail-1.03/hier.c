@@ -1,5 +1,8 @@
 /*
  * $Log: hier.c,v $
+ * Revision 1.226  2017-03-27 08:51:20+05:30  Cprogrammer
+ * moved inquery to /var/indimail
+ *
  * Revision 1.225  2017-03-21 15:39:11+05:30  Cprogrammer
  * added certs directory for certificates
  *
@@ -751,12 +754,12 @@ hier(inst_dir, fatal, dev_package)
 	d(auto_qmail_home, "qscanq/root/scanq", auto_uidc, auto_gidc, 0750);
 	d(auto_qmail_home, "alias", auto_uida, auto_gidq, 02775);
 	d(auto_qmail_home, "autoturn", auto_uidv, auto_gidq, 02775);
+#ifdef INDIMAIL
+	d(auto_qmail_home, "inquery", auto_uidv, auto_gidq, 0775);
+#endif
 	d(auto_cntrl_dir,  "control/domainkeys", auto_uidv, auto_gidq, 0775);
 	d(auto_cntrl_dir,  "control/ratelimit", auto_uidr, auto_gidq, 02775);
 	d(auto_cntrl_dir,  "control/defaultqueue", auto_uidv, auto_gidq, 0775);
-#ifdef INDIMAIL
-	d(auto_cntrl_dir,  "control/inquery", auto_uidv, auto_gidq, 0775);
-#endif
 	d(auto_shared,     "boot", auto_uido, auto_gidq, 0555);
 	d(auto_shared,     "doc", auto_uido, auto_gidq, 0555);
 	d(mandir,          "man", uidr, gidr, moder_d);
@@ -1542,7 +1545,7 @@ hier(inst_dir, fatal, dev_package)
 void
 getversion_install_big_c()
 {
-	static char    *x = "$Id: hier.c,v 1.225 2017-03-21 15:39:11+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: hier.c,v 1.226 2017-03-27 08:51:20+05:30 Cprogrammer Exp mbhangui $";
 
 #ifdef INDIMAIL
 	if (x)
