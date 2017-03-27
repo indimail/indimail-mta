@@ -10,6 +10,7 @@ dotforward,
 fastforward,
 mess822,
 daemontools,
+ezmlm-idx mailing list manager,
 ucspi-tcp,
 logalert,
 Courier IMAP/POP3, (you can use any IMAP/POP3 server which supports PAM)
@@ -300,6 +301,7 @@ Some of the features available in this package
     control/tlsservermethod (qmail-remote)
 79. roundcube support for password, autoresponder through roundcube plugin
     iwebadmin
+80. ezmlm-idx mailing list manager from https://untroubled.org/ezmlm/
 
 You can take a detailed look at the feature list at
 
