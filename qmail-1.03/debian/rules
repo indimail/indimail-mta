@@ -26,6 +26,7 @@ mandir=$(prefix)/share/man
 libdkim_version=1.4
 libsrs2_version=1.0.18
 tcpserver_plugin=1
+version=2.1
 bits=$(shell if [ -d /usr/lib64 ] ; then echo 64; else echo 32; fi)
 libdir=$(shell if [ $(bits) -eq 64 ] ; then echo $(prefix)/lib64; else echo $(prefix)/lib;fi)
 cp=/bin/cp
@@ -70,6 +71,14 @@ build-stamp:
 	if [ -d libsrs2-$(libsrs2_version) ] ; then $(MAKE) -s -C libsrs2-$(libsrs2_version) DESTDIR=$(DESTDIR); fi
 	if [ -d qmail-1.03 ]                 ; then $(MAKE) -s -C qmail-1.03 DESTDIR=$(DESTDIR); fi
 	${rm} -rf $(DESTDIR)/$(prefix)/$(libdir)/*.la
+	(
+	echo NAME=indimail-mta
+	echo Description="IndiMail MTA"
+	echo MTA_version=$(version)
+	echo ID=indimail-mta
+	echo HOME_URL="http://www.indimail.org"
+	echo PACKAGE_BUGREPORT='Manvendra Bhangui manvendra@indimail.org'
+	) > indimail-mta-release
 	touch build-stamp
 
 clean:
@@ -126,6 +135,7 @@ install: build
 	if [ -f ../BUILD/debian/usr.bin.freshclam ] ; then \
 		${cp} ../BUILD/debian/usr.bin.freshclam $(DESTDIR)/$(sysconfdir)/apparmor.d/local; \
 	fi
+	install -m 0644 indimail-mta-release "$(DESTDIR)$(sysconfdir)"/indimail-mta-release
 
 binary-indep: build install
 	dh_testdir
