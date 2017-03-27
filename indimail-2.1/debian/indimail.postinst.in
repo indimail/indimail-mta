@@ -347,7 +347,7 @@ do
 				--qhpsi="$qhpsi" \
 				--spamfilter="${prefix}/bin/bogofilter -p -d ${sysconfdir}" \
 				--logfilter=/tmp/logfifo --rejectspam=0 --spamexitcode=0 \
-				--dmasquerade \
+				--dmasquerade --infifo=infifo \
 				--dkverify=$ver_opt \
 				--dksign=$sign_opt --private_key=${sysconfdir}/control/domainkeys/%/$dkimkeyfn \
 				$extra_opt
@@ -361,7 +361,7 @@ do
 				--min-free=52428800 --content-filter --virus-filter \
 				--spamfilter="${prefix}/bin/bogofilter -p -d ${sysconfdir}" \
 				--logfilter=/tmp/logfifo --rejectspam=0 --spamexitcode=0 \
-				--dmasquerade \
+				--dmasquerade --infifo=infifo \
 				--dkverify=both \
 				--dksign=both --private_key=${sysconfdir}/control/domainkeys/%/$dkimkeyfn \
 				$extra_opt
@@ -376,7 +376,7 @@ do
 				--chkrecipient --chkrelay --masquerade \
 				--min-free=52428800 --content-filter \
 				--qhpsi="$qhpsi" \
-				--dmasquerade \
+				--dmasquerade --infifo=infifo \
 				--dkverify=both \
 				--dksign=both --private_key=${sysconfdir}/control/domainkeys/%/$dkimkeyfn \
 				$extra_opt
@@ -388,7 +388,7 @@ do
 				--starttls --fsync --syncdir --memory=$smtp_soft_mem \
 				--chkrecipient --chkrelay --masquerade \
 				--min-free=52428800 --content-filter --virus-filter \
-				--dmasquerade \
+				--dmasquerade --infifo=infifo \
 				--dkverify=both \
 				--dksign=both --private_key=${sysconfdir}/control/domainkeys/%/$dkimkeyfn \
 				$extra_opt
@@ -419,7 +419,7 @@ fi
 # ODMR Service
 #
 ${prefix}/sbin/svctool --smtp=366 --odmr --servicedir=$servicedir \
-	--query-cache --password-cache
+	--infifo="" --query-cache --password-cache
 echo "1" > ${servicedir}/qmail-smtpd.366/variables/DISABLE_PLUGIN
 
 # Greylist daemon
@@ -484,32 +484,32 @@ fi
 if [ $nocourierimap -eq 0 ] ; then
 # IMAP/POP3
 ${prefix}/sbin/svctool --imap=143 --servicedir=$servicedir --localip=0 \
-	--maxdaemons=40 --maxperip=25 \
+	--maxdaemons=40 --maxperip=25 --infifo=infifo \
 	--starttls --default-domain=${default_domain} --memory=$imap_pop3_mem
 ${prefix}/sbin/svctool --imap=993 --servicedir=$servicedir --localip=0 \
-	--maxdaemons=40 --maxperip=25 \
+	--maxdaemons=40 --maxperip=25 --infifo=infifo \
 	--default-domain=${default_domain} --memory=$imap_pop3_mem --ssl
 ${prefix}/sbin/svctool --pop3=110 --servicedir=$servicedir --localip=0 \
-	--maxdaemons=40 --maxperip=25 \
+	--maxdaemons=40 --maxperip=25 --infifo=infifo \
 	--starttls --default-domain=${default_domain} --memory=$imap_pop3_mem
 ${prefix}/sbin/svctool --pop3=995 --servicedir=$servicedir --localip=0 \
-	--maxdaemons=40 --maxperip=25 \
+	--maxdaemons=40 --maxperip=25 --infifo=infifo \
 	--default-domain=${default_domain} --memory=$imap_pop3_mem --ssl
 fi
 if [ $noproxy -eq 0 ] ; then
 ${prefix}/sbin/svctool --imap=4143 --servicedir=$servicedir --localip=0 \
-	--maxdaemons=40 --maxperip=25 \
+	--maxdaemons=40 --maxperip=25 --infifo=infifo \
 	--default-domain=${default_domain} --memory=$imap_pop3_mem --proxy=143 \
 	--starttls
 ${prefix}/sbin/svctool --imap=9143 --servicedir=$servicedir --localip=0 \
-	--maxdaemons=40 --maxperip=25 \
+	--maxdaemons=40 --maxperip=25 --infifo=infifo \
 	--default-domain=${default_domain} --memory=$imap_pop3_mem --proxy=143 --ssl
 ${prefix}/sbin/svctool --pop3=4110 --servicedir=$servicedir --localip=0 \
-	--maxdaemons=40 --maxperip=25 \
+	--maxdaemons=40 --maxperip=25 --infifo=infifo \
 	--default-domain=${default_domain} --memory=$imap_pop3_mem --proxy=110 \
 	--starttls
 ${prefix}/sbin/svctool --pop3=9110 --servicedir=$servicedir --localip=0 \
-	--maxdaemons=40 --maxperip=25 \
+	--maxdaemons=40 --maxperip=25 --infifo=infifo \
 	--default-domain=${default_domain} --memory=$imap_pop3_mem --proxy=110 --ssl
 fi
 

@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail-mta.spec,v 1.77 2017-03-21 15:39:21+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail-mta.spec,v 1.78 2017-03-27 08:51:32+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 %global debug_package %{nil}
@@ -1732,7 +1732,7 @@ do
       --starttls --fsync --syncdir --memory=%{smtp_soft_mem} --chkrecipient --chkrelay --masquerade \
       --min-free=52428800 --content-filter \
       --qhpsi="$qhpsi" \
-      --dmasquerade \
+      --dmasquerade --infifo=infifo \
       --dkverify=both \
       --dksign=both --private_key=%{qsysconfdir}/control/domainkeys/%/%{dkimkeyfn} \
       $extra_opt
@@ -1743,7 +1743,7 @@ do
       --cntrldir=control --localip=0 --maxdaemons=75 --maxperip=25 --persistdb \
       --starttls --fsync --syncdir --memory=%{smtp_soft_mem} --chkrecipient --chkrelay --masquerade \
       --min-free=52428800 --content-filter --virus-filter \
-      --dmasquerade \
+      --dmasquerade --infifo=infifo \
       --dkverify=both \
       --dksign=both --private_key=%{qsysconfdir}/control/domainkeys/%/%{dkimkeyfn} \
       $extra_opt
@@ -1771,7 +1771,7 @@ fi
 
 # ODMR service
 %{_prefix}/sbin/svctool --smtp=366 --odmr --servicedir=%{servicedir} \
-  --query-cache --password-cache --memory=%{smtp_soft_mem}
+  --infifo="" --query-cache --password-cache --memory=%{smtp_soft_mem}
 echo "1" > %{servicedir}/qmail-smtpd.366/variables/DISABLE_PLUGIN
 
 # Greylist daemon

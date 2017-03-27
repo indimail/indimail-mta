@@ -287,7 +287,7 @@ do
 			--chkrecipient --chkrelay --masquerade \
 			--min-free=52428800 --content-filter \
 			--qhpsi="$qhpsi" \
-			--dmasquerade \
+			--dmasquerade --infifo=infifo \
 			--dkverify=both \
 			--dksign=both --private_key=${sysconfdir}/control/domainkeys/%/$dkimkeyfn \
 			$extra_opt
@@ -299,7 +299,7 @@ do
 			--starttls --fsync --syncdir --memory=$smtp_soft_mem \
 			--chkrecipient --chkrelay --masquerade \
 			--min-free=52428800 --content-filter --virus-filter \
-			--dmasquerade \
+			--dmasquerade --infifo=infifo \
 			--dkverify=both \
 			--dksign=both --private_key=${sysconfdir}/control/domainkeys/%/$dkimkeyfn \
 			$extra_opt
@@ -323,7 +323,7 @@ else
 		$extra_opt
 fi
 ${prefix}/sbin/svctool --smtp=366 --odmr --servicedir=$servicedir \
-	--query-cache --password-cache
+	--infifo="" --query-cache --password-cache
 echo "1" > $servicedir/qmail-smtpd.366/variables/DISABLE_PLUGIN
 # Greylist daemon
 ${prefix}/sbin/svctool --greylist=1999 --servicedir=$servicedir --min-resend-min=2 \

@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail.spec.in,v 2.376 2017-03-25 10:49:19+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 2.377 2017-03-27 08:50:01+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 %global debug_package %{nil}
@@ -2618,7 +2618,7 @@ do
         --spamfilter="%{_prefix}/bin/bogofilter -p -d %{sysconfdir}" \
         --logfilter=/tmp/logfifo --rejectspam=0 --spamexitcode=0 \
         --qhpsi="$qhpsi" \
-        --dmasquerade \
+        --dmasquerade --infifo=infifo \
         --dkverify=$ver_opt \
         --dksign=$sign_opt --private_key=%{sysconfdir}/control/domainkeys/%/%{dkimkeyfn} \
         $extra_opt
@@ -2631,7 +2631,7 @@ do
         --min-free=52428800 --content-filter --virus-filter \
         --spamfilter="%{_prefix}/bin/bogofilter -p -d %{sysconfdir}" \
         --logfilter=/tmp/logfifo --rejectspam=0 --spamexitcode=0 \
-        --dmasquerade \
+        --dmasquerade --infifo=infifo \
         --dkverify=both \
         --dksign=both --private_key=%{sysconfdir}/control/domainkeys/%/%{dkimkeyfn} \
         $extra_opt
@@ -2645,7 +2645,7 @@ do
         --starttls --fsync --syncdir --memory=%{smtp_soft_mem} --chkrecipient --chkrelay --masquerade \
         --min-free=52428800 --content-filter \
         --qhpsi="$qhpsi" \
-        --dmasquerade \
+        --dmasquerade --infifo=infifo \
         --dkverify=both \
         --dksign=both --private_key=%{sysconfdir}/control/domainkeys/%/%{dkimkeyfn} \
         $extra_opt
@@ -2656,7 +2656,7 @@ do
         --cntrldir=control --localip=0 --maxdaemons=75 --maxperip=25 --persistdb \
         --starttls --fsync --syncdir --memory=%{smtp_soft_mem} --chkrecipient --chkrelay --masquerade \
         --min-free=52428800 --content-filter --virus-filter \
-        --dmasquerade \
+        --dmasquerade --infifo=infifo \
         --dkverify=both \
         --dksign=both --private_key=%{sysconfdir}/control/domainkeys/%/%{dkimkeyfn} \
         $extra_opt
@@ -2685,7 +2685,7 @@ fi
 # ODMR Service
 #
 %{_prefix}/sbin/svctool --smtp=366 --odmr --servicedir=%{servicedir} \
-  --query-cache --password-cache --memory=%{smtp_soft_mem}
+  --infifo="" --query-cache --password-cache --memory=%{smtp_soft_mem}
 echo "1" > %{servicedir}/qmail-smtpd.366/variables/DISABLE_PLUGIN
 # Greylist daemon
 %{_prefix}/sbin/svctool --greylist=1999 --servicedir=%{servicedir} --min-resend-min=2 \
@@ -2748,30 +2748,30 @@ if [ %nocourierimap -eq 0 ] ; then
 # IMAP/POP3
 %{_prefix}/sbin/svctool --imap=143 --servicedir=%{servicedir} --localip=0 --maxdaemons=40 \
   --maxperip=25 --query-cache --default-domain=%{default_domain} --memory=%{imap_pop3_mem} \
-  --starttls
+  --starttls --infifo=infifo
 %{_prefix}/sbin/svctool --imap=993 --servicedir=%{servicedir} --localip=0 --maxdaemons=40 \
   --maxperip=25 --query-cache --default-domain=%{default_domain} --memory=%{imapspop3_mem} \
-  --ssl
+  --ssl --infifo=infifo
 %{_prefix}/sbin/svctool --pop3=110 --servicedir=%{servicedir} --localip=0 --maxdaemons=40 \
   --maxperip=25 --query-cache --default-domain=%{default_domain} --memory=%{imap_pop3_mem} \
-  --starttls
+  --starttls --infifo=infifo
 %{_prefix}/sbin/svctool --pop3=995 --servicedir=%{servicedir} --localip=0 --maxdaemons=40 \
   --maxperip=25 --query-cache --default-domain=%{default_domain} --memory=%{imapspop3_mem} \
-  --ssl
+  --ssl --infifo=infifo
 fi
 if [ %noproxy -eq 0 ] ; then
 %{_prefix}/sbin/svctool --imap=4143 --servicedir=%{servicedir} --localip=0 --maxdaemons=40 \
   --maxperip=25 --query-cache --default-domain=%{default_domain} --memory=%{imap_pop3_mem} \
-  --proxy=143 --starttls --tlsprog=%{_prefix}/bin/sslerator
+  --proxy=143 --starttls --tlsprog=%{_prefix}/bin/sslerator --infifo=infifo
 %{_prefix}/sbin/svctool --imap=9143 --servicedir=%{servicedir} --localip=0 --maxdaemons=40 \
   --maxperip=25 --query-cache --default-domain=%{default_domain} --memory=%{imapspop3_mem} \
-  --proxy=143 --ssl
+  --proxy=143 --ssl --infifo=infifo
 %{_prefix}/sbin/svctool --pop3=4110 --servicedir=%{servicedir} --localip=0 --maxdaemons=40 \
   --maxperip=25 --query-cache --default-domain=%{default_domain} --memory=%{imap_pop3_mem} \
-  --proxy=110 --starttls --tlsprog=%{_prefix}/bin/sslerator
+  --proxy=110 --starttls --tlsprog=%{_prefix}/bin/sslerator --infifo=infifo
 %{_prefix}/sbin/svctool --pop3=9110 --servicedir=%{servicedir} --localip=0 --maxdaemons=40 \
   --maxperip=25 --query-cache --default-domain=%{default_domain} --memory=%{imapspop3_mem} \
-  --proxy=110 --ssl
+  --proxy=110 --ssl --infifo=infifo
 fi
 
 # IndiMail Daemons
