@@ -35,7 +35,7 @@ iauthdir=@libdir@
 
 SYSCONFDIR = @sysconfdir@
 sysconf_DATA = indimail.settings controlfiles headerlist osh.table cronlist perm_list \
-			   indimail.mrtg.cfg
+			   indimail.mrtg.cfg indimail-release
 pkgconfigdir=@pkgconfigdir@
 pkgconfig_DATA = libindimail.pc
 
@@ -155,7 +155,7 @@ indimailsbin_PROGRAMS = adminclient chowkidar clearopensmtp \
 indimaillibexec_PROGRAMS = sq_vacation qmailmrtg7 execmysql cindimail hashtable displaytop \
 						   indimail_config updatefile mail_report testmra copyemail
 indimaillibexec_SCRIPTS = mailzipper overquota.sh controlsync cputime tls-cert-check get-cert \
-						  myslave bogofilter-qfe
+						  myslave bogofilter-qfe postupgrade.sh
 
 indimailauthlib_PROGRAMS = authindi authpgsql
 
