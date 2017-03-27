@@ -1,25 +1,54 @@
-%{expand: %%{global} _i_am_%{_target_os} %%{nil}}
-# If OS is Linux
-%{?_i_am_linux: %global ezcgidir /var/www/cgi-bin}
-%{?_i_am_linux: %global rcdir /etc/indimail/ezmlm}
-# If OS is not Linux
-%{!?_i_am_linux: %global ezcgidir /usr/local/apache/cgi-bin}
-%{?_i_am_linux: %global rcdir /etc/indimail/ezmlm}
-# endif OS
+%undefine _missing_build_ids_terminate_build
+%define _unpackaged_files_terminate_build 1
+%global debug_package %{nil}
+
+%if %{defined _project}
+# define if building on openSUSE build service
+%define build_on_obs       1
+%else
+%define _project           local
+%define build_on_obs       0
+%global _hardened_build    1
+%endif
+
+%global ezcgidir /var/www/cgi-bin}
+%global rcdir /etc/indimail/ezmlm}
 %global mandir %_prefix/share/man
 %global ezdocdir %_prefix/share/doc/ezmlm-idx
+
 Name: ezmlm-idx
 Version: 7.2.2
 Release: 1
 Summary: Easy Mailing List Manager + IDX patches
 BuildRequires: rpm >= 3.0.2
 Buildroot: %_tmppath/%name-%version-root
-License: GPL
+%if %build_on_obs == 1
+License: GPL-3.0+
+%else
+License: GPLv3
+%endif
 Group: Utilities/System
-Packager: Bruce Guenter <bruce@untroubled.org>
+Packager: Manvendra Bhangui <manvendra@indimail.org>
 BuildRequires: mysql-devel
 BuildRequires: postgresql-devel
 BuildRequires: sqlite-devel
+##################################### OBS ####################################
+%if %build_on_obs == 1
+BuildRequires: libidn-devel
+%if 0%{?rhel_version} == 700
+BuildRequires: groff-doc
+%else
+BuildRequires: groff
+%endif
+
+%if 0%{?suse_version}
+BuildRequires: -post-build-checks  
+#!BuildIgnore: post-build-checks  
+%endif
+##############################################################################
+%else
+BuildRequires: groff
+%endif
 Requires: rpm >= 3.0.2
 Requires: indimail-mta >= 2.0
 Source0: http://ezmlm.org/archive/%{version}/%{name}-%{version}.tar.gz
@@ -89,7 +118,7 @@ Requires: ezmlm-idx
 Conflicts: ezmlm ezmlm-idx-std ezmlm-idx-mysql < 6.0
 
 %description mysql
-MySQL support module for ezmlm-idx
+MySQL support module for ezmlm-idx. Provides sub-mysql.so module
 
 %package pgsql
 Summary: PostgreSQL support module for ezmlm-idx
@@ -98,7 +127,7 @@ Requires: ezmlm-idx
 Conflicts: ezmlm ezmlm-idx-std ezmlm-idx-pgsql < 6.0
 
 %description pgsql
-PostgreSQL support module for ezmlm-idx
+PostgreSQL support module for ezmlm-idx. Provides sub-pgsql.so module
 
 %package sqlite3
 Summary: SQLite3 support module for ezmlm-idx
@@ -107,11 +136,11 @@ Requires: ezmlm-idx
 Conflicts: ezmlm ezmlm-idx-std ezmlm-idx-pgsql < 6.0
 
 %description sqlite3
-SQLite3 support module for ezmlm-idx
+SQLite3 support module for ezmlm-idx. Provides sub-sqlite3.so module
 
 %package cgi
 Prefix: %ezcgidir
-Summary: www archiver for %name
+Summary: Web archiver for %name
 Group: Utilities/System 
 Requires: ezmlm-idx
 
@@ -133,6 +162,17 @@ echo gcc %optflags -I%_includedir/mysql -I%_includedir/pgsql >conf-cc
 echo gcc %optflags -s -L%{_libdir}/mysql >conf-ld
 
 make all
+
+# Create INSTALL file for how to set up ezmlm-cgi
+
+(
+echo "The binary ezmlm-cgi is installed as  %ezcgidir/ezmlm-cgi with"
+echo "permissions 04555."
+echo ""
+echo "Please see INSTALL 16-22) in this package's doc directory and the"
+echo "man page ezmlm-cgi.1 for more details on setting up and using ezmlm-cgi."
+echo ""
+) > INSTALL.cgi
 
 %install
 /bin/rm -rf %buildroot
@@ -158,15 +198,12 @@ find %{buildroot}%{mandir} -type f -exec gzip -q {} \;
 # create file list for man pages
 find %buildroot/%{mandir} -type f | sed -e "s}%buildroot}}" -e "s}$}*}" > man-list
 
-# Create INSTALL file for how to set up ezmlm-cgi
-cat <<EOF > INSTALL.cgi
-The binary ezmlm-cgi is installed as  %ezcgidir/ezmlm-cgi with 
-permissions 04755.
-
-Please see INSTALL 16-22) in this package's doc directory and the
-man page ezmlm-cgi.1 for more details on setting up and using ezmlm-cgi.
-
-EOF
+# copy documents
+for i in BLURB CHANGES FAQ INSTALL README README.mysql README.pgsql README.std \
+	THANKS TODO UPGRADE ChangeLog INSTALL.cgi ezcgirc ezcgi.css
+do
+	install -m 0644 $i %{buildroot}%{ezdocdir}
+done
 
 %post
 echo To create an ezmlmrc file for a language other than US English
@@ -180,14 +217,21 @@ echo file, section 7.
 /bin/rm -rf %buildroot
 
 %files -f man-list
+
 %defattr(-,root,root)
+
 %dir %rcdir
 %config(noreplace) %rcdir/*
+%attr(644,root,root) %ezdocdir/BLURB
+%attr(644,root,root) %ezdocdir/CHANGES* 
+%attr(644,root,root) %ezdocdir/FAQ
+%attr(644,root,root) %ezdocdir/INSTALL
+%attr(644,root,root) %ezdocdir/README*
+%attr(644,root,root) %ezdocdir/THANKS
+%attr(644,root,root) %ezdocdir/TODO
+%attr(644,root,root) %ezdocdir/UPGRADE
+%attr(644,root,root) %ezdocdir/ChangeLog
 
-%docdir %{ezdocdir}
-%doc BLURB CHANGES* FAQ INSTALL README*
-%doc THANKS TODO UPGRADE ChangeLog
-%doc DOWNGRADE ezmlmrc.template
 %_bindir/*
 %_prefix/sbin/*
 %_prefix/lib/indimail/ezmlm/sub-std.so
@@ -195,22 +239,22 @@ echo file, section 7.
 %files cgi
 %defattr(-,root,root)
 %attr(4555,root,root) %ezcgidir/ezmlm-cgi
-%doc INSTALL.cgi ezcgirc ezcgi.css
+%attr(644,root,root)  %ezdocdir/INSTALL.cgi
+%attr(644,root,root)  %ezdocdir/ezcgirc
+%attr(644,root,root)  %ezdocdir/ezcgi.css
 %{mandir}/man1/ezmlm-cgi.1*
 
 %files mysql
 %defattr(-,root,root)
 %_prefix/lib/indimail/ezmlm/sub-mysql.so
 
-%docdir %{ezdocdir}
-%doc %{ezdocdir}/README.mysql
+%attr(644,root,root)  %ezdocdir/README.mysql
 
 %files pgsql
 %defattr(-,root,root)
 %_prefix/lib/indimail/ezmlm/sub-pgsql.so
 
-%docdir %{ezdocdir}
-%doc %{ezdocdir}/README.pgsql
+%attr(644,root,root)  %ezdocdir/README.pgsql
 
 %files sqlite3
 %defattr(-,root,root)
