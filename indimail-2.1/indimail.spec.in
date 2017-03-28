@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail.spec.in,v 2.381 2017-03-27 23:17:52+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 2.382 2017-03-28 19:24:19+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 %global debug_package %{nil}
@@ -48,15 +48,8 @@
 %global noperms            1
 %endif
 %global see_base           For a description of IndiMail visit http://www.indimail.org
-%global i_m_on_mac         0
-%if %i_m_on_mac == 1
-%global nonssd             1
-%global reconfigure_mode   1
-%global noclamav           1
-%else
 %global nonssd             0
 %global noclamav           1
-%endif
 %global noproxy            0
 %global nocourierimap      0
 %global nolibdkim          0
@@ -75,11 +68,7 @@
 %global servicedir         @servicedir@
 %global pam_confdir        /etc/pam.d
 %global dkimkeyfn          default
-%if %i_m_on_mac == 0
 %global pam_module_dir     /%{_lib}/security
-%else
-%global pam_module_dir     /usr/%{_lib}/pam
-%endif
 %global _pkg_config_path   /usr/%{_lib}/pkgconfig
 %global mysqlSocket        /var/run/mysqld/mysqld.sock
 
@@ -186,11 +175,7 @@ Patch2:  http://downloads.sourceforge.net/%{name}/Patches-2.0/ucspi-tcp-%{ucspi_
 
 %if %build_on_obs == 0
 %if %nocourierimap == 0
-%if %i_m_on_mac == 1
-Patch3:  http://downloads.sourceforge.net/%{name}/Patches-1.0/courier-imap-%{courier_version}-1.2.patch.gz
-%else
 Patch3:  http://downloads.sourceforge.net/%{name}/Patches-1.0/courier-imap-%{courier_version}.patch.gz
-%endif
 %endif
 %endif
 
@@ -206,10 +191,6 @@ Patch11: http://downloads.sourceforge.net/%{name}/Patches-1.0/fetchmail-%{fetchm
 
 %if %noclamav == 0
 Patch12: http://downloads.sourceforge.net/%{name}/Patches-1.0/clamav-%{clamav_version}.patch.gz
-%endif
-
-%if %i_m_on_mac == 1
-Patch13: http://downloads.sourceforge.net/%{name}/Patches-1.0/courier-imap-%{courier_version}-1.2.mac_supplement.patch.gz
 %endif
 
 %if 0 != 0
@@ -338,9 +319,7 @@ Requires: coreutils grep /bin/sh glibc openssl
 # rpm --showrc for all macros
 # rpm -qlp some-file.rpm
 %if %build_on_obs == 1
-%if %i_m_on_mac == 0
 Requires: /usr/sbin/useradd /usr/sbin/groupadd /usr/sbin/groupdel
-%endif
 %endif
 Requires: /sbin/chkconfig procps /usr/bin/awk
 
@@ -527,9 +506,6 @@ done
 %if %build_on_obs == 0
 %if %nocourierimap == 0
 %patch3  -p0
-%if %i_m_on_mac == 1
-%patch13  -p0
-%endif
 %endif
 %endif
 
@@ -757,6 +733,8 @@ if [ $ID -eq 0 ] ; then
   if [ $nscd_up -ge 1 ] ; then
     if [ -x %{_sysconfdir}/init.d/nscd ] ; then
       %{_sysconfdir}/init.d/nscd start
+    elif [ -f %{_sysconfdir}/lib/systemd/system/multi-user.target/nscd.service ] ; then
+      /bin/systemctl start nscd.service
     fi
   fi
 fi
@@ -956,7 +934,7 @@ fi
 for i in indimail.cnf tcp.imap tcp.imap.cdb tcp.pop3 tcp.pop3.cdb \
 tcp.smtp tcp.smtp.cdb tcp.qmtp tcp.qmtp.cdb tcp.qmqp tcp.qmqp.cdb \
 tcp.poppass tcp.poppass.cdb procmailrc indimail.pp indimail.mod \
-users/cdb users/assign
+users/cdb users/assign .upgrade.sh
 do
   if [ ! -f %{buildroot}%{sysconfdir}/$i ] ; then
     $TOUCH %{buildroot}%{sysconfdir}/$i
@@ -1042,9 +1020,7 @@ fi
 %endif
 
 %if %nofetchmail == 0
-%if %i_m_on_mac == 0
 %dir %attr(755,root,root)         %{shareddir}/locale
-%endif
 %endif
 
 %dir %attr(775,root,indimail)     %{domaindir}/domains
@@ -1244,7 +1220,8 @@ fi
 %attr(755,root,qmail)                   %{libexecdir}/testmra
 %attr(755,root,qmail)                   %{libexecdir}/mail_report
 %attr(755,root,qmail)                   %{libexecdir}/copyemail
-%attr(755,root,qmail)                   %{libexecdir}/postupgrade.sh
+%attr(755,root,qmail)                   %{libexecdir}/upgrade.sh
+%ghost %attr(0400,root,root)            %{libexecdir}/.upgrade.sh
 
 # qmail binaries
 %attr(755,root,qmail)                   %{_prefix}/bin/qmail-popbull
@@ -1531,9 +1508,7 @@ fi
 %attr(755,root,root)                    %{_prefix}/sbin/sharedindexinstall
 %attr(755,root,root)                    %{_prefix}/sbin/sharedindexsplit
 #
-%if %i_m_on_mac == 0
 %attr(4755,root,root)                   %{libexecdir}/imapmodules/authshadow
-%endif
 %endif
 
 # ucspi-tcp
@@ -1615,10 +1590,6 @@ fi
 %attr(755,root,qmail)                   %{shareddir}/boot/binm2+df
 %attr(444,root,qmail)                   %{shareddir}/boot/upstart
 %attr(444,root,qmail)                   %{shareddir}/boot/systemd
-%if %i_m_on_mac == 1
-%attr(444,root,qmail)                   %{shareddir}/boot/StartupParameters.plist
-%attr(444,root,qmail)                   %{shareddir}/boot/indimail.plist
-%endif
 
 %if %nocourierimap == 0
 %attr(755,root,root)                    %{libexecdir}/pop3d-ssl.rc
@@ -1763,7 +1734,6 @@ fi
 %endif
 
 %if %nofetchmail == 0
-%if %i_m_on_mac == 0
 #%%attr(644,root,root)                    %%{shareddir}/locale/*/LC_MESSAGES/*.mo
 #%%files -f fetchmail.lang
 %lang(eo) /usr/share/indimail/locale/eo/LC_MESSAGES/fetchmail.mo
@@ -1790,7 +1760,6 @@ fi
 %lang(zh) /usr/share/indimail/locale/zh_CN/LC_MESSAGES/fetchmail.mo
 %lang(sk) /usr/share/indimail/locale/sk/LC_MESSAGES/fetchmail.mo
 %lang(ja) /usr/share/indimail/locale/ja/LC_MESSAGES/fetchmail.mo
-%endif
 %attr(644,root,root)                    %{pythondir}/fetchmailconf.pyo
 %attr(755,root,root)                    %{pythondir}/fetchmailconf.py
 %attr(644,root,root)                    %{pythondir}/fetchmailconf.pyc
@@ -1890,38 +1859,20 @@ fi
 %attr(755,root,root)                    /%{pam_module_dir}/pam-multi.so
 
 %if %nolibdkim == 0
-%if %i_m_on_mac == 1
-%{_libdir}/libdkim-%{libdkim_version}.0.dylib
-%else
 %{_libdir}/libdkim-%{libdkim_version}.so.0
 %{_libdir}/libdkim-%{libdkim_version}.so.0.0.0
 %endif
-%endif
 
 %if %nolibsrs2 == 0
-%if %i_m_on_mac == 1
-%{_libdir}/libsrs2-%{libsrs2_version}.0.dylib
-%else
 %{_libdir}/libsrs2-%{libsrs2_version}.so.0
 %{_libdir}/libsrs2-%{libsrs2_version}.so.0.0.0
 %endif
-%endif
 
 %if %nocourierimap == 0
-%if %i_m_on_mac == 1
-%{_libdir}/libunicode.0.dylib
-%else
 %{_libdir}/libunicode.so.1
 %{_libdir}/libunicode.so.1.1.0
 %endif
-%endif
 
-%if %i_m_on_mac == 1
-%{_libdir}/libeps-%{eps_version}.0.dylib
-%{_libdir}/libcdb-%{cdb_version}.0.dylib
-%{_libdir}/libflash-%{flash_version}.0.dylib
-%{_libdir}/libindimail-%{version}.0.dylib
-%else
 %{_libdir}/libeps-%{eps_version}.so.0
 %{_libdir}/libeps-%{eps_version}.so.0.0.0
 %{_libdir}/libcdb-%{cdb_version}.so.0
@@ -1930,7 +1881,6 @@ fi
 %{_libdir}/libflash-%{flash_version}.so.0.0.0
 %{_libdir}/libindimail-%{version}.so.0
 %{_libdir}/libindimail-%{version}.so.0.0.0
-%endif
 
 %if %nonssd == 0
                                         %{_libdir}/libnss_nssd.so.2
@@ -1999,48 +1949,26 @@ fi
 %{_libdir}/libindimail.a
 
 %if %noclamav == 0
-%if %i_m_on_mac == 1
-%{_libdir}/libclam*.dylib
-%else
 %{_libdir}/libclam*.so
-%endif
 %attr(644,root,root)                        %{_pkg_config_path}/libclamav.pc
 %endif
 
 %if %nolibdkim == 0
-%if %i_m_on_mac == 1
-%{_libdir}/libdkim.dylib
-%else
 %{_libdir}/libdkim.so
-%endif
 %endif
 
 %if %nolibsrs2 == 0
-%if %i_m_on_mac == 1
-%{_libdir}/libsrs2.dylib
-%else
 %{_libdir}/libsrs2.so
-%endif
 %endif
 
 %if %nocourierimap == 0
-%if %i_m_on_mac == 1
-%{_libdir}/libunicode.dylib
-%else
 %{_libdir}/libunicode.so
 %endif
-%endif
 
-%if %i_m_on_mac == 1
-%{_libdir}/libcdb.dylib
-%{_libdir}/libflash.dylib
-%{_libdir}/libindimail.dylib
-%else
 %{_libdir}/libeps.so
 %{_libdir}/libcdb.so
 %{_libdir}/libflash.so
 %{_libdir}/libindimail.so
-%endif
 
 %if %nonssd == 0
                                         %{_libdir}/libnss_nssd.so
@@ -2052,41 +1980,24 @@ fi
 %defattr(-, root, root, 0755)
 # Shared libraries (omit for architectures that don't support them)
 %if %noclamav == 0
-%if %i_m_on_mac == 1
-%{_libdir}/libclam*.dylib
-%else
 %{_libdir}/libclam*.so.*
-%endif
 %endif
 
 %if %nolibdkim == 0
-%if %i_m_on_mac == 1
-%{_libdir}/libdkim-%{libdkim_version}.0.dylib
-%else
 %{_libdir}/libdkim-%{libdkim_version}.so.0
 %{_libdir}/libdkim-%{libdkim_version}.so.0.0.0
 %endif
-%endif
 
 %if %nolibsrs2 == 0
-%if %i_m_on_mac == 1
-%{_libdir}/libsrs2-%{libsrs2_version}.0.dylib
-%else
 %{_libdir}/libsrs2-%{libsrs2_version}.so.0
 %{_libdir}/libsrs2-%{libsrs2_version}.so.0.0.0
 %endif
-%endif
 
 %if %nocourierimap == 0
-%if %i_m_on_mac == 1
-%{_libdir}/libunicode.0.dylib
-%else
 %{_libdir}/libunicode.so.1
 %{_libdir}/libunicode.so.1.1.0
 %endif
-%endif
 
-%if %i_m_on_mac == 0
 %{_libdir}/libeps-%{eps_version}.so.0
 %{_libdir}/libeps-%{eps_version}.so.0.0.0
 %{_libdir}/libcdb-%{cdb_version}.so.0
@@ -2095,12 +2006,7 @@ fi
 %{_libdir}/libflash-%{flash_version}.so.0.0.0
 %{_libdir}/libindimail-%{version}.so.0
 %{_libdir}/libindimail-%{version}.so.0.0.0
-%else
-%{_libdir}/libeps-%{eps_version}.0.dylib
-%{_libdir}/libcdb-%{cdb_version}.0.dylib
-%{_libdir}/libflash-%{flash_version}.0.dylib
-%{_libdir}/libindimail-%{version}.0.dylib
-%endif
+
 %if %nonssd == 0
                                         %{_libdir}/libnss_nssd.so.2
 %attr(755,root,root)                    %{_libdir}/libnss_nssd.so.2.0.0
@@ -2270,8 +2176,16 @@ if [ $ID -ne 0 ] ; then
   echo "You are not root" 1>&2
   exit 1
 fi
+# initialize setup log file
+> /tmp/indimail-setup.log
 # we are doing upgrade
 if [ $argv1 -eq 2 ] ; then
+  if [ -f %{libexecdir}/upgrade.sh ] ; then
+	(
+    echo "Running Custom Upgrade Script for pre upgrade"
+    /bin/sh %{libexecdir}/upgrade.sh pre upgrade @version@ $*
+	) >> /tmp/indimail-setup.log 2>&1
+  fi
   exit 0
 fi
 (
@@ -2297,51 +2211,6 @@ case "%host" in
     exit 1
   fi
 esac
-%if %i_m_on_mac == 1
-echo "Adding IndiMail users/groups"
-/usr/bin/dscl . -create /Groups/indimail PrimaryGroupID 555
-/usr/bin/dscl . -create /Groups/nofiles PrimaryGroupID 556
-/usr/bin/dscl . -create /Groups/qmail   PrimaryGroupID 557
-/usr/bin/dscl . -create /Groups/qscand  PrimaryGroupID 558
-
-/usr/bin/dscl . -create /Users/indimail UniqueID 555
-/usr/bin/dscl . -create /Users/indimail home @indimaildir@
-/usr/bin/dscl . -create /Users/indimail PrimaryGroupID 555
-/usr/bin/dscl . -create /Users/indimail UserShell /bin/bash
-/usr/bin/dscl . -create /Users/indimail RealName indimail
-
-/usr/bin/dscl . -create /Users/alias    UniqueID 556
-/usr/bin/dscl . -create /Users/alias    home @indimaildir@/alias
-/usr/bin/dscl . -create /Users/alias    PrimaryGroupID 556
-/usr/bin/dscl . -create /Users/alias    UserShell /bin/bash
-/usr/bin/dscl . -create /Users/alias    RealName alias
-id=557
-for i in qmaild qmaill qmailp
-do
-  /usr/bin/dscl . -create /Users/$i   UniqueID $id
-  /usr/bin/dscl . -create /Users/$i   home @indimaildir@
-  /usr/bin/dscl . -create /Users/$i   PrimaryGroupID 556
-  /usr/bin/dscl . -create /Users/$i   UserShell /bin/bash
-  /usr/bin/dscl . -create /Users/$i   RealName qmaild
-  id=`expr $id + 1`
-done
-id=560
-for i in qmailq qmailr qmails
-do
-  /usr/bin/dscl . -create /Users/$i   UniqueID $id
-  /usr/bin/dscl . -create /Users/$i   home @indimaildir@
-  /usr/bin/dscl . -create /Users/$i   PrimaryGroupID 557
-  /usr/bin/dscl . -create /Users/$i   UserShell /bin/bash
-  /usr/bin/dscl . -create /Users/$i   RealName qmailq
-  id=`expr $id + 1`
-done
-/usr/bin/dscl . -create /Users/qscand UniqueID 563
-/usr/bin/dscl . -create /Users/qscand home @indimaildir@/qscanq
-/usr/bin/dscl . -create /Users/qscand PrimaryGroupID 558
-/usr/bin/dscl . -create /Users/qscand UserShell /bin/false
-/usr/bin/dscl . -create /Users/qscand RealName qscand
-/usr/bin/dscl . -append /Groups/qmail GroupMembership qscand
-%else
 #
 # Create a users and groups. Do not report any problems if they already
 # exists.
@@ -2350,6 +2219,8 @@ nscd_up=`ps -ef |grep nscd |grep -v grep|wc -l`
 if [ $nscd_up -ge 1 ] ; then
   if [ -x %{_sysconfdir}/init.d/nscd ] ; then
     %{_sysconfdir}/init.d/nscd stop
+  elif [ -f %{_sysconfdir}/lib/systemd/system/multi-user.target/nscd.service ] ; then
+    /bin/systemctl start nscd.service
   fi
 fi
 echo "Adding IndiMail users/groups"
@@ -2381,10 +2252,11 @@ done
 if [ $nscd_up -ge 1 ] ; then
   if [ -x %{_sysconfdir}/init.d/nscd ] ; then
     %{_sysconfdir}/init.d/nscd start
+  elif [ -f %{_sysconfdir}/lib/systemd/system/multi-user.target/nscd.service ] ; then
+    /bin/systemctl start nscd.service
   fi
 fi
-%endif
-) > /tmp/indimail-install.log 2>&1
+) >> /tmp/indimail-setup.log 2>&1
 
 ### SCRIPTLET ###############################################################################
 %post
@@ -2404,12 +2276,10 @@ fi
 
 if [ $argv1 -eq 2 ] ; then # upgrade
   (
-  if [ -f %{libexecdir}/postupgrade.sh ] ; then
-%if %i_m_on_mac == 0
+  if [ -f %{libexecdir}/upgrade.sh ] ; then
     /sbin/ldconfig
-%endif
     echo "Running Custom Upgrade Script for post upgrade"
-    /bin/sh %{libexecdir}/postupgrade.sh post upgrade @version@ $*
+    /bin/sh %{libexecdir}/upgrade.sh post upgrade @version@ $*
   fi
   echo "doing post upgrade activities"
   # selinux
@@ -2418,7 +2288,6 @@ if [ $argv1 -eq 2 ] ; then # upgrade
   exit 0
 fi
 
-%if %i_m_on_mac == 0
 # Recreate ld.so links and cache
 if [ -d %{_sysconfdir}/ld.so.conf.d ] ; then
   (
@@ -2431,7 +2300,6 @@ if [ -d %{_sysconfdir}/ld.so.conf.d ] ; then
   ) > %{_sysconfdir}/ld.so.conf.d/indimail-%{_arch}.conf
 fi
 /sbin/ldconfig
-%endif
 
 echo "Doing post installation activities for the following"
 echo ""
@@ -2878,9 +2746,9 @@ if [ -f ${sysconfdir}/cronlist ] ; then
   /usr/bin/crontab -u root ${sysconfdir}/cronlist
 fi
 
-if [ -f %{libexecdir}/postupgrade.sh ] ; then
+if [ -f %{libexecdir}/upgrade.sh ] ; then
   echo "Running Custom Installation Script for post install"
-  /bin/sh %{libexecdir}/postupgrade.sh post install @version@ $*
+  /bin/sh %{libexecdir}/upgrade.sh post install @version@ $*
 fi
 
 if [ -x /bin/systemctl ] ; then
@@ -2894,14 +2762,9 @@ elif [ -f %{_sysconfdir}/systemd/system/multi-user.target.wants/indimail.service
   echo "1. Issue /bin/systemctl start indimail.service to start services"
   count=1
 else
-%if %i_m_on_mac == 0
   echo "1. Issue %{_prefix}/sbin/initsvc -on"
   echo "2. Issue /sbin/init q to start services"
   count=2
-%else
-  echo "1. Issue /bin/launchctl load /System/Library/LaunchDaemons/indimail.plist"
-  count=1
-%endif
 fi
 count=`expr $count + 1`
 echo "$count. Change your default domain in %{sysconfdir}/control/defaultdomain"
@@ -2967,16 +2830,16 @@ fi
 
 # we are doing upgrade
 if [ $argv1 -eq 1 ] ; then
-  if [ -f %{libexecdir}/postupgrade.sh ] ; then
+  if [ -f %{libexecdir}/upgrade.sh ] ; then
     echo "Running Custom Un-Installation Script for preun upgrade"
-    /bin/sh %{libexecdir}/postupgrade.sh preun upgrade @version@ "$argv1"
+    /bin/sh %{libexecdir}/upgrade.sh preun upgrade @version@ "$argv1"
   fi
   exit 0
 fi
 
-if [ -f %{libexecdir}/postupgrade.sh ] ; then
+if [ -f %{libexecdir}/upgrade.sh ] ; then
   echo "Running Custom Un-Installation Script for preun pre-uninstall"
-  /bin/sh %{libexecdir}/postupgrade.sh preun uninstall @version@ "$argv1"
+  /bin/sh %{libexecdir}/upgrade.sh preun uninstall @version@ "$argv1"
 fi
 
 # Remove IndiMail being started on system boot
@@ -2995,15 +2858,13 @@ fi
 # we are doing upgrade
 if [ $argv1 -eq 1 ] ; then
   (
-  if [ -f %{libexecdir}/postupgrade.sh ] ; then
+  if [ -f %{libexecdir}/upgrade.sh ] ; then
     echo "Running Custom Un-Installation Script for postun upgrade"
-    /bin/sh %{libexecdir}/postupgrade.sh postun upgrade @version@ $*
+    /bin/sh %{libexecdir}/upgrade.sh postun upgrade @version@ $*
   fi
   ) >> /tmp/indimail-setup.log
-%if %i_m_on_mac == 0
   echo "recreating ld.so cache"
   /sbin/ldconfig
-%endif
   exit 0
 fi
 
@@ -3013,9 +2874,10 @@ nscd_up=`ps -ef |grep nscd |grep -v grep|wc -l`
 if [ $nscd_up -ge 1 ] ; then
   if [ -x %{_sysconfdir}/init.d/nscd ] ; then
     %{_sysconfdir}/init.d/nscd stop
+  elif [ -f %{_sysconfdir}/lib/systemd/system/multi-user.target/nscd.service ] ; then
+    /bin/systemctl start nscd.service
   fi
 fi
-%if %i_m_on_mac == 0
 for i in alias qmaild qmaill qmailp qmailq qmailr qmails qscand indimail
 do
   echo "removing user $i"
@@ -3029,18 +2891,10 @@ done
 if [ $nscd_up -ge 1 ] ; then
   if [ -x %{_sysconfdir}/init.d/nscd ] ; then
     %{_sysconfdir}/init.d/nscd start
+  elif [ -f %{_sysconfdir}/lib/systemd/system/multi-user.target/nscd.service ] ; then
+    /bin/systemctl start nscd.service
   fi
 fi
-%else
-  for i in indimail qmail nofiles qscand; do
-    echo "removing group $i"
-    dscl . -delete /Groups/$i
-  done
-  for i in indimail alias qmaild qmaill qmailp qmailq qmailr qmails qscand; do
-    echo "removing user $i"
-    dscl . -delete /Users/$i
-  done
-%endif
 
 echo "removing binaries, libraries, libexec, shared dir, modules, queues, man pages"
 if [ %{_prefix} = "/var/indimail" -o %{_prefix} = "/var/qmail" ] ; then
@@ -3228,10 +3082,8 @@ else
   log_dir=%{logdir}
 fi
 [ "$log_dir" != "/" ] && %{__rm} -fr $log_dir
-%if %i_m_on_mac == 0
 echo "recreating ld.so cache"
 /sbin/ldconfig
-%endif
 
 if [ -x /usr/sbin/selinuxenabled ] ; then
   /usr/sbin/selinuxenabled
@@ -3241,9 +3093,9 @@ if [ -x /usr/sbin/selinuxenabled ] ; then
   fi
 fi
 
-if [ -f %{libexecdir}/postupgrade.sh ] ; then
+if [ -f %{libexecdir}/upgrade.sh ] ; then
   echo "Running Custom Un-Installation Script for postun uninstall"
-  /bin/sh %{libexecdir}/postupgrade.sh postun uninstall @version@ $*
+  /bin/sh %{libexecdir}/upgrade.sh postun uninstall @version@ $*
 fi
 ) >> /tmp/indimail-setup.log 2>&1
 
@@ -3255,10 +3107,10 @@ if [ $ID -ne 0 ] ; then
   echo "You are not root" 1>&2
   exit 1
 fi
-if [ -f %{libexecdir}/postupgrade.sh ] ; then
+if [ -f %{libexecdir}/upgrade.sh ] ; then
 (
   echo "Running Custom Installation Script for posttrans"
-  /bin/sh %{libexecdir}/postupgrade.sh posttrans noargs @version@ $*
+  /bin/sh %{libexecdir}/upgrade.sh posttrans noargs @version@ $*
 ) >> /tmp/indimail-setup.log 2>&1
 fi
 echo ""
@@ -3268,9 +3120,7 @@ echo ""
 
 ### SCRIPTLET ###############################################################################
 %post -n libindimail
-%if %i_m_on_mac == 0
 /sbin/ldconfig
-%endif
 
 ### SCRIPTLET ###############################################################################
 %postun -n libindimail
@@ -3286,37 +3136,17 @@ echo "removing shared libraries"
 %endif
 
 %if %nolibdkim == 0
-%if %i_m_on_mac == 1
-%{__rm} -f %{_libdir}/libdkim*.dylib
-%{__rm} -f %{_libdir}/libdkim-%{libdkim_version}.0.dylib
-%else
 %{__rm} -f %{_libdir}/libdkim.so
 %{__rm} -f %{_libdir}/libdkim-%{libdkim_version}.so.0
 %{__rm} -f %{_libdir}/libdkim-%{libdkim_version}.so.0.0.0
 %endif
-%endif
 
 %if %nolibsrs2 == 0
-%if %i_m_on_mac == 1
-%{__rm} -f %{_libdir}/libsrs2*.dylib
-%{__rm} -f %{_libdir}/libsrs2-%{libsrs2_version}.0.dylib
-%else
 %{__rm} -f %{_libdir}/libsrs2.so
 %{__rm} -f %{_libdir}/libsrs2-%{libsrs2_version}.so.0
 %{__rm} -f %{_libdir}/libsrs2-%{libsrs2_version}.so.0.0.0
 %endif
-%endif
 
-%if %i_m_on_mac == 1
-%{__rm} -f %{_libdir}/libeps.dylib
-%{__rm} -f %{_libdir}/libeps-%{eps_version}.0.dylib
-%{__rm} -f %{_libdir}/libcdb.dylib
-%{__rm} -f %{_libdir}/libcdb-%{cdb_version}.0.dylib
-%{__rm} -f %{_libdir}/libflash.dylib
-%{__rm} -f %{_libdir}/libflash-%{flash_version}.0.dylib
-%{__rm} -f %{_libdir}/libindimail.dylib
-%{__rm} -f %{_libdir}/libindimail-%{version}.0.dylib
-%else
 %{__rm} -f %{_libdir}/libeps.so
 %{__rm} -f %{_libdir}/libeps-%{eps_version}.so.0
 %{__rm} -f %{_libdir}/libeps-%{eps_version}.so.0.0.0
@@ -3330,7 +3160,6 @@ echo "removing shared libraries"
 %{__rm} -f %{_libdir}/libindimail-%{version}.so.0
 %{__rm} -f %{_libdir}/libindimail-%{version}.so.0.0.0
 /sbin/ldconfig
-%endif
 
 %postun devel
 argv1=$1
@@ -3369,18 +3198,6 @@ fi
 if [ $argv1 -eq 2 ] ; then
   exit 0
 fi
-%if %i_m_on_mac == 1
-echo "Adding IndiMail users/groups"
-/usr/bin/dscl . -create /Groups/indimail PrimaryGroupID 555
-/usr/bin/dscl . -create /Groups/nofiles PrimaryGroupID 556
-/usr/bin/dscl . -create /Groups/qmail   PrimaryGroupID 557
-
-/usr/bin/dscl . -create /Users/indimail UniqueID 555
-/usr/bin/dscl . -create /Users/indimail home @indimaildir@
-/usr/bin/dscl . -create /Users/indimail PrimaryGroupID 555
-/usr/bin/dscl . -create /Users/indimail UserShell /bin/bash
-/usr/bin/dscl . -create /Users/indimail RealName indimail
-%else
 #
 # Create user/groups indimail. Do not report any problems if it already
 # exists.
@@ -3389,6 +3206,8 @@ nscd_up=`ps -ef |grep nscd |grep -v grep|wc -l`
 if [ $nscd_up -ge 1 ] ; then
   if [ -x %{_sysconfdir}/init.d/nscd ] ; then
     %{_sysconfdir}/init.d/nscd stop
+  elif [ -f %{_sysconfdir}/lib/systemd/system/multi-user.target/nscd.service ] ; then
+    /bin/systemctl start nscd.service
   fi
 fi
 echo "Adding IndiMail users/groups"
@@ -3408,9 +3227,10 @@ fi
 if [ $nscd_up -ge 1 ] ; then
   if [ -x %{_sysconfdir}/init.d/nscd ] ; then
     %{_sysconfdir}/init.d/nscd start
+  elif [ -f %{_sysconfdir}/lib/systemd/system/multi-user.target/nscd.service ] ; then
+    /bin/systemctl start nscd.service
   fi
 fi
-%endif
 
 if [ -f %{_prefix}/sbin/qmail-qmqpc ] ; then
   %{__rm} -f %{_prefix}/sbin/qmail-queue
