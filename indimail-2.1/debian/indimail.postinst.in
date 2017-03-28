@@ -135,10 +135,12 @@ done
 ) > ${sysconfdir}/stat.override
 fi
 
+# indimail.upgrade/indimail.install are created
+# by the preinst script
 if [ -f /tmp/indimail.upgrade ] ; then # upgrade
-	if [ -f ${shareddir}/boot/rpm.init ] ; then
-		echo "Running Custom Upgrade Script"
-		/bin/sh ${shareddir}/boot/rpm.init upgrade
+	if [ -f ${libexecdir}/upgrade.sh ] ; then
+    	echo "Running Custom Upgrade Script for post upgrade"
+    	/bin/sh ${libexecdir}/upgrade.sh post upgrade @version@ $*
 	fi
 	${rm} -f /tmp/indimail.upgrade
 	exit 0
@@ -659,7 +661,11 @@ fi
 #
 # create /tmp/skip-install_tables so that svctool does not run sbin/install_tables
 #
-) >> /tmp/indimail-install.log 2>&1
+if [ -f ${libexecdir}/upgrade.sh ] ; then
+  echo "Running Custom Installation Script for post install"
+  /bin/sh ${libexecdir}/upgrade.sh post install @version@ $*
+fi
+) >> /tmp/indimail-setup.log 2>&1
 
 if [ -f /etc/init/svscan.conf -o -f /etc/event.d/svscan ] ; then
 	echo "1. Issue /sbin/initctl emit qmailstart to start services"
@@ -695,6 +701,6 @@ echo "   command to create cert"
 echo "   ${prefix}/sbin/svctool --config-cert --postmaster=postmaster@yourdomain --common_name=yourdomain"
 fi
 echo
-echo "Check /tmp/indimail-install.log for the detailed installation log!!!"
+echo "Check /tmp/indimail-setup.log for the detailed installation log!!!"
 
 exit 0

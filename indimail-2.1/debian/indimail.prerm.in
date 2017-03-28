@@ -34,6 +34,12 @@ fi
 case "$1" in
     remove|upgrade|deconfigure)
 	(
+	if [ -f ${libexecdir}/upgrade.sh ] ; then
+	(
+		echo "Running Custom Upgrade Script for pre $1"
+		/bin/sh ${libexecdir}/upgrade.sh prerm $1 @version@ $*
+	) >> /tmp/indimail-setup.log 2>&1
+	fi
 	if [ -f ${prefix}/sbin/initsvc ] ; then
 		${prefix}/sbin/initsvc -status || /etc/init.d/indimail stop
 	fi
@@ -66,7 +72,7 @@ case "$1" in
 		/bin/sh ${shareddir}/boot/rpm.init preun
 	fi
 	sleep 5
-	) > /tmp/indimail-uninstall.log 2>&1
+	) >> /tmp/indimail-setup.log 2>&1
     ;;
 
     failed-upgrade)

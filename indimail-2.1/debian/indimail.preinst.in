@@ -28,12 +28,25 @@ echo "Checking for mandatory user/group mysql.."
 
 case "$1" in
     install|upgrade)
+	# create this for the postinst script to figure out if we are
+	# installing or upgrading
 	${rm} -f /tmp/indimail.install /tmp/indimail.upgrade
 	touch /tmp/indimail.$1
+	if [ -f ${libexecdir}/upgrade.sh ] ; then
+	(
+		echo "Running Custom Upgrade Script for pre $1"
+		/bin/sh ${libexecdir}/upgrade.sh pre $1 @version@ $*
+	) >> /tmp/indimail-setup.log 2>&1
+	fi
+	if [ " $1" = " upgrade" ] ; then
+		exit 0
+	fi
 	nscd_up=`ps -ef |grep nscd |grep -v grep|wc -l`
 	if [ $nscd_up -ge 1 ] ; then
 		if [ -x /etc/init.d/nscd ] ; then
 			/etc/init.d/nscd stop
+		elif [ -f /etc/systemd/system/multi-user.target/nscd.service ] ; then
+			systemctl stop nscd.service
 		fi
 	fi
 	#
@@ -70,9 +83,11 @@ case "$1" in
 	if [ $nscd_up -ge 1 ] ; then
 		if [ -x /etc/init.d/nscd ] ; then
 			/etc/init.d/nscd start
+		elif [ -f /etc/systemd/system/multi-user.target/nscd.service ] ; then
+			systemctl stop nscd.service
 		fi
 	fi
-	) > /tmp/indimail-install.log 2>&1
+	) >> /tmp/indimail-setup.log 2>&1
 	;;
 
     abort-upgrade)
