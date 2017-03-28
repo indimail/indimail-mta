@@ -268,6 +268,7 @@
 %attr(0755,root,qmail) /usr/libexec/indimail/zspam
 %attr(0755,root,qmail) /usr/libexec/indimail/zsuccesses
 %attr(0755,root,qmail) /usr/libexec/indimail/zsuids
+%attr(0755,root,qmail) /usr/libexec/indimail/upgrade.sh
 
 %attr(0751,root,qmail) /usr/bin/qmail-getpw
 %attr(0751,root,qmail) /usr/bin/qmail-local
