@@ -364,7 +364,7 @@
 %attr(0755,root,qmail) @libexecdir@/testmra
 %attr(0755,root,qmail) @libexecdir@/mail_report
 %attr(0755,root,qmail) @libexecdir@/copyemail
-%attr(0755,root,qmail) @libexecdir@/postupgrade.sh
+%attr(0755,root,qmail) @libexecdir@/upgrade.sh
 %attr(0755,root,qmail) @libexecdir@/qmail-lagcheck
 
 %attr(0755,root,qmail) @libexecdir@/zsuids
