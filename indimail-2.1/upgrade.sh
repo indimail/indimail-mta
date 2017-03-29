@@ -1,5 +1,8 @@
 #!/bin/sh
 # $Log: upgrade.sh,v $
+# Revision 2.4  2017-03-29 22:37:06+05:30  Cprogrammer
+# added case for pretrans
+#
 # Revision 2.3  2017-03-29 14:49:56+05:30  Cprogrammer
 # fixes for v2.1
 #
@@ -10,7 +13,7 @@
 # generic upgrade script for indimail
 #
 #
-# $Id: upgrade.sh,v 2.3 2017-03-29 14:49:56+05:30 Cprogrammer Exp mbhangui $
+# $Id: upgrade.sh,v 2.4 2017-03-29 22:37:06+05:30 Cprogrammer Exp mbhangui $
 
 do_upgrade()
 {
@@ -62,6 +65,7 @@ do_post()
 do_preun()
 {
 	RPM_VER=`rpm -qf /etc/indimail/indimail-release`
+	echo $RPM_VER > /tmp/indimail-rpm.old
 	echo "RPM Version  $RPM_VER"
 	if [ -f /etc/indimail/indimail-release ] ; then
 		. /etc/indimail/indimail-release
@@ -104,10 +108,28 @@ do_postun()
 	esac
 }
 
+do_prettrans()
+{
+	RPM_VER=`rpm -qf /etc/indimail/indimail-release`
+	echo "RPM Version $RPM_VER"
+	if [ -f /etc/indimail/indimail-release ] ; then
+		. /etc/indimail/indimail-release
+	fi
+	case $1 in
+		noargs)
+		echo do_prettrans noargs
+		do_upgrade prettrans
+		;;
+	esac
+}
+
 do_posttrans()
 {
 	RPM_VER=`rpm -qf /etc/indimail/indimail-release`
-	echo "RPM Version  $RPM_VER"
+	if [ -f /tmp/indimail-rpm.old ] ; then
+		OLD_RPM_VER=`cat /tmp/indimail-rpm.old`
+	fi
+	echo "RPM Version old $OLD_RPM_VER new $RPM_VER"
 	if [ -f /etc/indimail/indimail-release ] ; then
 		. /etc/indimail/indimail-release
 	fi
@@ -132,6 +154,9 @@ case $1 in
 	;;
 	postun)
 	do_postun $2
+	;;
+	prettrans)
+	do_prettrans $2
 	;;
 	posttrans)
 	do_posttrans $2
