@@ -1,6 +1,9 @@
 #!/bin/sh
 # WARNING: This file was auto-generated. Do not edit!
 # $Log: svctool.in,v $
+# Revision 2.313  2017-03-29 14:47:35+05:30  Cprogrammer
+# added qmail-logfifo to installed services
+#
 # Revision 2.312  2017-03-27 23:16:18+05:30  Cprogrammer
 # added new service --fifologger
 #
@@ -27,7 +30,7 @@
 # Initial revision
 #
 #
-# $Id: svctool.in,v 2.312 2017-03-27 23:16:18+05:30 Cprogrammer Exp mbhangui $
+# $Id: svctool.in,v 2.313 2017-03-29 14:47:35+05:30 Cprogrammer Exp mbhangui $
 #
 
 #
@@ -1105,9 +1108,6 @@ fi
 
 echo "Checking mandatory services"
 M_SERVICE=""
-if [ -x "$DESTDIR"$QmailBinPrefix/bin/bogofilter ] ; then
-  M_SERVICE="$M_SERVICE qmail-logfifo"
-fi
 if [ -x "$DESTDIR"$QmailBinPrefix/sbin/clamd -o -x "$DESTDIR"$QmailBinPrefix/bin/freshclam ] ; then
   M_SERVICE="$M_SERVICE clamd freshclam"
 fi
@@ -1122,10 +1122,10 @@ if [ $indimail_installed -eq 1 ] ; then
     qmail-imapd.143 qmail-pop3d.110 qmail-imapd-ssl.993 qmail-pop3d-ssl.995 \
     proxy-imapd.4143 proxy-imapd-ssl.9143 proxy-pop3d.4110 proxy-pop3d-ssl.9110 \
     qmail-send.25 qmail-smtpd.25 qmail-smtpd.366 qmail-smtpd.465 qmail-smtpd.587 \
-	udplogger.3000"
+	qmail-logfifo udplogger.3000"
 else
   LIST="qscanq greylist.1999 qmail-send.25 qmail-smtpd.25 qmail-smtpd.465 \
-	  udplogger.3000 qmail-smtpd.587"
+	  qmail-logfifo udplogger.3000 qmail-smtpd.587"
 fi
 for i in $LIST $M_SERVICE ; do
   echo $i
@@ -1549,7 +1549,7 @@ echo  $fifo_path > $conf_dir/LOGFILTER
 /bin/mkdir -p "$DESTDIR"$SERVICEDIR/qmail-logfifo/log
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.312 2017-03-27 23:16:18+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.313 2017-03-29 14:47:35+05:30 Cprogrammer Exp mbhangui $"
 echo "# $prog_args"
 echo ""
 echo "LOGFILTER=\`cat $SERVICEDIR/qmail-logfifo/variables/LOGFILTER\`"
@@ -1570,7 +1570,7 @@ fi
 #qmail-logfifo log script
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.312 2017-03-27 23:16:18+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.313 2017-03-29 14:47:35+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -1882,7 +1882,7 @@ esac
 echo "$QmailBinPrefix/sbin/vchkpass $QmailBinPrefix/sbin/systpass" > $conf_dir/AUTHMODULES
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.312 2017-03-27 23:16:18+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.313 2017-03-29 14:47:35+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -1945,7 +1945,7 @@ if [ ! -d $LOGDIR ] ; then
 fi
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.312 2017-03-27 23:16:18+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.313 2017-03-29 14:47:35+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -2207,7 +2207,7 @@ else
 fi
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.312 2017-03-27 23:16:18+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.313 2017-03-29 14:47:35+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -2248,7 +2248,7 @@ if [ ! -d $LOGDIR ] ; then
 fi
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.312 2017-03-27 23:16:18+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.313 2017-03-29 14:47:35+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -2303,7 +2303,7 @@ fi
 
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.312 2017-03-27 23:16:18+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.313 2017-03-29 14:47:35+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -2321,7 +2321,7 @@ if [ ! -d $LOGDIR ] ; then
 fi
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.312 2017-03-27 23:16:18+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.313 2017-03-29 14:47:35+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -2390,7 +2390,7 @@ CONTEXT_FILE=$CONTROLDIR/$CONTEXT_FILE
 
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.312 2017-03-27 23:16:18+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.313 2017-03-29 14:47:35+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -2413,7 +2413,7 @@ if [ ! -d $LOGDIR ] ; then
 fi
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.312 2017-03-27 23:16:18+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.313 2017-03-29 14:47:35+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -2443,7 +2443,7 @@ if [ " $servicetag" = " " ] ; then
 else
 	tag=$servicetag
 fi
-if [ " $stype"  " pop3d" ] ; then
+if [ " $stype" = " pop3d" ] ; then
 	cdb_f="pop3"
 elif [ " $stype" = " imapd" ] ; then
 	cdb_f="imap"
@@ -2512,7 +2512,7 @@ else
 fi
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.312 2017-03-27 23:16:18+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.313 2017-03-29 14:47:35+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -2568,7 +2568,7 @@ fi
 # qmail-[imapd|pop3d] log script
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.312 2017-03-27 23:16:18+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.313 2017-03-29 14:47:35+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -2603,7 +2603,7 @@ echo "TCP_FILE=$sysconfdir/tcp.imap"
 echo "OPEN_SMTP_CUR_FILE=$sysconfdir/open-smtp"
 echo "RELAY_TABLE=relay"
 echo "MCDFILE=mcdinfo"
-IMAP_PORT=#1
+IMAP_PORT=$1
 if [ " $IMAP_PORT" = " " ] ; then
 	echo "PORT=143"
 else
@@ -2986,7 +2986,7 @@ fi
 echo 1 > $conf_dir/MYSQL_OPT_RECONNECT
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.312 2017-03-27 23:16:18+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.313 2017-03-29 14:47:35+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -3014,7 +3014,7 @@ fi
 # indisrvr log script
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.312 2017-03-27 23:16:18+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.313 2017-03-29 14:47:35+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -3042,7 +3042,7 @@ conf_dir="$DESTDIR"$SERVICEDIR/qscanq/variables
 # qscanq script
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.312 2017-03-27 23:16:18+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.313 2017-03-29 14:47:35+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -3064,7 +3064,7 @@ fi
 # qscanq log script
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.312 2017-03-27 23:16:18+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.313 2017-03-29 14:47:35+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -3097,7 +3097,7 @@ conf_dir="$DESTDIR"$SERVICEDIR/clamd/variables
 # clamd script
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.312 2017-03-27 23:16:18+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.313 2017-03-29 14:47:35+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -3164,7 +3164,7 @@ fi
 # clamd log script
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.312 2017-03-27 23:16:18+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.313 2017-03-29 14:47:35+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -3181,7 +3181,7 @@ conf_dir="$DESTDIR"$SERVICEDIR/freshclam/variables
 # freshclam script
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.312 2017-03-27 23:16:18+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.313 2017-03-29 14:47:35+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -3229,7 +3229,7 @@ fi
 # freshclam log script
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.312 2017-03-27 23:16:18+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.313 2017-03-29 14:47:35+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -3260,7 +3260,7 @@ conf_dir="$DESTDIR"$SERVICEDIR/pwdlookup/variables
 /bin/chmod 500 $conf_dir
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.312 2017-03-27 23:16:18+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.313 2017-03-29 14:47:35+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -3276,7 +3276,7 @@ fi
 # pwdlookup log script
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.312 2017-03-27 23:16:18+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.313 2017-03-29 14:47:35+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -3386,7 +3386,7 @@ echo "inlookup" > $conf_dir/MYSQL_READ_DEFAULT_GROUP
 echo 1 > $conf_dir/MYSQL_OPT_RECONNECT
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.312 2017-03-27 23:16:18+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.313 2017-03-29 14:47:35+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -3402,7 +3402,7 @@ fi
 # inlookup log script
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.312 2017-03-27 23:16:18+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.313 2017-03-29 14:47:35+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -3462,7 +3462,7 @@ if [ ! -d "$DESTDIR"$databasedir/data -o $force -eq 1 ] ; then
 	fi
 	if ( /bin/mkdir -p "$DESTDIR"$databasedir/data && /bin/mkdir -p "$DESTDIR"$databasedir/logs ) ; then
 		(
-		echo "# \$Id: svctool.in,v 2.312 2017-03-27 23:16:18+05:30 Cprogrammer Exp mbhangui $"
+		echo "# \$Id: svctool.in,v 2.313 2017-03-29 14:47:35+05:30 Cprogrammer Exp mbhangui $"
 		echo "# generated on $host on `date`"
 		echo ""
 		echo "# svctool --config=mysqldb --mysqlPrefix=$mysqlPrefix --databasedir=$databasedir --nolog"
@@ -3593,7 +3593,7 @@ conf_dir="$DESTDIR"$SERVICEDIR/mysql.$port/variables
 /bin/chmod 500 $conf_dir
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.312 2017-03-27 23:16:18+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.313 2017-03-29 14:47:35+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -3690,7 +3690,7 @@ echo "--pid-file=\$PIDFILE 2>&1"
 
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.312 2017-03-27 23:16:18+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.313 2017-03-29 14:47:35+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -3707,7 +3707,7 @@ fi
 # mysql log script
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.312 2017-03-27 23:16:18+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.313 2017-03-29 14:47:35+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -3921,7 +3921,7 @@ fi
 # svscan log script
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.312 2017-03-27 23:16:18+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.313 2017-03-29 14:47:35+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -4048,7 +4048,7 @@ case "$dkverify_option" in
 esac
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.312 2017-03-27 23:16:18+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.313 2017-03-29 14:47:35+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -4070,7 +4070,7 @@ fi
 # fetchmail log script
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.312 2017-03-27 23:16:18+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.313 2017-03-29 14:47:35+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -4143,7 +4143,7 @@ else
 fi
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.312 2017-03-27 23:16:18+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.313 2017-03-29 14:47:35+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -4184,7 +4184,7 @@ fi
 # qmail-poppass log script
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.312 2017-03-27 23:16:18+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.313 2017-03-29 14:47:35+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -4407,7 +4407,7 @@ case "$dksign_option" in
 esac
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.312 2017-03-27 23:16:18+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.313 2017-03-29 14:47:35+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -4424,7 +4424,7 @@ fi
 /bin/mkdir -p "$DESTDIR"$SERVICEDIR/qmail-send."$tag"/log
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.312 2017-03-27 23:16:18+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.313 2017-03-29 14:47:35+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -6380,7 +6380,7 @@ if test $# -eq 0; then
     usage 1
 fi
 
-prog_args="$QmailBinPrefix/bin/svctool"
+prog_args="$QmailBinPrefix/sbin/svctool"
 force=0
 no_multi=0
 silent=0
@@ -6766,7 +6766,7 @@ while test $# -gt 0; do
 	;;
 
 	--version)
-	echo "\$Id: svctool.in,v 2.312 2017-03-27 23:16:18+05:30 Cprogrammer Exp mbhangui $"
+	echo "\$Id: svctool.in,v 2.313 2017-03-29 14:47:35+05:30 Cprogrammer Exp mbhangui $"
 	exit 0
 	;;
 
