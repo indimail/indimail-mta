@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail-mta.spec,v 1.79 2017-03-27 23:18:34+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail-mta.spec,v 1.80 2017-03-29 14:51:46+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 %global debug_package %{nil}
@@ -2101,7 +2101,7 @@ else
     %{__rm} -f %{qsysconfdir}/control/$i
   done
   for i in rsa1024.pem servercert.cnf servercert.pem dh1024.pem \
-  dh512.pem rsa512.pem servercert.rand
+  dh512.pem rsa512.pem servercert.rand clientcert.pem
   do
     %{__rm} -f %{qsysconfdir}/certs/$i
   done
