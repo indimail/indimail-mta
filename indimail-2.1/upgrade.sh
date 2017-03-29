@@ -1,5 +1,8 @@
 #!/bin/sh
 # $Log: upgrade.sh,v $
+# Revision 2.3  2017-03-29 14:49:56+05:30  Cprogrammer
+# fixes for v2.1
+#
 # Revision 2.2  2017-03-28 19:15:10+05:30  Cprogrammer
 # added do_upgrade scriptlet
 #
@@ -7,15 +10,16 @@
 # generic upgrade script for indimail
 #
 #
-# $Id: upgrade.sh,v 2.2 2017-03-28 19:15:10+05:30 Cprogrammer Exp mbhangui $
+# $Id: upgrade.sh,v 2.3 2017-03-29 14:49:56+05:30 Cprogrammer Exp mbhangui $
 
 do_upgrade()
 {
-	if [ -f /usr/libexec/indimail/.upgrade.sh ] ; then
-		sh /usr/libexec/indimail/.upgrade.sh
-		if [ $? -eq 0 ] ; then
-			/bin/rm -f /usr/libexec/indimail/.upgrade.sh
-		fi
+	if [ -f /usr/libexec/indimail/local_upgrade.sh ] ; then
+		echo "Running upgrade script for $1"
+		sh /usr/libexec/indimail/local_upgrade.sh
+		#if [ $? -eq 0 ] ; then
+		#	/bin/rm -f /usr/libexec/indimail/local_upgrade.sh
+		#fi
 	fi
 }
 
@@ -32,6 +36,7 @@ do_pre()
 		;;
 		upgrade)
 		echo do_pre upgrade
+		do_upgrade pre
 		;;
 	esac
 }
@@ -49,6 +54,7 @@ do_post()
 		;;
 		upgrade)
 		echo do_post upgrade
+		do_upgrade post
 		;;
 	esac
 }
@@ -108,11 +114,11 @@ do_posttrans()
 	case $1 in
 		noargs)
 		echo do_posttrans noargs
+		do_upgrade posttrans
 		;;
 	esac
 }
 
-do_upgrade
 version=$3
 case $1 in
 	pre)
@@ -131,9 +137,3 @@ case $1 in
 	do_posttrans $2
 	;;
 esac
-echo $NAME
-echo $DESCRIPTION
-echo $MTA_VERSION
-echo $ID
-echo $HOME_URL
-echo $PACKAGE_BUGREPORT
