@@ -1,5 +1,8 @@
 #!/bin/sh
 # $Log: local_upgrade.sh,v $
+# Revision 2.3  2017-03-29 19:31:59+05:30  Cprogrammer
+# added rsa2048.pem, dh2048.pem
+#
 # Revision 2.2  2017-03-29 14:45:42+05:30  Cprogrammer
 # fixed upgrade for v2.1
 #
@@ -42,7 +45,7 @@ if [ -f /etc/indimail/certs/clientcert.pem ] ; then
 	$rm -f /etc/indimail/certs/clientcert.pem
 fi
 for i in servercert.pem clientcert.pem dh1024.pem dh512.pem \
-	rsa512.pem servercert.pem couriersslcache servercert.cnf \
+	rsa2048.pem dh2048.pem rsa512.pem couriersslcache servercert.cnf \
 	servercert.rand tlshosts notlshosts
 do
 	if [ -f /etc/indimail/control/$i -a ! -L /etc/indimail/control/$i ] ; then
@@ -57,6 +60,12 @@ do
 			exit 1
 		fi
 		$ln -rsf /etc/indimail/certs/$i /etc/indimail/control/$i
+	fi
+done
+for i in servercert.pem dh2048.pem rsa2048.pem dh1024.pem rsa1024.pem dh512.pem rsa512.pem
+do
+	if [ -f /etc/indimail/certs/$i ] ; then
+		$chgrp apache /etc/indimail/certs/$i
 	fi
 done
 $ln -rsf /etc/indimail/certs/servercert.pem /etc/indimail/control/servercert.pem
