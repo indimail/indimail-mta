@@ -247,7 +247,7 @@ if [ " $1" = " purge" ] ; then
 	echo "removing startup services"
 	for i in clamd fetchmail freshclam indisrvr.4000 inlookup.infifo mysql.3306 \
 	pwdlookup qmail-imapd.143 qmail-imapd-ssl.993 qmail-pop3d.110 qmail-pop3d-ssl.995 \
-	qmail-send.25 qmail-smtpd.25 qmail-smtpd.366 qmail-spamlog qscanq qmail-imapd.4143 \
+	qmail-send.25 qmail-smtpd.25 qmail-smtpd.366 qmail-logfifo qscanq qmail-imapd.4143 \
 	qmail-pop3d.4110 qmail-smtpd.465 qmail-smtpd.587 qmail-qmtpd.209 qmail-qmqpd.628 \
 	qmail-poppass.106 greylist.1999 udplogger.3000 .svscan
 	do
