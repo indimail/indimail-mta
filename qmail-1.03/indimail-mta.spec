@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail-mta.spec,v 1.81 2017-03-29 19:13:06+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail-mta.spec,v 1.82 2017-03-29 23:25:35+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 %global debug_package %{nil}
@@ -1852,7 +1852,7 @@ EOF
 %{__chown} qscand:qscand %{qsysconfdir}/control/signatures
 
 # Recreate ld.so links and cache
-if [ ! " %{_libdir}" = " /usr/lib" -a ! " ${_libdir}" = " /usr/lib64" ] ; then
+if [ ! " %{_libdir}" = " /usr/lib" -a ! " %{_libdir}" = " /usr/lib64" ] ; then
 if [ -d %{_sysconfdir}/ld.so.conf.d ] ; then
   (
     echo %{_libdir}
