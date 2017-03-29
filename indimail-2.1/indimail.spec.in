@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail.spec.in,v 2.386 2017-03-29 22:36:51+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 2.387 2017-03-29 23:25:07+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 %global debug_package %{nil}
@@ -566,7 +566,7 @@ fi
   --enable-mysqlbindir=%{mysqlPrefix}/bin --enable-mysqlprefix=%{mysqlPrefix} \
   --libexecdir=%{libexecdir} --mandir=%{mandir} --enable-qmaildir=%{indimaildir} \
   --enable-shareddir=%{shareddir} --datarootdir=%{shareddir} \
-  --enable-modbase=${_prefix}/lib/indimail \
+  --enable-modbase=%{_prefix}/lib/indimail \
   --enable-basepath=@basepath@ --enable-logdir=@logdir@ \
   --enable-tcprules-prog=%{_prefix}/bin/tcprules --enable-tcpserver-file=%{sysconfdir}/tcp.smtp \
   --enable-moduledir=%pam_module_dir `%{__cat} config/indimail.opts`
@@ -2359,7 +2359,7 @@ fi
 if [ -x /usr/bin/uname -o -x /bin/uname ] ; then
   default_domain=`uname -n`
 fi
-echo "Creating default qmail configuraton and catch-all alias (${indimaildir}/alias/Maildir) for all system users"
+echo "Creating default qmail configuraton and catch-all alias (%{indimaildir}/alias/Maildir) for all system users"
 %{_prefix}/sbin/svctool --config=qmail --postmaster=%{indimaildir}/alias/Maildir/ \
   --default-domain=%{default_domain} --mysqlhost=localhost --mysqluser=indimail \
   --mysqlpass=ssh-1.5- --mysqlsocket=%{mysqlSocket}
@@ -2747,9 +2747,9 @@ done
 echo "adding indimail startup"
 %{_prefix}/sbin/svctool --config=add-boot
 
-if [ -f ${sysconfdir}/cronlist ] ; then
+if [ -f %{sysconfdir}/cronlist ] ; then
   echo "adding cron entries"
-  /usr/bin/crontab -u root ${sysconfdir}/cronlist
+  /usr/bin/crontab -u root %{sysconfdir}/cronlist
 fi
 
 if [ -f %{libexecdir}/upgrade.sh ] ; then
