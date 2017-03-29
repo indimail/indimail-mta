@@ -1,0 +1,13 @@
+#%PAM-1.0
+#
+#
+# Copyright 1998-2007 Double Precision, Inc.  See COPYING for
+# distribution information.
+#
+# This is a sample authpam configuration file that uses system-auth
+# (required starting with pam 0.99).
+
+auth       required     pam_nologin.so
+auth       include      system-auth
+account    include      system-auth
+session    include      system-auth

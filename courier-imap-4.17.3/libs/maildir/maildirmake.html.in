@@ -1,0 +1,134 @@
+<?xml version="1.0"?>
+<html xmlns="http://www.w3.org/1999/xhtml"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/><title>maildirmake</title><link rel="stylesheet" type="text/css" href="style.css"/><meta name="generator" content="DocBook XSL Stylesheets V1.78.1"/><link rel="home" href="#idm255213202976" title="maildirmake"/><link xmlns="" rel="stylesheet" type="text/css" href="manpage.css"/><meta xmlns="" name="MSSmartTagsPreventParsing" content="TRUE"/><link xmlns="" rel="icon" href="icon.gif" type="image/gif"/><!--
+
+Copyright 1998 - 2009 Double Precision, Inc.  See COPYING for distribution
+information.
+
+--></head><body><div class="refentry"><a id="idm255213202976" shape="rect"> </a><div class="titlepage"/><div class="refnamediv"><h2>Name</h2><p>maildirmake — create maildirs and maildir folders</p></div><div class="refsynopsisdiv"><h2>Synopsis</h2><div class="cmdsynopsis"><p><code class="command">maildirmake</code>  [options...] {<em class="replaceable"><code>maildir</code></em>}</p></div></div><div class="refsect1"><a id="idm255214899744" shape="rect"> </a><h2>DESCRIPTION</h2><p>
+The <span class="command"><strong>maildirmake</strong></span> command creates maildirs, and
+maildir folders.
+This documentation
+describes the <span class="command"><strong>maildirmake</strong></span> command from the
+<span class="application">Courier</span> mail server,
+which creates an extended form of maildirs that implements
+additional extensions beyond the basic maildir properties that were first
+implemented in the Qmail mail server.</p></div><div class="refsect1"><a id="idm255214896224" shape="rect"> </a><h2>OPTIONS</h2><div class="variablelist"><dl class="variablelist"><dt><span class="term"><code class="literal">-S</code></span></dt><dd>create a "sharable" maildir.  A sharable maildir has
+slightly different permissions which allows creation of publicly-shared
+folders.</dd></dl></div><div class="variablelist"><dl class="variablelist"><dt><span class="term"><code class="literal">-q</code> <em class="replaceable"><code>quota</code></em></span></dt><dd>install a quota on the maildir.
+See
+<a class="ulink" href="maildirquota.html" target="_top" shape="rect"><span class="citerefentry"><span class="refentrytitle">maildirquota</span>(7)</span></a>, below.</dd></dl></div><div class="variablelist"><dl class="variablelist"><dt><span class="term"><code class="literal">-f</code> <em class="replaceable"><code>folder</code></em></span></dt><dd>do not create a maildir, but create a folder in an
+existing maildir.</dd></dl></div><div class="variablelist"><dl class="variablelist"><dt><span class="term"><code class="literal">-F</code> <em class="replaceable"><code>folder</code></em></span></dt><dd>Like the <code class="literal">-f</code> option, except
+	    that the folder's name is given using the system locale's
+	    character set. Non-Latin characters in the folder's name
+	    must be given to the <code class="literal">-f</code> option using IMAP's
+	    modified-UTF7 encoding. The <code class="literal">-F</code> option
+	    takes the folder name specified using the console's character
+	    set..</dd></dl></div><div class="variablelist"><dl class="variablelist"><dt><span class="term"><code class="literal">-s</code> <em class="replaceable"><code>mode</code></em></span></dt><dd>create a publicly accessible folder in an
+existing sharable maildir.  First, use the <code class="option">-S</code> option to
+create a sharable maildir.
+Then, run <span class="command"><strong>maildirmake</strong></span> again with the
+<code class="option">-s</code> option to create
+publicly accessible folders.
+<em class="replaceable"><code>mode</code></em> is a comma-separated list of
+the following keywords: <code class="literal">read</code> - readonly folder, only you can
+write messages to this folder;
+<code class="literal">write</code> - anyone can read and
+write messages to this folder;
+<code class="literal">group</code> - only allow members of
+your own system group to access messages in this folder (instead of
+everyone).</dd></dl></div><div class="variablelist"><dl class="variablelist"><dt><span class="term"><code class="literal">--add</code> <em class="replaceable"><code>name</code></em>=<em class="replaceable"><code>pathname</code></em>,
+<code class="literal">--del</code> <em class="replaceable"><code>name</code></em></span></dt><dd>
+create or delete the directories and links needed to
+access shared folders.  See below for more information.</dd></dl></div><div class="refsect2"><a id="idm255209541904" shape="rect"> </a><h3>FOLDERS</h3><p>
+This <span class="command"><strong>maildirmake</strong></span> command supports enhanced maildirs that
+contain folders.</p><p>
+By itself, <span class="command"><strong>maildirmake</strong></span> makes a new subdirectory
+<em class="replaceable"><code>maildir</code></em>,
+and creates all the necessary structures.
+The <code class="option">-f</code> option
+creates a new "folder" within an existing
+<em class="replaceable"><code>maildir</code></em>. <em class="replaceable"><code>maildir</code></em> must
+already exist, and the <span class="command"><strong>maildirmake</strong></span> command will create a new
+folder in the maildir.</p><p>
+Folders are simply subdirectories inside the main maildir whose names start
+with a period, and which are themselves maildirs.
+For example, the command
+"<span class="command"><strong>maildirmake -f Drafts mail/Maildir</strong></span>" creates
+<code class="filename">mail/Maildir/.Drafts</code>,
+that has the usual <code class="filename">tmp</code>,
+<code class="filename">new</code> and <code class="filename">cur</code>.
+You MUST use the <code class="option">-f</code> option, instead of
+specifying <code class="filename">mail/Maildir/.Drafts</code> directly,
+in order to correctly
+initialize certain enhanced maildir features.</p><p>Folders cannot be created directly within other folders.
+Running
+<span class="command"><strong>maildirmake -f Urgent mail/Maildir/.Drafts</strong></span> will not work.
+Instead, the period character is designated as a hierarchy separator, run
+<span class="command"><strong>maildirmake -f Drafts.Urgent mail/Maildir</strong></span> instead.
+This creates
+<code class="filename">mail/Maildir/.Drafts.Urgent</code>, and all mail software
+that supports
+enhanced maildirs will interpret it as a subfolder Urgent of the Drafts
+folder.</p></div><div class="refsect2"><a id="idm255209528400" shape="rect"> </a><h3>SHARED FOLDERS</h3><p>
+This is another extension to the Maildir format that allows folders to be
+shared between multiple clients.</p><div class="note" style="margin-left: 0.5in; margin-right: 0.5in;"><h3 class="title">Note</h3><p>
+The <span class="application">Courier</span>
+IMAP server implements two types of shared folders:
+filesystem permission-based shared folders,
+as well as virtual shared folders based on IMAP access control lists.
+Use the <span class="command"><strong>maildirmake</strong></span> command
+to implement shared folders based on
+filesystem permissions.
+The
+<a class="ulink" href="maildiracl.html" target="_top" shape="rect"><span class="citerefentry"><span class="refentrytitle">maildiracl</span>(1)</span></a>
+command manages access control lists, which
+are used by virtual shared folders.</p><p>
+See the <span class="application">Courier</span>
+IMAP server documentation for more information.</p></div><p>
+First, you need to create a collection of
+sharable folders, as a separate maildir:</p><div class="blockquote"><blockquote class="blockquote"><div class="informalexample"><div class="literallayout"><p><span class="command"><strong>maildirmake -S /usr/local/share/maildirs/notices</strong></span></p></div></div></blockquote></div><p>
+Then, create individuals folders that will be accessed in shared mode:</p><div class="blockquote"><blockquote class="blockquote"><div class="informalexample"><div class="literallayout"><p><span class="command"><strong>maildirmake -s write -f Weekly /usr/local/share/maildirs/notices</strong></span></p></div></div></blockquote></div><p>In this example, the "Weekly" folder is created,
+with read/write access to everyone.
+Multiple folders can be created in the same maildir, with different access
+permissions. Everyone can create a sharable maildir.  The access privileges
+for individual folders are set by the <code class="option">-s</code> option, and are
+implemented using traditional filesystem permissions.</p><p>Use the <code class="option">--add</code> and
+<code class="option">--del</code> options to add a sharable maildir to
+an existing maildir.  Client software that implements this extension will now
+know where to find sharable folders:</p><div class="blockquote"><blockquote class="blockquote"><div class="informalexample"><div class="literallayout"><p><span class="command"><strong>maildirmake --add notices=/usr/local/share/maildirs/notices $HOME/Maildir</strong></span></p></div></div></blockquote></div><p>
+<code class="filename">$HOME/Maildir</code> is your main maildir.
+The argument to <code class="option">-add</code>
+is <em class="replaceable"><code>nick</code></em>=<em class="replaceable"><code>path</code></em>.
+<em class="replaceable"><code>nick</code></em> is a nickname for this collection of
+sharable folders, and <em class="replaceable"><code>path</code></em> is the location of the
+sharable maildir.
+All folders in the sharable maildir that you have access to -- such
+as "Weekly", in this case, will now be accessible.
+Multiple sharable maildirs can be added, by giving each one a unique
+<em class="replaceable"><code>nick</code></em>.</p><p>
+The <code class="option">--del</code> option "disconnects" the sharable maildir from
+the main maildir.</p></div><div class="refsect2"><a id="idm255211429376" shape="rect"> </a><h3>GLOBAL SHARED FOLDERS</h3><p>
+Normally <code class="option">-add</code> command must be run for every maildir
+which needs
+to access the sharable maildir. Alternatively the file
+<code class="filename">@sysconfdir@/maildirshared</code> can be created,
+to specify a default set of sharable maildirs.
+Each line in this file takes the following format:</p><div class="blockquote"><blockquote class="blockquote"><div class="informalexample"><div class="literallayout"><p><em class="replaceable"><code>nick</code></em><span class="token">&lt;tab&gt;</span><em class="replaceable"><code>path</code></em></p></div></div></blockquote></div><p><em class="replaceable"><code>nick</code></em> is a short nickname for
+the sharable maildir, <span class="token">&lt;tab&gt;</span>
+is a single tab character, <em class="replaceable"><code>path</code></em>
+is the pathname to the sharable maildir.</p></div><div class="refsect2"><a id="idm255209519248" shape="rect"> </a><h3>ACCESSING SHARED FOLDERS</h3><p>
+You may have read or write access to a shared folder.
+If you have write
+access, you can add messages to the shared folder. You can also delete
+messages that you've added.</p><p>Anyone can create a sharable maildir, so if the sharable maildir
+is actually created by you, can can delete any message, not just your
+own.</p></div></div><div class="refsect1"><a id="idm255209517232" shape="rect"> </a><h2>SEE ALSO</h2><p>
+<a class="ulink" href="maildir.html" target="_top" shape="rect"><span class="citerefentry"><span class="refentrytitle">maildir</span>(5)</span></a>,
+<a class="ulink" href="maildiracl.html" target="_top" shape="rect"><span class="citerefentry"><span class="refentrytitle">maildiracl</span>(1)</span></a>,
+<a class="ulink" href="maildirkw.html" target="_top" shape="rect"><span class="citerefentry"><span class="refentrytitle">maildirkw</span>(1)</span></a>,
+<a class="ulink" href="maildrop.html" target="_top" shape="rect"><span class="citerefentry"><span class="refentrytitle">maildrop</span>(1)</span></a>,
+<a class="ulink" href="maildirquota.html" target="_top" shape="rect"><span class="citerefentry"><span class="refentrytitle">maildirquota</span>(7)</span></a>,
+<a class="ulink" href="deliverquota.html" target="_top" shape="rect"><span class="citerefentry"><span class="refentrytitle">deliverquota</span>(8)</span></a>,
+<a class="ulink" href="maildropfilter.html" target="_top" shape="rect"><span class="citerefentry"><span class="refentrytitle">maildropfilter</span>(7)</span></a>,
+<a class="ulink" href="http://www.qmail.org/man/man5/maildir.html" target="_top" shape="rect">http://www.qmail.org/man/man5/maildir.html</a>.
+</p></div></div></body></html>

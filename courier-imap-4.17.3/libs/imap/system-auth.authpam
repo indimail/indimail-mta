@@ -1,0 +1,13 @@
+#%PAM-1.0
+#
+#
+# Copyright 1998-2001 Double Precision, Inc.  See COPYING for
+# distribution information.
+#
+# This is a sample authpam configuration file that uses pam_stack
+# (circa linux-pam 0.72).
+
+auth       required     pam_nologin.so
+auth       required     pam_stack.so service=system-auth
+account    required     pam_stack.so service=system-auth
+session    required     pam_stack.so service=system-auth

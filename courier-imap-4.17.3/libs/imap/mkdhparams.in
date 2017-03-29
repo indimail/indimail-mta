@@ -1,0 +1,67 @@
+#! @SHELL@
+#
+# Copyright 2013-2014 Double Precision, Inc.  See COPYING for
+# distribution information.
+#
+# Run this script monthly to generate DH parameters.
+
+# Override from the environment
+
+if test "@ssllib@" = "openssl"
+then
+	LIBRESSL=0
+
+	@OPENSSL@ version | grep LibreSSL 1>/dev/null
+	if test $? = 0
+	then
+		LIBRESSL=1
+	fi
+fi
+
+if test "$TLS_DHPARAMS" = ""
+then
+	TLS_DHPARAMS="@certsdir@/dhparams.pem"
+fi
+
+if test -f $TLS_DHPARAMS
+then
+    if test "`find $TLS_DHPARAMS -mtime +25 -print `" = ""
+    then
+	# Less than 25 days old
+	exit 0
+    fi
+fi
+
+set -e
+
+umask 077
+cp /dev/null $TLS_DHPARAMS.tmp
+umask 022
+chown @mailuser@ $TLS_DHPARAMS.tmp
+
+BITS="$DH_BITS"
+if test "@ssllib@" = "openssl"
+then
+    if test "$BITS" = ""
+    then
+	BITS=2048
+    fi
+
+    if test "$LIBRESSL" = 0
+    then
+        dd if=@RANDOMV@ of=$TLS_DHPARAMS.rand.tmp count=1 2>/dev/null
+        @OPENSSL@ dhparam -rand $TLS_DHPARAMS.rand.tmp -outform PEM $BITS >$TLS_DHPARAMS.tmp
+        rm -f $TLS_DHPARAMS.rand.tmp
+    else
+        @OPENSSL@ dhparam -outform PEM $BITS >$TLS_DHPARAMS.tmp
+    fi
+    mv -f $TLS_DHPARAMS.tmp $TLS_DHPARAMS
+else
+    if test "$BITS" = ""
+    then
+	BITS=high
+    fi
+
+    @CERTTOOL@ --generate-dh-params --sec-param $BITS >$TLS_DHPARAMS.tmp
+    mv -f $TLS_DHPARAMS.tmp $TLS_DHPARAMS
+fi
