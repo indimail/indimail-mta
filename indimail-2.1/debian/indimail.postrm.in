@@ -168,8 +168,8 @@ if [ " $1" = " purge" ] ; then
 	do
 		${rm} -f ${sysconfdir}/$i
 	done
-	for i in rsa1024.pem servercert.cnf servercert.pem dh1024.pem \
-		dh512.pem rsa512.pem servercert.rand clientcert.pem
+	for i in rsa2048.pem rsa1024.pem servercert.cnf servercert.pem dh1024.pem \
+		dh2048.pem dh512.pem rsa512.pem servercert.rand clientcert.pem
 	do
 		${rm} -f ${sysconfdir}/certs/$i
 	done
