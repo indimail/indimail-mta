@@ -4,6 +4,9 @@
 # Frederik Vermeulen 2004-04-19 GPL
 #
 # $Log: update_tmprsadh.sh,v $
+# Revision 1.5  2017-03-29 19:11:10+05:30  Cprogrammer
+# added rsa2048.pem, dh2048.pem creation
+#
 # Revision 1.4  2017-03-21 10:57:36+05:30  Cprogrammer
 # updated certificate directory to sysconfdir/certs
 #
@@ -58,20 +61,17 @@ slash=`echo $CERTDIR | cut -c1`
 if [ ! " $slash" = " /" ] ; then
 	cd @sysconfdir@
 fi
-/usr/bin/openssl genrsa -out $CERTDIR/rsa512.new 512 &&
-$chmod 600 $CERTDIR/rsa512.new &&
-$chown indimail:indimail $CERTDIR/rsa512.new &&
-mv -f $CERTDIR/rsa512.new $CERTDIR/rsa512.pem
-echo rsa512.pem
+for i in 512 1024 2048
+do
+	/usr/bin/openssl genrsa -out $CERTDIR/rsa"$i".new $i &&
+	$chmod 600 $CERTDIR/rsa"$i".new &&
+	$chown indimail:indimail $CERTDIR/rsa"$i".new &&
+	mv -f $CERTDIR/rsa"$i".new $CERTDIR/rsa"$i".pem
+	echo rsa"$i".pem
 
-/usr/bin/openssl dhparam -2 -out $CERTDIR/dh512.new 512 &&
-$chmod 600 $CERTDIR/dh512.new &&
-$chown indimail:indimail $CERTDIR/dh512.new &&
-mv -f $CERTDIR/dh512.new $CERTDIR/dh512.pem
-echo dh512.pem
-
-/usr/bin/openssl dhparam -2 -out $CERTDIR/dh1024.new 1024 &&
-$chmod 600 $CERTDIR/dh1024.new &&
-$chown indimail:indimail $CERTDIR/dh1024.new &&
-mv -f $CERTDIR/dh1024.new $CERTDIR/dh1024.pem
-echo dh1024.pem
+	/usr/bin/openssl dhparam -2 -out $CERTDIR/dh"$i".new $i &&
+	$chmod 600 $CERTDIR/dh"$i".new &&
+	$chown indimail:indimail $CERTDIR/dh"$i".new &&
+	mv -f $CERTDIR/dh"$i".new $CERTDIR/dh"$i".pem
+	echo dh"$i".pem
+done
