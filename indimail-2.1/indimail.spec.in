@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail.spec.in,v 2.384 2017-03-29 19:14:34+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 2.385 2017-03-29 22:10:59+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 %global debug_package %{nil}
@@ -2971,7 +2971,7 @@ else
     me nodnscheck plusdomain queue_base smtpgreeting \
     chkrcptdomains defaulthost envnoathost filterargs greylist.white \
     hostip timeoutremote timeoutsmtpd tlsserverciphers dnsbllist \
-    doublebounceto doublebouncehost
+    doublebounceto doublebouncehost tlsservermethod
   do
     %{__rm} -f %{sysconfdir}/control/$i
   done
