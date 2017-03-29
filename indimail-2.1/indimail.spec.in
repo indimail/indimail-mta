@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail.spec.in,v 2.382 2017-03-28 19:24:19+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 2.383 2017-03-29 14:49:28+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 %global debug_package %{nil}
@@ -934,7 +934,7 @@ fi
 for i in indimail.cnf tcp.imap tcp.imap.cdb tcp.pop3 tcp.pop3.cdb \
 tcp.smtp tcp.smtp.cdb tcp.qmtp tcp.qmtp.cdb tcp.qmqp tcp.qmqp.cdb \
 tcp.poppass tcp.poppass.cdb procmailrc indimail.pp indimail.mod \
-users/cdb users/assign .upgrade.sh
+users/cdb users/assign
 do
   if [ ! -f %{buildroot}%{sysconfdir}/$i ] ; then
     $TOUCH %{buildroot}%{sysconfdir}/$i
@@ -1221,7 +1221,7 @@ fi
 %attr(755,root,qmail)                   %{libexecdir}/mail_report
 %attr(755,root,qmail)                   %{libexecdir}/copyemail
 %attr(755,root,qmail)                   %{libexecdir}/upgrade.sh
-%ghost %attr(0400,root,root)            %{libexecdir}/.upgrade.sh
+%attr(755,root,root)                    %{libexecdir}/local_upgrade.sh
 
 # qmail binaries
 %attr(755,root,qmail)                   %{_prefix}/bin/qmail-popbull
@@ -1820,7 +1820,6 @@ fi
 %attr(444,root,qmail)                   %{shareddir}/doc/indimail_queue.png
 %attr(444,root,qmail)                   %{shareddir}/doc/FAQ.pdf
 %attr(444,root,qmail)                   %{shareddir}/doc/README
-
 %if %noperms == 0
 %if 0%{?suse_version} >= 1120
 %verify (not user group mode) %attr(4755, root, root)      %{_prefix}/bin/vdeluser
@@ -2181,10 +2180,10 @@ fi
 # we are doing upgrade
 if [ $argv1 -eq 2 ] ; then
   if [ -f %{libexecdir}/upgrade.sh ] ; then
-	(
+  (
     echo "Running Custom Upgrade Script for pre upgrade"
     /bin/sh %{libexecdir}/upgrade.sh pre upgrade @version@ $*
-	) >> /tmp/indimail-setup.log 2>&1
+  ) >> /tmp/indimail-setup.log 2>&1
   fi
   exit 0
 fi
@@ -2976,7 +2975,7 @@ else
     %{__rm} -f %{sysconfdir}/control/$i
   done
   for i in rsa1024.pem servercert.cnf servercert.pem dh1024.pem \
-  dh512.pem rsa512.pem servercert.rand
+  dh512.pem rsa512.pem servercert.rand clientcert.pem
   do
     %{__rm} -f %{sysconfdir}/certs/$i
   done
@@ -3051,7 +3050,7 @@ fi
 
 for i in fetchmail indisrvr.4000 inlookup.infifo mysql.3306 \
 pwdlookup qmail-imapd.143 qmail-imapd-ssl.993 qmail-pop3d.110 qmail-pop3d-ssl.995 \
-qmail-send.25 qmail-smtpd.25 qmail-smtpd.366 qmail-spamlog qscanq qmail-imapd.4143 \
+qmail-send.25 qmail-smtpd.25 qmail-smtpd.366 qmail-logfifo qscanq qmail-imapd.4143 \
 qmail-pop3d.4110 qmail-smtpd.465 qmail-smtpd.587 qmail-qmtpd.209 qmail-qmqpd.628 \
 qmail-poppass.106 greylist.1999 udplogger.3000 .svscan
 do
