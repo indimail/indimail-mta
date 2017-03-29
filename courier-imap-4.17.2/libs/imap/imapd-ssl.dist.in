@@ -182,17 +182,7 @@ COURIERTLS=@bindir@/couriertls
 #
 # It takes the same values for OpenSSL as TLS_PROTOCOL
 
-##NAME: TLS_CIPHER_LIST:0
-#
-# TLS_CIPHER_LIST optionally sets the list of ciphers to be used by the
-# OpenSSL library.  In most situations you can leave TLS_CIPHER_LIST
-# undefined
-#
-# OpenSSL:
-#
-# TLS_CIPHER_LIST="TLSv1:HIGH:!LOW:!MEDIUM:!EXP:!NULL:!aNULL@STRENGTH"
-#
-#
+TLS_STARTTLS_PROTOCOL="$TLS_PROTOCOL"
 
 ##NAME: TLS_MIN_DH_BITS:0
 #
