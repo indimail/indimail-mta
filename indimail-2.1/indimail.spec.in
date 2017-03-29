@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail.spec.in,v 2.385 2017-03-29 22:10:59+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 2.386 2017-03-29 22:36:51+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 %global debug_package %{nil}
@@ -2167,6 +2167,12 @@ if [ -d %{_prefix} -a -d /service ] ; then
   fi
   sleep 5
 fi
+if [ -f %{libexecdir}/upgrade.sh ] ; then
+(
+  echo "Running Custom Installation Script for pretrans"
+  /bin/sh %{libexecdir}/upgrade.sh pretrans noargs @version@ $*
+) >> /tmp/indimail-setup.log 2>&1
+fi
 
 ### SCRIPTLET ###############################################################################
 %pre
@@ -2784,7 +2790,7 @@ echo "$count. You need to create CERTS for STARTTLS / SSL enabled IMAP/POP3."
 echo "$count. You need to create CERTS for STARTTLS."
 %endif
 echo "   Run the following command to create Certificate for TLS/SSL"
-echo "   %{_prefix}/sbin/svctool --config-cert --postmaster=postmaster@yourdomain --common_name=yourdomain"
+echo "   %{_prefix}/sbin/svctool --config=cert --postmaster=postmaster@yourdomain --common_name=yourdomain"
 fi
 
 echo
@@ -3113,7 +3119,6 @@ if [ -f %{libexecdir}/upgrade.sh ] ; then
   /bin/sh %{libexecdir}/upgrade.sh posttrans noargs @version@ $*
 ) >> /tmp/indimail-setup.log 2>&1
 fi
-echo ""
 
 ### SCRIPTLET ###############################################################################
 %pre -n libindimail
