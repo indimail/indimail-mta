@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail.spec.in,v 2.383 2017-03-29 14:49:28+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 2.384 2017-03-29 19:14:34+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 %global debug_package %{nil}
@@ -25,7 +25,7 @@
 %global mandir             @mandir@
 %global shareddir          @shareddir@
 %global default_domain     @defaultdomain@
-%global courier_version    4.17.2
+%global courier_version    4.17.3
 %global bogofilter_version 1.2.4
 %global pam_multi_version  1.1
 %global ucspi_version      0.88
@@ -45,7 +45,7 @@
 %if 0%{?suse_version}
 %global noperms            1
 %else
-%global noperms            1
+%global noperms            0
 %endif
 %global see_base           For a description of IndiMail visit http://www.indimail.org
 %global nonssd             0
@@ -950,8 +950,8 @@ do
   $TOUCH %{buildroot}%{sysconfdir}/control/$i
 done
 
-for i in rsa512.pem rsa1024.pem dh512.pem dh1024.pem \
-servercert.rand servercert.cnf servercert.pem
+for i in rsa512.pem rsa1024.pem rsa2048.pem dh512.pem dh1024.pem \
+dh2048.pem servercert.rand servercert.cnf servercert.pem
 do
   echo "%ghost %config(noreplace,missingok)   %{sysconfdir}/certs/$i"
   $TOUCH %{buildroot}%{sysconfdir}/certs/$i
@@ -1222,6 +1222,7 @@ fi
 %attr(755,root,qmail)                   %{libexecdir}/copyemail
 %attr(755,root,qmail)                   %{libexecdir}/upgrade.sh
 %attr(755,root,root)                    %{libexecdir}/local_upgrade.sh
+%verify (not md5 size mtime mode)       %{libexecdir}/local_upgrade.sh
 
 # qmail binaries
 %attr(755,root,qmail)                   %{_prefix}/bin/qmail-popbull
@@ -2974,8 +2975,8 @@ else
   do
     %{__rm} -f %{sysconfdir}/control/$i
   done
-  for i in rsa1024.pem servercert.cnf servercert.pem dh1024.pem \
-  dh512.pem rsa512.pem servercert.rand clientcert.pem
+  for i in rsa2048.pem rsa1024.pem servercert.cnf servercert.pem dh1024.pem \
+  dh2048.pem dh512.pem rsa512.pem servercert.rand clientcert.pem
   do
     %{__rm} -f %{sysconfdir}/certs/$i
   done
