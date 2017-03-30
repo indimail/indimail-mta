@@ -5,7 +5,7 @@ args=$*
 while getopts vVnq:c:P:e:D:l: opt
 do
 	case $opt in
-		V) echo $Id: vmoduser_handle.in,v 2.1 2017-03-31 00:43:44+05:30 Cprogrammer Exp mbhangui $;;
+		V) echo $Id: vmoduser_handle.in,v 2.2 2017-03-31 02:40:34+05:30 Cprogrammer Exp mbhangui $;;
 		v) verbose=1;;
 		n) toggle=1;;
 		q) quota="$OPTARG";;
@@ -22,5 +22,5 @@ fi
 shift $((OPTIND-1))
 # now do something with $@
 if [ $verbose -ne 0 ] ; then
-@prefix@/bin/vuserinfo $@
+	@prefix@/bin/vuserinfo $@
 fi
