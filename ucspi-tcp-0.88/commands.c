@@ -13,7 +13,7 @@
 static stralloc cmd = { 0 };
 
 int
-commands(buffer * ss, struct commands *c)
+commands(buffer *ss, struct commands *c)
 {
 	int             i;
 	char           *arg;
