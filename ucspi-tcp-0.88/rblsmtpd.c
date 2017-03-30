@@ -1,5 +1,8 @@
 /*
  * $Log: rblsmtpd.c,v $
+ * Revision 1.16  2017-03-30 22:59:08+05:30  Cprogrammer
+ * prefix rbl with ip6_scan(), dns_txt(), smtp_mail(), smtp_rcpt(), smtpcommands - avoid duplicate symb in rblsmtpd.so with qmail_smtpd.so
+ *
  * Revision 1.15  2017-03-01 22:52:13+05:30  Cprogrammer
  * reset optind as it gets called in tcpserver and rblsmtpd.so might be loaded as shared object
  *
@@ -73,7 +76,7 @@
 #define FATAL "rblsmtpd: fatal: "
 
 #ifndef	lint
-static char     sccsid[] = "$Id: rblsmtpd.c,v 1.15 2017-03-01 22:52:13+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: rblsmtpd.c,v 1.16 2017-03-30 22:59:08+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 void
@@ -146,7 +149,7 @@ ip_init(void)
 			flagip6 = 1;
 	}
 	if (flagip6) {
-		if ((ip6_scan(ip_env, (char *) remoteip)) == 0)
+		if ((rblip6_scan(ip_env, (char *) remoteip)) == 0)
 			return;
 		for (j = 16; j > 0; j--) {
 			hexval = tohex(remoteip[j - 1] & 15);
@@ -263,7 +266,7 @@ rbl(char *base)
 		}
 	} else
 	{
-		if (dns_txt(&text, &tmp) == -1)
+		if (rbl_dns_txt(&text, &tmp) == -1)
 		{
 			flagmustnotbounce = 1;
 			if (flagfailclosed)
@@ -436,7 +439,7 @@ addrparse(char *arg)
 }
 
 void
-smtp_mail(char *arg)
+rblsmtp_mail(char *arg)
 {
 	rbl_out(1, 0);
 	if (!addrparse(arg))
@@ -452,7 +455,7 @@ smtp_mail(char *arg)
 }
 
 void
-smtp_rcpt(char *arg)
+rblsmtp_rcpt(char *arg)
 {
 	rbl_out(1, 0);
 	if (!addrparse(arg))
@@ -486,12 +489,12 @@ drop()
 	_exit(0);
 }
 
-struct commands smtpcommands[] = {
+struct commands rbl_smtpcommands[] = {
 	{"quit", quit, 0},
 	{"helo", accept, 0},
 	{"ehlo", accept, 0},
-	{"mail", smtp_mail, 0},
-	{"rcpt", smtp_rcpt, 0},
+	{"mail", rblsmtp_mail, 0},
+	{"rcpt", rblsmtp_rcpt, 0},
 	{"rset", accept, 0},
 	{"vrfy", verify, 0},
 	{"noop", accept, 0},
@@ -531,7 +534,7 @@ rblsmtpd_f(void)
 		sig_catch(sig_alarm, drop);
 		alarm(timeout);
 		greet();
-		commands(&in, smtpcommands);
+		commands(&in, rbl_smtpcommands);
 	}
 	rbl_out(1, ": Session terminated: quitting\n");
 	_exit(0);
