@@ -1,0 +1,10 @@
+#!/bin/sh
+#
+# $Log: vpasswd_handle.in,v $
+# Revision 2.1  2017-03-30 23:28:17+05:30  Cprogrammer
+# added vpasswd handle script
+#
+#
+# $Id: vpasswd_handle.in,v 2.1 2017-03-30 23:28:17+05:30 Cprogrammer Exp mbhangui $
+/usr/bin/svc -h /service/inlookup.infifo
+exec @prefix@/bin/vuserinfo $1

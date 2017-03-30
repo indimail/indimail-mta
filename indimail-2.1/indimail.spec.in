@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail.spec.in,v 2.387 2017-03-29 23:25:07+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 2.388 2017-03-30 23:28:02+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 %global debug_package %{nil}
@@ -1221,7 +1221,6 @@ fi
 %attr(755,root,qmail)                   %{libexecdir}/mail_report
 %attr(755,root,qmail)                   %{libexecdir}/copyemail
 %attr(755,root,qmail)                   %{libexecdir}/upgrade.sh
-%attr(755,root,root)                    %{libexecdir}/local_upgrade.sh
 %verify (not md5 size mtime mode)       %{libexecdir}/local_upgrade.sh
 
 # qmail binaries
@@ -1488,6 +1487,7 @@ fi
 %attr(755,root,qmail)                   %{_prefix}/bin/vproxy
 %attr(755,root,qmail)                   %{libexecdir}/vadddomain
 %attr(755,root,qmail)                   %{libexecdir}/vaddaliasdomain
+%attr(755,root,qmail)                   %{libexecdir}/vpasswd
 %attr(755,root,qmail)                   %{libexecdir}/vrenamedomain
 %attr(755,root,qmail)                   %{libexecdir}/vdeldomain
 %attr(755,root,qmail)                   %{libexecdir}/vadduser

@@ -168,7 +168,7 @@ indimailsbin_SCRIPTS = svctool
 noinst_SCRIPTS = indimail.spec indimail-@VERSION@-rpmlintrc \
 	INSTALL INSTALL-RPM INSTALL-MYSQL README-CLUSTER RELEASE-Notes Quick-INSTALL \
 	README INSTALL-MINI vadddomain_handle vadduser_handle vdeldomain_handle \
-	vaddaliasdomain_handle vrenamedomain_handle
+	vaddaliasdomain_handle vrenamedomain_handle vpasswd_handle
 
 post_handle_list = vadddomain vadduser vdeldomain vaddaliasdomain vrenamedomain
 
@@ -179,7 +179,7 @@ indimail-@VERSION@-rpmlintrc tls-cert-check mailzipper \
 perm_list dbinfo.8 inlookup.8 vadddomain.1 vdeldomain.1 vadduser.1 \
 vdeluser.1 vdelivermail.8 vrenamedomain.1 vrenameuser.1 vpasswd.1 vmoveuser.1 \
 vcfilter.1 indimail.7 svctool.8 indisub.c indimail.mrtg.cfg overquota.sh \
-vadddomain_handle vadduser_handle vdeldomain_handle vaddaliasdomain_handle \
+vadddomain_handle vadduser_handle vpasswd_handle vdeldomain_handle vaddaliasdomain_handle \
 vrenamedomain_handle login_tasks.3 authgeneric obs.mk usr.sbin.mysqld usr.sbin.clamd \
 usr.bin.freshclam indimail.mod indimail.pp
 
@@ -870,6 +870,8 @@ vdeldomain_handle: vdeldomain_handle.in
 	$(edit) $@.in > post_handle/vdeldomain; ln -sf post_handle/vdeldomain $@
 vadduser_handle: vadduser_handle.in
 	$(edit) $@.in > post_handle/vadduser; ln -sf post_handle/vadduser $@
+vpasswd_handle: vpasswd_handle.in
+	$(edit) $@.in > post_handle/vpasswd; ln -sf post_handle/vpasswd $@
 create_services: create_services.in
 	$(edit) $@.in > $@
 indimail.spec: indimail.spec.in catChangeLog
