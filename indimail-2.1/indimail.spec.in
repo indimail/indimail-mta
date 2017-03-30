@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail.spec.in,v 2.388 2017-03-30 23:28:02+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 2.389 2017-03-31 00:45:57+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 %global debug_package %{nil}
@@ -1491,6 +1491,7 @@ fi
 %attr(755,root,qmail)                   %{libexecdir}/vrenamedomain
 %attr(755,root,qmail)                   %{libexecdir}/vdeldomain
 %attr(755,root,qmail)                   %{libexecdir}/vadduser
+%attr(755,root,qmail)                   %{libexecdir}/vmoduser
 %attr(755,root,qmail)                   %{libexecdir}/overquota.sh
 %attr(755,root,qmail)                   %{libexecdir}/qmailmrtg7
 %attr(4755,root,qmail)                  %{libexecdir}/sq_vacation
