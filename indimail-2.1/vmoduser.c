@@ -1,5 +1,8 @@
 /*
  * $Log: vmoduser.c,v $
+ * Revision 2.30  2017-03-31 00:42:40+05:30  Cprogrammer
+ * added post handle script
+ *
  * Revision 2.29  2016-06-09 15:32:32+05:30  Cprogrammer
  * run if indimail gid is present in process supplementary groups
  *
@@ -156,7 +159,7 @@
 #include <signal.h>
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vmoduser.c,v 2.29 2016-06-09 15:32:32+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: vmoduser.c,v 2.30 2017-03-31 00:42:40+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 char            Email[MAX_BUFF];
@@ -185,7 +188,7 @@ main(argc, argv)
 	int             argc;
 	char           *argv[];
 {
-	int             err, fd;
+	int             err, fd, i;
 	uid_t           uid;
 	gid_t           gid;
 	struct passwd   PwTmp;
@@ -393,6 +396,20 @@ main(argc, argv)
 		close(fd);
 	}
 	vclose();
+	if (!err) {
+		for (i = 1, *tmpbuf = 0; i < argc; i++) {
+			strncat(tmpbuf, " ", MAX_BUFF);
+			strncat(tmpbuf, argv[i], MAX_BUFF);
+		}
+		if (!(ptr = getenv("POST_HANDLE")))
+		{
+			char           *base_argv0;
+			if (!(base_argv0 = strrchr(argv[0], '/')))
+				base_argv0 = argv[0];
+			return (post_handle("%s/%s%s", LIBEXECDIR, base_argv0, tmpbuf));
+		} else
+			return (post_handle("%s%s", ptr, tmpbuf));
+	}
 	return(err);
 }
 
