@@ -1,5 +1,8 @@
 /*
  * $Log: control.h,v $
+ * Revision 1.3  2017-03-30 16:19:06+05:30  Cprogrammer
+ * removed control_readfile()
+ *
  * Revision 1.2  2005-05-13 23:44:37+05:30  Cprogrammer
  * code indentation
  *
@@ -13,6 +16,5 @@
 
 int             control_readint(int *, char *);
 int             control_readline(stralloc *, char *);
-int             control_readfile(stralloc *, char *);
 void            striptrailingwhitespace(stralloc *);
 #endif
