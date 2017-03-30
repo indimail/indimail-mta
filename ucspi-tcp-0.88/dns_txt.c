@@ -1,5 +1,8 @@
 /*
  * $Log: dns_txt.c,v $
+ * Revision 1.2  2017-03-30 22:48:35+05:30  Cprogrammer
+ * prefix rbl with dns_txt() - avoid duplicate symb in rblsmtpd.so with qmail_smtpd.so
+ *
  * Revision 1.1  2003-12-31 19:46:55+05:30  Cprogrammer
  * Initial revision
  *
@@ -75,7 +78,7 @@ dns_txt_packet(stralloc * out, char *buf, unsigned int len)
 static char    *q = 0;
 
 int
-dns_txt(stralloc * out, stralloc * fqdn)
+rbl_dns_txt(stralloc * out, stralloc * fqdn)
 {
 	if (!dns_domain_fromdot(&q, fqdn->s, fqdn->len))
 		return -1;
