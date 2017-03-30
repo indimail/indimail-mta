@@ -1,5 +1,8 @@
 /*
  * $Log: dns_rcip.c,v $
+ * Revision 1.3  2017-03-30 22:47:02+05:30  Cprogrammer
+ * prefix rbl with ip6_scan(), ip4_scan() - avoid duplicate symb in rblsmtpd.so with qmail_smtpd.so
+ *
  * Revision 1.2  2005-06-10 09:05:46+05:30  Cprogrammer
  * added ipv6 support
  *
@@ -40,9 +43,9 @@ init(char ip[64])
 			else
 			{
 #ifdef IPV6
-				i = ip6_scan(x,ip + iplen);
+				i = rblip6_scan(x,ip + iplen);
 #else
-				i = ip4_scan(x, ip + iplen);
+				i = rblip4_scan(x, ip + iplen);
 #endif
 				if (!i)
 					break;
@@ -74,10 +77,10 @@ init(char ip[64])
 						while ((data.s[i] == ' ') || (data.s[i] == '\t'))
 							++i;
 #ifdef IPV6
-						if (iplen <= 60 && ip6_scan(data.s + i,ip + iplen))
+						if (iplen <= 60 && rblip6_scan(data.s + i,ip + iplen))
 							iplen += 16;
 #else
-						if (iplen <= 60 && ip4_scan(data.s + i, ip + iplen))
+						if (iplen <= 60 && rblip4_scan(data.s + i, ip + iplen))
 							iplen += 4;
 #endif
 					}
