@@ -1,5 +1,8 @@
 /*
  * $Log: load_shared.c,v $
+ * Revision 1.6  2017-03-30 23:01:06+05:30  Cprogrammer
+ * use RTLD_DEEPBIND to hide symbols within a shared library.
+ *
  * Revision 1.5  2016-05-23 04:42:46+05:30  Cprogrammer
  * added two arguments to strerr_die()
  *
@@ -35,7 +38,11 @@ load_shared(char *file, char **argv, char **envp)
 
 	if (!str_end(file, ".so")) {
 		if (!(handle = dlopen(file, RTLD_NOW|RTLD_NOLOAD))) {
+#ifdef RTLD_DEEPBIND
+			if (!(handle = dlopen(file, RTLD_NOW|RTLD_LOCAL|RTLD_DEEPBIND|RTLD_NODELETE))) {
+#else
 			if (!(handle = dlopen(file, RTLD_NOW|RTLD_LOCAL|RTLD_NODELETE))) {
+#endif
 				strerr_die(111, FATAL, "dlopen2: ", dlerror(), 0, 0, 0, 0, 0, (struct strerr *) 0);
 				return;
 			}
