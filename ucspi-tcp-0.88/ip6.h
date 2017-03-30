@@ -1,5 +1,8 @@
 /*
  * $Log: ip6.h,v $
+ * Revision 1.5  2017-03-30 22:51:34+05:30  Cprogrammer
+ * prefix rbl with ip6_scan() - avoid duplicate symb in rblsmtpd.so with qmail_smtpd.so"
+ *
  * Revision 1.4  2015-08-27 00:22:20+05:30  Cprogrammer
  * added ip6_fmt_exp() function to format expanded ipv6 address
  *
@@ -19,7 +22,7 @@
 #include "byte.h"
 #include "stralloc.h"
 
-unsigned int    ip6_scan(char *, char *);
+unsigned int    rblip6_scan(char *, char *);
 unsigned int    ip6_fmt(char *, char *);
 unsigned int    ip6_fmt_exp(char *, char *);
 unsigned int    ip6_fmt_flat(char *, char *);
