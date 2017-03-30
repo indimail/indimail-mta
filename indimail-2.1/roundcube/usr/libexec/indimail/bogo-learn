@@ -40,8 +40,9 @@ host=`echo $1 | cut -d: -f3|cut -d@ -f2|cut -d/ -f1`
 dbase=`echo $1 | cut -d: -f3|cut -d@ -f2|cut -d/ -f2`
 
 
-#from=`/var/indimail/bin/822field Return-Path < $5`
-#echo $* >> /tmp/bogofilter.cmd
+#from=`/usr/bin/822field Return-Path < $5`
+echo $* >> /tmp/bogofilter.cmd
+
 SPAMIGNORE=/etc/indimail/control/spamignorepatterns
 case $4 in
 	ham)
@@ -60,7 +61,7 @@ case $4 in
 	;;
 
 	whitelist)
-	#mysql:str xxxxx@xxxxxxxx.com xxxxxxxx@xxxxx.xxx whitelist del
+	#mysql:str xxxxx@xxxxxxxx.xxx xxxxxxxx@xxxxx.xxx whitelist del
 	case $5 in
 		add)
 		add_whitelist $3
