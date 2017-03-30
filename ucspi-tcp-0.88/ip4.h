@@ -1,5 +1,8 @@
 /*
  * $Log: ip4.h,v $
+ * Revision 1.4  2017-03-30 22:49:24+05:30  Cprogrammer
+ * prefix rbl with ip4_scan() - avoid duplicate symb in rblsmtpd.so with qmail_smtpd.so
+ *
  * Revision 1.3  2005-06-10 09:18:13+05:30  Cprogrammer
  * added for ipv6 support
  *
@@ -14,7 +17,7 @@
 #define IP4_H
 
 extern char     ip4loopback[4]; /* = {127,0,0,1}; */
-unsigned int    ip4_scan(char *, char *);
+unsigned int    rblip4_scan(char *, char *);
 unsigned int    ip4_fmt(char *, char *);
 
 #define IP4_FMT 20
