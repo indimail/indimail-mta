@@ -1,5 +1,8 @@
 /*
  * $Log: ip6_scan.c,v $
+ * Revision 1.4  2017-03-30 22:56:58+05:30  Cprogrammer
+ * prefix rbl with ip6_scan(), ip4_scan() - avoid duplicate symb in rblsmtpd.so with qmail_smtpd.so
+ *
  * Revision 1.3  2015-08-27 00:23:23+05:30  Cprogrammer
  * code beautified
  *
@@ -24,7 +27,7 @@
  */
 
 unsigned int
-ip6_scan(char *s, char ip[16])
+rblip6_scan(char *s, char ip[16])
 {
 	unsigned int    i;
 	unsigned int    len = 0;
@@ -34,7 +37,7 @@ ip6_scan(char *s, char ip[16])
 	int             prefixlen = 0;
 	int             suffixlen = 0;
 
-	if ((i = ip4_scan((char *) s, ip + 12)))
+	if ((i = rblip4_scan((char *) s, ip + 12)))
 	{
 		unsigned char *c = V4mappedprefix;
 		if (byte_equal((char *) ip + 12, 4, (char *) V6any))
@@ -60,7 +63,7 @@ ip6_scan(char *s, char ip[16])
 		if (!(i = scan_xlong((char *) s, &u)))
 			return 0;
 		if (prefixlen == 12 && s[i] == '.') { /*- the last 4 bytes may be written as IPv4 address */
-			if ((i = ip4_scan((char *) s, ip + 12)))
+			if ((i = rblip4_scan((char *) s, ip + 12)))
 				return i + len;
 			else
 				return 0;
@@ -91,7 +94,7 @@ ip6_scan(char *s, char ip[16])
 		}
 		if (suffixlen + prefixlen <= 12 && s[i] == '.')
 		{
-			int             j = ip4_scan((char *) s, suffix + suffixlen);
+			int             j = rblip4_scan((char *) s, suffix + suffixlen);
 			if (j)
 			{
 				suffixlen += 4;
