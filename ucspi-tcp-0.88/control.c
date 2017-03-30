@@ -1,5 +1,8 @@
 /*
  * $Log: control.c,v $
+ * Revision 1.2  2017-03-30 22:42:20+05:30  Cprogrammer
+ * made control_readline() exactly duplicate of qmail-1.03 control_readline()
+ *
  * Revision 1.1  2003-12-27 17:15:20+05:30  Cprogrammer
  * Initial revision
  *
@@ -46,8 +49,28 @@ control_readline(sa, fn)
 {
 	buffer          ss;
 	int             fd, match;
+	static char    *controldir;
+	static stralloc controlfile = {0};
 
-	if((fd = open_read(fn)) == -1)
+	if (*fn != '/' && *fn != '.')
+	{
+		if (!controldir)
+		{
+			if (!(controldir = env_get("CONTROLDIR")))
+				controldir = "/etc/indimail/control";
+		}
+		if (!stralloc_copys(&controlfile, controldir))
+			return(-1);
+		if (controlfile.s[controlfile.len - 1] != '/' && !stralloc_cats(&controlfile, "/"))
+			return(-1);
+		if (!stralloc_cats(&controlfile, fn))
+			return(-1);
+	} else
+	if (!stralloc_copys(&controlfile, fn))
+		return(-1);
+	if (!stralloc_0(&controlfile))
+		return(-1);
+	if((fd = open_read(controlfile.s)) == -1)
 	{
 		if (errno == error_noent)
 			return 0;
@@ -62,47 +85,6 @@ control_readline(sa, fn)
 	striptrailingwhitespace(sa);
 	close(fd);
 	return 1;
-}
-
-int
-control_readfile(sa, fn)
-	stralloc       *sa;
-	char           *fn;
-{
-	int             fd, match;
-	buffer          ssin;
-
-	if (!stralloc_copys(sa, ""))
-		return -1;
-	if((fd = open_read(fn)) == -1)
-	{
-		if (errno == error_noent)
-			return 0;
-		return -1;
-	}
-	buffer_init(&ssin, read, fd, inbuf, sizeof inbuf);
-	for (;;)
-	{
-		if (getln(&ssin, &line, &match, '\n') == -1)
-			break;
-		if (!match && !line.len)
-		{
-			close(fd);
-			return 1;
-		}
-		striptrailingwhitespace(&line);
-		if (!stralloc_0(&line))
-			break;
-		if (line.s[0] && line.s[0] != '#' && !stralloc_cat(sa, &line))
-			break;
-		if (!match)
-		{
-			close(fd);
-			return 1;
-		}
-	}
-	close(fd);
-	return -1;
 }
 
 void
