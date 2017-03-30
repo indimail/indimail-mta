@@ -1,5 +1,8 @@
 /*
  * $Log: ip4_scan.c,v $
+ * Revision 1.2  2017-03-30 22:50:41+05:30  Cprogrammer
+ * prefix rbl with ip4_scan() - avoid duplicate symb in rblsmtpd.so with qmail_smtpd.so
+ *
  * Revision 1.1  2003-12-31 19:46:55+05:30  Cprogrammer
  * Initial revision
  *
@@ -8,7 +11,7 @@
 #include "ip4.h"
 
 unsigned int
-ip4_scan(char *s, char ip[4])
+rblip4_scan(char *s, char ip[4])
 {
 	unsigned int    i;
 	unsigned int    len;
