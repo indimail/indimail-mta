@@ -1594,7 +1594,7 @@ sub process_args {
   $G::link{timeout} ||= $fconf->{TIMEOUT} || '30s';
   $G::link{timeout}   = time_to_seconds($G::link{timeout});
 
-  my $body  = 'This is a test mailing'; # default message body
+  my $body  = 'This is a test messaage'; # default message body
   my $bound = "";
   my $stdin = undef;
   if (defined($o->{body_822})) {
