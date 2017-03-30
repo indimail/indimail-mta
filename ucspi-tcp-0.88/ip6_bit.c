@@ -1,5 +1,8 @@
 /*
  * $Log: ip6_bit.c,v $
+ * Revision 1.2  2017-03-30 22:52:17+05:30  Cprogrammer
+ * prefix rbl with ip6_scan() - avoid duplicate symb in rblsmtpd.so with qmail_smtpd.so"
+ *
  * Revision 1.1  2013-08-06 07:56:03+05:30  Cprogrammer
  * Initial revision
  *
@@ -48,7 +51,7 @@ ip6tobitstring(char *ip6address, stralloc * ip6string, unsigned int prefix)
 			break;
 		}
 	}
-	if (!ip6_scan(ip6addr.s, ip6))
+	if (!rblip6_scan(ip6addr.s, ip6))
 		return 0;
 	if (!stralloc_copys(ip6string, ""))
 		return -1;
