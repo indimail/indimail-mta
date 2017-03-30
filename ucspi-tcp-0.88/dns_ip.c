@@ -1,5 +1,8 @@
 /*
  * $Log: dns_ip.c,v $
+ * Revision 1.4  2017-03-30 22:45:17+05:30  Cprogrammer
+ * renamed ip6_scan() to rblip6_scan() - avoid duplicate symb in rblsmtpd.so with qmail_smtpd.so
+ *
  * Revision 1.3  2007-06-10 10:14:25+05:30  Cprogrammer
  * beautify
  *
@@ -86,7 +89,7 @@ dns_ip6(stralloc *out, stralloc *fqdn)
 	if (!stralloc_readyplus(fqdn, 1))
 		return -1;
 	fqdn->s[fqdn->len] = 0;
-	if ((i = ip6_scan(fqdn->s, ip)))
+	if ((i = rblip6_scan(fqdn->s, ip)))
 	{
 		if (fqdn->s[i])
 			return -1;
