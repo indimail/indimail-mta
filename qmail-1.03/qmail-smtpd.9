@@ -108,6 +108,9 @@ DISABLE_CRAM_SHA256, DISABLE_CRAM_SHA512, DISABLE_CRAM_RIPEMD, DISABLE_DIGEST_MD
 the environment variable \fBSECURE_AUTH\fR, AUTH LOGIN and AUTH PLAIN gets disabled unless STARTTLS is issued or you
 run qmail-smtpd under SSL (port 465).
 
+Once a user has authenticated or authentication is enforced MASQUERADE env variable can be used to enforce
+a certain behaviour.
+
 If the environment variable MASQUERADE is set,
 .LP
 .nr step 1 1
