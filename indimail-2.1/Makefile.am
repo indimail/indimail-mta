@@ -49,7 +49,7 @@ man_MANS=vadduser.1 adminclient.8 chowkidar.8 clearopensmtp.8 dbinfo.8 hostcntrl
 	vrenameuser.1 vreorg.8 vsetuserquota.1 vsmtp.8 vuserinfo.1 indimail.7 IndiMail.7 \
 	updaterules.8 osh.8 svctool.8 systpass.8 vserverinfo.1 sslerator.1 iecho.1 \
 	ismaildup.1 login_tasks.3 vtable.1 install_tables.8 displaytop.8 hashtable.8 \
-	versioninfo.8 crc.1 crcdiff.1 vsetpass.8 crypt.1
+	versioninfo.8 crc.1 crcdiff.1 vsetpass.8 crypt.1 vmoduser.1
 
 setuid_list = ../sbin/systpass vdeldomain vadddomain vadduser vdeluser \
 			  vaddaliasdomain vrenamedomain vrenameuser vbulletin vdominfo \
@@ -168,7 +168,7 @@ indimailsbin_SCRIPTS = svctool
 noinst_SCRIPTS = indimail.spec indimail-@VERSION@-rpmlintrc \
 	INSTALL INSTALL-RPM INSTALL-MYSQL README-CLUSTER RELEASE-Notes Quick-INSTALL \
 	README INSTALL-MINI vadddomain_handle vadduser_handle vdeldomain_handle \
-	vaddaliasdomain_handle vrenamedomain_handle vpasswd_handle
+	vaddaliasdomain_handle vrenamedomain_handle vpasswd_handle vmoduser_handle
 
 post_handle_list = vadddomain vadduser vdeldomain vaddaliasdomain vrenamedomain
 
@@ -181,7 +181,7 @@ vdeluser.1 vdelivermail.8 vrenamedomain.1 vrenameuser.1 vpasswd.1 vmoveuser.1 \
 vcfilter.1 indimail.7 svctool.8 indisub.c indimail.mrtg.cfg overquota.sh \
 vadddomain_handle vadduser_handle vpasswd_handle vdeldomain_handle vaddaliasdomain_handle \
 vrenamedomain_handle login_tasks.3 authgeneric obs.mk usr.sbin.mysqld usr.sbin.clamd \
-usr.bin.freshclam indimail.mod indimail.pp
+vmoduser_handle vmoduser.1 usr.bin.freshclam indimail.mod indimail.pp
 
 #DISTCLEANFILES=.gitignore
 
@@ -872,6 +872,8 @@ vadduser_handle: vadduser_handle.in
 	$(edit) $@.in > post_handle/vadduser; ln -sf post_handle/vadduser $@
 vpasswd_handle: vpasswd_handle.in
 	$(edit) $@.in > post_handle/vpasswd; ln -sf post_handle/vpasswd $@
+vmoduser_handle: vmoduser_handle.in
+	$(edit) $@.in > post_handle/vmoduser; ln -sf post_handle/vmoduser $@
 create_services: create_services.in
 	$(edit) $@.in > $@
 indimail.spec: indimail.spec.in catChangeLog
@@ -903,6 +905,8 @@ vrenamedomain.1:vrenamedomain.9
 vrenameuser.1:vrenameuser.9
 	cat $^ | sed s}LIBEXECDIR}$(libexecdir)}g > $@
 vpasswd.1:vpasswd.9
+	cat $^ | sed s}LIBEXECDIR}$(libexecdir)}g > $@
+vmoduser.1:vmoduser.9
 	cat $^ | sed s}LIBEXECDIR}$(libexecdir)}g > $@
 vmoveuser.1:vmoveuser.9
 	cat $^ | sed s}LIBEXECDIR}$(libexecdir)}g > $@
