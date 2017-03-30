@@ -1,5 +1,8 @@
 /*
  * $Log: userinfo.c,v $
+ * Revision 2.42  2017-03-31 02:17:53+05:30  Cprogrammer
+ * display quota in mebibyte, gibibyte
+ *
  * Revision 2.41  2017-03-13 14:10:34+05:30  Cprogrammer
  * replaced qmaildir with sysconfdir
  *
@@ -218,7 +221,7 @@
 #include <sys/socket.h>
 
 #ifndef	lint
-static char     sccsid[] = "$Id: userinfo.c,v 2.41 2017-03-13 14:10:34+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: userinfo.c,v 2.42 2017-03-31 02:17:53+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 extern char *strptime(const char *, const char *, struct tm *);
@@ -436,7 +439,7 @@ vuserinfo(Email, User, Domain, DisplayName, DisplayPasswd, DisplayUid, DisplayGi
 		} else {
 			dquota = parse_quota(mypw->pw_shell, 0)/1048576;
 			printf("quota         : %s [%-4.2f %s]\n", mypw->pw_shell,
-				dquota < 1024 ? (float) dquota : (float) (dquota/1024), dquota < 1024 ? "Mb" : "Gb");
+				dquota < 1024 ? (float) dquota : (float) (dquota/1024), dquota < 1024 ? "MiB" : "GiB");
 		}
 		if (islocal)
 		{
