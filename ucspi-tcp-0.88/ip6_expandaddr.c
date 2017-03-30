@@ -1,5 +1,8 @@
 /*
  * $Log: ip6_expandaddr.c,v $
+ * Revision 1.3  2017-03-30 22:55:53+05:30  Cprogrammer
+ * prefix rbl with ip6_scan() - avoid duplicate symb in rblsmtpd.so with qmail_smtpd.so
+ *
  * Revision 1.2  2015-08-27 00:20:30+05:30  Cprogrammer
  * check for stralloc failure
  *
@@ -34,7 +37,7 @@ ip6_expandaddr(char *src, stralloc *destination)
 		return -1;
 	if (!stralloc_0(&addresstemp))
 		return -1;
-	if (ip6_scan(addresstemp.s, ip6) == 0)
+	if (rblip6_scan(addresstemp.s, ip6) == 0)
 		return 0;
 	if (!stralloc_copys(destination, ""))
 		return -1;
