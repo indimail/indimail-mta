@@ -1,5 +1,8 @@
 /*
  * $Log: tcpclient.c,v $
+ * Revision 1.9  2017-03-30 23:00:07+05:30  Cprogrammer
+ * prefix rbl with ip6_scan(), ip4_scan() - avoid duplicate symb in rblsmtpd.so with qmail_smtpd.so
+ *
  * Revision 1.8  2008-07-26 09:45:56+05:30  Cprogrammer
  * fixed compile error
  *
@@ -187,9 +190,9 @@ main(int argc, char **argv)
 			break;
 		case 'i':
 #ifdef IPV6
-			if (!ip6_scan(optarg, iplocal))
+			if (!rblip6_scan(optarg, iplocal))
 #else
-			if (!ip4_scan(optarg, iplocal))
+			if (!rblip4_scan(optarg, iplocal))
 #endif
 				usage();
 			break;
