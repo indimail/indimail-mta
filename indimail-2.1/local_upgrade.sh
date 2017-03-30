@@ -1,5 +1,8 @@
 #!/bin/sh
 # $Log: local_upgrade.sh,v $
+# Revision 2.4  2017-03-30 23:29:04+05:30  Cprogrammer
+# added chgrp
+#
 # Revision 2.3  2017-03-29 19:31:59+05:30  Cprogrammer
 # added rsa2048.pem, dh2048.pem
 #
@@ -14,6 +17,7 @@
 #
 PATH=/bin:/usr/bin:/usr/sbin:/sbin
 chown=$(which chown)
+chgrp=$(which chgrp)
 ln=$(which ln)
 chmod=$(which chmod)
 mkdir=$(which mkdir)
