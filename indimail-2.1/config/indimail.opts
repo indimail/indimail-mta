@@ -8,7 +8,7 @@
 --enable-logging=e
 --enable-mysql-logging=y
 --enable-auth-logging=y
---enable-hardquota=5242880
+--enable-hardquota=524288000
 --enable-maildir-quota=y
 --enable-large-site=n
 --enable-user-cluster=y
