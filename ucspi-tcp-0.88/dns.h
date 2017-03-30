@@ -1,5 +1,8 @@
 /*
  * $Log: dns.h,v $
+ * Revision 1.6  2017-03-30 22:43:48+05:30  Cprogrammer
+ * renamed dns_txt() to rbl_dns_txt() - avoid duplicate symb in rblsmtpd.so with qmail_smtpd.so
+ *
  * Revision 1.5  2007-06-10 10:13:52+05:30  Cprogrammer
  * fixed compilation warnings
  *
@@ -91,7 +94,7 @@ int             dns_name_packet(stralloc *, char *, unsigned int);
 void            dns_name4_domain(char *, char *);
 int             dns_name4(stralloc *, char *);
 int             dns_txt_packet(stralloc *, char *, unsigned int);
-int             dns_txt(stralloc *, stralloc *);
+int             rbl_dns_txt(stralloc *, stralloc *);
 int             dns_mx_packet(stralloc *, char *, unsigned int);
 int             dns_mx(stralloc *, stralloc *);
 int             dns_resolvconfrewrite(stralloc *);
