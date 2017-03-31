@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-remote.c,v $
+ * Revision 1.98  2017-03-31 10:22:46+05:30  Cprogrammer
+ * added SMTPSTATUS env variable for success
+ *
  * Revision 1.97  2017-03-24 15:34:35+05:30  Cprogrammer
  * fixes for onsuccess, onfailure scripts
  *
@@ -482,6 +485,11 @@ run_script(char code, int succ)
 	{
 	case 1: /*- success */
 		str = "ONSUCCESS_REMOTE";
+		remote_code[0] = 'K';
+		if (!env_put2("SMTPSTATUS", remote_code)) {
+			my_error("alert: Out of memory", 0, 0);
+			_exit (1);
+		}
 		break;
 	case 0: /*- failure */
 		str = "ONFAILURE_REMOTE";
@@ -3227,7 +3235,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_remote_c()
 {
-	static char    *x = "$Id: qmail-remote.c,v 1.97 2017-03-24 15:34:35+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-remote.c,v 1.98 2017-03-31 10:22:46+05:30 Cprogrammer Exp mbhangui $";
 	x=sccsidauthcramh;
 	x=sccsidauthdigestmd5h;
 	x++;
