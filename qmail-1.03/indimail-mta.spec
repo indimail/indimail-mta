@@ -1654,8 +1654,7 @@ fi
 # svscanlog service
 %{_prefix}/sbin/svctool --svscanlog --servicedir=%{servicedir}
 
-%{_prefix}/sbin/svctool --config=qmail --postmaster=%{qmaildir}/alias/Maildir/ \
-  --default-domain=indimail.org
+%{_prefix}/sbin/svctool --config=qmail --postmaster=%{qmaildir}/alias/Maildir/
 
 if [ -f %{shareddir}/boot/rpm.init ] ; then
   echo "Running Custom Installation Script for post"
