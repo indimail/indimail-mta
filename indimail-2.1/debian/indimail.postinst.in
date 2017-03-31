@@ -227,7 +227,6 @@ ${prefix}/sbin/svctool --svscanlog --servicedir=$servicedir
 
 echo "Creating default qmail configuraton and catch-all alias (${indimaildir}/alias/Maildir) for all system users"
 ${prefix}/sbin/svctool --config=qmail --postmaster=${indimaildir}/alias/Maildir/ \
-	--default-domain=${default_domain} \
 	--mysqlhost=localhost --mysqluser=indimail --mysqlpass=ssh-1.5- --mysqlsocket=${mysqlSocket}
 
 echo "Creating Database/Service for MySQL"
@@ -451,15 +450,14 @@ if [ $nofetchmail -eq 0 ] ; then
 		if [ $noclamav -eq 0 -o $clamav_os -eq 1 ] ; then
 			${prefix}/sbin/svctool --fetchmail --servicedir=$servicedir \
 				--qbase=${qbase} --qcount=${qcount} --qstart=1 \
-				--cntrldir=control --default-domain=${default_domain} \
-				--qhpsi="$qhpsi" \
+				--cntrldir=control --qhpsi="$qhpsi" \
 				--spamfilter="${prefix}/bin/bogofilter -p -d ${sysconfdir}" --spamexitcode=0 \
 				--memory=$fetchmail_mem --fsync --syncdir \
 				--dkverify=$ver_opt
 		else
 			${prefix}/sbin/svctool --fetchmail --servicedir=$servicedir \
 				--qbase=${qbase} --qcount=${qcount} --qstart=1 \
-				--cntrldir=control --default-domain=${default_domain} \
+				--cntrldir=control \
 				--spamfilter="${prefix}/bin/bogofilter -p -d ${sysconfdir}" --spamexitcode=0 \
 				--memory=$fetchmail_mem --fsync --syncdir \
 				--dkverify=$ver_opt
@@ -468,14 +466,13 @@ if [ $nofetchmail -eq 0 ] ; then
 		if [ $noclamav -eq 0 -o $clamav_os -eq 1 ] ; then
 			${prefix}/sbin/svctool --fetchmail --servicedir=$servicedir \
 				--qbase=${qbase} --qcount=${qcount} --qstart=1 \
-				--cntrldir=control --default-domain=${default_domain} \
-				--qhpsi="$qhpsi" \
+				--cntrldir=control --qhpsi="$qhpsi" \
 				--memory=$fetchmail_mem --fsync --syncdir \
 				--dkverify=$ver_opt
 		else
 			${prefix}/sbin/svctool --fetchmail --servicedir=$servicedir \
 				--qbase=${qbase} --qcount=${qcount} --qstart=1 \
-				--cntrldir=control --default-domain=${default_domain} \
+				--cntrldir=control \
 				--memory=$fetchmail_mem --fsync --syncdir \
 				--dkverify=$ver_opt
 		fi

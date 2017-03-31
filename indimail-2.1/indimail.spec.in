@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail.spec.in,v 2.390 2017-03-31 02:38:29+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 2.391 2017-03-31 21:07:15+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 %global debug_package %{nil}
@@ -2362,8 +2362,7 @@ if [ -x /usr/bin/uname -o -x /bin/uname ] ; then
 fi
 echo "Creating default qmail configuraton and catch-all alias (%{indimaildir}/alias/Maildir) for all system users"
 %{_prefix}/sbin/svctool --config=qmail --postmaster=%{indimaildir}/alias/Maildir/ \
-  --default-domain=%{default_domain} --mysqlhost=localhost --mysqluser=indimail \
-  --mysqlpass=ssh-1.5- --mysqlsocket=%{mysqlSocket}
+  --mysqlhost=localhost --mysqluser=indimail  --mysqlpass=ssh-1.5- --mysqlsocket=%{mysqlSocket}
 
 # MySQL
 if [ -x %{mysqlPrefix}/libexec/mysqld -o -x %{mysqlPrefix}/sbin/mysqld ] ; then
@@ -2587,8 +2586,7 @@ if [ %nofetchmail -eq 0 ] ; then
     if [ %noclamav -eq 0 -o $clamav_os -eq 1 ] ; then
       %{_prefix}/sbin/svctool --fetchmail --servicedir=%{servicedir} \
         --qbase=%{qbase} --qcount=%{qcount} --qstart=1 \
-        --cntrldir=control --default-domain=%{default_domain} \
-        --qhpsi="$qhpsi" \
+        --cntrldir=control --qhpsi="$qhpsi" \
         --spamfilter="%{_prefix}/bin/bogofilter -p -d %{sysconfdir}" \
         --logfilter=/tmp/logfifo --rejectspam=0 --spamexitcode=0 \
         --memory=%{fetchmail_mem} --fsync --syncdir \
@@ -2596,7 +2594,7 @@ if [ %nofetchmail -eq 0 ] ; then
     else
       %{_prefix}/sbin/svctool --fetchmail --servicedir=%{servicedir} \
         --qbase=%{qbase} --qcount=%{qcount} --qstart=1 \
-        --cntrldir=control --default-domain=%{default_domain} \
+        --cntrldir=control  \
         --spamfilter="%{_prefix}/bin/bogofilter -p -d %{sysconfdir}" \
         --logfilter=/tmp/logfifo --rejectspam=0 --spamexitcode=0 \
         --memory=%{fetchmail_mem} --fsync --syncdir \
@@ -2606,15 +2604,13 @@ if [ %nofetchmail -eq 0 ] ; then
     if [ %noclamav -eq 0 -o $clamav_os -eq 1 ] ; then
       %{_prefix}/sbin/svctool --fetchmail --servicedir=%{servicedir} \
         --qbase=%{qbase} --qcount=%{qcount} --qstart=1 \
-        --cntrldir=control --default-domain=%{default_domain} \
-        --qhpsi="$qhpsi" \
+        --cntrldir=control --qhpsi="$qhpsi" \
         --memory=%{fetchmail_mem} --fsync --syncdir \
         --dkverify=$ver_opt
     else
       %{_prefix}/sbin/svctool --fetchmail --servicedir=%{servicedir} \
         --qbase=%{qbase} --qcount=%{qcount} --qstart=1 \
-        --cntrldir=control --default-domain=%{default_domain} \
-        --memory=%{fetchmail_mem} --fsync --syncdir \
+        --cntrldir=control --memory=%{fetchmail_mem} --fsync --syncdir \
         --dkverify=$ver_opt
     fi
   fi
