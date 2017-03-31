@@ -1,5 +1,8 @@
 #!/bin/sh
 # $Log: local_upgrade.sh,v $
+# Revision 2.5  2017-03-31 21:17:37+05:30  Cprogrammer
+# fix DEFAULT_HOST, QMAILDEFAULTHOST, envnoathost, defaulthost settings
+#
 # Revision 2.4  2017-03-30 23:29:04+05:30  Cprogrammer
 # added chgrp
 #
@@ -19,6 +22,7 @@ PATH=/bin:/usr/bin:/usr/sbin:/sbin
 chown=$(which chown)
 chgrp=$(which chgrp)
 ln=$(which ln)
+uname=$(which uname)
 chmod=$(which chmod)
 mkdir=$(which mkdir)
 rm=$(which rm)
@@ -118,3 +122,9 @@ for i in /service/qmail-poppass* /service/indisrvr.*
 do
 	echo /etc/indimail/certs/servercert.pem  > $i/variables/CERTFILE
 done
+$uname -n > /service/qmail-send.25/variables/DEFAULT_DOMAIN
+$uname -n > /etc/indimail/control/envnoathost
+$uname -n > /etc/indimail/control/defaulthost
+if [ -f /service/fetchmail/variables/QMAILDEFAULTHOST ] ; then
+	$rm -f /service/fetchmamil/variables/QMAILDEFAULTHOST
+fi
