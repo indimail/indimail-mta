@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-remote.c,v $
+ * Revision 1.99  2017-03-31 15:27:37+05:30  Cprogrammer
+ * smtptext "Sorry I couldn't find any host named" was getting overwritten
+ *
  * Revision 1.98  2017-03-31 10:22:46+05:30  Cprogrammer
  * added SMTPSTATUS env variable for success
  *
@@ -792,7 +795,7 @@ perm_dns()
 	out(". (#5.1.2)\n");
 	if (!stralloc_copys(&smtptext, r + 1))
 		temp_nomem();
-	if (!stralloc_copy(&smtptext, &host))
+	if (!stralloc_cats(&smtptext, &host))
 		temp_nomem();
 	if (!stralloc_cats(&smtptext, ". (#5.1.2)"))
 		temp_nomem();
@@ -3235,7 +3238,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_remote_c()
 {
-	static char    *x = "$Id: qmail-remote.c,v 1.98 2017-03-31 10:22:46+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-remote.c,v 1.99 2017-03-31 15:27:37+05:30 Cprogrammer Exp mbhangui $";
 	x=sccsidauthcramh;
 	x=sccsidauthdigestmd5h;
 	x++;
