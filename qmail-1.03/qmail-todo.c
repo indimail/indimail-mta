@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-todo.c,v $
+ * Revision 1.35  2017-03-31 21:10:34+05:30  Cprogrammer
+ * log null addresses in log_stat() as <>
+ *
  * Revision 1.34  2016-05-17 19:44:58+05:30  Cprogrammer
  * use auto_control, set by conf-control to set control directory
  *
@@ -667,7 +670,8 @@ log_stat(long bytes)
 	strnum[fmt_ulong(strnum, bytes)] = 0;
 	for (ptr = mailto.s;ptr < mailto.s + mailto.len;)
 	{
-		log9(*ptr == 'L' ? "local: " : "remote: ", mailfrom.s + 1, " ", ptr + 2, " ", strnum, " ", queuedesc, "\n");
+		log9(*ptr == 'L' ? "local: " : "remote: ", mailfrom.len > 3 ? mailfrom.s + 1 : "<>", " ", 
+			*(ptr + 2) ? ptr + 2 : "<>", " ", strnum, " ", queuedesc, "\n");
 		ptr += str_len(ptr) + 1;
 	}
 	mailfrom.len = mailto.len = 0;
@@ -1159,7 +1163,7 @@ main()
 void
 getversion_qmail_todo_c()
 {
-	static char    *x = "$Id: qmail-todo.c,v 1.34 2016-05-17 19:44:58+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-todo.c,v 1.35 2017-03-31 21:10:34+05:30 Cprogrammer Exp mbhangui $";
 
 #ifdef INDIMAIL
 	if (x)
