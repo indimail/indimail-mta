@@ -795,7 +795,7 @@ perm_dns()
 	out(". (#5.1.2)\n");
 	if (!stralloc_copys(&smtptext, r + 1))
 		temp_nomem();
-	if (!stralloc_cats(&smtptext, &host))
+	if (!stralloc_cat(&smtptext, &host))
 		temp_nomem();
 	if (!stralloc_cats(&smtptext, ". (#5.1.2)"))
 		temp_nomem();
