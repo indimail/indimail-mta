@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail.spec.in,v 2.391 2017-03-31 21:07:15+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 2.392 2017-04-01 20:24:37+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 %global debug_package %{nil}
@@ -311,7 +311,7 @@ BuildRequires: -post-build-checks
 %endif
 ################################# OBS ###############################
 
-Requires: pam
+Requires: pam mrtg
 Requires: coreutils grep /bin/sh glibc openssl
 
 # rpm -qf /bin/ls
