@@ -1,5 +1,8 @@
 /*
  * $Log: qmailmrtg7.c,v $
+ * Revision 2.11  2017-04-01 20:25:07+05:30  Cprogrammer
+ * added debug option
+ *
  * Revision 2.10  2013-03-15 09:56:52+05:30  Cprogrammer
  * fixed option 't'
  *
@@ -66,7 +69,7 @@
 #include <dirent.h>
 
 #ifndef lint
-static char     sccsid[] = "$Id: qmailmrtg7.c,v 2.10 2013-03-15 09:56:52+05:30 Cprogrammer Stab mbhangui $";
+static char     sccsid[] = "$Id: qmailmrtg7.c,v 2.11 2017-04-01 20:25:07+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #define MAX_BUFF 1000
@@ -94,6 +97,8 @@ int             tcached, tquery;
 int             mess_count, todo_count;
 time_t          end_time;
 time_t          start_time;
+int             debug;
+
 unsigned long   get_tai(char *);
 void            get_options(int argc, char **argv);
 char            TheDir[MAX_BUFF];
@@ -119,6 +124,8 @@ main(int argc, char **argv)
 		usage();
 		exit(-1);
 	}
+	if (getenv("DEBUG"))
+		debug = 1;
 	snprintf(TheDir, sizeof (TheDir), "%s", argv[2]);
 	TheType = *argv[1];
 #if 0
@@ -144,7 +151,7 @@ main(int argc, char **argv)
 		usage();
 		exit(-1);
 	}
-	end_time = time(NULL);
+	end_time = time(0);
 	start_time = end_time - 300;
 	cconcurrency = tconcurrency = 0;
 	tallow = 0;
@@ -192,6 +199,8 @@ main(int argc, char **argv)
 		printf("%d\n%d\n", mess_count, todo_count);
 		return (0);
 	}
+	if (debug)
+		fprintf(stderr, "opening dir %s\n", TheDir);
 	if (!(mydir = opendir(TheDir))) {
 		printf("failed to open dir %s\n", TheDir);
 		exit(-1);
@@ -201,50 +210,54 @@ main(int argc, char **argv)
 			secs = get_tai(&mydirent->d_name[1]);
 			if (secs > start_time) {
 				snprintf(TheFile, sizeof (TheFile), "%s/%s", TheDir, mydirent->d_name);
+				if (debug)
+					fprintf(stderr, "processing file %s/%s\n", TheDir, mydirent->d_name);
 				process_file(TheFile);
 			}
 		} else
 		if (strcmp(mydirent->d_name, "current") == 0) {
 			snprintf(TheFile, sizeof (TheFile), "%s/%s", TheDir, mydirent->d_name);
+			if (debug)
+				fprintf(stderr, "processing file %s/%s\n", TheDir, mydirent->d_name);
 			process_file(TheFile);
 		}
 	}
 	closedir(mydir);
 	switch (TheType) {
-	case 'S': /*- bogofilter */
+	case 'S': /*- bogofilter per/hr */
 		printf("%i\n%i\n\n\n", tclean * 12, tspam * 12);
 		break;
-	case 'C': /*- clamav */
+	case 'C': /*- clamav per/hr */
 		printf("%i\n%i\n\n\n", cfound * 12, cerror * 12);
 		break;
 	case 't': /*- tcpserver concurrency */
 		printf("%d\n%d\n\n\n", cconcurrency, tconcurrency);
 		break;
-	case 'a': /*- tcpserver allow/deny */
+	case 'a': /*- tcpserver allow/deny per/hr */
 		printf("%d\n%d\n\n\n", tallow * 12, tdeny * 12);
 		break;
-	case 'm': /*- messages */
+	case 'm': /*- messages per/hr */
 		printf("%d\n%d\n\n\n", success * 12, (failure + success) * 12);
 		break;
 	case 'c': /*- remote/local concurrency */
 		printf("%d\n%d\n\n\n", local, remote);
 		break;
-	case 's': /*- success/failures */
+	case 's': /*- success/failures per/hr */
 		printf("%i\n%i\n\n\n", success * 12, failure * 12);
 		break;
-	case 'v': /*- clicked/viewed */
+	case 'v': /*- clicked/viewed per/hr */
 		printf("%i\n%i\n\n\n", viewed * 12, clicked * 12);
 		break;
-	case 'l': /*- lines */
+	case 'l': /*- lines per/hr */
 		printf("%i\n%i\n\n\n", ttotal * 12, ttotal * 12);
 		break;
-	case 'u': /*- lines */
+	case 'u': /*- lines per/hr */
 		printf("%i\n%i\n\n\n", unsub * 12, unsub * 12);
 		break;
-	case 'b': /*- bits */
+	case 'b': /*- bits per/sec */
 		printf("%.0f\n%.0f\n\n\n", (bytes * 8.0) / 300.0, (bytes * 8.0) / 300.0);
 		break;
-	case 'd': /*- dnscache */
+	case 'd': /*- dnscache per/hr */
 		printf("%i\n%i\n\n\n", tcached * 12, tquery * 12);
 		break;
 	}
@@ -260,8 +273,10 @@ process_file(char *file_name)
 	char           *tmpstr1;
 	char           *tmpstr2;
 
-	if ((fs = fopen(file_name, "r")) == NULL)
+	if ((fs = fopen(file_name, "r")) == NULL) {
+		perror(file_name);
 		return;
+	}
 	while (fgets(TmpBuf, MAX_BUFF, fs) != NULL) {
 		if (TmpBuf[0] != '@')
 			continue;
@@ -275,6 +290,8 @@ process_file(char *file_name)
 			} else if ((tmpstr1 = strstr(TmpBuf, "X-Bogosity: No")) != NULL) {
 				++tclean;
 			}
+			if (debug)
+				fprintf(stderr, "tspam %d tclean %d\n", tspam, tclean);
 			break;
 
 		case 'C':
@@ -283,6 +300,8 @@ process_file(char *file_name)
 			} else if ((tmpstr1 = strstr(TmpBuf, "ERROR")) != NULL) {
 				++cerror;
 			}
+			if (debug)
+				fprintf(stderr, "cfound %d cerror %d\n", cfound, cerror);
 			break;
 
 		case 't':
@@ -300,6 +319,8 @@ process_file(char *file_name)
 				if (tmpint > tconcurrency)
 					tconcurrency = tmpint;
 			}
+			if (debug)
+				fprintf(stderr, "cconcurrency %d toncurrency %d\n", cconcurrency, tconcurrency);
 			break;
 
 		case 'a':
@@ -310,6 +331,8 @@ process_file(char *file_name)
 			} else if ((tmpstr1 = strstr(TmpBuf, " rblsmtpd:")) != NULL) {
 				++tdeny;
 			}
+			if (debug)
+				fprintf(stderr, "tallow %d tdeny %d\n", tallow, tdeny);
 			break;
 
 		case 'c':
@@ -338,6 +361,8 @@ process_file(char *file_name)
 				if (tmpint > remote)
 					remote = tmpint;
 			}
+			if (debug)
+				fprintf(stderr, "local %d remote %d\n", local, remote);
 			break;
 
 		case 's':
@@ -348,6 +373,8 @@ process_file(char *file_name)
 				failure++;
 			if (strstr(TmpBuf, "deferral:"))
 				deferral++;
+			if (debug)
+				fprintf(stderr, "success %d failure %d deferral %d\n", success, failure, deferral);
 			break;
 
 		case 'v':
@@ -355,11 +382,15 @@ process_file(char *file_name)
 				viewed++;
 			if (strstr(TmpBuf, "clicked:"))
 				clicked++;
+			if (debug)
+				fprintf(stderr, "viewed %d clicked %d\n", viewed, clicked);
 			break;
 
 		case 'u':
 			if (strstr(TmpBuf, "unsub:"))
 				unsub++;
+			if (debug)
+				fprintf(stderr, "unsub %d\n", unsub);
 			break;
 
 		case 'b':
@@ -367,15 +398,21 @@ process_file(char *file_name)
 				tmpstr1 += 8;
 				bytes += atol(tmpstr1);
 			}
+			if (debug)
+				fprintf(stderr, "bytes %d\n", bytes);
 			break;
 		case 'l':
 			++ttotal;
+			if (debug)
+				fprintf(stderr, "ttotal %d\n", ttotal);
 			break;
 		case 'd':
 			if (strstr(TmpBuf, "cached"))
 				tcached++;
 			if (strstr(TmpBuf, "query"))
 				tquery++;
+			if (debug)
+				fprintf(stderr, "cached %d query %d\n", tcached, tquery);
 			break;
 		}
 	}
