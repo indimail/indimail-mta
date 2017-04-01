@@ -6217,7 +6217,7 @@ report ()
 				echo "Date: $date"
 				echo "Subject: $subject"
 				echo 
-				echo ATTENTION: Mail Administrators - aaj kaa taaja khabar
+				echo ATTENTION: Mail Administrators
 				echo
 				echo Mail Statistics for `/bin/cat $CONTROLDIR/me`
 				echo on $date
@@ -6235,7 +6235,7 @@ report ()
 				) | "$DESTDIR"$QmailBinPrefix/bin/sendmail -t
 			else
 				(
-				echo ATTENTION: Mail Administrators - aaj kaa taaja khabar
+				echo ATTENTION: Mail Administrators
 				echo
 				echo Mail Statistics for `/usr/bin/head -1 $CONTROLDIR/me` 
 				echo on $date
