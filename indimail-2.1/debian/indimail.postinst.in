@@ -222,6 +222,9 @@ fi
 # fifolog service
 ${prefix}/sbin/svctool --fifologger=/tmp/logfifo --servicedir=${servicedir}
 
+# mrtg service
+${prefix}/sbin/svctool --mrtg=/var/www/html/mailmrtg --servicedir=${servicedir}
+
 # create svscanlog service
 ${prefix}/sbin/svctool --svscanlog --servicedir=$servicedir
 
