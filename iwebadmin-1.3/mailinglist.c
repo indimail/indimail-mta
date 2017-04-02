@@ -1,5 +1,5 @@
 /*
- * $Id: mailinglist.c,v 1.4 2011-11-17 22:10:53+05:30 Cprogrammer Exp mbhangui $
+ * $Id: mailinglist.c,v 1.5 2017-04-02 22:43:13+05:30 Cprogrammer Exp mbhangui $
  * Copyright (C) 1999-2004 Inter7 Internet Technologies, Inc. 
  *
  * This program is free software; you can redistribute it and/or modify
@@ -467,6 +467,7 @@ ezmlm_make(int newlist)
 #ifdef EZMLMIDX
 	char            list_owner[MAX_BUFF];
 	char            owneremail[MAX_BUFF + 5];
+	int             i;
 #endif
 	char            options[MAX_BUFF];
 	char           *arguments[MAX_BUFF];
