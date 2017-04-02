@@ -293,10 +293,12 @@ PLUGIN1=HOME/plugins/rblsmtpd.so
 .EE
 
 The above causes tcpserver to load qmail_smtpd.so and execute the smtp_init(1) function, after changing directory to HOME,
-in the parent, which loads all qmail-smtpd control files. Additionally, if HOME/plugins/qmail_smtpd.so is specfied in
-the command line argument, instead of HOME/bin/qmail-smtpd, the control files are loaded just once. This improves the
-perfomance of the smtp service. In the above example, rblsmtpd.so is loaded without executing any initialization function and
-without changing directory. On SIGHUP, tcpserver executes the function smtp_init(0).
+in the parent. smtp_init() loads all qmail-smtpd control files. Additionally, if HOME/plugins/qmail_smtpd.so is specfied in
+the command line argument, instead of HOME/bin/qmail-smtpd, tcpserver will execute the fuction qmail_smtpd() instead of exec of
+the qmail-smtpd executable. This improves the perfomance of the smtp service. In the above example, rblsmtpd.so is loaded
+without executing any initialization function and without changing directory. On SIGHUP, tcpserver executes the
+function smtp_init(0). The variable PLUGINn_dir should be used if your function expects to be in a particular directory to
+function properly.
 
 .SH ENVIRONMENT
 .TP
